@@ -68,7 +68,7 @@ public:
     MS_Coupling_BoundaryCondition();
 
     //! Destructor
-    ~MS_Coupling_BoundaryCondition() {}
+    virtual ~MS_Coupling_BoundaryCondition() {}
 
     //@}
 
@@ -100,6 +100,16 @@ public:
     //@}
 
 private:
+
+    //! @name Unimplemented Methods
+    //@{
+
+    MS_Coupling_BoundaryCondition( const MS_Coupling_BoundaryCondition& coupling );
+
+    MS_Coupling_BoundaryCondition& operator=( const MS_Coupling_BoundaryCondition& coupling );
+
+    //@}
+
 
     //! @name Private MultiScale PhysicalCoupling Implementation
     //@{
@@ -155,7 +165,7 @@ private:
 };
 
 //! Factory create function
-inline MS_PhysicalCoupling* MS_createBoundaryCondition()
+inline MS_PhysicalCoupling* createMultiscaleCouplingBoundaryCondition()
 {
     return new MS_Coupling_BoundaryCondition();
 }

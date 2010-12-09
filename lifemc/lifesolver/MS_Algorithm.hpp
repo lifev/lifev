@@ -204,6 +204,17 @@ protected:
 
     UInt                                     M_subiterationsMaximumNumber;
     Real                                     M_tolerance;
+
+private:
+
+    //! @name Unimplemented Methods
+    //@{
+
+    MS_Algorithm( const MS_Algorithm& algorithm );
+
+    MS_Algorithm& operator=( const MS_Algorithm& algorithm );
+
+    //@}
 };
 
 } // Namespace LifeV

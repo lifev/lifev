@@ -67,7 +67,7 @@ public:
     MS_Solver();
 
     //! Destructor
-    ~MS_Solver() {}
+    virtual ~MS_Solver() {}
 
     //@}
 
@@ -79,31 +79,34 @@ public:
     /*!
      * @param comm Epetra communicator
      */
-    void SetCommunicator( const MS_Comm_PtrType& comm );
+    void setCommunicator( const MS_Comm_PtrType& comm );
 
     //! Setup the problem
     /*!
      * @param FileName Name of the data file.
      * @param problemName the name of the problem (useful for saving data in a specific folder)
      */
-    void SetupProblem( const std::string& FileName, const std::string& problemName );
+    void setupProblem( const std::string& fileName, const std::string& problemName );
 
     //! Run the time-loop to solve the MultiScale problem
     /*!
      * @return 0: EXIT_SUCCESS, 1: EXIT_FAILURE
      */
-    bool SolveProblem( const Real& externalResidual = -1 );
+    bool solveProblem( const Real& externalResidual = -1 );
 
     //! Display some information about the MultiScale problem (to be called after SetupProblem)
-    void ShowMe();
+    void showMe();
 
     //@}
 
 private:
 
-    //! @name Private Methods
+    //! @name Unimplemented Methods
     //@{
 
+    MS_Solver( const MS_Solver& solver );
+
+    MS_Solver& operator=( const MS_Solver& solver );
 
     //@}
 

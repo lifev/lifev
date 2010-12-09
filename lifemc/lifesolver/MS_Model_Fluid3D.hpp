@@ -108,27 +108,8 @@ public:
     //! Constructor
     MS_Model_Fluid3D();
 
-    //! Copy constructor
-    /*!
-     * @param Fluid3D MS_Model_Fluid3D
-     */
-    MS_Model_Fluid3D( const MS_Model_Fluid3D& Fluid3D );
-
     //! Destructor
-    ~MS_Model_Fluid3D() {}
-
-    //@}
-
-
-    //! @name Operators
-    //@{
-
-    //! Operator=
-    /*!
-     * @param fluid3D MS_Model_Fluid3D
-     * @return reference to a copy of the class
-     */
-    MS_Model_Fluid3D& operator=( const MS_Model_Fluid3D& fluid3D );
+    virtual ~MS_Model_Fluid3D() {}
 
     //@}
 
@@ -319,6 +300,16 @@ public:
 
 private:
 
+    //! @name Unimplemented Methods
+    //@{
+
+    MS_Model_Fluid3D( const MS_Model_Fluid3D& model );
+
+    MS_Model_Fluid3D& operator=( const MS_Model_Fluid3D& model );
+
+    //@}
+
+
     //! @name Private Methods
     //@{
 
@@ -405,7 +396,7 @@ private:
 };
 
 //! Factory create function
-inline MS_PhysicalModel* MS_createFluid3D()
+inline MS_PhysicalModel* createMultiscaleModelFluid3D()
 {
     return new MS_Model_Fluid3D();
 }

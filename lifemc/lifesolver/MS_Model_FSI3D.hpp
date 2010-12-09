@@ -106,7 +106,7 @@ public:
     MS_Model_FSI3D();
 
     //! Destructor
-    ~MS_Model_FSI3D() {}
+    virtual ~MS_Model_FSI3D() {}
 
     //@}
 
@@ -267,6 +267,16 @@ public:
 
 private:
 
+    //! @name Unimplemented Methods
+    //@{
+
+    MS_Model_FSI3D( const MS_Model_FSI3D& model );
+
+    MS_Model_FSI3D& operator=( const MS_Model_FSI3D& model );
+
+    //@}
+
+
     //! @name Private Methods
     //@{
 
@@ -350,7 +360,7 @@ private:
 };
 
 //! Factory create function
-inline MS_PhysicalModel* MS_createModelFSI3D()
+inline MS_PhysicalModel* createMultiscaleModelFSI3D()
 {
     return new MS_Model_FSI3D();
 }

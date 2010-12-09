@@ -63,25 +63,25 @@ MS_Solver::MS_Solver() :
     MS_MapsDefinition();
 
     //Register the objects
-    MS_Model_Factory::instance().registerProduct   (  MultiScale,          &MS_createMultiScale );
-    MS_Model_Factory::instance().registerProduct   (  Fluid3D,             &MS_createFluid3D );
-    MS_Model_Factory::instance().registerProduct   (  OneDimensional,      &MS_createOneDimensional );
-    MS_Model_Factory::instance().registerProduct   (  FSI3D,               &MS_createModelFSI3D );
+    MS_Model_Factory::instance().registerProduct   (  MultiScale,          &createMultiscaleModelMultiscale );
+    MS_Model_Factory::instance().registerProduct   (  Fluid3D,             &createMultiscaleModelFluid3D );
+    MS_Model_Factory::instance().registerProduct   (  OneDimensional,      &createMultiscaleModelOneDimensional );
+    MS_Model_Factory::instance().registerProduct   (  FSI3D,               &createMultiscaleModelFSI3D );
 
-    MS_Coupling_Factory::instance().registerProduct(  Stress,              &MS_createStress );
-    MS_Coupling_Factory::instance().registerProduct(  FluxStress,          &MS_createFluxStress );
-    MS_Coupling_Factory::instance().registerProduct(  BoundaryCondition,   &MS_createBoundaryCondition );
+    MS_Coupling_Factory::instance().registerProduct(  Stress,              &createMultiscaleCouplingStress );
+    MS_Coupling_Factory::instance().registerProduct(  FluxStress,          &createMultiscaleCouplingFluxStress );
+    MS_Coupling_Factory::instance().registerProduct(  BoundaryCondition,   &createMultiscaleCouplingBoundaryCondition );
 
-    MS_Algorithm_Factory::instance().registerProduct( Aitken,              &MS_createAitken );
-    MS_Algorithm_Factory::instance().registerProduct( Explicit,            &MS_createExplicit );
-    MS_Algorithm_Factory::instance().registerProduct( Newton,              &MS_createNewton );
+    MS_Algorithm_Factory::instance().registerProduct( Aitken,              &createMultiscaleAlgorithmAitken );
+    MS_Algorithm_Factory::instance().registerProduct( Explicit,            &createMultiscaleAlgorithmExplicit );
+    MS_Algorithm_Factory::instance().registerProduct( Newton,              &createMultiscaleAlgorithmNewton );
 }
 
 // ===================================================
 // Methods
 // ===================================================
 void
-MS_Solver::SetCommunicator( const MS_Comm_PtrType& comm )
+MS_Solver::setCommunicator( const MS_Comm_PtrType& comm )
 {
 
 #ifdef HAVE_LIFEV_DEBUG
@@ -93,31 +93,31 @@ MS_Solver::SetCommunicator( const MS_Comm_PtrType& comm )
 }
 
 void
-MS_Solver::SetupProblem( const std::string& FileName, const std::string& problemFolder )
+MS_Solver::setupProblem( const std::string& fileName, const std::string& problemFolder )
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 8000 ) << "MS_Solver::SetupData( FileName, problemFolder ) \n";
+    Debug( 8000 ) << "MS_Solver::SetupData( fileName, problemFolder ) \n";
 #endif
 
     // Load data file
-    GetPot DataFile( FileName );
+    GetPot dataFile( fileName );
 
     // Define the folder containing the problem
     MS_ProblemFolder = problemFolder;
 
     // Define the step of the problem
-    if ( DataFile( "Solver/Restart/Restart", false ) )
-        MS_ProblemStep = DataFile( "Solver/Restart/RestartFromStepNumber", 0 ) + 1;
+    if ( dataFile( "Solver/Restart/Restart", false ) )
+        MS_ProblemStep = dataFile( "Solver/Restart/RestartFromStepNumber", 0 ) + 1;
 
     // Create the main model and set the communicator
-    M_model = MS_Model_PtrType( MS_Model_Factory::instance().createObject( MS_modelsMap[ DataFile( "Problem/ProblemType", "MultiScale" ) ] ) );
+    M_model = MS_Model_PtrType( MS_Model_Factory::instance().createObject( MS_modelsMap[ dataFile( "Problem/ProblemType", "MultiScale" ) ] ) );
     M_model->SetCommunicator( M_comm );
 
     // Setup data
-    M_globalData->ReadData( DataFile );
+    M_globalData->ReadData( dataFile );
     M_model->SetGlobalData( M_globalData );
-    M_model->SetupData( DataFile( "Problem/ProblemFile", "./MultiScaleData/Models/Model.dat" ) );
+    M_model->SetupData( dataFile( "Problem/ProblemFile", "./MultiScaleData/Models/Model.dat" ) );
 
     // Setup Models
     M_model->SetupModel();
@@ -125,16 +125,16 @@ MS_Solver::SetupProblem( const std::string& FileName, const std::string& problem
     // Algorithm parameters
     if ( M_model->GetType() == MultiScale )
     {
-        M_algorithm = MS_Algorithm_PtrType( MS_Algorithm_Factory::instance().createObject( MS_algorithmsMap[ DataFile( "Solver/Algorithm/AlgorithmType", "Newton" ) ] ) );
+        M_algorithm = MS_Algorithm_PtrType( MS_Algorithm_Factory::instance().createObject( MS_algorithmsMap[ dataFile( "Solver/Algorithm/AlgorithmType", "Newton" ) ] ) );
         M_algorithm->setCommunicator( M_comm );
         M_algorithm->setModel( M_model );
-        M_algorithm->setupData( FileName );
+        M_algorithm->setupData( fileName );
         M_algorithm->initializeCouplingVariables();
     }
 }
 
 bool
-MS_Solver::SolveProblem( const Real& externalResidual )
+MS_Solver::solveProblem( const Real& externalResidual )
 {
 
 #ifdef HAVE_LIFEV_DEBUG
@@ -192,14 +192,15 @@ MS_Solver::SolveProblem( const Real& externalResidual )
     // Redisual check
     Real algorithmResidual( M_algorithm->computeResidual() );
     if ( externalResidual >= 0. && std::abs( externalResidual - algorithmResidual ) > 1e-8 )
-        MS_ErrorCheck( MS_Residual, "Algorithm Residual: " + number2string( algorithmResidual ) +
+        MS_ErrorCheck( MS_Residual,
+                       "Algorithm Residual: " + number2string( algorithmResidual ) +
                        " (External Residual: " + number2string( externalResidual ) + ")\n" );
 
     return MS_ExitFlag;
 }
 
 void
-MS_Solver::ShowMe()
+MS_Solver::showMe()
 {
     if ( M_displayer->isLeader() )
     {

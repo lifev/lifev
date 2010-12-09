@@ -65,7 +65,7 @@ public:
     MS_Algorithm_Newton();
 
     //! Destructor
-    ~MS_Algorithm_Newton() {}
+    virtual ~MS_Algorithm_Newton() {}
 
     //@}
 
@@ -96,10 +96,21 @@ protected:
 
     SolverTrilinos                           M_solver;
     MS_Matrix_PtrType                        M_jacobian;
+
+private:
+
+    //! @name Unimplemented Methods
+    //@{
+
+    MS_Algorithm_Newton( const MS_Algorithm_Newton& algorithm );
+
+    MS_Algorithm_Newton& operator=( const MS_Algorithm_Newton& algorithm );
+
+    //@}
 };
 
 //! Factory create function
-inline MS_Algorithm* MS_createNewton()
+inline MS_Algorithm* createMultiscaleAlgorithmNewton()
 {
     return new MS_Algorithm_Newton();
 }
