@@ -35,6 +35,8 @@
     @version 2.0
     @author Cristiano Malossi <cristiano.malossi@epfl.ch>
     @date 12-04-2010
+
+     @mantainer  Cristiano Malossi <cristiano.malossi@epfl.ch>
  */
 
 #ifndef ONEDIMENSIONALMODEL_DATA_H
@@ -333,7 +335,7 @@ private:
     /*!
      * Useful for tapering.
      */
-    void linearInterpolation( ScalVec& vector, const GetPot& dataFile, const std::string& quantity, const Real& defaultValue, const bool& isArea = false );
+    void linearInterpolation( scalVec_Type& vector, const GetPot& dataFile, const std::string& quantity, const Real& defaultValue, const bool& isArea = false );
 
     //! Compute the derivatives of alpha, area0, beta0, and beta1 using centered differences.
     /*!
@@ -398,43 +400,43 @@ private:
     Real M_InertialModulus;
     Real M_RobertsonCorrection;
 
-    ScalVec M_Thickness;
+    scalVec_Type M_Thickness;
     Real M_Friction; // Friction parameter
 
-    ScalVec M_Area0;      // area
-    ScalVec M_Alpha;      // Coriolis coefficient (often called alpha)
-    ScalVec M_Beta0;      // homogeneous to a pressure
-    ScalVec M_Beta1;      // power coeff (>0, often=1/2)
+    scalVec_Type M_Area0;      // area
+    scalVec_Type M_Alpha;      // Coriolis coefficient (often called alpha)
+    scalVec_Type M_Beta0;      // homogeneous to a pressure
+    scalVec_Type M_Beta1;      // power coeff (>0, often=1/2)
 
     //! Derivatives of main coefficients
-    ScalVec M_dArea0dz;
-    ScalVec M_dAlphadz;
-    ScalVec M_dBeta0dz; // homogeneous to a pressure
-    ScalVec M_dBeta1dz; // power coeff (>0, often=1/2)
+    scalVec_Type M_dArea0dz;
+    scalVec_Type M_dAlphadz;
+    scalVec_Type M_dBeta0dz; // homogeneous to a pressure
+    scalVec_Type M_dBeta1dz; // power coeff (>0, often=1/2)
 
     //! Flux matrix
-    ScalVec M_Flux11;
-    ScalVec M_Flux12;
-    ScalVec M_Flux21;
-    ScalVec M_Flux22;
+    scalVec_Type M_Flux11;
+    scalVec_Type M_Flux12;
+    scalVec_Type M_Flux21;
+    scalVec_Type M_Flux22;
 
     //! Celerities of the linear problem (eigenvalues of the flux matrix)
-    ScalVec M_Celerity1;
-    ScalVec M_Celerity2;
+    scalVec_Type M_Celerity1;
+    scalVec_Type M_Celerity2;
 
     //! Eigenvector for first and second eigenvalue
-    ScalVec M_Celerity1LeftEigenvector1;
-    ScalVec M_Celerity1LeftEigenvector2;
-    ScalVec M_Celerity2LeftEigenvector1;
-    ScalVec M_Celerity2LeftEigenvector2;
+    scalVec_Type M_Celerity1LeftEigenvector1;
+    scalVec_Type M_Celerity1LeftEigenvector2;
+    scalVec_Type M_Celerity2LeftEigenvector1;
+    scalVec_Type M_Celerity2LeftEigenvector2;
 
     //! Source matrix
-    ScalVec M_Source10;
-    ScalVec M_Source20;
-    ScalVec M_Source11;
-    ScalVec M_Source12;
-    ScalVec M_Source21;
-    ScalVec M_Source22;
+    scalVec_Type M_Source10;
+    scalVec_Type M_Source20;
+    scalVec_Type M_Source11;
+    scalVec_Type M_Source12;
+    scalVec_Type M_Source21;
+    scalVec_Type M_Source22;
 };
 
 }

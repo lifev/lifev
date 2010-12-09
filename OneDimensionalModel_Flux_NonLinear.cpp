@@ -1,40 +1,43 @@
 //@HEADER
 /*
-************************************************************************
+*******************************************************************************
 
- This file is part of the LifeV Applications.
- Copyright (C) 2001-2010 EPFL, Politecnico di Milano, INRIA
+    Copyright (C) 2004, 2005, 2007 EPFL, Politecnico di Milano, INRIA
+    Copyright (C) 2010 EPFL, Politecnico di Milano, Emory University
 
- This library is free software; you can redistribute it and/or modify
- it under the terms of the GNU Lesser General Public License as
- published by the Free Software Foundation; either version 2.1 of the
- License, or (at your option) any later version.
+    This file is part of LifeV.
 
- This library is distributed in the hope that it will be useful, but
- WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- Lesser General Public License for more details.
+    LifeV is free software; you can redistribute it and/or modify
+    it under the terms of the GNU Lesser General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
 
- You should have received a copy of the GNU Lesser General Public
- License along with this library; if not, write to the Free Software
- Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
- USA
+    LifeV is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+    Lesser General Public License for more details.
 
-************************************************************************
+    You should have received a copy of the GNU Lesser General Public License
+    along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
+
+*******************************************************************************
 */
 //@HEADER
 
 /*!
- *  @file
- *  @brief File containing a class for non linear 1D model flux function.
- *
- *  @version 1.0
- *  @author Vincent Martin
- *  @date
- *
- *  @version 2.0
- *  @author Cristiano Malossi <cristiano.malossi@epfl.ch>
- *  @date 15-04-2010
+    @file
+    @brief File containing a base class for non linear 1D model flux function.
+
+    @version 1.0
+    @author Vincent Martin
+
+    @version 2.0
+    @date 15-04-2010
+    @author Cristiano Malossi <cristiano.malossi@epfl.ch>
+
+    @contributor Simone Rossi <simone.rossi@epfl.ch>
+
+    @mantainer  Cristiano Malossi <cristiano.malossi@epfl.ch>
  */
 
 #include "OneDimensionalModel_Flux_NonLinear.hpp"
@@ -46,11 +49,11 @@ namespace LifeV
 // Constructors & Destructor
 // ===================================================
 OneDimensionalModel_Flux_NonLinear::OneDimensionalModel_Flux_NonLinear() :
-        super   ()
+    super   ()
 {}
 
-OneDimensionalModel_Flux_NonLinear::OneDimensionalModel_Flux_NonLinear( const Physics_PtrType Physics ) :
-        super   ( Physics )
+OneDimensionalModel_Flux_NonLinear::OneDimensionalModel_Flux_NonLinear( const physicsPtr_Type Physics ) :
+    super   ( Physics )
 {}
 
 // ===================================================
@@ -67,11 +70,12 @@ OneDimensionalModel_Flux_NonLinear::operator()( const Real& A, const Real& Q,
 
     if ( ii == 2 ) // F2
     {
-        return ( M_Physics->Data()->Alpha(i) * Q * Q / A
-                 + M_Physics->Data()->Beta0(i) * M_Physics->Data()->Beta1(i) * M_Physics->Data()->Area0(i)
-                 / ( ( M_Physics->Data()->Beta1(i) + 1) * M_Physics->Data()->DensityRho() )
-                 * ( std::pow( A / M_Physics->Data()->Area0(i), M_Physics->Data()->Beta1(i) + 1 ) - 1 )
-               ) * M_Physics->Data()->RobertsonCorrection();
+        return ( M_physics -> Data() -> Alpha(i) * Q * Q / A + M_physics
+                           -> Data() -> Beta0(i) * M_physics -> Data() -> Beta1(i) * M_physics
+                           -> Data() -> Area0(i) / ( ( M_physics -> Data() -> Beta1(i) + 1 ) * M_physics
+                           -> Data() -> DensityRho() ) * ( std::pow( A / M_physics -> Data() -> Area0(i), M_physics
+                           -> Data() -> Beta1(i) + 1 ) - 1 ) ) * M_physics
+                           -> Data() -> RobertsonCorrection();
     }
 
     ERROR_MSG("The flux function has only 2 components.");
@@ -95,14 +99,17 @@ OneDimensionalModel_Flux_NonLinear::diff( const Real& A, const Real& Q,
 
     if ( ii == 2 && jj == 1 ) // dF2/dA
     {
-        return ( M_Physics->Data()->Beta0(i) * M_Physics->Data()->Beta1(i) / M_Physics->Data()->DensityRho()
-                 * std::pow( A / M_Physics->Data()->Area0(i), M_Physics->Data()->Beta1(i) )
-                 - M_Physics->Data()->Alpha(i) * Q * Q / A / A
-               ) * M_Physics->Data()->RobertsonCorrection();
+        return ( M_physics -> Data() -> Beta0(i) * M_physics
+                           -> Data() -> Beta1(i) / M_physics
+                           -> Data() -> DensityRho() * std::pow( A / M_physics
+                           -> Data() -> Area0(i), M_physics
+                           -> Data() -> Beta1(i) ) - M_physics
+                           -> Data() -> Alpha(i) * Q * Q / A / A ) * M_physics
+                           -> Data() -> RobertsonCorrection();
     }
     if ( ii == 2 && jj == 2 ) // dF2/dQ
     {
-        return M_Physics->Data()->RobertsonCorrection() * 2 * M_Physics->Data()->Alpha(i) * Q / A;
+        return M_physics -> Data() -> RobertsonCorrection() * 2 * M_physics -> Data() -> Alpha(i) * Q / A;
     }
 
     ERROR_MSG("Flux's differential function has only 4 components.");
@@ -125,19 +132,19 @@ OneDimensionalModel_Flux_NonLinear::diff( const Real& A, const Real& Q,
 //    {
 //        if( jj == 1 && kk == 1 )  // d2F2/dA2
 //        {
-//            return M_Physics->Data()->RobertsonCorrection()
-//                       * M_Physics->Data()->Beta0(i) * M_Physics->Data()->Beta1(i) * M_Physics->Data()->Beta1(i)
-//                       / ( M_Physics->Data()->DensityRho() * M_Physics->Data()->Area0(i) )
-//                       * std::pow( A / M_Physics->Data()->Area0(i), M_Physics->Data()->Beta1(i) - 1);
+//            return M_physics->Data()->RobertsonCorrection()
+//                       * M_physics->Data()->Beta0(i) * M_physics->Data()->Beta1(i) * M_physics->Data()->Beta1(i)
+//                       / ( M_physics->Data()->DensityRho() * M_physics->Data()->Area0(i) )
+//                       * std::pow( A / M_physics->Data()->Area0(i), M_physics->Data()->Beta1(i) - 1);
 //        }
 //        // cross terms (equal)
 //        if( (jj == 1 && kk == 2) || (jj == 2 && kk == 1) ) // d2F2/dAdQ=d2F2/dQdA
 //        {
-//            return -M_Physics->Data()->RobertsonCorrection() * M_Physics->Data()->Alpha(i) * Q / ( A * A );
+//            return -M_physics->Data()->RobertsonCorrection() * M_physics->Data()->Alpha(i) * Q / ( A * A );
 //        }
 //        if( jj == 2 && kk == 2 ) // d2F2/dQ2
 //        {
-//            return M_Physics->Data()->RobertsonCorrection() * 2 * M_Physics->Data()->Alpha(i) / A;
+//            return M_physics->Data()->RobertsonCorrection() * 2 * M_physics->Data()->Alpha(i) / A;
 //        }
 //    }
 //    ERROR_MSG("Flux's second differential function has only 8 components.");
@@ -148,20 +155,24 @@ OneDimensionalModel_Flux_NonLinear::diff( const Real& A, const Real& Q,
 void
 OneDimensionalModel_Flux_NonLinear::EigenValuesEigenVectors( const Real& A,
                                                              const Real& Q,
-                                                             Container2D_Type& eigenvalues,
-                                                             Container2D_Type& leftEigenvector1,
-                                                             Container2D_Type& leftEigenvector2,
+                                                             container2D_Type& eigenvalues,
+                                                             container2D_Type& leftEigenvector1,
+                                                             container2D_Type& leftEigenvector2,
                                                              const UInt& i ) const
 {
     Debug(6312) << "[OneDimensionalModel_Flux_NonLinear]::jabocian_EigenValues_Vectors\n";
 
     Real celerity;
-    celerity       = std::sqrt( M_Physics->Data()->Alpha(i) * ( M_Physics->Data()->Alpha(i) - 1) * Q * Q / ( A * A )
-                                + M_Physics->Data()->Beta0(i) * M_Physics->Data()->Beta1(i)
-                                / M_Physics->Data()->DensityRho() * std::pow( A / M_Physics->Data()->Area0(i), M_Physics->Data()->Beta1(i) ) );
+    celerity       = std::sqrt( M_physics -> Data() -> Alpha(i) * ( M_physics
+                                          -> Data() -> Alpha(i) - 1) * Q * Q / ( A * A ) + M_physics
+                                          -> Data() -> Beta0(i) * M_physics
+                                          -> Data() -> Beta1(i) / M_physics
+                                          -> Data() -> DensityRho() * std::pow( A / M_physics
+                                          -> Data() -> Area0(i), M_physics
+                                          -> Data() -> Beta1(i) ) );
 
-    eigenvalues[0] = M_Physics->Data()->Alpha(i) * Q / A + celerity;
-    eigenvalues[1] = M_Physics->Data()->Alpha(i) * Q / A - celerity;
+    eigenvalues[0] = M_physics -> Data() -> Alpha(i) * Q / A + celerity;
+    eigenvalues[1] = M_physics -> Data() -> Alpha(i) * Q / A - celerity;
 
     leftEigenvector1[0] = - eigenvalues[1] / A;
     leftEigenvector1[1] = 1. / A;
@@ -172,25 +183,35 @@ OneDimensionalModel_Flux_NonLinear::EigenValuesEigenVectors( const Real& A,
 void
 OneDimensionalModel_Flux_NonLinear::deltaEigenValuesEigenVectors( const Real& A,
                                                                   const Real& Q,
-                                                                  Container2D_Type& deltaEigenvalues,
-                                                                  Container2D_Type& deltaLeftEigenvector1,
-                                                                  Container2D_Type& deltaLeftEigenvector2,
+                                                                  container2D_Type& deltaEigenvalues,
+                                                                  container2D_Type& deltaLeftEigenvector1,
+                                                                  container2D_Type& deltaLeftEigenvector2,
                                                                   const UInt& i ) const
 {
     Real deltaCelerity;
 
-    Real AoverA0( A / M_Physics->Data()->Area0(i) );
-    Real C ( std::pow(  AoverA0, M_Physics->Data()->Beta1(i) ) / M_Physics->Data()->DensityRho() );
+    Real AoverA0( A / M_physics -> Data() -> Area0(i) );
+    Real C ( std::pow(  AoverA0, M_physics -> Data() -> Beta1(i) ) / M_physics -> Data() -> DensityRho() );
 
-    deltaCelerity  = 0.5 / std::sqrt( M_Physics->Data()->Alpha(i) * ( M_Physics->Data()->Alpha(i) - 1) * Q * Q / ( A * A )
-                                      + M_Physics->Data()->Beta0(i) * M_Physics->Data()->Beta1(i) * C )
-                     * ( C * (  M_Physics->Data()->Beta1(i) * M_Physics->Data()->dBeta0dz(i)
-                                - M_Physics->Data()->Beta0(i) * M_Physics->Data()->Beta1(i) * M_Physics->Data()->Beta1(i) /  M_Physics->Data()->Area0(i) * M_Physics->Data()->dArea0dz(i)
-                                + M_Physics->Data()->Beta0(i) * ( 1 + M_Physics->Data()->Beta0(i) * std::log( AoverA0 ) ) * M_Physics->Data()->dBeta1dz(i) )
-                         + ( 2 * M_Physics->Data()->Alpha(i) - 1 ) * Q * Q / ( A * A ) * M_Physics->Data()->dAlphadz(i) );
+    deltaCelerity  = 0.5 / std::sqrt( M_physics -> Data() -> Alpha(i) * ( M_physics
+                                                -> Data() -> Alpha(i) - 1) * Q * Q / ( A * A )+ M_physics
+                                                -> Data() -> Beta0(i) * M_physics
+                                                -> Data() -> Beta1(i) * C ) * ( C * (  M_physics
+                                                -> Data() -> Beta1(i) * M_physics
+                                                -> Data() -> dBeta0dz(i) - M_physics
+                                                -> Data() -> Beta0(i) * M_physics
+                                                -> Data() -> Beta1(i) * M_physics
+                                                -> Data() -> Beta1(i) /  M_physics
+                                                -> Data() -> Area0(i) * M_physics
+                                                -> Data() -> dArea0dz(i) + M_physics
+                                                -> Data() -> Beta0(i) * ( 1 + M_physics
+                                                -> Data() -> Beta0(i) * std::log( AoverA0 ) ) * M_physics
+                                                -> Data() -> dBeta1dz(i) ) + ( 2 * M_physics
+                                                -> Data() -> Alpha(i) - 1 ) * Q * Q / ( A * A ) * M_physics
+                                                -> Data() -> dAlphadz(i) );
 
-    deltaEigenvalues[0] = M_Physics->Data()->dAlphadz(i) * Q / A + deltaCelerity;
-    deltaEigenvalues[1] = M_Physics->Data()->dAlphadz(i) * Q / A - deltaCelerity;
+    deltaEigenvalues[0] = M_physics -> Data() -> dAlphadz(i) * Q / A + deltaCelerity;
+    deltaEigenvalues[1] = M_physics -> Data() -> dAlphadz(i) * Q / A - deltaCelerity;
 
     deltaLeftEigenvector1[0] = - deltaEigenvalues[1] / A;
     deltaLeftEigenvector1[1] = 0;
