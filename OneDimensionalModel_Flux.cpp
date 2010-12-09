@@ -31,7 +31,7 @@
     @date 15-04-2010
     @author Cristiano Malossi <cristiano.malossi@epfl.ch>
 
-    @contributor Simone Rossi <simone.rossi@epfl.ch>
+    @contributors Simone Rossi <simone.rossi@epfl.ch>, Ricardo Ruiz-Baier <ricardo.ruiz@epfl.ch>
 
     @mantainer  Cristiano Malossi <cristiano.malossi@epfl.ch>
  */
@@ -51,24 +51,24 @@ OneDimensionalModel_Flux::OneDimensionalModel_Flux() :
     M_physics   ()
 {}
 
-OneDimensionalModel_Flux::OneDimensionalModel_Flux( const physicsPtr_Type Physics ) :
-    M_physics   ( Physics )
+OneDimensionalModel_Flux::OneDimensionalModel_Flux( const physicsPtr_Type physics ) :
+    M_physics   ( physics )
 {}
 
 // ===================================================
 // Set Methods
 // ===================================================
 void
-OneDimensionalModel_Flux::SetPhysics( const physicsPtr_Type& Physics )
+OneDimensionalModel_Flux::SetPhysics( const physicsPtr_Type& physics )
 {
-    M_physics = Physics;
+    M_physics = physics;
 }
 
 // ===================================================
 // Get Methods
 // ===================================================
 OneDimensionalModel_Flux::physicsPtr_Type
-OneDimensionalModel_Flux::Physics() const
+OneDimensionalModel_Flux::physics() const
 {
     return M_physics;
 }

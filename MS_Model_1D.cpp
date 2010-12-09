@@ -88,8 +88,8 @@ MS_Model_1D::MS_Model_1D() :
     factoryOneDimensionalPhysics_Type::instance().registerProduct( OneD_LinearPhysics,    &Create_OneDimensionalModel_Physics_Linear );
     factoryOneDimensionalPhysics_Type::instance().registerProduct( OneD_NonLinearPhysics, &Create_OneDimensionalModel_Physics_NonLinear );
 
-    factoryOneDimensionalFlux_Type::instance().registerProduct(    OneD_LinearFlux,       &Create_OneDimensionalModel_Flux_Linear );
-    factoryOneDimensionalFlux_Type::instance().registerProduct(    OneD_NonLinearFlux,    &Create_OneDimensionalModel_Flux_NonLinear );
+    factoryOneDimensionalFlux_Type::instance().registerProduct(    OneD_LinearFlux,       &createOneDimensionalFluxLinear );
+    factoryOneDimensionalFlux_Type::instance().registerProduct(    OneD_NonLinearFlux,    &createOneDimensionalFluxNonLinear );
 
     factoryOneDimensionalSource_Type::instance().registerProduct(  OneD_LinearSource,     &Create_OneDimensionalModel_Source_Linear );
     factoryOneDimensionalSource_Type::instance().registerProduct(  OneD_NonLinearSource,  &Create_OneDimensionalModel_Source_NonLinear );

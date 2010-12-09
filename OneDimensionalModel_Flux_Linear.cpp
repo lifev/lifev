@@ -35,7 +35,7 @@
     @date 15-04-2010
     @author Cristiano Malossi <cristiano.malossi@epfl.ch>
 
-    @contributor Simone Rossi <simone.rossi@epfl.ch>
+    @contributors Simone Rossi <simone.rossi@epfl.ch>, Ricardo Ruiz-Baier <ricardo.ruiz@epfl.ch>
 
     @mantainer  Cristiano Malossi <cristiano.malossi@epfl.ch>
  */
@@ -52,8 +52,8 @@ OneDimensionalModel_Flux_Linear::OneDimensionalModel_Flux_Linear() :
     super   ()
 {}
 
-OneDimensionalModel_Flux_Linear::OneDimensionalModel_Flux_Linear( const physicsPtr_Type Physics ) :
-    super   ( Physics )
+OneDimensionalModel_Flux_Linear::OneDimensionalModel_Flux_Linear( const physicsPtr_Type physics ) :
+    super   ( physics )
 {}
 
 // ===================================================
@@ -114,7 +114,7 @@ OneDimensionalModel_Flux_Linear::diff( const Real& /*U1*/, const Real& /*U2*/,
 //}
 
 void
-OneDimensionalModel_Flux_Linear::EigenValuesEigenVectors( const Real& /*U1*/, const Real& /*U2*/,
+OneDimensionalModel_Flux_Linear::eigenValuesEigenVectors( const Real& /*U1*/, const Real& /*U2*/,
                                                           container2D_Type& eigenvalues,
                                                           container2D_Type& leftEigenvector1,
                                                           container2D_Type& leftEigenvector2,
