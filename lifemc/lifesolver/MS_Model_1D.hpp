@@ -98,17 +98,17 @@ public:
     typedef OneDimensionalModel_Solver                             Solver_Type;
     typedef boost::shared_ptr< Solver_Type >                       Solver_PtrType;
 
-    typedef Solver_Type::Data_Type                                 Data_Type;
-    typedef Solver_Type::Mesh_Type                                 Mesh_Type;
-    typedef Solver_Type::Vector_Type                               Vector_Type;
-    typedef Solver_Type::Vector_PtrType                            Vector_PtrType;
-    typedef Solver_Type::Solution_Type                             Solution_Type;
-    typedef Solver_Type::Solution_PtrType                          Solution_PtrType;
-    typedef Solver_Type::Solution_ConstIterator                    Solution_ConstIterator;
-    typedef Solver_Type::LinearSolver_Type                         LinearSolver_Type;
+    typedef Solver_Type::data_Type                                 Data_Type;
+    typedef Solver_Type::mesh_Type                                 Mesh_Type;
+    typedef Solver_Type::vector_Type                               Vector_Type;
+    typedef Solver_Type::vectorPtr_Type                            Vector_PtrType;
+    typedef Solver_Type::solution_Type                             Solution_Type;
+    typedef Solver_Type::solutionPtr_Type                          Solution_PtrType;
+    typedef Solver_Type::solutionConstIterator_Type                Solution_ConstIterator;
+    typedef Solver_Type::linearSolver_Type                         LinearSolver_Type;
 
     typedef Solver_Type::FESpace_Type                              FESpace_Type;
-    typedef Solver_Type::FESpace_PtrType                           FESpace_PtrType;
+    typedef Solver_Type::FESpacePtr_Type                           FESpace_PtrType;
 
     typedef BCInterface1D< Solver_Type >                           BCInterface_Type;
     typedef boost::shared_ptr< BCInterface_Type >                  BCInterface_PtrType;
