@@ -1,35 +1,37 @@
 //@HEADER
 /*
-************************************************************************
+*******************************************************************************
 
- This file is part of the LifeV Applications.
- Copyright (C) 2001-2009 EPFL, Politecnico di Milano, INRIA
+    Copyright (C) 2004, 2005, 2007 EPFL, Politecnico di Milano, INRIA
+    Copyright (C) 2010 EPFL, Politecnico di Milano, Emory University
 
- This library is free software; you can redistribute it and/or modify
- it under the terms of the GNU Lesser General Public License as
- published by the Free Software Foundation; either version 2.1 of the
- License, or (at your option) any later version.
+    This file is part of LifeV.
 
- This library is distributed in the hope that it will be useful, but
- WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- Lesser General Public License for more details.
+    LifeV is free software; you can redistribute it and/or modify
+    it under the terms of the GNU Lesser General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
 
- You should have received a copy of the GNU Lesser General Public
- License along with this library; if not, write to the Free Software
- Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
- USA
+    LifeV is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+    Lesser General Public License for more details.
 
-************************************************************************
+    You should have received a copy of the GNU Lesser General Public License
+    along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
+
+*******************************************************************************
 */
-//@HEADER
+//@HEADERR
 
 /*!
  *  @file
- *  @brief MultiScale Solver
+ *  @brief File containing the MultiScale Solver
  *
- *  @author Cristiano Malossi <cristiano.malossi@epfl.ch>
  *  @date 28-09-2009
+ *  @author Cristiano Malossi <cristiano.malossi@epfl.ch>
+ *
+ *  @maintainer Cristiano Malossi <cristiano.malossi@epfl.ch>
  */
 
 #include <lifemc/lifesolver/MS_Solver.hpp>
@@ -124,10 +126,10 @@ MS_Solver::SetupProblem( const std::string& FileName, const std::string& problem
     if ( M_model->GetType() == MultiScale )
     {
         M_algorithm = MS_Algorithm_PtrType( MS_Algorithm_Factory::instance().createObject( MS_algorithmsMap[ DataFile( "Solver/Algorithm/AlgorithmType", "Newton" ) ] ) );
-        M_algorithm->SetCommunicator( M_comm );
-        M_algorithm->SetModel( M_model );
-        M_algorithm->SetupData( FileName );
-        M_algorithm->InitializeCouplingVariables();
+        M_algorithm->setCommunicator( M_comm );
+        M_algorithm->setModel( M_model );
+        M_algorithm->setupData( FileName );
+        M_algorithm->initializeCouplingVariables();
     }
 }
 
@@ -139,7 +141,7 @@ MS_Solver::SolveProblem( const Real& externalResidual )
     Debug( 8000 ) << "MS_Solver::SolveProblem() \n";
 #endif
 
-    // Save initial solution if it is the very first time step
+    // save initial solution if it is the very first time step
     if ( !MS_ProblemStep )
         M_model->SaveSolution();
 
@@ -167,7 +169,7 @@ MS_Solver::SolveProblem( const Real& externalResidual )
         else
         {
             if ( M_model->GetType() == MultiScale )
-                M_algorithm->UpdateCouplingVariables();
+                M_algorithm->updateCouplingVariables();
             M_model->UpdateSystem();
         }
 
@@ -176,7 +178,7 @@ MS_Solver::SolveProblem( const Real& externalResidual )
 
         // If it is a MultiScale model, call algorithms for subiterations
         if ( M_model->GetType() == MultiScale )
-            M_algorithm->SubIterate();
+            M_algorithm->subIterate();
 
         // SaveSolution
         M_model->SaveSolution();
@@ -188,7 +190,7 @@ MS_Solver::SolveProblem( const Real& externalResidual )
     }
 
     // Redisual check
-    Real algorithmResidual( M_algorithm->Residual() );
+    Real algorithmResidual( M_algorithm->computeResidual() );
     if ( externalResidual >= 0. && std::abs( externalResidual - algorithmResidual ) > 1e-8 )
         MS_ErrorCheck( MS_Residual, "Algorithm Residual: " + number2string( algorithmResidual ) +
                        " (External Residual: " + number2string( externalResidual ) + ")\n" );
@@ -214,7 +216,7 @@ MS_Solver::ShowMe()
 
     M_model->ShowMe();
     if ( M_model->GetType() == MultiScale )
-        M_algorithm->ShowMe();
+        M_algorithm->showMe();
 
     if ( M_displayer->isLeader() )
         std::cout << "=============================================================" << std::endl << std::endl;

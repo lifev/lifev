@@ -1,35 +1,37 @@
 //@HEADER
 /*
-************************************************************************
+*******************************************************************************
 
- This file is part of the LifeV Applications.
- Copyright (C) 2001-2009 EPFL, Politecnico di Milano, INRIA
+    Copyright (C) 2004, 2005, 2007 EPFL, Politecnico di Milano, INRIA
+    Copyright (C) 2010 EPFL, Politecnico di Milano, Emory University
 
- This library is free software; you can redistribute it and/or modify
- it under the terms of the GNU Lesser General Public License as
- published by the Free Software Foundation; either version 2.1 of the
- License, or (at your option) any later version.
+    This file is part of LifeV.
 
- This library is distributed in the hope that it will be useful, but
- WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- Lesser General Public License for more details.
+    LifeV is free software; you can redistribute it and/or modify
+    it under the terms of the GNU Lesser General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
 
- You should have received a copy of the GNU Lesser General Public
- License along with this library; if not, write to the Free Software
- Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
- USA
+    LifeV is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+    Lesser General Public License for more details.
 
-************************************************************************
+    You should have received a copy of the GNU Lesser General Public License
+    along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
+
+*******************************************************************************
 */
 //@HEADER
 
 /*!
  *  @file
- *  @brief MultiScale Aitken Algorithm
+ *  @brief File containing the MultiScale Aitken Algorithm
  *
- *  @author Cristiano Malossi <cristiano.malossi@epfl.ch>
  *  @date 23-10-2009
+ *  @author Cristiano Malossi <cristiano.malossi@epfl.ch>
+ *
+ *  @maintainer Cristiano Malossi <cristiano.malossi@epfl.ch>
  */
 
 #include <lifemc/lifesolver/MS_Algorithm_Aitken.hpp>
@@ -41,7 +43,7 @@ namespace LifeV
 // Constructors & Destructor
 // ===================================================
 MS_Algorithm_Aitken::MS_Algorithm_Aitken() :
-        super               (),
+        MS_Algorithm_Type   (),
         M_methodMap         (),
         M_method            (),
         M_generalizedAitken ()
@@ -63,39 +65,39 @@ MS_Algorithm_Aitken::MS_Algorithm_Aitken() :
 // MultiScale Algorithm Virtual Methods
 // ===================================================
 void
-MS_Algorithm_Aitken::SetupData( const std::string& FileName )
+MS_Algorithm_Aitken::setupData( const std::string& fileName )
 {
 
 #ifdef HAVE_LIFEV_DEBUG
     Debug( 8011 ) << "MS_Algorithm_Aitken::SetupData( algorithm ) \n";
 #endif
 
-    super::SetupData( FileName );
+    MS_Algorithm_Type::setupData( fileName );
 
-    GetPot DataFile( FileName );
+    GetPot dataFile( fileName );
 
-    M_generalizedAitken.setDefaultOmega( DataFile( "Solver/Algorithm/Aitken_method/Omega", 1.e-3 ) );
-    M_generalizedAitken.useDefaultOmega( DataFile( "Solver/Algorithm/Aitken_method/fixedOmega",   false ) );
-    M_generalizedAitken.setOmegaMin( DataFile( "Solver/Algorithm/Aitken_method/range", M_generalizedAitken.defaultOmegaFluid()/1024, 0 ) );
-    M_generalizedAitken.setOmegaMax( DataFile( "Solver/Algorithm/Aitken_method/range", M_generalizedAitken.defaultOmegaFluid()*1024, 1 ) );
-    M_generalizedAitken.setMinimizationType( DataFile( "Solver/Algorithm/Aitken_method/inverseOmega", true ) );
-    M_method = M_methodMap[ DataFile( "Solver/Algorithm/Aitken_method/method", "Vectorial" ) ];
+    M_generalizedAitken.setDefaultOmega( dataFile( "Solver/Algorithm/Aitken_method/Omega", 1.e-3 ) );
+    M_generalizedAitken.useDefaultOmega( dataFile( "Solver/Algorithm/Aitken_method/fixedOmega",   false ) );
+    M_generalizedAitken.setOmegaMin( dataFile( "Solver/Algorithm/Aitken_method/range", M_generalizedAitken.defaultOmegaFluid()/1024, 0 ) );
+    M_generalizedAitken.setOmegaMax( dataFile( "Solver/Algorithm/Aitken_method/range", M_generalizedAitken.defaultOmegaFluid()*1024, 1 ) );
+    M_generalizedAitken.setMinimizationType( dataFile( "Solver/Algorithm/Aitken_method/inverseOmega", true ) );
+    M_method = M_methodMap[ dataFile( "Solver/Algorithm/Aitken_method/method", "Vectorial" ) ];
 }
 
 void
-MS_Algorithm_Aitken::SubIterate()
+MS_Algorithm_Aitken::subIterate()
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 8011 ) << "MS_Algorithm_Aitken::SubIterate( tolerance, subITMax ) \n";
+    Debug( 8011 ) << "MS_Algorithm_Aitken::SubIterate() \n";
 #endif
 
-    super::SubIterate();
+    MS_Algorithm_Type::subIterate();
 
     // Verify tolerance
-    if ( ToleranceSatisfied() )
+    if ( toleranceSatisfied() )
     {
-        Save( 0, M_couplingResiduals->Norm2() );
+        save( 0, M_couplingResiduals->Norm2() );
         return;
     }
 
@@ -108,15 +110,15 @@ MS_Algorithm_Aitken::SubIterate()
     //for ( UInt i = 1 ; i < blocksVector.size() ; i = i+2)
     //    blocksVector[i] = 1.0;
     //std::cout << "blocksVector: " << std::endl;
-    //blocksVector.ShowMe();
+    //blocksVector.showMe();
 
-    for ( UInt subIT = 1; subIT <= M_SubiterationsMaximumNumber; ++subIT )
+    for ( UInt subIT = 1; subIT <= M_subiterationsMaximumNumber; ++subIT )
     {
         // To be moved in a post-processing class
         //std::cout << " MS-  CouplingVariables:\n" << std::endl;
-        //M_couplingVariables->ShowMe();
+        //M_couplingVariables->showMe();
         //std::cout << " MS-  CouplingResiduals:\n" << std::endl;
-        //M_couplingResiduals->ShowMe();
+        //M_couplingResiduals->showMe();
 
         // Update Coupling Variables
         switch ( M_method )
@@ -141,7 +143,7 @@ MS_Algorithm_Aitken::SubIterate()
         }
 
         //std::cout << " MS-  New CouplingVariables:\n" << std::endl;
-        //M_couplingVariables->ShowMe();
+        //M_couplingVariables->showMe();
 
         // Import Coupling Variables inside the coupling blocks
         M_multiscale->ImportCouplingVariables( *M_couplingVariables );
@@ -154,25 +156,25 @@ MS_Algorithm_Aitken::SubIterate()
             std::cout << " MS-  Sub-iteration n.:                        " << subIT << std::endl;
 
         // Verify tolerance
-        if ( ToleranceSatisfied() )
+        if ( toleranceSatisfied() )
         {
-            Save( subIT, M_couplingResiduals->Norm2() );
+            save( subIT, M_couplingResiduals->Norm2() );
             return;
         }
     }
 
-    Save( M_SubiterationsMaximumNumber, M_couplingResiduals->Norm2() );
+    save( M_subiterationsMaximumNumber, M_couplingResiduals->Norm2() );
 
     MS_ErrorCheck( MS_Tolerance, "Aitken algorithm residual: " + number2string( M_couplingResiduals->Norm2() ) +
-                   " (required: " + number2string( M_Tolerance ) + ")\n" );
+                   " (required: " + number2string( M_tolerance ) + ")\n" );
 }
 
 void
-MS_Algorithm_Aitken::ShowMe()
+MS_Algorithm_Aitken::showMe()
 {
     if ( M_displayer->isLeader() )
     {
-        super::ShowMe();
+        MS_Algorithm_Type::showMe();
 
         std::cout << "Aitken Method       = " << Enum2String( M_method, M_methodMap ) << std::endl;
         std::cout << std::endl << std::endl;

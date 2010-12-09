@@ -1,35 +1,37 @@
 //@HEADER
 /*
-************************************************************************
+*******************************************************************************
 
- This file is part of the LifeV Applications.
- Copyright (C) 2001-2009 EPFL, Politecnico di Milano, INRIA
+    Copyright (C) 2004, 2005, 2007 EPFL, Politecnico di Milano, INRIA
+    Copyright (C) 2010 EPFL, Politecnico di Milano, Emory University
 
- This library is free software; you can redistribute it and/or modify
- it under the terms of the GNU Lesser General Public License as
- published by the Free Software Foundation; either version 2.1 of the
- License, or (at your option) any later version.
+    This file is part of LifeV.
 
- This library is distributed in the hope that it will be useful, but
- WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- Lesser General Public License for more details.
+    LifeV is free software; you can redistribute it and/or modify
+    it under the terms of the GNU Lesser General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
 
- You should have received a copy of the GNU Lesser General Public
- License along with this library; if not, write to the Free Software
- Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
- USA
+    LifeV is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+    Lesser General Public License for more details.
 
-************************************************************************
+    You should have received a copy of the GNU Lesser General Public License
+    along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
+
+*******************************************************************************
 */
 //@HEADER
 
 /*!
  *  @file
- *  @brief MultiScale Newton Algorithm
+ *  @brief File containing the MultiScale Newton Algorithm
  *
- *  @author Cristiano Malossi <cristiano.malossi@epfl.ch>
  *  @date 26-10-2009
+ *  @author Cristiano Malossi <cristiano.malossi@epfl.ch>
+ *
+ *  @maintainer Cristiano Malossi <cristiano.malossi@epfl.ch>
  */
 
 #include <lifemc/lifesolver/MS_Algorithm_Newton.hpp>
@@ -41,9 +43,9 @@ namespace LifeV
 // Constructors & Destructor
 // ===================================================
 MS_Algorithm_Newton::MS_Algorithm_Newton() :
-        super               (),
+        MS_Algorithm_Type   (),
         M_solver            (),
-        M_Jacobian          ()
+        M_jacobian          ()
 {
 
 #ifdef HAVE_LIFEV_DEBUG
@@ -57,36 +59,36 @@ MS_Algorithm_Newton::MS_Algorithm_Newton() :
 // MultiScale Algorithm Virtual Methods
 // ===================================================
 void
-MS_Algorithm_Newton::SetupData( const std::string& FileName )
+MS_Algorithm_Newton::setupData( const std::string& fileName )
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 8013 ) << "MS_Algorithm_Newton::SetupData( DataFile ) \n";
+    Debug( 8013 ) << "MS_Algorithm_Newton::SetupData( fileName ) \n";
 #endif
 
-    super::SetupData( FileName );
+    MS_Algorithm_Type::setupData( fileName );
 
-    GetPot DataFile( FileName );
+    GetPot dataFile( fileName );
 
     M_solver.setCommunicator( M_comm );
-    M_solver.setDataFromGetPot( DataFile, "Solver/Algorithm/Newton_method/AztecOO" );
+    M_solver.setDataFromGetPot( dataFile, "Solver/Algorithm/Newton_method/AztecOO" );
     //M_solver.setUpPrec( DataFile, "Solver/Algorithm/Newton_method/Preconditioner" );
 }
 
 void
-MS_Algorithm_Newton::SubIterate()
+MS_Algorithm_Newton::subIterate()
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 8013 ) << "MS_Algorithm_Newton::SubIterate( tolerance, subITMax ) \n";
+    Debug( 8013 ) << "MS_Algorithm_Newton::SubIterate() \n";
 #endif
 
-    super::SubIterate();
+    MS_Algorithm_Type::subIterate();
 
     // Verify tolerance
-    if ( ToleranceSatisfied() )
+    if ( toleranceSatisfied() )
     {
-        Save( 0, M_couplingResiduals->Norm2() );
+        save( 0, M_couplingResiduals->Norm2() );
         return;
     }
 
@@ -97,33 +99,33 @@ MS_Algorithm_Newton::SubIterate()
     MS_Vector_Type minusCouplingResidual( *M_couplingResiduals );
     minusCouplingResidual = 0.0;
 
-    for ( UInt subIT = 1; subIT <= M_SubiterationsMaximumNumber; ++subIT )
+    for ( UInt subIT = 1; subIT <= M_subiterationsMaximumNumber; ++subIT )
     {
         // Compute the Jacobian (we completery delete the previous matrix)
-        M_Jacobian.reset( new MS_Matrix_Type( M_couplingVariables->getMap(), 50, 0 ) );
-        M_multiscale->ExportJacobian( *M_Jacobian );
-        M_Jacobian->GlobalAssemble();
-        M_solver.setMatrix( *M_Jacobian );
+        M_jacobian.reset( new MS_Matrix_Type( M_couplingVariables->getMap(), 50, 0 ) );
+        M_multiscale->ExportJacobian( *M_jacobian );
+        M_jacobian->GlobalAssemble();
+        M_solver.setMatrix( *M_jacobian );
 
-        //M_Jacobian->spy( "Jacobian" );
+        //M_jacobian->spy( "Jacobian" );
 
         // To be moved in a post-processing class
         //std::cout << " MS-  CouplingVariables:\n" << std::endl;
-        //M_couplingVariables->ShowMe();
+        //M_couplingVariables->showMe();
         //std::cout << " MS-  CouplingResiduals:\n" << std::endl;
-        //M_couplingResiduals->ShowMe();
+        //M_couplingResiduals->showMe();
 
         //Compute delta using -R
         minusCouplingResidual = -( *M_couplingResiduals );
 
         M_solver.solve( delta, minusCouplingResidual );
-        //M_solver.solveSystem( minusCouplingResidual, delta, M_Jacobian, false );
+        //M_solver.solveSystem( minusCouplingResidual, delta, M_jacobian, false );
 
         // Update Coupling Variables using the Newton Method
         *M_couplingVariables += delta;
 
         //std::cout << " MS-  New CouplingVariables:\n" << std::endl;
-        //M_couplingVariables->ShowMe();
+        //M_couplingVariables->showMe();
 
         // Import Coupling Variables inside the coupling blocks
         M_multiscale->ImportCouplingVariables( *M_couplingVariables );
@@ -136,25 +138,25 @@ MS_Algorithm_Newton::SubIterate()
             std::cout << " MS-  Sub-iteration n.:                        " << subIT << std::endl;
 
         // Verify tolerance
-        if ( ToleranceSatisfied() )
+        if ( toleranceSatisfied() )
         {
-            Save( subIT, M_couplingResiduals->Norm2() );
+            save( subIT, M_couplingResiduals->Norm2() );
             return;
         }
     }
 
-    Save( M_SubiterationsMaximumNumber, M_couplingResiduals->Norm2() );
+    save( M_subiterationsMaximumNumber, M_couplingResiduals->Norm2() );
 
     MS_ErrorCheck( MS_Tolerance, "Newton algorithm residual: " + number2string( M_couplingResiduals->Norm2() ) +
-                   " (required: " + number2string( M_Tolerance ) + ")\n" );
+                   " (required: " + number2string( M_tolerance ) + ")\n" );
 }
 
 void
-MS_Algorithm_Newton::ShowMe()
+MS_Algorithm_Newton::showMe()
 {
     if ( M_displayer->isLeader() )
     {
-        super::ShowMe();
+        MS_Algorithm_Type::showMe();
     }
 }
 
