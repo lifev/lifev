@@ -384,6 +384,24 @@ protected:
     //! Vector of all local mass matrices, possibly with mass function.
     std::vector<ElemMat>      M_elmatMass;
 
+private:
+
+    //! @name Private Constructors
+    //@{
+
+    //! Inhibited copy constructor.
+    HyperbolicSolver ( const HyperbolicSolver<Mesh, SolverType>& );
+
+    //@}
+
+    //! @name Private Operators
+    //@{
+
+    //! Inhibited assign operator.
+    HyperbolicSolver& operator= ( const HyperbolicSolver<Mesh, SolverType>& );
+
+    //@}
+
 }; // class HyperbolicSolver
 
 // ===================================================

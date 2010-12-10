@@ -104,6 +104,23 @@ import( std::string const& fileName,
 } // Namespace detail
 
 // ===================================================
+// Operators
+// ===================================================
+
+// Assign opertor overloading
+importer& importer::operator= ( const importer& import )
+{
+    // Avoid auto-copy
+    if ( this != &import )
+    {
+        M_fileName = import.M_fileName;
+        M_format   = import.M_format;
+    }
+
+    return *this;
+}
+
+// ===================================================
 // Methods
 // ===================================================
 

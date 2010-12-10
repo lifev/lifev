@@ -83,6 +83,26 @@ public:
         M_format   ( format )
     {}
 
+    //! Copy constructor
+    /*!
+      @param import Importer object to be copied
+    */
+    importer( const importer& import ):
+        M_fileName ( import.M_fileName ),
+        M_format   ( import.M_format )
+    {}
+
+    //@}
+
+    //! @name Operators
+    //@{
+
+    //! Assign opertor overloading
+    /*!
+      @param import Importer object to be copied
+    */
+    importer& operator= ( const importer& import );
+
     //@}
 
     //! @name Methods
