@@ -12,3 +12,17 @@
 
 AT_BANNER([life/lifecore testsuite ...])
 
+AT_SETUP([test_getPot])    #Name of the test
+AT_KEYWORDS([core getPot])
+AT_DATA([data_getPot],               #Data file
+[[
+[variables]
+
+A = 5        # Integer
+B = 5.12345  # Double
+C = true     # Bool  
+D = LifeV    # String
+E = 'Life V' # String list
+]])
+AT_CHECK([mpirun -n 1 ../../lifecore/test_getPot],[0],[ignore],[ignore])
+AT_CLEANUP() 

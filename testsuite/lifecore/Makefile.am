@@ -19,6 +19,10 @@ INCLUDES        = -I$(top_srcdir)/life/lifecore
 
 LDADD           = $(top_builddir)/life/lifecore/liblifecore.la
 
-check_PROGRAMS 	= 
+check_PROGRAMS 	    = test_getPot
+test_getPot_SOURCES = main_getPot.cpp
 
-EXTRA_DIST			= testsuite.at
+EXTRA_DIST = data
+
+link:
+	test -a data || ln -s $(srcdir)/data
