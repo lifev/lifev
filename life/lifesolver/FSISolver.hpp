@@ -1,3 +1,48 @@
+//@HEADER
+/*
+*******************************************************************************
+
+    Copyright (C) 2004, 2005, 2007 EPFL, Politecnico di Milano, INRIA
+    Copyright (C) 2010 EPFL, Politecnico di Milano, Emory University
+
+    This file is part of LifeV.
+
+    LifeV is free software; you can redistribute it and/or modify
+    it under the terms of the GNU Lesser General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    LifeV is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+    Lesser General Public License for more details.
+
+    You should have received a copy of the GNU Lesser General Public License
+    along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
+
+*******************************************************************************
+*/
+//@HEADER
+
+/*!
+ \include ../../doc/api/bibliography/newton
+ \include ../../doc/api/bibliography/fluidstructure
+
+    @file
+    @brief solver class for FSI
+
+    @author Christophe Prud'homme
+    @contributor Simone Deparis <simone.deparis@epfl.ch>
+    @contributor Gilles Fourestey <fourestey@cscs.ch>
+    @contributor Paolo Crosetto <paolo.crosetto@epfl.ch>
+    @maintainer  Paolo Crosetto <paolo.crosetto@epfl.ch>
+
+    @date 10-12-2010
+
+    This class handles the FSI iterations, it is generalized in the context of geometric multiscale applications by the
+    class MS_ModelFSI, thus it will become obsolete.
+ */
+
 /* -*- mode: c++ -*-
 
   This file is part of the LifeV library
@@ -28,15 +73,11 @@
  */
 
 
-#ifndef TWODIM
-
 #ifndef __FSISolver_H
 #define __FSISolver_H 1
 
-#include <life/lifecore/life.hpp>
-#include <life/lifearray/tab.hpp>
-#include <life/lifesolver/FSIOperator.hpp>
-#include <life/lifealg/newton.hpp>
+#pragma GCC diagnostic ignored "-Wunused-variable"
+#pragma GCC diagnostic ignored "-Wunused-parameter"
 
 #include <Epetra_ConfigDefs.h>
 #ifdef EPETRA_MPI
@@ -45,12 +86,26 @@
 #include <Epetra_SerialComm.h>
 #endif
 
+#include <life/lifecore/life.hpp>
+
+#include <life/lifearray/tab.hpp>
+
+//#include <life/lifealg/newton.hpp>
+
+#include <life/lifesolver/FSIOperator.hpp>
+
+#pragma GCC diagnostic warning "-Wunused-variable"
+#pragma GCC diagnostic warning "-Wunused-parameter"
+
 namespace LifeV
 {
 
 /*!
   \class FSISolver
   \brief solver for Fluid-Structure Interaction
+
+  This class handles the FSI iterations, it is generalized in the context of geometric multiscale applications by the
+  class MS_ModelFSI, thus it will become obsolete.
 
   \c FSISolver uses the FSI operators whose base class is \c FSIOperator to
   solve the FSI problem.  It behaves from an interface point of view
@@ -66,7 +121,6 @@ namespace LifeV
   \todo Generic fluid and Structure solvers
   \todo Allow delayed initialization
 
-  @author Christophe Prud'homme
   @see FSIOperator
 */
 class FSISolver
@@ -80,10 +134,10 @@ public:
     typedef FSIOperator                                             oper_fsi_type;
     typedef boost::shared_ptr<oper_fsi_type>                        oper_fsi_ptr_mpi;
 
-    typedef FSIOperator::mesh_type									mesh_type;
+    typedef FSIOperator::mesh_Type									mesh_type;
 
-    typedef FSIOperator::fluid_type::value_type						fluid_value_type;
-    typedef FSIOperator::solid_type::value_type						solid_value_type;
+    typedef FSIOperator::fluidPtr_Type::value_type						fluid_value_type;
+    typedef FSIOperator::solidPtr_Type::value_type						solid_value_type;
 
     typedef fluid_value_type::Function								fluid_function;
     typedef solid_value_type::Function								solid_function;
@@ -91,19 +145,19 @@ public:
     typedef fluid_value_type::source_type							fluid_source_type;
     typedef solid_value_type::source_Type							solid_source_type;
 
-    typedef FSIOperator::fluid_bchandler_type						fluid_bchandler_type;
-    typedef FSIOperator::solid_bchandler_type						solid_bchandler_type;
+    typedef FSIOperator::fluidBchandlerPtr_Type						fluid_bchandler_type;
+    typedef FSIOperator::solidBchandlerPtr_Type						solid_bchandler_type;
 
-    typedef FSIOperator::fluid_bchandler_raw_type					fluid_bchandler_raw_type;
-    typedef FSIOperator::solid_bchandler_raw_type					solid_bchandler_raw_type;
+    typedef FSIOperator::fluidBchandler_Type					fluid_bchandler_raw_type;
+    typedef FSIOperator::solidBchandler_Type					solid_bchandler_raw_type;
 
     typedef fluid_value_type::data_type								data_fluid;
     typedef solid_value_type::data_Type								data_solid;
 
-    typedef FSIOperator::data_PtrType                               data_PtrType;
+    typedef FSIOperator::dataPtr_Type                               data_PtrType;
 
-    typedef FSIOperator::vector_type								vector_type;
-    typedef FSIOperator::vector_ptrtype								vector_ptrtype;
+    typedef FSIOperator::vector_Type								vector_type;
+    typedef FSIOperator::vectorPtr_Type								vector_ptrtype;
 
     //@}
 
@@ -178,7 +232,9 @@ public:
     void setSolidBC              ( const solid_bchandler_type& bc_solid );
     void setLinSolidBC           ( const solid_bchandler_type& bc_dsolid );
     void setInvLinSolidBC        ( const solid_bchandler_type& bc_dsolid_inv );
+    //!\todo{kill this method}
     void setFluxBC              (const fluid_bchandler_type& bc_fluid);
+    //!\todo{kill this method}
     void setRobinBC              (const fluid_bchandler_type& bc_fluid);
 //     void setReducedLinFluidBC    ( const fluid_bchandler_type& bc_dredfluid );
 //     void setInvReducedLinFluidBC ( const fluid_bchandler_type& bc_dredfluid_inv );
@@ -270,4 +326,3 @@ private:
 
 } // Namespace LifeV
 #endif /* __FSISolver_H */
-#endif /* TWODIM */

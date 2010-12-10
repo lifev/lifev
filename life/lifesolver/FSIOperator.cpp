@@ -1,22 +1,53 @@
-/* -*- mode: c++ -*-
-   This program is part of the LifeV library
-   Copyright (C) 2001,2002,2003,2004 EPFL, INRIA, Politecnico di Milano
+//@HEADER
+/*
+*******************************************************************************
 
-   This program is free software; you can redistribute it and/or
-   modify it under the terms of the GNU General Public License
-   as published by the Free Software Foundation; either version 2
-   of the License, or (at your option) any later version.
+    Copyright (C) 2004, 2005, 2007 EPFL, Politecnico di Milano, INRIA
+    Copyright (C) 2010 EPFL, Politecnico di Milano, Emory University
 
-   This program is distributed in the hope that it will be useful,
-   but WITHOUT ANY WARRANTY; without even the implied warranty of
-   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-   GNU General Public License for more details.
+    This file is part of LifeV.
 
-   You should have received a copy of the GNU General Public License
-   along with this program; if not, write to the Free Software
-   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+    LifeV is free software; you can redistribute it and/or modify
+    it under the terms of the GNU Lesser General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    LifeV is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+    Lesser General Public License for more details.
+
+    You should have received a copy of the GNU Lesser General Public License
+    along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
+
+*******************************************************************************
 */
-#ifndef TWODIM
+//@HEADER
+//  \include ../../../mathcard/testsuite/test_monolithic/fluidstructure.dox
+
+
+/*!
+ \include ../../doc/api/bibliography/newton
+ \include ../../doc/api/bibliography/fluidstructure
+
+    @file
+    @brief Pure virtual operator class for FSI solvers
+
+    @author Simone Deparis <simone.deparis@epfl.ch>
+    @contributor Gilles Fourestey <fourestey@cscs.ch>
+    @contributor Paolo Crosetto <paolo.crosetto@epfl.ch>
+    @maintainer  Paolo Crosetto <paolo.crosetto@epfl.ch>
+
+    @date 10-12-2010
+
+    This is the base class for the FSI solvers in LifeV. It contains the methods to evaluate the residual and compute the
+    Jacobian matrix, which make it suited for the generalized Newton method implemente in NonlinearRichardson. The fluid
+    and structure classes are member of this class and different formulations (e.g. Monolithic \ref CDFQ , segregated
+    Newton \ref FM05 , Dirichlet--Neumann \ref DDFQ06 , Robin Neumann \ref BNV08 )
+
+ */
+
+#include <lifeconfig.h>
 #include <life/lifesolver/FSIOperator.hpp>
 //#include <life/lifesolver/reducedLinFluid.hpp>
 
@@ -132,11 +163,11 @@ void
 FSIOperator::setDataFile( const GetPot& dataFile )
 {
 
-    M_fluidMesh.reset(new mesh_type());
+    M_fluidMesh.reset(new mesh_Type());
     M_dataMeshFluid->setup(dataFile, "fluid/space_discretization");
     readMesh(*M_fluidMesh, *M_dataMeshFluid);
 
-    M_solidMesh.reset(new mesh_type());
+    M_solidMesh.reset(new mesh_Type());
     M_dataMeshSolid->setup(dataFile, "solid/space_discretization");
     readMesh(*M_solidMesh, *M_dataMeshSolid);
 
@@ -228,7 +259,7 @@ FSIOperator::setupFEspace()
     if (this->isFluid())
     {
 
-        M_mmFESpace.reset(new FESpace<mesh_type, EpetraMap>(*M_fluidMeshPart,
+        M_mmFESpace.reset(new FESpace<mesh_Type, EpetraMap>(*M_fluidMeshPart,
                                                             //dOrder,
                                                             *refFE_struct,
                                                             *qR_struct,
@@ -236,7 +267,7 @@ FSIOperator::setupFEspace()
                                                             3,
                                                             M_epetraComm));
 
-        M_uFESpace.reset( new FESpace<mesh_type, EpetraMap>(*M_fluidMeshPart,
+        M_uFESpace.reset( new FESpace<mesh_Type, EpetraMap>(*M_fluidMeshPart,
                                                             //uOrder,
                                                             *refFE_vel,
                                                             *qR_vel,
@@ -244,7 +275,7 @@ FSIOperator::setupFEspace()
                                                             3,
                                                             M_epetraComm));
 
-        M_pFESpace.reset( new FESpace<mesh_type, EpetraMap>(*M_fluidMeshPart,
+        M_pFESpace.reset( new FESpace<mesh_Type, EpetraMap>(*M_fluidMeshPart,
                                                             //pOrder,
                                                             *refFE_press,
                                                             *qR_press,
@@ -254,7 +285,7 @@ FSIOperator::setupFEspace()
     }
     else
     {
-        M_mmFESpace.reset(new FESpace<mesh_type, EpetraMap>(M_fluidMesh,
+        M_mmFESpace.reset(new FESpace<mesh_Type, EpetraMap>(M_fluidMesh,
                                                             //dOrder,
                                                             *refFE_struct,
                                                             *qR_struct,
@@ -262,7 +293,7 @@ FSIOperator::setupFEspace()
                                                             3,
                                                             M_epetraComm));
 
-        M_uFESpace.reset( new FESpace<mesh_type, EpetraMap>(M_fluidMesh,
+        M_uFESpace.reset( new FESpace<mesh_Type, EpetraMap>(M_fluidMesh,
                                                             //uOrder,
                                                             *refFE_vel,
                                                             *qR_vel,
@@ -270,7 +301,7 @@ FSIOperator::setupFEspace()
                                                             3,
                                                             M_epetraComm));
 
-        M_pFESpace.reset( new FESpace<mesh_type, EpetraMap>(M_fluidMesh,
+        M_pFESpace.reset( new FESpace<mesh_Type, EpetraMap>(M_fluidMesh,
                                                             //pOrder,
                                                             *refFE_press,
                                                             *qR_press,
@@ -283,7 +314,7 @@ FSIOperator::setupFEspace()
     disp.leaderPrint("FSI-  Building solid FESpace ...               \n");
     if (this->isSolid())
     {
-        M_dFESpace.reset( new FESpace<mesh_type, EpetraMap>( *M_solidMeshPart,
+        M_dFESpace.reset( new FESpace<mesh_Type, EpetraMap>( *M_solidMeshPart,
                                                              dOrder,
                                                              //*refFE_struct,
                                                              //*qR_struct,
@@ -293,7 +324,7 @@ FSIOperator::setupFEspace()
     }
     else
     {
-        M_dFESpace.reset(new FESpace<mesh_type, EpetraMap>(M_solidMesh,
+        M_dFESpace.reset(new FESpace<mesh_Type, EpetraMap>(M_solidMesh,
                                                            //dOrder,
                                                            *refFE_struct,
                                                            *qR_struct,
@@ -310,18 +341,18 @@ FSIOperator::partitionMeshes()
 {
     if (this->isFluid())
     {
-        M_fluidMeshPart.reset(new  partitionMesh< mesh_type > (M_fluidMesh, M_epetraComm));
+        M_fluidMeshPart.reset(new  partitionMesh< mesh_Type > (M_fluidMesh, M_epetraComm));
     }
     if (this->isSolid())
     {
-        M_solidMeshPart.reset( new  partitionMesh< mesh_type > ( M_solidMesh, M_epetraComm ) );
+        M_solidMeshPart.reset( new  partitionMesh< mesh_Type > ( M_solidMesh, M_epetraComm ) );
     }
 
 }
 
 #ifdef HAVE_HDF5
 void
-FSIOperator::partitionMeshes( mesh_filtertype& fluidMeshFilter, mesh_filtertype& solidMeshFilter )
+FSIOperator::partitionMeshes( meshFilter_Type& fluidMeshFilter, meshFilter_Type& solidMeshFilter )
 {
     M_fluidMesh = fluidMeshFilter.getMeshPartition();
     M_solidMesh = solidMeshFilter.getMeshPartition();
@@ -414,9 +445,9 @@ FSIOperator::setupFluidSolid( UInt const fluxes )
     {
         //M_fluxes = imposeFlux();
 
-        M_meshMotion.reset( new meshmotion_raw_type(               *M_mmFESpace,             M_epetraComm ) );
-        M_fluid.reset(      new fluid_raw_type(      M_data->dataFluid(), *M_uFESpace, *M_pFESpace, M_epetraComm, fluxes ) );
-        M_solid.reset( solid_raw_type::StructureSolverFactory::instance().createObject( M_data->dataSolid()->solidType( ) ) );
+        M_meshMotion.reset( new meshMotion_Type(               *M_mmFESpace,             M_epetraComm ) );
+        M_fluid.reset(      new fluid_Type(      M_data->dataFluid(), *M_uFESpace, *M_pFESpace, M_epetraComm, fluxes ) );
+        M_solid.reset( solid_Type::StructureSolverFactory::instance().createObject( M_data->dataSolid()->solidType( ) ) );
         M_solid->setup( M_data->dataSolid(), M_dFESpace, M_epetraComm );
 
 //         if ( M_linearFluid )
@@ -426,14 +457,14 @@ FSIOperator::setupFluidSolid( UInt const fluxes )
 //             M_solidLin.reset( new FSIOperator::solidlin_raw_type( *M_data->dataSolid(), *M_dFESpace, M_epetraComm ) );
 
         //Vector initialization
-        M_rhs.reset( new vector_type( M_fluid->getMap() ) );
+        M_rhs.reset( new vector_Type( M_fluid->getMap() ) );
     }
 
     if ( this->isSolid() )
     {
-//         M_fluid.reset( new fluid_raw_type( *M_data->dataFluid(), *M_uFESpace, *M_pFESpace, M_epetraComm ) );
-        M_meshMotion.reset( new meshmotion_raw_type(               *M_mmFESpace, M_epetraComm ) );
-        M_solid.reset(solid_raw_type::StructureSolverFactory::instance().createObject( M_data->dataSolid()->solidType( ) ) );
+//         M_fluid.reset( new fluid_Type( *M_data->dataFluid(), *M_uFESpace, *M_pFESpace, M_epetraComm ) );
+        M_meshMotion.reset( new meshMotion_Type(               *M_mmFESpace, M_epetraComm ) );
+        M_solid.reset(solid_Type::StructureSolverFactory::instance().createObject( M_data->dataSolid()->solidType( ) ) );
         M_solid->setup( M_data->dataSolid(), M_dFESpace,  M_epetraComm );
 
 //         if ( M_linearFluid )
@@ -503,7 +534,7 @@ FSIOperator::updateSystem( )
         transferMeshMotionOnFluid(M_meshMotion->disp(), *this->M_dispFluidMeshOld);
 
         if ( M_fluid->solution().get() )
-            M_un.reset( new vector_type( *M_fluid->solution() ) );
+            M_un.reset( new vector_Type( *M_fluid->solution() ) );
         *M_rhs = M_fluid->matrMass()*M_bdf->time_der( M_data->dataFluid()->dataTime()->getTimeStep() );
     }
 
@@ -521,7 +552,7 @@ void FSIOperator::couplingVariableExtrap( )
     *M_lambda      = lambdaSolid();
     if (!M_lambdaDot.get())
     {
-        M_lambdaDot.reset        ( new vector_type(*M_fluidInterfaceMap, Unique) );
+        M_lambdaDot.reset        ( new vector_Type(*M_fluidInterfaceMap, Unique) );
         *M_lambda     += M_data->dataFluid()->dataTime()->getTimeStep()*lambdaDotSolid();
     }
     else
@@ -563,9 +594,14 @@ FSIOperator::imposeFlux( void )
         return 0;
 }
 
-void FSIOperator::initializeBDF( const vector_type& un )
+// ===================================================
+//! Public Member Functions
+// ===================================================
+
+
+void FSIOperator::initializeBDF( const vector_Type& un )
 {
-    M_bdf.reset( new BdfT<vector_type>( M_data->dataFluid()->dataTime()->getBDF_order() ) );
+    M_bdf.reset( new BdfT<vector_Type>( M_data->dataFluid()->dataTime()->getBDF_order() ) );
     M_bdf->initialize_unk( un );
 }
 
@@ -586,7 +622,7 @@ void FSIOperator::createInterfaceMaps( std::map<ID, ID> const& locDofMap )
         dofInterfaceFluid.reserve( locDofMap.size() );
 
         for (UInt dim = 0; dim < nDimensions; ++dim)
-            for ( Iterator i = locDofMap.begin(); i != locDofMap.end(); ++i )
+            for ( iterator_Type i = locDofMap.begin(); i != locDofMap.end(); ++i )
                 dofInterfaceFluid.push_back(i->second + dim * M_dFESpace->dof().numTotalDof()); // in solid numerotation
     }
 
@@ -612,7 +648,7 @@ void FSIOperator::createInterfaceMaps( std::map<ID, ID> const& locDofMap )
         dofInterfaceSolid.reserve( locDofMap.size() );
         //std::cout << "solid" << std::endl;
         for (UInt dim = 0; dim < nDimensions; ++dim)
-            for ( Iterator i = locDofMap.begin(); i != locDofMap.end(); ++i )
+            for ( iterator_Type i = locDofMap.begin(); i != locDofMap.end(); ++i )
             {
                 dofInterfaceSolid.push_back(i->second/*Simone: first*/ + dim * M_dFESpace->dof().numTotalDof()); // in solid numerotation
             }
@@ -643,8 +679,8 @@ void FSIOperator::createInterfaceMaps( std::map<ID, ID> const& locDofMap )
 
 
 void
-FSIOperator::initializeFluid( const vector_type& velAndPressure,
-                              const vector_type& displacement )
+FSIOperator::initializeFluid( const vector_Type& velAndPressure,
+                              const vector_Type& displacement )
 {
     this->fluid().initialize( velAndPressure );
     this->meshMotion().initialize( displacement );
@@ -654,8 +690,8 @@ FSIOperator::initializeFluid( const vector_type& velAndPressure,
 
 
 void
-FSIOperator::initializeSolid( vector_ptrtype displacement,
-                              vector_ptrtype velocity )
+FSIOperator::initializeSolid( vectorPtr_Type displacement,
+                              vectorPtr_Type velocity )
 {
     this->solid().initialize( displacement, velocity);
 }
@@ -663,14 +699,14 @@ FSIOperator::initializeSolid( vector_ptrtype displacement,
 
 
 void
-FSIOperator::updateJacobian( const vector_type& /*sol*/, const int& /*iter*/)
+FSIOperator::updateJacobian( const vector_Type& /*sol*/, const int& /*iter*/)
 {
 }
 
 
 
 void
-FSIOperator::moveMesh( const vector_type& dep )
+FSIOperator::moveMesh( const vector_Type& dep )
 {
     displayer().leaderPrint("FSI-  Moving the mesh ...                      ");
     M_fluidMeshPart->mesh()->moveMesh(dep,  this->M_mmFESpace->dof().numTotalDof());
@@ -681,21 +717,21 @@ FSIOperator::moveMesh( const vector_type& dep )
 
 
 void
-FSIOperator::transferFluidOnInterface(const vector_type &_vec1, vector_type &_vec2)
+FSIOperator::transferFluidOnInterface(const vector_Type &_vec1, vector_Type &_vec2)
 {
     // e.g.: vec1=M_fluid->residual(), vec2=M_sigmaFluid
 //     _vec2 = ZeroVector(_vec2.size());
 
     if (_vec1.getMaptype() == Unique)
     {
-        vector_type const  vec1Repeated(_vec1, Repeated);
+        vector_Type const  vec1Repeated(_vec1, Repeated);
         transferFluidOnInterface(vec1Repeated, _vec2);
         return;
     }
 
     if (_vec2.getMaptype() == Repeated)
     {
-        vector_type  vec2Unique(_vec2, Unique);
+        vector_Type  vec2Unique(_vec2, Unique);
         transferFluidOnInterface(_vec1, vec2Unique);
         _vec2 = vec2Unique;
         return;
@@ -708,10 +744,10 @@ FSIOperator::transferFluidOnInterface(const vector_type &_vec1, vector_type &_ve
     int numTotalDofSolid = M_dFESpace->dof().numTotalDof();
     int numTotalDofFluid = M_uFESpace->dof().numTotalDof();
 
-    typedef std::map<ID, ID>::const_iterator Iterator;
+    typedef std::map<ID, ID>::const_iterator iterator_Type;
 
     for (UInt dim = 0; dim < nDimensions; ++dim)
-        for ( Iterator it = locDofMap.begin(); it != locDofMap.end(); ++it )
+        for ( iterator_Type it = locDofMap.begin(); it != locDofMap.end(); ++it )
         {
 //                 std::cout <<  it->second + dim*numTotalDofFluid << " to "
 //                           <<  it->first + dim*numTotalDofSolid << " : "
@@ -725,21 +761,21 @@ FSIOperator::transferFluidOnInterface(const vector_type &_vec1, vector_type &_ve
 
 //works in serial but no yet in parallel
 void
-FSIOperator::transferSolidOnFluid(const vector_type &_vec1, vector_type &_vec2)
+FSIOperator::transferSolidOnFluid(const vector_Type &_vec1, vector_Type &_vec2)
 {
     //    e.g.: vec2=M_fluid->residual(), vec1=M_sigmaFluid
     //     _vec2 = ZeroVector(_vec2.size());
 
     if (_vec1.getMaptype() == Unique)
     {
-        vector_type const  vec1Repeated(_vec1, Repeated);
+        vector_Type const  vec1Repeated(_vec1, Repeated);
         transferSolidOnInterface(vec1Repeated, _vec2);
         return;
     }
 
     if (_vec2.getMaptype() == Repeated)
     {
-        vector_type  vec2Unique(_vec2, Unique);
+        vector_Type  vec2Unique(_vec2, Unique);
         transferSolidOnInterface(_vec1, vec2Unique);
         _vec2 = vec2Unique;
         return;
@@ -753,10 +789,10 @@ FSIOperator::transferSolidOnFluid(const vector_type &_vec1, vector_type &_vec2)
     int numTotalDofSolid = M_dFESpace->dof().numTotalDof();
     int numTotalDofFluid = M_uFESpace->dof().numTotalDof();
 
-    typedef std::map<ID, ID>::const_iterator Iterator;
+    typedef std::map<ID, ID>::const_iterator iterator_Type;
 
     for (UInt dim = 0; dim < nDimensions; ++dim)
-        for ( Iterator it = locDofMap.begin(); it != locDofMap.end(); ++it )
+        for ( iterator_Type it = locDofMap.begin(); it != locDofMap.end(); ++it )
         {
             _vec2.checkAndSet( it->second + dim*numTotalDofFluid,
                                _vec1[it->first + dim*numTotalDofSolid]);
@@ -766,7 +802,7 @@ FSIOperator::transferSolidOnFluid(const vector_type &_vec1, vector_type &_vec2)
 
 
 void
-FSIOperator::transferSolidOnInterface(const vector_type &_vec1, vector_type &_vec2)
+FSIOperator::transferSolidOnInterface(const vector_Type &_vec1, vector_Type &_vec2)
 {
     /* e.g.:
        vec1 (Unique)       vec2 (Repeated)  (On different EpetraMaps) (Changing now to Unique on both)
@@ -777,14 +813,14 @@ FSIOperator::transferSolidOnInterface(const vector_type &_vec1, vector_type &_ve
 
     if (_vec1.getMaptype() == Unique)
     {
-        vector_type const  vec1Repeated(_vec1, Repeated);
+        vector_Type const  vec1Repeated(_vec1, Repeated);
         transferSolidOnInterface(vec1Repeated, _vec2);
         return;
     }
 
     if (_vec2.getMaptype() == Repeated)
     {
-        vector_type  vec2Unique(_vec2, Unique);
+        vector_Type  vec2Unique(_vec2, Unique);
         transferSolidOnInterface(_vec1, vec2Unique);
         _vec2 = vec2Unique;
         return;
@@ -796,10 +832,10 @@ FSIOperator::transferSolidOnInterface(const vector_type &_vec1, vector_type &_ve
 
     int numTotalDofSolid = M_dFESpace->dof().numTotalDof();
 
-    typedef std::map<ID, ID>::const_iterator Iterator;
+    typedef std::map<ID, ID>::const_iterator iterator_Type;
 
     for (UInt dim = 0; dim < nDimensions; ++dim)
-        for ( Iterator it = locDofMap.begin(); it != locDofMap.end(); ++it )
+        for ( iterator_Type it = locDofMap.begin(); it != locDofMap.end(); ++it )
         {
             _vec2.checkAndSet( it->second + dim*numTotalDofSolid,
                                _vec1[it->first + dim*numTotalDofSolid] );
@@ -807,7 +843,7 @@ FSIOperator::transferSolidOnInterface(const vector_type &_vec1, vector_type &_ve
 }
 
 void
-FSIOperator::transferInterfaceOnSolid(const vector_type& _vec1, vector_type& _vec2)
+FSIOperator::transferInterfaceOnSolid(const vector_Type& _vec1, vector_Type& _vec2)
 {
     /* e.g.:
        vec2                vec1
@@ -818,14 +854,14 @@ FSIOperator::transferInterfaceOnSolid(const vector_type& _vec1, vector_type& _ve
 
     if (_vec1.getMaptype() == Unique)
     {
-        vector_type const  vec1Repeated(_vec1, Repeated);
+        vector_Type const  vec1Repeated(_vec1, Repeated);
         transferInterfaceOnSolid(vec1Repeated, _vec2);
         return;
     }
 
     if (_vec2.getMaptype() == Repeated)
     {
-        vector_type  vec2Unique(_vec2, Unique);
+        vector_Type  vec2Unique(_vec2, Unique);
         transferInterfaceOnSolid(_vec1, vec2Unique);
         _vec2 = vec2Unique;
         return;
@@ -836,10 +872,10 @@ FSIOperator::transferInterfaceOnSolid(const vector_type& _vec1, vector_type& _ve
     std::map<ID, ID> const& locDofMap = M_dofStructureToHarmonicExtension->locDofMap();
     int numTotalDofSolid = M_dFESpace->dof().numTotalDof();
 
-    typedef std::map<ID, ID>::const_iterator Iterator;
+    typedef std::map<ID, ID>::const_iterator iterator_Type;
 
     for (UInt dim = 0; dim < nDimensions; ++dim)
-        for ( Iterator it = locDofMap.begin(); it != locDofMap.end(); ++it )
+        for ( iterator_Type it = locDofMap.begin(); it != locDofMap.end(); ++it )
         {
             _vec2.checkAndSet( it->second + dim*numTotalDofSolid,
                                _vec1[it->second + dim*numTotalDofSolid] );
@@ -847,7 +883,7 @@ FSIOperator::transferInterfaceOnSolid(const vector_type& _vec1, vector_type& _ve
 }
 
 void
-FSIOperator::bcManageVectorRHS( const fluid_bchandler_type& bch, vector_type& rhs )
+FSIOperator::bcManageVectorRHS( const fluidBchandlerPtr_Type& bch, vector_Type& rhs )
 {
     if ( !bch->bdUpdateDone() || M_fluid->recomputeMatrix() )
         bch->bdUpdate( *M_uFESpace->mesh(), M_uFESpace->feBd(), M_uFESpace->dof() );
@@ -926,11 +962,11 @@ FSIOperator::displayer()
 //! Get Functions
 // ===================================================
 /*
-FSIOperator::vector_type
+FSIOperator::vector_Type
 FSIOperator::displacementOnInterface()
 {
 
-//     vector_type dispOnInterface();
+//     vector_Type dispOnInterface();
 // //@     dispOnInterface = ZeroVector(dispOnInterface.size());
 
 //  //    FOR_EACH_INTERFACE_DOF( dispOnInterface[IDsolid - 1 + jDim*totalDofSolid] =
@@ -961,8 +997,8 @@ FSIOperator::displacementOnInterface()
 //! Set Functions
 // ===================================================
 void
-FSIOperator::setComm( const comm_PtrType& comm,
-                      const comm_PtrType& worldComm )
+FSIOperator::setComm( const commPtr_Type& comm,
+                      const commPtr_Type& worldComm )
 {
     M_epetraComm       = comm;
     M_epetraWorldComm  = worldComm;
@@ -970,7 +1006,7 @@ FSIOperator::setComm( const comm_PtrType& comm,
 
 
 void
-FSIOperator::setFluid( const fluid_type& fluid, const meshmotion_type& meshmotion )
+FSIOperator::setFluid( const fluidPtr_Type& fluid, const meshMotionPtr_Type& meshmotion )
 {
     M_fluid = fluid;
     M_meshMotion = meshmotion;
@@ -980,7 +1016,7 @@ FSIOperator::setFluid( const fluid_type& fluid, const meshmotion_type& meshmotio
 
 
 void
-FSIOperator::setSolid( const solid_type& solid )
+FSIOperator::setSolid( const solidPtr_Type& solid )
 {
     M_solid = solid;
     M_isSolid = true;
@@ -989,7 +1025,7 @@ FSIOperator::setSolid( const solid_type& solid )
 
 
 void
-FSIOperator::setFluidBC( const fluid_bchandler_type& bc_fluid )
+FSIOperator::setFluidBC( const fluidBchandlerPtr_Type& bc_fluid )
 {
     if ( isFluid() )
     {
@@ -1000,7 +1036,7 @@ FSIOperator::setFluidBC( const fluid_bchandler_type& bc_fluid )
 
 
 void
-FSIOperator::setHarmonicExtensionBC( const fluid_bchandler_type& bc_he )
+FSIOperator::setHarmonicExtensionBC( const fluidBchandlerPtr_Type& bc_he )
 {
     if ( isFluid() )
     {
@@ -1012,7 +1048,7 @@ FSIOperator::setHarmonicExtensionBC( const fluid_bchandler_type& bc_he )
 
 
 void
-FSIOperator::setSolidBC( const solid_bchandler_type& bc_solid )
+FSIOperator::setSolidBC( const solidBchandlerPtr_Type& bc_solid )
 {
     if ( isSolid() )
     {
@@ -1023,7 +1059,7 @@ FSIOperator::setSolidBC( const solid_bchandler_type& bc_solid )
 
 
 void
-FSIOperator::setLambdaFluid( const vector_type& lambda )
+FSIOperator::setLambdaFluid( const vector_Type& lambda )
 {
     if ( lambda.getMaptype() == Unique )
         *M_lambdaFluid = lambda;
@@ -1036,7 +1072,7 @@ FSIOperator::setLambdaFluid( const vector_type& lambda )
 
 
 void
-FSIOperator::setLambdaSolid( const vector_type& lambda )
+FSIOperator::setLambdaSolid( const vector_Type& lambda )
 {
     if ( lambda.getMaptype() == Unique )
         *M_lambdaSolid = lambda;
@@ -1049,7 +1085,7 @@ FSIOperator::setLambdaSolid( const vector_type& lambda )
 
 
 void
-FSIOperator::setLambdaSolidOld( const vector_type& lambda )
+FSIOperator::setLambdaSolidOld( const vector_Type& lambda )
 {
     if ( lambda.getMaptype() == Unique )
         *M_lambdaSolidOld = lambda;
@@ -1060,7 +1096,7 @@ FSIOperator::setLambdaSolidOld( const vector_type& lambda )
 
 
 void
-FSIOperator::setLambdaDotSolid( const vector_type& lambda )
+FSIOperator::setLambdaDotSolid( const vector_Type& lambda )
 {
     if ( lambda.getMaptype() == Unique )
         *M_lambdaDotSolid = lambda;
@@ -1073,7 +1109,7 @@ FSIOperator::setLambdaDotSolid( const vector_type& lambda )
 
 
 void
-FSIOperator::setSigmaSolid( const vector_type& sigma )
+FSIOperator::setSigmaSolid( const vector_Type& sigma )
 {
     if ( sigma.getMaptype() == Unique )
         *M_sigmaSolid = sigma;
@@ -1085,7 +1121,7 @@ FSIOperator::setSigmaSolid( const vector_type& sigma )
 
 
 void
-FSIOperator::setSigmaFluid( const vector_type& sigma )
+FSIOperator::setSigmaFluid( const vector_Type& sigma )
 {
     if ( sigma.getMaptype() == Unique )
         *M_sigmaFluid = sigma;
@@ -1099,7 +1135,7 @@ FSIOperator::setSigmaFluid( const vector_type& sigma )
 
 
 void
-FSIOperator::setMinusSigmaFluid( const vector_type& sigma )
+FSIOperator::setMinusSigmaFluid( const vector_Type& sigma )
 {
     if ( sigma.getMaptype() == Unique )
     {
@@ -1116,9 +1152,9 @@ FSIOperator::setMinusSigmaFluid( const vector_type& sigma )
 
 
 void
-FSIOperator::setAlphafbcf( const bc_function_type& alphafbcf )
+FSIOperator::setAlphafbcf( const bcFunction_Type& alphafbcf )
 {
-    vector_type vec( M_fluid->velFESpace().map());
+    vector_Type vec( M_fluid->velFESpace().map());
     M_fluid->velFESpace().interpolate(alphafbcf, vec, 0.0);
     *M_Alphaf = vec ;
 }
@@ -1126,7 +1162,7 @@ FSIOperator::setAlphafbcf( const bc_function_type& alphafbcf )
 
 
 void
-FSIOperator::setStructureDispToHarmonicExtension( const vector_type& disp, UInt type )
+FSIOperator::setStructureDispToHarmonicExtension( const vector_Type& disp, UInt type )
 {
     M_bcvStructureDispToHarmonicExtension->setup( disp,
                                                   M_dFESpace->dof().numTotalDof(),
@@ -1137,7 +1173,7 @@ FSIOperator::setStructureDispToHarmonicExtension( const vector_type& disp, UInt 
 
 
 void
-FSIOperator::setStructureToFluid( const vector_type& velo,  UInt type )
+FSIOperator::setStructureToFluid( const vector_Type& velo,  UInt type )
 {
     M_bcvStructureToFluid->setup( velo,
                                   M_uFESpace->dof().numTotalDof(),
@@ -1148,7 +1184,7 @@ FSIOperator::setStructureToFluid( const vector_type& velo,  UInt type )
 
 
 void
-FSIOperator::setStructureDispToFluid( const vector_type& disp,  UInt type )
+FSIOperator::setStructureDispToFluid( const vector_Type& disp,  UInt type )
 {
     M_bcvStructureDispToFluid->setup( disp,
                                       M_uFESpace->dof().numTotalDof(),
@@ -1159,7 +1195,7 @@ FSIOperator::setStructureDispToFluid( const vector_type& disp,  UInt type )
 
 
 void
-FSIOperator::setStructureDispToSolid( const vector_type& disp, UInt type )
+FSIOperator::setStructureDispToSolid( const vector_Type& disp, UInt type )
 {
     M_bcvStructureDispToSolid->setup( disp,
                                       M_dFESpace->dof().numTotalDof(),
@@ -1170,7 +1206,7 @@ FSIOperator::setStructureDispToSolid( const vector_type& disp, UInt type )
 
 
 void
-FSIOperator::setDerStructureDispToSolid( const vector_type& ddisp, UInt type )
+FSIOperator::setDerStructureDispToSolid( const vector_Type& ddisp, UInt type )
 {
     M_bcvDerStructureDispToSolid->setup( ddisp,
                                          M_dFESpace->dof().numTotalDof(),
@@ -1181,7 +1217,7 @@ FSIOperator::setDerStructureDispToSolid( const vector_type& ddisp, UInt type )
 
 
 void
-FSIOperator::setSolidLoadToStructure( const vector_type& load, UInt type )
+FSIOperator::setSolidLoadToStructure( const vector_Type& load, UInt type )
 {
     M_bcvSolidLoadToStructure->setup( load,
                                       M_dFESpace->dof().numTotalDof(),
@@ -1192,7 +1228,7 @@ FSIOperator::setSolidLoadToStructure( const vector_type& load, UInt type )
 
 
 void
-FSIOperator::setHarmonicExtensionVelToFluid( const vector_type& vel, UInt type )
+FSIOperator::setHarmonicExtensionVelToFluid( const vector_Type& vel, UInt type )
 {
     M_bcvHarmonicExtensionVelToFluid->setup( vel,
                                              M_uFESpace->dof().numTotalDof(),
@@ -1203,7 +1239,7 @@ FSIOperator::setHarmonicExtensionVelToFluid( const vector_type& vel, UInt type )
 
 
 void
-FSIOperator::setDerHarmonicExtensionVelToFluid( const vector_type& dvel, UInt type )
+FSIOperator::setDerHarmonicExtensionVelToFluid( const vector_Type& dvel, UInt type )
 {
     M_bcvDerHarmonicExtensionVelToFluid->setup( dvel,
                                                 M_uFESpace->dof().numTotalDof(),
@@ -1215,7 +1251,7 @@ FSIOperator::setDerHarmonicExtensionVelToFluid( const vector_type& dvel, UInt ty
 
 
 void
-FSIOperator::setFluidLoadToStructure( const vector_type& load, UInt type )
+FSIOperator::setFluidLoadToStructure( const vector_Type& load, UInt type )
 {
     M_bcvFluidLoadToStructure->setup( load,
                                       M_dFESpace->dof().numTotalDof(),
@@ -1226,7 +1262,7 @@ FSIOperator::setFluidLoadToStructure( const vector_type& load, UInt type )
 
 
 void
-FSIOperator::setDerFluidLoadToStructure( const vector_type& dload, UInt type )
+FSIOperator::setDerFluidLoadToStructure( const vector_Type& dload, UInt type )
 {
     M_bcvDerFluidLoadToStructure->setup( dload,
                                          M_dFESpace->dof().numTotalDof(),
@@ -1237,7 +1273,7 @@ FSIOperator::setDerFluidLoadToStructure( const vector_type& dload, UInt type )
 
 
 void
-FSIOperator::setDerFluidLoadToFluid( const vector_type& dload, UInt type )
+FSIOperator::setDerFluidLoadToFluid( const vector_Type& dload, UInt type )
 {
     M_bcvDerFluidLoadToFluid->setup( dload,
                                      M_uFESpace->dof().numTotalDof(),
@@ -1245,7 +1281,7 @@ FSIOperator::setDerFluidLoadToFluid( const vector_type& dload, UInt type )
                                      type );
 }
 
-void FSIOperator::setMixteOuterWall(function_type const& dload, function_type const& E)
+void FSIOperator::setMixteOuterWall(function_Type const& dload, function_Type const& E)
 {
     M_bcfMixteOuterWall.setFunctions_Mixte(dload,
                                            E);
@@ -1274,7 +1310,7 @@ void FSIOperator::setMixteOuterWall(function_type const& dload, function_type co
 
 
 // void
-// FSIOperator::setReducedLinFluidBC(fluid_bchandler_type bc_dredfluid )
+// FSIOperator::setReducedLinFluidBC(fluidBchandlerPtr_Type bc_dredfluid )
 // {
 //     M_BCh_dp     = bc_dredfluid;
 //     M_reducedLinFluid->setUpBC(bc_dredfluid);
@@ -1283,7 +1319,7 @@ void FSIOperator::setMixteOuterWall(function_type const& dload, function_type co
 
 
 // void
-// FSIOperator::setInvReducedLinFluidBC(fluid_bchandler_type bc_invdredfluid )
+// FSIOperator::setInvReducedLinFluidBC(fluidBchandlerPtr_Type bc_invdredfluid )
 // {
 //     M_BCh_dp_inv = bc_invdredfluid;
 // }
@@ -1304,51 +1340,51 @@ void
 FSIOperator::variablesInit( const std::string& /*dOrder*/ )
 //FSIOperator::variablesInit(const RefFE* refFE_struct,const LifeV::QuadRule*  bdQr_struct, const LifeV::QuadRule* qR_struct)
 {
-    M_lambdaFluid.reset        ( new vector_type(*M_fluidInterfaceMap, Unique) );
-    M_lambda.reset             ( new vector_type(*M_solidInterfaceMap, Unique) );
-    M_lambdaDot.reset             ( new vector_type(*M_solidInterfaceMap, Unique) );
-    M_lambdaFluidRepeated.reset( new vector_type(*M_fluidInterfaceMap, Repeated) );
+    M_lambdaFluid.reset        ( new vector_Type(*M_fluidInterfaceMap, Unique) );
+    M_lambda.reset             ( new vector_Type(*M_solidInterfaceMap, Unique) );
+    M_lambdaDot.reset             ( new vector_Type(*M_solidInterfaceMap, Unique) );
+    M_lambdaFluidRepeated.reset( new vector_Type(*M_fluidInterfaceMap, Repeated) );
 
     if ( this->isFluid() )
     {
-        M_dispFluidMeshOld.reset( new vector_type(M_uFESpace->map(), Repeated) );
-        M_veloFluidMesh.reset   ( new vector_type(M_uFESpace->map(), Repeated) );
-        M_Alphaf.reset          ( new vector_type(M_uFESpace->map(), Repeated));
+        M_dispFluidMeshOld.reset( new vector_Type(M_uFESpace->map(), Repeated) );
+        M_veloFluidMesh.reset   ( new vector_Type(M_uFESpace->map(), Repeated) );
+        M_Alphaf.reset          ( new vector_Type(M_uFESpace->map(), Repeated));
 
         if ( M_linearFluid )
-            M_derVeloFluidMesh.reset( new vector_type(this->M_uFESpace->map(), Repeated) );
+            M_derVeloFluidMesh.reset( new vector_Type(this->M_uFESpace->map(), Repeated) );
     }
 
-    M_sigmaFluid.reset              ( new vector_type(*M_fluidInterfaceMap, Unique) );
-    M_sigmaFluidRepeated.reset      ( new vector_type(*M_fluidInterfaceMap, Repeated) );
-    M_minusSigmaFluid.reset         ( new vector_type(*M_fluidInterfaceMap, Unique) );
-    M_minusSigmaFluidRepeated.reset ( new vector_type(*M_fluidInterfaceMap, Repeated) );
+    M_sigmaFluid.reset              ( new vector_Type(*M_fluidInterfaceMap, Unique) );
+    M_sigmaFluidRepeated.reset      ( new vector_Type(*M_fluidInterfaceMap, Repeated) );
+    M_minusSigmaFluid.reset         ( new vector_Type(*M_fluidInterfaceMap, Unique) );
+    M_minusSigmaFluidRepeated.reset ( new vector_Type(*M_fluidInterfaceMap, Repeated) );
 
-    M_lambdaSolid.reset   ( new vector_type(*M_solidInterfaceMap, Unique) );
-    M_lambdaSolidOld.reset( new vector_type(*M_solidInterfaceMap, Unique) );
-    M_lambdaDotSolid.reset( new vector_type(*M_solidInterfaceMap, Unique) );
-    M_sigmaSolid.reset    ( new vector_type(*M_solidInterfaceMap, Unique) );
+    M_lambdaSolid.reset   ( new vector_Type(*M_solidInterfaceMap, Unique) );
+    M_lambdaSolidOld.reset( new vector_Type(*M_solidInterfaceMap, Unique) );
+    M_lambdaDotSolid.reset( new vector_Type(*M_solidInterfaceMap, Unique) );
+    M_sigmaSolid.reset    ( new vector_Type(*M_solidInterfaceMap, Unique) );
 
-    M_lambdaSolidRepeated.reset   ( new vector_type(*M_solidInterfaceMap, Repeated) );
-    M_lambdaDotSolidRepeated.reset( new vector_type(*M_solidInterfaceMap, Repeated) );
-    M_sigmaSolidRepeated.reset    ( new vector_type(*M_solidInterfaceMap, Repeated) );
+    M_lambdaSolidRepeated.reset   ( new vector_Type(*M_solidInterfaceMap, Repeated) );
+    M_lambdaDotSolidRepeated.reset( new vector_Type(*M_solidInterfaceMap, Repeated) );
+    M_sigmaSolidRepeated.reset    ( new vector_Type(*M_solidInterfaceMap, Repeated) );
 }
 
 
 void
-FSIOperator::transferMeshMotionOnFluid( const vector_type& _vec1, vector_type& _vec2 )
+FSIOperator::transferMeshMotionOnFluid( const vector_Type& _vec1, vector_Type& _vec2 )
 {
     //transferMeshMotionOnFluid should handle the repetition of the interface nodes.
     if (_vec1.getMaptype() == Unique)
     {
-        vector_type const  vec1Repeated(_vec1, Repeated);
+        vector_Type const  vec1Repeated(_vec1, Repeated);
         transferMeshMotionOnFluid(vec1Repeated, _vec2);
         return;
     }
 
     if (_vec2.getMaptype() == Repeated)
     {
-        vector_type  vec2Unique(_vec2, Unique);
+        vector_Type  vec2Unique(_vec2, Unique);
         transferMeshMotionOnFluid(_vec1, vec2Unique);
         _vec2 = vec2Unique;
         return;
@@ -1362,12 +1398,12 @@ FSIOperator::transferMeshMotionOnFluid( const vector_type& _vec1, vector_type& _
 }
 
 void
-FSIOperator::interpolateVelocity( const vector_type& _vec1, vector_type& _vec2 )
+FSIOperator::interpolateVelocity( const vector_Type& _vec1, vector_Type& _vec2 )
 {
     assert(_vec1.getMaptype() == Repeated);
     assert(_vec2.getMaptype() == Unique);
 
-    typedef mesh_type::VolumeShape GeoShape; // Element shape
+    typedef mesh_Type::VolumeShape GeoShape; // Element shape
 
     UInt nDofpV = M_uFESpace->refFE().nbDofPerVertex(); // number of Dof per vertex
     UInt nDofpE = M_uFESpace->refFE().nbDofPerEdge();   // number of Dof per edge
@@ -1549,16 +1585,16 @@ FSIOperator::interpolateVelocity( const vector_type& _vec1, vector_type& _vec2 )
 
 // this will interpolate dofs values from fespace1 to fespace2
 void
-FSIOperator::interpolateInterfaceDofs( const FESpace<mesh_type, EpetraMap>& _fespace1,
-                                       const vector_type&                   _vec1,
-                                       const FESpace<mesh_type, EpetraMap>& _fespace2,
-                                       vector_type&                         _vec2,
-                                       dof_interface_type3D&                _dofInterface)
+FSIOperator::interpolateInterfaceDofs( const FESpace<mesh_Type, EpetraMap>& _fespace1,
+                                       const vector_Type&                   _vec1,
+                                       const FESpace<mesh_Type, EpetraMap>& _fespace2,
+                                       vector_Type&                         _vec2,
+                                       dofInterface3DPtr_Type&                _dofInterface)
 {
     assert(_vec1.getMaptype() == Repeated);
     assert(_vec2.getMaptype() == Unique);
 
-    typedef mesh_type::VolumeShape GeoShape; // Element shape
+    typedef mesh_Type::VolumeShape GeoShape; // Element shape
 
 
     UInt nDofPerVert1  = _fespace1.refFE().nbDofPerVertex(); // number of Dof per vertex
@@ -1806,4 +1842,3 @@ FSIOperator::interpolateInterfaceDofs( const FESpace<mesh_type, EpetraMap>& _fes
 
 } // Namespace LifeV
 
-#endif /* TWODIM */

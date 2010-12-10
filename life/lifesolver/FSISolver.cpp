@@ -1,35 +1,42 @@
 /* -*- mode: c++ -*-
+//@HEADER
+/*
+*******************************************************************************
 
-  This file is part of the LifeV library
+    Copyright (C) 2004, 2005, 2007 EPFL, Politecnico di Milano, INRIA
+    Copyright (C) 2010 EPFL, Politecnico di Milano, Emory University
 
-  Author(s): Christophe Prud'homme <christophe.prudhomme@epfl.ch>
-       Date: 2004-11-18
+    This file is part of LifeV.
 
-  Copyright (C) 2004 EPFL
+    LifeV is free software; you can redistribute it and/or modify
+    it under the terms of the GNU Lesser General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
 
-  This library is free software; you can redistribute it and/or
-  modify it under the terms of the GNU Lesser General Public
-  License as published by the Free Software Foundation; either
-  version 2.1 of the License, or (at your option) any later version.
+    LifeV is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+    Lesser General Public License for more details.
 
-  This library is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-  Lesser General Public License for more details.
+    You should have received a copy of the GNU Lesser General Public License
+    along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
 
-  You should have received a copy of the GNU Lesser General Public
-  License along with this library; if not, write to the Free Software
-  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+*******************************************************************************
 */
+//@HEADER
+
 /**
-   \file FSISolver.cpp
+   @file
+   @brief File containing the solver for the instances of the FSIOperator class.
    \author Christophe Prud'homme <christophe.prudhomme@epfl.ch>
    \date 2004-11-18
  */
 
 #ifndef TWODIM
 
+#include <lifeconfig.h>
 #include <life/lifesolver/FSISolver.hpp>
+//!\todo remove this header
 #include <life/lifealg/nonLinRichardson.hpp>
 
 namespace LifeV
@@ -348,7 +355,7 @@ void
 FSISolver::setFSIOperator( )
 {
     Debug( 6220 ) << "FSISolver::setFSIOperator with operator " << M_data->method() << "\n";
-    M_oper = oper_fsi_ptr_mpi( FSIOperator::FSIFactory::instance().createObject( M_data->method() ) );
+    M_oper = oper_fsi_ptr_mpi( FSIOperator::FSIFactory_Type::instance().createObject( M_data->method() ) );
 }
 
 void
@@ -399,12 +406,15 @@ FSISolver::setInvLinSolidBC( const solid_bchandler_type& bc_dsolid_inv )
     if ( this->isSolid() )
         M_oper->setInvLinSolidBC( bc_dsolid_inv );
 }
+
+//!\todo{kill this method}
 void FSISolver::setFluxBC(fluid_bchandler_type const& bc_fluid)
 {
     if (this->isFluid())
         M_oper->setFluxBC(bc_fluid);
 }
 
+//!\todo{kill this method}
 void
 FSISolver::setRobinBC(fluid_bchandler_type const& bc_Robin)
 {
