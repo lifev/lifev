@@ -119,6 +119,9 @@ public:
     //! Chi
     const Real&        Chi()            const {return M_volumeSurfaceRatio;}
 
+    //! lambda, key parameter in the derivation of Monodomain equations
+    const Real&        lambda()            const {return M_lambda;}
+
     //! fiber File
     string      fibers_file()    const {return M_fibersFile;}
 
