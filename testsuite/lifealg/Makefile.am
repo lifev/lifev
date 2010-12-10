@@ -19,8 +19,7 @@ INCLUDES        = -I$(top_srcdir)/life/lifecore $(top_srcdir)/life/lifealg
 
 LDADD           = $(top_builddir)/life/lifecore/liblifecore.la $(top_builddir)/life/lifealg/liblifealg.la
 
-check_PROGRAMS 	    = 
-test_getPot_SOURCES = 
+check_PROGRAMS 	    = #add list of programs
 
 EXTRA_DIST = 
 

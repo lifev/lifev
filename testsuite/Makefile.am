@@ -37,7 +37,7 @@ SUBDIRS		= data  \
               test_fsi \
               test_hyperbolic \
               test_LevelSetSolver \
-              test_partition \			  
+              test_partition \
               test_structure \
               test_TemplateTest \
               test_timeAdvance_orderI \

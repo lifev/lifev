@@ -11,15 +11,14 @@
 #
 #################################################################################################
 
-AM_CXXFLAGS=-O1
+include $(top_srcdir)/testsuite/Makefile.testsuite
 
 SUFFIXES		= .cpp .hpp .idl .c .h .f .F .o .moc 
 
-INCLUDES        = -I$(top_srcdir)/life/lifecore
-
-LDADD           = $(top_builddir)/life/lifecore/liblifecore.la
+check_HEADERS              = # List of all the hpp files
 
 check_PROGRAMS 	    = test_getPot
+
 test_getPot_SOURCES = main_getPot.cpp
 
 EXTRA_DIST = data_getPot
