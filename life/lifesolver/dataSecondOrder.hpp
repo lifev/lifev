@@ -1,31 +1,38 @@
+//@HEADER
 /*
-   This file is part of the LifeV library
-  Copyright (C) 2010 EPFL, INRIA, Politecnico di Milano and Emory University
+************************************************************************
 
- This library is free software; you can redistribute it and/or
- modify it under the terms of the GNU Lesser General Public
- License as published by the Free Software Foundation; either
- version 2.1 of the License, or (at your option) any later version.
+ This file is part of the LifeV Applications.
+ Copyright (C) 2001-2010 EPFL, Politecnico di Milano, INRIA
 
- This library is distributed in the hope that it will be useful,
- but WITHOUT ANY WARRANTY; without even the implied warranty of
+ This library is free software; you can redistribute it and/or modify
+ it under the terms of the GNU Lesser General Public License as
+ published by the Free Software Foundation; either version 2.1 of the
+ License, or (at your option) any later version.
+
+ This library is distributed in the hope that it will be useful, but
+ WITHOUT ANY WARRANTY; without even the implied warranty of
  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  Lesser General Public License for more details.
 
  You should have received a copy of the GNU Lesser General Public
  License along with this library; if not, write to the Free Software
- Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
-*/
-/*!
-  \file dataSecondOrder.h
-  \author F. Nobile, M. Pozzoli, C. Vergara
-  \date 02/2010
-  \version 1.0
-  \brief
-*/
+ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
+ USA
 
-#ifndef _DATASECONDORDER_H_
-#define _DATASECONDORDER_H_
+************************************************************************
+*/
+//@HEADER
+
+
+#ifndef _DataSecondOrder_H_
+#define _DataSecondOrder_H_
+
+// Tell the compiler to ignore specific kind of warnings:
+#pragma GCC diagnostic ignored "-Wunused-variable"
+#pragma GCC diagnostic ignored "-Wunused-parameter"
+
+
 #include <string>
 #include <iostream>
 #include <map>
@@ -35,40 +42,46 @@
 #include <life/lifefem/dataTime.hpp>
 #include <list>
 
+// Tell the compiler to ignore specific kind of warnings:
+#pragma GCC diagnostic ignored "-Wunused-variable"
+#pragma GCC diagnostic ignored "-Wunused-parameter"
+
+
 namespace LifeV
 {
 /*!
   \class DataSecondOrder
 */
 class DataSecondOrder:
-        public DataTime
+      public DataTime
 {
 public:
     //! @name Type definitions
     //@{
 
-    typedef DataTime                                                  Time_Type;
-    typedef boost::shared_ptr< Time_Type >                            Time_ptrType;
+    typedef DataTime                                 Time_Type;
+    typedef boost::shared_ptr< Time_Type >           Time_ptrType;
+
+    typedef std::map<UInt, Real>                                      MaterialContainer_Type;
+    typedef MaterialContainer_Type::const_iterator                    MaterialContainer_ConstIterator;
 
     //@}
 
     //! Constructor
     DataSecondOrder();
-    DataSecondOrder( const GetPot& dfile );
-    DataSecondOrder( const DataSecondOrder& dataSecondOrder);
+    DataSecondOrder( const DataSecondOrder& DataSecondOrder);
 
 //! @name Operators
     //@{
 
     //! Operator=
     /*!
-     * @param dataSecondOrder - DataSecondOrder
+     * @param DataSecondOrder - DataSecondOrder
      */
-    DataSecondOrder& operator=( const DataSecondOrder& dataSecondOrder );
+    DataSecondOrder& operator=( const DataSecondOrder& DataSecondOrder );
 
     //@}
-
-//! @name Methods
+    //! @name Methods
     //@{
 
     //! Read the dataFile and set all the quantities
@@ -82,7 +95,6 @@ public:
     void showMe( std::ostream& output = std::cout ) const;
 
     //@}
-
 
     //! @name Set methods
     //@{
@@ -99,13 +111,13 @@ public:
      */
     void setDensity( const Real& density );
 
-    //! Set alpha
+    //! Set gamma
     /*!
-     * @param alpha damping coefficient.
+     * @param gamma damping coefficient.
      */
-    void setAlpha( const Real& alpha );
+    void setGamma( const Real& gamma );
 
-    void setAlpha( const Real& alpha, const UInt& material );
+    void setGamma( const Real& gamma, const UInt& material );
 
     //! Set beta
     /*!
@@ -115,8 +127,28 @@ public:
 
     void setBeta( const Real& beta, const UInt& material);
 
-    //@}
 
+    //! Set thickness
+    /*!
+     * @param thickness solid thickness value
+     */
+    void setThickness( const Real& thickness );
+
+    //! Set poisson
+    /*!
+     * @param poisson solid poisson value
+     * @param material material ID (1 by default)
+     */
+    void setPoisson( const Real& poisson, const UInt& material = 1 );
+
+    //! Set Young modulus
+    /*!
+     * @param Young solid young modulus value
+     * @param material material ID (1 by default)
+     */
+    void setYoung( const Real& young, const UInt& material = 1 );
+
+    //@}
 
     //! @name Get methods
     //@{
@@ -133,11 +165,45 @@ public:
      */
     const Real& rho() const;
 
+    //! Get solid thickness
+    /*!
+     * @return Solid thickness
+     */
+    const Real& thickness() const;
+
+    //! Get solid poisson coefficient
+    /*!
+     * @param material material ID (1 by default)
+     * @return Solid poisson coefficient
+     */
+    const Real& poisson( const UInt& material = 1 ) const;
+
+    //! Get solid young modulus
+    /*!
+     * @param material material ID (1 by default)
+     * @return Solid young modulus
+     */
+    const Real& young( const UInt& material = 1 ) const;
+
+    //! Get solid first lame coefficient
+    /*!
+     * @param material material ID (1 by default)
+     * @return Solid first Lame coefficient
+     */
+    Real lambda( const UInt& material = 1 ) const;
+
+    //! Get solid second Lame coefficient
+    /*!
+     * @param material material ID (1 by default)
+     * @return Solid second Lame coefficient
+     */
+    Real mu( const UInt& material = 1 ) const;
+
     //! Get damping coefficients
     /*!
-     * @return alpha damping coefficient
+     * @return gamma damping coefficient
      */
-    const Real& alpha( const UInt& material = 1 ) const;
+    const Real& gamma( const UInt& material = 1 ) const;
 
     /*!
     * @return beta damping coefficient
@@ -162,9 +228,6 @@ public:
      */
     const UInt& verbose()   const;
 
-
-
-
     //!
     /*
      * @ return true if Damping coefficient is not zero.
@@ -172,8 +235,8 @@ public:
 
     bool  isDamping() const
     {
-        if (M_beta.size() == 1 || M_alpha.size()==1)
-            return  _beta +_alpha;
+        if (M_beta.size() == 1 || M_gamma.size()==1)
+            return  _beta +_gamma;
         return false;
     }
     //@}
@@ -185,228 +248,24 @@ private:
 
     //! Physics
     Real                   M_density; // densisty
-    Real                   _alpha;  // Damping coefficient (Mass)
+    Real                   _gamma;  // Damping coefficient (Mass)
     Real                   _beta; // Damping coefficient (Stiffness)
-    bool                   M_isDamping;  //true if damping else false
 
-    std::map<int, double>  M_alpha;
-    std::map<int, double>  M_beta;
+    Real                   M_thickness;
+
+    MaterialContainer_Type M_poisson;
+    MaterialContainer_Type M_young;
+
+    MaterialContainer_Type M_gamma;
+    MaterialContainer_Type  M_beta;
 
     //! Miscellaneous
-    Real                  M_factor; // amplification factor for deformed mesh
+    Real                   M_factor; // amplification factor for deformed mesh
     UInt                   M_verbose; // temporal output verbose
-    std::string        M_order;
+    std::string            M_order;
+    bool                   M_isDamping;  //true if damping else false
 
 };
 
-
-
-//
-// IMPLEMENTATION
-//
-DataSecondOrder::DataSecondOrder() :
-        M_time                             ( ),
-        M_density                        ( ),
-        M_alpha                           ( ),
-        M_beta                             ( ),
-        _alpha                              ( ),
-        _beta                                ( ),
-        M_factor                           ( ),
-        M_verbose                       ( )
-{
 }
-
-// Constructor
-DataSecondOrder::DataSecondOrder( const GetPot& dfile ) :
-        DataTime( dfile, "problem/time_discretization" )
-{
-    // physics
-    M_density        = dfile( "problem/physics/density", 1. );
-    _alpha    = dfile( "problem/physics/alpha" , 0.0 );
-    _beta     = dfile( "problem/physics/beta" , 0.0 );
-
-    // miscellaneous
-    M_factor  = dfile( "problem/miscellaneous/factor", 1.0 );
-    M_verbose = dfile( "problem/miscellaneous/verbose", 1 );
-
-    M_order  = dfile( "problem/space_discretization/order", "P1");
-
-    std::string flagList;
-    flagList = dfile("problem/physics/material_flag", "0");
-    std::list<int> fList;
-    parseList(flagList, fList);
-
-}
-
-DataSecondOrder::DataSecondOrder( const DataSecondOrder& dataSecondOrder):
-        DataTime               ( dataSecondOrder),
-        M_density               ( dataSecondOrder.M_density ),
-        _alpha                     ( dataSecondOrder._alpha ),
-        _beta                       ( dataSecondOrder._beta ),
-        M_isDamping         ( dataSecondOrder.M_isDamping),
-        M_alpha                  ( dataSecondOrder.M_alpha ),
-        M_beta                    ( dataSecondOrder.M_beta ),
-        M_factor                  ( dataSecondOrder.M_factor ),
-        M_verbose              ( dataSecondOrder.M_verbose ),
-        M_order                   ( dataSecondOrder.M_order )
-{
-}
-
-DataSecondOrder&
-DataSecondOrder::operator=( const DataSecondOrder& dataSecondOrder )
-{
-    if ( this != &dataSecondOrder )
-    {
-        M_time                       = dataSecondOrder.M_time;
-        M_density                  = dataSecondOrder.M_density;
-        M_isDamping            = dataSecondOrder.M_isDamping;
-        M_alpha                     = dataSecondOrder.M_alpha;
-        M_beta                       = dataSecondOrder.M_beta;
-        _alpha                        = dataSecondOrder._alpha;
-        _beta                          = dataSecondOrder._beta;
-        M_order                      = dataSecondOrder.M_order;
-        M_factor                     = dataSecondOrder.M_factor;
-        M_verbose                 = dataSecondOrder.M_verbose;
-    }
-
-    return *this;
-}
-
-// ===================================================
-// Methods
-// ===================================================
-
-void
-DataSecondOrder::setup( const GetPot& dataFile, const std::string& section )
-{
-    // If data time has not been set
-    if ( !M_time.get() )
-        M_time.reset( new Time_Type( dataFile, section + "/time_discretization" ) );
-
-    // physics
-    M_density   = dataFile( ( section + "/physics/density" ).data(), 1. );
-
-    M_alpha[1]   = dataFile( ( section + "/physics/young" ).data(), 0. );
-    M_beta[1] = dataFile( ( section + "/physics/poisson" ).data(), 0. );
-
-
-    // space_discretization
-    M_order     = dataFile( "solid/space_discretization/order", "P1" );
-
-    // miscellaneous
-    M_factor  = dataFile( "solid/miscellaneous/factor", 1.0 );
-    M_verbose = dataFile( "solid/miscellaneous/verbose", 1 );
-}
-
-
-
-// ===================================================
-// Set Method
-// ===================================================
-
-void
-DataSecondOrder::setDataTime( const Time_ptrType DataTime )
-{
-    M_time = DataTime;
-}
-
-void
-DataSecondOrder::setDensity( const Real& density )
-{
-    M_density = density;
-}
-
-void
-DataSecondOrder::setAlpha( const Real& alpha )
-{
-    _alpha = alpha;
-}
-
-void
-DataSecondOrder::setAlpha( const Real& alpha, const UInt& material )
-{
-    M_alpha[material] = alpha;
-}
-
-void
-DataSecondOrder::setBeta( const Real& beta )
-{
-    _beta = beta;
-}
-
-
-void
-DataSecondOrder::setBeta( const Real& beta, const UInt& material )
-{
-    M_beta[material] = beta;
-}
-
-
-
-// ===================================================
-// Get Method
-// ===================================================
-
-DataSecondOrder::Time_ptrType
-DataSecondOrder::dataTime() const
-{
-    return M_time;
-}
-
-const Real&
-DataSecondOrder::rho() const
-{
-    return M_density;
-}
-
-const Real&
-DataSecondOrder::alpha( const UInt& material ) const
-{
-    return M_alpha.find( material )->second;
-}
-
-
-const Real&
-DataSecondOrder::beta( const UInt& material ) const
-{
-    return M_beta.find( material )->second;
-}
-
-
-const Real&
-DataSecondOrder::factor() const
-{
-    return M_factor;
-}
-
-const std::string&
-DataSecondOrder::order() const
-{
-    return M_order;
-}
-
-
-
-// Output
-void DataSecondOrder::showMe( std::ostream& c ) const
-{
-
-    // physics
-    c << "\n*** Values for data [problem/physics]\n\n";
-    c << "density                          = " << M_density << std::endl;
-    c << "alpha                            = " << _alpha << std::endl;
-    c << "beta                             = " << _beta << std::endl;
-
-    c << "\n*** Values for data [problem/miscellaneous]\n\n";
-    c << "deformation factor               = " << M_factor << std::endl;
-    c << "verbose                          = " << M_verbose << std::endl;
-
-    c << "\n*** Values for data [problem/space_discretization]\n\n";
-
-    c << "\n*** Values for data [problem/time_discretization]\n\n";
-    DataTime::showMe( c );
-}
-
-}
-
 #endif

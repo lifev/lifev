@@ -165,6 +165,8 @@ problem::run()
     typedef boost::shared_ptr<vector_type>                                         vector_ptrtype;
 
     typedef boost::shared_ptr< TimeAdvance< vector_type > >                 TimeAdvance_type;
+    typedef FESpace< RegionMesh3D<LinearTetra>, EpetraMap > FESpace_type;
+    typedef  boost::shared_ptr<FESpace_type> FESpace_ptrtype;
 
     bool verbose = (members->comm->MyPID() == 0);
 
@@ -173,10 +175,9 @@ problem::run()
     //
 
     GetPot dataFile( members->data_file_name.c_str() );
-
-    DataSecondOrder dataProblem;
-    dataProblem.setup(dataFile, "problem");
-
+    boost::shared_ptr<DataSecondOrder> dataProblem(new DataSecondOrder( ));
+     dataProblem->setup(dataFile, "problem");
+   
     DataMesh             dataMesh;
     dataMesh.setup(dataFile, "problem/space_discretization");
 
@@ -226,19 +227,19 @@ problem::run()
 
 
     // finite element space of the solution
+   
+    std::string dOrder =  dataFile( "problem/space_discretization/order", "P1");
 
-    FESpace< RegionMesh, EpetraMap > FESpace(meshPart,
-                                             *refFE,
-                                             *qR,
-                                             *bdQr,
-                                             1,
-                                             members->comm);
+    FESpace_ptrtype feSpace( new FESpace_type(meshPart,dOrder,1,members->comm) );
 
     // instantiation of the SecondOrderSolver class
 
-    SecondOrderSolver< RegionMesh3D<LinearTetra> > problem                 (dataProblem,
-                                                                            FESpace,
-                                                                            members->comm);
+    SecondOrderSolver< RegionMesh3D<LinearTetra> > problem;
+
+    problem.setup(dataProblem,  feSpace,
+                                  members->comm);
+
+    problem.setDataFromGetPot(dataFile);
 
     // the boundary conditions
 
@@ -276,29 +277,30 @@ problem::run()
 
     //! initialization of parameters of time Advance method:
     if (TimeAdvanceMethod =="Newmark")
-        timeAdvance->setup( dataProblem.dataTime()->getNewmark_parameters() , OrderDev);
+        timeAdvance->setup( dataProblem->dataTime()->getNewmark_parameters() , OrderDev);
 
     if (TimeAdvanceMethod =="BDF")
-        timeAdvance->setup(dataProblem.dataTime()->getBDF_order() , OrderDev);
+        timeAdvance->setup(dataProblem->dataTime()->getBDF_order() , OrderDev);
 
-    timeAdvance->setDeltaT(dataProblem.dataTime()->getTimeStep());
+    timeAdvance->setDeltaT(dataProblem->dataTime()->getTimeStep());
     timeAdvance->showMe();
 
 
-    Real dt = dataProblem.dataTime()->getTimeStep();
-    Real T  = dataProblem.dataTime()->getEndTime();
+    dataProblem->setup(dataFile, "problem");
 
     chrono.start();
-    problem.setUp(dataFile);
+    
+    double xi = timeAdvance->coeff_derOrder2( 0 ) / ( dataProblem->dataTime()->getTimeStep()*dataProblem->dataTime()->getTimeStep());
 
-    problem.buildSystem();
+    problem.buildSystem(xi);
+
 
     MPI_Barrier(MPI_COMM_WORLD);
 
     if (verbose ) std::cout << "ok." << std::endl;
 
     // building some vectors:
-    EpetraMap uMap = problem.u().getMap();
+    EpetraMap uMap = problem.solution()->getMap();
 
     // computing the rhs
     vector_type rhs ( uMap, Unique );
@@ -324,38 +326,35 @@ problem::run()
     exporter->setDirectory( "./" ); // This is a test to see if M_post_dir is working
     exporter->setMeshProcId( meshPart.mesh(),  members->comm->MyPID() );
 
-    vector_ptrtype U ( new vector_type(problem.u(), exporter->mapType() ) );
-    vector_ptrtype V  ( new vector_type(problem.u(),  exporter->mapType() ) );
-    vector_ptrtype W    ( new vector_type( uMap,  exporter->mapType() ) );
-    vector_ptrtype Exact ( new vector_type(problem.u(), exporter->mapType() ) );
-    vector_ptrtype vExact  ( new vector_type(problem.u(),  exporter->mapType() ) );
-    vector_ptrtype wExact ( new vector_type(uMap,  Repeated ) );
-
+    vector_ptrtype U ( new vector_type(*problem.solution(), exporter->mapType() ) );
+    vector_ptrtype V  ( new vector_type(*problem.solution(),  exporter->mapType() ) );
+    vector_ptrtype W ( new vector_type(*problem.solution(),  exporter->mapType() ) );
+    vector_ptrtype Exact ( new vector_type(*problem.solution(), exporter->mapType() ) );
+    vector_ptrtype vExact  ( new vector_type(*problem.solution(),  exporter->mapType() ) );
+    vector_ptrtype wExact  ( new vector_type(*problem.solution(),  exporter->mapType() ) );
+    vector_ptrtype RHS ( new vector_type(*problem.solution(), exporter->mapType() ) );
     exporter->addVariable( ExporterData::Scalar, "displacement", U,
-                           UInt(0), FESpace.dof().numTotalDof() );
-    exporter->addVariable( ExporterData::Scalar, "velocity", V,
-                           UInt(0), FESpace.dof().numTotalDof() );
-    exporter->addVariable( ExporterData::Scalar, "acceleration", W,
-                           UInt(0), FESpace.dof().numTotalDof() );
+                           UInt(0), feSpace->dof().numTotalDof() );
 
+    exporter->addVariable( ExporterData::Scalar, "velocity", V,
+                           UInt(0), feSpace->dof().numTotalDof() );
     exporter->addVariable( ExporterData::Scalar, "uexact", Exact,
-                           UInt(0), FESpace.dof().numTotalDof() );
-    exporter->addVariable( ExporterData::Scalar, "vexact", vExact,
-                           UInt(0), FESpace.dof().numTotalDof() );
-    exporter->addVariable( ExporterData::Scalar, "wexact", wExact,
-                           UInt(0), FESpace.dof().numTotalDof() );
+                           UInt(0), feSpace->dof().numTotalDof() );
 
 
     exporter->postProcess( 0 );
 
     //evaluate disp and vel as interpolate the bcFunction d0 and v0
-    FESpace.interpolate(d0, *U, 0.0);
-    FESpace.interpolate(v0, *V , 0.0);
-    FESpace.interpolate(a0, *W, 0.0);
+    feSpace->interpolate(d0, *U, 0.0);
+    feSpace->interpolate(v0, *V , 0.0);
+    feSpace->interpolate(a0, *W, 0.0);
 
 //evaluate disp and vel as interpolate the bcFunction d0 and v0 and w0
 
     std::vector<vector_type> uv0;
+
+  Real dt = dataProblem->dataTime()->getTimeStep();
+    Real T  = dataProblem->dataTime()->getEndTime();
 
     if (TimeAdvanceMethod =="Newmark")
     {
@@ -365,17 +364,17 @@ problem::run()
     }
     if (TimeAdvanceMethod =="BDF")
     {
-        for ( int previousPass=0; previousPass < dataProblem.getBDF_order() ; previousPass++)
+        for ( int previousPass=0; previousPass < dataProblem->getBDF_order() ; previousPass++)
         {
             Real previousTimeStep = -previousPass*dt;
-            FESpace.interpolate(uexact, *U, previousTimeStep );
+            feSpace->interpolate(uexact, *U, previousTimeStep );
             uv0.push_back(*U);
         }
     }
 
     timeAdvance->initialize_unk(uv0);
 
-    timeAdvance-> setDeltaT(dataProblem.dataTime()->getTimeStep());
+    timeAdvance-> setDeltaT(dataProblem->dataTime()->getTimeStep());
 
     timeAdvance->time_der();
     timeAdvance->time_derOrder2();
@@ -385,9 +384,9 @@ problem::run()
     vector_type vExa(uMap, Repeated );
     vector_type wExa(uMap, Repeated );
 
-    FESpace.interpolate(uexact, *Exact, 0);
-    FESpace.interpolate(v0,     *vExact , 0);
-    FESpace.interpolate(a0,     *wExact , 0);
+    feSpace->interpolate(uexact, *Exact, 0);
+    feSpace->interpolate(v0,     *vExact , 0);
+    feSpace->interpolate(a0,     *wExact , 0);
 
     *U = timeAdvance->unk(0);
     *V = timeAdvance->vnk();
@@ -401,17 +400,15 @@ problem::run()
 
     for (Real time = dt; time <= T; time += dt)
     {
-        dataProblem.setTime(time);
+        dataProblem->setTime(time);
 
         if (verbose)
         {
             std::cout << std::endl;
-            std::cout << "P - Now we are at time " << dataProblem.dataTime()->getTime() << " s." << std::endl;
+            std::cout << " P - Now we are at time " << dataProblem->dataTime()->getTime() << " s." << std::endl;
         }
 
-        double xi = timeAdvance->coeff_derOrder2( 0 ) / ( dataProblem.dataTime()->getTimeStep()*dataProblem.dataTime()->getTimeStep());
-
-        rhs *=0;
+         rhs *=0;
         rhsW *=0;
         rhsV *=0;
 
@@ -419,22 +416,22 @@ problem::run()
         rhsV = timeAdvance->time_der(dt);
         //evaluate rhs
 
-        FESpace.L2ScalarProduct(source_in, rhs, time);
+        feSpace->L2ScalarProduct(source_in, rhs, time);
         rhs += problem.matrMass() *rhsW;
 
         //update system
-        problem.updateSystem(xi, rhs );
+        problem.updateRHS(rhs );
 
         //solver system
         problem.iterate( bcH );    // Computes the matrices and solves the system
 
         //update unknowns of timeAdvance
-        timeAdvance->shift_right(problem.u());
+        timeAdvance->shift_right(*problem.solution());
 
         //evaluate uexact solution
-        FESpace.interpolate(uexact, *Exact , time);
-        FESpace.interpolate(v0, *vExact , time);
-        FESpace.interpolate(a0, *wExact , time);
+        feSpace->interpolate(uexact, *Exact , time);
+        feSpace->interpolate(v0, *vExact , time);
+        feSpace->interpolate(a0, *wExact , time);
 
         *U =  timeAdvance->unk(0);
         *V = timeAdvance->vnk();
@@ -445,14 +442,14 @@ problem::run()
 
         // Error L2 and H1 Norms
 
-        vector_type u (problem.u(), Repeated);
+        vector_type u (*problem.solution(), Repeated);
 
         AnalyticalSol uExact;
 
         Real H1_Error,H1_Error1, H1_RelError, L2_Error1, L2_Error, L2_RelError, vL2_Error, vL2_RelError;
 
-        L2_Error = FESpace.L2Error(uexact, u, time ,&L2_RelError);
-        H1_Error = FESpace.H1Error(uExact, u, time ,&H1_RelError);
+        L2_Error = feSpace->L2Error(uexact, u, time ,&L2_RelError);
+        H1_Error = feSpace->H1Error(uExact, u, time ,&H1_RelError);
 
         //save the norm
         out_norm.open("norm.txt", std::ios::app);

@@ -31,10 +31,14 @@
  *  @author M.A. Fernandez
  *  @author Cristiano Malossi <cristiano.malossi@epfl.ch>
  *  @date 01-06-2009
- */
+ * 
+ *  @contributor Matteo Pozzoli <matteo1.pozzoli@mail.polimi.it>
+ *
+ *  @maintainer Matteo Pozzoli <matteo1.pozzoli@mail.polimi.it>
+  */
 
 #ifndef _DATATIME_H_
-#define _DATATIME_H_
+#define _DATATIME_H_ 1
 
 #include <ostream>
 #include <life/lifecore/GetPot.hpp>
@@ -150,19 +154,19 @@ public:
     /*!
      * @param order BDF order
      */
-    void setBDF_order( const UInt& BDF_order ) { M_BDF_order = BDF_order; }
+    void setBDF_order( const UInt& orderBDF ) { M_orderBDF = orderBDF; }
 
     //! Set the theta of Newmark scheme
     /*!
-     * @param theta theta Newmark value
+     * @param theta - coefficient of Newmark scheme
      */
     void setTheta( const Real& theta ) { M_theta = theta; }
 
     //! Set the theta of Newmark scheme
     /*!
-     * @param zeta zeta Newmark value
+     * @param gamma- coefficient of Newmark scheme
      */
-    void setZeta( const Real& zeta ) { M_zeta = zeta; }
+    void setZeta( const Real& gamma ) { M_gamma = gamma; }
 
     //@}
 
@@ -242,7 +246,7 @@ public:
     /*!
      * @return BDF order value
      */
-    const UInt& getBDF_order()		 const { return M_BDF_order; }
+    const UInt& getBDF_order()		 const { return M_orderBDF; }
 
     //! Return theta parameter of Newmark scheme
     /*!
@@ -250,13 +254,13 @@ public:
      */
     const Real& theta()             const { return M_theta; }
 
-    //! Return zeta of Newmark scheme
+    //! Return gamma of Newmark scheme
     /*!
-     * @return zeta value
+     * @return gamma value
      */
-    const Real& zeta()              const { return M_zeta; }
+    const Real& zeta()              const { return M_gamma; }
 
-    //! Return Newmark parameters (theta, zeta and timestep)
+    //! Return Newmark parameters (\f$theta\f$, $\gamma$)
     std::vector<Real> getNewmark_parameters();
 
     //@}
@@ -271,10 +275,10 @@ private:
     Real					M_inCycleTime;	  // in cycle time
     Real					M_time;           // time
     Real					M_timeStep; 	  // time step
-    UInt                    M_timeStepNumber; // iteration number
-    UInt					M_BDF_order; 	  // order of the time discretization formula
-    Real                    M_theta;          // Newmark parameter
-    Real                    M_zeta;           // Newmark parameter
+    UInt                                     M_timeStepNumber; // iteration number
+    UInt					M_orderBDF; 	  // order of the time discretization formula
+    Real                                    M_theta;          // Newmark parameter
+    Real                                    M_gamma;           // Newmark parameter
 };
 
 } // namespace LifeV

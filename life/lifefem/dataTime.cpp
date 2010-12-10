@@ -31,6 +31,10 @@
  *  @author M.A. Fernandez
  *  @author Cristiano Malossi <cristiano.malossi@epfl.ch>
  *  @date 01-06-2009
+ *
+ *  @contributor Matteo Pozzoli <matteo1.pozzoli@mail.polimi.it>
+ *
+ *  @maintainer Matteo Pozzoli <matteo1.pozzoli@mail.polimi.it>
  */
 #include <life/lifefem/dataTime.hpp>
 
@@ -43,13 +47,13 @@ namespace LifeV
 DataTime::DataTime( ) :
         M_initialTime   ( 0. ),
         M_endTime       ( 1. ),
-        M_periodTime       ( 1. ),
+        M_periodTime    ( 1. ),
         M_time          ( M_initialTime ),
         M_timeStep      ( M_endTime ),
         M_timeStepNumber( 0 ),
-        M_BDF_order     ( 1 ),
+        M_orderBDF      ( 1 ),
         M_theta         ( 0.25 ),
-        M_zeta          ( 0.5)
+        M_gamma         ( 0.5)
 {
 }
 
@@ -67,9 +71,9 @@ DataTime::DataTime( const DataTime& dataTime )
     M_time			= dataTime.M_time;
     M_timeStep		= dataTime.M_timeStep;
     M_timeStepNumber= dataTime.M_timeStepNumber;
-    M_BDF_order		= dataTime.M_BDF_order;
+    M_orderBDF		= dataTime.M_orderBDF;
     M_theta	        = dataTime.M_theta;
-    M_zeta          = dataTime.M_zeta;
+    M_gamma         = dataTime.M_gamma;
 }
 
 // ===================================================
@@ -83,9 +87,9 @@ DataTime::setup( const GetPot& dfile, const std::string& section )
     M_periodTime = dfile(( section + "/periodtime"      ).data(), 1.);
     M_time = M_initialTime;
     M_timeStep = dfile(( section + "/timestep" ).data(), M_endTime );
-    M_BDF_order = dfile(( section + "/BDF_order" ).data(), 1 );
+    M_orderBDF = dfile(( section + "/BDF_order" ).data(), 1 );
     M_theta = dfile((section + "/theta").data(),0.25);
-    M_zeta = dfile(( section + "/zeta").data(),0.5);
+    M_gamma = dfile(( section + "/zeta").data(),0.5);
 }
 
 void
@@ -99,9 +103,9 @@ DataTime::showMe( std::ostream& output ) const
     output << "Time           = " << M_time		      << std::endl;
     output << "TimeStep       = " << M_timeStep	      << std::endl;
     output << "TimeStepNumber = " << M_timeStepNumber << std::endl;
-    output << "BDF order      = " << M_BDF_order      << std::endl;
+    output << "BDF order      = " << M_orderBDF       << std::endl;
     output << "theta          = " << M_theta          << std::endl;
-    output << "zeta           = " << M_zeta           << std::endl;
+    output << "gamma          = " << M_gamma          << std::endl;
 }
 
 // ===================================================
@@ -113,7 +117,7 @@ DataTime::getNewmark_parameters()
     std::vector<Real> parameters;
 
     parameters.push_back( M_theta );
-    parameters.push_back( M_zeta );
+    parameters.push_back( M_gamma );
 
     return parameters;
 }
