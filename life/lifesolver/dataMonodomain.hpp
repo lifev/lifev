@@ -161,6 +161,7 @@ private:
     Real        M_membraneCapacitance;
     Real        M_transversalConductivity;
     Real        M_volumeSurfaceRatio;
+    Real        M_lambda;
 
     std::string M_fibersDirectory;
     std::string M_fibersFile;
