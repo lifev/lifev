@@ -22,7 +22,7 @@ LDADD           = $(top_builddir)/life/lifecore/liblifecore.la
 check_PROGRAMS 	    = test_getPot
 test_getPot_SOURCES = main_getPot.cpp
 
-EXTRA_DIST = data
+EXTRA_DIST = data_getPot
 
 link:
-	test -a data || ln -s $(srcdir)/data
+	test -a data_getPot || ln -s $(srcdir)/data_getPot
