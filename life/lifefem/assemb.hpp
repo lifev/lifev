@@ -226,7 +226,7 @@ assembleMatrix( EpetraMatrix<Real>&   globalMatrix,
         matPtr[k2] = &(localMatrix(static_cast<UInt>(0),k2));
     }
 
-    assert(mat.indexij( Int (1), Int(0) ) == 1);
+    assert(localMatrix.indexij( Int (1), Int(0) ) == 1);
 
     globalMatrix.set_mat_inc( fe1NbDof, fe2NbDof, iList, jList, matPtr, Epetra_FECrsMatrix::COLUMN_MAJOR );
 }
@@ -311,7 +311,7 @@ assembleTransposeMatrix( EpetraMatrix<Real>&   globalMatrix,
         jlist[k2]  = dof2.localToGlobal( elementID2, j + 1 ) - 1 + jOffset ;
     }
 
-    assert(mat.indexij( Int (1), Int(0) ) == 1);
+    assert(localView.indexij( Int (1), Int(0) ) == 1);
 
     globalMatrix.set_mat_inc( currentFE1.nbFEDof(), currentFE2.nbFEDof(),
                               ilist, jlist, matPtr, Epetra_FECrsMatrix::ROW_MAJOR );
