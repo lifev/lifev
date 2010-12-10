@@ -19,6 +19,7 @@
 #ifndef _SIMPLEVECT_HH_
 #define _SIMPLEVECT_HH_
 
+#include <cstdlib>
 #include <vector>
 
 namespace LifeV
