@@ -18,6 +18,6 @@ AT_DATA([data],[[
 # Place here the content of the GetPot data file for the night test.
 
 ]])
-AT_CHECK([mpirun -n 1 ../../test_currentFE/test_currentFE -c],[0],[ignore],[ignore])
+AT_CHECK([mpirun -n 1 ../../lifefem/test_currentFE -c],[0],[ignore],[ignore])
 AT_CLEANUP([])
 
