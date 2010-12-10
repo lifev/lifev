@@ -104,10 +104,6 @@ public:
     typedef MarkerTraits_Base::EntityFlag entityFlag_Type;
     //@}
 
-    // ===============================
-    // Constructors and destructor
-    // ===============================
-
     //! @name Constructor & Destructor
     //@{
 
@@ -116,11 +112,6 @@ public:
 
     //! Destructor
     virtual ~FSIOfflinePartitioner() {}
-
-    // ===============================
-    // Pubic methods
-    // ===============================
-
     //@}
 
     //! @name Methods
@@ -172,10 +163,6 @@ public:
     void showMe(std::ostream& output = std::cout) const;
 
     //@}
-
-    // ===============================
-    // Get methods
-    // ===============================
 
     //! @name Get Methods
     //@{
@@ -241,10 +228,6 @@ private:
     FSIOfflinePartitioner(const FSIOfflinePartitioner&);
     FSIOfflinePartitioner& operator=(const FSIOfflinePartitioner&);
 
-    // ===============================
-    // Private methods
-    // ===============================
-
     //! @name Private Methods
     //@{
 
@@ -272,10 +255,6 @@ private:
     void mapTheInterface();
 
     //@}
-
-    // ===============================
-    // Private data members
-    // ===============================
 
     comm_ptrType M_comm;
 

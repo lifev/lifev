@@ -63,9 +63,9 @@ along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
 namespace LifeV
 {
 /*!
-  \brief Class that handles mesh partitioning
-  \author Gilles Fourestey gilles.fourestey@epfl.ch
-  \author Radu Popescu radu.popescu@epfl.ch
+  @brief Class that handles mesh partitioning
+  @author Gilles Fourestey gilles.fourestey@epfl.ch
+  @contributor Radu Popescu radu.popescu@epfl.ch
 
   This class implements the partitioning of a mesh using (par)Metis. Currently
   it is possible to do both online and offline partitioning. In online
