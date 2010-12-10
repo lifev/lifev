@@ -25,7 +25,7 @@
  * @date 30-09-2010
  *
  * @author Alessio Fumagalli <alessio.fumagalli@mail.polimi.it>
- *         Michel Kern       <michel.kern@inria.fr>
+ * @author Michel Kern       <michel.kern@inria.fr>
  *
  * @contributor
  *
@@ -36,14 +36,14 @@
 #ifndef _HYPERBOLICSOLVER_H_
 #define _HYPERBOLICSOLVER_H_ 1
 
+#include <life/lifealg/SolverTrilinos.hpp>
+#include <life/lifealg/clapack.hpp>
+
 #include <life/lifefem/elemOper.hpp>
 #include <life/lifefem/bcManage.hpp>
+#include <life/lifefem/NumericalFluxes.hpp>
 
 #include <life/lifesolver/dataHyperbolic.hpp>
-#include <life/lifealg/SolverTrilinos.hpp>
-#include <Epetra_LAPACK.h>
-
-#include <life/lifefem/NumericalFluxes.hpp>
 
 namespace
 {
@@ -60,7 +60,72 @@ LifeV::Real _ZeroFun( const LifeV::Real&, const LifeV::Real&,
 // LifeV namespace.
 namespace LifeV
 {
+//! HyperbolicSolver Implements an hyperbolic solver.
 /*!
+
+@author Alessio Fumagalli <alessio.fumagalli@mail.polimi.it>
+@author Michel Kern       <michel.kern@inria.fr>
+
+  This class implements an hyperbolic solver.
+  <br>
+  <br>
+  This class solves a general hyperbolic scalar equation in the conservative form: find \f$ u \in V \f$ such that
+  \f[
+  \left\{
+  \begin{array}{l l}
+  \displaystyle \frac{\partial u}{\partial t} + \nabla \cdot \mathbf{F} ( u ) = f & \mathrm{ in } \quad \Omega \times [0,T]\,, \\
+  u(\mathbf{x}, 0) = u_0( \mathbf{x} ) & \mathrm{ in } \quad \Omega\,,
+  \end{array}
+  \right.
+  \f]
+  with prescribed inflow boundary conditions on \f$ \partial \Omega_{in} \f$
+  \f[
+  u = \bar{u} \quad \mathrm{ on } \quad \partial \Omega_{in}\,.
+  \f]
+  We have \f$ \partial \Omega = \partial \Omega_{in} \cap \partial \Omega_{out}\f$.
+  Since this solver can be used coupled with an elliptic solver, the Neumann and Robin boundary
+  are trated as outflow boundary, while the Dirichlet boundary is automatically dedived into
+  outflow boundary and inflow boundary. This choice is due to the general form of the flux function \f$ \mathbf{F} \f$.
+  <br>
+  Introducing a conforming triangolation \f$ \mathcal{T}_h = \cup K \f$ of the domain \f$ \Omega \f$, we write the strong formulation
+  in a weak form in each element \f$ K \f$: give a test function \f$ v \f$
+  \f[
+  \displaystyle \int_K \frac{\partial u}{\partial t} v + \int_K \nabla \cdot \mathbf{F} ( u ) v = \int_K f v \quad \forall v \in V\,,
+  \f]
+  integrating by part the integral with the divergence we find
+  \f[
+  \displaystyle \int_K \frac{\partial u}{\partial t} v - \int_K \mathbf{F} ( u ) \cdot \nabla v +
+  \int_{\partial K} \mathbf{F}( u ) \cdot \mathbf{n} v = \int_K f v \quad \forall v \in V\,.
+  \f]
+  The Discontinuous Galerkin formulation of the problem is given approximating \f$ V \f$ with a discontinuous finite element
+  space \f$ V_h \f$, while the numerical flux at the boundaries is approximated using a suitable numerical scheme obtaining
+  \f$ \hat{\mathbf{F}} \f$.
+  <br>
+  Summing on all the elements \f$ K \in \mathcal{T}_h \f$, the finite element problem reads: find \f$ u_h \in V_h \f$ such that
+  \f[
+  \displaystyle \sum_{K \in \mathcal{T}_h} \int_K \frac{\partial u_h}{\partial t} v_h - \int_K \mathbf{F} ( u_h ) \cdot \nabla v_h +
+  \int_{\partial K} \hat{\mathbf{F}}( u_h ) \cdot \mathbf{n} v_h =  \sum_{K \in \mathcal{T}_h} \int_K f v_h \quad \forall v_h \in V_h\,.
+  \f]
+  Each time step \f$ \Delta t^n \f$ and mesh size \f$ h \f$ are coupled via \f$ CFL \f$ condition at step \f$ n \f$, using esplicit Euler
+  scheme we find the relation between \f$ \Delta t^n \f$ and \f$ h \f$ satysfying \f$ CFL^n < 1 \f$.
+  <br>
+  A general form for computing the \f$ CFL \f$ condition is
+   \f[
+  CFL^n = \displaystyle \sup_{e \in \partial K, K \in \mathcal{T}_h } \Delta t^n \frac{\vert e \vert}{ \vert K \vert }
+          \Vert \mathbf{F}^\prime \cdot \mathbf{n}_{e, K} \Vert_{L^\infty(a_0, b_0) }\,,
+  \f]
+  where
+  \f[
+  \begin{array}{l}
+  \displaystyle a_0 = \inf_{x \in \Omega, t \in (t^{n-1}, t^n), y \in \partial \Omega_{in} } \left\{ u_0, \bar{u}(y, t) \right\}\,, \\
+  \displaystyle b_0 = \sup_{x \in \Omega, t \in (t^{n-1}, t^n), y \in \partial \Omega_{in} } \left\{ u_0, \bar{u}(y, t) \right\}\,.
+  \end{array}
+  \f]
+  Local approximation for the flux function \f$ \hat{\mathbf{F}} \cdot \mathbf{n} \f$ and the computation of
+  \f$ \mathbf{F}^\prime \cdot \mathbf{n}_{e, K} \f$ are in NumericalFlux.hpp file.
+  @note The implementation is given just for lowest order discontinuous finite elements.
+  @todo Implement the forcing term \f$ f \f$ and implement high order finite elements.
+  @todo When we will pass to Trilinos >= 10.6 use Epetra wrapper for LAPACK functions.
 */
 template< typename Mesh,
 typename SolverType = LifeV::SolverTrilinos >
@@ -72,17 +137,17 @@ public:
     //! @name Public Types
     //@{
 
-    typedef boost::function<Real ( const Real&, const Real&, const Real&,
-                                   const Real&, const UInt& )>
+    typedef boost::function< Real ( const Real&, const Real&, const Real&,
+                                   const Real&, const UInt& ) >
     Function_Type;
 
-    typedef DataHyperbolic<Mesh>                     data_Type;
+    typedef DataHyperbolic< Mesh >                   data_Type;
 
     typedef BCHandler                                bchandler_Type;
-    typedef boost::shared_ptr<bchandler_Type>        bchandlerPtr_Type;
+    typedef boost::shared_ptr< bchandler_Type >      bchandlerPtr_Type;
 
     typedef typename SolverType::vector_type         vector_Type;
-    typedef boost::shared_ptr<vector_Type>           vectorPtr_Type;
+    typedef boost::shared_ptr< vector_Type >         vectorPtr_Type;
 
     typedef Epetra_Comm                              comm_Type;
     typedef boost::shared_ptr< comm_Type >           commPtr_Type;
@@ -277,12 +342,6 @@ protected:
     //! Parallel displayer
     Displayer                 M_displayer;
 
-    //@}
-
-    // Data of the problem.
-    //! @name Data of the problem
-    //@{
-
     //! Data for Darcy solvers.
     const data_Type&          M_data;
 
@@ -332,8 +391,8 @@ protected:
 // ===================================================
 
 // Complete constructor.
-template<typename Mesh, typename SolverType>
-HyperbolicSolver<Mesh, SolverType>::
+template< typename Mesh, typename SolverType >
+HyperbolicSolver< Mesh, SolverType >::
 HyperbolicSolver ( const data_Type&          dataFile,
                    FESpace<Mesh, EpetraMap>& fESpace,
                    bchandler_Type&           bcHandler,
@@ -368,8 +427,8 @@ HyperbolicSolver ( const data_Type&          dataFile,
 
 
 // Constructor without boundary condition handler.
-template<typename Mesh, typename SolverType>
-HyperbolicSolver<Mesh, SolverType>::
+template< typename Mesh, typename SolverType >
+HyperbolicSolver< Mesh, SolverType >::
 HyperbolicSolver ( const data_Type&          dataFile,
                    FESpace<Mesh, EpetraMap>& fESpace,
                    commPtr_Type&             comm ):
@@ -402,8 +461,8 @@ HyperbolicSolver ( const data_Type&          dataFile,
 } // Constructor
 
 // Virtual destructor.
-template <typename Mesh, typename SolverType>
-HyperbolicSolver<Mesh, SolverType>::
+template< typename Mesh, typename SolverType >
+HyperbolicSolver< Mesh, SolverType >::
 ~HyperbolicSolver ()
 {
 
@@ -419,18 +478,16 @@ void
 HyperbolicSolver<Mesh, SolverType>::
 setup ()
 {
-    // Epetra LAPACK wrapper
-    Epetra_LAPACK lapack;
 
     // Flags for LAPACK routines.
     Int INFO[1]  = {0};
-    const Int NB =  M_FESpace.refFE().nbDof();
+    Int NB[1] = { M_FESpace.refFE().nbDof() };
 
     // Parameter that indicate the Lower storage of matrices.
-    const char param_L = 'L';
+    char param_L[1] = { 'L' };
 
     // Total number of elements.
-    const UInt meshNumberOfElements = M_FESpace.mesh()->numElements();
+    UInt meshNumberOfElements = M_FESpace.mesh()->numElements();
 
     // Vector of interpolation of the mass function
     vector_Type vectorMass( M_FESpace.map(), Repeated );
@@ -463,7 +520,7 @@ setup ()
 
         /* Put in M the matrix L and L^T, where L and L^T is the Cholesky factorization of M.
            For more details see http://www.netlib.org/lapack/double/dpotrf.f */
-        lapack.POTRF ( param_L, NB, matElem.mat(), NB, INFO );
+        dpotrf_( param_L, NB, matElem.mat(), NB, INFO );
         ASSERT_PRE( !INFO[0], "Lapack factorization of M is not achieved." );
 
         // Save the local mass matrix in the global vector of mass matrices
@@ -474,9 +531,9 @@ setup ()
 } // setup
 
 // Solve one time step of the hyperbolic problem.
-template<typename Mesh, typename SolverType>
+template< typename Mesh, typename SolverType >
 void
-HyperbolicSolver<Mesh, SolverType>::
+HyperbolicSolver< Mesh, SolverType >::
 solveOneStep ()
 {
 
@@ -524,9 +581,9 @@ solveOneStep ()
 } // solveOneStep
 
 // Compute the global CFL condition.
-template<typename Mesh, typename SolverType>
+template< typename Mesh, typename SolverType >
 Real
-HyperbolicSolver<Mesh, SolverType>::
+HyperbolicSolver< Mesh, SolverType >::
 CFL() const
 {
 
@@ -639,9 +696,9 @@ CFL() const
 // ===================================================
 
 // Set the initial solution for the computation.
-template<typename Mesh,typename SolverType>
+template< typename Mesh,typename SolverType >
 void
-HyperbolicSolver<Mesh, SolverType>::
+HyperbolicSolver< Mesh, SolverType >::
 setInitialSolution ( const Function_Type& initialSolution )
 {
 
@@ -652,6 +709,7 @@ setInitialSolution ( const Function_Type& initialSolution )
 
     // Update the solution
     *M_u = *M_uOld;
+
 } // setInitialSolution
 
 // ===================================================
@@ -659,9 +717,9 @@ setInitialSolution ( const Function_Type& initialSolution )
 // ===================================================
 
 // Reconstruct locally the solution.
-template<typename Mesh,typename SolverType>
+template< typename Mesh,typename SolverType >
 void
-HyperbolicSolver<Mesh, SolverType>::
+HyperbolicSolver< Mesh, SolverType >::
 localReconstruct ( const UInt& iElem )
 {
 
@@ -670,27 +728,25 @@ localReconstruct ( const UInt& iElem )
 } // localReconstruct
 
 // Compute the local contribute
-template<typename Mesh, typename SolverType>
+template< typename Mesh, typename SolverType >
 void
-HyperbolicSolver<Mesh, SolverType>::
+HyperbolicSolver< Mesh, SolverType >::
 localEvolve ( const UInt& iElem )
 {
-    // Epetra LAPACK wrapper
-    Epetra_LAPACK lapack;
 
     // Flags for LAPACK routines.
-    Int INFO[1]  = {0};
-    const Int NB = M_FESpace.refFE().nbDof();
+    Int INFO[1]  = { 0 };
+    Int NB[1] = { M_FESpace.refFE().nbDof() };
 
     // Parameter that indicate the Lower storage of matrices.
-    const char param_L = 'L';
-    const char param_N = 'N';
+    char param_L[1] = { 'L' };
+    char param_N[1] = { 'N' };
 
     // Paramater that indicate the Transpose of matrices.
-    const char param_T = 'T';
+    char param_T[1] = { 'T' };
 
     // Numbers of columns of the right hand side := 1.
-    const Int NBRHS = 1;
+    Int NBRHS[1] = { 1 };
 
     // Clean the local flux
     M_localFlux.zero();
@@ -698,7 +754,7 @@ localEvolve ( const UInt& iElem )
     // Loop on the faces of the element iElem and compute the local contribution
     for ( UInt iFace(1); iFace <= M_FESpace.mesh()->numLocalFaces(); ++iFace )
     {
-
+        // Id mapping
         const UInt iGlobalFace( M_FESpace.mesh()->localFaceId( iElem, iFace ) );
 
         // Take the left element to the face, see regionMesh for the meaning of left element
@@ -846,12 +902,12 @@ localEvolve ( const UInt& iElem )
 
         /* Put in localFlux the vector L^{-1} * localFlux
            For more details see http://www.netlib.org/lapack/lapack-3.1.1/SRC/dtrtrs.f */
-        lapack.TRTRS( param_L, param_N, param_N, NB, NBRHS, M_elmatMass[ iElem - 1 ].mat(), NB, localFaceFluxWeight, NB, INFO);
+        dtrtrs_( param_L, param_N, param_N, NB, NBRHS, M_elmatMass[ iElem - 1 ].mat(), NB, localFaceFluxWeight, NB, INFO);
         ASSERT_PRE( !INFO[0], "Lapack Computation M_elvecSource = LB^{-1} rhs is not achieved." );
 
         /* Put in localFlux the vector L^{-T} * localFlux
            For more details see http://www.netlib.org/lapack/lapack-3.1.1/SRC/dtrtrs.f */
-        lapack.TRTRS( param_L, param_T, param_N, NB, NBRHS, M_elmatMass[ iElem - 1 ].mat(), NB, localFaceFluxWeight, NB, INFO);
+        dtrtrs_( param_L, param_T, param_N, NB, NBRHS, M_elmatMass[ iElem - 1 ].mat(), NB, localFaceFluxWeight, NB, INFO);
         ASSERT_PRE( !INFO[0], "Lapack Computation M_elvecSource = LB^{-1} rhs is not achieved." );
 
         // Add to the local flux the local flux of the current face
@@ -862,9 +918,9 @@ localEvolve ( const UInt& iElem )
 } // localEvolve
 
 // Apply the flux limiters locally.
-template<typename Mesh, typename SolverType>
+template< typename Mesh, typename SolverType >
 void
-HyperbolicSolver<Mesh, SolverType>::
+HyperbolicSolver< Mesh, SolverType >::
 localAverage ( const UInt& iElem )
 {
 

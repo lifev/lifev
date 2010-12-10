@@ -44,6 +44,7 @@ namespace LifeV
 namespace detail
 {
 
+// Import function for 3D mesh
 template<typename Elt>
 void
 import( std::string const&  fileName,
@@ -51,7 +52,7 @@ import( std::string const&  fileName,
         RegionMesh3D<Elt>&  mesh,
         EntityFlag          regionFlag )
 {
-
+    // Select the right mesh format
     switch ( format )
     {
     case MESHPP:
@@ -71,8 +72,9 @@ import( std::string const&  fileName,
         break;
     }
 
-}
+} // import
 
+// Import function for 2D mesh
 template<typename Elt>
 void
 import( std::string const& fileName,
@@ -80,7 +82,7 @@ import( std::string const& fileName,
         RegionMesh2D<Elt>& mesh,
         EntityFlag         regionFlag )
 {
-
+    // Select the right mesh format, only Gmsh allowed
     switch ( format )
     {
     case MESHPP:
@@ -97,7 +99,7 @@ import( std::string const& fileName,
         break;
     }
 
-}
+} // import
 
 } // Namespace detail
 
@@ -105,34 +107,39 @@ import( std::string const& fileName,
 // Methods
 // ===================================================
 
-void
-importer::import( RegionMesh2D<LinearTriangle> & mesh,
-                  EntityFlag                     regionFlag )
-{
-    detail::import( M_fileName, M_format, mesh, regionFlag );
-}
-
-void
-importer::import( RegionMesh2D<LinearQuad> & mesh,
-                  EntityFlag                 regionFlag )
-{
-    detail::import( M_fileName, M_format, mesh, regionFlag );
-}
-
+// Import mesh with tetrahedras
 void
 importer::import( RegionMesh3D<LinearTetra> & mesh,
                   EntityFlag                  regionFlag )
 {
     detail::import( M_fileName, M_format, mesh, regionFlag );
-}
+} // import
 
+// Import mesh with linear hexahedras
 void
 importer::import( RegionMesh3D<LinearHexa> & mesh,
                   EntityFlag                 regionFlag )
 {
     detail::import( M_fileName, M_format, mesh, regionFlag );
-}
+} // import
 
+// Import mesh with linear triangles
+void
+importer::import( RegionMesh2D<LinearTriangle> & mesh,
+                  EntityFlag                     regionFlag )
+{
+    detail::import( M_fileName, M_format, mesh, regionFlag );
+} // import
+
+// Import mesh with linear quadrangles
+void
+importer::import( RegionMesh2D<LinearQuad> & mesh,
+                  EntityFlag                 regionFlag )
+{
+    detail::import( M_fileName, M_format, mesh, regionFlag );
+} // import
+
+// Print attributes of the class
 void
 importer::showMe( std::ostream& output ) const
 {
@@ -140,6 +147,6 @@ importer::showMe( std::ostream& output ) const
            << "File Name   " << M_fileName << std::endl
            << "File format " << M_format << std::endl
            << std::flush;
-}
+} // showMe
 
 } // Namespace LifeV

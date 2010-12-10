@@ -42,23 +42,23 @@
 namespace LifeV
 {
 
-/**
-  \enum MeshFormat
+/*! @enum MeshFormat
+  List of reading mesh format.
 */
 enum MeshFormat
 {
-    MESHPP,
-    INRIA,
-    GMSH,
-    NETGEN
+    MESHPP, /*!< Meshpp type mesh */
+    INRIA,  /*!< INRIA type mesh */
+    GMSH,   /*!< Gmsh type mesh */
+    NETGEN  /*!< NetGen type mesh */
 };
 
-/**
-  \class importer
+//! importer General interface for read different types of mesh.
+/*!
+  @author Christophe Prud'homme <christophe.prudhomme@epfl.ch>
 
-  import mesh data formats into Life mesh data structure.
+  Import different type of mesh data formats into Life mesh data structure.
 
-  \author Christophe Prud'homme <christophe.prudhomme@epfl.ch>
 */
 class importer
 {
@@ -96,14 +96,14 @@ public:
     void import( RegionMesh3D<LinearTetra> & mesh, EntityFlag regionFlag );
 
 
-    //! Import mesh with hexahedras
+    //! Import mesh with linear hexahedras
     /*!
       @param mesh mesh data structure to fill in
       @param regionFlag marker for the region to load
     */
     void import( RegionMesh3D<LinearHexa> & mesh, EntityFlag regionFlag );
 
-    //! Import mesh with triangles
+    //! Import mesh with linear triangles
     /*!
       @param mesh mesh data structure to fill in
       @param regionFlag marker for the region to load
@@ -111,7 +111,7 @@ public:
     void import( RegionMesh2D<LinearTriangle> & mesh, EntityFlag regionFlag );
 
 
-    //! Import mesh with quadrangles
+    //! Import mesh with linear quadrangles
     /*!
       @param mesh mesh data structure to fill in
       @param regionFlag marker for the region to load
@@ -133,7 +133,7 @@ public:
     /*!
       @param fileName of the mesh file
     */
-    void setFilename( std::string const& fileName )
+    inline void setFilename( std::string const& fileName )
     {
         M_fileName = fileName;
     }
@@ -142,7 +142,7 @@ public:
     /*!
       @param format format of the mesh file
     */
-    void setFormat( MeshFormat const& format )
+    inline void setFormat( MeshFormat const& format )
     {
         M_format = format;
     }
@@ -157,6 +157,7 @@ private:
     //! Format of the file to import
     MeshFormat M_format;
 };
+
 }
 
 #endif /* _IMPORTER_H */

@@ -25,7 +25,7 @@
  * @date 30-09-2010
  *
  * @author Alessio Fumagalli <alessio.fumagalli@mail.polimi.it>
- *         Michel Kern       <michel.kern@inria.fr>
+ * @author Michel Kern       <michel.kern@inria.fr>
  *
  * @contributor
  *
@@ -42,35 +42,38 @@
 #include <life/lifefem/assemb.hpp>
 #include <life/lifealg/brent.hpp>
 
-
 namespace
 {
 
-typedef boost::function<LifeV::Vector ( const LifeV::Real&, const LifeV::Real&,
-                                        const LifeV::Real&, const LifeV::Real&,
-                                        const std::vector<LifeV::Real>& )>
+using namespace LifeV;
+
+typedef boost::function<Vector ( const Real&, const Real&,
+                                 const Real&, const Real&,
+                                 const std::vector<Real>& )>
 vectorFunction;
 
-LifeV::Real functionDotNormal ( const LifeV::Real&              unknown,
-                                const vectorFunction&           function,
-                                const LifeV::KN<LifeV::Real>&   normal,
-                                const LifeV::Real&              t,
-                                const LifeV::Real&              x,
-                                const LifeV::Real&              y,
-                                const LifeV::Real&              z,
-                                const LifeV::Real&              plusMinus,
-                                const std::vector<LifeV::Real>& fieldsValues )
+// Compute plus or minus the function dot normal vector
+Real functionDotNormal ( const Real&              unknown,
+                         const vectorFunction&    function,
+                         const KN<Real>&          normal,
+                         const Real&              t,
+                         const Real&              x,
+                         const Real&              y,
+                         const Real&              z,
+                         const Real&              plusMinus,
+                         const std::vector<Real>& fieldsValues )
 {
-    LifeV::Real valueFunctionDotNormal(0);
-    const LifeV::UInt problemDimension( normal.size() );
-    std::vector<LifeV::Real> unknownAndFields( 1, 0. );
+    Real valueFunctionDotNormal(0);
+    const UInt problemDimension( normal.size() );
+    std::vector<Real> unknownAndFields( 1, 0. );
 
+    // Add to the vector unknownAndFields the values of the unknown then the value of the external fields.
     unknownAndFields[0] = unknown;
     unknownAndFields.insert ( unknownAndFields.begin() + 1,
                               fieldsValues.begin(), fieldsValues.end() );
 
-    // Compute \sum_{i} physicalFlux(i) * n(i)
-    for ( LifeV::UInt nDim(0); nDim < problemDimension; ++nDim )
+    // Compute  \sum_{i} physicalFlux(i) * n(i)
+    for ( UInt nDim(0); nDim < problemDimension; ++nDim )
     {
         valueFunctionDotNormal += plusMinus * function( t, x, y, z, unknownAndFields )[nDim] * normal[nDim];
     }
@@ -78,20 +81,22 @@ LifeV::Real functionDotNormal ( const LifeV::Real&              unknown,
     return valueFunctionDotNormal;
 }
 
-LifeV::Real absFunctionDotNormal ( const LifeV::Real&              unknown,
-                                   const vectorFunction&           function,
-                                   const LifeV::KN<LifeV::Real>&   normal,
-                                   const LifeV::Real&              t,
-                                   const LifeV::Real&              x,
-                                   const LifeV::Real&              y,
-                                   const LifeV::Real&              z,
-                                   const LifeV::Real&              plusMinus,
-                                   const std::vector<LifeV::Real>& fieldsValues)
+// Compute plus or minus the absolute value of function dot normal vector
+Real absFunctionDotNormal ( const Real&              unknown,
+                            const vectorFunction&    function,
+                            const KN<Real>&          normal,
+                            const Real&              t,
+                            const Real&              x,
+                            const Real&              y,
+                            const Real&              z,
+                            const Real&              plusMinus,
+                            const std::vector<Real>& fieldsValues)
 {
-    LifeV::Real valueFunctionDotNormal(0);
-    const LifeV::UInt problemDimension( normal.size() );
-    std::vector<LifeV::Real> unknownAndFields( fieldsValues.size() + 1, 0. );
+    Real valueFunctionDotNormal(0);
+    const UInt problemDimension( normal.size() );
+    std::vector<Real> unknownAndFields( fieldsValues.size() + 1, 0. );
 
+    // Add to the vector unknownAndFields the values of the unknown then the value of the external fields.
     unknownAndFields[0] = unknown;
     unknownAndFields.insert ( unknownAndFields.begin() + 1,
                               fieldsValues.begin(), fieldsValues.end() );
@@ -109,12 +114,26 @@ LifeV::Real absFunctionDotNormal ( const LifeV::Real&              unknown,
 
 
 // LifeV namespace.
-// We suppose that u[0] contains the non-linear value
 namespace LifeV
 {
+//! AbstractNumericalFlux Gives a common interface for hyperbolic's flux function.
+/*!
+  @author Alessio Fumagalli <alessio.fumagalli@mail.polimi.it>
+  @author Michel Kern       <michel.kern@inria.fr>
 
+  This class gives a common interface for hyperbolic's flux functions \f$ \mathbf{F}( u ) \f$, in particoular it computes
+  <ol>
+  <li> the flux function dot product the outward unit normal \f$ \mathbf{n} \f$;</li>
+  <li> the first derivative of the flux function, respect to \f$ u \f$, dot product the outward unit normal;</li>
+  <li> the maximum value of \f$ \hat{\mathbf{F}} \cdot \mathbf{n} \f$ between to adjacent elements; </li>
+  <li> the value of \f$ \Vert \mathbf{F}^\prime \cdot \mathbf{n}_{e, K} \Vert_{L^\infty(a_0, b_0) } \f$ between to adjacent elements.</li>
+  </ol>
+  The class can handle the dependeces of the flux function \f$ \mathbf{F} \f$ of external vector or scalar fields.
+  @note In the implementation of the physical flux \f$ \mathbf{F} \f$ we suppose that the first parameter of the vector is the unknown.
+        See the test case for an example.
+*/
 template< typename Mesh,
-typename SolverType = LifeV::SolverTrilinos >
+          typename SolverType = LifeV::SolverTrilinos >
 class AbstractNumericalFlux
 {
 
@@ -128,37 +147,60 @@ public:
                                      const std::vector<Real>& )>
     vectorFunction_Type;
 
-    typedef boost::function<Real ( const Real& )> scalarFunction_Type;
+    typedef boost::function< Real ( const Real& ) > scalarFunction_Type;
 
-    typedef typename SolverType::vector_type      vector_Type;
-    typedef boost::shared_ptr<vector_Type>        vectorPtr_Type;
+    typedef typename SolverType::vector_type        vector_Type;
+    typedef boost::shared_ptr< vector_Type >        vectorPtr_Type;
 
-    typedef GetPot                                dataFile_Type;
-    typedef KN<Real>                              normal_Type;
+    typedef GetPot                                  dataFile_Type;
+    typedef KN< Real >                              normal_Type;
 
     //@}
 
-    // Constructors and destructor.
+    // Constructors & destructor.
     //! @name Constructors and destructor
     //@{
 
+    //! Constructor for the class
+    /*!
+      @param physicalFlux Physical flux for the problem.
+      @param firstDerivativePhysicalFlux First derivative, respect the the unknown, of the physical flux.
+      @param fESpace Finite element space of the hyperbolic problem.
+      @param data Data for the problem.
+      @param section Section for read the data from GetPot file.
+    */
     AbstractNumericalFlux ( const vectorFunction_Type&       physicalFlux,
                             const vectorFunction_Type&       firstDerivativePhysicalFlux,
                             const FESpace<Mesh, EpetraMap>&  fESpace,
                             const dataFile_Type&             data,
                             const std::string&               section = "numerical_flux/");
 
-
+    //! Virtual destructor.
     virtual ~AbstractNumericalFlux ();
 
     //@}
 
-    // Add one field
-    inline void setField ( const vectorPtr_Type & field )
-    {
-        M_fields.push_back( &field );
-    };
+    //! @name Operators
+    //@{
 
+    //! Computes the face contribution of the flux.
+    /*!
+      Given a face \f$ e \in \partial K \f$ it evaluates
+      \f[
+      \max \hat{\mathbf{F}} \cdot \mathbf{n}
+      \f]
+      between to elements sharing the face.
+      @param leftState Left value of the unknown respect to the face.
+      @param rightValue Right value of the unknown respect to the face.
+      @param normal Normal of the face.
+      @param iElem The ID of the current element in the mesh.
+      @param t Current time.
+      @param x Abscissa.
+      @param y Ordinate.
+      @param z Quota.
+      @note We assume left and right side of \f$ e \f$ is given by: the normal direction goes
+      from the left side to the right side.
+    */
     virtual Real operator() ( const Real&        leftState,
                               const Real&        rightState,
                               const normal_Type& normal,
@@ -167,17 +209,56 @@ public:
                               const Real&        x = 0,
                               const Real&        y = 0,
                               const Real&        z = 0 ) const = 0;
+    //@}
 
+
+    //! @name Set Methods
+    //@{
+
+    //! Add one external field.
+    /*!
+      Add one extra field for the dependece from \f$ \mathbf{F} \f$.
+      @param field The filed to be added.
+    */
+    inline void setField ( const vectorPtr_Type & field )
+    {
+        M_fields.push_back( &field );
+    }
+
+    //@}
+
+    //! @name Get Methods
+    //@{
+
+    //! Return the physical flux.
+    /*!
+      @return The physical flux.
+    */
     inline vectorFunction_Type getPhysicalFlux () const
     {
         return M_physicalFlux;
     }
 
+    //! Return the first derivative, respect to the unknown, of the physical flux.
+    /*!
+      @return The first derivative of the physical flux.
+    */
     inline vectorFunction_Type getFirstDerivativePhysicalFlux () const
     {
         return M_firstDerivativePhysicalFlux;
     }
 
+    //! Evaluate the flux dot normal in a given point of a face.
+    /*!
+      @param normal The normal of the face.
+      @param iElem The ID of the current element in the mesh.
+      @param t Current time.
+      @param x Abscissa.
+      @param y Ordinate.
+      @param z Quota.
+      @param unknown The value of the unknown.
+      @return The value of \f$ \mathbf{ \hat{ F } } \cdot \mathbf{ n }\f$ in the point \f$ (x, y, z, t, u) \f$.
+    */
     inline Real getPhysicalFluxDotNormal ( const normal_Type& normal,
                                            const UInt&        iElem,
                                            const Real&        t,
@@ -189,6 +270,17 @@ public:
         return computeFunctionDotNormal ( M_physicalFlux, normal, iElem, t, x, y, z, +1 ) ( unknown );
     }
 
+    //! Evaluate the first derivative of the flux dot normal in a given point of a face.
+    /*!
+      @param normal The normal of the face.
+      @param iElem The ID of the current element in the mesh.
+      @param t Current time.
+      @param x Abscissa.
+      @param y Ordinate.
+      @param z Quota.
+      @param unknown The value of the unknown.
+      @return The value of \f$ \mathbf{ \hat{ F^\prime } } \cdot \mathbf{ n }\f$ in the point \f$ (x, y, z, t, u) \f$.
+    */
     inline Real getFirstDerivativePhysicalFluxDotNormal ( const normal_Type& normal,
                                                           const UInt&        iElem,
                                                           const Real&        t,
@@ -200,6 +292,24 @@ public:
         return computeFunctionDotNormal ( M_firstDerivativePhysicalFlux, normal, iElem, t, x, y, z, +1 ) ( unknown );
     }
 
+    //! Computes the local infinity norm of the first derivative of the flux dot normal.
+    /*!
+      Given a face \f$ e \in \partial K \f$ it evaluates
+      \f[
+      \displaystyle \max_{e \in \partial K^- \cap \partial K^+} \vert \hat{\mathbf{F^\prime}} \cdot \mathbf{n} \vert
+      \f]
+      between to elements sharing the face.
+      @param leftState Left value of the unknown respect to the face.
+      @param rightValue Right value of the unknown respect to the face.
+      @param normal Normal of the face.
+      @param iElem The ID of the current element in the mesh.
+      @param t Current time.
+      @param x Abscissa.
+      @param y Ordinate.
+      @param z Quota.
+      @note We assume left and right side of \f$ e \f$ is given by: the normal direction goes
+      from the left side to the right side.
+    */
     Real getNormInfty ( const Real&        leftState,
                         const Real&        rightState,
                         const normal_Type& normal,
@@ -209,8 +319,25 @@ public:
                         const Real&        y = 0,
                         const Real&        z = 0 ) const;
 
+    //@}
+
 protected:
 
+    //! @name Protected Methods
+    //@{
+
+    //! Return a scalar function from a general vector function dot normal in a given point of a face.
+    /*!
+      @param function Function to be reduced.
+      @param normal The normal of the face.
+      @param iElem The ID of the current element in the mesh.
+      @param t Current time.
+      @param x Abscissa.
+      @param y Ordinate.
+      @param z Quota.
+      @param plusMinus
+      @return The function \f$ g(u) = \pm \mathbf{f}(x,y,z,t,u) \cdot \mathbf{n} \f$.
+    */
     scalarFunction_Type computeFunctionDotNormal ( const vectorFunction_Type& function,
                                                    const normal_Type&         normal,
                                                    const UInt&                iElem,
@@ -220,6 +347,18 @@ protected:
                                                    const Real&                z,
                                                    const Real&                plusMinus ) const;
 
+    //! Return a scalar function from the absolute value of a general vector function dot normal in a given point of a face.
+    /*!
+      @param function Function to be reduced.
+      @param normal The normal of the face.
+      @param iElem The ID of the current element in the mesh.
+      @param t Current time.
+      @param x Abscissa.
+      @param y Ordinate.
+      @param z Quota.
+      @param plusMinus
+      @return The function \f$ g(u) = \pm \vert \mathbf{f}(x,y,z,t,u) \cdot \mathbf{n} \vert \f$.
+    */
     scalarFunction_Type computeAbsFunctionDotNormal ( const vectorFunction_Type& function,
                                                       const normal_Type&         normal,
                                                       const UInt&                iElem,
@@ -229,25 +368,33 @@ protected:
                                                       const Real&                z,
                                                       const Real&                plusMinus ) const;
 
+    //@}
+
+    //! Physical flux function.
     vectorFunction_Type                  M_physicalFlux;
 
+    //! First derivative, respect to unknown, of physical flux function.
     vectorFunction_Type                  M_firstDerivativePhysicalFlux;
 
-    // Tollerance for the brent algorithm for computing the CFL condition
+    //! Tollerance for the Brent algorithm for computing the CFL condition.
     Real                                 M_CFLBrentToll;
 
-    // Maxiter for the brent algorithm for computing the CFL condition
+    //! Maximum of iterations for the Brent algorithm for computing the CFL condition.
     UInt                                 M_CFLBrentMaxIter;
 
-    // Finite element space
+    //! Finite element space of the hyperbolic solver.
     const FESpace<Mesh, EpetraMap>&      M_fESpace;
 
-    // Vector of pointers for the dependences of the permeability to an external field.
+    //! Vector of pointers for the dependences of the permeability to external vector fields.
     std::vector< const vectorPtr_Type* > M_fields;
 
 }; // AbstractNumericalFlux
 
-// Constructor of the abstract class
+// ===================================================
+// Constructors & Destructor
+// ===================================================
+
+// Constructor of the class
 template < typename Mesh, typename SolverType >
 AbstractNumericalFlux<Mesh, SolverType>::
 AbstractNumericalFlux ( const vectorFunction_Type&       physicalFlux,
@@ -263,17 +410,22 @@ AbstractNumericalFlux ( const vectorFunction_Type&       physicalFlux,
         M_fields                      ( std::vector< const vectorPtr_Type* >(0) )
 {
 
-} // constructor
+} // Constructor
 
-// Destructor of the abstract class
+// Destructor of the class
 template < typename Mesh, typename SolverType >
 AbstractNumericalFlux<Mesh, SolverType>::
 ~AbstractNumericalFlux ()
 {
 
-} // destructor
+} // Destructor
 
-template < typename Mesh, typename SolverType >
+// ===================================================
+// Methods
+// ===================================================
+
+// Return the norm infinity
+template< typename Mesh, typename SolverType >
 Real
 AbstractNumericalFlux<Mesh, SolverType>::
 getNormInfty ( const Real& leftState, const Real& rightState, const normal_Type& normal, const UInt& iElem,
@@ -285,8 +437,10 @@ getNormInfty ( const Real& leftState, const Real& rightState, const normal_Type&
     const UInt fieldDim( M_fESpace.fieldDim() );
     scalarFunction_Type absFunctionDotNormalBound;
 
+    // Takes the value of all the external fields in the current element.
     for ( UInt i(0); i < M_fields.size(); ++i )
     {
+        // Select if the external field is a scalar or vector field
         for ( UInt iComponent(0); iComponent < fieldDim; ++iComponent )
         {
             values[ i*fieldDim + iComponent ] = (*( *(M_fields)[i] ))[ iComponent*totalDofsPresent + M_fESpace.dof().localToGlobal( iElem, 1)  ];
@@ -294,22 +448,24 @@ getNormInfty ( const Real& leftState, const Real& rightState, const normal_Type&
 
     }
 
+    // Bind the function which depends on all the parameter to obatin a scalar function, which depend just on the unknown
     absFunctionDotNormalBound = boost::bind ( &absFunctionDotNormal, _1,
                                               M_firstDerivativePhysicalFlux,
                                               normal, t, x, y, z, -1, values );
 
-    // Compute the maximum of the absFunctionDotNormal
+    // Compute the minumum of minus absFunctionDotNormal
     const Real maxValue = brent( absFunctionDotNormalBound, leftState, rightState,
                                  M_CFLBrentToll, M_CFLBrentMaxIter );
 
+    // Return minus the value
     return - absFunctionDotNormalBound ( maxValue );
 
 } // getNormInfty
 
 // Create the fluxDotNormal function
 template < typename Mesh, typename SolverType >
-boost::function<Real ( const Real& )>
-AbstractNumericalFlux<Mesh, SolverType>::
+boost::function< Real ( const Real& ) >
+AbstractNumericalFlux< Mesh, SolverType >::
 computeFunctionDotNormal ( const vectorFunction_Type& function, const normal_Type& normal, const UInt& iElem,
                            const Real& t, const Real& x, const Real& y, const Real& z, const Real& plusMinus ) const
 {
@@ -319,8 +475,10 @@ computeFunctionDotNormal ( const vectorFunction_Type& function, const normal_Typ
     const UInt fieldDim( M_fESpace.fieldDim() );
     scalarFunction_Type functionDotNormalBound;
 
+    // Takes the value of all the external fields in the current element.
     for ( UInt i(0); i < M_fields.size(); ++i )
     {
+        // Select if the external field is a scalar or vector field
         for ( UInt iComponent(0); iComponent < fieldDim; ++iComponent )
         {
             values[ i*fieldDim + iComponent ] = (*( *(M_fields)[i] ))[ iComponent*totalDofsPresent + M_fESpace.dof().localToGlobal( iElem, 1)  ];
@@ -328,7 +486,7 @@ computeFunctionDotNormal ( const vectorFunction_Type& function, const normal_Typ
 
     }
 
-    // Bind the anonymousnamespace::fluxDotNormal function with known quantities.
+    // Bind the fluxDotNormal function with known quantities.
     functionDotNormalBound = boost::bind ( &functionDotNormal, _1, function,
                                            normal, t, x, y, z, plusMinus, values );
 
@@ -338,6 +496,32 @@ computeFunctionDotNormal ( const vectorFunction_Type& function, const normal_Typ
 
 // ######################################################################### //
 
+//! GodunovNumericalFlux Gives an implementation for Godunov solver for hyperbolic's flux function.
+/*!
+  @author Alessio Fumagalli <alessio.fumagalli@mail.polimi.it>
+  @author Michel Kern       <michel.kern@inria.fr>
+
+  This class gives an implementation for Godunov solver for hyperbolic's flux functions \f$ \mathbf{F}( u ) \f$. In particular it implements
+  <ol>
+  <li> the flux function dot product the outward unit normal \f$ \mathbf{n} \f$;</li>
+  <li> the first derivative of the flux function, respect to \f$ u \f$, dot product the outward unit normal;</li>
+  <li> the maximum value of \f$ \hat{\mathbf{F}} \cdot \mathbf{n} \f$ between to adjacent elements computed using Godunov solver
+  \f[
+  \hat{\mathbf{F}} \cdot \mathbf{n} (a,b)=
+    \left\{
+      \begin{array}{l l}
+        \displaystyle \min_{a \leq u \leq b} \mathbf{F} \cdot \mathbf{n} ( u ) & \mathrm{if} \quad a \leq b\,, \\
+        \displaystyle \max_{b \leq u \leq a} \mathbf{F} \cdot \mathbf{n} ( u ) & \mathrm{otherwise}\,.
+      \end{array}
+    \right.
+  \f]
+  </li>
+  <li> the value of \f$ \Vert \mathbf{F}^\prime \cdot \mathbf{n}_{e, K} \Vert_{L^\infty(a_0, b_0) } \f$ between to adjacent elements.</li>
+  </ol>
+  The class can handle the dependeces of the flux function \f$ \mathbf{F} \f$ of external vector or scalar fields.
+  @note In the implementation of the physical flux \f$ \mathbf{F} \f$ we suppose that the first parameter of the vector is the unknown.
+        See the test case for an example.
+*/
 template< typename Mesh,
 typename SolverType = LifeV::SolverTrilinos >
 class GodunovNumericalFlux : public AbstractNumericalFlux<Mesh, SolverType>
@@ -345,19 +529,60 @@ class GodunovNumericalFlux : public AbstractNumericalFlux<Mesh, SolverType>
 
 public:
 
+    //! @name Public Types
+    //@{
+
     typedef typename AbstractNumericalFlux<Mesh, SolverType>::vectorFunction_Type vectorFunction_Type;
     typedef typename AbstractNumericalFlux<Mesh, SolverType>::scalarFunction_Type scalarFunction_Type;
     typedef typename AbstractNumericalFlux<Mesh, SolverType>::dataFile_Type       dataFile_Type;
     typedef typename AbstractNumericalFlux<Mesh, SolverType>::normal_Type         normal_Type;
 
+    //@}
+
+    // Constructors & destructor.
+    //! @name Constructors and destructor
+    //@{
+
+    //! Constructor for the class
+    /*!
+      @param physicalFlux Physical flux for the problem.
+      @param firstDerivativePhysicalFlux First derivative, respect the the unknown, of the physical flux.
+      @param fESpace Finite element space of the hyperbolic problem.
+      @param data Data for the problem.
+      @param section Section for read the data from GetPot file.
+    */
     GodunovNumericalFlux ( const vectorFunction_Type&      physicalFlux,
                            const vectorFunction_Type&      firstDerivativePhysicalFlux,
                            const FESpace<Mesh, EpetraMap>& fESpace,
                            const dataFile_Type&            data,
                            const std::string&              section = "numerical_flux/" );
 
+    //! Virtual destructor
     virtual ~GodunovNumericalFlux ();
 
+    //@}
+
+    //! @name Operators
+    //@{
+
+    //! Computes the face contribution of the flux.
+    /*!
+      Given a face \f$ e \in \partial K \f$ it evaluates
+      \f[
+      \max \hat{\mathbf{F}} \cdot \mathbf{n}
+      \f]
+      between to elements sharing the face, using Godunov flux.
+      @param leftState Left value of the unknown respect to the face.
+      @param rightValue Right value of the unknown respect to the face.
+      @param normal Normal of the face.
+      @param iElem The ID of the current element in the mesh.
+      @param t Current time.
+      @param x Abscissa.
+      @param y Ordinate.
+      @param z Quota.
+      @note We assume left and right side of \f$ e \f$ is given by: the normal direction goes
+      from the left side to the right side.
+    */
     virtual Real operator() ( const Real&        leftState,
                               const Real&        rightState,
                               const normal_Type& normal,
@@ -367,16 +592,23 @@ public:
                               const Real&        y = 0,
                               const Real&        z = 0 ) const;
 
+    //@}
+
 protected:
 
-    // Tollerance for the brent algorithm
+    //! Tollerance for the Brent algorithm used for Godunov flux.
     Real M_brentToll;
 
-    // Maxiter for the brent algorithm
+    //! Maximum of iteration for the Brent algorithm used for Godunov flux.
     UInt M_brentMaxIter;
 
 }; // GodunovNumericalFlux
 
+// ===================================================
+// Constructors & Destructor
+// ===================================================
+
+// Constructor of the class
 template < typename Mesh, typename SolverType >
 GodunovNumericalFlux<Mesh, SolverType>::
 GodunovNumericalFlux ( const vectorFunction_Type&       physicalFlux,
@@ -393,17 +625,19 @@ GodunovNumericalFlux ( const vectorFunction_Type&       physicalFlux,
     M_brentMaxIter                                ( data( ( section + "godunov/brent_maxIter" ).data(), 20) )
 {
 
-    CONSTRUCTOR( "GodunovNumericalFlux" );
+} // Constructor
 
-} // constructor
-
-// Destructor of the Godunov class
+// Destructor of the class
 template < typename Mesh, typename SolverType >
 GodunovNumericalFlux<Mesh, SolverType>::
 ~GodunovNumericalFlux ()
 {
 
-} // destructor
+} // Destructor
+
+// ===================================================
+// Operators
+// ===================================================
 
 template < typename Mesh, typename SolverType >
 Real
@@ -412,15 +646,16 @@ operator() ( const Real& leftState, const Real& rightState, const normal_Type& n
              const UInt& iElem, const Real& t, const Real& x, const Real& y, const Real& z ) const
 {
 
-    // The value of the flux
+    // It will store the value of the flux
     Real fluxValue( static_cast<Real>(0) );
 
-    // The argmin or argmax of flux dot normal
+    // It will store the argmin or argmax of flux dot normal
     Real minMax( static_cast<Real>(0) );
 
     // The normal flux function
     scalarFunction_Type normalFlux;
 
+    // Select where it is the upwind direction
     if ( rightState > leftState )
     {
         // Create the function f \cdot n

@@ -25,7 +25,7 @@
  * @date 30-09-2010
  *
  * @author Alessio Fumagalli <alessio.fumagalli@mail.polimi.it>
- *         Michel Kern       <michel.kern@inria.fr>
+ * @author Michel Kern       <michel.kern@inria.fr>
  *
  * @contributor
  *
@@ -36,17 +36,30 @@
 #ifndef _DATAHYPERBOLIC_H_
 #define _DATAHYPERBOLIC_H_ 1
 
-#include <life/lifemesh/dataMesh.hpp>
 #include <life/lifearray/tab.hpp>
+
+#include <life/lifemesh/dataMesh.hpp>
+
 #include <life/lifefem/dataTime.hpp>
 
 // LifeV namespace
 namespace LifeV
 {
 /*!
-  @class DataDarcy
+  @class DataHyperbolic
 
-  This class contain the basic data for the Darcy solver. In particoular it stores...
+  @author Alessio Fumagalli <alessio.fumagalli@mail.polimi.it>
+  @author Michel Kern       <michel.kern@inria.fr>
+
+  This class contain the basic data for the hyperbolic solver. In particoular it stores
+  <ol>
+  <li> the GetPot data file; </li>
+  <li> the time class handler; </li>
+  <li> the mesh class handler; </li>
+  <li> the level of verbosity of the solver hyperbolic; </li>
+  <li> the section for the GetPot data file; </li>
+  <li> the relax parameter for the CFL condition. </li>
+  </ol>
   @todo class not finished!
  */
 template <typename Mesh>
@@ -203,7 +216,7 @@ protected:
     UInt              M_verbose;
     std::string       M_section;
 
-    //! Relax paramether for the CFL condition
+    //! Relax parameter for the CFL condition
     Real              M_relaxCFL;
 
 };
@@ -253,6 +266,7 @@ DataHyperbolic<Mesh>::~DataHyperbolic()
 // ===================================================
 // Operators
 // ===================================================
+
 // Overloading of the operator =
 template < typename Mesh >
 DataHyperbolic<Mesh>&
@@ -278,6 +292,7 @@ DataHyperbolic<Mesh>::operator=( const DataHyperbolic& dataHyperbolic )
 // ===================================================
 // Methods
 // ===================================================
+
 // External set up method
 template < typename Mesh >
 void
