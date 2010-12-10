@@ -1,35 +1,43 @@
-/* -*- mode: c++ -*-
-   This program is part of the LifeV library
+//@HEADER
+/*
+*******************************************************************************
 
-   Autor(s): Alessio Fumagalli <alessio.fumagalli@mail.polimi.it>
-       Date:
+   Copyright (C) 2004, 2005, 2007 EPFL, Politecnico di Milano, INRIA
+   Copyright (C) 2010 EPFL, Politecnico di Milano, Emory UNiversity
 
-   Copyright (C) 2001-2006 EPFL, Politecnico di Milano, INRIA
-   Copyright (C) 2006-2010 EPFL, Politecnico di Milano
+   This file is part of the LifeV library
 
-   This program is free software; you can redistribute it and/or
-   modify it under the terms of the GNU General Public License
-   as published by the Free Software Foundation; either version 2
-   of the License, or (at your option) any later version.
+   LifeV is free software; you can redistribute it and/or modify
+   it under the terms of the GNU Lesser General Public License as published by
+   the Free Software Foundation; either version 3 of the License, or
+   (at your option) any later version.
 
-   This program is distributed in the hope that it will be useful,
+   LifeV is distributed in the hope that it will be useful,
    but WITHOUT ANY WARRANTY; without even the implied warranty of
-   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-   GNU General Public License for more details.
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+   Lesser General Public License for more details.
 
-   You should have received a copy of the GNU General Public License
-   along with this program; if not, write to the Free Software
-   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
-*/
-/**
-  @file dataDarcy.hpp
-  @author A. Fumagalli <alessio.fumagalli@mail.polimi.it>
-  @date 05/2010
+   You should have received a copy of the GNU Lesser General Public
+   License along with this library; if not, see <http://www.gnu.org/licenses/>
 
-  @brief This file contains the data for all the Darcy solver
+
+*******************************************************************************
 */
+//@HEADER
+
+/*!
+ *   @file
+     @brief This file contains the data for all the Darcy solver
+
+     @date 05/2010
+     @author A. Fumagalli <alessio.fumagalli@mail.polimi.it>
+
+     @contributor M. Kern <michel.kern@inria.fr>
+     @maintainer M. Kern <michel.kern@inria.fr>
+ */
+
 #ifndef _DATADARCY_H_
-#define _DATADARCY_H_
+#define _DATADARCY_H_ 1
 
 #include <life/lifemesh/dataMesh.hpp>
 #include <life/lifearray/tab.hpp>
@@ -87,6 +95,23 @@ public:
 
     //@}
 
+    // Methods.
+    //! @name Methods
+    //@{
+
+    /*! Overloading of the operator =
+        @param dataDarcy The DataDarcy to be copied.
+    */
+    DataDarcy& operator=( const DataDarcy& dataDarcy );
+
+    /*! External setup
+        @param dataFile The data file with all the data.
+        @param section The global section.
+    */
+    void setup( const Data_Type& dataFile, const std::string& section = "darcy"  );
+
+    //@}
+
     // Set methods
     //! @name Set methods
     //@{
@@ -112,13 +137,13 @@ public:
     //@{
 
     //! Get the level of verbosity of the problem.
-    inline const UInt verbose( void ) const
+    inline UInt verbose( void ) const
     {
         return M_verbose;
     }
 
     //! Get the main section of the data file.
-    inline const std::string section( void ) const
+    inline std::string section( void ) const
     {
         return M_section;
     }
@@ -145,26 +170,7 @@ public:
         return M_mesh;
     }
 
-
     //@}
-
-    // Methods.
-    //! @name Methods
-    //@{
-
-    /*! Overloading of the operator =
-        @param dataDarcy The DataDarcy to be copied.
-    */
-    DataDarcy& operator=( const DataDarcy& dataDarcy );
-
-    /*! External setup
-        @param dataFile The data file with all the data.
-        @param section The global section.
-    */
-    void setup( const Data_Type& dataFile, const std::string& section = "darcy"  );
-
-    //@}
-
 
 
 protected:
@@ -194,7 +200,7 @@ DataDarcy<Mesh>::DataDarcy( ):
         M_verbose       ( static_cast<UInt>(0) ),
         M_section       ( )
 {
-    CONSTRUCTOR( "DataDarcy" );
+
 }
 
 // Copy constructor
@@ -208,7 +214,7 @@ DataDarcy<Mesh>::DataDarcy( const DataDarcy &dataDarcy ):
         M_verbose             ( dataDarcy.M_verbose ),
         M_section             ( dataDarcy.M_section )
 {
-    CONSTRUCTOR( "DataDarcy" );
+
 }
 
 // Overloading of the operator =
@@ -257,8 +263,7 @@ void DataDarcy<Mesh>::setup( const Data_Type& dataFile, const std::string& secti
 
 /////////////////////////////////////////////////////////////////////////////////
 
-template< typename Mesh,
-typename SolverType = LifeV::SolverTrilinos >
+template< typename Mesh, typename SolverType = LifeV::SolverTrilinos >
 class inversePermeability
 {
 
@@ -270,8 +275,7 @@ public:
 
     typedef boost::function<Matrix ( const Real&, const Real&,
                                      const Real&, const Real&,
-                                     const std::vector<Real> & )>
-    permeability_type;
+                                     const std::vector<Real> & )> permeability_type;
 
     typedef typename SolverType::vector_type      vector_type;
     typedef boost::shared_ptr<vector_type>        vector_ptrtype;
@@ -284,9 +288,11 @@ public:
 
     // Copy constructor
     inversePermeability ( const permeability_type& invPerm, FESpace<Mesh, EpetraMap>& fESpace ):
-            M_inversePermeability ( invPerm ),
-            M_fESpace             ( fESpace ),
-            M_fields              ( std::vector< const vector_ptrtype* >(0) ) {};
+	M_fields              ( std::vector< const vector_ptrtype* >(0) ),
+	M_inversePermeability ( invPerm ),
+	M_fESpace             ( fESpace ) 
+    {
+    };
 
     //! Virtual destructor.
     // virtual ~inversePermeability ();
@@ -353,4 +359,6 @@ operator() ( const Real& t, const Real& x, const Real& y, const Real& z, const U
 }
 
 }
-#endif
+#endif _DATADARCY_H_
+
+// -*- mode: c++ -*-

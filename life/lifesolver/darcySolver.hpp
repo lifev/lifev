@@ -1,47 +1,56 @@
-/* -*- mode: c++ -*-
+//@HEADER
+/*
+*******************************************************************************
 
- This file is part of the LifeV library
+   Copyright (C) 2004, 2005, 2007 EPFL, Politecnico di Milano, INRIA
+   Copyright (C) 2010 EPFL, Politecnico di Milano, Emory UNiversity
 
- Author(s): A. Fumagalli  <alessio.fumagalli@mail.polimi.it>
-      Date: 2010-05-09
+   This file is part of the LifeV library
 
- Copyright (C) 2001-2006 EPFL, Politecnico di Milano, INRIA
- Copyright (C) 2006-2010 Politecnico di Milano
+   LifeV is free software; you can redistribute it and/or modify
+   it under the terms of the GNU Lesser General Public License as published by
+   the Free Software Foundation; either version 3 of the License, or
+   (at your option) any later version.
 
- This library is free software; you can redistribute it and/or
- modify it under the terms of the GNU Lesser General Public
- License as published by the Free Software Foundation; either
- version 2.1 of the License, or (at your option) any later version.
+   LifeV is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+   Lesser General Public License for more details.
 
- This library is distributed in the hope that it will be useful,
- but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- Lesser General Public License for more details.
+   You should have received a copy of the GNU Lesser General Public
+   License along with this library; if not, see <http://www.gnu.org/licenses/>
 
- You should have received a copy of the GNU Lesser General Public
- License along with this library; if not, write to the Free Software
- Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+
+*******************************************************************************
 */
-/**
-  @file darcySolver.hpp
-  @author A. Fumagalli <alessio.fumagalli@mail.polimi.it>
-  @date 05/2010
+//@HEADER
 
-  @brief This file contains a Darcy equation solver class
-*/
-#ifndef _darcySolver_H_
-#define _darcySolver_H_
+/*!
+ *   @file
+     @brief This file contains a Darcy solver with mixed-hybrid finite elements
+
+     @date 05/2010
+     @author A. Fumagalli <alessio.fumagalli@mail.polimi.it>
+
+     @contributor M. Kern <michel.kern@inria.fr>
+     @maintainer M. Kern <michel.kern@inria.fr>
+ */
+
+#ifndef _DARCYSOLVER_H_
+#define _DARCYSOLVER_H_ 1
 
 #include <life/lifefem/elemOper.hpp>
 #include <life/lifefem/bcManage.hpp>
 
 #include <life/lifealg/SolverTrilinos.hpp>
 #include <life/lifealg/clapack.hpp>
+#include <life/lifealg/cblas.hpp>
 //
 #include <life/lifefem/geoMap.hpp>
 #include <life/lifesolver/dataDarcy.hpp>
 //
 #include <life/lifecore/displayer.hpp>
+
 
 // Local namespace to store the default source term and the default permeability tensor.
 namespace
@@ -52,9 +61,9 @@ namespace
 */
 struct DarcyDefaultSource
 {
-    const LifeV::Real operator()( const LifeV::Real&, const LifeV::Real&,
-                                  const LifeV::Real&, const LifeV::Real&,
-                                  const LifeV::UInt&) const
+    LifeV::Real operator()( const LifeV::Real&, const LifeV::Real&,
+			    const LifeV::Real&, const LifeV::Real&,
+			    const LifeV::UInt&) const
     {
         return static_cast<LifeV::Real>( 0 );
     }
@@ -65,8 +74,10 @@ struct DarcyDefaultSource
 // LifeV namespace.
 namespace LifeV
 {
+//! class DarcySolver   This class implements a mixed-hybrid FE Darcy solver.
+
 /*!
-  @class DarcySolver
+  @author A. Fumagalli <alessio.fumagalli@mail.polimi.it>
 
   This class implements a Darcy solver.
   <br>
@@ -101,11 +112,11 @@ namespace LifeV
   the dual variable, the fourth for the hybrid variable.
   \f[
   \begin{array}{l}
-  V = L^2 (\Omega ) \,,\vspace{0.2cm} \\
+  V = L^2 (\Omega ) \,,\vspace{0.2cm} \					\
   H(div, K) = \displaystyle \left\{ \tau \in ( L^2(K))^n : \nabla \cdot \tau \in L^2(K)\right\}\,, \vspace{0.2cm}\\
   Z = \displaystyle \left\{ \tau \in L^2(\Omega) : \tau\vert_K \in H(div, K) \, \forall K \in  \mathcal{T}_h \right\}\,, \vspace{0.2cm}\\
   \Lambda = \displaystyle \left\{ \lambda \in \prod_{K \in \mathcal{T}_h} H^{1/2} (\partial K): \lambda_K = \lambda_{K'} \
-     ,\, \mathrm{on} \,\, e_{K\cap K'} \, \forall K \in \mathcal{T}_h,\, \lambda = g_D \,\, \mathrm{on} \,\, \Gamma_D \right\}\,.
+  ,\, \mathrm{on} \,\, e_{K\cap K'} \, \forall K \in \mathcal{T}_h,\, \lambda = g_D \,\, \mathrm{on} \,\, \Gamma_D \right\}\,.
   \end{array}
   \f]
   Introducing the following bilinear forms and functionals
@@ -224,54 +235,53 @@ namespace LifeV
   @note In the code we do not use the matrix \f$ H \f$ and the vector \f$ G \f$, because all the boundary
   conditions are imposed via BCHandler class.
   @todo Insert any scientific publications that use this solver.
-  @todo Post process for the dual variable.
   @bug If the save flag for the exporter is setted to 0 the program fails.
 */
-template< typename Mesh,
-typename SolverType = LifeV::SolverTrilinos >
+
+template< typename Mesh, typename SolverType = LifeV::SolverTrilinos >
 class DarcySolver
 {
 
 public:
 
-    // Policies.
-    //! @name Policies
+    //! @name Public Types
     //@{
 
+    typedef SolverType                             solver_Type;
+
     typedef boost::function<Real ( const Real&, const Real&, const Real&,
-                                   const Real&, const UInt& )>
-    Function;
+                                   const Real&, const UInt& )> Function;
 
-    typedef inversePermeability<Mesh, SolverType>  permeability_type;
-    typedef boost::shared_ptr<permeability_type>   permeability_ptrtype;
+    typedef inversePermeability<Mesh, SolverType>  permeability_Type;
+    typedef boost::shared_ptr<permeability_Type>   permeabilityPtr_Type;
 
-    typedef DataDarcy<Mesh>                        data_type;
+    typedef DataDarcy<Mesh>                        data_Type;
 
-    typedef Mesh                                   mesh_type;
+    typedef Mesh                                   mesh_Type;
 
-    typedef BCHandler                              bchandler_raw_type;
-    typedef boost::shared_ptr<bchandler_raw_type>  bchandler_type;
+    typedef BCHandler                              bchandler_raw_Type;
+    typedef boost::shared_ptr<bchandler_raw_Type>  bchandler_Type;
 
-    typedef typename SolverType::matrix_type       matrix_type;
-    typedef boost::shared_ptr<matrix_type>         matrix_ptrtype;
+    typedef typename solver_Type::matrix_type      matrix_Type;
+    typedef boost::shared_ptr<matrix_Type>         matrixPtr_Type;
 
-    typedef typename SolverType::vector_type       vector_type;
-    typedef boost::shared_ptr<vector_type>         vector_ptrtype;
+    typedef typename solver_Type::vector_type      vector_Type;
+    typedef boost::shared_ptr<vector_Type>         vectorPtr_Type;
 
-    typedef typename SolverType::prec_raw_type     prec_raw_type;
-    typedef typename SolverType::prec_type         prec_type;
+    typedef typename solver_Type::prec_raw_type    prec_raw_Type;
+    typedef typename solver_Type::prec_type        prec_Type;
 
-    typedef Epetra_Comm                            comm_type;
-    typedef boost::shared_ptr< comm_type >         comm_ptrtype;
+    typedef Epetra_Comm                            comm_Type;
+    typedef boost::shared_ptr< comm_Type >         commPtr_Type;
 
     //@}
 
-    // Constructors and destructor.
     //! @name Constructors and destructor
     //@{
 
+    //! Full constructor for the class.
+
     /*!
-      Full constructor for the class.
       @param dataFile Data for the problem.
       @param primal_FESpace Primal finite element space.
       @param dual_FESpace Dual element space.
@@ -280,16 +290,17 @@ public:
       @param bcHandler Boundary conditions for the problem.
       @param comm Shared pointer of the Epetra communicator.
     */
-    DarcySolver ( const data_type&          dataFile,
+    DarcySolver ( const data_Type&          dataFile,
                   FESpace<Mesh, EpetraMap>& primal_FESpace,
                   FESpace<Mesh, EpetraMap>& dual_FESpace,
                   FESpace<Mesh, EpetraMap>& hybrid_FESpace,
                   FESpace<Mesh, EpetraMap>& VdotN_FESpace,
-                  bchandler_raw_type&       bcHandler,
-                  comm_ptrtype&             comm );
+                  bchandler_raw_Type&       bcHandler,
+                  commPtr_Type&             comm );
+
+    //! Constructor for the class without the definition of the boundary handler.
 
     /*!
-      Constructor for the class without the definition of the boundary handler.
       @param dataFile Data for the problem.
       @param primal_FESpace Primal finite element space.
       @param dual_FESpace Dual finite element space.
@@ -297,178 +308,26 @@ public:
       @param VdotN_FESpace Dual basis function dot outward unit normal at each face (3D) or edge (2D) finite element space.
       @param comm Shared pointer of the Epetra communicator.
     */
-    DarcySolver ( const data_type&          dataFile,
+    DarcySolver ( const data_Type&          dataFile,
                   FESpace<Mesh, EpetraMap>& primal_FESpace,
                   FESpace<Mesh, EpetraMap>& dual_FESpace,
                   FESpace<Mesh, EpetraMap>& hybrid_FESpace,
                   FESpace<Mesh, EpetraMap>& VdotN_FESpace,
-                  comm_ptrtype&             comm );
+                  commPtr_Type&             comm );
 
     //! Virtual destructor.
     virtual ~DarcySolver ();
 
     //@}
 
-    // Update & set methos.
-    //! @name Update & set methos
-    //@{
-
-    /*!
-      Set up the linear solver and the preconditioner for the linear system.
-    */
-    virtual void setup ();
-
-    /*!
-      Set the boundary conditions.
-      @param bcHandler Boundary condition handler for the problem.
-    */
-    inline void setBC ( bchandler_raw_type& bcHandler )
-    {
-        M_BCh   = &bcHandler;
-        M_setBC = true;
-    }
-
-    /*!
-      Set the source term, the default setted source term is the zero function.
-      @param source Source term for the problem.
-    */
-    inline void setSourceTerm ( const Function& source )
-    {
-        M_source = source;
-    }
-
-    /*!
-      Set the inverse of diffusion tensor, the default setted inverse of permeability is the identity matrix.
-      @param invPerm Inverse of the permeability tensor for the problem.
-    */
-    inline void setInversePermeability ( const permeability_type& invPerm )
-    {
-        M_inversePermeability.reset ( new permeability_type( invPerm ) );
-    }
-
-    /*!
-      Set the hybrid solution vector.
-      @param hybrid Constant vector_ptrtype reference of the hybrid vector.
-     */
-    inline void setHybridSolution ( const vector_ptrtype& hybrid  )
-    {
-        M_hybrid = hybrid;
-    }
-
-    /*!
-      Set the primal solution vector.
-      @param primal Constant vector_type reference of the primal solution.
-    */
-    inline void setPrimalSolution ( const vector_ptrtype& primal )
-    {
-        M_primal = primal;
-    }
-
-    /*!
-      Set the dual solution vector.
-      @param dual Constant vector_ptrtype reference of the dual solution.
-    */
-    inline void setDualSolution ( const vector_ptrtype& dual )
-    {
-        M_dual = dual;
-    }
-
-    //@}
-
-    // Get methods.
-    //! @name Get methods
-    //@{
-
-    /*!
-      Returns the pointer of the hybrid solution vector.
-      @return Constant vector_ptrtype reference of the hybrid vector.
-     */
-    inline const vector_ptrtype& hybridSolution () const
-    {
-        return M_hybrid;
-    }
-
-    /*!
-      Returns the pointer of the primal solution vector.
-      @return Constant vector_type reference of the primal solution.
-    */
-    inline const vector_ptrtype& primalSolution () const
-    {
-        return M_primal;
-    }
-
-    /*!
-      Returns the pointer of the dual solution vector.
-      @return Constant vector_ptrtype reference of the dual solution.
-    */
-    inline const vector_ptrtype& dualSolution () const
-    {
-        return M_dual;
-    }
-
-    /*!
-      Returns the pointer of the residual vector.
-      @return Constant vector_ptrtype reference of the residual.
-    */
-    inline const vector_ptrtype& residual () const
-    {
-        return M_residual;
-    }
-
-    /*!
-      Return if the bounday conditions is setted or not.
-      @return Constant boolean with value true if the boundary condition is setted,
-      false otherwise
-    */
-    inline const bool BCset () const
-    {
-        return M_setBC;
-    }
-
-    /*!
-      Return the boundary conditions handler.
-      @return Reference of boundary conditions handler.
-    */
-    inline bchandler_type& bcHandler ()
-    {
-        return M_BCh;
-    }
-
-    /*!
-      Return the Epetra local map.
-      @return Constant EpetraMap reference of the problem.
-    */
-    inline EpetraMap const& getMap () const
-    {
-        return M_localMap;
-    }
-
-    /*!
-      Return the Epetra communicator.
-      @return Constant reference of the shared pointer of the communicator of the problem.
-    */
-    inline comm_ptrtype const & comm () const
-    {
-        return M_displayer.comm();
-    }
-
-    /*!
-      Return the displayer.
-      @return Constant reference of the displayer of the problem.
-    */
-    inline Displayer const & getDisplayer() const
-    {
-        return M_displayer;
-    }
-
-    //@}
-
-    // Solve functions.
-    //! @name Solve functions
+    //! @name Methods
     //@{
 
     //! Build the global hybrid system, the right hand and apply the boundary conditions.
     void buildSystem ();
+
+    //! Set up the linear solver and the preconditioner for the linear system.
+    virtual void setup ();
 
     //! Solve the global hybrid system.
     void solve ();
@@ -478,23 +337,168 @@ public:
 
     //@}
 
-protected:
+    //! @name Set Methods
+    //@{
 
+    //! Set the boundary conditions.
     /*!
-      Return the number of total degrees of freem of the problem.
-      @return The number of total degrees of freedom as a constant UInt.
+      @param bcHandler Boundary condition handler for the problem.
     */
-    inline const UInt dim () const
+    void setBC ( bchandler_raw_Type& bcHandler )
     {
-        return M_hybrid_FESpace.dim();
+        M_BCh   = &bcHandler;
+        M_setBC = true;
+    }
+
+    //! Set source term
+    /*!
+      Set the source term, the default source term is the zero function.
+      @param source Source term for the problem.
+    */
+    void setSourceTerm ( const Function& source )
+    {
+        M_source = source;
+    }
+
+    //! Set inverse diffusion tensor
+    /*!
+      Set the inverse of diffusion tensor, the default inverse of permeability is the identity matrix.
+      @param invPerm Inverse of the permeability tensor for the problem.
+    */
+    void setInversePermeability ( const permeability_Type& invPerm )
+    {
+        M_inversePermeability.reset ( new permeability_Type( invPerm ) );
+    }
+
+    //! Set the hybrid solution vector.
+    /*!
+      @param hybrid Constant vectorPtr_Type reference of the hybrid vector.
+     */
+    void setHybridSolution ( const vectorPtr_Type& hybrid  )
+    {
+        M_hybrid = hybrid;
+    }
+
+    //! Set the primal solution vector.
+    /*!
+      @param primal Constant vector_Type reference of the primal solution.
+    */
+    void setPrimalSolution ( const vectorPtr_Type& primal )
+    {
+        M_primal = primal;
+    }
+
+    //! Set the dual solution vector.
+    /*!
+      @param dual Constant vectorPtr_Type reference of the dual solution.
+    */
+    void setDualSolution ( const vectorPtr_Type& dual )
+    {
+        M_dual = dual;
+    }
+
+    //@}
+
+    //! @name Get Methods
+    //@{
+
+    //! Returns pointer to the hybrid solution vector.
+    /*!
+      @return Constant vectorPtr_Type reference of the hybrid vector.
+     */
+    const vectorPtr_Type& hybridSolution () const
+    {
+        return M_hybrid;
+    }
+
+    //! Returns pointer to the primal solution vector.
+    /*!
+      @return Constant vector_Type reference of the primal solution.
+    */
+    const vectorPtr_Type& primalSolution () const
+    {
+        return M_primal;
+    }
+
+    //! Returns pointer to the dual solution vector.
+    /*!
+      @return Constant vectorPtr_Type reference of the dual solution.
+    */
+    const vectorPtr_Type& dualSolution () const
+    {
+        return M_dual;
     }
 
     /*!
-      Apply the boundary condition to the hybrid global matrix and
-      to the hybrid global right hand side.
+      Returns the pointer of the residual vector.
+      @return Constant vectorPtr_Type reference of the residual.
     */
-    void applyBoundaryConditions ();
+    const vectorPtr_Type& residual () const
+    {
+        return M_residual;
+    }
 
+    //! Returns whether bounday conditions is set
+    /*!
+      @return Constant boolean with value true if the boundary condition is setted,
+      false otherwise
+    */
+    bool BCset () const
+    {
+        return M_setBC;
+    }
+
+    //! Returns boundary conditions handler.
+    /*!
+      @return Reference of boundary conditions handler.
+    */
+    bchandler_Type& bcHandler ()
+    {
+        return M_BCh;
+    }
+
+    //! Returns Epetra local map.
+    /*!
+      @return Constant EpetraMap reference of the problem.
+    */
+    EpetraMap const& getMap () const
+    {
+        return M_localMap;
+    }
+
+    //! Returns Epetra communicator.
+    /*!
+      @return Constant reference of the shared pointer of the communicator of the problem.
+    */
+    commPtr_Type const & getComm () const
+    {
+        return M_displayer.comm();
+    }
+
+    //! Returns displayer.
+    /*!
+      @return Constant reference of the displayer of the problem.
+    */
+    Displayer const & getDisplayer() const
+    {
+        return M_displayer;
+    }
+
+    //@}
+
+protected:
+
+    //! @name Protected Methods
+    //@{
+
+    //! Pre-computes local (element independant) matrices 
+    /*!
+      Compute all the local matrices that are independant
+      from the geometrical element.
+    */
+    virtual void computeConstantMatrices ();
+
+    //! Computes local (element dependent) matrices 
     /*!
       Locally update the current finite element for the primal
       and dual finite element space, then compute the Hdiv mass
@@ -503,14 +507,9 @@ protected:
     */
     virtual void localElementComputation ( const UInt & iElem );
 
+    //! Performs static condensation
     /*!
-      Compute all the local matrices that are inipendent
-      from the geometrical element.
-    */
-    virtual void computeConstantMatrices ();
-
-    /*!
-      Perform the static condensation of the problem, i.e. create the local
+      Locally eliminate pressure and velocity DOFs, create the local
       hybrid matrix and local hybrid right hand side.
     */
     virtual void staticCondensation ();
@@ -518,6 +517,7 @@ protected:
     //! Compute locally, as a post process, the primal and dual variable.
     virtual void localComputePrimalAndDual ();
 
+    //! Update all problem variables
     /*!
       Update all the variables of the problem before the construction of
       the global hybrid matrix, e.g. reset the global hybrid matrix.
@@ -526,18 +526,25 @@ protected:
     */
     virtual void updateVariables ();
 
+    //! Apply the boundary condition 
+    /* Apply BC to the hybrid global matrix and to the hybrid global right hand side.
+    */
+    void applyBoundaryConditions ();
+
+    //! Make matrix symmetric
     /*!
       Transform a symmetric matrix that is stored only in the lower or upper
       triangular part in a full symmetric matrix.
       @param UPLO Character that indicate if A is in the upper triangular part
       using flag 'U' or in the lower triangular part using flag 'L'.
       @param N The size of the matrix A.
-      @param A The matrix to be reorder.
+      @param A The matrix to be reordered.
     */
     template<typename matrix>
     void symmetrizeMatrix ( char* UPLO, int* N, matrix& A  );
 
-    // Parallel stuff.
+    //@}
+
     //! @name Parallel stuff
     //@{
 
@@ -557,16 +564,16 @@ protected:
     //@{
 
     //! Data for Darcy solvers.
-    const data_type&     M_data;
+    const data_Type&     M_data;
 
     //! Source function.
     Function             M_source;
 
     //! Permeability tensor.
-    permeability_ptrtype M_inversePermeability;
+    permeabilityPtr_Type M_inversePermeability;
 
     //! Bondary conditions handler.
-    bchandler_raw_type*  M_BCh;
+    bchandler_raw_Type*  M_BCh;
 
     //! Flag if the boundary conditions are setted or not.
     bool                 M_setBC;
@@ -596,25 +603,25 @@ protected:
     //@{
 
     //! Hybrid matrix.
-    matrix_ptrtype                          M_matrHybrid;
+    matrixPtr_Type                          M_matrHybrid;
 
     //! Right hand side.
-    vector_ptrtype                          M_rhs;
+    vectorPtr_Type                          M_rhs;
 
     //! Primal solution.
-    vector_ptrtype                          M_primal;
+    vectorPtr_Type                          M_primal;
 
     //! Dual solution.
-    vector_ptrtype                          M_dual;
+    vectorPtr_Type                          M_dual;
 
     //! Hybrid solution.
-    vector_ptrtype                          M_hybrid;
+    vectorPtr_Type                          M_hybrid;
 
     //! Residual.
-    vector_ptrtype                          M_residual;
+    vectorPtr_Type                          M_residual;
 
     //! Linear solver.
-    SolverType                              M_linearSolver;
+    solver_Type                              M_linearSolver;
 
     //! Epetra preconditioner for the linear system.
     boost::shared_ptr<EpetraPreconditioner> M_prec;
@@ -670,16 +677,20 @@ protected:
 // IMPLEMENTATION
 //
 
+// ====================================================================================================
+// Constructors and destructors
+// ====================================================================================================
+
 // Complete constructor.
 template<typename Mesh, typename SolverType>
 DarcySolver<Mesh, SolverType>::
-DarcySolver ( const data_type&           dataFile,
+DarcySolver ( const data_Type&           dataFile,
               FESpace<Mesh, EpetraMap>&  primal_FESpace,
               FESpace<Mesh, EpetraMap>&  dual_FESpace,
               FESpace<Mesh, EpetraMap>&  hybrid_FESpace,
               FESpace<Mesh, EpetraMap>&  VdotN_FESpace,
-              bchandler_raw_type&        bcHandler,
-              comm_ptrtype&              comm ):
+              bchandler_raw_Type&        bcHandler,
+              commPtr_Type&              comm ):
         // Parallel stuff.
         M_me                     ( comm->MyPID() ),
         M_localMap               ( hybrid_FESpace.map() ),
@@ -695,12 +706,12 @@ DarcySolver ( const data_type&           dataFile,
         M_hybrid_FESpace         ( hybrid_FESpace ),
         M_VdotN_FESpace          ( VdotN_FESpace ),
         // Algebraic stuff.
-        M_matrHybrid             ( new matrix_type ( M_localMap ) ),
-        M_rhs                    ( new vector_type ( M_localMap ) ),
-        M_primal    			 ( new vector_type ( M_primal_FESpace.map() ) ),
-        M_dual					 ( new vector_type ( M_dual_FESpace.map(), Repeated ) ),
-        M_hybrid                 ( new vector_type ( M_hybrid_FESpace.map() ) ),
-        M_residual               ( new vector_type ( M_localMap ) ),
+        M_matrHybrid             ( new matrix_Type ( M_localMap ) ),
+        M_rhs                    ( new vector_Type ( M_localMap ) ),
+        M_primal    		 ( new vector_Type ( M_primal_FESpace.map() ) ),
+        M_dual			 ( new vector_Type ( M_dual_FESpace.map(), Repeated ) ),
+        M_hybrid                 ( new vector_Type ( M_hybrid_FESpace.map() ) ),
+        M_residual               ( new vector_Type ( M_localMap ) ),
         M_linearSolver           ( ),
         M_prec                   ( ),
         // Elementary matrices and vectors used for the static condensation.
@@ -715,20 +726,18 @@ DarcySolver ( const data_type&           dataFile,
         M_BtC                    ( M_primal_FESpace.refFE().nbDof(), M_hybrid_FESpace.refFE().nbDof() )
 {
 
-    CONSTRUCTOR( "DarcySolver" );
-
 } // Constructor
 
 
 // Constructor without boundary condition handler.
 template<typename Mesh, typename SolverType>
 DarcySolver<Mesh, SolverType>::
-DarcySolver ( const data_type&           dataFile,
+DarcySolver ( const data_Type&           dataFile,
               FESpace<Mesh, EpetraMap>&  primal_FESpace,
               FESpace<Mesh, EpetraMap>&  dual_FESpace,
               FESpace<Mesh, EpetraMap>&  hybrid_FESpace,
               FESpace<Mesh, EpetraMap>&  VdotN_FESpace,
-              comm_ptrtype&              comm ):
+              commPtr_Type&              comm ):
         // Parallel stuff.
         M_me                     ( comm->MyPID() ),
         M_localMap               ( hybrid_FESpace.map() ),
@@ -743,12 +752,12 @@ DarcySolver ( const data_type&           dataFile,
         M_hybrid_FESpace         ( hybrid_FESpace ),
         M_VdotN_FESpace          ( VdotN_FESpace ),
         // Algebraic stuff.
-        M_matrHybrid             ( new matrix_type ( M_localMap ) ),
-        M_rhs                    ( new vector_type ( M_localMap ) ),
-        M_primal    			 ( new vector_type ( M_primal_FESpace.map() ) ),
-        M_dual					 ( new vector_type ( M_dual_FESpace.map(), Repeated ) ),
-        M_hybrid                 ( new vector_type ( M_hybrid_FESpace.map() ) ),
-        M_residual               ( new vector_type ( M_localMap ) ),
+        M_matrHybrid             ( new matrix_Type ( M_localMap ) ),
+        M_rhs                    ( new vector_Type ( M_localMap ) ),
+        M_primal    		 ( new vector_Type ( M_primal_FESpace.map() ) ),
+        M_dual			 ( new vector_Type ( M_dual_FESpace.map(), Repeated ) ),
+        M_hybrid                 ( new vector_Type ( M_hybrid_FESpace.map() ) ),
+        M_residual               ( new vector_Type ( M_localMap ) ),
         M_linearSolver           ( ),
         M_prec                   ( ),
         // Local matrices and vectors.
@@ -763,8 +772,6 @@ DarcySolver ( const data_type&           dataFile,
         M_BtC                    ( M_primal_FESpace.refFE().nbDof(), M_hybrid_FESpace.refFE().nbDof() )
 {
 
-    CONSTRUCTOR( "DarcySolver" );
-
 } // Constructor
 
 // Virtual destructor.
@@ -773,291 +780,11 @@ DarcySolver<Mesh, SolverType>::
 ~DarcySolver ( void )
 {
 
-    DESTRUCTOR( "DarcySolver" );
-
 } // Destructor
 
-// Set up the linear solver and the preconditioner.
-template<typename Mesh, typename SolverType>
-void
-DarcySolver<Mesh, SolverType>::
-setup ()
-{
-
-    GetPot dataFile( *(M_data.dataFile()) );
-
-    // Set up data for the linear solver and the preconditioner.
-    M_linearSolver.setDataFromGetPot( dataFile, "darcy/solver" );
-    M_linearSolver.setUpPrec( dataFile, "darcy/prec" );
-
-    // Choose the preconditioner type.
-    std::string precType = dataFile( "darcy/prec/prectype", "Ifpack");
-
-    // Create a preconditioner object.
-    M_prec.reset( PRECFactory::instance().createObject( precType ) );
-    ASSERT( M_prec.get() != 0, "DarcySolver : Preconditioner not set" );
-
-} // setup
-
-// Reorder a non full stored symmetric matrix.
-template<typename Mesh, typename SolverType>
-template<typename matrix>
-void
-DarcySolver<Mesh, SolverType>::
-symmetrizeMatrix ( char* UPLO, int* N, matrix& A  )
-{
-
-    // If the matrix is stored in the lower part
-    if ( UPLO[0] == 'L')
-    {
-        for (UInt i(0); i < static_cast<UInt>(N[0]); ++i)
-        {
-            for (UInt j(i + 1); j < static_cast<UInt>(N[0]); ++j)
-            {
-                A(i, j) = A(j, i);
-            }
-        }
-    }
-    // If the matrix is stored in the upper part
-    else
-    {
-        for (UInt i(0); i < static_cast<UInt>(N[0]); ++i)
-        {
-            for (UInt j(i + 1); j < static_cast<UInt>(N[0]); ++j)
-            {
-                A(j, i) = A(i, j);
-            }
-        }
-    }
-
-} //symmetrizeMatrix
-
-// Compute all the constant matrices.
-template <typename Mesh, typename SolverType>
-void
-DarcySolver<Mesh, SolverType>::
-computeConstantMatrices ()
-{
-
-    /* Update the divergence matrix, it is independant of the current element
-       thanks to the Piola transform. */
-    grad_Hdiv( static_cast<Real>(1.),
-               M_elmatMix,
-               M_dual_FESpace.fe(),
-               M_primal_FESpace.fe(), 0, 1 );
-
-    /* Update the boundary matrix, it is independant of the current element
-       thanks to the Piola transform.
-       Here we use the fact that a RefHybridFE "IS A" RefFE and the method refFE of
-       a FESpace object. In fact the method refFE return a const RefFE&, but the function
-       TP_VdotN_Hdiv takes two const RefHybridFE& so we must cast a const RefFE&
-       to a const RefHybridFE&. The cast of type is static and uses pointers. */
-    TP_VdotN_Hdiv( static_cast<Real>(1.),
-                   M_elmatMix,
-                   *static_cast<const RefFEHybrid*>(&M_hybrid_FESpace.refFE()),
-                   *static_cast<const RefFEHybrid*>(&M_VdotN_FESpace.refFE()),
-                   0, 2 );
-
-} // computeConstantMatrices
-
-// Update the primal and dual variable at the current element and compute the element Hdiv mass matrix.
-template <typename Mesh, typename SolverType>
-void
-DarcySolver<Mesh, SolverType>::
-localElementComputation ( const UInt & iElem )
-{
-
-    // Update the current element of ID iElem only for the dual variable.
-    M_dual_FESpace.fe().update( M_primal_FESpace.mesh()->element( iElem ),
-                                UPDATE_PHI_VECT | UPDATE_WDET );
-
-    /* Update the current element of ID iElem only for the primal variable,
-       it is used for computing the source term. */
-    M_primal_FESpace.fe().update( M_primal_FESpace.mesh()->element( iElem ),
-                                  UPDATE_QUAD_NODES | UPDATE_WDET );
-
-    /* Modify the (0,0) block (A) of the matrix M_elmatMix. The blocks (0,1) (B)
-       and (0,2) (C) are independent of the element and have already been computed. */
-
-    // Only one block is set to zero since the other ones are not recomputed.
-    M_elmatMix.block(0, 0) = static_cast<Real>( 0 );
-
-    // Get the coordinate of the barycenter of the current element of ID iElem.
-    Real xg(0), yg(0), zg(0);
-    M_primal_FESpace.fe().barycenter( xg, yg, zg );
-
-    /* Compute the Hdiv mass matrix. We pass the time at the inverse of the permeability
-       because the DarcySolverTransient needs the pemeability time dependent. In this case
-       we do not have a time evolution. */
-    mass_Hdiv( (*M_inversePermeability)( M_data.dataTime()->getTime(), xg, yg, zg, iElem ),
-               M_elmatMix,
-               M_dual_FESpace.fe(), 0, 0 );
-
-} // localElementComputation
-
-// Perform the static condensation for the local hybrid matrix.
-template <typename Mesh, typename SolverType>
-void
-DarcySolver<Mesh, SolverType>::
-staticCondensation ()
-{
-
-    // Flags for the BLAS and LAPACK routine.
-
-    int INFO[1]         = {0};
-    // Number of columns of the right hand side := 1.
-    int NBRHS[1]        = {1};
-    // Primal variable degrees of freedom.
-    int NBP[1]          = { M_primal_FESpace.refFE().nbDof() };
-    // Dual variable degrees of freedom.
-    int NBU[1]          = { M_dual_FESpace.refFE().nbDof() };
-    // Hybrid variable degree of freedom.
-    int NBL[1]          = { M_hybrid_FESpace.refFE().nbDof() };
-
-    double ONE_[1]      = {1.0};
-    double MINUSONE_[1] = {-1.0};
-    double ZERO_[1]     = {0.0};
-
-    // Parameter that indicate the Lower storage of matrices.
-    char _param_L[1]    = {'L'};
-    //
-    char _param_N[1]    = {'N'};
-    // Paramater that indicate the Transpose of matrices.
-    char _param_T[1]    = {'T'};
-
-
-    // Create and assign the local matrices A, B and C.
-    ElemMat::matrix_type A = M_elmatMix.block( 0, 0 );
-    ElemMat::matrix_type B = M_elmatMix.block( 0, 1 );
-    ElemMat::matrix_type C = M_elmatMix.block( 0, 2 );
-
-    //.................................
-    //        MATRIX OPERATIONS
-    //.................................
-
-    /* Put in A the matrix L and L^T, where L and L^T is the Cholesky factorization of A.
-       For more details see http://www.netlib.org/lapack/double/dpotrf.f */
-    dpotrf_( _param_L, NBU, A, NBU, INFO );
-    ASSERT_PRE( !INFO[0], "Lapack factorization of A is not achieved." );
-
-    /* Put in B the matrix L^{-1} * B, solving a triangular system.
-       For more details see http://www.netlib.org/lapack/lapack-3.1.1/SRC/dtrtrs.f */
-    dtrtrs_( _param_L, _param_N, _param_N, NBU, NBP, A, NBU, B, NBU, INFO );
-    ASSERT_PRE( !INFO[0], "Lapack Computation B = L^{-1} B  is not achieved." );
-
-    /* Put in C the matrix L^{-1} * C, solving a triangular system.
-       For more details see http://www.netlib.org/lapack/lapack-3.1.1/SRC/dtrtrs.f */
-    dtrtrs_( _param_L, _param_N, _param_N, NBU, NBL, A, NBU, C, NBL, INFO );
-    ASSERT_PRE( !INFO[0], "Lapack Computation C = L^{-1} C  is not achieved." );
-
-    /* Put in M_BtB the matrix  B^T * L^{-T} * L^{-1} * B = B^T * A^{-1} * B
-       M_BtB stored only on lower part.
-       For more details see http://www.netlib.org/slatec/lin/dsyrk.f */
-    dsyrk_( _param_L, _param_T, NBP, NBU, ONE_, B, NBU, ZERO_, M_BtB, NBP );
-
-    /* Put in M_CtC the matrix C^T * L^{-T} * L^{-1} * C = C^T * A^{-1} * C
-       M_CtC stored only on lower part.
-       For more details see http://www.netlib.org/slatec/lin/dsyrk.f  */
-    dsyrk_( _param_L, _param_T, NBL, NBU, ONE_, C, NBU, ZERO_, M_CtC, NBL );
-
-    /* Put in M_BtC the matrix B^T * L^{-T} * L^{-1} * C = B^T * A^{-1} * C
-       M_BtC fully stored.
-       For more details see http://www.netlib.org/blas/dgemm.f */
-    dgemm_( _param_T, _param_N, NBP, NBL, NBU, ONE_, B, NBU, C, NBU, ZERO_, M_BtC, NBP );
-
-    /* Put in M_BtB the matrix LB and LB^T where LB and LB^T is the cholesky
-       factorization of B^T * A^{-1} * B.
-       For more details see http://www.netlib.org/lapack/double/dpotrf.f  */
-    dpotrf_( _param_L, NBP, M_BtB , NBP, INFO );
-    ASSERT_PRE( !INFO[0],"Lapack factorization of BtB is not achieved." );
-
-    /* Put in M_BtC the matrix LB^{-1} * M_BtC = LB^{-1} * B^T * A^{-1} * C.
-       For more details see http://www.netlib.org/lapack/lapack-3.1.1/SRC/dtrtrs.f */
-    dtrtrs_( _param_L, _param_N, _param_N, NBP, NBL, M_BtB, NBP, M_BtC, NBP, INFO );
-    ASSERT_PRE( !INFO[0], "Lapack Computation BtC = LB^{-1} BtC is not achieved." );
-
-    /* Put in M_CtC the matrix -M_CtC + M_BtC^T * M_BtC
-       Result stored only on lower part, the matrix M_CtC stores
-       M_CtC = -C^T * A^{-1} * C + C^T * A^{-t} * B * ( B^T * A^{-1} * B)^{-1} * B^T * A^{-1} * C.
-       For more details see http://www.netlib.org/slatec/lin/dsyrk.f  */
-    dsyrk_( _param_L, _param_T, NBL, NBP, ONE_, M_BtC, NBP, MINUSONE_, M_CtC, NBL );
-
-    //...................................
-    //      END OF MATRIX OPERATIONS
-    //...................................
-
-    /* Sum up of the previews steps
-       A stores L and L^T where L and L^T is the Cholesky factorization of A
-       B stores L^{-1} * B
-       C stores L^{-1} * C
-       B^T stores LB and LB^T where LB and LB^T is the factorization of B^T * A^{-1} * B
-       M_BtC stores LB^{-1} * B^T * A^{-1} * C
-       M_CtC stores -C^T * A^{-1} * C + C^T * A^{-t} * B * (B^T * A^{-1} * B)^{-1} * B^T * A^{-1} * C */
-
-    //..........................
-    //     VECTOR OPERATIONS
-    //..........................
-
-    // Clear some vectors.
-    M_elvecSource.zero();
-    M_elvecHyb.zero();
-
-    // Compute the right hand side.
-    source( M_source,
-            M_elvecSource,
-            M_primal_FESpace.fe(),
-            static_cast<Real>(0), 0 );
-
-    /* Put in M_elvecSource the vector LB^{-1} * M_elvecSource = LB^{-1} F
-       For more details see http://www.netlib.org/lapack/lapack-3.1.1/SRC/dtrtrs.f */
-    dtrtrs_( _param_L, _param_N, _param_N, NBP, NBRHS, M_BtB, NBP, M_elvecSource, NBP, INFO);
-    ASSERT_PRE( !INFO[0], "Lapack Computation M_elvecSource = LB^{-1} rhs is not achieved." );
-
-    /* Put in M_elvecHyb the vector M_BtC^T * M_elvecSource = C^T * A^{-1} * B^T * (B^T * A^{-1} * B)^{-1} * F
-       M_elvecHyb is fully stored.
-       For more details see http://www.netlib.org/blas/dgemm.f */
-    dgemm_( _param_T, _param_N, NBL, NBRHS, NBP, ONE_, M_BtC, NBP, M_elvecSource, NBP, ZERO_, M_elvecHyb, NBL );
-
-    //........................
-    // END OF VECTOR OPERATIONS.
-    //........................
-
-    /* Previously the matrix M_CtC is stored only in the lower part, but at the moment there is not
-       a function assembleMatrix that store a lower triangular sparse matrix.
-       Remind to correct these line in the future. */
-    symmetrizeMatrix( _param_L, NBL, M_CtC );
-
-    // Update the hybrid element matrix.
-    M_elmatHyb.block(0,0) = M_CtC;
-
-} // staticCondensation
-
-// Update all the variables of the problem.
-template<typename Mesh, typename SolverType>
-void
-DarcySolver<Mesh, SolverType>::
-updateVariables ()
-{
-
-    // Reset the global hybrid matrix.
-    M_matrHybrid.reset( new matrix_type( M_localMap ) );
-
-    // Reset the global right hand side vector
-    M_rhs.reset( new vector_type( M_localMap ) );
-
-    // Reset the global primal vector
-    M_primal.reset( new vector_type( M_primal_FESpace.map() ) );
-
-    // Reset the global dual vector
-    M_dual.reset( new vector_type( M_dual_FESpace.map(), Repeated ) );
-
-    // Reset the global hybrid vector
-    M_hybrid.reset( new vector_type( M_hybrid_FESpace.map() ) );
-
-    // Reset the global residual vector
-    M_residual.reset( new vector_type( M_localMap ) );
-
-} // updateVariables
+// ===========================================================================================
+// Public methods
+// ==========================================================================================
 
 // Build the global hybrid matrix and global hybrid right hand side, with boundary conditions.
 template<typename Mesh, typename SolverType>
@@ -1174,54 +901,27 @@ buildSystem ()
 
 } // buildSystem
 
-// Apply the boundary conditions to the global hybrid matrix and the global hybrid right hand side.
+// Set up the linear solver and the preconditioner.
 template<typename Mesh, typename SolverType>
 void
 DarcySolver<Mesh, SolverType>::
-applyBoundaryConditions ()
+setup ()
 {
-    // Chrono.
-    Chrono chronoBC;
 
-    // Check if the boundary conditions were updated.
-    if ( !M_BCh->bdUpdateDone() )
-    {
+    GetPot dataFile( *(M_data.dataFile()) );
 
-        M_displayer.leaderPrint( "                 Updating the BC               ...          ");
-        chronoBC.start();
+    // Set up data for the linear solver and the preconditioner.
+    M_linearSolver.setDataFromGetPot( dataFile, "darcy/solver" );
+    M_linearSolver.setUpPrec( dataFile, "darcy/prec" );
 
-        // Update the boundary conditions handler. We use the finite element of the boundary of the dual variable.
-        M_BCh->bdUpdate( *M_dual_FESpace.mesh(),
-                         M_dual_FESpace.feBd(),
-                         M_dual_FESpace.dof() );
+    // Choose the preconditioner type.
+    std::string precType = dataFile( "darcy/prec/prectype", "Ifpack");
 
-        chronoBC.stop();
-        M_displayer.leaderPrintMax( "done in " , chronoBC.diff() );
-    }
+    // Create a preconditioner object.
+    M_prec.reset( PRECFactory::instance().createObject( precType ) );
+    ASSERT( M_prec.get() != 0, "DarcySolver : Preconditioner not set" );
 
-    // Ignoring non-local entries, otherwise they are summed up lately.
-    vector_type rhsFull( *M_rhs, Unique );
-
-    M_displayer.leaderPrint( "                 Managing the BC               ...          ");
-    chronoBC.start();
-
-    /* Update the global hybrid matrix and the global hybrid right hand side with the boundary conditions.
-       It takes care of the current time for DarcySolverTransient derived class. */
-    bcManage( *M_matrHybrid,
-              rhsFull,
-              *M_dual_FESpace.mesh(),
-              M_dual_FESpace.dof(),
-              *M_BCh,
-              M_dual_FESpace.feBd(), 1.,
-              M_data.dataTime()->getTime() );
-
-    chronoBC.stop();
-    M_displayer.leaderPrintMax( "done in " , chronoBC.diff() );
-
-    // Save the global hybrid right hand side.
-    *M_rhs = rhsFull;
-
-} // applyBoundaryConditions
+} // setup
 
 // Solve the linear system.
 template<typename Mesh, typename SolverType>
@@ -1239,154 +939,6 @@ solve ()
     M_displayer.leaderPrint( "                 Number of iterations  ", numIter, "\n" );
 
 } // solve
-
-// Locally compute the primal and dual variable.
-template<typename Mesh, typename SolverType>
-void
-DarcySolver<Mesh, SolverType>::
-localComputePrimalAndDual ()
-{
-
-    // Flags for the BLAS and LAPACK routine.
-
-    int INFO[1]         = {0};
-    // Numbers of columns of the right hand side := 1.
-    int NBRHS[1]        = {1};
-    // Increment := 1.
-    int INC1[1]         = {1};
-    // Primal variable degrees of freedom.
-    int NBP[1]          = { M_primal_FESpace.refFE().nbDof() };
-    // Dual variable degrees of freedom.
-    int NBU[1]          = { M_dual_FESpace.refFE().nbDof() };
-    // Hybrid variable degree of freedom.
-    int NBL[1]          = { M_hybrid_FESpace.refFE().nbDof() };
-
-    double ONE_[1]      = {1.0};
-    double MINUSONE_[1] = {-1.0};
-    double ZERO_[1]     = {0.0};
-
-    // Parameter that indicate the Lower storage of matrices.
-    char _param_L[1]    = {'L'};
-    //
-    char _param_N[1]    = {'N'};
-    // Paramater that indicate the Transpose of matrices.
-    char _param_T[1]    = {'T'};
-
-    // No need for CtC in this part, and last dsyrk, the only differences.
-    ElemMat::matrix_type A = M_elmatMix.block( 0, 0 );
-    ElemMat::matrix_type B = M_elmatMix.block( 0, 1 );
-    ElemMat::matrix_type C = M_elmatMix.block( 0, 2 );
-
-    //........................
-    //    MATRIX OPERATIONS
-    //........................
-
-    /* Put in A the matrix L and L^T, where L and L^T is the Cholesky factorization of A.
-       For more details see http://www.netlib.org/lapack/double/dpotrf.f */
-    dpotrf_( _param_L, NBU, A , NBU , INFO );
-    ASSERT_PRE( !INFO[0], "Lapack factorization of A is not achieved." );
-
-    /* Put in B the matrix L^{-1} * B, solving a triangular system.
-       For more details see http://www.netlib.org/lapack/lapack-3.1.1/SRC/dtrtrs.f */
-    dtrtrs_( _param_L, _param_N, _param_N, NBU, NBP, A, NBU, B, NBU, INFO );
-    ASSERT_PRE( !INFO[0], "Lapack Computation B = L^{-1} B  is not achieved." );
-
-    /* Put in C the matrix L^{-1} * C, solving a triangular system.
-       For more details see http://www.netlib.org/lapack/lapack-3.1.1/SRC/dtrtrs.f */
-    dtrtrs_( _param_L, _param_N, _param_N, NBU, NBL, A, NBU, C, NBU, INFO );
-    ASSERT_PRE( !INFO[0], "Lapack Computation C = L^{-1} C  is not achieved." );
-
-    /* Put in M_BtB the matrix  B^T * L^{-T} * L^{-1} * B = B^T * A^{-1} * B
-       M_BtB stored only on lower part.
-       For more details see http://www.netlib.org/slatec/lin/dsyrk.f */
-    dsyrk_( _param_L, _param_T, NBP, NBU, ONE_, B, NBU, ZERO_, M_BtB, NBP );
-
-    /* Put in M_BtC the matrix B^T * L^{-T} * L^{-1} * C = B^T * A^{-1} * C
-       M_BtC fully stored.
-       For more details see http://www.netlib.org/blas/dgemm.f */
-    dgemm_( _param_T, _param_N, NBP, NBL, NBU, ONE_, B, NBU, C, NBU, ZERO_, M_BtC, NBP );
-
-    /* Put in M_BtB the matrix LB and LB^T where LB and LB^T is the cholesky
-       factorization of B^T * A^{-1} * B.
-       For more details see http://www.netlib.org/lapack/double/dpotrf.f */
-    dpotrf_( _param_L, NBP, M_BtB , NBP, INFO );
-    ASSERT_PRE( !INFO[0], "Lapack factorization of BtB is not achieved." );
-
-    /* Put in M_BtC the matrix LB^{-1} * M_BtC = LB^{-1} * B^T * A^{-1} * C.
-       For more details see http://www.netlib.org/lapack/lapack-3.1.1/SRC/dtrtrs.f */
-    dtrtrs_( _param_L, _param_N, _param_N, NBP, NBL, M_BtB, NBP, M_BtC, NBP, INFO );
-    ASSERT_PRE( !INFO[0], "Lapack Computation BtC = LB^{-1} BtC is not achieved." );
-
-    //..............................
-    //   END OF MATRIX OPERATIONS
-    //..............................
-
-    /* Sum up of the previews steps
-       A stores L and L^T where L and L^T is the Cholesky factorization of A
-       B stores L^{-1} * B
-       C stores L^{-1} * C
-       M_BtB stores LB and LB^T where LB and LB^T is the factorization of B^T * A^{-1} * B
-       M_BtC stores LB^{-1} * B^T * A^{-1} * C */
-
-
-    //......................
-    //    VECTOR OPERATIONS (Computation of Pressure and Velocities)
-    //......................
-
-    //...................................
-    //  1) Computation of the PRESSURE
-    //...................................
-
-    // Clear the source vector.
-    M_elvecSource.zero();
-
-    // The source term is computed with a test function in the primal variable space.
-    source( M_source,
-            M_elvecSource,
-            M_primal_FESpace.fe(),
-            static_cast<Real>(0), 0 );
-
-    /* Put in M_elvecSource the vector LB^{-1} * M_elvecSource = LB^{-1} * F
-       For more details see http://www.netlib.org/lapack/lapack-3.1.1/SRC/dtrtrs.f */
-    dtrtrs_( _param_L, _param_N, _param_N, NBP, NBRHS, M_BtB, NBP, M_elvecSource, NBP, INFO );
-    ASSERT_PRE( !INFO[0], "Lapack Computation M_elvecSource = LB^{-1} M_elvecSource is not achieved." );
-
-    /* Put in M_elvecSource the vector
-       M_BtC * M_elvecHyb + M_elvecSource = LB^{-1} * B^T * A^{-1} * C * lambda_K + LB^{-1} * F
-       For more details see http://www.netlib.org/blas/dgemm.f */
-    dgemm_( _param_N, _param_N, NBP, NBRHS, NBL, MINUSONE_, M_BtC, NBP, M_elvecHyb, NBL, MINUSONE_, M_elvecSource, NBP );
-
-    /* Put in M_elvecSource the vector LB^{-T} * M_elvecSource, where
-       M_elvecSource stores - (B^T * A^{-1} * B)^{-1} * B^T * A^{-1} * C * lambda_K - (B^T * A^{-1} * B)^{-1} * F
-       For more details see http://www.netlib.org/lapack/lapack-3.1.1/SRC/dtrtrs.f */
-    dtrtrs_( _param_L, _param_T, _param_N, NBP, NBRHS, M_BtB, NBP, M_elvecSource, NBP, INFO );
-    ASSERT_PRE( !INFO[0], "Lapack Computation M_elvecSource = LB^{-T} M_elvecSource is not achieved." );
-
-    // Now rhs contains the primal variable for the current element, we must put it in the global vector.
-
-    //.....................................
-    //  2) Computation of the VELOCITIES
-    //.....................................
-
-    // Clear the element dual vector.
-    M_elvecFlux.zero();
-
-    /* Put in M_elvecFlux the vector B * M_elvecSource = L^{-1} * B * primal_K
-       For more details see http://www.netlib.org/slatec/lin/dgemv.f */
-    dgemv_( _param_N, NBU, NBP, ONE_, B, NBU, M_elvecSource, INC1, ZERO_, M_elvecFlux, INC1 );
-
-    /* Put in M_elvecFlux the vector
-       - C * M_elvecHyb - M_elvecFlux = - L^{-1} * C * lambda_K - L^{-1} * B * primal_K
-       For more details see http://www.netlib.org/slatec/lin/dgemv.f */
-    dgemv_( _param_N, NBU, NBL, MINUSONE_, C, NBL, M_elvecHyb, INC1, MINUSONE_, M_elvecFlux, INC1 );
-
-    /* Put in flux the vector
-       L^{-T} * M_elvecFlux = - A^{-1} * C^T * lambda_K - A^{-1} * B^T * primal_K
-       For more details see http://www.netlib.org/lapack/lapack-3.1.1/SRC/dtrtrs.f */
-    dtrtrs_(_param_L, _param_T, _param_N, NBU, NBRHS, A, NBU, M_elvecFlux, NBU, INFO );
-    ASSERT_PRE(!INFO[0], "Lapack Computation M_elvecFlux = L^{-T} M_elvecFlux is not achieved.");
-
-} // localComputePrimalAndDual
 
 // Compute primal and dual unknown as a post process.
 template<typename Mesh, typename SolverType>
@@ -1414,7 +966,7 @@ computePrimalAndDual ()
        The reconstruction of the primal and dual variabile need this share, so we create a repeated
        epetra vector. This operation maximize the efficiency of send/receive time cost instead to
        send and receive each time a single datum. */
-    vector_type M_hybrid_Repeated( *M_hybrid, Repeated );
+    vector_Type M_hybrid_Repeated( *M_hybrid, Repeated );
 
     //---------------------------------------
     //    LOOP ON ALL THE VOLUME ELEMENTS
@@ -1481,7 +1033,473 @@ computePrimalAndDual ()
 
 } // computePrimalAndDual
 
+// ==============================================================================
+// Protected methods
+// ==============================================================================
+
+// Compute all the constant matrices.
+template <typename Mesh, typename SolverType>
+void
+DarcySolver<Mesh, SolverType>::
+computeConstantMatrices ()
+{
+
+    /* Update the divergence matrix, it is independant of the current element
+       thanks to the Piola transform. */
+    grad_Hdiv( static_cast<Real>(1.),
+               M_elmatMix,
+               M_dual_FESpace.fe(),
+               M_primal_FESpace.fe(), 0, 1 );
+
+    /* Update the boundary matrix, it is independant of the current element
+       thanks to the Piola transform.
+       Here we use the fact that a RefHybridFE "IS A" RefFE and the method refFE of
+       a FESpace object. In fact the method refFE return a const RefFE&, but the function
+       TP_VdotN_Hdiv takes two const RefHybridFE& so we must cast a const RefFE&
+       to a const RefHybridFE&. The cast of type is static and uses pointers. */
+    TP_VdotN_Hdiv( static_cast<Real>(1.),
+                   M_elmatMix,
+                   *static_cast<const RefFEHybrid*>(&M_hybrid_FESpace.refFE()),
+                   *static_cast<const RefFEHybrid*>(&M_VdotN_FESpace.refFE()),
+                   0, 2 );
+
+} // computeConstantMatrices
+
+// Update the primal and dual variable at the current element and compute the element Hdiv mass matrix.
+template <typename Mesh, typename SolverType>
+void
+DarcySolver<Mesh, SolverType>::
+localElementComputation ( const UInt & iElem )
+{
+
+    // Update the current element of ID iElem only for the dual variable.
+    M_dual_FESpace.fe().update( M_primal_FESpace.mesh()->element( iElem ),
+                                UPDATE_PHI_VECT | UPDATE_WDET );
+
+    /* Update the current element of ID iElem only for the primal variable,
+       it is used for computing the source term. */
+    M_primal_FESpace.fe().update( M_primal_FESpace.mesh()->element( iElem ),
+                                  UPDATE_QUAD_NODES | UPDATE_WDET );
+
+    /* Modify the (0,0) block (A) of the matrix M_elmatMix. The blocks (0,1) (B)
+       and (0,2) (C) are independent of the element and have already been computed. */
+
+    // Only one block is set to zero since the other ones are not recomputed.
+    M_elmatMix.block(0, 0) = static_cast<Real>( 0 );
+
+    // Get the coordinate of the barycenter of the current element of ID iElem.
+    Real xg(0), yg(0), zg(0);
+    M_primal_FESpace.fe().barycenter( xg, yg, zg );
+
+    /* Compute the Hdiv mass matrix. We pass the time at the inverse of the permeability
+       because the DarcySolverTransient needs the pemeability time dependent. In this case
+       we do not have a time evolution. */
+    mass_Hdiv( (*M_inversePermeability)( M_data.dataTime()->getTime(), xg, yg, zg, iElem ),
+               M_elmatMix,
+               M_dual_FESpace.fe(), 0, 0 );
+
+} // localElementComputation
+
+// Perform the static condensation for the local hybrid matrix.
+template <typename Mesh, typename SolverType>
+void
+DarcySolver<Mesh, SolverType>::
+staticCondensation ()
+{
+
+    // Flags for the BLAS and LAPACK routine.
+
+    int INFO[1]         = {0};
+    // Number of columns of the right hand side := 1.
+    int NBRHS[1]        = {1};
+    // Primal variable degrees of freedom.
+    int NBP[1]          = { M_primal_FESpace.refFE().nbDof() };
+    // Dual variable degrees of freedom.
+    int NBU[1]          = { M_dual_FESpace.refFE().nbDof() };
+    // Hybrid variable degree of freedom.
+    int NBL[1]          = { M_hybrid_FESpace.refFE().nbDof() };
+
+    double ONE[1]      = {1.0};
+    double MINUSONE[1] = {-1.0};
+    double ZERO[1]     = {0.0};
+
+    // Parameter that indicate the Lower storage of matrices.
+    char UPLO[1]     = {'L'};
+
+    // Paramater that indicate the Transpose of matrices.
+    char   TRANS[1]    = {'T'};
+    char NOTRANS[1]    = {'N'};
+
+    // Parameter that indicates whether the matrix has diagonal unit ('N' means no)
+    char NODIAG[1] = {'N'};
+
+    // Create and assign the local matrices A, B and C.
+    ElemMat::matrix_type A = M_elmatMix.block( 0, 0 );
+    ElemMat::matrix_type B = M_elmatMix.block( 0, 1 );
+    ElemMat::matrix_type C = M_elmatMix.block( 0, 2 );
+
+    //.................................
+    //        MATRIX OPERATIONS
+    //.................................
+
+    /* Put in A the matrix L and L^T, where L and L^T is the Cholesky factorization of A.
+       For more details see http://www.netlib.org/lapack/double/dpotrf.f */
+    dpotrf_ (UPLO, NBU, A, NBU, INFO);
+    ASSERT_PRE( !INFO, "Lapack factorization of A is not achieved." );
+
+    /* Put in B the matrix L^{-1} * B, solving a triangular system.
+       For more details see http://www.netlib.org/lapack/lapack-3.1.1/SRC/dtrtrs.f */
+    dtrtrs_ (UPLO, NOTRANS, NODIAG, NBU, NBP, A, NBU, B, NBU, INFO);
+    ASSERT_PRE( !INFO, "Lapack Computation B = L^{-1} B  is not achieved." );
+
+    /* Put in C the matrix L^{-1} * C, solving a triangular system.
+       For more details see http://www.netlib.org/lapack/lapack-3.1.1/SRC/dtrtrs.f */
+    dtrtrs_ (UPLO, NOTRANS, NODIAG, NBU, NBL, A, NBU, C, NBL, INFO);
+    ASSERT_PRE( !INFO, "Lapack Computation C = L^{-1} C  is not achieved." );
+
+    /* Put in M_BtB the matrix  B^T * L^{-T} * L^{-1} * B = B^T * A^{-1} * B
+       M_BtB stored only on lower part.
+       For more details see http://www.netlib.org/lapack/lapack-3.1.1/BLAS/SRC/dsyrk.f */
+    dsyrk_ (UPLO, TRANS, NBP, NBU, ONE, B, NBU, ZERO, M_BtB, NBP);
+
+    /* Put in M_CtC the matrix C^T * L^{-T} * L^{-1} * C = C^T * A^{-1} * C
+       M_CtC stored only on lower part.
+       For more details see http://www.netlib.org/slatec/lin/dsyrk.f  */
+    dsyrk_ (UPLO, TRANS, NBL, NBU, ONE, C, NBU, ZERO, M_CtC, NBL);
+
+    /* Put in M_BtC the matrix B^T * L^{-T} * L^{-1} * C = B^T * A^{-1} * C
+       M_BtC fully stored.
+       For more details see http://www.netlib.org/blas/dgemm.f */
+    dgemm_ (TRANS, NOTRANS, NBP, NBL, NBU, ONE, B, NBU, C, NBU, ZERO, M_BtC, NBP);
+
+    /* Put in M_BtB the matrix LB and LB^T where LB and LB^T is the cholesky
+       factorization of B^T * A^{-1} * B.
+       For more details see http://www.netlib.org/lapack/double/dpotrf.f  */
+    dpotrf_ (UPLO, NBP, M_BtB, NBP, INFO);
+    ASSERT_PRE( !INFO,"Lapack factorization of BtB is not achieved." );
+
+    /* Put in M_BtC the matrix LB^{-1} * M_BtC = LB^{-1} * B^T * A^{-1} * C.
+       For more details see http://www.netlib.org/lapack/lapack-3.1.1/SRC/dtrtrs.f */
+    dtrtrs_ (UPLO, NOTRANS, NODIAG, NBP, NBL, M_BtB, NBP, M_BtC, NBP, INFO);
+    ASSERT_PRE( !INFO, "Lapack Computation BtC = LB^{-1} BtC is not achieved." );
+
+    /* Put in M_CtC the matrix -M_CtC + M_BtC^T * M_BtC
+       Result stored only on lower part, the matrix M_CtC stores
+       M_CtC = -C^T * A^{-1} * C + C^T * A^{-t} * B * ( B^T * A^{-1} * B)^{-1} * B^T * A^{-1} * C.
+       For more details see http://www.netlib.org/slatec/lin/dsyrk.f  */
+    dsyrk_ (UPLO, TRANS, NBL, NBP, ONE, M_BtC, NBP, MINUSONE, M_CtC, NBL);
+
+    //...................................
+    //      END OF MATRIX OPERATIONS
+    //...................................
+
+    /* Sum up of the previews steps
+       A stores L and L^T where L and L^T is the Cholesky factorization of A
+       B stores L^{-1} * B
+       C stores L^{-1} * C
+       B^T stores LB and LB^T where LB and LB^T is the factorization of B^T * A^{-1} * B
+       M_BtC stores LB^{-1} * B^T * A^{-1} * C
+       M_CtC stores -C^T * A^{-1} * C + C^T * A^{-t} * B * (B^T * A^{-1} * B)^{-1} * B^T * A^{-1} * C */
+
+    //..........................
+    //     VECTOR OPERATIONS
+    //..........................
+
+    // Clear some vectors.
+    M_elvecSource.zero();
+    M_elvecHyb.zero();
+
+    // Compute the right hand side.
+    source( M_source,
+            M_elvecSource,
+            M_primal_FESpace.fe(),
+            static_cast<Real>(0), 0 );
+
+    /* Put in M_elvecSource the vector LB^{-1} * M_elvecSource = LB^{-1} F
+       For more details see http://www.netlib.org/lapack/lapack-3.1.1/SRC/dtrtrs.f */
+    dtrtrs_ (UPLO, NOTRANS, NODIAG, NBP, NBRHS, M_BtB, NBP, M_elvecSource, NBP, INFO);
+    ASSERT_PRE( !INFO, "Lapack Computation M_elvecSource = LB^{-1} rhs is not achieved." );
+
+    /* Put in M_elvecHyb the vector M_BtC^T * M_elvecSource = C^T * A^{-1} * B^T * (B^T * A^{-1} * B)^{-1} * F
+       M_elvecHyb is fully stored.
+       For more details see http://www.netlib.org/blas/dgemm.f */
+    dgemm_ (TRANS, NOTRANS, NBL, NBRHS, NBP, ONE, M_BtC, NBP, M_elvecSource, NBP, ZERO, M_elvecHyb, NBL);
+
+    //........................
+    // END OF VECTOR OPERATIONS.
+    //........................
+
+    /* Previously the matrix M_CtC is stored only in the lower part, but at the moment there is not
+       a function assembleMatrix that store a lower triangular sparse matrix.
+       Remind to correct these line in the future. */
+    symmetrizeMatrix( UPLO, NBL, M_CtC );
+
+    // Update the hybrid element matrix.
+    M_elmatHyb.block(0,0) = M_CtC;
+
+} // staticCondensation
+
+// Locally compute the primal and dual variable.
+template<typename Mesh, typename SolverType>
+void
+DarcySolver<Mesh, SolverType>::
+localComputePrimalAndDual ()
+{
+
+    // Flags for the BLAS and LAPACK routine.
+
+    int INFO[1]         = {0};
+    // Number of columns of the right hand side := 1.
+    int NBRHS[1]        = {1};
+    // Primal variable degrees of freedom.
+    int NBP[1]          = { M_primal_FESpace.refFE().nbDof() };
+    // Dual variable degrees of freedom.
+    int NBU[1]          = { M_dual_FESpace.refFE().nbDof() };
+    // Hybrid variable degree of freedom.
+    int NBL[1]          = { M_hybrid_FESpace.refFE().nbDof() };
+    // Increment := 1.
+    int INC[1]         = {1};
+
+    double ONE[1]      = {1.0};
+    double MINUSONE[1] = {-1.0};
+    double ZERO[1]     = {0.0};
+
+    // Parameter that indicate the Lower storage of matrices.
+    char UPLO[1]     = {'L'};
+    // Parameter that indicate the Transpose of matrices.
+    char   TRANS[1]    = {'T'};
+    char NOTRANS[1]    = {'N'};
+    // Parameter that indicates whether the matrix has diagonal unit ('N' means no)
+    char NODIAG[1] = {'N'};
+
+    // No need for CtC in this part, and last dsyrk, the only differences.
+    ElemMat::matrix_type A = M_elmatMix.block( 0, 0 );
+    ElemMat::matrix_type B = M_elmatMix.block( 0, 1 );
+    ElemMat::matrix_type C = M_elmatMix.block( 0, 2 );
+
+    //........................
+    //    MATRIX OPERATIONS
+    //........................
+
+    /* Put in A the matrix L and L^T, where L and L^T is the Cholesky factorization of A.
+       For more details see http://www.netlib.org/lapack/double/dpotrf.f */
+    dpotrf_ (UPLO, NBU, A, NBU, INFO);
+    ASSERT_PRE( !INFO, "Lapack factorization of A is not achieved." );
+
+    /* Put in B the matrix L^{-1} * B, solving a triangular system.
+       For more details see http://www.netlib.org/lapack/lapack-3.1.1/SRC/dtrtrs.f */
+    dtrtrs_ (UPLO, NOTRANS, NODIAG, NBU, NBP, A, NBU, B, NBU, INFO);
+    ASSERT_PRE( !INFO[0], "Lapack Computation B = L^{-1} B  is not achieved." );
+
+    /* Put in C the matrix L^{-1} * C, solving a triangular system.
+       For more details see http://www.netlib.org/lapack/lapack-3.1.1/SRC/dtrtrs.f */
+    dtrtrs_ (UPLO, NOTRANS, NODIAG, NBU, NBL, A, NBU, C, NBU, INFO);
+    ASSERT_PRE( !INFO, "Lapack Computation C = L^{-1} C  is not achieved." );
+
+    /* Put in M_BtB the matrix  B^T * L^{-T} * L^{-1} * B = B^T * A^{-1} * B
+       M_BtB stored only on lower part.
+       For more details see http://www.netlib.org/slatec/lin/dsyrk.f */
+    dsyrk_ (UPLO, TRANS, NBP, NBU, ONE, B, NBU, ZERO, M_BtB, NBP);
+
+    /* Put in M_BtC the matrix B^T * L^{-T} * L^{-1} * C = B^T * A^{-1} * C
+       M_BtC fully stored.
+       For more details see http://www.netlib.org/blas/dgemm.f */
+    dgemm_ (TRANS, NOTRANS, NBP, NBL, NBU, ONE, B, NBU, C, NBU, ZERO, M_BtC, NBP);
+
+    /* Put in M_BtB the matrix LB and LB^T where LB and LB^T is the cholesky
+       factorization of B^T * A^{-1} * B.
+       For more details see http://www.netlib.org/lapack/double/dpotrf.f */
+    dpotrf_ (UPLO, NBP, M_BtB, NBP, INFO);
+    ASSERT_PRE( !INFO, "Lapack factorization of BtB is not achieved." );
+
+    /* Put in M_BtC the matrix LB^{-1} * M_BtC = LB^{-1} * B^T * A^{-1} * C.
+       For more details see http://www.netlib.org/lapack/lapack-3.1.1/SRC/dtrtrs.f */
+    dtrtrs_ (UPLO, NOTRANS, NODIAG, NBP, NBL, M_BtB, NBP, M_BtC, NBP, INFO);
+    ASSERT_PRE( !INFO, "Lapack Computation BtC = LB^{-1} BtC is not achieved." );
+
+    //..............................
+    //   END OF MATRIX OPERATIONS
+    //..............................
+
+    /* Sum up of the previews steps
+       A stores L and L^T where L and L^T is the Cholesky factorization of A
+       B stores L^{-1} * B
+       C stores L^{-1} * C
+       M_BtB stores LB and LB^T where LB and LB^T is the factorization of B^T * A^{-1} * B
+       M_BtC stores LB^{-1} * B^T * A^{-1} * C */
+
+
+    //......................
+    //    VECTOR OPERATIONS (Computation of Pressure and Velocities)
+    //......................
+
+    //...................................
+    //  1) Computation of the PRESSURE
+    //...................................
+
+    // Clear the source vector.
+    M_elvecSource.zero();
+
+    // The source term is computed with a test function in the primal variable space.
+    source( M_source,
+            M_elvecSource,
+            M_primal_FESpace.fe(),
+            static_cast<Real>(0), 0 );
+
+    /* Put in M_elvecSource the vector LB^{-1} * M_elvecSource = LB^{-1} * F
+       For more details see http://www.netlib.org/lapack/lapack-3.1.1/SRC/dtrtrs.f */
+    dtrtrs_ (UPLO, NOTRANS, NODIAG, NBP, NBRHS, M_BtB, NBP, M_elvecSource, NBP, INFO);
+    ASSERT_PRE( !INFO, "Lapack Computation M_elvecSource = LB^{-1} M_elvecSource is not achieved." );
+
+    /* Put in M_elvecSource the vector
+       M_BtC * M_elvecHyb + M_elvecSource = LB^{-1} * B^T * A^{-1} * C * lambda_K + LB^{-1} * F
+       For more details see http://www.netlib.org/blas/dgemm.f */
+    dgemm_ (NOTRANS, NOTRANS, NBP, NBRHS, NBL, MINUSONE, M_BtC, NBP, M_elvecHyb, NBL, MINUSONE, M_elvecSource, NBP);
+
+    /* Put in M_elvecSource the vector LB^{-T} * M_elvecSource, where
+       M_elvecSource stores - (B^T * A^{-1} * B)^{-1} * B^T * A^{-1} * C * lambda_K - (B^T * A^{-1} * B)^{-1} * F
+       For more details see http://www.netlib.org/lapack/lapack-3.1.1/SRC/dtrtrs.f */
+    dtrtrs_ (UPLO, TRANS, NODIAG, NBP, NBRHS, M_BtB, NBP, M_elvecSource, NBP, INFO);
+    ASSERT_PRE( !INFO, "Lapack Computation M_elvecSource = LB^{-T} M_elvecSource is not achieved." );
+
+    // Now rhs contains the primal variable for the current element, we must put it in the global vector.
+
+    //.....................................
+    //  2) Computation of the VELOCITIES
+    //.....................................
+
+    // Clear the element dual vector.
+    M_elvecFlux.zero();
+
+    /* Put in M_elvecFlux the vector B * M_elvecSource = L^{-1} * B * primal_K
+       For more details see http://www.netlib.org/slatec/lin/dgemv.f */
+    dgemv_ (NOTRANS, NBU, NBP, ONE, B, NBU, M_elvecSource, INC, ZERO, M_elvecFlux, INC);
+    /* Put in M_elvecFlux the vector
+       - C * M_elvecHyb - M_elvecFlux = - L^{-1} * C * lambda_K - L^{-1} * B * primal_K
+       For more details see http://www.netlib.org/slatec/lin/dgemv.f */
+    dgemv_ (NOTRANS, NBU, NBL, MINUSONE, C, NBL, M_elvecHyb, INC, MINUSONE, M_elvecFlux, INC);
+
+    /* Put in flux the vector
+       L^{-T} * M_elvecFlux = - A^{-1} * C^T * lambda_K - A^{-1} * B^T * primal_K
+       For more details see http://www.netlib.org/lapack/lapack-3.1.1/SRC/dtrtrs.f */
+    dtrtrs_ (UPLO, TRANS, NODIAG, NBU, NBRHS, A, NBU, M_elvecFlux, NBU, INFO);
+    ASSERT_PRE(!INFO, "Lapack Computation M_elvecFlux = L^{-T} M_elvecFlux is not achieved.");
+
+} // localComputePrimalAndDual
+
+// Update all the variables of the problem.
+template<typename Mesh, typename SolverType>
+void
+DarcySolver<Mesh, SolverType>::
+updateVariables ()
+{
+
+    // Reset the global hybrid matrix.
+    M_matrHybrid.reset( new matrix_Type( M_localMap ) );
+
+    // Reset the global right hand side vector
+    M_rhs.reset( new vector_Type( M_localMap ) );
+
+    // Reset the global primal vector
+    M_primal.reset( new vector_Type( M_primal_FESpace.map() ) );
+
+    // Reset the global dual vector
+    M_dual.reset( new vector_Type( M_dual_FESpace.map(), Repeated ) );
+
+    // Reset the global hybrid vector
+    M_hybrid.reset( new vector_Type( M_hybrid_FESpace.map() ) );
+
+    // Reset the global residual vector
+    M_residual.reset( new vector_Type( M_localMap ) );
+
+} // updateVariables
+
+// Apply the boundary conditions to the global hybrid matrix and the global hybrid right hand side.
+template<typename Mesh, typename SolverType>
+void
+DarcySolver<Mesh, SolverType>::
+applyBoundaryConditions ()
+{
+    // Chrono.
+    Chrono chronoBC;
+
+    // Check if the boundary conditions were updated.
+    if ( !M_BCh->bdUpdateDone() )
+    {
+
+        M_displayer.leaderPrint( "                 Updating the BC               ...          ");
+        chronoBC.start();
+
+        // Update the boundary conditions handler. We use the finite element of the boundary of the dual variable.
+        M_BCh->bdUpdate( *M_dual_FESpace.mesh(),
+                         M_dual_FESpace.feBd(),
+                         M_dual_FESpace.dof() );
+
+        chronoBC.stop();
+        M_displayer.leaderPrintMax( "done in " , chronoBC.diff() );
+    }
+
+    // Ignoring non-local entries, otherwise they are summed up lately.
+    vector_Type rhsFull( *M_rhs, Unique );
+
+    M_displayer.leaderPrint( "                 Managing the BC               ...          ");
+    chronoBC.start();
+
+    /* Update the global hybrid matrix and the global hybrid right hand side with the boundary conditions.
+       It takes care of the current time for DarcySolverTransient derived class. */
+    bcManage( *M_matrHybrid,
+              rhsFull,
+              *M_dual_FESpace.mesh(),
+              M_dual_FESpace.dof(),
+              *M_BCh,
+              M_dual_FESpace.feBd(), 1.,
+              M_data.dataTime()->getTime() );
+
+    chronoBC.stop();
+    M_displayer.leaderPrintMax( "done in " , chronoBC.diff() );
+
+    // Save the global hybrid right hand side.
+    *M_rhs = rhsFull;
+
+} // applyBoundaryConditions
+
+// Reorder a non full stored symmetric matrix.
+template<typename Mesh, typename SolverType>
+template<typename matrix>
+void
+DarcySolver<Mesh, SolverType>::
+symmetrizeMatrix ( char* UPLO, int* N, matrix& A  )
+{
+
+    // If the matrix is stored in the lower part
+    if ( UPLO[0] == 'L')
+    {
+        for (UInt i(0); i < static_cast<UInt>(N[0]); ++i)
+        {
+            for (UInt j(i + 1); j < static_cast<UInt>(N[0]); ++j)
+            {
+                A(i, j) = A(j, i);
+            }
+        }
+    }
+    // If the matrix is stored in the upper part
+    else
+    {
+        for (UInt i(0); i < static_cast<UInt>(N[0]); ++i)
+        {
+            for (UInt j(i + 1); j < static_cast<UInt>(N[0]); ++j)
+            {
+                A(j, i) = A(i, j);
+            }
+        }
+    }
+
+} //symmetrizeMatrix
+
+
 } // namespace LifeV
 
 
-#endif //_darcySolver_H_
+#endif //_DARCYSOLVER_H_
+
+// -*- mode: c++ -*-
