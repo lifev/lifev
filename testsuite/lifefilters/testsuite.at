@@ -65,8 +65,8 @@ press_order       = P1
 verbose         = 1
 steady          = 0
 ]])
-AT_CHECK([ ln -sf ../../test_filters/*{.case,.geo,.scl,.vct}  . &&
+AT_CHECK([ ln -sf ../../lifefilters/*{.case,.geo,.scl,.vct}  . &&
 	       ln -sf ../../data/mesh/inria/cube4x4.mesh &&
-           mpirun -np 4 ../../test_filters/test_filters -c],[0],[ignore],[ignore])
+           mpirun -np 4 ../../lifefilters/test_filters -c],[0],[ignore],[ignore])
 AT_CLEANUP([ethiersteinman.xmf ethiersteinman.h5])
 
