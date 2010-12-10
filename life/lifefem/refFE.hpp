@@ -1,21 +1,40 @@
-/*-*- mode: c++ -*-
- This file is part of the LifeV library
- Copyright (C) 2001,2002,2003,2004 EPFL, INRIA and Politecnico di Milano
+//@HEADER
+/*
+*******************************************************************************
 
- This library is free software; you can redistribute it and/or
- modify it under the terms of the GNU Lesser General Public
- License as published by the Free Software Foundation; either
- version 2.1 of the License, or (at your option) any later version.
+    Copyright (C) 2004, 2005, 2007 EPFL, Politecnico di Milano, INRIA
+    Copyright (C) 2010 EPFL, Politecnico di Milano, Emory University
 
- This library is distributed in the hope that it will be useful,
- but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- Lesser General Public License for more details.
+    This file is part of LifeV.
 
- You should have received a copy of the GNU Lesser General Public
- License along with this library; if not, write to the Free Software
- Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+    LifeV is free software; you can redistribute it and/or modify
+    it under the terms of the GNU Lesser General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    LifeV is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+    Lesser General Public License for more details.
+
+    You should have received a copy of the GNU Lesser General Public License
+    along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
+
+*******************************************************************************
 */
+//@HEADER
+
+/*!
+    @file
+    @brief Base structure for a reference finite element
+
+    @author Jean-Frederic Gerbeau
+    @date 00-04-2002
+
+    @contributor Samuel Quinodoz <samuel.quinodoz@epfl.ch>
+    @mantainer Samuel Quinodoz <samuel.quinodoz@epfl.ch>
+ */
+
 #ifndef _REFFE_H
 #define _REFFE_H
 
@@ -23,10 +42,6 @@
 #include <life/lifefem/refEle.hpp>
 #include <life/lifefem/localDofPattern.hpp>
 
-/*!
-  \file refFE.h
-  \brief Structure for a reference Lagrangian finite element
-*/
 namespace LifeV
 {
 /*!
@@ -99,7 +114,16 @@ class RefFE:
 
 public:
 
+    //! @name Public Types
+    //@{
+
     typedef RefEle::Fct Fct;
+
+    //@}
+
+
+    //! @name Constructor & Destructor
+    //@{
 
     //! Constructor of a reference Lagrangian finite element.
     /*!
@@ -133,13 +157,13 @@ public:
     RefFE( std::string          name,
            FE_TYPE              type,
            ReferenceShapes      shape,
-           int                  nbDofPerVertex,
-           int                  nbDofPerEdge,
-           int                  nbDofPerFace,
-           int                  nbDofPerVolume,
-           int                  nbDof,
-           int                  nbCoor,
-           int                  FEDim,
+           Int                  nbDofPerVertex,
+           Int                  nbDofPerEdge,
+           Int                  nbDofPerFace,
+           Int                  nbDofPerVolume,
+           Int                  nbDof,
+           Int                  nbCoor,
+           Int                  FEDim,
            const Fct*           phi,
            const Fct*           dPhi,
            const Fct*           d2Phi,
@@ -151,32 +175,46 @@ public:
     //! Destructor
     ~RefFE();
 
+    //@}
+
+
+    //! @name Get Methods
+    //@{
+
     //! Check if the reference element has boundary elements
-    inline bool hasBoundaryFE() const { return M_boundaryFE != NULL; }
+    bool hasBoundaryFE() const { return M_boundaryFE != NULL; }
 
     //! Getter for the boundary finite element
     /*
       The boundary of a finite element has to be understood in the sense of the trace. For example, the boundary finite element of the P0 finite element on a triangle is a P0 finite element on a segment, even if there is no degree of freedom located on the edges of the triangle for P0 finite element.
      */
-    inline const RefFE& boundaryFE() const
+    const RefFE& boundaryFE() const
     {
         ASSERT( M_boundaryFE , "No boundary FE defined" );
         return *M_boundaryFE;
     }
 
     //! Getter for the type of the finite element
-    inline const FE_TYPE& type() const
+    const FE_TYPE& type() const
     {
         return M_type;
     }
 
+    //@}
+
 private:
+
+    //! @name Private Methods
+    //@{
 
     //! No empty constructor
     RefFE();
 
     //! No copy constructor
     RefFE(const RefFE&);
+
+    //@}
+
 
     //! Reference to the boundary finite element
     const RefFE* M_boundaryFE;

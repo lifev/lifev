@@ -30,6 +30,9 @@
 namespace LifeV
 {
 
+// ===================================================
+// Constructors & Destructor
+// ===================================================
 
 // Empty constructor
 DataADR::DataADR():
@@ -67,6 +70,9 @@ DataADR::DataADR( const DataADR& dataADR ) :
 {
 }
 
+// ===================================================
+// Methods
+// ===================================================
 
 // Set up the class reading from data file
 void

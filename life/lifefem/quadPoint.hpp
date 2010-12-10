@@ -1,26 +1,26 @@
 //@HEADER
 /*
-************************************************************************
+*******************************************************************************
 
- This file is part of the LifeV Applications.
- Copyright (C) 2001-2010 EPFL, Politecnico di Milano, INRIA
+    Copyright (C) 2004, 2005, 2007 EPFL, Politecnico di Milano, INRIA
+    Copyright (C) 2010 EPFL, Politecnico di Milano, Emory University
 
- This library is free software; you can redistribute it and/or modify
- it under the terms of the GNU Lesser General Public License as
- published by the Free Software Foundation; either version 2.1 of the
- License, or (at your option) any later version.
+    This file is part of LifeV.
 
- This library is distributed in the hope that it will be useful, but
- WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- Lesser General Public License for more details.
+    LifeV is free software; you can redistribute it and/or modify
+    it under the terms of the GNU Lesser General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
 
- You should have received a copy of the GNU Lesser General Public
- License along with this library; if not, write to the Free Software
- Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
- USA
+    LifeV is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+    Lesser General Public License for more details.
 
-************************************************************************
+    You should have received a copy of the GNU Lesser General Public License
+    along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
+
+*******************************************************************************
 */
 //@HEADER
 
@@ -28,8 +28,12 @@
     @file
     @brief Definition of the quadPoint class, usefull for the quadrature rules.
 
-    @author Samuel Quinodoz <samuel.quinodoz@epfl.ch>
-    @date 18 May 2010
+    @author Jean-Frederic Gerbeau
+            Samuel Quinodoz <samuel.quinodoz@epfl.ch>
+    @date 18-05-2010
+
+    @contributor Samuel Quinodoz <samuel.quinodoz@epfl.ch>
+    @mantainer Samuel Quinodoz <samuel.quinodoz@epfl.ch>
  */
 
 #ifndef QUADPOINT_H
@@ -175,7 +179,7 @@ public:
     //@{
 
     //! Returns the dimension of the quadPoint
-    inline Real dimension() const
+    Real dimension() const
     {
         return M_coor.size();
     }
@@ -205,41 +209,41 @@ public:
     //@{
 
     //! Getter for the weight
-    inline const Real& weight() const
+    const Real& weight() const
     {
         return M_weight;
     }
 
     //! Getter for the first coordinate
-    inline const Real& x() const
+    const Real& x() const
     {
         ASSERT(0<M_coor.size()," No x coordinate for this quadrature point");
         return M_coor[ 0 ];
     }
 
     //! Getter for the second coordinate
-    inline const Real& y() const
+    const Real& y() const
     {
         ASSERT(1<M_coor.size()," No y coordinate for this quadrature point");
         return M_coor[ 1 ];
     }
 
     //! Getter for the third coordinate
-    inline const Real& z() const
+    const Real& z() const
     {
         ASSERT(2<M_coor.size()," No z coordinate for this quadrature point");
         return M_coor[ 2 ];
     }
 
     //! Getter for the coordinate (0<=i)
-    inline const Real& coor(const UInt& i ) const
+    const Real& coor(const UInt& i ) const
     {
         ASSERT(i<M_coor.size()," Error in the coordinate for this quadrature point");
         return M_coor[ i ];
     }
 
     //! Getter for the full vector of coordinates
-    inline const GeoVector& coor() const
+    const GeoVector& coor() const
     {
         return M_coor;
     }

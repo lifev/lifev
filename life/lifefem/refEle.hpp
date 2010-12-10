@@ -1,32 +1,38 @@
 //@HEADER
 /*
-************************************************************************
+*******************************************************************************
 
- This file is part of the LifeV Applications.
- Copyright (C) 2001-2010 EPFL, Politecnico di Milano, INRIA
+    Copyright (C) 2004, 2005, 2007 EPFL, Politecnico di Milano, INRIA
+    Copyright (C) 2010 EPFL, Politecnico di Milano, Emory University
 
- This library is free software; you can redistribute it and/or modify
- it under the terms of the GNU Lesser General Public License as
- published by the Free Software Foundation; either version 2.1 of the
- License, or (at your option) any later version.
+    This file is part of LifeV.
 
- This library is distributed in the hope that it will be useful, but
- WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- Lesser General Public License for more details.
+    LifeV is free software; you can redistribute it and/or modify
+    it under the terms of the GNU Lesser General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
 
- You should have received a copy of the GNU Lesser General Public
- License along with this library; if not, write to the Free Software
- Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
- USA
+    LifeV is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+    Lesser General Public License for more details.
 
-************************************************************************
+    You should have received a copy of the GNU Lesser General Public License
+    along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
+
+*******************************************************************************
 */
 //@HEADER
 
 /*!
     @file
     @brief Base class for RefFE and GeoMap
+
+    @author Jean-Frederic Gerbeau
+    @date 00-04-2002
+
+    @contributor Samuel Quinodoz <samuel.quinodoz@epfl.ch>
+    @mantainer Samuel Quinodoz <samuel.quinodoz@epfl.ch>
  */
 
 #ifndef REFELE_H
@@ -64,9 +70,13 @@ class RefEle
 
 public:
 
+    //! @name Public Types
+    //@{
+
     // Some typedefs for functions
     typedef Real ( * Fct ) ( const GeoVector& );
 
+    //@}
 
     //! @name Constructor & Destructor
     //@{
@@ -86,7 +96,7 @@ public:
             const Fct* phi, const Fct* dPhi, const Fct* d2Phi, const Fct* divPhi, const Real* refCoor);
 
     //! Destructor
-    ~RefEle();
+    virtual ~RefEle();
 
     //@}
 
@@ -96,25 +106,25 @@ public:
     //@{
 
     //! return the first local coordinate of the i-th node of the reference element
-    inline Real xi( UInt i ) const
+    Real xi( UInt i ) const
     {
         ASSERT_BD( i < M_nbDof )
         return M_refCoor[ 3 * i ];
     }
     //! return the second local coordinate of the i-th node of the reference element
-    inline Real eta( UInt i ) const
+    Real eta( UInt i ) const
     {
         ASSERT_BD( i < M_nbDof )
         return M_refCoor[ 3 * i + 1 ];
     }
     //! return the third local coordinate of the i-th node of the reference element
-    inline Real zeta( UInt i ) const
+    Real zeta( UInt i ) const
     {
         ASSERT_BD( i < M_nbDof )
         return M_refCoor[ 3 * i + 2 ];
     }
     //! return the icoor-th local coordinate of the i-th node of the reference element
-    inline Real refCoor( UInt i, UInt icoor ) const
+    Real refCoor( UInt i, UInt icoor ) const
     {
         ASSERT_BD( i < M_nbDof && icoor < M_nbCoor )
         return M_refCoor[ 3 * i + icoor ];
@@ -123,34 +133,34 @@ public:
     std::vector<GeoVector> refCoor() const;
 
     //! Return the value of the i-th basis function in the point v
-    inline Real phi( UInt i, const GeoVector& v ) const
+    Real phi( UInt i, const GeoVector& v ) const
     {
         ASSERT_BD( i < M_nbDof )
         return M_phi[ i ] ( v );
     }
 
     //! return the value of the component icoor-th of the i-th basis function on point v.
-    inline Real phi( UInt i, UInt icoor, const GeoVector& v ) const
+    Real phi( UInt i, UInt icoor, const GeoVector& v ) const
     {
         ASSERT_BD( i < M_nbDof && icoor < M_FEDim )
         return M_phi[ i * M_FEDim + icoor ] ( v );
     }
 
     //! return the value of the icoor-th derivative of the i-th basis function on point v
-    inline Real dPhi( UInt i, UInt icoor, const GeoVector& v ) const
+    Real dPhi( UInt i, UInt icoor, const GeoVector& v ) const
     {
         ASSERT_BD( i < M_nbDof && icoor < M_nbCoor )
         return M_dPhi[ i * M_nbCoor + icoor ] ( v );
     }
 
     //!  return the value of the (icoor,jcoor)-th second derivative of the i-th basis function on point v
-    inline Real d2Phi( UInt i, UInt icoor, UInt jcoor, const GeoVector& v ) const
+    Real d2Phi( UInt i, UInt icoor, UInt jcoor, const GeoVector& v ) const
     {
         ASSERT_BD( i < M_nbDof && icoor < M_nbCoor && jcoor < M_nbCoor )
         return M_d2Phi[ ( i * M_nbCoor + icoor ) * M_nbCoor + jcoor ] ( v );
     }
     //! return the value of the divergence of the i-th basis function on point v.
-    inline Real divPhi( UInt i, const GeoVector& v ) const
+    Real divPhi( UInt i, const GeoVector& v ) const
     {
         ASSERT_BD( i < M_nbDof )
         return M_divPhi[ i ] ( v );
@@ -158,22 +168,22 @@ public:
 
 
     //! Check if the refEle has phi functions
-    inline bool hasPhi() const
+    bool hasPhi() const
     {
         return ( M_phi != static_cast<Fct*>(NULL) );
     }
     //! Check if the refEle has dPhi functions
-    inline bool hasDPhi() const
+    bool hasDPhi() const
     {
         return ( M_dPhi != static_cast<Fct*>(NULL) );
     }
     //! Check if the refEle has d2Phi functions
-    inline bool hasD2Phi() const
+    bool hasD2Phi() const
     {
         return ( M_d2Phi != static_cast<Fct*>(NULL) );
     }
     //! Check if the refEle has divPhi functions
-    inline bool hasDivPhi() const
+    bool hasDivPhi() const
     {
         return ( M_divPhi != static_cast<Fct*>(NULL) );
     }
@@ -197,7 +207,7 @@ public:
       If one tries to use this method with a non nodal finite element, an
       error will be displayed and the program will stop running.
      */
-    inline virtual std::vector<Real> nodalToFEValues(const std::vector<Real>& /*nodalValues*/) const
+    virtual std::vector<Real> nodalToFEValues(const std::vector<Real>& /*nodalValues*/) const
     {
         //By default, it is not possible to use it.
         std::cerr << " Trying to access nodal values via nodalToFEValues function. " << std::endl;
@@ -213,31 +223,31 @@ public:
     //@{
 
     //! Return the name of the reference element.
-    inline const std::string& name() const
+    const std::string& name() const
     {
         return M_name;
     }
 
     //! Return the number of degrees of freedom for this reference element
-    inline const UInt& nbDof() const
+    const UInt& nbDof() const
     {
         return M_nbDof;
     }
 
     //! Return the number of local coordinates
-    inline const UInt& nbCoor() const
+    const UInt& nbCoor() const
     {
         return M_nbCoor;
     }
 
     //! Return the dimension of the FE (scalar vs vectorial FE)
-    inline const UInt& FEDim() const
+    const UInt& FEDim() const
     {
         return M_FEDim;
     }
 
     //! Return the shape of the element
-    inline const ReferenceShapes& shape() const
+    const ReferenceShapes& shape() const
     {
         return M_shape;
     }

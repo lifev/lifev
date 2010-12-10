@@ -1,30 +1,41 @@
+//@HEADER
 /*
-  This file is part of the LifeV library
-  Copyright (C) 2010 EPFL, INRIA, Politecnico di Milano and Emory University
+*******************************************************************************
 
-  This library is free software; you can redistribute it and/or
-  modify it under the terms of the GNU Lesser General Public
-  License as published by the Free Software Foundation; either
-  version 2.1 of the License, or (at your option) any later version.
+    Copyright (C) 2004, 2005, 2007 EPFL, Politecnico di Milano, INRIA
+    Copyright (C) 2010 EPFL, Politecnico di Milano, Emory University
 
-  This library is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-  Lesser General Public License for more details.
+    This file is part of LifeV.
 
-  You should have received a copy of the GNU Lesser General Public
-  License along with this library; if not, write to the Free Software
-  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+    LifeV is free software; you can redistribute it and/or modify
+    it under the terms of the GNU Lesser General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    LifeV is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+    Lesser General Public License for more details.
+
+    You should have received a copy of the GNU Lesser General Public License
+    along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
+
+*******************************************************************************
 */
-/*!
-  \file dataADR.hpp
-  \date 08/2010
-  \version 2.0
+//@HEADER
 
-  \brief File containing a class for handling data and parameters
+/*!
+    @file
+    @brief File containing a class for handling data and parameters
          for advection-diffusion-reaction problems
 
-*/
+    @author
+    @date 00-08-2010
+
+    @contributor Samuel Quinodoz <samuel.quinodoz@epfl.ch>
+    @mantainer Samuel Quinodoz <samuel.quinodoz@epfl.ch>
+
+ */
 #ifndef _DATAADR_H_
 #define _DATAADR_H_
 
@@ -59,15 +70,15 @@ class DataADR
 {
 public:
 
-    //! @name Type definitions
+    //! @name Public Types
     //@{
+
     //! The time data handler
     /*!
        The class DataADR "has a" time handler object, to manage time dependent
        problems.
      */
     typedef DataTime                              dataTime_type;
-    typedef dataTime_type*                        dataTime_rawptr_type;
     typedef boost::shared_ptr<dataTime_type>      dataTime_ptr_type;
 
     //@}
@@ -86,17 +97,6 @@ public:
 
     //@}
 
-    //! @name Operators
-    //@{
-
-    //! Operator=
-    /*!
-     * @param dataADR an object of type DataADR
-     */
-    DataADR& operator=( const DataADR& dataADR );
-
-    //@}
-
     //! @name Methods
     //@{
 
@@ -109,6 +109,17 @@ public:
 
     //! Display the internal values
     void showMe( std::ostream& output = std::cout ) const;
+
+    //@}
+
+    //! @name Operators
+    //@{
+
+    //! Operator=
+    /*!
+     * @param dataADR an object of type DataADR
+     */
+    DataADR& operator=( const DataADR& dataADR );
 
     //@}
 

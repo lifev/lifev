@@ -1,37 +1,39 @@
 //@HEADER
 /*
-************************************************************************
+*******************************************************************************
 
- This file is part of the LifeV Applications.
- Copyright (C) 2001-2010 EPFL, Politecnico di Milano, INRIA
+    Copyright (C) 2004, 2005, 2007 EPFL, Politecnico di Milano, INRIA
+    Copyright (C) 2010 EPFL, Politecnico di Milano, Emory University
 
- This library is free software; you can redistribute it and/or modify
- it under the terms of the GNU Lesser General Public License as
- published by the Free Software Foundation; either version 2.1 of the
- License, or (at your option) any later version.
+    This file is part of LifeV.
 
- This library is distributed in the hope that it will be useful, but
- WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- Lesser General Public License for more details.
+    LifeV is free software; you can redistribute it and/or modify
+    it under the terms of the GNU Lesser General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
 
- You should have received a copy of the GNU Lesser General Public
- License along with this library; if not, write to the Free Software
- Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
- USA
+    LifeV is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+    Lesser General Public License for more details.
 
-************************************************************************
+    You should have received a copy of the GNU Lesser General Public License
+    along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
+
+*******************************************************************************
 */
 //@HEADER
 
 /*!
     @file
-    @brief A short description of the file content
+    @brief Reference finite element for hybrid FEs.
 
-    @author Samuel Quinodoz <samuel.quinodoz@epfl.ch>
-    @date 10 May 2010
+    @author Alessio Fumagalli
+            Samuel Quinodoz <samuel.quinodoz@epfl.ch>
+    @date 10-05-2010
 
-    A more detailed description of the file (if necessary)
+    @contributor
+    @mantainer Samuel Quinodoz <samuel.quinodoz@epfl.ch>
  */
 
 #ifndef REFFEHYBRID_H
@@ -154,18 +156,31 @@ public:
 
     //@}
 
+
+    //! @name Operators
+    //@{
+
     //! Extracting a StaticBdFE from the faces list.
-    inline const StaticBdFE& operator[] ( const ID& i ) const
+    const StaticBdFE& operator[] ( const ID& i ) const
     {
         ASSERT_BD( i < static_cast<ID>( M_numberBoundaryFE ) );
         return M_boundaryFEList[ i ];
     }
 
+    //@}
+
+
+    //! @name Get Methods
+    //@{
+
     //! Return the number of boundary elements of the reference element.
-    inline const UInt& numberBoundaryFE() const
+    const UInt& numberBoundaryFE() const
     {
         return M_numberBoundaryFE;
     }
+
+    //@}
+
 
 private:
 

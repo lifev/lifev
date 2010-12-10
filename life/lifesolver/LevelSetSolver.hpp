@@ -1,26 +1,26 @@
 //@HEADER
 /*
-************************************************************************
+*******************************************************************************
 
- This file is part of the LifeV Applications.
- Copyright (C) 2001-2010 EPFL, Politecnico di Milano, INRIA
+    Copyright (C) 2004, 2005, 2007 EPFL, Politecnico di Milano, INRIA
+    Copyright (C) 2010 EPFL, Politecnico di Milano, Emory University
 
- This library is free software; you can redistribute it and/or modify
- it under the terms of the GNU Lesser General Public License as
- published by the Free Software Foundation; either version 2.1 of the
- License, or (at your option) any later version.
+    This file is part of LifeV.
 
- This library is distributed in the hope that it will be useful, but
- WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- Lesser General Public License for more details.
+    LifeV is free software; you can redistribute it and/or modify
+    it under the terms of the GNU Lesser General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
 
- You should have received a copy of the GNU Lesser General Public
- License along with this library; if not, write to the Free Software
- Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
- USA
+    LifeV is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+    Lesser General Public License for more details.
 
-************************************************************************
+    You should have received a copy of the GNU Lesser General Public License
+    along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
+
+*******************************************************************************
 */
 //@HEADER
 
@@ -29,7 +29,12 @@
     @brief File constaining a solver for the level set equation
 
     @author Samuel Quinodoz <samuel.quinodoz@epfl.ch>
-    @date 05 Nov 2010
+    @date 05-11-2010
+
+    @contributor Samuel Quinodoz <samuel.quinodoz@epfl.ch>
+    @mantainer Samuel Quinodoz <samuel.quinodoz@epfl.ch>
+
+    A more detailed description of the file (if necessary)
  */
 
 #ifndef LEVELSETSOLVER_H
@@ -252,28 +257,10 @@ private:
     typedef std::vector<Real>       point_type;
     typedef std::vector<point_type> face_type;
 
-    // Private members
-    fespace_ptrType M_fespace;
-    fespace_ptrType M_betaFESpace;
 
-    vector_type M_solution;
+    //! @name Private Methods
+    //@{
 
-    adrAssembler_type M_adrAssembler;
-    ipAssembler_type M_ipAssembler;
-
-    matrix_ptrType M_systemMatrix;
-    matrix_ptrType M_massMatrix;
-    matrix_ptrType M_rhsMatrix;
-
-    vector_type M_rhs;
-
-    data_ptrType M_data;
-
-    bdf_ptrType M_bdf;
-
-    solver_type M_linearSolver;
-
-    // Private methods for direct reinitialization
     void updateFacesNormalsRadius();
     Real computeUnsignedDistance(const std::vector< Real >& point);
     void cleanFacesData();
@@ -300,12 +287,39 @@ private:
         return std::sqrt(V[0]*V[0]+V[1]*V[1]+V[2]*V[2]);
     };
 
+    //@}
+
+
+    // Private members
+    fespace_ptrType M_fespace;
+    fespace_ptrType M_betaFESpace;
+
+    vector_type M_solution;
+
+    adrAssembler_type M_adrAssembler;
+    ipAssembler_type M_ipAssembler;
+
+    matrix_ptrType M_systemMatrix;
+    matrix_ptrType M_massMatrix;
+    matrix_ptrType M_rhsMatrix;
+
+    vector_type M_rhs;
+
+    data_ptrType M_data;
+
+    bdf_ptrType M_bdf;
+
+    solver_type M_linearSolver;
+
     std::vector<face_type> M_faces;
     std::vector<point_type> M_normals;
     std::vector<Real> M_radius;
 
 };
 
+// ===================================================
+// Constructors & Destructor
+// ===================================================
 
 template< typename mesh_type, typename solver_type>
 LevelSetSolver<mesh_type,solver_type>::
@@ -334,6 +348,10 @@ LevelSetSolver( fespace_ptrType fespace, fespace_ptrType betaFESpace )
     M_adrAssembler.setup(fespace,betaFESpace);
     M_ipAssembler.setup(fespace,betaFESpace);
 }
+
+// ===================================================
+// Methods
+// ===================================================
 
 template< typename mesh_type, typename solver_type>
 void
@@ -617,6 +635,10 @@ reinitializationDirect()
     M_solution = vector_type(repSol,Unique,Zero);
 
 };
+
+// ===================================================
+// Private Methods
+// ===================================================
 
 template<typename mesh_type, typename solver_type>
 void

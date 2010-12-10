@@ -1,223 +1,146 @@
+//@HEADER
 /*
- This file is part of the LifeV library
- Copyright (C) 2001,2002,2003,2004 EPFL, INRIA and Politecnico di Milano
+*******************************************************************************
 
- This library is free software; you can redistribute it and/or
- modify it under the terms of the GNU Lesser General Public
- License as published by the Free Software Foundation; either
- version 2.1 of the License, or (at your option) any later version.
+    Copyright (C) 2004, 2005, 2007 EPFL, Politecnico di Milano, INRIA
+    Copyright (C) 2010 EPFL, Politecnico di Milano, Emory University
 
- This library is distributed in the hope that it will be useful,
- but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- Lesser General Public License for more details.
+    This file is part of LifeV.
 
- You should have received a copy of the GNU Lesser General Public
- License along with this library; if not, write to the Free Software
- Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+    LifeV is free software; you can redistribute it and/or modify
+    it under the terms of the GNU Lesser General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    LifeV is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+    Lesser General Public License for more details.
+
+    You should have received a copy of the GNU Lesser General Public License
+    along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
+
+*******************************************************************************
 */
+//@HEADER
+
+/*!
+    @file
+    @brief Class for connecting the dof of a mesh (3D) and an interface (2D)
+    that lives on the boundary of the mesh.
+
+    @author V. Martin
+    @date 00-02-2003
+
+    @contributor Samuel Quinodoz <samuel.quinodoz@epfl.ch>
+    @mantainer Samuel Quinodoz <samuel.quinodoz@epfl.ch>
+ */
+
 #include <life/lifefem/dofInterfaceHandler.hpp>
 
 namespace LifeV
 {
-//! Default Constructor (call addNeigbor after for each interface)
-/*! \param NbNeigh  number of neighbouring subdomains
-*/
+
+// ===================================================
+// Constructors & Destructor
+// ===================================================
+
 DofInterfaceHandler::DofInterfaceHandler( const UInt& NbNeigh ) :
-        _nbNeigh( NbNeigh )
+        M_nbNeighbor( NbNeigh )
 {
-    _neighList.reserve( _nbNeigh );
-    _InIBCList.reserve( _nbNeigh );
-    _OutIBCList.reserve( _nbNeigh );
-    _bcvList.reserve( _nbNeigh );
+    M_neighborList.reserve( M_nbNeighbor );
+    M_inputBCList.reserve( M_nbNeighbor );
+    M_outputBCList.reserve( M_nbNeighbor );
+    M_BCVectorList.reserve( M_nbNeighbor );
 
 }
 
-//! Constructor
-/*! \param NbNeigh  number of neighbouring subdomains
-    \param refFe the part of the reference FE that contains the dof patterns (nbDofPerEdge...)
-    \param dof1 the Dof object of the mesh in which we want to make the computations
- */
 DofInterfaceHandler::DofInterfaceHandler( const UInt & NbNeigh, const LocalDofPattern& refFE, const Dof& dof1 ) :
-        _nbNeigh( NbNeigh )
+        M_nbNeighbor( NbNeigh )
 {
-    _neighList.reserve( _nbNeigh );
-    _InIBCList.reserve( _nbNeigh );
-    _OutIBCList.reserve( _nbNeigh );
-    _bcvList.reserve( _nbNeigh );
+    M_neighborList.reserve( M_nbNeighbor );
+    M_inputBCList.reserve( M_nbNeighbor );
+    M_outputBCList.reserve( M_nbNeighbor );
+    M_BCVectorList.reserve( M_nbNeighbor );
 
-    for ( UInt i = 0 ; i < _nbNeigh ; ++i )
+    for ( UInt i = 0 ; i < M_nbNeighbor ; ++i )
     {
-        _neighList.push_back( dof_interface_type( new DofInterface3Dto2D( refFE, dof1 ) ) );
+        M_neighborList.push_back( dof_interface_type( new DofInterface3Dto2D( refFE, dof1 ) ) );
     }
 }
 
-//! add a DofInterface3Dto2D to the list of neighbors
-/*
-    \param refFe the part of the reference FE that contains the dof patterns (nbDofPerEdge...)
-    \param dof1 the Dof object of the mesh in which we want to make the computations
-*/
+// ===================================================
+// Methods
+// ===================================================
+
 void DofInterfaceHandler::addNeighbor( const LocalDofPattern& refFE, const Dof& dof1 )
 {
-    ASSERT_PRE( _nbNeigh != _neighList.size(), "The list of neighbors in the Handler is full." );
-    _neighList.push_back( dof_interface_type( new DofInterface3Dto2D( refFE, dof1 ) ) );
+    ASSERT_PRE( M_nbNeighbor != M_neighborList.size(), "The list of neighbors in the Handler is full." );
+    M_neighborList.push_back( dof_interface_type( new DofInterface3Dto2D( refFE, dof1 ) ) );
 }
 
-//! creates the list of Vectors that store data
+
 void DofInterfaceHandler::initVectors()
 {
-    ASSERT_PRE( _nbNeigh != _InIBCList.size() || _nbNeigh == 0 , "The list of InIBC Vectors in the Handler is full." );
-    for ( UInt iter = 0 ; iter < _nbNeigh ; ++iter )
+    ASSERT_PRE( M_nbNeighbor != M_inputBCList.size() || M_nbNeighbor == 0 ,
+                "The list of InIBC Vectors in the Handler is full." );
+    for ( UInt iter = 0 ; iter < M_nbNeighbor ; ++iter )
     {
-        ASSERT_PRE( _neighList[ iter ]->finalized(), "The DofInterface3Dto2D should be updated before calling initVectors (InIBC)." );
-//@        _InIBCList.push_back( EpetraVector( _neighList[ iter ]->nbInterfaceDof() ) );
+        ASSERT_PRE( M_neighborList[ iter ]->finalized(),
+                    "The DofInterface3Dto2D should be updated before calling initVectors (InIBC)." );
 
     }
-    ASSERT_PRE( _nbNeigh != _OutIBCList.size() || _nbNeigh == 0 , "The list of OutIBC Vectors in the Handler is full." );
-    for ( UInt iter = 0 ; iter < _nbNeigh ; ++iter )
+    ASSERT_PRE( M_nbNeighbor != M_outputBCList.size() || M_nbNeighbor == 0 ,
+                "The list of OutIBC Vectors in the Handler is full." );
+    for ( UInt iter = 0 ; iter < M_nbNeighbor ; ++iter )
     {
-        ASSERT_PRE( _neighList[ iter ]->finalized(), "The DofInterface3Dto2D should be updated before calling initVectors (OutIBC)." );
-//@        _OutIBCList.push_back( EpetraVector( _neighList[ iter ]->nbInterfaceDof() ) );
+        ASSERT_PRE( M_neighborList[ iter ]->finalized(),
+                    "The DofInterface3Dto2D should be updated before calling initVectors (OutIBC)." );
 
-        _indexInterfRefMap[ _neighList[ iter ]->InterfaceRef() ] = iter;
+        M_referenceToIndexMap[ M_neighborList[ iter ]->InterfaceRef() ] = iter;
     }
 }
 
-//! creates the list of BC Vectors
+
 void DofInterfaceHandler::initBCVectorInterface()
 {
-    ASSERT_PRE( _nbNeigh != _bcvList.size() || _nbNeigh == 0 , "The list of BC Vectors in the Handler is full." );
-    ASSERT_PRE( _nbNeigh == _InIBCList.size(), "The list of InIBC Vectors in the Handler should be initialized before calling initBCVectorInterface." );
-    ASSERT_PRE( _nbNeigh == _OutIBCList.size(), "The list of OutIBC Vectors in the Handler should be initialized before calling initBCVectorInterface." );
-    for ( UInt iter = 0 ; iter < _nbNeigh ; ++iter )
+    ASSERT_PRE( M_nbNeighbor != M_BCVectorList.size() || M_nbNeighbor == 0 ,
+                "The list of BC Vectors in the Handler is full." );
+    ASSERT_PRE( M_nbNeighbor == M_inputBCList.size(),
+                "The list of InIBC Vectors in the Handler should be initialized before calling initBCVectorInterface." );
+    ASSERT_PRE( M_nbNeighbor == M_outputBCList.size(),
+                "The list of OutIBC Vectors in the Handler should be initialized before calling initBCVectorInterface." );
+    for ( UInt iter = 0 ; iter < M_nbNeighbor ; ++iter )
     {
-        ASSERT_PRE( _neighList[ iter ]->finalized(), "The DofInterface3Dto2D should be updated before calling initBCVectorInterface." );
+        ASSERT_PRE( M_neighborList[ iter ]->finalized(),
+                    "The DofInterface3Dto2D should be updated before calling initBCVectorInterface." );
 
-        BCVectorInterface::dof_interface_type __di = _neighList[ iter ];
-        _bcvList.push_back( BCVectorInterface( _InIBCList[ iter ], _neighList[ iter ]->nbInterfaceDof(), __di ) );
+        BCVectorInterface::dof_interface_type di = M_neighborList[ iter ];
+        M_BCVectorList.push_back( BCVectorInterface( M_inputBCList[ iter ],
+                                                     M_neighborList[ iter ]->nbInterfaceDof(), di ) );
     }
 
 }
 
-//! How many neighbors stored?
-UInt DofInterfaceHandler::NbNeigh() const
-{
-    //  std::cerr << "list size " << _neighList.size() << " and _nbNeigh " << _nbNeigh << std::endl;
-    return _neighList.size();
-}
-
-//! Sum of the sizes of the Interface vectors
 UInt DofInterfaceHandler::NbInterfaceUnknowns() const
 {
-    ASSERT_PRE( _nbNeigh == _InIBCList.size(), "Some Vectors have not been added to the list (InIBC)." );
-    ASSERT_PRE( _nbNeigh == _OutIBCList.size(), "Some Vectors have not been added to the list (OutIBC)." );
+    ASSERT_PRE( M_nbNeighbor == M_inputBCList.size(), "Some Vectors have not been added to the list (InIBC)." );
+    ASSERT_PRE( M_nbNeighbor == M_outputBCList.size(), "Some Vectors have not been added to the list (OutIBC)." );
     UInt counter = 0;
-    for ( UInt iter = 0 ; iter < _nbNeigh ; ++iter )
+    for ( UInt iter = 0 ; iter < M_nbNeighbor ; ++iter )
     {
-        ASSERT_PRE( (int)_neighList[ iter ]->nbInterfaceDof() == _InIBCList[ iter ].size() &&
-                    (int)_neighList[ iter ]->nbInterfaceDof() == _OutIBCList[ iter ].size(),
+        ASSERT_PRE( (int)M_neighborList[ iter ]->nbInterfaceDof() == M_inputBCList[ iter ].size() &&
+                    (int)M_neighborList[ iter ]->nbInterfaceDof() == M_outputBCList[ iter ].size(),
                     "The IBC vectors must have the same size as the number of interface dof." );
-        counter += _neighList[ iter ]->nbInterfaceDof();
+        counter += M_neighborList[ iter ]->nbInterfaceDof();
     }
     return counter;
 }
 
-//! Extracting neighbors from the list (starts from 0)
-DofInterface3Dto2D& DofInterfaceHandler::operator[] ( const UInt& i )
-{
-    ASSERT_PRE( _nbNeigh == _neighList.size(), "Some neighbors have not been added to the list" );
-    ASSERT_BD( i < _nbNeigh );
-    return *_neighList[ i ];
-}
-const DofInterface3Dto2D& DofInterfaceHandler::operator[] ( const UInt& i ) const
-{
-    ASSERT_PRE( _nbNeigh == _neighList.size(), "Some neighbors have not been added to the list" );
-    ASSERT_BD( i < _nbNeigh );
-    return *_neighList[ i ];
-}
-
-
-//! extracting a Vector in the _InIBCList list (starts from 0)
-const EpetraVector & DofInterfaceHandler::InIBC( const UInt & i ) const
-{
-    ASSERT_PRE( _nbNeigh == _InIBCList.size(), "Some Vectors have not been added to the list (InIBC)." );
-    ASSERT_BD( i < _nbNeigh );
-    return _InIBCList[ i ];
-}
-EpetraVector & DofInterfaceHandler::InIBC( const UInt & i )
-{
-    ASSERT_PRE( _nbNeigh == _InIBCList.size(), "Some Vectors have not been added to the list (InIBC)." );
-    ASSERT_BD( i < _nbNeigh );
-    return _InIBCList[ i ];
-}
-
-//! extracting a Vector in the _InIBCList list (starts from 0)
-//! using the reference of the interface
-const EpetraVector & DofInterfaceHandler::InIBC_byRefInterf( const Int & refinterf ) const
-{
-    ASSERT_PRE( _nbNeigh == _InIBCList.size(), "Some Vectors have not been added to the list (InIBC)." );
-    UInt i = IndexOfInterfaceRef( refinterf );
-    return _InIBCList[ i ];
-}
-EpetraVector & DofInterfaceHandler::InIBC_byRefInterf( const Int & refinterf )
-{
-    ASSERT_PRE( _nbNeigh == _InIBCList.size(), "Some Vectors have not been added to the list (InIBC)." );
-    UInt i = IndexOfInterfaceRef( refinterf );
-    return _InIBCList[ i ];
-}
-
-//! extracting a Vector in the _OutIBCList list (starts from 0)
-const EpetraVector & DofInterfaceHandler::OutIBC( const UInt & i ) const
-{
-    ASSERT_PRE( _nbNeigh == _OutIBCList.size(), "Some Vectors have not been added to the list (OutIBC)." );
-    ASSERT_BD( i < _nbNeigh );
-    return _OutIBCList[ i ];
-}
-EpetraVector & DofInterfaceHandler::OutIBC( const UInt & i )
-{
-    ASSERT_PRE( _nbNeigh == _OutIBCList.size(), "Some Vectors have not been added to the list (OutIBC)." );
-    ASSERT_BD( i < _nbNeigh );
-    return _OutIBCList[ i ];
-}
-
-//! extracting a Vector in the _OutIBCList list (starts from 0)
-//! using the reference of the interface
-const EpetraVector & DofInterfaceHandler::OutIBC_byRefInterf( const Int & refinterf ) const
-{
-    ASSERT_PRE( _nbNeigh == _OutIBCList.size(), "Some Vectors have not been added to the list (OutIBC)." );
-    UInt i = IndexOfInterfaceRef( refinterf );
-    return _OutIBCList[ i ];
-}
-EpetraVector & DofInterfaceHandler::OutIBC_byRefInterf( const Int & refinterf )
-{
-    ASSERT_PRE( _nbNeigh == _OutIBCList.size(), "Some Vectors have not been added to the list (OutIBC)." );
-    UInt i = IndexOfInterfaceRef( refinterf );
-    return _OutIBCList[ i ];
-}
-
-
-//! extracting a BCVector in the _bcvList list (starts from 0)
-const BCVectorInterface &DofInterfaceHandler:: BCvec( const UInt & i ) const
-{
-    ASSERT_PRE( _nbNeigh == _bcvList.size(), "Some BC Vectors have not been added to the list" );
-    return _bcvList[ i ];
-}
-BCVectorInterface & DofInterfaceHandler::BCvec( const UInt & i )
-{
-    ASSERT_PRE( _nbNeigh == _bcvList.size(), "Some BC Vectors have not been added to the list" );
-    return _bcvList[ i ];
-}
-
-
-/*! This method returns the corresponding index number in the vectors
-    (_neighList, _InIBCList...) living on the interfaces
-    for a specific reference interface number.
-  \param interfref : the reference of the interface.
-*/
 UInt DofInterfaceHandler::IndexOfInterfaceRef( const Int& interfref ) const
 {
-    std::map<Int, UInt>::const_iterator it = _indexInterfRefMap.find( interfref );
-    if ( it == _indexInterfRefMap.end() )
+    std::map<Int, UInt>::const_iterator it = M_referenceToIndexMap.find( interfref );
+    if ( it == M_referenceToIndexMap.end() )
     {
         std::ostringstream _err_msg;
         _err_msg << "Dof number " << interfref << " not found";
@@ -226,17 +149,106 @@ UInt DofInterfaceHandler::IndexOfInterfaceRef( const Int& interfref ) const
     return it->second;
 }
 
-//! save some memory: destroy _neighList
-//! use it safely!
-//!(USE IT AFTER the construction of the interface mesh
-//! and the _locDofMap in DofInterfaceBase)
 void DofInterfaceHandler::ClearSomeDofInterface3Dto2DList()
 {
-    for ( UInt iter = 0 ; iter < _nbNeigh ; ++iter )
+    for ( UInt iter = 0 ; iter < M_nbNeighbor ; ++iter )
     {
-        ASSERT_PRE( _neighList[ iter ]->finalized(), "The DofInterface3Dto2D should be updated before calling ClearDofInterface3Dto2DList()." );
-        _neighList[ iter ]->ClearLists();
+        ASSERT_PRE( M_neighborList[ iter ]->finalized(),
+                    "The DofInterface3Dto2D should be updated before calling ClearDofInterface3Dto2DList()." );
+        M_neighborList[ iter ]->ClearLists();
     }
 }
+
+// ===================================================
+// Operators
+// ===================================================
+
+//! Extracting neighbors from the list (starts from 0)
+DofInterface3Dto2D& DofInterfaceHandler::operator[] ( const UInt& i )
+{
+    ASSERT_PRE( M_nbNeighbor == M_neighborList.size(), "Some neighbors have not been added to the list" );
+    ASSERT_BD( i < M_nbNeighbor );
+    return *M_neighborList[ i ];
+}
+const DofInterface3Dto2D& DofInterfaceHandler::operator[] ( const UInt& i ) const
+{
+    ASSERT_PRE( M_nbNeighbor == M_neighborList.size(), "Some neighbors have not been added to the list" );
+    ASSERT_BD( i < M_nbNeighbor );
+    return *M_neighborList[ i ];
+}
+
+// ===================================================
+// Get Methods
+// ===================================================
+
+UInt DofInterfaceHandler::NbNeigh() const
+{
+    return M_neighborList.size();
+}
+
+const EpetraVector & DofInterfaceHandler::InIBC( const UInt & i ) const
+{
+    ASSERT_PRE( M_nbNeighbor == M_inputBCList.size(), "Some Vectors have not been added to the list (InIBC)." );
+    ASSERT_BD( i < M_nbNeighbor );
+    return M_inputBCList[ i ];
+}
+EpetraVector & DofInterfaceHandler::InIBC( const UInt & i )
+{
+    ASSERT_PRE( M_nbNeighbor == M_inputBCList.size(), "Some Vectors have not been added to the list (InIBC)." );
+    ASSERT_BD( i < M_nbNeighbor );
+    return M_inputBCList[ i ];
+}
+
+const EpetraVector & DofInterfaceHandler::InIBC_byRefInterf( const Int & refinterf ) const
+{
+    ASSERT_PRE( M_nbNeighbor == M_inputBCList.size(), "Some Vectors have not been added to the list (InIBC)." );
+    UInt i = IndexOfInterfaceRef( refinterf );
+    return M_inputBCList[ i ];
+}
+EpetraVector & DofInterfaceHandler::InIBC_byRefInterf( const Int & refinterf )
+{
+    ASSERT_PRE( M_nbNeighbor == M_inputBCList.size(), "Some Vectors have not been added to the list (InIBC)." );
+    UInt i = IndexOfInterfaceRef( refinterf );
+    return M_inputBCList[ i ];
+}
+
+const EpetraVector & DofInterfaceHandler::OutIBC( const UInt & i ) const
+{
+    ASSERT_PRE( M_nbNeighbor == M_outputBCList.size(), "Some Vectors have not been added to the list (OutIBC)." );
+    ASSERT_BD( i < M_nbNeighbor );
+    return M_outputBCList[ i ];
+}
+EpetraVector & DofInterfaceHandler::OutIBC( const UInt & i )
+{
+    ASSERT_PRE( M_nbNeighbor == M_outputBCList.size(), "Some Vectors have not been added to the list (OutIBC)." );
+    ASSERT_BD( i < M_nbNeighbor );
+    return M_outputBCList[ i ];
+}
+
+const EpetraVector & DofInterfaceHandler::OutIBC_byRefInterf( const Int & refinterf ) const
+{
+    ASSERT_PRE( M_nbNeighbor == M_outputBCList.size(), "Some Vectors have not been added to the list (OutIBC)." );
+    UInt i = IndexOfInterfaceRef( refinterf );
+    return M_outputBCList[ i ];
+}
+EpetraVector & DofInterfaceHandler::OutIBC_byRefInterf( const Int & refinterf )
+{
+    ASSERT_PRE( M_nbNeighbor == M_outputBCList.size(), "Some Vectors have not been added to the list (OutIBC)." );
+    UInt i = IndexOfInterfaceRef( refinterf );
+    return M_outputBCList[ i ];
+}
+
+const BCVectorInterface &DofInterfaceHandler:: BCvec( const UInt & i ) const
+{
+    ASSERT_PRE( M_nbNeighbor == M_BCVectorList.size(), "Some BC Vectors have not been added to the list" );
+    return M_BCVectorList[ i ];
+}
+BCVectorInterface & DofInterfaceHandler::BCvec( const UInt & i )
+{
+    ASSERT_PRE( M_nbNeighbor == M_BCVectorList.size(), "Some BC Vectors have not been added to the list" );
+    return M_BCVectorList[ i ];
+}
+
+
 
 }

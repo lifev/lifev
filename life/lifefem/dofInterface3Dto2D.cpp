@@ -1,155 +1,122 @@
+//@HEADER
 /*
- This file is part of the LifeV library
- Copyright (C) 2001,2002,2003,2004 EPFL, INRIA and Politecnico di Milano
+*******************************************************************************
 
- This library is free software; you can redistribute it and/or
- modify it under the terms of the GNU Lesser General Public
- License as published by the Free Software Foundation; either
- version 2.1 of the License, or (at your option) any later version.
+    Copyright (C) 2004, 2005, 2007 EPFL, Politecnico di Milano, INRIA
+    Copyright (C) 2010 EPFL, Politecnico di Milano, Emory University
 
- This library is distributed in the hope that it will be useful,
- but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- Lesser General Public License for more details.
+    This file is part of LifeV.
 
- You should have received a copy of the GNU Lesser General Public
- License along with this library; if not, write to the Free Software
- Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+    LifeV is free software; you can redistribute it and/or modify
+    it under the terms of the GNU Lesser General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    LifeV is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+    Lesser General Public License for more details.
+
+    You should have received a copy of the GNU Lesser General Public License
+    along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
+
+*******************************************************************************
 */
+//@HEADER
+
+/*!
+    @file
+    @brief Class for connecting the dof of a mesh (3D) and an interface (2D)
+         that lives on the boundary of the mesh.
+
+    @author Vincent Martin
+    @date 00-02-2003
+
+    This file contains the class which may be used to update and hold
+    the connections between the dof of a mesh (3D) and an interface (2D)
+    that lives on the boundary of the mesh. The interface is referenced
+    by a flag.
+
+    @contributor M.A. Fernandez
+                 Samuel Quinodoz <samuel.quinodoz@epfl.ch>
+    @mantainer Samuel Quinodoz <samuel.quinodoz@epfl.ch>
+ */
+
+
 #include <life/lifefem/dofInterface3Dto2D.hpp>
 
 namespace LifeV
 {
 
-//! Constructor for interfacing Dof of the same type (RefFE)
-/*!
-  \param refFe the part of the reference FE that contains the dof patterns (nbDofPerEdge...)
-  \param dof1 the Dof object of the mesh in which we want to make the computations
-*/
-DofInterface3Dto2D::DofInterface3Dto2D( const LocalDofPattern& refFE, const Dof& dof1 ) :
-        _interfRef( 0 ), _refFE1( &refFE ), _dof1( &dof1 )
-{
-    _finalized = false;
-}
+// ===================================================
+// Helper
+// ===================================================
 
 
-// Member functions
-
-void
-DofInterface3Dto2D::setup( const LocalDofPattern& refFE1, const Dof& dof1 )
-{
-    _refFE1    = &refFE1;
-    _dof1      = &dof1;
-
-    _finalized = false;
-}
-
-
-
-void RemoveMultiple( const std::list<ID> & list0, std::list< std::pair<ID, ID> > & listf )
+void RemoveMultiple( const std::list<ID> & listToTreat, std::list< std::pair<ID, ID> > & finalList )
 {
     ID counter = 1;
-    std::list<ID> tmplist( list0 );
+    std::list<ID> temporaryList( listToTreat );
 
     //! Sort the list
-    tmplist.sort();
+    temporaryList.sort();
 
     //! initialize the new list
-    std::pair <ID, ID> p0( tmplist.front() , counter );
-    listf.push_back( p0 );
+    std::pair <ID, ID> p0( temporaryList.front() , counter );
+    finalList.push_back( p0 );
 
     //! We remove the multiple occurences :
-    for ( std::list<ID>::iterator it = tmplist.begin() ; it != tmplist.end() ; ++ it )
+    for ( std::list<ID>::iterator it = temporaryList.begin() ; it != temporaryList.end() ; ++ it )
     {
-        if ( ( *it ) != listf.back().first )
+        if ( ( *it ) != finalList.back().first )
         {
             counter ++ ;
             //! Add to the list the new value
             std::pair <ID, ID> p( ( *it ) , counter );
-            listf.push_back( p );
+            finalList.push_back( p );
         }
     }
 }
 
-//! Returns the reference of the interface
-EntityFlag DofInterface3Dto2D::InterfaceRef() const
+// ===================================================
+// Constructors & Destructor
+// ===================================================
+
+DofInterface3Dto2D::DofInterface3Dto2D( const LocalDofPattern& refFE, const Dof& dof1 ) :
+        M_interfaceFlag( 0 ), M_refFE1( &refFE ), M_dof1( &dof1 )
 {
-    return _interfRef;
+    M_finalized = false;
 }
 
+// ===================================================
+// Methods
+// ===================================================
 
-//! Returns the identity of the i-th elements in the (finalised) face list
-//! (counting from 0 ' a la C')
-ID DofInterface3Dto2D::operator[] ( const UInt& i ) const
+void
+DofInterface3Dto2D::setup( const LocalDofPattern& refFE1, const Dof& dof1 )
 {
-    ASSERT_PRE( _finalized, "The face List should be finalised before being accessed" );
-    ASSERT_BD( i < _faceList.size() );
-    return _faceList[ i ].first;  // _faceList must be a vector!
+    M_refFE1    = &refFE1;
+    M_dof1      = &dof1;
+
+    M_finalized = false;
 }
 
-
-//! Assignment operator (we have a vector of DofInterface3Dto2D)
-DofInterface3Dto2D & DofInterface3Dto2D::operator=( const DofInterface3Dto2D& dofi )
-{
-    _interfRef = dofi._interfRef;
-    _refFE1 = dofi._refFE1;
-    _dof1 = dofi._dof1;
-    _faceList = dofi._faceList;
-    _vertexPerFaceList = dofi._vertexPerFaceList; // (empty)
-    _vertexList = dofi._vertexList;
-    // _edgePerFaceList   = dofi._edgePerFaceList; // (empty)
-    // _edgeList          = dofi._edgeList;
-    //_locDof = dofi._locDof;            // (empty)
-    _locDofMap = dofi._locDofMap;
-    _finalized = dofi._finalized;
-
-    return *this;
-}
-
-//! true if the lists have been updated.
-bool DofInterface3Dto2D::finalized() const
-{
-    return _finalized;
-}
-
-//! removes all unuseful list (all except _faceList). use it properly!
 void DofInterface3Dto2D::ClearLists()
 {
-    _vertexPerFaceList.clear();
-    _vertexList.clear();
-    //  _edgePerFaceList.clear();
-    //  _edgeList.clear();
-    //_locDof.clear();
+    M_vertexPerFaceList.clear();
+    M_vertexList.clear();
 }
 
-
-//! Transforms the 3d index of a vertex into its 2d (interface) index.
-//! This is a simple algorithm... Find out something better some day...?
-ID DofInterface3Dto2D::_Vtx3Dto2D( const ID& idpoint3D ) const
-{
-    ASSERT_PRE( _finalized, "The list of vertices must be finalized before accessing to the interface vertices." );
-    for ( std::list< std::pair<ID, ID> >::const_iterator it = _vertexList.begin(); it != _vertexList.end(); ++it )
-    {
-        if ( it->first == idpoint3D )
-            return it->second;
-    }
-    ERROR_MSG( "There is no such 3D index of vertex in the _vertexList." );
-
-    return ID();
-}
-
-
-//! Output
-std::ostream& DofInterface3Dto2D::showMe2D( bool verbose, std::ostream& out ) const
+std::ostream& DofInterface3Dto2D::showMe( bool verbose, std::ostream& out ) const
 {
     out << "------------------------------" << std::endl;
-    out << "myDofInterface reference: " << _interfRef << std::endl;
-    out << "Number of face connections (_faceList): " << _faceList.size() << std::endl;
+    out << "myDofInterface reference: " << M_interfaceFlag << std::endl;
+    out << "Number of face connections (M_faceList): " << M_faceList.size() << std::endl;
     if ( verbose )
     {
         unsigned int count( 0 ), lines( 10 );
         out << "\tList of connections between Faces: (global, local)";
-        for ( std::vector< std::pair<ID, ID> >::const_iterator i = _faceList.begin(); i != _faceList.end(); ++i )
+        for ( std::vector< std::pair<ID, ID> >::const_iterator i = M_faceList.begin(); i != M_faceList.end(); ++i )
         {
             if ( count++ % lines == 0 )
             {
@@ -159,12 +126,12 @@ std::ostream& DofInterface3Dto2D::showMe2D( bool verbose, std::ostream& out ) co
         }
         out << std::endl;
     }
-    out << "Number of connections between Vertices (_vertexList): " << _vertexList.size() << std::endl;
+    out << "Number of connections between Vertices (M_vertexList): " << M_vertexList.size() << std::endl;
     if ( verbose )
     {
         unsigned int count( 0 ), lines( 10 );
         out << "\tList of connections between Vertices: (global, local)";
-        for ( std::list< std::pair<ID, ID> >::const_iterator it = _vertexList.begin(); it != _vertexList.end(); ++it )
+        for ( std::list< std::pair<ID, ID> >::const_iterator it = M_vertexList.begin(); it != M_vertexList.end(); ++it )
         {
             if ( count++ % lines == 0 )
             {
@@ -174,11 +141,56 @@ std::ostream& DofInterface3Dto2D::showMe2D( bool verbose, std::ostream& out ) co
         }
         out << std::endl;
     }
-    //! print _locDofMap
+    //! print M_locDofMap
     showMe( verbose, out );
 
     out << "------------------------------" << std::endl;
     return out;
+}
+
+// ===================================================
+// Operators
+// ===================================================
+
+
+ID DofInterface3Dto2D::operator[] ( const UInt& i ) const
+{
+    ASSERT_PRE( M_finalized, "The face List should be finalised before being accessed" );
+    ASSERT_BD( i < M_faceList.size() );
+    return M_faceList[ i ].first;  // M_faceList must be a vector!
+}
+
+
+DofInterface3Dto2D & DofInterface3Dto2D::operator=( const DofInterface3Dto2D& dofi )
+{
+    M_interfaceFlag = dofi.M_interfaceFlag;
+    M_refFE1 = dofi.M_refFE1;
+    M_dof1 = dofi.M_dof1;
+    M_faceList = dofi.M_faceList;
+    M_vertexPerFaceList = dofi.M_vertexPerFaceList; // (empty)
+    M_vertexList = dofi.M_vertexList;
+    M_locDofMap = dofi.M_locDofMap;
+    M_finalized = dofi.M_finalized;
+
+    return *this;
+}
+
+
+// ===================================================
+// Private Methods
+// ===================================================
+
+ID DofInterface3Dto2D::Vertex3Dto2D( const ID& idpoint3D ) const
+{
+    ASSERT_PRE( M_finalized, "The list of vertices must be finalized before accessing to the interface vertices." );
+    for ( std::list< std::pair<ID, ID> >::const_iterator it = M_vertexList.begin(); it != M_vertexList.end(); ++it )
+    {
+        if ( it->first == idpoint3D )
+            return it->second;
+    }
+    ERROR_MSG( "There is no such 3D index of vertex in the M_vertexList." );
+
+    return ID();
 }
 
 

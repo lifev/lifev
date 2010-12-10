@@ -1,42 +1,62 @@
-/* -*- mode: c++ -*-
- This file is part of the LifeV library
- Copyright (C) 2001,2002,2003,2004 EPFL, INRIA and Politecnico di Milano
+//@HEADER
+/*
+*******************************************************************************
 
- This library is free software; you can redistribute it and/or
- modify it under the terms of the GNU Lesser General Public
- License as published by the Free Software Foundation; either
- version 2.1 of the License, or (at your option) any later version.
+    Copyright (C) 2004, 2005, 2007 EPFL, Politecnico di Milano, INRIA
+    Copyright (C) 2010 EPFL, Politecnico di Milano, Emory University
 
- This library is distributed in the hope that it will be useful,
- but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- Lesser General Public License for more details.
+    This file is part of LifeV.
 
- You should have received a copy of the GNU Lesser General Public
- License along with this library; if not, write to the Free Software
- Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+    LifeV is free software; you can redistribute it and/or modify
+    it under the terms of the GNU Lesser General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    LifeV is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+    Lesser General Public License for more details.
+
+    You should have received a copy of the GNU Lesser General Public License
+    along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
+
+*******************************************************************************
 */
+//@HEADER
+
+/*!
+    @file
+    @brief File containing the CurrentFE class implementation
+
+    @author Jean-Frederic Gerbeau
+    @date 00-04-2002
+
+    @contributor V. Martin
+                 Samuel Quinodoz <samuel.quinodoz@epfl.ch>
+    @mantainer Samuel Quinodoz <samuel.quinodoz@epfl.ch>
+ */
+
 #include <life/lifefem/currentFE.hpp>
 
 namespace LifeV
 {
-CurrentFE::CurrentFE( const RefFE& _refFE, const GeoMap& _geoMap, const QuadRule& _qr )
+CurrentFE::CurrentFE( const RefFE& refFE, const GeoMap& geoMap, const QuadRule& qr )
         :
-        nbNode( _refFE.nbDof() ),
-        M_nbCoor( _refFE.nbCoor() ),
-        M_nbDiag( _refFE.nbDiag() ),
-        M_nbUpper( _refFE.nbUpper() ) ,
-        M_nbPattern( _refFE.nbPattern() ),
+        nbNode( refFE.nbDof() ),
+        M_nbCoor( refFE.nbCoor() ),
+        M_nbDiag( refFE.nbDiag() ),
+        M_nbUpper( refFE.nbUpper() ) ,
+        M_nbPattern( refFE.nbPattern() ),
 
-        M_nbGeoNode( _geoMap.nbDof() ),
-        M_nbQuadPt( UInt(_qr.nbQuadPt()) ),
+        M_nbGeoNode( geoMap.nbDof() ),
+        M_nbQuadPt( UInt(qr.nbQuadPt()) ),
 
-        M_refFE( &_refFE ),
-        M_geoMap( &_geoMap),
-        M_quadRule(new QuadRule(_qr)),
+        M_refFE( &refFE ),
+        M_geoMap( &geoMap),
+        M_quadRule(new QuadRule(qr)),
 
 
-        M_cellNodes(boost::extents[_geoMap.nbDof()][M_nbCoor]),
+        M_cellNodes(boost::extents[geoMap.nbDof()][M_nbCoor]),
         M_quadNodes(boost::extents[M_nbQuadPt][3]),
 
         M_dphiGeoMap(boost::extents[M_nbGeoNode][M_nbCoor][M_nbQuadPt]),
@@ -139,23 +159,23 @@ CurrentFE::CurrentFE( const RefFE& _refFE, const GeoMap& _geoMap, const QuadRule
 
 }
 
-CurrentFE::CurrentFE( const RefFE& _refFE, const GeoMap& _geoMap )
+CurrentFE::CurrentFE( const RefFE& refFE, const GeoMap& geoMap )
         :
-        nbNode( _refFE.nbDof() ),
-        M_nbCoor( _refFE.nbCoor() ),
-        M_nbDiag( _refFE.nbDiag() ),
-        M_nbUpper( _refFE.nbUpper() ) ,
-        M_nbPattern( _refFE.nbPattern() ),
+        nbNode( refFE.nbDof() ),
+        M_nbCoor( refFE.nbCoor() ),
+        M_nbDiag( refFE.nbDiag() ),
+        M_nbUpper( refFE.nbUpper() ) ,
+        M_nbPattern( refFE.nbPattern() ),
 
-        M_nbGeoNode( _geoMap.nbDof() ),
+        M_nbGeoNode( geoMap.nbDof() ),
         M_nbQuadPt(0),
 
-        M_refFE( & _refFE ),
-        M_geoMap( &_geoMap ),
+        M_refFE( & refFE ),
+        M_geoMap( &geoMap ),
         M_quadRule( 0 ),
 
 
-        M_cellNodes(boost::extents[_geoMap.nbDof()][M_nbCoor]),
+        M_cellNodes(boost::extents[geoMap.nbDof()][M_nbCoor]),
 
 
         M_cellNodesUpdated(false),

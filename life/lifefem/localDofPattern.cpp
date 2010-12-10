@@ -1,32 +1,35 @@
 //@HEADER
 /*
-************************************************************************
+*******************************************************************************
 
- This file is part of the LifeV Applications.
- Copyright (C) 2001-2010 EPFL, Politecnico di Milano, INRIA
+    Copyright (C) 2004, 2005, 2007 EPFL, Politecnico di Milano, INRIA
+    Copyright (C) 2010 EPFL, Politecnico di Milano, Emory University
 
- This library is free software; you can redistribute it and/or modify
- it under the terms of the GNU Lesser General Public License as
- published by the Free Software Foundation; either version 2.1 of the
- License, or (at your option) any later version.
+    This file is part of LifeV.
 
- This library is distributed in the hope that it will be useful, but
- WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- Lesser General Public License for more details.
+    LifeV is free software; you can redistribute it and/or modify
+    it under the terms of the GNU Lesser General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
 
- You should have received a copy of the GNU Lesser General Public
- License along with this library; if not, write to the Free Software
- Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
- USA
+    LifeV is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+    Lesser General Public License for more details.
 
-************************************************************************
+    You should have received a copy of the GNU Lesser General Public License
+    along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
+
+*******************************************************************************
 */
 //@HEADER
 
 /*!
     @file
-    @brief Implementation of the localDofPattern class.
+    @brief This file contains the definition of the LocalDofPattern class.
+
+    @contributor Samuel Quinodoz <samuel.quinodoz@epfl.ch>
+    @mantainer Samuel Quinodoz <samuel.quinodoz@epfl.ch>
  */
 
 #include <life/lifefem/localDofPattern.hpp>
@@ -34,19 +37,22 @@
 namespace LifeV
 {
 
-// This is the 3D constructor
+// ===================================================
+// Constructors & Destructor
+// ===================================================
 
-LocalDofPattern::LocalDofPattern( const UInt& _nbLocalDof, const UInt& _nbDofPerVertex,
-                                  const UInt& _nbDofPerEdge, const UInt& _nbDofPerFace,
-                                  const UInt& _nbDofPerVolume, const DofPatternType& _patternType ) :
-        M_dim(3), M_nbLocalDof( _nbLocalDof ), M_nbDofPerDimEntity(std::vector< UInt> (4)),
-        M_patternType( _patternType )
+// This is the 3D constructor
+LocalDofPattern::LocalDofPattern( const UInt& nbLocalDof, const UInt& nbDofPerVertex,
+                                  const UInt& nbDofPerEdge, const UInt& nbDofPerFace,
+                                  const UInt& nbDofPerVolume, const DofPatternType& patternType ) :
+        M_dim(3), M_nbLocalDof( nbLocalDof ), M_nbDofPerDimEntity(std::vector< UInt> (4)),
+        M_patternType( patternType )
 {
     // Store the location of the dofs
-    M_nbDofPerDimEntity[0]=_nbDofPerVertex;
-    M_nbDofPerDimEntity[1]=_nbDofPerEdge;
-    M_nbDofPerDimEntity[2]=_nbDofPerFace;
-    M_nbDofPerDimEntity[3]=_nbDofPerVolume;
+    M_nbDofPerDimEntity[0]=nbDofPerVertex;
+    M_nbDofPerDimEntity[1]=nbDofPerEdge;
+    M_nbDofPerDimEntity[2]=nbDofPerFace;
+    M_nbDofPerDimEntity[3]=nbDofPerVolume;
 
     // Decide the pattern depending on the type
     switch ( M_patternType )
@@ -58,9 +64,9 @@ LocalDofPattern::LocalDofPattern( const UInt& _nbLocalDof, const UInt& _nbDofPer
     }
     default:
     {
-        std::ostringstream _err_msg;
-        _err_msg << "Pattern " << M_patternType << " not available for " << M_dim << "D. ";
-        ERROR_MSG( _err_msg.str().c_str() );
+        std::ostringstream errorMessage;
+        errorMessage << "Pattern " << M_patternType << " not available for " << M_dim << "D. ";
+        ERROR_MSG( errorMessage.str().c_str() );
     };
     };
 }
@@ -68,16 +74,16 @@ LocalDofPattern::LocalDofPattern( const UInt& _nbLocalDof, const UInt& _nbDofPer
 
 // This is the 2D constructor
 
-LocalDofPattern::LocalDofPattern( const UInt& _nbLocalDof, const UInt& _nbDofPerVertex,
-                                  const UInt& _nbDofPerEdge, const UInt& _nbDofPerFace,
-                                  const DofPatternType& _patternType ) :
-        M_dim(2), M_nbLocalDof( _nbLocalDof ), M_nbDofPerDimEntity(std::vector< UInt> (3)),
-        M_patternType( _patternType )
+LocalDofPattern::LocalDofPattern( const UInt& nbLocalDof, const UInt& nbDofPerVertex,
+                                  const UInt& nbDofPerEdge, const UInt& nbDofPerFace,
+                                  const DofPatternType& patternType ) :
+        M_dim(2), M_nbLocalDof( nbLocalDof ), M_nbDofPerDimEntity(std::vector< UInt> (3)),
+        M_patternType( patternType )
 {
     // Store the location of the dofs
-    M_nbDofPerDimEntity[0]=_nbDofPerVertex;
-    M_nbDofPerDimEntity[1]=_nbDofPerEdge;
-    M_nbDofPerDimEntity[2]=_nbDofPerFace;
+    M_nbDofPerDimEntity[0]=nbDofPerVertex;
+    M_nbDofPerDimEntity[1]=nbDofPerEdge;
+    M_nbDofPerDimEntity[2]=nbDofPerFace;
 
     // Decide the pattern depending on the type
     switch ( M_patternType )
@@ -94,9 +100,9 @@ LocalDofPattern::LocalDofPattern( const UInt& _nbLocalDof, const UInt& _nbDofPer
     }
     default:
     {
-        std::ostringstream _err_msg;
-        _err_msg << "Pattern " << M_patternType << " not available for " << M_dim << "D. ";
-        ERROR_MSG( _err_msg.str().c_str() );
+        std::ostringstream errorMessage;
+        errorMessage << "Pattern " << M_patternType << " not available for " << M_dim << "D. ";
+        ERROR_MSG( errorMessage.str().c_str() );
     };
     };
 }
@@ -104,14 +110,14 @@ LocalDofPattern::LocalDofPattern( const UInt& _nbLocalDof, const UInt& _nbDofPer
 
 // This is the 1D constructor
 
-LocalDofPattern::LocalDofPattern( const UInt& _nbLocalDof, const UInt& _nbDofPerVertex,
-                                  const UInt& _nbDofPerEdge, const DofPatternType& _patternType ) :
-        M_dim(1), M_nbLocalDof( _nbLocalDof ), M_nbDofPerDimEntity(std::vector< UInt> (2)),
-        M_patternType( _patternType )
+LocalDofPattern::LocalDofPattern( const UInt& nbLocalDof, const UInt& nbDofPerVertex,
+                                  const UInt& nbDofPerEdge, const DofPatternType& patternType ) :
+        M_dim(1), M_nbLocalDof( nbLocalDof ), M_nbDofPerDimEntity(std::vector< UInt> (2)),
+        M_patternType( patternType )
 {
     // Store the location of the dofs
-    M_nbDofPerDimEntity[0]=_nbDofPerVertex;
-    M_nbDofPerDimEntity[1]=_nbDofPerEdge;
+    M_nbDofPerDimEntity[0]=nbDofPerVertex;
+    M_nbDofPerDimEntity[1]=nbDofPerEdge;
 
     // Decide the pattern depending on the type
     switch ( M_patternType )
@@ -128,9 +134,9 @@ LocalDofPattern::LocalDofPattern( const UInt& _nbLocalDof, const UInt& _nbDofPer
     }
     default:
     {
-        std::ostringstream _err_msg;
-        _err_msg << "Pattern " << M_patternType << " not available for " << M_dim << "D. ";
-        ERROR_MSG( _err_msg.str().c_str() );
+        std::ostringstream errorMessage;
+        errorMessage << "Pattern " << M_patternType << " not available for " << M_dim << "D. ";
+        ERROR_MSG( errorMessage.str().c_str() );
 
     };
     }; // end of the switch
@@ -139,17 +145,20 @@ LocalDofPattern::LocalDofPattern( const UInt& _nbLocalDof, const UInt& _nbDofPer
 
 // The copy constructor
 
-LocalDofPattern::LocalDofPattern( const LocalDofPattern& _localDofPattern) :
-        M_dim(_localDofPattern.M_dim),
-        M_nbLocalDof (_localDofPattern.M_nbLocalDof ),
-        M_nbDofPerDimEntity (_localDofPattern.M_nbDofPerDimEntity),
-        M_patternType (_localDofPattern.M_patternType ),
-        M_pattern (_localDofPattern.M_pattern),
-        M_nbPattern(_localDofPattern.M_nbPattern),
-        M_nbDiag (_localDofPattern.M_nbDiag ),
-        M_nbUpper (_localDofPattern.M_nbUpper )
+LocalDofPattern::LocalDofPattern( const LocalDofPattern& localDofPattern) :
+        M_dim(localDofPattern.M_dim),
+        M_nbLocalDof (localDofPattern.M_nbLocalDof ),
+        M_nbDofPerDimEntity (localDofPattern.M_nbDofPerDimEntity),
+        M_patternType (localDofPattern.M_patternType ),
+        M_pattern (localDofPattern.M_pattern),
+        M_nbPattern(localDofPattern.M_nbPattern),
+        M_nbDiag (localDofPattern.M_nbDiag ),
+        M_nbUpper (localDofPattern.M_nbUpper )
 {};
 
+// ===================================================
+// Methods
+// ===================================================
 
 void LocalDofPattern::showMe( std::ostream& output) const
 {
@@ -163,6 +172,9 @@ void LocalDofPattern::showMe( std::ostream& output) const
     };
 }
 
+// ===================================================
+// Private Methods
+// ===================================================
 
 void LocalDofPattern::setupStandardPattern()
 {

@@ -1,32 +1,49 @@
-/* -*- mode: c++ -*-
- This file is part of the LifeV library
- Copyright (C) 2001,2002,2003,2004 EPFL, INRIA and Politecnico di Milano
+//@HEADER
+/*
+*******************************************************************************
 
- This library is free software; you can redistribute it and/or
- modify it under the terms of the GNU Lesser General Public
- License as published by the Free Software Foundation; either
- version 2.1 of the License, or (at your option) any later version.
+    Copyright (C) 2004, 2005, 2007 EPFL, Politecnico di Milano, INRIA
+    Copyright (C) 2010 EPFL, Politecnico di Milano, Emory University
 
- This library is distributed in the hope that it will be useful,
- but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- Lesser General Public License for more details.
+    This file is part of LifeV.
 
- You should have received a copy of the GNU Lesser General Public
- License along with this library; if not, write to the Free Software
- Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+    LifeV is free software; you can redistribute it and/or modify
+    it under the terms of the GNU Lesser General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    LifeV is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+    Lesser General Public License for more details.
+
+    You should have received a copy of the GNU Lesser General Public License
+    along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
+
+*******************************************************************************
 */
+//@HEADER
+
+/*!
+    @file
+    @brief CurrentFE living on the sides of the elements
+
+    @author Jean-Frederic Gerbeau
+    @date 00-09-2002
+
+    @contributor Samuel Quinodoz <samuel.quinodoz@epfl.ch>
+    @mantainer Samuel Quinodoz <samuel.quinodoz@epfl.ch>
+
+ */
+
 #ifndef _CURRENTBDFE_H
 #define _CURRENTBDFE_H
 
 #include <life/lifecore/life.hpp>
+
 #include <life/lifefem/geoMap.hpp>
 #include <life/lifefem/refFE.hpp>
 #include <life/lifefem/staticBdFE.hpp>
-/*!
-  \file currentBdFE.h
-  \brief Structure for a current finite element on the boundary
-*/
 
 namespace LifeV
 {
@@ -49,133 +66,206 @@ class CurrentBdFE:
         public StaticBdFE
 {
 public:
-    CurrentBdFE( const RefFE& _refFE, const GeoMap& _geoMap );
-    CurrentBdFE( const RefFE& _refFE, const GeoMap& _geoMap, const QuadRule& _qr );
-    ~CurrentBdFE();
+
+    //! @name Constructor & Destructor
+    //@{
+
+    //! Constructor with reference FE and geometric mapping
+    CurrentBdFE( const RefFE& refFE, const GeoMap& geoMap );
+
+    //! Constructor with reference FE, geometric mapping and quadrature rule
+    CurrentBdFE( const RefFE& refFE, const GeoMap& geoMap, const QuadRule& qr );
+
+    //! Destructor
+    virtual ~CurrentBdFE();
+
+    //@}
+
+
+    //! @name Methods
+    //@{
+
     /*!
       Compute only the coordinates of the nodes on the current boundary element
     */
-    template <class GEOELE>
-    void update( const GEOELE& geoele )
-    {
-#ifdef TEST_PRE
-        _hasMeas = false;
-        _hasTangent = false;
-        _hasNormal = false;
-        _hasQuadPtCoor = false;
-        _hasFirstDeriv = false;
-#endif
+    template <typename GeometricType>
+    void update( const GeometricType& geometricEntity );
 
-        _currentId = geoele.id();
-        // update the definition of the geo points
-        for ( UInt i = 0; (int)i < nbGeoNode; i++ )
-            for (UInt icoor=0; icoor<nDimensions; icoor++)
-                point( i, icoor ) = geoele.point( i + 1 ).coor()[icoor];
-    }
     /*!
       Compute the arrays meas, weightMeas, tangent
       on the current boundary element
     */
-    template <class GEOELE>
-    void updateMeas( const GEOELE& geoele )
-    {
-#ifdef TEST_PRE
-        _hasMeas = true;
-        _hasTangent = true;
-        _hasNormal = false;
-        _hasQuadPtCoor = false;
-        _hasFirstDeriv = false;
-#endif
+    template <typename GeometricType>
+    void updateMeas( const GeometricType& geometricEntity );
 
-        _currentId = geoele.id();
-        // update the definition of the geo points
-
-        for ( UInt i = 0; (int)i < nbGeoNode; i++ )
-            for (UInt icoor=0; icoor<nDimensions; icoor++)
-                point( i, icoor ) = geoele.point( i + 1 ).coor()[icoor];
-
-        // compute the measure
-        _comp_meas();
-    }
     /*!
       Compute the arrays meas, weightMeas, tangent
       and quadrature points on the current boundary element
     */
-    template <class GEOELE>
-    void updateMeasQuadPt( const GEOELE& geoele )
-    {
-#ifdef TEST_PRE
-        _hasMeas = true;
-        _hasTangent = true;
-        _hasNormal = false;
-        _hasQuadPtCoor = true;
-        _hasFirstDeriv = false;
-#endif
+    template <typename GeometricType>
+    void updateMeasQuadPt( const GeometricType& geometricEntity );
 
-        _currentId = geoele.id();
-        // update the definition of the geo points
-
-        for ( UInt i = 0; i < nbGeoNode; i++ )
-            for (UInt icoor=0; icoor<nDimensions; icoor++)
-                point( i, icoor ) = geoele.point( i + 1 ).coor()[icoor];
-
-        // compute the measure
-        _comp_meas();
-        // compute the coordinates of the quad points
-        _comp_quad_point_coor();
-    }
     /*!
       Compute the arrays meas, weightMeas, tangent
       and normal on the current boundary element
     */
-    template <class GEOELE>
-    void updateMeasNormal( const GEOELE& geoele )
-    {
-#ifdef TEST_PRE
-        _hasMeas = true;
-        _hasTangent = true;
-        _hasNormal = true;
-        _hasQuadPtCoor = false;
-        _hasFirstDeriv = false;
-#endif
+    template <typename GeometricType>
+    void updateMeasNormal( const GeometricType& geometricEntity );
 
-        _currentId = geoele.id();
-        // update the definition of the geo points
-
-        for ( UInt i = 0; (int)i < nbGeoNode; i++ )
-            for (UInt icoor=0; icoor<nDimensions; icoor++)
-                point( i, icoor ) = geoele.point( i + 1 ).coor()[icoor];
-
-        // compute the measure and the normal
-        _comp_meas_normal();
-    }
     /*!
       Compute the arrays meas, weightMeas, tangent,
       normal and quadrature points on the current boundary element
     */
-    template <class GEOELE>
-    void updateMeasNormalQuadPt( const GEOELE& geoele )
-    {
+    template <typename GeometricType>
+    void updateMeasNormalQuadPt( const GeometricType& geometricEntity );
+
+    //@}
+};
+
+// ===================================================
+// Methods
+// ===================================================
+
+template <typename GeometricType>
+void
+CurrentBdFE::
+update( const GeometricType& geometricEntity )
+{
 #ifdef TEST_PRE
-        _hasMeas = true;
-        _hasTangent = true;
-        _hasNormal = true;
-        _hasQuadPtCoor = true;
-        _hasFirstDeriv = false;
+    M_hasMeasure = false;
+    M_hasTangent = false;
+    M_hasNormal = false;
+    M_hasQuadPtCoor = false;
+    M_hasFirstDerivative = false;
 #endif
 
-        _currentId = geoele.id();
-        // update the definition of the geo points
-
-        for ( UInt i = 0; (int)i < nbGeoNode; i++ )
-            for (UInt icoor=0; icoor<nDimensions; icoor++)
-                point( i, icoor ) = geoele.point( i + 1 ).coor()[icoor];
-
-        // compute the measure and the normal
-        _comp_meas_normal();
-        // compute the coordinates of the quad points
-        _comp_quad_point_coor();
+    M_currentID = geometricEntity.id();
+    // update the definition of the geo points
+    for ( UInt i(0); i < nbGeoNode; i++ )
+    {
+        for (UInt icoor(0); icoor < nDimensions; icoor++)
+        {
+            point( i, icoor ) = geometricEntity.point( i + 1 ).coor()[icoor];
+        }
     }
-};
+}
+
+template <typename GeometricType>
+void
+CurrentBdFE::
+updateMeas( const GeometricType& geometricEntity )
+{
+#ifdef TEST_PRE
+    M_hasMeasure = true;
+    M_hasTangent = true;
+    M_hasNormal = false;
+    M_hasQuadPtCoor = false;
+    M_hasFirstDerivative = false;
+#endif
+
+    M_currentID = geometricEntity.id();
+    // update the definition of the geo points
+
+    for ( UInt i = 0; (int)i < nbGeoNode; i++ )
+    {
+        for (UInt icoor=0; icoor<nDimensions; icoor++)
+        {
+            point( i, icoor ) = geometricEntity.point( i + 1 ).coor()[icoor];
+        }
+    }
+
+    // compute the measure
+    computeMeasure();
+}
+
+template <typename GeometricType>
+void
+CurrentBdFE::
+updateMeasQuadPt( const GeometricType& geometricEntity )
+{
+#ifdef TEST_PRE
+    M_hasMeasure = true;
+    M_hasTangent = true;
+    M_hasNormal = false;
+    M_hasQuadPtCoor = true;
+    M_hasFirstDerivative = false;
+#endif
+
+    M_currentID = geometricEntity.id();
+    // update the definition of the geo points
+
+    for ( UInt i = 0; i < nbGeoNode; i++ )
+    {
+        for (UInt icoor=0; icoor<nDimensions; icoor++)
+        {
+            point( i, icoor ) = geometricEntity.point( i + 1 ).coor()[icoor];
+        }
+    }
+
+    // compute the measure
+    computeMeasure();
+    // compute the coordinates of the quad points
+    computeQuadPointCoordinate();
+}
+
+template <typename GeometricType>
+void
+CurrentBdFE::
+updateMeasNormal( const GeometricType& geometricEntity )
+{
+#ifdef TEST_PRE
+    M_hasMeasure = true;
+    M_hasTangent = true;
+    M_hasNormal = true;
+    M_hasQuadPtCoor = false;
+    M_hasFirstDerivative = false;
+#endif
+
+    M_currentID = geometricEntity.id();
+    // update the definition of the geo points
+
+    for ( UInt i = 0; (int)i < nbGeoNode; i++ )
+    {
+        for (UInt icoor=0; icoor<nDimensions; icoor++)
+        {
+            point( i, icoor ) = geometricEntity.point( i + 1 ).coor()[icoor];
+        }
+    }
+
+    // compute the measure and the normal
+    computeMeasureNormal();
+}
+
+template <typename GeometricType>
+void
+CurrentBdFE::
+updateMeasNormalQuadPt( const GeometricType& geometricEntity )
+{
+#ifdef TEST_PRE
+    M_hasMeasure = true;
+    M_hasTangent = true;
+    M_hasNormal = true;
+    M_hasQuadPtCoor = true;
+    M_hasFirstDerivative = false;
+#endif
+
+    M_currentID = geometricEntity.id();
+    // update the definition of the geo points
+
+    for ( UInt i = 0; (int)i < nbGeoNode; i++ )
+    {
+        for (UInt icoor=0; icoor<nDimensions; icoor++)
+        {
+            point( i, icoor ) = geometricEntity.point( i + 1 ).coor()[icoor];
+        }
+    }
+
+    // compute the measure and the normal
+    computeMeasureNormal();
+
+    // compute the coordinates of the quad points
+    computeQuadPointCoordinate();
+}
+
 }
 #endif

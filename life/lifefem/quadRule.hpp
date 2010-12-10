@@ -1,38 +1,39 @@
 //@HEADER
 /*
-************************************************************************
+*******************************************************************************
 
- This file is part of the LifeV Applications.
- Copyright (C) 2001-2010 EPFL, Politecnico di Milano, INRIA
+    Copyright (C) 2004, 2005, 2007 EPFL, Politecnico di Milano, INRIA
+    Copyright (C) 2010 EPFL, Politecnico di Milano, Emory University
 
- This library is free software; you can redistribute it and/or modify
- it under the terms of the GNU Lesser General Public License as
- published by the Free Software Foundation; either version 2.1 of the
- License, or (at your option) any later version.
+    This file is part of LifeV.
 
- This library is distributed in the hope that it will be useful, but
- WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- Lesser General Public License for more details.
+    LifeV is free software; you can redistribute it and/or modify
+    it under the terms of the GNU Lesser General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
 
- You should have received a copy of the GNU Lesser General Public
- License along with this library; if not, write to the Free Software
- Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
- USA
+    LifeV is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+    Lesser General Public License for more details.
 
-************************************************************************
+    You should have received a copy of the GNU Lesser General Public License
+    along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
+
+*******************************************************************************
 */
 //@HEADER
 
 /*!
     @file
-    @brief File for the implementation of the QuadRule class.
+    @brief File for the definition of the QuadRule class.
 
-    @author Samuel Quinodoz <samuel.quinodoz@epfl.ch>
-    @date 1 June 2010
+    @author Jean-Frederic Gerbeau
+            Samuel Quinodoz <samuel.quinodoz@epfl.ch>
+    @date 01-06-2010
 
-    This file existed before I reimplemented it. It was due to J.-F. Gerbeau (04/2002).
-    Many idea present in this class were taken from that file.
+    @contributor Samuel Quinodoz <samuel.quinodoz@epfl.ch>
+    @mantainer Samuel Quinodoz <samuel.quinodoz@epfl.ch>
  */
 
 
@@ -167,7 +168,16 @@ public:
 
 
     //! Destructor
-    ~QuadRule();
+    virtual ~QuadRule();
+
+    //@}
+
+
+    //! @name Operators
+    //@{
+
+    //! Output operator
+    friend std::ostream& operator << ( std::ostream& c, const QuadRule& qr );
 
     //@}
 
@@ -185,7 +195,7 @@ public:
 
       @param qp The quadrature point to add.
      */
-    inline void addPoint(const QuadPoint& qp)
+    void addPoint(const QuadPoint& qp)
     {
         M_pt.push_back(QuadPoint(qp,M_dimension));
         M_nbQuadPt+=1;
@@ -214,16 +224,7 @@ public:
 
       @param filename The name of the file to be created.
      */
-    void VTKexport( const std::string& filename) const;
-
-    //@}
-
-
-    //! @name Operators
-    //@{
-
-    //! Output operator
-    friend std::ostream& operator << ( std::ostream& c, const QuadRule& qr );
+    void VTKExport( const std::string& filename) const;
 
     //@}
 
@@ -269,35 +270,35 @@ public:
     //@{
 
     //! quadPoint(ig) is the ig-th quadrature point
-    inline const QuadPoint& quadPoint( const UInt& ig ) const
+    const QuadPoint& quadPoint( const UInt& ig ) const
     {
         ASSERT_BD( ig < M_nbQuadPt );
         return M_pt[ ig ];
     }
 
     //! weight(ig) is the ig-th quadrature weight
-    inline const Real& weight(const UInt& ig ) const
+    const Real& weight(const UInt& ig ) const
     {
         ASSERT_BD( ig < M_nbQuadPt );
         return M_pt[ ig ].weight();
     }
 
     //! quadPointCoor(ig,icoor) is the coordinate icoor of the quadrature point ig
-    inline const Real& quadPointCoor( const UInt& ig, const UInt& icoor ) const
+    const Real& quadPointCoor( const UInt& ig, const UInt& icoor ) const
     {
         ASSERT_BD( ig < M_nbQuadPt );
         return M_pt[ ig ].coor( icoor );
     }
 
     //! quadPointCoor(ig) is the full coordinates of the quadrature point ig
-    inline const GeoVector& quadPointCoor( const UInt& ig ) const
+    const GeoVector& quadPointCoor( const UInt& ig ) const
     {
         ASSERT_BD( ig < M_nbQuadPt );
         return M_pt[ ig ].coor( );
     }
 
     //! Getter for the number of quadrature points
-    inline const UInt& nbQuadPt() const
+    const UInt& nbQuadPt() const
     {
         return M_nbQuadPt;
     };
@@ -306,6 +307,10 @@ public:
 
 
 private:
+
+    //! @name Private Methods
+    //@{
+
     //! Check the exactness for quadrature rules on segments
     UInt checkExactnessSegment() const;
 
@@ -315,9 +320,10 @@ private:
     //! Check the exactness for quadrature rules on tetrahedra
     UInt checkExactnessTetra() const;
 
+    //@}
 
     //! Tolerance for the test of exactness
-    static Real exactnessTol;
+    static Real S_exactnessTol;
 
     // Storage for the quadrature nodes
     std::vector<QuadPoint> M_pt;

@@ -1,37 +1,43 @@
 //@HEADER
 /*
-************************************************************************
+*******************************************************************************
 
- This file is part of the LifeV Applications.
- Copyright (C) 2001-2009 EPFL, Politecnico di Milano, INRIA
+    Copyright (C) 2004, 2005, 2007 EPFL, Politecnico di Milano, INRIA
+    Copyright (C) 2010 EPFL, Politecnico di Milano, Emory University
 
- This library is free software; you can redistribute it and/or modify
- it under the terms of the GNU Lesser General Public License as
- published by the Free Software Foundation; either version 2.1 of the
- License, or (at your option) any later version.
+    This file is part of LifeV.
 
- This library is distributed in the hope that it will be useful, but
- WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- Lesser General Public License for more details.
+    LifeV is free software; you can redistribute it and/or modify
+    it under the terms of the GNU Lesser General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
 
- You should have received a copy of the GNU Lesser General Public
- License along with this library; if not, write to the Free Software
- Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
- USA
+    LifeV is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+    Lesser General Public License for more details.
 
-************************************************************************
+    You should have received a copy of the GNU Lesser General Public License
+    along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
+
+*******************************************************************************
 */
 //@HEADER
 
 /*!
- * @file
- * @brief This files contains the description and the implementation of the FESpace class.
- *
- * @author Gilles Fourestey <gilles.fourestey@epfl.ch>
- * @date 00-06-2007
- *
+    @file
+    @brief This files contains the description and the implementation of the FESpace class.
+
+    @author Gilles Fourestey <gilles.fourestey@epfl.ch>
+    @date 00-06-2007
+
+    @contributor Samuel Quinodoz <samuel.quinodoz@epfl.ch>
+    @mantainer Samuel Quinodoz <samuel.quinodoz@epfl.ch>
+
  */
+
+
+
 
 #ifndef _FESPACE_H_
 #define _FESPACE_H_
@@ -45,17 +51,12 @@
 #include <boost/function.hpp>
 #include <boost/shared_ptr.hpp>
 
-//#include <life/lifearray/pattern.hpp>
-//#include <life/lifearray/SimpleVect.hpp>
-
 #include <life/lifecore/life.hpp>
 
 #include <life/lifefem/bcHandler.hpp>
 #include <life/lifefem/currentFE.hpp>
 #include <life/lifefem/currentBdFE.hpp>
 #include <life/lifefem/dof.hpp>
-//#include <life/lifefem/geoMap.hpp>
-//#include <life/lifefem/refFE.hpp>
 #include <life/lifefem/sobolevNorms.hpp>
 
 #include <life/lifemesh/partitionMesh.hpp>
@@ -63,24 +64,6 @@
 
 namespace LifeV
 {
-
-inline Real
-elemL22( boost::function<Real( Real, Real, Real, Real, UInt )> fct,
-         const CurrentFE& fe, const Real t, const UInt nbcomp )
-{
-    UInt ic;
-    Real s = 0., f, x, y, z;
-    for ( UInt ig = 0; ig < fe.nbQuadPt(); ++ig )
-    {
-        fe.coorQuadPt( x, y, z, ig );
-        for ( ic = 0; ic < nbcomp; ic++ )
-        {
-            f = fct( t, x, y, z, ic + 1 );
-            s += f * f * fe.weightDet( ig );
-        }
-    }
-    return s;
-}
 
 
 //! FESpace - Short description here please!
@@ -91,24 +74,28 @@ elemL22( boost::function<Real( Real, Real, Real, Real, UInt )> fct,
  *
  */
 
-template <typename Mesh, typename Map>
+template <typename MeshType, typename MapType>
 class FESpace
 {
 
 public:
 
+    //! @name Public Types
+    //@{
+
     typedef boost::function<Real ( Real const&, Real const&, Real const&,
                                    Real const&, ID const& )> Function;
 
-
-    typedef Mesh                         mesh_type;
+    typedef MeshType                         mesh_type;
     typedef boost::shared_ptr<mesh_type> mesh_ptrtype;
-    typedef Map                          map_type;
-    typedef boost::shared_ptr<Map>       map_ptrtype;
-    typedef typename Map::comm_ptrtype   comm_ptrtype;
+    typedef MapType                          map_type;
+    typedef boost::shared_ptr<MapType>       map_ptrtype;
+    typedef typename MapType::comm_ptrtype   comm_ptrtype;
 
-    /** @name Constructors, Destructor
-     */
+    //@}
+
+
+    //! @name Constructor & Destructor
     //@{
 
     /*!
@@ -123,7 +110,7 @@ public:
       \param ord_bdf order of the bdf time advancing scheme and incremental pressure approach (default: Backward Euler)
     */
 
-    FESpace(	partitionMesh<Mesh>&	mesh,
+    FESpace(	partitionMesh<MeshType>&	mesh,
              const RefFE&			refFE,
              const QuadRule&			Qr,
              const QuadRule&			bdQr,
@@ -131,7 +118,7 @@ public:
              comm_ptrtype&			commptr
            );
 
-    FESpace(	partitionMesh<Mesh>&	mesh,
+    FESpace(	partitionMesh<MeshType>&	mesh,
              const std::string&		space,
              const Int				fDim,
              comm_ptrtype&			commptr
@@ -159,6 +146,54 @@ public:
 
     //! @name Methods
     //@{
+
+    //! Interpolate a given velocity function nodally onto a velocity vector
+    template<typename vector_type>
+    void interpolate( const Function& fct, vector_type& vect, const Real time = 0. );
+
+    template<typename vector_type>
+    void interpolateBC( BCHandler& BCh, vector_type&    vect, const Real      time);
+
+    //! calculate L2 velocity error for given exact velocity function
+    //! \param pexact the exact velocity as a function
+    //! \param time the time
+    //! \param relError Real* to store the relative error in
+
+    // this computes vec = \int fct phi_i
+    template<typename vector_type>
+    void L2ScalarProduct(	const Function&		fct,
+                          vector_type&		vec,
+                          const Real			t
+                        );
+
+    template<typename vector_type>
+    Real L20Error(			const Function& 	fexact,
+                     const vector_type& 	vec,
+                     const Real 			time,
+                     Real* 				relError = 0 );
+
+    template<typename vector_type>
+    Real L2Error(			const Function&		fexact,
+                    const vector_type&	vec,
+                    const Real			time,
+                    Real*				relError=0 );
+
+    template<typename function, typename vector_type>
+    Real H1Error(			const function&		fexact,
+                    const vector_type&	vec,
+                    const Real			time,
+                    Real*				relError=0 );
+
+
+    template<typename vector_type>
+    Real L2Norm( const vector_type& vec );
+
+    template<typename function>
+    Real L2NormFunction( const function& f, const Real time = 0);
+
+    template<typename vector_type>
+    Real H1Norm( const vector_type& vec );
+
 
     //! Method to computes the L2 error when using a weight function
     /*!
@@ -326,9 +361,7 @@ public:
     //@}
 
 
-
-    /** @name Get Functions
-     */
+    //! @name Get Methods
     //@{
 
     //    const mesh_type& mesh()       {return M_mesh;}
@@ -341,7 +374,7 @@ public:
     //! Returns map
     const map_type&		map()	const { return *M_map; }
     map_type&			map()		  { return *M_map; }
-    const boost::shared_ptr<const Map>			mapPtr() const  { return M_map; }
+    const boost::shared_ptr<const MapType>			mapPtr() const  { return M_map; }
 
     //! Returns the velocity dof
     const Dof&			dof()	const { return *M_dof; }
@@ -370,72 +403,15 @@ public:
     //@}
 
 
-    void initMap( const Int fDim, comm_ptrtype& commptr );
-
-    //! Interpolate a given velocity function nodally onto a velocity vector
-    template<typename vector_type>
-    void interpolate( const Function& fct, vector_type& vect, const Real time = 0. );
-
-    template<typename vector_type>
-    void interpolateBC( BCHandler& BCh, vector_type&    vect, const Real      time);
-
-    //! takes into account a possible offset by a constant
-    //! \param pexact the exact pressure as a function
-    //! \param time the time
-    //! \param relError Real* to store the relative error in
-//     Real pErrorL2( const Function&            pexact,
-//                    const ScalUnknown<Vector>& p,
-//                    Real                       time,
-//                    Real*                      relError = 0 );
-
-    //! calculate L2 velocity error for given exact velocity function
-    //! \param pexact the exact velocity as a function
-    //! \param time the time
-    //! \param relError Real* to store the relative error in
-
-    // this computes vec = \int fct phi_i
-    template<typename vector_type>
-    void L2ScalarProduct(	const Function&		fct,
-                          vector_type&		vec,
-                          const Real			t
-                        );
-
-    template<typename vector_type>
-    Real L20Error(			const Function& 	fexact,
-                     const vector_type& 	vec,
-                     const Real 			time,
-                     Real* 				relError = 0 );
-
-    template<typename vector_type>
-    Real L2Error(			const Function&		fexact,
-                    const vector_type&	vec,
-                    const Real			time,
-                    Real*				relError=0 );
-
-    template<typename function, typename vector_type>
-    Real H1Error(			const function&		fexact,
-                    const vector_type&	vec,
-                    const Real			time,
-                    Real*				relError=0 );
-
-
-    template<typename vector_type>
-    Real L2Norm( const vector_type& vec );
-
-    template<typename function>
-    Real L2NormFunction( const function& f, const Real time = 0);
-
-    template<typename vector_type>
-    Real H1Norm( const vector_type& vec );
-
 
 private:
+
+    //! @name Private Methods
+    //@{
 
     //! copy constructor
     FESpace( const FESpace& fespace );
 
-    //! @name Private Methods
-    //@{
 
     //! Set space
     inline void setSpace( const std::string& space );
@@ -554,15 +530,13 @@ private:
 
 };
 
-//
-// IMPLEMENTATION
-//
+// ===================================================
+// Constructors & Destructor
+// ===================================================
 
-
-// Constructors
-template <typename Mesh, typename Map>
-FESpace<Mesh, Map>::
-FESpace(	partitionMesh<Mesh>& 	mesh,
+template <typename MeshType, typename MapType>
+FESpace<MeshType, MapType>::
+FESpace(	partitionMesh<MeshType>& 	mesh,
          const RefFE&         	refFE,
          const QuadRule&      	Qr,
          const QuadRule&      	bdQr,
@@ -584,14 +558,14 @@ FESpace(	partitionMesh<Mesh>& 	mesh,
     {
         M_feBd.reset(new CurrentBdFE( M_refFE->boundaryFE(), getGeoMap( *M_mesh ).boundaryMap(), *M_bdQr ) );
     }
-    Map map( *M_refFE, *M_mesh, commptr );
+    MapType map( *M_refFE, *M_mesh, commptr );
     for ( UInt ii = 0; ii < M_fieldDim; ++ii )
         *M_map += map;
 }
 
-template <typename Mesh, typename Map>
-FESpace<Mesh, Map>::
-FESpace(	partitionMesh<Mesh>&	mesh,
+template <typename MeshType, typename MapType>
+FESpace<MeshType, MapType>::
+FESpace(	partitionMesh<MeshType>&	mesh,
          const std::string&		space,
          const Int				fDim,
          comm_ptrtype&			commptr
@@ -624,13 +598,13 @@ FESpace(	partitionMesh<Mesh>&	mesh,
     }
 
     // Build Map
-    Map map( *M_refFE, *M_mesh, commptr );
+    MapType map( *M_refFE, *M_mesh, commptr );
     for ( UInt ii = 0; ii < M_fieldDim; ++ii )
         *M_map += map;
 }
 
-template <typename Mesh, typename Map>
-FESpace<Mesh, Map>::
+template <typename MeshType, typename MapType>
+FESpace<MeshType, MapType>::
 FESpace(	mesh_ptrtype			mesh,
          const RefFE&			refFE,
          const QuadRule&			Qr,
@@ -649,7 +623,7 @@ FESpace(	mesh_ptrtype			mesh,
         M_feBd			( ),
         M_map			( new map_type() )
 {
-    Map map( *M_refFE, *M_mesh, commptr );
+    MapType map( *M_refFE, *M_mesh, commptr );
     for ( UInt ii = 0; ii < M_fieldDim; ++ii )
         *M_map += map;
 
@@ -659,8 +633,8 @@ FESpace(	mesh_ptrtype			mesh,
     }
 }
 
-template <typename Mesh, typename Map>
-FESpace<Mesh, Map>::
+template <typename MeshType, typename MapType>
+FESpace<MeshType, MapType>::
 FESpace(	mesh_ptrtype			mesh,
          const std::string&		space,
          const Int				fDim,
@@ -694,97 +668,20 @@ FESpace(	mesh_ptrtype			mesh,
     };
 
     // Build Map
-    Map map( *M_refFE, *M_mesh, commptr );
+    MapType map( *M_refFE, *M_mesh, commptr );
     for ( UInt ii = 0; ii < M_fieldDim; ++ii )
         *M_map += map;
 }
 
-// Set FE space (default standard parameters)
-template <typename Mesh, typename Map>
-inline void
-FESpace<Mesh, Map>::setSpace( const std::string& space )
-{
-    switch ( M_spaceMap[space] )
-    {
-    case P1 :
-
-#ifdef TWODIM
-        M_refFE = &feTriaP1;
-        M_Qr    = &quadRuleTria6pt;
-        M_bdQr  = &quadRuleSeg3pt;
-#else // THREEDIM
-        M_refFE = &feTetraP1;
-        M_Qr    = &quadRuleTetra4pt;
-        M_bdQr	= &quadRuleTria3pt;
-#endif
-
-        break;
-
-    case P1_HIGH :
-
-#ifdef TWODIM
-        M_refFE = &feTriaP1;
-        M_Qr    = &quadRuleTria6pt;
-        M_bdQr  = &quadRuleSeg3pt;
-#else // THREEDIM
-        M_refFE = &feTetraP1;
-        M_Qr    = &quadRuleTetra15pt;
-        M_bdQr	= &quadRuleTria4pt;
-#endif
-
-        break;
-
-    case P1Bubble :
-
-#ifdef TWODIM
-
-        break;
-
-#else // THREEDIM
-        M_refFE = &feTetraP1bubble;
-        M_Qr    = &quadRuleTetra64pt;
-        M_bdQr	= &quadRuleTria3pt;
-#endif
-
-        break;
-
-    case P2 :
-
-#ifdef TWODIM
-        M_refFE = &feTriaP2;
-        M_Qr    = &quadRuleTria6pt;
-        M_bdQr  = &quadRuleSeg3pt;
-#else // THREEDIM
-        M_refFE = &feTetraP2;
-        M_Qr    = &quadRuleTetra15pt;
-        M_bdQr	= &quadRuleTria3pt;
-#endif
-
-    case P2_HIGH :
-
-#ifdef TWODIM
-        M_refFE = &feTriaP2;
-        M_Qr    = &quadRuleTria6pt;
-        M_bdQr  = &quadRuleSeg3pt;
-#else // THREEDIM
-        M_refFE = &feTetraP2;
-        M_Qr    = &quadRuleTetra64pt;
-        M_bdQr	= &quadRuleTria4pt;
-#endif
-
-        break;
-
-    default :
-
-        std::cout << "!!! WARNING: Space " << space << "not implemented in FESpace class !!!" << std::endl;
-    }
-}
+// ===================================================
+// Methods
+// ===================================================
 
 
-template <typename Mesh, typename Map>
+template <typename MeshType, typename MapType>
 template<typename vector_type>
 void
-FESpace<Mesh, Map>::interpolate( const Function& fct,
+FESpace<MeshType, MapType>::interpolate( const Function& fct,
                                  vector_type&    vect,
                                  const Real      time)
 {
@@ -839,10 +736,10 @@ FESpace<Mesh, Map>::interpolate( const Function& fct,
 }
 
 
-template <typename Mesh, typename Map>
+template <typename MeshType, typename MapType>
 template<typename vector_type>
 void
-FESpace<Mesh, Map>::interpolateBC( BCHandler& BCh,
+FESpace<MeshType, MapType>::interpolateBC( BCHandler& BCh,
                                    vector_type&    vect,
                                    const Real      time)
 {
@@ -895,10 +792,10 @@ FESpace<Mesh, Map>::interpolateBC( BCHandler& BCh,
 
 
 // this computes vec = \int fct phi_i
-template <typename Mesh, typename Map>
+template <typename MeshType, typename MapType>
 template<typename vector_type>
 void
-FESpace<Mesh, Map>::L2ScalarProduct( const Function& fct, vector_type& vec, const Real t)
+FESpace<MeshType, MapType>::L2ScalarProduct( const Function& fct, vector_type& vec, const Real t)
 {
 
     for ( UInt iVol = 1; iVol <= this->mesh()->numElements(); iVol++ )
@@ -934,10 +831,10 @@ FESpace<Mesh, Map>::L2ScalarProduct( const Function& fct, vector_type& vec, cons
 
 
 
-template <typename Mesh, typename Map>
+template <typename MeshType, typename MapType>
 template<typename vector_type>
 Real
-FESpace<Mesh, Map>::L20Error( const Function& fexact,
+FESpace<MeshType, MapType>::L20Error( const Function& fexact,
                               const vector_type& vec,
                               const Real time,
                               Real* relError )
@@ -988,10 +885,10 @@ FESpace<Mesh, Map>::L20Error( const Function& fexact,
 
 
 
-template <typename Mesh, typename Map>
+template <typename MeshType, typename MapType>
 template<typename vector_type>
 Real
-FESpace<Mesh, Map>::L2Error( const Function&    fexact,
+FESpace<MeshType, MapType>::L2Error( const Function&    fexact,
                              const vector_type& vec,
                              const Real       time,
                              Real*            relError )
@@ -1038,10 +935,10 @@ FESpace<Mesh, Map>::L2Error( const Function&    fexact,
     return sqrt( normU );
 }
 
-template <typename Mesh, typename Map>
+template <typename MeshType, typename MapType>
 template<typename function>
 Real
-FESpace<Mesh, Map>::L2NormFunction( const function& f, const Real time)
+FESpace<MeshType, MapType>::L2NormFunction( const function& f, const Real time)
 {
     //
     ID nbComp = M_fieldDim; // Number of components of the mesh velocity
@@ -1066,10 +963,10 @@ FESpace<Mesh, Map>::L2NormFunction( const function& f, const Real time)
 
 }
 
-template<typename Mesh, typename Map>
+template<typename MeshType, typename MapType>
 template<typename vector_type>
 Real
-FESpace<Mesh,Map>:: L2ErrorWeighted(const Function&    exactSolution,
+FESpace<MeshType,MapType>:: L2ErrorWeighted(const Function&    exactSolution,
                                     const vector_type& solution,
                                     const Function&    weight,
                                     const Real         time)
@@ -1129,10 +1026,10 @@ FESpace<Mesh,Map>:: L2ErrorWeighted(const Function&    exactSolution,
 
 
 
-template <typename Mesh, typename Map>
+template <typename MeshType, typename MapType>
 template<typename function, typename vector_type>
 Real
-FESpace<Mesh, Map>::H1Error( const function&    fexact,
+FESpace<MeshType, MapType>::H1Error( const function&    fexact,
                              const vector_type& vec,
                              const Real       time,
                              Real*            relError )
@@ -1183,55 +1080,11 @@ FESpace<Mesh, Map>::H1Error( const function&    fexact,
     return sqrt( normU );
 }
 
-
-
-
-// template <typename Mesh, typename Map>
-// template<typename vector_type>
-// Real
-// FESpace<Mesh, Map>::L2Norm(vector_type vec)
-// {
-
-//     Real norm = 0.;
-//     Real tmp  = 0.;
-
-//    for ( UInt ielem = 1; ielem <= this->mesh()->numElements(); ielem++ )
-//     {
-//         //UInt elem = M_FESpace.mesh()->element( ielem ).id();
-//         this->fe().updateFirstDerivQuadPt( M_FESpace.mesh()->element( ielem ) );
-
-//         //int    marker = M_FESpace.mesh()->element( ielem ).marker();
-//         Real s      = 0;
-//         Real volume = M_FESpace.fe().detJac(0);
-
-//         for ( int ig = 0; ig < M_FESpace.fe().nbQuadPt(); ++ig )
-//         {
-//             for ( int k = 0; k < M_FESpace.fe().nbNode; ++k )
-//             {
-//                 for ( int j = 0; j < M_fDim; ++j)
-//                 {
-//                     int i    = M_FESpace.fe().patternFirst(k);
-//                     int idof = M_FESpace.dof().localToGlobal(M_FESpace.fe().currentLocalId(), i + 1);
-
-//                     tmp = this->fe().phi( k, 0 , ig )*
-//                         vec[idof + j*this->dim()];
-
-//                     norm += this->fe().weigh(ig)*tmp*tmp;
-//                 }
-//             }
-//         }
-
-
-//         return norm;
-
-// }
-
-
 // Warning! When using this function in parallel, the vector vec HAS TO BE REPEATED!
-template <typename Mesh, typename Map>
+template <typename MeshType, typename MapType>
 template<typename vector_type>
 Real
-FESpace<Mesh, Map>::L2Norm( const vector_type& vec)
+FESpace<MeshType, MapType>::L2Norm( const vector_type& vec)
 {
     //
     ID nbComp = M_fieldDim; // Number of components of the mesh velocity
@@ -1258,10 +1111,10 @@ FESpace<Mesh, Map>::L2Norm( const vector_type& vec)
 }
 
 
-template <typename Mesh, typename Map>
+template <typename MeshType, typename MapType>
 template<typename vector_type>
 Real
-FESpace<Mesh, Map>::H1Norm(const vector_type& vec)
+FESpace<MeshType, MapType>::H1Norm(const vector_type& vec)
 {
     //
     ID nbComp = M_fieldDim; // Number of components of the mesh velocity
@@ -1290,10 +1143,10 @@ FESpace<Mesh, Map>::H1Norm(const vector_type& vec)
 
 
 
-template<typename Mesh, typename Map>
+template<typename MeshType, typename MapType>
 template<typename point_type,typename vector_type>
 Real
-FESpace<Mesh, Map>::
+FESpace<MeshType, MapType>::
 FEinterpolateValue(const ID& elementID, const vector_type& solutionVector, const point_type& pt, const UInt& component ) const
 {
     // The vector has to be repeated, so if it is not, we make is repeated and call this function again.
@@ -1343,10 +1196,10 @@ FEinterpolateValue(const ID& elementID, const vector_type& solutionVector, const
 };
 
 
-template<typename Mesh, typename Map>
+template<typename MeshType, typename MapType>
 template<typename point_type,typename vector_type>
 Real
-FESpace<Mesh, Map>::
+FESpace<MeshType, MapType>::
 FEinterpolateValueLocal(const ID& elementID, const vector_type& solutionVector, const point_type& pt ) const
 {
     // Make sur everything is up to date
@@ -1384,10 +1237,10 @@ FEinterpolateValueLocal(const ID& elementID, const vector_type& solutionVector, 
 };
 
 
-template<typename Mesh, typename Map>
+template<typename MeshType, typename MapType>
 template<typename point_type,typename vector_type>
 Real
-FESpace<Mesh, Map>::
+FESpace<MeshType, MapType>::
 FEinterpolateGradient(const ID& elementID, const vector_type& solutionVector, const point_type& pt,
                       const UInt& gradientElement, const UInt& component ) const
 {
@@ -1445,10 +1298,10 @@ FEinterpolateGradient(const ID& elementID, const vector_type& solutionVector, co
 };
 
 
-template<typename Mesh, typename Map>
+template<typename MeshType, typename MapType>
 template<typename point_type,typename vector_type>
 Real
-FESpace<Mesh, Map>::
+FESpace<MeshType, MapType>::
 FEinterpolateGradientLocal(const ID& elementID, const vector_type& solutionVector, const point_type& pt,
                            const UInt& gradientElement ) const
 {
@@ -1490,10 +1343,10 @@ FEinterpolateGradientLocal(const ID& elementID, const vector_type& solutionVecto
 };
 
 
-template<typename Mesh, typename Map>
+template<typename MeshType, typename MapType>
 template<typename vector_type>
 vector_type
-FESpace<Mesh,Map>::
+FESpace<MeshType,MapType>::
 FeToFeInterpolate(const FESpace<mesh_type,map_type>& OriginalSpace,
                   const vector_type& OriginalVector) const
 {
@@ -1585,11 +1438,192 @@ FeToFeInterpolate(const FESpace<mesh_type,map_type>& OriginalSpace,
 };
 
 
-// This method returns a vector with Unique map.
-template<typename Mesh, typename Map>
+template<typename MeshType, typename MapType>
 template<typename vector_type>
 vector_type
-FESpace<Mesh,Map>::
+FESpace<MeshType,MapType>::
+GradientRecovery(const vector_type& solution, const UInt& dxi)
+{
+    if (solution.getMaptype() != Repeated)
+    {
+        return GradientRecovery(vector_type(solution,Repeated),dxi);
+    };
+
+    // Define a special quadrature rule for the interpolation
+    QuadRule interpQuad;
+    interpQuad.setDimensionShape(3,M_refFE->shape());
+    Real wQuad(1.0/(M_refFE->nbDof() * 6.0));       //Here use area=1/6 ==> only for tetra
+
+    for (UInt i(0); i<M_refFE->nbDof(); ++i) //nbRefCoor
+    {
+        interpQuad.addPoint(QuadPoint(M_refFE->xi(i),M_refFE->eta(i),M_refFE->zeta(i),wQuad));
+    };
+
+    // Initialization of the vectors
+    vector_type patchArea(solution,Repeated);
+    patchArea *= 0.0;
+
+    vector_type gradientSum(solution,Repeated);
+    gradientSum *= 0.0;
+
+
+    UInt totalNumberElements(M_mesh->numElements());
+    UInt numberLocalDof(M_dof->numLocalDof());
+
+    CurrentFE interpCFE(*M_refFE,getGeoMap(*M_mesh ),interpQuad);
+
+    // Loop over the cells
+    for (UInt iterVolume(1); iterVolume<= totalNumberElements; ++iterVolume)
+    {
+        interpCFE.update(mesh()->element(iterVolume), UPDATE_DPHI | UPDATE_WDET );
+
+        for (UInt iterDof(0); iterDof < numberLocalDof; ++iterDof)
+        {
+            for (UInt iDim(0); iDim < M_fieldDim; ++iDim)
+            {
+                ID globalDofID(dof().localToGlobal(iterVolume,iterDof+1) + iDim*dof().numTotalDof());
+
+                patchArea[globalDofID] += interpCFE.measure();
+                for (UInt iterDofGrad(0); iterDofGrad < numberLocalDof; ++iterDofGrad)
+                {
+                    ID globalDofIDGrad(dof().localToGlobal(iterVolume,iterDofGrad+1));
+                    gradientSum[globalDofID] += interpCFE.measure()*solution[globalDofIDGrad]*interpCFE.dphi(iterDofGrad,dxi,iterDof);
+                }
+            }
+        }
+    }
+
+    // Assembly
+    return vector_type(gradientSum,Unique,Add)/vector_type(patchArea,Unique,Add);
+}
+
+template<typename MeshType, typename MapType>
+template<typename vector_type>
+vector_type
+FESpace<MeshType,MapType>::
+LaplacianRecovery(const vector_type& solution)
+{
+    if (solution.getMaptype() != Repeated)
+    {
+        return LaplacianRecovery(vector_type(solution,Repeated));
+    }
+
+    vector_type laplacian(solution);
+    laplacian*=0.0;
+
+    for (UInt iterDim(0); iterDim< 3; ++iterDim)
+    {
+        laplacian+= GradientRecovery(GradientRecovery(solution,iterDim),iterDim);
+    }
+    return laplacian;
+}
+
+
+
+// ===================================================
+// Set Methods
+// ===================================================
+
+// Set FE space (default standard parameters)
+template <typename MeshType, typename MapType>
+inline void
+FESpace<MeshType, MapType>::setSpace( const std::string& space )
+{
+    switch ( M_spaceMap[space] )
+    {
+    case P1 :
+
+#ifdef TWODIM
+        M_refFE = &feTriaP1;
+        M_Qr    = &quadRuleTria6pt;
+        M_bdQr  = &quadRuleSeg3pt;
+#else // THREEDIM
+        M_refFE = &feTetraP1;
+        M_Qr    = &quadRuleTetra4pt;
+        M_bdQr	= &quadRuleTria3pt;
+#endif
+
+        break;
+
+    case P1_HIGH :
+
+#ifdef TWODIM
+        M_refFE = &feTriaP1;
+        M_Qr    = &quadRuleTria6pt;
+        M_bdQr  = &quadRuleSeg3pt;
+#else // THREEDIM
+        M_refFE = &feTetraP1;
+        M_Qr    = &quadRuleTetra15pt;
+        M_bdQr	= &quadRuleTria4pt;
+#endif
+
+        break;
+
+    case P1Bubble :
+
+#ifdef TWODIM
+
+        break;
+
+#else // THREEDIM
+        M_refFE = &feTetraP1bubble;
+        M_Qr    = &quadRuleTetra64pt;
+        M_bdQr	= &quadRuleTria3pt;
+#endif
+
+        break;
+
+    case P2 :
+
+#ifdef TWODIM
+        M_refFE = &feTriaP2;
+        M_Qr    = &quadRuleTria6pt;
+        M_bdQr  = &quadRuleSeg3pt;
+#else // THREEDIM
+        M_refFE = &feTetraP2;
+        M_Qr    = &quadRuleTetra15pt;
+        M_bdQr	= &quadRuleTria3pt;
+#endif
+
+    case P2_HIGH :
+
+#ifdef TWODIM
+        M_refFE = &feTriaP2;
+        M_Qr    = &quadRuleTria6pt;
+        M_bdQr  = &quadRuleSeg3pt;
+#else // THREEDIM
+        M_refFE = &feTetraP2;
+        M_Qr    = &quadRuleTetra64pt;
+        M_bdQr	= &quadRuleTria4pt;
+#endif
+
+        break;
+
+    default :
+
+        std::cout << "!!! WARNING: Space " << space << "not implemented in FESpace class !!!" << std::endl;
+    }
+}
+
+template<typename MeshType, typename MapType>
+void
+FESpace<MeshType,MapType>::
+setQuadRule(const QuadRule& Qr)
+{
+    M_Qr = &Qr;
+    M_fe.reset( new CurrentFE( *M_refFE, getGeoMap( *M_mesh ), *M_Qr ) );
+};
+
+
+// ===================================================
+// Private Methods
+// ===================================================
+
+// This method returns a vector with Unique map.
+template<typename MeshType, typename MapType>
+template<typename vector_type>
+vector_type
+FESpace<MeshType,MapType>::
 P2ToP1Interpolate(const FESpace<mesh_type,map_type>& OriginalSpace,
                   const vector_type& OriginalVector) const
 {
@@ -1637,10 +1671,10 @@ P2ToP1Interpolate(const FESpace<mesh_type,map_type>& OriginalSpace,
 };
 
 
-template<typename Mesh, typename Map>
+template<typename MeshType, typename MapType>
 template<typename vector_type>
 vector_type
-FESpace<Mesh,Map>::
+FESpace<MeshType,MapType>::
 P1bToP1Interpolate(const FESpace<mesh_type,map_type>& OriginalSpace,
                    const vector_type& OriginalVector) const
 {
@@ -1688,10 +1722,10 @@ P1bToP1Interpolate(const FESpace<mesh_type,map_type>& OriginalSpace,
 };
 
 
-template<typename Mesh, typename Map>
+template<typename MeshType, typename MapType>
 template<typename vector_type>
 vector_type
-FESpace<Mesh,Map>::
+FESpace<MeshType,MapType>::
 P1ToP2Interpolate(const FESpace<mesh_type,map_type>& OriginalSpace,
                   const vector_type& OriginalVector) const
 {
@@ -1757,10 +1791,10 @@ P1ToP2Interpolate(const FESpace<mesh_type,map_type>& OriginalSpace,
 
 };
 
-template<typename Mesh, typename Map>
+template<typename MeshType, typename MapType>
 template<typename vector_type>
 vector_type
-FESpace<Mesh,Map>::
+FESpace<MeshType,MapType>::
 P1ToP1bInterpolate(const FESpace<mesh_type,map_type>& OriginalSpace,
                    const vector_type& OriginalVector) const
 {
@@ -1821,10 +1855,10 @@ P1ToP1bInterpolate(const FESpace<mesh_type,map_type>& OriginalSpace,
 
 };
 
-template<typename Mesh, typename Map>
+template<typename MeshType, typename MapType>
 template<typename vector_type>
 vector_type
-FESpace<Mesh,Map>::
+FESpace<MeshType,MapType>::
 P1bToP2Interpolate(const FESpace<mesh_type,map_type>& OriginalSpace,
                    const vector_type& OriginalVector) const
 {
@@ -1892,10 +1926,10 @@ P1bToP2Interpolate(const FESpace<mesh_type,map_type>& OriginalSpace,
 };
 
 
-template<typename Mesh, typename Map>
+template<typename MeshType, typename MapType>
 template<typename vector_type>
 vector_type
-FESpace<Mesh,Map>::
+FESpace<MeshType,MapType>::
 P2ToP1bInterpolate(const FESpace<mesh_type,map_type>& OriginalSpace,
                    const vector_type& OriginalVector) const
 {
@@ -1970,10 +2004,10 @@ P2ToP1bInterpolate(const FESpace<mesh_type,map_type>& OriginalSpace,
     return return_vector;
 };
 
-template<typename Mesh, typename Map>
+template<typename MeshType, typename MapType>
 template<typename vector_type>
 vector_type
-FESpace<Mesh,Map>::
+FESpace<MeshType,MapType>::
 RT0ToP0Interpolate(const FESpace<mesh_type,map_type>& OriginalSpace,
                    const vector_type& OriginalVector) const
 {
@@ -2067,97 +2101,6 @@ RT0ToP0Interpolate(const FESpace<mesh_type,map_type>& OriginalSpace,
 
     vector_type return_vector(Interpolated,Unique,Insert);
     return return_vector;
-}
-
-
-template<typename Mesh, typename Map>
-void
-FESpace<Mesh,Map>::
-setQuadRule(const QuadRule& Qr)
-{
-    M_Qr = &Qr;
-    M_fe.reset( new CurrentFE( *M_refFE, getGeoMap( *M_mesh ), *M_Qr ) );
-};
-
-
-template<typename Mesh, typename Map>
-template<typename vector_type>
-vector_type
-FESpace<Mesh,Map>::
-GradientRecovery(const vector_type& solution, const UInt& dxi)
-{
-    if (solution.getMaptype() != Repeated)
-    {
-        return GradientRecovery(vector_type(solution,Repeated),dxi);
-    };
-
-    // Define a special quadrature rule for the interpolation
-    QuadRule interpQuad;
-    interpQuad.setDimensionShape(3,M_refFE->shape());
-    Real wQuad(1.0/(M_refFE->nbDof() * 6.0));       //Here use area=1/6 ==> only for tetra
-
-    for (UInt i(0); i<M_refFE->nbDof(); ++i) //nbRefCoor
-    {
-        interpQuad.addPoint(QuadPoint(M_refFE->xi(i),M_refFE->eta(i),M_refFE->zeta(i),wQuad));
-    };
-
-    // Initialization of the vectors
-    vector_type patchArea(solution,Repeated);
-    patchArea *= 0.0;
-
-    vector_type gradientSum(solution,Repeated);
-    gradientSum *= 0.0;
-
-
-    UInt totalNumberElements(M_mesh->numElements());
-    UInt numberLocalDof(M_dof->numLocalDof());
-
-    CurrentFE interpCFE(*M_refFE,getGeoMap(*M_mesh ),interpQuad);
-
-    // Loop over the cells
-    for (UInt iterVolume(1); iterVolume<= totalNumberElements; ++iterVolume)
-    {
-        interpCFE.update(mesh()->element(iterVolume), UPDATE_DPHI | UPDATE_WDET );
-
-        for (UInt iterDof(0); iterDof < numberLocalDof; ++iterDof)
-        {
-            for (UInt iDim(0); iDim < M_fieldDim; ++iDim)
-            {
-                ID globalDofID(dof().localToGlobal(iterVolume,iterDof+1) + iDim*dof().numTotalDof());
-
-                patchArea[globalDofID] += interpCFE.measure();
-                for (UInt iterDofGrad(0); iterDofGrad < numberLocalDof; ++iterDofGrad)
-                {
-                    ID globalDofIDGrad(dof().localToGlobal(iterVolume,iterDofGrad+1));
-                    gradientSum[globalDofID] += interpCFE.measure()*solution[globalDofIDGrad]*interpCFE.dphi(iterDofGrad,dxi,iterDof);
-                }
-            }
-        }
-    }
-
-    // Assembly
-    return vector_type(gradientSum,Unique,Add)/vector_type(patchArea,Unique,Add);
-}
-
-template<typename Mesh, typename Map>
-template<typename vector_type>
-vector_type
-FESpace<Mesh,Map>::
-LaplacianRecovery(const vector_type& solution)
-{
-    if (solution.getMaptype() != Repeated)
-    {
-        return LaplacianRecovery(vector_type(solution,Repeated));
-    }
-
-    vector_type laplacian(solution);
-    laplacian*=0.0;
-
-    for (UInt iterDim(0); iterDim< 3; ++iterDim)
-    {
-        laplacian+= GradientRecovery(GradientRecovery(solution,iterDim),iterDim);
-    }
-    return laplacian;
 }
 
 

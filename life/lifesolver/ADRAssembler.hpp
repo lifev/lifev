@@ -1,26 +1,26 @@
 //@HEADER
 /*
-************************************************************************
+*******************************************************************************
 
- This file is part of the LifeV Applications.
- Copyright (C) 2001-2010 EPFL, Politecnico di Milano, INRIA
+    Copyright (C) 2004, 2005, 2007 EPFL, Politecnico di Milano, INRIA
+    Copyright (C) 2010 EPFL, Politecnico di Milano, Emory University
 
- This library is free software; you can redistribute it and/or modify
- it under the terms of the GNU Lesser General Public License as
- published by the Free Software Foundation; either version 2.1 of the
- License, or (at your option) any later version.
+    This file is part of LifeV.
 
- This library is distributed in the hope that it will be useful, but
- WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- Lesser General Public License for more details.
+    LifeV is free software; you can redistribute it and/or modify
+    it under the terms of the GNU Lesser General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
 
- You should have received a copy of the GNU Lesser General Public
- License along with this library; if not, write to the Free Software
- Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
- USA
+    LifeV is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+    Lesser General Public License for more details.
 
-************************************************************************
+    You should have received a copy of the GNU Lesser General Public License
+    along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
+
+*******************************************************************************
 */
 //@HEADER
 
@@ -29,8 +29,12 @@
     @brief File containing the ADRAssembler class.
 
     @author Samuel Quinodoz <samuel.quinodoz@epfl.ch>
-    @date 28 Sep 2010
-*/
+    @date 28-09-2010
+
+    @contributor Samuel Quinodoz <samuel.quinodoz@epfl.ch>
+    @mantainer Samuel Quinodoz <samuel.quinodoz@epfl.ch>
+
+ */
 
 #ifndef ADRASSEMBLER_H
 #define ADRASSEMBLER_H 1
@@ -206,7 +210,7 @@ public:
       @remark Nul pointers cannot be passed to this method. Use a more
       specific setter if you want to do that.
      */
-    virtual void setup(const fespace_ptrType& fespace, const fespace_ptrType& betaFESpace);
+    void setup(const fespace_ptrType& fespace, const fespace_ptrType& betaFESpace);
 
     //! Assembling for the mass
     /*!
@@ -459,6 +463,9 @@ ADRAssembler():
         M_massRhsAssemblyChrono()
 {};
 
+// ===================================================
+// Constructors & Destructor
+// ===================================================
 
 template<typename mesh_type, typename matrix_type, typename vector_type>
 void
@@ -476,45 +483,9 @@ setup( const fespace_ptrType& fespace, const fespace_ptrType& betaFESpace )
     M_setupChrono.stop();
 }
 
-template<typename mesh_type, typename matrix_type, typename vector_type>
-void
-ADRAssembler< mesh_type, matrix_type, vector_type>::
-setFespace(const fespace_ptrType& fespace)
-{
-    ASSERT(fespace!=0," Setting the FE space for the unknown to 0 is not permitted ");
-
-    M_fespace=fespace;
-
-    M_massCFE.reset(new currentFE_type(M_fespace->refFE(),M_fespace->fe().geoMap(),M_fespace->qr()));
-    M_localMass.reset(new localMatrix_type(M_fespace->fe().nbFEDof(),
-                                           M_fespace->fieldDim(),
-                                           M_fespace->fieldDim()));
-
-    M_advCFE.reset(new currentFE_type(M_fespace->refFE(),M_fespace->fe().geoMap(),M_fespace->qr()));
-    M_localAdv.reset(new localMatrix_type(M_fespace->fe().nbFEDof(),
-                                          M_fespace->fieldDim(),
-                                          M_fespace->fieldDim()));
-
-    M_diffCFE.reset(new currentFE_type(M_fespace->refFE(),M_fespace->fe().geoMap(),M_fespace->qr()));
-    M_localDiff.reset(new localMatrix_type(M_fespace->fe().nbFEDof(),
-                                           M_fespace->fieldDim(),
-                                           M_fespace->fieldDim()));
-
-    M_massRhsCFE.reset(new currentFE_type(M_fespace->refFE(),M_fespace->fe().geoMap(),M_fespace->qr()));
-    M_localMassRhs.reset(new localVector_type(M_fespace->fe().nbFEDof(), M_fespace->fieldDim()));
-}
-
-template<typename mesh_type, typename matrix_type, typename vector_type>
-void
-ADRAssembler< mesh_type, matrix_type, vector_type>::
-setBetaFespace(const fespace_ptrType& betaFESpace)
-{
-    ASSERT(M_fespace != 0," No FE space for the unknown! Use setFespace before setBetaFespace!");
-    ASSERT(M_advCFE != 0, " No current FE set for the advection of the unknown! Internal error.");
-    M_betaFESpace=betaFESpace;
-
-    M_advBetaCFE.reset(new currentFE_type(M_betaFESpace->refFE(),M_fespace->fe().geoMap(),M_advCFE->quadRule()));
-}
+// ===================================================
+// Methods
+// ===================================================
 
 template<typename mesh_type, typename matrix_type, typename vector_type>
 void
@@ -834,6 +805,52 @@ addMassRhs(vector_type& rhs, const function_type& f, const Real& t)
 
     M_massRhsAssemblyChrono.stop();
 }
+
+
+// ===================================================
+// Set Methods
+// ===================================================
+
+template<typename mesh_type, typename matrix_type, typename vector_type>
+void
+ADRAssembler< mesh_type, matrix_type, vector_type>::
+setFespace(const fespace_ptrType& fespace)
+{
+    ASSERT(fespace!=0," Setting the FE space for the unknown to 0 is not permitted ");
+
+    M_fespace=fespace;
+
+    M_massCFE.reset(new currentFE_type(M_fespace->refFE(),M_fespace->fe().geoMap(),M_fespace->qr()));
+    M_localMass.reset(new localMatrix_type(M_fespace->fe().nbFEDof(),
+                                           M_fespace->fieldDim(),
+                                           M_fespace->fieldDim()));
+
+    M_advCFE.reset(new currentFE_type(M_fespace->refFE(),M_fespace->fe().geoMap(),M_fespace->qr()));
+    M_localAdv.reset(new localMatrix_type(M_fespace->fe().nbFEDof(),
+                                          M_fespace->fieldDim(),
+                                          M_fespace->fieldDim()));
+
+    M_diffCFE.reset(new currentFE_type(M_fespace->refFE(),M_fespace->fe().geoMap(),M_fespace->qr()));
+    M_localDiff.reset(new localMatrix_type(M_fespace->fe().nbFEDof(),
+                                           M_fespace->fieldDim(),
+                                           M_fespace->fieldDim()));
+
+    M_massRhsCFE.reset(new currentFE_type(M_fespace->refFE(),M_fespace->fe().geoMap(),M_fespace->qr()));
+    M_localMassRhs.reset(new localVector_type(M_fespace->fe().nbFEDof(), M_fespace->fieldDim()));
+}
+
+template<typename mesh_type, typename matrix_type, typename vector_type>
+void
+ADRAssembler< mesh_type, matrix_type, vector_type>::
+setBetaFespace(const fespace_ptrType& betaFESpace)
+{
+    ASSERT(M_fespace != 0," No FE space for the unknown! Use setFespace before setBetaFespace!");
+    ASSERT(M_advCFE != 0, " No current FE set for the advection of the unknown! Internal error.");
+    M_betaFESpace=betaFESpace;
+
+    M_advBetaCFE.reset(new currentFE_type(M_betaFESpace->refFE(),M_fespace->fe().geoMap(),M_advCFE->quadRule()));
+}
+
 
 } // Namespace LifeV
 

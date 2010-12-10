@@ -1,38 +1,40 @@
 //@HEADER
 /*
-************************************************************************
+*******************************************************************************
 
- This file is part of the LifeV Applications.
- Copyright (C) 2001-2010 EPFL, Politecnico di Milano, INRIA
+    Copyright (C) 2004, 2005, 2007 EPFL, Politecnico di Milano, INRIA
+    Copyright (C) 2010 EPFL, Politecnico di Milano, Emory University
 
- This library is free software; you can redistribute it and/or modify
- it under the terms of the GNU Lesser General Public License as
- published by the Free Software Foundation; either version 2.1 of the
- License, or (at your option) any later version.
+    This file is part of LifeV.
 
- This library is distributed in the hope that it will be useful, but
- WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- Lesser General Public License for more details.
+    LifeV is free software; you can redistribute it and/or modify
+    it under the terms of the GNU Lesser General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
 
- You should have received a copy of the GNU Lesser General Public
- License along with this library; if not, write to the Free Software
- Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
- USA
+    LifeV is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+    Lesser General Public License for more details.
 
-************************************************************************
+    You should have received a copy of the GNU Lesser General Public License
+    along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
+
+*******************************************************************************
 */
 //@HEADER
 
 /*!
     @file
-    @brief A short description of the file content
+    @brief Reference finite element for scalar lagrangian FEs.
 
     @author Samuel Quinodoz <samuel.quinodoz@epfl.ch>
-    @date 10 May 2010
+    @date 10-05-2010
 
-    A more detailed description of the file (if necessary)
+    @contributor
+    @mantainer Samuel Quinodoz <samuel.quinodoz@epfl.ch>
  */
+
 
 #ifndef REFFESCALAR_H
 #define REFFESCALAR_H 1
@@ -52,8 +54,17 @@ class RefFEScalar
 {
 public:
 
+    //! @name Public Types
+    //@{
+
     typedef RefFE::Fct Fct;
     typedef std::vector<Real> (*ValuesToValuesFct) (const std::vector<Real>&);
+
+    //@}
+
+
+    //! @name Constructor & Destructor
+    //@{
 
     //! Constructor of a reference Lagrangian finite element.
     /*!
@@ -86,12 +97,12 @@ public:
     RefFEScalar( std::string          name,
                  FE_TYPE              type,
                  ReferenceShapes      shape,
-                 int                  nbDofPerVertex,
-                 int                  nbDofPerEdge,
-                 int                  nbDofPerFace,
-                 int                  nbDofPerVolume,
-                 int                  nbDof,
-                 int                  nbCoor,
+                 Int                  nbDofPerVertex,
+                 Int                  nbDofPerEdge,
+                 Int                  nbDofPerFace,
+                 Int                  nbDofPerVolume,
+                 Int                  nbDof,
+                 Int                  nbCoor,
                  const Fct*           phi,
                  const Fct*           dPhi,
                  const Fct*           d2Phi,
@@ -100,15 +111,15 @@ public:
                  const RefFE*         bdRefFE,
                  const ValuesToValuesFct nodalToFE);
 
-    ~RefFEScalar()
-    {
-        DESTRUCTOR( "RefFEScalar" );
-    };
+    ~RefFEScalar(){};
+
+    //@}
+
 
     //! @name Methods
     //@{
 
-    inline std::vector<Real> nodalToFEValues(const std::vector<Real>& nodalValues) const
+    std::vector<Real> nodalToFEValues(const std::vector<Real>& nodalValues) const
     {
         ASSERT( nodalValues.size() == nbDof() ,"Number of nodal values does not match with the number of degrees of freedom");
         return M_nodalToFEValues(nodalValues);

@@ -1,39 +1,39 @@
 //@HEADER
 /*
-************************************************************************
+*******************************************************************************
 
- This file is part of the LifeV Applications.
- Copyright (C) 2001-2010 EPFL, Politecnico di Milano, INRIA
+    Copyright (C) 2004, 2005, 2007 EPFL, Politecnico di Milano, INRIA
+    Copyright (C) 2010 EPFL, Politecnico di Milano, Emory University
 
- This library is free software; you can redistribute it and/or modify
- it under the terms of the GNU Lesser General Public License as
- published by the Free Software Foundation; either version 2.1 of the
- License, or (at your option) any later version.
+    This file is part of LifeV.
 
- This library is distributed in the hope that it will be useful, but
- WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- Lesser General Public License for more details.
+    LifeV is free software; you can redistribute it and/or modify
+    it under the terms of the GNU Lesser General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
 
- You should have received a copy of the GNU Lesser General Public
- License along with this library; if not, write to the Free Software
- Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
- USA
+    LifeV is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+    Lesser General Public License for more details.
 
-************************************************************************
+    You should have received a copy of the GNU Lesser General Public License
+    along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
+
+*******************************************************************************
 */
 //@HEADER
 
 /*!
     @file
-    @brief This file contains the CurrentFE class that is one of the most important classes required
-    for the assembly of the matrices
+    @brief File containing the CurrentFE class
 
-    @author Samuel Quinodoz <samuel.quinodoz@epfl.ch>
-    @date 13 Apr 2010
+    @author Jean-Frederic Gerbeau
+    @date 00-04-2002
 
-    This file existed before I reimplemented it. It was due to J.-F. Gerbeau (04/2002) and V. Martin(07/2004).
-    Many idea present in this class were taken from that file.
+    @contributor V. Martin
+                 Samuel Quinodoz <samuel.quinodoz@epfl.ch>
+    @mantainer Samuel Quinodoz <samuel.quinodoz@epfl.ch>
  */
 
 
@@ -259,21 +259,21 @@ public:
 
     //! Full constructor with default quadrature
     /*!
-      @param _refFE Reference finite element used
-      @param _geoMap Geometric mapping used
-      @param _qr Quadrature rule for the computations
+      @param refFE Reference finite element used
+      @param geoMap Geometric mapping used
+      @param qr Quadrature rule for the computations
      */
-    CurrentFE( const RefFE& _refFE, const GeoMap& _geoMap, const QuadRule& _qr );
+    CurrentFE( const RefFE& refFE, const GeoMap& geoMap, const QuadRule& qr );
 
     //! Constructor without quadrature specification
     /*!
       If you use this constructor, you have to use the method CurrentFE::setQuadRule before
       using any update method!
 
-      @param _refFE Reference finite element used
-      @param _geoMap Geometric mapping used
+      @param refFE Reference finite element used
+      @param geoMap Geometric mapping used
      */
-    CurrentFE( const RefFE& _refFE, const GeoMap& _geoMap);
+    CurrentFE( const RefFE& refFE, const GeoMap& geoMap);
 
     //! Destructor
     ~CurrentFE() { delete M_quadRule;}
@@ -291,8 +291,8 @@ public:
       @param geoele The cell that we are looking at
       @param upFlag The flag to explain the quantities that we want to update
      */
-    template<typename GeoElement>
-    void update(const GeoElement& geoele, const flag_Type& upFlag);
+    template<typename GeoElementType>
+    void update(const GeoElementType& geoele, const flag_Type& upFlag);
 
     //! Update method using only point coordinates. It used the flags, as defined in \ref update_procedure "this page".
     void update(const std::vector<std::vector<Real> >& pts, const flag_Type& upFlag);
@@ -564,8 +564,8 @@ private:
     CurrentFE( const CurrentFE& );
 
     //! Update the nodes of the cell to the current one.
-    template<typename GeoElement>
-    void computeCellNodes(const GeoElement& geoele);
+    template<typename GeoElementType>
+    void computeCellNodes(const GeoElementType& geoele);
 
     //! Update only the nodes of the cells to the current one.
     void computeCellNodes(const std::vector<std::vector< Real> >& pts);
@@ -623,8 +623,6 @@ private:
 
     // Important structures
 
-    //const RefFE& M_refFE;
-    //const GeoMap& M_geoMap;
     const RefFE* M_refFE;
     const GeoMap* M_geoMap;
     QuadRule* M_quadRule;
@@ -732,56 +730,56 @@ public:
     /*!
       minimal update: we just identify the id of the current element
     */
-    template <class GEOELE>
-    void update( const GEOELE& geoele );
+    template <class GeoElementType>
+    void update( const GeoElementType& geoele );
     /*!
       compute the arrays detJac, weightDet, jacobian on
       the current element
     */
-    template <class GEOELE>
-    void updateJac( const GEOELE& geoele );
+    template <class GeoElementType>
+    void updateJac( const GeoElementType& geoele );
     /*!
       compute the arrays detJac, weightDet, jacobian and quadPt
       on the current element
     */
-    template <class GEOELE>
-    void updateJacQuadPt( const GEOELE& geoele );
+    template <class GeoElementType>
+    void updateJacQuadPt( const GeoElementType& geoele );
     /*!
       compute the arrays detJac, weightDet, jacobian,
       tInvJac, phiDer on the current element
     */
-    template <class GEOELE>
-    void updateFirstDeriv( const GEOELE& geoele );
+    template <class GeoElementType>
+    void updateFirstDeriv( const GeoElementType& geoele );
     /*!
       compute the arrays detJac, weightDet, jacobian,
       tInvJac, phiDer and quadPt on the current element
     */
-    template <class GEOELE>
-    void updateFirstDerivQuadPt( const GEOELE& geoele );
+    template <class GeoElementType>
+    void updateFirstDerivQuadPt( const GeoElementType& geoele );
     /*!
       compute the arrays detJac, weightDet, jacobian,
       tInvJac, phiDer2 on the current element
     */
-    template <class GEOELE>
-    void updateSecondDeriv( const GEOELE& geoele );
+    template <class GeoElementType>
+    void updateSecondDeriv( const GeoElementType& geoele );
     /*!
       compute the arrays detJac, weightDet, jacobian,
       tInvJac, phiDer2 on the current element
     */
-    template <class GEOELE>
-    void updateSecondDerivQuadPt( const GEOELE& geoele );
+    template <class GeoElementType>
+    void updateSecondDerivQuadPt( const GeoElementType& geoele );
     /*!
       compute the arrays detJac, weightDet, jacobian,
       tInvJac, phiDer, phiDer2 on the current element
     */
-    template <class GEOELE>
-    void updateFirstSecondDeriv( const GEOELE& geoele );
+    template <class GeoElementType>
+    void updateFirstSecondDeriv( const GeoElementType& geoele );
     /*!
       compute the arrays detJac, weightDet, jacobian,
       tInvJac, phiDer, phiDer2 on the current element
     */
-    template <class GEOELE>
-    void updateFirstSecondDerivQuadPt( const GEOELE& geoele );
+    template <class GeoElementType>
+    void updateFirstSecondDerivQuadPt( const GeoElementType& geoele );
 
     //@}
 
@@ -832,8 +830,8 @@ void CurrentFE::computeCellNodes(const GeoElement& geoele)
 /*!
     minimal update: we just identify the id of the current element
   */
-template <class GEOELE>
-void CurrentFE::update( const GEOELE& geoele )
+template <class GeoElementType>
+void CurrentFE::update( const GeoElementType& geoele )
 {
     M_currentId      = geoele.id();
     M_currentLocalId = geoele.localId();
@@ -843,8 +841,8 @@ void CurrentFE::update( const GEOELE& geoele )
     compute the arrays detJac, weightDet, jacobian on
     the current element
 */
-template <class GEOELE>
-void CurrentFE::updateJac( const GEOELE& geoele )
+template <class GeoElementType>
+void CurrentFE::updateJac( const GeoElementType& geoele )
 {
     ASSERT(M_nbQuadPt!=0," No quadrature rule defined, cannot update!");
     M_currentId      = geoele.id();
@@ -861,8 +859,8 @@ void CurrentFE::updateJac( const GEOELE& geoele )
     compute the arrays detJac, weightDet, jacobian and quadPt
     on the current element
 */
-template <class GEOELE>
-void CurrentFE::updateJacQuadPt( const GEOELE& geoele )
+template <class GeoElementType>
+void CurrentFE::updateJacQuadPt( const GeoElementType& geoele )
 {
     ASSERT(M_nbQuadPt!=0," No quadrature rule defined, cannot update!");
     M_currentId      = geoele.id();
@@ -881,8 +879,8 @@ void CurrentFE::updateJacQuadPt( const GEOELE& geoele )
     compute the arrays detJac, weightDet, jacobian,
     tInvJac, phiDer on the current element
 */
-template <class GEOELE>
-void CurrentFE::updateFirstDeriv( const GEOELE& geoele )
+template <class GeoElementType>
+void CurrentFE::updateFirstDeriv( const GeoElementType& geoele )
 {
     ASSERT(M_nbQuadPt!=0," No quadrature rule defined, cannot update!");
     M_currentId      = geoele.id();
@@ -903,8 +901,8 @@ void CurrentFE::updateFirstDeriv( const GEOELE& geoele )
     compute the arrays detJac, weightDet, jacobian,
     tInvJac, phiDer and quadPt on the current element
 */
-template <class GEOELE>
-void CurrentFE::updateFirstDerivQuadPt( const GEOELE& geoele )
+template <class GeoElementType>
+void CurrentFE::updateFirstDerivQuadPt( const GeoElementType& geoele )
 {
     ASSERT(M_nbQuadPt!=0," No quadrature rule defined, cannot update!");
     M_currentId      = geoele.id();
@@ -928,8 +926,8 @@ void CurrentFE::updateFirstDerivQuadPt( const GEOELE& geoele )
   compute the arrays detJac, weightDet, jacobian,
   tInvJac, phiDer2 on the current element
 */
-template <class GEOELE>
-void CurrentFE::updateSecondDeriv( const GEOELE& geoele )
+template <class GeoElementType>
+void CurrentFE::updateSecondDeriv( const GeoElementType& geoele )
 {
     ASSERT(M_nbQuadPt!=0," No quadrature rule defined, cannot update!");
     M_currentId      = geoele.id();
@@ -950,8 +948,8 @@ void CurrentFE::updateSecondDeriv( const GEOELE& geoele )
     compute the arrays detJac, weightDet, jacobian,
     tInvJac, phiDer2 on the current element
   */
-template <class GEOELE>
-void CurrentFE::updateSecondDerivQuadPt( const GEOELE& geoele )
+template <class GeoElementType>
+void CurrentFE::updateSecondDerivQuadPt( const GeoElementType& geoele )
 {
     ASSERT(M_nbQuadPt!=0," No quadrature rule defined, cannot update!");
     M_currentId      = geoele.id();
@@ -973,8 +971,8 @@ void CurrentFE::updateSecondDerivQuadPt( const GEOELE& geoele )
     compute the arrays detJac, weightDet, jacobian,
     tInvJac, phiDer, phiDer2 on the current element
   */
-template <class GEOELE>
-void CurrentFE::updateFirstSecondDeriv( const GEOELE& geoele )
+template <class GeoElementType>
+void CurrentFE::updateFirstSecondDeriv( const GeoElementType& geoele )
 {
     ASSERT(M_nbQuadPt!=0," No quadrature rule defined, cannot update!");
     M_currentId      = geoele.id();
@@ -996,8 +994,8 @@ void CurrentFE::updateFirstSecondDeriv( const GEOELE& geoele )
     compute the arrays detJac, weightDet, jacobian,
     tInvJac, phiDer, phiDer2 on the current element
   */
-template <class GEOELE>
-void CurrentFE::updateFirstSecondDerivQuadPt( const GEOELE& geoele )
+template <class GeoElementType>
+void CurrentFE::updateFirstSecondDerivQuadPt( const GeoElementType& geoele )
 {
     ASSERT(M_nbQuadPt!=0," No quadrature rule defined, cannot update!");
     M_currentId      = geoele.id();

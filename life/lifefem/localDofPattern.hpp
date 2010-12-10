@@ -1,39 +1,42 @@
 //@HEADER
 /*
-************************************************************************
+*******************************************************************************
 
- This file is part of the LifeV Applications.
- Copyright (C) 2001-2010 EPFL, Politecnico di Milano, INRIA
+    Copyright (C) 2004, 2005, 2007 EPFL, Politecnico di Milano, INRIA
+    Copyright (C) 2010 EPFL, Politecnico di Milano, Emory University
 
- This library is free software; you can redistribute it and/or modify
- it under the terms of the GNU Lesser General Public License as
- published by the Free Software Foundation; either version 2.1 of the
- License, or (at your option) any later version.
+    This file is part of LifeV.
 
- This library is distributed in the hope that it will be useful, but
- WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- Lesser General Public License for more details.
+    LifeV is free software; you can redistribute it and/or modify
+    it under the terms of the GNU Lesser General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
 
- You should have received a copy of the GNU Lesser General Public
- License along with this library; if not, write to the Free Software
- Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
- USA
+    LifeV is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+    Lesser General Public License for more details.
 
-************************************************************************
+    You should have received a copy of the GNU Lesser General Public License
+    along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
+
+*******************************************************************************
 */
 //@HEADER
 
 /*!
     @file
     @brief This file contains the definition of the LocalDofPattern class.
- */
 
+    @contributor Samuel Quinodoz <samuel.quinodoz@epfl.ch>
+    @mantainer Samuel Quinodoz <samuel.quinodoz@epfl.ch>
+ */
 
 #ifndef _LOCAL_DOF_PATTERN_HH
 #define _LOCAL_DOF_PATTERN_HH
 
 #include <life/lifecore/life.hpp>
+
 #include <utility>
 
 namespace LifeV
@@ -68,7 +71,7 @@ enum DofPatternType {STANDARD_PATTERN = 1,
 
   In order to represent the couplings between the basis functions, we can use a matrix \f$ C \f$ such that
   \f$ C_{ij} = 1 \f$ if the basis functions \f$ i \f$ and \f$ j \f$ have a common support, otherwise it is \f$ 0 \f$.
-  This matrix is symetric.
+  This matrix is symmetric.
 
   For the P1-iso-P2 element, this matrix would be:
   \f[
@@ -109,19 +112,19 @@ public:
     //@{
 
     //! Full constructor for 3D elements
-    LocalDofPattern( const UInt& _nbLocalDof, const UInt& _nbDofPerVertex, const UInt& _nbDofPerEdge,
-                     const UInt& _nbDofPerFace, const UInt& _nbDofPerVolume, const DofPatternType& _patternType );
+    LocalDofPattern( const UInt& nbLocalDof, const UInt& nbDofPerVertex, const UInt& nbDofPerEdge,
+                     const UInt& nbDofPerFace, const UInt& nbDofPerVolume, const DofPatternType& patternType );
 
     //! Full constructor for 2D elements
-    LocalDofPattern( const UInt& _nbLocalDof, const UInt& _nbDofPerVertex, const UInt& _nbDofPerEdge,
-                     const UInt& _nbDofPerFace, const DofPatternType& _patternType );
+    LocalDofPattern( const UInt& nbLocalDof, const UInt& nbDofPerVertex, const UInt& nbDofPerEdge,
+                     const UInt& nbDofPerFace, const DofPatternType& patternType );
 
     //! Full constructor for 1D elements
-    LocalDofPattern( const UInt& _nbLocalDof, const UInt& _nbDofPerVertex, const UInt& _nbDofPerEdge,
-                     const DofPatternType& _patternType );
+    LocalDofPattern( const UInt& nbLocalDof, const UInt& nbDofPerVertex, const UInt& nbDofPerEdge,
+                     const DofPatternType& patternType );
 
     //! Simple copy constructor
-    LocalDofPattern( const LocalDofPattern& _localDofPattern);
+    LocalDofPattern( const LocalDofPattern& localDofPattern);
 
     //! Empty destructor
     ~LocalDofPattern()
@@ -134,14 +137,14 @@ public:
     //@{
 
     //!  patternFirst(i): row index in the element matrix of the i-th term of the pattern (the index starts from 0, not from 1 !).
-    inline const UInt& patternFirst(const UInt& i ) const
+    const UInt& patternFirst(const UInt& i ) const
     {
         ASSERT_BD( i < M_nbPattern );
         return M_pattern[i].first;
     }
 
     //! patternSecond(i): column index in the element matrix of the i-th term of the pattern (the index starts from 0, not from 1 !).
-    inline const UInt& patternSecond(const UInt& i ) const
+    const UInt& patternSecond(const UInt& i ) const
     {
         ASSERT_BD( i < M_nbPattern );
         return M_pattern[i].second;
@@ -157,37 +160,37 @@ public:
     //@{
 
     //! Number of non-zero terms in the element matrix
-    inline const UInt& nbPattern() const
+    const UInt& nbPattern() const
     {
         return M_nbPattern;
     }
 
     //! Number of diagonal terms in the element matrix
-    inline const UInt& nbDiag() const
+    const UInt& nbDiag() const
     {
         return M_nbDiag;
     }
 
     //! Number of upper terms in the element matrix
-    inline const UInt& nbUpper() const
+    const UInt& nbUpper() const
     {
         return M_nbUpper;
     }
 
     //! Return the number of local degrees of freedom
-    inline const UInt& nbLocalDof() const
+    const UInt& nbLocalDof() const
     {
         return M_nbLocalDof;
     };
 
     //! Return the number of degrees of freedom located on the vertices (0D structures)
-    inline const UInt& nbDofPerVertex() const
+    const UInt& nbDofPerVertex() const
     {
         return M_nbDofPerDimEntity[0];
     };
 
     //! Return the number of degrees of freedom located on the edges (1D structures)
-    inline const UInt& nbDofPerEdge() const
+    const UInt& nbDofPerEdge() const
     {
         ASSERT(M_dim >=1, "No edge available for that dimension");
         return M_nbDofPerDimEntity[1];
@@ -197,14 +200,14 @@ public:
     /*!Beware that in the 2D case, the face of a triangle is the triangle itself
       (use edges or vertices if you want to access substructures).
      */
-    inline const UInt& nbDofPerFace() const
+    const UInt& nbDofPerFace() const
     {
         ASSERT(M_dim >=2, "No face available for that dimension");
         return M_nbDofPerDimEntity[2];
     };
 
     //! Return the number of degrees of freedom located in the volume (3D structures).
-    inline const UInt& nbDofPerVolume() const
+    const UInt& nbDofPerVolume() const
     {
         ASSERT(M_dim >=3, "No volume available for that dimension");
         return M_nbDofPerDimEntity[3];
@@ -214,7 +217,7 @@ public:
     /*! For example, if we want to access the vertices, structDim should be 0,
       if we want the edges, then it should be 1,...
      */
-    inline const UInt& nbDofPerDimStrut(const UInt & structDim) const
+    const UInt& nbDofPerDimStrut(const UInt & structDim) const
     {
         ASSERT(structDim <= M_dim, "No structure with this dimension");
         return M_nbDofPerDimEntity[structDim];
@@ -226,7 +229,7 @@ public:
       1, edges 2 and vertices 3. This method could be usefull to code "dimension-free" code.
       (for example, IP is built on edges in 2D, faces in 3D, so on objects with codimension 1).
      */
-    inline const UInt& nbDofPerCodimStrut(const UInt & structCodim) const
+    const UInt& nbDofPerCodimStrut(const UInt & structCodim) const
     {
         ASSERT(structCodim <= M_dim, "No structure with this codimension");
         return M_nbDofPerDimEntity[M_dim-structCodim];
@@ -237,6 +240,24 @@ public:
 
 
 private:
+
+    //! @name Private Methods
+    //@{
+
+    //! Default constructor disabled (because there is no setup/set method)
+    LocalDofPattern();
+
+    //! Method to setup the standard pattern, i.e. with all degrees of freedom coupled.
+    void setupStandardPattern();
+
+    //! Method for the P1isoP2 pattern for the segments (1D)
+    void setupP1isoP2SegPattern();
+
+    //! Method for the P1isoP2 pattern for the triangles (2D)
+    void setupP1isoP2TriaPattern();
+
+    //@}
+
 
     //! dimension of the element (3 for a tetrahedra for example).
     UInt M_dim;
@@ -270,18 +291,6 @@ private:
     //! Number of upper terms in the element matrix
     UInt M_nbUpper;
 
-
-    //! Default constructor disabled (because there is no setup/set method)
-    LocalDofPattern();
-
-    //! Method to setup the standard pattern, i.e. with all degrees of freedom coupled.
-    void setupStandardPattern();
-
-    //! Method for the P1isoP2 pattern for the segments (1D)
-    void setupP1isoP2SegPattern();
-
-    //! Method for the P1isoP2 pattern for the triangles (2D)
-    void setupP1isoP2TriaPattern();
 };
 
 
