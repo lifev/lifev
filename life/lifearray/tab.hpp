@@ -385,7 +385,7 @@ struct norm_inf_adaptor // TODO: REMOVE UNUSED
     {
         return  v.NormInf();
     }
-}
+};
 
 //! @name Functions
 //@{
