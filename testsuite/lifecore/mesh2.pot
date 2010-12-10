@@ -1,3 +1,0 @@
-[mesh]
-edgemarkers = 1;
-
