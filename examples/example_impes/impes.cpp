@@ -238,7 +238,7 @@ impes::run()
     typedef DarcySolver< RegionMesh, solver_type >                   ds;
     typedef DarcySolverTransientNonLinear< RegionMesh, solver_type > dstnl;
     typedef HyperbolicSolver< RegionMesh, solver_type >              hyper;
-    typedef ds::vector_type                                          vector_type;
+    typedef ds::vector_Type                                          vector_type;
     typedef boost::shared_ptr<vector_type>                           vector_ptrtype;
 
     Chrono chronoTotal;

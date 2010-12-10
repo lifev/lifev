@@ -128,7 +128,7 @@ multimesh  =    false   # actually we export also the displacement
 start      = 0
 save       = 1
 ]])
-AT_XFAIL_IF(1)
+AT_XFAIL_IF([:])
 AT_CHECK([ln -sf ../../data/mesh/inria/cube16x16.mesh  && ../../test_bdf/test_bdf],[0],[ignore],[ignore])
 AT_CLEANUP
 
@@ -235,6 +235,6 @@ multimesh  =    false   # actually we export also the displacement
 start      = 0
 save       = 1
 ]])
-AT_XFAIL_IF(1)
+AT_XFAIL_IF([:])
 AT_CHECK([ln -sf ../../data/mesh/inria/cube16x16.mesh  && ../../test_bdf/test_bdf],[0],[ignore],[ignore])
 AT_CLEANUP

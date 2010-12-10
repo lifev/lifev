@@ -22,10 +22,23 @@
 
 SUFFIXES	= .cpp .hpp .idl .c .h .f .F .o .moc
 
-DO_NOT_COMPILE=
+DO_NOT_COMPILE= example_cavity \
+				example_masstransport \
+                example_ML \
+                unmaintained_ct \
+                unmaintained_rk
+                
 
-SUBDIRS		=  \
-              $(DO_NOT_COMPILE)
+SUBDIRS		=  benchmark_RossEthierSteinman \
+               example_cylinder \
+               example_heart \
+               example_impes \
+               example_NavierStokesRestart \
+               example_ns_flux \
+               example_nsResistanceBC \
+               utility_fsiCutter \
+               utility_meshReorder
+              
 
 
 

@@ -61,26 +61,6 @@ Solve the problem
 
 #include "impes.hpp"
 
-
-// ===================================================
-//! Program information
-// ===================================================
-
-LifeV::AboutData
-makeAbout()
-{
-    LifeV::AboutData about( "Test IMPES" ,
-                            "LifeV Test IMPES" ,
-                            "1.0",
-                            "IMPES test case",
-                            LifeV::AboutData::License_GPL,
-                            "Copyright (c) 2010 MOX");
-
-    about.addAuthor("Alessio Fumagalli", "Developer", "alessio.fumagalli@mail.polimi.it", "");
-
-    return about;
-}
-
 // ===================================================
 //! Namespaces
 // ===================================================
