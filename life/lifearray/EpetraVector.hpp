@@ -40,11 +40,19 @@
 #ifndef _EPETRAVECTOR_HPP_
 #define _EPETRAVECTOR_HPP_
 
-#include <life/lifecore/life.hpp>
-#include <life/lifealg/EpetraMap.hpp>
+// Tell the compiler to ignore specific kind of warnings:
+#pragma GCC diagnostic ignored "-Wunused-variable"
+#pragma GCC diagnostic ignored "-Wunused-parameter"
 
 #include <Epetra_FEVector.h>
 #include <Epetra_Export.h>
+
+// Tell the compiler to ignore specific kind of warnings:
+#pragma GCC diagnostic warning "-Wunused-variable"
+#pragma GCC diagnostic warning "-Wunused-parameter"
+
+#include <life/lifecore/life.hpp>
+#include <life/lifealg/EpetraMap.hpp>
 
 namespace LifeV
 {
@@ -64,9 +72,9 @@ public:
     //! @name Public Types
     //@{
 
-    typedef Epetra_FEVector                      vector_type;
-    typedef boost::shared_ptr< vector_type >     Vector_PtrType;
-    typedef Real data_type;
+    typedef Epetra_FEVector                  vector_type;
+    typedef boost::shared_ptr< vector_type > Vector_PtrType;
+    typedef Real                             data_type;
 
     //@}
 
@@ -75,30 +83,31 @@ public:
     //@{
 
     //! Empty Constructor
-    EpetraVector( const EpetraMapType& maptype = Unique );
+    EpetraVector( const EpetraMapType& mapType = Unique );
 
     //! Constructor - Using Maps
-    EpetraVector( const EpetraMap& _map, const EpetraMapType& maptype = Unique );
+    EpetraVector( const EpetraMap& map, const EpetraMapType& mapType = Unique );
 
     //! Constructor - Using Maps
-    EpetraVector( const boost::shared_ptr< EpetraMap >& _map, const EpetraMapType& maptype = Unique );
+    EpetraVector( const boost::shared_ptr< EpetraMap >& map,
+                  const EpetraMapType& mapType = Unique );
 
     //! Constructor - Using Vector (without using map)
     EpetraVector( const EpetraVector& vector );
 
     //! Constructor - Using Vector (without using map)
-    EpetraVector( const EpetraVector& vector, const EpetraMapType& maptype );
+    EpetraVector( const EpetraVector& vector, const EpetraMapType& mapType );
 
     //! Constructor - Using Vector (without using map)
     /*! combineMode is only used during the copy, and not in subsequent calls. */
     EpetraVector( const EpetraVector& vector,
-                  const EpetraMapType& maptype,
+                  const EpetraMapType& mapType,
                   const Epetra_CombineMode& combineMode );
 
     //! Constructor - Copies vector to FEvector that comes as Multivector
     EpetraVector( const Epetra_MultiVector& vector,
-                  const boost::shared_ptr< EpetraMap > _map,
-                  const EpetraMapType& maptype );
+                  const boost::shared_ptr< EpetraMap > map,
+                  const EpetraMapType& mapType );
 
     //! Constructor - Copies vector to a vector which resides only on the processor "reduceToProc"
     EpetraVector( const EpetraVector& vector, const Int& reduceToProc );
@@ -283,10 +292,10 @@ public:
         @param column  column of the multivector from which to extract the data
     */
     EpetraVector& subset(const Epetra_MultiVector& vector,
-                         const EpetraMap&    map,
-                         const UInt          offset1,
-                         const UInt          offset2,
-                         const UInt          column = 0);
+                         const EpetraMap& map,
+                         const UInt offset1,
+                         const UInt offset2,
+                         const UInt column = 0);
 
    void MeanValue ( Real* res ) const;
 
@@ -307,8 +316,8 @@ public:
     void MinValue( Real& res ) const;
 
     Real MaxValue() const;
-    void   MaxValue( Real* res ) const;
-    void   MaxValue( Real& res ) const;
+    void MaxValue( Real* res ) const;
+    void MaxValue( Real& res ) const;
 
     //! Abs - Replace the vector with his abs.
     /*!
@@ -341,9 +350,9 @@ public:
      *
      * To read the file in Matlab type load filename;
      */
-    void matrixMarket( std::string const &filename, const bool headers = true ) const;
+    void matrixMarket( std::string const &fileName, const bool headers = true ) const;
 
-    void spy( std::string const &filename ) const;
+    void spy( std::string const &fileName ) const;
 
     void ShowMe( std::ostream& output = std::cout ) const;
 
@@ -367,7 +376,7 @@ public:
         Most of the LifeV library is structured to use combine mode
         equal to Add.
      */
-    void setDefaultCombineMode( );
+    void setDefaultCombineMode();
 
     //! Sets the map to use for the epetra vector
     /*!
@@ -403,7 +412,7 @@ public:
 
     EpetraMapType getMaptype() const
     {
-        return M_maptype;
+        return M_mapType;
     }
 
     const EpetraMap& getMap() const
@@ -418,15 +427,10 @@ public:
 
     const Epetra_Map& getEpetra_Map() const
     {
-        return *( M_epetraMap->getMap( M_maptype ) );
+        return *( M_epetraMap->getMap( M_mapType ) );
     }
 
-    Int size() const
-    {
-        if ( M_epetraVector.get() )
-            return M_epetraVector->GlobalLength();
-        return 0;
-    }
+    Int size() const;
 
     //@}
 
@@ -465,11 +469,10 @@ private:
 
     //@}
 
-    boost::shared_ptr< EpetraMap >   M_epetraMap;
-    EpetraMapType                    M_maptype;
-    Vector_PtrType                   M_epetraVector;
-
-    Epetra_CombineMode               M_combineMode;
+    boost::shared_ptr< EpetraMap > M_epetraMap;
+    EpetraMapType                  M_mapType;
+    Vector_PtrType                 M_epetraVector;
+    Epetra_CombineMode             M_combineMode;
 };
 
 EpetraVector operator-( const EpetraVector& vector );

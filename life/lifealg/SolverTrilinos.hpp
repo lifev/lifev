@@ -39,6 +39,14 @@
 #ifndef __SolverTrilinos_H
 #define __SolverTrilinos_H 1
 
+#include <iomanip>
+
+#include <boost/shared_ptr.hpp>
+
+// Tell the compiler to ignore specific kind of warnings:
+#pragma GCC diagnostic ignored "-Wunused-variable"
+#pragma GCC diagnostic ignored "-Wunused-parameter"
+
 #include <Epetra_ConfigDefs.h>
 #ifdef EPETRA_MPI
 #include <Epetra_MpiComm.h>
@@ -50,20 +58,18 @@
 #include <AztecOO.h>
 #include <Teuchos_ParameterList.hpp>
 
+// Tell the compiler to ignore specific kind of warnings:
+#pragma GCC diagnostic warning "-Wunused-variable"
+#pragma GCC diagnostic warning "-Wunused-parameter"
+
 #include <life/lifearray/EpetraVector.hpp>
 #include <life/lifearray/EpetraMatrix.hpp>
-
 #include <life/lifealg/EpetraPreconditioner.hpp>
 #include <life/lifealg/IfpackPreconditioner.hpp>
-
 #include <life/lifecore/debug.hpp>
 #include <life/lifecore/GetPot.hpp>
 #include <life/lifecore/chrono.hpp>
 #include <life/lifecore/displayer.hpp>
-
-#include <boost/shared_ptr.hpp>
-
-#include <iomanip>
 
 namespace LifeV
 {
@@ -87,18 +93,18 @@ public:
     //! @name Public Types
     //@{
 
-    typedef Real                             value_type;
+    typedef Real                               value_type;
 
-    typedef SolverTrilinos                   solver_type;
+    typedef SolverTrilinos                     solver_type;
 
-    typedef EpetraMatrix<Real>               matrix_type;
-    typedef EpetraVector                     vector_type;
+    typedef EpetraMatrix<Real>                 matrix_type;
+    typedef EpetraVector                       vector_type;
 
-    typedef EpetraPreconditioner             prec_raw_type;
-    typedef boost::shared_ptr<prec_raw_type> prec_type;
+    typedef EpetraPreconditioner               prec_raw_type;
+    typedef boost::shared_ptr<prec_raw_type>   prec_type;
     typedef boost::shared_ptr<Epetra_Operator> comp_prec_type;
-    typedef boost::shared_ptr<matrix_type>   matrix_ptrtype;
-    typedef boost::shared_ptr<EpetraVector>  vector_ptrtype;
+    typedef boost::shared_ptr<matrix_type>     matrix_ptrtype;
+    typedef boost::shared_ptr<EpetraVector>    vector_ptrtype;
 
     //@}
 
@@ -118,9 +124,9 @@ public:
      *  return the number of iterations, M_maxIter+1 if solve failed.
      * \param algorithm - MS_Algorithm
      */
-    Int solve( vector_type& x, const vector_type& b );
+    Int solve( vector_type& solution, const vector_type& rhs );
 
-    Real computeResidual( vector_type& __X, vector_type& __B );
+    Real computeResidual( vector_type& solution, vector_type& rhs );
 
     // return the Aztec status
     std::string printStatus();
@@ -137,9 +143,9 @@ public:
         returns number of iterations. If negative, the solver did not converge,
         the preconditioner has been recomputed, and a second solution is tried
     */
-    Int solveSystem(  const vector_type& rhsFull,
-                      vector_type&       sol,
-                      matrix_ptrtype&    baseMatrixForPreconditioner );
+    Int solveSystem( const vector_type& rhsFull,
+                     vector_type&       solution,
+                     matrix_ptrtype&    baseMatrixForPreconditioner );
 
     //! Solves the system and returns the number of iterations.
     /*! The Matrix has already been passed by the method
@@ -151,22 +157,24 @@ public:
     */
     template <typename PrecPtrOperator>
     Int solveSystem(  const vector_type& rhsFull,
-                      vector_type&       sol,
-                      PrecPtrOperator         prec );
+                      vector_type&       solution,
+                      PrecPtrOperator    preconditionerPtr );
 
-    void setUpPrec(const GetPot& dataFile,  const std::string& section);
+    void setUpPrec( const GetPot& dataFile, const std::string& section );
 
     //! builds the preconditioner starting from the matrix baseMatrixForPreconditioner
     /*! The preconditioner is build starting from the matrix baseMatrixForPreconditioner
         by the preconditioner object passed in by the method setPreconditioner
         @param  baseMatrixForPreconditioner base matrix for the preconditioner construction
     */
-    void buildPreconditioner( matrix_ptrtype& baseMatrixForPreconditioner);
+    void buildPreconditioner( matrix_ptrtype& baseMatrixForPreconditioner );
 
     void precReset();
 
     // Return if preconditioner has been setted
     bool isPrecSet() const;
+
+    void showMe( std::ostream& output = std::cout ) const;
 
     //@}
 
@@ -174,28 +182,28 @@ public:
     //@{
 
     //! Method to set communicator for Displayer (for empty constructor)
-    void setCommunicator( const boost::shared_ptr<Epetra_Comm>& comm);
+    void setCommunicator( const boost::shared_ptr<Epetra_Comm>& comm );
 
     //! Method to set matrix from EpetraMatrix
-    void setMatrix(matrix_type& m);
+    void setMatrix( matrix_type& matrix );
 
     /** Method to set a general linear operator (of class derived from Epetra_Operator) defining the linear system*/
-    void setOperator(Epetra_Operator& op);
+    void setOperator( Epetra_Operator& oper );
 
     //! Method to set an EpetraPreconditioner preconditioner
-    void setPreconditioner( prec_type& _prec );
+    void setPreconditioner( prec_type& preconditioner );
 
     /** Method to set a general Epetra_Operator as preconditioner*/
-    void setPreconditioner( comp_prec_type& _prec );
+    void setPreconditioner( comp_prec_type& preconditioner );
 
-    void setDataFromGetPot( const GetPot& dfile, const std::string& section );
+    void setDataFromGetPot( const GetPot& dataFile, const std::string& section );
 
-    void setParameters( bool cerr_warning_if_unused = false );
+    void setParameters( bool cerrWarningIfUnused = false );
 
-    void setTolMaxiter( const Real tol, const Int maxiter = -1 );
+    void setTolMaxiter( const Real tolerance, const Int maxIter = -1 );
 
     //! if set to true,  do not recompute the preconditioner
-    void setReusePreconditioner( const bool reuse );
+    void setReusePreconditioner( const bool reusePreconditioner );
 
     boost::shared_ptr<Displayer> displayer();
     //@}
@@ -215,7 +223,7 @@ public:
     /** Method to get a shared pointer to the preconditioner (of type derived from EpetraPreconditioner)*/
     prec_type& getPrec();
 
-    void getAztecStatus( Real status[AZ_STATUS_SIZE]);
+    void getAztecStatus( Real status[AZ_STATUS_SIZE] );
 
     Teuchos::ParameterList& getParameterList();
 
@@ -225,43 +233,43 @@ public:
 
 private:
 
-    matrix_type::matrix_ptrtype M_matrix;
-    prec_type                   M_prec;
+    matrix_type::matrix_ptrtype  M_matrix;
+    prec_type                    M_preconditioner;
 
-    AztecOO                     M_solver;
+    AztecOO                      M_solver;
 
-    Teuchos::ParameterList      M_TrilinosParameterList;
+    Teuchos::ParameterList       M_TrilinosParameterList;
     boost::shared_ptr<Displayer> M_displayer;
 
-    Real                        M_tol;
-    Int                         M_maxIter;
-    Int                         M_maxIterForReuse;
-    bool                        M_reusePreconditioner;
+    Real                         M_tolerance;
+    Int                          M_maxIter;
+    Int                          M_maxIterForReuse;
+    bool                         M_reusePreconditioner;
 };
 
 template <typename PrecPtrOperator>
 Int SolverTrilinos::solveSystem( const vector_type&  rhsFull,
-                                 vector_type&        sol,
-                                 PrecPtrOperator          prec )
+                                 vector_type&        solution,
+                                 PrecPtrOperator     preconditioner )
 
 {
     M_displayer->leaderPrint("      AztecOO solving system ...         ");
-    setPreconditioner(prec);
+    setPreconditioner(preconditioner);
 
     Chrono chrono;
     chrono.start();
-    Int numIter = solve( sol, rhsFull );
+    Int numIter = solve( solution, rhsFull );
     chrono.stop();
     M_displayer->leaderPrintMax( "      done in " , chrono.diff() );
 
     // If we use the "none" as output setting, we display just a summary
     if ( M_TrilinosParameterList.get( "output", "all" ) == "none" )
     {
-        M_displayer->leaderPrint("      Iterations number:                       ", M_solver.NumIters(), "\n");
-        M_displayer->leaderPrint("      Scaled residual:                         ", M_solver.ScaledResidual(), "\n");
+        M_displayer->leaderPrint( "      Iterations number:                       ", M_solver.NumIters(), "\n" );
+        M_displayer->leaderPrint( "      Scaled residual:                         ", M_solver.ScaledResidual(), "\n" );
     }
 
-    if (numIter >= M_maxIter)
+    if ( numIter >= M_maxIter )
         numIter = -numIter;
 
     return numIter;

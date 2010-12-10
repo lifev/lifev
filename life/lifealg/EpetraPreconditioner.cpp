@@ -47,21 +47,24 @@ namespace LifeV
 EpetraPreconditioner::EpetraPreconditioner( const comm_PtrType& comm ):
         M_precType              ( "EpetraPreconditioner" ),
         M_displayer             ( comm ),
-        M_List                  (),
+        M_list                  (),
         M_preconditionerCreated ( false )
 {
+
 }
 
-EpetraPreconditioner::EpetraPreconditioner( const EpetraPreconditioner& P, const comm_PtrType& comm ):
-        M_precType              ( P.M_precType ),
+EpetraPreconditioner::EpetraPreconditioner( const EpetraPreconditioner& preconditioner, const comm_PtrType& comm ):
+        M_precType              ( preconditioner.M_precType ),
         M_displayer             ( comm ),
-        M_List                  ( P.getList() ),
-        M_preconditionerCreated ( P.M_preconditionerCreated )
+        M_list                  ( preconditioner.getList() ),
+        M_preconditionerCreated ( preconditioner.M_preconditionerCreated )
 {
+
 }
 
 EpetraPreconditioner::~EpetraPreconditioner()
 {
+
 }
 
 // ===================================================
@@ -80,14 +83,14 @@ EpetraPreconditioner::SetUseTranspose( const bool /*useTranspose=false*/ )
 }
 
 Int
-EpetraPreconditioner::Apply( const Epetra_MultiVector& /*X*/, Epetra_MultiVector& /*Y*/ ) const
+EpetraPreconditioner::Apply( const Epetra_MultiVector& /*vector1*/, Epetra_MultiVector& /*vector2*/ ) const
 {
     assert( false );
     return 0;
 }
 
 Int
-EpetraPreconditioner::ApplyInverse( const Epetra_MultiVector& /*X*/, Epetra_MultiVector& /*Y*/ ) const
+EpetraPreconditioner::ApplyInverse( const Epetra_MultiVector& /*vector1*/, Epetra_MultiVector& /*vector2*/ ) const
 {
     assert( false );
     return 0;
@@ -116,13 +119,19 @@ EpetraPreconditioner::OperatorDomainMap() const
     return *emptyMapPtr;
 }
 
+void
+EpetraPreconditioner::showMe( std::ostream& output ) const
+{
+    assert( false );
+}
+
 // ===================================================
 // Set Methods
 // ===================================================
 void
 EpetraPreconditioner::setList( const list_Type& list )
 {
-    M_List = list;
+    M_list = list;
 }
 
 void
@@ -143,13 +152,13 @@ EpetraPreconditioner::preconditionerCreated()
 const EpetraPreconditioner::list_Type&
 EpetraPreconditioner::getList() const
 {
-    return M_List;
+    return M_list;
 }
 
 EpetraPreconditioner::list_Type&
 EpetraPreconditioner::list()
 {
-    return M_List;
+    return M_list;
 }
 
 } // namespace LifeV

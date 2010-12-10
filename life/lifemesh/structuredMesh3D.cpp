@@ -44,12 +44,12 @@
 namespace LifeV
 {
 
-EntityFlag regularMeshPointPosition(const UInt& i_x,
-                                    const UInt& i_y,
-                                    const UInt& i_z,
-                                    const UInt& n_x,
-                                    const UInt& n_y,
-                                    const UInt& n_z)
+EntityFlag regularMeshPointPosition( const UInt& i_x,
+                                     const UInt& i_y,
+                                     const UInt& i_z,
+                                     const UInt& n_x,
+                                     const UInt& n_y,
+                                     const UInt& n_z )
 {
     // We will use a binary representation to
     // find the position of the point
@@ -61,14 +61,14 @@ EntityFlag regularMeshPointPosition(const UInt& i_x,
     // 010000 = on the plane x-y   (16)
     // 100000 = on the plane z=n_z (32)
     UInt pointPosition(0);
-    if (i_y==0)    {pointPosition=pointPosition|1;}
-    if (i_x==n_x-1) {pointPosition=pointPosition|2;}
-    if (i_y==n_y-1) {pointPosition=pointPosition|4;}
-    if (i_x==0)    {pointPosition=pointPosition|8;}
-    if (i_z==0)    {pointPosition=pointPosition|16;}
-    if (i_z==n_z-1) {pointPosition=pointPosition|32;}
+    if ( i_y == 0 )       { pointPosition = pointPosition |  1; }
+    if ( i_x == n_x - 1)  { pointPosition = pointPosition |  2; }
+    if ( i_y == n_y - 1)  { pointPosition = pointPosition |  4; }
+    if ( i_x == 0 )       { pointPosition = pointPosition |  8; }
+    if ( i_z == 0 )       { pointPosition = pointPosition | 16; }
+    if ( i_z == n_z - 1 ) { pointPosition = pointPosition | 32; }
 
-    switch (pointPosition)
+    switch ( pointPosition )
     {
         // We are inside
     case 0:

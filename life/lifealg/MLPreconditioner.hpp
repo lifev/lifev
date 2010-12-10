@@ -40,14 +40,21 @@
 
 #include <boost/shared_ptr.hpp>
 
+// Tell the compiler to ignore specific kind of warnings:
+#pragma GCC diagnostic ignored "-Wunused-variable"
+#pragma GCC diagnostic ignored "-Wunused-parameter"
+
 // #include <Ifpack_config.h>
 // #include <Ifpack.h>
 // #include <Ifpack_Preconditioner.h>
 // #include <Ifpack_AdditiveSchwarz.h>
 // #include <Ifpack_Amesos.h>
 // #include <Ifpack_ILU.h>
-
 #include <ml_MultiLevelPreconditioner.h>
+
+// Tell the compiler to ignore specific kind of warnings:
+#pragma GCC diagnostic warning "-Wunused-variable"
+#pragma GCC diagnostic warning "-Wunused-parameter"
 
 #include <life/lifecore/GetPot.hpp>
 #include <life/lifearray/EpetraMatrix.hpp>
@@ -86,42 +93,44 @@ public:
 
     //! constructor from matrix A.
     //! @param A EpetraMatrix<Real> matrix upon which construct the preconditioner
-    MLPreconditioner(operator_type& A);
+    MLPreconditioner( operator_type& matrix );
 
     //@}
 
     //! @name Methods
     //@{
 
-    Int                     buildPreconditioner(operator_type& A);
+    Int buildPreconditioner( operator_type& matrix );
 
-    void                    precReset();
+    void precReset();
 
-    void                    testSmoothers(operator_type& A);
+    void testSmoothers( operator_type& matrix );
 
     //! returns true if prec exists
     /*const*/
-    bool  set() const {return M_Prec;}
+    bool  set() const {return M_preconditioner;}
 
-    virtual void createList(       list_Type&   list,
-                                   const GetPot&      dataFile,
-                                   const std::string& section,
-                                   const std::string& subSection ) {createMLList( list, dataFile, section, subSection);}
+    virtual void createList( list_Type& list,
+                             const GetPot&      dataFile,
+                             const std::string& section,
+                             const std::string& subSection ) { createMLList( list, dataFile, section, subSection ); }
 
-    static void createMLList(       list_Type&   list,
-                                    const GetPot&      dataFile,
-                                    const std::string& section,
-                                    const std::string& subSection = "ML" );
+    static void createMLList( list_Type&   list,
+                              const GetPot&      dataFile,
+                              const std::string& section,
+                              const std::string& subSection = "ML" );
 
-    virtual Int ApplyInverse(const Epetra_MultiVector& X, Epetra_MultiVector& Y) const
+    virtual Int ApplyInverse( const Epetra_MultiVector& vector1, Epetra_MultiVector& vector2 ) const
     {
-        return M_Prec->ApplyInverse(X, Y);
+        return M_preconditioner->ApplyInverse( vector1, vector2 );
     }
 
-    virtual Int Apply(const Epetra_MultiVector& X, Epetra_MultiVector& Y) const
+    virtual Int Apply( const Epetra_MultiVector& vector1, Epetra_MultiVector& vector2 ) const
     {
-        return M_Prec->Apply(X, Y);
+        return M_preconditioner->Apply( vector1, vector2 );
     }
+
+    virtual void showMe( std::ostream& output = std::cout ) const;
 
     //@}
 
@@ -129,10 +138,10 @@ public:
     //! @name Set Methods
     //@{
 
-    void                    setDataFromGetPot ( const GetPot&      dataFile,
-                                                const std::string& section );
+    void setDataFromGetPot ( const GetPot&      dataFile,
+                             const std::string& section );
 
-    Int            SetUseTranspose( bool useTranspose=false ) {return M_Prec->SetUseTranspose(useTranspose);}
+    Int SetUseTranspose( bool useTranspose=false ) { return M_preconditioner->SetUseTranspose(useTranspose); }
 
     //@}
 
@@ -140,33 +149,33 @@ public:
     //! @name Get Methods
     //@{
 
-    Real                  Condest ();
+    Real Condest ();
 
-    super::prec_raw_type*   getPrec();
+    super::prec_raw_type* getPrec();
 
-    super::prec_type   getPrecPtr() {return M_Prec;}
+    super::prec_type getPrecPtr() { return M_preconditioner; }
 
-    std::string             precType() {return M_precType;}
+    std::string precType() { return M_precType; }
 
-    bool            UseTranspose(  ) {return M_Prec->UseTranspose();}
+    bool UseTranspose(  ) { return M_preconditioner->UseTranspose(); }
 
     const Epetra_Map & OperatorRangeMap() const
-    {return M_Prec->OperatorRangeMap();}
+    { return M_preconditioner->OperatorRangeMap(); }
 
     const Epetra_Map & OperatorDomainMap() const
-    {return M_Prec->OperatorDomainMap();}
+    { return M_preconditioner->OperatorDomainMap(); }
 
     //@}
 
 protected:
 
-    list_Type  M_IFPACKSubList;
+    list_Type  M_IfpackSubList;
 
 private:
 
-    operator_raw_type::matrix_ptrtype   M_Oper;
+    operator_raw_type::matrix_ptrtype M_operator;
 
-    prec_type               M_Prec;
+    prec_type               M_preconditioner;
 
     bool                    M_analyze;
 

@@ -40,12 +40,20 @@
 
 #include <boost/shared_ptr.hpp>
 
+// Tell the compiler to ignore specific kind of warnings:
+#pragma GCC diagnostic ignored "-Wunused-variable"
+#pragma GCC diagnostic ignored "-Wunused-parameter"
+
 #include <Ifpack_config.h>
 #include <Ifpack.h>
 #include <Ifpack_Preconditioner.h>
 #include <Ifpack_AdditiveSchwarz.h>
 #include <Ifpack_Amesos.h>
 #include <Ifpack_ILU.h>
+
+// Tell the compiler to ignore specific kind of warnings:
+#pragma GCC diagnostic warning "-Wunused-variable"
+#pragma GCC diagnostic warning "-Wunused-parameter"
 
 #include <life/lifecore/GetPot.hpp>
 #include <life/lifearray/EpetraMatrix.hpp>
@@ -62,13 +70,13 @@ public:
     //! @name Public Types
     //@{
 
-    typedef EpetraPreconditioner                 super;
+    typedef EpetraPreconditioner             super;
 
-    typedef Ifpack_Preconditioner                prec_raw_type;
-    typedef boost::shared_ptr<prec_raw_type>     prec_type;
+    typedef Ifpack_Preconditioner            prec_raw_type;
+    typedef boost::shared_ptr<prec_raw_type> prec_type;
 
-    typedef super::operator_raw_type             operator_raw_type;
-    typedef super::operator_type                 operator_type;
+    typedef super::operator_raw_type         operator_raw_type;
+    typedef super::operator_type             operator_type;
 
     //@}
 
@@ -92,9 +100,9 @@ public:
     //! @name Methods
     //@{
 
-    Int                    buildPreconditioner(operator_type& A);
+    Int buildPreconditioner( operator_type& matrix );
 
-    void                   precReset();
+    void precReset();
 
 
 
@@ -103,14 +111,16 @@ public:
                              const std::string& section,
                              const std::string& subSection );
 
-    static void createIfpackList(       list_Type&   list,
-                                        const GetPot&      dataFile,
-                                        const std::string& section,
-                                        const std::string& subSection = "ifpack" );
+    static void createIfpackList( list_Type&         list,
+                                  const GetPot&      dataFile,
+                                  const std::string& section,
+                                  const std::string& subSection = "ifpack" );
 
-    virtual Int ApplyInverse(const Epetra_MultiVector& X, Epetra_MultiVector& Y) const;
+    virtual Int ApplyInverse( const Epetra_MultiVector& vector1, Epetra_MultiVector& vector2 ) const;
 
-    virtual Int Apply(const Epetra_MultiVector& X, Epetra_MultiVector& Y) const;
+    virtual Int Apply( const Epetra_MultiVector& vector1, Epetra_MultiVector& vector2 ) const;
+
+    virtual void showMe( std::ostream& output = std::cout ) const;
 
     //@}
 
@@ -118,10 +128,10 @@ public:
     //! @name Set Methods
     //@{
 
-    void                   setDataFromGetPot ( const GetPot&      dataFile,
-                                               const std::string& section );
+    void setDataFromGetPot ( const GetPot&      dataFile,
+                             const std::string& section );
 
-    Int            SetUseTranspose( bool useTranspose=false );
+    Int SetUseTranspose( bool useTranspose = false );
 
     //@}
 
@@ -129,19 +139,19 @@ public:
     //! @name Get Methods
     //@{
 
-    bool                   set() const;
+    bool set() const;
 
-    Real                   Condest ();
+    Real Condest ();
 
-    super::prec_raw_type*  getPrec();
+    super::prec_raw_type* getPrec();
 
-    super::prec_type  getPrecPtr();
+    super::prec_type getPrecPtr();
 
-    std::string            precType();
+    std::string precType();
 
     const Int& getOverlapLevel() const;
 
-    bool            UseTranspose(  );
+    bool UseTranspose();
 
     const Epetra_Map & OperatorRangeMap() const;
 
@@ -151,12 +161,12 @@ public:
 
 protected:
 
-    prec_type              M_Prec;
+    prec_type M_preconditioner;
 
 private:
 
-    Int                                 M_overlapLevel;
-    operator_raw_type::matrix_ptrtype   M_Oper;
+    Int M_overlapLevel;
+    operator_raw_type::matrix_ptrtype M_operator;
 
 };
 

@@ -40,13 +40,20 @@
 
 #include <boost/shared_ptr.hpp>
 
+// Tell the compiler to ignore specific kind of warnings:
+#pragma GCC diagnostic ignored "-Wunused-variable"
+#pragma GCC diagnostic ignored "-Wunused-parameter"
+
 #include <Teuchos_ParameterList.hpp>
+
+// Tell the compiler to ignore specific kind of warnings:
+#pragma GCC diagnostic warning "-Wunused-variable"
+#pragma GCC diagnostic warning "-Wunused-parameter"
 
 #include <life/lifecore/factory.hpp>
 #include <life/lifecore/singleton.hpp>
 #include <life/lifecore/GetPot.hpp>
 #include <life/lifecore/displayer.hpp>
-
 #include <life/lifearray/EpetraMatrix.hpp>
 
 namespace LifeV
@@ -65,7 +72,7 @@ public:
     typedef Epetra_Operator                      prec_raw_type;
     typedef boost::shared_ptr<prec_raw_type>     prec_type;
 
-    typedef EpetraMatrix<Real>                 operator_raw_type;
+    typedef EpetraMatrix<Real>                   operator_raw_type;
     typedef boost::shared_ptr<operator_raw_type> operator_type;
 
     typedef Displayer::comm_Type                 comm_Type;
@@ -83,7 +90,7 @@ public:
     EpetraPreconditioner( const comm_PtrType& comm = comm_PtrType() );
 
     /** Copy constructor*/
-    EpetraPreconditioner( const EpetraPreconditioner& P, const comm_PtrType& comm = comm_PtrType() );
+    EpetraPreconditioner( const EpetraPreconditioner& preconditioner, const comm_PtrType& comm = comm_PtrType() );
 
     //! Default virtual destructor
     virtual ~EpetraPreconditioner();
@@ -100,7 +107,7 @@ public:
     /*!
      *  @param A the base matrix for computing the preconditioner
      */
-    virtual Int buildPreconditioner( operator_type& A ) = 0;
+    virtual Int buildPreconditioner( operator_type& matrix ) = 0;
 
     virtual void precReset() = 0;
 
@@ -110,6 +117,8 @@ public:
      */
     virtual Real Condest() = 0;
 
+    virtual void showMe( std::ostream& output = std::cout ) const;
+
     //@}
 
 
@@ -118,9 +127,9 @@ public:
 
     virtual Int SetUseTranspose( const bool useTranspose = false );
 
-    virtual Int Apply( const Epetra_MultiVector& X, Epetra_MultiVector& Y ) const;
+    virtual Int Apply( const Epetra_MultiVector& vector1, Epetra_MultiVector& vector2 ) const;
 
-    virtual Int ApplyInverse( const Epetra_MultiVector& X, Epetra_MultiVector& Y ) const;
+    virtual Int ApplyInverse( const Epetra_MultiVector& vector1, Epetra_MultiVector& vector2 ) const;
 
     virtual bool UseTranspose();
 
@@ -180,14 +189,10 @@ public:
 
 protected:
 
-    std::string                         M_precType;
-    Displayer                           M_displayer;
-    list_Type                           M_List;
-    bool                                M_preconditionerCreated;
-
-private:
-
-    ///static void createPreconditionerList( list_Type& list, const GetPot& dataFile, const std::string& section, const std::string& subSection ) {};
+    std::string M_precType;
+    Displayer   M_displayer;
+    list_Type   M_list;
+    bool        M_preconditionerCreated;
 
 };
 

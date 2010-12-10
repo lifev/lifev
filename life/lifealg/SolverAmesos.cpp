@@ -35,14 +35,21 @@
     @date 29-08-2004
  */
 
+// Tell the compiler to ignore specific kind of warnings:
+#pragma GCC diagnostic ignored "-Wunused-variable"
+#pragma GCC diagnostic ignored "-Wunused-parameter"
+
+#include <Epetra_Comm.h>
+
+// Tell the compiler to ignore specific kind of warnings:
+#pragma GCC diagnostic warning "-Wunused-variable"
+#pragma GCC diagnostic warning "-Wunused-parameter"
+
 #include <lifeconfig.h>
 #include <life/lifealg/SolverAmesos.hpp>
-
 #include <life/lifecore/debug.hpp>
 #include <life/lifecore/chrono.hpp>
 #include <life/lifecore/GetPot.hpp>
-
-#include <Epetra_Comm.h>
 
 namespace LifeV
 {
@@ -54,7 +61,7 @@ SolverAmesos::SolverAmesos( const comm_PtrType& comm ) :
         M_matrix               (),
         M_problem              (),
         M_solver               (),
-        M_TrilinosParameterList(),
+        M_trilinosParameterList(),
         M_displayer            ( comm )
 {
 }
@@ -63,9 +70,9 @@ SolverAmesos::SolverAmesos( const comm_PtrType& comm ) :
 // Methods
 // ===================================================
 Real
-SolverAmesos::computeResidual( const vector_type& x, const vector_type& rhs )
+SolverAmesos::computeResidual( const vector_type& solution, const vector_type& rhs )
 {
-    vector_type Ax(x.getMap());
+    vector_type Ax(solution.getMap());
     vector_type res(rhs);
 
     res.getEpetraVector().Update(1, Ax.getEpetraVector(), -1);
@@ -79,14 +86,14 @@ SolverAmesos::computeResidual( const vector_type& x, const vector_type& rhs )
 
 Int
 SolverAmesos::solveSystem( vector_type&    rhsFull,
-                           vector_type&    sol,
-                           matrix_ptrtype& /*basePrecMatrix*/)
+                           vector_type&    solution,
+                           matrix_ptrtype& /*basePrecMatrix*/ )
 {
-    M_displayer.leaderPrint("      Amesos solving system ...                ");
+    M_displayer.leaderPrint( "      Amesos solving system ...                " );
     Chrono chrono;
     chrono.start();
 
-    M_problem.SetLHS( &sol.getEpetraVector() );
+    M_problem.SetLHS( &solution.getEpetraVector() );
     M_problem.SetRHS( &rhsFull.getEpetraVector() );
 
     M_solver->Solve();
@@ -123,10 +130,10 @@ SolverAmesos::printStatus()
     std::cout << "  Amesos: Total vector redistribution time  " << M_vec_redist_time << std::endl;
     */
 
-    if ( M_TrilinosParameterList.get( "PrintTiming", false ) )
+    if ( M_trilinosParameterList.get( "PrintTiming", false ) )
         M_solver->PrintTiming();
 
-    if ( M_TrilinosParameterList.get( "PrintStatus", false ) )
+    if ( M_trilinosParameterList.get( "PrintStatus", false ) )
         M_solver->PrintStatus();
 }
 
@@ -136,13 +143,24 @@ bool SolverAmesos::isPrecSet() const
 }
 
 void SolverAmesos::precReset()
-{}
+{
+
+}
 
 void SolverAmesos::setUpPrec( const GetPot& /*dataFile*/, const std::string& /*section*/ )
-{}
+{
 
-void SolverAmesos::setReusePreconditioner( const bool& /*reuse*/ )
-{}
+}
+
+void SolverAmesos::setReusePreconditioner( const bool& /*reusePreconditioner*/ )
+{
+
+}
+
+void SolverAmesos::showMe( std::ostream& output ) const
+{
+    output << "showMe must be implemented for the SolverAmesos class" << std::endl;
+}
 
 // ===================================================
 // Set Methods
@@ -157,38 +175,38 @@ void SolverAmesos::setMatrix( const matrix_type& matrix )
     M_solver->NumericFactorization();
 }
 
-void SolverAmesos::setOperator( const Epetra_Operator& /*op*/ )
+void SolverAmesos::setOperator( const Epetra_Operator& /*oper*/ )
 {
-    ASSERT(false, "SolverAmesos::setOperator: not coded");
+    ASSERT( false, "SolverAmesos::setOperator: not coded" );
 }
 
 void SolverAmesos::setDataFromGetPot( const GetPot& dataFile, const std::string& section )
 {
     // Status parameters
-    M_TrilinosParameterList.set( "OutputLevel",  dataFile(( section + "/amesos/outputlevel").data(), 0) );
-    M_TrilinosParameterList.set( "PrintStatus",  dataFile(( section + "/amesos/print_status").data(), false) );
-    M_TrilinosParameterList.set( "PrintTiming",  dataFile(( section + "/amesos/print_timing").data(), false) );
-    M_TrilinosParameterList.set( "ComputeVectorNorms", dataFile(( section + "/amesos/computevectornorms").data(), false) );
-    M_TrilinosParameterList.set( "ComputeTrueResidual", dataFile(( section + "/amesos/computeresidual").data(), false) );
+    M_trilinosParameterList.set( "OutputLevel",  dataFile( ( section + "/amesos/outputlevel").data(), 0 ) );
+    M_trilinosParameterList.set( "PrintStatus",  dataFile( ( section + "/amesos/print_status").data(), false ) );
+    M_trilinosParameterList.set( "PrintTiming",  dataFile( ( section + "/amesos/print_timing").data(), false ) );
+    M_trilinosParameterList.set( "ComputeVectorNorms", dataFile( ( section + "/amesos/computevectornorms").data(), false ) );
+    M_trilinosParameterList.set( "ComputeTrueResidual", dataFile( ( section + "/amesos/computeresidual").data(), false ) );
 
     // Control parameters
-    M_TrilinosParameterList.set( "AddZeroToDiag",  dataFile(( section + "/amesos/addzerotodiag").data(), false) );
-    M_TrilinosParameterList.set( "Refactorize", dataFile(( section + "/amesos/refactorize").data(), false) );
-    M_TrilinosParameterList.set( "RcondThreshold", dataFile(( section + "/amesos/rcondthreshold").data(), 1.e-2) );
-    M_TrilinosParameterList.set( "Redistribute", dataFile(( section + "/amesos/redistribute").data(), true) ); // SuperLU
-    M_TrilinosParameterList.set( "MaxProcs", dataFile(( section + "/amesos/maxprocs").data(), -1) ); // ScalaPack
-    M_TrilinosParameterList.set( "ScaleMethod", dataFile(( section + "/amesos/scalemethod").data(), 1) );
+    M_trilinosParameterList.set( "AddZeroToDiag",  dataFile( ( section + "/amesos/addzerotodiag").data(), false ) );
+    M_trilinosParameterList.set( "Refactorize", dataFile( ( section + "/amesos/refactorize").data(), false ) );
+    M_trilinosParameterList.set( "RcondThreshold", dataFile( ( section + "/amesos/rcondthreshold").data(), 1.e-2) );
+    M_trilinosParameterList.set( "Redistribute", dataFile( ( section + "/amesos/redistribute").data(), true ) ); // SuperLU
+    M_trilinosParameterList.set( "MaxProcs", dataFile( ( section + "/amesos/maxprocs").data(), -1) ); // ScalaPack
+    M_trilinosParameterList.set( "ScaleMethod", dataFile( ( section + "/amesos/scalemethod").data(), 1) );
 
     // Type of the matrix: symmetric, SDP, general
-    M_TrilinosParameterList.set( "MatrixProperty", dataFile(( section + "/amesos/matrixproperty").data(), "general") );
+    M_trilinosParameterList.set( "MatrixProperty", dataFile( ( section + "/amesos/matrixproperty").data(), "general" ) );
 
     // Create the solver
-    createSolver( dataFile(( section + "/amesos/solvertype"  ).data(), "Klu") );
+    createSolver( dataFile( ( section + "/amesos/solvertype"  ).data(), "Klu" ) );
 }
 
 void SolverAmesos::setParameters()
 {
-    M_solver->SetParameters( M_TrilinosParameterList );
+    M_solver->SetParameters( M_trilinosParameterList );
 }
 
 // ===================================================

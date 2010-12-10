@@ -41,18 +41,24 @@
 #ifndef _EPETRAMAP_
 #define _EPETRAMAP_
 
-
 #include <boost/shared_ptr.hpp>
 
-#include <life/lifefem/refFE.hpp>
+// Tell the compiler to ignore specific kind of warnings:
+#pragma GCC diagnostic ignored "-Wunused-variable"
+#pragma GCC diagnostic ignored "-Wunused-parameter"
 
 #include <Epetra_Map.h>
 #include <Epetra_Export.h>
 #include <Epetra_Import.h>
 #include <Epetra_Comm.h>
+
+// Tell the compiler to ignore specific kind of warnings:
+#pragma GCC diagnostic warning "-Wunused-variable"
+#pragma GCC diagnostic warning "-Wunused-parameter"
+
+#include <life/lifefem/refFE.hpp>
 #include <life/lifecore/life.hpp>
 #include <life/lifemesh/partitionMesh.hpp>
-
 
 
 namespace LifeV
@@ -72,12 +78,12 @@ public:
     //! @name Public Types
     //@{
 
-    typedef Epetra_Map map_type;
-    typedef boost::shared_ptr<map_type> map_ptrtype;
+    typedef Epetra_Map                                            map_type;
+    typedef boost::shared_ptr<map_type>                           map_ptrtype;
     typedef boost::shared_ptr< boost::shared_ptr<Epetra_Export> > exporter_ptrtype;
     typedef boost::shared_ptr< boost::shared_ptr<Epetra_Import> > importer_ptrtype;
-    typedef Epetra_Comm comm_type;
-    typedef boost::shared_ptr<comm_type> comm_ptrtype;
+    typedef Epetra_Comm                                           comm_type;
+    typedef boost::shared_ptr<comm_type>                          comm_ptrtype;
 
     //@}
 
@@ -87,20 +93,11 @@ public:
     //! Default Constructor
     EpetraMap();
     // epetra map constructor. To define a linear map, set MyGlobalElements = 0
-    EpetraMap(Int                NumGlobalElements,
-              Int                NumMyElements,
-              Int*               MyGlobalElements,
-              Int                IndexBase,
-              const comm_ptrtype&  CommPtr);
-
-    //! construct a map with entries lagrangeMultipliers.
-    //! Repeated lagrange multipliers will be repeated on the repeatedmap
-    //! Again: it is not necessary that the lagrangeMltiplier vector is the same on all
-    //!       processors nor that it is different
-    /*
-    EpetraMap(std::vector<Int> const& lagrangeMultipliers,
-              comm_ptrtype&      CommPtr);
-    */
+    EpetraMap( Int  numGlobalElements,
+               Int  numMyElements,
+               Int* myGlobalElements,
+               Int  indexBase,
+               const comm_ptrtype& commPtr );
 
     //! Build a nearly equally distributed map.
     /*!
@@ -109,24 +106,26 @@ public:
      *  @param indexBase - Starting index base (typically 0 or 1)
      *  @param CommPtr - a pointer to the Epetra communicator
      */
-    EpetraMap( const Int NumGlobalElements, const Int IndexBase, const comm_ptrtype& CommPtr );
+    EpetraMap( const Int numGlobalElements,
+               const Int indexBase,
+               const comm_ptrtype& commPtr );
 
-    EpetraMap(const Int               size,
-              const comm_ptrtype&     CommPtr);
-
-    // Calls createImportExport from setUp()
-    template<typename Mesh>
-    EpetraMap(const RefFE&               refFE,
-              const partitionMesh<Mesh>& meshPart,
-              const comm_ptrtype&       _commPtr);
+    EpetraMap( const Int           size,
+               const comm_ptrtype& commPtr );
 
     // Calls createImportExport from setUp()
     template<typename Mesh>
-    EpetraMap(const RefFE&         refFE,
-              const Mesh&          mesh,
-              const comm_ptrtype& _commPtr);
+    EpetraMap( const RefFE&               refFE,
+               const partitionMesh<Mesh>& meshPart,
+               const comm_ptrtype&        commPtr );
 
-    EpetraMap(const EpetraMap& _epetraMap);
+    // Calls createImportExport from setUp()
+    template<typename Mesh>
+    EpetraMap( const RefFE&         refFE,
+               const Mesh&          mesh,
+               const comm_ptrtype&  commPtr );
+
+    EpetraMap( const EpetraMap&  epetraMap );
 
     /*! Builds a submap of map _epetraMap with a given positive offset and
       the maximum id to consider
@@ -136,8 +135,10 @@ public:
 
       if needed, indexBase may be changed (default values < 0 means "same as original map")
     */
-    EpetraMap(const Epetra_BlockMap& _blockMap, const Int offset, const Int maxid,
-              Int indexbase = -1);
+    EpetraMap( const Epetra_BlockMap& blockMap,
+               const Int offset,
+               const Int maxId,
+               Int indexBase = -1 );
 
     //! Constructor from raw Epetra_Map. This constructor should be used only inside this class,
     //! therefore it is private
@@ -145,7 +146,7 @@ public:
      * \param map: underlying Epetra_Map
      */
 private:
-    EpetraMap(const map_type map);
+    EpetraMap( const map_type map );
 
 public:
     ~EpetraMap() {}
@@ -157,37 +158,11 @@ public:
     //@{
 
     // The copy operator will copy the pointers of the maps, exporter and importer
-    EpetraMap&         operator  = (const EpetraMap& _epetraMap);
-
-    EpetraMap&         operator += (const EpetraMap& _epetraMap);
-    EpetraMap          operator +  (const EpetraMap& _epetraMap)
-    {
-        EpetraMap map( *this );
-        map += _epetraMap;
-        createImportExport();
-        return map;
-    }
-
-    /*
-    EpetraMap&         operator += (std::vector<Int> const&   lagrangeMultipliers);
-    EpetraMap          operator +  (std::vector<Int> const&   lagrangeMultipliers)
-        {
-            EpetraMap map( *this );
-            map += lagrangeMultipliers;
-            createImportExport();
-            return map;
-        }
-    */
-
-    EpetraMap&         operator += (Int const size);
-    EpetraMap          operator +  (Int const size)
-    {
-        //Int me =  M_uniqueEpetraMap->Comm().MyPID();
-        EpetraMap map( *this );
-        map += size;
-        createImportExport();
-        return map;
-    }
+    EpetraMap&         operator  = ( const EpetraMap& epetraMap );
+    EpetraMap&         operator += ( const EpetraMap& epetraMap );
+    EpetraMap          operator +  ( const EpetraMap& epetraMap );
+    EpetraMap&         operator += ( Int const size );
+    EpetraMap          operator +  ( Int const size );
 
     //@}
 
@@ -199,11 +174,11 @@ public:
      * \param this: EpetraMap that selects the relevant points
      * \param root: processor on which to export all the points
      */
-    boost::shared_ptr<EpetraMap>         createRootMap( Int const     root)    const;
+    boost::shared_ptr<EpetraMap> createRootMap( Int const root ) const;
 
-    bool MapsAreSimilar( EpetraMap const& _epetraMap) const;
+    bool MapsAreSimilar( EpetraMap const& epetraMap ) const;
 
-    //EpetraMap&          uniqueMap();
+    void showMe( std::ostream& output = std::cout ) const;
 
     //@}
 
@@ -214,9 +189,9 @@ public:
     comm_type const& Comm() const { return *M_commPtr; }
     comm_ptrtype& CommPtr() { return M_commPtr; }
 
-    //Epetra_Map*        getRepeatedEpetra_Map(){return M_repeatedEpetra_Map;}
+    //Epetra_Map*        getRepeatedEpetra_Map(){return M_repeatedEpetraMap;}
 
-    map_ptrtype const & getMap  ( EpetraMapType maptype) const;
+    map_ptrtype const & getMap  ( EpetraMapType mapType ) const;
 
     Epetra_Export const& getExporter();
 
@@ -230,37 +205,31 @@ private:
     //@{
 
     // createMap does not call createImportExport
-    void               createMap(Int   NumGlobalElements,
-                                 Int   NumMyElements,
-                                 Int*  MyGlobalElements,
-                                 Int   IndexBase,
-                                 const comm_type& Comm)  ;
+    void createMap( Int   numGlobalElements,
+                    Int   numMyElements,
+                    Int*  myGlobalElements,
+                    Int   indexBase,
+                    const comm_type& comm );
 
-    /*
-    Epetra_Map const * getRepeatedEpetra_Map()       const
-        {return M_repeatedEpetra_Map;}
-    Epetra_Map const * getUniqueEpetra_Map()   const
-        {return M_uniqueEpetraMap;}
-    */
-    map_ptrtype const & getRepeatedMap() const { return M_repeatedEpetra_Map; }
+    map_ptrtype const & getRepeatedMap() const { return M_repeatedEpetraMap; }
     map_ptrtype const & getUniqueMap()   const { return M_uniqueEpetraMap; }
 
 
     void  uniqueMap();
     void  createImportExport();
-    void  bubbleSort(Epetra_IntSerialDenseVector& Elements);
+    void  bubbleSort( Epetra_IntSerialDenseVector& elements );
 
     // Calls createImportExport
-    void setUp(const RefFE&               refFE,
-               const comm_ptrtype&       _commPtr,
-               std::vector<Int>& repeatedNodeVector,
-               std::vector<Int>& repeatedEdgeVector,
-               std::vector<Int>& repeatedFaceVector,
-               std::vector<Int>& repeatedVolumeVector);
+    void setUp( const RefFE&        refFE,
+                const comm_ptrtype& commPtr,
+                std::vector<Int>& repeatedNodeVector,
+                std::vector<Int>& repeatedEdgeVector,
+                std::vector<Int>& repeatedFaceVector,
+                std::vector<Int>& repeatedVolumeVector );
 
     //@}
 
-    map_ptrtype        M_repeatedEpetra_Map;
+    map_ptrtype        M_repeatedEpetraMap;
     map_ptrtype        M_uniqueEpetraMap;
     exporter_ptrtype   M_exporter;
     importer_ptrtype   M_importer;
@@ -274,80 +243,78 @@ private:
 // ===================================================
 template<typename Mesh>
 EpetraMap::
-EpetraMap(const RefFE&               refFE,
-          const partitionMesh<Mesh>& meshPart,
-          const comm_ptrtype&        _commPtr):
-        M_repeatedEpetra_Map(),
+EpetraMap( const RefFE&               refFE,
+           const partitionMesh<Mesh>& meshPart,
+           const comm_ptrtype&        commPtr ):
+        M_repeatedEpetraMap(),
         M_uniqueEpetraMap(),
         M_exporter(),
         M_importer(),
-        M_commPtr(_commPtr)
+        M_commPtr( commPtr )
 {
-
     // Epetra_Map is "badly" coded, in fact its constructor needs a non-constant pointer to indices, but it
     // never modify them
 
     setUp( refFE,
-           _commPtr,
-           const_cast<std::vector<Int>&>(meshPart.repeatedNodeVector()),
-           const_cast<std::vector<Int>&>(meshPart.repeatedEdgeVector()),
-           const_cast<std::vector<Int>&>(meshPart.repeatedFaceVector()),
-           const_cast<std::vector<Int>&>(meshPart.repeatedVolumeVector()) );
+           commPtr,
+           const_cast<std::vector<Int>&>( meshPart.repeatedNodeVector() ),
+           const_cast<std::vector<Int>&>( meshPart.repeatedEdgeVector() ),
+           const_cast<std::vector<Int>&>( meshPart.repeatedFaceVector() ),
+           const_cast<std::vector<Int>&>( meshPart.repeatedVolumeVector() ) );
 
 }
 
 
 template<typename Mesh>
 EpetraMap::
-EpetraMap(const RefFE&               refFE,
-          const Mesh&                mesh,
-          const comm_ptrtype&        _commPtr):
-        M_repeatedEpetra_Map(),
+EpetraMap( const RefFE&        refFE,
+           const Mesh&         mesh,
+           const comm_ptrtype& commPtr ):
+        M_repeatedEpetraMap(),
         M_uniqueEpetraMap(),
         M_exporter(),
         M_importer(),
-        M_commPtr(_commPtr)
+        M_commPtr( commPtr )
 {
-
     std::vector<Int> repeatedNodeVector;
     std::vector<Int> repeatedEdgeVector;
     std::vector<Int> repeatedFaceVector;
     std::vector<Int> repeatedVolumeVector;
 
-    if (refFE.nbDofPerVertex())
+    if ( refFE.nbDofPerVertex() )
     {
         repeatedNodeVector.reserve(mesh.numPoints());
         for ( UInt ii = 1; ii <= mesh.numPoints(); ii++ )
-            repeatedNodeVector.push_back(mesh.pointList( ii ).id());
+            repeatedNodeVector.push_back( mesh.pointList(ii).id() );
     }
 
-    if (refFE.nbDofPerEdge())
+    if ( refFE.nbDofPerEdge() )
     {
-        repeatedEdgeVector.reserve(mesh.numEdges());
+        repeatedEdgeVector.reserve( mesh.numEdges() );
 
         for ( UInt ii = 1; ii <= mesh.numEdges(); ii++ )
-            repeatedEdgeVector.push_back(mesh.edgeList( ii ).id());
+            repeatedEdgeVector.push_back( mesh.edgeList(ii).id() );
     }
 
-    if (refFE.nbDofPerFace())
+    if ( refFE.nbDofPerFace() )
     {
-        repeatedFaceVector.reserve(mesh.numFaces());
+        repeatedFaceVector.reserve( mesh.numFaces() );
 
         for ( UInt ii = 1; ii <= mesh.numFaces(); ii++ )
-            repeatedFaceVector.push_back(mesh.faceList( ii ).id());
+            repeatedFaceVector.push_back( mesh.faceList(ii).id() );
     }
 
-    if (refFE.nbDofPerVolume())
+    if ( refFE.nbDofPerVolume() )
     {
-        repeatedVolumeVector.reserve(mesh.numVolumes());
+        repeatedVolumeVector.reserve( mesh.numVolumes() );
 
         for ( UInt ii = 1; ii <= mesh.numVolumes(); ii++ )
-            repeatedVolumeVector.push_back(mesh.volumeList( ii ).id());
+            repeatedVolumeVector.push_back( mesh.volumeList(ii).id() );
     }
 
 
     setUp( refFE,
-           _commPtr,
+           commPtr,
            repeatedNodeVector,
            repeatedEdgeVector,
            repeatedFaceVector,

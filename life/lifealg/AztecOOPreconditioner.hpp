@@ -57,12 +57,12 @@ public:
     //! @name Public Types
     //@{
 
-    typedef EpetraPreconditioner                 super;
+    typedef EpetraPreconditioner     super;
 
-    typedef super::operator_raw_type             operator_raw_type;
-    typedef super::operator_type                 operator_type;
+    typedef super::operator_raw_type operator_raw_type;
+    typedef super::operator_type     operator_type;
 
-    typedef SolverTrilinos                       Solver_Type;
+    typedef SolverTrilinos           Solver_Type;
 
     //@}
 
@@ -86,7 +86,7 @@ public:
     /*!
      *  @param A the base matrix for computing the preconditioner
      */
-    Int buildPreconditioner( operator_type& A );
+    Int buildPreconditioner( operator_type& matrix );
 
     //! Reset the preconditioner
     void precReset();
@@ -99,6 +99,8 @@ public:
 
     //! Create the list of parameters
     void createList( list_Type& list, const GetPot& dataFile, const std::string& section, const std::string& subSection );
+
+    virtual void showMe( std::ostream& output = std::cout ) const;
 
     //@}
 

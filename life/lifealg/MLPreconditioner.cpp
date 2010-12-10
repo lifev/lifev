@@ -32,7 +32,7 @@
     @contributor Gwenol Grandperrin <gwenol.grandperrin@epfl.ch>
     @maintainer Gwenol Grandperrin <gwenol.grandperrin@epfl.ch>
 
-    @date 09-11-0006
+    @date 09-11-2006
  */
 
 #include <lifeconfig.h>
@@ -46,50 +46,48 @@ namespace LifeV
 // ===================================================
 MLPreconditioner::MLPreconditioner():
         super(),
-        M_Oper(),
-        M_Prec(),
+        M_operator(),
+        M_preconditioner(),
         M_analyze(false)
-{}
+{
+
+}
 
 MLPreconditioner::~MLPreconditioner()
-{}
+{
+
+}
 
 
 // ===================================================
 // Methods
 // ===================================================
 Int
-MLPreconditioner::buildPreconditioner(operator_type& oper)
+MLPreconditioner::buildPreconditioner( operator_type& matrix )
 {
 
-    //the Trilinos::MultiLevelPreconditioner unsafely access to the area of memory co-owned by M_Oper.
-    //to avoid the risk of dandling pointers always deallocate M_Prec first and then M_Oper
-    M_Prec.reset();
-    M_Oper = oper->getMatrixPtr();
+    //the Trilinos::MultiLevelPreconditioner unsafely access to the area of memory co-owned by M_operator.
+    //to avoid the risk of dandling pointers always deallocate M_preconditioner first and then M_operator
+    M_preconditioner.reset();
+    M_operator = matrix->getMatrixPtr();
 
-    M_precType = M_List.get("prec type", "undefined??");
+    M_precType = M_list.get( "prec type", "undefined??" );
     M_precType += "_ML";
 
     // <one-level-postsmoothing> / <two-level-additive>
     // <two-level-hybrid> / <two-level-hybrid2>
 
-    M_Prec.reset(new prec_raw_type(*M_Oper, this->getList(), true));
+    M_preconditioner.reset( new prec_raw_type( *M_operator, this->getList(), true ) );
 
-    if (M_analyze)
+    if ( M_analyze )
     {
         ML_Epetra::MultiLevelPreconditioner* prec;
-        prec = dynamic_cast<ML_Epetra::MultiLevelPreconditioner*> (M_Prec.get());
+        prec = dynamic_cast<ML_Epetra::MultiLevelPreconditioner*> ( M_preconditioner.get() );
         Int NumPreCycles = 5;
         Int NumPostCycles = 1;
         Int NumMLCycles = 10;
-        prec->AnalyzeHierarchy(true, NumPreCycles, NumPostCycles, NumMLCycles);
-
-        //prec->TestSmoothers();
+        prec->AnalyzeHierarchy( true, NumPreCycles, NumPostCycles, NumMLCycles );
     }
-
-//     ML_CHK_ERR(M_Prec->SetParameters(M_List));
-//     M_Prec->Initialize();
-//     M_Prec->Compute();
 
     this->M_preconditionerCreated = true;
 
@@ -99,230 +97,225 @@ MLPreconditioner::buildPreconditioner(operator_type& oper)
 void
 MLPreconditioner::precReset()
 {
-    //the Trilinos::MultiLevelPreconditioner unsafely access to the area of memory co-owned by M_Oper.
-    //to avoid the risk of dandling pointers always deallocate M_Prec first and then M_Oper
+    //the Trilinos::MultiLevelPreconditioner unsafely access to the area of memory co-owned by M_operator.
+    //to avoid the risk of dandling pointers always deallocate M_preconditioner first and then M_operator
 
-    M_Prec.reset();
-    M_Oper.reset();
+    M_preconditioner.reset();
+    M_operator.reset();
 
     this->M_preconditionerCreated = false;
 }
 
 void
-MLPreconditioner::createMLList(       list_Type&    list,
-                                      const GetPot&       dataFile,
-                                      const std::string&  section,
-                                      const std::string&  subSection )
+MLPreconditioner::createMLList( list_Type& list,
+                                const GetPot&       dataFile,
+                                const std::string&  section,
+                                const std::string&  subSection )
 {
-    list.setName("ML paramters list");
+    list.setName( "ML paramters list" );
 
-    std::string defList      = dataFile((section + "/" + subSection + "/default_parameter_list").data(), "SA");
-    if (defList != "none")
-        ML_Epetra::SetDefaults(defList, list);
+    std::string defList = dataFile( (section + "/" + subSection + "/default_parameter_list").data(), "SA" );
+    if ( defList != "none" )
+        ML_Epetra::SetDefaults( defList, list );
 
     bool found;
 
-    Int MLPrintParameterList = dataFile((section + "/displayList").data(),      0, found);
+    Int MLPrintParameterList = dataFile( (section + "/displayList").data(), 0, found );
 
-    Int MLOutput             = dataFile((section + "/" + subSection + "/MLOuput").data(),       0, found);
-    if (found) list.set("ML output",               MLOutput);
+    Int MLOutput             = dataFile((section + "/" + subSection + "/MLOuput").data(), 0, found);
+    if ( found ) list.set( "ML output", MLOutput );
 
     Int printUnused          = dataFile((section + "/" + subSection + "/print_unused").data(), -2, found);
-    if (found) list.set("print unused",            printUnused);
+    if ( found ) list.set( "print unused", printUnused );
 
-    Int PDEEquations         = dataFile((section + "/" + subSection + "/pde_equations").data(),    1, found);
-    if (found) list.set("PDE equations",           PDEEquations);
+    Int PDEEquations         = dataFile((section + "/" + subSection + "/pde_equations").data(), 1, found);
+    if ( found ) list.set( "PDE equations", PDEEquations );
 
     Int CycleApplications    = dataFile((section + "/" + subSection + "/cycle_applications").data(), 1, found);
-    if (found) list.set("cycle applications", CycleApplications);
+    if ( found ) list.set( "cycle applications", CycleApplications );
 
-    Int MaxLevels            = dataFile((section + "/" + subSection + "/max_levels").data(),         2, found);
-    if (found) list.set("max levels", MaxLevels);
+    Int MaxLevels            = dataFile((section + "/" + subSection + "/max_levels").data(), 2, found);
+    if ( found ) list.set( "max levels", MaxLevels );
 
-    std::string IncOrDec     = dataFile((section + "/" + subSection + "/inc_or_dec").data(),         "increasing", found);
-    if (found) list.set("increasing or decreasing", IncOrDec);
+    std::string IncOrDec     = dataFile((section + "/" + subSection + "/inc_or_dec").data(), "increasing", found);
+    if ( found ) list.set( "increasing or decreasing", IncOrDec );
 
-    std::string precType     = dataFile((section + "/" + subSection + "/prec_type").data(),          "MGV", found);
-    if (found) list.set("prec type", precType);
+    std::string precType     = dataFile((section + "/" + subSection + "/prec_type").data(), "MGV", found);
+    if ( found ) list.set( "prec type", precType );
 
-    //    Int NumProjectedModes    = dataFile((section + "/" + subSection + "/number_of_prejected_modes").data(), 0);
+    // Int NumProjectedModes    = dataFile( (section + "/" + subSection + "/number_of_prejected_modes").data(), 0 );
+    // if ( found ) list.set( "ML print parameter list", MLPrintParameterList );
 
-    // if (found) list.set("ML print parameter list", MLPrintParameterList);
+    std::string eigenAnalysisType = dataFile( (section + "/" + subSection + "/eigne-analysis/type").data(), "cg", found );
+    if ( found ) list.set( "eigen-analysis: type", eigenAnalysisType );
 
-    std::string eigenAnalysisType = dataFile((section + "/" + subSection + "/eigne-analysis/type").data(), "cg", found);
-    if (found) list.set("eigen-analysis: type",       eigenAnalysisType);
-
-    Int eigenAnalysisIterations   = dataFile((section + "/" + subSection + "/eigne-analysis/iterations").data(), 10, found);
-    if (found) list.set("eigen-analysis: iterations", eigenAnalysisIterations);
+    Int eigenAnalysisIterations   = dataFile( (section + "/" + subSection + "/eigne-analysis/iterations").data(), 10, found );
+    if ( found ) list.set( "eigen-analysis: iterations", eigenAnalysisIterations );
 
     // Aggregation options
 
-    std::string AggregationType                  = dataFile((section + "/" + subSection + "/aggregation/type").data(), "Uncoupled", found);
-    if (found) list.set("aggregation: type",                              AggregationType);
+    std::string AggregationType                  = dataFile( (section + "/" + subSection + "/aggregation/type").data(), "Uncoupled", found );
+    if ( found ) list.set( "aggregation: type", AggregationType );
 
-    Real        AggregationThreshold             = dataFile((section + "/" + subSection + "/aggregation/threshold").data(), 0.0 , found);
-    if (found) list.set("aggregation: threshold",                         AggregationThreshold);
+    Real        AggregationThreshold             = dataFile( (section + "/" + subSection + "/aggregation/threshold").data(), 0.0 , found );
+    if ( found ) list.set( "aggregation: threshold", AggregationThreshold );
 
-    Real        AggregationDampingFactor         = dataFile((section + "/" + subSection + "/aggregation/damping_factor").data(), 4./3. , found);
-    if (found) list.set("aggregation: damping factor",                    AggregationDampingFactor);
+    Real        AggregationDampingFactor         = dataFile( (section + "/" + subSection + "/aggregation/damping_factor").data(), 4./3. , found );
+    if ( found ) list.set( "aggregation: damping factor", AggregationDampingFactor );
 
-    Int AggregationSmoothingSweeps               = dataFile((section + "/" + subSection + "/aggregation/smoothing_sweeps").data(),    1, found);
-    if (found) list.set("aggregation: smoothing sweeps",                 AggregationSmoothingSweeps);
+    Int AggregationSmoothingSweeps               = dataFile( (section + "/" + subSection + "/aggregation/smoothing_sweeps").data(), 1, found );
+    if ( found ) list.set( "aggregation: smoothing sweeps", AggregationSmoothingSweeps );
 
-    Int AggregationGlobalAggregates              = dataFile((section + "/" + subSection + "/aggregation/global_aggregates").data(),   1, found);
-    if (found) list.set("aggregation: global aggregates",                 AggregationGlobalAggregates);
+    Int AggregationGlobalAggregates              = dataFile( (section + "/" + subSection + "/aggregation/global_aggregates").data(), 1, found );
+    if ( found ) list.set( "aggregation: global aggregates", AggregationGlobalAggregates );
 
-    Int AggregationLocalAggregates               = dataFile((section + "/" + subSection + "/aggregation/local_aggregates").data(),    1, found);
-    if (found) list.set("aggregation: local aggregates",                  AggregationLocalAggregates);
+    Int AggregationLocalAggregates               = dataFile( (section + "/" + subSection + "/aggregation/local_aggregates").data(), 1, found );
+    if ( found ) list.set( "aggregation: local aggregates", AggregationLocalAggregates );
 
-    Int AggregationNodesPerAggregate             = dataFile((section + "/" + subSection + "/aggregation/nodes_per_aggregate").data(), 1, found);
-    if (found) list.set("aggregation: nodes per aggregate",               AggregationNodesPerAggregate);
+    Int AggregationNodesPerAggregate             = dataFile( (section + "/" + subSection + "/aggregation/nodes_per_aggregate").data(), 1, found );
+    if ( found ) list.set( "aggregation: nodes per aggregate",  AggregationNodesPerAggregate );
 
-    Int AggregationNextLevelAggregatesPerProcess = dataFile((section + "/" + subSection + "/aggregation/next-level_aggregates_per_process").data(), 128, found);
-    if (found) list.set("aggregation: next level aggregates per process", AggregationNextLevelAggregatesPerProcess);
+    Int AggregationNextLevelAggregatesPerProcess = dataFile( (section + "/" + subSection + "/aggregation/next-level_aggregates_per_process").data(), 128, found );
+    if ( found ) list.set( "aggregation: next level aggregates per process", AggregationNextLevelAggregatesPerProcess );
 
-    bool AggregationUseTentativeRestriction      = dataFile((section + "/" + subSection + "/aggregation/tentative_restriction").data(), false, found);
-    if (found) list.set("aggregation: use tentative restriction",         AggregationUseTentativeRestriction);
+    bool AggregationUseTentativeRestriction      = dataFile( (section + "/" + subSection + "/aggregation/tentative_restriction").data(), false, found );
+    if ( found ) list.set( "aggregation: use tentative restriction", AggregationUseTentativeRestriction );
 
-    bool AggregationSymmetrize                   = dataFile((section + "/" + subSection + "/aggregation/symmetrize").data(),            false, found);
-    if (found) list.set("aggregation: symmetrize",                        AggregationSymmetrize);
+    bool AggregationSymmetrize                   = dataFile( (section + "/" + subSection + "/aggregation/symmetrize").data(), false, found );
+    if ( found ) list.set( "aggregation: symmetrize", AggregationSymmetrize );
 
-    bool   EnergyMinimizationEnable              = dataFile((section + "/" + subSection + "/energy_minimization/enable").data(),        false, found);
-    if (found) list.set("energy minimization: enable",                    EnergyMinimizationEnable);
+    bool   EnergyMinimizationEnable              = dataFile( (section + "/" + subSection + "/energy_minimization/enable").data(), false, found );
+    if ( found ) list.set( "energy minimization: enable", EnergyMinimizationEnable );
 
-    Int    EnergyMinimizationType                = dataFile((section + "/" + subSection + "/energy_minimization/type").data(),          2, found);
-    if (found) list.set("energy minimization: type",                      EnergyMinimizationType);
+    Int    EnergyMinimizationType                = dataFile( (section + "/" + subSection + "/energy_minimization/type").data(), 2, found );
+    if ( found ) list.set( "energy minimization: type", EnergyMinimizationType );
 
-    Real   EnergyMinimizationDropTol             = dataFile((section + "/" + subSection + "/energy_minimization/droptol").data(),       0., found);
-    if (found) list.set("energy minimization: droptol",                   EnergyMinimizationDropTol);
+    Real   EnergyMinimizationDropTol             = dataFile( (section + "/" + subSection + "/energy_minimization/droptol").data(), 0., found );
+    if ( found ) list.set( "energy minimization: droptol", EnergyMinimizationDropTol );
 
-    bool   EnergyMinimizationCheap               = dataFile((section + "/" + subSection + "/energy_minimization/cheap").data(),         false, found);
-    if (found) list.set("energy minimization: cheap",                     EnergyMinimizationCheap);
+    bool   EnergyMinimizationCheap               = dataFile( (section + "/" + subSection + "/energy_minimization/cheap").data(), false, found );
+    if ( found ) list.set( "energy minimization: cheap", EnergyMinimizationCheap );
 
     // Smoothing parameters
 
+    std::string SmootherType                = dataFile( (section + "/" + subSection + "/smoother/type").data(), "IFPACK", found );
+    if ( found ) list.set( "smoother: type", SmootherType );
 
-    std::string SmootherType                = dataFile((section + "/" + subSection + "/smoother/type").data(), "IFPACK", found);
-    if (found) list.set("smoother: type",                         SmootherType);
+    Int SmootherSweeps                      = dataFile( (section + "/" + subSection + "/smoother/sweeps").data(), 2, found );
+    if ( found ) list.set( "smoother: sweeps", SmootherSweeps );
 
-    Int SmootherSweeps                      = dataFile((section + "/" + subSection + "/smoother/sweeps").data(), 2, found);
-    if (found) list.set("smoother: sweeps",                       SmootherSweeps);
+    Real   SmootherDampingFactor            = dataFile( (section + "/" + subSection + "/smoother/damping_factor").data(), 1.0, found );
+    if ( found ) list.set( "smoother: damping factor", SmootherDampingFactor );
 
-    Real   SmootherDampingFactor            = dataFile((section + "/" + subSection + "/smoother/damping_factor").data(), 1.0, found);
-    if (found) list.set("smoother: damping factor",               SmootherDampingFactor);
+    std::string SmootherPreOrPost           = dataFile( (section + "/" + subSection + "/smoother/pre_or_post").data(), "both", found );
+    if ( found ) list.set( "smoother: pre or post", SmootherPreOrPost );
 
-    std::string SmootherPreOrPost           = dataFile((section + "/" + subSection + "/smoother/pre_or_post").data(), "both", found);
-    if (found) list.set("smoother: pre or post",                  SmootherPreOrPost);
+    Real   SmootherChebyshevAlpha           = dataFile( (section + "/" + subSection + "/smoother/Chebyshev_alpha").data(), 20., found );
+    if ( found ) list.set( "smoother: Chebyshev alpha", SmootherChebyshevAlpha );
 
-    Real   SmootherChebyshevAlpha           = dataFile((section + "/" + subSection + "/smoother/Chebyshev_alpha").data(), 20., found);
-    if (found) list.set("smoother: Chebyshev alpha",              SmootherChebyshevAlpha);
-
-    bool SmootherHiptmairEfficientSymmetric = dataFile((section + "/" + subSection + "/smoother/Hiptmair_efficient_symmetric").data(), true, found);
-    if (found) list.set("smoother: Hiptmair efficient symmetric", SmootherHiptmairEfficientSymmetric);
-
+    bool SmootherHiptmairEfficientSymmetric = dataFile( (section + "/" + subSection + "/smoother/Hiptmair_efficient_symmetric").data(), true, found );
+    if ( found ) list.set( "smoother: Hiptmair efficient symmetric", SmootherHiptmairEfficientSymmetric );
 
     // subsmoother parameter
 
-    std::string SubSmootherType             = dataFile((section + "/" + subSection + "/subsmoother/type").data(), "Chebyshev", found);
-    if (found) list.set("subsmoother: type",                      SubSmootherType);
+    std::string SubSmootherType             = dataFile( (section + "/" + subSection + "/subsmoother/type").data(), "Chebyshev", found );
+    if ( found ) list.set( "subsmoother: type", SubSmootherType );
 
-    Real   SubSmootherChebyshevAlpha        = dataFile((section + "/" + subSection + "/subsmoother/Chebyshev_alpha").data(), 20., found);
-    if (found) list.set("subsmoother: Chebyshev alpha",           SubSmootherChebyshevAlpha);
+    Real   SubSmootherChebyshevAlpha        = dataFile( (section + "/" + subSection + "/subsmoother/Chebyshev_alpha").data(), 20., found );
+    if ( found ) list.set( "subsmoother: Chebyshev alpha", SubSmootherChebyshevAlpha );
 
-    //    Real   SubSmootherSGSDampingFactor      = dataFile((section + "/" + subSection + "/subsmoothers/SGS_damping_factor").data(), 1., found);
-    Int SubSmootherEdgeSweeps               = dataFile((section + "/" + subSection + "/subsmoother/edge_sweeps").data(), 2, found);
-    if (found) list.set("subsmoother: edge sweeps",               SubSmootherEdgeSweeps);
+    //    Real   SubSmootherSGSDampingFactor      = dataFile((section + "/" + subSection + "/subsmoothers/SGS_damping_factor").data(), 1., found );
+    Int SubSmootherEdgeSweeps               = dataFile( (section + "/" + subSection + "/subsmoother/edge_sweeps").data(), 2, found );
+    if ( found ) list.set( "subsmoother: edge sweeps", SubSmootherEdgeSweeps );
 
-    Int SubSmootherNodeSweeps               = dataFile((section + "/" + subSection + "/subsmoother/node_sweeps").data(), 2, found);
-    if (found) list.set("subsmoother: node sweeps",               SubSmootherNodeSweeps);
+    Int SubSmootherNodeSweeps               = dataFile( (section + "/" + subSection + "/subsmoother/node_sweeps").data(), 2, found );
+    if ( found ) list.set( "subsmoother: node sweeps", SubSmootherNodeSweeps );
 
-
-
-
-//     if (found) list.set("smoother: type (level 0)","IFPACK");
-//     if (found) list.set("smoother: type (level 1)","IFPACK");
-
-    //    if (found) list.set("subsmoother: SGS damping factor",        SubSmootherSGSDampingFactor);
 
     // Coarsest Grid Parameters
 
-    Int CoarseMaxSize                 = dataFile((section + "/" + subSection + "/coarse/max_size").data(), 128, found);
-    if (found) list.set("coarse: max size",  CoarseMaxSize);
+    Int CoarseMaxSize                 = dataFile( (section + "/" + subSection + "/coarse/max_size").data(), 128, found );
+    if ( found ) list.set( "coarse: max size",  CoarseMaxSize );
 
-    std::string CoarseType            = dataFile((section + "/" + subSection + "/coarse/type").data(), "Chebyshev", found);
-    if (found) list.set("coarse: type", CoarseType);
+    std::string CoarseType            = dataFile( (section + "/" + subSection + "/coarse/type").data(), "Chebyshev", found );
+    if ( found ) list.set( "coarse: type", CoarseType );
 
-    std::string CoarsePreOrPost       = dataFile((section + "/" + subSection + "/coarse/pre_or_post").data(), "post", found);
-    if (found) list.set("coarse: pre or post", CoarsePreOrPost);
+    std::string CoarsePreOrPost       = dataFile( (section + "/" + subSection + "/coarse/pre_or_post").data(), "post", found );
+    if ( found ) list.set( "coarse: pre or post", CoarsePreOrPost );
 
-    Int CoarseSweeps                  = dataFile((section + "/" + subSection + "/coarse/sweeps").data(), 2, found);
-    if (found) list.set("coarse: sweeps", CoarseSweeps);
+    Int CoarseSweeps                  = dataFile( (section + "/" + subSection + "/coarse/sweeps").data(), 2, found );
+    if ( found ) list.set( "coarse: sweeps", CoarseSweeps );
 
-    Real   CoarseDampingFactor        = dataFile((section + "/" + subSection + "/coarse/damping_factor").data(), 1.0, found);
-    if (found) list.set("coarse: damping factor", CoarseDampingFactor);
+    Real   CoarseDampingFactor        = dataFile( (section + "/" + subSection + "/coarse/damping_factor").data(), 1.0, found );
+    if ( found ) list.set( "coarse: damping factor", CoarseDampingFactor );
 
-    std::string CoarseSubsmootherType = dataFile((section + "/" + subSection + "/coarse/subsmoother_type").data(), "Chebyshev", found);
-    if (found) list.set("coarse: subsmoother type", CoarseSubsmootherType);
+    std::string CoarseSubsmootherType = dataFile( (section + "/" + subSection + "/coarse/subsmoother_type").data(), "Chebyshev", found );
+    if ( found ) list.set( "coarse: subsmoother type", CoarseSubsmootherType );
 
-    Int CoarseNodeSweeps              = dataFile((section + "/" + subSection + "/coarse/node_sweeps").data(), 2, found);
-    if (found) list.set("coarse: node sweeps", CoarseNodeSweeps);
+    Int CoarseNodeSweeps              = dataFile( (section + "/" + subSection + "/coarse/node_sweeps").data(), 2, found );
+    if ( found ) list.set( "coarse: node sweeps", CoarseNodeSweeps );
 
-    Int CoarseEdgeSweeps              = dataFile((section + "/" + subSection + "/coarse/edge_sweeps").data(), 2, found);
-    if (found) list.set("coarse: edge sweeps", CoarseEdgeSweeps);
+    Int CoarseEdgeSweeps              = dataFile( (section + "/" + subSection + "/coarse/edge_sweeps").data(), 2, found );
+    if ( found ) list.set( "coarse: edge sweeps", CoarseEdgeSweeps );
 
-    Real   CoarseChebyshevAlpha       = dataFile((section + "/" + subSection + "/coarse/Chebyshev_alpha").data(), 30., found);
-    if (found) list.set("coarse: Chebyshev alpha", CoarseChebyshevAlpha);
+    Real   CoarseChebyshevAlpha       = dataFile( (section + "/" + subSection + "/coarse/Chebyshev_alpha").data(), 30., found );
+    if ( found ) list.set( "coarse: Chebyshev alpha", CoarseChebyshevAlpha );
 
-    Int CoarseMaxProcesses            = dataFile((section + "/" + subSection + "/coarse/max_processes").data(),-1, found);
-    if (found) list.set("coarse: max processes", CoarseMaxProcesses);
+    Int CoarseMaxProcesses            = dataFile( (section + "/" + subSection + "/coarse/max_processes").data(),-1, found );
+    if ( found ) list.set( "coarse: max processes", CoarseMaxProcesses );
 
 
     // Load-balancing Options
-    Int RepartitionEnable              = dataFile((section + "/" + subSection + "/repartition/enable").data(), 0, found);
-    if (found) list.set("repartition: enable",             RepartitionEnable);
+    Int RepartitionEnable              = dataFile( (section + "/" + subSection + "/repartition/enable").data(), 0, found );
+    if ( found ) list.set( "repartition: enable", RepartitionEnable );
 
-    std::string RepartitionPartitioner = dataFile((section + "/" + subSection + "/repartition/partitioner").data(), "ParMETIS", found);
-    if (found) list.set("repartition: partitioner",        RepartitionPartitioner);
+    std::string RepartitionPartitioner = dataFile( (section + "/" + subSection + "/repartition/partitioner").data(), "ParMETIS", found );
+    if ( found ) list.set( "repartition: partitioner", RepartitionPartitioner );
 
-    Real   RepartitionMaxMinRatio      = dataFile((section + "/" + subSection + "/repartition/max_min_ratio").data(), 1.3, found);
-    if (found) list.set("repartition: max min ratio",      RepartitionMaxMinRatio);
+    Real   RepartitionMaxMinRatio      = dataFile( (section + "/" + subSection + "/repartition/max_min_ratio").data(), 1.3, found );
+    if ( found ) list.set( "repartition: max min ratio", RepartitionMaxMinRatio );
 
-    Int RepartitionMinPerProc          = dataFile((section + "/" + subSection + "/repartition/min_per_proc").data(), 512, found);
-    if (found) list.set("repartition: min per proc",       RepartitionMinPerProc);
+    Int RepartitionMinPerProc          = dataFile( (section + "/" + subSection + "/repartition/min_per_proc").data(), 512, found );
+    if ( found ) list.set( "repartition: min per proc", RepartitionMinPerProc );
 
-    Real   RepartitionNodeMaxMinRatio  = dataFile((section + "/" + subSection + "/repartition/node_max_min_ratio").data(), 1.3, found);
-    if (found) list.set("repartition: node max min ratio", RepartitionNodeMaxMinRatio);
+    Real   RepartitionNodeMaxMinRatio  = dataFile( (section + "/" + subSection + "/repartition/node_max_min_ratio").data(), 1.3, found );
+    if ( found ) list.set( "repartition: node max min ratio", RepartitionNodeMaxMinRatio );
 
-    Int RepartitionNodeMinPerProc      = dataFile((section + "/" + subSection + "/repartition/node_min_per_proc").data(), 170, found);
-    if (found) list.set("repartition: node min per proc",  RepartitionNodeMinPerProc);
+    Int RepartitionNodeMinPerProc      = dataFile( (section + "/" + subSection + "/repartition/node_min_per_proc").data(), 170, found );
+    if ( found ) list.set( "repartition: node min per proc", RepartitionNodeMinPerProc );
 
-    Int RepartitionZoltanDimensions    = dataFile((section + "/" + subSection + "/repartition/Zoltan_dimensions").data(), 2, found);
-    if (found) list.set("repartition: Zoltan dimensions",  RepartitionZoltanDimensions);
+    Int RepartitionZoltanDimensions    = dataFile( (section + "/" + subSection + "/repartition/Zoltan_dimensions").data(), 2, found );
+    if ( found ) list.set( "repartition: Zoltan dimensions", RepartitionZoltanDimensions );
 
 
-    if (MLPrintParameterList)
+    if ( MLPrintParameterList )
     {
         std::cout << "  Parameters List: " << std::endl;
-        list.print(std::cout);
+        list.print( std::cout );
         std::cout << std::endl;
     }
+}
+
+void MLPreconditioner::showMe( std::ostream& output ) const
+{
+    output << "showMe must be implemented for the MLPreconditioner class" << std::endl;
 }
 
 // ===================================================
 // Set Methods
 // ===================================================
 void
-MLPreconditioner::setDataFromGetPot( const GetPot&          dataFile,
-                                     const std::string&     section )
+MLPreconditioner::setDataFromGetPot( const GetPot&      dataFile,
+                                     const std::string& section )
 {
-    M_analyze = dataFile((section + "/" + "ML" + "/analyze_smoother").data(), false); // To be moved in createMLList
+    M_analyze = dataFile( (section + "/" + "ML" + "/analyze_smoother" ).data(), false); // To be moved in createMLList
 
     // ML List
-    createMLList(M_List, dataFile, section, "ML" );
+    createMLList( M_list, dataFile, section, "ML" );
 
     // IfPack list
-    list_Type& SmootherIFSubList = M_List.sublist("smoother: ifpack list");
-    IfpackPreconditioner::createIfpackList(SmootherIFSubList, dataFile, section, "ML");
+    list_Type& SmootherIFSubList = M_list.sublist( "smoother: ifpack list" );
+    IfpackPreconditioner::createIfpackList( SmootherIFSubList, dataFile, section, "ML" );
 }
 
 
@@ -338,7 +331,7 @@ MLPreconditioner::Condest()
 EpetraPreconditioner::prec_raw_type*
 MLPreconditioner::getPrec()
 {
-    return M_Prec.get();
+    return M_preconditioner.get();
 }
 
 } // namespace LifeV

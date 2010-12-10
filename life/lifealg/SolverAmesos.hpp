@@ -38,13 +38,20 @@
 #ifndef _SolverAmesos_H
 #define _SolverAmesos_H
 
+// Tell the compiler to ignore specific kind of warnings:
+#pragma GCC diagnostic ignored "-Wunused-variable"
+#pragma GCC diagnostic ignored "-Wunused-parameter"
+
 #include <Amesos.h>
 #include <Amesos_BaseSolver.h>
-
 #include <Teuchos_ParameterList.hpp>
+
+// Tell the compiler to ignore specific kind of warnings:
+#pragma GCC diagnostic warning "-Wunused-variable"
+#pragma GCC diagnostic warning "-Wunused-parameter"
+
 #include <life/lifearray/EpetraVector.hpp>
 #include <life/lifearray/EpetraMatrix.hpp>
-
 #include <life/lifecore/displayer.hpp>
 
 class GetPot;
@@ -94,7 +101,7 @@ public:
     //! @name Methods
     //@{
 
-    Real computeResidual( const vector_type& x, const vector_type& rhs );
+    Real computeResidual( const vector_type& solution, const vector_type& rhs );
 
     /** Solves the system and returns the number of iterations.
         @param  matrFull,
@@ -105,8 +112,8 @@ public:
         the preconditionar has been recomputed, and a second solution is tried
     */
     Int solveSystem( vector_type&    rhsFull,
-                     vector_type&    sol,
-                     matrix_ptrtype& /* unused */);
+                     vector_type&    solution,
+                     matrix_ptrtype& /* unused */ );
 
     //Display status
     void printStatus();
@@ -117,7 +124,9 @@ public:
 
     void setUpPrec( const GetPot& dataFile,  const std::string& section );
 
-    void setReusePreconditioner( const bool& /*reuse*/ );
+    void setReusePreconditioner( const bool& /*reusePreconditioner*/ );
+
+    void showMe( std::ostream& output = std::cout ) const;
 
     //@}
 
@@ -128,13 +137,13 @@ public:
     //! Set matrix from EpetraMatrix
     void setMatrix( const matrix_type& matrix );
 
-    void setOperator( const Epetra_Operator& op );
+    void setOperator( const Epetra_Operator& oper );
 
-    void setDataFromGetPot( const GetPot& dfile, const std::string& section );
+    void setDataFromGetPot( const GetPot& dataFile, const std::string& section );
 
     void setParameters();
 
-    void setTolMaxiter( const Real tol, const Int maxiter = -1 );
+    void setTolMaxiter( const Real tolerance, const Int maxIter = -1 );
 
     //@}
 
@@ -165,7 +174,7 @@ private:
 
     Amesos_BaseSolver*          M_solver;
 
-    Teuchos::ParameterList      M_TrilinosParameterList;
+    Teuchos::ParameterList      M_trilinosParameterList;
 
     Displayer                   M_displayer;
 };
