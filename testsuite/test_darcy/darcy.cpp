@@ -288,7 +288,7 @@ darcy::run()
 
     typedef boost::shared_ptr< darcyLinearSolver_type >               darcyLinearSolver_ptrtype;
 
-    typedef darcyLinearSolver_type::vector_type                       vector_type;
+    typedef darcyLinearSolver_type::vector_Type                       vector_type;
     typedef boost::shared_ptr< vector_type >                          vector_ptrtype;
 
     Chrono chronoTotal;
