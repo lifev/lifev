@@ -1,47 +1,28 @@
 # -*- makefile -*-
+###################################################################################################
 #
-# Author: Christophe Prud'homme
+#                       This file is part of the LifeV Library                       
+#                Copyright (C) 2004, 2005, 2007 EPFL, Politecnico di Milano, INRIA
+#                Copyright (C) 2010 EPFL, Politecnico di Milano, Emory University
 #
-# Copyright (C) 2004 EPFL, INRIA, Politecnico di Milano
+#      Author(s): Umberto Villa <uvilla@emory.edu>
+#           Date: 10-12-2010
+#  License Terms: GNU LGPL
 #
-# Distributed under the GPL(GNU Public License):
-# This program is free software; you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation; either version 2 of the License, or
-# (at your option) any later version.
-#
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU General Public License for more details.
-#
-# You should have received a copy of the GNU General Public License
-# along with this program; if not, write to the Free Software
-# Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-#
+#################################################################################################
 
-SUFFIXES	= .cpp .hpp .idl .c .h .f .F .o .moc
+AM_CXXFLAGS=-O1
 
-INCLUDES		= -I$(top_srcdir)/life/lifecore -I$(top_srcdir)/life/lifearray  -I$(top_srcdir)/life/lifealg -I$(top_srcdir)/life/lifemesh
+SUFFIXES		= .cpp .hpp .idl .c .h .f .F .o .moc 
 
+INCLUDES        = -I$(top_srcdir)/life/lifecore $(top_srcdir)/life/lifealg
 
-check_HEADERS		= MatrixTest.hpp
+LDADD           = $(top_builddir)/life/lifecore/liblifecore.la $(top_builddir)/life/lifealg/liblifealg.la
 
-check_LTLIBRARIES	= liblifealg_testsuite.la
+check_PROGRAMS 	    = 
+test_getPot_SOURCES = 
 
-liblifealg_testsuite_la_SOURCES	= MatrixTest.cpp
-liblifealg_testsuite_la_LIBADD	= $(top_builddir)/life/lifealg/liblifealg.la
+EXTRA_DIST = 
 
-check_PROGRAMS	= test_linearsolvers test_umfpack
-
-
-test_umfpack_SOURCES	= test_umfpack.cpp
-test_umfpack_LDADD    = $(top_builddir)/life/lifealg/liblifealg.la $(boost_unit_test_framework_lib)
-
-test_linearsolvers_SOURCES	= test_linearsolvers.cpp
-test_linearsolvers_LDADD	= liblifealg_testsuite.la $(top_builddir)/life/lifecore/liblifecore.la  $(top_builddir)/life/lifealg/liblifealg.la  $(umfpack_libs)
-
-
-EXTRA_DIST  = testsuite.at
-
-MOSTLYCLEANFILES=mass.m convdiff.m
+link:
+	test -a data || ln -s $(srcdir)/data
