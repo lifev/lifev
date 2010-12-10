@@ -29,29 +29,30 @@ AT_INIT([lifev testsuite])
 
 
 #lifecore tests
-##m4_include([lifecore/testsuite.at])
+#m4_include([lifecore/testsuite.at])
 
 #lifearray tests
-##m4_include([lifearray/testsuite.at])
+#m4_include([lifearray/testsuite.at])
 
 #lifealg tests
-##m4_include([lifealg/testsuite.at])
+#m4_include([lifealg/testsuite.at])
+
+#lifefem tests
+m4_include([lifefem/testsuite.at])
+
+#filters tests
+m4_include([lifefilters/testsuite.at])
 
 # mesh tests
-##AT_BANNER([life/lifemesh testsuite ...])
-##m4_include([test_mesh/testsuite.at])
+#AT_BANNER([life/lifemesh testsuite ...])
+#m4_include([test_mesh/testsuite.at])
 
 # solver tests
 AT_BANNER([life/lifesolver testsuite ...])
 m4_include([test_TemplateTest/testsuite.at])
-m4_include([test_cylinder/testsuite.at])
-m4_include([test_ethiersteinman/testsuite.at])
 m4_include([test_structure/testsuite.at])
 m4_include([test_fsi/testsuite.at])
-m4_include([test_meshReorder/testsuite.at])
-m4_include([test_filters/testsuite.at])
 m4_include([test_partition/testsuite.at])
-m4_include([test_resistance/testsuite.at])
 m4_include([test_darcy/testsuite.at])
 m4_include([test_timeAdvance_orderI/testsuite.at])
 m4_include([test_timeAdvance_orderII/testsuite.at])

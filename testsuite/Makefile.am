@@ -25,42 +25,35 @@ SUFFIXES	= .cpp .hpp .idl .c .h .f .F .o .moc
 DO_NOT_COMPILE=
 
 SUBDIRS		= data  \
-              test_TemplateTest \
-              test_cylinder \
-              test_restartFluid \
-              test_getpot \
-              test_structure \
-              test_ethiersteinman \
-              test_fsi \
-              test_ns_flux \
-              test_meshReorder \
-              test_currentFE \
-              test_filters \
-              test_partition \
+			  lifealg \
+			  lifearray \
+			  lifecore \
+			  lifefem \
+			  lifefilters \
+			  lifemesh \
+			  test_ADRAssembler \
+			  test_bdf \
               test_darcy \
-              test_resistance \
+              test_fsi \
+              test_hyperbolic \
+              test_LevelSetSolver \
+              test_partition \			  
+              test_structure \
+              test_TemplateTest \
               test_timeAdvance_orderI \
-              test_timeAdvance_orderII \
-	      test_ADRAssembler \
-	      test_LevelSetSolver \
-              $(DO_NOT_COMPILE)
+              test_timeAdvance_orderII
 
-#              test_laplacian
 
 
 TESTSUITES=$(srcdir)/test_TemplateTest/testsuite.at \
-           $(srcdir)/test_cylinder/testsuite.at \
            $(srcdir)/test_structure/testsuite.at \
-           $(srcdir)/test_ethiersteinman/testsuite.at\
            $(srcdir)/test_fsi/testsuite.at \
-           $(srcdir)/test_filters/testsuite.at \
-           $(srcdir)/test_currentFE/testsuite.at \
-           $(srcdir)/test_meshReorder/testsuite.at \
+           $(srcdir)/lifefilters/testsuite.at \
+           $(srcdir)/lifefem/testsuite.at \
            $(srcdir)/test_partition/testsuite.at \
            $(srcdir)/test_darcy/testsuite.at \
-           $(srcdir)/test_resistance/testsuite.at \
-	   $(srcdir)/test_ADRAssembler/testsuite.at
-	   $(srcdir)/test_LevelSetSolver/testsuite.at
+		   $(srcdir)/test_ADRAssembler/testsuite.at \
+	   	   $(srcdir)/test_LevelSetSolver/testsuite.at
 
 
 
