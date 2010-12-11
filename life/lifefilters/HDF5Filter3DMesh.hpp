@@ -707,8 +707,10 @@ std::vector<std::string>& HDF5Filter3DMesh<MeshType>::queryStoredInterfaceTypes(
 template <typename MeshType>
 boost::shared_ptr<MeshType>& HDF5Filter3DMesh<MeshType>::getMeshPartition()
 {
+    boost::shared_ptr<MeshType> tempMesh(new MeshType);
+
     UInt elementNodes, faceNodes;
-    switch (Mesh::ElementShape::Shape)
+    switch (MeshType::ElementShape::Shape)
     {
     case HEXA:
         elementNodes = 8;
