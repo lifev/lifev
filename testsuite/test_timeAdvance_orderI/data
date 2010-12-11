@@ -14,13 +14,15 @@ save       = 1
 [problem]
 
 [./physics]
-density   = 1.               # density
-
+material_flag =1
+density   = 1.             
+poisson   = 0
+young     = 1
 
 [../time_discretization]
 initialtime		= 0.
 endtime			= 2
-timestep		= 0.0625
+timestep		= 0.1
 method                  =  BDF  #BDF
 # Newmark parameters:
 theta                   = 0.5  #0.5
@@ -38,7 +40,7 @@ order     = P1
 [../miscellaneous]
 factor    = 1
 verbose   = 1
-
+damping   = false
 
 [../newton]
 maxiter = 1
