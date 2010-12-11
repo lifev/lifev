@@ -94,7 +94,7 @@ public:
     /*! Nullflag is the value indicating a null flag, i.e a flag not yet
       set to a usable value
     */
-    static const entityFlag_Type S_NULLFLAG;
+    static const entityFlag_Type NULLFLAG;
 
 
     //! Selects the stronger between two flags
@@ -284,7 +284,7 @@ public:
 //  ***********************************************************************************************************
 
 template <typename MarkerTraits>
-Marker_Base<MarkerTraits>::Marker_Base() : M_flag( MarkerTraits::S_NULLFLAG )
+Marker_Base<MarkerTraits>::Marker_Base() : M_flag( MarkerTraits::NULLFLAG )
 {
     // nothing to be done here
 }
@@ -310,7 +310,7 @@ typename MarkerTraits::entityFlag_Type Marker_Base<MarkerTraits>::marker() const
 template <typename MarkerTraits>
 typename MarkerTraits::entityFlag_Type const & Marker_Base<MarkerTraits>::nullFlag() const
 {
-    return MarkerTraits::S_NULLFLAG;
+    return MarkerTraits::NULLFLAG;
 }
 
 template <typename MarkerTraits>

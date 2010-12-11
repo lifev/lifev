@@ -54,7 +54,8 @@ typedef MarkerCommon<MarkerTraits_Base> defMarkerCommon_Type;
 typedef MarkerTraits_Base::entityFlag_Type entityFlag_Type;
 
 //!Expose NULLFLAG
-static const entityFlag_Type NULLFLAG = MarkerTraits_Base::S_NULLFLAG;
+//static const entityFlag_Type S_NULLFLAG = MarkerTraits_Base::S_NULLFLAG;
+static const entityFlag_Type NULLFLAG = MarkerTraits_Base::NULLFLAG;
 
 // Old typedefs to delete
 typedef MarkerCommon<MarkerTraits_Base> DefMarkerCommon;
