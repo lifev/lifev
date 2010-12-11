@@ -595,7 +595,7 @@ buildSystem(const Real& xi, const Real& alpha)
  // these lines must be removed next week
  this->buildSystem(M_matrSystem, xi);
  
- if(M_data->isDamping())
+ if(M_data->damping())
    {
      M_matrDamping.reset(new matrix_type(*M_localMap));
    this->buildDamping(M_matrSystem, alpha);
