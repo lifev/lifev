@@ -1,15 +1,44 @@
-/* -*- Mode : c++; c-tab-always-indent: t; indent-tabs-mode: nil; -*-
+//@HEADER
+/*
+*******************************************************************************
 
-  <short description here>
+    Copyright (C) 2004, 2005, 2007 EPFL, Politecnico di Milano, INRIA
+    Copyright (C) 2010 EPFL, Politecnico di Milano, Emory University
 
-  Gilles Fourestey gilles.fourestey@epfl.ch
+    This file is part of LifeV.
 
+    LifeV is free software; you can redistribute it and/or modify
+    it under the terms of the GNU Lesser General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    LifeV is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+    Lesser General Public License for more details.
+
+    You should have received a copy of the GNU Lesser General Public License
+    along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
+
+*******************************************************************************
 */
-/** \file dataNavierStokes.cpp
-*/
+//@HEADER
+
+/*!
+    @file
+    @brief File containing the implementation of the file DataNavierStokes.hpp
+
+    @author Gilles Fourestey <gilles.fourestey@epfl.ch>
+    @contributor Alexis Aposporidis <aapospo@emory.edu>
+    @maintainer
+
+    @date 01-09-2009
+
+ */
 
 
 #include <life/lifesolver/dataNavierStokes.hpp>
+#include <lifeconfig.h>
 
 
 namespace LifeV
@@ -19,20 +48,19 @@ namespace LifeV
 // ===================================================
 // Constructors
 // ===================================================
-//template <typename Mesh>
+
 DataNavierStokes::DataNavierStokes( ) :
         M_time                             ( ),
-        //M_mesh                             ( ),
         M_density                          ( ),
         M_viscosity                        ( ),
         M_uOrder                           ( ),
         M_pOrder                           ( ),
         M_verbose                          ( ),
-        M_dump_init                        ( ),
-        M_dump_period                      ( ),
+        M_dumpInit                         ( ),
+        M_dumpPeriod                       ( ),
         M_factor                           ( ),
-        M_Stokes                           ( false ),
-        M_stab_method                      ( ),
+        M_stokes                           ( false ),
+        M_stabMethod                       ( ),
         M_semiImplicit                     ( false ),
         M_shapeDerivatives                 ( false ),
         M_computeMeanValuesPerSection      ( ),
@@ -42,55 +70,24 @@ DataNavierStokes::DataNavierStokes( ) :
         M_ZSectionInit                     ( ),
         M_ZSectionFinal                    ( ),
         M_NbPolygonEdges                   ( ),
-        M_stabilization_list               ( "fluid/space_discretization/stabilization" )
+        M_stabilizationList                ( "fluid/space_discretization/stabilization" )
 {
 }
 
-// template <typename Mesh>
-// DataNavierStokes<Mesh>::DataNavierStokes( const GetPot& dataFile,
-//                                           const Time_ptrType DataTime,
-//                                           const Mesh_ptrType DataMesh ) :
-//         M_time                             ( DataTime ),
-//         M_mesh                             ( DataMesh ),
-//         M_density                          ( ),
-//         M_viscosity                        ( ),
-//         M_uOrder                           ( ),
-//         M_pOrder                           ( ),
-//         M_verbose                          ( ),
-//         M_dump_init                        ( ),
-//         M_dump_period                      ( ),
-//         M_factor                           ( ),
-//         M_Stokes                           ( false ),
-//         M_stab_method                      ( ),
-//         M_semiImplicit                     ( false ),
-//         M_shapeDerivatives                 ( false ),
-//         M_computeMeanValuesPerSection      ( ),
-//         M_NbZSections                      ( ),
-//         M_ToleranceSection                 ( ),
-//         M_XSectionFrontier                 ( ),
-//         M_ZSectionInit                     ( ),
-//         M_ZSectionFinal                    ( ),
-//         M_NbPolygonEdges                   ( ),
-//         M_stabilization_list               ( "fluid/space_discretization/stabilization" )
-// {
-//     setup( dataFile );
-// }
 
-//template <typename Mesh>
 DataNavierStokes::DataNavierStokes( const DataNavierStokes& dataNavierStokes ) :
         M_time                             ( dataNavierStokes.M_time ),
-        //M_mesh                             ( dataNavierStokes.M_mesh ),
-        M_fluid_number                     ( dataNavierStokes.M_fluid_number ),
+        M_fluidNumber                      ( dataNavierStokes.M_fluidNumber ),
         M_density                          ( dataNavierStokes.M_density ),
         M_viscosity                        ( dataNavierStokes.M_viscosity ),
         M_uOrder                           ( dataNavierStokes.M_uOrder ),
         M_pOrder                           ( dataNavierStokes.M_pOrder ),
         M_verbose                          ( dataNavierStokes.M_verbose ),
-        M_dump_init                        ( dataNavierStokes.M_dump_init ),
-        M_dump_period                      ( dataNavierStokes.M_dump_period ),
+        M_dumpInit                         ( dataNavierStokes.M_dumpInit ),
+        M_dumpPeriod                       ( dataNavierStokes.M_dumpPeriod ),
         M_factor                           ( dataNavierStokes.M_factor ),
-        M_Stokes                           ( dataNavierStokes.M_Stokes ),
-        M_stab_method                      ( dataNavierStokes.M_stab_method ),
+        M_stokes                           ( dataNavierStokes.M_stokes ),
+        M_stabMethod                       ( dataNavierStokes.M_stabMethod ),
         M_semiImplicit                     ( false ),
         M_shapeDerivatives                 ( false ),
         M_computeMeanValuesPerSection      ( dataNavierStokes.M_computeMeanValuesPerSection ),
@@ -100,7 +97,7 @@ DataNavierStokes::DataNavierStokes( const DataNavierStokes& dataNavierStokes ) :
         M_ZSectionInit                     ( dataNavierStokes.M_ZSectionInit ),
         M_ZSectionFinal                    ( dataNavierStokes.M_ZSectionFinal ),
         M_NbPolygonEdges                   ( dataNavierStokes.M_NbPolygonEdges ),
-        M_stabilization_list               ( dataNavierStokes.M_stabilization_list )
+        M_stabilizationList                ( dataNavierStokes.M_stabilizationList )
 {
 }
 
@@ -112,7 +109,6 @@ DataNavierStokes::DataNavierStokes( const DataNavierStokes& dataNavierStokes ) :
 // ===================================================
 // Methods
 // ===================================================
-//template <typename Mesh>
 
 DataNavierStokes&
 DataNavierStokes::operator=( const DataNavierStokes& dataNavierStokes )
@@ -120,18 +116,17 @@ DataNavierStokes::operator=( const DataNavierStokes& dataNavierStokes )
     if ( this != &dataNavierStokes )
     {
         M_time                             = dataNavierStokes.M_time;
-        //M_mesh                             = dataNavierStokes.M_mesh;
-        M_fluid_number                     = dataNavierStokes.M_fluid_number;
+        M_fluidNumber                      = dataNavierStokes.M_fluidNumber;
         M_density                          = dataNavierStokes.M_density;
         M_viscosity                        = dataNavierStokes.M_viscosity;
         M_uOrder                           = dataNavierStokes.M_uOrder;
         M_pOrder                           = dataNavierStokes.M_pOrder;
         M_verbose                          = dataNavierStokes.M_verbose;
-        M_dump_init                        = dataNavierStokes.M_dump_init;
-        M_dump_period                      = dataNavierStokes.M_dump_period;
+        M_dumpInit                         = dataNavierStokes.M_dumpInit;
+        M_dumpPeriod                       = dataNavierStokes.M_dumpPeriod;
         M_factor                           = dataNavierStokes.M_factor;
-        M_Stokes                           = dataNavierStokes.M_Stokes;
-        M_stab_method                      = dataNavierStokes.M_stab_method;
+        M_stokes                           = dataNavierStokes.M_stokes;
+        M_stabMethod                       = dataNavierStokes.M_stabMethod;
         M_semiImplicit                     = dataNavierStokes.M_semiImplicit;
         M_shapeDerivatives                 = dataNavierStokes.M_shapeDerivatives;
         M_computeMeanValuesPerSection      = dataNavierStokes.M_computeMeanValuesPerSection;
@@ -141,40 +136,36 @@ DataNavierStokes::operator=( const DataNavierStokes& dataNavierStokes )
         M_ZSectionInit                     = dataNavierStokes.M_ZSectionInit;
         M_ZSectionFinal                    = dataNavierStokes.M_ZSectionFinal;
         M_NbPolygonEdges                   = dataNavierStokes.M_NbPolygonEdges;
-        M_stabilization_list               = dataNavierStokes.M_stabilization_list;
+        M_stabilizationList                = dataNavierStokes.M_stabilizationList;
     }
 
     return *this;
 }
 
-// template <typename Mesh>
+
 void
 DataNavierStokes::setup( const GetPot& dataFile, const std::string& section )
 {
     // If data time has not been set
     if ( !M_time.get() )
-        M_time.reset( new Time_Type( dataFile, section + "/time_discretization" ) );
+        M_time.reset( new time_Type( dataFile, section + "/time_discretization" ) );
 
-    // If data mesh has not been set
-    // if ( !M_mesh.get() )
-    //     M_mesh.reset( new Mesh_Type( dataFile, section + "/space_discretization" ) );
-
-    M_stabilization_list.add( "ip", IP_STABILIZATION,   "interior penalty " );
-    M_stabilization_list.add( "sd", SD_STABILIZATION,   "stream-line diffusion" );
-    M_stabilization_list.add( "none", NO_STABILIZATION, "none (default)" );
+    M_stabilizationList.add( "ip", IP_STABILIZATION,   "interior penalty " );
+    M_stabilizationList.add( "sd", SD_STABILIZATION,   "stream-line diffusion" );
+    M_stabilizationList.add( "none", NO_STABILIZATION, "none (default)" );
 
     // Physics
     UInt temp = dataFile( (section + "/physics/fluid_number" ).data(), 0 );
 
     if (temp == 0) // Old fashion of declaring fluids
     {
-        M_fluid_number = 1;
+        M_fluidNumber = 1;
         M_density.push_back( dataFile( ( section + "/physics/density" ).data(), 1. ) );
         M_viscosity.push_back ( dataFile( ( section + "/physics/viscosity" ).data(), 1. ) );
     }
     else   // New fashion of declaring fluids
     {
-        M_fluid_number = temp;
+        M_fluidNumber = temp;
         M_density = std::vector<Real>(temp,0);
         M_viscosity = std::vector<Real>(temp,0);
 
@@ -196,13 +187,13 @@ DataNavierStokes::setup( const GetPot& dataFile, const std::string& section )
 
     // Miscellaneous
     M_verbose      = dataFile( ( section + "/miscellaneous/verbose" ).data(), 1 );
-    M_dump_init    = dataFile( ( section + "/miscellaneous/dump_init" ).data(), M_time->getInitialTime() );
-    M_dump_period  = dataFile( ( section + "/miscellaneous/dump_period" ).data(), 1 );
+    M_dumpInit    = dataFile( ( section + "/miscellaneous/dump_init" ).data(), M_time->getInitialTime() );
+    M_dumpPeriod  = dataFile( ( section + "/miscellaneous/dump_period" ).data(), 1 );
     M_factor       = dataFile( ( section + "/miscellaneous/factor" ).data(), 0. );
-    M_Stokes       = dataFile( ( section + "/miscellaneous/Stokes" ).data(), false );
+    M_stokes       = dataFile( ( section + "/miscellaneous/Stokes" ).data(), false );
 
-    M_stab_method  = NSStabilization ( M_stabilization_list.value(
-                                           dataFile( ( section + "/space_discretization/stabilization" ).data(), "none") ) );
+    M_stabMethod  = NSStabilization ( M_stabilizationList.value(
+                                          dataFile( ( section + "/space_discretization/stabilization" ).data(), "none") ) );
 
     // Semi-implicit and shape derivatives
     M_semiImplicit     = dataFile( ( section + "/semiImplicit" ).data(), false ) ;
@@ -219,11 +210,11 @@ DataNavierStokes::setup( const GetPot& dataFile, const std::string& section )
     M_NbPolygonEdges   = dataFile( ( section + "/valuespersection/nb_polygon_edges" ).data(), 10 );
 }
 
-//template <typename Mesh>
+
 void
 DataNavierStokes::showMe( std::ostream& output ) const
 {
-    if (M_fluid_number == 1)
+    if (M_fluidNumber == 1)
     {
         output << "\n*** Values for data [fluid/physics]\n\n";
         output << "density     = " << M_density[0] << std::endl;
@@ -232,7 +223,7 @@ DataNavierStokes::showMe( std::ostream& output ) const
     else
     {
         output << "\n*** Values for data [fluid/physics]\n\n";
-        for (UInt iter_fluid(0); iter_fluid<M_fluid_number; ++iter_fluid)
+        for (UInt iter_fluid(0); iter_fluid<M_fluidNumber; ++iter_fluid)
         {
             output << "fluid " << iter_fluid << std::endl;
             output << "density     = " << M_density[iter_fluid] << std::endl;
@@ -241,18 +232,17 @@ DataNavierStokes::showMe( std::ostream& output ) const
     }
     output << "\n*** Values for data [fluid/miscellaneous]\n\n";
     output << "verbose     = " << M_verbose << std::endl;
-    output << "initial time for writing solution  = " << M_dump_init << std::endl;
-    output << "number of time steps between two consecutive dumps of the solution = " << M_dump_period << std::endl;
+    output << "initial time for writing solution  = " << M_dumpInit << std::endl;
+    output << "number of time steps between two consecutive dumps of the solution = " << M_dumpPeriod << std::endl;
     output << "amplification factor = " << M_factor << std::endl;
-    output << "Stokes simulation    = " << M_Stokes << std::endl;
+    output << "Stokes simulation    = " << M_stokes << std::endl;
 
-    // output << "\n*** Values for data [fluid/space_discretization]\n\n";
-    // M_mesh->showMe( output );
+
     output << "\n*** Values for data [fluid/time_discretization]\n\n";
     M_time->showMe( output );
 
     output << "stabilization = ";
-    switch ( M_stab_method )
+    switch ( M_stabMethod )
     {
     case NO_STABILIZATION:
         output << "none" ;
@@ -276,4 +266,6 @@ DataNavierStokes::showMe( std::ostream& output ) const
     output << "z_section_final    = " << M_ZSectionFinal << std::endl;
     output << "nb_polygon_edges   = " << M_NbPolygonEdges << std::endl;
 }
-}
+
+
+} //end namespace LifeV
