@@ -24,6 +24,15 @@
 */
 //@HEADER
 
+/*!
+  @file
+  @brief dataSecondOrder - Class to secondorder problem (S. Venant Kirchhoff Viscoelastic)
+ 
+  @author Matteo Pozzoli <matteo1.pozzoli@mail.polimi.it>
+  
+  @contributor Matteo Pozzoli <matteo1.pozzoli@mail.polimi.it>
+  @maintainer Matteo Pozzoli <matteo1.pozzoli@mail.polimi.it>
+ */
 
 #ifndef VENANTKIRCHHOFFVISCOELASTICDATA_H
 #define VENANTKIRCHHOFFVISCOELASTICDATA_H 1

@@ -25,19 +25,12 @@
 //@HEADER
 
 /*!
- *  @file
- *  @brief DataSecondOrder - File containing a data container for solid problems with elastic structure
- *
- *  @version 1.0
- *  @author M.A. Fernandez
- *  @date 01-10-2003
- *
- *  @version 1.18
- *  @author Cristiano Malossi
- *  @date 10-06-2010
- *
- *  @version 1.19
- *  @author Matteo Pozzoli
+  @brief dataSecondOrder - Class to secondorder problem (S. Venant Kirchhoff Viscoelastic)
+
+  @author Matteo Pozzoli <matteo1.pozzoli@mail.polimi.it>
+
+  @contributor Matteo Pozzoli <matteo1.pozzoli@mail.polimi.it>
+  @maintainer Matteo Pozzoli <matteo1.pozzoli@mail.polimi.it>
  */
 
 #include <life/lifesolver/dataSecondOrder.hpp>
