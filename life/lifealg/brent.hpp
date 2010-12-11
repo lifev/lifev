@@ -1,42 +1,76 @@
+//@HEADER
 /*
- This file is part of the LifeV library
- Copyright (C) 2001,2002,2003,2004 EPFL, INRIA and Politecnico di Milano
+*******************************************************************************
 
- This library is free software; you can redistribute it and/or
- modify it under the terms of the GNU Lesser General Public
- License as published by the Free Software Foundation; either
- version 2.1 of the License, or (at your option) any later version.
+    Copyright (C) 2004, 2005, 2007 EPFL, Politecnico di Milano, INRIA
+    Copyright (C) 2010 EPFL, Politecnico di Milano, Emory University
 
- This library is distributed in the hope that it will be useful,
- but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- Lesser General Public License for more details.
+    This file is part of LifeV.
 
- You should have received a copy of the GNU Lesser General Public
- License along with this library; if not, write to the Free Software
- Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+    LifeV is free software; you can redistribute it and/or modify
+    it under the terms of the GNU Lesser General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    LifeV is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+    Lesser General Public License for more details.
+
+    You should have received a copy of the GNU Lesser General Public License
+    along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
+
+*******************************************************************************
 */
-#ifndef _brentAlgorithm_H
-#define _brentAlgorithm_H
+//@HEADER
+
+/*!
+    @file
+    @brief Implementation of Brent's method for root finding.
+
+    @author Alessio Fumagalli <alessio.fumagalli@mail.polimi.it>
+    @date
+
+    @contributor Alessandro Melani <alessandro.melani@mail.polimi.it>
+    @mantainer Alessandro Melani <alessandro.melani@mail.polimi.it>
+
+    Brent's method  is a root-finding algorithm combining the bisection method, the secant method
+    and inverse quadratic interpolation. It has the reliability of bisection but it can be as quick
+    as some of the less reliable methods. The idea is to use the secant method or inverse quadratic
+    interpolation if possible, because they converge faster, but to fall back to the more robust bisection
+    method if necessary.
+
+    @see  Chapter 4 of R.P. Brent, "Algorithms for Minimization without Derivatives", Prentice-Hall, Englewood Cliffs, NJ. 1973
+ */
+#ifndef _BRENTALGORITHM_H
+#define _BRENTALGORITHM_H 1
 
 #include <limits>
-//#include <cmath>
-//#include <iostream>
-
-
-//#include <boost/function.hpp>
-//#include <boost/bind.hpp>
-
-
-// Policy for scalar functions
-//typedef boost::function<Real ( const Real& )> fct_type;
 
 namespace LifeV
 {
+//! Implementation of Brent's method for root finding.
+/*!
+    @author Alessio Fumagalli <alessio.fumagalli@mail.polimi.it>
+    @date
 
+    Brent's method  is a root-finding algorithm combining the bisection method, the secant method and inverse quadratic interpolation.
+    It has the reliability of bisection but it can be as quick as some of the less reliable methods.
+    The idea is to use the secant method or inverse quadratic interpolation if possible, because they converge faster, but to fall back
+    to the more robust bisection method if necessary.
+
+    See  Chapter 4 of R.P. Brent, "Algorithms for Minimization without Derivatives", Prentice-Hall, Englewood Cliffs, NJ. 1973
+
+    @param f                     Function
+    @param leftExtremeBase       Left extreme of the interval
+    @param rightExtremeBase      Right extreme of the interval
+    @param toll                  Tollerance
+    @param maxIter               Maximum number of iterations
+*/
 template <class Function>
-Real brent( const Function& f/* const fct_type& f*/, const Real& leftExtremeBase, const Real& rightExtremeBase, const Real& toll, const UInt& maxIter )
+Real brent( const Function& f, const Real& leftExtremeBase, const Real& rightExtremeBase, const Real& toll, const UInt& maxIter )
 {
+
     // Current left and right extreme of the interval
     Real leftExtreme( leftExtremeBase ), rightExtreme( rightExtremeBase );
 
@@ -51,7 +85,7 @@ Real brent( const Function& f/* const fct_type& f*/, const Real& leftExtremeBase
     // Medium point of the current interval
     Real midpoint( ( leftExtreme + rightExtreme ) / static_cast<Real>(2.) );
 
-    // Gold (???)
+    // Gold
     Real gold( static_cast<Real>( (3. - sqrt(5.)) / 2. ) );
 
     // Ausiliar variables
@@ -198,9 +232,8 @@ Real brent( const Function& f/* const fct_type& f*/, const Real& leftExtremeBase
     }
     std::ostringstream os;
     os << "Attention the brent scheme does not reach the convergence in "
-    << numIter
-    << ", with tollerance "
-    << tollRelative << std::endl;
+       << numIter << ", with tollerance "
+       << tollRelative << std::endl;
 
 
     // Check if the method reach the tollerance.
@@ -210,5 +243,6 @@ Real brent( const Function& f/* const fct_type& f*/, const Real& leftExtremeBase
 
 }
 
-}
-#endif // _brentAlgorithm_H
+} // Namespace LifeV
+
+#endif /* _BRENTALGORITHM_ */
