@@ -1,223 +1,311 @@
+//@HEADER
 /*
- This file is part of the LifeV library
- Copyright (C) 2001,2002,2003,2004 EPFL, INRIA and Politecnico di Milano
+************************************************************************
 
- This library is free software; you can redistribute it and/or
- modify it under the terms of the GNU Lesser General Public
- License as published by the Free Software Foundation; either
- version 2.1 of the License, or (at your option) any later version.
+ This file is part of the LifeV Applications.
+ Copyright (C) 2001-2010 EPFL, Politecnico di Milano, INRIA
 
- This library is distributed in the hope that it will be useful,
- but WITHOUT ANY WARRANTY; without even the implied warranty of
+ This library is free software; you can redistribute it and/or modify
+ it under the terms of the GNU Lesser General Public License as
+ published by the Free Software Foundation; either version 2.1 of the
+ License, or (at your option) any later version.
+
+ This library is distributed in the hope that it will be useful, but
+ WITHOUT ANY WARRANTY; without even the implied warranty of
  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  Lesser General Public License for more details.
 
  You should have received a copy of the GNU Lesser General Public
  License along with this library; if not, write to the Free Software
- Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
+ USA
+
+************************************************************************
 */
+//@HEADER
+
 /*!
-  \file identifier.h
-  \brief Classes for identifiers
-  \version 1.0
-  \author M.A. Fernandez & Luca Formaggia
-  \date 07/2002
+    @file
+    @brief Classes for identifiers
 
-  This classes hold a identifier that allow us to impose a specific boundary condition.
-  Each type of boundary condition needs a specic information on the boundary. Thus, the
-  key is to use inheritance by adding, to the base class, the information requested for
-  imposing the BC.
+    @date 01-07-2002
+    @author M. A. Fernandez & Luca Formaggia
+    @contributor Luca Bertagna <lbertag@emory.edu>
 
-*/
+    This classes hold a identifier that allow us to impose a specific boundary condition.
+    Each type of boundary condition needs a specic information on the boundary. Thus, the
+    key is to use inheritance by adding, to the base class, the information requested for
+    imposing the BC.
+ */
 
-#ifndef __IDENTIFIER_HH__
-#define __IDENTIFIER_HH__
+#ifndef IDENTIFIER_H
+#define IDENTIFIER_H 1
 
 #include <iostream>
-
 #include <boost/shared_ptr.hpp>
-
 #include <life/lifecore/life.hpp>
 #include <life/lifearray/SimpleVect.hpp>
 
 namespace LifeV
 {
 
-//============ IdentifierBase ==============
+//! IdentifierBase - Base class holding Dof identifiers for implementing BC
 
-/*!
-
- \class IdentifierBase
-
- Base class holding Dof identifiers for implementing BC
-
- \todo The data functions given by the user must have the following declaration
- \verbatim
- Real g(const Real& time, const Real& x, const Real& y, const Real& z, const ID& icomp)
- \endverbatim
-
- We can use inheritance to hold specific boundary condition data. See, for instance,
- Mixte boundary conditions.
-*/
-//! Declaration of the base class holding DOF identifiers for implementing BC
 class IdentifierBase
 {
 public:
 
-    //! Constructor
-    /*!
-      \param i ussualy the id of the Dof, id of a boundary face, etc...
-    */
-    IdentifierBase( ID const & i ) : _id( i )
+    //! @name Constructor & Destructor
+    //@{
+
+    //! Empty Constructor
+    IdentifierBase()
     {
-        //nothing to be done here
+        // Nothing to be done here
     }
 
+    //! Constructor given the ID
+    /*!
+        Creates an Identifier with a given ID
+        @param i Usually the id of the Dof, or the id of a boundary face, etc...
+    */
+    explicit IdentifierBase( ID const & i ) : M_id( i )
+    {
+        // Nothing to be done here
+    }
+
+    //! Copy constructor
+    IdentifierBase( IdentifierBase const & id );
+
+    //! Destructor
     virtual ~IdentifierBase()
     {
-        //nothing to be done here
+        // Nothing to be done here
     }
 
-    //! Returns the ID
-    const ID& id() const
-    {
-        return _id;
-    }
+    //@}
 
-    //! Conversion operators
+
+    //! @name Operators
+    //@{
+
+    //! Conversion operator to unsigned int
     operator unsigned int()
     {
         return id();
     }
+
+    //! Conversion operator to int
     operator int()
     {
         return ( int ) id();
     }
 
+    //@}
+
+
+    //! @name Get Methods
+    //@{
+
+    //! Returns the ID of the Identifier
+    const ID& id() const
+    {
+        return M_id;
+    }
+
+    //@}
+
 protected:
-    //! The identifier
-    ID _id;
+
+    ID M_id;
 };
 
-/*!
+//! IdentifierComp - Functor for ordering operations (required in set STL container)
 
- \class identifierComp
-
- Functor for ordering operations (requested in set STL container)
-
-*/
 class identifierComp
 {
 public:
+
+    //! @name Operators
+    //@{
+
+    //! Comparison operator for Identifier objects
+    /*!
+        @return Boolean which is true if the ID of the first Identifier is smaller
+                than the ID of the second Identifier
+     */
     bool operator() ( const IdentifierBase* i1, const IdentifierBase* i2 ) const
     {
         return ( i1->id() < i2->id() );
     }
+
+    //! Comparison operator for shared pointers to Identifier objects
+    /*!
+        @return Boolean which is true if the ID of the first Identifier is smaller
+                than the ID of the second Identifier
+     */
     bool operator() ( boost::shared_ptr<IdentifierBase> const& i1, boost::shared_ptr<IdentifierBase> const& i2 ) const
     {
         return ( i1.get()->id() < i2.get()->id() );
     }
+
+    //@}
 };
 
-//! Overloading == operator for identifiers
-inline bool operator==( const IdentifierBase& a, const IdentifierBase& b )
+//! Overloading == operator for objects of type Identifier
+/*!
+    @param first The first Identifier
+    @param second The second Identifier
+    @return A bool which is 1 if the ID of the two Identifier objects are the same
+ */
+inline bool operator==( const IdentifierBase& first, const IdentifierBase& second )
 {
-    return a.id() == b.id();
+    return first.id() == second.id();
 }
 
-
-//============ IdentifierEssential ==============
+//! IdentifierEssential - Identifier for implementing Essential Boundary Conditions
 /*!
 
- \class IdentifierEssential
+    This class holds the Dof identifier and its coordinates for implementing Essential
+    Boundary Conditions
 
- Class holding the Dof identifier and coordinates for implementing Essential BC
+ */
 
- \todo A Essential boundary condition requests the number of the Dof (in a scalar sense) and the
- coordiantes of associated node. This information is updated in Dof::bdUpdate method
-*/
 class IdentifierEssential: public IdentifierBase
 {
 public:
 
-    //! Constructor
-    /*!
-      \param i the id of the Dof
-      \param x x-coordinate of the node where this BC applies
-      \param y y-coordinate of the node where this BC applies
-      \param z z-coordinate of the node where this BC applies
-    */
-    IdentifierEssential( const ID& id, const Real& x, const Real& y, const Real& z ) : IdentifierBase( id )
+    //! Constructor & Destructor
+    //@{
+
+    //! Empty Constructor
+    IdentifierEssential() : IdentifierBase()
     {
-        _x = x;
-        _y = y;
-        _z = z;
+        // Nothing to be done here
     }
 
-    //! Recovering node coordinates
+    //! Constructor given the ID and the coordinates
+    /*!
+     *  Creates an Identifier with a given ID and given coordinates
+        @paramx x x-coordinate of the node where this BC applies
+        @paramx y y-coordinate of the node where this BC applies
+        @paramx z z-coordinate of the node where this BC applies
+     */
+    IdentifierEssential( const ID& id, const Real& x, const Real& y, const Real& z ) :
+            IdentifierBase( id ),
+            M_x( x ),
+            M_y( y ),
+            M_z( z )
+    {
+        // Nothing to be done here
+    }
+
+    //! Copy Constructor
+    IdentifierEssential( IdentifierEssential const & id );
+
+    //@}
+
+
+    //! @name Get Methods
+    //@{
+
+    //! Recovering the node's x-coordinate
+    /*!
+        @return The x-coordinate of the node
+     */
     const Real& x() const
     {
-        return _x;
-    }
-    const Real& y() const
-    {
-        return _y;
-    }
-    const Real& z() const
-    {
-        return _z;
+        return M_x;
     }
 
+    //! Recovering the node's y-coordinate
+    /*!
+        @return The y-coordinate of the node
+    */
+    const Real& y() const
+    {
+        return M_y;
+    }
+
+    //! Recovering the node's z-coordinate
+    /*!
+        @return The z-coordinate of the node
+     */
+    const Real& z() const
+    {
+        return M_z;
+    }
+
+    //@}
+
 private:
-    //! Node coordinates
-    Real _x, _y, _z;
+
+    Real M_x, M_y, M_z;
 };
 
 
-//============ IdentifierNatural ==============
-
+//! IdentifierNatural - Idenifier for Natural and Mixte Boundary Condiions
 /*!
 
- \class IdentifierNatural
+    This class holds the Dof identifier and the bdLocalToGlobal information for implementing
+    Natural and Mixte boundary conditions
 
- Class holding the Dof identifier and the bdLocalToGlobal information for implementing
- Natural and Mixte boundary conditions
+ */
 
- \todo Natural or Mixte boundary conditions requests the number of the boundary face number
- where they apply and the bdLocalToGlobal map on this face. This information is updated
- in Dof::bdUpdate method
-*/
 class IdentifierNatural: public IdentifierBase
 {
 public:
 
-    //! Constructor
-    /*!
-      \param i the number of the boundary face
-      \param bdltg a SimpleVect holding the bdLocalToGlobal map on this face
-    */
-    IdentifierNatural( const ID& i, const SimpleVect<ID>& bdltg );
+    //! @name Constructor & Destructor
+    //@{
 
-    //! Constructor when a vector data is provided
-    /*!
-      \param i the number of the dof
-    */
-    IdentifierNatural( const ID& i );
+    //! Empty Constructor
+    IdentifierNatural() : IdentifierBase()
+    {
+        // Nothing to be done here
+    }
 
+    //
+
+    //! Constructor given ID and bdLocalToGlobal map
+    /*!
+        Creates an Identifier with a given ID and a given local-to-global map
+        @param i The number of the boundary face
+        @param bdltg A SimpleVect holding the local-to-global map on this face
+    */
+    IdentifierNatural( const ID& i, const SimpleVect<ID>& localToGlobal );
+
+    //! Constructor given the ID
+    /*!
+        @param id The ID of the dof
+    */
+    explicit IdentifierNatural( const ID& id );
+
+    //! Copy Constructor
+    IdentifierNatural( IdentifierNatural const & id );
+
+    //@}
+
+
+    //! @name Get Methods
+    //@{
 
     //! Return the global Dof corresponding tho the i-th local Dof in the face
     /*!
-      \param i local Dof in the face
+        @param i The local Dof in the face
     */
     ID bdLocalToGlobal( const ID& i ) const
     {
-        return _bdltg( i );
+        return M_localToGlobal( i );
     }
 
+    //@}
+
 private:
-    //! SimpleVect container holding the bdLocalToGlobal map on this face
-    SimpleVect<ID> _bdltg;
+
+    SimpleVect<ID> M_localToGlobal;
 };
 
-}
-#endif
+} // Namespace LifeV
+
+#endif /* IDENTIFIER_H */

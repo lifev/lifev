@@ -1,8 +1,42 @@
+//@HEADER
 /*
- * OP_LinearOperator.hpp
- *
- *  Created on: Sep 3, 2010
- *      Author: uvilla
+*******************************************************************************
+
+    Copyright (C) 2004, 2005, 2007 EPFL, Politecnico di Milano, INRIA
+    Copyright (C) 2010 EPFL, Politecnico di Milano, Emory University
+
+    This file is part of LifeV.
+
+    LifeV is free software; you can redistribute it and/or modify
+    it under the terms of the GNU Lesser General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    LifeV is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+    Lesser General Public License for more details.
+
+    You should have received a copy of the GNU Lesser General Public License
+    along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
+
+*******************************************************************************
+*/
+//@HEADER
+
+/*!
+    @file
+    @brief Some linear operators which inherit from Epetra_Operator
+
+    @author Umberto Villa <uvilla.@emory.edu>
+
+    @date 03-09-2010
+
+    In this file we define a Lifev::Operators:LinearOperator which inherit from Epetra_Operator.
+    LinearOperator adds to the interface of Epetra_Operator a method "Apply" and "ApplyInverse"
+    which work with LifeV::EpetraVector instead of Epetra_MultiVector.
+    LinearOperator is an abstract class with virtual public interface.
+    IdentityOperator and NullOperator are defined in this file and both inherit from LinearOperator.
  */
 
 #ifndef LINEAROPERATOR_HPP_

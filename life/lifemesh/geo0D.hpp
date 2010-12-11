@@ -1,141 +1,244 @@
+//@HEADER
 /*
- This file is part of the LifeV library
- Copyright (C) 2001,2002,2003,2004 EPFL, INRIA and Politecnico di Milano
+*******************************************************************************
 
- This library is free software; you can redistribute it and/or
- modify it under the terms of the GNU Lesser General Public
- License as published by the Free Software Foundation; either
- version 2.1 of the License, or (at your option) any later version.
+    Copyright (C) 2004, 2005, 2007 EPFL, Politecnico di Milano, INRIA
+    Copyright (C) 2010 EPFL, Politecnico di Milano, Emory University
 
- This library is distributed in the hope that it will be useful,
- but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- Lesser General Public License for more details.
+    This file is part of LifeV.
 
- You should have received a copy of the GNU Lesser General Public
- License along with this library; if not, write to the Free Software
- Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+    LifeV is free software; you can redistribute it and/or modify
+    it under the terms of the GNU Lesser General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    LifeV is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+    Lesser General Public License for more details.
+
+    You should have received a copy of the GNU Lesser General Public License
+    along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
+
+*******************************************************************************
 */
-/*! file geo0D.h */
+//@HEADER
+
+/*!
+    @file
+    @brief Zero dimensional entity
+
+    @author Luca Formaggia <luca.formaggia@polimi.it>
+    @contributor Marta D'Elia <mdelia2@mathcs.emory.edu>
+    @maintainer Marta D'Elia <mdelia2@mathcs.emory.edu>
+
+    @date 00-00-0000
+
+*/
+
+
 #ifndef _GEO0D_HH_
 #define _GEO0D_HH_
 
 #include <boost/array.hpp>
-
 #include <life/lifemesh/meshEntity.hpp>
 #include <life/lifemesh/basisElSh.hpp>
 
 namespace LifeV
 {
-//! \defgroup GeoXD Basis Geometrical Entities Geo0D and GeoND.
+//! Geo0D -  Zero dimensional entity.
 /*!
+    @author
+	Intermediate class used to build the actual Geometry classes; it stores boundary information.
 
-They are intermediate classes used to build the actual Geometry classes
+	@warning Geo1D/2D/3D are template classes; in fact, information might not be known a priori.
+	All vector dimensions are determined at compile time to enhance memory access time.
+	A coherent GeoShape has to be provided by the user.
 
-\warning Geo1D/2D/3D are template classes because some of the info is not
-known a priori and I want all vector dimensions determined at compile time
-to enhance memory access time. IT IS UP TO THE USER to provide a coherent
-GeoShape!.  */
-
-/*@{*/
-
-//! Zero dimensional entity. It stores boundary information
-class Geo0D
-        :
-        public MeshEntityWithBoundary
+ */
+class Geo0D : public MeshEntityWithBoundary
 {
 public:
 
+    //! @name Public Types
+    //@{
+
+    typedef GeoPoint geoShape_Type;
+    typedef GeoPoint GeoShape; //to be removed
+
+    //@}
+
+    //! @name Constructor & Destructor
+    //@{
+
+    //! Empty Constructor
     Geo0D();
-    //! constructor where I give the id and declare if Geo0D object is on a
-    //!boundary
-    explicit Geo0D( ID id, bool boundary = false );
-    //! constructor where I give the id, the point coordinate and I declare
-    //! if the Geo0D object is on a boundary
-    explicit Geo0D( ID id, Real x, Real y, Real z, bool boundary = false );
 
-    Geo0D( Geo0D const & G );
-    Geo0D & operator=( Geo0D const & G );
+    //! Declares item identity and states if it is on boundary
+    /*!
+    	@param identity Element identity
+        @param boundary True if the element is on boundary
+     */
+    explicit Geo0D( ID identity, bool boundary = false );
 
-    typedef GeoPoint GeoShape;
+    //! Declares item identity, provides coordinate and states if it is on boundary
+    /*!
+    	@param identity Element identity
+    	@param x Element x coordinate      // %%%% e' ok minuscolo?
+    	@param y Element y coordinate
+    	@param z Element z coordinate
+    	@param boundary True if the element is on boundary
+     */
+    Geo0D( ID identity, Real x, Real y, Real z, bool boundary = false );
 
+    //! Copy constructor
+    /*!
+        @param Element Geo0D to be copied
+     */
+    Geo0D( Geo0D const & Element );
 
-    //! returns a pointer to a Real[3] containing the coordinates
-    /*
-    Real * coor()
-        {
-            return const_cast<Real*>( _coor.data() );
-        };
-    */
+    //! Destructor
+    virtual ~Geo0D()
+    {
+        // nothing to be done
+    }
+
+    //@}
+
+    //! @name Operators
+    //@{
+
+    //! The equivalence operator
+    /*!
+        @param Element Equivalent GeoElement0D
+        @return Reference to a new GeoElement0D with the same content of GeoElement0D Element
+     */
+    Geo0D & operator=( Geo0D const & Element );
+
+    //@}
+
+    //@}
+
+    //! @name Methods
+    //@{
+
+    //! Display general information about the content of the class
+    /*! %%%%
+        List of things displayed in the class
+        @param output specify the output format (std::cout by default)
+     */
+    std::ostream & showMe( bool Verbose = false, std::ostream & coordinateVector = std::cout ) const;
+
+    //@}
+
+    //! @name Get Methods
+    //@{
+
+    //! Returns the pointer to the coordinates vector
+    /*!
+    	@return Pointer to coordinate vector
+     */
     Real const * coor() const
     {
-        return _coor.data();
+        return M_coordinates.data();
     };
 
-
-    //! Used to provide coords to object created using
-    //! a constructor with no coordinates given, or to
-    //! modify existing coordinates.
+    //! Returns the reference to the x-coordinate
+    /*!
+    	Used to provide coordinates to object created using a constructor with no coordinates given, or to modify existing coordinates
+    	@return Reference to element x-coordinate
+     */
     Real & x()
     {
-        return _coor[ 0 ];
+        return M_coordinates[ 0 ];
     }
+    //! Returns the reference to the y-coordinate
+    /*!
+      	Used to provide coordinates to object created using a constructor with no coordinates given, or to modify existing coordinates
+    	@return Reference to element y-coordinate
+     */
     Real & y()
     {
-        return _coor[ 1 ];
+        return M_coordinates[ 1 ];
     }
+    //! Returns the reference to the z-coordinate and checks if working in two dimensions
+    /*!
+    	Used to provide coordinates to object created using a constructor with no coordinates given, or to modify existing coordinates
+    	@return Reference to element z-coordinate
+     */
     Real & z()
     {
 #ifdef TWODIM
         ERROR_MSG( "z coordinate may be modified only in a 3D problem" );
-#else // THREEDIM
-        return _coor[ 2 ];
+#else
+        return M_coordinates[ 2 ];
 #endif
 
     }
+    //! Returns the x-coordinate
+    /*!
+    	@return Element x-coordinate
+     */
     Real x() const
     {
-        return _coor[ 0 ];
+        return M_coordinates[ 0 ];
     }
+    //! Returns the y-coordinate
+    /*!
+    	@return Element y-coordinate
+     */
     Real y() const
     {
-        return _coor[ 1 ];
+        return M_coordinates[ 1 ];
     };
+    //! Returns the z-coordinate and checks if working in two dimensions
+    /*!
+    	@return Element z-coordinate
+     */
     Real z() const
     {
 #ifdef TWODIM
         return 0;
-#else // THREEDIM
-        return _coor[ 2 ];
+#else
+        return M_coordinates[ 2 ];
 #endif
 
     }
-
-    //!Another way to access coordinate data and modify them!
+    //! Returns the coordinates vector
+    /*!
+        The method allows to access coordinates and modify them
+    	@return Coordinates array
+     */
     boost::array<Real,NDIM>& coordinate ( void )
     {
-        return _coor;
+        return M_coordinates;
     }
-
-    //!Another way to access coordinate data
-    Real coordinate ( ID const i ) const
+    //! Returns the coordinate specified in the argument
+    /*!
+        The method allows to access the coordinate specified in the argument
+    	@param coordinate x, y, or z coordinate to be returned
+    	@return Coordinate specified in the argument
+     */
+    Real coordinate ( ID const coordinate ) const
     {
-        ASSERT_BD( i > 0 && i <= NDIM ) ;
-        return _coor[ i -1 ]; // indexing from 1
+        ASSERT_BD( coordinate > 0 && coordinate <= NDIM ) ;
+        return M_coordinates[ coordinate -1 ]; // indexing from 1
     }
-
-    //!Another way to modify coordinate data
-    Real & coordinate ( ID const i )
+    //! Returns the reference to the coordinate specified in the argument
+    /*!
+        The method allows to modify the coordinate specified in the argument
+    	@param coordinate x, y, or z coordinate to be returned
+    	@return Reference to the coordinate specified in the argument
+     */
+    Real & coordinate ( ID const coordinate )
     {
-        ASSERT_BD( i > 0 && i <= NDIM ) ;
-        return _coor[ i -1 ];
+        ASSERT_BD( coordinate > 0 && coordinate <= NDIM ) ;
+        return M_coordinates[ coordinate -1 ];
     }
-
-    //! Useful for debugging
-    std::ostream & showMe( bool verbose = false, std::ostream & c = std::cout ) const;
 
 private:
-    boost::array<Real,NDIM> _coor;
+    boost::array<Real,NDIM> M_coordinates;
 };
+
 }
 #endif

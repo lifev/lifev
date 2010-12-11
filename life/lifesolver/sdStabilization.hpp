@@ -1,33 +1,38 @@
-/* -*- mode: c++ -*-
+//@HEADER
+/*
+*******************************************************************************
 
- This file is part of the LifeV library
+    Copyright (C) 2004, 2005, 2007 EPFL, Politecnico di Milano, INRIA
+    Copyright (C) 2010 EPFL, Politecnico di Milano, Emory University
 
- Author(s): Miguel A. Fernandez <miguel.fernandez@inria.fr>
-      Date: 2005-04
+    This file is part of LifeV.
 
- Copyright (C) 2005 INRIA
+    LifeV is free software; you can redistribute it and/or modify
+    it under the terms of the GNU Lesser General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
 
- This library is free software; you can redistribute it and/or
- modify it under the terms of the GNU Lesser General Public
- License as published by the Free Software Foundation; either
- version 2.1 of the License, or (at your option) any later version.
+    LifeV is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+    Lesser General Public License for more details.
 
- This library is distributed in the hope that it will be useful,
- but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- Lesser General Public License for more details.
+    You should have received a copy of the GNU Lesser General Public License
+    along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
 
- You should have received a copy of the GNU Lesser General Public
- License along with this library; if not, write to the Free Software
- Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+*******************************************************************************
 */
-/**
-   \file sdStabilization.hpp
-   \author M.A. Fernandez
-   \date 01/05/2005
+//@HEADER
+/*!
+   @file
+   @brief Streamline diffusion and SUPG stabilization.
+   @author M.A. Fernandez
+   @contributor Umberto Villa <uvilla@emory.edu>
+   @maintainer Umberto Villa <uvilla@emory.edu>
+   @date 01/05/2005
 
-   \brief This file contains a c++ class implementing the Stream-line Diffusion
-          stabilization for the Navier-Stokes equations. Tested with P1/P1 and Q1/Q1
+   This file contains a c++ class implementing the streamline diffusion (SD) and the SUPG
+   stabilization for the Navier-Stokes equations. Tested with P1/P1 and Q1/Q1
 
 */
 
@@ -36,81 +41,198 @@
 
 
 #include <life/lifecore/GetPot.hpp>
+#include <life/lifecore/debug.hpp>
 
 namespace LifeV
 {
 
-template<typename MESH, typename DOF>
+//! SDStabilization Class
+/*!
+ * @brief Streamline diffusion and SUPG for Navier-Stokes
+ * @author M.A. Fernandez
+ *
+ * Implementation of streamline diffusion (SD) and SUPG for the Navier-Stokes equations. <br>
+ * SUPG can be used only with equal order finite element for the discretization of velocity and pressure fields.
+ */
+
+template<typename MeshType, typename DofType>
 class SDStabilization
 {
 public:
 
+    //@name Public Types
+    //@{
+    typedef MeshType mesh_Type;
+    typedef DofType  dof_Type;
+    //@}
+
+    //! @name Constructor and Destructor
+    //@{
     //! Constructor
+    /*!
+     * @param dataFile GetPot       dataFile where to read the stabilization parameter
+     * @param mesh     mesh_Type    mesh
+     * @param dof      dof_Type     velocity field degree of freedom
+     * @param refFE    refFE        velocity field reference finite element
+     * @param quadRule QuadRule     quadrature rule for the integration of the stabilization variational forms
+     * @param viscosity viscosity   fluid viscosity  @f$\nu@f$
+     */
     SDStabilization( const GetPot&   dataFile,
-                     const MESH&     mesh,
-                     const DOF&      dof,
+                     const mesh_Type&     mesh,
+                     const dof_Type&      dof,
                      const RefFE&    refFE,
                      const QuadRule& quadRule,
                      Real      viscosity);
+    //! ~Destructor
+    virtual ~SDStabilization() {};
+    //@}
 
-
-    /*! compute SD stabilization terms and add them into matrix
-     *  @param matrix matrix where the stabilization terms are added into
-     *  @param state state vector for linearization of nonlinear stabilization
+    //! @name Methods
+    //@{
+    //! compute the SUPG stabilization terms and add them into the monolithic N.S. matrix
+    /*!
+     *  This function adds the following stabilization terms to the Navier-Stokes monolithic matrix:
+     *  <ol>
+     *  <li> Block(1,1): @f$c_\beta(\beta \nabla \mathbf{u} , \beta \nabla \mathbf{v}) + c_\beta( - \mu L \mathbf{u} , \beta \nabla \mathbf{v} )+ c_d( div \mathbf{u} , div \nabla \mathbf{v})@f$
+     *  <li> Block(1,2): @f$c_\beta(\nabla p , \beta \nabla \mathbf{v})@f$
+     *  <li> Block(2,1): @f$c_\beta(\beta \nabla \mathbf{u} , \nabla q) + c_\beta( - \mu L \mathbf{u} , \nabla q )@f$
+     *  <li> Block(2,2): @f$c_\beta(\nabla p , \nabla q)@f$
+     *  </ol>
+     *  where @f$(\cdot, \cdot)@f$ represents the @f$L^2@f$ scalar product, and
+     *  <ol>
+     *  <li> @f$\displaystyle c_\beta = \frac{\gamma_\beta}{\sqrt{ 4/( dt^2)
+                                     + 4\|\beta\|_\infty/h^2
+                                     + 16*\nu/h^4 }} @f$, where @f$h@f$ is the diameter of the element;
+     *  <li> @f$\displaystyle c_d = \gamma_d h \|\beta\|_\infty @f$.
+     *  </ol>
+     *  Both high Pechlet numbers and inf-sup incompatible FEM are stabilized.
+     *
+     *	PREREQUISITE: The velocity and the pressure field should belong to the same finite element space
+     *
+     *  Parameters are the followings:
+     *  @param dt     Real   timestep (INPUT)
+     *  @param matrix MatrixType where the stabilization terms are added into. (OUTPUT)
+     *  @param state  VectorType velocity field for the linearization of the stabilization (INPUT)
      */
-    template<typename MATRIX, typename VECTOR>
-    void apply(const Real dt, MATRIX& matrix, const VECTOR& state );
+    template<typename MatrixType, typename VectorType>
+    void applySUPG(const Real dt, MatrixType& matrix, const VectorType& state );
 
-    template<typename MATRIX, typename VECTOR>
-    void applyCT(const Real dt, MATRIX& matrix, const VECTOR& state );
+    //! compute the SD stabilization terms and add them into the Momentum matrix
+    /*!
+     *  The following stabilization term is added:
+     *  @f$c_\beta(\beta \nabla \mathbf{u} , \beta \nabla \mathbf{v})@f$
+     *  @param dt     Real   timestep
+     *  @param matrix MatrixType where the stabilization terms are added into
+     *  @param state  VectorType velocity field for the linearization of the stabilization
+     */
+    template<typename MatrixType, typename VectorType>
+    void applySD(const Real dt, MatrixType& matrix, const VectorType& state );
 
-    template <typename VECTOR, typename SOURCE >
-    void apply(const Real dt, VECTOR& vector, const VECTOR& state, const SOURCE& source, const Real& time);
+    //! compute the SUPG stabilization terms and add them into the right and side
+    /*!
+     *  Add the following stabilization terms to rhs
+     *  <ol>
+     *  <li> Block(1,1):  @f$(c_\beta f , \beta \nabla \mathbf{v})@f$;
+     *  <li> Block(1,2):  @f$(c_\beta f , \nabla q )@f$.
+     *  </ol>
+     *
+     *  @param dt     Real   timestep
+     *  @param vector VectorType where the stabilization terms are added into
+     *  @param state  VectorType velocity field for the linearization of the stabilization
+     *  @param source SourceType a functor f(time, x, y, z, ic) which represents the forcing term
+     *  @param time   REAL   the actual time in which source should be evaluated
+     */
+    template <typename VectorType, typename SourceType >
+    void applyRHS(const Real dt, VectorType& vector, const VectorType& state,
+                  const SourceType& source, const Real& time);
 
+    //! Display class informations
+    void showMe(std::ostream & output = std::cout) const;
+    //@}
+
+    //! @name Set Methods
+    //@{
+    //! Set the stabilization parameter @f$\gamma_\beta@f$ for @f$( \beta \nabla \mathbf{u} , \beta \nabla \mathbf{v})@f$
+    void setGammaBeta (const Real & gammaBeta) { M_gammaBeta  = gammaBeta;}
+    //! Set the stabilization parameter @f$\gamma_d@f$ for @f$( div \mathbf{u} , div \nabla \mathbf{v})@f$
+    void setGammaDiv  (const Real & gammaDiv)  { M_gammaDiv   = gammaDiv;}
+    //@}
 private:
 
-    const MESH&  M_mesh;
-    const DOF&   M_dof;
-    CurrentFE    M_fe;
-    Real         M_viscosity;
-    Real         M_gammaBeta;
-    Real         M_gammaDiv;
-    ElemMat      M_elMat;
-    ElemVec      M_elVec;
+    //! @name Private Constructor
+    //@{
+    //! Default Constructor
+    SDStabilization();
+    //! Copy Constructor
+    SDStabilization(const SDStabilization<mesh_Type, dof_Type> & original);
+    //@}
 
-
-
+    //! @name Private Methods
+    //@{
     // methods for elementary computations
-    template <typename VECTOR>
-    void M_computeParameters(const Real dt, const ID iVol, const VECTOR& state, ElemVec& beta,  Real& coeffBeta, Real& coeffDiv);
 
+    //! Compute the stabilization coefficients for each element
+    template <typename VectorType>
+    void computeParameters(const Real dt, const UInt iVol, const VectorType& state,
+                           ElemVec& beta,  Real& coeffBeta, Real& coeffDiv) const;
+
+    //!Evaluate the varf @f$(\beta \nabla \mathbf{u}, \beta \nabla \mathbf{v})@f$
     void bgradu_bgradv(const Real& coef, ElemVec& vel, ElemMat& elmat,const CurrentFE& fe,
-                       int iblock, int jblock, int nb);
+                       UInt iblock, UInt jblock, UInt nb) const;
 
+    //! Evaluate the varf @f$(\Delta \mathbf{u}, \beta \nabla \mathbf{v})@f$
     void lapu_bgradv(const Real& coef, ElemVec& vel, ElemMat& elmat, const CurrentFE& fe,
-                     int iblock, int jblock, int nb);
+                     UInt iblock, UInt jblock, UInt nb) const;
 
-    void gradp_bgradv(const Real& coef, ElemVec& vel, ElemMat& elmat, const CurrentFE& fe);
+    //! Evaluate the varf @f$(\nabla p, \beta \nabla \mathbf{v})@f$
+    void gradp_bgradv(const Real& coef, ElemVec& vel, ElemMat& elmat, const CurrentFE& fe) const;
 
-    void lapu_gradq(const Real& coef, ElemMat& elmat, const CurrentFE& fe);
+    //! Evaluate the varf @f$(\Delta \mathbf{u}, \nabla q)@f$
+    void lapu_gradq(const Real& coef, ElemMat& elmat, const CurrentFE& fe) const;
 
-    template <typename SOURCE>
-    void f_bgradv(const Real& coef, SOURCE& source, ElemVec& vel,
-                  ElemVec& elvec, const CurrentFE& fe, int iblock, const Real& time);
+    //! Evaluate the varf @f$(f, \beta \nabla \mathbf{v})@f$
+    template <typename SourceType>
+    void f_bgradv(const Real& coef, SourceType& source, ElemVec& vel,
+                  ElemVec& elvec, const CurrentFE& fe, UInt iblock, const Real& time) const;
 
-    template<typename SOURCE>
-    void f_gradq(const Real& coef, SOURCE& source, ElemVec& elvec, const CurrentFE& fe, int iblock, const Real& time);
+    //! Evaluate the varf @f$(f, \nabla q)@f$
+    template<typename SourceType>
+    void f_gradq(const Real& coef, SourceType& source, ElemVec& elvec,
+                 const CurrentFE& fe, UInt iblock, const Real& time) const;
+    //@}
 
-
+    //! @name Private Attributes
+    //@{
+    //! the mesh object
+    const mesh_Type&  M_mesh;
+    //! the dof object
+    const dof_Type&   M_dof;
+    //! current fe for the assembling of stabilization terms.
+    CurrentFE    M_fe;
+    //! fluid viscosity @f$\nu@f$
+    Real         M_viscosity;
+    //! Stabilization coefficient of @f$(c(h,dt, |\beta|, nu) \beta \nabla \mathbf{u} , \beta \nabla \mathbf{v})@f$
+    Real         M_gammaBeta;
+    //! Stabilization coefficient of @f$(c(h,dt) div \mathbf{u} , div \nabla \mathbf{v})@f$
+    Real         M_gammaDiv;
+    //! Elementary Matrix for assembling the stabilization terms
+    ElemMat      M_elMat;
+    //! Elementary Vector for assembling the stabilization terms
+    ElemVec      M_elVec;
+    //@}
 }; // class SDStabilization
 
-template<typename MESH, typename DOF>
-SDStabilization<MESH, DOF>::SDStabilization( const GetPot& dataFile,
-                                             const MESH&     mesh,
-                                             const DOF&      dof,
-                                             const RefFE&    refFE,
-                                             const QuadRule& quadRule,
-                                             Real            viscosity):
+//=============================================================================
+// Constructor
+//=============================================================================
+
+template<typename MeshType, typename DofType>
+SDStabilization<MeshType, DofType>::SDStabilization( const GetPot& dataFile,
+                                                     const mesh_Type&     mesh,
+                                                     const dof_Type&      dof,
+                                                     const RefFE&    refFE,
+                                                     const QuadRule& quadRule,
+                                                     Real            viscosity):
         M_mesh( mesh ),
         M_dof( dof ),
         M_fe( refFE, getGeoMap(mesh), quadRule ),
@@ -120,10 +242,13 @@ SDStabilization<MESH, DOF>::SDStabilization( const GetPot& dataFile,
         M_elMat( M_fe.nbNode, nDimensions+1, nDimensions+1 ) ,
         M_elVec( M_fe.nbNode, nDimensions+1 ) {}
 
+//=============================================================================
+// Methods
+//=============================================================================
 
-template<typename MESH, typename DOF>
-template <typename MATRIX, typename VECTOR>
-void SDStabilization<MESH, DOF>::apply(const Real dt, MATRIX& matrix, const VECTOR& state )
+template<typename MeshType, typename DofType>
+template <typename MatrixType, typename VectorType>
+void SDStabilization<MeshType, DofType>::applySUPG(const Real dt, MatrixType& matrix, const VectorType& state )
 {
     if ( M_gammaBeta == 0 && M_gammaDiv == 0)
         return;
@@ -148,17 +273,17 @@ void SDStabilization<MESH, DOF>::apply(const Real dt, MATRIX& matrix, const VECT
 
         // stabilization parameters computation
         chronoBeta.start();
-        this->M_computeParameters(dt, iVol, state, beta, coeffBeta, coeffDiv);
+        this->computeParameters(dt, iVol, state, beta, coeffBeta, coeffDiv);
         chronoBeta.stop();
 
         chronoElemComp.start();
         M_elMat.zero();
 
-        // coeffBeta (beta \nabla u , \beta \nabla v)
+        // coeffBeta (\beta \nabla \mathbf{u} , \beta \nabla \mathbf{v})
         //
         this->bgradu_bgradv(coeffBeta, beta, M_elMat, M_fe, 0, 0, nDimensions);
 
-        // coeffBeta  ( (beta \nabla u , \nabla q) + (\nabla p , \beta \nabla v) )
+        // coeffBeta  ( (\beta \nabla \mathbf{u} , \nabla q) + (\nabla p , \beta \nabla \mathbf{v}) )
         //
         this->gradp_bgradv(coeffBeta, beta, M_elMat, M_fe);
 
@@ -166,15 +291,15 @@ void SDStabilization<MESH, DOF>::apply(const Real dt, MATRIX& matrix, const VECT
         //
         stiff( coeffBeta, M_elMat, M_fe, nDimensions, nDimensions );
 
-        // coeffBeta ( - \mu L u , \beta \nabla v )
+        // coeffBeta ( - \mu L \mathbf{u} , \beta \nabla \mathbf{v} )
         //
         this->lapu_bgradv(-coeffBeta*M_viscosity, beta, M_elMat, M_fe, 0, 0, nDimensions);
 
-        // coeffBeta ( - \mu L u , \nabla q )
+        // coeffBeta ( - \mu L \mathbf{u} , \nabla q )
         //
         this->lapu_gradq(-coeffBeta*M_viscosity, M_elMat, M_fe);
 
-        // coeffDiv ( \div u , \div \nabla v)
+        // coeffDiv ( div \mathbf{u} , div \nabla \mathbf{v})
         //
         stiff_div(coeffDiv, M_elMat, M_fe );
 
@@ -189,23 +314,23 @@ void SDStabilization<MESH, DOF>::apply(const Real dt, MATRIX& matrix, const VECT
 
     }// loop on elements
 
-    std::cout << std::endl;
-    std::cout << "      Updating of element   done in "
-              << chronoUpdate.diff_cumul()   << "s." << std::endl;
-    std::cout << "      Determination of parameters done in "
-              << chronoBeta.diff_cumul()     << "s." << std::endl;
-    std::cout << "      Element computations  done in "
-              << chronoElemComp.diff_cumul() << "s." << std::endl;
-    std::cout << "      Assembly              done in "
-              << chronoAssembly.diff_cumul() << "s." << std::endl;
+    Debug(7100) << std::endl;
+    Debug(7100) << "      Updating of element   done in "
+    << chronoUpdate.diff_cumul()   << "s." << std::endl;
+    Debug(7100) << "      Determination of parameters done in "
+    << chronoBeta.diff_cumul()     << "s." << std::endl;
+    Debug(7100) << "      Element computations  done in "
+    << chronoElemComp.diff_cumul() << "s." << std::endl;
+    Debug(7100) << "      Assembly              done in "
+    << chronoAssembly.diff_cumul() << "s." << std::endl;
 
 
-} // apply(...)
+} // applySUPG(...)
 
 
-template<typename MESH, typename DOF>
-template <typename MATRIX, typename VECTOR>
-void SDStabilization<MESH, DOF>::applyCT(const Real dt, MATRIX& matrix, const VECTOR& state )
+template<typename MeshType, typename DofType>
+template <typename MatrixType, typename VectorType>
+void SDStabilization<MeshType, DofType>::applySD(const Real dt, MatrixType& matrix, const VectorType& state )
 {
     if ( M_gammaBeta == 0 && M_gammaDiv == 0)
         return;
@@ -215,8 +340,8 @@ void SDStabilization<MESH, DOF>::applyCT(const Real dt, MATRIX& matrix, const VE
     Chrono chronoElemComp;
     Chrono chronoAssembly;
 
-    // stabailization parameters
-    Real coeffBeta, coeffDiv;
+    // Stabilization parameters
+    Real coeffBeta/*, coeffDiv*/;
 
     // local velocity
     ElemVec beta( M_fe.nbNode, nDimensions );
@@ -228,23 +353,23 @@ void SDStabilization<MESH, DOF>::applyCT(const Real dt, MATRIX& matrix, const VE
         // update current finite elements
         M_fe.updateFirstSecondDeriv( M_mesh.volumeList( iVol ) );
 
-        // stabilization paramteres computation
+        // stabilization parameters computation
         chronoBeta.start();
-        this->M_computeParameters(dt, iVol, state, beta, coeffBeta, coeffDiv);
+        this->computeParameters(dt, iVol, state, beta, coeffBeta, coeffDiv);
         chronoBeta.stop();
 
         chronoElemComp.start();
         M_elMat.zero();
 
-        // coeffBeta (beta \nabla u , \beta \nabla v)
+        // coeffBeta (\beta \nabla \mathbf{u} , \beta \nabla \mathbf{v})
         //
         this->bgradu_bgradv(coeffBeta, beta, M_elMat, M_fe, 0, 0, nDimensions);
 
-        // coeffBeta ( - \mu L u , \beta \nabla v )
+        // coeffBeta ( - \mu L \mathbf{u} , \beta \nabla \mathbf{v} )
         //
-        this->lapu_bgradv(-coeffBeta*M_viscosity, beta, M_elMat, M_fe, 0, 0, nDimensions);
+        //this->lapu_bgradv(-coeffBeta*M_viscosity, beta, M_elMat, M_fe, 0, 0, nDimensions);
 
-        // coeffDiv ( \div u , \div \nabla v)
+        // coeffDiv ( div \mathbf{u} , div \nabla \mathbf{v})
         //
         //stiff_div(coeffDiv, M_elMat, M_fe );
 
@@ -259,22 +384,23 @@ void SDStabilization<MESH, DOF>::applyCT(const Real dt, MATRIX& matrix, const VE
 
     }// loop on elements
 
-    std::cout << std::endl;
-    std::cout << "      Updating of element   done in "
-              << chronoUpdate.diff_cumul()   << "s." << std::endl;
-    std::cout << "      Determination of parameters done in "
-              << chronoBeta.diff_cumul()     << "s." << std::endl;
-    std::cout << "      Element computations  done in "
-              << chronoElemComp.diff_cumul() << "s." << std::endl;
-    std::cout << "      Assembly              done in "
-              << chronoAssembly.diff_cumul() << "s." << std::endl;
+    Debug(7100) << std::endl;
+    Debug(7100) << "      Updating of element   done in "
+    << chronoUpdate.diff_cumul()   << "s." << std::endl;
+    Debug(7100) << "      Determination of parameters done in "
+    << chronoBeta.diff_cumul()     << "s." << std::endl;
+    Debug(7100) << "      Element computations  done in "
+    << chronoElemComp.diff_cumul() << "s." << std::endl;
+    Debug(7100) << "      Assembly              done in "
+    << chronoAssembly.diff_cumul() << "s." << std::endl;
 
 
-} // applyCT(...)
+} // applySD(...)
 
-template<typename MESH, typename DOF>
-template <typename VECTOR, typename SOURCE >
-void SDStabilization<MESH, DOF>::apply(const Real dt, VECTOR& vector, const VECTOR& state, const SOURCE& source, const Real& time)
+template<typename MeshType, typename DofType>
+template <typename VectorType, typename SourceType >
+void SDStabilization<MeshType, DofType>::applyRHS(const Real dt, VectorType& vector, const VectorType& state,
+                                                  const SourceType& source, const Real& time)
 {
     if ( M_gammaBeta == 0 )
         return;
@@ -301,13 +427,13 @@ void SDStabilization<MESH, DOF>::apply(const Real dt, VECTOR& vector, const VECT
         chronoUpdate.stop();
 
         chronoBeta.start();
-        this->M_computeParameters(dt, iVol, state, beta, coeffBeta, coeffDiv);
+        this->computeParameters(dt, iVol, state, beta, coeffBeta, coeffDiv);
         chronoBeta.stop();
 
         chronoElemComp.start();
         M_elVec.zero();
 
-        // coeffBeta ( f , \beta \nabla v)
+        // coeffBeta ( f , \beta \nabla \mathbf{v})
         //
         this->f_bgradv(coeffBeta, source, beta, M_elVec, M_fe, 0, time);
 
@@ -324,24 +450,37 @@ void SDStabilization<MESH, DOF>::apply(const Real dt, VECTOR& vector, const VECT
 
     }// loop on elements
 
-    std::cout << std::endl;
-    std::cout << "      Updating of element   done in "
-              << chronoUpdate.diff_cumul()   << "s." << std::endl;
-    std::cout << "      Determination of parameters done in "
-              << chronoBeta.diff_cumul()     << "s." << std::endl;
-    std::cout << "      Element computations  done in "
-              << chronoElemComp.diff_cumul() << "s." << std::endl;
-    std::cout << "      Assembly              done in "
-              << chronoAssembly.diff_cumul() << "s." << std::endl;
+    Debug(7100) << std::endl;
+    Debug(7100) << "      Updating of element   done in "
+    << chronoUpdate.diff_cumul()   << "s." << std::endl;
+    Debug(7100) << "      Determination of parameters done in "
+    << chronoBeta.diff_cumul()     << "s." << std::endl;
+    Debug(7100) << "      Element computations  done in "
+    << chronoElemComp.diff_cumul() << "s." << std::endl;
+    Debug(7100) << "      Assembly              done in "
+    << chronoAssembly.diff_cumul() << "s." << std::endl;
 
 
-} // apply(...)
+} // applyRHS(...)
 
+template<typename MeshType, typename DofType>
+void SDStabilization<MeshType, DofType>::showMe(std::ostream & output) const
+{
+    output << "SDStabilization::showMe() " <<std::endl;
+    output << "Fluid Viscosity: " << M_viscosity << std::endl;
+    output << "Stabilization coefficient SUPG/SD:  " << M_gammaBeta << std::endl;
+    output << "Stabilization coefficient div grad: "<< M_gammaDiv   << std::endl;
+    M_mesh.showMe(output);
+    M_dof.showMe(output);
+}
 
-template<typename MESH, typename DOF>
-template<typename VECTOR>
-void SDStabilization<MESH, DOF>::M_computeParameters(const Real dt, const ID iVol, const VECTOR& state,
-                                                     ElemVec& beta, Real& coeffBeta, Real& coeffDiv)
+//=============================================================================
+// Private Method
+//=============================================================================
+template<typename MeshType, typename DofType>
+template<typename VectorType>
+void SDStabilization<MeshType, DofType>::computeParameters(const Real dt, const UInt iVol, const VectorType& state,
+                                                           ElemVec& beta, Real& coeffBeta, Real& coeffDiv) const
 {
 
     const UInt nDof = M_dof.numTotalDof();
@@ -355,9 +494,9 @@ void SDStabilization<MESH, DOF>::M_computeParameters(const Real dt, const ID iVo
 
     // determine bmax = ||\beta||_{0,\infty,K}
     // first, get the local velocity into beta
-    for ( int iNode = 0; iNode < M_fe.nbNode; ++iNode )
+    for ( UInt iNode = 0; iNode < M_fe.nbNode; ++iNode )
     {
-        for ( int iCoor = 0; iCoor < M_fe.nbCoor; ++iCoor )
+        for ( UInt iCoor = 0; iCoor < M_fe.nbCoor(); ++iCoor )
         {
             UInt ig = M_dof.localToGlobal( iVol, iNode+1 )-1+iCoor*nDof;
             beta.vec()[ iCoor*M_fe.nbNode + iNode ] = state[ig];
@@ -366,7 +505,7 @@ void SDStabilization<MESH, DOF>::M_computeParameters(const Real dt, const ID iVo
 
     // second, calculate its max norm
     Real bmax = fabs( beta.vec()[ 0 ] );
-    for ( int l = 1; l < int( M_fe.nbCoor*M_fe.nbNode ); ++l )
+    for ( UInt l = 1; l < UInt( M_fe.nbCoor()*M_fe.nbNode ); ++l )
     {
         if ( bmax < fabs( beta.vec()[ l ] ) )
             bmax = fabs( beta.vec()[ l ] );
@@ -380,42 +519,42 @@ void SDStabilization<MESH, DOF>::M_computeParameters(const Real dt, const ID iVo
 }
 
 
-template<typename MESH, typename DOF>
-void SDStabilization<MESH, DOF>::gradp_bgradv(const Real& coef, ElemVec& vel,
-                                              ElemMat& elmat,const CurrentFE& fe)
+template<typename MeshType, typename DofType>
+void SDStabilization<MeshType, DofType>::gradp_bgradv(const Real& coef, ElemVec& vel,
+                                                      ElemMat& elmat,const CurrentFE& fe)  const
 {
     ASSERT_PRE(fe.hasFirstDeriv(),
                "advection_grad  matrix needs at least the first derivatives");
 
-    ElemMat::matrix_type v(fe.nbCoor,fe.nbQuadPt);
+    ElemMat::matrix_type v(fe.nbCoor(),fe.nbQuadPt());
     Real s;
 
 
     // local velocity at quadrature points
-    for (int ig=0; ig<fe.nbQuadPt; ig++)
+    for (UInt ig(0); ig<fe.nbQuadPt(); ++ig)
     {
-        for (int icoor=0; icoor<fe.nbCoor; icoor++)
+        for (UInt icoor(0); icoor<fe.nbCoor(); ++icoor)
         {
             ElemVec::vector_view velicoor=vel.block(icoor);
             v(icoor,ig)=0.;
-            for (int k=0; k<fe.nbNode; k++)
+            for (UInt k(0); k<fe.nbNode; ++k)
             {
                 v(icoor,ig) += velicoor(k)*fe.phi(k,ig); // velocity on the intgt point
             }
         }
     }
 
-    for (int ic=0; ic < fe.nbCoor; ++ic)
+    for (UInt ic(0); ic < fe.nbCoor(); ++ic)
     {
-        ElemMat::matrix_view mat_ic3 = elmat.block(ic,fe.nbCoor);
-        ElemMat::matrix_view mat_3ic = elmat.block(fe.nbCoor,ic);
-        for (int i=0; i<fe.nbNode; i++)
+        ElemMat::matrix_view mat_ic3 = elmat.block(ic,fe.nbCoor());
+        ElemMat::matrix_view mat_3ic = elmat.block(fe.nbCoor(),ic);
+        for (UInt i=0; i<fe.nbNode; ++i)
         {
-            for (int j=0; j<fe.nbNode; j++)
+            for (UInt j=0; j<fe.nbNode; ++j)
             {
                 s = 0.0;
-                for (int ig=0; ig<fe.nbQuadPt; ig++)
-                    for (int jcoor=0; jcoor<fe.nbCoor; jcoor++)
+                for (UInt ig(0); ig<fe.nbQuadPt(); ++ig)
+                    for (UInt jcoor(0); jcoor<fe.nbCoor(); ++jcoor)
                         s += fe.phiDer(j,ic,ig)*v(jcoor,ig)*fe.phiDer(i,jcoor,ig)*fe.weightDet(ig);
                 mat_ic3(i,j) += coef*s;
                 mat_3ic(j,i) += coef*s;
@@ -425,55 +564,52 @@ void SDStabilization<MESH, DOF>::gradp_bgradv(const Real& coef, ElemVec& vel,
 }
 
 
-
-
-
-template<typename MESH, typename DOF>
-void SDStabilization<MESH, DOF>::bgradu_bgradv(const Real& coef, ElemVec& vel, ElemMat& elmat, const CurrentFE& fe,
-                                               int iblock, int jblock, int nb)
+template<typename MeshType, typename DofType>
+void SDStabilization<MeshType, DofType>::bgradu_bgradv(const Real& coef, ElemVec& vel, ElemMat& elmat, const CurrentFE& fe,
+                                                       UInt iblock, UInt jblock, UInt nb)  const
 {
     ASSERT_PRE(fe.hasFirstDeriv(),
                "advection (vect) matrix needs at least the first derivatives");
 
 
     ElemMat::matrix_type mat_tmp(fe.nbNode,fe.nbNode);
-    ElemMat::matrix_type v( fe.nbCoor,fe.nbQuadPt );
+    ElemMat::matrix_type v( fe.nbCoor(),fe.nbQuadPt() );
     Real s;
 
 
     // compute local vectors values
-    for (int ig=0; ig<fe.nbQuadPt; ig++)
+    for (UInt ig(0); ig<fe.nbQuadPt(); ++ig)
     {
-        for (int icoor=0; icoor<fe.nbCoor; icoor++)
+        for (UInt icoor(0); icoor<fe.nbCoor(); ++icoor)
         {
             ElemVec::vector_view velicoor=vel.block(icoor);
             v(icoor,ig)=0.;
-            for (int k=0; k<fe.nbNode; k++)
+            for (UInt k(0); k<fe.nbNode; k++)
                 v(icoor,ig) += velicoor(k)*fe.phi(k,ig); // velocity on the intgt point
         }
     }
 
-    for (int i=0; i<fe.nbNode; i++)
+    for (UInt i(0); i<fe.nbNode; ++i)
     {
-        for (int j=0; j<fe.nbNode; j++)
+        for (UInt j(0); j<fe.nbNode; ++j)
         {
             s = 0.0;
 
-            for (int ig=0; ig<fe.nbQuadPt; ig++)
-                for (int icoor=0; icoor<fe.nbCoor; icoor++)
-                    for (int jcoor=0; jcoor<fe.nbCoor; jcoor++)
+            for (UInt ig(0); ig<fe.nbQuadPt(); ++ig)
+                for (UInt icoor(0); icoor<fe.nbCoor(); ++icoor)
+                    for (UInt jcoor(0); jcoor<fe.nbCoor(); ++jcoor)
                         s += fe.phiDer(i,jcoor,ig)*v(jcoor,ig)*v(icoor,ig)*fe.phiDer(j,icoor,ig)*fe.weightDet(ig);
             mat_tmp(i,j) = coef*s;
         }
     }
 
     // copy on the components
-    for (int icomp=0; icomp<nb; icomp++)
+    for (UInt icomp(0); icomp<nb; icomp++)
     {
         ElemMat::matrix_view mat_icomp = elmat.block(iblock+icomp,jblock+icomp);
-        for (int i=0; i<fe.nbDiag; i++)
+        for (UInt i(0); i<fe.nbDiag(); ++i)
         {
-            for (int j=0; j<fe.nbDiag; j++)
+            for (UInt j(0); j<fe.nbDiag(); ++j)
             {
                 mat_icomp(i,j) += mat_tmp(i,j);
             }
@@ -483,9 +619,9 @@ void SDStabilization<MESH, DOF>::bgradu_bgradv(const Real& coef, ElemVec& vel, E
 
 
 
-template<typename MESH, typename DOF>
-void SDStabilization<MESH, DOF>::lapu_bgradv(const Real& coef, ElemVec& vel, ElemMat& elmat, const CurrentFE& fe,
-                                             int iblock, int jblock, int nb)
+template<typename MeshType, typename DofType>
+void SDStabilization<MeshType, DofType>::lapu_bgradv(const Real& coef, ElemVec& vel, ElemMat& elmat, const CurrentFE& fe,
+                                                     UInt iblock, UInt jblock, UInt nb)  const
 {
 
 
@@ -496,44 +632,44 @@ void SDStabilization<MESH, DOF>::lapu_bgradv(const Real& coef, ElemVec& vel, Ele
                "lapu_bgradv matrix needs second derivatives");
 
     ElemMat::matrix_type mat_tmp(fe.nbNode,fe.nbNode);
-    ElemMat::matrix_type v( fe.nbCoor,fe.nbQuadPt );
+    ElemMat::matrix_type v( fe.nbCoor(),fe.nbQuadPt() );
     Real s;
 
 
     // compute local vectors values at quadrature points
-    for (int ig=0; ig<fe.nbQuadPt; ig++)
+    for (UInt ig(0); ig<fe.nbQuadPt(); ++ig)
     {
-        for (int icoor=0; icoor<fe.nbCoor; icoor++)
+        for (UInt icoor(0); icoor<fe.nbCoor(); ++icoor)
         {
             ElemVec::vector_view velicoor=vel.block(icoor);
             v(icoor,ig)=0.;
-            for (int k=0; k<fe.nbNode; k++)
+            for (UInt k(0); k<fe.nbNode; ++k)
                 v(icoor,ig) += velicoor(k)*fe.phi(k,ig); // velocity on the intgt point
         }
     }
 
 
     // numerical integration
-    for (int i=0; i<fe.nbNode; i++)
+    for (UInt i(0); i<fe.nbNode; ++i)
     {
-        for (int j=0; j<fe.nbNode; j++)
+        for (UInt j(0); j<fe.nbNode; ++j)
         {
             s = 0.0;
-            for (int ig=0; ig<fe.nbQuadPt; ig++)
-                for (int icoor=0; icoor<fe.nbCoor; icoor++)
-                    for (int jcoor=0; jcoor<fe.nbCoor; jcoor++)
+            for (UInt ig(0); ig<fe.nbQuadPt(); ++ig)
+                for (UInt icoor(0); icoor<fe.nbCoor(); ++icoor)
+                    for (UInt jcoor(0); jcoor<fe.nbCoor(); ++jcoor)
                         s += fe.phiDer2(j,icoor,icoor,ig)*v(jcoor,ig)*fe.phiDer(i,jcoor,ig)*fe.weightDet(ig);
             mat_tmp(i,j) = coef*s;
         }
     }
 
     // copy on the components
-    for (int icomp=0; icomp<nb; icomp++)
+    for (UInt icomp(0); icomp<nb; ++icomp)
     {
         ElemMat::matrix_view mat_icomp = elmat.block(iblock+icomp,jblock+icomp);
-        for (int i=0; i<fe.nbDiag; i++)
+        for (UInt i(0); i<fe.nbDiag(); ++i)
         {
-            for (int j=0; j<fe.nbDiag; j++)
+            for (UInt j(0); j<fe.nbDiag(); ++j)
             {
                 mat_icomp(i,j) += mat_tmp(i,j);
             }
@@ -542,10 +678,8 @@ void SDStabilization<MESH, DOF>::lapu_bgradv(const Real& coef, ElemVec& vel, Ele
 }
 
 
-
-
-template<typename MESH, typename DOF>
-void SDStabilization<MESH, DOF>::lapu_gradq(const Real& coef, ElemMat& elmat,const CurrentFE& fe)
+template<typename MeshType, typename DofType>
+void SDStabilization<MeshType, DofType>::lapu_gradq(const Real& coef, ElemMat& elmat,const CurrentFE& fe)  const
 {
 
     ASSERT_PRE(fe.hasFirstDeriv(),
@@ -556,17 +690,17 @@ void SDStabilization<MESH, DOF>::lapu_gradq(const Real& coef, ElemMat& elmat,con
 
     Real s;
 
-    for (int jc=0; jc < fe.nbCoor; ++jc) // loop on column blocks
+    for (UInt jc(0); jc < fe.nbCoor(); ++jc) // loop on column blocks
     {
-        ElemMat::matrix_view mat_view = elmat.block(fe.nbCoor,jc);
-        for (int i=0; i<fe.nbNode; ++i) // local rows
+        ElemMat::matrix_view mat_view = elmat.block(fe.nbCoor(),jc);
+        for (UInt i(0); i<fe.nbNode; ++i) // local rows
         {
-            for (int j=0; j<fe.nbNode; ++j) // local columns
+            for (UInt j(0); j<fe.nbNode; ++j) // local columns
             {
                 s = 0.0;
                 // quadrature formula
-                for (int ig=0; ig<fe.nbQuadPt; ++ig)
-                    for (int jcoor=0; jcoor<fe.nbCoor; ++jcoor) // lap
+                for (UInt ig(0); ig<fe.nbQuadPt(); ++ig)
+                    for (UInt jcoor(0); jcoor<fe.nbCoor(); ++jcoor) // lap
                         s += fe.phiDer2(j,jcoor,jcoor,ig)*fe.phiDer(i,jc,ig)*fe.weightDet(ig);
                 mat_view(i,j) += coef*s;
             }
@@ -575,50 +709,40 @@ void SDStabilization<MESH, DOF>::lapu_gradq(const Real& coef, ElemMat& elmat,con
 }
 
 
-
-
-
-
-
-
-
-
-
-
-template<typename MESH, typename DOF>
-template<typename SOURCE>
-void SDStabilization<MESH, DOF>::f_bgradv(const Real& coef, SOURCE& source, ElemVec& vel,
-                                          ElemVec& elvec, const CurrentFE& fe, int iblock, const Real& time)
+template<typename MeshType, typename DofType>
+template<typename SourceType>
+void SDStabilization<MeshType, DofType>::f_bgradv(const Real& coef, SourceType& source, ElemVec& vel,
+                                                  ElemVec& elvec, const CurrentFE& fe, UInt iblock, const Real& time)  const
 {
 
     ASSERT_PRE(fe.hasFirstDeriv(),
                "f_bgradv  vector needs at least the first derivatives");
 
-    ElemMat::matrix_type v(fe.nbCoor,fe.nbQuadPt);
+    ElemMat::matrix_type v(fe.nbCoor(),fe.nbQuadPt());
     Real s;
 
 
     // local velocity at quadrature points
-    for (int ig=0; ig<fe.nbQuadPt; ig++)
+    for (UInt ig(0); ig<fe.nbQuadPt(); ++ig)
     {
-        for (int icoor=0; icoor<fe.nbCoor; icoor++)
+        for (UInt icoor(0); icoor<fe.nbCoor(); ++icoor)
         {
             ElemVec::vector_view velicoor=vel.block(icoor);
             v(icoor,ig)=0.;
-            for (int k=0; k<fe.nbNode; k++)
+            for (UInt k(0); k<fe.nbNode; ++k)
                 v(icoor,ig) += velicoor(k)*fe.phi(k,ig); // velocity on the intgt point
         }
     }
 
     // local vector per block
-    for (int ic=0; ic < fe.nbCoor; ++ic)
+    for (UInt ic(0); ic < fe.nbCoor(); ++ic)
     {
         ElemVec::vector_view vec_ic = elvec.block(ic+iblock);
-        for (int i=0; i<fe.nbNode; i++)
+        for (UInt i(0); i<fe.nbNode; ++i)
         {
             s = 0.0;
-            for (int ig=0; ig<fe.nbQuadPt; ig++)
-                for (int jcoor=0; jcoor<fe.nbCoor; jcoor++)
+            for (UInt ig(0); ig<fe.nbQuadPt(); ++ig)
+                for (UInt jcoor(0); jcoor<fe.nbCoor(); ++jcoor)
                     s += source(time,fe.quadPt(ig,0),fe.quadPt(ig,1),fe.quadPt(ig,2),ic+1)
                          *fe.phiDer(i,jcoor,ig)*v(jcoor,ig)*fe.weightDet(ig);
             vec_ic(i) += coef*s;
@@ -628,9 +752,9 @@ void SDStabilization<MESH, DOF>::f_bgradv(const Real& coef, SOURCE& source, Elem
 
 
 
-template<typename MESH, typename DOF>
-template<typename SOURCE>
-void SDStabilization<MESH, DOF>::f_gradq(const Real& coef, SOURCE& source, ElemVec& elvec, const CurrentFE& fe, int iblock, const Real& time)
+template<typename MeshType, typename DofType>
+template<typename SourceType>
+void SDStabilization<MeshType, DofType>::f_gradq(const Real& coef, SourceType& source, ElemVec& elvec, const CurrentFE& fe, UInt iblock, const Real& time) const
 {
 
     ASSERT_PRE(fe.hasFirstDeriv(),
@@ -639,11 +763,11 @@ void SDStabilization<MESH, DOF>::f_gradq(const Real& coef, SOURCE& source, ElemV
     Real s;
 
     ElemVec::vector_view vec_ic = elvec.block(iblock);
-    for (int i=0; i<fe.nbNode; i++)
+    for (UInt i(0); i<fe.nbNode; ++i)
     {
         s = 0.0;
-        for (int ig=0; ig<fe.nbQuadPt; ig++)
-            for (int jcoor=0; jcoor<fe.nbCoor; jcoor++)
+        for (UInt ig=0; ig<fe.nbQuadPt(); ++ig)
+            for (UInt jcoor(0); jcoor<fe.nbCoor(); ++jcoor)
                 s += source(time,fe.quadPt(ig,0),fe.quadPt(ig,1),fe.quadPt(ig,2),jcoor+1)
                      *fe.phiDer(i,jcoor,ig)*fe.weightDet(ig);
         vec_ic(i) += coef*s;

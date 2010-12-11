@@ -1,48 +1,74 @@
+//@HEADER
 /*
- This file is part of the LifeV library
- Copyright (C) 2001,2002,2003,2004 EPFL, INRIA and Politecnico di Milano
+*******************************************************************************
 
- This library is free software; you can redistribute it and/or
- modify it under the terms of the GNU Lesser General Public
- License as published by the Free Software Foundation; either
- version 2.1 of the License, or (at your option) any later version.
+    Copyright (C) 2004, 2005, 2007 EPFL, Politecnico di Milano, INRIA
+    Copyright (C) 2010 EPFL, Politecnico di Milano, Emory University
 
- This library is distributed in the hope that it will be useful,
- but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- Lesser General Public License for more details.
+    This file is part of LifeV.
 
- You should have received a copy of the GNU Lesser General Public
- License along with this library; if not, write to the Free Software
- Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+    LifeV is free software; you can redistribute it and/or modify
+    it under the terms of the GNU Lesser General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    LifeV is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+    Lesser General Public License for more details.
+
+    You should have received a copy of the GNU Lesser General Public License
+    along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
+
+*******************************************************************************
 */
+//@HEADER
+
+/*!
+    @file
+    @brief Implementations for markers_base.hpp
+
+    @contributor Luca Bertagna <lbertag@emory.edu>
+    @date 00-00-0000
+
+ */
+
 #include <climits>
 #include <life/lifemesh/markers_base.hpp>
 
 namespace LifeV
 {
+
 //  ***********************************************************************************************************
 //                                           IMPLEMENTATION
 //  ***********************************************************************************************************
-//MarkerTraits_Base
-const MarkerTraits_Base::EntityFlag MarkerTraits_Base::NULLFLAG = LONG_MIN;
+
+///////////////////////
+// MarkerTraits_Base //
+///////////////////////
+
+const MarkerTraits_Base::EntityFlag MarkerTraits_Base::S_NULLFLAG = LONG_MIN;
 
 //MM: if you modity these changes here recheck function readNetgenMesh
 //        becouse it uses this changes
 
-MarkerTraits_Base::EntityFlag MarkerTraits_Base::strongerFlag( EntityFlag const & a, EntityFlag const & b )
+MarkerTraits_Base::entityFlag_Type MarkerTraits_Base::strongerFlag( entityFlag_Type const & flag1, entityFlag_Type const & flag2 )
 {
-    return a > b ? a : b ;
+    return flag1 > flag2 ? flag1 : flag2 ;
 }
 
-MarkerTraits_Base::EntityFlag MarkerTraits_Base::weakerFlag( EntityFlag const & a, EntityFlag const & b )
+MarkerTraits_Base::entityFlag_Type MarkerTraits_Base::weakerFlag( entityFlag_Type const & flag1, entityFlag_Type const & flag2 )
 {
-    if (a==NULLFLAG)return b;
-    if (b==NULLFLAG)return a;
-    return a < b ? a : b ;
+    if ( flag1 == S_NULLFLAG )
+        return flag2;
+    if ( flag2 == S_NULLFLAG )
+        return flag1;
+    return flag1 < flag2 ? flag1 : flag2 ;
 }
 
-bool MarkerTraits_Base::EqualFlags(const EntityFlag& a, const EntityFlag& b)
-{return a==b;}
-
+bool MarkerTraits_Base::EqualFlags(const entityFlag_Type& flag1, const entityFlag_Type& flag2)
+{
+    return flag1 == flag2;
 }
+
+} // Namespace LifeV

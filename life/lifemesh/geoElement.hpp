@@ -1,27 +1,40 @@
+//@HEADER
 /*
- This file is part of the LifeV library
- Copyright (C) 2001,2002,2003,2004 EPFL, INRIA and Politecnico di Milano
+*******************************************************************************
 
- This library is free software; you can redistribute it and/or
- modify it under the terms of the GNU Lesser General Public
- License as published by the Free Software Foundation; either
- version 2.1 of the License, or (at your option) any later version.
+    Copyright (C) 2004, 2005, 2007 EPFL, Politecnico di Milano, INRIA
+    Copyright (C) 2010 EPFL, Politecnico di Milano, Emory University
 
- This library is distributed in the hope that it will be useful,
- but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- Lesser General Public License for more details.
+    This file is part of LifeV.
 
- You should have received a copy of the GNU Lesser General Public
- License along with this library; if not, write to the Free Software
- Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+    LifeV is free software; you can redistribute it and/or modify
+    it under the terms of the GNU Lesser General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    LifeV is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+    Lesser General Public License for more details.
+
+    You should have received a copy of the GNU Lesser General Public License
+    along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
+
+*******************************************************************************
 */
-/*! file geoElement.h
-\brief Geometric elements
-\version $Revision: 1.15 $ Luca Formaggia
+//@HEADER
 
-  Introduces all the geometric elements
-*/
+/*!
+    @file
+    @brief Geometric elements
+
+    @author Luca Formaggia <luca.formaggia@polimi.it>
+    @contributor Marta D'Elia <mdelia2@mathcs.emory.edu>
+    @maintainer Marta D'Elia <mdelia2@mathcs.emory.edu>
+
+    @date 00-00-0000
+
+ */
 
 #ifndef _GEOELEMENT_HH_
 #define _GEOELEMENT_HH_
@@ -33,203 +46,335 @@
 
 namespace LifeV
 {
-//using namespace std; //Pretty useless
 
-//     *********** Geometrical Elements *****************
-//! \defgroup GeoEle Geometry Element classes
+//! GeoElement0D - Class for Points and Vertices
+/*!
+    @author Luca Formaggia
 
-/*! \warning It is UP to the user to parametrise the templates correctly. */
-
-/*@{*/
-//! Class for Points and Vertices
-/*! MC is a markercommon which defines the markers for
-  all geometric entities. */
+    @sa markers.h
+ */
 template <typename MC = DefMarkerCommon>
-class
-        GeoElement0D: public Geo0D, public MC::PointMarker
+class GeoElement0D: public Geo0D, public MC::PointMarker
 {
 public:
+
+    //! @name Public Types
+    //@{
+    typedef typename MC::PointMarker Marker; //to be removed
+    typedef typename MC::PointMarker marker_Type;
+
+    //@}
+
+    //! @name Constructor & Destructor
+    //@{
+
+    //! Empty Constructor
     GeoElement0D();
 
-    //! Declares item id and if it is on boundary
-    GeoElement0D( ID id, bool boundary = false );
+    //! Declares item identity and states if it is on boundary
+    /*!
+    	@param identity Element identity
+        @param boundary True if the element is on boundary
+     */
+    GeoElement0D( ID identity, bool boundary = false );
 
-    //! Declares item id and if it is on boundary, and provides coordinate
-    //! data.
-    GeoElement0D( ID id, Real x, Real y, Real z, bool boundary = false );
+    //! Declares item identity, provides coordinate and states if it is on boundary
+    /*!
+    	@param identity Element identity
+    	@param x Element x coordinate
+    	@param y Element y coordinate
+    	@param z Element z coordinate
+    	@param boundary True if the element is on boundary
+     */
+    GeoElement0D( ID identity, Real x, Real y, Real z, bool boundary = false );
 
-    GeoElement0D( GeoElement0D const & g );
-    GeoElement0D( Geo0D const & g, MC const & m );
-    GeoElement0D & operator = ( GeoElement0D const & g );
+    //! Copy constructor
+    /*!
+        @param Element GeoElement0D to be copied
+     */
+    GeoElement0D( GeoElement0D const & Element );
 
-    typedef typename MC::PointMarker Marker;
+    //! Copy constructor
+    /*!
+        @param Element GeoElement0D to be copied
+        @param Marker Markercommon
+     */
+    GeoElement0D( Geo0D const & Element, MC const & Marker );
+
+    //@}
+
+    //! @name Operators
+    //@{
+
+    //! The equivalence operator
+    /*!
+        @param Element Equivalent GeoElement0D
+        @return Reference to a new GeoElement0D with the same content of GeoElement0D Element
+     */
+    GeoElement0D & operator = ( const GeoElement0D  & Element );
+
+    //@}
 
 };
 
-
-//!  Class for edges.
-/*! In the 2D case, we store the IDs of the adjacent
-  2Delements and their relative position.*/
+//! GeoElement1D - Class for Edges
+/*!
+    @author Luca Formaggia
+	@warning In the 2D case, Identities of the adjacent 2Delements and their relative position are stored
+ */
 template
 <typename GEOSHAPE, typename MC = DefMarkerCommon>
 class GeoElement1D : public GeoND<GEOSHAPE, GeoElement0D<MC> >, public MC::EdgeMarker
 {
 public:
-    GeoElement1D( ID id = 0 );
-    GeoElement1D( const GeoElement1D& geoElement1D);
 
-    typedef GEOSHAPE GeoShape;
-    typedef typename MC::EdgeMarker Marker;
-    typedef GeoElement0D<MC> GeoBElement;
-    typedef GeoElement0D<MC> PointType;
+    //! @name Public Types
+    //@{
+
+    typedef GEOSHAPE geoShape_Type;
+    typedef typename MC::EdgeMarker marker_Type;
+    typedef GeoElement0D<MC> geoBElement_Type;
+    typedef GeoElement0D<MC> point_Type;
+    typedef GEOSHAPE GeoShape; // to be removed
+    typedef typename MC::EdgeMarker Marker; // to be removed
+    typedef GeoElement0D<MC> GeoBElement; // to be removed
+    typedef GeoElement0D<MC> PointType; // to be removed
+    //@}
+
+    //! @name Constructor & Destructor
+    //@{
+
+    //! Declares element identity
+    /*!
+        @param identity Element identity
+     */
+    explicit GeoElement1D( ID identity = 0 );
+
+    //! Copy constructor
+    /*!
+        @param Element GeoElement1D to be copied
+     */
+    GeoElement1D( const GeoElement1D& Element);
+
+    //@}
 
 #ifdef TWODIM
-    //! ID of first adjacent 2D element
+    //! @name Get Methods
+    //@{
+
+    //! Returns the identity of the first adjacent element
+    /*!
+    	@return Identity of the first adjacent element
+     */
     ID ad_first() const
     {
-        return efirst;
+        return M_FirstAdjacentElementIdentity;
     };
-    //! ID of second adjacent 2D element
+    //! Returns the identity of the second adjacent element
+    /*!
+    	@return Identity of the second adjacent element
+     */
     ID ad_second() const
     {
-        return esecond;
+        return M_SecondAdjacentElementIdentity;
     };
-    //! ID of first adjacent 2D element
+    //! Returns the identity of the first adjacent element
+    /*!
+    	@return Identity of the first adjacent element
+     */
     ID & ad_first()
     {
-        return efirst;
-    }
-    //! ID of second adjacent 2D element
+        return M_FirstAdjacentElementIdentity;
+    };
+    //! Returns the identity of the second adjacent element
+    /*!
+    	@return Identity of the second adjacent element
+     */
     ID & ad_second()
     {
-        return esecond;
-    }
-    //! Position of first adjacent 2D element
+        return M_SecondAdjacentElementIdentity;
+    };
+    //! Returns the position of the first adjacent element
+    /*!
+    	@return Position of the first adjacent element
+     */
     ID pos_first() const
     {
-        return posfirst;
+        return M_FirstAdjacentElementPosition;
     };
-    //! Position of second adjacent 2D element
+    //! Returns the position of the second adjacent element
+    /*!
+    	@return Position of the second adjacent element
+     */
     ID pos_second() const
     {
-        return possecond;
+        return M_SecondAdjacentElementPosition;
     };
-    //! Position of fist adjacent 2D element
+    //! Returns the position of the first adjacent element
+    /*!
+    	@return Position of the first adjacent element
+     */
     ID & pos_first()
     {
-        return posfirst;
-    }
-    //! Position of second adjacent 2D element
+        return M_FirstAdjacentElementPosition;
+    };
+    //! Returns the position of the second adjacent element
+    /*!
+    	@return Position of the second adjacent element
+     */
     ID & pos_second()
     {
-        return possecond;
-    }
+        return M_SecondAdjacentElementPosition;
+    };
+    //@}
+
 private:
-    ID efirst;
-    ID esecond;
-    ID posfirst;
-    ID possecond;
+    ID M_FirstAdjacentElementIdentity;
+    ID M_SecondAdjacentElementIdentity;
+    ID M_FirstAdjacentElementPosition;
+    ID M_SecondAdjacentElementPosition;
 #endif
 };
 
-//!  Class for 2D elements.
-
-/*! In the 3D case, we store the IDs of the adjacent
-  3Delements and their relative position.*/
+//! GeoElement2D - Class for Faces
+/*!
+    @author Luca Formaggia
+	@warning In the 3D case, Identities of the adjacent 3D elements and their relative position are stored
+ */
 template
 <typename GEOSHAPE, typename MC = DefMarkerCommon>
-class GeoElement2D
-        :
-        public GeoND<GEOSHAPE, GeoElement0D<MC> >,
-        public MC::FaceMarker
+class GeoElement2D: public GeoND<GEOSHAPE, GeoElement0D<MC> >, public MC::FaceMarker
 {
+
 public:
 
-    GeoElement2D( ID id = 0 );
-    GeoElement2D( const GeoElement2D<GEOSHAPE, MC>& geoElement2D );
-    //! Number of element edges
-    static const UInt numLocalEdges = GeoND<GEOSHAPE, GeoElement0D<MC> >::numEdges; //For compatibility
+    //! @name Public Types
+    //@{
 
-    typedef GEOSHAPE GeoShape;
-    typedef typename MC::FaceMarker Marker;
-    typedef typename GEOSHAPE::GeoBShape EdgeShape;
-    typedef GeoElement1D<EdgeShape, MC> EdgeType;
-    typedef GeoElement0D<MC> PointType;
-    typedef EdgeType GeoBElement;
+    //! Number of element edges, for compatibility
+    static const UInt numLocalEdges = GeoND<GEOSHAPE, GeoElement0D<MC> >::numEdges;
 
+    typedef GEOSHAPE geoShape_Type;
+    typedef typename MC::FaceMarker marker_Type;
+    typedef typename GEOSHAPE::GeoBShape edgeShape_Type;
+    typedef GeoElement1D<edgeShape_Type, MC> edge_Type;
+    typedef GeoElement0D<MC> point_Type;
+    typedef edge_Type geoBElement_Type;
 
-#ifndef TWODIM
-    //! ID of first adjacent 2D element
+    typedef GEOSHAPE GeoShape; // to be removed
+    typedef typename MC::FaceMarker Marker; // to be removed
+    typedef typename GEOSHAPE::GeoBShape EdgeShape; // to be removed
+    typedef GeoElement1D<EdgeShape, MC> EdgeType; // to be removed
+    typedef GeoElement0D<MC> PointType; // to be removed
+    typedef EdgeType GeoBElement; // to be removed
+    //@}
+
+    //! @name Constructor & Destructor
+    //@{
+
+    //! Declares element identity
+    /*!
+        @param identity Element identity
+     */
+    explicit GeoElement2D( ID identity = 0 );
+
+    //! Copy constructor
+    /*!
+        @param Element GeoElement2D to be copied
+     */
+    GeoElement2D( const GeoElement2D<GEOSHAPE, MC>& Element);
+
+    //@}
+
+    //! @name Get Methods
+    //@{
+
+    //! Returns the identity of the first adjacent element
+    /*!
+    	@return Identity of the first adjacent element
+     */
     ID ad_first() const
     {
-        return efirst;
+        return M_FirstAdjacentElementIdentity;
     };
-    //! ID of second adjacent 2D element
+    //! Returns the identity of the second adjacent element
+    /*!
+    	@return Identity of the second adjacent element
+     */
     ID ad_second() const
     {
-        return esecond;
+        return M_SecondAdjacentElementIdentity;
     };
-    //! ID of first adjacent 2D element
+    //! Returns the identity of the first adjacent element
+    /*!
+    	@return Identity of the first adjacent element
+     */
     ID & ad_first()
     {
-        return efirst;
-    }
-    //! ID of second adjacent 2D element
+        return M_FirstAdjacentElementIdentity;
+    };
+    //! Returns the identity of the second adjacent element
+    /*!
+    	@return Identity of the second adjacent element
+     */
     ID & ad_second()
     {
-        return esecond;
-    }
-    //! Position of first adjacent 2D element
+        return M_SecondAdjacentElementIdentity;
+    };
+    //! Returns the position of the first adjacent element
+    /*!
+    	@return Position of the first adjacent element
+     */
     ID pos_first() const
     {
-        return posfirst;
+        return M_FirstAdjacentElementPosition;
     };
-    //! Position of second adjacent 2D element
+    //! Returns the position of the second adjacent element
+    /*!
+    	@return Position of the second adjacent element
+     */
     ID pos_second() const
     {
-        return possecond;
+        return M_SecondAdjacentElementPosition;
     };
-    //! Position of fist adjacent 2D element
+    //! Returns the position of the first adjacent element
+    /*!
+    	@return Position of the first adjacent element
+     */
     ID & pos_first()
     {
-        return posfirst;
-    }
-    //! Position of second adjacent 2D element
+        return M_FirstAdjacentElementPosition;
+    };
+    //! Returns the position of the second adjacent element
+    /*!
+    	@return Position of the second adjacent element
+     */
     ID & pos_second()
     {
-        return possecond;
-    }
+        return M_SecondAdjacentElementPosition;
+    };
+    //@}
+
 private:
-    ID efirst;
-    ID esecond;
-    ID posfirst;
-    ID possecond;
-#endif
+    ID M_FirstAdjacentElementIdentity;
+    ID M_SecondAdjacentElementIdentity;
+    ID M_FirstAdjacentElementPosition;
+    ID M_SecondAdjacentElementPosition;
 };
 
 
-//! Class for 3D elements
+//! GeoElement3D - Class for Volumes
+/*!
+    @author Luca Formaggia
+ */
 template
 <typename GEOSHAPE, typename MC = DefMarkerCommon>
-class GeoElement3D
-        :
-        public GeoND<GEOSHAPE, GeoElement0D<MC> >,
-        public MC::VolumeMarker
+class GeoElement3D: public GeoND<GEOSHAPE, GeoElement0D<MC> >, public MC::VolumeMarker
 {
 public:
 
-    GeoElement3D( ID id = 0 );
-    GeoElement3D( const GeoElement3D<GEOSHAPE, MC>& geoElement3D );
-
-    typedef GEOSHAPE GeoShape;
-    typedef typename MC::VolumeMarker Marker;
-    typedef typename GEOSHAPE::GeoBShape FaceShape;
-    typedef typename FaceShape::GeoBShape EdgeShape;
-
-    typedef GeoElement1D<EdgeShape, MC> EdgeType;
-    typedef GeoElement2D<FaceShape, MC> FaceType;
-    typedef GeoElement0D<MC> PointType;
-    typedef FaceType GeoBElement;
+    //! @name Public Types
+    //@{
 
     //! Number of local Vertices
     static const UInt numLocalVertices = GeoND<GEOSHAPE, GeoElement0D<MC> >::numVertices;
@@ -237,42 +382,86 @@ public:
     static const UInt numLocalFaces = GeoND<GEOSHAPE, GeoElement0D<MC> >::numFaces;
     //! Number of local Edges (using Euler Formula)
     static const UInt numLocalEdges = GeoND<GEOSHAPE, GeoElement0D<MC> >::numEdges;
+
+    typedef GEOSHAPE geoShape_Type;
+    typedef typename MC::VolumeMarker marker_Type;
+    typedef typename GEOSHAPE::GeoBShape faceShape_Type;
+    typedef typename faceShape_Type::GeoBShape edgeShape_Type;
+
+    typedef GeoElement1D<edgeShape_Type, MC> edge_Type;
+    typedef GeoElement2D<faceShape_Type, MC> face_Type;
+    typedef GeoElement0D<MC> point_Type;
+    typedef face_Type geoBElement_Type;
+
+    typedef GEOSHAPE GeoShape;
+    typedef typename MC::VolumeMarker Marker;
+    typedef typename GEOSHAPE::GeoBShape FaceShape;
+    typedef typename FaceShape::GeoBShape EdgeShape;
+
+    typedef GeoElement1D<EdgeShape, MC> EdgeType; // to be removed
+    typedef GeoElement2D<FaceShape, MC> FaceType; // to be removed
+    typedef GeoElement0D<MC> PointType; // to be removed
+    typedef FaceType GeoBElement; // to be removed
+
+    //@}
+
+    //! @name Constructor & Destructor
+    //@{
+
+    //! Declares element identity
+    /*!
+        @param identity Element identity
+     */
+    explicit GeoElement3D( ID identity = 0 );
+
+    //! Copy constructor
+    /*!
+        @param Element GeoElement3D to be copied
+     */
+    GeoElement3D( const GeoElement3D<GEOSHAPE, MC>& Element );
+
+    //@}
 };
-/*@}*/
 
 
 /*-------------------------------------------------------------------------
   GeoElement0D
   --------------------------------------------------------------------------*/
+// ==========================================
+// Constructor & Destructor
+// ==========================================
 template <typename MC>
 GeoElement0D<MC>::GeoElement0D() :
         Geo0D(), MC::PointMarker()
 {}
 
 template <typename MC>
-GeoElement0D<MC>::GeoElement0D( ID id, bool boundary ) :
-        Geo0D( id, boundary ), MC::PointMarker()
+GeoElement0D<MC>::GeoElement0D( ID identity, bool boundary ) :
+        Geo0D( identity, boundary ), MC::PointMarker()
 {}
 
 template <typename MC>
-GeoElement0D<MC>::GeoElement0D( ID id, Real x, Real y, Real z, bool boundary ) :
-        Geo0D( id, x, y, z, boundary ), MC::PointMarker()
+GeoElement0D<MC>::GeoElement0D( ID identity, Real x, Real y, Real z, bool boundary ) :
+        Geo0D( identity, x, y, z, boundary ), MC::PointMarker()
 {}
 
 template <typename MC>
-GeoElement0D<MC>::GeoElement0D( GeoElement0D<MC> const & g ) :
-        Geo0D( g ), MC::PointMarker( g )
+GeoElement0D<MC>::GeoElement0D( GeoElement0D<MC> const & Element ) :
+        Geo0D( Element ), MC::PointMarker( Element )
 {}
 
+// ==========================================
+// Operators
+// ==========================================
 //! It calls operator= of base classes, just to be sure to do the right thing.
 template <typename MC>
 GeoElement0D<MC> &
-GeoElement0D<MC>::operator = ( GeoElement0D<MC> const & g )
+GeoElement0D<MC>::operator = ( GeoElement0D<MC> const & Element )
 {
-    if ( this != &g )
+    if ( this != &Element )
     {
-        Geo0D::operator=( g );
-        Marker::operator=( g );
+        Geo0D::operator=( Element );
+        Marker::operator=( Element );
     }
     return *this;
 }
@@ -280,34 +469,36 @@ GeoElement0D<MC>::operator = ( GeoElement0D<MC> const & g )
 /*-------------------------------------------------------------------------
   GeoElement1D
   --------------------------------------------------------------------------*/
-
+// ==========================================
+// Constructor & Destructor
+// ==========================================
 #ifdef TWODIM
 template <typename GEOSHAPE, typename MC>
-GeoElement1D<GEOSHAPE, MC>::GeoElement1D( ID id ) :
-        GeoND<GEOSHAPE, GeoElement0D<MC> >( id ),
+GeoElement1D<GEOSHAPE, MC>::GeoElement1D( ID Identity ) :
+        GeoND<GEOSHAPE, GeoElement0D<MC> >( Identity ),
         MC::EdgeMarker (),
-        efirst   ( 0 ),
-        esecond  ( 0 ),
-        posfirst ( 0 ),
-        possecond( 0 )
+        M_FirstAdjacentElementIdentity    ( 0 ),
+        M_SecondAdjacentElementIdentity   ( 0 ),
+        M_FirstAdjacentElementPosition    ( 0 ),
+        M_SecondAdjacentElementPosition   ( 0 )
 #else
 template <typename GEOSHAPE, typename MC>
-GeoElement1D<GEOSHAPE, MC>::GeoElement1D( ID id ) :
-        GeoND<GEOSHAPE, GeoElement0D<MC> >( id )
+GeoElement1D<GEOSHAPE, MC>::GeoElement1D( ID identity ) :
+        GeoND<GEOSHAPE, GeoElement0D<MC> >( identity )
 #endif
 {
-    ASSERT_PRE( GEOSHAPE::nDim == 1 , "geoElement2D with incorrect GeoSHape" ) ;
+    ASSERT_PRE( GEOSHAPE::nDim == 1 , "geoElement2D with incorrect GeoShape" ) ;
 }
 
 #ifdef TWODIM
 template <typename GEOSHAPE, typename MC>
-GeoElement1D<GEOSHAPE, MC>::GeoElement1D( const GeoElement1D<GEOSHAPE, MC>& geoElement1D ) :
-        GeoND<GEOSHAPE, GeoElement0D<MC> >( geoElement1D ),
-        MC::EdgeMarker                    ( geoElement1D ),
-        efirst                            ( geoElement1D.efirst ),
-        esecond                           ( geoElement1D.esecond ),
-        posfirst                          ( geoElement1D.posfirst ),
-        possecond                         ( geoElement1D.possecond )
+GeoElement1D<GEOSHAPE, MC>::GeoElement1D( const GeoElement1D<GEOSHAPE, MC>& Element ) :
+        GeoND<GEOSHAPE, GeoElement0D<MC> >( Element ),
+        MC::EdgeMarker                    ( Element ),
+        M_FirstAdjacentElementIdentity    ( Element.M_FirstAdjacentElementIdentity),
+        M_SecondAdjacentElementIdentity   ( Element.M_SecondAdjacentElementIdentity),
+        M_FirstAdjacentElementPosition    ( Element.M_FirstAdjacentElementPosition ),
+        M_SecondAdjacentElementPosition   ( Element.M_SecondAdjacentElementPosition )
 #else
 template <typename GEOSHAPE, typename MC>
 GeoElement1D<GEOSHAPE, MC>::GeoElement1D( const GeoElement1D<GEOSHAPE, MC>& geoElement1D ) :
@@ -315,7 +506,7 @@ GeoElement1D<GEOSHAPE, MC>::GeoElement1D( const GeoElement1D<GEOSHAPE, MC>& geoE
         MC::EdgeMarker                    ( geoElement1D )
 #endif
 {
-    ASSERT_PRE( GEOSHAPE::nDim == 1 , "geoElement2D with incorrect GeoSHape" ) ;
+    ASSERT_PRE( GEOSHAPE::nDim == 1 , "geoElement2D with incorrect GeoShape" ) ;
 }
 
 
@@ -323,43 +514,46 @@ GeoElement1D<GEOSHAPE, MC>::GeoElement1D( const GeoElement1D<GEOSHAPE, MC>& geoE
 /*-------------------------------------------------------------------------
   GeoElement2D
   --------------------------------------------------------------------------*/
+// ==========================================
+// Constructor & Destructor
+// ==========================================
 template <typename GEOSHAPE, typename MC>
 const UInt GeoElement2D<GEOSHAPE, MC>::numLocalEdges;
 
 #ifdef TWODIM
 template <typename GEOSHAPE, typename MC>
-GeoElement2D<GEOSHAPE, MC>::GeoElement2D( ID id ) :
-        GeoND<GEOSHAPE, GeoElement0D<MC> >( id )
-#else //THREEDIM
+GeoElement2D<GEOSHAPE, MC>::GeoElement2D( ID identity ) :
+        GeoND<GEOSHAPE, GeoElement0D<MC> >( identity )
+#else
 template <typename GEOSHAPE, typename MC>
-GeoElement2D<GEOSHAPE, MC>::GeoElement2D( ID id ) :
-        GeoND<GEOSHAPE, GeoElement0D<MC> >( id ),
-        efirst   ( 0 ),
-        esecond  ( 0 ),
-        posfirst ( 0 ),
-        possecond( 0 )
+GeoElement2D<GEOSHAPE, MC>::GeoElement2D( ID identity ) :
+        GeoND<GEOSHAPE, GeoElement0D<MC> >( identity ),
+        M_FirstAdjacentElementIdentity   ( 0 ),
+        M_SecondAdjacentElementIdentity  ( 0 ),
+        M_FirstAdjacentElementPosition   ( 0 ),
+        M_SecondAdjacentElementPosition  ( 0 )
 #endif
 {
-    ASSERT_PRE( GEOSHAPE::nDim == 2 , "geoElement2D with incorrect GeoSHape" ) ;
+    ASSERT_PRE( GEOSHAPE::nDim == 2 , "geoElement2D with incorrect GeoShape" ) ;
 }
 
 #ifdef TWODIM
 template <typename GEOSHAPE, typename MC>
-GeoElement2D<GEOSHAPE, MC>::GeoElement2D( const GeoElement2D<GEOSHAPE, MC>& geoElement2D ) :
-        GeoND<GEOSHAPE, GeoElement0D<MC> >( geoElement2D ),
-        MC::FaceMarker                    ( geoElement2D )
-#else //THREEDIM
+GeoElement2D<GEOSHAPE, MC>::GeoElement2D( const GeoElement2D<GEOSHAPE, MC>& Element ) :
+        GeoND<GEOSHAPE, GeoElement0D<MC> >( Element ),
+        MC::FaceMarker                    ( Element )
+#else
 template <typename GEOSHAPE, typename MC>
-GeoElement2D<GEOSHAPE, MC>::GeoElement2D( const GeoElement2D<GEOSHAPE, MC>& geoElement2D ) :
-        GeoND<GEOSHAPE, GeoElement0D<MC> >( geoElement2D ),
-        MC::FaceMarker                    ( geoElement2D ),
-        efirst   ( geoElement2D.efirst    ),
-        esecond  ( geoElement2D.esecond   ),
-        posfirst ( geoElement2D.posfirst  ),
-        possecond( geoElement2D.possecond )
+GeoElement2D<GEOSHAPE, MC>::GeoElement2D( const GeoElement2D<GEOSHAPE, MC>& Element ) :
+        GeoND<GEOSHAPE, GeoElement0D<MC> >( Element ),
+        MC::FaceMarker                    ( Element ),
+        M_FirstAdjacentElementIdentity    ( Element.M_FirstAdjacentElementIdentity),
+        M_SecondAdjacentElementIdentity   ( Element.M_SecondAdjacentElementIdentity),
+        M_FirstAdjacentElementPosition    ( Element.M_FirstAdjacentElementPosition ),
+        M_SecondAdjacentElementPosition   ( Element.M_SecondAdjacentElementPosition )
 #endif
 {
-    ASSERT_PRE( GEOSHAPE::nDim == 2 , "geoElement2D with incorrect GeoSHape" ) ;
+    ASSERT_PRE( GEOSHAPE::nDim == 2 , "geoElement2D with incorrect GeoShape" ) ;
 }
 
 
@@ -373,19 +567,22 @@ const UInt GeoElement3D<GEOSHAPE, MC>::numLocalFaces;
 template <typename GEOSHAPE, typename MC>
 const UInt GeoElement3D<GEOSHAPE, MC>::numLocalEdges;
 
+// ==========================================
+// Constructor & Destructor
+// ==========================================
 template <typename GEOSHAPE, typename MC>
-GeoElement3D<GEOSHAPE, MC>::GeoElement3D( ID id ) :
-        GeoND<GEOSHAPE, GeoElement0D<MC> >( id )
+GeoElement3D<GEOSHAPE, MC>::GeoElement3D( ID identity ) :
+        GeoND<GEOSHAPE, GeoElement0D<MC> >( identity )
 {
-    ASSERT_PRE( GEOSHAPE::nDim == 3 , "geoElement3D with incorrect GeoSHape" )
+    ASSERT_PRE( GEOSHAPE::nDim == 3 , "geoElement3D with incorrect GeoShape" )
 }
 
 template <typename GEOSHAPE, typename MC>
-GeoElement3D<GEOSHAPE, MC>::GeoElement3D( const GeoElement3D<GEOSHAPE, MC>& geoElement3D ) :
-        GeoND<GEOSHAPE, GeoElement0D<MC> >( geoElement3D ),
-        MC::VolumeMarker                  ( geoElement3D )
+GeoElement3D<GEOSHAPE, MC>::GeoElement3D( const GeoElement3D<GEOSHAPE, MC>& Element ) :
+        GeoND<GEOSHAPE, GeoElement0D<MC> >( Element ),
+        MC::VolumeMarker                  ( Element )
 {
-    ASSERT_PRE( GEOSHAPE::nDim == 3 , "geoElement3D with incorrect GeoSHape" )
+    ASSERT_PRE( GEOSHAPE::nDim == 3 , "geoElement3D with incorrect GeoShape" )
 }
 }
 #endif

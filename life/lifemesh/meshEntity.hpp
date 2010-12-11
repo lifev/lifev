@@ -1,26 +1,26 @@
 //@HEADER
 /*
-************************************************************************
+*******************************************************************************
 
- This file is part of the LifeV Applications.
- Copyright (C) 2001-2010 EPFL, Politecnico di Milano, INRIA
+    Copyright (C) 2004, 2005, 2007 EPFL, Politecnico di Milano, INRIA
+    Copyright (C) 2010 EPFL, Politecnico di Milano, Emory University
 
- This library is free software; you can redistribute it and/or modify
- it under the terms of the GNU Lesser General Public License as
- published by the Free Software Foundation; either version 2.1 of the
- License, or (at your option) any later version.
+    This file is part of LifeV.
 
- This library is distributed in the hope that it will be useful, but
- WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- Lesser General Public License for more details.
+    LifeV is free software; you can redistribute it and/or modify
+    it under the terms of the GNU Lesser General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
 
- You should have received a copy of the GNU Lesser General Public
- License along with this library; if not, write to the Free Software
- Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
- USA
+    LifeV is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+    Lesser General Public License for more details.
 
-************************************************************************
+    You should have received a copy of the GNU Lesser General Public License
+    along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
+
+*******************************************************************************
 */
 //@HEADER
 
@@ -28,24 +28,27 @@
     @file
     @brief This file contains the MeshEntity and MeshEntityWithBoundary classes.
 
-    The classes included in this file are usefull to store the identifiers of
+    @contributor Samuel Quinodoz <samuel.quinodoz@epfl.ch>
+    @maintainer Tiziano Passerini <tiziano@mathcs.emory.edu>
+
+    The classes included in this file are useful to store the identifiers of
     the different structures stored in the meshes.
  */
 
-#ifndef _MESHENTITY_HH_
-#define _MESHENTITY_HH_
+#ifndef MESHENTITY_H
+#define MESHENTITY_H 1
 
 #include <life/lifecore/life.hpp>
 
 namespace LifeV
 {
-//! MeshEntity - This is the base class to store the identifiers.
+//! This is the base class to store the identifiers.
 /*!
    In this class, there are two identifiers stored:
     <ol>
         <li> The global identifier is defined for the whole mesh.
         <li> The local identifier is defined as the identifier for
-        a particular processor.
+             a particular processor.
     </ol>
 
     When running the code in serial (1 processor), the identifiers
@@ -57,11 +60,10 @@ namespace LifeV
     Note: Documentation by Samuel Quinodoz, implementation anterior
     to the documentation, without name of author.
  */
-
 class MeshEntity
 {
 public:
-    //! @name Constructor & Destructor
+    //! @name Constructors & Destructor
     //@{
 
     //! Empty Constructor
@@ -109,7 +111,7 @@ public:
     //@{
 
 
-    //! Display the informations stored by this class
+    //! Displays the informations stored by this class
     void showMe( std::ostream& output = std::cout ) const
     {
         output << " Global ID : " << M_id << " -- " << " Local ID " << M_localId << std::endl;
@@ -122,7 +124,7 @@ public:
     //! @name Operators
     //@{
 
-    //! Equivalence operator that check if BOTH identifiers are the same.
+    //! Equivalence operator that checks if BOTH identifiers are the same.
     /*!
       @param e The mesh entity to be compared with.
      */
@@ -132,7 +134,7 @@ public:
         return res;
     };
 
-    //! Relation operator that perform the same comparison on the GLOBAL identifier.
+    //! Relation operator that performs the same comparison on the GLOBAL identifier.
     /*!
       @param e The mesh entity to be compared with.
     */
@@ -141,7 +143,7 @@ public:
         return M_id <= e.id();
     };
 
-    //! Relation operator that perform the same comparison on the GLOBAL identifier.
+    //! Relation operator that performs the same comparison on the GLOBAL identifier.
     /*!
       @param e The mesh entity to be compared with.
     */
@@ -215,18 +217,17 @@ private:
   Note: Documentation by Samuel Quinodoz, implementation anterior
   to the documentation, without name of author.
  */
-
 class MeshEntityWithBoundary : public MeshEntity
 {
 public:
 
-    //! @name Constructor & Destructor
+    //! @name Constructors & Destructor
     //@{
 
     //! Empty constructor
     /*!
-      This constructor calles the empty constructor of MeshEntity and
-      set the boundary indicator to false.
+      This constructor calls the empty constructor of MeshEntity and
+      sets the boundary indicator to false.
     */
     MeshEntityWithBoundary() : MeshEntity(), M_boundary( false )
     {};
