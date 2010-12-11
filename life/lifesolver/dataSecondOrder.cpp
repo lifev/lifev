@@ -57,7 +57,9 @@ DataSecondOrder::DataSecondOrder() :
         M_gamma                        ( ),
         M_beta                             ( ),
         M_factor                           ( ),
-        M_verbose                       ( )
+	M_verbose                       ( ),
+	M_order                            ( ),                       
+      	M_isDamping                   ( )
 {
 }
 
@@ -71,12 +73,12 @@ DataSecondOrder::DataSecondOrder( const DataSecondOrder& DataSecondOrder):
 	M_thickness            ( DataSecondOrder.M_thickness ),
         M_poisson               ( DataSecondOrder.M_poisson ),
         M_young                 ( DataSecondOrder.M_young ),
-        M_isDamping         ( DataSecondOrder.M_isDamping),
         M_gamma              ( DataSecondOrder.M_gamma ),
         M_beta                    ( DataSecondOrder.M_beta ),
         M_factor                  ( DataSecondOrder.M_factor ),
         M_verbose              ( DataSecondOrder.M_verbose ),
-        M_order                   ( DataSecondOrder.M_order )
+        M_order                   ( DataSecondOrder.M_order ),
+	M_isDamping           ( DataSecondOrder.M_isDamping )
 {
 }
 
@@ -94,12 +96,12 @@ DataSecondOrder::operator=( const DataSecondOrder& DataSecondOrder )
 	M_thickness               = DataSecondOrder.M_thickness;
 	M_poisson                  = DataSecondOrder.M_poisson;
         M_young                    = DataSecondOrder.M_young;
-        M_isDamping            = DataSecondOrder.M_isDamping;
         M_gamma                 = DataSecondOrder.M_gamma;
         M_beta                       = DataSecondOrder.M_beta;
-        M_order                      = DataSecondOrder.M_order;
         M_factor                     = DataSecondOrder.M_factor;
         M_verbose                 = DataSecondOrder.M_verbose;
+	M_order                      = DataSecondOrder.M_order;
+	M_isDamping            = DataSecondOrder.M_isDamping;
     }
 
     return *this;
@@ -144,12 +146,15 @@ DataSecondOrder::setup( const GetPot& dataFile, const std::string& section )
 	  }
     }
 
+    M_isDamping     = dataFile( (section+"/damping").data(), false);
+
     // space_discretization
     M_order     = dataFile( (section+"/space_discretization/order").data(), "P1" );
 
     // miscellaneous
     M_factor  = dataFile( (section + "/miscellaneous/factor").data(), 1.0 );
     M_verbose = dataFile( (section + "/miscellaneous/verbose").data(), 1 );
+
 }
 
 void
@@ -265,10 +270,7 @@ DataSecondOrder::poisson( const UInt& material ) const
     if (IT != M_poisson.end())
         return M_poisson.find( material )->second;
     else
-    {
-        //WARNING("the Poisson modulus has not been set");
-        return 0;
-    }
+      return 0;
 }
 
 const Real&
@@ -278,10 +280,7 @@ DataSecondOrder::young( const UInt& material ) const
     if (IT != M_young.end())
         return IT->second;
     else
-    {
-        //WARNING("the Young modulus has not been set");
-        return 0;
-    }
+       return 0;
 }
 
 Real
