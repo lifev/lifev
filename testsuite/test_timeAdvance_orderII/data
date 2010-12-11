@@ -12,8 +12,12 @@ save       = 1
 
 [problem]
 
-   [./physics]
-   density   = 1.               # density
+ [./physics]
+ material_flag =1
+ density   = 1.
+ poisson   = 0
+ young     = 1
+
   
    [../time_discretization]
    initialtime		= 0.
