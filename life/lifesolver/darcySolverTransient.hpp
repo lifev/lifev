@@ -607,17 +607,17 @@ staticCondensation ()
     /* Put in A the matrix L and L^T, where L and L^T is the Cholesky factorization of A.
        For more details see http://www.netlib.org/lapack/double/dpotrf.f */
     dpotrf_ (UPLO, NBU, A, NBU, INFO);
-    ASSERT_PRE( !INFO, "Lapack factorization of A is not achieved." );
+    ASSERT_PRE( !INFO[0], "Lapack factorization of A is not achieved." );
 
     /* Put in B the matrix L^{-1} * B, solving a triangular system.
        For more details see http://www.netlib.org/lapack/lapack-3.1.1/SRC/dtrtrs.f */
     dtrtrs_ (UPLO, NOTRANS, NODIAG, NBU, NBP, A, NBU, B, NBU, INFO);
-    ASSERT_PRE( !INFO, "Lapack Computation B = L^{-1} B  is not achieved." );
+    ASSERT_PRE( !INFO[0], "Lapack Computation B = L^{-1} B  is not achieved." );
 
     /* Put in C the matrix L^{-1} * C, solving a triangular system.
        For more details see http://www.netlib.org/lapack/lapack-3.1.1/SRC/dtrtrs.f */
     dtrtrs_ (UPLO, NOTRANS, NODIAG, NBU, NBL, A, NBU, C, NBL, INFO);
-    ASSERT_PRE( !INFO, "Lapack Computation C = L^{-1} C  is not achieved." );
+    ASSERT_PRE( !INFO[0], "Lapack Computation C = L^{-1} C  is not achieved." );
 
     /* Put in M_BtB the matrix  B^T * L^{-T} * L^{-1} * B = B^T * A^{-1} * B
        M_BtB stored only on lower part.
@@ -643,12 +643,12 @@ staticCondensation ()
        factorization of B^T * A^{-1} * B + M_elmatMassPrimal / \Delta t.
        For more details see http://www.netlib.org/lapack/double/dpotrf.f  */
     dpotrf_ (UPLO, NBP, this->M_BtB, NBP, INFO);
-    ASSERT_PRE( !INFO,"Lapack factorization of BtB is not achieved." );
+    ASSERT_PRE( !INFO[0],"Lapack factorization of BtB is not achieved." );
 
     /* Put in M_BtC the matrix LB^{-1} * M_BtC = LB^{-1} * B^T * A^{-1} * C.
        For more details see http://www.netlib.org/lapack/lapack-3.1.1/SRC/dtrtrs.f */
     dtrtrs_ (UPLO, NOTRANS, NODIAG, NBP, NBL, this->M_BtB, NBP, this->M_BtC, NBP, INFO);
-    ASSERT_PRE( !INFO, "Lapack Computation BtC = LB^{-1} BtC is not achieved." );
+    ASSERT_PRE( !INFO[0], "Lapack Computation BtC = LB^{-1} BtC is not achieved." );
 
     /* Put in M_CtC the matrix -M_CtC + M_BtC^T * M_BtC
        Result stored only on lower part, the matrix M_CtC stores
@@ -767,17 +767,17 @@ localComputePrimalAndDual ()
     /* Put in A the matrix L and L^T, where L and L^T is the Cholesky factorization of A.
        For more details see http://www.netlib.org/lapack/double/dpotrf.f */
     dpotrf_ (UPLO, NBU, A, NBU, INFO);
-    ASSERT_PRE( !INFO, "Lapack factorization of A is not achieved." );
+    ASSERT_PRE( !INFO[0], "Lapack factorization of A is not achieved." );
 
     /* Put in B the matrix L^{-1} * B, solving a triangular system.
        For more details see http://www.netlib.org/lapack/lapack-3.1.1/SRC/dtrtrs.f */
     dtrtrs_ (UPLO, NOTRANS, NODIAG, NBU, NBP, A, NBU, B, NBU, INFO);
-    ASSERT_PRE( !INFO, "Lapack Computation B = L^{-1} B  is not achieved." );
+    ASSERT_PRE( !INFO[0], "Lapack Computation B = L^{-1} B  is not achieved." );
 
     /* Put in C the matrix L^{-1} * C, solving a triangular system.
        For more details see http://www.netlib.org/lapack/lapack-3.1.1/SRC/dtrtrs.f */
     dtrtrs_ (UPLO, NOTRANS, NODIAG, NBU, NBL, A, NBU, C, NBU, INFO);
-    ASSERT_PRE( !INFO, "Lapack Computation C = L^{-1} C  is not achieved." );
+    ASSERT_PRE( !INFO[0], "Lapack Computation C = L^{-1} C  is not achieved." );
 
     /* Put in M_BtB the matrix  B^T * L^{-T} * L^{-1} * B = B^T * A^{-1} * B
        M_BtB stored only on lower part.
@@ -798,12 +798,12 @@ localComputePrimalAndDual ()
        factorization of B^T * A^{-1} * B + M_elmatMassPrimal / \Delta t.
        For more details see http://www.netlib.org/lapack/double/dpotrf.f */
     dpotrf_ (UPLO, NBP, this->M_BtB, NBP, INFO);
-    ASSERT_PRE( !INFO, "Lapack factorization of BtB is not achieved." );
+    ASSERT_PRE( !INFO[0], "Lapack factorization of BtB is not achieved." );
 
     /* Put in M_BtC the matrix LB^{-1} * M_BtC = LB^{-1} * B^T * A^{-1} * C.
            For more details see http://www.netlib.org/lapack/lapack-3.1.1/SRC/dtrtrs.f */
     dtrtrs_ (UPLO, NOTRANS, NODIAG, NBP, NBL, this->M_BtB, NBP, this->M_BtC, NBP, INFO);
-    ASSERT_PRE( !INFO, "Lapack Computation BtC = LB^{-1} BtC is not achieved." );
+    ASSERT_PRE( !INFO[0], "Lapack Computation BtC = LB^{-1} BtC is not achieved." );
 
     //..............................
     //   END OF MATRIX OPERATIONS
@@ -851,7 +851,7 @@ localComputePrimalAndDual ()
     /* Put in M_elvecSource the vector LB^{-1} * M_elvecSource = LB^{-1} * ( F + M_elmatMassPrimal / \Delta t * elvecPrimalOldLocal )
        For more details see http://www.netlib.org/lapack/lapack-3.1.1/SRC/dtrtrs.f */
     dtrtrs_ (UPLO, NOTRANS, NODIAG, NBP, NBRHS, this->M_BtB, NBP, this->M_elvecSource, NBP, INFO);
-    ASSERT_PRE( !INFO, "Lapack Computation M_elvecSource = LB^{-1} M_elvecSource is not achieved." );
+    ASSERT_PRE( !INFO[0], "Lapack Computation M_elvecSource = LB^{-1} M_elvecSource is not achieved." );
 
     /* Put in M_elvecSource the vector
        -M_BtC * M_elvecHyb + M_elvecSource = -LB^{-1} * B^T * A^{-1} * C * lambda_K + LB^{-1} * ( F + M_elmatMassPrimal / \Delta t)
@@ -863,7 +863,7 @@ localComputePrimalAndDual ()
        - (B^T * A^{-1} * B)^{-1} * B^T * A^{-1} * C * lambda_K + (B^T * A^{-1} * B)^{-1} * (F + M_elmatMassPrimal / \Delta t)
        For more details see http://www.netlib.org/lapack/lapack-3.1.1/SRC/dtrtrs.f */
     dtrtrs_ (UPLO, TRANS, NODIAG, NBP, NBRHS, this->M_BtB, NBP, this->M_elvecSource, NBP, INFO);
-    ASSERT_PRE( !INFO, "Lapack Computation M_elvecSource = LB^{-T} M_elvecSource is not achieved." );
+    ASSERT_PRE( !INFO[0], "Lapack Computation M_elvecSource = LB^{-T} M_elvecSource is not achieved." );
 
     // Now rhs contains the primal variable for the current element, we must put it in the global vector.
 
@@ -887,7 +887,7 @@ localComputePrimalAndDual ()
        L^{-T} * M_elvecFlux = - A^{-1} * C^T * lambda_K - A^{-1} * B^T * primal_K
        For more details see http://www.netlib.org/lapack/lapack-3.1.1/SRC/dtrtrs.f */
     dtrtrs_ (UPLO, TRANS, NODIAG, NBU, NBRHS, A, NBU, this->M_elvecFlux, NBU, INFO);
-    ASSERT_PRE(!INFO, "Lapack Computation M_elvecFlux = L^{-T} M_elvecFlux is not achieved.");
+    ASSERT_PRE(!INFO[0], "Lapack Computation M_elvecFlux = L^{-T} M_elvecFlux is not achieved.");
 
 } // localComputePrimalAndDual
 
