@@ -39,6 +39,8 @@ along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <ctime>
 
+#include <life/lifecore/life.hpp>
+
 namespace LifeV
 {
 
@@ -53,10 +55,10 @@ public:
     //! @name Constructor
     //@{
     Chrono() :
-            M_t1(0),
-            M_t2(0),
-            M_dt(0),
-            M_running(false)
+        M_t1(0),
+        M_t2(0),
+        M_dt(0),
+        M_running(false)
     {
     }
     //@}
@@ -89,7 +91,7 @@ public:
     }
 
     //! Compute the difference in time between start and stop
-    double diff()
+    Real diff()
     {
         if (M_running)
             return ( 1. * ( clock() - M_t1 ) ) / CLOCKS_PER_SEC;
@@ -98,7 +100,7 @@ public:
     }
 
     //! Return a cumulative time difference
-    double diff_cumul()
+    Real diff_cumul()
     {
         if (M_running)
             return ( 1. * ( M_dt +  clock() - M_t1 ) ) / CLOCKS_PER_SEC;
@@ -141,11 +143,11 @@ public:
     void stop()
     {
     }
-    double diff()
+    Real diff()
     {
         return -1.;
     };
-    double diff_cumul()
+    Real diff_cumul()
     {
         return -1.;
     };
