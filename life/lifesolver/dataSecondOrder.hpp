@@ -25,26 +25,26 @@
 //@HEADER
 
 
-#ifndef _DataSecondOrder_H_
-#define _DataSecondOrder_H_
+#ifndef VENANTKIRCHHOFFVISCOELASTICDATA_H
+#define VENANTKIRCHHOFFVISCOELASTICDATA_H 1
 
 // Tell the compiler to ignore specific kind of warnings:
 #pragma GCC diagnostic ignored "-Wunused-variable"
 #pragma GCC diagnostic ignored "-Wunused-parameter"
-
 
 #include <string>
 #include <iostream>
 #include <map>
-#include <life/lifecore/GetPot.hpp>
-#include <boost/shared_ptr.hpp>
-#include <life/lifecore/life.hpp>
-#include <life/lifefem/dataTime.hpp>
 #include <list>
+#include <boost/shared_ptr.hpp>
 
 // Tell the compiler to ignore specific kind of warnings:
 #pragma GCC diagnostic ignored "-Wunused-variable"
 #pragma GCC diagnostic ignored "-Wunused-parameter"
+
+#include <life/lifecore/GetPot.hpp>
+#include <life/lifecore/life.hpp>
+#include <life/lifefem/dataTime.hpp>
 
 
 namespace LifeV
@@ -62,8 +62,8 @@ public:
     typedef DataTime                                 Time_Type;
     typedef boost::shared_ptr< Time_Type >           Time_ptrType;
 
-    typedef std::map<UInt, Real>                                      MaterialContainer_Type;
-    typedef MaterialContainer_Type::const_iterator                    MaterialContainer_ConstIterator;
+    typedef std::map<UInt, Real>                    MaterialContainer_Type;
+    typedef MaterialContainer_Type::const_iterator  MaterialContainer_ConstIterator;
 
     //@}
 
@@ -71,7 +71,7 @@ public:
     DataSecondOrder();
     DataSecondOrder( const DataSecondOrder& DataSecondOrder);
 
-//! @name Operators
+    //! @name Operators
     //@{
 
     //! Operator=
@@ -232,10 +232,9 @@ public:
     /*
      * @ return true if Damping coefficient is not zero.
     */
-
-    bool  isDamping() const
+    bool  damping() const
     {
-        return M_isDamping;
+        return M_damping;
     }
     //@}
 
@@ -244,23 +243,37 @@ private:
     //! Data containers for time and mesh
     Time_ptrType           M_time;
 
-    //! Physics
-    Real                   M_density; // densisty
+    //@name Physics 
+    //@{
+    //! density
+    Real                   M_density;
+
+    //!thickness 
     Real                   M_thickness;
 
+    //!poisson 
     MaterialContainer_Type M_poisson;
+
+    //!young
     MaterialContainer_Type M_young;
 
+    //!damping coefficient (Stiffness)
     MaterialContainer_Type M_gamma;
+  
+    //! damping coefficint (mass)
     MaterialContainer_Type  M_beta;
-
+    //@}
+    
     //! Miscellaneous
     Real                   M_factor; // amplification factor for deformed mesh
-    UInt                    M_verbose; // temporal output verbose
-    std::string         M_order;
-    bool                   M_isDamping;  //true if damping else false
+    //!verbose
+    UInt                   M_verbose; // temporal output verbose
+    //! order
+    std::string            M_order;
 
+    //!damping true when there is damping term
+    bool                   M_damping;  
 };
 
-}
-#endif
+}  //namespace 
+#endif /* VENANTKIRCHHOFFVISCOELASTICDATA_H*/

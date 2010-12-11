@@ -45,40 +45,37 @@
 namespace LifeV
 {
 
-//
-// IMPLEMENTATION
-//
-DataSecondOrder::DataSecondOrder() :
-        M_time                             ( ),
-        M_density                        ( ),
-        M_thickness                     ( ),
-        M_poisson                        ( ),
-        M_young                           ( ),
-        M_gamma                        ( ),
-        M_beta                             ( ),
-        M_factor                           ( ),
-	M_verbose                       ( ),
-	M_order                            ( ),                       
-      	M_isDamping                   ( )
-{
-}
-
 //===================================================
 // Constructor
 //===================================================
 
+DataSecondOrder::DataSecondOrder() :
+        M_time                           ( ),
+        M_density                        ( ),
+        M_thickness                      ( ),
+        M_poisson                        ( ),
+        M_young                          ( ),
+        M_gamma                          ( ),
+        M_beta                           ( ),
+        M_factor                         ( ),
+	M_verbose                        ( ),
+	M_order                          ( ),                       
+      	M_damping                        ( )
+{
+}
+
 DataSecondOrder::DataSecondOrder( const DataSecondOrder& DataSecondOrder):
         DataTime               ( DataSecondOrder),
-        M_density               ( DataSecondOrder.M_density ),
+        M_density              ( DataSecondOrder.M_density ),
 	M_thickness            ( DataSecondOrder.M_thickness ),
-        M_poisson               ( DataSecondOrder.M_poisson ),
-        M_young                 ( DataSecondOrder.M_young ),
-        M_gamma              ( DataSecondOrder.M_gamma ),
-        M_beta                    ( DataSecondOrder.M_beta ),
-        M_factor                  ( DataSecondOrder.M_factor ),
+        M_poisson              ( DataSecondOrder.M_poisson ),
+        M_young                ( DataSecondOrder.M_young ),
+        M_gamma                ( DataSecondOrder.M_gamma ),
+        M_beta                 ( DataSecondOrder.M_beta ),
+        M_factor               ( DataSecondOrder.M_factor ),
         M_verbose              ( DataSecondOrder.M_verbose ),
-        M_order                   ( DataSecondOrder.M_order ),
-	M_isDamping           ( DataSecondOrder.M_isDamping )
+        M_order                ( DataSecondOrder.M_order ),
+	M_damping              ( DataSecondOrder.M_damping )
 {
 }
 
@@ -91,17 +88,17 @@ DataSecondOrder::operator=( const DataSecondOrder& DataSecondOrder )
 {
     if ( this != &DataSecondOrder )
     {
-        M_time                       = DataSecondOrder.M_time;
-        M_density                  = DataSecondOrder.M_density;
+        M_time                    = DataSecondOrder.M_time;
+        M_density                 = DataSecondOrder.M_density;
 	M_thickness               = DataSecondOrder.M_thickness;
-	M_poisson                  = DataSecondOrder.M_poisson;
-        M_young                    = DataSecondOrder.M_young;
-        M_gamma                 = DataSecondOrder.M_gamma;
-        M_beta                       = DataSecondOrder.M_beta;
-        M_factor                     = DataSecondOrder.M_factor;
+	M_poisson                 = DataSecondOrder.M_poisson;
+        M_young                   = DataSecondOrder.M_young;
+        M_gamma                   = DataSecondOrder.M_gamma;
+        M_beta                    = DataSecondOrder.M_beta;
+        M_factor                  = DataSecondOrder.M_factor;
         M_verbose                 = DataSecondOrder.M_verbose;
-	M_order                      = DataSecondOrder.M_order;
-	M_isDamping            = DataSecondOrder.M_isDamping;
+	M_order                   = DataSecondOrder.M_order;
+	M_damping                 = DataSecondOrder.M_damping;
     }
 
     return *this;
@@ -146,7 +143,7 @@ DataSecondOrder::setup( const GetPot& dataFile, const std::string& section )
 	  }
     }
 
-    M_isDamping     = dataFile( (section+"/damping").data(), false);
+    M_damping     = dataFile( (section+"/damping").data(), false);
 
     // space_discretization
     M_order     = dataFile( (section+"/space_discretization/order").data(), "P1" );
