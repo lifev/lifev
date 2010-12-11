@@ -30,7 +30,6 @@ along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
   @date 11-12-2010
   @author
 
-  @contributor Radu Popescu <radu.popescu@epfl.ch>
   @maintainer Radu Popescu <radu.popescu@epfl.ch>
 */
 
