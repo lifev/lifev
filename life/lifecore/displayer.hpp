@@ -3,8 +3,7 @@
 ************************************************************************
 
  This file is part of the LifeV Applications.
- Copyright (C) 2001-2006 EPFL, Politecnico di Milano, INRIA
-               2006-2010 EPFL, Politecnico di Milano
+ Copyright (C) 2009-2010 EPFL, Politecnico di Milano
 
  This library is free software; you can redistribute it and/or modify
  it under the terms of the GNU Lesser General Public License as
@@ -23,27 +22,26 @@
 
 ************************************************************************
 */
-//@HEADER
-
 /*!
  * @file
  *
- * @version 1.0
- * @date 2009-03-02
- * @author Paolo Crosetto <crosetto@iacspc70.epfl.ch>
- *
- * @version 1.4
- * @date 2009-03-02
- * @author Cristiano Malossi <cristiano.malossi@epfl.ch>
- *
  * @brief Template input variables for more general output messages:
  * now it is possible to display not only strings but also Int, Real, etc..
+ *
+ * @date 2009-03-02
+ * @author Paolo Crosetto <crosetto@iacspc70.epfl.ch>
+ * @author Cristiano Malossi <cristiano.malossi@epfl.ch>
+ *
+ * @maintainer Radu Popescu <radu.popescu@epfl.ch>
  */
-
 
 #ifndef DISPLAYER_H
 #define DISPLAYER_H 1
 
+#pragma GCC diagnostic ignored "-Wunused-variable"
+#pragma GCC diagnostic ignored "-Wunused-parameter"
+
+#include <boost/shared_ptr.hpp>
 #include <Epetra_ConfigDefs.h>
 #ifdef EPETRA_MPI
 #include <Epetra_MpiComm.h>
@@ -51,8 +49,10 @@
 #include <Epetra_SerialComm.h>
 #endif
 
+#pragma GCC diagnostic warning "-Wunused-variable"
+#pragma GCC diagnostic warning "-Wunused-parameter"
+
 #include <life/lifecore/life.hpp>
-#include <boost/shared_ptr.hpp>
 
 namespace LifeV
 {
@@ -155,7 +155,10 @@ public:
     /*!
      * @return the communicator
      */
-    const comm_PtrType& comm() const;
+    const comm_PtrType& comm() const
+    {
+        return M_comm;
+    }
 
     //@}
 
@@ -213,4 +216,4 @@ Displayer::leaderPrintMax( const T1& message1, const Real& localMax ) const
 
 } // Namespace LifeV
 
-#endif
+#endif // DISPLAYER_H
