@@ -235,9 +235,7 @@ public:
 
     bool  isDamping() const
     {
-        if (M_beta.size() == 1 || M_gamma.size()==1)
-            return  _beta +_gamma;
-        return false;
+        return M_isDamping;
     }
     //@}
 
@@ -248,9 +246,6 @@ private:
 
     //! Physics
     Real                   M_density; // densisty
-    Real                   _gamma;  // Damping coefficient (Mass)
-    Real                   _beta; // Damping coefficient (Stiffness)
-
     Real                   M_thickness;
 
     MaterialContainer_Type M_poisson;
@@ -261,8 +256,8 @@ private:
 
     //! Miscellaneous
     Real                   M_factor; // amplification factor for deformed mesh
-    UInt                   M_verbose; // temporal output verbose
-    std::string            M_order;
+    UInt                    M_verbose; // temporal output verbose
+    std::string         M_order;
     bool                   M_isDamping;  //true if damping else false
 
 };
