@@ -1,88 +1,117 @@
+//@HEADER
 /*
- This file is part of the LifeV library
- Copyright (C) 2001,2002,2003,2004 EPFL, INRIA and Politecnico di Milano
+*******************************************************************************
 
- This library is free software; you can redistribute it and/or
- modify it under the terms of the GNU Lesser General Public
- License as published by the Free Software Foundation; either
- version 2.1 of the License, or (at your option) any later version.
+    Copyright (C) 2004, 2005, 2007 EPFL, Politecnico di Milano, INRIA
+    Copyright (C) 2010 EPFL, Politecnico di Milano, Emory University
 
- This library is distributed in the hope that it will be useful,
- but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- Lesser General Public License for more details.
+    This file is part of LifeV.
 
- You should have received a copy of the GNU Lesser General Public
- License along with this library; if not, write to the Free Software
- Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+    LifeV is free software; you can redistribute it and/or modify
+    it under the terms of the GNU Lesser General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    LifeV is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+    Lesser General Public License for more details.
+
+    You should have received a copy of the GNU Lesser General Public License
+    along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
+
+*******************************************************************************
 */
+//@HEADER
+
+/*!
+    @file
+    @brief Zero dimensional entity
+
+    @author Luca Formaggia <luca.formaggia@polimi.it>
+    @contributor Marta D'Elia <mdelia2@mathcs.emory.edu>
+    @maintainer Marta D'Elia <mdelia2@mathcs.emory.edu>
+
+    @date 00-00-0000
+
+*/
+
 #include <life/lifemesh/geo0D.hpp>
+#include <lifeconfig.h>
 
 namespace LifeV
 {
-/*--------------------------------------------------------------
-                                 Geo0D
-  ---------------------------------------------------------------*/
-Geo0D::Geo0D()
-        :
+
+
+// ==========================================
+// Constructor & Destructor
+// ==========================================
+Geo0D::Geo0D() :
         MeshEntityWithBoundary( 0 ),
-        _coor()
+        M_coordinates()
 {
-    _coor.assign( 0 );
+    M_coordinates.assign( 0 );
 }
 
-Geo0D::Geo0D( ID id, bool boundary )
+Geo0D::Geo0D( ID identity, bool boundary )
         :
-        MeshEntityWithBoundary( id, boundary ),
-        _coor()
+        MeshEntityWithBoundary( identity, boundary ),
+        M_coordinates()
 {
-    _coor.assign( 0 );
+    M_coordinates.assign( 0 );
 }
 
-Geo0D::Geo0D( ID id, Real x, Real y, Real z, bool boundary )
+Geo0D::Geo0D( ID identity, Real x, Real y, Real z, bool boundary )
         :
-        MeshEntityWithBoundary( id, boundary ),
-        _coor()
+        MeshEntityWithBoundary( identity, boundary ),
+        M_coordinates()
 {
-    _coor[ 0 ] = x;
-    _coor[ 1 ] = y;
-    _coor[ 2 ] = z;
+    M_coordinates[ 0 ] = x;
+    M_coordinates[ 1 ] = y;
+    M_coordinates[ 2 ] = z;
 }
 
-Geo0D::Geo0D( Geo0D const & G )
+Geo0D::Geo0D( Geo0D const & Element )
         :
-        MeshEntityWithBoundary( G.id(), G.boundary() ),
-        _coor( G._coor )
+        MeshEntityWithBoundary( Element.id(), Element.boundary() ),
+        M_coordinates( Element.M_coordinates )
 {
+
 }
 
+// ==========================================
+// Operators
+// ==========================================
 Geo0D &
-Geo0D::operator=( Geo0D const & G )
+Geo0D::operator=( Geo0D const & Element )
 {
-    if (  this == &G )
+    if (  this == &Element )
         return *this;
-    this->setId(G.id());
-    setBoundary(G.boundary());
-    _coor = G._coor;
+
+    this->setId(Element.id());
+    setBoundary(Element.boundary());
+    M_coordinates = Element.M_coordinates;
     return *this;
 }
 
-
+// ==========================================
+// Methods
+// ==========================================
 std::ostream &
 Geo0D::showMe( bool verbose, std::ostream & out ) const
 {
     out.setf( std::ios::scientific, std::ios::floatfield );
-    out << " Geo0D object " << std::endl;
+    out << "----- Geo0D object -----" << std::endl;
     if ( verbose )
     {
         unsigned i;
         out << " Coordinates:" << std::endl;
-        Real const * c = coor();
+        Real const * coordinateVector = coor();
         for ( i = 0; i < nDimensions-1; i++ )
         {
-            out << c[ i ] << ",  ";
+            out << coordinateVector[ i ] << ",  ";
         }
-        out << c[i] << std::endl << std::endl;
+        out << coordinateVector[ i ] << std::endl << std::endl;
     }
     out << " ID       = " << id()      << std::endl;
     out << " local ID = " << localId() << std::endl;

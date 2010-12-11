@@ -1,766 +1,1116 @@
+//@HEADER
 /*
- This file is part of the LifeV library
- Copyright (C) 2001,2002,2003,2004 EPFL, INRIA and Politecnico di Milano
+*******************************************************************************
 
- This library is free software; you can redistribute it and/or
- modify it under the terms of the GNU Lesser General Public
- License as published by the Free Software Foundation; either
- version 2.1 of the License, or (at your option) any later version.
+    Copyright (C) 2004, 2005, 2007 EPFL, Politecnico di Milano, INRIA
+    Copyright (C) 2010 EPFL, Politecnico di Milano, Emory University
 
- This library is distributed in the hope that it will be useful,
- but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- Lesser General Public License for more details.
+    This file is part of LifeV.
 
- You should have received a copy of the GNU Lesser General Public
- License along with this library; if not, write to the Free Software
- Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+    LifeV is free software; you can redistribute it and/or modify
+    it under the terms of the GNU Lesser General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    LifeV is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+    Lesser General Public License for more details.
+
+    You should have received a copy of the GNU Lesser General Public License
+    along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
+
+*******************************************************************************
 */
-#ifndef __MESH_UTIL_BASE__
-#define __MESH_UTIL_BASE__
-#include <vector>
+//@HEADER
+
+/*!
+    @file
+    @brief Base utilities operating on meshes
+
+    @contributor Tiziano Passerini <tiziano@mathcs.emory.edu>
+    @maintainer Tiziano Passerini <tiziano@mathcs.emory.edu>
+
+    This file contains a set of base utilities used to test mesh entities or
+    operate on them
+ */
+
+#ifndef MESHUTILITYBASE_H
+#define MESHUTILITYBASE_H 1
+
 #include <algorithm>
+#include <iostream>
 #include <set>
+#include <vector>
 
 #include <life/lifecore/life.hpp>
-#include <life/lifemesh/regionMesh3D.hpp>
+#include <life/lifecore/switch.hpp>
+#include <life/lifemesh/bareItems.hpp>
+#include <life/lifemesh/markers.hpp>
+#include <life/lifemesh/meshEntity.hpp>
 
 namespace LifeV
 {
-/*!
-  \brief Base utilities operating on meshes
-
-
-  This file contains a set of base utilities used to test mesh entities or
-  operate on them
-
-*/
 
 //! A locally used structure, not meant for general use
 typedef std::map<BareFace, std::pair<ID, ID >,
-cmpBareItem<BareFace> > TempFaceContainer;
+cmpBareItem<BareFace> > temporaryFaceContainer_Type;
+// deprecated
+typedef temporaryFaceContainer_Type TempFaceContainer;
 
 //! A locally used structure, not meant for general use
 typedef std::map<BareEdge, std::pair<ID, ID>,
-cmpBareItem<BareEdge> > TempEdgeContainer;
+cmpBareItem<BareEdge> > temporaryEdgeContainer_Type;
+// deprecated
+typedef temporaryEdgeContainer_Type TempEdgeContainer;
 
 /*
 *******************************************************************************
                             FUNCTORS
 *******************************************************************************
 */
-//! \defgroup Test_Functors Some useful functors to be used for test mesh entities
+//! @defgroup Test_Functors Some useful functors to be used to test mesh entities
 
-/*! \ingroup Test_Functors
-  \briefFunctor to check if a Point, Face or Edge is on the boundary.
+//! Functor to check if a Point, Face or Edge is on the boundary
+/*!
+    @ingroup Test_Functors
 
-  \precond It assumes that boundary points in RegionMesh are correctly set.
-  \precond   the RegionMesh must export the typenames
-  PointType, FaceType and EdgeType.
+    A geometric entity is on the boundary if all its vertices are boundary vertices.
+
+    @pre It assumes that boundary points in the mesh are correctly set.
+    @pre The MeshType must export the typenames PointType, FaceType and EdgeType.
 */
-template <typename RegionMesh>
+template <typename MeshType>
 class EnquireBEntity
 {
 public:
-    EnquireBEntity( RegionMesh const & mesh ) : pmesh( &mesh )
+
+    //! @name Public Types
+    //@{
+    // todo use boost::shared_ptr
+    typedef MeshType                      mesh_Type;
+    typedef mesh_Type const *             meshPtr_Type;
+    typedef typename mesh_Type::FaceType  face_Type;
+    typedef typename mesh_Type::EdgeType  edge_Type;
+    typedef typename mesh_Type::PointType point_Type;
+
+    // The following should be removed
+    typedef typename mesh_Type::FaceType  FaceType;
+    typedef typename mesh_Type::EdgeType  EdgeType;
+    typedef typename mesh_Type::PointType PointType;
+    //@}
+
+    //! @name Constructor & Destructor
+    //@{
+
+    //! Constructor taking a mesh object
+    /*!
+        @param mesh a mesh object
+     */
+    explicit EnquireBEntity( mesh_Type const & mesh ) : meshPtr( &mesh )
     {}
-    ;
-    typedef typename RegionMesh::FaceType FaceType;
-    typedef typename RegionMesh::EdgeType EdgeType;
-    typedef typename RegionMesh::PointType PointType;
 
-    bool operator() ( FaceType & face )
+    //! Copy Constructor
+    EnquireBEntity( EnquireBEntity const & enquireBEntity ) :
+            meshPtr( enquireBEntity.meshPtr )
+    {}
+
+    //! Virtual Destructor
+    virtual ~EnquireBEntity()
+    {}
+    //@}
+
+    //! @name Operators
+    //@{
+
+    //! The function call operator
+    /*!
+        @param face a face entity in the mesh_Type
+        @return true if the face is on the boundary, false otherwise
+     */
+    bool operator() ( face_Type & face )
     {
-        bool isboundary = true;
-        for ( UInt k = 1; k <= FaceType::numVertices; ++k )
+        bool isBoundary = true;
+        for ( UInt kPointId = 1; kPointId <= face_Type::numVertices; ++kPointId )
         {
-            isboundary = isboundary & face.point( k ).boundary();
+            isBoundary = isBoundary & face.point( kPointId ).boundary();
         }
-        return isboundary;
+        return isBoundary;
     }
 
-    bool operator() ( EdgeType & edge )
+    //! The function call operator
+    /*!
+        @param edge an edge entity in the mesh_Type
+        @return true if the edge is on the boundary, false otherwise
+     */
+    bool operator() ( edge_Type & edge )
     {
-        bool isboundary = true;
-        for ( UInt k = 1; k <= EdgeType::numVertices; ++k )
+        bool isBoundary = true;
+        for ( UInt kPointId = 1; kPointId <= edge_Type::numVertices; ++kPointId )
         {
-            isboundary = isboundary & edge.point( k ).boundary();
+            isBoundary = isBoundary & edge.point( kPointId ).boundary();
         }
-        return isboundary;
+        return isBoundary;
     }
 
-    INLINE bool operator() ( PointType & point )
+    //! The function call operator
+    /*!
+        @param point a point entity in the mesh_Type
+        @return true if the point is on the boundary, false otherwise
+     */
+    inline bool operator() ( point_Type & point )
     {
         return point.boundary();
     }
 
+    //@}
+
 private:
-    EnquireBEntity()
-    {}
-    RegionMesh const * pmesh;
+    //! @name Private Types
+    //@{
+
+    //! Empty Constructor
+    EnquireBEntity() {}
+
+    //@}
+
+    meshPtr_Type meshPtr;
 };
 
-//!\ingroup Test_Functors
-/*! Functor to check if a Face is on the boundary, by using the information
- contained in a TempFaceContainer produced by findBoundaryFaces(). It does
- not use the information contained in the mesh PointList, so it differs
- from EnquireBEntity.
- \precond bfaces have been previously set by a call to FindBoundaryFaces
+
+//! Functor to check if a Face is on the boundary
+/*!
+    @ingroup Test_Functors
+
+    This object uses the information contained in a FaceContainer produced
+    by findBoundaryFaces(). It does not use the information contained in the
+    mesh PointList, so it differs from EnquireBEntity.
+
+    @pre boundaryFaceContainer has been previously set by a call to findBoundaryFaces()
 */
-template <typename RegionMesh>
+template <typename MeshType>
 class EnquireBFace
 {
 public:
-    typedef typename RegionMesh::FaceType FaceType;
-    typedef typename RegionMesh::FaceShape FaceShape;
 
-    EnquireBFace( RegionMesh const & mesh, TempFaceContainer const & bfaces ) :
-            pmesh( &mesh ), pbfaces( &bfaces )
+    //! @name Public Types
+    //@{
+    typedef MeshType                            mesh_Type;
+    typedef mesh_Type const *                   meshPtr_Type;
+    typedef typename mesh_Type::FaceType        face_Type;
+    typedef typename mesh_Type::FaceShape       faceShape_Type;
+    typedef temporaryFaceContainer_Type const * temporaryFaceContainerPtr_Type;
+    // The following should be removed
+    typedef typename mesh_Type::FaceType  FaceType;
+    typedef typename mesh_Type::FaceShape FaceShape;
+    //@}
+
+    //! @name Constructor & Destructor
+    //@{
+
+    //! Constructor taking a mesh object and a face container
+    /*!
+        @param mesh a mesh object
+        @param boundaryFaceContainer a container of boundary faces
+        @pre boundaryFaceContainer has been previously set by a call to findBoundaryFaces()
+     */
+    EnquireBFace( mesh_Type const & mesh, temporaryFaceContainer_Type const & boundaryFaceContainer ) :
+            meshPtr                 ( &mesh ),
+            boundaryFaceContainerPtr( &boundaryFaceContainer )
     {}
 
-    bool operator() ( FaceType & f )
-    {
-        ID i1, i2, i3, i4;
-        BareFace bface;
+    //! Copy Constructor
+    EnquireBFace( EnquireBFace const & enquireBFace ) :
+            meshPtr                 ( enquireBFace.meshPtr ),
+            boundaryFaceContainerPtr( enquireBFace.boundaryFaceContainerPtr )
+    {}
 
-        i1 = f.point( 1 ).id();
-        i2 = f.point( 2 ).id();
-        i3 = f.point( 3 ).id();
-        if ( FaceShape::numVertices == 4 )
+    //! Virtual Destructor
+    virtual ~EnquireBFace()
+    {}
+    //@}
+
+    //! @name Operators
+    //@{
+
+    //! The function call operator
+    /*!
+        @param face a face entity in the mesh_Type
+        @return true if the face is on the boundary, false otherwise
+     */
+    bool operator() ( face_Type & face )
+    {
+        ID point1Id, point2Id, point3Id, point4Id;
+        BareFace bareFace;
+
+        point1Id = face.point( 1 ).id();
+        point2Id = face.point( 2 ).id();
+        point3Id = face.point( 3 ).id();
+        if ( faceShape_Type::numVertices == 4 )
         {
-            i4 = f.point( 4 ).id();
-            bface = ( makeBareFace( i1, i2, i3, i4 ) ).first;
+            point4Id = face.point( 4 ).id();
+            bareFace = ( makeBareFace( point1Id, point2Id, point3Id, point4Id ) ).first;
         }
         else
         {
-            bface = ( makeBareFace( i1, i2, i3 ) ).first;
+            bareFace = ( makeBareFace( point1Id, point2Id, point3Id ) ).first;
         }
-        return pbfaces->find( bface ) != pbfaces->end();
+        return ( boundaryFaceContainerPtr->find( bareFace ) != boundaryFaceContainerPtr->end() );
     }
+
+    //@}
 private:
+    //! @name Private Methods
+    //@{
+
+    //! Empty Constructor
     EnquireBFace()
     {}
-    ;
-    RegionMesh const * pmesh;
-    TempFaceContainer const * pbfaces;
+    //@}
+
+    meshPtr_Type meshPtr;
+    temporaryFaceContainerPtr_Type boundaryFaceContainerPtr;
 };
 
-//!\ingroup Test_Functors
-/*! Functor to check if an edge is on the boundary, by using the information
- contained in a TempFaceContainer produced by findBoundaryEdges(). It does
- not use the information contained in the mesh PointList, so it differs
- from EnquireBEntity.
 
- \precond bedges have been previously set by a call to FindBoundaryEdges()
+/*! Functor to check if an edge is on the boundary
+
+    @ingroup Test_Functors
+
+    This object uses the information contained in an EdgeContainer produced
+    by findBoundaryEdges(). It does not use the information contained in the mesh
+    PointList, so it differs from EnquireBEntity.
+
+    @pre boundaryEdgeContainer has been previously set by a call to findBoundaryEdges()
 
 */
-template <typename RegionMesh>
+template <typename MeshType>
 class EnquireBEdge
 {
 public:
-    typedef typename RegionMesh::EdgeType EdgeType;
-    typedef typename RegionMesh::EdgeShape EdgeShape;
 
-    EnquireBEdge( RegionMesh const & mesh, TempEdgeContainer const & bedges ) :
-            pmesh( &mesh ), pbedges( &bedges )
+    //! @name Public Types
+    //@{
+    typedef MeshType                            mesh_Type;
+    typedef mesh_Type const *                   meshPtr_Type;
+    typedef typename mesh_Type::EdgeType        edge_Type;
+    typedef typename mesh_Type::EdgeShape       edgeShape_Type;
+    typedef temporaryEdgeContainer_Type const * temporaryEdgeContainerPtr_Type;
+    // The following should be removed
+    typedef typename mesh_Type::EdgeType  EdgeType;
+    typedef typename mesh_Type::EdgeShape EdgeShape;
+    //@}
+
+    //! @name Constructor & Destructor
+    //@{
+
+    //! Constructor taking a mesh object and an edge container
+    /*!
+        @param mesh a mesh object
+        @param boundaryEdgeContainer a container of boundary edges
+     */
+    EnquireBEdge( mesh_Type const & mesh, temporaryEdgeContainer_Type const & boundaryEdgeContainer ) :
+            meshPtr                 ( &mesh ),
+            boundaryEdgeContainerPtr( &boundaryEdgeContainer )
     {}
 
-    bool operator() ( EdgeType & f )
-    {
-        ID i1, i2;
-        BareEdge bedge;
+    //! Copy Constructor
+    EnquireBEdge( EnquireBEdge const & enquireBEdge ) :
+            meshPtr                 ( enquireBEdge.meshPtr ),
+            boundaryEdgeContainerPtr( enquireBEdge.boundaryEdgeContainerPtr )
+    {}
 
-        i1 = f.point( 1 ).id();
-        i2 = f.point( 2 ).id();
-        bedge = ( makeBareEdge( i1, i2 ) ).first;
-        return pbedges->find( bedge ) != pbedges->end();
+    //! Virtual Destructor
+    virtual ~EnquireBEdge()
+    {}
+    //@}
+
+    //! @name Operators
+    //@{
+
+    //! The function call operator
+    /*!
+        @param edge an edge entity in the mesh_Type
+        @return true if the edge is on the boundary, false otherwise
+     */
+    bool operator() ( edge_Type & edge )
+    {
+        ID point1Id, point2Id;
+        BareEdge bareEdge;
+
+        point1Id = edge.point( 1 ).id();
+        point2Id = edge.point( 2 ).id();
+        bareEdge = ( makeBareEdge( point1Id, point2Id ) ).first;
+        return boundaryEdgeContainerPtr->find( bareEdge ) != boundaryEdgeContainerPtr->end();
     }
 
+    //@}
 private:
+    //! @name Private Methods
+    //@{
+
+    //! Empty Constructor
     EnquireBEdge()
     {}
-    ;
-    RegionMesh const * pmesh;
-    TempEdgeContainer const * pbedges;
+    //@}
+
+    meshPtr_Type                   meshPtr;
+    temporaryEdgeContainerPtr_Type boundaryEdgeContainerPtr;
 };
 
-//! \ingroup Test_Functors
-/*! Functor to check if a mesh entity with boundary indicator (for instance
-  a GeoPoint) is on the boundary, by enquiring its boundary flag.
-  \warning It assumes that boundary points are correctly set.
+
+/*! Functor to check if a mesh entity with boundary indicator is on the boundary
+
+    @ingroup Test_Functors
+
+    This objects works on mesh entities with boundary indicator (for instance a GeoPoint)
+    by enquiring its boundary flag.
+
+    @warning It assumes that boundary indicators are correctly set.
 */
-template <typename RegionMesh>
+template <typename MeshType>
 class EnquireBPoint
 {
 public:
-    EnquireBPoint( RegionMesh & mesh ) : pmesh( &mesh )
+
+    //! @name Public Types
+    //@{
+    typedef MeshType                      mesh_Type;
+    typedef mesh_Type *                   meshPtr_Type;
+    //@}
+
+    //! @name Constructor & Destructor
+    //@{
+
+    //! Constructor taking a mesh object
+    /*!
+        @param mesh a mesh object
+     */
+    explicit EnquireBPoint( mesh_Type & mesh ) : meshPtr( &mesh )
     {}
-    ;
-    bool operator() ( MeshEntityWithBoundary & e )
+
+    //! Copy Constructor
+    EnquireBPoint( EnquireBPoint const & enquireBPoint ) :
+            meshPtr( enquireBPoint.meshPtr )
+    {}
+
+    //! Virtual Destructor
+    virtual ~EnquireBPoint()
+    {}
+    //@}
+
+    //! @name Operators
+    //@{
+
+    //! The function call operator
+    /*!
+        @param meshEntityWithBoundary a mesh entity with boundary indicator
+        @return true if the entity is on the boundary, false otherwise
+     */
+    bool operator() ( MeshEntityWithBoundary & meshEntityWithBoundary )
     {
-        return e.boundary();
+        return meshEntityWithBoundary.boundary();
     }
+    //@}
+
 private:
+    //! @name Public Types
+    //@{
+
+    //! Empty Constructor
     EnquireBPoint()
     {}
-    ;
-    RegionMesh * pmesh;
+    //@}
+
+    meshPtr_Type meshPtr;
 };
 
 
-//! \ingroup Test_Functors
-/*! This functor is used to do some geometry checks It returns a coordinate
+/*! @ingroup Test_Functors
+
+    @brief This functor is used to do some geometry checks.
+
+    It is instantiated with the index of the component to be extracted from a vector
+    of geometric coordinates.
  */
 class GetCoordComponent
 {
 public:
+
+    //! @name Constructor & Destructor
+    //@{
+
+    //! Empty Constructor
     GetCoordComponent();
-    GetCoordComponent( int i );
+
+    //! Constructor taking the component
+    /*!
+        @param i the index of the component to be extracted from a vector of geometric coordinates
+     */
+    explicit GetCoordComponent( int i );
+
+    //! Copy constructor
+    GetCoordComponent( const GetCoordComponent& getCoordComponent ) :
+            componentIndex( getCoordComponent.componentIndex )
+    {}
+
+    //! Virtual Destructor
+    virtual ~GetCoordComponent()
+    {}
+    //@}
+
+
+    //! @name Operators
+    //@{
+
+    //! The function call operator
+    /*!
+        If componentIndex is valid (0 <= 2), the function call operator will operate on a vector
+        by returning a new vector of geometric coordinates, with the single
+        non null component corresponding to the componentIndex.
+
+        Otherwise, the vector given as an argument will be returned unchanged.
+
+        @param[in] x first component of the input vector
+        @param[in] y second component of the input vector
+        @param[in] z third component of the input vector
+        @param[out] ret output vector
+     */
     void operator() ( Real const x, Real const y,
                       Real const z, Real ret[ 3 ] ) const;
+
+    //@}
 private:
-    int comp;
+    int componentIndex;
 };
 
-//! \ingroup Test_Functors
-/*! This functor is used to do some geometry checks It returns a vector of ones
+
+/*! @ingroup Test_Functors
+
+    This functor is used to do some geometry checks.
+    It returns a vector of ones
  */
 class GetOnes
 {
 public:
+    //! @name Constructor & Destructor
+    //@{
+
+    //! Empty Constructor
+    GetOnes()
+    {}
+
+    //! Copy Constructor
+    GetOnes( const GetOnes& /* getOnes */ )
+    {}
+
+    //! Virtual Destructor
+    virtual ~GetOnes()
+    {}
+    //@}
+
+
+    //! @name Operators
+    //@{
+
+    //! The function call operator
+    /*!
+        @param[in] x first component of the input vector
+        @param[in] y second component of the input vector
+        @param[in] z third component of the input vector
+        @param[out] ret output vector (always a vector of ones)
+     */
     void operator() ( Real const x, Real const y,
                       Real const z, Real ret[ 3 ] ) const;
+    //@}
 };
+
+
 /*
 *******************************************************************************
                             EDGES/FACES FINDERS
 *******************************************************************************
 */
 
-//! Finds boundary faces.
-/*!  A low level routine, not meant to be called directly. It creates a
-container with all the information needed to set up properly the boundary
-faces connectivities.
+//! Finds mesh faces
+/*!
+    A low level routine, not meant to be called directly. It creates a
+    container with all the information needed to set up properly the boundary
+    faces connectivities.
 
-\param mesh A 3D mesh.
+    @param mesh A 3D mesh.
 
-\param NumInternalFaces. A reference to an integer returning the number of internal faces found.
+    @param boundaryFaceContainer[out] This container will eventually contain a map whose key are
+    the BareFaces corresponding to the boundary faces; the map data are pairs of
+    IDs: the ID of the adjacent element and the relative position of the face
+    in the element. The search of boundary faces does not rely on the proper setting of boundary nodes.
 
-\param bfaces This container will eventually contain a map whose key are
-the BareFace corresponding to the boundary faces and the data a pair of
-IDs: the ID of the adjacent element and the relative position of the face
-in the element. The search of boundary faces does not rely on the proper setting of boundary nodes.
+    @param NumInternalFaces[out] A reference to an integer returning the number of internal faces found.
 
-\param allFaces When this bool is set true the function will also construct the set of internale faces, stored in intfaces.
+    @param[out] internalFaces A container that will possibly contain a map whose keys are
+    the BareFaces corresponding to internal faces and whose data are pairs of IDs:
+    the ID of the two elements adjacent to the face.
 
-\param intfaces A container that will possibly contain a map whose keys are
-the BareFace corresponding to an internal faces and the data a pair of IDs:
-the ID of the two elements adjacent to the face.
+    @param buildAllFaces When this bool is set true the function will also construct the set
+    of internal faces, stored in internalFaces.
 
-\return Number of boundary faces found
+    @return Number of boundary faces found
+
+    @note this method is intended to work on 3D meshes
 */
-template <typename RegionMesh3D>
-UInt findFaces( const RegionMesh3D & mesh, TempFaceContainer & bfaces,
-                UInt & numInternalFaces, TempFaceContainer & intfaces,
-                bool allFaces = false )
+template <typename MeshType>
+UInt findFaces( const MeshType & mesh, temporaryFaceContainer_Type & boundaryFaceContainer,
+                UInt & numInternalFaces, temporaryFaceContainer_Type & internalFaces,
+                bool buildAllFaces = false )
 {
-    UInt i1, i2, i3, i4;
-    BareFace bface;
-    typename RegionMesh3D::VolumeShape ele;
-    typedef typename RegionMesh3D::Volumes Volumes;
-    TempFaceContainer fctmp;
-    TempFaceContainer::iterator fi;
+    UInt                                  point1Id, point2Id, point3Id, point4Id;
+    BareFace                              bareFace;
+    typename MeshType::VolumeShape        volumeShape;
+    typedef typename MeshType::Volumes    volumeContainer_Type;
+    temporaryFaceContainer_Type::iterator faceContainerIterator;
 
-    // clean first in case it has been alredy used
-
-    bfaces.clear();
-    if ( allFaces )
-        intfaces.clear();
+    // clean first in case it has been already used
+    boundaryFaceContainer.clear();
+    if ( buildAllFaces )
+        internalFaces.clear();
     numInternalFaces = 0;
 
-    for ( typename Volumes::const_iterator iv = mesh.volumeList.begin();
-            iv != mesh.volumeList.end(); ++iv )
+    for ( typename volumeContainer_Type::const_iterator volumeContainerIterator = mesh.volumeList.begin();
+            volumeContainerIterator != mesh.volumeList.end(); ++volumeContainerIterator )
     {
-        for ( ID j = 1; j <= mesh.numLocalFaces(); ++j )
+        for ( ID jFaceLocalId = 1; jFaceLocalId <= mesh.numLocalFaces(); ++jFaceLocalId )
         {
-            i1 = ele.fToP( j, 1 );
-            i2 = ele.fToP( j, 2 );
-            i3 = ele.fToP( j, 3 );
+            point1Id = volumeShape.fToP( jFaceLocalId, 1 );
+            point2Id = volumeShape.fToP( jFaceLocalId, 2 );
+            point3Id = volumeShape.fToP( jFaceLocalId, 3 );
             // go to global
-            i1 = ( iv->point( i1 ) ).id();
-            i2 = ( iv->point( i2 ) ).id();
-            i3 = ( iv->point( i3 ) ).id();
-            if ( RegionMesh3D::FaceShape::numVertices == 4 )
+            point1Id = ( volumeContainerIterator->point( point1Id ) ).id();
+            point2Id = ( volumeContainerIterator->point( point2Id ) ).id();
+            point3Id = ( volumeContainerIterator->point( point3Id ) ).id();
+            if ( MeshType::FaceShape::numVertices == 4 )
             {
-                i4 = ele.fToP( j, 4 );
-                i4 = ( iv->point( i4 ) ).id();
-                bface = ( makeBareFace( i1, i2, i3, i4 ) ).first;
+                point4Id = volumeShape.fToP( jFaceLocalId, 4 );
+                point4Id = ( volumeContainerIterator->point( point4Id ) ).id();
+                bareFace = ( makeBareFace( point1Id, point2Id, point3Id, point4Id ) ).first;
             }
             else
             {
-                bface = ( makeBareFace( i1, i2, i3 ) ).first;
+                bareFace = ( makeBareFace( point1Id, point2Id, point3Id ) ).first;
             }
 
-            if ( ( fi = bfaces.find( bface ) ) == bfaces.end() )
+            if ( ( faceContainerIterator = boundaryFaceContainer.find( bareFace ) ) == boundaryFaceContainer.end() )
             {
-                bfaces.insert( std::make_pair( bface, std::make_pair( iv->id(), j ) ) );
+                boundaryFaceContainer.insert(
+                        std::make_pair( bareFace, std::make_pair( volumeContainerIterator->id(), jFaceLocalId ) ) );
             }
             else
             {
-                if ( allFaces && i1 > i2 )
-                    intfaces.insert
-                    ( ( std::make_pair( bface, std::make_pair( iv->id(), j ) ) ) );
-                bfaces.erase( fi ); // counted twice: internal face
+                if ( buildAllFaces && point1Id > point2Id )
+                {
+                    internalFaces.insert(
+                            ( std::make_pair( bareFace, std::make_pair( volumeContainerIterator->id(), jFaceLocalId ) ) ) );
+                }
+                boundaryFaceContainer.erase( faceContainerIterator ); // counted twice: internal face
                 ++numInternalFaces;
             }
         }
     }
-    return bfaces.size();
+    return boundaryFaceContainer.size();
 }
 
-//! Finds boundary edges.
-/*!  A low level routine, not meant to be called directly. It creates a
-container with all the information needed to set up properly the boundary
-face connectivities.
 
-\param mesh A 3D mesh.
+//! Finds boundary faces
+/*!
+    A low level routine, not meant to be called directly. It creates a
+    container with all the information needed to set up properly the boundary
+    face connectivities.
 
-\param bfaces This container will be fillled with the bounddary faces.
+    @param mesh A 3D mesh.
 
-\return Number of boundary faces found.
+    @param boundaryFaceContainer[out] This container will eventually contain a map whose key are
+    the BareFaces corresponding to the boundary faces; the map data are pairs of
+    IDs: the ID of the adjacent element and the relative position of the face
+    in the element. The search of boundary faces does not rely on the proper setting of boundary nodes.
 
+    @param numInternalFaces[out] A reference to an integer returning the number of internal faces found.
+
+    @return Number of boundary faces found.
+
+    @note this method is intended to work on 3D meshes
 */
-template <typename RegionMesh3D>
-UInt findBoundaryFaces( const RegionMesh3D & mesh,
-                        TempFaceContainer & bfaces,
+template <typename MeshType>
+UInt findBoundaryFaces( const MeshType & mesh,
+                        temporaryFaceContainer_Type & boundaryFaceContainer,
                         UInt & numInternalFaces )
 {
-    TempFaceContainer dummy;
-    return findFaces( mesh, bfaces, numInternalFaces, dummy, false );
+    temporaryFaceContainer_Type dummy;
+    return findFaces( mesh, boundaryFaceContainer, numInternalFaces, dummy, false );
 }
 
 
+//! Finds boundary edges
+/*!
+    A low level routine, not meant to be called directly. It creates a
+    container with all the information needed to set up properly the boundary
+    edges connectivities.
 
-//! Finds boundary edges.
-/*!  A low level routine, not meant to be called directly. It creates a
-container with all the information needed to set up properly the boundary
-edges connectivities.
+    @param mesh A mesh.
 
-\param mesh A 3D mesh.
+    @param boundaryEdgeContainer[out] This container will eventually contain a map whose key are
+    the BareEdges corresponding to the boundary edges; the map data are pairs of
+    IDs: the ID of the adjacent face and the relative position of the edge
+    in the element. The search of boundary edges does not rely on the proper setting of boundary nodes.
 
-\param bedges This container contains a set with the BareEdge of the
-boundary edges.
+    @return Number of boundary edges found.
 
-\return Number of boundary edges found.
-
-\pre The list of boundary faces must be correctly set.
+    @pre The list of boundary faces in the mesh must be correctly set.
 */
-template <typename RegionMesh3D>
-UInt findBoundaryEdges( const RegionMesh3D & mesh, TempEdgeContainer & bedges )
+template <typename MeshType>
+UInt findBoundaryEdges( const MeshType & mesh, temporaryEdgeContainer_Type & boundaryEdgeContainer )
 {
-    UInt i1, i2;
-    BareEdge bedge;
-    typedef typename RegionMesh3D::FaceShape FaceShape;
-    typedef typename RegionMesh3D::Faces Faces;
+    UInt                                 point1Id, point2Id;
+    BareEdge                             bareEdge;
+    typedef typename MeshType::FaceShape faceShape_Type;
+    typedef typename MeshType::Faces     faceContainer_Type;
 
 
     if ( ! mesh.hasFaces() )
         return 0;
 
-    // clean first in case it has been alredy used
-    bedges.clear();
+    // clean first in case it has been already used
+    boundaryEdgeContainer.clear();
 
-    for ( typename Faces::const_iterator ifa = mesh.faceList.begin();
-            ifa != mesh.faceList.begin() + mesh.numBFaces(); ++ifa )
+    // the following cycle assumes to visit only the boundary faces in mesh.faceList()
+    for ( typename faceContainer_Type::const_iterator faceContainerIterator = mesh.faceList.begin();
+            faceContainerIterator != mesh.faceList.begin() + mesh.numBFaces(); ++faceContainerIterator )
     {
-        for ( ID j = 1; j <= mesh.numLocalEdgesOfFace(); ++j )
+        for ( ID jEdgeLocalId = 1; jEdgeLocalId <= mesh.numLocalEdgesOfFace(); ++jEdgeLocalId )
         {
-            i1 = FaceShape::eToP( j, 1 );
-            i2 = FaceShape::eToP( j, 2 );
+            point1Id = faceShape_Type::eToP( jEdgeLocalId, 1 );
+            point2Id = faceShape_Type::eToP( jEdgeLocalId, 2 );
             // go to global
-            i1 = ( ifa->point( i1 ) ).id();
-            i2 = ( ifa->point( i2 ) ).id();
-            bedge = ( makeBareEdge( i1, i2 ) ).first;
-            bedges.insert( std::make_pair( bedge, std::make_pair( ifa->id(), j ) ) );
+            point1Id = ( faceContainerIterator->point( point1Id ) ).id();
+            point2Id = ( faceContainerIterator->point( point2Id ) ).id();
+            bareEdge = ( makeBareEdge( point1Id, point2Id ) ).first;
+            boundaryEdgeContainer.insert(
+                    std::make_pair( bareEdge, std::make_pair( faceContainerIterator->id(), jEdgeLocalId ) ) );
         }
     }
-    return bedges.size();
+    return boundaryEdgeContainer.size();
 }
 
-//! Finds all  edges.
-/*!  A low level routine, not meant to be called directly. It creates a
-container with all the information needed to set up properly the edge
-connectivities.
 
-\param mesh A 3D mesh.
+//! Finds internal edges.
+/*!
+    A low level routine, not meant to be called directly. It creates a
+    container with all the information needed to set up properly the edge
+    connectivities.
 
-\param bedges This container contains a set of  BareEdges for all mesh edges.
+    @param mesh A 3D mesh.
 
-\return Number of edges found.
+    @param boundaryEdgeContainer[in] This container contains a map whose key are
+    the BareEdges corresponding to the boundary edges; the map data are pairs of
+    IDs (if generated from findBoundaryEdges(), those pairs will contain be the ID
+    of the adjacent mesh element and the relative position of the edge in the element).
+
+    @param internalEdgeContainer[out] This container contains a map whose key are
+    the BareEdges corresponding to the boundary edges; the map data are pairs of
+    IDs: the ID of the adjacent element and the relative position of the edge
+    in the element.
+
+    @return Number of edges found.
 
 */
-
-template <typename RegionMesh3D>
-UInt findInternalEdges( const RegionMesh3D & mesh,
-                        const TempEdgeContainer & boundary_edges,
-                        TempEdgeContainer & internal_edges )
+template <typename MeshType>
+UInt findInternalEdges( const MeshType & mesh,
+                        const temporaryEdgeContainer_Type & boundaryEdgeContainer,
+                        temporaryEdgeContainer_Type & internalEdgeContainer )
 {
-    UInt i1, i2;
-    BareEdge bedge;
-    typedef typename RegionMesh3D::ElementShape VolumeShape;
-    typedef typename RegionMesh3D::Volumes Volumes;
-    TempEdgeContainer tec;
+    UInt                                   point1Id, point2Id;
+    BareEdge                               bareEdge;
+    typedef typename MeshType::VolumeShape volumeShape_Type;
+    typedef typename MeshType::Volumes     volumeContainer_Type;
+    temporaryEdgeContainer_Type            temporaryEdgeContainer;
 
     ASSERT0( mesh.numVolumes() > 0, "We must have some 3D elements stored n the mesh to use this function!" );
 
-    internal_edges.clear();
-    internal_edges.swap(tec);
+    internalEdgeContainer.clear();
+    internalEdgeContainer.swap(temporaryEdgeContainer);
 
-
-    for ( typename Volumes::const_iterator ifa = mesh.volumeList.begin();
-            ifa != mesh.volumeList.end(); ++ifa )
+    for ( typename volumeContainer_Type::const_iterator volumeContainerIterator = mesh.volumeList.begin();
+            volumeContainerIterator != mesh.volumeList.end(); ++volumeContainerIterator )
     {
-        for ( ID j = 1; j <= mesh.numLocalEdges(); ++j )
+        for ( ID jEdgeLocalId = 1; jEdgeLocalId <= mesh.numLocalEdges(); ++jEdgeLocalId )
         {
-            i1 = VolumeShape::eToP( j, 1 );
-            i2 = VolumeShape::eToP( j, 2 );
+            point1Id = volumeShape_Type::eToP( jEdgeLocalId, 1 );
+            point2Id = volumeShape_Type::eToP( jEdgeLocalId, 2 );
             // go to global
-            i1 = ( ifa->point( i1 ) ).id();
-            i2 = ( ifa->point( i2 ) ).id();
-            bedge = ( makeBareEdge( i1, i2 ) ).first;
-            if ( boundary_edges.find( bedge ) == boundary_edges.end() )
-                internal_edges.insert
-                ( std::make_pair( bedge, std::make_pair( ifa->id(), j ) ) );
+            point1Id = ( volumeContainerIterator->point( point1Id ) ).id();
+            point2Id = ( volumeContainerIterator->point( point2Id ) ).id();
+            bareEdge = ( makeBareEdge( point1Id, point2Id ) ).first;
+            if ( boundaryEdgeContainer.find( bareEdge ) == boundaryEdgeContainer.end() )
+                internalEdgeContainer.insert
+                ( std::make_pair( bareEdge, std::make_pair( volumeContainerIterator->id(), jEdgeLocalId ) ) );
         }
     }
-    return internal_edges.size();
+    return internalEdgeContainer.size();
 }
+
+
 /*
 *******************************************************************************
                             MARKERS HANDLERS
 *******************************************************************************
 */
-//! \defgroup marker_handlers Used to manage missing handlers
+//! @defgroup marker_handlers Used to manage missing handlers
 
-/*! \ingroup marker_handlers
+/*! Sets the marker flag of a GeoElement of dimension greater than one
 
-//! \brief Sets the marker flag of a GeoElement of dimension greater one
+    @ingroup marker_handlers
 
- It gets the stronger marker of the GeoElement points. The marker
-hierarchy is defined in the marker.h file.  It returns a bool indicating if
-the flag has changed. If any of the vertices has an unset marker the result
-is an unset flag for the GeoElement.
+    It gets the stronger marker of the GeoElement points. The marker
+    hierarchy is defined in the markers.hpp file.  It returns a bool indicating if
+    the flag has changed. If any of the vertices has an unset marker the result
+    is an unset flag for the GeoElement.
 
-\warning It overrides the original marker flag.
+    @sa markers.hpp
+    @warning It overrides the original marker flag.
 */
-template <typename GeoElement>
-EntityFlag inheritStrongerMarker( GeoElement & fp )
+template <typename GeoElementType>
+EntityFlag inheritStrongerMarker( GeoElementType & geoElement )
 {
-    ASSERT_PRE( GeoElement::nDim > 0,
+    ASSERT_PRE( GeoElementType::nDim > 0,
                 "A GeoElement with ndim<1 cannot inherit marker flags" );
 
-    fp.setMarker( fp.point( 1 ).marker() );
-    for ( ID j = 2; j <= GeoElement::numVertices; ++j )
-        fp.setStrongerMarker( fp.point( j ).marker() );
-    return fp.marker();
+    geoElement.setMarker( geoElement.point( 1 ).marker() );
+    for ( ID jPointId = 2; jPointId <= GeoElementType::numVertices; ++jPointId )
+        geoElement.setStrongerMarker( geoElement.point( jPointId ).marker() );
+    return geoElement.marker();
 
 }
 
 
-/*! \ingroup marker_handlers
+/*! @ingroup marker_handlers
 
-//! \brief Sets the marker flag of a GeoElement of dimension greater one
+//! @brief Sets the marker flag of a GeoElement of dimension greater one
 
- It gets the weaker marker of the GeoElement points. The marker
-hierarchy is defined in the marker.h file.  It returns a bool indicating if
-the flag has changed. If any of the vertices has an unset marker the result
-is an unset flag for the GeoElement.
+    It gets the weaker marker of the GeoElement points. The marker
+    hierarchy is defined in the markers.hpp file.  It returns a bool indicating if
+    the flag has changed. If any of the vertices has an unset marker the result
+    is an unset flag for the GeoElement.
 
-\warning It overrides the original marker flag.*/
-template <typename GeoElement>
-EntityFlag inheritWeakerMarker( GeoElement & fp )
+    @sa markers.hpp
+    @warning It overrides the original marker flag.
+*/
+template <typename GeoElementType>
+EntityFlag inheritWeakerMarker( GeoElementType & geoElement )
 {
-    ASSERT_PRE( GeoElement::nDim > 0,
+    ASSERT_PRE( GeoElementType::nDim > 0,
                 "A GeoElement with ndim<1 cannot inherit marker flags" );
-    fp.setMarker( fp.point( 1 ).marker() );
-    for ( ID j = 2; j <= GeoElement::numVertices; ++j )
-        fp.setWeakerMarker( fp.point( j ).marker() );
-    return fp.marker();
+
+    geoElement.setMarker( geoElement.point( 1 ).marker() );
+    for ( ID jPointId = 2; jPointId <= GeoElementType::numVertices; ++jPointId )
+        geoElement.setWeakerMarker( geoElement.point( jPointId ).marker() );
+    return geoElement.marker();
 
 }
+
+
 /*!
-  This routine tests if the topological descrption of boundary face is sane.
-  In particular all boundary edges must be adjacent to only 2 surface elements
-  and the orientation must be correct.
+    This routine tests if the topological description of boundary face is sane.
+    In particular all boundary edges must be adjacent to only 2 surface elements
+    and the orientation must be correct.
 
-  \param mesh a mesh
-  \param numBedges  The function also returns the number of boundary edges in numBedges.
-  \return It it returns 0 the test has been passed. If  not it returns the number of of wrong boundary edges.
-  \warning numBEdges is properly set only if the test has been passed.
+    @param mesh a mesh
+    @param numBoundaryEdges The function also returns the number of boundary edges in numBoundaryEdges.
+
+    @return It it returns 0 if the test has been passed. If not it returns the number of wrong boundary edges.
+    @warning numBoundaryEdges is properly set only if the test has been passed.
 */
-template <typename RegionMesh3D>
-UInt testClosedDomain_Top( RegionMesh3D const & mesh, UInt & numBEdges )
+template <typename MeshType>
+UInt testClosedDomain_Top( MeshType const & mesh, UInt & numBoundaryEdges )
 {
 
-    typedef std::set
-    <BareEdge, cmpBareItem<BareEdge> > TempEdgeContainer2;
-    TempEdgeContainer2 bedges;
-    UInt i1, i2;
-    BareEdge bedge;
-    typename RegionMesh3D::BElementShape ele;
-    typedef typename RegionMesh3D::Faces Faces;
-    typedef typename RegionMesh3D::FaceType FaceType;
-    TempEdgeContainer2::iterator ed;
+    typedef std::set <BareEdge, cmpBareItem<BareEdge> > localTemporaryEdgeContainer_Type;
+    localTemporaryEdgeContainer_Type                    localTemporaryEdgeContainer;
+    UInt                                                point1Id, point2Id;
+    BareEdge                                            bareEdge;
+    typename MeshType::BElementShape                    facetShape;
+    typedef typename MeshType::Faces                    faceContainer_Type;
+    typedef typename MeshType::FaceType                 face_Type;
+    localTemporaryEdgeContainer_Type::iterator          edgeContainerIterator;
 
+    typename faceContainer_Type::const_iterator faceContainerIterator = mesh.faceList.begin();
 
-    // clean first in case it has been alredy used
-
-    typename Faces::const_iterator iv = mesh.faceList.begin();
-
-    for ( UInt k = 0; k < mesh.numBFaces(); ++k )
+    for ( UInt kFaceId = 0; kFaceId < mesh.numBFaces(); ++kFaceId )
     {
-        std::ostringstream _err_msg;
-        _err_msg << " Trying to get not existing face"
-        << k << " " << mesh.numBFaces();
-        ASSERT( iv != mesh.faceList.end(), _err_msg.str().c_str() );
+        std::ostringstream errorStream;
+        errorStream << " Trying to get not existing face"
+        << kFaceId << " " << mesh.numBFaces();
+        ASSERT( faceContainerIterator != mesh.faceList.end(), errorStream.str().c_str() );
 
-        for ( ID j = 1; j <= FaceType::numEdges; ++j )
+        for ( ID jEdgeLocalId = 1; jEdgeLocalId <= face_Type::numEdges; ++jEdgeLocalId )
         {
-            i1 = ele.eToP( j, 1 );
-            i2 = ele.eToP( j, 2 );
+            point1Id = facetShape.eToP( jEdgeLocalId, 1 );
+            point2Id = facetShape.eToP( jEdgeLocalId, 2 );
             // go to global
-            i1 = ( iv->point( i1 ) ).id();
-            i2 = ( iv->point( i2 ) ).id();
-            bedge = ( makeBareEdge( i1, i2 ) ).first;
+            point1Id = ( faceContainerIterator->point( point1Id ) ).id();
+            point2Id = ( faceContainerIterator->point( point2Id ) ).id();
+            bareEdge = ( makeBareEdge( point1Id, point2Id ) ).first;
 
-            if ( ( ed = bedges.find( bedge ) ) == bedges.end() )
+            if ( ( edgeContainerIterator = localTemporaryEdgeContainer.find( bareEdge ) )
+                    == localTemporaryEdgeContainer.end() )
             {
-                bedges.insert( bedge );
-                ++numBEdges;
+                localTemporaryEdgeContainer.insert( bareEdge );
+                ++numBoundaryEdges;
             }
             else
             {
-                bedges.erase( ed );
+                localTemporaryEdgeContainer.erase( edgeContainerIterator );
             }
         }
-        ++iv;
+        ++faceContainerIterator;
     }
-    return bedges.size();
+    return localTemporaryEdgeContainer.size();
 }
+
+
 /*
 *******************************************************************************
                                 MARKERS FIXING
 *******************************************************************************
 */
 
-//! Check wether all markers of a the goemetry entities stored in a list are set
-template <typename MeshEntityList>
-bool checkMarkerSet( const MeshEntityList & list )
+//! Check whether all markers of a the geometry entities stored in a list are set
+template <typename MeshEntityListType>
+bool checkMarkerSet( const MeshEntityListType & meshEntityList )
 {
-    typedef typename MeshEntityList::const_iterator C_Iter;
+    typedef typename MeshEntityListType::const_iterator MeshEntityListTypeConstIterator_Type;
     bool ok( true );
-    for ( C_Iter l = list.begin(); l != list.end(); ++l )
-        ok = ( ok & l->isMarkerSet() );
+    for ( MeshEntityListTypeConstIterator_Type meshEntityListIterator = meshEntityList.begin();
+            meshEntityListIterator != meshEntityList.end(); ++meshEntityListIterator )
+        ok = ( ok & meshEntityListIterator->isMarkerSet() );
     return ok;
 }
 
+
 //! Sets the marker flag for all boundary edges by inheriting them from boundary points.
-/*! The paradigm is that an edge <B>WHOSE MARKER HAS NOT ALREADY BEEN
-  SET</B> will get the WEAKER marker flag among its VERTICES. For instance
-  is a vertex is assigned to an Essential B.C and the other to a Natural
-  B.C. the edge will get the flag related to the Natural B.C.
+/*!
+    The paradigm is that an edge <B>WHOSE MARKER HAS NOT ALREADY BEEN
+    SET</B> will get the WEAKER marker flag among its VERTICES. For instance
+    if a vertex is assigned to an Essential BC and the other to a Natural
+    BC the edge will get the flag related to the Natural B.C.
 
-  /param mesh A mesh
-  /param clog ostream to which the logging of the map of the newly assigned marked will be output
-  /param err ostream to which error messages will be sent
+    @param mesh A mesh
+    @param logStream stream to which a map edgeId -> NewMarker will be output
+    @param errorStream stream to which error messages will be sent
+    @param verbose if false, no messages will be sent to the logStream
 
-  /todo better handling of flags: all function handling flags should be
-  wrapped into a class
+    @todo better handling of flags: all function handling flags should be
+    wrapped into a class
+    @todo errorStream is unused
 */
-
-template <typename RegionMesh>
+template <typename MeshType>
 void
-setBEdgesMarker( RegionMesh & mesh, std::ostream & clog = std::cout,
-                 std::ostream & /*err*/ = std::cerr, bool verbose = true )
+setBEdgesMarker( MeshType & mesh, std::ostream & logStream = std::cout,
+                 std::ostream & /*errorStream*/ = std::cerr, bool verbose = true )
 {
-    typename RegionMesh::EdgeType * fp = 0;
-    unsigned int count( 0 );
+    typename MeshType::EdgeType * edgePtr = 0;
+    unsigned int                  counter( 0 );
 
     if ( verbose )
-        clog << "NEW EDGE MARKER MAP" << std::endl
+        logStream << "NEW EDGE MARKER MAP" << std::endl
         << " ID->New Marker" << std::endl;
 
-    for ( ID k = 1; k <= mesh.numBEdges(); ++k )
+    for ( ID kEdgeId = 1; kEdgeId <= mesh.numBEdges(); ++kEdgeId )
     {
-        fp = &( mesh.edge( k ) );
-        if ( fp->isMarkerUnset() )
+        edgePtr = &( mesh.edge( kEdgeId ) );
+        if ( edgePtr->isMarkerUnset() )
         {
-            inheritWeakerMarker( *fp );
+            inheritWeakerMarker( *edgePtr );
             if ( verbose )
             {
-                clog << fp->id() << " -> ";
-                fp->printFlag( clog );
-                clog << " ";
-                if ( ++count % 3 == 0 )
-                    clog << std::endl;
+                logStream << edgePtr->id() << " -> ";
+                edgePtr->printFlag( logStream );
+                logStream << " ";
+                if ( ++counter % 3 == 0 )
+                    logStream << std::endl;
             }
         }
     }
     if ( verbose )
-        clog << std::endl;
+        logStream << std::endl;
 }
 
 
 //! Sets the marker flag for all boundary faces by inheriting them from boundary points.
-/*! The paradigm is that a face WHOSE MARKER HAS NOT ALREADY BEEN SET will
-  get the WEAKER marker flag among its VERTICES. For instance if a vertex
-  is assigned to a Natural B.C and the others to a Natural B.C. the face
-  will get the flag related to the Natural B.C.
+/*!
+    The paradigm is that a face <B>WHOSE MARKER HAS NOT ALREADY BEEN SET</B> will
+    get the WEAKER marker flag among its VERTICES. For instance if a vertex
+    is assigned to a Natural BC and the others to a Natural BC the face
+    will get the flag related to the Natural BC
 
-  /todo better handling of flags: all function handling flags should be
-  wrapped into a class
+    @param mesh A mesh
+    @param logStream stream to which a map faceId -> NewMarker will be output
+    @param errorStream stream to which error messages will be sent
+    @param verbose if false, no messages will be sent to the logStream
+
+    @todo better handling of flags: all function handling flags should be
+    wrapped into a class
 */
-template <typename RegionMesh>
+template <typename MeshType>
 void
-setBFacesMarker( RegionMesh & mesh, std::ostream & clog = std::cout,
-                 std::ostream & /*err*/ = std::cerr, bool verbose = true )
+setBFacesMarker( MeshType & mesh, std::ostream & logStream = std::cout,
+                 std::ostream & /*errorStream*/ = std::cerr, bool verbose = true )
 {
-    typename RegionMesh::FaceType * fp = 0;
-    unsigned int count( 0 );
+    typename MeshType::FaceType * facePtr = 0;
+    unsigned int                  counter( 0 );
 
     if ( verbose )
-        clog << "NEW FACE MARKER MAP" << std::endl
-        << " ID->New Marker" << std::endl;
-
-    for ( UInt k = 1; k <= mesh.numBFaces(); ++k )
     {
-        fp = &( mesh.face( k ) );
-        if ( fp->isMarkerUnset() )
+        logStream << "**** NEW FACE MARKER MAP **************" << std::endl;
+        logStream << " Face ID -> New Marker\tFace ID -> New Marker\tFace ID -> New Marker" << std::endl;
+    }
+
+    for ( UInt kFaceId = 1; kFaceId <= mesh.numBFaces(); ++kFaceId )
+    {
+        facePtr = &( mesh.face( kFaceId ) );
+        if ( facePtr->isMarkerUnset() )
         {
-            inheritWeakerMarker( *fp );
+            inheritWeakerMarker( *facePtr );
             if ( verbose )
             {
-                clog << fp->id() << " -> ";
-                fp->printFlag( clog );
-                clog << " ";
-                if ( ++count % 3 == 0 )
-                    clog << std::endl;
+                logStream << facePtr->id() << " -> ";
+                facePtr->printFlag( logStream );
+                logStream << "\t";
+                if ( ++counter % 3 == 0 )
+                    logStream << std::endl;
             }
         }
     }
     if ( verbose )
-        clog << std::endl;
+        logStream << std::endl;
 }
 
-//! It sets the marker flag of boundary points, by inheriting it from boundary elements.
-/*! The paradigm is that a point whose marker flag is unset will inherhit
-  the strongest marker flag of the surrounding Boundary Elements, with the
-  convention that if the marker flag of one of the surrounding boundary
-  elements is null is ignored.
+
+//! It sets the marker flag of boundary points, by inheriting it from facets.
+/*!
+    The paradigm is that a point whose marker flag is unset will inherit
+    the strongest marker flag of the surrounding facets, with the
+    convention that if the marker flag of one of the surrounding facets is null,
+    it is ignored.
+
+    @param mesh A mesh
+    @param logStream stream to which a map edgeId -> NewMarker will be output
+    @param errorStream stream to which error messages will be sent
+    @param verbose if false, no messages will be sent to the logStream
+
 */
-template <typename RegionMesh>
+template <typename MeshType>
 void
-setBPointsMarker( RegionMesh & mesh, std::ostream & clog = std::cout,
-                  std::ostream& /*err*/ = std::cerr, bool verbose = false )
+setBPointsMarker( MeshType & mesh, std::ostream & logStream = std::cout,
+                  std::ostream& /*errorStream*/ = std::cerr, bool verbose = false )
 {
     // First looks at points whose marker has already been set
-    std::vector<bool> markset( mesh.storedPoints(), false );
+    std::vector<bool> isDefinedPointMarker( mesh.storedPoints(), false );
 
-    typedef typename RegionMesh::Points::iterator PointIterator;
-    typedef typename RegionMesh::BElementShape BElementShape;
+    typedef typename MeshType::Points::iterator pointContainerIterator_Type;
+    typedef typename MeshType::BElementShape    facetShape_Type;
 
-    std::vector<bool>::iterator pm = markset.begin();
+    std::vector<bool>::iterator isDefinedPointMarkerIterator = isDefinedPointMarker.begin();
 
-    for ( PointIterator p = mesh.pointList.begin();
-            p != mesh.pointList.end(); ++p )
-        *( pm++ ) = p->isMarkerSet();
+    for ( pointContainerIterator_Type pointContainerIterator = mesh.pointList.begin();
+            pointContainerIterator != mesh.pointList.end(); ++pointContainerIterator )
+        *( isDefinedPointMarkerIterator++ ) = pointContainerIterator->isMarkerSet();
 
-    typename RegionMesh::BElementType * fp = 0;
-    for ( UInt k = 1; k <= mesh.numBElements(); ++k )
+    typename MeshType::BElementType * facetPtr = 0;
+    for ( UInt kFacetId = 1; kFacetId <= mesh.numBElements(); ++kFacetId )
     {
-        fp = &( mesh.bElement( k ) );
-        if ( fp->isMarkerSet() )
+        facetPtr = &( mesh.bElement( kFacetId ) );
+        if ( facetPtr->isMarkerSet() )
         {
-            for ( UInt j = 1; j <= BElementShape::numPoints; ++j )
+            for ( UInt jPointId = 1; jPointId <= facetShape_Type::numPoints; ++jPointId )
             {
-                if ( !markset[ ( fp->point( j ).id() ) - 1 ] )
-                    fp->setStrongerMarkerAtPoint( j, fp->marker() );
+                if ( !isDefinedPointMarker[ ( facetPtr->point( jPointId ).id() ) - 1 ] )
+                    facetPtr->setStrongerMarkerAtPoint( jPointId, facetPtr->marker() );
             }
         }
     }
-    unsigned int count( 0 );
+    unsigned int counter( 0 );
 
     if ( verbose )
     {
-        clog << "**** NEW POINTS MARKERS **************" << std::endl;
-        clog << "id->marker    id->marker     id->marker" << std::endl;
-        pm = markset.begin();
-        for ( PointIterator p = mesh.pointList.begin();
-                p != mesh.pointList.end(); ++p )
+        logStream << "**** NEW POINT MARKER MAP **************" << std::endl;
+        logStream << " Point ID -> New Marker\tPoint ID -> New Marker\tPoint ID -> New Marker" << std::endl;
+        isDefinedPointMarkerIterator = isDefinedPointMarker.begin();
+        for ( pointContainerIterator_Type pointContainerIterator = mesh.pointList.begin();
+                pointContainerIterator != mesh.pointList.end(); ++pointContainerIterator )
         {
-            if ( *pm++ )
+            if ( *isDefinedPointMarkerIterator++ )
             {
-                clog << p->id() << " -> ";
-                p->printFlag( clog );
-                clog << " ";
-                if ( ++count % 3 )
-                    clog << std::endl;
+                logStream << pointContainerIterator->id() << " -> ";
+                pointContainerIterator->printFlag( logStream );
+                logStream << "\t";
+                if ( ++counter % 3 )
+                    logStream << std::endl;
             }
         }
-        clog << std::endl;
+        logStream << std::endl;
     }
 }
+
+
 /*
 *******************************************************************************
                                 FIXING ID AND COUNTERS
 *******************************************************************************
 */
-//! \brief Verifies if a list of mesh entities have the ID properly set.
+//! @brief Verifies if a list of mesh entities have the ID properly set.
 /* More precisely, the id() must correspond to the position of the entity
    in the list (starting from 1, since id=0 is reserved for unset entities.
 
-   \pre The template argument MeshEntityList must be a stl
+   @pre The template argument MeshEntityListType must be a stl
    compliant container and its elements must have the method id().
 */
-template <typename MeshEntityList>
-bool checkIdnumber( const MeshEntityList & list )
+template <typename MeshEntityListType>
+bool checkIdnumber( const MeshEntityListType & meshEntityList )
 {
-    typedef typename MeshEntityList::const_iterator C_Iter;
+    typedef typename MeshEntityListType::const_iterator MeshEntityListTypeConstIterator_Type;
     bool ok( true );
-    unsigned int count( 1 );
-    for ( C_Iter l = list.begin(); l != list.end() && ok; ++l, ++count )
-        ok = ( l->id() == count );
+    unsigned int counter( 1 );
+    for ( MeshEntityListTypeConstIterator_Type meshEntityListIterator = meshEntityList.begin(); meshEntityListIterator != meshEntityList.end() && ok; ++meshEntityListIterator, ++counter )
+        ok = ( meshEntityListIterator->id() == counter );
     return ok;
 }
 
-//! \brief Fixes a a list of mesh entities so that the ID is properly set.
+//! @brief Fixes a a list of mesh entities so that the ID is properly set.
 /* \post  The id will correspond to the position of the entity
    in the list (starting from 1, since id=0 is reserved for unset entities.
 
-   \pre The template argument MeshEntityList must be a stl
+   @pre The template argument MeshEntityListType must be a stl
    compliant container and its elements must have the method UInt &id().
 */
 template
-<typename MeshEntityList>
-void fixIdnumber( MeshEntityList & list )
+<typename MeshEntityListType>
+void fixIdnumber( MeshEntityListType & meshEntityList )
 {
-    unsigned int count( 0 );
-    typedef typename MeshEntityList::iterator Iter;
-    for ( Iter l = list.begin() ; l != list.end(); ++l )
-        l->setId( ++count );
+    unsigned int counter( 0 );
+    typedef typename MeshEntityListType::iterator Iter;
+    for ( Iter meshEntityListIterator = meshEntityList.begin() ; meshEntityListIterator != meshEntityList.end(); ++meshEntityListIterator )
+        meshEntityListIterator->setId( ++counter );
 }
 
-/*! \brief Fixes boundary points counter
+/*! @brief Fixes boundary points counter
   It fix the boundary points counter by counting
   how many points have te boundary flag set.
   It also reset the Bpoints list.
 
-  \pre It assumes that the points have the boundary flag corretly set
+  @pre It assumes that the points have the boundary flag corretly set
 */
 
-template <typename RegionMesh>
+template <typename MeshType>
 void
-setBPointsCounters( RegionMesh & mesh )
+setBPointsCounters( MeshType & mesh )
 {
 
     unsigned int countBP( 0 );
@@ -768,18 +1118,18 @@ setBPointsCounters( RegionMesh & mesh )
 
     mesh._bPoints.clear();
 
-    for ( UInt k = 1; k <= mesh.numVertices(); ++k )
+    for ( UInt kPointId = 1; kPointId <= mesh.numVertices(); ++kPointId )
     {
-        if ( mesh.isBoundaryPoint( k ) )
+        if ( mesh.isBoundaryPoint( kPointId ) )
         {
             ++countBP;
             ++countBV;
         }
     }
 
-    for ( UInt k = mesh.numVertices() + 1; k <= mesh.storedPoints(); ++k )
+    for ( UInt kPointId = mesh.numVertices() + 1; kPointId <= mesh.storedPoints(); ++kPointId )
     {
-        if ( mesh.isBoundaryPoint( k ) )
+        if ( mesh.isBoundaryPoint( kPointId ) )
         {
             ++countBP;
         }
@@ -790,10 +1140,10 @@ setBPointsCounters( RegionMesh & mesh )
     mesh._bPoints.clear();
     mesh._bPoints.reserve( countBP );
 
-    for ( UInt k = 1; k <= mesh.storedPoints(); ++k )
+    for ( UInt kPointId = 1; kPointId <= mesh.storedPoints(); ++kPointId )
     {
-        if ( mesh.isBoundaryPoint( k ) )
-            mesh._bPoints.push_back( &mesh.point( k ) );
+        if ( mesh.isBoundaryPoint( kPointId ) )
+            mesh._bPoints.push_back( &mesh.point( kPointId ) );
     }
 }
 
@@ -804,44 +1154,44 @@ BOUNDARY INDICATOR FIXING
 */
 //! It fixes boundary flag on points laying on boundary faces.
 /*!
-  \param mesh a mesh
-  \param clog logging stream
-  \param err error stream
-  \param verbose If true you have a verbose output
+  @param mesh a mesh
+  @param logStream logging stream
+  @param errorStream error stream
+  @param verbose If true you have a verbose output
 
-  \pre mesh point list must exists and boundary face lsist  must have been set properly.
+  @pre mesh point list must exists and boundary face list  must have been set properly.
 */
-template <typename RegionMesh>
+template <typename MeshType>
 void
-fixBPoints( RegionMesh & mesh, std::ostream & clog = std::cout,
-            std::ostream & /* err */ = std::cerr, bool verbose = true )
+fixBPoints( MeshType & mesh, std::ostream & logStream = std::cout,
+            std::ostream & /* errorStream */ = std::cerr, bool verbose = true )
 {
     ASSERT_PRE( mesh.numPoints() > 0, "The point list should not be empty" );
     ASSERT_PRE( mesh.numBElements() > 0,
                 "The BElements list should not be empty" );
 
-    typedef typename RegionMesh::BElements BElements;
-    typedef typename RegionMesh::BElementShape BElementShape;
+    typedef typename MeshType::BElements     facetContainer_Type;
+    typedef typename MeshType::BElementShape facetShape_Type;
 
-    if ( verbose ) clog << "Fixing BPoints" << std::endl;
+    if ( verbose ) logStream << "Fixing BPoints" << std::endl;
     std::vector<bool>bpts(mesh.numPoints());
     // I may have launched the program for a P2 mesh
     // yet not all the points are there
     unsigned int numitems;
     if (mesh.storedPoints()==mesh.numVertices())
     {
-        numitems=BElementShape::numVertices;
+        numitems=facetShape_Type::numVertices;
     }
     else
     {
-        numitems=BElementShape::numPoints;
+        numitems=facetShape_Type::numPoints;
     }
 
-    for ( UInt k = 1; k <= mesh.numBElements(); ++k )
-        for ( UInt j = 1; j <= numitems; ++j )
-            bpts[mesh.bElement(k).point(j).id()-1]=true;
-    for (ID  k = 1; k <= mesh.storedPoints() ; ++k )
-        mesh.point(k).setBoundary(bpts[k-1]);
+    for ( UInt kFacetId = 1; kFacetId <= mesh.numBElements(); ++kFacetId )
+        for ( UInt jPointId = 1; jPointId <= numitems; ++jPointId )
+            bpts[mesh.bElement(kFacetId).point(jPointId).id()-1]=true;
+    for (ID  kPointId = 1; kPointId <= mesh.storedPoints() ; ++kPointId )
+        mesh.point(kPointId).setBoundary(bpts[kPointId-1]);
     bpts.clear();
     std::vector<bool> temp;
     bpts.swap(temp);
@@ -851,16 +1201,16 @@ fixBPoints( RegionMesh & mesh, std::ostream & clog = std::cout,
 
 //!It makes sure that boundary edges are stored first
 /*!
-\pre It assumes that boundary points are properly stored in the mesh
+@pre It assumes that boundary points are properly stored in the mesh
 */
-template <typename RegionMesh>
+template <typename MeshType>
 void
-setBoundaryEdgesFirst( RegionMesh & mesh )
+setBoundaryEdgesFirst( MeshType & mesh )
 {
 
-    typedef typename RegionMesh::Edges Edges;
+    typedef typename MeshType::Edges Edges;
     // set the functor
-    EnquireBEntity<RegionMesh > enquireBEdge( mesh );
+    EnquireBEntity<MeshType > enquireBEdge( mesh );
 
     std::partition( mesh.edgeList.begin(), mesh.edgeList.end(), enquireBEdge );
     fixIdnumber( mesh.edgeList );
@@ -868,59 +1218,59 @@ setBoundaryEdgesFirst( RegionMesh & mesh )
 
 //!It makes sure that boundary faces are stored first
 /*!
-\pre It assumes that boundary points are properly stored in the mesh
+@pre It assumes that boundary points are properly stored in the mesh
 */
-template <typename RegionMesh>
+template <typename MeshType>
 void
-setBoundaryFacesFirst( RegionMesh & mesh )
+setBoundaryFacesFirst( MeshType & mesh )
 {
 
-    typedef typename RegionMesh::Faces Faces;
+    typedef typename MeshType::Faces faceContainer_Type;
     // set the functor
-    EnquireBEntity<RegionMesh> enquireBFace( mesh );
+    EnquireBEntity<MeshType> enquireBFace( mesh );
 
     std::partition( mesh.faceList.begin(), mesh.faceList.end(), enquireBFace );
     fixIdnumber( mesh.faceList );
 }
 
 //! Tests if boundary faces are stored first
-/*! \return true if boundary faces are indeed stored first
-  \pre It assumes that boundary points are set */
-template <typename RegionMesh>
-bool checkBoundaryFacesFirst( const RegionMesh & mesh )
+/*! @return true if boundary faces are indeed stored first
+  @pre It assumes that boundary points are set */
+template <typename MeshType>
+bool checkBoundaryFacesFirst( const MeshType & mesh )
 {
 
-    typedef typename RegionMesh::Faces Faces;
+    typedef typename MeshType::Faces faceContainer_Type;
 
     // set the functor
-    EnquireBEntity<RegionMesh> enquireBFace( mesh );
+    EnquireBEntity<MeshType> enquireBFace( mesh );
     bool ok( true );
 
-    for ( UInt k = 1; k <= mesh.numBElements(); ++k )
-        ok = ok && enquireBFace( mesh.boundaryFace( k ) );
-    for ( UInt k = mesh.numBElements() + 1; k <= mesh.storedFaces(); ++k )
-        ok = ok && ! enquireBFace( mesh.face( k ) );
+    for ( UInt kFacetId = 1; kFacetId <= mesh.numFacets(); ++kFacetId )
+        ok = ok && enquireBFace( mesh.boundaryFace( kFacetId ) );
+    for ( UInt kFacetId = mesh.numBElements() + 1; kFacetId <= mesh.storedFaces(); ++kFacetId )
+        ok = ok && ! enquireBFace( mesh.face( kFacetId ) );
 
     return ok;
 }
 
 //! Tests if boundary edges are stored first
-/*! \return true if boundary edges are indeed stored first
-  \pre It assumes that boundary points are set */
-template <typename RegionMesh>
-bool checkBoundaryEdgesFirst( const RegionMesh & mesh )
+/*! @return true if boundary edges are indeed stored first
+  @pre It assumes that boundary points are set */
+template <typename MeshType>
+bool checkBoundaryEdgesFirst( const MeshType & mesh )
 {
 
-    typedef typename RegionMesh::Edges Edges;
+    typedef typename MeshType::Edges Edges;
 
     // set the functor
-    EnquireBEntity<RegionMesh> enquireBEdge( mesh );
+    EnquireBEntity<MeshType> enquireBEdge( mesh );
     bool ok( true );
 
-    for ( UInt k = 1; k <= mesh.numBEdges(); ++k )
-        ok = ok && enquireBEdge( mesh.boundaryEdge( k ) );
-    for ( UInt k = mesh.numBEdges() + 1; k <= mesh.storedEdges(); ++k )
-        ok = ok && ! enquireBEdge( mesh.edge( k ) );
+    for ( UInt kBEdgeId = 1; kBEdgeId <= mesh.numBEdges(); ++kBEdgeId )
+        ok = ok && enquireBEdge( mesh.bareEdge( kBEdgeId ) );
+    for ( UInt kBEdgeId = mesh.numBEdges() + 1; kBEdgeId <= mesh.storedEdges(); ++kBEdgeId )
+        ok = ok && ! enquireBEdge( mesh.edge( kBEdgeId ) );
     return ok;
 }
 
@@ -933,9 +1283,9 @@ bool checkBoundaryEdgesFirst( const RegionMesh & mesh )
 
 /*! An important step for building degrees of freedom on faces.  It also
   fixes other face related data.
-\param mesh a mesh
-\param err  ostream for error messages
-\param sw A switch that will contain information on what has been done
+@param mesh a mesh
+@param errorStream  ostream for error messages
+@param sw A switch that will contain information on what has been done
 Possible values are
 <ol>
 <li>NUM_FACES_MISMATCH</li>
@@ -947,199 +1297,199 @@ Possible values are
 <li>FIXED_MAX_NUM_FACES</li>
 </ol>
 
-\param fixMarker If set to the true value all faces without a markerFlag set will inherit it from the points.
+@param fixMarker If set to the true value all faces without a markerFlag set will inherit it from the points.
 
-\param clog ostream that will all information regarding the markers
+@param logStream ostream that will all information regarding the markers
 
-\param verbose if falso nothng is written to clog
+@param verbose if falso nothng is written to logStream
 
-\param numFaces It returns the number of faces found by the function
+@param numFaces It returns the number of faces found by the function
 
-\param bfaces_found It returns the number of boundary faces found by the function
+@param numBoundaryFaces It returns the number of boundary faces found by the function
 
-\param ext_container. If not NULL it is a pointer to an external map of bondary faces, already
+@param externalFaceContainer. If not NULL it is a pointer to an external map of bondary faces, already
   produced by a call to findBoundaryFaces(). This parameter may be used to save al lot of computational work, since
   findBoundaryFaces() is rather expensive.
 
-\pre Boundary faces list must be properly set.
+@pre Boundary faces list must be properly set.
 */
 
 
 #ifndef TWODIM
-template <class RegionMesh3D>
-bool fixBoundaryFaces( RegionMesh3D & mesh,
-                       std::ostream & clog,
-                       std::ostream &err,
+template <class MeshType>
+bool fixBoundaryFaces( MeshType & mesh,
+                       std::ostream & logStream,
+                       std::ostream &errorStream,
                        Switch & sw,
                        UInt & numFaces,
-                       UInt & bfaces_found,
+                       UInt & numBoundaryFaces,
                        bool /* fixMarker */ = false,
                        bool verbose = false,
-                       TempFaceContainer * ext_container = 0 )
+                       temporaryFaceContainer_Type * externalFaceContainer = 0 )
 {
 
-    typedef typename RegionMesh3D::Volumes Volumes;
-    typedef typename RegionMesh3D::VolumeType VolumeType;
-    typedef typename RegionMesh3D::Faces Faces;
-    typedef typename RegionMesh3D::FaceType FaceType;
+    typedef typename MeshType::Volumes volumeContainer_Type;
+    typedef typename MeshType::VolumeType VolumeType;
+    typedef typename MeshType::Faces faceContainer_Type;
+    typedef typename MeshType::FaceType face_Type;
 
-    UInt i1, i2, i3, i4;
-    BareFace bface;
-    VolumeType * pv;
-    typename Faces::iterator fit;
-    typename RegionMesh3D::VolumeShape ele;
-    TempFaceContainer * bfaces;
-    TempFaceContainer::iterator fi;
-    std::pair<ID, ID>info;
-    ID j;
-    ID vol;
+    UInt point1Id, point2Id, point3Id, point4Id;
+    BareFace bareFace;
+    VolumeType * volumePtr;
+    typename faceContainer_Type::iterator faceContainerIterator;
+    typename MeshType::VolumeShape volumeShape;
+    temporaryFaceContainer_Type * boundaryFaceContainerPtr;
+    temporaryFaceContainer_Type::iterator boundaryFaceContainerIterator;
+    std::pair<ID, ID>volumeIdToLocalFaceIdPair;
+    ID jFaceLocalId;
+    ID volumeId;
     UInt numInternalFaces;
     bool notfound( false );
-    bool extcont( false );
+    bool externalContainerIsProvided( false );
 
-    if ( (extcont = ( ext_container != 0 )) )
+    if ( (externalContainerIsProvided = ( externalFaceContainer != 0 )) )
     {
-        bfaces = ext_container;
-        bfaces_found = bfaces->size();
+        boundaryFaceContainerPtr = externalFaceContainer;
+        numBoundaryFaces = boundaryFaceContainerPtr->size();
     }
     else
     {
-        bfaces = new TempFaceContainer;
-        bfaces_found = findBoundaryFaces( mesh, *bfaces, numInternalFaces );
-        numFaces = bfaces_found + numInternalFaces;
+        boundaryFaceContainerPtr = new temporaryFaceContainer_Type;
+        numBoundaryFaces = findBoundaryFaces( mesh, *boundaryFaceContainerPtr, numInternalFaces );
+        numFaces = numBoundaryFaces + numInternalFaces;
     }
 
 
-    bool notEnough = mesh.storedFaces() < bfaces_found;
+    bool notEnough = mesh.storedFaces() < numBoundaryFaces;
 
 
 
     if ( notEnough )
     {
-        err << "WARNING: number of B. Faces stored smaller" << std::endl;
-        err << "         than the number of bfaces found  and build is not set"
+        errorStream << "WARNING: number of B. Faces stored smaller" << std::endl;
+        errorStream << "         than the number of boundaryFaces found  and build is not set"
         << std::endl;
-        err << "POSSIBLE ERROR" << std::endl;
+        errorStream << "POSSIBLE ERROR" << std::endl;
         sw.create( "BFACE_STORED_MISMATCH", true );
     }
 
     if ( mesh.numBElements() == 0 )
     {
-        err << "ERROR: Boundary Element counter was not set" << std::endl;
-        err << "I Cannot proceed because the situation is ambiguous"
+        errorStream << "ERROR: Boundary Element counter was not set" << std::endl;
+        errorStream << "I Cannot proceed because the situation is ambiguous"
         << std::endl;
-        err << "Please check and eventually either: (a) call buildBoundaryFaces()" << std::endl;
-        err << "or (b) set the correct number of bfaces in the mesh using mesh.numBElements()" << std::endl;
-        err << "ABORT" << std::endl;
+        errorStream << "Please check and eventually either: (a) call buildBoundaryFaces()" << std::endl;
+        errorStream << "or (b) set the correct number of boundaryFaces in the mesh using mesh.numBElements()" << std::endl;
+        errorStream << "ABORT" << std::endl;
         sw.create( "BELEMENT_COUNTER_UNSET", true );
     }
 
-    if ( mesh.numBFaces() != bfaces_found )
+    if ( mesh.numBFaces() != numBoundaryFaces )
     {
-        err << "WARNING: Boundary face counter in mesh is set to "
+        errorStream << "WARNING: Boundary face counter in mesh is set to "
         << mesh.numBFaces() << std::endl;
-        err << "         while I have found " << bfaces_found
+        errorStream << "         while I have found " << numBoundaryFaces
         << " boundary elements in mesh." << std::endl;
-        err << "         Please check... I continue anyway" << std::endl;
+        errorStream << "         Please check... I continue anyway" << std::endl;
         sw.create( "BFACE_COUNTER_MISMATCH", true );
     }
 
     if ( verbose )
     {
-        clog << "**** Fixed Marker Flags for Boundary Faces ***" << std::endl;
-        clog << " (it only contains those that were fixed because unset !"
+        logStream << "**** Fixed Marker Flags for Boundary Faces ***" << std::endl;
+        logStream << " (it only contains those that were fixed because unset !)"
         << std::endl;
-        clog << "id->marker   id->marker  id->marker" << std::endl;
+        logStream << "id->marker   id->marker  id->marker" << std::endl;
     }
 
-    UInt count( 0 );
+    UInt counter( 0 );
 
-    fit = mesh.faceList.begin();
+    faceContainerIterator = mesh.faceList.begin();
     for ( UInt facid = 0; facid < mesh.numBElements(); ++facid )
     {
-        i1 = ( fit->point( 1 ) ).id();
-        i2 = ( fit->point( 2 ) ).id();
-        i3 = ( fit->point( 3 ) ).id();
-        if ( RegionMesh3D::FaceShape::numVertices == 4 )
+        point1Id = ( faceContainerIterator->point( 1 ) ).id();
+        point2Id = ( faceContainerIterator->point( 2 ) ).id();
+        point3Id = ( faceContainerIterator->point( 3 ) ).id();
+        if ( MeshType::FaceShape::numVertices == 4 )
         {
-            i4 = ( fit->point( 4 ) ).id();
-            bface = ( makeBareFace( i1, i2, i3, i4 ) ).first;
+            point4Id = ( faceContainerIterator->point( 4 ) ).id();
+            bareFace = ( makeBareFace( point1Id, point2Id, point3Id, point4Id ) ).first;
         }
         else
         {
-            bface = ( makeBareFace( i1, i2, i3 ) ).first;
+            bareFace = ( makeBareFace( point1Id, point2Id, point3Id ) ).first;
         }
-        fi = bfaces->find( bface );
-        if ( fi == bfaces->end() )
+        boundaryFaceContainerIterator = boundaryFaceContainerPtr->find( bareFace );
+        if ( boundaryFaceContainerIterator == boundaryFaceContainerPtr->end() )
         {
             if (verbose)
             {
-                if ( RegionMesh3D::FaceShape::numVertices == 3 )
+                if ( MeshType::FaceShape::numVertices == 3 )
                 {
-                    err<<"Face "<<i1<<" "<<i2<<" "<<i3;
+                    errorStream<<"Face "<<point1Id<<" "<<point2Id<<" "<<point3Id;
                 }
                 else
                 {
-                    err<<"Face "<<i1<<" "<<i2<<" "<<i3<<" " <<i4;
+                    errorStream<<"Face "<<point1Id<<" "<<point2Id<<" "<<point3Id<<" " <<point4Id;
                 }
-                err<<" stored as boundary face, it's not!"<< std::endl;
+                errorStream<<" stored as boundary face, it's not!"<< std::endl;
             }
             notfound = true;
         }
         else
         {
-            info = fi->second;
-            vol = info.first; // Element ID
-            pv = &mesh.volume( vol ); // Element
-            j = info.second;       // The local ID of face on element
+            volumeIdToLocalFaceIdPair = boundaryFaceContainerIterator->second;
+            volumeId = volumeIdToLocalFaceIdPair.first; // Element ID
+            volumePtr = &mesh.volume( volumeId ); // Element
+            jFaceLocalId = volumeIdToLocalFaceIdPair.second;       // The local ID of face on element
             // Reset face point definition to be consistent with face.
-            for ( UInt k = 1; k <= FaceType::numPoints; ++k )
+            for ( UInt kPointId = 1; kPointId <= face_Type::numPoints; ++kPointId )
             {
-                fit->setPoint( k, pv->point( ele.fToP( j, k ) ) );
+                faceContainerIterator->setPoint( kPointId, volumePtr->point( volumeShape.fToP( jFaceLocalId, kPointId ) ) );
             }
             // Correct extra info
-            fit->ad_first() = vol;
-            fit->pos_first() = j;
-            if ( fit->isMarkerUnset() )
+            faceContainerIterator->ad_first() = volumeId;
+            faceContainerIterator->pos_first() = jFaceLocalId;
+            if ( faceContainerIterator->isMarkerUnset() )
             {
-                inheritWeakerMarker( *fit );
+                inheritWeakerMarker( *faceContainerIterator );
                 if ( verbose )
                 {
-                    clog << fit->id() << " -> ";
-                    fit->printFlag( clog );
-                    clog << " ";
-                    if ( ++count % 3 == 0 )
-                        clog << std::endl;
+                    logStream << faceContainerIterator->id() << " -> ";
+                    faceContainerIterator->printFlag( logStream );
+                    logStream << " ";
+                    if ( ++counter % 3 == 0 )
+                        logStream << std::endl;
                 }
             }
             // Take out face from temporary container
-            bfaces->erase( fi );
+            boundaryFaceContainerPtr->erase( boundaryFaceContainerIterator );
         }
-        ++fit;
+        ++faceContainerIterator;
     }
 
-    if ( !extcont )
-        delete bfaces;
+    if ( !externalContainerIsProvided )
+        delete boundaryFaceContainerPtr;
 
     if ( notfound )
     {
-        err << "WARNING: At least one boundary face has not been found on the list stored in RegionMesh3D\n";
+        errorStream << "WARNING: At least one boundary face has not been found on the list stored in MeshType\n";
         sw.create( "BFACE_MISSING", true );
     }
 
     if ( verbose )
     {
-        clog << std::endl << "  *****  END OF LIST ****" << std::endl;
+        logStream << std::endl << "  *****  END OF LIST ****" << std::endl;
     }
 
     // Here I calculate the number of faces,
 
     if ( mesh.numFaces() != numFaces )
     {
-        err << "WARNING: faces counter in mesh should be " << numFaces
+        errorStream << "WARNING: faces counter in mesh should be " << numFaces
         << std::endl;
-        err << "         (bfaces->size()+numInternalFaces)" << std::endl;
-        err << "         it is instead " << mesh.numFaces() << std::endl;
+        errorStream << "         (boundaryFaceContainerPtr->size()+numInternalFaces)" << std::endl;
+        errorStream << "         it is instead " << mesh.numFaces() << std::endl;
         sw.create( "NUM_FACES_MISMATCH", true );
     }
     mesh.setLinkSwitch( std::string( "HAS_BOUNDARY_FACES" ) );
@@ -1148,144 +1498,148 @@ bool fixBoundaryFaces( RegionMesh3D & mesh,
 }
 #endif
 
+
 //! Builds faces
 /*! This function may alternatively be used to build the compulsory boundary
   faces, all the mesh faces, or just add to an existing list of just boundary
   faces the internal ones.
 
-  \param mesh A mesh
+  @param mesh A mesh
 
-  \param clog Log file for information on the newly created markers
+  @param logStream Log stream for information on the newly created markers
 
-  \param err  Error stream
+  @param errorStream Error stream
 
-  \param buildbounary if true the function builds boundary faces
+  @param numBoundaryFaces It returns the number of boundary faces
 
-  \param buildinternal if true the function builds internal faces
+  @param numInternalFaces It returns the number of internal faces (only if externalFaceContainer is not provided!)
 
-  \param verbose. If true markerFrlags info is written on clog.
+  @param buildBoundaryFaces if true the function builds boundary faces
 
-  \param numInternalFaces It returns the number of internal faces (only if ext_container is not provided!)
+  @param buildInternalFaces if true the function builds internal faces
 
-  \param bfaces_found It returns the number of boundary faces
+  @param verbose If true markerFlags info is written on logStream.
 
-  \param ext_container. If not NULL it is a pointer to an external map of bondary faces, already
-  produced by a call to findBoundaryFaces(). This parameter may be used to save al lot of computational work, since
+  @param externalFaceContainer. If not NULL it is a pointer to an external map of boundary faces, already
+  produced by a call to findBoundaryFaces(). This parameter may be used to save a lot of computational work, since
   findBoundaryFaces() is rather expensive.
 
-  \pre If buildinternal=true and buildboundary=false the mesh must contain a proper list
+  @pre If buildInternalFaces=true and buildBoundaryFaces=false the mesh must contain a proper list
   of boundary faces
 
-  \note By setting buildinternal=true and buildboundary=true the function just fixes the counters
+  @note By setting buildInternalFaces=true and buildBoundaryFaces=true the function just fixes the counters
   with the number of faces in the mesh
+
+  @return true if successful
  */
 
 #ifndef TWODIM
-template <class RegionMesh3D>
-bool buildFaces( RegionMesh3D & mesh,
-                 std::ostream & clog,
-                 std::ostream &err,
-                 UInt & bfaces_found,
+template <class MeshType>
+bool buildFaces( MeshType & mesh,
+                 std::ostream & logStream,
+                 std::ostream & errorStream,
+                 UInt & numBoundaryFaces,
                  UInt & numInternalFaces,
-                 bool buildboundary = true,
-                 bool buildinternal = false,
+                 bool buildBoundaryFaces = true,
+                 bool buildInternalFaces = false,
                  bool verbose = false,
-                 TempFaceContainer * ext_container = 0 )
+                 temporaryFaceContainer_Type * externalFaceContainer = 0 )
 {
-    UInt i1, i2, i3, i4;
-    typename RegionMesh3D::VolumeShape ele;
-    typedef typename RegionMesh3D::Volumes Volumes;
-    typedef typename RegionMesh3D::VolumeType VolumeType;
-    typedef typename RegionMesh3D::Faces Faces;
-    typedef typename RegionMesh3D::FaceType FaceType;
-    VolumeType * pv;
-    TempFaceContainer* bfaces;
-    TempFaceContainer::iterator fi;
-    bool extcont( false );
+    UInt                                  point1Id, point2Id, point3Id, point4Id;
+    typename MeshType::VolumeShape        volumeShape;
+    typedef typename MeshType::Volumes    volumeContainer_Type;
+    typedef typename MeshType::VolumeType volume_Type;
+    typedef typename MeshType::Faces      faceContainer_Type;
+    typedef typename MeshType::FaceType   face_Type;
+    volume_Type *                         volumePtr;
+    temporaryFaceContainer_Type*          boundaryFaceContainerPtr;
+    temporaryFaceContainer_Type::iterator boundaryFaceContainerIterator;
+    bool                                  externalContainerIsProvided( false );
 
-    std::pair<ID, ID>info;
-    ID j, id;
-    ID vol;
+    std::pair<ID, ID>                     volumeIdToLocalFaceIdPair;
+    ID                                    jFaceLocalId, newFaceId;
+    ID                                    volumeId;
 
-    if ( (extcont = ( ext_container != 0 )) )
+    if ( (externalContainerIsProvided = ( externalFaceContainer != 0 )) )
     {
-        bfaces = ext_container;
-        bfaces_found = bfaces->size();
+        boundaryFaceContainerPtr = externalFaceContainer;
+        numBoundaryFaces = boundaryFaceContainerPtr->size();
     }
     else
     {
-        bfaces = new TempFaceContainer;
-        bfaces_found = findBoundaryFaces( mesh, *bfaces, numInternalFaces );
+        boundaryFaceContainerPtr = new temporaryFaceContainer_Type;
+        numBoundaryFaces = findBoundaryFaces( mesh, *boundaryFaceContainerPtr, numInternalFaces );
     }
 
-    if ( buildboundary )
+    if ( buildBoundaryFaces )
         mesh.faceList.clear();
-    mesh.setNumBFaces( bfaces_found );
-    if ( !buildinternal )
+    mesh.setNumBFaces( numBoundaryFaces );
+    if ( !buildInternalFaces )
     {
-        mesh.setMaxNumFaces( bfaces_found, false );
-        mesh.setNumFaces( numInternalFaces + bfaces_found );
+        mesh.setMaxNumFaces( numBoundaryFaces, false );
+        mesh.setNumFaces( numInternalFaces + numBoundaryFaces );
     }
     else
     {
-        mesh.setMaxNumFaces( numInternalFaces + bfaces_found, true );
+        mesh.setMaxNumFaces( numInternalFaces + numBoundaryFaces, true );
     }
 
-    FaceType face;
+    face_Type face;
 
-    if ( buildboundary )
+    if ( buildBoundaryFaces )
     {
 
         if ( verbose )
         {
-            clog << "**** Marker Flags for Newly Created Boundary Faces ***"
+            logStream << "**** Marker Flags for Newly Created Boundary Faces ***"
             << std::endl;
-            clog << "id->marker   id->marker  id->marker" << std::endl;
+            logStream << "id->marker   id->marker  id->marker" << std::endl;
         }
 
-        for ( fi = bfaces->begin(); fi != bfaces->end(); ++fi )
+        for ( boundaryFaceContainerIterator = boundaryFaceContainerPtr->begin();
+        		boundaryFaceContainerIterator != boundaryFaceContainerPtr->end(); ++boundaryFaceContainerIterator )
         {
-            info = fi->second;
-            vol = info.first; // Element ID
-            pv = &mesh.volume( vol ); // Element
-            j = info.second;       // The local ID of face on element
+            volumeIdToLocalFaceIdPair = boundaryFaceContainerIterator->second;
+            volumeId = volumeIdToLocalFaceIdPair.first; // Element ID
+            volumePtr = &mesh.volume( volumeId ); // Element
+            jFaceLocalId = volumeIdToLocalFaceIdPair.second;       // The local ID of face on element
 
-            for ( UInt k = 1; k <= FaceType::numPoints; ++k )
-                face.setPoint( k, pv->point( ele.fToP( j, k ) ) );
+            for ( UInt kPointId = 1; kPointId <= face_Type::numPoints; ++kPointId )
+                face.setPoint( kPointId, volumePtr->point( volumeShape.fToP( jFaceLocalId, kPointId ) ) );
             // Add extra info
-            face.ad_first() = vol;
-            face.pos_first() = j;
+            face.ad_first() = volumeId;
+            face.pos_first() = jFaceLocalId;
             // Get marker value
             inheritWeakerMarker( face );
-            id = mesh.addFace( face, true ).id();
+            newFaceId = mesh.addFace( face, true ).id();
             if ( verbose )
             {
-                if ( id % 3 == 0 )
-                    clog << std::endl;
-                clog << id << " -> ";
-                face.printFlag( clog );
-                clog << " ";
+                if ( newFaceId % 3 == 0 )
+                    logStream << std::endl;
+                logStream << newFaceId << " -> ";
+                face.printFlag( logStream );
+                logStream << " ";
             }
         }
         mesh.setLinkSwitch( std::string( "HAS_BOUNDARY_FACES" ) );
-        if ( ! buildinternal )
+        if ( ! buildInternalFaces )
             mesh.unsetLinkSwitch( std::string( "HAS_ALL_FACES" ) );
         mesh.setLinkSwitch( std::string( "FACES_HAVE_ADIACENCY" ) );
     }
 
-    if ( !extcont )
-        delete bfaces;
+    if ( !externalContainerIsProvided )
+        delete boundaryFaceContainerPtr;
 
-    if ( ! buildinternal )
+    if ( ! buildInternalFaces )
         return true;
 
 
-    if ( !buildboundary )
+    if ( !buildBoundaryFaces )
     {
         if ( mesh.storedFaces() < mesh.numBFaces() )
         {
-            err << "ERROR: mesh has not boundary faces, cannot just create internal ones!!!" << std::endl;
-            err << "ABORT CONDITION" << std::endl;
+            errorStream << "ERROR: mesh has not boundary faces, cannot just create internal ones!!!" << std::endl;
+            errorStream << "ABORT CONDITION" << std::endl;
             return false;
         }
         else if ( mesh.storedFaces() > mesh.numBFaces() )
@@ -1296,80 +1650,80 @@ bool buildFaces( RegionMesh3D & mesh,
 
 
     /*
-      I may get rid of the bfaces container. Unfortunately now I need a more
-      complex structure, a BareItemsHandel, in order to generate the internal
+      I may get rid of the boundaryFaces container. Unfortunately now I need a more
+      complex structure, a BareItemsHandler, in order to generate the internal
       faces id. An alternative would be to use the point data to identify
       boundary faces as the ones with all point on the boundary. Yet in this
-      function we do not want to use a priori infromation, so that it might
+      function we do not want to use a priori information, so that it might
       work even if the points boundary flag is not properly set.
     */
 
-    BareItemsHandler<BareFace> _be;
-    std::pair<UInt, bool> e;
+    BareItemsHandler<BareFace> bareFaceHandler;
+    std::pair<UInt, bool> faceIdToBoolPair;
     std::pair<BareFace, bool> _face;
 
-    for ( UInt j = 0; j < mesh.faceList.size(); ++j )
+    for ( UInt jFaceId = 0; jFaceId < mesh.faceList.size(); ++jFaceId )
     {
-        i1 = ( mesh.faceList[ j ].point( 1 ) ).id();
-        i2 = ( mesh.faceList[ j ].point( 2 ) ).id();
-        i3 = ( mesh.faceList[ j ].point( 3 ) ).id();
-        if ( RegionMesh3D::FaceShape::numVertices == 4 )
+        point1Id = ( mesh.faceList[ jFaceId ].point( 1 ) ).id();
+        point2Id = ( mesh.faceList[ jFaceId ].point( 2 ) ).id();
+        point3Id = ( mesh.faceList[ jFaceId ].point( 3 ) ).id();
+        if ( MeshType::FaceShape::numVertices == 4 )
         {
-            i4 = ( mesh.faceList[ j ].point( 4 ) ).id();
-            _face = makeBareFace( i1, i2, i3, i4 );
+            point4Id = ( mesh.faceList[ jFaceId ].point( 4 ) ).id();
+            _face = makeBareFace( point1Id, point2Id, point3Id, point4Id );
         }
         else
         {
-            _face = makeBareFace( i1, i2, i3 );
+            _face = makeBareFace( point1Id, point2Id, point3Id );
         }
-        _be.addIfNotThere( _face.first );
+        bareFaceHandler.addIfNotThere( _face.first );
     }
 
-    EntityFlag mm( mesh.marker() );
-    ID vid;
+    EntityFlag meshMarker( mesh.marker() );
+    // ID volumeId;
 
-    for ( typename Volumes::iterator iv = mesh.volumeList.begin();
-            iv != mesh.volumeList.end(); ++iv )
+    for ( typename volumeContainer_Type::iterator volumeContainerIterator = mesh.volumeList.begin();
+            volumeContainerIterator != mesh.volumeList.end(); ++volumeContainerIterator )
     {
-        vid = iv->id();
+        volumeId = volumeContainerIterator->id();
         // REMEMBER: numbering from 1
-        for ( UInt j = 1; j <= mesh.numLocalFaces(); j++ )
+        for ( UInt jFaceLocalId = 1; jFaceLocalId <= mesh.numLocalFaces(); jFaceLocalId++ )
         {
-            i1 = ele.fToP( j, 1 );
-            i2 = ele.fToP( j, 2 );
-            i3 = ele.fToP( j, 3 );
+            point1Id = volumeShape.fToP( jFaceLocalId, 1 );
+            point2Id = volumeShape.fToP( jFaceLocalId, 2 );
+            point3Id = volumeShape.fToP( jFaceLocalId, 3 );
             // go to global
-            i1 = ( iv->point( i1 ) ).id();
-            i2 = ( iv->point( i2 ) ).id();
-            i3 = ( iv->point( i3 ) ).id();
-            if ( RegionMesh3D::FaceShape::numVertices == 4 )
+            point1Id = ( volumeContainerIterator->point( point1Id ) ).id();
+            point2Id = ( volumeContainerIterator->point( point2Id ) ).id();
+            point3Id = ( volumeContainerIterator->point( point3Id ) ).id();
+            if ( MeshType::FaceShape::numVertices == 4 )
             {
-                i4 = ele.fToP( j, 4 );
-                i4 = ( iv->point( i4 ) ).id();
-                _face = makeBareFace( i1, i2, i3, i4 );
+                point4Id = volumeShape.fToP( jFaceLocalId, 4 );
+                point4Id = ( volumeContainerIterator->point( point4Id ) ).id();
+                _face = makeBareFace( point1Id, point2Id, point3Id, point4Id );
             }
             else
             {
-                _face = makeBareFace( i1, i2, i3 );
+                _face = makeBareFace( point1Id, point2Id, point3Id );
             }
-            e = _be.addIfNotThere( _face.first );
-            if ( e.second )
+            faceIdToBoolPair = bareFaceHandler.addIfNotThere( _face.first );
+            if ( faceIdToBoolPair.second )
             {
                 // a new face It must be internal.
-                for ( UInt k = 1; k <= FaceType::numPoints; ++k )
-                    face.setPoint( k, iv->point( ele.fToP( j, k ) ) );
-                face.ad_first() = vid;
-                face.pos_first() = j;
-                // gets the marker from the RegionMesh
-                face.setMarker( mm );
+                for ( UInt kPointId = 1; kPointId <= face_Type::numPoints; ++kPointId )
+                    face.setPoint( kPointId, volumeContainerIterator->point( volumeShape.fToP( jFaceLocalId, kPointId ) ) );
+                face.ad_first() = volumeId;
+                face.pos_first() = jFaceLocalId;
+                // gets the marker from the MeshType
+                face.setMarker( meshMarker );
                 mesh.addFace( face, false ); //The id should be correct
             }
             else
             {
-                if ( e.first > bfaces_found )  // internal
+                if ( faceIdToBoolPair.first > numBoundaryFaces )  // internal
                 {
-                    mesh.faceList( e.first ).ad_second() = vid;
-                    mesh.faceList( e.first ).pos_second() = j;
+                    mesh.faceList( faceIdToBoolPair.first ).ad_second() = volumeId;
+                    mesh.faceList( faceIdToBoolPair.first ).pos_second() = jFaceLocalId;
                 }
             }
         }
@@ -1379,163 +1733,168 @@ bool buildFaces( RegionMesh3D & mesh,
 }
 #endif
 
+
 //! It builds edges.
+/*!
+    This function may alternatively be used to build the boundary edges,
+	all the mesh edges, or just add the internal edges to an existing list of
+	just boundary edges.
 
-/*! This function may alternatively be used to build the boundary edges,
-  all the mesh faces, or just add the internal edges to an existing list of
-  just boundary edges.
+	@param mesh A mesh
 
-  \param mesh A mesh
+	@param logStream Log stream for information on the newly created markers for boundary edges
 
-  \param clog Log file for information on the newly created markers for boundary edges
+	@param errorStream Error stream
 
-  \param err  Error stream
+	@param numBoundaryEdgesFound Returns the number of boundary edges
 
-  \param bedges_found Returns the number of boundary edges
+	@param numInternalEdgesFound Returns the number of internal edges
 
-  \param iedges_found Returns the number of internal edges
+	@param buildBoundaryEdges if true the function builds boundary edges
 
-  \param buildbounary if true the function builds boundary edges
+	@param buildInternalEdges if true the function builds internal edges
 
-  \param buildinternal if true the function builds internal edges
+	@param verbose. If true markerFlags info is written on logStream.
 
-  \param verbose. If true markerFlags info is written on clog.
+	@param externalEdgeContainer. If not NULL it is a pointer to an external map of bondary edges, already
+	produced by a call to findBoundaryEdges(). This parameter may be used to save al lot of computational work, since
+	findBoundaryEdges() is rather expensive.
 
-  \param ext_container. If not NULL it is a pointer to an external map of bondary edges, already
-  produced by a call to findBoundaryEdges(). This parameter may be used to save al lot of computational work, since
-  findBoundaryEdges() is rather expensive.
+	@return true if successful
 
-  \pre If buildinternal=true and buildboundary=false the mesh must contain a proper list
-  of boundary edges
-  \pre The mesh must copntain a proper list of boundary faces
+	@pre If buildInternalEdges=true and buildBoundaryEdges=false the mesh must contain a proper list
+	of boundary edges
 
-  \note By setting buildinternal=true and buildboundary=true the function just fixes the counters
-  with the number of edges in the mesh
+	@pre The mesh must contain a proper list of boundary faces
+
+	@note By setting buildInternalEdges=true and buildBoundaryEdges=true the function just fixes the counters
+	with the number of edges in the mesh
  */
 
-template <typename RegionMesh3D>
-bool buildEdges( RegionMesh3D & mesh,
-                 std::ostream & clog,
-                 std::ostream &err,
-                 UInt & bedges_found,
-                 UInt & iedges_found,
-                 bool buildboundary = true,
-                 bool buildinternal = false,
+template <typename MeshType>
+bool buildEdges( MeshType & mesh,
+                 std::ostream & logStream,
+                 std::ostream & errorStream,
+                 UInt & numBoundaryEdgesFound,
+                 UInt & numInternalEdgesFound,
+                 bool buildBoundaryEdges = true,
+                 bool buildInternalEdges = false,
                  bool verbose = false,
-                 TempEdgeContainer * ext_container = 0 )
+                 temporaryEdgeContainer_Type * externalEdgeContainer = 0 )
 {
-    typedef typename RegionMesh3D::Volumes Volumes;
-    typedef typename RegionMesh3D::Faces Faces;
-    typedef typename RegionMesh3D::VolumeType VolumeType;
-    typedef typename RegionMesh3D::VolumeShape VolumeShape;
-    typedef typename RegionMesh3D::Edges Edges;
-    typedef typename RegionMesh3D::EdgeType EdgeType;
-    typedef typename RegionMesh3D::FaceType FaceType;
-    typedef typename RegionMesh3D::FaceShape FaceShape;
-    typename RegionMesh3D::FaceType * pf;
-    typename RegionMesh3D::VolumeType * pv;
+    typedef typename MeshType::Volumes volumeContainer_Type;
+    typedef typename MeshType::Faces faceContainer_Type;
+    typedef typename MeshType::VolumeType volume_Type;
+    typedef typename MeshType::VolumeShape volumeShape_Type;
+    typedef typename MeshType::Edges Edges;
+    typedef typename MeshType::EdgeType edge_Type;
+    typedef typename MeshType::FaceType face_Type;
+    typedef typename MeshType::FaceShape faceShape_Type;
 
-    TempEdgeContainer * bedges;
-    TempEdgeContainer iedges;
-    std::pair<ID, ID>info;
-    ID j, id;
-    ID facID;
+    face_Type * facePtr;
+    volume_Type * volumePtr;
 
-
-    bool extcont( false );
+    temporaryEdgeContainer_Type * temporaryEdgeContainer;
+    temporaryEdgeContainer_Type edgeContainer;
+    std::pair<ID, ID> faceIdToLocalEdgeIdPair;
+    ID jEdgeLocalId, newEdgeId;
+    ID faceId;
 
 
-    if ( (extcont = ( ext_container != 0 )) )
+    bool externalContainerIsProvided( false );
+
+
+    if ( (externalContainerIsProvided = ( externalEdgeContainer != 0 )) )
     {
-        bedges = ext_container;
-        bedges_found = bedges->size();
+        temporaryEdgeContainer = externalEdgeContainer;
+        numBoundaryEdgesFound = temporaryEdgeContainer->size();
     }
     else
     {
-        bedges = new TempEdgeContainer;
-        bedges_found = findBoundaryEdges( mesh, *bedges );
+        temporaryEdgeContainer = new temporaryEdgeContainer_Type;
+        numBoundaryEdgesFound = findBoundaryEdges( mesh, *temporaryEdgeContainer );
     }
 
-    iedges_found = findInternalEdges( mesh, *bedges, iedges );
+    numInternalEdgesFound = findInternalEdges( mesh, *temporaryEdgeContainer, edgeContainer );
     // free some memory if not needed!
-    if ( !buildinternal )
-        iedges.clear();
-    if ( !buildboundary && buildinternal )
+    if ( !buildInternalEdges )
+        edgeContainer.clear();
+    if ( !buildBoundaryEdges && buildInternalEdges )
     {
-        if ( mesh.storedEdges() < bedges_found )
+        if ( mesh.storedEdges() < numBoundaryEdgesFound )
         {
-            err << "ERROR in buildEdges(): mesh does not contain boundary edges" << std::endl;
-            err << "  I need to set buildboundary=true" << std::endl;
-            err << "  ABORT CONDITION" << std::endl;
+            errorStream << "ERROR in buildEdges(): mesh does not contain boundary edges" << std::endl;
+            errorStream << "  I need to set buildBoundaryEdges=true" << std::endl;
+            errorStream << "  ABORT CONDITION" << std::endl;
             return false;
         }
-        else if ( mesh.storedEdges() > bedges_found )
+        else if ( mesh.storedEdges() > numBoundaryEdgesFound )
         {
-            mesh.edgeList.resize( bedges_found );
+            mesh.edgeList.resize( numBoundaryEdgesFound );
         }
     }
-    mesh.setNumBEdges( bedges_found );
-    mesh.setNumEdges( bedges_found + iedges_found );
-    if ( buildboundary )
+    mesh.setNumBEdges( numBoundaryEdgesFound );
+    mesh.setNumEdges( numBoundaryEdgesFound + numInternalEdgesFound );
+    if ( buildBoundaryEdges )
         mesh.edgeList.clear();
-    if ( buildboundary && ! buildinternal )
-        mesh.setMaxNumEdges( bedges_found, false );
-    if ( buildinternal )
-        mesh.setMaxNumEdges( bedges_found + iedges_found, true );
+    if ( buildBoundaryEdges && ! buildInternalEdges )
+        mesh.setMaxNumEdges( numBoundaryEdgesFound, false );
+    if ( buildInternalEdges )
+        mesh.setMaxNumEdges( numBoundaryEdgesFound + numInternalEdgesFound, true );
 
     if (verbose)
-        err << "Building edges from scratch" << std::endl;
+        errorStream << "Building edges from scratch" << std::endl;
 
-    EdgeType edge;
+    edge_Type edge;
 
-    if ( buildboundary )
+    if ( buildBoundaryEdges )
     {
 
         if ( verbose )
         {
-            clog << "**** Marker Flags for Newly Created Boundary Edges ***"
+            logStream << "**** Marker Flags for Newly Created Boundary Edges ***"
             << std::endl;
-            clog << "Edgeid->marker" << std::endl;
+            logStream << "Edgeid->marker" << std::endl;
         }
 
         // First boundary.
-        for ( TempEdgeContainer::iterator ei = bedges->begin();
-                ei != bedges->end(); ++ei )
+        for ( temporaryEdgeContainer_Type::iterator edgeContainerIterator = temporaryEdgeContainer->begin();
+                edgeContainerIterator != temporaryEdgeContainer->end(); ++edgeContainerIterator )
         {
-            info = ei->second;
-            facID = info.first; // Face ID
-            pf = &mesh.face( facID ); // Face
-            j = info.second;       // The local ID of edge on face
-            for ( UInt k = 1; k <= EdgeType::numPoints; ++k )
+            faceIdToLocalEdgeIdPair = edgeContainerIterator->second;
+            faceId = faceIdToLocalEdgeIdPair.first; // Face ID
+            facePtr = &mesh.face( faceId ); // Face
+            jEdgeLocalId = faceIdToLocalEdgeIdPair.second;       // The local ID of edge on face
+            for ( UInt kPointId = 1; kPointId <= edge_Type::numPoints; ++kPointId )
             {
-                edge.setPoint( k, pf->point( FaceShape::eToP( j, k ) ) );
+                edge.setPoint( kPointId, facePtr->point( faceShape_Type::eToP( jEdgeLocalId, kPointId ) ) );
             }
 
             // Get marker value inheriting from points
             inheritWeakerMarker( edge );
 
-            id = mesh.addEdge( edge, true ).id();
+            newEdgeId = mesh.addEdge( edge, true ).id();
             if ( verbose )
             {
-                if ( id % 6 == 0 )
-                    clog << std::endl;
-                clog << id << " -> ";
-                edge.printFlag( clog );
-                clog << " ";
+                if ( newEdgeId % 6 == 0 )
+                    logStream << std::endl;
+                logStream << newEdgeId << " -> ";
+                edge.printFlag( logStream );
+                logStream << " ";
             }
         }
 
         if ( verbose )
-            clog << std::endl << "  *****  END OF LIST OF BOUNDARY EDGES ****"
+            logStream << std::endl << "  *****  END OF LIST OF BOUNDARY EDGES ****"
             << std::endl;
 
         mesh.setLinkSwitch( std::string( "HAS_BOUNDARY_EDGES" ) );
     }
 
-    if ( !extcont )
-        delete bedges;
+    if ( !externalContainerIsProvided )
+        delete temporaryEdgeContainer;
 
-    if ( !buildinternal )
+    if ( !buildInternalEdges )
     {
         mesh.unsetLinkSwitch( std::string( "HAS_ALL_EDGES" ) );
         return true;
@@ -1546,15 +1905,15 @@ bool buildEdges( RegionMesh3D & mesh,
     // Now internal edges
     // free some memory
 
-    for ( TempEdgeContainer::iterator ei = iedges.begin();
-            ei != iedges.end(); ++ei )
+    for ( temporaryEdgeContainer_Type::iterator edgeContainerIterator = edgeContainer.begin();
+            edgeContainerIterator != edgeContainer.end(); ++edgeContainerIterator )
     {
-        info = ei->second;
-        facID = info.first; // Volume ID
-        pv = &mesh.volume( facID ); // Volume that generated the edge
-        j = info.second;       // The local ID of edge on volume
-        for ( UInt k = 1; k <= EdgeType::numPoints; ++k )
-            edge.setPoint( k, pv->point( VolumeShape::eToP( j, k ) ) );
+        faceIdToLocalEdgeIdPair = edgeContainerIterator->second;
+        faceId = faceIdToLocalEdgeIdPair.first; // Volume ID
+        volumePtr = &mesh.volume( faceId ); // Volume that generated the edge
+        jEdgeLocalId = faceIdToLocalEdgeIdPair.second;       // The local ID of edge on volume
+        for ( UInt kPointId = 1; kPointId <= edge_Type::numPoints; ++kPointId )
+            edge.setPoint( kPointId, volumePtr->point( volumeShape_Type::eToP( jEdgeLocalId, kPointId ) ) );
         edge.setMarker( mesh.marker() ); // Get marker value: that of the mesh
         mesh.addEdge( edge, false );
     }
@@ -1572,165 +1931,145 @@ bool buildEdges( RegionMesh3D & mesh,
 */
 //! It builds a P2 mesh from P1 data.
 /*!
-  \author L.Formaggia.
-  \version Version 1.0
-  \pre All compulsory structures in mesh must have been already set: volumes and boundary faces.
-  \pre Points list MUST have been dimensioned correctly!!!
-  \note the function takes advantage of the fact that
+	@author L.Formaggia.
+	@version Version 1.0
+	@pre All compulsory structures in mesh must have been already set: volumes and boundary faces.
+	@pre Points list MUST have been dimensioned correctly!!!
+	@note the function takes advantage of the fact that
 */
-template <typename RegionMesh>
+template <typename MeshType>
 void
-p1top2( RegionMesh & mesh, std::ostream & out = std::cout )
+p1top2( MeshType & mesh, std::ostream & outputStream = std::cout )
 {
 
-    typedef typename RegionMesh::ElementShape GeoShape;
-    typedef typename RegionMesh::BElementShape GeoBShape;
+    typedef typename MeshType::ElementShape  GeoShape;
+    typedef typename MeshType::BElementShape GeoBShape;
     ASSERT_PRE( GeoShape::numPoints > 4, "p1top2 ERROR: we need a P2 mesh" );
 
-    out << "Building P2 mesh points and connectivities from P1 data"
+    outputStream << "Building P2 mesh points and connectivities from P1 data"
     << std::endl;
 
 
-    typename RegionMesh::PointType * pp = 0;
-    typename RegionMesh::EdgeType * pe = 0;
-    typename RegionMesh::ElementType * pv = 0;
-    typename RegionMesh::BElementType * pbe = 0;
-    typedef typename RegionMesh::Elements Elements;
-    typedef typename RegionMesh::BElements BElements;
+    typename MeshType::PointType *       pointPtr = 0;
+    typename MeshType::EdgeType *        edgePtr = 0;
+    typename MeshType::ElementType *     elementPtr = 0;
+    typename MeshType::BElementType *    facetPtr = 0;
+    typedef typename MeshType::Elements  elementContainer_Type;
+    typedef typename MeshType::BElements facetContainer_Type;
 
-    BareItemsHandler<BareEdge> _be;
-    std::pair<UInt, bool> _edgeid;
-    UInt i1, i2, e_id;
-    std::pair<BareEdge, bool> _edge;
-    typename RegionMesh::ElementShape ele;
-    out << "Processing " << mesh.storedEdges() << " P1 Edges" << std::endl;
-    UInt nbe = mesh.numBEdges();
-    for ( UInt j = 1; j <= mesh.storedEdges(); ++j )
+    BareItemsHandler<BareEdge>           bareEdgeHandler;
+    std::pair<UInt, bool>                edgeIdToBoolPair;
+    UInt                                 point1Id, point2Id, edgeId;
+    std::pair<BareEdge, bool>            bareEdgeToBoolPair;
+    typename MeshType::ElementShape      elementShape;
+
+    outputStream << "Processing " << mesh.storedEdges() << " P1 Edges" << std::endl;
+    UInt numBoundaryEdges = mesh.numBEdges();
+    for ( UInt jEdgeId = 1; jEdgeId <= mesh.storedEdges(); ++jEdgeId )
     {
-        pe = & mesh.edge( j );
-        i1 = ( pe->point( 1 ) ).id();
-        i2 = ( pe->point( 2 ) ).id();
-        pp = & mesh.addPoint( j <= nbe ); // true for boundary points
-        pp->x() = ( ( pe->point( 1 ) ).x() +
-                    ( pe->point( 2 ) ).x() ) * .5;
-        pp->y() = ( ( pe->point( 1 ) ).y() +
-                    ( pe->point( 2 ) ).y() ) * .5;
-        pp->z() = ( ( pe->point( 1 ) ).z() +
-                    ( pe->point( 2 ) ).z() ) * .5;
+        edgePtr = & mesh.edge( jEdgeId );
+        point1Id = ( edgePtr->point( 1 ) ).id();
+        point2Id = ( edgePtr->point( 2 ) ).id();
+        pointPtr = & mesh.addPoint( jEdgeId <= numBoundaryEdges ); // true for boundary points
+        pointPtr->x() = ( ( edgePtr->point( 1 ) ).x() +
+                    ( edgePtr->point( 2 ) ).x() ) * .5;
+        pointPtr->y() = ( ( edgePtr->point( 1 ) ).y() +
+                    ( edgePtr->point( 2 ) ).y() ) * .5;
+        pointPtr->z() = ( ( edgePtr->point( 1 ) ).z() +
+                    ( edgePtr->point( 2 ) ).z() ) * .5;
 
         /*
           If we have set a marker for the boundary edge, that marker is
           inherited by the new created point. Otherwise the edge (and the new
           created point) gets the WORST marker among the two end Vertices
         */
-        /*
-          JFG 07/2002:
-          if the mesh file do not contain the edges (inria files), they are
-          built in fixBoundaryEdges(...), but I suspect that this function
-          does not attribute the right marker to the edges (maybe a problem in
-          setWorseMarkerOfEntity, or something like that...)
-          If you do #undef JFG : no change, if you do #define JFG, we do not
-          consider the (wrong) marker of the edge to define the marker of the
-          added node (I arbitrarily take the marker of the first node)
-        */
-        //#define JFG
-        //#ifndef JFG
-        // original version: DOES NOT work when the edges are not give in the mesh file
-        if ( pe->isMarkerUnset() )
-            inheritWeakerMarker( *pe );
-        pp->setMarker( pe->marker() );
-        //#else
-        // temporary version that works when the edges are not given in the mesh file
-        // pe->setMarker(mesh.point(i1).marker());
-        // pp->setMarker(pe->marker());
-        //#endif
-        // pp->id()=++i; // Indexing from 1
-        // if I storealso non B. edges:
-        // pointList[i].boundary()=
-        // (edgeList[j].point(1)).boundary() &&(edgeList[j].point(2)).boundary();
-        pe->setPoint( 3, pp ); //use overloaded version that takes a pointer
-        _edge = makeBareEdge( i1, i2 );
-        _edgeid = _be.addIfNotThere( _edge.first, pp->id() );
+        if ( edgePtr->isMarkerUnset() )
+            inheritWeakerMarker( *edgePtr );
+        pointPtr->setMarker( edgePtr->marker() );
+        // todo check that the id() of the new point is correctly set
+        edgePtr->setPoint( 3, pointPtr ); //use overloaded version that takes a pointer
+        bareEdgeToBoolPair = makeBareEdge( point1Id, point2Id );
+        edgeIdToBoolPair = bareEdgeHandler.addIfNotThere( bareEdgeToBoolPair.first, pointPtr->id() );
     }
     // Now the other edges, of which I do NOT build the global stuff
     // (I would need to check the switch but I will do that part later on)
     if ( GeoShape::nDim == 3 )
     {
-        UInt nbf = mesh.numBFaces();
-        UInt nbv = GeoBShape::numVertices;
-        out << "Processing " << mesh.storedFaces() << " Face Edges"
+        UInt numBoundaryFaces = mesh.numBFaces();
+
+        outputStream << "Processing " << mesh.storedFaces() << " Face Edges"
         << std::endl;
-        for ( UInt k = 1; k <= mesh.storedFaces(); ++k )
+        for ( UInt kFaceId = 1; kFaceId <= mesh.storedFaces(); ++kFaceId )
         {
-            pbe = &mesh.face( k );
-            for ( UInt j = 1; j <= mesh.numLocalEdgesOfFace(); j++ )
+            facetPtr = &mesh.face( kFaceId );
+            for ( UInt jEdgeLocalId = 1; jEdgeLocalId <= mesh.numLocalEdgesOfFace(); jEdgeLocalId++ )
             {
-                i1 = GeoBShape::eToP( j, 1 );
-                i2 = GeoBShape::eToP( j, 2 );
-                i1 = ( pbe->point( i1 ) ).id();
-                i2 = ( pbe->point( i2 ) ).id();
-                _edge = makeBareEdge( i1, i2 );
-                e_id = _be.id( _edge.first );
-                if ( e_id != 0 )
+                point1Id = GeoBShape::eToP( jEdgeLocalId, 1 );
+                point2Id = GeoBShape::eToP( jEdgeLocalId, 2 );
+                point1Id = ( facetPtr->point( point1Id ) ).id();
+                point2Id = ( facetPtr->point( point2Id ) ).id();
+                bareEdgeToBoolPair = makeBareEdge( point1Id, point2Id );
+                edgeId = bareEdgeHandler.id( bareEdgeToBoolPair.first );
+                if ( edgeId != 0 )
                 {
-                    pp = &mesh.point( e_id );
+                    pointPtr = &mesh.point( edgeId );
                 }
                 else
                 {
                     // new edge -> new Point
-                    pp = &mesh.addPoint( k <= nbf );// true for boundary points
-                    _edgeid = _be.addIfNotThere( _edge.first, pp->id() );
-                    pp->x() = ( mesh.point( i1 ).x() +
-                                mesh.point( i2 ).x() ) * .5;
-                    pp->y() = ( mesh.point( i1 ).y() +
-                                mesh.point( i2 ).y() ) * .5;
-                    pp->z() = ( mesh.point( i1 ).z() +
-                                mesh.point( i2 ).z() ) * .5;
+                    pointPtr = &mesh.addPoint( kFaceId <= numBoundaryFaces );// true for boundary points
+                    edgeIdToBoolPair = bareEdgeHandler.addIfNotThere( bareEdgeToBoolPair.first, pointPtr->id() );
+                    pointPtr->x() = ( mesh.point( point1Id ).x() +
+                                mesh.point( point2Id ).x() ) * .5;
+                    pointPtr->y() = ( mesh.point( point1Id ).y() +
+                                mesh.point( point2Id ).y() ) * .5;
+                    pointPtr->z() = ( mesh.point( point1Id ).z() +
+                                mesh.point( point2Id ).z() ) * .5;
                     // If we have set a marker for the face, that marker is
                     // inherited by the new created point
-                    pp->setMarker( pbe->marker() );
+                    pointPtr->setMarker( facetPtr->marker() );
                 }
-                pbe->setPoint( nbv + j, pp );
+                facetPtr->setPoint( GeoBShape::numVertices + jEdgeLocalId, pointPtr );
             }
         }
     }
 
-    out << "Processing " << mesh.numElements() << " Mesh Elements"
+    outputStream << "Processing " << mesh.numElements() << " Mesh Elements"
     << std::endl;
     UInt nev = GeoShape::numVertices;
-    for ( UInt k = 1; k <= mesh.numElements(); ++k )
+    for ( UInt kElementId = 1; kElementId <= mesh.numElements(); ++kElementId )
     {
-        pv = &mesh.element( k );
-        for ( UInt j = 1; j <= mesh.numLocalEdges(); j++ )
+        elementPtr = &mesh.element( kElementId );
+        for ( UInt jEdgeLocalId = 1; jEdgeLocalId <= mesh.numLocalEdges(); jEdgeLocalId++ )
         {
-            i1 = ele.eToP( j, 1 );
-            i2 = ele.eToP( j, 2 );
-            i1 = ( pv->point( i1 ) ).id();
-            i2 = ( pv->point( i2 ) ).id();
-            _edge = makeBareEdge( i1, i2 );
-            e_id = _be.id( _edge.first );
-            if ( e_id != 0 )
+            point1Id = elementShape.eToP( jEdgeLocalId, 1 );
+            point2Id = elementShape.eToP( jEdgeLocalId, 2 );
+            point1Id = ( elementPtr->point( point1Id ) ).id();
+            point2Id = ( elementPtr->point( point2Id ) ).id();
+            bareEdgeToBoolPair = makeBareEdge( point1Id, point2Id );
+            edgeId = bareEdgeHandler.id( bareEdgeToBoolPair.first );
+            if ( edgeId != 0 )
             {
-                pp = &mesh.point( e_id );
+                pointPtr = &mesh.point( edgeId );
             }
             else
             {
                 // cannot be on boundary if the mesh is proper!
-                pp = &mesh.addPoint( false );
-                _edgeid = _be.addIfNotThere( _edge.first, pp->id() );
-                pp->x() = ( mesh.point( i1 ).x() +
-                            mesh.point( i2 ).x() ) * .5;
-                pp->y() = ( mesh.point( i1 ).y() +
-                            mesh.point( i2 ).y() ) * .5;
-                pp->z() = ( mesh.point( i1 ).z() +
-                            mesh.point( i2 ).z() ) * .5;
-                pp->setMarker( pe->marker() );
+                pointPtr = &mesh.addPoint( false );
+                edgeIdToBoolPair = bareEdgeHandler.addIfNotThere( bareEdgeToBoolPair.first, pointPtr->id() );
+                pointPtr->x() = ( mesh.point( point1Id ).x() +
+                            mesh.point( point2Id ).x() ) * .5;
+                pointPtr->y() = ( mesh.point( point1Id ).y() +
+                            mesh.point( point2Id ).y() ) * .5;
+                pointPtr->z() = ( mesh.point( point1Id ).z() +
+                            mesh.point( point2Id ).z() ) * .5;
+                pointPtr->setMarker( edgePtr->marker() );
             }
-            pv->setPoint( nev + j, pp );
+            elementPtr->setPoint( nev + jEdgeLocalId, pointPtr );
         }
     }
     /*=============================*/
-    out << " ******* Done Construction of P2 Mmesh *******"
+    outputStream << " ******* Done Construction of P2 Mmesh *******"
     << std::endl << std::endl;
 }
 
@@ -1739,14 +2078,14 @@ p1top2( RegionMesh & mesh, std::ostream & out = std::cout )
   Using some heuristics it tries to fix mesh switches
  */
 
-// template<typename RegionMesh>
+// template<typename MeshType>
 // void
-// fixSwitches(RegionMesh ^ mesh, std::ostream & clog=std::cout, bool verbose=false)
+// fixSwitches(MeshType ^ mesh, std::ostream & logStream=std::cout, bool verbose=false)
 // {
 
-//   clog<<" ************** FIXING MESH SWITCHES **********************"<<std::endl;
-//   clog<<"            Mesh switches Status before fixing"<<std::endl;
-//   mesh.showLinkSwitch(verbose,clog);
+//   logStream<<" ************** FIXING MESH SWITCHES **********************"<<std::endl;
+//   logStream<<"            Mesh switches Status before fixing"<<std::endl;
+//   mesh.showLinkSwitch(verbose,logStream);
 //   if (mesh.storedFaces()> mesh.numBFaces()){
 //     mesh.setLinkSwitch("HAS_ALL_FACES");
 //   }  else{
