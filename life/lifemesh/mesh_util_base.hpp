@@ -447,7 +447,7 @@ public:
     /*!
         @param i the index of the component to be extracted from a vector of geometric coordinates
      */
-    explicit GetCoordComponent( int i );
+    explicit GetCoordComponent( Int i );
 
     //! Copy constructor
     GetCoordComponent( const GetCoordComponent& getCoordComponent ) :
@@ -481,7 +481,7 @@ public:
 
     //@}
 private:
-    int componentIndex;
+    Int componentIndex;
 };
 
 
@@ -916,7 +916,7 @@ setBEdgesMarker( MeshType & mesh, std::ostream & logStream = std::cout,
                  std::ostream & /*errorStream*/ = std::cerr, bool verbose = true )
 {
     typename MeshType::EdgeType * edgePtr = 0;
-    unsigned int                  counter( 0 );
+    UInt                  counter( 0 );
 
     if ( verbose )
         logStream << "NEW EDGE MARKER MAP" << std::endl
@@ -964,7 +964,7 @@ setBFacesMarker( MeshType & mesh, std::ostream & logStream = std::cout,
                  std::ostream & /*errorStream*/ = std::cerr, bool verbose = true )
 {
     typename MeshType::FaceType * facePtr = 0;
-    unsigned int                  counter( 0 );
+    UInt                  counter( 0 );
 
     if ( verbose )
     {
@@ -1036,7 +1036,7 @@ setBPointsMarker( MeshType & mesh, std::ostream & logStream = std::cout,
             }
         }
     }
-    unsigned int counter( 0 );
+    UInt counter( 0 );
 
     if ( verbose )
     {
@@ -1077,7 +1077,7 @@ bool checkIdnumber( const MeshEntityListType & meshEntityList )
 {
     typedef typename MeshEntityListType::const_iterator MeshEntityListTypeConstIterator_Type;
     bool ok( true );
-    unsigned int counter( 1 );
+    UInt counter( 1 );
     for ( MeshEntityListTypeConstIterator_Type meshEntityListIterator = meshEntityList.begin(); meshEntityListIterator != meshEntityList.end() && ok; ++meshEntityListIterator, ++counter )
         ok = ( meshEntityListIterator->id() == counter );
     return ok;
@@ -1094,7 +1094,7 @@ template
 <typename MeshEntityListType>
 void fixIdnumber( MeshEntityListType & meshEntityList )
 {
-    unsigned int counter( 0 );
+    UInt counter( 0 );
     typedef typename MeshEntityListType::iterator Iter;
     for ( Iter meshEntityListIterator = meshEntityList.begin() ; meshEntityListIterator != meshEntityList.end(); ++meshEntityListIterator )
         meshEntityListIterator->setId( ++counter );
@@ -1113,8 +1113,8 @@ void
 setBPointsCounters( MeshType & mesh )
 {
 
-    unsigned int countBP( 0 );
-    unsigned int countBV( 0 );
+    UInt countBP( 0 );
+    UInt countBV( 0 );
 
     mesh._bPoints.clear();
 
@@ -1177,7 +1177,7 @@ fixBPoints( MeshType & mesh, std::ostream & logStream = std::cout,
     std::vector<bool>bpts(mesh.numPoints());
     // I may have launched the program for a P2 mesh
     // yet not all the points are there
-    unsigned int numitems;
+    UInt numitems;
     if (mesh.storedPoints()==mesh.numVertices())
     {
         numitems=facetShape_Type::numVertices;

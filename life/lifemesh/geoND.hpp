@@ -308,11 +308,11 @@ template <typename GEOSHAPE, typename POINTTYPE>
 void GeoND<GEOSHAPE, POINTTYPE>::exchangePoints( const ID oldToNew[ GEOSHAPE::numPoints ] )
 {
     PointType const* tmp[ GEOSHAPE::numPoints ];
-    for ( unsigned int i = 0; i < GEOSHAPE::numPoints; ++i )
+    for ( UInt i = 0; i < GEOSHAPE::numPoints; ++i )
     {
         tmp[ i ] = M_points[ i ];
     }
-    for ( unsigned int i = 0; i < GEOSHAPE::numPoints; ++i )
+    for ( UInt i = 0; i < GEOSHAPE::numPoints; ++i )
     {
         M_points[ i ] = tmp[ oldToNew[ i ] - 1 ];
     }

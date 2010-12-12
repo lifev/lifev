@@ -44,7 +44,7 @@ namespace LifeV
 GetCoordComponent::GetCoordComponent() : componentIndex( -1 )
 {}
 
-GetCoordComponent::GetCoordComponent( int i ) : componentIndex( i )
+GetCoordComponent::GetCoordComponent( Int i ) : componentIndex( i )
 {}
 
 // ===================================================
