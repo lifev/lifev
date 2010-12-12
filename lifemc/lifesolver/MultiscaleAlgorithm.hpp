@@ -37,8 +37,8 @@
 #ifndef MS_Algorithm_H
 #define MS_Algorithm_H 1
 
-#include <lifemc/lifesolver/MS_Definitions.hpp>
-#include <lifemc/lifesolver/MS_Model_MultiScale.hpp>
+#include <lifemc/lifesolver/MultiscaleDefinitions.hpp>
+#include <lifemc/lifesolver/MultiscaleModelMultiscale.hpp>
 
 namespace LifeV
 {

@@ -37,7 +37,7 @@
 #ifndef MS_PhysicalData_H
 #define MS_PhysicalData_H 1
 
-#include <lifemc/lifesolver/MS_Definitions.hpp>
+#include <lifemc/lifesolver/MultiscaleDefinitions.hpp>
 
 namespace LifeV
 {

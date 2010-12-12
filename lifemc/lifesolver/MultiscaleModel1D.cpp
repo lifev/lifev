@@ -39,7 +39,7 @@
  *  @maintainer Cristiano Malossi <cristiano.malossi@epfl.ch>
  */
 
-#include "MS_Model_1D.hpp"
+#include "MultiscaleModel1D.hpp"
 
 namespace LifeV
 {

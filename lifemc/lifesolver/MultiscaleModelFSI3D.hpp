@@ -38,13 +38,6 @@
 #ifndef MS_MODEL_FSI3D_H
 #define MS_MODEL_FSI3D_H 1
 
-// Mathcard includes
-#include <lifemc/lifesolver/BCInterface.hpp>
-#include <lifemc/lifesolver/MS_PhysicalModel.hpp>
-
-#include <lifemc/lifesolver/MonolithicGE.hpp>
-#include <lifemc/lifesolver/MonolithicGI.hpp>
-
 // LifeV includes
 #include <life/lifesolver/FSIOperator.hpp>
 #include <life/lifealg/nonLinRichardson.hpp>
@@ -53,6 +46,19 @@
 #ifdef HAVE_HDF5
 #include <life/lifefilters/hdf5exporter.hpp>
 #endif
+
+// Mathcard includes
+#include <lifemc/lifesolver/MonolithicGE.hpp>
+#include <lifemc/lifesolver/MonolithicGI.hpp>
+
+#include <lifemc/lifesolver/BlockMatrix.hpp>
+#include <lifemc/lifesolver/BlockMatrixRN.hpp>
+#include <lifemc/lifesolver/ComposedDN.hpp>
+#include <lifemc/lifesolver/ComposedNN.hpp>
+#include <lifemc/lifesolver/ComposedDNND.hpp>
+
+#include <lifemc/lifesolver/BCInterface.hpp>
+#include <lifemc/lifesolver/MultiscaleModel.hpp>
 
 namespace LifeV
 {

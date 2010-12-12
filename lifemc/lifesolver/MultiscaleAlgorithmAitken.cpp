@@ -34,7 +34,7 @@
  *  @maintainer Cristiano Malossi <cristiano.malossi@epfl.ch>
  */
 
-#include <lifemc/lifesolver/MS_Algorithm_Aitken.hpp>
+#include <lifemc/lifesolver/MultiscaleAlgorithmAitken.hpp>
 
 namespace LifeV
 {
