@@ -1,32 +1,37 @@
-/* -*- mode: c++ -*-
+//@HEADER
+/*
+************************************************************************
 
-  This file is part of the LifeV Applications.
+ This file is part of the LifeV Applications.
+ Copyright (C) 2001-2010 EPFL, Politecnico di Milano, INRIA
 
-  Author(s):  Umberto Villa <uvilla@emory.edu>
-       Date: 2010-04-14
+ This library is free software; you can redistribute it and/or modify
+ it under the terms of the GNU Lesser General Public License as
+ published by the Free Software Foundation; either version 2.1 of the
+ License, or (at your option) any later version.
 
-  Copyright (C) 2009 EPFL
+ This library is distributed in the hope that it will be useful, but
+ WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ Lesser General Public License for more details.
 
-  This program is free software; you can redistribute it and/or modify
-  it under the terms of the GNU General Public License as published by
-  the Free Software Foundation; either version 2.1 of the License, or
-  (at your option) any later version.
+ You should have received a copy of the GNU Lesser General Public
+ License along with this library; if not, write to the Free Software
+ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
+ USA
 
-  This program is distributed in the hope that it will be useful, but
-  WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-  General Public License for more details.
-
-  You should have received a copy of the GNU General Public License
-  along with this program; if not, write to the Free Software
-  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
-  USA
+************************************************************************
 */
-/* ========================================================
+//@HEADER
 
-  Simple Fourier test with Dirichlet Boundary condition
+/*!
+    @file
+    @brief Simple Fourier test with Dirichlet Boundary condition
 
-  Solve the problem
+    @author Umberto Villa <uvilla@emory.edu>
+    @date 14-04-2010
+
+     Solve the problem
 
            \partial_t u - \nu(t) \Delta u + sigma(t) u = f(t)
 
@@ -34,23 +39,16 @@
                         u(t=0) = u0 initial condition
 
             on a cube
-\nu, \sigma and \source can be function of time
-(which implies that the matrix needs to be reassembled each time)
+            \nu, \sigma and \source can be function of time
+            (which implies that the matrix needs to be reassembled each time)
 
- Purpose: Test BDF of different order
+    Purpose: Test BDF of different order
 
-The analytical solution used in the test is quadratic both in space and time.
-Therefore a second order approximation in space + BDF2 should provide a solution exact up to
-the tolerance of the linear system.
-*/
+    The analytical solution used in the test is quadratic both in space and time.
+    Therefore a second order approximation in space + BDF2 should provide a solution exact up to
+    the tolerance of the linear system.
 
-/**
-   \file test_bdf.hpp
-   \author U. Villa <uvilla@emory.edu>
-   \date 2010-04-14
  */
-
-
 
 
 #ifndef __test_bdf_H
