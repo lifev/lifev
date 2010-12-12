@@ -87,9 +87,9 @@ public:
      *     <li> perform preliminary operations which do not depend on the couplings.
      * </ol>
      *
-     * @param FileName Name of data file.
+     * @param fileName Name of data file.
      */
-    virtual void SetupData( const std::string& FileName );
+    virtual void setupData( const std::string& fileName );
 
     //! Setup the model.
     /*!
@@ -100,44 +100,44 @@ public:
      *     <li> perform preliminary operations which depend on the couplings.
      * </ol>
      */
-    virtual void SetupModel() = 0;
+    virtual void setupModel() = 0;
 
     //! Build the initial system.
     /*!
-     * This method is alternative to UpdateSystem and should be called only once at the fist timestep.
+     * This method is alternative to updateSystem and should be called only once at the fist timestep.
      * This method is reserved for the construction of:
      * <ol>
      *     <li> objects that are constant (with respect to the time);
      *     <li> objects that are required for the first time step and should not be updated during subiterations.
      * </ol>
      */
-    virtual void BuildSystem() = 0;
+    virtual void buildSystem() = 0;
 
     //! Update the system.
     /*!
-     * This method is alternative to BuildSystem and should be called from the second timestep.
+     * This method is alternative to buildSystem and should be called from the second timestep.
      * This method is reserved for the update of:
      * <ol>
      *     <li> objects that are not constant with respect to the time but should not be updated during subiterations.
      * </ol>
      */
-    virtual void UpdateSystem() = 0;
+    virtual void updateSystem() = 0;
 
     //! Solve the System.
     /*!
      * This method is called once for each subiteration (in the case of implicit coupling).
      * It computes the solution at time t_n+1.
      */
-    virtual void SolveSystem() = 0;
+    virtual void solveSystem() = 0;
 
     //! save the solution.
     /*!
-     * This method wrote to file the solution computed during the last call of SolveSystem.
+     * This method wrote to file the solution computed during the last call of solveSystem.
      */
-    virtual void SaveSolution() = 0;
+    virtual void saveSolution() = 0;
 
     //! Display some information about the model.
-    virtual void ShowMe();
+    virtual void showMe();
 
     //@}
 
@@ -150,7 +150,7 @@ public:
      *  This method has to be called before the automatic destructor, in order
      *  to disconnect the coupling classes from the model classes.
      */
-    void ClearCouplingsList();
+    void clearCouplingsList();
 
     //@}
 
@@ -162,13 +162,13 @@ public:
     /*!
      * @param id Model ID
      */
-    void SetID( const UInt& id );
+    void setID( const UInt& id );
 
     //! Add a pointer to one of the couplings which couple the model
     /*!
      * @param coupling shared_ptr of the coupling
      */
-    void AddCoupling( const MS_Coupling_PtrType& coupling );
+    void addCoupling( const MS_Coupling_PtrType& coupling );
 
     //! Setup the global data of the model.
     /*!
@@ -177,7 +177,7 @@ public:
      *
      * @param globalData Global data container.
      */
-    void SetGlobalData( const MS_GlobalDataContainer_PtrType& globalData );
+    void setGlobalData( const MS_GlobalDataContainer_PtrType& globalData );
 
     //! Scale, rotate and translate the Model in the 3D space
     /*!
@@ -186,7 +186,7 @@ public:
      * @param rotate Vector (Rx,Ry,Rz) of angles for rotation (degree units)
      * @param translate Vector (Tx,Ty,Tz) of offset for position
      */
-    void SetGeometry( const boost::array< Real, NDIM >& scale,
+    void setGeometry( const boost::array< Real, NDIM >& scale,
                       const boost::array< Real, NDIM >& rotate,
                       const boost::array< Real, NDIM >& translate );
 
@@ -194,7 +194,7 @@ public:
     /*!
      * @param comm Epetra communicator
      */
-    void SetCommunicator( const MS_Comm_PtrType& comm );
+    void setCommunicator( const MS_Comm_PtrType& comm );
 
     //@}
 
@@ -206,58 +206,58 @@ public:
     /*!
      * @return global ID of the model
      */
-    const UInt& GetID() const;
+    const UInt& ID() const;
 
     //! Get the type of the model
     /*!
      * @return type of the model
      */
-    const modelsTypes& GetType() const;
+    const models_Type& type() const;
 
     //! Get one available flag by id
     /*!
      * @param id id of the boundary flag
      * @return flag
      */
-    const BCFlag& GetFlag( const UInt& id ) const;
+    const BCFlag& flag( const UInt& id ) const;
 
     //! Get the flag vector of the model
     /*!
      * @return vector of flags available for coupling
      */
-    const std::vector< BCFlag >& GetFlags() const;
+    const std::vector< BCFlag >& flags() const;
 
     //! Get the name of the model
     /*!
      * @return name of the model
      */
-    const std::string& GetModelName() const;
+    const std::string& modelName() const;
 
     //! Get the number of couplings connecting the model
     /*!
      * @return number of couplings connecting the model
      */
-    UInt GetCouplingsNumber() const;
+    UInt couplingsNumber() const;
 
     //! Get the coupling local ID through global ID
     /*!
      * @param ID global ID of the coupling
      * @return local ID of the coupling
      */
-    UInt GetCouplingLocalID( const UInt& ID ) const;
+    UInt couplingLocalID( const UInt& ID ) const;
 
     //! Get the coupling through local ID
     /*!
      * @param ID local ID of the coupling
      * @return Pointer to the coupling
      */
-    MS_Coupling_PtrType GetCoupling( const UInt& LocalID ) const;
+    MS_Coupling_PtrType coupling( const UInt& localID ) const;
 
     //! Get the global data of the model.
     /*!
      * @return Global data container.
      */
-    const MS_GlobalDataContainer_PtrType& GetGlobalData() const;
+    const MS_GlobalDataContainer_PtrType& globalData() const;
 
     //@}
 
@@ -266,7 +266,7 @@ protected:
     static UInt                          M_modelsNumber;       // Total number of models
 
     UInt                                 M_ID;                 // Global ID of the model
-    modelsTypes                          M_type;               // Type of the model (depends on the derived class)
+    models_Type                          M_type;               // Type of the model (depends on the derived class)
 
     MS_CouplingsVector_Type              M_couplings;          // Container for the couplings
     std::string                          M_modelName;          // Name of the model

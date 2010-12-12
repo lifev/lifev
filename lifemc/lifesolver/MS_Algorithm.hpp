@@ -132,7 +132,7 @@ public:
     /*!
      * @return type of the algorithm
      */
-    const algorithmsTypes& type() const;
+    const algorithms_Type& type() const;
 
     //! Get the Multiscale problem
     /*!
@@ -192,7 +192,7 @@ protected:
 
     //@}
 
-    algorithmsTypes                          M_type;
+    algorithms_Type                          M_type;
 
     multiscaleModelPtr_Type                  M_multiscale;
 

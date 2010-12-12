@@ -58,8 +58,8 @@ public:
     //! @name Type definitions
     //@{
 
-    typedef std::vector< MS_Vector_PtrType >                     CouplingVariablesContainer_Type;
-    typedef std::vector< Real >                                  TimeContainer_Type;
+    typedef std::vector< MS_Vector_PtrType >                     couplingVariablesContainer_Type;
+    typedef std::vector< Real >                                  timeContainer_Type;
 
     //@}
 
@@ -83,22 +83,22 @@ public:
     /*!
      * @param FileName Name of data file
      */
-    virtual void SetupData( const std::string& FileName );
+    virtual void setupData( const std::string& fileName );
 
     //! Setup the coupling
-    virtual void SetupCoupling() = 0;
+    virtual void setupCoupling() = 0;
 
     //! Initialize the values of the coupling variables
-    virtual void InitializeCouplingVariables() = 0;
+    virtual void initializeCouplingVariables() = 0;
 
     //! Export the values of the local coupling residuals into a global vector
     /*!
-     * @param CouplingResiduals Global vector of variables
+     * @param couplingResiduals Global vector of variables
      */
-    virtual void ExportCouplingResiduals( MS_Vector_Type& CouplingResiduals ) = 0;
+    virtual void exportCouplingResiduals( MS_Vector_Type& couplingResiduals ) = 0;
 
     //! Display some information about the coupling
-    virtual void ShowMe();
+    virtual void showMe();
 
     //@}
 
@@ -110,51 +110,51 @@ public:
     /*!
      * @param couplingMap Global coupling map
      */
-    void CreateCouplingMap( EpetraMap& couplingMap );
+    void createCouplingMap( EpetraMap& couplingMap );
 
     //! Import the values of the coupling variables
     /*!
-     * @param CouplingVariables Global vector of coupling variables
+     * @param couplingVariables Global vector of coupling variables
      */
-    void ImportCouplingVariables( const MS_Vector_Type& CouplingVariables );
+    void importCouplingVariables( const MS_Vector_Type& couplingVariables );
 
     //! Export the values of the coupling variables
     /*!
-     * @param CouplingVariables Global vector of coupling variables
+     * @param couplingVariables Global vector of coupling variables
      */
-    void ExportCouplingVariables( MS_Vector_Type& CouplingVariables );
+    void exportCouplingVariables( MS_Vector_Type& couplingVariables );
 
     //! Extrapolate the values of the coupling variables for the next time step
-    void ExtrapolateCouplingVariables();
+    void extrapolateCouplingVariables();
 
     //! Find if a perturbation is imposed on the coupling.
     /*!
      * @return true if a perturbation is imposed
      */
-    bool IsPerturbed() const;
+    bool isPerturbed() const;
 
     //! Export the Jacobian matrix
     /*!
      * @param Jacobian Jacobian Matrix
      */
-    void ExportJacobian( MS_Matrix_Type& Jacobian );
+    void exportJacobian( MS_Matrix_Type& jacobian );
 
     //! Export the values of the Jacobian product
     /*!
      * @param deltaCouplingVariables variation of the coupling variables
-     * @param JacobianProduct the product of the Jacobian by the varuatuib if tge coupling variables
+     * @param jacobianProduct the product of the Jacobian by the varuatuib if tge coupling variables
      */
-    void ExportJacobianProduct( const MS_Vector_Type& deltaCouplingVariables, MS_Vector_Type& JacobianProduct );
+    void exportJacobianProduct( const MS_Vector_Type& deltaCouplingVariables, MS_Vector_Type& jacobianProduct );
 
     //! save the coupling variables information on a file
-    void SaveSolution();
+    void saveSolution();
 
     //! Clear the list of pointers to the models.
     /*!
      *  This method has to be called before the automatic destructor, in order
      *  to disconnect the coupling classes from the model classes.
      */
-    void ClearModelsList();
+    void clearModelsList();
 
     //@}
 
@@ -166,25 +166,25 @@ public:
     /*!
      * @param id Coupling ID
      */
-    void SetID( const UInt& id );
+    void setID( const UInt& id );
 
     //! Add a pointer to one of the models to couple
     /*!
      * @param model shared_ptr of the model
      */
-    void AddModel( const MS_Model_PtrType& model );
+    void addModel( const MS_Model_PtrType& model );
 
     //! Add a flag of one of the models to couple
     /*!
      * @param flag flag of the model
      */
-    void AddFlag( const BCFlag& flag );
+    void addFlag( const BCFlag& flag );
 
     //! Add a flag of one of the models to couple
     /*!
      * @param flagID get from the model the flag with this flagID
      */
-    void AddFlagID( const UInt& flagID );
+    void addFlagID( const UInt& flagID );
 
     //! Setup the global data of the coupling.
     /*!
@@ -193,13 +193,13 @@ public:
      *
      * @param globalData Global data container.
      */
-    void SetGlobalData( const MS_GlobalDataContainer_PtrType& globalData );
+    void setGlobalData( const MS_GlobalDataContainer_PtrType& globalData );
 
     //! Set the epetra communicator for the coupling
     /*!
      * @param comm Epetra communicator
      */
-    void SetCommunicator( const MS_Comm_PtrType& comm );
+    void setCommunicator( const MS_Comm_PtrType& comm );
 
     //@}
 
@@ -211,68 +211,68 @@ public:
     /*!
      * @return global ID of the coupling
      */
-    const UInt& GetID() const;
+    const UInt& ID() const;
 
     //! Get the type of the coupling
     /*!
      * @return type of the coupling
      */
-    const couplingsTypes& GetType() const;
+    const couplings_Type& type() const;
 
     //! Get the name of the coupling
     /*!
      * @return name of the coupling
      */
-    const std::string& GetCouplingName() const;
+    const std::string& couplingName() const;
 
     //! Get the number of models connected by the coupling
-    UInt GetModelsNumber() const;
+    UInt modelsNumber() const;
 
     //! Get the model local ID through global ID
     /*!
      * @param ID global ID of the model
      * @return local ID of the model
      */
-    UInt GetModelLocalID( const UInt& ID ) const;
+    UInt modelGlobalToLocalID( const UInt& ID ) const;
 
     //! Get the model connected by the coupling through local ID
     /*!
      * @param LocalID local ID of the model
      * @return Pointer to the model
      */
-    MS_Model_PtrType GetModel( const UInt& LocalID ) const;
+    MS_Model_PtrType model( const UInt& localID ) const;
 
     //! Get the model connected by the coupling through local ID
     /*!
      * @param LocalID local ID of the model
      * @return Coupling flag of the model
      */
-    const BCFlag& GetFlag( const UInt& LocalID ) const;
+    const BCFlag& flag( const UInt& localID ) const;
 
     //! Get the number of the coupling variables
     /*!
      * @return number of the coupling variables
      */
-    const UInt& GetCouplingVariablesNumber() const;
+    const UInt& couplingVariablesNumber() const;
 
     //! Get the perturbed coupling.
     /*!
      * If it is unperturbed it returns -1.
      * @return the localID of the perturbed coupling
      */
-    const Int& GetPerturbedCoupling() const;
+    const Int& perturbedCoupling() const;
 
     //! Get the local residual.
     /*!
      * @return the local residual of the coupling
      */
-    const MS_Vector_Type& GetResidual() const;
+    const MS_Vector_Type& residual() const;
 
     //! Get the time interpolation order.
     /*!
      * @return the value of the time interpolation order.
      */
-    const UInt& GetTimeInterpolationOrder() const;
+    const UInt& timeInterpolationOrder() const;
 
 
     //@}
@@ -287,13 +287,13 @@ protected:
      * @param LocalCouplingVariableID local coupling variable (perturbed)
      * @return list of models affected by the perturbation
      */
-    virtual MS_ModelsVector_Type GetListOfPerturbedModels( const UInt& LocalCouplingVariableID ) = 0;
+    virtual MS_ModelsVector_Type listOfPerturbedModels( const UInt& localCouplingVariableID ) = 0;
 
     //! Insert constant coefficients into the Jacobian matrix
     /*!
      * @param Jacobian the Jacobian matrix
      */
-    virtual void InsertJacobianConstantCoefficients( MS_Matrix_Type& Jacobian ) = 0;
+    virtual void insertJacobianConstantCoefficients( MS_Matrix_Type& jacobian ) = 0;
 
     //! Insert the Jacobian coefficient(s) depending on a perturbation of the model, due to a specific variable (the column)
     /*!
@@ -302,13 +302,13 @@ protected:
      * @param ID the global ID of the model which is perturbed by the variable
      * @param SolveLinearSystem a flag to which determine if the linear system has to be solved
      */
-    virtual void InsertJacobianDeltaCoefficients( MS_Matrix_Type& Jacobian, const UInt& Column, const UInt& ID, bool& LinearSystemSolved ) = 0;
+    virtual void insertJacobianDeltaCoefficients( MS_Matrix_Type& jacobian, const UInt& column, const UInt& ID, bool& linearSystemSolved ) = 0;
 
     //! Display some information about the coupling
     /*!
      * @param output specify the output stream
      */
-    virtual void DisplayCouplingValues( std::ostream& output ) = 0;
+    virtual void displayCouplingValues( std::ostream& output ) = 0;
 
     //@}
 
@@ -317,14 +317,14 @@ protected:
     //@{
 
     //! Create the local vectors of the coupling
-    void CreateLocalVectors();
+    void createLocalVectors();
 
     //! Import the content of the Global Vector in the Local vector
     /*!
      * @param globalVector the global vector
      * @param localVector the local vector
      */
-    void ImportCouplingVector( const MS_Vector_Type& globalVector, MS_Vector_Type& localVector );
+    void importCouplingVector( const MS_Vector_Type& globalVector, MS_Vector_Type& localVector );
 
     //! Export the content of the Local Vector in the Global vector
     /*!
@@ -332,7 +332,7 @@ protected:
      * @param localVector the local vector
      * @param globalVector the global vector
      */
-    void ExportCouplingVector( const MS_Vector_Type& localVector, MS_Vector_Type& globalVector );
+    void exportCouplingVector( const MS_Vector_Type& localVector, MS_Vector_Type& globalVector );
 
     //! Lagrange interpolation/extrapolation of the coupling variables at selected time.
     /*!
@@ -340,8 +340,7 @@ protected:
      * @param t interpolation time
      * @param interpolatedCouplingVariables variables interpolated/extrapolated at time t
      */
-    void InterpolateCouplingVariables( const TimeContainer_Type& timeContainer,
-                                       const Real& t,
+    void interpolateCouplingVariables( const timeContainer_Type& timeContainer, const Real& t,
                                        MS_Vector_Type& interpolatedCouplingVariables );
 
     //! Display and error message for the specific model
@@ -355,7 +354,7 @@ protected:
     static UInt                          M_couplingsNumber;
 
     UInt                                 M_ID;
-    couplingsTypes                       M_type;
+    couplings_Type                       M_type;
 
     MS_ModelsVector_Type                 M_models;
     std::string                          M_couplingName;
@@ -365,8 +364,8 @@ protected:
 
     std::pair< UInt, UInt >              M_couplingIndex;
 
-    CouplingVariablesContainer_Type      M_LocalCouplingVariables;
-    MS_Vector_PtrType                    M_LocalCouplingResiduals;
+    couplingVariablesContainer_Type      M_localCouplingVariables;
+    MS_Vector_PtrType                    M_localCouplingResiduals;
 
     UInt                                 M_timeInterpolationOrder;
 

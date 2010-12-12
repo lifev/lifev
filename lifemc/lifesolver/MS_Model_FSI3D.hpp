@@ -68,13 +68,11 @@ public:
     //! @name Public Types
     //@{
 
-    typedef MS_PhysicalModel                                                               super;
-
     typedef FSIOperator                                                                    FSIOperator_Type;
-    typedef boost::shared_ptr< FSIOperator_Type>                                           FSIOperator_PtrType;
+    typedef boost::shared_ptr< FSIOperator_Type>                                           FSIOperatorPtr_Type;
 
     typedef FSIOperator::data_Type                                                         data_Type;
-    typedef FSIOperator::data_PtrType                                                      data_PtrType;
+    typedef FSIOperator::data_PtrType                                                      dataPtr_Type;
 
     typedef FSIOperator::mesh_type                                                         mesh_Type;
 
@@ -82,19 +80,20 @@ public:
     typedef FSIOperator::solid_raw_type                                                    solid_Type;
 
     typedef FSIOperator::vector_type                                                       vector_Type;
-    typedef FSIOperator::vector_ptrtype                                                    vector_PtrType;
+    typedef FSIOperator::vector_ptrtype                                                    vectorPtr_Type;
 
     typedef Exporter< mesh_Type >                                                          IOFile_Type;
-    typedef boost::shared_ptr< IOFile_Type >                                               IOFile_PtrType;
+    typedef boost::shared_ptr< IOFile_Type >                                               IOFilePtr_Type;
 
     typedef Ensight< mesh_Type >                                                           ensightIOFile_Type;
 #ifdef HAVE_HDF5
     typedef Hdf5exporter< mesh_Type >                                                      hdf5IOFile_Type;
 #endif
 
-    typedef BCHandler                                                                      BC_Type;
-    typedef boost::shared_ptr< BC_Type >                                                   BC_PtrType;
-    typedef BCInterface< FSIOperator >                                                     BCInterface_Type;
+    typedef BCHandler                                                                      bc_Type;
+    typedef boost::shared_ptr< bc_Type >                                                   bcPtr_Type;
+    typedef BCInterface< FSIOperator >                                                     bcInterface_Type;
+    typedef boost::shared_ptr< bcInterface_Type >                                          bcInterfacePtr_Type;
 
     //@}
 
@@ -116,27 +115,27 @@ public:
 
     //! Setup the data of the model.
     /*!
-     * @param FileName Name of data file.
+     * @param fileName Name of data file.
      */
-    void SetupData( const std::string& FileName );
+    void setupData( const std::string& fileName );
 
     //! Setup the model.
-    void SetupModel();
+    void setupModel();
 
     //! Build the initial system (matrix and vectors).
-    void BuildSystem();
+    void buildSystem();
 
     //! Update the system for (matrix and vectors).
-    void UpdateSystem();
+    void updateSystem();
 
     //! Solve the problem.
-    void SolveSystem( );
+    void solveSystem( );
 
     //! save the solution
-    void SaveSolution();
+    void saveSolution();
 
     //! Display some information about the model.
-    void ShowMe();
+    void showMe();
 
     //@}
 
@@ -145,13 +144,13 @@ public:
     //@{
 
     //! Setup the linear model
-    void SetupLinearModel();
+    void setupLinearModel();
 
     //! Update the linear system matrix and vectors
-    void UpdateLinearModel();
+    void updateLinearModel();
 
     //! Solve the linear problem
-    void SolveLinearModel( bool& SolveLinearSystem );
+    void solveLinearModel( bool& solveLinearSystem );
 
     //@}
 
@@ -163,105 +162,105 @@ public:
     /*!
      * @return BCInterface container
      */
-    BCInterface_Type& GetBCInterface();
+    bcInterface_Type& bcInterface();
 
     //! Get the density on a specific boundary face of the model
     /*!
      * @param flag flag of the boundary face
      * @return density value
      */
-    Real GetBoundaryDensity( const BCFlag& /*flag*/) const;
+    Real boundaryDensity( const BCFlag& /*flag*/) const;
 
     //! Get the viscosity on a specific boundary face of the model
     /*!
      * @param flag flag of the boundary face
      * @return viscosity value
      */
-    Real GetBoundaryViscosity( const BCFlag& /*flag*/) const;
+    Real boundaryViscosity( const BCFlag& /*flag*/) const;
 
     //! Get the area on a specific boundary face of the model
     /*!
      * @param flag flag of the boundary face
      * @return area value
      */
-    Real GetBoundaryArea( const BCFlag& Flag ) const;
+    Real boundaryArea( const BCFlag& flag ) const;
 
     //! Get the flow rate on a specific boundary face of the model
     /*!
      * @param flag flag of the boundary face
      * @return flow rate value
      */
-    Real GetBoundaryFlowRate( const BCFlag& Flag ) const;
+    Real boundaryFlowRate( const BCFlag& flag ) const;
 
     //! Get the integral of the pressure (on a specific boundary face)
     /*!
      * @param flag flag of the boundary face
      * @return pressure value
      */
-    Real GetBoundaryPressure( const BCFlag& Flag ) const;
+    Real boundaryPressure( const BCFlag& flag ) const;
 
     //! Get the integral of the dynamic pressure (on a specific boundary face)
     /*!
      * @param flag flag of the boundary face
      * @return dynamic pressure value
      */
-    Real GetBoundaryDynamicPressure( const BCFlag& Flag ) const;
+    Real boundaryDynamicPressure( const BCFlag& flag ) const;
 
     //! Get the value of the Lagrange multiplier associated to a specific boundary face
     /*!
-     * @param Flag flag of the boundary face
+     * @param flag flag of the boundary face
      * @return Lagrange multiplier value
      */
-    Real GetBoundaryLagrangeMultiplier( const BCFlag& Flag ) const;
+    Real boundaryLagrangeMultiplier( const BCFlag& flag ) const;
 
     //! Get the integral of the normal stress (on a specific boundary face)
     /*!
      * @param flag flag of the boundary face
-     * @param StressType Type of approximation for the stress
+     * @param stressType Type of approximation for the stress
      * @return stress value
      */
-    Real GetBoundaryStress( const BCFlag& Flag, const stressTypes& StressType = StaticPressure ) const;
+    Real boundaryStress( const BCFlag& flag, const stress_Type& stressType = StaticPressure ) const;
 
     //! Get the variation of the flow rate (on a specific boundary face) using the linear model
     /*!
-     * @param Flag flag of the boundary face on which quantity should be computed
-     * @param SolveLinearSystem a flag to which determine if the linear system has to be solved
+     * @param flag flag of the boundary face on which quantity should be computed
+     * @param solveLinearSystem a flag to which determine if the linear system has to be solved
      * @return variation of the flow rate
      */
-    Real GetBoundaryDeltaFlowRate( const BCFlag& Flag, bool& SolveLinearSystem );
+    Real boundaryDeltaFlowRate( const BCFlag& flag, bool& solveLinearSystem );
 
     //! Get the variation of the pressure (on a specific boundary face) using the linear model
     /*!
-     * @param Flag flag of the boundary face on which quantity should be computed
-     * @param SolveLinearSystem a flag to which determine if the linear system has to be solved
+     * @param flag flag of the boundary face on which quantity should be computed
+     * @param solveLinearSystem a flag to which determine if the linear system has to be solved
      * @return variation of the pressure
      */
-    Real GetBoundaryDeltaPressure( const BCFlag& Flag, bool& SolveLinearSystem );
+    Real boundaryDeltaPressure( const BCFlag& flag, bool& solveLinearSystem );
 
     //! Get the variation of the total pressure (on a specific boundary face) using the linear model
     /*!
-     * @param Flag flag of the boundary face on which quantity should be computed
-     * @param SolveLinearSystem a flag to which determine if the linear system has to be solved
+     * @param flag flag of the boundary face on which quantity should be computed
+     * @param solveLinearSystem a flag to which determine if the linear system has to be solved
      * @return variation of the dynamic pressure
      */
-    Real GetBoundaryDeltaDynamicPressure( const BCFlag& Flag, bool& SolveLinearSystem );
+    Real boundaryDeltaDynamicPressure( const BCFlag& flag, bool& solveLinearSystem );
 
     //! Get the variation of the Lagrange multiplier associated to a specific boundary face, using the linear model
     /*!
-     * @param Flag flag of the boundary face
-     * @param SolveLinearSystem a flag to which determine if the linear system has to be solved
+     * @param flag flag of the boundary face
+     * @param solveLinearSystem a flag to which determine if the linear system has to be solved
      * @return Lagrange multiplier value
      */
-    Real GetBoundaryDeltaLagrangeMultiplier( const BCFlag& Flag, bool& SolveLinearSystem );
+    Real boundaryDeltaLagrangeMultiplier( const BCFlag& flag, bool& solveLinearSystem );
 
     //! Get the variation of the integral of the normal stress (on a specific boundary face)
     /*!
      * @param flag flag of the boundary face
-     * @param SolveLinearSystem a flag to which determine if the linear system has to be solved
-     * @param StressType Type of approximation for the stress
+     * @param solveLinearSystem a flag to which determine if the linear system has to be solved
+     * @param stressType Type of approximation for the stress
      * @return variation of the stress
      */
-    Real GetBoundaryDeltaStress( const BCFlag& Flag, bool& SolveLinearSystem, const stressTypes& StressType = StaticPressure );
+    Real boundaryDeltaStress( const BCFlag& flag, bool& solveLinearSystem, const stress_Type& stressType = StaticPressure );
 
     //@}
 
@@ -285,9 +284,9 @@ private:
      * In particular, it replaces the default local values with the ones in the global container.
      * If a value is already specified in the data file, do not perform the replacement.
      *
-     * @param FileName File name of the specific model.
+     * @param fileName File name of the specific model.
      */
-    void SetupGlobalData( const std::string& FileName );
+    void setupGlobalData( const std::string& fileName );
 
     void setupCommunicator();
 
@@ -295,68 +294,66 @@ private:
     //void setupSegregatedBC( const std::string& fileName );
     void updateBC();
 
-    void SetupExporter( IOFile_PtrType& exporter, const GetPot& dataFile, const std::string& label = "" );
-    void SetupImporter( IOFile_PtrType& exporter, const GetPot& dataFile, const std::string& label = "" );
+    void setupExporter( IOFilePtr_Type& exporter, const GetPot& dataFile, const std::string& label = "" );
+    void setupImporter( IOFilePtr_Type& exporter, const GetPot& dataFile, const std::string& label = "" );
 
-    void SetExporterFluid( const IOFile_PtrType& exporter );
-    void SetExporterSolid( const IOFile_PtrType& exporter );
+    void setExporterFluid( const IOFilePtr_Type& exporter );
+    void setExporterSolid( const IOFilePtr_Type& exporter );
 
     //! Initialize the solution.
     void initializeSolution();
 
     //! Impose the coupling perturbation on the correct BC inside the BCHandler
-    void ImposePerturbation();
+    void imposePerturbation();
 
     //! Reset all the coupling perturbations imposed on the BCHandler
-    void ResetPerturbation();
+    void resetPerturbation();
 
-    Real BCFunctionDelta_Zero( const Real& /*t*/, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& /*id*/ );
-    Real BCFunctionDelta_One( const Real& /*t*/, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& /*id*/ );
+    Real bcFunctionDeltaZero( const Real& /*t*/, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const UInt& /*id*/ );
+    Real bcFunctionDeltaOne( const Real& /*t*/, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const UInt& /*id*/ );
 
     //@}
 
     // Operator
-    FSIOperator_PtrType                    M_FSIoperator;
+    FSIOperatorPtr_Type                    M_FSIoperator;
 
     // Data
-    data_PtrType                           M_data;
+    dataPtr_Type                           M_data;
 
     // Exporters
-    IOFile_PtrType                         M_exporterFluid;
-    IOFile_PtrType                         M_exporterSolid;
+    IOFilePtr_Type                         M_exporterFluid;
+    IOFilePtr_Type                         M_exporterSolid;
 
     // Importers
-    IOFile_PtrType                         M_importerFluid;
-    IOFile_PtrType                         M_importerSolid;
+    IOFilePtr_Type                         M_importerFluid;
+    IOFilePtr_Type                         M_importerSolid;
 
     // Solution
-    vector_PtrType                         M_solution_tn;
-    vector_PtrType                         M_meshDisp_tn;
-    vector_PtrType                         M_meshDispOld_tn;
-    vector_PtrType                         M_rhs_tn;
+    vectorPtr_Type                         M_fluidVelocityPressure;
+    vectorPtr_Type                         M_fluidDisplacement;
+    vectorPtr_Type                         M_solidVelocity;
+    vectorPtr_Type                         M_solidDisplacement;
 
-    vector_PtrType                         M_fluidVelocityPressure;
-    vector_PtrType                         M_fluidDisplacement;
-    vector_PtrType                         M_solidVelocity;
-    vector_PtrType                         M_solidDisplacement;
+    // Old Solution
+    vectorPtr_Type                         M_fluidVelocityPressure_tn;
+    vectorPtr_Type                         M_solidDisplacement_tn;
+    vectorPtr_Type                         M_solidDisplacementOld_tn;
+    vectorPtr_Type                         M_rhs_tn;
+    UInt                                   M_nonLinearRichardsonIteration;
 
     // Boundary Conditions
-    boost::shared_ptr< BCInterface_Type >  M_fluidBC;
-    boost::shared_ptr< BCInterface_Type >  M_solidBC;
-    boost::shared_ptr< BCInterface_Type >  M_harmonicExtensionBC;
-//    boost::shared_ptr< BCInterface_Type >  M_linearizedFluidBC;
-//    boost::shared_ptr< BCInterface_Type >  M_linearizedSolidBC;
+    bcInterfacePtr_Type                    M_fluidBC;
+    bcInterfacePtr_Type                    M_solidBC;
+    bcInterfacePtr_Type                    M_harmonicExtensionBC;
 
     // Linear Fluid problem
-    BC_PtrType                             M_linearBC;
-    vector_PtrType                         M_linearRHS;
-    vector_PtrType                         M_linearSolution;
+    bcPtr_Type                             M_linearBC;
+    vectorPtr_Type                         M_linearRHS;
+    vectorPtr_Type                         M_linearSolution;
 
     // BC Functions for tangent problem
-    BCFunctionBase                         M_BCBaseDelta_Zero;
-    BCFunctionBase                         M_BCBaseDelta_One;
-
-    UInt                                   M_iter;
+    BCFunctionBase                         M_bcBaseDeltaZero;
+    BCFunctionBase                         M_bcBaseDeltaOne;
 };
 
 //! Factory create function

@@ -69,7 +69,7 @@ MS_Solver::MS_Solver() :
     MS_Model_Factory::instance().registerProduct   (  FSI3D,               &createMultiscaleModelFSI3D );
 
     MS_Coupling_Factory::instance().registerProduct(  Stress,              &createMultiscaleCouplingStress );
-    MS_Coupling_Factory::instance().registerProduct(  FluxStress,          &createMultiscaleCouplingFluxStress );
+    MS_Coupling_Factory::instance().registerProduct(  FlowRateStress,      &createMultiscaleCouplingFlowRateStress );
     MS_Coupling_Factory::instance().registerProduct(  BoundaryCondition,   &createMultiscaleCouplingBoundaryCondition );
 
     MS_Algorithm_Factory::instance().registerProduct( Aitken,              &createMultiscaleAlgorithmAitken );
@@ -112,18 +112,18 @@ MS_Solver::setupProblem( const std::string& fileName, const std::string& problem
 
     // Create the main model and set the communicator
     M_model = MS_Model_PtrType( MS_Model_Factory::instance().createObject( MS_modelsMap[ dataFile( "Problem/ProblemType", "MultiScale" ) ] ) );
-    M_model->SetCommunicator( M_comm );
+    M_model->setCommunicator( M_comm );
 
     // Setup data
-    M_globalData->ReadData( dataFile );
-    M_model->SetGlobalData( M_globalData );
-    M_model->SetupData( dataFile( "Problem/ProblemFile", "./MultiScaleData/Models/Model.dat" ) );
+    M_globalData->readData( dataFile );
+    M_model->setGlobalData( M_globalData );
+    M_model->setupData( dataFile( "Problem/ProblemFile", "./MultiScaleData/Models/Model.dat" ) );
 
     // Setup Models
-    M_model->SetupModel();
+    M_model->setupModel();
 
     // Algorithm parameters
-    if ( M_model->GetType() == MultiScale )
+    if ( M_model->type() == MultiScale )
     {
         M_algorithm = MS_Algorithm_PtrType( MS_Algorithm_Factory::instance().createObject( MS_algorithmsMap[ dataFile( "Solver/Algorithm/AlgorithmType", "Newton" ) ] ) );
         M_algorithm->setCommunicator( M_comm );
@@ -143,13 +143,13 @@ MS_Solver::solveProblem( const Real& externalResidual )
 
     // save initial solution if it is the very first time step
     if ( !MS_ProblemStep )
-        M_model->SaveSolution();
+        M_model->saveSolution();
 
     // Move to the "true" first time-step
-    M_globalData->GetDataTime()->updateTime();
-    M_globalData->GetDataTime()->setInitialTime( M_globalData->GetDataTime()->getTime() );
+    M_globalData->dataTime()->updateTime();
+    M_globalData->dataTime()->setInitialTime( M_globalData->dataTime()->getTime() );
 
-    for ( ; M_globalData->GetDataTime()->canAdvance(); M_globalData->GetDataTime()->updateTime() )
+    for ( ; M_globalData->dataTime()->canAdvance(); M_globalData->dataTime()->updateTime() )
     {
         M_chrono.start();
 
@@ -158,30 +158,30 @@ MS_Solver::solveProblem( const Real& externalResidual )
             std::cout << std::endl;
             std::cout << "$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$" << std::endl;
             std::cout << "                    MULTISCALE SIMULATION" << std::endl;
-            std::cout << "             time = " << M_globalData->GetDataTime()->getTime() << " s; "  <<
-                      "time step number = " << M_globalData->GetDataTime()->getTimeStepNumber()  << std::endl;
+            std::cout << "             time = " << M_globalData->dataTime()->getTime() << " s; "  <<
+                      "time step number = " << M_globalData->dataTime()->getTimeStepNumber()  << std::endl;
             std::cout << "$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$" << std::endl << std::endl;
         }
 
         // Build or Update System
-        if ( M_globalData->GetDataTime()->isFirstTimeStep() )
-            M_model->BuildSystem();
+        if ( M_globalData->dataTime()->isFirstTimeStep() )
+            M_model->buildSystem();
         else
         {
-            if ( M_model->GetType() == MultiScale )
+            if ( M_model->type() == MultiScale )
                 M_algorithm->updateCouplingVariables();
-            M_model->UpdateSystem();
+            M_model->updateSystem();
         }
 
-        // SolveSystem
-        M_model->SolveSystem();
+        // solveSystem
+        M_model->solveSystem();
 
         // If it is a MultiScale model, call algorithms for subiterations
-        if ( M_model->GetType() == MultiScale )
+        if ( M_model->type() == MultiScale )
             M_algorithm->subIterate();
 
-        // SaveSolution
-        M_model->SaveSolution();
+        // saveSolution
+        M_model->saveSolution();
 
         M_chrono.stop();
 
@@ -210,13 +210,13 @@ MS_Solver::showMe()
         std::cout << "Problem folder                = " << MS_ProblemFolder << std::endl
                   << "Problem step                  = " << MS_ProblemStep << std::endl << std::endl;
 
-        M_globalData->ShowMe();
+        M_globalData->showMe();
 
         std::cout << std::endl << std::endl;
     }
 
-    M_model->ShowMe();
-    if ( M_model->GetType() == MultiScale )
+    M_model->showMe();
+    if ( M_model->type() == MultiScale )
         M_algorithm->showMe();
 
     if ( M_displayer->isLeader() )

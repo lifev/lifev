@@ -59,8 +59,6 @@ class MS_Coupling_BoundaryCondition: public virtual MS_PhysicalCoupling
 {
 public:
 
-    typedef MS_PhysicalCoupling super;
-
     //! @name Constructors & Destructor
     //@{
 
@@ -78,24 +76,24 @@ public:
 
     //! Setup the data of the coupling
     /*!
-     *  @param FileName Name of data file
+     *  @param fileName Name of data file
      */
-    void SetupData( const std::string& FileName );
+    void setupData( const std::string& fileName );
 
     //! Setup the coupling
-    void SetupCoupling();
+    void setupCoupling();
 
     //! Initialize the values of the coupling variables (DO NOTHING)
-    void InitializeCouplingVariables() {}
+    void initializeCouplingVariables() {}
 
     //! Export the values of the local coupling residuals into a global vector (DO NOTHING)
     /*!
-     * @param CouplingResiduals Global vector of variables
+     * @param couplingResiduals Global vector of variables
      */
-    void ExportCouplingResiduals( MS_Vector_Type& /*CouplingResiduals*/ ) {}
+    void exportCouplingResiduals( MS_Vector_Type& /*couplingResiduals*/ ) {}
 
     //! Display some information about the coupling
-    void ShowMe();
+    void showMe();
 
     //@}
 
@@ -116,31 +114,31 @@ private:
 
     //! Build the list of models affected by the perturbation of a local coupling variable
     /*!
-     * @param LocalCouplingVariableID local coupling variable (perturbed)
+     * @param localCouplingVariableID local coupling variable (perturbed)
      * @return list of models affected by the perturbation
      */
-    MS_ModelsVector_Type GetListOfPerturbedModels( const UInt& /*LocalCouplingVariableID*/ );
+    MS_ModelsVector_Type listOfPerturbedModels( const UInt& /*localCouplingVariableID*/ );
 
     //! Insert constant coefficients into the Jacobian matrix (DO NOTHING)
     /*!
-     * @param Jacobian the Jacobian matrix
+     * @param jacobian the Jacobian matrix
      */
-    void InsertJacobianConstantCoefficients( MS_Matrix_Type& /*Jacobian*/ ) {}
+    void insertJacobianConstantCoefficients( MS_Matrix_Type& /*jacobian*/ ) {}
 
     //! Insert the Jacobian coefficient(s) depending on a perturbation of the model, due to a specific variable (the column) (DO NOTHING)
     /*!
-     * @param Jacobian          the Jacobian matrix
-     * @param Column            the column related to the perturbed variable
+     * @param jacobian          the Jacobian matrix
+     * @param column            the column related to the perturbed variable
      * @param ID                the global ID of the model which is perturbed by the variable
-     * @param SolveLinearSystem a flag to which determine if the linear system has to be solved
+     * @param solveLinearSystem a flag to which determine if the linear system has to be solved
      */
-    void InsertJacobianDeltaCoefficients( MS_Matrix_Type& /*Jacobian*/, const UInt& /*Column*/, const UInt& /*ID*/, bool& /*SolveLinearSystem*/ ) {}
+    void insertJacobianDeltaCoefficients( MS_Matrix_Type& /*jacobian*/, const UInt& /*column*/, const UInt& /*ID*/, bool& /*solveLinearSystem*/ ) {}
 
     //! Display some information about the coupling
     /*!
      * @param output specify the output stream
      */
-    void DisplayCouplingValues( std::ostream& output );
+    void displayCouplingValues( std::ostream& output );
 
     //@}
 
@@ -149,16 +147,16 @@ private:
     //@{
 
     //! Apply the boundary condition to the specific 1D model
-    template< class model >
-    inline void ApplyBoundaryConditions1D( const UInt& i );
+    template< class ModelType >
+    void applyBoundaryConditions1D( const UInt& i );
 
     //! Apply the boundary condition to the specific 3D model
-    template< class model >
-    inline void ApplyBoundaryConditions3D( const UInt& i );
+    template< class ModelType >
+    void applyBoundaryConditions3D( const UInt& i );
 
     //@}
 
-    std::string           M_FileName;
+    std::string           M_fileName;
 
     std::vector< BCName > M_list;
     UInt                  M_listSize;
@@ -173,36 +171,36 @@ inline MS_PhysicalCoupling* createMultiscaleCouplingBoundaryCondition()
 // ===================================================
 // Template implementation
 // ===================================================
-template< class model >
+template< class ModelType >
 inline void
-MS_Coupling_BoundaryCondition::ApplyBoundaryConditions1D( const UInt& i )
+MS_Coupling_BoundaryCondition::applyBoundaryConditions1D( const UInt& i )
 {
-    model *Model = MS_DynamicCast< model >( M_models[i] );
+    ModelType *model = MS_DynamicCast< ModelType >( M_models[i] );
 
     for ( UInt j( 0 ); j < M_listSize; ++j )
     {
-        Model->GetBCInterface().readBC( M_FileName, "boundary_conditions/", M_list[j] );
+        model->bcInterface().readBC( M_fileName, "boundary_conditions/", M_list[j] );
 
-        Model->GetBCInterface().dataContainer().setSide( (M_flags[i] == 0) ? OneD_left : OneD_right );
+        model->bcInterface().dataContainer().setSide( (M_flags[i] == 0) ? OneD_left : OneD_right );
 
-        Model->GetBCInterface().insertBC();
+        model->bcInterface().insertBC();
     }
 }
 
-template< class model >
+template< class ModelType >
 inline void
-MS_Coupling_BoundaryCondition::ApplyBoundaryConditions3D( const UInt& i )
+MS_Coupling_BoundaryCondition::applyBoundaryConditions3D( const UInt& i )
 {
-    model *Model = MS_DynamicCast< model >( M_models[i] );
+    ModelType *model = MS_DynamicCast< ModelType >( M_models[i] );
 
     for ( UInt j( 0 ); j < M_listSize; ++j )
     {
-        Model->GetBCInterface().readBC( M_FileName, "boundary_conditions/", M_list[j] );
+        model->bcInterface().readBC( M_fileName, "boundary_conditions/", M_list[j] );
 
-        Model->GetBCInterface().dataContainer().setName( "CouplingBC_Model_" + number2string( Model->GetID() ) + "_Flag_" + number2string( M_flags[i] ) + "_" + M_list[j] );
-        Model->GetBCInterface().dataContainer().setFlag( M_flags[i] );
+        model->bcInterface().dataContainer().setName( "CouplingBC_Model_" + number2string( model->ID() ) + "_Flag_" + number2string( M_flags[i] ) + "_" + M_list[j] );
+        model->bcInterface().dataContainer().setFlag( M_flags[i] );
 
-        Model->GetBCInterface().insertBC();
+        model->bcInterface().insertBC();
     }
 }
 

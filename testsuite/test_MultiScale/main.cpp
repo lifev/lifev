@@ -75,7 +75,7 @@ int
 main( int argc, char** argv )
 {
     //Setup main communicator
-    boost::shared_ptr<Epetra_Comm>	comm;
+    boost::shared_ptr< Epetra_Comm >	comm;
 
     //Setup MPI variables
     int nprocs(1);
@@ -102,10 +102,10 @@ main( int argc, char** argv )
 
     // Setup MultiScale problem
     bool exitFlag = EXIT_SUCCESS;
-    MS_Solver MS;
+    MS_Solver multiscale;
 
     // Set the communicator
-    MS.SetCommunicator( comm );
+    multiscale.setCommunicator( comm );
 
     // Command line parameters
     GetPot commandLine( argc, argv );
@@ -124,14 +124,14 @@ main( int argc, char** argv )
     }
 
     // Setup the problem
-    MS.SetupProblem( dataFile, problemFolder );
+    multiscale.setupProblem( dataFile, problemFolder );
 
     // Display problem information
     if ( verbose )
-        MS.ShowMe();
+        multiscale.showMe();
 
     // Solve the problem
-    exitFlag = MS.SolveProblem( externalResidual );
+    exitFlag = multiscale.solveProblem( externalResidual );
 
 #ifdef HAVE_MPI
     if ( rank == 0 )

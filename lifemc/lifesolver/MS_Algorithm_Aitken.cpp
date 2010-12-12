@@ -101,7 +101,7 @@ MS_Algorithm_Aitken::subIterate()
         return;
     }
 
-    M_multiscale->ExportCouplingVariables( *M_couplingVariables );
+    M_multiscale->exportCouplingVariables( *M_couplingVariables );
 
     M_generalizedAitken.restart();
 
@@ -146,10 +146,10 @@ MS_Algorithm_Aitken::subIterate()
         //M_couplingVariables->showMe();
 
         // Import Coupling Variables inside the coupling blocks
-        M_multiscale->ImportCouplingVariables( *M_couplingVariables );
+        M_multiscale->importCouplingVariables( *M_couplingVariables );
 
-        // SolveSystem
-        M_multiscale->SolveSystem();
+        // solveSystem
+        M_multiscale->solveSystem();
 
         // Display subiteration information
         if ( M_displayer->isLeader() )

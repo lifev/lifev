@@ -84,8 +84,6 @@ class MS_Model_1D: public virtual MS_PhysicalModel
 {
 public:
 
-    typedef MS_PhysicalModel                                       super;
-
     typedef OneDimensionalModel_Physics                            Physics_Type;
     typedef boost::shared_ptr< Physics_Type >                      Physics_PtrType;
 
@@ -136,27 +134,27 @@ public:
 
     //! Setup the data of the model.
     /*!
-     * @param FileName Name of data file.
+     * @param fileName Name of data file.
      */
-    void SetupData( const std::string& FileName );
+    void setupData( const std::string& fileName );
 
     //! Setup the model.
-    void SetupModel();
+    void setupModel();
 
     //! Build the initial system (matrix and vectors).
-    void BuildSystem();
+    void buildSystem();
 
     //! Update the system for (matrix and vectors).
-    void UpdateSystem();
+    void updateSystem();
 
     //! Solve the problem.
-    void SolveSystem();
+    void solveSystem();
 
     //! save the solution
-    void SaveSolution();
+    void saveSolution();
 
     //! Display some information about the model.
-    void ShowMe();
+    void showMe();
 
     //@}
 
@@ -167,13 +165,13 @@ public:
 #ifdef JACOBIAN_WITH_FINITEDIFFERENCE
 
     //! Setup the linear model
-    void SetupLinearModel();
+    void setupLinearModel();
 
     //! Update the linear system matrix and vectors
-    void UpdateLinearModel();
+    void updateLinearModel();
 
     //! Solve the linear problem
-    void SolveLinearModel( bool& SolveLinearSystem );
+    void solveLinearModel( bool& solveLinearSystem );
 
 #endif
 
@@ -187,90 +185,90 @@ public:
     /*!
      * @return BCInterface container
      */
-    BCInterface_Type& GetBCInterface() const;
+    BCInterface_Type& bcInterface() const;
 
     //! Get the density on a specific boundary face of the model
     /*!
      * @param flag flag of the boundary face
      * @return density value
      */
-    Real GetBoundaryDensity( const BCFlag& /*Flag*/) const;
+    Real boundaryDensity( const BCFlag& /*flag*/) const;
 
     //! Get the viscosity on a specific boundary face of the model
     /*!
      * @param flag flag of the boundary face
      * @return viscosity value
      */
-    Real GetBoundaryViscosity( const BCFlag& /*Flag*/) const;
+    Real boundaryViscosity( const BCFlag& /*flag*/) const;
 
     //! Get the area on a specific boundary face of the model
     /*!
      * @param flag flag of the boundary face
      * @return area value
      */
-    Real GetBoundaryArea( const BCFlag& Flag ) const;
+    Real boundaryArea( const BCFlag& flag ) const;
 
     //! Get the flux on a specific boundary face of the model
     /*!
      * @param flag flag of the boundary face
      * @return flux value
      */
-    Real GetBoundaryFlowRate( const BCFlag& Flag ) const;
+    Real boundaryFlowRate( const BCFlag& flag ) const;
 
     //! Get the integral of the pressure (on a specific boundary face)
     /*!
      * @param flag flag of the boundary face
      * @return pressure value
      */
-    Real GetBoundaryPressure( const BCFlag& Flag ) const;
+    Real boundaryPressure( const BCFlag& flag ) const;
 
     //! Get the integral of the dynamic pressure (on a specific boundary face)
     /*!
      * @param flag flag of the boundary face
      * @return dynamic pressure value
      */
-    Real GetBoundaryDynamicPressure( const BCFlag& Flag ) const;
+    Real boundaryDynamicPressure( const BCFlag& flag ) const;
 
     //! Get the integral of the normal stress (on a specific boundary face)
     /*!
      * @param flag flag of the boundary face
-     * @param StressType Type of approximation for the stress
+     * @param stressType Type of approximation for the stress
      * @return stress value
      */
-    Real GetBoundaryStress( const BCFlag& Flag, const stressTypes& StressType = StaticPressure ) const;
+    Real boundaryStress( const BCFlag& flag, const stress_Type& stressType = StaticPressure ) const;
 
     //! Get the variation of the flow rate (on a specific boundary face) using the linear model
     /*!
-     * @param Flag flag of the boundary face on which quantity should be computed
-     * @param SolveLinearSystem a flag to which determine if the linear system has to be solved
+     * @param flag flag of the boundary face on which quantity should be computed
+     * @param solveLinearSystem a flag to which determine if the linear system has to be solved
      * @return variation of the flow rate
      */
-    Real GetBoundaryDeltaFlowRate( const BCFlag& Flag, bool& SolveLinearSystem );
+    Real boundaryDeltaFlowRate( const BCFlag& flag, bool& solveLinearSystem );
 
     //! Get the variation of the pressure (on a specific boundary face) using the linear model
     /*!
-     * @param Flag flag of the boundary face on which quantity should be computed
-     * @param SolveLinearSystem a flag to which determine if the linear system has to be solved
+     * @param flag flag of the boundary face on which quantity should be computed
+     * @param solveLinearSystem a flag to which determine if the linear system has to be solved
      * @return variation of the pressure
      */
-    Real GetBoundaryDeltaPressure( const BCFlag& Flag, bool& SolveLinearSystem );
+    Real boundaryDeltaPressure( const BCFlag& flag, bool& solveLinearSystem );
 
     //! Get the variation of the total pressure (on a specific boundary face) using the linear model
     /*!
-     * @param Flag flag of the boundary face on which quantity should be computed
-     * @param SolveLinearSystem a flag to which determine if the linear system has to be solved
+     * @param flag flag of the boundary face on which quantity should be computed
+     * @param solveLinearSystem a flag to which determine if the linear system has to be solved
      * @return variation of the dynamic pressure
      */
-    Real GetBoundaryDeltaDynamicPressure( const BCFlag& Flag, bool& SolveLinearSystem );
+    Real boundaryDeltaDynamicPressure( const BCFlag& flag, bool& solveLinearSystem );
 
     //! Get the variation of the integral of the normal stress (on a specific boundary face)
     /*!
      * @param flag flag of the boundary face
-     * @param SolveLinearSystem a flag to which determine if the linear system has to be solved
-     * @param StressType Type of approximation for the stress
+     * @param solveLinearSystem a flag to which determine if the linear system has to be solved
+     * @param stressType Type of approximation for the stress
      * @return variation of the stress
      */
-    Real GetBoundaryDeltaStress( const BCFlag& Flag, bool& SolveLinearSystem, const stressTypes& StressType = StaticPressure );
+    Real boundaryDeltaStress( const BCFlag& flag, bool& solveLinearSystem, const stress_Type& stressType = StaticPressure );
 
     //@}
 
@@ -282,56 +280,56 @@ public:
     /*!
      * @return BC handler
      */
-    BC_Type& GetBC() const;
+    BC_Type& bc() const;
 
     //! Get the data container of the 1D model.
     /*!
      * @return 1D Model data container.
      */
-    Data_Type&    GetData() const;
+    Data_Type& data() const;
 
     //! Get the Physics of the 1D model.
     /*!
      * @return 1D Model physics.
      */
-    Physics_PtrType GetPhysics() const;
+    Physics_PtrType physics() const;
 
     //! Get the Flux of the 1D model.
     /*!
      * @return 1D Model Flux.
      */
-    Flux_PtrType GetFlux() const;
+    Flux_PtrType flux() const;
 
     //! Get the Source of the 1D model.
     /*!
      * @return 1D Model Source.
      */
-    Source_PtrType GetSource() const;
+    Source_PtrType source() const;
 
     //! Get the FESpace of the 1D model.
     /*!
      * @return 1D model FESpace
      */
-    FESpace_PtrType GetFESpace() const;
+    FESpace_PtrType FESpace() const;
 
     //! Get the Solver of the 1D model.
     /*!
      * @return 1D model solver.
      */
-    Solver_PtrType GetSolver() const;
+    Solver_PtrType solver() const;
 
     //! Get the solution container of the 1D model.
     /*!
      * @return 1D model solution.
      */
-    const Solution_PtrType& GetSolution() const;
+    const Solution_PtrType& solution() const;
 
     //! Get a specific quantity of the solution container of the 1D model.
     /*!
      * @param quantity solution quantity.
      * @return 1D model solution.
      */
-    const Vector_PtrType& GetSolution( const std::string& quantity) const;
+    const Vector_PtrType& solution( const std::string& quantity) const;
 
     //@}
 
@@ -355,22 +353,22 @@ private:
      * In particular, it replaces the default local values with the ones in the global container.
      * If a value is already specified in the data file, do not perform the replacement.
      *
-     * @param FileName File name of the specific model.
+     * @param fileName File name of the specific model.
      */
-    void SetupGlobalData( const std::string& FileName );
+    void setupGlobalData( const std::string& fileName );
 
     //! Setup the FE space for pressure and velocity
-    void SetupFESpace();
+    void setupFESpace();
 
     //! Initialize the solution.
-    void InitializeSolution();
+    void initializeSolution();
 
     //! Update the solution (solution2 = solution1)
     /*!
      * @param solution1 solution to be copied.
      * @param solution2 copy of solution1.
      */
-    void UpdateSolution( const Solution_Type& solution1, Solution_Type& solution2 );
+    void updateSolution( const Solution_Type& solution1, Solution_Type& solution2 );
 
     //! Solve the 1D hyperbolic problem
     /*!
@@ -378,26 +376,26 @@ private:
      * @param solution solution container.
      * @param solverType string containing the prefix ID to display when solving the system.
      */
-    void Solve( BC_Type& bc, Solution_Type& solution, const std::string& solverType = " 1D-" );
+    void solve( BC_Type& bc, Solution_Type& solution, const std::string& solverType = " 1D-" );
 
-    OneD_BCSide FlagConverter( const BCFlag& flag ) const;
+    OneD_BCSide flagConverter( const BCFlag& flag ) const;
 
 #ifdef JACOBIAN_WITH_FINITEDIFFERENCE
 
 
     //! Update linear BC
-    void CreateLinearBC();
+    void createLinearBC();
 
     //! Update linear BC
-    void UpdateLinearBC( const Solution_Type& solution );
+    void updateLinearBC( const Solution_Type& solution );
 
     //! Impose the coupling perturbation on the correct BC inside the BCHandler
-    void ImposePerturbation();
+    void imposePerturbation();
 
     //! Reset all the coupling perturbations imposed on the BCHandler
-    void ResetPerturbation();
+    void resetPerturbation();
 
-    Real BCFunctionDelta( const Real& t );
+    Real bcFunctionDelta( const Real& t );
 
 #else
 
@@ -407,51 +405,51 @@ private:
      * @param bcOutputType type of the quantity to be computed.
      * @return Jacobian coefficient.
      */
-    Real TangentProblem( const OneD_BCSide& bcOutputSide, const OneD_BC& bcOutputType );
+    Real tangentProblem( const OneD_BCSide& bcOutputSide, const OneD_BC& bcOutputType );
 
 #endif
     //@}
 
 #ifdef HAVE_HDF5
-    boost::shared_ptr< IOFile_Type >       M_Exporter;
-    boost::shared_ptr< IOFile_Type >       M_Importer;
+    boost::shared_ptr< IOFile_Type >       M_exporter;
+    boost::shared_ptr< IOFile_Type >       M_importer;
 
-    boost::shared_ptr< Mesh_Type >         M_ExporterMesh;
+    boost::shared_ptr< Mesh_Type >         M_exporterMesh;
 #endif
 
 #ifdef JACOBIAN_WITH_FINITEDIFFERENCE
     // Linear BC
-    BC_PtrType                             M_LinearBC;
+    BC_PtrType                             M_linearBC;
 
-    Solution_PtrType                       M_LinearSolution; // Solution of the perturbed problem
+    Solution_PtrType                       M_linearSolution; // Solution of the perturbed problem
 
     // BC perturbation
-    std::vector< std::map< OneD_BCSide, std::map< OneD_BC, Real > > > M_BCPreviousTimeSteps;
+    std::vector< std::map< OneD_BCSide, std::map< OneD_BC, Real > > > M_bcPreviousTimeSteps;
 
     // BC Functions for tangent problem
-    OneDimensionalModel_BCFunction         M_BCBaseDelta;
+    OneDimensionalModel_BCFunction         M_bcBaseDelta;
 
-    Real                                   M_BCDelta;
-    OneD_BC                                M_BCDeltaType;
-    OneD_BCSide                            M_BCDeltaSide;
+    Real                                   M_bcDelta;
+    OneD_BC                                M_bcDeltaType;
+    OneD_BCSide                            M_bcDeltaSide;
 #endif
 
     // 1D problem
-    boost::shared_ptr< Data_Type >         M_Data;
-    BCInterface_PtrType                    M_BC;
-    Physics_PtrType                        M_Physics;
-    Flux_PtrType                           M_Flux;
-    Source_PtrType                         M_Source;
-    Solver_PtrType                         M_Solver;
+    boost::shared_ptr< Data_Type >         M_data;
+    BCInterface_PtrType                    M_bc;
+    Physics_PtrType                        M_physics;
+    Flux_PtrType                           M_flux;
+    Source_PtrType                         M_source;
+    Solver_PtrType                         M_solver;
 
     // Linear solver
-    boost::shared_ptr< LinearSolver_Type > M_LinearSolver;
+    boost::shared_ptr< LinearSolver_Type > M_linearSolver;
 
     // FE spaces
     boost::shared_ptr< FESpace_Type >      M_FESpace;
 
-    Solution_PtrType                       M_Solution_tn;    // Solution at time t_n
-    Solution_PtrType                       M_Solution;       // Solution at time t_n+1
+    Solution_PtrType                       M_solution_tn;    // Solution at time t_n
+    Solution_PtrType                       M_solution;       // Solution at time t_n+1
 
 };
 

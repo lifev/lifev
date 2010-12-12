@@ -92,7 +92,7 @@ MS_Algorithm_Newton::subIterate()
         return;
     }
 
-    M_multiscale->ExportCouplingVariables( *M_couplingVariables );
+    M_multiscale->exportCouplingVariables( *M_couplingVariables );
 
     MS_Vector_Type delta( *M_couplingResiduals );
     delta = 0.0;
@@ -103,7 +103,7 @@ MS_Algorithm_Newton::subIterate()
     {
         // Compute the Jacobian (we completery delete the previous matrix)
         M_jacobian.reset( new MS_Matrix_Type( M_couplingVariables->getMap(), 50, 0 ) );
-        M_multiscale->ExportJacobian( *M_jacobian );
+        M_multiscale->exportJacobian( *M_jacobian );
         M_jacobian->GlobalAssemble();
         M_solver.setMatrix( *M_jacobian );
 
@@ -128,10 +128,10 @@ MS_Algorithm_Newton::subIterate()
         //M_couplingVariables->showMe();
 
         // Import Coupling Variables inside the coupling blocks
-        M_multiscale->ImportCouplingVariables( *M_couplingVariables );
+        M_multiscale->importCouplingVariables( *M_couplingVariables );
 
-        // SolveSystem
-        M_multiscale->SolveSystem();
+        // solveSystem
+        M_multiscale->solveSystem();
 
         // Display subiteration information
         if ( M_displayer->isLeader() )

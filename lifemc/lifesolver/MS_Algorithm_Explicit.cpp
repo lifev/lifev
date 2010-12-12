@@ -82,7 +82,7 @@ void
 MS_Algorithm_Explicit::updateCouplingVariables()
 {
     // We use the initialize method for updating the coupling
-    M_multiscale->InitializeCouplingVariables();
+    M_multiscale->initializeCouplingVariables();
 }
 
 void

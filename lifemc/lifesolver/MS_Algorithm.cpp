@@ -39,7 +39,7 @@
 namespace LifeV
 {
 
-std::map< std::string, algorithmsTypes > MS_algorithmsMap;
+std::map< std::string, algorithms_Type > MS_algorithmsMap;
 
 // ===================================================
 // Constructors & Destructor
@@ -95,7 +95,7 @@ void
 MS_Algorithm::updateCouplingVariables()
 {
     // The default approach is to extrapolate the next coupling variables
-    M_multiscale->ExtrapolateCouplingVariables();
+    M_multiscale->extrapolateCouplingVariables();
 }
 
 void
@@ -115,14 +115,14 @@ MS_Algorithm::showMe()
 void
 MS_Algorithm::initializeCouplingVariables()
 {
-    M_multiscale->InitializeCouplingVariables();
+    M_multiscale->initializeCouplingVariables();
 }
 
 Real
 MS_Algorithm::computeResidual() const
 {
     // Compute computeResidual
-    M_multiscale->ExportCouplingResiduals( *M_couplingResiduals );
+    M_multiscale->exportCouplingResiduals( *M_couplingResiduals );
     return M_couplingResiduals->Norm2();
 }
 
@@ -154,7 +154,7 @@ MS_Algorithm::setModel( const MS_Model_PtrType model )
     // Build coupling variables and residuals vectors
     std::vector<Int> myGlobalElements(0);
     EpetraMap couplingMap( -1, static_cast<Int> ( myGlobalElements.size() ), &myGlobalElements[0], 0, M_comm );
-    M_multiscale->CreateCouplingMap( couplingMap );
+    M_multiscale->createCouplingMap( couplingMap );
 
     M_couplingVariables.reset( new EpetraVector( couplingMap, Unique ) );
     M_couplingResiduals.reset( new EpetraVector( couplingMap, Unique ) );
@@ -163,7 +163,7 @@ MS_Algorithm::setModel( const MS_Model_PtrType model )
 // ===================================================
 // Get Methods
 // ===================================================
-const algorithmsTypes&
+const algorithms_Type&
 MS_Algorithm::type() const
 {
     return M_type;
@@ -218,7 +218,7 @@ MS_Algorithm::save( const UInt& subiterationsNumber, const Real& residual )
     {
         std::string filename = MS_ProblemFolder + "Step_" + number2string( MS_ProblemStep ) + "_Algorithm.mfile";
 
-        if ( M_multiscale->GetGlobalData()->GetDataTime()->isFirstTimeStep() )
+        if ( M_multiscale->globalData()->dataTime()->isFirstTimeStep() )
         {
             output.open( filename.c_str(), std::ios::trunc );
             output << "% Algorithm Type: " << Enum2String( M_type, MS_algorithmsMap ) << std::endl;
@@ -229,7 +229,7 @@ MS_Algorithm::save( const UInt& subiterationsNumber, const Real& residual )
         else
             output.open( filename.c_str(), std::ios::app );
 
-        output << M_multiscale->GetGlobalData()->GetDataTime()->getTime() << "      "
+        output << M_multiscale->globalData()->dataTime()->getTime() << "      "
                << subiterationsNumber << "                  " << residual << std::endl;
 
         output.close();
