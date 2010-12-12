@@ -1,23 +1,26 @@
 ###################################################################################################
 #
-#                       This file is part of the LifeV Applications                        
-#                Copyright (C) 2001-2010 EPFL, Politecnico di Milano, INRIA      
+#                       This file is part of the LifeV Library                       
+#                Copyright (C) 2004, 2005, 2007 EPFL, Politecnico di Milano, INRIA
+#                Copyright (C) 2010 EPFL, Politecnico di Milano, Emory University
 #
 #      Author(s): Samuel Quinodoz <samuel.quinodoz@epfl.ch>
+#                 Umberto Villa <uvilla@emory.edu>
+#                 Tiziano Passerini <tiziano@mathcs.emory.edu>
 #           Date: 06-04-2010
-#  License Terms: GNU GPL
+#  License Terms: GNU LGPL
 #
 ###################################################################################################
-### TEST: CurrentFE ###############################################################################
+### TESTSUITE: LIFEFEM ############################################################################
 ###################################################################################################
 
 AT_SETUP([test_currentFE])
-AT_KEYWORDS([])
+AT_KEYWORDS([currentFE])
 AT_DATA([data],[[
 
 # Place here the content of the GetPot data file for the night test.
 
 ]])
-AT_CHECK([mpirun -n 1 ../../lifefem/test_currentFE -c],[0],[ignore],[ignore])
-AT_CLEANUP([])
+AT_CHECK([mpirun -n 1 $abs_top_builddir/testsuite/lifefem/test_currentFE -c],[0],[ignore],[ignore])
+AT_CLEANUP
 

@@ -5,12 +5,13 @@
 #                Copyright (C) 2010 EPFL, Politecnico di Milano, Emory University
 #
 #      Author(s): Umberto Villa <uvilla@emory.edu>
+#                 Tiziano Passerini <tiziano@mathcs.emory.edu>
 #           Date: 10-12-2010
 #  License Terms: GNU LGPL
 #
 ###################################################################################################
-
-AT_BANNER([life/lifecore testsuite ...])
+### TESTSUITE: LIFECORE ###########################################################################
+###################################################################################################
 
 AT_SETUP([test_getPot])    #Name of the test
 AT_KEYWORDS([core getPot])
@@ -24,5 +25,5 @@ C = true     # Bool
 D = LifeV    # String
 E = 'Life V' # String list
 ]])
-AT_CHECK([mpirun -n 1 ../../lifecore/test_getPot],[0],[ignore],[ignore])
-AT_CLEANUP() 
+AT_CHECK([mpirun -n 1 $abs_top_builddir/testsuite/lifecore/test_getPot],[0],[ignore],[ignore])
+AT_CLEANUP

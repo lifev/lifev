@@ -1,19 +1,20 @@
 ###################################################################################################
 #
-#                       This file is part of the LifeV Applications                        
-#                Copyright (C) 2001-2010 EPFL, Politecnico di Milano, INRIA      
+#                       This file is part of the LifeV Library                       
+#                Copyright (C) 2004, 2005, 2007 EPFL, Politecnico di Milano, INRIA
+#                Copyright (C) 2010 EPFL, Politecnico di Milano, Emory University
 #
-#      Author(s): Christophe Prud'homme <christophe.prudhomme@epfl.ch>
-#           Date: 29-08-2004
-#  License Terms: GNU GPL
+#      Author(s): Umberto Villa <uvilla@emory.edu>
+#                 Tiziano Passerini <tiziano@mathcs.emory.edu>
+#           Date: 10-12-2010
+#  License Terms: GNU LGPL
 #
 ###################################################################################################
-### TEST: PARTITION ###############################################################################
+### TESTSUITE: MESH PARTITION #####################################################################
 ###################################################################################################
-
 
 AT_SETUP([test_partition])
-AT_KEYWORDS([test_partition fluid])
+AT_KEYWORDS([test_partition mesh fluid])
 AT_DATA([data_partition],[[# -*- getpot -*- (GetPot mode activation for emacs)
 #----------------------------------------------------------------
 #      Data file for cylinder test with Navier-Stokes
@@ -301,9 +302,9 @@ save       = 10
 		function   = '(0., 0., 0.)'
 ]])
 
-AT_CHECK([ln -sf ../../data/mesh/inria/tube20.mesh;
-          ln -sf ../../test_partition/cylinder_ref.h5;
-          ../../test_partition/test_partition -f data_partition;
-          mpirun -np 4 ../../test_partition/test_cylinder -f data_cylinder],[0],[ignore],[ignore])
-AT_CLEANUP([out_res_solid iter num_iter out_iter_solid res])
+AT_CHECK([ln -sf $abs_top_builddir/testsuite/data/mesh/inria/tube20.mesh;
+          ln -sf $abs_top_builddir/testsuite/test_partition/cylinder_ref.h5;
+          $abs_top_builddir/testsuite/test_partition/test_partition -f data_partition;
+          mpirun -np 4 $abs_top_builddir/testsuite/test_partition/test_cylinder -f data_cylinder],[0],[ignore],[ignore])
+AT_CLEANUP
 

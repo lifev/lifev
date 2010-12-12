@@ -1,15 +1,17 @@
 ###################################################################################################
 #
-#                       This file is part of the LifeV Applications                        
-#                Copyright (C) 2001-2010 EPFL, Politecnico di Milano, INRIA      
+#                       This file is part of the LifeV Library                       
+#                Copyright (C) 2004, 2005, 2007 EPFL, Politecnico di Milano, INRIA
+#                Copyright (C) 2010 EPFL, Politecnico di Milano, Emory University
 #
-#      Author(s): Christophe Prud'homme <christophe.prudhomme@epfl.ch>
-#                 Gwenol Grandperrin <gwenol.grandperrin@epfl.ch>
-#           Date: 17-05-2010
-#  License Terms: GNU GPL
+#      Author(s): Samuel Quinodoz <samuel.quinodoz@epfl.ch>
+#                 Umberto Villa <uvilla@emory.edu>
+#                 Tiziano Passerini <tiziano@mathcs.emory.edu>
+#           Date: 10-12-2010
+#  License Terms: GNU LGPL
 #
 ###################################################################################################
-### TEST: LEVEL SET SOLVER ########################################################################
+### TESTSUITE: LEVEL SET ##########################################################################
 ###################################################################################################
 
 AT_SETUP([test_LevelSetSolver])
@@ -71,7 +73,7 @@ save       = 1
 [../level-set]
 	
 	[./time_discretization]
-      		initialtime             = 0.
+      	initialtime             = 0.
 		endtime                 = 0.1
 		timestep        	= 0.05
 		BDF_order               = 1
@@ -91,6 +93,6 @@ save       = 1
 
 
 ]])
-AT_CHECK([ mpirun -np 3 ../../test_LevelSetSolver/test_LevelSetSolver -c],[0],[ignore],[ignore])
-AT_CLEANUP([])
+AT_CHECK([ mpirun -np 3 $abs_top_builddir/testsuite/test_LevelSetSolver/test_LevelSetSolver -c],[0],[ignore],[ignore])
+AT_CLEANUP
 

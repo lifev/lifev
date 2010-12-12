@@ -1,16 +1,17 @@
 ###################################################################################################
 #
-#                       This file is part of the LifeV Applications                        
-#                Copyright (C) 2001-2010 EPFL, Politecnico di Milano, INRIA      
+#                       This file is part of the LifeV Library                       
+#                Copyright (C) 2004, 2005, 2007 EPFL, Politecnico di Milano, INRIA
+#                Copyright (C) 2010 EPFL, Politecnico di Milano, Emory University
 #
-#      Author(s): Christophe Prud'homme <christophe.prudhomme@epfl.ch>
-#           Date: 29-08-2004
-#  License Terms: GNU GPL
+#      Author(s): Umberto Villa <uvilla@emory.edu>
+#                 Tiziano Passerini <tiziano@mathcs.emory.edu>
+#           Date: 10-12-2010
+#  License Terms: GNU LGPL
 #
 ###################################################################################################
-### TEST: FSI #####################################################################################
+### TESTSUITE: FSI ################################################################################
 ###################################################################################################
-
 
 AT_SETUP([test_fsi])
 AT_KEYWORDS([ns fluid solid fsi])
@@ -82,7 +83,7 @@ viscosity = 0.03              # viscosity
 
 [../time_discretization]
 initialtime		= 0.
-endtime			= 0.006
+endtime			= 0.003
 timestep		= 0.001
 BDF_order		= 1
 
@@ -306,13 +307,7 @@ kspace   = 40;
 conv     = rhs;
 
 ]])
-AT_CHECK([ln -sf ../../data/mesh/inria/tube20.mesh &&
-          ln -sf ../../data/mesh/inria/vessel20.mesh &&
-          mpirun -n 4 ../../test_fsi/test_fsi],[0],[ignore],[ignore])
-AT_CLEANUP([out_res_solid iter num_iter out_iter_solid res])
-
-#
-# test_fsi with reduced fluid
-#
-
-# removed
+AT_CHECK([ln -sf $abs_top_builddir/testsuite/data/mesh/inria/tube20.mesh &&
+          ln -sf $abs_top_builddir/testsuite/data/mesh/inria/vessel20.mesh &&
+          mpirun -n 4 $abs_top_builddir/testsuite/test_fsi/test_fsi],[0],[ignore],[ignore])
+AT_CLEANUP

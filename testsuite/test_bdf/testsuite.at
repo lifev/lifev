@@ -1,18 +1,20 @@
 ###################################################################################################
 #
-#                       This file is part of the LifeV Applications                        
-#                Copyright (C) 2001-2010 EPFL, Politecnico di Milano, INRIA      
+#                       This file is part of the LifeV Library                       
+#                Copyright (C) 2004, 2005, 2007 EPFL, Politecnico di Milano, INRIA
+#                Copyright (C) 2010 EPFL, Politecnico di Milano, Emory University
 #
-#      Author(s): Christophe Prud'homme <christophe.prudhomme@epfl.ch>
-#           Date: 29-08-2004
-#  License Terms: GNU GPL
+#      Author(s): Umberto Villa <uvilla@emory.edu>
+#                 Tiziano Passerini <tiziano@mathcs.emory.edu>
+#           Date: 10-12-2010
+#  License Terms: GNU LGPL
 #
 ###################################################################################################
-### TEST: BDF #####################################################################################
+### TESTSUITE: BDF ################################################################################
 ###################################################################################################
 
 AT_SETUP([test_bdf (order 1)])
-AT_KEYWORDS([test_bdf bdf])
+AT_KEYWORDS([test_bdf bdf bdf1])
 AT_DATA([data],[[# -*- getpot -*- (GetPot mode activation for emacs)
 #-------------------------------------------------
 #      Data file for BDF test
@@ -115,11 +117,12 @@ start      = 0
 save       = 1
 ]])
 AT_XFAIL_IF([:])
-AT_CHECK([ln -sf ../../data/mesh/inria/cube16x16.mesh  && ../../test_bdf/test_bdf],[0],[ignore],[ignore])
+AT_CHECK([ln -sf $abs_top_builddir/testsuite/data/mesh/inria/cube16x16.mesh  && \
+          $abs_top_builddir/testsuite/test_bdf/test_bdf],[0],[ignore],[ignore])
 AT_CLEANUP
 
 AT_SETUP([test_bdf (order 2)])
-AT_KEYWORDS([test_bdf bdf])
+AT_KEYWORDS([test_bdf bdf bdf2])
 AT_DATA([data],[[# -*- getpot -*- (GetPot mode activation for emacs)
 #-------------------------------------------------
 #      Data file for BDF test
@@ -222,5 +225,6 @@ start      = 0
 save       = 1
 ]])
 AT_XFAIL_IF([:])
-AT_CHECK([ln -sf ../../data/mesh/inria/cube16x16.mesh  && ../../test_bdf/test_bdf],[0],[ignore],[ignore])
+AT_CHECK([ln -sf $abs_top_builddir/testsuite/data/mesh/inria/cube16x16.mesh  && \
+          $abs_top_builddir/testsuite/test_bdf/test_bdf],[0],[ignore],[ignore])
 AT_CLEANUP

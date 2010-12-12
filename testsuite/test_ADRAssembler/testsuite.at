@@ -1,18 +1,18 @@
 ###################################################################################################
 #
-#                       This file is part of the LifeV Applications                        
-#                Copyright (C) 2001-2010 EPFL, Politecnico di Milano, INRIA      
+#                       This file is part of the LifeV Library                       
+#                Copyright (C) 2004, 2005, 2007 EPFL, Politecnico di Milano, INRIA
+#                Copyright (C) 2010 EPFL, Politecnico di Milano, Emory University
 #
-#      Author(s): Christophe Prud'homme <christophe.prudhomme@epfl.ch>
-#                 Gwenol Grandperrin <gwenol.grandperrin@epfl.ch>
-#           Date: 17-05-2010
-#  License Terms: GNU GPL
+#      Author(s): Gwenol Grandperrin <gwenol.grandperrin@epfl.ch>
+#                 Umberto Villa <uvilla@emory.edu>
+#                 Tiziano Passerini <tiziano@mathcs.emory.edu>
+#           Date: 10-12-2010
+#  License Terms: GNU LGPL
 #
 ###################################################################################################
-### TEST: ADRAssembler ############################################################################
+### TESTSUITE: ADR ASSEMBLER ######################################################################
 ###################################################################################################
-
-
 
 AT_SETUP([test_ADRAssembler])
 AT_KEYWORDS([Advection Diffusion Reaction Assembler])
@@ -73,6 +73,6 @@ save       = 1
 
 
 ]])
-AT_CHECK([ mpirun -np 3 ../../test_ADRAssembler/test_ADRAssembler -c],[0],[ignore],[ignore])
-AT_CLEANUP([out_res_solid iter num_iter out_iter_solid res])
+AT_CHECK([ mpirun -np 3 $abs_top_builddir/testsuite/test_ADRAssembler/test_ADRAssembler -c],[0],[ignore],[ignore])
+AT_CLEANUP
 
