@@ -37,9 +37,9 @@
 #ifndef MS_PhysicalModel_H
 #define MS_PhysicalModel_H 1
 
-#include <lifemc/lifesolver/MS_Definitions.hpp>
-#include <lifemc/lifesolver/MS_PhysicalData.hpp>
-#include <lifemc/lifesolver/MS_PhysicalCoupling.hpp>
+#include <lifemc/lifesolver/MultiscaleDefinitions.hpp>
+#include <lifemc/lifesolver/MultiscaleData.hpp>
+#include <lifemc/lifesolver/MultiscaleCoupling.hpp>
 
 
 namespace LifeV

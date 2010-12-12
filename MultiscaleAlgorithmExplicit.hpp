@@ -37,7 +37,7 @@
 #ifndef MS_Algorithm_Explicit_H
 #define MS_Algorithm_Explicit_H 1
 
-#include <lifemc/lifesolver/MS_Algorithm.hpp>
+#include <lifemc/lifesolver/MultiscaleAlgorithm.hpp>
 
 namespace LifeV
 {

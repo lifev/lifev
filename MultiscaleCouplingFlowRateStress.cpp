@@ -34,7 +34,7 @@
  *  @maintainer Cristiano Malossi <cristiano.malossi@epfl.ch>
  */
 
-#include <lifemc/lifesolver/MS_Coupling_FluxStress.hpp>
+#include <lifemc/lifesolver/MultiscaleCouplingFlowRateStress.hpp>
 
 namespace LifeV
 {

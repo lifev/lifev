@@ -34,7 +34,7 @@
  *  @maintainer Cristiano Malossi <cristiano.malossi@epfl.ch>
  */
 
-#include <lifemc/lifesolver/MS_Algorithm_Newton.hpp>
+#include <lifemc/lifesolver/MultiscaleAlgorithmNewton.hpp>
 
 namespace LifeV
 {

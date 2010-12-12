@@ -37,10 +37,10 @@
 #ifndef MS_Coupling_Stress_H
 #define MS_Coupling_Stress_H 1
 
-#include <lifemc/lifesolver/MS_PhysicalCoupling.hpp>
-#include <lifemc/lifesolver/MS_Model_Fluid3D.hpp>
-#include <lifemc/lifesolver/MS_Model_FSI3D.hpp>
-#include <lifemc/lifesolver/MS_Model_1D.hpp>
+#include <lifemc/lifesolver/MultiscaleCoupling.hpp>
+#include <lifemc/lifesolver/MultiscaleModelFluid3D.hpp>
+#include <lifemc/lifesolver/MultiscaleModelFSI3D.hpp>
+#include <lifemc/lifesolver/MultiscaleModel1D.hpp>
 
 namespace LifeV
 {

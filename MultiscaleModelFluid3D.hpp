@@ -38,10 +38,6 @@
 #ifndef MS_Model_Fluid3D_H
 #define MS_Model_Fluid3D_H 1
 
-// Mathcard includes
-#include <lifemc/lifesolver/BCInterface.hpp>
-#include <lifemc/lifesolver/MS_PhysicalModel.hpp>
-
 // LifeV includes
 #include <life/lifemesh/partitionMesh.hpp>
 #include <life/lifesolver/dataNavierStokes.hpp>
@@ -53,6 +49,10 @@
 #include <life/lifefilters/hdf5exporter.hpp>
 #endif
 #include <life/lifesolver/OseenShapeDerivative.hpp>
+
+// Mathcard includes
+#include <lifemc/lifesolver/BCInterface.hpp>
+#include <lifemc/lifesolver/MultiscaleModel.hpp>
 
 namespace LifeV
 {

@@ -41,21 +41,21 @@ liblifemcsolver_la_SOURCES   = BCInterface_FSI.cpp \
                                ComposedDND.cpp \
                                ComposedNN.cpp \
                                ComposedDNND.cpp \
-                               MS_Solver.cpp \
-                               MS_Algorithm.cpp \
-                               MS_Algorithm_Aitken.cpp \
-                               MS_Algorithm_Explicit.cpp \
-                               MS_Algorithm_Newton.cpp \
-                               MS_PhysicalData.cpp \
-                               MS_PhysicalModel.cpp \
-                               MS_Model_MultiScale.cpp \
-                               MS_Model_Fluid3D.cpp \
-                               MS_Model_FSI3D.cpp \
-                               MS_Model_1D.cpp \
-                               MS_PhysicalCoupling.cpp \
-                               MS_Coupling_BoundaryCondition.cpp \
-                               MS_Coupling_Stress.cpp \
-                               MS_Coupling_FluxStress.cpp \
+                               MultiscaleSolver.cpp \
+                               MultiscaleAlgorithm.cpp \
+                               MultiscaleAlgorithmAitken.cpp \
+                               MultiscaleAlgorithmExplicit.cpp \
+                               MultiscaleAlgorithmNewton.cpp \
+                               MultiscaleData.cpp \
+                               MultiscaleModel.cpp \
+                               MultiscaleModelMultiscale.cpp \
+                               MultiscaleModelFluid3D.cpp \
+                               MultiscaleModelFSI3D.cpp \
+                               MultiscaleModel1D.cpp \
+                               MultiscaleCoupling.cpp \
+                               MultiscaleCouplingBoundaryCondition.cpp \
+                               MultiscaleCouplingStress.cpp \
+                               MultiscaleCouplingFlowRateStress.cpp \
                                OneDimensionalModel_Data.cpp \
                                OneDimensionalModel_Physics.cpp \
                                OneDimensionalModel_Physics_Linear.cpp \

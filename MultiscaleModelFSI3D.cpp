@@ -35,13 +35,7 @@
  *  @maintainer Cristiano Malossi <cristiano.malossi@epfl.ch>
  */
 
-#include <lifemc/lifesolver/MS_Model_FSI3D.hpp>
-
-#include <lifemc/lifesolver/BlockMatrix.hpp>
-#include <lifemc/lifesolver/BlockMatrixRN.hpp>
-#include <lifemc/lifesolver/ComposedDN.hpp>
-#include <lifemc/lifesolver/ComposedNN.hpp>
-#include <lifemc/lifesolver/ComposedDNND.hpp>
+#include <lifemc/lifesolver/MultiscaleModelFSI3D.hpp>
 
 namespace LifeV
 {

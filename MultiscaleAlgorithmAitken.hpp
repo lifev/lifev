@@ -39,7 +39,7 @@
 
 #include <life/lifealg/generalizedAitken.hpp>
 
-#include <lifemc/lifesolver/MS_Algorithm.hpp>
+#include <lifemc/lifesolver/MultiscaleAlgorithm.hpp>
 
 namespace LifeV
 {

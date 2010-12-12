@@ -34,7 +34,7 @@
  *  @maintainer Cristiano Malossi <cristiano.malossi@epfl.ch>
  */
 
-#include <lifemc/lifesolver/MS_Algorithm.hpp>
+#include <lifemc/lifesolver/MultiscaleAlgorithm.hpp>
 
 namespace LifeV
 {

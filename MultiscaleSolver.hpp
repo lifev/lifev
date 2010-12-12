@@ -37,14 +37,14 @@
 #ifndef MS_Solver_H
 #define MS_Solver_H 1
 
-#include <lifemc/lifesolver/MS_Definitions.hpp>
+#include <lifemc/lifesolver/MultiscaleDefinitions.hpp>
 
-#include <lifemc/lifesolver/MS_Algorithm.hpp>
-#include <lifemc/lifesolver/MS_Algorithm_Aitken.hpp>
-#include <lifemc/lifesolver/MS_Algorithm_Explicit.hpp>
-#include <lifemc/lifesolver/MS_Algorithm_Newton.hpp>
+#include <lifemc/lifesolver/MultiscaleAlgorithm.hpp>
+#include <lifemc/lifesolver/MultiscaleAlgorithmAitken.hpp>
+#include <lifemc/lifesolver/MultiscaleAlgorithmExplicit.hpp>
+#include <lifemc/lifesolver/MultiscaleAlgorithmNewton.hpp>
 
-#include <lifemc/lifesolver/MS_Model_MultiScale.hpp>
+#include <lifemc/lifesolver/MultiscaleModelMultiscale.hpp>
 
 namespace LifeV
 {

@@ -34,7 +34,7 @@
  *  @maintainer Cristiano Malossi <cristiano.malossi@epfl.ch>
  */
 
-#include <lifemc/lifesolver/MS_Model_Fluid3D.hpp>
+#include <lifemc/lifesolver/MultiscaleModelFluid3D.hpp>
 
 namespace LifeV
 {

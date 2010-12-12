@@ -42,7 +42,7 @@
 #include <life/lifealg/EpetraPreconditioner.hpp>
 #include <life/lifealg/IfpackPreconditioner.hpp>
 
-#include <lifemc/lifesolver/MS_Algorithm.hpp>
+#include <lifemc/lifesolver/MultiscaleAlgorithm.hpp>
 
 namespace LifeV
 {
