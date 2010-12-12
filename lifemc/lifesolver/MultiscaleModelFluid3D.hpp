@@ -35,8 +35,8 @@
  */
 
 
-#ifndef MS_Model_Fluid3D_H
-#define MS_Model_Fluid3D_H 1
+#ifndef MultiscaleModelFluid3D_H
+#define MultiscaleModelFluid3D_H 1
 
 // LifeV includes
 #include <life/lifemesh/partitionMesh.hpp>
@@ -57,14 +57,14 @@
 namespace LifeV
 {
 
-//! MS_Model_Fluid3D - MultiScale model for 3D Fluid simulations
+//! MultiscaleModelFluid3D - MultiScale model for 3D Fluid simulations
 /*!
  *  @author Cristiano Malossi
  *
- *  The MS_Model_Fluid3D class is an implementation of the MS_PhysicalModel
+ *  The MultiscaleModelFluid3D class is an implementation of the MS_Model_Type
  *  for 3D Fluid problem (in particular Oseen with Shape Derivatives).
  */
-class MS_Model_Fluid3D: public virtual MS_PhysicalModel
+class MultiscaleModelFluid3D: public virtual MS_Model_Type
 {
 public:
 
@@ -104,10 +104,10 @@ public:
     //@{
 
     //! Constructor
-    MS_Model_Fluid3D();
+    MultiscaleModelFluid3D();
 
     //! Destructor
-    virtual ~MS_Model_Fluid3D() {}
+    virtual ~MultiscaleModelFluid3D() {}
 
     //@}
 
@@ -301,9 +301,9 @@ private:
     //! @name Unimplemented Methods
     //@{
 
-    MS_Model_Fluid3D( const MS_Model_Fluid3D& model );
+    MultiscaleModelFluid3D( const MultiscaleModelFluid3D& model );
 
-    MS_Model_Fluid3D& operator=( const MS_Model_Fluid3D& model );
+    MultiscaleModelFluid3D& operator=( const MultiscaleModelFluid3D& model );
 
     //@}
 
@@ -394,11 +394,11 @@ private:
 };
 
 //! Factory create function
-inline MS_PhysicalModel* createMultiscaleModelFluid3D()
+inline MS_Model_Type* createMultiscaleModelFluid3D()
 {
-    return new MS_Model_Fluid3D();
+    return new MultiscaleModelFluid3D();
 }
 
 } // Namespace LifeV
 
-#endif /* MS_Model_Fluid3D_H */
+#endif /* MultiscaleModelFluid3D_H */

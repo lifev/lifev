@@ -42,7 +42,7 @@ namespace LifeV
 // ===================================================
 // Constructors & Destructor
 // ===================================================
-MS_PhysicalData::MS_PhysicalData() :
+MultiscaleData::MultiscaleData() :
         M_dataTime                      (),
         M_fluidDensity                  (),
         M_fluidViscosity                (),
@@ -54,7 +54,7 @@ MS_PhysicalData::MS_PhysicalData() :
 {
 }
 
-MS_PhysicalData::MS_PhysicalData( const MS_PhysicalData& data ) :
+MultiscaleData::MultiscaleData( const MultiscaleData& data ) :
         M_dataTime                      ( data.M_dataTime ),
         M_fluidDensity                  ( data.M_fluidDensity ),
         M_fluidViscosity                ( data.M_fluidViscosity ),
@@ -69,8 +69,8 @@ MS_PhysicalData::MS_PhysicalData( const MS_PhysicalData& data ) :
 // ===================================================
 // Operators
 // ===================================================
-MS_PhysicalData&
-MS_PhysicalData::operator=( const MS_PhysicalData& data )
+MultiscaleData&
+MultiscaleData::operator=( const MultiscaleData& data )
 {
     if ( this != &data )
     {
@@ -91,7 +91,7 @@ MS_PhysicalData::operator=( const MS_PhysicalData& data )
 // Methods
 // ===================================================
 void
-MS_PhysicalData::readData( const GetPot& dataFile )
+MultiscaleData::readData( const GetPot& dataFile )
 {
     M_dataTime.reset( new time_Type( dataFile, "Solver/time_discretization" ) );
     M_fluidDensity                  = dataFile( "Physics/FluidDensity", 0. );
@@ -104,7 +104,7 @@ MS_PhysicalData::readData( const GetPot& dataFile )
 }
 
 void
-MS_PhysicalData::showMe()
+MultiscaleData::showMe()
 {
     std::cout << "Fluid density                 = " << M_fluidDensity << std::endl
               << "Fluid viscosity               = " << M_fluidViscosity << std::endl
@@ -123,50 +123,50 @@ MS_PhysicalData::showMe()
 // ===================================================
 // Get Methods
 // ===================================================
-MS_PhysicalData::timePtr_Type
-MS_PhysicalData::dataTime() const
+MultiscaleData::timePtr_Type
+MultiscaleData::dataTime() const
 {
     return M_dataTime;
 }
 
 const Real&
-MS_PhysicalData::fluidDensity() const
+MultiscaleData::fluidDensity() const
 {
     return M_fluidDensity;
 }
 
 const Real&
-MS_PhysicalData::fluidViscosity() const
+MultiscaleData::fluidViscosity() const
 {
     return M_fluidViscosity;
 }
 
 const Real&
-MS_PhysicalData::fluidReferencePressure() const
+MultiscaleData::fluidReferencePressure() const
 {
     return M_fluidReferencePressure;
 }
 
 const Real&
-MS_PhysicalData::structureDensity() const
+MultiscaleData::structureDensity() const
 {
     return M_structureDensity;
 }
 
 const Real&
-MS_PhysicalData::structurePoissonCoefficient() const
+MultiscaleData::structurePoissonCoefficient() const
 {
     return M_structurePoissonCoefficient;
 }
 
 //const Real&
-//MS_PhysicalData::GetStructureThickness() const
+//MultiscaleData::GetStructureThickness() const
 //{
 //    return M_structureThickness;
 //}
 
 const Real&
-MS_PhysicalData::structureYoungModulus() const
+MultiscaleData::structureYoungModulus() const
 {
     return M_structureYoungModulus;
 }

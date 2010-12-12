@@ -34,8 +34,8 @@
  *  @maintainer Cristiano Malossi <cristiano.malossi@epfl.ch>
  */
 
-#ifndef MS_Solver_H
-#define MS_Solver_H 1
+#ifndef MultiscaleSolver_H
+#define MultiscaleSolver_H 1
 
 #include <lifemc/lifesolver/MultiscaleDefinitions.hpp>
 
@@ -49,14 +49,14 @@
 namespace LifeV
 {
 
-//! MS_Solver - The MultiScale problem solver
+//! MultiscaleSolver - The MultiScale problem solver
 /*!
  *  @author Cristiano Malossi
  *
- *  The MS_Solver class provides a series of functions to create and
+ *  The MultiscaleSolver class provides a series of functions to create and
  *  solve a general MultiScale problem.
  */
-class MS_Solver
+class MultiscaleSolver
 {
 public:
 
@@ -64,10 +64,10 @@ public:
     //@{
 
     //! Constructor
-    MS_Solver();
+    MultiscaleSolver();
 
     //! Destructor
-    virtual ~MS_Solver() {}
+    virtual ~MultiscaleSolver() {}
 
     //@}
 
@@ -104,9 +104,9 @@ private:
     //! @name Unimplemented Methods
     //@{
 
-    MS_Solver( const MS_Solver& solver );
+    MultiscaleSolver( const MultiscaleSolver& solver );
 
-    MS_Solver& operator=( const MS_Solver& solver );
+    MultiscaleSolver& operator=( const MultiscaleSolver& solver );
 
     //@}
 
@@ -131,4 +131,4 @@ private:
 
 } // Namespace LifeV
 
-#endif /* MS_Solver_H */
+#endif /* MultiscaleSolver_H */

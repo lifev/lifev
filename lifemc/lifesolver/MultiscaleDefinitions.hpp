@@ -135,10 +135,10 @@ extern std::map< std::string, couplings_Type >  MS_couplingsMap;
 extern std::map< std::string, stress_Type >     MS_stressesMap;
 
 // Forward class declarations
-class MS_Algorithm;
-class MS_PhysicalModel;
-class MS_PhysicalCoupling;
-class MS_PhysicalData;
+class MultiscaleAlgorithm;
+class MultiscaleModel;
+class MultiscaleCoupling;
+class MultiscaleData;
 
 // Type definitions
 typedef EntityFlag                                                 BCFlag;
@@ -151,15 +151,15 @@ typedef boost::shared_ptr< MS_Vector_Type >                        MS_Vector_Ptr
 typedef EpetraMatrix< Real >                                       MS_Matrix_Type;
 typedef boost::shared_ptr< MS_Matrix_Type >                        MS_Matrix_PtrType;
 
-typedef MS_Algorithm                                               MS_Algorithm_Type;
+typedef MultiscaleAlgorithm                                        MS_Algorithm_Type;
 typedef boost::shared_ptr< MS_Algorithm_Type >                     MS_Algorithm_PtrType;
 typedef singleton< factory< MS_Algorithm_Type, algorithms_Type > > MS_Algorithm_Factory;
 
-typedef MS_PhysicalModel                                           MS_Model_Type;
+typedef MultiscaleModel                                            MS_Model_Type;
 typedef boost::shared_ptr< MS_Model_Type >                         MS_Model_PtrType;
 typedef singleton< factory< MS_Model_Type, models_Type > >         MS_Model_Factory;
 
-typedef MS_PhysicalCoupling                                        MS_Coupling_Type;
+typedef MultiscaleCoupling                                         MS_Coupling_Type;
 typedef boost::shared_ptr< MS_Coupling_Type >                      MS_Coupling_PtrType;
 typedef singleton< factory< MS_Coupling_Type, couplings_Type > >   MS_Coupling_Factory;
 
@@ -171,7 +171,7 @@ typedef std::vector< MS_Coupling_PtrType >                         MS_CouplingsV
 typedef MS_CouplingsVector_Type::iterator                          MS_CouplingsVector_Iterator;
 typedef MS_CouplingsVector_Type::const_iterator                    MS_CouplingsVector_ConstIterator;
 
-typedef MS_PhysicalData                                            MS_GlobalDataContainer_Type;
+typedef MultiscaleData                                            MS_GlobalDataContainer_Type;
 typedef boost::shared_ptr< MS_GlobalDataContainer_Type >           MS_GlobalDataContainer_PtrType;
 
 // ===================================================

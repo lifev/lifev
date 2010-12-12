@@ -64,7 +64,7 @@
 
 #include <life/lifecore/life.hpp>
 
-#include <lifemc/lifesolver/MS_Solver.hpp>
+#include <lifemc/lifesolver/MultiscaleSolver.hpp>
 
 #include <sys/stat.h>
 #include <sys/types.h>
@@ -102,7 +102,7 @@ main( int argc, char** argv )
 
     // Setup MultiScale problem
     bool exitFlag = EXIT_SUCCESS;
-    MS_Solver multiscale;
+    MultiscaleSolver multiscale;
 
     // Set the communicator
     multiscale.setCommunicator( comm );

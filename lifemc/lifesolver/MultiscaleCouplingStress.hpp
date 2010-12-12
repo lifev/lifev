@@ -34,8 +34,8 @@
  *  @maintainer Cristiano Malossi <cristiano.malossi@epfl.ch>
  */
 
-#ifndef MS_Coupling_Stress_H
-#define MS_Coupling_Stress_H 1
+#ifndef MultiscaleCouplingStress_H
+#define MultiscaleCouplingStress_H 1
 
 #include <lifemc/lifesolver/MultiscaleCoupling.hpp>
 #include <lifemc/lifesolver/MultiscaleModelFluid3D.hpp>
@@ -45,14 +45,14 @@
 namespace LifeV
 {
 
-//! MS_Coupling_Stress - Stress coupling condition
+//! MultiscaleCouplingStress - Stress coupling condition
 /*!
  *  @author Cristiano Malossi
  *
- *  The MS_Coupling_Stress class is an implementation of the MS_PhysicalCoupling
+ *  The MultiscaleCouplingStress class is an implementation of the MS_Coupling_Type
  *  for applying Stress coupling conditions on the models.
  */
-class MS_Coupling_Stress: public virtual MS_PhysicalCoupling
+class MultiscaleCouplingStress: public virtual MS_Coupling_Type
 {
 public:
 
@@ -60,10 +60,10 @@ public:
     //@{
 
     //! Constructor
-    MS_Coupling_Stress();
+    MultiscaleCouplingStress();
 
     //! Destructor
-    virtual ~MS_Coupling_Stress() {}
+    virtual ~MultiscaleCouplingStress() {}
 
     //@}
 
@@ -96,9 +96,9 @@ private:
     //! @name Unimplemented Methods
     //@{
 
-    MS_Coupling_Stress( const MS_Coupling_Stress& coupling );
+    MultiscaleCouplingStress( const MultiscaleCouplingStress& coupling );
 
-    MS_Coupling_Stress& operator=( const MS_Coupling_Stress& coupling );
+    MultiscaleCouplingStress& operator=( const MultiscaleCouplingStress& coupling );
 
     //@}
 
@@ -158,9 +158,9 @@ private:
 };
 
 //! Factory create function
-inline MS_PhysicalCoupling* createMultiscaleCouplingStress()
+inline MS_Coupling_Type* createMultiscaleCouplingStress()
 {
-    return new MS_Coupling_Stress();
+    return new MultiscaleCouplingStress();
 }
 
 // ===================================================
@@ -168,7 +168,7 @@ inline MS_PhysicalCoupling* createMultiscaleCouplingStress()
 // ===================================================
 template< class ModelType >
 inline void
-MS_Coupling_Stress::imposeStress3D( const UInt& i )
+MultiscaleCouplingStress::imposeStress3D( const UInt& i )
 {
     ModelType *model = MS_DynamicCast< ModelType >( M_models[i] );
 
@@ -178,7 +178,7 @@ MS_Coupling_Stress::imposeStress3D( const UInt& i )
 
 template< class ModelType >
 inline void
-MS_Coupling_Stress::imposeStress1D( const UInt& i )
+MultiscaleCouplingStress::imposeStress1D( const UInt& i )
 {
     ModelType *model = MS_DynamicCast< ModelType >( M_models[i] );
 
@@ -187,4 +187,4 @@ MS_Coupling_Stress::imposeStress1D( const UInt& i )
 
 } // Namespace LifeV
 
-#endif /* MS_Coupling_Stress_H */
+#endif /* MultiscaleCouplingStress_H */

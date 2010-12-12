@@ -39,8 +39,8 @@
  *  @maintainer Cristiano Malossi <cristiano.malossi@epfl.ch>
  */
 
-#ifndef MS_Model_1D_H
-#define MS_Model_1D_H 1
+#ifndef MultiscaleModel1D_H
+#define MultiscaleModel1D_H 1
 
 // Jacobian coefficient approximation
 #define JACOBIAN_WITH_FINITEDIFFERENCE
@@ -73,14 +73,14 @@
 namespace LifeV
 {
 
-//! MS_Model_1D - MultiScale model for 1D Fluid simulations
+//! MultiscaleModel1D - MultiScale model for 1D Fluid simulations
 /*!
  *  @author Gilles Fourestey, Cristiano Malossi
  *
- *  The MS_Model_1D class is an implementation of the MS_PhysicalModel
+ *  The MultiscaleModel1D class is an implementation of the MS_Model_Type
  *  for 1D Fluid problem.
  */
-class MS_Model_1D: public virtual MS_PhysicalModel
+class MultiscaleModel1D: public virtual MS_Model_Type
 {
 public:
 
@@ -121,10 +121,10 @@ public:
     //@{
 
     //! Constructor
-    MS_Model_1D();
+    MultiscaleModel1D();
 
     //! Destructor
-    virtual ~MS_Model_1D() {}
+    virtual ~MultiscaleModel1D() {}
 
     //@}
 
@@ -338,9 +338,9 @@ private:
     //! @name Unimplemented Methods
     //@{
 
-    MS_Model_1D( const MS_Model_1D& model );
+    MultiscaleModel1D( const MultiscaleModel1D& model );
 
-    MS_Model_1D& operator=( const MS_Model_1D& model );
+    MultiscaleModel1D& operator=( const MultiscaleModel1D& model );
 
     //@}
 
@@ -454,11 +454,11 @@ private:
 };
 
 //! Factory create function
-inline MS_PhysicalModel* createMultiscaleModelOneDimensional()
+inline MS_Model_Type* createMultiscaleModelOneDimensional()
 {
-    return new MS_Model_1D();
+    return new MultiscaleModel1D();
 }
 
 } // Namespace LifeV
 
-#endif /* MS_Model_1D_H */
+#endif /* MultiscaleModel1D_H */

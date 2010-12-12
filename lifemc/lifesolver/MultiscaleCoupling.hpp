@@ -34,8 +34,8 @@
  *  @maintainer Cristiano Malossi <cristiano.malossi@epfl.ch>
  */
 
-#ifndef MS_PhysicalCoupling_H
-#define MS_PhysicalCoupling_H 1
+#ifndef MultiscaleCoupling_H
+#define MultiscaleCoupling_H 1
 
 #include <lifemc/lifesolver/MultiscaleDefinitions.hpp>
 #include <lifemc/lifesolver/MultiscaleData.hpp>
@@ -44,14 +44,14 @@
 namespace LifeV
 {
 
-//! MS_PhysicalCoupling - The MultiScale Physical Coupling
+//! MultiscaleCoupling - The MultiScale Physical Coupling
 /*!
  *  @author Cristiano Malossi
  *
- *  The MS_PhysicalCoupling class provides a general interface between the
+ *  The MultiscaleCoupling class provides a general interface between the
  *  MS_Algorithm and all the coupling conditions.
  */
-class MS_PhysicalCoupling
+class MultiscaleCoupling
 {
 public:
 
@@ -68,10 +68,10 @@ public:
     //@{
 
     //! Constructor
-    MS_PhysicalCoupling();
+    MultiscaleCoupling();
 
     //! Destructor
-    virtual ~MS_PhysicalCoupling() {}
+    virtual ~MultiscaleCoupling() {}
 
     //@}
 
@@ -379,13 +379,13 @@ private:
     //! @name Unimplemented Methods
     //@{
 
-    MS_PhysicalCoupling( const MS_PhysicalCoupling& coupling );
+    MultiscaleCoupling( const MultiscaleCoupling& coupling );
 
-    MS_PhysicalCoupling& operator=( const MS_PhysicalCoupling& coupling );
+    MultiscaleCoupling& operator=( const MultiscaleCoupling& coupling );
 
     //@}
 };
 
 } // Namespace LifeV
 
-#endif /* MS_PhysicalCoupling_H */
+#endif /* MultiscaleCoupling_H */

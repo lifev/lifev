@@ -47,8 +47,8 @@ namespace LifeV
 // ===================================================
 // Constructors & Destructor
 // ===================================================
-MS_Model_1D::MS_Model_1D() :
-        MS_PhysicalModel                          (),
+MultiscaleModel1D::MultiscaleModel1D() :
+        MS_Model_Type                  (),
 #ifdef HAVE_HDF5
         M_exporter                     ( new IOFile_Type() ),
         M_importer                     ( new IOFile_Type() ),
@@ -76,7 +76,7 @@ MS_Model_1D::MS_Model_1D() :
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 8130 ) << "MS_Model_1D::MS_Model_1D() \n";
+    Debug( 8130 ) << "MultiscaleModel1D::MultiscaleModel1D() \n";
 #endif
 
     M_type = OneDimensional;
@@ -99,11 +99,11 @@ MS_Model_1D::MS_Model_1D() :
 // MultiScale PhysicalModel Virtual Methods
 // ===================================================
 void
-MS_Model_1D::setupData( const std::string& fileName )
+MultiscaleModel1D::setupData( const std::string& fileName )
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 8130 ) << "MS_Model_1D::SetupData( ) \n";
+    Debug( 8130 ) << "MultiscaleModel1D::SetupData( ) \n";
 #endif
 
     // Preliminary setup of the communicator
@@ -115,7 +115,7 @@ MS_Model_1D::setupData( const std::string& fileName )
     M_comm.reset( new Epetra_SerialComm() );
 #endif
 
-    MS_PhysicalModel::setupData( fileName );
+    MS_Model_Type::setupData( fileName );
 
     GetPot dataFile( fileName );
 
@@ -169,11 +169,11 @@ MS_Model_1D::setupData( const std::string& fileName )
 }
 
 void
-MS_Model_1D::setupModel()
+MultiscaleModel1D::setupModel()
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 8130 ) << "MS_Model_1D::SetupProblem() \n";
+    Debug( 8130 ) << "MultiscaleModel1D::SetupProblem() \n";
 #endif
 
     //FEspace
@@ -221,11 +221,11 @@ MS_Model_1D::setupModel()
 }
 
 void
-MS_Model_1D::buildSystem()
+MultiscaleModel1D::buildSystem()
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 8130 ) << "MS_Model_1D::BuildSystem() \n";
+    Debug( 8130 ) << "MultiscaleModel1D::BuildSystem() \n";
 #endif
 
     //M_Data->showMe();
@@ -242,11 +242,11 @@ MS_Model_1D::buildSystem()
 }
 
 void
-MS_Model_1D::updateSystem()
+MultiscaleModel1D::updateSystem()
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 8130 ) << "MS_Model_1D::UpdateSystem() \n";
+    Debug( 8130 ) << "MultiscaleModel1D::UpdateSystem() \n";
 #endif
 
     // Update previous solution
@@ -260,11 +260,11 @@ MS_Model_1D::updateSystem()
 }
 
 void
-MS_Model_1D::solveSystem()
+MultiscaleModel1D::solveSystem()
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 8130 ) << "MS_Model_1D::SolveSystem() \n";
+    Debug( 8130 ) << "MultiscaleModel1D::SolveSystem() \n";
 #endif
 
     solve( *M_bc->handler(), *M_solution );
@@ -277,11 +277,11 @@ MS_Model_1D::solveSystem()
 }
 
 void
-MS_Model_1D::saveSolution()
+MultiscaleModel1D::saveSolution()
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 8130 ) << "MS_Model_1D::SaveSolution() \n";
+    Debug( 8130 ) << "MultiscaleModel1D::SaveSolution() \n";
 #endif
 
 #ifdef HAVE_HDF5
@@ -299,11 +299,11 @@ MS_Model_1D::saveSolution()
 }
 
 void
-MS_Model_1D::showMe()
+MultiscaleModel1D::showMe()
 {
     if ( M_displayer->isLeader() )
     {
-        MS_PhysicalModel::showMe();
+        MS_Model_Type::showMe();
 
         std::cout << "FE order            = " << "P1" << std::endl
                   << "DOF                 = " << M_data->mesh()->numPoints() << std::endl << std::endl;
@@ -319,15 +319,15 @@ MS_Model_1D::showMe()
 #ifdef JACOBIAN_WITH_FINITEDIFFERENCE
 
 void
-MS_Model_1D::setupLinearModel()
+MultiscaleModel1D::setupLinearModel()
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 8130 ) << "MS_Model_1D::SetupLinearModel( ) \n";
+    Debug( 8130 ) << "MultiscaleModel1D::SetupLinearModel( ) \n";
 #endif
 
     // Define BCFunction for linear problem
-    M_bcBaseDelta.setFunction( boost::bind( &MS_Model_1D::bcFunctionDelta, this, _1 ) );
+    M_bcBaseDelta.setFunction( boost::bind( &MultiscaleModel1D::bcFunctionDelta, this, _1 ) );
 
     // The linear BCHandler is a copy of the original BCHandler with the LinearSolution instead of the true solution
     //M_LinearBC.reset( new bc_Type( *M_bc->handler() ) ); // COPY CONSTRUCTOR NOT WORKING
@@ -348,7 +348,7 @@ MS_Model_1D::setupLinearModel()
 }
 
 void
-MS_Model_1D::updateLinearModel()
+MultiscaleModel1D::updateLinearModel()
 {
     // The couplings should use the same value for the time interpolation order
     UInt timeInterpolationOrder( std::max( M_couplings[0]->timeInterpolationOrder(), M_couplings[1]->timeInterpolationOrder() ) );
@@ -368,11 +368,11 @@ MS_Model_1D::updateLinearModel()
 }
 
 void
-MS_Model_1D::solveLinearModel( bool& solveLinearSystem )
+MultiscaleModel1D::solveLinearModel( bool& solveLinearSystem )
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 8130 ) << "MS_Model_1D::SolveLinearModel() \n";
+    Debug( 8130 ) << "MultiscaleModel1D::SolveLinearModel() \n";
 #endif
 
     if ( !solveLinearSystem )
@@ -393,50 +393,50 @@ MS_Model_1D::solveLinearModel( bool& solveLinearSystem )
 // ===================================================
 // Get Methods (couplings)
 // ===================================================
-MS_Model_1D::BCInterface_Type&
-MS_Model_1D::bcInterface() const
+MultiscaleModel1D::BCInterface_Type&
+MultiscaleModel1D::bcInterface() const
 {
     return *M_bc;
 }
 
 Real
-MS_Model_1D::boundaryDensity( const BCFlag& /*flag*/ ) const
+MultiscaleModel1D::boundaryDensity( const BCFlag& /*flag*/ ) const
 {
     return M_data->densityRho();
 }
 
 Real
-MS_Model_1D::boundaryViscosity( const BCFlag& /*flag*/ ) const
+MultiscaleModel1D::boundaryViscosity( const BCFlag& /*flag*/ ) const
 {
     return M_data->viscosity();
 }
 
 Real
-MS_Model_1D::boundaryArea( const BCFlag& flag ) const
+MultiscaleModel1D::boundaryArea( const BCFlag& flag ) const
 {
     return M_solver->boundaryValue( *M_solution, OneD_A, flagConverter( flag ) );
 }
 
 Real
-MS_Model_1D::boundaryFlowRate( const BCFlag& flag ) const
+MultiscaleModel1D::boundaryFlowRate( const BCFlag& flag ) const
 {
     return M_solver->boundaryValue( *M_solution, OneD_Q, flagConverter( flag ) );
 }
 
 Real
-MS_Model_1D::boundaryPressure( const BCFlag& flag ) const
+MultiscaleModel1D::boundaryPressure( const BCFlag& flag ) const
 {
     return M_solver->boundaryValue( *M_solution, OneD_P, flagConverter( flag ) );
 }
 
 Real
-MS_Model_1D::boundaryDynamicPressure( const BCFlag& flag ) const
+MultiscaleModel1D::boundaryDynamicPressure( const BCFlag& flag ) const
 {
     return 0.5 * boundaryDensity( flag ) * std::pow( boundaryFlowRate( flag ) / boundaryArea( flag ), 2 );
 }
 
 Real
-MS_Model_1D::boundaryStress( const BCFlag& flag, const stress_Type& stressType ) const
+MultiscaleModel1D::boundaryStress( const BCFlag& flag, const stress_Type& stressType ) const
 {
     switch ( stressType )
     {
@@ -462,7 +462,7 @@ MS_Model_1D::boundaryStress( const BCFlag& flag, const stress_Type& stressType )
 #ifdef JACOBIAN_WITH_FINITEDIFFERENCE
 
 Real
-MS_Model_1D::boundaryDeltaFlowRate( const BCFlag& flag, bool& solveLinearSystem )
+MultiscaleModel1D::boundaryDeltaFlowRate( const BCFlag& flag, bool& solveLinearSystem )
 {
     OneD_BCSide bcSide = flagConverter( flag );
 
@@ -472,7 +472,7 @@ MS_Model_1D::boundaryDeltaFlowRate( const BCFlag& flag, bool& solveLinearSystem 
     Real Qdelta = M_solver->boundaryValue( *M_linearSolution, OneD_Q, bcSide );
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 8130 ) << "MS_Model_1D::GetBoundaryDeltaFlowRate( flag, solveLinearSystem ) \n";
+    Debug( 8130 ) << "MultiscaleModel1D::GetBoundaryDeltaFlowRate( flag, solveLinearSystem ) \n";
     Debug( 8130 ) << "Q:          " << Q << "\n";
     Debug( 8130 ) << "Qdelta:     " << Qdelta << "\n";
 #endif
@@ -499,7 +499,7 @@ MS_Model_1D::boundaryDeltaFlowRate( const BCFlag& flag, bool& solveLinearSystem 
 }
 
 Real
-MS_Model_1D::boundaryDeltaPressure( const BCFlag& flag, bool& solveLinearSystem )
+MultiscaleModel1D::boundaryDeltaPressure( const BCFlag& flag, bool& solveLinearSystem )
 {
     OneD_BCSide bcSide = flagConverter( flag );
 
@@ -511,7 +511,7 @@ MS_Model_1D::boundaryDeltaPressure( const BCFlag& flag, bool& solveLinearSystem 
     Real Adelta = M_solver->boundaryValue( *M_linearSolution, OneD_A, bcSide );
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 8130 ) << "MS_Model_1D::GetBoundaryDeltaPressure( flag, solveLinearSystem ) \n";
+    Debug( 8130 ) << "MultiscaleModel1D::GetBoundaryDeltaPressure( flag, solveLinearSystem ) \n";
     Debug( 8130 ) << "A:          " << A <<  "\n";
     Debug( 8130 ) << "Adelta:     " << Adelta <<  "\n";
 #endif
@@ -534,7 +534,7 @@ MS_Model_1D::boundaryDeltaPressure( const BCFlag& flag, bool& solveLinearSystem 
     Real Pdelta = M_solver->boundaryValue( *M_linearSolution, OneD_P, bcSide );
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 8130 ) << "MS_Model_1D::GetBoundaryDeltaPressure( flag, solveLinearSystem ) \n";
+    Debug( 8130 ) << "MultiscaleModel1D::GetBoundaryDeltaPressure( flag, solveLinearSystem ) \n";
     Debug( 8130 ) << "P:          " << P <<  "\n";
     Debug( 8130 ) << "Pdelta:     " << Pdelta <<  "\n";
 #endif
@@ -548,13 +548,13 @@ MS_Model_1D::boundaryDeltaPressure( const BCFlag& flag, bool& solveLinearSystem 
 #else
 
 Real
-MS_Model_1D::boundaryDeltaFlowRate( const BCFlag& flag, bool& /*solveLinearSystem*/ )
+MultiscaleModel1D::boundaryDeltaFlowRate( const BCFlag& flag, bool& /*solveLinearSystem*/ )
 {
     return tangentProblem( flagConverter( flag ), OneD_Q );
 }
 
 Real
-MS_Model_1D::boundaryDeltaPressure( const BCFlag& flag, bool& /*solveLinearSystem*/ )
+MultiscaleModel1D::boundaryDeltaPressure( const BCFlag& flag, bool& /*solveLinearSystem*/ )
 {
     return tangentProblem( flagConverter( flag ), OneD_P );
 }
@@ -562,14 +562,14 @@ MS_Model_1D::boundaryDeltaPressure( const BCFlag& flag, bool& /*solveLinearSyste
 #endif
 
 Real
-MS_Model_1D::boundaryDeltaDynamicPressure( const BCFlag& flag, bool& solveLinearSystem )
+MultiscaleModel1D::boundaryDeltaDynamicPressure( const BCFlag& flag, bool& solveLinearSystem )
 {
     // Untested
     return boundaryDensity( flag ) * boundaryDeltaFlowRate( flag, solveLinearSystem ) * boundaryFlowRate( flag ) / ( boundaryArea( flag ) * boundaryArea( flag ) );
 }
 
 Real
-MS_Model_1D::boundaryDeltaStress( const BCFlag& flag, bool& solveLinearSystem, const stress_Type& stressType )
+MultiscaleModel1D::boundaryDeltaStress( const BCFlag& flag, bool& solveLinearSystem, const stress_Type& stressType )
 {
     switch ( stressType )
     {
@@ -595,57 +595,57 @@ MS_Model_1D::boundaryDeltaStress( const BCFlag& flag, bool& solveLinearSystem, c
 // ===================================================
 // Get Methods
 // ===================================================
-MS_Model_1D::BC_Type&
-MS_Model_1D::bc() const
+MultiscaleModel1D::BC_Type&
+MultiscaleModel1D::bc() const
 {
     return *(M_bc->handler());
 }
 
 
-MS_Model_1D::Data_Type&
-MS_Model_1D::data() const
+MultiscaleModel1D::Data_Type&
+MultiscaleModel1D::data() const
 {
     return *M_data;
 }
 
-MS_Model_1D::Physics_PtrType
-MS_Model_1D::physics() const
+MultiscaleModel1D::Physics_PtrType
+MultiscaleModel1D::physics() const
 {
     return M_physics;
 }
 
-MS_Model_1D::Flux_PtrType
-MS_Model_1D::flux() const
+MultiscaleModel1D::Flux_PtrType
+MultiscaleModel1D::flux() const
 {
     return M_flux;
 }
 
-MS_Model_1D::Source_PtrType
-MS_Model_1D::source() const
+MultiscaleModel1D::Source_PtrType
+MultiscaleModel1D::source() const
 {
     return M_source;
 }
 
-MS_Model_1D::FESpace_PtrType
-MS_Model_1D::FESpace() const
+MultiscaleModel1D::FESpace_PtrType
+MultiscaleModel1D::FESpace() const
 {
     return M_FESpace;
 }
 
-MS_Model_1D::Solver_PtrType
-MS_Model_1D::solver() const
+MultiscaleModel1D::Solver_PtrType
+MultiscaleModel1D::solver() const
 {
     return M_solver;
 }
 
-const MS_Model_1D::Solution_PtrType&
-MS_Model_1D::solution() const
+const MultiscaleModel1D::Solution_PtrType&
+MultiscaleModel1D::solution() const
 {
     return M_solution;
 }
 
-const MS_Model_1D::Vector_PtrType&
-MS_Model_1D::solution( const std::string& quantity) const
+const MultiscaleModel1D::Vector_PtrType&
+MultiscaleModel1D::solution( const std::string& quantity) const
 {
     return (*M_solution)[quantity];
 }
@@ -654,11 +654,11 @@ MS_Model_1D::solution( const std::string& quantity) const
 // Private Methods
 // ===================================================
 void
-MS_Model_1D::setupGlobalData( const std::string& fileName )
+MultiscaleModel1D::setupGlobalData( const std::string& fileName )
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 8130 ) << "MS_Model_1D::SetupGlobalData( fileName ) \n";
+    Debug( 8130 ) << "MultiscaleModel1D::SetupGlobalData( fileName ) \n";
 #endif
 
     GetPot dataFile( fileName );
@@ -685,11 +685,11 @@ MS_Model_1D::setupGlobalData( const std::string& fileName )
 }
 
 void
-MS_Model_1D::setupFESpace()
+MultiscaleModel1D::setupFESpace()
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 8130 ) << "MS_Model_1D::SetupFEspace() \n";
+    Debug( 8130 ) << "MultiscaleModel1D::SetupFEspace() \n";
 #endif
 
     //Transform mesh
@@ -726,11 +726,11 @@ MS_Model_1D::setupFESpace()
 }
 
 void
-MS_Model_1D::initializeSolution()
+MultiscaleModel1D::initializeSolution()
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 8130 ) << "MS_Model_1D::InitializeSolution() \n";
+    Debug( 8130 ) << "MultiscaleModel1D::InitializeSolution() \n";
 #endif
 
     if ( MS_ProblemStep > 0 )
@@ -758,11 +758,11 @@ MS_Model_1D::initializeSolution()
 }
 
 void
-MS_Model_1D::updateSolution( const Solution_Type& solution1, Solution_Type& solution2 )
+MultiscaleModel1D::updateSolution( const Solution_Type& solution1, Solution_Type& solution2 )
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 8130 ) << "MS_Model_1D::UpdateSolution( solution1, solution2 ) \n";
+    Debug( 8130 ) << "MultiscaleModel1D::UpdateSolution( solution1, solution2 ) \n";
 #endif
 
     // Here we make a true copy (not a copy of the shared_ptr, but a copy of its content)
@@ -771,11 +771,11 @@ MS_Model_1D::updateSolution( const Solution_Type& solution1, Solution_Type& solu
 }
 
 void
-MS_Model_1D::solve( BC_Type& bc, Solution_Type& solution, const std::string& solverType )
+MultiscaleModel1D::solve( BC_Type& bc, Solution_Type& solution, const std::string& solverType )
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 8130 ) << "MS_Model_1D::Solve() \n";
+    Debug( 8130 ) << "MultiscaleModel1D::Solve() \n";
 #endif
 
     // Re-initialize solution
@@ -810,7 +810,7 @@ MS_Model_1D::solve( BC_Type& bc, Solution_Type& solution, const std::string& sol
 }
 
 OneD_BCSide
-MS_Model_1D::flagConverter( const BCFlag& flag ) const
+MultiscaleModel1D::flagConverter( const BCFlag& flag ) const
 {
     return (flag == 0) ? OneD_left : OneD_right;
 }
@@ -818,7 +818,7 @@ MS_Model_1D::flagConverter( const BCFlag& flag ) const
 #ifdef JACOBIAN_WITH_FINITEDIFFERENCE
 
 void
-MS_Model_1D::createLinearBC()
+MultiscaleModel1D::createLinearBC()
 {
     // Allocating the correct space
     M_bcPreviousTimeSteps.reserve( std::max( M_couplings[0]->timeInterpolationOrder(), M_couplings[1]->timeInterpolationOrder() ) );
@@ -834,7 +834,7 @@ MS_Model_1D::createLinearBC()
 }
 
 void
-MS_Model_1D::updateLinearBC( const Solution_Type& solution )
+MultiscaleModel1D::updateLinearBC( const Solution_Type& solution )
 {
     M_bcPreviousTimeSteps[0][OneD_left][OneD_A]  = M_solver->boundaryValue( solution, OneD_A, OneD_left );
     M_bcPreviousTimeSteps[0][OneD_left][OneD_P]  = M_solver->boundaryValue( solution, OneD_P, OneD_left );
@@ -845,11 +845,11 @@ MS_Model_1D::updateLinearBC( const Solution_Type& solution )
 }
 
 void
-MS_Model_1D::imposePerturbation()
+MultiscaleModel1D::imposePerturbation()
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 8130 ) << "MS_Model_1D::Perturbation() \n";
+    Debug( 8130 ) << "MultiscaleModel1D::Perturbation() \n";
 #endif
 
     for ( MS_CouplingsVector_ConstIterator i = M_couplings.begin(); i < M_couplings.end(); ++i )
@@ -908,11 +908,11 @@ MS_Model_1D::imposePerturbation()
 }
 
 void
-MS_Model_1D::resetPerturbation()
+MultiscaleModel1D::resetPerturbation()
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 8130 ) << "MS_Model_1D::ResetPerturbation() \n";
+    Debug( 8130 ) << "MultiscaleModel1D::ResetPerturbation() \n";
 #endif
 
     M_linearBC->BC( M_bcDeltaSide )->setBCFunction( OneD_first, M_bc->handler()->BC( M_bcDeltaSide )->BCFunction( OneD_first ) );
@@ -926,7 +926,7 @@ MS_Model_1D::resetPerturbation()
 }
 
 Real
-MS_Model_1D::bcFunctionDelta( const Real& t )
+MultiscaleModel1D::bcFunctionDelta( const Real& t )
 {
     // Lagrange interpolation
     Real bcValue(0);
@@ -956,11 +956,11 @@ MS_Model_1D::bcFunctionDelta( const Real& t )
 #else
 
 Real
-MS_Model_1D::tangentProblem( const OneD_BCSide& bcOutputSide, const OneD_BC& bcOutputType )
+MultiscaleModel1D::tangentProblem( const OneD_BCSide& bcOutputSide, const OneD_BC& bcOutputType )
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 8130 ) << "MS_Model_1D::TangentProblem( bcOutputSide, bcOutputType ) \n";
+    Debug( 8130 ) << "MultiscaleModel1D::TangentProblem( bcOutputSide, bcOutputType ) \n";
 #endif
 
     Real jacobianCoefficient(0);

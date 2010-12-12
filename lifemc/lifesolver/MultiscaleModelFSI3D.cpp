@@ -43,8 +43,8 @@ namespace LifeV
 // ===================================================
 // Constructors & Destructor
 // ===================================================
-MS_Model_FSI3D::MS_Model_FSI3D() :
-        MS_PhysicalModel               (),
+MultiscaleModelFSI3D::MultiscaleModelFSI3D() :
+        MS_Model_Type                  (),
         M_FSIoperator                  (),
         M_data                         ( new data_Type() ),
         M_exporterFluid                (),
@@ -71,7 +71,7 @@ MS_Model_FSI3D::MS_Model_FSI3D() :
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 8140 ) << "MS_Model_FSI3D::MS_Model_FSI3D() \n";
+    Debug( 8140 ) << "MultiscaleModelFSI3D::MultiscaleModelFSI3D() \n";
 #endif
 
     M_type = FSI3D;
@@ -93,9 +93,9 @@ MS_Model_FSI3D::MS_Model_FSI3D() :
 // MultiScale PhysicalModel Virtual Methods
 // ===================================================
 void
-MS_Model_FSI3D::setupData( const std::string& fileName )
+MultiscaleModelFSI3D::setupData( const std::string& fileName )
 {
-    MS_PhysicalModel::setupData( fileName );
+    MS_Model_Type::setupData( fileName );
 
     GetPot dataFile( fileName );
 
@@ -132,7 +132,7 @@ MS_Model_FSI3D::setupData( const std::string& fileName )
 }
 
 void
-MS_Model_FSI3D::setupModel()
+MultiscaleModelFSI3D::setupModel()
 {
     // Mesh transformation (before partitioning, ideally should be done after for scalability)
     //M_FSIoperator->fluidMesh().transformMesh( M_geometryScale, M_geometryRotate, M_geometryTranslate );
@@ -176,7 +176,7 @@ MS_Model_FSI3D::setupModel()
 }
 
 void
-MS_Model_FSI3D::buildSystem()
+MultiscaleModelFSI3D::buildSystem()
 {
     // Update BCInterface Operator BC
     updateBC();
@@ -193,7 +193,7 @@ MS_Model_FSI3D::buildSystem()
 }
 
 void
-MS_Model_FSI3D::updateSystem()
+MultiscaleModelFSI3D::updateSystem()
 {
     // Update BCInterface Operator BC
     updateBC();
@@ -213,7 +213,7 @@ MS_Model_FSI3D::updateSystem()
 }
 
 void
-MS_Model_FSI3D::solveSystem( )
+MultiscaleModelFSI3D::solveSystem( )
 {
     UInt maxSubIterationNumber = M_data->maxSubIterationNumber();
     std::ofstream outRes; // Unuseful variable
@@ -260,7 +260,7 @@ MS_Model_FSI3D::solveSystem( )
 }
 
 void
-MS_Model_FSI3D::saveSolution()
+MultiscaleModelFSI3D::saveSolution()
 {
     // TODO Post-process must be made here. We need to add to HDF5exporter some methods to:
     // 1) save only the xmf file (done once, as it is independent from the variable)
@@ -319,11 +319,11 @@ MS_Model_FSI3D::saveSolution()
 }
 
 void
-MS_Model_FSI3D::showMe()
+MultiscaleModelFSI3D::showMe()
 {
     if ( M_displayer->isLeader() )
     {
-        MS_PhysicalModel::showMe();
+        MS_Model_Type::showMe();
 
         std::cout << "FSI method          = " << M_data->method() << std::endl << std::endl;
 
@@ -347,7 +347,7 @@ MS_Model_FSI3D::showMe()
 // Methods
 // ===================================================
 void
-MS_Model_FSI3D::setupLinearModel()
+MultiscaleModelFSI3D::setupLinearModel()
 {
 
 #ifdef HAVE_LIFEV_DEBUG
@@ -355,8 +355,8 @@ MS_Model_FSI3D::setupLinearModel()
 #endif
 
     // Define BCFunctions for tangent problem
-    M_bcBaseDeltaZero.setFunction( boost::bind( &MS_Model_FSI3D::bcFunctionDeltaZero, this, _1, _2, _3, _4, _5 ) );
-    M_bcBaseDeltaOne.setFunction(  boost::bind( &MS_Model_FSI3D::bcFunctionDeltaOne,  this, _1, _2, _3, _4, _5 ) );
+    M_bcBaseDeltaZero.setFunction( boost::bind( &MultiscaleModelFSI3D::bcFunctionDeltaZero, this, _1, _2, _3, _4, _5 ) );
+    M_bcBaseDeltaOne.setFunction(  boost::bind( &MultiscaleModelFSI3D::bcFunctionDeltaOne,  this, _1, _2, _3, _4, _5 ) );
 
     // The linear BCHandler is a copy of the original BCHandler with all BCFunctions giving zero
     bcPtr_Type LinearBCHandler ( new bc_Type( *M_fluidBC->handler() ) );
@@ -372,11 +372,11 @@ MS_Model_FSI3D::setupLinearModel()
 }
 
 void
-MS_Model_FSI3D::updateLinearModel()
+MultiscaleModelFSI3D::updateLinearModel()
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 8140 ) << "MS_Model_FSI3D::UpdateLinearModel() \n";
+    Debug( 8140 ) << "MultiscaleModelFSI3D::UpdateLinearModel() \n";
 #endif
 
     //Create the RHS
@@ -385,11 +385,11 @@ MS_Model_FSI3D::updateLinearModel()
 }
 
 void
-MS_Model_FSI3D::solveLinearModel( bool& solveLinearSystem )
+MultiscaleModelFSI3D::solveLinearModel( bool& solveLinearSystem )
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 8140 ) << "MS_Model_FSI3D::SolveLinearModel() \n";
+    Debug( 8140 ) << "MultiscaleModelFSI3D::SolveLinearModel() \n";
 #endif
 
     if ( !solveLinearSystem )
@@ -411,57 +411,57 @@ MS_Model_FSI3D::solveLinearModel( bool& solveLinearSystem )
 // ===================================================
 // Get Methods
 // ===================================================
-MS_Model_FSI3D::bcInterface_Type&
-MS_Model_FSI3D::bcInterface()
+MultiscaleModelFSI3D::bcInterface_Type&
+MultiscaleModelFSI3D::bcInterface()
 {
     return *M_fluidBC;
 }
 
 Real
-MS_Model_FSI3D::boundaryDensity( const BCFlag& /*flag*/ ) const
+MultiscaleModelFSI3D::boundaryDensity( const BCFlag& /*flag*/ ) const
 {
     return M_FSIoperator->dataFluid()->density();
 }
 
 Real
-MS_Model_FSI3D::boundaryViscosity( const BCFlag& /*flag*/ ) const
+MultiscaleModelFSI3D::boundaryViscosity( const BCFlag& /*flag*/ ) const
 {
     return M_FSIoperator->dataFluid()->viscosity();
 }
 
 Real
-MS_Model_FSI3D::boundaryArea( const BCFlag& flag ) const
+MultiscaleModelFSI3D::boundaryArea( const BCFlag& flag ) const
 {
     return M_FSIoperator->fluid().area( flag );
 }
 
 Real
-MS_Model_FSI3D::boundaryFlowRate( const BCFlag& flag ) const
+MultiscaleModelFSI3D::boundaryFlowRate( const BCFlag& flag ) const
 {
     return M_FSIoperator->fluid().flux( flag, *M_FSIoperator->solutionPtr() );
 }
 
 Real
-MS_Model_FSI3D::boundaryPressure( const BCFlag& flag ) const
+MultiscaleModelFSI3D::boundaryPressure( const BCFlag& flag ) const
 {
     return M_FSIoperator->fluid().pressure( flag, *M_FSIoperator->solutionPtr() );
 }
 
 Real
-MS_Model_FSI3D::boundaryDynamicPressure( const BCFlag& flag ) const
+MultiscaleModelFSI3D::boundaryDynamicPressure( const BCFlag& flag ) const
 {
     return 0.5 * boundaryDensity( flag ) * ( boundaryFlowRate( flag ) * boundaryFlowRate( flag ) )
            / ( boundaryArea( flag ) * boundaryArea( flag ) );
 }
 
 Real
-MS_Model_FSI3D::boundaryLagrangeMultiplier( const BCFlag& flag ) const
+MultiscaleModelFSI3D::boundaryLagrangeMultiplier( const BCFlag& flag ) const
 {
     return M_FSIoperator->fluid().LagrangeMultiplier(flag, *M_fluidBC->handler(), M_FSIoperator->getSolution() );
 }
 
 Real
-MS_Model_FSI3D::boundaryStress( const BCFlag& flag, const stress_Type& stressType ) const
+MultiscaleModelFSI3D::boundaryStress( const BCFlag& flag, const stress_Type& stressType ) const
 {
     switch ( stressType )
     {
@@ -489,7 +489,7 @@ MS_Model_FSI3D::boundaryStress( const BCFlag& flag, const stress_Type& stressTyp
 }
 
 Real
-MS_Model_FSI3D::boundaryDeltaFlowRate( const BCFlag& flag, bool& solveLinearSystem )
+MultiscaleModelFSI3D::boundaryDeltaFlowRate( const BCFlag& flag, bool& solveLinearSystem )
 {
     solveLinearModel( solveLinearSystem );
 
@@ -497,7 +497,7 @@ MS_Model_FSI3D::boundaryDeltaFlowRate( const BCFlag& flag, bool& solveLinearSyst
 }
 
 Real
-MS_Model_FSI3D::boundaryDeltaPressure( const BCFlag& flag, bool& solveLinearSystem )
+MultiscaleModelFSI3D::boundaryDeltaPressure( const BCFlag& flag, bool& solveLinearSystem )
 {
     solveLinearModel( solveLinearSystem );
 
@@ -505,13 +505,13 @@ MS_Model_FSI3D::boundaryDeltaPressure( const BCFlag& flag, bool& solveLinearSyst
 }
 
 Real
-MS_Model_FSI3D::boundaryDeltaDynamicPressure( const BCFlag& flag, bool& solveLinearSystem )
+MultiscaleModelFSI3D::boundaryDeltaDynamicPressure( const BCFlag& flag, bool& solveLinearSystem )
 {
     return boundaryDensity( flag ) * boundaryDeltaFlowRate( flag, solveLinearSystem ) * boundaryFlowRate( flag ) / ( boundaryArea( flag ) * boundaryArea( flag ) );
 }
 
 Real
-MS_Model_FSI3D::boundaryDeltaLagrangeMultiplier( const BCFlag& flag, bool& solveLinearSystem )
+MultiscaleModelFSI3D::boundaryDeltaLagrangeMultiplier( const BCFlag& flag, bool& solveLinearSystem )
 {
     solveLinearModel( solveLinearSystem );
 
@@ -519,7 +519,7 @@ MS_Model_FSI3D::boundaryDeltaLagrangeMultiplier( const BCFlag& flag, bool& solve
 }
 
 Real
-MS_Model_FSI3D::boundaryDeltaStress( const BCFlag& flag, bool& solveLinearSystem, const stress_Type& stressType )
+MultiscaleModelFSI3D::boundaryDeltaStress( const BCFlag& flag, bool& solveLinearSystem, const stress_Type& stressType )
 {
     switch ( stressType )
     {
@@ -550,7 +550,7 @@ MS_Model_FSI3D::boundaryDeltaStress( const BCFlag& flag, bool& solveLinearSystem
 // Private Methods
 // ===================================================
 void
-MS_Model_FSI3D::setupGlobalData( const std::string& fileName )
+MultiscaleModelFSI3D::setupGlobalData( const std::string& fileName )
 {
     GetPot dataFile( fileName );
 
@@ -575,7 +575,7 @@ MS_Model_FSI3D::setupGlobalData( const std::string& fileName )
 }
 
 void
-MS_Model_FSI3D::setupCommunicator()
+MultiscaleModelFSI3D::setupCommunicator()
 {
     M_FSIoperator->setFluid( true );
     M_FSIoperator->setSolid( true );
@@ -587,7 +587,7 @@ MS_Model_FSI3D::setupCommunicator()
 }
 
 void
-MS_Model_FSI3D::setupBC( const std::string& fileName )
+MultiscaleModelFSI3D::setupBC( const std::string& fileName )
 {
     if ( M_FSIoperator->isFluid() )
     {
@@ -612,7 +612,7 @@ MS_Model_FSI3D::setupBC( const std::string& fileName )
 }
 
 void
-MS_Model_FSI3D::updateBC()
+MultiscaleModelFSI3D::updateBC()
 {
     if ( M_FSIoperator->isFluid() )
     {
@@ -626,7 +626,7 @@ MS_Model_FSI3D::updateBC()
 }
 
 void
-MS_Model_FSI3D::setupExporter( IOFilePtr_Type& exporter, const GetPot& dataFile, const std::string& label )
+MultiscaleModelFSI3D::setupExporter( IOFilePtr_Type& exporter, const GetPot& dataFile, const std::string& label )
 {
     const std::string exporterType = dataFile( "exporter/type", "ensight" );
 #ifdef HAVE_HDF5
@@ -641,7 +641,7 @@ MS_Model_FSI3D::setupExporter( IOFilePtr_Type& exporter, const GetPot& dataFile,
 }
 
 void
-MS_Model_FSI3D::setupImporter( IOFilePtr_Type& importer, const GetPot& dataFile, const std::string& label )
+MultiscaleModelFSI3D::setupImporter( IOFilePtr_Type& importer, const GetPot& dataFile, const std::string& label )
 {
     const std::string importerType = dataFile( "exporter/type", "ensight" );
 #ifdef HAVE_HDF5
@@ -656,7 +656,7 @@ MS_Model_FSI3D::setupImporter( IOFilePtr_Type& importer, const GetPot& dataFile,
 }
 
 void
-MS_Model_FSI3D::setExporterFluid( const IOFilePtr_Type& exporter )
+MultiscaleModelFSI3D::setExporterFluid( const IOFilePtr_Type& exporter )
 {
     M_fluidVelocityPressure.reset( new vector_Type( M_FSIoperator->fluid().getMap(),  M_exporterFluid->mapType() ) );
     M_fluidDisplacement.reset    ( new vector_Type( M_FSIoperator->mmFESpace().map(), M_exporterFluid->mapType() ) );
@@ -671,7 +671,7 @@ MS_Model_FSI3D::setExporterFluid( const IOFilePtr_Type& exporter )
 }
 
 void
-MS_Model_FSI3D::setExporterSolid( const IOFilePtr_Type& exporter )
+MultiscaleModelFSI3D::setExporterSolid( const IOFilePtr_Type& exporter )
 {
     M_solidDisplacement.reset( new vector_Type( M_FSIoperator->dFESpace().map(), M_exporterSolid->mapType() ) );
     M_solidVelocity.reset    ( new vector_Type( M_FSIoperator->dFESpace().map(), M_exporterSolid->mapType() ) );
@@ -684,11 +684,11 @@ MS_Model_FSI3D::setExporterSolid( const IOFilePtr_Type& exporter )
 }
 
 void
-MS_Model_FSI3D::initializeSolution()
+MultiscaleModelFSI3D::initializeSolution()
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 8140 ) << "MS_Model_FSI3D::InitializeSolution() \n";
+    Debug( 8140 ) << "MultiscaleModelFSI3D::InitializeSolution() \n";
 #endif
 
     if ( MS_ProblemStep > 0 )
@@ -750,7 +750,7 @@ MS_Model_FSI3D::initializeSolution()
 }
 
 void
-MS_Model_FSI3D::imposePerturbation()
+MultiscaleModelFSI3D::imposePerturbation()
 {
 
 #ifdef HAVE_LIFEV_DEBUG
@@ -767,11 +767,11 @@ MS_Model_FSI3D::imposePerturbation()
 }
 
 void
-MS_Model_FSI3D::resetPerturbation()
+MultiscaleModelFSI3D::resetPerturbation()
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 8140 ) << "MS_Model_FSI3D::ResetPerturbation() \n";
+    Debug( 8140 ) << "MultiscaleModelFSI3D::ResetPerturbation() \n";
 #endif
 
     for ( MS_CouplingsVector_ConstIterator i = M_couplings.begin(); i < M_couplings.end(); ++i )
@@ -784,13 +784,13 @@ MS_Model_FSI3D::resetPerturbation()
 }
 
 Real
-MS_Model_FSI3D::bcFunctionDeltaZero( const Real& /*t*/, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const UInt& /*id*/ )
+MultiscaleModelFSI3D::bcFunctionDeltaZero( const Real& /*t*/, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const UInt& /*id*/ )
 {
     return 0.;
 }
 
 Real
-MS_Model_FSI3D::bcFunctionDeltaOne( const Real& /*t*/, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const UInt& /*id*/ )
+MultiscaleModelFSI3D::bcFunctionDeltaOne( const Real& /*t*/, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const UInt& /*id*/ )
 {
     return 1.;
 }
