@@ -34,8 +34,8 @@
  *  @maintainer Cristiano Malossi <cristiano.malossi@epfl.ch>
  */
 
-#ifndef MS_Model_MultiScale_H
-#define MS_Model_MultiScale_H 1
+#ifndef MultiscaleModelMultiscale_H
+#define MultiscaleModelMultiscale_H 1
 
 #include <lifemc/lifesolver/MultiscaleModel.hpp>
 #include <lifemc/lifesolver/MultiscaleModelFluid3D.hpp>
@@ -50,14 +50,14 @@
 namespace LifeV
 {
 
-//! MS_Model_MultiScale - MultiScale model
+//! MultiscaleModelMultiscale - MultiScale model
 /*!
  *  @author Cristiano Malossi
  *
- *  The MS_Model_MultiScale class is an implementation of the MS_PhysicalModel
+ *  The MultiscaleModelMultiscale class is an implementation of the MultiscaleModel
  *  for a general multiscale problem.
  */
-class MS_Model_MultiScale: public virtual MS_PhysicalModel
+class MultiscaleModelMultiscale: public virtual MS_Model_Type
 {
 public:
 
@@ -65,10 +65,10 @@ public:
     //@{
 
     //! Constructor
-    MS_Model_MultiScale();
+    MultiscaleModelMultiscale();
 
     //! Destructor
-    virtual ~MS_Model_MultiScale();
+    virtual ~MultiscaleModelMultiscale();
 
     //@}
 
@@ -152,9 +152,9 @@ private:
     //! @name Unimplemented Methods
     //@{
 
-    MS_Model_MultiScale( const MS_Model_MultiScale& model );
+    MultiscaleModelMultiscale( const MultiscaleModelMultiscale& model );
 
-    MS_Model_MultiScale& operator=( const MS_Model_MultiScale& model );
+    MultiscaleModelMultiscale& operator=( const MultiscaleModelMultiscale& model );
 
     //@}
 
@@ -164,11 +164,11 @@ private:
 };
 
 //! Factory create function
-inline MS_PhysicalModel* createMultiscaleModelMultiscale()
+inline MS_Model_Type* createMultiscaleModelMultiscale()
 {
-    return new MS_Model_MultiScale();
+    return new MultiscaleModelMultiscale();
 }
 
 } // Namespace LifeV
 
-#endif /* MS_Model_MultiScale_H */
+#endif /* MultiscaleModelMultiscale_H */

@@ -34,8 +34,8 @@
  *  @maintainer Cristiano Malossi <cristiano.malossi@epfl.ch>
  */
 
-#ifndef MS_Coupling_FlowRateStress_H
-#define MS_Coupling_FlowRateStress_H 1
+#ifndef MultiscaleCouplingFlowRateStress_H
+#define MultiscaleCouplingFlowRateStress_H 1
 
 #include <lifemc/lifesolver/MultiscaleCoupling.hpp>
 #include <lifemc/lifesolver/MultiscaleModelFluid3D.hpp>
@@ -45,11 +45,11 @@
 namespace LifeV
 {
 
-//! MS_Coupling_FlowRateStress - FlowRate-Stress coupling condition
+//! MultiscaleCouplingFlowRateStress - FlowRate-Stress coupling condition
 /*!
  *  @author Cristiano Malossi
  *
- *  The MS_Coupling_FlowRateStress class is an implementation of the MS_PhysicalCoupling
+ *  The MultiscaleCouplingFlowRateStress class is an implementation of the MS_Coupling_Type
  *  for applying FlowRate-Stress coupling conditions on the models.
  *
  *  The coupling equations are:
@@ -57,7 +57,7 @@ namespace LifeV
  *  \sigma_i = -P_j
  *  where Q is the flux and P is the pressure (or the total pressure).
  */
-class MS_Coupling_FlowRateStress: public virtual MS_PhysicalCoupling
+class MultiscaleCouplingFlowRateStress: public virtual MS_Coupling_Type
 {
 public:
 
@@ -65,10 +65,10 @@ public:
     //@{
 
     //! Constructor
-    MS_Coupling_FlowRateStress();
+    MultiscaleCouplingFlowRateStress();
 
     //! Destructor
-    virtual ~MS_Coupling_FlowRateStress() {}
+    virtual ~MultiscaleCouplingFlowRateStress() {}
 
     //@}
 
@@ -104,9 +104,9 @@ private:
     //! @name Unimplemented Methods
     //@{
 
-    MS_Coupling_FlowRateStress( const MS_Coupling_FlowRateStress& coupling );
+    MultiscaleCouplingFlowRateStress( const MultiscaleCouplingFlowRateStress& coupling );
 
-    MS_Coupling_FlowRateStress& operator=( const MS_Coupling_FlowRateStress& coupling );
+    MultiscaleCouplingFlowRateStress& operator=( const MultiscaleCouplingFlowRateStress& coupling );
 
     //@}
 
@@ -175,9 +175,9 @@ private:
 };
 
 //! Factory create function
-inline MS_PhysicalCoupling* createMultiscaleCouplingFlowRateStress()
+inline MS_Coupling_Type* createMultiscaleCouplingFlowRateStress()
 {
-    return new MS_Coupling_FlowRateStress();
+    return new MultiscaleCouplingFlowRateStress();
 }
 
 // ===================================================
@@ -185,7 +185,7 @@ inline MS_PhysicalCoupling* createMultiscaleCouplingFlowRateStress()
 // ===================================================
 template< class ModelType >
 inline void
-MS_Coupling_FlowRateStress::imposeFlowRate3D( const UInt& i )
+MultiscaleCouplingFlowRateStress::imposeFlowRate3D( const UInt& i )
 {
     ModelType *model = MS_DynamicCast< ModelType >( M_models[i] );
 
@@ -194,7 +194,7 @@ MS_Coupling_FlowRateStress::imposeFlowRate3D( const UInt& i )
 
 template< class ModelType >
 inline void
-MS_Coupling_FlowRateStress::imposeStress3D( const UInt& i )
+MultiscaleCouplingFlowRateStress::imposeStress3D( const UInt& i )
 {
     ModelType *model = MS_DynamicCast< ModelType >( M_models[i] );
 
@@ -203,7 +203,7 @@ MS_Coupling_FlowRateStress::imposeStress3D( const UInt& i )
 
 template< class ModelType >
 inline void
-MS_Coupling_FlowRateStress::imposeFlowRate1D( const UInt& i )
+MultiscaleCouplingFlowRateStress::imposeFlowRate1D( const UInt& i )
 {
     ModelType *model = MS_DynamicCast< ModelType >( M_models[i] );
 
@@ -212,7 +212,7 @@ MS_Coupling_FlowRateStress::imposeFlowRate1D( const UInt& i )
 
 template< class ModelType >
 inline void
-MS_Coupling_FlowRateStress::imposeStress1D( const UInt& i )
+MultiscaleCouplingFlowRateStress::imposeStress1D( const UInt& i )
 {
     ModelType *model = MS_DynamicCast< ModelType >( M_models[i] );
 
@@ -221,4 +221,4 @@ MS_Coupling_FlowRateStress::imposeStress1D( const UInt& i )
 
 } // Namespace LifeV
 
-#endif /* MS_Coupling_FlowRateStress_H */
+#endif /* MultiscaleCouplingFlowRateStress_H */

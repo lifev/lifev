@@ -34,8 +34,8 @@
  *  @maintainer Cristiano Malossi <cristiano.malossi@epfl.ch>
  */
 
-#ifndef MS_Algorithm_H
-#define MS_Algorithm_H 1
+#ifndef MultiscaleAlgorithm_H
+#define MultiscaleAlgorithm_H 1
 
 #include <lifemc/lifesolver/MultiscaleDefinitions.hpp>
 #include <lifemc/lifesolver/MultiscaleModelMultiscale.hpp>
@@ -43,22 +43,22 @@
 namespace LifeV
 {
 
-//! MS_Algorithm - The MultiScale Algorithm Interface
+//! MultiscaleAlgorithm - The MultiScale Algorithm Interface
 /*!
  *  @author Cristiano Malossi
  *
- *  The MS_Algorithm class provides a general interface between the
+ *  The MultiscaleAlgorithm class provides a general interface between the
  *  MS_Solver and the specific Algorithm to solve the problem.
  *
  */
-class MS_Algorithm
+class MultiscaleAlgorithm
 {
 public:
 
     //! @name Type definitions
     //@{
 
-    typedef boost::shared_ptr< MS_Model_MultiScale >                   multiscaleModelPtr_Type;
+    typedef boost::shared_ptr< MultiscaleModelMultiscale >                   multiscaleModelPtr_Type;
 
     //@}
 
@@ -67,10 +67,10 @@ public:
     //@{
 
     //! Constructor
-    MS_Algorithm();
+    MultiscaleAlgorithm();
 
     //! Destructor
-    virtual ~MS_Algorithm() {}
+    virtual ~MultiscaleAlgorithm() {}
 
     //@}
 
@@ -210,13 +210,13 @@ private:
     //! @name Unimplemented Methods
     //@{
 
-    MS_Algorithm( const MS_Algorithm& algorithm );
+    MultiscaleAlgorithm( const MultiscaleAlgorithm& algorithm );
 
-    MS_Algorithm& operator=( const MS_Algorithm& algorithm );
+    MultiscaleAlgorithm& operator=( const MultiscaleAlgorithm& algorithm );
 
     //@}
 };
 
 } // Namespace LifeV
 
-#endif /* MS_Algorithm_H */
+#endif /* MultiscaleAlgorithm_H */

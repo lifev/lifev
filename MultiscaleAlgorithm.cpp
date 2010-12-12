@@ -44,7 +44,7 @@ std::map< std::string, algorithms_Type > MS_algorithmsMap;
 // ===================================================
 // Constructors & Destructor
 // ===================================================
-MS_Algorithm::MS_Algorithm() :
+MultiscaleAlgorithm::MultiscaleAlgorithm() :
         M_type                       (),
         M_multiscale                 (),
         M_couplingVariables          (),
@@ -56,7 +56,7 @@ MS_Algorithm::MS_Algorithm() :
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 8010 ) << "MS_Algorithm::MS_Algorithm() \n";
+    Debug( 8010 ) << "MultiscaleAlgorithm::MultiscaleAlgorithm() \n";
 #endif
 
 }
@@ -65,11 +65,11 @@ MS_Algorithm::MS_Algorithm() :
 // MultiScale Algorithm Virtual Methods
 // ===================================================
 void
-MS_Algorithm::setupData( const std::string& fileName )
+MultiscaleAlgorithm::setupData( const std::string& fileName )
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 8010 ) << "MS_Algorithm::SetupData( fileName ) \n";
+    Debug( 8010 ) << "MultiscaleAlgorithm::SetupData( fileName ) \n";
 #endif
 
     GetPot dataFile( fileName );
@@ -79,11 +79,11 @@ MS_Algorithm::setupData( const std::string& fileName )
 }
 
 void
-MS_Algorithm::subIterate()
+MultiscaleAlgorithm::subIterate()
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 8010 ) << "MS_Algorithm::SubIterate() \n";
+    Debug( 8010 ) << "MultiscaleAlgorithm::SubIterate() \n";
 #endif
 
     // Algorithm Type
@@ -92,14 +92,14 @@ MS_Algorithm::subIterate()
 }
 
 void
-MS_Algorithm::updateCouplingVariables()
+MultiscaleAlgorithm::updateCouplingVariables()
 {
     // The default approach is to extrapolate the next coupling variables
     M_multiscale->extrapolateCouplingVariables();
 }
 
 void
-MS_Algorithm::showMe()
+MultiscaleAlgorithm::showMe()
 {
     std::cout << "=================== Algorithm Information ===================" << std::endl << std::endl;
 
@@ -113,13 +113,13 @@ MS_Algorithm::showMe()
 // Methods
 // ===================================================
 void
-MS_Algorithm::initializeCouplingVariables()
+MultiscaleAlgorithm::initializeCouplingVariables()
 {
     M_multiscale->initializeCouplingVariables();
 }
 
 Real
-MS_Algorithm::computeResidual() const
+MultiscaleAlgorithm::computeResidual() const
 {
     // Compute computeResidual
     M_multiscale->exportCouplingResiduals( *M_couplingResiduals );
@@ -130,11 +130,11 @@ MS_Algorithm::computeResidual() const
 // Set Methods
 // ===================================================
 void
-MS_Algorithm::setCommunicator( const MS_Comm_PtrType& comm )
+MultiscaleAlgorithm::setCommunicator( const MS_Comm_PtrType& comm )
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 8100 ) << "MS_Algorithm::SetCommunicator( comm ) \n";
+    Debug( 8100 ) << "MultiscaleAlgorithm::SetCommunicator( comm ) \n";
 #endif
 
     M_comm = comm;
@@ -142,14 +142,14 @@ MS_Algorithm::setCommunicator( const MS_Comm_PtrType& comm )
 }
 
 void
-MS_Algorithm::setModel( const MS_Model_PtrType model )
+MultiscaleAlgorithm::setModel( const MS_Model_PtrType model )
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 8010 ) << "MS_Algorithm::SetMultiScaleProblem( multiscale ) \n";
+    Debug( 8010 ) << "MultiscaleAlgorithm::SetMultiScaleProblem( multiscale ) \n";
 #endif
 
-    M_multiscale = boost::dynamic_pointer_cast< MS_Model_MultiScale >( model );
+    M_multiscale = boost::dynamic_pointer_cast< MultiscaleModelMultiscale >( model );
 
     // Build coupling variables and residuals vectors
     std::vector<Int> myGlobalElements(0);
@@ -164,43 +164,43 @@ MS_Algorithm::setModel( const MS_Model_PtrType model )
 // Get Methods
 // ===================================================
 const algorithms_Type&
-MS_Algorithm::type() const
+MultiscaleAlgorithm::type() const
 {
     return M_type;
 }
 
-const MS_Algorithm::multiscaleModelPtr_Type
-MS_Algorithm::multiScaleProblem() const
+const MultiscaleAlgorithm::multiscaleModelPtr_Type
+MultiscaleAlgorithm::multiScaleProblem() const
 {
     return M_multiscale;
 }
 
 const MS_Vector_PtrType
-MS_Algorithm::couplingVariables() const
+MultiscaleAlgorithm::couplingVariables() const
 {
     return M_couplingVariables;
 }
 
 const MS_Vector_PtrType
-MS_Algorithm::couplingResiduals() const
+MultiscaleAlgorithm::couplingResiduals() const
 {
     return M_couplingResiduals;
 }
 
 const MS_Comm_PtrType
-MS_Algorithm::communicator() const
+MultiscaleAlgorithm::communicator() const
 {
     return M_comm;
 }
 
 const UInt&
-MS_Algorithm::subiterationsMaximumNumber() const
+MultiscaleAlgorithm::subiterationsMaximumNumber() const
 {
     return M_subiterationsMaximumNumber;
 }
 
 const Real&
-MS_Algorithm::tolerance() const
+MultiscaleAlgorithm::tolerance() const
 {
     return M_tolerance;
 }
@@ -209,7 +209,7 @@ MS_Algorithm::tolerance() const
 // Protected Methods
 // ===================================================
 void
-MS_Algorithm::save( const UInt& subiterationsNumber, const Real& residual )
+MultiscaleAlgorithm::save( const UInt& subiterationsNumber, const Real& residual )
 {
     std::ofstream output;
     output << std::scientific << std::setprecision( 15 );
@@ -237,7 +237,7 @@ MS_Algorithm::save( const UInt& subiterationsNumber, const Real& residual )
 }
 
 bool
-MS_Algorithm::toleranceSatisfied()
+MultiscaleAlgorithm::toleranceSatisfied()
 {
     // Compute computeResidual
     Real residual ( computeResidual() );

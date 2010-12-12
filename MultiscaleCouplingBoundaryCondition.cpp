@@ -42,15 +42,15 @@ namespace LifeV
 // ===================================================
 // Constructors & Destructor
 // ===================================================
-MS_Coupling_BoundaryCondition::MS_Coupling_BoundaryCondition() :
+MultiscaleCouplingBoundaryCondition::MultiscaleCouplingBoundaryCondition() :
         MS_Coupling_Type       (),
-        M_fileName  (),
-        M_list      (),
-        M_listSize  ()
+        M_fileName             (),
+        M_list                 (),
+        M_listSize             ()
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 8210 ) << "MS_Coupling_BoundaryCondition::MS_Coupling_BoundaryCondition() \n";
+    Debug( 8210 ) << "MultiscaleCouplingBoundaryCondition::MultiscaleCouplingBoundaryCondition() \n";
 #endif
 
     M_type = BoundaryCondition;
@@ -60,11 +60,11 @@ MS_Coupling_BoundaryCondition::MS_Coupling_BoundaryCondition() :
 // MultiScale PhysicalCoupling Implementation
 // ===================================================
 void
-MS_Coupling_BoundaryCondition::setupData( const std::string& fileName )
+MultiscaleCouplingBoundaryCondition::setupData( const std::string& fileName )
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 8210 ) << "MS_Coupling_BoundaryCondition::SetupData() \n";
+    Debug( 8210 ) << "MultiscaleCouplingBoundaryCondition::SetupData() \n";
 #endif
 
     MS_Coupling_Type::setupData( fileName );
@@ -81,11 +81,11 @@ MS_Coupling_BoundaryCondition::setupData( const std::string& fileName )
 }
 
 void
-MS_Coupling_BoundaryCondition::setupCoupling()
+MultiscaleCouplingBoundaryCondition::setupCoupling()
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 8210 ) << "MS_Coupling_BoundaryCondition::SetupCoupling() \n";
+    Debug( 8210 ) << "MultiscaleCouplingBoundaryCondition::SetupCoupling() \n";
 #endif
 
     //Set number of coupling variables
@@ -99,19 +99,19 @@ MS_Coupling_BoundaryCondition::setupCoupling()
         {
         case Fluid3D:
 
-            applyBoundaryConditions3D< MS_Model_Fluid3D > ( i );
+            applyBoundaryConditions3D< MultiscaleModelFluid3D > ( i );
 
             break;
 
         case FSI3D:
 
-            applyBoundaryConditions3D< MS_Model_FSI3D > ( i );
+            applyBoundaryConditions3D< MultiscaleModelFSI3D > ( i );
 
             break;
 
         case OneDimensional:
 
-            applyBoundaryConditions1D< MS_Model_1D > ( i );
+            applyBoundaryConditions1D< MultiscaleModel1D > ( i );
 
             break;
 
@@ -123,7 +123,7 @@ MS_Coupling_BoundaryCondition::setupCoupling()
 }
 
 void
-MS_Coupling_BoundaryCondition::showMe()
+MultiscaleCouplingBoundaryCondition::showMe()
 {
     if ( M_displayer->isLeader() )
     {
@@ -141,11 +141,11 @@ MS_Coupling_BoundaryCondition::showMe()
 // Private MultiScale PhysicalCoupling Implementation
 // ===================================================
 MS_ModelsVector_Type
-MS_Coupling_BoundaryCondition::listOfPerturbedModels( const UInt& /*localCouplingVariableID*/ )
+MultiscaleCouplingBoundaryCondition::listOfPerturbedModels( const UInt& /*localCouplingVariableID*/ )
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 8210 ) << "MS_Coupling_BoundaryCondition::GetListOfPerturbedModels() \n";
+    Debug( 8210 ) << "MultiscaleCouplingBoundaryCondition::GetListOfPerturbedModels() \n";
 #endif
 
     MS_ModelsVector_Type emptyList;
@@ -154,7 +154,7 @@ MS_Coupling_BoundaryCondition::listOfPerturbedModels( const UInt& /*localCouplin
 }
 
 void
-MS_Coupling_BoundaryCondition::displayCouplingValues( std::ostream& output )
+MultiscaleCouplingBoundaryCondition::displayCouplingValues( std::ostream& output )
 {
     Real FlowRate(0), Pressure(0), DynamicPressure(0);
     for ( UInt i( 0 ); i < modelsNumber(); ++i )
@@ -163,27 +163,27 @@ MS_Coupling_BoundaryCondition::displayCouplingValues( std::ostream& output )
         {
         case Fluid3D:
         {
-            FlowRate        = MS_DynamicCast< MS_Model_Fluid3D >( M_models[i] )->boundaryFlowRate( M_flags[i] );
-            Pressure        = MS_DynamicCast< MS_Model_Fluid3D >( M_models[i] )->boundaryPressure( M_flags[i] );
-            DynamicPressure = MS_DynamicCast< MS_Model_Fluid3D >( M_models[i] )->boundaryDynamicPressure( M_flags[i] );
+            FlowRate        = MS_DynamicCast< MultiscaleModelFluid3D >( M_models[i] )->boundaryFlowRate( M_flags[i] );
+            Pressure        = MS_DynamicCast< MultiscaleModelFluid3D >( M_models[i] )->boundaryPressure( M_flags[i] );
+            DynamicPressure = MS_DynamicCast< MultiscaleModelFluid3D >( M_models[i] )->boundaryDynamicPressure( M_flags[i] );
 
             break;
         }
 
         case FSI3D:
         {
-            FlowRate        = MS_DynamicCast< MS_Model_FSI3D >( M_models[i] )->boundaryFlowRate( M_flags[i] );
-            Pressure        = MS_DynamicCast< MS_Model_FSI3D >( M_models[i] )->boundaryPressure( M_flags[i] );
-            DynamicPressure = MS_DynamicCast< MS_Model_FSI3D >( M_models[i] )->boundaryDynamicPressure( M_flags[i] );
+            FlowRate        = MS_DynamicCast< MultiscaleModelFSI3D >( M_models[i] )->boundaryFlowRate( M_flags[i] );
+            Pressure        = MS_DynamicCast< MultiscaleModelFSI3D >( M_models[i] )->boundaryPressure( M_flags[i] );
+            DynamicPressure = MS_DynamicCast< MultiscaleModelFSI3D >( M_models[i] )->boundaryDynamicPressure( M_flags[i] );
 
             break;
         }
 
         case OneDimensional:
         {
-            FlowRate        = MS_DynamicCast< MS_Model_1D >( M_models[i] )->boundaryFlowRate( M_flags[i] );
-            Pressure        = MS_DynamicCast< MS_Model_1D >( M_models[i] )->boundaryPressure( M_flags[i] );
-            DynamicPressure = MS_DynamicCast< MS_Model_1D >( M_models[i] )->boundaryDynamicPressure( M_flags[i] );
+            FlowRate        = MS_DynamicCast< MultiscaleModel1D >( M_models[i] )->boundaryFlowRate( M_flags[i] );
+            Pressure        = MS_DynamicCast< MultiscaleModel1D >( M_models[i] )->boundaryPressure( M_flags[i] );
+            DynamicPressure = MS_DynamicCast< MultiscaleModel1D >( M_models[i] )->boundaryDynamicPressure( M_flags[i] );
 
             break;
         }

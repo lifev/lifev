@@ -34,22 +34,22 @@
  *  @maintainer Cristiano Malossi <cristiano.malossi@epfl.ch>
  */
 
-#ifndef MS_Algorithm_Explicit_H
-#define MS_Algorithm_Explicit_H 1
+#ifndef MultiscaleAlgorithmExplicit_H
+#define MultiscaleAlgorithmExplicit_H 1
 
 #include <lifemc/lifesolver/MultiscaleAlgorithm.hpp>
 
 namespace LifeV
 {
 
-//! MS_Algorithm_Explicit - The MultiScale Algorithm implementation of Explicit
+//! MultiscaleAlgorithmExplicit - The MultiScale Algorithm implementation of Explicit
 /*!
  *  @author Cristiano Malossi
  *
- *  The MS_Algorithm_Explicit is an implementation of MS_Algorithm
+ *  The MultiscaleAlgorithmExplicit is an implementation of MS_Algorithm_Type
  *  which implements the Explicit method.
  */
-class MS_Algorithm_Explicit : public virtual MS_Algorithm
+class MultiscaleAlgorithmExplicit : public virtual MS_Algorithm_Type
 {
 public:
 
@@ -57,10 +57,10 @@ public:
     //@{
 
     //! Constructor
-    MS_Algorithm_Explicit();
+    MultiscaleAlgorithmExplicit();
 
     //! Destructor
-    virtual ~MS_Algorithm_Explicit() {}
+    virtual ~MultiscaleAlgorithmExplicit() {}
 
     //@}
 
@@ -90,20 +90,20 @@ private:
     //! @name Unimplemented Methods
     //@{
 
-    MS_Algorithm_Explicit( const MS_Algorithm_Explicit& algorithm );
+    MultiscaleAlgorithmExplicit( const MultiscaleAlgorithmExplicit& algorithm );
 
-    MS_Algorithm_Explicit& operator=( const MS_Algorithm_Explicit& algorithm );
+    MultiscaleAlgorithmExplicit& operator=( const MultiscaleAlgorithmExplicit& algorithm );
 
     //@}
 
 };
 
 //! Factory create function
-inline MS_Algorithm* createMultiscaleAlgorithmExplicit()
+inline MS_Algorithm_Type* createMultiscaleAlgorithmExplicit()
 {
-    return new MS_Algorithm_Explicit();
+    return new MultiscaleAlgorithmExplicit();
 }
 
 } // Namespace LifeV
 
-#endif /* MS_Algorithm_Explicit_H */
+#endif /* MultiscaleAlgorithmExplicit_H */

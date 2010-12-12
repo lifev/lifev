@@ -34,15 +34,15 @@
  *  @maintainer Cristiano Malossi <cristiano.malossi@epfl.ch>
  */
 
-#ifndef MS_PhysicalData_H
-#define MS_PhysicalData_H 1
+#ifndef MultiscaleData_H
+#define MultiscaleData_H 1
 
 #include <lifemc/lifesolver/MultiscaleDefinitions.hpp>
 
 namespace LifeV
 {
 
-//! MS_PhysicalData - Global data container for the physical quantities of the problem
+//! MultiscaleData - Global data container for the physical quantities of the problem
 /*!
  *  @author Cristiano Malossi
  *
@@ -54,7 +54,7 @@ namespace LifeV
  *      <li> Structure Poisson coefficient
  *  </ul>
  */
-class MS_PhysicalData
+class MultiscaleData
 {
 public:
 
@@ -71,16 +71,16 @@ public:
     //@{
 
     //! Constructor
-    MS_PhysicalData();
+    MultiscaleData();
 
     //! Copy constructor
     /*!
-     * @param PhysicalData MS_PhysicalData
+     * @param PhysicalData MultiscaleData
      */
-    MS_PhysicalData( const MS_PhysicalData& data );
+    MultiscaleData( const MultiscaleData& data );
 
     //! Destructor
-    virtual ~MS_PhysicalData() {}
+    virtual ~MultiscaleData() {}
 
     //@}
 
@@ -90,10 +90,10 @@ public:
 
     //! Operator=
     /*!
-     * @param PhysicalData MS_PhysicalData
+     * @param PhysicalData MultiscaleData
      * @return reference to a copy of the class
      */
-    MS_PhysicalData& operator=( const MS_PhysicalData& data );
+    MultiscaleData& operator=( const MultiscaleData& data );
 
     //@}
 
@@ -183,4 +183,4 @@ private:
 
 } // Namespace LifeV
 
-#endif /* MS_PhysicalData_H */
+#endif /* MultiscaleData_H */

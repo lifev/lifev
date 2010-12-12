@@ -41,12 +41,12 @@ namespace LifeV
 
 std::map< std::string, couplings_Type > MS_couplingsMap;
 
-UInt MS_PhysicalCoupling::M_couplingsNumber = 0;
+UInt MultiscaleCoupling::M_couplingsNumber = 0;
 
 // ===================================================
 // Constructors & Destructor
 // ===================================================
-MS_PhysicalCoupling::MS_PhysicalCoupling() :
+MultiscaleCoupling::MultiscaleCoupling() :
         M_ID                          (),
         M_type                        (),
         M_models                      (),
@@ -63,7 +63,7 @@ MS_PhysicalCoupling::MS_PhysicalCoupling() :
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 8200 ) << "MS_PhysicalCoupling::MS_PhysicalCoupling() \n";
+    Debug( 8200 ) << "MultiscaleCoupling::MultiscaleCoupling() \n";
 #endif
 
     M_ID = M_couplingsNumber++;
@@ -73,11 +73,11 @@ MS_PhysicalCoupling::MS_PhysicalCoupling() :
 // MultiScale PhysicalCoupling Virtual Methods
 // ===================================================
 void
-MS_PhysicalCoupling::setupData( const std::string& fileName )
+MultiscaleCoupling::setupData( const std::string& fileName )
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 8200 ) << "MS_PhysicalCoupling::SetupData( fileName ) \n";
+    Debug( 8200 ) << "MultiscaleCoupling::SetupData( fileName ) \n";
 #endif
 
     GetPot dataFile( fileName );
@@ -91,7 +91,7 @@ MS_PhysicalCoupling::setupData( const std::string& fileName )
 }
 
 void
-MS_PhysicalCoupling::showMe()
+MultiscaleCoupling::showMe()
 {
     std::cout << "Coupling id         = " << M_ID << std::endl
               << "Coupling name       = " << M_couplingName << std::endl
@@ -116,11 +116,11 @@ MS_PhysicalCoupling::showMe()
 // Methods
 // ===================================================
 void
-MS_PhysicalCoupling::createCouplingMap( EpetraMap& couplingMap )
+MultiscaleCoupling::createCouplingMap( EpetraMap& couplingMap )
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 8200 ) << "MS_PhysicalCoupling::CreateCouplingMap( couplingMap ) \n";
+    Debug( 8200 ) << "MultiscaleCoupling::CreateCouplingMap( couplingMap ) \n";
 #endif
 
     M_couplingIndex.second = couplingMap.getMap( Unique )->NumGlobalElements();
@@ -129,33 +129,33 @@ MS_PhysicalCoupling::createCouplingMap( EpetraMap& couplingMap )
 }
 
 void
-MS_PhysicalCoupling::importCouplingVariables( const MS_Vector_Type& couplingVariables )
+MultiscaleCoupling::importCouplingVariables( const MS_Vector_Type& couplingVariables )
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 8200 ) << "MS_PhysicalCoupling::ImportCouplingVariables( couplingVariables ) \n";
+    Debug( 8200 ) << "MultiscaleCoupling::ImportCouplingVariables( couplingVariables ) \n";
 #endif
 
     importCouplingVector( couplingVariables, *M_localCouplingVariables[0] );
 }
 
 void
-MS_PhysicalCoupling::exportCouplingVariables( MS_Vector_Type& couplingVariables )
+MultiscaleCoupling::exportCouplingVariables( MS_Vector_Type& couplingVariables )
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 8200 ) << "MS_PhysicalCoupling::ExportCouplingVariables( couplingVariables ) \n";
+    Debug( 8200 ) << "MultiscaleCoupling::ExportCouplingVariables( couplingVariables ) \n";
 #endif
 
     exportCouplingVector( *M_localCouplingVariables[0], couplingVariables );
 }
 
 void
-MS_PhysicalCoupling::extrapolateCouplingVariables()
+MultiscaleCoupling::extrapolateCouplingVariables()
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 8200 ) << "MS_PhysicalCoupling::ExtrapolateCouplingVariables() \n";
+    Debug( 8200 ) << "MultiscaleCoupling::ExtrapolateCouplingVariables() \n";
 #endif
 
     MS_Vector_Type extrapolatedCouplingVariables( *M_localCouplingVariables[0] );
@@ -190,17 +190,17 @@ MS_PhysicalCoupling::extrapolateCouplingVariables()
 }
 
 bool
-MS_PhysicalCoupling::isPerturbed() const
+MultiscaleCoupling::isPerturbed() const
 {
     return M_perturbedCoupling == -1 ? false : true;
 }
 
 void
-MS_PhysicalCoupling::exportJacobian( MS_Matrix_Type& jacobian )
+MultiscaleCoupling::exportJacobian( MS_Matrix_Type& jacobian )
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 8200 ) << "MS_PhysicalCoupling::exportJacobian( jacobian ) \n";
+    Debug( 8200 ) << "MultiscaleCoupling::exportJacobian( jacobian ) \n";
 #endif
 
     // Definitions
@@ -235,11 +235,11 @@ MS_PhysicalCoupling::exportJacobian( MS_Matrix_Type& jacobian )
 }
 
 void
-MS_PhysicalCoupling::saveSolution()
+MultiscaleCoupling::saveSolution()
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 8200 ) << "MS_PhysicalCoupling::SaveSolution() \n";
+    Debug( 8200 ) << "MultiscaleCoupling::SaveSolution() \n";
 #endif
 
     std::ofstream output;
@@ -266,7 +266,7 @@ MS_PhysicalCoupling::saveSolution()
 }
 
 void
-MS_PhysicalCoupling::clearModelsList()
+MultiscaleCoupling::clearModelsList()
 {
     M_models.clear();
 }
@@ -275,46 +275,46 @@ MS_PhysicalCoupling::clearModelsList()
 // Set Methods
 // ===================================================
 void
-MS_PhysicalCoupling::setID( const UInt& id )
+MultiscaleCoupling::setID( const UInt& id )
 {
     M_ID = id;
 }
 
 void
-MS_PhysicalCoupling::addModel( const MS_Model_PtrType& model )
+MultiscaleCoupling::addModel( const MS_Model_PtrType& model )
 {
     M_models.push_back( model );
 }
 
 void
-MS_PhysicalCoupling::addFlag( const BCFlag& flag )
+MultiscaleCoupling::addFlag( const BCFlag& flag )
 {
     M_flags.push_back( flag );
 }
 
 void
-MS_PhysicalCoupling::addFlagID( const UInt& flagID )
+MultiscaleCoupling::addFlagID( const UInt& flagID )
 {
     M_flags.push_back( M_models.back()->flag( flagID ) );
 }
 
 void
-MS_PhysicalCoupling::setGlobalData( const MS_GlobalDataContainer_PtrType& globalData )
+MultiscaleCoupling::setGlobalData( const MS_GlobalDataContainer_PtrType& globalData )
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 8200 ) << "MS_PhysicalCoupling::SetupData( globalData ) \n";
+    Debug( 8200 ) << "MultiscaleCoupling::SetupData( globalData ) \n";
 #endif
 
     M_globalData = globalData;
 }
 
 void
-MS_PhysicalCoupling::setCommunicator( const MS_Comm_PtrType& comm )
+MultiscaleCoupling::setCommunicator( const MS_Comm_PtrType& comm )
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 8200 ) << "MS_PhysicalCoupling::SetCommunicator( comm ) \n";
+    Debug( 8200 ) << "MultiscaleCoupling::SetCommunicator( comm ) \n";
 #endif
 
     M_comm = comm;
@@ -325,31 +325,31 @@ MS_PhysicalCoupling::setCommunicator( const MS_Comm_PtrType& comm )
 // Get Methods
 // ===================================================
 const UInt&
-MS_PhysicalCoupling::ID() const
+MultiscaleCoupling::ID() const
 {
     return M_ID;
 }
 
 const couplings_Type&
-MS_PhysicalCoupling::type() const
+MultiscaleCoupling::type() const
 {
     return M_type;
 }
 
 const std::string&
-MS_PhysicalCoupling::couplingName() const
+MultiscaleCoupling::couplingName() const
 {
     return M_couplingName;
 }
 
 UInt
-MS_PhysicalCoupling::modelsNumber() const
+MultiscaleCoupling::modelsNumber() const
 {
     return static_cast< UInt > ( M_models.size() );
 }
 
 UInt
-MS_PhysicalCoupling::modelGlobalToLocalID( const UInt& ID ) const
+MultiscaleCoupling::modelGlobalToLocalID( const UInt& ID ) const
 {
     for ( UInt localID( 0 ); localID < modelsNumber(); ++localID )
         if ( M_models[localID]->ID() == ID )
@@ -359,37 +359,37 @@ MS_PhysicalCoupling::modelGlobalToLocalID( const UInt& ID ) const
 }
 
 MS_Model_PtrType
-MS_PhysicalCoupling::model( const UInt& localID ) const
+MultiscaleCoupling::model( const UInt& localID ) const
 {
     return M_models[localID];
 }
 
 const BCFlag&
-MS_PhysicalCoupling::flag( const UInt& localID ) const
+MultiscaleCoupling::flag( const UInt& localID ) const
 {
     return M_flags[localID];
 }
 
 const UInt&
-MS_PhysicalCoupling::couplingVariablesNumber() const
+MultiscaleCoupling::couplingVariablesNumber() const
 {
     return M_couplingIndex.first;
 }
 
 const Int&
-MS_PhysicalCoupling::perturbedCoupling() const
+MultiscaleCoupling::perturbedCoupling() const
 {
     return M_perturbedCoupling;
 }
 
 const MS_Vector_Type&
-MS_PhysicalCoupling::residual() const
+MultiscaleCoupling::residual() const
 {
     return *M_localCouplingResiduals;
 }
 
 const UInt&
-MS_PhysicalCoupling::timeInterpolationOrder() const
+MultiscaleCoupling::timeInterpolationOrder() const
 {
     return M_timeInterpolationOrder;
 }
@@ -398,7 +398,7 @@ MS_PhysicalCoupling::timeInterpolationOrder() const
 // Protected Methods
 // ===================================================
 void
-MS_PhysicalCoupling::createLocalVectors()
+MultiscaleCoupling::createLocalVectors()
 {
     // Build a repeated list of GlobalElements
     std::vector<Int> myGlobalElements( M_couplingIndex.first );
@@ -414,7 +414,7 @@ MS_PhysicalCoupling::createLocalVectors()
 }
 
 void
-MS_PhysicalCoupling::importCouplingVector( const MS_Vector_Type& globalVector, MS_Vector_Type& localVector )
+MultiscaleCoupling::importCouplingVector( const MS_Vector_Type& globalVector, MS_Vector_Type& localVector )
 {
     Real value(0);
     for ( UInt i(0) ; i < M_couplingIndex.first ; ++i )
@@ -429,7 +429,7 @@ MS_PhysicalCoupling::importCouplingVector( const MS_Vector_Type& globalVector, M
 }
 
 void
-MS_PhysicalCoupling::exportCouplingVector( const MS_Vector_Type& localVector, MS_Vector_Type& globalVector )
+MultiscaleCoupling::exportCouplingVector( const MS_Vector_Type& localVector, MS_Vector_Type& globalVector )
 {
     for ( UInt i(0) ; i < M_couplingIndex.first ; ++i )
         if ( M_comm->MyPID() == 0 )
@@ -437,7 +437,7 @@ MS_PhysicalCoupling::exportCouplingVector( const MS_Vector_Type& localVector, MS
 }
 
 void
-MS_PhysicalCoupling::interpolateCouplingVariables( const timeContainer_Type& timeContainer, const Real& t,
+MultiscaleCoupling::interpolateCouplingVariables( const timeContainer_Type& timeContainer, const Real& t,
                                                    MS_Vector_Type& interpolatedCouplingVariables )
 {
     // Lagrange interpolation
@@ -456,7 +456,7 @@ MS_PhysicalCoupling::interpolateCouplingVariables( const timeContainer_Type& tim
 }
 
 void
-MS_PhysicalCoupling::switchErrorMessage( const MS_Model_PtrType& model )
+MultiscaleCoupling::switchErrorMessage( const MS_Model_PtrType& model )
 {
     MS_ErrorCheck( MS_ModelType, "Invalid model type ["  + Enum2String( model->type(), MS_modelsMap ) +
                    "] for coupling type [" + Enum2String( M_type, MS_couplingsMap ) +"]\n" );

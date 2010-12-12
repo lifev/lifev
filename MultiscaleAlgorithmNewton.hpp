@@ -34,8 +34,8 @@
  *  @maintainer Cristiano Malossi <cristiano.malossi@epfl.ch>
  */
 
-#ifndef MS_Algorithm_Newton_H
-#define MS_Algorithm_Newton_H 1
+#ifndef MultiscaleAlgorithmNewton_H
+#define MultiscaleAlgorithmNewton_H 1
 
 #include <life/lifealg/SolverTrilinos.hpp>
 
@@ -47,14 +47,14 @@
 namespace LifeV
 {
 
-//! MS_Algorithm_Newton - The MultiScale Algorithm implementation of Newton
+//! MultiscaleAlgorithmNewton - The MultiScale Algorithm implementation of Newton
 /*!
  *  @author Cristiano Malossi
  *
- *  The MS_Algorithm_Newton is an implementation of MS_Algorithm
+ *  The MultiscaleAlgorithmNewton is an implementation of MS_Algorithm_Type
  *  which implements the Newton method.
  */
-class MS_Algorithm_Newton : public virtual MS_Algorithm
+class MultiscaleAlgorithmNewton : public virtual MS_Algorithm_Type
 {
 public:
 
@@ -62,10 +62,10 @@ public:
     //@{
 
     //! Constructor
-    MS_Algorithm_Newton();
+    MultiscaleAlgorithmNewton();
 
     //! Destructor
-    virtual ~MS_Algorithm_Newton() {}
+    virtual ~MultiscaleAlgorithmNewton() {}
 
     //@}
 
@@ -102,19 +102,19 @@ private:
     //! @name Unimplemented Methods
     //@{
 
-    MS_Algorithm_Newton( const MS_Algorithm_Newton& algorithm );
+    MultiscaleAlgorithmNewton( const MultiscaleAlgorithmNewton& algorithm );
 
-    MS_Algorithm_Newton& operator=( const MS_Algorithm_Newton& algorithm );
+    MultiscaleAlgorithmNewton& operator=( const MultiscaleAlgorithmNewton& algorithm );
 
     //@}
 };
 
 //! Factory create function
-inline MS_Algorithm* createMultiscaleAlgorithmNewton()
+inline MS_Algorithm_Type* createMultiscaleAlgorithmNewton()
 {
-    return new MS_Algorithm_Newton();
+    return new MultiscaleAlgorithmNewton();
 }
 
 } // Namespace LifeV
 
-#endif /* MS_Algorithm_Newton_H */
+#endif /* MultiscaleAlgorithmNewton_H */

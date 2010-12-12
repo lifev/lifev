@@ -46,7 +46,7 @@ bool        MS_ExitFlag      = EXIT_SUCCESS;
 // ===================================================
 // Constructors
 // ===================================================
-MS_Solver::MS_Solver() :
+MultiscaleSolver::MultiscaleSolver() :
         M_model             (),
         M_algorithm         (),
         M_globalData        ( new MS_GlobalDataContainer_Type() ),
@@ -56,7 +56,7 @@ MS_Solver::MS_Solver() :
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 8000 ) << "MS_Solver::MS_Solver() \n";
+    Debug( 8000 ) << "MultiscaleSolver::MultiscaleSolver() \n";
 #endif
 
     //Define the maps of MS objects
@@ -81,11 +81,11 @@ MS_Solver::MS_Solver() :
 // Methods
 // ===================================================
 void
-MS_Solver::setCommunicator( const MS_Comm_PtrType& comm )
+MultiscaleSolver::setCommunicator( const MS_Comm_PtrType& comm )
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 8000 ) << "MS_Solver::SetCommunicator( comm ) \n";
+    Debug( 8000 ) << "MultiscaleSolver::SetCommunicator( comm ) \n";
 #endif
 
     M_comm = comm;
@@ -93,11 +93,11 @@ MS_Solver::setCommunicator( const MS_Comm_PtrType& comm )
 }
 
 void
-MS_Solver::setupProblem( const std::string& fileName, const std::string& problemFolder )
+MultiscaleSolver::setupProblem( const std::string& fileName, const std::string& problemFolder )
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 8000 ) << "MS_Solver::SetupData( fileName, problemFolder ) \n";
+    Debug( 8000 ) << "MultiscaleSolver::SetupData( fileName, problemFolder ) \n";
 #endif
 
     // Load data file
@@ -134,11 +134,11 @@ MS_Solver::setupProblem( const std::string& fileName, const std::string& problem
 }
 
 bool
-MS_Solver::solveProblem( const Real& externalResidual )
+MultiscaleSolver::solveProblem( const Real& externalResidual )
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 8000 ) << "MS_Solver::SolveProblem() \n";
+    Debug( 8000 ) << "MultiscaleSolver::SolveProblem() \n";
 #endif
 
     // save initial solution if it is the very first time step
@@ -200,7 +200,7 @@ MS_Solver::solveProblem( const Real& externalResidual )
 }
 
 void
-MS_Solver::showMe()
+MultiscaleSolver::showMe()
 {
     if ( M_displayer->isLeader() )
     {

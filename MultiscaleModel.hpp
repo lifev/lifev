@@ -34,8 +34,8 @@
  *  @maintainer Cristiano Malossi <cristiano.malossi@epfl.ch>
  */
 
-#ifndef MS_PhysicalModel_H
-#define MS_PhysicalModel_H 1
+#ifndef MultiscaleModel_H
+#define MultiscaleModel_H 1
 
 #include <lifemc/lifesolver/MultiscaleDefinitions.hpp>
 #include <lifemc/lifesolver/MultiscaleData.hpp>
@@ -45,15 +45,15 @@
 namespace LifeV
 {
 
-//! MS_PhysicalModel - The MultiScale Physical Model
+//! MultiscaleModel - The MultiScale Physical Model
 /*!
  *  @author Cristiano Malossi
  *
- *  The MS_PhysicalModel class provides a general interface between the
+ *  The MultiscaleModel class provides a general interface between the
  *  MS_Algorithm and all the other models. Moreover it provides internal methods
  *  for accessing general information and model related couplings.
  */
-class MS_PhysicalModel
+class MultiscaleModel
 {
 public:
 
@@ -66,10 +66,10 @@ public:
      * be constructed using an empty constructor which calls (as first operation)
      * this empty constructor.
      */
-    MS_PhysicalModel();
+    MultiscaleModel();
 
     //! Destructor
-    virtual ~MS_PhysicalModel() {}
+    virtual ~MultiscaleModel() {}
 
     //@}
 
@@ -286,13 +286,13 @@ private:
     //! @name Unimplemented Methods
     //@{
 
-    MS_PhysicalModel( const MS_PhysicalModel& model );
+    MultiscaleModel( const MultiscaleModel& model );
 
-    MS_PhysicalModel& operator=( const MS_PhysicalModel& model );
+    MultiscaleModel& operator=( const MultiscaleModel& model );
 
     //@}
 };
 
 } // Namespace LifeV
 
-#endif /* MS_PhysicalModel_H */
+#endif /* MultiscaleModel_H */

@@ -42,14 +42,14 @@ namespace LifeV
 // ===================================================
 // Constructors & Destructor
 // ===================================================
-MS_Algorithm_Newton::MS_Algorithm_Newton() :
+MultiscaleAlgorithmNewton::MultiscaleAlgorithmNewton() :
         MS_Algorithm_Type   (),
         M_solver            (),
         M_jacobian          ()
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 8013 ) << "MS_Algorithm_Newton::MS_Algorithm_Newton() \n";
+    Debug( 8013 ) << "MultiscaleAlgorithmNewton::MultiscaleAlgorithmNewton() \n";
 #endif
 
     M_type = Newton;
@@ -59,11 +59,11 @@ MS_Algorithm_Newton::MS_Algorithm_Newton() :
 // MultiScale Algorithm Virtual Methods
 // ===================================================
 void
-MS_Algorithm_Newton::setupData( const std::string& fileName )
+MultiscaleAlgorithmNewton::setupData( const std::string& fileName )
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 8013 ) << "MS_Algorithm_Newton::SetupData( fileName ) \n";
+    Debug( 8013 ) << "MultiscaleAlgorithmNewton::SetupData( fileName ) \n";
 #endif
 
     MS_Algorithm_Type::setupData( fileName );
@@ -76,11 +76,11 @@ MS_Algorithm_Newton::setupData( const std::string& fileName )
 }
 
 void
-MS_Algorithm_Newton::subIterate()
+MultiscaleAlgorithmNewton::subIterate()
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 8013 ) << "MS_Algorithm_Newton::SubIterate() \n";
+    Debug( 8013 ) << "MultiscaleAlgorithmNewton::SubIterate() \n";
 #endif
 
     MS_Algorithm_Type::subIterate();
@@ -152,7 +152,7 @@ MS_Algorithm_Newton::subIterate()
 }
 
 void
-MS_Algorithm_Newton::showMe()
+MultiscaleAlgorithmNewton::showMe()
 {
     if ( M_displayer->isLeader() )
     {

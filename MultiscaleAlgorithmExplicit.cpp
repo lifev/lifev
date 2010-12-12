@@ -42,12 +42,12 @@ namespace LifeV
 // ===================================================
 // Constructors & Destructor
 // ===================================================
-MS_Algorithm_Explicit::MS_Algorithm_Explicit() :
+MultiscaleAlgorithmExplicit::MultiscaleAlgorithmExplicit() :
         MS_Algorithm_Type    ()
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 8011 ) << "MS_Algorithm_Explicit::MS_Algorithm_Explicit() \n";
+    Debug( 8011 ) << "MultiscaleAlgorithmExplicit::MultiscaleAlgorithmExplicit() \n";
 #endif
 
     M_type = Explicit;
@@ -57,36 +57,36 @@ MS_Algorithm_Explicit::MS_Algorithm_Explicit() :
 // MultiScale Algorithm Virtual Methods
 // ===================================================
 void
-MS_Algorithm_Explicit::setupData( const std::string& fileName )
+MultiscaleAlgorithmExplicit::setupData( const std::string& fileName )
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 8012 ) << "MS_Algorithm_Explicit::SetupData( fileName ) \n";
+    Debug( 8012 ) << "MultiscaleAlgorithmExplicit::SetupData( fileName ) \n";
 #endif
 
     MS_Algorithm_Type::setupData( fileName );
 }
 
 void
-MS_Algorithm_Explicit::subIterate()
+MultiscaleAlgorithmExplicit::subIterate()
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 8012 ) << "MS_Algorithm_Explicit::SubIterate() \n";
+    Debug( 8012 ) << "MultiscaleAlgorithmExplicit::SubIterate() \n";
 #endif
 
     toleranceSatisfied();
 }
 
 void
-MS_Algorithm_Explicit::updateCouplingVariables()
+MultiscaleAlgorithmExplicit::updateCouplingVariables()
 {
     // We use the initialize method for updating the coupling
     M_multiscale->initializeCouplingVariables();
 }
 
 void
-MS_Algorithm_Explicit::showMe()
+MultiscaleAlgorithmExplicit::showMe()
 {
     if ( M_displayer->isLeader() )
     {

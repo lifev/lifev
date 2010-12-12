@@ -63,11 +63,11 @@
 namespace LifeV
 {
 
-//! MS_Model_FSI3D - MultiScale model for 3D FSI simulations
+//! MultiscaleModelFSI3D - MultiScale model for 3D FSI simulations
 /*!
  *  @author Paolo Crosetto
  */
-class MS_Model_FSI3D: public virtual MS_PhysicalModel
+class MultiscaleModelFSI3D: public virtual MS_Model_Type
 {
 public:
 
@@ -108,10 +108,10 @@ public:
     //@{
 
     //! Constructor
-    MS_Model_FSI3D();
+    MultiscaleModelFSI3D();
 
     //! Destructor
-    virtual ~MS_Model_FSI3D() {}
+    virtual ~MultiscaleModelFSI3D() {}
 
     //@}
 
@@ -275,9 +275,9 @@ private:
     //! @name Unimplemented Methods
     //@{
 
-    MS_Model_FSI3D( const MS_Model_FSI3D& model );
+    MultiscaleModelFSI3D( const MultiscaleModelFSI3D& model );
 
-    MS_Model_FSI3D& operator=( const MS_Model_FSI3D& model );
+    MultiscaleModelFSI3D& operator=( const MultiscaleModelFSI3D& model );
 
     //@}
 
@@ -363,9 +363,9 @@ private:
 };
 
 //! Factory create function
-inline MS_PhysicalModel* createMultiscaleModelFSI3D()
+inline MS_Model_Type* createMultiscaleModelFSI3D()
 {
-    return new MS_Model_FSI3D();
+    return new MultiscaleModelFSI3D();
 }
 
 } // Namespace LifeV

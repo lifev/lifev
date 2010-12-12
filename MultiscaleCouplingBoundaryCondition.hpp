@@ -34,8 +34,8 @@
  *  @maintainer Cristiano Malossi <cristiano.malossi@epfl.ch>
  */
 
-#ifndef MS_Coupling_BoundaryCondition_H
-#define MS_Coupling_BoundaryCondition_H 1
+#ifndef MultiscaleCouplingBoundaryCondition_H
+#define MultiscaleCouplingBoundaryCondition_H 1
 
 #include <lifemc/lifesolver/BCInterface.hpp>
 #include <lifemc/lifesolver/BCInterface1D.hpp>
@@ -48,14 +48,14 @@
 namespace LifeV
 {
 
-//! MS_Coupling_BoundaryCondition - Coupling condition for standard boundary conditions
+//! MultiscaleCouplingBoundaryCondition - Coupling condition for standard boundary conditions
 /*!
  *  @author Cristiano Malossi
  *
- *  The MS_Coupling_BoundaryCondition class is an implementation of the MS_PhysicalCoupling
+ *  The MultiscaleCouplingBoundaryCondition class is an implementation of the MS_Coupling_Type
  *  for applying standard boundary conditions on the models.
  */
-class MS_Coupling_BoundaryCondition: public virtual MS_PhysicalCoupling
+class MultiscaleCouplingBoundaryCondition: public virtual MS_Coupling_Type
 {
 public:
 
@@ -63,10 +63,10 @@ public:
     //@{
 
     //! Constructor
-    MS_Coupling_BoundaryCondition();
+    MultiscaleCouplingBoundaryCondition();
 
     //! Destructor
-    virtual ~MS_Coupling_BoundaryCondition() {}
+    virtual ~MultiscaleCouplingBoundaryCondition() {}
 
     //@}
 
@@ -102,9 +102,9 @@ private:
     //! @name Unimplemented Methods
     //@{
 
-    MS_Coupling_BoundaryCondition( const MS_Coupling_BoundaryCondition& coupling );
+    MultiscaleCouplingBoundaryCondition( const MultiscaleCouplingBoundaryCondition& coupling );
 
-    MS_Coupling_BoundaryCondition& operator=( const MS_Coupling_BoundaryCondition& coupling );
+    MultiscaleCouplingBoundaryCondition& operator=( const MultiscaleCouplingBoundaryCondition& coupling );
 
     //@}
 
@@ -163,9 +163,9 @@ private:
 };
 
 //! Factory create function
-inline MS_PhysicalCoupling* createMultiscaleCouplingBoundaryCondition()
+inline MS_Coupling_Type* createMultiscaleCouplingBoundaryCondition()
 {
-    return new MS_Coupling_BoundaryCondition();
+    return new MultiscaleCouplingBoundaryCondition();
 }
 
 // ===================================================
@@ -173,7 +173,7 @@ inline MS_PhysicalCoupling* createMultiscaleCouplingBoundaryCondition()
 // ===================================================
 template< class ModelType >
 inline void
-MS_Coupling_BoundaryCondition::applyBoundaryConditions1D( const UInt& i )
+MultiscaleCouplingBoundaryCondition::applyBoundaryConditions1D( const UInt& i )
 {
     ModelType *model = MS_DynamicCast< ModelType >( M_models[i] );
 
@@ -189,7 +189,7 @@ MS_Coupling_BoundaryCondition::applyBoundaryConditions1D( const UInt& i )
 
 template< class ModelType >
 inline void
-MS_Coupling_BoundaryCondition::applyBoundaryConditions3D( const UInt& i )
+MultiscaleCouplingBoundaryCondition::applyBoundaryConditions3D( const UInt& i )
 {
     ModelType *model = MS_DynamicCast< ModelType >( M_models[i] );
 
@@ -206,4 +206,4 @@ MS_Coupling_BoundaryCondition::applyBoundaryConditions3D( const UInt& i )
 
 } // Namespace LifeV
 
-#endif /* MS_Coupling_BoundaryCondition_H */
+#endif /* MultiscaleCouplingBoundaryCondition_H */

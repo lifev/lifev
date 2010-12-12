@@ -34,8 +34,8 @@
  *  @maintainer Cristiano Malossi <cristiano.malossi@epfl.ch>
  */
 
-#ifndef MS_Algorithm_Aitken_H
-#define MS_Algorithm_Aitken_H 1
+#ifndef MultiscaleAlgorithmAitken_H
+#define MultiscaleAlgorithmAitken_H 1
 
 #include <life/lifealg/generalizedAitken.hpp>
 
@@ -44,14 +44,14 @@
 namespace LifeV
 {
 
-//! MS_Algorithm_Aitken - The MultiScale Algorithm implementation of Aitken
+//! MultiscaleAlgorithmAitken - The MultiScale Algorithm implementation of Aitken
 /*!
  *  @author Cristiano Malossi
  *
- *  The MS_Algorithm_Aitken is an implementation of MS_Algorithm
+ *  The MultiscaleAlgorithmAitken is an implementation of MS_Algorithm_Type
  *  which implements the Aitken method.
  */
-class MS_Algorithm_Aitken : public virtual MS_Algorithm
+class MultiscaleAlgorithmAitken : public virtual MS_Algorithm_Type
 {
 public:
 
@@ -59,10 +59,10 @@ public:
     //@{
 
     //! Constructor
-    MS_Algorithm_Aitken();
+    MultiscaleAlgorithmAitken();
 
     //! Destructor
-    virtual ~MS_Algorithm_Aitken() {}
+    virtual ~MultiscaleAlgorithmAitken() {}
 
     //@}
 
@@ -105,19 +105,19 @@ private:
     //! @name Unimplemented Methods
     //@{
 
-    MS_Algorithm_Aitken( const MS_Algorithm_Aitken& algorithm );
+    MultiscaleAlgorithmAitken( const MultiscaleAlgorithmAitken& algorithm );
 
-    MS_Algorithm_Aitken& operator=( const MS_Algorithm_Aitken& algorithm );
+    MultiscaleAlgorithmAitken& operator=( const MultiscaleAlgorithmAitken& algorithm );
 
     //@}
 };
 
 //! Factory create function
-inline MS_Algorithm* createMultiscaleAlgorithmAitken()
+inline MS_Algorithm_Type* createMultiscaleAlgorithmAitken()
 {
-    return new MS_Algorithm_Aitken();
+    return new MultiscaleAlgorithmAitken();
 }
 
 } // Namespace LifeV
 
-#endif /* MS_Algorithm_Aitken_H */
+#endif /* MultiscaleAlgorithmAitken_H */

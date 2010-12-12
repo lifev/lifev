@@ -41,12 +41,12 @@ namespace LifeV
 
 std::map< std::string, models_Type > MS_modelsMap;
 
-UInt MS_PhysicalModel::M_modelsNumber = 0;
+UInt MultiscaleModel::M_modelsNumber = 0;
 
 // ===================================================
 // Constructors & Destructor
 // ===================================================
-MS_PhysicalModel::MS_PhysicalModel() :
+MultiscaleModel::MultiscaleModel() :
         M_ID                (),
         M_type              (),
         M_couplings         (),
@@ -61,7 +61,7 @@ MS_PhysicalModel::MS_PhysicalModel() :
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 8100 ) << "MS_PhysicalModel::MS_PhysicalModel() \n";
+    Debug( 8100 ) << "MultiscaleModel::MultiscaleModel() \n";
 #endif
 
     M_ID = M_modelsNumber++;
@@ -79,11 +79,11 @@ MS_PhysicalModel::MS_PhysicalModel() :
 // MultiScale PhysicalModel Virtual Methods
 // ===================================================
 void
-MS_PhysicalModel::setupData( const std::string& fileName )
+MultiscaleModel::setupData( const std::string& fileName )
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 8100 ) << "MS_PhysicalModel::SetupData( fileName ) \n";
+    Debug( 8100 ) << "MultiscaleModel::SetupData( fileName ) \n";
 #endif
 
     GetPot dataFile( fileName );
@@ -99,7 +99,7 @@ MS_PhysicalModel::setupData( const std::string& fileName )
 }
 
 void
-MS_PhysicalModel::showMe()
+MultiscaleModel::showMe()
 {
     std::cout << "Model id            = " << M_ID << std::endl
               << "Model name          = " << M_modelName << std::endl
@@ -137,7 +137,7 @@ MS_PhysicalModel::showMe()
 // Methods
 // ===================================================
 void
-MS_PhysicalModel::clearCouplingsList()
+MultiscaleModel::clearCouplingsList()
 {
     M_couplings.clear();
 }
@@ -146,31 +146,31 @@ MS_PhysicalModel::clearCouplingsList()
 // Set Methods
 // ===================================================
 void
-MS_PhysicalModel::setID( const UInt& id )
+MultiscaleModel::setID( const UInt& id )
 {
     M_ID = id;
 }
 
 void
-MS_PhysicalModel::addCoupling( const MS_Coupling_PtrType& coupling )
+MultiscaleModel::addCoupling( const MS_Coupling_PtrType& coupling )
 {
     M_couplings.push_back( coupling );
 }
 
 void
-MS_PhysicalModel::setGlobalData( const MS_GlobalDataContainer_PtrType& globalData )
+MultiscaleModel::setGlobalData( const MS_GlobalDataContainer_PtrType& globalData )
 {
     M_globalData = globalData;
 }
 
 void
-MS_PhysicalModel::setGeometry( const boost::array< Real, NDIM >& scale,
+MultiscaleModel::setGeometry( const boost::array< Real, NDIM >& scale,
                                const boost::array< Real, NDIM >& rotate,
                                const boost::array< Real, NDIM >& translate )
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 8100 ) << "MS_PhysicalModel::SetGeometry( scale, rotate, translate ) \n";
+    Debug( 8100 ) << "MultiscaleModel::SetGeometry( scale, rotate, translate ) \n";
 #endif
 
     M_geometryScale     = scale;
@@ -179,11 +179,11 @@ MS_PhysicalModel::setGeometry( const boost::array< Real, NDIM >& scale,
 }
 
 void
-MS_PhysicalModel::setCommunicator( const MS_Comm_PtrType& comm )
+MultiscaleModel::setCommunicator( const MS_Comm_PtrType& comm )
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 8100 ) << "MS_PhysicalModel::SetCommunicator( comm ) \n";
+    Debug( 8100 ) << "MultiscaleModel::SetCommunicator( comm ) \n";
 #endif
 
     M_comm = comm;
@@ -194,43 +194,43 @@ MS_PhysicalModel::setCommunicator( const MS_Comm_PtrType& comm )
 // Get Methods
 // ===================================================
 const UInt&
-MS_PhysicalModel::ID() const
+MultiscaleModel::ID() const
 {
     return M_ID;
 }
 
 const models_Type&
-MS_PhysicalModel::type() const
+MultiscaleModel::type() const
 {
     return M_type;
 }
 
 const BCFlag&
-MS_PhysicalModel::flag( const UInt& id ) const
+MultiscaleModel::flag( const UInt& id ) const
 {
     return M_flags[id];
 }
 
 const std::vector< BCFlag >&
-MS_PhysicalModel::flags() const
+MultiscaleModel::flags() const
 {
     return M_flags;
 }
 
 const std::string&
-MS_PhysicalModel::modelName() const
+MultiscaleModel::modelName() const
 {
     return M_modelName;
 }
 
 UInt
-MS_PhysicalModel::couplingsNumber() const
+MultiscaleModel::couplingsNumber() const
 {
     return static_cast< UInt > ( M_couplings.size() );
 }
 
 UInt
-MS_PhysicalModel::couplingLocalID( const UInt& ID ) const
+MultiscaleModel::couplingLocalID( const UInt& ID ) const
 {
     for ( UInt localID( 0 ); localID < couplingsNumber(); ++localID )
         if ( M_couplings[localID]->ID() == ID )
@@ -240,13 +240,13 @@ MS_PhysicalModel::couplingLocalID( const UInt& ID ) const
 }
 
 MS_Coupling_PtrType
-MS_PhysicalModel::coupling( const UInt& localID ) const
+MultiscaleModel::coupling( const UInt& localID ) const
 {
     return M_couplings[localID];
 }
 
 const MS_GlobalDataContainer_PtrType&
-MS_PhysicalModel::globalData() const
+MultiscaleModel::globalData() const
 {
     return M_globalData;
 }

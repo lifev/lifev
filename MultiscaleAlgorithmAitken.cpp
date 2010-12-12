@@ -42,7 +42,7 @@ namespace LifeV
 // ===================================================
 // Constructors & Destructor
 // ===================================================
-MS_Algorithm_Aitken::MS_Algorithm_Aitken() :
+MultiscaleAlgorithmAitken::MultiscaleAlgorithmAitken() :
         MS_Algorithm_Type   (),
         M_methodMap         (),
         M_method            (),
@@ -50,7 +50,7 @@ MS_Algorithm_Aitken::MS_Algorithm_Aitken() :
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 8011 ) << "MS_Algorithm_Aitken::MS_Algorithm_Aitken() \n";
+    Debug( 8011 ) << "MultiscaleAlgorithmAitken::MultiscaleAlgorithmAitken() \n";
 #endif
 
     M_type = Aitken;
@@ -65,11 +65,11 @@ MS_Algorithm_Aitken::MS_Algorithm_Aitken() :
 // MultiScale Algorithm Virtual Methods
 // ===================================================
 void
-MS_Algorithm_Aitken::setupData( const std::string& fileName )
+MultiscaleAlgorithmAitken::setupData( const std::string& fileName )
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 8011 ) << "MS_Algorithm_Aitken::SetupData( algorithm ) \n";
+    Debug( 8011 ) << "MultiscaleAlgorithmAitken::SetupData( algorithm ) \n";
 #endif
 
     MS_Algorithm_Type::setupData( fileName );
@@ -85,11 +85,11 @@ MS_Algorithm_Aitken::setupData( const std::string& fileName )
 }
 
 void
-MS_Algorithm_Aitken::subIterate()
+MultiscaleAlgorithmAitken::subIterate()
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 8011 ) << "MS_Algorithm_Aitken::SubIterate() \n";
+    Debug( 8011 ) << "MultiscaleAlgorithmAitken::SubIterate() \n";
 #endif
 
     MS_Algorithm_Type::subIterate();
@@ -170,7 +170,7 @@ MS_Algorithm_Aitken::subIterate()
 }
 
 void
-MS_Algorithm_Aitken::showMe()
+MultiscaleAlgorithmAitken::showMe()
 {
     if ( M_displayer->isLeader() )
     {
