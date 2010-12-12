@@ -309,7 +309,7 @@ private:
     prec_type                 M_linearPreconditioner;
 
 
-    ElemVec                   M_elementVectorVelocity; // Elementary right hand side for the linearized pressure
+    ElemVec                   M_elementVectorVelocity; // Elementary right hand side for the linearized velocity
     ElemVec                   M_elementVectorPressure; // Elementary right hand side for the linearized pressure
     //    boost::shared_ptr<ElemMat>                   M_elementMatrixVelocity;
     //    boost::shared_ptr<ElemMat>                   M_elementMatrixConvective;
@@ -538,8 +538,8 @@ void OseenShapeDerivative<MeshType, SolverType>::iterateLin( bcHandler_Type& bcH
 
 template<typename MeshType, typename SolverType>
 void
-OseenShapeDerivative<MeshType, SolverType>::updateLinearSystem( const matrix_Type& matrixNoBC,
-                                                                  Real&              alpha,
+OseenShapeDerivative<MeshType, SolverType>::updateLinearSystem( const matrix_Type& /*matrixNoBC*/,
+                                                                  Real&              /*alpha*/,
                                                                   const vector_Type& un,
                                                                   const vector_Type& uk,
                                                                   const vector_Type& disp,
@@ -835,7 +835,7 @@ updateShapeDerivatives( matrix_Type&                   matrix,
                     // else
                     // u^n - w^iNode local
                     // M_elementConvectionVelocity.vec() [ iLocal + iComponent*this->M_velocityFESpace.fe().nbNode ] = ukRepeated(iGlobal)
-                    - wRepeated(iGlobal);
+                    // - wRepeated(iGlobal);
                     // w^iNode local
                     M_elementMeshVelocity.vec( )  [ iLocal + iComponent*this->M_velocityFESpace.fe().nbNode ] = wRepeated( iGlobal );
                     // u^iNode local
