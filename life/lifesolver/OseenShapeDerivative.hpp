@@ -1,541 +1,763 @@
-/* -*- mode: c++ -*-
+//@HEADER
+/*
+*******************************************************************************
 
- This file is part of the LifeV library
+    Copyright (C) 2004, 2005, 2007 EPFL, Politecnico di Milano, INRIA
+    Copyright (C) 2010 EPFL, Politecnico di Milano, Emory University
 
- Author(s): Miguel A. Fernandez <miguel.fernandez@inria.fr>
+    This file is part of LifeV.
+
+    LifeV is free software; you can redistribute it and/or modify
+    it under the terms of the GNU Lesser General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    LifeV is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+    Lesser General Public License for more details.
+
+    You should have received a copy of the GNU Lesser General Public License
+    along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
+
+*******************************************************************************
+*/
+//@HEADER
+
+/*!
+    @file
+    @brief This file contains an Oseen equation solver class with shape derivative
+           for fluid structure interaction problem
+
+    @author MiGlobaluel A. Fernandez <miGlobaluel.fernandez@inria.fr>
             Christoph Winkelmann <christoph.winkelmann@epfl.ch>
-      Date: 2003-06-09
+    @date 09-06-2003
 
- Copyright (C) 2004 EPFL
+    @author G. Fourestey
+    @date 00-02-2007
 
- This library is free software; you can redistribute it and/or
- modify it under the terms of the GNU Lesser General Public
- License as published by the Free Software Foundation; either
- version 2.1 of the License, or (at your option) any later version.
+    @contributor Zhen Wang <zhen.wang@emory.edu>
 
- This library is distributed in the hope that it will be useful,
- but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- Lesser General Public License for more details.
-
- You should have received a copy of the GNU Lesser General Public
- License along with this library; if not, write to the Free Software
- Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
-*/
-/**
-  \file Oseen.hpp
-  \author G. Fourestey
-  \date 2/2007
-
-  \brief This file contains a Oseen equation solver class with shape derivative
-  for FSI
-*/
+ */
 
 
-
-#ifndef _OSEENSD_H_
-#define _OSEENSD_H_
+#ifndef OSEENSHAPEDERIVATIVE_H
+#define OSEENSHAPEDERIVATIVE_H 1
 
 #include <life/lifesolver/Oseen.hpp>
 
 namespace LifeV
 {
-template< typename Mesh,
-typename SolverType = LifeV::SolverTrilinos >
+
+//! @class OseenShapeDerivative
+/*!
+
+    @brief This class contains an Oseen equation solver class with shape derivative
+           for fluid structure interaction problem
+
+    @author MiGlobaluel A. Fernandez <miGlobaluel.fernandez@inria.fr>
+            Christoph Winkelmann <christoph.winkelmann@epfl.ch>
+    @date 09-06-2003
+    @author G. Fourestey
+    @date 02-2007
+
+    @contributor Zhen Wang <zhen.wang@emory.edu>
+
+ */
+
+template< typename MeshType, typename SolverType = LifeV::SolverTrilinos >
 class OseenShapeDerivative:
-        public Oseen<Mesh, SolverType>
+        public Oseen< MeshType, SolverType >
 {
 
 public:
 
-    typedef Oseen<Mesh, SolverType>             super;
-    typedef typename super::vector_type         vector_type;
-    typedef typename super::matrix_type         matrix_type;
-    typedef typename super::matrix_ptrtype      matrix_ptrtype;
-    typedef typename super::data_type           data_type;
-    typedef typename super::prec_type           prec_type;
-    typedef typename super::prec_raw_type       prec_raw_type;
+    //! @name Public Types
+    //@{
 
-    typedef typename super::bchandler_raw_type bchandler_raw_type;
+    ///////// old: to be removed
+    typedef Oseen< MeshType, SolverType >                     oseenSolver_Type;
+    typedef typename oseenSolver_Type::vector_type            vector_type;
+    typedef typename oseenSolver_Type::matrix_type            matrix_type;
+    typedef typename oseenSolver_Type::matrix_ptrtype         matrix_ptrtype;
+    typedef typename oseenSolver_Type::data_type              data_type;
+    typedef typename oseenSolver_Type::prec_type              prec_type;
+    typedef typename oseenSolver_Type::prec_raw_type          prec_raw_type;
+    typedef typename oseenSolver_Type::bchandler_raw_type     bchandler_raw_type;
+    /////////
+
+    typedef MeshType                                          mesh_Type;
+    typedef SolverType                                        linearSolver_Type;
+    // typedef Oseen< mesh_Type, linearSolver_Type >             oseenSolver_Type;
+    typedef typename oseenSolver_Type::vector_Type            vector_Type;
+    typedef typename oseenSolver_Type::matrix_Type            matrix_Type;
+    typedef typename oseenSolver_Type::matrixPtr_Type         matrixPtr_Type;
+    typedef typename oseenSolver_Type::data_Type              data_Type;
+    typedef typename oseenSolver_Type::preconditionerPtr_Type preconditionerPtr_type;
+    typedef typename oseenSolver_Type::preconditioner_Type    preconditioner_Type;
+    typedef typename oseenSolver_Type::bcHandler_Type         bcHandler_Type;
+
+    //@}
+
+    //! @name Constructors & Destructor
+    //@{
+
+    //! Empty constructor
+    OseenShapeDerivative();
+
+    //! Constructor
+    /*!
+        @param dataType DataNavierStokes class
+        @param velocityFESpace Velocity FE space
+        @param pressureFESpace Pressure FE space
+        @param communicator MPI communicator
+        @param lagrangeMultiplier Lagrange multiplier
+     */
+    OseenShapeDerivative( boost::shared_ptr<data_Type>    dataType,
+                          FESpace<mesh_Type, EpetraMap>&  velocityFESpace,
+                          FESpace<mesh_Type, EpetraMap>&  pressureFESpace,
+                          boost::shared_ptr<Epetra_Comm>& communicator,
+                          const Int                       lagrangeMultiplier = 0);
+
+    //! Constructor
+    /*!
+        @param dataType DataNavierStokes class
+        @param velocityFESpace Velocity FE space
+        @param pressureFESpace Pressure FE space
+        @param communicator MPI communicator
+        @param monolithicMap EpetraMap class
+        @param offset
+     */
+    OseenShapeDerivative( boost::shared_ptr<data_Type>    dataType,
+                          FESpace<mesh_Type, EpetraMap>&  velocityFESpace,
+                          FESpace<mesh_Type, EpetraMap>&  pressureFESpace,
+                          boost::shared_ptr<Epetra_Comm>& communicator,
+                          const EpetraMap                 monolithicMap,
+                          const UInt                      offset = 0 );
+
+    //! Constructor
+    /*!
+        @param dataType DataNavierStokes class
+        @param velocityFESpace Velocity FE space
+        @param pressureFESpace Pressure FE space
+        @param mmFESpace FE space
+        @param communicator MPI communicator
+        @param monolithicMap EpetraMap class
+        @param offset
+     */
+    OseenShapeDerivative( boost::shared_ptr<data_Type>    dataType,
+                          FESpace<mesh_Type, EpetraMap>&  velocityFESpace,
+                          FESpace<mesh_Type, EpetraMap>&  pressureFESpace,
+                          FESpace<mesh_Type, EpetraMap>&  mmFESpace,
+                          boost::shared_ptr<Epetra_Comm>& communicator,
+                          const EpetraMap                 monolithicMap,
+                          const UInt                      offset = 0 );
+
+    //! Virtual destructor
+    virtual ~OseenShapeDerivative();
+
+    //@}
 
 
-    OseenShapeDerivative( boost::shared_ptr<data_type> dataType,
-                          FESpace<Mesh, EpetraMap>& uFESpace,
-                          FESpace<Mesh, EpetraMap>& pFESpace,
-                          boost::shared_ptr<Epetra_Comm>& comm,
-                          const int                 lagrangeMultiplier = 0);
+    //! @name Methods
+    //@{
 
-    OseenShapeDerivative( boost::shared_ptr<data_type> dataType,
-                          FESpace<Mesh, EpetraMap>& uFESpace,
-                          FESpace<Mesh, EpetraMap>& pFESpace,
-                          boost::shared_ptr<Epetra_Comm>& comm,
-                          const EpetraMap           bigMap,
-                          const UInt                offset=0);
-
-    OseenShapeDerivative( boost::shared_ptr<data_type> dataType,
-                          FESpace<Mesh, EpetraMap>& uFESpace,
-                          FESpace<Mesh, EpetraMap>& pFESpace,
-                          FESpace<Mesh, EpetraMap>& mmFESpace,
-                          boost::shared_ptr<Epetra_Comm>& comm,
-                          const EpetraMap           bigMap,
-                          const UInt                offset=0);
-
-    ~OseenShapeDerivative();
-
+    //! Set up data from GetPot
+    /*!
+        @param dataFile GetPot object
+     */
     void setUp( const GetPot& dataFile );
 
-    void iterateLin( bchandler_raw_type& bch );
-
-    void updateLinearSystem( const matrix_type& matrNoBC,
-                             double&       alpha,
-                             const vector_type& un,
-                             const vector_type& uk,
-                             const vector_type& disp,
-                             const vector_type& w,
-                             const vector_type& dw,
-                             const vector_type& sourceVec);
-    //getter
-    vector_type& rhsLinNoBC() {return M_rhsLinNoBC;}
-
-    Real GetLinearFlux    ( const EntityFlag& flag );
-    Real GetLinearPressure( const EntityFlag& flag );
-
-    //! Get the lagrange multiplier related to a flux imposed on a given part of the boundary.
+    //!
     /*!
-     * @param Flag flag of the boundary face associated with the flux and the Lagrange multiplier we want.
-     * @param BC BChandler containing the boundary conditions of the problem.
-     * @return Lagrange multiplier
+        @param bcHandler BC handler
      */
-    Real LinearLagrangeMultiplier( const EntityFlag& Flag, bchandler_raw_type& BC );
+    void iterateLin( bcHandler_Type& bcHandler );
+
+    //! Update linear system.
+    /*!
+        @param matrixNoBC Fluid matrix withoud BC
+        @param alpha alpha
+        @param un Beta
+        @param uk Fluid solution
+        @param disp mesh_Type deltaX
+        @param w mesh_Type Velocity
+        @param dw mesh_Type deltaVelocity
+        @param sourceVector RHS (usually 0 )
+     */
+    void updateLinearSystem( const matrix_Type& matrixNoBC,
+                             Real&              alpha,
+                             const vector_Type& un,
+                             const vector_Type& uk,
+                             const vector_Type& disp,
+                             const vector_Type& w,
+                             const vector_Type& dw,
+                             const vector_Type& sourceVector);
+
+    //! Update shape derivatives.
+    /*!
+        @param matrixNoBC Fluid matrix withoud BC
+        @param alpha alpha
+        @param un Beta
+        @param uk Fluid solution
+        @param disp mesh_Type deltaX
+        @param w mesh_Type Velocity
+        @param offset
+        @param dFESpace
+        @param wImplicit
+        @param convectiveTermDerivative
+     */
+    void updateShapeDerivatives( matrix_Type&                   matrixNoBC,
+                                 Real&                          alpha,
+                                 const vector_Type&             un,
+                                 const vector_Type&             uk,
+                                 //const vector_Type&           disp,
+                                 const vector_Type&             w,
+                                 UInt                           offset,
+                                 FESpace<mesh_Type, EpetraMap>& dFESpace,
+                                 bool                           wImplicit = true,
+                                 bool                           convectiveTermDerivative = false);
+
+    //@}
+
+
+    //! @name Set Methods
+    //@{
+
+    //! Set
+    /*!
+        @param rightHandSide
+     */
+    void updateRhsLinNoBC( const vector_Type& rightHandSide)
+    {
+        M_linearRightHandSideNoBC = rightHandSide;
+    }
+
+    //@}
+
+    //! @name Get Methods
+    //@{
+
+    //! Return
+    /*!
+        @return M_linearRightHandSideNoBC
+     */
+    vector_Type& rhsLinNoBC()
+    {
+        return M_linearRightHandSideNoBC;
+    }
+
+    const vector_Type& rhsLinNoBC() const
+    {
+        return M_linearRightHandSideNoBC;
+    }
 
     //! Get the solution of the Shape Derivative problem.
     /*!
-     * @return vector containing the solution of the Shape Derivative problem.
+        @return vector containing the solution of the Shape Derivative problem.
      */
-    const vector_type& LinearSolution() const { return M_linSol; }
+    const vector_Type& LinearSolution() const
+    {
+        return M_linearSolution;
+    }
 
-    void updateShapeDerivatives(
-        matrix_type& matrNoBC,
-        double&       alpha,
-        const vector_type& un,
-        const vector_type& uk,
-        //const vector_type& disp,
-        const vector_type& w,
-        UInt offset,
-        FESpace<Mesh, EpetraMap>& dFESpace,
-        bool wImplicit=true,
-        bool convectiveTermDerivative=false);
+    //! Return
+    /*!
+        @return stab
+     */
+    bool stab()
+    {
+        return this->M_stabilization;
+    }
 
-    void updateRhsLinNoBC( const vector_type& rhs) {M_rhsLinNoBC=rhs;}
-    bool stab()         { return this->M_stab; }
+    const bool& stab() const
+    {
+        return this->M_stabilization;
+    }
+
+    //! Return
+    /*!
+        @return linear flux
+     */
+    Real GetLinearFlux ( const EntityFlag& flag );
+
+    //! Return
+    /*!
+        @return linear pressure
+     */
+    Real GetLinearPressure( const EntityFlag& flag );
+
+    //! Get the Lagrange multiplier related to a flux imposed on a given part of the boundary.
+    /*!
+        @param Flag flag of the boundary face associated with the flux and the Lagrange multiplier we want.
+        @param BC BChandler containing the boundary conditions of the problem.
+        @return Lagrange multiplier
+     */
+    Real LinearLagrangeMultiplier( const EntityFlag& flag, bcHandler_Type& bcHandler );
+
+    //@}
+
+
 private:
 
+    vector_Type               M_linearRightHandSideNoBC;
+    vector_Type               M_linearRightHandSideFull;
 
-    vector_type               M_rhsLinNoBC;
-    vector_type               M_rhsLinFull;
+    vector_Type               M_linearSolution;
 
-    vector_type               M_linSol;
-
-    SolverType                M_linearLinSolver;
-    prec_type                 M_linPrec;
+    linearSolver_Type         M_linearLinSolver;
+    prec_type                 M_linearPreconditioner;
 
 
-//    ElemVec                   M_elvec_du; // Elementary right hand side for the linearized velocity
-    ElemVec                   M_elvec_du; // Elementary right hand side for the linearized pressure
-    //    boost::shared_ptr<ElemMat>                   M_elmat_du;
-    //    boost::shared_ptr<ElemMat>                   M_elmat_du_convective;
-    ElemVec                   M_elvec_dp; // Elementary right hand side for the linearized pressure
-    //    boost::shared_ptr<ElemMat>                   M_elmat_dp;    // Elementary displacement for right hand side
-    ElemVec                   M_w_loc;    // Elementary mesh velocity
-    ElemVec                   M_uk_loc;   // Elementary velocity
-    ElemVec                   M_pk_loc;   // Elementary pressure
-    ElemVec                   M_elvec;    // Elementary convection velocity
-    ElemVec                   M_d_loc;    // Elementary displacement for right hand side
-    ElemVec                   M_dw_loc;   // Elementary mesh velocity for right hand side
+    ElemVec                   M_elementVectorVelocity; // Elementary right hand side for the linearized pressure
+    ElemVec                   M_elementVectorPressure; // Elementary right hand side for the linearized pressure
+    //    boost::shared_ptr<ElemMat>                   M_elementMatrixVelocity;
+    //    boost::shared_ptr<ElemMat>                   M_elementMatrixConvective;
+    //    boost::shared_ptr<ElemMat>                   M_elementMatrixPressure;    // Elementary displacement for right hand side
+    ElemVec                   M_elementMeshVelocity;    // Elementary mesh velocity
+    ElemVec                   M_elementVelocity;   // Elementary velocity
+    ElemVec                   M_elementPressure;   // Elementary pressure
+    ElemVec                   M_elementConvectionVelocity;    // Elementary convection velocity
+    ElemVec                   M_elementDisplacement;    // Elementary displacement for right hand side
+    ElemVec                   M_elementVelocityRightHandSide;   // Elementary mesh velocity for right hand side
     ElemVec                   M_u_loc;
-    bool                      M_reusePrecLin;
-    FESpace<Mesh, EpetraMap>* M_mmFESpace;
+    bool                      M_reuseLinearPreconditioner;
+    FESpace<mesh_Type, EpetraMap>* M_mmFESpace;
 };
 
 
-template<typename Mesh, typename SolverType>
-OseenShapeDerivative<Mesh, SolverType>::
-OseenShapeDerivative( boost::shared_ptr<data_type>          dataType,
-                      FESpace<Mesh, EpetraMap>& uFESpace,
-                      FESpace<Mesh, EpetraMap>& pFESpace,
-                      boost::shared_ptr<Epetra_Comm>& comm,
-                      const int                 lagrangeMultiplier):
-        super            (dataType,
-                          uFESpace,
-                          pFESpace,
-                          comm,
-                          lagrangeMultiplier),
-        M_rhsLinNoBC     ( this->getMap()),
-        M_rhsLinFull     ( this->getMap()),
-        M_linSol         ( this->getMap()),
-        M_linearLinSolver( comm ),
-        M_linPrec        ( ),
-        M_elvec_du       ( this->M_uFESpace.fe().nbNode, nDimensions ),
-        M_elvec_dp       ( this->M_pFESpace.fe().nbNode, 1 ),
-//    M_elvec_dp       ( this->M_pFESpace.fe().nbNode, nDimensions ),
-        M_w_loc          ( this->M_uFESpace.fe().nbNode, nDimensions ),
-        M_uk_loc         ( this->M_uFESpace.fe().nbNode, nDimensions ),
-        M_pk_loc         ( this->M_pFESpace.fe().nbNode, 1 ),
-        M_elvec          ( this->M_uFESpace.fe().nbNode, nDimensions ),
-        M_d_loc          ( this->M_uFESpace.fe().nbNode, nDimensions ),
-        M_dw_loc         ( this->M_uFESpace.fe().nbNode, nDimensions ),
-        M_u_loc          ( this->M_uFESpace.fe().nbNode, nDimensions ),
-        M_reusePrecLin   (true)
+
+// ===================================================
+// Constructors & Destructor
+// ===================================================
+
+template<typename MeshType, typename SolverType>
+OseenShapeDerivative<MeshType, SolverType>::
+OseenShapeDerivative( boost::shared_ptr<data_Type>    dataType,
+                      FESpace<mesh_Type, EpetraMap>&  velocityFESpace,
+                      FESpace<mesh_Type, EpetraMap>&  pressureFESpace,
+                      boost::shared_ptr<Epetra_Comm>& communicator,
+                      const Int                       lagrangeMultiplier):
+        oseenSolver_Type ( dataType,
+                           velocityFESpace,
+                           pressureFESpace,
+                           communicator,
+                           lagrangeMultiplier ),
+        M_linearRightHandSideNoBC     ( this->getMap() ),
+        M_linearRightHandSideFull     ( this->getMap() ),
+        M_linearSolution         ( this->getMap() ),
+        M_linearLinSolver( communicator ),
+        M_linearPreconditioner        ( ),
+        M_elementVectorVelocity ( this->M_velocityFESpace.fe().nbNode, nDimensions ),
+        M_elementVectorPressure ( this->M_pressureFESpace.fe().nbNode, 1 ),
+//    M_elementVectorPressure   ( this->M_pressureFESpace.fe().nbNode, nDimensions ),
+        M_elementMeshVelocity          ( this->M_velocityFESpace.fe().nbNode, nDimensions ),
+        M_elementVelocity         ( this->M_velocityFESpace.fe().nbNode, nDimensions ),
+        M_elementPressure         ( this->M_pressureFESpace.fe().nbNode, 1 ),
+        M_elementConvectionVelocity          ( this->M_velocityFESpace.fe().nbNode, nDimensions ),
+        M_elementDisplacement          ( this->M_velocityFESpace.fe().nbNode, nDimensions ),
+        M_elementVelocityRightHandSide         ( this->M_velocityFESpace.fe().nbNode, nDimensions ),
+        M_u_loc          ( this->M_velocityFESpace.fe().nbNode, nDimensions ),
+        M_reuseLinearPreconditioner   ( true )
 {
 
 }
 
-template<typename Mesh, typename SolverType>
-OseenShapeDerivative<Mesh, SolverType>::
-OseenShapeDerivative( boost::shared_ptr<data_type> dataType,
-                      FESpace<Mesh, EpetraMap>& uFESpace,
-                      FESpace<Mesh, EpetraMap>& pFESpace,
-                      boost::shared_ptr<Epetra_Comm>& comm,
-                      const EpetraMap           bigMap,
-                      const UInt                offset):
-        super            (dataType,
-                          uFESpace,
-                          pFESpace,
-                          comm,
-                          bigMap,
-                          offset),
-        M_rhsLinNoBC     ( this->getMap()),
-        M_rhsLinFull     ( this->getMap()),
-        M_linSol         ( this->getMap()),
-        M_linearLinSolver( comm ),
-        M_linPrec        ( ),
-        M_elvec_du       ( this->M_uFESpace.fe().nbNode, nDimensions ),
-        M_elvec_dp       ( this->M_pFESpace.fe().nbNode, 1 ),
-//    M_elvec_dp       ( this->M_pFESpace.fe().nbNode, nDimensions ),
-        M_w_loc          ( this->M_uFESpace.fe().nbNode, nDimensions ),
-        M_uk_loc         ( this->M_uFESpace.fe().nbNode, nDimensions ),
-        M_pk_loc         ( this->M_pFESpace.fe().nbNode, 1 ),
-        M_elvec          ( this->M_uFESpace.fe().nbNode, nDimensions ),
-        M_d_loc          ( this->M_uFESpace.fe().nbNode, nDimensions ),
-        M_dw_loc         ( this->M_uFESpace.fe().nbNode, nDimensions ),
-        M_u_loc          ( this->M_uFESpace.fe().nbNode, nDimensions ),
-        M_reusePrecLin   (true)
+template<typename MeshType, typename SolverType>
+OseenShapeDerivative<MeshType, SolverType>::
+OseenShapeDerivative( boost::shared_ptr<data_Type>    dataType,
+                      FESpace<mesh_Type, EpetraMap>&  velocityFESpace,
+                      FESpace<mesh_Type, EpetraMap>&  pressureFESpace,
+                      boost::shared_ptr<Epetra_Comm>& communicator,
+                      const EpetraMap                 monolithicMap,
+                      const UInt                      offset ):
+        oseenSolver_Type ( dataType,
+                           velocityFESpace,
+                           pressureFESpace,
+                           communicator,
+                           monolithicMap,
+                           offset),
+        M_linearRightHandSideNoBC     ( this->getMap()),
+        M_linearRightHandSideFull     ( this->getMap()),
+        M_linearSolution         ( this->getMap()),
+        M_linearLinSolver( communicator ),
+        M_linearPreconditioner        ( ),
+        M_elementVectorVelocity ( this->M_velocityFESpace.fe().nbNode, nDimensions ),
+        M_elementVectorPressure ( this->M_pressureFESpace.fe().nbNode, 1 ),
+//    M_elementVectorPressure   ( this->M_pressureFESpace.fe().nbNode, nDimensions ),
+        M_elementMeshVelocity          ( this->M_velocityFESpace.fe().nbNode, nDimensions ),
+        M_elementVelocity         ( this->M_velocityFESpace.fe().nbNode, nDimensions ),
+        M_elementPressure         ( this->M_pressureFESpace.fe().nbNode, 1 ),
+        M_elementConvectionVelocity          ( this->M_velocityFESpace.fe().nbNode, nDimensions ),
+        M_elementDisplacement          ( this->M_velocityFESpace.fe().nbNode, nDimensions ),
+        M_elementVelocityRightHandSide         ( this->M_velocityFESpace.fe().nbNode, nDimensions ),
+        M_u_loc          ( this->M_velocityFESpace.fe().nbNode, nDimensions ),
+        M_reuseLinearPreconditioner   ( true )
 {
 
 }
 
-template<typename Mesh, typename SolverType>
-OseenShapeDerivative<Mesh, SolverType>::
-OseenShapeDerivative( boost::shared_ptr<data_type> dataType,
-                      FESpace<Mesh, EpetraMap>& uFESpace,
-                      FESpace<Mesh, EpetraMap>& pFESpace,
-                      FESpace<Mesh, EpetraMap>& mmFESpace,
-                      boost::shared_ptr<Epetra_Comm>& comm,
-                      const EpetraMap           bigMap,
-                      const UInt                offset):
-        super            (dataType,
-                          uFESpace,
-                          pFESpace,
-                          comm,
-                          bigMap,
-                          offset),
-        M_rhsLinNoBC     ( this->getMap()),
-        M_rhsLinFull     ( this->getMap()),
-        M_linSol         ( this->getMap()),
+template<typename MeshType, typename SolverType>
+OseenShapeDerivative<MeshType, SolverType>::
+OseenShapeDerivative( boost::shared_ptr<data_Type>    dataType,
+                      FESpace<mesh_Type, EpetraMap>&  velocityFESpace,
+                      FESpace<mesh_Type, EpetraMap>&  pressureFESpace,
+                      FESpace<mesh_Type, EpetraMap>&  mmFESpace,
+                      boost::shared_ptr<Epetra_Comm>& communicator,
+                      const EpetraMap                 monolithicMap,
+                      const UInt                      offset):
+        oseenSolver_Type  (dataType,
+                           velocityFESpace,
+                           pressureFESpace,
+                           communicator,
+                           monolithicMap,
+                           offset),
+        M_linearRightHandSideNoBC     ( this->getMap()),
+        M_linearRightHandSideFull     ( this->getMap()),
+        M_linearSolution         ( this->getMap()),
         M_linearLinSolver( ),
-        M_linPrec        ( ),
-        M_elvec_du       ( this->M_uFESpace.fe().nbNode, nDimensions ),
-        M_elvec_dp       ( this->M_pFESpace.fe().nbNode, 1 ),
-//    M_elvec_dp       ( this->M_pFESpace.fe().nbNode, nDimensions ),
-        M_w_loc          ( this->M_uFESpace.fe().nbNode, nDimensions ),
-        M_uk_loc         ( this->M_uFESpace.fe().nbNode, nDimensions ),
-        M_pk_loc         ( this->M_pFESpace.fe().nbNode, 1 ),
-        M_elvec          ( this->M_uFESpace.fe().nbNode, nDimensions ),
-        M_d_loc          ( this->M_uFESpace.fe().nbNode, nDimensions ),
-        M_dw_loc         ( this->M_uFESpace.fe().nbNode, nDimensions ),
-        M_u_loc          ( this->M_uFESpace.fe().nbNode, nDimensions ),
-        M_reusePrecLin   (true),
-        M_mmFESpace  (&mmFESpace)
+        M_linearPreconditioner        ( ),
+        M_elementVectorVelocity ( this->M_velocityFESpace.fe().nbNode, nDimensions ),
+        M_elementVectorPressure ( this->M_pressureFESpace.fe().nbNode, 1 ),
+//    M_elementVectorPressure   ( this->M_pressureFESpace.fe().nbNode, nDimensions ),
+        M_elementMeshVelocity          ( this->M_velocityFESpace.fe().nbNode, nDimensions ),
+        M_elementVelocity         ( this->M_velocityFESpace.fe().nbNode, nDimensions ),
+        M_elementPressure         ( this->M_pressureFESpace.fe().nbNode, 1 ),
+        M_elementConvectionVelocity          ( this->M_velocityFESpace.fe().nbNode, nDimensions ),
+        M_elementDisplacement          ( this->M_velocityFESpace.fe().nbNode, nDimensions ),
+        M_elementVelocityRightHandSide         ( this->M_velocityFESpace.fe().nbNode, nDimensions ),
+        M_u_loc          ( this->M_velocityFESpace.fe().nbNode, nDimensions ),
+        M_reuseLinearPreconditioner   ( true ),
+        M_mmFESpace      ( &mmFESpace )
 {
 
 }
 
-
-template<typename Mesh, typename SolverType>
-OseenShapeDerivative<Mesh, SolverType>::
+template<typename MeshType, typename SolverType>
+OseenShapeDerivative<MeshType, SolverType>::
 ~OseenShapeDerivative()
 {
 
 }
 
-template<typename Mesh, typename SolverType>
+
+// ===================================================
+// Methods
+// ===================================================
+
+template<typename MeshType, typename SolverType>
 Real
-OseenShapeDerivative<Mesh, SolverType>::GetLinearFlux( const EntityFlag& flag )
+OseenShapeDerivative<MeshType, SolverType>::GetLinearFlux( const EntityFlag& flag )
 {
-    return flux( flag, M_linSol );
+    return flux( flag, M_linearSolution );
 }
 
-template<typename Mesh, typename SolverType>
+template<typename MeshType, typename SolverType>
 Real
-OseenShapeDerivative<Mesh, SolverType>::GetLinearPressure( const EntityFlag& flag )
+OseenShapeDerivative<MeshType, SolverType>::GetLinearPressure( const EntityFlag& flag )
 {
-    return pressure( flag, M_linSol );
+    return pressure( flag, M_linearSolution );
 }
 
-template<typename Mesh, typename SolverType>
+template<typename MeshType, typename SolverType>
 Real
-OseenShapeDerivative<Mesh, SolverType>::LinearLagrangeMultiplier( const EntityFlag& Flag, bchandler_raw_type& BC )
+OseenShapeDerivative<MeshType, SolverType>::LinearLagrangeMultiplier( const EntityFlag& flag, bcHandler_Type& bcHandler )
 {
-    return LagrangeMultiplier( Flag, BC, M_linSol );
-}
-
-template<typename Mesh, typename SolverType>
-void OseenShapeDerivative<Mesh, SolverType>::setUp( const GetPot& dataFile )
-{
-    //M_linearLinSolver.setDataFromGetPot( dataFile, "lin_fluid/solver" );
-    //    M_linearLinSolver.setAztecooPreconditioner( dataFile, "lin_fluid/solver" );
-
-    super::setUp( dataFile );
-
-    M_reusePrecLin = dataFile( "lin_fluid/prec/reuse", true);
-
-    //std::string precType = dataFile( "lin_fluid/prec/prectype", "Ifpack");
-
-    //    M_linPrec            = prec_type( PRECFactory::instance().createObject( precType ) ); //linPrec is not used
-    //    M_linPrec->setDataFromGetPot( dataFile, "lin_fluid/prec" );
-
+    return LagrangeMultiplier( flag, bcHandler, M_linearSolution );
 }
 
 
-
-template<typename Mesh, typename SolverType>
-void OseenShapeDerivative<Mesh, SolverType>::iterateLin( bchandler_raw_type& bch )
+template<typename MeshType, typename SolverType>
+void OseenShapeDerivative<MeshType, SolverType>::setUp( const GetPot& dataFile )
 {
-    this->M_Displayer.leaderPrint(" LF-  Finalizing the matrix and vectors ...    ");
+    // M_linearLinSolver.setDataFromGetPot( dataFile, "lin_fluid/solver" );
+    // M_linearLinSolver.setAztecooPreconditioner( dataFile, "lin_fluid/solver" );
+
+    oseenSolver_Type::setUp( dataFile );
+
+    M_reuseLinearPreconditioner = dataFile( "lin_fluid/prec/reuse", true );
+
+    // std::string precType = dataFile( "lin_fluid/prec/prectype", "Ifpack" );
+
+    // M_linearPreconditioner = prec_type( PRECFactory::instance().createObject( precType ) ); //linPrec is not used
+    // M_linearPreconditioner->setDataFromGetPot( dataFile, "lin_fluid/prec" );
+
+}
+
+
+template<typename MeshType, typename SolverType>
+void OseenShapeDerivative<MeshType, SolverType>::iterateLin( bcHandler_Type& bcHandler )
+{
+    this->M_Displayer.leaderPrint( " LF-  Finalizing the matrix and vectors ...    " );
 
     Chrono chrono;
     chrono.start();
 
     // matrix and vector assembling communication
-    this->M_matrNoBC->GlobalAssemble();
+    this->M_matrixNoBC->GlobalAssemble();
 
-    M_rhsLinNoBC.GlobalAssemble();
+    M_linearRightHandSideNoBC.GlobalAssemble();
 
-    matrix_ptrtype matrFull( new matrix_type( this->M_localMap, this->M_matrNoBC->getMeanNumEntries()));
+    matrix_ptrtype matrixFull( new matrix_Type( this->M_localMap, this->M_matrixNoBC->getMeanNumEntries() ) );
 
-    updateStab(*matrFull);
-    getFluidMatrix(*matrFull);
+    updateStab( *matrixFull );
+    getFluidMatrix( *matrixFull );
 
-    vector_type    rhsFull(M_rhsLinNoBC);
+    vector_Type    rightHandSideFull( M_linearRightHandSideNoBC );
 
     chrono.stop();
-    this->M_Displayer.leaderPrintMax("done in " , chrono.diff());
+    this->M_Displayer.leaderPrintMax( "done in " , chrono.diff() );
 
     // boundary conditions update
-    this->M_Displayer.leaderPrint(" LF-  Applying boundary conditions ...         ");
+    this->M_Displayer.leaderPrint( " LF-  Applying boundary conditions ...         " );
     chrono.start();
 
-    applyBoundaryConditions( *matrFull, rhsFull, bch );
+    applyBoundaryConditions( *matrixFull, rightHandSideFull, bcHandler );
 
     chrono.stop();
-    this->M_Displayer.leaderPrintMax("done in ", chrono.diff() );
+    this->M_Displayer.leaderPrintMax( "done in ", chrono.diff() );
 
     // solving the system
 
     // using the same preconditioner as for the non linear problem (the matrix changes only in the
     // boundary terms).
-    matrFull->GlobalAssemble();
-    this->M_linearSolver.setMatrix(*matrFull);
-    this->M_linearSolver.setReusePreconditioner( M_reusePrecLin );
-    this->M_linearSolver.solveSystem( rhsFull, M_linSol, matrFull );
+    matrixFull->GlobalAssemble();
+    this->M_linearSolver.setMatrix( *matrixFull );
+    this->M_linearSolver.setReusePreconditioner( M_reuseLinearPreconditioner );
+    this->M_linearSolver.solveSystem( rightHandSideFull, M_linearSolution, matrixFull );
 
-    this->M_residual  = M_rhsLinNoBC;
-    this->M_residual -= *this->M_matrNoBC*this->M_linSol;
+    this->M_residual  = M_linearRightHandSideNoBC;
+    this->M_residual -= *this->M_matrixNoBC*this->M_linearSolution;
 
 //     if(S_verbose)
 //         {
 //             this->M_Displayer.leaderPrintMax( "NormInf Residual Lin = " , this->M_residual.NormInf());
-//             this->M_Displayer.leaderPrintMax( "NormInf Solution Lin = " , this->M_linSol.NormInf());
+//             this->M_Displayer.leaderPrintMax( "NormInf Solution Lin = " , this->M_linearSolution.NormInf());
 //         }
 } // iterateLin
 
-template<typename Mesh, typename SolverType>
+template<typename MeshType, typename SolverType>
 void
-OseenShapeDerivative<Mesh, SolverType>::updateLinearSystem( const matrix_type& /*matrNoBC*/, //Fluid Matrix withoud BC
-                                                            double&      /*alpha*/,    //alpha
-                                                            const vector_type& un,           //Beta
-                                                            const vector_type& uk,           //Fluid Solution
-                                                            const vector_type& disp,         //Mesh deltaX
-                                                            const vector_type& w,            //Mesh Velocity
-                                                            const vector_type& dw,           //Mesh deltaVelocity
-                                                            const vector_type& sourceVec)    //RHS (usually 0 )
+OseenShapeDerivative<MeshType, SolverType>::updateLinearSystem( const matrix_Type& matrixNoBC,
+                                                                  Real&              alpha,
+                                                                  const vector_Type& un,
+                                                                  const vector_Type& uk,
+                                                                  const vector_Type& disp,
+                                                                  const vector_Type& w,
+                                                                  const vector_Type& dw,
+                                                                  const vector_Type& sourceVector )
 {
-    this->M_Displayer.leaderPrint(" LF-  Updating the right hand side ...         ");
+    this->M_Displayer.leaderPrint( " LF-  Updating the right hand side ...         " );
     Chrono chrono;
     chrono.start();
 
-    int nbCompU = nDimensions;
-    M_rhsLinNoBC = sourceVec;//which is usually zero
+    Int numVelocityComponent = nDimensions;
+    // sourceVector is usually zero
+    M_linearRightHandSideNoBC = sourceVector;
 
-    if (this->M_data->useShapeDerivatives())
+    if ( this->M_dataNavierStokes->useShapeDerivatives() )
     {
-        //
-        // RIGHT HAND SIDE FOR THE LINEARIZED ALE SYSTEM
-        //
-
+        // right hand side for the linearized ale system
         // Loop on elements
-        vector_type unRep  ( un  , Repeated );
-        vector_type ukRep  ( uk  , Repeated );
-        vector_type dispRep( disp, Repeated );
-        vector_type wRep   ( w   , Repeated );
-        vector_type dwRep  ( dw  , Repeated );
+        vector_Type unRepeated   ( un  , Repeated );
+        vector_Type ukRepeated   ( uk  , Repeated );
+        vector_Type dispRepeated ( disp, Repeated );
+        vector_Type wRepeated    ( w   , Repeated );
+        vector_Type dwRepeated   ( dw  , Repeated );
 
-        //     std::cout << wRep.NormInf() << std::endl;
-        //     std::cout << dwRep.NormInf() << std::endl;
-        //     std::cout << dispRep.NormInf() << std::endl;
+        //     std::cout << wRepeated.NormInf() << std::endl;
+        //     std::cout << dwRepeated.NormInf() << std::endl;
+        //     std::cout << dispRepeated.NormInf() << std::endl;
 
-        vector_type rhsLinNoBC( M_rhsLinNoBC.getMap(), Repeated);
+        vector_Type rhsLinNoBC( M_linearRightHandSideNoBC.getMap(), Repeated );
 
-        for ( UInt i = 1; i <= this->M_uFESpace.mesh()->numVolumes(); i++ )
+        for ( UInt i = 1; i <= this->M_velocityFESpace.mesh()->numVolumes(); i++ )
         {
 
-            this->M_pFESpace.fe().update( this->M_pFESpace.mesh()->volumeList( i ) );
-            this->M_uFESpace.fe().updateFirstDerivQuadPt( this->M_uFESpace.mesh()->volumeList( i ) );
+            this->M_pressureFESpace.fe().update( this->M_pressureFESpace.mesh()->volumeList( i ) );
+            this->M_velocityFESpace.fe().updateFirstDerivQuadPt( this->M_velocityFESpace.mesh()->volumeList( i ) );
 
             // initialization of elementary vectors
-            M_elvec_du.zero();
-            M_elvec_dp.zero();
+            M_elementVectorVelocity.zero();
+            M_elementVectorPressure.zero();
 
-            for ( UInt k = 0 ; k < this->M_uFESpace.fe().nbNode ; k++ )
+            for ( UInt iNode = 0 ; iNode < this->M_velocityFESpace.fe().nbNode ; iNode++ )
             {
-                UInt iloc = this->M_uFESpace.fe().patternFirst( k ); // iloc = k
+                UInt iLocal = this->M_velocityFESpace.fe().patternFirst( iNode ); // iLocal = iNode
 
-                for ( int ic = 0; ic < nbCompU; ++ic )
+                for ( Int iComponent = 0; iComponent < numVelocityComponent; ++iComponent )
                 {
-                    UInt ig    = this->M_uFESpace.dof().localToGlobal( i, iloc + 1 ) + ic * this->dim_u();
+                    UInt iGlobal = this->M_velocityFESpace.dof().localToGlobal( i, iLocal + 1 ) + iComponent * this->dim_u();
 
-                    M_elvec.vec( )  [ iloc + ic*this->M_uFESpace.fe().nbNode ] = unRep(ig) - wRep( ig ); // u^n - w^k local
-                    M_w_loc.vec( )  [ iloc + ic*this->M_uFESpace.fe().nbNode ] = wRep( ig );             // w^k local
-                    M_uk_loc.vec( ) [ iloc + ic*this->M_uFESpace.fe().nbNode ] = ukRep( ig );            // u^k local
-                    M_d_loc.vec( )  [ iloc + ic*this->M_uFESpace.fe().nbNode ] = dispRep( ig );          // d local
-                    M_dw_loc.vec( ) [ iloc + ic*this->M_uFESpace.fe().nbNode ] = dwRep( ig );            // dw local
-                    M_u_loc.vec()   [ iloc + ic*this->M_uFESpace.fe().nbNode ] = unRep( ig );            // un local
+                    // u^n - w^iNode local
+                    M_elementConvectionVelocity.vec( )  [ iLocal + iComponent*this->M_velocityFESpace.fe().nbNode ] = unRepeated(iGlobal)
+                            - wRepeated( iGlobal );
+                    // w^iNode local
+                    M_elementMeshVelocity.vec( )  [ iLocal + iComponent*this->M_velocityFESpace.fe().nbNode ] = wRepeated( iGlobal );
+                    // u^iNode local
+                    M_elementVelocity.vec( ) [ iLocal + iComponent*this->M_velocityFESpace.fe().nbNode ] = ukRepeated( iGlobal );
+                    // d local
+                    M_elementDisplacement.vec( )  [ iLocal + iComponent*this->M_velocityFESpace.fe().nbNode ] = dispRepeated( iGlobal );
+                    // dw local
+                    M_elementVelocityRightHandSide.vec( ) [ iLocal + iComponent*this->M_velocityFESpace.fe().nbNode ] = dwRepeated( iGlobal );
+                    // un local
+                    M_u_loc.vec()   [ iLocal + iComponent*this->M_velocityFESpace.fe().nbNode ] = unRepeated( iGlobal );
                 }
             }
             /*
-              std::cout << M_elvec.vec() << std::endl;
-              std::cout << M_w_loc.vec() << std::endl;
-              std::cout << M_uk_loc.vec() << std::endl;
-              std::cout << M_d_loc.vec() << std::endl;
-              std::cout << M_dw_loc.vec() << std::endl;
+              std::cout << M_elementConvectionVelocity.vec() << std::endl;
+              std::cout << M_elementMeshVelocity.vec() << std::endl;
+              std::cout << M_elementVelocity.vec() << std::endl;
+              std::cout << M_elementDisplacement.vec() << std::endl;
+              std::cout << M_elementVelocityRightHandSide.vec() << std::endl;
               std::cout << M_u_loc.vec() << std::endl;
             */
-            for ( UInt k = 0 ; k < this->M_pFESpace.fe().nbNode ; k++ )
+            for ( UInt iNode = 0 ; iNode < this->M_pressureFESpace.fe().nbNode ; iNode++ )
             {
-                UInt iloc = this->M_pFESpace.fe().patternFirst( k ); // iloc = k
-                UInt ig   = this->M_pFESpace.dof().localToGlobal( i, iloc + 1 ) + nbCompU*this->dim_u();
-                M_pk_loc[ iloc ] = ukRep[ ig ];  // p^k local
+                UInt iLocal = this->M_pressureFESpace.fe().patternFirst( iNode ); // iLocal = iNode
+                UInt iGlobal   = this->M_pressureFESpace.dof().localToGlobal( i, iLocal + 1 ) + numVelocityComponent*this->dim_u();
+                M_elementPressure[ iLocal ] = ukRepeated[ iGlobal ];  // p^iNode local
 
             }
 
-            //
             // Elementary vectors
-            //
+
             //commented the code to print out the elementary data. Useful for debugging.
 
-            //  - \rho ( \grad( u^n-w^k ):[I\div d - (\grad d)^T] u^k + ( u^n-w^k )^T[I\div d - (\grad d)^T] (\grad u^k)^T , v  )
-            source_mass1( - this->M_data->density(), M_uk_loc, M_w_loc, M_elvec, M_d_loc, M_elvec_du, this->M_uFESpace.fe() );
+            //  - \rho ( \grad( u^n-w^iNode ):[I\div d - (\grad d)^T] u^iNode + ( u^n-w^iNode )^T[I\div d - (\grad d)^T] (\grad u^iNode)^T , v  )
+            source_mass1( - this->M_dataNavierStokes->density(),
+                          M_elementVelocity,
+                          M_elementMeshVelocity,
+                          M_elementConvectionVelocity,
+                          M_elementDisplacement,
+                          M_elementVectorVelocity,
+                          this->M_velocityFESpace.fe() );
             /*
-            std::cout << "source_mass1 -> norm_inf(M_elvec_du)" << std::endl;
-            M_elvec_du.showMe(std::cout);
+            std::cout << "source_mass1 -> norm_inf(M_elementVectorVelocity)" << std::endl;
+            M_elementVectorVelocity.showMe(std::cout);
             */
-            //  + \rho * ( \grad u^k dw, v  )
-            source_mass2( this->M_data->density(), M_uk_loc, M_dw_loc, M_elvec_du, this->M_uFESpace.fe() );
+            //  + \rho * ( \grad u^iNode dw, v  )
+            source_mass2( this->M_dataNavierStokes->density(),
+                          M_elementVelocity,
+                          M_elementVelocityRightHandSide,
+                          M_elementVectorVelocity,
+                          this->M_velocityFESpace.fe() );
             /*
-            std::cout << "source_mass2 -> norm_inf(M_elvec_du)" << std::endl;
-            M_elvec_du.showMe(std::cout);
+            std::cout << "source_mass2 -> norm_inf(M_elementVectorVelocity)" << std::endl;
+            M_elementVectorVelocity.showMe(std::cout);
             */
-            //  - \rho/2 ( \nabla u^n:[2 * I\div d - (\grad d)^T]  u^k , v  )
-            source_mass3( - 0.5*this->M_data->density(), M_u_loc, M_uk_loc, M_d_loc, M_elvec_du, this->M_uFESpace.fe() );
+            //  - \rho/2 ( \nabla u^n:[2 * I\div d - (\grad d)^T]  u^iNode , v  )
+            source_mass3( - 0.5*this->M_dataNavierStokes->density(),
+                          M_u_loc,
+                          M_elementVelocity,
+                          M_elementDisplacement,
+                          M_elementVectorVelocity,
+                          this->M_velocityFESpace.fe() );
             /*
-            std::cout << "source_mass3 -> norm_inf(M_elvec_du)" << std::endl;
-            M_elvec_du.showMe(std::cout);
+            std::cout << "source_mass3 -> norm_inf(M_elementVectorVelocity)" << std::endl;
+            M_elementVectorVelocity.showMe(std::cout);
             */
-            //  - ( [-p^k I + 2*mu e(u^k)] [I\div d - (\grad d)^T] , \grad v  )
-            source_stress( - 1.0, this->M_data->viscosity(), M_uk_loc, M_pk_loc, M_d_loc, M_elvec_du, this->M_uFESpace.fe(), this->M_pFESpace.fe() );
+            //  - ( [-p^iNode I + 2*mu e(u^iNode)] [I\div d - (\grad d)^T] , \grad v  )
+            source_stress( - 1.0,
+                           this->M_dataNavierStokes->viscosity(),
+                           M_elementVelocity,
+                           M_elementPressure,
+                           M_elementDisplacement,
+                           M_elementVectorVelocity,
+                           this->M_velocityFESpace.fe(),
+                           this->M_pressureFESpace.fe() );
             /*
-            std::cout << "source_stress -> norm_inf(M_elvec_du)" << std::endl;
-            M_elvec_du.showMe(std::cout);
+            std::cout << "source_stress -> norm_inf(M_elementVectorVelocity)" << std::endl;
+            M_elementVectorVelocity.showMe(std::cout);
             */
-            // + \mu ( \grad u^k \grad d + [\grad d]^T[\grad u^k]^T : \grad v )
-            source_stress2( this->M_data->viscosity(), M_uk_loc, M_d_loc, M_elvec_du, this->M_uFESpace.fe() );
+            // + \mu ( \grad u^iNode \grad d + [\grad d]^T[\grad u^iNode]^T : \grad v )
+            source_stress2( this->M_dataNavierStokes->viscosity(),
+                            M_elementVelocity,
+                            M_elementDisplacement,
+                            M_elementVectorVelocity,
+                            this->M_velocityFESpace.fe() );
             /*
-            std::cout << "source_stress2 -> norm_inf(M_elvec_du)" << std::endl;
-            M_elvec_du.showMe(std::cout);
+            std::cout << "source_stress2 -> norm_inf(M_elementVectorVelocity)" << std::endl;
+            M_elementVectorVelocity.showMe(std::cout);
             */
-            //  + ( (\grad u^k):[I\div d - (\grad d)^T] , q  )
-            source_press( -1.0, M_uk_loc, M_d_loc, M_elvec_dp, this->M_uFESpace.fe(), this->M_pFESpace.fe() );
+            //  + ( (\grad u^iNode):[I\div d - (\grad d)^T] , q  )
+            source_press( -1.0,
+                          M_elementVelocity,
+                          M_elementDisplacement,
+                          M_elementVectorPressure,
+                          this->M_velocityFESpace.fe(),
+                          this->M_pressureFESpace.fe() );
             /*
-            std::cout << "source_press -> norm_inf(M_elvec_du)"  << std::endl;
-            M_elvec_dp.showMe(std::cout);
+            std::cout << "source_press -> norm_inf(M_elementVectorVelocity)"  << std::endl;
+            M_elementVectorPressure.showMe(std::cout);
             */
             //
             // Assembling
             //
             /*
               std::cout << "debut ====================" << std::endl;
-              M_elvec_dp.showMe(std::cout);
-              M_elvec_du.showMe(std::cout);
+              M_elementVectorPressure.showMe(std::cout);
+              M_elementVectorVelocity.showMe(std::cout);
               std::cout << "fin   ====================" << std::endl;
             */
             // assembling pressure right hand side
-            assembleVector( rhsLinNoBC, M_elvec_dp, this->M_pFESpace.fe(), this->M_pFESpace.dof(), 0, nbCompU*this->dim_u() );
+            assembleVector( rhsLinNoBC,
+                            M_elementVectorPressure,
+                            this->M_pressureFESpace.fe(),
+                            this->M_pressureFESpace.dof(),
+                            0,
+                            numVelocityComponent*this->dim_u() );
 
             // loop on velocity components
-            for ( int ic = 0; ic < nbCompU; ic++ )
+            for ( Int iComponent = 0; iComponent < numVelocityComponent; iComponent++ )
             {
                 // assembling velocity right hand side
-                assembleVector( rhsLinNoBC, M_elvec_du, this->M_uFESpace.fe(), this->M_uFESpace.dof(), ic, ic*this->dim_u() );
+                assembleVector( rhsLinNoBC,
+                                M_elementVectorVelocity,
+                                this->M_velocityFESpace.fe(),
+                                this->M_velocityFESpace.dof(),
+                                iComponent,
+                                iComponent*this->dim_u() );
             }
         }
 
         rhsLinNoBC.GlobalAssemble();
-        M_rhsLinNoBC += rhsLinNoBC;
-        //            M_rhsLinNoBC *= -1.;
-//             if(S_verbose)
-//                 this->M_Displayer.leaderPrint( "norm( M_rhsLinNoBC)  = " , M_rhsLinNoBC.NormInf() );
+        M_linearRightHandSideNoBC += rhsLinNoBC;
+//       M_linearRightHandSideNoBC *= -1.;
+//       if( S_verbose )
+//           this->M_Displayer.leaderPrint( "norm( M_linearRightHandSideNoBC)  = " , M_linearRightHandSideNoBC.NormInf() );
 
     }
 
     chrono.stop();
-    this->M_Displayer.leaderPrintMax("done in ", chrono.diff() );
+    this->M_Displayer.leaderPrintMax( "done in ", chrono.diff() );
 }
 
 
 //#if UNDEF
-template<typename Mesh, typename SolverType>
+template<typename MeshType, typename SolverType>
 void
-OseenShapeDerivative<Mesh, SolverType>::updateShapeDerivatives( matrix_type& M_matr,
-                                                                double&       alpha,
-                                                                const vector_type& un,
-                                                                const vector_type& uk,
-                                                                //const vector_type& disp,
-                                                                const vector_type& w,
-                                                                UInt offset,
-                                                                FESpace<Mesh, EpetraMap>& mmFESpace,
-                                                                bool wImplicit,
-                                                                bool convectiveTermDerivative
-                                                              )
+OseenShapeDerivative<MeshType, SolverType>::
+updateShapeDerivatives( matrix_Type&                   matrix,
+                        Real&                          alpha,
+                        const vector_Type&             un,
+                        const vector_Type&             uk,
+                        //const vector_Type&           disp,
+                        const vector_Type&             w,
+                        UInt                           offset,
+                        FESpace<mesh_Type, EpetraMap>& mmFESpace,
+                        bool                           wImplicit,
+                        bool                           convectiveTermDerivative )
 {
     Chrono chrono;
 
-    UInt nbCompU = nDimensions;
+    UInt numVelocityComponent = nDimensions;
 
-    //    M_rhsLinNoBC = sourceVec;//which is usually zero
+    //    M_linearRightHandSideNoBC = sourceVector;//which is usually zero
 
-    if (this->M_data->useShapeDerivatives())
+    if ( this->M_dataNavierStokes->useShapeDerivatives() )
     {
-        this->M_Displayer.leaderPrint(" LF-  Updating shape derivative blocks ...     ");
+        this->M_Displayer.leaderPrint( " LF-  Updating shape derivative blocks ...     " );
 
         //
         // RIGHT HAND SIDE FOR THE LINEARIZED ALE SYSTEM
@@ -544,159 +766,200 @@ OseenShapeDerivative<Mesh, SolverType>::updateShapeDerivatives( matrix_type& M_m
 
         // Loop on elements
 
-        vector_type unRep  ( un  , Repeated );
-        vector_type ukRep  ( uk  , Repeated );
-        //vector_type dispRep( disp, Repeated );
-        vector_type wRep   ( w   , Repeated );
-        //            vector_type dwRep  ( dw  , Repeated );
+        vector_Type unRepeated  ( un  , Repeated );
+        vector_Type ukRepeated  ( uk  , Repeated );
+        // vector_Type dispRepeated( disp, Repeated );
+        vector_Type wRepeated   ( w   , Repeated );
+        // vector_Type dwRepeated  ( dw  , Repeated );
 
-//     std::cout << wRep.NormInf() << std::endl;
-//     std::cout << dwRep.NormInf() << std::endl;
-//     std::cout << dispRep.NormInf() << std::endl;
+//     std::cout << wRepeated.NormInf() << std::endl;
+//     std::cout << dwRepeated.NormInf() << std::endl;
+//     std::cout << dispRepeated.NormInf() << std::endl;
 
-//            vector_type rhsLinNoBC( M_rhsLinNoBC.getMap(), Repeated);
+//            vector_Type rhsLinNoBC( M_linearRightHandSideNoBC.getMap(), Repeated);
 
-        for ( UInt i = 1; i <= this->M_uFESpace.mesh()->numVolumes(); i++ )
+        for ( UInt i = 1; i <= this->M_velocityFESpace.mesh()->numVolumes(); i++ )
         {
 
+            this->M_pressureFESpace.fe().update( this->M_pressureFESpace.mesh()->volumeList( i ) );
+            this->M_velocityFESpace.fe().updateFirstDerivQuadPt( this->M_velocityFESpace.mesh()->volumeList( i ) );
+            this->M_pressureFESpace.fe().updateFirstDerivQuadPt( this->M_velocityFESpace.mesh()->volumeList( i ) );
 
-
-            this->M_pFESpace.fe().update( this->M_pFESpace.mesh()->volumeList( i ) );
-            this->M_uFESpace.fe().updateFirstDerivQuadPt( this->M_uFESpace.mesh()->volumeList( i ) );
-            this->M_pFESpace.fe().updateFirstDerivQuadPt( this->M_uFESpace.mesh()->volumeList( i ) );
-
-            //this->M_pFESpace.fe().updateFirstDeriv( this->M_uFESpace.mesh()->volumeList( i ) ); // just to provide the id number in the assem_mat_mixed
-            //this->M_uFESpace.fe().updateFirstDeriv( this->M_uFESpace.mesh()->volumeList( i ) ); //as updateFirstDer
+            // just to provide the id number in the assem_mat_mixed
+            //this->M_pressureFESpace.fe().updateFirstDeriv( this->M_velocityFESpace.mesh()->volumeList( i ) );
+            //as updateFirstDer
+            //this->M_velocityFESpace.fe().updateFirstDeriv( this->M_velocityFESpace.mesh()->volumeList( i ) );
             mmFESpace.fe().updateFirstDerivQuadPt( mmFESpace.mesh()->volumeList( i ) );
 
             // initialization of elementary vectors
-            boost::shared_ptr<ElemMat> elmat_dp       ( new ElemMat(this->M_pFESpace.fe().nbNode, 1, 0, mmFESpace.fe().nbNode, 0, nDimensions ));
-            boost::shared_ptr<ElemMat> elmat_du       ( new ElemMat(this->M_uFESpace.fe().nbNode, nDimensions, 0, this->M_uFESpace.fe().nbNode, 0, nDimensions ));
-            boost::shared_ptr<ElemMat> elmat_du_convective;
+            boost::shared_ptr<ElemMat> elementMatrixPressure ( new ElemMat( this->M_pressureFESpace.fe().nbNode,
+                                                                            1,
+                                                                            0,
+                                                                            mmFESpace.fe().nbNode,
+                                                                            0,
+                                                                            nDimensions ) );
+            boost::shared_ptr<ElemMat> elementMatrixVelocity ( new ElemMat( this->M_velocityFESpace.fe().nbNode,
+                                                                            nDimensions,
+                                                                            0,
+                                                                            this->M_velocityFESpace.fe().nbNode,
+                                                                            0,
+                                                                            nDimensions ) );
+            boost::shared_ptr<ElemMat> elementMatrixConvective;
 
-            if (convectiveTermDerivative)
+            if ( convectiveTermDerivative )
             {
-                elmat_du_convective.reset( new ElemMat(this->M_uFESpace.fe().nbNode, nDimensions, 0, mmFESpace.fe().nbNode, 0, nDimensions ));
-                elmat_du_convective->zero();
+                elementMatrixConvective.reset( new ElemMat( this->M_velocityFESpace.fe().nbNode,
+                                                            nDimensions,
+                                                            0,
+                                                            mmFESpace.fe().nbNode,
+                                                            0,
+                                                            nDimensions ) );
+                elementMatrixConvective->zero();
             }
 
+            elementMatrixPressure->zero();
+            elementMatrixVelocity->zero();
 
-
-            elmat_dp->zero();
-            elmat_du->zero();
-
-
-            for ( UInt k = 0 ; k < this->M_uFESpace.fe().nbNode ; k++ )
+            for ( UInt iNode = 0 ; iNode < this->M_velocityFESpace.fe().nbNode ; iNode++ )
             {
-                UInt iloc = this->M_uFESpace.fe().patternFirst( k ); // iloc = k
+                UInt iLocal = this->M_velocityFESpace.fe().patternFirst( iNode ); // iLocal = iNode
 
-                for ( UInt ic = 0; ic < nbCompU; ++ic )
+                for ( UInt iComponent = 0; iComponent < numVelocityComponent; ++iComponent )
                 {
-                    UInt ig    = this->M_uFESpace.dof().localToGlobal( i, iloc + 1 ) + ic * this->dim_u();
+                    UInt iGlobal = this->M_velocityFESpace.dof().localToGlobal( i, iLocal + 1 ) + iComponent * this->dim_u();
 
-                    //                                    if(!wImplicit)
-                    M_elvec.vec( )  [ iloc + ic*this->M_uFESpace.fe().nbNode ] = unRep(ig) - wRep( ig ); // u^n - w^k local
-//                                     else
-//                                         M_elvec.vec( )  [ iloc + ic*this->M_uFESpace.fe().nbNode ] = ukRep(ig) - wRep( ig ); // u^n - w^k local
-                    M_w_loc.vec( )  [ iloc + ic*this->M_uFESpace.fe().nbNode ] = wRep( ig );             // w^k local
-                    M_uk_loc.vec( ) [ iloc + ic*this->M_uFESpace.fe().nbNode ] = ukRep( ig );            // u^k local
-                    //M_d_loc.vec( ) [ iloc + ic*this->M_uFESpace.fe().nbNode ] = dispRep( ig );            // dw local
-                    //M_dw_loc.vec( ) [ iloc + ic*this->M_uFESpace.fe().nbNode ] = dwRep( ig );            // dw local
-                    M_u_loc.vec()   [ iloc + ic*this->M_uFESpace.fe().nbNode ] = unRep( ig );            // un local
+                    // if(!wImplicit)
+                    // u^n - w^iNode local
+                    M_elementConvectionVelocity.vec() [ iLocal + iComponent*this->M_velocityFESpace.fe().nbNode ] = unRepeated(iGlobal)
+                            - wRepeated( iGlobal );
+                    // else
+                    // u^n - w^iNode local
+                    // M_elementConvectionVelocity.vec() [ iLocal + iComponent*this->M_velocityFESpace.fe().nbNode ] = ukRepeated(iGlobal)
+                    - wRepeated(iGlobal);
+                    // w^iNode local
+                    M_elementMeshVelocity.vec( )  [ iLocal + iComponent*this->M_velocityFESpace.fe().nbNode ] = wRepeated( iGlobal );
+                    // u^iNode local
+                    M_elementVelocity.vec( ) [ iLocal + iComponent*this->M_velocityFESpace.fe().nbNode ] = ukRepeated( iGlobal );
+                    // dw local
+                    //M_elementDisplacement.vec( ) [ iLocal + iComponent*this->M_velocityFESpace.fe().nbNode ] = dispRepeated( iGlobal );
+                    // dw local
+                    //M_elementVelocityRightHandSide.vec( ) [ iLocal + iComponent*this->M_velocityFESpace.fe().nbNode ] = dwRepeated( iGlobal );
+                    // un local
+                    M_u_loc.vec()   [ iLocal + iComponent*this->M_velocityFESpace.fe().nbNode ] = unRepeated( iGlobal );
                 }
             }
             /*
-            std::cout << M_elvec.vec() << std::endl;
-            std::cout << M_w_loc.vec() << std::endl;
-            std::cout << M_uk_loc.vec() << std::endl;
-            std::cout << M_d_loc.vec() << std::endl;
-            std::cout << M_dw_loc.vec() << std::endl;
+            std::cout << M_elementConvectionVelocity.vec() << std::endl;
+            std::cout << M_elementMeshVelocity.vec() << std::endl;
+            std::cout << M_elementVelocity.vec() << std::endl;
+            std::cout << M_elementDisplacement.vec() << std::endl;
+            std::cout << M_elementVelocityRightHandSide.vec() << std::endl;
             std::cout << M_u_loc.vec() << std::endl;
             */
-            for ( UInt k = 0 ; k < this->M_pFESpace.fe().nbNode ; k++ )
+            for ( UInt iNode = 0 ; iNode < this->M_pressureFESpace.fe().nbNode ; iNode++ )
             {
-                UInt iloc = this->M_pFESpace.fe().patternFirst( k ); // iloc = k
-                UInt ig   = this->M_pFESpace.dof().localToGlobal( i, iloc + 1 ) + nbCompU*this->dim_u();
-                M_pk_loc[ iloc ] = ukRep[ ig ];  // p^k local
+                // iLocal = iNode
+                UInt iLocal = this->M_pressureFESpace.fe().patternFirst( iNode );
+                UInt iGlobal = this->M_pressureFESpace.dof().localToGlobal( i, iLocal + 1 ) + numVelocityComponent*this->dim_u();
+                // p^iNode local
+                M_elementPressure[ iLocal ] = ukRepeated[ iGlobal ];
             }
 
 
-            shape_terms(
-                //M_d_loc,
-                this->M_data->density(),
-                this->M_data->viscosity(),
+            shape_terms( //M_elementDisplacement,
+                this->M_dataNavierStokes->density(),
+                this->M_dataNavierStokes->viscosity(),
                 M_u_loc,
-                M_uk_loc,
-                M_w_loc,
-                M_elvec,
-                M_pk_loc,
-                *elmat_du,
-                this->M_uFESpace.fe(),
-                this->M_pFESpace.fe(),
+                M_elementVelocity,
+                M_elementMeshVelocity,
+                M_elementConvectionVelocity,
+                M_elementPressure,
+                *elementMatrixVelocity,
+                this->M_velocityFESpace.fe(),
+                this->M_pressureFESpace.fe(),
                 (ID) mmFESpace.fe().nbNode,
-                *elmat_dp,
+                *elementMatrixPressure,
                 0,
                 wImplicit,
                 alpha//,
-                //elmat_du_convective
+                //elementMatrixConvective
             );
 
-            //elmat_du->showMe(std::cout);
+            //elementMatrixVelocity->showMe(std::cout);
 
-            //source_mass2( this->M_data->density(), M_uk_loc, *M_elmat_du_convective, this->M_uFESpace.fe(), alpha );
-
-            source_press( 1.0, M_uk_loc,*elmat_dp, this->M_uFESpace.fe(), this->M_pFESpace.fe(), (ID) mmFESpace.fe().nbNode);
-
-
-            if (convectiveTermDerivative)//derivative of the convective term
-                mass_gradu(this->M_data->density(), M_uk_loc, *elmat_du_convective, this->M_uFESpace.fe());
             /*
-              std::cout << "source_press -> norm_inf(M_elvec_du)"  << std::endl;
-            M_elvec_dp.showMe(std::cout);
+            source_mass2( this->M_dataNavierStokes->density(),
+                          M_elementVelocity,
+                          *M_elementMatrixConvective,
+                          this->M_velocityFESpace.fe(),
+                          alpha );
+            */
+
+            source_press( 1.0,
+                          M_elementVelocity,
+                          *elementMatrixPressure,
+                          this->M_velocityFESpace.fe(),
+                          this->M_pressureFESpace.fe(),
+                          (ID) mmFESpace.fe().nbNode );
+
+            //derivative of the convective term
+            if ( convectiveTermDerivative )
+                mass_gradu( this->M_dataNavierStokes->density(),
+                            M_elementVelocity,
+                            *elementMatrixConvective,
+                            this->M_velocityFESpace.fe() );
+            /*
+              std::cout << "source_press -> norm_inf( M_elementVectorVelocity )"  << std::endl;
+            M_elementVectorPressure.showMe( std::cout );
             */
             //
             // Assembling
             //
             /*
             std::cout << "debut ====================" << std::endl;
-            M_elvec_dp.showMe(std::cout);
-            M_elvec_du.showMe(std::cout);
+            M_elementVectorPressure.showMe( std::cout );
+            M_elementVectorVelocity.showMe( std::cout );
             std::cout << "fin   ====================" << std::endl;
             */
-            UInt const velTotalDof (this->M_uFESpace.dof().numTotalDof());
-            for (UInt icomp=0; icomp<nbCompU; ++icomp)
+            UInt const velocityTotalDof ( this->M_velocityFESpace.dof().numTotalDof() );
+            for ( UInt iComponent = 0; iComponent < numVelocityComponent; ++iComponent )
             {
-                for (UInt jcomp=0; jcomp<nbCompU; ++jcomp)
+                for ( UInt jComponent = 0; jComponent < numVelocityComponent; ++jComponent )
                 {
-                    assembleMatrix( M_matr,
-                                    *elmat_du,
-                                    this->M_uFESpace.fe(),
+                    assembleMatrix( matrix,
+                                    *elementMatrixVelocity,
+                                    this->M_velocityFESpace.fe(),
                                     mmFESpace.fe(),
-                                    this->M_uFESpace.dof(),
+                                    this->M_velocityFESpace.dof(),
                                     mmFESpace.dof(),
-                                    icomp, jcomp,
-                                    icomp*velTotalDof, offset+jcomp*velTotalDof
-                                  );
-                    if (convectiveTermDerivative)//assembling the derivative of the convective term
-                        assembleMatrix( M_matr,
-                                        *elmat_du_convective,
-                                        this->M_uFESpace.fe(),
-                                        this->M_uFESpace.fe(),
-                                        this->M_uFESpace.dof(),
-                                        this->M_uFESpace.dof(),
-                                        icomp, jcomp,
-                                        icomp*velTotalDof, jcomp*velTotalDof
-                                      );
+                                    iComponent,
+                                    jComponent,
+                                    iComponent * velocityTotalDof,
+                                    offset + jComponent * velocityTotalDof );
+
+                    //assembling the derivative of the convective term
+                    if ( convectiveTermDerivative )
+                        assembleMatrix( matrix,
+                                        *elementMatrixConvective,
+                                        this->M_velocityFESpace.fe(),
+                                        this->M_velocityFESpace.fe(),
+                                        this->M_velocityFESpace.dof(),
+                                        this->M_velocityFESpace.dof(),
+                                        iComponent,
+                                        jComponent,
+                                        iComponent * velocityTotalDof,
+                                        jComponent * velocityTotalDof );
                 }
-                assembleMatrix( M_matr,
-                                *elmat_dp,
-                                this->M_pFESpace.fe(),
+                assembleMatrix( matrix,
+                                *elementMatrixPressure,
+                                this->M_pressureFESpace.fe(),
                                 mmFESpace.fe(),
-                                this->M_pFESpace.dof(),
+                                this->M_pressureFESpace.dof(),
                                 mmFESpace.dof(),
-                                (UInt)0, icomp,
-                                (UInt)nbCompU*velTotalDof, offset+icomp*velTotalDof
-                              );
+                                (UInt) 0,
+                                iComponent,
+                                (UInt) numVelocityComponent * velocityTotalDof,
+                                offset + iComponent * velocityTotalDof );
             }
         }
 
@@ -705,6 +968,6 @@ OseenShapeDerivative<Mesh, SolverType>::updateShapeDerivatives( matrix_type& M_m
     this->M_Displayer.leaderPrintMax("done in ", chrono.diff() );
 }
 
-}
+} // namespace LifeV
 
-#endif
+#endif // OSSENSHAPEDERIVATIVE_H
