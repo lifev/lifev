@@ -43,26 +43,26 @@ namespace LifeV
 // Constructors & Destructor
 // ===================================================
 MS_Model_Fluid3D::MS_Model_Fluid3D() :
-        super                          (),
+        MS_PhysicalModel               (),
         M_exporter                     (),
         M_importer                     (),
         M_fileName                     (),
         M_fluid                        (),
-        M_BC                           ( new BCInterface_Type() ),
-        M_BDF                          (),
-        M_data                         ( new Data_Type() ),
+        M_bc                           ( new bcInterface_Type() ),
+        M_bdf                          (),
+        M_data                         ( new data_Type() ),
         M_dataMesh                     ( new DataMesh()),
         M_mesh                         (),
         M_map                          (),
         M_solution                     (),
-        M_linearBC                     ( new BC_Type() ),
+        M_linearBC                     ( new bc_Type() ),
         M_updateLinearModel            ( true ),
         M_uFESpace                     (),
         M_pFESpace                     (),
         M_lmDOF                        ( 0 ),
         M_alpha                        ( 0 ),
         M_beta                         (),
-        M_RHS                          (),
+        M_rhs                          (),
         M_subiterationsMaximumNumber   (),
         M_tolerance                    (),
         M_generalizedAitken            ()
@@ -79,44 +79,44 @@ MS_Model_Fluid3D::MS_Model_Fluid3D() :
 // MultiScale PhysicalModel Virtual Methods
 // ===================================================
 void
-MS_Model_Fluid3D::SetupData( const std::string& FileName )
+MS_Model_Fluid3D::setupData( const std::string& fileName )
 {
 
 #ifdef HAVE_LIFEV_DEBUG
     Debug( 8120 ) << "MS_Model_Fluid3D::SetupData( ) \n";
 #endif
 
-    super::SetupData( FileName );
-    M_fileName = FileName;
+    MS_PhysicalModel::setupData( fileName );
+    M_fileName = fileName;
 
-    GetPot DataFile( FileName );
+    GetPot dataFile( fileName );
 
     //Fluid data
-    M_data->setup( DataFile );
+    M_data->setup( dataFile );
     if ( M_globalData.get() )
-        SetupGlobalData( FileName );
+        setupGlobalData( fileName );
 
-    M_dataMesh->setup(DataFile, "fluid/space_discretization");
+    M_dataMesh->setup(dataFile, "fluid/space_discretization");
 
     // Parameters for the NS Iterations
-    M_subiterationsMaximumNumber = DataFile( "fluid/miscellaneous/SubITMax", 0 );
-    M_tolerance                  = DataFile( "fluid/miscellaneous/Tolerance", 1.e-6 );
+    M_subiterationsMaximumNumber = dataFile( "fluid/miscellaneous/SubITMax", 0 );
+    M_tolerance                  = dataFile( "fluid/miscellaneous/Tolerance", 1.e-6 );
 
-    M_generalizedAitken.setDefaultOmega(     DataFile( "fluid/miscellaneous/Omega",        1.e-3 ) );
-    M_generalizedAitken.setOmegaMin(         DataFile( "fluid/miscellaneous/range",        M_generalizedAitken.defaultOmegaFluid()/1024, 0 ) );
-    M_generalizedAitken.setOmegaMax(         DataFile( "fluid/miscellaneous/range",        M_generalizedAitken.defaultOmegaFluid()*1024, 1 ) );
-    M_generalizedAitken.useDefaultOmega(     DataFile( "fluid/miscellaneous/fixedOmega",   false ) );
-    M_generalizedAitken.setMinimizationType( DataFile( "fluid/miscellaneous/inverseOmega", true ) );
+    M_generalizedAitken.setDefaultOmega(     dataFile( "fluid/miscellaneous/Omega",        1.e-3 ) );
+    M_generalizedAitken.setOmegaMin(         dataFile( "fluid/miscellaneous/range",        M_generalizedAitken.defaultOmegaFluid()/1024, 0 ) );
+    M_generalizedAitken.setOmegaMax(         dataFile( "fluid/miscellaneous/range",        M_generalizedAitken.defaultOmegaFluid()*1024, 1 ) );
+    M_generalizedAitken.useDefaultOmega(     dataFile( "fluid/miscellaneous/fixedOmega",   false ) );
+    M_generalizedAitken.setMinimizationType( dataFile( "fluid/miscellaneous/inverseOmega", true ) );
 
     //Boundary Conditions for the problem
-    M_BC->fillHandler( FileName, "fluid" );
+    M_bc->fillHandler( fileName, "fluid" );
 
     //Setup Exporter & Importer
-    SetupExporterImporter( FileName );
+    setupExporterImporter( fileName );
 }
 
 void
-MS_Model_Fluid3D::SetupModel()
+MS_Model_Fluid3D::setupModel()
 {
 
 #ifdef HAVE_LIFEV_DEBUG
@@ -124,36 +124,36 @@ MS_Model_Fluid3D::SetupModel()
 #endif
 
     //Mesh
-    SetupMesh();
+    setupMesh();
 
     //FEspace
-    SetupFEspace();
+    setupFEspace();
 
     //Add flow rate offset to BC
-    M_lmDOF = M_BC->handler()->getNumberBCWithType( Flux );
-    SetupBCOffset( M_BC->handler() );
+    M_lmDOF = M_bc->handler()->getNumberBCWithType( Flux );
+    setupBCOffset( M_bc->handler() );
 
     //Fluid
-    M_fluid.reset( new Fluid_Type( M_data, *M_uFESpace, *M_pFESpace, M_comm, M_lmDOF ) );
-    M_BC->setPhysicalSolver( M_fluid );
+    M_fluid.reset( new fluid_Type( M_data, *M_uFESpace, *M_pFESpace, M_comm, M_lmDOF ) );
+    M_bc->setPhysicalSolver( M_fluid );
 
-    GetPot DataFile( M_fileName );
-    M_fluid->setUp( DataFile ); //Remove Preconditioner and Solver if possible!
+    GetPot dataFile( M_fileName );
+    M_fluid->setUp( dataFile ); //Remove Preconditioner and Solver if possible!
 
     //Fluid MAP
     M_map.reset( new EpetraMap( M_fluid->getMap() ) );
 
     //BDF
-    M_BDF.reset( new BDF_Type( M_data->dataTime()->getBDF_order() ) );
+    M_bdf.reset( new bdf_Type( M_data->dataTime()->getBDF_order() ) );
 
     //Problem coefficients
-    M_beta.reset( new FluidVector_Type( M_map ) );
-    M_RHS.reset ( new FluidVector_Type( M_map ) );
+    M_beta.reset( new fluidVector_Type( M_map ) );
+    M_rhs.reset ( new fluidVector_Type( M_map ) );
 
     //Post-processing
     M_exporter->setMeshProcId( M_mesh->mesh(), M_comm->MyPID() );
 
-    M_solution.reset( new FluidVector_Type( *M_fluid->solution(), M_exporter->mapType() ) );
+    M_solution.reset( new fluidVector_Type( *M_fluid->solution(), M_exporter->mapType() ) );
     if ( M_exporter->mapType() == Unique )
         M_solution->setCombineMode( Zero );
 
@@ -161,14 +161,14 @@ MS_Model_Fluid3D::SetupModel()
     M_exporter->addVariable( ExporterData::Scalar, "Fluid Pressure", M_solution, 3 * M_uFESpace->dof().numTotalDof(),              M_pFESpace->dof().numTotalDof() );
 
     //Setup linear model
-    SetupLinearModel();
+    setupLinearModel();
 
     //Setup solution
-    InitializeSolution();
+    initializeSolution();
 }
 
 void
-MS_Model_Fluid3D::BuildSystem()
+MS_Model_Fluid3D::buildSystem()
 {
 
 #ifdef HAVE_LIFEV_DEBUG
@@ -179,28 +179,28 @@ MS_Model_Fluid3D::BuildSystem()
     M_fluid->buildSystem();
 
     //Initialize BDF
-    M_BDF->bdf_u().initialize_unk( *M_fluid->solution() );
+    M_bdf->bdf_u().initialize_unk( *M_fluid->solution() );
 
     //Define problem coefficients
     if ( M_data->Stokes() )
     {
         M_alpha  = 0.0;
         *M_beta  = *M_fluid->solution(); //It is a stationary Navier-Stokes
-        *M_RHS  *= 0.0;
+        *M_rhs  *= 0.0;
     }
     else
     {
-        M_alpha = M_BDF->bdf_u().coeff_der( 0 ) / M_data->dataTime()->getTimeStep();
-        *M_beta = M_BDF->bdf_u().extrap();
-        *M_RHS  = M_fluid->matrMass() * M_BDF->bdf_u().time_der( M_data->dataTime()->getTimeStep() );
+        M_alpha = M_bdf->bdf_u().coeff_der( 0 ) / M_data->dataTime()->getTimeStep();
+        *M_beta = M_bdf->bdf_u().extrap();
+        *M_rhs  = M_fluid->matrMass() * M_bdf->bdf_u().time_der( M_data->dataTime()->getTimeStep() );
     }
 
     //Set problem coefficients
-    M_fluid->updateSystem( M_alpha, *M_beta, *M_RHS );
+    M_fluid->updateSystem( M_alpha, *M_beta, *M_rhs );
 }
 
 void
-MS_Model_Fluid3D::UpdateSystem()
+MS_Model_Fluid3D::updateSystem()
 {
 
 #ifdef HAVE_LIFEV_DEBUG
@@ -208,18 +208,18 @@ MS_Model_Fluid3D::UpdateSystem()
 #endif
 
     //Update BDF
-    M_BDF->bdf_u().shift_right( *M_fluid->solution() );
+    M_bdf->bdf_u().shift_right( *M_fluid->solution() );
 
     //Update problem coefficients
-    M_alpha = M_BDF->bdf_u().coeff_der( 0 ) / M_data->dataTime()->getTimeStep();
-    *M_beta = M_BDF->bdf_u().extrap();
-    *M_RHS  = M_fluid->matrMass() * M_BDF->bdf_u().time_der( M_data->dataTime()->getTimeStep() );
+    M_alpha = M_bdf->bdf_u().coeff_der( 0 ) / M_data->dataTime()->getTimeStep();
+    *M_beta = M_bdf->bdf_u().extrap();
+    *M_rhs  = M_fluid->matrMass() * M_bdf->bdf_u().time_der( M_data->dataTime()->getTimeStep() );
 
     //Set problem coefficients
-    M_fluid->updateSystem( M_alpha, *M_beta, *M_RHS );
+    M_fluid->updateSystem( M_alpha, *M_beta, *M_rhs );
 
     //Update operator BC
-    M_BC->updatePhysicalSolverVariables();
+    M_bc->updatePhysicalSolverVariables();
 
     //Recompute preconditioner
     M_fluid->resetPrec( true );
@@ -229,7 +229,7 @@ MS_Model_Fluid3D::UpdateSystem()
 }
 
 void
-MS_Model_Fluid3D::SolveSystem()
+MS_Model_Fluid3D::solveSystem()
 {
 
 #ifdef HAVE_LIFEV_DEBUG
@@ -237,7 +237,7 @@ MS_Model_Fluid3D::SolveSystem()
 #endif
 
     //Solve the problem
-    M_fluid->iterate( *M_BC->handler() );
+    M_fluid->iterate( *M_bc->handler() );
 
     if ( M_subiterationsMaximumNumber > 0 )
     {
@@ -256,12 +256,12 @@ MS_Model_Fluid3D::SolveSystem()
             *M_beta += M_generalizedAitken.computeDeltaLambdaScalar( *M_beta, *M_beta - *M_fluid->solution() );
 
             //Linear model need to be updated!
-            M_fluid->updateSystem( M_alpha, *M_beta, *M_RHS );
-            M_BC->updatePhysicalSolverVariables();
+            M_fluid->updateSystem( M_alpha, *M_beta, *M_rhs );
+            M_bc->updatePhysicalSolverVariables();
             M_updateLinearModel = true;
 
             //Solve system
-            M_fluid->iterate( *M_BC->handler() );
+            M_fluid->iterate( *M_bc->handler() );
 
             // Check the new residual
             residual = ( *M_beta - *M_fluid->solution() ).Norm2(); // residual is computed on the whole solution vector
@@ -277,7 +277,7 @@ MS_Model_Fluid3D::SolveSystem()
 }
 
 void
-MS_Model_Fluid3D::SaveSolution()
+MS_Model_Fluid3D::saveSolution()
 {
 
 #ifdef HAVE_LIFEV_DEBUG
@@ -290,17 +290,17 @@ MS_Model_Fluid3D::SaveSolution()
 
 #ifdef HAVE_HDF5
     if ( M_data->dataTime()->isLastTimeStep() )
-        ( MS_DynamicCast< HDF5IOFile_Type >( M_exporter ) )->CloseFile();
+        ( MS_DynamicCast< hdf5IOFile_Type >( M_exporter ) )->CloseFile();
 #endif
 
 }
 
 void
-MS_Model_Fluid3D::ShowMe()
+MS_Model_Fluid3D::showMe()
 {
     if ( M_displayer->isLeader() )
     {
-        super::ShowMe();
+        MS_PhysicalModel::showMe();
 
         std::cout << "Velocity FE order   = " << M_data->uOrder() << std::endl
                   << "Pressure FE order   = " << M_data->pOrder() << std::endl << std::endl;
@@ -322,7 +322,7 @@ MS_Model_Fluid3D::ShowMe()
 // Methods
 // ===================================================
 void
-MS_Model_Fluid3D::SetupLinearModel()
+MS_Model_Fluid3D::setupLinearModel()
 {
 
 #ifdef HAVE_LIFEV_DEBUG
@@ -330,20 +330,20 @@ MS_Model_Fluid3D::SetupLinearModel()
 #endif
 
     // Define BCFunctions for tangent problem
-    M_BCBaseDelta_Zero.setFunction( boost::bind( &MS_Model_Fluid3D::BCFunctionDelta_Zero, this, _1, _2, _3, _4, _5 ) );
-    M_BCBaseDelta_One.setFunction(  boost::bind( &MS_Model_Fluid3D::BCFunctionDelta_One,  this, _1, _2, _3, _4, _5 ) );
+    M_bcBaseDeltaZero.setFunction( boost::bind( &MS_Model_Fluid3D::bcFunctionDeltaZero, this, _1, _2, _3, _4, _5 ) );
+    M_bcBaseDeltaOne.setFunction(  boost::bind( &MS_Model_Fluid3D::bcFunctionDeltaOne,  this, _1, _2, _3, _4, _5 ) );
 
     // The linear BCHandler is a copy of the original BCHandler with all BCFunctions giving zero
-    BC_PtrType LinearBCHandler ( new BC_Type( *M_BC->handler() ) );
+    bcPtr_Type LinearBCHandler ( new bc_Type( *M_bc->handler() ) );
     M_linearBC = LinearBCHandler;
 
     // Set all te BCFunctions to zero
-    for ( BC_Type::BCBase_Iterator i = M_linearBC->begin() ; i != M_linearBC->end() ; ++i )
-        i->setBCFunction( M_BCBaseDelta_Zero );
+    for ( bc_Type::BCBase_Iterator i = M_linearBC->begin() ; i != M_linearBC->end() ; ++i )
+        i->setBCFunction( M_bcBaseDeltaZero );
 }
 
 void
-MS_Model_Fluid3D::UpdateLinearModel()
+MS_Model_Fluid3D::updateLinearModel()
 {
 
 #ifdef HAVE_LIFEV_DEBUG
@@ -351,55 +351,55 @@ MS_Model_Fluid3D::UpdateLinearModel()
 #endif
 
     //Create an empty vector
-    FluidVector_Type VectorZero( *M_solution );
-    VectorZero = 0.0;
+    fluidVector_Type vectorZero( *M_solution );
+    vectorZero = 0.0;
 
-    //UpdateLinearModel TODO REMOVE ?
+    //updateLinearModel TODO REMOVE ?
     M_fluid->updateLinearSystem( M_fluid->matrNoBC(),
                                  M_alpha,
                                  *M_beta,
                                  *M_fluid->solution(),
-                                 VectorZero,
-                                 VectorZero,
-                                 VectorZero,
-                                 VectorZero );
+                                 vectorZero,
+                                 vectorZero,
+                                 vectorZero,
+                                 vectorZero );
 
     //Linear System Updated
     M_updateLinearModel = false;
 }
 
 void
-MS_Model_Fluid3D::SolveLinearModel( bool& SolveLinearSystem )
+MS_Model_Fluid3D::solveLinearModel( bool& solveLinearSystem )
 {
 
 #ifdef HAVE_LIFEV_DEBUG
     Debug( 8120 ) << "MS_Model_Fluid3D::SolveLinearModel() \n";
 #endif
 
-    if ( !SolveLinearSystem )
+    if ( !solveLinearSystem )
         return;
 
-    ImposePerturbation();
+    imposePerturbation();
 
     if ( M_updateLinearModel )
-        UpdateLinearModel();
+        updateLinearModel();
 
     //Solve the linear problem
     M_fluid->iterateLin( *M_linearBC );
 
-    ResetPerturbation();
+    resetPerturbation();
 
     //This flag avoid recomputation of the same system
-    SolveLinearSystem = false;
+    solveLinearSystem = false;
 }
 
 // ===================================================
 // Set Methods
 // ===================================================
 void
-MS_Model_Fluid3D::setSolution( const FluidVector_PtrType& Solution )
+MS_Model_Fluid3D::setSolution( const fluidVectorPtr_Type& solution )
 {
-    M_solution = Solution;
+    M_solution = solution;
 
     M_fluid->initialize( *M_solution );
 }
@@ -407,136 +407,136 @@ MS_Model_Fluid3D::setSolution( const FluidVector_PtrType& Solution )
 // ===================================================
 // Get Methods (couplings)
 // ===================================================
-MS_Model_Fluid3D::BCInterface_Type&
-MS_Model_Fluid3D::GetBCInterface()
+MS_Model_Fluid3D::bcInterface_Type&
+MS_Model_Fluid3D::bcInterface()
 {
-    return *M_BC;
+    return *M_bc;
 }
 
 Real
-MS_Model_Fluid3D::GetBoundaryDensity( const BCFlag& /*Flag*/ ) const
+MS_Model_Fluid3D::boundaryDensity( const BCFlag& /*flag*/ ) const
 {
     return M_data->density();
 }
 
 Real
-MS_Model_Fluid3D::GetBoundaryViscosity( const BCFlag& /*Flag*/ ) const
+MS_Model_Fluid3D::boundaryViscosity( const BCFlag& /*flag*/ ) const
 {
     return M_data->viscosity();
 }
 
 Real
-MS_Model_Fluid3D::GetBoundaryArea( const BCFlag& Flag ) const
+MS_Model_Fluid3D::boundaryArea( const BCFlag& flag ) const
 {
-    return M_fluid->area( Flag );
+    return M_fluid->area( flag );
 }
 
 Real
-MS_Model_Fluid3D::GetBoundaryFlowRate( const BCFlag& Flag ) const
+MS_Model_Fluid3D::boundaryFlowRate( const BCFlag& flag ) const
 {
-    return M_fluid->flux( Flag );
+    return M_fluid->flux( flag );
 }
 
 Real
-MS_Model_Fluid3D::GetBoundaryPressure( const BCFlag& Flag ) const
+MS_Model_Fluid3D::boundaryPressure( const BCFlag& flag ) const
 {
-    return M_fluid->pressure( Flag );
+    return M_fluid->pressure( flag );
 }
 
 Real
-MS_Model_Fluid3D::GetBoundaryDynamicPressure( const BCFlag& Flag ) const
+MS_Model_Fluid3D::boundaryDynamicPressure( const BCFlag& flag ) const
 {
-    return 0.5 * GetBoundaryDensity( Flag ) * ( GetBoundaryFlowRate( Flag ) * GetBoundaryFlowRate( Flag ) )
-           / ( GetBoundaryArea( Flag ) * GetBoundaryArea( Flag ) );
+    return 0.5 * boundaryDensity( flag ) * ( boundaryFlowRate( flag ) * boundaryFlowRate( flag ) )
+           / ( boundaryArea( flag ) * boundaryArea( flag ) );
 }
 
 Real
-MS_Model_Fluid3D::GetBoundaryLagrangeMultiplier( const BCFlag& Flag ) const
+MS_Model_Fluid3D::boundaryLagrangeMultiplier( const BCFlag& flag ) const
 {
-    return M_fluid->LagrangeMultiplier(Flag, *M_BC->handler() );
+    return M_fluid->LagrangeMultiplier(flag, *M_bc->handler() );
 }
 
 Real
-MS_Model_Fluid3D::GetBoundaryStress( const BCFlag& Flag, const stressTypes& StressType ) const
+MS_Model_Fluid3D::boundaryStress( const BCFlag& flag, const stress_Type& stressType ) const
 {
-    switch ( StressType )
+    switch ( stressType )
     {
     case StaticPressure:
     {
-        return -GetBoundaryPressure( Flag );
+        return -boundaryPressure( flag );
     }
 
     case TotalPressure:
     {
-        return -GetBoundaryPressure( Flag ) + GetBoundaryDynamicPressure( Flag ) * ( ( GetBoundaryFlowRate( Flag ) > 0.0 ) ? 1 : -1 );
+        return -boundaryPressure( flag ) + boundaryDynamicPressure( flag ) * ( ( boundaryFlowRate( flag ) > 0.0 ) ? 1 : -1 );
     }
 
     case LagrangeMultiplier:
     {
-        return -GetBoundaryLagrangeMultiplier( Flag );
+        return -boundaryLagrangeMultiplier( flag );
     }
 
     default:
 
-        std::cout << "ERROR: Invalid stress type [" << Enum2String( StressType, MS_stressesMap ) << "]" << std::endl;
+        std::cout << "ERROR: Invalid stress type [" << Enum2String( stressType, MS_stressesMap ) << "]" << std::endl;
 
         return 0.0;
     }
 }
 
 Real
-MS_Model_Fluid3D::GetBoundaryDeltaFlowRate( const BCFlag& Flag, bool& SolveLinearSystem )
+MS_Model_Fluid3D::boundaryDeltaFlowRate( const BCFlag& flag, bool& solveLinearSystem )
 {
-    SolveLinearModel( SolveLinearSystem );
+    solveLinearModel( solveLinearSystem );
 
-    return M_fluid->GetLinearFlux( Flag );
+    return M_fluid->GetLinearFlux( flag );
 }
 
 Real
-MS_Model_Fluid3D::GetBoundaryDeltaPressure( const BCFlag& Flag, bool& SolveLinearSystem )
+MS_Model_Fluid3D::boundaryDeltaPressure( const BCFlag& flag, bool& solveLinearSystem )
 {
-    SolveLinearModel( SolveLinearSystem );
+    solveLinearModel( solveLinearSystem );
 
-    return M_fluid->GetLinearPressure( Flag );
+    return M_fluid->GetLinearPressure( flag );
 }
 
 Real
-MS_Model_Fluid3D::GetBoundaryDeltaDynamicPressure( const BCFlag& Flag, bool& SolveLinearSystem )
+MS_Model_Fluid3D::boundaryDeltaDynamicPressure( const BCFlag& flag, bool& solveLinearSystem )
 {
-    return GetBoundaryDensity( Flag ) * GetBoundaryDeltaFlowRate( Flag, SolveLinearSystem ) * GetBoundaryFlowRate( Flag ) / ( GetBoundaryArea( Flag ) * GetBoundaryArea( Flag ) );
+    return boundaryDensity( flag ) * boundaryDeltaFlowRate( flag, solveLinearSystem ) * boundaryFlowRate( flag ) / ( boundaryArea( flag ) * boundaryArea( flag ) );
 }
 
 Real
-MS_Model_Fluid3D::GetBoundaryDeltaLagrangeMultiplier( const BCFlag& Flag, bool& SolveLinearSystem )
+MS_Model_Fluid3D::boundaryDeltaLagrangeMultiplier( const BCFlag& flag, bool& solveLinearSystem )
 {
-    SolveLinearModel( SolveLinearSystem );
+    solveLinearModel( solveLinearSystem );
 
-    return M_fluid->LinearLagrangeMultiplier(Flag, *M_linearBC );
+    return M_fluid->LinearLagrangeMultiplier( flag, *M_linearBC );
 }
 
 Real
-MS_Model_Fluid3D::GetBoundaryDeltaStress( const BCFlag& Flag, bool& SolveLinearSystem, const stressTypes& StressType )
+MS_Model_Fluid3D::boundaryDeltaStress( const BCFlag& flag, bool& solveLinearSystem, const stress_Type& stressType )
 {
-    switch ( StressType )
+    switch ( stressType )
     {
     case StaticPressure:
     {
-        return -GetBoundaryDeltaPressure( Flag, SolveLinearSystem );
+        return -boundaryDeltaPressure( flag, solveLinearSystem );
     }
 
     case TotalPressure:
     {
-        return -GetBoundaryDeltaPressure( Flag, SolveLinearSystem ) + GetBoundaryDeltaDynamicPressure( Flag, SolveLinearSystem ); //Verify the sign of DynamicPressure contribute!
+        return -boundaryDeltaPressure( flag, solveLinearSystem ) + boundaryDeltaDynamicPressure( flag, solveLinearSystem ); //Verify the sign of DynamicPressure contribute!
     }
 
     case LagrangeMultiplier:
     {
-        return -GetBoundaryDeltaLagrangeMultiplier( Flag, SolveLinearSystem );
+        return -boundaryDeltaLagrangeMultiplier( flag, solveLinearSystem );
     }
 
     default:
 
-        std::cout << "ERROR: Invalid stress type [" << Enum2String( StressType, MS_stressesMap ) << "]" << std::endl;
+        std::cout << "ERROR: Invalid stress type [" << Enum2String( stressType, MS_stressesMap ) << "]" << std::endl;
 
         return 0.0;
     }
@@ -545,14 +545,14 @@ MS_Model_Fluid3D::GetBoundaryDeltaStress( const BCFlag& Flag, bool& SolveLinearS
 // ===================================================
 // Get Methods
 // ===================================================
-const MS_Model_Fluid3D::Data_Type&
-MS_Model_Fluid3D::GetData() const
+const MS_Model_Fluid3D::data_Type&
+MS_Model_Fluid3D::data() const
 {
     return *M_data;
 }
 
-const MS_Model_Fluid3D::FluidVector_Type&
-MS_Model_Fluid3D::GetSolution() const
+const MS_Model_Fluid3D::fluidVector_Type&
+MS_Model_Fluid3D::solution() const
 {
     return *M_solution;
 }
@@ -561,75 +561,75 @@ MS_Model_Fluid3D::GetSolution() const
 // Private Methods
 // ===================================================
 void
-MS_Model_Fluid3D::SetupGlobalData( const std::string& FileName )
+MS_Model_Fluid3D::setupGlobalData( const std::string& fileName )
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 8120 ) << "MS_Model_Fluid3D::SetupGlobalData( FileName ) \n";
+    Debug( 8120 ) << "MS_Model_Fluid3D::SetupGlobalData( fileName ) \n";
 #endif
 
-    GetPot DataFile( FileName );
+    GetPot dataFile( fileName );
 
     //Global data time
-    M_data->setDataTime( M_globalData->GetDataTime() );
+    M_data->setDataTime( M_globalData->dataTime() );
 
     //Global physical quantities
-    if ( !DataFile.checkVariable( "fluid/physics/density" ) )
-        M_data->density( M_globalData->GetFluidDensity() );
-    if ( !DataFile.checkVariable( "fluid/physics/viscosity" ) )
-        M_data->viscosity( M_globalData->GetFluidViscosity() );
+    if ( !dataFile.checkVariable( "fluid/physics/density" ) )
+        M_data->density( M_globalData->fluidDensity() );
+    if ( !dataFile.checkVariable( "fluid/physics/viscosity" ) )
+        M_data->viscosity( M_globalData->fluidViscosity() );
 }
 
 void
-MS_Model_Fluid3D::SetupExporterImporter( const std::string& FileName )
+MS_Model_Fluid3D::setupExporterImporter( const std::string& fileName )
 {
-    GetPot DataFile( FileName );
+    GetPot dataFile( fileName );
 
     //Exporter
-    const std::string exporterType = DataFile( "exporter/type", "ensight" );
+    const std::string exporterType = dataFile( "exporter/type", "ensight" );
 
 #ifdef HAVE_HDF5
     if ( !exporterType.compare( "hdf5" ) )
-        M_exporter.reset( new HDF5IOFile_Type() );
+        M_exporter.reset( new hdf5IOFile_Type() );
     else
 #endif
-        M_exporter.reset( new EnsightIOFile_Type() );
+        M_exporter.reset( new ensightIOFile_Type() );
 
-    M_exporter->setDataFromGetPot( DataFile );
+    M_exporter->setDataFromGetPot( dataFile );
     M_exporter->setPrefix( "Step_" + number2string( MS_ProblemStep ) + "_Model_" + number2string( M_ID ) );
     M_exporter->setDirectory( MS_ProblemFolder );
 
     //Importer
-    const std::string importerType = DataFile( "importer/type", "ensight" );
+    const std::string importerType = dataFile( "importer/type", "ensight" );
 
 #ifdef HAVE_HDF5
     if ( !importerType.compare( "hdf5" ) )
-        M_importer.reset( new HDF5IOFile_Type() );
+        M_importer.reset( new hdf5IOFile_Type() );
     else
 #endif
-        M_importer.reset( new EnsightIOFile_Type() );
+        M_importer.reset( new ensightIOFile_Type() );
 
-    M_importer->setDataFromGetPot( DataFile );
+    M_importer->setDataFromGetPot( dataFile );
     M_importer->setPrefix( "Step_" + number2string( MS_ProblemStep - 1 ) + "_Model_" + number2string( M_ID ) );
     M_importer->setDirectory( MS_ProblemFolder );
 }
 
 void
-MS_Model_Fluid3D::SetupMesh()
+MS_Model_Fluid3D::setupMesh()
 {
     //Read fluid mesh from file
-    boost::shared_ptr<Mesh_Type> fluidMesh(new Mesh_Type);
-    readMesh( *fluidMesh, *M_dataMesh);
+    boost::shared_ptr< mesh_Type > fluidMesh( new mesh_Type );
+    readMesh( *fluidMesh, *M_dataMesh );
 
     //Transform mesh
     fluidMesh->transformMesh( M_geometryScale, M_geometryRotate, M_geometryTranslate );
 
     //Partition mesh
-    M_mesh.reset( new PartitionMesh_Type( fluidMesh, M_comm ) );
+    M_mesh.reset( new partitionMesh_Type( fluidMesh, M_comm ) );
 }
 
 void
-MS_Model_Fluid3D::SetupFEspace()
+MS_Model_Fluid3D::setupFEspace()
 {
 
 #ifdef HAVE_LIFEV_DEBUG
@@ -695,21 +695,21 @@ MS_Model_Fluid3D::SetupFEspace()
 }
 
 void
-MS_Model_Fluid3D::SetupDOF()
+MS_Model_Fluid3D::setupDOF()
 {
 
 #ifdef HAVE_LIFEV_DEBUG
     Debug( 8120 ) << "MS_Model_Fluid3D::SetupDOF \n";
 #endif
 
-    M_lmDOF = M_BC->handler()->getNumberBCWithType( Flux );
+    M_lmDOF = M_bc->handler()->getNumberBCWithType( Flux );
 
     //M_uDOF = M_uFESpace->map().getMap(Unique)->NumGlobalElements();
     //M_pFESpace->dof().numTotalDof() = M_pFESpace->map().getMap(Unique)->NumGlobalElements();
 }
 
 void
-MS_Model_Fluid3D::SetupBCOffset( const boost::shared_ptr< BC_Type >& BC )
+MS_Model_Fluid3D::setupBCOffset( const bcPtr_Type& BC )
 {
 
 #ifdef HAVE_LIFEV_DEBUG
@@ -724,7 +724,7 @@ MS_Model_Fluid3D::SetupBCOffset( const boost::shared_ptr< BC_Type >& BC )
 }
 
 void
-MS_Model_Fluid3D::InitializeSolution()
+MS_Model_Fluid3D::initializeSolution()
 {
 
 #ifdef HAVE_LIFEV_DEBUG
@@ -748,7 +748,7 @@ MS_Model_Fluid3D::InitializeSolution()
 }
 
 void
-MS_Model_Fluid3D::ImposePerturbation()
+MS_Model_Fluid3D::imposePerturbation()
 {
 
 #ifdef HAVE_LIFEV_DEBUG
@@ -756,16 +756,16 @@ MS_Model_Fluid3D::ImposePerturbation()
 #endif
 
     for ( MS_CouplingsVector_ConstIterator i = M_couplings.begin(); i < M_couplings.end(); ++i )
-        if ( ( *i )->IsPerturbed() )
+        if ( ( *i )->isPerturbed() )
         {
-            M_linearBC->GetBCWithFlag( ( *i )->GetFlag( ( *i )->GetModelLocalID( M_ID ) ) ).setBCFunction( M_BCBaseDelta_One );
+            M_linearBC->GetBCWithFlag( ( *i )->flag( ( *i )->modelGlobalToLocalID( M_ID ) ) ).setBCFunction( M_bcBaseDeltaOne );
 
             break;
         }
 }
 
 void
-MS_Model_Fluid3D::ResetPerturbation()
+MS_Model_Fluid3D::resetPerturbation()
 {
 
 #ifdef HAVE_LIFEV_DEBUG
@@ -773,22 +773,22 @@ MS_Model_Fluid3D::ResetPerturbation()
 #endif
 
     for ( MS_CouplingsVector_ConstIterator i = M_couplings.begin(); i < M_couplings.end(); ++i )
-        if ( ( *i )->IsPerturbed() )
+        if ( ( *i )->isPerturbed() )
         {
-            M_linearBC->GetBCWithFlag( ( *i )->GetFlag( ( *i )->GetModelLocalID( M_ID ) ) ).setBCFunction( M_BCBaseDelta_Zero );
+            M_linearBC->GetBCWithFlag( ( *i )->flag( ( *i )->modelGlobalToLocalID( M_ID ) ) ).setBCFunction( M_bcBaseDeltaZero );
 
             break;
         }
 }
 
 Real
-MS_Model_Fluid3D::BCFunctionDelta_Zero( const Real& /*t*/, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& /*id*/ )
+MS_Model_Fluid3D::bcFunctionDeltaZero( const Real& /*t*/, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const UInt& /*id*/ )
 {
     return 0.;
 }
 
 Real
-MS_Model_Fluid3D::BCFunctionDelta_One( const Real& /*t*/, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& /*id*/ )
+MS_Model_Fluid3D::bcFunctionDeltaOne( const Real& /*t*/, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const UInt& /*id*/ )
 {
     return 1.;
 }

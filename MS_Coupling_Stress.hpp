@@ -56,8 +56,6 @@ class MS_Coupling_Stress: public virtual MS_PhysicalCoupling
 {
 public:
 
-    typedef MS_PhysicalCoupling super;
-
     //! @name Constructors & Destructor
     //@{
 
@@ -77,19 +75,19 @@ public:
     /*!
      *  @param FileName Name of data file
      */
-    void SetupData( const std::string& FileName );
+    void setupData( const std::string& fileName );
 
     //! Setup the coupling
-    void SetupCoupling();
+    void setupCoupling();
 
     //! Initialize the values of the coupling variables
-    void InitializeCouplingVariables();
+    void initializeCouplingVariables();
 
     //! Update the values of the coupling residuals
-    void ExportCouplingResiduals( MS_Vector_Type& CouplingResiduals );
+    void exportCouplingResiduals( MS_Vector_Type& couplingResiduals );
 
     //! Display some information about the coupling
-    void ShowMe();
+    void showMe();
 
     //@}
 
@@ -113,28 +111,28 @@ private:
      * @param LocalCouplingVariableID local coupling variable (perturbed)
      * @return list of models affected by the perturbation
      */
-    MS_ModelsVector_Type GetListOfPerturbedModels( const UInt& LocalCouplingVariableID );
+    MS_ModelsVector_Type listOfPerturbedModels( const UInt& localCouplingVariableID );
 
     //! Insert constant coefficients into the Jacobian matrix
     /*!
-     * @param Jacobian the Jacobian matrix
+     * @param jacobian the Jacobian matrix
      */
-    void InsertJacobianConstantCoefficients( MS_Matrix_Type& Jacobian );
+    void insertJacobianConstantCoefficients( MS_Matrix_Type& jacobian );
 
     //! Insert the Jacobian coefficient(s) depending on a perturbation of the model, due to a specific variable (the column)
     /*!
-     * @param Jacobian the Jacobian matrix
-     * @param Column the column related to the perturbed variable
+     * @param jacobian the Jacobian matrix
+     * @param column the column related to the perturbed variable
      * @param ID the global ID of the model which is perturbed by the variable
-     * @param SolveLinearSystem a flag to which determine if the linear system has to be solved
+     * @param solveLinearSystem a flag to which determine if the linear system has to be solved
      */
-    void InsertJacobianDeltaCoefficients( MS_Matrix_Type& Jacobian, const UInt& Column, const UInt& ID, bool& SolveLinearSystem );
+    void insertJacobianDeltaCoefficients( MS_Matrix_Type& jacobian, const UInt& column, const UInt& ID, bool& solveLinearSystem );
 
     //! Display some information about the coupling
     /*!
      * @param output specify the output stream
      */
-    void DisplayCouplingValues( std::ostream& output );
+    void displayCouplingValues( std::ostream& output );
 
     //@}
 
@@ -142,13 +140,13 @@ private:
     //! @name Private Methods
     //@{
 
-    template< class model >
-    inline void ImposeStress3D( const UInt& i );
+    template< class ModelType >
+    void imposeStress3D( const UInt& i );
 
-    template< class model >
-    inline void ImposeStress1D( const UInt& i );
+    template< class ModelType >
+    void imposeStress1D( const UInt& i );
 
-    Real FunctionStress( const Real& /*t*/, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& /*id*/);
+    Real functionStress( const Real& /*t*/, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const UInt& /*id*/);
 
     //@}
 
@@ -156,7 +154,7 @@ private:
 
     OneDimensionalModel_BCFunction M_baseStress1D;
 
-    stressTypes    M_stressType;
+    stress_Type    M_stressType;
 };
 
 //! Factory create function
@@ -168,23 +166,23 @@ inline MS_PhysicalCoupling* createMultiscaleCouplingStress()
 // ===================================================
 // Template implementation
 // ===================================================
-template< class model >
+template< class ModelType >
 inline void
-MS_Coupling_Stress::ImposeStress3D( const UInt& i )
+MS_Coupling_Stress::imposeStress3D( const UInt& i )
 {
-    model *Model = MS_DynamicCast< model >( M_models[i] );
+    ModelType *model = MS_DynamicCast< ModelType >( M_models[i] );
 
-    Model->GetBCInterface().addBC( "CouplingStress_Model_" + number2string( Model->GetID() ) + "_Flag_" + number2string( M_flags[i] ),
+    model->bcInterface().addBC( "CouplingStress_Model_" + number2string( model->ID() ) + "_Flag_" + number2string( M_flags[i] ),
                                    M_flags[i], Natural, Normal, M_baseStress3D );
 }
 
-template< class model >
+template< class ModelType >
 inline void
-MS_Coupling_Stress::ImposeStress1D( const UInt& i )
+MS_Coupling_Stress::imposeStress1D( const UInt& i )
 {
-    model *Model = MS_DynamicCast< model >( M_models[i] );
+    ModelType *model = MS_DynamicCast< ModelType >( M_models[i] );
 
-    Model->GetBCInterface().setBC( (M_flags[i] == 0) ? OneD_left : OneD_right, OneD_first, OneD_P, M_baseStress1D );
+    model->bcInterface().setBC( (M_flags[i] == 0) ? OneD_left : OneD_right, OneD_first, OneD_P, M_baseStress1D );
 }
 
 } // Namespace LifeV

@@ -26,7 +26,7 @@
 
 /*!
  *  @file
- *  @brief File containing the MultiScale Coupling FluxStress
+ *  @brief File containing the MultiScale Coupling FlowRateStress
  *
  *  @date 24-08-2009
  *  @author Cristiano Malossi <cristiano.malossi@epfl.ch>
@@ -34,8 +34,8 @@
  *  @maintainer Cristiano Malossi <cristiano.malossi@epfl.ch>
  */
 
-#ifndef MS_Coupling_FluxStress_H
-#define MS_Coupling_FluxStress_H 1
+#ifndef MS_Coupling_FlowRateStress_H
+#define MS_Coupling_FlowRateStress_H 1
 
 #include <lifemc/lifesolver/MS_PhysicalCoupling.hpp>
 #include <lifemc/lifesolver/MS_Model_Fluid3D.hpp>
@@ -45,32 +45,30 @@
 namespace LifeV
 {
 
-//! MS_Coupling_FluxStress - Flux-Stress coupling condition
+//! MS_Coupling_FlowRateStress - FlowRate-Stress coupling condition
 /*!
  *  @author Cristiano Malossi
  *
- *  The MS_Coupling_FluxStress class is an implementation of the MS_PhysicalCoupling
- *  for applying Flux-Stress coupling conditions on the models.
+ *  The MS_Coupling_FlowRateStress class is an implementation of the MS_PhysicalCoupling
+ *  for applying FlowRate-Stress coupling conditions on the models.
  *
  *  The coupling equations are:
  *  Q_j = - \sum Q_i
  *  \sigma_i = -P_j
  *  where Q is the flux and P is the pressure (or the total pressure).
  */
-class MS_Coupling_FluxStress: public virtual MS_PhysicalCoupling
+class MS_Coupling_FlowRateStress: public virtual MS_PhysicalCoupling
 {
 public:
-
-    typedef MS_PhysicalCoupling super;
 
     //! @name Constructors & Destructor
     //@{
 
     //! Constructor
-    MS_Coupling_FluxStress();
+    MS_Coupling_FlowRateStress();
 
     //! Destructor
-    virtual ~MS_Coupling_FluxStress() {}
+    virtual ~MS_Coupling_FlowRateStress() {}
 
     //@}
 
@@ -80,24 +78,24 @@ public:
 
     //! Setup the data of the coupling
     /*!
-     *  @param FileName Name of data file
+     *  @param fileName Name of data file
      */
-    void SetupData( const std::string& FileName );
+    void setupData( const std::string& fileName );
 
     //! Setup the coupling
-    void SetupCoupling();
+    void setupCoupling();
 
     //! Initialize the values of the coupling variables
-    void InitializeCouplingVariables();
+    void initializeCouplingVariables();
 
     //! Update the values of the coupling residuals
     /*!
-     * @param CouplingResiduals Global vector of variables
+     * @param couplingResiduals Global vector of variables
      */
-    void ExportCouplingResiduals( MS_Vector_Type& CouplingResiduals );
+    void exportCouplingResiduals( MS_Vector_Type& couplingResiduals );
 
     //! Display some information about the coupling
-    void ShowMe();
+    void showMe();
 
     //@}
 
@@ -106,9 +104,9 @@ private:
     //! @name Unimplemented Methods
     //@{
 
-    MS_Coupling_FluxStress( const MS_Coupling_FluxStress& coupling );
+    MS_Coupling_FlowRateStress( const MS_Coupling_FlowRateStress& coupling );
 
-    MS_Coupling_FluxStress& operator=( const MS_Coupling_FluxStress& coupling );
+    MS_Coupling_FlowRateStress& operator=( const MS_Coupling_FlowRateStress& coupling );
 
     //@}
 
@@ -118,31 +116,31 @@ private:
 
     //! Build the list of models affected by the perturbation of a local coupling variable
     /*!
-     * @param LocalCouplingVariableID local coupling variable (perturbed)
+     * @param localCouplingVariableID local coupling variable (perturbed)
      * @return list of models affected by the perturbation
      */
-    MS_ModelsVector_Type GetListOfPerturbedModels( const UInt& LocalCouplingVariableID );
+    MS_ModelsVector_Type listOfPerturbedModels( const UInt& localCouplingVariableID );
 
     //! Insert constant coefficients into the Jacobian matrix
     /*!
-     * @param Jacobian the Jacobian matrix
+     * @param jacobian the Jacobian matrix
      */
-    void InsertJacobianConstantCoefficients( MS_Matrix_Type& Jacobian );
+    void insertJacobianConstantCoefficients( MS_Matrix_Type& jacobian );
 
     //! Insert the Jacobian coefficient(s) depending on a perturbation of the model, due to a specific variable (the column)
     /*!
-     * @param Jacobian the Jacobian matrix
-     * @param Column the column related to the perturbed variable
+     * @param jacobian the Jacobian matrix
+     * @param column the column related to the perturbed variable
      * @param ID the global ID of the model which is perturbed by the variable
-     * @param SolveLinearSystem a flag to which determine if the linear system has to be solved
+     * @param solveLinearSystem a flag to which determine if the linear system has to be solved
      */
-    void InsertJacobianDeltaCoefficients( MS_Matrix_Type& Jacobian, const UInt& Column, const UInt& ID, bool& SolveLinearSystem );
+    void insertJacobianDeltaCoefficients( MS_Matrix_Type& jacobian, const UInt& column, const UInt& ID, bool& solveLinearSystem );
 
     //! Display some information about the coupling
     /*!
      * @param output specify the output stream
      */
-    void DisplayCouplingValues( std::ostream& output );
+    void displayCouplingValues( std::ostream& output );
 
     //@}
 
@@ -150,77 +148,77 @@ private:
     //! @name Private Methods
     //@{
 
-    template< class model >
-    inline void ImposeFlux3D( const UInt& i);
+    template< class ModelType >
+    void imposeFlowRate3D( const UInt& i);
 
-    template< class model >
-    inline void ImposeStress3D( const UInt& i );
+    template< class ModelType >
+    void imposeStress3D( const UInt& i );
 
-    template< class model >
-    inline void ImposeFlux1D( const UInt& i);
+    template< class ModelType >
+    void imposeFlowRate1D( const UInt& i);
 
-    template< class model >
-    inline void ImposeStress1D( const UInt& i );
+    template< class ModelType >
+    void imposeStress1D( const UInt& i );
 
-    Real FunctionFlux  ( const Real& t, const Real&, const Real&, const Real&, const ID& );
-    Real FunctionStress( const Real& t, const Real&, const Real&, const Real&, const ID& );
+    Real functionFlowRate  ( const Real& t, const Real&, const Real&, const Real&, const UInt& );
+    Real functionStress( const Real& t, const Real&, const Real&, const Real&, const UInt& );
 
     //@}
 
-    BCFunctionBase M_baseFlux3D;
+    BCFunctionBase M_baseFlowRate3D;
     BCFunctionBase M_baseStress3D;
 
-    OneDimensionalModel_BCFunction M_baseFlux1D;
+    OneDimensionalModel_BCFunction M_baseFlowRate1D;
     OneDimensionalModel_BCFunction M_baseStress1D;
 
-    stressTypes    M_stressType;
+    stress_Type    M_stressType;
 };
 
 //! Factory create function
-inline MS_PhysicalCoupling* createMultiscaleCouplingFluxStress()
+inline MS_PhysicalCoupling* createMultiscaleCouplingFlowRateStress()
 {
-    return new MS_Coupling_FluxStress();
+    return new MS_Coupling_FlowRateStress();
 }
 
 // ===================================================
 // Template implementation
 // ===================================================
-template< class model >
+template< class ModelType >
 inline void
-MS_Coupling_FluxStress::ImposeFlux3D( const UInt& i )
+MS_Coupling_FlowRateStress::imposeFlowRate3D( const UInt& i )
 {
-    model *Model = MS_DynamicCast< model >( M_models[i] );
+    ModelType *model = MS_DynamicCast< ModelType >( M_models[i] );
 
-    Model->GetBCInterface().addBC( "CouplingFlux_Model_" + number2string( Model->GetID() ) + "_Flag_" + number2string( M_flags[i] ), M_flags[i], Flux, Full, M_baseFlux3D, 3 );
+    model->bcInterface().addBC( "CouplingFlowRate_Model_" + number2string( model->ID() ) + "_Flag_" + number2string( M_flags[i] ), M_flags[i], Flux, Full, M_baseFlowRate3D, 3 );
 }
 
-template< class model >
+template< class ModelType >
 inline void
-MS_Coupling_FluxStress::ImposeStress3D( const UInt& i )
+MS_Coupling_FlowRateStress::imposeStress3D( const UInt& i )
 {
-    model *Model = MS_DynamicCast< model >( M_models[i] );
+    ModelType *model = MS_DynamicCast< ModelType >( M_models[i] );
 
-    Model->GetBCInterface().addBC( "CouplingStress_Model_" + number2string( Model->GetID() ) + "_Flag_" + number2string( M_flags[i] ), M_flags[i], Natural, Normal, M_baseStress3D );
+    model->bcInterface().addBC( "CouplingStress_Model_" + number2string( model->ID() ) + "_Flag_" + number2string( M_flags[i] ), M_flags[i], Natural, Normal, M_baseStress3D );
 }
 
-template< class model >
+template< class ModelType >
 inline void
-MS_Coupling_FluxStress::ImposeFlux1D( const UInt& i )
+MS_Coupling_FlowRateStress::imposeFlowRate1D( const UInt& i )
 {
-    model *Model = MS_DynamicCast< model >( M_models[i] );
+    ModelType *model = MS_DynamicCast< ModelType >( M_models[i] );
 
-    Model->GetBCInterface().setBC( (M_flags[i] == 0) ? OneD_left : OneD_right, OneD_first, OneD_Q, M_baseFlux1D );
+    model->bcInterface().setBC( (M_flags[i] == 0) ? OneD_left : OneD_right, OneD_first, OneD_Q, M_baseFlowRate1D );
 }
 
-template< class model >
+template< class ModelType >
 inline void
-MS_Coupling_FluxStress::ImposeStress1D( const UInt& i )
+MS_Coupling_FlowRateStress::imposeStress1D( const UInt& i )
 {
-    model *Model = MS_DynamicCast< model >( M_models[i] );
+    ModelType *model = MS_DynamicCast< ModelType >( M_models[i] );
 
-    Model->GetBCInterface().setBC( (M_flags[i] == 0) ? OneD_left : OneD_right, OneD_first, OneD_P, M_baseStress1D );
+    model->bcInterface().setBC( (M_flags[i] == 0) ? OneD_left : OneD_right, OneD_first, OneD_P, M_baseStress1D );
 }
 
 } // Namespace LifeV
 
-#endif /* MS_Coupling_FluxStress_H */
+#endif /* MS_Coupling_FlowRateStress_H */

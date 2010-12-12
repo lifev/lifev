@@ -63,30 +63,30 @@ MS_Model_MultiScale::~MS_Model_MultiScale()
 
     // Disconnect models and couplings to allow their destruction
     for ( MS_ModelsVector_ConstIterator i = M_modelsList.begin(); i != M_modelsList.end(); ++i )
-        ( *i )->ClearCouplingsList();
+        ( *i )->clearCouplingsList();
 
     for ( MS_CouplingsVector_ConstIterator i = M_couplingsList.begin(); i != M_couplingsList.end(); ++i )
-        ( *i )->ClearModelsList();
+        ( *i )->clearModelsList();
 }
 
 // ===================================================
 // MultiScale Physical Model
 // ===================================================
 void
-MS_Model_MultiScale::SetupData( const std::string& FileName )
+MS_Model_MultiScale::setupData( const std::string& fileName )
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 8110 ) << "MS_Model_MultiScale::SetupData( FileName ) \n";
+    Debug( 8110 ) << "MS_Model_MultiScale::SetupData( fileName ) \n";
 #endif
 
-    super::SetupData( FileName );
+    MS_PhysicalModel::setupData( fileName );
 
     // Useful variables
     UInt id;
 
-    modelsTypes model;
-    couplingsTypes coupling;
+    models_Type model;
+    couplings_Type coupling;
     boost::array< Real, NDIM > geometryScale, geometryRotate, geometryTranslate;
 
     std::map< UInt, UInt > modelsIDMap;
@@ -98,22 +98,22 @@ MS_Model_MultiScale::SetupData( const std::string& FileName )
     UInt couplingsColumnsNumber = 5.0;
     UInt geometryColumnsNumber  = 10.0;
 
-    GetPot DataFile( FileName );
+    GetPot dataFile( fileName );
 
-    UInt modelsLinesNumber    = DataFile.vector_variable_size( "Problem/models" ) / modelsColumnsNumber;
-    UInt couplingsLinesNumber = DataFile.vector_variable_size( "Problem/couplings" ) / couplingsColumnsNumber;
-    UInt geometryLinesNumber  = DataFile.vector_variable_size( "Problem/offset" ) / geometryColumnsNumber;
+    UInt modelsLinesNumber    = dataFile.vector_variable_size( "Problem/models" ) / modelsColumnsNumber;
+    UInt couplingsLinesNumber = dataFile.vector_variable_size( "Problem/couplings" ) / couplingsColumnsNumber;
+    UInt geometryLinesNumber  = dataFile.vector_variable_size( "Problem/offset" ) / geometryColumnsNumber;
 
     M_modelsList.resize( modelsLinesNumber );
     M_couplingsList.resize( couplingsLinesNumber );
 
     // Load Models
-    std::string path = DataFile( "Problem/modelsPath", "./" );
+    std::string path = dataFile( "Problem/modelsPath", "./" );
     for ( UInt i( 0 ); i < modelsLinesNumber; ++i )
     {
-        id    = DataFile( "Problem/models", 0, i * modelsColumnsNumber );
+        id    = dataFile( "Problem/models", 0, i * modelsColumnsNumber );
         modelsIDMap[id] = i;
-        model = MS_modelsMap[DataFile( "Problem/models", "undefined", i * modelsColumnsNumber + 1 )];
+        model = MS_modelsMap[dataFile( "Problem/models", "undefined", i * modelsColumnsNumber + 1 )];
 
         // Set Geometry
         geometryScale[0]     = M_geometryScale[0];
@@ -129,48 +129,48 @@ MS_Model_MultiScale::SetupData( const std::string& FileName )
         geometryTranslate[2] = M_geometryTranslate[2];
 
         for ( UInt j( 0 ); j < geometryLinesNumber; ++j )
-            if ( id == DataFile( "Problem/offset", 1., j * geometryColumnsNumber ) )
+            if ( id == dataFile( "Problem/offset", 1., j * geometryColumnsNumber ) )
             {
-                geometryScale[0]     *= DataFile( "Problem/offset", 1., j * geometryColumnsNumber + 1 );
-                geometryScale[1]     *= DataFile( "Problem/offset", 1., j * geometryColumnsNumber + 2 );
-                geometryScale[2]     *= DataFile( "Problem/offset", 1., j * geometryColumnsNumber + 3 );
+                geometryScale[0]     *= dataFile( "Problem/offset", 1., j * geometryColumnsNumber + 1 );
+                geometryScale[1]     *= dataFile( "Problem/offset", 1., j * geometryColumnsNumber + 2 );
+                geometryScale[2]     *= dataFile( "Problem/offset", 1., j * geometryColumnsNumber + 3 );
 
-                geometryRotate[0]    += DataFile( "Problem/offset", 0., j * geometryColumnsNumber + 4 ) * Pi / 180;
-                geometryRotate[1]    += DataFile( "Problem/offset", 0., j * geometryColumnsNumber + 5 ) * Pi / 180;
-                geometryRotate[2]    += DataFile( "Problem/offset", 0., j * geometryColumnsNumber + 6 ) * Pi / 180;
+                geometryRotate[0]    += dataFile( "Problem/offset", 0., j * geometryColumnsNumber + 4 ) * Pi / 180;
+                geometryRotate[1]    += dataFile( "Problem/offset", 0., j * geometryColumnsNumber + 5 ) * Pi / 180;
+                geometryRotate[2]    += dataFile( "Problem/offset", 0., j * geometryColumnsNumber + 6 ) * Pi / 180;
 
-                geometryTranslate[0] += DataFile( "Problem/offset", 0., j * geometryColumnsNumber + 7 );
-                geometryTranslate[1] += DataFile( "Problem/offset", 0., j * geometryColumnsNumber + 8 );
-                geometryTranslate[2] += DataFile( "Problem/offset", 0., j * geometryColumnsNumber + 9 );
+                geometryTranslate[0] += dataFile( "Problem/offset", 0., j * geometryColumnsNumber + 7 );
+                geometryTranslate[1] += dataFile( "Problem/offset", 0., j * geometryColumnsNumber + 8 );
+                geometryTranslate[2] += dataFile( "Problem/offset", 0., j * geometryColumnsNumber + 9 );
             }
 
         M_modelsList[i] = MS_Model_PtrType( MS_Model_Factory::instance().createObject( model ) );
-        M_modelsList[i]->SetCommunicator( M_comm );
-        M_modelsList[i]->SetGeometry( geometryScale, geometryRotate, geometryTranslate );
-        M_modelsList[i]->SetGlobalData( M_globalData );
-        M_modelsList[i]->SetupData( path + Enum2String( model, MS_modelsMap ) + "/"
-                                    + DataFile( "Problem/models", "undefined", i * modelsColumnsNumber + 2 ) + ".dat" );
+        M_modelsList[i]->setCommunicator( M_comm );
+        M_modelsList[i]->setGeometry( geometryScale, geometryRotate, geometryTranslate );
+        M_modelsList[i]->setGlobalData( M_globalData );
+        M_modelsList[i]->setupData( path + Enum2String( model, MS_modelsMap ) + "/"
+                                    + dataFile( "Problem/models", "undefined", i * modelsColumnsNumber + 2 ) + ".dat" );
     }
 
     // Load couplings
-    path = DataFile( "Problem/couplingsPath", "./" );
+    path = dataFile( "Problem/couplingsPath", "./" );
     for ( UInt i( 0 ); i < couplingsLinesNumber; ++i )
     {
-        coupling = MS_couplingsMap[DataFile( "Problem/couplings", "undefined", i * couplingsColumnsNumber + 1 )];
+        coupling = MS_couplingsMap[dataFile( "Problem/couplings", "undefined", i * couplingsColumnsNumber + 1 )];
 
         M_couplingsList[i] = MS_Coupling_PtrType( MS_Coupling_Factory::instance().createObject( coupling ) );
-        M_couplingsList[i]->SetCommunicator( M_comm );
-        M_couplingsList[i]->SetGlobalData( M_globalData );
-        M_couplingsList[i]->SetupData( path + Enum2String( coupling, MS_couplingsMap ) + "/"
-                                       + DataFile( "Problem/couplings", "undefined", i * couplingsColumnsNumber + 2 ) + ".dat" );
+        M_couplingsList[i]->setCommunicator( M_comm );
+        M_couplingsList[i]->setGlobalData( M_globalData );
+        M_couplingsList[i]->setupData( path + Enum2String( coupling, MS_couplingsMap ) + "/"
+                                       + dataFile( "Problem/couplings", "undefined", i * couplingsColumnsNumber + 2 ) + ".dat" );
 
-        string2numbersVector< UInt > ( DataFile( "Problem/couplings", "undefined", i * couplingsColumnsNumber + 3 ), modelsIDVector );
-        string2numbersVector< UInt > ( DataFile( "Problem/couplings", "undefined", i * couplingsColumnsNumber + 4 ), flagsIDVector );
+        string2numbersVector< UInt > ( dataFile( "Problem/couplings", "undefined", i * couplingsColumnsNumber + 3 ), modelsIDVector );
+        string2numbersVector< UInt > ( dataFile( "Problem/couplings", "undefined", i * couplingsColumnsNumber + 4 ), flagsIDVector );
         for ( UInt j( 0 ); j < static_cast< UInt > ( modelsIDVector.size() ); ++j )
         {
-            M_couplingsList[i]->AddModel( M_modelsList[modelsIDMap[modelsIDVector[j]]] );
-            M_couplingsList[i]->AddFlagID( flagsIDVector[j] );
-            M_modelsList[modelsIDMap[modelsIDVector[j]]]->AddCoupling( M_couplingsList[i] );
+            M_couplingsList[i]->addModel( M_modelsList[modelsIDMap[modelsIDVector[j]]] );
+            M_couplingsList[i]->addFlagID( flagsIDVector[j] );
+            M_modelsList[modelsIDMap[modelsIDVector[j]]]->addCoupling( M_couplingsList[i] );
         }
         modelsIDVector.clear();
         flagsIDVector.clear();
@@ -178,7 +178,7 @@ MS_Model_MultiScale::SetupData( const std::string& FileName )
 }
 
 void
-MS_Model_MultiScale::SetupModel()
+MS_Model_MultiScale::setupModel()
 {
 
 #ifdef HAVE_LIFEV_DEBUG
@@ -186,14 +186,14 @@ MS_Model_MultiScale::SetupModel()
 #endif
 
     for ( MS_CouplingsVector_ConstIterator i = M_couplingsList.begin(); i != M_couplingsList.end(); ++i )
-        ( *i )->SetupCoupling();
+        ( *i )->setupCoupling();
 
     for ( MS_ModelsVector_ConstIterator i = M_modelsList.begin(); i != M_modelsList.end(); ++i )
-        ( *i )->SetupModel();
+        ( *i )->setupModel();
 }
 
 void
-MS_Model_MultiScale::BuildSystem()
+MS_Model_MultiScale::buildSystem()
 {
 
 #ifdef HAVE_LIFEV_DEBUG
@@ -201,14 +201,14 @@ MS_Model_MultiScale::BuildSystem()
 #endif
 
     for ( MS_ModelsVector_ConstIterator i = M_modelsList.begin(); i != M_modelsList.end(); ++i )
-        ( *i )->BuildSystem();
+        ( *i )->buildSystem();
 
     for ( MS_CouplingsVector_ConstIterator i = M_couplingsList.begin(); i != M_couplingsList.end(); ++i )
-        ( *i )->InitializeCouplingVariables();
+        ( *i )->initializeCouplingVariables();
 }
 
 void
-MS_Model_MultiScale::UpdateSystem()
+MS_Model_MultiScale::updateSystem()
 {
 
 #ifdef HAVE_LIFEV_DEBUG
@@ -216,11 +216,11 @@ MS_Model_MultiScale::UpdateSystem()
 #endif
 
     for ( MS_ModelsVector_ConstIterator i = M_modelsList.begin(); i != M_modelsList.end(); ++i )
-        ( *i )->UpdateSystem();
+        ( *i )->updateSystem();
 }
 
 void
-MS_Model_MultiScale::SolveSystem()
+MS_Model_MultiScale::solveSystem()
 {
 
 #ifdef HAVE_LIFEV_DEBUG
@@ -228,11 +228,11 @@ MS_Model_MultiScale::SolveSystem()
 #endif
 
     for ( MS_ModelsVector_ConstIterator i = M_modelsList.begin(); i != M_modelsList.end(); ++i )
-        ( *i )->SolveSystem();
+        ( *i )->solveSystem();
 }
 
 void
-MS_Model_MultiScale::SaveSolution()
+MS_Model_MultiScale::saveSolution()
 {
 
 #ifdef HAVE_LIFEV_DEBUG
@@ -240,18 +240,18 @@ MS_Model_MultiScale::SaveSolution()
 #endif
 
     for ( MS_ModelsVector_ConstIterator i = M_modelsList.begin(); i != M_modelsList.end(); ++i )
-        ( *i )->SaveSolution();
+        ( *i )->saveSolution();
 
     for ( MS_CouplingsVector_ConstIterator i = M_couplingsList.begin(); i != M_couplingsList.end(); ++i )
-        ( *i )->SaveSolution();
+        ( *i )->saveSolution();
 }
 
 void
-MS_Model_MultiScale::ShowMe()
+MS_Model_MultiScale::showMe()
 {
     if ( M_displayer->isLeader() )
     {
-        super::ShowMe();
+        MS_PhysicalModel::showMe();
         std::cout << "Models number       = " << M_modelsList.size() << std::endl
                   << "Couplings number    = " << M_couplingsList.size() << std::endl << std::endl;
 
@@ -259,20 +259,20 @@ MS_Model_MultiScale::ShowMe()
     }
 
     for ( MS_ModelsVector_ConstIterator i = M_modelsList.begin(); i != M_modelsList.end(); ++i )
-        ( *i )->ShowMe();
+        ( *i )->showMe();
 
     if ( M_displayer->isLeader() )
         std::cout << "=================== Couplings Information ===================" << std::endl << std::endl;
 
     for ( MS_CouplingsVector_ConstIterator i = M_couplingsList.begin(); i != M_couplingsList.end(); ++i )
-        ( *i )->ShowMe();
+        ( *i )->showMe();
 }
 
 // ===================================================
 // Methods
 // ===================================================
 void
-MS_Model_MultiScale::CreateCouplingMap( EpetraMap& couplingMap )
+MS_Model_MultiScale::createCouplingMap( EpetraMap& couplingMap )
 {
 
 #ifdef HAVE_LIFEV_DEBUG
@@ -280,15 +280,15 @@ MS_Model_MultiScale::CreateCouplingMap( EpetraMap& couplingMap )
 #endif
 
     for ( MS_ModelsVector_ConstIterator i = M_modelsList.begin(); i != M_modelsList.end(); ++i )
-        if ( ( *i )->GetType() == MultiScale )
-            ( MS_DynamicCast< MS_Model_MultiScale > ( *i ) )->CreateCouplingMap( couplingMap );
+        if ( ( *i )->type() == MultiScale )
+            ( MS_DynamicCast< MS_Model_MultiScale > ( *i ) )->createCouplingMap( couplingMap );
 
     for ( MS_CouplingsVector_ConstIterator i = M_couplingsList.begin(); i != M_couplingsList.end(); ++i )
-        ( *i )->CreateCouplingMap( couplingMap );
+        ( *i )->createCouplingMap( couplingMap );
 }
 
 void
-MS_Model_MultiScale::InitializeCouplingVariables()
+MS_Model_MultiScale::initializeCouplingVariables()
 {
 
 #ifdef HAVE_LIFEV_DEBUG
@@ -296,15 +296,15 @@ MS_Model_MultiScale::InitializeCouplingVariables()
 #endif
 
     for ( MS_ModelsVector_ConstIterator i = M_modelsList.begin(); i != M_modelsList.end(); ++i )
-        if ( ( *i )->GetType() == MultiScale )
-            ( MS_DynamicCast< MS_Model_MultiScale > ( *i ) )->InitializeCouplingVariables();
+        if ( ( *i )->type() == MultiScale )
+            ( MS_DynamicCast< MS_Model_MultiScale > ( *i ) )->initializeCouplingVariables();
 
     for ( MS_CouplingsVector_ConstIterator i = M_couplingsList.begin(); i != M_couplingsList.end(); ++i )
-        ( *i )->InitializeCouplingVariables();
+        ( *i )->initializeCouplingVariables();
 }
 
 void
-MS_Model_MultiScale::ExtrapolateCouplingVariables()
+MS_Model_MultiScale::extrapolateCouplingVariables()
 {
 
 #ifdef HAVE_LIFEV_DEBUG
@@ -312,63 +312,63 @@ MS_Model_MultiScale::ExtrapolateCouplingVariables()
 #endif
 
     for ( MS_ModelsVector_ConstIterator i = M_modelsList.begin(); i != M_modelsList.end(); ++i )
-        if ( ( *i )->GetType() == MultiScale )
-            ( MS_DynamicCast< MS_Model_MultiScale > ( *i ) )->ExtrapolateCouplingVariables();
+        if ( ( *i )->type() == MultiScale )
+            ( MS_DynamicCast< MS_Model_MultiScale > ( *i ) )->extrapolateCouplingVariables();
 
     for ( MS_CouplingsVector_ConstIterator i = M_couplingsList.begin(); i != M_couplingsList.end(); ++i )
-        ( *i )->ExtrapolateCouplingVariables();
+        ( *i )->extrapolateCouplingVariables();
 }
 
 void
-MS_Model_MultiScale::ImportCouplingVariables( const MS_Vector_Type& CouplingVariables )
+MS_Model_MultiScale::importCouplingVariables( const MS_Vector_Type& couplingVariables )
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 8110 ) << "MS_Model_MultiScale::ImportCouplingVariables( CouplingVariables ) \n";
+    Debug( 8110 ) << "MS_Model_MultiScale::ImportCouplingVariables( couplingVariables ) \n";
 #endif
 
     for ( MS_ModelsVector_ConstIterator i = M_modelsList.begin(); i != M_modelsList.end(); ++i )
-        if ( ( *i )->GetType() == MultiScale )
-            ( MS_DynamicCast< MS_Model_MultiScale > ( *i ) )->ImportCouplingVariables( CouplingVariables );
+        if ( ( *i )->type() == MultiScale )
+            ( MS_DynamicCast< MS_Model_MultiScale > ( *i ) )->importCouplingVariables( couplingVariables );
 
     for ( MS_CouplingsVector_ConstIterator i = M_couplingsList.begin(); i != M_couplingsList.end(); ++i )
-        ( *i )->ImportCouplingVariables( CouplingVariables );
+        ( *i )->importCouplingVariables( couplingVariables );
 }
 
 void
-MS_Model_MultiScale::ExportCouplingVariables( MS_Vector_Type& CouplingVariables )
+MS_Model_MultiScale::exportCouplingVariables( MS_Vector_Type& couplingVariables )
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 8110 ) << "MS_Model_MultiScale::ExportCouplingVariables( CouplingVariables ) \n";
+    Debug( 8110 ) << "MS_Model_MultiScale::ExportCouplingVariables( couplingVariables ) \n";
 #endif
 
     for ( MS_ModelsVector_ConstIterator i = M_modelsList.begin(); i != M_modelsList.end(); ++i )
-        if ( ( *i )->GetType() == MultiScale )
-            ( MS_DynamicCast< MS_Model_MultiScale > ( *i ) )->ExportCouplingVariables( CouplingVariables);
+        if ( ( *i )->type() == MultiScale )
+            ( MS_DynamicCast< MS_Model_MultiScale > ( *i ) )->exportCouplingVariables( couplingVariables);
 
     for ( MS_CouplingsVector_ConstIterator i = M_couplingsList.begin(); i != M_couplingsList.end(); ++i )
-        ( *i )->ExportCouplingVariables( CouplingVariables );
+        ( *i )->exportCouplingVariables( couplingVariables );
 }
 
 void
-MS_Model_MultiScale::ExportCouplingResiduals( MS_Vector_Type& CouplingResiduals )
+MS_Model_MultiScale::exportCouplingResiduals( MS_Vector_Type& couplingResiduals )
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 8110 ) << "MS_Model_MultiScale::ExportCouplingResiduals( CouplingResiduals ) \n";
+    Debug( 8110 ) << "MS_Model_MultiScale::ExportCouplingResiduals( couplingResiduals ) \n";
 #endif
 
     for ( MS_ModelsVector_ConstIterator i = M_modelsList.begin(); i != M_modelsList.end(); ++i )
-        if ( ( *i )->GetType() == MultiScale )
-            ( MS_DynamicCast< MS_Model_MultiScale > ( *i ) )->ExportCouplingResiduals( CouplingResiduals );
+        if ( ( *i )->type() == MultiScale )
+            ( MS_DynamicCast< MS_Model_MultiScale > ( *i ) )->exportCouplingResiduals( couplingResiduals );
 
     for ( MS_CouplingsVector_ConstIterator i = M_couplingsList.begin(); i != M_couplingsList.end(); ++i )
-        ( *i )->ExportCouplingResiduals( CouplingResiduals );
+        ( *i )->exportCouplingResiduals( couplingResiduals );
 }
 
 void
-MS_Model_MultiScale::ExportJacobian( MS_Matrix_Type& Jacobian )
+MS_Model_MultiScale::exportJacobian( MS_Matrix_Type& jacobian )
 {
 
 #ifdef HAVE_LIFEV_DEBUG
@@ -376,34 +376,34 @@ MS_Model_MultiScale::ExportJacobian( MS_Matrix_Type& Jacobian )
 #endif
 
     for ( MS_ModelsVector_ConstIterator i = M_modelsList.begin(); i != M_modelsList.end(); ++i )
-        if ( ( *i )->GetType() == MultiScale )
-            ( MS_DynamicCast< MS_Model_MultiScale > ( *i ) )->ExportJacobian( Jacobian );
+        if ( ( *i )->type() == MultiScale )
+            ( MS_DynamicCast< MS_Model_MultiScale > ( *i ) )->exportJacobian( jacobian );
 
     for ( MS_CouplingsVector_ConstIterator i = M_couplingsList.begin(); i != M_couplingsList.end(); ++i )
-        ( *i )->ExportJacobian( Jacobian );
+        ( *i )->exportJacobian( jacobian );
 }
 
 // ===================================================
 // Get Methods
 // ===================================================
 UInt
-MS_Model_MultiScale::GetCouplingVariablesNumber()
+MS_Model_MultiScale::couplingVariablesNumber()
 {
 
 #ifdef HAVE_LIFEV_DEBUG
     Debug( 8110 ) << "MS_Model_MultiScale::GetCouplingVariablesNumber() \n";
 #endif
 
-    UInt CouplingVariablesNumber = 0;
+    UInt couplingVariablesNumber = 0;
 
     for ( MS_ModelsVector_ConstIterator i = M_modelsList.begin(); i != M_modelsList.end(); ++i )
-        if ( ( *i )->GetType() == MultiScale )
-            CouplingVariablesNumber += ( MS_DynamicCast< MS_Model_MultiScale > ( *i ) )->GetCouplingVariablesNumber();
+        if ( ( *i )->type() == MultiScale )
+            couplingVariablesNumber += ( MS_DynamicCast< MS_Model_MultiScale > ( *i ) )->couplingVariablesNumber();
 
     for ( MS_CouplingsVector_ConstIterator i = M_couplingsList.begin(); i != M_couplingsList.end(); ++i )
-        CouplingVariablesNumber += ( *i )->GetCouplingVariablesNumber();
+        couplingVariablesNumber += ( *i )->couplingVariablesNumber();
 
-    return CouplingVariablesNumber;
+    return couplingVariablesNumber;
 }
 
 } // Namespace LifeV

@@ -61,8 +61,8 @@ public:
     //! @name Type definitions
     //@{
 
-    typedef DataTime                                     Time_Type;
-    typedef boost::shared_ptr< Time_Type >               Time_ptrType;
+    typedef DataTime                                     time_Type;
+    typedef boost::shared_ptr< time_Type >               timePtr_Type;
 
     //@}
 
@@ -77,7 +77,7 @@ public:
     /*!
      * @param PhysicalData MS_PhysicalData
      */
-    MS_PhysicalData( const MS_PhysicalData& PhysicalData );
+    MS_PhysicalData( const MS_PhysicalData& data );
 
     //! Destructor
     virtual ~MS_PhysicalData() {}
@@ -93,7 +93,7 @@ public:
      * @param PhysicalData MS_PhysicalData
      * @return reference to a copy of the class
      */
-    MS_PhysicalData& operator=( const MS_PhysicalData& PhysicalData );
+    MS_PhysicalData& operator=( const MS_PhysicalData& data );
 
     //@}
 
@@ -105,10 +105,10 @@ public:
     /*!
      * @param dataFile GetPot file
      */
-    void ReadData( const GetPot& dataFile );
+    void readData( const GetPot& dataFile );
 
     //! Display some information about the physical quantities
-    void ShowMe();
+    void showMe();
 
     //@}
 
@@ -120,37 +120,37 @@ public:
     /*!
      * @return time container
      */
-    Time_ptrType GetDataTime() const;
+    timePtr_Type dataTime() const;
 
     //! Get the global fluid density.
     /*!
      * @return density of the fluid.
      */
-    const Real& GetFluidDensity() const;
+    const Real& fluidDensity() const;
 
     //! Get the global fluid viscosity.
     /*!
      * @return viscosity of the fluid.
      */
-    const Real& GetFluidViscosity() const;
+    const Real& fluidViscosity() const;
 
     //! Get the global fluid reference pressure (used by 1D model).
     /*!
      * @return reference pressure of the fluid.
      */
-    const Real& GetFluidReferencePressure() const;
+    const Real& fluidReferencePressure() const;
 
     //! Get the global structural Poisson coefficient.
     /*!
      * @return Poisson coefficient of the structure.
      */
-    const Real& GetStructureDensity() const;
+    const Real& structureDensity() const;
 
     //! Get the global structural density.
     /*!
      * @return density of the structure.
      */
-    const Real& GetStructurePoissonCoefficient() const;
+    const Real& structurePoissonCoefficient() const;
 
     // //! Get the global structural thickness.
     // /*!
@@ -162,22 +162,22 @@ public:
     /*!
      * @return Young modulus of the structure.
      */
-    const Real& GetStructureYoungModulus() const;
+    const Real& structureYoungModulus() const;
 
     //@}
 
 private:
 
-    Time_ptrType                        M_DataTime;
+    timePtr_Type                        M_dataTime;
 
-    Real                                M_FluidDensity;
-    Real                                M_FluidViscosity;
-    Real                                M_FluidReferencePressure;
+    Real                                M_fluidDensity;
+    Real                                M_fluidViscosity;
+    Real                                M_fluidReferencePressure;
 
-    Real                                M_StructureDensity;
-    Real                                M_StructurePoissonCoefficient;
-    //Real                                M_StructureThickness;
-    Real                                M_StructureYoungModulus;
+    Real                                M_structureDensity;
+    Real                                M_structurePoissonCoefficient;
+//    Real                                M_structureThickness;
+    Real                                M_structureYoungModulus;
 
 };
 

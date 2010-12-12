@@ -39,7 +39,7 @@
 namespace LifeV
 {
 
-std::map< std::string, modelsTypes > MS_modelsMap;
+std::map< std::string, models_Type > MS_modelsMap;
 
 UInt MS_PhysicalModel::M_modelsNumber = 0;
 
@@ -79,43 +79,43 @@ MS_PhysicalModel::MS_PhysicalModel() :
 // MultiScale PhysicalModel Virtual Methods
 // ===================================================
 void
-MS_PhysicalModel::SetupData( const std::string& FileName )
+MS_PhysicalModel::setupData( const std::string& fileName )
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 8100 ) << "MS_PhysicalModel::SetupData( FileName ) \n";
+    Debug( 8100 ) << "MS_PhysicalModel::SetupData( fileName ) \n";
 #endif
 
-    GetPot DataFile( FileName );
+    GetPot dataFile( fileName );
 
     // Read modelName
-    M_modelName = DataFile( "MultiScale/modelName", "modelName" );
+    M_modelName = dataFile( "MultiScale/modelName", "modelName" );
 
     // Read flags
-    UInt componentSize = DataFile.vector_variable_size( "MultiScale/couplingFlags" );
+    UInt componentSize = dataFile.vector_variable_size( "MultiScale/couplingFlags" );
     M_flags.reserve( componentSize );
     for ( UInt j( 0 ); j < componentSize; ++j )
-        M_flags.push_back( DataFile( "MultiScale/couplingFlags", 0, j ) );
+        M_flags.push_back( dataFile( "MultiScale/couplingFlags", 0, j ) );
 }
 
 void
-MS_PhysicalModel::ShowMe()
+MS_PhysicalModel::showMe()
 {
     std::cout << "Model id            = " << M_ID << std::endl
               << "Model name          = " << M_modelName << std::endl
               << "Model type          = " << Enum2String( M_type, MS_modelsMap ) << std::endl;
 
-    std::cout << "Couplings number    = " << GetCouplingsNumber() << std::endl;
+    std::cout << "Couplings number    = " << couplingsNumber() << std::endl;
     std::cout << "Couplings ID(s)     = ";
-    for ( UInt i( 0 ); i < GetCouplingsNumber(); ++i )
-        std::cout << M_couplings[i]->GetID() << " ";
+    for ( UInt i( 0 ); i < couplingsNumber(); ++i )
+        std::cout << M_couplings[i]->ID() << " ";
     std::cout << std::endl;
     std::cout << "Couplings type(s)   = ";
-    for ( UInt i( 0 ); i < GetCouplingsNumber(); ++i )
-        std::cout << Enum2String( M_couplings[i]->GetType(), MS_couplingsMap ) << " ";
+    for ( UInt i( 0 ); i < couplingsNumber(); ++i )
+        std::cout << Enum2String( M_couplings[i]->type(), MS_couplingsMap ) << " ";
     std::cout << std::endl;
     std::cout << "Flags list          = ";
-    for ( UInt i( 0 ); i < GetCouplingsNumber(); ++i )
+    for ( UInt i( 0 ); i < couplingsNumber(); ++i )
         std::cout << M_flags[i] << " ";
     std::cout << std::endl << std::endl;
 
@@ -137,7 +137,7 @@ MS_PhysicalModel::ShowMe()
 // Methods
 // ===================================================
 void
-MS_PhysicalModel::ClearCouplingsList()
+MS_PhysicalModel::clearCouplingsList()
 {
     M_couplings.clear();
 }
@@ -146,25 +146,25 @@ MS_PhysicalModel::ClearCouplingsList()
 // Set Methods
 // ===================================================
 void
-MS_PhysicalModel::SetID( const UInt& id )
+MS_PhysicalModel::setID( const UInt& id )
 {
     M_ID = id;
 }
 
 void
-MS_PhysicalModel::AddCoupling( const MS_Coupling_PtrType& coupling )
+MS_PhysicalModel::addCoupling( const MS_Coupling_PtrType& coupling )
 {
     M_couplings.push_back( coupling );
 }
 
 void
-MS_PhysicalModel::SetGlobalData( const MS_GlobalDataContainer_PtrType& globalData )
+MS_PhysicalModel::setGlobalData( const MS_GlobalDataContainer_PtrType& globalData )
 {
     M_globalData = globalData;
 }
 
 void
-MS_PhysicalModel::SetGeometry( const boost::array< Real, NDIM >& scale,
+MS_PhysicalModel::setGeometry( const boost::array< Real, NDIM >& scale,
                                const boost::array< Real, NDIM >& rotate,
                                const boost::array< Real, NDIM >& translate )
 {
@@ -179,7 +179,7 @@ MS_PhysicalModel::SetGeometry( const boost::array< Real, NDIM >& scale,
 }
 
 void
-MS_PhysicalModel::SetCommunicator( const MS_Comm_PtrType& comm )
+MS_PhysicalModel::setCommunicator( const MS_Comm_PtrType& comm )
 {
 
 #ifdef HAVE_LIFEV_DEBUG
@@ -194,59 +194,59 @@ MS_PhysicalModel::SetCommunicator( const MS_Comm_PtrType& comm )
 // Get Methods
 // ===================================================
 const UInt&
-MS_PhysicalModel::GetID() const
+MS_PhysicalModel::ID() const
 {
     return M_ID;
 }
 
-const modelsTypes&
-MS_PhysicalModel::GetType() const
+const models_Type&
+MS_PhysicalModel::type() const
 {
     return M_type;
 }
 
 const BCFlag&
-MS_PhysicalModel::GetFlag( const UInt& id ) const
+MS_PhysicalModel::flag( const UInt& id ) const
 {
     return M_flags[id];
 }
 
 const std::vector< BCFlag >&
-MS_PhysicalModel::GetFlags() const
+MS_PhysicalModel::flags() const
 {
     return M_flags;
 }
 
 const std::string&
-MS_PhysicalModel::GetModelName() const
+MS_PhysicalModel::modelName() const
 {
     return M_modelName;
 }
 
 UInt
-MS_PhysicalModel::GetCouplingsNumber() const
+MS_PhysicalModel::couplingsNumber() const
 {
     return static_cast< UInt > ( M_couplings.size() );
 }
 
 UInt
-MS_PhysicalModel::GetCouplingLocalID( const UInt& ID ) const
+MS_PhysicalModel::couplingLocalID( const UInt& ID ) const
 {
-    for ( UInt localID( 0 ); localID < GetCouplingsNumber(); ++localID )
-        if ( M_couplings[localID]->GetID() == ID )
+    for ( UInt localID( 0 ); localID < couplingsNumber(); ++localID )
+        if ( M_couplings[localID]->ID() == ID )
             return localID;
 
     return -1;
 }
 
 MS_Coupling_PtrType
-MS_PhysicalModel::GetCoupling( const UInt& LocalID ) const
+MS_PhysicalModel::coupling( const UInt& localID ) const
 {
-    return M_couplings[LocalID];
+    return M_couplings[localID];
 }
 
 const MS_GlobalDataContainer_PtrType&
-MS_PhysicalModel::GetGlobalData() const
+MS_PhysicalModel::globalData() const
 {
     return M_globalData;
 }

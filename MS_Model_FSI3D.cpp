@@ -50,30 +50,30 @@ namespace LifeV
 // Constructors & Destructor
 // ===================================================
 MS_Model_FSI3D::MS_Model_FSI3D() :
-        super                          (),
-        M_FSIoperator                  ( ),
+        MS_PhysicalModel               (),
+        M_FSIoperator                  (),
         M_data                         ( new data_Type() ),
         M_exporterFluid                (),
         M_exporterSolid                (),
         M_importerFluid                (),
         M_importerSolid                (),
-        M_solution_tn                  (),
         M_fluidVelocityPressure        (),
         M_fluidDisplacement            (),
         M_solidVelocity                (),
         M_solidDisplacement            (),
-        M_fluidBC                      ( new BCInterface_Type() ),
-        M_solidBC                      ( new BCInterface_Type() ),
-        M_harmonicExtensionBC          ( new BCInterface_Type() ),
-//    M_linearizedFluidBC            (),
-//    M_linearizedSolidBC            (),
+        M_fluidVelocityPressure_tn     (),
+        M_solidDisplacement_tn         (),
+        M_solidDisplacementOld_tn      (),
+        M_rhs_tn                       (),
+        M_nonLinearRichardsonIteration (),
+        M_fluidBC                      ( new bcInterface_Type() ),
+        M_solidBC                      ( new bcInterface_Type() ),
+        M_harmonicExtensionBC          ( new bcInterface_Type() ),
         M_linearBC                     (),
         M_linearRHS                    (),
         M_linearSolution               (),
-        M_BCBaseDelta_Zero             (),
-        M_BCBaseDelta_One              (),
-        M_iter                         (0),
-        M_meshDisp_tn                  ()
+        M_bcBaseDeltaZero              (),
+        M_bcBaseDeltaOne               ()
 {
 
 #ifdef HAVE_LIFEV_DEBUG
@@ -92,16 +92,16 @@ MS_Model_FSI3D::MS_Model_FSI3D() :
     BlockMatrix::Factory::instance().registerProduct("AdditiveSchwarzRN", &BlockMatrixRN::createAdditiveSchwarzRN ) ;
 
     FSIOperator_Type::solid_raw_type::StructureSolverFactory::instance().registerProduct( "linearVenantKirchhof", &FSIOperator_Type::createLinearStructure );
-    //FSIOperator_Type::solid_raw_type::StructureSolverFactory::instance().registerProduct( "nonLinearVenantKirchhof", &FSIOperator_Type::createNonLinearStructure );
+//    FSIOperator_Type::solid_raw_type::StructureSolverFactory::instance().registerProduct( "nonLinearVenantKirchhof", &FSIOperator_Type::createNonLinearStructure );
 }
 
 // ===================================================
 // MultiScale PhysicalModel Virtual Methods
 // ===================================================
 void
-MS_Model_FSI3D::SetupData( const std::string& fileName )
+MS_Model_FSI3D::setupData( const std::string& fileName )
 {
-    super::SetupData( fileName );
+    MS_PhysicalModel::setupData( fileName );
 
     GetPot dataFile( fileName );
 
@@ -109,10 +109,10 @@ MS_Model_FSI3D::SetupData( const std::string& fileName )
     M_data->setup( dataFile );
 
     if ( M_globalData.get() )
-        SetupGlobalData( fileName );
+        setupGlobalData( fileName );
 
     // Create FSIOperator
-    M_FSIoperator = FSIOperator_PtrType( FSIOperator::FSIFactory::instance().createObject( M_data->method() ) );
+    M_FSIoperator = FSIOperatorPtr_Type( FSIOperator::FSIFactory::instance().createObject( M_data->method() ) );
 
     // Setup Communicator
     setupCommunicator();
@@ -121,28 +121,24 @@ MS_Model_FSI3D::SetupData( const std::string& fileName )
     M_FSIoperator->setData( M_data );
     M_FSIoperator->setDataFile( dataFile );
 
-    // Setup Boundary Conditions for FSI from file
+    // Setup Boundary Conditions from file
     setupBC( fileName );
-
-    // Setup Boundary Conditions for segregated FSI  from file
-//     if( !M_data->isMonolithic() )
-//         setupSegregatedBC( fileName );
 
     // Setup exporter
     if ( M_FSIoperator->isFluid() )
     {
-        SetupExporter( M_exporterFluid, dataFile );
-        SetupImporter( M_importerFluid, dataFile );
+        setupExporter( M_exporterFluid, dataFile );
+        setupImporter( M_importerFluid, dataFile );
     }
     if ( M_FSIoperator->isSolid() )
     {
-        SetupExporter( M_exporterSolid, dataFile, "_Solid" );
-        SetupImporter( M_importerSolid, dataFile, "_Solid" );
+        setupExporter( M_exporterSolid, dataFile, "_Solid" );
+        setupImporter( M_importerSolid, dataFile, "_Solid" );
     }
 }
 
 void
-MS_Model_FSI3D::SetupModel()
+MS_Model_FSI3D::setupModel()
 {
     // Mesh transformation (before partitioning, ideally should be done after for scalability)
     //M_FSIoperator->fluidMesh().transformMesh( M_geometryScale, M_geometryRotate, M_geometryTranslate );
@@ -171,24 +167,22 @@ MS_Model_FSI3D::SetupModel()
 
     // Setup Exporters
     if ( M_FSIoperator->isFluid() )
-        SetExporterFluid( M_exporterFluid );
+        setExporterFluid( M_exporterFluid );
 
     if ( M_FSIoperator->isSolid() )
-        SetExporterSolid( M_exporterSolid );
+        setExporterSolid( M_exporterSolid );
 
     //Setup solution
     initializeSolution();
 
     //Setup linear model
-    SetupLinearModel();
+    setupLinearModel();
 
-    M_meshDisp_tn.reset( new vector_Type( *M_fluidDisplacement ));
-    //to kill when everithing is merged
-    //M_offset=(dynamic_cast<LifeV::Monolithic*>(M_FSIoperator.get()))->getOffset();
+    M_solidDisplacement_tn.reset( new vector_Type( *M_fluidDisplacement ));
 }
 
 void
-MS_Model_FSI3D::BuildSystem()
+MS_Model_FSI3D::buildSystem()
 {
     // Update BCInterface Operator BC
     updateBC();
@@ -198,17 +192,14 @@ MS_Model_FSI3D::BuildSystem()
     M_FSIoperator->updateSystem();
 
     // Update solution at time n
-    M_solution_tn.reset( new vector_Type( M_FSIoperator->getSolution() ) );
+    M_fluidVelocityPressure_tn.reset( new vector_Type( M_FSIoperator->getSolution() ) );
     M_rhs_tn.reset( new vector_Type( M_FSIoperator->getSolution().getMap() ) );
-    M_meshDisp_tn.reset( new vector_Type( M_FSIoperator->meshDisp() ) );
-    M_meshDispOld_tn.reset( new vector_Type( M_FSIoperator->meshDisp() ) );
-
-    // Non-linear Richardson solver
-    //vector_PtrType solution = M_solution_tn ;
+    M_solidDisplacement_tn.reset( new vector_Type( M_FSIoperator->meshDisp() ) );
+    M_solidDisplacementOld_tn.reset( new vector_Type( M_FSIoperator->meshDisp() ) );
 }
 
 void
-MS_Model_FSI3D::UpdateSystem()
+MS_Model_FSI3D::updateSystem()
 {
     // Update BCInterface Operator BC
     updateBC();
@@ -216,42 +207,36 @@ MS_Model_FSI3D::UpdateSystem()
     // Update System
     M_FSIoperator->updateSystem();
 
-
     //Update solution at time n
-    *M_meshDispOld_tn = M_FSIoperator->meshMotion().dispOld();
-    *M_solution_tn = *M_FSIoperator->solutionPtr();
-    *M_meshDisp_tn = M_FSIoperator->meshDisp();
+    *M_fluidVelocityPressure_tn = *M_FSIoperator->solutionPtr();
+    *M_solidDisplacementOld_tn = M_FSIoperator->meshMotion().dispOld();
+    *M_solidDisplacement_tn = M_FSIoperator->meshDisp();
     *M_rhs_tn *= 0;
 
-    boost::dynamic_pointer_cast<Monolithic>(M_FSIoperator)->precPtr()->setRecompute( 1, true );
-    //M_solution_tn = M_FSIoperator->solutionPtr();
+    M_nonLinearRichardsonIteration = 0;
 
-    M_iter = 0;
+    boost::dynamic_pointer_cast<Monolithic>(M_FSIoperator)->precPtr()->setRecompute( 1, true );
 }
 
 void
-MS_Model_FSI3D::SolveSystem( )
+MS_Model_FSI3D::solveSystem( )
 {
     UInt maxSubIterationNumber = M_data->maxSubIterationNumber();
     std::ofstream outRes; // Unuseful variable
 
     // Non-linear Richardson solver
-    //vector_PtrType solution = M_solution_tn ;
-    vector_PtrType solution( new vector_Type( *M_solution_tn ) ) ;
-    boost::dynamic_pointer_cast<LifeV::Monolithic>(M_FSIoperator)->initializeMesh(M_meshDisp_tn);
+    vectorPtr_Type solution( new vector_Type( *M_fluidVelocityPressure_tn ) ) ;
+    boost::dynamic_pointer_cast<LifeV::Monolithic>(M_FSIoperator)->initializeMesh(M_solidDisplacement_tn);
     M_FSIoperator->fluid().initialize( *M_fluidVelocityPressure );//useless?
-    vector_PtrType newDisp(new vector_Type(*M_solidDisplacement));
+    vectorPtr_Type newDisp(new vector_Type(*M_solidDisplacement));
     M_FSIoperator->solid().initialize( newDisp, M_solidVelocity );
-    vector_PtrType newRHS(new vector_Type(*M_rhs_tn));
+    vectorPtr_Type newRHS(new vector_Type(*M_rhs_tn));
     M_FSIoperator->setRHS( newRHS );
-    M_FSIoperator->setSolution( *M_solution_tn );
-    M_FSIoperator->initializeBDF( *M_solution_tn );
+    M_FSIoperator->setSolution( *M_fluidVelocityPressure_tn );
+    M_FSIoperator->initializeBDF( *M_fluidVelocityPressure_tn );
     M_FSIoperator->setRestarts( true );
 
-//    std::cout<< "norm displacement: " << M_meshDisp_tn->Norm2() << std::endl;
-
-
-    if (M_iter != 0)
+    if (M_nonLinearRichardsonIteration != 0)
     {
         boost::dynamic_pointer_cast<Monolithic>(M_FSIoperator)->precPtr()->setRecompute( 1, false );
         M_FSIoperator->updateRHS();
@@ -266,25 +251,22 @@ MS_Model_FSI3D::SolveSystem( )
                                     M_data->linesearch(),
                                     outRes,
                                     M_data->dataFluid()->dataTime()->getTime(),
-                                    M_iter
+                                    M_nonLinearRichardsonIteration
                                   );
-    if (M_iter == 0)
-    {
+    if (M_nonLinearRichardsonIteration == 0)
         *M_fluidDisplacement = M_FSIoperator->meshDisp();
-    }
 
+    M_nonLinearRichardsonIteration=1;
 
-    M_iter=1;
     // We set the solution for the next time step
     M_FSIoperator->setSolutionPtr( solution );
 
     if ( status == EXIT_FAILURE )
         std::cout << "Non-Linear Richardson failed to converge" << std::endl;
-
 }
 
 void
-MS_Model_FSI3D::SaveSolution()
+MS_Model_FSI3D::saveSolution()
 {
     // TODO Post-process must be made here. We need to add to HDF5exporter some methods to:
     // 1) save only the xmf file (done once, as it is independent from the variable)
@@ -343,11 +325,11 @@ MS_Model_FSI3D::SaveSolution()
 }
 
 void
-MS_Model_FSI3D::ShowMe()
+MS_Model_FSI3D::showMe()
 {
     if ( M_displayer->isLeader() )
     {
-        super::ShowMe();
+        MS_PhysicalModel::showMe();
 
         std::cout << "FSI method          = " << M_data->method() << std::endl << std::endl;
 
@@ -371,7 +353,7 @@ MS_Model_FSI3D::ShowMe()
 // Methods
 // ===================================================
 void
-MS_Model_FSI3D::SetupLinearModel()
+MS_Model_FSI3D::setupLinearModel()
 {
 
 #ifdef HAVE_LIFEV_DEBUG
@@ -379,16 +361,16 @@ MS_Model_FSI3D::SetupLinearModel()
 #endif
 
     // Define BCFunctions for tangent problem
-    M_BCBaseDelta_Zero.setFunction( boost::bind( &MS_Model_FSI3D::BCFunctionDelta_Zero, this, _1, _2, _3, _4, _5 ) );
-    M_BCBaseDelta_One.setFunction(  boost::bind( &MS_Model_FSI3D::BCFunctionDelta_One,  this, _1, _2, _3, _4, _5 ) );
+    M_bcBaseDeltaZero.setFunction( boost::bind( &MS_Model_FSI3D::bcFunctionDeltaZero, this, _1, _2, _3, _4, _5 ) );
+    M_bcBaseDeltaOne.setFunction(  boost::bind( &MS_Model_FSI3D::bcFunctionDeltaOne,  this, _1, _2, _3, _4, _5 ) );
 
     // The linear BCHandler is a copy of the original BCHandler with all BCFunctions giving zero
-    BC_PtrType LinearBCHandler ( new BC_Type( *M_fluidBC->handler() ) );
+    bcPtr_Type LinearBCHandler ( new bc_Type( *M_fluidBC->handler() ) );
     M_linearBC = LinearBCHandler;
 
     // Set all the BCFunctions to zero
-    for ( BC_Type::BCBase_Iterator i = M_linearBC->begin() ; i != M_linearBC->end() ; ++i )
-        i->setBCFunction( M_BCBaseDelta_Zero );
+    for ( bc_Type::BCBase_Iterator i = M_linearBC->begin() ; i != M_linearBC->end() ; ++i )
+        i->setBCFunction( M_bcBaseDeltaZero );
 
     // Setup linear solution & the RHS
     M_linearSolution.reset( new vector_Type( M_FSIoperator->un()->getMap() ) );
@@ -396,7 +378,7 @@ MS_Model_FSI3D::SetupLinearModel()
 }
 
 void
-MS_Model_FSI3D::UpdateLinearModel()
+MS_Model_FSI3D::updateLinearModel()
 {
 
 #ifdef HAVE_LIFEV_DEBUG
@@ -409,162 +391,162 @@ MS_Model_FSI3D::UpdateLinearModel()
 }
 
 void
-MS_Model_FSI3D::SolveLinearModel( bool& SolveLinearSystem )
+MS_Model_FSI3D::solveLinearModel( bool& solveLinearSystem )
 {
 
 #ifdef HAVE_LIFEV_DEBUG
     Debug( 8140 ) << "MS_Model_FSI3D::SolveLinearModel() \n";
 #endif
 
-    if ( !SolveLinearSystem )
+    if ( !solveLinearSystem )
         return;
 
-    ImposePerturbation();
+    imposePerturbation();
 
-    UpdateLinearModel();
+    updateLinearModel();
 
     //Solve the linear problem
     M_FSIoperator->solveJac( *M_linearSolution, *M_linearRHS, 0. );
 
-    ResetPerturbation();
+    resetPerturbation();
 
     //This flag avoid recomputation of the same system
-    SolveLinearSystem = false;
+    solveLinearSystem = false;
 }
 
 // ===================================================
 // Get Methods
 // ===================================================
-MS_Model_FSI3D::BCInterface_Type&
-MS_Model_FSI3D::GetBCInterface()
+MS_Model_FSI3D::bcInterface_Type&
+MS_Model_FSI3D::bcInterface()
 {
     return *M_fluidBC;
 }
 
 Real
-MS_Model_FSI3D::GetBoundaryDensity( const BCFlag& /*Flag*/ ) const
+MS_Model_FSI3D::boundaryDensity( const BCFlag& /*flag*/ ) const
 {
     return M_FSIoperator->dataFluid()->density();
 }
 
 Real
-MS_Model_FSI3D::GetBoundaryViscosity( const BCFlag& /*Flag*/ ) const
+MS_Model_FSI3D::boundaryViscosity( const BCFlag& /*flag*/ ) const
 {
     return M_FSIoperator->dataFluid()->viscosity();
 }
 
 Real
-MS_Model_FSI3D::GetBoundaryArea( const BCFlag& Flag ) const
+MS_Model_FSI3D::boundaryArea( const BCFlag& flag ) const
 {
-    return M_FSIoperator->fluid().area( Flag );
+    return M_FSIoperator->fluid().area( flag );
 }
 
 Real
-MS_Model_FSI3D::GetBoundaryFlowRate( const BCFlag& Flag ) const
+MS_Model_FSI3D::boundaryFlowRate( const BCFlag& flag ) const
 {
-    return M_FSIoperator->fluid().flux( Flag, *M_FSIoperator->solutionPtr() );
+    return M_FSIoperator->fluid().flux( flag, *M_FSIoperator->solutionPtr() );
 }
 
 Real
-MS_Model_FSI3D::GetBoundaryPressure( const BCFlag& Flag ) const
+MS_Model_FSI3D::boundaryPressure( const BCFlag& flag ) const
 {
-    return M_FSIoperator->fluid().pressure( Flag, *M_FSIoperator->solutionPtr() );
+    return M_FSIoperator->fluid().pressure( flag, *M_FSIoperator->solutionPtr() );
 }
 
 Real
-MS_Model_FSI3D::GetBoundaryDynamicPressure( const BCFlag& Flag ) const
+MS_Model_FSI3D::boundaryDynamicPressure( const BCFlag& flag ) const
 {
-    return 0.5 * GetBoundaryDensity( Flag ) * ( GetBoundaryFlowRate( Flag ) * GetBoundaryFlowRate( Flag ) )
-           / ( GetBoundaryArea( Flag ) * GetBoundaryArea( Flag ) );
+    return 0.5 * boundaryDensity( flag ) * ( boundaryFlowRate( flag ) * boundaryFlowRate( flag ) )
+           / ( boundaryArea( flag ) * boundaryArea( flag ) );
 }
 
 Real
-MS_Model_FSI3D::GetBoundaryLagrangeMultiplier( const BCFlag& Flag ) const
+MS_Model_FSI3D::boundaryLagrangeMultiplier( const BCFlag& flag ) const
 {
-    return M_FSIoperator->fluid().LagrangeMultiplier(Flag, *M_fluidBC->handler(), M_FSIoperator->getSolution() );
+    return M_FSIoperator->fluid().LagrangeMultiplier(flag, *M_fluidBC->handler(), M_FSIoperator->getSolution() );
 }
 
 Real
-MS_Model_FSI3D::GetBoundaryStress( const BCFlag& Flag, const stressTypes& StressType ) const
+MS_Model_FSI3D::boundaryStress( const BCFlag& flag, const stress_Type& stressType ) const
 {
-    switch ( StressType )
+    switch ( stressType )
     {
     case StaticPressure:
     {
-        return -GetBoundaryPressure( Flag );
+        return -boundaryPressure( flag );
     }
 
     case TotalPressure:
     {
-        return -GetBoundaryPressure( Flag ) + GetBoundaryDynamicPressure( Flag ) * ( ( GetBoundaryFlowRate( Flag ) > 0.0 ) ? 1 : -1 );
+        return -boundaryPressure( flag ) + boundaryDynamicPressure( flag ) * ( ( boundaryFlowRate( flag ) > 0.0 ) ? 1 : -1 );
     }
 
     case LagrangeMultiplier:
     {
-        return -GetBoundaryLagrangeMultiplier( Flag );
+        return -boundaryLagrangeMultiplier( flag );
     }
 
     default:
 
-        std::cout << "ERROR: Invalid stress type [" << Enum2String( StressType, MS_stressesMap ) << "]" << std::endl;
+        std::cout << "ERROR: Invalid stress type [" << Enum2String( stressType, MS_stressesMap ) << "]" << std::endl;
 
         return 0.0;
     }
 }
 
 Real
-MS_Model_FSI3D::GetBoundaryDeltaFlowRate( const BCFlag& Flag, bool& SolveLinearSystem )
+MS_Model_FSI3D::boundaryDeltaFlowRate( const BCFlag& flag, bool& solveLinearSystem )
 {
-    SolveLinearModel( SolveLinearSystem );
+    solveLinearModel( solveLinearSystem );
 
-    return M_FSIoperator->fluid().flux( Flag, *M_linearSolution );
+    return M_FSIoperator->fluid().flux( flag, *M_linearSolution );
 }
 
 Real
-MS_Model_FSI3D::GetBoundaryDeltaPressure( const BCFlag& Flag, bool& SolveLinearSystem )
+MS_Model_FSI3D::boundaryDeltaPressure( const BCFlag& flag, bool& solveLinearSystem )
 {
-    SolveLinearModel( SolveLinearSystem );
+    solveLinearModel( solveLinearSystem );
 
-    return M_FSIoperator->fluid().pressure( Flag, *M_linearSolution );
+    return M_FSIoperator->fluid().pressure( flag, *M_linearSolution );
 }
 
 Real
-MS_Model_FSI3D::GetBoundaryDeltaDynamicPressure( const BCFlag& Flag, bool& SolveLinearSystem )
+MS_Model_FSI3D::boundaryDeltaDynamicPressure( const BCFlag& flag, bool& solveLinearSystem )
 {
-    return GetBoundaryDensity( Flag ) * GetBoundaryDeltaFlowRate( Flag, SolveLinearSystem ) * GetBoundaryFlowRate( Flag ) / ( GetBoundaryArea( Flag ) * GetBoundaryArea( Flag ) );
+    return boundaryDensity( flag ) * boundaryDeltaFlowRate( flag, solveLinearSystem ) * boundaryFlowRate( flag ) / ( boundaryArea( flag ) * boundaryArea( flag ) );
 }
 
 Real
-MS_Model_FSI3D::GetBoundaryDeltaLagrangeMultiplier( const BCFlag& Flag, bool& SolveLinearSystem )
+MS_Model_FSI3D::boundaryDeltaLagrangeMultiplier( const BCFlag& flag, bool& solveLinearSystem )
 {
-    SolveLinearModel( SolveLinearSystem );
+    solveLinearModel( solveLinearSystem );
 
-    return M_FSIoperator->fluid().LagrangeMultiplier( Flag, *M_linearBC, *M_linearSolution );
+    return M_FSIoperator->fluid().LagrangeMultiplier( flag, *M_linearBC, *M_linearSolution );
 }
 
 Real
-MS_Model_FSI3D::GetBoundaryDeltaStress( const BCFlag& Flag, bool& SolveLinearSystem, const stressTypes& StressType )
+MS_Model_FSI3D::boundaryDeltaStress( const BCFlag& flag, bool& solveLinearSystem, const stress_Type& stressType )
 {
-    switch ( StressType )
+    switch ( stressType )
     {
     case StaticPressure:
     {
-        return -GetBoundaryDeltaPressure( Flag, SolveLinearSystem );
+        return -boundaryDeltaPressure( flag, solveLinearSystem );
     }
 
     case TotalPressure:
     {
-        return -GetBoundaryDeltaPressure( Flag, SolveLinearSystem ) + GetBoundaryDeltaDynamicPressure( Flag, SolveLinearSystem ); //Verify the sign of DynamicPressure contribute!
+        return -boundaryDeltaPressure( flag, solveLinearSystem ) + boundaryDeltaDynamicPressure( flag, solveLinearSystem ); //Verify the sign of DynamicPressure contribute!
     }
 
     case LagrangeMultiplier:
     {
-        return -GetBoundaryDeltaLagrangeMultiplier( Flag, SolveLinearSystem );
+        return -boundaryDeltaLagrangeMultiplier( flag, solveLinearSystem );
     }
 
     default:
 
-        std::cout << "ERROR: Invalid stress type [" << Enum2String( StressType, MS_stressesMap ) << "]" << std::endl;
+        std::cout << "ERROR: Invalid stress type [" << Enum2String( stressType, MS_stressesMap ) << "]" << std::endl;
 
         return 0.0;
     }
@@ -574,26 +556,26 @@ MS_Model_FSI3D::GetBoundaryDeltaStress( const BCFlag& Flag, bool& SolveLinearSys
 // Private Methods
 // ===================================================
 void
-MS_Model_FSI3D::SetupGlobalData( const std::string& FileName )
+MS_Model_FSI3D::setupGlobalData( const std::string& fileName )
 {
-    GetPot DataFile( FileName );
+    GetPot dataFile( fileName );
 
     //Global data time
-    M_data->dataFluid()->setDataTime( M_globalData->GetDataTime() );
-    M_data->dataSolid()->setDataTime( M_globalData->GetDataTime() );
+    M_data->dataFluid()->setDataTime( M_globalData->dataTime() );
+    M_data->dataSolid()->setDataTime( M_globalData->dataTime() );
 
     //Global physical quantities
-    if ( !DataFile.checkVariable( "fluid/physics/density" ) )
-        M_data->dataFluid()->density( M_globalData->GetFluidDensity() );
-    if ( !DataFile.checkVariable( "fluid/physics/viscosity" ) )
-        M_data->dataFluid()->viscosity( M_globalData->GetFluidViscosity() );
+    if ( !dataFile.checkVariable( "fluid/physics/density" ) )
+        M_data->dataFluid()->density( M_globalData->fluidDensity() );
+    if ( !dataFile.checkVariable( "fluid/physics/viscosity" ) )
+        M_data->dataFluid()->viscosity( M_globalData->fluidViscosity() );
 
-    if ( !DataFile.checkVariable( "solid/physics/density" ) )
-        M_data->dataSolid()->setDensity( M_globalData->GetStructureDensity() );
-    if ( !DataFile.checkVariable( "solid/physics/poisson" ) )
-        M_data->dataSolid()->setPoisson( M_globalData->GetStructurePoissonCoefficient() );
-    if ( !DataFile.checkVariable( "solid/physics/young" ) )
-        M_data->dataSolid()->setYoung( M_globalData->GetStructureYoungModulus() );
+    if ( !dataFile.checkVariable( "solid/physics/density" ) )
+        M_data->dataSolid()->setDensity( M_globalData->structureDensity() );
+    if ( !dataFile.checkVariable( "solid/physics/poisson" ) )
+        M_data->dataSolid()->setPoisson( M_globalData->structurePoissonCoefficient() );
+    if ( !dataFile.checkVariable( "solid/physics/young" ) )
+        M_data->dataSolid()->setYoung( M_globalData->structureYoungModulus() );
 
     //M_data->showMe();
 }
@@ -601,84 +583,13 @@ MS_Model_FSI3D::SetupGlobalData( const std::string& FileName )
 void
 MS_Model_FSI3D::setupCommunicator()
 {
-    bool fluid = false;
-    bool solid = false;
+    M_FSIoperator->setFluid( true );
+    M_FSIoperator->setSolid( true );
 
-    Int  fluidLeader( 0 );
-    Int  solidLeader( 0 );
+    M_FSIoperator->setFluidLeader( 0 );
+    M_FSIoperator->setSolidLeader( 0 );
 
-    boost::shared_ptr<Epetra_Comm> epetraComm;
-
-    if ( M_data->isMonolithic() )
-    {
-        fluid = true;
-        solid = true;
-        solidLeader = 0;
-        fluidLeader = solidLeader;
-
-        epetraComm = M_comm;
-    }
-    else
-    {
-        /*
-                MPI_Group  originGroup, newGroup;
-                MPI_Comm   newComm;
-                MPI_Comm_group( M_comm->Comm(), &originGroup );
-
-                if ( M_comm->NumProc() == 1 )
-                {
-                    std::cout << "Serial Fluid/Structure computation" << std::endl;
-                    newComm = M_comm->Comm();
-                    fluid = true;
-                    solid = true;
-                    fluidLeader = 0;
-                    solidLeader = 0;
-
-                    epetraComm = M_comm;
-                }
-                else
-                {
-                    Int members[M_comm->NumProc()];
-
-                    solidLeader = 0;
-                    fluidLeader = 1-solidLeader;
-
-                    if ( M_comm->MyPID() == solidLeader )
-                    {
-                        members[0] = solidLeader;
-                        MPI_Group_incl( originGroup, 1, members, &newGroup );
-                        solid = true;
-                    }
-                    else
-                    {
-                        for (Int ii = 0; ii <= M_comm->NumProc(); ++ii)
-                        {
-                            if ( ii < solidLeader )
-                                members[ii] = ii;
-                            else if ( ii > solidLeader )
-                                members[ii - 1] = ii;
-                        }
-
-                        MPI_Group_incl( originGroup, M_comm->NumProc() - 1, members, &newGroup );
-                        fluid = true;
-                    }
-
-                    MPI_Comm* localComm = new MPI_Comm;
-                    MPI_Comm_create( M_comm->Comm(), newGroup, localComm );
-                    epetraComm.reset( new Epetra_MpiComm( *localComm ) );
-                }
-        */
-    }
-
-    M_comm->Barrier();
-
-    M_FSIoperator->setFluid( fluid );
-    M_FSIoperator->setSolid( solid );
-
-    M_FSIoperator->setFluidLeader( fluidLeader );
-    M_FSIoperator->setSolidLeader( solidLeader );
-
-    M_FSIoperator->setComm( epetraComm, M_comm );
+    M_FSIoperator->setComm( M_comm, M_comm );
 }
 
 void
@@ -706,32 +617,6 @@ MS_Model_FSI3D::setupBC( const std::string& fileName )
     }
 }
 
-/*
-void
-MS_Model_FSI3D::setupSegregatedBC( const std::string& fileName )
-{
-    // Setup additional BCHandler for segregated FSI
-     M_linearizedFluidBC.reset( new BCInterface_Type() );
-     M_linearizedSolidBC.reset( new BCInterface_Type() );
-     M_lineardBC.reset( new BCInterface_Type() );
-
-     M_linearizedFluidBC->setPhysicalSolver( M_FSIoperator );
-     M_linearizedSolidBC->setPhysicalSolver( M_FSIoperator );
-
-     if ( M_FSIoperator->isFluid() )
-         M_linearBC->fillHandler( fileName, "lin_fluid" );
-
-     if ( M_FSIoperator->isFluid() )
-         M_linearizedFluidBC->fillHandler( fileName, "lin_fluid" );
-
-     if ( M_FSIoperator->isSolid() )
-         M_linearizedSolidBC->fillHandler( fileName, "lin_solid" );
-
-     M_solver->setLinFluidBC( M_linearizedFluidBC->handler() );
-     M_solver->setLinSolidBC( M_linearizedSolidBC->handler() );
-}
-*/
-
 void
 MS_Model_FSI3D::updateBC()
 {
@@ -739,21 +624,15 @@ MS_Model_FSI3D::updateBC()
     {
         M_fluidBC->updatePhysicalSolverVariables();
         M_harmonicExtensionBC->updatePhysicalSolverVariables();
-
-//        if( !M_data->isMonolithic() )
-//            M_linearBC->updateOperatorVariables();
     }
     else
     {
         M_solidBC->updatePhysicalSolverVariables();
-
-//        if( !M_data->isMonolithic() )
-//            M_linearizedSolidBC->updateOperatorVariables();
     }
 }
 
 void
-MS_Model_FSI3D::SetupExporter( IOFile_PtrType& exporter, const GetPot& dataFile, const std::string& label )
+MS_Model_FSI3D::setupExporter( IOFilePtr_Type& exporter, const GetPot& dataFile, const std::string& label )
 {
     const std::string exporterType = dataFile( "exporter/type", "ensight" );
 #ifdef HAVE_HDF5
@@ -768,7 +647,7 @@ MS_Model_FSI3D::SetupExporter( IOFile_PtrType& exporter, const GetPot& dataFile,
 }
 
 void
-MS_Model_FSI3D::SetupImporter( IOFile_PtrType& importer, const GetPot& dataFile, const std::string& label )
+MS_Model_FSI3D::setupImporter( IOFilePtr_Type& importer, const GetPot& dataFile, const std::string& label )
 {
     const std::string importerType = dataFile( "exporter/type", "ensight" );
 #ifdef HAVE_HDF5
@@ -783,7 +662,7 @@ MS_Model_FSI3D::SetupImporter( IOFile_PtrType& importer, const GetPot& dataFile,
 }
 
 void
-MS_Model_FSI3D::SetExporterFluid( const IOFile_PtrType& exporter )
+MS_Model_FSI3D::setExporterFluid( const IOFilePtr_Type& exporter )
 {
     M_fluidVelocityPressure.reset( new vector_Type( M_FSIoperator->fluid().getMap(),  M_exporterFluid->mapType() ) );
     M_fluidDisplacement.reset    ( new vector_Type( M_FSIoperator->mmFESpace().map(), M_exporterFluid->mapType() ) );
@@ -798,7 +677,7 @@ MS_Model_FSI3D::SetExporterFluid( const IOFile_PtrType& exporter )
 }
 
 void
-MS_Model_FSI3D::SetExporterSolid( const IOFile_PtrType& exporter )
+MS_Model_FSI3D::setExporterSolid( const IOFilePtr_Type& exporter )
 {
     M_solidDisplacement.reset( new vector_Type( M_FSIoperator->dFESpace().map(), M_exporterSolid->mapType() ) );
     M_solidVelocity.reset    ( new vector_Type( M_FSIoperator->dFESpace().map(), M_exporterSolid->mapType() ) );
@@ -839,11 +718,11 @@ MS_Model_FSI3D::initializeSolution()
         // IMPORTANT NOTE:
         // 1) TODO Remove nRestart flag from the file
         // 2) TODO This part should be rewritten better
-        vector_PtrType UniqueVFDOld( new vector_Type( *M_fluidDisplacement, Unique, Zero ) );
+        vectorPtr_Type UniqueVFDOld( new vector_Type( *M_fluidDisplacement, Unique, Zero ) );
         dynamic_cast< Monolithic* >( M_FSIoperator.get())->initializeMesh( UniqueVFDOld );
 
-        vector_PtrType initSol( new EpetraVector( *M_FSIoperator->getCouplingVariableMap() ) );
-        vector_PtrType UniqueV( new vector_Type( *M_fluidVelocityPressure, Unique, Zero ) );
+        vectorPtr_Type initSol( new EpetraVector( *M_FSIoperator->getCouplingVariableMap() ) );
+        vectorPtr_Type UniqueV( new vector_Type( *M_fluidVelocityPressure, Unique, Zero ) );
         *initSol = *UniqueV;
         M_FSIoperator->fluid().initialize( *initSol );
 
@@ -856,12 +735,12 @@ MS_Model_FSI3D::initializeSolution()
 
         if ( !M_data->method().compare("monolithicGI") )
         {
-            vector_PtrType UniqueVFD ( new vector_Type( *M_FSIoperator->getCouplingVariableMap(), Unique, Zero ) );
+            vectorPtr_Type UniqueVFD ( new vector_Type( *M_FSIoperator->getCouplingVariableMap(), Unique, Zero ) );
             UniqueVFD->subset( *M_fluidDisplacement, M_fluidDisplacement->getMap(), (UInt)0, dynamic_cast<MonolithicGI*>(M_FSIoperator.get())->mapWithoutMesh().getMap(Unique)->NumGlobalElements());
             *initSol += *UniqueVFD;
         }
 
-        vector_PtrType initSolSVel( new vector_Type( *M_FSIoperator->getCouplingVariableMap(), Unique, Zero ) );
+        vectorPtr_Type initSolSVel( new vector_Type( *M_FSIoperator->getCouplingVariableMap(), Unique, Zero ) );
         initSolSVel->subset( *M_solidVelocity,M_solidVelocity->getMap(), (UInt)0, offset );
         *initSolSVel *= 1 / ( M_FSIoperator->solid().rescaleFactor() * M_data->dataSolid()->dataTime()->getTimeStep() );
         M_FSIoperator->solid().initializeVel( *initSolSVel );
@@ -877,7 +756,7 @@ MS_Model_FSI3D::initializeSolution()
 }
 
 void
-MS_Model_FSI3D::ImposePerturbation()
+MS_Model_FSI3D::imposePerturbation()
 {
 
 #ifdef HAVE_LIFEV_DEBUG
@@ -885,16 +764,16 @@ MS_Model_FSI3D::ImposePerturbation()
 #endif
 
     for ( MS_CouplingsVector_ConstIterator i = M_couplings.begin(); i < M_couplings.end(); ++i )
-        if ( ( *i )->IsPerturbed() )
+        if ( ( *i )->isPerturbed() )
         {
-            M_linearBC->GetBCWithFlag( ( *i )->GetFlag( ( *i )->GetModelLocalID( M_ID ) ) ).setBCFunction( M_BCBaseDelta_One );
+            M_linearBC->GetBCWithFlag( ( *i )->flag( ( *i )->modelGlobalToLocalID( M_ID ) ) ).setBCFunction( M_bcBaseDeltaOne );
 
             break;
         }
 }
 
 void
-MS_Model_FSI3D::ResetPerturbation()
+MS_Model_FSI3D::resetPerturbation()
 {
 
 #ifdef HAVE_LIFEV_DEBUG
@@ -902,22 +781,22 @@ MS_Model_FSI3D::ResetPerturbation()
 #endif
 
     for ( MS_CouplingsVector_ConstIterator i = M_couplings.begin(); i < M_couplings.end(); ++i )
-        if ( ( *i )->IsPerturbed() )
+        if ( ( *i )->isPerturbed() )
         {
-            M_linearBC->GetBCWithFlag( ( *i )->GetFlag( ( *i )->GetModelLocalID( M_ID ) ) ).setBCFunction( M_BCBaseDelta_Zero );
+            M_linearBC->GetBCWithFlag( ( *i )->flag( ( *i )->modelGlobalToLocalID( M_ID ) ) ).setBCFunction( M_bcBaseDeltaZero );
 
             break;
         }
 }
 
 Real
-MS_Model_FSI3D::BCFunctionDelta_Zero( const Real& /*t*/, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& /*id*/ )
+MS_Model_FSI3D::bcFunctionDeltaZero( const Real& /*t*/, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const UInt& /*id*/ )
 {
     return 0.;
 }
 
 Real
-MS_Model_FSI3D::BCFunctionDelta_One( const Real& /*t*/, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& /*id*/ )
+MS_Model_FSI3D::bcFunctionDeltaOne( const Real& /*t*/, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const UInt& /*id*/ )
 {
     return 1.;
 }

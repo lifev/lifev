@@ -64,14 +64,6 @@ public:
     //! @name Constructors & Destructor
     //@{
 
-    typedef MS_PhysicalModel                                            super;
-
-    //@}
-
-
-    //! @name Constructors & Destructor
-    //@{
-
     //! Constructor
     MS_Model_MultiScale();
 
@@ -86,27 +78,27 @@ public:
 
     //! Load data and create the models and the couplings
     /*!
-     * @param FileName Name of data file.
+     * @param fileName Name of data file.
      */
-    void SetupData( const std::string& FileName );
+    void setupData( const std::string& fileName );
 
     //! Setup the model
-    void SetupModel();
+    void setupModel();
 
     //! Build the system matrix and vectors
-    void BuildSystem();
+    void buildSystem();
 
     //! Update the system matrix and vectors
-    void UpdateSystem();
+    void updateSystem();
 
     //! Solve the problem
-    void SolveSystem();
+    void solveSystem();
 
     //! save the solution
-    void SaveSolution();
+    void saveSolution();
 
     //! Display some information about the multiscale problem (call after SetupProblem)
-    void ShowMe();
+    void showMe();
 
     //@}
 
@@ -118,28 +110,28 @@ public:
     /*!
      * @param couplingMap Global coupling map
      */
-    void CreateCouplingMap( EpetraMap& couplingMap );
+    void createCouplingMap( EpetraMap& couplingMap );
 
     //! Initialize coupling variables for the first time step
-    void InitializeCouplingVariables();
+    void initializeCouplingVariables();
 
     //! Extrapolate coupling variables for the next time step
-    void ExtrapolateCouplingVariables();
+    void extrapolateCouplingVariables();
 
     //! Import the values of the coupling variables
-    void ImportCouplingVariables( const MS_Vector_Type& CouplingVariables );
+    void importCouplingVariables( const MS_Vector_Type& couplingVariables );
 
     //! Export the values of the coupling variables
-    void ExportCouplingVariables( MS_Vector_Type& CouplingVariables );
+    void exportCouplingVariables( MS_Vector_Type& couplingVariables );
 
     //! Export the values of the coupling residuals
-    void ExportCouplingResiduals( MS_Vector_Type& CouplingResiduals );
+    void exportCouplingResiduals( MS_Vector_Type& couplingResiduals );
 
     //! Export the Jacobian matrix
     /*!
-     * @param Jacobian Matrix
+     * @param jacobian Matrix
      */
-    void ExportJacobian( MS_Matrix_Type& Jacobian );
+    void exportJacobian( MS_Matrix_Type& jacobian );
 
     //@}
 
@@ -151,7 +143,7 @@ public:
     /*!
      * @return number of the coupling variables
      */
-    UInt GetCouplingVariablesNumber();
+    UInt couplingVariablesNumber();
 
     //@}
 

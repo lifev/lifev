@@ -75,7 +75,7 @@ namespace LifeV
 // Enum objects
 /*! @enum algorithmsTypes
  */
-enum algorithmsTypes
+enum algorithms_Type
 {
     Aitken,   /*!< Aitken method */
     Explicit, /*!< Explicit method */
@@ -84,7 +84,7 @@ enum algorithmsTypes
 
 /*! @enum modelsTypes
  */
-enum modelsTypes
+enum models_Type
 {
     Fluid3D,                   /*!< Fluid (Oseen) 3D model */
     FSI3D,                     /*!< FSI 3D model */
@@ -94,23 +94,23 @@ enum modelsTypes
 
 /*! @enum couplingsTypes
  */
-enum couplingsTypes
+enum couplings_Type
 {
     BoundaryCondition,         /*!< Boundary condition */
-    FluxStress,                /*!< Flux/stress coupling condition */
+    FlowRateStress,            /*!< Flow Rate/stress coupling condition */
     Stress                     /*!< All stress coupling condition */
 };
 
 /*! @enum stressTypes
  */
-enum stressTypes
+enum stress_Type
 {
     StaticPressure,             /*!< Use static pressure */
     TotalPressure,              /*!< Use total pressure (static + dynamic) */
     LagrangeMultiplier          /*!< Use the Lagrange multiplier */
 };
 
-enum errorsTypes
+enum errors_Type
 {
     MS_IterationsMaximumNumber, /*!< Maximum number of iterations reached */
     MS_Tolerance,               /*!< Tolerance not satisfied */
@@ -129,10 +129,10 @@ extern UInt MS_ProblemStep;
 extern bool MS_ExitFlag;
 
 // Map objects
-extern std::map< std::string, algorithmsTypes > MS_algorithmsMap;
-extern std::map< std::string, modelsTypes >     MS_modelsMap;
-extern std::map< std::string, couplingsTypes >  MS_couplingsMap;
-extern std::map< std::string, stressTypes >     MS_stressesMap;
+extern std::map< std::string, algorithms_Type > MS_algorithmsMap;
+extern std::map< std::string, models_Type >     MS_modelsMap;
+extern std::map< std::string, couplings_Type >  MS_couplingsMap;
+extern std::map< std::string, stress_Type >     MS_stressesMap;
 
 // Forward class declarations
 class MS_Algorithm;
@@ -153,15 +153,15 @@ typedef boost::shared_ptr< MS_Matrix_Type >                        MS_Matrix_Ptr
 
 typedef MS_Algorithm                                               MS_Algorithm_Type;
 typedef boost::shared_ptr< MS_Algorithm_Type >                     MS_Algorithm_PtrType;
-typedef singleton< factory< MS_Algorithm_Type, algorithmsTypes > > MS_Algorithm_Factory;
+typedef singleton< factory< MS_Algorithm_Type, algorithms_Type > > MS_Algorithm_Factory;
 
 typedef MS_PhysicalModel                                           MS_Model_Type;
 typedef boost::shared_ptr< MS_Model_Type >                         MS_Model_PtrType;
-typedef singleton< factory< MS_Model_Type, modelsTypes > >         MS_Model_Factory;
+typedef singleton< factory< MS_Model_Type, models_Type > >         MS_Model_Factory;
 
 typedef MS_PhysicalCoupling                                        MS_Coupling_Type;
 typedef boost::shared_ptr< MS_Coupling_Type >                      MS_Coupling_PtrType;
-typedef singleton< factory< MS_Coupling_Type, couplingsTypes > >   MS_Coupling_Factory;
+typedef singleton< factory< MS_Coupling_Type, couplings_Type > >   MS_Coupling_Factory;
 
 typedef std::vector< MS_Model_PtrType >                            MS_ModelsVector_Type;
 typedef MS_ModelsVector_Type::iterator                             MS_ModelsVector_Iterator;
@@ -188,7 +188,7 @@ MS_MapsDefinition()
     MS_modelsMap["OneDimensional"]       = OneDimensional;
 
     MS_couplingsMap["BoundaryCondition"] = BoundaryCondition;
-    MS_couplingsMap["FluxStress"]        = FluxStress;
+    MS_couplingsMap["FlowRateStress"]    = FlowRateStress;
     MS_couplingsMap["Stress"]            = Stress;
 
     MS_algorithmsMap["Aitken"]           = Aitken;
@@ -205,9 +205,9 @@ MS_MapsDefinition()
  * @param base - pointer to the base object
  * @return pointer to the derived object
  */
-template < typename DerivedType, typename Base_ptrType >
+template < typename DerivedType, typename BasePtrType >
 inline DerivedType*
-MS_DynamicCast( Base_ptrType& base )
+MS_DynamicCast( BasePtrType& base )
 {
     return dynamic_cast< DerivedType * > ( &( *base ) );
 }
@@ -228,7 +228,7 @@ MS_ErrorMessage( const std::stringstream& errorMessage )
  * @param message - Additional information about the error
  */
 inline void
-MS_ErrorCheck( const errorsTypes& error, const std::string& message = "" )
+MS_ErrorCheck( const errors_Type& error, const std::string& message = "" )
 {
     std::stringstream errorMessage;
     errorMessage << std::scientific << std::setprecision( 6 );

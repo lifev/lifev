@@ -39,13 +39,13 @@
 namespace LifeV
 {
 
-std::map< std::string, stressTypes > MS_stressesMap;
+std::map< std::string, stress_Type > MS_stressesMap;
 
 // ===================================================
 // Constructors & Destructor
 // ===================================================
 MS_Coupling_Stress::MS_Coupling_Stress() :
-        super                (),
+        MS_Coupling_Type     (),
         M_baseStress3D       (),
         M_baseStress1D       (),
         M_stressType         ()
@@ -62,59 +62,59 @@ MS_Coupling_Stress::MS_Coupling_Stress() :
 // MultiScale PhysicalCoupling Implementation
 // ===================================================
 void
-MS_Coupling_Stress::SetupData( const std::string& FileName )
+MS_Coupling_Stress::setupData( const std::string& fileName )
 {
 
 #ifdef HAVE_LIFEV_DEBUG
     Debug( 8220 ) << "MS_Coupling_Stress::SetupData() \n";
 #endif
 
-    super::SetupData( FileName );
+    MS_Coupling_Type::setupData( fileName );
 
-    GetPot DataFile( FileName );
+    GetPot DataFile( fileName );
 
     //Set type of stress coupling
     M_stressType = MS_stressesMap[DataFile( "MultiScale/stressType", "StaticPressure" )];
 }
 
 void
-MS_Coupling_Stress::SetupCoupling()
+MS_Coupling_Stress::setupCoupling()
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 8220 ) << "MS_Coupling_Stress::SetupCoupling() \n";
+    Debug( 8220 ) << "MS_Coupling_Stress::setupCoupling() \n";
 #endif
 
     //Set number of coupling variables
-    M_couplingIndex.first = GetModelsNumber();
+    M_couplingIndex.first = modelsNumber();
 
     //Create local vectors
-    CreateLocalVectors();
+    createLocalVectors();
 
     //Set Functions
-    M_baseStress3D.setFunction( boost::bind( &MS_Coupling_Stress::FunctionStress, this, _1, _2, _3, _4, _5 ) );
+    M_baseStress3D.setFunction( boost::bind( &MS_Coupling_Stress::functionStress, this, _1, _2, _3, _4, _5 ) );
 
-    M_baseStress1D.setFunction( boost::bind( &MS_Coupling_Stress::FunctionStress, this, _1, _1, _1, _1, _1 ) );
+    M_baseStress1D.setFunction( boost::bind( &MS_Coupling_Stress::functionStress, this, _1, _1, _1, _1, _1 ) );
 
     // Impose stress
-    for ( UInt i( 0 ); i < GetModelsNumber(); ++i )
-        switch ( M_models[i]->GetType() )
+    for ( UInt i( 0 ); i < modelsNumber(); ++i )
+        switch ( M_models[i]->type() )
         {
         case Fluid3D:
 
-            ImposeStress3D< MS_Model_Fluid3D > ( i );
+            imposeStress3D< MS_Model_Fluid3D > ( i );
 
             break;
 
         case FSI3D:
 
-            ImposeStress3D< MS_Model_FSI3D > ( i );
+            imposeStress3D< MS_Model_FSI3D > ( i );
 
             break;
 
         case OneDimensional:
 
-            ImposeStress1D< MS_Model_1D > ( i );
+            imposeStress1D< MS_Model_1D > ( i );
 
             break;
 
@@ -126,36 +126,36 @@ MS_Coupling_Stress::SetupCoupling()
 }
 
 void
-MS_Coupling_Stress::InitializeCouplingVariables()
+MS_Coupling_Stress::initializeCouplingVariables()
 {
 
 #ifdef HAVE_LIFEV_DEBUG
     Debug( 8220 ) << "MS_Coupling_Stress::InitializeCouplingVariables() \n";
 #endif
 
-    *M_LocalCouplingVariables[0] = 0.;
+    *M_localCouplingVariables[0] = 0.;
 
     // Compute the Stress coupling variable as an average of all the stresses
-    for ( UInt i( 0 ); i < GetModelsNumber(); ++i )
-        switch ( M_models[i]->GetType() )
+    for ( UInt i( 0 ); i < modelsNumber(); ++i )
+        switch ( M_models[i]->type() )
         {
         case Fluid3D:
         {
-            ( *M_LocalCouplingVariables[0] )[0] += MS_DynamicCast< MS_Model_Fluid3D >( M_models[i] )->GetBoundaryStress( M_flags[i], M_stressType );
+            ( *M_localCouplingVariables[0] )[0] += MS_DynamicCast< MS_Model_Fluid3D >( M_models[i] )->boundaryStress( M_flags[i], M_stressType );
 
             break;
         }
 
         case FSI3D:
         {
-            ( *M_LocalCouplingVariables[0] )[0] += MS_DynamicCast< MS_Model_FSI3D >( M_models[i] )->GetBoundaryStress( M_flags[i], M_stressType );
+            ( *M_localCouplingVariables[0] )[0] += MS_DynamicCast< MS_Model_FSI3D >( M_models[i] )->boundaryStress( M_flags[i], M_stressType );
 
             break;
         }
 
         case OneDimensional:
         {
-            ( *M_LocalCouplingVariables[0] )[0] += MS_DynamicCast< MS_Model_1D >( M_models[i] )->GetBoundaryStress( M_flags[i], M_stressType );
+            ( *M_localCouplingVariables[0] )[0] += MS_DynamicCast< MS_Model_1D >( M_models[i] )->boundaryStress( M_flags[i], M_stressType );
 
             break;
         }
@@ -165,16 +165,16 @@ MS_Coupling_Stress::InitializeCouplingVariables()
             if ( M_displayer->isLeader() )
                 switchErrorMessage( M_models[i] );
         }
-    ( *M_LocalCouplingVariables[0] )[0] /= GetModelsNumber();
+    ( *M_localCouplingVariables[0] )[0] /= modelsNumber();
 
     // Compute Flux coupling variables
-    for ( UInt i( 1 ); i < GetModelsNumber(); ++i )
-        switch ( M_models[i]->GetType() )
+    for ( UInt i( 1 ); i < modelsNumber(); ++i )
+        switch ( M_models[i]->type() )
         {
         case Fluid3D:
         {
 
-            ( *M_LocalCouplingVariables[0] )[i] = MS_DynamicCast< MS_Model_Fluid3D >( M_models[i] )->GetBoundaryFlowRate( M_flags[i] );
+            ( *M_localCouplingVariables[0] )[i] = MS_DynamicCast< MS_Model_Fluid3D >( M_models[i] )->boundaryFlowRate( M_flags[i] );
 
             break;
         }
@@ -182,7 +182,7 @@ MS_Coupling_Stress::InitializeCouplingVariables()
         case FSI3D:
         {
 
-            ( *M_LocalCouplingVariables[0] )[i] = MS_DynamicCast< MS_Model_FSI3D >( M_models[i] )->GetBoundaryFlowRate( M_flags[i] );
+            ( *M_localCouplingVariables[0] )[i] = MS_DynamicCast< MS_Model_FSI3D >( M_models[i] )->boundaryFlowRate( M_flags[i] );
 
             break;
         }
@@ -190,7 +190,7 @@ MS_Coupling_Stress::InitializeCouplingVariables()
         case OneDimensional:
         {
 
-            ( *M_LocalCouplingVariables[0] )[i] = MS_DynamicCast< MS_Model_1D >( M_models[i] )->GetBoundaryFlowRate( M_flags[i] );
+            ( *M_localCouplingVariables[0] )[i] = MS_DynamicCast< MS_Model_1D >( M_models[i] )->boundaryFlowRate( M_flags[i] );
 
             break;
         }
@@ -203,37 +203,37 @@ MS_Coupling_Stress::InitializeCouplingVariables()
 
 #ifdef HAVE_LIFEV_DEBUG
     for ( UInt i( 0 ); i < M_couplingIndex.first; ++i )
-        Debug( 8220 ) << "C(" << M_couplingIndex.second + i << ") = " << ( *M_LocalCouplingVariables[0] )[i]  << "\n";
+        Debug( 8220 ) << "C(" << M_couplingIndex.second + i << ") = " << ( *M_localCouplingVariables[0] )[i]  << "\n";
 #endif
 
 }
 
 void
-MS_Coupling_Stress::ExportCouplingResiduals( MS_Vector_Type& CouplingResiduals )
+MS_Coupling_Stress::exportCouplingResiduals( MS_Vector_Type& couplingResiduals )
 {
 
 #ifdef HAVE_LIFEV_DEBUG
     Debug( 8220 ) << "MS_Coupling_Stress::ExportCouplingResiduals()  \n";
 #endif
 
-    for ( UInt i( 0 ); i < GetModelsNumber(); ++i )
-        switch ( M_models[i]->GetType() )
+    for ( UInt i( 0 ); i < modelsNumber(); ++i )
+        switch ( M_models[i]->type() )
         {
         case Fluid3D:
 
-            ( *M_LocalCouplingResiduals )[i] = MS_DynamicCast< MS_Model_Fluid3D >( M_models[i] )->GetBoundaryFlowRate( M_flags[i] );
+            ( *M_localCouplingResiduals )[i] = MS_DynamicCast< MS_Model_Fluid3D >( M_models[i] )->boundaryFlowRate( M_flags[i] );
 
             break;
 
         case FSI3D:
 
-            ( *M_LocalCouplingResiduals )[i] = MS_DynamicCast< MS_Model_FSI3D >( M_models[i] )->GetBoundaryFlowRate( M_flags[i] );
+            ( *M_localCouplingResiduals )[i] = MS_DynamicCast< MS_Model_FSI3D >( M_models[i] )->boundaryFlowRate( M_flags[i] );
 
             break;
 
         case OneDimensional:
 
-            ( *M_LocalCouplingResiduals )[i] = MS_DynamicCast< MS_Model_1D >( M_models[i] )->GetBoundaryFlowRate( M_flags[i] );
+            ( *M_localCouplingResiduals )[i] = MS_DynamicCast< MS_Model_1D >( M_models[i] )->boundaryFlowRate( M_flags[i] );
 
             break;
 
@@ -243,30 +243,30 @@ MS_Coupling_Stress::ExportCouplingResiduals( MS_Vector_Type& CouplingResiduals )
                 switchErrorMessage( M_models[i] );
         }
 
-    for ( UInt i( 1 ); i < GetModelsNumber(); ++i )
+    for ( UInt i( 1 ); i < modelsNumber(); ++i )
     {
-        ( *M_LocalCouplingResiduals )[0]  += ( *M_LocalCouplingVariables[0] )[i];
-        ( *M_LocalCouplingResiduals )[i]  -= ( *M_LocalCouplingVariables[0] )[i];
+        ( *M_localCouplingResiduals )[0]  += ( *M_localCouplingVariables[0] )[i];
+        ( *M_localCouplingResiduals )[i]  -= ( *M_localCouplingVariables[0] )[i];
     }
 
-    ExportCouplingVector( *M_LocalCouplingResiduals, CouplingResiduals );
+    exportCouplingVector( *M_localCouplingResiduals, couplingResiduals );
 
 #ifdef HAVE_LIFEV_DEBUG
     for ( UInt i( 0 ); i < M_couplingIndex.first; ++i )
-        Debug( 8220 ) << "R(" << M_couplingIndex.second + i << ") = " << ( *M_LocalCouplingResiduals )[i]  << "\n";
+        Debug( 8220 ) << "R(" << M_couplingIndex.second + i << ") = " << ( *M_localCouplingResiduals )[i]  << "\n";
 #endif
 
 }
 
 void
-MS_Coupling_Stress::ShowMe()
+MS_Coupling_Stress::showMe()
 {
     if ( M_displayer->isLeader() )
     {
-        super::ShowMe();
+        MS_Coupling_Type::showMe();
 
         std::cout << "Stress Type         = " << Enum2String( M_stressType, MS_stressesMap ) << std::endl;
-        std::cout << "Coupling Stress     = " << ( *M_LocalCouplingVariables[0] )[0] << std::endl << std::endl;
+        std::cout << "Coupling Stress     = " << ( *M_localCouplingVariables[0] )[0] << std::endl << std::endl;
         std::cout << std::endl << std::endl;
     }
 }
@@ -275,20 +275,20 @@ MS_Coupling_Stress::ShowMe()
 // Private MultiScale PhysicalCoupling Implementation
 // ===================================================
 MS_ModelsVector_Type
-MS_Coupling_Stress::GetListOfPerturbedModels( const UInt& LocalCouplingVariableID )
+MS_Coupling_Stress::listOfPerturbedModels( const UInt& localCouplingVariableID )
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 8220 ) << "MS_Coupling_Stress::GetListOfPerturbedModels( LocalCouplingVariableID ) \n";
+    Debug( 8220 ) << "MS_Coupling_Stress::GetListOfPerturbedModels( localCouplingVariableID ) \n";
 #endif
 
     MS_ModelsVector_Type perturbedModelsList(0);
 
-    if ( LocalCouplingVariableID == 0 )
+    if ( localCouplingVariableID == 0 )
     {
-        perturbedModelsList.resize( GetModelsNumber() );
+        perturbedModelsList.resize( modelsNumber() );
 
-        for ( UInt i( 0 ); i < GetModelsNumber(); ++i )
+        for ( UInt i( 0 ); i < modelsNumber(); ++i )
             perturbedModelsList[i] = M_models[i];
     }
 
@@ -296,108 +296,108 @@ MS_Coupling_Stress::GetListOfPerturbedModels( const UInt& LocalCouplingVariableI
 }
 
 void
-MS_Coupling_Stress::InsertJacobianConstantCoefficients( MS_Matrix_Type& Jacobian )
+MS_Coupling_Stress::insertJacobianConstantCoefficients( MS_Matrix_Type& jacobian )
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 8220 ) << "MS_Coupling_Stress::InsertJacobianConstantCoefficients( Jacobian )  \n";
+    Debug( 8220 ) << "MS_Coupling_Stress::InsertJacobianConstantCoefficients( jacobian )  \n";
 #endif
 
-    UInt Row    = M_couplingIndex.second;
-    UInt Column = M_couplingIndex.second;
+    UInt row    = M_couplingIndex.second;
+    UInt column = M_couplingIndex.second;
 
     if ( M_comm->MyPID() == 0 )
-        for ( UInt i( 1 ); i < GetModelsNumber(); ++i )
+        for ( UInt i( 1 ); i < modelsNumber(); ++i )
         {
-            Jacobian.set_mat_inc( Row,     Column + i,  1 );
-            Jacobian.set_mat_inc( Row + i, Column + i, -1 );
+            jacobian.set_mat_inc( row,     column + i,  1 );
+            jacobian.set_mat_inc( row + i, column + i, -1 );
         }
 }
 
 void
-MS_Coupling_Stress::InsertJacobianDeltaCoefficients( MS_Matrix_Type& Jacobian, const UInt& Column, const UInt& ID, bool& SolveLinearSystem )
+MS_Coupling_Stress::insertJacobianDeltaCoefficients( MS_Matrix_Type& jacobian, const UInt& column, const UInt& ID, bool& solveLinearSystem )
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 8220 ) << "MS_Coupling_Stress::InsertJacobianDeltaCoefficients( Jacobian, Column, ID, LinearSystemSolved )  \n";
+    Debug( 8220 ) << "MS_Coupling_Stress::InsertJacobianDeltaCoefficients( jacobian, column, ID, LinearSystemSolved )  \n";
 #endif
 
     // Definitions
-    Real Coefficient  = 0;
-    UInt Row          = 0;
-    UInt ModelLocalID = GetModelLocalID( ID );
+    Real coefficient  = 0;
+    UInt row          = 0;
+    UInt modelLocalID = modelGlobalToLocalID( ID );
 
-    switch ( M_models[ModelLocalID]->GetType() )
+    switch ( M_models[modelLocalID]->type() )
     {
     case Fluid3D:
 
-        Coefficient = MS_DynamicCast< MS_Model_Fluid3D >( M_models[ModelLocalID] )->GetBoundaryDeltaFlowRate( M_flags[ModelLocalID], SolveLinearSystem );
+        coefficient = MS_DynamicCast< MS_Model_Fluid3D >( M_models[modelLocalID] )->boundaryDeltaFlowRate( M_flags[modelLocalID], solveLinearSystem );
 
         break;
 
     case FSI3D:
 
-        Coefficient = MS_DynamicCast< MS_Model_FSI3D >( M_models[ModelLocalID] )->GetBoundaryDeltaFlowRate( M_flags[ModelLocalID], SolveLinearSystem );
+        coefficient = MS_DynamicCast< MS_Model_FSI3D >( M_models[modelLocalID] )->boundaryDeltaFlowRate( M_flags[modelLocalID], solveLinearSystem );
 
         break;
 
     case OneDimensional:
 
-        Coefficient = MS_DynamicCast< MS_Model_1D >( M_models[ModelLocalID] )->GetBoundaryDeltaFlowRate( M_flags[ModelLocalID], SolveLinearSystem );
+        coefficient = MS_DynamicCast< MS_Model_1D >( M_models[modelLocalID] )->boundaryDeltaFlowRate( M_flags[modelLocalID], solveLinearSystem );
 
         break;
 
     default:
 
         if ( M_displayer->isLeader() )
-            switchErrorMessage( M_models[ModelLocalID] );
+            switchErrorMessage( M_models[modelLocalID] );
     }
 
     // Add coefficient to the matrix
-    Row = M_couplingIndex.second + ModelLocalID;
+    row = M_couplingIndex.second + modelLocalID;
     if ( M_comm->MyPID() == 0 )
-        Jacobian.set_mat_inc( Row, Column, Coefficient );
+        jacobian.set_mat_inc( row, column, coefficient );
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 8220 ) << "J(" << Row << "," << Column << ") = " << Coefficient  << "\n";
+    Debug( 8220 ) << "J(" << row << "," << column << ") = " << coefficient  << "\n";
 #endif
 
 }
 
 void
-MS_Coupling_Stress::DisplayCouplingValues( std::ostream& output )
+MS_Coupling_Stress::displayCouplingValues( std::ostream& output )
 {
-    Real FlowRate(0), Stress(0), Pressure(0), DynamicPressure(0);
-    for ( UInt i( 0 ); i < GetModelsNumber(); ++i )
+    Real flowRate(0), stress(0), pressure(0), dynamicPressure(0);
+    for ( UInt i( 0 ); i < modelsNumber(); ++i )
     {
-        switch ( M_models[i]->GetType() )
+        switch ( M_models[i]->type() )
         {
         case Fluid3D:
         {
-            FlowRate        = MS_DynamicCast< MS_Model_Fluid3D >( M_models[i] )->GetBoundaryFlowRate( M_flags[i] );
-            Stress          = ( *M_LocalCouplingVariables[0] )[0];
-            Pressure        = MS_DynamicCast< MS_Model_Fluid3D >( M_models[i] )->GetBoundaryPressure( M_flags[i] );
-            DynamicPressure = MS_DynamicCast< MS_Model_Fluid3D >( M_models[i] )->GetBoundaryDynamicPressure( M_flags[i] );
+            flowRate        = MS_DynamicCast< MS_Model_Fluid3D >( M_models[i] )->boundaryFlowRate( M_flags[i] );
+            stress          = ( *M_localCouplingVariables[0] )[0];
+            pressure        = MS_DynamicCast< MS_Model_Fluid3D >( M_models[i] )->boundaryPressure( M_flags[i] );
+            dynamicPressure = MS_DynamicCast< MS_Model_Fluid3D >( M_models[i] )->boundaryDynamicPressure( M_flags[i] );
 
             break;
         }
 
         case FSI3D:
         {
-            FlowRate        = MS_DynamicCast< MS_Model_FSI3D >( M_models[i] )->GetBoundaryFlowRate( M_flags[i] );
-            Stress          = ( *M_LocalCouplingVariables[0] )[0];
-            Pressure        = MS_DynamicCast< MS_Model_FSI3D >( M_models[i] )->GetBoundaryPressure( M_flags[i] );
-            DynamicPressure = MS_DynamicCast< MS_Model_FSI3D >( M_models[i] )->GetBoundaryDynamicPressure( M_flags[i] );
+            flowRate        = MS_DynamicCast< MS_Model_FSI3D >( M_models[i] )->boundaryFlowRate( M_flags[i] );
+            stress          = ( *M_localCouplingVariables[0] )[0];
+            pressure        = MS_DynamicCast< MS_Model_FSI3D >( M_models[i] )->boundaryPressure( M_flags[i] );
+            dynamicPressure = MS_DynamicCast< MS_Model_FSI3D >( M_models[i] )->boundaryDynamicPressure( M_flags[i] );
 
             break;
         }
 
         case OneDimensional:
         {
-            FlowRate        = MS_DynamicCast< MS_Model_1D >( M_models[i] )->GetBoundaryFlowRate( M_flags[i] );
-            Stress          = ( *M_LocalCouplingVariables[0] )[0];
-            Pressure        = MS_DynamicCast< MS_Model_1D >( M_models[i] )->GetBoundaryPressure( M_flags[i] );
-            DynamicPressure = MS_DynamicCast< MS_Model_1D >( M_models[i] )->GetBoundaryDynamicPressure( M_flags[i] );
+            flowRate        = MS_DynamicCast< MS_Model_1D >( M_models[i] )->boundaryFlowRate( M_flags[i] );
+            stress          = ( *M_localCouplingVariables[0] )[0];
+            pressure        = MS_DynamicCast< MS_Model_1D >( M_models[i] )->boundaryPressure( M_flags[i] );
+            dynamicPressure = MS_DynamicCast< MS_Model_1D >( M_models[i] )->boundaryDynamicPressure( M_flags[i] );
 
             break;
         }
@@ -409,12 +409,12 @@ MS_Coupling_Stress::DisplayCouplingValues( std::ostream& output )
         }
 
         if ( M_comm->MyPID() == 0 )
-            output << "  " << M_globalData->GetDataTime()->getTime() << "    " << M_models[i]->GetID()
+            output << "  " << M_globalData->dataTime()->getTime() << "    " << M_models[i]->ID()
             << "    " << M_flags[i]
-            << "    " << FlowRate
-            << "    " << Stress
-            << "    " << Pressure
-            << "    " << DynamicPressure << std::endl;
+            << "    " << flowRate
+            << "    " << stress
+            << "    " << pressure
+            << "    " << dynamicPressure << std::endl;
     }
 }
 
@@ -422,15 +422,15 @@ MS_Coupling_Stress::DisplayCouplingValues( std::ostream& output )
 // Private Methods
 // ===================================================
 Real
-MS_Coupling_Stress::FunctionStress( const Real& t, const Real&, const Real&, const Real&, const ID& )
+MS_Coupling_Stress::functionStress( const Real& t, const Real&, const Real&, const Real&, const UInt& )
 {
-    MS_Vector_Type interpolatedCouplingVariables( *M_LocalCouplingVariables[0] );
+    MS_Vector_Type interpolatedCouplingVariables( *M_localCouplingVariables[0] );
 
-    TimeContainer_Type timeContainer( M_timeInterpolationOrder + 1 );
+    timeContainer_Type timeContainer( M_timeInterpolationOrder + 1 );
     for ( UInt i(0) ; i <= M_timeInterpolationOrder ; ++i )
-        timeContainer[i] = M_globalData->GetDataTime()->getTime() - i * M_globalData->GetDataTime()->getTimeStep();
+        timeContainer[i] = M_globalData->dataTime()->getTime() - i * M_globalData->dataTime()->getTimeStep();
 
-    InterpolateCouplingVariables( timeContainer, t, interpolatedCouplingVariables );
+    interpolateCouplingVariables( timeContainer, t, interpolatedCouplingVariables );
 
     return interpolatedCouplingVariables[0];
 }

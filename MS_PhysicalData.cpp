@@ -43,26 +43,26 @@ namespace LifeV
 // Constructors & Destructor
 // ===================================================
 MS_PhysicalData::MS_PhysicalData() :
-        M_DataTime                      (),
-        M_FluidDensity                  (),
-        M_FluidViscosity                (),
-        M_FluidReferencePressure        (),
-        M_StructureDensity              (),
-        M_StructurePoissonCoefficient   (),
-        //M_StructureThickness            (),
-        M_StructureYoungModulus         ()
+        M_dataTime                      (),
+        M_fluidDensity                  (),
+        M_fluidViscosity                (),
+        M_fluidReferencePressure        (),
+        M_structureDensity              (),
+        M_structurePoissonCoefficient   (),
+        //M_structureThickness            (),
+        M_structureYoungModulus         ()
 {
 }
 
-MS_PhysicalData::MS_PhysicalData( const MS_PhysicalData& PhysicalData ) :
-        M_DataTime                      ( PhysicalData.M_DataTime ),
-        M_FluidDensity                  ( PhysicalData.M_FluidDensity ),
-        M_FluidViscosity                ( PhysicalData.M_FluidViscosity ),
-        M_FluidReferencePressure        ( PhysicalData.M_FluidReferencePressure ),
-        M_StructureDensity              ( PhysicalData.M_StructureDensity ),
-        M_StructurePoissonCoefficient   ( PhysicalData.M_StructurePoissonCoefficient ),
-        //M_StructureThickness            ( PhysicalData.M_StructureThickness ),
-        M_StructureYoungModulus         ( PhysicalData.M_StructureYoungModulus )
+MS_PhysicalData::MS_PhysicalData( const MS_PhysicalData& data ) :
+        M_dataTime                      ( data.M_dataTime ),
+        M_fluidDensity                  ( data.M_fluidDensity ),
+        M_fluidViscosity                ( data.M_fluidViscosity ),
+        M_fluidReferencePressure        ( data.M_fluidReferencePressure ),
+        M_structureDensity              ( data.M_structureDensity ),
+        M_structurePoissonCoefficient   ( data.M_structurePoissonCoefficient ),
+        //M_structureThickness            ( data.M_structureThickness ),
+        M_structureYoungModulus         ( data.M_structureYoungModulus )
 {
 }
 
@@ -70,18 +70,18 @@ MS_PhysicalData::MS_PhysicalData( const MS_PhysicalData& PhysicalData ) :
 // Operators
 // ===================================================
 MS_PhysicalData&
-MS_PhysicalData::operator=( const MS_PhysicalData& PhysicalData )
+MS_PhysicalData::operator=( const MS_PhysicalData& data )
 {
-    if ( this != &PhysicalData )
+    if ( this != &data )
     {
-        M_DataTime                      = PhysicalData.M_DataTime;
-        M_FluidDensity                  = PhysicalData.M_FluidDensity;
-        M_FluidViscosity                = PhysicalData.M_FluidViscosity;
-        M_FluidReferencePressure        = PhysicalData.M_FluidReferencePressure;
-        M_StructureDensity              = PhysicalData.M_StructureDensity;
-        M_StructurePoissonCoefficient   = PhysicalData.M_StructurePoissonCoefficient;
-        //M_StructureThickness            = PhysicalData.M_StructureThickness;
-        M_StructureYoungModulus         = PhysicalData.M_StructureYoungModulus;
+        M_dataTime                      = data.M_dataTime;
+        M_fluidDensity                  = data.M_fluidDensity;
+        M_fluidViscosity                = data.M_fluidViscosity;
+        M_fluidReferencePressure        = data.M_fluidReferencePressure;
+        M_structureDensity              = data.M_structureDensity;
+        M_structurePoissonCoefficient   = data.M_structurePoissonCoefficient;
+        //M_structureThickness            = data.M_structureThickness;
+        M_structureYoungModulus         = data.M_structureYoungModulus;
     }
 
     return *this;
@@ -91,84 +91,84 @@ MS_PhysicalData::operator=( const MS_PhysicalData& PhysicalData )
 // Methods
 // ===================================================
 void
-MS_PhysicalData::ReadData( const GetPot& dataFile )
+MS_PhysicalData::readData( const GetPot& dataFile )
 {
-    M_DataTime.reset( new Time_Type( dataFile, "Solver/time_discretization" ) );
-    M_FluidDensity                  = dataFile( "Physics/FluidDensity", 0. );
-    M_FluidViscosity                = dataFile( "Physics/FluidViscosity", 0. );
-    M_FluidReferencePressure        = dataFile( "Physics/FluidReferencePressure", 0. );
-    M_StructureDensity              = dataFile( "Physics/StructureDensity", 0. );
-    M_StructurePoissonCoefficient   = dataFile( "Physics/StructurePoissonCoefficient", 0. );
-    //M_StructureThickness            = dataFile( "Physics/StructureThickness", 0. );
-    M_StructureYoungModulus         = dataFile( "Physics/StructureYoungModulus", 0. );
+    M_dataTime.reset( new time_Type( dataFile, "Solver/time_discretization" ) );
+    M_fluidDensity                  = dataFile( "Physics/FluidDensity", 0. );
+    M_fluidViscosity                = dataFile( "Physics/FluidViscosity", 0. );
+    M_fluidReferencePressure        = dataFile( "Physics/FluidReferencePressure", 0. );
+    M_structureDensity              = dataFile( "Physics/StructureDensity", 0. );
+    M_structurePoissonCoefficient   = dataFile( "Physics/StructurePoissonCoefficient", 0. );
+    //M_structureThickness            = dataFile( "Physics/StructureThickness", 0. );
+    M_structureYoungModulus         = dataFile( "Physics/StructureYoungModulus", 0. );
 }
 
 void
-MS_PhysicalData::ShowMe()
+MS_PhysicalData::showMe()
 {
-    std::cout << "Fluid density                 = " << M_FluidDensity << std::endl
-              << "Fluid viscosity               = " << M_FluidViscosity << std::endl
-              << "Fluid reference pressure      = " << M_FluidReferencePressure << std::endl << std::endl;
+    std::cout << "Fluid density                 = " << M_fluidDensity << std::endl
+              << "Fluid viscosity               = " << M_fluidViscosity << std::endl
+              << "Fluid reference pressure      = " << M_fluidReferencePressure << std::endl << std::endl;
 
-    std::cout << "Structure density coefficient = " << M_StructureDensity << std::endl
-              << "Structure Poisson coefficient = " << M_StructurePoissonCoefficient << std::endl
-              //<< "Structure Thickness           = " << M_StructureThickness << std::endl
-              << "Structure Young modulus       = " << M_StructureYoungModulus << std::endl << std::endl;
+    std::cout << "Structure density coefficient = " << M_structureDensity << std::endl
+              << "Structure Poisson coefficient = " << M_structurePoissonCoefficient << std::endl
+              //<< "Structure Thickness           = " << M_structureThickness << std::endl
+              << "Structure Young modulus       = " << M_structureYoungModulus << std::endl << std::endl;
 
-    std::cout << "Initial time                  = " << M_DataTime->getInitialTime() << std::endl
-              << "End time                      = " << M_DataTime->getEndTime() << std::endl
-              << "TimeStep                      = " << M_DataTime->getTimeStep() << std::endl << std::endl;
+    std::cout << "Initial time                  = " << M_dataTime->getInitialTime() << std::endl
+              << "End time                      = " << M_dataTime->getEndTime() << std::endl
+              << "TimeStep                      = " << M_dataTime->getTimeStep() << std::endl << std::endl;
 }
 
 // ===================================================
 // Get Methods
 // ===================================================
-MS_PhysicalData::Time_ptrType
-MS_PhysicalData::GetDataTime() const
+MS_PhysicalData::timePtr_Type
+MS_PhysicalData::dataTime() const
 {
-    return M_DataTime;
+    return M_dataTime;
 }
 
 const Real&
-MS_PhysicalData::GetFluidDensity() const
+MS_PhysicalData::fluidDensity() const
 {
-    return M_FluidDensity;
+    return M_fluidDensity;
 }
 
 const Real&
-MS_PhysicalData::GetFluidViscosity() const
+MS_PhysicalData::fluidViscosity() const
 {
-    return M_FluidViscosity;
+    return M_fluidViscosity;
 }
 
 const Real&
-MS_PhysicalData::GetFluidReferencePressure() const
+MS_PhysicalData::fluidReferencePressure() const
 {
-    return M_FluidReferencePressure;
+    return M_fluidReferencePressure;
 }
 
 const Real&
-MS_PhysicalData::GetStructureDensity() const
+MS_PhysicalData::structureDensity() const
 {
-    return M_StructureDensity;
+    return M_structureDensity;
 }
 
 const Real&
-MS_PhysicalData::GetStructurePoissonCoefficient() const
+MS_PhysicalData::structurePoissonCoefficient() const
 {
-    return M_StructurePoissonCoefficient;
+    return M_structurePoissonCoefficient;
 }
 
 //const Real&
 //MS_PhysicalData::GetStructureThickness() const
 //{
-//    return M_StructureThickness;
+//    return M_structureThickness;
 //}
 
 const Real&
-MS_PhysicalData::GetStructureYoungModulus() const
+MS_PhysicalData::structureYoungModulus() const
 {
-    return M_StructureYoungModulus;
+    return M_structureYoungModulus;
 }
 
 } // Namespace LifeV
