@@ -57,6 +57,7 @@ exactJacobian::setDataFile( const GetPot& dataFile )
     M_aitkFS.setDefaultOmega( M_data->defaultOmega(), 0.001 );
     M_aitkFS.setOmegaRange( M_data->OmegaRange() );
 
+    M_linearSolver.setCommunicator( M_epetraComm );
     M_linearSolver.setDataFromGetPot(dataFile, "jacobian");
 
 }
