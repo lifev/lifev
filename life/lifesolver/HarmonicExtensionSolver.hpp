@@ -78,22 +78,15 @@ public:
 
     typedef SolverType                             solver_Type;
 
-    typedef typename solver_type::matrix_Type      matrix_Type;
-    typedef boost::shared_ptr<matrix_type>         matrixPtr_Type;
-    typedef typename solver_type::vector_type      vector_Type;
-
-    typedef typename solver_type::prec_Type        prec_Type;
-    typedef typename solver_type::precPtr_type     precPtr_Type;
+    typedef typename solver_Type::matrix_type      matrix_Type;
+    typedef typename solver_Type::matrix_ptrtype   matrixPtr_Type;
+    typedef typename solver_Type::vector_type      vector_Type;
 
     // OBSOLETE typedefs
     typedef SolverType                             solver_type;
 
     typedef typename solver_type::matrix_type      matrix_type;
-    typedef boost::shared_ptr<matrix_type>         matrix_ptrtype;
     typedef typename solver_type::vector_type      vector_type;
-
-    typedef typename solver_type::prec_raw_type    prec_raw_type;
-    typedef typename solver_type::prec_type        prec_type;
 
     //@}
 
@@ -168,7 +161,7 @@ public:
     void rescaleMatrix(Real& dt) {*M_matrHE *= dt;}
 
     //! this method is not a setter. It is an operator=+
-    void setMatrix(matrix_ptrtype matr) {*matr += *M_matrHE;}
+    void setMatrix(matrixPtr_Type matr) {*matr += *M_matrHE;}
 
     //! Apply boundary conditions.
     /*!
@@ -210,7 +203,7 @@ private:
     EpetraMap                      M_localMap;
 
     //! The matrix holding the values
-    matrix_ptrtype                 M_matrHE;
+    matrixPtr_Type                 M_matrHE;
 
     Displayer                      M_Displayer;
     int                            M_me;
@@ -228,7 +221,7 @@ private:
     vector_Type                    M_secondRHS;
 
     //! The linear solver
-    solver_type                    M_linearSolver;
+    solver_Type                    M_linearSolver;
 
     //! Diffusion coefficient for the laplacian operator
     Real                           M_diffusion;
