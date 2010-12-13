@@ -491,14 +491,14 @@ protected:
     //! @name Protected Methods
     //@{
 
-    //! Pre-computes local (element independant) matrices 
+    //! Pre-computes local (element independant) matrices
     /*!
       Compute all the local matrices that are independant
       from the geometrical element.
     */
     virtual void computeConstantMatrices ();
 
-    //! Computes local (element dependent) matrices 
+    //! Computes local (element dependent) matrices
     /*!
       Locally update the current finite element for the primal
       and dual finite element space, then compute the Hdiv mass
@@ -526,7 +526,7 @@ protected:
     */
     virtual void updateVariables ();
 
-    //! Apply the boundary condition 
+    //! Apply the boundary condition
     /* Apply BC to the hybrid global matrix and to the hybrid global right hand side.
     */
     void applyBoundaryConditions ();
@@ -754,8 +754,8 @@ DarcySolver ( const data_Type&           dataFile,
         // Algebraic stuff.
         M_matrHybrid             ( new matrix_Type ( M_localMap ) ),
         M_rhs                    ( new vector_Type ( M_localMap ) ),
-        M_primal    		 ( new vector_Type ( M_primal_FESpace.map() ) ),
-        M_dual			 ( new vector_Type ( M_dual_FESpace.map(), Repeated ) ),
+        M_primal    	    	 ( new vector_Type ( M_primal_FESpace.map() ) ),
+        M_dual		        	 ( new vector_Type ( M_dual_FESpace.map(), Repeated ) ),
         M_hybrid                 ( new vector_Type ( M_hybrid_FESpace.map() ) ),
         M_residual               ( new vector_Type ( M_localMap ) ),
         M_linearSolver           ( ),
@@ -913,6 +913,7 @@ setup ()
     // Set up data for the linear solver and the preconditioner.
     M_linearSolver.setDataFromGetPot( dataFile, "darcy/solver" );
     M_linearSolver.setUpPrec( dataFile, "darcy/prec" );
+    M_linearSolver.setCommunicator( M_displayer.comm() );
 
     // Choose the preconditioner type.
     std::string precType = dataFile( "darcy/prec/prectype", "Ifpack");
