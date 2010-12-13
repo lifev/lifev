@@ -21,6 +21,7 @@
 
 #include <boost/shared_ptr.hpp>
 
+#include <life/lifearray/SimpleVect.hpp>
 #include <life/lifemesh/mesh_util_base.hpp>
 #include <life/lifefem/geoMap.hpp>
 #include <life/lifefem/currentFE.hpp>
