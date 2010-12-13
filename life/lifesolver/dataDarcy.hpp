@@ -359,6 +359,6 @@ operator() ( const Real& t, const Real& x, const Real& y, const Real& z, const U
 }
 
 }
-#endif _DATADARCY_H_
+#endif // _DATADARCY_H_
 
 // -*- mode: c++ -*-
