@@ -194,35 +194,35 @@ public:
      * @param flag flag of the boundary face
      * @return density value
      */
-    Real boundaryDensity( const BCFlag& /*flag*/) const { return M_data->DensityRho(); }
+    Real boundaryDensity( const BCFlag& /*flag*/) const { return M_data->densityRho(); }
 
     //! Get the viscosity on a specific boundary face of the model
     /*!
      * @param flag flag of the boundary face
      * @return viscosity value
      */
-    Real boundaryViscosity( const BCFlag& /*flag*/) const { return M_data->Viscosity(); }
+    Real boundaryViscosity( const BCFlag& /*flag*/) const { return M_data->viscosity(); }
 
     //! Get the area on a specific boundary face of the model
     /*!
      * @param flag flag of the boundary face
      * @return area value
      */
-    Real boundaryArea( const BCFlag& flag ) const { return M_solver->BoundaryValue( *M_solution, OneD_A, flagConverter( flag ) ); }
+    Real boundaryArea( const BCFlag& flag ) const { return M_solver->boundaryValue( *M_solution, OneD_A, flagConverter( flag ) ); }
 
     //! Get the flux on a specific boundary face of the model
     /*!
      * @param flag flag of the boundary face
      * @return flux value
      */
-    Real boundaryFlowRate( const BCFlag& flag ) const { return M_solver->BoundaryValue( *M_solution, OneD_Q, flagConverter( flag ) ); }
+    Real boundaryFlowRate( const BCFlag& flag ) const { return M_solver->boundaryValue( *M_solution, OneD_Q, flagConverter( flag ) ); }
 
     //! Get the integral of the pressure (on a specific boundary face)
     /*!
      * @param flag flag of the boundary face
      * @return pressure value
      */
-    Real boundaryPressure( const BCFlag& flag ) const { return M_solver->BoundaryValue( *M_solution, OneD_P, flagConverter( flag ) ); }
+    Real boundaryPressure( const BCFlag& flag ) const { return M_solver->boundaryValue( *M_solution, OneD_P, flagConverter( flag ) ); }
 
     //! Get the integral of the dynamic pressure (on a specific boundary face)
     /*!
