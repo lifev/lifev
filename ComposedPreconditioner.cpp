@@ -83,15 +83,11 @@ ComposedPreconditioner::createList(       list_Type& /*list*/,
     //! See http://trilinos.sandia.gov/packages/docs/r9.0/packages/ifpack/doc/html/index.html
     //! for more informations on the parameters
     ASSERT( !M_prec->getNumber(), "Error, when initializing the preconditioner, it must be empty" );
-    for(UInt i = 0; i < listNumber; ++i)
+    for ( UInt i(0); i < dataFile.vector_variable_size( ( section + "/" + subSection + "/list" ).data() ); ++i )
     {
-        std::string newSection(section);
-        newSection = section + "/" + (i+1);
-        //dataFile( ( section + "/physics/material_flag" ).data(), 0., i );
-        std::string prectype = dataFile( ( newSection + "composedPrecType" ).data(), "ML" );
-        epetraPrecPtr_Type tmp( PRECFactory::instance().createObject( prectype ) );
+        epetra_prec_type tmp( PRECFactory::instance().createObject( dataFile( ( section + "/" + subSection + "/list" ).data(), "ML", i ) ) );
         M_prec->push_back(tmp);
-        M_prec->P()[i]->createList(dataFile, section + "/" +  prectype + (i+1) , M_prec->P()[i]->list());
+        M_prec->P()[i]->createList(M_prec->P()[i]->list(), dataFile, section, dataFile( ( section + "/" + subSection + "/sections" ).data(), "ML", i ));
     }
 }
 

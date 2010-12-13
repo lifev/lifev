@@ -117,7 +117,7 @@ public:
     //!@name  Public Methods
     //@{
     void                   setDataFromGetPot ( const GetPot&      dataFile,
-                                               const std::string& section );
+                                               const std::string& section);
 
     void                   createList( list_Type& /*list*/, const GetPot& dataFile, const std::string& section, const std::string& subSection );
     double                 Condest ();
