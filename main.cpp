@@ -54,8 +54,8 @@
 
 using namespace LifeV;
 
-int
-main( int argc, char** argv )
+Int
+main( Int argc, char** argv )
 {
 #ifdef HAVE_MPI
     std::cout << "MPI Initialization" << std::endl;
@@ -69,8 +69,8 @@ main( int argc, char** argv )
     //Setup main communicator
     boost::shared_ptr<Epetra_Comm>	comm;
 
-    int	nprocs;
-    int rank;
+    Int	nprocs;
+    Int rank;
 
     //MPI Preprocessing
 #ifdef EPETRA_MPI
@@ -100,7 +100,7 @@ main( int argc, char** argv )
     typedef EpetraVector                        Vector;
     typedef boost::shared_ptr<Vector>           Vector_ptr;
 
-    int MyGlobalIElementsA[3],MyGlobalIElementsB[2];
+    Int MyGlobalIElementsA[3],MyGlobalIElementsB[2];
     MyGlobalIElementsA[0] = 0;
     MyGlobalIElementsA[1] = 1;
     MyGlobalIElementsA[2] = 2;
