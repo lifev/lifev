@@ -85,19 +85,7 @@
 #ifndef _LIFEV_HH_
 #define _LIFEV_HH_
 
-#include <boost/mpl/multiplies.hpp>
-#include <boost/mpl/list.hpp>
-#include <boost/mpl/lower_bound.hpp>
-#include <boost/mpl/transform_view.hpp>
-#include <boost/mpl/sizeof.hpp>
-#include <boost/mpl/int.hpp>
-#include <boost/mpl/identity.hpp>
-#include <boost/mpl/base.hpp>
-#include <boost/mpl/deref.hpp>
-#include <boost/mpl/begin_end.hpp>
-
-// only available in boost 1.32
-#include <boost/mpl/eval_if.hpp>
+#include <stdint.h>
 
 #include <cstdlib>
 #include <iostream>
@@ -106,10 +94,7 @@
 #include <iosfwd>
 #include <string>
 
-#include <life/lifecore/lifemacros.hpp>
-#include <life/lifecore/lifeversion.hpp>
 #include <life/lifecore/lifeassert.hpp>
-#include <life/lifecore/debug.hpp>
 
 namespace LifeV
 {
@@ -158,85 +143,15 @@ namespace LifeV
 //! Generic real data
 typedef double Real;
 
-/*! @namespace detail
-  @internal
-*/
-namespace detail
-{
-template<int bit_size>
-class no_int
-{
-private:
-    no_int();
-};
+typedef int8_t  int8_type;
+typedef int16_t int16_type;
+typedef int32_t int32_type;
+typedef int64_t int64_type;
 
-template< int bit_size >
-struct integer
-{
-    typedef boost::mpl::list<signed char, signed short,
-                             signed int, signed long int,
-                             signed long long>                builtins_;
-    typedef typename boost::mpl::base<
-        typename boost::mpl::lower_bound<
-            boost::mpl::transform_view< builtins_,
-                 boost::mpl::multiplies<
-                     boost::mpl::sizeof_<boost::mpl::placeholders::_1>,
-                     boost::mpl::int_<8> > >,
-            boost::mpl::integral_c<size_t, bit_size>
-            >::type >::type                                   iter_;
-
-    typedef typename boost::mpl::end<builtins_>::type last_;
-    typedef typename boost::mpl::eval_if<
-        boost::is_same<iter_,last_>,
-        boost::mpl::identity< no_int<bit_size> >,
-        boost::mpl::deref<iter_>
-        >::type                                               type;
-};
-} // end namespace detail
-
-typedef detail::integer<1>::type  int1_type;
-typedef detail::integer<8>::type  int8_type;
-typedef detail::integer<16>::type int16_type;
-typedef detail::integer<32>::type int32_type;
-typedef detail::integer<64>::type int64_type;
-
-/*! @namespace detail
-  @internal
-*/
-namespace detail
-{
-template< int bit_size >
-struct unsigned_integer
-{
-    typedef boost::mpl::list<unsigned char,
-                             unsigned short,
-                             unsigned int,
-                             unsigned long int,
-                             unsigned long long>         builtins_;
-    typedef typename boost::mpl::base<
-        typename boost::mpl::lower_bound<
-            boost::mpl::transform_view< builtins_,
-                boost::mpl::multiplies<
-                    boost::mpl::sizeof_<boost::mpl::placeholders::_1>,
-                    boost::mpl::int_<8> > >,
-                boost::mpl::integral_c<size_t, bit_size>
-    >::type >::type iter_;
-
-    typedef typename boost::mpl::end<builtins_>::type last_;
-    typedef typename boost::mpl::eval_if<
-        boost::is_same<iter_,last_>
-        , boost::mpl::identity< no_int<bit_size> >
-        , boost::mpl::deref<iter_>
-        >::type type;
-};
-} // end namespace detail
-
-
-typedef detail::unsigned_integer<1>::type  uint1_type;
-typedef detail::unsigned_integer<8>::type  uint8_type;
-typedef detail::unsigned_integer<16>::type uint16_type;
-typedef detail::unsigned_integer<32>::type uint32_type;
-typedef detail::unsigned_integer<64>::type uint64_type;
+typedef uint8_t  uint8_type;
+typedef uint16_t uint16_type;
+typedef uint32_t uint32_type;
+typedef uint64_t uint64_type;
 
 //! Generic integer data
 typedef int32_type  Int;
