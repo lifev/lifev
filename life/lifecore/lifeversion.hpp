@@ -37,6 +37,8 @@
 #ifndef _LIFEV_VERSION_H_
 #define _LIFEV_VERSION_H_
 
+//#include <life/lifecore/life.hpp>
+
 #define LIFEV_MAKE_VERSION( a,b,c ) (((a) << 16) | ((b) << 8) | (c))
 
 #if !defined(LIFEV_VERSION_MAJOR)
@@ -69,7 +71,7 @@ namespace LifeV
  * @return the version number, encoded in a single uint
  * @since 0.7
  */
-LIFEV_EXPORT unsigned int version();
+unsigned int version();
 
 /**
  * Returns the major number of LIFEV's version, e.g.
@@ -77,7 +79,7 @@ LIFEV_EXPORT unsigned int version();
  * @return the major version number
  * @since 0.7
  */
-LIFEV_EXPORT unsigned int versionMajor();
+unsigned int versionMajor();
 
 /**
  * Returns the minor number of LIFEV's version, e.g.
@@ -85,7 +87,7 @@ LIFEV_EXPORT unsigned int versionMajor();
  * @return the minor version number
  * @since 0.7
  */
-LIFEV_EXPORT unsigned int versionMinor();
+unsigned int versionMinor();
 
 /**
  * Returns the micro number of LIFEV's version, e.g.
@@ -93,14 +95,14 @@ LIFEV_EXPORT unsigned int versionMinor();
  * @return the extra information
  * @since 0.7
  */
-LIFEV_EXPORT unsigned int versionMicro();
+unsigned int versionMicro();
 
 /**
  * Returns the LIFEV version as string, e.g. "0.7.0".
  * @return the LIFEV version. You can keep the string forever
  * @since 0.7
  */
-LIFEV_EXPORT char const* versionString();
+char const* versionString();
 }
 
 #endif // _LIFEV_VERSION_H_

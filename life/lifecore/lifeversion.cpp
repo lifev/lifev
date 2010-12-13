@@ -27,6 +27,7 @@
    \date 2005-02-19
  */
 #include <life/lifecore/life.hpp>
+#include <life/lifecore/lifeversion.hpp>
 
 namespace LifeV
 {
