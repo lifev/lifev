@@ -70,7 +70,7 @@ void
 ComposedPreconditioner::setDataFromGetPot( const GetPot&      dataFile,
                                            const std::string& section )
 {
-    createList( M_List, dataFile, section, "Composed" );
+    //createList( M_List, dataFile, section, "Composed" );
 }
 
 void
