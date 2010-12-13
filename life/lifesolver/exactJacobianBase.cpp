@@ -80,8 +80,8 @@ exactJacobian::setupFluidSolid()
 
     if ( this->isFluid() )
     {
-        M_rhsNew.reset(new vector_type(this->M_fluid->getMap()));
-        M_beta.reset  (new vector_type(this->M_fluid->getMap()));
+        M_rhsNew.reset(new vector_Type(this->M_fluid->getMap()));
+        M_beta.reset  (new vector_Type(this->M_fluid->getMap()));
     }
 
 
@@ -118,7 +118,7 @@ exactJacobian::imposeFlux( void )
 // Residual computation
 //
 
-void exactJacobian::eval(const vector_type& _disp,
+void exactJacobian::eval(const vector_Type& _disp,
                          const UInt          iter)
 {
     Chrono chronoFluid, chronoSolid, chronoInterface;
@@ -138,7 +138,7 @@ void exactJacobian::eval(const vector_type& _disp,
     this->setLambdaFluid(_disp);
 
 
-    vector_type sigmaFluidUnique (this->sigmaFluid(), Unique);
+    vector_Type sigmaFluidUnique (this->sigmaFluid(), Unique);
 
     M_epetraWorldComm->Barrier();
     chronoFluid.start();
@@ -162,11 +162,11 @@ void exactJacobian::eval(const vector_type& _disp,
 
             *M_beta *= 0.;
 
-            vector_type meshDisp( M_meshMotion->disp(), Repeated );
+            vector_Type meshDisp( M_meshMotion->disp(), Repeated );
 
             this->moveMesh(meshDisp);
 
-            vector_type meshDispDiff( M_meshMotion->dispDiff(), Repeated );
+            vector_Type meshDispDiff( M_meshMotion->dispDiff(), Repeated );
             this->interpolateVelocity(meshDispDiff, *M_beta);
 
             *M_beta *= -1./M_data->dataFluid()->dataTime()->getTimeStep();
@@ -196,8 +196,8 @@ void exactJacobian::eval(const vector_type& _disp,
 
     if ( false && this->isFluid() )
     {
-        vector_type vel  (this->fluid().velFESpace().map());
-        vector_type press(this->fluid().pressFESpace().map());
+        vector_Type vel  (this->fluid().velFESpace().map());
+        vector_Type press(this->fluid().pressFESpace().map());
 
         vel.subset(*this->M_fluid->solution());
         press.subset(*this->M_fluid->solution(), this->fluid().velFESpace().dim()*this->fluid().pressFESpace().fieldDim());
@@ -215,9 +215,9 @@ void exactJacobian::eval(const vector_type& _disp,
 
 
 
-    vector_type lambdaSolidUnique   (this->lambdaSolid(),    Unique);
-    vector_type lambdaDotSolidUnique(this->lambdaDotSolid(), Unique);
-    vector_type sigmaSolidUnique    (this->sigmaSolid(),     Unique);
+    vector_Type lambdaSolidUnique   (this->lambdaSolid(),    Unique);
+    vector_Type lambdaDotSolidUnique(this->lambdaDotSolid(), Unique);
+    vector_Type sigmaSolidUnique    (this->sigmaSolid(),     Unique);
 
     chronoInterface.stop();
     M_epetraWorldComm->Barrier();
@@ -273,8 +273,8 @@ void exactJacobian::eval(const vector_type& _disp,
     }
 }
 
-void exactJacobian::evalResidual(vector_type&       res,
-                                 const vector_type& disp,
+void exactJacobian::evalResidual(vector_Type&       res,
+                                 const vector_Type& disp,
                                  const UInt          iter)
 {
     if (this->isSolid())
@@ -302,8 +302,8 @@ void exactJacobian::evalResidual(vector_type&       res,
 //
 
 
-void  exactJacobian::solveJac(vector_type         &_muk,
-                              const vector_type   &_res,
+void  exactJacobian::solveJac(vector_Type         &_muk,
+                              const vector_Type   &_res,
                               const Real         _linearRelTol)
 {
     if (this->isFluid() && this->isLeader()) std::cout << "  f- ";
@@ -314,7 +314,7 @@ void  exactJacobian::solveJac(vector_type         &_muk,
 
     M_linearSolver.setTolMaxiter(_linearRelTol, 100);
 
-    vector_type res(_res);
+    vector_Type res(_res);
 
     M_linearSolver.setOperator(*M_epetraOper);
 
@@ -329,20 +329,20 @@ void  exactJacobian::solveJac(vector_type         &_muk,
 
 void  exactJacobian::solveLinearFluid()
 {
-    //vector_type dispFluidDomainRep( M_fluid->matrNoBC().getMap(), Repeated);
-    vector_type dispFluidDomain( M_fluid->matrNoBC().getMap(), Unique, Zero);
+    //vector_Type dispFluidDomainRep( M_fluid->matrNoBC().getMap(), Repeated);
+    vector_Type dispFluidDomain( M_fluid->matrNoBC().getMap(), Unique, Zero);
     dispFluidDomain.setCombineMode(Zero);
-    vector_type dispFluidMesh(this->derVeloFluidMesh().getMap(), Repeated);
+    vector_Type dispFluidMesh(this->derVeloFluidMesh().getMap(), Repeated);
 //if statement: in order not to iterate the mesh for each linear residual calculation, needed just for exact Jac case.
     if (false && this->M_data->dataFluid()->isSemiImplicit()==true)// not working in parallel
     {//to be corrected: up to now also in the semi implicit case the harmonic extension eq.
         //is solved at each GMRES iteration
 
-        //vector_type solidDisplacementRepeated(this->M_solid->disp(), Repeated);
+        //vector_Type solidDisplacementRepeated(this->M_solid->disp(), Repeated);
 
         //            this->transferSolidOnInterface(sldsp, lambdaSolid());
 
-        //            vector_type repLambdaSolid(lambdaSolid(), Repeated);
+        //            vector_Type repLambdaSolid(lambdaSolid(), Repeated);
 
         //this->transferInterfaceOnFluid(repLambdaSolid, dispFluidMesh);
         this->transferSolidOnFluid(this->M_solid->disp(), dispFluidMesh);
@@ -380,7 +380,7 @@ void  exactJacobian::solveLinearFluid()
         if (M_recomputeShapeDer)
         {
             M_recomputeShapeDer=false;
-            M_matrShapeDer.reset(new matrix_type(M_fluid->matrNoBC().getMap()/*, M_mmFESpace->map()*/));
+            M_matrShapeDer.reset(new matrix_Type(M_fluid->matrNoBC().getMap()/*, M_mmFESpace->map()*/));
             this->M_fluid->updateShapeDerivatives(
                 *M_matrShapeDer,
                 alpha,
@@ -404,7 +404,7 @@ void  exactJacobian::solveLinearFluid()
     }
 
 //    //DEBUG:
-//     vector_type rhs_debug(M_fluid->matrNoBC().getMap());
+//     vector_Type rhs_debug(M_fluid->matrNoBC().getMap());
 //     rhs_debug=*M_matrShapeDer*dispFluidDomain;
 //     std::cout<<"normInf1 "<<rhs_debug.NormInf()<<std::endl;
 //     //    std::cout<<"normInf2 "<<M_rhsLin->NormInf()<<std::endl;
@@ -450,7 +450,7 @@ int Epetra_ExactJacobian::Apply(const Epetra_MultiVector &X, Epetra_MultiVector 
     }
     else
     {
-        FSIOperator::vector_type const z(X,  M_ej->solidInterfaceMap(), Unique);
+        vector_Type const z(X,  M_ej->solidInterfaceMap(), Unique);
 
         M_ej->displayer().leaderPrint( "NormInf res   " , z.NormInf(), "\n" );
 
@@ -467,7 +467,7 @@ int Epetra_ExactJacobian::Apply(const Epetra_MultiVector &X, Epetra_MultiVector 
         //M_ej->transferInterfaceOnSolid(z, M_ej->solid().disp());
 
         chronoInterface.start();
-        vector_type sigmaFluidUnique (M_ej->sigmaFluid(), Unique);
+        vector_Type sigmaFluidUnique (M_ej->sigmaFluid(), Unique);
         chronoInterface.stop();
 
         M_comm->Barrier();
@@ -502,7 +502,7 @@ int Epetra_ExactJacobian::Apply(const Epetra_MultiVector &X, Epetra_MultiVector 
         M_ej->setSigmaSolid(sigmaFluidUnique);
 
 
-        vector_type lambdaSolidUnique (M_ej->lambdaSolid(), Unique);
+        vector_Type lambdaSolidUnique (M_ej->lambdaSolid(), Unique);
         chronoInterface.stop();
 
         M_comm->Barrier();
@@ -542,7 +542,7 @@ int Epetra_ExactJacobian::Apply(const Epetra_MultiVector &X, Epetra_MultiVector 
     return 0;
 }
 
-void  exactJacobian::bcManageVec( fluid_bchandler_type& /*bch*/, vector_type& /*rhs*/ )
+void  exactJacobian::bcManageVec( super::fluidBchandler_Type& /*bch*/, vector_Type& /*rhs*/ )
 {
 
 }

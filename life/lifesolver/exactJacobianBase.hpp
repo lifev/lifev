@@ -1,67 +1,118 @@
-/* -*- mode: c++ -*-
-   This program is part of the LifeV library
-   Copyright (C) 2001,2002,2003,2004 EPFL, INRIA, Politecnico di Milano
+//@HEADER
+/*
+*******************************************************************************
 
-   This program is free software; you can redistribute it and/or
-   modify it under the terms of the GNU General Public License
-   as published by the Free Software Foundation; either version 2
-   of the License, or (at your option) any later version.
+    Copyright (C) 2004, 2005, 2007 EPFL, Politecnico di Milano, INRIA
+    Copyright (C) 2010 EPFL, Politecnico di Milano, Emory University
 
-   This program is distributed in the hope that it will be useful,
-   but WITHOUT ANY WARRANTY; without even the implied warranty of
-   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-   GNU General Public License for more details.
+    This file is part of LifeV.
 
-   You should have received a copy of the GNU General Public License
-   along with this program; if not, write to the Free Software
-   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+    LifeV is free software; you can redistribute it and/or modify
+    it under the terms of the GNU Lesser General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    LifeV is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+    Lesser General Public License for more details.
+
+    You should have received a copy of the GNU Lesser General Public License
+    along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
+
+*******************************************************************************
 */
+//@HEADER
+
+/*!
+    @file
+    @brief DataFSI - File containing a data container for FSI problems
+
+    @author Miguel Fernandez
+    @author Gilles Fourestey
+    @author Paolo Crosetto <paolo.crosetto@epfl.ch>
+    @date 10-06-2010
+
+    @contributor Simone Deparis <simone.deparis@epfl.ch>
+    @maintainer Simone Deparis <simone.deparis@epfl.ch>
+ */
 
 
-#ifndef TWODIM
-#ifndef _EJ_HPP
-#define _EJ_HPP
+#ifndef EXACTJACOBIANBASE_HPP
+#define EXACTJACOBIANBASE_HPP
 
 #include <life/lifesolver/FSIOperator.hpp>
 
 namespace LifeV
 {
 
-
 class Epetra_ExactJacobian;
-//class Epetra_ExactJacobian;
 
+//! ExampleClass - Short description of the class
+/*!
+\include ../../doc/api/bibliography/newton.dox
 
+    @author Name Surname
+    @see  \ref{FM05}
+    FSIOperator
 
+    This class implements an FSIOperator whose Jacobian is computed exacly, i.e., using
+    shape dericatives.
+
+*/
 
 class exactJacobian : public FSIOperator
 {
 public:
 
-    typedef FSIOperator super;
+    //! @name Public Types
+    //@{
+    typedef FSIOperator                     super;
 
-    typedef super::fluid_type fluid_type;
-    typedef super::solid_type solid_type;
+    typedef super::vector_Type              vector_Type;
+    typedef super::vectorPtr_Type           vectorPtr_type;
 
-    typedef super::fluid_bchandler_type  bchandler_type;
+    typedef fluid_Type::matrix_Type         matrix_Type;
+    typedef fluid_Type::matrixPtr_Type      matrixPtr_Type;
 
-    typedef fluid_raw_type::vector_type  vector_type;
-    typedef fluid_raw_type::matrix_type      matrix_type;
-    typedef boost::shared_ptr<matrix_type>        matrix_ptrtype;
+//! OBSOLETE typedefs
+    //typedef super::fluid_Type               fluid_Type;
+    //typedef super::solid_Type               solid_Type;
 
-    // default constructor
+    //typedef super::fluidBchandler_Type      fluidBchandler_Type;
+
+    typedef super::fluid_Type               fluid_type;
+    typedef super::solid_Type               solid_type;
+    typedef super::vector_Type              vector_type;
+
+    typedef super::fluidBchandler_Type      bchandler_type;
+
+    typedef super::vector_Type              vector_type;
+
+    typedef fluid_Type::matrix_Type         matrix_types;
+    typedef fluid_Type::matrixPtr_Type      matrix_ptrtype;
+
+    //@}
+
+
+    //! @name Constructor & Destructor
+    //@{
+
+    //! Empty Constructor
     exactJacobian();
 
-    // destructor
+    //! Destructor
     ~exactJacobian();
+    //@}
 
-    // member functions
+    //! @name Methods
+    //@{
 
-    void evalResidual(vector_type       &_res,
-                      const vector_type &_disp,
+    void evalResidual(vector_Type       &_res,
+                      const vector_Type &_disp,
                       const UInt          _iter);
-    void solveJac(vector_type       &_muk,
-                  const vector_type &_res,
+    void solveJac(vector_Type       &_muk,
+                  const vector_Type &_res,
                   const Real       _linearRelTol);
 
     void solveLinearFluid();
@@ -73,83 +124,70 @@ public:
 
     void setDataFile( GetPot const& data );
 
-//     vector_type & displacement()    {return this->solid().disp();}
-//     vector_type & residual()        {return M_interfaceStress;}
-//     vector_type & velocity()        {return this->solid().w();}
-//     vector_type & residualFSI()     {return M_residualFSI;}
 
     //
     // BCs treatment
     //
 
     // Solid, Lin. Solid, and inverses
-    void setSolidInterfaceDisp         (vector_type& disp  , UInt type = 0);
-    void setSolidLinInterfaceDisp      (vector_type& disp  , UInt type = 0);
-    void setSolidInvLinInterfaceStress (vector_type& stress, UInt type = 0);
-    void setReducedFluidInterfaceAcc   (vector_type& acc   , UInt type = 0);
-    void setReducedFluidInvInterfaceAcc(vector_type& acc   , UInt type = 0);
+    void setSolidInterfaceDisp         (vector_Type& disp  , UInt type = 0);
+    void setSolidLinInterfaceDisp      (vector_Type& disp  , UInt type = 0);
+    void setSolidInvLinInterfaceStress (vector_Type& stress, UInt type = 0);
+    void setReducedFluidInterfaceAcc   (vector_Type& acc   , UInt type = 0);
+    void setReducedFluidInvInterfaceAcc(vector_Type& acc   , UInt type = 0);
 
-//     void setfluidLoadToStructure(vector_type &acc,
-//                                  UInt type);
-//    void setSolidInterfaceStress (vector_type &stress, UInt type = 0);
 
     bc_vector_interface bcvFluidLoadToStructure()       {return M_bcvFluidLoadToStructure;}
-//     bc_vector_interface bcvSolidLinInterfaceDisp()    {return M_bcvSolidLinInterfaceDisp;}
-// //     bc_vector_interface bcvSolidInvInterfaceDisp()    {return M_bcvSolidInvInterfaceDisp;}
-//     bc_vector_interface bcvSolidInvLinInterfaceStress() {return M_bcvSolidInvLinInterfaceStress;}
 
     // Fluid, Lin. Fluid, and inverses
 
-    void bcManageVec   ( bchandler_type& bch, vector_type& rhs );
+    void bcManageVec   ( super::fluidBchandler_Type& bch, vector_Type& rhs );
 
-    void setFluidInterfaceDisp      (vector_type &disp, UInt type = 0);
+    void setFluidInterfaceDisp      (vector_Type &disp, UInt type = 0);
 
     void registerMyProducts( );
-//    void setFluidLinInterfaceStress (vector_type &disp, UInt type = 0);
 
-//     bc_vector_interface bcvFluidLoadToSolid()       {return M_bcvFluidLoadToSolid;}
-//     bc_vector_interface bcvFluidLinInterfaceDisp()    {return M_bcvFluidLinInterfaceDisp;}
-// //     bc_vector_interface bcvFluidInvInterfaceDisp()    {return M_bcvFluidInvInterfaceDisp;}
-// //     bc_vector_interface bcvFluidInvLinInterfaceDisp() {return M_bcvFluidInvLinInterfaceDisp;}
+    //! Display general information about the content of the class
+    /*!
+        List of things displayed in the class
+        @param output specify the output format (std::cout by default)
+     */
+    void showMe( std::ostream& output = std::cout ) const;
 
-//     bc_vector_interface bcvReducedFluidInterfaceAcc()    {return M_bcvReducedFluidInterfaceAcc;}
-//     bc_vector_interface bcvReducedFluidInvInterfaceAcc() {return M_bcvReducedFluidInvInterfaceAcc;}
+    //@}
 
-//     struct dataJacobian
-//     {
+    //! @name Set Methods
+    //@{
 
-//         dataJacobian():
-//             M_pFS( 0 )
-//             {}
+    //@}
 
-//         dataJacobian(exactJacobian* oper):
-//             M_pFS(oper)
-//             {}
 
-//         exactJacobian* M_pFS;
-//     };
+    //! @name Get Methods
+    //@{
 
-    //Displayer const& getDisplayer(){return displayer();}
+    //@}
+
 private:
+
+    //! @name Private Methods
+    //@{
 
     UInt imposeFlux( );
 
+    //@}
+
     int M_updateEvery;
 
-//     boost::shared_ptr<vector_type>       M_residualFSI;
 
-//     boost::shared_ptr<vector_type>       M_interfaceDisplacement;
-//     boost::shared_ptr<vector_type>       M_interfaceStress;
+    vectorPtr_Type       M_rhsNew;
+    vectorPtr_Type       M_beta;
 
-    boost::shared_ptr<vector_type>       M_rhsNew;
-    boost::shared_ptr<vector_type>       M_beta;
-
-    generalizedAitken<vector_type> M_aitkFS;
+    generalizedAitken<vector_Type> M_aitkFS;
 
 
 //     bc_vector_interface     M_bcvFluidLoadToStructure;
 
-    void eval(const vector_type& _res, UInt status);
+    void eval(const vector_Type& _res, UInt status);
 
 //    dataJacobian                         M_dataJacobian;
 
@@ -157,7 +195,7 @@ private:
 
     boost::shared_ptr<Epetra_ExactJacobian> M_epetraOper;
 
-    matrix_ptrtype M_matrShapeDer;
+    matrixPtr_Type M_matrShapeDer;
     bool M_recomputeShapeDer;
 
 }; // end class exactJacobian
@@ -169,7 +207,9 @@ class Epetra_ExactJacobian:
 
 public:
 
-    typedef exactJacobian::vector_type  vector_type;
+    typedef exactJacobian::vector_Type  vector_Type;
+    // OBSOLETE typedef
+    typedef exactJacobian::vector_Type  vector_type;
 
     Epetra_ExactJacobian(exactJacobian* ej):
             M_ej               (ej),
@@ -230,7 +270,6 @@ namespace
 static bool registerEJ = FSIOperator::FSIFactory::instance().registerProduct( "exactJacobian", &createEJ );
 }
 
-}
+}  // Namespace LifeV
 
-#endif
-#endif
+#endif // EXACTJACOBIANBASE_HPP
