@@ -33,9 +33,6 @@ along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
   @maintainer Radu Popescu <radu.popescu@epfl.ch>
 */
 
-#ifndef LIFEASSERT_HPP
-#define LIFEASSERT_HPP 1
-
 /*!  \page macros_page LifeV Macros
   \section assert_macros Assertion Macros
 
@@ -62,31 +59,19 @@ along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
   -# #LIFEV_ISLIKELY and #LIFEV_ISUNLIKELY
 */
 
+#ifndef LIFEASSERT_HPP
+#define LIFEASSERT_HPP 1
+
 #include <life/lifecore/SmartAssert.hpp>
 
 #define ABORT() std::abort()
 
-# define ERROR_MSG(A)  \
-   do { std::cerr << std::endl << std::endl << A << std::endl << std::endl ; ABORT() ; } while (0)
-
-# define ASSERT0(X,A) if ( !(X) ) \
-ERROR_MSG(A << std::endl << "Error in file" << __FILE__ << " line " << __LINE__) ;
-
-# define ASSERT_PRE0(X,A) if ( !(X) ) \
-ERROR_MSG(A << std::endl << "Precondition Error " << "in file " << __FILE__ \
-     << " line " << __LINE__) ;
-
-# define ASSERT_POS0(X,A) if ( !(X) ) \
-ERROR_MSG(A << std::endl <<"Postcondition Error " << "in file " << __FILE__ \
-     << " line " << __LINE__) ;
-
-# define ASSERT_INV0(X,A)  if ( !(X) ) \
-ERROR_MSG(A <<std::endl <<  "Invariant Error " << "in file " << __FILE__  \
-   << " line " << __LINE__) ;
-
-# define ASSERT_BD0(X)  if ( !(X) ) \
-ERROR_MSG("Array bound error " << "in file " << __FILE__  \
-   << " line " << __LINE__) ;
+#define ERROR_MSG(A) LIFEV_ASSERT( 0 ).error( A );
+#define ASSERT0(X,A) LIFEV_ASSERT( X ).error( A );
+#define ASSERT_PRE0(X,A) LIFEV_ASSERT( X ).error( "Precondition Error"  );
+#define ASSERT_POS0(X,A) LIFEV_ASSERT( X ).error( "Postcondition Error"  );
+#define ASSERT_INV0(X,A) LIFEV_ASSERT( X ).error( "Invariant Error : "  );
+#define ASSERT_BD0(X)    LIFEV_ASSERT( X ).error( "Array bounds error" );
 
 #ifdef  LIFEV_CHECK_ALL
 #define CHECK_KN
