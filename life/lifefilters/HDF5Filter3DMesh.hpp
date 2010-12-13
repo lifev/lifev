@@ -279,7 +279,7 @@ void HDF5Filter3DMesh<MeshType>::loadGraph(graph_ptrtype graph, boost::shared_pt
     }
     if (! this->M_HDF5->IsOpen())
     {
-        this->M_HDF5->Open(this->M_post_dir + this->M_prefix + ".h5", H5F_ACC_RDONLY);
+        this->M_HDF5->Open(this->M_postDir + this->M_prefix + ".h5", H5F_ACC_RDONLY);
     }
 
     Int nPartitions;
@@ -332,7 +332,7 @@ void HDF5Filter3DMesh<MeshType>::loadMyPartition(mesh_ptrtype meshPartition,
     }
     if (! this->M_HDF5->IsOpen())
     {
-        this->M_HDF5->Open(this->M_post_dir + this->M_prefix + ".h5", H5F_ACC_RDONLY);
+        this->M_HDF5->Open(this->M_postDir + this->M_prefix + ".h5", H5F_ACC_RDONLY);
     }
 
     std::stringstream index;
@@ -590,7 +590,7 @@ void HDF5Filter3DMesh<MeshType>::postProcess(const Real& time)
             this->M_HDF5.reset(new hdf5_type(*M_comm));
         }
         this->M_outputFileName=this->M_prefix+".h5";
-        this->M_HDF5->Create(this->M_post_dir+this->M_outputFileName);
+        this->M_HDF5->Create(this->M_postDir+this->M_outputFileName);
 
         // write empty xdmf file
         this->M_wr_initXdmf();
@@ -669,7 +669,7 @@ int HDF5Filter3DMesh<MeshType>::queryStoredInterfaceNumber()
     }
     if (! this->M_HDF5->IsOpen())
     {
-        this->M_HDF5->Open(this->M_post_dir + this->M_prefix + ".h5", H5F_ACC_RDONLY);
+        this->M_HDF5->Open(this->M_postDir + this->M_prefix + ".h5", H5F_ACC_RDONLY);
     }
 
     Int storedInterfaceNumber;
@@ -687,7 +687,7 @@ std::vector<std::string>& HDF5Filter3DMesh<MeshType>::queryStoredInterfaceTypes(
     }
     if (! this->M_HDF5->IsOpen())
     {
-        this->M_HDF5->Open(this->M_post_dir + this->M_prefix + ".h5", H5F_ACC_RDONLY);
+        this->M_HDF5->Open(this->M_postDir + this->M_prefix + ".h5", H5F_ACC_RDONLY);
     }
 
     int storedInterfaceNumber;
@@ -727,7 +727,7 @@ boost::shared_ptr<MeshType>& HDF5Filter3DMesh<MeshType>::getMeshPartition()
     }
     if (! this->M_HDF5->IsOpen())
     {
-        this->M_HDF5->Open(this->M_post_dir + this->M_prefix + ".h5", H5F_ACC_RDONLY);
+        this->M_HDF5->Open(this->M_postDir + this->M_prefix + ".h5", H5F_ACC_RDONLY);
     }
 
     std::stringstream index;
@@ -981,7 +981,7 @@ boost::shared_ptr< std::map<UInt, UInt> >& HDF5Filter3DMesh<MeshType>::getStored
     }
     if (! this->M_HDF5->IsOpen())
     {
-        this->M_HDF5->Open(this->M_post_dir + this->M_prefix + ".h5", H5F_ACC_RDONLY);
+        this->M_HDF5->Open(this->M_postDir + this->M_prefix + ".h5", H5F_ACC_RDONLY);
     }
 
     int myRank = M_comm->MyPID();

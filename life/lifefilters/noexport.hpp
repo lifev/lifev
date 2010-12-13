@@ -50,7 +50,7 @@ class NoExport : public Exporter<MeshType>
 public:
     //! @name Public typedefs
     //@{
-    typedef MeshTypeType mesh_Type;
+    typedef MeshType mesh_Type;
     typedef Exporter<MeshType> super;
     typedef typename super::mesh_ptrtype  mesh_ptrtype;
     typedef typename super::vector_ptrtype vector_ptrtype;

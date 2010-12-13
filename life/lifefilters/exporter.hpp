@@ -334,8 +334,8 @@ protected:
     //! compute postfix
     void computePostfix();
 
-    virtual void M_rd_scalar( ExporterData& dvar ) = 0;
-    virtual void M_rd_vector( ExporterData& dvar ) = 0;
+    virtual void readScalar( ExporterData& dvar ) = 0;
+    virtual void readVector( ExporterData& dvar ) = 0;
 
     //@}
 
@@ -482,10 +482,10 @@ void Exporter<MeshType>::rd_var(ExporterData& dvar)
     switch ( dvar.type() )
     {
     case ExporterData::Scalar:
-        M_rd_scalar(dvar);
+        readScalar(dvar);
         break;
     case ExporterData::Vector:
-        M_rd_vector(dvar);
+        readVector(dvar);
         break;
     }
 }

@@ -204,8 +204,8 @@ protected:
 
     void M_wr_geo();
 
-    void M_rd_scalar( ExporterData& dvar);
-    void M_rd_vector( ExporterData& dvar);
+    void readScalar( ExporterData& dvar);
+    void readVector( ExporterData& dvar);
 
     //@}
 
@@ -263,7 +263,7 @@ void Hdf5exporter<Mesh>::postProcess(const Real& time)
     {
         M_HDF5.reset(new hdf5_type(this->M_listData.begin()->storedArray()->Comm()));
         M_outputFileName=this->M_prefix+".h5";
-        M_HDF5->Create(this->M_post_dir+M_outputFileName);
+        M_HDF5->Create(this->M_postDir+M_outputFileName);
 
         // write empty xdmf file
         M_wr_initXdmf();
@@ -316,7 +316,7 @@ UInt Hdf5exporter<Mesh>::importFromTime( const Real& Time )
     {
         // Open the xmf file
         std::ifstream xmfFile;
-        xmfFile.open( ( this->M_post_dir + this->M_prefix + ".xmf" ).c_str(), std::ios::in );
+        xmfFile.open( ( this->M_postDir + this->M_prefix + ".xmf" ).c_str(), std::ios::in );
 
         // Vector of TimeStep
         std::vector< std::pair< Real, int > > TimeAndPostfix;
@@ -382,7 +382,7 @@ double Hdf5exporter<Mesh>::importFromIter( const UInt& iter )
     {
         // Open the xmf file
         std::ifstream xmfFile;
-        xmfFile.open( ( this->M_post_dir + this->M_prefix + ".xmf" ).c_str(), std::ios::in );
+        xmfFile.open( ( this->M_postDir + this->M_prefix + ".xmf" ).c_str(), std::ios::in );
 
         // Vector of TimeStep
         std::vector< std::pair< Real, int > > TimeAndPostfix;
@@ -487,7 +487,7 @@ void Hdf5exporter<Mesh>::import(const Real& time)
     if ( M_HDF5.get() == 0)
     {
         M_HDF5.reset(new hdf5_type(this->M_listData.begin()->storedArray()->Comm()));
-        M_HDF5->Open(this->M_post_dir+this->M_prefix+".h5"); //!! Simone
+        M_HDF5->Open(this->M_postDir+this->M_prefix+".h5"); //!! Simone
     }
 
     this->M_timeSteps.push_back(time);
@@ -758,7 +758,7 @@ void Hdf5exporter<Mesh>::M_wr_initXdmf()
 {
     if (this->M_procId == 0)
     {
-        M_xdmf.open( (this->M_post_dir+this->M_prefix+".xmf").c_str(), std::ios_base::out );
+        M_xdmf.open( (this->M_postDir+this->M_prefix+".xmf").c_str(), std::ios_base::out );
 
         M_xdmf <<
         "<?xml version=\"1.0\" ?>\n" <<
@@ -1040,13 +1040,13 @@ void Hdf5exporter<Mesh>::rd_var(ExporterData& dvar)
     if ( M_HDF5.get() == 0)
     {
         M_HDF5.reset(new hdf5_type(dvar.storedArray()->BlockMap().Comm()));
-        M_HDF5->Open(this->M_post_dir+this->M_prefix+".h5"); //!! Simone
+        M_HDF5->Open(this->M_postDir+this->M_prefix+".h5"); //!! Simone
     }
     super::rd_var(dvar);
 }
 
 template <typename Mesh>
-void Hdf5exporter<Mesh>::M_rd_scalar(ExporterData& dvar)
+void Hdf5exporter<Mesh>::readScalar(ExporterData& dvar)
 {
 
     UInt size  = dvar.size();
@@ -1070,7 +1070,7 @@ void Hdf5exporter<Mesh>::M_rd_scalar(ExporterData& dvar)
 }
 
 template <typename Mesh>
-void Hdf5exporter<Mesh>::M_rd_vector( ExporterData& dvar)
+void Hdf5exporter<Mesh>::readVector( ExporterData& dvar)
 {
     UInt size  = dvar.size();
     UInt start = dvar.start();
