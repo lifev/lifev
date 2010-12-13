@@ -33,6 +33,11 @@
 
 namespace LifeV
 {
+
+// ===============================
+// Constructors and Destructor
+// ===============================
+
 TypeInfo::TypeInfo()
 {
     class Nil {};
@@ -57,8 +62,11 @@ TypeInfo::TypeInfo( TypeInfo const& ti )
 
 TypeInfo::~TypeInfo()
 {
-    ; // do nothing here
 }
+
+// ===============================
+// Public methods
+// ===============================
 
 bool
 TypeInfo::before(const TypeInfo& rhs) const
@@ -66,6 +74,10 @@ TypeInfo::before(const TypeInfo& rhs) const
     assert( _M_info != 0 );
     return _M_info->before(*rhs._M_info);
 }
+
+// ======================
+// Get methods
+// ======================
 
 const std::type_info&
 TypeInfo::typeInfo() const
@@ -80,8 +92,5 @@ TypeInfo::name() const
     assert( _M_info != 0 );
     return _M_info->name();
 }
-
-// Comparison operators
-
 
 }
