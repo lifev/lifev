@@ -51,10 +51,11 @@
 #include <lifemc/lifecore/Parser.hpp>
 
 using namespace LifeV;
+using namespace LifeV::parser;
 
 bool EXIT_FLAG = EXIT_SUCCESS;
-std::string Success = "OK     ";
-std::string Failed  = "FAILED ";
+std::string success = "OK     ";
+std::string failed  = "FAILED ";
 
 inline std::string
 check( const bool& expression )
@@ -62,14 +63,14 @@ check( const bool& expression )
     if ( expression )
     {
         EXIT_FLAG = EXIT_FAILURE;
-        return Failed;
+        return failed;
     }
 
-    return Success;
+    return success;
 }
 
-int
-main( int argc, char** argv )
+Int
+main( Int argc, char** argv )
 {
 #ifdef HAVE_MPI
     std::cout << "MPI Initialization" << std::endl;
@@ -173,9 +174,9 @@ main( int argc, char** argv )
               << "x = " << 4 << ", y = " << 5 << " ==> "
               << expression << " = [" << parser.Evaluate(1) << ", " << parser.Evaluate(2) << ", " << parser.Evaluate(3) << "]" << std::endl;
 
-    std::cout << std::endl << "TEST ENDS SUCCESFULLY -> NOW TESTING PERFORMANCES" << std::endl;
+    std::cout << std::endl << "TEST ENDS SUCCESFULLY" << std::endl;
 
-    // PERFORMANCE TEST
+//    // PERFORMANCE TEST
 //	Chrono chrono;
 //
 //	expression = "sqrt(((index+pi)*2)^3)"; //We test ONE expression containing different operations
