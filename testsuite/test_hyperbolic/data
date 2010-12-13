@@ -9,7 +9,7 @@
     multimesh  = false   # actually we export also the displacement
     start      = 0
     save       = 1
-    file_name  = Concentration64
+    file_name  = Concentration
     [../]
 
     [hyperbolic]
@@ -26,13 +26,13 @@
 
         [./time_discretization]
         initialtime   = 0.
-        endtime       = 1
+        endtime       = 0.1
         [../]
 
         [./numerical_flux]
 
             [./CFL]
-            brent_toll    = 1e-8
+            brent_toll    = 1e-4
             brent_maxIter = 500
             relax         = 0.8
             [../]
@@ -40,7 +40,7 @@
             fluxtype = Godunov
 
             [./godunov]
-            brent_toll    = 1e-8
+            brent_toll    = 1e-4
             brent_maxIter = 500
             [../]
 

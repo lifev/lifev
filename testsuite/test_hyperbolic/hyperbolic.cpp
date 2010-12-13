@@ -336,6 +336,7 @@ hyperbolic::run()
     Chrono chronoFiniteElementSpace;
     Chrono chronoProblem;
     Chrono chronoProcess;
+    Chrono chronoTimeStep;
     Chrono chronoError;
 
     // Start chronoTotal for measure the total time for the computation
@@ -591,6 +592,9 @@ hyperbolic::run()
     for (; dataHyperbolic.dataTime()->canAdvance() && !isLastTimeStep; dataHyperbolic.dataTime()->updateTime() )
     {
 
+        // Start chronoTimeStep for measure the time for the current time step
+        chronoTimeStep.start();
+
         // Compute the new time step according to the CFL condition.
         timeStep = hyperbolicSolver.CFL();
 
@@ -623,6 +627,13 @@ hyperbolic::run()
 
         // Save the solution into the exporter
         exporter->postProcess( dataHyperbolic.dataTime()->getTime() );
+
+        // Stop chronoTimeStep
+        chronoTimeStep.stop();
+
+        // The leader process print chronoTimeStep
+        hyperbolicSolver.getDisplayer().leaderPrint( "Time for current time step ",
+                                                     chronoTimeStep.diff(), "\n" );
 
     }
 
