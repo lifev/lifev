@@ -41,6 +41,7 @@ along with LifeV. If not, see <http://www.gnu.org/licenses/>.
 #include <fstream>
 
 #include <life/lifecore/life.hpp>
+#include <life/lifecore/debug.hpp>
 #include <life/lifemesh/geoElement.hpp>
 #include <life/lifecore/switch.hpp>
 #include <life/lifemesh/bareItems.hpp>
@@ -2115,7 +2116,7 @@ RegionMesh3D<GEOSHAPE, MC>::setMaxNumGlobalVolumes( UInt const n )
 }
 
 template <typename GEOSHAPE, typename MC>
-INLINE
+inline
 typename RegionMesh3D<GEOSHAPE, MC>::VolumeType &
 RegionMesh3D<GEOSHAPE, MC>::addVolume()
 {
@@ -2123,7 +2124,7 @@ RegionMesh3D<GEOSHAPE, MC>::addVolume()
 }
 
 template <typename GEOSHAPE, typename MC>
-INLINE
+inline
 typename RegionMesh3D<GEOSHAPE, MC>::VolumeType &
 RegionMesh3D<GEOSHAPE, MC>::addVolume( VolumeType const & v )
 {
@@ -2136,7 +2137,7 @@ RegionMesh3D<GEOSHAPE, MC>::addVolume( VolumeType const & v )
 }
 
 template <typename GEOSHAPE, typename MC>
-INLINE
+inline
 typename RegionMesh3D<GEOSHAPE, MC>::VolumeType &
 RegionMesh3D<GEOSHAPE, MC>::setVolume( VolumeType const & v, UInt const pos )
 {
@@ -2148,7 +2149,7 @@ RegionMesh3D<GEOSHAPE, MC>::setVolume( VolumeType const & v, UInt const pos )
 }
 
 template <typename GEOSHAPE, typename MC>
-INLINE
+inline
 void
 RegionMesh3D<GEOSHAPE, MC>::setVolumeCounter()
 {
@@ -2156,7 +2157,7 @@ RegionMesh3D<GEOSHAPE, MC>::setVolumeCounter()
 }
 
 template <typename GEOSHAPE, typename MC>
-INLINE
+inline
 typename RegionMesh3D<GEOSHAPE, MC>::VolumeType &
 RegionMesh3D<GEOSHAPE, MC>::lastVolume()
 {
@@ -2164,7 +2165,7 @@ RegionMesh3D<GEOSHAPE, MC>::lastVolume()
 }
 
 template <typename GEOSHAPE, typename MC>
-INLINE
+inline
 typename RegionMesh3D<GEOSHAPE, MC>::VolumeType const &
 RegionMesh3D<GEOSHAPE, MC>::volume( UInt const i ) const
 {
@@ -2173,7 +2174,7 @@ RegionMesh3D<GEOSHAPE, MC>::volume( UInt const i ) const
 }
 
 template <typename GEOSHAPE, typename MC>
-INLINE
+inline
 typename RegionMesh3D<GEOSHAPE, MC>::VolumeType &
 RegionMesh3D<GEOSHAPE, MC>::volume( UInt const i )
 {
@@ -2234,7 +2235,7 @@ RegionMesh3D<GEOSHAPE, MC>::setMaxNumGlobalFaces( UInt const n )
 }
 
 template <typename GEOSHAPE, typename MC>
-INLINE
+inline
 typename RegionMesh3D<GEOSHAPE, MC>::FaceType &
 RegionMesh3D<GEOSHAPE, MC>::addFace( bool const boundary )
 {
@@ -2243,7 +2244,7 @@ RegionMesh3D<GEOSHAPE, MC>::addFace( bool const boundary )
 
 
 template <typename GEOSHAPE, typename MC>
-INLINE
+inline
 typename RegionMesh3D<GEOSHAPE, MC>::FaceType &
 RegionMesh3D<GEOSHAPE, MC>::addFace( FaceType const & f, bool const /*boundary*/ )
 {
@@ -2256,7 +2257,7 @@ RegionMesh3D<GEOSHAPE, MC>::addFace( FaceType const & f, bool const /*boundary*/
 }
 
 template <typename GEOSHAPE, typename MC>
-INLINE
+inline
 typename RegionMesh3D<GEOSHAPE, MC>::FaceType &
 RegionMesh3D<GEOSHAPE, MC>::setFace( FaceType const & f, UInt position, bool const boundary )
 {
@@ -2277,7 +2278,7 @@ RegionMesh3D<GEOSHAPE, MC>::setFace( FaceType const & f, UInt position, bool con
 }
 
 template <typename GEOSHAPE, typename MC>
-INLINE
+inline
 typename RegionMesh3D<GEOSHAPE, MC>::FaceType &
 RegionMesh3D<GEOSHAPE, MC>::lastFace()
 {
@@ -2286,7 +2287,7 @@ RegionMesh3D<GEOSHAPE, MC>::lastFace()
 
 
 template <typename GEOSHAPE, typename MC>
-INLINE
+inline
 typename RegionMesh3D<GEOSHAPE, MC>::FaceType const &
 RegionMesh3D<GEOSHAPE, MC>::face( UInt const i ) const
 {
@@ -2295,7 +2296,7 @@ RegionMesh3D<GEOSHAPE, MC>::face( UInt const i ) const
 }
 
 template <typename GEOSHAPE, typename MC>
-INLINE
+inline
 typename RegionMesh3D<GEOSHAPE, MC>::FaceType &
 RegionMesh3D<GEOSHAPE, MC>::face( UInt const i )
 {
@@ -2305,7 +2306,7 @@ RegionMesh3D<GEOSHAPE, MC>::face( UInt const i )
 
 
 template <typename GEOSHAPE, typename MC>
-INLINE
+inline
 typename RegionMesh3D<GEOSHAPE, MC>::FaceType const &
 RegionMesh3D<GEOSHAPE, MC>::boundaryFace( UInt const i ) const
 {
@@ -2315,7 +2316,7 @@ RegionMesh3D<GEOSHAPE, MC>::boundaryFace( UInt const i ) const
 }
 
 template <typename GEOSHAPE, typename MC>
-INLINE
+inline
 typename RegionMesh3D<GEOSHAPE, MC>::FaceType &
 RegionMesh3D<GEOSHAPE, MC>::boundaryFace( UInt const i )
 {
@@ -2406,7 +2407,7 @@ RegionMesh3D<GEOSHAPE, MC>::setNumEdges( UInt const n)
 }
 
 template <typename GEOSHAPE, typename MC>
-INLINE
+inline
 typename RegionMesh3D<GEOSHAPE, MC>::EdgeType &
 RegionMesh3D<GEOSHAPE, MC>::addEdge( bool const boundary )
 {
@@ -2414,7 +2415,7 @@ RegionMesh3D<GEOSHAPE, MC>::addEdge( bool const boundary )
 }
 
 template <typename GEOSHAPE, typename MC>
-INLINE
+inline
 typename RegionMesh3D<GEOSHAPE, MC>::EdgeType &
 RegionMesh3D<GEOSHAPE, MC>::addEdge( EdgeType const & f, bool const /*boundary*/ )
 {
@@ -2428,7 +2429,7 @@ RegionMesh3D<GEOSHAPE, MC>::addEdge( EdgeType const & f, bool const /*boundary*/
 }
 
 template <typename GEOSHAPE, typename MC>
-INLINE
+inline
 typename RegionMesh3D<GEOSHAPE, MC>::EdgeType &
 RegionMesh3D<GEOSHAPE, MC>::setEdge( EdgeType const & f, UInt position, bool const boundary )
 {
@@ -2441,7 +2442,7 @@ RegionMesh3D<GEOSHAPE, MC>::setEdge( EdgeType const & f, UInt position, bool con
 
 
 template <typename GEOSHAPE, typename MC>
-INLINE
+inline
 typename RegionMesh3D<GEOSHAPE, MC>::EdgeType &
 RegionMesh3D<GEOSHAPE, MC>::lastEdge()
 {
@@ -2451,7 +2452,7 @@ RegionMesh3D<GEOSHAPE, MC>::lastEdge()
 
 
 template <typename GEOSHAPE, typename MC>
-INLINE
+inline
 typename RegionMesh3D<GEOSHAPE, MC>::EdgeType const &
 RegionMesh3D<GEOSHAPE, MC>::edge( UInt const i ) const
 {
@@ -2460,7 +2461,7 @@ RegionMesh3D<GEOSHAPE, MC>::edge( UInt const i ) const
 }
 
 template <typename GEOSHAPE, typename MC>
-INLINE
+inline
 typename RegionMesh3D<GEOSHAPE, MC>::EdgeType &
 RegionMesh3D<GEOSHAPE, MC>::edge( UInt const i )
 {
@@ -2470,7 +2471,7 @@ RegionMesh3D<GEOSHAPE, MC>::edge( UInt const i )
 
 
 template <typename GEOSHAPE, typename MC>
-INLINE
+inline
 typename RegionMesh3D<GEOSHAPE, MC>::EdgeType const &
 RegionMesh3D<GEOSHAPE, MC>::boundaryEdge( UInt const i ) const
 {
@@ -2480,7 +2481,7 @@ RegionMesh3D<GEOSHAPE, MC>::boundaryEdge( UInt const i ) const
 }
 
 template <typename GEOSHAPE, typename MC>
-INLINE
+inline
 typename RegionMesh3D<GEOSHAPE, MC>::EdgeType &
 RegionMesh3D<GEOSHAPE, MC>::boundaryEdge( UInt const i )
 {
@@ -2578,7 +2579,7 @@ RegionMesh3D<GEOSHAPE, MC>::setMaxNumGlobalPoints( UInt const n )
 }
 
 template <typename GEOSHAPE, typename MC>
-INLINE
+inline
 typename RegionMesh3D<GEOSHAPE, MC>::PointType &
 RegionMesh3D<GEOSHAPE, MC>::addPoint( bool const boundary, bool const vertex )
 {
@@ -2586,7 +2587,7 @@ RegionMesh3D<GEOSHAPE, MC>::addPoint( bool const boundary, bool const vertex )
 }
 
 template <typename GEOSHAPE, typename MC>
-INLINE
+inline
 typename RegionMesh3D<GEOSHAPE, MC>::PointType &
 RegionMesh3D<GEOSHAPE, MC>::addPoint( PointType const & p, bool const boundary, bool const /*vertex*/ )
 {
@@ -2609,7 +2610,7 @@ RegionMesh3D<GEOSHAPE, MC>::addPoint( PointType const & p, bool const boundary, 
 }
 
 template <typename GEOSHAPE, typename MC>
-INLINE
+inline
 typename RegionMesh3D<GEOSHAPE, MC>::PointType &
 RegionMesh3D<GEOSHAPE, MC>::setPoint( PointType const & p, UInt position, bool const boundary, bool const vertex)
 {
@@ -2645,7 +2646,7 @@ RegionMesh3D<GEOSHAPE, MC>::setPoint( PointType const & p, UInt position, bool c
 }
 
 template <typename GEOSHAPE, typename MC>
-INLINE
+inline
 typename RegionMesh3D<GEOSHAPE, MC>::PointType &
 RegionMesh3D<GEOSHAPE, MC>::
 setPoint(UInt const & position, bool const boundary, bool const vertex)
@@ -2676,7 +2677,7 @@ setPoint(UInt const & position, bool const boundary, bool const vertex)
 }
 
 template <typename GEOSHAPE, typename MC>
-INLINE
+inline
 //RegionMesh3D<GEOSHAPE,MC>::PointType &
 UInt
 RegionMesh3D<GEOSHAPE, MC>::addPoint( UInt const iden, bool const boundary, UInt const start )
@@ -2701,7 +2702,7 @@ RegionMesh3D<GEOSHAPE, MC>::addPoint( UInt const iden, bool const boundary, UInt
 }
 
 template <typename GEOSHAPE, typename MC>
-INLINE
+inline
 typename RegionMesh3D<GEOSHAPE, MC>::PointType &
 RegionMesh3D<GEOSHAPE, MC>::lastPoint()
 {
@@ -2710,7 +2711,7 @@ RegionMesh3D<GEOSHAPE, MC>::lastPoint()
 
 
 template <typename GEOSHAPE, typename MC>
-INLINE
+inline
 typename RegionMesh3D<GEOSHAPE, MC>::PointType const &
 RegionMesh3D<GEOSHAPE, MC>::point( UInt const i ) const
 {
@@ -2720,7 +2721,7 @@ RegionMesh3D<GEOSHAPE, MC>::point( UInt const i ) const
 }
 
 template <typename GEOSHAPE, typename MC>
-INLINE
+inline
 typename RegionMesh3D<GEOSHAPE, MC>::PointType &
 RegionMesh3D<GEOSHAPE, MC>::point( UInt const i )
 {
@@ -2730,7 +2731,7 @@ RegionMesh3D<GEOSHAPE, MC>::point( UInt const i )
 }
 
 template <typename GEOSHAPE, typename MC>
-INLINE
+inline
 typename RegionMesh3D<GEOSHAPE, MC>::PointType const &
 RegionMesh3D<GEOSHAPE, MC>::pointInitial( UInt const i ) const
 {
@@ -2740,7 +2741,7 @@ RegionMesh3D<GEOSHAPE, MC>::pointInitial( UInt const i ) const
 }
 
 template <typename GEOSHAPE, typename MC>
-INLINE
+inline
 typename RegionMesh3D<GEOSHAPE, MC>::PointType &
 RegionMesh3D<GEOSHAPE, MC>::pointInitial( UInt const i )
 {
@@ -2750,7 +2751,7 @@ RegionMesh3D<GEOSHAPE, MC>::pointInitial( UInt const i )
 }
 
 template <typename GEOSHAPE, typename MC>
-INLINE
+inline
 typename RegionMesh3D<GEOSHAPE, MC>::PointType const &
 RegionMesh3D<GEOSHAPE, MC>::boundaryPoint( UInt const i ) const
 {
@@ -2760,7 +2761,7 @@ RegionMesh3D<GEOSHAPE, MC>::boundaryPoint( UInt const i ) const
 }
 
 template <typename GEOSHAPE, typename MC>
-INLINE
+inline
 typename RegionMesh3D<GEOSHAPE, MC>::PointType &
 RegionMesh3D<GEOSHAPE, MC>::boundaryPoint( UInt const i )
 {
@@ -3074,7 +3075,7 @@ RegionMesh3D<GEOSHAPE, MC>::extractEntityList
 
 
 template <typename GEOSHAPE, typename MC>
-INLINE
+inline
 UInt
 RegionMesh3D<GEOSHAPE, MC>::faceElement( UInt const i, UInt const Pos ) const
 {
@@ -3092,7 +3093,7 @@ RegionMesh3D<GEOSHAPE, MC>::faceElement( UInt const i, UInt const Pos ) const
 }
 
 template <typename GEOSHAPE, typename MC>
-INLINE
+inline
 UInt
 RegionMesh3D<GEOSHAPE, MC>::faceElement( FaceType const & f, UInt const Pos ) const
 {
@@ -3111,7 +3112,7 @@ RegionMesh3D<GEOSHAPE, MC>::faceElement( FaceType const & f, UInt const Pos ) co
 
 
 template <typename GEOSHAPE, typename MC>
-INLINE
+inline
 void
 RegionMesh3D<GEOSHAPE, MC>::setLinkSwitch( std::string const & _s )
 {
@@ -3119,7 +3120,7 @@ RegionMesh3D<GEOSHAPE, MC>::setLinkSwitch( std::string const & _s )
 }
 
 template <typename GEOSHAPE, typename MC>
-INLINE
+inline
 void
 RegionMesh3D<GEOSHAPE, MC>::unsetLinkSwitch( std::string const & _s )
 {
@@ -3127,7 +3128,7 @@ RegionMesh3D<GEOSHAPE, MC>::unsetLinkSwitch( std::string const & _s )
 }
 
 template <typename GEOSHAPE, typename MC>
-INLINE
+inline
 bool
 RegionMesh3D<GEOSHAPE, MC>::getLinkSwitch( std::string const & _s ) const
 {
@@ -3135,7 +3136,7 @@ RegionMesh3D<GEOSHAPE, MC>::getLinkSwitch( std::string const & _s ) const
 }
 
 template <typename GEOSHAPE, typename MC>
-INLINE
+inline
 bool
 RegionMesh3D<GEOSHAPE, MC>::hasInternalFaces() const
 {
@@ -3143,7 +3144,7 @@ RegionMesh3D<GEOSHAPE, MC>::hasInternalFaces() const
 }
 
 template <typename GEOSHAPE, typename MC>
-INLINE
+inline
 bool
 RegionMesh3D<GEOSHAPE, MC>::hasInternalEdges() const
 {
@@ -3151,7 +3152,7 @@ RegionMesh3D<GEOSHAPE, MC>::hasInternalEdges() const
 }
 
 template <typename GEOSHAPE, typename MC>
-INLINE
+inline
 bool
 RegionMesh3D<GEOSHAPE, MC>::hasEdges() const
 {
@@ -3159,7 +3160,7 @@ RegionMesh3D<GEOSHAPE, MC>::hasEdges() const
 }
 
 template <typename GEOSHAPE, typename MC>
-INLINE
+inline
 bool
 RegionMesh3D<GEOSHAPE, MC>::hasFaces() const
 {
@@ -3167,7 +3168,7 @@ RegionMesh3D<GEOSHAPE, MC>::hasFaces() const
 }
 
 template <typename GEOSHAPE, typename MC>
-INLINE
+inline
 bool
 RegionMesh3D<GEOSHAPE, MC>::isVertex( PointType const & p ) const
 {
@@ -3175,7 +3176,7 @@ RegionMesh3D<GEOSHAPE, MC>::isVertex( PointType const & p ) const
 }
 
 template <typename GEOSHAPE, typename MC>
-INLINE
+inline
 bool
 RegionMesh3D<GEOSHAPE, MC>::isVertex( UInt const & id ) const
 {
@@ -3184,7 +3185,7 @@ RegionMesh3D<GEOSHAPE, MC>::isVertex( UInt const & id ) const
 
 
 template <typename GEOSHAPE, typename MC>
-INLINE
+inline
 bool
 RegionMesh3D<GEOSHAPE, MC>::isBoundaryPoint( UInt const & id ) const
 {
@@ -3192,7 +3193,7 @@ RegionMesh3D<GEOSHAPE, MC>::isBoundaryPoint( UInt const & id ) const
 }
 
 template <typename GEOSHAPE, typename MC>
-INLINE
+inline
 bool
 RegionMesh3D<GEOSHAPE, MC>::isBoundaryPoint( PointType const & p ) const
 {
@@ -3200,7 +3201,7 @@ RegionMesh3D<GEOSHAPE, MC>::isBoundaryPoint( PointType const & p ) const
 }
 
 template <typename GEOSHAPE, typename MC>
-INLINE
+inline
 bool
 RegionMesh3D<GEOSHAPE, MC>::isBoundaryEdge( EdgeType const & e ) const
 {
@@ -3208,7 +3209,7 @@ RegionMesh3D<GEOSHAPE, MC>::isBoundaryEdge( EdgeType const & e ) const
 }
 
 template <typename GEOSHAPE, typename MC>
-INLINE
+inline
 bool
 RegionMesh3D<GEOSHAPE, MC>::isBoundaryEdge( UInt const & id ) const
 {
@@ -3216,7 +3217,7 @@ RegionMesh3D<GEOSHAPE, MC>::isBoundaryEdge( UInt const & id ) const
 }
 
 template <typename GEOSHAPE, typename MC>
-INLINE
+inline
 bool
 RegionMesh3D<GEOSHAPE, MC>::isBoundaryFace( FaceType const & f ) const
 {
@@ -3224,7 +3225,7 @@ RegionMesh3D<GEOSHAPE, MC>::isBoundaryFace( FaceType const & f ) const
 }
 
 template <typename GEOSHAPE, typename MC>
-INLINE
+inline
 bool
 RegionMesh3D<GEOSHAPE, MC>::isBoundaryFace( UInt const & id ) const
 {
@@ -3232,7 +3233,7 @@ RegionMesh3D<GEOSHAPE, MC>::isBoundaryFace( UInt const & id ) const
 }
 
 template <typename GEOSHAPE, typename MC>
-INLINE
+inline
 bool
 RegionMesh3D<GEOSHAPE, MC>::hasLocalFaces() const
 {
@@ -3240,7 +3241,7 @@ RegionMesh3D<GEOSHAPE, MC>::hasLocalFaces() const
 }
 
 template <typename GEOSHAPE, typename MC>
-INLINE
+inline
 bool
 RegionMesh3D<GEOSHAPE, MC>::hasLocalEdges() const
 {
@@ -3248,7 +3249,7 @@ RegionMesh3D<GEOSHAPE, MC>::hasLocalEdges() const
 }
 
 template <typename GEOSHAPE, typename MC>
-INLINE
+inline
 UInt
 RegionMesh3D<GEOSHAPE, MC>::localFaceId( UInt const volId, UInt const locF ) const
 {
@@ -3259,7 +3260,7 @@ RegionMesh3D<GEOSHAPE, MC>::localFaceId( UInt const volId, UInt const locF ) con
 }
 
 template <typename GEOSHAPE, typename MC>
-INLINE
+inline
 UInt
 RegionMesh3D<GEOSHAPE, MC>::localEdgeId( UInt const volId, UInt const locE )
 const
@@ -3271,7 +3272,7 @@ const
 }
 
 template <typename GEOSHAPE, typename MC>
-INLINE
+inline
 UInt
 RegionMesh3D<GEOSHAPE, MC>::localFaceId( const VolumeType & iv, UInt const locF ) const
 {
@@ -3281,7 +3282,7 @@ RegionMesh3D<GEOSHAPE, MC>::localFaceId( const VolumeType & iv, UInt const locF 
 }
 
 template <typename GEOSHAPE, typename MC>
-INLINE
+inline
 UInt
 RegionMesh3D<GEOSHAPE, MC>::localEdgeId( const VolumeType & iv, UInt const locE )
 const
@@ -3292,7 +3293,7 @@ const
 }
 
 template <typename GEOSHAPE, typename MC>
-INLINE
+inline
 bool
 RegionMesh3D<GEOSHAPE, MC>::isFullEdge( UInt const & id ) const
 {
@@ -3300,7 +3301,7 @@ RegionMesh3D<GEOSHAPE, MC>::isFullEdge( UInt const & id ) const
 }
 
 template <typename GEOSHAPE, typename MC>
-INLINE
+inline
 bool
 RegionMesh3D<GEOSHAPE, MC>::isFullFace( UInt const & id ) const
 {
