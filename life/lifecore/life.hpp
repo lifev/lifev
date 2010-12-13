@@ -79,15 +79,15 @@ namespace LifeV
 {
 
 /*!
-  \page types_page LifeV Types
-  \section types Types
-  \subsection real Real Numbers
+  @page types_page LifeV Types
+  @section types Types
+  @subsection real Real Numbers
 
   LifeV defines a number of types that are used in the library.
 
   -# \c Real 64 bits real number type
 
-  \section ints Integers
+  @section ints Integers
 
   LifeV defines a number of integer type that have controlled bit
   size. These types are constructed automatically by LifeV in order to have
@@ -122,8 +122,8 @@ namespace LifeV
 //! Generic real data
 typedef double Real;
 
-/*! \namespace detail
-  \internal
+/*! @namespace detail
+  @internal
 */
 namespace detail
 {
@@ -164,8 +164,8 @@ typedef detail::integer<16>::type int16_type;
 typedef detail::integer<32>::type int32_type;
 typedef detail::integer<64>::type int64_type;
 
-/*! \namespace detail
-  \internal
+/*! @namespace detail
+  @internal
 */
 namespace detail
 {
