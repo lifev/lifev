@@ -262,7 +262,7 @@ void
 Monolithic::buildSystem()
 {
     M_solidBlock.reset(new matrix_Type(*M_monolithicMap, 1));//since it is constant, we keep this throughout the simulation
-    M_solid->buildSystem(M_solidBlock, M_data->dataSolid()->dataTime()->getTimeStep()*M_data->dataSolid()->rescaleFactor());
+    M_solid->buildSystem(M_solidBlock, M_data->dataSolid()->dataTime()->getTimeStep()*M_solid->rescaleFactor());//M_data->dataSolid()->rescaleFactor());
     M_solidBlock->GlobalAssemble();
     M_solid->rescaleMatrices();
 }

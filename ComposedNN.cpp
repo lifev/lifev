@@ -116,7 +116,7 @@ int ComposedNN::solveSystem( const vector_type& rhs, vector_type& step, solver_p
 
 void ComposedNN::setDataFromGetPot(const GetPot& data, const std::string& section)
 {
-    IfpackPreconditioner::createIfpackList(data, section, M_list);
+    IfpackPreconditioner::createIfpackList( M_list, data, section, "");
 }
 
 void ComposedNN::coupler(map_shared_ptrtype& map,
