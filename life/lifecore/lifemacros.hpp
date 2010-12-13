@@ -1,51 +1,58 @@
-/* -*- mode: c++ -*-
+//@HEADER
+/*
+*******************************************************************************
 
-  This file is part of the LifeV library
+    Copyright (C) 2004, 2005, 2007 EPFL, Politecnico di Milano, INRIA
+    Copyright (C) 2010 EPFL, Politecnico di Milano, Emory University
 
-  Author(s): Christophe Prud'homme <christophe.prudhomme@epfl.ch>
-       Date: 2005-01-24
+    This file is part of LifeV.
 
-  Copyright (C) 2005 EPFL
+    LifeV is free software; you can redistribute it and/or modify
+    it under the terms of the GNU Lesser General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
 
-  This library is free software; you can redistribute it and/or
-  modify it under the terms of the GNU Lesser General Public
-  License as published by the Free Software Foundation; either
-  version 2.1 of the License, or (at your option) any later version.
+    LifeV is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+    Lesser General Public License for more details.
 
-  This library is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-  Lesser General Public License for more details.
+    You should have received a copy of the GNU Lesser General Public License
+    along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
 
-  You should have received a copy of the GNU Lesser General Public
-  License along with this library; if not, write to the Free Software
-  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+*******************************************************************************
 */
-/**
-   \file lifeVmacros.hpp
-   \author Christophe Prud'homme <christophe.prudhomme@epfl.ch>
-   \date 2005-01-24
+//@HEADER
+/*!
+    @file
+    @brief Base utilities operating on meshes
+    @date 2005-01-24
+
+    @author Christophe Prud'homme <christophe.prudhomme@epfl.ch>
+    @contributor
+    @maintainer Simone Deparis <simone.deparis@epfl.ch>
+
+    @date 08-02-2004
+
+    @subsection hints LifeV C++ Compiler Hints
+
+    -# #INLINE
+    -# #LIFEV_RESTRICT
+
+    @subsection attribute_macro LifeV Attribute Macros
+
+    -# #LIFEV_EXPORT and #LIFEV_NO_EXPORT
+    -# #LIFEV_PACKED
+    -# #LIFEV_DEPRECATED
+    -# #LIFEV_ISLIKELY and #LIFEV_ISUNLIKELY
+
  */
+
 #ifndef LIFEMACROS_HPP
 #define LIFEMACROS_HPP 1
 
-/*!  \page macros_page LifeV Macros
-  \section macros Macros
-
-   \subsection hints LifeV C++ Compiler Hints
-
-  -# #INLINE
-  -# #LIFEV_RESTRICT
-
-  \subsection attribute_macro LifeV Attribute Macros
-
-  -# #LIFEV_EXPORT and #LIFEV_NO_EXPORT
-  -# #LIFEV_PACKED
-  -# #LIFEV_DEPRECATED
-  -# #LIFEV_ISLIKELY and #LIFEV_ISUNLIKELY
-*/
 /**
-   \def LIFEV_CONSTRUCTOR_BEGIN(Area,x)
+   @def LIFEV_CONSTRUCTOR_BEGIN(Area,x)
    Inform that the constructor of the class x has started
  */
 #define LIFEV_CONSTRUCTOR_BEGIN(Area, A) Debug( Area ) << "Constructor of " << A << " begins\n";
@@ -53,13 +60,13 @@
 #define CONSTRUCTOR(A) LIFEV_CONSTRUCTOR_BEGIN(20000,A)
 
 /**
-   \def LIFEV_CONSTRUCTOR_END(Area,x)
+   @def LIFEV_CONSTRUCTOR_END(Area,x)
    Inform that the constructor of the class x has ended
  */
 #define LIFEV_CONSTRUCTOR_END(Area,A) Debug( Area ) << "Constructor of " << A << " ends\n";
 
 /**
-   \def LIFEV_DESTRUCTOR_BEGIN(Area,x)
+   @def LIFEV_DESTRUCTOR_BEGIN(Area,x)
    Inform that the destructor of the class x has started
  */
 #define LIFEV_DESTRUCTOR_BEGIN(Area,A) Debug( Area ) << "Destructor of " << A << " begins\n";
@@ -67,22 +74,22 @@
 #define DESTRUCTOR(A) LIFEV_DESTRUCTOR_BEGIN(20000,A)
 
 /**
-   \def LIFEV_DESTRUCTOR_END(Area,x)
+   @def LIFEV_DESTRUCTOR_END(Area,x)
    Inform that the destructor of the class x has started
  */
 #define LIFEV_DESTRUCTOR_END(Area,A) Debug( Area ) << "Destructor of " << A << " ends\n";
 
 
 /**
-   \def INLINE
+   @def INLINE
 
    Alias to the C/C++ keyword \c inline
  */
 #define INLINE inline
 
 /**
-   \def LIFEV_RESTRICT
-   \brief C99 feature of restricted(not aliased) pointers and references
+   @def LIFEV_RESTRICT
+   @brief C99 feature of restricted(not aliased) pointers and references
 
    As with gcc, g++ understands the C99 feature of restricted
    pointers, specified with the \c __restrict__, or __restrict type
@@ -94,12 +101,12 @@
    restricted references, which indicate that the reference is not
    aliased in the local context.
 
-   \code
+   @code
    void fn (int *__restrict__ rptr, int &__restrict__ rref)
    {
    ...
    }
-   \endcode
+   @endcode
 
    In the body of \c fn, \c rptr points to an unaliased integer and \c rref
    refers to a (different) unaliased integer.
@@ -108,12 +115,12 @@
    You may also specify whether a member function's this pointer is
    unaliased by using \c __restrict__ as a member function qualifier.
 
-   \code
+   @code
    void T::fn () __restrict__
    {
    ...
    }
-   \endcode
+   @endcode
 
    Within the body of T::fn, this will have the effective definition
    <tt>T* __restrict__</tt> const this. Notice that the interpretation of a
@@ -138,8 +145,8 @@
 
 
 /**
-   \def LIFEV_EXPORT
-   \brief Load time improvements for DSO libraries
+   @def LIFEV_EXPORT
+   @brief Load time improvements for DSO libraries
 
    Here are a few explanations why this is useful.  For more info
    checkout http://www.nedprod.com/programs/gccvisibility.html
@@ -170,7 +177,7 @@
    behind us with this patch. Hallelujah!
 
    here is an example on how to use them
-   \code
+   @code
    int LIFEV_NO_EXPORT foo;
    int LIFEV_EXPORT bar;
 
@@ -188,10 +195,10 @@
      Person(int _c) : c(_c) { }
      static void foo(int a);
     };
-   \endcode
+   @endcode
 */
 /**
-   \def LIFEV_NO_EXPORT
+   @def LIFEV_NO_EXPORT
 
    Counterpart to #LIFEV_EXPORT.
  */
@@ -205,7 +212,7 @@
 #endif
 
 /**
-   \def LIFEV_PACKED
+   @def LIFEV_PACKED
    The LIFEV_PACKED can be used to hint the compiler that a particular
    structure or class should not contain unnecessary paddings.
 
@@ -226,7 +233,7 @@
    each other. For example, here are some things I tried out -- I created
    a C source file - \c test.c
 
-   \code
+   @code
    struct test_t {
    int  a;
    char b;
@@ -234,12 +241,12 @@
    } ;
 
    struct test_t test = { 10, 20, 30};
-   \endcode
+   @endcode
 
    And compiled it with the -S option (ie to generate the assembly
    equivalent of the code generated).
 
-   \code
+   @code
       .file "t.cpp"
       .globl test
         .data
@@ -253,7 +260,7 @@
       .long 30</b>
       .section .note.GNU-stack,"",@progbits
       .ident   "GCC: (GNU) 3.3.5 (Debian 1:3.3.5-6)"
-   \endcode
+   @endcode
 
    Notice the emphasized code. You can see that the structure "test"
    is being declared. First the field "a" (int) as .long 10 followed
@@ -263,7 +270,7 @@
    sizeof struct test_t as 12 instead of the expected 9. Then I tried
    with the __packed__ attribute -
 
-   \code
+   @code
    struct test_t {
    int  a;
    char b;
@@ -271,11 +278,11 @@
    } LIFEV_PACKED
 
    struct test_t test = { 10, 20, 30};
-   \endcode
+   @endcode
 
    and the "-S" output I got after compiling was
 
-   \code
+   @code
    .file "t.cpp"
    .globl test
      .data
@@ -287,7 +294,7 @@
      .long 30
    .section .note.GNU-stack,"",@progbits
    .ident   "GCC: (GNU) 3.3.5 (Debian 1:3.3.5-6)"
-   \endcode
+   @endcode
 
    in which the zeros are missing making the sizeof structure test_t =
    9. Always remember that memory alignment is *good* even if it
@@ -308,30 +315,30 @@
    For non-inline functions, the macro gets inserted at the very end of the
    function declaration, right before the semicolon:
 
-   \code
+   @code
    DeprecatedConstructor() LIFEV_DEPRECATED;
    void deprecatedFunctionA() LIFEV_DEPRECATED;
    int deprecatedFunctionB() const LIFEV_DEPRECATED;
-   \endcode
+   @endcode
 
    Functions which are implemented inline are handled differently: for them,
    the LIFEV_DEPRECATED macro is inserted at the front, right before the return
    type, but after "static" or "virtual":
 
-   \code
+   @code
    LIFEV_DEPRECATED void deprecatedInlineFunctionA() { .. }
    virtual LIFEV_DEPRECATED int deprecatedInlineFunctionB() { .. }
    static LIFEV_DEPRECATED bool deprecatedInlineFunctionC() { .. }
-   \end
+   @end
 
    You can also mark whole structs or classes as deprecated, by inserting the
    LIFEV_DEPRECATED macro after the struct/class keyword, but before the
    name of the struct/class:
 
-   \code
+   @code
    class LIFEV_DEPRECATED DeprecatedClass { };
    struct LIFEV_DEPRECATED DeprecatedStruct { };
-   \endcode
+   @endcode
 */
 #if __GNUC__ - 0 > 3 || (__GNUC__ - 0 == 3 && __GNUC_MINOR__ - 0 >= 2)
 # define LIFEV_DEPRECATED __attribute__ ((deprecated))
@@ -340,7 +347,7 @@
 #endif
 
 /**
-   \def LIFEV_ISLIKELY(x)
+   @def LIFEV_ISLIKELY(x)
    The LIFEV_ISLIKELY macro tags a boolean expression as likely to evaluate to
    'true'. When used in an if ( ) statement, it gives a hint to the compiler
    that the following codeblock is likely to get executed. Providing this
@@ -348,25 +355,25 @@
    Using the macro has an insignificant code size or runtime memory footprint impact.
    The code semantics is not affected.
 
-   \note
+   @note
    Providing wrong information ( like marking a condition that almost never
    passes as 'likely' ) will cause a significant runtime slowdown. Therefore only
    use it for cases where you can be sure about the odds of the expression to pass
    in all cases ( independent from e.g. user configuration ).
 
-   \par
+   @par
    The LIFEV_ISUNLIKELY macro tags an expression as unlikely evaluating to 'true'.
 
-   \note
+   @note
    Do NOT use ( !LIFEV_ISLIKELY(foo) ) as an replacement for LIFEV_ISUNLIKELY !
 
-   \code
+   @code
    if ( LIFEV_ISUNLIKELY( testsomething() ) )
        abort();     // assume its unlikely that the application aborts
-   \endcode
+   @endcode
 */
 /**
-   \def LIFEV_ISUNLIKELY(x)
+   @def LIFEV_ISUNLIKELY(x)
    Counterpart to #LIFEV_ISLIKELY
    The LIFEV_ISUNLIKELY macro tags an expression as unlikely evaluating to 'true'.
  */
