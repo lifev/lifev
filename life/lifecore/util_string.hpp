@@ -1,36 +1,59 @@
+//@HEADER
 /*
-This file is part of the LifeV library
-Copyright (C) 2001,2002,2003,2004 EPFL, INRIA and Politecnico di Milano
+*******************************************************************************
 
-This library is free software; you can redistribute it and/or
-modify it under the terms of the GNU Lesser General Public
-License as published by the Free Software Foundation; either
-version 2.1 of the License, or (at your option) any later version.
+Copyright (C) 2004, 2005, 2007 EPFL, Politecnico di Milano, INRIA
+Copyright (C) 2010 EPFL, Politecnico di Milano, Emory University
 
-This library is distributed in the hope that it will be useful,
+This file is part of LifeV.
+
+LifeV is free software; you can redistribute it and/or modify
+it under the terms of the GNU Lesser General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+LifeV is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
 Lesser General Public License for more details.
 
-You should have received a copy of the GNU Lesser General Public
-License along with this library; if not, write to the Free Software
-Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+You should have received a copy of the GNU Lesser General Public License
+along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
+
+*******************************************************************************
 */
+//@HEADER
+/*!
+  @file
+  @brief String utilities
+
+  @date 13-12-2010
+  @author
+
+  @maintainer Radu Popescu <radu.popescu@epfl.ch>
+*/
+
 #ifndef UTIL_STRING_H
 #define UTIL_STRING_H
+
+# include <cstdio>
+# include <cstdlib>
+# include <cstring>
 # include <iosfwd>
 # include <iostream>
-
-# include <string>
-# include <cstring>
-# include <cstdlib>
-# include <cstdio>
 # include <list>
-# include <sstream>
 # include <map>
+# include <sstream>
+# include <string>
 # include <vector>
 
+#pragma GCC diagnostic ignored "-Wunused-variable"
+#pragma GCC diagnostic ignored "-Wunused-parameter"
+
 #include <boost/algorithm/string.hpp>
+
+#pragma GCC diagnostic warning "-Wunused-variable"
+#pragma GCC diagnostic warning "-Wunused-parameter"
 
 #include <life/lifecore/life.hpp>
 
@@ -145,5 +168,6 @@ string2numbersVector( const std::string& string, std::vector< number >& numberVe
         numberVector.push_back( static_cast< number > ( std::atoi( stringVector[i].c_str() ) ) );
 }
 
-}
-#endif
+} // Namespace LifeV
+
+#endif //  UTIL_STRING_H
