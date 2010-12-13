@@ -42,6 +42,8 @@
 
 namespace LifeV
 {
+namespace multiscale
+{
 
 //! MultiscaleAlgorithm - The MultiScale Algorithm Interface
 /*!
@@ -217,6 +219,7 @@ private:
     //@}
 };
 
+} // Namespace multiscale
 } // Namespace LifeV
 
 #endif /* MultiscaleAlgorithm_H */

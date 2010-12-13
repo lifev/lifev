@@ -38,8 +38,10 @@
 
 namespace LifeV
 {
+namespace multiscale
+{
 
-std::map< std::string, algorithms_Type > MS_algorithmsMap;
+std::map< std::string, algorithms_Type > multiscaleAlgorithmsMap;
 
 // ===================================================
 // Constructors & Destructor
@@ -88,7 +90,7 @@ MultiscaleAlgorithm::subIterate()
 
     // Algorithm Type
     if ( M_displayer->isLeader() )
-        std::cout << " MS-  " << Enum2String( M_type, MS_algorithmsMap ) << " Algorithm" << std::endl;
+        std::cout << " MS-  " << Enum2String( M_type, multiscaleAlgorithmsMap ) << " Algorithm" << std::endl;
 }
 
 void
@@ -103,7 +105,7 @@ MultiscaleAlgorithm::showMe()
 {
     std::cout << "=================== Algorithm Information ===================" << std::endl << std::endl;
 
-    std::cout << "Algorithm type      = " << Enum2String( M_type, MS_algorithmsMap ) << std::endl
+    std::cout << "Algorithm type      = " << Enum2String( M_type, multiscaleAlgorithmsMap ) << std::endl
               << "Max Sub-iterations  = " << M_subiterationsMaximumNumber << std::endl
               << "Tolerance           = " << M_tolerance << std::endl << std::endl;
     std::cout << std::endl << std::endl;
@@ -216,12 +218,12 @@ MultiscaleAlgorithm::save( const UInt& subiterationsNumber, const Real& residual
 
     if ( M_comm->MyPID() == 0 )
     {
-        std::string filename = MS_ProblemFolder + "Step_" + number2string( MS_ProblemStep ) + "_Algorithm.mfile";
+        std::string filename = multiscaleProblemFolder + "Step_" + number2string( multiscaleProblemStep ) + "_Algorithm.mfile";
 
         if ( M_multiscale->globalData()->dataTime()->isFirstTimeStep() )
         {
             output.open( filename.c_str(), std::ios::trunc );
-            output << "% Algorithm Type: " << Enum2String( M_type, MS_algorithmsMap ) << std::endl;
+            output << "% Algorithm Type: " << Enum2String( M_type, multiscaleAlgorithmsMap ) << std::endl;
             output << "% Subiteration maximum number: " << M_subiterationsMaximumNumber << std::endl;
             output << "% Tolerance: " << M_tolerance << std::endl << std::endl;
             output << "% TIME                     Subiterations      Residual" << std::endl;
@@ -253,4 +255,5 @@ MultiscaleAlgorithm::toleranceSatisfied()
         return false;
 }
 
+} // Namespace multiscale
 } // Namespace LifeV

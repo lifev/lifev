@@ -38,6 +38,8 @@
 
 namespace LifeV
 {
+namespace multiscale
+{
 
 // ===================================================
 // Constructors & Destructor
@@ -74,7 +76,7 @@ MultiscaleCouplingFlowRateStress::setupData( const std::string& fileName )
     GetPot dataFile( fileName );
 
     //Set type of stress coupling
-    M_stressType = MS_stressesMap[dataFile( "MultiScale/stressType", "StaticPressure" )];
+    M_stressType = multiscaleStressesMap[dataFile( "MultiScale/stressType", "StaticPressure" )];
 }
 
 void
@@ -170,21 +172,21 @@ MultiscaleCouplingFlowRateStress::initializeCouplingVariables()
         {
         case Fluid3D:
         {
-            ( *M_localCouplingVariables[0] )[0] -= MS_DynamicCast< MultiscaleModelFluid3D >( M_models[i] )->boundaryFlowRate( M_flags[i] );
+            ( *M_localCouplingVariables[0] )[0] -= multiscaleDynamicCast< MultiscaleModelFluid3D >( M_models[i] )->boundaryFlowRate( M_flags[i] );
 
             break;
         }
 
         case FSI3D:
         {
-            ( *M_localCouplingVariables[0] )[0] -= MS_DynamicCast< MultiscaleModelFSI3D >( M_models[i] )->boundaryFlowRate( M_flags[i] );
+            ( *M_localCouplingVariables[0] )[0] -= multiscaleDynamicCast< MultiscaleModelFSI3D >( M_models[i] )->boundaryFlowRate( M_flags[i] );
 
             break;
         }
 
         case OneDimensional:
         {
-            ( *M_localCouplingVariables[0] )[0] -= MS_DynamicCast< MultiscaleModel1D >( M_models[i] )->boundaryFlowRate( M_flags[i] );
+            ( *M_localCouplingVariables[0] )[0] -= multiscaleDynamicCast< MultiscaleModel1D >( M_models[i] )->boundaryFlowRate( M_flags[i] );
 
             break;
         }
@@ -200,21 +202,21 @@ MultiscaleCouplingFlowRateStress::initializeCouplingVariables()
     {
     case Fluid3D:
     {
-        ( *M_localCouplingVariables[0] )[1] = MS_DynamicCast< MultiscaleModelFluid3D >( M_models[0] )->boundaryStress( M_flags[0], M_stressType );
+        ( *M_localCouplingVariables[0] )[1] = multiscaleDynamicCast< MultiscaleModelFluid3D >( M_models[0] )->boundaryStress( M_flags[0], M_stressType );
 
         break;
     }
 
     case FSI3D:
     {
-        ( *M_localCouplingVariables[0] )[1] = MS_DynamicCast< MultiscaleModelFSI3D >( M_models[0] )->boundaryStress( M_flags[0], M_stressType );
+        ( *M_localCouplingVariables[0] )[1] = multiscaleDynamicCast< MultiscaleModelFSI3D >( M_models[0] )->boundaryStress( M_flags[0], M_stressType );
 
         break;
     }
 
     case OneDimensional:
     {
-        ( *M_localCouplingVariables[0] )[1] = MS_DynamicCast< MultiscaleModel1D >( M_models[0] )->boundaryStress( M_flags[0], M_stressType );
+        ( *M_localCouplingVariables[0] )[1] = multiscaleDynamicCast< MultiscaleModel1D >( M_models[0] )->boundaryStress( M_flags[0], M_stressType );
 
         break;
     }
@@ -247,21 +249,21 @@ MultiscaleCouplingFlowRateStress::exportCouplingResiduals( MS_Vector_Type& coupl
         {
         case Fluid3D:
         {
-            ( *M_localCouplingResiduals )[0] -= MS_DynamicCast< MultiscaleModelFluid3D >( M_models[i] )->boundaryFlowRate( M_flags[i] );
+            ( *M_localCouplingResiduals )[0] -= multiscaleDynamicCast< MultiscaleModelFluid3D >( M_models[i] )->boundaryFlowRate( M_flags[i] );
 
             break;
         }
 
         case FSI3D:
         {
-            ( *M_localCouplingResiduals )[0] -= MS_DynamicCast< MultiscaleModelFSI3D >( M_models[i] )->boundaryFlowRate( M_flags[i] );
+            ( *M_localCouplingResiduals )[0] -= multiscaleDynamicCast< MultiscaleModelFSI3D >( M_models[i] )->boundaryFlowRate( M_flags[i] );
 
             break;
         }
 
         case OneDimensional:
         {
-            ( *M_localCouplingResiduals )[0] -= MS_DynamicCast< MultiscaleModel1D >( M_models[i] )->boundaryFlowRate( M_flags[i] );
+            ( *M_localCouplingResiduals )[0] -= multiscaleDynamicCast< MultiscaleModel1D >( M_models[i] )->boundaryFlowRate( M_flags[i] );
 
             break;
         }
@@ -277,21 +279,21 @@ MultiscaleCouplingFlowRateStress::exportCouplingResiduals( MS_Vector_Type& coupl
     {
     case Fluid3D:
     {
-        ( *M_localCouplingResiduals )[1] = MS_DynamicCast< MultiscaleModelFluid3D >( M_models[0] )->boundaryStress( M_flags[0], M_stressType );
+        ( *M_localCouplingResiduals )[1] = multiscaleDynamicCast< MultiscaleModelFluid3D >( M_models[0] )->boundaryStress( M_flags[0], M_stressType );
 
         break;
     }
 
     case FSI3D:
     {
-        ( *M_localCouplingResiduals )[1] = MS_DynamicCast< MultiscaleModelFSI3D >( M_models[0] )->boundaryStress( M_flags[0], M_stressType );
+        ( *M_localCouplingResiduals )[1] = multiscaleDynamicCast< MultiscaleModelFSI3D >( M_models[0] )->boundaryStress( M_flags[0], M_stressType );
 
         break;
     }
 
     case OneDimensional:
     {
-        ( *M_localCouplingResiduals )[1] = MS_DynamicCast< MultiscaleModel1D >( M_models[0] )->boundaryStress( M_flags[0], M_stressType );
+        ( *M_localCouplingResiduals )[1] = multiscaleDynamicCast< MultiscaleModel1D >( M_models[0] )->boundaryStress( M_flags[0], M_stressType );
 
         break;
     }
@@ -319,7 +321,7 @@ MultiscaleCouplingFlowRateStress::showMe()
     {
         MS_Coupling_Type::showMe();
 
-        std::cout << "Stress Type         = " << Enum2String( M_stressType, MS_stressesMap ) << std::endl;
+        std::cout << "Stress Type         = " << Enum2String( M_stressType, multiscaleStressesMap ) << std::endl;
         std::cout << "Coupling FlowRate   = " << ( *M_localCouplingVariables[0] )[0] << std::endl
                   << "Coupling Stress     = " << ( *M_localCouplingVariables[0] )[1] << std::endl << std::endl;
         std::cout << std::endl << std::endl;
@@ -389,9 +391,9 @@ MultiscaleCouplingFlowRateStress::insertJacobianDeltaCoefficients( MS_Matrix_Typ
     {
 
         if ( modelLocalID == 0 ) // DeltaSigma coefficient
-            coefficient =  MS_DynamicCast< MultiscaleModelFluid3D >( M_models[modelLocalID] )->boundaryDeltaStress( M_flags[modelLocalID], solveLinearSystem, M_stressType );
+            coefficient =  multiscaleDynamicCast< MultiscaleModelFluid3D >( M_models[modelLocalID] )->boundaryDeltaStress( M_flags[modelLocalID], solveLinearSystem, M_stressType );
         else                     // DeltaFlowRate coefficient
-            coefficient = -MS_DynamicCast< MultiscaleModelFluid3D >( M_models[modelLocalID] )->boundaryDeltaFlowRate( M_flags[modelLocalID], solveLinearSystem );
+            coefficient = -multiscaleDynamicCast< MultiscaleModelFluid3D >( M_models[modelLocalID] )->boundaryDeltaFlowRate( M_flags[modelLocalID], solveLinearSystem );
 
         break;
     }
@@ -400,9 +402,9 @@ MultiscaleCouplingFlowRateStress::insertJacobianDeltaCoefficients( MS_Matrix_Typ
     {
 
         if ( modelLocalID == 0 ) // DeltaSigma coefficient
-            coefficient =  MS_DynamicCast< MultiscaleModelFSI3D >( M_models[modelLocalID] )->boundaryDeltaStress( M_flags[modelLocalID], solveLinearSystem, M_stressType );
+            coefficient =  multiscaleDynamicCast< MultiscaleModelFSI3D >( M_models[modelLocalID] )->boundaryDeltaStress( M_flags[modelLocalID], solveLinearSystem, M_stressType );
         else                     // DeltaFlowRate coefficient
-            coefficient = -MS_DynamicCast< MultiscaleModelFSI3D >( M_models[modelLocalID] )->boundaryDeltaFlowRate( M_flags[modelLocalID], solveLinearSystem );
+            coefficient = -multiscaleDynamicCast< MultiscaleModelFSI3D >( M_models[modelLocalID] )->boundaryDeltaFlowRate( M_flags[modelLocalID], solveLinearSystem );
 
         break;
     }
@@ -411,9 +413,9 @@ MultiscaleCouplingFlowRateStress::insertJacobianDeltaCoefficients( MS_Matrix_Typ
     {
 
         if ( modelLocalID == 0 ) // DeltaSigma coefficient
-            coefficient =  MS_DynamicCast< MultiscaleModel1D >( M_models[modelLocalID] )->boundaryDeltaStress( M_flags[modelLocalID], solveLinearSystem, M_stressType );
+            coefficient =  multiscaleDynamicCast< MultiscaleModel1D >( M_models[modelLocalID] )->boundaryDeltaStress( M_flags[modelLocalID], solveLinearSystem, M_stressType );
         else                     // DeltaFlowRate coefficient
-            coefficient = -MS_DynamicCast< MultiscaleModel1D >( M_models[modelLocalID] )->boundaryDeltaFlowRate( M_flags[modelLocalID], solveLinearSystem );
+            coefficient = -multiscaleDynamicCast< MultiscaleModel1D >( M_models[modelLocalID] )->boundaryDeltaFlowRate( M_flags[modelLocalID], solveLinearSystem );
 
         break;
     }
@@ -450,30 +452,30 @@ MultiscaleCouplingFlowRateStress::displayCouplingValues( std::ostream& output )
         {
         case Fluid3D:
         {
-            flowRate        = MS_DynamicCast< MultiscaleModelFluid3D >( M_models[i] )->boundaryFlowRate( M_flags[i] );
+            flowRate        = multiscaleDynamicCast< MultiscaleModelFluid3D >( M_models[i] )->boundaryFlowRate( M_flags[i] );
             stress          = ( *M_localCouplingVariables[0] )[1];
-            pressure        = MS_DynamicCast< MultiscaleModelFluid3D >( M_models[i] )->boundaryPressure( M_flags[i] );
-            dynamicPressure = MS_DynamicCast< MultiscaleModelFluid3D >( M_models[i] )->boundaryDynamicPressure( M_flags[i] );
+            pressure        = multiscaleDynamicCast< MultiscaleModelFluid3D >( M_models[i] )->boundaryPressure( M_flags[i] );
+            dynamicPressure = multiscaleDynamicCast< MultiscaleModelFluid3D >( M_models[i] )->boundaryDynamicPressure( M_flags[i] );
 
             break;
         }
 
         case FSI3D:
         {
-            flowRate        = MS_DynamicCast< MultiscaleModelFSI3D >( M_models[i] )->boundaryFlowRate( M_flags[i] );
+            flowRate        = multiscaleDynamicCast< MultiscaleModelFSI3D >( M_models[i] )->boundaryFlowRate( M_flags[i] );
             stress          = ( *M_localCouplingVariables[0] )[1];
-            pressure        = MS_DynamicCast< MultiscaleModelFSI3D >( M_models[i] )->boundaryPressure( M_flags[i] );
-            dynamicPressure = MS_DynamicCast< MultiscaleModelFSI3D >( M_models[i] )->boundaryDynamicPressure( M_flags[i] );
+            pressure        = multiscaleDynamicCast< MultiscaleModelFSI3D >( M_models[i] )->boundaryPressure( M_flags[i] );
+            dynamicPressure = multiscaleDynamicCast< MultiscaleModelFSI3D >( M_models[i] )->boundaryDynamicPressure( M_flags[i] );
 
             break;
         }
 
         case OneDimensional:
         {
-            flowRate        = MS_DynamicCast< MultiscaleModel1D >( M_models[i] )->boundaryFlowRate( M_flags[i] );
+            flowRate        = multiscaleDynamicCast< MultiscaleModel1D >( M_models[i] )->boundaryFlowRate( M_flags[i] );
             stress          = ( *M_localCouplingVariables[0] )[1];
-            pressure        = MS_DynamicCast< MultiscaleModel1D >( M_models[i] )->boundaryPressure( M_flags[i] );
-            dynamicPressure = MS_DynamicCast< MultiscaleModel1D >( M_models[i] )->boundaryDynamicPressure( M_flags[i] );
+            pressure        = multiscaleDynamicCast< MultiscaleModel1D >( M_models[i] )->boundaryPressure( M_flags[i] );
+            dynamicPressure = multiscaleDynamicCast< MultiscaleModel1D >( M_models[i] )->boundaryDynamicPressure( M_flags[i] );
 
             break;
         }
@@ -525,4 +527,5 @@ MultiscaleCouplingFlowRateStress::functionStress( const Real& t, const Real&, co
     return interpolatedCouplingVariables[1];
 }
 
+} // Namespace multiscale
 } // Namespace LifeV

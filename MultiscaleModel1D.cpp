@@ -43,6 +43,8 @@
 
 namespace LifeV
 {
+namespace multiscale
+{
 
 // ===================================================
 // Constructors & Destructor
@@ -151,19 +153,19 @@ MultiscaleModel1D::setupData( const std::string& fileName )
     //M_bc->fillHandler( fileName, "1D_Model" );
 
     //Exporters
-    M_data->setPostprocessingDirectory( MS_ProblemFolder );
-    M_data->setPostprocessingFile( "Step_" + number2string( MS_ProblemStep ) + "_Model_" + number2string( M_ID ) );
+    M_data->setPostprocessingDirectory( multiscaleProblemFolder );
+    M_data->setPostprocessingFile( "Step_" + number2string( multiscaleProblemStep ) + "_Model_" + number2string( M_ID ) );
 
 #ifdef HAVE_HDF5
     M_exporter->setDataFromGetPot( dataFile );
-    M_exporter->setPrefix( "Step_" + number2string( MS_ProblemStep ) + "_Model_" + number2string( M_ID ) );
-    M_exporter->setDirectory( MS_ProblemFolder );
+    M_exporter->setPrefix( "Step_" + number2string( multiscaleProblemStep ) + "_Model_" + number2string( M_ID ) );
+    M_exporter->setDirectory( multiscaleProblemFolder );
 
     M_exporterMesh->setup( M_data->length(), M_data->numberOfElements() );
 
     M_importer->setDataFromGetPot( dataFile );
-    M_importer->setPrefix( "Step_" + number2string( MS_ProblemStep - 1 ) + "_Model_" + number2string( M_ID ) );
-    M_importer->setDirectory( MS_ProblemFolder );
+    M_importer->setPrefix( "Step_" + number2string( multiscaleProblemStep - 1 ) + "_Model_" + number2string( M_ID ) );
+    M_importer->setDirectory( multiscaleProblemFolder );
 #endif
 
 }
@@ -452,7 +454,7 @@ MultiscaleModel1D::boundaryStress( const BCFlag& flag, const stress_Type& stress
 
     default:
     {
-        std::cout << "ERROR: Invalid stress type [" << Enum2String( stressType, MS_stressesMap ) << "]" << std::endl;
+        std::cout << "ERROR: Invalid stress type [" << Enum2String( stressType, multiscaleStressesMap ) << "]" << std::endl;
 
         return 0.0;
     }
@@ -585,7 +587,7 @@ MultiscaleModel1D::boundaryDeltaStress( const BCFlag& flag, bool& solveLinearSys
 
     default:
     {
-        std::cout << "ERROR: Invalid stress type [" << Enum2String( stressType, MS_stressesMap ) << "]" << std::endl;
+        std::cout << "ERROR: Invalid stress type [" << Enum2String( stressType, multiscaleStressesMap ) << "]" << std::endl;
 
         return 0.0;
     }
@@ -733,7 +735,7 @@ MultiscaleModel1D::initializeSolution()
     Debug( 8130 ) << "MultiscaleModel1D::InitializeSolution() \n";
 #endif
 
-    if ( MS_ProblemStep > 0 )
+    if ( multiscaleProblemStep > 0 )
     {
         M_importer->setMeshProcId( M_exporterMesh, M_comm->MyPID() );
 
@@ -1023,4 +1025,5 @@ MultiscaleModel1D::tangentProblem( const OneD_BCSide& bcOutputSide, const OneD_B
 
 #endif
 
+} // Namespace multiscale
 } // Namespace LifeV

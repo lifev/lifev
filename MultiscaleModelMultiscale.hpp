@@ -49,6 +49,8 @@
 
 namespace LifeV
 {
+namespace multiscale
+{
 
 //! MultiscaleModelMultiscale - MultiScale model
 /*!
@@ -169,6 +171,7 @@ inline MS_Model_Type* createMultiscaleModelMultiscale()
     return new MultiscaleModelMultiscale();
 }
 
+} // Namespace multiscale
 } // Namespace LifeV
 
 #endif /* MultiscaleModelMultiscale_H */

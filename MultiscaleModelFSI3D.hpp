@@ -62,6 +62,8 @@
 
 namespace LifeV
 {
+namespace multiscale
+{
 
 //! MultiscaleModelFSI3D - MultiScale model for 3D FSI simulations
 /*!
@@ -368,6 +370,7 @@ inline MS_Model_Type* createMultiscaleModelFSI3D()
     return new MultiscaleModelFSI3D();
 }
 
+} // Namespace multiscale
 } // Namespace LifeV
 
 #endif /* MS_MODEL_FSI3D_H */

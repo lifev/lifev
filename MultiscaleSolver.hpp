@@ -48,6 +48,8 @@
 
 namespace LifeV
 {
+namespace multiscale
+{
 
 //! MultiscaleSolver - The MultiScale problem solver
 /*!
@@ -129,6 +131,7 @@ private:
     Chrono                                   M_chrono;
 };
 
+} // Namespace multiscale
 } // Namespace LifeV
 
 #endif /* MultiscaleSolver_H */

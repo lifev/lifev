@@ -44,6 +44,8 @@
 
 namespace LifeV
 {
+namespace multiscale
+{
 
 //! MultiscaleModel - The MultiScale Physical Model
 /*!
@@ -293,6 +295,7 @@ private:
     //@}
 };
 
+} // Namespace multiscale
 } // Namespace LifeV
 
 #endif /* MultiscaleModel_H */

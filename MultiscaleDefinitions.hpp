@@ -71,6 +71,8 @@
 
 namespace LifeV
 {
+namespace multiscale
+{
 
 // Enum objects
 /*! @enum algorithmsTypes
@@ -112,27 +114,27 @@ enum stress_Type
 
 enum errors_Type
 {
-    MS_IterationsMaximumNumber, /*!< Maximum number of iterations reached */
-    MS_Tolerance,               /*!< Tolerance not satisfied */
-    MS_Residual,                /*!< External residual not satisfied */
-    MS_ModelType,               /*!< Model type not recognized */
-    MS_CouplingType             /*!< Coupling type not recognized */
+    IterationsMaximumNumber, /*!< Maximum number of iterations reached */
+    Tolerance,               /*!< Tolerance not satisfied */
+    Residual,                /*!< External residual not satisfied */
+    ModelType,               /*!< Model type not recognized */
+    CouplingType             /*!< Coupling type not recognized */
 };
 
 // Folder of the problem
-extern std::string MS_ProblemFolder;
+extern std::string multiscaleProblemFolder;
 
 // Step of the problem ( > 0 when performing a restart )
-extern UInt MS_ProblemStep;
+extern UInt multiscaleProblemStep;
 
 // Exit Flag
-extern bool MS_ExitFlag;
+extern bool multiscaleExitFlag;
 
 // Map objects
-extern std::map< std::string, algorithms_Type > MS_algorithmsMap;
-extern std::map< std::string, models_Type >     MS_modelsMap;
-extern std::map< std::string, couplings_Type >  MS_couplingsMap;
-extern std::map< std::string, stress_Type >     MS_stressesMap;
+extern std::map< std::string, algorithms_Type > multiscaleAlgorithmsMap;
+extern std::map< std::string, models_Type >     multiscaleModelsMap;
+extern std::map< std::string, couplings_Type >  multiscaleCouplingsMap;
+extern std::map< std::string, stress_Type >     multiscaleStressesMap;
 
 // Forward class declarations
 class MultiscaleAlgorithm;
@@ -171,7 +173,7 @@ typedef std::vector< MS_Coupling_PtrType >                         MS_CouplingsV
 typedef MS_CouplingsVector_Type::iterator                          MS_CouplingsVector_Iterator;
 typedef MS_CouplingsVector_Type::const_iterator                    MS_CouplingsVector_ConstIterator;
 
-typedef MultiscaleData                                            MS_GlobalDataContainer_Type;
+typedef MultiscaleData                                             MS_GlobalDataContainer_Type;
 typedef boost::shared_ptr< MS_GlobalDataContainer_Type >           MS_GlobalDataContainer_PtrType;
 
 // ===================================================
@@ -180,24 +182,24 @@ typedef boost::shared_ptr< MS_GlobalDataContainer_Type >           MS_GlobalData
 
 //! Define the map of the MS objects
 inline void
-MS_MapsDefinition()
+multiscaleMapsDefinition()
 {
-    MS_modelsMap["Fluid3D"]              = Fluid3D;
-    MS_modelsMap["FSI3D"]                = FSI3D;
-    MS_modelsMap["MultiScale"]           = MultiScale;
-    MS_modelsMap["OneDimensional"]       = OneDimensional;
+    multiscaleModelsMap["Fluid3D"]              = Fluid3D;
+    multiscaleModelsMap["FSI3D"]                = FSI3D;
+    multiscaleModelsMap["MultiScale"]           = MultiScale;
+    multiscaleModelsMap["OneDimensional"]       = OneDimensional;
 
-    MS_couplingsMap["BoundaryCondition"] = BoundaryCondition;
-    MS_couplingsMap["FlowRateStress"]    = FlowRateStress;
-    MS_couplingsMap["Stress"]            = Stress;
+    multiscaleCouplingsMap["BoundaryCondition"] = BoundaryCondition;
+    multiscaleCouplingsMap["FlowRateStress"]    = FlowRateStress;
+    multiscaleCouplingsMap["Stress"]            = Stress;
 
-    MS_algorithmsMap["Aitken"]           = Aitken;
-    MS_algorithmsMap["Explicit"]         = Explicit;
-    MS_algorithmsMap["Newton"]           = Newton;
+    multiscaleAlgorithmsMap["Aitken"]           = Aitken;
+    multiscaleAlgorithmsMap["Explicit"]         = Explicit;
+    multiscaleAlgorithmsMap["Newton"]           = Newton;
 
-    MS_stressesMap["StaticPressure"]     = StaticPressure;
-    MS_stressesMap["TotalPressure"]      = TotalPressure;
-    MS_stressesMap["LagrangeMultiplier"] = LagrangeMultiplier;
+    multiscaleStressesMap["StaticPressure"]     = StaticPressure;
+    multiscaleStressesMap["TotalPressure"]      = TotalPressure;
+    multiscaleStressesMap["LagrangeMultiplier"] = LagrangeMultiplier;
 }
 
 //! Perform a dynamic cast from a base class to a derived class
@@ -207,7 +209,7 @@ MS_MapsDefinition()
  */
 template < typename DerivedType, typename BasePtrType >
 inline DerivedType*
-MS_DynamicCast( BasePtrType& base )
+multiscaleDynamicCast( BasePtrType& base )
 {
     return dynamic_cast< DerivedType * > ( &( *base ) );
 }
@@ -217,7 +219,7 @@ MS_DynamicCast( BasePtrType& base )
  * @param errorMessage - The message that should be displayed
  */
 inline void
-MS_ErrorMessage( const std::stringstream& errorMessage )
+multiscaleErrorMessage( const std::stringstream& errorMessage )
 {
     std::cout << "MS ERROR: " << errorMessage.str() << std::endl;
 }
@@ -228,38 +230,38 @@ MS_ErrorMessage( const std::stringstream& errorMessage )
  * @param message - Additional information about the error
  */
 inline void
-MS_ErrorCheck( const errors_Type& error, const std::string& message = "" )
+multiscaleErrorCheck( const errors_Type& error, const std::string& message = "" )
 {
     std::stringstream errorMessage;
     errorMessage << std::scientific << std::setprecision( 6 );
 
     switch ( error )
     {
-    case MS_IterationsMaximumNumber:
+    case IterationsMaximumNumber:
 
         errorMessage << "Maximum number of iterations reached!\n";
 
         break;
 
-    case MS_Tolerance:
+    case Tolerance:
 
         errorMessage << "Tolerance not satisfied!\n";
 
         break;
 
-    case MS_Residual:
+    case Residual:
 
         errorMessage << "External residual not satisfied!\n";
 
         break;
 
-    case MS_ModelType:
+    case ModelType:
 
         errorMessage << "Model type incorrect!\n";
 
         break;
 
-    case MS_CouplingType:
+    case CouplingType:
 
         errorMessage << "Coupling type incorrect!\n";
 
@@ -271,11 +273,13 @@ MS_ErrorCheck( const errors_Type& error, const std::string& message = "" )
     }
 
     errorMessage << message << "\n";
-    MS_ErrorMessage( errorMessage );
+    multiscaleErrorMessage( errorMessage );
 
     // Change ExitFlag
-    MS_ExitFlag = EXIT_FAILURE;
+    multiscaleExitFlag = EXIT_FAILURE;
 }
+
+} // Namespace multiscale
 
 } // Namespace LifeV
 

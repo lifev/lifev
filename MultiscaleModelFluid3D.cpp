@@ -38,6 +38,8 @@
 
 namespace LifeV
 {
+namespace multiscale
+{
 
 // ===================================================
 // Constructors & Destructor
@@ -290,7 +292,7 @@ MultiscaleModelFluid3D::saveSolution()
 
 #ifdef HAVE_HDF5
     if ( M_data->dataTime()->isLastTimeStep() )
-        ( MS_DynamicCast< hdf5IOFile_Type >( M_exporter ) )->CloseFile();
+        ( multiscaleDynamicCast< hdf5IOFile_Type >( M_exporter ) )->CloseFile();
 #endif
 
 }
@@ -478,7 +480,7 @@ MultiscaleModelFluid3D::boundaryStress( const BCFlag& flag, const stress_Type& s
 
     default:
 
-        std::cout << "ERROR: Invalid stress type [" << Enum2String( stressType, MS_stressesMap ) << "]" << std::endl;
+        std::cout << "ERROR: Invalid stress type [" << Enum2String( stressType, multiscaleStressesMap ) << "]" << std::endl;
 
         return 0.0;
     }
@@ -536,7 +538,7 @@ MultiscaleModelFluid3D::boundaryDeltaStress( const BCFlag& flag, bool& solveLine
 
     default:
 
-        std::cout << "ERROR: Invalid stress type [" << Enum2String( stressType, MS_stressesMap ) << "]" << std::endl;
+        std::cout << "ERROR: Invalid stress type [" << Enum2String( stressType, multiscaleStressesMap ) << "]" << std::endl;
 
         return 0.0;
     }
@@ -596,8 +598,8 @@ MultiscaleModelFluid3D::setupExporterImporter( const std::string& fileName )
         M_exporter.reset( new ensightIOFile_Type() );
 
     M_exporter->setDataFromGetPot( dataFile );
-    M_exporter->setPrefix( "Step_" + number2string( MS_ProblemStep ) + "_Model_" + number2string( M_ID ) );
-    M_exporter->setDirectory( MS_ProblemFolder );
+    M_exporter->setPrefix( "Step_" + number2string( multiscaleProblemStep ) + "_Model_" + number2string( M_ID ) );
+    M_exporter->setDirectory( multiscaleProblemFolder );
 
     //Importer
     const std::string importerType = dataFile( "importer/type", "ensight" );
@@ -610,8 +612,8 @@ MultiscaleModelFluid3D::setupExporterImporter( const std::string& fileName )
         M_importer.reset( new ensightIOFile_Type() );
 
     M_importer->setDataFromGetPot( dataFile );
-    M_importer->setPrefix( "Step_" + number2string( MS_ProblemStep - 1 ) + "_Model_" + number2string( M_ID ) );
-    M_importer->setDirectory( MS_ProblemFolder );
+    M_importer->setPrefix( "Step_" + number2string( multiscaleProblemStep - 1 ) + "_Model_" + number2string( M_ID ) );
+    M_importer->setDirectory( multiscaleProblemFolder );
 }
 
 void
@@ -731,7 +733,7 @@ MultiscaleModelFluid3D::initializeSolution()
     Debug( 8120 ) << "MultiscaleModelFluid3D::InitializeSolution() \n";
 #endif
 
-    if ( MS_ProblemStep > 0 )
+    if ( multiscaleProblemStep > 0 )
     {
         M_importer->setMeshProcId( M_mesh->mesh(), M_comm->MyPID() );
 
@@ -793,4 +795,5 @@ MultiscaleModelFluid3D::bcFunctionDeltaOne( const Real& /*t*/, const Real& /*x*/
     return 1.;
 }
 
+} // Namespace multiscale
 } // Namespace LifeV

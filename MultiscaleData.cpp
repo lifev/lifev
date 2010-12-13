@@ -38,6 +38,8 @@
 
 namespace LifeV
 {
+namespace multiscale
+{
 
 // ===================================================
 // Constructors & Destructor
@@ -171,4 +173,5 @@ MultiscaleData::structureYoungModulus() const
     return M_structureYoungModulus;
 }
 
+} // Namespace multiscale
 } // Namespace LifeV

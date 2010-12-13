@@ -43,6 +43,8 @@
 
 namespace LifeV
 {
+namespace multiscale
+{
 
 //! MultiscaleAlgorithmAitken - The MultiScale Algorithm implementation of Aitken
 /*!
@@ -118,6 +120,7 @@ inline MS_Algorithm_Type* createMultiscaleAlgorithmAitken()
     return new MultiscaleAlgorithmAitken();
 }
 
+} // Namespace multiscale
 } // Namespace LifeV
 
 #endif /* MultiscaleAlgorithmAitken_H */
