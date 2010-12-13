@@ -17,19 +17,18 @@
    Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 
-
-#ifndef TWODIM
 #include <life/lifesolver/fixedPointBase.hpp>
 
 namespace LifeV
 {
+
+// ===================================================
+// Constructors & Destructor
+// ===================================================
+
 fixedPoint::fixedPoint():
         super(),
         M_aitkFS(),
-        //    M_displacement(),
-        //    M_stress(),
-        //    M_velocity(),
-        //    M_residualFSI(),
         M_rhsNew(),
         M_beta()
 {
@@ -40,17 +39,42 @@ fixedPoint::~fixedPoint()
 {}
 
 
-void
-fixedPoint::setDataFile( GetPot const& dataFile )
+// ===================================================
+// Methods
+// ===================================================
+
+void  fixedPoint::solveJac(vector_Type        &muk,
+                           const vector_Type  &res,
+                           const Real   /*_linearRelTol*/)
 {
-    super::setDataFile( dataFile );
+    M_aitkFS.restart();
 
-    M_aitkFS.setDefaultOmega(M_data->defaultOmega(), 0.001);
-    M_aitkFS.setOmegaRange( M_data->OmegaRange() );
+    if (M_data->algorithm()=="RobinNeumann")
+    {
+        muk = M_aitkFS.computeDeltaLambdaScalar(this->lambdaSolidOld(), res);
+    }
+    else
+    {
+        muk = M_aitkFS.computeDeltaLambdaScalar(this->lambdaSolidOld(), -1.*res);
+    }
+}
 
-    if ( M_data->algorithm() == "RobinNeumann" )
-        M_aitkFS.setDefaultOmega(-1, 1);
+void fixedPoint::evalResidual(vector_Type &res, const vector_Type& disp, UInt iter)
+{
 
+    if (this->isSolid())
+    {
+        std::cout << "*** Residual computation g(x_" << iter <<" )";
+        if (iter == 0) std::cout << " [NEW TIME STEP] ";
+        std::cout << std::endl;
+    }
+
+    this->setLambdaSolidOld(disp);
+
+    eval(disp, iter);
+
+    res  = disp;
+    res -= this->lambdaSolid();
 }
 
 
@@ -62,6 +86,8 @@ fixedPoint::setupFEspace()
 
     super::setupFEspace();
 }
+
+
 
 void
 fixedPoint::setupFluidSolid()
@@ -77,24 +103,40 @@ fixedPoint::setupFluidSolid()
 
     if ( this->isFluid() )
     {
-        M_rhsNew.reset(new vector_type(this->M_fluid->getMap()));
-        M_beta.reset(new vector_type(this->M_fluid->getMap()));
+        M_rhsNew.reset(new vector_Type(this->M_fluid->getMap()));
+        M_beta.reset(new vector_Type(this->M_fluid->getMap()));
     }
 
-//@    setUpBC();
 }
 
-void fixedPoint::eval( const vector_type& _disp,
+void
+fixedPoint::setDataFile( GetPot const& dataFile )
+{
+    super::setDataFile( dataFile );
+
+    M_aitkFS.setDefaultOmega(M_data->defaultOmega(), 0.001);
+    M_aitkFS.setOmegaRange( M_data->OmegaRange() );
+
+    if ( M_data->algorithm() == "RobinNeumann" )
+        M_aitkFS.setDefaultOmega(-1, 1);
+
+}
+
+// ===================================================
+// Private Methods
+// ===================================================
+
+void fixedPoint::eval( const vector_Type& _disp,
                        UInt                iter)
 {
-    // If M_updateEvery == 1, normal fixedPoint algorithm
-    // If M_updateEvery  > 1, recompute computational domain every M_updateEvery iterations (transpiration)
-    // If M_updateEvery <= 0, recompute computational domain and matrices only at first subiteration (semi-implicit)
+    // If M_data->updateEvery() == 1, normal fixedPoint algorithm
+    // If M_data->updateEvery()  > 1, recompute computational domain every updateEvery iterations (transpiration)
+    // If M_data->updateEvery() <= 0, recompute computational domain and matrices only at first subiteration (semi-implicit)
     bool recomputeMatrices ( iter == 0 || ( M_data->updateEvery() > 0 && iter % M_data->updateEvery() == 0 ) );
 
     std::cout << "recomputeMatrices = " << recomputeMatrices << " == " << true
               << "; iter = " << iter
-              << "; M_updateEvery = " << M_data->updateEvery() << std::endl;
+              << "; updateEvery = " << M_data->updateEvery() << std::endl;
 
     if (iter == 0 && this->isFluid())
     {
@@ -114,7 +156,7 @@ void fixedPoint::eval( const vector_type& _disp,
     if (M_data->algorithm()=="RobinNeumann")   this->setMinusSigmaFluid( this->sigmaSolid() );
 
 
-    vector_type sigmaFluidUnique (this->sigmaFluid().getMap(), Unique);
+    vector_Type sigmaFluidUnique (this->sigmaFluid().getMap(), Unique);
 
     if (this->isFluid())
     {
@@ -129,10 +171,10 @@ void fixedPoint::eval( const vector_type& _disp,
         // copying displacement to a repeated indeces displacement, otherwise the mesh wont know
         // the value of the displacement for some points
 
-        vector_type const meshDisplacement( M_meshMotion->disp(), Repeated );
+        vector_Type const meshDisplacement( M_meshMotion->disp(), Repeated );
         this->moveMesh(meshDisplacement);
         /*
-        vector_type const meshDisplacement( M_meshMotion->dispDiff(), Repeated );
+        vector_Type const meshDisplacement( M_meshMotion->dispDiff(), Repeated );
         this->moveMesh(meshDispDiff);
         */
 
@@ -174,8 +216,8 @@ void fixedPoint::eval( const vector_type& _disp,
 
     if ( true && this->isFluid() )
     {
-        vector_type vel  (this->fluid().velFESpace().map());
-        vector_type press(this->fluid().pressFESpace().map());
+        vector_Type vel  (this->fluid().velFESpace().map());
+        vector_Type press(this->fluid().pressFESpace().map());
 
         vel.subset(*this->M_fluid->solution());
         press.subset(*this->M_fluid->solution(), this->fluid().velFESpace().dim()*this->fluid().pressFESpace().fieldDim());
@@ -189,15 +231,13 @@ void fixedPoint::eval( const vector_type& _disp,
 
     this->setSigmaFluid( sigmaFluidUnique );
     this->setSigmaSolid( sigmaFluidUnique );
-    //*this->M_sigmaSolid = -1.0 * *this->M_sigmaFluid;
 
-//    this->M_sigmaSolid->spy("sigmasolid");
     MPI_Barrier(MPI_COMM_WORLD);
 
 
-    vector_type lambdaSolidUnique   (this->lambdaSolid().getMap(),    Unique);
-    vector_type lambdaDotSolidUnique(this->lambdaDotSolid().getMap(), Unique);
-    vector_type sigmaSolidUnique    (this->sigmaSolid().getMap(),     Unique);
+    vector_Type lambdaSolidUnique   (this->lambdaSolid().getMap(),    Unique);
+    vector_Type lambdaDotSolidUnique(this->lambdaDotSolid().getMap(), Unique);
+    vector_Type sigmaSolidUnique    (this->sigmaSolid().getMap(),     Unique);
 
     if (this->isSolid())
     {
@@ -210,9 +250,6 @@ void fixedPoint::eval( const vector_type& _disp,
     this->setLambdaSolid( lambdaSolidUnique );
     this->setLambdaDotSolid( lambdaDotSolidUnique );
     this->setSigmaSolid( sigmaSolidUnique );
-
-//     dispNew = *this->M_lambdaSolid;
-//     velo    = *this->M_lambdaDotSolid;
 
     MPI_Barrier(MPI_COMM_WORLD);
 
@@ -259,69 +296,14 @@ void fixedPoint::eval( const vector_type& _disp,
 
 }
 
-// Residual evaluation
-//
-void fixedPoint::evalResidual(vector_type &res, const vector_type& disp, UInt iter)
-{
 
 
-    if (this->isSolid())
-    {
-        std::cout << "*** Residual computation g(x_" << iter <<" )";
-        if (iter == 0) std::cout << " [NEW TIME STEP] ";
-        std::cout << std::endl;
-    }
-
-    this->setLambdaSolidOld(disp);
-
-    eval(disp, iter);
-
-    res  = disp;
-    res -= this->lambdaSolid();
-//     res  = this->lambdaSolid();
-//     res -= disp;
-}
-
-
-//
-// new step computation resolution
-//
-
-
-void  fixedPoint::solveJac(vector_type        &muk,
-                           const vector_type  &res,
-                           const Real   /*_linearRelTol*/)
-{
-    M_aitkFS.restart();
-
-    if (M_data->algorithm()=="RobinNeumann")
-    {
-        muk = M_aitkFS.computeDeltaLambdaScalar(this->lambdaSolidOld(), res);
-    }
-    else
-    {
-        muk = M_aitkFS.computeDeltaLambdaScalar(this->lambdaSolidOld(), -1.*res);
-    }
-}
 
 void fixedPoint::registerMyProducts( )
 {
     FSIFactory::instance().registerProduct( "fixedPoint", &createFP );
-    solid_raw_type::StructureSolverFactory::instance().registerProduct( "LinearVenantKirchhof", &FSIOperator::createLinearStructure );
-//solid_raw_type::StructureSolverFactory::instance().registerProduct( "NonLinearVenantKirchhof", &FSIOperator::createNonLinearStructure );
+    solid_Type::StructureSolverFactory::instance().registerProduct( "LinearVenantKirchhof", &FSIOperator::createLinearStructure );
+    //solid_Type::StructureSolverFactory::instance().registerProduct( "NonLinearVenantKirchhof", &FSIOperator::createNonLinearStructure );
 }
 
-
-//
-// add fixedPoint to factory
-//
-
-
-// namespace
-// {
-// FSIOperator* createFP(){ return new fixedPoint(); }
-// bool reg = FSIFactory::instance().registerProduct( "fixedPoint", &createFP );
-// }
-
-}
-#endif
+}   // Namespace LifeV

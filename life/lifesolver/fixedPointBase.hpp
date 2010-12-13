@@ -1,94 +1,177 @@
-/* -*- mode: c++ -*-
-   This program is part of the LifeV library
-   Copyright (C) 2001,2002,2003,2004 EPFL, INRIA, Politecnico di Milano
+//@HEADER
+/*
+*******************************************************************************
 
-   This program is free software; you can redistribute it and/or
-   modify it under the terms of the GNU General Public License
-   as published by the Free Software Foundation; either version 2
-   of the License, or (at your option) any later version.
+    Copyright (C) 2004, 2005, 2007 EPFL, Politecnico di Milano, INRIA
+    Copyright (C) 2010 EPFL, Politecnico di Milano, Emory University
 
-   This program is distributed in the hope that it will be useful,
-   but WITHOUT ANY WARRANTY; without even the implied warranty of
-   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-   GNU General Public License for more details.
+    This file is part of LifeV.
 
-   You should have received a copy of the GNU General Public License
-   along with this program; if not, write to the Free Software
-   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+    LifeV is free software; you can redistribute it and/or modify
+    it under the terms of the GNU Lesser General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    LifeV is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+    Lesser General Public License for more details.
+
+    You should have received a copy of the GNU Lesser General Public License
+    along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
+
+*******************************************************************************
 */
+//@HEADER
+
+/*!
+    @file
+    @brief Implementation of an  FSIOperator with fixed point iterations.
+
+    @author Miguel Fernandez
+    @author Gilles Fourestey
+    @date 10-06-2010
+
+    @contributor Simone Deparis <simone.deparis@epfl.ch>
+    @maintainer Simone Deparis <simone.deparis@epfl.ch>
+ */
 
 
-#ifndef TWODIM
-#ifndef _FP_HPP
-#define _FP_HPP
+#ifndef FIXEDPOINTBASE_HPP
+#define FIXEDPOINTBASE_HPP
 
 #include <life/lifesolver/FSIOperator.hpp>
 
 namespace LifeV
 {
 
+//! fixedPont - Implementation of an  FSIOperator with fixed point iterations.
+/*!
+\include ../../doc/api/bibliography/fluidstructure
+
+    @author Miguel Fernandez
+    @author Gilles Fourestey
+    @author Paolo Crosetto <paolo.crosetto@epfl.ch>
+    @see
+    \ref DDFQ06 (Dirichlet--Neumann )
+    \ref BNV08 (Robin Neumann)
+    FSIOperator
+
+    This class implements an FSIOperator that will solve the FSI problem by a
+    relaxed fixed point method.
+*/
+
 class fixedPoint : public FSIOperator
 {
 public:
 
-    typedef FSIOperator super;
-    typedef super::fluid_type           fluid_type;
-    typedef super::solid_type           solid_type;
-    typedef super::fluid_bchandler_type bchandler_type;
+    //! @name Public Types
+    //@{
+    typedef FSIOperator                     super;
 
-    typedef fluid_raw_type::vector_type  vector_type;
-    // constructors
+    typedef super::vector_Type              vector_Type;
+    typedef super::vectorPtr_Type           vectorPtr_type;
 
+    typedef fluid_Type::matrix_Type         matrix_Type;
+    typedef fluid_Type::matrixPtr_Type      matrixPtr_Type;
+
+
+    //typedef super::fluid_Type               fluid_Type;
+    typedef super::solid_Type               solid_Type;
+
+    //! OBSOLETE typedefs
+    //typedef super::fluidBchandler_Type      fluidBchandler_Type;
+
+    typedef super::fluid_Type               fluid_type;
+    typedef super::solid_Type               solid_type;
+    typedef super::vector_Type              vector_type;
+
+    typedef super::fluidBchandler_Type      bchandler_type;
+
+    typedef fluid_Type::matrix_Type         matrix_types;
+    typedef fluid_Type::matrixPtr_Type      matrix_ptrtype;
+
+    //@}
+
+    //! @name Constructor & Destructor
+    //@{
+
+    //! Empty Constructor
     fixedPoint();
 
-    // destructor
-
+    //! Destructor
     ~fixedPoint();
 
-    // member functions
+    //! @name Methods
+    //@{
 
-    void evalResidual(vector_type&        _res,
-                      const vector_type&  _disp,
-                      const UInt           _iter);
-
+    //! solves the Jacobian system
+    /**
+       The implementation of this method distinguish the various FSI formulations which derive from this class.
+       For this reason it must be pure virtual, snd implemented in the child classes.
+       \param muk: unknown solution at the k-th nonlinear iteration
+       \param res: residual vector (the right hand side of the Jacobian system)
+       \param linearRelTol: tolerance for the nonlinear solver
+       \todo{replace Real with Real& }
+     */
     void solveJac     (vector_type&       _muk,
                        const vector_type& _res,
                        const Real       _linearRelTol);
 
-    void setUpBC     ();
 
-    void setDataFile( GetPot const& data );
+    //! Evaluates the nonlinear residual of the FSI system
+    /**
+       The implementation of this method also depends on the child classes, though it does not characterize them.
+       \param res:  residual vector  to be computed
+       \param disp: current unknown solution
+       \param iter: nonlinear iteration counter. The part of th rhs related to the time discretization is computed only for iter=0
+    */
+    void evalResidual(vector_type&        _res,
+                      const vector_type&  _disp,
+                      const UInt           _iter);
 
+
+    //! sets the space discretization parameters
+    /*!
+      The FE discretization is set accordingly to what specified in the FSIdata member (order of accuracy for the fluid
+      pressure, velocity and for the structure).
+     */
     void setupFEspace();
 
+    //! setup of the fluid and solid solver classes
+    /**
+       This method computes the number of fluxes assigned at the boundaries and calls setupFluidSolid(UInt fluxes)
+     */
     void setupFluidSolid();
 
+    //! initializes the GetPot data file
+    void setDataFile( GetPot const& data );
+
+    //! register the product for the factory
     void registerMyProducts( );
 
-    //vector_type& displacement()    {return *M_displacement;}
-    //vector_type& residual()        {return *M_stress;}
-    //vector_type& velocity()        {return *M_velocity;}
-    //vector_type& residualFSI()     {return *M_residualFSI;}
+    // OBSOLETE
+    void setUpBC     ();
+
+    //@}
+
 
 private:
 
-    generalizedAitken<vector_type> M_aitkFS;
+    //! @name Private Methods
+    //@{
 
-//     boost::shared_ptr<vector_type>       M_displacement;
-//     boost::shared_ptr<vector_type>       M_stress;
-//     boost::shared_ptr<vector_type>       M_velocity;
-//     boost::shared_ptr<vector_type>       M_residualFSI;
+    void eval( const vector_Type& disp, UInt status );
 
-    boost::shared_ptr<vector_type>       M_rhsNew;
-    boost::shared_ptr<vector_type>       M_beta;
+    //@}
 
-    void eval( const vector_type& disp, UInt status );
+    vectorPtr_Type       M_rhsNew;
+    vectorPtr_Type       M_beta;
 
-//    FSIOperator* createFP(){ return new fixedPoint(); }
-//    static bool              reg;
+    generalizedAitken<vector_Type> M_aitkFS;
 
-};
 
+}; // end class fixedPointBase
 
 
 inline FSIOperator* createFP() { return new fixedPoint();}
@@ -97,7 +180,7 @@ namespace
 static bool registerFP = FSIOperator::FSIFactory::instance().registerProduct( "fixedPoint", &createFP );
 }
 
-}
+}   // Namespace LifeV
 
-#endif
-#endif
+
+#endif // FIXEDPOINTBASE_HPP
