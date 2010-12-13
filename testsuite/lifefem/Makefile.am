@@ -14,12 +14,14 @@ include $(top_srcdir)/testsuite/Makefile.testsuite
 
 SUFFIXES                   = .cpp .hpp .idl .c .h .f .F .o .moc
 
-check_HEADERS              = # List of all the hpp files
+check_HEADERS              = test_quadrule.hpp SetOfFun.hpp
 
-check_PROGRAMS             = test_currentFE
+check_PROGRAMS             = test_currentFE test_quadrule
+
 test_currentFE_SOURCES  = main.cpp # List of all the cpp files
+test_quadrule_SOURCES   = test_quadrule.cpp SetOfFun.cpp
 
-EXTRA_DIST = testsuite.at
+EXTRA_DIST = data.txt testsuite.at
 
 recheck: clean_PROGRAMS check
 
