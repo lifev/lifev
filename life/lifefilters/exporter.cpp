@@ -1,41 +1,52 @@
 //@HEADER
 /*
-************************************************************************
+*******************************************************************************
 
- This file is part of the LifeV Applications.
- Copyright (C) 2001-2010 EPFL, Politecnico di Milano, INRIA
+Copyright (C) 2004, 2005, 2007 EPFL, Politecnico di Milano, INRIA
+Copyright (C) 2010 EPFL, Politecnico di Milano, Emory University
 
- This library is free software; you can redistribute it and/or modify
- it under the terms of the GNU Lesser General Public License as
- published by the Free Software Foundation; either version 2.1 of the
- License, or (at your option) any later version.
+This file is part of LifeV.
 
- This library is distributed in the hope that it will be useful, but
- WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- Lesser General Public License for more details.
+LifeV is free software; you can redistribute it and/or modify
+it under the terms of the GNU Lesser General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
 
- You should have received a copy of the GNU Lesser General Public
- License along with this library; if not, write to the Free Software
- Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
- USA
+LifeV is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+Lesser General Public License for more details.
 
-************************************************************************
+You should have received a copy of the GNU Lesser General Public License
+along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
+
+*******************************************************************************
 */
 //@HEADER
-
 /*!
- *  @file
- *  @brief ExporterData
- *
- *  @author Simone Deparis <simone.deparis@epfl.ch>
- *  @date 11-11-2008
- */
+  @file
+  @brief exporter and ExporterData classes provide interfaces for post-processing
+
+  @date 11-11-2008
+  @author Simone Deparis <simone.deparis.epfl.ch>
+
+  @maintainer Radu Popescu <radu.popescu@epfl.ch>
+
+    Usage: two steps
+    <ol>
+        <li> first: add the variables using addVariable
+        <li> second: call postProcess( time );
+    </ol>
+*/
 
 #include <life/lifefilters/exporter.hpp>
 
 namespace LifeV
 {
+
+// =================
+// Constructor
+// =================
 
 ExporterData::ExporterData( const  ExporterData::Type& type,
                             const std::string& variableName,
@@ -53,34 +64,18 @@ ExporterData::ExporterData( const  ExporterData::Type& type,
         M_where         ( where )
 {}
 
-const std::string&
-ExporterData::variableName() const
-{
-    return M_variableName;
-}
+// ==============
+// Operators
+// ==============
 
-Real
-ExporterData::operator()( const UInt i ) const
+Real ExporterData::operator()( const UInt i ) const
 {
     return (*M_vr)[i];
 }
 
-Real&
-ExporterData::operator()( const UInt i )
+Real& ExporterData::operator()( const UInt i )
 {
     return (*M_vr)[i];
-}
-
-const UInt&
-ExporterData::size() const
-{
-    return M_size;
-}
-
-const ExporterData::Type&
-ExporterData::type() const
-{
-    return M_type;
 }
 
 std::string ExporterData::typeName() const
@@ -96,8 +91,7 @@ std::string ExporterData::typeName() const
     return "ERROR string";
 }
 
-UInt
-ExporterData::typeDim() const
+UInt ExporterData::typeDim() const
 {
     switch ( M_type )
     {
@@ -108,12 +102,6 @@ ExporterData::typeDim() const
     }
 
     return 0;
-}
-
-const ExporterData::Where&
-ExporterData::where() const
-{
-    return M_where;
 }
 
 std::string ExporterData::whereName() const
@@ -128,6 +116,5 @@ std::string ExporterData::whereName() const
 
     return "ERROR string";
 }
-
 
 }

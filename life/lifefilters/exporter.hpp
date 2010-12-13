@@ -1,63 +1,69 @@
 //@HEADER
 /*
-************************************************************************
+*******************************************************************************
 
- This file is part of the LifeV Applications.
- Copyright (C) 2001-2010 EPFL, Politecnico di Milano, INRIA
+Copyright (C) 2004, 2005, 2007 EPFL, Politecnico di Milano, INRIA
+Copyright (C) 2010 EPFL, Politecnico di Milano, Emory University
 
- This library is free software; you can redistribute it and/or modify
- it under the terms of the GNU Lesser General Public License as
- published by the Free Software Foundation; either version 2.1 of the
- License, or (at your option) any later version.
+This file is part of LifeV.
 
- This library is distributed in the hope that it will be useful, but
- WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- Lesser General Public License for more details.
+LifeV is free software; you can redistribute it and/or modify
+it under the terms of the GNU Lesser General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
 
- You should have received a copy of the GNU Lesser General Public
- License along with this library; if not, write to the Free Software
- Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
- USA
+LifeV is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+Lesser General Public License for more details.
 
-************************************************************************
+You should have received a copy of the GNU Lesser General Public License
+along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
+
+*******************************************************************************
 */
 //@HEADER
-
 /*!
-    @file exporter.hpp
-    @brief This file provides an interface for post-processing
+  @file
+  @brief exporter and ExporterData classes provide interfaces for post-processing
 
-    @author Simone Deparis <simone.deparis@epfl.ch>
-    @date 11-11-2008
+  @date 11-11-2008
+  @author Simone Deparis <simone.deparis.epfl.ch>
+
+  @maintainer Radu Popescu <radu.popescu@epfl.ch>
 
     Usage: two steps
     <ol>
         <li> first: add the variables using addVariable
         <li> second: call postProcess( time );
     </ol>
- */
+*/
 
+#ifndef EXPORTER_H
+#define EXPORTER_H 1
 
-#ifndef _EXPORTER_H_
-#define _EXPORTER_H_
-
-#include <life/lifecore/life.hpp>
-#include <life/lifemesh/markers.hpp>
-#include <life/lifefem/refFE.hpp>
-#include <life/lifearray/tab.hpp>
-#include <iostream>
 #include <fstream>
-#include <sstream>
-#include <set>
-#include <map>
+#include <iostream>
 #include <list>
-//#include <ext/slist>
-#include <life/lifecore/GetPot.hpp>
-#include <life/lifecore/chrono.hpp>
-#include <life/lifearray/EpetraVector.hpp>
+#include <map>
+#include <set>
+#include <sstream>
+
+#pragma GCC diagnostic ignored "-Wunused-variable"
+#pragma GCC diagnostic ignored "-Wunused-parameter"
 
 #include <boost/shared_ptr.hpp>
+
+#pragma GCC diagnostic warning "-Wunused-variable"
+#pragma GCC diagnostic warning "-Wunused-parameter"
+
+#include <life/lifearray/EpetraVector.hpp>
+#include <life/lifearray/tab.hpp>
+#include <life/lifecore/GetPot.hpp>
+#include <life/lifecore/chrono.hpp>
+#include <life/lifecore/life.hpp>
+#include <life/lifefem/refFE.hpp>
+#include <life/lifemesh/markers.hpp>
 
 namespace LifeV
 {
@@ -97,7 +103,6 @@ public:
 
     //@}
 
-
     //! @name Constructor & Destructor
     //@{
 
@@ -123,7 +128,6 @@ public:
 
     //@}
 
-
     //! @name Operators
     //@{
 
@@ -145,6 +149,7 @@ public:
     //@{
 
     //! file name for postprocessing has to include time dependency
+    // TODO: RENAME TO setSteady
     void set_steady(UInt i) {M_steady = i;}
 
     //@}
@@ -154,19 +159,31 @@ public:
     //@{
 
     //! name assigned to this variable in output file
-    const std::string&  variableName() const;
+    const std::string&  variableName() const
+    {
+        return M_variableName;
+    }
 
     //! size of the stored array
-    const UInt& size() const;
+    const UInt& size() const
+    {
+        return M_size;
+    }
 
     //! address of first datum in the array
     const UInt& start() const { return M_start; }
 
     //! scalar or vector field
-    const Type& type() const;
+    const Type& type() const
+    {
+        return M_type;
+    }
 
     //! shared pointer to array
-    const vector_ptrtype storedArray() const { return M_vr; }
+    const vector_ptrtype storedArray() const
+    {
+        return M_vr;
+    }
 
     //! returns 0 if file name for postprocessing has to include time dependency
     UInt steady() const {return M_steady; }
@@ -178,13 +195,15 @@ public:
     UInt typeDim() const;
 
     //! Node or Cell centered ?
-    const Where& where() const;
+    const Where& where() const
+    {
+        return M_where;
+    }
 
     //! returns Node or Cell centered string
     std::string whereName() const;
 
     //@}
-
 
 private:
 
@@ -196,6 +215,8 @@ private:
 
     //@}
 
+    //! @name Private data members
+    //@{
     //! name assigned to this variable in output file
     std::string M_variableName;
 
@@ -216,6 +237,7 @@ private:
 
     //! Node or Cell centered
     Where M_where;
+    //@}
 };
 
 
@@ -227,15 +249,18 @@ private:
     This class is pure virtual and describes a generic exporter that can
     also do import
  */
-template<typename Mesh>
+template<typename MeshType>
 class Exporter
 {
 
 public:
-
-    typedef boost::shared_ptr<Mesh>      mesh_ptrtype;
+    //! @name Public typedefs
+    //@{
+    typedef MeshType mesh_Type;
+    typedef boost::shared_ptr<MeshType>      mesh_ptrtype;
     typedef ExporterData::vector_rawtype vector_rawtype;
     typedef ExporterData::vector_ptrtype vector_ptrtype;
+    //@}
 
     //! @name Constructor & Destructor
     //@{
@@ -269,8 +294,13 @@ public:
         @param vr an ublas::vector_range type given a view of the varialbe (ex: subrange(fluid.u(),0,3*dimU) )
         @param size size of the stored array
     */
-    void addVariable(const ExporterData::Type& type, const std::string& variableName, const vector_ptrtype& vector,
-                     const UInt& start, const UInt& size, const UInt& steady = 0, const ExporterData::Where& where = ExporterData::Node );
+    void addVariable(const ExporterData::Type& type,
+                     const std::string& variableName,
+                     const vector_ptrtype& vector,
+                     const UInt& start,
+                     const UInt& size,
+                     const UInt& steady = 0,
+                     const ExporterData::Where& where = ExporterData::Node );
 
     //! Post-process the variables added to the list
     /*!
@@ -289,15 +319,18 @@ public:
        @param time the solver time
        @param dt time step used to rebuild the history up to now
     */
-    virtual void import(const Real& Tstart, const Real& dt) = 0;
+    virtual void import(const Real& startTime, const Real& dt) = 0;
 
     //! Read  only last timestep
-    virtual void import(const Real& Tstart) = 0;
+    virtual void import(const Real& startTime) = 0;
 
     virtual void rd_var(ExporterData& dvar);
+    //@}
 
 protected:
 
+    //! @name Protected methods
+    //@{
     //! compute postfix
     void computePostfix();
 
@@ -306,11 +339,24 @@ protected:
 
     //@}
 
-
-    //! @name Set Methods
+    //! @name Protected data members
     //@{
+    std::string                 M_prefix;
+    std::string                 M_postDir;
+    UInt                        M_count;
+    UInt                        M_save;
+    bool                        M_multimesh;
+    mesh_ptrtype                M_mesh;
+    int                         M_procId;
+    std::string                 M_postfix;
+
+    std::list<ExporterData>     M_listData;
+    std::list<Real>             M_timeSteps;
+    //@}
 
 public:
+    //! @name Set Methods
+    //@{
 
     //! Set data from file.
     /*!
@@ -323,31 +369,46 @@ public:
     /*!
      * @param prefix prefix.
      */
-    void setPrefix( const std::string& prefix );
+    void setPrefix( const std::string& prefix )
+    {
+        M_prefix = prefix;
+    }
 
     //! Set the folder for pre/postprocessing
     /*!
      * @param Directory output folder
      */
-    void setDirectory( const std::string& Directory );
+    void setDirectory( const std::string& Directory )
+    {
+        M_postDir = Directory;
+    }
 
     //! Set the folder for pre/postprocessing
     /*!
      * @param Directory output folder
      */
-    void setStartIndex( const UInt& StartIndex );
+    void setStartIndex( const UInt& StartIndex )
+    {
+        M_count = StartIndex;
+    }
 
     //! Set how many time step between two saves.
     /*!
      * @param save steps
      */
-    void setSave( const UInt& save );
+    void setSave( const UInt& save )
+    {
+        M_save = save;
+    }
 
     //! Set if to save the mesh at each time step.
     /*!
      * @param multimesh multimesh
      */
-    void setMultimesh( const bool& multimesh );
+    void setMultimesh( const bool& multimesh )
+    {
+        M_multimesh = multimesh;
+    }
 
     virtual void setMeshProcId( const mesh_ptrtype mesh, const int& procId );
 
@@ -363,46 +424,38 @@ public:
     //! @name Get Methods
     //@{
 
-    const UInt& getStartIndex( void );
+    const UInt& getStartIndex( void )
+    {
+        return M_count;
+    }
+
 
     //! returns the type of the map to use for the EpetraVector
     virtual EpetraMapType mapType() const = 0;
 
     //@}
-
-protected:
-
-    std::string                 M_prefix;
-    std::string                 M_post_dir;
-    UInt                        M_count;
-    UInt                        M_save;
-    bool                        M_multimesh;
-    mesh_ptrtype                M_mesh;
-    int                         M_procId;
-    std::string                 M_postfix;
-
-    std::list<ExporterData>     M_listData;
-    std::list<Real>             M_timeSteps;
 };
 
-
+// ==================================================
+// IMPLEMENTATION
+// ==================================================
 
 // ===================================================
 // Constructors
 // ===================================================
-template<typename Mesh>
-Exporter<Mesh>::Exporter():
+template<typename MeshType>
+Exporter<MeshType>::Exporter():
         M_prefix        ( "output"),
-        M_post_dir      ( "./" ),
+        M_postDir      ( "./" ),
         M_count         ( 0 ),
         M_save          ( 1 ),
         M_multimesh     ( true )
 {}
 
-template<typename Mesh>
-Exporter<Mesh>::Exporter( const GetPot& dfile, const std::string& prefix ):
+template<typename MeshType>
+Exporter<MeshType>::Exporter( const GetPot& dfile, const std::string& prefix ):
         M_prefix        ( prefix ),
-        M_post_dir      ( dfile("exporter/post_dir", "./") ),
+        M_postDir      ( dfile("exporter/post_dir", "./") ),
         M_count         ( dfile("exporter/start",0) ),
         M_save          ( dfile("exporter/save",1) ),
         M_multimesh     ( dfile("exporter/multimesh",true) )
@@ -411,8 +464,8 @@ Exporter<Mesh>::Exporter( const GetPot& dfile, const std::string& prefix ):
 // ===================================================
 // Methods
 // ===================================================
-template<typename Mesh>
-void Exporter<Mesh>::addVariable(const ExporterData::Type&  type,
+template<typename MeshType>
+void Exporter<MeshType>::addVariable(const ExporterData::Type&  type,
                                  const std::string&         variableName,
                                  const vector_ptrtype&      vr,
                                  const UInt&                start,
@@ -423,8 +476,8 @@ void Exporter<Mesh>::addVariable(const ExporterData::Type&  type,
     M_listData.push_back( ExporterData(type,variableName, vr, start, size, steady, where) );
 }
 
-template <typename Mesh>
-void Exporter<Mesh>::rd_var(ExporterData& dvar)
+template <typename MeshType>
+void Exporter<MeshType>::rd_var(ExporterData& dvar)
 {
     switch ( dvar.type() )
     {
@@ -437,8 +490,8 @@ void Exporter<Mesh>::rd_var(ExporterData& dvar)
     }
 }
 
-template <typename Mesh>
-void Exporter<Mesh>::computePostfix()
+template <typename MeshType>
+void Exporter<MeshType>::computePostfix()
 {
     std::ostringstream index;
     index.fill( '0' );
@@ -458,61 +511,22 @@ void Exporter<Mesh>::computePostfix()
 // ===================================================
 // Set Methods
 // ===================================================
-template<typename Mesh>
-void Exporter<Mesh>::setDataFromGetPot( const GetPot& dataFile, const std::string& section )
+template<typename MeshType>
+void Exporter<MeshType>::setDataFromGetPot( const GetPot& dataFile, const std::string& section )
 {
-    M_post_dir      = dataFile( ( section + "/post_dir"  ).data(), "./" );
+    M_postDir      = dataFile( ( section + "/post_dir"  ).data(), "./" );
     M_count         = dataFile( ( section + "/start"     ).data(), 0 );
     M_save          = dataFile( ( section + "/save"      ).data(), 1 );
     M_multimesh     = dataFile( ( section + "/multimesh" ).data(), true );
 }
 
-template<typename Mesh>
-void Exporter<Mesh>::setPrefix( const std::string& prefix )
-{
-    M_prefix = prefix;
-}
-
-template<typename Mesh>
-void Exporter<Mesh>::setDirectory( const std::string& Directory )
-{
-    M_post_dir = Directory;
-}
-
-template<typename Mesh>
-void Exporter<Mesh>::setStartIndex( const UInt& StartIndex )
-{
-    M_count = StartIndex;
-}
-
-template<typename Mesh>
-void Exporter<Mesh>::setSave( const UInt& save )
-{
-    M_save = save;
-}
-
-template<typename Mesh>
-void Exporter<Mesh>::setMultimesh( const bool& multimesh )
-{
-    M_multimesh = multimesh;
-}
-
-template<typename Mesh>
-void Exporter<Mesh>::setMeshProcId( const mesh_ptrtype mesh , const int& procId )
+template<typename MeshType>
+void Exporter<MeshType>::setMeshProcId( const mesh_ptrtype mesh , const int& procId )
 {
     M_mesh   = mesh;
     M_procId = procId;
 }
 
-// ===================================================
-// Get Methods
-// ===================================================
-template<typename Mesh>
-const UInt& Exporter<Mesh>::getStartIndex( void )
-{
-    return M_count;
-}
+} // Namespace LifeV
 
-}
-
-#endif
+#endif // EXPORTER_H
