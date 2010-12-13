@@ -75,10 +75,10 @@ public:
     typedef fluid_Type::matrix_Type         matrix_Type;
     typedef fluid_Type::matrixPtr_Type      matrixPtr_Type;
 
-    //! OBSOLETE typedefs
     //typedef super::fluid_Type               fluid_Type;
-    //typedef super::solid_Type               solid_Type;
+    typedef super::solid_Type               solid_Type;
 
+    //! OBSOLETE typedefs
     //typedef super::fluidBchandler_Type      fluidBchandler_Type;
 
     typedef super::fluid_Type               fluid_type;
@@ -258,8 +258,6 @@ private:
 
     matrixPtr_Type M_matrShapeDer;
     bool           M_recomputeShapeDer;
-
-
 
 
 }; // end class exactJacobian

@@ -176,15 +176,6 @@ void  exactJacobian::solveLinearFluid()
         M_fluid->updateRhsLinNoBC(*M_rhsNew);
     }
 
-//    //DEBUG:
-//     vector_Type rhs_debug(M_fluid->matrNoBC().getMap());
-//     rhs_debug=*M_matrShapeDer*dispFluidDomain;
-//     std::cout<<"normInf1 "<<rhs_debug.NormInf()<<std::endl;
-//     //    std::cout<<"normInf2 "<<M_rhsLin->NormInf()<<std::endl;
-//     std::cout<<"normInf displ "<<dispFluidMesh.NormInf()<<std::endl;
-//     std::cout<<"normInf solution "<<M_fluid->solution().NormInf()<<std::endl;
-//     std::cout<<"normInf sould be 0 "<<rhs_debug.NormInf()<<std::endl;
-//     //END DEBUG
 
     this->M_fluid->iterateLin( *this->M_BCh_du );
 }
@@ -236,7 +227,7 @@ exactJacobian::setDataFile( const GetPot& dataFile )
 void exactJacobian::registerMyProducts( )
 {
     FSIFactory::instance().registerProduct( "exactJacobian", &createEJ );
-    solid_raw_type::StructureSolverFactory::instance().registerProduct( "LinearVenantKirchhof", &createLinearStructure );
+    solid_Type::StructureSolverFactory::instance().registerProduct( "LinearVenantKirchhof", &createLinearStructure );
 //solid_raw_type::StructureSolverFactory::instance().registerProduct( "NonLinearVenantKirchhof", &createNonLinearStructure );
 }
 
