@@ -29,7 +29,7 @@ lib_LTLIBRARIES		= liblifecore.la
 liblifecore_la_SOURCES	=  life.cpp lifeversion.cpp\
 dataString.cpp debug.cpp \
 switch.cpp util_string.cpp typeInfo.cpp\
-SmartAssert.cpp displayer.cpp
+SmartAssert.cpp displayer.cpp CommunicatorEpetra.cpp
 liblifecore_la_LIBADD	= $(aztec_libs)
 
 if HAVE_BOOST_PROGRAM_OPTIONS
