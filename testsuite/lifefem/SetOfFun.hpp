@@ -46,19 +46,20 @@ The last function is an exponential function to check the convergence rate
 
 namespace LifeV
 {
-class SetofFun{
-	public:
-	SetofFun();
-	Real val(int fun, Real& x, Real& y, Real& z);
-	UInt degree(UInt fun);
-	Real ex_int(UInt fun);
-	std::string name(UInt fun);
-	UInt nfun();
-	private:
-	int _i;
-	std::vector<Real> _integral;
-	std::vector<std::string> _name;
-	std::vector<UInt> _degree;
+class SetofFun
+{
+public:
+    SetofFun();
+    Real val(int fun, Real& x, Real& y, Real& z);
+    UInt degree(UInt fun);
+    Real ex_int(UInt fun);
+    std::string name(UInt fun);
+    UInt nfun();
+private:
+    int _i;
+    std::vector<Real> _integral;
+    std::vector<std::string> _name;
+    std::vector<UInt> _degree;
 };
 }
 #define SETOFFUN_HPP_

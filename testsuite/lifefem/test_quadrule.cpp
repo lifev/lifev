@@ -63,10 +63,10 @@ int main(int argc, char** argv)
 {
     using namespace LifeV;
 
-    #ifdef HAVE_MPI
+#ifdef HAVE_MPI
     std::cout << "MPI Initialization" << std::endl;
     MPI_Init( &argc, &argv );
-	#endif
+#endif
 
     bool checkGlobal(true), check(true);
 
@@ -102,29 +102,29 @@ int main(int argc, char** argv)
     checkGlobal = checkGlobal & check;
 
     // Check the quadrature rules for triangles
-    for(constIterator_Type it(allQuadRuleTria.begin()); it != allQuadRuleTria.end(); ++it)
+    for (constIterator_Type it(allQuadRuleTria.begin()); it != allQuadRuleTria.end(); ++it)
     {
-    	check = (*it)->degreeOfExactness() == (*it)->checkExactness();
-    	checkGlobal = checkGlobal & check;
+        check = (*it)->degreeOfExactness() == (*it)->checkExactness();
+        checkGlobal = checkGlobal & check;
     }
 
     // Check the quadrature rules for triangles
-    for(constIterator_Type it(allQuadRuleSegments.begin()); it != allQuadRuleSegments.end(); ++it)
+    for (constIterator_Type it(allQuadRuleSegments.begin()); it != allQuadRuleSegments.end(); ++it)
     {
-    	check = (*it)->degreeOfExactness() == (*it)->checkExactness();
-    	checkGlobal = checkGlobal & check;
+        check = (*it)->degreeOfExactness() == (*it)->checkExactness();
+        checkGlobal = checkGlobal & check;
     }
 
-    #ifdef HAVE_MPI
+#ifdef HAVE_MPI
     std::cout << "MPI Finalization" << std::endl;
     MPI_Finalize();
-	#endif
+#endif
 
 
-    if(check)
-    	return EXIT_SUCCESS;
+    if (check)
+        return EXIT_SUCCESS;
     else
-    	return EXIT_FAILURE;
+        return EXIT_FAILURE;
 }//end main
 
 
