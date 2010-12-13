@@ -1,35 +1,49 @@
+//@HEADER
 /*
-  This file is part of the LifeV library.
+*******************************************************************************
 
-  Author: Christophe Prud'homme (christophe.prudhomme@epfl.ch)
+Copyright (C) 2004, 2005, 2007 EPFL, Politecnico di Milano, INRIA
+Copyright (C) 2010 EPFL, Politecnico di Milano, Emory University
 
-  Copyright (C) 2004 EPFL
+This file is part of LifeV.
 
-  This library is free software; you can redistribute it and/or
-  modify it under the terms of the GNU Lesser General Public
-  License as published by the Free Software Foundation; either
-  version 2.1 of the License, or (at your option) any later version.
+LifeV is free software; you can redistribute it and/or modify
+it under the terms of the GNU Lesser General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
 
-  This library is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-  Lesser General Public License for more details.
+LifeV is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+Lesser General Public License for more details.
 
-  You should have received a copy of the GNU Lesser General Public
-  License along with this library; if not, write to the Free Software
-  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+You should have received a copy of the GNU Lesser General Public License
+along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
+
+*******************************************************************************
 */
-#ifndef __Debug_H
-#define __Debug_H 1
+//@HEADER
+/*!
+  @file
+  @brief Classes for debugging
+
+  @date 13-12-2010
+  @author Christophe Prud'homme <christophe.prudhomme@epfl.ch>
+
+  @maintainer Radu Popescu <radu.popescu@epfl.ch>
+*/
+
+#ifndef DEBUG_H
+#define DEBUG_H 1
 
 #include <cstdio>
 #include <iosfwd>
-
-#include <string>
 #include <sstream>
+#include <string>
 
 namespace LifeV
 {
+// Forward declarations
 class DebugStream;
 class NdebugStream;
 
@@ -47,92 +61,89 @@ typedef NdebugStream & (*LNManipFunction)( NdebugStream&); // manipulator functi
 class DebugStream
 {
 public:
-
-
-    /** @name Internal Structures
-     */
+    //! @name Public typedefs and structures
     //@{
-
     struct Private;
-
     typedef int (*stprintf)( const char* format, ... );
     //@}
 
     /** @name Constructors, destructor
      */
     //@{
-
     DebugStream(int area = 0, int level = 1, bool print = true);
     DebugStream(const char* initialString, int area = 0, int level = 1, bool print = true);
     DebugStream( DebugStream const& );
     ~DebugStream();
-
     //@}
 
-    void setFlush( stprintf = 0 );
-
-    /** @name  Methods
-     */
+    //! @name Operators
     //@{
-
-    static void attach( std::string const& __logfile );
-    static void attach( std::string const& __logfile, int area );
-    static void detach( std::string const& __logfile, int area );
-    static void detachAll();
-    void flush();
-
-
     DebugStream& operator<<( char const* );
-
     DebugStream& operator<<( double );
-
     DebugStream& operator<<( std::string const& );
     DebugStream& operator<<( LManipFunction f );
     //@}
 
+    /** @name  Methods
+     */
+    //@{
+    void setFlush( stprintf = 0 );
+    void flush();
 
-
-protected:
+    static void attach( std::string const& logfile );
+    static void attach( std::string const& logfile, int area );
+    static void detach( std::string const& logfile, int area );
+    static void detachAll();
+    //@}
 
 private:
-    Private* __p;
-
+    Private* M_data;
 };
 
+// ===================================
+// Debug Stream Implementation
+// ===================================
+
 template<typename T>
-DebugStream& operator<< ( DebugStream& __s, T const* __t )
+DebugStream& operator<< ( DebugStream& stream, T const* data )
 {
-    std::ostringstream __os;
-    __os << __t;
-    __s << __os.str();
-    return __s;
+    std::ostringstream out_stream;
+    out_stream << data;
+    stream << out_stream.str();
+    return stream;
 }
+
 #ifdef HAVE_BACKTRACE
 std::string backtrace ();
 std::string backtrace ( int );
 #endif
 
+
 class NdebugStream
 {
 public:
-    /** @name Constructors, destructor
-     */
+    //! @name Public typedefs
     //@{
     typedef int (*stprintf)( const char* format, ... );
-
-    NdebugStream() {}
-    ~NdebugStream() {}
-
     //@}
 
-    /** @name  Methods
-     */
+    //! @name Constructors, destructor
+    //@{
+    NdebugStream() {}
+    ~NdebugStream() {}
+    //@}
+
+    //! @name Operators
+    //@{
+    NdebugStream& operator<<( char const* code ) { return *this; }
+    NdebugStream& operator<<( std::string const& str) { return *this; }
+    NdebugStream& operator<<( double code) { return *this; }
+    NdebugStream& operator<<( LNManipFunction f ) { return *this; }
+    //@}
+
+    //! @name  Methods
     //@{
     void flush( stprintf = 0 ) {}
-    NdebugStream& operator<<( char const* ) { return *this; }
-    NdebugStream& operator<<( std::string const& ) { return *this; }
-    NdebugStream& operator<<( double ) { return *this; }
-    NdebugStream& operator<<( LNManipFunction /*f*/ ) { return *this; }
     //@}
 };
 
@@ -159,12 +170,9 @@ DebugStream Fatal( bool cond, int area = 0 );
 
 }
 
-
-
-
 LifeV::DebugStream& perror( LifeV::DebugStream& s );
 LifeV::DebugStream& endl( LifeV::DebugStream& s );
 LifeV::DebugStream& flush( LifeV::DebugStream& );
 
 
-#endif /* __Debug_H */
+#endif // DEBUG_H

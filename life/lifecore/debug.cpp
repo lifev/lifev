@@ -1,80 +1,70 @@
+//@HEADER
 /*
-  This file is part of the LifeV library.
+*******************************************************************************
 
-  Author: Christophe Prud'homme (christophe.prudhomme@epfl.ch)
+Copyright (C) 2004, 2005, 2007 EPFL, Politecnico di Milano, INRIA
+Copyright (C) 2010 EPFL, Politecnico di Milano, Emory University
 
-  Copyright (C) 2004 EPFL
+This file is part of LifeV.
 
-  This library is free software; you can redistribute it and/or
-  modify it under the terms of the GNU Lesser General Public
-  License as published by the Free Software Foundation; either
-  version 2.1 of the License, or (at your option) any later version.
+LifeV is free software; you can redistribute it and/or modify
+it under the terms of the GNU Lesser General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
 
-  This library is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-  Lesser General Public License for more details.
+LifeV is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+Lesser General Public License for more details.
 
-  You should have received a copy of the GNU Lesser General Public
-  License along with this library; if not, write to the Free Software
-  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+You should have received a copy of the GNU Lesser General Public License
+along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
+
+*******************************************************************************
 */
-#include <cstring>
-#include <cstdlib>
-#include <errno.h>
+//@HEADER
+/*!
+  @file
+  @brief Classes for debugging
 
+  @date 13-12-2010
+  @author Christophe Prud'homme <christophe.prudhomme@epfl.ch>
+
+  @maintainer Radu Popescu <radu.popescu@epfl.ch>
+*/
+
+#include <algorithm>
+#include <cstdlib>
+#include <cstring>
+#include <errno.h>
+#include <fstream>
+#include <iostream>
+#include <iterator>
 #include <list>
 #include <map>
-#include <vector>
-
-#include <iterator>
-#include <iostream>
-#include <fstream>
-#include <algorithm>
 #include <sstream>
 #include <string>
+#include <vector>
+
+#pragma GCC diagnostic ignored "-Wunused-variable"
+#pragma GCC diagnostic ignored "-Wunused-parameter"
 
 #include <boost/lexical_cast.hpp>
-
-#include <lifeconfig.h>
 
 #ifdef HAVE_BACKTRACE
 # include <execinfo.h>
 #endif
 
+#pragma GCC diagnostic warning "-Wunused-variable"
+#pragma GCC diagnostic warning "-Wunused-parameter"
+
+#include <lifeconfig.h>
 #include <life/lifecore/debug.hpp>
+
 
 namespace LifeV
 {
-/*!
-  \class Debug
-  \brief Area debugging tool
 
-  \c Debug() provides a debug stream to which you can pass a number, say 100, associated
-  to an area of the code, say a class \c A.  In the implementation of the class \c A, you use
-  debug statement like
-
-  void A::f()
-  {
-    Debug(100) << "A::f() is called.\n";
-    // do something here
-  }
-
-  Now the debug message "A::f() is called." will be seen only if the area 100
-  is defined in the environment(shell) variable \c DEBUG while executing a program
-  \c A::f() is called \c runWithA that makes use of our class \c A.
-
-  > runwithA
-    --> no debug message related to A
-  > export DEBUG="100"
-  > runwithA
-    A::f() is called.
-
-   With this tool you can select the area you want to debug explicitly while keeping the
-   others hidden.
-
-  @author Christophe Prud'homme (christophe.prudhomme@epfl.ch)
-*/
 enum DebugLevels
 {
     DEBUG_INFO  = 0,
@@ -82,23 +72,28 @@ enum DebugLevels
     DEBUG_ERROR = 2,
     DEBUG_FATAL = 3,
 };
+
+// ===============================================
+// Private data struct declaration for DebugStream
+// ===============================================
+
 struct DebugStream::Private
 {
-    Private()
-            :
+    Private() :
             debug( false ),
-            __flush_function( 0 )
+            flushFunction( 0 )
     {}
+
     bool debug;
     std::ostringstream _M_output;
 
-    stprintf __flush_function;
+    stprintf flushFunction;
 
     static bool _S_attached;
     static std::ofstream _S_logfile;
-    //static std::map<int, std::ostream*> _S_logfile_per_area;
 
 };
+
 //
 // getDescription
 //
@@ -109,10 +104,8 @@ static std::string* DEBUG_AREA = 0;
 
 namespace
 {
-// this Function makes sure that the static variables are initialized
-// properly before being used
-void
-initDebugAreas ()
+
+void initDebugAreas ()
 {
     static bool alloc = false;
     if ( alloc == false )
@@ -172,8 +165,7 @@ initDebugAreas ()
 
     }
 }
-std::string
-getDescription ( unsigned int __area )
+std::string getDescription ( unsigned int __area )
 {
     if ( DebugAreas->empty() )
         return std::string( "Area " ) + boost::lexical_cast<std::string>(__area);
@@ -189,163 +181,140 @@ getDescription ( unsigned int __area )
 }
 }
 
-//
-// DebugStream
-//
+// =============================================
+// DebugStream - Constructors
+// =============================================
+
 DebugStream::DebugStream( int area, int /*level*/, bool print )
         :
-        __p( new Private )
+        M_data( new Private )
 {
     initDebugAreas ();
 
     if ( DEBUG_AREA && ! DEBUG_AREA->empty() )
     {
-        __p->debug =  ( std::find ( AREAS->begin (), AREAS->end (), area ) != AREAS->end() &&
+        M_data->debug =  ( std::find ( AREAS->begin (), AREAS->end (), area ) != AREAS->end() &&
                         print ) ||
                       ( !area );
     }
     else
     {
-        __p->debug =  ( print && !area );
+        M_data->debug =  ( print && !area );
     }
-    if ( __p->debug )
-        __p->_M_output << getDescription ( area ) << ": ";
+    if ( M_data->debug )
+        M_data->_M_output << getDescription ( area ) << ": ";
 
 }
+
 DebugStream::DebugStream( const char* initialString, int area, int /*level*/, bool print )
         :
-        __p( new Private )
+        M_data( new Private )
 {
     initDebugAreas ();
     if ( DEBUG_AREA && ! DEBUG_AREA->empty() )
     {
-        __p->debug =  ( std::find ( AREAS->begin (), AREAS->end (), area ) != AREAS->end() &&
+        M_data->debug =  ( std::find ( AREAS->begin (), AREAS->end (), area ) != AREAS->end() &&
                         print ) ||
                       ( !area );
     }
     else
     {
-        __p->debug =  ( print && !area );
+        M_data->debug =  ( print && !area );
     }
-    if ( __p->debug )
-        __p->_M_output << getDescription ( area ) << ": "
+    if ( M_data->debug )
+        M_data->_M_output << getDescription ( area ) << ": "
         << initialString;
 }
+
 DebugStream::DebugStream( const DebugStream& sd )
         :
-        __p( new Private )
+        M_data( new Private )
 {
-    __p->debug = sd.__p->debug;
-    __p->__flush_function = sd.__p->__flush_function;
+    M_data->debug = sd.M_data->debug;
+    M_data->flushFunction = sd.M_data->flushFunction;
 }
 DebugStream::~DebugStream()
 {
-    delete __p;
+    delete M_data;
 }
-DebugStream&
-DebugStream::operator<<( char const* s)
+
+// ========================================
+// DebugStream Operators
+// ========================================
+
+DebugStream& DebugStream::operator<<( char const* s)
 {
-    if ( __p->debug )
-        __p->_M_output  << s;
+    if ( M_data->debug )
+        M_data->_M_output  << s;
     if ( s[strlen(s)-1] == '\n')
         flush();
     return *this;
 }
-DebugStream&
-DebugStream::operator<<( double s)
-{
-    if ( __p->debug )
-    {
-        __p->_M_output  << s;
-        flush();
-    }
-    return *this;
-}
-#if 0
 
-DebugStream&
-DebugStream::operator<<( ulong s)
+DebugStream& DebugStream::operator<<( double s)
 {
-    if ( __p->debug )
+    if ( M_data->debug )
     {
-        __p->_M_output  << s;
+        M_data->_M_output  << s;
         flush();
     }
     return *this;
 }
 
-DebugStream&
-DebugStream::operator<<( long s)
+DebugStream& DebugStream::operator<<( std::string const& s)
 {
-    if ( __p->debug )
-    {
-        __p->_M_output  << s;
-        flush();
-    }
-    return *this;
-}
-DebugStream&
-DebugStream::operator<<( int s)
-{
-    if ( __p->debug )
-    {
-        __p->_M_output  << s;
-        flush();
-    }
-    return *this;
-}
-#endif
-DebugStream&
-DebugStream::operator<<( std::string const& s)
-{
-    if ( __p->debug )
-        __p->_M_output  << s;
+    if ( M_data->debug )
+        M_data->_M_output  << s;
     if ( s[s.size() -1] == '\n')
         flush();
     return *this;
 }
 
-
-DebugStream&
-DebugStream::operator<<( LifeV::LManipFunction __f )
+DebugStream& DebugStream::operator<<( LifeV::LManipFunction __f )
 {
-    if ( __p->debug )
+    if ( M_data->debug )
     {
         (*__f)( *this );
     }
     return *this;
 }
 
-void
-DebugStream::setFlush( stprintf func )
+// ==============================================
+// DebugStream Public Methods
+// ==============================================
+
+void DebugStream::setFlush( stprintf func )
 {
-    __p->__flush_function = func;
+    M_data->flushFunction = func;
 }
-void
-DebugStream::flush(  )
+
+void DebugStream::flush(  )
 {
-    if ( !__p->_M_output.str().empty() )
+    if ( !M_data->_M_output.str().empty() )
     {
         if ( Private::_S_attached )
         {
-            Private::_S_logfile << __p->_M_output.str();
+            Private::_S_logfile << M_data->_M_output.str();
         }
-        else if ( __p->__flush_function == 0 )
+        else if ( M_data->flushFunction == 0 )
         {
-            std::cerr << __p->_M_output.str();
+            std::cerr << M_data->_M_output.str();
         }
         else
         {
-            __p->__flush_function( "%s", __p->_M_output.str().c_str() );
+            M_data->flushFunction( "%s", M_data->_M_output.str().c_str() );
         }
-        __p->_M_output.str( "" );
+        M_data->_M_output.str( "" );
     }
 
 }
 
+// ==============================================
+// DebugStream Static Methods
+// ==============================================
+
 bool DebugStream::Private::_S_attached = false;
 std::ofstream DebugStream::Private::_S_logfile;
-//std::map<int, std::ostream*> DebugStream::_S_logfile_per_area;
 
 void DebugStream::attach( std::string const& __logfile )
 {
@@ -371,20 +340,18 @@ void DebugStream::attach( std::string const& __logfile )
         Private::_S_attached = true;
     }
 }
-void
-DebugStream::attach( std::string const& /*__logfile*/, int /*__area*/ )
+
+void DebugStream::attach( std::string const& /*__logfile*/, int /*__area*/ )
 {
-
 }
-void
-DebugStream::detach( std::string const& /*__logfile*/, int /*__area*/ )
-{}
 
-void
-DebugStream::detachAll()
-{}
+void DebugStream::detach( std::string const& /*__logfile*/, int /*__area*/ )
+{
+}
 
-
+void DebugStream::detachAll()
+{
+}
 
 #ifndef NDEBUG_OLD
 DebugStream
@@ -395,8 +362,7 @@ Debug( int area, DebugStream::stprintf func )
     return s;
 }
 
-DebugStream
-Debug( bool cond, int area, DebugStream::stprintf /*func*/ )
+DebugStream Debug( bool cond, int area, DebugStream::stprintf /*func*/ )
 {
     if ( cond )
         return DebugStream( area, DEBUG_INFO );
@@ -405,14 +371,12 @@ Debug( bool cond, int area, DebugStream::stprintf /*func*/ )
 }
 #endif
 
-DebugStream
-Warning( int area )
+DebugStream Warning( int area )
 {
     return DebugStream( "WARNING: ", area, DEBUG_WARN );
 }
 
-DebugStream
-Warning( bool cond, int area )
+DebugStream Warning( bool cond, int area )
 {
     if ( cond )
         return DebugStream( "WARNING: ", area, DEBUG_WARN );
@@ -421,15 +385,13 @@ Warning( bool cond, int area )
 
 }
 
-DebugStream
-Error( int area )
+DebugStream Error( int area )
 {
     //Debug () << LBacktrace() << "\n";
     return DebugStream( "ERROR: ", area, DEBUG_ERROR );
 }
 
-DebugStream
-Error( bool cond, int area )
+DebugStream Error( bool cond, int area )
 {
     //Debug () << LBacktrace() << "\n";
     if ( cond )
@@ -439,15 +401,13 @@ Error( bool cond, int area )
 
 }
 
-DebugStream
-Fatal( int area )
+DebugStream Fatal( int area )
 {
     //LBacktrace();
     return DebugStream( "FATAL: ", area, DEBUG_FATAL );
 }
 
-DebugStream
-Fatal( bool cond, int area )
+DebugStream Fatal( bool cond, int area )
 {
     //LBacktrace();
     if ( cond )
@@ -457,15 +417,13 @@ Fatal( bool cond, int area )
 }
 
 #ifdef HAVE_BACKTRACE
-std::string
-backtrace ()
+std::string backtrace ()
 {
     // show all backtrace
     return backtrace( -1 );
 }
 
-std::string
-backtrace ( int __levels )
+std::string backtrace ( int __levels )
 {
     std::ostringstream os;
 
@@ -485,22 +443,22 @@ backtrace ( int __levels )
     return os.str();
 }
 #endif
-}
 
-LifeV::DebugStream&
-perror( LifeV::DebugStream& s )
+} // Namespace LifeV
+
+LifeV::DebugStream& perror( LifeV::DebugStream& s )
 {
     s << " " << strerror( errno );
     return s;
 }
-LifeV::DebugStream&
-endl( LifeV::DebugStream& s )
+
+LifeV::DebugStream& endl( LifeV::DebugStream& s )
 {
     s << "\n";
     return s;
 }
-LifeV::DebugStream&
-flush( LifeV::DebugStream& s )
+
+LifeV::DebugStream& flush( LifeV::DebugStream& s )
 {
     s.flush();
     return s;
