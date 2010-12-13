@@ -1,38 +1,24 @@
-# -*- mode: m4 -*-
+###################################################################################################
 #
-#  This file is part of the LifeV library
+#                 This file is part of the MathCard software project                       
+#                Copyright (C) 2009, 2010 EPFL, Politecnico di Milano
 #
-#  Author(s): Cristiano Malossi <cristiano.malossi@epfl.ch>
-#       Date: 2009-04-30
+#      Author(s): Cristiano Malossi <cristiano.malossi@epfl.ch>
+#                 Tiziano Passerini <tiziano@mathcs.emory.edu>
+#           Date: 10-12-2010
 #
-#  Copyright (C) 2009 EPFL, INRIA and Politechnico di Milano
-#
-#  This library is free software; you can redistribute it and/or
-#  modify it under the terms of the GNU Lesser General Public
-#  License as published by the Free Software Foundation; either
-#  version 2.1 of the License, or (at your option) any later version.
-#
-#  This library is distributed in the hope that it will be useful,
-#  but WITHOUT ANY WARRANTY; without even the implied warranty of
-#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-#  Lesser General Public License for more details.
-#
-#  You should have received a copy of the GNU Lesser General Public
-#  License along with this library; if not, write to the Free Software
-#  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
-#
-# \file test_Fluid3D.at
-# \author Cristiano Malossi <cristiano.malossi@epfl.ch>
-# \date 2009-04-30
-#
+###################################################################################################
+### TESTSUITE: MULTISCALE (1D) ####################################################################
+###################################################################################################
+
 AT_SETUP([test_MultiScale (1D)])
 AT_KEYWORDS([test_MS 1D])
 AT_DATA([data],[[
 
 ]])
-AT_CHECK([ln -sf ../../data/mesh/inria/ Mesh &&
-          ln -sf ../../data/physicalFunctions/ physicalFunctions &&
-		  ln -sf ../../data/MultiScaleData/ MultiScaleData &&
-		  mpirun -n 1 ../../test_MultiScale/test_MS -s 1 -f MultiScaleData/Test_1D.dat -c 2.722449289527601e-09],[0],[ignore],[ignore])
-AT_CLEANUP([])
+AT_CHECK([ln -sf $abs_top_builddir/testsuite/data/mesh/inria/ Mesh &&
+          ln -sf $abs_top_builddir/testsuite/data/physicalFunctions/ physicalFunctions &&
+		  ln -sf $abs_top_builddir/testsuite/data/MultiScaleData/ MultiScaleData &&
+		  mpirun -n 1 $abs_top_builddir/testsuite/test_MultiScale/test_MS -s 1 -f MultiScaleData/Test_1D.dat -c 2.722449289527601e-09],[0],[ignore],[ignore])
+AT_CLEANUP
 
