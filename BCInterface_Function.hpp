@@ -94,6 +94,7 @@ public:
     typedef PhysicalSolverType                                                    physicalSolver_Type;
     typedef BCInterface_Data                                                      data_Type;
     typedef BCFunctionBase                                                        bcFunction_Type;
+    typedef parser::Parser                                                        parser_Type;
 
     //@}
 
@@ -149,7 +150,7 @@ protected:
 
     //@}
 
-    boost::shared_ptr< Parser >       M_parser;
+    boost::shared_ptr< parser_Type > M_parser;
 
 private:
 
@@ -234,7 +235,7 @@ BCInterface_Function< PhysicalSolverType >::setData( const data_Type& data )
     if ( M_parser )
         M_parser->SetString( data.baseString() );
     else
-        M_parser.reset( new Parser( data.baseString() ) );
+        M_parser.reset( new parser_Type( data.baseString() ) );
 
     /*
      * MODE          COMPONENT     FUNCTION      |      COMV.SIZE     ARGUMENTS     INTERFACEFUNCTION
