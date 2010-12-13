@@ -25,19 +25,17 @@
 //@HEADER
 
 /*!
- *  @file
- *  @brief File containing a class to  deal the time advancing scheme.
- *  This class consider \f$\theta\f$-method for first order problems and
- *  Newmark scheme for the second order problems.
- *
- *  @date
- *
- *  @author Matteo Pozzoli <matteo1.pozzoli@mail.polimi.it>
- *
- *  @contributor Matteo Pozzoli <matteo1.pozzoli@mail.polimi.it>
- *
- *  @maintainer Matteo Pozzoli <matteo1.pozzoli@mail.polimi.it>
- */
+    @file
+    @brief File containing a class to  deal the time advancing scheme.
+    This class consider \f$\theta\f$-method for first order problems and
+    Newmark scheme for the second order problems.
+ 
+    @date
+ 
+    @author Matteo Pozzoli <matteo1.pozzoli@mail.polimi.it>
+    @contributor Matteo Pozzoli <matteo1.pozzoli@mail.polimi.it>
+    @maintainer Matteo Pozzoli <matteo1.pozzoli@mail.polimi.it>
+*/
 
 #ifndef TIMEADVANCENEWMARK_H
 #define TIMEADVANCENEWMARK_H 1

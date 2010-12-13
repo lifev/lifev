@@ -25,16 +25,14 @@
 //@HEADER
 
 /*!
- *  @file
- *  @brief File containing a class to  deal the time advancing scheme
- *
- *  @date
- *  @author Matteo Pozzoli <matteo1.pozzoli@mail.polimi.it>
- *
- *  @contributor Matteo Pozzoli <matteo1.pozzoli@mail.polimi.it>
- *
- *  @maintainer Matteo Pozzoli <matteo1.pozzoli@mail.polimi.it>
- */
+    @file
+    @brief File containing a class to  deal the time advancing scheme
+  
+    @date
+    @author Matteo Pozzoli <matteo1.pozzoli@mail.polimi.it>
+    @contributor Matteo Pozzoli <matteo1.pozzoli@mail.polimi.it>
+    @maintainer Matteo Pozzoli <matteo1.pozzoli@mail.polimi.it>
+*/
 
 #ifndef TIMEADVANCEBASE_H
 #define TIMEADVANCEBASE_H 1
