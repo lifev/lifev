@@ -48,10 +48,10 @@ along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
 #pragma GCC diagnostic ignored "-Wunused-variable"
 #pragma GCC diagnostic ignored "-Wunused-parameter"
 
-#include <EpetraExt_HDF5.h>
-#include <Epetra_MpiComm.h>
 #include <boost/shared_ptr.hpp>
 #include <parmetis.h>
+#include <Epetra_MpiComm.h>
+#include <EpetraExt_HDF5.h>
 
 #pragma GCC diagnostic warning "-Wunused-variable"
 #pragma GCC diagnostic warning "-Wunused-parameter"
