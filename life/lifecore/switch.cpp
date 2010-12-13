@@ -21,9 +21,12 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 namespace LifeV
 {
-bool
-Switch::set
-( std::string const & a )
+
+// =======================
+// Public methods
+// =======================
+
+bool Switch::set ( std::string const & a )
 {
     iterator i = find( a );
     if ( i == end() )
@@ -38,20 +41,14 @@ Switch::set
     }
 }
 
-bool
-Switch::set
-( const char * a )
+bool Switch::set ( const char * a )
 {
     std::string temp( a );
     return set
            ( temp );
 }
 
-
-
-
-bool
-Switch::unset( std::string const & a )
+bool Switch::unset( std::string const & a )
 {
     iterator i = find( a );
     if ( i == end() )
@@ -66,17 +63,14 @@ Switch::unset( std::string const & a )
     }
 }
 
-bool
-Switch::unset( const char * a )
+bool Switch::unset( const char * a )
 {
     std::string temp( a );
     return unset( temp );
 
 }
 
-
-bool
-Switch::toggle( std::string const & a )
+bool Switch::toggle( std::string const & a )
 {
     iterator i = find( a );
     if ( i == end() )
@@ -91,17 +85,14 @@ Switch::toggle( std::string const & a )
     }
 }
 
-bool
-Switch::toggle( const char * a )
+bool Switch::toggle( const char * a )
 {
     std::string temp( a );
     return toggle( temp );
 
 }
 
-
-void
-Switch::create( std::string const & a, bool status )
+void Switch::create( std::string const & a, bool status )
 {
     iterator i = find( a );
     if ( i == end() )
@@ -115,16 +106,14 @@ Switch::create( std::string const & a, bool status )
     }
 }
 
-void
-Switch::create( const char * a, bool status )
+void Switch::create( const char * a, bool status )
 {
     std::string temp( a );
     create( temp, status );
 }
 
 
-std::pair<bool, bool>
-Switch::status( std::string const & a ) const
+std::pair<bool, bool> Switch::status( std::string const & a ) const
 {
     const_iterator i = find( a );
     if ( i == end() )
@@ -138,8 +127,7 @@ Switch::status( std::string const & a ) const
     }
 }
 
-std::pair<bool, bool>
-Switch::status( const char * a ) const
+std::pair<bool, bool> Switch::status( const char * a ) const
 {
     std::string temp( a );
     return status( temp );
@@ -160,14 +148,13 @@ Switch::test( std::string const & a ) const
     }
 }
 
-bool
-Switch::test( const char * a ) const
+bool Switch::test( const char * a ) const
 {
     std::string temp( a );
     return test( temp );
 }
 
-std::ostream & Switch::showMe( bool /*verbose*/, std::ostream & out ) const
+std::ostream & Switch::showMe( bool verbose, std::ostream & out ) const
 {
     out << std::endl << " Status of switches" << std::endl;
     for ( const_iterator i = begin(); i != end(); ++i )
