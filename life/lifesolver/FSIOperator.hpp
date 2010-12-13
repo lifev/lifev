@@ -144,7 +144,7 @@ public:
     typedef boost::shared_ptr<fluidLin_Type>                                        fluidLinPtr_Type;
     typedef boost::shared_ptr<solidLin_Type>                                        solidLinPtr_Type;
     typedef fluid_Type::vector_type/*fluidPtr_Type::vector_Type*/                   vector_Type;
-    typedef boost::shared_ptr<vector_Type>         vectorPtr_Type;
+    typedef boost::shared_ptr<vector_Type>                                          vectorPtr_Type;
     typedef fluid_Type::source_type/*fluidPtr_Type::source_Type*/                   fluidSource_Type;
     typedef solid_Type::source_Type                                                 solidSource_Type;
     typedef boost::function<Real ( const Real&, const Real&,
@@ -935,21 +935,19 @@ protected:
 //     bcVectorInterfacePtr_Type                               M_bcvDerReducedFluidLoadToStructure;
 //     bcVectorInterfacePtr_Type                               M_bcvDerStructureAccToReducedFluid;
 
-    boost::shared_ptr<vector_Type>                    M_lambdaFluid;
-    boost::shared_ptr<vector_Type>                    M_lambdaFluidRepeated;
-    boost::shared_ptr<vector_Type>                    M_lambda;
-    boost::shared_ptr<vector_Type>                    M_lambdaDot;
+    vectorPtr_Type                    M_lambdaFluid;
+    vectorPtr_Type                    M_lambdaFluidRepeated;
+    vectorPtr_Type                    M_lambda;
+    vectorPtr_Type                    M_lambdaDot;
 
 
-    boost::shared_ptr<vector_Type>                    M_un;
-    boost::shared_ptr<vector_Type>                    M_rhs;
-    boost::shared_ptr<vector_Type>                    M_Alphaf;
+    vectorPtr_Type                    M_un;
+    vectorPtr_Type                    M_rhs;
+    vectorPtr_Type                    M_Alphaf;
 
     Real                                              M_AlphafCoef;
     //\todo{try to set as deprecated}
     Real                                              M_betamedio;
-//     boost::shared_ptr<vector_Type>                    M_w;
-//     boost::shared_ptr<vector_Type>                    M_dw;
 
     UInt                                              M_fluxes;
 
@@ -961,31 +959,27 @@ private:
     //! @name Private Attributes
     //@{
     // displacement on the interface
-    boost::shared_ptr<vector_Type>                    M_lambdaSolid;
-    boost::shared_ptr<vector_Type>                    M_lambdaSolidRepeated;
+    vectorPtr_Type                    M_lambdaSolid;
+    vectorPtr_Type                    M_lambdaSolidRepeated;
 
-    boost::shared_ptr<vector_Type>                    M_lambdaSolidOld;
-    boost::shared_ptr<vector_Type>                    M_lambdaDotSolid;
-    boost::shared_ptr<vector_Type>                    M_lambdaDotSolidRepeated;
+    vectorPtr_Type                    M_lambdaSolidOld;
+    vectorPtr_Type                    M_lambdaDotSolid;
+    vectorPtr_Type                    M_lambdaDotSolidRepeated;
 
-    boost::shared_ptr<vector_Type>                    M_sigmaFluid;
-    boost::shared_ptr<vector_Type>                    M_sigmaSolid;
+    vectorPtr_Type                    M_sigmaFluid;
+    vectorPtr_Type                    M_sigmaSolid;
 
-    boost::shared_ptr<vector_Type>                    M_sigmaFluidRepeated;
-    boost::shared_ptr<vector_Type>                    M_sigmaSolidRepeated;
+    vectorPtr_Type                    M_sigmaFluidRepeated;
+    vectorPtr_Type                    M_sigmaSolidRepeated;
 
     //\todo{try to set as deprecated}
-    boost::shared_ptr<vector_Type>                    M_minusSigmaFluid;
+    vectorPtr_Type                    M_minusSigmaFluid;
     //\todo{try to set as deprecated}
-    boost::shared_ptr<vector_Type>                    M_minusSigmaFluidRepeated;
+    vectorPtr_Type                    M_minusSigmaFluidRepeated;
 
-//     boost::shared_ptr<vector_Type>                    M_dispStruct;
-//     boost::shared_ptr<vector_Type>                    M_dispStructOld;
-//     boost::shared_ptr<vector_Type>                    M_veloStruct;
-
-    boost::shared_ptr<vector_Type>                    M_dispFluidMeshOld;
-    boost::shared_ptr<vector_Type>                    M_veloFluidMesh;
-    boost::shared_ptr<vector_Type>                    M_derVeloFluidMesh;
+    vectorPtr_Type                    M_dispFluidMeshOld;
+    vectorPtr_Type                    M_veloFluidMesh;
+    vectorPtr_Type                    M_derVeloFluidMesh;
 
     //\todo{try to set as deprecated}
     bool                                              M_mpi;
