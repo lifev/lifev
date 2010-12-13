@@ -136,35 +136,8 @@ MultiscaleModel::showMe()
 }
 
 // ===================================================
-// Methods
-// ===================================================
-void
-MultiscaleModel::clearCouplingsList()
-{
-    M_couplings.clear();
-}
-
-// ===================================================
 // Set Methods
 // ===================================================
-void
-MultiscaleModel::setID( const UInt& id )
-{
-    M_ID = id;
-}
-
-void
-MultiscaleModel::addCoupling( const MS_Coupling_PtrType& coupling )
-{
-    M_couplings.push_back( coupling );
-}
-
-void
-MultiscaleModel::setGlobalData( const MS_GlobalDataContainer_PtrType& globalData )
-{
-    M_globalData = globalData;
-}
-
 void
 MultiscaleModel::setGeometry( const boost::array< Real, NDIM >& scale,
                                const boost::array< Real, NDIM >& rotate,
@@ -181,7 +154,7 @@ MultiscaleModel::setGeometry( const boost::array< Real, NDIM >& scale,
 }
 
 void
-MultiscaleModel::setCommunicator( const MS_Comm_PtrType& comm )
+MultiscaleModel::setCommunicator( const multiscaleCommPtr_Type& comm )
 {
 
 #ifdef HAVE_LIFEV_DEBUG
@@ -195,42 +168,6 @@ MultiscaleModel::setCommunicator( const MS_Comm_PtrType& comm )
 // ===================================================
 // Get Methods
 // ===================================================
-const UInt&
-MultiscaleModel::ID() const
-{
-    return M_ID;
-}
-
-const models_Type&
-MultiscaleModel::type() const
-{
-    return M_type;
-}
-
-const BCFlag&
-MultiscaleModel::flag( const UInt& id ) const
-{
-    return M_flags[id];
-}
-
-const std::vector< BCFlag >&
-MultiscaleModel::flags() const
-{
-    return M_flags;
-}
-
-const std::string&
-MultiscaleModel::modelName() const
-{
-    return M_modelName;
-}
-
-UInt
-MultiscaleModel::couplingsNumber() const
-{
-    return static_cast< UInt > ( M_couplings.size() );
-}
-
 UInt
 MultiscaleModel::couplingLocalID( const UInt& ID ) const
 {
@@ -239,18 +176,6 @@ MultiscaleModel::couplingLocalID( const UInt& ID ) const
             return localID;
 
     return -1;
-}
-
-MS_Coupling_PtrType
-MultiscaleModel::coupling( const UInt& localID ) const
-{
-    return M_couplings[localID];
-}
-
-const MS_GlobalDataContainer_PtrType&
-MultiscaleModel::globalData() const
-{
-    return M_globalData;
 }
 
 } // Namespace multiscale

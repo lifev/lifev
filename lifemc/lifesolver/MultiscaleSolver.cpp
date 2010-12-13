@@ -51,7 +51,7 @@ bool        multiscaleExitFlag      = EXIT_SUCCESS;
 MultiscaleSolver::MultiscaleSolver() :
         M_model             (),
         M_algorithm         (),
-        M_globalData        ( new MS_GlobalDataContainer_Type() ),
+        M_globalData        ( new multiscaleData_Type() ),
         M_comm              (),
         M_displayer         (),
         M_chrono            ()
@@ -65,25 +65,25 @@ MultiscaleSolver::MultiscaleSolver() :
     multiscaleMapsDefinition();
 
     //Register the objects
-    MS_Model_Factory::instance().registerProduct   (  MultiScale,          &createMultiscaleModelMultiscale );
-    MS_Model_Factory::instance().registerProduct   (  Fluid3D,             &createMultiscaleModelFluid3D );
-    MS_Model_Factory::instance().registerProduct   (  OneDimensional,      &createMultiscaleModelOneDimensional );
-    MS_Model_Factory::instance().registerProduct   (  FSI3D,               &createMultiscaleModelFSI3D );
+    multiscaleModelFactory_Type::instance().registerProduct   (  MultiScale,          &createMultiscaleModelMultiscale );
+    multiscaleModelFactory_Type::instance().registerProduct   (  Fluid3D,             &createMultiscaleModelFluid3D );
+    multiscaleModelFactory_Type::instance().registerProduct   (  OneDimensional,      &createMultiscaleModelOneDimensional );
+    multiscaleModelFactory_Type::instance().registerProduct   (  FSI3D,               &createMultiscaleModelFSI3D );
 
-    MS_Coupling_Factory::instance().registerProduct(  Stress,              &createMultiscaleCouplingStress );
-    MS_Coupling_Factory::instance().registerProduct(  FlowRateStress,      &createMultiscaleCouplingFlowRateStress );
-    MS_Coupling_Factory::instance().registerProduct(  BoundaryCondition,   &createMultiscaleCouplingBoundaryCondition );
+    multiscaleCouplingFactory_Type::instance().registerProduct(  Stress,              &createMultiscaleCouplingStress );
+    multiscaleCouplingFactory_Type::instance().registerProduct(  FlowRateStress,      &createMultiscaleCouplingFlowRateStress );
+    multiscaleCouplingFactory_Type::instance().registerProduct(  BoundaryCondition,   &createMultiscaleCouplingBoundaryCondition );
 
-    MS_Algorithm_Factory::instance().registerProduct( Aitken,              &createMultiscaleAlgorithmAitken );
-    MS_Algorithm_Factory::instance().registerProduct( Explicit,            &createMultiscaleAlgorithmExplicit );
-    MS_Algorithm_Factory::instance().registerProduct( Newton,              &createMultiscaleAlgorithmNewton );
+    multiscaleAlgorithmFactory_Type::instance().registerProduct( Aitken,              &createMultiscaleAlgorithmAitken );
+    multiscaleAlgorithmFactory_Type::instance().registerProduct( Explicit,            &createMultiscaleAlgorithmExplicit );
+    multiscaleAlgorithmFactory_Type::instance().registerProduct( Newton,              &createMultiscaleAlgorithmNewton );
 }
 
 // ===================================================
 // Methods
 // ===================================================
 void
-MultiscaleSolver::setCommunicator( const MS_Comm_PtrType& comm )
+MultiscaleSolver::setCommunicator( const multiscaleCommPtr_Type& comm )
 {
 
 #ifdef HAVE_LIFEV_DEBUG
@@ -113,7 +113,7 @@ MultiscaleSolver::setupProblem( const std::string& fileName, const std::string& 
         multiscaleProblemStep = dataFile( "Solver/Restart/RestartFromStepNumber", 0 ) + 1;
 
     // Create the main model and set the communicator
-    M_model = MS_Model_PtrType( MS_Model_Factory::instance().createObject( multiscaleModelsMap[ dataFile( "Problem/ProblemType", "MultiScale" ) ] ) );
+    M_model = multiscaleModelPtr_Type( multiscaleModelFactory_Type::instance().createObject( multiscaleModelsMap[ dataFile( "Problem/ProblemType", "MultiScale" ) ] ) );
     M_model->setCommunicator( M_comm );
 
     // Setup data
@@ -127,7 +127,7 @@ MultiscaleSolver::setupProblem( const std::string& fileName, const std::string& 
     // Algorithm parameters
     if ( M_model->type() == MultiScale )
     {
-        M_algorithm = MS_Algorithm_PtrType( MS_Algorithm_Factory::instance().createObject( multiscaleAlgorithmsMap[ dataFile( "Solver/Algorithm/AlgorithmType", "Newton" ) ] ) );
+        M_algorithm = multiscaleAlgorithmPtr_Type( multiscaleAlgorithmFactory_Type::instance().createObject( multiscaleAlgorithmsMap[ dataFile( "Solver/Algorithm/AlgorithmType", "Newton" ) ] ) );
         M_algorithm->setCommunicator( M_comm );
         M_algorithm->setModel( M_model );
         M_algorithm->setupData( fileName );

@@ -122,56 +122,5 @@ MultiscaleData::showMe()
               << "TimeStep                      = " << M_dataTime->getTimeStep() << std::endl << std::endl;
 }
 
-// ===================================================
-// Get Methods
-// ===================================================
-MultiscaleData::timePtr_Type
-MultiscaleData::dataTime() const
-{
-    return M_dataTime;
-}
-
-const Real&
-MultiscaleData::fluidDensity() const
-{
-    return M_fluidDensity;
-}
-
-const Real&
-MultiscaleData::fluidViscosity() const
-{
-    return M_fluidViscosity;
-}
-
-const Real&
-MultiscaleData::fluidReferencePressure() const
-{
-    return M_fluidReferencePressure;
-}
-
-const Real&
-MultiscaleData::structureDensity() const
-{
-    return M_structureDensity;
-}
-
-const Real&
-MultiscaleData::structurePoissonCoefficient() const
-{
-    return M_structurePoissonCoefficient;
-}
-
-//const Real&
-//MultiscaleData::GetStructureThickness() const
-//{
-//    return M_structureThickness;
-//}
-
-const Real&
-MultiscaleData::structureYoungModulus() const
-{
-    return M_structureYoungModulus;
-}
-
 } // Namespace multiscale
 } // Namespace LifeV

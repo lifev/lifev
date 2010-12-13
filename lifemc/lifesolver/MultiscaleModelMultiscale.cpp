@@ -45,9 +45,9 @@ namespace multiscale
 // Constructors & Destructor
 // ===================================================
 MultiscaleModelMultiscale::MultiscaleModelMultiscale() :
-        MS_Model_Type       (),
-        M_modelsList        (),
-        M_couplingsList     ()
+        multiscaleModel_Type       (),
+        M_modelsList               (),
+        M_couplingsList            ()
 {
 
 #ifdef HAVE_LIFEV_DEBUG
@@ -65,10 +65,10 @@ MultiscaleModelMultiscale::~MultiscaleModelMultiscale()
 #endif
 
     // Disconnect models and couplings to allow their destruction
-    for ( MS_ModelsVector_ConstIterator i = M_modelsList.begin(); i != M_modelsList.end(); ++i )
+    for ( multiscaleModelsVectorConstIterator_Type i = M_modelsList.begin(); i != M_modelsList.end(); ++i )
         ( *i )->clearCouplingsList();
 
-    for ( MS_CouplingsVector_ConstIterator i = M_couplingsList.begin(); i != M_couplingsList.end(); ++i )
+    for ( multiscaleCouplingsVectorConstIterator_Type i = M_couplingsList.begin(); i != M_couplingsList.end(); ++i )
         ( *i )->clearModelsList();
 }
 
@@ -83,7 +83,7 @@ MultiscaleModelMultiscale::setupData( const std::string& fileName )
     Debug( 8110 ) << "MultiscaleModelMultiscale::SetupData( fileName ) \n";
 #endif
 
-    MS_Model_Type::setupData( fileName );
+    multiscaleModel_Type::setupData( fileName );
 
     // Useful variables
     UInt id;
@@ -147,7 +147,7 @@ MultiscaleModelMultiscale::setupData( const std::string& fileName )
                 geometryTranslate[2] += dataFile( "Problem/offset", 0., j * geometryColumnsNumber + 9 );
             }
 
-        M_modelsList[i] = MS_Model_PtrType( MS_Model_Factory::instance().createObject( model ) );
+        M_modelsList[i] = multiscaleModelPtr_Type( multiscaleModelFactory_Type::instance().createObject( model ) );
         M_modelsList[i]->setCommunicator( M_comm );
         M_modelsList[i]->setGeometry( geometryScale, geometryRotate, geometryTranslate );
         M_modelsList[i]->setGlobalData( M_globalData );
@@ -161,7 +161,7 @@ MultiscaleModelMultiscale::setupData( const std::string& fileName )
     {
         coupling = multiscaleCouplingsMap[dataFile( "Problem/couplings", "undefined", i * couplingsColumnsNumber + 1 )];
 
-        M_couplingsList[i] = MS_Coupling_PtrType( MS_Coupling_Factory::instance().createObject( coupling ) );
+        M_couplingsList[i] = multiscaleCouplingPtr_Type( multiscaleCouplingFactory_Type::instance().createObject( coupling ) );
         M_couplingsList[i]->setCommunicator( M_comm );
         M_couplingsList[i]->setGlobalData( M_globalData );
         M_couplingsList[i]->setupData( path + Enum2String( coupling, multiscaleCouplingsMap ) + "/"
@@ -188,10 +188,10 @@ MultiscaleModelMultiscale::setupModel()
     Debug( 8110 ) << "MultiscaleModelMultiscale::SetupModel() \n";
 #endif
 
-    for ( MS_CouplingsVector_ConstIterator i = M_couplingsList.begin(); i != M_couplingsList.end(); ++i )
+    for ( multiscaleCouplingsVectorConstIterator_Type i = M_couplingsList.begin(); i != M_couplingsList.end(); ++i )
         ( *i )->setupCoupling();
 
-    for ( MS_ModelsVector_ConstIterator i = M_modelsList.begin(); i != M_modelsList.end(); ++i )
+    for ( multiscaleModelsVectorConstIterator_Type i = M_modelsList.begin(); i != M_modelsList.end(); ++i )
         ( *i )->setupModel();
 }
 
@@ -203,10 +203,10 @@ MultiscaleModelMultiscale::buildSystem()
     Debug( 8110 ) << "MultiscaleModelMultiscale::BuildSystem() \n";
 #endif
 
-    for ( MS_ModelsVector_ConstIterator i = M_modelsList.begin(); i != M_modelsList.end(); ++i )
+    for ( multiscaleModelsVectorConstIterator_Type i = M_modelsList.begin(); i != M_modelsList.end(); ++i )
         ( *i )->buildSystem();
 
-    for ( MS_CouplingsVector_ConstIterator i = M_couplingsList.begin(); i != M_couplingsList.end(); ++i )
+    for ( multiscaleCouplingsVectorConstIterator_Type i = M_couplingsList.begin(); i != M_couplingsList.end(); ++i )
         ( *i )->initializeCouplingVariables();
 }
 
@@ -218,7 +218,7 @@ MultiscaleModelMultiscale::updateSystem()
     Debug( 8110 ) << "MultiscaleModelMultiscale::UpdateSystem() \n";
 #endif
 
-    for ( MS_ModelsVector_ConstIterator i = M_modelsList.begin(); i != M_modelsList.end(); ++i )
+    for ( multiscaleModelsVectorConstIterator_Type i = M_modelsList.begin(); i != M_modelsList.end(); ++i )
         ( *i )->updateSystem();
 }
 
@@ -230,7 +230,7 @@ MultiscaleModelMultiscale::solveSystem()
     Debug( 8110 ) << "MultiscaleModelMultiscale::SolveSystem() \n";
 #endif
 
-    for ( MS_ModelsVector_ConstIterator i = M_modelsList.begin(); i != M_modelsList.end(); ++i )
+    for ( multiscaleModelsVectorConstIterator_Type i = M_modelsList.begin(); i != M_modelsList.end(); ++i )
         ( *i )->solveSystem();
 }
 
@@ -242,10 +242,10 @@ MultiscaleModelMultiscale::saveSolution()
     Debug( 8110 ) << "MultiscaleModelMultiscale::SaveSolution() \n";
 #endif
 
-    for ( MS_ModelsVector_ConstIterator i = M_modelsList.begin(); i != M_modelsList.end(); ++i )
+    for ( multiscaleModelsVectorConstIterator_Type i = M_modelsList.begin(); i != M_modelsList.end(); ++i )
         ( *i )->saveSolution();
 
-    for ( MS_CouplingsVector_ConstIterator i = M_couplingsList.begin(); i != M_couplingsList.end(); ++i )
+    for ( multiscaleCouplingsVectorConstIterator_Type i = M_couplingsList.begin(); i != M_couplingsList.end(); ++i )
         ( *i )->saveSolution();
 }
 
@@ -254,20 +254,20 @@ MultiscaleModelMultiscale::showMe()
 {
     if ( M_displayer->isLeader() )
     {
-        MS_Model_Type::showMe();
+        multiscaleModel_Type::showMe();
         std::cout << "Models number       = " << M_modelsList.size() << std::endl
                   << "Couplings number    = " << M_couplingsList.size() << std::endl << std::endl;
 
         std::cout << "==================== Models Information =====================" << std::endl << std::endl;
     }
 
-    for ( MS_ModelsVector_ConstIterator i = M_modelsList.begin(); i != M_modelsList.end(); ++i )
+    for ( multiscaleModelsVectorConstIterator_Type i = M_modelsList.begin(); i != M_modelsList.end(); ++i )
         ( *i )->showMe();
 
     if ( M_displayer->isLeader() )
         std::cout << "=================== Couplings Information ===================" << std::endl << std::endl;
 
-    for ( MS_CouplingsVector_ConstIterator i = M_couplingsList.begin(); i != M_couplingsList.end(); ++i )
+    for ( multiscaleCouplingsVectorConstIterator_Type i = M_couplingsList.begin(); i != M_couplingsList.end(); ++i )
         ( *i )->showMe();
 }
 
@@ -282,11 +282,11 @@ MultiscaleModelMultiscale::createCouplingMap( EpetraMap& couplingMap )
     Debug( 8110 ) << "MultiscaleModelMultiscale::CreateCouplingMap( couplingMap ) \n";
 #endif
 
-    for ( MS_ModelsVector_ConstIterator i = M_modelsList.begin(); i != M_modelsList.end(); ++i )
+    for ( multiscaleModelsVectorConstIterator_Type i = M_modelsList.begin(); i != M_modelsList.end(); ++i )
         if ( ( *i )->type() == MultiScale )
             ( multiscaleDynamicCast< MultiscaleModelMultiscale > ( *i ) )->createCouplingMap( couplingMap );
 
-    for ( MS_CouplingsVector_ConstIterator i = M_couplingsList.begin(); i != M_couplingsList.end(); ++i )
+    for ( multiscaleCouplingsVectorConstIterator_Type i = M_couplingsList.begin(); i != M_couplingsList.end(); ++i )
         ( *i )->createCouplingMap( couplingMap );
 }
 
@@ -298,11 +298,11 @@ MultiscaleModelMultiscale::initializeCouplingVariables()
     Debug( 8110 ) << "MultiscaleModelMultiscale::InitializeCouplingVariables() \n";
 #endif
 
-    for ( MS_ModelsVector_ConstIterator i = M_modelsList.begin(); i != M_modelsList.end(); ++i )
+    for ( multiscaleModelsVectorConstIterator_Type i = M_modelsList.begin(); i != M_modelsList.end(); ++i )
         if ( ( *i )->type() == MultiScale )
             ( multiscaleDynamicCast< MultiscaleModelMultiscale > ( *i ) )->initializeCouplingVariables();
 
-    for ( MS_CouplingsVector_ConstIterator i = M_couplingsList.begin(); i != M_couplingsList.end(); ++i )
+    for ( multiscaleCouplingsVectorConstIterator_Type i = M_couplingsList.begin(); i != M_couplingsList.end(); ++i )
         ( *i )->initializeCouplingVariables();
 }
 
@@ -314,75 +314,75 @@ MultiscaleModelMultiscale::extrapolateCouplingVariables()
     Debug( 8110 ) << "MultiscaleModelMultiscale::ExtrapolateCouplingVariables() \n";
 #endif
 
-    for ( MS_ModelsVector_ConstIterator i = M_modelsList.begin(); i != M_modelsList.end(); ++i )
+    for ( multiscaleModelsVectorConstIterator_Type i = M_modelsList.begin(); i != M_modelsList.end(); ++i )
         if ( ( *i )->type() == MultiScale )
             ( multiscaleDynamicCast< MultiscaleModelMultiscale > ( *i ) )->extrapolateCouplingVariables();
 
-    for ( MS_CouplingsVector_ConstIterator i = M_couplingsList.begin(); i != M_couplingsList.end(); ++i )
+    for ( multiscaleCouplingsVectorConstIterator_Type i = M_couplingsList.begin(); i != M_couplingsList.end(); ++i )
         ( *i )->extrapolateCouplingVariables();
 }
 
 void
-MultiscaleModelMultiscale::importCouplingVariables( const MS_Vector_Type& couplingVariables )
+MultiscaleModelMultiscale::importCouplingVariables( const multiscaleVector_Type& couplingVariables )
 {
 
 #ifdef HAVE_LIFEV_DEBUG
     Debug( 8110 ) << "MultiscaleModelMultiscale::ImportCouplingVariables( couplingVariables ) \n";
 #endif
 
-    for ( MS_ModelsVector_ConstIterator i = M_modelsList.begin(); i != M_modelsList.end(); ++i )
+    for ( multiscaleModelsVectorConstIterator_Type i = M_modelsList.begin(); i != M_modelsList.end(); ++i )
         if ( ( *i )->type() == MultiScale )
             ( multiscaleDynamicCast< MultiscaleModelMultiscale > ( *i ) )->importCouplingVariables( couplingVariables );
 
-    for ( MS_CouplingsVector_ConstIterator i = M_couplingsList.begin(); i != M_couplingsList.end(); ++i )
+    for ( multiscaleCouplingsVectorConstIterator_Type i = M_couplingsList.begin(); i != M_couplingsList.end(); ++i )
         ( *i )->importCouplingVariables( couplingVariables );
 }
 
 void
-MultiscaleModelMultiscale::exportCouplingVariables( MS_Vector_Type& couplingVariables )
+MultiscaleModelMultiscale::exportCouplingVariables( multiscaleVector_Type& couplingVariables )
 {
 
 #ifdef HAVE_LIFEV_DEBUG
     Debug( 8110 ) << "MultiscaleModelMultiscale::ExportCouplingVariables( couplingVariables ) \n";
 #endif
 
-    for ( MS_ModelsVector_ConstIterator i = M_modelsList.begin(); i != M_modelsList.end(); ++i )
+    for ( multiscaleModelsVectorConstIterator_Type i = M_modelsList.begin(); i != M_modelsList.end(); ++i )
         if ( ( *i )->type() == MultiScale )
             ( multiscaleDynamicCast< MultiscaleModelMultiscale > ( *i ) )->exportCouplingVariables( couplingVariables);
 
-    for ( MS_CouplingsVector_ConstIterator i = M_couplingsList.begin(); i != M_couplingsList.end(); ++i )
+    for ( multiscaleCouplingsVectorConstIterator_Type i = M_couplingsList.begin(); i != M_couplingsList.end(); ++i )
         ( *i )->exportCouplingVariables( couplingVariables );
 }
 
 void
-MultiscaleModelMultiscale::exportCouplingResiduals( MS_Vector_Type& couplingResiduals )
+MultiscaleModelMultiscale::exportCouplingResiduals( multiscaleVector_Type& couplingResiduals )
 {
 
 #ifdef HAVE_LIFEV_DEBUG
     Debug( 8110 ) << "MultiscaleModelMultiscale::ExportCouplingResiduals( couplingResiduals ) \n";
 #endif
 
-    for ( MS_ModelsVector_ConstIterator i = M_modelsList.begin(); i != M_modelsList.end(); ++i )
+    for ( multiscaleModelsVectorConstIterator_Type i = M_modelsList.begin(); i != M_modelsList.end(); ++i )
         if ( ( *i )->type() == MultiScale )
             ( multiscaleDynamicCast< MultiscaleModelMultiscale > ( *i ) )->exportCouplingResiduals( couplingResiduals );
 
-    for ( MS_CouplingsVector_ConstIterator i = M_couplingsList.begin(); i != M_couplingsList.end(); ++i )
+    for ( multiscaleCouplingsVectorConstIterator_Type i = M_couplingsList.begin(); i != M_couplingsList.end(); ++i )
         ( *i )->exportCouplingResiduals( couplingResiduals );
 }
 
 void
-MultiscaleModelMultiscale::exportJacobian( MS_Matrix_Type& jacobian )
+MultiscaleModelMultiscale::exportJacobian( multiscaleMatrix_Type& jacobian )
 {
 
 #ifdef HAVE_LIFEV_DEBUG
     Debug( 8110 ) << "MultiscaleModelMultiscale::ExportJacobian() \n";
 #endif
 
-    for ( MS_ModelsVector_ConstIterator i = M_modelsList.begin(); i != M_modelsList.end(); ++i )
+    for ( multiscaleModelsVectorConstIterator_Type i = M_modelsList.begin(); i != M_modelsList.end(); ++i )
         if ( ( *i )->type() == MultiScale )
             ( multiscaleDynamicCast< MultiscaleModelMultiscale > ( *i ) )->exportJacobian( jacobian );
 
-    for ( MS_CouplingsVector_ConstIterator i = M_couplingsList.begin(); i != M_couplingsList.end(); ++i )
+    for ( multiscaleCouplingsVectorConstIterator_Type i = M_couplingsList.begin(); i != M_couplingsList.end(); ++i )
         ( *i )->exportJacobian( jacobian );
 }
 
@@ -399,11 +399,11 @@ MultiscaleModelMultiscale::couplingVariablesNumber()
 
     UInt couplingVariablesNumber = 0;
 
-    for ( MS_ModelsVector_ConstIterator i = M_modelsList.begin(); i != M_modelsList.end(); ++i )
+    for ( multiscaleModelsVectorConstIterator_Type i = M_modelsList.begin(); i != M_modelsList.end(); ++i )
         if ( ( *i )->type() == MultiScale )
             couplingVariablesNumber += ( multiscaleDynamicCast< MultiscaleModelMultiscale > ( *i ) )->couplingVariablesNumber();
 
-    for ( MS_CouplingsVector_ConstIterator i = M_couplingsList.begin(); i != M_couplingsList.end(); ++i )
+    for ( multiscaleCouplingsVectorConstIterator_Type i = M_couplingsList.begin(); i != M_couplingsList.end(); ++i )
         couplingVariablesNumber += ( *i )->couplingVariablesNumber();
 
     return couplingVariablesNumber;

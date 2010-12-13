@@ -53,10 +53,10 @@ namespace multiscale
 /*!
  *  @author Cristiano Malossi
  *
- *  The MultiscaleAlgorithmNewton is an implementation of MS_Algorithm_Type
+ *  The MultiscaleAlgorithmNewton is an implementation of multiscaleAlgorithm_Type
  *  which implements the Newton method.
  */
-class MultiscaleAlgorithmNewton : public virtual MS_Algorithm_Type
+class MultiscaleAlgorithmNewton : public virtual multiscaleAlgorithm_Type
 {
 public:
 
@@ -64,7 +64,7 @@ public:
     //@{
 
     //! Constructor
-    MultiscaleAlgorithmNewton();
+    explicit MultiscaleAlgorithmNewton();
 
     //! Destructor
     virtual ~MultiscaleAlgorithmNewton() {}
@@ -84,9 +84,6 @@ public:
     //! Perform sub-iteration on the coupling variables
     void subIterate();
 
-    //! Display some information about the algorithm
-    void showMe();
-
     //@}
 
 protected:
@@ -97,7 +94,7 @@ protected:
     //@}
 
     SolverTrilinos                           M_solver;
-    MS_Matrix_PtrType                        M_jacobian;
+    multiscaleMatrixPtr_Type                 M_jacobian;
 
 private:
 
@@ -112,7 +109,7 @@ private:
 };
 
 //! Factory create function
-inline MS_Algorithm_Type* createMultiscaleAlgorithmNewton()
+inline multiscaleAlgorithm_Type* createMultiscaleAlgorithmNewton()
 {
     return new MultiscaleAlgorithmNewton();
 }

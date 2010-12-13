@@ -45,7 +45,7 @@ namespace multiscale
 // Constructors & Destructor
 // ===================================================
 MultiscaleModelFluid3D::MultiscaleModelFluid3D() :
-        MS_Model_Type                  (),
+        multiscaleModel_Type           (),
         M_exporter                     (),
         M_importer                     (),
         M_fileName                     (),
@@ -88,7 +88,7 @@ MultiscaleModelFluid3D::setupData( const std::string& fileName )
     Debug( 8120 ) << "MultiscaleModelFluid3D::SetupData( ) \n";
 #endif
 
-    MS_Model_Type::setupData( fileName );
+    multiscaleModel_Type::setupData( fileName );
     M_fileName = fileName;
 
     GetPot dataFile( fileName );
@@ -302,7 +302,7 @@ MultiscaleModelFluid3D::showMe()
 {
     if ( M_displayer->isLeader() )
     {
-        MS_Model_Type::showMe();
+        multiscaleModel_Type::showMe();
 
         std::cout << "Velocity FE order   = " << M_data->uOrder() << std::endl
                   << "Pressure FE order   = " << M_data->pOrder() << std::endl << std::endl;
@@ -409,55 +409,6 @@ MultiscaleModelFluid3D::setSolution( const fluidVectorPtr_Type& solution )
 // ===================================================
 // Get Methods (couplings)
 // ===================================================
-MultiscaleModelFluid3D::bcInterface_Type&
-MultiscaleModelFluid3D::bcInterface()
-{
-    return *M_bc;
-}
-
-Real
-MultiscaleModelFluid3D::boundaryDensity( const BCFlag& /*flag*/ ) const
-{
-    return M_data->density();
-}
-
-Real
-MultiscaleModelFluid3D::boundaryViscosity( const BCFlag& /*flag*/ ) const
-{
-    return M_data->viscosity();
-}
-
-Real
-MultiscaleModelFluid3D::boundaryArea( const BCFlag& flag ) const
-{
-    return M_fluid->area( flag );
-}
-
-Real
-MultiscaleModelFluid3D::boundaryFlowRate( const BCFlag& flag ) const
-{
-    return M_fluid->flux( flag );
-}
-
-Real
-MultiscaleModelFluid3D::boundaryPressure( const BCFlag& flag ) const
-{
-    return M_fluid->pressure( flag );
-}
-
-Real
-MultiscaleModelFluid3D::boundaryDynamicPressure( const BCFlag& flag ) const
-{
-    return 0.5 * boundaryDensity( flag ) * ( boundaryFlowRate( flag ) * boundaryFlowRate( flag ) )
-           / ( boundaryArea( flag ) * boundaryArea( flag ) );
-}
-
-Real
-MultiscaleModelFluid3D::boundaryLagrangeMultiplier( const BCFlag& flag ) const
-{
-    return M_fluid->LagrangeMultiplier(flag, *M_bc->handler() );
-}
-
 Real
 MultiscaleModelFluid3D::boundaryStress( const BCFlag& flag, const stress_Type& stressType ) const
 {
@@ -542,21 +493,6 @@ MultiscaleModelFluid3D::boundaryDeltaStress( const BCFlag& flag, bool& solveLine
 
         return 0.0;
     }
-}
-
-// ===================================================
-// Get Methods
-// ===================================================
-const MultiscaleModelFluid3D::data_Type&
-MultiscaleModelFluid3D::data() const
-{
-    return *M_data;
-}
-
-const MultiscaleModelFluid3D::fluidVector_Type&
-MultiscaleModelFluid3D::solution() const
-{
-    return *M_solution;
 }
 
 // ===================================================
@@ -757,7 +693,7 @@ MultiscaleModelFluid3D::imposePerturbation()
     Debug( 8120 ) << "MultiscaleModelFluid3D::ImposePerturbation() \n";
 #endif
 
-    for ( MS_CouplingsVector_ConstIterator i = M_couplings.begin(); i < M_couplings.end(); ++i )
+    for ( multiscaleCouplingsVectorConstIterator_Type i = M_couplings.begin(); i < M_couplings.end(); ++i )
         if ( ( *i )->isPerturbed() )
         {
             M_linearBC->GetBCWithFlag( ( *i )->flag( ( *i )->modelGlobalToLocalID( M_ID ) ) ).setBCFunction( M_bcBaseDeltaOne );
@@ -774,25 +710,13 @@ MultiscaleModelFluid3D::resetPerturbation()
     Debug( 8120 ) << "MultiscaleModelFluid3D::ResetPerturbation() \n";
 #endif
 
-    for ( MS_CouplingsVector_ConstIterator i = M_couplings.begin(); i < M_couplings.end(); ++i )
+    for ( multiscaleCouplingsVectorConstIterator_Type i = M_couplings.begin(); i < M_couplings.end(); ++i )
         if ( ( *i )->isPerturbed() )
         {
             M_linearBC->GetBCWithFlag( ( *i )->flag( ( *i )->modelGlobalToLocalID( M_ID ) ) ).setBCFunction( M_bcBaseDeltaZero );
 
             break;
         }
-}
-
-Real
-MultiscaleModelFluid3D::bcFunctionDeltaZero( const Real& /*t*/, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const UInt& /*id*/ )
-{
-    return 0.;
-}
-
-Real
-MultiscaleModelFluid3D::bcFunctionDeltaOne( const Real& /*t*/, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const UInt& /*id*/ )
-{
-    return 1.;
 }
 
 } // Namespace multiscale

@@ -45,12 +45,12 @@ namespace multiscale
 // Constructors & Destructor
 // ===================================================
 MultiscaleCouplingFlowRateStress::MultiscaleCouplingFlowRateStress() :
-        MS_Coupling_Type     (),
-        M_baseFlowRate3D     (),
-        M_baseStress3D       (),
-        M_baseFlowRate1D     (),
-        M_baseStress1D       (),
-        M_stressType         ()
+        multiscaleCoupling_Type     (),
+        M_baseFlowRate3D            (),
+        M_baseStress3D              (),
+        M_baseFlowRate1D            (),
+        M_baseStress1D              (),
+        M_stressType                ()
 {
 
 #ifdef HAVE_LIFEV_DEBUG
@@ -71,7 +71,7 @@ MultiscaleCouplingFlowRateStress::setupData( const std::string& fileName )
     Debug( 8230 ) << "MultiscaleCouplingFlowRateStress::SetupData() \n";
 #endif
 
-    MS_Coupling_Type::setupData( fileName );
+    multiscaleCoupling_Type::setupData( fileName );
 
     GetPot dataFile( fileName );
 
@@ -235,7 +235,7 @@ MultiscaleCouplingFlowRateStress::initializeCouplingVariables()
 }
 
 void
-MultiscaleCouplingFlowRateStress::exportCouplingResiduals( MS_Vector_Type& couplingResiduals )
+MultiscaleCouplingFlowRateStress::exportCouplingResiduals( multiscaleVector_Type& couplingResiduals )
 {
 #ifdef HAVE_LIFEV_DEBUG
     Debug( 8230 ) << "MultiscaleCouplingFlowRateStress::ExportCouplingResiduals() \n";
@@ -319,7 +319,7 @@ MultiscaleCouplingFlowRateStress::showMe()
 {
     if ( M_displayer->isLeader() )
     {
-        MS_Coupling_Type::showMe();
+        multiscaleCoupling_Type::showMe();
 
         std::cout << "Stress Type         = " << Enum2String( M_stressType, multiscaleStressesMap ) << std::endl;
         std::cout << "Coupling FlowRate   = " << ( *M_localCouplingVariables[0] )[0] << std::endl
@@ -331,7 +331,7 @@ MultiscaleCouplingFlowRateStress::showMe()
 // ===================================================
 // Private MultiScale PhysicalCoupling Implementation
 // ===================================================
-MS_ModelsVector_Type
+multiscaleModelsVector_Type
 MultiscaleCouplingFlowRateStress::listOfPerturbedModels( const UInt& localCouplingVariableID )
 {
 
@@ -339,7 +339,7 @@ MultiscaleCouplingFlowRateStress::listOfPerturbedModels( const UInt& localCoupli
     Debug( 8230 ) << "MultiscaleCouplingFlowRateStress::GetListOfPerturbedModels( localCouplingVariableID ) \n";
 #endif
 
-    MS_ModelsVector_Type perturbedModelsList(1);
+    multiscaleModelsVector_Type perturbedModelsList(1);
 
     if ( localCouplingVariableID == 0 )
         perturbedModelsList[0] = M_models[0];
@@ -355,7 +355,7 @@ MultiscaleCouplingFlowRateStress::listOfPerturbedModels( const UInt& localCoupli
 }
 
 void
-MultiscaleCouplingFlowRateStress::insertJacobianConstantCoefficients( MS_Matrix_Type& jacobian )
+MultiscaleCouplingFlowRateStress::insertJacobianConstantCoefficients( multiscaleMatrix_Type& jacobian )
 {
 
 #ifdef HAVE_LIFEV_DEBUG
@@ -372,7 +372,7 @@ MultiscaleCouplingFlowRateStress::insertJacobianConstantCoefficients( MS_Matrix_
 }
 
 void
-MultiscaleCouplingFlowRateStress::insertJacobianDeltaCoefficients( MS_Matrix_Type& jacobian, const UInt& column, const UInt& ID, bool& solveLinearSystem )
+MultiscaleCouplingFlowRateStress::insertJacobianDeltaCoefficients( multiscaleMatrix_Type& jacobian, const UInt& column, const UInt& ID, bool& solveLinearSystem )
 {
 
 #ifdef HAVE_LIFEV_DEBUG
@@ -502,7 +502,7 @@ MultiscaleCouplingFlowRateStress::displayCouplingValues( std::ostream& output )
 Real
 MultiscaleCouplingFlowRateStress::functionFlowRate( const Real& t, const Real&, const Real& , const Real&, const UInt& )
 {
-    MS_Vector_Type interpolatedCouplingVariables( *M_localCouplingVariables[0] );
+    multiscaleVector_Type interpolatedCouplingVariables( *M_localCouplingVariables[0] );
 
     timeContainer_Type timeContainer( M_timeInterpolationOrder + 1 );
     for ( UInt i(0) ; i <= M_timeInterpolationOrder ; ++i )
@@ -516,7 +516,7 @@ MultiscaleCouplingFlowRateStress::functionFlowRate( const Real& t, const Real&, 
 Real
 MultiscaleCouplingFlowRateStress::functionStress( const Real& t, const Real&, const Real&, const Real&, const UInt& )
 {
-    MS_Vector_Type interpolatedCouplingVariables( *M_localCouplingVariables[0] );
+    multiscaleVector_Type interpolatedCouplingVariables( *M_localCouplingVariables[0] );
 
     timeContainer_Type timeContainer( M_timeInterpolationOrder + 1 );
     for ( UInt i(0) ; i <= M_timeInterpolationOrder ; ++i )

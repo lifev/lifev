@@ -46,7 +46,7 @@ namespace multiscale
 // Constructors & Destructor
 // ===================================================
 MultiscaleModelFSI3D::MultiscaleModelFSI3D() :
-        MS_Model_Type                  (),
+        multiscaleModel_Type           (),
         M_FSIoperator                  (),
         M_data                         ( new data_Type() ),
         M_exporterFluid                (),
@@ -97,7 +97,7 @@ MultiscaleModelFSI3D::MultiscaleModelFSI3D() :
 void
 MultiscaleModelFSI3D::setupData( const std::string& fileName )
 {
-    MS_Model_Type::setupData( fileName );
+    multiscaleModel_Type::setupData( fileName );
 
     GetPot dataFile( fileName );
 
@@ -325,7 +325,7 @@ MultiscaleModelFSI3D::showMe()
 {
     if ( M_displayer->isLeader() )
     {
-        MS_Model_Type::showMe();
+        multiscaleModel_Type::showMe();
 
         std::cout << "FSI method          = " << M_data->method() << std::endl << std::endl;
 
@@ -413,55 +413,6 @@ MultiscaleModelFSI3D::solveLinearModel( bool& solveLinearSystem )
 // ===================================================
 // Get Methods
 // ===================================================
-MultiscaleModelFSI3D::bcInterface_Type&
-MultiscaleModelFSI3D::bcInterface()
-{
-    return *M_fluidBC;
-}
-
-Real
-MultiscaleModelFSI3D::boundaryDensity( const BCFlag& /*flag*/ ) const
-{
-    return M_FSIoperator->dataFluid()->density();
-}
-
-Real
-MultiscaleModelFSI3D::boundaryViscosity( const BCFlag& /*flag*/ ) const
-{
-    return M_FSIoperator->dataFluid()->viscosity();
-}
-
-Real
-MultiscaleModelFSI3D::boundaryArea( const BCFlag& flag ) const
-{
-    return M_FSIoperator->fluid().area( flag );
-}
-
-Real
-MultiscaleModelFSI3D::boundaryFlowRate( const BCFlag& flag ) const
-{
-    return M_FSIoperator->fluid().flux( flag, *M_FSIoperator->solutionPtr() );
-}
-
-Real
-MultiscaleModelFSI3D::boundaryPressure( const BCFlag& flag ) const
-{
-    return M_FSIoperator->fluid().pressure( flag, *M_FSIoperator->solutionPtr() );
-}
-
-Real
-MultiscaleModelFSI3D::boundaryDynamicPressure( const BCFlag& flag ) const
-{
-    return 0.5 * boundaryDensity( flag ) * ( boundaryFlowRate( flag ) * boundaryFlowRate( flag ) )
-           / ( boundaryArea( flag ) * boundaryArea( flag ) );
-}
-
-Real
-MultiscaleModelFSI3D::boundaryLagrangeMultiplier( const BCFlag& flag ) const
-{
-    return M_FSIoperator->fluid().LagrangeMultiplier(flag, *M_fluidBC->handler(), M_FSIoperator->getSolution() );
-}
-
 Real
 MultiscaleModelFSI3D::boundaryStress( const BCFlag& flag, const stress_Type& stressType ) const
 {
@@ -759,7 +710,7 @@ MultiscaleModelFSI3D::imposePerturbation()
     Debug( 8140 ) << "MS_Model_FSID::ImposePerturbation() \n";
 #endif
 
-    for ( MS_CouplingsVector_ConstIterator i = M_couplings.begin(); i < M_couplings.end(); ++i )
+    for ( multiscaleCouplingsVectorConstIterator_Type i = M_couplings.begin(); i < M_couplings.end(); ++i )
         if ( ( *i )->isPerturbed() )
         {
             M_linearBC->GetBCWithFlag( ( *i )->flag( ( *i )->modelGlobalToLocalID( M_ID ) ) ).setBCFunction( M_bcBaseDeltaOne );
@@ -776,25 +727,13 @@ MultiscaleModelFSI3D::resetPerturbation()
     Debug( 8140 ) << "MultiscaleModelFSI3D::ResetPerturbation() \n";
 #endif
 
-    for ( MS_CouplingsVector_ConstIterator i = M_couplings.begin(); i < M_couplings.end(); ++i )
+    for ( multiscaleCouplingsVectorConstIterator_Type i = M_couplings.begin(); i < M_couplings.end(); ++i )
         if ( ( *i )->isPerturbed() )
         {
             M_linearBC->GetBCWithFlag( ( *i )->flag( ( *i )->modelGlobalToLocalID( M_ID ) ) ).setBCFunction( M_bcBaseDeltaZero );
 
             break;
         }
-}
-
-Real
-MultiscaleModelFSI3D::bcFunctionDeltaZero( const Real& /*t*/, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const UInt& /*id*/ )
-{
-    return 0.;
-}
-
-Real
-MultiscaleModelFSI3D::bcFunctionDeltaOne( const Real& /*t*/, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const UInt& /*id*/ )
-{
-    return 1.;
 }
 
 } // Namespace multiscale

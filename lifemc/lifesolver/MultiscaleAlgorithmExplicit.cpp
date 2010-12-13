@@ -45,7 +45,7 @@ namespace multiscale
 // Constructors & Destructor
 // ===================================================
 MultiscaleAlgorithmExplicit::MultiscaleAlgorithmExplicit() :
-        MS_Algorithm_Type    ()
+        multiscaleAlgorithm_Type    ()
 {
 
 #ifdef HAVE_LIFEV_DEBUG
@@ -53,47 +53,6 @@ MultiscaleAlgorithmExplicit::MultiscaleAlgorithmExplicit() :
 #endif
 
     M_type = Explicit;
-}
-
-// ===================================================
-// MultiScale Algorithm Virtual Methods
-// ===================================================
-void
-MultiscaleAlgorithmExplicit::setupData( const std::string& fileName )
-{
-
-#ifdef HAVE_LIFEV_DEBUG
-    Debug( 8012 ) << "MultiscaleAlgorithmExplicit::SetupData( fileName ) \n";
-#endif
-
-    MS_Algorithm_Type::setupData( fileName );
-}
-
-void
-MultiscaleAlgorithmExplicit::subIterate()
-{
-
-#ifdef HAVE_LIFEV_DEBUG
-    Debug( 8012 ) << "MultiscaleAlgorithmExplicit::SubIterate() \n";
-#endif
-
-    toleranceSatisfied();
-}
-
-void
-MultiscaleAlgorithmExplicit::updateCouplingVariables()
-{
-    // We use the initialize method for updating the coupling
-    M_multiscale->initializeCouplingVariables();
-}
-
-void
-MultiscaleAlgorithmExplicit::showMe()
-{
-    if ( M_displayer->isLeader() )
-    {
-        MS_Algorithm_Type::showMe();
-    }
 }
 
 } // Namespace multiscale

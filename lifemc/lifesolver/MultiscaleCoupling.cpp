@@ -131,28 +131,6 @@ MultiscaleCoupling::createCouplingMap( EpetraMap& couplingMap )
 }
 
 void
-MultiscaleCoupling::importCouplingVariables( const MS_Vector_Type& couplingVariables )
-{
-
-#ifdef HAVE_LIFEV_DEBUG
-    Debug( 8200 ) << "MultiscaleCoupling::ImportCouplingVariables( couplingVariables ) \n";
-#endif
-
-    importCouplingVector( couplingVariables, *M_localCouplingVariables[0] );
-}
-
-void
-MultiscaleCoupling::exportCouplingVariables( MS_Vector_Type& couplingVariables )
-{
-
-#ifdef HAVE_LIFEV_DEBUG
-    Debug( 8200 ) << "MultiscaleCoupling::ExportCouplingVariables( couplingVariables ) \n";
-#endif
-
-    exportCouplingVector( *M_localCouplingVariables[0], couplingVariables );
-}
-
-void
 MultiscaleCoupling::extrapolateCouplingVariables()
 {
 
@@ -160,7 +138,7 @@ MultiscaleCoupling::extrapolateCouplingVariables()
     Debug( 8200 ) << "MultiscaleCoupling::ExtrapolateCouplingVariables() \n";
 #endif
 
-    MS_Vector_Type extrapolatedCouplingVariables( *M_localCouplingVariables[0] );
+    multiscaleVector_Type extrapolatedCouplingVariables( *M_localCouplingVariables[0] );
     UInt couplingVariablesSize( M_localCouplingVariables.size() );
 
     // Time container for interpolation
@@ -175,7 +153,7 @@ MultiscaleCoupling::extrapolateCouplingVariables()
     if ( couplingVariablesSize <= M_timeInterpolationOrder )
     {
         ++couplingVariablesSize;
-        M_localCouplingVariables.push_back( MS_Vector_PtrType ( new EpetraVector( *M_localCouplingVariables[0] ) ) );
+        M_localCouplingVariables.push_back( multiscaleVectorPtr_Type ( new EpetraVector( *M_localCouplingVariables[0] ) ) );
     }
 
     // Updating database
@@ -191,14 +169,8 @@ MultiscaleCoupling::extrapolateCouplingVariables()
 
 }
 
-bool
-MultiscaleCoupling::isPerturbed() const
-{
-    return M_perturbedCoupling == -1 ? false : true;
-}
-
 void
-MultiscaleCoupling::exportJacobian( MS_Matrix_Type& jacobian )
+MultiscaleCoupling::exportJacobian( multiscaleMatrix_Type& jacobian )
 {
 
 #ifdef HAVE_LIFEV_DEBUG
@@ -207,7 +179,7 @@ MultiscaleCoupling::exportJacobian( MS_Matrix_Type& jacobian )
 
     // Definitions
     bool solveLinearSystem;                   // Flag to avoid multiple solution of the same linear system
-    MS_ModelsVector_Type perturbedModelsList; // List of perturbed model
+    multiscaleModelsVector_Type perturbedModelsList; // List of perturbed model
 
     // Insert constant values in the jacobian (due to this coupling condition)
     insertJacobianConstantCoefficients( jacobian );
@@ -222,7 +194,7 @@ MultiscaleCoupling::exportJacobian( MS_Matrix_Type& jacobian )
         perturbedModelsList = listOfPerturbedModels( M_perturbedCoupling );
 
         // Loop on all the models, that could be influenced by the perturbation of the coupling variable
-        for ( MS_ModelsVector_Iterator j = perturbedModelsList.begin() ; j < perturbedModelsList.end() ; ++j )
+        for ( multiscaleModelsVectorIterator_Type j = perturbedModelsList.begin() ; j < perturbedModelsList.end() ; ++j )
         {
             solveLinearSystem = true;
 
@@ -267,33 +239,9 @@ MultiscaleCoupling::saveSolution()
         output.close();
 }
 
-void
-MultiscaleCoupling::clearModelsList()
-{
-    M_models.clear();
-}
-
 // ===================================================
 // Set Methods
 // ===================================================
-void
-MultiscaleCoupling::setID( const UInt& id )
-{
-    M_ID = id;
-}
-
-void
-MultiscaleCoupling::addModel( const MS_Model_PtrType& model )
-{
-    M_models.push_back( model );
-}
-
-void
-MultiscaleCoupling::addFlag( const BCFlag& flag )
-{
-    M_flags.push_back( flag );
-}
-
 void
 MultiscaleCoupling::addFlagID( const UInt& flagID )
 {
@@ -301,18 +249,7 @@ MultiscaleCoupling::addFlagID( const UInt& flagID )
 }
 
 void
-MultiscaleCoupling::setGlobalData( const MS_GlobalDataContainer_PtrType& globalData )
-{
-
-#ifdef HAVE_LIFEV_DEBUG
-    Debug( 8200 ) << "MultiscaleCoupling::SetupData( globalData ) \n";
-#endif
-
-    M_globalData = globalData;
-}
-
-void
-MultiscaleCoupling::setCommunicator( const MS_Comm_PtrType& comm )
+MultiscaleCoupling::setCommunicator( const multiscaleCommPtr_Type& comm )
 {
 
 #ifdef HAVE_LIFEV_DEBUG
@@ -326,30 +263,6 @@ MultiscaleCoupling::setCommunicator( const MS_Comm_PtrType& comm )
 // ===================================================
 // Get Methods
 // ===================================================
-const UInt&
-MultiscaleCoupling::ID() const
-{
-    return M_ID;
-}
-
-const couplings_Type&
-MultiscaleCoupling::type() const
-{
-    return M_type;
-}
-
-const std::string&
-MultiscaleCoupling::couplingName() const
-{
-    return M_couplingName;
-}
-
-UInt
-MultiscaleCoupling::modelsNumber() const
-{
-    return static_cast< UInt > ( M_models.size() );
-}
-
 UInt
 MultiscaleCoupling::modelGlobalToLocalID( const UInt& ID ) const
 {
@@ -358,42 +271,6 @@ MultiscaleCoupling::modelGlobalToLocalID( const UInt& ID ) const
             return localID;
 
     return -1;
-}
-
-MS_Model_PtrType
-MultiscaleCoupling::model( const UInt& localID ) const
-{
-    return M_models[localID];
-}
-
-const BCFlag&
-MultiscaleCoupling::flag( const UInt& localID ) const
-{
-    return M_flags[localID];
-}
-
-const UInt&
-MultiscaleCoupling::couplingVariablesNumber() const
-{
-    return M_couplingIndex.first;
-}
-
-const Int&
-MultiscaleCoupling::perturbedCoupling() const
-{
-    return M_perturbedCoupling;
-}
-
-const MS_Vector_Type&
-MultiscaleCoupling::residual() const
-{
-    return *M_localCouplingResiduals;
-}
-
-const UInt&
-MultiscaleCoupling::timeInterpolationOrder() const
-{
-    return M_timeInterpolationOrder;
 }
 
 // ===================================================
@@ -411,12 +288,12 @@ MultiscaleCoupling::createLocalVectors()
     EpetraMap map( -1, static_cast< Int > ( myGlobalElements.size() ), &myGlobalElements[0], 0, M_comm );
 
     // Create local repeated vectors
-    M_localCouplingVariables.push_back( MS_Vector_PtrType ( new EpetraVector( map, Repeated ) ) );
+    M_localCouplingVariables.push_back( multiscaleVectorPtr_Type ( new EpetraVector( map, Repeated ) ) );
     M_localCouplingResiduals.reset( new EpetraVector( map, Repeated ) );
 }
 
 void
-MultiscaleCoupling::importCouplingVector( const MS_Vector_Type& globalVector, MS_Vector_Type& localVector )
+MultiscaleCoupling::importCouplingVector( const multiscaleVector_Type& globalVector, multiscaleVector_Type& localVector )
 {
     Real value(0);
     for ( UInt i(0) ; i < M_couplingIndex.first ; ++i )
@@ -431,7 +308,7 @@ MultiscaleCoupling::importCouplingVector( const MS_Vector_Type& globalVector, MS
 }
 
 void
-MultiscaleCoupling::exportCouplingVector( const MS_Vector_Type& localVector, MS_Vector_Type& globalVector )
+MultiscaleCoupling::exportCouplingVector( const multiscaleVector_Type& localVector, multiscaleVector_Type& globalVector )
 {
     for ( UInt i(0) ; i < M_couplingIndex.first ; ++i )
         if ( M_comm->MyPID() == 0 )
@@ -440,7 +317,7 @@ MultiscaleCoupling::exportCouplingVector( const MS_Vector_Type& localVector, MS_
 
 void
 MultiscaleCoupling::interpolateCouplingVariables( const timeContainer_Type& timeContainer, const Real& t,
-                                                   MS_Vector_Type& interpolatedCouplingVariables )
+                                                   multiscaleVector_Type& interpolatedCouplingVariables )
 {
     // Lagrange interpolation
     interpolatedCouplingVariables *= 0;
@@ -458,7 +335,7 @@ MultiscaleCoupling::interpolateCouplingVariables( const timeContainer_Type& time
 }
 
 void
-MultiscaleCoupling::switchErrorMessage( const MS_Model_PtrType& model )
+MultiscaleCoupling::switchErrorMessage( const multiscaleModelPtr_Type& model )
 {
     multiscaleErrorCheck( ModelType, "Invalid model type ["  + Enum2String( model->type(), multiscaleModelsMap ) +
                         "] for coupling type [" + Enum2String( M_type, multiscaleCouplingsMap ) +"]\n" );

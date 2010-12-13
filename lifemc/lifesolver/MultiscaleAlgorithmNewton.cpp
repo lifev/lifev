@@ -45,9 +45,9 @@ namespace multiscale
 // Constructors & Destructor
 // ===================================================
 MultiscaleAlgorithmNewton::MultiscaleAlgorithmNewton() :
-        MS_Algorithm_Type   (),
-        M_solver            (),
-        M_jacobian          ()
+        multiscaleAlgorithm_Type   (),
+        M_solver                   (),
+        M_jacobian                 ()
 {
 
 #ifdef HAVE_LIFEV_DEBUG
@@ -68,7 +68,7 @@ MultiscaleAlgorithmNewton::setupData( const std::string& fileName )
     Debug( 8013 ) << "MultiscaleAlgorithmNewton::SetupData( fileName ) \n";
 #endif
 
-    MS_Algorithm_Type::setupData( fileName );
+    multiscaleAlgorithm_Type::setupData( fileName );
 
     GetPot dataFile( fileName );
 
@@ -85,7 +85,7 @@ MultiscaleAlgorithmNewton::subIterate()
     Debug( 8013 ) << "MultiscaleAlgorithmNewton::SubIterate() \n";
 #endif
 
-    MS_Algorithm_Type::subIterate();
+    multiscaleAlgorithm_Type::subIterate();
 
     // Verify tolerance
     if ( toleranceSatisfied() )
@@ -96,15 +96,15 @@ MultiscaleAlgorithmNewton::subIterate()
 
     M_multiscale->exportCouplingVariables( *M_couplingVariables );
 
-    MS_Vector_Type delta( *M_couplingResiduals );
+    multiscaleVector_Type delta( *M_couplingResiduals );
     delta = 0.0;
-    MS_Vector_Type minusCouplingResidual( *M_couplingResiduals );
+    multiscaleVector_Type minusCouplingResidual( *M_couplingResiduals );
     minusCouplingResidual = 0.0;
 
     for ( UInt subIT = 1; subIT <= M_subiterationsMaximumNumber; ++subIT )
     {
         // Compute the Jacobian (we completery delete the previous matrix)
-        M_jacobian.reset( new MS_Matrix_Type( M_couplingVariables->getMap(), 50, 0 ) );
+        M_jacobian.reset( new multiscaleMatrix_Type( M_couplingVariables->getMap(), 50, 0 ) );
         M_multiscale->exportJacobian( *M_jacobian );
         M_jacobian->GlobalAssemble();
         M_solver.setMatrix( *M_jacobian );
@@ -151,15 +151,6 @@ MultiscaleAlgorithmNewton::subIterate()
 
     multiscaleErrorCheck( Tolerance, "Newton algorithm residual: " + number2string( M_couplingResiduals->Norm2() ) +
                         " (required: " + number2string( M_tolerance ) + ")\n" );
-}
-
-void
-MultiscaleAlgorithmNewton::showMe()
-{
-    if ( M_displayer->isLeader() )
-    {
-        MS_Algorithm_Type::showMe();
-    }
 }
 
 } // Namespace multiscale

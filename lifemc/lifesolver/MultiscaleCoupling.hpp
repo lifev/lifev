@@ -60,7 +60,7 @@ public:
     //! @name Type definitions
     //@{
 
-    typedef std::vector< MS_Vector_PtrType >                     couplingVariablesContainer_Type;
+    typedef std::vector< multiscaleVectorPtr_Type >              couplingVariablesContainer_Type;
     typedef std::vector< Real >                                  timeContainer_Type;
 
     //@}
@@ -70,7 +70,7 @@ public:
     //@{
 
     //! Constructor
-    MultiscaleCoupling();
+    explicit MultiscaleCoupling();
 
     //! Destructor
     virtual ~MultiscaleCoupling() {}
@@ -97,7 +97,7 @@ public:
     /*!
      * @param couplingResiduals Global vector of variables
      */
-    virtual void exportCouplingResiduals( MS_Vector_Type& couplingResiduals ) = 0;
+    virtual void exportCouplingResiduals( multiscaleVector_Type& couplingResiduals ) = 0;
 
     //! Display some information about the coupling
     virtual void showMe();
@@ -118,13 +118,13 @@ public:
     /*!
      * @param couplingVariables Global vector of coupling variables
      */
-    void importCouplingVariables( const MS_Vector_Type& couplingVariables );
+    void importCouplingVariables( const multiscaleVector_Type& couplingVariables ) { importCouplingVector( couplingVariables, *M_localCouplingVariables[0] ); }
 
     //! Export the values of the coupling variables
     /*!
      * @param couplingVariables Global vector of coupling variables
      */
-    void exportCouplingVariables( MS_Vector_Type& couplingVariables );
+    void exportCouplingVariables( multiscaleVector_Type& couplingVariables ) { exportCouplingVector( *M_localCouplingVariables[0], couplingVariables ); }
 
     //! Extrapolate the values of the coupling variables for the next time step
     void extrapolateCouplingVariables();
@@ -133,20 +133,20 @@ public:
     /*!
      * @return true if a perturbation is imposed
      */
-    bool isPerturbed() const;
+    bool isPerturbed() const { return M_perturbedCoupling == -1 ? false : true; }
 
     //! Export the Jacobian matrix
     /*!
      * @param Jacobian Jacobian Matrix
      */
-    void exportJacobian( MS_Matrix_Type& jacobian );
+    void exportJacobian( multiscaleMatrix_Type& jacobian );
 
     //! Export the values of the Jacobian product
     /*!
      * @param deltaCouplingVariables variation of the coupling variables
      * @param jacobianProduct the product of the Jacobian by the varuatuib if tge coupling variables
      */
-    void exportJacobianProduct( const MS_Vector_Type& deltaCouplingVariables, MS_Vector_Type& jacobianProduct );
+    void exportJacobianProduct( const multiscaleVector_Type& deltaCouplingVariables, multiscaleVector_Type& jacobianProduct );
 
     //! save the coupling variables information on a file
     void saveSolution();
@@ -156,7 +156,7 @@ public:
      *  This method has to be called before the automatic destructor, in order
      *  to disconnect the coupling classes from the model classes.
      */
-    void clearModelsList();
+    void clearModelsList() { M_models.clear(); }
 
     //@}
 
@@ -168,19 +168,19 @@ public:
     /*!
      * @param id Coupling ID
      */
-    void setID( const UInt& id );
+    void setID( const UInt& id ) { M_ID = id; }
 
     //! Add a pointer to one of the models to couple
     /*!
      * @param model shared_ptr of the model
      */
-    void addModel( const MS_Model_PtrType& model );
+    void addModel( const multiscaleModelPtr_Type& model ) { M_models.push_back( model ); }
 
     //! Add a flag of one of the models to couple
     /*!
      * @param flag flag of the model
      */
-    void addFlag( const BCFlag& flag );
+    void addFlag( const BCFlag& flag ) { M_flags.push_back( flag ); }
 
     //! Add a flag of one of the models to couple
     /*!
@@ -195,13 +195,13 @@ public:
      *
      * @param globalData Global data container.
      */
-    void setGlobalData( const MS_GlobalDataContainer_PtrType& globalData );
+    void setGlobalData( const multiscaleDataPtr_Type& globalData ) { M_globalData = globalData; }
 
     //! Set the epetra communicator for the coupling
     /*!
      * @param comm Epetra communicator
      */
-    void setCommunicator( const MS_Comm_PtrType& comm );
+    void setCommunicator( const multiscaleCommPtr_Type& comm );
 
     //@}
 
@@ -213,22 +213,22 @@ public:
     /*!
      * @return global ID of the coupling
      */
-    const UInt& ID() const;
+    const UInt& ID() const { return M_ID; }
 
     //! Get the type of the coupling
     /*!
      * @return type of the coupling
      */
-    const couplings_Type& type() const;
+    const couplings_Type& type() const { return M_type; }
 
     //! Get the name of the coupling
     /*!
      * @return name of the coupling
      */
-    const std::string& couplingName() const;
+    const std::string& couplingName() const { return M_couplingName; }
 
     //! Get the number of models connected by the coupling
-    UInt modelsNumber() const;
+    UInt modelsNumber() const { return static_cast< UInt > ( M_models.size() ); }
 
     //! Get the model local ID through global ID
     /*!
@@ -242,39 +242,39 @@ public:
      * @param LocalID local ID of the model
      * @return Pointer to the model
      */
-    MS_Model_PtrType model( const UInt& localID ) const;
+    multiscaleModelPtr_Type model( const UInt& localID ) const { return M_models[localID]; }
 
     //! Get the model connected by the coupling through local ID
     /*!
      * @param LocalID local ID of the model
      * @return Coupling flag of the model
      */
-    const BCFlag& flag( const UInt& localID ) const;
+    const BCFlag& flag( const UInt& localID ) const { return M_flags[localID]; }
 
     //! Get the number of the coupling variables
     /*!
      * @return number of the coupling variables
      */
-    const UInt& couplingVariablesNumber() const;
+    const UInt& couplingVariablesNumber() const { return M_couplingIndex.first; }
 
     //! Get the perturbed coupling.
     /*!
      * If it is unperturbed it returns -1.
      * @return the localID of the perturbed coupling
      */
-    const Int& perturbedCoupling() const;
+    const Int& perturbedCoupling() const { return M_perturbedCoupling; }
 
     //! Get the local residual.
     /*!
      * @return the local residual of the coupling
      */
-    const MS_Vector_Type& residual() const;
+    const multiscaleVector_Type& residual() const { return *M_localCouplingResiduals; }
 
     //! Get the time interpolation order.
     /*!
      * @return the value of the time interpolation order.
      */
-    const UInt& timeInterpolationOrder() const;
+    const UInt& timeInterpolationOrder() const { return M_timeInterpolationOrder; }
 
 
     //@}
@@ -289,13 +289,13 @@ protected:
      * @param LocalCouplingVariableID local coupling variable (perturbed)
      * @return list of models affected by the perturbation
      */
-    virtual MS_ModelsVector_Type listOfPerturbedModels( const UInt& localCouplingVariableID ) = 0;
+    virtual multiscaleModelsVector_Type listOfPerturbedModels( const UInt& localCouplingVariableID ) = 0;
 
     //! Insert constant coefficients into the Jacobian matrix
     /*!
      * @param Jacobian the Jacobian matrix
      */
-    virtual void insertJacobianConstantCoefficients( MS_Matrix_Type& jacobian ) = 0;
+    virtual void insertJacobianConstantCoefficients( multiscaleMatrix_Type& jacobian ) = 0;
 
     //! Insert the Jacobian coefficient(s) depending on a perturbation of the model, due to a specific variable (the column)
     /*!
@@ -304,7 +304,7 @@ protected:
      * @param ID the global ID of the model which is perturbed by the variable
      * @param SolveLinearSystem a flag to which determine if the linear system has to be solved
      */
-    virtual void insertJacobianDeltaCoefficients( MS_Matrix_Type& jacobian, const UInt& column, const UInt& ID, bool& linearSystemSolved ) = 0;
+    virtual void insertJacobianDeltaCoefficients( multiscaleMatrix_Type& jacobian, const UInt& column, const UInt& ID, bool& linearSystemSolved ) = 0;
 
     //! Display some information about the coupling
     /*!
@@ -326,7 +326,7 @@ protected:
      * @param globalVector the global vector
      * @param localVector the local vector
      */
-    void importCouplingVector( const MS_Vector_Type& globalVector, MS_Vector_Type& localVector );
+    void importCouplingVector( const multiscaleVector_Type& globalVector, multiscaleVector_Type& localVector );
 
     //! Export the content of the Local Vector in the Global vector
     /*!
@@ -334,7 +334,7 @@ protected:
      * @param localVector the local vector
      * @param globalVector the global vector
      */
-    void exportCouplingVector( const MS_Vector_Type& localVector, MS_Vector_Type& globalVector );
+    void exportCouplingVector( const multiscaleVector_Type& localVector, multiscaleVector_Type& globalVector );
 
     //! Lagrange interpolation/extrapolation of the coupling variables at selected time.
     /*!
@@ -343,13 +343,13 @@ protected:
      * @param interpolatedCouplingVariables variables interpolated/extrapolated at time t
      */
     void interpolateCouplingVariables( const timeContainer_Type& timeContainer, const Real& t,
-                                       MS_Vector_Type& interpolatedCouplingVariables );
+                                       multiscaleVector_Type& interpolatedCouplingVariables );
 
     //! Display and error message for the specific model
     /*!
      * @param model shared_ptr to the specific model
      */
-    void switchErrorMessage( const MS_Model_PtrType& model );
+    void switchErrorMessage( const multiscaleModelPtr_Type& model );
 
     //@}
 
@@ -358,22 +358,22 @@ protected:
     UInt                                 M_ID;
     couplings_Type                       M_type;
 
-    MS_ModelsVector_Type                 M_models;
+    multiscaleModelsVector_Type          M_models;
     std::string                          M_couplingName;
     std::vector< BCFlag >                M_flags;
 
-    MS_GlobalDataContainer_PtrType       M_globalData;
+    multiscaleDataPtr_Type               M_globalData;
 
     std::pair< UInt, UInt >              M_couplingIndex;
 
     couplingVariablesContainer_Type      M_localCouplingVariables;
-    MS_Vector_PtrType                    M_localCouplingResiduals;
+    multiscaleVectorPtr_Type             M_localCouplingResiduals;
 
     UInt                                 M_timeInterpolationOrder;
 
     Int                                  M_perturbedCoupling;
 
-    MS_Comm_PtrType                      M_comm;
+    multiscaleCommPtr_Type               M_comm;
     boost::shared_ptr< Displayer >       M_displayer;
 
 private:

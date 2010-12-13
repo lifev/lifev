@@ -68,7 +68,7 @@ public:
      * be constructed using an empty constructor which calls (as first operation)
      * this empty constructor.
      */
-    MultiscaleModel();
+    explicit MultiscaleModel();
 
     //! Destructor
     virtual ~MultiscaleModel() {}
@@ -152,7 +152,7 @@ public:
      *  This method has to be called before the automatic destructor, in order
      *  to disconnect the coupling classes from the model classes.
      */
-    void clearCouplingsList();
+    void clearCouplingsList() { M_couplings.clear(); }
 
     //@}
 
@@ -164,13 +164,13 @@ public:
     /*!
      * @param id Model ID
      */
-    void setID( const UInt& id );
+    void setID( const UInt& id ) { M_ID = id; }
 
     //! Add a pointer to one of the couplings which couple the model
     /*!
      * @param coupling shared_ptr of the coupling
      */
-    void addCoupling( const MS_Coupling_PtrType& coupling );
+    void addCoupling( const multiscaleCouplingPtr_Type& coupling ) { M_couplings.push_back( coupling ); }
 
     //! Setup the global data of the model.
     /*!
@@ -179,7 +179,7 @@ public:
      *
      * @param globalData Global data container.
      */
-    void setGlobalData( const MS_GlobalDataContainer_PtrType& globalData );
+    void setGlobalData( const multiscaleDataPtr_Type& globalData ) { M_globalData = globalData; }
 
     //! Scale, rotate and translate the Model in the 3D space
     /*!
@@ -196,7 +196,7 @@ public:
     /*!
      * @param comm Epetra communicator
      */
-    void setCommunicator( const MS_Comm_PtrType& comm );
+    void setCommunicator( const multiscaleCommPtr_Type& comm );
 
     //@}
 
@@ -208,38 +208,38 @@ public:
     /*!
      * @return global ID of the model
      */
-    const UInt& ID() const;
+    const UInt& ID() const { return M_ID; }
 
     //! Get the type of the model
     /*!
      * @return type of the model
      */
-    const models_Type& type() const;
+    const models_Type& type() const { return M_type; }
 
     //! Get one available flag by id
     /*!
      * @param id id of the boundary flag
      * @return flag
      */
-    const BCFlag& flag( const UInt& id ) const;
+    const BCFlag& flag( const UInt& id ) const { return M_flags[id]; }
 
     //! Get the flag vector of the model
     /*!
      * @return vector of flags available for coupling
      */
-    const std::vector< BCFlag >& flags() const;
+    const std::vector< BCFlag >& flags() const { return M_flags; }
 
     //! Get the name of the model
     /*!
      * @return name of the model
      */
-    const std::string& modelName() const;
+    const std::string& modelName() const { return M_modelName; }
 
     //! Get the number of couplings connecting the model
     /*!
      * @return number of couplings connecting the model
      */
-    UInt couplingsNumber() const;
+    UInt couplingsNumber() const { return static_cast< UInt > ( M_couplings.size() ); }
 
     //! Get the coupling local ID through global ID
     /*!
@@ -253,13 +253,13 @@ public:
      * @param ID local ID of the coupling
      * @return Pointer to the coupling
      */
-    MS_Coupling_PtrType coupling( const UInt& localID ) const;
+    multiscaleCouplingPtr_Type coupling( const UInt& localID ) const { return M_couplings[localID]; }
 
     //! Get the global data of the model.
     /*!
      * @return Global data container.
      */
-    const MS_GlobalDataContainer_PtrType& globalData() const;
+    const multiscaleDataPtr_Type& globalData() const { return M_globalData; }
 
     //@}
 
@@ -270,17 +270,17 @@ protected:
     UInt                                 M_ID;                 // Global ID of the model
     models_Type                          M_type;               // Type of the model (depends on the derived class)
 
-    MS_CouplingsVector_Type              M_couplings;          // Container for the couplings
+    multiscaleCouplingsVector_Type       M_couplings;          // Container for the couplings
     std::string                          M_modelName;          // Name of the model
     std::vector< BCFlag >                M_flags;              // Free flags, available for the couplings
 
-    MS_GlobalDataContainer_PtrType       M_globalData;         // GlobalDataContainer
+    multiscaleDataPtr_Type               M_globalData;         // GlobalDataContainer
 
     boost::array< Real, NDIM >           M_geometryScale;      // Global geometrical scale
     boost::array< Real, NDIM >           M_geometryRotate;     // Global geometrical rotation
     boost::array< Real, NDIM >           M_geometryTranslate;  // Global geometrical translation
 
-    MS_Comm_PtrType                      M_comm;               // Communicator
+    multiscaleCommPtr_Type               M_comm;               // Communicator
     boost::shared_ptr< Displayer >       M_displayer;          // Displayer
 
 private:

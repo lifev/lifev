@@ -45,10 +45,10 @@ namespace multiscale
 // Constructors & Destructor
 // ===================================================
 MultiscaleAlgorithmAitken::MultiscaleAlgorithmAitken() :
-        MS_Algorithm_Type   (),
-        M_methodMap         (),
-        M_method            (),
-        M_generalizedAitken ()
+        multiscaleAlgorithm_Type   (),
+        M_methodMap                (),
+        M_method                   (),
+        M_generalizedAitken        ()
 {
 
 #ifdef HAVE_LIFEV_DEBUG
@@ -74,7 +74,7 @@ MultiscaleAlgorithmAitken::setupData( const std::string& fileName )
     Debug( 8011 ) << "MultiscaleAlgorithmAitken::SetupData( algorithm ) \n";
 #endif
 
-    MS_Algorithm_Type::setupData( fileName );
+    multiscaleAlgorithm_Type::setupData( fileName );
 
     GetPot dataFile( fileName );
 
@@ -94,7 +94,7 @@ MultiscaleAlgorithmAitken::subIterate()
     Debug( 8011 ) << "MultiscaleAlgorithmAitken::SubIterate() \n";
 #endif
 
-    MS_Algorithm_Type::subIterate();
+    multiscaleAlgorithm_Type::subIterate();
 
     // Verify tolerance
     if ( toleranceSatisfied() )
@@ -176,7 +176,7 @@ MultiscaleAlgorithmAitken::showMe()
 {
     if ( M_displayer->isLeader() )
     {
-        MS_Algorithm_Type::showMe();
+        multiscaleAlgorithm_Type::showMe();
 
         std::cout << "Aitken Method       = " << Enum2String( M_method, M_methodMap ) << std::endl;
         std::cout << std::endl << std::endl;
