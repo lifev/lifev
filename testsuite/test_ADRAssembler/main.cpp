@@ -280,6 +280,8 @@ main( int argc, char** argv )
     linearSolver.setMatrix(*systemMatrix);
     if (verbose) std::cout << " done ! " << std::endl;
 
+    linearSolver.setCommunicator(Comm);
+
 // Definition of the solution
 
     if (verbose) std::cout << " -- Defining the solution ... " << std::flush;

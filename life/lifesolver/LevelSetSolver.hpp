@@ -347,6 +347,8 @@ LevelSetSolver( fespace_ptrType fespace, fespace_ptrType betaFESpace )
 {
     M_adrAssembler.setup(fespace,betaFESpace);
     M_ipAssembler.setup(fespace,betaFESpace);
+    
+    M_linearSolver.setCommunicator(fespace->map().CommPtr());
 }
 
 // ===================================================
