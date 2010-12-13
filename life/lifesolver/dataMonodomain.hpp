@@ -120,7 +120,7 @@ public:
     const Real&        Chi()            const {return M_volumeSurfaceRatio;}
 
     //! lambda, key parameter in the derivation of Monodomain equations
-    const Real&        lambda()            const {return M_lambda;}
+    const Real&        lambda()            const {return M_conductivityRatio;}
 
     //! fiber File
     string      fibers_file()    const {return M_fibersFile;}
@@ -161,7 +161,7 @@ private:
     Real        M_membraneCapacitance;
     Real        M_transversalConductivity;
     Real        M_volumeSurfaceRatio;
-    Real        M_lambda;
+    Real        M_conductivityRatio;
 
     std::string M_fibersDirectory;
     std::string M_fibersFile;

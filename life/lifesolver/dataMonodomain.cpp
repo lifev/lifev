@@ -67,7 +67,7 @@ DataMonodomain::DataMonodomain() :
     M_membraneCapacitance           ( ),
     M_transversalConductivity       ( ),
     M_volumeSurfaceRatio            ( ),
-    M_lambda                        ( ),
+    M_conductivityRatio             ( ),
     M_fibersDirectory               ( ),
     M_fibersFile                    ( ),
     M_postProcessingDirectory       ( ),
@@ -87,7 +87,7 @@ DataMonodomain::DataMonodomain( const DataMonodomain& dataMonodomain ) :
     M_membraneCapacitance           ( dataMonodomain.M_membraneCapacitance ),
     M_transversalConductivity       ( dataMonodomain.M_transversalConductivity ),
     M_volumeSurfaceRatio            ( dataMonodomain.M_volumeSurfaceRatio ),
-    M_lambda                        ( dataMonodomain.M_lambda ),
+    M_conductivityRatio             ( dataMonodomain.M_conductivityRatio ),
     M_fibersDirectory               ( dataMonodomain.M_fibersDirectory ),
     M_fibersFile                    ( dataMonodomain.M_fibersFile ),
     M_postProcessingDirectory       ( dataMonodomain.M_postProcessingDirectory ),
@@ -112,7 +112,7 @@ DataMonodomain::operator=( const DataMonodomain& dataMonodomain )
         M_membraneCapacitance           = dataMonodomain.M_membraneCapacitance;
         M_transversalConductivity       = dataMonodomain.M_transversalConductivity;
         M_volumeSurfaceRatio            = dataMonodomain.M_volumeSurfaceRatio;
-        M_lambda                        = dataMonodomain.M_lambda;
+        M_conductivityRatio             = dataMonodomain.M_conductivityRatio;
         M_fibersDirectory               = dataMonodomain.M_fibersDirectory;
         M_fibersFile                    = dataMonodomain.M_fibersFile;
         M_postProcessingDirectory       = dataMonodomain.M_postProcessingDirectory;
@@ -143,7 +143,7 @@ DataMonodomain::setup(  const GetPot& dataFile )
         M_longitudinalConductivity = dataFile("electric/physics/sigmal", 1.2e-3);  // 1.2e-3  [1/Ohm/cm]   sigmal_i*sigmal_e/(sigmal_i+sigmal_e)    ColliPavarinoTaccardi2005
         M_transversalConductivity  = dataFile("electric/physics/sigmat", 2.56e-4); // 2.56e-4 [1/Ohm/cm]   sigmat_i*sigmat_e/(sigmat_i+sigmat_e)    ColliPavarinoTaccardi2005
     }
-    M_lambda  =  dataFile("electric/physics/lambda", 0.66667); // 0.66667 [adim]       sigmal_e/sigmal_i
+    M_conductivityRatio            =  dataFile("electric/physics/lambda", 0.66667); // 0.66667 [adim]       sigmal_e/sigmal_i
     M_heartDiffusionFactor         = dataFile("electric/physics/heartDiffusionFunctor",0);
     M_postProcessingDirectory      = dataFile("electric/miscellaneous/post_dir","./");
     M_uOrder                       = dataFile( "electric/space_discretization/u_order", "P1");
