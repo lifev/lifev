@@ -39,6 +39,8 @@
 
 namespace LifeV
 {
+namespace multiscale
+{
 
 // ===================================================
 // Constructors & Destructor
@@ -302,9 +304,9 @@ MultiscaleModelFSI3D::saveSolution()
     if ( M_data->dataFluid()->dataTime()->isLastTimeStep() )
     {
         if ( M_FSIoperator->isFluid() )
-            ( MS_DynamicCast< hdf5IOFile_Type >( M_exporterFluid ) )->CloseFile();
+            ( multiscaleDynamicCast< hdf5IOFile_Type >( M_exporterFluid ) )->CloseFile();
         if ( M_FSIoperator->isSolid() )
-            ( MS_DynamicCast< hdf5IOFile_Type >( M_exporterSolid ) )->CloseFile();
+            ( multiscaleDynamicCast< hdf5IOFile_Type >( M_exporterSolid ) )->CloseFile();
     }
 #endif
 
@@ -482,7 +484,7 @@ MultiscaleModelFSI3D::boundaryStress( const BCFlag& flag, const stress_Type& str
 
     default:
 
-        std::cout << "ERROR: Invalid stress type [" << Enum2String( stressType, MS_stressesMap ) << "]" << std::endl;
+        std::cout << "ERROR: Invalid stress type [" << Enum2String( stressType, multiscaleStressesMap ) << "]" << std::endl;
 
         return 0.0;
     }
@@ -540,7 +542,7 @@ MultiscaleModelFSI3D::boundaryDeltaStress( const BCFlag& flag, bool& solveLinear
 
     default:
 
-        std::cout << "ERROR: Invalid stress type [" << Enum2String( stressType, MS_stressesMap ) << "]" << std::endl;
+        std::cout << "ERROR: Invalid stress type [" << Enum2String( stressType, multiscaleStressesMap ) << "]" << std::endl;
 
         return 0.0;
     }
@@ -636,8 +638,8 @@ MultiscaleModelFSI3D::setupExporter( IOFilePtr_Type& exporter, const GetPot& dat
 #endif
         exporter.reset( new ensightIOFile_Type( dataFile, label ) );
 
-    exporter->setPrefix( "Step_" + number2string( MS_ProblemStep ) + "_Model_" + number2string( M_ID ) + label );
-    exporter->setDirectory( MS_ProblemFolder );
+    exporter->setPrefix( "Step_" + number2string( multiscaleProblemStep ) + "_Model_" + number2string( M_ID ) + label );
+    exporter->setDirectory( multiscaleProblemFolder );
 }
 
 void
@@ -651,8 +653,8 @@ MultiscaleModelFSI3D::setupImporter( IOFilePtr_Type& importer, const GetPot& dat
 #endif
         importer.reset( new ensightIOFile_Type( dataFile, label ) );
 
-    importer->setPrefix( "Step_" + number2string( MS_ProblemStep - 1 ) + "_Model_" + number2string( M_ID ) + label );
-    importer->setDirectory( MS_ProblemFolder );
+    importer->setPrefix( "Step_" + number2string( multiscaleProblemStep - 1 ) + "_Model_" + number2string( M_ID ) + label );
+    importer->setDirectory( multiscaleProblemFolder );
 }
 
 void
@@ -691,7 +693,7 @@ MultiscaleModelFSI3D::initializeSolution()
     Debug( 8140 ) << "MultiscaleModelFSI3D::InitializeSolution() \n";
 #endif
 
-    if ( MS_ProblemStep > 0 )
+    if ( multiscaleProblemStep > 0 )
     {
         M_importerFluid->setMeshProcId( M_FSIoperator->uFESpace().mesh(), M_FSIoperator->uFESpace().map().Comm().MyPID() );
         M_importerSolid->setMeshProcId( M_FSIoperator->dFESpace().mesh(), M_FSIoperator->dFESpace().map().Comm().MyPID() );
@@ -795,4 +797,5 @@ MultiscaleModelFSI3D::bcFunctionDeltaOne( const Real& /*t*/, const Real& /*x*/, 
     return 1.;
 }
 
+} // Namespace multiscale
 } // Namespace LifeV

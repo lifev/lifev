@@ -44,6 +44,8 @@
 
 namespace LifeV
 {
+namespace multiscale
+{
 
 //! MultiscaleCouplingFlowRateStress - FlowRate-Stress coupling condition
 /*!
@@ -187,7 +189,7 @@ template< class ModelType >
 inline void
 MultiscaleCouplingFlowRateStress::imposeFlowRate3D( const UInt& i )
 {
-    ModelType *model = MS_DynamicCast< ModelType >( M_models[i] );
+    ModelType *model = multiscaleDynamicCast< ModelType >( M_models[i] );
 
     model->bcInterface().addBC( "CouplingFlowRate_Model_" + number2string( model->ID() ) + "_Flag_" + number2string( M_flags[i] ), M_flags[i], Flux, Full, M_baseFlowRate3D, 3 );
 }
@@ -196,7 +198,7 @@ template< class ModelType >
 inline void
 MultiscaleCouplingFlowRateStress::imposeStress3D( const UInt& i )
 {
-    ModelType *model = MS_DynamicCast< ModelType >( M_models[i] );
+    ModelType *model = multiscaleDynamicCast< ModelType >( M_models[i] );
 
     model->bcInterface().addBC( "CouplingStress_Model_" + number2string( model->ID() ) + "_Flag_" + number2string( M_flags[i] ), M_flags[i], Natural, Normal, M_baseStress3D );
 }
@@ -205,7 +207,7 @@ template< class ModelType >
 inline void
 MultiscaleCouplingFlowRateStress::imposeFlowRate1D( const UInt& i )
 {
-    ModelType *model = MS_DynamicCast< ModelType >( M_models[i] );
+    ModelType *model = multiscaleDynamicCast< ModelType >( M_models[i] );
 
     model->bcInterface().setBC( (M_flags[i] == 0) ? OneD_left : OneD_right, OneD_first, OneD_Q, M_baseFlowRate1D );
 }
@@ -214,11 +216,12 @@ template< class ModelType >
 inline void
 MultiscaleCouplingFlowRateStress::imposeStress1D( const UInt& i )
 {
-    ModelType *model = MS_DynamicCast< ModelType >( M_models[i] );
+    ModelType *model = multiscaleDynamicCast< ModelType >( M_models[i] );
 
     model->bcInterface().setBC( (M_flags[i] == 0) ? OneD_left : OneD_right, OneD_first, OneD_P, M_baseStress1D );
 }
 
+} // Namespace multiscale
 } // Namespace LifeV
 
 #endif /* MultiscaleCouplingFlowRateStress_H */

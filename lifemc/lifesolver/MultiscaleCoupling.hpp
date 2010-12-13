@@ -43,6 +43,8 @@
 
 namespace LifeV
 {
+namespace multiscale
+{
 
 //! MultiscaleCoupling - The MultiScale Physical Coupling
 /*!
@@ -386,6 +388,7 @@ private:
     //@}
 };
 
+} // Namespace multiscale
 } // Namespace LifeV
 
 #endif /* MultiscaleCoupling_H */

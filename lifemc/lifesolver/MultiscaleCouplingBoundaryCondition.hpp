@@ -47,6 +47,8 @@
 
 namespace LifeV
 {
+namespace multiscale
+{
 
 //! MultiscaleCouplingBoundaryCondition - Coupling condition for standard boundary conditions
 /*!
@@ -175,7 +177,7 @@ template< class ModelType >
 inline void
 MultiscaleCouplingBoundaryCondition::applyBoundaryConditions1D( const UInt& i )
 {
-    ModelType *model = MS_DynamicCast< ModelType >( M_models[i] );
+    ModelType *model = multiscaleDynamicCast< ModelType >( M_models[i] );
 
     for ( UInt j( 0 ); j < M_listSize; ++j )
     {
@@ -191,7 +193,7 @@ template< class ModelType >
 inline void
 MultiscaleCouplingBoundaryCondition::applyBoundaryConditions3D( const UInt& i )
 {
-    ModelType *model = MS_DynamicCast< ModelType >( M_models[i] );
+    ModelType *model = multiscaleDynamicCast< ModelType >( M_models[i] );
 
     for ( UInt j( 0 ); j < M_listSize; ++j )
     {
@@ -204,6 +206,7 @@ MultiscaleCouplingBoundaryCondition::applyBoundaryConditions3D( const UInt& i )
     }
 }
 
+} // Namespace multiscale
 } // Namespace LifeV
 
 #endif /* MultiscaleCouplingBoundaryCondition_H */

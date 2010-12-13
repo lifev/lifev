@@ -38,6 +38,8 @@
 
 namespace LifeV
 {
+namespace multiscale
+{
 
 // ===================================================
 // Constructors & Destructor
@@ -147,8 +149,8 @@ MultiscaleAlgorithmNewton::subIterate()
 
     save( M_subiterationsMaximumNumber, M_couplingResiduals->Norm2() );
 
-    MS_ErrorCheck( MS_Tolerance, "Newton algorithm residual: " + number2string( M_couplingResiduals->Norm2() ) +
-                   " (required: " + number2string( M_tolerance ) + ")\n" );
+    multiscaleErrorCheck( Tolerance, "Newton algorithm residual: " + number2string( M_couplingResiduals->Norm2() ) +
+                        " (required: " + number2string( M_tolerance ) + ")\n" );
 }
 
 void
@@ -160,4 +162,5 @@ MultiscaleAlgorithmNewton::showMe()
     }
 }
 
+} // Namespace multiscale
 } // Namespace LifeV

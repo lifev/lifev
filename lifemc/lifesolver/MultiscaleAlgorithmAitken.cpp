@@ -38,6 +38,8 @@
 
 namespace LifeV
 {
+namespace multiscale
+{
 
 // ===================================================
 // Constructors & Destructor
@@ -165,8 +167,8 @@ MultiscaleAlgorithmAitken::subIterate()
 
     save( M_subiterationsMaximumNumber, M_couplingResiduals->Norm2() );
 
-    MS_ErrorCheck( MS_Tolerance, "Aitken algorithm residual: " + number2string( M_couplingResiduals->Norm2() ) +
-                   " (required: " + number2string( M_tolerance ) + ")\n" );
+    multiscaleErrorCheck( Tolerance, "Aitken algorithm residual: " + number2string( M_couplingResiduals->Norm2() ) +
+                        " (required: " + number2string( M_tolerance ) + ")\n" );
 }
 
 void
@@ -181,4 +183,5 @@ MultiscaleAlgorithmAitken::showMe()
     }
 }
 
+} // Namespace multiscale
 } // Namespace LifeV

@@ -56,6 +56,8 @@
 
 namespace LifeV
 {
+namespace multiscale
+{
 
 //! MultiscaleModelFluid3D - MultiScale model for 3D Fluid simulations
 /*!
@@ -399,6 +401,7 @@ inline MS_Model_Type* createMultiscaleModelFluid3D()
     return new MultiscaleModelFluid3D();
 }
 
+} // Namespace multiscale
 } // Namespace LifeV
 
 #endif /* MultiscaleModelFluid3D_H */

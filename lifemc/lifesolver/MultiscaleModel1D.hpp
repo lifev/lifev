@@ -72,6 +72,8 @@
 
 namespace LifeV
 {
+namespace multiscale
+{
 
 //! MultiscaleModel1D - MultiScale model for 1D Fluid simulations
 /*!
@@ -459,6 +461,7 @@ inline MS_Model_Type* createMultiscaleModelOneDimensional()
     return new MultiscaleModel1D();
 }
 
+} // Namespace multiscale
 } // Namespace LifeV
 
 #endif /* MultiscaleModel1D_H */

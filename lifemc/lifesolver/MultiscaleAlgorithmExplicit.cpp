@@ -38,6 +38,8 @@
 
 namespace LifeV
 {
+namespace multiscale
+{
 
 // ===================================================
 // Constructors & Destructor
@@ -94,4 +96,5 @@ MultiscaleAlgorithmExplicit::showMe()
     }
 }
 
+} // Namespace multiscale
 } // Namespace LifeV

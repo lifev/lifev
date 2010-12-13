@@ -38,10 +38,12 @@
 
 namespace LifeV
 {
+namespace multiscale
+{
 
-std::string MS_ProblemFolder = "./";
-UInt        MS_ProblemStep   = 0;
-bool        MS_ExitFlag      = EXIT_SUCCESS;
+std::string multiscaleProblemFolder = "./";
+UInt        multiscaleProblemStep   = 0;
+bool        multiscaleExitFlag      = EXIT_SUCCESS;
 
 // ===================================================
 // Constructors
@@ -60,7 +62,7 @@ MultiscaleSolver::MultiscaleSolver() :
 #endif
 
     //Define the maps of MS objects
-    MS_MapsDefinition();
+    multiscaleMapsDefinition();
 
     //Register the objects
     MS_Model_Factory::instance().registerProduct   (  MultiScale,          &createMultiscaleModelMultiscale );
@@ -104,14 +106,14 @@ MultiscaleSolver::setupProblem( const std::string& fileName, const std::string& 
     GetPot dataFile( fileName );
 
     // Define the folder containing the problem
-    MS_ProblemFolder = problemFolder;
+    multiscaleProblemFolder = problemFolder;
 
     // Define the step of the problem
     if ( dataFile( "Solver/Restart/Restart", false ) )
-        MS_ProblemStep = dataFile( "Solver/Restart/RestartFromStepNumber", 0 ) + 1;
+        multiscaleProblemStep = dataFile( "Solver/Restart/RestartFromStepNumber", 0 ) + 1;
 
     // Create the main model and set the communicator
-    M_model = MS_Model_PtrType( MS_Model_Factory::instance().createObject( MS_modelsMap[ dataFile( "Problem/ProblemType", "MultiScale" ) ] ) );
+    M_model = MS_Model_PtrType( MS_Model_Factory::instance().createObject( multiscaleModelsMap[ dataFile( "Problem/ProblemType", "MultiScale" ) ] ) );
     M_model->setCommunicator( M_comm );
 
     // Setup data
@@ -125,7 +127,7 @@ MultiscaleSolver::setupProblem( const std::string& fileName, const std::string& 
     // Algorithm parameters
     if ( M_model->type() == MultiScale )
     {
-        M_algorithm = MS_Algorithm_PtrType( MS_Algorithm_Factory::instance().createObject( MS_algorithmsMap[ dataFile( "Solver/Algorithm/AlgorithmType", "Newton" ) ] ) );
+        M_algorithm = MS_Algorithm_PtrType( MS_Algorithm_Factory::instance().createObject( multiscaleAlgorithmsMap[ dataFile( "Solver/Algorithm/AlgorithmType", "Newton" ) ] ) );
         M_algorithm->setCommunicator( M_comm );
         M_algorithm->setModel( M_model );
         M_algorithm->setupData( fileName );
@@ -142,7 +144,7 @@ MultiscaleSolver::solveProblem( const Real& externalResidual )
 #endif
 
     // save initial solution if it is the very first time step
-    if ( !MS_ProblemStep )
+    if ( !multiscaleProblemStep )
         M_model->saveSolution();
 
     // Move to the "true" first time-step
@@ -192,11 +194,10 @@ MultiscaleSolver::solveProblem( const Real& externalResidual )
     // Redisual check
     Real algorithmResidual( M_algorithm->computeResidual() );
     if ( externalResidual >= 0. && std::abs( externalResidual - algorithmResidual ) > 1e-8 )
-        MS_ErrorCheck( MS_Residual,
-                       "Algorithm Residual: " + number2string( algorithmResidual ) +
+        multiscaleErrorCheck( Residual, "Algorithm Residual: " + number2string( algorithmResidual ) +
                        " (External Residual: " + number2string( externalResidual ) + ")\n" );
 
-    return MS_ExitFlag;
+    return multiscaleExitFlag;
 }
 
 void
@@ -207,8 +208,8 @@ MultiscaleSolver::showMe()
         std::cout << std::endl << std::endl
                   << "=============== MultiScale Solver Information ===============" << std::endl << std::endl;
 
-        std::cout << "Problem folder                = " << MS_ProblemFolder << std::endl
-                  << "Problem step                  = " << MS_ProblemStep << std::endl << std::endl;
+        std::cout << "Problem folder                = " << multiscaleProblemFolder << std::endl
+                  << "Problem step                  = " << multiscaleProblemStep << std::endl << std::endl;
 
         M_globalData->showMe();
 
@@ -223,4 +224,5 @@ MultiscaleSolver::showMe()
         std::cout << "=============================================================" << std::endl << std::endl;
 }
 
+} // Namespace multiscale
 } // Namespace LifeV

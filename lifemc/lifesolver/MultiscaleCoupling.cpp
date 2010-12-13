@@ -38,8 +38,10 @@
 
 namespace LifeV
 {
+namespace multiscale
+{
 
-std::map< std::string, couplings_Type > MS_couplingsMap;
+std::map< std::string, couplings_Type > multiscaleCouplingsMap;
 
 UInt MultiscaleCoupling::M_couplingsNumber = 0;
 
@@ -95,7 +97,7 @@ MultiscaleCoupling::showMe()
 {
     std::cout << "Coupling id         = " << M_ID << std::endl
               << "Coupling name       = " << M_couplingName << std::endl
-              << "Coupling type       = " << Enum2String( M_type, MS_couplingsMap ) << std::endl << std::endl;
+              << "Coupling type       = " << Enum2String( M_type, multiscaleCouplingsMap ) << std::endl << std::endl;
 
     std::cout << "Models number       = " << modelsNumber() << std::endl;
     std::cout << "Models ID(s)        = ";
@@ -104,7 +106,7 @@ MultiscaleCoupling::showMe()
     std::cout << std::endl;
     std::cout << "Models type(s)      = ";
     for ( UInt i( 0 ); i < modelsNumber(); ++i )
-        std::cout << Enum2String( M_models[i]->type(), MS_modelsMap ) << " ";
+        std::cout << Enum2String( M_models[i]->type(), multiscaleModelsMap ) << " ";
     std::cout << std::endl;
     std::cout << "Flags list          = ";
     for ( UInt i( 0 ); i < modelsNumber(); ++i )
@@ -247,12 +249,12 @@ MultiscaleCoupling::saveSolution()
 
     if ( M_comm->MyPID() == 0 )
     {
-        std::string filename = MS_ProblemFolder + "Step_" + number2string( MS_ProblemStep ) + "_Coupling_" + number2string( M_ID ) + ".mfile";
+        std::string filename = multiscaleProblemFolder + "Step_" + number2string( multiscaleProblemStep ) + "_Coupling_" + number2string( M_ID ) + ".mfile";
 
         if ( M_globalData->dataTime()->isFirstTimeStep() )
         {
             output.open( filename.c_str(), std::ios::trunc );
-            output << "% Coupling Type: " << Enum2String( M_type, MS_couplingsMap ) << std::endl << std::endl;
+            output << "% Coupling Type: " << Enum2String( M_type, multiscaleCouplingsMap ) << std::endl << std::endl;
             output << "% TIME                     ID   FLAG FLUX                     STRESS                    S. PRESSURE              D. PRESSURE" << std::endl;
         }
         else
@@ -458,8 +460,9 @@ MultiscaleCoupling::interpolateCouplingVariables( const timeContainer_Type& time
 void
 MultiscaleCoupling::switchErrorMessage( const MS_Model_PtrType& model )
 {
-    MS_ErrorCheck( MS_ModelType, "Invalid model type ["  + Enum2String( model->type(), MS_modelsMap ) +
-                   "] for coupling type [" + Enum2String( M_type, MS_couplingsMap ) +"]\n" );
+    multiscaleErrorCheck( ModelType, "Invalid model type ["  + Enum2String( model->type(), multiscaleModelsMap ) +
+                        "] for coupling type [" + Enum2String( M_type, multiscaleCouplingsMap ) +"]\n" );
 }
 
+} // Namespace multiscale
 } // Namespace LifeV
