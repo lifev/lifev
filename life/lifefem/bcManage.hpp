@@ -676,7 +676,7 @@ bcManage( Real (*mu)(Real time,Real x, Real y, Real z, Real u),
         case Mixte:  // Mixte boundary conditions (Robin)
 
             if (bcHandler[ i ].isUDep())
-                ERROR_MSG( "This BC mode is not yet implemented for this setting" )    //not implemented yet
+                ERROR_MSG( "This BC mode is not yet implemented for this setting" );    //not implemented yet
                 else
                     bcMixteManage( matrix, rhsRepeated, mesh, dof, bcHandler[ i ], currentBdFE, time, bcHandler.offset() );
             break;
