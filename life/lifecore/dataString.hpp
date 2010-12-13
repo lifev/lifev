@@ -148,9 +148,13 @@ public:
 
     Int value( const std::string& str ) const;
     //@}
-};
+
 private:
-std::string M_title;
-std::vector<DataString> M_list;
+    //! @name Private data members
+    //@{
+    std::string M_title;
+    std::vector<DataString> M_list;
+    //@}
+};
 }
 #endif // DATA_STRING_H
