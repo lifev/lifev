@@ -117,7 +117,7 @@ public:
     HDF5Filter3DMesh(const GetPot& dataFile, const std::string& prefix);
 
     //! Destructor for HDF5Filter3DMesh
-    ~HDF5Filter3DMesh() {}
+    virtual ~HDF5Filter3DMesh() {}
 
     //@}
 
@@ -593,13 +593,13 @@ void HDF5Filter3DMesh<MeshType>::postProcess(const Real& time)
         this->M_HDF5->Create(this->M_postDir+this->M_outputFileName);
 
         // write empty xdmf file
-        this->M_wr_initXdmf();
+        this->writeInitXdmf();
 
         if (!this->M_multimesh)
         {
             if (this->M_listData.size() != 0)
             {
-                this->M_wr_geo(); // see also M_wr_geometry
+                this->writeGeometry(); // see also writeGeometrymetry
             }
 
             if (M_graph.get() != 0)
@@ -639,16 +639,16 @@ void HDF5Filter3DMesh<MeshType>::postProcess(const Real& time)
         chrono.start();
         for (Iterator i=this->M_listData.begin(); i != this->M_listData.end(); ++i)
         {
-            this->M_wr_var(*i);
+            this->writeVariable(*i);
         }
         // pushing time
         this->M_timeSteps.push_back(time);
 
-        this->M_wr_Xdmf(time);
+        this->writeXdmf(time);
 
         if (this->M_multimesh)
         {
-            this->M_wr_geo(); // see also M_wr_geometry
+            this->writeGeometry(); // see also writeGeometry
         }
 
         chrono.stop();
