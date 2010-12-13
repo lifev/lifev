@@ -70,16 +70,17 @@
 #include <sys/types.h>
 
 using namespace LifeV;
+using namespace multiscale;
 
-int
-main( int argc, char** argv )
+Int
+main( Int argc, char** argv )
 {
     //Setup main communicator
     boost::shared_ptr< Epetra_Comm >	comm;
 
     //Setup MPI variables
-    int nprocs(1);
-    int rank(0);
+    Int nprocs(1);
+    Int rank(0);
 
 #ifdef HAVE_MPI
     MPI_Init( &argc, &argv );
