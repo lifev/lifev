@@ -26,7 +26,7 @@
 
 /*!
     @file
-    @brief DataFSI - File containing a data container for FSI problems
+    @brief Implementation of an  FSIOperator with shape derivatives.
 
     @author Miguel Fernandez
     @author Gilles Fourestey
@@ -48,7 +48,7 @@ namespace LifeV
 
 class Epetra_ExactJacobian;
 
-//! ExampleClass - Short description of the class
+//! exactJacobian - Implementation of an  FSIOperator with shape derivatives.
 /*!
 \include ../../doc/api/bibliography/newton.dox
 
