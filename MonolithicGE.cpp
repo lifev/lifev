@@ -88,11 +88,11 @@ void MonolithicGE::setupFluidSolid( UInt const fluxes )
 
 
 
-// void MonolithicGE::setupDOF()
-// {
-//     M_bcvStructureDispToHarmonicExtension.reset( new  BCVectorInterface );
-//     super_Type::setupDOF();
-// }
+void MonolithicGE::setupDOF()
+{
+    M_bcvStructureDispToHarmonicExtension.reset( new  BCVectorInterface );
+    super_Type::setupDOF();
+}
 
 void
 MonolithicGE::setupSystem( )
