@@ -2,11 +2,12 @@
 ###################################################################################################
 #
 #                       This file is part of the LifeV Applications                        
-#                Copyright (C) 2001-2010 EPFL, Politecnico di Milano, INRIA          
+#                Copyright (C) 2004, 2005, 2007 EPFL, Politecnico di Milano, INRIA
+#                Copyright (C) 2010 EPFL, Politecnico di Milano, Emory University      
 #
 #      Author(s): Radu Popescu <radu.popescu@epfl.ch>
 #           Date: 02-07-2010
-#  License Terms: GNU GPL
+#  License Terms: GNU LGPL
 #
 ###################################################################################################
 
