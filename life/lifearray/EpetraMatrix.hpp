@@ -588,7 +588,7 @@ EpetraMatrix<DataType>::operator * ( const vector_type& vector ) const
 {
     ASSERT_PRE( M_epetraCrs->Filled(),
                 "EpetraMatrix::Operator*: globalAssemble(...) should be called first" );
-    ASSERT_PRE( vec.getMap().MapsAreSimilar(*M_domainMap),
+    ASSERT_PRE( vector.getMap().MapsAreSimilar(*M_domainMap),
                 "EpetraMatrix::Operator*: the map of vec is not the same of domainMap" );
     vector_type result(vector);
 
