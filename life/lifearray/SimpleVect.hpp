@@ -1,232 +1,494 @@
+//@HEADER
 /*
- This file is part of the LifeV library
- Copyright (C) 2001,2002,2003,2004 EPFL, INRIA and Politecnico di Milano
+*******************************************************************************
 
- This library is free software; you can redistribute it and/or
- modify it under the terms of the GNU Lesser General Public
- License as published by the Free Software Foundation; either
- version 2.1 of the License, or (at your option) any later version.
+    Copyright (C) 2004, 2005, 2007 EPFL, Politecnico di Milano, INRIA
+    Copyright (C) 2010 EPFL, Politecnico di Milano, Emory University
 
- This library is distributed in the hope that it will be useful,
- but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- Lesser General Public License for more details.
+    This file is part of LifeV.
 
- You should have received a copy of the GNU Lesser General Public
- License along with this library; if not, write to the Free Software
- Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+    LifeV is free software; you can redistribute it and/or modify
+    it under the terms of the GNU Lesser General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    LifeV is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+    Lesser General Public License for more details.
+
+    You should have received a copy of the GNU Lesser General Public License
+    along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
+
+*******************************************************************************
 */
+//@HEADER
+
+/*!
+ *  @file
+ *  @brief The file contains two classes implementing a wrap up
+           of Standard Library vector class to allow indexing from one.
+ *
+ *  @date 30-08-1999
+ *  @author Luca Formaggia <luca.formaggia@polimi.it>
+ *
+ *  @contributor Laura Cattaneo
+ *  @mantainer Laura Cattaneo
+ */
+
 #ifndef _SIMPLEVECT_HH_
 #define _SIMPLEVECT_HH_
 
 #include <cstdlib>
 #include <vector>
+#include <life/lifecore/life.hpp>
 
 namespace LifeV
 {
-/******************************************************************
-/#Version Luca Formaggia 30 Agu 1999 Experimental
-/
-/#Purpose: a stupid wrap up of stl vector Class to allow indexing from one.
-/
-/#Usage:
-/                SimpleVect<float> a(10);
-/                a(10)=90; // a[9] will contain 90.0
-/                SimpleArray<int> b(3,5) // an arrray with 3 rows
-/                                           and 5 columns
-/                b(3,2)=5;
-/                b.reshape(2,3) // now b is 2x3
-/
-******************************************************************/
+//! SimpleVect
+/*!
+    @author Luca Formaggia
 
-template <typename T, int OFFSETVEC = 1>
-class SimpleVect : public std::vector<T>
+    The class is a wrap up of Standard Library vector class to allow indexing from one.
+    It implements one dimensional vector
+
+    Example:
+
+    SimpleVect<float> a(10);
+
+    a(10)=90; // a[9] will contain 90.0
+
+ */
+
+template <typename DataType, int offsetVector = 1>
+class SimpleVect : public std::vector<DataType>
 {
 public:
-    typedef std::vector<T> raw_container;
-    typedef typename raw_container::size_type size_type;
-    typedef typename raw_container::reference reference;
-    typedef typename raw_container::const_reference const_reference;
 
-    explicit SimpleVect( size_type i ) : raw_container( i )
-    {}
-    ;
-    SimpleVect() : raw_container()
-    {}
-    ;
-    SimpleVect( const SimpleVect<T, OFFSETVEC> & );
+    //! @name Public Types
+    //@{
 
+    typedef DataType                                data_Type;
+    typedef std::vector<DataType>                   vector_Type;
+    typedef typename vector_Type::size_type         vectorSize_Type;
+    typedef typename vector_Type::reference         vectorReference_Type;
+    typedef typename vector_Type::const_reference   vectorConstReference_Type;
+
+    //@}
+
+    //! @name Constructor & Destructor
+    //@{
+
+    //! Empty Constructor
+    SimpleVect() : vector_Type() {};
+
+    //! Constructor
+    /*!
+        @param size size of the vector
+     */
+    explicit SimpleVect( vectorSize_Type size ) : vector_Type( size ){};
+
+    //! Copy constructor
+    /*!
+        @param vector SimpleVect vector to copy
+     */
+    SimpleVect( const SimpleVect<DataType, offsetVector> & vector );
+
+    //! Constructor
+    /*!
+        Construct by copying a Standard Library vector
+        @param vector Standard Library vector
+     */
+    explicit SimpleVect( const vector_Type & vector );
+
+    //! Destructor
     ~SimpleVect() {}
 
-    explicit SimpleVect( const raw_container & );
-    SimpleVect<T, OFFSETVEC> & operator=( const SimpleVect<T, OFFSETVEC> & );
-    T& fat( size_type i );
-    const T& fat( size_type i ) const;
-    inline reference operator() ( size_type const i )
-    {
-        //return * ( this->begin() + ( i - OFFSETVEC ) );
-        return ( this->operator[] ( i - OFFSETVEC ) );
-    }
-    inline const_reference operator() ( size_type const i ) const
-    {
-        //return * ( this->begin() + ( i - OFFSETVEC ) );
-        return ( this->operator[] ( i - OFFSETVEC ) );
-    }
-    //! Completely clear out the container, returning memory to the system
-    void clean()
-    {
-        raw_container tmp;
-        this->clear();
-        this->swap( tmp );
-    }
-    inline bool bCheck( size_type const i ) const
-    {
-        return i >= OFFSETVEC && i < this->size() + OFFSETVEC ;
-    }
-};
+    //@}
 
-template <typename T, int OFFSETVEC = 1>
-class SimpleArray : public std::vector<T>
-{
-public:
 
-    typedef std::vector<T> raw_container;
-    typedef typename raw_container::size_type size_type;
-    typedef typename raw_container::reference reference;
-    typedef typename raw_container::const_reference const_reference;
-    typedef typename raw_container::iterator iterator;
-    typedef typename raw_container::const_iterator const_iterator;
+    //! @name Operators
+    //@{
 
-    explicit SimpleArray( size_type ntot );
-    explicit SimpleArray();
-    explicit SimpleArray( size_type nrows, size_type ncols );
+    //! Equivalence operator
+    /*!
+        Copies source SimpleVect vector into "this"
+        @param vector SimpleVect vector
+        @return Reference to a new SimpleVect vector with the same
+                content of SimpleVect vector
+     */
+    SimpleVect<DataType, offsetVector> & operator=( const SimpleVect<DataType, offsetVector> & vector );
 
-    ~SimpleArray() {}
-
-    reference operator() ( size_type const i )
+    //! Access operator
+    /*!
+        Example: a(10)=90; // a[9] will contain 90.0
+        @param i index of the element of the SimpleVect vector
+        @return a vector reference
+     */
+    vectorReference_Type operator() ( vectorSize_Type const i )
     {
-        return * ( this->begin() + ( i - OFFSETVEC ) );
-    } // Array is seen as vector (index from OFFSETVEC)
-
-    const_reference operator() ( size_type const i ) const
-    {
-        return * ( this->begin() + ( i - OFFSETVEC ) );
-    } // Array is seen as vector (index from OFFSETVEC)
-
-    reference operator() ( size_type const i, size_type const j )
-    {
-        return * ( this->begin() + ( j - OFFSETVEC ) * _M_nrows + ( i - OFFSETVEC ) );
-    } // from OFFSETVEC
-
-    const_reference operator() ( size_type const i, size_type const j ) const
-    {
-        // from OFFSETVEC
-        return * ( this->begin() + ( j - OFFSETVEC ) * _M_nrows + ( i - OFFSETVEC ) );
+        return ( this->operator[] ( i - offsetVector ) );
     }
 
-    typename SimpleArray<T, OFFSETVEC>::iterator columnIterator( size_type const col )
+    //! Const access operator
+    /*!
+        Example: a(10)=90; // a[9] will contain 90.0
+        @param i index of the element of the SimpleVect vector
+        @return a vector const reference
+     */
+    vectorConstReference_Type operator() ( vectorSize_Type const i ) const
     {
-        if ( col > _M_ncols )
-            return typename SimpleArray<T, OFFSETVEC>::iterator();
-        else
-            return this->begin() + ( col - OFFSETVEC ) * _M_nrows;
+        return ( this->operator[] ( i - offsetVector ) );
     }
 
-    void reshape( SimpleArray<T, OFFSETVEC>::size_type const n, size_type const m );
+    //@}
+
+
+    //! @name Methods
+    //@{
 
     //! Completely clear out the container, returning memory to the system
-    void clean()
+    inline void clean();
+
+    //! Check if the SimpleVect vector contains an element with index i
+    /*!
+        @param i index
+        @return boolean
+     */
+    bool bCheck( vectorSize_Type const i ) const
     {
-        raw_container tmp;
-        this->clear();
-        this->swap( tmp );
-        _M_nrows = 0;
-        _M_ncols = 0;
+        return i >= offsetVector && i < this->size() + offsetVector ;
     }
 
-    bool bCheck( size_type const i, size_type const j ) const
-    {
-        return i >= OFFSETVEC && i - OFFSETVEC + ( j - OFFSETVEC ) * _M_nrows < this->size() ;
-    }
+    //! Return a reference to the element of type data_Type stored in the i-th position.
+    //! The operator aborts if the SimpleVect vector doesn't contain an element with index i
+    /*!
+        @param i index
+        @return reference to the data_Type element
+     */
+    data_Type& fat( vectorSize_Type i );
 
-    inline size_type nrows() const
-    {
-        return _M_nrows;
-    }
-    inline size_type ncols() const
-    {
-        return _M_ncols;
-    }
+    //! Return a const reference to the element of type data_Type stored in the i-th position.
+    //! The operator aborts if the SimpleVect vector doesn't contain an element with index i
+    /*!
+        @param i index
+        @return const reference to the data_Type element
+     */
+    const data_Type& fat( vectorSize_Type i ) const;
 
-private:
-    size_type _M_nrows;
-    size_type _M_ncols;
+    //@}
+
 };
 
-
-template <typename T, int OFFSETVEC>
-T& SimpleVect<T, OFFSETVEC>::fat( size_type i )
-{
-    if ( ! bCheck( i ) )
-        abort();
-    return *( this->begin() + ( i - OFFSETVEC ) );
-}
-
-template <typename T, int OFFSETVEC>
-const T& SimpleVect<T, OFFSETVEC>::fat( size_type i ) const
-{
-    if ( ! bCheck( i ) )
-        abort();
-    return *( this->begin() + ( i - OFFSETVEC ) );
-}
-
-template <typename T, int OFFSETVEC>
-SimpleVect<T, OFFSETVEC>::SimpleVect( const SimpleVect<T, OFFSETVEC> & v ) : raw_container( v )
+//============================================================================
+// Constructors
+//============================================================================
+template <typename DataType, int offsetVector>
+SimpleVect<DataType, offsetVector>::SimpleVect( const SimpleVect<DataType, offsetVector> & vector )
+        :
+        vector_Type( vector )
 {}
 
-template <typename T, int OFFSETVEC>
-SimpleVect<T, OFFSETVEC> &
-SimpleVect<T, OFFSETVEC>::operator=( const SimpleVect<T, OFFSETVEC> & v )
+
+//============================================================================
+// Operators
+//============================================================================
+template <typename DataType, int offsetVector>
+SimpleVect<DataType, offsetVector> &
+SimpleVect<DataType, offsetVector>::operator=( const SimpleVect<DataType, offsetVector> & vector )
 {
-    raw_container::operator=( v );
+    vector_Type::operator=( vector );
     return *this;
 }
 
 
-// SIMPLE ARRAYS
-
-template <typename T, int OFFSETVEC>
-SimpleArray<T, OFFSETVEC>::SimpleArray()
-        :
-        std::vector<T>(),
-        _M_nrows( 0 ),
-        _M_ncols( 1 )
-{}
-
-template <typename T, int OFFSETVEC>
-SimpleArray<T, OFFSETVEC>::SimpleArray( size_type ntot )
-        :
-        std::vector<T>( ntot ),
-        _M_nrows( ntot ),
-        _M_ncols( 1 )
-{}
-
-template <typename T, int OFFSETVEC>
-SimpleArray<T, OFFSETVEC>::SimpleArray( size_type nrows, size_type ncols )
-        :
-        std::vector<T>( nrows*ncols ),
-        _M_nrows( nrows ),
-        _M_ncols( ncols )
-{}
-
-template <typename T, int OFFSETVEC>
+//============================================================================
+// Methods
+//============================================================================
+template <typename DataType, int offsetVector>
 void
-SimpleArray<T, OFFSETVEC>::reshape( size_type nrows, size_type ncols )
+SimpleVect<DataType, offsetVector>::clean()
 {
-    raw_container::resize( nrows * ncols ); // stl vector method
-    _M_nrows = nrows;
-    _M_ncols = ncols;
+    vector_Type tmp;
+    this->clear();
+    this->swap( tmp );
 }
+
+template <typename DataType, int offsetVector>
+typename SimpleVect<DataType, offsetVector>::data_Type&
+SimpleVect<DataType, offsetVector>::fat( vectorSize_Type i )
+{
+    if ( ! bCheck( i ) )
+        abort();
+    return *( this->begin() + ( i - offsetVector ) );
 }
-#endif
+
+template <typename DataType, int offsetVector>
+const typename SimpleVect<DataType, offsetVector>::data_Type&
+SimpleVect<DataType, offsetVector>::fat( vectorSize_Type i ) const
+{
+    if ( ! bCheck( i ) )
+        abort();
+    return *( this->begin() + ( i - offsetVector ) );
+}
+
+
+//! SimpleArray
+/*!
+    @author Luca Formaggia
+
+    The class is a wrap up of Standard Library vector class to allow indexing from one.
+    It defines vectors of n x m size.
+
+    Example:
+
+    SimpleArray<int> b(3,5) is an array with 3 rows and 5 columns
+
+    b(3,2)=5 puts the number 5 in the third row, in the second column.
+
+ */
+
+template <typename DataType, int offsetVector = 1>
+class SimpleArray : public std::vector<DataType>
+{
+public:
+
+    //! @name Public Types
+    //@{
+
+    typedef DataType                                data_Type;
+    typedef std::vector<DataType>                   vector_Type;
+    typedef typename vector_Type::size_type         vectorSize_Type;
+    typedef typename vector_Type::reference         vectorReference_Type;
+    typedef typename vector_Type::const_reference   vectorConstReference_Type;
+    typedef typename vector_Type::iterator          vectorIterator_Type;
+    typedef typename vector_Type::const_iterator    vectorConstIterator_Type;
+
+    //@}
+
+
+    //! @name Constructor & Destructor
+    //@{
+
+    //! Empty Constructor
+    /*!
+       Construct a SimpleArray vector of size (0,1)
+     */
+    explicit SimpleArray();
+
+    //! Constructor
+    /*!
+        Construct a SimpleArray vector of size (size,1)
+        @param size size of the SimpleArray vector
+     */
+    explicit SimpleArray( vectorSize_Type size );
+
+    //! Constructor
+    /*!
+        Construct a SimpleArray object of size (numberOfRows,numberOfColumns)
+        @param numberOfRows number of rows
+        @param numberOfColumns number of columns
+     */
+    explicit SimpleArray( vectorSize_Type numberOfRows, vectorSize_Type numberOfColumns );
+
+    //! Destructor
+    ~SimpleArray() {}
+
+    //@}
+
+
+    //! @name Operators
+    //@{
+
+    //! Access operator
+    /*!
+        SimpleArray is seen as vector (index from one)
+        @param i index of the element of the SimpleArray vector
+        @return a vector reference
+     */
+    vectorReference_Type operator() ( vectorSize_Type const i )
+    {
+        return *( this->begin() + ( i - offsetVector ) );
+    }
+
+    //! Const access operator
+    /*!
+        SimpleArray is seen as vector (index from one)
+        @param i index of the element of the SimpleArray vector
+        @return a vector const reference
+     */
+    vectorConstReference_Type operator() ( vectorSize_Type const i ) const
+    {
+        return *( this->begin() + ( i - offsetVector ) );
+    }
+
+    //! Access operator
+    /*!
+        Indices start from one
+        @param i row index
+        @param j column index
+        @return a vector reference
+     */
+    vectorReference_Type operator() ( vectorSize_Type const i, vectorSize_Type const j )
+    {
+        return *( this->begin() + ( j - offsetVector ) * M_numberOfRows + ( i - offsetVector ) );
+    }
+
+    //! Const access operator
+    /*!
+        Indices start from one
+        @param i row index
+        @param j column index
+        @return a vector const reference
+     */
+    vectorConstReference_Type operator() ( vectorSize_Type const i, vectorSize_Type const j ) const
+    {
+        return *( this->begin() + ( j - offsetVector ) * M_numberOfRows + ( i - offsetVector ) );
+    }
+
+    //@}
+
+
+    //! @name Methods
+    //@{
+
+    //!Return the column iterator
+    /*!
+        @param column column index
+        @return SimpleArray iterator
+     */
+    inline typename SimpleArray<DataType, offsetVector>::iterator columnIterator( vectorSize_Type const column );
+
+    //!Resize the SimpleArray vector
+    /*!
+        @param numberOfRows number of rows
+        @param numberOfColumns number of columns
+     */
+    void reshape( vectorSize_Type const numberOfRows, vectorSize_Type const numberOfColumns );
+
+    //! Completely clear out the container, returning memory to the system
+    inline void clean();
+
+    //! Check if the SimpleVect vector contains an element with row index i and column index j
+    /*!
+        @param i row index
+        @param j column index
+        @return boolean
+     */
+    bool bCheck( vectorSize_Type const i, vectorSize_Type const j ) const
+    {
+        return i >= offsetVector && i - offsetVector + ( j - offsetVector ) * M_numberOfRows < this->size();
+    }
+
+    //! Show the contents of the SimpleArray vector
+    void showMe() const;
+
+    //@}
+
+
+    //! @name Get Methods
+    //@{
+
+    //!Return the number of rows
+    /*!
+        @return a vector size type variable holding the number of rows
+     */
+    vectorSize_Type nrows() const
+    {
+        return M_numberOfRows;
+    }
+
+    //!Return the number of columns
+    /*!
+        @return a vector size type variable holding the number of columns
+     */
+    vectorSize_Type ncols() const
+    {
+        return M_numberOfColumns;
+    }
+
+    //@}
+
+private:
+
+    //! Number of rows
+    vectorSize_Type M_numberOfRows;
+
+    //! Number of columns
+    vectorSize_Type M_numberOfColumns;
+};
+
+
+//============================================================================
+// Constructors
+//============================================================================
+template <typename DataType, int offsetVector>
+SimpleArray<DataType, offsetVector>::SimpleArray()
+        :
+        std::vector<DataType>(),
+        M_numberOfRows( 0 ),
+        M_numberOfColumns( 1 )
+{}
+
+template <typename DataType, int offsetVector>
+SimpleArray<DataType, offsetVector>::SimpleArray( vectorSize_Type size )
+        :
+        std::vector<DataType>( size ),
+        M_numberOfRows( size ),
+        M_numberOfColumns( 1 )
+{}
+
+template <typename DataType, int offsetVector>
+SimpleArray<DataType, offsetVector>::SimpleArray( vectorSize_Type numberOfRows, vectorSize_Type numberOfColumns )
+        :
+        std::vector<DataType>( numberOfRows * numberOfColumns ),
+        M_numberOfRows( numberOfRows ),
+        M_numberOfColumns( numberOfColumns )
+{}
+
+//============================================================================
+// Methods
+//============================================================================
+template <typename DataType, int offsetVector>
+typename SimpleArray<DataType, offsetVector>::iterator
+SimpleArray<DataType, offsetVector>::columnIterator( vectorSize_Type const column )
+{
+    if ( column > M_numberOfColumns )
+        return typename SimpleArray<DataType, offsetVector>::iterator();
+    else
+        return this->begin() + ( column - offsetVector ) * M_numberOfRows;
+}
+
+
+template <typename DataType, int offsetVector>
+void
+SimpleArray<DataType, offsetVector>::reshape( vectorSize_Type numberOfRows, vectorSize_Type numberOfColumns )
+{
+    vector_Type::resize( numberOfRows * numberOfColumns ); // Standard Library vector method
+    M_numberOfRows = numberOfRows;
+    M_numberOfColumns = numberOfColumns;
+}
+
+template <typename DataType, int offsetVector>
+void
+SimpleArray<DataType, offsetVector>::clean()
+{
+    vector_Type tmp;
+    this->clear();
+    this->swap( tmp );
+    M_numberOfRows = 0;
+    M_numberOfColumns = 0;
+}
+
+template <typename DataType, int offsetVector>
+void
+SimpleArray<DataType, offsetVector>::showMe() const
+{
+    std::cout << " Number of rows: " << M_numberOfRows << std::endl;
+    std::cout << " Number of columns: " << M_numberOfColumns << std::endl;
+}
+
+}// Namespace LifeV
+
+#endif /* _SIMPLEVECT_HH_ */
 
