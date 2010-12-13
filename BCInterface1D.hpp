@@ -146,7 +146,7 @@ public:
     //@{
 
     //! Constructor
-    BCInterface1D();
+    explicit BCInterface1D();
 
     //! Destructor
     virtual ~BCInterface1D() {}

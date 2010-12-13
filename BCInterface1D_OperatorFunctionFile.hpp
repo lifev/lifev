@@ -74,13 +74,13 @@ public:
     //@{
 
     //! Constructor
-    BCInterface1D_OperatorFunctionFile();
+    explicit BCInterface1D_OperatorFunctionFile();
 
     //! Constructor
     /*!
      * @param data BC data loaded from GetPot file
      */
-    BCInterface1D_OperatorFunctionFile( const data_Type& data );
+    explicit BCInterface1D_OperatorFunctionFile( const data_Type& data );
 
     //! Destructor
     virtual ~BCInterface1D_OperatorFunctionFile() {}

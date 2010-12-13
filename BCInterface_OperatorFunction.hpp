@@ -92,13 +92,13 @@ public:
     //@{
 
     //! Constructor
-    BCInterface_OperatorFunction();
+    explicit BCInterface_OperatorFunction();
 
     //! Constructor
     /*!
      * @param data BC data loaded from GetPot file
      */
-    BCInterface_OperatorFunction( const data_Type& data );
+    explicit BCInterface_OperatorFunction( const data_Type& data );
 
     //! Destructor
     virtual ~BCInterface_OperatorFunction() {}
@@ -135,7 +135,7 @@ public:
      * @param name name of the variable
      * @param value value of the variable
      */
-    void setVariable( const std::string& name, const Real& value ) { function_Type::M_parser->SetVariable( name, value ); }
+    void setVariable( const std::string& name, const Real& value ) { function_Type::M_parser->setVariable( name, value ); }
 
     //@}
 

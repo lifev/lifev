@@ -94,7 +94,7 @@ public:
     typedef PhysicalSolverType                                                    physicalSolver_Type;
     typedef BCInterface_Data                                                      data_Type;
     typedef BCFunctionBase                                                        bcFunction_Type;
-    typedef parser::Parser                                                        parser_Type;
+    typedef Parser                                                                parser_Type;
 
     //@}
 
@@ -103,13 +103,13 @@ public:
     //@{
 
     //! Empty Constructor
-    BCInterface_Function();
+    explicit BCInterface_Function();
 
     //! Constructor
     /*!
      * @param data BC data loaded from GetPot file
      */
-    BCInterface_Function( const data_Type& data );
+    explicit BCInterface_Function( const data_Type& data );
 
     //! Destructor
     virtual ~BCInterface_Function() {}
@@ -233,7 +233,7 @@ BCInterface_Function< PhysicalSolverType >::setData( const data_Type& data )
 #endif
 
     if ( M_parser )
-        M_parser->SetString( data.baseString() );
+        M_parser->setString( data.baseString() );
     else
         M_parser.reset( new parser_Type( data.baseString() ) );
 
@@ -292,18 +292,18 @@ BCInterface_Function< PhysicalSolverType >::function( const Real& t,
     Debug( 5021 ) << "                                                           t: " << t << "\n";
 #endif
 
-    M_parser->SetVariable( "t", t );
-    M_parser->SetVariable( "x", x );
-    M_parser->SetVariable( "y", y );
-    M_parser->SetVariable( "z", z );
+    M_parser->setVariable( "t", t );
+    M_parser->setVariable( "x", x );
+    M_parser->setVariable( "y", y );
+    M_parser->setVariable( "z", z );
 
     this->dataInterpolation();
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 5021 ) << "                                                evaluate(" << 1 << ") : " << M_parser->Evaluate( 1 ) << "\n";
+    Debug( 5021 ) << "                                                evaluate(" << 1 << ") : " << M_parser->evaluate( 1 ) << "\n";
 #endif
 
-    return M_parser->Evaluate( 1 );
+    return M_parser->evaluate( 1 );
 }
 
 template< typename PhysicalSolverType >
@@ -324,18 +324,18 @@ BCInterface_Function< PhysicalSolverType >::functionID( const Real& t,
     Debug( 5021 ) << "                                                          id: " << id << "\n";
 #endif
 
-    M_parser->SetVariable( "t", t );
-    M_parser->SetVariable( "x", x );
-    M_parser->SetVariable( "y", y );
-    M_parser->SetVariable( "z", z );
+    M_parser->setVariable( "t", t );
+    M_parser->setVariable( "x", x );
+    M_parser->setVariable( "y", y );
+    M_parser->setVariable( "z", z );
 
     this->dataInterpolation();
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 5021 ) << "                                                evaluate(" << M_mapID[id] << ") : " << M_parser->Evaluate( M_mapID[id] ) << "\n";
+    Debug( 5021 ) << "                                                evaluate(" << M_mapID[id] << ") : " << M_parser->evaluate( M_mapID[id] ) << "\n";
 #endif
 
-    return M_parser->Evaluate( M_mapID[id] );
+    return M_parser->evaluate( M_mapID[id] );
 }
 
 } // Namespace LifeV
