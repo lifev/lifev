@@ -44,9 +44,6 @@
 namespace LifeV
 {
 
-namespace parser
-{
-
 //! Parser - A string parser for algebraic expressions
 /*!
  *  @author(s) Cristiano Malossi, Gilles Fourestey
@@ -60,7 +57,10 @@ public:
     //! @name Public Types
     //@{
 
+    typedef std::vector< std::string >                       stringsVector_Type;
+    typedef std::string::const_iterator                      stringIterator_Type;
     typedef ParserSpiritGrammar< stringIterator_Type >       calculator_Type;
+    typedef calculator_Type::results_Type                    results_Type;
 
     //@}
 
@@ -69,19 +69,19 @@ public:
     //@{
 
     //! Empty constructor (it needs a manual call to setString)
-    Parser();
+    explicit Parser();
 
     //! Constructor
     /*!
      * @param string expression to parse
      */
-    Parser( const std::string& string );
+    explicit Parser( const std::string& string );
 
     //! Copy constructor
     /*!
      * @param parser Parser
      */
-    Parser( const Parser& parser );
+    explicit Parser( const Parser& parser );
 
     //! Destructor
     virtual ~Parser() {}
@@ -109,7 +109,7 @@ public:
      * @param id expression index (starting from 1)
      * @return computed value
      */
-    const Real& Evaluate( const ID& id = 1 );
+    const Real& evaluate( const ID& id = 1 );
 
     /*! Count how many times a substring is present in the string (utility for BCInterfaceFunction)
      *
@@ -132,14 +132,14 @@ public:
      * @param string Expression to evaluate
      * @param stringSeparator Separator identifier (default -> ";")
      */
-    void SetString( const std::string& string, const std::string& stringSeparator = ";" );
+    void setString( const std::string& string, const std::string& stringSeparator = ";" );
 
     /*! Set/replace a variable
      *
      * @param name name of the parameter
      * @param value value of the parameter
      */
-    void SetVariable( const std::string& name, const Real& value );
+    void setVariable( const std::string& name, const Real& value );
 
     //@}
 
@@ -158,15 +158,14 @@ public:
 
 private:
 
-    strings_Type        M_strings;
+    stringsVector_Type  M_strings;
+
     results_Type        M_results;
 
     calculator_Type     M_calculator;
 
     bool                M_evaluate;
 };
-
-} // Namespace parser
 
 } // Namespace LifeV
 

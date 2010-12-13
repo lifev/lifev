@@ -74,19 +74,4 @@ namespace phoenix = boost::phoenix;
 // LifeV classes
 #include <life/lifecore/life.hpp>
 
-namespace LifeV
-{
-
-namespace parser
-{
-
-typedef std::vector< std::string >               strings_Type;
-typedef std::string::const_iterator              stringIterator_Type;
-
-typedef std::vector< Real >                      results_Type;
-
-}
-
-} // Namespace LifeV
-
 #endif /* Parser_Definitions_H */

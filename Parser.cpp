@@ -40,9 +40,6 @@
 namespace LifeV
 {
 
-namespace parser
-{
-
 // ===================================================
 // Constructors & Destructor
 // ===================================================
@@ -72,7 +69,7 @@ Parser::Parser( const std::string& string ) :
 #endif
 
     M_calculator.setDefaultVariables();
-    SetString( string );
+    setString( string );
 }
 
 Parser::Parser( const Parser& parser ) :
@@ -104,7 +101,7 @@ Parser::operator=( const Parser& parser )
 // Methods
 // ===================================================
 const Real&
-Parser::Evaluate( const ID& id )
+Parser::evaluate( const ID& id )
 {
     if ( M_evaluate )
     {
@@ -170,7 +167,7 @@ Parser::clearVariables()
 // Set Methods
 // ===================================================
 void
-Parser::SetString( const std::string& string, const std::string& stringSeparator )
+Parser::setString( const std::string& string, const std::string& stringSeparator )
 {
 
 #ifdef HAVE_LIFEV_DEBUG
@@ -192,7 +189,7 @@ Parser::SetString( const std::string& string, const std::string& stringSeparator
 }
 
 void
-Parser::SetVariable( const std::string& name, const Real& value )
+Parser::setVariable( const std::string& name, const Real& value )
 {
 
 #ifdef HAVE_LIFEV_DEBUG
@@ -217,7 +214,5 @@ Parser::variable( const std::string& name )
 
     return M_calculator.variable( name );
 }
-
-} // Namespace parser
 
 } // Namespace LifeV

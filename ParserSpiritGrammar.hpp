@@ -42,9 +42,6 @@
 namespace LifeV
 {
 
-namespace parser
-{
-
 #ifdef HAVE_BOOST_SPIRIT_QI
 
 //! ParserSpiritGrammar - A string parser grammar based on \c boost::spirit::qi
@@ -80,8 +77,8 @@ namespace parser
  *  \endverbatim
  *
  */
-template < typename IteratorType >
-class ParserSpiritGrammar : public qi::grammar< IteratorType, results_Type(), ascii::space_type >
+template < typename IteratorType = std::string::const_iterator, typename ResultsType = std::vector < Real > >
+class ParserSpiritGrammar : public qi::grammar< IteratorType, ResultsType(), ascii::space_type >
 {
 public:
 
@@ -89,7 +86,8 @@ public:
     //@{
 
     typedef IteratorType                                        iterator_Type;
-    typedef boost::iterator_range< stringIterator_Type >        iteratorRange_Type;
+    typedef boost::iterator_range< iterator_Type >              iteratorRange_Type;
+    typedef ResultsType                                         results_Type;
 
     //@}
 
@@ -98,16 +96,17 @@ public:
     //@{
 
     //! Constructor
-    ParserSpiritGrammar();
+    explicit ParserSpiritGrammar();
 
     //! Copy constructor
     /*!
      * @param ParserSpiritGrammar ParserSpiritGrammar
      */
-    ParserSpiritGrammar( const ParserSpiritGrammar& spiritGrammar );
+    explicit ParserSpiritGrammar( const ParserSpiritGrammar& spiritGrammar );
 
     //! Destructor
     virtual ~ParserSpiritGrammar() {}
+
     //@}
 
 
@@ -251,7 +250,7 @@ private:
     qi::rule< iterator_Type, double(), ascii::space_type >       Function;
     qi::rule< iterator_Type, double(), ascii::space_type >       Group;
 
-    qi::symbols<char, Real >                                Variable;
+    qi::symbols<char, Real >                                     Variable;
 };
 
 
@@ -259,8 +258,8 @@ private:
 // ===================================================
 // Constructors & Destructor
 // ===================================================
-template < typename IteratorType >
-ParserSpiritGrammar< IteratorType >::ParserSpiritGrammar() :
+template < typename IteratorType, typename ResultsType >
+ParserSpiritGrammar< IteratorType, ResultsType >::ParserSpiritGrammar() :
         ParserSpiritGrammar::base_type( Start ),
         Start                               (),
         Assignment                          (),
@@ -392,8 +391,8 @@ ParserSpiritGrammar< IteratorType >::ParserSpiritGrammar() :
         ;
 }
 
-template < typename IteratorType >
-ParserSpiritGrammar< IteratorType >::ParserSpiritGrammar( const ParserSpiritGrammar& spiritGrammar ) :
+template < typename IteratorType, typename ResultsType >
+ParserSpiritGrammar< IteratorType, ResultsType >::ParserSpiritGrammar( const ParserSpiritGrammar& spiritGrammar ) :
         ParserSpiritGrammar::base_type     ( spiritGrammar.Start ),
         Start                               ( spiritGrammar.Start ),
         Assignment                          ( spiritGrammar.Assignment ),
@@ -414,14 +413,14 @@ ParserSpiritGrammar< IteratorType >::ParserSpiritGrammar( const ParserSpiritGram
 // ===================================================
 // Operators
 // ===================================================
-template < typename IteratorType >
-ParserSpiritGrammar< IteratorType >&
-ParserSpiritGrammar< IteratorType >::operator=( const ParserSpiritGrammar& spiritGrammar )
+template < typename IteratorType, typename ResultsType >
+ParserSpiritGrammar< IteratorType, ResultsType >&
+ParserSpiritGrammar< IteratorType, ResultsType >::operator=( const ParserSpiritGrammar& spiritGrammar )
 {
     if ( this != &spiritGrammar )
     {
         ParserSpiritGrammar::base_type::operator=( spiritGrammar.Start );
-        //ParserSpiritGrammar< IteratorType >::operator=( spiritGrammar );
+        //ParserSpiritGrammar< IteratorType, ResultsType >::operator=( spiritGrammar );
         Start                               = spiritGrammar.Start;
         Assignment                          = spiritGrammar.Assignment;
 //        Command                             = spiritGrammar.Command;
@@ -443,9 +442,9 @@ ParserSpiritGrammar< IteratorType >::operator=( const ParserSpiritGrammar& spiri
 // ===================================================
 // Set Methods
 // ===================================================
-template < typename IteratorType >
+template < typename IteratorType, typename ResultsType >
 inline void
-ParserSpiritGrammar< IteratorType >::setDefaultVariables()
+ParserSpiritGrammar< IteratorType, ResultsType >::setDefaultVariables()
 {
     Variable.add( "pi" , 3.141592653589793 );
     Variable.add( "e", 2.718281828459046 );
@@ -453,9 +452,9 @@ ParserSpiritGrammar< IteratorType >::setDefaultVariables()
     //add( "pi", 3.1415926535897932384626433832795 ); //Better only with long Real!
 }
 
-template < typename IteratorType >
+template < typename IteratorType, typename ResultsType >
 inline void
-ParserSpiritGrammar< IteratorType >::setVariable( const std::string& name, const Real& value )
+ParserSpiritGrammar< IteratorType, ResultsType >::setVariable( const std::string& name, const Real& value )
 {
     Real *p = Variable.find( name );
     if ( p != 0 )
@@ -496,7 +495,7 @@ ParserSpiritGrammar< IteratorType >::setVariable( const std::string& name, const
 #else
 
 //! ParserSpiritGrammar - An empty implementation for boost version < 1.41
-template < typename IteratorType >
+template < typename IteratorType, typename ResultsType >
 class ParserSpiritGrammar
 {
 public:
@@ -518,8 +517,6 @@ public:
 };
 
 #endif /* HAVE_BOOST_SPIRIT_QI */
-
-} // Namespace parser
 
 } // Namespace LifeV
 
