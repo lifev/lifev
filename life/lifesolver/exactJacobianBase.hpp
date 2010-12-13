@@ -87,8 +87,6 @@ public:
 
     typedef super::fluidBchandler_Type      bchandler_type;
 
-    typedef super::vector_Type              vector_type;
-
     typedef fluid_Type::matrix_Type         matrix_types;
     typedef fluid_Type::matrixPtr_Type      matrix_ptrtype;
 
