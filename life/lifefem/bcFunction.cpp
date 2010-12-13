@@ -1,124 +1,151 @@
-/* -*- mode: c++ -*-
+//@HEADER
+/*
+*******************************************************************************
 
-  This file is part of the LifeV library
+    Copyright (C) 2004, 2005, 2007 EPFL, Politecnico di Milano, INRIA
+    Copyright (C) 2010 EPFL, Politecnico di Milano, Emory University
 
-  Author(s): M.A. Fernandez
-             Christophe Prud'homme <christophe.prudhomme@epfl.ch>
-       Date: 2004-10-12
+    This file is part of LifeV.
 
-  Copyright (C) 2004 EPFL, INRIA, Politecnico di Milano
+    LifeV is free software; you can redistribute it and/or modify
+    it under the terms of the GNU Lesser General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
 
-  This library is free software; you can redistribute it and/or
-  modify it under the terms of the GNU Lesser General Public
-  License as published by the Free Software Foundation; either
-  version 2.1 of the License, or (at your option) any later version.
+    LifeV is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+    Lesser General Public License for more details.
 
-  This library is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-  Lesser General Public License for more details.
+    You should have received a copy of the GNU Lesser General Public License
+    along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
 
-  You should have received a copy of the GNU Lesser General Public
-  License along with this library; if not, write to the Free Software
-  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+*******************************************************************************
 */
-/**
-   \file bcFunction.cpp
-   \author M.A. Fernandez
-   \author Christophe Prud'homme <christophe.prudhomme@epfl.ch>
-   \date 2004-10-12
- */
+//@HEADER
+
+/*!
+    @file
+    @brief File contains BCNormalManager class for handling normal essential boundary conditions
+
+	@author Miguel Fernandez <miguel.fernandez@inria.fr>
+    @contributor Christophe Prud'homme <christophe.prudhomme@epfl.ch>
+    @contributor Mauro Perego <perego.mauro@gmail.com>
+    @maintainer Mauro Perego <perego.mauro@gmail.com>
+
+    @date 10-12-2004
+ *///@HEADER
+
+
 #include <life/lifecore/life.hpp>
 #include <life/lifefem/bcFunction.hpp>
 
 namespace LifeV
 {
 
-//
+//==================================================
 // BCFunctionBase
-//
-BCFunctionBase::BCFunctionBase( const BCFunctionBase& bcf )
+//==================================================
+
+
+//==================================================
+// Constructors
+//==================================================
+
+
+BCFunctionBase::BCFunctionBase( function_Type userDefinedFunction )
         :
-        _M_g( bcf._M_g )
+        M_userDefinedFunction( userDefinedFunction )
 {
 }
 
-//! Constructor for BCFuncion_Base from a user defined function
-BCFunctionBase::BCFunctionBase( function_type g )
+BCFunctionBase::BCFunctionBase( const BCFunctionBase& bcFunctionBase )
         :
-        _M_g( g )
+        M_userDefinedFunction( bcFunctionBase.M_userDefinedFunction )
 {
 }
 
-//! set the function after having built it.
-void
-BCFunctionBase::setFunction( function_type g )
+
+//==================================================
+// Operators
+//==================================================
+
+
+BCFunctionBase&
+BCFunctionBase::operator= ( const BCFunctionBase& bcFunctionBase )
 {
-    _M_g = g;
+    if (this != &bcFunctionBase)
+    {
+        M_userDefinedFunction = bcFunctionBase.M_userDefinedFunction;
+    }
+    return *this;
 }
 
-//! get the function
-BCFunctionBase::function_type&
-BCFunctionBase::Function()
-{
-    return _M_g;
-}
-
-//! Overloading function operator by calling attribut _g
-Real
-BCFunctionBase::operator() ( const Real& t, const Real& x, const Real& y,
-                             const Real& z, const ID& icomp ) const
-{
-    return _M_g( t, x, y, z, icomp );
-}
 
 BCFunctionBase*
-createBCFunctionBase( BCFunctionBase const* __bc )
+createBCFunctionBase( BCFunctionBase const* bcFunctionBase )
 {
-    return new BCFunctionBase( ( BCFunctionBase const& )*__bc );
+    return new BCFunctionBase( ( BCFunctionBase const& )* bcFunctionBase );
 }
 // register BCFunctionBase in factory for cloning
-const bool __bcbase = FactoryCloneBCFunction::instance().registerProduct( typeid(BCFunctionBase), &createBCFunctionBase );
+const bool bcBaseFactory = FactoryCloneBCFunction::instance().registerProduct( typeid(BCFunctionBase), &createBCFunctionBase );
 
-//
+
+
+
+//==================================================
 // BCFunctionMixte
-//
-BCFunctionMixte::BCFunctionMixte( const BCFunctionMixte& bcf )
+//==================================================
+
+//==================================================
+// Constructors
+//==================================================
+
+BCFunctionMixte::BCFunctionMixte( const BCFunctionMixte& bcFunctionMixte )
         :
-        BCFunctionBase( bcf ),
-        _M_coef( bcf._M_coef )
+        BCFunctionBase( bcFunctionMixte ),
+        M_robinBoundaryMassCoeffFunction( bcFunctionMixte.M_robinBoundaryMassCoeffFunction )
 {
 }
 
-BCFunctionMixte::BCFunctionMixte( function_type g, function_type coef )
+BCFunctionMixte::BCFunctionMixte( const function_Type& rightHandSideFunction, const function_Type& massCoeffFunction )
         :
-        BCFunctionBase( g ),
-        _M_coef( coef )
+        BCFunctionBase( rightHandSideFunction ),
+        M_robinBoundaryMassCoeffFunction( massCoeffFunction )
 
 {
 }
 
-//! set the functions after having built it.
+
+//==================================================
+// Assignment Operator
+//==================================================
+
+
+BCFunctionMixte&
+BCFunctionMixte::operator=( const BCFunctionMixte& bcFunctionMixte )
+{
+    if ( this != &bcFunctionMixte )
+    {
+        this->BCFunctionBase::operator=( bcFunctionMixte );
+        M_robinBoundaryMassCoeffFunction = bcFunctionMixte.M_robinBoundaryMassCoeffFunction;
+    }
+    return *this;
+}
+
+
+//==================================================
+// Set Methods
+//==================================================
+
 void
-BCFunctionMixte::setFunctions_Mixte( function_type g, function_type coef )
+BCFunctionMixte::setFunctions_Mixte( const function_Type& rightHandSideFunction, const function_Type& massCoeffFunction )
 {
-    setFunction( g );
-    _M_coef = coef;
+    setFunction( rightHandSideFunction );
+    M_robinBoundaryMassCoeffFunction = massCoeffFunction;
 }
 
-//! set the functions after having built it.
-BCFunctionBase::function_type&
-BCFunctionMixte::Functions_Mixte()
-{
-    return _M_coef;
-}
 
-Real
-BCFunctionMixte::coef( const Real& t, const Real& x, const Real& y,
-                       const Real& z, const ID& icomp ) const
-{
-    return _M_coef( t, x, y, z, icomp );
-}
 
 BCFunctionBase*
 createBCFunctionMixte( BCFunctionBase const* __bc )
@@ -129,110 +156,167 @@ createBCFunctionMixte( BCFunctionBase const* __bc )
 const bool __bcmixte = FactoryCloneBCFunction::instance().registerProduct( typeid(BCFunctionMixte), &createBCFunctionMixte );
 
 
-BCFunctionUDepBase::BCFunctionUDepBase(function_type g ):_M_g(g)
+//==================================================
+// BCFunctionUDepBase
+//==================================================
+
+//==================================================
+// Constructors
+//==================================================
+
+
+BCFunctionUDepBase::BCFunctionUDepBase(const function_Type& userDefinedFunction ): M_userDefinedFunction(userDefinedFunction)
 {
 }
-BCFunctionUDepBase::BCFunctionUDepBase(const BCFunctionUDepBase& bcf ):
-        _M_g(bcf._M_g)
+
+
+BCFunctionUDepBase::BCFunctionUDepBase(const BCFunctionUDepBase& bcFunctionUDepBase ):
+        M_userDefinedFunction(bcFunctionUDepBase.M_userDefinedFunction)
 {
 }
-void
-BCFunctionUDepBase::setFunction(function_type g)
+
+
+//==================================================
+// Operators
+//==================================================
+
+BCFunctionUDepBase&
+BCFunctionUDepBase::operator= ( const BCFunctionUDepBase& bcFunctionUDepBase )
 {
-    _M_g=g;
+    if (this != &bcFunctionUDepBase)
+    {
+        M_userDefinedFunction = bcFunctionUDepBase.M_userDefinedFunction;
+    }
+    return *this;
 }
-Real
-BCFunctionUDepBase::operator()(const Real& t, const Real& x, const Real& y,
-                               const Real& z, const ID& i, const Real& u ) const
-{
-    return _M_g(t,x,y,z,i,u);
-}
+
 
 BCFunctionUDepBase*
-createBCFunctionUDep( BCFunctionUDepBase const* __bc )
+createBCFunctionUDep( BCFunctionUDepBase const* bcFunctionUDepBase )
 {
-    return new BCFunctionUDepBase( ( BCFunctionUDepBase const& )*__bc );
+    return new BCFunctionUDepBase( ( BCFunctionUDepBase const& )* bcFunctionUDepBase );
 }
-const bool __bcUDepBase = FactoryCloneBCFunctionUDep::instance().registerProduct(
-                              typeid(BCFunctionUDepBase), &createBCFunctionUDep );
+const bool bcFunctionUDepBase = FactoryCloneBCFunctionUDep::instance().registerProduct(
+                                    typeid(BCFunctionUDepBase), &createBCFunctionUDep );
 
-BCFunctionUDepMixte::BCFunctionUDepMixte(function_type g,function_type coef):
-        BCFunctionUDepBase(g),_M_coef(coef)
+
+//==================================================
+// BCFunctionUDepMixte
+//==================================================
+
+
+//==================================================
+// Constructor
+//==================================================
+
+BCFunctionUDepMixte::BCFunctionUDepMixte( const BCFunctionUDepMixte& bcFunctionUDepMixte )
+        :
+        BCFunctionUDepBase( bcFunctionUDepMixte ),
+        M_robinBoundaryMassCoeffFunction( bcFunctionUDepMixte.M_robinBoundaryMassCoeffFunction )
 {
 }
 
-BCFunctionUDepMixte::BCFunctionUDepMixte(const BCFunctionUDepMixte& bcf):
-        BCFunctionUDepBase(bcf),_M_coef(bcf._M_coef)
+BCFunctionUDepMixte::BCFunctionUDepMixte( const function_Type& rightHandSideFunction, const function_Type& massCoeffFunction )
+        :
+        BCFunctionUDepBase( rightHandSideFunction ),
+        M_robinBoundaryMassCoeffFunction( massCoeffFunction )
+
 {
 }
+
+
+//==================================================
+// Operators
+//==================================================
+
+BCFunctionUDepMixte&
+BCFunctionUDepMixte::operator=( const BCFunctionUDepMixte& bcFunctionUDepMixte )
+{
+    if ( this != &bcFunctionUDepMixte )
+    {
+        this->BCFunctionUDepBase::operator=( bcFunctionUDepMixte );
+        M_robinBoundaryMassCoeffFunction = bcFunctionUDepMixte.M_robinBoundaryMassCoeffFunction;
+    }
+    return *this;
+}
+
+
+//==================================================
+// Set Methods
+//==================================================
+
 void
-BCFunctionUDepMixte::setFunctions_Mixte(function_type g, function_type coef )
+BCFunctionUDepMixte::setFunctions_Mixte( const function_Type& rightHandSideFunction, const function_Type& massCoeffFunction )
 {
-    setFunction(g);
-    _M_coef=coef;
+    setFunction( rightHandSideFunction );
+    M_robinBoundaryMassCoeffFunction = massCoeffFunction;
 }
-Real
-BCFunctionUDepMixte::coef(const Real& t, const Real& x, const Real& y,
-                          const Real& z, const ID& icomp, const Real& u ) const
-{
-    return _M_coef( t, x, y, z, icomp, u );
-}
+
 
 BCFunctionUDepBase*
-createBCFunctionUDepMixte( BCFunctionUDepBase const* __bc )
+createBCFunctionUDepMixte( BCFunctionUDepBase const* bcFunctionUDepMixte )
 {
-    return new BCFunctionUDepMixte( ( BCFunctionUDepMixte const& )*__bc );
+    return new BCFunctionUDepMixte( ( BCFunctionUDepMixte const& )* bcFunctionUDepMixte );
 }
-const bool __bcUDepMixte = FactoryCloneBCFunctionUDep::instance().registerProduct(
-                               typeid(BCFunctionUDepMixte), &createBCFunctionUDepMixte );
+const bool bcFunctionUDepMixte = FactoryCloneBCFunctionUDep::instance().registerProduct(
+                                     typeid(BCFunctionUDepMixte), &createBCFunctionUDepMixte );
 
 
-//
+//==================================================
 // BCFunctionDirectional
-//
-BCFunctionDirectional::BCFunctionDirectional( const BCFunctionDirectional& bcf )
+//==================================================
+
+//==================================================
+// Constructors
+//==================================================
+BCFunctionDirectional::BCFunctionDirectional( const BCFunctionDirectional& bcFunctionDirectional )
         :
-        BCFunctionBase( bcf ),
-        _M_vectFct( bcf._M_vectFct )
+        BCFunctionBase( bcFunctionDirectional ),
+        M_userDefinedVersorsFunction( bcFunctionDirectional.M_userDefinedVersorsFunction )
 {
 }
 
-BCFunctionDirectional::BCFunctionDirectional( function_type g, function_type vectFct )
+BCFunctionDirectional::BCFunctionDirectional( const function_Type& userDefinedFunction, const function_Type& userDefinedVersorsFunction )
         :
-        BCFunctionBase( g ),
-        _M_vectFct( vectFct )
+        BCFunctionBase( userDefinedFunction ),
+        M_userDefinedVersorsFunction( userDefinedVersorsFunction )
 
 {
 }
 
-//! set the functions after having built it.
+//==================================================
+// Operators
+//==================================================
+
+BCFunctionDirectional&
+BCFunctionDirectional::operator=( const BCFunctionDirectional& bcFunctionDirectional )
+{
+    if ( this != &bcFunctionDirectional )
+    {
+        this->BCFunctionBase::operator=( bcFunctionDirectional );
+        M_userDefinedVersorsFunction = bcFunctionDirectional.M_userDefinedVersorsFunction;
+    }
+    return *this;
+}
+
+
+//==================================================
+// Set Method
+//==================================================
 void
-BCFunctionDirectional::setFunctions_Directional( function_type g, function_type vectFct )
+BCFunctionDirectional::setFunctions_Directional( const function_Type& userDefinedFunction, const function_Type& userDefinedVersorsFunction )
 {
-    setFunction( g );
-    _M_vectFct = vectFct;
+    setFunction( userDefinedFunction );
+    M_userDefinedVersorsFunction = userDefinedVersorsFunction;
 }
 
-//! set the functions after having built it.
-BCFunctionBase::function_type&
-BCFunctionDirectional::Functions_Directional()
-{
-    return _M_vectFct;
-}
-
-Real
-BCFunctionDirectional::vectFct( const Real& t, const Real& x, const Real& y,
-                                const Real& z, const ID& icomp ) const
-{
-    return _M_vectFct( t, x, y, z, icomp );
-}
 
 BCFunctionBase*
-createBCFunctionDirectional( BCFunctionBase const* __bc )
+createBCFunctionDirectional( BCFunctionBase const* bcFunctionDirectional )
 {
-    return new BCFunctionDirectional( ( BCFunctionDirectional const& )*__bc );
+    return new BCFunctionDirectional( ( BCFunctionDirectional const& )* bcFunctionDirectional);
 }
 // register BCFunctionMixte in factory for cloning
-const bool __bcdirectional = FactoryCloneBCFunction::instance().registerProduct( typeid(BCFunctionDirectional), &createBCFunctionDirectional );
+const bool bcFunctionDirectional = FactoryCloneBCFunction::instance().registerProduct( typeid(BCFunctionDirectional), &createBCFunctionDirectional );
 
 } //End of namespace LifeV

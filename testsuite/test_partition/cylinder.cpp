@@ -287,12 +287,16 @@ struct Cylinder::Private
                      const Real& z,
                      const ID&   id ) const
     {
-        double r = std::sqrt(x*x + y*y);
+        double result(0.);
+        double dist2 = D*D/4. - (x*x + y*y);
 
         if (id == 3)
-            return Um_2d()*2*((D/2.)*(D/2.) - r*r);
+        {
+            // make sure it is exactely 0 on the cylinder surface.
+            result = (fabs(dist2)<1e-5) ? 0. : Um_2d()*2*dist2;
+        }
 
-        return 0.;
+        return result;
     }
 
     fct_type getU_pois()
@@ -398,8 +402,6 @@ Cylinder::run()
     //cylinder
 
     bcH.addBC( "Inlet",    INLET,    Essential,     Full,     uPois  , 3 );
-    bcH.addBC( "Ringin",   RINGIN,   Essential,     Full,     uZero  , 3 );
-    bcH.addBC( "Ringout",  RINGOUT,  Essential,     Full,     uZero  , 3 );
     bcH.addBC( "Outlet",   OUTLET,   Natural,     Full,     uZero, 3 );
     bcH.addBC( "Wall",     WALL,     Essential,   Full,     uZero, 3 );
 

@@ -1,39 +1,43 @@
+//@HEADER
 /*
- This file is part of the LifeV library
+*******************************************************************************
 
- Authors: Miguel Fernandez
-          Vincent Martin
-          Christophe Prud'homme <christophe.prudhomme@epfl.ch>
+    Copyright (C) 2004, 2005, 2007 EPFL, Politecnico di Milano, INRIA
+    Copyright (C) 2010 EPFL, Politecnico di Milano, Emory University
 
- Copyright (C) 2001,2002,2003,2004 EPFL, INRIA and Politecnico di Milano
+    This file is part of LifeV.
 
- This library is free software; you can redistribute it and/or
- modify it under the terms of the GNU Lesser General Public
- License as published by the Free Software Foundation; either
- version 2.1 of the License, or (at your option) any later version.
+    LifeV is free software; you can redistribute it and/or modify
+    it under the terms of the GNU Lesser General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
 
- This library is distributed in the hope that it will be useful,
- but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- Lesser General Public License for more details.
+    LifeV is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+    Lesser General Public License for more details.
 
- You should have received a copy of the GNU Lesser General Public
- License along with this library; if not, write to the Free Software
- Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+    You should have received a copy of the GNU Lesser General Public License
+    along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
+
+*******************************************************************************
 */
+//@HEADER
+
 /*!
-  \file bcVector.hpp
-  \brief classes to handle data vectors for boundary conditions.
-  \author M.A. Fernandez
-  \author V. Martin
-  \author C. Prud'homme
+    @file
+    @brief File contains classes to holds the FE vectors used for prescribing boundary conditions
 
-  This file contains the classes which may be used to store boundary
-  conditions.
-*/
+	@author Miguel Fernandez <miguel.fernandez@inria.fr>
+    @author Christophe Prud'homme <christophe.prudhomme@epfl.ch>
+    @author Vincent Martin <vincent.martin@inria.fr>
+    @contributor Mauro Perego <perego.mauro@gmail.com>
+    @maintainer Mauro Perego <perego.mauro@gmail.com>
 
-#ifndef __BCVECTOR__
-#define __BCVECTOR__
+    */
+
+#ifndef BCVECTOR_H
+#define BCVECTOR_H 1
 
 #include <boost/function.hpp>
 #include <boost/shared_ptr.hpp>
@@ -48,256 +52,307 @@
 
 namespace LifeV
 {
+
+//! BCVectorBase - class that holds the FE vectors used for prescribing boundary conditions.
 /*!
+   @author Miguel Fernandez
+   @author Christophe Prud'homme <christophe.prudhomme@epfl.ch>
+   @author Vincent Martin <vincent.martin@inria.fr>
 
-\class BCVectorBase
+  This class holds the FE vectors used for prescribing  boundary conditions.
+  The FE vectors given by the user must have the dimension of the total DOFs, although only DOFs on the boundary are considered.
 
-Base class that holding data vector for boundary conditions
+  In the case of Essential boundary condition, we want to prescribe u = v on part of the boundary ( u is the solution, v the given FE vector).
+  In the case of Natural boundary condition, depending on the type, we want to add to the right hand side of the equation one of the following terms:
 
+  type 0: 	v, 				in this case v is a quantity integrated on the boundary (i.e. a residual) <br>
+  type 1: ( v, n phi)_bd  	with v scalar and phi vector <br>
+  type 2: ( v n, phi)_bd  	v vector, phi scalar <br>
+  type 3: ( v, phi)_bd   	v and phi can be both vectors or scalars  (not yet implemented)
+
+  here ( . , . )_bd  denote the L2 inner product on the boundary, n is the normal, v the given FE vector
+
+  This class holds data structure also for Resistance and Flux boundary conditions
+
+  This is the base class for other BCVectorXXX classes.
+  Inheritance is used to hold specific boundary condition data.
 */
+
 class BCVectorBase
 {
 public:
 
-    //! Constructor
+    //! @name Constructors and Destructor
+    //@{
+
+
+    //! Empty Constructor
     /*!
-      \param vec data vector holding data
-      \param nbTotalDof number of total dof in the vector of data
-      \param type must be
-      -# 0:  boundary integration done (ex. residual of a variational problem)
-      -# 1:  needs boundary integration of \f$\lambda n \cdot  \mathbf{\phi}_i\f$
-      \warning (implemented only for the Natural BC AM 10/2004)
-      -# 2:  needs boundary integration of \f$\mathbf{\lambda} \cdot n \phi_i\f$
-    */
-
-    BCVectorBase( const EpetraVector& vec, const UInt nbTotalDof, UInt type = 0 );
-
-
-    //! Default Constructor (the user must call setBCVector(..))
+     * The user must call setBCVector(..).
+     */
     BCVectorBase();
 
-    //! Do nothing destructor
+
+    //! Constructor
+    /*!
+      @param rightHandSideVector The given Finite Element vector holding data to prescribe on boundary
+      @param numberOfTotalDof number of total dof in the vector of data
+      @param type The type can assume the following values (0, 1, 2); see BCVector class description for their meaning
+    */
+
+    BCVectorBase( const EpetraVector& rightHandSideVector, const UInt numberOfTotalDof, UInt type = 0 );
+
+
+    //! Copy Constructor
+    BCVectorBase( const BCVectorBase& bcVectorBase);
+
+
+    //! Destructor
     virtual ~BCVectorBase()
     {
         // nothing to be done here
     }
 
+
+    //@}
+
+    //! @name Operators
     //@{
 
-    //! assignement operator
+    //! Assignment operator
     virtual BCVectorBase& operator=( BCVectorBase const& );
 
-    //! This method returns the value to be imposed in the component iComp of the dof iDof
+    //! Return the value of the selected component of rightHandSideVector at position globalDofID
     /*!
-      \param iDof the number of the Dof
-      \param iComp the number of the component
+      @param globalDofId The global DOF id
+      @param component The vector component
     */
-    virtual Real operator() ( const ID& iDof, const ID& iComp ) const;
-
-    //! Return the value of the Mixte coefficient vector to be imposed in the component iComp of the dof iDof
-    virtual Real MixteVec( const ID& iDof, const ID& iComp ) const;
-
-    //! Return the value of the Beta coefficient vector to be imposed in the component iComp of the dof iDof
-    virtual Real BetaVec( const ID& iDof, const ID& iComp ) const;
-
-    //! Return the value of the Gamma coefficient vector to be imposed in the component iComp of the dof iDof
-    virtual Real GammaVec( const ID& iDof, const ID& iComp ) const;
+    virtual Real operator() ( const ID& globalDofId, const ID& component ) const;
 
     //@}
 
-    //@{
 
-    //! \return true if finalized, false otherwise
-    bool isFinalized() const
-    {
-        return _M_finalized;
-    }
+    //! @name Methods
 
-    //! return the total number of DOF
-    UInt nbTotalDOF() const
-    {
-        return _M_nbTotalDof;
-    }
-
+    //!  Return the value of the selected component of the boundary mass coefficient vector at position dofID
     /*!
-      Return the type of the kind of information in BCVector
-
-      -# 0:  boundary integration done (ex. residual of a variational problem)
-
-      -# 1: needs boundary integration of \f$\lambda n \cdot \mathbf{\phi}_i\f$
-      \warning (implemented only for the Natural BC - AM 10/2004)
-
-      -# 2:  needs boundary integration of \f$\mathbf{\lambda} \cdot n \phi_i\f$
-      \warning (not yet implemented - AM 10/2004)
+      @param globalDofId The global DOF id
+      @param component The vector component
     */
-    UInt type() const
-    {
-        return _M_type;
-    }
+    virtual Real MixteVec( const ID& globalDofId, const ID& component ) const;
 
 
-    //! Return the value of the Mixte coefficient
-    Real mixteCoef() const
-    {
-        return _M_mixteCoef;
-    }
+    //!  Return the value of the selected component of the beta coefficient vector at position dofID
+    /*!
+      @param globalDofId The global DOF id
+      @param component The vector component
+    */
+    virtual Real BetaVec( const ID& globalDofId, const ID& component ) const;
 
-    //! Return the value of the Mixte coefficient
-    Real resistanceCoef() const
-    {
-        return _M_resistanceCoef;
-    }
 
-    //! Return the value of the beta coefficient
-    Real betaCoef() const
-    {
-        return _M_betaCoef;
-    }
-    //! Return the value of the gamma coefficient
-    Real gammaCoef() const
-    {
-        return _M_gammaCoef;
-    }
+    //!  Return the value of the selected component of the gamma coefficient vector at position dofID
+    /*!
+      @param globalDofId The global DOF id
+      @param component The vector component
+    */
+    virtual Real GammaVec( const ID& globalDofId, const ID& component ) const;
+
+    //! showMe
+    /*!
+     * @param verbose The verbosity
+     * @param out The output stream (default: cout)
+     */
+    virtual std::ostream & showMe( bool verbose = false, std::ostream & out = std::cout ) const = 0;
+
+
     //@}
 
-
+    //! @name Get Methods
     //@{
 
-    //! finalize the BC
-    void setFinalized( bool __v )
-    {
-        _M_finalized = __v;
-    }
 
-    //true if Mixte coefficient is a Vector
-    bool ismixteVec()const  {return _M_ismixteVec;}
+
+
+    //! Return the number of total DOF
+    inline UInt nbTotalDOF() const { return M_numberOfTotalDof; }
+
+
+    //! Return the type of conditions (see BCVector class description)
+    inline UInt type() const { return M_type; }
+
+
+    //! determine whether the BCVector is updated
+    inline bool isFinalized() const { return M_finalized;}
+
+
+    //! determine whether the boundary mass coefficient for Robin bc is a Vector
+    inline bool ismixteVec() const  {return M_isRobinBdMassCoeffAVector;}
+
 
     //true if beta coefficient is a Vector
-    bool isbetaVec() const  {return _M_isbetaVec;}
+    inline bool isbetaVec() const  {return M_isBetaCoeffAVector;}
+
 
     //true if gamma coefficient is a Vector
-    bool isgammaVec() const {return _M_isgammaVec;}
-
-    //setting modes of coefficent
-
-    void setmixte(bool _s) {_M_ismixteVec = _s;}
-
-    void setisbeta(bool _s) {_M_isbetaVec = _s;}
-
-    void setisgamma(bool _s) {_M_isgammaVec =_s;}
-
-    //! set the Mixte coefficient
-    void setMixteCoef( const Real& coef )
-    {
-        _M_mixteCoef = coef;
-    }
-
-    //! set the Resistance coefficient
-    void setResistanceCoef( const Real& coef )
-    {
-        _M_resistanceCoef = coef;
-    }
-
-    //! set the Mixte coefficient data vector
-    void setMixteVec( EpetraVector& vec_mixte )
-    {
-        _M_ismixteVec = true;
-        _M_vec_mixte= &vec_mixte;
-    }
-
-    //! set the Beta coefficient data vector
-    void setBetaCoef( const Real& coef )
-    {
-        _M_betaCoef = coef;
-    }
-
-    //! set the Gamma coefficient data vector
-    void setGammaCoef( const Real& coef )
-    {
-        _M_gammaCoef = coef;
-    }
+    inline bool isgammaVec() const {return M_isGammaCoeffAVector;}
 
 
-    //! set the beta coefficient data vector
-    void setBetaVec( EpetraVector& vec_beta )
-    {
-        _M_isbetaVec = true;
-        _M_vec_beta= &vec_beta;
-    }
+    //! Return the value of the boundary mass coefficient of Robin conditions
+    inline Real mixteCoef() const { return M_robinBoundaryMassCoeff; }
 
-    //! set the gamma coefficient data vector
-    void setGammaVec( EpetraVector& vec_gamma )
-    {
-        _M_isgammaVec = true;
-        _M_vec_gamma= &vec_gamma;
-    }
 
-    //! set the vector
-    void setVector( EpetraVector& __vec, UInt nbDOF, UInt type=0 );
+    //! Return the value of the resistance coefficient
+    inline Real resistanceCoef() const { return M_resistanceCoeff; }
+
+
+    //! Return the value of the beta coefficient
+    inline Real betaCoef() const { return M_betaCoeff; }
+
+
+    //! Return the value of the gamma coefficient
+    inline Real gammaCoef() const { return M_gammaCoeff; }
 
     //@}
 
+
+    //! @name Set Methods
     //@{
 
-    //! Output
-    virtual std::ostream & showMe( bool verbose = false, std::ostream & out = std::cout ) const = 0;
+    //! set the finalize status
+    /*!
+      @param isFinalized Boolean value saying whether BCVectorBase have been updated
+    */
+    inline void setFinalized( bool isFinalized ) { M_finalized = isFinalized; }
+
+
+    //! set M_isRobinBdMassCoeffAVector
+    /*!
+      @param isRobinBdMassCoeffAVector Boolean value saying whether the boundary mass coefficient is a vector
+     */
+    inline void setmixte( bool isRobinBdMassCoeffAVector ) { M_isRobinBdMassCoeffAVector = isRobinBdMassCoeffAVector; }
+
+
+    //! set M_isBetaCoeffAVector
+    /*!
+      @param isRobinBdMassCoeffAVector Boolean value saying whether the beta coefficient is a vector
+     */
+    inline void setisbeta( bool isBetaCoeffAVector) { M_isBetaCoeffAVector = isBetaCoeffAVector; }
+
+
+    //! set M_isGammaCoeffAVector
+    /*!
+      @param isGammaCoeffAVector Boolean value saying whether the gamma coefficient is a vector
+     */
+    inline void setisgamma( bool isGammaCoeffAVector ) { M_isGammaCoeffAVector = isGammaCoeffAVector; }
+
+
+    //! set the boundary mass coefficient of Robin bc
+    /*!
+      @param robinBoundaryMassCoeff The boundary mass coefficient of robin conditions
+     */
+    inline void setMixteCoef( const Real& robinBoundaryMassCoeff ) { M_robinBoundaryMassCoeff = robinBoundaryMassCoeff;}
+
+
+    //! set the Resistance coefficient
+    /*!
+      @param robinBoundaryMassCoeff The boundary mass coefficient of robin conditions
+     */
+
+    inline void setResistanceCoef( const Real& resistanceCoeff ) { M_resistanceCoeff = resistanceCoeff; }
+
+
+    //! set the Beta coefficient FE vector
+    /*!
+      @param betaCoeff The beta coefficient
+     */
+
+    inline void setBetaCoef( const Real& betaCoeff ) { M_betaCoeff = betaCoeff;}
+
+
+    //! set the Gamma coefficient FE vector
+    /*!
+      @param gammaCoeff The gamma coefficient
+     */
+
+    void setGammaCoef( const Real& gammaCoeff ) { M_gammaCoeff = gammaCoeff; }
+
+
+    //! set the boundary mass coefficient FE vector for Robin boundary conditions
+    /*!
+      @param robinBoundaryMassCoeff The boundary mass coefficient of robin conditions
+     */
+
+    void setMixteVec( const EpetraVector& robinBoundaryMassCoeffVector );
+
+
+
+    //! set the beta coefficient FE vector
+    /*!
+      @param betaCoeffVector The beta coefficient FE vector
+     */
+    void setBetaVec( const EpetraVector& betaCoeffVector );
+
+
+    //! set the gamma coefficient FE vector
+    /*!
+      @param gammaCoeffVector The gamaa coefficient FE vector
+     */
+    void setGammaVec( const EpetraVector& gammaCoeffVector );
+
+
+    //! set the right hand side FE vector
+    /*!
+      @param righHandSideVector
+      @param numberOfTotalDOF
+      @param type
+     */
+    void setVector( const EpetraVector& righHandSideVector, UInt numberOfTotalDOF, UInt type=0 );
 
     //@}
 
 protected:
 
-    //! The data vector
-    const EpetraVector* _M_vec;
+    //! The pointer to  FE vector for the right hand side part of the equation
+    const EpetraVector* M_rightHandSideVectorPtr;
 
-    //! The data vector of the mixte coefficient
-    EpetraVector* _M_vec_mixte;
-    EpetraVector* _M_vec_beta;
-    EpetraVector* _M_vec_gamma;
+    //! The pointer to FE Vector holding the robin boundary Mass coefficients
+    const EpetraVector* M_robinBoundaryMassCoeffVectorPtr;
+    const EpetraVector* M_betaCoeffVectorPtr;
+    const EpetraVector* M_gammaCoeffVectorPtr;
 
     //! Number of total dof in the vector of data
-    UInt _M_nbTotalDof;
+    UInt M_numberOfTotalDof;
 
-    //! Coefficient for mixte boundary conditions (Robin)
-    /*! For the moment, it is the same for all the entries of the data vector.
-     */
-    Real _M_mixteCoef;
+    //! Coefficient for boundary mass term in Robin conditions
+    Real M_robinBoundaryMassCoeff;
 
-    //! Coefficient for mixte boundary conditions (Resistance)
-    /*! For the moment, it is the same for all the entries of the data vector.
-     */
-    Real _M_resistanceCoef;
+    //! Coefficient for Resistance coefficient
+    Real M_resistanceCoeff;
 
 
-    //! Coefficient for mixte boundary conditions (Robin)
-    /*! For the moment, it is the same for all the entries of the data vector.
-     */
-    Real _M_betaCoef;
+    //! Coefficient for the beta coefficient
+    Real M_betaCoeff;
 
-    //! Coefficient for  boundary conditions (Natural type 0)
-    /*! For the moment, it is the same for all the entries of the data vector.
-     */
-    Real _M_gammaCoef;
+    //! Coefficient for gamma coefficient
+    Real M_gammaCoeff;
 
-    bool _M_ismixteVec;
-    bool _M_isbetaVec;
-    bool _M_isgammaVec;
+    //! boolean determining whether the boundary mass coefficient is a FE Vector
+    bool M_isRobinBdMassCoeffAVector;
+
+    //! boolean determining whether the boundary mass coefficient is a FE Vector
+    bool M_isBetaCoeffAVector;
+
+    //! boolean determining whether the boundary mass coefficient is a FE Vector
+    bool M_isGammaCoeffAVector;
 
 
-    /*!
-      Type of boundary condition
-
-      -# boundary integration done (ex. residual of a variational problem)
-
-      -# needs boundary integration of \f$\lambda n \cdot  \mathbf{\phi}_i\f$
-
-      -# needs boundary integration of \f$\mathbf{\lambda} \cdot n \phi_i\f$
-    */
-    UInt _M_type;
+    //!  Type of boundary condition; see the BCBase class description
+    UInt M_type;
 
 private:
 
-    //! true when the BCVector is updated (and can be used)
-    bool _M_finalized;
+    //! true when the BCVector is updated
+    bool M_finalized;
 
 };
 
@@ -305,12 +360,38 @@ private:
 
 // ============ BCVector ================
 
+
+//! BCVector - class that holds the FE vectors used for prescribing boundary conditions.
 /*!
+   @author Miguel Fernandez
+   @author Christophe Prud'homme <christophe.prudhomme@epfl.ch>
+   @author Vincent Martin <vincent.martin@inria.fr>
 
-\class BCVector
+  This class holds the FE vectors used for prescribing  boundary conditions. It is derived from the class BCVectorBase
+  The FE vectors given by the user must have the dimension of the total DOFs, although only DOFs on the boundary are considered.
 
-Class that holds a user data vector for boundary conditions
+  In the case of Essential boundary condition, we want to prescribe u = v on part of the boundary ( u is the solution, v the given FE vector).
+  In the case of Natural boundary condition, depending on the type, we want to add to the right hand side of the equation one of the following terms:
 
+  type 0: @c	v, 				in this case v is a quantity integrated on the boundary (i.e. a residual) <br>
+  type 1: @c ( v, n phi)_bd  	with v scalar and phi vector <br>
+  type 2: @c ( v n, phi)_bd  	v vector, phi scalar  <br>
+  type 3: @c ( v, phi)_bd   	v and phi can be both vectors or scalars  (not yet implemented)
+
+  here ( . , . )_bd  denote the the L2 inner product on the boundary, n is the normal, v the given FE vector and phi the FE test function
+
+  This class holds data structure also for Robin, Resistance and Flux boundary conditions.
+
+  Since the FE vector v is used in the right hand side of the equation, the associate code variable is @c M_rightHandSideVector  (EpetraVector)
+
+  In Robin boundary conditions we add to the matrix the term: <br>
+  @c (coeff u, phi)_bd   <br>
+  and to the right hand side of the equation the term: <br>
+  @ ( v, phi)_bd     <br>
+  The code variables associated with coeff are M_boundaryMassCoeff and M_boundaryMassCoeffVector, the former being a scalar (Real), the latter an FE Vector (EpetraVector)
+
+   This is the base class for other BCVectorInterface class.
+  Inheritance is used to hold specific boundary condition data.
 */
 
 class BCVector:
@@ -318,46 +399,95 @@ class BCVector:
 {
 public:
 
+    //! @name Public Types
+    //@{
     //! super class
-    typedef BCVectorBase super;
+    typedef BCVectorBase super; //deprecated
+    typedef BCVectorBase bcVectorBase_Type;
+
+    //@}
+
+    //! @name Constructors and Destructor
+    //@{
+
+    //! Default Constructor
+    /*!
+     * The user must call setVector(..)
+     */
+    BCVector() {}
 
     //! Constructor
     /*!
-      \param vec data vector holding data
-      \param nbTotalDof number of total dof in the vector of data
-      \param type must be
-      -# boundary integration done (ex. residual of a variational problem)
-      -# needs boundary integration of \f$\lambda n \cdot  \mathbf{\phi}_i\f$ \warning (not yet implemented - AM 10/2004)
-      -# needs boundary integration of \f$\mathbf{\lambda} \cdot n \phi_i\f$ \warning (implemented only for the Natural BC - AM 10/2004)
+    	@param rightHandSideVector The given Finite Element vector holding data to prescribe on boundary
+    	@param numberOfTotalDof number of total dof in the vector of data
+    	@param type The type can assume the following values (0, 1, 2); see BCVector class description for their meaning
     */
-    BCVector( EpetraVector& vec, UInt const nbTotalDof, UInt type=0 );
+    BCVector( EpetraVector& rightHandSideVector, UInt const numberOfTotalDof, UInt type=0 );
 
-    //! Default Constructor (the user must call setVector(..))
-    BCVector();
 
-    //! Assignment operator for BCVectorInterface
-    BCVector & operator=( const BCVector & BCv );
+    //Copy Constructor
+    BCVector( const BCVector& bcVector );
 
-    //! Output
+    //! Destructor
+    virtual ~BCVector( ) {}
+
+    //@}
+
+
+    //! @name Operators
+    //@{
+
+    //! Assignment operator for BCVector
+    BCVector & operator=( const BCVector & bcVector );
+
+    //@}
+
+    //! @name Methods
+    //@{
+
+    //! showMe
+    /*!
+    * @param verbose The verbosity
+    * @param out The output stream (default: cout)
+    */
     std::ostream & showMe( bool verbose = false, std::ostream & out = std::cout ) const;
+
+    //@}
 };
 
 // ============ BCVectorInterface ================
 
+//! BCVectorInterface - class that holds the FE vectors used for prescribing boundary conditions on Interfaces.
 /*!
+   @author Miguel Fernandez
+   @author Christophe Prud'homme <christophe.prudhomme@epfl.ch>
+   @author Vincent Martin <vincent.martin@inria.fr>
 
-\class BCVectorInterface
+  This class holds the FE vectors used for prescribing  boundary conditions. It is derived from the class BCVectorBase
+  The FE vectors given by the user must have the dimension of the total DOFs, although only DOFs on the boundary are considered.
 
-Class that holds a user data vector for boundary conditions on
-interfaces
+  In the case of Essential boundary condition, we want to prescribe u = v on part of the boundary ( u is the solution, v the given FE vector).
+  In the case of Natural boundary condition, depending on the type, we want to add to the right hand side of the equation one of the following terms:
 
-The data functions given by the user must have the following
-declaration
+  type 0: 	v, 				in this case v is a quantity integrated on the boundary (i.e. a residual) <br>
+  type 1: ( v, n phi)_bd  	with v scalar and phi vector  <br>
+  type 2: ( v n, phi)_bd  	v vector, phi scalar  <br>
+  type 3: ( v, phi)_bd   	v and phi can be both vectors or scalars  (not yet implemented)
 
-\verbatim
-Real g( const Real& time, const Real& x, const Real& y,
-const Real& z, const ID& icomp)
-\endverbatim
+  here ( . , . )_bd  denote the L2 inner product on the boundary, n is the normal, v the given FE vector
+
+  This class holds data structure also for Robin, Resistance and Flux boundary conditions.
+
+  Since the FE vector v is used in the right hand side of the equation, the associate code variable is @c M_rightHandSideVector  (EpetraVector)
+
+  In Robin boundary conditions we add to the matrix the term: <br>
+  @c (coeff u, phi)_bd   <br>
+  and to the right hand side of the equation the term: <br>
+  @ ( v, phi)_bd     <br>
+  The code variables associated with coeff are M_boundaryMassCoeff and M_boundaryMassCoeffVector, the former being a scalar (Real), the latter an FE Vector (EpetraVector)
+
+  This is the base class for other BCVectorInterface class.
+  Inheritance is used to hold specific boundary condition data.
 */
 
 class BCVectorInterface
@@ -366,69 +496,137 @@ class BCVectorInterface
 {
 public:
 
-    //! super class
+    //! @name Public Types
+    //@{
 
-//    typedef FSIOperator::vector_type vector_type;
-    typedef BCVectorBase super;
-    typedef boost::shared_ptr<DofInterfaceBase> dof_interface_type;
+
+    typedef BCVectorBase super;  //deprecated
+    typedef boost::shared_ptr<DofInterfaceBase> dof_interface_type; //deprecated
+
+    typedef BCVectorBase bcVectorBase_Type;
+    typedef boost::shared_ptr<DofInterfaceBase> dofInterfacePtr_Type;
+
+    //@}
+
+
+    //! @name Constructors and Destructor
+    //@{
+
+
+    //! Default Constructor
+    /*!
+     * The user must call setVector(..)
+     */
+    BCVectorInterface () {}
 
     //! Constructor
     /*!
-      \param vec data vector holding data
-      \param nbTotalDof number of total dof in the vector of data
-      \param dofIn dofInterfaceBase object holding the connections between the interface dofs of the
-      data vector and those of the associated to the boundary conditions
-      \param type must be
-      -# 0:  boundary integration done (ex. residual of a variational problem)
-      -# 1:  needs boundary integration of \f$\lambda n \cdot  \mathbf{\phi}_i\f$
-      \warning: implemented only for the Natural BC
-      -# 2:  needs boundary integration of \f$\mathbf{\lambda} \cdot n \phi_i\f$
+      @param rightHandSideVector The given Finite Element vector holding data to prescribe on boundary
+      @param numberOfTotalDof Number of total dof in the vector of data
+      @param interfaceDofPtr The pointer to the container of connections between the DOFs on two matching meshes
+      @param type The type can assume the following values (0, 1, 2); see BCVector class description for their meaning
     */
-    BCVectorInterface( const EpetraVector& vec, UInt nbTotalDof, dof_interface_type dofIn, UInt type=0 );
+    BCVectorInterface( const EpetraVector& rightHandSideVector, UInt numberOfTotalDof, const dofInterfacePtr_Type& interfaceDofPtr, UInt type=0 );
 
-    //! Default Constructor (the user must call setBCVector(..))
-    BCVectorInterface ();
 
-    //! setup after default constructor
+    //! Copy Constructor
+    BCVectorInterface( const BCVectorInterface & bcVectorInterface );
 
-    void setup ( const EpetraVector& vec, UInt nbTotalDof, dof_interface_type dofIn, UInt type=0 );
 
-    //! set the BC vector (after default construction)
-    void setVector( EpetraVector& vec, UInt nbTotalDof, dof_interface_type dofIn, UInt type=0);
+    //!Destructor
+    virtual ~BCVectorInterface() {}
 
-    /*!
-      This method returns the value to be imposed in the component iComp of the dof iDof.
 
-      \param iDof the number of the Dofin
-      \param iComp the number of the component
-    */
-    Real operator() ( const ID& iDof, const ID& iComp ) const;
+    //@}
 
-    //! This method returns the value of the mixte coefficient to be imposed in the component iComp of the dof iDof
-    Real MixteVec( const ID& iDof, const ID& iComp ) const;
 
-    //! This method returns the value of the beta coefficient to be imposed in the component iComp of the dof iDof
-    Real BetaVec( const ID& iDof, const ID& iComp ) const;
 
-    //! This method returns the value of the gamma coefficient to be imposed in the component iComp of the dof iDof
-    Real GammaVec( const ID& iDof, const ID& iComp ) const;
+    //! @name Operators
+    //@{
 
     //! Assignment operator for BCVectorInterface
-    BCVectorInterface & operator=( const BCVectorInterface & BCv );
+    BCVectorInterface & operator=( const BCVectorInterface & bcVectorInterface );
 
-    //! getter
-    DofInterfaceBase const & dofInterface() const
-    {
-        return *_M_dofIn;
-    }
 
-    //! Output
+    //! Return the value of the selected component of rightHandSideVector at position globalDofID
+    /*!
+      @param globalDofId The global DOF id
+      @param component The vector component
+    */
+    Real operator() ( const ID& globalDofId, const ID& component ) const;
+
+
+
+    //@}
+
+
+
+    //! setup after default constructor
+    /*!
+          @param rightHandSideVector The given Finite Element vector holding data to prescribe on boundary
+          @param numberOfTotalDof Number of total dof in the vector of data
+          @param interfaceDofPtr The pointer to the container of connections between the DOFs on two matching meshes
+          @param type The type can assume the following values (0, 1, 2); see BCVectorInterface class description for their meaning
+        */
+    void setup ( const EpetraVector& rightHandSideVector, UInt numberOfTotalDof, const dofInterfacePtr_Type& interfaceDofPtr, UInt type=0 );
+
+
+    //! set the BC vector (after default construction)
+    /*!
+      @param rightHandSideVector The given Finite Element vector holding data to prescribe on boundary
+      @param numberOfTotalDof Number of total dof in the vector of data
+      @param interfaceDofPtr The pointer to the container of connections between the DOFs on two matching meshes
+      @param type The type can assume the following values (0, 1, 2); see BCVectorInterface class description for their meaning
+    */
+    void setVector( const EpetraVector& rightHandSideVector, UInt numberOfTotalDof, const dofInterfacePtr_Type& interfaceDofPtr, UInt type=0);
+
+
+
+    //! @name Methods
+    //@{
+
+    //!  Return the value of the selected component of the boundary mass coefficient vector at position dofID
+    /*!
+      @param globalDofId The global DOF id
+      @param component The vector component
+    */
+    Real MixteVec( const ID& globalDofId, const ID& component ) const;
+
+
+    //!  Return the value of the selected component of the beta coefficient vector at position dofID
+    /*!
+      @param globalDofId The global DOF id
+      @param component The vector component
+    */
+    Real BetaVec( const ID& globalDofId, const ID& component ) const;
+
+
+    //!  Return the value of the selected component of the gamma coefficient vector at position dofID
+    /*!
+      @param globalDofId The global DOF id
+      @param component The vector component
+    */
+    Real GammaVec( const ID& globalDofId, const ID& component ) const;
+
+
+
+    //! showMe
+    /*!
+    * @param verbose The verbosity
+    * @param out The output stream (default: cout)
+    */
     std::ostream & showMe( bool verbose = false, std::ostream & out = std::cout ) const;
+
+
+    //! Return reference to  DofInterfaceBase object, the container of connection of DOFs
+    inline DofInterfaceBase const & dofInterface() const { return *M_interfaceDofPtr; }
+
+    //@}
 
 protected:
 
     //! DofInterfaceBase object holding the connections between the interface dofs
-    dof_interface_type _M_dofIn;
+    dofInterfacePtr_Type M_interfaceDofPtr;
 
 };
 typedef LifeV::singleton< LifeV::factoryClone< BCVectorBase > > FactoryCloneBCVector;

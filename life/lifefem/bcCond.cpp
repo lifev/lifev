@@ -1,599 +1,454 @@
+//@HEADER
 /*
- This file is part of the LifeV library
- Copyright (C) 2001,2002,2003,2004 EPFL, INRIA and Politecnico di Milano
+ *******************************************************************************
 
- This library is free software; you can redistribute it and/or
- modify it under the terms of the GNU Lesser General Public
- License as published by the Free Software Foundation; either
- version 2.1 of the License, or (at your option) any later version.
+    Copyright (C) 2004, 2005, 2007 EPFL, Politecnico di Milano, INRIA
+    Copyright (C) 2010 EPFL, Politecnico di Milano, Emory University
 
- This library is distributed in the hope that it will be useful,
- but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- Lesser General Public License for more details.
+    This file is part of LifeV.
 
- You should have received a copy of the GNU Lesser General Public
- License along with this library; if not, write to the Free Software
- Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
-*/
+    LifeV is free software; you can redistribute it and/or modify
+    it under the terms of the GNU Lesser General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    LifeV is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+    Lesser General Public License for more details.
+
+    You should have received a copy of the GNU Lesser General Public License
+    along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
+
+ *******************************************************************************
+ */
+//@HEADER
+
 /*!
-  \file bcCond.cc
-  \brief Implementations for bcCond.h
-  \version 1.0
-  \author M.A. Fernandez
-  \date 07/2002
+    @file
+    @brief classes to handle boundary conditions
 
-*/
+    @author M.A. Fernandez
+    @contributor Lucia Mirabella <lucia.mirabell@gmail.com>
+    @maintainer Lucia Mirabella <lucia.mirabell@gmail.com>
 
+    @date 06-2002
 
+    @date 11-2002
+
+  This file contains the classes which may be used to store boundary
+  conditions. A boundary condition object will have the following
+  elements:
+<ol>
+  <li> a name identifying a specific BC,
+
+  <li> a flag identifying a specific part of the mesh boundary,
+
+  <li> a type (Essential, Natural, Mixte, Flux, Resistance),
+
+  <li> a mode of implementation (Scalar, Full, Component, Normal,
+     Tangential, Resistance, Directional),
+
+  <li> a functor holding the data function,
+
+  <li> a bool vector  describing the components involved in this boundary condition
+
+  <li> a list of pointers to identifiers allowing the user to know to
+     which DOF the boundary condition applies.
+</ol>
+
+ */
+
+#include <lifeconfig.h>
 #include <life/lifefem/bcCond.hpp>
 
 namespace LifeV
 {
 
-// ============ BCBase ================
-//! Constructor for BC
+// ===================================================
+// Constructors & Destructor
+// ===================================================
+
+BCBase::BCBase()
+{
+}
+
 BCBase::BCBase( const std::string& name, const EntityFlag& flag,
                 const BCType& type, const BCMode& mode,
-                BCFunctionBase& bcf, const std::vector<ID>& comp )
+                BCFunctionBase& bcFunction, const std::vector<ID>& components )
         :
-        _M_isUDep(false),
-        _M_name( name ),
-        _M_flag( flag ),
-        _M_type( type ),
-        _M_mode( mode ),
-        _M_bcf( FactoryCloneBCFunction::instance().createObject( &bcf ) ),
-        _M_dataVector( false ),
-        _M_comp( comp ),
-        _M_offset( -1 ),
-        _M_finalised( false )
+        M_name( name ),
+        M_flag( flag ),
+        M_type( type ),
+        M_mode( mode ),
+        M_components( components ),
+        M_bcFunction( FactoryCloneBCFunction::instance().createObject( &bcFunction ) ),
+        M_bcFunctionFEVectorDependent(),
+        M_bcVector(),
+        M_isStored_BcVector( false ),
+        M_isStored_BcFunctionVectorDependent(false),
+        M_offset( -1 ),
+        M_finalized( false )
 {
-    if ( _M_mode != Component )
+    if ( M_mode != Component )
     {
         ERROR_MSG( "BCBase::BCBase: You should use a more specific constructor for this mode" );
     }
 }
 
-//! Constructor for BC without components for Scalar, Tangential or Normal  mode problems
 BCBase::BCBase( const std::string& name,
                 const EntityFlag&  flag,
                 const BCType&      type,
                 const BCMode&      mode,
-                BCFunctionBase&    bcf ):
-        _M_isUDep(false),
-        _M_name( name ),
-        _M_flag( flag ),
-        _M_type( type ),
-        _M_mode( mode ),
-        _M_bcf( FactoryCloneBCFunction::instance().createObject( &bcf ) ),
-        _M_dataVector( false ),
-        _M_comp(),
-        _M_offset( -1 ),
-        _M_finalised( false )
+                BCFunctionBase&    bcFunction ):
+        M_name( name ),
+        M_flag( flag ),
+        M_type( type ),
+        M_mode( mode ),
+        M_components(),
+        M_bcFunction( FactoryCloneBCFunction::instance().createObject( &bcFunction ) ),
+        M_bcFunctionFEVectorDependent(),
+        M_bcVector(),
+        M_isStored_BcVector( false ),
+        M_isStored_BcFunctionVectorDependent(false),
+        M_offset( -1 ),
+        M_finalized( false )
 {
-    //if(type==3)//flux
-    //{
-    //	++BCBase::M_fluxes;
-    //}
-    UInt nComp;
-    switch ( _M_mode = mode )
+    UInt numberOfComponents;
+    switch ( M_mode = mode )
     {
     case Scalar:
-        nComp = 1;
-        _M_comp.reserve( nComp );
-        _M_comp.push_back( 1 );
+        numberOfComponents = 1;
+        M_components.reserve( numberOfComponents );
+        M_components.push_back( 1 );
         break;
     case Tangential:
-        nComp = nDimensions;
-        _M_comp.reserve( nComp );
-        for ( ID i = 1; i <= nComp; ++i )
-            _M_comp.push_back( i );
+        numberOfComponents = nDimensions;
+        M_components.reserve( numberOfComponents );
+        for ( ID i = 1; i <= numberOfComponents; ++i )
+            M_components.push_back( i );
         break;
     case Normal:
         // Normal Essential boundary condition (cf Gwenol Grandperrin Master Thesis)
         if (type == Essential)
         {
-            nComp = 1;
-            _M_comp.reserve( nComp );
-            _M_comp.push_back( nDimensions );
+            numberOfComponents = 1;
+            M_components.reserve( numberOfComponents );
+            M_components.push_back( nDimensions );
         }
         else
         {
-            nComp = nDimensions;
-            _M_comp.reserve( nComp );
-            for ( ID i = 1; i <= nComp; ++i )
-                _M_comp.push_back( i );
+            numberOfComponents = nDimensions;
+            M_components.reserve( numberOfComponents );
+            for ( ID i = 1; i <= numberOfComponents; ++i )
+                M_components.push_back( i );
         }
         break;
     case Directional:
-        nComp = 1;
-        _M_comp.reserve( nComp );
-        _M_comp.push_back( nDimensions );
+        numberOfComponents = 1;
+        M_components.reserve( numberOfComponents );
+        M_components.push_back( nDimensions );
         break;
     default:
         ERROR_MSG( "BCBase::BCBase: You should use a more specific constructor for this mode" );
     }
 }
 
-
-//! Constructor for BC without list of components for Full mode problems
 BCBase::BCBase( const std::string& name,
                 const EntityFlag&  flag,
                 const BCType&      type,
                 const BCMode&      mode,
-                BCFunctionBase&    bcf,
-                const UInt&        nComp )
-
+                BCFunctionBase&    bcFunction,
+                const UInt&        numberOfComponents )
         :
-        _M_isUDep(false),
-        _M_name( name ),
-        _M_flag( flag ),
-        _M_type( type ),
-        _M_mode( mode ),
-        _M_bcf( FactoryCloneBCFunction::instance().createObject( &bcf ) ),
-        _M_dataVector( false ),
-        _M_comp(),
-        _M_offset( -1 ),
-        _M_finalised( false )
+        M_name( name ),
+        M_flag( flag ),
+        M_type( type ),
+        M_mode( mode ),
+        M_components(),
+        M_bcFunction( FactoryCloneBCFunction::instance().createObject( &bcFunction ) ),
+        M_bcFunctionFEVectorDependent(),
+        M_bcVector(),
+        M_isStored_BcVector( false ),
+        M_isStored_BcFunctionVectorDependent(false),
+        M_offset( -1 ),
+        M_finalized( false )
 {
-    if ( _M_mode != Full )
+    if ( M_mode != Full )
     {
         ERROR_MSG( "BCBase::BCBase: You should use a more specific constructor for this mode" );
     }
-    _M_comp.reserve( nComp );
-    for ( ID i = 1; i <= nComp; ++i )
-        _M_comp.push_back( i );
-
-//     if(type==3)//flux
-//       {
-// 	++BCBase::M_fluxes;
-//      }
+    M_components.reserve( numberOfComponents );
+    for ( ID i = 1; i <= numberOfComponents; ++i )
+        M_components.push_back( i );
 
 }
 
 
-
-//! Constructor for BC with data vector
 BCBase::BCBase( const std::string& name,
                 const EntityFlag& flag,
                 const BCType& type,
                 const BCMode& mode,
-                BCVectorBase& bcv,
-                const std::vector<ID>& comp )
+                BCVectorBase& bcVector,
+                const std::vector<ID>& components )
         :
-        _M_isUDep(false),
-        _M_name( name ),
-        _M_flag( flag ),
-        _M_type( type ),
-        _M_mode( mode ),
-        _M_bcf(),_M_bcfUDep(),
-        _M_bcv( FactoryCloneBCVector::instance().createObject( &bcv )  ),
-        _M_dataVector( true ),
-        _M_comp(comp),
-        _M_offset( -1 ),
-        _M_finalised( false )
+        M_name( name ),
+        M_flag( flag ),
+        M_type( type ),
+        M_mode( mode ),
+        M_components(components),
+        M_bcFunction(),
+        M_bcFunctionFEVectorDependent(),
+        M_bcVector( FactoryCloneBCVector::instance().createObject( &bcVector )  ),
+        M_isStored_BcVector( true ),
+        M_isStored_BcFunctionVectorDependent(false),
+        M_offset( -1 ),
+        M_finalized( false )
 {
     if ( mode != Component )
     {
         ERROR_MSG( "BCBase::BCBase: You should use a more specific constructor for this mode" );
     }
-//     if(type==3)//flux
-//       {
-// 	++BCBase::M_fluxes;
-//       }
 }
 
-//! Constructor for BC with data vector, without components for Scalar, Tangential or Normal  mode problems
 BCBase::BCBase( const std::string& name,
                 const EntityFlag& flag,
                 const BCType& type,
                 const BCMode& mode,
-                BCVectorBase& bcv )
+                BCVectorBase& bcVector )
         :
-        _M_isUDep(false),
-        _M_name( name ),
-        _M_flag( flag ),
-        _M_type( type ),
-        _M_mode( mode ),
-        _M_bcf(),_M_bcfUDep(),
-        _M_bcv( FactoryCloneBCVector::instance().createObject( &bcv ) ),
-        _M_dataVector( true ),
-        _M_comp(),
-        _M_finalised( false )
+        M_name( name ),
+        M_flag( flag ),
+        M_type( type ),
+        M_mode( mode ),
+        M_components(),
+        M_bcFunction(),
+        M_bcFunctionFEVectorDependent(),
+        M_bcVector( FactoryCloneBCVector::instance().createObject( &bcVector ) ),
+        M_isStored_BcVector( true ),
+        M_isStored_BcFunctionVectorDependent(false),
+        M_finalized( false )
 {
-    UInt nComp;
-    switch ( _M_mode = mode )
+    UInt numberOfComponents;
+    switch ( M_mode = mode )
     {
     case Scalar:
-        nComp = 1;
-        _M_comp.reserve( nComp );
-        _M_comp.push_back( 1 );
+        numberOfComponents = 1;
+        M_components.reserve( numberOfComponents );
+        M_components.push_back( 1 );
 
         break;
     case Tangential:
-        nComp = nDimensions - 1;
-        _M_comp.reserve( nComp );
-        for ( ID i = 1; i <= nComp; ++i )
-            _M_comp.push_back( i );
+        numberOfComponents = nDimensions - 1;
+        M_components.reserve( numberOfComponents );
+        for ( ID i = 1; i <= numberOfComponents; ++i )
+            M_components.push_back( i );
 
         break;
     case Normal:
-        nComp = 1;
-        _M_comp.reserve( nComp );
-        _M_comp.push_back( nDimensions );
+        numberOfComponents = 1;
+        M_components.reserve( numberOfComponents );
+        M_components.push_back( nDimensions );
 
         break;
     case Directional:
-        nComp = 1;
-        _M_comp.reserve( nComp );
-        _M_comp.push_back( nDimensions );
+        numberOfComponents = 1;
+        M_components.reserve( numberOfComponents );
+        M_components.push_back( nDimensions );
         break;
     default:
         ERROR_MSG( "BCBase::BCBase: You should use a more specific constructor for this mode" );
     }
-//     if(type==3)//flux
-//       {
-// 	++BCBase::M_fluxes;
-//       }
 }
 
 
-//! Constructor for BC with data vector, without list of components for Full mode problems
 BCBase::BCBase( const std::string& name,
                 const EntityFlag& flag,
                 const BCType& type,
                 const BCMode& mode,
-                BCVectorBase& bcv,
-                const UInt& nComp )
+                BCVectorBase& bcVector,
+                const UInt& numberOfComponents )
         :
-        _M_isUDep(false),
-        _M_name( name ),
-        _M_flag( flag ),
-        _M_type( type ),
-        _M_mode( mode ),
-        _M_bcf(),_M_bcfUDep(),
-        _M_bcv( FactoryCloneBCVector::instance().createObject( &bcv ) ),
-        _M_dataVector( true ),
-        _M_comp(),
-        _M_offset( -1 ),
-        _M_finalised( false )
+        M_name( name ),
+        M_flag( flag ),
+        M_type( type ),
+        M_mode( mode ),
+        M_components(),
+        M_bcFunction(),
+        M_bcFunctionFEVectorDependent(),
+        M_bcVector( FactoryCloneBCVector::instance().createObject( &bcVector ) ),
+        M_isStored_BcVector( true ),
+        M_isStored_BcFunctionVectorDependent(false),
+        M_offset( -1 ),
+        M_finalized( false )
 {
     if ( mode != Full )
     {
         ERROR_MSG( "BCBase::BCBase: You should use a more specific constructor for this mode" );
     }
 
-    _M_comp.reserve( nComp );
-    for ( ID i = 1; i <= nComp; ++i )
-        _M_comp.push_back( i );
+    M_components.reserve( numberOfComponents );
+    for ( ID i = 1; i <= numberOfComponents; ++i )
+        M_components.push_back( i );
 
-//     if(type==3)//flux
-//       {
-// 	++BCBase::M_fluxes;
-//       }
 }
 
 BCBase::BCBase( const std::string&     name,
                 const EntityFlag&      flag,
                 const BCType&          type,
                 const BCMode&          mode,
-                BCFunctionUDepBase&    bcf,
-                const std::vector<ID>& comp ):
-        _M_isUDep(true),
-        _M_name( name ),
-        _M_flag( flag ),
-        _M_type( type ),
-        _M_mode( mode ),
-        _M_bcfUDep( FactoryCloneBCFunctionUDep::instance().createObject( &bcf ) ),
-        _M_dataVector( false ),
-        _M_comp( comp ),
-        _M_finalised( false )
+                BCFunctionUDepBase&    bcFunctionFEVectorDependent,
+                const std::vector<ID>& components ):
+        M_name( name ),
+        M_flag( flag ),
+        M_type( type ),
+        M_mode( mode ),
+        M_components( components ),
+        M_bcFunction(),
+        M_bcFunctionFEVectorDependent( FactoryCloneBCFunctionUDep::instance().createObject( &bcFunctionFEVectorDependent ) ),
+        M_bcVector(),
+        M_isStored_BcVector( false ),
+        M_isStored_BcFunctionVectorDependent(true),
+        M_finalized( false )
 {
-    if ( _M_mode != Component )
+    if ( M_mode != Component )
     {
         ERROR_MSG( "BCBase::BCBase: You should use a more specific constructor for this mode" );
     }
-//     if(type==3)//flux
-//       {
-// 	++BCBase::M_fluxes;
-//       }
 }
+
 BCBase::BCBase( const std::string&  name,
                 const EntityFlag&   flag,
                 const BCType&       type,
                 const BCMode&       mode,
-                BCFunctionUDepBase& bcf):
-        _M_isUDep(true),
-        _M_name( name ),
-        _M_flag( flag ),
-        _M_type( type ),
-        _M_mode( mode ),
-        _M_bcfUDep( FactoryCloneBCFunctionUDep::instance().createObject( &bcf ) ),
-        _M_dataVector( false ),
-        _M_comp(),
-        _M_offset( -1 ),
-        _M_finalised( false )
+                BCFunctionUDepBase& bcFunctionFEVectorDependent):
+        M_name( name ),
+        M_flag( flag ),
+        M_type( type ),
+        M_mode( mode ),
+        M_components(),
+        M_bcFunction(),
+        M_bcFunctionFEVectorDependent( FactoryCloneBCFunctionUDep::instance().createObject( &bcFunctionFEVectorDependent ) ),
+        M_bcVector(),
+        M_isStored_BcVector( false ),
+        M_isStored_BcFunctionVectorDependent(true),
+        M_offset( -1 ),
+        M_finalized( false )
 {
 
-    UInt nComp;
-    switch ( _M_mode = mode )
+    UInt numberOfComponents;
+    switch ( M_mode = mode )
     {
     case Scalar:
-        nComp = 1;
-        _M_comp.reserve( nComp );
-        _M_comp.push_back( 1 );
+        numberOfComponents = 1;
+        M_components.reserve( numberOfComponents );
+        M_components.push_back( 1 );
         break;
     case Tangential:
-        nComp = nDimensions - 1;
-        _M_comp.reserve( nComp );
-        for ( ID i = 1; i <= nComp; ++i )
-            _M_comp.push_back( i );
+        numberOfComponents = nDimensions - 1;
+        M_components.reserve( numberOfComponents );
+        for ( ID i = 1; i <= numberOfComponents; ++i )
+            M_components.push_back( i );
         break;
     case Normal:
-        nComp = 1;
-        _M_comp.reserve( nComp );
-        _M_comp.push_back( nDimensions );
+        numberOfComponents = 1;
+        M_components.reserve( numberOfComponents );
+        M_components.push_back( nDimensions );
         break;
     case Directional:
-        nComp = 1;
-        _M_comp.reserve( nComp );
-        _M_comp.push_back( nDimensions );
+        numberOfComponents = 1;
+        M_components.reserve( numberOfComponents );
+        M_components.push_back( nDimensions );
         break;
     default:
         ERROR_MSG( "BCBase::BCBase: You should use a more specific constructor for this mode" );
     }
-//     if(type==3)//flux
-//       {
-// 	++BCBase::M_fluxes;
-//       }
+
 }
+
 BCBase::BCBase( const std::string&  name,
                 const EntityFlag&   flag,
                 const BCType&       type,
                 const BCMode&       mode,
-                BCFunctionUDepBase& bcf,
-                const UInt&         nComp )
+                BCFunctionUDepBase& bcFunctionFEVectorDependent,
+                const UInt&         numberOfComponents )
         :
-        _M_isUDep(true),
-        _M_name( name ),
-        _M_flag( flag ),
-        _M_type( type ),
-        _M_mode( mode ),
-        _M_bcfUDep( FactoryCloneBCFunctionUDep::instance().createObject( &bcf ) ),
-        _M_dataVector( false ),
-        _M_comp(),
-        _M_offset( -1 ),
-        _M_finalised( false )
+        M_name( name ),
+        M_flag( flag ),
+        M_type( type ),
+        M_mode( mode ),
+        M_components(),
+        M_bcFunction(),
+        M_bcFunctionFEVectorDependent( FactoryCloneBCFunctionUDep::instance().createObject( &bcFunctionFEVectorDependent ) ),
+        M_bcVector(),
+        M_isStored_BcVector( false ),
+        M_isStored_BcFunctionVectorDependent(true),
+        M_offset( -1 ),
+        M_finalized( false )
 {
-    if ( _M_mode != Full )
+    if ( M_mode != Full )
     {
         ERROR_MSG( "BCBase::BCBase: You should use a more specific constructor for this mode" );
     }
 
-    _M_comp.reserve( nComp );
-    for ( ID i = 1; i <= nComp; ++i )
-        _M_comp.push_back( i );
+    M_components.reserve( numberOfComponents );
+    for ( ID i = 1; i <= numberOfComponents; ++i )
+        M_components.push_back( i );
 
-//     if(type==3)//flux
-//       {
-// 	++BCBase::M_fluxes;
-//       }
 }
 
 
-
-
-
-//! Destructor (we have a vector of pointers to ID's and Functors)
-BCBase::~BCBase()
-{
-}
-
-
-
-//! Assignment operator for BC (we have a vector of pointers to ID's
-//and a pointer to user defined functions)
-BCBase & BCBase::operator=( const BCBase& BCb )
-{
-
-    _M_name = BCb._M_name;
-    _M_flag = BCb._M_flag;
-    _M_type = BCb._M_type;
-    _M_mode = BCb._M_mode;
-    _M_finalised = BCb._M_finalised;
-    _M_dataVector = BCb._M_dataVector;
-    _M_bcfUDep=BCb._M_bcfUDep;
-    _M_bcv = BCb._M_bcv;
-    _M_bcf = BCb._M_bcf;
-    _M_offset  = BCb._M_offset;
-    _M_comp = BCb._M_comp;
-    _M_isUDep=BCb._M_isUDep;
-
-    // Important!!: The set member list0 is always empty at this
-    // point, it is just an auxiliary container used at the moment of
-    // the boundary update (see BCHandler::bdUpdate)
-
-    // The list of ID's must be empty
-    if ( !_M_idList.empty() || !BCb._M_idList.empty() )
-    {
-        ERROR_MSG( "BCBase::operator= : The BC assigment operator does not work with lists of identifiers which are not empty" );
-    }
-
-    return *this;
-}
-
-//! Copy constructor for BC (we have a vector of pointers to ID's and a pointer to user defined functions)
-BCBase::BCBase( const BCBase& BCb )
+BCBase::BCBase( const BCBase& bcBase )
         :
-        _M_isUDep(BCb._M_isUDep),
-        _M_name( BCb._M_name ),
-        _M_flag( BCb._M_flag ),
-        _M_type( BCb._M_type ),
-        _M_mode( BCb._M_mode ),
-        _M_bcf( BCb._M_bcf ),           // Ptr copy
-        _M_bcfUDep(BCb._M_bcfUDep),     // Ptr copy
-        _M_bcv( BCb._M_bcv ),           // Ptr copy
-        _M_dataVector( BCb._M_dataVector ),
-        _M_comp( BCb._M_comp ),
-        list0( ),
-        listIdGlobal( ),
-        _M_IdGlobal( ),
-        _M_idList( ),
-        _M_IdGlobalList( ),
-        _M_offset   ( BCb._M_offset ),
-        _M_finalised( BCb._M_finalised ),
-        _M_finalisedIdGlobal()
+        M_name( bcBase.M_name ),
+        M_flag( bcBase.M_flag ),
+        M_type( bcBase.M_type ),
+        M_mode( bcBase.M_mode ),
+        M_components( bcBase.M_components ),
+        M_bcFunction( bcBase.M_bcFunction ),
+        M_bcFunctionFEVectorDependent(bcBase.M_bcFunctionFEVectorDependent),
+        M_bcVector( bcBase.M_bcVector ),
+        M_isStored_BcVector( bcBase.M_isStored_BcVector ),
+        M_isStored_BcFunctionVectorDependent(bcBase.M_isStored_BcFunctionVectorDependent),
+        M_idSet( ),
+        M_idGlobalSet( ),
+        M_IdGlobalVector( ),
+        M_idList( ),
+        M_idGlobalList( ),
+        M_offset   ( bcBase.M_offset ),
+        M_finalized( bcBase.M_finalized ),
+        M_finalizedIdGlobal()
 {
-    // Important!!: The set member list0 is always empty at this point, it is just
+    // Important!!: The set member M_idSet is always empty at this point, it is just
     // an auxiliary container used at the moment of the boundary update (see BCHandler::bdUpdate)
 
     // The list of ID's must be empty
-    if ( !_M_idList.empty() || !BCb._M_idList.empty() )
+    if ( !M_idList.empty() || !bcBase.M_idList.empty() )
     {
         ERROR_MSG( "BCBase::BCBase : The BC copy constructor does not work with list of identifiers which are not empty" );
     }
 }
 
-//! Returns the BC name
-std::string BCBase::name() const
+
+BCBase::~BCBase()
 {
-    return _M_name;
 }
 
-//! Returns the BC associated flag
-EntityFlag BCBase::flag() const
-{
-    return _M_flag;
-}
+// ===================================================
+// Methods
+// ===================================================
 
-//! Returns the BC type
-BCType BCBase::type() const
-{
-    return _M_type;
-}
-
-//! Returns the BC mode
-BCMode BCBase::mode() const
-{
-    return _M_mode;
-}
-bool BCBase::isUDep() const
-{
-    return _M_isUDep;
-}
-
-//! Returns the number of components involved in this boundary condition
-UInt BCBase::numberOfComponents() const
-{
-    return _M_comp.size();
-}
-
-//! eturns the global i-th component involved in the boundary condition
 ID BCBase::component( const ID i ) const
 {
-    ASSERT_BD( i >= 1 && i <= _M_comp.size() );
-    return _M_comp[ i -1 ];
+    ASSERT_BD( i >= 1 && i <= M_components.size() );
+    return M_components[ i -1 ];
 }
 
-//! Returns wether the list is finalised and the vector of ID's is then accessible
-bool BCBase::finalised() const
-{
-    return _M_finalised;
-}
-
-//! Returns wether the list is finalised and the vector of IdGlobal's is then accessible
-bool BCBase::finalisedIdGlobal() const
-{
-    return _M_finalisedIdGlobal;
-}
-
-
-
-//! Overloading function operator by calling the (*_M_bcf)() user specified function
-Real BCBase::operator() ( const Real& t, const Real& x, const Real& y,
-                          const Real& z, const ID& i ) const
-{
-    return _M_bcf->operator() ( t,x, y, z, i );
-}
-
-//! Overloading function operator by calling the (*_M_bcf)() user specified function
-/* new overloading for BCFunctionUDepending */
-Real BCBase::operator() ( const Real& t, const Real& x, const Real& y,
-                          const Real& z, const ID& i, const Real& u ) const
-{
-    /* is there a better way ? */
-    Debug(800)<<"debug800 in BCBase::operator(6x)\n";
-    return _M_bcfUDep->operator()(t,x, y, z, i, u);
-    Debug(800)<<"debug800 out BCBase::operator(6x)\n";
-}
-
-
-
-//! Returns a pointer  to the user defined STL functor
-const BCFunctionBase* BCBase::pointerToFunctor() const
-{
-    return _M_bcf.get();
-}
-
-//! Returns a pointer  to the BCVector
-const BCVectorBase* BCBase::pointerToBCVector() const
-{
-    return _M_bcv.get();
-}
-
-//! Returns a pointer  to the user defined STL functor
-const BCFunctionUDepBase* BCBase::pointerToFunctorUDep() const
-{
-    return _M_bcfUDep.get();
-}
-
-//! True is a data vector has been provided
-bool BCBase::dataVector() const
-{
-    return _M_dataVector;
-}
-
-void
-BCBase::setBCVector( BCVectorBase& __v )
-{
-    _M_bcv = boost::shared_ptr<BCVectorBase >( FactoryCloneBCVector::instance().createObject( &__v ) );
-    _M_dataVector = true;
-    _M_isUDep=false;
-}
-
-void
-BCBase::setBCFunction( BCFunctionBase& __f )
-{
-    _M_bcf = boost::shared_ptr<BCFunctionBase>( FactoryCloneBCFunction::instance().createObject( &__f ) );
-    _M_dataVector = false;
-    _M_isUDep=false;
-}
-
-void
-BCBase::setBCFunction( BCFunctionUDepBase& __f )
-{
-    _M_bcfUDep = boost::shared_ptr<BCFunctionUDepBase>( FactoryCloneBCFunctionUDep::instance().createObject( &__f ) );
-    _M_dataVector = false;
-    _M_isUDep=true;
-}
-
-Real BCBase::operator() ( const ID& iDof, const ID& iComp ) const
-{
-    if ( _M_dataVector )
-        return ( *_M_bcv ) ( iDof, iComp );
-    else
-    {
-        ERROR_MSG( "BCBase::operator() : A data vector must be specified before calling this method" );
-        return 0.;
-    }
-}
-
-//! Return true if mixte coefficient is bcVector, false otherside
 bool  BCBase::ismixteVec()  const
 {
-    if ( _M_dataVector )
+    if ( M_isStored_BcVector )
     {
-        return  (*_M_bcv).ismixteVec();
+        return  (*M_bcVector).ismixteVec();
     }
     else
     {
@@ -602,28 +457,12 @@ bool  BCBase::ismixteVec()  const
     }
 }
 
-//! Returns the value of the resistance coefficient (in BC Vector)
-Real BCBase::resistanceCoef() const
-{
-    if ( _M_dataVector )
-        return ( *_M_bcv ).resistanceCoef();
-    else
-    {
-        ERROR_MSG( "BCBase::resistanceCoef : A data vector must be specified before calling this method" );
-        return 0.;
-    }
-
-}
-
-
-
-//! Return true if beta coefficient  is bcVector, false otherside
 bool BCBase::isbetaVec()   const
 {
-    if ( _M_dataVector )
+    if ( M_isStored_BcVector )
     {
 
-        return   (*_M_bcv).isbetaVec();
+        return   (*M_bcVector).isbetaVec();
     }
     else
     {
@@ -632,13 +471,12 @@ bool BCBase::isbetaVec()   const
     }
 }
 
-//! Return true if gamma coefficient is bcVector, false otherside
 bool BCBase::isgammaVec()  const
 {
-    if ( _M_dataVector )
+    if ( M_isStored_BcVector )
     {
 
-        return (*_M_bcv).isgammaVec();
+        return (*M_bcVector).isgammaVec();
     }
     else
     {
@@ -647,50 +485,33 @@ bool BCBase::isgammaVec()  const
     }
 }
 
-//! Returns the value of the mixte coefficient (in BC Vector)
-Real BCBase::mixteCoef() const
+Real BCBase::MixteVec( const ID& iDof, const ID& iComponent ) const
 {
-    if ( _M_dataVector )
-        return ( *_M_bcv ).mixteCoef();
+    if ( M_isStored_BcVector )
+        return ( *M_bcVector).MixteVec( iDof, iComponent );
     else
     {
-        ERROR_MSG( "BCBase::mixteCoef : A data vector must be specified before calling this method" );
+        ERROR_MSG( "BCBase::MixteVec : A data vector must be specified before calling this method" );
+        return 0.;
+    }
+}
+
+Real BCBase::BetaVec( const ID& iDof, const ID& iComponent ) const
+{
+    if ( M_isStored_BcVector )
+        return ( *M_bcVector).BetaVec( iDof, iComponent );
+    else
+    {
+        ERROR_MSG( "BCBase::MixteVec : A data vector must be specified before calling this method" );
         return 0.;
     }
 
 }
 
-//! Returns the value of the beta coefficient (in BC Vector)
-Real BCBase::betaCoef() const
+Real BCBase::GammaVec( const ID& iDof, const ID& iComponent ) const
 {
-    if ( _M_dataVector )
-        return ( *_M_bcv ).betaCoef();
-    else
-    {
-        ERROR_MSG( "BCBase::mixteCoef : A data vector must be specified before calling this method" );
-        return 0.;
-    }
-
-}
-
-//! Returns the value of the gamma coefficient (in BC Vector)
-Real BCBase::gammaCoef() const
-{
-    if ( _M_dataVector )
-        return ( *_M_bcv ).gammaCoef();
-    else
-    {
-        ERROR_MSG( "BCBase::mixteCoef : A data vector must be specified before calling this method" );
-        return 0.;
-    }
-
-}
-
-//! Returns the value of the mixte coefficient vector (in BC Vector) M.Prosi
-Real BCBase::MixteVec( const ID& iDof, const ID& iComp ) const
-{
-    if ( _M_dataVector )
-        return ( *_M_bcv).MixteVec( iDof, iComp );
+    if ( M_isStored_BcVector )
+        return ( *M_bcVector).GammaVec( iDof, iComponent );
     else
     {
         ERROR_MSG( "BCBase::MixteVec : A data vector must be specified before calling this method" );
@@ -700,162 +521,90 @@ Real BCBase::MixteVec( const ID& iDof, const ID& iComp ) const
 }
 
 
-//! Returns the value of the beta coefficient vector (in BC Vector)
-Real BCBase::BetaVec( const ID& iDof, const ID& iComp ) const
+const BCFunctionBase* BCBase::pointerToFunctor() const
 {
-    if ( _M_dataVector )
-        return ( *_M_bcv).BetaVec( iDof, iComp );
-    else
-    {
-        ERROR_MSG( "BCBase::MixteVec : A data vector must be specified before calling this method" );
-        return 0.;
-    }
-
+    return M_bcFunction.get();
 }
 
-//! Returns the value of the gamma coefficient vector (in BC Vector)
-Real BCBase::GammaVec( const ID& iDof, const ID& iComp ) const
+const BCFunctionUDepBase* BCBase::pointerToFunctorUDep() const
 {
-    if ( _M_dataVector )
-        return ( *_M_bcv).GammaVec( iDof, iComp );
-    else
-    {
-        ERROR_MSG( "BCBase::MixteVec : A data vector must be specified before calling this method" );
-        return 0.;
-    }
-
+    return M_bcFunctionFEVectorDependent.get();
 }
 
-
-//! Returns a pointer  to the i-th elements in the (finalised) list
-//! (counting from 1 ' a la FORTRAN')
-const IdentifierBase*
-BCBase::operator() ( const ID& i ) const
+const BCVectorBase* BCBase::pointerToBCVector() const
 {
-    return this->operator[] ( i-1 );
+    return M_bcVector.get();
 }
 
-//! Returns a pointer to the i-th elements in the (finalised) list
-//! (counting from 0 ' a la C')
-const IdentifierBase*
-BCBase::operator[] ( const ID& i ) const
-{
-    ASSERT_PRE( _M_finalised, "BC List should be finalised before being accessed" );
-    ASSERT_BD( i < _M_idList.size() );
-    return _M_idList[ i ].get();
-}
-
-
-//! Add a new identifier to the preliminary list of Identifiers
 void
-BCBase::addIdentifier( IdentifierBase* iden )
+BCBase::addIdentifier( IdentifierBase* identifierToAddPtr )
 {
-    list0.insert( boost::shared_ptr<IdentifierBase>( iden ) );
+    M_idSet.insert( boost::shared_ptr<IdentifierBase>( identifierToAddPtr ) );
 }
 
-
-//! Add a new identifier to the preliminary list of IdGlobal
 void
-BCBase::addIdentifierIdGlobal( IdentifierBase* iden )
+BCBase::addIdentifierIdGlobal( IdentifierBase* identifierToAddPtr )
 {
-    UInt temp = listIdGlobal.size();
-    listIdGlobal.insert( boost::shared_ptr<IdentifierBase>( iden ) );
+    UInt temp = M_idGlobalSet.size();
+    M_idGlobalSet.insert( boost::shared_ptr<IdentifierBase>( identifierToAddPtr ) );
 
     if ( temp==0 )
     {
-        _M_IdGlobal.push_back(0);
-        _M_IdGlobal.push_back((iden ) -> id());
+        M_IdGlobalVector.push_back(0);
+        M_IdGlobalVector.push_back((identifierToAddPtr ) -> id());
         temp ++ ;
     }
-    if ( temp != listIdGlobal.size())
+    if ( temp != M_idGlobalSet.size())
     {
-        _M_IdGlobal.push_back((iden ) -> id());
+        M_IdGlobalVector.push_back((identifierToAddPtr ) -> id());
     }
 }
 
-//! Transfer between the list and vector containers of ID's
-void
-BCBase::finalise()
-{
-    if ( ! list0.empty() )
-    {
-        _M_idList.clear();
-        _M_idList.reserve( list0.size() );
-        std::copy( list0.begin(), list0.end(), std::inserter( _M_idList, _M_idList.end() ) );
-        list0.clear();
-    }
-    _M_finalised = true;
-}
-
-//! Transfer between the list and vector containers of IdGlobal
-void
-BCBase::finaliseIdGlobal()
-{
-    if ( ! listIdGlobal.empty() )
-    {
-        _M_IdGlobalList.clear();
-        _M_IdGlobalList.reserve( listIdGlobal.size() );
-        std::copy( listIdGlobal.begin(), listIdGlobal.end(), std::inserter( _M_IdGlobalList, _M_IdGlobalList.end() ) );
-        listIdGlobal.clear();
-    }
-
-    _M_finalisedIdGlobal = true;
-    _M_IdGlobal.size();
-
-}
-
-
-//! Returns the liste size
 UInt
 BCBase::list_size() const
 {
-    return _M_idList.size();
+    return M_idList.size();
 }
 
-//! Returns the list size of IdGlobal
 UInt
 BCBase::list_size_IdGlobal() const
 {
-    return _M_IdGlobalList.size();
+    return M_idGlobalList.size();
 }
 
-
-// return IdGlobal element
 int
 BCBase::IdGlobal( int id) const
 {
-    return _M_IdGlobal[id];
+    return M_IdGlobalVector[id];
 }
 
-
-//! Output
 std::ostream&
 BCBase::showMe( bool verbose, std::ostream & out ) const
 {
     out << "********************************" << std::endl;
-    out << "BC Name              : " << _M_name << std::endl;
-    out << "Flag                 : " << _M_flag << std::endl;
-    out << "Type                 : " << _M_type << std::endl;
-    out << "Mode                 : " << _M_mode << std::endl;
-    out << "Number of components : " << _M_comp.size() << std::endl;
+    out << "BC Name              : " << M_name << std::endl;
+    out << "Flag                 : " << M_flag << std::endl;
+    out << "Type                 : " << M_type << std::endl;
+    out << "Mode                 : " << M_mode << std::endl;
+    out << "Number of components : " << M_components.size() << std::endl;
     out << "List of components   : ";
-    for ( ID i = 0; i < _M_comp.size(); ++i )
-        out << _M_comp[ i ] << " ";
+    for ( ID i = 0; i < M_components.size(); ++i )
+        out << M_components[ i ] << " ";
     out << std::endl;
-    out << "Offset               : " << _M_offset << std::endl;
-    out << "Number of stored ID's: " << _M_idList.size() << std::endl;
+    out << "Offset               : " << M_offset << std::endl;
+    out << "Number of stored ID's: " << M_idList.size() << std::endl;
 
-    if ( _M_type== Resistance)
+    if ( M_type== Resistance)
     {
-        out << "Number of stored IdGlobal's: " << _M_IdGlobalList.size() << std::endl;
+        out << "Number of stored IdGlobal's: " << M_idGlobalList.size() << std::endl;
     }
 
-    if ( verbose && _M_finalised )
+    if ( verbose && M_finalized )
     {
         unsigned int count( 0 ), lines( 10 );
         out << "IDs in list";
-        for ( std::vector<boost::shared_ptr<IdentifierBase> >::const_iterator i = _M_idList.begin();
-                i != _M_idList.end(); i++ )
+        for ( std::vector<boost::shared_ptr<IdentifierBase> >::const_iterator i = M_idList.begin();
+                i != M_idList.end(); i++ )
         {
             if ( count++ % lines == 0 )
             {
@@ -869,7 +618,7 @@ BCBase::showMe( bool verbose, std::ostream & out ) const
         }
         if ( dataVector() )
         {
-            _M_bcv->showMe( verbose, out );
+            M_bcVector->showMe( verbose, out );
         }
     }
 
@@ -877,6 +626,240 @@ BCBase::showMe( bool verbose, std::ostream & out ) const
     return out;
 }
 
-//  UInt BCBase::M_fluxes(0);
+
+// ===================================================
+// Operators
+// ===================================================
+
+BCBase & BCBase::operator=( const BCBase& BCb )
+{
+
+    M_name = BCb.M_name;
+    M_flag = BCb.M_flag;
+    M_type = BCb.M_type;
+    M_mode = BCb.M_mode;
+    M_finalized = BCb.M_finalized;
+    M_isStored_BcVector = BCb.M_isStored_BcVector;
+    M_bcFunctionFEVectorDependent=BCb.M_bcFunctionFEVectorDependent;
+    M_bcVector = BCb.M_bcVector;
+    M_bcFunction = BCb.M_bcFunction;
+    M_offset  = BCb.M_offset;
+    M_components = BCb.M_components;
+    M_isStored_BcFunctionVectorDependent=BCb.M_isStored_BcFunctionVectorDependent;
+
+    // Important!!: The set member M_idSet is always empty at this
+    // point, it is just an auxiliary container used at the moment of
+    // the boundary update (see BCHandler::bdUpdate)
+
+    // The list of ID's must be empty
+    if ( !M_idList.empty() || !BCb.M_idList.empty() )
+    {
+        ERROR_MSG( "BCBase::operator= : The BC assigment operator does not work with lists of identifiers which are not empty" );
+    }
+
+    return *this;
+}
+
+const IdentifierBase*
+BCBase::operator[] ( const ID& i ) const
+{
+    ASSERT_PRE( M_finalized, "BC List should be finalized before being accessed" );
+    ASSERT_BD( i < M_idList.size() );
+    return M_idList[ i ].get();
+}
+
+const IdentifierBase*
+BCBase::operator() ( const ID& i ) const
+{
+    return this->operator[] ( i-1 );
+}
+
+Real BCBase::operator() ( const Real& t, const Real& x, const Real& y,
+                          const Real& z, const ID& iComponent ) const
+{
+    return M_bcFunction->operator() ( t,x, y, z, iComponent );
+}
+
+Real BCBase::operator() ( const Real& t, const Real& x, const Real& y,
+                          const Real& z, const ID& iComponent, const Real& u ) const
+{
+    /* is there a better way ? */
+    Debug(800)<<"debug800 in BCBase::operator(6x)\n";
+    return M_bcFunctionFEVectorDependent->operator()(t,x, y, z, iComponent, u);
+    Debug(800)<<"debug800 out BCBase::operator(6x)\n";
+}
+
+Real BCBase::operator() ( const ID& iDof, const ID& iComponent ) const
+{
+    if ( M_isStored_BcVector )
+        return ( *M_bcVector ) ( iDof, iComponent );
+    else
+    {
+        ERROR_MSG( "BCBase::operator() : A data vector must be specified before calling this method" );
+        return 0.;
+    }
+}
+
+
+// ===================================================
+// Set Methods
+// ===================================================
+
+void
+BCBase::setBCVector( const BCVectorBase& bcVector )
+{
+    M_bcVector = boost::shared_ptr<BCVectorBase >( FactoryCloneBCVector::instance().createObject( &bcVector ) );
+    M_isStored_BcVector = true;
+    M_isStored_BcFunctionVectorDependent=false;
+}
+
+void
+BCBase::setBCFunction( const BCFunctionBase& bcFunction )
+{
+    M_bcFunction = boost::shared_ptr<BCFunctionBase>( FactoryCloneBCFunction::instance().createObject( &bcFunction ) );
+    M_isStored_BcVector = false;
+    M_isStored_BcFunctionVectorDependent=false;
+}
+
+void
+BCBase::setBCFunction( const BCFunctionUDepBase& bcFunctionFEVectorDependent )
+{
+    M_bcFunctionFEVectorDependent = boost::shared_ptr<BCFunctionUDepBase>( FactoryCloneBCFunctionUDep::instance().createObject( &bcFunctionFEVectorDependent ) );
+    M_isStored_BcVector = false;
+    M_isStored_BcFunctionVectorDependent=true;
+}
+
+
+// ===================================================
+// Get Methods
+// ===================================================
+
+std::string BCBase::name() const
+{
+    return M_name;
+}
+
+EntityFlag BCBase::flag() const
+{
+    return M_flag;
+}
+
+BCType BCBase::type() const
+{
+    return M_type;
+}
+
+BCMode BCBase::mode() const
+{
+    return M_mode;
+}
+
+UInt BCBase::numberOfComponents() const
+{
+    return M_components.size();
+}
+
+Real BCBase::mixteCoef() const
+{
+    if ( M_isStored_BcVector )
+        return ( *M_bcVector ).mixteCoef();
+    else
+    {
+        ERROR_MSG( "BCBase::mixteCoef : A data vector must be specified before calling this method" );
+        return 0.;
+    }
+
+}
+
+Real BCBase::resistanceCoef() const
+{
+    if ( M_isStored_BcVector )
+        return ( *M_bcVector ).resistanceCoef();
+    else
+    {
+        ERROR_MSG( "BCBase::resistanceCoef : A data vector must be specified before calling this method" );
+        return 0.;
+    }
+
+}
+
+Real BCBase::betaCoef() const
+{
+    if ( M_isStored_BcVector )
+        return ( *M_bcVector ).betaCoef();
+    else
+    {
+        ERROR_MSG( "BCBase::mixteCoef : A data vector must be specified before calling this method" );
+        return 0.;
+    }
+
+}
+
+Real BCBase::gammaCoef() const
+{
+    if ( M_isStored_BcVector )
+        return ( *M_bcVector ).gammaCoef();
+    else
+    {
+        ERROR_MSG( "BCBase::mixteCoef : A data vector must be specified before calling this method" );
+        return 0.;
+    }
+
+}
+
+bool BCBase::dataVector() const
+{
+    return M_isStored_BcVector;
+}
+
+bool BCBase::finalized() const
+{
+    return M_finalized;
+}
+
+bool BCBase::finalizedIdGlobal() const
+{
+    return M_finalizedIdGlobal;
+}
+
+bool BCBase::isUDep() const
+{
+    return M_isStored_BcFunctionVectorDependent;
+}
+
+
+// ===================================================
+// Private Methods
+// ===================================================
+
+void
+BCBase::finalize()
+{
+    if ( ! M_idSet.empty() )
+    {
+        M_idList.clear();
+        M_idList.reserve( M_idSet.size() );
+        std::copy( M_idSet.begin(), M_idSet.end(), std::inserter( M_idList, M_idList.end() ) );
+        M_idSet.clear();
+    }
+    M_finalized = true;
+}
+
+void
+BCBase::finalizeIdGlobal()
+{
+    if ( ! M_idGlobalSet.empty() )
+    {
+        M_idGlobalList.clear();
+        M_idGlobalList.reserve( M_idGlobalSet.size() );
+        std::copy( M_idGlobalSet.begin(), M_idGlobalSet.end(), std::inserter( M_idGlobalList, M_idGlobalList.end() ) );
+        M_idGlobalSet.clear();
+    }
+
+    M_finalizedIdGlobal = true;
+    M_IdGlobalVector.size();
+
+}
+
 
 }

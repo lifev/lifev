@@ -1,132 +1,111 @@
 //@HEADER
 /*
-************************************************************************
+*******************************************************************************
 
- This file is part of the LifeV Applications.
- Copyright (C) 2001-2096 EPFL, Politecnico di Milano, INRIA
-               2006-2010 EPFL, Politecnico di Milano
+    Copyright (C) 2004, 2005, 2007 EPFL, Politecnico di Milano, INRIA
+    Copyright (C) 2010 EPFL, Politecnico di Milano, Emory University
 
- This library is free software; you can redistribute it and/or modify
- it under the terms of the GNU Lesser General Public License as
- published by the Free Software Foundation; either version 2.1 of the
- License, or (at your option) any later version.
+    This file is part of LifeV.
 
- This library is distributed in the hope that it will be useful, but
- WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- Lesser General Public License for more details.
+    LifeV is free software; you can redistribute it and/or modify
+    it under the terms of the GNU Lesser General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
 
- You should have received a copy of the GNU Lesser General Public
- License along with this library; if not, write to the Free Software
- Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
- USA
+    LifeV is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+    Lesser General Public License for more details.
 
-************************************************************************
+    You should have received a copy of the GNU Lesser General Public License
+    along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
+
+*******************************************************************************
 */
 //@HEADER
-/**
-   @file
-   @brief File containing a class for BC handling
 
-   @author Miguel Fernandez
-   @author Christophe Prud'homme <christophe.prudhomme@epfl.ch>
+/*!
+    @file
+    @brief File containing BCHandler class for handling boundary conditions
 
-   @date 2004-10-11
-*/
+    @author Miguel Fernandez <miguel.fernandez@inria.fr>
+    @contributor Christophe Prud'homme <christophe.prudhomme@epfl.ch>
+    @contributor Mauro Perego <perego.mauro@gmail.com>
+    @maintainer Mauro Perego <perego.mauro@gmail.com>
 
-#ifndef BCHandler_H
-#define BCHandler_H 1
+    @date 10-11-2004
+ *///@HEADER
+
+#ifndef BCHANDLER_H
+#define BCHANDLER_H 1
 
 #include <life/lifefem/bcCond.hpp>
 
 namespace LifeV
 {
 
-/*! @page bc_page Boundary Conditions
-
-  @section bc_identifier Conventions
-
-  Here we explain what is the convention for the boundary conditions is LifeV.
-
-  The main issue is to understand what is the flag that are attributed to the degrees of freedom not located on a vertex. In that case, the flag of the smallest entity including the degree of freedom is used.
-
-  This means that:
-  <ol>
-  <li> A degree of freedom based on a vertex will use the flag of that vertex.
-  <li> A degree of freedom based on an edge (but not on a vertex) will use the flag of that edge.
-  <li> A degree of freedom based on a face (but not on a vertex or an edge) will use the flag of that face.
-  <li> ...
-  </ol>
-
-  The user of the library has then the responsability to define the good flags for each mesh entity. There is no priority for any of the boundary conditions. This is an important issue has it can create buggy behaviours that are difficult to trace back. We provide here an example.
-
-  Suppose that we want to keep a fluid inside a cube.
-
-  @image html cube.png "The domain"
-
-  Then, no penetration boundary conditions have to be imposed on all the sides, otherwise the fluid will escape from the container. No penetration boundary conditions are different depending on the face/edge/vertex that we are considering, as shown on the next picture (for a corner of the cube).
-
-   @image html bc_cube_types.png "Boundary conditions to be imposed"
-
-   To impose these conditions, we might have defined in the mesh file flags for all the vertices. Here, we might have defined them as in the next figure.
-
-   @image html bc_cube_flags_I_P1.png "A choice for the flags"
-
-   However, if P2 finite elements are used, the degrees of freedom in the middle of each edge are concerned by the boundary conditions. By default, when the mesh is built, the flag attributed to the edge is the minimum of the flags of the vertices defining it. The flag of the edge is then used as the flag of the P2 degree of freedom, as shown in the next picture.
-
-   @image html bc_cube_flags_I_P2.png "The resulting flags for the P2 degrees of freedom"
-
-   We can see that this will result in a wrong behaviour, as the boundary conditions of the edges are spread on the faces of the cube, what is not what we wanted. If we are aware of the default behaviour, we can reorder the flags to get boundary conditions that are closer to what we wanted, as shown in the next two figures.
-
-   @image html bc_cube_flags_II_P1.png "A better choice for the flags ..."
-
-   @image html bc_cube_flags_II_P2.png "... and the resulting flags for the P2 degrees of freedom"
-
-   However, we see on the last picture that there are still two degrees of freedom with the wrong boundary conditions, near the corner. On the front face, we would like the upper "3" to be "1" as the boundary condition for the face should apply. The library cannot guess that it has to take the flag "1"! This is why in this situation, the user has to provide a flag for this edge in the mesh file.
-
-   @image html bc_cube_flags_III_P2.png "The correct flag repartition"
-
-   <b>Remark</b>: The mesh shown in the previous examples should be avoided, not only because it makes "complicated" boundary conditions for the P2 elements, but also because the tetrahedron in the corner is "locked" if the P1 elements are choosen.
- */
-
-
-//! BCHandler - The BC handler class
+//! BCHandler - class for handling boundary conditions
 /*!
-   @class BCHandler
+   @author Miguel Fernandez
 
    Container for @c BCBase classes
 
-   @c BCHandler is a container for the boundary condition (BC) classes. It just
-   uses an stl vector to store @c BCBase objets. The usage is simple: the
-   user creates the data functors from the user defined functions:
+   @c BCHandler is a container of @c BCBase objects.
+   It instantiates the needed @c BCBase objects and provide them with the data needed.
+   As an example, if a @c BCBase object is related with an Essential boundary condition, then the global DOFs IDs associated with that essential boundary conditions will be passed to the object.
+
+   Boundary conditions are added using the method @c addBC(@c name, @c flag, @c type, ...).
+   @c type is a @c BCType and describes the type of boundary condition (@c Essential, @c Natural, etc.).
+   @c flag is used to determine on which elements the boundary condition should be prescribed.
+
+   In general @c flag refers to the boundary elements' marker.
+   The only exception are the @c BCType @c EssentialEdges and @c EssentialVertices.
+   In these two cases the flag refers respectively to the Edges' markers and to the Vertices' markers.
+   In general @c EssentialEdges and @c EssentialVertices types are not recommended and they should be used only by advanced users.
+
+   For this reasons boundary element markers are needed (and they better be specified in the mesh files).
+
+
+   The typical way to use the class is to create function handlers:
 
    @verbatim
-   BCFunctionBase gv( g );
-   BCFunctionMixte gp( h, q );
+   BCFunctionBase bcFuncEss( solOnBoundary ), bcFuncNat( ZeroFunction);
+
    @endverbatim
-   Then he/she specifies the number of BC and uses the @c BCHandler for
-   creating the actual @c BCBase objects and storing them.
+
+   Then, instantiate a BCHandler object and add boundary conditions (this will create @c BCBase objects).
 
    @verbatim
-   BCHandler bcV( 3 );
-   bcV.addBC( "inlet", 10, Essential, Full, gv, 3 );
-   bcV.addBC( "outflow", 11, Mixte, Scalar );
-   bcV.addBC( "wall", 10, Essential, Full, gv, 3 );
+   BCHandler bcHandler;
+   bcHandler.addBC( "inlet", 10, Essential, Full, bcFuncEss, 3 );
+   bcHandler.addBC( "outlet", 20, Natural, Full, bcFuncNat, 3 );
+   bcHandler.addBC( "wall", 30, Essential, Full, bcFuncEss, 3 );
    @endverbatim
-*/
+
+   Number 10, 20, 30 refers to the markers on the mesh boundary elements (facets: faces in 3D, edges in 2D).
+   More information about boundary conditions will be found in BCBase.hpp
+
+   Then, update the boundary conditions, using the function bcUpdate
+   @verbatim
+   bcHandler.bdUpdate(mesh, boundaryFe, dof);
+   @endverbatim
+
+   This method will looks for the markers in the mesh and will fill the boundary conditions container BCBase, with the appropriate data structures (global Dof id.. coordinates.. ecc)
+
+   Now all is set to prescribe boundary conditions using one of the functions in bcManager.hpp
+ */
+
+
+
 class BCHandler
 {
 public:
 
-    //! @name Type & enum definitions
+    //! @name Public Types
     //@{
 
-    typedef std::vector<BCBase>::iterator       BCBase_Iterator;
-    typedef std::vector<BCBase>::const_iterator BCBase_ConstIterator;
-
-    /*!
-      @typedef enum
-      Hints about the nature of the BCs
+    /*! @enum BCHints
+    	Hints about the nature of the BCs
     */
     enum BCHints
     {
@@ -134,23 +113,39 @@ public:
         HINT_BC_ONLY_ESSENTIAL //!< BCs are only essential
     };
 
+
+    typedef std::vector<BCBase>::iterator       BCBase_Iterator;      //deprecated
+    typedef std::vector<BCBase>::const_iterator BCBase_ConstIterator; //deprecated
+
+    typedef std::vector<BCBase>::iterator       bcBaseIterator_Type;
+    typedef std::vector<BCBase>::const_iterator bcBaseConstIterator_Type;
+
     //@}
 
-    //! @name Constructors & Destructor
+    //! @name Constructor & Destructor
     //@{
 
-    //! Constructor
+    //! Empty Constructor
+    BCHandler();
+
+    //! Constructor given the number of boundary conditions and the hint of their nature
     /*!
-      @param nbc the number of BC to be stored
-      @param hint hint about their nature
-    */
-    BCHandler( const ID& nbc = 0 , const BCHints& hint = HINT_BC_NONE );
+        @param numBoundaryConditions The number of boundary condition to be stored
+        @param hint Hint about the nature (hasOnlyEssential or none) of boundary conditions
+     */
+    BCHandler( const ID& numBoundaryConditions , const BCHints& hint = HINT_BC_NONE );
 
     //! Copy constructor
     /*!
-     * @param BCh BCHandler
+       @warning This is not a copy constructor, since bdUpdate is set to false,
+       		   as a consequence of the fact that also BCBase "copy" constructor is not
+      			actually a copy constructor
+       @param bcHandler BCHandler
      */
-    BCHandler( const BCHandler & BCh );
+    BCHandler( const BCHandler & bcHandler );
+
+    //! Destructor
+    ~BCHandler();
 
     //@}
 
@@ -158,13 +153,26 @@ public:
     //! @name Operators
     //@{
 
-    //! assignment operator
-    BCHandler& operator= ( const BCHandler& BCh );
+    //! Assignment operator
+    /*!
+      @param bcHandler BCHandler
+      @return Reference to a new BCHandler with the same
+                content of BCHandler bcHandler
+     */
+    BCHandler& operator= ( const BCHandler& bcHandler );
 
-    //! extracting a BC in the list
+    //! Extract a BC in the list
+    /*!
+      @param i Position index
+      @return Reference to the BCBase object in M_bcList at position i
+     */
     BCBase& operator[] ( const ID& );
 
-    //! extracting a BC in the list
+    //! Extract a BC in the list, const
+    /*!
+      @param i Position index
+      @return Const reference to the BCBase object in M_bcList at position i
+     */
     const BCBase& operator[] ( const ID& ) const;
 
     //@}
@@ -173,143 +181,196 @@ public:
     //! @name Methods
     //@{
 
-    //! Add new BC to the list (user defined function)
+    //! Add new BC to the list for Component or Directional mode problems (user defined function case)
     /*!
-      @param name the name of the boundary condition
-      @param flag the mesh flag identifying the part of the mesh where the boundary condtion applies
-      @param type the boundary condition type: Natural, Essential, Mixte
-      @param mode the boundary condition mode: Scalar, Full, Component, Normal, Tangential
-      @param bcf the function holding the user defined function involved in this boundary condition
-      @param std::vector<ID> storing the list of components involved in this boundary condition
+      @param name The name of the boundary condition
+      @param flag The mesh flag identifying the part of the mesh where the boundary condition applies
+      @param type The boundary condition type: Natural, Mixte, Flux, Resistance, Periodic, Essential, EssentialEdges, EssentialVertices
+      @param mode the boundary condition mode: Scalar, Full, Component, Normal, Tangential, Directional
+      @param bcFunction  The container holding the user defined function involved in this boundary condition
+      @param components storing the list of components involved in this boundary condition
     */
     void addBC( const std::string& name,
                 const EntityFlag& flag,
                 const BCType& type,
                 const BCMode& mode,
-                BCFunctionBase& bcf,
-                const std::vector<ID>& comp );
+                BCFunctionBase& bcFunction,
+                const std::vector<ID>& components );
 
 
-    //! Add new BC to the list without specified components for Scalar, Tangential or Normal mode problems (user defined function).
+    //! Add new BC to the list for Scalar, Tangential or Normal mode problems (user defined function case)
     /*!
-       @param name the name of the boundary condition
-       @param flag the mesh flag identifying the part of the mesh where the boundary condtion applies
-       @param type the boundary condition type: Natural, Essential, Mixte
-       @param mode the boundary condition mode: Scalar, Full, Component, Normal, Tangential
-       @param bcf the function holding the user defined function involved in this boundary condition
+      @param name The name of the boundary condition
+      @param flag The mesh flag identifying the part of the mesh where the boundary condition applies
+      @param type The boundary condition type: Natural, Mixte, Flux, Resistance, Periodic, Essential, EssentialEdges, EssentialVertices
+      @param mode the boundary condition mode: Scalar, Full, Component, Normal, Tangential, Directional
+      @param bcFunction  The container holding the user defined function involved in this boundary condition
     */
     void addBC( const std::string& name,
                 const EntityFlag& flag,
                 const BCType& type,
                 const BCMode& mode,
-                BCFunctionBase& bcf );
+                BCFunctionBase& bcFunction );
 
 
-    //! Add new BC to the list without list of components for Full mode problems  (user defined function)
+    //! Add new BC to the list for Full mode problems  (user defined function case)
     /*!
-      @param name the name of the boundary condition
-      @param flag the mesh flag identifying the part of the mesh where the boundary condiion applies
-      @param type the boundary condition type: Natural, Essential, Mixte
-      @param mode the boundary condition mode: Scalar, Full, Normal, Tangential
-      @param bcf the function holding the user defined function involved in this boundary condition
-      @param nComp the number of componets involved in this boundary condition
+     @param name The name of the boundary condition
+     @param flag The mesh flag identifying the part of the mesh where the boundary condition applies
+     @param type The boundary condition type: Natural, Mixte, Flux, Resistance, Periodic, Essential, EssentialEdges, EssentialVertices
+     @param mode The boundary condition mode: Scalar, Full, Component, Normal, Tangential, Directional
+     @param bcFunction The container holding the user defined function involved in this boundary condition
+     @param numberOfComponents The number of components involved in this boundary condition
     */
     void addBC( const std::string& name,
                 const EntityFlag& flag,
                 const BCType& type,
                 const BCMode& mode,
-                BCFunctionBase& bcf,
+                BCFunctionBase& bcFunction,
+                const UInt& numberOfComponents );
+
+
+    //! Add new BC to the list for Component or Directional mode problems (data vector case)
+    /*!
+      @param name The name of the boundary condition
+      @param flag The mesh flag identifying the part of the mesh where the boundary condition applies
+      @param type The boundary condition type: Natural, Mixte, Flux, Resistance, Periodic, Essential, EssentialEdges, EssentialVertices
+      @param mode the boundary condition mode: Scalar, Full, Component, Normal, Tangential, Directional
+      @param bcVector The container holding the finite element vector involved in this boundary condition
+      @param components storing the list of components involved in this boundary condition
+    */
+    void addBC( const std::string& name,
+                const EntityFlag& flag,
+                const BCType& type,
+                const BCMode& mode,
+                BCVectorBase& bcVector,
+                const std::vector<ID>& components );
+
+
+    //! Add new BC to the list for Scalar, Tangential or Normal  mode problems (data vector case)
+    /*!
+      @param name The name of the boundary condition
+      @param flag The mesh flag identifying the part of the mesh where the boundary condition applies
+      @param type The boundary condition type: Natural, Mixte, Flux, Resistance, Periodic, Essential, EssentialEdges, EssentialVertices
+      @param mode the boundary condition mode: Scalar, Full, Component, Normal, Tangential, Directional
+      @param bcVector The container holding the finite element vector involved in this boundary condition
+     */
+    void addBC( const std::string& name,
+                const EntityFlag& flag,
+                const BCType& type,
+                const BCMode& mode,
+                BCVectorBase& bcVector );
+
+
+    //! Add new BC to the list for Full mode problems (data vector case)
+    /*!
+      @param name The name of the boundary condition
+      @param flag The mesh flag identifying the part of the mesh where the boundary condition applies
+      @param type The boundary condition type: Natural, Mixte, Flux, Resistance, Periodic, Essential, EssentialEdges, EssentialVertices
+      @param mode the boundary condition mode: Scalar, Full, Component, Normal, Tangential, Directional
+      @param bcVector The container holding the finite element vector involved in this boundary condition
+      @param numberOfComponents The number of components involved in this boundary condition
+    */
+    void addBC( const std::string& name,
+                const EntityFlag& flag,
+                const BCType& type,
+                const BCMode& mode,
+                BCVectorBase& bcVector,
                 const UInt& nComp );
 
 
-    //! Add new BC to the list (data vector)
+    //! Add new BC to the list for Scalar, Tangential or Normal mode problems (user defined function case, with function depending on U)
     /*!
-      @param name the name of the boundary condition
-      @param flag the mesh flag identifying the part of the mesh where the boundary condtion applies
-      @param type the boundary condition type: Natural, Essential, Mixte
-      @param mode the boundary condition mode: Scalar, Full, Component, Normal, Tangential
-      @param bcv data vector
-      @param std::vector<ID> storing the list of components involved in this boundary condition
+      @param name The name of the boundary condition
+      @param flag The mesh flag identifying the part of the mesh bcBaseIterator the boundary condition applies
+      @param type The boundary condition type: Natural, Mixte, Flux, Resistance, Periodic, Essential, EssentialEdges, EssentialVertices
+      @param mode the boundary condition mode: Scalar, Full, Component, Normal, Tangential, Directional
+      @param  bcFunctionFEVectorDependent  The container holding the user defined function, depending on a FE vector, involved in this boundary condition
     */
     void addBC( const std::string& name,
                 const EntityFlag& flag,
                 const BCType& type,
                 const BCMode& mode,
-                BCVectorBase& bcv,
-                const std::vector<ID>& comp );
+                BCFunctionUDepBase&  bcFunctionFEVectorDependent );
 
 
-    //! Add new BC to the list  without specified components for Scalar, Tangential or Normal  mode problemst (data vector)
+    //! Modify the boundary condition @c name, assigning the function @c bcFunction
     /*!
-      @param name the name of the boundary condition
-      @param flag the mesh flag identifying the part of the mesh where the boundary condtion applies
-      @param type the boundary condition type: Natural, Essential, Mixte
-      @param mode the boundary condition mode: Scalar, Full, Component, Normal, Tangential
-      @param bcv data vector
-    */
-    void addBC( const std::string& name,
-                const EntityFlag& flag,
-                const BCType& type,
-                const BCMode& mode,
-                BCVectorBase& bcv );
+      @param name The name of the boundary condition to be modified
+      @param bcFunction The container holding the user defined function which will replace the existing one
 
+     */
+    void modifyBC( std::string const& name, BCFunctionBase const& bcFunction );
 
-    //! Add new BC to the list without list of components for Full mode problems t (data vector)
+    //! Modify the boundary condition @c assigning the FE vector in @c bcVector
     /*!
-      @param name the name of the boundary condition
-      @param flag the mesh flag identifying the part of the mesh where the boundary condiion applies
-      @param type the boundary condition type: Natural, Essential, Mixte
-      @param mode the boundary condition mode: Scalar, Full, Normal, Tangential
-      @param bcv data vector
-      @param nComp the number of componets involved in this boundary condition
-    */
-    void addBC( const std::string& name,
-                const EntityFlag& flag,
-                const BCType& type,
-                const BCMode& mode,
-                BCVectorBase& bcv,
-                const UInt& nComp );
+      @param name The name of the boundary condition to be modified
+      @param bcVector The container holding the user FE vector which will replace the existing one
+     */
+    void modifyBC( std::string const& name, BCVectorBase const& bcVector );
 
-    void addBC( const std::string& name,
-                const EntityFlag& flag,
-                const BCType& type,
-                const BCMode& mode,
-                BCFunctionUDepBase& bcf );
-
-
-    //! modify the boundary condition @c name with condition @c bcv
-    void modifyBC( std::string const& name, BCFunctionBase& bcv );
-
-    //! modify the boundary condition @c name with condition @c bcv
-    void modifyBC( std::string const& name, BCVectorBase& bcv );
-
-    void modifyBC( std::string const& __name, BCFunctionUDepBase& __bcf );
-
-    //! modify the boundary condition @c lab with condition @c bcv
-    void modifyBC( Int lab, BCFunctionBase& bcv );
-
-    //! modify the boundary condition @c lab with condition @c bcv
-    void modifyBC( Int lab, BCVectorBase& bcv );
-
-    void modifyBC( Int lab, BCFunctionUDepBase& __bcf );
-
-    //! Build the boundary stuff
+    //! Modify the boundary condition @c name, assigning the function in @c  bcFunctionFEVectorDependent
     /*!
-      This method udapte the BC classes checking the markers
-      on the boundary. It builds the list of identifiers depending
-      on the BC type.
-      It updates @c BCHandler objects not @c Dof objects
-      @param mesh the mesh
-      @param feBd the current finite element on the boundary
-      @param dof give the local to global table
+      @param name The name of the boundary condition to be modified
+      @param  bcFunctionFEVectorDependent The container holding the user defined function, depending on an FE vector, which will replace the existing one
+     */
+    void modifyBC( std::string const& name, BCFunctionUDepBase const&  bcFunctionFEVectorDependent );
+
+    //! Modify the boundary condition associated with flag @c aFlag, assigning the function in @c bcFunction
+    /*!
+      @param aFlag The flag associated with the boundary condition to be modified
+      @param bcFunction The container holding the user defined function which will replace the existing one
+     */
+    void modifyBC( EntityFlag const& aFlag, BCFunctionBase const& bcFunction );
+
+    //! Modify the boundary condition associated with flag @c aFlag, assigning the FE vector in @c bcVector
+    /*!
+      @param aFlag The flag associated with the boundary condition to be modified
+      @param bcVector The container holding the user FE vector which will replace the existing one
+     */
+    void modifyBC( EntityFlag const& aFlag, BCVectorBase const& bcVector );
+
+    //! Modify the boundary condition associated with flag @c aFlag, assigning the function in @c  bcFunctionFEVectorDependent
+    /*!
+      @param aFlag The flag associated with the boundary condition to be modified
+      @param  bcFunctionFEVectorDependent The container holding the user defined function, depending on an FE vector, which will replace the existing one
+     */
+    void modifyBC( EntityFlag const& aFlag, BCFunctionUDepBase const&  bcFunctionFEVectorDependent );
+
+
+    //! Update all the boundary conditions
+    /*!
+      This method update the BC classes checking the markers
+      on the boundary.
+      Except for EssentialEdges and EssentialVertices type of boundary conditions,
+      the flags associated with the boundary conditions will be searched among the markers of the boundary element (facets).
+
+      Then, all the DOFs belonging to a matching boundary element will be associated with the appropriate boundary conditions.
+      It is possible then the same DOF is shared by different boundary conditions.
+      In the case of essential boundary conditions, the largest condition will be prescribed on the shared DOF (largest in the ordering given by the operator< in BCBase.hpp)
+      In particular, if two Essential boundary conditions share the same DOF, it will be prescribed the condition with the largest flag.
+      This behavior is due to the fact that the largest boundary condition is the last to be prescribed.
+
+      Finally M_bdUpdateDone is set to true, and it is possible to prescribed boundary conditions using functions in bcManage.hpp.
+
+      @param mesh The mesh
+      @param boundaryFE Current finite element on the boundary
+      @param dof Container of the local to global map of DOF id
     */
     template <typename Mesh>
-    void bdUpdate( Mesh& mesh, CurrentBdFE& feBd, const Dof& dof );
+    void bdUpdate( Mesh& mesh, CurrentBdFE& boundaryFE, const Dof& dof );
 
-    //! merges two different BCHandler (with their offsets) into one
+    //! Merges the boundary condition bch (with its offset) with the stored one
+    /*!
+      @param bch BCHandler
+     */
     void merge( BCHandler& bch );
 
     //! Display the content of the variables
+    /*!
+      @param verbose The verbosity (default: true)
+      @param out The ostream output (default: std::cout)
+     */
     void showMe( bool verbose = false, std::ostream & out = std::cout ) const;
 
     //@}
@@ -318,14 +379,24 @@ public:
     //! @name Set Methods
     //@{
 
-    //! the offset is used on all BCs
+    //! Set @c offset in all boundary conditions
+    /*!
+      @param offset The boundary condition offset
+     */
     void setOffset( const UInt& offset );
 
-    //! specific BC offset
+    //! Set @c offset in boundary conditions @c name
+    /*!
+      @param name The name of the boundary condition
+      @param offset The boundary condition offset
+     */
     void setOffset( const std::string& name, Int offset );
 
-    //! specific BC hint
-    void setBCHint(const BCHints& hint) {M_hint = hint;}
+    //! Specify BC hint
+    /*!
+      @param hint The hint of the nature of the boundary conditions
+     */
+    inline void setBCHint(const BCHints& hint) {M_hint = hint;}
 
     //@}
 
@@ -335,51 +406,95 @@ public:
 
     //! Extract the type of the boundary condition with flag aFlag.
     /*!
-     * Useful for weak imposition of boundary conditions (e.g. in DG-FEM).
+      Useful for weak imposition of boundary conditions (e.g. in DG-FEM).
+      @param aFlag The flag associated with the boundary condition
+      @return Type of boundary condition associated with flag aFlag
      */
     BCType boundaryType(const EntityFlag& aFlag) const;
 
     //! Extract a BC in the list according to its flag
-    BCBase& GetBCWithFlag(const EntityFlag& );
-    const BCBase& GetBCWithFlag(const EntityFlag&) const;
+    /*!
+      @param aFlag The flag associated with the boundary condition
+      @return constant Reference to the  boundary condition associated with flag aFlag
+     */
+    BCBase& GetBCWithFlag(const EntityFlag& aFlag);
+
+
+    //! Extract a BC in the list according to its flag (non const)
+    /*!
+      @param aFlag The flag associated with the boundary condition
+      @return constant Reference to the  boundary condition associated with flag aFlag
+     */
+    const BCBase& GetBCWithFlag(const EntityFlag& aFlag) const;
 
     //! Get a vector list of BC with specific type. The list contains the BCName of the BC.
     /*!
-      @param type - the BC type to be inserted in the list
+      @param aType The BC type to be inserted in the list
     */
-    std::vector<BCName> getBCWithType( const BCType& type );
+    std::vector<BCName> getBCWithType( const BCType& aType ) const;
 
-    //! Get the number of BC with specific type.
+
+    //! Get the number of boundary conditions with type @c aType
     /*!
-      @param type - the BC type to be counted
+      @param aType The BC type to be counted
+      @return Number of boundary conditions with type aType
     */
-    UInt getNumberBCWithType( const BCType& type );
+    UInt getNumberBCWithType( const BCType& aType ) const;
 
-    // get the BC number from the list using its name
-    UInt getBCbyName(const std::string _BCName) const;
 
+    // Get the BC index from the list using its name
+    /*!
+      @param name The name of the boundary condition
+      @return The index of the boundary condition
+     */
+    ID getBCbyName(const BCName& name) const;
+
+
+    // Get the offset of the boundary conditions
+    /*!
+      @return The offset of the boundary conditions
+     */
     UInt offset() const;
 
-    //! Iterators for the begining of the BC list
-    BCBase_Iterator begin();
 
-    //! Iterators for the end of the BC list
-    BCBase_Iterator end();
+    //! Iterator of the beginning of the boundary elements list
+    /*!
+      @return The Iterator of the beginning of M_bcList
+     */
+    bcBaseIterator_Type begin();
 
-    //! How many BC stored?
+
+    //! Iterator of the end of the boundary elements list
+    /*!
+      @return The Iterator of the end of M_bcList
+     */
+    bcBaseIterator_Type end();
+
+
+    //! Number of the stored boundary conditions
+    /*!
+     @return the number of boundary conditions stored
+     */
     ID size() const;
 
-    //! Is there no BC stored?
+
+    //! Determine whether no boundary conditions are stored
+    /*!
+     @return true only if no boundary conditions are stored
+     */
     bool empty() const;
 
-    //! returns true if the bdUpdate has been done before
+
+    //! Determine whether bdUpdate has been done before
+    /*!
+     @return true only if bdUpdate has been done before
+     */
     bool bdUpdateDone() const;
 
-    /*!
-      @brief returns true if all the stored BC are of Essential type
 
-      It throws a @c logic_error exception if state is not consistent with
-      hint.
+    //!Determine whether all the stored boundary conditions have EssentialXXX type
+    /*!  It throws a @c logic_error exception if state is not consistent with hint.
+      @return true only if the stored boundary conditions are of EssentialXXX type
     */
     bool hasOnlyEssential() const;
 
@@ -387,24 +502,37 @@ public:
 
 private:
 
-    /**
-       look for the BC named @c name.
-
+    //! Find the BC named @c name
+    /*!
        It throws an @c invalid_argument exception if @c name is not
        found.
 
-       @return a pointer to @c BCBase
+       @return A pointer to @c BCBase
     */
-    BCBase* findBC( const std::string& __name );
+    BCBase* findBC( const std::string& name );
 
-    BCBase* findBC( const Int& lab );
 
-    //! determine whether BCs in M_bcList are only essential
+    //! Find the BC named @c aFlag
+    /*!
+       It throws an @c invalid_argument exception if @c aFlag is not
+       found.
+
+       @return A pointer to @c BCBase
+    */
+    BCBase* findBC( const EntityFlag& aFlag);
+
+
+    //! Determine whether all the boundary conditions in M_bcList are of type EssentialXXX
+    /*!
+     @return true only if all the boundary conditions in M_bcList are of type EssentialXXX
+     */
     bool listHasOnlyEssential() const;
 
+
+    //! Sum the M_offset to boundary conditions offsets
     void sumOffsets();
 
-    //! stores status (essential or not) of the boundary associated to a marker
+    //! Store status (essential or not) of the boundary associated to a marker
     class EssentialStatus
     {
     public:
@@ -431,7 +559,7 @@ private:
             bool result = true;
             for (UInt iComp=0; iComp<nDimensions; ++iComp)
                 result &= M_components[iComp];
-            result = result || ( M_normal && M_tangential );
+            result = result || M_normal;
             return result;
         }
 
@@ -443,15 +571,16 @@ private:
         bool M_directional;
     };
 
-    //! Number of BC to be stored: true if the bdUpdate has been done
+    //! true only if the bdUpdate has been done
     bool M_bdUpdateDone;
 
     //! hints about the nature of the BCs
     BCHints M_hint;
 
-    //! vector list holding the stored BC
+    //! vector list holding the stored BCs
     std::vector<BCBase> M_bcList;
 
+    //! offset
     UInt M_offset;
 
     //! set of markers which are in the mesh but not in the list
@@ -459,14 +588,348 @@ private:
 
 };
 
+
+//*
 // ===================================================
 // Template methods implementations
 // ===================================================
 template <typename Mesh>
 void
-BCHandler::bdUpdate( Mesh& mesh, CurrentBdFE& feBd, const Dof& dof )
+BCHandler::bdUpdate( Mesh& mesh, CurrentBdFE& boundaryFE, const Dof& dof )
 {
-    typedef typename Mesh::ElementShape GeoShape;
+    typedef typename Mesh::ElementShape geoShape_Type;
+
+    // Some useful local variables
+    UInt nDofPerVert = dof.fe.nbDofPerVertex(); // number of Dof per vertices
+    UInt nDofPerEdge = dof.fe.nbDofPerEdge();   // number of Dof per edges
+    UInt nDofPerFace = dof.fe.nbDofPerFace();   // number of Dof per faces
+
+    UInt numBElements = mesh.numBElements();    // number of boundary elements
+
+    EntityFlag marker; //will store the marker of each geometric entity
+    EntityFlag elementMarker; //will store the marker of the element
+
+    typedef typename geoShape_Type::GeoBShape geoBShape_Type;
+
+    UInt nBElemVertices = geoBShape_Type::numVertices; // Number of boundary element's vertices
+    UInt nBElemEdges = geoBShape_Type::numEdges;    // Number of boundary element's edges
+
+    UInt nElemVertices = geoShape_Type::numVertices; // Number of element's vertices
+    UInt nElemEdges = geoShape_Type::numEdges;    // Number of element's edges
+
+    UInt nDofBElemVertices = nDofPerVert * nBElemVertices; // number of vertex's Dof on a boundary element
+    UInt nDofBElemEdges = nDofPerEdge * nBElemEdges; // number of edge's Dof on a boundary element
+
+    UInt nDofBElem = nDofBElemVertices + nDofBElemEdges + nDofPerFace; // number of total Dof on a boundary element
+
+    UInt  nDofElemVertices = nElemVertices * nDofPerVert; // number of vertex's Dof on a Element
+    UInt nDofElemEdges = nElemEdges * nDofPerEdge; // number of edge's Dof on a Element
+
+    //vector containing the local to global map on each elemenet
+    SimpleVect<ID> localToGlobalMapOnBElem( nDofBElem );
+
+    // BCbase Iterator
+    bcBaseIterator_Type bcBaseIterator;
+
+    // Iterators which point to the beginning of Essential, EssentialEdges and EssentialVertices conditions
+    bcBaseIterator_Type beginEssential, beginEssVertices, beginEssEdges;
+
+    ID iAdjacentElem; // index of Adjacent Element
+
+    ID iElemBElement; // index of boundary Element in Element
+
+    ID iElemEdge; // index of Edge in Element
+
+    ID iElemVertex; // index of Vertex in Element
+
+    // coordinates of DOFs points
+    Real x, y, z;
+
+    //sets containing markers of boundary elements which have not been found in the boundary conditions' flags
+    std::set<EntityFlag> notFoundMarkers;
+
+    bool marker_found(false);
+
+    //We set the iterators which points to the beginning of essential types bc.
+    //(Notice that essential bc are positioned at the end of M_bcList, in the order
+    // Essential, EssentialEdges, EssentialVertices)
+
+    beginEssential = M_bcList.begin();
+    while ((beginEssential != M_bcList.end())&&(beginEssential->type() < Essential))
+        beginEssential++;
+
+    beginEssEdges = beginEssential;
+    while ((beginEssEdges != M_bcList.end())&&(beginEssEdges->type() < EssentialEdges))
+        beginEssEdges++;
+
+    beginEssVertices = beginEssEdges;
+    while ((beginEssVertices != M_bcList.end())&&(beginEssVertices->type() < EssentialVertices))
+        beginEssVertices++;
+
+    // ===================================================
+    // Loop on boundary faces
+    // ===================================================
+    for ( ID iBoundaryElement = 1 ; iBoundaryElement <= numBElements; ++iBoundaryElement )
+    {
+        // ===================================================================================
+        // construction of localToGlobalMapOnBElem (this part should be moved in Dof.hpp)
+        // ===================================================================================
+
+        boundaryFE.updateMeas( mesh.bElement( iBoundaryElement ) );  // updating finite element information
+        elementMarker = mesh.bElement( iBoundaryElement ).marker(); // We keep the element marker
+        iAdjacentElem = mesh.bElement( iBoundaryElement ).ad_first();  // id of the element adjacent to the face
+        iElemBElement = mesh.bElement( iBoundaryElement ).pos_first(); // local id of the face in its adjacent element
+
+        UInt lDof = 1; //local Dof on boundary element
+
+        //loop on Dofs associated with vertices
+        for ( ID iBElemVert = 1; iBElemVert <= nBElemVertices; ++iBElemVert )
+        {
+            iElemVertex = geoShape_Type::fToP( iElemBElement, iBElemVert ); // local vertex number (in element)
+            for ( ID l = 1; l <= nDofPerVert; ++l )
+                localToGlobalMapOnBElem( lDof++) = dof.localToGlobal( iAdjacentElem, ( iElemVertex - 1 ) * nDofPerVert + l );
+        }
+
+        //loop on Dofs associated with Edges
+        for ( ID iBElemEdge = 1; iBElemEdge <= nBElemEdges; ++iBElemEdge )
+        {
+            iElemEdge = geoShape_Type::fToE( iElemBElement, iBElemEdge ).first; // local edge number (in element)
+            for ( ID l = 1; l <= nDofPerEdge; ++l )
+                localToGlobalMapOnBElem( lDof++) = dof.localToGlobal( iAdjacentElem,  nDofElemVertices + ( iElemEdge - 1 ) * nDofPerEdge + l ); // global Dof
+        }
+
+        //loop on Dofs associated with faces
+        for ( ID l = 1; l <= nDofPerFace; ++l )
+            localToGlobalMapOnBElem( lDof++) = dof.localToGlobal( iAdjacentElem, nDofElemEdges +  nDofElemVertices + ( iElemBElement - 1 ) * nDofPerFace + l ); // global Dof
+
+
+
+
+        // =============================================================
+        // Insertion of boundary conditions defined on boundary Elements
+        // =============================================================
+
+        //looking for elementMarker in boundary conditions' flags, and updating the boundary conditions data accordingly
+
+        marker_found = false;
+        bcBaseIterator = M_bcList.begin();
+        while ( ( bcBaseIterator = find( bcBaseIterator, beginEssEdges, elementMarker ) ) != beginEssEdges )
+        {
+            marker_found = true;
+            switch ( bcBaseIterator->type() )
+            {
+            case EssentialVertices:
+            case EssentialEdges:
+                ERROR_MSG("EssentialVertices and EssentialEdges types should not be prescribed on face labels");
+                break;
+
+            case Essential:
+                for (ID lDof = 0; lDof< localToGlobalMapOnBElem.size(); lDof++)
+                {
+                    ID gDof = localToGlobalMapOnBElem( lDof+1); // global DOF
+
+                    //providing Essential boundary conditions with needed data (global DOF id and their coordinates)
+                    if ( bcBaseIterator->dataVector())
+                        bcBaseIterator->addIdentifier( new IdentifierBase( gDof) );
+                    else
+                    { // With user defined functions
+                        boundaryFE.coorMap( x, y, z, boundaryFE.refFE.xi( lDof ), boundaryFE.refFE.eta( lDof ) );
+                        bcBaseIterator->addIdentifier( new IdentifierEssential( gDof, x, y, z ) );
+                    }
+                }
+                break;
+
+            case Natural:
+                //providing Natural boundary conditions with global DOFs on element
+                if ( bcBaseIterator->dataVector() )
+                { // With data vector
+                    UInt type = bcBaseIterator->pointerToBCVector()->type() ;
+                    if ( type == 0 )  // if the BC is a vector which values don't need to be integrated
+                    {
+                        for (ID lDof = 0; lDof< localToGlobalMapOnBElem.size(); lDof++)
+                            bcBaseIterator->addIdentifier( new IdentifierNatural( localToGlobalMapOnBElem(lDof+1) ) );
+                    }
+                    else if ( type <= 3 )  // FE vector which needed to be integrated on the boundary
+                        bcBaseIterator->addIdentifier( new IdentifierNatural( iBoundaryElement, localToGlobalMapOnBElem ) );
+                    else
+                        ERROR_MSG( "This BCVector type is not yet implemented" );
+                }
+                else
+                    bcBaseIterator->addIdentifier( new IdentifierNatural( iBoundaryElement, localToGlobalMapOnBElem) );
+                break;
+
+            case Mixte:
+                //providing Robin boundary conditions with global DOFs on element
+                bcBaseIterator->addIdentifier( new IdentifierNatural( iBoundaryElement, localToGlobalMapOnBElem ) );
+                break;
+            case Resistance:
+                //providing Resistance boundary conditions with global DOFs on element
+                if ( bcBaseIterator->dataVector() )
+                {
+                    bcBaseIterator->addIdentifier( new IdentifierNatural( iBoundaryElement, localToGlobalMapOnBElem ) );
+                    for (ID lDof = 0; lDof< localToGlobalMapOnBElem.size(); lDof++)
+                        bcBaseIterator->addIdentifierIdGlobal(new IdentifierBase( localToGlobalMapOnBElem(lDof+1) ) );
+                }
+                break;
+            case Flux:
+                //providing Flux boundary conditions with global DOFs on element
+                bcBaseIterator->addIdentifier( new IdentifierNatural( iBoundaryElement, localToGlobalMapOnBElem ) );
+                break;
+            default:
+                ERROR_MSG("BC not yet implemented");
+                break;
+            }
+            bcBaseIterator++;
+        }
+
+        //inserting found and not found markers in respective containers.
+        if (!marker_found)
+            notFoundMarkers.insert(elementMarker);
+
+
+        // ===================================================
+        // Insertion of EssentialEdges bc
+        // ===================================================
+
+        //looking for which EssentialEdges are involved in this element.
+        if ((beginEssEdges != beginEssVertices)&&(nDofPerVert||nDofPerEdge))
+        {
+            //loop on boundary element edges
+            for ( ID iBElemEdge = 1; iBElemEdge <= nBElemEdges; ++iBElemEdge )
+            {
+                //index of edge in element
+                iElemEdge = geoShape_Type::fToE( iElemBElement, iBElemEdge ).first;
+
+                //marker on boundary edge
+                marker = mesh.boundaryEdge( mesh.localEdgeId( iAdjacentElem, iElemEdge ) ).marker(); // edge marker
+
+                //indices of edge's vertices
+                UInt iEdgeFirstVert =  geoBShape_Type::eToP( iBElemEdge, 1)-1;
+                UInt iEdgeSecondVert = geoBShape_Type::eToP( iBElemEdge, 2)-1;
+
+                // Finding this marker on the BC list
+                bcBaseIterator = beginEssEdges;
+                while ( ( bcBaseIterator = find( bcBaseIterator, beginEssVertices, marker ) ) != beginEssVertices )
+                {
+                    //vector of boundary element DOFs on current edge
+                    std::vector<ID> vecEdgeDofs(nDofPerEdge+2*nDofPerVert);
+
+                    ID iTotalEdgeDof=0; //local index of total DOF on current edge
+
+                    //loop on Vertices DOFs
+                    for ( ID iVertexDof = 0; iVertexDof < nDofPerVert; ++iVertexDof )
+                    {
+                        vecEdgeDofs[iTotalEdgeDof++] = iEdgeFirstVert * nDofPerVert + iVertexDof ; // local Dof
+                        vecEdgeDofs[iTotalEdgeDof++] = iEdgeSecondVert * nDofPerVert + iVertexDof ;
+                    }
+
+                    //loop on Edge DOFs
+                    for ( ID iEdgeDof = 0; iEdgeDof < nDofPerEdge; ++iEdgeDof )
+                        vecEdgeDofs[iTotalEdgeDof++] = nDofPerVert * nBElemVertices + ( iBElemEdge - 1 ) * nDofPerEdge + iEdgeDof ; // local Dof
+
+
+                    //loop on total DOFs of current edge
+                    for (iTotalEdgeDof =0; iTotalEdgeDof<vecEdgeDofs.size(); iTotalEdgeDof++)
+                    {
+                        UInt lDof = vecEdgeDofs[iTotalEdgeDof]; //local DOF on boundary element
+                        UInt gDof = localToGlobalMapOnBElem( lDof+1 ); // global DOF
+
+                        //providing the boundary conditions with needed data
+                        if ( bcBaseIterator->dataVector() )
+                            bcBaseIterator->addIdentifier( new IdentifierBase( gDof ) );
+                        else
+                        { // With user defined functions
+                            boundaryFE.coorMap( x, y, z, boundaryFE.refFE.xi( lDof ), boundaryFE.refFE.eta( lDof ) );
+                            bcBaseIterator->addIdentifier( new IdentifierEssential( gDof, x, y, z ) );
+                        }
+                    }
+                    bcBaseIterator++;
+                }
+            }
+        }
+
+
+        // ===================================================
+        // Insertion of EssentialVertices bc
+        // ===================================================
+        if ((beginEssVertices != M_bcList.end())&&nDofPerVert)
+        {
+            //loop on boundary element vertices
+            for ( ID iBElemVert = 0; iBElemVert < nBElemVertices; ++iBElemVert )
+            {
+                marker = mesh.bElement( iBoundaryElement ).point( iBElemVert+1 ).marker(); // vertex marker
+
+                // Finding this marker on the BC list
+                bcBaseIterator = beginEssVertices;
+                while ( ( bcBaseIterator = find( bcBaseIterator, M_bcList.end(), marker ) ) != M_bcList.end() )
+                {
+                    for ( ID iVertexDof = 0; iVertexDof < nDofPerVert; ++iVertexDof )
+                    {
+                        UInt lDof = iBElemVert * nDofPerVert + iVertexDof ; // local Dof
+                        UInt gDof = localToGlobalMapOnBElem(lDof+1); // global Dof
+
+                        //providing the boundary conditions with needed data
+                        if ( bcBaseIterator->dataVector() )
+                            bcBaseIterator->addIdentifier( new IdentifierBase( gDof ) );
+                        else
+                        { // With user defined functions
+                            boundaryFE.coorMap( x, y, z, boundaryFE.refFE.xi( lDof ), boundaryFE.refFE.eta( lDof ) );
+                            bcBaseIterator->addIdentifier( new IdentifierEssential( gDof, x, y, z ) );
+                        }
+                    }
+                    bcBaseIterator++;
+                }
+            }
+        }
+    }
+
+
+#ifdef DEBUG
+
+    if ( notFoundMarkers.size() > 0 )
+    {
+
+
+        Debug(5010) <<
+        "WARNING -- BCHandler::bdUpdate()\n" <<
+        "  boundary degrees of freedom with the following markers\n" <<
+        "  have no boundary condition set: ";
+        for ( std::set<EntityFlag>::iterator it = notFoundMarkers.begin();
+                it != notFoundMarkers.end(); ++it )
+        {
+            Debug(5010) << *it << " ";
+        }
+        Debug(5010) << "\n";
+
+    }
+#endif
+
+    // ============================================================================
+    // There is no more identifiers to add to the boundary conditions
+    // We finalize the set of identifiers by transferring it elements to a std::vector
+    // ============================================================================
+    for ( bcBaseIterator = M_bcList.begin(); bcBaseIterator != M_bcList.end(); ++bcBaseIterator )
+    {
+        bcBaseIterator->finalize();
+        bcBaseIterator->finalizeIdGlobal();
+    }
+
+    M_bdUpdateDone = true;
+} // bdUpdate
+
+
+//TODO this will be removed before the end of the cleaning week
+
+// =============================================================
+// Old implementation
+// =============================================================
+
+/*/
+template <typename Mesh>
+void
+BCHandler::bdUpdate( Mesh& mesh, CurrentBdFE& boundaryFE, const Dof& dof )
+{
+    typedef typename Mesh::ElementShape geoShape_Type;
 
     // Some useful local variables, to save some typing
     UInt nDofPerVert = dof.fe.nbDofPerVertex(); // number of Dof per vertices
@@ -478,30 +941,28 @@ BCHandler::bdUpdate( Mesh& mesh, CurrentBdFE& feBd, const Dof& dof )
     EntityFlag marker; //will store the marker of each geometric entity
     EntityFlag elementMarker; //will store the marker of the element
 
-    typedef typename GeoShape::GeoBShape GeoBShape;
+    typedef typename geoShape_Type::GeoBShape geoBShape_Type;
 
-    UInt nBElementV = GeoBShape::numVertices; // Number of boundary element's vertices
-    UInt nBElementE = GeoBShape::numEdges;    // Number of boundary element's edges
+    UInt nBElemVertices = geoBShape_Type::numVertices; // Number of boundary element's vertices
+    UInt nBElemEdges = geoBShape_Type::numEdges;    // Number of boundary element's edges
 
-    UInt nElemV = GeoShape::numVertices; // Number of element's vertices
-    UInt nElemE = GeoShape::numEdges;    // Number of element's edges
+    UInt nElemVertices = geoShape_Type::numVertices; // Number of element's vertices
+    UInt nElemEdges = geoShape_Type::numEdges;    // Number of element's edges
 
-    UInt nDofBElV = nDofPerVert * nBElementV; // number of vertex's Dof on a boundary element
-    UInt nDofBElE = nDofPerEdge * nBElementE; // number of edge's Dof on a boundary element
-#ifdef TWODIM
-    UInt nDofBEl = nDofBElV + nDofBElE; // number of total Dof on a boundary element
-#else
-    UInt nDofBEl = nDofBElV + nDofBElE + nDofPerFace; // number of total Dof on a boundary element
-#endif
-    UInt nDofElemV = nElemV * nDofPerVert; // number of vertex's Dof on a Element
-    UInt nDofElemE = nElemE * nDofPerEdge; // number of edge's Dof on a Element
+    UInt nDofBElemVertices = nDofPerVert * nBElemVertices; // number of vertex's Dof on a boundary element
+    UInt nDofBElemEdges = nDofPerEdge * nBElemEdges; // number of edge's Dof on a boundary element
 
-    SimpleVect<ID> bdltg( nDofBEl );
+    UInt nDofBElem = nDofBElemVertices + nDofBElemEdges + nDofPerFace; // number of total Dof on a boundary element
+
+    UInt  nDofElemVertices = nElemVertices * nDofPerVert; // number of vertex's Dof on a Element
+    UInt nDofElemEdges = nElemEdges * nDofPerEdge; // number of edge's Dof on a Element
+
+    SimpleVect<ID> bdltg( nDofBElem );
     typedef std::vector<BCBase>::iterator Iterator;
     Iterator where;
     std::vector<Iterator> whereList;
 
-    UInt iElAd, iVeEl, iBElEl, iEdEl;
+    UInt iAdjacentElem, iElemVertex, iElemBElement, iElemEdge;
     ID lDof, gDof;
     Real x, y, z;
 
@@ -512,10 +973,10 @@ BCHandler::bdUpdate( Mesh& mesh, CurrentBdFE& feBd, const Dof& dof )
     // ===================================================
     for ( ID iBoundaryElement = 1 ; iBoundaryElement <= numBElements; ++iBoundaryElement )
     {
-        iElAd = mesh.bElement( iBoundaryElement ).ad_first();  // id of the element adjacent to the face
-        iBElEl = mesh.bElement( iBoundaryElement ).pos_first(); // local id of the face in its adjacent element
+        iAdjacentElem = mesh.bElement( iBoundaryElement ).ad_first();  // id of the element adjacent to the face
+        iElemBElement = mesh.bElement( iBoundaryElement ).pos_first(); // local id of the face in its adjacent element
 
-        feBd.updateMeas( mesh.bElement( iBoundaryElement ) );  // updating finite element information
+        boundaryFE.updateMeas( mesh.bElement( iBoundaryElement ) );  // updating finite element information
         elementMarker = mesh.bElement( iBoundaryElement ).marker(); // We keep the element marker (added by Gwenol Grandperrin)
 
         // ===================================================
@@ -525,15 +986,11 @@ BCHandler::bdUpdate( Mesh& mesh, CurrentBdFE& feBd, const Dof& dof )
         {
 
             // loop on boundary elements vertices
-            for ( ID iVeBEl = 1; iVeBEl <= nBElementV; ++iVeBEl )
+            for ( ID iBElemVert = 1; iBElemVert <= nBElemVertices; ++iBElemVert )
             {
 
-                marker = mesh.bElement( iBoundaryElement ).point( iVeBEl ).marker(); // vertex marker
-#ifdef TWODIM
-                iVeEl = GeoShape::eToP( iBElEl, iVeBEl ); // local vertex number (in element)
-#else // THREEDIM
-                iVeEl = GeoShape::fToP( iBElEl, iVeBEl ); // local vertex number (in element)
-#endif
+                marker = mesh.bElement( iBoundaryElement ).point( iBElemVert ).marker(); // vertex marker
+                iElemVertex = geoShape_Type::fToP( iElemBElement, iBElemVert ); // local vertex number (in element)
 
                 // Finding this marker on the BC list
                 whereList.clear();
@@ -552,20 +1009,21 @@ BCHandler::bdUpdate( Mesh& mesh, CurrentBdFE& feBd, const Dof& dof )
                 for ( ID l = 1; l <= nDofPerVert; ++l )
                 {
 
-                    lDof = ( iVeBEl - 1 ) * nDofPerVert + l ; // local Dof
+                    lDof = ( iBElemVert - 1 ) * nDofPerVert + l ; // local Dof
 
                     // global Dof
-                    gDof = dof.localToGlobal( iElAd, ( iVeEl - 1 ) * nDofPerVert + l );
+                    gDof = dof.localToGlobal( iAdjacentElem, ( iElemVertex - 1 ) * nDofPerVert + l );
                     bdltg( lDof ) = gDof; // local to global on this face
 
                     // Adding identifier
                     for ( UInt i = 0 ; i < whereList.size(); ++i )
                     {
                         where = whereList[ i ];
-                        //                         std::cout << "type = " << where->type() << std::endl;
                         switch ( where->type() )
                         {
                         case Essential:
+                        case EssentialEdges:
+                        case EssentialVertices:
                             // Which kind of data ?
                             if ( where->dataVector() )
                             { // With data vector
@@ -573,7 +1031,7 @@ BCHandler::bdUpdate( Mesh& mesh, CurrentBdFE& feBd, const Dof& dof )
                             }
                             else
                             { // With user defined functions
-                                feBd.coorMap( x, y, z, feBd.refFE.xi( lDof - 1 ), feBd.refFE.eta( lDof - 1 ) );
+                                boundaryFE.coorMap( x, y, z, boundaryFE.refFE.xi( lDof - 1 ), boundaryFE.refFE.eta( lDof - 1 ) );
                                 where->addIdentifier( new IdentifierEssential( gDof, x, y, z ) );
                             }
                             break;
@@ -585,7 +1043,6 @@ BCHandler::bdUpdate( Mesh& mesh, CurrentBdFE& feBd, const Dof& dof )
                                 case 0:
                                     // if the BC is a function or a vector which values
                                     // don't need to be integrated
-                                    //std::cout << "adding natural identifier" << std::endl;
                                     where->addIdentifier( new IdentifierNatural( gDof ) );
                                     break;
                                 case 1:  // if the BC is a vector of values to be integrated
@@ -627,10 +1084,6 @@ BCHandler::bdUpdate( Mesh& mesh, CurrentBdFE& feBd, const Dof& dof )
                             }
                             else
                             {
-                                //                                        feBd.coorMap( x, y, z, feBd.refFE.xi( lDof - 1 ), feBd.refFE.eta( lDof - 1 ) );
-                                //                                        where->addIdentifier( new IdentifierEssential( gDof, x, y, z ) );
-//                                                             std::cout << "adding flux identifier " << gDof << std::endl;
-//                                                             where->addIdentifier( new IdentifierNatural( gDof ) );
                             }
                             break;
                         case Resistance:
@@ -641,7 +1094,7 @@ BCHandler::bdUpdate( Mesh& mesh, CurrentBdFE& feBd, const Dof& dof )
 
                             else
                             { // With user defined functions
-                                // feBd.coorMap( x, y, z, feBd.refFE.xi( lDof - 1 ), feBd.refFE.eta( lDof - 1 ) );
+                                // boundaryFE.coorMap( x, y, z, boundaryFE.refFE.xi( lDof - 1 ), boundaryFE.refFE.eta( lDof - 1 ) );
                                 //where->addIdentifierIdGlobal( new IdentifierEssential( gDof, x, y, z ) );
                             }
                             break;
@@ -660,14 +1113,10 @@ BCHandler::bdUpdate( Mesh& mesh, CurrentBdFE& feBd, const Dof& dof )
         if ( nDofPerEdge )
         {
             // loop on boundary element's edges
-            for ( ID iLocalBElement = 1; iLocalBElement <= nBElementE; ++iLocalBElement )
+            for ( ID iBElemEdge = 1; iBElemEdge <= nBElemEdges; ++iBElemEdge )
             {
-#ifdef TWODIM
-                iEdEl = iBElEl; // local edge number (in element)
-#else // THREEDIM
-                iEdEl = GeoShape::fToE( iBElEl, iLocalBElement ).first; // local edge number (in element)
-#endif
-                marker = mesh.boundaryEdge( mesh.localEdgeId( iElAd, iEdEl ) ).marker(); // edge marker
+                iElemEdge = geoShape_Type::fToE( iElemBElement, iBElemEdge ).first; // local edge number (in element)
+                marker = mesh.boundaryEdge( mesh.localEdgeId( iAdjacentElem, iElemEdge ) ).marker(); // edge marker
                 //if(marker!= elementMarker){continue;}
                 // Finding this marker on the BC list
                 whereList.clear();
@@ -686,8 +1135,8 @@ BCHandler::bdUpdate( Mesh& mesh, CurrentBdFE& feBd, const Dof& dof )
                 for ( ID l = 1; l <= nDofPerEdge; ++l )
                 {
 
-                    lDof = nDofBElV + ( iLocalBElement - 1 ) * nDofPerEdge + l ; // local Dof
-                    gDof = dof.localToGlobal( iElAd, nDofElemV + ( iEdEl - 1 ) * nDofPerEdge + l ); // global Dof
+                    lDof = nDofBElemVertices + ( iBElemEdge - 1 ) * nDofPerEdge + l ; // local Dof
+                    gDof = dof.localToGlobal( iAdjacentElem,  nDofElemVertices + ( iElemEdge - 1 ) * nDofPerEdge + l ); // global Dof
                     bdltg( lDof ) = gDof; // local to global on this face
 
                     // Adding identifier
@@ -697,6 +1146,7 @@ BCHandler::bdUpdate( Mesh& mesh, CurrentBdFE& feBd, const Dof& dof )
                         switch ( where->type() )
                         {
                         case Essential:
+                        case EssentialEdges:
                             // Which kind of data ?
                             if ( where->dataVector() )
                             { // With data vector
@@ -704,7 +1154,7 @@ BCHandler::bdUpdate( Mesh& mesh, CurrentBdFE& feBd, const Dof& dof )
                             }
                             else
                             { // With user defined functions
-                                feBd.coorMap( x, y, z, feBd.refFE.xi( lDof - 1 ), feBd.refFE.eta( lDof - 1 ) );
+                                boundaryFE.coorMap( x, y, z, boundaryFE.refFE.xi( lDof - 1 ), boundaryFE.refFE.eta( lDof - 1 ) );
                                 where->addIdentifier( new IdentifierEssential( gDof, x, y, z ) );
                             }
                             break;
@@ -755,7 +1205,6 @@ BCHandler::bdUpdate( Mesh& mesh, CurrentBdFE& feBd, const Dof& dof )
         }
 
 
-#ifndef TWODIM
         // ===================================================
         // Face based Dof
         // ===================================================
@@ -785,8 +1234,8 @@ BCHandler::bdUpdate( Mesh& mesh, CurrentBdFE& feBd, const Dof& dof )
                 // Loop on number of Dof per face
                 for ( ID l = 1; l <= nDofPerFace; ++l )
                 {
-                    lDof = nDofBElE + nDofBElV + l; // local Dof
-                    gDof = dof.localToGlobal( iElAd, nDofElemE + nDofElemV + ( iBElEl - 1 ) * nDofPerFace + l ); // global Dof
+                    lDof = nDofBElemEdges + nDofBElemVertices + l; // local Dof
+                    gDof = dof.localToGlobal( iAdjacentElem, nDofElemEdges +  nDofElemVertices + ( iElemBElement - 1 ) * nDofPerFace + l ); // global Dof
                     // Why kind of data ?
                     if ( where->dataVector() )
                     { // With data vector
@@ -794,7 +1243,7 @@ BCHandler::bdUpdate( Mesh& mesh, CurrentBdFE& feBd, const Dof& dof )
                     }
                     else
                     { // With user defined functions
-                        feBd.coorMap( x, y, z, feBd.refFE.xi( lDof - 1 ), feBd.refFE.eta( lDof - 1 ) );
+                        boundaryFE.coorMap( x, y, z, boundaryFE.refFE.xi( lDof - 1 ), boundaryFE.refFE.eta( lDof - 1 ) );
                         where->addIdentifier( new IdentifierEssential( gDof, x, y, z ) );
                     }
                 }
@@ -811,8 +1260,8 @@ BCHandler::bdUpdate( Mesh& mesh, CurrentBdFE& feBd, const Dof& dof )
                         // if the BC is a vector which values don't need to be integrated
                         for ( ID l = 1; l <= nDofPerFace; ++l )
                         {
-                            lDof = nDofBElE + nDofBElV + l; // local Dof
-                            gDof = dof.localToGlobal( iElAd, nDofElemE + nDofElemV + ( iBElEl - 1 ) * nDofPerFace + l ); // global Dof
+                            lDof = nDofBElemEdges + nDofBElemVertices + l; // local Dof
+                            gDof = dof.localToGlobal( iAdjacentElem, nDofElemEdges +  nDofElemVertices + ( iElemBElement - 1 ) * nDofPerFace + l ); // global Dof
                             where->addIdentifier( new IdentifierNatural( gDof ) );
                         }
                     }
@@ -821,9 +1270,8 @@ BCHandler::bdUpdate( Mesh& mesh, CurrentBdFE& feBd, const Dof& dof )
                         // Loop on number of Dof per face
                         for ( ID l = 1; l <= nDofPerFace; ++l )
                         {
-                            lDof = nDofBElE + nDofBElV + l; // local Dof
-                            gDof = dof.localToGlobal( iElAd, nDofElemE + nDofElemV + ( iBElEl - 1 ) * nDofPerFace + l ); // global Dof
-                            std::cout << lDof << " to " << gDof << std::endl;
+                            lDof = nDofBElemEdges + nDofBElemVertices + l; // local Dof
+                            gDof = dof.localToGlobal( iAdjacentElem, nDofElemEdges +  nDofElemVertices + ( iElemBElement - 1 ) * nDofPerFace + l ); // global Dof
                             bdltg( lDof ) = gDof; // local to global on this face
                         }
                         where->addIdentifier( new IdentifierNatural( iBoundaryElement, bdltg ) );
@@ -838,39 +1286,24 @@ BCHandler::bdUpdate( Mesh& mesh, CurrentBdFE& feBd, const Dof& dof )
                     // Loop on number of Dof per face
                     for ( ID l = 1; l <= nDofPerFace; ++l )
                     {
-                        lDof = nDofBElE + nDofBElV + l; // local Dof
-                        gDof = dof.localToGlobal( iElAd, nDofElemE + nDofElemV + ( iBElEl - 1 ) * nDofPerFace + l ); // global Dof
+                        lDof = nDofBElemEdges + nDofBElemVertices + l; // local Dof
+                        gDof = dof.localToGlobal( iAdjacentElem, nDofElemEdges +  nDofElemVertices + ( iElemBElement - 1 ) * nDofPerFace + l ); // global Dof
                         bdltg( lDof ) = gDof; // local to global on this face
                     }
                     where->addIdentifier( new IdentifierNatural( iBoundaryElement, bdltg ) );
                 }
                 break;
             case Mixte:
-                // Why kind of data ?
-                // vincent please check again for your Mixte-FE it doesn't work for Q1
-                // if ( where->dataVector()  ) { // With data vector
-                //   for (ID l=1; l<=nDofPerFace; ++l) {
-                //     lDof = nDofBElE + nDofBElV + l; // local Dof
-                //     gDof = dof.localToGlobal( iElAd, nDofElemE + nDofElemV + (iBElEl-1)*nDofPerFace + l); // global Dof
-                //     where->addIdentifier( new IdentifierNatural(gDof) );
-                //   }
-                // }
-                // else {
-                // Loop on number of Dof per face
-                for ( ID l = 1; l <= nDofPerFace; ++l )
+                 for ( ID l = 1; l <= nDofPerFace; ++l )
                 {
-                    lDof = nDofBElE + nDofBElV + l; // local Dof
-                    gDof = dof.localToGlobal( iElAd, nDofElemE + nDofElemV + ( iBElEl - 1 ) * nDofPerFace + l ); // global Dof
+                    lDof = nDofBElemEdges + nDofBElemVertices + l; // local Dof
+                    gDof = dof.localToGlobal( iAdjacentElem, nDofElemEdges +  nDofElemVertices + ( iElemBElement - 1 ) * nDofPerFace + l ); // global Dof
                     bdltg( lDof ) = gDof; // local to global on this face
                 }
                 where->addIdentifier( new IdentifierNatural( iBoundaryElement, bdltg ) );
                 // }
                 break;
             case Flux:
-//                             std::cout << iBoundaryElement << " = ";
-//                             for (Int ii = 0; ii < bdltg.size(); ++ii)
-//                                 std::cout << bdltg[ii] << " ";
-//                             std::cout << std::endl;
                 where->addIdentifier( new IdentifierNatural( iBoundaryElement, bdltg ) );
                 break;
 
@@ -880,8 +1313,8 @@ BCHandler::bdUpdate( Mesh& mesh, CurrentBdFE& feBd, const Dof& dof )
 
                     for ( ID l = 1; l <= nDofPerFace; ++l )
                     {
-                        lDof = nDofBElE + nDofBElV + l; // local Dof
-                        gDof = dof.localToGlobal( iElAd, nDofElemE + nDofElemV + ( iBElEl - 1 ) * nDofPerFace + l ); // global Dof
+                        lDof = nDofBElemEdges + nDofBElemVertices + l; // local Dof
+                        gDof = dof.localToGlobal( iAdjacentElem, nDofElemEdges +  nDofElemVertices + ( iElemBElement - 1 ) * nDofPerFace + l ); // global Dof
                         where->addIdentifierIdGlobal(new IdentifierBase( gDof ) );
                         bdltg( lDof ) = gDof; // local to global on this face
                     }
@@ -893,7 +1326,6 @@ BCHandler::bdUpdate( Mesh& mesh, CurrentBdFE& feBd, const Dof& dof )
             }
         }
 
-#endif
     }
 
     std::set<EntityFlag> notFoundMarkersNew;
@@ -929,17 +1361,19 @@ BCHandler::bdUpdate( Mesh& mesh, CurrentBdFE& feBd, const Dof& dof )
     whereList.clear();
     // ============================================================================
     // There is no more identifiers to add to the boundary conditions
-    // We finalise de set of identifiers by transfering it elements to a std::vector
+    // We  de set of identifiers by transferring it elements to a std::vector
     // ============================================================================
     for ( Iterator it = M_bcList.begin(); it != M_bcList.end(); ++it )
     {
-        it->finalise();
-        it->finaliseIdGlobal();
+        it->finalize();
+        it->finalizeIdGlobal();
     }
 
     M_bdUpdateDone = true;
 } // bdUpdate
+//*/
+
 
 } // namespace LifeV
 
-#endif /* BCHandler_H */
+#endif /* BCHANDLER_H */
