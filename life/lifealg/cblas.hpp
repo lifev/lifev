@@ -1,14 +1,41 @@
+//@HEADER
 /*
- * cblas_f77.h
- * Written by Keita Teranishi
- *
- * Updated by Jeff Horner
- * Merged cblas_f77.h and cblas_fortran_header.h
+ *******************************************************************************
+
+    Copyright (C) 2004, 2005, 2007 EPFL, Politecnico di Milano, INRIA
+    Copyright (C) 2010 EPFL, Politecnico di Milano, Emory University
+
+    This file is part of LifeV.
+
+    LifeV is free software; you can redistribute it and/or modify
+    it under the terms of the GNU Lesser General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    LifeV is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+    Lesser General Public License for more details.
+
+    You should have received a copy of the GNU Lesser General Public License
+    along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
+
+ *******************************************************************************
  */
-/*
- * Updated 2004 Christophe Prud'homme <christophe.prudhomme@epfl.ch>
- * - use F77NAME() to declare the fortran functions
- * - removed some extremely verbose declarations
+//@HEADER
+
+/*!
+    @file
+    @brief Fortran BLAS function with undersore handling
+
+    @author Keita Teranishi
+    @author Jeff Horner
+    @author Christophe Prud'homme <christophe.prudhomme@epfl.ch>
+    @date 2004
+
+    @contributor Alessio Fumagalli <alessio.fumagalli@mail.polimi.it>
+    @maintainer Alessio Fumagalli <alessio.fumagalli@mail.polimi.it>
+
  */
 
 #ifndef CBLAS_F77_H
