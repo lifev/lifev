@@ -1,53 +1,65 @@
-/* -*- mode: c++ -*-
+//@HEADER
+/*
+*******************************************************************************
 
-  This file is part of the LifeV library
+Copyright (C) 2004, 2005, 2007 EPFL, Politecnico di Milano, INRIA
+Copyright (C) 2010 EPFL, Politecnico di Milano, Emory University
 
-  Author(s): Christophe Prud'homme <christophe.prudhomme@epfl.ch>
-       Date: 2004-10-04
+This file is part of LifeV.
 
-  Copyright (C) 2004 EPFL
+LifeV is free software; you can redistribute it and/or modify
+it under the terms of the GNU Lesser General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
 
-  This library is free software; you can redistribute it and/or
-  modify it under the terms of the GNU Lesser General Public
-  License as published by the Free Software Foundation; either
-  version 2.1 of the License, or (at your option) any later version.
+LifeV is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+Lesser General Public License for more details.
 
-  This library is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-  Lesser General Public License for more details.
+You should have received a copy of the GNU Lesser General Public License
+along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
 
-  You should have received a copy of the GNU Lesser General Public
-  License along with this library; if not, write to the Free Software
-  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+*******************************************************************************
 */
-/**
-   \file factory.hpp
-   \author Christophe Prud'homme <christophe.prudhomme@epfl.ch>
-   \date 2004-10-04
- */
-#ifndef __factory_H
-#define __factory_H 1
+//@HEADER
+/*!
+  @file
+  @brief Factory class
+
+  @date 4-10-2004
+  @author Christophe Prud'homme <christophe.prudhomme@epfl.ch>
+
+  @maintainer Radu Popescu <radu.popescu@epfl.ch>
+*/
+
+#ifndef FACTORY_H
+#define FACTORY_H 1
 
 #include <map>
 #include <stdexcept>
 #include <string>
 
+#pragma GCC diagnostic ignored "-Wunused-variable"
+#pragma GCC diagnostic ignored "-Wunused-parameter"
+
 #include <boost/function.hpp>
 #include <boost/bind.hpp>
+
+#pragma GCC diagnostic warning "-Wunused-variable"
+#pragma GCC diagnostic warning "-Wunused-parameter"
 
 #include <life/lifecore/debug.hpp>
 #include <life/lifecore/typeInfo.hpp>
 
 namespace LifeV
 {
-/*! \struct factoryDefaultError
+
+//! @struct factoryDefaultError
+/*!
   Manages the "Unknown Type" error in an object factory.
 */
-template <
-typename IdentifierType,
-class AbstractProduct
->
+template <typename IdentifierType, class AbstractProduct>
 struct factoryDefaultError
 {
     class Exception
@@ -55,13 +67,12 @@ struct factoryDefaultError
             public std::exception
     {
     public:
-        Exception( IdentifierType /*id*/ )
+        Exception( IdentifierType id )
                 :
                 std::exception(),
                 _M_ex()
         {
             std::ostringstream __ex_str;
-            //__ex_str << "[factory] Unknown Type : " << id;
             __ex_str << "[factory] Unknown Type : ";
             _M_ex = __ex_str.str();
 
@@ -83,41 +94,26 @@ struct factoryDefaultError
 };
 
 /*!
-  \class factory
-  \brief Implements a generic object factory
+  @class factory
+  @brief Implements a generic object factory
 
-  \sa factoryDefaultError, factoryClone, TypeInfo
-
-  @author Christophe Prud'homme
+  @sa factoryDefaultError, factoryClone, TypeInfo
 */
-template
-<
-class AbstractProduct,
-typename IdentifierType,
-typename ProductCreator = boost::function<AbstractProduct*()>,
-template<typename, class> class factoryErrorPolicy = factoryDefaultError
->
-class factory
-        :
-        public factoryErrorPolicy<IdentifierType,AbstractProduct>
+template <class AbstractProduct, typename IdentifierType,
+          typename ProductCreator = boost::function<AbstractProduct*()>,
+          template<typename, class> class factoryErrorPolicy = factoryDefaultError>
+class factory : public factoryErrorPolicy<IdentifierType,AbstractProduct>
 {
 public:
-
-
-    /** @name Typedefs
-     */
+    //! @name Public Typedefs
     //@{
     typedef IdentifierType identifier_type;
     typedef AbstractProduct product_type;
     typedef ProductCreator creator_type;
-
     typedef factoryErrorPolicy<identifier_type,product_type> super;
-
     //@}
 
-
-    /** @name  Methods
-     */
+    //! @name  Methods
     //@{
 
     /**
@@ -171,75 +167,32 @@ public:
         LifeV::Debug( 2200 ) << "Unknown type with id : " << id << "\n";
         return super::onUnknownType( id );
     }
-
-
-
     //@}
+
 private:
     typedef std::map<identifier_type, creator_type> id_to_product_type;
     id_to_product_type _M_associations;
-
 };
 
 /*!
-  \class factoryClone
-  \brief Implements a generic cloning object factory
+  @class factoryClone
+  @brief Implements a generic cloning object factory
 
-  \sa factory, factoryDefaultError
-
-  \author Christophe Prud'homme
+  @sa factory, factoryDefaultError
 */
-template <
-class AbstractProduct,
-class ProductCreator = boost::function<AbstractProduct* (const AbstractProduct*)>,
-template<typename, class> class FactoryErrorPolicy = factoryDefaultError
->
-class factoryClone
-        :
-        public FactoryErrorPolicy<TypeInfo, AbstractProduct>
+template <class AbstractProduct,
+          class ProductCreator = boost::function<AbstractProduct* (const AbstractProduct*)>,
+          template<typename, class> class FactoryErrorPolicy = factoryDefaultError>
+class factoryClone : public FactoryErrorPolicy<TypeInfo, AbstractProduct>
 {
 public:
-
-
-    /** @name Typedefs
-     */
+    //! @name Typedefs
     //@{
-
     typedef FactoryErrorPolicy<TypeInfo,AbstractProduct> super;
-
     //@}
 
-    /** @name Constructors, destructor
-     */
+    //! @name  Methods
     //@{
-
-    //@}
-
-    /** @name Operator overloads
-     */
-    //@{
-
-
-    //@}
-
-    /** @name Accessors
-     */
-    //@{
-
-
-    //@}
-
-    /** @name  Mutators
-     */
-    //@{
-
-
-    //@}
-
-    /** @name  Methods
-     */
-    //@{
-
     bool registerProduct(const TypeInfo& id, ProductCreator creator)
     {
         return _M_associations.insert( typename id_to_product_type::value_type( id, creator ) ).second;
@@ -261,7 +214,6 @@ public:
         }
         return super::onUnknownType(typeid(*model));
     }
-
     //@}
 
 private:
@@ -269,6 +221,5 @@ private:
     id_to_product_type _M_associations;
 };
 
-
 }
-#endif /* __factory_H */
+#endif // FACTORY_H
