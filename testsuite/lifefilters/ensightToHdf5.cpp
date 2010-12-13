@@ -209,6 +209,7 @@ EnsightToHdf5::run()
 
     std::string const importerType =  dataFile( "importer/type", "ensight");
     std::string const importerName =  dataFile( "importer/filename", "ethiersteinman");
+    std::string const importDir    =  dataFile( "importer/importDir", "importDir");
 
 #ifdef HAVE_HDF5
     if (exporterType.compare("hdf5") == 0)
@@ -217,7 +218,7 @@ EnsightToHdf5::run()
 #endif
         exporter.reset( new Ensight<RegionMesh3D<LinearTetra> > ( dataFile, exporterName ) );
 
-    exporter->setDirectory( "./" ); // This is a test to see if M_post_dir is working
+    exporter->setDirectory( importDir ); // This is a test to see if M_post_dir is working
     exporter->setMeshProcId( meshPart.mesh(), d->comm->MyPID() );
 
 #ifdef HAVE_HDF5

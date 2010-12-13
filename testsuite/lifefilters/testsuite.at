@@ -53,7 +53,7 @@ press_order       = P1
 verbose         = 1
 steady          = 0
 ]])
-AT_CHECK([ ln -sf $abs_top_builddir/testsuite/lifefilters/*{.case,.geo,.scl,.vct} . &&
+AT_CHECK([ ln -sf $abs_top_builddir/testsuite/lifefilters importDir &&
 	       ln -sf $abs_top_builddir/testsuite/data/mesh/inria/cube4x4.mesh &&
            mpirun -np 4 $abs_top_builddir/testsuite/lifefilters/test_filters -c],[0],[ignore],[ignore])
 AT_CLEANUP
