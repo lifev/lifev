@@ -1,100 +1,128 @@
 //@HEADER
 /*
-************************************************************************
+*******************************************************************************
 
- This file is part of the LifeV Applications.
- Copyright (C) 2001-2010 EPFL, Politecnico di Milano, INRIA
+Copyright (C) 2004, 2005, 2007 EPFL, Politecnico di Milano, INRIA
+Copyright (C) 2010 EPFL, Politecnico di Milano, Emory University
 
- This library is free software; you can redistribute it and/or modify
- it under the terms of the GNU Lesser General Public License as
- published by the Free Software Foundation; either version 2.1 of the
- License, or (at your option) any later version.
+This file is part of LifeV.
 
- This library is distributed in the hope that it will be useful, but
- WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- Lesser General Public License for more details.
+LifeV is free software; you can redistribute it and/or modify
+it under the terms of the GNU Lesser General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
 
- You should have received a copy of the GNU Lesser General Public
- License along with this library; if not, write to the Free Software
- Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
- USA
+LifeV is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+Lesser General Public License for more details.
 
-************************************************************************
+You should have received a copy of the GNU Lesser General Public License
+along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
+
+*******************************************************************************
 */
 //@HEADER
 
 /*!
-    @file exporter.hpp
-    @brief This file provides an interface for post-processing
+    @file
+    @brief This file provides a dummy interface for post-processing
 
+    @date 27-12-2008
     @author Simone Deparis <simone.deparis@epfl.ch>
-    @date 2008-12-27
 
-    This file provides an interface as a fake post-processing.
+    @maintainer Radu Popescu <radu.popescu@epfl.ch>
  */
 
-#ifndef _NOEXPORT_H_
-#define _NOEXPORT_H_
+#ifndef NOEXPORT_H
+#define NOEXPORT_H 1
 
 #include <life/lifefilters/exporter.hpp>
 
 namespace LifeV
 {
 
-template<typename Mesh>
-class NoExport : public Exporter<Mesh>
+//! @name Class that provides a dummy interface for post-processing
+template<typename MeshType>
+class NoExport : public Exporter<MeshType>
 {
 
 public:
-
-    typedef Exporter<Mesh> super;
+    //! @name Public typedefs
+    //@{
+    typedef MeshTypeType mesh_Type;
+    typedef Exporter<MeshType> super;
     typedef typename super::mesh_ptrtype  mesh_ptrtype;
     typedef typename super::vector_ptrtype vector_ptrtype;
+    //@}
 
+    //! @name Constructors
+    //@{
     NoExport();
-    NoExport(const GetPot& dfile, mesh_ptrtype mesh, const std::string& prefix, const int& procId );
+    NoExport(const GetPot& dfile, mesh_ptrtype mesh, const std::string& prefix, const int& procId);
     NoExport(const GetPot& dfile, const std::string& prefix);
+    //@}
 
+    //! @name Public methods
+    //@{
+    void postProcess(const Real& time) {}
+    UInt importFromTime( const Real& time ) { assert(false); return 0; }
+    void import(const Real& startTime, const Real& dt) {}
+    void import(const Real& startTime) {}
+    //@}
+
+    //! @name Get methods
+    //@{
     EpetraMapType mapType() const;
-    void postProcess(const Real& /*time*/) {}
-    UInt importFromTime( const Real& /*Time*/ ) { assert(false); return 0; }
-    void import(const Real& /*Tstart*/, const Real& /*dt*/) {} // dt is used to rebuild the history up to now
-    void import(const Real& /*Tstart*/) {}
+    //@}
 
 private:
-    virtual void M_rd_scalar( ExporterData& /*dvar*/ ) {}
-    virtual void M_rd_vector( ExporterData& /*dvar*/ ) {}
+    //! @name Private methods
+    //@{
+    virtual void readScalar( ExporterData& dvar) {}
+    virtual void readVector( ExporterData& dvar) {}
+    //@}
 
 };
 
-template<typename Mesh>
-NoExport<Mesh>::NoExport():
+// ======================
+// IMPLEMENTATION
+// ======================
+
+// ======================
+// Constructors
+// ======================
+
+template<typename MeshType>
+NoExport<MeshType>::NoExport():
         super()
 {
 }
 
-template<typename Mesh>
-NoExport<Mesh>::NoExport(const GetPot& dfile, mesh_ptrtype mesh, const std::string& prefix,
-                         const int& procId)
-        :
-        super(dfile,prefix)
+template<typename MeshType>
+NoExport<MeshType>::NoExport(const GetPot& dfile, mesh_ptrtype mesh, const std::string& prefix,
+                         const int& procId):
+        super(dfile, prefix)
 {
-    setMeshProcId(mesh,procId);
+    setMeshProcId(mesh, procId);
 }
 
-template<typename Mesh>
-NoExport<Mesh>::NoExport(const GetPot& dfile, const std::string& prefix):
-        super(dfile,prefix)
+template<typename MeshType>
+NoExport<MeshType>::NoExport(const GetPot& dfile, const std::string& prefix):
+        super(dfile, prefix)
 {
 }
 
-template<typename Mesh>
-EpetraMapType NoExport<Mesh>::mapType() const
+// ====================
+// Get methods
+// ====================
+
+template<typename MeshType>
+EpetraMapType NoExport<MeshType>::mapType() const
 {
     return Unique;
 }
 
-}
+} // Namespace LifeV
 
-#endif
+#endif // NOEXPORT_H
