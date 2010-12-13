@@ -106,7 +106,7 @@ public:
     //@}
 
 
-    //! @name Constructor & Destructor
+    //! @name Constructors & Destructor
     //@{
 
     //! Empty Constructor
