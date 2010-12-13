@@ -1,6 +1,6 @@
 //@HEADER
 /*
-*******************************************************************************
+ *******************************************************************************
 
     Copyright (C) 2004, 2005, 2007 EPFL, Politecnico di Milano, INRIA
     Copyright (C) 2010 EPFL, Politecnico di Milano, Emory University
@@ -20,17 +20,23 @@
     You should have received a copy of the GNU Lesser General Public License
     along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
 
-*******************************************************************************
-*/
+ *******************************************************************************
+ */
 //@HEADER
 
 /*!
     @file
-    @brief Special structures for handling mesh faces and sides
+    @brief   Special routines to read meshes and special structures for
+  sides and faces handling
 
-    @author Luca Formaggia
+  Classes BareFace and BareEdge have been created to give an UNIQUE
+  Representation for mesh faces and edges and thus allow the construction
+  of global tables or fields.
+
+    @author Luca Formaggia <luca.formaggia@polimi.it>
     @contributor Luca Bertagna <lbertag@emory.edu>
-    @maintainer
+    @contributor Lucia Mirabella <lucia.mirabell@gmail.com>
+    @maintainer Lucia Mirabella <lucia.mirabell@gmail.com>
 
     @date 19-08-1999
 
@@ -44,9 +50,9 @@
 	that degrees of freedom (Dof) are linked to geometrical	entities.  Now if
 	we have degrees of freedom associated, for instance, to	an Edge (like in
 	a P2 Tetra) in order to build the global numbering of the Dof and the
-	association between local (element-wise) and global numbering, I need to
-	identify edges and give them a unique ID. Yet, I may not want want to
-	build a full Edge (GeoElement2D) object: after all that I need is
+	association between local (element-wise) and global numbering, we need to
+	identify edges and give them a unique ID. Yet, we may not want to
+	build a full Edge (GeoElement2D) object: we only need
 	the ID of the edge and a way of computing the ID's of the degrees of
 	freedom on the edge, all the remaining data of a full Edge object is not
 	necessarily needed.
@@ -63,8 +69,8 @@
 	has been instantiated.
 
 	Another <em>very important</em> issue is that of orientation.  There are
-	different ways of considerin orientation of a Face or an Edge. The first is
-	the <em>local</em> orientation of a Face or Egde of the reference finite
+	different ways of considering orientation of a Face or an Edge. The first is
+	the <em>local</em> orientation of a Face or Edge of the reference finite
 	element. This is conventionally chosen when designing the finite
 	elements. For the faces, we have adopted the convention that the local
 	positive orientation is such that the face normal calculated with the right
@@ -80,7 +86,7 @@
 	boundary elements (faced in 3D or edges in 2D) it is compulsory that the
 	orientation of the stored item be consistent with the convention chosen for
 	the orientation of the domain boundary. More precisely, boundary elements
-	are stored so that the normal (always calculated following the righ hand
+	are stored so that the normal (always calculated following the right hand
 	rule) is outward with respect to the domain.
 
 	However, there is the need of defining a <em>global</em> orientation also
@@ -107,25 +113,11 @@
 	entity, since BareEdges do not store Marker data. (This is why the
 	RegionMesh classes treat boundary items in a rather special way).
 
-	\par Usage
-
-	Since BareItems are used only internally, we are (temporarily) omitting a
-	detailed documentation.
 
  */
 
-#ifndef _MESHBAREITEMS_HH_
-#define _MESHBAREITEMS_HH_
-
-/*!
-  Special routines to read meshes and special structures for
-  sides and faces handling
-
-  Classes BareFace and BareEdge have been created to give an UNIQUE
-  Representation for mesh faces and edges and thus allow the construction
-  of global tables or Fields.
-
-*/
+#ifndef BAREITEMS_H
+#define BAREITEMS_H 1
 
 #include<utility>
 #include<vector>
@@ -142,7 +134,7 @@ namespace LifeV
 \brief type used for Identifiers (Integral type in the range [1, MAX_INT]).
 All principal items handled by the library have an identified, which is an
 unsigned integer <em>greater or equal to one</em>
-*/
+ */
 // more correct version
 typedef size_t ID;
 // original version
@@ -155,48 +147,68 @@ typedef unsigned int UInt;
 #endif
 
 //! The Edge basis class
-/*! It contains the attributes common to all Edges In particular, it
+/*! It contains the attributes common to all Edges. In particular, it
 contains the two ID's (first and second) of the points at the two ends
 of the edge.
 \invariant first < second
-*/
+ */
 struct BareEdge
 {
+    //! @name Constructor & Destructor
+    //@{
+    //! Empty Constructor
     BareEdge() : first( 0 ), second( 0 )
     {}
-    ; /*!< Standard Constructor*/
+    ;
+    //! Constructor that takes the ID's as parameter
+    /*!
+        @param i ID of the first node of the edge
+        @param j ID of the second node of the edge
+     */
     BareEdge( ID i, ID j ) : first( i ), second( j )
     {}
-    ; /*!< constructor taking the ID's */
+    ;
+    //@}
     ID first; //!< First ID which defines the Edge
     ID second; //!< Second ID which defines the Edge
 };
 
 //! The base Face class
-/*! Contains the common parameters of all Edges A Face contains three
+/*! It contains the attributes common to all Faces. In particular, a it contains three
   ID's (first, second and third) of points at face vertex, chosen so
   to uniquely identify the face.
 \invariant first<second<third.
-
-*/
+ */
 struct BareFace
 {
+    //! @name Constructor & Destructor
+    //@{
+    //! Empty Constructor
     BareFace() : first( 0 ), second( 0 ), third( 0 )
     {}
-    ; //!< Default constructor
+    ;
     //! Constructor that takes the ID's as parameter
+    /*!
+        @param i ID of the first node of the face
+        @param j ID of the second node of the face
+        @param k ID of the third node of the face
+     */
+    //!
     BareFace( ID i, ID j, ID k ) : first( i ), second( j ), third( k )
     {}
     ;
-    /*! Constructor that takes a BareEdge Object and an ID. The face is
-      then identified by the ID of the Points on the BareEdge +
-      <tt>i</tt>*/
-    BareFace( ID i, const BareEdge & e ) : first( i ), second( e.first ), third( e.second )
+    //! Constructor that takes a BareEdge object and an ID. The face is then identified by the ID of the Points on the BareEdge + the point with identified by id
+    /*!
+        @param id of the third point defining the face
+        @param id of the edgedefining the face
+
+     */
+    BareFace( ID id, const BareEdge & edge ) : first( id ), second( edge.first ), third( edge.second )
     {}
     ;
-    ID first; //!< First ID which defines the BareFace
+    ID first;  //!< First ID which defines the BareFace
     ID second; //!< Second ID which defines the BareFace
-    ID third; //!< Third ID which defines the BareFace
+    ID third;  //!< Third ID which defines the BareFace
 };
 
 
@@ -205,9 +217,9 @@ struct BareFace
 /*! \ingroup BareItemsBuilder
   \brief It creates a BareEdge end returns the orientation of the created edge with respect
   to the given data.
-  \param  bool is false if orientation  has been changed.
-  \param i is a Point ID
-  \param j is a Point ID
+  @param i is a Point ID
+  @param j is a Point ID
+  @return a pair composed of the created BareEdge and a boolean value which is False if orientation has been changed, True otherwise
 
   The BareEdge that will be built is the one passing by <tt>i</tt> and
   <tt>j</tt>. The orientation is i->j if the returned parameter is a
@@ -230,31 +242,33 @@ makeBareEdge( ID const i, ID const j )
 }
 
 /*! \ingroup BareItemsBuilder
-  \param i is a Point ID
-  \param j is a Point ID
   \brief It creates a BareEdge, ignoring orientation.
+  @param i is a Point ID
+  @param j is a Point ID
+  @return the BareEdge created
 
   The BareEdge that will be built is the one passing by <tt>i</tt> and <tt>j</tt>
   A lighter version of MakeBareEdge, to be used
   if orientation flag is not needed;
   \pre i and j >0, i!=j
-*/
+ */
 inline
 BareEdge
 setBareEdge( ID const i, ID const j )
 {
-    BareEdge be;
-    be.first = i < j ? i : j;
-    be.second = ( i - be.first ) + j;
-    return be;
+    BareEdge bareEdge;
+    bareEdge.first = i < j ? i : j;
+    bareEdge.second = ( i - bareEdge.first ) + j;
+    return bareEdge;
 }
 
 /*! \ingroup BareItemsBuilder
-  \param  bool is false if orientation  has been changed.
-  \param i is a Point ID
-  \param j is a Point ID
-  \pre i and j >0
   \brief It creates a non-standard BareEdge.
+  @param i is a Point ID
+  @param j is a Point ID
+  @return the BareEdge created
+
+  \pre i and j >0
 
   Yet another  lighter version of MakeBareEdge, without orientation, To be used for
   non-oriented graphs.
@@ -272,232 +286,369 @@ setBareEdgeNo( ID const i, ID const j )
 
 /*! \ingroup BareItemsBuilder
  \brief It creates Bare Face objects from three Point ID's
-  \param  bool is false if orientation  has been changed.
   \param i is a Point ID
   \param j is a Point ID
   \param k is a Point ID
+  @return a pair composed of the created BareFace and a boolean value which is False if orientation has been changed, True otherwise
 
   To be used for triangular faces.
   \pre i, j and k >0. i!=j!=k
 
-*/
+ */
 std::pair<BareFace, bool> makeBareFace( ID const i, ID const j, ID const k );
 
 /*! \ingroup BareItemsBuilder
- \brief It creates Bare Face objects from four Point ID's
-  \param  bool is false if orientation  has been changed.
+ \brief It creates Bare Face objects from four Point ID's. To be used with Quad faces.
   \param i is a Point ID
   \param j is a Point ID
   \param k is a Point ID
   \param l is a Point ID
+  @return a pair composed of the created BareFace and a boolean value which is False if orientation has been changed, True otherwise
 
-  To be used for triangular faces.
-  \pre i, j and k >0. i!=j!=k
+  \remarks For quad faces the construction process is more complex. We start from
+  the smallest vertex and we take the first three vertices in the
+  sequence. We then proceede as for the triangles.
 
-*/
+ */
 std::pair<BareFace, bool> makeBareFace( ID const i, ID const j, ID const k, ID const l );
 
 /*! \defgroup comparison Comparison Operators
   Operators for comparing BareItems
-*/
+ */
 
 /*! \ingroup comparison
-    inequality
-*/
+    \brief inequality
+ */
 inline
 bool
-operator!=( const BareEdge & p1 , const BareEdge & p2 )
+operator!=( const BareEdge & edge1 , const BareEdge & edge2 )
 {
-    return p1.first != p2.first || p1.second != p2.second;
+    return edge1.first != edge2.first || edge1.second != edge2.second;
 }
 
 /*! \ingroup comparison
-     equality
-*/
+     \brief equality
+ */
 inline
 bool
-operator==( const BareEdge & p1 , const BareEdge & p2 )
+operator==( const BareEdge & edge1 , const BareEdge & edge2 )
 {
-    return p1.first == p2.first && p1.second == p2.second;
+    return edge1.first == edge2.first && edge1.second == edge2.second;
 }
 
 /*! \ingroup comparison
-    greater than
-*/
+    \brief greater than
+ */
 inline
 bool
-operator>( const BareEdge & e1 , const BareEdge & e2 )
+operator>( const BareEdge & edge1 , const BareEdge & edge2 )
 {
-    return e2.first > e1.first || ( e2.first == e1.first && e2.second > e1.second );
+    return edge2.first > edge1.first || ( edge2.first == edge1.first && edge2.second > edge1.second );
 }
 
 /*! \ingroup comparison
-     greater-equal than
-*/
+    \brief greater-equal than
+ */
 inline
 bool
-operator>=( const BareEdge & e1 , const BareEdge & e2 )
+operator>=( const BareEdge & edge1 , const BareEdge & edge2 )
 {
-    return e1 == e2 || e1 > e2;
+    return edge1 == edge2 || edge1 > edge2;
 }
 
 /*! \ingroup comparison
-    less than
-*/
+    \brief less than
+ */
 inline
 bool
-operator<( const BareEdge & e1 , const BareEdge & e2 )
+operator<( const BareEdge & edge1 , const BareEdge & edge2 )
 {
-    return e2.first < e1.first || ( e2.first == e1.first && e2.second < e1.second );
+    return edge2.first < edge1.first || ( edge2.first == edge1.first && edge2.second < edge1.second );
 }
 
 /*! \ingroup comparison
-     less-equal than
-*/
+    \brief less-equal than
+ */
 inline
 bool
-operator<=( const BareEdge & e1 , const BareEdge & e2 )
+operator<=( const BareEdge & edge1 , const BareEdge & edge2 )
 {
-    return e1 == e2 || e1 < e2;
+    return edge1 == edge2 || edge1 < edge2;
     ;
 }
 
-/*! \ingroup comparison*/
+/*! \ingroup comparison
+  \brief inequality
+ */
 inline
 bool
-operator!=( const BareFace & p1 , const BareFace & p2 )
+operator!=( const BareFace & face1 , const BareFace & face2 )
 {
-    return p1.first != p2.first || p1.second != p2.second || p1.third != p2.third;
+    return face1.first != face2.first || face1.second != face2.second || face1.third != face2.third;
 }
 
 
-/*! \ingroup comparison*/
+/*! \ingroup comparison
+  \brief equality
+ */
 inline
 bool
-operator==( const BareFace & p1 , const BareFace & p2 )
+operator==( const BareFace & face1 , const BareFace & face2 )
 {
-    return p1.first == p2.first && p1.second == p2.second && p1.third == p2.third;
+    return face1.first == face2.first && face1.second == face2.second && face1.third == face2.third;
 }
 
 /*! \ingroup comparison
-  General functor for lexicographic comparison
-*/
+  \brief General functor for lexicographic comparison
+ */
 template <typename T>
 struct cmpBareItem;
 
 /*! \ingroup comparison
-   Specialised functor for Edges
-*/
-// Specialisations
+   \brief Specialized functor for Edges
+ */
 template <>
 struct cmpBareItem<BareEdge> //!< The actual comparison operator
 {
-    bool operator() ( const BareEdge & e1, const BareEdge & e2 ) const
+    bool operator() ( const BareEdge & edge1, const BareEdge & edge2 ) const
     {
-        return e2.first > e1.first || ( e2.first == e1.first && e2.second > e1.second );
+        return edge2.first > edge1.first || ( edge2.first == edge1.first && edge2.second > edge1.second );
     }
 };
 
 /*! \ingroup comparison
-  Specialised functor for Faces
-*/
+  \brief Specialized functor for Faces
+ */
 template <>
 struct cmpBareItem<BareFace>
 {
-    bool operator() ( const BareFace & e1, const BareFace & e2 ) const
+    bool operator() ( const BareFace & edge1, const BareFace & edge2 ) const
     {
-        if ( e2.first > e1.first )
+        if ( edge2.first > edge1.first )
             return true;
-        if ( e2.first == e1.first )
+        if ( edge2.first == edge1.first )
         {
-            if ( e2.second > e1.second )
+            if ( edge2.second > edge1.second )
                 return true;
-            if ( e2.second == e1.second )
-                return e2.third > e1.third;
+            if ( edge2.second == edge1.second )
+                return edge2.third > edge1.third;
         }
         return false;
     }
 };
 
-//! Handles Bare Items
-/*! This class handles mesh bare edges and faces construction. Used only in mesh builders
- A BareItemsHandler is a specialisation of a STL map which holds the pair
- formed by a bareitem and its ID.
- The ID  is automatically generated if one uses the method  addIfNotThere
-*/
-template <typename BareItem>
-class BareItemsHandler: public std::map<BareItem, ID, cmpBareItem<BareItem> >
+//! BareItemsHandler class - Class to handle bare edges and faces construction
+/*!
+    @author Luca Formaggia
+    @see
+
+	This class handles mesh bare edges and faces construction. Used only in mesh builders
+	A BareItemsHandler is a specialisation of a STL map which holds the pair
+	formed by a bareitem and its ID.
+	The ID  is automatically generated if one uses the method addIfNotThere
+ */
+template <typename BareItemType>
+class BareItemsHandler: public std::map<BareItemType, ID, cmpBareItem<BareItemType> >
 {
 public:
-    typedef std::map<BareItem, UInt, cmpBareItem<BareItem> > container;
-    typedef typename container::iterator iterator;
-    typedef typename container::const_iterator const_iterator;
-    typedef std::pair<const BareItem, UInt> value_type;
+    //! @name Public Types
+    //@{
+    typedef BareItemType 												bareItem_Type;
+    typedef std::map<bareItem_Type, UInt, cmpBareItem<bareItem_Type> > 	container_Type;
+    typedef typename container_Type::iterator 							containerIterator_Type;
+    typedef typename container_Type::const_iterator 					containerConstIterator_Type;
+    typedef std::pair<const bareItem_Type, UInt> 						value_Type;
 
+    //    typedef std::map<BareItem, UInt, cmpBareItem<BareItem> > container;
+    //    typedef typename container::iterator iterator;
+    //    typedef typename container::const_iterator const_iterator;
+    //    typedef std::pair<const BareItem, UInt> value_type;
+    //@}
+
+    //! @name Constructors & Destructor
+    //@{
+    //! Empty Constructor
     BareItemsHandler();
-    bool isThere( BareItem const & ) const; //!< is the item there? I just ask
-    ID id( BareItem const & ) const; //!< Returns ID of a BareItem. 0 if not there
-    bool setId( BareItem const & item, ID const i ); //!< To modify ID of bareitem item in the list
-    std::pair<ID, bool> addIfNotThere( BareItem const & ); //!< if not there adds it, the item ID is autogenerated
-    std::pair<ID, bool> addIfNotThere( BareItem const &, const ID id ); //!<if not there adds it, and sets ID id
-    bool isThereDel( BareItem const & ); //!< if it is there take it out (Id is lost)
+    //@}
 
-    UInt howMany() const; //!< The # of entities ones actually stored.
+    //! @name Methods
+    //@{
+
+    //! Method to ask if an item already exists
+    /*!
+        @param item Item we are looking for
+        @return True if the item has been found, False otherwise
+     */
+    bool isThere( bareItem_Type const & item) const;
+
+    //! Method that adds a BareItem if it is not already there and automatically generates the ID
+    /*!
+        @param item Item to be added
+    	@return a pair composed of the ID of the added item and a boolean value which is True if the item has been successfully added and False otherwise
+     */
+    std::pair<ID, bool> addIfNotThere( bareItem_Type const & item );
+
+    //! Method that adds a bareItem_Type if it is not already there and assigns the ID
+    /*!
+        @param item Item to be added
+        @param id ID to be assigned to the item
+    	@return a pair composed of the ID of the added item and a boolean value which is True if the item has been successfully added and False otherwise
+     */
+    std::pair<ID, bool> addIfNotThere( bareItem_Type const & item, const ID id );
+
+    //! Method that removes a bareItem_Type if it is there (the ID is then lost)
+    /*!
+        @param item Item to be removed
+    	@return True if the item has been erased and False otherwise
+     */
+    bool isThereDel( bareItem_Type const & item);
+
+    //! Method that counts how many items are stored
+    /*!
+    	@return the number of entities actually stored
+     */
+    UInt howMany() const;
+
+    //! Method that returns the maximum id currently in use
+    /*!
+    	@return the maximum id currently in use
+     */
     UInt maxId() const
     {
-        return _idCount;
-    } //!< Max ID currently in use
-    void showMe() const; //!< Writes info in output
+        return M_idCount;
+    }
+
+    //! Method that writes info in output
+    /*!
+     */
+    void showMe() const;
+    //@}
+
+    //! @name Set Methods
+    //@{
+
+    //! Method that returns the ID of a BareItem. It returns 0 if the item doesn't exist
+    /*!
+        @param item Item to modify
+        @param id new ID to assign to item
+    	@return True if the item has been found and modified, False otherwise
+     */
+    bool setId( bareItem_Type const & item, ID const id );
+    //@}
+
+    //! @name Get Methods
+    //@{
+
+    //! Method that returns the ID of a BareItem. It returns 0 if the item doesn't exist
+    /*!
+        @param item Item we are looking for
+        @return ID of the item. 0 if the item doesn't exist
+     */
+    ID id( bareItem_Type const & item ) const;
+    //@}
 private:
-    UInt _idCount;
+    UInt M_idCount;
 };
 
 /*********************************************************************************
                IMPLEMENTATIONS
-*********************************************************************************/
+ *********************************************************************************/
 //
 /*! \defgroup Helper Some helper functions
-*/
+ */
 
 //!\ingroup Helper
-template <typename BareItem>
+template <typename BareItemType>
 inline
-ID getId( std::pair<BareItem, ID> const & i )
+ID getId( std::pair<BareItemType, ID> const & i )
 {
     return i.second;
 }
 
 //!\ingroup Helper
-template <typename BareItem>
+template <typename BareItemType>
 inline
-BareItem getItem( std::pair<BareItem, ID> const & i )
+BareItemType getItem( std::pair<BareItemType, ID> const & i )
 {
     return i.first;
 }
 
 
-//                   BareItemsHandler
-template <class BareItem>
-BareItemsHandler<BareItem>::BareItemsHandler() :
-        _idCount( 0 )
+// ===================================================
+// Constructors & Destructor
+// ===================================================
+template <class BareItemType>
+BareItemsHandler<BareItemType>::BareItemsHandler() :
+        M_idCount( 0 )
 { }
 
-
-template <class BareItem>
+// ===================================================
+// Methods
+// ===================================================
+template <class BareItemType>
 inline
 bool
-BareItemsHandler<BareItem>::isThere( const BareItem & s ) const
+BareItemsHandler<BareItemType>::isThere( const bareItem_Type & item ) const
 {
-    return find( s ) != container::end();
+    return find( item ) != container_Type::end();
 }
 
-template <class BareItem>
+template <class BareItemType>
+inline
+std::pair<ID, bool>
+BareItemsHandler<BareItemType>::addIfNotThere( const bareItem_Type & item )
+{
+    std::pair<typename BareItemsHandler<BareItemType>::containerIterator_Type, bool> i( insert( std::make_pair( item, M_idCount + 1 ) ) );
+    if ( i.second )
+        ++M_idCount;
+    return std::make_pair( ( i.first )->second, i.second );
+}
+
+template <class BareItemType>
+inline
+std::pair<ID, bool>
+BareItemsHandler<BareItemType>::addIfNotThere( const bareItem_Type & item, const ID id )
+{
+    std::pair<typename BareItemsHandler<BareItemType>::containerIterator_Type, bool> i( insert( std::make_pair( item, id ) ) );
+    ( i.first ) ->second = id; // Set new id in any case.
+    return std::make_pair( id, i.second ); // for consistency with other version.
+}
+
+template <class BareItemType>
+bool
+BareItemsHandler<BareItemType>::isThereDel( bareItem_Type const & item )
+{
+    return erase( item ) != 0;
+}
+
+template <class BareItemType>
+inline
+UInt
+BareItemsHandler<BareItemType>::howMany() const
+{
+    return container_Type::size();
+}
+
+template <typename BareItemType>
+inline
+void BareItemsHandler<BareItemType>::showMe() const
+{
+    std::cout << "BareItemsHandler: " << std::endl;
+    std::cout << "Number of Items stored: " << this->size() << std::endl;
+    std::cout << "Max Id stored         : " << this->maxId() << std::endl;
+    std::cout << "End of Information";
+}
+
+// ===================================================
+// Set Methods
+// ===================================================
+template <class BareItemType>
 inline
 bool
-BareItemsHandler<BareItem>::setId( const BareItem & s, ID const id )
+BareItemsHandler<BareItemType>::setId( const bareItem_Type & item, ID const id )
 {
-    const_iterator i = find( s );
-    if ( i != container::end() )
+    containerConstIterator_Type i = find( item );
+    if ( i != container_Type::end() )
     {
         i->second = id;
         return true;
@@ -509,63 +660,21 @@ BareItemsHandler<BareItem>::setId( const BareItem & s, ID const id )
 
 }
 
-template <class BareItem>
+// ===================================================
+// Get Methods
+// ===================================================
+template <class BareItemType>
 inline
 ID
-BareItemsHandler<BareItem>::id( const BareItem & s ) const
+BareItemsHandler<BareItemType>::id( const bareItem_Type & item ) const
 {
-    const_iterator i = this->find( s );
-    if ( i != container::end() )
+    containerConstIterator_Type i = this->find( item );
+    if ( i != container_Type::end() )
         return i->second;
     else
         return 0;
 }
 
-template <class BareItem>
-inline
-std::pair<ID, bool>
-BareItemsHandler<BareItem>::addIfNotThere( const BareItem & s )
-{
-    std::pair<typename BareItemsHandler<BareItem>::iterator, bool> i( insert( std::make_pair( s, _idCount + 1 ) ) );
-    if ( i.second )
-        ++_idCount;
-    return std::make_pair( ( i.first )->second, i.second );
-}
-
-template <class BareItem>
-inline
-std::pair<ID, bool>
-BareItemsHandler<BareItem>::addIfNotThere( const BareItem & s, const ID id )
-{
-    std::pair<typename BareItemsHandler<BareItem>::iterator, bool> i( insert( std::make_pair( s, id ) ) );
-    ( i.first ) ->second = id; // Set new id in any case.
-    return std::make_pair( id, i.second ); // for consistency with other version.
-}
-
-template <class BareItem>
-inline
-UInt
-BareItemsHandler<BareItem>::howMany() const
-{
-    return container::size();
-}
-
-template <class BareItem>
-bool
-BareItemsHandler<BareItem>::isThereDel( BareItem const & s )
-{
-    return erase( s ) != 0;
-}
-
-template <typename BareItem>
-inline
-void BareItemsHandler<BareItem>::showMe() const
-{
-    std::cout << "BareItemsHandler: " << std::endl;
-    std::cout << "Number of Items stored: " << this->size() << std::endl;
-    std::cout << "Max Id stored         : " << this->maxId() << std::endl;
-    std::cout << "End of Information";
-}
 }
 #endif
 
