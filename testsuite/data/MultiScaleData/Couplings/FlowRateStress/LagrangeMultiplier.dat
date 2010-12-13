@@ -9,10 +9,10 @@
 #  License Terms: GNU GPL
 #
 ###################################################################################################
-### COUPLING: FluxStress - Lagrange Multiplier ####################################################
+### COUPLING: FlowRateStress - Lagrange Multiplier ################################################
 ###################################################################################################
 
 [MultiScale]
-couplingName           = FluxStess_LagrangeMultiplier
+couplingName           = FlowRateStess_LagrangeMultiplier
 stressType             = LagrangeMultiplier
 timeInterpolationOrder = 1

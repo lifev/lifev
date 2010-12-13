@@ -9,10 +9,10 @@
 #  License Terms: GNU GPL
 #
 ###################################################################################################
-### COUPLING: FluxStress - Total Pressure #########################################################
+### COUPLING: FlowRateStress - Total Pressure #####################################################
 ###################################################################################################
 
 [MultiScale]
-couplingName           = FluxStess_TotalPressure
+couplingName           = FlowRateStess_TotalPressure
 stressType             = TotalPressure
 timeInterpolationOrder = 1

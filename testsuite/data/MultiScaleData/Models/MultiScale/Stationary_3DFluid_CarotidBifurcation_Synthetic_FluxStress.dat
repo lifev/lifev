@@ -14,7 +14,7 @@
 
 [MultiScale] ######################################################################################
 ###################################################################################################
-modelName        = 'Synthetic Carotid Bifurcation (tube40, Fluid3D), Stress'
+modelName        = 'Synthetic Carotid Bifurcation (tube40, Fluid3D), FlowRateStress'
 modelType        = MultiScale
 couplingFlags    = ' '
 
@@ -39,11 +39,11 @@ models = '
 ########### ID #### Type ############## File (without .dat) ########### Models ######## Flags #####
 couplings = '    
             0       BoundaryCondition   CarotidBifurcationFlux_Dynamic  0               0
-            1       FluxStress          LagrangeMultiplier              1,0             0,1
-            2       FluxStress          LagrangeMultiplier              2,4             0,1
-            3       FluxStress          LagrangeMultiplier              3,5             0,1
+            1       FlowRateStress      LagrangeMultiplier              1,0             0,1
+            2       FlowRateStress      LagrangeMultiplier              2,4             0,1
+            3       FlowRateStress      LagrangeMultiplier              3,5             0,1
             4       BoundaryCondition   NoStress                        2,3             1,1
-            5       FluxStress          LagrangeMultiplier              4,1,5           0,1,0
+            5       FlowRateStress      LagrangeMultiplier              4,1,5           0,1,0
             '
 ###################################################################################################
 

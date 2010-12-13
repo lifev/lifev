@@ -9,12 +9,12 @@
 #  License Terms: GNU GPL
 #
 ###################################################################################################
-### MODEL: MultiScale - Womersley: Five cylinders (Fluid3D) - FluxStress ##########################
+### MODEL: MultiScale - Womersley: Five cylinders (Fluid3D) - FlowRateStress ######################
 ###################################################################################################
 
 [MultiScale] ######################################################################################
 ###################################################################################################
-modelName        = 'Womersley: Five cylinders (tube60 - Fluid3D), FluxStress'
+modelName        = 'Womersley: Five cylinders (tube60 - Fluid3D), FlowRateStress'
 modelType        = MultiScale
 couplingFlags    = ' '
 
@@ -38,10 +38,10 @@ models = '
 ########### ID #### Type ############## File (without .dat) ########### Models ######## Flags #####
 couplings = '    
             0       BoundaryCondition   WomersleySinusoidalFlux         0               0
-            1       FluxStress          LagrangeMultiplier              1,0             0,1
-            2       FluxStress          LagrangeMultiplier              2,1             0,1
-            3       FluxStress          LagrangeMultiplier              3,2             0,1
-            4       FluxStress          LagrangeMultiplier              4,3             0,1
+            1       FlowRateStress      LagrangeMultiplier              1,0             0,1
+            2       FlowRateStress      LagrangeMultiplier              2,1             0,1
+            3       FlowRateStress      LagrangeMultiplier              3,2             0,1
+            4       FlowRateStress      LagrangeMultiplier              4,3             0,1
             5       BoundaryCondition   NoStress                        4               1
             '
 ###################################################################################################

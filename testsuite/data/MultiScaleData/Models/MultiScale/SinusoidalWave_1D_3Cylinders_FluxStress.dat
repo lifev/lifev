@@ -14,7 +14,7 @@
 
 [MultiScale] ######################################################################################
 ###################################################################################################
-modelName        = 'Two Cylinder (OneDimensional, FluxStress)'
+modelName        = 'Two Cylinder (OneDimensional, FlowRateStress)'
 modelType        = MultiScale
 couplingFlags    = ' '
 
@@ -36,8 +36,8 @@ models = '
 ########### ID #### Type ############## File (without .dat) ########### Models ######## Flags #####
 couplings = '    
             0       BoundaryCondition   SinusoidalFluxWave              0               0
-            1       FluxStress          StaticPressure                  1,0             0,1
-            2       FluxStress          StaticPressure                  2,1             0,1
+            1       FlowRateStress      StaticPressure                  1,0             0,1
+            2       FlowRateStress      StaticPressure                  2,1             0,1
             3       BoundaryCondition   Absorbing_1D_right              2               1
             '
 ###################################################################################################

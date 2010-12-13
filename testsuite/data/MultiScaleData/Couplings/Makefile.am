@@ -23,7 +23,7 @@
 SUFFIXES	= .cpp .hpp .idl .c .h .f .F .o .moc
 
 SUBDIRS		= 	BoundaryCondition\
-				FluxStress\
+				FlowRateStress\
 				Stress
 
 dist_pkgdata_DATA = 

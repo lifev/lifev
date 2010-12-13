@@ -9,10 +9,10 @@
 #  License Terms: GNU GPL
 #
 ###################################################################################################
-### COUPLING: FluxStress - Static Pressure ########################################################
+### COUPLING: FlowRateStress - Static Pressure ####################################################
 ###################################################################################################
 
 [MultiScale]
-couplingName           = FluxStess_StaticPressure
+couplingName           = FlowRateStess_StaticPressure
 stressType             = StaticPressure
 timeInterpolationOrder = 1
