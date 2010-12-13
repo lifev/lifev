@@ -303,6 +303,18 @@ public:
         return M_nbQuadPt;
     };
 
+    //! Getter for the name of the quadrature
+    const std::string& name() const
+    {
+        return M_name;
+    };
+
+    //! Getter for the degree of exactness
+    const UInt& degreeOfExactness() const
+    {
+        return M_degOfExact;
+    };
+
     //@}
 
 
