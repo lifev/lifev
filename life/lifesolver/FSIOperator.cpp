@@ -1,3 +1,4 @@
+/* -*- mode: c++ -*-
 //@HEADER
 /*
 *******************************************************************************
@@ -154,11 +155,10 @@ FSIOperator::~FSIOperator()
 }
 
 
-
-
 // ===================================================
-//! Virtual Methods
+//! Virtual Public Methods
 // ===================================================
+
 void
 FSIOperator::setDataFile( const GetPot& dataFile )
 {
@@ -595,7 +595,7 @@ FSIOperator::imposeFlux( void )
 }
 
 // ===================================================
-//! Public Member Functions
+//! Public Methods
 // ===================================================
 
 

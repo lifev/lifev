@@ -1,3 +1,4 @@
+/* -*- mode: c++ -*-
 //@HEADER
 /*
 *******************************************************************************
@@ -217,7 +218,7 @@ public:
     //@}
 
 
-    /** @name Virtual Methods
+    /** @name Virtual Public Methods
      */
     //@{
 
@@ -249,7 +250,8 @@ public:
     //! sets up the correspondences between the fluid and structure degrees of freedom across the interface.
     /**
        This method introduces a non scalable loop, in DOFInterface3Dto3D. It is preferable to avoid it for massively
-       parallel computetions, using the offline partitioner.
+       parallel computetions, using the offline partitioner. However it is much lighter that the correspondent
+       method for partitioned algorithms.
      */
     virtual void setupDOF();
 
@@ -385,7 +387,7 @@ public:
     static VenantKirchhofSolver< FSIOperator::mesh_Type, SolverTrilinos >*    createLinearStructure() { return new LinearVenantKirchhofSolver< FSIOperator::mesh_Type, SolverTrilinos >(); }
     //@}
 
-    //!@name Public Member Functions
+    //!@name Public Methods
     //@{
     //!Initializes the BDF which should handle the fluid time discretization
     /**

@@ -91,7 +91,7 @@ SolverTrilinos::solve( vector_type& solution, const vector_type& rhs )
     status = M_solver.Iterate(maxiter, mytol);
 
 #ifdef HAVE_LIFEV_DEBUG
-    M_displayer->comm().Barrier();
+    M_displayer->comm()->Barrier();
     M_displayer->leaderPrint( "  o-  Number of iterations = ", M_solver.NumIters());
     M_displayer->leaderPrint( "  o-  Norm of the true residual = ", M_solver.TrueResidual());
     M_displayer->leaderPrint( "  o-  Norm of the true ratio    = ",  M_solver.ScaledResidual());
@@ -110,7 +110,7 @@ SolverTrilinos::solve( vector_type& solution, const vector_type& rhs )
         status      = M_solver.Iterate(maxiter, mytol);
 
 #ifdef HAVE_LIFEV_DEBUG
-        M_displayer->comm().Barrier();
+        M_displayer->comm()->Barrier();
         M_displayer->leaderPrint( "  o-  Second run: number of iterations = ", M_solver.NumIters());
         M_displayer->leaderPrint( "  o-  Norm of the true residual = ",  M_solver.TrueResidual());
         M_displayer->leaderPrint( "  o-  Norm of the true ratio    = ",  M_solver.ScaledResidual());
