@@ -24,3 +24,7 @@ AT_DATA([data],[[
 AT_CHECK([mpirun -n 1 ../../lifefem/test_currentFE -c],[0],[ignore],[ignore])
 AT_CLEANUP
 
+AT_SETUP([test_quadRule])
+AT_KEYWORDS([quadRule])
+AT_CHECK([mpirun -n 1 $abs_top_builddir/testsuite/lifefem/test_quadRule -c],[0],[ignore],[ignore])
+AT_CLEANUP

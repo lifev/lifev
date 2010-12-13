@@ -1,29 +1,44 @@
-/* -*- mode: c++ -*-
-   This program is part of the LifeV library
-   Copyright (C) 2001,2002,2003,2004 EPFL, INRIA, Politecnico di Milano
+//@HEADER
+/*
+*******************************************************************************
 
-   This program is free software; you can redistribute it and/or
-   modify it under the terms of the GNU General Public License
-   as published by the Free Software Foundation; either version 2
-   of the License, or (at your option) any later version.
+    Copyright (C) 2004, 2005, 2007 EPFL, Politecnico di Milano, INRIA
+    Copyright (C) 2010 EPFL, Politecnico di Milano, Emory University
 
-   This program is distributed in the hope that it will be useful,
-   but WITHOUT ANY WARRANTY; without even the implied warranty of
-   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-   GNU General Public License for more details.
+    This file is part of LifeV.
 
-   You should have received a copy of the GNU General Public License
-   along with this program; if not, write to the Free Software
-   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+    LifeV is free software; you can redistribute it and/or modify
+    it under the terms of the GNU Lesser General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    LifeV is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+    Lesser General Public License for more details.
+
+    You should have received a copy of the GNU Lesser General Public License
+    along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
+
+*******************************************************************************
 */
-/* ========================================================
+//@HEADER
+
+/*!
+    @file
+    @brief Quadrature Rule test
+
+	@author Samuel Quinodoz <samuel.quinodoz@epfl.ch>
+    @author Umberto Villa <uvilla@emory.edu>
+    @contributor
+    @maintainer Umberto Villa <uvilla@emory.edu>
+
+    @date 02-03-2010
 
 Definition of all the polynomials we need to integrate to check the degree of exactness.
 The last function is an exponential function to check the convergence rate
 
 
-\author Umberto Villa <uvilla@emory.edu>
-\date 02/03/2010
 */
 
 #include "SetOfFun.hpp"
@@ -142,18 +157,18 @@ default:
 }
 }
 
-std::string SetofFun::name(int fun){
+std::string SetofFun::name(UInt fun){
 	return _name[fun];
 }
 
-int SetofFun::degree(int fun){
+UInt SetofFun::degree(UInt fun){
 	return _degree[fun];
 }
 
-Real SetofFun::ex_int(int fun){
+Real SetofFun::ex_int(UInt fun){
 	return _integral[fun];
 }
 
-int SetofFun::nfun(){return _i;}
+UInt SetofFun::nfun(){return _i;}
 
 } /*end namespace */

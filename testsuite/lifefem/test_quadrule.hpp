@@ -1,41 +1,49 @@
-/* -*- mode: c++ -*-
-   This program is part of the LifeV library
-   Copyright (C) 2001,2002,2003,2004 EPFL, INRIA, Politecnico di Milano
+//@HEADER
+/*
+*******************************************************************************
 
-   This program is free software; you can redistribute it and/or
-   modify it under the terms of the GNU General Public License
-   as published by the Free Software Foundation; either version 2
-   of the License, or (at your option) any later version.
+    Copyright (C) 2004, 2005, 2007 EPFL, Politecnico di Milano, INRIA
+    Copyright (C) 2010 EPFL, Politecnico di Milano, Emory University
 
-   This program is distributed in the hope that it will be useful,
-   but WITHOUT ANY WARRANTY; without even the implied warranty of
-   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-   GNU General Public License for more details.
+    This file is part of LifeV.
 
-   You should have received a copy of the GNU General Public License
-   along with this program; if not, write to the Free Software
-   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+    LifeV is free software; you can redistribute it and/or modify
+    it under the terms of the GNU Lesser General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    LifeV is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+    Lesser General Public License for more details.
+
+    You should have received a copy of the GNU Lesser General Public License
+    along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
+
+*******************************************************************************
 */
-/* ========================================================
+//@HEADER
 
-The main program test the degree of exactness (DoE) and the convergence rate (CR)
-of all the quadrature rule in 3D (Tetrahedra and Hexahedra) or in 2D (Triangles, and soon
-Quadrilaterals).
+/*!
+    @file
+    @brief Quadrature Rule test
 
-NODE: If you want to a new quadrature rule, it will be automatically tested. No modification of the test
-is needed
+	@author Samuel Quinodoz <samuel.quinodoz@epfl.ch>
+    @author Umberto Villa <uvilla@emory.edu>
+    @contributor
+    @maintainer Umberto Villa <uvilla@emory.edu>
+
+    @date 02-03-2010
+
+The program tests the degree of exactness (DoE) and the convergence rate (CR)
+of all the quadrature rule in 3D (Tetrahedra) or in 2D (Triangles).
 
 The code produce the following output:
 
-quadRule_ELEMENT_SHAPE.txt ==> Show the Degree of Exactness of all the quadrature rules on _ELEMENT_SHAPE.
-                               _ELEMENT_SHAPE = Tria (for 2d),  Tetra Hexa (for 3d).
-quadRule_ELEMENT_SHAPE.plt ==> Show the Convergence Rate of all the quadrature rules on _ELEMENT_SHAPE
+quadRuleTetra.txt ==> Show the Degree of Exactness of all the quadrature rules on Tetrahedral elements
+quadRuleTetra.plt ==> Show the Convergence Rate of all the quadrature rules on Tetrahedral elements
                                using gnuplot
-
-\author Umberto Villa <uvilla@emory.edu>
-\date 02/03/2010
-*/
-
+ */
 
 #include <life/lifecore/life.hpp>
 #include <life/lifefem/quadRule.hpp>
@@ -45,14 +53,17 @@ quadRule_ELEMENT_SHAPE.plt ==> Show the Convergence Rate of all the quadrature r
 namespace LifeV
 {
 
+typedef std::vector<QuadRule const *> container_Type;
+typedef container_Type::const_iterator constIterator_Type;
+
 // This function checks the DEGREE of Exactness (DoE) of the quadrature rules
 template<typename Mesh>
-bool quad_check_doe(const RefFE &refFE, const GeoMap & geoMap, const std::vector<QuadRule*> &allQuad, std::string output_file)
+bool quad_check_doe(const RefFE &refFE, const GeoMap & geoMap, const container_Type &allQuad, std::string output_file)
 {
 
 	Mesh aMesh;
 	UInt nEl(1);
-	regularMesh3D( aMesh, 0, nEl, nEl, nEl);
+	regularMesh3D( aMesh, 1, nEl, nEl, nEl);
 
     SetofFun fct;
     int nquadrule = allQuad.size();
@@ -61,34 +72,35 @@ bool quad_check_doe(const RefFE &refFE, const GeoMap & geoMap, const std::vector
     std::ofstream ofile(output_file.c_str());
 
 
-    for(int nqr = 0; nqr<nquadrule; ++nqr){
+    for(UInt nqr(0); nqr<nquadrule; ++nqr)
+    {
 
     	CurrentFE fe(refFE,geoMap, *allQuad[nqr]);
     	ofile<<"*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_"<<std::endl;
     	ofile<<allQuad[nqr]->name()<<std::endl;
-    	ofile<<"Degree of Exactness: "<<allQuad[nqr]->degOfExact()<<std::endl;
+    	ofile<<"Degree of Exactness: "<<allQuad[nqr]->degreeOfExactness()<<std::endl;
     	ofile<<"*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_"<<std::endl;
 
     	ofile<<"polynomial \t\t test \t quadrature error"<<std::endl;
 
-    	for(UInt fun = 0; static_cast<int>(fun)<fct.nfun(); ++fun){
+    	for(UInt fun(0); fun<fct.nfun(); ++fun)
+    	{
     		Real integral = 0.;
     		for(UInt i=1; i<=aMesh.numElements(); ++i)
     			{
         		fe.updateJacQuadPt(aMesh.element(i));
-     			int ig;
      			Real s = 0., x, y, z;
-     			for ( ig = 0;ig < fe.nbQuadPt;ig++ )
-     				{
+     			for ( UInt ig(0); ig < fe.nbQuadPt(); ++ig )
+     			{
         			fe.coorQuadPt( x, y, z, ig );
         			s += fct.val( fun, x, y, z) * fe.weightDet( ig );
-     				}
+     			}
         		integral+=s;
     			}
 		Real err;
 		err = integral-fct.ex_int(fun);
 		// Check for Quadrature Rule Errors
-		if (fct.degree(fun) <= allQuad[nqr]->degOfExact())
+		if (fct.degree(fun) <= allQuad[nqr]->degreeOfExactness())
 		{
 			if (fabs(err)<1e-9)
 			{
@@ -110,12 +122,12 @@ bool quad_check_doe(const RefFE &refFE, const GeoMap & geoMap, const std::vector
 
 // This function checks the convergence rate (CR) of the quadrature rules
 template<typename Mesh>
-bool quad_check_cr(	const RefFE &refFE, const GeoMap & geoMap, const std::vector<QuadRule*> &allQuad, std::string output_name)
+bool quad_check_cr(	const RefFE &refFE, const GeoMap & geoMap, const container_Type &allQuad, std::string output_name)
 {
 	SetofFun fct;
 	int fun(fct.nfun());
 
-	int nrefine(5);
+	int nrefine(4);
 	Vector h(nrefine);
 
 	for (int i=0;i<nrefine;++i)
@@ -128,7 +140,7 @@ bool quad_check_cr(	const RefFE &refFE, const GeoMap & geoMap, const std::vector
 
 		Mesh aMesh;
 		UInt nEl( pow(2.0,static_cast<double>(iref) ) );
-		regularMesh3D( aMesh, 0, nEl, nEl, nEl);
+		regularMesh3D( aMesh, 1, nEl, nEl, nEl);
 
 	    err(iref,0) = h(iref);
 	    for(int iqr = 0; iqr<nquadrule; ++iqr){
@@ -141,17 +153,16 @@ bool quad_check_cr(	const RefFE &refFE, const GeoMap & geoMap, const std::vector
 		CurrentFE fe(refFE,geoMap, *allQuad[iqr]);
 			Real integral = 0.;
 			for(UInt i=1; i<=aMesh.numElements(); ++i)
-	    			{
-	        		fe.updateJacQuadPt(aMesh.element(i));
-	     			int ig;
-	     			Real s = 0., x, y, z;
-	     			for ( ig = 0;ig < fe.nbQuadPt;ig++ )
-	     				{
-	        			fe.coorQuadPt( x, y, z, ig );
-	        			s += fct.val( fun, x, y, z) * fe.weightDet( ig );
-	     				}
-	        		integral+=s;
-	    			}
+	    	{
+	        	fe.updateJacQuadPt(aMesh.element(i));
+	     		Real s = 0., x, y, z;
+	     		for ( UInt ig(0); ig < fe.nbQuadPt(); ++ig )
+	     		{
+	        		fe.coorQuadPt( x, y, z, ig );
+	        		s += fct.val( fun, x, y, z) * fe.weightDet( ig );
+	     		}
+	        	integral+=s;
+	    	}
 			err(iref,iqr+1) = fabs(integral-fct.ex_int(fun));
 
 
@@ -181,7 +192,7 @@ bool quad_check_cr(	const RefFE &refFE, const GeoMap & geoMap, const std::vector
 	ofile<<"\""<<output_name<<".dat\" using 1:($1**6) with lines title 'order 6'";
 	}
 
-		return 0;
+		return true;
 
 }
 

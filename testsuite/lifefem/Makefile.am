@@ -16,10 +16,10 @@ SUFFIXES                   = .cpp .hpp .idl .c .h .f .F .o .moc
 
 check_HEADERS              = test_quadrule.hpp SetOfFun.hpp
 
-check_PROGRAMS             = test_currentFE test_quadrule
+check_PROGRAMS             = test_currentFE test_quadRule
 
 test_currentFE_SOURCES  = main.cpp # List of all the cpp files
-test_quadrule_SOURCES   = test_quadrule.cpp SetOfFun.cpp
+test_quadRule_SOURCES   = test_quadrule.cpp SetOfFun.cpp
 
 EXTRA_DIST = data.txt testsuite.at
 

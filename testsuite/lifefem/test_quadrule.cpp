@@ -1,40 +1,49 @@
-/* -*- mode: c++ -*-
-   This program is part of the LifeV library
-   Copyright (C) 2001,2002,2003,2004 EPFL, INRIA, Politecnico di Milano
+//@HEADER
+/*
+*******************************************************************************
 
-   This program is free software; you can redistribute it and/or
-   modify it under the terms of the GNU General Public License
-   as published by the Free Software Foundation; either version 2
-   of the License, or (at your option) any later version.
+    Copyright (C) 2004, 2005, 2007 EPFL, Politecnico di Milano, INRIA
+    Copyright (C) 2010 EPFL, Politecnico di Milano, Emory University
 
-   This program is distributed in the hope that it will be useful,
-   but WITHOUT ANY WARRANTY; without even the implied warranty of
-   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-   GNU General Public License for more details.
+    This file is part of LifeV.
 
-   You should have received a copy of the GNU General Public License
-   along with this program; if not, write to the Free Software
-   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+    LifeV is free software; you can redistribute it and/or modify
+    it under the terms of the GNU Lesser General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    LifeV is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+    Lesser General Public License for more details.
+
+    You should have received a copy of the GNU Lesser General Public License
+    along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
+
+*******************************************************************************
 */
-/* ========================================================
+//@HEADER
+
+/*!
+    @file
+    @brief Quadrature Rule test
+
+	@author Samuel Quinodoz <samuel.quinodoz@epfl.ch>
+    @author Umberto Villa <uvilla@emory.edu>
+    @contributor
+    @maintainer Umberto Villa <uvilla@emory.edu>
+
+    @date 02-03-2010
 
 The program tests the degree of exactness (DoE) and the convergence rate (CR)
-of all the quadrature rule in 3D (Tetrahedra and Hexahedra) or in 2D (Triangles, and soon
-Quadrilaterals).
-
-NOTE: If you want to add a new quadrature rule, it will be automatically tested. No modification of the test
-is needed
+of all the quadrature rule in 3D (Tetrahedra) or in 2D (Triangles).
 
 The code produce the following output:
 
-quadRule_ELEMENT_SHAPE.txt ==> Show the Degree of Exactness of all the quadrature rules on _ELEMENT_SHAPE.
-                               _ELEMENT_SHAPE = Tria (for 2d),  Tetra Hexa (for 3d).
-quadRule_ELEMENT_SHAPE.plt ==> Show the Convergence Rate of all the quadrature rules on _ELEMENT_SHAPE
+quadRuleTetra.txt ==> Show the Degree of Exactness of all the quadrature rules on Tetrahedral elements
+quadRuleTetra.plt ==> Show the Convergence Rate of all the quadrature rules on Tetrahedral elements
                                using gnuplot
-
-\author Umberto Villa <uvilla@emory.edu>
-\date 02/03/2010
-*/
+ */
 
 #ifdef HAVE_MPI
 #include <mpi.h>
@@ -59,10 +68,10 @@ int main(int argc, char** argv)
     MPI_Init( &argc, &argv );
 	#endif
 
-    bool check(true);
-    GetPot command_line(argc,argv);
+    bool checkGlobal(true), check(true);
 
-    std::vector<QuadRule*> allQuadRuleTetra;
+    // All the quadrature rules for tetrahedra
+    container_Type allQuadRuleTetra;
     allQuadRuleTetra.reserve(5);
     allQuadRuleTetra.push_back(&quadRuleTetra1pt);
     allQuadRuleTetra.push_back(&quadRuleTetra4pt);
@@ -70,12 +79,41 @@ int main(int argc, char** argv)
     allQuadRuleTetra.push_back(&quadRuleTetra15pt);
     allQuadRuleTetra.push_back(&quadRuleTetra64pt);
 
+    // All the quadrature rules for triangles
+    container_Type allQuadRuleTria;
+    allQuadRuleTria.reserve(5);
+    allQuadRuleTria.push_back(&quadRuleTria1pt);
+    allQuadRuleTria.push_back(&quadRuleTria3pt);
+    allQuadRuleTria.push_back(&quadRuleTria4pt);
+    allQuadRuleTria.push_back(&quadRuleTria6pt);
+    allQuadRuleTria.push_back(&quadRuleTria7pt);
+
+    // All the quadrature rules for segments
+    container_Type allQuadRuleSegments;
+    allQuadRuleSegments.reserve(3);
+    allQuadRuleSegments.push_back(&quadRuleSeg1pt);
+    allQuadRuleSegments.push_back(&quadRuleSeg2pt);
+    allQuadRuleSegments.push_back(&quadRuleSeg3pt);
+
     // Check Quadrature Rule on Tetrahedra
-    std::string data_file_name = command_line.follow("data", 2, "-f","--file");
+    check = quad_check_doe< RegionMesh3D<LinearTetra> >(feTetraP1, geoLinearTetra, allQuadRuleTetra, "quadRuleTetra");
+    checkGlobal = checkGlobal & check;
+    check = quad_check_cr< RegionMesh3D<LinearTetra> >(feTetraP1, geoLinearTetra, allQuadRuleTetra, "quadRuleTetra");
+    checkGlobal = checkGlobal & check;
 
-    check = quad_check_doe< RegionMesh3D<LinearTetra> >(feTetraP2, geoLinearTetra, allQuadRuleTetra, "quadRuleTetra");
+    // Check the quadrature rules for triangles
+    for(constIterator_Type it(allQuadRuleTria.begin()); it != allQuadRuleTria.end(); ++it)
+    {
+    	check = (*it)->degreeOfExactness() == (*it)->checkExactness();
+    	checkGlobal = checkGlobal & check;
+    }
 
-    quad_check_cr< RegionMesh3D<LinearTetra> >(feTetraP2, geoLinearTetra, allQuadRuleTetra, "quadRuleTetra");
+    // Check the quadrature rules for triangles
+    for(constIterator_Type it(allQuadRuleSegments.begin()); it != allQuadRuleSegments.end(); ++it)
+    {
+    	check = (*it)->degreeOfExactness() == (*it)->checkExactness();
+    	checkGlobal = checkGlobal & check;
+    }
 
     #ifdef HAVE_MPI
     std::cout << "MPI Finalization" << std::endl;
