@@ -96,29 +96,6 @@ EpetraPreconditioner::ApplyInverse( const Epetra_MultiVector& /*vector1*/, Epetr
     return 0;
 }
 
-bool
-EpetraPreconditioner::UseTranspose()
-{
-    assert( false );
-    return false;
-}
-
-const Epetra_Map&
-EpetraPreconditioner::OperatorRangeMap() const
-{
-    assert( false );
-    Epetra_Map *emptyMapPtr( NULL );
-    return *emptyMapPtr;
-}
-
-const Epetra_Map&
-EpetraPreconditioner::OperatorDomainMap() const
-{
-    assert( false );
-    Epetra_Map *emptyMapPtr( NULL );
-    return *emptyMapPtr;
-}
-
 void
 EpetraPreconditioner::showMe( std::ostream& output ) const
 {
@@ -159,6 +136,29 @@ EpetraPreconditioner::list_Type&
 EpetraPreconditioner::list()
 {
     return M_list;
+}
+
+bool
+EpetraPreconditioner::UseTranspose()
+{
+    assert( false );
+    return false;
+}
+
+const Epetra_Map&
+EpetraPreconditioner::OperatorRangeMap() const
+{
+    assert( false );
+    Epetra_Map *emptyMapPtr( NULL );
+    return *emptyMapPtr;
+}
+
+const Epetra_Map&
+EpetraPreconditioner::OperatorDomainMap() const
+{
+    assert( false );
+    Epetra_Map *emptyMapPtr( NULL );
+    return *emptyMapPtr;
 }
 
 } // namespace LifeV

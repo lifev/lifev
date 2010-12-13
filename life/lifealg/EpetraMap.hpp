@@ -63,14 +63,20 @@
 
 namespace LifeV
 {
-////////////////////////////////////////////////////////////////
-//
-//  Epetra Matrix format Wrapper
-//
-///////////////////////////////////////////////////////////////
 
 enum EpetraMapType {Unique = 0, Repeated};
 
+
+//! EpetraMap - Wrapper for Epetra_Map
+/*!
+  @author Gilles Fourestey <gilles.fourestey@epfl.ch>
+  @author Simone Deparis <simone.deparis@epfl.ch>
+  @author Gwenol Grandperrin <gwenol.grandperrin@epfl.ch>
+
+  The EpetraMap class provides a general interface for the Epetra_Map class of Trilinos.
+
+  Visit http://trilinos.sandia.gov for more informations about Epetra_Map.
+ */
 class EpetraMap
 {
 public:
@@ -90,65 +96,109 @@ public:
     //! @name Constructors & Destructor
     //@{
 
-    //! Default Constructor
+    //! Empty Constructor
     EpetraMap();
-    // epetra map constructor. To define a linear map, set MyGlobalElements = 0
+
+    //! Constructor
+    /*!
+      To define a linear map, set MyGlobalElements = 0
+      @param numGlobalElements Number of global elements
+      @param numMyElements Number of local elements
+      @param myGlobalElements Array of Id of the local element
+      @param indexBase Starting index base (typically 0 or 1)
+      @param commPtr Pointer to the communicator
+    */
     EpetraMap( Int  numGlobalElements,
                Int  numMyElements,
                Int* myGlobalElements,
                Int  indexBase,
                const comm_ptrtype& commPtr );
 
-    //! Build a nearly equally distributed map.
+    //! Constructor
     /*!
-     *  The map is equally distributed if NumGlobalElements % Rank = 0
-     *  @param NumGlobalElements - Total number of elements inside the map
-     *  @param indexBase - Starting index base (typically 0 or 1)
-     *  @param CommPtr - a pointer to the Epetra communicator
+      Build a nearly equally distributed map.
+
+      The map is equally distributed if NumGlobalElements % Rank = 0
+      @param NumGlobalElements Total number of elements inside the map
+      @param indexBase Starting index base (typically 0 or 1)
+      @param CommPtr A pointer to the Epetra communicator
      */
     EpetraMap( const Int numGlobalElements,
                const Int indexBase,
                const comm_ptrtype& commPtr );
 
+    //! Constructor
+    /*!
+      @param size Size of the map
+      @param commPtr Pointer to the communicator
+     */
     EpetraMap( const Int           size,
                const comm_ptrtype& commPtr );
 
-    // Calls createImportExport from setUp()
+    //! Constructor
+    /*!
+      Calls createImportExport from setUp()
+      @param refFE Reference finite element
+      @param meshPart Partition of the mesh
+      @param commPtr Pointer to the communicator
+     */
     template<typename Mesh>
     EpetraMap( const RefFE&               refFE,
                const partitionMesh<Mesh>& meshPart,
                const comm_ptrtype&        commPtr );
 
-    // Calls createImportExport from setUp()
+    //! Constructor
+    /*!
+      Calls createImportExport from setUp()
+      @param refFE Reference finite element
+      @param mesh Mesh
+      @param commPtr Pointer to the communicator
+    */
     template<typename Mesh>
     EpetraMap( const RefFE&         refFE,
                const Mesh&          mesh,
                const comm_ptrtype&  commPtr );
 
+    //! Copy constructor
+    /*!
+      @param epetraMap An EpetraMap object
+     */
     EpetraMap( const EpetraMap&  epetraMap );
 
-    /*! Builds a submap of map _epetraMap with a given positive offset and
+    //! Constructor
+    /*!
+      Builds a submap of map _epetraMap with a given positive offset and
       the maximum id to consider
-      eg: offset = 2, maxid = 6;
-      _epetraMap = [ 0 2 5 7 8 10 1]
-      this  =      [   0 3 5 6 ]
+
+      e.g:
+      <ol>
+      <li> offset = 2,
+      <li> maxid = 6
+      <li> epetraMap = [ 0 2 5 7 8 10 1 ]
+      <li> this = [ 0 3 5 6 ]
+      </ol>
 
       if needed, indexBase may be changed (default values < 0 means "same as original map")
+      @param blockMap Epetra_BlockMap
+      @param offset Offset to be used to build the map
+      @param maxId Maximum Id
+      @param indexBase Starting index base (typically 0 or 1)
     */
     EpetraMap( const Epetra_BlockMap& blockMap,
                const Int offset,
                const Int maxId,
                Int indexBase = -1 );
-
-    //! Constructor from raw Epetra_Map. This constructor should be used only inside this class,
-    //! therefore it is private
-    /*!
-     * \param map: underlying Epetra_Map
-     */
 private:
+    //! Constructor from raw Epetra_Map
+    /*!
+      This constructor should be used only inside this class,
+      therefore it is private
+      @param map: underlying Epetra_Map
+     */
     EpetraMap( const map_type map );
 
 public:
+    //! Destructor
     ~EpetraMap() {}
 
     //@}
@@ -157,27 +207,57 @@ public:
     //! @name Operators
     //@{
 
-    // The copy operator will copy the pointers of the maps, exporter and importer
-    EpetraMap&         operator  = ( const EpetraMap& epetraMap );
-    EpetraMap&         operator += ( const EpetraMap& epetraMap );
-    EpetraMap          operator +  ( const EpetraMap& epetraMap );
-    EpetraMap&         operator += ( Int const size );
-    EpetraMap          operator +  ( Int const size );
+    //! Assignment operator
+    /*!
+      The assignment operator will copy the pointers of the maps, exporter and importer
+      @param epetraMap EpetraMap to be assigned to the current matrix
+     */
+    EpetraMap& operator  = ( const EpetraMap& epetraMap );
+
+    //! Addition operator
+    /*!
+      The addition operator combines two map together
+      @param epetraMap EpetraMap to be combined with the current map
+     */
+    EpetraMap& operator += ( const EpetraMap& epetraMap );
+
+    //! Addition operator
+    /*!
+      The addition operator combines two map together to create a new map
+      @param epetraMap EpetraMap to be combined with the current map
+     */
+    EpetraMap operator +  ( const EpetraMap& epetraMap );
+
+    //! Addition operator
+    /*!
+      The addition operator create a map of size "size" and add it to the current map.
+      @param size Size of the map to be added to the current map
+     */
+    EpetraMap& operator += ( Int const size );
+
+    //! Addition operator
+    /*!
+      The addition operator create a map of size "size" and add it to the current map
+      to create a new map
+      @param size Size of the map to be added to the current map
+     */
+    EpetraMap operator +  ( Int const size );
 
     //@}
 
     //! @name Methods
     //@{
 
-    //! This methods create a pointer to a EpetraMap that has points only on processor root
+    //! This method creates a pointer to a EpetraMap that has points only on processor root
     /*!
-     * \param this: EpetraMap that selects the relevant points
-     * \param root: processor on which to export all the points
+      @param root processor on which to export all the points
      */
     boost::shared_ptr<EpetraMap> createRootMap( Int const root ) const;
 
+    //! This method return true if both the unique map and the repeated map are identical
     bool MapsAreSimilar( EpetraMap const& epetraMap ) const;
 
+    //! Show informations about the map
     void showMe( std::ostream& output = std::cout ) const;
 
     //@}
@@ -185,16 +265,19 @@ public:
     //! @name Get Methods
     //@{
 
-    //comm_type const& Comm() const { return M_uniqueEpetraMap->Comm(); }
+    //! Return the communicator
     comm_type const& Comm() const { return *M_commPtr; }
+
+    //! Return a shared pointer on the communicator
     comm_ptrtype& CommPtr() { return M_commPtr; }
 
-    //Epetra_Map*        getRepeatedEpetra_Map(){return M_repeatedEpetraMap;}
-
+    //! Return a shared pointer on the internal Epetra_Map
     map_ptrtype const & getMap  ( EpetraMapType mapType ) const;
 
+    //! Getter for the Epetra_Export
     Epetra_Export const& getExporter();
 
+    //! Getter for the Epetra_Import
     Epetra_Import const& getImporter();
 
     //@}
@@ -204,22 +287,49 @@ private:
     //! @name Private Methods
     //@{
 
-    // createMap does not call createImportExport
+    //! Create a map
+    /*!
+      Note: createMap does not call createImportExport
+      @param numGlobalElements Number of global elements of the map
+      @param numMyElements number of local element
+      @param myGlobalElements Array of Id of the global elements of the map
+      @param indexBase Starting index base (typically 0 or 1)
+      @param comm Communicator
+    */
     void createMap( Int   numGlobalElements,
                     Int   numMyElements,
                     Int*  myGlobalElements,
                     Int   indexBase,
                     const comm_type& comm );
 
+    //! Getter for the repeated map
     map_ptrtype const & getRepeatedMap() const { return M_repeatedEpetraMap; }
+
+    //! Getter for the unique map
     map_ptrtype const & getUniqueMap()   const { return M_uniqueEpetraMap; }
 
-
+    //! Reset the internal unique map and recompute it using the repeated map
     void  uniqueMap();
+
+    //! Reset and rebuild the importer and exporter for the map
     void  createImportExport();
+
+    //! Sort the element given using a bubble sort algorithm
+    /*!
+      @param elements Epetra_IntSerialDenseVector vector to be sorted
+     */
     void  bubbleSort( Epetra_IntSerialDenseVector& elements );
 
-    // Calls createImportExport
+    //! Setup a map using the finite element and using nodes, edges, faces and volumes numbering
+    /*!
+      Calls createImportExport
+      @param refFE Reference finite element
+      @param commPtr Pointer on the communicator
+      @param repeatedNodeVector Vector containing the node ids
+      @param repeatedEdgeVector Vector containing the edge ids
+      @param repeatedFaceVector Vector containing the face ids
+      @param repeatedVolumeVector Vector containing the volume ids
+     */
     void setUp( const RefFE&        refFE,
                 const comm_ptrtype& commPtr,
                 std::vector<Int>& repeatedNodeVector,

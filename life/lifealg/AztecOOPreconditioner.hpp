@@ -46,9 +46,9 @@ namespace LifeV
 
 //! AztecOOPreconditioner - The implementation of EpetraPreconditioner for AztecOO preconditioners
 /*!
- *  @author Cristiano Malossi
- *
- *  This class provides the interface for using AztecOO preconditioners with SolverTrilinos.
+  @author Cristiano Malossi <cristinao.malossi@epfl.ch>
+
+  This class provides the interface for using AztecOO preconditioners with SolverTrilinos.
  */
 class AztecOOPreconditioner : public EpetraPreconditioner
 {
@@ -84,23 +84,33 @@ public:
 
     //! Build the preconditioner
     /*!
-     *  @param A the base matrix for computing the preconditioner
+      @param A the base matrix for computing the preconditioner
      */
     Int buildPreconditioner( operator_type& matrix );
 
     //! Reset the preconditioner
     void precReset();
 
-    //! AztecOO preconditioner is set?
-    /*!
-     *  @return true
-     */
+    //! Return true if the AztecOO preconditioner is set
     bool set() const { return M_preconditionerCreated; }
 
-    //! Create the list of parameters
+    //! Create the list of parameters of the preconditioner
+    /*!
+      @param list A Parameter list to be filled
+      @param dataFile A GetPot object containing the data about the preconditioner
+      @param section The section in "dataFile" where to find data about the preconditioner
+      @param subSection The subsection in "dataFile" where to find data about the preconditioner
+     */
     void createList( list_Type& list, const GetPot& dataFile, const std::string& section, const std::string& subSection );
 
+    //! Show informations about the preconditioner
     virtual void showMe( std::ostream& output = std::cout ) const;
+
+    //! Compute the condition number of the preconditioner
+    /*!
+      @return Condition number of the preconditioner
+     */
+    Real Condest();
 
     //@}
 
@@ -108,16 +118,16 @@ public:
     //! @name Set Methods
     //@{
 
-    //! Load parameters from a GetPot files
+    //! Set the data of the preconditioner using a GetPot object
     /*!
-     *  @param dataFile the GetPot file
-     *  @param section the section inside the GetPot file containing the parameters
+      @param dataFile A GetPot object containing the data about the preconditioner
+      @param section The section in "dataFile" where to find data about the preconditioner
      */
     void setDataFromGetPot ( const GetPot& dataFile, const std::string& section );
 
     //! Set the external solver (AztecOO)
     /*!
-     *  @param solver reference to the AztecOO solver
+      @param solver reference to the AztecOO solver
      */
     void setSolver( SolverTrilinos& solver ) { M_solver = &solver; }
 
@@ -127,27 +137,21 @@ public:
     //! @name Get Methods
     //@{
 
-    //! Compute the condition number of the preconditioner
-    /*!
-     *  @return Condition number of the preconditioner
-     */
-    Real Condest();
-
     //! Return the pointer to the preconditioner
     /*!
-     *  @return always zero because no external precondtioner is used here!
+      @return always zero because no external precondtioner is used here!
      */
     super::prec_raw_type* getPrec();
 
     //! Return the shared pointer to the preconditioner
     /*!
-     *  @Deprecated
+      @Deprecated
      */
     super::prec_type  getPrecPtr();
 
     //! Return the name of the preconditioner
     /*!
-     *  @return "AztecOO"
+      @return "AztecOO"
      */
     std::string precType() { return "AztecOO"; }
 

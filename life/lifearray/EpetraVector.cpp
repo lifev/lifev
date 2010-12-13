@@ -267,9 +267,9 @@ EpetraVector::operator=( const Epetra_MultiVector& vector )
 }
 
 EpetraVector&
-EpetraVector::operator=( data_type t )
+EpetraVector::operator=( data_type scalar )
 {
-    M_epetraVector->PutScalar(t);
+    M_epetraVector->PutScalar(scalar);
 
     return *this;
 }
@@ -589,13 +589,13 @@ bool EpetraVector::checkAndSet( const UInt row, const data_type& value, UInt off
     return true;
 }
 
-Int EpetraVector::replaceGlobalValues( std::vector<Int>& rVec, std::vector<Real>& datumVec )
+Int EpetraVector::replaceGlobalValues( std::vector<Int>& rowsVector, std::vector<Real>& valuesVector )
 {
-    ASSERT( rVec.size() == datumVec.size(), "Error: rVec and datumVec should have the same size" );
+    ASSERT( rowsVector.size() == valuesVector.size(), "Error: rowsVector and valuesVector should have the same size" );
     ASSERT( M_mapType == Unique, "Error: Vector must have a unique map" );
 
     // Coding this part by hands, in fact I do not trust the following line (Simone, June 2008)
-    // return M_epetraVector->ReplaceGlobalValues(rVec.size(), &rVec.front(), &datumVec.front());
+    // return M_epetraVector->ReplaceGlobalValues(rowsVector.size(), &rowsVector.front(), &valuesVector.front());
 
     const Epetra_Comm&  Comm( M_epetraVector->Comm() );
     Int numProcs( Comm.NumProc() );
@@ -611,8 +611,8 @@ Int EpetraVector::replaceGlobalValues( std::vector<Int>& rVec, std::vector<Real>
     // loop on all proc
     for ( Int p(0); p < numProcs; p++ )
     {
-        Int sizeVec( static_cast<Int>( rVec.size() ) );
-        if ( sizeVec != static_cast<Int>( datumVec.size() ) )
+        Int sizeVec( static_cast<Int>( rowsVector.size() ) );
+        if ( sizeVec != static_cast<Int>( valuesVector.size() ) )
         { //! vectors must be of the same size
             ERROR_MSG( "diagonalize: vectors must be of the same size\n" );
         }
@@ -621,12 +621,12 @@ Int EpetraVector::replaceGlobalValues( std::vector<Int>& rVec, std::vector<Real>
 
         if ( p == MyPID )
         {
-            r     =  &rVec    .front();
-            datum = &datumVec.front();
+            r     =  &rowsVector.front();
+            datum = &valuesVector.front();
         }
         else
         {
-            r     = new Int     [sizeVec];
+            r     = new Int      [sizeVec];
             datum = new data_type[sizeVec];
         }
 
@@ -716,109 +716,109 @@ EpetraVector::subset( const Epetra_MultiVector& vector,
 }
 
 void
-EpetraVector::MeanValue( Real* res ) const
+EpetraVector::MeanValue( Real* result ) const
 {
-    M_epetraVector->MeanValue(res);
+    M_epetraVector->MeanValue(result);
 }
 
 Real
 EpetraVector::Norm1() const
 {
-    Real res;
-    M_epetraVector->Norm1(&res);
-    return res;
+    Real result;
+    M_epetraVector->Norm1(&result);
+    return result;
 }
 
 void
-EpetraVector::Norm1( Real* res ) const
+EpetraVector::Norm1( Real* result ) const
 {
-    M_epetraVector->Norm1(res);
+    M_epetraVector->Norm1(result);
 }
 
 void
-EpetraVector::Norm1( Real& res ) const
+EpetraVector::Norm1( Real& result ) const
 {
-    M_epetraVector->Norm1(&res);
+    M_epetraVector->Norm1(&result);
 }
 
 Real
 EpetraVector::Norm2() const
 {
-    Real res;
-    M_epetraVector->Norm2(&res);
-    return res;
+    Real result;
+    M_epetraVector->Norm2(&result);
+    return result;
 }
 
 void
-EpetraVector::Norm2( Real* res ) const
+EpetraVector::Norm2( Real* result ) const
 {
-    M_epetraVector->Norm2(res);
+    M_epetraVector->Norm2(result);
 }
 
 void
-EpetraVector::Norm2( Real& res ) const
+EpetraVector::Norm2( Real& result ) const
 {
-    M_epetraVector->Norm2( &res );
+    M_epetraVector->Norm2( &result );
 }
 
 Real
 EpetraVector::NormInf() const
 {
-    Real res;
-    M_epetraVector->NormInf(&res);
-    return res;
+    Real result;
+    M_epetraVector->NormInf(&result);
+    return result;
 }
 
 void
-EpetraVector::NormInf( Real* res ) const
+EpetraVector::NormInf( Real* result ) const
 {
-    M_epetraVector->NormInf(res);
+    M_epetraVector->NormInf(result);
 }
 
 void
-EpetraVector::NormInf( Real& res ) const
+EpetraVector::NormInf( Real& result ) const
 {
-    M_epetraVector->NormInf(&res);
+    M_epetraVector->NormInf(&result);
 }
 
 Real
 EpetraVector::MinValue() const
 {
-    Real res;
-    M_epetraVector->MinValue(&res);
-    return res;
+    Real result;
+    M_epetraVector->MinValue(&result);
+    return result;
 }
 
 Real
 EpetraVector::MaxValue() const
 {
-    Real res;
-    M_epetraVector->MaxValue(&res);
-    return res;
+    Real result;
+    M_epetraVector->MaxValue(&result);
+    return result;
 }
 
 void
-EpetraVector::MinValue( Real* res ) const
+EpetraVector::MinValue( Real* result ) const
 {
-    M_epetraVector->MinValue(res);
+    M_epetraVector->MinValue(result);
 }
 
 void
-EpetraVector::MaxValue( Real* res ) const
+EpetraVector::MaxValue( Real* result ) const
 {
-    M_epetraVector->MaxValue(res);
+    M_epetraVector->MaxValue(result);
 }
 
 void
-EpetraVector::MinValue( Real& res ) const
+EpetraVector::MinValue( Real& result ) const
 {
-    M_epetraVector->MinValue(&res);
+    M_epetraVector->MinValue(&result);
 }
 
 void
-EpetraVector::MaxValue( Real& res ) const
+EpetraVector::MaxValue( Real& result ) const
 {
-    M_epetraVector->MaxValue(&res);
+    M_epetraVector->MaxValue(&result);
 }
 
 void

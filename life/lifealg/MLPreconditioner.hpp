@@ -44,12 +44,6 @@
 #pragma GCC diagnostic ignored "-Wunused-variable"
 #pragma GCC diagnostic ignored "-Wunused-parameter"
 
-// #include <Ifpack_config.h>
-// #include <Ifpack.h>
-// #include <Ifpack_Preconditioner.h>
-// #include <Ifpack_AdditiveSchwarz.h>
-// #include <Ifpack_Amesos.h>
-// #include <Ifpack_ILU.h>
 #include <ml_MultiLevelPreconditioner.h>
 
 // Tell the compiler to ignore specific kind of warnings:
@@ -64,6 +58,10 @@
 namespace LifeV
 {
 
+//! MLPreconditioner - Class of multilevels preconditioner
+/*!
+  @author Simone Deparis   <simone.deparis@epfl.ch>
+*/
 class MLPreconditioner:
         public EpetraPreconditioner
 {
@@ -85,14 +83,16 @@ public:
 
     //! @name Constructors & Destructor
     //@{
-    //! default constructor.
+    //! Empty constructor.
     MLPreconditioner();
 
     //! destructor.
     ~MLPreconditioner();
 
-    //! constructor from matrix A.
-    //! @param A EpetraMatrix<Real> matrix upon which construct the preconditioner
+    //! Constructor from a matrix
+    /*!
+      @param matrix Matrix upon which construct the preconditioner
+    */
     MLPreconditioner( operator_type& matrix );
 
     //@}
@@ -100,36 +100,66 @@ public:
     //! @name Methods
     //@{
 
+    //! Build a preconditioner based on the given matrix
+    /*!
+      @param matrix Matrix upon which construct the preconditioner
+     */
     Int buildPreconditioner( operator_type& matrix );
 
+    //! Reset the preconditioner
     void precReset();
 
+    //! ?
     void testSmoothers( operator_type& matrix );
 
-    //! returns true if prec exists
-    /*const*/
+    //! Returns true if the preconditioner is set
     bool  set() const {return M_preconditioner;}
 
+    //! Create the list of parameters of the preconditioner
+    /*!
+      @param list A Parameter list to be filled
+      @param dataFile A GetPot object containing the data about the preconditioner
+      @param section The section in "dataFile" where to find data about the preconditioner
+      @param subSection The subsection in "dataFile" where to find data about the preconditioner
+     */
     virtual void createList( list_Type& list,
-                             const GetPot&      dataFile,
+                             const GetPot& dataFile,
                              const std::string& section,
                              const std::string& subSection ) { createMLList( list, dataFile, section, subSection ); }
 
-    static void createMLList( list_Type&   list,
-                              const GetPot&      dataFile,
+    //! Create the list of parameters of the preconditioner
+    /*!
+      @param list A Parameter list to be filled
+      @param dataFile A GetPot object containing the data about the preconditioner
+      @param section The section in "dataFile" where to find data about the preconditioner
+      @param subSection The subsection in "dataFile" where to find data about the preconditioner
+     */
+    static void createMLList( list_Type& list,
+                              const GetPot& dataFile,
                               const std::string& section,
                               const std::string& subSection = "ML" );
 
+    //! Apply the inverse of the preconditioner on vector1 and store the result in vector2
+    /*!
+      @param vector1 Vector to which we apply the preconditioner
+      @param vector2 Vector to the store the result
+     */
     virtual Int ApplyInverse( const Epetra_MultiVector& vector1, Epetra_MultiVector& vector2 ) const
     {
         return M_preconditioner->ApplyInverse( vector1, vector2 );
     }
 
+    //! Apply the preconditioner on vector1 and store the result in vector2
+    /*!
+      @param vector1 Vector to which we apply the preconditioner
+      @param vector2 Vector to the store the result
+     */
     virtual Int Apply( const Epetra_MultiVector& vector1, Epetra_MultiVector& vector2 ) const
     {
         return M_preconditioner->Apply( vector1, vector2 );
     }
 
+    //! Show informations about the preconditioner
     virtual void showMe( std::ostream& output = std::cout ) const;
 
     //@}
@@ -138,9 +168,18 @@ public:
     //! @name Set Methods
     //@{
 
+    //! Set the data of the preconditioner using a GetPot object
+    /*!
+      @param dataFile A GetPot object containing the data about the preconditioner
+      @param section The section in "dataFile" where to find data about the preconditioner
+     */
     void setDataFromGetPot ( const GetPot&      dataFile,
                              const std::string& section );
 
+    //! Set the matrix to be used transposed (or not)
+    /*!
+      @param useTranspose If true the preconditioner is transposed
+     */
     Int SetUseTranspose( bool useTranspose=false ) { return M_preconditioner->SetUseTranspose(useTranspose); }
 
     //@}
@@ -149,19 +188,26 @@ public:
     //! @name Get Methods
     //@{
 
+    //! Return An estimation of the condition number of the preconditioner
     Real Condest ();
 
+    //! Return a raw pointer on the preconditioner
     super::prec_raw_type* getPrec();
 
+    //! Return a shared pointer on the preconditioner
     super::prec_type getPrecPtr() { return M_preconditioner; }
 
+    //! Return the type of preconditioner
     std::string precType() { return M_precType; }
 
-    bool UseTranspose(  ) { return M_preconditioner->UseTranspose(); }
+    //! Return true if the preconditioner is transposed
+    bool UseTranspose() { return M_preconditioner->UseTranspose(); }
 
+    //! Return the Range map of the operator
     const Epetra_Map & OperatorRangeMap() const
     { return M_preconditioner->OperatorRangeMap(); }
 
+    //! Return the Domain map of the operator
     const Epetra_Map & OperatorDomainMap() const
     { return M_preconditioner->OperatorDomainMap(); }
 

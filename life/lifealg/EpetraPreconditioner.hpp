@@ -62,6 +62,10 @@ namespace LifeV
 // Forward declaration
 class SolverTrilinos;
 
+//! EpetraPreconditioner - Abstract preconditioner class
+/*!
+  @author Simone Deparis   <simone.deparis@epfl.ch>
+*/
 class EpetraPreconditioner
 {
 public:
@@ -86,13 +90,20 @@ public:
     //! @name Constructors & Destructor
     //@{
 
-    //! Default constructor.
+    //! Constructor
+    /*!
+      @param comm Comminicator
+     */
     EpetraPreconditioner( const comm_PtrType& comm = comm_PtrType() );
 
-    /** Copy constructor*/
+    //! Copy constructor
+    /*!
+      @param preconditioner EpetraPreconditioner
+      @param comm Comminicator
+     */
     EpetraPreconditioner( const EpetraPreconditioner& preconditioner, const comm_PtrType& comm = comm_PtrType() );
 
-    //! Default virtual destructor
+    //! Destructor
     virtual ~EpetraPreconditioner();
 
     //@}
@@ -101,22 +112,31 @@ public:
     //! @name Methods
     //@{
 
-    virtual void createList( list_Type& list, const GetPot& dataFile, const std::string& section, const std::string& subSection ) = 0;
-
-    //! Build the preconditioner
+     //! Create the list of parameters of the preconditioner
     /*!
-     *  @param A the base matrix for computing the preconditioner
+      @param list A Parameter list to be filled
+      @param dataFile A GetPot object containing the data about the preconditioner
+      @param section The section in "dataFile" where to find data about the preconditioner
+      @param subSection The subsection in "dataFile" where to find data about the preconditioner
+     */
+    virtual void createList( list_Type& list,
+                             const GetPot& dataFile,
+                             const std::string& section,
+                             const std::string& subSection ) = 0;
+
+    //! Build a preconditioner based on the given matrix
+    /*!
+      @param matrix Matrix upon which construct the preconditioner
      */
     virtual Int buildPreconditioner( operator_type& matrix ) = 0;
 
+    //! Reset the preconditioner
     virtual void precReset() = 0;
 
-    //! Compute the condition number of the preconditioner
-    /*!
-     *  @return Condition number of the preconditioner
-     */
+    //! Return An estimation of the condition number of the preconditioner
     virtual Real Condest() = 0;
 
+    //! Show informations about the preconditioner
     virtual void showMe( std::ostream& output = std::cout ) const;
 
     //@}
@@ -125,17 +145,25 @@ public:
     //! @name Epetra Operator Interface Methods
     //@{
 
+    //! Set the matrix to be used transposed (or not)
+    /*!
+      @param useTranspose If true the preconditioner is transposed
+     */
     virtual Int SetUseTranspose( const bool useTranspose = false );
 
+    //! Apply the inverse of the preconditioner on vector1 and store the result in vector2
+    /*!
+      @param vector1 Vector to which we apply the preconditioner
+      @param vector2 Vector to the store the result
+     */
     virtual Int Apply( const Epetra_MultiVector& vector1, Epetra_MultiVector& vector2 ) const;
 
+    //! Apply the inverse of the preconditioner on vector1 and store the result in vector2
+    /*!
+      @param vector1 Vector to which we apply the preconditioner
+      @param vector2 Vector to the store the result
+     */
     virtual Int ApplyInverse( const Epetra_MultiVector& vector1, Epetra_MultiVector& vector2 ) const;
-
-    virtual bool UseTranspose();
-
-    virtual const Epetra_Map& OperatorRangeMap() const;
-
-    virtual const Epetra_Map& OperatorDomainMap() const;
 
     //@}
 
@@ -143,10 +171,24 @@ public:
     //! @name Set Methods
     //@{
 
+    //! The the internal list
+    /*!
+      @param list List to be set into the preconditioner
+     */
     void setList( const list_Type& list );
 
+    //! Set the data of the preconditioner using a GetPot object
+    /*!
+      @param dataFile A GetPot object containing the data about the preconditioner
+      @param section The section in "dataFile" where to find data about the preconditioner
+     */
     virtual void setDataFromGetPot ( const GetPot& dataFile, const std::string& section ) = 0;
 
+    //! Set the internal solver
+    /*!
+      Note: the argument is unused
+      @param solver SolverTrilinos
+     */
     virtual void setSolver( SolverTrilinos& /*solver*/ );
 
     //@}
@@ -155,35 +197,35 @@ public:
     //! @name Get Methods
     //@{
 
-    //! Return if the preconditioner has been created
-    /*!
-     *  @return true if the preconditioner has been created.
-     */
+    //! Return true if the preconditioner has been created
     const bool& preconditionerCreated();
 
-    //! Preconditioner is set?
-    /*!
-     *  @return true
-     */
+    //! Return true if the preconditioner is set
     virtual bool set() const = 0;
 
-    /** Get a standard pointer to the preconditioner. In most of the cases is more safe to use getPrecPtr(), which
-     returns a boost::shared_ptr*/
+    //! Return a raw pointer on the preconditioner
     virtual prec_raw_type* getPrec() = 0;
 
-    /** get a boost::shared_ptr to the preconditioner. The only requirement on the preconditioner is that
-     it must derive from the Epetra_Operator object*/
+    //! Return a shared pointer on the preconditioner
     virtual prec_type getPrecPtr() = 0;
 
-    //! Return the type name of the preconditioner.
-    /*!
-     *  @return type of the preconditioner
-     */
+    //! Return the type of preconditioner
     virtual std::string precType() = 0;
 
+    //! Return the parameters list
     const list_Type& getList() const;
 
+    //! Return the parameters list
     list_Type& list();
+
+    //! Return true if the preconditioner is transposed
+    virtual bool UseTranspose();
+
+    //! Return the Range map of the operator
+    virtual const Epetra_Map& OperatorRangeMap() const;
+
+    //! Return the Domain map of the operator
+    virtual const Epetra_Map& OperatorDomainMap() const;
 
     //@}
 

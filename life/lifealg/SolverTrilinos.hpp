@@ -73,19 +73,14 @@
 
 namespace LifeV
 {
-// namespace Epetra
-// {
-/*!
-  \class SolverTrilinos
-  \brief wrap trilinos linear solvers
 
+//! SolverTrilinos - Class to wrap linear solver
+/*!
   By default the solver is gmres and the preconditioner is ilu.
 
-  \author Simone Deparis   <simone.deparis@epfl.ch>
-  \author Gilles Fourestey <gilles.fourestey@epfl.ch>
-  @see
+  @author Simone Deparis   <simone.deparis@epfl.ch>
+  @author Gilles Fourestey <gilles.fourestey@epfl.ch>
 */
-
 class SolverTrilinos
 {
 public:
@@ -111,7 +106,13 @@ public:
     //! @name Constructors & Destructor
     //@{
 
+    //! Empty constructor
     SolverTrilinos();
+
+    //! Constructor
+    /*!
+      @param comm Communicator
+     */
     SolverTrilinos( const boost::shared_ptr<Epetra_Comm>& comm );
 
     //@}
@@ -119,61 +120,78 @@ public:
    //! @name Methods
     //@{
 
-    //! solve
-    /*! Solve the problem \f$ A x = b \f$. \c A has been entered via \c setMatrix.
-     *  return the number of iterations, M_maxIter+1 if solve failed.
-     * \param algorithm - MS_Algorithm
+    //! Solve the problem \f$ A x = b \f$.
+    /*!
+      A has been entered via \c setMatrix.
+      @param solution Vector to store the solution
+      @rhs rhs Right hand side of the problem
+      @return Number of iterations, M_maxIter+1 if solve failed.
      */
     Int solve( vector_type& solution, const vector_type& rhs );
 
+    //! Compute the residual
+    /*!
+      @param solution Solution of the system
+      @param rhs Right hand side of the problem
+     */
     Real computeResidual( vector_type& solution, vector_type& rhs );
 
-    // return the Aztec status
+    //! return the Aztec status
     std::string printStatus();
 
     //! Solves the system and returns the number of iterations.
-    /*! The Matrix has already been passed by the method
-        setMatrix or setOperator
-        The preconditioner is build starting from the matrix baseMatrixForPreconditioner
-        by the preconditioner object passed in by the method setPreconditioner
-        @param  rhsFull   right hand side
-        @param  sol       solution
-        @param  baseMatrixForPreconditioner base matrix for the preconditioner construction
+    /*!
+      The Matrix has already been passed by the method
+      setMatrix or setOperator
 
-        returns number of iterations. If negative, the solver did not converge,
-        the preconditioner has been recomputed, and a second solution is tried
+      The preconditioner is build starting from the matrix baseMatrixForPreconditioner
+      by the preconditioner object passed in by the method setPreconditioner
+      @param  rhsFull Right hand side
+      @param  solution vector to store the solution
+      @param  baseMatrixForPreconditioner Base matrix for the preconditioner construction
+      @return number of iterations. If negative, the solver did not converge,
+               the preconditioner has been recomputed, and a second solution is tried
     */
     Int solveSystem( const vector_type& rhsFull,
                      vector_type&       solution,
                      matrix_ptrtype&    baseMatrixForPreconditioner );
 
     //! Solves the system and returns the number of iterations.
-    /*! The Matrix has already been passed by the method
-        setMatrix or setOperator
-        @param  rhsFull   right hand side
-        @param  sol       solution
-        @param  prec      preconditioner to use (templated parameter, can derive from
-    EpetraPreconditioner class or from Epetra_Operator)
+    /*!
+      The Matrix has already been passed by the method
+      setMatrix or setOperator
+      @param  rhsFull Right hand side
+      @param  solution Vector to store the solution
+      @param  preconditionerPtr Pointer on a preconditioner to use (templated parameter, can derive from
+                                EpetraPreconditioner class or from Epetra_Operator)
     */
     template <typename PrecPtrOperator>
     Int solveSystem(  const vector_type& rhsFull,
                       vector_type&       solution,
                       PrecPtrOperator    preconditionerPtr );
 
+    //! Setup the preconditioner
+    /*!
+      @param dataFile GetPot object which contains the data about the preconditioner
+      @param section Section the GetPot structure where to find the informations about the preconditioner
+     */
     void setUpPrec( const GetPot& dataFile, const std::string& section );
 
-    //! builds the preconditioner starting from the matrix baseMatrixForPreconditioner
-    /*! The preconditioner is build starting from the matrix baseMatrixForPreconditioner
-        by the preconditioner object passed in by the method setPreconditioner
-        @param  baseMatrixForPreconditioner base matrix for the preconditioner construction
+    //! Builds the preconditioner starting from the matrix "baseMatrixForPreconditioner"
+    /*!
+      The preconditioner is build starting from the matrix baseMatrixForPreconditioner
+      by the preconditioner object passed in by the method setPreconditioner
+      @param  baseMatrixForPreconditioner Base matrix for the preconditioner construction
     */
     void buildPreconditioner( matrix_ptrtype& baseMatrixForPreconditioner );
 
+    //! Delete the stored preconditioner
     void precReset();
 
-    // Return if preconditioner has been setted
+    //! Return true if preconditioner has been setted
     bool isPrecSet() const;
 
+    //! Print informations about the solver
     void showMe( std::ostream& output = std::cout ) const;
 
     //@}
@@ -182,51 +200,88 @@ public:
     //@{
 
     //! Method to set communicator for Displayer (for empty constructor)
+    /*!
+      @param comm Communicator for the displayer
+     */
     void setCommunicator( const boost::shared_ptr<Epetra_Comm>& comm );
 
     //! Method to set matrix from EpetraMatrix
+    /*!
+      @param matrix Matrix of the system
+     */
     void setMatrix( matrix_type& matrix );
 
-    /** Method to set a general linear operator (of class derived from Epetra_Operator) defining the linear system*/
+    //! Method to set a general linear operator (of class derived from Epetra_Operator) defining the linear system
+    /*!
+      @param oper Operator for the system
+     */
     void setOperator( Epetra_Operator& oper );
 
     //! Method to set an EpetraPreconditioner preconditioner
+    /*!
+      @param preconditioner EpetraPreconditioner to be used to solve the system
+     */
     void setPreconditioner( prec_type& preconditioner );
 
-    /** Method to set a general Epetra_Operator as preconditioner*/
+    //! Method to set a general Epetra_Operator as preconditioner
+    /*!
+      @param preconditioner  Preconditioner to be set of type Epetra_Operator
+     */
     void setPreconditioner( comp_prec_type& preconditioner );
 
+    //! Method to setup the solver using GetPot
+    /*!
+      @param dataFile GetPot object which contains the data about the solver
+     */
     void setDataFromGetPot( const GetPot& dataFile, const std::string& section );
 
+    //! Set the current parameters with the internal parameters list
+    /*!
+      Note: The parameter list is set using "setDataFromGetPot".
+      @param cerrWarningIfUnused If true the solver return warning if some parameters are unused
+     */
     void setParameters( bool cerrWarningIfUnused = false );
 
+    //! Set the tolerance and the maximum number of iteration
+    /*!
+      @param tolerance Tolerance for the solver
+      @param maxIter Maximum number of iteration
+     */
     void setTolMaxiter( const Real tolerance, const Int maxIter = -1 );
 
-    //! if set to true,  do not recompute the preconditioner
+    //! Specify if the preconditioner should be reuse or not
+    /*!
+      @param reusePreconditioner If set to true, do not recompute the preconditioner
+     */
     void setReusePreconditioner( const bool reusePreconditioner );
 
+    //! Return the displayer
     boost::shared_ptr<Displayer> displayer();
+
     //@}
 
     //! @name Get Method
     //@{
 
-    //! Total number of iterations
+    //! Return the total number of iterations
     Int NumIters() const;
 
-    //! Maximum Total number of iterations
+    //! Return the maximum total number of iterations
     Int MaxIter() const;
 
-    //! True Residual
+    //! Return the true residual
     Real TrueResidual();
 
-    /** Method to get a shared pointer to the preconditioner (of type derived from EpetraPreconditioner)*/
+    //! Method to get a shared pointer to the preconditioner (of type derived from EpetraPreconditioner)*/
     prec_type& getPrec();
 
+    //! Return the AztecStatus
     void getAztecStatus( Real status[AZ_STATUS_SIZE] );
 
+    //! Return a Teuchos parameters list
     Teuchos::ParameterList& getParameterList();
 
+    //! Return a reference on the AztecOO solver
     AztecOO& getSolver();
 
     //@}

@@ -59,6 +59,11 @@ class GetPot;
 namespace LifeV
 {
 
+//! SolverAmesos - Class to wrap linear solver
+/*!
+  @author Simone Deparis   <simone.deparis@epfl.ch>
+  @author Gilles Fourestey <gilles.fourestey@epfl.ch>
+*/
 class SolverAmesos
 {
 public:
@@ -88,7 +93,7 @@ public:
 
     //! Default constructor
     /*!
-     * @param comm the communicator.
+     * @param comm The communicator.
      */
     SolverAmesos( const comm_PtrType& comm );
 
@@ -101,31 +106,55 @@ public:
     //! @name Methods
     //@{
 
+    //! Compute the residual
+    /*!
+      @param solution Solution vector
+      @param rhs Right hand side of the system
+     */
     Real computeResidual( const vector_type& solution, const vector_type& rhs );
 
-    /** Solves the system and returns the number of iterations.
-        @param  matrFull,
-        @param  rhsFull,
-        @param  sol,
-        @param  prec
-        returns number of iterations. If negative, the solver did not converge,
-        the preconditionar has been recomputed, and a second solution is tried
+    //! Solves the system and returns the number of iterations.
+    /*!
+      returns number of iterations. If negative, the solver did not converge,
+      the preconditionar has been recomputed, and a second solution is tried
+      @param  rhsFull Right hand side vector
+      @param  solution Vector to store the solution
     */
     Int solveSystem( vector_type&    rhsFull,
                      vector_type&    solution,
                      matrix_ptrtype& /* unused */ );
 
-    //Display status
+    //! Display status of the solver
     void printStatus();
 
+    //! Return true if the preconditioner is set
+    /*!
+      Note: This method always return true!
+    */
     bool isPrecSet() const;
 
+    //! Delete the stored preconditioner
+    /*!
+      Note: This method is empty
+     */
     void precReset();
 
+    //! Setup the preconditioner
+    /*!
+      Note: This method is empty
+      @param dataFile GetPot object which contains the data about the preconditioner
+      @param section Section the GetPot structure where to find the informations about the preconditioner
+     */
     void setUpPrec( const GetPot& dataFile,  const std::string& section );
 
+    //! Specify if the preconditioner should be reuse or not
+    /*!
+      Note: This method is empty
+      @param reusePreconditioner If set to true, do not recompute the preconditioner
+     */
     void setReusePreconditioner( const bool& /*reusePreconditioner*/ );
 
+    //! Print informations about the solver
     void showMe( std::ostream& output = std::cout ) const;
 
     //@}
@@ -135,14 +164,35 @@ public:
     //@{
 
     //! Set matrix from EpetraMatrix
+    /*!
+      @param matrix Matrix of the system
+     */
     void setMatrix( const matrix_type& matrix );
 
+    //! Method to set a general linear operator (of class derived from Epetra_Operator) defining the linear system
+    /*!
+      @param oper Operator for the system
+     */
     void setOperator( const Epetra_Operator& oper );
 
+    //! Method to setup the solver using GetPot
+    /*!
+      @param dataFile GetPot object which contains the data about the solver
+     */
     void setDataFromGetPot( const GetPot& dataFile, const std::string& section );
 
+    //! Set the current parameters with the internal parameters list
+    /*!
+      Note: The parameter list is set using "setDataFromGetPot".
+      @param cerrWarningIfUnused If true the solver return warning if some parameters are unused
+     */
     void setParameters();
 
+    //! Set the tolerance and the maximum number of iteration
+    /*!
+      @param tolerance Tolerance for the solver
+      @param maxIter Maximum number of iteration
+     */
     void setTolMaxiter( const Real tolerance, const Int maxIter = -1 );
 
     //@}
@@ -151,10 +201,10 @@ public:
     //! @name Get Methods
     //@{
 
-    //! Total number of iterations
+    //! Return the total number of iterations
     Int NumIters();
 
-    //! True Residual
+    //! Return the true residual
     Real TrueResidual();
 
     //@}
@@ -164,6 +214,10 @@ private:
     //! @name Private Methods
     //@{
 
+    //! Create a solver using a factory
+    /*!
+      @param solverType String containing the name of the solver
+     */
     void createSolver( const std::string& solverType );
 
     //@}

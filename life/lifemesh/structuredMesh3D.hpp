@@ -88,7 +88,7 @@ const Int TOPCORNER4    = 26;
 //! @name Methods
 //@{
 
-//! This method gives the flag for a cube.
+//! This method gives the flags for a parallelepiped
 /*!
   @param i_x Number of elements along the length
   @param i_y Number of elements along the width
@@ -109,7 +109,7 @@ EntityFlag regularMeshPointPosition( const UInt& i_x,
                                      const UInt& n_y,
                                      const UInt& n_z );
 
-//! This method generate a structured mesh
+//! This method generate a parallelepiped structured mesh
 /*!
   @param mesh The mesh that we want to generate
   @param regionFlag Flag of the region

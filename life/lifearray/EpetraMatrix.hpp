@@ -66,11 +66,13 @@ namespace LifeV
 
 //! EpetraMatrix - The Epetra Matrix format Wrapper
 /*!
- *  @author Gilles Fourestey, Simone Deparis, Gwenol Grandperrin
- *
- *  The EpetraMatrix class provides a general interface for the Epetra_FECrsMatrix of Trilinos.
- *
- *  TODO Reorder the class and to add more doxygen comments.
+  @author Gilles Fourestey <gilles.fourestey@epfl.ch>
+  @author Simone Deparis <simone.deparis@epfl.ch>
+  @author Gwenol Grandperrin <gwenol.grandperrin@epfl.ch>
+
+  The EpetraMatrix class provides a general interface for the Epetra_FECrsMatrix of Trilinos.
+
+  Visit http://trilinos.sandia.gov for more informations about Epetra_FECrsMatrix.
  */
 template <typename DataType>
 class EpetraMatrix
@@ -92,24 +94,34 @@ public:
 
     //! Constructor for square and rectangular matrices
     /*!
-     * Constructor for square and rectangular matrices
-     * @param _map: the row map. The column map will be defined in EpetraMatrix<DataType>::GlobalAssemble(...,...)
-     * @param numEntries: the average number of entries for each row.
-     * @param indexBase: the base index to address entries in the matrix (Usually 0 o 1)
+      @param map Row map. The column map will be defined in EpetraMatrix<DataType>::GlobalAssemble(...,...)
+      @param numEntries The average number of entries for each row.
+      @param indexBase The base index to address entries in the matrix (Usually 0 o 1)
      */
     EpetraMatrix( const EpetraMap& map, Int numEntries = 50, Int indexBase = 1 );
 
     //! Copy Constructor
+    /*!
+      @param matrix Matrix used to create the new occurence
+     */
     EpetraMatrix( const EpetraMatrix& matrix);
 
-    //! Copies _matrix to a matrix which resides only on the processor "reduceToProc"
+    //! Copies the matrix to a matrix which resides only on the processor
+    /*!
+      @param matrix Matrix where the content of the matrix should be stored
+      @param reduceToProc Processor where the matrix should be stored
+     */
     EpetraMatrix( const EpetraMatrix& matrix, const UInt reduceToProc );
 
-    /*! Constructs an EpetraMatrix view of an Epetra_FECrsMatrix. This constructor can be used
-     *  when we need to modify an Epetra_FECrsMatrix using a method of the class EpetraMatrix.
+    //! Constructs an EpetraMatrix view of an Epetra_FECrsMatrix.
+    /*!
+      This constructor can be used when we need to modify an Epetra_FECrsMatrix
+      using a method of the class EpetraMatrix
+      @param crsMatrixPtr Pointer on a Epetra_FECrsMatrix of Trilinos
      */
-    EpetraMatrix( matrix_ptrtype CRSMatrixPtr );
+    EpetraMatrix( matrix_ptrtype crsMatrixPtr );
 
+    //! Destructor
     ~EpetraMatrix() {};
 
     //@}
@@ -118,19 +130,38 @@ public:
     //! @name Operators
     //@{
 
-    //! Unary operator+
+    //! Addition operator
+    /*!
+      @param matrix matrix to be added to the current matrix
+     */
     EpetraMatrix& operator += ( const EpetraMatrix& matrix );
 
     //! Assignment operator
+    /*!
+      @param matrix matrix to be assigned to the current matrix
+     */
     EpetraMatrix& operator= ( const EpetraMatrix& matrix );
 
     //! Matrix-Vector multiplication
+    /*!
+      @param vector Vector to be multiplied by the current matrix
+     */
     vector_type   operator * ( const vector_type& vector ) const;
 
-    //! Unary operator* (it scales the matrix by the factor val)
+    //! Multiplication operator
+    /*!
+      Multiply by a scalar value the components of the current matrix.
+      (modify the matrix of the class)
+      @param scalar Value for the multiplication
+     */
     EpetraMatrix& operator *= ( const DataType scalar );
 
-    //! const operator* (it returns a rescaled matrix this)
+    //! Multiplication operator
+    /*!
+      Multiply by a scalar value the components of the current matrix.
+      (do not modify the matrix of the class)
+      @param scalar Value for the multiplication
+     */
     EpetraMatrix  operator *  ( const DataType scalar ) const;
 
     //@}
@@ -143,24 +174,30 @@ public:
     void openCrsMatrix();
 
     //! This function removes all the zeros in the matrix and add zero on the diagonal
+    /*!
+      The zeros added on the diagonal are used to impose boundary conditions
+     */
     void removeZeros();
 
-    /*! Swap the given shared pointer with the one of the matrix
-     *  @param p pointer on the matrix
+    //! Swap the given shared pointer with the one of the matrix
+    /*!
+      @param matrixPtr pointer on the matrix
      */
     void swapCrsMatrix( matrix_ptrtype& matrixPtr );
 
-    /*! Swap the matrix with the one given as argument
-     *  @param matrix matrix which is swapped
+    //! Swap the matrix with the one given as argument
+    /*!
+      @param matrix matrix which is swapped
      */
     void swapCrsMatrix( EpetraMatrix<DataType>& matrix );
 
-    /*! Multiply the EpetraMatrix by the first given matrix and put the result in the second given matrix
-     *  @param transposeA if true, it transposes the EpetraMatrix
-     *  @param B matrix that multiply the EpetraMatrix
-     *  @param transposeB if true, it transposes the matrix B
-     *  @param C matrix to store the result
-     *  @param call_FillComplete_on_result if true, the matrix C will be filled (i.e. closed) after the multiplication
+    //! Multiply the EpetraMatrix by the first given matrix and put the result in the second given matrix
+    /*!
+      @param transposeCurrent If true, it transposes the EpetraMatrix
+      @param matrix Matrix that multiply the EpetraMatrix
+      @param transposeMatrix if true, it transposes the matrix "matrix"
+      @param result Matrix to store the result
+      @param callFillCompleteOnResult If true, the matrix "result" will be filled (i.e. closed) after the multiplication
      */
     Int Multiply( bool transposeCurrent,
                   const EpetraMatrix<DataType> &matrix,
@@ -168,27 +205,44 @@ public:
                   EpetraMatrix<DataType> &result,
                   bool callFillCompleteOnResult=true ) const;
 
-    /*! Multiply the first EpetraVector given as a parameter by the EpetraMatrix and put the result into the second given EpetraVector
-     *  @param transposeA if true, it transposes the EpetraMatrix
-     *  @param x vector that will be multiply by the EpetraMatrix
-     *  @param y vector that will store the result
+    //! Multiply the first EpetraVector given as a parameter by the EpetraMatrix and put the result into the second given EpetraVector
+    /*!
+      @param transposeCurrent If true, it transposes the EpetraMatrix
+      @param vector1 Vector that will be multiply by the EpetraMatrix
+      @param vector2 Vector that will store the result
      */
     Int Multiply( bool transposeCurrent, const vector_type& vector1, vector_type &vector2 ) const;
 
-    //! Add a multiple of a given matrix:  *this += val*_matrix
+    //! Add a multiple of a given matrix:  *this += scalar*matrix
+    /*!
+      @param scalar Scalar which multiplies the matrix
+      @param matrix Matrix to be added
+     */
     void add( const DataType scalar, const EpetraMatrix& matrix );
 
-    //! set entries (rVec(i),rVec(i)) to coeff and rest of row r(i) to zero
+    //! Set entries (rVec(i),rVec(i)) to coefficient and the rest of the row entries to zero
+    /*!
+      @param rVec Vector of the Id that should be set to "coefficient"
+      @param coefficient Value to be set on the diagonal
+      @param offset Offset used for the indices
+     */
     void diagonalize ( std::vector<UInt> rVec, DataType const coefficient, UInt offset = 0 );
 
-    //! set entry (r,r) to coeff and rest of row r to zero
+    //! Set entry (entryIndex,entryIndex) to coefficient and the rest of the row to zero
+    /*!
+      @param entryIndex Index of the row where we set the "coefficient"
+      @param coefficient Value to be set on the diagonal
+      @param offset Offset used for the indices
+     */
     void diagonalize ( UInt const entryIndex, DataType const coefficient, UInt offset = 0 );
 
-    /*! apply constraint on all rows rVec
-     *  @param rVec vector of rows
-     *  @param coeff value to set entry (r,r) at
-     *  @param b right hand side Vector of the system to be adapted accordingly
-     *  @param datumVec vector of values to constrain entry r of the solution at
+    //! apply constraint on all rows rVec
+    /*!
+      @param rVec vector of rows
+      @param coefficient Value to set entry (r,r) at
+      @param rhs Right hand side Vector of the system to be adapted accordingly
+      @param datumVector vector of values to constrain entry r of the solution at
+      @param offset Offset used for the indices
      */
     void diagonalize( std::vector<UInt> rVec,
                       DataType const coefficient,
@@ -196,111 +250,136 @@ public:
                       std::vector<DataType> datumVector,
                       UInt offset = 0 );
 
-    /*! apply constraint on row r
-     *  @param row row number
-     *  @param coeff value to set entry (r,r) at
-     *  @param b right hand side vector of the system to be adapted accordingly
-     *  @param datum value to constrain entry r of the solution at
+    //! apply constraint on row "row"
+    /*!
+      @param row row number
+      @param coefficient value to set entry (row,row) at
+      @param rhs Right hand side vector of the system to be adapted accordingly
+      @param datumVector value to constrain entry r of the solution at
+      @param offset Offset used for the indices
      */
     void diagonalize( UInt const row, DataType const coefficient, vector_type &rhs,
                       DataType datum,
                       UInt offset = 0 );
 
-    /*! Save the matrix into a MatrixMarket (.mtx) file
-     *  @param filename file where the matrix will be saved
-     *  @param headers boolean to write the MM headers or not
+    //! Save the matrix into a MatrixMarket (.mtx) file
+    /*!
+      @param filename file where the matrix will be saved
+      @param headers boolean to write the MM headers or not
      */
-
     void matrixMarket( std::string const &fileName, const bool headers = true );
 
-    /*! Save the matrix into a Matlab (.m) file
-     *  @param filename file where the matrix will be saved
+    //! Save the matrix into a Matlab (.m) file
+    /*!
+      @param filename file where the matrix will be saved
      */
     void spy( std::string const &fileName );
 
+    //! Print the contents of the matrix
+    /*!
+      @param output Stream where the informations must be printed
+     */
     void showMe( std::ostream& output = std::cout ) const;
 
     //! Global assemble of a square matrix with default domain and range map
     /*
-     * !
-     * 1) Calls insertZeroDiagonal and then Epetra_FECsrMatrix::GlobalAssemble();
-     * 2) Set M_domainMap and M_rangeMap
-     *
-     * EpetraFECsrMatrix will assume that both the domain and range map are the same
-     * of the row map defined in the constructor.
-     *
-     * NOTE: domain and range map must be one-to-one and onto. (Unique map)
-     *
+      <ol>
+      <li> Calls insertZeroDiagonal and then Epetra_FECsrMatrix::GlobalAssemble();
+      <li> Set M_domainMap and M_rangeMap
+      </ol>
+
+      EpetraFECsrMatrix will assume that both the domain and range map are the same
+      of the row map defined in the constructor.
+
+      NOTE: domain and range map must be one-to-one and onto. (Unique map)
      */
     Int GlobalAssemble();
 
     //! Global assemble for rectangular matrices.
     /*
-     * !
-     * 1) Calls Epetra_FECsrMatrix::GlobalAssemble(Epetra_Map & domainMap, Epetra_Map & rangeMap);
-     * 2) Set M_domainMap and M_rangeMap
-     * Input:
-     * @param domainMap the domain map
-     * @param rangeMap the range map
+     <ol>
+     <li> Calls Epetra_FECsrMatrix::GlobalAssemble(Epetra_Map & domainMap, Epetra_Map & rangeMap);
+     <li> Set M_domainMap and M_rangeMap
+     </ol>
+     @param domainMap The domain map
+     @param rangeMap The range map
      */
     Int GlobalAssemble( const boost::shared_ptr<const EpetraMap> & domainMap,
                         const boost::shared_ptr<const EpetraMap> & rangeMap );
 
     //! insert the given value into the diagonal
-    /*! Pay intention that this will add values to the diagonal,
-        so for later added values with set_mat_inc, the one
-        will be added
-        Inserts Value on the local diagonal for diagonal elements specified by the input EpetraMap;
-        This methods works only if matrix is not closed.
+    /*!
+      Pay intention that this will add values to the diagonal,
+      so for later added values with set_mat_inc, the one
+      will be added.
+      Inserts Value on the local diagonal for diagonal elements specified by the input EpetraMap;
+      This methods works only if matrix is not closed.
 
-        \param entry: the entry that is inserted in the diagonal
-        \param Map: the EpetraMap
-        \param offset: an offset for the insertion of the diagonal entries
-        \param replace: if the matrix is filled and the diagonal entries are present this bool should be set to true.
-        Otherwise is the matrix is not filled it should be set to false.
+      @param entry The entry that is inserted in the diagonal
+      @param Map The EpetraMap
+      @param offset An offset for the insertion of the diagonal entries
     */
     void insertValueDiagonal( const DataType entry, const EpetraMap& Map, const UInt offset = 0 );
 
     //! insert the given value into the diagonal
-    /*! Pay intention that this will add values to the diagonal,
-        so for later added values with set_mat_inc, the one
-    will be added
-    Inserts Value on the local diagonal for diagonal elements >= from and < to;
-    If from > to, process all diagonal entries entries
-    If from = to, do nothing
-    This methods works only if matrix is not closed.
+    /*!
+      Pay intention that this will add values to the diagonal,
+      so for later added values with set_mat_inc, the one
+      will be added
+
+      Inserts Value on the local diagonal for diagonal elements >= from and < to;
+      <ol>
+      <li> If from > to, process all diagonal entries entries
+      <li> If from = to, do nothing
+      </ol>
+      This methods works only if matrix is not closed.
+      @param value Value to be inserted on the diagonal
+      @param from Starting row
+      @param to Ending row
     */
     void insertValueDiagonal( const DataType& value, Int from = -1, Int to = -2 );
 
     //! insert ones into the diagonal to ensure the matrix' graph has a entry there
-    //! Pay intention that this will add ones to the diagonal,
-    //! so for later added values with set_mat_inc, the one
-    //! will be added
-    /** Inserts Zero on the local diagonal for diagonal elements >= from and < to;
-    If from > to, process all diagonal entries entries
-    If from = to, do nothing
-    This methods works only if matrix is not closed.
+    /*
+      Pay intention that this will add ones to the diagonal,
+      so for later added values with set_mat_inc, the one
+      will be added
+
+      Inserts Value on the local diagonal for diagonal elements >= from and < to;
+      <ol>
+      <li> If from > to, process all diagonal entries entries
+      <li> If from = to, do nothing
+      </ol>
+      This methods works only if matrix is not closed.
+      @param from Starting row
+      @param to Ending row
     */
     void insertOneDiagonal( Int from = -1, Int to = -2 );
 
     //! insert zeros into the diagonal to ensure the matrix' graph has a entry there
-    //! This method does not remove non zero entries in the diagonal.
-    /** Inserts Zero on the local diagonal for diagonal elements >= from and < to;
-    If from > to, process all diagonal entries entries
-    If from = to, do nothing
-    This methods works only if matrix is not closed.
+    /*!
+      This method does not remove non zero entries in the diagonal.
+
+      Inserts Value on the local diagonal for diagonal elements >= from and < to;
+      <ol>
+      <li> If from > to, process all diagonal entries entries
+      <li> If from = to, do nothing
+      </ol>
+      This methods works only if matrix is not closed.
+      @param from Starting row
+      @param to Ending row
     */
     void insertZeroDiagonal( Int from = -1, Int to = -2 );
 
     //! Compute the norm 1 of the global matrix
     /*!
-     * @return norm 1
+      @return norm 1
      */
     Real NormOne() const;
 
     //! Compute the norm inf of the global matrix
     /*!
-     * @return norm inf
+      @return norm inf
      */
     Real NormInf() const;
 
@@ -310,13 +389,33 @@ public:
     //! @name Set Methods
     //@{
 
+    //! Set a coefficient of the matrix
+    /*!
+      @param row Row index of the coefficient
+      @param column column index of the coefficient
+     */
     void set_mat( UInt row, UInt column, DataType localValue );
 
+    //! Add a set of values to the corresponding set of coefficient in the matrix
+    /*!
+      @param numRows Number of rows into the list given in "localValues"
+      @param numColumns Number of columns into the list given in "localValues"
+      @param rowIndices List of row indices
+      @param columnIndices List of column indices
+      @param localValues 2D array containing the coefficient related to "rowIndices" and "columnIndices"
+      @param format Format of the matrix (Epetra_FECrsMatrix::COLUMN_MAJOR or Epetra_FECrsMatrix::ROW_MAJOR)
+     */
     void set_mat_inc( Int const numRows, Int const numColumns,
-                      std::vector<Int> const row, std::vector<Int> const column,
-                      DataType* const* const localValue,
+                      std::vector<Int> const rowIndices, std::vector<Int> const columnIndices,
+                      DataType* const* const localValues,
                       Int format = Epetra_FECrsMatrix::COLUMN_MAJOR );
 
+    //! Add a value at a coefficient of the matrix
+    /*!
+      @param row Row index of the value to be added
+      @param column Column index of the value to be added
+      @param localValue Value to be added to the coefficient
+     */
     void set_mat_inc( UInt row, UInt column, DataType localValue );
 
     //@}
@@ -331,27 +430,29 @@ public:
     //! Return the const shared_pointer of the Epetra_FECrsMatrix
     const matrix_ptrtype& getMatrixPtr() const{ return M_epetraCrs; }
 
+    //! Return the mean number of entries in the matrix rows
     Int getMeanNumEntries() const ;
 
+    //! Return the Id of the processor
     Int MyPID();
 
     //! Return the row EpetraMap of the EpetraMatrix used in the assembling
     /*!
-     * This method should be call when EpetraMap is still open.
+      Note: This method should be call when EpetraMap is still open.
      */
     const EpetraMap& getMap() const;
 
     //! Return the domain EpetraMap of the EpetraMatrix
     /*!
-     * This function should be called only after EpetraMatrix<DataType>::GlobalAssemble(...) has been called.
-     * If this is an open matrix that M_domainMap is an invalid pointer
+      This function should be called only after EpetraMatrix<DataType>::GlobalAssemble(...) has been called.
+      If this is an open matrix that M_domainMap is an invalid pointer
      */
     const EpetraMap& getDomainMap() const;
 
     //! Return the range EpetraMap of the EpetraMatrix
     /*!
-     * This function should be called only after EpetraMatrix<DataType>::GlobalAssemble(...) has been called.
-     * If this is an open matrix that M_domainMap is an invalid pointer
+      This function should be called only after EpetraMatrix<DataType>::GlobalAssemble(...) has been called.
+      If this is an open matrix that M_domainMap is an invalid pointer
      */
     const EpetraMap& getRangeMap() const;
 
@@ -360,36 +461,32 @@ public:
 private:
 
 
-    //! Shared pointer on the row EpetraMap used in the assembling
+    // Shared pointer on the row EpetraMap used in the assembling
     boost::shared_ptr< EpetraMap > M_map;
 
-    //! Shared pointer on the domain EpetraMap.
+    // Shared pointer on the domain EpetraMap.
     /*
-     * !
-     * if y = this*x,
-     * then x.getMap() is the domain map.
-     * NOTE: Epetra assume the domain map to be 1-1 and onto (Unique)
-     * M_domainMap is a NULL pointer until EpetraMatrix<DataType> is called.
+      if y = this*x,
+      then x.getMap() is the domain map.
+      NOTE: Epetra assume the domain map to be 1-1 and onto (Unique)
+      M_domainMap is a NULL pointer until EpetraMatrix<DataType> is called.
      */
     boost::shared_ptr< const EpetraMap > M_domainMap;
 
     //! Shared pointer on the range EpetraMap.
-    //! Shared pointer on the domain EpetraMap.
     /*
-     * !
-     * if y = this*x,
-     * then y.getMap() is the range map.
-     * NOTE: Epetra assume the domain map to be 1-1 and onto (Unique)
-     * M_rangeMap is a NULL pointer until EpetraMatrix<DataType> is called.
+      if y = this*x,
+      then y.getMap() is the range map.
+      NOTE: Epetra assume the domain map to be 1-1 and onto (Unique)
+      M_rangeMap is a NULL pointer until EpetraMatrix<DataType> is called.
      */
     boost::shared_ptr< const EpetraMap > M_rangeMap;
 
-
-    //!Pointer on a Epetra_FECrsMatrix
+    // Pointer on a Epetra_FECrsMatrix
     matrix_ptrtype  M_epetraCrs;
 
-    //! The index base for the matrix
-    Int             M_indexBase;
+    //  The index base for the matrix
+    Int M_indexBase;
 
 };
 
@@ -1141,8 +1238,8 @@ set_mat_inc( UInt row, UInt column, DataType localValue )
 template <typename DataType>
 void EpetraMatrix<DataType>::
 set_mat_inc( Int const numRows, Int const numColumns,
-             std::vector<Int> const row, std::vector<Int> const column,
-             DataType* const* const localValue,
+             std::vector<Int> const rowIndices, std::vector<Int> const columnIndices,
+             DataType* const* const localValues,
              Int format )
 {
 
@@ -1152,16 +1249,16 @@ set_mat_inc( Int const numRows, Int const numColumns,
 
     std::vector<Int>::const_iterator pt;
 
-    pt = row.begin();
-    for ( std::vector<Int>::iterator i( irow.begin() ); i !=  irow.end() && pt != row.end(); ++i, ++pt )
+    pt = rowIndices.begin();
+    for ( std::vector<Int>::iterator i( irow.begin() ); i !=  irow.end() && pt != rowIndices.end(); ++i, ++pt )
         *i = *pt + M_indexBase;
 
-    pt = column.begin();
-    for ( std::vector<Int>::iterator i( icol.begin() ); i !=  icol.end() && pt != column.end(); ++i, ++pt )
+    pt = columnIndices.begin();
+    for ( std::vector<Int>::iterator i( icol.begin() ); i !=  icol.end() && pt != columnIndices.end(); ++i, ++pt )
         *i = *pt + M_indexBase;
 
 
-    Int ierr = M_epetraCrs->InsertGlobalValues( numRows, &irow[0], numColumns, &icol[0], localValue, format );
+    Int ierr = M_epetraCrs->InsertGlobalValues( numRows, &irow[0], numColumns, &icol[0], localValues, format );
 
     if ( ierr < 0 ) std::cout << " error in matrix insertion " << ierr << std::endl;
 }

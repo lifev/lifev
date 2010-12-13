@@ -168,6 +168,17 @@ AztecOOPreconditioner::showMe( std::ostream& output ) const
     output << "showMe must be implemented for the AztecOOPreconditioner class" << std::endl;
 }
 
+Real
+AztecOOPreconditioner::Condest()
+{
+
+#ifdef HAVE_LIFEV_DEBUG
+    Debug( 7100 ) << "AztecOOPreconditioner::Condest() \n";
+#endif
+
+    return M_solver->getSolver().Condest();
+}
+
 // ===================================================
 // Set Methods
 // ===================================================
@@ -187,17 +198,6 @@ AztecOOPreconditioner::setDataFromGetPot( const GetPot&      dataFile,
 // ===================================================
 // Get Methods
 // ===================================================
-Real
-AztecOOPreconditioner::Condest()
-{
-
-#ifdef HAVE_LIFEV_DEBUG
-    Debug( 7100 ) << "AztecOOPreconditioner::Condest() \n";
-#endif
-
-    return M_solver->getSolver().Condest();
-}
-
 EpetraPreconditioner::prec_raw_type*
 AztecOOPreconditioner::getPrec()
 {
