@@ -1,51 +1,104 @@
+//@HEADER
 /*
- This file is part of the LifeV library
- Copyright (C) 2001,2002,2003,2004 EPFL, INRIA and Politecnico di Milano
+*******************************************************************************
 
- This library is free software; you can redistribute it and/or
- modify it under the terms of the GNU Lesser General Public
- License as published by the Free Software Foundation; either
- version 2.1 of the License, or (at your option) any later version.
+    Copyright (C) 2004, 2005, 2007 EPFL, Politecnico di Milano, INRIA
+    Copyright (C) 2010 EPFL, Politecnico di Milano, Emory University
 
- This library is distributed in the hope that it will be useful,
- but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- Lesser General Public License for more details.
+    This file is part of LifeV.
 
- You should have received a copy of the GNU Lesser General Public
- License along with this library; if not, write to the Free Software
- Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+    LifeV is free software; you can redistribute it and/or modify
+    it under the terms of the GNU Lesser General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    LifeV is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+    Lesser General Public License for more details.
+
+    You should have received a copy of the GNU Lesser General Public License
+    along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
+
+*******************************************************************************
 */
-#ifndef _SELECTMARKER_HH_
-#define _SELECTMARKER_HH_
+//@HEADER
 
-#include <life/lifecore/debug.hpp>
+/*!
+    @file
+    @brief It contains the standard selector for internal entities
+
+    @author 
+    @contributor Nur Aiman Fadel <nur.fadel@mail.polimi.it>
+    @maintainer Nur Aiman Fadel <nur.fadel@mail.polimi.it>
+
+    @date
+
+    A more detailed description of the file (if necessary)
+ */
+
+#ifndef _SELECTMARKER_HH_
+#define _SELECTMARKER_HH_ 1
+
 #include <life/lifemesh/regionMesh3D.hpp>
 
 namespace LifeV
 {
-//! \file selectMarker.hpp
-//! This file contains the standard selector for internal entities
 
+//! InternalEntitySelector - Functor class that tells whether an entity flag corresponds to an internal face
+/*!
+    @author 
+    @see 
 
-//! Functor class that tells whether an entity flag corresponds to an internal face
+    This class takes in input an EntityFlag and it can be used <br>
+    in order to understand if the input is or not an internal face.
+ */
+
 class InternalEntitySelector
 {
 public:
-    //! The default watermark used when standard contructor is adopted
+    //! The default watermark used when standard contructor is adopted.
     static const EntityFlag defMarkFlag;
+
+    //! @name Constructors & Destructor
+    //@{
+
+    //! Empty Constructor
     InternalEntitySelector();
+
+    //! Short description of the constructor
+    /*!
+        It is a constructor which requires the EntityFlag
+        @param w, the costant EntityFlag which is required in order 
+        to create an InternalEntitySelector object.
+     */
     InternalEntitySelector(const EntityFlag & w);
-    /*! operator returning true if flag corresponds to internal entity
-      If the EntityFlag is greater that the watermark then it is assumed that
-      the associated geometry entity is internal
-    */
-    bool operator()(EntityFlag const &) const;
+    //@}
+
+
+    //! @name Operators
+    //@{
+
+    //! The round brackets operator
+    /*!
+        Operator returning true if the flag corresponds to internal entity.
+        If the EntityFlag is greater that the watermark, the associated geometry entity is internal.
+        @param test, it is the reference to geometric entity.
+        @return true, if the flag corresponds to an internal entity.
+     */
+    bool operator()(EntityFlag const & test) const;
+    //@}
+
 private:
+
     //! The current watermark
-    EntityFlag waterMarkFlag;
-};
-}
+    EntityFlag M_watermarkFlag;
 
+    //! Unsed operator equivalence
+    InternalEntitySelector& operator=( const InternalEntitySelector& example );
 
-#endif
+}; // Class InternalEntitySelector
+
+} // Namespace LifeV
+
+#endif /* SELECTMARKER_H */

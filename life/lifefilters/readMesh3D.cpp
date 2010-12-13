@@ -1,47 +1,65 @@
+//@HEADER
 /*
-  This file is part of the LifeV library
-  Copyright (C) 2001,2002,2003,2004 EPFL, INRIA and Politecnico di Milano
+*******************************************************************************
 
-  This library is free software; you can redistribute it and/or
-  modify it under the terms of the GNU Lesser General Public
-  License as published by the Free Software Foundation; either
-  version 2.1 of the License, or (at your option) any later version.
+    Copyright (C) 2004, 2005, 2007 EPFL, Politecnico di Milano, INRIA
+    Copyright (C) 2010 EPFL, Politecnico di Milano, Emory University
 
-  This library is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-  Lesser General Public License for more details.
+    This file is part of LifeV.
 
-  You should have received a copy of the GNU Lesser General Public
-  License along with this library; if not, write to the Free Software
-  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+    LifeV is free software; you can redistribute it and/or modify
+    it under the terms of the GNU Lesser General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    LifeV is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+    Lesser General Public License for more details.
+
+    You should have received a copy of the GNU Lesser General Public License
+    along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
+
+*******************************************************************************
 */
+//@HEADER
+
+/*!
+    @file
+    @brief Mesh reader from mesh3d files
+
+    @author Luca Formaggia <luca.formaggia@polimi.it>
+    @contributor JFG, Nur Aiman Fadel <nur.fadel@mail.polimi.it>
+    @maintainer Nur Aiman Fadel <nur.fadel@mail.polimi.it>
+
+    @date 29-06-2002
+
+    Mesh reader that it is able to read 3d meshes.<br>
+ */
+
 #include <life/lifefilters/readMesh3D.hpp>
-# include <stdlib.h>
-# include <stdio.h>
 
 namespace LifeV
 {
-// here I should cut and paste the end of the readMesh3D.h
-// but I have troubles when linking (see the comments in readMesh3D.h)
-//----------------------------------------------------------------------
-//
-// Problem: the functions that follows should be in a readMesh3D.cc
-// nevertheless, if I do that, I can compile the library, but I
-// obtain several errors during the linking with a main.cc.
-// JFG, 07/09/2002
-//======================================================================
+
+// ===================================================
+// Mpp mesh readers
+// ===================================================
 
 bool
-readMppFileHead( std::ifstream & mystream, UInt & numVertices, UInt & numBVertices, UInt & numBFaces, UInt & numBEdges, UInt & numVolumes )
+readMppFileHead( std::ifstream & mystream,
+                 UInt & numVertices,
+                 UInt & numBVertices,
+                 UInt & numBFaces,
+                 UInt & numBEdges,
+                 UInt & numVolumes )
 {
-    unsigned done = 0;
+    UInt done = 0;
     std::string line;
     Real x, y, z;
-    int ity, ity_id;
+    Int ity, ity_id;
     UInt p1, p2, p3;
     UInt i, ibc;
-    //streampos start=mystream.tellg();
 
     while ( next_good_line( mystream, line ).good() )
     {
@@ -56,6 +74,7 @@ readMppFileHead( std::ifstream & mystream, UInt & numVertices, UInt & numBVertic
                 mystream >> x >> y >> z >> ity >> ibc;
                 if ( ity != 3 )
                 {
+
 #ifndef OLDMPPFILE
                     mystream >> ibc;
 #endif
@@ -107,30 +126,32 @@ readMppFileHead( std::ifstream & mystream, UInt & numVertices, UInt & numBVertic
         }
     }
     return done == 4 ;
-}
+}// Function readMppFileHead
 
+// ===================================================
+// INRIA mesh readers
+// ===================================================
 
-
-// ****************      INRIA mesh  readers   **********************************
-
-
-
-int nextIntINRIAMeshField( std::string const & line, std::istream & mystream )
+Int nextIntINRIAMeshField( std::string const & line, std::istream & mystream )
 {
-    // first control if line has something. If so use atoi (the version from util_string.h) to extract
-    // the integer. Otherwise get if from the input stream
+    /*
+     first control if line has something.
+     If so use atoi (the version from util_string.h)
+     to extract the integer.
+     Otherwise get if from the input stream
+     */
     for ( std::string::const_iterator is = line.begin(); is != line.end(); ++is )
         if ( *is != ' ' )
             return atoi( line );
-    int dummy;
+    Int dummy;
     mystream >> dummy;
     return dummy;
-}
+}// Function nextIntINRIAMeshField
 
-//
-
-
-//! It Reads all basic info from INRIA MESH file so as to be able to properly dimension all arrays
+/*
+ It Reads all basic info from INRIA MESH file
+ so as to be able to properly dimension all arrays
+*/
 bool
 readINRIAMeshFileHead( std::ifstream & mystream,
                        UInt & numVertices,
@@ -142,13 +163,13 @@ readINRIAMeshFileHead( std::ifstream & mystream,
                        ReferenceShapes & shape,
                        InternalEntitySelector iSelect )
 {
-    unsigned done = 0;
+    UInt done = 0;
     std::string line;
     Real x, y, z;
     UInt p1, p2, p3, p4, p5, p6, p7, p8;
     UInt i, ibc;
 
-    int idummy;
+    Int idummy;
 
     UInt numReadFaces = 0;
     numStoredFaces    = 0;
@@ -160,7 +181,7 @@ readINRIAMeshFileHead( std::ifstream & mystream,
     while ( next_good_line( mystream, line ).good() )
     {
 
-        if ( line.find( "MeshVersionFormatted" ) != std::string:: npos )
+        if ( line.find( "MeshVersionFormatted" ) != std::string::npos )
         {
             idummy = nextIntINRIAMeshField( line.substr( line.find_last_of( "d" ) + 1 ), mystream );
             ASSERT_PRE0( idummy == 1, "I can read only formatted INRIA Mesh files, sorry" );
@@ -178,15 +199,15 @@ readINRIAMeshFileHead( std::ifstream & mystream,
             numVertices = nextIntINRIAMeshField( line.substr( line.find_last_of( "s" ) + 1 ), mystream );
             done++;
             numBVertices = 0;
-            isboundary.resize(numVertices,false);
+            isboundary.resize( numVertices,false );
 
             for ( i = 0; i < numVertices; ++i )
             {
                 mystream >> x >> y >> z >> ibc;
-                if ( ! iSelect(EntityFlag(ibc)))
+                if ( ! iSelect( EntityFlag( ibc ) ) )
                 {
                     numBVertices++;
-                    isboundary[i]=true;
+                    isboundary[ i ] = true;
                 }
             }
         }
@@ -195,32 +216,40 @@ readINRIAMeshFileHead( std::ifstream & mystream,
         {
             ASSERT_PRE0( shape != HEXA, " Cannot have triangular faces in an HEXA INRIA  MESH" );
             shape = TETRA;
-            numReadFaces=nextIntINRIAMeshField( line.substr( line.find_last_of( "s" ) + 1 ), mystream );
+            numReadFaces = nextIntINRIAMeshField( line.substr( line.find_last_of( "s" ) + 1 ), mystream );
             numBFaces = 0;
 
             done++;
+
             for ( UInt k = 0; k < numReadFaces; k++ )
             {
                 mystream >> p1 >> p2 >> p3 >> ibc;
-                if (isboundary[p1-1]&&isboundary[p2-1]&&isboundary[p3-1])
+                if ( isboundary[ p1 - 1 ] && isboundary [ p2 - 1 ] && isboundary[ p3 - 1 ])
                 {
-                    if (iSelect(EntityFlag(ibc)))
+                    if ( iSelect( EntityFlag( ibc ) ) )
                     {
-                        std::cerr<<"ATTENTION: Face "<<p1<<" "<<p2<<" "<<p3<<
-                                 " has all vertices on the boundary yet is marked as interior: "<<ibc<<std::endl;
+                        std::cerr << "ATTENTION: Face "
+                                  << p1 << " "
+                                  << p2 << " "
+                                  << p3 << " has all vertices on the boundary yet is marked as interior: "
+                                  << ibc << std::endl;
                     }
                     ++numBFaces;
                 }
                 else
                 {
-                    if (!iSelect(EntityFlag(ibc)))
+                    if ( !iSelect( EntityFlag( ibc ) ) )
                     {
-                        std::cerr<<"ATTENTION: Face "<<p1<<" "<<p2<<" "<<p3<<
-                                 " has vertices in the interior yet is marked as boundary: "<<ibc<<std::endl;
+                        std::cerr << "ATTENTION: Face "
+                                  << p1 << " "
+                                  << p2 << " "
+                                  << p3
+                                  << " has vertices in the interior yet is marked as boundary: "
+                                  << ibc << std::endl;
                     }
                 }
             }
-            numStoredFaces=numReadFaces;
+            numStoredFaces = numReadFaces;
         }
 
 
@@ -228,26 +257,30 @@ readINRIAMeshFileHead( std::ifstream & mystream,
         {
             ASSERT_PRE0( shape != TETRA, " Cannot have quad faces in an TETRA INRIA MESH" );
             shape = HEXA;
-            numReadFaces= nextIntINRIAMeshField( line.substr( line.find_last_of( "s" ) + 1 ), mystream );
+            numReadFaces = nextIntINRIAMeshField( line.substr( line.find_last_of( "s" ) + 1 ), mystream );
             done++;
             numBFaces = 0;
             for ( UInt k = 0; k < numReadFaces; k++ )
             {
-                mystream >> p1 >> p2 >> p3 >> p4 >> ibc;
-                if (isboundary[p1-1]&&isboundary[p2-1]&&isboundary[p3-1]&&isboundary[p4-1]
-                   )
+               mystream >> p1 >> p2 >> p3 >> p4 >> ibc;
+               if ( isboundary[ p1 - 1 ] && isboundary[ p2 - 1 ]
+                    && isboundary[ p3 - 1 ] && isboundary[ p4 - 1 ] )
                 {
-                    if (iSelect(EntityFlag(ibc)))
+                    if ( iSelect( EntityFlag( ibc ) ) )
                     {
-                        std::cerr<<"ATTENTION: Face "<<p1<<" "<<p2<<" "<<p3<<" "<<p4<<
-                                 " has all vertices on the boundary yet is marked as interior: "<<
-                                 ibc<<std::endl;
+                        std::cerr << "ATTENTION: Face "
+                                  << p1 << " "
+                                  << p2 << " "
+                                  << p3 << " "
+                                  << p4
+                                  << " has all vertices on the boundary yet is marked as interior: "
+                                  << ibc << std::endl;
                     }
                     ++numBFaces;
                 }
 
             }
-            numStoredFaces=numReadFaces;
+            numStoredFaces = numReadFaces;
         }
         // To cope with a mistake in INRIA Mesh files
         if ( line.find( "Tetrahedra" ) != std::string::npos )
@@ -268,6 +301,7 @@ readINRIAMeshFileHead( std::ifstream & mystream,
             shape = HEXA;
             numVolumes = nextIntINRIAMeshField( line.substr( line.find_last_of( "a" ) + 1 ), mystream );
             done++;
+
             for ( i = 0; i < numVolumes; i++ )
             {
                 mystream >> p1 >> p2 >> p3 >> p4 >> p5 >> p6 >> p7 >> p8 >> ibc;
@@ -285,5 +319,8 @@ readINRIAMeshFileHead( std::ifstream & mystream,
         }
     }
     return true ;
-}
-}
+
+}// Function readINRIAMeshFileHead
+
+
+} // Namespace LifeV
