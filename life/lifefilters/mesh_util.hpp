@@ -1,21 +1,39 @@
+//@HEADER
 /*
- This file is part of the LifeV library
- Copyright (C) 2001,2002,2003,2004 EPFL, INRIA and Politecnico di Milano
+*******************************************************************************
 
- This library is free software; you can redistribute it and/or
- modify it under the terms of the GNU Lesser General Public
- License as published by the Free Software Foundation; either
- version 2.1 of the License, or (at your option) any later version.
+    Copyright (C) 2004, 2005, 2007 EPFL, Politecnico di Milano, INRIA
+    Copyright (C) 2010 EPFL, Politecnico di Milano, Emory University
 
- This library is distributed in the hope that it will be useful,
- but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- Lesser General Public License for more details.
+    This file is part of LifeV.
 
- You should have received a copy of the GNU Lesser General Public
- License along with this library; if not, write to the Free Software
- Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+    LifeV is free software; you can redistribute it and/or modify
+    it under the terms of the GNU Lesser General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    LifeV is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+    Lesser General Public License for more details.
+
+    You should have received a copy of the GNU Lesser General Public License
+    along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
+
+*******************************************************************************
 */
+//@HEADER
+
+/*!
+    @file
+    @brief Base utilities operating on meshes
+
+    @contributor Simone Deparis <simone.deparis@epfl.ch>
+    @maintainer Simone Deparis <simone.deparis@epfl.ch>
+
+    This file contains a set of base utilities used to test mesh entities or
+    operate on them
+ */
 #ifndef __MESH_UTILITIES__
 #define __MESH_UTILITIES__
 
@@ -34,9 +52,8 @@
   some possible problems. Some methods are general (2D and 3D meshes), some are
   specific to 3D meshes.
 
-  They sametimes
-  require in input  a Switch parementer sw and ostreams references.
-  The switch valueas are
+  They sometimes require in input a Switch paramenter sw and ostreams references.
+  The switch values are
 <UL>
 <LI>"ABORT_CONDITION"  "SKIPPED_ORIENTATION_TEST"</LI>
 <LI>"HAS_NEGATIVE_VOLUMES" "BFACE_STORED_MISMATCH"</LI>
@@ -337,21 +354,6 @@ bool checkMesh3D( RegionMesh3D & mesh,
         sw.create( "NOT_HAS_POINTS", true );
         return false;
     }
-
-#if 0
-    if ( !checkIdnumber( mesh.pointList ) )
-    {
-        if (verbose)
-        {
-            err << "ERROR: points ids where wrongly set" << std::endl;
-            //                err << "FIXED" << std::endl;
-        }
-        if ( fix )
-            sw.create( "FIXED_POINTS_ID", true );
-        if ( fix )
-            fixIdnumber( mesh.pointList );
-    }
-#endif
 
     if ( !checkMarkerSet( mesh.pointList ) )
     {
