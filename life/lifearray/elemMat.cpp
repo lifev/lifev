@@ -39,13 +39,11 @@ namespace LifeV
 {
 ElemMat::~ElemMat()
 {
-    DESTRUCTOR( "ElemMat" );
 }
 
 ElemMat::ElemMat( UInt nNode1, UInt nbr1, UInt nbc1 ) :
         _mat( nNode1*nbr1, nNode1*nbc1 )
 {
-    CONSTRUCTOR( "ElemMat 1" );
     //
     _nBlockRow = nbr1;
     _nBlockCol = nbc1;
@@ -76,7 +74,6 @@ ElemMat::ElemMat( UInt nNode1, UInt nbr1, UInt nbc1,
                   UInt nNode2, UInt nbr2, UInt nbc2 ) :
         _mat( nNode1*nbr1 + nNode2*nbr2, nNode1*nbc1 + nNode2*nbc2 )
 {
-    CONSTRUCTOR( "ElemMat 2" );
     //
     _nBlockRow = nbr1 + nbr2;
     _nBlockCol = nbc1 + nbc2;
@@ -122,7 +119,6 @@ ElemMat::ElemMat( UInt nNode1, UInt nbr1, UInt nbc1,
         _mat( nNode1*nbr1 + nNode2*nbr2 + nNode3*nbr3,
               nNode1*nbc1 + nNode2*nbc2 + nNode3*nbc3 )
 {
-    CONSTRUCTOR( "ElemMat 3" );
     //
     _nBlockRow = nbr1 + nbr2 + nbr3;
     _nBlockCol = nbc1 + nbc2 + nbc3;
