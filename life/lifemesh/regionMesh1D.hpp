@@ -1,55 +1,43 @@
 //@HEADER
 /*
-************************************************************************
+*******************************************************************************
+Copyright (C) 2004, 2005, 2007 EPFL, Politecnico di Milano, INRIA
+Copyright (C) 2010 EPFL, Politecnico di Milano, Emory University
 
- This file is part of the LifeV Applications.
- Copyright (C) 2001-2006 EPFL, Politecnico di Milano, INRIA
-               2006-2010 EPFL, Politecnico di Milano
+This file is part of LifeV.
 
- This library is free software; you can redistribute it and/or modify
- it under the terms of the GNU Lesser General Public License as
- published by the Free Software Foundation; either version 2.1 of the
- License, or (at your option) any later version.
+LifeV is free software; you can redistribute it and/or modify
+it under the terms of the GNU Lesser General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
 
- This library is distributed in the hope that it will be useful, but
- WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- Lesser General Public License for more details.
+LifeV is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+Lesser General Public License for more details.
 
- You should have received a copy of the GNU Lesser General Public
- License along with this library; if not, write to the Free Software
- Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
- USA
-
-************************************************************************
+You should have received a copy of the GNU Lesser General Public License
+along with LifeV. If not, see <http://www.gnu.org/licenses/>.
+*******************************************************************************
 */
 //@HEADER
 
 /*!
  *  @file
- *  @brief File containing 1D mesh classes
+ *  @brief File containing 1D Mesh Classes
  *
- *  @version 1.0
- *  @author Luca Formaggia
- *  @author Christophe Prud'homme <christophe.prudhomme@epfl.ch>
- *  @author Tiziano Passerini
- *  @date
- *
- *  @version 1.1
- *  @author Cristiano Malossi <cristiano.malossi@epfl.ch>
  *  @date 27-04-2010
+ *  @author Luca Formaggia <luca.formaggia@polimi.it>
+ *  @author Christophe Prud'homme <christophe.prudhomme@epfl.ch>
+ *  @author Tiziano Passerini <tiziano.passerini@gmail.com>
+ *  @author Cristiano Malossi <cristiano.malossi@epfl.ch>
+ *
+ *  @contributor Simone Pezzuto <simone.pezzuto@mail.polimi.it>
+ *  @mantainer Simone Pezzuto <simone.pezzuto@mail.polimi.it>
  */
 
 #ifndef REGIONMESH1D_H
 #define REGIONMESH1D_H
-
-#include <iomanip>
-#include <fstream>
-#include <cstdlib>
-
-#include <boost/numeric/ublas/vector.hpp>
-#include <boost/numeric/ublas/matrix.hpp>
-#include <boost/numeric/ublas/io.hpp>
 
 #include <life/lifecore/life.hpp>
 #include <life/lifecore/switch.hpp>
@@ -59,59 +47,59 @@
 #include <life/lifemesh/basisElSh.hpp>
 #include <life/lifearray/SimpleVect.hpp>
 
+#include <iomanip>
+#include <fstream>
+#include <cstdlib>
+
+#include <boost/numeric/ublas/vector.hpp>
+#include <boost/numeric/ublas/matrix.hpp>
+#include <boost/numeric/ublas/io.hpp>
+
 namespace LifeV
 {
-//! RegionMesh1D
-/*!
- * @author Luca Formaggia
- * @author Christophe Prud'homme <christophe.prudhomme@epfl.ch>
- * @author Tiziano Passerini
+/** @class RegionMesh1D
+ *  @brief Class for 1D Mesh
+ *  @author Luca Formaggia <luca.formaggia@polimi.it>
+ *  @author Christophe Prud'homme <christophe.prudhomme@epfl.ch>
+ *  @author Tiziano Passerini <tiziano.passerini@gmail.com>
  *
- * This is the class that stores the mesh entities for a single 1D region In
- * a region elements are all of the same type
+ *  This is the class that stores the mesh entities for a single 1D region.
+ * 
+ *  In a region elements are all of the same type.
  */
 template <typename GEOSHAPE, typename MC = DefMarkerCommon >
 class RegionMesh1D : public MeshEntity,
         public MC::RegionMarker
 {
 public:
-
-    //! \name Markers_Types
-    //@{
-
-    typedef MC MarkerCommon;
-    typedef typename MC::PointMarker     PointMarker;
-    typedef typename MC::EdgeMarker      EdgeMarker;
-    typedef typename MC::RegionMarker    RegionMarker;
-    typedef typename MC::RegionMarker    Marker;
-
-    //@}
-
-    //! \name Basic_Element_Shapes_Types
-    //@{
-
-    typedef GEOSHAPE                     VolumeShape;
-    typedef GEOSHAPE                     EdgeShape;
-    typedef typename GEOSHAPE::GeoBShape PointShape;
-
-    //@}
-
-    //! \name Geometric_Element_Types
-    //@{
-
-    typedef GeoElement1D<EdgeShape, MC>  VolumeType;
-    typedef GeoElement1D<EdgeShape, MC>  FaceType;
-    typedef GeoElement1D<EdgeShape, MC>  EdgeType;
-    typedef GeoElement0D<MC>             PointType;
-
-    //@}
-
-    //! \name GeoElement_Container_Types
-    /*!
-     * Typedefs for STL compliant containers of mesh geometric entities
-     * I Use SimpleVect for addressing from 1.
+    /** @defgroup public_types Public Types
+     * 
      */
-    //@{
+
+    /** @name Marker Types
+     *  @ingroup public_types
+     *  Markers for Point, Edge and Region
+     *  @{
+     */
+
+    //! Common Marker Class
+    typedef MC MarkerCommon;
+    //! Point Marker
+    typedef typename MC::PointMarker     PointMarker;
+    //! Edge Marker
+    typedef typename MC::EdgeMarker      EdgeMarker;
+    //! Region Marker
+    typedef typename MC::RegionMarker    RegionMarker;
+
+    /** @} */ // End of group Marker Types
+
+    /** @name Geometric Element Container Types
+     *  @ingroup public_types
+     *  Typedefs for STL compliant containers of mesh geometric entities.
+     * 
+     *  I Use SimpleVect container for addressing from 1.
+     *  @{
+     */
 
     //! Points Container
     typedef SimpleVect<PointType>  Points;
@@ -122,589 +110,1133 @@ public:
     //! Edges Container: at least boundary edges
     typedef SimpleVect<EdgeType>   Edges;
 
-    //@}
+    /** @} */ // End of group Geometric Element Container Types
 
-    //! \name Generic_Types
-    //@{
+    /** @name Generic Types
+     *  @ingroup public_types
+     *  Elements and Boundary Elements Types.
+     *  @{
+     */
 
+    //! Element Geometric Shape
     typedef GEOSHAPE                     ElementShape;
+    //! Boundary Element Geometric Shape
     typedef typename GEOSHAPE::GeoBShape BElementShape;
 
+    //! Element Geometric Type
     typedef GeoElement1D<GEOSHAPE, MC>   ElementType;
+    //! Boundary Element Geometric Type
     typedef GeoElement0D<MC>             BElementType;
 
-    typedef SimpleVect<EdgeType >        Elements;
+    //! Element Geometric Shape Container Type
+    typedef SimpleVect<EdgeType>         Elements;
+    //! Boundary Element Geometric Shape Container Type
     typedef SimpleVect<PointType>        BElements;
 
-    //@}
+    /** @} */ // End of group Generic Types
 
-
-    //! @name Constructors & Destructor
-    //@{
+    /** @name Constructors & Destructor
+     *  Default and Copy Constructor for the class.
+     *  @{
+     */
 
     //! Default constructor
-    /*!
-     * @param id marker of the RegionMesh1D
+    /** 
+     *  @param id marker of the RegionMesh1D
      */
-    explicit RegionMesh1D( ID id = 0 );
+    explicit RegionMesh1D( UInt id = 0 );
 
     //! Copy constructor
-    /*!
-     * @param mesh a RegionMesh1D
+    /**
+     *  @param mesh a RegionMesh1D
      */
     explicit RegionMesh1D( const RegionMesh1D<GEOSHAPE, MC>& mesh );
 
-    //@}
+    /** @} */ // End of group Constructors & Destructor
 
-
-    //! @name Operators
-    //@{
+    /** @name Operators
+     *  Public Operator Methods
+     *
+     *  @{
+     */
 
     //! Assignment operator
-    /*!
-     * @param mesh a RegionMesh1D
-     * @return the newly copied RegionMesh1D
+    /**
+     *  @param mesh a RegionMesh1D
+     *  @return the newly copied RegionMesh1D
      */
     RegionMesh1D<GEOSHAPE, MC> operator=( RegionMesh1D<GEOSHAPE, MC> const & mesh );
 
-    //@}
+    /** @} */ // End of group Operators
 
 
-    //! @name Methods
-    //@{
+    /** @defgroup public_methods Public Methods
+     *
+     */
 
+    /** @name Debugging Methods
+     *  @ingroup public_methods
+     *  Debugging methods
+     *
+     *  @{
+     */
+    
+    //! Display general information about the content of the class.
+    /**
+     *  Pretty output of information about the mesh.
+     *
+     *  @param verbose If true output is verbose, false otherwise (default);
+     *  @param out Output stream (std::cout default);
+     *  @return Output stream (for concatenation).
+     */
+    std::ostream & showMe( bool verbose = false, std::ostream & out = std::cout );
+    
+    //! Basic tests for mesh consistency.
+    /**
+     *  Check consistency of the mesh and fix errors.
+     *
+     *  @param level How much deep in the check we should go (not used yet).
+     *  @param fix If true errors will be fixed, not otherwise (default).
+     *  @param verbose If true output is verbose, false otherwise (default);
+     *  @param out Output stream (std::cerr default);
+     *  @return Severity of the errors.
+     */
+    int check( int level = 0, bool const fix = false, bool const verbose = true, std::ostream & out = std::cerr );
+
+    /** @} */ // End of group Debugging Methods
+
+
+    /** @name Geometric Methods
+     *  @ingroup public_methods
+     *  Geometric operations on mesh.
+     *
+     *  @{
+     */
+    
     //! Setup mesh
-    /*!
-     * Mesh construction by hand.
+    /**
+     *  @param Length Total length of the mesh.
+     *  @param NumberOfElements Number of elements inside the mesh.
+     *
+     *  Mesh construction by hand.
      */
     void setup( const Real& Length, const UInt& NumberOfElements );
 
-    //! Transform the mesh using boost::numeric::ublas; \author Cristiano Malossi:27/04/2010
-    /*! Scale, rotate and translate the mesh (operations performed in this order!).
-     *  NOTES:
-     *    -  Rotation follows Paraview conventions: first rotate around z-axis,
-     *       then around y-axis and finally around x-axis;
-     *    -  All the vectors must allow the command: operator[];
-     * @param scale        - vector of three components for (x,y,z) scaling of the mesh
-     * @param rotate       - vector of three components (radiants) for rotating the mesh
-     * @param translate    - vector of three components for (x,y,z) translation the mesh
+    //! Transform the mesh using boost::numeric::ublas.
+    /** Scale, rotate and translate the mesh (operations performed in this order).
+     *  @date   27/04/2010
+     *  @author Cristiano Malossi
+     *  @note - Rotation follows Paraview conventions: first rotate around z-axis,
+     *        then around y-axis and finally around x-axis;
+     *  @note - All the vectors must allow the command: operator[];
+     *  @param scale        vector of three components for (x,y,z) scaling of the mesh
+     *  @param rotate       vector of three components (radiants) for rotating the mesh
+     *  @param translate    vector of three components for (x,y,z) translation the mesh
+     *
      */
     template <typename VECTOR>
     void transformMesh( const VECTOR& scale, const VECTOR& rotate, const VECTOR& translate );
 
-    //! Get the maximum H over all the edges of the mesh; @author Cristiano Malossi: 27/04/2010
-    /*!
-     * @return maximum H
+    //! Get the maximum H over all the edges of the mesh.
+    /**
+     *  @date 27/04/2010
+     *  @author Cristiano Malossi
+     *  @return Maximum element length H
      */
     Real maxH() const;
 
-
-    //! Get the minumum H over all the edges of the mesh; @author Cristiano Malossi: 27/04/2010
-    /*!
-     * @return minumum H
+    //! Get the minumum H over all the edges of the mesh.
+    /**
+     *  @date 27/04/2010
+     *  @author Cristiano Malossi
+     *  @return Minimum element length H
      */
     Real minH() const;
 
-    //! Get the mean H over all the edges of the mesh; @author Cristiano Malossi: 27/04/2010
-    /*!
-     * @return maximum H
+    //! Get the mean H over all the edges of the mesh.
+    /**
+     *  @date 27/04/2010
+     *  @author Cristiano Malossi
+     *  @return Average element length H
      */
     Real meanH() const;
 
-    //@}
+    /** @} */ // End of group Geometric Methods
 
 
-    //! @name Switches Methods
-    /*!
-     * Switches are used to store the status of the RegionMesh The switches
-     * are used internally to control whether some data structures have been
-     * set up.
+    /** @name Switches Methods
+     *  @ingroup public_methods
+     *  Switches are used to store the status of the RegionMesh The switches
+     *  are used internally to control whether some data structures have been
+     *  set up.
      *
-     *     The possible Switches are
+     *  The possible Switches are:
+     *  - \c HAS_ALL_EDGES
+     *  - \c HAS_FACE_TO_EDGES
+     *  - \c HAS_BEEN_CHECKED
+     *  - \c HAS_BOUNDARY_EDGES
+     *  - \c EDGES_HAVE_ADIACENCY
      *
-     *    \verbatim
-     *
-     *     HAS_ALL_EDGES            HAS_FACE_TO_EDGES
-     *     HAS_BEEN_CHECKED
-     *     HAS_BOUNDARY_EDGES       EDGES_HAVE_ADIACENCY
-     *
-     *     \endverbatim
-     *
+     *  @{
      */
-    //@{
 
-    //! numSwitches
-    /*!
-     * @return the number of switches which have been set
+    //! Get the number of switch which have been set.
+    /**
+     *  @return The number of switches which have been set.
      */
     const UInt& numSwitches() const
     {
         return switches.size();
     }
 
-    void set_switches_for_regionmesh1D( Switch & sw );
-
+    //! Set a given switch as switch inside the class.
     /**
-     * Interrogate Switch
-     * @param _s name of the switch
-     * @return true if the name is in the switch, false otherwise
+     *  @param sw Switch to be set.
+     */
+    void setSwitch( Switch & sw );
+
+    //! Interrogate Switch.
+    /**
+     *  @param _s Name of the switch.
+     *  @return true if the name is in the switch, false otherwise.
      */
     bool getLinkSwitch( std::string const & _s ) const;
 
+    //! Set a switch using a given name
     /**
-     *  Set a switch
-     * @param _s
+     *  @param _s Name of the switch.
      */
     void setLinkSwitch( std::string const & _s );
 
+    //! Unset a switch.
     /**
-     * unset a switch
-     * @param _s
+     *  @param _s Name of the switch.
      */
     void unsetLinkSwitch( std::string const & _s );
 
-    //@}
+    /** @} */ // End of group Switch Methods
 
 
-    //! @name Generic Methods
-    /*!
-     * These are the generic methods to get information about the number of
-     * elements.  It is a generic interface common for all RegionMeshes (3D --
-     * 1D)
+    /** @name Generic Methods
+     *  @ingroup public_methods
+     *
+     *  These are the generic methods to get information about the number of
+     *  elements.
+     *
+     *  It is a generic interface common for all RegionMeshes (3D -- 1D).
+     * 
+     *  @{
      */
-    //@{
 
+    //! Number of local vertices for each (1D) element.
     /**
-     * Number of local vertices for each (1D) element
-     * @return Number of local vertices for each (1D) element
+     *  @return Number of local vertices for each (1D) element.
      */
     UInt numLocalVertices() const;
 
+    //! Number of elements in mesh.
     /**
-     * Number of local edges for each (1D) element
-     * @return Number of local edges for each (1D) element
-     */
-    //UInt numLocalEdges() const;
-
-    /**
-     * Number of elements in mesh (alias to numEdges())
-     * @return Number of elements in mesh (alias to numEdges())
+     *  @return Number of elements in mesh.
+     *  @sa numEdges
+     *  @note Alias to numEdges()
      */
     UInt numElements() const;
 
+    //! Number of 3D elements.
     /**
-     * Number of 3D elements
-     * @return Number of 3D elements
+     *  @return Number of 3D elements.
      */
     UInt & numElements();
 
+    //! Number of Global elements in mesh.
     /**
-     * Number of Global elements in mesh (alias to numEdges())
-     * @return Number of elements in mesh (alias to numEdges())
+     *  @return Number of elements in mesh.
+     *  @sa numEdges
+     *  @note Alias to numEdges()
      */
     UInt numGlobalElements() const;
 
+    //! Number of Global 3D elements.
     /**
-     * Number of Global 3D elements
-     * @return Number of 3D elements
+     *  @return Number of 3D elements.
      */
     UInt & numGlobalElements();
 
+    //! Number of Boundary edges.
     /**
-     * Number of Boundary edges
-     * @return Number of Boundary edges
+     * @return Number of Boundary edges.
      */
     UInt numBElements() const;
 
+    //! Number of boundary edges
     /**
-     * Number of boundary edges
-     * @return Number of boundary edges
+     *  @return Number of boundary edges
      */
     UInt& numBElements();
 
+    //! Get element at the i-th index.
     /**
-     * get element at the i-th index
-     * @param i index of the element
-     * @return element at index i
+     * @param i Index of the element
+     * @return Element at index i
      */
-    ElementType& element( const ID& i );
+    ElementType& element( const UInt& i );
 
+    //! Get element at the i-th index.
     /**
-     * get element at the i-th index
-     * @param i index of the element
-     * @return element at index i
+     * @param i Index of the element
+     * @return Element at index i
      */
-    const ElementType& element( const ID& i ) const;
+    const ElementType& element( const UInt& i ) const;
 
+    //! Get boundary element at the i-th index.
     /**
-     * get boundary element at the i-th index
-     * @param i index of the boundary element
-     * @return boundary element at the i-th index
+     * @param i Index of the element
+     * @return Boundary element at index i
      */
-    BElementType& bElement( const ID& i );
+    BElementType& bElement( const UInt& i );
 
+    //! Get boundary element at the i-th index.
     /**
-     * get boundary element at the i-th index
-     * @param i index of the boundary element
-     * @return boundary element at the i-th index
+     * @param i Index of the element
+     * @return Boundary element at index i
      */
-    const BElementType& bElement( const ID& i ) const;
+    const BElementType& bElement( const UInt& i ) const;
 
-    //@}
+    /** @} */ // End of group Generic Methods
 
 
-    //! \name Volume_Methods - For compatibility reasons this methods do the same as edge methods
-    //@{
+    /** @name Volume Methods
+     *  @ingroup public_methods
+     *
+     *  These are generic methods related to volumes.
+     * 
+     *  @note For compatibility reasons this methods do the same as edge methods.
+     *
+     *  @{
+     */
 
+    //! Returns Number of Volumes (not used in 1D)
     UInt numVolumes()       const                { return 0; }
+    //! Returns Global Number of Volumes (not used in 1D)
     UInt numGlobalVolumes() const                { return 0; }
-    const VolumeType& volume( const ID i ) const { ASSERT_BD( i > 0 && i <= edgeList.size() ); return edgeList( i ); }
-    VolumeType& volume( const ID i )             { ASSERT_BD( i > 0 && i <= edgeList.size() ); return edgeList( i ); }
+    //! Returns Volume for a given Id
+    /**
+     *  For compatibility reasons, it returns an edge (i.e. Volume for 1D meshes)
+     *  @param i Volume id
+     *  @return Reference to the Volume
+     */
+    const VolumeType& volume( const UInt i ) const { ASSERT_BD( i > 0 && i <= edgeList.size() ); return edgeList( i ); }
+    //! Returns Volume for a given Id
+    /** @copydoc volume */
+    VolumeType& volume( const UInt i )             { ASSERT_BD( i > 0 && i <= edgeList.size() ); return edgeList( i ); }
 
-    //@}
+    /** @} */ // End of group Volume Methods
 
 
-    //! \name Faces Methods - Not used in 1D
-    //@{
+    /** @name Faces Methods
+     *  @ingroup public_methods
+     *
+     *  These are generic methods related to faces.
+     *
+     *  @note These methods are not used in 1D.
+     *
+     *  @{
+     */
 
-    UInt numFaces()         const {return 0;}
-    UInt numGlobalFaces()   const {return 0;}
+    //! Returns Number of Faces (not used in 1D)
+    UInt numFaces()         const { return 0; }
+    //! Returns Global Number of Faces (not used in 1D)
+    UInt numGlobalFaces()   const { return 0; }
+    //! Returns true if there is local Faces table (not used in 1D)
     bool hasLocalFaces() const { return true; }
-    ID localFaceId( const ID /*volId*/, const ID /*locF*/ ) const { return 0; }
-    ID localFaceId( const VolumeType& /*iv*/, const ID /*locF*/ ) const {return 0;}
+    //! Returns local Face Id for a given Volume (not used in 1D)
+    UInt localFaceId( const UInt /*volId*/, const UInt /*locF*/ ) const { return 0; }
+    //! Returns local Face Id for a given Volume (not used in 1D)
+    UInt localFaceId( const VolumeType& /*iv*/, const UInt /*locF*/ ) const {return 0;}
+    //! Update Element-To-Faces lookup table (not implemented)
     void updateElementFaces( bool createFaces = false, UInt estimateFaceNumber = 0 );
+    //! Clean Element-To-Faces lookup table (not implemented)
     void cleanElementFaces() {}
 
-    //@}
+    /** @} */ // End of group Faces Methods
 
-    /* ============================================
-                      Edge Related Methods
-       ============================================*/
-    //! \name Edge_Methods All methods which operates on 1D elements
-    //@{
+    /** @name Edge Methods
+     *  @ingroup public_methods
+     *  All methods which operates on 1D elements.
+     *
+     *  There are different point counters which may bi interrogated or set:
+     *  - <strong>Number of Edges</strong>: is the declared number of total edges in the mesh.\n
+     *   <strong>Beware</strong>: A value different from zero does NOT imply that the
+     *   edges are actually stored.
+     *  - <strong>Number of Boundary Edges</strong>: is the declared number of boundary edges
+     *   in the mesh.\n
+     *   <strong>Beware</strong>: A value different from zero does NOT imply that
+     *   the boundary edges are actually stored.
+     *  - <strong>Number of Stored Edges</strong>: It is the number of Edges actually stored
+     *   on the edge container.
+     *  - <strong>Maximum number of stored edges</strong>: The number of edges that may stored
+     *   before the container is resized.\n
+     *   <strong>Important</strong>: This parameter has to be
+     *   set BEFORE inserting edges in the container if we want that pointer
+     *   into the container maintains their validity. The container will also
+     *   have a better performance.
+     *
+     *  @note To have more information on the Edge methods
+     *  look at the documentation of th eanalogous Edges methods.
+     * 
+     *  @{
+     */
+
+    //! Number of Edges.
     /**
-     * Returns number of Edge elements in the mesh
-     * as given by the internal counter
-     * @return
+     *  Returns number of Edge elements in the mesh
+     *  as given by the internal counter.
+     * 
+     *  @return Number of Edges.
      */
     UInt numEdges() const;
+    
+    //! Global number of Edges.
+    /**
+     *  Returns global number of Edge elements in the mesh
+     *  as given by the internal counter.
+     *
+     *  @return Global number of Edges.
+     */
     UInt numGlobalEdges() const;
 
-
+    //! Access number of Edges.
     /**
-     * Access number of Edge (internal counter)
-     * @return Access number of Edge (internal counter)
+     *  Access to the internal counter.
+     * 
+     *  @return Access number of Edges.
      */
     UInt & numEdges();
 
-    /**
-     * edges actually stored in list
-     * @return number of edges actually stored in list
+    //! Number of stored Edges.
+    /** 
+     *  Edges actually stored in list.
+     * 
+     *  @return number of edges actually stored in list.
      */
     UInt storedEdges() const;
 
+    //! Capacity of Edge Container.
     /**
+     *  Current capacity of Edges Container,
+     *  i.e. how many elements may be stored.
      *
-     * @return
+     *  @return Edges Container Capacity.
      */
-    UInt maxNumEdges() const; /*!< Current capacity of Edges Container,
-             i.e. how many elements may be stored */
+    UInt maxNumEdges() const;
 
+    //! Changes Current capacity of Edges.
     /**
-     * Changes Current capacity of Edges
-     * (Optionally sets internal counter.)
-     * @param n maximum number of edges
-     * @param setcounter true to set the counter, false otherwise
+     *  Optionally sets internal counter.
+     * 
+     *  @param n Maximum number of edges.
+     *  @param setcounter true to set the counter, false otherwise.
      */
     void setMaxNumEdges( UInt const n, bool const setcounter = false );
 
+    //! Adds Edges.
     /**
-     * Adds edges. Id computed automatically.
-     * @return ref to added edge
+     *  Adds edges. Id computed automatically.
+     * 
+     *  @return Reference to added edge.
      */
     EdgeType & addEdge();
 
+    //! Adds Edges.
     /**
-     * Adds edges. Id computed automatically.
-     * @param v edge to add
-     * @return reference to the newly added edge
+     *  Adds edges. Id computed automatically.
+     *
+     *  @param v Edge to add.
+     *  @return Reference to added edge.
      */
     EdgeType & addEdge( EdgeType const & v );
 
+    //! Adds Edges to specified position.
     /**
-     * Add edge to a specified position
-     * @param v edge to add
-     * @param pos position of the edge
-     * @return reference to the newly added edge
+     *  Adds edges. Id computed automatically.
+     *
+     *  @param v Edge to add.
+     *  @param pos Position of the edge.
+     *  @return Reference to added edge.
      */
-    EdgeType & setEdge( EdgeType const & v, ID const pos );
+    EdgeType & setEdge( EdgeType const & v, UInt const pos );
 
+    //! Set numEdges counter.
     /**
-     * set numEdges counter
+     *  Set internal numEdges counter.
      */
     void setEdgeCounter();
 
+    //! Reference to last edge stored in list.
     /**
-     * Reference to last edge stored in list.
-     * Useful for mesh readers
-     * @return reference of the last edge in the list
+     *  Useful for mesh readers
+     *  @return reference of the last edge in the list.
      */
     EdgeType & lastEdge();
 
+    //! i-th mesh 1D Element.
     /**
-     * ith mesh 1Delement
-     * @param i index of the mesh 1Delement
-     * @return the i-th edge
+     *  Returns the i-th mesh Element.
+     * 
+     *  @param i Index of the mesh 1D Element.
+     *  @return The i-th edge.
      */
-    EdgeType const & edge( ID const i ) const;
+    EdgeType const & edge( UInt const i ) const;
 
+    //! i-th mesh 1D Element reference.
     /**
-     * ith mesh 1Delement
-     * @param i index of the mesh edge
-     * @return reference to the ith mesh edge
+     *  Returns a reference to the i-th mesh Element.
+     *
+     *  @param i Index of the mesh 1D Element.
+     *  @return Reference to the i-th edge.
      */
-    EdgeType & edge( ID const i ); //!<
+    EdgeType & edge( UInt const i );
 
+    //! i-th mesh 1D Element length.
     /**
-     * ith mesh 1Delement length
-     * @param i index of the mesh 1Delement
-     * @return length of the i-th edge
+     *  Returns the i-th mesh 1D Element length.
+     * 
+     *  @param i Index of the mesh 1D Element.
+     *  @return Length of the i-th Edge.
      */
-    const Real edgeLength( const ID& i ) const;
+    const Real edgeLength( const UInt& i ) const;
 
-    //@}
-
-    /* ============================================
-                      Edge Related Methods
-       ============================================*/
-
-    //! \name  EdgeMethods Methods to access/create/modify edges data
-    /*!  There are different point counters which may bi interrogated or set:
-
-      <UL> <LI>Number of Edges: is the declared number of total edges in the
-      mesh. \b Beware: A value different from zero does NOT imply that the
-      edges are actually stored.</LI>
-
-      <LI>Number of Boundary Edges: is the declared number of boundary edges
-      in the mesh. \b Beware: A value different from zero does NOT imply that
-      the boundary edges are actually stored.</LI>
-
-      <LI>Number of Stored Edges: It is the number of Edges actually stored
-      on the edge container.</LI>
-
-      <LI>Maximum number of stored edges. The number of edges that may stored
-      before the container is resized. \b Important: This parameter has to be
-      set BEFORE inserting edges in the container if we want that pointer
-      into the container maintains their validity. The container will also
-      have a better performance.</LI> </UL> \note To have more information on
-      the Edge methods look at the documentation of th eanalogous Edges
-      methods */
-
-    //@{
-//     UInt numEdges() const; //!<Number of total edges in mesh (uses counter).
-//     UInt & numEdges();    //!<Number of total edges (uses counter, may modify)
-//     UInt storedEdges() const; //!< Number of stored edges
-//     UInt maxNumEdges() const;  //!< Max number of edges that can be stored
-    //! Set Maximum Number of Edges in the Edges container
-//     void setMaxNumEdges( UInt const n, bool const setcounter = false );
-    //! Adds a edge to list. Returns reference to it
+    //! Adds a edge to list.
+    /**
+     *  @param boundary true if it's a boundary edge.
+     *  @return Reference to the newly added edge.
+     */
     EdgeType & addEdge( bool const boundary = false );
-    //! Adds a edge (optionally a boundary edge) to the end of the list
-    //! and adjourn its ID. Returns reference to the added edge
+    
+    //! Adds a edge to the end of the list and adjourn its ID.
+    /**
+     *  @param f Reference of edge to be added.
+     *  @param boundary true if it's a boundary edge.
+     *  @return Reference to the newly added edge.
+     */
     EdgeType & addEdge( EdgeType const & f, bool const boundary = false );
-    //! Adds a edge (optionally a boundary edge) and adjourn its ID
-    EdgeType & setEdge( EdgeType const & f, ID position, bool const boundary = false );
-    //! The last edge in the container
-//     EdgeType & lastEdge();
-//     EdgeType const & edge( ID const i ) const; //<! ith mesh edge
-//     EdgeType & edge( ID const i ); //!< ith mesh edge (may  modify!)
-    EdgeType const & boundaryEdge( ID const i ) const; //!< ith boundary edge.
-    EdgeType & boundaryEdge( ID const i ); //!< ith boundary  edge.
-    void setNumBEdges( UInt const n ) ; //<! Set counter of boundary edges
-    bool hasEdges() const;  //<! Do I store mesh edges?
-    bool hasInternalEdges() const; //<! Do I store also internal edges?
-    UInt numBEdges() const;  //<! Number of Boundary Edges
-    bool isBoundaryEdge( EdgeType const & f ) const;  //<!Is this edge on boundary?
-    bool isBoundaryEdge( ID const & id ) const;  //<!Is  edge whose ID is id on boundary?
-    /*! Does this ID corresponds to a full edge? A FULL EDGE is a 1DElement  that is actually
-    stored in the Edge container */
+    
+    //! Adds a edge to the end of the list and adjourn its ID.
+    /**
+     *  @param f Reference of edge to be added.
+     *  @param position Desired id for the edge.
+     *  @param boundary true if it's a boundary edge.
+     *  @return Reference to the newly added edge.
+     */
+    EdgeType & setEdge( EdgeType const & f, UInt position, bool const boundary = false );
+    
+    //! i-th mesh 1D Boundary Element.
+    /**
+     *  Returns the i-th mesh Boundary Element.
+     *
+     *  @param i Index of the mesh 1D Boundary Element.
+     *  @return i-th boundary edge.
+     */
+    EdgeType const & boundaryEdge( UInt const i ) const;
+    
+    //! i-th mesh 1D Boundary Element Reference.
+    /**
+     *  Returns a reference to the i-th mesh Boundary Element.
+     *
+     *  @param i Index of the mesh 1D Boundary Element.
+     *  @return Reference to the i-th boundary edge.
+     */
+    EdgeType & boundaryEdge( UInt const i );
+    
+    //! Set boundary Edge counter.
+    /**
+     *  Set the Boundary Edges counter to a given number.
+     *
+     *  @param n Count of Boundary Edge.
+     */
+    void setNumBEdges( UInt const n );
+    
+    //! Do I store mesh edges?
+    /**
+     *  Returns true if edges are stored.
+     *
+     *  @return true if edge are stored, false otherwise.
+     */
+    bool hasEdges() const;
+    
+    //! Do I store mesh internal edges?
+    /**
+     *  Returns true if internal edges are stored.
+     *
+     *  @return true if internal edge are stored, false otherwise.
+     */
+    bool hasInternalEdges() const;
+    
+    //! Number of Boundary Edges.
+    /**
+     *  Returns the number of boundary edges.
+     *
+     *  @return Number of boundary Edges.
+     */
+    UInt numBEdges() const;
+    
+    //! Edge on boundary check.
+    /**
+     *  Is this edge on boundary?
+     *
+     *  @param f The Edge.
+     *  @return true if the edge is on the boundary, false otherwise.
+     */
+    bool isBoundaryEdge( EdgeType const & f ) const;
+    
+    //! Edge on boundary check by id.
+    /**
+     *  Is this edge, of given id, on boundary?
+     *
+     *  @param id Id of the edge.
+     *  @return true if the edge is on the boundary, false otherwise.
+     */
+    bool isBoundaryEdge( UInt const & id ) const;
+    
+    //! Full Edge check by id.
+    /**
+     *  Does this ID corresponds to a full edge?
+     *
+     *  A FULL EDGE is a 1D Element that is actually stored in the Edge container.
+     *
+     *  @param id Id of the edge.
+     *  @return true if the edge is actually stored, false otherwise.
+     */
     bool isFullEdge( UInt const & id ) const;
 
-    /*@{*/
-    //!ID of the  Element adjacent to a Edge.
-    /*!  Edge ID given.  Pos =1 or 2 indicates first or second element.  The
-      first element is the one <em>ORIENTED coherently with the edge</em> (AS
-      STORED in Edges). It means that the edge orientation is OUTWARD with
-      respect to the element. The second element is either null (boundary
-      edge) or indicates that the normal of the edge appears INWARD with
-      respect to that element*/
-
-    UInt edgeElement( ID const edgeId, UInt const Pos ) const;
-    //! Element adjacent to a EDGE. Edge reference given.
-    UInt edgeElement( EdgeType const & f, UInt const Pos ) const;
-    /*@}*/
-    //@}
+    /** @} */ // End of group Edges Methods
 
 
-    /* ============================================
-                      Points/Vertices Related Methods
-       ============================================*/
-    //! \name PointMethods Methods to access/create/modify Points/Vertices
-    //!data
-    /*!  There are different Point counters which may be interrogated or set
-         <UL> <LI>Number of Points: is the declared number of total points in
-         the mesh.</LI>
+    /** @name Points Methods
+     *  @ingroup public_methods
+     *  All methods which operates on Point Elements.
+     *
+     *  There are different Point counters which may be interrogated or set:
+     *  - <strong>Number of Points</strong>: is the declared number of total points in
+     *   the mesh.
+     *  - <strong>Number of Boundary Points</strong>: is the declared number of boundary
+     *   points in the mesh.\n
+     *   Does NOT imply that the boundary points are actually stored.
+     *  - <strong>Number of Stored Points</strong>: It is the number of Points actually stored
+     *   on the points container.
+     *  - <strong>Maximum number of stored points</strong>: The number of points that may
+     *   stored before the container is resized.\n
+     *   <strong>Very Important</strong>: This parameter has to be set <strong>BEFORE</strong>
+     *   inserting points in the container. Since GeoElements will contain POINTERS
+     *   into the container!\n
+     *   This is a debatable point!
+     *
+     *   @note To have more information on the Point methods look at the
+     *   documentation of the analogous Edges methods.
+     * 
+     *  @{
+     */
 
-      <LI>Number of Boundary Points: is the declared number of boundary
-      points in the mesh.  does NOT imply that the boundary points are
-      actually stored.</LI>
-
-      <LI>Number of Stored Points: It is the number of Points actually stored
-      on the points container.</LI>
-
-      <LI>Maximum number of stored points. The number of points that may
-      stored before the container is resized.  \b Very \b Important: This
-      parameter has to be set \b BEFORE inserting points in the
-      container. since Geoelements will contain POINTERS into the container!
-      This is a debatable point! </LI> </UL>
-
-      \note To have more information on the Point methods look at the
-      documentation of the analogous Edges methods */
-
-    //@{
-    //! Returns number of points in the mesh (interrogate counter)
+    //! Returns number of points in the mesh.
+    /**
+     *  Interrogation to the counter of points in the mesh.
+     *
+     *  @return Number of points in the mesh.
+     */
     UInt numPoints() const;
-    //! Changes number of points in the mesh (interrogate counter)
+    
+    //! Returns a reference to number of points in the mesh.
+    /**
+     *  Returns a reference to the internal counter of the number of points in the mesh.
+     *
+     *  @return Reference to the internal counter of number of points in the mesh.
+     */
     UInt & numPoints();
-    //! Returns number of points currently stored in Points container
-    /*! (interrogates container)*/
+    
+    //! Returns number of points in the mesh actually stored.
+    /**
+     *  Returns number of points in the mesh actually stored interrogating the internal counter.
+     *
+     *  @return Number of stored points in the mesh.
+     */
     UInt storedPoints() const;
+
+    //! Returns number of boundary points in the mesh actually stored.
+    /**
+     *  Returns number of boundary points in the mesh actually stored interrogating the internal counter.
+     *
+     *  @return Number of stored boundary points in the mesh.
+     */
     UInt storedBPoints() const;
+    
+    //! Returns the number of storable points in the mesh.
+    /**
+     *  Returns the number of storable points in the mesh interrogating the internal counter.
+     *
+     *  @return The number of storable points.
+     */
     UInt maxNumPoints() const;
+
+    //! Set the number of storable points in the mesh.
+    /**
+     *  Set the internal counter of storable points in the mesh.
+     *
+     *  @param n Maximum number of storable points in the mesh.
+     *  @param setcounter If true, it sets the internal counter, otherwise not (default).
+     */
     void setMaxNumPoints( UInt const n, bool const setcounter = false );
+    
+    //! Adds a Point in the mesh.
+    /**
+     *  Adds a Point inside the mesh, eventually specifing if it's a boundary point or a vertex.
+     *
+     *  @param boundary If true, it's a boundary point, otherwise not (default).
+     *  @param vertices If true, it's a vertex, otherwise not (default).
+     *  @return Reference to the newly added Point.
+     */
     PointType & addPoint( bool const boundary = false, bool const vertices = false );
+
+    //! Adds a Point in the mesh.
+    /**
+     *  Adds a Point inside the mesh, eventually specifing if it's a boundary point or a vertex.
+     *
+     *  @param p Point to be added.
+     *  @param boundary If true, it's a boundary point, otherwise not (default).
+     *  @param vertices If true, it's a vertex, otherwise not (default).
+     *  @return Reference to the newly added Point.
+     */
     PointType & addPoint( PointType const & p, bool const boundary = false, bool const vertices = false );
-    PointType & setPoint( PointType const & p, ID const position, bool const boundary = false, bool const vertices = false ); //!< adds point
-    PointType & firstPoint(); //!< first mesh point
-    PointType & lastPoint(); //!< last mesh point
-    PointType const & point( ID const i ) const; //!< ith mesh point
-    PointType & point( ID const i ); //!< ith mesh point
-    PointType const & boundaryPoint( ID const i ) const; //!< ith b. point.
-    PointType & boundaryPoint( ID const i ); //!< ith b. point.
-    UInt numBPoints() const; //!< counter of boundary points
-    void setNumBPoints( UInt const n ); //<! Sets counter of boundary points
 
-    // Vertices
+    //! Adds a Point in the mesh giving an id.
+    /**
+     *  Adds a Point inside the mesh giving an id, eventually specifing if it's a boundary point or a vertex.
+     *
+     *  @param p Point to be added.
+     *  @param position Desired id.
+     *  @param boundary If true, it's a boundary point, otherwise not (default).
+     *  @param vertices If true, it's a vertex, otherwise not (default).
+     *  @return Reference to the newly added Point.
+     */
+    PointType & setPoint( PointType const & p, UInt const position, bool const boundary = false, bool const vertices = false );
 
-    UInt  numVertices () const; //!< Number of vertices in Region
-    UInt& numVertices (); //!< Allows to change number of vertices in Region
-    UInt  numBVertices() const; //!< Number of boundary vertices in RegionMesh
+    //! Returns the first mesh Point.
+    /**
+     *  Returns the first Point in the mesh.
+     *
+     *  @return Reference to the first mesh Point.
+     */
+    PointType & firstPoint();
+    
+    //! Returns the last mesh Point.
+    /**
+     *  Returns the last Point in the mesh.
+     *
+     *  @return Reference to the last mesh Point.
+     */
+    PointType & lastPoint();
+    
+    //! Returns the i-th mesh Point.
+    /**
+     *  Returns the i-th Point in the mesh.
+     *
+     *  @param i Id of the Point.
+     *  @return i-th mesh Point.
+     */
+    PointType const & point( UInt const i ) const;
+
+    //! Returns a reference to the i-th mesh Point.
+    /**
+     *  Returns the i-th Point in the mesh.
+     *
+     *  @param i Id of the Point.
+     *  @return Reference i-th mesh Point.
+     */
+    PointType & point( UInt const i );
+    
+    //! Returns a reference to the i-th mesh Boundary Point.
+    /**
+     *  Returns the i-th Boundary Point in the mesh.
+     *
+     *  @param i Id of the Boundary Point.
+     *  @return Reference i-th mesh Boundary Point.
+     */
+    PointType const & boundaryPoint( UInt const i ) const;
+    
+    //! Returns a reference to the i-th mesh Boundary Point.
+    /**
+     *  Returns the i-th Boundary Point in the mesh.
+     *
+     *  @param i Id of the Boundary Point.
+     *  @return Reference i-th mesh Boundary Point.
+     */
+    PointType & boundaryPoint( UInt const i );
+    
+    //! Returns the number of Boundary Points.
+    /**
+     *  Returns the counter of the number of Boundary Points.
+     *
+     *  @return Number Boundary Points.
+     */
+    UInt numBPoints() const;
+    
+    //! Sets the number of Boundary Points.
+    /**
+     *  Sets the counter of the number of Boundary Points.
+     *
+     *  @param n Number Boundary Points.
+     */
+    void setNumBPoints( UInt const n );
+
+    /** @} */ // End of group Points Methods
+
+
+    /** @name Vertices Methods
+     *  @ingroup public_methods
+     *  All methods which operates on Vertex Elements.
+     *
+     *  @{
+     */
+    
+    //! Number of Vertices in Region.
+    /**
+     *  Returns the number of Vertices in Region.
+     *
+     *  @return Number of Vertices in Region.
+     */
+    UInt  numVertices () const;
+
+    //! Reference to the counter of Vertices in Region.
+    /**
+     *  Allows to change number of Vertices in Region.
+     *
+     *  @return Reference to the counter of Vertices in Region.
+     */
+    UInt& numVertices ();
+    
+    //! Number of Boundary Vertices in Region.
+    /**
+     *  Returns the number of Boundary Vertices in Region.
+     *
+     *  @return Number of Vertices in Region.
+     */
+    UInt  numBVertices() const;
+
+    //! Reference to the counter of Boundary Vertices in Region.
+    /**
+     *  Allows to change number of Boundary Vertices in Region.
+     *
+     *  @return Reference to the counter of Boundary Vertices in Region.
+     */
     UInt& numBVertices();
 
+    //! Returns the global number of vertices in the mesh.
+    /**
+     *  Interrogation to the counter of vertices in the mesh.
+     *
+     *  @return Number of vertices in the mesh.
+     */
     UInt numGlobalVertices() const;
+    
+    //! Set the number of vertices in the mesh.
+    /**
+     *  Set the internal counter of vertices points in the mesh.
+     *
+     *  @param n Number of vertices in the mesh.
+     */
     void setNumGlobalVertices( UInt const n ) { M_numGlobalVertices = n; }
 
-    bool isVertex        ( ID const & id )       const;  //<!Is this point a Vertex?
-    bool isVertex        ( PointType const & p ) const;  //<!Is this point a Vertex?
-    bool isBoundaryPoint ( PointType const & p ) const;  //<!Is this point on boundary?
-    bool isBoundaryPoint ( ID const & id )       const;  //<!Is this point on boundary?
-    //@}
+    //! Vertex check.
+    /**
+     *  Is this Point a Vertex?
+     *
+     *  @param id Point's id.
+     *  @return true if the Point is a Vertex, false otherwise.
+     */
+    bool isVertex        ( UInt const & id )       const;
+    
+    //! Vertex check.
+    /**
+     *  Is this Point a Vertex?
+     *
+     *  @param p A Point.
+     *  @return true if the Point is a Vertex, false otherwise.
+     */
+    bool isVertex        ( PointType const & p ) const;
+   
+    //! Vertex on boundary check.
+    /**
+     *  Is this Point on boundary?
+     *
+     *  @param id Point's id.
+     *  @return true if the Point is on boundary, false otherwise.
+     */
+    bool isBoundaryPoint ( UInt const & id )       const;
+
+    //! Vertex on boundary check.
+    /**
+     *  Is this Point on boundary?
+     *
+     *  @param p A Point.
+     *  @return true if the Point is on boundary, false otherwise.
+     */
+    bool isBoundaryPoint ( PointType const & p ) const;
+
+    /** @} */ // End of group Vertices Methods
 
 
-    //! Prints some mesh info
-    std::ostream & showMe( bool verbose = false, std::ostream & out = std::cout );
-    //! Basic tests for mesh consistency.
-    /*! For more estensive test see \link mesh_util.h */
-    int check( int level = 0, bool const fix = false, bool const verbose = true, std::ostream & out = std::cerr );
-
-
-    /*! \name Element_Adiacency_Methods
-
-     Methods to obtain the ID of Edges belonging to an element.
-     Accessing this information requires that the appropriate data
-     structures have been set up by using the updateElementEdges() method.
-
-     Often, it is NOT required to have the full information about edges and faces:
-     The ID of the Face and Edge entities may be calculated without
-     contructing the corresponding Edge of Face Object. This saves memory.  */
-    //@{
-
-
+    /** @name Element Adjacency Methods
+     *  @ingroup public_methods
+     *  Methods to obtain the ID of Edges belonging to an element.
+     * 
+     *  Accessing this information requires that the appropriate data
+     *  structures have been set up by using the updateElementEdges() method.
+     *
+     *  Often, it is NOT required to have the full information about edges and faces:
+     *  The ID of the Face and Edge entities may be calculated without
+     *  contructing the corresponding Edge of Face Object. This saves memory.
+     * 
+     *  @{
+     */
+    
     //! Is the array for local Edges set up?
-    /*! It does not use switches, but interrogates the container directly*/
-    bool hasLocalEdges() const {return true;}  //!<Check wether edge info is available
-    //!Edge n. locF around face. Returns edgeID
-    UInt localEdgeId( const FaceType& /*iface*/, const UInt /*locE*/ ) const {return 0;}
-    //!Edge n. locF around face. Returns edgeID
-    UInt localEdgeId( const ID /*facId*/, const UInt /*locE*/ ) const {return 0;}
-    //
-    void updateElementEdges(bool ce=false, UInt ee=0 ); //!<Build localEdgeId table
-    //! Destroys element-to-face container
+    /**
+     *  It does not use switches, but interrogates the container directly.
+     *
+     *  @return true if edges information are available, false otherwise.
+     */
+    bool hasLocalEdges() const { return true; }
+    
+    //! Edge Id of a certain edge number around a Face.
+    /**
+     *  Returns always zero. Parameters not used.
+     *
+     *  @param iface Reference to Face.
+     *  @param locE Position of the surrounding edges.
+     *  @return Edge Id.
+     */
+    UInt localEdgeId( const FaceType& iface, const UInt locE ) const { return 0; }
+    
+    //! Edge Id of a certain edge number around a Face.
+    /**
+     *  Returns always zero. Parameters not used.
+     *
+     *  @param facId Face Id.
+     *  @param locE Position of the surrounding edges.
+     *  @return Edge Id.
+     */
+    UInt localEdgeId( const UInt facId, const UInt locE ) const { return 0; }
+
+    //! Builds Edge-To-Face lookup table.
+    /**
+     *  Builds the lookup table for adjacency queries (not used).
+     *
+     *  It does nothing in 1D mesh.
+     *
+     *  @param ce true if edge Counter is set, false otherwise (default).
+     *  @param ee Edge count for memory reservation (0 default).
+     */
+    void updateElementEdges(bool ce=false, UInt ee=0 );
+    
+    //! Destroys Edge-To-Face lookup table.
+    /**
+     *  Destroys the lookup table for adjacency queries (not used).
+     *
+     *  It does nothing in 1D mesh.
+     */
     void cleanElementEdges() {return;}
 
-    //
+    //! Global number of Edges.
+    /**
+     *  Set the internal counter of global number of Edge elements in the mesh.
+     *
+     *  @param n Number of Edges.
+     */
     void setNumGlobalEdges( UInt const n ) { M_numGlobalEdges = n; }
 
-    /*! \name RegionContainers
+    //! Element adjacent to a Edge.
+    /**
+     *  Returns ID of adjacent Element to a given Edge.
      *
-
-     * Stl compliant containers for basic structure I expose them since they
-     * are standard containers
+     *  The first element is the one <strong>ORIENTED coherently with the edge</strong> (AS
+     *  STORED in Edges). It means that the edge orientation is OUTWARD with
+     *  respect to the element.\n
+     *  The second element is either null (boundary edge) or indicates that
+     *  the normal of the edge appears INWARD with respect to that element.
+     *
+     *  @param edgeId Id of a given edge.
+     *  @param Pos Position equal to 1 or 2 indicates first or second adjacent Element.
+     *  @return Edge ID given.
      */
-    //@{
-    Volumes volumeList; // NOT USED IN 1D
-    Points  pointList;  //!< Container of mesh points/verices
-    Faces   faceList;   // NOT USED IN 1D
-    Edges   edgeList;   //!< Container of mesh Edges.
+    UInt edgeElement( UInt const edgeId, UInt const Pos ) const;
 
-    SimpleVect<PointType * > _bPoints; //!< Boundary points list
-    //@}
+    //! Element adjacent to a Edge by reference.
+    /**
+     *  Returns ID of adjacent Element to a given Edge.
+     *
+     *  The first element is the one <strong>ORIENTED coherently with the edge</strong> (AS
+     *  STORED in Edges). It means that the edge orientation is OUTWARD with
+     *  respect to the element.\n
+     *  The second element is either null (boundary edge) or indicates that
+     *  the normal of the edge appears INWARD with respect to that element.
+     *
+     *  @param f Reference of a given edge.
+     *  @param Pos Position equal to 1 or 2 indicates first or second adjacent Element.
+     *  @return Edge ID given.
+     */
+    UInt edgeElement( EdgeType const & f, UInt const Pos ) const;
 
+    /** @} */ // End of group Element Adjacency Methods
+
+
+    /** @defgroup public_attributes Public Attributes
+     *
+     */
+
+    /** @name Region Containers
+     *  @ingroup public_attributes
+     *
+     *  STL compliant containers for basic structure.
+     *
+     *  I expose them since they are standard containers.
+     *
+     *  @{
+     */
+
+    //! Container of mesh Volumes (not used).
+    Volumes volumeList;
+    //! Container of mesh Points/Vertices.
+    Points  pointList;
+    //! Container of mesh Faces (not used).
+    Faces   faceList.
+    //! Container of mesh Edges.
+    Edges   edgeList;
+    //! Boundary points list.
+    SimpleVect<PointType * > _bPoints;
+
+    /** @} */ // End of group Region Containers
+
+
+    /** @name Switches
+     *  @ingroup public_attributes
+     *
+     *  @{
+     */
+    
     //! Switches
     Switch switches;
+    
+    /** @} */ // End of group Switches
+
 
 protected:
 
+    /** @defgroup protected_methods Protected Methods
+     */
+
+    //! Number of Elements in a list.
+    /**
+     *  Returns the number of elements in a given list.
+     *
+     *  @param list SimpleVect list of elements.
+     *  @return Number of elements in list.
+     */
     template < typename T >
     UInt numItems( SimpleVect< T> const & list ) const;
 
+    //! Maximum number of Elements in a list.
+    /**
+     *  Returns maximum number of elements in a given list.
+     *
+     *  @param list SimpleVect list of elements.
+     *  @return Maximum number of elements in list.
+     */
     template < typename T >
     UInt maxNumItems( SimpleVect< T> const & list ) const;
 
+    //! Set maximum number of Elements in a list.
+    /**
+     *  Set maximum number of elements in a given list.
+     *
+     *  @param list SimpleVect list of elements.
+     *  @param n Number of elements.
+     *  @param title Title for verbose output.
+     */
     template < typename T >
     void setMaxNumItems( SimpleVect< T> & list, UInt n, std::string title );
 
-    /*! Arrays containing the ids of Edges and Edges of each element
-    I use a Define to use localto global array or directly the
-    bareedges */
+    /** @defgroup protected_attributes Protected Attributes
+     */
+
+    /** @name Face-To-Edge and Boundary Edges Containers
+     *  @ingroup protected_attributes
+     * 
+     *  Arrays containing the ids of Edges and Edges of each element
+     *  I use a Define to use localto global array or directly the
+     *  bareedges.
+     * 
+     *  - \c SAVEMEMORY defined: Try to save some memory.
+     *  - \c NOT_BDATA_FIRST defined: boundary edge are stored apart.
+     *
+     *  @{
+     */
 #ifdef SAVEMEMORY
+    //! Face-To-Edge Container.
     BareItemsHandler<BareEdge> _FToE;
 #else
+    //! Face-To-Edge Container.
     SimpleArray<UInt> _FToE;
 #endif
 
 #ifdef NOT_BDATA_FIRST
+    //! Boundary Edges Container
     SimpleVect<EdgeType * > _bEdges;
 #endif
 
-    // Internal counters
+    /** @} */ // End of group Face-To-Edge and Boundary Containers
+    
+    /** @name Internal Counters
+     *  @ingroup protected_attributes
+     *
+     *  @{
+     */
+
+    //! Vertices Number
     UInt _numVertices;
+    //! Boundary Vertices Number
     UInt _numBVertices;
+    //! Points Number
     UInt _numPoints;
+    //! Boundary Points Number
     UInt _numBPoints;
+    //! Edges Number
     UInt _numEdges;
+    //! Boundary Edges Number
     UInt _numBEdges;
 
+    //! Global Vertices Number
     UInt M_numGlobalVertices;
+    //! Global Points Number
     UInt M_numGlobalPoints;
+    //! Global Edges Number
     UInt M_numGlobalEdges;
-};
+
+    /** @} */ // End of group Internal Counters
+
+}; // End of class RegionMesh1D
+
+
+// =================================================== //
+// =================================================== //
+//                    IMPLEMENTATION                   //
+// =================================================== //
+// =================================================== //
+
 
 // ===================================================
 // Constructors
 // ===================================================
 template <typename GEOSHAPE, typename MC>
-RegionMesh1D<GEOSHAPE, MC>::RegionMesh1D( ID id ) :
+RegionMesh1D<GEOSHAPE, MC>::RegionMesh1D( UInt id ) :
         MeshEntity          ( id ),
         MC::RegionMarker    (),
         switches            (),
@@ -718,7 +1250,7 @@ RegionMesh1D<GEOSHAPE, MC>::RegionMesh1D( ID id ) :
         M_numGlobalPoints   (),
         M_numGlobalEdges    ()
 {
-    set_switches_for_regionmesh1D( switches );
+    setSwitch( switches );
 }
 
 template <typename GEOSHAPE, typename MC>
@@ -936,7 +1468,7 @@ Real RegionMesh1D<GEOSHAPE, MC>::meanH() const
 // ===================================================
 template <typename GEOSHAPE, typename MC>
 void
-RegionMesh1D<GEOSHAPE, MC>::set_switches_for_regionmesh1D( Switch & sw )
+RegionMesh1D<GEOSHAPE, MC>::setSwitch( Switch & sw )
 {
     sw.create( "HAS_ALL_EDGES" );
     sw.create( "HAS_BOUNDARY_EDGES" );
@@ -980,13 +1512,6 @@ RegionMesh1D<GEOSHAPE, MC>::numLocalVertices() const
     return EdgeType::numLocalVertices;
 }
 
-// template <typename GEOSHAPE, typename MC>
-// UInt
-// RegionMesh1D<GEOSHAPE, MC>::numLocalEdges() const
-// {
-//     return EdgeType::numLocalEdges;
-// }
-
 // ************** Generic Methods
 template <typename GEOSHAPE, typename MC>
 UInt RegionMesh1D<GEOSHAPE, MC>::numElements() const
@@ -1026,28 +1551,28 @@ UInt &RegionMesh1D<GEOSHAPE, MC>::numBElements()
 
 template <typename GEOSHAPE, typename MC>
 typename RegionMesh1D<GEOSHAPE, MC>::ElementType &
-RegionMesh1D<GEOSHAPE, MC>::element( ID const & i )
+RegionMesh1D<GEOSHAPE, MC>::element( UInt const & i )
 {
     return edge( i );
 }
 
 template <typename GEOSHAPE, typename MC>
 typename RegionMesh1D<GEOSHAPE, MC>::ElementType const &
-RegionMesh1D<GEOSHAPE, MC>::element( ID const & i ) const
+RegionMesh1D<GEOSHAPE, MC>::element( UInt const & i ) const
 {
     return edge( i );
 }
 
 template <typename GEOSHAPE, typename MC>
 typename RegionMesh1D<GEOSHAPE, MC>::BElementType &
-RegionMesh1D<GEOSHAPE, MC>::bElement( ID const & i )
+RegionMesh1D<GEOSHAPE, MC>::bElement( UInt const & i )
 {
     return boundaryEdge( i );
 }
 
 template <typename GEOSHAPE, typename MC>
 typename RegionMesh1D<GEOSHAPE, MC>::BElementType const &
-RegionMesh1D<GEOSHAPE, MC>::bElement( ID const & i ) const
+RegionMesh1D<GEOSHAPE, MC>::bElement( UInt const & i ) const
 {
     return boundaryEdge( i );
 }
@@ -1125,7 +1650,7 @@ RegionMesh1D<GEOSHAPE, MC>::addEdge( EdgeType const & v )
 template <typename GEOSHAPE, typename MC>
 INLINE
 typename RegionMesh1D<GEOSHAPE, MC>::EdgeType &
-RegionMesh1D<GEOSHAPE, MC>::setEdge( EdgeType const & v, ID const pos )
+RegionMesh1D<GEOSHAPE, MC>::setEdge( EdgeType const & v, UInt const pos )
 {
     ASSERT_PRE( pos <= edgeList.capacity() , "position requested exceed capacity" <<
                 pos << " " << edgeList.capacity() ) ;
@@ -1145,7 +1670,7 @@ RegionMesh1D<GEOSHAPE, MC>::setEdgeCounter()
 template <typename GEOSHAPE, typename MC>
 INLINE
 typename RegionMesh1D<GEOSHAPE, MC>::EdgeType const &
-RegionMesh1D<GEOSHAPE, MC>::edge( ID const i ) const
+RegionMesh1D<GEOSHAPE, MC>::edge( UInt const i ) const
 {
     ASSERT_BD( i > 0 && i <= edgeList.size() ) ;
     return edgeList( i );
@@ -1154,7 +1679,7 @@ RegionMesh1D<GEOSHAPE, MC>::edge( ID const i ) const
 template <typename GEOSHAPE, typename MC>
 INLINE
 typename RegionMesh1D<GEOSHAPE, MC>::EdgeType &
-RegionMesh1D<GEOSHAPE, MC>::edge( ID const i )
+RegionMesh1D<GEOSHAPE, MC>::edge( UInt const i )
 {
     ASSERT_BD( i > 0 && i <= edgeList.size() ) ;
     return edgeList( i );
@@ -1162,7 +1687,7 @@ RegionMesh1D<GEOSHAPE, MC>::edge( ID const i )
 
 template <typename GEOSHAPE, typename MC>
 const Real
-RegionMesh1D<GEOSHAPE, MC>::edgeLength( const ID& i ) const
+RegionMesh1D<GEOSHAPE, MC>::edgeLength( const UInt& i ) const
 {
     ASSERT_BD( i >= 0 && i < edgeList.size() );
 
@@ -1261,7 +1786,7 @@ RegionMesh1D<GEOSHAPE, MC>::addEdge( EdgeType const & f, bool const boundary )
 template <typename GEOSHAPE, typename MC>
 INLINE
 typename RegionMesh1D<GEOSHAPE, MC>::EdgeType &
-RegionMesh1D<GEOSHAPE, MC>::setEdge( EdgeType const & f, ID position, bool const boundary )
+RegionMesh1D<GEOSHAPE, MC>::setEdge( EdgeType const & f, UInt position, bool const boundary )
 {
     ASSERT_PRE( position <= edgeList.capacity(), "Edge list size exceeded" <<
                 position << " " << edgeList.capacity() ) ;
@@ -1293,7 +1818,7 @@ RegionMesh1D<GEOSHAPE, MC>::lastEdge()
 template <typename GEOSHAPE, typename MC>
 INLINE
 typename RegionMesh1D<GEOSHAPE, MC>::EdgeType const &
-RegionMesh1D<GEOSHAPE, MC>::boundaryEdge( ID const i ) const
+RegionMesh1D<GEOSHAPE, MC>::boundaryEdge( UInt const i ) const
 {
 #ifdef NOT_BDATA_FIRST
     ASSERT_PRE( _bEdges.size() != 0 " Boundary Edges not Stored" ) ;
@@ -1310,7 +1835,7 @@ RegionMesh1D<GEOSHAPE, MC>::boundaryEdge( ID const i ) const
 template <typename GEOSHAPE, typename MC>
 INLINE
 typename RegionMesh1D<GEOSHAPE, MC>::EdgeType &
-RegionMesh1D<GEOSHAPE, MC>::boundaryEdge( ID const i )
+RegionMesh1D<GEOSHAPE, MC>::boundaryEdge( UInt const i )
 {
 #ifdef NOT_BDATA_FIRST
     ASSERT_PRE( _bEdges.size() != 0 " Boundary Edges not Stored" ) ;
@@ -1383,7 +1908,7 @@ RegionMesh1D<GEOSHAPE, MC>::isBoundaryEdge( EdgeType const & e ) const
 template <typename GEOSHAPE, typename MC>
 INLINE
 bool
-RegionMesh1D<GEOSHAPE, MC>::isBoundaryEdge( ID const & id ) const
+RegionMesh1D<GEOSHAPE, MC>::isBoundaryEdge( UInt const & id ) const
 {
     return isBoundaryEdge( edge( id ) );
 }
@@ -1391,7 +1916,7 @@ RegionMesh1D<GEOSHAPE, MC>::isBoundaryEdge( ID const & id ) const
 template <typename GEOSHAPE, typename MC>
 INLINE
 bool
-RegionMesh1D<GEOSHAPE, MC>::isFullEdge( ID const & id ) const
+RegionMesh1D<GEOSHAPE, MC>::isFullEdge( const UInt & id ) const
 {
     return edgeList.size() >= id;
 }
@@ -1399,7 +1924,7 @@ RegionMesh1D<GEOSHAPE, MC>::isFullEdge( ID const & id ) const
 template <typename GEOSHAPE, typename MC>
 INLINE
 UInt
-RegionMesh1D<GEOSHAPE, MC>::edgeElement( ID const i, UInt const Pos ) const
+RegionMesh1D<GEOSHAPE, MC>::edgeElement( UInt const i, UInt const Pos ) const
 {
     ASSERT_PRE( i <= edgeList.size(), "Not enough edges stored" ) ;
     ASSERT_BD( i > 0 ) ;
@@ -1501,7 +2026,7 @@ template <typename GEOSHAPE, typename MC>
 INLINE
 typename RegionMesh1D<GEOSHAPE, MC>::PointType &
 RegionMesh1D<GEOSHAPE, MC>::setPoint
-( PointType const & p, ID position, bool const boundary, bool const vertex )
+( PointType const & p, UInt position, bool const boundary, bool const vertex )
 {
     ASSERT_PRE( position <= pointList.capacity(), "Position  exceed lpoint list capacity" <<
                 position << " " << pointList.capacity() ) ;
@@ -1569,7 +2094,7 @@ RegionMesh1D<GEOSHAPE, MC>::point( UInt const i )
 template <typename GEOSHAPE, typename MC>
 INLINE
 typename RegionMesh1D<GEOSHAPE, MC>::PointType const &
-RegionMesh1D<GEOSHAPE, MC>::boundaryPoint( ID const i ) const
+RegionMesh1D<GEOSHAPE, MC>::boundaryPoint( UInt const i ) const
 {
     ASSERT_PRE( _bPoints.size() != 0, " Boundary Points not Stored" ) ;
     ASSERT_BD( i > 0 && i <= _bPoints.size() ) ;
@@ -1579,7 +2104,7 @@ RegionMesh1D<GEOSHAPE, MC>::boundaryPoint( ID const i ) const
 template <typename GEOSHAPE, typename MC>
 INLINE
 typename RegionMesh1D<GEOSHAPE, MC>::PointType &
-RegionMesh1D<GEOSHAPE, MC>::boundaryPoint( ID const i )
+RegionMesh1D<GEOSHAPE, MC>::boundaryPoint( UInt const i )
 {
     ASSERT_PRE( _bPoints.size() != 0, " Boundary Points not Stored" ) ;
     ASSERT_BD( i > 0 && i <= _bPoints.size() ) ;
@@ -1648,7 +2173,7 @@ RegionMesh1D<GEOSHAPE, MC>::isVertex( PointType const & p ) const
 template <typename GEOSHAPE, typename MC>
 INLINE
 bool
-RegionMesh1D<GEOSHAPE, MC>::isVertex( ID const & id ) const
+RegionMesh1D<GEOSHAPE, MC>::isVertex( UInt const & id ) const
 {
     return id <= _numVertices;
 }
@@ -1657,7 +2182,7 @@ RegionMesh1D<GEOSHAPE, MC>::isVertex( ID const & id ) const
 template <typename GEOSHAPE, typename MC>
 INLINE
 bool
-RegionMesh1D<GEOSHAPE, MC>::isBoundaryPoint( ID const & id ) const
+RegionMesh1D<GEOSHAPE, MC>::isBoundaryPoint( UInt const & id ) const
 {
     return point( id ).boundary();
 }
@@ -1826,6 +2351,6 @@ RegionMesh1D<GEOSHAPE, MC>::check( int level, bool const fix, bool const verb, s
     return severity;
 }
 
-}
+} // End of namespace LifeV
 
 #endif //REGIONMESH1D_H
