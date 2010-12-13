@@ -1,21 +1,49 @@
+//@HEADER
 /*
- This file is part of the LifeV library
- Copyright (C) 2001,2002,2003,2004 EPFL, INRIA and Politecnico di Milano
+*******************************************************************************
 
- This library is free software; you can redistribute it and/or
- modify it under the terms of the GNU Lesser General Public
- License as published by the Free Software Foundation; either
- version 2.1 of the License, or (at your option) any later version.
+    Copyright (C) 2004, 2005, 2007 EPFL, Politecnico di Milano, INRIA
+    Copyright (C) 2010 EPFL, Politecnico di Milano, Emory University
 
- This library is distributed in the hope that it will be useful,
- but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- Lesser General Public License for more details.
+    This file is part of LifeV.
 
- You should have received a copy of the GNU Lesser General Public
- License along with this library; if not, write to the Free Software
- Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+    LifeV is free software; you can redistribute it and/or modify
+    it under the terms of the GNU Lesser General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    LifeV is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+    Lesser General Public License for more details.
+
+    You should have received a copy of the GNU Lesser General Public License
+    along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
+
+*******************************************************************************
 */
+//@HEADER
+
+/*!
+    @file
+    @brief Preconditioned relaxed solver for non linear problems.
+
+    @author
+    @date 01-01-2004
+
+    Given a functional this method tries to find a root near an
+    initial guess sol. The two methods that the functional must
+    have are evalRes and solveJac. If solveJac inverts the exact
+    Jacobian of the functional, than this is equivalent to a Newton
+    method. If convergence do not appens in the expected ratio,
+    a linesearch algorithm is called (uadratic or parabolic).
+
+    @contributor Simone Deparis <simone.deparis@epfl.ch>
+    @maintainer Simone Deparis <simone.deparis@epfl.ch>
+
+
+ */
+
 #ifndef _NONLINRICHARDSON_HPP
 #define _NONLINRICHARDSON_HPP
 
@@ -27,6 +55,31 @@
 
 namespace LifeV
 {
+//! Preconditioned relaxed solver for non linear problems.
+   /*!
+       Add more details about the constructor.
+       NOTE: short description is automatically added before this part.
+       @param sol            :  the solution
+       @param maxit          :  input: maximum iterations, output: nb of iterations
+       @param abstol, reltol :  the stoping criteria is abstol+reltol*norm(residual_0),
+       @param eta_max        :  Maximum error tolerance for residual in linear solver.
+
+       The linear solver terminates when the relative
+       linear residual is smaller than eta*| f(sol) |.
+
+       The value linear_rel_tol send for the relative tolerance
+       to the linear solver is therefore eta. eta is determined
+       by the modified Eisenstat-Walker formula if etamax > 0.
+
+       @param linesearch     :  for now consider only the case linesearch=0
+         (coded but not theoretically analysed)
+
+       @param omega          :  default relaxation parameter to be passed to Aitken.
+       if omega is negative, then its absolute value is
+       taken as constant relaxation parameter
+
+    */
+
 template < class Fct >
 Int nonLinRichardson( EpetraVector& sol,
                       Fct&        functional,
@@ -40,25 +93,7 @@ Int nonLinRichardson( EpetraVector& sol,
                       UInt iter = UInt(0) )
 {
     /*
-      sol            :  the solution
-      maxit          :  input: maximum iterations, output: nb of iterations
-      abstol, reltol :  the stoping criteria is abstol+reltol*norm(residual_0),
-      eta_max        :  Maximum error tolerance for residual in linear solver.
-
-      The linear solver terminates when the relative
-      linear residual is smaller than eta*| f(sol) |.
-
-      The value linear_rel_tol send for the relative tolerance
-      to the linear solver is therefore eta. eta is determined
-      by the modified Eisenstat-Walker formula if etamax > 0.
-
-      linesearch     :  for now consider only the case linesearch=0
-      (coded but not theoretically analysed)
-
-      omega          :  default relaxation parameter to be passed to Aitken.
-      if omega is negative, then its absolute value is
-      taken as constant relaxation parameter
-    */
+        */
 
     /*
       max_increase_res: maximum number of successive increases in residual
