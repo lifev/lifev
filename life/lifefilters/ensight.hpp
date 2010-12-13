@@ -116,7 +116,7 @@ public:
 
     //! Read variable
     // TODO: RENAME ro readVariable(...) DURING INTERFACE WEEK
-    void rd_var(exporterData& dvar) {super::rd_var(dvar);}
+    void rd_var(ExporterData& dvar) {super::rd_var(dvar);}
 
     //! Set the mesh and the processor id
     void setMeshProcId( const mesh_ptrtype mesh, const Int& procId );
@@ -138,15 +138,15 @@ private:
     void writeCase(const Real& time);
     void writeAsciiGeometry( const std::string geoFile );
 
-    void writeAscii(const exporterData& dvar);
-    void writeAsciiScalar(const exporterData& dvar);
-    void writeAsciiVector(const exporterData& dvar);
+    void writeAscii(const ExporterData& dvar);
+    void writeAsciiScalar(const ExporterData& dvar);
+    void writeAsciiVector(const ExporterData& dvar);
     void caseMeshSection(std::ofstream& casef);
     void caseVariableSection(std::ofstream& casef);
     void caseTimeSection(std::ofstream& casef, const Real& time);
 
-    void readScalar( exporterData& dvar );
-    void readVector( exporterData& dvar );
+    void readScalar( ExporterData& dvar );
+    void readVector( ExporterData& dvar );
 
     void initProcId();
     void setNodesMap( std::vector<Int> ltGNodesMap );
