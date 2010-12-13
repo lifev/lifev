@@ -145,8 +145,6 @@ void  exactJacobian::solveLinearFluid()
                                            this->veloFluidMesh(),
                                            this->derVeloFluidMesh(),
                                            *M_rhsNew );
->>>>>>> doxygen, moved methods, put Epetra_ExactJacobian inside the class exactJacobian
-
     }
     else
     {
