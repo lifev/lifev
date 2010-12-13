@@ -1,30 +1,35 @@
 /* -*- mode: c++ -*-
+//@HEADER
+/*
+*******************************************************************************
 
-  This file is part of the LifeV library
+    Copyright (C) 2004, 2005, 2007 EPFL, Politecnico di Milano, INRIA
+    Copyright (C) 2010 EPFL, Politecnico di Milano, Emory University
 
-  Author(s): Paolo Crosetto <paolo.crosetto@epfl.ch>
-       Date: 2009-03-25
+    This file is part of LifeV.
 
-  Copyright (C) 2009 EPFL
+    LifeV is free software; you can redistribute it and/or modify
+    it under the terms of the GNU Lesser General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
 
-  This library is free software; you can redistribute it and/or
-  modify it under the terms of the GNU Lesser General Public
-  License as published by the Free Software Foundation; either
-  version 2.1 of the License, or (at your option) any later version.
+    LifeV is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+    Lesser General Public License for more details.
 
-  This library is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-  Lesser General Public License for more details.
+    You should have received a copy of the GNU Lesser General Public License
+    along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
 
-  You should have received a copy of the GNU Lesser General Public
-  License along with this library; if not, write to the Free Software
-  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+*******************************************************************************
 */
+//@HEADER
+
 /**
-   \file eigenSolver.hpp
+   \file eigenSolver.cpp
    \author Paolo Crosetto <paolo.crosetto@epfl.ch>
    \date 2009-03-25
+   \brief Class handling an eigensolver
  */
 
 
@@ -41,6 +46,10 @@
 
 #ifndef EIGENSOLVER_HPP
 #define EIGENSOLVER_HPP
+
+
+#pragma GCC diagnostic ignored "-Wunused-variable"
+#pragma GCC diagnostic ignored "-Wunused-parameter"
 
 #include "Epetra_MultiVector.h"
 #include "Epetra_SerialDenseVector.h"
@@ -59,6 +68,9 @@
 #include "AnasaziLOBPCGSolMgr.hpp"
 #include "AnasaziEpetraAdapter.hpp"
 
+#pragma GCC diagnostic warning "-Wunused-variable"
+#pragma GCC diagnostic warning "-Wunused-parameter"
+
 #include <cstdlib>
 #include <boost/shared_ptr.hpp>
 
@@ -67,12 +79,6 @@
 
 namespace LifeV
 {
-/**
- * class handling the Anasazi BlockKrylovSchur eigensolver. It works for any Epetra_Operator:
- * in particular in Lifev it shuld be used with the ComposedOperator, that inherits direcly
- * from the Epetra_Operator. Since the class ComposedOperator is templated it can contain
- *  both matrices or preconditioners. See Monolithic.cpp for an example using the ComposedOperator.
- */
 
 class UNDEF_EIGENSOLVER_EXCEPTION;
 
@@ -82,7 +88,18 @@ class UNDEF_EIGENSOLVER_EXCEPTION;
 //  template <typename DataType, typename Solver, typename Vector>
 class EigenSolver
 {
+/**
+   @class
+ * class handling the Anasazi BlockKrylovSchur eigensolver. It works for any Epetra_Operator:
+ * in particular in Lifev it shuld be used with the ComposedOperator, that inherits direcly
+ * from the Epetra_Operator. Since the class ComposedOperator is templated it can contain
+ *  both matrices or preconditioners. See Monolithic.cpp for an example using the ComposedOperator.
+ */
+
 public:
+
+    //!@name Public Types
+    //@{
     typedef double DataType;
     typedef Epetra_Operator Solver;
     typedef Epetra_MultiVector Vector;
@@ -92,10 +109,18 @@ public:
     typedef Anasazi::BlockKrylovSchurSolMgr <DataType,Vector,Solver>                 eigensolver_raw_type;
     typedef boost::shared_ptr<eigensolver_raw_type>                                  eigensolver_type;
 
+    //@}
+    //!@name Constructor and Destructor
+    //@{
+
     EigenSolver(boost::shared_ptr<Solver> const matrix, Epetra_BlockMap const& block_map, long unsigned int numvec);
 
     virtual ~EigenSolver()
     {}
+
+    //@}
+    //!@name Public Methods
+    //@{
 
     /**sets the parameters for the eigenproblem:
      */
@@ -109,14 +134,17 @@ public:
 
     /** solves the eigenproblem*/
     int solve();
-
+    //@}
 
 private :
 
+    //!@name Private Members
+    //@{
     Teuchos::RCP<Vector> M_eigenVectors;
     eigenpb_type MyProblem;
     Teuchos::ParameterList MyPL;
     eigensolver_type MySolver;
+    //@}
 };
 
 class UNDEF_EIGENSOLVER_EXCEPTION
