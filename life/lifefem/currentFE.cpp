@@ -93,8 +93,6 @@ CurrentFE::CurrentFE( const RefFE& refFE, const GeoMap& geoMap, const QuadRule& 
         M_divPhiRefUpdated(false)
 
 {
-    CONSTRUCTOR( "CurrentFE" );
-
     for ( UInt iterQuad(0); iterQuad < M_nbQuadPt; ++iterQuad )
     {
         for ( UInt iterNode(0); iterNode < M_nbNode; ++iterNode )
@@ -197,7 +195,6 @@ CurrentFE::CurrentFE( const RefFE& refFE, const GeoMap& geoMap )
         M_divPhiRefUpdated(false)
 
 {
-    CONSTRUCTOR( "CurrentFE" );
 }
 
 //----------------------------------------------------------------------
