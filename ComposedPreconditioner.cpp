@@ -70,7 +70,7 @@ void
 ComposedPreconditioner::setDataFromGetPot( const GetPot&      dataFile,
                                            const std::string& section )
 {
-    //createList( M_List, dataFile, section, "Composed" );
+    createList( M_list, dataFile, section, "Composed" );
 }
 
 void
@@ -79,7 +79,7 @@ ComposedPreconditioner::createList(       list_Type& /*list*/,
                                           const std::string& section,
                                           const std::string& subSection )
 {
-    //M_List.resize(listNumber);
+    //M_list.resize(listNumber);
     //! See http://trilinos.sandia.gov/packages/docs/r9.0/packages/ifpack/doc/html/index.html
     //! for more informations on the parameters
     ASSERT( !M_prec->getNumber(), "Error, when initializing the preconditioner, it must be empty" );
