@@ -94,13 +94,6 @@ MultiscaleAlgorithm::subIterate()
 }
 
 void
-MultiscaleAlgorithm::updateCouplingVariables()
-{
-    // The default approach is to extrapolate the next coupling variables
-    M_multiscale->extrapolateCouplingVariables();
-}
-
-void
 MultiscaleAlgorithm::showMe()
 {
     std::cout << "=================== Algorithm Information ===================" << std::endl << std::endl;
@@ -114,12 +107,6 @@ MultiscaleAlgorithm::showMe()
 // ===================================================
 // Methods
 // ===================================================
-void
-MultiscaleAlgorithm::initializeCouplingVariables()
-{
-    M_multiscale->initializeCouplingVariables();
-}
-
 Real
 MultiscaleAlgorithm::computeResidual() const
 {
@@ -132,7 +119,7 @@ MultiscaleAlgorithm::computeResidual() const
 // Set Methods
 // ===================================================
 void
-MultiscaleAlgorithm::setCommunicator( const MS_Comm_PtrType& comm )
+MultiscaleAlgorithm::setCommunicator( const multiscaleCommPtr_Type& comm )
 {
 
 #ifdef HAVE_LIFEV_DEBUG
@@ -144,7 +131,7 @@ MultiscaleAlgorithm::setCommunicator( const MS_Comm_PtrType& comm )
 }
 
 void
-MultiscaleAlgorithm::setModel( const MS_Model_PtrType model )
+MultiscaleAlgorithm::setModel( const multiscaleModelPtr_Type model )
 {
 
 #ifdef HAVE_LIFEV_DEBUG
@@ -160,51 +147,6 @@ MultiscaleAlgorithm::setModel( const MS_Model_PtrType model )
 
     M_couplingVariables.reset( new EpetraVector( couplingMap, Unique ) );
     M_couplingResiduals.reset( new EpetraVector( couplingMap, Unique ) );
-}
-
-// ===================================================
-// Get Methods
-// ===================================================
-const algorithms_Type&
-MultiscaleAlgorithm::type() const
-{
-    return M_type;
-}
-
-const MultiscaleAlgorithm::multiscaleModelPtr_Type
-MultiscaleAlgorithm::multiScaleProblem() const
-{
-    return M_multiscale;
-}
-
-const MS_Vector_PtrType
-MultiscaleAlgorithm::couplingVariables() const
-{
-    return M_couplingVariables;
-}
-
-const MS_Vector_PtrType
-MultiscaleAlgorithm::couplingResiduals() const
-{
-    return M_couplingResiduals;
-}
-
-const MS_Comm_PtrType
-MultiscaleAlgorithm::communicator() const
-{
-    return M_comm;
-}
-
-const UInt&
-MultiscaleAlgorithm::subiterationsMaximumNumber() const
-{
-    return M_subiterationsMaximumNumber;
-}
-
-const Real&
-MultiscaleAlgorithm::tolerance() const
-{
-    return M_tolerance;
 }
 
 // ===================================================

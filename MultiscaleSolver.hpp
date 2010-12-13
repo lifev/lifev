@@ -66,7 +66,7 @@ public:
     //@{
 
     //! Constructor
-    MultiscaleSolver();
+    explicit MultiscaleSolver();
 
     //! Destructor
     virtual ~MultiscaleSolver() {}
@@ -81,7 +81,7 @@ public:
     /*!
      * @param comm Epetra communicator
      */
-    void setCommunicator( const MS_Comm_PtrType& comm );
+    void setCommunicator( const multiscaleCommPtr_Type& comm );
 
     //! Setup the problem
     /*!
@@ -113,22 +113,22 @@ private:
     //@}
 
     // The main model (can be a specific model or a MultiScale model)
-    MS_Model_PtrType                         M_model;
+    multiscaleModelPtr_Type          M_model;
 
     // Algorithm for subiterations
-    MS_Algorithm_PtrType                     M_algorithm;
+    multiscaleAlgorithmPtr_Type      M_algorithm;
 
     // PhysicalData container
-    MS_GlobalDataContainer_PtrType           M_globalData;
+    multiscaleDataPtr_Type           M_globalData;
 
     // Communicator
-    MS_Comm_PtrType                          M_comm;
+    multiscaleCommPtr_Type           M_comm;
 
     // Displayer tool for MPI processes
-    boost::shared_ptr< Displayer >           M_displayer;
+    boost::shared_ptr< Displayer >   M_displayer;
 
     // Chrono performances
-    Chrono                                   M_chrono;
+    Chrono                           M_chrono;
 };
 
 } // Namespace multiscale

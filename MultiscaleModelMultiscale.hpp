@@ -59,7 +59,7 @@ namespace multiscale
  *  The MultiscaleModelMultiscale class is an implementation of the MultiscaleModel
  *  for a general multiscale problem.
  */
-class MultiscaleModelMultiscale: public virtual MS_Model_Type
+class MultiscaleModelMultiscale: public virtual multiscaleModel_Type
 {
 public:
 
@@ -67,7 +67,7 @@ public:
     //@{
 
     //! Constructor
-    MultiscaleModelMultiscale();
+    explicit MultiscaleModelMultiscale();
 
     //! Destructor
     virtual ~MultiscaleModelMultiscale();
@@ -121,19 +121,19 @@ public:
     void extrapolateCouplingVariables();
 
     //! Import the values of the coupling variables
-    void importCouplingVariables( const MS_Vector_Type& couplingVariables );
+    void importCouplingVariables( const multiscaleVector_Type& couplingVariables );
 
     //! Export the values of the coupling variables
-    void exportCouplingVariables( MS_Vector_Type& couplingVariables );
+    void exportCouplingVariables( multiscaleVector_Type& couplingVariables );
 
     //! Export the values of the coupling residuals
-    void exportCouplingResiduals( MS_Vector_Type& couplingResiduals );
+    void exportCouplingResiduals( multiscaleVector_Type& couplingResiduals );
 
     //! Export the Jacobian matrix
     /*!
      * @param jacobian Matrix
      */
-    void exportJacobian( MS_Matrix_Type& jacobian );
+    void exportJacobian( multiscaleMatrix_Type& jacobian );
 
     //@}
 
@@ -161,12 +161,12 @@ private:
     //@}
 
     // Models & Couplings
-    MS_ModelsVector_Type        M_modelsList;
-    MS_CouplingsVector_Type     M_couplingsList;
+    multiscaleModelsVector_Type        M_modelsList;
+    multiscaleCouplingsVector_Type     M_couplingsList;
 };
 
 //! Factory create function
-inline MS_Model_Type* createMultiscaleModelMultiscale()
+inline multiscaleModel_Type* createMultiscaleModelMultiscale()
 {
     return new MultiscaleModelMultiscale();
 }

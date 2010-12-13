@@ -50,7 +50,7 @@ namespace multiscale
 // Constructors & Destructor
 // ===================================================
 MultiscaleModel1D::MultiscaleModel1D() :
-        MS_Model_Type                  (),
+        multiscaleModel_Type           (),
 #ifdef HAVE_HDF5
         M_exporter                     ( new IOFile_Type() ),
         M_importer                     ( new IOFile_Type() ),
@@ -117,7 +117,7 @@ MultiscaleModel1D::setupData( const std::string& fileName )
     M_comm.reset( new Epetra_SerialComm() );
 #endif
 
-    MS_Model_Type::setupData( fileName );
+    multiscaleModel_Type::setupData( fileName );
 
     GetPot dataFile( fileName );
 
@@ -305,7 +305,7 @@ MultiscaleModel1D::showMe()
 {
     if ( M_displayer->isLeader() )
     {
-        MS_Model_Type::showMe();
+        multiscaleModel_Type::showMe();
 
         std::cout << "FE order            = " << "P1" << std::endl
                   << "DOF                 = " << M_data->mesh()->numPoints() << std::endl << std::endl;
@@ -395,48 +395,6 @@ MultiscaleModel1D::solveLinearModel( bool& solveLinearSystem )
 // ===================================================
 // Get Methods (couplings)
 // ===================================================
-MultiscaleModel1D::BCInterface_Type&
-MultiscaleModel1D::bcInterface() const
-{
-    return *M_bc;
-}
-
-Real
-MultiscaleModel1D::boundaryDensity( const BCFlag& /*flag*/ ) const
-{
-    return M_data->densityRho();
-}
-
-Real
-MultiscaleModel1D::boundaryViscosity( const BCFlag& /*flag*/ ) const
-{
-    return M_data->viscosity();
-}
-
-Real
-MultiscaleModel1D::boundaryArea( const BCFlag& flag ) const
-{
-    return M_solver->boundaryValue( *M_solution, OneD_A, flagConverter( flag ) );
-}
-
-Real
-MultiscaleModel1D::boundaryFlowRate( const BCFlag& flag ) const
-{
-    return M_solver->boundaryValue( *M_solution, OneD_Q, flagConverter( flag ) );
-}
-
-Real
-MultiscaleModel1D::boundaryPressure( const BCFlag& flag ) const
-{
-    return M_solver->boundaryValue( *M_solution, OneD_P, flagConverter( flag ) );
-}
-
-Real
-MultiscaleModel1D::boundaryDynamicPressure( const BCFlag& flag ) const
-{
-    return 0.5 * boundaryDensity( flag ) * std::pow( boundaryFlowRate( flag ) / boundaryArea( flag ), 2 );
-}
-
 Real
 MultiscaleModel1D::boundaryStress( const BCFlag& flag, const stress_Type& stressType ) const
 {
@@ -592,64 +550,6 @@ MultiscaleModel1D::boundaryDeltaStress( const BCFlag& flag, bool& solveLinearSys
         return 0.0;
     }
     }
-}
-
-// ===================================================
-// Get Methods
-// ===================================================
-MultiscaleModel1D::BC_Type&
-MultiscaleModel1D::bc() const
-{
-    return *(M_bc->handler());
-}
-
-
-MultiscaleModel1D::Data_Type&
-MultiscaleModel1D::data() const
-{
-    return *M_data;
-}
-
-MultiscaleModel1D::Physics_PtrType
-MultiscaleModel1D::physics() const
-{
-    return M_physics;
-}
-
-MultiscaleModel1D::Flux_PtrType
-MultiscaleModel1D::flux() const
-{
-    return M_flux;
-}
-
-MultiscaleModel1D::Source_PtrType
-MultiscaleModel1D::source() const
-{
-    return M_source;
-}
-
-MultiscaleModel1D::FESpace_PtrType
-MultiscaleModel1D::FESpace() const
-{
-    return M_FESpace;
-}
-
-MultiscaleModel1D::Solver_PtrType
-MultiscaleModel1D::solver() const
-{
-    return M_solver;
-}
-
-const MultiscaleModel1D::Solution_PtrType&
-MultiscaleModel1D::solution() const
-{
-    return M_solution;
-}
-
-const MultiscaleModel1D::Vector_PtrType&
-MultiscaleModel1D::solution( const std::string& quantity) const
-{
-    return (*M_solution)[quantity];
 }
 
 // ===================================================
@@ -811,12 +711,6 @@ MultiscaleModel1D::solve( BC_Type& bc, Solution_Type& solution, const std::strin
     }
 }
 
-OneD_BCSide
-MultiscaleModel1D::flagConverter( const BCFlag& flag ) const
-{
-    return (flag == 0) ? OneD_left : OneD_right;
-}
-
 #ifdef JACOBIAN_WITH_FINITEDIFFERENCE
 
 void
@@ -854,7 +748,7 @@ MultiscaleModel1D::imposePerturbation()
     Debug( 8130 ) << "MultiscaleModel1D::Perturbation() \n";
 #endif
 
-    for ( MS_CouplingsVector_ConstIterator i = M_couplings.begin(); i < M_couplings.end(); ++i )
+    for ( multiscaleCouplingsVectorConstIterator_Type i = M_couplings.begin(); i < M_couplings.end(); ++i )
         if ( ( *i )->isPerturbed() )
         {
             // Find the side to perturb and apply the perturbation
@@ -967,7 +861,7 @@ MultiscaleModel1D::tangentProblem( const OneD_BCSide& bcOutputSide, const OneD_B
 
     Real jacobianCoefficient(0);
 
-    for ( MS_CouplingsVector_ConstIterator i = M_couplings.begin(); i < M_couplings.end(); ++i )
+    for ( multiscaleCouplingsVectorConstIterator_Type i = M_couplings.begin(); i < M_couplings.end(); ++i )
         if ( ( *i )->isPerturbed() )
         {
             // Find the perturbed side

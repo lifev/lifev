@@ -69,7 +69,7 @@ namespace multiscale
 /*!
  *  @author Paolo Crosetto
  */
-class MultiscaleModelFSI3D: public virtual MS_Model_Type
+class MultiscaleModelFSI3D: public virtual multiscaleModel_Type
 {
 public:
 
@@ -110,7 +110,7 @@ public:
     //@{
 
     //! Constructor
-    MultiscaleModelFSI3D();
+    explicit MultiscaleModelFSI3D();
 
     //! Destructor
     virtual ~MultiscaleModelFSI3D() {}
@@ -170,56 +170,56 @@ public:
     /*!
      * @return BCInterface container
      */
-    bcInterface_Type& bcInterface();
+    bcInterface_Type& bcInterface() { return *M_fluidBC; }
 
     //! Get the density on a specific boundary face of the model
     /*!
      * @param flag flag of the boundary face
      * @return density value
      */
-    Real boundaryDensity( const BCFlag& /*flag*/) const;
+    Real boundaryDensity( const BCFlag& /*flag*/) const { return M_FSIoperator->dataFluid()->density(); }
 
     //! Get the viscosity on a specific boundary face of the model
     /*!
      * @param flag flag of the boundary face
      * @return viscosity value
      */
-    Real boundaryViscosity( const BCFlag& /*flag*/) const;
+    Real boundaryViscosity( const BCFlag& /*flag*/) const { return M_FSIoperator->dataFluid()->viscosity(); }
 
     //! Get the area on a specific boundary face of the model
     /*!
      * @param flag flag of the boundary face
      * @return area value
      */
-    Real boundaryArea( const BCFlag& flag ) const;
+    Real boundaryArea( const BCFlag& flag ) const { return M_FSIoperator->fluid().area( flag ); }
 
     //! Get the flow rate on a specific boundary face of the model
     /*!
      * @param flag flag of the boundary face
      * @return flow rate value
      */
-    Real boundaryFlowRate( const BCFlag& flag ) const;
+    Real boundaryFlowRate( const BCFlag& flag ) const { return M_FSIoperator->fluid().flux( flag, *M_FSIoperator->solutionPtr() ); }
 
     //! Get the integral of the pressure (on a specific boundary face)
     /*!
      * @param flag flag of the boundary face
      * @return pressure value
      */
-    Real boundaryPressure( const BCFlag& flag ) const;
+    Real boundaryPressure( const BCFlag& flag ) const { return M_FSIoperator->fluid().pressure( flag, *M_FSIoperator->solutionPtr() ); }
 
     //! Get the integral of the dynamic pressure (on a specific boundary face)
     /*!
      * @param flag flag of the boundary face
      * @return dynamic pressure value
      */
-    Real boundaryDynamicPressure( const BCFlag& flag ) const;
+    Real boundaryDynamicPressure( const BCFlag& flag ) const { return 0.5 * boundaryDensity( flag ) * ( boundaryFlowRate( flag ) * boundaryFlowRate( flag ) ) / ( boundaryArea( flag ) * boundaryArea( flag ) ); }
 
     //! Get the value of the Lagrange multiplier associated to a specific boundary face
     /*!
      * @param flag flag of the boundary face
      * @return Lagrange multiplier value
      */
-    Real boundaryLagrangeMultiplier( const BCFlag& flag ) const;
+    Real boundaryLagrangeMultiplier( const BCFlag& flag ) const { return M_FSIoperator->fluid().LagrangeMultiplier(flag, *M_fluidBC->handler(), M_FSIoperator->getSolution() ); }
 
     //! Get the integral of the normal stress (on a specific boundary face)
     /*!
@@ -317,8 +317,8 @@ private:
     //! Reset all the coupling perturbations imposed on the BCHandler
     void resetPerturbation();
 
-    Real bcFunctionDeltaZero( const Real& /*t*/, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const UInt& /*id*/ );
-    Real bcFunctionDeltaOne( const Real& /*t*/, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const UInt& /*id*/ );
+    Real bcFunctionDeltaZero( const Real& /*t*/, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const UInt& /*id*/ ) { return 0.; }
+    Real bcFunctionDeltaOne( const Real& /*t*/, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const UInt& /*id*/ ) { return 1.; }
 
     //@}
 
@@ -365,7 +365,7 @@ private:
 };
 
 //! Factory create function
-inline MS_Model_Type* createMultiscaleModelFSI3D()
+inline multiscaleModel_Type* createMultiscaleModelFSI3D()
 {
     return new MultiscaleModelFSI3D();
 }

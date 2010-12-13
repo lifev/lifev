@@ -60,7 +60,7 @@ public:
     //! @name Type definitions
     //@{
 
-    typedef boost::shared_ptr< MultiscaleModelMultiscale >                   multiscaleModelPtr_Type;
+    typedef boost::shared_ptr< MultiscaleModelMultiscale >                   multiscaleModelMultiscalePtr_Type;
 
     //@}
 
@@ -69,7 +69,7 @@ public:
     //@{
 
     //! Constructor
-    MultiscaleAlgorithm();
+    explicit MultiscaleAlgorithm();
 
     //! Destructor
     virtual ~MultiscaleAlgorithm() {}
@@ -90,7 +90,7 @@ public:
     virtual void subIterate();
 
     //! Update coupling variables for the next time step.
-    virtual void updateCouplingVariables();
+    virtual void updateCouplingVariables() { M_multiscale->extrapolateCouplingVariables(); }
 
     //! Display some information about the algorithm
     virtual void showMe();
@@ -102,7 +102,7 @@ public:
     //@{
 
     //! Initialize coupling variables for the first time step.
-    void initializeCouplingVariables();
+    void initializeCouplingVariables() { M_multiscale->initializeCouplingVariables(); }
 
     Real computeResidual() const;
 
@@ -116,13 +116,13 @@ public:
     /*!
      * @param comm Epetra communicator
      */
-    void setCommunicator( const MS_Comm_PtrType& comm );
+    void setCommunicator( const multiscaleCommPtr_Type& comm );
 
     //! Set the main MultiScale model
     /*!
      * @param model MultiScale model
      */
-    void setModel( const MS_Model_PtrType model );
+    void setModel( const multiscaleModelPtr_Type model );
 
     //@}
 
@@ -134,43 +134,43 @@ public:
     /*!
      * @return type of the algorithm
      */
-    const algorithms_Type& type() const;
+    const algorithms_Type& type() const { return M_type; }
 
     //! Get the Multiscale problem
     /*!
      * @return shared_ptr to the MultiScale problem
      */
-    const multiscaleModelPtr_Type multiScaleProblem() const;
+    const multiscaleModelMultiscalePtr_Type multiScaleProblem() const { return M_multiscale; }
 
     //! Get the coupling variables
     /*!
      * @return pointer to the coupling variables vector
      */
-    const MS_Vector_PtrType couplingVariables() const;
+    const multiscaleVectorPtr_Type couplingVariables() const { return M_couplingVariables; }
 
     //! Get the coupling residuals
     /*!
      * @return pointer to the coupling residuals vector
      */
-    const MS_Vector_PtrType couplingResiduals() const;
+    const multiscaleVectorPtr_Type couplingResiduals() const { return M_couplingResiduals; }
 
     //! Get the communicator
     /*!
      * @return pointer to the communicator
      */
-    const MS_Comm_PtrType communicator() const;
+    const multiscaleCommPtr_Type communicator() const { return M_comm; }
 
     //! Get the subiterations maximum number
     /*!
      * @return maximum number of subiterations
      */
-    const UInt& subiterationsMaximumNumber() const;
+    const UInt& subiterationsMaximumNumber() const { return M_subiterationsMaximumNumber; }
 
     //! Get the required tolerance
     /*!
      * @return tolerance
      */
-    const Real& tolerance() const;
+    const Real& tolerance() const { return M_tolerance; }
 
     //@}
 
@@ -196,12 +196,12 @@ protected:
 
     algorithms_Type                          M_type;
 
-    multiscaleModelPtr_Type                  M_multiscale;
+    multiscaleModelMultiscalePtr_Type        M_multiscale;
 
-    MS_Vector_PtrType                        M_couplingVariables;
-    MS_Vector_PtrType                        M_couplingResiduals;
+    multiscaleVectorPtr_Type                 M_couplingVariables;
+    multiscaleVectorPtr_Type                 M_couplingResiduals;
 
-    MS_Comm_PtrType                          M_comm;
+    multiscaleCommPtr_Type                   M_comm;
     boost::shared_ptr< Displayer >           M_displayer;
 
     UInt                                     M_subiterationsMaximumNumber;

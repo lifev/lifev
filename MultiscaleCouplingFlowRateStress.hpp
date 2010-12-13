@@ -51,7 +51,7 @@ namespace multiscale
 /*!
  *  @author Cristiano Malossi
  *
- *  The MultiscaleCouplingFlowRateStress class is an implementation of the MS_Coupling_Type
+ *  The MultiscaleCouplingFlowRateStress class is an implementation of the multiscaleCoupling_Type
  *  for applying FlowRate-Stress coupling conditions on the models.
  *
  *  The coupling equations are:
@@ -59,7 +59,7 @@ namespace multiscale
  *  \sigma_i = -P_j
  *  where Q is the flux and P is the pressure (or the total pressure).
  */
-class MultiscaleCouplingFlowRateStress: public virtual MS_Coupling_Type
+class MultiscaleCouplingFlowRateStress: public virtual multiscaleCoupling_Type
 {
 public:
 
@@ -67,7 +67,7 @@ public:
     //@{
 
     //! Constructor
-    MultiscaleCouplingFlowRateStress();
+    explicit MultiscaleCouplingFlowRateStress();
 
     //! Destructor
     virtual ~MultiscaleCouplingFlowRateStress() {}
@@ -94,7 +94,7 @@ public:
     /*!
      * @param couplingResiduals Global vector of variables
      */
-    void exportCouplingResiduals( MS_Vector_Type& couplingResiduals );
+    void exportCouplingResiduals( multiscaleVector_Type& couplingResiduals );
 
     //! Display some information about the coupling
     void showMe();
@@ -121,13 +121,13 @@ private:
      * @param localCouplingVariableID local coupling variable (perturbed)
      * @return list of models affected by the perturbation
      */
-    MS_ModelsVector_Type listOfPerturbedModels( const UInt& localCouplingVariableID );
+    multiscaleModelsVector_Type listOfPerturbedModels( const UInt& localCouplingVariableID );
 
     //! Insert constant coefficients into the Jacobian matrix
     /*!
      * @param jacobian the Jacobian matrix
      */
-    void insertJacobianConstantCoefficients( MS_Matrix_Type& jacobian );
+    void insertJacobianConstantCoefficients( multiscaleMatrix_Type& jacobian );
 
     //! Insert the Jacobian coefficient(s) depending on a perturbation of the model, due to a specific variable (the column)
     /*!
@@ -136,7 +136,7 @@ private:
      * @param ID the global ID of the model which is perturbed by the variable
      * @param solveLinearSystem a flag to which determine if the linear system has to be solved
      */
-    void insertJacobianDeltaCoefficients( MS_Matrix_Type& jacobian, const UInt& column, const UInt& ID, bool& solveLinearSystem );
+    void insertJacobianDeltaCoefficients( multiscaleMatrix_Type& jacobian, const UInt& column, const UInt& ID, bool& solveLinearSystem );
 
     //! Display some information about the coupling
     /*!
@@ -167,17 +167,17 @@ private:
 
     //@}
 
-    BCFunctionBase M_baseFlowRate3D;
-    BCFunctionBase M_baseStress3D;
+    BCFunctionBase                 M_baseFlowRate3D;
+    BCFunctionBase                 M_baseStress3D;
 
     OneDimensionalModel_BCFunction M_baseFlowRate1D;
     OneDimensionalModel_BCFunction M_baseStress1D;
 
-    stress_Type    M_stressType;
+    stress_Type                    M_stressType;
 };
 
 //! Factory create function
-inline MS_Coupling_Type* createMultiscaleCouplingFlowRateStress()
+inline multiscaleCoupling_Type* createMultiscaleCouplingFlowRateStress()
 {
     return new MultiscaleCouplingFlowRateStress();
 }

@@ -51,10 +51,10 @@ namespace multiscale
 /*!
  *  @author Cristiano Malossi
  *
- *  The MultiscaleCouplingStress class is an implementation of the MS_Coupling_Type
+ *  The MultiscaleCouplingStress class is an implementation of the multiscaleCoupling_Type
  *  for applying Stress coupling conditions on the models.
  */
-class MultiscaleCouplingStress: public virtual MS_Coupling_Type
+class MultiscaleCouplingStress: public virtual multiscaleCoupling_Type
 {
 public:
 
@@ -62,7 +62,7 @@ public:
     //@{
 
     //! Constructor
-    MultiscaleCouplingStress();
+    explicit MultiscaleCouplingStress();
 
     //! Destructor
     virtual ~MultiscaleCouplingStress() {}
@@ -86,7 +86,7 @@ public:
     void initializeCouplingVariables();
 
     //! Update the values of the coupling residuals
-    void exportCouplingResiduals( MS_Vector_Type& couplingResiduals );
+    void exportCouplingResiduals( multiscaleVector_Type& couplingResiduals );
 
     //! Display some information about the coupling
     void showMe();
@@ -113,13 +113,13 @@ private:
      * @param LocalCouplingVariableID local coupling variable (perturbed)
      * @return list of models affected by the perturbation
      */
-    MS_ModelsVector_Type listOfPerturbedModels( const UInt& localCouplingVariableID );
+    multiscaleModelsVector_Type listOfPerturbedModels( const UInt& localCouplingVariableID );
 
     //! Insert constant coefficients into the Jacobian matrix
     /*!
      * @param jacobian the Jacobian matrix
      */
-    void insertJacobianConstantCoefficients( MS_Matrix_Type& jacobian );
+    void insertJacobianConstantCoefficients( multiscaleMatrix_Type& jacobian );
 
     //! Insert the Jacobian coefficient(s) depending on a perturbation of the model, due to a specific variable (the column)
     /*!
@@ -128,7 +128,7 @@ private:
      * @param ID the global ID of the model which is perturbed by the variable
      * @param solveLinearSystem a flag to which determine if the linear system has to be solved
      */
-    void insertJacobianDeltaCoefficients( MS_Matrix_Type& jacobian, const UInt& column, const UInt& ID, bool& solveLinearSystem );
+    void insertJacobianDeltaCoefficients( multiscaleMatrix_Type& jacobian, const UInt& column, const UInt& ID, bool& solveLinearSystem );
 
     //! Display some information about the coupling
     /*!
@@ -152,15 +152,15 @@ private:
 
     //@}
 
-    BCFunctionBase M_baseStress3D;
+    BCFunctionBase                 M_baseStress3D;
 
     OneDimensionalModel_BCFunction M_baseStress1D;
 
-    stress_Type    M_stressType;
+    stress_Type                    M_stressType;
 };
 
 //! Factory create function
-inline MS_Coupling_Type* createMultiscaleCouplingStress()
+inline multiscaleCoupling_Type* createMultiscaleCouplingStress()
 {
     return new MultiscaleCouplingStress();
 }

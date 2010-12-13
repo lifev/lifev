@@ -48,10 +48,10 @@ namespace multiscale
 /*!
  *  @author Cristiano Malossi
  *
- *  The MultiscaleAlgorithmExplicit is an implementation of MS_Algorithm_Type
+ *  The MultiscaleAlgorithmExplicit is an implementation of multiscaleAlgorithm_Type
  *  which implements the Explicit method.
  */
-class MultiscaleAlgorithmExplicit : public virtual MS_Algorithm_Type
+class MultiscaleAlgorithmExplicit : public virtual multiscaleAlgorithm_Type
 {
 public:
 
@@ -59,7 +59,7 @@ public:
     //@{
 
     //! Constructor
-    MultiscaleAlgorithmExplicit();
+    explicit MultiscaleAlgorithmExplicit();
 
     //! Destructor
     virtual ~MultiscaleAlgorithmExplicit() {}
@@ -70,20 +70,11 @@ public:
     //! @name MultiScale Algorithm Virtual Methods
     //@{
 
-    //! Setup the data of the algorithm using a data file
-    /*!
-     * @param FileName Name of the data file.
-     */
-    void setupData( const std::string& fileName );
-
     //! Perform sub-iteration on the coupling variables
-    void subIterate();
+    void subIterate() { toleranceSatisfied(); }
 
     //! Update coupling variables for the next time step.
-    void updateCouplingVariables();
-
-    //! Display some information about the algorithm
-    void showMe();
+    void updateCouplingVariables() { M_multiscale->initializeCouplingVariables(); }
 
     //@}
 
@@ -101,7 +92,7 @@ private:
 };
 
 //! Factory create function
-inline MS_Algorithm_Type* createMultiscaleAlgorithmExplicit()
+inline multiscaleAlgorithm_Type* createMultiscaleAlgorithmExplicit()
 {
     return new MultiscaleAlgorithmExplicit();
 }

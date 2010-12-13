@@ -143,38 +143,38 @@ class MultiscaleCoupling;
 class MultiscaleData;
 
 // Type definitions
-typedef EntityFlag                                                 BCFlag;
+typedef EntityFlag                                                        BCFlag;
 
-typedef Displayer::comm_PtrType                                    MS_Comm_PtrType;
+typedef Displayer::comm_PtrType                                           multiscaleCommPtr_Type;
 
-typedef EpetraVector                                               MS_Vector_Type;
-typedef boost::shared_ptr< MS_Vector_Type >                        MS_Vector_PtrType;
+typedef EpetraVector                                                      multiscaleVector_Type;
+typedef boost::shared_ptr< multiscaleVector_Type >                        multiscaleVectorPtr_Type;
 
-typedef EpetraMatrix< Real >                                       MS_Matrix_Type;
-typedef boost::shared_ptr< MS_Matrix_Type >                        MS_Matrix_PtrType;
+typedef EpetraMatrix< Real >                                              multiscaleMatrix_Type;
+typedef boost::shared_ptr< multiscaleMatrix_Type >                        multiscaleMatrixPtr_Type;
 
-typedef MultiscaleAlgorithm                                        MS_Algorithm_Type;
-typedef boost::shared_ptr< MS_Algorithm_Type >                     MS_Algorithm_PtrType;
-typedef singleton< factory< MS_Algorithm_Type, algorithms_Type > > MS_Algorithm_Factory;
+typedef MultiscaleAlgorithm                                               multiscaleAlgorithm_Type;
+typedef boost::shared_ptr< multiscaleAlgorithm_Type >                     multiscaleAlgorithmPtr_Type;
+typedef singleton< factory< multiscaleAlgorithm_Type, algorithms_Type > > multiscaleAlgorithmFactory_Type;
 
-typedef MultiscaleModel                                            MS_Model_Type;
-typedef boost::shared_ptr< MS_Model_Type >                         MS_Model_PtrType;
-typedef singleton< factory< MS_Model_Type, models_Type > >         MS_Model_Factory;
+typedef MultiscaleModel                                                   multiscaleModel_Type;
+typedef boost::shared_ptr< multiscaleModel_Type >                         multiscaleModelPtr_Type;
+typedef singleton< factory< multiscaleModel_Type, models_Type > >         multiscaleModelFactory_Type;
 
-typedef MultiscaleCoupling                                         MS_Coupling_Type;
-typedef boost::shared_ptr< MS_Coupling_Type >                      MS_Coupling_PtrType;
-typedef singleton< factory< MS_Coupling_Type, couplings_Type > >   MS_Coupling_Factory;
+typedef MultiscaleCoupling                                                multiscaleCoupling_Type;
+typedef boost::shared_ptr< multiscaleCoupling_Type >                      multiscaleCouplingPtr_Type;
+typedef singleton< factory< multiscaleCoupling_Type, couplings_Type > >   multiscaleCouplingFactory_Type;
 
-typedef std::vector< MS_Model_PtrType >                            MS_ModelsVector_Type;
-typedef MS_ModelsVector_Type::iterator                             MS_ModelsVector_Iterator;
-typedef MS_ModelsVector_Type::const_iterator                       MS_ModelsVector_ConstIterator;
+typedef std::vector< multiscaleModelPtr_Type >                            multiscaleModelsVector_Type;
+typedef multiscaleModelsVector_Type::iterator                             multiscaleModelsVectorIterator_Type;
+typedef multiscaleModelsVector_Type::const_iterator                       multiscaleModelsVectorConstIterator_Type;
 
-typedef std::vector< MS_Coupling_PtrType >                         MS_CouplingsVector_Type;
-typedef MS_CouplingsVector_Type::iterator                          MS_CouplingsVector_Iterator;
-typedef MS_CouplingsVector_Type::const_iterator                    MS_CouplingsVector_ConstIterator;
+typedef std::vector< multiscaleCouplingPtr_Type >                         multiscaleCouplingsVector_Type;
+typedef multiscaleCouplingsVector_Type::iterator                          multiscaleCouplingsVectorIterator_Type;
+typedef multiscaleCouplingsVector_Type::const_iterator                    multiscaleCouplingsVectorConstIterator_Type;
 
-typedef MultiscaleData                                             MS_GlobalDataContainer_Type;
-typedef boost::shared_ptr< MS_GlobalDataContainer_Type >           MS_GlobalDataContainer_PtrType;
+typedef MultiscaleData                                                    multiscaleData_Type;
+typedef boost::shared_ptr< multiscaleData_Type >                          multiscaleDataPtr_Type;
 
 // ===================================================
 // MS Utility Methods

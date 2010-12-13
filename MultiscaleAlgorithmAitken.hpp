@@ -50,10 +50,10 @@ namespace multiscale
 /*!
  *  @author Cristiano Malossi
  *
- *  The MultiscaleAlgorithmAitken is an implementation of MS_Algorithm_Type
+ *  The MultiscaleAlgorithmAitken is an implementation of multiscaleAlgorithm_Type
  *  which implements the Aitken method.
  */
-class MultiscaleAlgorithmAitken : public virtual MS_Algorithm_Type
+class MultiscaleAlgorithmAitken : public virtual multiscaleAlgorithm_Type
 {
 public:
 
@@ -61,7 +61,7 @@ public:
     //@{
 
     //! Constructor
-    MultiscaleAlgorithmAitken();
+    explicit MultiscaleAlgorithmAitken();
 
     //! Destructor
     virtual ~MultiscaleAlgorithmAitken() {}
@@ -100,7 +100,7 @@ protected:
 
     std::map< std::string, methodType >            M_methodMap;
     methodType                                     M_method;
-    generalizedAitken< MS_Vector_Type >            M_generalizedAitken;
+    generalizedAitken< multiscaleVector_Type >     M_generalizedAitken;
 
 private:
 
@@ -115,7 +115,7 @@ private:
 };
 
 //! Factory create function
-inline MS_Algorithm_Type* createMultiscaleAlgorithmAitken()
+inline multiscaleAlgorithm_Type* createMultiscaleAlgorithmAitken()
 {
     return new MultiscaleAlgorithmAitken();
 }

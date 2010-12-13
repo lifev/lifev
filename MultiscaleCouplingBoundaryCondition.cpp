@@ -45,10 +45,10 @@ namespace multiscale
 // Constructors & Destructor
 // ===================================================
 MultiscaleCouplingBoundaryCondition::MultiscaleCouplingBoundaryCondition() :
-        MS_Coupling_Type       (),
-        M_fileName             (),
-        M_list                 (),
-        M_listSize             ()
+        multiscaleCoupling_Type       (),
+        M_fileName                    (),
+        M_list                        (),
+        M_listSize                    ()
 {
 
 #ifdef HAVE_LIFEV_DEBUG
@@ -69,7 +69,7 @@ MultiscaleCouplingBoundaryCondition::setupData( const std::string& fileName )
     Debug( 8210 ) << "MultiscaleCouplingBoundaryCondition::SetupData() \n";
 #endif
 
-    MS_Coupling_Type::setupData( fileName );
+    multiscaleCoupling_Type::setupData( fileName );
 
     M_fileName = fileName;
     GetPot dataFile( fileName );
@@ -129,7 +129,7 @@ MultiscaleCouplingBoundaryCondition::showMe()
 {
     if ( M_displayer->isLeader() )
     {
-        MS_Coupling_Type::showMe();
+        multiscaleCoupling_Type::showMe();
 
         std::cout << "List size           = " << M_listSize << std::endl;
         std::cout << "List                = ";
@@ -142,7 +142,7 @@ MultiscaleCouplingBoundaryCondition::showMe()
 // ===================================================
 // Private MultiScale PhysicalCoupling Implementation
 // ===================================================
-MS_ModelsVector_Type
+multiscaleModelsVector_Type
 MultiscaleCouplingBoundaryCondition::listOfPerturbedModels( const UInt& /*localCouplingVariableID*/ )
 {
 
@@ -150,7 +150,7 @@ MultiscaleCouplingBoundaryCondition::listOfPerturbedModels( const UInt& /*localC
     Debug( 8210 ) << "MultiscaleCouplingBoundaryCondition::GetListOfPerturbedModels() \n";
 #endif
 
-    MS_ModelsVector_Type emptyList;
+    multiscaleModelsVector_Type emptyList;
 
     return emptyList;
 }

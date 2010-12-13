@@ -79,10 +79,10 @@ namespace multiscale
 /*!
  *  @author Gilles Fourestey, Cristiano Malossi
  *
- *  The MultiscaleModel1D class is an implementation of the MS_Model_Type
+ *  The MultiscaleModel1D class is an implementation of the multiscaleModel_Type
  *  for 1D Fluid problem.
  */
-class MultiscaleModel1D: public virtual MS_Model_Type
+class MultiscaleModel1D: public virtual multiscaleModel_Type
 {
 public:
 
@@ -123,7 +123,7 @@ public:
     //@{
 
     //! Constructor
-    MultiscaleModel1D();
+    explicit MultiscaleModel1D();
 
     //! Destructor
     virtual ~MultiscaleModel1D() {}
@@ -187,49 +187,49 @@ public:
     /*!
      * @return BCInterface container
      */
-    BCInterface_Type& bcInterface() const;
+    BCInterface_Type& bcInterface() const { return *M_bc; }
 
     //! Get the density on a specific boundary face of the model
     /*!
      * @param flag flag of the boundary face
      * @return density value
      */
-    Real boundaryDensity( const BCFlag& /*flag*/) const;
+    Real boundaryDensity( const BCFlag& /*flag*/) const { return M_data->DensityRho(); }
 
     //! Get the viscosity on a specific boundary face of the model
     /*!
      * @param flag flag of the boundary face
      * @return viscosity value
      */
-    Real boundaryViscosity( const BCFlag& /*flag*/) const;
+    Real boundaryViscosity( const BCFlag& /*flag*/) const { return M_data->Viscosity(); }
 
     //! Get the area on a specific boundary face of the model
     /*!
      * @param flag flag of the boundary face
      * @return area value
      */
-    Real boundaryArea( const BCFlag& flag ) const;
+    Real boundaryArea( const BCFlag& flag ) const { return M_solver->BoundaryValue( *M_solution, OneD_A, flagConverter( flag ) ); }
 
     //! Get the flux on a specific boundary face of the model
     /*!
      * @param flag flag of the boundary face
      * @return flux value
      */
-    Real boundaryFlowRate( const BCFlag& flag ) const;
+    Real boundaryFlowRate( const BCFlag& flag ) const { return M_solver->BoundaryValue( *M_solution, OneD_Q, flagConverter( flag ) ); }
 
     //! Get the integral of the pressure (on a specific boundary face)
     /*!
      * @param flag flag of the boundary face
      * @return pressure value
      */
-    Real boundaryPressure( const BCFlag& flag ) const;
+    Real boundaryPressure( const BCFlag& flag ) const { return M_solver->BoundaryValue( *M_solution, OneD_P, flagConverter( flag ) ); }
 
     //! Get the integral of the dynamic pressure (on a specific boundary face)
     /*!
      * @param flag flag of the boundary face
      * @return dynamic pressure value
      */
-    Real boundaryDynamicPressure( const BCFlag& flag ) const;
+    Real boundaryDynamicPressure( const BCFlag& flag ) const { return 0.5 * boundaryDensity( flag ) * std::pow( boundaryFlowRate( flag ) / boundaryArea( flag ), 2 ); }
 
     //! Get the integral of the normal stress (on a specific boundary face)
     /*!
@@ -282,56 +282,56 @@ public:
     /*!
      * @return BC handler
      */
-    BC_Type& bc() const;
+    BC_Type& bc() const { return *(M_bc->handler()); }
 
     //! Get the data container of the 1D model.
     /*!
      * @return 1D Model data container.
      */
-    Data_Type& data() const;
+    Data_Type& data() const { return *M_data; }
 
     //! Get the Physics of the 1D model.
     /*!
      * @return 1D Model physics.
      */
-    Physics_PtrType physics() const;
+    Physics_PtrType physics() const { return M_physics; }
 
     //! Get the Flux of the 1D model.
     /*!
      * @return 1D Model Flux.
      */
-    Flux_PtrType flux() const;
+    Flux_PtrType flux() const { return M_flux; }
 
     //! Get the Source of the 1D model.
     /*!
      * @return 1D Model Source.
      */
-    Source_PtrType source() const;
+    Source_PtrType source() const { return M_source; }
 
     //! Get the FESpace of the 1D model.
     /*!
      * @return 1D model FESpace
      */
-    FESpace_PtrType FESpace() const;
+    FESpace_PtrType FESpace() const { return M_FESpace; }
 
     //! Get the Solver of the 1D model.
     /*!
      * @return 1D model solver.
      */
-    Solver_PtrType solver() const;
+    Solver_PtrType solver() const { return M_solver; }
 
     //! Get the solution container of the 1D model.
     /*!
      * @return 1D model solution.
      */
-    const Solution_PtrType& solution() const;
+    const Solution_PtrType& solution() const { return M_solution; }
 
     //! Get a specific quantity of the solution container of the 1D model.
     /*!
      * @param quantity solution quantity.
      * @return 1D model solution.
      */
-    const Vector_PtrType& solution( const std::string& quantity) const;
+    const Vector_PtrType& solution( const std::string& quantity) const { return (*M_solution)[quantity]; }
 
     //@}
 
@@ -380,7 +380,7 @@ private:
      */
     void solve( BC_Type& bc, Solution_Type& solution, const std::string& solverType = " 1D-" );
 
-    OneD_BCSide flagConverter( const BCFlag& flag ) const;
+    OneD_BCSide flagConverter( const BCFlag& flag ) const { return (flag == 0) ? OneD_left : OneD_right; }
 
 #ifdef JACOBIAN_WITH_FINITEDIFFERENCE
 
@@ -456,7 +456,7 @@ private:
 };
 
 //! Factory create function
-inline MS_Model_Type* createMultiscaleModelOneDimensional()
+inline multiscaleModel_Type* createMultiscaleModelOneDimensional()
 {
     return new MultiscaleModel1D();
 }

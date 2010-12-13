@@ -54,10 +54,10 @@ namespace multiscale
 /*!
  *  @author Cristiano Malossi
  *
- *  The MultiscaleCouplingBoundaryCondition class is an implementation of the MS_Coupling_Type
+ *  The MultiscaleCouplingBoundaryCondition class is an implementation of the multiscaleCoupling_Type
  *  for applying standard boundary conditions on the models.
  */
-class MultiscaleCouplingBoundaryCondition: public virtual MS_Coupling_Type
+class MultiscaleCouplingBoundaryCondition: public virtual multiscaleCoupling_Type
 {
 public:
 
@@ -65,7 +65,7 @@ public:
     //@{
 
     //! Constructor
-    MultiscaleCouplingBoundaryCondition();
+    explicit MultiscaleCouplingBoundaryCondition();
 
     //! Destructor
     virtual ~MultiscaleCouplingBoundaryCondition() {}
@@ -92,7 +92,7 @@ public:
     /*!
      * @param couplingResiduals Global vector of variables
      */
-    void exportCouplingResiduals( MS_Vector_Type& /*couplingResiduals*/ ) {}
+    void exportCouplingResiduals( multiscaleVector_Type& /*couplingResiduals*/ ) {}
 
     //! Display some information about the coupling
     void showMe();
@@ -119,13 +119,13 @@ private:
      * @param localCouplingVariableID local coupling variable (perturbed)
      * @return list of models affected by the perturbation
      */
-    MS_ModelsVector_Type listOfPerturbedModels( const UInt& /*localCouplingVariableID*/ );
+    multiscaleModelsVector_Type listOfPerturbedModels( const UInt& /*localCouplingVariableID*/ );
 
     //! Insert constant coefficients into the Jacobian matrix (DO NOTHING)
     /*!
      * @param jacobian the Jacobian matrix
      */
-    void insertJacobianConstantCoefficients( MS_Matrix_Type& /*jacobian*/ ) {}
+    void insertJacobianConstantCoefficients( multiscaleMatrix_Type& /*jacobian*/ ) {}
 
     //! Insert the Jacobian coefficient(s) depending on a perturbation of the model, due to a specific variable (the column) (DO NOTHING)
     /*!
@@ -134,7 +134,7 @@ private:
      * @param ID                the global ID of the model which is perturbed by the variable
      * @param solveLinearSystem a flag to which determine if the linear system has to be solved
      */
-    void insertJacobianDeltaCoefficients( MS_Matrix_Type& /*jacobian*/, const UInt& /*column*/, const UInt& /*ID*/, bool& /*solveLinearSystem*/ ) {}
+    void insertJacobianDeltaCoefficients( multiscaleMatrix_Type& /*jacobian*/, const UInt& /*column*/, const UInt& /*ID*/, bool& /*solveLinearSystem*/ ) {}
 
     //! Display some information about the coupling
     /*!
@@ -165,7 +165,7 @@ private:
 };
 
 //! Factory create function
-inline MS_Coupling_Type* createMultiscaleCouplingBoundaryCondition()
+inline multiscaleCoupling_Type* createMultiscaleCouplingBoundaryCondition()
 {
     return new MultiscaleCouplingBoundaryCondition();
 }

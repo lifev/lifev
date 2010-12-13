@@ -73,13 +73,13 @@ public:
     //@{
 
     //! Constructor
-    MultiscaleData();
+    explicit MultiscaleData();
 
     //! Copy constructor
     /*!
      * @param PhysicalData MultiscaleData
      */
-    MultiscaleData( const MultiscaleData& data );
+    explicit MultiscaleData( const MultiscaleData& data );
 
     //! Destructor
     virtual ~MultiscaleData() {}
@@ -122,49 +122,49 @@ public:
     /*!
      * @return time container
      */
-    timePtr_Type dataTime() const;
+    timePtr_Type dataTime() const { return M_dataTime; }
 
     //! Get the global fluid density.
     /*!
      * @return density of the fluid.
      */
-    const Real& fluidDensity() const;
+    const Real& fluidDensity() const { return M_fluidDensity; }
 
     //! Get the global fluid viscosity.
     /*!
      * @return viscosity of the fluid.
      */
-    const Real& fluidViscosity() const;
+    const Real& fluidViscosity() const { return M_fluidViscosity; }
 
     //! Get the global fluid reference pressure (used by 1D model).
     /*!
      * @return reference pressure of the fluid.
      */
-    const Real& fluidReferencePressure() const;
+    const Real& fluidReferencePressure() const { return M_fluidReferencePressure; }
 
     //! Get the global structural Poisson coefficient.
     /*!
      * @return Poisson coefficient of the structure.
      */
-    const Real& structureDensity() const;
+    const Real& structureDensity() const { return M_structureDensity; }
 
     //! Get the global structural density.
     /*!
      * @return density of the structure.
      */
-    const Real& structurePoissonCoefficient() const;
+    const Real& structurePoissonCoefficient() const { return M_structurePoissonCoefficient; }
 
     // //! Get the global structural thickness.
     // /*!
     // * @return thickness of the structure.
     // */
-    // const Real& GetStructureThickness() const;
+    // const Real& GetStructureThickness() const { return M_structureThickness; }
 
     //! Get the global structural Young modulus.
     /*!
      * @return Young modulus of the structure.
      */
-    const Real& structureYoungModulus() const;
+    const Real& structureYoungModulus() const { return M_structureYoungModulus; }
 
     //@}
 
