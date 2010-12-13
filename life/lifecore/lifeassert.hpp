@@ -1,31 +1,38 @@
-/* -*- mode: c++ -*-
+//@HEADER
+/*
+*******************************************************************************
 
-  This file is part of the LifeV library
+Copyright (C) 2004, 2005, 2007 EPFL, Politecnico di Milano, INRIA
+Copyright (C) 2010 EPFL, Politecnico di Milano, Emory University
 
-  Author(s): Christophe Prud'homme <christophe.prudhomme@epfl.ch>
-       Date: 2005-02-19
+This file is part of LifeV.
 
-  Copyright (C) 2005 EPFL
+LifeV is free software; you can redistribute it and/or modify
+it under the terms of the GNU Lesser General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
 
-  This library is free software; you can redistribute it and/or
-  modify it under the terms of the GNU Lesser General Public
-  License as published by the Free Software Foundation; either
-  version 2.1 of the License, or (at your option) any later version.
+LifeV is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+Lesser General Public License for more details.
 
-  This library is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-  Lesser General Public License for more details.
+You should have received a copy of the GNU Lesser General Public License
+along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
 
-  You should have received a copy of the GNU Lesser General Public
-  License along with this library; if not, write to the Free Software
-  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+*******************************************************************************
 */
-/**
-   \file lifeassert.hpp
-   \author Christophe Prud'homme <christophe.prudhomme@epfl.ch>
-   \date 2005-02-19
- */
+//@HEADER
+/*!
+  @file
+  @brief Assert macros for LifeV
+
+  @date 19-02-2005
+  @author Christophe Prud'homme <christophe.prudhomme@epfl.ch>
+
+  @maintainer Radu Popescu <radu.popescu@epfl.ch>
+*/
+
 #ifndef LIFEASSERT_HPP
 #define LIFEASSERT_HPP 1
 
@@ -55,40 +62,23 @@
   -# #LIFEV_ISLIKELY and #LIFEV_ISUNLIKELY
 */
 
-// access to smart assertion from lifeV.hpp
 #include <life/lifecore/SmartAssert.hpp>
 
 #define ABORT() std::abort()
 
-#if LIFEV_IS_VERSION(0,9,0)
-
-#define ERROR_MSG(A) LIFEV_ASSERT( 0 ).error( A );
-#define ASSERT0(X,A) LIFEV_ASSERT( X ).error( A );
-#define ASSERT_PRE0(X,A) LIFEV_ASSERT( X ).error( "Precondition Error"  );
-#define ASSERT_POS0(X,A) LIFEV_ASSERT( X ).error( "Postcondition Error"  );
-#define ASSERT_INV0(X,A) LIFEV_ASSERT( X ).error( "Invariant Error : "  );
-#define ASSERT_BD0(X)    LIFEV_ASSERT( X ).error( "Array bounds error" );
-
-#else
-
 # define ERROR_MSG(A)  \
    do { std::cerr << std::endl << std::endl << A << std::endl << std::endl ; ABORT() ; } while (0)
 
-
-
 # define ASSERT0(X,A) if ( !(X) ) \
 ERROR_MSG(A << std::endl << "Error in file" << __FILE__ << " line " << __LINE__) ;
-
 
 # define ASSERT_PRE0(X,A) if ( !(X) ) \
 ERROR_MSG(A << std::endl << "Precondition Error " << "in file " << __FILE__ \
      << " line " << __LINE__) ;
 
-
 # define ASSERT_POS0(X,A) if ( !(X) ) \
 ERROR_MSG(A << std::endl <<"Postcondition Error " << "in file " << __FILE__ \
      << " line " << __LINE__) ;
-
 
 # define ASSERT_INV0(X,A)  if ( !(X) ) \
 ERROR_MSG(A <<std::endl <<  "Invariant Error " << "in file " << __FILE__  \
@@ -97,8 +87,6 @@ ERROR_MSG(A <<std::endl <<  "Invariant Error " << "in file " << __FILE__  \
 # define ASSERT_BD0(X)  if ( !(X) ) \
 ERROR_MSG("Array bound error " << "in file " << __FILE__  \
    << " line " << __LINE__) ;
-
-#endif /* 0 */
 
 #ifdef  LIFEV_CHECK_ALL
 #define CHECK_KN
@@ -139,8 +127,6 @@ ERROR_MSG("Array bound error " << "in file " << __FILE__  \
 #else
 #define ASSERT_BD(X)
 #endif
-
-
 
 #endif /* LIFEASSERT_HPP */
 
