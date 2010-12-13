@@ -31,7 +31,6 @@ namespace LifeV
 // ===================================================
 exactJacobian::exactJacobian():
         super(),
-        M_updateEvery(),
         M_rhsNew(),
         M_beta(),
         M_aitkFS(),

@@ -26,7 +26,7 @@
 
 /*!
     @file
-    @brief Implementation of an  FSIOperator with shape derivatives.
+    @brief Implementation of an  FSIOperator with Newton algorithm.
 
     @author Miguel Fernandez
     @author Gilles Fourestey
@@ -46,9 +46,7 @@
 namespace LifeV
 {
 
-//class Epetra_ExactJacobian;
-
-//! exactJacobian - Implementation of an  FSIOperator with shape derivatives.
+//! exactJacobian - Implementation of an  FSIOperator with Newton algorithm.
 /*!
 \include ../../doc/api/bibliography/newton.dox
 
@@ -127,8 +125,7 @@ public:
        \param res:  residual vector  to be computed
        \param disp: current unknown solution
        \param iter: nonlinear iteration counter. The part of th rhs related to the time discretization is computed only for iter=0
-     */
-
+    */
     void evalResidual(vector_Type       &_res,
                       const vector_Type &_disp,
                       const UInt          _iter);
@@ -162,18 +159,8 @@ public:
     //! should call bcManage for a vector, but the implementation is empty
     void bcManageVec   ( super::fluidBchandler_Type& bch, vector_Type& rhs ) {};
 
+    //! register the product for the factory
     void registerMyProducts( );
-
-    //@}
-
-    //! @name Set Methods
-    //@{
-
-    //@}
-
-
-    //! @name Get Methods
-    //@{
 
     //@}
 
@@ -200,68 +187,66 @@ private:
 
 */
 
-class Epetra_ExactJacobian:
+    class Epetra_ExactJacobian:
         public Epetra_Operator
-{
+    {
 
-public:
+    public:
 
-    typedef exactJacobian::vector_Type  vector_Type;
-    typedef Epetra_Map                  map_Type;
-    typedef boost::shared_ptr<map_Type> mapPtr_Type;
+        typedef exactJacobian::vector_Type  vector_Type;
+        typedef Epetra_Map                  map_Type;
+        typedef boost::shared_ptr<map_Type> mapPtr_Type;
 
-    // OBSOLETE typedef
-    typedef exactJacobian::vector_Type  vector_type;
+        // OBSOLETE typedef
+        typedef exactJacobian::vector_Type  vector_type;
 
-    //! @name Constructor & Destructor
-    //@{
-    //! Empty Constructor
-    Epetra_ExactJacobian();
+        //! @name Constructor & Destructor
+        //@{
+        //! Empty Constructor
+        Epetra_ExactJacobian();
 
-    //! Destructor
-    virtual ~Epetra_ExactJacobian() {};
-    //@}
+        //! Destructor
+        virtual ~Epetra_ExactJacobian() {};
+        //@}
 
-    //! @name Methods
-    //@{
+        //! @name Methods
+        //@{
 
-    //! sets the exactJacobian pointer and some contents thereof
-    void setOperator(exactJacobian* ej);
+        //! sets the exactJacobian pointer and some contents thereof
+        void setOperator(exactJacobian* ej);
 
-    //! apply the jacobian to X and returns the result in Y
-    int 	Apply           (const Epetra_MultiVector &X, Epetra_MultiVector &Y) const;
+        //! apply the jacobian to X and returns the result in Y
+        int 	Apply           (const Epetra_MultiVector &X, Epetra_MultiVector &Y) const;
 
-    //! These are the methods necessary to implement Epetra_Operator but that are not used.
-    int 	SetUseTranspose (bool  /*UseTranspose*/)
-    {std::cout << "********* EJ : transpose not available\n"; return -1;}
+        //! These are the methods necessary to implement Epetra_Operator but that are not used.
+        int 	SetUseTranspose (bool  /*UseTranspose*/)
+        {std::cout << "********* EJ : transpose not available\n"; return -1;}
 
-    int 	ApplyInverse    (const Epetra_MultiVector &/*X*/, Epetra_MultiVector &/*Y*/) const
-    {std::cout << "********* EJ : inverse not available\n"; return -1;}
-    double 	NormInf         () const
-    {std::cout << "********* EJ : NormInf not available\n"; return 1.;}
-    const char * Label      () const {return "exactJacobian";}
-    bool 	UseTranspose    () const {return false;}
-    bool 	HasNormInf      () const {return false;}
+        int 	ApplyInverse    (const Epetra_MultiVector &/*X*/, Epetra_MultiVector &/*Y*/) const
+        {std::cout << "********* EJ : inverse not available\n"; return -1;}
+        double 	NormInf         () const
+        {std::cout << "********* EJ : NormInf not available\n"; return 1.;}
+        const char * Label      () const {return "exactJacobian";}
+        bool 	UseTranspose    () const {return false;}
+        bool 	HasNormInf      () const {return false;}
 
-    const Epetra_Comm&  Comm () const { return *M_comm; }
-    const Epetra_Map & 	OperatorDomainMap () const {return *M_operatorDomainMap;}
-    const Epetra_Map & 	OperatorRangeMap  () const {return *M_operatorRangeMap;}
-    //@}
-
-
-private:
-
-    exactJacobian*                  M_ej;
-
-    mapPtr_Type                     M_operatorDomainMap;
-    mapPtr_Type                     M_operatorRangeMap;
-
-    boost::shared_ptr<Epetra_Comm>  M_comm;
-
-};
+        const Epetra_Comm&  Comm () const { return *M_comm; }
+        const Epetra_Map & 	OperatorDomainMap () const {return *M_operatorDomainMap;}
+        const Epetra_Map & 	OperatorRangeMap  () const {return *M_operatorRangeMap;}
+        //@}
 
 
-    int M_updateEvery;
+    private:
+
+        exactJacobian*                  M_ej;
+
+        mapPtr_Type                     M_operatorDomainMap;
+        mapPtr_Type                     M_operatorRangeMap;
+
+        boost::shared_ptr<Epetra_Comm>  M_comm;
+
+    }; // end of class Epetra_ExactJacobian
+
 
     vectorPtr_Type       M_rhsNew;
     vectorPtr_Type       M_beta;
