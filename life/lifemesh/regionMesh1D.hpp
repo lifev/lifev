@@ -93,6 +93,38 @@ public:
 
     /** @} */ // End of group Marker Types
 
+    /** @name Basic Element Shape Types
+     *  @ingroup public_types
+     *  Volume, Face and Edge geometric shapes.
+     *  @{
+     */
+
+    //! Volume Shape.
+    typedef GEOSHAPE VolumeShape;
+    //! Face Shape (Boundary Element).
+    typedef GEOSHAPE EdgeShape;
+    //! Edge Shape (Boundary of Boundary Element)
+    typedef typename GEOSHAPE::GeoBShape PointShape;
+
+    /** @} */ // End of group Basic Element Shape Types
+
+    /** @name Geometric Element Types
+     *  @ingroup public_types
+     *  Volumes, Faces, Edges and Points.
+     *  @{
+     */
+
+    //! Volume Element (1D)
+    typedef GeoElement1D<EdgeShape, MC>  VolumeType;
+    //! Face Element (1D)
+    typedef GeoElement1D<EdgeShape, MC>  FaceType;
+    //! Edge Element (1D)
+    typedef GeoElement1D<EdgeShape, MC>  EdgeType;
+    //! Point Element (0D)
+    typedef GeoElement0D<MC>             PointType;
+
+    /** @} */ // End of group Geometric Element Types
+
     /** @name Geometric Element Container Types
      *  @ingroup public_types
      *  Typedefs for STL compliant containers of mesh geometric entities.
@@ -604,7 +636,7 @@ public:
      *  @param i Index of the mesh 1D Element.
      *  @return Length of the i-th Edge.
      */
-    const Real edgeLength( const UInt& i ) const;
+    Real edgeLength( const UInt& i ) const;
 
     //! Adds a edge to list.
     /**
@@ -1107,7 +1139,7 @@ public:
     //! Container of mesh Points/Vertices.
     Points  pointList;
     //! Container of mesh Faces (not used).
-    Faces   faceList.
+    Faces   faceList;
     //! Container of mesh Edges.
     Edges   edgeList;
     //! Boundary points list.
@@ -1686,7 +1718,7 @@ RegionMesh1D<GEOSHAPE, MC>::edge( UInt const i )
 }
 
 template <typename GEOSHAPE, typename MC>
-const Real
+Real
 RegionMesh1D<GEOSHAPE, MC>::edgeLength( const UInt& i ) const
 {
     ASSERT_BD( i >= 0 && i < edgeList.size() );
