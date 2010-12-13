@@ -11,11 +11,10 @@
 ###################################################################################################
 
 AT_SETUP([test_hyperbolic])    #Name of the test
+AT_XFAIL_IF([:])
 AT_KEYWORDS([hyperbolic])
 AT_DATA([data.txt],               #Data file
 [[
 ]])
-AT_SKIP_IF([:])
-AT_CHECK([ln -sf $abs_top_builddir/testsuite/data/mesh/inria/Mesh &&
-		  mpirun -n 1 $abs_top_builddir/testsuite/test_TemplateTest/test_TemplateTest -c],[0],[ignore],[ignore])
+AT_CHECK([echo "this test needs to be fixed"; exit 1;],[0],[ignore],[ignore])
 AT_CLEANUP
