@@ -1,46 +1,52 @@
-/* -*- mode: c++ -*-
+//@HEADER
+/*
+*******************************************************************************
 
-  This file is part of the LifeV library
+Copyright (C) 2004, 2005, 2007 EPFL, Politecnico di Milano, INRIA
+Copyright (C) 2010 EPFL, Politecnico di Milano, Emory University
 
-  Author(s): Christophe Prud'homme <christophe.prudhomme@epfl.ch>
-       Date: 2005-01-16
+This file is part of LifeV.
 
-  Copyright (C) 2005 EPFL
+LifeV is free software; you can redistribute it and/or modify
+it under the terms of the GNU Lesser General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
 
-  This library is free software; you can redistribute it and/or
-  modify it under the terms of the GNU Lesser General Public
-  License as published by the Free Software Foundation; either
-  version 2.1 of the License, or (at your option) any later version.
+LifeV is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+Lesser General Public License for more details.
 
-  This library is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-  Lesser General Public License for more details.
+You should have received a copy of the GNU Lesser General Public License
+along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
 
-  You should have received a copy of the GNU Lesser General Public
-  License along with this library; if not, write to the Free Software
-  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+*******************************************************************************
 */
-/**
-   \file SmartAssert.hpp
-   \author Christophe Prud'homme <christophe.prudhomme@epfl.ch>
-   \date 2005-01-16
- */
-#if !defined(SMART_ASSERT_H)
+//@HEADER
+/*!
+  @file
+  @brief Complex assertion mechanism
+
+  @date 16-01-2005
+  @author Christophe Prud'homme <christophe.prudhomme@epfl.ch>
+
+  @maintainer Radu Popescu <radu.popescu@epfl.ch>
+*/
+
+#ifndef SMART_ASSERT_H
 #define SMART_ASSERT_H
 
-#include <string>
 #include <iostream>
+#include <map>
 #include <sstream>
+#include <string>
 #include <utility>
 #include <vector>
-#include <map>
 
 namespace LifeV
 {
 enum
 {
-
     // default behavior - just loggs this assert
     // (a message is shown to the user to the console)
     lvl_warn = 100,
@@ -57,8 +63,6 @@ enum
     lvl_fatal = 1000
 };
 
-
-
 /**
    \class AssertContext
    \brief contains details about a failed assertion
@@ -67,9 +71,13 @@ class AssertContext
 {
     typedef std::string string;
 public:
-    AssertContext() : _M_level( lvl_debug)
-    {}
+    //! @name Constructor
+    //@{
+    AssertContext() : _M_level( lvl_debug) {}
+    //@}
 
+    //! @name Public methods
+    //@{
     // where the assertion failed: file & line
     void setFileLine( const char * file, int line)
     {
@@ -107,6 +115,7 @@ public:
             _M_msg.erase();
     }
     const string & get_level_msg() const { return _M_msg; }
+    //@}
 
 private:
     // where the assertion occured
@@ -184,12 +193,17 @@ struct isNullFinder< const char*>
 
 struct Assert
 {
+    //! @name Helpers and Typedefs
+    //@{
     typedef SmartAssert::assert_function_type assert_function_type;
 
     // helpers, in order to be able to compile the code
     Assert & SMART_ASSERT_A;
     Assert & SMART_ASSERT_B;
+    //@}
 
+    //! @name Constructors and destructor
+    //@{
     Assert( const char * expr)
             : SMART_ASSERT_A( *this),
             SMART_ASSERT_B( *this),
@@ -218,7 +232,10 @@ struct Assert
         if ( _M_needs_handling)
             handleAssert();
     }
+    //@}
 
+    //! @name Public methods
+    //@{
     template< class type>
     Assert & printCurrentValue( const type & val, const char * msg)
     {
@@ -278,7 +295,10 @@ struct Assert
     {
         return  level( lvl_fatal, strMsg);
     }
+    //@}
 
+    //! @name Static methods
+    //@{
     // in this case, we set the default logger, and make it
     // write everything to this file
     static void setLog( const char * strFileName)
@@ -304,8 +324,11 @@ struct Assert
     {
         handlers()[ nLevel] = handler;
     }
+    //@}
 
 private:
+    //! @name Private methods
+    //@{
     // handles the current assertion.
     void handleAssert()
     {
@@ -322,7 +345,10 @@ private:
       be initialized. However, making them functions
       will make it work.
     */
+    //@}
 
+    //! @name Private static methods
+    //@{
     // the log
     static assert_function_type & logger()
     {
@@ -347,6 +373,7 @@ private:
             // we always assume the debug handler has been set
             return handlers().find( lvl_debug)->second;
     }
+    //@}
 
 private:
     AssertContext _M_context;
@@ -419,4 +446,4 @@ inline ::LifeV::Assert make_assert( const char * expr)
     SMART_ASSERT_A.printCurrentValue((x), #x).SMART_ASSERT_ ## next \
     /**/
 
-#endif
+#endif // SMART_ASSERT_H
