@@ -90,13 +90,13 @@ public:
     //@{
 
     //! Constructor
-    BCInterface1D_DefaultFunctions();
+    explicit BCInterface1D_DefaultFunctions();
 
     //! Constructor
     /*!
      * @param data BC data loaded from GetPot file
      */
-    BCInterface1D_DefaultFunctions( const data_Type& data );
+    explicit BCInterface1D_DefaultFunctions( const data_Type& data );
 
     //! Destructor
     ~BCInterface1D_DefaultFunctions() {}

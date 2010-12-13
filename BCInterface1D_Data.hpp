@@ -66,7 +66,7 @@ public:
     //@{
 
     //! Constructor
-    BCInterface1D_Data();
+    explicit BCInterface1D_Data();
 
     //! Copy constructor
     /*!

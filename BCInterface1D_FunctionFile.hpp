@@ -102,13 +102,13 @@ public:
     //@{
 
     //! Empty Constructor
-    BCInterface1D_FunctionFile();
+    explicit BCInterface1D_FunctionFile();
 
     //! Constructor
     /*!
      * @param data BC data loaded from GetPot file
      */
-    BCInterface1D_FunctionFile( const data_Type& data );
+    explicit BCInterface1D_FunctionFile( const data_Type& data );
 
     //! Destructor
     virtual ~BCInterface1D_FunctionFile() {}
@@ -352,7 +352,7 @@ BCInterface1D_FunctionFile< PhysicalSolverType >::dataInterpolation()
         A  = M_data[M_variables[j]][position];
         B  = M_data[M_variables[j]][position + 1];
 
-        function_Type::M_parser->SetVariable( M_variables[j], A + ( B - A ) / ( xB - xA ) * ( X - xA ) );
+        function_Type::M_parser->setVariable( M_variables[j], A + ( B - A ) / ( xB - xA ) * ( X - xA ) );
 
 #ifdef HAVE_LIFEV_DEBUG
         Debug( 5022 ) << "                                                          " << M_variables[j] << " = " << A+(B-A)/(xB-xA)*(X-xA) << "\n";

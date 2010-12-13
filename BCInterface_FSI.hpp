@@ -71,8 +71,8 @@ public:
     //! @name Constructors & Destructor
     //@{
 
-    BCInterface_FSI() {}
-    BCInterface_FSI( const data_Type& /*data*/) {}
+    explicit BCInterface_FSI() {}
+    explicit BCInterface_FSI( const data_Type& /*data*/) {}
 
     virtual ~BCInterface_FSI() {}
 
@@ -170,13 +170,13 @@ public:
     //@{
 
     //! Constructor
-    BCInterface_FSI();
+    explicit BCInterface_FSI();
 
     //! Constructor
     /*!
      * @param data BC data loaded from GetPot file
      */
-    BCInterface_FSI( const data_Type& data );
+    explicit BCInterface_FSI( const data_Type& data );
 
     //! Destructor
     virtual ~BCInterface_FSI() {}
