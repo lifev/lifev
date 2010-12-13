@@ -1,68 +1,48 @@
+/* -*- mode: c++ -*- */
 //@HEADER
 /*
-************************************************************************
+*******************************************************************************
 
- This file is part of the LifeV Applications.
- Copyright (C) 2001-2010 EPFL, Politecnico di Milano, INRIA
+    Copyright (C) 2004, 2005, 2007 EPFL, Politecnico di Milano, INRIA
+    Copyright (C) 2010 EPFL, Politecnico di Milano, Emory University
 
- This library is free software; you can redistribute it and/or modify
- it under the terms of the GNU Lesser General Public License as
- published by the Free Software Foundation; either version 2.1 of the
- License, or (at your option) any later version.
+    This file is part of LifeV.
 
- This library is distributed in the hope that it will be useful, but
- WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- Lesser General Public License for more details.
+    LifeV is free software; you can redistribute it and/or modify
+    it under the terms of the GNU Lesser General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
 
- You should have received a copy of the GNU Lesser General Public
- License along with this library; if not, write to the Free Software
- Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
- USA
+    LifeV is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+    Lesser General Public License for more details.
 
-************************************************************************
+    You should have received a copy of the GNU Lesser General Public License
+    along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
+
+*******************************************************************************
 */
 //@HEADER
 
-/*!
-  @file ComposedDN.cpp
-
-  @author Paolo Crosetto <crosetto@iacspc70.epfl.ch>
-  @date 08 Jun 2010
-*/
+#include <lifeconfig.h>
 
 #include <ComposedDN.hpp>
 
 namespace LifeV
 {
 
-void ComposedDN::setDataFromGetPot( const GetPot& dataFile, const std::string& section )
+
+// ===================================================
+//! Public Methods
+// ===================================================
+
+void ComposedDN::setDataFromGetPot( const GetPot& dataFile,
+                                      const std::string& section )
 {
     M_blockPrecs->setDataFromGetPot( dataFile, section );
 }
 
-
-void ComposedDN::coupler(map_shared_ptrtype& map,
-                         const std::map<ID, ID>& locDofMap,
-                         const vector_ptrtype& numerationInterface,
-                         const Real& timeStep)
-{
-    UInt totalDofs( map->getMap(Unique)->NumGlobalElements() );
-    UInt solidAndFluid(M_offset[solid]+1+M_FESpace[solid]->map().getMap(Unique)->NumGlobalElements());
-
-    matrix_ptrtype coupling(new matrix_type(*map));
-    couplingMatrix( coupling,  (*M_couplingFlags)[solid], M_FESpace, M_offset, locDofMap, numerationInterface, timeStep);
-    coupling->insertValueDiagonal( 1., M_offset[fluid]+1, M_offset[solid]+1 );
-    coupling->insertValueDiagonal( 1., solidAndFluid, totalDofs+1 );
-    M_coupling.push_back(coupling);
-
-    coupling.reset(new matrix_type(*map));
-    couplingMatrix( coupling,  (*M_couplingFlags)[fluid], M_FESpace, M_offset, locDofMap, numerationInterface, timeStep);
-    coupling->insertValueDiagonal( 1. , M_offset[solid], solidAndFluid );
-    coupling->insertValueDiagonal( 1. , solidAndFluid + nDimensions*numerationInterface->getMap().getMap(Unique)->NumGlobalElements(), totalDofs +1 );
-    M_coupling.push_back(coupling);
-
-}
 
 int ComposedDN::solveSystem( const vector_type& rhs, vector_type& step, solver_ptrtype& linearSolver )
 {
@@ -90,12 +70,40 @@ int ComposedDN::solveSystem( const vector_type& rhs, vector_type& step, solver_p
 }
 
 
-void ComposedDN::push_back_precs( matrix_ptrtype& Mat )
+void ComposedDN::coupler(map_shared_ptrtype& map,
+                         const std::map<ID, ID>& locDofMap,
+                         const vector_ptrtype& numerationInterface,
+                         const Real& timeStep)
+{
+    UInt totalDofs( map->getMap(Unique)->NumGlobalElements() );
+    UInt solidAndFluid(M_offset[solid]+1+M_FESpace[solid]->map().getMap(Unique)->NumGlobalElements());
+
+    matrixPtr_Type coupling(new matrix_Type(*map));
+    couplingMatrix( coupling,  (*M_couplingFlags)[solid], M_FESpace, M_offset, locDofMap, numerationInterface, timeStep);
+    coupling->insertValueDiagonal( 1., M_offset[fluid]+1, M_offset[solid]+1 );
+    coupling->insertValueDiagonal( 1., solidAndFluid, totalDofs+1 );
+    M_coupling.push_back(coupling);
+
+    coupling.reset(new matrix_Type(*map));
+    couplingMatrix( coupling,  (*M_couplingFlags)[fluid], M_FESpace, M_offset, locDofMap, numerationInterface, timeStep);
+    coupling->insertValueDiagonal( 1. , M_offset[solid], solidAndFluid );
+    coupling->insertValueDiagonal( 1. , solidAndFluid + nDimensions*numerationInterface->getMap().getMap(Unique)->NumGlobalElements(), totalDofs +1 );
+    M_coupling.push_back(coupling);
+
+}
+
+void ComposedDN::push_back_precs( matrixPtr_Type& Mat )
 {
     M_blockPrecs->push_back(Mat);
 }
 
-void ComposedDN::replace_precs(  matrix_ptrtype& Mat, UInt position )
+
+// ===================================================
+//! Protected Methods
+// ===================================================
+
+
+void ComposedDN::replace_precs(  matrixPtr_Type& Mat, UInt position )
 {
     M_blockPrecs->replace(Mat, position);
 }

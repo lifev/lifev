@@ -1,37 +1,40 @@
+/* -*- mode: c++ -*- */
 //@HEADER
 /*
-************************************************************************
+*******************************************************************************
 
- This file is part of the LifeV Applications.
- Copyright (C) 2001-2010 EPFL, Politecnico di Milano, INRIA
+    Copyright (C) 2004, 2005, 2007 EPFL, Politecnico di Milano, INRIA
+    Copyright (C) 2010 EPFL, Politecnico di Milano, Emory University
 
- This library is free software; you can redistribute it and/or modify
- it under the terms of the GNU Lesser General Public License as
- published by the Free Software Foundation; either version 2.1 of the
- License, or (at your option) any later version.
+    This file is part of LifeV.
 
- This library is distributed in the hope that it will be useful, but
- WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- Lesser General Public License for more details.
+    LifeV is free software; you can redistribute it and/or modify
+    it under the terms of the GNU Lesser General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
 
- You should have received a copy of the GNU Lesser General Public
- License along with this library; if not, write to the Free Software
- Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
- USA
+    LifeV is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+    Lesser General Public License for more details.
 
-************************************************************************
+    You should have received a copy of the GNU Lesser General Public License
+    along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
+
+*******************************************************************************
 */
 //@HEADER
+/**
 
 /*!
     @file
-    @brief A short description of the file content
+    @brief Monolithic Geometry--Explicit FSI Solver
 
     @author Paolo Crosetto <crosetto@iacspc70.epfl.ch>
     @date 26 Jul 2010
 
-    A more detailed description of the file (if necessary)
+    \include ../../testsuite/test_monolithic/fluidstructure.dox
+    This file implements the Monolithic Geometry--Explicit solver, see \ref CDFQ for details
  */
 
 #ifndef MONOLITHICGE_H
@@ -79,13 +82,13 @@ class MonolithicGE : public Monolithic
 {
 public:
 
-    typedef Monolithic super;
+    typedef Monolithic super_Type;
     //! @name Constructor & Destructor
     //@{
 
     //! Empty Constructor
     MonolithicGE():
-            super()
+        super_Type()
     {}
 
     //! Destructor
@@ -96,15 +99,29 @@ public:
 
 
 
-    //! @name Methods
+    //! @name Public Methods
     //@{
 
+    //! Setup method for the subfroblem
+    /**
+       Sets up the fluid, solid and harmonic extension finite element spaces and initializes most of the variables
+       used in the solver
+     */
     void setupFluidSolid( UInt const fluxes );
 
-    void setupDOF();
+    //!@todo remove setupDof
+    //void setupDOF();
 
+    //! setUp from data file
+    /**
+       calls the setup for the fluid, solid and mesh motion problems
+     */
     void setupSystem();
 
+    //!Updates the system for the next time step
+    /**
+       Calls the updateSystem of the mother class and updates the solid displacement in the solid problem
+     */
     void updateSystem();
 
 
@@ -124,33 +141,42 @@ public:
     */
     void iterateMesh( const vector_type& disp );
 
-    //! get the solution
+    //@}
+    //!@name Getter Methods
+    //@{
+
+    //! Gets the solution
     const vector_type& getSolution() const { return *M_un; }
 
-    //! get the solution ptr
-    vector_ptrtype& solutionPtr() { return M_un; }
+    //! Gets the solution ptr
+    vector_ptrtype solutionPtr() const { return M_un; }
 
-    //! set the solution
+    //! Sets the solution
     void setSolution( const vector_type& solution ) { M_un.reset( new vector_type( solution ) ); }
-
-    //! set the solution ptr
-    void setSolutionPtr( const vector_ptrtype& sol) { M_un = sol; }
-
-    void registerMyProducts();
-
-    void applyBoundaryConditions();
-
-    static FSIOperator* createM() { return new MonolithicGE(); }
-
     //@}
 
-private:
+    //!@name Setter Methods
+    //@{
+    //! Sets the solution ptr
+    void setSolutionPtr( const vector_ptrtype& sol) { M_un = sol; }
 
+    //! Applies the bounsary conditions to the matrix
+    void applyBoundaryConditions();
+    //@}
+
+    //! Factory method
+    static FSIOperator* createM(){ return new MonolithicGE(); }
+
+private:
+    //!@name Private Methods
+    //@{
     void createOperator( std::string& operType )
     {
         M_monolithicMatrix.reset(BlockMatrix::Factory::instance().createObject( operType ));
     }
+    //@}
 
+    //!@name Private Members
     static bool reg;
     //@}
 };

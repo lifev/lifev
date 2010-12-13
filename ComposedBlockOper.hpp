@@ -1,26 +1,27 @@
+/* -*- mode: c++ -*- */
 //@HEADER
 /*
-************************************************************************
+*******************************************************************************
 
- This file is part of the LifeV Applications.
- Copyright (C) 2001-2010 EPFL, Politecnico di Milano, INRIA
+    Copyright (C) 2004, 2005, 2007 EPFL, Politecnico di Milano, INRIA
+    Copyright (C) 2010 EPFL, Politecnico di Milano, Emory University
 
- This library is free software; you can redistribute it and/or modify
- it under the terms of the GNU Lesser General Public License as
- published by the Free Software Foundation; either version 2.1 of the
- License, or (at your option) any later version.
+    This file is part of LifeV.
 
- This library is distributed in the hope that it will be useful, but
- WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- Lesser General Public License for more details.
+    LifeV is free software; you can redistribute it and/or modify
+    it under the terms of the GNU Lesser General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
 
- You should have received a copy of the GNU Lesser General Public
- License along with this library; if not, write to the Free Software
- Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
- USA
+    LifeV is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+    Lesser General Public License for more details.
 
-************************************************************************
+    You should have received a copy of the GNU Lesser General Public License
+    along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
+
+*******************************************************************************
 */
 //@HEADER
 
@@ -72,11 +73,18 @@ public:
     //@{
     typedef BlockInterface                           super;
     typedef super::fespace_shared_ptrtype            fespace_ptrtype;
-    typedef ComposedOperator<Epetra_Operator>  operator_type;
+    typedef ComposedOperator<Epetra_Operator>  operatorPtr_Type;
     //@}
 
     //! @name Constructor and Destructor
     //@{
+    //! Constructor
+    /**
+       The coupling and the order have to be specified in input. In particular the order specifies which block go
+       first, second etc.
+       \param flags: vector of flags specifying the type of coupling between the different blocks that we chose for this operator
+       \param order: vector specifying the order of the blocks.
+     */
     ComposedBlockOper(const std::vector<Int>& flags, const std::vector<Block>& order):
             super(),
             M_recompute(order.size()),
@@ -108,32 +116,15 @@ public:
      */
     virtual void  setDataFromGetPot(const GetPot& data, const std::string& section)=0;
 
+    //! returns true if the operator is set
+    /*!
+      returns the length of the vector M_blocks
+    */
+    virtual bool set()=0;
+
     //@}
-
-    //! pushes a block at the end of the vector
-    /*!
-      adds a new block
-        @param Mat block matrix to push
-        @param recompute flag stating wether the preconditioner for this block have to be recomputed at every time step
-     */
-    virtual void    push_back_matrix(const matrix_ptrtype& Mat, const bool recompute);
-
-    //! replaces a block
-    /*!
-      replaces a block on a specified position in the vector
-        @param Mat block matrix to push
-        @param index position in the vector
-     */
-    virtual void replace_matrix( const matrix_ptrtype& oper, UInt position );//{M_blocks.replace(oper, position);}
-
-
-    //! replaces a coupling block
-    /*!
-      replaces a coupling block on a specified position in the vector
-        @param Mat block matrix to push
-        @param index position in the vector
-     */
-    virtual void replace_coupling( const matrix_ptrtype& Mat, UInt index);
+    //!@name Public Methods
+    //@{
 
 
     //! runs GlobalAssemble on the blocks
@@ -142,39 +133,12 @@ public:
      */
     void GlobalAssemble();
 
-    //! returns true if the operator is set
-    /*!
-      returns the length of the vector M_blocks
-    */
-    virtual bool set()=0;
-
     //!sums the coupling matrices with the corresponding blocks
     /*!
       Everything (but the boundary conditions assembling) must have been set before calling this
     */
     virtual void blockAssembling();
 
-    //! pushes a block at the end of the vector
-    /*!
-      adds a new block
-        @param Mat block matrix to push
-        @param recompute flag stating wether the preconditioner for this block have to be recomputed at every time step
-     */
-    virtual void addToCoupling( const matrix_ptrtype& Mat, UInt position);
-
-    virtual void push_back_oper( ComposedBlockOper& Oper);
-    //@}
-
-    //!@name Getters
-    //@{
-    //! returns the vector of flags (by const reference).
-    const std::vector<bool>& getRecompute() {return M_recompute;}
-
-    //! turns on/off the recomputation of the preconditioner for a specified factor
-    void setRecompute( UInt position, bool flag ) { M_recompute[position] = flag; }
-
-    //! returns the vector of pointers to the coupling blocks (by const reference).
-    const std::vector<matrix_ptrtype> getCouplingVector() {return M_coupling;}
 
     //! adds a default coupling matrix for a specified block.
     /*!
@@ -192,9 +156,57 @@ public:
                  const vector_ptrtype& numerationInterface,
                  const Real& timeStep,
                  UInt couplingBlock
-                );
+                 );
 
-    virtual void push_back_coupling( matrix_ptrtype& coupling);
+
+    //! pushes a block at the end of the vector
+    /*!
+      adds a new block
+        @param Mat block matrix to push
+        @param recompute flag stating wether the preconditioner for this block have to be recomputed at every time step
+     */
+    virtual void    push_back_matrix(const matrixPtr_Type& Mat, const bool recompute);
+
+    virtual void push_back_oper( ComposedBlockOper& Oper);
+
+    virtual void push_back_coupling( matrixPtr_Type& coupling);
+
+    //! replaces a block
+    /*!
+      replaces a block on a specified position in the vector
+        @param Mat block matrix to push
+        @param index position in the vector
+     */
+    virtual void replace_matrix( const matrixPtr_Type& oper, UInt position );//{M_blocks.replace(oper, position);}
+
+
+    //! replaces a coupling block
+    /*!
+      replaces a coupling block on a specified position in the vector
+        @param Mat block matrix to push
+        @param index position in the vector
+     */
+    virtual void replace_coupling( const matrixPtr_Type& Mat, UInt index);
+
+    //! pushes a block at the end of the vector
+    /*!
+      adds a new block
+        @param Mat block matrix to push
+        @param recompute flag stating wether the preconditioner for this block have to be recomputed at every time step
+     */
+    virtual void addToCoupling( const matrixPtr_Type& Mat, UInt position);
+    //@}
+
+    //!@name Get Methods
+    //@{
+    //! returns the vector of flags (by const reference).
+    const std::vector<bool>& getRecompute() {return M_recompute;}
+
+    //! turns on/off the recomputation of the preconditioner for a specified factor
+    void setRecompute( UInt position, bool flag ) { M_recompute[position] = flag; }
+
+    //! returns the vector of pointers to the coupling blocks (by const reference).
+    const std::vector<matrixPtr_Type> getCouplingVector(){return M_coupling;}
 
     //@}
 
@@ -225,7 +237,7 @@ protected:
     //! vector of flags saying if the matrix is to be recomputed every time
     std::vector<bool>                                           M_recompute;
     //! vector of coupling matrices
-    std::vector<matrix_ptrtype>                                 M_coupling;
+    std::vector<matrixPtr_Type>                                 M_coupling;
 
     //! vector of flags specifying the coupling strategy for each block.
     /*!

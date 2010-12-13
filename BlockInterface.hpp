@@ -1,26 +1,27 @@
+/* -*- mode: c++ -*- */
 //@HEADER
 /*
-************************************************************************
+*******************************************************************************
 
- This file is part of the LifeV Applications.
- Copyright (C) 2001-2010 EPFL, Politecnico di Milano, INRIA
+    Copyright (C) 2004, 2005, 2007 EPFL, Politecnico di Milano, INRIA
+    Copyright (C) 2010 EPFL, Politecnico di Milano, Emory University
 
- This library is free software; you can redistribute it and/or modify
- it under the terms of the GNU Lesser General Public License as
- published by the Free Software Foundation; either version 2.1 of the
- License, or (at your option) any later version.
+    This file is part of LifeV.
 
- This library is distributed in the hope that it will be useful, but
- WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- Lesser General Public License for more details.
+    LifeV is free software; you can redistribute it and/or modify
+    it under the terms of the GNU Lesser General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
 
- You should have received a copy of the GNU Lesser General Public
- License along with this library; if not, write to the Free Software
- Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
- USA
+    LifeV is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+    Lesser General Public License for more details.
 
-************************************************************************
+    You should have received a copy of the GNU Lesser General Public License
+    along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
+
+*******************************************************************************
 */
 //@HEADER
 
@@ -41,15 +42,15 @@
 #include <life/lifecore/life.hpp>
 #include <life/lifecore/GetPot.hpp>
 
-#include <life/lifefem/FESpace.hpp>
-
 #include <life/lifealg/SolverTrilinos.hpp>
 #include <life/lifealg/IfpackPreconditioner.hpp>
-#include <lifemc/lifealg/ComposedOperator.hpp>
+
+#include <life/lifefem/FESpace.hpp>
 #include <life/lifefem/bcManage.hpp>
 
-namespace LifeV
-{
+#include <lifemc/lifealg/ComposedOperator.hpp>
+
+namespace LifeV {
 
 //! BlockInterface - This is a pure virtual class for the linear operators with a block structure
 /*!    (i.e. block matrices and preconditioners).
@@ -70,11 +71,11 @@ public:
 
     typedef EpetraVector                                               vector_type;
     typedef boost::shared_ptr< vector_type >                           vector_ptrtype;
-    typedef EpetraMatrix< Real >                                       matrix_type;
-    typedef boost::shared_ptr< matrix_type >                           matrix_ptrtype;
+    typedef EpetraMatrix< Real >                                       matrix_Type;
+    typedef boost::shared_ptr< matrix_Type >                           matrixPtr_Type;
     typedef boost::shared_ptr< Epetra_Operator >                       epetra_operator_ptrtype;
     typedef boost::shared_ptr< EpetraPreconditioner >                  epetra_preconditioner_ptrtype;
-    typedef matrix_type::matrix_type                                   epetra_matrix_type;
+    typedef matrix_Type::matrix_type/*matrix_Type*/                                   epetra_matrix_Type;
     typedef SolverTrilinos                                             solver_type;
     typedef boost::shared_ptr< SolverTrilinos >                        solver_ptrtype;
     typedef boost::shared_ptr< FESpace<RegionMesh3D<LinearTetra>, EpetraMap> >  fespace_shared_ptrtype;
@@ -140,7 +141,7 @@ public:
         @param Mat block matrix to push
         @param recompute flag stating wether the preconditioner for this block have to be recomputed at every time step
      */
-    virtual void push_back_matrix( const matrix_ptrtype& Mat, const bool recompute ) =0;
+    virtual void push_back_matrix( const matrixPtr_Type& Mat, const bool recompute ) =0;
 
     //!
     /*!
@@ -148,17 +149,9 @@ public:
         @param Mat block matrix to push
         @param recompute flag stating wether the preconditioner for this block have to be recomputed at every time step
      */
-    virtual void addToCoupling( const matrix_ptrtype& Mat, UInt position ) =0;
+    virtual void addToCoupling( const matrixPtr_Type& Mat, UInt position ) =0;
 
     virtual void setRecompute(UInt position, bool flag) {assert(false);}
-
-    //!
-    /*!
-      adds a new block
-        @param Mat block matrix to push
-        @param position position of the matrix to which we want to add Mat
-     */
-    virtual void addToBlock( const matrix_ptrtype& Mat, UInt position );
 
     //! replaces a block
     /*!
@@ -166,7 +159,7 @@ public:
         @param Mat block matrix to push
         @param index position in the vector
      */
-    virtual void replace_matrix( const matrix_ptrtype& Mat, UInt index)=0;
+    virtual void replace_matrix( const matrixPtr_Type& Mat, UInt index)=0;
 
 
     //! replaces a coupling block
@@ -175,13 +168,20 @@ public:
         @param Mat block matrix to push
         @param index position in the vector
      */
-    virtual void replace_coupling( const matrix_ptrtype& Mat, UInt index)=0;
+    virtual void replace_coupling( const matrixPtr_Type& Mat, UInt index)=0;
 
     //! runs GlobalAssemble on the blocks
     /*!
       closes and distributes all the matrices before computing the preconditioner
      */
     virtual void GlobalAssemble()=0;
+
+
+    //!sums the coupling matrices with the corresponding blocks
+    /*!
+      Everything (but the boundary conditions) must have been set before calling this
+     */
+    virtual void blockAssembling(){}
 
     //! Computes the coupling
     /*!
@@ -231,6 +231,9 @@ public:
     /*!
     */
     virtual bool set()=0;
+
+    //! Pushes a new coupling matrix in the corresponding vector
+    virtual void push_back_coupling( matrixPtr_Type& coupling)=0;
     //@}
 
     //@name virtual methods
@@ -273,12 +276,6 @@ public:
      */
     virtual void applyBoundaryConditions(const Real& time, const UInt block);
 
-    //!sums the coupling matrices with the corresponding blocks
-    /*!
-      Everything (but the boundary conditions) must have been set before calling this
-     */
-    virtual void blockAssembling() {}
-
 
     //!resets the blocks (frees the shared pointers)
     /*!
@@ -311,7 +308,7 @@ public:
     /*!
       Applies the robin preconditioners when needed, otherwise does nothing
      */
-    virtual void setRobin(matrix_ptrtype& mat, vector_ptrtype& rhs) {}
+    virtual void setRobin(matrixPtr_Type& mat, vector_ptrtype& rhs){}
 
 
     //! builds the coupling matrix.
@@ -332,7 +329,7 @@ public:
        \param numerationInterface vector containing the correspondence of the Lagrange multipliers with the interface dofs
        \param value value to insert in the coupling blocks
      */
-    void couplingMatrix(matrix_ptrtype& bigMatrix,
+    void couplingMatrix(matrixPtr_Type& bigMatrix,
                         Int coupling,
                         const std::vector<fespace_ptrtype>& problem,
                         const std::vector<UInt>& offset,
@@ -341,16 +338,6 @@ public:
                         const Real& timeStep=1.e-3,
                         const Real& value=1.); // not working with non-matching grids
 
-
-    //!applies a Robin preconditioner
-    /*!
-      (only used if the operator is a particular preconditioner, that is AdditiveSchwarz or AdditiveSchwarzRN)
-      applies a Robin preconditioner (mixing the two coupling conditions) to the input matrix, to the rhs, and to the internal
-      preconditioner matrix M_blockPrecs.
-      \param matrix: input matrix (the matrix of the linear system)
-      \param rhsFull: right hand side of the linear system
-     */
-    void robinPreconditioner(matrix_ptrtype& matrix, vector_ptrtype& rhsFull) {}
 
     //!sets the vector of raw pointer to the BCHandler
     /*!
@@ -396,7 +383,7 @@ public:
       \param locDofMap: std::map with the correspondance between the numeration of the interface in the 2 FE spaces.
       \param numerationInterface:  vector containing the correspondence of the Lagrange multipliers with the interface dofs
      */
-    void robinCoupling( BlockInterface::matrix_ptrtype& matrix,
+    void robinCoupling( BlockInterface::matrixPtr_Type& matrix,
                         Real& alphaf,
                         Real& alphas,
                         UInt coupling,
@@ -407,15 +394,25 @@ public:
                         const std::map<ID, ID>& locDofMap,
                         const BlockInterface::vector_ptrtype& numerationInterface );
 
+
+    //!
+    /*!
+      adds a new block
+        @param Mat block matrix to push
+        @param position position of the matrix to which we want to add Mat
+     */
+    virtual void addToBlock( const matrixPtr_Type& Mat, UInt position );
+
+    //! Pushes a new block
+    /** Pushes a matrix, BCHandler, FESpace and offset in the correspondent vector*/
     virtual void push_back_oper( BlockInterface& Oper);
 
-    virtual void push_back_coupling( matrix_ptrtype& coupling)=0;
     //@}
 
-    //!@name Getters
+    //!@name Get Methods
     //@{
     //! returns the vector of pointers to the blocks (by const reference).
-    const std::vector<matrix_ptrtype>&    getBlockVector() {return M_blocks;}
+    const std::vector<matrixPtr_Type>&    getBlockVector(){return M_blocks;}
 
     //! returns the vector of pointers to the BCHandlers (by const reference).
     const std::vector<bchandler_ptrtype>& getBChVector() {return M_bch;}
@@ -460,7 +457,7 @@ protected:
     //! @name Protected Members
     //@{
     //ComposedOperator<Epetra_Operator>                      M_blocks;
-    std::vector<matrix_ptrtype>                                  M_blocks;
+    std::vector<matrixPtr_Type>                                  M_blocks;
     std::vector<bchandler_ptrtype>                               M_bch;
     std::vector<fespace_ptrtype>                                 M_FESpace;
     std::vector<UInt>                                            M_offset;
@@ -479,7 +476,7 @@ private:
       If you need a copy you should implement it, so that it copies the shared pointer one by one, without copying
       the content.
      */
-    BlockInterface( matrix_ptrtype& T);
+    BlockInterface( matrixPtr_Type& T);
     //@}
 };
 

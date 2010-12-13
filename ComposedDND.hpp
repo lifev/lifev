@@ -26,12 +26,12 @@
 
 /*!
     @file
-    @brief A short description of the file content
+    @brief Composed preconditioner for a three blocks coupled problem
 
     @author Paolo Crosetto <crosetto@iacspc70.epfl.ch>
     @date 09 Aug 2010
 
-    A more detailed description of the file (if necessary)
+    Solves a Dirichlet--Neumann--Dirichlet system for the three blocks
  */
 
 #ifndef COMPOSEDDND_H
@@ -43,7 +43,7 @@
 namespace LifeV
 {
 
-//! ComposedDND - Modular preconditioner for geometry implicit monolithic FSI, three factors splitting
+//! ComposedDND - Modular preconditioner for (e.g.) geometry implicit monolithic FSI, three factors splitting
 /*!
     @author Paolo Crosetto
 
@@ -54,8 +54,12 @@ class ComposedDND : public ComposedDN
 {
 public:
 
+    //! @name Public Types
+    //@{
+
     typedef ComposedDN super;
 
+    //@}
     //! @name Constructors and destructor
     //@{
 
@@ -68,13 +72,21 @@ public:
     ~ComposedDND() {}
 
     //@}
-
+    //!@name Public Methods
+    //@{
 
     void blockAssembling( );
 
+    //@}
+
 private:
 
+    //!@name Protected Members
+    //@{
+
     bool M_swapped;
+
+    //@}
 
 };
 

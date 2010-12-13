@@ -1,31 +1,31 @@
-/* -*- mode: c++ -*-
+/* -*- mode: c++ -*- */
+//@HEADER
+/*
+*******************************************************************************
 
-   This file is part of the LifeV library
+    Copyright (C) 2004, 2005, 2007 EPFL, Politecnico di Milano, INRIA
+    Copyright (C) 2010 EPFL, Politecnico di Milano, Emory University
 
-   Author(s): Paolo Crosetto <crosetto@iacspc70.epfl.ch>
-   Date: 2008-09-17
+    This file is part of LifeV.
 
-   Copyright (C) 2008
+    LifeV is free software; you can redistribute it and/or modify
+    it under the terms of the GNU Lesser General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
 
-   This library is free software; you can redistribute it and/or
-   modify it under the terms of the GNU Lesser General Public
-   License as published by the Free Software Foundation; either
-   version 2.1 of the License, or (at your option) any later version.
+    LifeV is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+    Lesser General Public License for more details.
 
-   This library is distributed in the hope that it will be useful,
-   but WITHOUT ANY WARRANTY; without even the implied warranty of
-   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-   Lesser General Public License for more details.
+    You should have received a copy of the GNU Lesser General Public License
+    along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
 
-   You should have received a copy of the GNU Lesser General Public
-   License along with this library; if not, write to the Free Software
-   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+*******************************************************************************
 */
-/**
-   \file (monolithicGI)
-   \author crosetto <Paolo Crosetto>
-   \date (17/09/2008)
-*/
+//@HEADER
+
+#include <lifeconfig.h>
 
 #include <life/lifesolver/VenantKirchhofSolver.hpp>
 //#include <life/lifesolver/NonLinearVenantKirchhofSolver.hpp>
@@ -34,6 +34,12 @@
 #include <lifemc/lifesolver/ComposedDN.hpp>
 #include <lifemc/lifesolver/ComposedDND.hpp>
 #include <lifemc/lifesolver/BlockMatrixRN.hpp>
+
+
+// ===================================================
+//! Constructors and Descructor
+// ===================================================
+
 
 namespace LifeV
 {
@@ -48,6 +54,21 @@ MonolithicGI::MonolithicGI():
         M_meshBlock(),
         M_shapeDerivativesBlock()
 {}
+
+
+// ===================================================
+//! Public Methods
+// ===================================================
+
+
+void
+MonolithicGI::setUp( const GetPot& dataFile )
+{
+    super::setUp(dataFile);
+
+    M_domainVelImplicit     = dataFile( "fluid/domainVelImplicit", true);
+    M_convectiveTermDer     = dataFile( "fluid/convectiveTermDer", false);
+}
 
 void
 MonolithicGI::setupFluidSolid( UInt const fluxes )
@@ -71,8 +92,8 @@ MonolithicGI::setupFluidSolid( UInt const fluxes )
     M_bdf->initialize_unk(u0);
     this->M_rhs.reset(new vector_type(*this->M_monolithicMap));
     this->M_rhsFull.reset(new vector_type(*this->M_monolithicMap));
-    if (M_data->dataFluid()->useShapeDerivatives())
-        M_shapeDerivativesBlock.reset(new matrix_type(*M_monolithicMap));
+    if(M_data->dataFluid()->useShapeDerivatives())
+        M_shapeDerivativesBlock.reset(new matrix_Type(*M_monolithicMap));
     M_uk.reset (new vector_type(*this->M_monolithicMap));
     M_un.reset (new vector_type(*this->M_monolithicMap));
 
@@ -227,65 +248,6 @@ MonolithicGI::applyBoundaryConditions()
 }
 
 
-int MonolithicGI::setupBlockPrec( )
-{
-    super::setupBlockPrec( );
-
-    if (M_data->dataFluid()->useShapeDerivatives())
-    {
-        *M_shapeDerivativesBlock *= 0.;
-        M_shapeDerivativesBlock->openCrsMatrix( );
-        shapeDerivatives( M_shapeDerivativesBlock ,*M_uk/*subX*/, M_domainVelImplicit, M_convectiveTermDer );
-        //*M_shapeDerivativesBlock += *M_monolithicMatrix->getMatrix();
-        M_shapeDerivativesBlock->GlobalAssemble( );
-        M_monolithicMatrix->addToGlobalMatrix( M_shapeDerivativesBlock );
-    }
-
-    //M_solidDerBlock = M_solidBlockPrec; // an inexact Newton approximation of the Jacobian
-
-    //The following part accounts for a possibly nonlinear structure model, should not be run when linear
-    //elasticity is used
-    if ( M_data->dataSolid()->useExactJacobian() )
-    {
-        M_solid->updateJacobian( *M_uk, M_solidDerBlock ); // computing the derivatives if nonlinear (comment this for inexact Newton);
-        *M_monolithicMatrix->getMatrix() *= 0;
-        // doing nothing if linear
-        M_solidBlockPrec.reset(new matrix_type(*M_monolithicMap, 1));
-        *M_solidBlockPrec += *M_solidDerBlock;
-        M_solidBlockPrec->GlobalAssemble();
-        M_precPtr->replace_matrix( M_solidBlockPrec, 0 );
-        M_monolithicMatrix->blockAssembling();
-        M_monolithicMatrix->applyBoundaryConditions( dataFluid()->dataTime()->getTime());
-        M_monolithicMatrix->GlobalAssemble();
-        *M_monolithicMatrix->getMatrix() *= M_data->dataFluid()->dataTime()->getTimeStep();
-    }
-
-    if ( M_precPtr->getBlockVector( ).size( )<3 )
-    {
-        M_precPtr->push_back_matrix( M_meshBlock, false );
-        M_precPtr->setConditions( M_BChs );
-        M_precPtr->setSpaces( M_FESpaces );
-        M_precPtr->setOffsets( 3, M_offset, 0,  M_solidAndFluidDim + nDimensions*M_interface );
-        M_precPtr->coupler( M_monolithicMap, M_dofStructureToHarmonicExtension->locDofMap(), M_numerationInterface, M_data->dataFluid()->dataTime()->getTimeStep(), 2 );
-
-        if (M_data->dataFluid()->useShapeDerivatives())
-        {
-            M_precPtr->push_back_coupling( M_shapeDerivativesBlock );
-        }
-    }
-    else
-    {
-        //M_precPtr->replace_matrix( M_solidBlockPrec, 0 );
-        //M_precPtr->replace_matrix( M_fluidBlock, 1 );
-        M_precPtr->replace_matrix( M_meshBlock, 2 );
-
-        if (M_data->dataFluid()->useShapeDerivatives())
-        {
-            M_precPtr->replace_coupling( M_shapeDerivativesBlock, 2 );
-        }
-    }
-}
-
 void MonolithicGI::solveJac(vector_type       &_step,
                             const vector_type &_res,
                             const Real       _linearRelTol)
@@ -322,7 +284,68 @@ void MonolithicGI::initialize( FSIOperator::fluid_type::value_type::Function con
     M_meshMotion->setDisplacement(df);
 }
 
-void MonolithicGI::shapeDerivatives(matrix_ptrtype sdMatrix, const vector_type& sol, bool domainVelImplicit, bool convectiveTermDer)
+
+int MonolithicGI::setupBlockPrec( )
+{
+    super::setupBlockPrec( );
+
+    if (M_data->dataFluid()->useShapeDerivatives())
+    {
+        *M_shapeDerivativesBlock *= 0.;
+        M_shapeDerivativesBlock->openCrsMatrix( );
+        shapeDerivatives( M_shapeDerivativesBlock ,*M_uk/*subX*/, M_domainVelImplicit, M_convectiveTermDer );
+        //*M_shapeDerivativesBlock += *M_monolithicMatrix->getMatrix();
+        M_shapeDerivativesBlock->GlobalAssemble( );
+        M_monolithicMatrix->addToGlobalMatrix( M_shapeDerivativesBlock );
+    }
+
+    //M_solidDerBlock = M_solidBlockPrec; // an inexact Newton approximation of the Jacobian
+
+    //The following part accounts for a possibly nonlinear structure model, should not be run when linear
+    //elasticity is used
+    if ( M_data->dataSolid()->useExactJacobian() )
+    {
+        M_solid->updateJacobian( *M_uk, M_solidDerBlock ); // computing the derivatives if nonlinear (comment this for inexact Newton);
+        *M_monolithicMatrix->getMatrix() *= 0;
+        // doing nothing if linear
+        M_solidBlockPrec.reset(new matrix_Type(*M_monolithicMap, 1));
+        *M_solidBlockPrec += *M_solidDerBlock;
+        M_solidBlockPrec->GlobalAssemble();
+        M_precPtr->replace_matrix( M_solidBlockPrec, 0 );
+        M_monolithicMatrix->blockAssembling();
+        M_monolithicMatrix->applyBoundaryConditions( dataFluid()->dataTime()->getTime());
+        M_monolithicMatrix->GlobalAssemble();
+        *M_monolithicMatrix->getMatrix() *= M_data->dataFluid()->dataTime()->getTimeStep();
+    }
+
+    if ( M_precPtr->getBlockVector( ).size( )<3 )
+    {
+        M_precPtr->push_back_matrix( M_meshBlock, false );
+        M_precPtr->setConditions( M_BChs );
+        M_precPtr->setSpaces( M_FESpaces );
+        M_precPtr->setOffsets( 3, M_offset, 0,  M_solidAndFluidDim + nDimensions*M_interface );
+        M_precPtr->coupler( M_monolithicMap, M_dofStructureToHarmonicExtension->locDofMap(), M_numerationInterface, M_data->dataFluid()->dataTime()->getTimeStep(), 2 );
+
+        if (M_data->dataFluid()->useShapeDerivatives())
+        {
+            M_precPtr->push_back_coupling( M_shapeDerivativesBlock );
+        }
+    }
+    else
+    {
+        //M_precPtr->replace_matrix( M_solidBlockPrec, 0 );
+        //M_precPtr->replace_matrix( M_fluidBlock, 1 );
+        M_precPtr->replace_matrix( M_meshBlock, 2 );
+
+        if (M_data->dataFluid()->useShapeDerivatives())
+        {
+            M_precPtr->replace_coupling( M_shapeDerivativesBlock, 2 );
+        }
+    }
+}
+
+
+void MonolithicGI::shapeDerivatives(matrixPtr_Type sdMatrix, const vector_type& sol, bool domainVelImplicit, bool convectiveTermDer)
 {
     double alpha = 1./M_data->dataFluid()->dataTime()->getTimeStep();
     vector_ptrtype rhsNew(new vector_type(*M_monolithicMap));
@@ -372,20 +395,11 @@ void MonolithicGI::shapeDerivatives(matrix_ptrtype sdMatrix, const vector_type& 
                                    );
 }
 
-void
-MonolithicGI::setUp( const GetPot& dataFile )
-{
-    super::setUp(dataFile);
-
-    M_domainVelImplicit     = dataFile( "fluid/domainVelImplicit", true);
-    M_convectiveTermDer     = dataFile( "fluid/convectiveTermDer", false);
-}
-
 
 void
 MonolithicGI::assembleMeshBlock(UInt iter)
 {
-    M_meshBlock.reset(new matrix_type(*M_monolithicMap));
+    M_meshBlock.reset(new matrix_Type(*M_monolithicMap));
     M_meshMotion->setMatrix(M_meshBlock);
     M_meshBlock->GlobalAssemble();
     UInt offset(M_solidAndFluidDim+nDimensions*M_interface);
@@ -413,6 +427,12 @@ MonolithicGI::assembleMeshBlock(UInt iter)
             M_meshBlock->diagonalize(i+offset+dim*M_mmFESpace->dof().numTotalDof()-1 , 1.);
         }
 }
+
+
+
+// ===================================================
+//! Factory methods
+// ===================================================
 
 namespace
 {
@@ -464,6 +484,10 @@ BlockInterface*    createComposedDND2GI()
 }
 FSIOperator*    createFM() { return new MonolithicGI(); }
 }
+
+// ===================================================
+//! Products registration
+// ===================================================
 
 bool MonolithicGI::reg =  BlockPrecFactory::instance().registerProduct("AdditiveSchwarzGI"  , &createAdditiveSchwarzGI )
                           &&

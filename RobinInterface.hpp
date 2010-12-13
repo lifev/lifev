@@ -1,37 +1,38 @@
+/* -*- mode: c++ -*- */
 //@HEADER
 /*
-************************************************************************
+*******************************************************************************
 
- This file is part of the LifeV Applications.
- Copyright (C) 2001-2010 EPFL, Politecnico di Milano, INRIA
+    Copyright (C) 2004, 2005, 2007 EPFL, Politecnico di Milano, INRIA
+    Copyright (C) 2010 EPFL, Politecnico di Milano, Emory University
 
- This library is free software; you can redistribute it and/or modify
- it under the terms of the GNU Lesser General Public License as
- published by the Free Software Foundation; either version 2.1 of the
- License, or (at your option) any later version.
+    This file is part of LifeV.
 
- This library is distributed in the hope that it will be useful, but
- WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- Lesser General Public License for more details.
+    LifeV is free software; you can redistribute it and/or modify
+    it under the terms of the GNU Lesser General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
 
- You should have received a copy of the GNU Lesser General Public
- License along with this library; if not, write to the Free Software
- Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
- USA
+    LifeV is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+    Lesser General Public License for more details.
 
-************************************************************************
+    You should have received a copy of the GNU Lesser General Public License
+    along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
+
+*******************************************************************************
 */
 //@HEADER
 
 /*!
     @file
-    @brief A short description of the file content
+    @brief An interface implementing the Robin coupling
 
     @author Paolo Crosetto <crosetto@iacspc70.epfl.ch>
     @date 09 Jul 2010
 
-    A more detailed description of the file (if necessary)
+    Used for the robin coupling in a monolithic formulation of a multiphysics problem.
  */
 
 #ifndef ROBININTERFACE_H
@@ -57,6 +58,8 @@ namespace LifeV
     coupling conditions already present in the matrix. This is achieved by multiplying the matrix times a restriction
     matrix (M_robinCoupling) which performs the restriction to the interface and the linear combination. Then the result
     is summed to the original matrix. The update of the rhs vector must be done outside this class.
+
+    \todo Remove this class and try to implement the same coupling otherwise.
  */
 class RobinInterface
 {
@@ -94,7 +97,7 @@ public:
       \param data: data file
       \param section: the section (usually /robin) in the GetPot file where the parameters are specified
      */
-    void setRobinMatrix( BlockInterface::matrix_ptrtype& robinMatrix ) {M_robinPart=robinMatrix;}
+    void setRobinMatrix( BlockInterface::matrixPtr_Type& robinMatrix ){M_robinPart=robinMatrix;}
 
     //! method to initialize the pointer to the robin RHS
     /*!
@@ -107,7 +110,7 @@ public:
       Note that the coupling matrix M_robinCoupling must be set before calling this.
       \param blockVector: the vector of blocks to couple.
      */
-    void applyRobinCoupling( std::vector<BlockInterface::matrix_ptrtype> blockVector);
+    void applyRobinCoupling( std::vector<BlockInterface::matrixPtr_Type> blockVector);
 
     //@}
 
@@ -117,7 +120,7 @@ protected:
     //! @name Protected Methods
     //@{
 
-    void applyRobinCoupling( BlockInterface::matrix_ptrtype firstBlock );
+    void applyRobinCoupling( BlockInterface::matrixPtr_Type firstBlock );
 
     //@}
 
@@ -127,8 +130,8 @@ protected:
 
     Real                                 M_alphaf;
     Real                                 M_alphas;
-    BlockInterface::matrix_ptrtype       M_robinCoupling;
-    BlockInterface::matrix_ptrtype       M_robinPart;
+    BlockInterface::matrixPtr_Type       M_robinCoupling;
+    BlockInterface::matrixPtr_Type       M_robinPart;
     BlockInterface::vector_ptrtype       M_rhsVec;
     //@}
 

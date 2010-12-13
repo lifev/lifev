@@ -1,43 +1,40 @@
+/* -*- mode: c++ -*- */
 //@HEADER
 /*
-************************************************************************
+*******************************************************************************
 
- This file is part of the LifeV Applications.
- Copyright (C) 2001-2010 EPFL, Politecnico di Milano, INRIA
+    Copyright (C) 2004, 2005, 2007 EPFL, Politecnico di Milano, INRIA
+    Copyright (C) 2010 EPFL, Politecnico di Milano, Emory University
 
- This library is free software; you can redistribute it and/or modify
- it under the terms of the GNU Lesser General Public License as
- published by the Free Software Foundation; either version 2.1 of the
- License, or (at your option) any later version.
+    This file is part of LifeV.
 
- This library is distributed in the hope that it will be useful, but
- WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- Lesser General Public License for more details.
+    LifeV is free software; you can redistribute it and/or modify
+    it under the terms of the GNU Lesser General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
 
- You should have received a copy of the GNU Lesser General Public
- License along with this library; if not, write to the Free Software
- Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
- USA
+    LifeV is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+    Lesser General Public License for more details.
 
-************************************************************************
+    You should have received a copy of the GNU Lesser General Public License
+    along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
+
+*******************************************************************************
 */
 //@HEADER
 
-/*!
-    @file
-    @brief A short description of the file content
-
-    @author Paolo Crosetto <crosetto@iacspc70.epfl.ch>
-    @date 09 Jul 2010
-
-    A more detailed description of the file (if necessary)
- */
+#include <lifeconfig.h>
 
 #include <lifemc/lifesolver/RobinInterface.hpp>
 
 namespace LifeV
 {
+
+// ===================================================
+//! Public Methods
+// ===================================================
 
 void RobinInterface::setRobinData(const GetPot& data, const std::string& section)
 {
@@ -46,16 +43,21 @@ void RobinInterface::setRobinData(const GetPot& data, const std::string& section
 }
 
 
-void RobinInterface::applyRobinCoupling( std::vector<BlockInterface::matrix_ptrtype> blockVector)
+void RobinInterface::applyRobinCoupling( std::vector<BlockInterface::matrixPtr_Type> blockVector)
 {
-    M_robinPart.reset(new BlockInterface::matrix_type(M_robinCoupling->getMap(), 0));
-    for ( UInt ITBlock = 0; ITBlock < blockVector.size(); ++ITBlock )
+    M_robinPart.reset(new BlockInterface::matrix_Type(M_robinCoupling->getMap(), 0));
+    for( UInt ITBlock = 0; ITBlock < blockVector.size(); ++ITBlock )
         applyRobinCoupling( blockVector[ITBlock] );
 }
 
-void RobinInterface::applyRobinCoupling( BlockInterface::matrix_ptrtype block)
+
+// ===================================================
+//! Protected Methods
+// ===================================================
+
+void RobinInterface::applyRobinCoupling( BlockInterface::matrixPtr_Type block)
 {
-    BlockInterface::matrix_ptrtype tmpMatrix(new BlockInterface::matrix_type(M_robinCoupling->getMap(), 0));
+    BlockInterface::matrixPtr_Type tmpMatrix(new BlockInterface::matrix_Type(M_robinCoupling->getMap(), 0));
     int err = EpetraExt::MatrixMatrix::
               Multiply( *M_robinCoupling->getMatrixPtr(),
                         false,

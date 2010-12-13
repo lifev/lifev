@@ -1,30 +1,39 @@
-/* -*- mode: c++ -*-
+/* -*- mode: c++ -*- */
+//@HEADER
+/*
+*******************************************************************************
 
-   This file is part of the LifeV library
+    Copyright (C) 2004, 2005, 2007 EPFL, Politecnico di Milano, INRIA
+    Copyright (C) 2010 EPFL, Politecnico di Milano, Emory University
 
-   Author(s): Paolo Crosetto <crosetto@iacspc70.epfl.ch>
-   Date: 2008-09-18
+    This file is part of LifeV.
 
-   Copyright (C) 2008
+    LifeV is free software; you can redistribute it and/or modify
+    it under the terms of the GNU Lesser General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
 
-   This library is free software; you can redistribute it and/or
-   modify it under the terms of the GNU Lesser General Public
-   License as published by the Free Software Foundation; either
-   version 2.1 of the License, or (at your option) any later version.
+    LifeV is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+    Lesser General Public License for more details.
 
-   This library is distributed in the hope that it will be useful,
-   but WITHOUT ANY WARRANTY; without even the implied warranty of
-   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-   Lesser General Public License for more details.
+    You should have received a copy of the GNU Lesser General Public License
+    along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
 
-   You should have received a copy of the GNU Lesser General Public
-   License along with this library; if not, write to the Free Software
-   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+*******************************************************************************
 */
+//@HEADER
+
 /**
    \file monolithicGI.hpp
+   @breif Monolithic Geometry--Implicit FSI Solver
    \author crosetto <Paolo Crosetto>
-   \date 18/09/2008
+   \date 18 Sep 2008
+
+   \include ../../testsuite/test_monolithic/fluidstructure.dox
+   This file implements the Monolithic Geometry--Implicit solver, see \ref CDFQ for details
+
 */
 #ifndef _MONOLITHICGI_HPP
 #define _MONOLITHICGI_HPP
@@ -70,8 +79,8 @@ class Epetra_FullMonolithic;
  alphas=0.
  - DDBlockPrec: specifies the possible preconditioners to use. Can be: AdditiveSchwarz, ComposedDN, ComposedDN2,
  ComposedNN, ComposedDNND.
-
  */
+
 class MonolithicGI : public Monolithic
 {
 public:
@@ -80,13 +89,16 @@ public:
     typedef EpetraPreconditioner                               prec_raw_type;
     typedef boost::shared_ptr<prec_raw_type>                   prec_type;
 
-    ///constructor
+    //!@name Constructor and Destructor
+    //@{
+    //! Empty Constructor
     MonolithicGI();
+    //! Destructor
+    virtual ~MonolithicGI(){}
+    //@}
 
-
-    ///destructor
-    virtual ~MonolithicGI() {}
-
+    //!@name Public Methods
+    //@{
     /**
        constructs the matrix handling the coupling and sums it to matrix
        \param matrix: output matrix
@@ -103,8 +115,6 @@ public:
     */
     void                        updateSystem();
 
-    //!sets the block preconditioner
-    int                        setupBlockPrec( );
 
     //@}
 
@@ -135,14 +145,22 @@ public:
     void                        solveJac(vector_type       &_muk,
                                          const vector_type &_res,
                                          const Real       _linearRelTol);
+    //! initialize the system with functions
+    void                        initialize( FSIOperator::fluid_type::value_type::Function const& u0,
+                                            FSIOperator::solid_type::value_type::Function const& p0,
+                                            FSIOperator::solid_type::value_type::Function const& d0,
+                                            FSIOperator::solid_type::value_type::Function const& w0,
+                                            FSIOperator::solid_type::value_type::Function const& df0 );
 
-    //! @getters
+    //@}
+    //!@name Get Methods
     //@{
+
     //! getter for the map of fluid-structure-interface (without the mesh motion)
     const EpetraMap&            mapWithoutMesh() const {return *M_mapWithoutMesh;}
 
     //! getter for the global matrix of the system
-    const matrix_ptrtype        getMatrixPtr() const {return this->M_monolithicMatrix->getMatrix();}
+    const matrixPtr_Type        getMatrixPtr() const {return this->M_monolithicMatrix->getMatrix();}
 
     //! getter for the current iteration solution
     const vector_ptrtype  uk()  const      {return M_uk;}
@@ -160,38 +178,33 @@ public:
     //! get the solution.
     vector_ptrtype& solutionPtr() { return M_uk; }
 
+    //@}
+    //!@name Set Methods
+    //@{
     //! set the solution
     void setSolution( const vector_type& solution ) { M_uk.reset( new vector_type( solution ) ); }
 
     void setSolutionPtr                     ( const vector_ptrtype& sol) { M_uk = sol; }
     //@}
 
-    //! initialize the system with functions
-    void                        initialize( FSIOperator::fluid_type::value_type::Function const& u0,
-                                            FSIOperator::solid_type::value_type::Function const& p0,
-                                            FSIOperator::solid_type::value_type::Function const& d0,
-                                            FSIOperator::solid_type::value_type::Function const& w0,
-                                            FSIOperator::solid_type::value_type::Function const& df0 );
+protected:
 
-    void registerMyProducts( ) {};
+    //!@name Protected Methods
+    //@{
+    //!sets the block preconditioner
+    int                        setupBlockPrec( );
+    //@}
+
 private:
 
     //! @name Private Methods
     //@{
-//     //! creates the
+
+    //! Factory method for the system matrix, of type MonolithicBlockBase
     void createOperator( std::string& operType )
     {
         M_monolithicMatrix.reset(BlockMatrix::Factory::instance().createObject( operType ));
     }
-
-    //! initializes the solution vectors needed for the time discrtization of every problem
-    /*!
-      \param u0: initial fluid velocity
-      \param p0: initial pressure (not used in general)
-      \param d0: initial solid displacement
-      \param fd0: initial fluid domain displacement
-     */
-    void initialize( vector_type const& u0, vector_type const& p0, vector_type const& d0, vector_type const& df0);
 
     /**
        calculates the terms due to the shape derivatives on the rhs of the monolithic system rhsShapeDerivatives
@@ -199,7 +212,7 @@ private:
        \param rhsShapeDerivatives: output. Shape derivative terms.
        \param meshDeltaDisp: input. Mesh displacement increment.
     */
-    void shapeDerivatives(matrix_ptrtype sdMatrix, const vector_type& sol,  bool fullImplicit, bool convectiveTerm);
+    void shapeDerivatives(matrixPtr_Type sdMatrix, const vector_type& sol,  bool fullImplicit, bool convectiveTerm);
 
     //! assembles the mesh motion matrix.
     /*!In Particular it diagonalize the part of the matrix corresponding to the
@@ -207,18 +220,22 @@ private:
       \param iter: current iteration: used as flag to distinguish the first nonlinear iteration from the others
      */
     void assembleMeshBlock(UInt iter);
+
     //@}
+    //!@name Private Members
+    //@{
 
     boost::shared_ptr<EpetraMap>         M_mapWithoutMesh;
     vector_ptrtype                       M_uk;
     bool                                 M_domainVelImplicit;
     bool                                 M_convectiveTermDer;
     UInt                                 M_interface;
-    matrix_ptrtype                       M_meshBlock;
-    matrix_ptrtype                       M_shapeDerivativesBlock;
-    matrix_ptrtype                       M_solidDerBlock;
+    matrixPtr_Type                       M_meshBlock;
+    matrixPtr_Type                       M_shapeDerivativesBlock;
+    matrixPtr_Type                       M_solidDerBlock;
     //std::vector<fluid_bchandler_type>    M_BChsLin;
     static bool                          reg;
+    //@}
 };
 
 }

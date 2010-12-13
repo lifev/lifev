@@ -1,26 +1,27 @@
+/* -*- mode: c++ -*- */
 //@HEADER
 /*
-************************************************************************
+*******************************************************************************
 
- This file is part of the LifeV Applications.
- Copyright (C) 2001-2010 EPFL, Politecnico di Milano, INRIA
+    Copyright (C) 2004, 2005, 2007 EPFL, Politecnico di Milano, INRIA
+    Copyright (C) 2010 EPFL, Politecnico di Milano, Emory University
 
- This library is free software; you can redistribute it and/or modify
- it under the terms of the GNU Lesser General Public License as
- published by the Free Software Foundation; either version 2.1 of the
- License, or (at your option) any later version.
+    This file is part of LifeV.
 
- This library is distributed in the hope that it will be useful, but
- WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- Lesser General Public License for more details.
+    LifeV is free software; you can redistribute it and/or modify
+    it under the terms of the GNU Lesser General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
 
- You should have received a copy of the GNU Lesser General Public
- License along with this library; if not, write to the Free Software
- Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
- USA
+    LifeV is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+    Lesser General Public License for more details.
 
-************************************************************************
+    You should have received a copy of the GNU Lesser General Public License
+    along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
+
+*******************************************************************************
 */
 //@HEADER
 
@@ -34,6 +35,8 @@
     A more detailed description of the file (if necessary)
  */
 
+#include <lifeconfig.h>
+
 #include <BlockMatrix.hpp>
 
 namespace LifeV
@@ -41,17 +44,21 @@ namespace LifeV
 
 
 
-
-int BlockMatrix::solveSystem( const vector_type& rhs, vector_type& step, solver_ptrtype& linearSolver)
-{
-    return linearSolver->solveSystem(rhs, step, M_globalMatrix);
-}
+// ===================================================
+//! Public Methods
+// ===================================================
 
 
 void BlockMatrix::setDataFromGetPot(const GetPot& data, const std::string& section)
 {
 }
 
+
+void BlockMatrix::GlobalAssemble()
+{
+    M_globalMatrix->GlobalAssemble();
+    //    M_globalMatrix->spy("Prec");
+}
 
 void BlockMatrix::coupler(map_shared_ptrtype& map,
                           const std::map<ID, ID>& locDofMap,
@@ -60,7 +67,7 @@ void BlockMatrix::coupler(map_shared_ptrtype& map,
                          )
 {
     ASSERT(!M_coupling.get(), "coupler must not be called twice \n");
-    M_coupling.reset(new matrix_type(*map));
+    M_coupling.reset(new matrix_Type(*map));
     super::couplingMatrix( M_coupling,  M_couplingFlag, super::M_FESpace, super::M_offset, locDofMap, numerationInterface, timeStep);
 }
 
@@ -75,13 +82,18 @@ void BlockMatrix::coupler(map_shared_ptrtype& map,
 }
 
 
-void BlockMatrix::push_back_matrix( const matrix_ptrtype& Mat, bool /*recompute*/)
+int BlockMatrix::solveSystem( const vector_type& rhs, vector_type& step, solver_ptrtype& linearSolver)
+{
+    return linearSolver->solveSystem(rhs, step, M_globalMatrix);
+}
+
+void BlockMatrix::push_back_matrix( const matrixPtr_Type& Mat, bool /*recompute*/)
 {
     super::M_blocks.push_back(Mat);
 }
 
 
-void BlockMatrix::replace_matrix( const matrix_ptrtype& Mat, UInt index)
+void BlockMatrix::replace_matrix( const matrixPtr_Type& Mat, UInt index)
 {
     super::M_blocks[index] = Mat;
 }
@@ -96,7 +108,7 @@ void BlockMatrix::replace_precs( const epetra_operator_ptrtype& Mat, UInt index)
 void BlockMatrix::blockAssembling()
 {
     M_coupling->GlobalAssemble();
-    M_globalMatrix.reset(new matrix_type(M_coupling->getMap()));
+    M_globalMatrix.reset(new matrix_Type(M_coupling->getMap()));
     *M_globalMatrix += *M_coupling;
     for (UInt k=0; k<M_blocks.size(); ++k)
     {
@@ -106,21 +118,15 @@ void BlockMatrix::blockAssembling()
 }
 
 
-void BlockMatrix::GlobalAssemble()
-{
-    M_globalMatrix->GlobalAssemble();
-    //    M_globalMatrix->spy("Prec");
-}
 
-
-void BlockMatrix::applyPreconditioner(const matrix_ptrtype matrix, vector_ptrtype& rhsFull)
+void BlockMatrix::applyPreconditioner(const matrixPtr_Type matrix, vector_ptrtype& rhsFull)
 {
     this->applyPreconditioner(matrix, M_globalMatrix);
     *rhsFull = (*matrix)*(*rhsFull);
 }
 
 
-void BlockMatrix::applyPreconditioner( matrix_ptrtype robinCoupling, matrix_ptrtype prec, vector_ptrtype& rhs)
+void BlockMatrix::applyPreconditioner( matrixPtr_Type robinCoupling, matrixPtr_Type prec, vector_ptrtype& rhs)
 {
     applyPreconditioner(robinCoupling, prec);
     applyPreconditioner(robinCoupling, M_globalMatrix);
@@ -128,9 +134,9 @@ void BlockMatrix::applyPreconditioner( matrix_ptrtype robinCoupling, matrix_ptrt
 }
 
 
-void BlockMatrix::applyPreconditioner( const matrix_ptrtype prec, matrix_ptrtype& oper )
+void BlockMatrix::applyPreconditioner( const matrixPtr_Type prec, matrixPtr_Type& oper )
 {
-    matrix_type tmpMatrix(prec->getMap(), 1);
+    matrix_Type tmpMatrix(prec->getMap(), 1);
     EpetraExt::MatrixMatrix::Multiply( *prec->getMatrixPtr(),
                                        false,
                                        *oper->getMatrixPtr(),
@@ -225,13 +231,13 @@ void BlockMatrix::applyBoundaryConditions(const Real& time, const UInt block)
     bcManageMatrix( *M_globalMatrix , *super::M_FESpace[block]->mesh(), super::M_FESpace[block]->dof(), *super::M_bch[block], super::M_FESpace[block]->feBd(), 1., time);
 }
 
-void BlockMatrix::addToCoupling( const matrix_ptrtype& Mat, UInt /*position*/)
+void BlockMatrix::addToCoupling( const matrixPtr_Type& Mat, UInt /*position*/)
 {
     if (!M_coupling->getMatrixPtr()->Filled())
         *M_coupling += *Mat;
     else
     {
-        matrix_ptrtype tmp(new matrix_type(M_coupling->getMap()));
+        matrixPtr_Type tmp(new matrix_Type(M_coupling->getMap()));
         *tmp += *M_coupling;
         *tmp += *Mat;
         M_coupling = tmp;

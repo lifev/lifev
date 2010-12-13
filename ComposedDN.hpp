@@ -1,26 +1,27 @@
+/* -*- mode: c++ -*- */
 //@HEADER
 /*
-************************************************************************
+*******************************************************************************
 
- This file is part of the LifeV Applications.
- Copyright (C) 2001-2010 EPFL, Politecnico di Milano, INRIA
+    Copyright (C) 2004, 2005, 2007 EPFL, Politecnico di Milano, INRIA
+    Copyright (C) 2010 EPFL, Politecnico di Milano, Emory University
 
- This library is free software; you can redistribute it and/or modify
- it under the terms of the GNU Lesser General Public License as
- published by the Free Software Foundation; either version 2.1 of the
- License, or (at your option) any later version.
+    This file is part of LifeV.
 
- This library is distributed in the hope that it will be useful, but
- WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- Lesser General Public License for more details.
+    LifeV is free software; you can redistribute it and/or modify
+    it under the terms of the GNU Lesser General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
 
- You should have received a copy of the GNU Lesser General Public
- License along with this library; if not, write to the Free Software
- Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
- USA
+    LifeV is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+    Lesser General Public License for more details.
 
-************************************************************************
+    You should have received a copy of the GNU Lesser General Public License
+    along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
+
+*******************************************************************************
 */
 //@HEADER
 
@@ -69,12 +70,11 @@
 
 #include <life/lifecore/life.hpp>
 
-#include <lifemc/lifesolver/ComposedBlockOper.hpp>
-
 #include <lifemc/lifealg/ComposedPreconditioner.hpp>
 
-namespace LifeV
-{
+#include <lifemc/lifesolver/ComposedBlockOper.hpp>
+
+namespace LifeV {
 
 //! ComposedDN - Short description of the class
 /*!
@@ -101,6 +101,15 @@ public:
 
     //! @name public methods
     //@{
+
+    //! sets the parameters related to M_blockPrecs from the data file
+    /*!
+      \param dataFile: GetPot data file
+      \param section: string identifying the section in the data file
+     */
+    void setDataFromGetPot( const GetPot& dataFile,
+                            const std::string& section );
+
     //! Solves the preconditioned linear system
     /*!
       Provided the linear solver and the right hand side this method computes the solution and returns it into
@@ -155,15 +164,7 @@ public:
       which computes the AAS preconditioner for the input matrix
       \param Mat: input matrix
      */
-    virtual void    push_back_precs( matrix_ptrtype& Mat);
-
-    //! sets the parameters related to M_blockPrecs from the data file
-    /*!
-      \param dataFile: GetPot data file
-      \param section: string identifying the section in the data file
-     */
-    void setDataFromGetPot( const GetPot& dataFile,
-                            const std::string& section );
+    virtual void    push_back_precs( matrixPtr_Type& Mat);
 
     //! returns the true if the preconditioner has at leas one factor computed
     bool set()
@@ -180,6 +181,9 @@ public:
         M_blockPrecs.reset( new ComposedPreconditioner(M_comm));
     }
 
+    //@}
+    //!@name Factory Methods
+    //@{
 
     static BlockInterface* createComposedDN()
     {
@@ -199,7 +203,7 @@ public:
         const std::vector<ComposedBlockOper::Block> orderVector(order, order+2);
         return new ComposedDN(couplingVectorDN2, orderVector);
     }
-
+    //@}
 
 protected:
 
@@ -209,7 +213,7 @@ protected:
     /*!
       Replaces the preconditioner in M_blockPrecs with another one that is already constructed
     */
-    virtual void    replace_precs( matrix_ptrtype& Mat, UInt position);
+    virtual void    replace_precs( matrixPtr_Type& Mat, UInt position);
     //@}
 
     //! @name Protected Members

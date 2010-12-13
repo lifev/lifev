@@ -1,26 +1,27 @@
+/* -*- mode: c++ -*- */
 //@HEADER
 /*
-************************************************************************
+*******************************************************************************
 
- This file is part of the LifeV Applications.
- Copyright (C) 2001-2010 EPFL, Politecnico di Milano, INRIA
+    Copyright (C) 2004, 2005, 2007 EPFL, Politecnico di Milano, INRIA
+    Copyright (C) 2010 EPFL, Politecnico di Milano, Emory University
 
- This library is free software; you can redistribute it and/or modify
- it under the terms of the GNU Lesser General Public License as
- published by the Free Software Foundation; either version 2.1 of the
- License, or (at your option) any later version.
+    This file is part of LifeV.
 
- This library is distributed in the hope that it will be useful, but
- WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- Lesser General Public License for more details.
+    LifeV is free software; you can redistribute it and/or modify
+    it under the terms of the GNU Lesser General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
 
- You should have received a copy of the GNU Lesser General Public
- License along with this library; if not, write to the Free Software
- Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
- USA
+    LifeV is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+    Lesser General Public License for more details.
 
-************************************************************************
+    You should have received a copy of the GNU Lesser General Public License
+    along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
+
+*******************************************************************************
 */
 //@HEADER
 
@@ -61,8 +62,8 @@ public:
     typedef  super::vector_type             vector_type;
     typedef  super::vector_ptrtype          vector_ptrtype;
     typedef  super::solver_ptrtype          solver_ptrtype;
-    typedef  super::matrix_type          matrix_type;
-    typedef  super::matrix_ptrtype          matrix_ptrtype;
+    typedef  super::matrix_Type          matrix_Type;
+    typedef  super::matrixPtr_Type          matrixPtr_Type;
     typedef  super::epetra_operator_ptrtype epetra_operator_ptrtype;
     typedef  super::map_shared_ptrtype      map_shared_ptrtype;
     typedef singleton<factory<BlockMatrix,  std::string> >     Factory;
@@ -174,7 +175,7 @@ public:
         In this case it is not used since it is equal to the boolean specifying wether the whole preconditioner must be
         recomputed or not.
      */
-    void  push_back_matrix( const matrix_ptrtype& Mat, bool /*recompute*/);
+    void  push_back_matrix( const matrixPtr_Type& Mat, bool /*recompute*/);
 
     //! replaces a block
     /*!
@@ -182,7 +183,7 @@ public:
         @param Mat block matrix to push
         @param index position in the vector
      */
-    void  replace_matrix( const matrix_ptrtype& Mat, UInt index);
+    void  replace_matrix( const matrixPtr_Type& Mat, UInt index);
 
 
     //! replaces the coupling matrix without copies
@@ -190,7 +191,7 @@ public:
       this method is deprecated, it is implemented for compatibility with the base class
       \param Mat replacing matrix
      */
-    void replace_coupling( const matrix_ptrtype& Mat, UInt /*index*/)
+    void replace_coupling( const matrixPtr_Type& Mat, UInt /*index*/)
     {
         // not used for matrices (only for preconditioners)
         /*M_coupling = Mat;*/
@@ -211,7 +212,7 @@ public:
     //! returns the global matrix, with all the blocks and the coupling parts
     /*!
     */
-    matrix_ptrtype& getMatrix( ) {return M_globalMatrix;}
+    matrixPtr_Type& getMatrix( ){return M_globalMatrix;}
 
     //! multiplies the whole system times a matrix
     /*!
@@ -222,7 +223,7 @@ public:
       \param prec preconditioner matrix
       \param rhs right hand side of the system
     */
-    void applyPreconditioner(   matrix_ptrtype robinCoupling, matrix_ptrtype prec, vector_ptrtype& rhs);
+    void applyPreconditioner(   matrixPtr_Type robinCoupling, matrixPtr_Type prec, vector_ptrtype& rhs);
 
     //! multiplies two matrices
     /*!
@@ -230,7 +231,7 @@ public:
       \param robinCoupling the matrix that multiplies
       \param prec the matrix multiplied (modified)
      */
-    void applyPreconditioner( const matrix_ptrtype robinCoupling, matrix_ptrtype& prec );
+    void applyPreconditioner( const matrixPtr_Type robinCoupling, matrixPtr_Type& prec );
 
 
     //! applies a matrix to the system
@@ -239,7 +240,7 @@ public:
       \param matrix the preconditioning matrix
       \param rhsFull the right hand side of the system
      */
-    void applyPreconditioner( const matrix_ptrtype matrix, vector_ptrtype& rhsFull);
+    void applyPreconditioner( const matrixPtr_Type matrix, vector_ptrtype& rhsFull);
 
     //!creates the map for the coupling
     /*!
@@ -260,24 +261,6 @@ public:
                              const UInt subdomainMaxId,
                              const boost::shared_ptr<Epetra_Comm> epetraWorldComm );
 
-    //! TODO Paolo implement this method!
-    void setRecompute(UInt /*position*/, bool /*flag*/) { }
-
-    //! returns the map built for theLagrange multipliers
-    map_shared_ptrtype getInterfaceMap() const { return M_interfaceMap; }
-
-    //! returns the numeration of the interface
-    /*!
-      \param numeration: output vector
-     */
-    void getNumerationInterface( vector_ptrtype& numeration ) { numeration =  M_numerationInterface; }
-
-
-    //! returns the dimension of the interface
-    /*!
-      NOTE: it has to be multiplied times nDimensions to get the number of interface dofs
-     */
-    UInt getInterface() {return M_interface;}
 
     //! applies the b.c. to every block
     void applyBoundaryConditions(const Real& time);
@@ -296,7 +279,7 @@ public:
       @param Mat: block added
       @param position of the block, unused here because there is only one coupling matrix
      */
-    void addToCoupling( const matrix_ptrtype& Mat, UInt /*position*/);
+    void addToCoupling( const matrixPtr_Type& Mat, UInt /*position*/);
 
     //! adds a block to the coupling matrix
     /*!
@@ -304,9 +287,9 @@ public:
       to the global matrix
       @param Mat: block matrix to be added.
      */
-    void addToGlobalMatrix( const matrix_ptrtype& Mat)
+    void addToGlobalMatrix( const matrixPtr_Type& Mat)
     {
-        matrix_ptrtype tmp(new matrix_type(M_globalMatrix->getMap()));
+        matrixPtr_Type tmp(new matrix_Type(M_globalMatrix->getMap()));
         *tmp += *M_globalMatrix;
         *tmp += *Mat;
         tmp->GlobalAssemble();
@@ -317,24 +300,46 @@ public:
     /*!
       This method is kept for compatibility with the base class. It calls the method addToCoupling.
      */
-    void push_back_coupling( matrix_ptrtype& coupling)
+    void push_back_coupling( matrixPtr_Type& coupling)
     {
         addToCoupling(coupling, 0);
     }
     //@}
 
+    //!@name Get Methods
+    //@{
+    //! returns the dimension of the interface
+    /*!
+      NOTE: it has to be multiplied times nDimensions to get the number of interface dofs
+     */
+    UInt getInterface(){return M_interface;}
 
+    //! returns the map built for theLagrange multipliers
+    map_shared_ptrtype getInterfaceMap() const { return M_interfaceMap; }
+
+    //! returns the numeration of the interface
+    /*!
+      \param numeration: output vector
+     */
+    void getNumerationInterface( vector_ptrtype& numeration ) { numeration =  M_numerationInterface; }
+
+    //@}
+
+    //!@name Factory Method
+    //@{
     static BlockMatrix*    createAdditiveSchwarz()
     {
         return new BlockMatrix(15);
     }
+    //@}
+
 
 protected:
 
     //! @name Protected Members
     //@{
-    matrix_ptrtype                              M_globalMatrix;
-    matrix_ptrtype                              M_coupling;
+    matrixPtr_Type                              M_globalMatrix;
+    matrixPtr_Type                              M_coupling;
     map_shared_ptrtype                          M_interfaceMap;
     UInt                                        M_interface;
     //@}

@@ -1,26 +1,27 @@
+/* -*- mode: c++ -*- */
 //@HEADER
 /*
-************************************************************************
+*******************************************************************************
 
- This file is part of the LifeV Applications.
- Copyright (C) 2001-2010 EPFL, Politecnico di Milano, INRIA
+    Copyright (C) 2004, 2005, 2007 EPFL, Politecnico di Milano, INRIA
+    Copyright (C) 2010 EPFL, Politecnico di Milano, Emory University
 
- This library is free software; you can redistribute it and/or modify
- it under the terms of the GNU Lesser General Public License as
- published by the Free Software Foundation; either version 2.1 of the
- License, or (at your option) any later version.
+    This file is part of LifeV.
 
- This library is distributed in the hope that it will be useful, but
- WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- Lesser General Public License for more details.
+    LifeV is free software; you can redistribute it and/or modify
+    it under the terms of the GNU Lesser General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
 
- You should have received a copy of the GNU Lesser General Public
- License along with this library; if not, write to the Free Software
- Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
- USA
+    LifeV is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+    Lesser General Public License for more details.
 
-************************************************************************
+    You should have received a copy of the GNU Lesser General Public License
+    along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
+
+*******************************************************************************
 */
 //@HEADER
 
@@ -134,6 +135,14 @@ public:
     //! @name Public Methods
     //@{
 
+    //! Sets the parameters needed by the preconditioner from data file
+    /*!
+        @param data GetPot object reading the text data file
+        @param section string specifying the path in the data file where to find the options for the operator
+     */
+    void setDataFromGetPot( const GetPot&      dataFile,
+                            const std::string& section ){}
+
     //! Computes the coupling
     /*!
       computes all the coupling blocks specific for the chosen preconditioner. The coupling is handled
@@ -153,14 +162,9 @@ public:
                  const vector_ptrtype&    numerationInterface,
                  const Real& timeStep);
 
-
-    //! Sets the parameters needed by the preconditioner from data file
-    /*!
-        @param data GetPot object reading the text data file
-        @param section string specifying the path in the data file where to find the options for the operator
-     */
-    void setDataFromGetPot( const GetPot&      dataFile,
-                            const std::string& section ) {}
+    //@}
+    //!@name Factory Method
+    //@{
 
     static BlockInterface* createComposedDNND()
     {
@@ -172,6 +176,7 @@ public:
     }
 
     //@}
+
 private:
 
     //static bool reg;

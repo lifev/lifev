@@ -1,37 +1,38 @@
+/* -*- mode: c++ -*- */
 //@HEADER
 /*
-************************************************************************
+*******************************************************************************
 
- This file is part of the LifeV Applications.
- Copyright (C) 2001-2010 EPFL, Politecnico di Milano, INRIA
+    Copyright (C) 2004, 2005, 2007 EPFL, Politecnico di Milano, INRIA
+    Copyright (C) 2010 EPFL, Politecnico di Milano, Emory University
 
- This library is free software; you can redistribute it and/or modify
- it under the terms of the GNU Lesser General Public License as
- published by the Free Software Foundation; either version 2.1 of the
- License, or (at your option) any later version.
+    This file is part of LifeV.
 
- This library is distributed in the hope that it will be useful, but
- WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- Lesser General Public License for more details.
+    LifeV is free software; you can redistribute it and/or modify
+    it under the terms of the GNU Lesser General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
 
- You should have received a copy of the GNU Lesser General Public
- License along with this library; if not, write to the Free Software
- Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
- USA
+    LifeV is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+    Lesser General Public License for more details.
 
-************************************************************************
+    You should have received a copy of the GNU Lesser General Public License
+    along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
+
+*******************************************************************************
 */
 //@HEADER
 
 /*!
     @file
-    @brief A short description of the file content
+    @brief Block (a little exotic) preconditioner.
 
     @author Paolo Crosetto <crosetto@iacspc70.epfl.ch>
     @date 29 Jun 2010
 
-    A more detailed description of the file (if necessary)
+    It is the sum of the inverse of 2 Dirichlet and 2 Neumann problems.
  */
 
 #ifndef COMPOSEDNN_H
@@ -79,8 +80,16 @@ public:
 
 
 
-    //! @name Virtual methods
+    //! @name Public Methods
     //@{
+
+
+    //! Sets the parameters needed by the preconditioner from data file (creates the Ifpack list)
+    /*!
+        @param data GetPot object reading the text data file
+        @param section string specifying the path in the data file where to find the options for the operator
+     */
+    void setDataFromGetPot( const GetPot& data, const std::string& section );
 
     //! Solves the preconditioned linear system (used only when dealing with a preconditioner)
     /*!
@@ -92,16 +101,6 @@ public:
      */
     virtual int   solveSystem( const vector_type& rhs, vector_type& step, solver_ptrtype& linearSolver);
 
-
-
-    //!Applies the correspondent boundary conditions to every block
-    /*!
-      note that this method must be called after blockAssembling(), that sums the coupling conditions to the blocks. For
-      this type of preconditioners this method is overloaded. In fact in the diagonalization for the essential boundary
-      conditions the value replaced on the diagonal must be 2 instead of 1.
-      \param time: time
-     */
-    void applyBoundaryConditions(const Real& time, const UInt i);
 
     //! Computes the coupling
     /*!
@@ -120,35 +119,35 @@ public:
                           const std::map<ID, ID>& locDofMap,
                           const vector_ptrtype& numerationInterface,
                           const Real& timeStep);
-    //@}
 
-    //! @name Methods
-    //@{
-
-    //! Sets the parameters needed by the preconditioner from data file (creates the Ifpack list)
+    //!Applies the correspondent boundary conditions to every block
     /*!
-        @param data GetPot object reading the text data file
-        @param section string specifying the path in the data file where to find the options for the operator
+      note that this method must be called after blockAssembling(), that sums the coupling conditions to the blocks. For
+      this type of preconditioners this method is overloaded. In fact in the diagonalization for the essential boundary
+      conditions the value replaced on the diagonal must be 2 instead of 1.
+      \param time: time
      */
-    void setDataFromGetPot( const GetPot& data, const std::string& section );
+    void applyBoundaryConditions(const Real& time, const UInt i);
 
     //! Multiplies the block times 2 and calls super::push_back_matrix(...)
     /*!
       \param Mat: block matrix
       \param recompute: flag stating if the matrix need to be recomputed
      */
-    void push_back_matrix( const  matrix_ptrtype& Mat, const  bool recompute );
+    void push_back_matrix( const  matrixPtr_Type& Mat, const  bool recompute );
 
     /*! Multiplies the block times 2 and calls super::replace_matrix(...) in the position "position" specified in
       input and in the shifted position "position"+2
       \param oper: input matrix
       \param position: position
      */
-    void replace_matrix( const matrix_ptrtype& oper, UInt position );
+    void replace_matrix( const matrixPtr_Type& oper, UInt position );
 
-    bool set() {return (bool) M_blockPrecs.get() && M_blockPrecs->getNumber();}
+    bool set(){return (bool) M_blockPrecs.get() && M_blockPrecs->getNumber();}
+
     //@}
-
+    //!@name Factory Method
+    //@{
 
     static BlockInterface* createComposedNN()
     {
@@ -158,6 +157,8 @@ public:
         const std::vector<ComposedBlockOper::Block> orderVector(order, order+4);
         return new ComposedNN( couplingVectorNN, orderVector );
     }
+
+    //@}
 
 
 protected:
@@ -178,8 +179,8 @@ private:
 
     boost::shared_ptr< composed_prec > M_firstCompPrec ;
     boost::shared_ptr< composed_prec > M_secondCompPrec;
-    //@}
 
+    //@}
 };
 
 } // Namespace LifeV

@@ -1,37 +1,31 @@
+/* -*- mode: c++ -*- */
 //@HEADER
 /*
-************************************************************************
+*******************************************************************************
 
- This file is part of the LifeV Applications.
- Copyright (C) 2001-2010 EPFL, Politecnico di Milano, INRIA
+    Copyright (C) 2004, 2005, 2007 EPFL, Politecnico di Milano, INRIA
+    Copyright (C) 2010 EPFL, Politecnico di Milano, Emory University
 
- This library is free software; you can redistribute it and/or modify
- it under the terms of the GNU Lesser General Public License as
- published by the Free Software Foundation; either version 2.1 of the
- License, or (at your option) any later version.
+    This file is part of LifeV.
 
- This library is distributed in the hope that it will be useful, but
- WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- Lesser General Public License for more details.
+    LifeV is free software; you can redistribute it and/or modify
+    it under the terms of the GNU Lesser General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
 
- You should have received a copy of the GNU Lesser General Public
- License along with this library; if not, write to the Free Software
- Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
- USA
+    LifeV is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+    Lesser General Public License for more details.
 
-************************************************************************
+    You should have received a copy of the GNU Lesser General Public License
+    along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
+
+*******************************************************************************
 */
 //@HEADER
 
-/*!
-    @file
-    @brief This file contains the implementation of some methods common to all the linear systems with
-    a block structure.
-
-    @author Paolo Crosetto <crosetto@iacspc70.epfl.ch>
-    @date 07 Jun 2010
- */
+#include <lifeconfig.h>
 
 #include <BlockInterface.hpp>
 
@@ -39,7 +33,11 @@ namespace LifeV
 {
 
 
-void BlockInterface::couplingMatrix(matrix_ptrtype & bigMatrix,
+// ===================================================
+//! Public Methods
+// ===================================================
+
+void BlockInterface::couplingMatrix(matrixPtr_Type & bigMatrix,
                                     Int flag,
                                     const std::vector<fespace_ptrtype>& problem,
                                     const std::vector<UInt>& offset,
@@ -159,7 +157,7 @@ BlockInterface::setOffsets(UInt blocks, ...)
 
 
 void
-BlockInterface::robinCoupling( matrix_ptrtype& matrix,
+BlockInterface::robinCoupling( matrixPtr_Type& matrix,
                                Real&  alphaf,
                                Real&  alphas,
                                UInt  coupling,
@@ -218,7 +216,7 @@ BlockInterface::robinCoupling( matrix_ptrtype& matrix,
     }
 }
 
-void BlockInterface::addToBlock( const matrix_ptrtype& Mat, UInt position)
+void BlockInterface::addToBlock( const matrixPtr_Type& Mat, UInt position)
 {
     *Mat += *M_blocks[position];
     M_blocks[position] = Mat;
