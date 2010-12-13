@@ -51,7 +51,7 @@
 
 
 #ifndef FSIOPERATOR_H
-#define  FSIOPERATOR_H
+#define FSIOPERATOR_H
 
 #pragma GCC diagnostic ignored "-Wunused-variable"
 #pragma GCC diagnostic ignored "-Wunused-parameter"
