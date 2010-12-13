@@ -1,191 +1,298 @@
-/* -*- mode: c++ -*-
-   This program is part of the LifeV library
-   Copyright (C) 2001,2002,2003,2004 EPFL, INRIA, Politecnico di Milano
+//@HEADER
+/*
+************************************************************************
 
-   This program is free software; you can redistribute it and/or
-   modify it under the terms of the GNU General Public License
-   as published by the Free Software Foundation; either version 2
-   of the License, or (at your option) any later version.
+ This file is part of the LifeV Applications.
+ Copyright (C) 2009-2010 EPFL, Politecnico di Milano
 
-   This program is distributed in the hope that it will be useful,
-   but WITHOUT ANY WARRANTY; without even the implied warranty of
-   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-   GNU General Public License for more details.
+ This library is free software; you can redistribute it and/or modify
+ it under the terms of the GNU Lesser General Public License as
+ published by the Free Software Foundation; either version 2.1 of the
+ License, or (at your option) any later version.
 
-   You should have received a copy of the GNU General Public License
-   along with this program; if not, write to the Free Software
-   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+ This library is distributed in the hope that it will be useful, but
+ WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ Lesser General Public License for more details.
+
+ You should have received a copy of the GNU Lesser General Public
+ License along with this library; if not, write to the Free Software
+ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
+ USA
+
+************************************************************************
 */
+//@HEADER
 
 /*!
-  \file ensight.hpp
-  \author M.A. Fernandez, C. Prud'homme, S. Deparis
-  \date 10/2005 08/2007
-  \version 1.0
+ *  @file
+ *  @brief This file provides an interface for post-processing with ensight
+ *
+ *  @author M.A. Fernandez
+ *  @author C. Prud'homme
+ *  @author S. Deparis
+ *  @date 1-10-2005
+ *
+ *  @maintainer Radu Popescu <radu.popescu@epfl.ch>
+ */
 
-  \brief This file provides an interface for post-processing with ensight
-
-  Usage: two steps
-  - first: add the variables using addVariable
-  - second: call postProcess( time );
-*/
-#ifndef _ENSIGHT_H_
-#define _ENSIGHT_H_
+#ifndef ENSIGHT_H
+#define ENSIGHT_H
 
 #include <life/lifefilters/exporter.hpp>
-
 
 namespace LifeV
 {
 
 /**
- * \class Ensight
- * \brief Ensight data exporter
+ * @class Ensight
+ * @brief Ensight data exporter
  */
-template<typename Mesh>
-class Ensight : public Exporter<Mesh>
+template<typename MeshType>
+class Ensight : public Exporter<MeshType>
 {
 
 public:
-
-    typedef Exporter<Mesh> super;
+    //! @name Public typedefs
+    //@{
+    typedef MeshType mesh_Type;
+    typedef Exporter<MeshType> super;
     typedef typename super::mesh_ptrtype  mesh_ptrtype;
     typedef typename super::vector_ptrtype vector_ptrtype;
+    //@}
 
-    //! Empty constructor
+    //! @name Constructors and destructor
+    //@{
+    //! Default constructor
     Ensight();
 
-    /**
-       Constructor for Ensight
 
-       \param dfile the GetPot data file where you must provide and [ensight] section with:
-       "start" (start index for filenames 0 for 000, 1 for 001 etc.),
-       "save" (how many time steps per posptrocessing)
-       "multimesh" (=true if the mesh has to be saved at each post-processing step)
+    //! Constructor for Ensight
+    /*!
+      @param dfile the GetPot data file where you must provide and [ensight] section with:
+      "start" (start index for filenames 0 for 000, 1 for 001 etc.),
+      "save" (how many time steps per posptrocessing)
+      "multimesh" (=true if the mesh has to be saved at each post-processing step)
 
-       \param mesh the mesh
+      @param mesh the mesh
 
-       \param the prefix for the case file (ex. "test" for test.case)
+      @param the prefix for the case file (ex. "test" for test.case)
 
-       \param the procId determines de CPU id. if negative, it ussemes there is only one processor
+      @param the procId determines de CPU id. if negative, it ussemes there is only one processor
     */
-    Ensight(const GetPot& dfile, mesh_ptrtype mesh, const std::string& prefix, const int& procId );
+    Ensight(const GetPot& dfile, mesh_ptrtype mesh, const std::string& prefix, const Int& procId );
 
+    //! Constructor for Ensight
     Ensight(const GetPot& dfile, const std::string& prefix);
+    //@}
 
+    //! @name Public methods
+    //@{
 
-    /**
-       setters
-    */
-
-    //! returns the type of the map to use for the EpetraVector
-    EpetraMapType mapType() const;
-
-    /**
-       Post-porcess the variables added to the list
-
-       \param time the solver time
+    //! Post-porcess the variables added to the list
+    /*!
+      @param time the solver time
     */
     void postProcess(const Real& time);
 
     //! Import data from previous simulations at a certain time
     /*!
-       @param Time the time of the data to be imported
-     */
-    UInt importFromTime( const Real& /*Time*/ ) { assert(false); return 0; } //Not yet implemented for Ensight
+      @param Time the time of the data to be imported
 
-    /**
-       Import data from previous simulations
-
-       \param time the solver time
+      Not yet implemented for Ensight
     */
-    void import(const Real& Tstart, const Real& dt); // dt is used to rebuild the history up to now
+    UInt importFromTime( const Real& time ) { assert(false); return 0; }
+
+    //! Import data from previous simulations
+    /*!
+      @param time the solver time
+
+      dt is used to rebuild the history up to now
+    */
+    void import(const Real& startTime, const Real& dt);
 
     //! Read  only last timestep
-    void import(const Real& Tstart);
+    void import(const Real& startTime);
 
-    void rd_var(ExporterData& dvar) {super::rd_var(dvar);}
+    //! Read variable
+    // TODO: RENAME ro readVariable(...) DURING INTERFACE WEEK
+    void rd_var(exporterData& dvar) {super::rd_var(dvar);}
 
-    void setMeshProcId( const mesh_ptrtype mesh, const int& procId );
+    //! Set the mesh and the processor id
+    void setMeshProcId( const mesh_ptrtype mesh, const Int& procId );
+    //@}
+
+    //! @name Get methods
+    //@{
+
+    //! returns the type of the map to use for the EpetraVector
+    EpetraMapType mapType() const;
+
+    //@}
 
 private:
-
+    //! @name Private methods
+    //@{
     void defineShape();
-    void M_wr_case(const Real& time);
-    void M_wr_ascii_geo( const std::string geo_file );
 
-    void M_wr_ascii(const ExporterData& dvar);
-    void M_wr_ascii_scalar(const ExporterData& dvar);
-    void M_wr_ascii_vector(const ExporterData& dvar);
-    void M_case_mesh_section(std::ofstream& casef);
-    void M_case_variable_section(std::ofstream& casef);
-    void M_case_time_section(std::ofstream& casef, const Real& time);
+    void writeCase(const Real& time);
+    void writeAsciiGeometry( const std::string geoFile );
 
-    void M_rd_scalar( ExporterData& dvar );
-    void M_rd_vector( ExporterData& dvar );
+    void writeAscii(const exporterData& dvar);
+    void writeAsciiScalar(const exporterData& dvar);
+    void writeAsciiVector(const exporterData& dvar);
+    void caseMeshSection(std::ofstream& casef);
+    void caseVariableSection(std::ofstream& casef);
+    void caseTimeSection(std::ofstream& casef, const Real& time);
+
+    void readScalar( exporterData& dvar );
+    void readVector( exporterData& dvar );
 
     void initProcId();
-    void setNodesMap( std::vector<int> LtGNodesMap );
+    void setNodesMap( std::vector<Int> ltGNodesMap );
     void initNodesMap();
+    //@}
 
-
-    std::string M_import_dir;
+    //! @name Private members
+    //@{
+    std::string M_importDir;
     UInt M_steps;
-    std::vector<int> M_LtGNodesMap;
+    std::vector<Int> M_ltGNodesMap;
     std::string M_me;
 
     std::string                 M_FEstr;
     std::string                 M_bdFEstr;
     UInt                        M_nbLocalDof;
     UInt                        M_nbLocalBdDof;
+    //@}
 };
 
 
-//
+// ==============
 // Implementation
-//
-template<typename Mesh>
-Ensight<Mesh>::Ensight():
-        super(),
-        M_import_dir("./"),
-        M_steps(0),
-        M_LtGNodesMap(),
-        M_me()
+// ==============
+
+// ==============
+// Constructors
+// ==============
+
+template<typename MeshType>
+Ensight<MeshType>::Ensight():
+    super(),
+    M_importDir("./"),
+    M_steps(0),
+    M_ltGNodesMap(),
+    M_me()
 {
 }
 
-template<typename Mesh>
-Ensight<Mesh>::Ensight(const GetPot& dfile, mesh_ptrtype mesh, const std::string& prefix,
-                       const int& procId)
-        :
-        super(dfile, prefix),
-        M_import_dir(dfile("exporter/import_dir", "./")),
-        M_steps(0),
-        M_LtGNodesMap(),
-        M_me()
+template<typename MeshType>
+Ensight<MeshType>::Ensight(const GetPot& dfile, mesh_ptrtype mesh, const std::string& prefix,
+                       const Int& procId)
+    :
+    super(dfile, prefix),
+    M_importDir(dfile("exporter/import_dir", "./")),
+    M_steps(0),
+    M_ltGNodesMap(),
+    M_me()
 {
     this->setMeshProcId(mesh,procId);
 }
 
-template<typename Mesh>
-Ensight<Mesh>::Ensight(const GetPot& dfile, const std::string& prefix):
-        super(dfile,prefix),
-        M_import_dir(dfile("exporter/import_dir", "./")),
-        M_steps(0),
-        M_LtGNodesMap(),
-        M_me()
+template<typename MeshType>
+Ensight<MeshType>::Ensight(const GetPot& dfile, const std::string& prefix):
+    super(dfile,prefix),
+    M_importDir(dfile("exporter/import_dir", "./")),
+    M_steps(0),
+    M_ltGNodesMap(),
+    M_me()
 {
 }
-template<typename Mesh>
-void
-Ensight<Mesh>::setMeshProcId( const mesh_ptrtype mesh, const int& procId )
+
+// =====================
+// Public methods
+// =====================
+
+template<typename MeshType>
+void Ensight<MeshType>::postProcess(const Real& time)
+{
+    typedef std::list< ExporterData >::iterator Iterator;
+
+    this->computePostfix();
+
+    if ( this->M_postfix != "*****" )
+    {
+        if (!this->M_procId) std::cout << "  x-  Ensight post-processing ...        " << std::flush;
+        Chrono chrono;
+        chrono.start();
+        for (Iterator i=this->M_listData.begin(); i != this->M_listData.end(); ++i)
+        {
+            if (i->steady() < 2 )
+                writeAscii(*i);
+            if (i->steady() == 1) i->set_steady(2);
+        }
+        writeCase(time);
+
+        if (this->M_multimesh)
+            writeAsciiGeometry( this->M_postDir + this->M_prefix + this->M_postfix + this->M_me+".geo" );
+        chrono.stop();
+        if (!this->M_procId) std::cout << "      done in " << chrono.diff() << " s." << std::endl;
+    }
+}
+
+template<typename MeshType>
+void Ensight<MeshType>::import(const Real& startTime, const Real& dt)
+{
+    // dt is used to rebuild the history up to now
+    Real time(startTime - this->M_count * dt);
+
+    for ( UInt count(0); count < this->M_count; ++count)
+    {
+        this->M_timeSteps.push_back(time);
+        ++this->M_steps;
+        time += dt;
+    }
+
+    time += dt;
+
+    import(time);
+
+}
+
+template<typename MeshType>
+void Ensight<MeshType>::import(const Real& time)
+{
+    this->M_timeSteps.push_back(time);
+    ++this->M_steps;
+
+    typedef std::list< ExporterData >::iterator Iterator;
+
+    this->computePostfix();
+
+    assert( this->M_postfix != "*****" );
+
+    if (!this->M_procId) std::cout << "  x-  Ensight importing ..."<< std::endl;
+
+    Chrono chrono;
+    chrono.start();
+    for (Iterator i=this->M_listData.begin(); i != this->M_listData.end(); ++i)
+    {
+        this->rd_var(*i);
+    }
+    chrono.stop();
+    if (!this->M_procId) std::cout << "      done in " << chrono.diff() << " s." << std::endl;
+
+}
+
+template<typename MeshType>
+void Ensight<MeshType>::setMeshProcId( const mesh_ptrtype mesh, const Int& procId )
 {
     super::setMeshProcId( mesh, procId );
 
     initNodesMap();
     initProcId();
 
-    typedef typename Mesh::ElementShape ElementShape;
+    typedef typename MeshType::ElementShape ElementShape;
 
     switch ( ElementShape::Shape )
     {
@@ -218,247 +325,208 @@ Ensight<Mesh>::setMeshProcId( const mesh_ptrtype mesh, const int& procId )
     }
 
     if (!this->M_multimesh)
-        M_wr_ascii_geo( this->M_post_dir+this->M_prefix+this->M_me+".geo" );
+        writeAsciiGeometry( this->M_postDir + this->M_prefix + this->M_me + ".geo" );
 }
 
-template<typename Mesh>
-EpetraMapType Ensight<Mesh>::mapType() const
+// ===================
+// Get methods
+// ===================
+
+template<typename MeshType>
+EpetraMapType Ensight<MeshType>::mapType() const
 {
     return Repeated;
 }
 
-template<typename Mesh>
-void Ensight<Mesh>::postProcess(const Real& time)
+// ===================
+// Private methods
+// ===================
+
+template <typename MeshType>
+void Ensight<MeshType>::writeCase(const Real& time)
 {
-    typedef std::list< ExporterData >::iterator Iterator;
+    std::ofstream casef( (this->M_postDir + this->M_prefix + this->M_me + ".case").c_str() );
+    casef << "FORMAT\n";
+    casef << "type: ensight\n";
+    caseMeshSection(casef);
+    caseVariableSection(casef);
+    caseTimeSection(casef,time);
+}
 
-    this->computePostfix();
+template <typename MeshType>
+void Ensight<MeshType>::writeAsciiGeometry(const std::string gFile)
+{
+    using std::setw;
 
-    if ( this->M_postfix != "*****" )
+    std::ofstream geoFile(gFile.c_str() );
+    ID vertexNumber = this->M_mesh->numVertices();
+    ID elementNumber = this->M_mesh->numElements();
+    UInt part=0;
+    geoFile << "Geometry file\n";
+    geoFile << "Geometry file\n";
+    geoFile << "node id given\n";
+    geoFile << "element id given\n";
+    geoFile << "coordinates\n";
+    geoFile.setf(std::ios::right | std::ios_base::scientific);
+    geoFile.precision(5);
+    geoFile << setw(8) <<  vertexNumber << "\n";
+    for (ID i=1; i <= vertexNumber; ++i)
     {
-        if (!this->M_procId) std::cout << "  x-  Ensight post-processing ...        " << std::flush;
-        Chrono chrono;
-        chrono.start();
-        for (Iterator i=this->M_listData.begin(); i != this->M_listData.end(); ++i)
-        {
-            if (i->steady() < 2 )
-                M_wr_ascii(*i);
-            if (i->steady() == 1) i->set_steady(2);
-        }
-        M_wr_case(time);
+        geoFile << setw(8) << i ;
+        for (UInt icoor=0; icoor<nDimensions; icoor++)
+            geoFile << setw(12) << float(this->M_mesh->pointList(i).coor()[icoor]);
+        geoFile << "\n";
+    }
 
-        if (this->M_multimesh)
-            M_wr_ascii_geo( this->M_post_dir+this->M_prefix+this->M_postfix+this->M_me+".geo" );
-        chrono.stop();
-        if (!this->M_procId) std::cout << "      done in " << chrono.diff() << " s." << std::endl;
+    geoFile<< "part";
+
+    ++part;
+    geoFile << setw(8) << part << "\n";
+    geoFile << "full geometry\n";
+    // elements
+    geoFile << M_FEstr << "\n";
+    geoFile << setw(8) << elementNumber << "\n";
+    for (ID i=1; i <= elementNumber; ++i)
+    {
+        geoFile << setw(8) << i ;
+        for (ID j=1; j<= M_nbLocalDof; ++j)
+        {
+            geoFile << setw(8) << this->M_mesh->element(i).point(j).localId();
+        }
+        geoFile << "\n";
+
     }
 }
 
-template <typename Mesh>
-void Ensight<Mesh>::M_wr_ascii(const ExporterData& dvar)
+template <typename MeshType>
+void Ensight<MeshType>::writeAscii(const ExporterData& dvar)
 {
 
     switch ( dvar.type() )
     {
     case ExporterData::Scalar:
-        M_wr_ascii_scalar(dvar);
+        writeAsciiScalar(dvar);
         break;
     case ExporterData::Vector:
-        M_wr_ascii_vector(dvar);
+        writeAsciiVector(dvar);
         break;
     }
 
 }
 
-
-
-template <typename Mesh>
-void Ensight<Mesh>::M_wr_ascii_scalar(const ExporterData& dvar)
+template <typename MeshType>
+void Ensight<MeshType>::writeAsciiScalar(const ExporterData& dvar)
 {
     using std::setw;
 
-    std::ofstream sclf;
+    std::ofstream scalarFile;
 
     if (dvar.steady() )
-        sclf.open( (this->M_post_dir+super::M_prefix+"_"+dvar.variableName()+this->M_me+".scl").c_str() );
+        scalarFile.open( (this->M_postDir + super::M_prefix + "_" + dvar.variableName() +
+                          this->M_me + ".scl").c_str() );
     else
-        sclf.open( (this->M_post_dir+super::M_prefix+"_"+dvar.variableName()+this->M_postfix+this->M_me+".scl").c_str() );
+        scalarFile.open( (this->M_postDir + super::M_prefix + "_" + dvar.variableName() +
+                          this->M_postfix + this->M_me + ".scl").c_str() );
 
     UInt count=0;
 
     UInt start = dvar.start();
-    //    UInt nVert = this->M_mesh->numVertices();
-    UInt nVert = static_cast<UInt> (this->M_LtGNodesMap.size());
-    sclf<<"Scalar per node\n";
-    //for (UInt i=start;i<dim;++i)
+    UInt vertexNumber = static_cast<UInt> (this->M_ltGNodesMap.size());
+    scalarFile<<"Scalar per node\n";
 
-    sclf.setf(std::ios::right | std::ios_base::scientific);
-    sclf.precision(5);
+    scalarFile.setf(std::ios::right | std::ios_base::scientific);
+    scalarFile.precision(5);
 
-    for (UInt i=0; i<nVert; ++i)
+    for (UInt i=0; i<vertexNumber; ++i)
     {
-        // int id = this->M_mesh->pointList( i ).id();
-        int id = this->M_LtGNodesMap[i];
-        sclf << setw(12) << float(dvar(start+id)) ;
+        Int id = this->M_ltGNodesMap[i];
+        scalarFile << setw(12) << float(dvar(start + id)) ;
         ++count;
         if ( count == 6 )
         {
-            sclf << "\n";
+            scalarFile << "\n";
             count=0;
         }
     }
-    sclf << std::endl;
+    scalarFile << std::endl;
 }
 
-template <typename Mesh> void Ensight<Mesh>::M_wr_ascii_vector(const ExporterData& dvar)
+template <typename MeshType> void Ensight<MeshType>::writeAsciiVector(const ExporterData& dvar)
 {
     using std::setw;
 
-    std::ofstream vctf;
+    std::ofstream vectorFile;
 
     if (dvar.steady() )
-        vctf.open( (this->M_post_dir+super::M_prefix+"_"+dvar.variableName()+this->M_me+".vct").c_str() );
+        vectorFile.open( (this->M_postDir + super::M_prefix + "_" + dvar.variableName() +
+                          this->M_me + ".vct").c_str() );
     else
-        vctf.open( (this->M_post_dir+super::M_prefix+"_"+dvar.variableName()+this->M_postfix+this->M_me+".vct").c_str() );
+        vectorFile.open( (this->M_postDir + super::M_prefix + "_" + dvar.variableName() +
+                          this->M_postfix + this->M_me + ".vct").c_str() );
 
     UInt count=0;
 
     UInt size   = dvar.size();
     UInt start = dvar.start();
-    //    UInt nVert = this->M_mesh->numVertices();
-    UInt nVert = static_cast<UInt> (this->M_LtGNodesMap.size());
+    UInt vertexNumber = static_cast<UInt> (this->M_ltGNodesMap.size());
 
-    vctf<<"Vector per node\n";
-    //for (UInt i=start;i<dim;++i)
+    vectorFile<<"Vector per node\n";
 
-    vctf.setf(std::ios::right | std::ios_base::scientific);
-    vctf.precision(5);
+    vectorFile.setf(std::ios::right | std::ios_base::scientific);
+    vectorFile.precision(5);
 
-    for (UInt i=0; i<nVert; ++i)
+    for (UInt i=0; i<vertexNumber; ++i)
         for (UInt j=0; j< nDimensions; ++j)
         {
-            // int id = this->M_mesh->pointList( i ).id();
-            int id = this->M_LtGNodesMap[i];
-            vctf << setw(12) << float(dvar(start+j*size+id)) ;
+            Int id = this->M_ltGNodesMap[i];
+            vectorFile << setw(12) << float(dvar(start + j * size + id)) ;
             ++count;
             if ( count == 6 )
             {
-                vctf << "\n";
+                vectorFile << "\n";
                 count=0;
             }
         }
-    vctf << std::endl;
+    vectorFile << std::endl;
 }
 
-
-template <typename Mesh> void Ensight<Mesh>::M_wr_ascii_geo(const std::string geo_file)
-{
-    using std::setw;
-
-    std::ofstream geof(geo_file.c_str() );
-    ID nV = this->M_mesh->numVertices();
-    ID nE = this->M_mesh->numElements();
-    UInt part=0;
-    geof << "Geometry file\n";
-    geof << "Geometry file\n";
-    geof << "node id given\n";
-    geof << "element id given\n";
-    geof << "coordinates\n";
-    geof.setf(std::ios::right | std::ios_base::scientific);
-    geof.precision(5);
-    geof << setw(8) <<  nV << "\n";
-    for (ID i=1; i <= nV; ++i)
-    {
-        geof << setw(8) << i ;
-        for (UInt icoor=0; icoor<nDimensions; icoor++)
-            geof << setw(12) << float(this->M_mesh->pointList(i).coor()[icoor]);
-        geof << "\n";
-    }
-
-    geof<< "part";
-
-    ++part;
-    geof << setw(8) << part << "\n";
-    geof << "full geometry\n";
-    // elements
-    geof << M_FEstr << "\n";
-    geof << setw(8) << nE << "\n";
-    for (ID i=1; i <= nE; ++i)
-    {
-        geof << setw(8) << i ;
-        for (ID j=1; j<= M_nbLocalDof; ++j)
-        {
-            //geof << M_mesh->volume(i).point(j).id();
-            geof << setw(8) << this->M_mesh->element(i).point(j).localId();
-        }
-        geof << "\n";
-
-    }
-
-    // boundary parts
-#if 0
-    std::set<EntityFlag> flags;
-    std::map< EntityFlag, __gnu_cxx::slist<ID> > faces;
-    EntityFlag marker;
-    typedef std::set<EntityFlag>::const_iterator Iterator_flag;
-    typedef __gnu_cxx::slist<ID>::const_iterator Iterator_face;
-
-    Iterator_flag result;
-
-    ID nBF = M_mesh->numBFaces();
-    for (ID i=1; i <= nBF; ++i)
-    {
-        marker = M_mesh->boundaryFace(i).marker();
-        flags.insert(marker);
-        faces[marker].push_front(i);
-    }
-
-    for (Iterator_flag i=flags.begin(); i!= flags.end(); ++i)
-    {
-        marker = *i;
-        geof<< "part";
-        ++part;
-        geof<< setw(8) << part << "\n";
-        geof<<"boundary ref "<< marker << "\n";
-        __gnu_cxx::slist<ID>& faceList= faces[marker];
-        geof<< M_bdFEstr << "\n";
-        geof<< setw(8) << faceList.size() << "\n";
-        for (Iterator_face j=faceList.begin(); j!= faceList.end(); ++j)
-        {
-            for ( ID k=1; k <= M_nbLocalBdDof; ++k)
-            {
-                geof << setw(8) << M_mesh->boundaryFace(*j).point(k).id();
-            }
-            geof << "\n";
-        }
-    }
-#endif
-}
-
-template
-<typename Mesh> void Ensight<Mesh>::M_wr_case(const Real& time)
-{
-    std::ofstream casef( (this->M_post_dir+this->M_prefix+this->M_me+".case").c_str() );
-    casef << "FORMAT\n";
-    casef << "type: ensight\n";
-    M_case_mesh_section(casef);
-    M_case_variable_section(casef);
-    M_case_time_section(casef,time);
-}
-
-template <typename Mesh> void Ensight<Mesh>::M_case_mesh_section(std::ofstream& casef)
+template <typename MeshType>
+void Ensight<MeshType>::caseMeshSection(std::ofstream& casef)
 {
     casef << "GEOMETRY\n";
     if ( this->M_multimesh )
-        casef << "model: 1 "+this->M_prefix+".*****"<< this->M_me << ".geo change_coords_only\n";
+        casef << "model: 1 " + this->M_prefix + ".*****"<< this->M_me << ".geo change_coords_only\n";
     else
-        casef << "model: 1 "+this->M_prefix+this->M_me+".geo\n";
+        casef << "model: 1 " + this->M_prefix + this->M_me + ".geo\n";
 }
 
+template <typename MeshType>
+void Ensight<MeshType>::caseVariableSection(std::ofstream& casef)
+{
+    typedef std::list< ExporterData >::const_iterator Iterator;
+    casef << "VARIABLE\n";
+    std::string aux, str;
+    for (Iterator i=this->M_listData.begin(); i != this->M_listData.end(); ++i)
+    {
+        if (i-> steady() )
+            str = "";
+        else
+            str = ".*****";
+        aux = i->variableName() + " " + super::M_prefix + "_" + i->variableName();
+        switch ( i->type() )
+        {
+        case ExporterData::Scalar:
+            casef << "scalar per node: 1 " +  aux + str << this->M_me << ".scl\n";
+            break;
+        case ExporterData::Vector:
+            casef << "vector per node: 1 " +  aux +  str << this->M_me << ".vct\n";
+            break;
+        }
+    }
+}
 
-
-
-template <typename Mesh> void Ensight<Mesh>::M_case_time_section(std::ofstream& casef, const Real& time)
+template <typename MeshType>
+void Ensight<MeshType>::caseTimeSection(std::ofstream& casef, const Real& time)
 {
     this->M_timeSteps.push_back(time);
     ++this->M_steps;
@@ -484,167 +552,86 @@ template <typename Mesh> void Ensight<Mesh>::M_case_time_section(std::ofstream& 
     }
 }
 
-template <typename Mesh> void Ensight<Mesh>::M_case_variable_section(std::ofstream& casef)
-{
-    typedef std::list< ExporterData >::const_iterator Iterator;
-    casef << "VARIABLE\n";
-    std::string aux, str;
-    for (Iterator i=this->M_listData.begin(); i != this->M_listData.end(); ++i)
-    {
-        if (i-> steady() )
-            str = "";
-        else
-            str = ".*****";
-        aux = i->variableName()+" "+super::M_prefix+"_"+i->variableName();
-        switch ( i->type() )
-        {
-        case ExporterData::Scalar:
-            casef << "scalar per node: 1 "+ aux + str << this->M_me << ".scl\n";
-            break;
-        case ExporterData::Vector:
-            casef << "vector per node: 1 "+ aux+ str << this->M_me << ".vct\n";
-            break;
-        }
-    }
-}
-
-template<typename Mesh>
-void Ensight<Mesh>::import(const Real& Tstart, const Real& dt)
-{
-    // dt is used to rebuild the history up to now
-    Real time(Tstart - this->M_count*dt);
-
-    for ( UInt count(0); count < this->M_count; ++count)
-    {
-        this->M_timeSteps.push_back(time);
-        ++this->M_steps;
-        time += dt;
-    }
-
-    time += dt;
-
-    import(time);
-
-}
-
-template<typename Mesh>
-void Ensight<Mesh>::import(const Real& time)
-{
-    this->M_timeSteps.push_back(time);
-    ++this->M_steps;
-
-    typedef std::list< ExporterData >::iterator Iterator;
-
-    this->computePostfix();
-
-    assert( this->M_postfix != "*****" );
-
-    if (!this->M_procId) std::cout << "  x-  Ensight importing ..."<< std::endl;
-
-    Chrono chrono;
-    chrono.start();
-    for (Iterator i=this->M_listData.begin(); i != this->M_listData.end(); ++i)
-    {
-        this->rd_var(*i);
-    }
-    chrono.stop();
-    if (!this->M_procId) std::cout << "      done in " << chrono.diff() << " s." << std::endl;
-
-}
-
-template <typename Mesh>
-void Ensight<Mesh>::M_rd_scalar( ExporterData& dvar )
+template <typename MeshType>
+void Ensight<MeshType>::readScalar( ExporterData& dvar )
 {
 
-    std::string filename( M_import_dir+super::M_prefix+"_"+dvar.variableName()+this->M_postfix+this->M_me+".scl" );
-    std::ifstream sclf( filename.c_str() );
+    std::string filename( M_importDir + super::M_prefix + "_" + dvar.variableName() +
+                          this->M_postfix + this->M_me + ".scl" );
+    std::ifstream scalarFile( filename.c_str() );
 
     if (!this->M_procId) std::cout << "\tfile "<< filename << std::endl;
 
-    ASSERT(sclf.good(), std::stringstream("There is an error while reading " + filename).str().c_str() );
-
-    // UInt count=0;
+    ASSERT(scalarFile.good(), std::stringstream("There is an error while reading " +
+                                                filename).str().c_str() );
 
     UInt start = dvar.start();
-    //    UInt nVert = this->M_mesh->numVertices();
-    UInt nVert = static_cast<UInt> (this->M_LtGNodesMap.size());
+
+    UInt vertexNumber = static_cast<UInt> (this->M_ltGNodesMap.size());
 
     std::string trashcan;
 
-    sclf >> trashcan >> trashcan >> trashcan; // <<"Scalar per node\n";
+    scalarFile >> trashcan >> trashcan >> trashcan;
 
-    sclf.setf(std::ios::right | std::ios_base::scientific);
-    sclf.precision(5);
+    scalarFile.setf(std::ios::right | std::ios_base::scientific);
+    scalarFile.precision(5);
 
-    std::map<int,int>::iterator iter;
+    std::map<Int,Int>::iterator iter;
 
-    for (UInt i=0; i<nVert; ++i)
+    for (UInt i=0; i<vertexNumber; ++i)
     {
-        ASSERT(sclf.good(), std::stringstream("There is an error while reading " + filename).str().c_str() );
+        ASSERT(scalarFile.good(), std::stringstream("There is an error while reading " +
+                                                    filename).str().c_str() );
 
-        // int id = this->M_mesh->pointList( i ).id();
-        int id = this->M_LtGNodesMap[i];
-        sclf.width(12);
-        sclf >> dvar(start+id) ;
-        /*
-        ++count;
-        if ( count == 6 )
-            {
-                sclf << "\n";
-                count=0;
-            }
-        */
+        Int id = this->M_ltGNodesMap[i];
+        scalarFile.width(12);
+        scalarFile >> dvar(start + id) ;
     }
-    ASSERT(!sclf.fail(), std::stringstream("There is an error while reading " + filename).str().c_str() );
+
+    ASSERT(!scalarFile.fail(), std::stringstream("There is an error while reading " +
+                                                 filename).str().c_str() );
 }
 
-template <typename Mesh> void Ensight<Mesh>::M_rd_vector(ExporterData& dvar)
+template <typename MeshType> void Ensight<MeshType>::readVector(ExporterData& dvar)
 {
 
-    std::string filename( M_import_dir+super::M_prefix+"_"+dvar.variableName()+this->M_postfix+this->M_me+".vct" );
-    std::ifstream vctf( filename.c_str() );
+    std::string filename( M_importDir + super::M_prefix + "_" + dvar.variableName() +
+                          this->M_postfix + this->M_me + ".vct" );
+    std::ifstream vectorFile( filename.c_str() );
 
     if (!this->M_procId) std::cout << "\tfile "<< filename << std::endl;
 
-    ASSERT(vctf.good(), std::stringstream("There is an error while reading " + filename).str().c_str() );
-
-//    UInt count=0;
+    ASSERT(vectorFile.good(), std::stringstream("There is an error while reading " +
+                                                filename).str().c_str() );
 
     UInt size   = dvar.size();
     UInt start = dvar.start();
-    //    UInt nVert = this->M_mesh->numVertices();
-    UInt nVert = static_cast<UInt> (this->M_LtGNodesMap.size());
+    UInt vertexNumber = static_cast<UInt> (this->M_ltGNodesMap.size());
 
     std::string trashcan;
 
-    vctf >> trashcan >> trashcan >> trashcan;  // <<"Vector per node\n";
+    vectorFile >> trashcan >> trashcan >> trashcan;
 
-    vctf.setf(std::ios::right | std::ios_base::scientific);
-    vctf.precision(5);
+    vectorFile.setf(std::ios::right | std::ios_base::scientific);
+    vectorFile.precision(5);
 
-    for (UInt i=0; i<nVert; ++i)
+    for (UInt i=0; i<vertexNumber; ++i)
         for (UInt j=0; j< nDimensions; ++j)
         {
-            ASSERT(vctf.good(), std::stringstream("There is an error while reading " + filename).str().c_str() );
+            ASSERT(vectorFile.good(), std::stringstream("There is an error while reading " +
+                                                        filename).str().c_str() );
 
-            // int id = this->M_mesh->pointList( i ).id();
-            int id = this->M_LtGNodesMap[i];
-            vctf.width(12);
-            vctf >> dvar(start+j*size+id) ;
-            /*
-            ++count;
-            if ( count == 6 )
-                {
-                    vctf << "\n";
-                    count=0;
-                }
-            */
+            Int id = this->M_ltGNodesMap[i];
+            vectorFile.width(12);
+            vectorFile >> dvar(start + j*size + id) ;
         }
-    ASSERT(!vctf.fail(), std::stringstream("There is an error while reading " + filename).str().c_str() );
+
+    ASSERT(!vectorFile.fail(), std::stringstream("There is an error while reading " +
+                                                 filename).str().c_str() );
 }
 
-template<typename Mesh>
-void Ensight<Mesh>::initProcId()
+template<typename MeshType>
+void Ensight<MeshType>::initProcId()
 {
     std::ostringstream index;
     index.fill( '0' );
@@ -656,24 +643,24 @@ void Ensight<Mesh>::initProcId()
     M_me = index.str();
 }
 
-template<typename Mesh>
-void Ensight<Mesh>::setNodesMap( std::vector<int> LtGNodesMap )
+template<typename MeshType>
+void Ensight<MeshType>::setNodesMap( std::vector<Int> ltGNodesMap )
 {
-    M_LtGNodesMap = LtGNodesMap;
+    M_ltGNodesMap = ltGNodesMap;
 }
 
-template<typename Mesh>
-void Ensight<Mesh>::initNodesMap()
+template<typename MeshType>
+void Ensight<MeshType>::initNodesMap()
 {
-    UInt nVert = this->M_mesh->numVertices();
-    M_LtGNodesMap.resize(nVert);
-    for (UInt i=0; i<nVert; ++i)
+    UInt vertexNumber = this->M_mesh->numVertices();
+    M_ltGNodesMap.resize(vertexNumber);
+    for (UInt i=0; i<vertexNumber; ++i)
     {
-        int id = this->M_mesh->pointList( i+1 ).id();
-        M_LtGNodesMap[i] = id;
+        Int id = this->M_mesh->pointList( i + 1 ).id();
+        M_ltGNodesMap[i] = id;
     }
 }
 
-}
+} // Namespace LifeV
 
-#endif
+#endif // ENSIGHT_H
