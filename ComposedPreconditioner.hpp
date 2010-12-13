@@ -78,6 +78,7 @@ public:
     typedef boost::shared_ptr<ML_Epetra::MultiLevelPreconditioner>     mlPrecPtr_Type;
     typedef super_Type::operator_raw_type                                  operator_Type;
     typedef boost::shared_ptr<operator_Type>                           operatorPtr_Type;
+    typedef super_Type::list_Type                                      list_Type;
 
     // OBSOLETE typedefs
       typedef EpetraPreconditioner                                       super;

@@ -70,7 +70,8 @@ void
 ComposedPreconditioner::setDataFromGetPot( const GetPot&      dataFile,
                                            const std::string& section )
 {
-    createList( M_list, dataFile, section, "Composed" );
+	list_Type uselessList __attribute__ ((deprecated));
+    createList( uselessList, dataFile, section, "Composed" );
 }
 
 void
