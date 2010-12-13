@@ -44,6 +44,9 @@
 namespace LifeV
 {
 
+namespace parser
+{
+
 //! Parser - A string parser for algebraic expressions
 /*!
  *  @author(s) Cristiano Malossi, Gilles Fourestey
@@ -162,6 +165,8 @@ private:
 
     bool                M_evaluate;
 };
+
+} // Namespace parser
 
 } // Namespace LifeV
 

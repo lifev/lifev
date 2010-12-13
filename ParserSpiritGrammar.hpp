@@ -42,6 +42,9 @@
 namespace LifeV
 {
 
+namespace parser
+{
+
 #ifdef HAVE_BOOST_SPIRIT_QI
 
 //! ParserSpiritGrammar - A string parser grammar based on \c boost::spirit::qi
@@ -515,6 +518,8 @@ public:
 };
 
 #endif /* HAVE_BOOST_SPIRIT_QI */
+
+} // Namespace parser
 
 } // Namespace LifeV
 

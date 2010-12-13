@@ -77,10 +77,15 @@ namespace phoenix = boost::phoenix;
 namespace LifeV
 {
 
+namespace parser
+{
+
 typedef std::vector< std::string >               strings_Type;
 typedef std::string::const_iterator              stringIterator_Type;
 
 typedef std::vector< Real >                      results_Type;
+
+}
 
 } // Namespace LifeV
 

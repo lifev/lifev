@@ -40,6 +40,9 @@
 namespace LifeV
 {
 
+namespace parser
+{
+
 // ===================================================
 // Constructors & Destructor
 // ===================================================
@@ -214,5 +217,7 @@ Parser::variable( const std::string& name )
 
     return M_calculator.variable( name );
 }
+
+} // Namespace parser
 
 } // Namespace LifeV
