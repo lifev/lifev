@@ -46,13 +46,15 @@
 namespace LifeV
 {
 
-class Epetra_ExactJacobian;
+//class Epetra_ExactJacobian;
 
 //! exactJacobian - Implementation of an  FSIOperator with shape derivatives.
 /*!
 \include ../../doc/api/bibliography/newton.dox
 
-    @author Name Surname
+    @author Miguel Fernandez
+    @author Gilles Fourestey
+    @author Paolo Crosetto <paolo.crosetto@epfl.ch>
     @see  \ref{FM05}
     FSIOperator
 
@@ -75,7 +77,7 @@ public:
     typedef fluid_Type::matrix_Type         matrix_Type;
     typedef fluid_Type::matrixPtr_Type      matrixPtr_Type;
 
-//! OBSOLETE typedefs
+    //! OBSOLETE typedefs
     //typedef super::fluid_Type               fluid_Type;
     //typedef super::solid_Type               solid_Type;
 
@@ -106,51 +108,61 @@ public:
     //! @name Methods
     //@{
 
-    void evalResidual(vector_Type       &_res,
-                      const vector_Type &_disp,
-                      const UInt          _iter);
+    //! solves the Jacobian system
+    /**
+       The implementation of this method distinguish the various FSI formulations which derive from this class.
+       For this reason it must be pure virtual, snd implemented in the child classes.
+       \param muk: unknown solution at the k-th nonlinear iteration
+       \param res: residual vector (the right hand side of the Jacobian system)
+       \param linearRelTol: tolerance for the nonlinear solver
+       \todo{replace Real with Real& }
+     */
     void solveJac(vector_Type       &_muk,
                   const vector_Type &_res,
                   const Real       _linearRelTol);
 
+    //! Evaluates the nonlinear residual of the FSI system
+    /**
+       The implementation of this method also depends on the child classes, though it does not characterize them.
+       \param res:  residual vector  to be computed
+       \param disp: current unknown solution
+       \param iter: nonlinear iteration counter. The part of th rhs related to the time discretization is computed only for iter=0
+     */
+
+    void evalResidual(vector_Type       &_res,
+                      const vector_Type &_disp,
+                      const UInt          _iter);
+
+    //! Solves the linear fluid problem
+    /** this method is called only by the class Epetra_ExactJacobian
+     */
     void solveLinearFluid();
+
+    //! Solves the linear structure problem
+    /** this method is called only by the class Epetra_ExactJacobian
+     */
     void solveLinearSolid();
 
+    //! sets the space discretization parameters
+    /*!
+      The FE discretization is set accordingly to what specified in the FSIdata member (order of accuracy for the fluid
+      pressure, velocity and for the structure).
+     */
     void setupFEspace();
 
+    //! setup of the fluid and solid solver classes
+    /**
+       This method computes the number of fluxes assigned at the boundaries and calls setupFluidSolid(UInt fluxes)
+     */
     void setupFluidSolid();
 
+    //! initializes the GetPot data file
     void setDataFile( GetPot const& data );
 
-
-    //
-    // BCs treatment
-    //
-
-    // Solid, Lin. Solid, and inverses
-    void setSolidInterfaceDisp         (vector_Type& disp  , UInt type = 0);
-    void setSolidLinInterfaceDisp      (vector_Type& disp  , UInt type = 0);
-    void setSolidInvLinInterfaceStress (vector_Type& stress, UInt type = 0);
-    void setReducedFluidInterfaceAcc   (vector_Type& acc   , UInt type = 0);
-    void setReducedFluidInvInterfaceAcc(vector_Type& acc   , UInt type = 0);
-
-
-    bc_vector_interface bcvFluidLoadToStructure()       {return M_bcvFluidLoadToStructure;}
-
-    // Fluid, Lin. Fluid, and inverses
-
-    void bcManageVec   ( super::fluidBchandler_Type& bch, vector_Type& rhs );
-
-    void setFluidInterfaceDisp      (vector_Type &disp, UInt type = 0);
+    //! should call bcManage for a vector, but the implementation is empty
+    void bcManageVec   ( super::fluidBchandler_Type& bch, vector_Type& rhs ) {};
 
     void registerMyProducts( );
-
-    //! Display general information about the content of the class
-    /*!
-        List of things displayed in the class
-        @param output specify the output format (std::cout by default)
-     */
-    void showMe( std::ostream& output = std::cout ) const;
 
     //@}
 
@@ -172,32 +184,21 @@ private:
 
     UInt imposeFlux( );
 
-    //@}
-
-    int M_updateEvery;
-
-
-    vectorPtr_Type       M_rhsNew;
-    vectorPtr_Type       M_beta;
-
-    generalizedAitken<vector_Type> M_aitkFS;
-
-
-//     bc_vector_interface     M_bcvFluidLoadToStructure;
-
     void eval(const vector_Type& _res, UInt status);
 
-//    dataJacobian                         M_dataJacobian;
 
-    LifeV::SolverTrilinos        M_linearSolver;
+    //@}
 
-    boost::shared_ptr<Epetra_ExactJacobian> M_epetraOper;
+//! Epetra_ExactJacobian  This class implements an Epetra_Operator to be passed to AztecOO.
+/*!
 
-    matrixPtr_Type M_matrShapeDer;
-    bool M_recomputeShapeDer;
+    @author Gilles Fourestey
+    @see
+    exactJacobian
 
-}; // end class exactJacobian
+    This class relies on exactJacobian to solve the linear jacobian problem
 
+*/
 
 class Epetra_ExactJacobian:
         public Epetra_Operator
@@ -206,26 +207,34 @@ class Epetra_ExactJacobian:
 public:
 
     typedef exactJacobian::vector_Type  vector_Type;
+    typedef Epetra_Map                  map_Type;
+    typedef boost::shared_ptr<map_Type> mapPtr_Type;
+
     // OBSOLETE typedef
     typedef exactJacobian::vector_Type  vector_type;
 
-    Epetra_ExactJacobian(exactJacobian* ej):
-            M_ej               (ej),
-            M_operatorDomainMap(*M_ej->solidInterfaceMap()->getMap(Repeated)),
-            M_operatorRangeMap (*M_ej->solidInterfaceMap()->getMap(Repeated)),
-            M_comm             (M_ej->worldComm())
-    {
-//             std::cout << ej << std::endl;
-//             std::cout << M_ej->fluidInterfaceMap().getEpetra_Map() << std::endl;
-//             std::cout << M_ej->solidInterfaceMap().getEpetra_Map() << std::endl;
-//             std::cout << "ok" << std::endl;
-    };
+    //! @name Constructor & Destructor
+    //@{
+    //! Empty Constructor
+    Epetra_ExactJacobian();
 
+    //! Destructor
     virtual ~Epetra_ExactJacobian() {};
+    //@}
 
+    //! @name Methods
+    //@{
+
+    //! sets the exactJacobian pointer and some contents thereof
+    void setOperator(exactJacobian* ej);
+
+    //! apply the jacobian to X and returns the result in Y
+    int 	Apply           (const Epetra_MultiVector &X, Epetra_MultiVector &Y) const;
+
+    //! These are the methods necessary to implement Epetra_Operator but that are not used.
     int 	SetUseTranspose (bool  /*UseTranspose*/)
     {std::cout << "********* EJ : transpose not available\n"; return -1;}
-    int 	Apply           (const Epetra_MultiVector &X, Epetra_MultiVector &Y) const;
+
     int 	ApplyInverse    (const Epetra_MultiVector &/*X*/, Epetra_MultiVector &/*Y*/) const
     {std::cout << "********* EJ : inverse not available\n"; return -1;}
     double 	NormInf         () const
@@ -235,30 +244,40 @@ public:
     bool 	HasNormInf      () const {return false;}
 
     const Epetra_Comm&  Comm () const { return *M_comm; }
-    const Epetra_Map & 	OperatorDomainMap () const {return M_operatorDomainMap;}
-    const Epetra_Map & 	OperatorRangeMap  () const {return M_operatorRangeMap;}
+    const Epetra_Map & 	OperatorDomainMap () const {return *M_operatorDomainMap;}
+    const Epetra_Map & 	OperatorRangeMap  () const {return *M_operatorRangeMap;}
+    //@}
 
-    void setOperator( exactJacobian* ej) {M_ej = ej;}
 
 private:
 
+    exactJacobian*                  M_ej;
 
+    mapPtr_Type                     M_operatorDomainMap;
+    mapPtr_Type                     M_operatorRangeMap;
 
-    exactJacobian*                       M_ej;
-
-    const Epetra_Map                     M_operatorDomainMap;
-    const Epetra_Map                     M_operatorRangeMap;
-
-    boost::shared_ptr<Epetra_Comm>       M_comm;
+    boost::shared_ptr<Epetra_Comm>  M_comm;
 
 };
 
 
-Real fzeroEJ(const Real& t,
-             const Real& x,
-             const Real& y,
-             const Real& z,
-             const ID& i);
+    int M_updateEvery;
+
+    vectorPtr_Type       M_rhsNew;
+    vectorPtr_Type       M_beta;
+
+    generalizedAitken<vector_Type> M_aitkFS;
+
+    LifeV::SolverTrilinos  M_linearSolver;
+    Epetra_ExactJacobian   M_epetraOper;
+
+    matrixPtr_Type M_matrShapeDer;
+    bool           M_recomputeShapeDer;
+
+
+
+
+}; // end class exactJacobian
 
 
 inline FSIOperator* createEJ() { return new exactJacobian(); }

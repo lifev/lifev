@@ -26,22 +26,21 @@
 namespace LifeV
 {
 
-Real fzeroEJ(const Real& /*t*/,
-             const Real& /*x*/,
-             const Real& /*y*/,
-             const Real& /*z*/,
-             const ID& /*i*/)
-{return 0.0;}
-
-
+// ===================================================
+// Constructors & Destructor
+// ===================================================
 exactJacobian::exactJacobian():
-        super       (),
-        M_matrShapeDer()
-//    M_epetraOper(this)
+        super(),
+        M_updateEvery(),
+        M_rhsNew(),
+        M_beta(),
+        M_aitkFS(),
+        M_linearSolver(),
+        M_epetraOper(),
+        M_matrShapeDer(),
+        M_recomputeShapeDer(true)
 {
 
-//     M_epetraOper = new Epetra_ExactJacobian();
-//    M_epetraOper->setOperator(this);
 }
 
 
@@ -49,17 +48,152 @@ exactJacobian::exactJacobian():
 exactJacobian::~exactJacobian()
 {}
 
-void
-exactJacobian::setDataFile( const GetPot& dataFile )
+// ===================================================
+// Methods
+// ===================================================
+
+void  exactJacobian::solveJac(vector_Type         &_muk,
+                              const vector_Type   &_res,
+                              const Real         _linearRelTol)
 {
-    super::setDataFile( dataFile );
+    if (this->isFluid() && this->isLeader()) std::cout << "  f- ";
+    if (this->isSolid() && this->isLeader()) std::cout << "  s- ";
 
-    M_aitkFS.setDefaultOmega( M_data->defaultOmega(), 0.001 );
-    M_aitkFS.setOmegaRange( M_data->OmegaRange() );
+    this->displayer().leaderPrint( "solveJac: NormInf res " , _res.NormInf(), "\n" );
+    _muk *= 0.;
 
-    M_linearSolver.setCommunicator( M_epetraComm );
-    M_linearSolver.setDataFromGetPot(dataFile, "jacobian");
+    M_linearSolver.setTolMaxiter(_linearRelTol, 100);
 
+    vector_Type res(_res);
+
+    M_linearSolver.setOperator(M_epetraOper);
+
+    this->displayer().leaderPrint( "Solving Jacobian system... " );
+
+    M_recomputeShapeDer=true;
+    M_linearSolver.solve(_muk, res);
+
+    this->displayer().leaderPrint( "Solving the Jacobian system done.\n" );
+}
+
+void exactJacobian::evalResidual(vector_Type&       res,
+                                 const vector_Type& disp,
+                                 const UInt          iter)
+{
+    if (this->isSolid())
+    {
+        std::cout << "      Residual computation g(x_" << iter <<" )\n";
+    }
+
+    this->setLambdaSolidOld(disp);
+
+
+    eval(disp, iter);
+
+    res  = this->lambdaSolid();
+    res -=  disp;
+
+    this->displayer().leaderPrint("      NormInf res        =                     " , res.NormInf(), "\n" );
+    if (this->isSolid())
+        this->displayer().leaderPrint("      NormInf res_d      =                     " , this->solid().residual().NormInf(), "\n" );
+
+}
+
+
+void  exactJacobian::solveLinearFluid()
+{
+    //vector_Type dispFluidDomainRep( M_fluid->matrNoBC().getMap(), Repeated);
+    vector_Type dispFluidDomain( M_fluid->matrNoBC().getMap(), Unique, Zero);
+    dispFluidDomain.setCombineMode(Zero);
+    vector_Type dispFluidMesh(this->derVeloFluidMesh().getMap(), Repeated);
+//if statement: in order not to iterate the mesh for each linear residual calculation, needed just for exact Jac case.
+    if (false && this->M_data->dataFluid()->isSemiImplicit()==true)// not working in parallel
+    {//to be corrected: up to now also in the semi implicit case the harmonic extension eq.
+        //is solved at each GMRES iteration
+
+        //vector_Type solidDisplacementRepeated(this->M_solid->disp(), Repeated);
+
+        //            this->transferSolidOnInterface(sldsp, lambdaSolid());
+
+        //            vector_Type repLambdaSolid(lambdaSolid(), Repeated);
+
+        //this->transferInterfaceOnFluid(repLambdaSolid, dispFluidMesh);
+        this->transferSolidOnFluid(this->M_solid->disp(), dispFluidMesh);
+    }
+    else
+    {
+
+        this->transferMeshMotionOnFluid(M_meshMotion->disp(),
+                                        dispFluidMesh);
+    }
+    //dispFluidDomainRep = dispFluidMesh;//import
+    dispFluidDomain=dispFluidMesh;//import
+    this->derVeloFluidMesh() = dispFluidMesh;
+    this->derVeloFluidMesh() *= 1./(M_data->dataFluid()->dataTime()->getTimeStep());
+    this->displayer().leaderPrint( " norm inf dw = " , this->derVeloFluidMesh().NormInf(), "\n" );
+    *M_rhsNew *= 0.;
+
+    double alpha = this->M_bdf->coeff_der( 0 ) / M_data->dataFluid()->dataTime()->getTimeStep();
+
+    if (!this->M_fluid->stab())//if using P1Bubble
+    {
+
+        this->M_fluid->updateLinearSystem( M_fluid->matrNoBC(),
+                                           alpha,
+                                           *M_un,
+                                           *M_fluid->solution(),
+                                           dispFluidMesh,
+                                           this->veloFluidMesh(),
+                                           this->derVeloFluidMesh(),
+                                           *M_rhsNew );
+>>>>>>> doxygen, moved methods, put Epetra_ExactJacobian inside the class exactJacobian
+
+    }
+    else
+    {
+        if (M_recomputeShapeDer)
+        {
+            M_recomputeShapeDer=false;
+            M_matrShapeDer.reset(new matrix_Type(M_fluid->matrNoBC().getMap()/*, M_mmFESpace->map()*/));
+            this->M_fluid->updateShapeDerivatives(
+                *M_matrShapeDer,
+                alpha,
+                *M_un,
+                *M_fluid->solution(),
+                //dispFluidMesh,
+                this->veloFluidMesh(),
+                (UInt)0,
+                *M_mmFESpace,
+                true,
+                false
+                //this->derVeloFluidMesh(),
+                //*M_rhsNew
+            );
+            M_matrShapeDer->GlobalAssemble();
+            *M_matrShapeDer*=-1;
+            //M_matrShapeDer->spy("matrsd");
+        }
+        *M_rhsNew=(*M_matrShapeDer)*dispFluidDomain;
+        M_fluid->updateRhsLinNoBC(*M_rhsNew);
+    }
+
+//    //DEBUG:
+//     vector_Type rhs_debug(M_fluid->matrNoBC().getMap());
+//     rhs_debug=*M_matrShapeDer*dispFluidDomain;
+//     std::cout<<"normInf1 "<<rhs_debug.NormInf()<<std::endl;
+//     //    std::cout<<"normInf2 "<<M_rhsLin->NormInf()<<std::endl;
+//     std::cout<<"normInf displ "<<dispFluidMesh.NormInf()<<std::endl;
+//     std::cout<<"normInf solution "<<M_fluid->solution().NormInf()<<std::endl;
+//     std::cout<<"normInf sould be 0 "<<rhs_debug.NormInf()<<std::endl;
+//     //END DEBUG
+
+    this->M_fluid->iterateLin( *this->M_BCh_du );
+}
+
+
+void  exactJacobian::solveLinearSolid()
+{
+    this->M_solid->iterateLin( M_BCh_dz );
 }
 
 void
@@ -76,7 +210,7 @@ exactJacobian::setupFluidSolid()
 {
     super::setupFluidSolid();
 
-    M_epetraOper.reset( new Epetra_ExactJacobian(this));
+    M_epetraOper.setOperator(this);
 
     if ( this->isFluid() )
     {
@@ -84,9 +218,32 @@ exactJacobian::setupFluidSolid()
         M_beta.reset  (new vector_Type(this->M_fluid->getMap()));
     }
 
-
-//    M_reducedLinFluid.reset(new reducedLinFluid(this, M_fluid, M_solid));
 }
+
+void
+exactJacobian::setDataFile( const GetPot& dataFile )
+{
+    super::setDataFile( dataFile );
+
+    M_aitkFS.setDefaultOmega( M_data->defaultOmega(), 0.001 );
+    M_aitkFS.setOmegaRange( M_data->OmegaRange() );
+
+    M_linearSolver.setCommunicator( M_epetraComm );
+    M_linearSolver.setDataFromGetPot(dataFile, "jacobian");
+
+}
+
+
+void exactJacobian::registerMyProducts( )
+{
+    FSIFactory::instance().registerProduct( "exactJacobian", &createEJ );
+    solid_raw_type::StructureSolverFactory::instance().registerProduct( "LinearVenantKirchhof", &createLinearStructure );
+//solid_raw_type::StructureSolverFactory::instance().registerProduct( "NonLinearVenantKirchhof", &createNonLinearStructure );
+}
+
+// ===================================================
+// Private Methods
+// ===================================================
 
 
 UInt
@@ -273,161 +430,41 @@ void exactJacobian::eval(const vector_Type& _disp,
     }
 }
 
-void exactJacobian::evalResidual(vector_Type&       res,
-                                 const vector_Type& disp,
-                                 const UInt          iter)
+
+
+
+
+
+// ===================================================
+// Epetra_ExactJacobian
+// ===================================================
+
+// ===================================================
+// Constructors & Destructor
+// ===================================================
+
+exactJacobian::Epetra_ExactJacobian::Epetra_ExactJacobian() :
+    M_ej(),
+    M_operatorDomainMap(),
+    M_operatorRangeMap(),
+    M_comm()
 {
-    if (this->isSolid())
-    {
-        std::cout << "      Residual computation g(x_" << iter <<" )\n";
-    }
+};
 
-    this->setLambdaSolidOld(disp);
+// ===================================================
+// Methods
+// ===================================================
 
-
-    eval(disp, iter);
-
-    res  = this->lambdaSolid();
-    res -=  disp;
-
-    this->displayer().leaderPrint("      NormInf res        =                     " , res.NormInf(), "\n" );
-    if (this->isSolid())
-        this->displayer().leaderPrint("      NormInf res_d      =                     " , this->solid().residual().NormInf(), "\n" );
-
+void exactJacobian::Epetra_ExactJacobian::setOperator(exactJacobian* ej)
+{
+    ASSERT(ej != 0, "passing NULL pointer to se operator");
+    M_ej                = ej;
+    M_operatorDomainMap = M_ej->solidInterfaceMap()->getMap(Repeated);
+    M_operatorRangeMap  = M_ej->solidInterfaceMap()->getMap(Repeated);
+    M_comm              = M_ej->worldComm();
 }
 
-
-//
-// new step computation resolution
-//
-
-
-void  exactJacobian::solveJac(vector_Type         &_muk,
-                              const vector_Type   &_res,
-                              const Real         _linearRelTol)
-{
-    if (this->isFluid() && this->isLeader()) std::cout << "  f- ";
-    if (this->isSolid() && this->isLeader()) std::cout << "  s- ";
-
-    this->displayer().leaderPrint( "solveJac: NormInf res " , _res.NormInf(), "\n" );
-    _muk *= 0.;
-
-    M_linearSolver.setTolMaxiter(_linearRelTol, 100);
-
-    vector_Type res(_res);
-
-    M_linearSolver.setOperator(*M_epetraOper);
-
-    this->displayer().leaderPrint( "Solving Jacobian system... " );
-
-    M_recomputeShapeDer=true;
-    M_linearSolver.solve(_muk, res);
-
-    this->displayer().leaderPrint( "Solving the Jacobian system done.\n" );
-}
-
-
-void  exactJacobian::solveLinearFluid()
-{
-    //vector_Type dispFluidDomainRep( M_fluid->matrNoBC().getMap(), Repeated);
-    vector_Type dispFluidDomain( M_fluid->matrNoBC().getMap(), Unique, Zero);
-    dispFluidDomain.setCombineMode(Zero);
-    vector_Type dispFluidMesh(this->derVeloFluidMesh().getMap(), Repeated);
-//if statement: in order not to iterate the mesh for each linear residual calculation, needed just for exact Jac case.
-    if (false && this->M_data->dataFluid()->isSemiImplicit()==true)// not working in parallel
-    {//to be corrected: up to now also in the semi implicit case the harmonic extension eq.
-        //is solved at each GMRES iteration
-
-        //vector_Type solidDisplacementRepeated(this->M_solid->disp(), Repeated);
-
-        //            this->transferSolidOnInterface(sldsp, lambdaSolid());
-
-        //            vector_Type repLambdaSolid(lambdaSolid(), Repeated);
-
-        //this->transferInterfaceOnFluid(repLambdaSolid, dispFluidMesh);
-        this->transferSolidOnFluid(this->M_solid->disp(), dispFluidMesh);
-    }
-    else
-    {
-
-        this->transferMeshMotionOnFluid(M_meshMotion->disp(),
-                                        dispFluidMesh);
-    }
-    //dispFluidDomainRep = dispFluidMesh;//import
-    dispFluidDomain=dispFluidMesh;//import
-    this->derVeloFluidMesh() = dispFluidMesh;
-    this->derVeloFluidMesh() *= 1./(M_data->dataFluid()->dataTime()->getTimeStep());
-    this->displayer().leaderPrint( " norm inf dw = " , this->derVeloFluidMesh().NormInf(), "\n" );
-    *M_rhsNew *= 0.;
-
-    double alpha = this->M_bdf->coeff_der( 0 ) / M_data->dataFluid()->dataTime()->getTimeStep();
-
-    if (!this->M_fluid->stab())//if using P1Bubble
-    {
-
-        this->M_fluid->updateLinearSystem( M_fluid->matrNoBC(),
-                                           alpha,
-                                           *M_un,
-                                           *M_fluid->solution(),
-                                           dispFluidMesh,
-                                           this->veloFluidMesh(),
-                                           this->derVeloFluidMesh(),
-                                           *M_rhsNew );
-
-    }
-    else
-    {
-        if (M_recomputeShapeDer)
-        {
-            M_recomputeShapeDer=false;
-            M_matrShapeDer.reset(new matrix_Type(M_fluid->matrNoBC().getMap()/*, M_mmFESpace->map()*/));
-            this->M_fluid->updateShapeDerivatives(
-                *M_matrShapeDer,
-                alpha,
-                *M_un,
-                *M_fluid->solution(),
-                //dispFluidMesh,
-                this->veloFluidMesh(),
-                (UInt)0,
-                *M_mmFESpace,
-                true,
-                false
-                //this->derVeloFluidMesh(),
-                //*M_rhsNew
-            );
-            M_matrShapeDer->GlobalAssemble();
-            *M_matrShapeDer*=-1;
-            //M_matrShapeDer->spy("matrsd");
-        }
-        *M_rhsNew=(*M_matrShapeDer)*dispFluidDomain;
-        M_fluid->updateRhsLinNoBC(*M_rhsNew);
-    }
-
-//    //DEBUG:
-//     vector_Type rhs_debug(M_fluid->matrNoBC().getMap());
-//     rhs_debug=*M_matrShapeDer*dispFluidDomain;
-//     std::cout<<"normInf1 "<<rhs_debug.NormInf()<<std::endl;
-//     //    std::cout<<"normInf2 "<<M_rhsLin->NormInf()<<std::endl;
-//     std::cout<<"normInf displ "<<dispFluidMesh.NormInf()<<std::endl;
-//     std::cout<<"normInf solution "<<M_fluid->solution().NormInf()<<std::endl;
-//     std::cout<<"normInf sould be 0 "<<rhs_debug.NormInf()<<std::endl;
-//     //END DEBUG
-
-    this->M_fluid->iterateLin( *this->M_BCh_du );
-}
-
-
-//
-
-
-void  exactJacobian::solveLinearSolid()
-{
-    this->M_solid->iterateLin( M_BCh_dz );
-}
-
-
-
-int Epetra_ExactJacobian::Apply(const Epetra_MultiVector &X, Epetra_MultiVector &Y) const
+int exactJacobian::Epetra_ExactJacobian::Apply(const Epetra_MultiVector &X, Epetra_MultiVector &Y) const
 {
 
     Chrono chronoFluid, chronoSolid, chronoInterface;
@@ -540,18 +577,6 @@ int Epetra_ExactJacobian::Apply(const Epetra_MultiVector &X, Epetra_MultiVector 
                   << std::endl << std::endl;
 
     return 0;
-}
-
-void  exactJacobian::bcManageVec( super::fluidBchandler_Type& /*bch*/, vector_Type& /*rhs*/ )
-{
-
-}
-
-void exactJacobian::registerMyProducts( )
-{
-    FSIFactory::instance().registerProduct( "exactJacobian", &createEJ );
-    solid_raw_type::StructureSolverFactory::instance().registerProduct( "LinearVenantKirchhof", &createLinearStructure );
-//solid_raw_type::StructureSolverFactory::instance().registerProduct( "NonLinearVenantKirchhof", &createNonLinearStructure );
 }
 
 
