@@ -1078,13 +1078,15 @@ bool checkIdnumber( const MeshEntityListType & meshEntityList )
     typedef typename MeshEntityListType::const_iterator MeshEntityListTypeConstIterator_Type;
     bool ok( true );
     UInt counter( 1 );
-    for ( MeshEntityListTypeConstIterator_Type meshEntityListIterator = meshEntityList.begin(); meshEntityListIterator != meshEntityList.end() && ok; ++meshEntityListIterator, ++counter )
+    for ( MeshEntityListTypeConstIterator_Type meshEntityListIterator = meshEntityList.begin();
+    		meshEntityListIterator != meshEntityList.end() && ok; ++meshEntityListIterator, ++counter )
         ok = ( meshEntityListIterator->id() == counter );
     return ok;
 }
 
+
 //! @brief Fixes a a list of mesh entities so that the ID is properly set.
-/* \post  The id will correspond to the position of the entity
+/* @post  The id will correspond to the position of the entity
    in the list (starting from 1, since id=0 is reserved for unset entities.
 
    @pre The template argument MeshEntityListType must be a stl
@@ -1096,16 +1098,18 @@ void fixIdnumber( MeshEntityListType & meshEntityList )
 {
     UInt counter( 0 );
     typedef typename MeshEntityListType::iterator Iter;
-    for ( Iter meshEntityListIterator = meshEntityList.begin() ; meshEntityListIterator != meshEntityList.end(); ++meshEntityListIterator )
+    for ( Iter meshEntityListIterator = meshEntityList.begin();
+    		meshEntityListIterator != meshEntityList.end(); ++meshEntityListIterator )
         meshEntityListIterator->setId( ++counter );
 }
 
+
 /*! @brief Fixes boundary points counter
   It fix the boundary points counter by counting
-  how many points have te boundary flag set.
-  It also reset the Bpoints list.
+  how many points have the boundary flag set.
+  It also resets the Bpoints list.
 
-  @pre It assumes that the points have the boundary flag corretly set
+  @pre It assumes that the points have the boundary flag correctly set
 */
 
 template <typename MeshType>
@@ -1113,8 +1117,8 @@ void
 setBPointsCounters( MeshType & mesh )
 {
 
-    UInt countBP( 0 );
-    UInt countBV( 0 );
+    UInt boundaryPointCounter( 0 );
+    UInt boundaryVertexCounter( 0 );
 
     mesh._bPoints.clear();
 
@@ -1122,8 +1126,8 @@ setBPointsCounters( MeshType & mesh )
     {
         if ( mesh.isBoundaryPoint( kPointId ) )
         {
-            ++countBP;
-            ++countBV;
+            ++boundaryPointCounter;
+            ++boundaryVertexCounter;
         }
     }
 
@@ -1131,14 +1135,14 @@ setBPointsCounters( MeshType & mesh )
     {
         if ( mesh.isBoundaryPoint( kPointId ) )
         {
-            ++countBP;
+            ++boundaryPointCounter;
         }
     }
 
-    mesh.numBVertices() = countBV;
-    mesh.setNumBPoints( countBP );
+    mesh.numBVertices() = boundaryVertexCounter;
+    mesh.setNumBPoints( boundaryPointCounter );
     mesh._bPoints.clear();
-    mesh._bPoints.reserve( countBP );
+    mesh._bPoints.reserve( boundaryPointCounter );
 
     for ( UInt kPointId = 1; kPointId <= mesh.storedPoints(); ++kPointId )
     {
@@ -1146,6 +1150,7 @@ setBPointsCounters( MeshType & mesh )
             mesh._bPoints.push_back( &mesh.point( kPointId ) );
     }
 }
+
 
 /*
 *******************************************************************************
@@ -1159,7 +1164,7 @@ BOUNDARY INDICATOR FIXING
   @param errorStream error stream
   @param verbose If true you have a verbose output
 
-  @pre mesh point list must exists and boundary face list  must have been set properly.
+  @pre mesh point list must exists and boundary face list must have been set properly.
 */
 template <typename MeshType>
 void
@@ -1174,7 +1179,7 @@ fixBPoints( MeshType & mesh, std::ostream & logStream = std::cout,
     typedef typename MeshType::BElementShape facetShape_Type;
 
     if ( verbose ) logStream << "Fixing BPoints" << std::endl;
-    std::vector<bool>bpts(mesh.numPoints());
+    std::vector<bool> boundaryPoints(mesh.numPoints());
     // I may have launched the program for a P2 mesh
     // yet not all the points are there
     UInt numitems;
@@ -1189,19 +1194,21 @@ fixBPoints( MeshType & mesh, std::ostream & logStream = std::cout,
 
     for ( UInt kFacetId = 1; kFacetId <= mesh.numBElements(); ++kFacetId )
         for ( UInt jPointId = 1; jPointId <= numitems; ++jPointId )
-            bpts[mesh.bElement(kFacetId).point(jPointId).id()-1]=true;
+            boundaryPoints[mesh.bElement(kFacetId).point(jPointId).id()-1]=true;
     for (ID  kPointId = 1; kPointId <= mesh.storedPoints() ; ++kPointId )
-        mesh.point(kPointId).setBoundary(bpts[kPointId-1]);
-    bpts.clear();
+        mesh.point(kPointId).setBoundary(boundaryPoints[kPointId-1]);
+    boundaryPoints.clear();
     std::vector<bool> temp;
-    bpts.swap(temp);
+    boundaryPoints.swap(temp);
     // Fix now the number of vertices/points
     setBPointsCounters( mesh );
 }
 
+
 //!It makes sure that boundary edges are stored first
 /*!
-@pre It assumes that boundary points are properly stored in the mesh
+    Calls fixIdnumber (@sa fixIdnumber)
+    @pre It assumes that boundary points are properly stored in the mesh
 */
 template <typename MeshType>
 void
@@ -1216,9 +1223,11 @@ setBoundaryEdgesFirst( MeshType & mesh )
     fixIdnumber( mesh.edgeList );
 }
 
+
 //!It makes sure that boundary faces are stored first
 /*!
-@pre It assumes that boundary points are properly stored in the mesh
+    Calls fixIdnumber (@sa fixIdnumber)
+    @pre It assumes that boundary points are properly stored in the mesh
 */
 template <typename MeshType>
 void
@@ -1232,6 +1241,7 @@ setBoundaryFacesFirst( MeshType & mesh )
     std::partition( mesh.faceList.begin(), mesh.faceList.end(), enquireBFace );
     fixIdnumber( mesh.faceList );
 }
+
 
 //! Tests if boundary faces are stored first
 /*! @return true if boundary faces are indeed stored first
@@ -1254,6 +1264,7 @@ bool checkBoundaryFacesFirst( const MeshType & mesh )
     return ok;
 }
 
+
 //! Tests if boundary edges are stored first
 /*! @return true if boundary edges are indeed stored first
   @pre It assumes that boundary points are set */
@@ -1274,6 +1285,7 @@ bool checkBoundaryEdgesFirst( const MeshType & mesh )
     return ok;
 }
 
+
 /*
 *******************************************************************************
  UTILITIES TO VERIFY/CREATE FACES/EDGES
@@ -1282,36 +1294,39 @@ bool checkBoundaryEdgesFirst( const MeshType & mesh )
 //! It fixes boundary faces so that they are consistently numbered with volumes.
 
 /*! An important step for building degrees of freedom on faces.  It also
-  fixes other face related data.
-@param mesh a mesh
-@param errorStream  ostream for error messages
-@param sw A switch that will contain information on what has been done
-Possible values are
-<ol>
-<li>NUM_FACES_MISMATCH</li>
-<li>FIXED_FACE_COUNTER</li>
-<li>BFACE_MISSING</li>
-<li>BFACE_STORED_MISMATCH</li>
-<li>BELEMENT_COUNTER_UNSET</li>
-<li>BFACE_STORED_MISMATCH</li>
-<li>FIXED_MAX_NUM_FACES</li>
-</ol>
+    fixes other face related data.
+	@param[out] mesh a mesh
 
-@param fixMarker If set to the true value all faces without a markerFlag set will inherit it from the points.
+	@param[out] logStream stream that will receive all information regarding the markers
 
-@param logStream ostream that will all information regarding the markers
+	@param[out] errorStream stream for error messages
 
-@param verbose if falso nothng is written to logStream
+	@param[out] sw A switch that will contain information on what has been done
+	Possible values are
+	<ol>
+	<li>NUM_FACES_MISMATCH</li>
+	<li>FIXED_FACE_COUNTER</li>
+	<li>BFACE_MISSING</li>
+	<li>BFACE_STORED_MISMATCH</li>
+	<li>BELEMENT_COUNTER_UNSET</li>
+	<li>BFACE_STORED_MISMATCH</li>
+	<li>FIXED_MAX_NUM_FACES</li>
+	</ol>
 
-@param numFaces It returns the number of faces found by the function
+	@param numFaces[out] It returns the number of faces found by the function
 
-@param numBoundaryFaces It returns the number of boundary faces found by the function
+	@param numBoundaryFaces[out] It returns the number of boundary faces found by the function
 
-@param externalFaceContainer. If not NULL it is a pointer to an external map of bondary faces, already
-  produced by a call to findBoundaryFaces(). This parameter may be used to save al lot of computational work, since
-  findBoundaryFaces() is rather expensive.
+	@param fixMarker[in] If set to the true value, all faces without a markerFlag set will inherit it from the points.
+	    todo remove this parameter (unused)
 
-@pre Boundary faces list must be properly set.
+	@param[in] verbose if false nothing is written to logStream
+
+	@param[out] externalFaceContainer. If not NULL it is a pointer to an external map of boundary faces, already
+	  produced by a call to findBoundaryFaces(). This parameter may be used to save a lot of computational work, since
+	  findBoundaryFaces() is rather expensive.
+
+	@pre Boundary faces list must be properly set.
 */
 
 
@@ -1333,19 +1348,19 @@ bool fixBoundaryFaces( MeshType & mesh,
     typedef typename MeshType::Faces faceContainer_Type;
     typedef typename MeshType::FaceType face_Type;
 
-    UInt point1Id, point2Id, point3Id, point4Id;
-    BareFace bareFace;
-    VolumeType * volumePtr;
+    UInt                                  point1Id, point2Id, point3Id, point4Id;
+    BareFace                              bareFace;
+    VolumeType *                          volumePtr;
     typename faceContainer_Type::iterator faceContainerIterator;
-    typename MeshType::VolumeShape volumeShape;
-    temporaryFaceContainer_Type * boundaryFaceContainerPtr;
+    typename MeshType::VolumeShape        volumeShape;
+    temporaryFaceContainer_Type *         boundaryFaceContainerPtr;
     temporaryFaceContainer_Type::iterator boundaryFaceContainerIterator;
-    std::pair<ID, ID>volumeIdToLocalFaceIdPair;
-    ID jFaceLocalId;
-    ID volumeId;
-    UInt numInternalFaces;
-    bool notfound( false );
-    bool externalContainerIsProvided( false );
+    std::pair<ID, ID>                     volumeIdToLocalFaceIdPair;
+    ID                                    jFaceLocalId;
+    ID                                    volumeId;
+    UInt                                  numInternalFaces;
+    bool                                  notfound( false );
+    bool                                  externalContainerIsProvided( false );
 
     if ( (externalContainerIsProvided = ( externalFaceContainer != 0 )) )
     {
@@ -1936,6 +1951,8 @@ bool buildEdges( MeshType & mesh,
 	@pre All compulsory structures in mesh must have been already set: volumes and boundary faces.
 	@pre Points list MUST have been dimensioned correctly!!!
 	@note the function takes advantage of the fact that
+    @param mesh[out] A mesh
+	@param logStream[out] Log stream for information on the newly created markers for boundary edges
 */
 template <typename MeshType>
 void
