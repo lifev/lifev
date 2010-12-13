@@ -345,7 +345,7 @@ void GeoND<GEOSHAPE, POINTTYPE>::exchangePoints( const ID oldToNew[ GEOSHAPE::S_
 }
 
 template <typename GEOSHAPE, typename POINTTYPE>
-INLINE
+inline
 POINTTYPE const & GeoND<GEOSHAPE, POINTTYPE>::point( ID const identity ) const
 {
     ASSERT_BD( ( identity > 0 && identity <= GeoND<GEOSHAPE, POINTTYPE>::S_numLocalPoints ) );
@@ -353,7 +353,7 @@ POINTTYPE const & GeoND<GEOSHAPE, POINTTYPE>::point( ID const identity ) const
 }
 
 template <typename GEOSHAPE, typename POINTTYPE>
-INLINE
+inline
 POINTTYPE const & GeoND<GEOSHAPE, POINTTYPE>::reversepoint( ID const identity ) const
 {
     ASSERT_BD( ( identity > 0 && identity <= GeoND<GEOSHAPE, POINTTYPE>::S_numLocalPoints ) );
@@ -361,7 +361,7 @@ POINTTYPE const & GeoND<GEOSHAPE, POINTTYPE>::reversepoint( ID const identity ) 
 }
 
 template <typename GEOSHAPE, typename POINTTYPE>
-INLINE
+inline
 void GeoND<GEOSHAPE, POINTTYPE>::setPoint( ID const identity, PointType const & point )
 {
     ASSERT_BD( ( identity > 0 && identity <= GeoND<GEOSHAPE, POINTTYPE>::S_numLocalPoints ) ) ;
@@ -384,7 +384,7 @@ bool __attribute__ ((__deprecated__)) GeoND<GEOSHAPE, POINTTYPE>::setPointBD( ID
 }
 
 template <typename GEOSHAPE, typename POINTTYPE>
-INLINE
+inline
 void GeoND<GEOSHAPE, POINTTYPE>::setPoint( ID const identity, PointType const * point )
 {
     ASSERT_BD( ( identity > 0 && identity <= GeoND<GEOSHAPE, POINTTYPE>::S_numLocalPoints ) ) ;
