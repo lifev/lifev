@@ -169,6 +169,7 @@ typedef MultiscaleCoupling                                                multis
 //!\todo pass a std::string to the factories
 //typedef singleton< factory< multiscaleCoupling_Type, std::string > >   multiscaleCouplingFactory_Type;
 typedef boost::shared_ptr< multiscaleCoupling_Type >                      multiscaleCouplingPtr_Type;
+typedef singleton< factory< multiscaleCoupling_Type, couplings_Type > >   multiscaleCouplingFactory_Type;
 
 typedef std::vector< multiscaleModelPtr_Type >                            multiscaleModelsVector_Type;
 typedef multiscaleModelsVector_Type::iterator                             multiscaleModelsVectorIterator_Type;
