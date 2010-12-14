@@ -37,8 +37,8 @@
 #ifndef BCInterface_OperatorFunctionFile_H
 #define BCInterface_OperatorFunctionFile_H 1
 
-#include <lifemc/lifesolver/BCInterface_FunctionFile.hpp>
-#include <lifemc/lifesolver/BCInterface_OperatorFunction.hpp>
+#include <lifemc/lifesolver/BCInterface3DFunctionFile.hpp>
+#include <lifemc/lifesolver/BCInterface3DFunctionSolver.hpp>
 
 namespace LifeV
 {
