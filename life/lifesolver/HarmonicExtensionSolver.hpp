@@ -164,7 +164,7 @@ public:
     void __attribute__ ((__deprecated__)) setMatrix(matrixPtr_Type matr) { addSystemMatrixTo(matr); }
 
     //! Adds the system matrix to the argument
-    void addSystemMatrixTo(matrixPtr_Type matr) const;
+    void addSystemMatrixTo(matrixPtr_Type matr) const {*matr += *M_matrHE;}
 
     //! Apply boundary conditions.
     /*!
