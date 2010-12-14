@@ -38,7 +38,7 @@
 #define Parser_Definitions_H 1
 
 // LifeV config - Should be removed from here, but we cannot due to flag HAVE_BOOST_SPIRIT_QI
-#include <lifeconfig.h>
+#include <life/lifecore/life.hpp>
 
 // Tell the compiler to ignore specific kind of warnings:
 #pragma GCC diagnostic ignored "-Wunused-variable"
