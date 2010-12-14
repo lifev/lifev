@@ -59,6 +59,8 @@ namespace LifeV
 /*!
   Manages the "Unknown Type" error in an object factory.
 */
+//!\todo uncomment this line
+//template <class AbstractProduct>
 template <typename IdentifierType, class AbstractProduct>
 struct factoryDefaultError
 {
@@ -67,12 +69,16 @@ struct factoryDefaultError
             public std::exception
     {
     public:
+//!\todo uncomment this line
+//        Exception( const std::string& id )
         Exception( IdentifierType id )
                 :
                 std::exception(),
                 _M_ex()
         {
             std::ostringstream __ex_str;
+            //!\todo uncomment this line
+            //__ex_str << "[factory] Unknown Type : " + id;
             __ex_str << "[factory] Unknown Type : ";
             _M_ex = __ex_str.str();
 
@@ -87,7 +93,9 @@ struct factoryDefaultError
         std::string _M_ex;
     };
 
-    static AbstractProduct* onUnknownType(IdentifierType id )
+    //!\todo uncomment this line
+    //static AbstractProduct* onUnknownType(IdentifierType id )
+    static AbstractProduct* onUnknownType(const std::string& id )
     {
         throw Exception( id );
     }
@@ -99,17 +107,30 @@ struct factoryDefaultError
 
   @sa factoryDefaultError, factoryClone, TypeInfo
 */
+
+//!\todo uncomment this line
+// template <class AbstractProduct, typename IdentifierType,
+//           typename ProductCreator = boost::function<AbstractProduct*()>,
+//           template<class> class factoryErrorPolicy = factoryDefaultError >
+// class factory : public factoryErrorPolicy<AbstractProduct>
+
 template <class AbstractProduct, typename IdentifierType,
           typename ProductCreator = boost::function<AbstractProduct*()>,
           template<typename, class> class factoryErrorPolicy = factoryDefaultError>
 class factory : public factoryErrorPolicy<IdentifierType,AbstractProduct>
+
 {
 public:
     //! @name Public Typedefs
     //@{
+
+    //!\todo uncomment this line
+    //typedef std::string identifier_type;
     typedef IdentifierType identifier_type;
     typedef AbstractProduct product_type;
     typedef ProductCreator creator_type;
+    //!\todo uncomment this line
+    //typedef factoryErrorPolicy<product_type> super;
     typedef factoryErrorPolicy<identifier_type,product_type> super;
     //@}
 
@@ -180,6 +201,12 @@ private:
 
   @sa factory, factoryDefaultError
 */
+//!\todo uncomment this line
+// template <class AbstractProduct,
+//           class ProductCreator = boost::function<AbstractProduct* (const AbstractProduct*)>,
+//           template<class> class FactoryErrorPolicy = factoryDefaultError>
+// class factoryClone : public FactoryErrorPolicy<AbstractProduct>
+
 template <class AbstractProduct,
           class ProductCreator = boost::function<AbstractProduct* (const AbstractProduct*)>,
           template<typename, class> class FactoryErrorPolicy = factoryDefaultError>
@@ -188,7 +215,7 @@ class factoryClone : public FactoryErrorPolicy<TypeInfo, AbstractProduct>
 public:
     //! @name Typedefs
     //@{
-    typedef FactoryErrorPolicy<TypeInfo,AbstractProduct> super;
+    typedef FactoryErrorPolicy<AbstractProduct> super;
     //@}
 
     //! @name  Methods
@@ -212,6 +239,8 @@ public:
         {
             return (i->second)(model);
         }
+        //!\todo uncomment this line
+        //return super::onUnknownType(typeid(*model).name());
         return super::onUnknownType(typeid(*model));
     }
     //@}
