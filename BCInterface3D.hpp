@@ -37,14 +37,14 @@
 #ifndef BCInterface3D_H
 #define BCInterface3D_H 1
 
-#include <lifemc/lifesolver/BCInterface_Definitions.hpp>
+#include <lifemc/lifesolver/BCInterface3DDefinitions.hpp>
 
-#include <lifemc/lifesolver/BCInterface_Data.hpp>
-#include <lifemc/lifesolver/BCInterface_Function.hpp>
-#include <lifemc/lifesolver/BCInterface_FunctionFile.hpp>
-#include <lifemc/lifesolver/BCInterface_OperatorFunction.hpp>
-#include <lifemc/lifesolver/BCInterface_OperatorFunctionFile.hpp>
-#include <lifemc/lifesolver/BCInterface_FSI.hpp>
+#include <lifemc/lifesolver/BCInterface3DData.hpp>
+#include <lifemc/lifesolver/BCInterface3DFunction.hpp>
+#include <lifemc/lifesolver/BCInterface3DFunctionFile.hpp>
+#include <lifemc/lifesolver/BCInterface3DFunctionSolver.hpp>
+#include <lifemc/lifesolver/BCInterface3DFunctionFileSolver.hpp>
+#include <lifemc/lifesolver/BCInterface3DFunctionFSI.hpp>
 
 namespace LifeV
 {

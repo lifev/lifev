@@ -37,8 +37,8 @@
 #ifndef BCInterface_FSI_H
 #define BCInterface_FSI_H 1
 
-#include <lifemc/lifesolver/BCInterface_Definitions.hpp>
-#include <lifemc/lifesolver/BCInterface_Data.hpp>
+#include <lifemc/lifesolver/BCInterface3DDefinitions.hpp>
+#include <lifemc/lifesolver/BCInterface3DData.hpp>
 
 #include <life/lifesolver/exactJacobianBase.hpp>
 #include <life/lifesolver/fixedPointBase.hpp>

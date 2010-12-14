@@ -40,7 +40,7 @@
 #include <life/lifesolver/FSIOperator.hpp>
 #include <life/lifesolver/OseenShapeDerivative.hpp>
 
-#include <lifemc/lifesolver/BCInterface_Function.hpp>
+#include <lifemc/lifesolver/BCInterface3DFunction.hpp>
 
 namespace LifeV
 {
