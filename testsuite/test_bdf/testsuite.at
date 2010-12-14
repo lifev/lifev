@@ -229,7 +229,7 @@ AT_DATA([data],[[# -*- getpot -*- (GetPot mode activation for emacs)
     save       = 1
 
 [errorNorms]
-    l2Error = 1e-9
+    l2Error = 1e-7
 ]])
 
 AT_CHECK([ln -sf ../../data/mesh/inria/cube4x4.mesh  && \
@@ -341,7 +341,7 @@ AT_DATA([data],[[# -*- getpot -*- (GetPot mode activation for emacs)
     save       = 1
 
 [errorNorms]
-    l2Error = 1e-9
+    l2Error = 1e-7
 ]])
 
 AT_CHECK([ln -sf ../../data/mesh/inria/cube4x4.mesh  && \
