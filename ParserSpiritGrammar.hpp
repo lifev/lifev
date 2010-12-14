@@ -495,10 +495,14 @@ ParserSpiritGrammar< IteratorType, ResultsType >::setVariable( const std::string
 #else
 
 //! ParserSpiritGrammar - An empty implementation for boost version < 1.41
-template < typename IteratorType, typename ResultsType >
+template < typename IteratorType = std::string::const_iterator, typename ResultsType = std::vector < Real > >
 class ParserSpiritGrammar
 {
 public:
+
+    typedef IteratorType                                        iterator_Type;
+    typedef boost::iterator_range< iterator_Type >              iteratorRange_Type;
+    typedef ResultsType                                         results_Type;
 
     ParserSpiritGrammar() : M_real(0.) {}
     ParserSpiritGrammar( const ParserSpiritGrammar& ) : M_real(0.) {}
