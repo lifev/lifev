@@ -25,6 +25,7 @@ AT_DATA([data],[[# -*- getpot -*- (GetPot mode activation for emacs)
 multimesh  = false
 start      = 0
 save       = 1
+import_dir = importDir/
 
 [fluid]
 
@@ -53,7 +54,7 @@ press_order       = P1
 verbose         = 1
 steady          = 0
 ]])
-AT_CHECK([ ln -sf $abs_top_builddir/testsuite/lifefilters importDir &&
+AT_CHECK([ ln -sf $abs_top_srcdir/testsuite/lifefilters importDir &&
 	       ln -sf $abs_top_builddir/testsuite/data/mesh/inria/cube4x4.mesh &&
            mpirun -np 4 $abs_top_builddir/testsuite/lifefilters/test_filters -c],[0],[ignore],[ignore])
 AT_CLEANUP

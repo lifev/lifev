@@ -70,7 +70,7 @@ computeP0pressure(FESpace< Mesh, Map >& pFESpace,
                   FESpace< Mesh, Map >& p0FESpace,
                   const FESpace<Mesh, Map >& uFESpace,
                   const vector_type& velAndPressureExport,
-                  vector_type& P0pres, Real time);
+                  vector_type& P0pres, Real /*time*/);
 
 struct EnsightToHdf5::Private
 {
@@ -98,7 +98,7 @@ EnsightToHdf5::EnsightToHdf5( int argc,
     // MPI_Init(&argc,&argv);
     d->comm.reset( new Epetra_MpiComm( MPI_COMM_WORLD ) );
     int ntasks;
-    int err = MPI_Comm_size(MPI_COMM_WORLD, &ntasks);
+    // int err = MPI_Comm_size(MPI_COMM_WORLD, &ntasks);
 #else
     d->comm.reset( new Epetra_SerialComm() );
 #endif
@@ -206,6 +206,7 @@ EnsightToHdf5::run()
 
     std::string const exporterType =  dataFile( "exporter/type", "hdf5");
     std::string const exporterName =  dataFile( "exporter/filename", "ethiersteinman");
+    std::string const exportDir    =  dataFile( "exporter/exportDir", "./");
 
     std::string const importerType =  dataFile( "importer/type", "ensight");
     std::string const importerName =  dataFile( "importer/filename", "ethiersteinman");
@@ -218,7 +219,7 @@ EnsightToHdf5::run()
 #endif
         exporter.reset( new Ensight<RegionMesh3D<LinearTetra> > ( dataFile, exporterName ) );
 
-    exporter->setDirectory( importDir ); // This is a test to see if M_post_dir is working
+    exporter->setDirectory( exportDir ); // This is a test to see if M_post_dir is working
     exporter->setMeshProcId( meshPart.mesh(), d->comm->MyPID() );
 
 #ifdef HAVE_HDF5
@@ -228,7 +229,8 @@ EnsightToHdf5::run()
 #endif
         importer.reset( new Ensight<RegionMesh3D<LinearTetra> > ( dataFile, importerName ) );
 
-    importer->setDirectory( "./" ); // This is a test to see if M_post_dir is working
+    // todo this will not work with the Ensight filter (it uses M_importDir, a private variable)
+    importer->setDirectory( importDir ); // This is a test to see if M_post_dir is working
     importer->setMeshProcId( meshPart.mesh(), d->comm->MyPID() );
 
     vector_ptrtype velAndPressureExport ( new vector_type(*fluid.solution(), exporter->mapType() ) );

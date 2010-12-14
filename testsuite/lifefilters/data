@@ -10,6 +10,7 @@ filename   = filtered
 multimesh  = false
 start      = 0
 save       = 1
+import_dir = importDir/
 
 [importer]
 type       = ensight
