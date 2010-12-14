@@ -137,7 +137,7 @@ MultiscaleModel1D::setupData( const std::string& fileName )
 
     //1D Model Physics
     //!\todo pass a std::string to the factories
-    M_physics = Physics_PtrType( factoryOneDimensionalPhysics_Type::instance().createObject( "M_data->physicsType()" ) );
+    //M_physics = Physics_PtrType( factoryOneDimensionalPhysics_Type::instance().createObject( "M_data->physicsType()" ) );
     M_physics = Physics_PtrType( factoryOneDimensionalPhysics_Type::instance().createObject( M_data->physicsType() ) );
     M_physics->setData( M_data );
 
