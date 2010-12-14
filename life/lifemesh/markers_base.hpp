@@ -402,6 +402,7 @@ template <typename MarkerTraits>
 std::ostream & Marker_Base<MarkerTraits>::printFlag( std::ostream & output ) const
 {
     showMe( output );
+    return output;
 }
 
 template <typename MarkerTraits>

@@ -171,7 +171,7 @@ bool Switch::test( const char * a ) const
     return test( temp );
 }
 
-std::ostream & Switch::showMe( bool verbose, std::ostream & out ) const
+std::ostream & Switch::showMe( bool /*verbose*/, std::ostream & out ) const
 {
     out << std::endl << " Status of switches" << std::endl;
     for ( const_iterator i = begin(); i != end(); ++i )

@@ -135,10 +135,10 @@ public:
 
     //! @name Operators
     //@{
-    NdebugStream& operator<<( char const* code ) { return *this; }
-    NdebugStream& operator<<( std::string const& str) { return *this; }
-    NdebugStream& operator<<( double code) { return *this; }
-    NdebugStream& operator<<( LNManipFunction f ) { return *this; }
+    NdebugStream& operator<<( char const* /*code*/ ) { return *this; }
+    NdebugStream& operator<<( std::string const& /*str*/) { return *this; }
+    NdebugStream& operator<<( double /*code*/) { return *this; }
+    NdebugStream& operator<<( LNManipFunction /*f*/ ) { return *this; }
     //@}
 
     //! @name  Methods
