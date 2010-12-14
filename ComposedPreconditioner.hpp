@@ -38,7 +38,7 @@
 
 #pragma GCC diagnostic ignored "-Wunused-variable"
 #pragma GCC diagnostic ignored "-Wunused-parameter"
-#include <Ifpack_config.h>
+#include <Ifpack_ConfigDefs.h>
 #include <Ifpack.h>
 #include <Ifpack_Preconditioner.h>
 #include <ml_MultiLevelPreconditioner.h>
