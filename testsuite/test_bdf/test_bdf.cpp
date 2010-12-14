@@ -92,6 +92,7 @@ struct test_bdf::Private
 
     std::string data_file_name;
     boost::shared_ptr<Epetra_Comm> comm;
+    Real errorNorm;
 
 };
 
@@ -325,10 +326,20 @@ void test_bdf::run()
             std::cout << "Error Norm L2: " << L2_Error
                       << "\nRelative Error Norm L2: " << L2_RelError << std::endl;
 
+        Members->errorNorm = L2_Error;
 
         //transfer the solution at time t.
         *u_display_ptr = u;
         exporter->postProcess(t);
     }
 
+
+
+}
+
+bool test_bdf::check()
+{
+    // Reading from data file
+    GetPot dataFile(Members->data_file_name.c_str());
+    return Members->errorNorm < dataFile("errorNorms/l2Error", -10e10);
 }

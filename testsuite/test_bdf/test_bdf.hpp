@@ -97,6 +97,7 @@ public:
     //@{
 
     void run();
+    bool check();
 
     //@}
 

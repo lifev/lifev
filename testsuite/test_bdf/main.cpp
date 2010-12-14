@@ -70,16 +70,6 @@
 //! Namespaces
 // ===================================================
 using namespace LifeV;
-//Register products in the preconditioner factory, so we can use Ifpack and ML as preconditioners.
-namespace
-{
-static bool regIF = (PRECFactory::instance().registerProduct( "Ifpack", &createIfpack ));
-static bool regML = (PRECFactory::instance().registerProduct( "ML", &createML ));
-}
-
-
-
-
 
 // ===================================================
 //! Main
@@ -94,6 +84,8 @@ int main(int argc, char** argv)
 
     test_bdf bdf_t( argc, argv );
     bdf_t.run();
+    bool check(true);
+    check = bdf_t.check();
 
 
 #ifdef HAVE_MPI
@@ -101,5 +93,8 @@ int main(int argc, char** argv)
     std::cout << "MPI Finalization" << std::endl;
 #endif
 
-    return( EXIT_SUCCESS );
+    if(check)
+    	return( EXIT_SUCCESS );
+    else
+    	return( EXIT_FAILURE );
 }
