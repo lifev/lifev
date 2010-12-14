@@ -88,8 +88,13 @@ MultiscaleModelMultiscale::setupData( const std::string& fileName )
     // Useful variables
     UInt id;
 
+    //!\todo pass a std::string to the factories
+    //std::string model;
+    //std::string coupling;
+
     models_Type model;
     couplings_Type coupling;
+
     boost::array< Real, NDIM > geometryScale, geometryRotate, geometryTranslate;
 
     std::map< UInt, UInt > modelsIDMap;
@@ -116,6 +121,9 @@ MultiscaleModelMultiscale::setupData( const std::string& fileName )
     {
         id    = dataFile( "Problem/models", 0, i * modelsColumnsNumber );
         modelsIDMap[id] = i;
+
+        //!\todo pass a std::string to the factories
+        //model = dataFile( "Problem/models", "undefined", i * modelsColumnsNumber + 1 );
         model = multiscaleModelsMap[dataFile( "Problem/models", "undefined", i * modelsColumnsNumber + 1 )];
 
         // Set Geometry
@@ -151,19 +159,29 @@ MultiscaleModelMultiscale::setupData( const std::string& fileName )
         M_modelsList[i]->setCommunicator( M_comm );
         M_modelsList[i]->setGeometry( geometryScale, geometryRotate, geometryTranslate );
         M_modelsList[i]->setGlobalData( M_globalData );
+
+//!\todo pass a std::string to the factories
+//         M_modelsList[i]->setupData( path + model + "/"
+//                                     + dataFile( "Problem/models", "undefined", i * modelsColumnsNumber + 2 ) + ".dat" );
         M_modelsList[i]->setupData( path + Enum2String( model, multiscaleModelsMap ) + "/"
                                     + dataFile( "Problem/models", "undefined", i * modelsColumnsNumber + 2 ) + ".dat" );
+
     }
 
     // Load couplings
     path = dataFile( "Problem/couplingsPath", "./" );
     for ( UInt i( 0 ); i < couplingsLinesNumber; ++i )
     {
+        //!\todo pass a std::string to the factories
+        //coupling = dataFile( "Problem/couplings", "undefined", i * couplingsColumnsNumber + 1 );
         coupling = multiscaleCouplingsMap[dataFile( "Problem/couplings", "undefined", i * couplingsColumnsNumber + 1 )];
 
         M_couplingsList[i] = multiscaleCouplingPtr_Type( multiscaleCouplingFactory_Type::instance().createObject( coupling ) );
         M_couplingsList[i]->setCommunicator( M_comm );
         M_couplingsList[i]->setGlobalData( M_globalData );
+        //!\todo pass a std::string to the factories
+//         M_couplingsList[i]->setupData( path + coupling + "/"
+//                                        + dataFile( "Problem/couplings", "undefined", i * couplingsColumnsNumber + 2 ) + ".dat" );
         M_couplingsList[i]->setupData( path + Enum2String( coupling, multiscaleCouplingsMap ) + "/"
                                        + dataFile( "Problem/couplings", "undefined", i * couplingsColumnsNumber + 2 ) + ".dat" );
 
