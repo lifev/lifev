@@ -305,10 +305,17 @@ BCInterface1D< PhysicalSolverType >::BCInterface1D( ) :
 #endif
 
     //Factory registration
-    factoryFunction_Type::instance().registerProduct( BCInterface1D_function,         &createBCInterface1D_Function< physicalSolver_Type > );
-    factoryFunction_Type::instance().registerProduct( BCInterface1D_functionFile,     &createBCInterface1D_FunctionFile< physicalSolver_Type > );
-    factoryFunction_Type::instance().registerProduct( BCInterface1D_OPERfunction,     &createBCInterface1D_OperatorFunction< physicalSolver_Type > );
-    factoryFunction_Type::instance().registerProduct( BCInterface1D_OPERfunctionFile, &createBCInterface1D_OperatorFunctionFile< physicalSolver_Type > );
+    factoryFunction_Type::instance().registerProduct( "BCInterface1D_function",         &createBCInterface1D_Function< physicalSolver_Type > );
+    factoryFunction_Type::instance().registerProduct( "BCInterface1D_functionFile",     &createBCInterface1D_FunctionFile< physicalSolver_Type > );
+    factoryFunction_Type::instance().registerProduct( "BCInterface1D_OPERfunction",     &createBCInterface1D_OperatorFunction< physicalSolver_Type > );
+    factoryFunction_Type::instance().registerProduct( "BCInterface1D_OPERfunctionFile", &createBCInterface1D_OperatorFunctionFile< physicalSolver_Type > );
+
+    //!\todo pass a std::string to the factories
+//     factoryFunction_Type::instance().registerProduct( BCInterface1D_function,         &createBCInterface1D_Function< physicalSolver_Type > );
+//     factoryFunction_Type::instance().registerProduct( BCInterface1D_functionFile,     &createBCInterface1D_FunctionFile< physicalSolver_Type > );
+//     factoryFunction_Type::instance().registerProduct( BCInterface1D_OPERfunction,     &createBCInterface1D_OperatorFunction< physicalSolver_Type > );
+//     factoryFunction_Type::instance().registerProduct( BCInterface1D_OPERfunctionFile, &createBCInterface1D_OperatorFunctionFile< physicalSolver_Type > );
+
 }
 
 // ===================================================
@@ -451,6 +458,8 @@ BCInterface1D< PhysicalSolverType >::addBase( std::vector< boost::shared_ptr< BC
                                           const bcBaseList_Type& physicalSolver )
 {
     boost::shared_ptr< BCInterfaceBaseType > function( factoryFunction_Type::instance().createObject( physicalSolver ) );
+    //!\todo pass a std::string to the factories
+    //boost::shared_ptr< BCInterfaceBaseType > function( factoryFunction_Type::instance().createObject( "physicalSolver" ) );
 
     function->setData( M_data );
 
