@@ -323,10 +323,10 @@ BCInterface3D< PhysicalSolverType >::BCInterface3D( ) :
 #endif
 
     //Factory registration
-    factoryFunction_Type::instance().registerProduct( BCI3DFunction,           &createBCInterface_Function< physicalSolver_Type > );
-    factoryFunction_Type::instance().registerProduct( BCI3DFunctionFile,       &createBCInterface_FunctionFile< physicalSolver_Type > );
-    factoryFunction_Type::instance().registerProduct( BCI3DFunctionSolver,     &createBCInterface_OperatorFunction< physicalSolver_Type > );
-    factoryFunction_Type::instance().registerProduct( BCI3DFunctionFileSolver, &createBCInterface_OperatorFunctionFile< physicalSolver_Type > );
+    factoryFunction_Type::instance().registerProduct( BCI3DFunction,           &createBCInterface3DFunction< physicalSolver_Type > );
+    factoryFunction_Type::instance().registerProduct( BCI3DFunctionFile,       &createBCInterface3DFunctionFile< physicalSolver_Type > );
+    factoryFunction_Type::instance().registerProduct( BCI3DFunctionSolver,     &createBCInterface3DFunctionSolver< physicalSolver_Type > );
+    factoryFunction_Type::instance().registerProduct( BCI3DFunctionFileSolver, &createBCInterface3DFunctionFileSolver< physicalSolver_Type > );
 }
 
 // ===================================================

@@ -185,7 +185,7 @@ private:
 // ===================================================
 //! Factory create function
 template< typename PhysicalSolverType >
-inline BCInterface3DFunction< PhysicalSolverType >* createBCInterface_Function()
+inline BCInterface3DFunction< PhysicalSolverType >* createBCInterface3DFunction()
 {
     return new BCInterface3DFunction< PhysicalSolverType > ();
 }

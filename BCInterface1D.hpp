@@ -304,10 +304,10 @@ BCInterface1D< PhysicalSolverType >::BCInterface1D( ) :
 #endif
 
     //Factory registration
-    factoryFunction_Type::instance().registerProduct( BCI1DFunction,           &createBCInterface1D_Function< physicalSolver_Type > );
-    factoryFunction_Type::instance().registerProduct( BCI1DFunctionFile,       &createBCInterface1D_FunctionFile< physicalSolver_Type > );
-    factoryFunction_Type::instance().registerProduct( BCI1DFunctionSolver,     &createBCInterface1D_OperatorFunction< physicalSolver_Type > );
-    factoryFunction_Type::instance().registerProduct( BCI1DFunctionFileSolver, &createBCInterface1D_OperatorFunctionFile< physicalSolver_Type > );
+    factoryFunction_Type::instance().registerProduct( BCI1DFunction,           &createBCInterface1DFunction< physicalSolver_Type > );
+    factoryFunction_Type::instance().registerProduct( BCI1DFunctionFile,       &createBCInterface1DFunctionFile< physicalSolver_Type > );
+    factoryFunction_Type::instance().registerProduct( BCI1DFunctionSolver,     &createBCInterface1DFunctionSolver< physicalSolver_Type > );
+    factoryFunction_Type::instance().registerProduct( BCI1DFunctionFileSolver, &createBCInterface1DFunctionFileSolver< physicalSolver_Type > );
 }
 
 // ===================================================
