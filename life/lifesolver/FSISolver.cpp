@@ -1,4 +1,3 @@
-/* -*- mode: c++ -*-
 //@HEADER
 /*
 *******************************************************************************
@@ -34,7 +33,7 @@
 
 #ifndef TWODIM
 
-#include <lifeconfig.h>
+#include <life/lifecore/life.hpp>
 #include <life/lifesolver/FSISolver.hpp>
 //!\todo remove this header
 #include <life/lifealg/nonLinRichardson.hpp>
