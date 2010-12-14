@@ -39,7 +39,7 @@
 
 #include <lifemc/lifesolver/OneDimensionalModel_Solver.hpp>
 
-#include <lifemc/lifesolver/BCInterface1D_Function.hpp>
+#include <lifemc/lifesolver/BCInterface1DFunction.hpp>
 
 namespace LifeV
 {
