@@ -89,7 +89,7 @@ public:
     //! @name Public methods
     //@{
 
-    //! Post-porcess the variables added to the list
+    //! Post-process the variables added to the list
     /*!
       @param time the solver time
     */
@@ -101,7 +101,7 @@ public:
 
       Not yet implemented for Ensight
     */
-    UInt importFromTime( const Real& time ) { assert(false); return 0; }
+    UInt importFromTime( const Real& /*time*/ ) { assert(false); return 0; }
 
     //! Import data from previous simulations
     /*!
