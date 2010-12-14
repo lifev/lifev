@@ -26,22 +26,22 @@
 
 /*!
  *  @file
- *  @brief File containing the BCInterface1D_FunctionFile class
+ *  @brief File containing the BCInterface1DFunctionFile class
  *
  *  @date 10-05-2010
  *  @author Cristiano Malossi <cristiano.malossi@epfl.ch>
  *
  *  @maintainer Cristiano Malossi <cristiano.malossi@epfl.ch>
  */
-#ifndef BCInterface1D_FunctionFile_H
-#define BCInterface1D_FunctionFile_H 1
+#ifndef BCInterface1DFunctionFile_H
+#define BCInterface1DFunctionFile_H 1
 
 #include <lifemc/lifesolver/BCInterface1DFunction.hpp>
 
 namespace LifeV
 {
 
-//! BCInterface1D_FunctionFile - LifeV bcFunction wrapper for BCInterface1D
+//! BCInterface1DFunctionFile - LifeV bcFunction wrapper for BCInterface1D
 /*!
  *  @author Cristiano Malossi
  *
@@ -84,7 +84,7 @@ namespace LifeV
  *  				1.000000000		4.00'
  */
 template< typename PhysicalSolverType >
-class BCInterface1D_FunctionFile: public virtual BCInterface1D_Function< PhysicalSolverType >
+class BCInterface1DFunctionFile: public virtual BCInterface1DFunction< PhysicalSolverType >
 {
 public:
 
@@ -92,8 +92,8 @@ public:
     //@{
 
     typedef PhysicalSolverType                                                    physicalSolver_Type;
-    typedef BCInterface1D_Data                                                    data_Type;
-    typedef BCInterface1D_Function< physicalSolver_Type >                         function_Type;
+    typedef BCInterface1DData                                                     data_Type;
+    typedef BCInterface1DFunction< physicalSolver_Type >                          function_Type;
 
     //@}
 
@@ -102,16 +102,16 @@ public:
     //@{
 
     //! Empty Constructor
-    explicit BCInterface1D_FunctionFile();
+    explicit BCInterface1DFunctionFile();
 
     //! Constructor
     /*!
      * @param data BC data loaded from GetPot file
      */
-    explicit BCInterface1D_FunctionFile( const data_Type& data );
+    explicit BCInterface1DFunctionFile( const data_Type& data );
 
     //! Destructor
-    virtual ~BCInterface1D_FunctionFile() {}
+    virtual ~BCInterface1DFunctionFile() {}
 
     //@}
 
@@ -132,9 +132,9 @@ private:
     //! @name Unimplemented Methods
     //@{
 
-    BCInterface1D_FunctionFile( const BCInterface1D_FunctionFile& function );
+    BCInterface1DFunctionFile( const BCInterface1DFunctionFile& function );
 
-    BCInterface1D_FunctionFile& operator=( const BCInterface1D_FunctionFile& function );
+    BCInterface1DFunctionFile& operator=( const BCInterface1DFunctionFile& function );
 
     //@}
 
@@ -161,16 +161,16 @@ private:
 // ===================================================
 //! Factory create function
 template< typename PhysicalSolverType >
-inline BCInterface1D_Function< PhysicalSolverType >* createBCInterface1D_FunctionFile()
+inline BCInterface1DFunction< PhysicalSolverType >* createBCInterface1D_FunctionFile()
 {
-    return new BCInterface1D_FunctionFile< PhysicalSolverType > ();
+    return new BCInterface1DFunctionFile< PhysicalSolverType > ();
 }
 
 // ===================================================
 // Constructors
 // ===================================================
 template< typename PhysicalSolverType >
-BCInterface1D_FunctionFile< PhysicalSolverType >::BCInterface1D_FunctionFile() :
+BCInterface1DFunctionFile< PhysicalSolverType >::BCInterface1DFunctionFile() :
         function_Type                    (),
         M_variables                      (),
         M_loop                           (),
@@ -179,13 +179,13 @@ BCInterface1D_FunctionFile< PhysicalSolverType >::BCInterface1D_FunctionFile() :
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 5022 ) << "BCInterface1D_FunctionFile::BCInterface1D_FunctionFile()" << "\n";
+    Debug( 5022 ) << "BCInterface1DFunctionFile::BCInterface1DFunctionFile()" << "\n";
 #endif
 
 }
 
 template< typename PhysicalSolverType >
-BCInterface1D_FunctionFile< PhysicalSolverType >::BCInterface1D_FunctionFile( const data_Type& data ) :
+BCInterface1DFunctionFile< PhysicalSolverType >::BCInterface1DFunctionFile( const data_Type& data ) :
         function_Type                    (),
         M_variables                      (),
         M_loop                           (),
@@ -194,7 +194,7 @@ BCInterface1D_FunctionFile< PhysicalSolverType >::BCInterface1D_FunctionFile( co
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 5022 ) << "BCInterface1D_FunctionFile::BCInterface1D_FunctionFile( data )" << "\n";
+    Debug( 5022 ) << "BCInterface1DFunctionFile::BCInterface1DFunctionFile( data )" << "\n";
 #endif
 
     this->setData( data );
@@ -205,11 +205,11 @@ BCInterface1D_FunctionFile< PhysicalSolverType >::BCInterface1D_FunctionFile( co
 // ===================================================
 template< typename PhysicalSolverType >
 inline void
-BCInterface1D_FunctionFile< PhysicalSolverType >::loadData( data_Type data )
+BCInterface1DFunctionFile< PhysicalSolverType >::loadData( data_Type data )
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 5022 ) << "BCInterface1D_FunctionFile::setData             fileName: " << data.baseString() << "\n";
+    Debug( 5022 ) << "BCInterface1DFunctionFile::setData             fileName: " << data.baseString() << "\n";
 #endif
 
     std::vector< std::string > stringsVector;
@@ -235,7 +235,7 @@ BCInterface1D_FunctionFile< PhysicalSolverType >::loadData( data_Type data )
 
 #ifdef HAVE_LIFEV_DEBUG
     std::stringstream output;
-    output << "BCInterface1D_FunctionFile::loadData           variables: ";
+    output << "BCInterface1DFunctionFile::loadData           variables: ";
     for ( UInt j(0); j < variablesNumber; ++j )
         output << M_variables[j] << "  ";
 
@@ -280,7 +280,7 @@ BCInterface1D_FunctionFile< PhysicalSolverType >::loadData( data_Type data )
     //Initialize iterator
     M_dataIterator = M_data[M_variables[0]].begin();
 
-    //Update the data container (IT IS A COPY!) with the correct base string for the BCInterface1D_Function
+    //Update the data container (IT IS A COPY!) with the correct base string for the BCInterface1DFunction
     if ( stringsVector.size() < 2 )
         data.setBaseString( dataFile( "function", "Undefined" ) );
     else
@@ -300,7 +300,7 @@ BCInterface1D_FunctionFile< PhysicalSolverType >::loadData( data_Type data )
 
 template< typename PhysicalSolverType >
 inline void
-BCInterface1D_FunctionFile< PhysicalSolverType >::dataInterpolation()
+BCInterface1DFunctionFile< PhysicalSolverType >::dataInterpolation()
 {
     //Get variable
     Real X = function_Type::M_parser->variable( M_variables[0] );
@@ -362,4 +362,4 @@ BCInterface1D_FunctionFile< PhysicalSolverType >::dataInterpolation()
 
 } // Namespace LifeV
 
-#endif /* BCInterface1D_FunctionFile_H */
+#endif /* BCInterface1DFunctionFile_H */

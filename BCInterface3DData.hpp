@@ -26,7 +26,7 @@
 
 /*!
  *  @file
- *  @brief File containing the BCInterface_Data class
+ *  @brief File containing the BCInterface3DData class
  *
  *  @date 17-07-2009
  *  @author Cristiano Malossi <cristiano.malossi@epfl.ch>
@@ -34,29 +34,29 @@
  *  @maintainer Cristiano Malossi <cristiano.malossi@epfl.ch>
  */
 
-#ifndef BCInterface_Data_H
-#define BCInterface_Data_H 1
+#ifndef BCInterface3DData_H
+#define BCInterface3DData_H 1
 
 #include <lifemc/lifesolver/BCInterface3DDefinitions.hpp>
 
 namespace LifeV
 {
 
-//! BCInterface_Data - The BCInterface data container
+//! BCInterface3DData - The BCInterface data container
 /*!
  *  @author Cristiano Malossi
  *
- *  The BCInterface_Data class provides a temporal container to pass information
+ *  The BCInterface3DData class provides a general container to pass information
  *  to all the BCInterface functions.
  */
-class BCInterface_Data
+class BCInterface3DData
 {
 public:
 
     //! @name Type definitions
     //@{
 
-    typedef BCInterface_BaseList                                                       bcBaseList_Type;
+    typedef baseList3D_Type                                                            bcBaseList_Type;
 
     //@}
 
@@ -65,16 +65,16 @@ public:
     //@{
 
     //! Constructor
-    explicit BCInterface_Data();
+    explicit BCInterface3DData();
 
     //! Copy constructor
     /*!
-     * @param data BCInterface_Data
+     * @param data BCInterface3DData
      */
-    BCInterface_Data( const BCInterface_Data& data );
+    BCInterface3DData( const BCInterface3DData& data );
 
     //! Destructor
-    virtual ~BCInterface_Data() {}
+    virtual ~BCInterface3DData() {}
 
     //@}
 
@@ -84,10 +84,10 @@ public:
 
     //! Operator =
     /*!
-     * @param data BCInterface_Data
+     * @param data BCInterface3DData
      * @return reference to a copy of the class
      */
-    BCInterface_Data& operator=( const BCInterface_Data& data );
+    BCInterface3DData& operator=( const BCInterface3DData& data );
 
     //@}
 
@@ -275,4 +275,4 @@ private:
 
 } // Namespace LifeV
 
-#endif /* BCInterface_Data_H */
+#endif /* BCInterface3DData_H */

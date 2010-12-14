@@ -26,7 +26,7 @@
 
 /*!
  *  @file
- *  @brief File containing the BCInterface1D_OperatorFunctionFile class
+ *  @brief File containing the BCInterface1DFunctionFileSolver class
  *
  *  @date 10-05-2010
  *  @author Cristiano Malossi <cristiano.malossi@epfl.ch>
@@ -34,8 +34,8 @@
  *  @maintainer Cristiano Malossi <cristiano.malossi@epfl.ch>
  */
 
-#ifndef BCInterface1D_OperatorFunctionFile_H
-#define BCInterface1D_OperatorFunctionFile_H 1
+#ifndef BCInterface1DFunctionFileSolver_H
+#define BCInterface1DFunctionFileSolver_H 1
 
 #include <lifemc/lifesolver/BCInterface1DFunctionFile.hpp>
 #include <lifemc/lifesolver/BCInterface1DFunctionSolver.hpp>
@@ -43,7 +43,7 @@
 namespace LifeV
 {
 
-//! BCInterface1D_OperatorFunctionFile - LifeV bcFunction wrapper for BCInterface1D (with Operators)
+//! BCInterface1DFunctionFileSolver - LifeV bcFunction wrapper for BCInterface1D (with Operators)
 /*!
  *  @author Cristiano Malossi
  *
@@ -54,8 +54,8 @@ namespace LifeV
  *  The function string can contain Operator parameters.
  */
 template< class PhysicalSolverType >
-class BCInterface1D_OperatorFunctionFile: public virtual BCInterface1D_FunctionFile< PhysicalSolverType > ,
-        public virtual BCInterface1D_OperatorFunction< PhysicalSolverType >
+class BCInterface1DFunctionFileSolver: public virtual BCInterface1DFunctionFile< PhysicalSolverType > ,
+        public virtual BCInterface1DFunctionSolver< PhysicalSolverType >
 {
 public:
 
@@ -63,10 +63,10 @@ public:
     //@{
 
     typedef PhysicalSolverType                                                    physicalSolver_Type;
-    typedef BCInterface1D_Data                                                    data_Type;
-    typedef BCInterface1D_Function< physicalSolver_Type >                         function_Type;
-    typedef BCInterface1D_FunctionFile< physicalSolver_Type >                     functionFile_Type;
-    typedef BCInterface1D_OperatorFunction< physicalSolver_Type >                 functionSolver_Type;
+    typedef BCInterface1DData                                                     data_Type;
+    typedef BCInterface1DFunction< physicalSolver_Type >                          function_Type;
+    typedef BCInterface1DFunctionFile< physicalSolver_Type >                      functionFile_Type;
+    typedef BCInterface1DFunctionSolver< physicalSolver_Type >                    functionSolver_Type;
     //@}
 
 
@@ -74,16 +74,16 @@ public:
     //@{
 
     //! Constructor
-    explicit BCInterface1D_OperatorFunctionFile();
+    explicit BCInterface1DFunctionFileSolver();
 
     //! Constructor
     /*!
      * @param data BC data loaded from GetPot file
      */
-    explicit BCInterface1D_OperatorFunctionFile( const data_Type& data );
+    explicit BCInterface1DFunctionFileSolver( const data_Type& data );
 
     //! Destructor
-    virtual ~BCInterface1D_OperatorFunctionFile() {}
+    virtual ~BCInterface1DFunctionFileSolver() {}
 
     //@}
 
@@ -104,9 +104,9 @@ private:
     //! @name Unimplemented Methods
     //@{
 
-    BCInterface1D_OperatorFunctionFile( const BCInterface1D_OperatorFunctionFile& function );
+    BCInterface1DFunctionFileSolver( const BCInterface1DFunctionFileSolver& function );
 
-    BCInterface1D_OperatorFunctionFile& operator=( const BCInterface1D_OperatorFunctionFile& function );
+    BCInterface1DFunctionFileSolver& operator=( const BCInterface1DFunctionFileSolver& function );
 
     //@}
 
@@ -117,36 +117,36 @@ private:
 // ===================================================
 //! Factory create function
 template< typename PhysicalSolverType >
-inline BCInterface1D_Function< PhysicalSolverType >* createBCInterface1D_OperatorFunctionFile()
+inline BCInterface1DFunction< PhysicalSolverType >* createBCInterface1D_OperatorFunctionFile()
 {
-    return new BCInterface1D_OperatorFunctionFile< PhysicalSolverType > ();
+    return new BCInterface1DFunctionFileSolver< PhysicalSolverType > ();
 }
 
 // ===================================================
 // Constructors
 // ===================================================
 template< class PhysicalSolverType >
-BCInterface1D_OperatorFunctionFile< PhysicalSolverType >::BCInterface1D_OperatorFunctionFile() :
+BCInterface1DFunctionFileSolver< PhysicalSolverType >::BCInterface1DFunctionFileSolver() :
         function_Type          (),
         functionFile_Type      (),
         functionSolver_Type    ()
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 5024 ) << "BCInterface1D_OperatorFunctionFile::BCInterface1D_OperatorFunctionFile()" << "\n";
+    Debug( 5024 ) << "BCInterface1DOperatorFunctionFile::BCInterface1DOperatorFunctionFile()" << "\n";
 #endif
 
 }
 
 template< class PhysicalSolverType >
-BCInterface1D_OperatorFunctionFile< PhysicalSolverType >::BCInterface1D_OperatorFunctionFile( const data_Type& data ) :
+BCInterface1DFunctionFileSolver< PhysicalSolverType >::BCInterface1DFunctionFileSolver( const data_Type& data ) :
         function_Type          (),
         functionFile_Type      (),
         functionSolver_Type    ()
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 5024 ) << "BCInterface1D_OperatorFunctionFile::BCInterface1D_OperatorFunctionFile( data )" << "\n";
+    Debug( 5024 ) << "BCInterface1DOperatorFunctionFile::BCInterface1DOperatorFunctionFile( data )" << "\n";
 #endif
 
     this->setData( data );
@@ -157,11 +157,11 @@ BCInterface1D_OperatorFunctionFile< PhysicalSolverType >::BCInterface1D_Operator
 // ===================================================
 template< class PhysicalSolverType >
 void
-BCInterface1D_OperatorFunctionFile< PhysicalSolverType >::setData( const data_Type& data )
+BCInterface1DFunctionFileSolver< PhysicalSolverType >::setData( const data_Type& data )
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 5024 ) << "BCInterface1D_OperatorFunctionFile::setData" << "\n";
+    Debug( 5024 ) << "BCInterface1DOperatorFunctionFile::setData" << "\n";
 #endif
     functionFile_Type::setData( data );
 
@@ -173,4 +173,4 @@ BCInterface1D_OperatorFunctionFile< PhysicalSolverType >::setData( const data_Ty
 
 } // Namespace LifeV
 
-#endif /* BCInterface1D_OperatorFunctionFile_H */
+#endif /* BCInterface1DFunctionFileSolver_H */

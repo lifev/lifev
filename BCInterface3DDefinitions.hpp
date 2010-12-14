@@ -26,7 +26,7 @@
 
 /*!
  *  @file
- *  @brief File containing the BCInterface definitions
+ *  @brief File containing the BCInterface3D definitions
  *
  *  @date 12-11-2009
  *  @author Cristiano Malossi <cristiano.malossi@epfl.ch>
@@ -34,8 +34,8 @@
  *  @maintainer Cristiano Malossi <cristiano.malossi@epfl.ch>
  */
 
-#ifndef BCInterface_Definitions_H
-#define BCInterface_Definitions_H 1
+#ifndef BCInterface3DDefinitions_H
+#define BCInterface3DDefinitions_H 1
 
 // Tell the compiler to ignore specific kind of warnings:
 #pragma GCC diagnostic ignored "-Wunused-variable"
@@ -62,21 +62,18 @@
 #include <life/lifecore/singleton.hpp>
 
 #include <life/lifefem/bcHandler.hpp>
-#include <life/lifefem/bcCond.hpp>
-#include <life/lifefem/bcFunction.hpp>
-#include <life/lifefem/bcVector.hpp>
 
 namespace LifeV
 {
 
 // Enum objects
-enum BCInterface_BaseList
+enum baseList3D_Type
 {
-    BCInterface_function,
-    BCInterface_functionFile,
-    BCInterface_OPERfunction,
-    BCInterface_OPERfunctionFile,
-    BCInterface_OPERFSI
+    BCI3DFunction,
+    BCI3DFunctionFile,
+    BCI3DFunctionSolver,
+    BCI3DFunctionFileSolver,
+    BCI3DFunctionFSI
 };
 
 // Type definitions
@@ -85,4 +82,4 @@ typedef std::vector< ID > BCComV;
 
 } // Namespace LifeV
 
-#endif /* BCInterface_Definitions_H */
+#endif /* BCInterface3DDefinitions_H */

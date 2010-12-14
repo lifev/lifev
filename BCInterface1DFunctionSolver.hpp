@@ -26,7 +26,7 @@
 
 /*!
  *  @file
- *  @brief File containing the BCInterface1D_OperatorFunction class
+ *  @brief File containing the BCInterface1DFunctionSolver class
  *
  *  @date 10-05-2010
  *  @author Cristiano Malossi <cristiano.malossi@epfl.ch>
@@ -34,8 +34,8 @@
  *  @maintainer Cristiano Malossi <cristiano.malossi@epfl.ch>
  */
 
-#ifndef BCInterface1D_OperatorFunction_H
-#define BCInterface1D_OperatorFunction_H 1
+#ifndef BCInterface1DFunctionSolver_H
+#define BCInterface1DFunctionSolver_H 1
 
 #include <lifemc/lifesolver/OneDimensionalModel_Solver.hpp>
 
@@ -44,7 +44,7 @@
 namespace LifeV
 {
 
-//! BCInterface1D_OperatorFunction - LifeV bcFunction wrapper for BCInterface1D (with operators)
+//! BCInterface1DFunctionSolver - LifeV bcFunction wrapper for BCInterface1D (with operators)
 /*!
  *  @author Cristiano Malossi
  *
@@ -73,7 +73,7 @@ namespace LifeV
  *	s_young
  */
 template< class PhysicalSolverType >
-class BCInterface1D_OperatorFunction: public virtual BCInterface1D_Function< PhysicalSolverType >
+class BCInterface1DFunctionSolver: public virtual BCInterface1DFunction< PhysicalSolverType >
 {
 public:
 
@@ -81,8 +81,8 @@ public:
     //@{
 
     typedef PhysicalSolverType                                                    physicalSolver_Type;
-    typedef BCInterface1D_Data                                                    data_Type;
-    typedef BCInterface1D_Function< physicalSolver_Type >                         function_Type;
+    typedef BCInterface1DData                                                     data_Type;
+    typedef BCInterface1DFunction< physicalSolver_Type >                          function_Type;
     typedef OneDimensionalModel_Solver::solutionPtr_Type                          solutionPtr_Type;
 
     //@}
@@ -92,16 +92,16 @@ public:
     //@{
 
     //! Constructor
-    explicit BCInterface1D_OperatorFunction();
+    explicit BCInterface1DFunctionSolver();
 
     //! Constructor
     /*!
      * @param data BC data loaded from GetPot file
      */
-    explicit BCInterface1D_OperatorFunction( const data_Type& data );
+    explicit BCInterface1DFunctionSolver( const data_Type& data );
 
     //! Destructor
-    virtual ~BCInterface1D_OperatorFunction() {}
+    virtual ~BCInterface1DFunctionSolver() {}
 
     //@}
 
@@ -141,7 +141,7 @@ public:
      * @param name name of the variable
      * @param value value of the variable
      */
-    void setVariable( const std::string& name, const Real& value ) { function_Type::M_parser->SetVariable( name, value ); }
+    void setVariable( const std::string& name, const Real& value ) { function_Type::M_parser->setVariable( name, value ); }
 
     //@}
 
@@ -168,7 +168,7 @@ protected:
         s_young,
     };
 
-    boost::shared_ptr< PhysicalSolverType >   M_physicalSolver;
+    boost::shared_ptr< PhysicalSolverType >    M_physicalSolver;
     solutionPtr_Type                           M_solution;
 
     OneD_BCSide                                M_side;
@@ -179,9 +179,9 @@ private:
     //! @name Unimplemented Methods
     //@{
 
-    BCInterface1D_OperatorFunction( const BCInterface1D_OperatorFunction& function );
+    BCInterface1DFunctionSolver( const BCInterface1DFunctionSolver& function );
 
-    BCInterface1D_OperatorFunction& operator=( const BCInterface1D_OperatorFunction& function );
+    BCInterface1DFunctionSolver& operator=( const BCInterface1DFunctionSolver& function );
 
     //@}
 
@@ -204,16 +204,16 @@ private:
 // ===================================================
 //! Factory create function
 template< typename PhysicalSolverType >
-inline BCInterface1D_Function< PhysicalSolverType >* createBCInterface1D_OperatorFunction()
+inline BCInterface1DFunction< PhysicalSolverType >* createBCInterface1D_OperatorFunction()
 {
-    return new BCInterface1D_OperatorFunction< PhysicalSolverType > ();
+    return new BCInterface1DFunctionSolver< PhysicalSolverType > ();
 }
 
 // ===================================================
 // Constructors
 // ===================================================
 template< class PhysicalSolverType >
-BCInterface1D_OperatorFunction< PhysicalSolverType >::BCInterface1D_OperatorFunction() :
+BCInterface1DFunctionSolver< PhysicalSolverType >::BCInterface1DFunctionSolver() :
         function_Type                    (),
         M_physicalSolver                 (),
         M_solution                       (),
@@ -222,13 +222,13 @@ BCInterface1D_OperatorFunction< PhysicalSolverType >::BCInterface1D_OperatorFunc
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 5023 ) << "BCInterface1D_OperatorFunction::BCInterface1D_OperatorFunction()" << "\n";
+    Debug( 5023 ) << "BCInterface1DFunctionSolver::BCInterface1DFunctionSolver()" << "\n";
 #endif
 
 }
 
 template< class PhysicalSolverType >
-BCInterface1D_OperatorFunction< PhysicalSolverType >::BCInterface1D_OperatorFunction( const data_Type& data ) :
+BCInterface1DFunctionSolver< PhysicalSolverType >::BCInterface1DFunctionSolver( const data_Type& data ) :
         function_Type                    (),
         M_physicalSolver                 (),
         M_solution                       (),
@@ -237,7 +237,7 @@ BCInterface1D_OperatorFunction< PhysicalSolverType >::BCInterface1D_OperatorFunc
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 5023 ) << "BCInterface1D_OperatorFunction::BCInterface1D_OperatorFunction( data )" << "\n";
+    Debug( 5023 ) << "BCInterface1DFunctionSolver::BCInterface1DFunctionSolver( data )" << "\n";
 #endif
 
     this->setData( data );
@@ -248,11 +248,11 @@ BCInterface1D_OperatorFunction< PhysicalSolverType >::BCInterface1D_OperatorFunc
 // ===================================================
 template< class PhysicalSolverType >
 inline void
-BCInterface1D_OperatorFunction< PhysicalSolverType >::updatePhysicalSolverVariables()
+BCInterface1DFunctionSolver< PhysicalSolverType >::updatePhysicalSolverVariables()
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 5023 ) << "BCInterface1D_OperatorFunction<FSIOperator>::UpdateOperatorVariables  " << "\n";
+    Debug( 5023 ) << "BCInterface1DFunctionSolver<FSIOperator>::UpdateOperatorVariables  " << "\n";
 #endif
 
     // Create/Update variables for 1D problem
@@ -263,47 +263,47 @@ BCInterface1D_OperatorFunction< PhysicalSolverType >::updatePhysicalSolverVariab
         case f_area:
 
 #ifdef HAVE_LIFEV_DEBUG
-            Debug( 5023 ) << "                                                   f_area(" << static_cast<Real> (M_side) << "): " << M_physicalSolver->BoundaryValue( OneD_A, M_side ) << "\n";
+            Debug( 5023 ) << "                                                   f_area(" << static_cast<Real> (M_side) << "): " << M_physicalSolver->boundaryValue( OneD_A, M_side ) << "\n";
 #endif
-            setVariable( "f_area", M_physicalSolver->BoundaryValue( *M_solution, OneD_A, M_side ) );
+            setVariable( "f_area", M_physicalSolver->boundaryValue( *M_solution, OneD_A, M_side ) );
 
             break;
 
         case f_density:
 
 #ifdef HAVE_LIFEV_DEBUG
-            Debug( 5023 ) << "                                                  f_density: " << M_physicalSolver->Physics()->Data()->DensityRho() << "\n";
+            Debug( 5023 ) << "                                                  f_density: " << M_physicalSolver->physics()->data()->densityRho() << "\n";
 #endif
-            setVariable( "f_density", M_physicalSolver->Physics()->Data()->DensityRho() );
+            setVariable( "f_density", M_physicalSolver->physics()->data()->densityRho() );
 
             break;
 
         case f_flux:
 
 #ifdef HAVE_LIFEV_DEBUG
-            Debug( 5023 ) << "                                                   f_flux(" << static_cast<Real> (M_side) << "): " << M_physicalSolver->BoundaryValue( OneD_Q, M_side ) << "\n";
+            Debug( 5023 ) << "                                                   f_flux(" << static_cast<Real> (M_side) << "): " << M_physicalSolver->boundaryValue( OneD_Q, M_side ) << "\n";
 #endif
 
-            setVariable( "f_flux", M_physicalSolver->BoundaryValue( *M_solution, OneD_Q, M_side ) );
+            setVariable( "f_flux", M_physicalSolver->boundaryValue( *M_solution, OneD_Q, M_side ) );
 
             break;
 
         case f_pressure:
 
 #ifdef HAVE_LIFEV_DEBUG
-            Debug( 5023 ) << "                                               f_pressure(" << static_cast<Real> (M_side) << "): " << M_physicalSolver->BoundaryValue( OneD_P, M_side ) << "\n";
+            Debug( 5023 ) << "                                               f_pressure(" << static_cast<Real> (M_side) << "): " << M_physicalSolver->boundaryValue( OneD_P, M_side ) << "\n";
 #endif
 
-            setVariable( "f_pressure", M_physicalSolver->BoundaryValue( *M_solution, OneD_P, M_side ) );
+            setVariable( "f_pressure", M_physicalSolver->boundaryValue( *M_solution, OneD_P, M_side ) );
 
             break;
 
         case f_viscosity:
 
 #ifdef HAVE_LIFEV_DEBUG
-            Debug( 5023 ) << "                                                f_viscosity: " << M_physicalSolver->fluid().viscosity() << "\n";
+            Debug( 5023 ) << "                                                f_viscosity: " << M_physicalSolver->physics()->data()->viscosity() << "\n";
 #endif
-            setVariable( "f_viscosity", M_physicalSolver->Physics()->Data()->Viscosity() );
+            setVariable( "f_viscosity", M_physicalSolver->physics()->data()->viscosity() );
 
             break;
 
@@ -311,40 +311,40 @@ BCInterface1D_OperatorFunction< PhysicalSolverType >::updatePhysicalSolverVariab
         case s_density:
 
 #ifdef HAVE_LIFEV_DEBUG
-            Debug( 5023 ) << "                                                   s_density: " << M_physicalSolver->solid().rho() << "\n";
+            Debug( 5023 ) << "                                                   s_density: " << M_physicalSolver->physics()->data()->densityWall() << "\n";
 #endif
 
-            setVariable( "s_density", M_physicalSolver->Physics()->Data()->DensityWall() );
+            setVariable( "s_density", M_physicalSolver->physics()->data()->densityWall() );
 
             break;
 
         case s_poisson:
 
 #ifdef HAVE_LIFEV_DEBUG
-            Debug( 5023 ) << "                                                   s_poisson: " << M_physicalSolver->solid().poisson() << "\n";
+            Debug( 5023 ) << "                                                   s_poisson: " << M_physicalSolver->physics()->data()->poisson() << "\n";
 #endif
 
-            setVariable( "s_poisson", M_physicalSolver->Physics()->Data()->Poisson() );
+            setVariable( "s_poisson", M_physicalSolver->physics()->data()->poisson() );
 
             break;
 
         case s_thickness:
 
 #ifdef HAVE_LIFEV_DEBUG
-            Debug( 5023 ) << "                                                 s_thickness: " << M_physicalSolver->solid().thickness() << "\n";
+            Debug( 5023 ) << "                                                 s_thickness: " << M_physicalSolver->physics()->data()->thickness() << "\n";
 #endif
 
-            setVariable( "s_thickness", M_physicalSolver->Physics()->Data()->Thickness() );
+            setVariable( "s_thickness", M_physicalSolver->physics()->data()->thickness() );
 
             break;
 
         case s_young:
 
 #ifdef HAVE_LIFEV_DEBUG
-            Debug( 5023 ) << "                                                     s_young: " << M_physicalSolver->solid().young() << "\n";
+            Debug( 5023 ) << "                                                     s_young: " << M_physicalSolver->physics()->data()->young() << "\n";
 #endif
 
-            setVariable( "s_young", M_physicalSolver->Physics()->Data()->Young() );
+            setVariable( "s_young", M_physicalSolver->physics()->data()->young() );
 
             break;
 
@@ -358,11 +358,11 @@ BCInterface1D_OperatorFunction< PhysicalSolverType >::updatePhysicalSolverVariab
 // ===================================================
 template< class PhysicalSolverType >
 void
-BCInterface1D_OperatorFunction< PhysicalSolverType >::setData( const data_Type& data )
+BCInterface1DFunctionSolver< PhysicalSolverType >::setData( const data_Type& data )
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 5023 ) << "BCInterface1D_OperatorFunction::setData" << "\n";
+    Debug( 5023 ) << "BCInterface1DFunctionSolver::setData" << "\n";
 #endif
 
     M_side     = data.side();
@@ -377,11 +377,11 @@ BCInterface1D_OperatorFunction< PhysicalSolverType >::setData( const data_Type& 
 // ===================================================
 template< class PhysicalSolverType >
 inline void
-BCInterface1D_OperatorFunction< PhysicalSolverType >::createAccessList( const data_Type& data )
+BCInterface1DFunctionSolver< PhysicalSolverType >::createAccessList( const data_Type& data )
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 5023 ) << "BCInterface1D_OperatorFunction<FSIOperator>::createAccessList" << "\n";
+    Debug( 5023 ) << "BCInterface1DFunctionSolver<FSIOperator>::createAccessList" << "\n";
 #endif
 
     std::map< std::string, physicalSolverList > mapList;
@@ -399,7 +399,7 @@ BCInterface1D_OperatorFunction< PhysicalSolverType >::createAccessList( const da
 // ===================================================
 template< class PhysicalSolverType >
 inline void
-BCInterface1D_OperatorFunction< PhysicalSolverType >::createFluidMap( std::map< std::string, physicalSolverList >& mapList )
+BCInterface1DFunctionSolver< PhysicalSolverType >::createFluidMap( std::map< std::string, physicalSolverList >& mapList )
 {
     mapList["f_area"]      = f_area;
     mapList["f_density"]   = f_density;
@@ -410,7 +410,7 @@ BCInterface1D_OperatorFunction< PhysicalSolverType >::createFluidMap( std::map< 
 
 template< class PhysicalSolverType >
 inline void
-BCInterface1D_OperatorFunction< PhysicalSolverType >::createSolidMap( std::map< std::string, physicalSolverList >& mapList )
+BCInterface1DFunctionSolver< PhysicalSolverType >::createSolidMap( std::map< std::string, physicalSolverList >& mapList )
 {
     mapList["s_density"]   = s_density;
     mapList["s_poisson"]   = s_poisson;
@@ -420,7 +420,7 @@ BCInterface1D_OperatorFunction< PhysicalSolverType >::createSolidMap( std::map< 
 
 template< class PhysicalSolverType >
 inline void
-BCInterface1D_OperatorFunction< PhysicalSolverType >::createList( const std::map< std::string, physicalSolverList >& mapList, const data_Type& data )
+BCInterface1DFunctionSolver< PhysicalSolverType >::createList( const std::map< std::string, physicalSolverList >& mapList, const data_Type& data )
 {
     M_list.clear();
     for ( typename std::map< std::string, physicalSolverList >::const_iterator j = mapList.begin(); j != mapList.end(); ++j )
@@ -430,4 +430,4 @@ BCInterface1D_OperatorFunction< PhysicalSolverType >::createList( const std::map
 
 } // Namespace LifeV
 
-#endif /* BCInterface1D_OperatorFunction_H */
+#endif /* BCInterface1DFunctionSolver_H */
