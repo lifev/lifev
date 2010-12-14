@@ -35,7 +35,7 @@
  */
 
 
-#include <lifemc/lifesolver/BCInterface1D_Data.hpp>
+#include <lifemc/lifesolver/BCInterface1DData.hpp>
 
 namespace LifeV
 {
