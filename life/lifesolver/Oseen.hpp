@@ -787,17 +787,17 @@ Oseen( boost::shared_ptr<data_Type>    dataType,
         M_diagonalize            ( false ),
         M_count                  ( 0 ),
         M_recomputeMatrix        ( false ),
-        M_elementMatrixStiff     ( M_velocityFESpace.fe().nbNode, nDimensions, nDimensions ),
-        M_elementMatrixMass      ( M_velocityFESpace.fe().nbNode, nDimensions, nDimensions ),
-        M_elementMatrixPreconditioner ( M_pressureFESpace.fe().nbNode, 1, 1 ),
-        M_elementMatrixDivergence ( M_pressureFESpace.fe().nbNode, 1, 0,
-                                    M_velocityFESpace.fe().nbNode, 0, nDimensions ),
-        M_elementMatrixGradient  ( M_velocityFESpace.fe().nbNode, nDimensions, 0,
-                                   M_pressureFESpace.fe().nbNode, 0, 1 ),
-        M_elementRightHandSide   ( M_velocityFESpace.fe().nbNode, nDimensions ),
+        M_elementMatrixStiff     ( M_velocityFESpace.fe().nbFEDof(), nDimensions, nDimensions ),
+        M_elementMatrixMass      ( M_velocityFESpace.fe().nbFEDof(), nDimensions, nDimensions ),
+        M_elementMatrixPreconditioner ( M_pressureFESpace.fe().nbFEDof(), 1, 1 ),
+        M_elementMatrixDivergence ( M_pressureFESpace.fe().nbFEDof(), 1, 0,
+                                    M_velocityFESpace.fe().nbFEDof(), 0, nDimensions ),
+        M_elementMatrixGradient  ( M_velocityFESpace.fe().nbFEDof(), nDimensions, 0,
+                                   M_pressureFESpace.fe().nbFEDof(), 0, 1 ),
+        M_elementRightHandSide   ( M_velocityFESpace.fe().nbFEDof(), nDimensions ),
         M_blockPreconditioner    ( ),
-        M_wLoc                   ( M_velocityFESpace.fe().nbNode, nDimensions ),
-        M_uLoc                   ( M_velocityFESpace.fe().nbNode, nDimensions ),
+        M_wLoc                   ( M_velocityFESpace.fe().nbFEDof(), nDimensions ),
+        M_uLoc                   ( M_velocityFESpace.fe().nbFEDof(), nDimensions ),
         M_un                     ( new vector_Type(M_localMap) )
 {
     M_stabilization = ( &M_velocityFESpace.refFE() == &M_pressureFESpace.refFE() );
@@ -848,17 +848,17 @@ Oseen( boost::shared_ptr<data_Type>    dataType,
         M_diagonalize            ( false ),
         M_count                  ( 0 ),
         M_recomputeMatrix        ( false ),
-        M_elementMatrixStiff     ( M_velocityFESpace.fe().nbNode, nDimensions, nDimensions ),
-        M_elementMatrixMass      ( M_velocityFESpace.fe().nbNode, nDimensions, nDimensions ),
-        M_elementMatrixPreconditioner                 ( M_pressureFESpace.fe().nbNode, 1, 1 ),
-        M_elementMatrixDivergence ( M_pressureFESpace.fe().nbNode, 1, 0,
-                                    M_velocityFESpace.fe().nbNode, 0, nDimensions ),
-        M_elementMatrixGradient  ( M_velocityFESpace.fe().nbNode, nDimensions, 0,
-                                   M_pressureFESpace.fe().nbNode, 0, 1 ),
-        M_elementRightHandSide   ( M_velocityFESpace.fe().nbNode, nDimensions ),
+        M_elementMatrixStiff     ( M_velocityFESpace.fe().nbFEDof(), nDimensions, nDimensions ),
+        M_elementMatrixMass      ( M_velocityFESpace.fe().nbFEDof(), nDimensions, nDimensions ),
+        M_elementMatrixPreconditioner                 ( M_pressureFESpace.fe().nbFEDof(), 1, 1 ),
+        M_elementMatrixDivergence ( M_pressureFESpace.fe().nbFEDof(), 1, 0,
+                                    M_velocityFESpace.fe().nbFEDof(), 0, nDimensions ),
+        M_elementMatrixGradient  ( M_velocityFESpace.fe().nbFEDof(), nDimensions, 0,
+                                   M_pressureFESpace.fe().nbFEDof(), 0, 1 ),
+        M_elementRightHandSide   ( M_velocityFESpace.fe().nbFEDof(), nDimensions ),
         M_blockPreconditioner    ( ),
-        M_wLoc                   ( M_velocityFESpace.fe().nbNode, nDimensions ),
-        M_uLoc                   ( M_velocityFESpace.fe().nbNode, nDimensions ),
+        M_wLoc                   ( M_velocityFESpace.fe().nbFEDof(), nDimensions ),
+        M_uLoc                   ( M_velocityFESpace.fe().nbFEDof(), nDimensions ),
         M_un                     ( new vector_Type(M_localMap) )
 {
     M_stabilization = ( &M_velocityFESpace.refFE() == &M_pressureFESpace.refFE() );
@@ -908,17 +908,17 @@ Oseen( boost::shared_ptr<data_Type>    dataType,
         M_diagonalize            ( false ),
         M_count                  ( 0 ),
         M_recomputeMatrix        ( false ),
-        M_elementMatrixStiff     ( M_velocityFESpace.fe().nbNode, nDimensions, nDimensions ),
-        M_elementMatrixMass      ( M_velocityFESpace.fe().nbNode, nDimensions, nDimensions ),
-        M_elementMatrixPreconditioner ( M_pressureFESpace.fe().nbNode, 1, 1 ),
-        M_elementMatrixDivergence ( M_pressureFESpace.fe().nbNode, 1, 0,
-                                    M_velocityFESpace.fe().nbNode, 0, nDimensions ),
-        M_elementMatrixGradient  ( M_velocityFESpace.fe().nbNode, nDimensions, 0,
-                                   M_pressureFESpace.fe().nbNode, 0, 1 ),
-        M_elementRightHandSide   ( M_velocityFESpace.fe().nbNode, nDimensions ),
+        M_elementMatrixStiff     ( M_velocityFESpace.fe().nbFEDof(), nDimensions, nDimensions ),
+        M_elementMatrixMass      ( M_velocityFESpace.fe().nbFEDof(), nDimensions, nDimensions ),
+        M_elementMatrixPreconditioner ( M_pressureFESpace.fe().nbFEDof(), 1, 1 ),
+        M_elementMatrixDivergence ( M_pressureFESpace.fe().nbFEDof(), 1, 0,
+                                    M_velocityFESpace.fe().nbFEDof(), 0, nDimensions ),
+        M_elementMatrixGradient  ( M_velocityFESpace.fe().nbFEDof(), nDimensions, 0,
+                                   M_pressureFESpace.fe().nbFEDof(), 0, 1 ),
+        M_elementRightHandSide   ( M_velocityFESpace.fe().nbFEDof(), nDimensions ),
         M_blockPreconditioner    ( ),
-        M_wLoc                   ( M_velocityFESpace.fe().nbNode, nDimensions ),
-        M_uLoc                   ( M_velocityFESpace.fe().nbNode, nDimensions ),
+        M_wLoc                   ( M_velocityFESpace.fe().nbFEDof(), nDimensions ),
+        M_uLoc                   ( M_velocityFESpace.fe().nbFEDof(), nDimensions ),
         M_un                     ( new vector_Type(M_localMap) )
 {
     M_stabilization = ( &M_velocityFESpace.refFE() == &M_pressureFESpace.refFE() );
@@ -1331,19 +1331,19 @@ updateSystem( const Real         alpha,
             UInt elementID = M_velocityFESpace.fe().currentLocalId();
             // Non linear term, Semi-implicit approach
             // M_elementRightHandSide contains the velocity values in the nodes
-            for ( UInt iNode = 0 ; iNode < M_velocityFESpace.fe().nbNode ; iNode++ )
+            for ( UInt iNode = 0 ; iNode < M_velocityFESpace.fe().nbFEDof() ; iNode++ )
             {
                 UInt iLocal = M_velocityFESpace.fe().patternFirst( iNode );
                 for ( UInt iComponent = 0; iComponent < numVelocityComponent; ++iComponent )
                 {
                     UInt iGlobal = M_velocityFESpace.dof().localToGlobal( elementID, iLocal + 1 )
                                    + iComponent * dim_u();
-                    M_elementRightHandSide.vec() [ iLocal + iComponent * M_velocityFESpace.fe().nbNode ]
+                    M_elementRightHandSide.vec() [ iLocal + iComponent * M_velocityFESpace.fe().nbFEDof() ]
                     = betaVectorRepeated[iGlobal]; // BASEINDEX + 1
 
-                    M_uLoc.vec() [ iLocal + iComponent * M_velocityFESpace.fe().nbNode ]
+                    M_uLoc.vec() [ iLocal + iComponent * M_velocityFESpace.fe().nbFEDof() ]
                     = unRepeated(iGlobal);
-                    M_wLoc.vec() [ iLocal + iComponent * M_velocityFESpace.fe().nbNode ]
+                    M_wLoc.vec() [ iLocal + iComponent * M_velocityFESpace.fe().nbFEDof() ]
                     = unRepeated(iGlobal) - betaVectorRepeated(iGlobal);
                 }
             }
