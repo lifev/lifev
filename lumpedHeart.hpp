@@ -33,14 +33,14 @@
 #include <life/lifecore/GetPot.hpp>
 #include <life/lifesolver/FSISolver.hpp>
 #include <life/lifesolver/FSIOperator.hpp>
-#include <lifemc/lifesolver/BCInterface.hpp>
+#include <lifemc/lifesolver/BCInterface3D.hpp>
 
 namespace LifeV
 {
 class LumpedHeart
 {
 public:
-    typedef BCInterface< FSIOperator >                                                     bc_type;
+    typedef BCInterface3D< FSIOperator >                                                   bc_type;
     typedef FSIOperator::vector_type                                                       vector_type;
     typedef FSIOperator::vector_ptrtype                                                    vector_ptrtype;
 
