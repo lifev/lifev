@@ -1,4 +1,4 @@
-/* -*- mode: c++ -*-
+/* -*- mode: c++ -*- */
 //@HEADER
 /*
 ************************************************************************
@@ -303,7 +303,7 @@ Monolithic::computeMaxSingularValue( )
     {
         throw UNDEF_EIGENSOLVER_EXCEPTION();
     }
-    for (int i=0; i<real.size(); ++i)
+    for (UInt i=0; i<real.size(); ++i)
     {
         displayer().leaderPrint("\n real part ", real[i]);
         displayer().leaderPrint("\n imaginary part ", imaginary[i]);
@@ -361,7 +361,7 @@ void
 Monolithic::initialize( FSIOperator::fluid_type::value_type::Function const& u0,
                         FSIOperator::solid_type::value_type::Function const& p0,
                         FSIOperator::solid_type::value_type::Function const& d0,
-                        FSIOperator::solid_type::value_type::Function const& w0,
+                        FSIOperator::solid_type::value_type::Function const& /*w0*/,
                         FSIOperator::solid_type::value_type::Function const& /*w0*/ )
 {
     vector_type u(M_uFESpace->map());
@@ -410,7 +410,7 @@ iterateMonolithic(const vector_type& rhs, vector_type& step)
 
     M_linearSolver->setReusePreconditioner( (M_reusePrec) && (!M_resetPrec) );
 
-    UInt numIter = M_precPtr->solveSystem( rhs, step, M_linearSolver );
+    int numIter = M_precPtr->solveSystem( rhs, step, M_linearSolver );
 
     if (numIter < 0)
     {
@@ -525,6 +525,7 @@ int Monolithic::setupBlockPrec( )
          M_precPtr->replace_matrix(M_fluidBlock, 1);
          M_precPtr->replace_matrix(M_solidBlockPrec, 0);
      }
+     return EXIT_SUCCESS;
 }
 
 void

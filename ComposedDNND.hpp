@@ -140,8 +140,8 @@ public:
         @param data GetPot object reading the text data file
         @param section string specifying the path in the data file where to find the options for the operator
      */
-    void setDataFromGetPot( const GetPot&      dataFile,
-                            const std::string& section ){}
+    void setDataFromGetPot( const GetPot&      /*dataFile*/,
+                            const std::string& /*section*/ ){}
 
     //! Computes the coupling
     /*!

@@ -1,4 +1,4 @@
-/* -*- mode: c++ -*-
+/* -*- mode: c++ -*- */
 //@HEADER
 /*
 *******************************************************************************
@@ -376,7 +376,7 @@ public:
     //    const boost::shared_ptr<EpetraMap>& monolithicMap() {return M_monolithicMap;}
 
     //!get the total dimension of the FS interface
-    const UInt getDimInterface() const {return nDimensions*M_monolithicMatrix->getInterface();}
+    UInt getDimInterface() const {return nDimensions*M_monolithicMatrix->getInterface();}
 
     //! Returns the solution at the previous time step
     vector_ptrtype const&       un(){return M_un;}
@@ -385,7 +385,7 @@ public:
     //bool const isFullMonolithic(){return M_fullMonolithic;}
 
     //! Returns the offset assigned to the solid block
-    UInt const getOffset(){return M_offset;}
+    UInt  getOffset() const {return M_offset;}
 
 
     //!Get the solid displacement from the solution M_un

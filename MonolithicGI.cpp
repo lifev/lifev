@@ -250,7 +250,7 @@ MonolithicGI::applyBoundaryConditions()
 
 void MonolithicGI::solveJac(vector_type       &_step,
                             const vector_type &_res,
-                            const Real       _linearRelTol)
+                            const Real       /*_linearRelTol*/)
 {
 
     setupBlockPrec( );
@@ -397,7 +397,7 @@ void MonolithicGI::shapeDerivatives(matrixPtr_Type sdMatrix, const vector_type& 
 
 
 void
-MonolithicGI::assembleMeshBlock(UInt iter)
+MonolithicGI::assembleMeshBlock(UInt /*iter*/)
 {
     M_meshBlock.reset(new matrix_Type(*M_monolithicMap));
     M_meshMotion->setMatrix(M_meshBlock);

@@ -191,7 +191,7 @@ public:
       this method is deprecated, it is implemented for compatibility with the base class
       \param Mat replacing matrix
      */
-    void replace_coupling( const matrixPtr_Type& Mat, UInt /*index*/)
+    void replace_coupling( const matrixPtr_Type& /*Mat*/, UInt /*index*/)
     {
         // not used for matrices (only for preconditioners)
         /*M_coupling = Mat;*/

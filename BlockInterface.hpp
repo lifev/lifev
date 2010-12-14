@@ -95,6 +95,8 @@ public:
             M_bch(),
             M_blocks(),
             M_FESpace(),
+            M_offset(),
+            M_numerationInterface(),
             M_comm()
     {}
 
@@ -151,7 +153,7 @@ public:
      */
     virtual void addToCoupling( const matrixPtr_Type& Mat, UInt position ) =0;
 
-    virtual void setRecompute(UInt position, bool flag) {assert(false);}
+    virtual void setRecompute(UInt /*position*/, bool /*flag*/) {assert(false);}
 
     //! replaces a block
     /*!
@@ -242,14 +244,14 @@ public:
     /*!
       (only used if the operator is a preconditioner)
      */
-    virtual void replace_precs ( const epetra_operator_ptrtype& Mat, UInt index)
+    virtual void replace_precs ( const epetra_operator_ptrtype& /*Mat*/, UInt /*index*/)
     {ERROR_MSG("this method should not be implemented");}
 
     //!pushes back a block preconditioner
     /*!
       (only used if the operator is a preconditioner)
      */
-    virtual void push_back_precs (const epetra_operator_ptrtype& Mat)
+    virtual void push_back_precs (const epetra_operator_ptrtype& /*Mat*/)
     {ERROR_MSG("this method should not be implemented");}
     //@}
 
@@ -259,7 +261,7 @@ public:
       \param bch: input BCHandler to replace
       \param position: position
      */
-    virtual void replace_bch(bchandler_ptrtype& bch, UInt position) {};
+    virtual void replace_bch(bchandler_ptrtype& /*bch*/, UInt /*position*/) {};
 
     //!Applies the correspondent boundary conditions to every block
     /*!
@@ -308,7 +310,7 @@ public:
     /*!
       Applies the robin preconditioners when needed, otherwise does nothing
      */
-    virtual void setRobin(matrixPtr_Type& mat, vector_ptrtype& rhs){}
+    virtual void setRobin(matrixPtr_Type& /*mat*/, vector_ptrtype& /*rhs*/){}
 
 
     //! builds the coupling matrix.
@@ -433,7 +435,7 @@ protected:
     /*!
       Everything (but the boundary conditions) must have been set before calling this
      */
-    virtual void blockAssembling(const UInt k) {}
+    virtual void blockAssembling(const UInt /*k*/) {}
 
     //!swaps two boost::shared_ptr. The tamplate argument of the shared_ptr is templated
     /*!
@@ -457,8 +459,8 @@ protected:
     //! @name Protected Members
     //@{
     //ComposedOperator<Epetra_Operator>                      M_blocks;
-    std::vector<matrixPtr_Type>                                  M_blocks;
     std::vector<bchandler_ptrtype>                               M_bch;
+    std::vector<matrixPtr_Type>                                  M_blocks;
     std::vector<fespace_ptrtype>                                 M_FESpace;
     std::vector<UInt>                                            M_offset;
     vector_ptrtype                                               M_numerationInterface;

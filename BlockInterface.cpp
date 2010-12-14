@@ -61,7 +61,7 @@ void BlockInterface::couplingMatrix(matrixPtr_Type & bigMatrix,
 
     if (flag-16>=0)//coupling the mesh in FSI
     {
-        UInt interface( numerationInterface->getMap().getMap( Unique )->NumGlobalElements() );
+        //UInt interface( numerationInterface->getMap().getMap( Unique )->NumGlobalElements() );
         UInt solidFluidInterface( offset[2] );
         std::map<ID, ID>::const_iterator ITrow;
         for ( UInt dim = 0; dim < nDimensions; ++dim )
@@ -162,7 +162,7 @@ BlockInterface::robinCoupling( matrixPtr_Type& matrix,
                                Real&  alphas,
                                UInt  coupling,
                                const BlockInterface::fespace_ptrtype& FESpace1,
-                               const UInt& offset1,
+                               const UInt& /*offset1*/,
                                const BlockInterface::fespace_ptrtype& FESpace2,
                                const UInt& offset2,
                                const std::map<ID, ID>& locDofMap,
@@ -173,7 +173,7 @@ BlockInterface::robinCoupling( matrixPtr_Type& matrix,
     UInt totalSize(offset2+FESpace2->map().getMap(Unique)->NumGlobalElements());
 
 
-    if (coupling-4 >= 0)
+    if (((Int)coupling)-4 >= 0)
     {
         for ( ITrow = locDofMap.begin(); ITrow != locDofMap.end() ; ++ITrow)
         {
@@ -187,7 +187,7 @@ BlockInterface::robinCoupling( matrixPtr_Type& matrix,
         }
         coupling -= 4;
     }
-    if (coupling-2 >= 0)
+    if (((Int)coupling-2) >= 0)
     {
         for ( ITrow = locDofMap.begin(); ITrow != locDofMap.end() ; ++ITrow)
         {
@@ -201,7 +201,7 @@ BlockInterface::robinCoupling( matrixPtr_Type& matrix,
         }
         coupling -= 2;
     }
-    if (coupling-1 >= 0)
+    if (((Int)coupling)-1 >= 0)
     {
         for ( ITrow = locDofMap.begin(); ITrow != locDofMap.end() ; ++ITrow)
         {
