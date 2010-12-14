@@ -1,27 +1,82 @@
 This library is a joint effort of several people between EPFL (CMCS),
-Politecnico (MOX) and INRIA (BANG).
+Politecnico (MOX) and Emory University (ECM2).
 
 * Active Developers:
 ====================
 
-In alphabetical order:
+In random order:
 
-AM   :: A.   Moura
-AV   :: A.   Veneziani
-CP   :: C.   Prud'homme <christophe.prudhomme@epfl.ch>
-CW   :: C.   Winkelmann <christoph.winkelmann@epfl.ch>
-DADP :: D.A. Di Pietro 
-GF   :: G.   Fourestey
-JFG  :: J.F. Gerbeau
-LF   :: L.   Formaggia
-MF   :: M.   Fernandez
-MM   :: M.   Meneghin
-MP   :: M.   Prosi
-SD   :: S.   Deparis
-VM   :: V.   Martin
+Project Managers:
+
+Simone Deparis
+Luca Formaggia
+Tiziano Passerini
+
+Developers:
+
+Alessandro Melani
+Alessandro Veneziani
+Alessio Fumagalli
+Alexandra Moura
+Alexis Aposporidis
+Andrea Manzoni
+Andreas Fischle
+Antonio Cervone
+Carlo de Falco
+christian vergara
+Claudia Colciago
+Cristiano Malossi
+fabio nobile
+Federico Bonelli
+gianmarco mengaldo
+Gilles Fourestey
+Gwenol Grandperrin
+Jean Bonnemain
+Julian Tercero Becerra Sagredo
+laura cattaneo
+Laura Iapichino
+Lorenzo Tamellini
+Luca Bertagna
+Luca Gerardo Giorda
+Lucia Mirabella
+Marco Discacciati
+Mariarita de Luca
+Marta D'Elia
+Matteo Astorino
+Matteo Lesinigo
+Matteo Pozzoli
+mauro perego
+Michel Kern
+Nicola Parolini
+Nur Fadel
+Paolo Crosetto
+Paolo Ferrandi
+Radu Popescu
+Ricardo Ruiz Baier
+Samuel Quinodoz
+Sara Minisini
+Simne Rossi
+Simone Cassani
+Simone Pezzuto
+Susanna Carcano
+Toni Lassila
+Tricerri Paolo
+Umberto Emanuele Villa
+Zhen Wang
 
 * Former Developers
 ===================
 
+A.   Moura
+C.   Prud'homme <christophe.prudhomme@epfl.ch>
+C.   Winkelmann <christoph.winkelmann@epfl.ch>
+D.A. Di Pietro
+J.F. Gerbeau
+M.   Fernandez
+M.   Meneghin
+M.   Prosi
+V.   Martin
 A. Gauthier
 D. Mastalli
+
+And of Course INRIA (REO).
