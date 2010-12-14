@@ -79,13 +79,13 @@ public:
     //@{
 
     //! Constructor
-    OneDimensionalModel_BCHandler();
+    explicit OneDimensionalModel_BCHandler();
 
     //! Copy constructor
     /*!
      * @param BCH OneDimensionalModel_BCHandler
      */
-    OneDimensionalModel_BCHandler( const OneDimensionalModel_BCHandler& BCH );
+    explicit OneDimensionalModel_BCHandler( const OneDimensionalModel_BCHandler& BCH );
 
     //! Destructor
     virtual ~OneDimensionalModel_BCHandler() {}
@@ -127,9 +127,9 @@ public:
     //! @name Get Methods
     //@{
 
-    const BC_PtrType& BC( const OneD_BCSide& side );
+    const BC_PtrType& BC( const OneD_BCSide& side ) { return M_boundary[side]; }
 
-    const bool& BCReady( const OneD_BCSide& side, const OneD_BCLine& line );
+    const bool& BCReady( const OneD_BCSide& side, const OneD_BCLine& line ) {     return M_boundarySet[side][line]; }
 
     //@}
 

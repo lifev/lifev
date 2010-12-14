@@ -214,19 +214,5 @@ OneDimensionalModel_BCHandler::setInternalNode( const OneD_BCSide& side )
     M_boundary[ side ]->setInternalFlag( true );
 }
 
-// ===================================================
-// Get Methods
-// ===================================================
-const OneDimensionalModel_BCHandler::BC_PtrType&
-OneDimensionalModel_BCHandler::BC( const OneD_BCSide& side )
-{
-    return M_boundary[side];
-}
-
-const bool&
-OneDimensionalModel_BCHandler::BCReady( const OneD_BCSide& side, const OneD_BCLine& line )
-{
-    return M_boundarySet[side][line];
-}
 
 }

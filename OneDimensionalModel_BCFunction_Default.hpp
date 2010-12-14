@@ -87,13 +87,13 @@ public:
     //@{
 
     //! Constructor
-    OneDimensionalModel_BCFunction_Default( const OneD_BCSide& side, const OneD_BC& bcType );
+    explicit OneDimensionalModel_BCFunction_Default( const OneD_BCSide& side, const OneD_BC& bcType );
 
     //! Copy constructor
     /*!
      * @param BCF_Default OneDimensionalModel_BCFunction_Default
      */
-    OneDimensionalModel_BCFunction_Default( const OneDimensionalModel_BCFunction_Default& BCF_Default );
+    explicit OneDimensionalModel_BCFunction_Default( const OneDimensionalModel_BCFunction_Default& BCF_Default );
 
     //! Destructor
     virtual ~OneDimensionalModel_BCFunction_Default() {}
@@ -111,7 +111,7 @@ public:
     //! @name Set Methods
     //@{
 
-    void setSolution( const Solution_PtrType& solution );
+    void setSolution( const Solution_PtrType& solution ) { M_Solution = solution; }
 
     void setFluxSource( const Flux_PtrType& flux, const Source_PtrType& source );
 
@@ -151,13 +151,13 @@ public:
     //@{
 
     //! Constructor
-    OneDimensionalModel_BCFunction_Riemann( const OneD_BCSide& side, const OneD_BC& bcType );
+    explicit OneDimensionalModel_BCFunction_Riemann( const OneD_BCSide& side, const OneD_BC& bcType );
 
     //! Copy constructor
     /*!
      * @param BCF_Riemann OneDimensionalModel_BCFunction_Riemann
      */
-    OneDimensionalModel_BCFunction_Riemann( const OneDimensionalModel_BCFunction_Riemann& BCF_Riemann );
+    explicit OneDimensionalModel_BCFunction_Riemann( const OneDimensionalModel_BCFunction_Riemann& BCF_Riemann );
 
     //! Destructor
     virtual ~OneDimensionalModel_BCFunction_Riemann() {}
@@ -216,13 +216,13 @@ public:
     //@{
 
     //! Constructor
-    OneDimensionalModel_BCFunction_Compatibility( const OneD_BCSide& side,  const OneD_BC& bcType );
+    explicit OneDimensionalModel_BCFunction_Compatibility( const OneD_BCSide& side,  const OneD_BC& bcType );
 
     //! Copy constructor
     /*!
      * @param BCF_Compatibility OneDimensionalModel_BCFunction_Compatibility
      */
-    OneDimensionalModel_BCFunction_Compatibility( const OneDimensionalModel_BCFunction_Compatibility& BCF_Compatibility );
+    explicit OneDimensionalModel_BCFunction_Compatibility( const OneDimensionalModel_BCFunction_Compatibility& BCF_Compatibility );
 
     //! Destructor
     virtual ~OneDimensionalModel_BCFunction_Compatibility() {}
@@ -233,7 +233,7 @@ public:
     //! @name Methods
     //@{
 
-    virtual Real operator() ( const Real& time, const Real& timeStep );
+    virtual Real operator() ( const Real& /*time*/, const Real& timeStep ) { return computeRHS( timeStep ); }
 
     //@}
 
@@ -300,13 +300,13 @@ public:
     //@{
 
     //! Constructor
-    OneDimensionalModel_BCFunction_Absorbing( const OneD_BCSide& side,  const OneD_BC& bcType );
+    explicit OneDimensionalModel_BCFunction_Absorbing( const OneD_BCSide& bcSide, const OneD_BC& bcType ) : super( bcSide, bcType ) {}
 
     //! Copy constructor
     /*!
      * @param BCF_Absorbing OneDimensionalModel_BCFunction_Absorbing
      */
-    OneDimensionalModel_BCFunction_Absorbing( const OneDimensionalModel_BCFunction_Absorbing& BCF_Absorbing );
+    explicit OneDimensionalModel_BCFunction_Absorbing( const OneDimensionalModel_BCFunction_Absorbing& BCF_Absorbing ) : super( BCF_Absorbing ) {}
 
     //! Destructor
     virtual ~OneDimensionalModel_BCFunction_Absorbing() {}
@@ -324,7 +324,7 @@ public:
 protected:
 
 
-   virtual void resistance( Real& resistance );
+   virtual void resistance( Real& /*resistance*/ ) { /*Do nothing => absorbing!*/ }
 
 };
 
@@ -354,14 +354,13 @@ public:
     //@{
 
     //! Constructor
-    OneDimensionalModel_BCFunction_Resistance( const OneD_BCSide& side,  const OneD_BC& bcType,
-                                               const Real& resistance );
+    explicit OneDimensionalModel_BCFunction_Resistance( const OneD_BCSide& side,  const OneD_BC& bcType, const Real& resistance );
 
     //! Copy constructor
     /*!
      * @param BCF_Resistance OneDimensionalModel_BCFunction_Resistance
      */
-    OneDimensionalModel_BCFunction_Resistance( const OneDimensionalModel_BCFunction_Resistance& BCF_Resistance );
+    explicit OneDimensionalModel_BCFunction_Resistance( const OneDimensionalModel_BCFunction_Resistance& BCF_Resistance );
 
     //! Destructor
     virtual ~OneDimensionalModel_BCFunction_Resistance() {}
@@ -370,7 +369,7 @@ public:
 
 protected:
 
-    void resistance( Real& resistance );
+    void resistance( Real& resistance ) { resistance = M_resistance; }
 
     Real M_resistance;
 
@@ -422,17 +421,17 @@ public:
     //@{
 
     //! Constructor
-    OneDimensionalModel_BCFunction_Windkessel3( const OneD_BCSide&  side,        const OneD_BC&        bcType,
-                                                const Real&         resistance1, const Real&           resistance2,
-                                                const Real&         compliance,
-                                                const bool&         absorbing1 = false,
-                                                const Real&         venousPressure = 6666. );
+    explicit OneDimensionalModel_BCFunction_Windkessel3( const OneD_BCSide& side, const OneD_BC& bcType,
+                                                         const Real& resistance1, const Real& resistance2,
+                                                         const Real& compliance,
+                                                         const bool& absorbing1 = false,
+                                                         const Real& venousPressure = 6666. );
 
     //! Copy constructor
     /*!
      * @param BCF_Resistance OneDimensionalModel_BCFunction_Resistance
      */
-    OneDimensionalModel_BCFunction_Windkessel3( const OneDimensionalModel_BCFunction_Windkessel3& BCF_Windkessel3 );
+    explicit OneDimensionalModel_BCFunction_Windkessel3( const OneDimensionalModel_BCFunction_Windkessel3& BCF_Windkessel3 );
 
     //! Destructor
     virtual ~OneDimensionalModel_BCFunction_Windkessel3() {}

@@ -78,12 +78,6 @@ OneDimensionalModel_BCFunction_Default::operator() ( const Real& /*time*/, const
 // Set Methods
 // ===================================================
 void
-OneDimensionalModel_BCFunction_Default::setSolution( const Solution_PtrType& solution )
-{
-    M_Solution = solution;
-}
-
-void
 OneDimensionalModel_BCFunction_Default::setFluxSource( const Flux_PtrType& flux, const Source_PtrType& source )
 {
     M_Flux   = flux;
@@ -186,15 +180,6 @@ OneDimensionalModel_BCFunction_Compatibility::OneDimensionalModel_BCFunction_Com
         M_deltaLeftEigenvector1         ( BCF_Compatibility.M_deltaLeftEigenvector1 ),
         M_deltaLeftEigenvector2         ( BCF_Compatibility.M_deltaLeftEigenvector2 )
 {
-}
-
-// ===================================================
-// Methods
-// ===================================================
-Real
-OneDimensionalModel_BCFunction_Compatibility::operator()( const Real& /*time*/, const Real& timeStep )
-{
-    return computeRHS( timeStep );
 }
 
 // ===================================================
@@ -338,20 +323,6 @@ OneDimensionalModel_BCFunction_Compatibility::computeCFL( const Real& eigenvalue
     return std::abs(cfl);
 }
 
-
-
-// ===================================================
-// Constructors & Destructor
-// ===================================================
-OneDimensionalModel_BCFunction_Absorbing::OneDimensionalModel_BCFunction_Absorbing( const OneD_BCSide&     bcSide,
-        const OneD_BC&         bcType ):
-        super                           ( bcSide, bcType )
-{}
-
-OneDimensionalModel_BCFunction_Absorbing::OneDimensionalModel_BCFunction_Absorbing( const OneDimensionalModel_BCFunction_Absorbing& BCF_Absorbing ) :
-        super                           ( BCF_Absorbing )
-{}
-
 // ===================================================
 // Methods
 // ===================================================
@@ -400,11 +371,11 @@ OneDimensionalModel_BCFunction_Absorbing::operator()( const Real& /*time*/, cons
 // ===================================================
 // Protected Methods
 // ===================================================
-void
-OneDimensionalModel_BCFunction_Absorbing::resistance( Real& /*resistance*/ )
+/*void
+OneDimensionalModel_BCFunction_Absorbing::resistance( Real& resistance )
 {
     //Do nothing => absorbing!
-}
+}*/
 
 
 
@@ -422,18 +393,6 @@ OneDimensionalModel_BCFunction_Resistance::OneDimensionalModel_BCFunction_Resist
         super                           ( BCF_Resistance ),
         M_resistance                    ( BCF_Resistance.M_resistance )
 {}
-
-// ===================================================
-// Protected Methods
-// ===================================================
-void
-OneDimensionalModel_BCFunction_Resistance::resistance( Real& resistance )
-{
-    resistance = M_resistance;
-}
-
-
-
 // ===================================================
 // Constructors & Destructor
 // ===================================================

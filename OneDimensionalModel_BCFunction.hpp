@@ -66,16 +66,16 @@ public:
     //@{
 
     //! Constructor
-    OneDimensionalModel_BCFunction();
+    explicit OneDimensionalModel_BCFunction() : M_function  () {}
 
     //! Constructor by function
     /*!
       @param function the user defined function
     */
-    OneDimensionalModel_BCFunction( const Function_Type& function );
+    explicit OneDimensionalModel_BCFunction( const Function_Type& function ) : M_function( function ) {}
 
     //! Copy constructor
-    OneDimensionalModel_BCFunction( const OneDimensionalModel_BCFunction& BCFunction );
+    explicit OneDimensionalModel_BCFunction( const OneDimensionalModel_BCFunction& BCFunction ) : M_function  ( BCFunction.M_function ) {}
 
     //! Destructor
     virtual ~OneDimensionalModel_BCFunction() {}
@@ -88,7 +88,7 @@ public:
 
     OneDimensionalModel_BCFunction& operator= ( const OneDimensionalModel_BCFunction& BCFunction );
 
-    Real operator() ( const Real& time, const Real& timeStep = 0. ) const;
+    Real operator() ( const Real& time, const Real& timeStep = 0. ) const { return M_function( time, timeStep ); }
 
     //@}
 
@@ -100,7 +100,7 @@ public:
     /*!
       @param function the user defined function
     */
-    void setFunction( const Function_Type& function );
+    void setFunction( const Function_Type& function ) { M_function = function; }
 
     //@}
 
@@ -112,7 +112,7 @@ public:
     /*!
       @return the user defined function
     */
-    const Function_Type& Function() const;
+    const Function_Type& Function() const { return M_function; }
 
     //@}
 

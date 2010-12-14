@@ -112,28 +112,6 @@ OneDimensionalModel_BC::applyBC( const Real&             time,
     Debug(6311) << "[OneDimensionalModel_BC::applyBC] on side " << M_bcSide
     << " imposing [ A, Q ] = [ " << BC[0] << ", " << BC[1] << " ]\n";
 }
-
-// ===================================================
-// Set Methods
-// ===================================================
-void
-OneDimensionalModel_BC::setType( const OneD_BCLine& line, const OneD_BC& bc )
-{
-    M_bcType[line] = bc;
-}
-
-void
-OneDimensionalModel_BC::setBCFunction( const OneD_BCLine& line, const BCFunction_Type& BCFunction )
-{
-    M_bcFunction[line] = BCFunction; //FactoryClone_OneDimensionalModel_BCFunction::instance().createObject( &BCFunction );
-}
-
-void
-OneDimensionalModel_BC::setInternalFlag( const bool& flag )
-{
-    M_isInternal = flag;
-}
-
 /*
 void
 OneDimensionalModel_BC::setMatrixRow( const OneD_BCLine& line, const Container2D_Type& matrixrow )
@@ -141,28 +119,6 @@ OneDimensionalModel_BC::setMatrixRow( const OneD_BCLine& line, const Container2D
     M_bcMatrix[line] = matrixrow;
 }
 */
-
-// ===================================================
-// Get Methods
-// ===================================================
-const OneD_BC&
-OneDimensionalModel_BC::type( const OneD_BCLine& line )
-{
-    return M_bcType[line];
-}
-
-OneDimensionalModel_BC::BCFunction_Type&
-OneDimensionalModel_BC::BCFunction( const OneD_BCLine& line )
-{
-    return M_bcFunction[line]; //FactoryClone_OneDimensionalModel_BCFunction::instance().createObject( &rhs );
-}
-
-const bool&
-OneDimensionalModel_BC::isInternal()
-{
-    return M_isInternal;
-}
-
 // ===================================================
 // Private Methods
 // ===================================================

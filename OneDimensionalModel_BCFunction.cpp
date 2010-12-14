@@ -42,22 +42,6 @@
 
 namespace LifeV
 {
-
-// ===================================================
-// Constructors & Destructor
-// ===================================================
-OneDimensionalModel_BCFunction::OneDimensionalModel_BCFunction() :
-        M_function  ()
-{}
-
-OneDimensionalModel_BCFunction::OneDimensionalModel_BCFunction( const Function_Type& function ) :
-        M_function  ( function )
-{}
-
-OneDimensionalModel_BCFunction::OneDimensionalModel_BCFunction( const OneDimensionalModel_BCFunction& BCFunction ) :
-        M_function  ( BCFunction.M_function )
-{}
-
 // ===================================================
 // Operators
 // ===================================================
@@ -72,28 +56,5 @@ OneDimensionalModel_BCFunction::operator=( const OneDimensionalModel_BCFunction&
     return *this;
 }
 
-Real
-OneDimensionalModel_BCFunction::operator()( const Real& time, const Real& timeStep ) const
-{
-    return M_function( time, timeStep );
-}
-
-// ===================================================
-// Set Methods
-// ===================================================
-void
-OneDimensionalModel_BCFunction::setFunction( const Function_Type& function )
-{
-    M_function = function;
-}
-
-// ===================================================
-// Get Methods
-// ===================================================
-const OneDimensionalModel_BCFunction::Function_Type&
-OneDimensionalModel_BCFunction::Function() const
-{
-    return M_function;
-}
 
 }

@@ -77,13 +77,13 @@ public:
     //@{
 
     //! Constructor
-    OneDimensionalModel_BC( const OneD_BCSide& side );
+    explicit OneDimensionalModel_BC( const OneD_BCSide& side );
 
     //! Copy constructor
     /*!
      * @param BC OneDimensionalModel_BC
      */
-    OneDimensionalModel_BC( const OneDimensionalModel_BC& BC );
+    explicit OneDimensionalModel_BC( const OneDimensionalModel_BC& BC );
 
     //! Destructor
     virtual ~OneDimensionalModel_BC() {}
@@ -107,11 +107,11 @@ public:
     //! @name Set Methods
     //@{
 
-    void setType( const OneD_BCLine& line, const OneD_BC& bc );
+    void setType( const OneD_BCLine& line, const OneD_BC& bc ) { M_bcType[line] = bc; }
 
-    void setBCFunction( const OneD_BCLine& line, const BCFunction_Type& rhs );
+    void setBCFunction( const OneD_BCLine& line, const BCFunction_Type& rhs ) { M_bcFunction[line] = rhs; }
 
-    void setInternalFlag( const bool& flag );
+    void setInternalFlag( const bool& flag ) { M_isInternal = flag; }
 
     //void setMatrixRow( const OneD_BCLine& line, const container2D_Type& matrixrow );
 
@@ -121,11 +121,11 @@ public:
     //! @name Get Methods
     //@{
 
-    const OneD_BC& type( const OneD_BCLine& line );
+    const OneD_BC& type( const OneD_BCLine& line ) { return M_bcType[line]; }
 
-    BCFunction_Type& BCFunction( const OneD_BCLine& line );
+    BCFunction_Type& BCFunction( const OneD_BCLine& line ) { return M_bcFunction[line]; }
 
-    const bool& isInternal();
+    const bool& isInternal() { return M_isInternal; }
 
     //@}
 
