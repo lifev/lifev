@@ -67,11 +67,6 @@ class DataHyperbolic
 {
 public:
 
-    inline Real __attribute__ ((__deprecated__)) getCFLrelax () const
-    {
-        return getCFLRelaxParameter ();
-    }
-
     //! @name Public Types
     //@{
 
@@ -209,6 +204,11 @@ public:
     }
 
     //@}
+
+    inline Real __attribute__ ((__deprecated__)) getCFLrelax () const
+    {
+        return getCFLRelaxParameter ();
+    }
 
 protected:
 

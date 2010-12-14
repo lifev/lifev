@@ -157,38 +157,6 @@ public:
 
     //@}
 
-    inline void __attribute__ ((__deprecated__)) setBC ( bchandler_Type& bcHandler )
-    {
-        // Deprecated method
-        setBoundaryCondition( bcHandler );
-    }
-
-    inline bool __attribute__ ((__deprecated__)) BCset () const
-    {
-        return isBoundaryConditionSet();
-    }
-
-    inline  bchandlerPtr_Type& __attribute__ ((__deprecated__)) bcHandler ()
-    {
-        return boundaryConditionHandler();
-    }
-
-    inline EpetraMap __attribute__ ((__deprecated__)) const& getMap () const
-    {
-        return map();
-    }
-
-    inline Displayer __attribute__ ((__deprecated__))const & getDisplayer() const
-    {
-        return displayer();
-    }
-
-    void __attribute__ ((__deprecated__)) solveOneStep()
-    {
-         solveOneTimeStep();
-    }
-
-
     //! @name Constructors & Destructor
     //@{
 
@@ -349,6 +317,37 @@ public:
     }
 
     //@}
+
+    inline void __attribute__ ((__deprecated__)) setBC ( bchandler_Type& bcHandler )
+    {
+        // Deprecated method
+        setBoundaryCondition( bcHandler );
+    }
+
+    inline bool __attribute__ ((__deprecated__)) BCset () const
+    {
+        return isBoundaryConditionSet();
+    }
+
+    inline  bchandlerPtr_Type& __attribute__ ((__deprecated__)) bcHandler ()
+    {
+        return boundaryConditionHandler();
+    }
+
+    inline EpetraMap __attribute__ ((__deprecated__)) const& getMap () const
+    {
+        return map();
+    }
+
+    inline Displayer __attribute__ ((__deprecated__))const & getDisplayer() const
+    {
+        return displayer();
+    }
+
+    void __attribute__ ((__deprecated__)) solveOneStep()
+    {
+         solveOneTimeStep();
+    }
 
 protected:
 

@@ -64,11 +64,6 @@ class importer
 {
 public:
 
-    inline void __attribute__ ((__deprecated__)) setFilename( std::string const& fileName )
-    {
-        setFileName( fileName );
-    }
-
     //! @name Constructor & Destructor
     //@{
 
@@ -173,6 +168,11 @@ public:
     }
 
     //@}
+
+    inline void __attribute__ ((__deprecated__)) setFilename( std::string const& fileName )
+    {
+        setFileName( fileName );
+    }
 
 private:
 
