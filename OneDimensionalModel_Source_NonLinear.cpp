@@ -44,18 +44,6 @@
 
 namespace LifeV
 {
-
-// ===================================================
-// Constructors & Destructor
-// ===================================================
-OneDimensionalModel_Source_NonLinear::OneDimensionalModel_Source_NonLinear() :
-    super    ()
-{}
-
-OneDimensionalModel_Source_NonLinear::OneDimensionalModel_Source_NonLinear( const physicsPtr_Type physics ) :
-    super    ( physics )
-{}
-
 // ===================================================
 // Methods
 // ===================================================

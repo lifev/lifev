@@ -45,19 +45,6 @@
 
 namespace LifeV
 {
-
-// ===================================================
-// Constructors
-// ===================================================
-OneDimensionalModel_Physics_Linear::OneDimensionalModel_Physics_Linear()
-{
-}
-
-OneDimensionalModel_Physics_Linear::OneDimensionalModel_Physics_Linear( const dataPtr_Type data ) :
-    super   ( data )
-{
-}
-
 // ===================================================
 // Methods
 // ===================================================

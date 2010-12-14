@@ -44,33 +44,5 @@ namespace LifeV
 
 std::map< std::string, OneDimensionalModel_FluxTypes > OneDimensionalModel_FluxMap;
 
-// ===================================================
-// Constructors & Destructor
-// ===================================================
-OneDimensionalModel_Flux::OneDimensionalModel_Flux() :
-    M_physics   ()
-{}
-
-OneDimensionalModel_Flux::OneDimensionalModel_Flux( const physicsPtr_Type physics ) :
-    M_physics   ( physics )
-{}
-
-// ===================================================
-// Set Methods
-// ===================================================
-void
-OneDimensionalModel_Flux::setPhysics( const physicsPtr_Type& physics )
-{
-    M_physics = physics;
-}
-
-// ===================================================
-// Get Methods
-// ===================================================
-OneDimensionalModel_Flux::physicsPtr_Type
-OneDimensionalModel_Flux::physics() const
-{
-    return M_physics;
-}
 
 }

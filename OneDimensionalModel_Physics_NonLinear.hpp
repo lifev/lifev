@@ -74,9 +74,9 @@ public :
     //@{
 
     //! Constructor
-    OneDimensionalModel_Physics_NonLinear();
+    explicit OneDimensionalModel_Physics_NonLinear() : super() {}
 
-    OneDimensionalModel_Physics_NonLinear( const dataPtr_Type data );
+    explicit OneDimensionalModel_Physics_NonLinear( const dataPtr_Type data ) : super( data ) {}
 
     //! Destructor
     virtual ~OneDimensionalModel_Physics_NonLinear() {}

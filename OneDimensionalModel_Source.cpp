@@ -42,33 +42,5 @@ namespace LifeV
 
 std::map< std::string, OneDimensionalModel_SourceTypes > OneDimensionalModel_SourceMap;
 
-// ===================================================
-// Constructors & Destructor
-// ===================================================
-OneDimensionalModel_Source::OneDimensionalModel_Source() :
-    M_physics   ()
-{}
-
-OneDimensionalModel_Source::OneDimensionalModel_Source( const physicsPtr_Type physics ) :
-    M_physics   ( physics )
-{}
-
-// ===================================================
-// Set Methods
-// ===================================================
-void
-OneDimensionalModel_Source::setPhysics( const physicsPtr_Type& physics )
-{
-    M_physics = physics;
-}
-
-// ===================================================
-// Get Methods
-// ===================================================
-OneDimensionalModel_Source::physicsPtr_Type
-OneDimensionalModel_Source::physics() const
-{
-    return M_physics;
-}
 
 }

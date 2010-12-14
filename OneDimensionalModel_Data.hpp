@@ -143,7 +143,7 @@ public:
     //! @name Constructors & Destructor
     //@{
 
-    OneDimensionalModel_Data();
+    explicit OneDimensionalModel_Data();
 
     //! Destructor
     virtual ~OneDimensionalModel_Data() {}
@@ -184,35 +184,35 @@ public:
     //! @name Set Methods
     //@{
 
-    void setPostprocessingDirectory( const std::string& directory );
+    void setPostprocessingDirectory( const std::string& directory ) {  M_postprocessingDirectory = directory; }
 
-    void setPostprocessingFile( const std::string& file );
+    void setPostprocessingFile( const std::string& file ) { M_postprocessingFile = file; }
 
     //! Set data time container
     /*!
      * @param DataTime shared_ptr to dataTime container
      */
-    void setDataTime( const Time_PtrType DataTime );
+    void setDataTime( const Time_PtrType dataTime ) { M_time = dataTime; }
 
-    void setDensity( const Real& density );
+    void setDensity( const Real& density ) { M_density = density; }
 
-    void setViscosity( const Real& discosity );
+    void setViscosity( const Real& viscosity ) { M_viscosity = viscosity; }
 
-    void setDensityWall( const Real& densityWall );
+    void setDensityWall( const Real& densityWall ) { M_densityWall = densityWall; }
 
-    void setThickness( const Real& thickness, const UInt& i );
+    void setThickness( const Real& thickness, const UInt& i ) { M_thickness[i] = thickness; }
 
-    void setYoung( const Real& young );
+    void setYoung( const Real& young ) { M_young = young; }
 
-    void setPoisson( const Real& poisson );
+    void setPoisson( const Real& poisson ) { M_poisson = poisson; }
 
-    void setExternalPressure( const Real& externalPressure );
+    void setExternalPressure( const Real& externalPressure ) { M_externalPressure = externalPressure; }
 
-    void setArea0( const Real& area0, const UInt& i );
+    void setArea0( const Real& area0, const UInt& i ) { M_area0[i] = area0; }
 
-    void setBeta0( const Real& beta0, const UInt& i );
+    void setBeta0( const Real& beta0, const UInt& i ) { M_beta0[i] = beta0; }
 
-    void setdBeta0dz( const Real& dBeta0dz, const UInt& i );
+    void setdBeta0dz( const Real& dBeta0dz, const UInt& i ) { M_dBeta0dz[i] = dBeta0dz; }
 
     //@}
 
@@ -224,47 +224,47 @@ public:
     /*!
      * @return Physics Type
      */
-    const OneDimensionalModel_PhysicsTypes& physicsType() const;
+    const OneDimensionalModel_PhysicsTypes& physicsType() const { return M_physicsType; }
 
     //! Get the flux type
     /*!
      * @return Flux Type
      */
-    const OneDimensionalModel_FluxTypes& fluxType() const;
+    const OneDimensionalModel_FluxTypes& fluxType() const { return M_fluxType; }
 
     //! Get the source type
     /*!
      * @return Source Type
      */
-    const OneDimensionalModel_SourceTypes& sourceType() const;
+    const OneDimensionalModel_SourceTypes& sourceType() const { return M_sourceType; }
 
     //! Get data time container
     /*!
      * @return shared_ptr to dataTime container
      */
-    Time_PtrType       dataTime() const;
+    Time_PtrType dataTime() const { return M_time; }
 
-    Mesh_PtrType       mesh() const;
-    Real               length() const;
-    UInt               numberOfElements() const;
-    UInt               numberOfNodes() const;
+    Mesh_PtrType mesh() const { return M_mesh; }
+    Real length() const { return M_mesh->pointList( M_mesh->numVertices() ).x() - M_mesh->pointList( 1 ).x(); }
+    UInt numberOfElements() const { return M_mesh->numElements(); }
+    UInt numberOfNodes() const { return M_mesh->numPoints(); }
 
-    const std::string& postprocessingDirectory() const;
-    const std::string& postprocessingFile() const;
+    const std::string& postprocessingDirectory() const { return M_postprocessingDirectory; }
+    const std::string& postprocessingFile() const { return M_postprocessingFile; }
 
-    const Int&         verbose() const;
+    const Int& verbose() const { return M_verbose; }
 
-    const bool&        UW() const;
-    const bool&        inertialWall() const;
-    const bool&        viscoelasticWall() const;
-    const bool&        linearizeStringModel() const;
-    const bool&        linearizeEquations() const;
-    const bool&        longitudinalWall() const;
+    const bool& UW() const { return M_UW; }
+    const bool& inertialWall() const { return M_inertialWall; }
+    const bool& viscoelasticWall() const { return M_viscoelasticWall; }
+    const bool& linearizeStringModel() const { return M_linearizeStringModel; }
+    const bool& linearizeEquations() const { return M_linearizeEquations; }
+    const bool& longitudinalWall() const { return M_longitudinalWall; }
 
-    const bool&        fluxSecondDer() const;
+    const bool& fluxSecondDer() const { return M_fluxSecondDer; }
 
-    const Int&         DPdtSteps() const;
-    const Real&        CFLmax() const;
+    const Int& DPdtSteps() const { return M_dP_dt_steps; }
+    const Real& CFLmax() const { return M_CFLmax; }
 
 //    const OneD_Initialize& initialVariable() const;
 //    const Real&        initialValue() const;
@@ -272,57 +272,57 @@ public:
 //    const Real&        multiplier() const;
 
     // Physical Parameters
-    const Real& densityRho() const;
-    const Real& viscosity() const;
+    const Real& densityRho() const { return M_density; }
+    const Real& viscosity() const { return M_viscosity; }
 
-    const Real& densityWall() const;
-    const Real& young() const;
-    const Real& poisson() const;
+    const Real& densityWall() const { return M_densityWall; }
+    const Real& young() const { return M_young; }
+    const Real& poisson() const { return M_poisson; }
 
-    const Real& externalPressure() const;
+    const Real& externalPressure() const { return M_externalPressure; }
 
-    const Real& viscoelasticModulus() const;
-    const Real& inertialModulus() const;
+    const Real& viscoelasticModulus() const { return M_viscoelasticModulus; }
+    const Real& inertialModulus() const { return M_inertialModulus; }
     const Real& robertsonCorrection() const;
 
-    const Real& thickness( const UInt& i ) const;
-    const Real& friction() const;
+    const Real& thickness( const UInt& i ) const {  return M_thickness[i]; }
+    const Real& friction() const { return M_friction; }
 
-    const Real& area0( const UInt& i ) const;
-    const Real& alpha( const UInt& i ) const;
-    const Real& beta0( const UInt& i ) const;
-    const Real& beta1( const UInt& i ) const;
+    const Real& area0( const UInt& i ) const { return M_area0[i]; }
+    const Real& alpha( const UInt& i ) const { return M_alpha[i]; }
+    const Real& beta0( const UInt& i ) const { return M_beta0[i]; }
+    const Real& beta1( const UInt& i ) const { return M_beta1[i]; }
 
-    const Real& dArea0dz( const UInt& i ) const;
-    const Real& dAlphadz( const UInt& i ) const;
-    const Real& dBeta0dz( const UInt& i ) const;
-    const Real& dBeta1dz( const UInt& i ) const;
+    const Real& dArea0dz( const UInt& i ) const { return M_dArea0dz[i]; }
+    const Real& dAlphadz( const UInt& i ) const { return M_dAlphadz[i]; }
+    const Real& dBeta0dz( const UInt& i ) const { return M_dBeta0dz[i]; }
+    const Real& dBeta1dz( const UInt& i ) const { return M_dBeta1dz[i]; }
 
     // Jacobian perturbation parameters
-    const Real& jacobianPerturbationArea() const;
-    const Real& jacobianPerturbationFlowRate() const;
-    const Real& jacobianPerturbationPressure() const;
+    const Real& jacobianPerturbationArea() const { return M_jacobianPerturbationArea; }
+    const Real& jacobianPerturbationFlowRate() const { return M_jacobianPerturbationFlowRate; }
+    const Real& jacobianPerturbationPressure() const { return M_jacobianPerturbationPressure; }
 
     // Linear Parameters
-    const Real& flux11( const UInt& i ) const;
-    const Real& flux12( const UInt& i ) const;
-    const Real& flux21( const UInt& i ) const;
-    const Real& flux22( const UInt& i ) const;
+    const Real& flux11( const UInt& i ) const { return M_flux11[i]; }
+    const Real& flux12( const UInt& i ) const { return M_flux12[i]; }
+    const Real& flux21( const UInt& i ) const { return M_flux21[i]; }
+    const Real& flux22( const UInt& i ) const { return M_flux22[i]; }
 
-    const Real& celerity1( const UInt& i ) const;
-    const Real& celerity2( const UInt& i ) const;
+    const Real& celerity1( const UInt& i ) const { return M_celerity1[i]; }
+    const Real& celerity2( const UInt& i ) const { return M_celerity2[i]; }
 
-    const Real& leftEigenVector11( const UInt& i ) const;
-    const Real& leftEigenVector12( const UInt& i ) const;
-    const Real& leftEigenVector21( const UInt& i ) const;
-    const Real& leftEigenVector22( const UInt& i ) const;
+    const Real& leftEigenVector11( const UInt& i ) const { return M_celerity1LeftEigenvector1[i]; }
+    const Real& leftEigenVector12( const UInt& i ) const { return M_celerity1LeftEigenvector2[i]; }
+    const Real& leftEigenVector21( const UInt& i ) const { return M_celerity2LeftEigenvector1[i]; }
+    const Real& leftEigenVector22( const UInt& i ) const { return M_celerity2LeftEigenvector2[i]; }
 
-    const Real& source10( const UInt& i ) const;
-    const Real& source20( const UInt& i ) const;
-    const Real& source11( const UInt& i ) const;
-    const Real& source12( const UInt& i ) const;
-    const Real& source21( const UInt& i ) const;
-    const Real& source22( const UInt& i ) const;
+    const Real& source10( const UInt& i ) const { return M_source10[i]; }
+    const Real& source20( const UInt& i ) const { return M_source20[i]; }
+    const Real& source11( const UInt& i ) const { return M_source11[i]; }
+    const Real& source12( const UInt& i ) const { return M_source12[i]; }
+    const Real& source21( const UInt& i ) const { return M_source21[i]; }
+    const Real& source22( const UInt& i ) const { return M_source22[i]; }
 
     //@}
 

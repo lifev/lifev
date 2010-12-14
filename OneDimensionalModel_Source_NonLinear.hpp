@@ -66,9 +66,9 @@ public:
     //@{
 
     //! Constructor
-    OneDimensionalModel_Source_NonLinear();
+    explicit OneDimensionalModel_Source_NonLinear() : super() {}
 
-    OneDimensionalModel_Source_NonLinear( const physicsPtr_Type physics );
+    explicit OneDimensionalModel_Source_NonLinear( const physicsPtr_Type physics ) : super( physics ) {}
 
     //! Do nothing destructor
     virtual ~OneDimensionalModel_Source_NonLinear() {}
