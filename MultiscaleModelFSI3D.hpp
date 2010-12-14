@@ -57,7 +57,7 @@
 #include <lifemc/lifesolver/ComposedNN.hpp>
 #include <lifemc/lifesolver/ComposedDNND.hpp>
 
-#include <lifemc/lifesolver/BCInterface.hpp>
+#include <lifemc/lifesolver/BCInterface3D.hpp>
 #include <lifemc/lifesolver/MultiscaleModel.hpp>
 
 namespace LifeV
@@ -100,7 +100,7 @@ public:
 
     typedef BCHandler                                                                      bc_Type;
     typedef boost::shared_ptr< bc_Type >                                                   bcPtr_Type;
-    typedef BCInterface< FSIOperator >                                                     bcInterface_Type;
+    typedef BCInterface3D< FSIOperator >                                                   bcInterface_Type;
     typedef boost::shared_ptr< bcInterface_Type >                                          bcInterfacePtr_Type;
 
     //@}

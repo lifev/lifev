@@ -137,7 +137,7 @@ protected:
 
     //@}
 
-    boost::shared_ptr< parser_Type >       M_parser;
+    boost::shared_ptr< parser_Type > M_parser;
 
 private:
 
