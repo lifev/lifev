@@ -21,6 +21,6 @@ AT_DATA([data],[[
 # Place here the content of the GetPot data file for the night test.
 
 ]])
-AT_CHECK([mpirun -n 1 $abs_top_builddir/testsuite/lifefem/test_currentFE -c],[0],[ignore],[ignore])
+AT_CHECK([mpirun -n 1 ../../lifefem/test_currentFE -c],[0],[ignore],[ignore])
 AT_CLEANUP
 

@@ -25,5 +25,5 @@ C = true     # Bool
 D = LifeV    # String
 E = 'Life V' # String list
 ]])
-AT_CHECK([mpirun -n 1 $abs_top_builddir/testsuite/lifecore/test_getPot],[0],[ignore],[ignore])
+AT_CHECK([mpirun -n 1 ../../lifecore/test_getPot],[0],[ignore],[ignore])
 AT_CLEANUP

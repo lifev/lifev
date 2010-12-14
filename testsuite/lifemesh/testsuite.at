@@ -24,6 +24,6 @@ AT_DATA([data],[[# -*- getpot -*- (GetPot mode activation for emacs)
 mesh_dir = ./
 mesh_file  = 'cube_47785.m++'        # mesh file
 ]])
-AT_CHECK([ln -sf $abs_top_builddir/testsuite/data/mesh/mesh++/cube_47785.m++ && \
-          mpirun -n 1 $abs_top_builddir/testsuite/lifemesh/test_mesh],[0],[ignore],[ignore])
+AT_CHECK([ln -sf ../../data/mesh/mesh++/cube_47785.m++ && \
+          mpirun -n 1 ../../lifemesh/test_mesh],[0],[ignore],[ignore])
 AT_CLEANUP

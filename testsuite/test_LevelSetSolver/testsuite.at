@@ -93,6 +93,6 @@ save       = 1
 
 
 ]])
-AT_CHECK([ mpirun -np 3 $abs_top_builddir/testsuite/test_LevelSetSolver/test_LevelSetSolver -c],[0],[ignore],[ignore])
+AT_CHECK([ mpirun -np 3 ../../test_LevelSetSolver/test_LevelSetSolver -c],[0],[ignore],[ignore])
 AT_CLEANUP
 

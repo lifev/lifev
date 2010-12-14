@@ -93,7 +93,7 @@ save       = 1
    [../]
 
 ]])
-AT_CHECK([ln -sf $abs_top_builddir/testsuite/data/mesh/inria/vessel20.mesh &&
-          mpirun -np 2 $abs_top_builddir/testsuite/test_structure/test_structure -c],[0],[ignore],[ignore])
+AT_CHECK([ln -sf ../../data/mesh/inria/vessel20.mesh &&
+          mpirun -np 2 ../../test_structure/test_structure -c],[0],[ignore],[ignore])
 AT_CLEANUP
 

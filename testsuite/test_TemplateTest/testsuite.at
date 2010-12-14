@@ -19,7 +19,7 @@ AT_DATA([data],[[
 # Place here the content of the GetPot data file for the night test.
 
 ]])
-AT_CHECK([ln -sf $abs_top_builddir/testsuite/data/mesh/inria/Mesh &&
-		  mpirun -n 1 $abs_top_builddir/testsuite/test_TemplateTest/test_TemplateTest -c],[0],[ignore],[ignore])
+AT_CHECK([ln -sf ../../data/mesh/inria/Mesh &&
+		  mpirun -n 1 ../../test_TemplateTest/test_TemplateTest -c],[0],[ignore],[ignore])
 AT_CLEANUP
 
