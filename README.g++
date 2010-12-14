@@ -1,8 +1,0 @@
-LifeV was mainly developed with the GCC compiler suite and in particular g++
-its C++ compiler. 
-
-Unfortunately implementation of certain important classes of LifeV did not
-follow the C++ standard and LifeV C++/g++ compliance stops at g+=-3.3. Any
-version >= 3.4 won't compile LifeV.
-
-LIFEV MUST BE COMPILED WITH G++ <= 3.3
