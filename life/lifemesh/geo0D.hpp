@@ -84,7 +84,7 @@ public:
     //! Declares item identity, provides coordinate and states if it is on boundary
     /*!
     	@param identity Element identity
-    	@param x Element x coordinate      // %%%% e' ok minuscolo?
+    	@param x Element x coordinate
     	@param y Element y coordinate
     	@param z Element z coordinate
     	@param boundary True if the element is on boundary
@@ -117,30 +117,31 @@ public:
 
     //@}
 
-    //@}
-
     //! @name Methods
     //@{
 
     //! Display general information about the content of the class
-    /*! %%%%
+    /*!
         List of things displayed in the class
         @param output specify the output format (std::cout by default)
      */
     std::ostream & showMe( bool Verbose = false, std::ostream & coordinateVector = std::cout ) const;
 
-    //@}
-
-    //! @name Get Methods
-    //@{
-
     //! Returns the pointer to the coordinates vector
     /*!
     	@return Pointer to coordinate vector
      */
-    Real const * coor() const
+    Real const * coordinatesArray() const
     {
         return M_coordinates.data();
+    };
+    //! Returns the pointer to the coordinates vector
+    /*!
+    	@return Pointer to coordinate vector
+     */
+    Real const * __attribute__ ((__deprecated__)) coor() const
+    {
+        return coordinatesArray();
     };
 
     //! Returns the reference to the x-coordinate
@@ -204,15 +205,7 @@ public:
 #endif
 
     }
-    //! Returns the coordinates vector
-    /*!
-        The method allows to access coordinates and modify them
-    	@return Coordinates array
-     */
-    boost::array<Real,NDIM>& coordinate ( void )
-    {
-        return M_coordinates;
-    }
+
     //! Returns the coordinate specified in the argument
     /*!
         The method allows to access the coordinate specified in the argument
@@ -235,6 +228,32 @@ public:
         ASSERT_BD( coordinate > 0 && coordinate <= NDIM ) ;
         return M_coordinates[ coordinate -1 ];
     }
+
+    //@}
+
+    //! @name Get Methods
+    //@{
+
+    //! Returns the coordinates vector
+    /*!
+        The method allows to access coordinates and modify them
+    	@return Coordinates array
+     */
+    boost::array<Real,NDIM>& coordinates ( void )
+    {
+        return M_coordinates;
+    }
+    //! Returns the coordinates vector
+    /*!
+        The method allows to access coordinates and modify them
+    	@return Coordinates array
+     */
+    boost::array<Real,NDIM>& __attribute__ ((__deprecated__)) coordinate ( void )
+    {
+        return coordinates();
+    }
+
+    //@}
 
 private:
     boost::array<Real,NDIM> M_coordinates;

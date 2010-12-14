@@ -49,8 +49,8 @@ namespace LifeV
 
 const MarkerTraits_Base::EntityFlag MarkerTraits_Base::NULLFLAG = LONG_MIN;
 
-//MM: if you modity these changes here recheck function readNetgenMesh
-//        becouse it uses this changes
+//MM: if you modify these changes here recheck function readNetgenMesh
+//        because it uses this changes
 
 MarkerTraits_Base::entityFlag_Type MarkerTraits_Base::strongerFlag( entityFlag_Type const & flag1, entityFlag_Type const & flag2 )
 {

@@ -101,6 +101,12 @@ public:
      */
     GeoElement0D( Geo0D const & Element, MC const & Marker );
 
+    //! Destructor
+    virtual ~GeoElement0D()
+    {
+        // nothing to be done
+    }
+
     //@}
 
     //! @name Operators
@@ -114,6 +120,7 @@ public:
     GeoElement0D & operator = ( const GeoElement0D  & Element );
 
     //@}
+
 
 };
 
@@ -156,6 +163,12 @@ public:
      */
     GeoElement1D( const GeoElement1D& Element);
 
+    //! Destructor
+    virtual ~GeoElement1D()
+    {
+        // nothing to be done
+    }
+
     //@}
 
 #ifdef TWODIM
@@ -166,73 +179,146 @@ public:
     /*!
     	@return Identity of the first adjacent element
      */
-    ID ad_first() const
+    ID firstAdjacentElementIdentity() const
     {
         return M_FirstAdjacentElementIdentity;
-    };
-    //! Returns the identity of the second adjacent element
-    /*!
-    	@return Identity of the second adjacent element
-     */
-    ID ad_second() const
-    {
-        return M_SecondAdjacentElementIdentity;
     };
     //! Returns the identity of the first adjacent element
     /*!
     	@return Identity of the first adjacent element
      */
-    ID & ad_first()
+    ID __attribute__ ((__deprecated__)) ad_first() const
     {
-        return M_FirstAdjacentElementIdentity;
+        return firstAdjacentElementIdentity();
+    };
+
+
+    //! Returns the identity of the second adjacent element
+    /*!
+    	@return Identity of the second adjacent element
+     */
+    ID secondAdjacentElementIdentity() const
+    {
+        return M_secondAdjacentElementIdentity;
     };
     //! Returns the identity of the second adjacent element
     /*!
     	@return Identity of the second adjacent element
      */
-    ID & ad_second()
+    ID __attribute__ ((__deprecated__)) ad_second() const
     {
-        return M_SecondAdjacentElementIdentity;
+        return secondAdjacentElementIdentity();
+    };
+
+    //! Returns the identity of the first adjacent element
+    /*!
+    	@return Identity of the first adjacent element
+     */
+    ID & firstAdjacentElementIdentity()
+    {
+        return M_firstAdjacentElementIdentity;
+    };
+    //! Returns the identity of the first adjacent element
+    /*!
+    	@return Identity of the first adjacent element
+     */
+    ID & __attribute__ ((__deprecated__)) ad_first()
+    {
+        return firstAdjacentElementIdentity();
+    };
+
+    //! Returns the identity of the second adjacent element
+    /*!
+    	@return Identity of the second adjacent element
+     */
+    ID & secondAdjacentElementIdentity()
+    {
+        return M_secondAdjacentElementIdentity;
+    };
+    //! Returns the identity of the second adjacent element
+    /*!
+    	@return Identity of the second adjacent element
+     */
+    ID & __attribute__ ((__deprecated__)) ad_second()
+    {
+        return secondAdjacentElementIdentity();
+    };
+
+    //! Returns the position of the first adjacent element
+    /*!
+    	@return Position of the first adjacent element
+     */
+    ID firstAdjacentElementPosition() const
+    {
+        return M_firstAdjacentElementPosition;
     };
     //! Returns the position of the first adjacent element
     /*!
     	@return Position of the first adjacent element
      */
-    ID pos_first() const
+    ID __attribute__ ((__deprecated__)) pos_first() const
     {
-        return M_FirstAdjacentElementPosition;
+        return firstAdjacentElementPosition();
+    };
+
+    //! Returns the position of the second adjacent element
+    /*!
+    	@return Position of the second adjacent element
+     */
+    ID secondAdjacentElementPosition() const
+    {
+        return M_secondAdjacentElementPosition;
     };
     //! Returns the position of the second adjacent element
     /*!
     	@return Position of the second adjacent element
      */
-    ID pos_second() const
+    ID __attribute__ ((__deprecated__)) pos_second() const
     {
-        return M_SecondAdjacentElementPosition;
+        return secondAdjacentElementPosition();
+    };
+
+    //! Returns the position of the first adjacent element
+    /*!
+    	@return Position of the first adjacent element
+     */
+    ID & firstAdjacentElementPosition()
+    {
+        return M_firstAdjacentElementPosition;
     };
     //! Returns the position of the first adjacent element
     /*!
     	@return Position of the first adjacent element
      */
-    ID & pos_first()
+    ID & __attribute__ ((__deprecated__)) pos_first()
     {
-        return M_FirstAdjacentElementPosition;
+        return firstAdjacentElementPosition();
+    };
+
+    //! Returns the position of the second adjacent element
+    /*!
+    	@return Position of the second adjacent element
+     */
+    ID & secondAdjacentElementPosition()
+    {
+        return M_secondAdjacentElementPosition;
     };
     //! Returns the position of the second adjacent element
     /*!
     	@return Position of the second adjacent element
      */
-    ID & pos_second()
+    ID & __attribute__ ((__deprecated__)) pos_second()
     {
-        return M_SecondAdjacentElementPosition;
+        return secondAdjacentElementPosition();
     };
+
     //@}
 
 private:
-    ID M_FirstAdjacentElementIdentity;
-    ID M_SecondAdjacentElementIdentity;
-    ID M_FirstAdjacentElementPosition;
-    ID M_SecondAdjacentElementPosition;
+    ID M_firstAdjacentElementIdentity;
+    ID M_secondAdjacentElementIdentity;
+    ID M_firstAdjacentElementPosition;
+    ID M_secondAdjacentElementPosition;
 #endif
 };
 
@@ -284,6 +370,12 @@ public:
      */
     GeoElement2D( const GeoElement2D<GEOSHAPE, MC>& Element);
 
+    //! Destructor
+    virtual ~GeoElement2D()
+    {
+        // nothing to be done
+    }
+
     //@}
 
     //! @name Get Methods
@@ -293,73 +385,145 @@ public:
     /*!
     	@return Identity of the first adjacent element
      */
-    ID ad_first() const
+    ID firstAdjacentElementIdentity() const
     {
-        return M_FirstAdjacentElementIdentity;
-    };
-    //! Returns the identity of the second adjacent element
-    /*!
-    	@return Identity of the second adjacent element
-     */
-    ID ad_second() const
-    {
-        return M_SecondAdjacentElementIdentity;
+
+    	return M_firstAdjacentElementIdentity;
     };
     //! Returns the identity of the first adjacent element
     /*!
     	@return Identity of the first adjacent element
      */
-    ID & ad_first()
+    ID __attribute__ ((__deprecated__)) ad_first() const
     {
-        return M_FirstAdjacentElementIdentity;
+        return firstAdjacentElementIdentity();
+    };
+
+    //! Returns the identity of the second adjacent element
+    /*!
+    	@return Identity of the second adjacent element
+     */
+    ID secondAdjacentElementIdentity() const
+    {
+        return M_secondAdjacentElementIdentity;
     };
     //! Returns the identity of the second adjacent element
     /*!
     	@return Identity of the second adjacent element
      */
-    ID & ad_second()
+    ID __attribute__ ((__deprecated__)) ad_second() const
     {
-        return M_SecondAdjacentElementIdentity;
+        return secondAdjacentElementIdentity();
+    };
+
+    //! Returns the identity of the first adjacent element
+    /*!
+    	@return Identity of the first adjacent element
+     */
+    ID & firstAdjacentElementIdentity()
+    {
+        return M_firstAdjacentElementIdentity;
+    };
+    //! Returns the identity of the first adjacent element
+    /*!
+    	@return Identity of the first adjacent element
+     */
+    ID & __attribute__ ((__deprecated__)) ad_first()
+    {
+        return firstAdjacentElementIdentity();
+    };
+
+    //! Returns the identity of the second adjacent element
+    /*!
+    	@return Identity of the second adjacent element
+     */
+    ID & secondAdjacentElementIdentity()
+    {
+        return M_secondAdjacentElementIdentity;
+    };
+    //! Returns the identity of the second adjacent element
+    /*!
+    	@return Identity of the second adjacent element
+     */
+    ID & __attribute__ ((__deprecated__)) ad_second()
+    {
+        return secondAdjacentElementIdentity();
+    };
+
+    //! Returns the position of the first adjacent element
+    /*!
+    	@return Position of the first adjacent element
+     */
+    ID firstAdjacentElementPosition() const
+    {
+        return M_firstAdjacentElementPosition;
     };
     //! Returns the position of the first adjacent element
     /*!
     	@return Position of the first adjacent element
      */
-    ID pos_first() const
+    ID __attribute__ ((__deprecated__)) pos_first() const
     {
-        return M_FirstAdjacentElementPosition;
+        return firstAdjacentElementPosition();
+    };
+
+    //! Returns the position of the second adjacent element
+    /*!
+    	@return Position of the second adjacent element
+     */
+    ID secondAdjacentElementPosition() const
+    {
+        return M_secondAdjacentElementPosition;
     };
     //! Returns the position of the second adjacent element
     /*!
     	@return Position of the second adjacent element
      */
-    ID pos_second() const
+    ID __attribute__ ((__deprecated__)) pos_second() const
     {
-        return M_SecondAdjacentElementPosition;
+        return secondAdjacentElementPosition();
+    };
+
+    //! Returns the position of the first adjacent element
+    /*!
+    	@return Position of the first adjacent element
+     */
+    ID & firstAdjacentElementPosition()
+    {
+        return M_firstAdjacentElementPosition;
     };
     //! Returns the position of the first adjacent element
     /*!
     	@return Position of the first adjacent element
      */
-    ID & pos_first()
+    ID & __attribute__ ((__deprecated__)) pos_first()
     {
-        return M_FirstAdjacentElementPosition;
+        return firstAdjacentElementPosition();
+    };
+
+    //! Returns the position of the second adjacent element
+    /*!
+    	@return Position of the second adjacent element
+     */
+    ID & secondAdjacentElementPosition()
+    {
+        return M_secondAdjacentElementPosition;
     };
     //! Returns the position of the second adjacent element
     /*!
     	@return Position of the second adjacent element
      */
-    ID & pos_second()
+    ID & __attribute__ ((__deprecated__)) pos_second()
     {
-        return M_SecondAdjacentElementPosition;
+        return secondAdjacentElementPosition();
     };
     //@}
 
 private:
-    ID M_FirstAdjacentElementIdentity;
-    ID M_SecondAdjacentElementIdentity;
-    ID M_FirstAdjacentElementPosition;
-    ID M_SecondAdjacentElementPosition;
+    ID M_firstAdjacentElementIdentity;
+    ID M_secondAdjacentElementIdentity;
+    ID M_firstAdjacentElementPosition;
+    ID M_secondAdjacentElementPosition;
 };
 
 
@@ -420,6 +584,12 @@ public:
      */
     GeoElement3D( const GeoElement3D<GEOSHAPE, MC>& Element );
 
+    //! Destructor
+    virtual ~GeoElement3D()
+    {
+        // nothing to be done
+    }
+
     //@}
 };
 
@@ -466,6 +636,7 @@ GeoElement0D<MC>::operator = ( GeoElement0D<MC> const & Element )
     return *this;
 }
 
+
 /*-------------------------------------------------------------------------
   GeoElement1D
   --------------------------------------------------------------------------*/
@@ -477,10 +648,10 @@ template <typename GEOSHAPE, typename MC>
 GeoElement1D<GEOSHAPE, MC>::GeoElement1D( ID Identity ) :
         GeoND<GEOSHAPE, GeoElement0D<MC> >( Identity ),
         MC::EdgeMarker (),
-        M_FirstAdjacentElementIdentity    ( 0 ),
-        M_SecondAdjacentElementIdentity   ( 0 ),
-        M_FirstAdjacentElementPosition    ( 0 ),
-        M_SecondAdjacentElementPosition   ( 0 )
+        M_firstAdjacentElementIdentity    ( 0 ),
+        M_secondAdjacentElementIdentity   ( 0 ),
+        M_firstAdjacentElementPosition    ( 0 ),
+        M_secondAdjacentElementPosition   ( 0 )
 #else
 template <typename GEOSHAPE, typename MC>
 GeoElement1D<GEOSHAPE, MC>::GeoElement1D( ID identity ) :
@@ -495,15 +666,15 @@ template <typename GEOSHAPE, typename MC>
 GeoElement1D<GEOSHAPE, MC>::GeoElement1D( const GeoElement1D<GEOSHAPE, MC>& Element ) :
         GeoND<GEOSHAPE, GeoElement0D<MC> >( Element ),
         MC::EdgeMarker                    ( Element ),
-        M_FirstAdjacentElementIdentity    ( Element.M_FirstAdjacentElementIdentity),
-        M_SecondAdjacentElementIdentity   ( Element.M_SecondAdjacentElementIdentity),
-        M_FirstAdjacentElementPosition    ( Element.M_FirstAdjacentElementPosition ),
-        M_SecondAdjacentElementPosition   ( Element.M_SecondAdjacentElementPosition )
+        M_firstAdjacentElementIdentity    ( Element.M_firstAdjacentElementIdentity),
+        M_secondAdjacentElementIdentity   ( Element.M_secondAdjacentElementIdentity),
+        M_firstAdjacentElementPosition    ( Element.M_firstAdjacentElementPosition ),
+        M_secondAdjacentElementPosition   ( Element.M_secondAdjacentElementPosition )
 #else
 template <typename GEOSHAPE, typename MC>
-GeoElement1D<GEOSHAPE, MC>::GeoElement1D( const GeoElement1D<GEOSHAPE, MC>& geoElement1D ) :
-        GeoND<GEOSHAPE, GeoElement0D<MC> >( geoElement1D ),
-        MC::EdgeMarker                    ( geoElement1D )
+GeoElement1D<GEOSHAPE, MC>::GeoElement1D( const GeoElement1D<GEOSHAPE, MC>& Element ) :
+        GeoND<GEOSHAPE, GeoElement0D<MC> >( Element ),
+        MC::EdgeMarker                    ( Element )
 #endif
 {
     ASSERT_PRE( GEOSHAPE::nDim == 1 , "geoElement2D with incorrect GeoShape" ) ;
@@ -528,10 +699,10 @@ GeoElement2D<GEOSHAPE, MC>::GeoElement2D( ID identity ) :
 template <typename GEOSHAPE, typename MC>
 GeoElement2D<GEOSHAPE, MC>::GeoElement2D( ID identity ) :
         GeoND<GEOSHAPE, GeoElement0D<MC> >( identity ),
-        M_FirstAdjacentElementIdentity   ( 0 ),
-        M_SecondAdjacentElementIdentity  ( 0 ),
-        M_FirstAdjacentElementPosition   ( 0 ),
-        M_SecondAdjacentElementPosition  ( 0 )
+        M_firstAdjacentElementIdentity   ( 0 ),
+        M_secondAdjacentElementIdentity  ( 0 ),
+        M_firstAdjacentElementPosition   ( 0 ),
+        M_secondAdjacentElementPosition  ( 0 )
 #endif
 {
     ASSERT_PRE( GEOSHAPE::nDim == 2 , "geoElement2D with incorrect GeoShape" ) ;
@@ -547,10 +718,10 @@ template <typename GEOSHAPE, typename MC>
 GeoElement2D<GEOSHAPE, MC>::GeoElement2D( const GeoElement2D<GEOSHAPE, MC>& Element ) :
         GeoND<GEOSHAPE, GeoElement0D<MC> >( Element ),
         MC::FaceMarker                    ( Element ),
-        M_FirstAdjacentElementIdentity    ( Element.M_FirstAdjacentElementIdentity),
-        M_SecondAdjacentElementIdentity   ( Element.M_SecondAdjacentElementIdentity),
-        M_FirstAdjacentElementPosition    ( Element.M_FirstAdjacentElementPosition ),
-        M_SecondAdjacentElementPosition   ( Element.M_SecondAdjacentElementPosition )
+        M_firstAdjacentElementIdentity    ( Element.M_firstAdjacentElementIdentity),
+        M_secondAdjacentElementIdentity   ( Element.M_secondAdjacentElementIdentity),
+        M_firstAdjacentElementPosition    ( Element.M_firstAdjacentElementPosition ),
+        M_secondAdjacentElementPosition   ( Element.M_secondAdjacentElementPosition )
 #endif
 {
     ASSERT_PRE( GEOSHAPE::nDim == 2 , "geoElement2D with incorrect GeoShape" ) ;

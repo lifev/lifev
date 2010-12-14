@@ -187,11 +187,14 @@ public:
     */
     inline bool hasEqualEntityFlag(entityFlag_Type const & flag ) const;
 
+    //! Display method
+    virtual void showMe( std::ostream & output = std::cout ) const;
+
     //! Helper function that prints a marker Flag
-    std::ostream & printFlag( entityFlag_Type const f, std::ostream & output ) const;
+    std::ostream & __attribute__ ((__deprecated__)) printFlag( entityFlag_Type const f, std::ostream & output ) const;
 
     //! Helper function that prints "this" marker flag
-    std::ostream & printFlag( std::ostream & output ) const;
+    std::ostream & __attribute__ ((__deprecated__)) printFlag( std::ostream & output ) const;
 
     //@}
 
@@ -398,7 +401,16 @@ std::ostream & Marker_Base<MarkerTraits>::printFlag( entityFlag_Type const f, st
 template <typename MarkerTraits>
 std::ostream & Marker_Base<MarkerTraits>::printFlag( std::ostream & output ) const
 {
-    return printFlag( M_flag, output );
+    showMe( output );
+}
+
+template <typename MarkerTraits>
+void Marker_Base<MarkerTraits>::showMe( std::ostream & output) const
+{
+	if ( M_flag == nullFlag() )
+		output << "UNSET";
+	else
+		output << M_flag;
 }
 
 } //Namespace LifeV

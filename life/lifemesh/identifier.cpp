@@ -42,39 +42,61 @@ namespace LifeV
 // IdentifierBase //
 ////////////////////
 
-// ===================================================
-// Constructors & Destructor
-// ===================================================
+// ============================================= //
+//          Constructors & Destructor            //
+// ============================================= //
 
-IdentifierBase::IdentifierBase(const IdentifierBase & id)
+IdentifierBase::IdentifierBase(const IdentifierBase & id): M_id( id.M_id )
 {
-    M_id = id.M_id;
+    // Nothing to be done here
+}
+
+// ============================= //
+//            Methods            //
+// ============================= //
+
+void IdentifierBase::showMe( std::ostream& output) const
+{
+	output << "\n Node id: " << M_id << '\n';
 }
 
 /////////////////////////
 // IdentifierEssential //
 /////////////////////////
 
-// ===================================================
-// Constructors & Destructor
-// ===================================================
+// ============================================= //
+//          Constructors & Destructor            //
+// ============================================= //
 
-IdentifierEssential::IdentifierEssential( IdentifierEssential const & id )
+IdentifierEssential::IdentifierEssential( IdentifierEssential const & id ) : IdentifierBase ( id ),
+                                                                             M_x( id.M_x ),
+                                                                             M_y( id.M_y ),
+                                                                             M_z( id.M_z )
 {
-    M_id = id.M_id;
-    M_x  = id.M_x;
-    M_y  = id.M_y;
-    M_z  = id.M_z;
+    // Nothing to be done here
 }
 
+// ============================= //
+//            Methods            //
+// ============================= //
+
+void IdentifierEssential::showMe( std::ostream& output) const
+{
+	output << "\nNode id:" << M_id << '\n';
+	output << "Node coordinates:\n";
+	output << "              x = " << M_x;
+	output << "              y = " << M_y;
+	output << "              z = " << M_z;
+}
 
 ///////////////////////
 // IdentifierNatural //
 ///////////////////////
 
-// ===================================================
-// Constructors & Destructor
-// ===================================================
+// ============================================= //
+//          Constructors & Destructor            //
+// ============================================= //
+
 IdentifierNatural::IdentifierNatural( const ID& id, const SimpleVect<ID>& localToGlobal ) : IdentifierBase( id )
 {
     M_localToGlobal.reserve( localToGlobal.size() );
@@ -86,11 +108,24 @@ IdentifierNatural::IdentifierNatural( const ID& id ) : IdentifierBase( id )
     // Nothing to be done here
 }
 
-IdentifierNatural::IdentifierNatural( IdentifierNatural const & id )
+IdentifierNatural::IdentifierNatural( IdentifierNatural const & id ) : IdentifierBase( id ),
+                                                                       M_localToGlobal( id.M_localToGlobal )
 {
-    M_id            = id.M_id;
-    M_localToGlobal = id.M_localToGlobal;
+    // Nothing to be done here
 }
 
+// ============================= //
+//            Methods            //
+// ============================= //
+
+void IdentifierNatural::showMe( std::ostream & output) const
+{
+	output << "\nNode id:" << M_id << '\n';
+	output << "Local-to-global map:\n";
+
+	int i(1);
+	for( SimpleVect<ID>::const_iterator it = M_localToGlobal.begin(); it != M_localToGlobal.end(); ++it, ++i )
+		output << "Local id: " << i << "  -->  Global id: " << *it << '\n';
+}
 
 } // Namespace LifeV

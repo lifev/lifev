@@ -122,7 +122,7 @@ public:
     /*!
         List of things displayed in the class
         @param verbose If true more information is displayed
-        @param c %%%%
+        @param c Output
      */
     std::ostream & showMe( bool verbose = false, std::ostream & c = std::cout ) const;
 
@@ -142,53 +142,6 @@ public:
      */
     void exchangePoints( const ID oldToNew[ GEOSHAPE::numPoints ] );
 
-    //@}
-
-    //! @name Set Methods
-    //@{
-
-    //! Inserts a point using point references
-    /*!
-        @param identity Identity of the point to be inserted
-        @param point Point to be inserted
-     */
-    void setPoint( ID const identity, PointType const & point );
-    //!Inserts a point using point references with forced bound check
-    /*!
-        @param identity Identity of the point to be inserted
-        @param point Point to be inserted
-        @return %%%%
-     */
-    bool setPointBD( ID const identity, PointType const & point );
-    //!Inserts a point using pointers
-    /*!
-        @param identity Identity of the point to be inserted
-        @param point Point to be inserted
-     */
-    void setPoint( ID const identity, PointType const * point );
-    //!Inserts a point using pointers with forced bound check
-    /*!
-        @param identity Identity of the point to be inserted
-        @param point Point to be inserted
-        @return %%%%
-     */
-    bool setPointBD( ID const identity, PointType const * point );
-
-    //! Sets the flag of a point
-    /*!
-    	Sets the flag to the stronger between the stored one and the one provided by the argument
-    	@param identity Identity of the point to be inserted
-        @param point Point to be inserted
-        @return %%%%%
-    	@warning A const_cast to M_points is done in order to change the flag
-    */
-    EntityFlag setStrongerMarkerAtPoint( const ID& identity, EntityFlag const & flag );
-
-    //@}
-
-    //! @name Get Methods
-    //@{
-
     //! Returns the point of identity indicated in the argument
     /*!
     	@param identity Identity of the point (numbering starts from 1)
@@ -204,6 +157,79 @@ public:
         	@return reference to a point object, possibly derived from PointType
     */
     PointType const & reversepoint ( ID const identity ) const;
+
+    //@}
+
+    //! @name Set Methods
+    //@{
+
+    //! Inserts a point using point references
+    /*!
+        @param identity Identity of the point to be inserted
+        @param point Point to be inserted
+     */
+    void setPoint( ID const identity, PointType const & point );
+    //!Inserts a point using point references with forced boundary check
+    /*!
+        @param identity Identity of the point to be inserted
+        @param point Point to be inserted
+        @return TRUE if the point is set
+     */
+    bool setPointWithBoundaryCheck( ID const identity, PointType const & point );
+    //!Inserts a point using point references with forced boundary check
+    /*!
+        @param identity Identity of the point to be inserted
+        @param point Point to be inserted
+        @return TRUE if the point is set
+     */
+    bool __attribute__ ((__deprecated__)) setPointBD( ID const identity, PointType const & point );
+
+
+    //!Inserts a point using pointers
+    /*!
+        @param identity Identity of the point to be inserted
+        @param point Point to be inserted
+     */
+    void setPoint( ID const identity, PointType const * point );
+    //!Inserts a point using pointers with forced boundary check
+    /*!
+        @param identity Identity of the point to be inserted
+        @param point Point to be inserted
+        @return %%%%
+     */
+    bool setPointWithBoundaryCheck( ID const identity, PointType const * point );
+    //!Inserts a point using pointers with forced boundary check
+    /*!
+        @param identity Identity of the point to be inserted
+        @param point Point to be inserted
+        @return TRUE if the point is set
+     */
+    bool __attribute__ ((__deprecated__)) setPointBD( ID const identity, PointType const * point );
+
+    //! Sets the flag of a point
+    /*!
+    	Sets the flag to the stronger between the stored one and the one provided by the argument
+    	@param identity Identity of the point to be inserted
+        @param point Point to be inserted
+        @return TRUE if the point is set
+    	@warning A const_cast to M_points is done in order to change the flag
+    */
+    EntityFlag setStrongerMarkerAtPoint( const ID& identity, EntityFlag const & flag );
+
+    //@}
+
+    //! @name Get Methods
+    //@{
+
+    //! Returns the points vector
+    /*!
+        The method allows to access coordinates and modify them
+    	@return Points vector
+     */
+    PointType const* points ()
+    {
+        return M_points;
+    }
 
     //@}
 
@@ -320,48 +346,6 @@ void GeoND<GEOSHAPE, POINTTYPE>::exchangePoints( const ID oldToNew[ GEOSHAPE::nu
 
 template <typename GEOSHAPE, typename POINTTYPE>
 INLINE
-void GeoND<GEOSHAPE, POINTTYPE>::setPoint( ID const identity, PointType const & point )
-{
-    ASSERT_BD( ( identity > 0 && identity <= GeoND<GEOSHAPE, POINTTYPE>::numLocalPoints ) ) ;
-    M_points[ identity - 1 ] = ( &point );
-}
-
-template <typename GEOSHAPE, typename POINTTYPE>
-bool GeoND<GEOSHAPE, POINTTYPE>::setPointBD( ID const identity, PointType const & point )
-{
-    ASSERT_BD0( ( identity > 0 && identity <= GeoND<GEOSHAPE, POINTTYPE>::numLocalPoints ) ) ;
-    if ( identity <= 0 || identity > GeoND<GEOSHAPE, POINTTYPE>::numLocalVertices )
-        return false;
-    M_points[ identity -1 ] = ( &point );
-    return true;
-}
-
-template <typename GEOSHAPE, typename POINTTYPE>
-INLINE
-void GeoND<GEOSHAPE, POINTTYPE>::setPoint( ID const identity, PointType const * point )
-{
-    ASSERT_BD( ( identity > 0 && identity <= GeoND<GEOSHAPE, POINTTYPE>::numLocalPoints ) ) ;
-    M_points[ identity - 1 ] = ( point );
-}
-
-template <typename GEOSHAPE, typename POINTTYPE>
-bool GeoND<GEOSHAPE, POINTTYPE>::setPointBD( ID const identity, PointType const * point )
-{
-    ASSERT_BD0( ( identity > 0 && identity <= GeoND<GEOSHAPE, POINTTYPE>::numLocalPoints ) ) ;
-    if ( identity <= 0 || identity > GeoND<GEOSHAPE, POINTTYPE>::numLocalVertices )
-        return false;
-    M_points[ identity -1 ] = ( point );
-    return true;
-}
-
-template <typename GEOSHAPE, typename POINTTYPE>
-EntityFlag GeoND<GEOSHAPE, POINTTYPE>::setStrongerMarkerAtPoint( const ID& identity, EntityFlag const & flag )
-{
-    return (const_cast<POINTTYPE *> ( M_points[identity -1]) ) -> setStrongerMarker(flag);
-}
-
-template <typename GEOSHAPE, typename POINTTYPE>
-INLINE
 POINTTYPE const & GeoND<GEOSHAPE, POINTTYPE>::point( ID const identity ) const
 {
     ASSERT_BD( ( identity > 0 && identity <= GeoND<GEOSHAPE, POINTTYPE>::numLocalPoints ) );
@@ -376,5 +360,58 @@ POINTTYPE const & GeoND<GEOSHAPE, POINTTYPE>::reversepoint( ID const identity ) 
     return *( static_cast<POINTTYPE const*>( M_points[ reversePoint<GEOSHAPE>::operate( identity ) - 1 ] ) );
 }
 
+template <typename GEOSHAPE, typename POINTTYPE>
+INLINE
+void GeoND<GEOSHAPE, POINTTYPE>::setPoint( ID const identity, PointType const & point )
+{
+    ASSERT_BD( ( identity > 0 && identity <= GeoND<GEOSHAPE, POINTTYPE>::numLocalPoints ) ) ;
+    M_points[ identity - 1 ] = ( &point );
+}
+
+template <typename GEOSHAPE, typename POINTTYPE>
+bool GeoND<GEOSHAPE, POINTTYPE>::setPointWithBoundaryCheck( ID const identity, PointType const & point )
+{
+    ASSERT_BD0( ( identity > 0 && identity <= GeoND<GEOSHAPE, POINTTYPE>::numLocalPoints ) ) ;
+    if ( identity <= 0 || identity > GeoND<GEOSHAPE, POINTTYPE>::numLocalVertices )
+        return false;
+    M_points[ identity -1 ] = ( &point );
+    return true;
+}
+template <typename GEOSHAPE, typename POINTTYPE>
+bool __attribute__ ((__deprecated__)) GeoND<GEOSHAPE, POINTTYPE>::setPointBD( ID const identity, PointType const & point )
+{
+    return setPointWithBoundaryCheck( identity, point );
+}
+
+template <typename GEOSHAPE, typename POINTTYPE>
+INLINE
+void GeoND<GEOSHAPE, POINTTYPE>::setPoint( ID const identity, PointType const * point )
+{
+    ASSERT_BD( ( identity > 0 && identity <= GeoND<GEOSHAPE, POINTTYPE>::numLocalPoints ) ) ;
+    M_points[ identity - 1 ] = ( point );
+}
+
+template <typename GEOSHAPE, typename POINTTYPE>
+bool GeoND<GEOSHAPE, POINTTYPE>::setPointWithBoundaryCheck( ID const identity, PointType const * point )
+{
+    ASSERT_BD0( ( identity > 0 && identity <= GeoND<GEOSHAPE, POINTTYPE>::numLocalPoints ) ) ;
+    if ( identity <= 0 || identity > GeoND<GEOSHAPE, POINTTYPE>::numLocalVertices )
+        return false;
+    M_points[ identity -1 ] = ( point );
+    return true;
+}
+template <typename GEOSHAPE, typename POINTTYPE>
+bool __attribute__ ((__deprecated__)) GeoND<GEOSHAPE, POINTTYPE>::setPointBD( ID const identity, PointType const * point )
+{
+    return setPointWithBoundaryCheck( identity, point );
+}
+
+template <typename GEOSHAPE, typename POINTTYPE>
+EntityFlag GeoND<GEOSHAPE, POINTTYPE>::setStrongerMarkerAtPoint( const ID& identity, EntityFlag const & flag )
+{
+    return (const_cast<POINTTYPE *> ( M_points[identity -1]) ) -> setStrongerMarker(flag);
+}
+
 }
 #endif
+

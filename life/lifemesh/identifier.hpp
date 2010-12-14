@@ -46,8 +46,7 @@
 #include <life/lifecore/life.hpp>
 #include <life/lifearray/SimpleVect.hpp>
 
-namespace LifeV
-{
+namespace LifeV {
 
 //! IdentifierBase - Base class holding Dof identifiers for implementing BC
 
@@ -85,6 +84,13 @@ public:
 
     //@}
 
+    //! @name Methods
+    //@{
+
+    //! Display method
+    virtual void showMe( std::ostream & output = std::cout ) const;
+
+    //@}
 
     //! @name Operators
     //@{
@@ -144,7 +150,7 @@ public:
         @return Boolean which is true if the ID of the first Identifier is smaller
                 than the ID of the second Identifier
      */
-    bool operator() ( boost::shared_ptr<IdentifierBase> const& i1, boost::shared_ptr<IdentifierBase> const& i2 ) const
+    bool operator() ( boost::shared_ptr<IdentifierBase> const & i1, boost::shared_ptr<IdentifierBase> const & i2 ) const
     {
         return ( i1.get()->id() < i2.get()->id() );
     }
@@ -205,6 +211,13 @@ public:
 
     //@}
 
+    //! @name Methods
+    //@{
+
+    //! Display method
+    virtual void showMe( std::ostream& output = std::cout ) const;
+
+    //@}
 
     //! @name Get Methods
     //@{
@@ -265,8 +278,6 @@ public:
         // Nothing to be done here
     }
 
-    //
-
     //! Constructor given ID and bdLocalToGlobal map
     /*!
         Creates an Identifier with a given ID and a given local-to-global map
@@ -284,8 +295,21 @@ public:
     //! Copy Constructor
     IdentifierNatural( IdentifierNatural const & id );
 
+    //! Destructor
+    virtual ~IdentifierNatural()
+    {
+        // Nothing to be done here
+    }
+
     //@}
 
+    //! @name Methods
+    //@{
+
+    //! Display method
+    virtual void showMe(std::ostream& output = std::cout ) const;
+
+    //@}
 
     //! @name Get Methods
     //@{
@@ -294,9 +318,14 @@ public:
     /*!
         @param i The local Dof in the face
     */
-    ID bdLocalToGlobal( const ID& i ) const
+    ID localToGlobalMap( const ID& i ) const
     {
         return M_localToGlobal( i );
+    }
+
+    ID __attribute__ ((__deprecated__)) bdLocalToGlobal( const ID& i ) const
+    {
+        return localToGlobalMap( i );
     }
 
     //@}

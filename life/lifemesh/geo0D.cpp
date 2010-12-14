@@ -47,7 +47,7 @@ namespace LifeV
 // Constructor & Destructor
 // ==========================================
 Geo0D::Geo0D() :
-        MeshEntityWithBoundary( 0 ),
+		MeshEntityWithBoundary( 0 ),
         M_coordinates()
 {
     M_coordinates.assign( 0 );
@@ -66,9 +66,9 @@ Geo0D::Geo0D( ID identity, Real x, Real y, Real z, bool boundary )
         MeshEntityWithBoundary( identity, boundary ),
         M_coordinates()
 {
-    M_coordinates[ 0 ] = x;
-    M_coordinates[ 1 ] = y;
-    M_coordinates[ 2 ] = z;
+	M_coordinates[ 0 ] = x;
+	M_coordinates[ 1 ] = y;
+	M_coordinates[ 2 ] = z;
 }
 
 Geo0D::Geo0D( Geo0D const & Element )
