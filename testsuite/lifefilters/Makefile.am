@@ -30,30 +30,7 @@ check_PROGRAMS = test_filters
 test_filters_SOURCES = main.cpp ensightToHdf5.cpp
 
 link:
-	test -a Mesh              || ln -s $(top_srcdir)/testsuite/data/mesh/inria/ Mesh
+	test -a Mesh || ln -s $(top_srcdir)/testsuite/data/mesh/inria/ Mesh
+	test -a importDir || ln -s $(top_srcdir)/testsuite/lifefilters/ importDir
 
-EXTRA_DIST = data testsuite.at \
-  ethiersteinman.000.case                ethiersteinman_pressure.00004.000.scl\
-  ethiersteinman.000.geo                 ethiersteinman_pressure.00004.001.scl\
-  ethiersteinman.001.case                ethiersteinman_pressure.00004.002.scl\
-  ethiersteinman.001.geo                 ethiersteinman_pressure.00004.003.scl\
-  ethiersteinman.002.case                ethiersteinman_velocity.00000.000.vct\
-  ethiersteinman.002.geo                 ethiersteinman_velocity.00000.001.vct\
-  ethiersteinman.003.case                ethiersteinman_velocity.00000.002.vct\
-  ethiersteinman.003.geo                 ethiersteinman_velocity.00000.003.vct\
-  ethiersteinman_pressure.00000.000.scl  ethiersteinman_velocity.00001.000.vct\
-  ethiersteinman_pressure.00000.001.scl  ethiersteinman_velocity.00001.001.vct\
-  ethiersteinman_pressure.00000.002.scl  ethiersteinman_velocity.00001.002.vct\
-  ethiersteinman_pressure.00000.003.scl  ethiersteinman_velocity.00001.003.vct\
-  ethiersteinman_pressure.00001.000.scl  ethiersteinman_velocity.00002.000.vct\
-  ethiersteinman_pressure.00001.001.scl  ethiersteinman_velocity.00002.001.vct\
-  ethiersteinman_pressure.00001.002.scl  ethiersteinman_velocity.00002.002.vct\
-  ethiersteinman_pressure.00001.003.scl  ethiersteinman_velocity.00002.003.vct\
-  ethiersteinman_pressure.00002.000.scl  ethiersteinman_velocity.00003.000.vct\
-  ethiersteinman_pressure.00002.001.scl  ethiersteinman_velocity.00003.001.vct\
-  ethiersteinman_pressure.00002.002.scl  ethiersteinman_velocity.00003.002.vct\
-  ethiersteinman_pressure.00002.003.scl  ethiersteinman_velocity.00003.003.vct\
-  ethiersteinman_pressure.00003.000.scl  ethiersteinman_velocity.00004.000.vct\
-  ethiersteinman_pressure.00003.001.scl  ethiersteinman_velocity.00004.001.vct\
-  ethiersteinman_pressure.00003.002.scl  ethiersteinman_velocity.00004.002.vct\
-  ethiersteinman_pressure.00003.003.scl  ethiersteinman_velocity.00004.003.vct
+EXTRA_DIST = data testsuite.at 
