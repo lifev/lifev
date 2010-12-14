@@ -334,7 +334,12 @@ public:
       is mapped on the current element, while it is still in the reference element
       for quadRule::VTKexport.
      */
-    void QuadRuleVTKexport( const std::string& filename) const;
+    void quadRuleVTKexport( const std::string& filename) const;
+
+    void __attribute__ ((__deprecated__)) QuadRuleVTKexport( const std::string& filename) const
+    {
+        return quadRuleVTKexport(filename);
+    }
 
 
     //@}

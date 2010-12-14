@@ -58,7 +58,6 @@ QuadRule::QuadRule( const QuadPoint* pt, int /*id*/, std::string name,
         M_shape( shape ), M_name( name ),
         M_nbQuadPt( nbQuadPt ), M_degOfExact( degOfExact )
 {
-    CONSTRUCTOR( "QuadRule" );
     M_dimension = 3;
     for (UInt i(0); i<nbQuadPt; ++i)
     {
@@ -70,7 +69,6 @@ QuadRule::QuadRule( const QuadRule& qr ) :
         M_pt( qr.M_pt ), M_shape( qr.M_shape ), M_name( qr.M_name ),
         M_nbQuadPt( qr.M_nbQuadPt ), M_degOfExact( qr.M_degOfExact ), M_dimension(qr.M_dimension)
 {
-    CONSTRUCTOR( "QuadRule" );
 }
 
 QuadRule::QuadRule( const QuadRule& qr, const UInt dim) :
@@ -84,7 +82,6 @@ QuadRule::QuadRule( const QuadRule& qr, const UInt dim) :
         M_pt[i] = QuadPoint(qr.M_pt[i],dim);
     }
 
-    CONSTRUCTOR( "QuadRule" );
 }
 
 QuadRule::QuadRule(std::string name, ReferenceShapes shape, UInt dimension, UInt degreeOfExactness, UInt nbQuadPt, ... ) :
@@ -97,7 +94,6 @@ QuadRule::QuadRule(std::string name, ReferenceShapes shape, UInt dimension, UInt
 {
     ASSERT(dimension >= getReferenceDimension(shape)," Downgrading quadrature rule is forbidden ");
 
-    CONSTRUCTOR( "QuadRule" );
     va_list quadList;
     va_start(quadList,nbQuadPt);
     for (UInt iterArg(0); iterArg<nbQuadPt; ++iterArg)
@@ -114,7 +110,6 @@ QuadRule::QuadRule(std::string name, ReferenceShapes shape, UInt dimension, UInt
 
 QuadRule::~QuadRule()
 {
-    DESTRUCTOR( "QuadRule" );
 }
 
 // ===================================================
@@ -172,7 +167,7 @@ UInt QuadRule::checkExactness() const
     }
 }
 
-void QuadRule::VTKExport( const std::string& filename) const
+void QuadRule::vtkExport( const std::string& filename) const
 {
     std::ofstream output(filename.c_str());
     ASSERT(!output.fail(), " Unable to open the file for the export of the quadrature ");

@@ -64,7 +64,7 @@ public:
     //! @name Public Types
     //@{
 
-    typedef RefEle::Fct Fct;
+    typedef RefEle::function_Type function_Type;
 
     //@}
 
@@ -88,9 +88,9 @@ public:
             ReferenceShapes      shape,
             UInt                 nbDof,
             UInt                 nbCoor,
-            const Fct*           phi,
-            const Fct*           dPhi,
-            const Fct*           d2Phi,
+            const function_Type* phi,
+            const function_Type* dPhi,
+            const function_Type* d2Phi,
             const Real*          refCoor,
             const GeoMap*        bdMap );
 
@@ -104,7 +104,7 @@ public:
     //@{
 
     //! return the natural mapping for the boundary of the element
-    inline const GeoMap& boundaryMap() const
+    const GeoMap& boundaryMap() const
     {
         ASSERT( M_boundaryMap!=0 , "No boundary map defined" );
         return *M_boundaryMap;

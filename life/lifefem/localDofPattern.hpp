@@ -127,7 +127,7 @@ public:
     LocalDofPattern( const LocalDofPattern& localDofPattern);
 
     //! Empty destructor
-    ~LocalDofPattern()
+    virtual ~LocalDofPattern()
     {};
 
     //@}

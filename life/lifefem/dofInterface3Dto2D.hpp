@@ -114,10 +114,22 @@ public:
     (Call update once previously).
     */
     template <typename MeshType>
-    void Generate2DMesh( std::string fname, const MeshType& mesh1 ) const;
+    void generate2DMesh( std::string fname, const MeshType& mesh1 ) const;
+
+    template <typename MeshType>
+    void
+    __attribute__ ((__deprecated__))
+    Generate2DMesh( std::string fname, const MeshType& mesh1 ) const
+    {
+        return generate2DMesh(fname, mesh1 );
+    }
 
     //! removes all unuseful list (all except M_faceList). use it properly!
-    void ClearLists();
+    void clearLists();
+    void __attribute__ ((__deprecated__)) ClearLists()
+    {
+        return clearLists();
+    }
 
     //! output
     std::ostream& showMe( bool verbose = false, std::ostream& out = std::cout ) const ;
@@ -142,9 +154,14 @@ public:
     //@{
 
     //! Returns the reference of the interface
-    EntityFlag InterfaceRef() const
+    const EntityFlag& interfaceFlag() const
     {
         return M_interfaceFlag;
+    }
+
+    EntityFlag __attribute__ ((__deprecated__)) InterfaceRef() const
+    {
+        return interfaceFlag();
     }
 
     //! true if the lists have been updated.
@@ -163,7 +180,7 @@ private:
     //! Transforms the 3d index of a vertex into its 2d (interface) index.
     //! This is a simple algorithm... Find out something better some day...?
 
-    ID Vertex3Dto2D( const ID& idpoint3D ) const;
+    ID vertex3Dto2D( const ID& idpoint3D ) const;
 
     //! This method builds the connections between faces at the interface (M_faceList container)
     /*!
@@ -265,7 +282,7 @@ update( const MeshType& mesh1, const EntityFlag& flag1 )
 
 template <typename MeshType>
 void DofInterface3Dto2D::
-Generate2DMesh( std::string fname, const MeshType& mesh1 ) const
+generate2DMesh( std::string fname, const MeshType& mesh1 ) const
 {
 
     ASSERT_PRE( M_finalized, "The lists of vertices and faces must be finalized before generating the interface mesh." );
@@ -320,7 +337,7 @@ Generate2DMesh( std::string fname, const MeshType& mesh1 ) const
         for ( ID vertex = 1 ; vertex <= numVertexPerFace ; ++ vertex )
         {
             idpoint3D = mesh1.boundaryFace( idface3D ).point( vertex ).id();
-            idpoint2D = Vertex3Dto2D( idpoint3D ); //Simple algorithm (of Search in the list...)
+            idpoint2D = vertex3Dto2D( idpoint3D ); //Simple algorithm (of Search in the list...)
             ofile << idpoint2D << " ";
         }
         ofile << mesh1.boundaryFace( idface3D ).marker() << std::endl;
@@ -492,7 +509,7 @@ updateDofConnections( const MeshType& mesh1 )
     {
 //        std::cout << it->first << " " << it->second << ". ";
         std::pair<ID, ID> _locDof(it->first, ii);
-        M_locDofMap.insert(_locDof);
+        M_localDofMap.insert(_locDof);
     }
 }
 

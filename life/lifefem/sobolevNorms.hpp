@@ -47,23 +47,6 @@
 namespace LifeV
 {
 
-inline Real
-elemL22( boost::function<Real( Real, Real, Real, Real, UInt )> fct,
-         const CurrentFE& fe, const Real t, const UInt nbcomp )
-{
-    UInt ic;
-    Real s = 0., f, x, y, z;
-    for ( UInt ig = 0; ig < fe.nbQuadPt(); ++ig )
-    {
-        fe.coorQuadPt( x, y, z, ig );
-        for ( ic = 0; ic < nbcomp; ic++ )
-        {
-            f = fct( t, x, y, z, ic + 1 );
-            s += f * f * fe.weightDet( ig );
-        }
-    }
-    return s;
-}
 
 //! returns the square of the L2 norm of u on the current element
 // TO BE DELETED
@@ -92,8 +75,8 @@ elem_L2_2( const VectorType & u, const CurrentFE& fe, const DofType& dof )
 //! version for vectorial problem
 template <typename VectorType>
 Real
-elem_L2_2( const VectorType & u, const CurrentFE& fe, const Dof& dof,
-           const UInt nbComp )
+elementaryL2NormSquare( const VectorType & u, const CurrentFE& fe, const Dof& dof,
+                        const UInt nbComp )
 {
     Int dofID;
     UInt eleID (fe.currentLocalId());
@@ -116,10 +99,20 @@ elem_L2_2( const VectorType & u, const CurrentFE& fe, const Dof& dof,
     return sum;
 }
 
+
+template <typename VectorType>
+Real
+__attribute__ (( __deprecated__))
+elem_L2_2( const VectorType & u, const CurrentFE& fe, const Dof& dof,
+           const UInt nbComp )
+{
+    return elementaryL2NormSquare(u,fe,dof,nbComp);
+}
+
 //! returns the square of the L2 norm of fct on the current element
 inline Real
-elem_L2_2( boost::function<Real( Real,Real,Real )> fct,
-           const CurrentFE& fe )
+elementaryFctL2NormSquare( boost::function<Real( Real,Real,Real )> fct,
+                           const CurrentFE& fe )
 {
     Real sum(0.0);
     Real f;
@@ -135,10 +128,19 @@ elem_L2_2( boost::function<Real( Real,Real,Real )> fct,
     return sum;
 }
 
+inline Real
+__attribute__ (( __deprecated__))
+elem_L2_2( boost::function<Real( Real,Real,Real )> fct,
+           const CurrentFE& fe )
+{
+    return elementaryFctL2NormSquare(fct,fe);
+}
+
+
 //! for time dependent+vectorial.
 inline Real
-elem_L2_2( boost::function<Real( Real, Real, Real, Real, UInt )> fct,
-           const CurrentFE& fe, const Real t, const UInt nbComp )
+elementaryFctL2NormSquare( boost::function<Real( Real, Real, Real, Real, UInt )> fct,
+                           const CurrentFE& fe, const Real t, const UInt nbComp )
 {
     Real sum(0.0);
     Real f;
@@ -156,6 +158,24 @@ elem_L2_2( boost::function<Real( Real, Real, Real, Real, UInt )> fct,
     }
     return sum;
 }
+
+inline Real
+__attribute__ (( __deprecated__))
+elem_L2_2( boost::function<Real( Real, Real, Real, Real, UInt )> fct,
+           const CurrentFE& fe, const Real t, const UInt nbComp )
+{
+    return elementaryFctL2NormSquare(fct,fe,t,nbComp);
+}
+
+
+inline Real
+__attribute__ (( __deprecated__))
+elemL22( boost::function<Real( Real, Real, Real, Real, UInt )> fct,
+         const CurrentFE& fe, const Real t, const UInt nbcomp )
+{
+    return elementaryFctL2NormSquare(fct,fe,t,nbcomp);
+}
+
 
 //! returns the square of the L2 norm of fct on the current element
 // TO BE DELETED (duplicated)
@@ -195,7 +215,7 @@ elem_f_L2_2( boost::function<Real( Real, Real, Real, Real, UInt )> fct,
 //! returns the square of the H1 norm of u on the current element
 template <typename VectorType>
 Real
-elem_H1_2( const VectorType & u, const CurrentFE& fe, const Dof& dof, const int nbComp=1 )
+elementaryH1NormSquare( const VectorType & u, const CurrentFE& fe, const Dof& dof, const int nbComp=1 )
 {
     UInt eleID (fe.currentLocalId());
     Real sum (0.0);
@@ -235,10 +255,19 @@ elem_H1_2( const VectorType & u, const CurrentFE& fe, const Dof& dof, const int 
     return sum;
 }
 
-//! returns the square of the H1 norm of fct on the current element
-template<typename UsrFct>
+template <typename VectorType>
 Real
-elem_H1_2( const UsrFct& fct, const CurrentFE& fe )
+__attribute__ (( __deprecated__))
+elem_H1_2( const VectorType & u, const CurrentFE& fe, const Dof& dof, const int nbComp=1 )
+{
+    return elementaryH1NormSquare(u,fe,dof,nbComp);
+}
+
+
+//! returns the square of the H1 norm of fct on the current element
+template<typename FunctionType>
+Real
+elementaryFctH1NormSquare( const FunctionType& fct, const CurrentFE& fe )
 {
     Real sum(0.0);
     Real sum2(0.0);
@@ -259,9 +288,18 @@ elem_H1_2( const UsrFct& fct, const CurrentFE& fe )
     return sum;
 }
 
+template<typename UsrFct>
+Real
+__attribute__ (( __deprecated__))
+elem_H1_2( const UsrFct& fct, const CurrentFE& fe )
+{
+    return elementaryFctH1NormSquare(fct,fe);
+}
+
+
 //! returns the square of the H1 norm of fct on the current element (time-dependent case)
-template <typename UsrFct>
-Real elem_H1_2( const UsrFct& fct, const CurrentFE& fe, const Real t, const UInt nbComp )
+template <typename FunctionType>
+Real elementaryFctH1NormSquare( const FunctionType& fct, const CurrentFE& fe, const Real t, const UInt nbComp )
 {
     Real sum(0.0);
     Real sum2(0.0);
@@ -286,13 +324,20 @@ Real elem_H1_2( const UsrFct& fct, const CurrentFE& fe, const Real t, const UInt
     return sum;
 }
 
+template <typename UsrFct>
+__attribute__ (( __deprecated__))
+Real elem_H1_2( const UsrFct& fct, const CurrentFE& fe, const Real t, const UInt nbComp )
+{
+    return elementaryFctH1NormSquare(fct,fe,t,nbComp);
+}
+
 
 //! returns the square of the L2 norm of (u-fct) on the current element
 template <typename VectorType>
-Real elem_L2_diff_2( VectorType & u,
-                     boost::function<Real( Real, Real, Real )> fct,
-                     const CurrentFE& fe,
-                     const Dof& dof )
+Real elementaryDifferenceL2NormSquare( VectorType & u,
+                                       boost::function<Real( Real, Real, Real )> fct,
+                                       const CurrentFE& fe,
+                                       const Dof& dof )
 {
     UInt eleID (fe.currentLocalId());
     Real sum(0.0);
@@ -317,13 +362,23 @@ Real elem_L2_diff_2( VectorType & u,
     return sum;
 }
 
+template <typename VectorType>
+__attribute__ (( __deprecated__))
+Real elem_L2_diff_2( VectorType & u,
+                     boost::function<Real( Real, Real, Real )> fct,
+                     const CurrentFE& fe,
+                     const Dof& dof )
+{
+    return elementaryDifferenceL2NormSquare(u,fct,fe,dof);
+}
+
 //! returns the square of the L2 norm of (u-fct) on the current element
 //! for time dependent+vectorial
 template <typename VectorType>
-Real elem_L2_diff_2( VectorType & u,
-                     boost::function<Real( Real, Real, Real, Real, UInt )> fct,
-                     const CurrentFE& fe,
-                     const Dof& dof, const Real t, const UInt nbComp )
+Real elementaryDifferenceL2NormSquare( VectorType & u,
+                                       boost::function<Real( Real, Real, Real, Real, UInt )> fct,
+                                       const CurrentFE& fe,
+                                       const Dof& dof, const Real t, const UInt nbComp )
 {
     // returns the square of the L2 norm of (u-fct) on the current element
 
@@ -353,10 +408,22 @@ Real elem_L2_diff_2( VectorType & u,
     return sum;
 }
 
+template <typename VectorType>
+Real
+__attribute__ (( __deprecated__))
+elem_L2_diff_2( VectorType & u,
+                     boost::function<Real( Real, Real, Real, Real, UInt )> fct,
+                     const CurrentFE& fe,
+                     const Dof& dof, const Real t, const UInt nbComp )
+{
+    return elementaryDifferenceL2NormSquare(u,fct,fe,dof,t,nbComp);
+}
+
+
 //! returns the square of the H1 norm of (u-fct) on the current element
 template <typename VectorType, typename UsrFct>
-Real elem_H1_diff_2( const VectorType & u, const UsrFct& fct, const CurrentFE& fe,
-                     const Dof& dof )
+Real elementaryDifferenceH1NormSquare( const VectorType & u, const UsrFct& fct, const CurrentFE& fe,
+                                       const Dof& dof )
 {
     UInt eleID (fe.currentLocalId());
     Real sum(0.0);
@@ -401,10 +468,19 @@ Real elem_H1_diff_2( const VectorType & u, const UsrFct& fct, const CurrentFE& f
     return sum;
 }
 
+template <typename VectorType, typename UsrFct>
+Real
+__attribute__ (( __deprecated__))
+elem_H1_diff_2( const VectorType & u, const UsrFct& fct, const CurrentFE& fe,
+                                  const Dof& dof )
+{
+    return elementaryDifferenceH1NormSquare(u,fct,fe,dof);
+}
+
 //! returns the square of the H1 norm of (u-fct) on the current element  (time-dependent case)
 template <typename VectorType, typename UsrFct>
-Real elem_H1_diff_2( const VectorType & u, const UsrFct& fct, const CurrentFE& fe,
-                     const Dof& dof, const Real t, const UInt nbComp )
+Real elementaryDifferenceH1NormSquare( const VectorType & u, const UsrFct& fct, const CurrentFE& fe,
+                                       const Dof& dof, const Real t, const UInt nbComp )
 {
     UInt eleID = fe.currentLocalId();
     Real sum(0.0);
@@ -453,11 +529,19 @@ Real elem_H1_diff_2( const VectorType & u, const UsrFct& fct, const CurrentFE& f
     return sum;
 }
 
+template <typename VectorType, typename UsrFct>
+Real
+__attribute__ (( __deprecated__))
+elem_H1_diff_2( const VectorType & u, const UsrFct& fct, const CurrentFE& fe,
+                     const Dof& dof, const Real t, const UInt nbComp )
+{
+    return elementaryDifferenceH1NormSquare(u,fct,fe,dof,t,nbComp);
+}
+
 //! returns the integral of (u-fct) on the current element
 //! for time dependent+vectorial
-//! THIS IS WRONG if nbComp != 1 !!!
 template <typename VectorType>
-Real elem_integral_diff( VectorType & u,
+Real elementaryDifferenceIntegral( VectorType & u,
                          boost::function<Real( Real, Real, Real, Real, UInt )> fct,
                          const CurrentFE& fe,
                          const Dof& dof, const Real t, const UInt nbComp )
@@ -485,13 +569,23 @@ Real elem_integral_diff( VectorType & u,
     return sum;
 }
 
+template <typename VectorType>
+Real
+__attribute__ (( __deprecated__))
+elem_integral_diff( VectorType & u,
+                         boost::function<Real( Real, Real, Real, Real, UInt )> fct,
+                         const CurrentFE& fe,
+                         const Dof& dof, const Real t, const UInt nbComp )
+{
+    return elementaryDifferenceIntegral(u,fct,fe,dof,t,nbComp);
+}
+
 //! returns the integral of u on the current element
 //! for time dependent+vectorial
-//! WRONG if nbComp is not 1 !!
 template <typename VectorType>
-Real elem_integral( VectorType & u,
-                    const CurrentFE& fe,
-                    const Dof& dof, const UInt nbComp )
+Real elementaryIntegral( VectorType & u,
+                         const CurrentFE& fe,
+                         const Dof& dof, const UInt nbComp )
 {
     UInt eleID (fe.currentLocalId());
     Real sum(0.0);
@@ -511,13 +605,23 @@ Real elem_integral( VectorType & u,
     return sum;
 }
 
+template <typename VectorType>
+Real
+__attribute__ (( __deprecated__))
+elem_integral( VectorType & u,
+                    const CurrentFE& fe,
+                    const Dof& dof, const UInt nbComp )
+{
+    return elementaryIntegral(u,fe,dof,nbComp);
+}
+
 //! returns the integral of fct on the current element
 //! for time dependent+vectorial
 //! WRONG if nbComp is not 1 !!
 inline Real
-elem_integral( boost::function<Real( Real, Real, Real,
-                                     Real, UInt )> fct,
-               const CurrentFE& fe, const Real t, const UInt nbComp )
+elementaryFctIntegral( boost::function<Real( Real, Real, Real,
+                                             Real, UInt )> fct,
+                       const CurrentFE& fe, const Real t, const UInt nbComp )
 {
     Real sum(0.0);
     Real x;
@@ -530,6 +634,15 @@ elem_integral( boost::function<Real( Real, Real, Real,
         sum += fct( t, x, y, z, nbComp ) * fe.weightDet( iQuadPt );
     }
     return sum;
+}
+
+inline Real
+__attribute__ (( __deprecated__))
+elem_integral( boost::function<Real( Real, Real, Real,
+                                     Real, UInt )> fct,
+               const CurrentFE& fe, const Real t, const UInt nbComp )
+{
+    return elementaryFctIntegral(fct,fe,t,nbComp);
 }
 
 } // namespace LifeV

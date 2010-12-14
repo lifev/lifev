@@ -101,7 +101,7 @@ DofInterface3Dto2D::setup( const LocalDofPattern& refFE1, const Dof& dof1 )
     M_finalized = false;
 }
 
-void DofInterface3Dto2D::ClearLists()
+void DofInterface3Dto2D::clearLists()
 {
     M_vertexPerFaceList.clear();
     M_vertexList.clear();
@@ -169,7 +169,7 @@ DofInterface3Dto2D & DofInterface3Dto2D::operator=( const DofInterface3Dto2D& do
     M_faceList = dofi.M_faceList;
     M_vertexPerFaceList = dofi.M_vertexPerFaceList; // (empty)
     M_vertexList = dofi.M_vertexList;
-    M_locDofMap = dofi.M_locDofMap;
+    M_localDofMap = dofi.M_localDofMap;
     M_finalized = dofi.M_finalized;
 
     return *this;
@@ -180,7 +180,7 @@ DofInterface3Dto2D & DofInterface3Dto2D::operator=( const DofInterface3Dto2D& do
 // Private Methods
 // ===================================================
 
-ID DofInterface3Dto2D::Vertex3Dto2D( const ID& idpoint3D ) const
+ID DofInterface3Dto2D::vertex3Dto2D( const ID& idpoint3D ) const
 {
     ASSERT_PRE( M_finalized, "The list of vertices must be finalized before accessing to the interface vertices." );
     for ( std::list< std::pair<ID, ID> >::const_iterator it = M_vertexList.begin(); it != M_vertexList.end(); ++it )

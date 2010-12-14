@@ -156,7 +156,7 @@ public:
     //@{
 
     //! This method returns the corresponding dof object when interpolation is used
-    UInt numTotalDof() const {return M_dof->numTotalDof();}
+    const UInt& numTotalDof() const {return M_dof->numTotalDof();}
 
     //@}
 
@@ -680,7 +680,7 @@ void DofInterface3Dto3D::updateDofConnections( const Mesh& mesh1, const Dof& dof
     // Updating the map containter with the connections
     for ( Iterator i = M_dofToDofConnectionList.begin(); i != M_dofToDofConnectionList.end(); ++i )
     {
-        M_locDofMap[ i->first ] = i->second;
+        M_localDofMap[ i->first ] = i->second;
     }
 
     // Saving memory

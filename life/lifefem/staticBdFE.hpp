@@ -142,7 +142,7 @@ public:
       return true if a quadrature rule has been given
       (can ONLY be used if TEST_PRE is defined at compilation time)
     */
-    bool hasQR() const
+    const bool& hasQR() const
     {
         return M_hasQR;
     }
@@ -150,7 +150,7 @@ public:
       return true if the measure has been updated
       (can ONLY be used if TEST_PRE is defined at compilation time)
     */
-    bool hasMeas() const
+    const bool& hasMeas() const
     {
         return M_hasMeasure;
     }
@@ -158,7 +158,7 @@ public:
       return true if the first derivatives have been updated
       (can ONLY be used if TEST_PRE is defined at compilation time)
     */
-    bool hasFirstDeriv() const
+    const bool& hasFirstDeriv() const
     {
         return M_hasFirstDerivative;
     }
@@ -166,7 +166,7 @@ public:
       return true if the tangents have been updated
       (can ONLY be used if TEST_PRE is defined at compilation time)
     */
-    bool hasTangent() const
+    const bool& hasTangent() const
     {
         return M_hasTangent;
     }
@@ -174,7 +174,7 @@ public:
       return true if the normal has been updated
       (can ONLY be used if TEST_PRE is defined at compilation time)
     */
-    bool hasNormal() const
+    const bool& hasNormal() const
     {
         return M_hasNormal;
     }
@@ -182,7 +182,7 @@ public:
       return true if the coordinate of the quadrature points have been updated
       (can ONLY be used if TEST_PRE is defined at compilation time)
     */
-    bool hasQuadPtCoor() const
+    const bool& hasQuadPtCoor() const
     {
         return M_hasQuadPtCoor;
     }
@@ -190,7 +190,7 @@ public:
     /*!
       return the id of the current element (updated with the update* functions)
     */
-    UInt currentId() const
+    const UInt& currentId() const
     {
         return M_currentID;
     }

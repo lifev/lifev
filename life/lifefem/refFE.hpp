@@ -117,7 +117,7 @@ public:
     //! @name Public Types
     //@{
 
-    typedef RefEle::Fct Fct;
+    typedef RefEle::function_Type function_Type;
 
     //@}
 
@@ -164,10 +164,10 @@ public:
            Int                  nbDof,
            Int                  nbCoor,
            Int                  FEDim,
-           const Fct*           phi,
-           const Fct*           dPhi,
-           const Fct*           d2Phi,
-           const Fct*           divPhi,
+           const function_Type* phi,
+           const function_Type* dPhi,
+           const function_Type* d2Phi,
+           const function_Type* divPhi,
            const Real*          refCoor,
            DofPatternType       patternType,
            const RefFE*         bdRefFE );

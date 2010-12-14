@@ -46,16 +46,15 @@ namespace LifeV
 
 RefFEScalar::RefFEScalar( std::string name, FE_TYPE type, ReferenceShapes shape,
                           Int nbDofPerVertex, Int nbDofPerEdge, Int nbDofPerFace,
-                          Int nbDofPerVolume, Int nbDof, Int nbCoor, const Fct* phi,
-                          const Fct* dPhi, const Fct* d2Phi, const Real* refCoor,
+                          Int nbDofPerVolume, Int nbDof, Int nbCoor, const function_Type* phi,
+                          const function_Type* dPhi, const function_Type* d2Phi, const Real* refCoor,
                           DofPatternType patternType,
                           const RefFE* bdRefFE, const ValuesToValuesFct nodalToFE ) :
         RefFE( name, type, shape,nbDofPerVertex,nbDofPerEdge,nbDofPerFace,
-               nbDofPerVolume, nbDof, nbCoor,1, phi, dPhi, d2Phi, static_cast<Fct*>(NULL), refCoor,
+               nbDofPerVolume, nbDof, nbCoor,1, phi, dPhi, d2Phi, static_cast<function_Type*>(NULL), refCoor,
                patternType, bdRefFE ),
         M_nodalToFEValues(nodalToFE)
 {
-    CONSTRUCTOR( "RefScalar" );
 }
 
 } // Namespace LifeV

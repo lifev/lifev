@@ -224,7 +224,12 @@ public:
 
       @param filename The name of the file to be created.
      */
-    void VTKExport( const std::string& filename) const;
+    void vtkExport( const std::string& filename) const;
+
+    void VTKExport( const std::string& filename) const
+    {
+        return vtkExport(filename);
+    }
 
     //@}
 

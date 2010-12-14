@@ -50,7 +50,7 @@
 namespace LifeV
 {
 
-//! quadPoint - Simple container for a point of a quadrature rule.
+//! QuadPoint - Simple container for a point of a quadrature rule.
 /*!
     @author Samuel Quinodoz
     @date 05/2010
@@ -170,7 +170,7 @@ public:
     QuadPoint(const QuadPoint& qp, const UInt spaceDim);
 
     //! Destructor
-    ~QuadPoint() {};
+    virtual ~QuadPoint() {};
 
     //@}
 

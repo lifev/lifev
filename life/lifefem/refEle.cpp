@@ -44,8 +44,9 @@ namespace LifeV
 // Constructors & Destructor
 // ===================================================
 
-RefEle::RefEle( std::string name, ReferenceShapes shape, UInt nbDof, UInt nbCoor, UInt FEDim,
-                const Fct* phi, const Fct* dPhi, const Fct* d2Phi, const Fct* divPhi, const Real* refCoor ) :
+RefEle::RefEle( std::string name, ReferenceShapes shape, UInt nbDof, UInt nbCoor, UInt feDim,
+                const function_Type* phi, const function_Type* dPhi, const function_Type* d2Phi,
+                const function_Type* divPhi, const Real* refCoor ) :
         M_phi( phi ),
         M_dPhi( dPhi ),
         M_d2Phi( d2Phi ),
@@ -56,14 +57,12 @@ RefEle::RefEle( std::string name, ReferenceShapes shape, UInt nbDof, UInt nbCoor
         M_shape( shape ),
         M_nbDof( nbDof ),
         M_nbCoor( nbCoor ),
-        M_FEDim( FEDim )
+        M_feDim( feDim )
 {
-    CONSTRUCTOR( "RefEle" );
 }
 
 RefEle::~RefEle()
 {
-    DESTRUCTOR( "RefEle" );
 }
 
 // ===================================================

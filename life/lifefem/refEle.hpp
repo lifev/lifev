@@ -29,9 +29,10 @@
     @brief Base class for RefFE and GeoMap
 
     @author Jean-Frederic Gerbeau
+            Samuel Quinodoz <samuel.quinodoz@epfl.ch>
     @date 00-04-2002
 
-    @contributor Samuel Quinodoz <samuel.quinodoz@epfl.ch>
+    @contributor
     @mantainer Samuel Quinodoz <samuel.quinodoz@epfl.ch>
  */
 
@@ -74,7 +75,7 @@ public:
     //@{
 
     // Some typedefs for functions
-    typedef Real ( * Fct ) ( const GeoVector& );
+    typedef Real ( * function_Type ) ( const GeoVector& );
 
     //@}
 
@@ -92,8 +93,9 @@ public:
       @param d2Phi Array of the second derivatives of the basis functions
       @param refCoor Array of the reference coordinates for this reference element
      */
-    RefEle( std::string name, ReferenceShapes shape, UInt nbDof, UInt nbCoor, UInt FEDim,
-            const Fct* phi, const Fct* dPhi, const Fct* d2Phi, const Fct* divPhi, const Real* refCoor);
+    RefEle( std::string name, ReferenceShapes shape, UInt nbDof, UInt nbCoor, UInt feDim,
+            const function_Type* phi, const function_Type* dPhi, const function_Type* d2Phi,
+            const function_Type* divPhi, const Real* refCoor);
 
     //! Destructor
     virtual ~RefEle();
@@ -142,8 +144,8 @@ public:
     //! return the value of the component icoor-th of the i-th basis function on point v.
     Real phi( UInt i, UInt icoor, const GeoVector& v ) const
     {
-        ASSERT_BD( i < M_nbDof && icoor < M_FEDim )
-        return M_phi[ i * M_FEDim + icoor ] ( v );
+        ASSERT_BD( i < M_nbDof && icoor < M_feDim )
+        return M_phi[ i * M_feDim + icoor ] ( v );
     }
 
     //! return the value of the icoor-th derivative of the i-th basis function on point v
@@ -170,22 +172,22 @@ public:
     //! Check if the refEle has phi functions
     bool hasPhi() const
     {
-        return ( M_phi != static_cast<Fct*>(NULL) );
+        return ( M_phi != static_cast<function_Type*>(NULL) );
     }
     //! Check if the refEle has dPhi functions
     bool hasDPhi() const
     {
-        return ( M_dPhi != static_cast<Fct*>(NULL) );
+        return ( M_dPhi != static_cast<function_Type*>(NULL) );
     }
     //! Check if the refEle has d2Phi functions
     bool hasD2Phi() const
     {
-        return ( M_d2Phi != static_cast<Fct*>(NULL) );
+        return ( M_d2Phi != static_cast<function_Type*>(NULL) );
     }
     //! Check if the refEle has divPhi functions
     bool hasDivPhi() const
     {
-        return ( M_divPhi != static_cast<Fct*>(NULL) );
+        return ( M_divPhi != static_cast<function_Type*>(NULL) );
     }
 
     //! Method for transforming nodal values into FE values
@@ -241,10 +243,15 @@ public:
     }
 
     //! Return the dimension of the FE (scalar vs vectorial FE)
-    const UInt& FEDim() const
+    const UInt& feDim() const
     {
-        return M_FEDim;
+        return M_feDim;
     }
+    const UInt& __attribute__ (( __deprecated__)) FEDim() const
+    {
+        return feDim();
+    }
+
 
     //! Return the shape of the element
     const ReferenceShapes& shape() const
@@ -271,12 +278,12 @@ public:
     //! return the value of the component icoor-th of the i-th basis function on point (x,y,z).
     inline Real phi( UInt i, UInt icoor, const Real& x, const Real& y, const Real& z ) const
     {
-        ASSERT_BD( i < M_nbDof && icoor < M_FEDim )
+        ASSERT_BD( i < M_nbDof && icoor < M_feDim )
         GeoVector v(3);
         v[0]=x;
         v[1]=y;
         v[2]=z;
-        return M_phi[ i * M_FEDim + icoor ] ( v );
+        return M_phi[ i * M_feDim + icoor ] ( v );
     }
 
     //! return the value of the icoor-th derivative of the i-th basis function on point (x,y,z)
@@ -327,16 +334,16 @@ private:
 
 
     //! pointer on the basis functions
-    const Fct* M_phi;
+    const function_Type* M_phi;
 
     //! pointer on the derivatives of the basis functions
-    const Fct* M_dPhi;
+    const function_Type* M_dPhi;
 
     //! pointer on the second derivatives of the basis functions
-    const Fct* M_d2Phi;
+    const function_Type* M_d2Phi;
 
     //! pointer on the divergence of the basis functions
-    const Fct* M_divPhi;
+    const function_Type* M_divPhi;
 
     //! reference coordinates. Order: xi_1,eta_1,zeta_1,xi_2,eta_2,zeta_2,...
     const Real* M_refCoor;
@@ -356,7 +363,7 @@ private:
     const UInt M_nbCoor;
 
     //! Number of dimension of the FE (1 for scalar FE, more for vectorial FE)
-    const UInt M_FEDim;
+    const UInt M_feDim;
 
 };
 
@@ -383,17 +390,17 @@ static const Real refcoor_P0_0D[ 3 ] =
     1. , 0. , 0.
 };
 
-static const RefEle::Fct fct_P0_0D[ 1 ] =
+static const RefEle::function_Type fct_P0_0D[ 1 ] =
 {
     fct1_P0_0D
 };
 
-static const RefEle::Fct derfct_P0_0D[ 1 ] =
+static const RefEle::function_Type derfct_P0_0D[ 1 ] =
 {
     derfct1_P0_0D
 };
 
-static const RefEle::Fct der2fct_P0_0D[ 1 ] =
+static const RefEle::function_Type der2fct_P0_0D[ 1 ] =
 {
     der2fct1_P0_0D
 };
@@ -420,15 +427,15 @@ static const Real refcoor_P1_1D[ 6 ] =
     1. , 0. , 0.
 };
 
-static const RefEle::Fct fct_P1_1D[ 2 ] =
+static const RefEle::function_Type fct_P1_1D[ 2 ] =
 {
     fct1_P1_1D, fct2_P1_1D
 };
-static const RefEle::Fct derfct_P1_1D[ 2 ] =
+static const RefEle::function_Type derfct_P1_1D[ 2 ] =
 {
     derfct1_1_P1_1D, derfct2_1_P1_1D
 };
-static const RefEle::Fct der2fct_P1_1D[ 2 ] =
+static const RefEle::function_Type der2fct_P1_1D[ 2 ] =
 {
     der2fct1_P1_1D, der2fct1_P1_1D
 };
@@ -459,15 +466,15 @@ static const Real refcoor_P2_1D[ 9 ] =
     1. , 0. , 0.,
     0.5 , 0. , 0.
 };
-static const RefEle::Fct fct_P2_1D[ 3 ] =
+static const RefEle::function_Type fct_P2_1D[ 3 ] =
 {
     fct1_P2_1D, fct2_P2_1D, fct3_P2_1D
 };
-static const RefEle::Fct derfct_P2_1D[ 3 ] =
+static const RefEle::function_Type derfct_P2_1D[ 3 ] =
 {
     derfct1_1_P2_1D, derfct2_1_P2_1D, derfct3_1_P2_1D
 };
-static const RefEle::Fct der2fct_P2_1D[ 3 ] =
+static const RefEle::function_Type der2fct_P2_1D[ 3 ] =
 {
     der2fct1_11_P2_1D, der2fct2_11_P2_1D, der2fct3_11_P2_1D
 };
@@ -495,17 +502,17 @@ static const Real refcoor_P0_2D[ 3 ] =
 }
 ;  // check this : gravity center??
 
-static const RefEle::Fct fct_P0_2D[ 1 ] =
+static const RefEle::function_Type fct_P0_2D[ 1 ] =
 {
     fct1_P0_2D
 };
 
-static const RefEle::Fct derfct_P0_2D[ 2 ] =
+static const RefEle::function_Type derfct_P0_2D[ 2 ] =
 {
     derfct1_P0_2D, derfct1_P0_2D
 };
 
-static const RefEle::Fct der2fct_P0_2D[ 4 ] =
+static const RefEle::function_Type der2fct_P0_2D[ 4 ] =
 {
     der2fct1_P0_2D, der2fct1_P0_2D,
     der2fct1_P0_2D, der2fct1_P0_2D
@@ -544,18 +551,18 @@ static const Real refcoor_P1_2D[ 9 ] =
     0. , 1. , 0.
 };
 
-static const RefEle::Fct fct_P1_2D[ 3 ] =
+static const RefEle::function_Type fct_P1_2D[ 3 ] =
 {
     fct1_P1_2D, fct2_P1_2D, fct3_P1_2D
 };
 
-static const RefEle::Fct derfct_P1_2D[ 6 ] =
+static const RefEle::function_Type derfct_P1_2D[ 6 ] =
 {
     derfct1_1_P1_2D, derfct1_2_P1_2D,
     derfct2_1_P1_2D, derfct2_2_P1_2D,
     derfct3_1_P1_2D, derfct3_2_P1_2D
 };
-static const RefEle::Fct der2fct_P1_2D[ 12 ] =
+static const RefEle::function_Type der2fct_P1_2D[ 12 ] =
 {
     der2fctx_xx_P1_2D, der2fctx_xx_P1_2D, der2fctx_xx_P1_2D, der2fctx_xx_P1_2D,
     der2fctx_xx_P1_2D, der2fctx_xx_P1_2D, der2fctx_xx_P1_2D, der2fctx_xx_P1_2D,
@@ -633,13 +640,13 @@ static const Real refcoor_P2_2D[ 18 ] =
     0. , 0.5 , 0.
 };
 
-static const RefEle::Fct fct_P2_2D[ 6 ] =
+static const RefEle::function_Type fct_P2_2D[ 6 ] =
 {
     fct1_P2_2D, fct2_P2_2D, fct3_P2_2D,
     fct4_P2_2D, fct5_P2_2D, fct6_P2_2D
 };
 
-static const RefEle::Fct derfct_P2_2D[ 12 ] =
+static const RefEle::function_Type derfct_P2_2D[ 12 ] =
 {
     derfct1_1_P2_2D, derfct1_2_P2_2D,
     derfct2_1_P2_2D, derfct2_2_P2_2D,
@@ -648,7 +655,7 @@ static const RefEle::Fct derfct_P2_2D[ 12 ] =
     derfct5_1_P2_2D, derfct5_2_P2_2D,
     derfct6_1_P2_2D, derfct6_2_P2_2D
 };
-static const RefEle::Fct der2fct_P2_2D[ 24 ] =
+static const RefEle::function_Type der2fct_P2_2D[ 24 ] =
 {
     der2fct1_11_P2_2D, der2fct1_12_P2_2D, der2fct1_21_P2_2D, der2fct1_22_P2_2D,
     der2fct2_11_P2_2D, der2fct2_12_P2_2D, der2fct2_21_P2_2D, der2fct2_22_P2_2D,
@@ -682,17 +689,17 @@ static const Real refcoor_Q0_2D[ 3 ] =
     0.5, 0.5, 0.
 };
 
-static const RefEle::Fct fct_Q0_2D[ 1 ] =
+static const RefEle::function_Type fct_Q0_2D[ 1 ] =
 {
     fct1_Q0_2D
 };
 
-static const RefEle::Fct derfct_Q0_2D[ 2 ] =
+static const RefEle::function_Type derfct_Q0_2D[ 2 ] =
 {
     derfct1_Q0_2D, derfct1_Q0_2D
 };
 
-static const RefEle::Fct der2fct_Q0_2D[ 4 ] =
+static const RefEle::function_Type der2fct_Q0_2D[ 4 ] =
 {
     der2fct1_Q0_2D, der2fct1_Q0_2D,
     der2fct1_Q0_2D, der2fct1_Q0_2D
@@ -735,19 +742,19 @@ static const Real refcoor_Q1_2D[ 12 ] =
     0. , 1. , 0.
 };
 
-static const RefEle::Fct fct_Q1_2D[ 4 ] =
+static const RefEle::function_Type fct_Q1_2D[ 4 ] =
 {
     fct1_Q1_2D, fct2_Q1_2D, fct3_Q1_2D, fct4_Q1_2D
 };
 
-static const RefEle::Fct derfct_Q1_2D[ 8 ] =
+static const RefEle::function_Type derfct_Q1_2D[ 8 ] =
 {
     derfct1_1_Q1_2D, derfct1_2_Q1_2D,
     derfct2_1_Q1_2D, derfct2_2_Q1_2D,
     derfct3_1_Q1_2D, derfct3_2_Q1_2D,
     derfct4_1_Q1_2D, derfct4_2_Q1_2D
 };
-static const RefEle::Fct der2fct_Q1_2D[ 16 ] =
+static const RefEle::function_Type der2fct_Q1_2D[ 16 ] =
 {
     der2fctx_xx_Q1_2D, der2fctx_xx_Q1_2D, der2fctx_xx_Q1_2D, der2fctx_xx_Q1_2D,
     der2fctx_xx_Q1_2D, der2fctx_xx_Q1_2D, der2fctx_xx_Q1_2D, der2fctx_xx_Q1_2D,
@@ -855,7 +862,7 @@ static const Real refcoor_Q2_2D[ 27 ] =
     0.5 , 0.5 , 0.
 };
 
-static const RefEle::Fct fct_Q2_2D[ 9 ] =
+static const RefEle::function_Type fct_Q2_2D[ 9 ] =
 {
     fct1_Q2_2D, fct2_Q2_2D, fct3_Q2_2D, fct4_Q2_2D,
     fct5_Q2_2D, fct6_Q2_2D, fct7_Q2_2D, fct8_Q2_2D,
@@ -863,7 +870,7 @@ static const RefEle::Fct fct_Q2_2D[ 9 ] =
 };
 
 
-static const RefEle::Fct derfct_Q2_2D[ 18 ] =
+static const RefEle::function_Type derfct_Q2_2D[ 18 ] =
 {
     derfct1_1_Q2_2D, derfct1_2_Q2_2D,
     derfct2_1_Q2_2D, derfct2_2_Q2_2D,
@@ -876,7 +883,7 @@ static const RefEle::Fct derfct_Q2_2D[ 18 ] =
     derfct9_1_Q2_2D, derfct9_2_Q2_2D
 };
 
-static const RefEle::Fct der2fct_Q2_2D[ 36 ] =
+static const RefEle::function_Type der2fct_Q2_2D[ 36 ] =
 {
     der2fct1_11_Q2_2D, der2fct1_12_Q2_2D, der2fct1_21_Q2_2D, der2fct1_22_Q2_2D,
     der2fct2_11_Q2_2D, der2fct2_12_Q2_2D, der2fct2_21_Q2_2D, der2fct2_22_Q2_2D,
@@ -915,16 +922,16 @@ static const Real refcoor_P0_3D[ 3 ] =
     0.25 , 0.25 , 0.25
 };
 
-static const RefEle::Fct fct_P0_3D[ 1 ] =
+static const RefEle::function_Type fct_P0_3D[ 1 ] =
 {
     fct1_P0_3D
 };
 
-static const RefEle::Fct derfct_P0_3D[ 3 ] =
+static const RefEle::function_Type derfct_P0_3D[ 3 ] =
 {
     derfct1_P0_3D, derfct1_P0_3D, derfct1_P0_3D
 };
-static const RefEle::Fct der2fct_P0_3D[ 9 ] =
+static const RefEle::function_Type der2fct_P0_3D[ 9 ] =
 {
     derfct1_P0_3D, derfct1_P0_3D, derfct1_P0_3D,
     derfct1_P0_3D, derfct1_P0_3D, derfct1_P0_3D,
@@ -974,19 +981,19 @@ static const Real refcoor_P1_3D[ 12 ] =
     0. , 0. , 1.
 };
 
-static const RefEle::Fct fct_P1_3D[ 4 ] =
+static const RefEle::function_Type fct_P1_3D[ 4 ] =
 {
     fct1_P1_3D, fct2_P1_3D, fct3_P1_3D, fct4_P1_3D
 };
 
-static const RefEle::Fct derfct_P1_3D[ 12 ] =
+static const RefEle::function_Type derfct_P1_3D[ 12 ] =
 {
     derfct1_1_P1_3D, derfct1_2_P1_3D, derfct1_3_P1_3D,
     derfct2_1_P1_3D, derfct2_2_P1_3D, derfct2_3_P1_3D,
     derfct3_1_P1_3D, derfct3_2_P1_3D, derfct3_3_P1_3D,
     derfct4_1_P1_3D, derfct4_2_P1_3D, derfct4_3_P1_3D
 };
-static const RefEle::Fct der2fct_P1_3D[ 36 ] =
+static const RefEle::function_Type der2fct_P1_3D[ 36 ] =
 {
     der2fctx_xx_P1_3D, der2fctx_xx_P1_3D, der2fctx_xx_P1_3D, der2fctx_xx_P1_3D,
     der2fctx_xx_P1_3D, der2fctx_xx_P1_3D, der2fctx_xx_P1_3D, der2fctx_xx_P1_3D, der2fctx_xx_P1_3D,
@@ -1055,12 +1062,12 @@ static const Real refcoor_P1bubble_3D[ 15 ] =
     0.25, 0.25, 0.25
 };
 
-static const RefEle::Fct fct_P1bubble_3D[ 5 ] =
+static const RefEle::function_Type fct_P1bubble_3D[ 5 ] =
 {
     fct1_P1bubble_3D, fct2_P1bubble_3D, fct3_P1bubble_3D, fct4_P1bubble_3D, fct5_P1bubble_3D
 };
 
-static const RefEle::Fct derfct_P1bubble_3D[ 15 ] =
+static const RefEle::function_Type derfct_P1bubble_3D[ 15 ] =
 {
     derfct1_1_P1bubble_3D, derfct1_2_P1bubble_3D, derfct1_3_P1bubble_3D,
     derfct2_1_P1bubble_3D, derfct2_2_P1bubble_3D, derfct2_3_P1bubble_3D,
@@ -1068,7 +1075,7 @@ static const RefEle::Fct derfct_P1bubble_3D[ 15 ] =
     derfct4_1_P1bubble_3D, derfct4_2_P1bubble_3D, derfct4_3_P1bubble_3D,
     derfct5_1_P1bubble_3D, derfct5_2_P1bubble_3D, derfct5_3_P1bubble_3D
 };
-static const RefEle::Fct der2fct_P1bubble_3D[ 45 ] =
+static const RefEle::function_Type der2fct_P1bubble_3D[ 45 ] =
 {
     der2fctx_xx_P1bubble_3D, der2fctx_xx_P1bubble_3D, der2fctx_xx_P1bubble_3D,
     der2fctx_xx_P1bubble_3D, der2fctx_xx_P1bubble_3D, der2fctx_xx_P1bubble_3D,
@@ -1269,14 +1276,14 @@ static const Real refcoor_P2_3D[ 30 ] =
     0. , 0.5 , 0.5
 };
 
-static const RefEle::Fct fct_P2_3D[ 10 ] =
+static const RefEle::function_Type fct_P2_3D[ 10 ] =
 {
     fct1_P2_3D, fct2_P2_3D, fct3_P2_3D, fct4_P2_3D,
     fct5_P2_3D, fct6_P2_3D, fct7_P2_3D, fct8_P2_3D,
     fct9_P2_3D, fct10_P2_3D
 };
 
-static const RefEle::Fct derfct_P2_3D[ 30 ] =
+static const RefEle::function_Type derfct_P2_3D[ 30 ] =
 {
     derfct1_1_P2_3D, derfct1_2_P2_3D, derfct1_3_P2_3D,
     derfct2_1_P2_3D, derfct2_2_P2_3D, derfct2_3_P2_3D,
@@ -1297,7 +1304,7 @@ static const RefEle::Fct derfct_P2_3D[ 30 ] =
   }
 }
 */
-static const RefEle::Fct der2fct_P2_3D[ 90 ] =
+static const RefEle::function_Type der2fct_P2_3D[ 90 ] =
 {
     der2fct1_11_P2_3D, der2fct1_12_P2_3D, der2fct1_13_P2_3D,
     der2fct1_21_P2_3D, der2fct1_22_P2_3D, der2fct1_23_P2_3D,
@@ -1529,14 +1536,14 @@ static const Real refcoor_P2tilde_3D[ 33 ] =
     0.25, 0.25, 0.25
 };
 
-static const RefEle::Fct fct_P2tilde_3D[ 11 ] =
+static const RefEle::function_Type fct_P2tilde_3D[ 11 ] =
 {
     fct1_P2tilde_3D, fct2_P2tilde_3D, fct3_P2tilde_3D, fct4_P2tilde_3D,
     fct5_P2tilde_3D, fct6_P2tilde_3D, fct7_P2tilde_3D, fct8_P2tilde_3D,
     fct9_P2tilde_3D, fct10_P2tilde_3D, fct11_P2tilde_3D
 };
 
-static const RefEle::Fct derfct_P2tilde_3D[ 33 ] =
+static const RefEle::function_Type derfct_P2tilde_3D[ 33 ] =
 {
     derfct1_1_P2tilde_3D, derfct1_2_P2tilde_3D, derfct1_3_P2tilde_3D,
     derfct2_1_P2tilde_3D, derfct2_2_P2tilde_3D, derfct2_3_P2tilde_3D,
@@ -1558,7 +1565,7 @@ static const RefEle::Fct derfct_P2tilde_3D[ 33 ] =
   }
 }
 */
-static const RefEle::Fct der2fct_P2tilde_3D[ 99 ] =
+static const RefEle::function_Type der2fct_P2tilde_3D[ 99 ] =
 {
     der2fct1_11_P2tilde_3D, der2fct1_12_P2tilde_3D, der2fct1_13_P2tilde_3D,
     der2fct1_21_P2tilde_3D, der2fct1_22_P2tilde_3D, der2fct1_23_P2tilde_3D,
@@ -1623,17 +1630,17 @@ static const Real refcoor_Q0_3D[ 3 ] =
 };
 
 
-static const RefEle::Fct fct_Q0_3D[ 1 ] =
+static const RefEle::function_Type fct_Q0_3D[ 1 ] =
 {
     fct1_Q0_3D
 };
 
-static const RefEle::Fct derfct_Q0_3D[ 3 ] =
+static const RefEle::function_Type derfct_Q0_3D[ 3 ] =
 {
     derfct1_Q0_3D, derfct1_Q0_3D, derfct1_Q0_3D
 };
 
-static const RefEle::Fct der2fct_Q0_3D[ 9 ] =
+static const RefEle::function_Type der2fct_Q0_3D[ 9 ] =
 {
     der2fct1_Q0_3D, der2fct1_Q0_3D, der2fct1_Q0_3D,
     der2fct1_Q0_3D, der2fct1_Q0_3D, der2fct1_Q0_3D,
@@ -1783,14 +1790,14 @@ static const Real refcoor_Q1_3D[ 24 ] =
 };
 
 
-static const RefEle::Fct fct_Q1_3D[ 8 ] =
+static const RefEle::function_Type fct_Q1_3D[ 8 ] =
 {
     fct1_Q1_3D, fct2_Q1_3D, fct3_Q1_3D, fct4_Q1_3D, fct5_Q1_3D,
     fct6_Q1_3D, fct7_Q1_3D, fct8_Q1_3D
 };
 
 
-static const RefEle::Fct derfct_Q1_3D[ 24 ] =
+static const RefEle::function_Type derfct_Q1_3D[ 24 ] =
 {
     derfct1_1_Q1_3D, derfct1_2_Q1_3D, derfct1_3_Q1_3D,
     derfct2_1_Q1_3D, derfct2_2_Q1_3D, derfct2_3_Q1_3D,
@@ -1809,7 +1816,7 @@ static const RefEle::Fct derfct_Q1_3D[ 24 ] =
   }
 }
 */
-static const RefEle::Fct der2fct_Q1_3D[ 72 ] =
+static const RefEle::function_Type der2fct_Q1_3D[ 72 ] =
 {
     der2fct1_11_Q1_3D, der2fct1_12_Q1_3D, der2fct1_13_Q1_3D,
     der2fct1_21_Q1_3D, der2fct1_22_Q1_3D, der2fct1_23_Q1_3D,
@@ -1905,7 +1912,7 @@ static const Real refcoor_RT0_HEXA_3D[ 18 ] =
     0.5 , 0.5 , 1.
 };
 
-static const RefEle::Fct fct_RT0_HEXA_3D[ 18 ] =
+static const RefEle::function_Type fct_RT0_HEXA_3D[ 18 ] =
 {
     fct1_RT0_1_HEXA_3D, fct1_RT0_2_HEXA_3D, fct1_RT0_3_HEXA_3D,
     fct2_RT0_1_HEXA_3D, fct2_RT0_2_HEXA_3D, fct2_RT0_3_HEXA_3D,
@@ -1915,7 +1922,7 @@ static const RefEle::Fct fct_RT0_HEXA_3D[ 18 ] =
     fct6_RT0_1_HEXA_3D, fct6_RT0_2_HEXA_3D, fct6_RT0_3_HEXA_3D
 };
 
-static const RefEle::Fct fct_DIV_RT0_HEXA_3D[ 6 ] =
+static const RefEle::function_Type fct_DIV_RT0_HEXA_3D[ 6 ] =
 {
     fct1_DIV_RT0_HEXA_3D, fct2_DIV_RT0_HEXA_3D,
     fct3_DIV_RT0_HEXA_3D, fct4_DIV_RT0_HEXA_3D,
@@ -1981,7 +1988,7 @@ static const Real refcoor_RT0_TETRA_3D[ 12 ] =
     0.      , 1. / 3. , 1. / 3.
 };
 
-static const RefEle::Fct fct_RT0_TETRA_3D[ 12 ] =
+static const RefEle::function_Type fct_RT0_TETRA_3D[ 12 ] =
 {
     fct1_RT0_1_TETRA_3D, fct1_RT0_2_TETRA_3D, fct1_RT0_3_TETRA_3D,
     fct2_RT0_1_TETRA_3D, fct2_RT0_2_TETRA_3D, fct2_RT0_3_TETRA_3D,
@@ -1989,7 +1996,7 @@ static const RefEle::Fct fct_RT0_TETRA_3D[ 12 ] =
     fct4_RT0_1_TETRA_3D, fct4_RT0_2_TETRA_3D, fct4_RT0_3_TETRA_3D
 };
 
-static const RefEle::Fct fct_DIV_RT0_TETRA_3D[ 4 ] =
+static const RefEle::function_Type fct_DIV_RT0_TETRA_3D[ 4 ] =
 {
     fct1_DIV_RT0_TETRA_3D, fct2_DIV_RT0_TETRA_3D,
     fct3_DIV_RT0_TETRA_3D, fct4_DIV_RT0_TETRA_3D

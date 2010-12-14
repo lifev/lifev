@@ -103,7 +103,7 @@ public:
     //@{
 
     //! Set value to be associated to key
-    void set(ID key, ID value);
+    void set(const ID& key,const ID& value);
 
     //@}
 
@@ -114,14 +114,15 @@ public:
     ID nbInterfaceDof() const;
 
     //! Return the correspondance map
-    const std::map<ID, ID> & locDofMap() {return M_locDofMap;}
+    const std::map<ID, ID> & localDofMap() {return M_localDofMap;}
+    const std::map<ID, ID> & __attribute__ (( __deprecated__)) locDofMap() {return localDofMap();}
 
     //@}
 
 protected:
 
     //!  STL map container which holds the connections between Dof at the interface
-    std::map<ID, ID> M_locDofMap;
+    std::map<ID, ID> M_localDofMap;
 
 };
 

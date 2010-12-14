@@ -50,10 +50,10 @@ namespace LifeV
 
 GeoMap::GeoMap( std::string name, ReferenceShapes shape,
                 UInt nbDof, UInt nbCoor,
-                const Fct* phi, const Fct* dPhi, const Fct* d2Phi,
+                const function_Type* phi, const function_Type* dPhi, const function_Type* d2Phi,
                 const Real* refCoor,
                 const GeoMap* bdMap ) :
-        RefEle( name, shape, nbDof, nbCoor,1, phi, dPhi, d2Phi, static_cast<Fct*>(NULL),  refCoor ),
+        RefEle( name, shape, nbDof, nbCoor,1, phi, dPhi, d2Phi, static_cast<function_Type*>(NULL),  refCoor ),
         M_boundaryMap( bdMap )
 {}
 GeoMap::~GeoMap()

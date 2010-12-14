@@ -688,7 +688,7 @@ GeoVector CurrentFE::coorMap(const GeoVector& P) const
 }
 
 
-void CurrentFE::QuadRuleVTKexport( const std::string& filename) const
+void CurrentFE::quadRuleVTKexport( const std::string& filename) const
 {
     ASSERT(M_quadNodesUpdated,"Quad nodes are not updated! No export possible");
 

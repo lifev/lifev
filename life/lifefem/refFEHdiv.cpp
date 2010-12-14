@@ -47,12 +47,12 @@ namespace LifeV
 
 RefFEHdiv::RefFEHdiv( std::string name, FE_TYPE type, ReferenceShapes shape,
                       Int nbDofPerVertex, Int nbDofPerEdge, Int nbDofPerFace,
-                      Int nbDofPerVolume, Int nbDof, Int nbCoor, const Fct* phi,
-                      const Fct* divPhi, const Real* refCoor, DofPatternType patternType,
+                      Int nbDofPerVolume, Int nbDof, Int nbCoor, const function_Type* phi,
+                      const function_Type* divPhi, const Real* refCoor, DofPatternType patternType,
                       const RefFE* bdRefFE ) :
         RefFE( name, type, shape,nbDofPerVertex,nbDofPerEdge,nbDofPerFace,
-               nbDofPerVolume, nbDof, nbCoor, nbCoor, phi, static_cast<Fct*>(NULL), static_cast<Fct*>(NULL),
-               divPhi, refCoor,
+               nbDofPerVolume, nbDof, nbCoor, nbCoor, phi, static_cast<function_Type*>(NULL),
+               static_cast<function_Type*>(NULL), divPhi, refCoor,
                patternType, bdRefFE )
 {}
 

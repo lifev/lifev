@@ -46,8 +46,8 @@ namespace LifeV
 
 RefFE::RefFE( std::string name, FE_TYPE type, ReferenceShapes shape,
               Int nbDofPerVertex, Int nbDofPerEdge, Int nbDofPerFace,
-              Int nbDofPerVolume, Int nbDof, Int nbCoor, Int FEDim, const Fct* phi,
-              const Fct* dPhi, const Fct* d2Phi, const Fct* divPhi , const Real* refCoor,
+              Int nbDofPerVolume, Int nbDof, Int nbCoor, Int FEDim, const function_Type* phi,
+              const function_Type* dPhi, const function_Type* d2Phi, const function_Type* divPhi , const Real* refCoor,
               DofPatternType patternType,
               const RefFE* bdRefFE ) :
         RefEle( name, shape, nbDof, nbCoor, FEDim, phi, dPhi, d2Phi, divPhi, refCoor ),

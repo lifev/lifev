@@ -57,7 +57,7 @@ public:
     //! @name Public Types
     //@{
 
-    typedef RefFE::Fct Fct;
+    typedef RefFE::function_Type function_Type;
     typedef std::vector<Real> (*ValuesToValuesFct) (const std::vector<Real>&);
 
     //@}
@@ -103,9 +103,9 @@ public:
                  Int                  nbDofPerVolume,
                  Int                  nbDof,
                  Int                  nbCoor,
-                 const Fct*           phi,
-                 const Fct*           dPhi,
-                 const Fct*           d2Phi,
+                 const function_Type*           phi,
+                 const function_Type*           dPhi,
+                 const function_Type*           d2Phi,
                  const Real*          refCoor,
                  DofPatternType       patternType,
                  const RefFE*         bdRefFE,

@@ -112,7 +112,7 @@ class RefFEHybrid:
 {
 public:
 
-    typedef RefFE::Fct Fct;
+    typedef RefFE::function_Type function_Type;
 
     //! @name Constructor & Destructor
     //@{
