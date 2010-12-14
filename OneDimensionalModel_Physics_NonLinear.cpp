@@ -46,20 +46,6 @@
 
 namespace LifeV
 {
-
-// ===================================================
-// Constructors
-// ===================================================
-OneDimensionalModel_Physics_NonLinear::OneDimensionalModel_Physics_NonLinear() :
-    super   ()
-{
-}
-
-OneDimensionalModel_Physics_NonLinear::OneDimensionalModel_Physics_NonLinear( const dataPtr_Type data ) :
-    super   ( data )
-{
-}
-
 // ===================================================
 // Methods
 // ===================================================
@@ -83,7 +69,7 @@ OneDimensionalModel_Physics_NonLinear::fromWToU(       Real& A,        Real& Q,
 {
     Real rhooverbeta0beta1 ( M_data -> densityRho() / ( M_data -> beta0(indz) * M_data -> beta1(indz) ) );
 
-    Real beta1over4SQRTchi( M_data -> beta1(indz) / ( std::sqrt(M_data -> robertsonCorrection()) * 4 ) );
+    Real beta1over4SQRTchi( M_data -> beta1(indz) / ( std::sqrt(M_data -> robertsonCorrection() ) * 4 ) );
 
     A = M_data -> area0(indz)
         * std::pow( rhooverbeta0beta1, (1/M_data -> beta1(indz)) )

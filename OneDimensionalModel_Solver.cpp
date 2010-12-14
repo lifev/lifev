@@ -906,48 +906,6 @@ OneDimensionalModel_Solver::setBCValuesRight( const Real& bcR1, const Real& bcR2
 // ===================================================
 // Get Methods
 // ===================================================
-const OneDimensionalModel_Solver::physicsPtr_Type&
-OneDimensionalModel_Solver::physics() const
-{
-    return M_physics;
-}
-
-const OneDimensionalModel_Solver::fluxPtr_Type&
-OneDimensionalModel_Solver::flux() const
-{
-    return M_flux;
-}
-
-const OneDimensionalModel_Solver::sourcePtr_Type&
-OneDimensionalModel_Solver::source() const
-{
-    return M_source;
-}
-
-const UInt&
-OneDimensionalModel_Solver::leftNodeId() const
-{
-    return M_leftNodeId;
-}
-
-const UInt&
-OneDimensionalModel_Solver::leftInternalNodeId() const
-{
-    return M_leftInternalNodeId;
-}
-
-const UInt&
-OneDimensionalModel_Solver::rightNodeId() const
-{
-    return M_rightNodeId;
-}
-
-const UInt&
-OneDimensionalModel_Solver::rightInternalNodeId() const
-{
-    return M_rightInternalNodeId;
-}
-
 container2D_Type
 OneDimensionalModel_Solver::bcValuesLeft( const solution_Type& solution ) const
 {

@@ -62,9 +62,9 @@ public:
     //@{
 
     //! Constructor
-    OneDimensionalModel_Flux();
+    explicit OneDimensionalModel_Flux() : M_physics() {}
 
-    OneDimensionalModel_Flux( const physicsPtr_Type physics );
+    explicit OneDimensionalModel_Flux( const physicsPtr_Type physics ) : M_physics( physics ) {}
 
     //! Do nothing destructor
     virtual ~OneDimensionalModel_Flux() {}
@@ -133,7 +133,7 @@ public:
     //! @name Set Methods
     //@{
 
-    void setPhysics( const physicsPtr_Type& physics );
+    void setPhysics( const physicsPtr_Type& physics ) { M_physics = physics; }
 
     //@}
 
@@ -141,7 +141,7 @@ public:
     //! @name Get Methods
     //@{
 
-    physicsPtr_Type physics() const ;
+    physicsPtr_Type physics() const { return M_physics; }
 
     //@}
 

@@ -63,9 +63,9 @@ public:
     //@{
 
     //! Constructor
-    OneDimensionalModel_Source();
+    explicit OneDimensionalModel_Source() : M_physics() {}
 
-    OneDimensionalModel_Source( const physicsPtr_Type physics );
+    explicit OneDimensionalModel_Source( const physicsPtr_Type physics ) : M_physics( physics ) {}
 
     //! Do nothing destructor
     virtual ~OneDimensionalModel_Source() {}
@@ -118,7 +118,7 @@ public:
     //! @name Set Methods
     //@{
 
-    void setPhysics( const physicsPtr_Type& physics );
+    void setPhysics( const physicsPtr_Type& physics ) { M_physics = physics; }
 
     //@}
 
@@ -126,7 +126,7 @@ public:
     //! @name Get Methods
     //@{
 
-    physicsPtr_Type physics() const ;
+    physicsPtr_Type physics() const { return M_physics; }
 
     //@}
 

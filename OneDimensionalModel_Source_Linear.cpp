@@ -44,18 +44,6 @@
 
 namespace LifeV
 {
-
-// ===================================================
-// Constructors & Destructor
-// ===================================================
-OneDimensionalModel_Source_Linear::OneDimensionalModel_Source_Linear() :
-    super    ()
-{}
-
-OneDimensionalModel_Source_Linear::OneDimensionalModel_Source_Linear( const physicsPtr_Type physics ) :
-    super    ( physics )
-{}
-
 // ===================================================
 // Methods
 // ===================================================

@@ -67,9 +67,9 @@ public:
     //@{
 
     //! Constructor
-    OneDimensionalModel_Source_Linear();
+    explicit OneDimensionalModel_Source_Linear() : super() {}
 
-    OneDimensionalModel_Source_Linear( const physicsPtr_Type physics );
+    explicit OneDimensionalModel_Source_Linear( const physicsPtr_Type physics ) : super( physics ) {}
 
     //! Do nothing destructor
     virtual ~OneDimensionalModel_Source_Linear() {}

@@ -67,9 +67,9 @@ public:
     //@{
 
     //! Constructor
-    OneDimensionalModel_Flux_NonLinear();
+    explicit OneDimensionalModel_Flux_NonLinear() : super() {};
 
-    OneDimensionalModel_Flux_NonLinear( const physicsPtr_Type physics );
+    explicit OneDimensionalModel_Flux_NonLinear( const physicsPtr_Type physics ) : super( physics ) {};
 
     //! Do nothing destructor
     virtual ~OneDimensionalModel_Flux_NonLinear() {}

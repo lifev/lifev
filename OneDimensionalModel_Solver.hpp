@@ -201,7 +201,7 @@ public:
     /*!
      * Need a call to: setCommunicator, setProblem, setFESpace
      */
-    OneDimensionalModel_Solver();
+    explicit OneDimensionalModel_Solver();
 
     //! Destructor
     virtual ~OneDimensionalModel_Solver() {}
@@ -370,25 +370,25 @@ public:
     //@{
 
     //! Get the physics function
-    const physicsPtr_Type& physics() const;
+    const physicsPtr_Type& physics() const { return M_physics; }
 
     //! Get the flux function
-    const fluxPtr_Type& flux() const;
+    const fluxPtr_Type& flux() const { return M_flux; }
 
     //! Get the source function
-    const sourcePtr_Type& source() const;
+    const sourcePtr_Type& source() const { return M_source; }
 
     //! Get the left node identifier
-    const UInt& leftNodeId() const;
+    const UInt& leftNodeId() const { return M_leftNodeId; }
 
     //! Get the left internal node (neighboring node)
-    const UInt& leftInternalNodeId() const;
+    const UInt& leftInternalNodeId() const { return M_leftInternalNodeId; }
 
     //! Get the right node identifier
-    const UInt& rightNodeId() const;
+    const UInt& rightNodeId() const { return M_rightNodeId; }
 
     //! Get the right internal node (neighboring node)
-    const UInt& rightInternalNodeId() const;
+    const UInt& rightInternalNodeId() const { return M_rightInternalNodeId; }
 
     //! Get the Dirichlet boundary conditions (left)
     container2D_Type bcValuesLeft( const solution_Type& solution ) const;

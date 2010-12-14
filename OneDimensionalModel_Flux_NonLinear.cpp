@@ -44,18 +44,6 @@
 
 namespace LifeV
 {
-
-// ===================================================
-// Constructors & Destructor
-// ===================================================
-OneDimensionalModel_Flux_NonLinear::OneDimensionalModel_Flux_NonLinear() :
-    super   ()
-{}
-
-OneDimensionalModel_Flux_NonLinear::OneDimensionalModel_Flux_NonLinear( const physicsPtr_Type physics ) :
-    super   ( physics )
-{}
-
 // ===================================================
 // Methods
 // ===================================================

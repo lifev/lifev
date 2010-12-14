@@ -65,9 +65,9 @@ public :
     //@{
 
     //! Constructor
-    OneDimensionalModel_Physics();
+    explicit OneDimensionalModel_Physics() : M_data () {}
 
-    OneDimensionalModel_Physics( const dataPtr_Type data );
+    explicit OneDimensionalModel_Physics( const dataPtr_Type data ) : M_data ( data ) {}
 
     //! Destructor
     virtual ~OneDimensionalModel_Physics() {}
@@ -189,14 +189,14 @@ public :
     //! @name Set Methods
     //@{
 
-    void setData( const dataPtr_Type& data );
+    void setData( const dataPtr_Type& data ) { M_data = data; }
 
     //@}
 
     //! @name Get Methods
     //@{
 
-    dataPtr_Type data() const ;
+    dataPtr_Type data() const { return M_data; }
 
     //@}
 

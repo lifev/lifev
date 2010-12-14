@@ -48,18 +48,6 @@ namespace LifeV
 
 std::map< std::string, OneDimensionalModel_PhysicsTypes > OneDimensionalModel_PhysicsMap;
 
-// ===================================================
-// Constructors
-// ===================================================
-OneDimensionalModel_Physics::OneDimensionalModel_Physics() :
-    M_data      ()
-{
-}
-
-OneDimensionalModel_Physics::OneDimensionalModel_Physics( const dataPtr_Type data ) :
-    M_data      ( data )
-{
-}
 
 // ===================================================
 // Methods
@@ -67,13 +55,15 @@ OneDimensionalModel_Physics::OneDimensionalModel_Physics( const dataPtr_Type dat
 Real
 OneDimensionalModel_Physics::celerity0( const UInt& i ) const
 {
-    return std::sqrt( M_data -> beta0(i) * M_data -> beta1(i) / M_data -> densityRho() );
+    return std::sqrt( M_data -> beta0(i) * M_data ->
+                                beta1(i) / M_data -> densityRho() );
 }
 
 Real
 OneDimensionalModel_Physics::elasticPressure( const Real& A, const UInt& i ) const
 {
-    return ( M_data -> beta0(i) * ( std::pow( A/M_data -> area0(i), M_data -> beta1(i) ) - 1 ) ) + M_data -> externalPressure();
+    return ( M_data -> beta0(i) * ( std::pow( A/M_data -> area0(i), M_data ->
+                       beta1(i) ) - 1 ) ) + M_data -> externalPressure();
 }
 
 Real
@@ -98,19 +88,23 @@ OneDimensionalModel_Physics::dAdt( const Real& Anp1, const Real& An, const Real&
 Real
 OneDimensionalModel_Physics::dPdA( const Real& A, const UInt& i ) const
 {
-    return M_data -> beta0(i) * M_data -> beta1(i) * std::pow( A / M_data -> area0(i), M_data -> beta1(i) ) / A;
+    return M_data -> beta0(i) * M_data -> beta1(i)
+                              * std::pow( A / M_data -> area0(i), M_data -> beta1(i) ) / A;
 }
 
 Real
 OneDimensionalModel_Physics::dAdP( const Real& P, const UInt& i ) const
 {
-    return M_data -> area0(i) / ( M_data -> beta0(i) * M_data -> beta1(i) ) * std::pow( 1 + ( P - M_data -> externalPressure() ) / M_data -> beta0(i), 1 / M_data -> beta1(i) - 1 );
+    return M_data -> area0(i) / ( M_data -> beta0(i) * M_data -> beta1(i) )
+                              * std::pow( 1 + ( P - M_data -> externalPressure() )
+                              / M_data -> beta0(i), 1 / M_data -> beta1(i) - 1 );
 }
 
 Real
 OneDimensionalModel_Physics::fromPToA( const Real& P, const UInt& i ) const
 {
-    return ( M_data -> area0(i) * std::pow( ( P - M_data -> externalPressure() ) / M_data -> beta0(i) + 1, 1/M_data -> beta1(i) )  );
+    return ( M_data -> area0(i) * std::pow( ( P - M_data -> externalPressure() )
+                                                / M_data -> beta0(i) + 1, 1/M_data -> beta1(i) )  );
 }
 
 Real
@@ -405,22 +399,5 @@ OneDimensionalModel_Physics::stiffenVesselRight( const Real& xl,     const Real&
     }
 }
 
-// ===================================================
-// Set Methods
-// ===================================================
-void
-OneDimensionalModel_Physics::setData( const dataPtr_Type& Data )
-{
-    M_data = Data;
-}
-
-// ===================================================
-// Get Methods
-// ===================================================
-OneDimensionalModel_Physics::dataPtr_Type
-OneDimensionalModel_Physics::data() const
-{
-    return M_data;
-}
 
 }

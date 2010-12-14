@@ -69,9 +69,9 @@ public:
     //@{
 
     //! Constructor
-    OneDimensionalModel_Flux_Linear();
+    explicit OneDimensionalModel_Flux_Linear() : super() {};
 
-    OneDimensionalModel_Flux_Linear( const physicsPtr_Type physics );
+    explicit OneDimensionalModel_Flux_Linear( const physicsPtr_Type physics ) : super( physics ) {};
 
     //! Do nothing destructor
     virtual ~OneDimensionalModel_Flux_Linear() {}
