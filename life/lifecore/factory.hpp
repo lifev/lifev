@@ -94,8 +94,8 @@ struct factoryDefaultError
     };
 
     //!\todo uncomment this line
-    //static AbstractProduct* onUnknownType(IdentifierType id )
-    static AbstractProduct* onUnknownType(const std::string& id )
+    //static AbstractProduct* onUnknownType(const std::string& id )
+    static AbstractProduct* onUnknownType(IdentifierType id )
     {
         throw Exception( id );
     }
@@ -215,7 +215,9 @@ class factoryClone : public FactoryErrorPolicy<TypeInfo, AbstractProduct>
 public:
     //! @name Typedefs
     //@{
-    typedef FactoryErrorPolicy<AbstractProduct> super;
+    //!\todo uncomment this line
+    //typedef FactoryErrorPolicy<AbstractProduct> super;
+    typedef FactoryErrorPolicy<TypeInfo,AbstractProduct> super;
     //@}
 
     //! @name  Methods
