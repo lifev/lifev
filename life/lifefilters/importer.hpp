@@ -64,6 +64,11 @@ class importer
 {
 public:
 
+    inline void __attribute__ ((__deprecated__)) setFilename( std::string const& fileName )
+    {
+        setFileName( fileName );
+    }
+
     //! @name Constructor & Destructor
     //@{
 
@@ -153,7 +158,7 @@ public:
     /*!
       @param fileName of the mesh file
     */
-    inline void setFilename( std::string const& fileName )
+    inline void setFileName( std::string const& fileName )
     {
         M_fileName = fileName;
     }

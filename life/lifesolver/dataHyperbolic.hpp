@@ -67,6 +67,11 @@ class DataHyperbolic
 {
 public:
 
+    inline Real __attribute__ ((__deprecated__)) getCFLrelax () const
+    {
+        return getCFLRelaxParameter ();
+    }
+
     //! @name Public Types
     //@{
 
@@ -198,7 +203,7 @@ public:
     /* Get the parameter to compute \f$ CFL_{\rm used} = \alpha CFL_{\rm computed} \f$
        @return CFL relaxation parameter
     */
-    inline Real getCFLrelax () const
+    inline Real getCFLRelaxParameter () const
     {
         return M_relaxCFL;
     }

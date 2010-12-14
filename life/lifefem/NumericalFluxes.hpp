@@ -157,6 +157,55 @@ public:
 
     //@}
 
+    inline void __attribute__ ((__deprecated__)) setField ( const vectorPtr_Type & field )
+    {
+        setExternalField ( field );
+    }
+
+    inline vectorFunction_Type __attribute__ ((__deprecated__)) getPhysicalFlux () const
+    {
+        return physicalFlux ();
+    }
+
+    inline vectorFunction_Type __attribute__ ((__deprecated__)) getFirstDerivativePhysicalFlux () const
+    {
+        return firstDerivativePhysicalFlux ();
+    }
+
+    inline Real __attribute__ ((__deprecated__)) getPhysicalFluxDotNormal ( const normal_Type& normal,
+                                                                            const UInt&        iElem,
+                                                                            const Real&        t,
+                                                                            const Real&        x,
+                                                                            const Real&        y,
+                                                                            const Real&        z,
+                                                                            const Real&        unknown ) const
+    {
+        return  physicalFluxDotNormal ( normal, iElem, t, x, y, z, unknown );
+    }
+
+    inline Real __attribute__ ((__deprecated__)) getFirstDerivativePhysicalFluxDotNormal ( const normal_Type& normal,
+                                                                                           const UInt&        iElem,
+                                                                                           const Real&        t,
+                                                                                           const Real&        x,
+                                                                                           const Real&        y,
+                                                                                           const Real&        z,
+                                                                                           const Real&        unknown ) const
+    {
+        return firstDerivativePhysicalFluxDotNormal ( normal, iElem, t, x, y, z, unknown );
+    }
+
+    Real __attribute__ ((__deprecated__)) getNormInfty ( const Real&        leftState,
+                                                         const Real&        rightState,
+                                                         const normal_Type& normal,
+                                                         const UInt&        iElem,
+                                                         const Real&        t = 0,
+                                                         const Real&        x = 0,
+                                                         const Real&        y = 0,
+                                                         const Real&        z = 0 ) const
+    {
+        return normInfinity( leftState, rightState, normal, iElem, t, x, y, z );
+    }
+
     // Constructors & destructor.
     //! @name Constructors and destructor
     //@{
@@ -220,7 +269,7 @@ public:
       Add one extra field for the dependece from \f$ \mathbf{F} \f$.
       @param field The filed to be added.
     */
-    inline void setField ( const vectorPtr_Type & field )
+    inline void setExternalField ( const vectorPtr_Type & field )
     {
         M_fields.push_back( &field );
     }
@@ -234,7 +283,7 @@ public:
     /*!
       @return The physical flux.
     */
-    inline vectorFunction_Type getPhysicalFlux () const
+    inline vectorFunction_Type physicalFlux () const
     {
         return M_physicalFlux;
     }
@@ -243,7 +292,7 @@ public:
     /*!
       @return The first derivative of the physical flux.
     */
-    inline vectorFunction_Type getFirstDerivativePhysicalFlux () const
+    inline vectorFunction_Type firstDerivativePhysicalFlux () const
     {
         return M_firstDerivativePhysicalFlux;
     }
@@ -259,13 +308,13 @@ public:
       @param unknown The value of the unknown.
       @return The value of \f$ \mathbf{ \hat{ F } } \cdot \mathbf{ n }\f$ in the point \f$ (x, y, z, t, u) \f$.
     */
-    inline Real getPhysicalFluxDotNormal ( const normal_Type& normal,
-                                           const UInt&        iElem,
-                                           const Real&        t,
-                                           const Real&        x,
-                                           const Real&        y,
-                                           const Real&        z,
-                                           const Real&        unknown ) const
+    inline Real physicalFluxDotNormal ( const normal_Type& normal,
+                                        const UInt&        iElem,
+                                        const Real&        t,
+                                        const Real&        x,
+                                        const Real&        y,
+                                        const Real&        z,
+                                        const Real&        unknown ) const
     {
         return computeFunctionDotNormal ( M_physicalFlux, normal, iElem, t, x, y, z, +1 ) ( unknown );
     }
@@ -281,13 +330,13 @@ public:
       @param unknown The value of the unknown.
       @return The value of \f$ \mathbf{ \hat{ F^\prime } } \cdot \mathbf{ n }\f$ in the point \f$ (x, y, z, t, u) \f$.
     */
-    inline Real getFirstDerivativePhysicalFluxDotNormal ( const normal_Type& normal,
-                                                          const UInt&        iElem,
-                                                          const Real&        t,
-                                                          const Real&        x,
-                                                          const Real&        y,
-                                                          const Real&        z,
-                                                          const Real&        unknown ) const
+    inline Real firstDerivativePhysicalFluxDotNormal ( const normal_Type& normal,
+                                                       const UInt&        iElem,
+                                                       const Real&        t,
+                                                       const Real&        x,
+                                                       const Real&        y,
+                                                       const Real&        z,
+                                                       const Real&        unknown ) const
     {
         return computeFunctionDotNormal ( M_firstDerivativePhysicalFlux, normal, iElem, t, x, y, z, +1 ) ( unknown );
     }
@@ -310,7 +359,7 @@ public:
       @note We assume left and right side of \f$ e \f$ is given by: the normal direction goes
       from the left side to the right side.
     */
-    Real getNormInfty ( const Real&        leftState,
+    Real normInfinity ( const Real&        leftState,
                         const Real&        rightState,
                         const normal_Type& normal,
                         const UInt&        iElem,
@@ -428,8 +477,8 @@ AbstractNumericalFlux<Mesh, SolverType>::
 template< typename Mesh, typename SolverType >
 Real
 AbstractNumericalFlux<Mesh, SolverType>::
-getNormInfty ( const Real& leftState, const Real& rightState, const normal_Type& normal, const UInt& iElem,
-               const Real& t, const Real& x, const Real& y, const Real& z ) const
+normInfinity ( const Real& leftState, const Real& rightState, const normal_Type& normal, const UInt& iElem,
+            const Real& t, const Real& x, const Real& y, const Real& z ) const
 {
 
     std::vector<Real> values ( M_fields.size() * M_fESpace.fieldDim(), 0 );

@@ -157,6 +157,38 @@ public:
 
     //@}
 
+    inline void __attribute__ ((__deprecated__)) setBC ( bchandler_Type& bcHandler )
+    {
+        // Deprecated method
+        setBoundaryCondition( bcHandler );
+    }
+
+    inline bool __attribute__ ((__deprecated__)) BCset () const
+    {
+        return isBoundaryConditionSet();
+    }
+
+    inline  bchandlerPtr_Type& __attribute__ ((__deprecated__)) bcHandler ()
+    {
+        return boundaryConditionHandler();
+    }
+
+    inline EpetraMap __attribute__ ((__deprecated__)) const& getMap () const
+    {
+        return map();
+    }
+
+    inline Displayer __attribute__ ((__deprecated__))const & getDisplayer() const
+    {
+        return displayer();
+    }
+
+    void __attribute__ ((__deprecated__)) solveOneStep()
+    {
+         solveOneTimeStep();
+    }
+
+
     //! @name Constructors & Destructor
     //@{
 
@@ -194,7 +226,7 @@ public:
     void setup ();
 
     //! Solve one time step of the hyperbolic problem.
-    void solveOneStep();
+    void solveOneTimeStep();
 
     //! Compute the global CFL condition.
     Real CFL() const;
@@ -216,7 +248,7 @@ public:
     /*!
       @param bcHandler Boundary condition handler for the problem.
     */
-    inline void setBC ( bchandler_Type& bcHandler )
+    inline void setBoundaryCondition ( bchandler_Type& bcHandler )
     {
         M_BCh.reset( new bchandler_Type( bcHandler ) );
         M_setBC = true;
@@ -282,7 +314,7 @@ public:
       @return Constant boolean with value true if the boundary condition is setted,
       false otherwise
     */
-    inline bool BCset () const
+    inline bool isBoundaryConditionSet() const
     {
         return M_setBC;
     }
@@ -291,16 +323,17 @@ public:
     /*!
       @return Reference of boundary conditions handler.
     */
-    inline bchandlerPtr_Type& bcHandler ()
+    inline bchandlerPtr_Type& boundaryConditionHandler ()
     {
         return M_BCh;
     }
+
 
     //! Return the Epetra local map.
     /*!
       @return Constant EpetraMap reference of the problem.
     */
-    inline EpetraMap const& getMap () const
+    inline EpetraMap const& map () const
     {
         return M_localMap;
     }
@@ -310,7 +343,7 @@ public:
       Useful for parallel print in programs.
       @return Constant reference of the displayer of the problem.
     */
-    inline Displayer const & getDisplayer() const
+    inline Displayer const & displayer() const
     {
         return M_displayer;
     }
@@ -552,7 +585,7 @@ setup ()
 template< typename Mesh, typename SolverType >
 void
 HyperbolicSolver< Mesh, SolverType >::
-solveOneStep ()
+solveOneTimeStep ()
 {
 
     // Total number of elements in the mesh
