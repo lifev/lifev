@@ -155,15 +155,20 @@ typedef boost::shared_ptr< multiscaleMatrix_Type >                        multis
 
 typedef MultiscaleAlgorithm                                               multiscaleAlgorithm_Type;
 typedef boost::shared_ptr< multiscaleAlgorithm_Type >                     multiscaleAlgorithmPtr_Type;
+//!\todo pass a std::string to the factories
+//typedef singleton< factory< multiscaleAlgorithm_Type, std::string > > multiscaleAlgorithmFactory_Type;
 typedef singleton< factory< multiscaleAlgorithm_Type, algorithms_Type > > multiscaleAlgorithmFactory_Type;
 
 typedef MultiscaleModel                                                   multiscaleModel_Type;
 typedef boost::shared_ptr< multiscaleModel_Type >                         multiscaleModelPtr_Type;
+//!\todo pass a std::string to the factories
+//typedef singleton< factory< multiscaleModel_Type, std::string > >         multiscaleModelFactory_Type;
 typedef singleton< factory< multiscaleModel_Type, models_Type > >         multiscaleModelFactory_Type;
 
 typedef MultiscaleCoupling                                                multiscaleCoupling_Type;
+//!\todo pass a std::string to the factories
+//typedef singleton< factory< multiscaleCoupling_Type, std::string > >   multiscaleCouplingFactory_Type;
 typedef boost::shared_ptr< multiscaleCoupling_Type >                      multiscaleCouplingPtr_Type;
-typedef singleton< factory< multiscaleCoupling_Type, couplings_Type > >   multiscaleCouplingFactory_Type;
 
 typedef std::vector< multiscaleModelPtr_Type >                            multiscaleModelsVector_Type;
 typedef multiscaleModelsVector_Type::iterator                             multiscaleModelsVectorIterator_Type;
