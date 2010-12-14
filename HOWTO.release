@@ -3,15 +3,20 @@
 HOWTO to make a release X_Y_Z
 =============================
 
-1- branch HEAD with the tag LIFEV_X_2Y_BRANCH
+(this is a preliminary version for git)
+
    cd top_srcdir
-   cvs tag -b LIFEV_X_2Y_BRANCH
+
+1- branch HEAD with the branchname LIFEV_X_2Y_BRANCH
+   git branch LIFEV_X_2Y_BRANCH
+   git checkout LIFEV_X_2Y_BRANCH
 
    and
 
    tag LIFEV_X_2Y_BRANCH with the tag LIFEV_X_2Y_Z
-   cd top_srcdir
-   cvs tag LIFEV_X_2Y_Z
+   git tag LIFEV_X_2Y_Z
+
+   git push --tags
 
 2- update configure.in.in VERSION
 
@@ -39,12 +44,10 @@ If step 3 went fine then
 
    tag LIFEV_X_2Y_BRANCH with the tag LIFEV_X_2Y_Z
    cd top_srcdir
-   cvs tag LIFEV_X_2Y_Z
+   git tag LIFEV_X_2Y_Z
 
 6- merge fixes to HEAD: cd lifev-head
-   cvs up -j LIFEV_X_2Y_BRANCH   files
-   or
-   cvs up -j LIFEV_X_2Y_Z2  -r LIFEV_X_2Y_Z2  files
+   (to do)
 
 7- upload the tarball on cmcsforge.epfl.ch
 
