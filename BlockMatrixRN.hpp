@@ -37,7 +37,7 @@
 #ifndef BLOCKMATRIXRN_H
 #define BLOCKMATRIXRN_H 1
 
-#include <lifeconfig.h>
+#include <life/lifecore/life.hpp>
 
 #include <life/lifecore/life.hpp>
 

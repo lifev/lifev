@@ -25,7 +25,7 @@
 */
 //@HEADER
 
-#include <lifeconfig.h>
+#include <life/lifecore/life.hpp>
 
 #include <life/lifesolver/VenantKirchhofSolver.hpp>
 //#include <life/lifesolver/NonLinearVenantKirchhofSolver.hpp>

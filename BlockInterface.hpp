@@ -39,7 +39,6 @@
 #define BLOCKINTERFACE_H 1
 
 #include <cstdarg>
-#include <life/lifecore/life.hpp>
 #include <life/lifecore/GetPot.hpp>
 
 #include <life/lifealg/SolverTrilinos.hpp>
@@ -49,6 +48,8 @@
 #include <life/lifefem/bcManage.hpp>
 
 #include <lifemc/lifealg/ComposedOperator.hpp>
+
+#include <life/lifecore/life.hpp>
 
 namespace LifeV {
 

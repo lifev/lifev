@@ -35,7 +35,7 @@
     A more detailed description of the file (if necessary)
  */
 
-#include <lifeconfig.h>
+#include <life/lifecore/life.hpp>
 
 #include <MonolithicGE.hpp>
 
