@@ -118,6 +118,7 @@ AC_CHECK_BOOST_GRAPH
 dnl AC_CHECK_BOOST_SIGNALS
 AC_CHECK_BOOST_REGEX
 AC_CHECK_BOOST_UNIT_TEST_FRAMEWORK
+AC_CHECK_BOOST_SPIRIT
 
 AC_CHECK_BOOST_PROGRAM_OPTIONS
 AM_CONDITIONAL(HAVE_BOOST_PROGRAM_OPTIONS, test "x$boost_program_options_error" = "xno")
@@ -129,17 +130,9 @@ dnl pvm
 dnl AC_CHECK_PVM
 dnl AM_CONDITIONAL(HAVE_PVM, test "x$pvm_libs" != "x" )
 
-
-#all_includes="-I\$(top_srcdir) -I\$(top_srcdir)/life/lifecore -I\$(top_srcdir)/life/lifearray  -I\$(top_srcdir)/life/lifemesh -I\$(top_srcdir)/life/lifealg  -I\$(top_srcdir)/life/lifefem -I\$(top_srcdir)/life/lifesolver -I\$(top_srcdir)/life/lifefilters"
-#AC_SUBST(all_includes)
-
 CPPFLAGS="-I\${top_srcdir} ${CPPFLAGS}"
 
 life_libs="\${top_builddir}/life/lifefilters/liblifefilters.la \${top_builddir}/life/lifesolver/liblifesolver.la  \${top_builddir}/life/lifefem/liblifefem.la \${top_builddir}/life/lifealg/liblifealg.la \${top_builddir}/life/lifemesh/liblifemesh.la \${top_builddir}/life/lifearray/liblifearray.la \${top_builddir}/life/lifecore/liblifecore.la"
-
-#life_libs="\$(top_builddir)/life/lifefilters/liblifefilters.la  \$(top_builddir)/life/lifesolver/liblifesolver.la \$(top_builddir)/life/lifefem/liblifefem.la \$(top_builddir)/life/lifealg/liblifealg.la \$(top_builddir)/life/lifemesh/liblifemesh.la \$(top_builddir)/life/lifearray/liblifearray.la \$(top_builddir)/life/lifecore/liblifecore.la"
-
-#life_libs="\$(top_builddir)/life/lifefilters/liblifefilters.la  \$(top_builddir)/life/lifefem/liblifefem.la \$(top_builddir)/life/lifealg/liblifealg.la \$(top_builddir)/life/lifearray/liblifearray.la \$(top_builddir)/life/lifemesh/liblifemesh.la \$(top_builddir)/life/lifecore/liblifecore.la"
 
 AC_SUBST(life_libs)
 LIFEV_LIBS="-llifefilters -llifesolver -llifefem -llifealg -llifemesh -llifearray -llifecore"
@@ -159,5 +152,3 @@ AC_CONFIG_TESTDIR(testsuite)
 
 dnl pkgconfig
 AX_CREATE_PKGCONFIG_INFO(life.pc,,[${LIFEV_LIBS} $LIBS],[Finite Element Library and more],[$CPPFLAGS $CFLAGS])
-
-
