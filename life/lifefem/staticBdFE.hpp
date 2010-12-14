@@ -211,7 +211,10 @@ public:
     const UInt       nbQuadPt;
 
     //! The point that define the geometry
-    KNM<Real>       point;
+    const Real& point(const UInt& i, const UInt& coor) const
+    {
+        return M_point(int(i),int(coor));
+    }
 
     //! The reference finite element
     const RefFE&    refFE;
@@ -223,37 +226,71 @@ public:
     const QuadRule& qr;
 
     //! Values of the basis functions on quadrature points
-    KNM<Real>  phi;
+    const Real& phi(const UInt& i, const UInt& iQuadPt) const
+    {
+        return M_phi(int(i),int(iQuadPt));
+    }
 
     //! Values of the derivatives of the basis functions on quadrature points on the reference finite element
-    KNMK<Real> dPhiRef;
+    const Real& dPhiRef(const UInt& i, const UInt& dxj, const UInt& iQuadPt) const
+    {
+        return M_dPhiRef(int(i),int(dxj),int(iQuadPt));
+    }
 
     //! Values of the derivatives of the basis functions on quadrature points on the current finite element
-    KNMK<Real> dPhi;
+    const Real& dPhi(const UInt& i, const UInt& dxj, const UInt& iQuadPt) const
+    {
+        return M_dPhi(int(i),int(dxj),int(iQuadPt));
+    }
 
     //! Values of the geometric basis functions on quadrature points
-    KNM<Real>  phiGeo;
+    const Real& phiGeo(const UInt& i, const UInt& iQuadPt) const
+    {
+        return M_phiGeo(int(i),int(iQuadPt));
+
+    }
 
     //! Values of the derivatives of the geometric basis functions on quadrature points
-    KNMK<Real> dPhiGeo;
+    const Real& dPhiGeo(const UInt& i, const UInt& dxj, const UInt& iQuadPt) const
+    {
+        return M_dPhiGeo(int(i),int(dxj),int(iQuadPt));
+    }
 
     //! Values of the weight times the measure on the quadrature points
-    KN<Real>   weightMeas;
+    const Real& weightMeas(const UInt& iQuadPt) const
+    {
+        return M_weightMeas(int(iQuadPt));
+    }
 
     //! Values of the measures on the quadrature points
-    KN<Real>   meas;
+    const Real& meas(const UInt& iQuadPt) const
+    {
+        return M_meas(int(iQuadPt));
+    }
 
     //! Values of the normal on the quadrature points
-    KNM<Real>  normal;
+    const Real& normal(const UInt& coor, const UInt& iQuadPt) const
+    {
+        return M_normal(int(coor),int(iQuadPt));
+    }
 
     //! Values of the tangents on the quadrature points
-    KNMK<Real> tangent;
+    const Real& tangent(const UInt& i, const UInt& coor, const UInt& iQuadPt) const
+    {
+        return M_tangent(int(i),int(coor),int(iQuadPt));
+    }
 
     //! Metric tensor on the quadrature points
-    KNMK<Real> metric;
+    const Real& metric(const UInt& iCoor, const UInt& jCoor, const UInt& iQuadPt) const
+    {
+        return M_metric(int(iCoor),int(jCoor),int(iQuadPt));
+    }
 
     //! Coordinates of the quadrature points on the current element
-    KNM<Real>  quadPt;
+    const Real& quadPt(const UInt& i, const UInt& coor) const
+    {
+        return M_quadPt(int(i),int(coor));
+    }
 
     //! Inverse of the area
     const Real invArea;
@@ -274,6 +311,21 @@ protected:
     bool M_hasQuadPtCoor;
 #endif
 
+    KNM<Real>  M_point;
+
+
+    KNM<Real>  M_phi;
+    KNMK<Real> M_dPhiRef;
+    KNMK<Real> M_dPhi;
+    KNM<Real>  M_phiGeo;
+    KNMK<Real> M_dPhiGeo;
+    KN<Real>   M_weightMeas;
+    KN<Real>   M_meas;
+    KNM<Real>  M_normal;
+    KNMK<Real> M_tangent;
+    KNMK<Real> M_metric;
+    KNM<Real>  M_quadPt;
+
 };
 
 
@@ -288,7 +340,7 @@ integral( const FunctorType & f ) const
     for ( UInt iQuadPt(0); iQuadPt < nbQuadPt; ++iQuadPt )
     {
         coorQuadPt( x, y, z, iQuadPt );
-        integ += f( x, y, z ) * weightMeas( iQuadPt );
+        integ += f( x, y, z ) * M_weightMeas( iQuadPt );
     }
     return integ;
 }
@@ -312,7 +364,7 @@ integral_n( const FunctorType & f ) const
         {
             tmp += ret[ d ] * normal( d, iQuadPt );
         }
-        integ += tmp * weightMeas( iQuadPt );
+        integ += tmp * M_weightMeas( iQuadPt );
     }
     return integ;
 }

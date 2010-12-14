@@ -1334,7 +1334,6 @@ void ipstab_bagrad( const Real coef, ElemMat& elmat,
 
     fe1.coorMap( b1[ 0 ], b1[ 1 ], b1[ 2 ], 0, 0, 0 ); // translation fe1
     fe2.coorMap( b2[ 0 ], b2[ 1 ], b2[ 2 ], 0, 0, 0 ); // translation fe2
-    const KNM<Real>& normal = bdfe.normal;
 
     //
     // convection velocity term |\beta . n|^2 / |\beta|
@@ -1352,7 +1351,7 @@ void ipstab_bagrad( const Real coef, ElemMat& elmat,
             {
                 Real betaLoc = bdfe.phi( i, ig ) *
                                beta.vec() [ icoor * bdfe.nbCoor + i ];
-                sum1 += betaLoc * normal(icoor, ig);
+                sum1 += betaLoc * bdfe.normal(icoor, ig);
                 sum2 += betaLoc * betaLoc;
             }
         }
@@ -1458,7 +1457,6 @@ void ipstab_bagrad( const Real         coef,
 
     fe1.coorMap( b1[ 0 ], b1[ 1 ], b1[ 2 ], 0, 0, 0 ); // translation fe1
     fe2.coorMap( b2[ 0 ], b2[ 1 ], b2[ 2 ], 0, 0, 0 ); // translation fe2
-    const KNM<Real>& normal = bdfe.normal;
 
     //
     // convection velocity term |\beta . n|
@@ -1477,7 +1475,7 @@ void ipstab_bagrad( const Real         coef,
             {
                 Real betaLoc = fe3.phi( i, ig ) *
                                beta.vec() [ icoor*fe3.nbFEDof() + i ];
-                sum1 += betaLoc * normal(icoor, ig);
+                sum1 += betaLoc * bdfe.normal(icoor, ig);
             }
         }
         bn[ ig ] = std::abs(sum1);

@@ -145,7 +145,7 @@ update( const GeometricType& geometricEntity )
     {
         for (UInt icoor(0); icoor < nDimensions; icoor++)
         {
-            point( i, icoor ) = geometricEntity.point( i + 1 ).coor()[icoor];
+            M_point( i, icoor ) = geometricEntity.point( i + 1 ).coor()[icoor];
         }
     }
 }
@@ -170,7 +170,7 @@ updateMeas( const GeometricType& geometricEntity )
     {
         for (UInt icoor=0; icoor<nDimensions; icoor++)
         {
-            point( i, icoor ) = geometricEntity.point( i + 1 ).coor()[icoor];
+            M_point( i, icoor ) = geometricEntity.point( i + 1 ).coor()[icoor];
         }
     }
 
@@ -198,7 +198,7 @@ updateMeasQuadPt( const GeometricType& geometricEntity )
     {
         for (UInt icoor=0; icoor<nDimensions; icoor++)
         {
-            point( i, icoor ) = geometricEntity.point( i + 1 ).coor()[icoor];
+            M_point( i, icoor ) = geometricEntity.point( i + 1 ).coor()[icoor];
         }
     }
 
@@ -228,7 +228,7 @@ updateMeasNormal( const GeometricType& geometricEntity )
     {
         for (UInt icoor=0; icoor<nDimensions; icoor++)
         {
-            point( i, icoor ) = geometricEntity.point( i + 1 ).coor()[icoor];
+            M_point( i, icoor ) = geometricEntity.point( i + 1 ).coor()[icoor];
         }
     }
 
@@ -256,7 +256,7 @@ updateMeasNormalQuadPt( const GeometricType& geometricEntity )
     {
         for (UInt icoor=0; icoor<nDimensions; icoor++)
         {
-            point( i, icoor ) = geometricEntity.point( i + 1 ).coor()[icoor];
+            M_point( i, icoor ) = geometricEntity.point( i + 1 ).coor()[icoor];
         }
     }
 
