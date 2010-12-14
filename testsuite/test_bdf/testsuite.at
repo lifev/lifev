@@ -28,7 +28,7 @@ AT_DATA([data],[[# -*- getpot -*- (GetPot mode activation for emacs)
 	
 	[./space_discretization]
 	order     = P2
-	mesh_dir  = ./Mesh/  # the directory where the mesh file is
+	mesh_dir  = ./  # the directory where the mesh file is
 	mesh_file = cube4x4.mesh      # mesh file
 
 	[../prec]
@@ -117,8 +117,8 @@ start      = 0
 save       = 1
 ]])
 
-AT_CHECK([ln -sf $abs_top_builddir/testsuite/data/mesh/inria Mesh  && \
-          mpirun -np 2 $abs_top_builddir/testsuite/test_bdf/test_bdf],[0],[ignore],[ignore])
+AT_CHECK([ln -sf ../../data/mesh/inria/cube4x4.mesh  && \
+          mpirun -n 2 ../../test_bdf/test_bdf],[0],[ignore],[ignore])
 AT_CLEANUP
 
 AT_SETUP([test_bdf (order 2)])
@@ -136,7 +136,7 @@ AT_DATA([data],[[# -*- getpot -*- (GetPot mode activation for emacs)
 	
 	[./space_discretization]
 	order     = P2
-	mesh_dir  = ./Mesh/  # the directory where the mesh file is
+	mesh_dir  = ./  # the directory where the mesh file is
 	mesh_file = cube4x4.mesh      # mesh file
 
 	[../prec]
@@ -225,6 +225,6 @@ start      = 0
 save       = 1
 ]])
 
-AT_CHECK([ln -sf $abs_top_builddir/testsuite/data/mesh/inria Mesh  && \
-          mpirun -np 2 $abs_top_builddir/testsuite/test_bdf/test_bdf],[0],[ignore],[ignore])
+AT_CHECK([ln -sf ../../data/mesh/inria/cube4x4.mesh  && \
+          mpirun -n 2 ../../test_bdf/test_bdf],[0],[ignore],[ignore])
 AT_CLEANUP
