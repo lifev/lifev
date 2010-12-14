@@ -51,7 +51,7 @@
 #include <life/lifesolver/OseenShapeDerivative.hpp>
 
 // Mathcard includes
-#include <lifemc/lifesolver/BCInterface.hpp>
+#include <lifemc/lifesolver/BCInterface3D.hpp>
 #include <lifemc/lifesolver/MultiscaleModel.hpp>
 
 namespace LifeV
@@ -90,7 +90,7 @@ public:
 
     typedef BCHandler                             bc_Type;
     typedef boost::shared_ptr< bc_Type >          bcPtr_Type;
-    typedef BCInterface< fluid_Type >             bcInterface_Type;
+    typedef BCInterface3D< fluid_Type >           bcInterface_Type;
     typedef boost::shared_ptr< bcInterface_Type > bcInterfacePtr_Type;
 
     typedef BdfTNS< fluidVector_Type >            bdf_Type;
