@@ -2,7 +2,7 @@
 # DO NOT EDIT : generated automatically by update-headers
 #
 
-LIFECORE_HDRS=life/lifecore/dataString.hpp life/lifecore/lifemacros.hpp life/lifecore/lifeassert.hpp life/lifecore/GetPot.hpp life/lifecore/policy.hpp life/lifecore/SmartAssert.hpp life/lifecore/life.hpp life/lifecore/factory.hpp life/lifecore/util_string.hpp life/lifecore/displayer.hpp life/lifecore/debug.hpp life/lifecore/lifeversion.hpp life/lifecore/switch.hpp life/lifecore/typeInfo.hpp life/lifecore/CommunicatorEpetra.hpp life/lifecore/fortran_wrap.hpp life/lifecore/singleton.hpp life/lifecore/chrono.hpp 
+LIFECORE_HDRS=life/lifecore/dataString.hpp life/lifecore/lifemacros.hpp life/lifecore/lifeassert.hpp life/lifecore/GetPot.hpp life/lifecore/policy.hpp life/lifecore/SmartAssert.hpp life/lifecore/life.hpp life/lifecore/factory.hpp life/lifecore/util_string.hpp life/lifecore/displayer.hpp life/lifecore/debug.hpp life/lifecore/lifeversion.hpp life/lifecore/switch.hpp life/lifecore/typeInfo.hpp life/lifecore/fortran_wrap.hpp life/lifecore/singleton.hpp life/lifecore/chrono.hpp 
 
 LIFEARRAY_HDRS=life/lifearray/elemMat.hpp life/lifearray/MatrixContainer.hpp life/lifearray/SimpleVect.hpp life/lifearray/RNM_tpl.hpp life/lifearray/elemVec.hpp life/lifearray/RNM_op.hpp life/lifearray/tab.hpp life/lifearray/RNM_opc.hpp life/lifearray/RNM.hpp life/lifearray/EpetraVector.hpp life/lifearray/EpetraMatrix.hpp 
 
