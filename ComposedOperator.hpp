@@ -1,4 +1,4 @@
-/* -*- mode: c++ -*-
+/* -*- mode: c++ -*- */
 //@HEADER
 /*
 *******************************************************************************
@@ -221,7 +221,7 @@ public:
     /**
        The operator transposed means that all its factors have to be considered transposed
      */
-    const bool getAllTranspose() const {return M_allTranspose;}
+    bool getAllTranspose() const {return M_allTranspose;}
 
     //! Returns a vector saying for each factor if it is considered transposed or not
     const std::vector<bool>&  getTranspose() const {return M_transpose;}
@@ -238,11 +238,11 @@ public:
     const std::vector<bool>& getInverse() const {return M_inverse;}
 
     //! returns the number of factors present in the operator
-    const UInt getNumber() const {return M_set;}
+    UInt getNumber() const {return M_set;}
 
     const double& getMeanIter() const {return M_meanIter;}
 
-    const int getNumCalled() const {return M_numCalled;}
+    int getNumCalled() const {return M_numCalled;}
 
     const Displayer& displayer(){return M_displayer;}
     //@}
@@ -312,7 +312,7 @@ ComposedOperator<operator_Type>::ComposedOperator( const ComposedOperator<operat
     M_numCalled(P.getNumCalled()),
     M_displayer(P.getCommPtr())
 {
-    for(int i=0; i<M_set; ++i)
+    for(UInt i=0; i<M_set; ++i)
     {
         M_operator.push_back(P.getP()[i]);
     }
@@ -578,7 +578,7 @@ Apply_DirectOperator(const Epetra_MultiVector& X, Epetra_MultiVector& Y) const
     ID k=0;
     for (Int q(M_set-1); q>=0 ; q--)
     {
-        if(M_summed.size() && q==M_summed[k])
+        if(M_summed.size() && q==(Int)M_summed[k])
         {
             ++k;
         }

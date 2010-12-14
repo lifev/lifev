@@ -27,6 +27,8 @@
    \date 2009-05-07
  */
 
+#include <lifeconfig.h>
+
 #include <lifemc/lifealg/ComposedPreconditioner.hpp>
 #include <life/lifealg/IfpackPreconditioner.hpp>
 #include <life/lifealg/MLPreconditioner.hpp>
@@ -179,11 +181,11 @@ ComposedPreconditioner::precReset()
 //! Private Methods
 // ===================================================
 
-int
+Int
 ComposedPreconditioner::createPrec(operator_type& oper,
                                    boost::shared_ptr<EpetraPreconditioner> & prec )
 {
-    prec->buildPreconditioner( oper );
+    return prec->buildPreconditioner( oper );
 }
 
 

@@ -1,4 +1,4 @@
-/* -*- mode: c++ -*-
+/* -*- mode: c++ -*-*/
 //@HEADER
 /*
 *******************************************************************************
@@ -47,8 +47,8 @@
 namespace LifeV
 {
 EigenSolver::EigenSolver(boost::shared_ptr<Solver> const matrix, Epetra_BlockMap const& block_map, long unsigned int numvec):
-        MyProblem( new Anasazi::BasicEigenproblem<DataType, Vector, Solver>(Teuchos::rcp(matrix), M_eigenVectors) ),
         M_eigenVectors(new Epetra_MultiVector(block_map, numvec)),
+        MyProblem( new Anasazi::BasicEigenproblem<DataType, Vector, Solver>(Teuchos::rcp(matrix), M_eigenVectors) ),
         MyPL(),
         MySolver()
 {
@@ -69,7 +69,6 @@ EigenSolver::setDataFromGetPot(GetPot const& data , const std::string& section)
     std::string which = data((section + "which").c_str(), "ML");
     int nev = data((section + "neval").c_str(), 10);//number of eigenvalues
     bool verbose = data((section + "verbose").c_str(), true);
-    bool debug = data((section + "debug").c_str(), true);
 
 
     int verbosity = Anasazi::Errors + Anasazi::Warnings;
@@ -77,7 +76,9 @@ EigenSolver::setDataFromGetPot(GetPot const& data , const std::string& section)
     {
         verbosity += Anasazi::FinalSummary + Anasazi::TimingDetails;
     }
-#ifdef DEBUG
+#ifdef HAVE_LIFEV_DEBUG
+    bool debug = data((section + "debug").c_str(), true);
+
     if (debug)
         verbosity += Anasazi::Debug;
 #endif

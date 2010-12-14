@@ -1,4 +1,4 @@
-/* -*- mode: c++ -*-
+/* -*- mode: c++ -*-*/
 //@HEADER
 /*
 *******************************************************************************
@@ -125,7 +125,7 @@ public:
 
     super_Type::prec_raw_type*  getPrec ();
 
-    const UInt getNumber() const {return M_prec->getNumber();}
+    UInt getNumber() const {return M_prec->getNumber();}
 
     super_Type::prec_type              getPrecPtr(){return M_prec;}
 
@@ -201,7 +201,7 @@ private:
     //!@name Private Methods
     //@{
 
-    int createPrec (operatorPtr_Type& oper,
+    Int createPrec (operatorPtr_Type& oper,
                     boost::shared_ptr<EpetraPreconditioner>& prec);
     //@}
 
