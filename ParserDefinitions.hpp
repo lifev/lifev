@@ -37,7 +37,7 @@
 #ifndef Parser_Definitions_H
 #define Parser_Definitions_H 1
 
-// LifeV config - Should be removed from here, but we cannot due to flag HAVE_BOOST_SPIRIT_QI
+// LifeV classes
 #include <life/lifecore/life.hpp>
 
 // Tell the compiler to ignore specific kind of warnings:
@@ -70,8 +70,5 @@ namespace phoenix = boost::phoenix;
 // Tell the compiler to restore the warning previously silented
 #pragma GCC diagnostic warning "-Wunused-variable"
 #pragma GCC diagnostic warning "-Wunused-parameter"
-
-// LifeV classes
-#include <life/lifecore/life.hpp>
 
 #endif /* Parser_Definitions_H */
