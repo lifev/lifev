@@ -34,8 +34,8 @@
  *  @maintainer Cristiano Malossi <cristiano.malossi@epfl.ch>
  */
 
-#ifndef BCInterface1D_Definitions_H
-#define BCInterface1D_Definitions_H 1
+#ifndef BCInterface1DDefinitions_H
+#define BCInterface1DDefinitions_H 1
 
 // Tell the compiler to ignore specific kind of warnings:
 #pragma GCC diagnostic ignored "-Wunused-variable"
@@ -67,15 +67,15 @@ namespace LifeV
 {
 
 // Enum objects
-enum BCInterface1D_BaseList
+enum baseList1D_Type
 {
-    BCInterface1D_function,
-    BCInterface1D_functionFile,
-    BCInterface1D_OPERfunction,
-    BCInterface1D_OPERfunctionFile,
-    BCInterface1D_Default
+    BCI1DFunction,
+    BCI1DFunctionFile,
+    BCI1DFunctionSolver,
+    BCI1DFunctionFileSolver,
+    BCI1DFunctionDefault
 };
 
 } // Namespace LifeV
 
-#endif /* BCInterface1D_Definitions_H */
+#endif /* BCInterface1DDefinitions_H */

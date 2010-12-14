@@ -26,7 +26,7 @@
 
 /*!
  *  @file
- *  @brief File containing the BCInterface1D_DefaultFunctions class
+ *  @brief File containing the BCInterface1DFunctionDefault class
  *
  *  @date 10-05-2010
  *  @author Cristiano Malossi <cristiano.malossi@epfl.ch>
@@ -34,8 +34,8 @@
  *  @maintainer Cristiano Malossi <cristiano.malossi@epfl.ch>
  */
 
-#ifndef BCInterface1D_DefaultFunctions_H
-#define BCInterface1D_DefaultFunctions_H 1
+#ifndef BCInterface1DFunctionDefault_H
+#define BCInterface1DFunctionDefault_H 1
 
 #include <lifemc/lifesolver/BCInterface1DDefinitions.hpp>
 #include <lifemc/lifesolver/BCInterface1DData.hpp>
@@ -45,11 +45,11 @@
 namespace LifeV
 {
 
-//! BCInterface1D_DefaultFunctions - Interface with the default boundary conditions of the 1D model
+//! BCInterface1DFunctionDefault - Interface with the default boundary conditions of the 1D model
 /*!
  *  @author Cristiano Malossi
  *
- *  The BCInterface1D_DefaultFunctions class provides a general interface between the
+ *  The BCInterface1DFunctionDefault class provides a general interface between the
  *  BCInterface1D and the default BC for the 1D Model.
  *
  *  <b>DETAILS:</b>
@@ -65,7 +65,7 @@ namespace LifeV
  *	To get the base for the boundary condition, call the \c base() method.
  */
 template< class PhysicalSolverType >
-class BCInterface1D_DefaultFunctions
+class BCInterface1DFunctionDefault
 {
 public:
 
@@ -73,7 +73,7 @@ public:
     //@{
 
     typedef PhysicalSolverType                                                    physicalSolver_Type;
-    typedef BCInterface1D_Data                                                    data_Type;
+    typedef BCInterface1DData                                                     data_Type;
 
     typedef OneDimensionalModel_BC::BCFunction_Type                               bcFunction_Type;
     typedef OneDimensionalModel_BC::BCFunction_PtrType                            bcFunction_PtrType;
@@ -90,16 +90,16 @@ public:
     //@{
 
     //! Constructor
-    explicit BCInterface1D_DefaultFunctions();
+    explicit BCInterface1DFunctionDefault();
 
     //! Constructor
     /*!
      * @param data BC data loaded from GetPot file
      */
-    explicit BCInterface1D_DefaultFunctions( const data_Type& data );
+    explicit BCInterface1DFunctionDefault( const data_Type& data );
 
     //! Destructor
-    ~BCInterface1D_DefaultFunctions() {}
+    virtual ~BCInterface1DFunctionDefault() {}
 
     //@}
 
@@ -145,9 +145,9 @@ private:
     //! @name Unimplemented Methods
     //@{
 
-    BCInterface1D_DefaultFunctions( const BCInterface1D_DefaultFunctions& defaultFunctions );
+    BCInterface1DFunctionDefault( const BCInterface1DFunctionDefault& defaultFunctions );
 
-    BCInterface1D_DefaultFunctions& operator=( const BCInterface1D_DefaultFunctions& defaultFunctions );
+    BCInterface1DFunctionDefault& operator=( const BCInterface1DFunctionDefault& defaultFunctions );
 
     //@}
 
@@ -167,25 +167,25 @@ private:
 // Constructors
 // ===================================================
 template< class PhysicalSolverType >
-BCInterface1D_DefaultFunctions< PhysicalSolverType >::BCInterface1D_DefaultFunctions() :
+BCInterface1DFunctionDefault< PhysicalSolverType >::BCInterface1DFunctionDefault() :
         M_base              ( new bcFunction_Type() ),
         M_defaultFunction   ()
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 5025 ) << "BCInterface1D_DefaultFunctions::BCInterface1D_DefaultFunctions()" << "\n";
+    Debug( 5025 ) << "BCInterface1DFunctionDefault::BCInterface1DFunctionDefault()" << "\n";
 #endif
 
 }
 
 template< class PhysicalSolverType >
-BCInterface1D_DefaultFunctions< PhysicalSolverType >::BCInterface1D_DefaultFunctions( const data_Type& data ) :
+BCInterface1DFunctionDefault< PhysicalSolverType >::BCInterface1DFunctionDefault( const data_Type& data ) :
         M_base              ( new bcFunction_Type() ),
         M_defaultFunction   ()
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 5025 ) << "BCInterface1D_DefaultFunctions::BCInterface1D_DefaultFunctions( data )" << "\n";
+    Debug( 5025 ) << "BCInterface1DFunctionDefault::BCInterface1DFunctionDefault( data )" << "\n";
 #endif
 
     this->setData( data );
@@ -196,11 +196,11 @@ BCInterface1D_DefaultFunctions< PhysicalSolverType >::BCInterface1D_DefaultFunct
 // ===================================================
 template< class PhysicalSolverType >
 inline void
-BCInterface1D_DefaultFunctions< PhysicalSolverType >::setData( const data_Type& data )
+BCInterface1DFunctionDefault< PhysicalSolverType >::setData( const data_Type& data )
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 5025 ) << "BCInterface1D_DefaultFunctions::setData" << "\n";
+    Debug( 5025 ) << "BCInterface1DFunctionDefault::setData" << "\n";
 #endif
 
     //Set mapFunction
@@ -253,4 +253,4 @@ BCInterface1D_DefaultFunctions< PhysicalSolverType >::setData( const data_Type& 
 
 } // Namespace LifeV
 
-#endif /* BCInterface1D_DefaultFunctions_H */
+#endif /* BCInterface1DFunctionDefault_H */

@@ -26,7 +26,7 @@
 
 /*!
  *  @file
- *  @brief File containing the BCInterface_Data class
+ *  @brief File containing the BCInterface3DData class
  *
  *  @date 17-07-2009
  *  @author Cristiano Malossi <cristiano.malossi@epfl.ch>
@@ -42,7 +42,7 @@ namespace LifeV
 // ===================================================
 // Constructors
 // ===================================================
-BCInterface_Data::BCInterface_Data() :
+BCInterface3DData::BCInterface3DData() :
         M_name               (),
         M_flag               (),
         M_type               (),
@@ -71,14 +71,14 @@ BCInterface_Data::BCInterface_Data() :
     M_mapMode["Directional"] = Directional;
 
     //Set mapBase
-    M_mapBase["function"]         = BCInterface_function;
-    M_mapBase["functionFile"]     = BCInterface_functionFile;
-    M_mapBase["OPERfunction"]     = BCInterface_OPERfunction;
-    M_mapBase["OPERfunctionFile"] = BCInterface_OPERfunctionFile;
-    M_mapBase["FSI"]              = BCInterface_OPERFSI;
+    M_mapBase["function"]         = BCI3DFunction;
+    M_mapBase["functionFile"]     = BCI3DFunctionFile;
+    M_mapBase["OPERfunction"]     = BCI3DFunctionSolver;
+    M_mapBase["OPERfunctionFile"] = BCI3DFunctionFileSolver;
+    M_mapBase["FSI"]              = BCI3DFunctionFSI;
 }
 
-BCInterface_Data::BCInterface_Data( const BCInterface_Data& data ) :
+BCInterface3DData::BCInterface3DData( const BCInterface3DData& data ) :
         M_name              ( data.M_name ),
         M_flag              ( data.M_flag ),
         M_type              ( data.M_type ),
@@ -96,8 +96,8 @@ BCInterface_Data::BCInterface_Data( const BCInterface_Data& data ) :
 // ===================================================
 // Operators
 // ===================================================
-BCInterface_Data&
-BCInterface_Data::operator=( const BCInterface_Data& data )
+BCInterface3DData&
+BCInterface3DData::operator=( const BCInterface3DData& data )
 {
     if ( this != &data )
     {
@@ -121,7 +121,7 @@ BCInterface_Data::operator=( const BCInterface_Data& data )
 // Methods
 // ===================================================
 void
-BCInterface_Data::readBC( const std::string& fileName,
+BCInterface3DData::readBC( const std::string& fileName,
                           const std::string& dataSection,
                           const BCName& name )
 {
@@ -138,7 +138,7 @@ BCInterface_Data::readBC( const std::string& fileName,
 }
 
 void
-BCInterface_Data::showMe( std::ostream& output ) const
+BCInterface3DData::showMe( std::ostream& output ) const
 {
     output << "Flag       = " << static_cast< Real > ( M_flag ) << std::endl;
     output << "Type       = " << M_type << std::endl;
@@ -155,7 +155,7 @@ BCInterface_Data::showMe( std::ostream& output ) const
 // ===================================================
 // Set Methods
 // ===================================================
-void BCInterface_Data::setBaseString( const std::string& baseString )
+void BCInterface3DData::setBaseString( const std::string& baseString )
 {
     M_baseString = baseString;
     boost::replace_all( M_baseString, " ", "" );
@@ -165,7 +165,7 @@ void BCInterface_Data::setBaseString( const std::string& baseString )
 // Private Methods
 // ===================================================
 void
-BCInterface_Data::readComV( const GetPot& dataFile, const char* component )
+BCInterface3DData::readComV( const GetPot& dataFile, const char* component )
 {
     UInt componentSize = dataFile.vector_variable_size( component );
 
@@ -177,7 +177,7 @@ BCInterface_Data::readComV( const GetPot& dataFile, const char* component )
 }
 
 void
-BCInterface_Data::readBase( const GetPot& dataFile, const std::string& base )
+BCInterface3DData::readBase( const GetPot& dataFile, const std::string& base )
 {
     for ( std::map< std::string, bcBaseList_Type >::iterator j = M_mapBase.begin(); j
             != M_mapBase.end(); ++j )
@@ -191,7 +191,7 @@ BCInterface_Data::readBase( const GetPot& dataFile, const std::string& base )
 }
 
 bool
-BCInterface_Data::isBase( const GetPot& dataFile, const char* base )
+BCInterface3DData::isBase( const GetPot& dataFile, const char* base )
 {
     M_baseString = dataFile( base, " " );
 

@@ -26,7 +26,7 @@
 
 /*!
  *  @file
- *  @brief File containing the BCInterface1D_Data class
+ *  @brief File containing the BCInterface1DData class
  *
  *  @date 10-05-2010
  *  @author Cristiano Malossi <cristiano.malossi@epfl.ch>
@@ -34,29 +34,29 @@
  *  @maintainer Cristiano Malossi <cristiano.malossi@epfl.ch>
  */
 
-#ifndef BCInterface_Data1D_H
-#define BCInterface_Data1D_H 1
+#ifndef BCInterface1DData_H
+#define BCInterface1DData_H 1
 
 #include <lifemc/lifesolver/BCInterface1DDefinitions.hpp>
 
 namespace LifeV
 {
 
-//! BCInterface1D_Data - The BCInterface data container
+//! BCInterface1DData - The BCInterface data container
 /*!
  *  @author Cristiano Malossi
  *
- *  The BCInterface1D_Data class provides a general container to pass information
+ *  The BCInterface1DData class provides a general container to pass information
  *  to all the BCInterface functions.
  */
-class BCInterface1D_Data
+class BCInterface1DData
 {
 public:
 
     //! @name Type definitions
     //@{
 
-    typedef BCInterface1D_BaseList                                                     bcBaseList_Type;
+    typedef baseList1D_Type                                                            bcBaseList_Type;
     typedef std::vector< Real >                                                        resistanceContainer_Type;
 
     //@}
@@ -66,16 +66,16 @@ public:
     //@{
 
     //! Constructor
-    explicit BCInterface1D_Data();
+    explicit BCInterface1DData();
 
     //! Copy constructor
     /*!
-     * @param data BCInterface1D_Data
+     * @param data BCInterface1DData
      */
-    BCInterface1D_Data( const BCInterface1D_Data& data );
+    BCInterface1DData( const BCInterface1DData& data );
 
     //! Destructor
-    virtual ~BCInterface1D_Data() {}
+    virtual ~BCInterface1DData() {}
 
     //@}
 
@@ -85,10 +85,10 @@ public:
 
     //! Operator =
     /*!
-     * @param data BCInterface1D_Data
+     * @param data BCInterface1DData
      * @return reference to a copy of the class
      */
-    BCInterface1D_Data& operator=( const BCInterface1D_Data& data );
+    BCInterface1DData& operator=( const BCInterface1DData& data );
 
     //@}
 
@@ -206,4 +206,4 @@ private:
 
 } // Namespace LifeV
 
-#endif /* BCInterface_Data1D_H */
+#endif /* BCInterface1DData_H */

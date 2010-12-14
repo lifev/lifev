@@ -26,7 +26,7 @@
 
 /*!
  *  @file
- *  @brief File containing the BCInterface1D_Function class
+ *  @brief File containing the BCInterface1DFunction class
  *
  *  @date 10-05-2010
  *  @author Cristiano Malossi <cristiano.malossi@epfl.ch>
@@ -34,8 +34,8 @@
  *  @maintainer Cristiano Malossi <cristiano.malossi@epfl.ch>
  */
 
-#ifndef BCInterface1D_Function_H
-#define BCInterface1D_Function_H 1
+#ifndef BCInterface1DFunction_H
+#define BCInterface1DFunction_H 1
 
 #include <lifemc/lifesolver/BCInterface1DDefinitions.hpp>
 #include <lifemc/lifesolver/BCInterface1DData.hpp>
@@ -45,7 +45,7 @@
 namespace LifeV
 {
 
-//! BCInterface1D_Function - LifeV bcFunction wrapper for BCInterface
+//! BCInterface1DFunction - LifeV bcFunction wrapper for BCInterface
 /*!
  *  @author Cristiano Malossi
  *
@@ -71,7 +71,7 @@ namespace LifeV
  *  function = 'a=5.67436; (a*sin(2*pi*t))'
  */
 template< typename PhysicalSolverType >
-class BCInterface1D_Function
+class BCInterface1DFunction
 {
 public:
 
@@ -79,7 +79,7 @@ public:
     //@{
 
     typedef PhysicalSolverType                                                    physicalSolver_Type;
-    typedef BCInterface1D_Data                                                    data_Type;
+    typedef BCInterface1DData                                                     data_Type;
     typedef OneDimensionalModel_BCFunction                                        bcFunction_Type;
     typedef Parser                                                                parser_Type;
 
@@ -90,16 +90,16 @@ public:
     //@{
 
     //! Empty Constructor
-    explicit BCInterface1D_Function();
+    explicit BCInterface1DFunction();
 
     //! Constructor
     /*!
      * @param data BC data loaded from GetPot file
      */
-    explicit BCInterface1D_Function( const data_Type& data );
+    explicit BCInterface1DFunction( const data_Type& data );
 
     //! Destructor
-    virtual ~BCInterface1D_Function() {}
+    virtual ~BCInterface1DFunction() {}
 
     //@}
 
@@ -144,9 +144,9 @@ private:
     //! @name Unimplemented Methods
     //@{
 
-    BCInterface1D_Function( const BCInterface1D_Function& function );
+    BCInterface1DFunction( const BCInterface1DFunction& function );
 
-    BCInterface1D_Function& operator=( const BCInterface1D_Function& function );
+    BCInterface1DFunction& operator=( const BCInterface1DFunction& function );
 
     //@}
 
@@ -155,7 +155,7 @@ private:
     //@{
 
     //! setFunction
-    void setFunction() { M_base.setFunction( boost::bind( &BCInterface1D_Function::function, this, _1 ) ); }
+    void setFunction() { M_base.setFunction( boost::bind( &BCInterface1DFunction::function, this, _1 ) ); }
 
     //! function
     Real function( const Real& t );
@@ -171,34 +171,34 @@ private:
 // ===================================================
 //! Factory create function
 template< typename PhysicalSolverType >
-inline BCInterface1D_Function< PhysicalSolverType >* createBCInterface1D_Function()
+inline BCInterface1DFunction< PhysicalSolverType >* createBCInterface1D_Function()
 {
-    return new BCInterface1D_Function< PhysicalSolverType > ();
+    return new BCInterface1DFunction< PhysicalSolverType > ();
 }
 
 // ===================================================
 // Constructor
 // ===================================================
 template< typename PhysicalSolverType >
-BCInterface1D_Function< PhysicalSolverType >::BCInterface1D_Function() :
+BCInterface1DFunction< PhysicalSolverType >::BCInterface1DFunction() :
         M_parser    (),
         M_base      ()
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 5021 ) << "BCInterface1D_Function::BCInterface1D_Function()" << "\n";
+    Debug( 5021 ) << "BCInterface1DFunction::BCInterface1DFunction()" << "\n";
 #endif
 
 }
 
 template< typename PhysicalSolverType >
-BCInterface1D_Function< PhysicalSolverType >::BCInterface1D_Function( const data_Type& data ) :
+BCInterface1DFunction< PhysicalSolverType >::BCInterface1DFunction( const data_Type& data ) :
         M_parser    (),
         M_base      ()
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 5021 ) << "BCInterface1D_Function::BCInterface1D_Function( data )" << "\n";
+    Debug( 5021 ) << "BCInterface1DFunction::BCInterface1DFunction( data )" << "\n";
 #endif
 
     this->setData( data );
@@ -209,11 +209,11 @@ BCInterface1D_Function< PhysicalSolverType >::BCInterface1D_Function( const data
 // ===================================================
 template< typename PhysicalSolverType >
 void
-BCInterface1D_Function< PhysicalSolverType >::setData( const data_Type& data )
+BCInterface1DFunction< PhysicalSolverType >::setData( const data_Type& data )
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 5022 ) << "BCInterface1D_Function::setData" << "\n";
+    Debug( 5022 ) << "BCInterface1DFunction::setData" << "\n";
 #endif
 
     if ( M_parser )
@@ -229,11 +229,11 @@ BCInterface1D_Function< PhysicalSolverType >::setData( const data_Type& data )
 // ===================================================
 template< typename PhysicalSolverType >
 Real
-BCInterface1D_Function< PhysicalSolverType >::function( const Real& t )
+BCInterface1DFunction< PhysicalSolverType >::function( const Real& t )
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 5021 ) << "BCInterface1D_Function::Function: " << "\n";
+    Debug( 5021 ) << "BCInterface1DFunction::Function: " << "\n";
     Debug( 5021 ) << "                                                           t: " << t << "\n";
 #endif
 
@@ -250,4 +250,4 @@ BCInterface1D_Function< PhysicalSolverType >::function( const Real& t )
 
 } // Namespace LifeV
 
-#endif /* BCInterface1D_Function_H */
+#endif /* BCInterface1DFunction_H */

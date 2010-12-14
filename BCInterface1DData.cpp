@@ -26,7 +26,7 @@
 
 /*!
  *  @file
- *  @brief File containing the BCInterface1D_Data class
+ *  @brief File containing the BCInterface1DData class
  *
  *  @date 10-05-2010
  *  @author Cristiano Malossi <cristiano.malossi@epfl.ch>
@@ -43,7 +43,7 @@ namespace LifeV
 // ===================================================
 // Constructors
 // ===================================================
-BCInterface1D_Data::BCInterface1D_Data() :
+BCInterface1DData::BCInterface1DData() :
         M_side               (),
         M_line               (),
         M_quantity           (),
@@ -71,14 +71,14 @@ BCInterface1D_Data::BCInterface1D_Data() :
     M_mapLine["second"] = OneD_second;
 
     //Set mapBase
-    M_mapBase["function"]         = BCInterface1D_function;
-    M_mapBase["functionFile"]     = BCInterface1D_functionFile;
-    M_mapBase["OPERfunction"]     = BCInterface1D_OPERfunction;
-    M_mapBase["OPERfunctionFile"] = BCInterface1D_OPERfunctionFile;
-    M_mapBase["Default"]          = BCInterface1D_Default;
+    M_mapBase["function"]         = BCI1DFunction;
+    M_mapBase["functionFile"]     = BCI1DFunctionFile;
+    M_mapBase["OPERfunction"]     = BCI1DFunctionSolver;
+    M_mapBase["OPERfunctionFile"] = BCI1DFunctionFileSolver;
+    M_mapBase["Default"]          = BCI1DFunctionDefault;
 }
 
-BCInterface1D_Data::BCInterface1D_Data( const BCInterface1D_Data& data ) :
+BCInterface1DData::BCInterface1DData( const BCInterface1DData& data ) :
         M_side              ( data.M_side ),
         M_line              ( data.M_line ),
         M_quantity          ( data.M_quantity ),
@@ -95,8 +95,8 @@ BCInterface1D_Data::BCInterface1D_Data( const BCInterface1D_Data& data ) :
 // ===================================================
 // Operators
 // ===================================================
-BCInterface1D_Data&
-BCInterface1D_Data::operator=( const BCInterface1D_Data& data )
+BCInterface1DData&
+BCInterface1DData::operator=( const BCInterface1DData& data )
 {
     if ( this != &data )
     {
@@ -119,7 +119,7 @@ BCInterface1D_Data::operator=( const BCInterface1D_Data& data )
 // Methods
 // ===================================================
 void
-BCInterface1D_Data::readBC( const std::string& fileName, const std::string& dataSection, const BCName& name )
+BCInterface1DData::readBC( const std::string& fileName, const std::string& dataSection, const BCName& name )
 {
     GetPot dataFile( fileName );
 
@@ -131,7 +131,7 @@ BCInterface1D_Data::readBC( const std::string& fileName, const std::string& data
 }
 
 void
-BCInterface1D_Data::showMe( std::ostream& output ) const
+BCInterface1DData::showMe( std::ostream& output ) const
 {
     output << "Side       = " << M_side << std::endl;
     output << "Line       = " << M_line << std::endl;
@@ -148,7 +148,7 @@ BCInterface1D_Data::showMe( std::ostream& output ) const
 // Methods
 // ===================================================
 void
-BCInterface1D_Data::setBaseString( const std::string& baseString )
+BCInterface1DData::setBaseString( const std::string& baseString )
 {
     M_baseString = baseString;
     boost::replace_all( M_baseString, " ", "" );
@@ -158,7 +158,7 @@ BCInterface1D_Data::setBaseString( const std::string& baseString )
 // Private Methods
 // ===================================================
 void
-BCInterface1D_Data::readBase( const GetPot& dataFile, const std::string& base )
+BCInterface1DData::readBase( const GetPot& dataFile, const std::string& base )
 {
     for ( std::map< std::string, bcBaseList_Type >::iterator j = M_mapBase.begin(); j
             != M_mapBase.end(); ++j )
@@ -172,7 +172,7 @@ BCInterface1D_Data::readBase( const GetPot& dataFile, const std::string& base )
 }
 
 bool
-BCInterface1D_Data::isBase( const GetPot& dataFile, const char* base )
+BCInterface1DData::isBase( const GetPot& dataFile, const char* base )
 {
     M_baseString = dataFile( base, " " );
 
@@ -180,7 +180,7 @@ BCInterface1D_Data::isBase( const GetPot& dataFile, const char* base )
 }
 
 void
-BCInterface1D_Data::readResistance( const GetPot& dataFile, const char* resistance )
+BCInterface1DData::readResistance( const GetPot& dataFile, const char* resistance )
 {
     UInt resistanceSize = dataFile.vector_variable_size( resistance );
 

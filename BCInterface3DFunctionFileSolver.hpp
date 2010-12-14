@@ -26,7 +26,7 @@
 
 /*!
  *  @file
- *  @brief File containing the BCInterface_OperatorFunctionFile class
+ *  @brief File containing the BCInterface3DFunctionFileSolver class
  *
  *  @date 26-08-2009
  *  @author Cristiano Malossi <cristiano.malossi@epfl.ch>
@@ -34,8 +34,8 @@
  *  @maintainer Cristiano Malossi <cristiano.malossi@epfl.ch>
  */
 
-#ifndef BCInterface_OperatorFunctionFile_H
-#define BCInterface_OperatorFunctionFile_H 1
+#ifndef BCInterface3DFunctionFileSolver_H
+#define BCInterface3DFunctionFileSolver_H 1
 
 #include <lifemc/lifesolver/BCInterface3DFunctionFile.hpp>
 #include <lifemc/lifesolver/BCInterface3DFunctionSolver.hpp>
@@ -43,7 +43,7 @@
 namespace LifeV
 {
 
-//! BCInterface_OperatorFunctionFile - LifeV bcFunction wrapper for BCInterface (with Operators)
+//! BCInterface3DFunctionFileSolver - LifeV bcFunction wrapper for BCInterface (with Operators)
 /*!
  *  @author Cristiano Malossi
  *
@@ -54,8 +54,8 @@ namespace LifeV
  *  The function string can contain Operator parameters.
  */
 template< class PhysicalSolverType >
-class BCInterface_OperatorFunctionFile: public virtual BCInterface_FunctionFile< PhysicalSolverType > ,
-                                        public virtual BCInterface_OperatorFunction< PhysicalSolverType >
+class BCInterface3DFunctionFileSolver: public virtual BCInterface3DFunctionFile< PhysicalSolverType > ,
+                                       public virtual BCInterface3DFunctionSolver< PhysicalSolverType >
 {
 public:
 
@@ -63,11 +63,10 @@ public:
     //@{
 
     typedef PhysicalSolverType                                                    physicalSolver_Type;
-    typedef BCInterface_Data                                                      data_Type;
-
-    typedef BCInterface_Function< physicalSolver_Type >                           function_Type;
-    typedef BCInterface_FunctionFile< physicalSolver_Type >                       functionFile_Type;
-    typedef BCInterface_OperatorFunction< physicalSolver_Type >                   functionSolver_Type;
+    typedef BCInterface3DData                                                     data_Type;
+    typedef BCInterface3DFunction< physicalSolver_Type >                          function_Type;
+    typedef BCInterface3DFunctionFile< physicalSolver_Type >                      functionFile_Type;
+    typedef BCInterface3DFunctionSolver< physicalSolver_Type >                    functionSolver_Type;
 
     //@}
 
@@ -76,16 +75,16 @@ public:
     //@{
 
     //! Constructor
-    explicit BCInterface_OperatorFunctionFile();
+    explicit BCInterface3DFunctionFileSolver();
 
     //! Constructor
     /*!
      * @param data BC data loaded from GetPot file
      */
-    explicit BCInterface_OperatorFunctionFile( const data_Type& data );
+    explicit BCInterface3DFunctionFileSolver( const data_Type& data );
 
     //! Destructor
-    virtual ~BCInterface_OperatorFunctionFile() {}
+    virtual ~BCInterface3DFunctionFileSolver() {}
 
     //@}
 
@@ -106,9 +105,9 @@ private:
     //! @name Unimplemented Methods
     //@{
 
-    BCInterface_OperatorFunctionFile( const BCInterface_OperatorFunctionFile& function );
+    BCInterface3DFunctionFileSolver( const BCInterface3DFunctionFileSolver& function );
 
-    BCInterface_OperatorFunctionFile& operator=( const BCInterface_OperatorFunctionFile& function );
+    BCInterface3DFunctionFileSolver& operator=( const BCInterface3DFunctionFileSolver& function );
 
     //@}
 
@@ -119,36 +118,36 @@ private:
 // ===================================================
 //! Factory create function
 template< typename PhysicalSolverType >
-inline BCInterface_Function< PhysicalSolverType >* createBCInterface_OperatorFunctionFile()
+inline BCInterface3DFunction< PhysicalSolverType >* createBCInterface_OperatorFunctionFile()
 {
-    return new BCInterface_OperatorFunctionFile< PhysicalSolverType > ();
+    return new BCInterface3DFunctionFileSolver< PhysicalSolverType > ();
 }
 
 // ===================================================
 // Constructors
 // ===================================================
 template< class PhysicalSolverType >
-BCInterface_OperatorFunctionFile< PhysicalSolverType >::BCInterface_OperatorFunctionFile() :
+BCInterface3DFunctionFileSolver< PhysicalSolverType >::BCInterface3DFunctionFileSolver() :
         function_Type          (),
         functionFile_Type      (),
         functionSolver_Type    ()
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 5024 ) << "BCInterface_OperatorFunctionFile::BCInterface_OperatorFunctionFile()" << "\n";
+    Debug( 5024 ) << "BCInterface3DFunctionFileSolver::BCInterface3DFunctionFileSolver()" << "\n";
 #endif
 
 }
 
 template< class PhysicalSolverType >
-BCInterface_OperatorFunctionFile< PhysicalSolverType >::BCInterface_OperatorFunctionFile( const data_Type& data ) :
+BCInterface3DFunctionFileSolver< PhysicalSolverType >::BCInterface3DFunctionFileSolver( const data_Type& data ) :
         function_Type          (),
         functionFile_Type      (),
         functionSolver_Type    ()
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 5024 ) << "BCInterface_OperatorFunctionFile::BCInterface_OperatorFunctionFile( data )" << "\n";
+    Debug( 5024 ) << "BCInterface3DFunctionFileSolver::BCInterface3DFunctionFileSolver( data )" << "\n";
 #endif
 
     this->setData( data );
@@ -159,15 +158,15 @@ BCInterface_OperatorFunctionFile< PhysicalSolverType >::BCInterface_OperatorFunc
 // ===================================================
 template< class PhysicalSolverType >
 void
-BCInterface_OperatorFunctionFile< PhysicalSolverType >::setData( const data_Type& data )
+BCInterface3DFunctionFileSolver< PhysicalSolverType >::setData( const data_Type& data )
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 5024 ) << "BCInterface_OperatorFunctionFile::setData" << "\n";
+    Debug( 5024 ) << "BCInterface3DFunctionFileSolver::setData" << "\n";
 #endif
     functionFile_Type::setData( data );
 
-    //functionSolver_Type::setData( data ); Cannot call directly, because it call again BCInterface_Function::setup( data )
+    //functionSolver_Type::setData( data ); Cannot call directly, because it call again BCInterface3DFunction::setup( data )
     functionSolver_Type::M_flag = data.flag();
 
     functionSolver_Type::createAccessList( data );
@@ -175,4 +174,4 @@ BCInterface_OperatorFunctionFile< PhysicalSolverType >::setData( const data_Type
 
 } // Namespace LifeV
 
-#endif /* BCInterface_OperatorFunctionFile_H */
+#endif /* BCInterface3DFunctionFileSolver_H */

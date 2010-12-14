@@ -37,8 +37,8 @@
 #ifndef MultiscaleCouplingBoundaryCondition_H
 #define MultiscaleCouplingBoundaryCondition_H 1
 
-#include <lifemc/lifesolver/BCInterface.hpp>
 #include <lifemc/lifesolver/BCInterface1D.hpp>
+#include <lifemc/lifesolver/BCInterface3D.hpp>
 
 #include <lifemc/lifesolver/MultiscaleCoupling.hpp>
 #include <lifemc/lifesolver/MultiscaleModelFluid3D.hpp>

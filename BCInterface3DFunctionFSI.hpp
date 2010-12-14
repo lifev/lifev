@@ -26,7 +26,7 @@
 
 /*!
  *  @file
- *  @brief File containing the BCInterface_FSI class
+ *  @brief File containing the BCInterface3DFunctionFSI class
  *
  *  @date 23-04-2009
  *  @author Cristiano Malossi <cristiano.malossi@epfl.ch>
@@ -34,8 +34,8 @@
  *  @maintainer Cristiano Malossi <cristiano.malossi@epfl.ch>
  */
 
-#ifndef BCInterface_FSI_H
-#define BCInterface_FSI_H 1
+#ifndef BCInterface3DFunctionFSI_H
+#define BCInterface3DFunctionFSI_H 1
 
 #include <lifemc/lifesolver/BCInterface3DDefinitions.hpp>
 #include <lifemc/lifesolver/BCInterface3DData.hpp>
@@ -49,12 +49,12 @@
 namespace LifeV
 {
 
-//! BCInterface_FSI Fake class for non-FSI problems.
+//! BCInterface3DFunctionFSI Fake class for non-FSI problems.
 /*!
  *  @author Cristiano Malossi
  */
 template< class PhysicalSolverType >
-class BCInterface_FSI
+class BCInterface3DFunctionFSI
 {
 public:
 
@@ -62,7 +62,7 @@ public:
     //@{
 
     typedef PhysicalSolverType                                                    physicalSolver_Type;
-    typedef BCInterface_Data                                                      data_Type;
+    typedef BCInterface3DData                                                     data_Type;
     typedef BCVectorInterface                                                     bcFunction_Type;
 
     //@}
@@ -71,10 +71,10 @@ public:
     //! @name Constructors & Destructor
     //@{
 
-    explicit BCInterface_FSI() {}
-    explicit BCInterface_FSI( const data_Type& /*data*/) {}
+    explicit BCInterface3DFunctionFSI() {}
+    explicit BCInterface3DFunctionFSI( const data_Type& /*data*/) {}
 
-    virtual ~BCInterface_FSI() {}
+    virtual ~BCInterface3DFunctionFSI() {}
 
     //@}
 
@@ -108,16 +108,16 @@ private:
     //! @name Unimplemented Methods
     //@{
 
-    BCInterface_FSI( const BCInterface_FSI& fsi);
+    BCInterface3DFunctionFSI( const BCInterface3DFunctionFSI& fsi);
 
-    BCInterface_FSI& operator=( const BCInterface_FSI& fsi );
+    BCInterface3DFunctionFSI& operator=( const BCInterface3DFunctionFSI& fsi );
 
     //@}
 
     boost::shared_ptr< bcFunction_Type > M_base;
 };
 
-//! BCInterface_FSI - specialized template implementation for FSI problems.
+//! BCInterface3DFunctionFSI - specialized template implementation for FSI problems.
 /*!
  *  @author Cristiano Malossi
  *
@@ -153,14 +153,14 @@ private:
  *	To get the base for the boundary condition call the getBase function.
  */
 template< >
-class BCInterface_FSI< FSIOperator >
+class BCInterface3DFunctionFSI< FSIOperator >
 {
 public:
 
     //! @name Type definitions
     //@{
 
-    typedef BCInterface_Data                                                      data_Type;
+    typedef BCInterface3DData                                                      data_Type;
     typedef BCVectorInterface                                                     bcFunction_Type;
 
     //@}
@@ -170,16 +170,16 @@ public:
     //@{
 
     //! Constructor
-    explicit BCInterface_FSI();
+    explicit BCInterface3DFunctionFSI();
 
     //! Constructor
     /*!
      * @param data BC data loaded from GetPot file
      */
-    explicit BCInterface_FSI( const data_Type& data );
+    explicit BCInterface3DFunctionFSI( const data_Type& data );
 
     //! Destructor
-    virtual ~BCInterface_FSI() {}
+    virtual ~BCInterface3DFunctionFSI() {}
 
     //@}
 
@@ -214,10 +214,13 @@ public:
     //@}
 
 
-    //! @name Get methods
+    //! @name Get Methods
     //@{
 
     //! Get the base of the boundary condition
+    /*!
+     * @return boundary condition base
+     */
     bcFunction_Type& base() { return *M_base; }
 
     //@}
@@ -227,9 +230,9 @@ private:
     //! @name Unimplemented Methods
     //@{
 
-    BCInterface_FSI( const BCInterface_FSI& fsi);
+    BCInterface3DFunctionFSI( const BCInterface3DFunctionFSI& fsi);
 
-    BCInterface_FSI& operator=( const BCInterface_FSI& fsi );
+    BCInterface3DFunctionFSI& operator=( const BCInterface3DFunctionFSI& fsi );
 
     //@}
 
@@ -278,7 +281,7 @@ private:
 // Private functions
 // ===================================================
 template< class method >
-inline void BCInterface_FSI< FSIOperator >::checkFunction( const boost::shared_ptr< FSIOperator >& physicalSolver )
+inline void BCInterface3DFunctionFSI< FSIOperator >::checkFunction( const boost::shared_ptr< FSIOperator >& physicalSolver )
 {
     method *operMethod = dynamic_cast< method * > ( &*physicalSolver );
 
@@ -287,7 +290,7 @@ inline void BCInterface_FSI< FSIOperator >::checkFunction( const boost::shared_p
     case DerFluidLoadToFluid:
 
 #ifdef HAVE_LIFEV_DEBUG
-        Debug( 5025 ) << "BCInterface_FSI::checkFunction                          DerFluidLoadToFluid" << "\n";
+        Debug( 5025 ) << "BCInterface3DFunctionFSI::checkFunction                          DerFluidLoadToFluid" << "\n";
 #endif
 
         break;
@@ -295,7 +298,7 @@ inline void BCInterface_FSI< FSIOperator >::checkFunction( const boost::shared_p
     case DerFluidLoadToStructure:
 
 #ifdef HAVE_LIFEV_DEBUG
-        Debug( 5025 ) << "BCInterface_FSI::checkFunction                          DerFluidLoadToStructure" << "\n";
+        Debug( 5025 ) << "BCInterface3DFunctionFSI::checkFunction                          DerFluidLoadToStructure" << "\n";
 #endif
         if ( !physicalSolver->isSolid() )
             return;
@@ -309,7 +312,7 @@ inline void BCInterface_FSI< FSIOperator >::checkFunction( const boost::shared_p
     case DerHarmonicExtensionVelToFluid:
 
 #ifdef HAVE_LIFEV_DEBUG
-        Debug( 5025 ) << "BCInterface_FSI::checkFunction                          DerHarmonicExtensionVelToFluid" << "\n";
+        Debug( 5025 ) << "BCInterface3DFunctionFSI::checkFunction                          DerHarmonicExtensionVelToFluid" << "\n";
 #endif
 
         if ( !physicalSolver->isFluid() )
@@ -324,7 +327,7 @@ inline void BCInterface_FSI< FSIOperator >::checkFunction( const boost::shared_p
     case DerStructureDispToSolid:
 
 #ifdef HAVE_LIFEV_DEBUG
-        Debug( 5025 ) << "BCInterface_FSI::checkFunction                          DerStructureDispToSolid" << "\n";
+        Debug( 5025 ) << "BCInterface3DFunctionFSI::checkFunction                          DerStructureDispToSolid" << "\n";
 #endif
 
         break;
@@ -332,7 +335,7 @@ inline void BCInterface_FSI< FSIOperator >::checkFunction( const boost::shared_p
     case FluidInterfaceDisp:
 
 #ifdef HAVE_LIFEV_DEBUG
-        Debug( 5025 ) << "BCInterface_FSI::checkFunction                          FluidInterfaceDisp" << "\n";
+        Debug( 5025 ) << "BCInterface3DFunctionFSI::checkFunction                          FluidInterfaceDisp" << "\n";
 #endif
 
         //operMethod->FluidInterfaceDisp( (LifeV::Vector&) physicalSolver->lambdaFluidRepeated() );
@@ -344,7 +347,7 @@ inline void BCInterface_FSI< FSIOperator >::checkFunction( const boost::shared_p
     case FluidLoadToStructure:
 
 #ifdef HAVE_LIFEV_DEBUG
-        Debug( 5025 ) << "BCInterface_FSI::checkFunction                          FluidLoadToStructure" << "\n";
+        Debug( 5025 ) << "BCInterface3DFunctionFSI::checkFunction                          FluidLoadToStructure" << "\n";
 #endif
 
         if ( !physicalSolver->isSolid() )
@@ -359,7 +362,7 @@ inline void BCInterface_FSI< FSIOperator >::checkFunction( const boost::shared_p
     case HarmonicExtensionVelToFluid:
 
 #ifdef HAVE_LIFEV_DEBUG
-        Debug( 5025 ) << "BCInterface_FSI::checkFunction                          HarmonicExtensionVelToFluid" << "\n";
+        Debug( 5025 ) << "BCInterface3DFunctionFSI::checkFunction                          HarmonicExtensionVelToFluid" << "\n";
 #endif
 
         if ( !physicalSolver->isFluid() )
@@ -374,7 +377,7 @@ inline void BCInterface_FSI< FSIOperator >::checkFunction( const boost::shared_p
     case SolidLoadToStructure:
 
 #ifdef HAVE_LIFEV_DEBUG
-        Debug( 5025 ) << "BCInterface_FSI::checkFunction                          SolidLoadToStructure" << "\n";
+        Debug( 5025 ) << "BCInterface3DFunctionFSI::checkFunction                          SolidLoadToStructure" << "\n";
 #endif
         if ( !physicalSolver->isFluid() )
             return;
@@ -388,7 +391,7 @@ inline void BCInterface_FSI< FSIOperator >::checkFunction( const boost::shared_p
     case StructureDispToHarmonicExtension:
 
 #ifdef HAVE_LIFEV_DEBUG
-        Debug( 5025 ) << "BCInterface_FSI::checkFunction                          StructureDispToHarmonicExtension" << "\n";
+        Debug( 5025 ) << "BCInterface3DFunctionFSI::checkFunction                          StructureDispToHarmonicExtension" << "\n";
 #endif
 
         if ( !physicalSolver->isFluid() )
@@ -403,7 +406,7 @@ inline void BCInterface_FSI< FSIOperator >::checkFunction( const boost::shared_p
     case StructureDispToSolid:
 
 #ifdef HAVE_LIFEV_DEBUG
-        Debug( 5025 ) << "BCInterface_FSI::checkFunction                          StructureDispToSolid" << "\n";
+        Debug( 5025 ) << "BCInterface3DFunctionFSI::checkFunction                          StructureDispToSolid" << "\n";
 #endif
 
         break;
@@ -411,7 +414,7 @@ inline void BCInterface_FSI< FSIOperator >::checkFunction( const boost::shared_p
     case StructureToFluid:
 
 #ifdef HAVE_LIFEV_DEBUG
-        Debug( 5025 ) << "BCInterface_FSI::checkFunction                          StructureToFluid" << "\n";
+        Debug( 5025 ) << "BCInterface3DFunctionFSI::checkFunction                          StructureToFluid" << "\n";
 #endif
 
         if ( !physicalSolver->isFluid() )
@@ -428,4 +431,4 @@ inline void BCInterface_FSI< FSIOperator >::checkFunction( const boost::shared_p
 
 } // Namespace LifeV
 
-#endif /* BCInterface_FSI_H */
+#endif /* BCInterface3DFunctionFSI_H */

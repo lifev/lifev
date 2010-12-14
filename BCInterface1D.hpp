@@ -37,14 +37,14 @@
 #ifndef BCInterface1D_H
 #define BCInterface1D_H 1
 
-#include <lifemc/lifesolver/BCInterface1D_Definitions.hpp>
+#include <lifemc/lifesolver/BCInterface1DDefinitions.hpp>
 
-#include <lifemc/lifesolver/BCInterface1D_Data.hpp>
-#include <lifemc/lifesolver/BCInterface1D_Function.hpp>
-#include <lifemc/lifesolver/BCInterface1D_FunctionFile.hpp>
-#include <lifemc/lifesolver/BCInterface1D_OperatorFunction.hpp>
-#include <lifemc/lifesolver/BCInterface1D_OperatorFunctionFile.hpp>
-#include <lifemc/lifesolver/BCInterface1D_DefaultFunctions.hpp>
+#include <lifemc/lifesolver/BCInterface1DData.hpp>
+#include <lifemc/lifesolver/BCInterface1DFunction.hpp>
+#include <lifemc/lifesolver/BCInterface1DFunctionFile.hpp>
+#include <lifemc/lifesolver/BCInterface1DFunctionSolver.hpp>
+#include <lifemc/lifesolver/BCInterface1DFunctionFileSolver.hpp>
+#include <lifemc/lifesolver/BCInterface1DFunctionDefault.hpp>
 
 namespace LifeV
 {
@@ -123,9 +123,10 @@ public:
     //@{
 
     typedef PhysicalSolverType                                                                        physicalSolver_Type;
-    typedef BCInterface1D_BaseList                                                                    bcBaseList_Type;
+    typedef baseList1D_Type                                                                           bcBaseList_Type;
+    typedef BCInterface1DData                                                                         data_Type;
 
-    typedef singleton< factory< BCInterface1D_Function< physicalSolver_Type > , bcBaseList_Type > >   factoryFunction_Type;
+    typedef singleton< factory< BCInterface1DFunction< physicalSolver_Type > , bcBaseList_Type > >    factoryFunction_Type;
 
     typedef OneDimensionalModel_BCHandler                                                             bcHandler_Type;
     typedef boost::shared_ptr< bcHandler_Type >                                                       bcHandlerPtr_Type;
@@ -134,10 +135,8 @@ public:
     typedef bcHandler_Type::Flux_PtrType                                                              fluxPtr_Type;
     typedef bcHandler_Type::Source_PtrType                                                            sourcePtr_Type;
 
-    typedef BCInterface1D_Data                                                                        data_Type;
-
-    typedef std::vector< boost::shared_ptr< BCInterface1D_Function< physicalSolver_Type > > >         vectorFunction_Type;
-    typedef std::vector< boost::shared_ptr< BCInterface1D_DefaultFunctions< physicalSolver_Type > > > vectorDefaultFunction_Type;
+    typedef std::vector< boost::shared_ptr< BCInterface1DFunction< physicalSolver_Type > > >          vectorFunction_Type;
+    typedef std::vector< boost::shared_ptr< BCInterface1DFunctionDefault< physicalSolver_Type > > >   vectorDefaultFunction_Type;
 
     //@}
 
@@ -209,6 +208,12 @@ public:
      */
     void setPhysicalSolver( const boost::shared_ptr< physicalSolver_Type >& physicalSolver );
 
+    //! Set an Handler
+    /*!
+     * @param handler BCHandler
+     */
+    void setHandler( const bcHandlerPtr_Type& handler ) { M_handler = handler; }
+
     //! Set the solution for the members that need it
     /*!
      * @param solution solution
@@ -221,12 +226,6 @@ public:
      * @param source source
      */
     void setFluxSource( const fluxPtr_Type& flux, const sourcePtr_Type& source );
-
-    //! Set an Handler
-    /*!
-     * @param handler BCHandler
-     */
-    void setHandler( const bcHandlerPtr_Type& handler ) { M_handler = handler; }
 
     //@}
 
@@ -305,19 +304,10 @@ BCInterface1D< PhysicalSolverType >::BCInterface1D( ) :
 #endif
 
     //Factory registration
-    factoryFunction_Type::instance().registerProduct( BCInterface1D_function,         &createBCInterface1D_Function< physicalSolver_Type > );
-    factoryFunction_Type::instance().registerProduct( BCInterface1D_functionFile,     &createBCInterface1D_FunctionFile< physicalSolver_Type > );
-    factoryFunction_Type::instance().registerProduct( BCInterface1D_OPERfunction,     &createBCInterface1D_OperatorFunction< physicalSolver_Type > );
-    factoryFunction_Type::instance().registerProduct( BCInterface1D_OPERfunctionFile, &createBCInterface1D_OperatorFunctionFile< physicalSolver_Type > );
-
-    //!\todo pass a std::string to the factories
-    // factoryFunction_Type::instance().registerProduct( "BCInterface1D_function",         &createBCInterface1D_Function< physicalSolver_Type > );
-    // factoryFunction_Type::instance().registerProduct( "BCInterface1D_functionFile",     &createBCInterface1D_FunctionFile< physicalSolver_Type > );
-    // factoryFunction_Type::instance().registerProduct( "BCInterface1D_OPERfunction",     &createBCInterface1D_OperatorFunction< physicalSolver_Type > );
-    // factoryFunction_Type::instance().registerProduct( "BCInterface1D_OPERfunctionFile", &createBCInterface1D_OperatorFunctionFile< physicalSolver_Type > );
-
-
-
+    factoryFunction_Type::instance().registerProduct( BCI1DFunction,           &createBCInterface1D_Function< physicalSolver_Type > );
+    factoryFunction_Type::instance().registerProduct( BCI1DFunctionFile,       &createBCInterface1D_FunctionFile< physicalSolver_Type > );
+    factoryFunction_Type::instance().registerProduct( BCI1DFunctionSolver,     &createBCInterface1D_OperatorFunction< physicalSolver_Type > );
+    factoryFunction_Type::instance().registerProduct( BCI1DFunctionFileSolver, &createBCInterface1D_OperatorFunctionFile< physicalSolver_Type > );
 }
 
 // ===================================================
@@ -355,8 +345,8 @@ BCInterface1D< PhysicalSolverType >::updatePhysicalSolverVariables()
 
     for ( UInt i( 0 ); i < M_vectorFunction.size(); ++i )
     {
-        BCInterface1D_OperatorFunction< physicalSolver_Type > *physicalSolver =
-            dynamic_cast< BCInterface1D_OperatorFunction< physicalSolver_Type > * > ( &( *M_vectorFunction[i] ) );
+        BCInterface1DFunctionSolver< physicalSolver_Type > *physicalSolver =
+            dynamic_cast< BCInterface1DFunctionSolver< physicalSolver_Type > * > ( &( *M_vectorFunction[i] ) );
 
         if ( physicalSolver != 0 )
             physicalSolver->updatePhysicalSolverVariables();
@@ -373,8 +363,8 @@ BCInterface1D< PhysicalSolverType >::setPhysicalSolver( const boost::shared_ptr<
     //for ( typename vectorFunction_Type::const_iterator i = M_vectorFunction.begin() ; i < M_vectorFunction.end() ; ++i )
     for ( UInt i( 0 ); i < M_vectorFunction.size(); ++i )
     {
-        BCInterface1D_OperatorFunction< physicalSolver_Type > *castedOperator =
-            dynamic_cast < BCInterface1D_OperatorFunction< physicalSolver_Type >* > ( &( *M_vectorFunction[i] ) );
+        BCInterface1DFunctionSolver< physicalSolver_Type > *castedOperator =
+            dynamic_cast < BCInterface1DFunctionSolver< physicalSolver_Type >* > ( &( *M_vectorFunction[i] ) );
 
         if ( castedOperator != 0 )
             castedOperator->setPhysicalSolver( physicalSolver );
@@ -388,8 +378,8 @@ BCInterface1D< PhysicalSolverType >::setSolution( const solutionPtr_Type solutio
     //for ( typename vectorFunction_Type::const_iterator i = M_vectorFunction.begin() ; i < M_vectorFunction.end() ; ++i )
     for ( UInt i( 0 ); i < M_vectorFunction.size(); ++i )
     {
-        BCInterface1D_OperatorFunction< physicalSolver_Type > *castedOperator =
-            dynamic_cast < BCInterface1D_OperatorFunction< physicalSolver_Type >* > ( &( *M_vectorFunction[i] ) );
+        BCInterface1DFunctionSolver< physicalSolver_Type > *castedOperator =
+            dynamic_cast < BCInterface1DFunctionSolver< physicalSolver_Type >* > ( &( *M_vectorFunction[i] ) );
 
         if ( castedOperator != 0 )
             castedOperator->setSolution( solution );
@@ -425,10 +415,10 @@ BCInterface1D< PhysicalSolverType >::buildBase()
 
     switch ( M_data.base().second )
     {
-    case BCInterface1D_function:
-    case BCInterface1D_functionFile:
-    case BCInterface1D_OPERfunction:
-    case BCInterface1D_OPERfunctionFile:
+    case BCI1DFunction:
+    case BCI1DFunctionFile:
+    case BCI1DFunctionSolver:
+    case BCI1DFunctionFileSolver:
 
         addBase( M_vectorFunction, M_data.base().second );
 
@@ -436,7 +426,7 @@ BCInterface1D< PhysicalSolverType >::buildBase()
 
         break;
 
-    case BCInterface1D_Default:
+    case BCI1DFunctionDefault:
 
         addBase( M_vectorDefaultFunction1D );
 
