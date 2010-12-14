@@ -611,9 +611,9 @@ VenantKirchhofSolver<Mesh, SolverType>::setup(boost::shared_ptr<data_Type>      
   M_FESpace                         = dFESpace;
   M_Displayer.reset                 (new Displayer(comm));
   M_me                              = comm->MyPID();
-  M_elmatK.reset                    ( new ElemMat( M_FESpace->fe().nbNode, nDimensions, nDimensions ) );
-  M_elmatM.reset                    ( new ElemMat( M_FESpace->fe().nbNode, nDimensions, nDimensions ) );
-  M_elmatC.reset                    ( new ElemMat( M_FESpace->fe().nbNode, nDimensions, nDimensions ) );
+  M_elmatK.reset                    ( new ElemMat( M_FESpace->fe().nbFEDof(), nDimensions, nDimensions ) );
+  M_elmatM.reset                    ( new ElemMat( M_FESpace->fe().nbFEDof(), nDimensions, nDimensions ) );
+  M_elmatC.reset                    ( new ElemMat( M_FESpace->fe().nbFEDof(), nDimensions, nDimensions ) );
   M_localMap                        = monolithicMap;
   M_disp.reset                      (new vector_type(*M_localMap));
   M_vel.reset                       (new vector_type(*M_localMap));
@@ -899,7 +899,7 @@ VenantKirchhofSolver<Mesh, SolverType>::evalConstraintTensor()
 
       for ( Int ig = 0; ig < M_FESpace->fe().nbQuadPt; ++ig )
 	{
-	  for ( Int k = 0; k < M_FESpace->fe().nbNode; ++k )
+        for ( Int k = 0; k < M_FESpace->fe().nbFEDof(); ++k )
 	    {
 	      Int i    = M_FESpace->fe().patternFirst(k);
 	      Int idof = M_FESpace->dof().localToGlobal(M_FESpace->fe().currentLocalId(), i + 1);
@@ -923,7 +923,7 @@ VenantKirchhofSolver<Mesh, SolverType>::evalConstraintTensor()
 	    }
 	}
 
-      for ( Int k = 0; k < M_FESpace->fe().nbNode; ++k )
+      for ( Int k = 0; k < M_FESpace->fe().nbFEDof(); ++k )
 	{
 	  Int i    = M_FESpace->fe().patternFirst(k);
 	  Int idof = M_FESpace->dof().localToGlobal(M_FESpace->fe().currentLocalId(), i + 1);
@@ -935,7 +935,7 @@ VenantKirchhofSolver<Mesh, SolverType>::evalConstraintTensor()
 
       for ( Int ig = 0; ig < M_FESpace->fe().nbQuadPt; ++ig )
 	{
-	  for ( Int k = 0; k < M_FESpace->fe().nbNode; ++k )
+        for ( Int k = 0; k < M_FESpace->fe().nbFEDof(); ++k )
 	    {
 	      Int i    = M_FESpace->fe().patternFirst(k);
 	      Int idof = M_FESpace->dof().localToGlobal(M_FESpace->fe().currentLocalId(), i + 1);
@@ -960,7 +960,7 @@ VenantKirchhofSolver<Mesh, SolverType>::evalConstraintTensor()
 	    }
 	}
 
-      for ( Int k = 0; k < M_FESpace->fe().nbNode; ++k )
+      for ( Int k = 0; k < M_FESpace->fe().nbFEDof(); ++k )
 	{
 	  Int i    = M_FESpace->fe().patternFirst(k);
 	  Int idof = M_FESpace->dof().localToGlobal(M_FESpace->fe().currentLocalId(), i + 1);
@@ -973,7 +973,7 @@ VenantKirchhofSolver<Mesh, SolverType>::evalConstraintTensor()
 
       for ( Int ig = 0; ig < M_FESpace->fe().nbQuadPt; ++ig )
 	{
-	  for ( Int k = 0; k < M_FESpace->fe().nbNode; ++k )
+        for ( Int k = 0; k < M_FESpace->fe().nbFEDof(); ++k )
 	    {
 	      Int i    = M_FESpace->fe().patternFirst(k);
 	      Int idof = M_FESpace->dof().localToGlobal(M_FESpace->fe().currentLocalId(), i + 1);
@@ -997,7 +997,7 @@ VenantKirchhofSolver<Mesh, SolverType>::evalConstraintTensor()
 	    }
 	}
 
-      for ( Int k = 0; k < M_FESpace->fe().nbNode; ++k )
+      for ( Int k = 0; k < M_FESpace->fe().nbFEDof(); ++k )
 	{
 	  Int i    = M_FESpace->fe().patternFirst(k);
 	  Int idof = M_FESpace->dof().localToGlobal(M_FESpace->fe().currentLocalId(), i + 1);

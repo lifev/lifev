@@ -815,7 +815,7 @@ FESpace<MeshType, MapType>::L2ScalarProduct( const Function& fct, vector_type& v
                 this->fe().coorQuadPt( x, y, z, ig );
                 f = fct( t, x, y, z, ic + 1 );
                 u_ig = 0.;
-                for ( i = 0; i < this->fe().nbNode; i++ )
+                for ( i = 0; i < this->fe().nbFEDof(); i++ )
                 {
                     inod = this->dof().localToGlobal( eleID, i + 1 ) + ic * dim();
                     u_ig = f*this->fe().phi( i, ig );

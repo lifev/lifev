@@ -172,7 +172,7 @@ void test_bdf::run()
 
     //=============================================================================
     //Fe Matrices and vectors
-    ElemMat elmat(FeSpace.fe().nbNode, 1, 1); //local matrix
+    ElemMat elmat(FeSpace.fe().nbFEDof(), 1, 1); //local matrix
     EpetraMatrix<double> matM(FeSpace.map()); //mass matrix
     boost::shared_ptr<EpetraMatrix<double> > matA_ptr(
         new EpetraMatrix<double> (FeSpace.map())); //stiff matrix

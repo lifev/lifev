@@ -112,7 +112,7 @@ public:
     typedef boost::shared_ptr<matrix_type>         matrix_ptrtype;
     typedef typename solver_type::vector_type     vector_type;
     typedef boost::shared_ptr<vector_type>          vector_ptrtype;
- 
+
     typedef typename SolverType::prec_raw_type prec_raw_type;
     typedef typename SolverType::prec_type         prec_type;
 
@@ -133,12 +133,12 @@ public:
 
     //! @name Methods
     //@{
- 
+
     //! class setup
     /*!
-    @param data file                                                                                                                        
-    @param feSpace finite element space                                                                                                                                                                                                                          
-    @param comm communicator    
+    @param data file
+    @param feSpace finite element space
+    @param comm communicator
     */
     void setup( boost::shared_ptr<data_type> data,
                 const boost::shared_ptr< FESpace<Mesh, EpetraMap> >&   feSpace,
@@ -146,32 +146,32 @@ public:
               );
 
     //!  class setup
-    /*!                                                                                                                                                      
-    @param data file                                                                                                                        
-    @param feSpace finite element space                                                                                                                                                                                                                          
-    @param BCh boundary condition
-    @param comm communicator                                                                                                 
-    */                                                                                                                                                       
-    void setup( boost::shared_ptr<data_type> data,                                                                                                           
-                const boost::shared_ptr< FESpace<Mesh, EpetraMap> >&   feSpace,                                                                              
-                bchandler_type&       BCh,                                                                                                                   
-                boost::shared_ptr<Epetra_Comm>&     comm                                                                                                     
-              );                                                                                                                                             
-                                                                                                                                                    
-                                                                                                                                             
-    //! class setup   
     /*!
-    @param data file                                                                                                                        
-    @param feSpace finite element space                                                                                                                                                                                                                          
-    @param comm communicator           
+    @param data file
+    @param feSpace finite element space
+    @param BCh boundary condition
+    @param comm communicator
+    */
+    void setup( boost::shared_ptr<data_type> data,
+                const boost::shared_ptr< FESpace<Mesh, EpetraMap> >&   feSpace,
+                bchandler_type&       BCh,
+                boost::shared_ptr<Epetra_Comm>&     comm
+              );
+
+
+    //! class setup
+    /*!
+    @param data file
+    @param feSpace finite element space
+    @param comm communicator
     @param epetraMap  epetra vector
-    @param offset                                                                                                                                                                                               
-    */                                                                                                                                            
-    virtual void setup( boost::shared_ptr<data_type> data,                                                                                                   
-                const boost::shared_ptr< FESpace<Mesh, EpetraMap> >&   feSpace,                                                                             
-                boost::shared_ptr<Epetra_Comm>&     comm,                                                                                                    
-                const boost::shared_ptr<const EpetraMap>&      epetraMap,                                                                               
-                UInt       offset=0   ); 
+    @param offset
+    */
+    virtual void setup( boost::shared_ptr<data_type> data,
+                const boost::shared_ptr< FESpace<Mesh, EpetraMap> >&   feSpace,
+                boost::shared_ptr<Epetra_Comm>&     comm,
+                const boost::shared_ptr<const EpetraMap>&      epetraMap,
+                UInt       offset=0   );
 
 
     //! buildSystem
@@ -192,7 +192,7 @@ public:
     //! build Damping matrix
     /*!
     building damping matrix defined as \f$\gamma  A + \beta  M\f$
-    @param damping matrix  
+    @param damping matrix
     @param alpha is the coefficient of time advancing
     scheme defined as \f$\alpha^0/dt\f$
     @notes alpha can be 1 and we can introduce
@@ -354,7 +354,7 @@ public:
     @returns offset;
     */
     const UInt& offset() const { return M_offset; }
-   
+
     //!thickness
      /*!
      @returns the thickness
@@ -365,7 +365,7 @@ public:
     @returns the density
      */
     inline const Real& density()   const { return M_data->rho(); }
-  
+
     //!young
     /*!
     @returns the young
@@ -459,13 +459,13 @@ protected :
 
     //! data for solving tangent problem with aztec
     boost::shared_ptr<solver_type> M_linearSolver;
-    
+
     //! true if reuse the preconditonar
     bool                            M_reusePrec;
-    
+
     //! max number of iteration before to update preconditonator
     UInt                            M_maxIterForReuse;
-    
+
     //! reset preconditionator
     bool                            M_resetPrec;
 
@@ -511,7 +511,7 @@ SecondOrderSolver( ) :
         M_resetPrec                        (    ),
         M_maxIterSolver                    (    ),
         M_offset                           (    )
-    	
+
 {
 }
 
@@ -519,61 +519,61 @@ SecondOrderSolver( ) :
 // Methods
 // ==============================================================
 
-template <typename Mesh, typename SolverType>                                                                                                                
-void                                                                                                                                                         
-SecondOrderSolver<Mesh, SolverType>::setup(                                                                                                                  
-    boost::shared_ptr<data_type>        data,                                                                                                                
-    const boost::shared_ptr< FESpace<Mesh, EpetraMap> >& feSpace,                                                                                            
-    boost::shared_ptr<Epetra_Comm>&     comm,                                                                                                                
-    const boost::shared_ptr<const EpetraMap>&  epetraMap,                                                                                                
-    UInt                                offset                                                                                                               
-)                                                                                                                                                            
-{                                                                                                                                                            
-    M_data                                        = data;                                                                                                    
-    M_FESpace                                 = feSpace;                                                                                                     
-    M_displayer.reset                      (new Displayer(comm));                                                                                            
-    M_me                                           = comm->MyPID();                                                                                          
-    M_elmatK.reset                           ( new ElemMat( M_FESpace->fe().nbNode, nDimensions, nDimensions ) );                                            
-    M_elmatM.reset                           ( new ElemMat( M_FESpace->fe().nbNode, nDimensions, nDimensions ) );                                            
-    M_elmatC.reset                           ( new ElemMat( M_FESpace->fe().nbNode, nDimensions, nDimensions ) );                                            
-    M_elmatD.reset                           ( new ElemMat( M_FESpace->fe().nbNode, nDimensions, nDimensions ) );                                            
-    M_localMap                                   = epetraMap;                                                                                            
-    M_solution.reset                          (new vector_type(*M_localMap));                                                                                
-    M_rhsNoBC.reset                         ( new vector_type(*M_localMap));                                                                                 
-    M_matrMass.reset                       (new matrix_type(*M_localMap));                                                                                   
-    M_matrLinearStiffness.reset     (new matrix_type(*M_localMap));                                                                                          
-    M_matrDamping.reset               (new matrix_type(*M_localMap));                                                                                        
-    M_matrSystem.reset                  (new matrix_type(*M_localMap));                                                                                      
-    M_offset                                        = offset;                                                                                                
-}                                                                                                                                                            
-                                                                                                                                                             
-template <typename Mesh, typename SolverType>                                                                                                                
-void                                                                                                                                                         
-SecondOrderSolver<Mesh, SolverType>::setup(                                                                                                                  
-    boost::shared_ptr<data_type>        data,                                                                                                                
-    const boost::shared_ptr< FESpace<Mesh, EpetraMap> >& feSpace,                                                                                            
-    boost::shared_ptr<Epetra_Comm>&     comm                                                                                                                 
-)                                                                                                                                                            
-{                                                                                                                                                            
-    setup( data, feSpace, comm, feSpace->mapPtr(), (UInt)0 );                                                                                                
-    M_rhs.reset                              ( new vector_type(*M_localMap));                                                                                
-    M_residual.reset                     ( new vector_type(*M_localMap));                                                                                    
-    M_linearSolver.reset              ( new SolverType( comm ) );                                                                                            
-                                                                                                                                                             
- }                                                                                                                                                           
-                                                                                                                                                             
-template <typename Mesh, typename SolverType>                                                                                                                
-void                                                                                                                                                         
-SecondOrderSolver<Mesh, SolverType>::setup(                                                                                                                  
-    boost::shared_ptr<data_type>          data,                                                                                                              
-    const boost::shared_ptr< FESpace<Mesh, EpetraMap> >& feSpace,                                                                                            
-    bchandler_type&                BCh,                                                                                                                      
-    boost::shared_ptr<Epetra_Comm>&              comm                                                                                                        
-)                                                                                                                                                            
-{                                                                                                                                                            
-    setup(data, feSpace, comm);                                                                                                                              
-    M_BCh = BCh;                                                                                                                                             
-}                  
+template <typename Mesh, typename SolverType>
+void
+SecondOrderSolver<Mesh, SolverType>::setup(
+    boost::shared_ptr<data_type>        data,
+    const boost::shared_ptr< FESpace<Mesh, EpetraMap> >& feSpace,
+    boost::shared_ptr<Epetra_Comm>&     comm,
+    const boost::shared_ptr<const EpetraMap>&  epetraMap,
+    UInt                                offset
+)
+{
+    M_data                                        = data;
+    M_FESpace                                 = feSpace;
+    M_displayer.reset                      (new Displayer(comm));
+    M_me                                           = comm->MyPID();
+    M_elmatK.reset                           ( new ElemMat( M_FESpace->fe().nbFEDof(), nDimensions, nDimensions ) );
+    M_elmatM.reset                           ( new ElemMat( M_FESpace->fe().nbFEDof(), nDimensions, nDimensions ) );
+    M_elmatC.reset                           ( new ElemMat( M_FESpace->fe().nbFEDof(), nDimensions, nDimensions ) );
+    M_elmatD.reset                           ( new ElemMat( M_FESpace->fe().nbFEDof(), nDimensions, nDimensions ) );
+    M_localMap                                   = epetraMap;
+    M_solution.reset                          (new vector_type(*M_localMap));
+    M_rhsNoBC.reset                         ( new vector_type(*M_localMap));
+    M_matrMass.reset                       (new matrix_type(*M_localMap));
+    M_matrLinearStiffness.reset     (new matrix_type(*M_localMap));
+    M_matrDamping.reset               (new matrix_type(*M_localMap));
+    M_matrSystem.reset                  (new matrix_type(*M_localMap));
+    M_offset                                        = offset;
+}
+
+template <typename Mesh, typename SolverType>
+void
+SecondOrderSolver<Mesh, SolverType>::setup(
+    boost::shared_ptr<data_type>        data,
+    const boost::shared_ptr< FESpace<Mesh, EpetraMap> >& feSpace,
+    boost::shared_ptr<Epetra_Comm>&     comm
+)
+{
+    setup( data, feSpace, comm, feSpace->mapPtr(), (UInt)0 );
+    M_rhs.reset                              ( new vector_type(*M_localMap));
+    M_residual.reset                     ( new vector_type(*M_localMap));
+    M_linearSolver.reset              ( new SolverType( comm ) );
+
+ }
+
+template <typename Mesh, typename SolverType>
+void
+SecondOrderSolver<Mesh, SolverType>::setup(
+    boost::shared_ptr<data_type>          data,
+    const boost::shared_ptr< FESpace<Mesh, EpetraMap> >& feSpace,
+    bchandler_type&                BCh,
+    boost::shared_ptr<Epetra_Comm>&              comm
+)
+{
+    setup(data, feSpace, comm);
+    M_BCh = BCh;
+}
 
 template <typename Mesh, typename SolverType>
 void
@@ -594,7 +594,7 @@ buildSystem(const Real& xi, const Real& alpha)
 
  // these lines must be removed next week
  this->buildSystem(M_matrSystem, xi);
- 
+
  if(M_data->damping())
    {
      M_matrDamping.reset(new matrix_type(*M_localMap));
@@ -648,7 +648,7 @@ buildSystem(matrix_ptrtype matrSystem, const Real& xi)
         //mass
         this->M_elmatM->zero();
         mass(M_data->rho(), *this->M_elmatM, this->M_FESpace->fe(), 0, 0, nDimensions );
-	
+
         assembleMatrix( *M_matrLinearStiffness,
                         *this->M_elmatC,
                         this->M_FESpace->fe(),
@@ -656,7 +656,7 @@ buildSystem(matrix_ptrtype matrSystem, const Real& xi)
                         this->M_FESpace->dof(),
                         this->M_FESpace->dof(),
                         0, 0, 0, 0);
-       
+
         assembleMatrix( *matrSystem,
                         *this->M_elmatC,
                         this->M_FESpace->fe(),
@@ -739,7 +739,7 @@ updateSystem(const vector_type& rhs,
     Chrono chrono;
 
     updateRHS(rhs);
-    
+
     if(xi == 0 & alpha == 0 )
      M_displayer->leaderPrint("P - use the same System matrix ...  \n ");
     else
@@ -747,7 +747,7 @@ updateSystem(const vector_type& rhs,
     M_displayer->leaderPrint("P - updating the System matrix ....      ");
     chrono.start();
     M_matrSystem = M_matrLinearStiffness;
-    
+
     if (xi!= 0. )
         *M_matrSystem += *M_matrMass * xi;
 
@@ -809,7 +809,7 @@ updateSourceTerm(const  vector_type&  source)
           f = M_source(M_data->dataTime()->getTime(), x, y, z, iComp + 1 );
           u_ig = 0.;
 
-          for ( i = 0;i < M_FESpace->fe().nbNode; ++i )
+          for ( i = 0;i < M_FESpace->fe().nbFEDof(); ++i )
             {
               inod = this->M_FESpace->dof().localToGlobal( eleID, i + 1 ) + iComp * this->M_FESpace->dof().numTotalDof();
               u_ig = f*this->M_FESpace->fe().phi( i, ig );
@@ -889,9 +889,9 @@ applyBoundaryConditions(matrix_type&        matrix,
         BCh.bdUpdate( *this->M_FESpace->mesh(), this->M_FESpace->feBd(), this->M_FESpace->dof() );
 
      vector_type rhsFull(rhs, Unique);  // bcManages now manages the also repeated parts
-  
+
     bcManage( matrix, rhsFull, *this->M_FESpace->mesh(), this->M_FESpace->dof(), BCh, this->M_FESpace->feBd(), 1., M_data->dataTime()->getTime());
-    
+
     // matrix should be GlobalAssembled by  bcManage
 
     rhs = rhsFull;

@@ -253,10 +253,10 @@ IPStabilization<MeshType, DofType>::IPStabilization( const meshPtr_Type & mesh,
         M_gammaDiv  ( gammaDiv ),
         M_gammaPress( gammaPress ),
         M_viscosity ( viscosity ),
-        M_elMatU    ( M_feOnSide1->nbNode, nDimensions    , nDimensions   ),
-        M_elMatP    ( M_feOnSide1->nbNode, nDimensions + 1, nDimensions+1 )
+        M_elMatU    ( M_feOnSide1->nbFEDof(), nDimensions    , nDimensions   ),
+        M_elMatP    ( M_feOnSide1->nbFEDof(), nDimensions + 1, nDimensions+1 )
 {
-    switch ( M_feOnSide1->nbNode )
+    switch ( M_feOnSide1->nbFEDof() )
     {
     case 4:
         M_fToP = LinearTetra::fToP;
@@ -625,7 +625,7 @@ void IPStabilization<MeshType, DofType>::setDiscretization(const dofPtr_Type& do
     M_feOnSide1.reset( new CurrentFE(refFE, getGeoMap(*M_mesh), quadRule) );
     M_feOnSide2.reset( new CurrentFE(refFE, getGeoMap(*M_mesh), quadRule) );
     M_feBd      ( &feBd );
-    switch ( M_feOnSide1->nbNode )
+    switch ( M_feOnSide1->nbFEDof() )
     {
     case 4:
         M_fToP = LinearTetra::fToP;

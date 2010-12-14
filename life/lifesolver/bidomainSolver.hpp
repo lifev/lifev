@@ -323,8 +323,8 @@ BidomainSolver( const data_type&          dataType,
             M_maxIterSolver          ( -1 ),
             M_recomputeMatrix        ( false ),
             M_bdf_uiue                 ( M_data.order_bdf()),
-            M_elmatStiff             ( M_pFESpace.fe().nbNode, 2, 2 ),
-            M_elmatMass              ( M_pFESpace.fe().nbNode, 2, 2 )
+            M_elmatStiff             ( M_pFESpace.fe().nbFEDof(), 2, 2 ),
+            M_elmatMass              ( M_pFESpace.fe().nbFEDof(), 2, 2 )
             {
     if (M_data.has_fibers() )
     {

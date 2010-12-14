@@ -364,9 +364,9 @@ void Heart::computeRhs( vector_Type& rhs,
     //! u, w with repeated map
     vector_Type uVecRep(electricModel.solution_u(), Repeated);
     ionicModel->updateRepeated();
-    ElemVec elvec_Iapp( electricModel.potentialFESpace().fe().nbNode, 2 ),
-    elvec_u( electricModel.potentialFESpace().fe().nbNode, 1 ),
-    elvec_Iion( electricModel.potentialFESpace().fe().nbNode, 1 );
+    ElemVec elvec_Iapp( electricModel.potentialFESpace().fe().nbFEDof(), 2 ),
+    elvec_u( electricModel.potentialFESpace().fe().nbFEDof(), 1 ),
+    elvec_Iion( electricModel.potentialFESpace().fe().nbFEDof(), 1 );
 
     for (UInt iVol=1; iVol<=electricModel.potentialFESpace().mesh()->numVolumes(); ++iVol)
     {
@@ -376,7 +376,7 @@ void Heart::computeRhs( vector_Type& rhs,
         elvec_Iion.zero();
         Int ig;
         UInt eleIDu = electricModel.potentialFESpace().fe().currentLocalId();
-        UInt nbNode = ( UInt ) electricModel.potentialFESpace().fe().nbNode;
+        UInt nbNode = ( UInt ) electricModel.potentialFESpace().fe().nbFEDof();
 
         //! Filling local elvec_u with potential values in the nodes
         for ( UInt iNode = 0 ; iNode < nbNode ; iNode++ )
@@ -401,7 +401,7 @@ void Heart::computeRhs( vector_Type& rhs,
                1);
 
         //! Assembling the righthand side
-        for ( Int i = 0 ; i < electricModel.potentialFESpace().fe().nbNode ; i++ )
+        for ( Int i = 0 ; i < electricModel.potentialFESpace().fe().nbFEDof() ; i++ )
         {
             ig = electricModel.potentialFESpace().dof().localToGlobal( eleIDu, i + 1 );
             rhs.sumIntoGlobalValues (ig, (lambda * elvec_Iapp.vec()[i] +
@@ -433,9 +433,9 @@ void Heart::computeRhs( vector_Type& rhs,
     vector_Type uVecRep(electricModel.solution_u(), Repeated);
     ionicModel->updateRepeated();
 
-    ElemVec elvec_Iapp( electricModel.potentialFESpace().fe().nbNode, 2 ),
-    elvec_u( electricModel.potentialFESpace().fe().nbNode, 1 ),
-    elvec_Iion( electricModel.potentialFESpace().fe().nbNode, 1 );
+    ElemVec elvec_Iapp( electricModel.potentialFESpace().fe().nbFEDof(), 2 ),
+    elvec_u( electricModel.potentialFESpace().fe().nbFEDof(), 1 ),
+    elvec_Iion( electricModel.potentialFESpace().fe().nbFEDof(), 1 );
     for (UInt iVol=1; iVol<=electricModel.potentialFESpace().mesh()->numVolumes(); ++iVol)
     {
         electricModel.potentialFESpace().fe().updateJacQuadPt( electricModel.potentialFESpace().mesh()->volumeList( iVol ) );
@@ -444,7 +444,7 @@ void Heart::computeRhs( vector_Type& rhs,
         elvec_Iapp.zero();
 
         UInt eleIDu = electricModel.potentialFESpace().fe().currentLocalId();
-        UInt nbNode = ( UInt ) electricModel.potentialFESpace().fe().nbNode;
+        UInt nbNode = ( UInt ) electricModel.potentialFESpace().fe().nbFEDof();
         for ( UInt iNode = 0 ; iNode < nbNode ; iNode++ )
         {
             Int ig = electricModel.potentialFESpace().dof().localToGlobal( eleIDu, iNode + 1 );

@@ -270,7 +270,7 @@ MitchellSchaeffer( const data_Type& dataType,
     IonicSolver<Mesh, SolverType>( dataType, mesh, uFEspace, comm),
     M_sol_w ( IonicSolver<Mesh, SolverType>::M_localMap ),
     M_wVecRep( M_sol_w, Repeated ),
-    M_elvec ( IonicSolver<Mesh, SolverType>::M_uFESpace.fe().nbNode, 1 ),
+    M_elvec ( IonicSolver<Mesh, SolverType>::M_uFESpace.fe().nbFEDof(), 1 ),
     order_bdf ( IonicSolver<Mesh, SolverType>::M_data.M_BDForder ),
     bdf_w( order_bdf )
 {
@@ -295,7 +295,7 @@ void MitchellSchaeffer<Mesh, SolverType>::updateElvec( UInt eleID )
 	M_elvec.zero();
 	UInt ig;
     //! Filling local elvec_w with recovery variable values in the nodes
-    for ( UInt iNode = 0 ; iNode < IonicSolver<Mesh, SolverType>::M_uFESpace.fe().nbNode ; iNode++ )
+    for ( UInt iNode = 0 ; iNode < IonicSolver<Mesh, SolverType>::M_uFESpace.fe().nbFEDof() ; iNode++ )
     {
         ig = IonicSolver<Mesh, SolverType>::M_uFESpace.dof().localToGlobal( eleID, iNode + 1 );
         M_elvec.vec()[ iNode ] = M_wVecRep[ig];
@@ -369,7 +369,7 @@ void MitchellSchaeffer<Mesh, SolverType>::computeIion(  Real,
                                                          ElemVec& elvec_u,
                                                          FESpace<Mesh, EpetraMap>& uFESpace )
 {
-	for ( UInt i = 0;i < uFESpace.fe().nbNode;i++ )
+	for ( UInt i = 0;i < uFESpace.fe().nbFEDof();i++ )
     {
         elvec( i ) =  this->M_data.M_reactionAmplitude*
             (((M_elvec( i ) / this->M_data.M_tau_in) *
@@ -450,7 +450,7 @@ RogersMcCulloch( const data_Type& dataType,
     IonicSolver<Mesh, SolverType>( dataType, mesh, uFEspace, comm),
     M_sol_w ( IonicSolver<Mesh, SolverType>::M_localMap ),
     M_wVecRep ( M_sol_w, Repeated ),
-    M_elvec ( IonicSolver<Mesh, SolverType>::M_uFESpace.fe().nbNode, 1 )
+    M_elvec ( IonicSolver<Mesh, SolverType>::M_uFESpace.fe().nbFEDof(), 1 )
 {
 }
 
@@ -472,7 +472,7 @@ void RogersMcCulloch<Mesh, SolverType>::updateElvec( UInt eleID )
 	M_elvec.zero();
 	UInt ig;
 		//! Filling local elvec_w with recovery variable values in the nodes
-		for ( UInt iNode = 0 ; iNode < IonicSolver<Mesh, SolverType>::M_uFESpace.fe().nbNode ; iNode++ )
+		for ( UInt iNode = 0 ; iNode < IonicSolver<Mesh, SolverType>::M_uFESpace.fe().nbFEDof() ; iNode++ )
 		{
 			ig = IonicSolver<Mesh, SolverType>::M_uFESpace.dof().localToGlobal( eleID, iNode + 1 );
 			M_elvec.vec()[ iNode ] = M_wVecRep[ig];
@@ -515,12 +515,12 @@ void RogersMcCulloch<Mesh, SolverType>::computeIion(  Real Capacitance,
         for ( UInt ig = 0; ig < uFESpace.fe().nbQuadPt();ig++ )
     {
         u_ig = w_ig = 0.;
-        for ( UInt i = 0;i < uFESpace.fe().nbNode;i++ )
+        for ( UInt i = 0;i < uFESpace.fe().nbFEDof();i++ )
             u_ig += elvec_u( i ) * uFESpace.fe().phi( i, ig );
-        for ( UInt i = 0;i < uFESpace.fe().nbNode;i++ )
+        for ( UInt i = 0;i < uFESpace.fe().nbFEDof();i++ )
             w_ig += M_elvec( i ) * uFESpace.fe().phi( i, ig );
 
-        for ( UInt i = 0;i < uFESpace.fe().nbNode;i++ )
+        for ( UInt i = 0;i < uFESpace.fe().nbFEDof();i++ )
         {
             elvec( i ) -= Capacitance*(G1*(u_ig- this->M_data.M_restPotential)*
                                        (u_ig - this->M_data.M_restPotential -
@@ -667,7 +667,7 @@ LuoRudy( const data_Type& dataType,
 			M_sol_Ca                  ( IonicSolver<Mesh, SolverType>::M_localMap ),
 			Iion( IonicSolver<Mesh, SolverType>::M_localMap ),
 			M_Iion_VecRep( Iion, Repeated ),
-			M_elvec_Iion ( IonicSolver<Mesh, SolverType>::M_uFESpace.fe().nbNode, 1 ),
+			M_elvec_Iion ( IonicSolver<Mesh, SolverType>::M_uFESpace.fe().nbFEDof(), 1 ),
 			M_K0(5.4),
 			M_Ki(145.),
 			M_Na0(140.),
@@ -720,7 +720,7 @@ void LuoRudy<Mesh, SolverType>::updateElvec( UInt eleID)
 	M_elvec_Iion.zero();
 	UInt ig;
 		//! Filling local elvec with recovery variable values in the nodes
-		for ( UInt iNode = 0 ; iNode < IonicSolver<Mesh, SolverType>::M_uFESpace.fe().nbNode ; iNode++ )
+		for ( UInt iNode = 0 ; iNode < IonicSolver<Mesh, SolverType>::M_uFESpace.fe().nbFEDof() ; iNode++ )
 		{
 			ig = IonicSolver<Mesh, SolverType>::M_uFESpace.dof().localToGlobal( eleID, iNode + 1 );
 			M_elvec_Iion.vec()[ iNode ] = M_Iion_VecRep[ig];
@@ -942,9 +942,9 @@ void LuoRudy<Mesh, SolverType>::computeIion(  Real Capacitance,
     for ( UInt ig = 0; ig < uFESpace.fe().nbQuadPt();ig++ )
     {
         Iion_ig = 0.;
-        for ( UInt i = 0;i < uFESpace.fe().nbNode;i++ )
+        for ( UInt i = 0;i < uFESpace.fe().nbFEDof();i++ )
             Iion_ig += M_elvec_Iion( i ) * uFESpace.fe().phi( i, ig );
-        for ( UInt i = 0;i < uFESpace.fe().nbNode;i++ )
+        for ( UInt i = 0;i < uFESpace.fe().nbFEDof();i++ )
         {
             // divide by 1000 to convert microA in mA
             elvec( i ) -= Iion_ig * Capacitance *
