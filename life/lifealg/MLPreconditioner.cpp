@@ -35,8 +35,8 @@
     @date 09-11-2006
  */
 
-#include <lifeconfig.h>
-#include "MLPreconditioner.hpp"
+#include <life/lifecore/life.hpp>
+#include <MLPreconditioner.hpp>
 
 namespace LifeV
 {

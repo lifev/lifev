@@ -37,7 +37,7 @@
 */
 
 #include <life/lifemesh/geo0D.hpp>
-#include <lifeconfig.h>
+#include <life/lifecore/life.hpp>
 
 namespace LifeV
 {

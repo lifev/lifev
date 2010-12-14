@@ -30,7 +30,7 @@
    \date 2010-05-18
  */
 
-// #include <lifeconfig.h>
+// #include <life/lifecore/life.hpp>
 
 // #include <life/lifecore/life.hpp>
 // #include <life/lifecore/GetPot.hpp>

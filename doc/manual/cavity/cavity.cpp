@@ -38,7 +38,7 @@
 //#include <fstream> // To create an output for the flux
 
 // Trilinos-MPI communication definitions
-#include "Epetra_config.h"
+#include <Epetra_ConfigDefs.h>
 #ifdef HAVE_MPI
 #include "Epetra_MpiComm.h"
 #else

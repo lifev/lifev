@@ -35,7 +35,7 @@
     @date 09-11-2006
  */
 
-#include <lifeconfig.h>
+#include <life/lifecore/life.hpp>
 #include "IfpackPreconditioner.hpp"
 
 namespace LifeV

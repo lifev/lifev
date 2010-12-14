@@ -37,7 +37,7 @@
 
 
 
-// #include <lifeconfig.h>
+// #include <life/lifecore/life.hpp>
 
 // #include <life/lifecore/life.hpp>
 // #include <life/lifecore/GetPot.hpp>

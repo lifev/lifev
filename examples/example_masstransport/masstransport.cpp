@@ -28,7 +28,7 @@
    \date 2005-04-19
  */
 
-// #include <lifeconfig.h>
+// #include <life/lifecore/life.hpp>
 
 // #include <life/lifecore/life.hpp>
 // #include <life/lifecore/GetPot.hpp>

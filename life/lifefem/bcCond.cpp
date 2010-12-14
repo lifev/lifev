@@ -59,7 +59,7 @@
 
  */
 
-#include <lifeconfig.h>
+#include <life/lifecore/life.hpp>
 #include <life/lifefem/bcCond.hpp>
 
 namespace LifeV

@@ -38,7 +38,7 @@
 
 
 #include <life/lifesolver/dataNavierStokes.hpp>
-#include <lifeconfig.h>
+#include <life/lifecore/life.hpp>
 
 
 namespace LifeV

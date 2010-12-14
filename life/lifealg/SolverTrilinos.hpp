@@ -54,7 +54,7 @@
 #include <Epetra_SerialComm.h>
 #endif
 
-#include <AztecOO_config.h>
+#include <AztecOO_ConfigDefs.h>
 #include <AztecOO.h>
 #include <Teuchos_ParameterList.hpp>
 

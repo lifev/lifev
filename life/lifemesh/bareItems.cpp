@@ -116,7 +116,7 @@
 
  */
 
-#include <lifeconfig.h>
+#include <life/lifecore/life.hpp>
 #include <life/lifemesh/bareItems.hpp>
 
 namespace LifeV

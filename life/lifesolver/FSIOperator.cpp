@@ -48,7 +48,7 @@
 
  */
 
-#include <lifeconfig.h>
+#include <life/lifecore/life.hpp>
 #include <life/lifesolver/FSIOperator.hpp>
 //#include <life/lifesolver/reducedLinFluid.hpp>
 

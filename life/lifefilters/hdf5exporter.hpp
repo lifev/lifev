@@ -38,7 +38,7 @@ along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
 #define HDF5EXPORTER_H 1
 
 
-#include <lifeconfig.h>
+#include <life/lifecore/life.hpp>
 
 #ifndef HAVE_HDF5
 
