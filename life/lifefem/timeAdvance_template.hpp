@@ -248,7 +248,7 @@ public:
      @param x0 is the initial unk;
      */
      virtual void setInitialCondition( const feVectorType& x0) = 0;
-     virtual void __attribute__ ((__deprecated)) initialize_unk( const feVectorType& x0) = 0;
+     virtual void __attribute__ ((__deprecated__)) initialize_unk( const feVectorType& x0) = 0;
 
      //! initialize the State Vector
      /*!
@@ -258,7 +258,7 @@ public:
      @param v0 is the initial velocity
      */
      virtual void setInitialCondition( const feVectorType& x0, const feVectorType& v0) = 0;
-     virtual  __attribute__ ((__deprecated)) void initialize_unk  ( const feVectorType& x0, const feVectorType& v0) = 0;
+     virtual  __attribute__ ((__deprecated__)) void initialize_unk  ( const feVectorType& x0, const feVectorType& v0) = 0;
      //! initialize the StateVector
      /*!
      Initialize all the entries of the unknown vector to be derived with the vector x0, v0,w0 (duplicated).
@@ -268,7 +268,7 @@ public:
      @param w0 is the initial accelerate
      */
      virtual void setInitialCondition( const feVectorType& x0, const feVectorType& v0, const feVectorType& w0) = 0;
-     virtual void __attribute__ ((__deprecated)) initialize_unk ( const feVectorType& x0, const feVectorType& v0, const feVectorType& w0) = 0;
+     virtual void __attribute__ ((__deprecated__)) initialize_unk ( const feVectorType& x0, const feVectorType& v0, const feVectorType& w0) = 0;
 
     //! initialize the StateVector
     /*!
@@ -278,7 +278,7 @@ public:
     */
     virtual void setInitialCondition( const feVectorContainer_Type& x0) = 0;
 
-    virtual void __attribute__ ((__deprecated)) initialize_unk ( const feVectorContainer_Type& x0) = 0;
+    virtual void __attribute__ ((__deprecated__)) initialize_unk ( const feVectorContainer_Type& x0) = 0;
 
  //!Initialize the RhsVector:
     /*!
@@ -288,7 +288,7 @@ public:
     */
     void setInitialRHS(const feVectorType & rhs0 ) ;
 
-    void  __attribute__ ((__deprecated)) initialize_rhs(const feVectorType & rhs0 ) ;
+    void  __attribute__ ((__deprecated__)) initialize_rhs(const feVectorType & rhs0 ) ;
 
 
     //! Set time step
