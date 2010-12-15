@@ -60,11 +60,9 @@ public:
     //@{
     //! It sets the switch  It does NOT create a new switch (use create);
     //! Returns true if the switch s existed
-    bool set
-    ( std::string const & a );
+    bool set( std::string const & a );
 
-    bool set
-    ( const char * a );
+    bool set( const char * a );
 
     //! It unsets the switch. It does NOT create a new switch (use create)
     //! Returns true if the switch s existed
