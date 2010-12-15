@@ -55,13 +55,13 @@ namespace LifeV
    from Alexandrescu's book "modern C++ design"
    http://www.moderncppdesign.com/
 */
-template <typename T>
+template <typename SingletonType>
 class singleton
 {
 public:
     //! @name Public typedefs
     //@{
-    typedef T singleton_type;
+    typedef SingletonType singleton_type;
     typedef policyLifeTimeDefault<singleton_type> lifetime_policy;
     typedef policyCreationUsingNew<singleton_type> creation_policy;
     //@}
@@ -92,52 +92,52 @@ private:
     static void destroySingleton();
 
     //@}
-    static instance_type _S_instance;
-    static bool _S_destroyed;
+    static instance_type S_instance;
+    static bool S_destroyed;
 };
 
 // ===================================
 // Singleton Implementation
 // ===================================
 
-template <class T>
-typename singleton<T>::instance_type singleton<T>::_S_instance;
+template <class SingletonType>
+typename singleton<SingletonType>::instance_type singleton<SingletonType>::S_instance;
 
-template <class T>
-bool singleton<T>::_S_destroyed;
+template <class SingletonType>
+bool singleton<SingletonType>::S_destroyed;
 
-template <class T>
-inline T& singleton<T>::instance()
+template <class SingletonType>
+inline SingletonType& singleton<SingletonType>::instance()
 {
-    if ( !_S_instance )
+    if ( !S_instance )
     {
         makeInstance();
     }
-    return *_S_instance;
+    return *S_instance;
 }
 
-template <class T>
-void singleton<T>::makeInstance()
+template <class SingletonType>
+void singleton<SingletonType>::makeInstance()
 {
-    if ( !_S_instance )
+    if ( !S_instance )
     {
-        if ( _S_destroyed )
+        if ( S_destroyed )
         {
             lifetime_policy::onDeadReference();
-            _S_destroyed = false;
+            S_destroyed = false;
         }
-        _S_instance = creation_policy::create();
-        lifetime_policy::scheduleDestruction( _S_instance, &destroySingleton );
+        S_instance = creation_policy::create();
+        lifetime_policy::scheduleDestruction( S_instance, &destroySingleton );
     }
 }
 
-template <class T>
-void singleton<T>::destroySingleton()
+template <class SingletonType>
+void singleton<SingletonType>::destroySingleton()
 {
-    assert( !_S_destroyed );
-    creation_policy::destroy( _S_instance );
-    _S_instance = 0;
-    _S_destroyed = true;
+    assert( !S_destroyed );
+    creation_policy::destroy( S_instance );
+    S_instance = 0;
+    S_destroyed = true;
 }
 
 } // Namespace LifeV
