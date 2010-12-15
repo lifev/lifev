@@ -91,27 +91,30 @@ typedef int L_F77; // LOGICAL 4 bytes
 
   /author Carsten A. Arnholm, 04-MAR-1996 (Modified by L. Formaggia MAR 2002)
 */
-template <class T>
+template <class ScalarType>
 class FMATRIX
 {
 public:
+    //! @name Public typedefs
+    //@{
+    typedef ScalarType scalar_Type;
     //! @name Constructors and destructor
     //@{
     FMATRIX( size_t dim1, size_t dim2 = 1 );
-    FMATRIX( T* cppArray, size_t dim1, size_t dim2 = 1 );
+    FMATRIX( ScalarType* cppArray, size_t dim1, size_t dim2 = 1 );
     ~FMATRIX();
     //@}
 
     //! @name Operators
     //@{
-    operator T*();
-    T& operator() ( size_t index1, size_t index2 = 0 ); // numbering from 0
+    operator ScalarType*();
+    ScalarType& operator() ( size_t index1, size_t index2 = 0 ); // numbering from 0
     //@}
 
 public:
     size_t M_arrayDimensions[ 7 ]; // size of each dimension
-    T* M_cppRepresentation; // original c++ array
-    T* M_fortranRepresentation; // array used by FORTRAN
+    ScalarType* M_cppRepresentation; // original c++ array
+    ScalarType* M_fortranRepresentation; // array used by FORTRAN
     const size_t M_numDimensions; // number of array dimensions
 };
 
@@ -180,10 +183,10 @@ public:
 // FMATRIX Constructors and destructor
 // =======================================
 
-template <class T>
-FMATRIX<T>::FMATRIX( size_t dim1, size_t dim2 ):
+template <class ScalarType>
+FMATRIX<ScalarType>::FMATRIX( size_t dim1, size_t dim2 ):
     M_cppRepresentation( NULL ),
-    M_fortranRepresentation( new T[ dim1*dim2 ] ),
+    M_fortranRepresentation( new ScalarType[ dim1*dim2 ] ),
     M_numDimensions( 2 )
 {
     dim[ 0 ] = dim1;
@@ -195,10 +198,10 @@ FMATRIX<T>::FMATRIX( size_t dim1, size_t dim2 ):
     dim[ 6 ] = 0;
 }
 
-template <class T>
-FMATRIX<T>::FMATRIX( T* cppArray, size_t dim1, size_t dim2 ):
+template <class ScalarType>
+FMATRIX<ScalarType>::FMATRIX( ScalarType* cppArray, size_t dim1, size_t dim2 ):
     M_cppRepresentation( cppArray ),
-    M_fortranRepresentation( new T[ dim1*dim2 ] ),
+    M_fortranRepresentation( new ScalarType[ dim1*dim2 ] ),
     M_numDimensions( 2 )
 {
     dim[ 0 ] = dim1;
@@ -222,8 +225,8 @@ FMATRIX<T>::FMATRIX( T* cppArray, size_t dim1, size_t dim2 ):
     }
 }
 
-template <class T>
-FMATRIX<T>::~FMATRIX()
+template <class ScalarType>
+FMATRIX<ScalarType>::~FMATRIX()
 {
     if ( M_cppRepresentation )
     {
@@ -248,15 +251,15 @@ FMATRIX<T>::~FMATRIX()
 // FMATRIX Operators
 // ============================
 
-template <class T>
-FMATRIX<T>::operator T*()
+template <class ScalarType>
+FMATRIX<ScalarType>::operator ScalarType*()
 {
     // Pass the FORTRAN representation when calling a function
     return M_fortranRepresentation;
 }
 
-template <class T>
-T& FMATRIX<T>::operator() ( size_t index1, size_t index2 )
+template <class ScalarType>
+ScalarType& FMATRIX<ScalarType>::operator() ( size_t index1, size_t index2 )
 {
     assert( M_numDimensions == 2 ); // only 2d arrays supported (so far)
     // indexing according to F77 conventions
