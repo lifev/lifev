@@ -189,13 +189,13 @@ FMATRIX<ScalarType>::FMATRIX( size_t dim1, size_t dim2 ):
     M_fortranRepresentation( new ScalarType[ dim1*dim2 ] ),
     M_numDimensions( 2 )
 {
-    dim[ 0 ] = dim1;
-    dim[ 1 ] = dim2;
-    dim[ 2 ] = 0;
-    dim[ 3 ] = 0;
-    dim[ 4 ] = 0;
-    dim[ 5 ] = 0;
-    dim[ 6 ] = 0;
+    M_arrayDimensions[ 0 ] = dim1;
+    M_arrayDimensions[ 1 ] = dim2;
+    M_arrayDimensions[ 2 ] = 0;
+    M_arrayDimensions[ 3 ] = 0;
+    M_arrayDimensions[ 4 ] = 0;
+    M_arrayDimensions[ 5 ] = 0;
+    M_arrayDimensions[ 6 ] = 0;
 }
 
 template <class ScalarType>
@@ -204,13 +204,13 @@ FMATRIX<ScalarType>::FMATRIX( ScalarType* cppArray, size_t dim1, size_t dim2 ):
     M_fortranRepresentation( new ScalarType[ dim1*dim2 ] ),
     M_numDimensions( 2 )
 {
-    dim[ 0 ] = dim1;
-    dim[ 1 ] = dim2;
-    dim[ 2 ] = 0;
-    dim[ 3 ] = 0;
-    dim[ 4 ] = 0;
-    dim[ 5 ] = 0;
-    dim[ 6 ] = 0;
+    M_arrayDimensions[ 0 ] = dim1;
+    M_arrayDimensions[ 1 ] = dim2;
+    M_arrayDimensions[ 2 ] = 0;
+    M_arrayDimensions[ 3 ] = 0;
+    M_arrayDimensions[ 4 ] = 0;
+    M_arrayDimensions[ 5 ] = 0;
+    M_arrayDimensions[ 6 ] = 0;
 
     // make a FORTRAN-compatible copy of the array
     size_t index_cpp = 0;

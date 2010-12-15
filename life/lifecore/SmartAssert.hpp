@@ -147,7 +147,7 @@ namespace SmartAssert
 typedef void (*assert_function_type)( const AssertContext & context);
 
 // helpers
-std::std::string getTypeofLevel( int nLevel);
+std::string getTypeofLevel( int nLevel);
 void dumpContextSummary( const AssertContext & context, std::ostream & out);
 void dumpContextDetail( const AssertContext & context, std::ostream & out);
 
