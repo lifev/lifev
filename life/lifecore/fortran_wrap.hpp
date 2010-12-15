@@ -46,7 +46,7 @@ namespace LifeV
 //! \file fortran_wrap.h
 /*
   Useful utilities for interfacing FORTRAN77 subroutines with C++
-  code. Mainly based on the utilitieas developed by Carsten A. Arnholm
+  code. Mainly based on the utilities developed by Carsten A. Arnholm
   (http://www.lctn.u-nancy.fr/design/hcomp.html), slightly simplified by
   Luca Formaggia (March 2002).
 */
@@ -98,7 +98,7 @@ public:
     //! @name Constructors and destructor
     //@{
     FMATRIX( size_t dim1, size_t dim2 = 1 );
-    FMATRIX( T* cpparr, size_t dim1, size_t dim2 = 1 );
+    FMATRIX( T* cppArray, size_t dim1, size_t dim2 = 1 );
     ~FMATRIX();
     //@}
 
@@ -109,10 +109,10 @@ public:
     //@}
 
 public:
-    size_t dim[ 7 ]; // size of each dimension
-    T* cpprep; // original c++ array
-    T* f77rep; // array used by FORTRAN
-    const size_t ndim; // number of array dimensions
+    size_t M_arrayDimensions[ 7 ]; // size of each dimension
+    T* M_cppRepresentation; // original c++ array
+    T* M_fortranRepresentation; // array used by FORTRAN
+    const size_t M_numDimensions; // number of array dimensions
 };
 
 //! F77 compatible character class
@@ -151,7 +151,7 @@ public:
     //! @name Constructors and destructor
     //@{
     CHARACTER( char* cstring );
-    CHARACTER( char* cstring, const size_t lstr );
+    CHARACTER( char* cstring, const size_t stringLength );
     ~CHARACTER();
     //@}
 
@@ -164,12 +164,12 @@ public:
 
     //! @name Methods
     //@{
-    void pad( size_t first,size_t howmany = 1 );
+    void pad( size_t first, size_t paddingSize = 1 );
     //@}
 
 public:
-    char* rep; // Actual string
-    size_t len; // String length
+    char* M_representation; // Actual string
+    size_t M_length; // String length
 };
 
 // ======================
@@ -182,9 +182,9 @@ public:
 
 template <class T>
 FMATRIX<T>::FMATRIX( size_t dim1, size_t dim2 ):
-    cpprep( NULL ),
-    f77rep( new T[ dim1*dim2 ] ),
-    ndim( 2 )
+    M_cppRepresentation( NULL ),
+    M_fortranRepresentation( new T[ dim1*dim2 ] ),
+    M_numDimensions( 2 )
 {
     dim[ 0 ] = dim1;
     dim[ 1 ] = dim2;
@@ -196,10 +196,10 @@ FMATRIX<T>::FMATRIX( size_t dim1, size_t dim2 ):
 }
 
 template <class T>
-FMATRIX<T>::FMATRIX( T* cpparr, size_t dim1, size_t dim2 ):
-    cpprep( cpparr ),
-    f77rep( new T[ dim1*dim2 ] ),
-    ndim( 2 )
+FMATRIX<T>::FMATRIX( T* cppArray, size_t dim1, size_t dim2 ):
+    M_cppRepresentation( cppArray ),
+    M_fortranRepresentation( new T[ dim1*dim2 ] ),
+    M_numDimensions( 2 )
 {
     dim[ 0 ] = dim1;
     dim[ 1 ] = dim2;
@@ -212,12 +212,12 @@ FMATRIX<T>::FMATRIX( T* cpparr, size_t dim1, size_t dim2 ):
     // make a FORTRAN-compatible copy of the array
     size_t index_cpp = 0;
     size_t index_f77;
-    for ( size_t i = 0; i < dim[ 0 ]; i++ )
+    for ( size_t i = 0; i < M_arrayDimensions[ 0 ]; i++ )
     {
-        for ( size_t j = 0; j < dim[ 1 ]; j++ )
+        for ( size_t j = 0; j < M_arrayDimensions[ 1 ]; j++ )
         {
-            index_f77 = j * dim[ 0 ] + i;
-            f77rep[ index_f77 ] = cpprep[ index_cpp++ ];
+            index_f77 = j * M_arrayDimensions[ 0 ] + i;
+            M_fortranRepresentation[ index_f77 ] = M_cppRepresentation[ index_cpp++ ];
         }
     }
 }
@@ -225,23 +225,23 @@ FMATRIX<T>::FMATRIX( T* cpparr, size_t dim1, size_t dim2 ):
 template <class T>
 FMATRIX<T>::~FMATRIX()
 {
-    if ( cpprep )
+    if ( M_cppRepresentation )
     {
-        assert( ndim == 2 ); // only 2d arrays supported (so far)
+        assert( M_numDimensions == 2 ); // only 2d arrays supported (so far)
         // copy back from FORTRAN to C++ array
         size_t index_cpp;
         size_t index_f77 = 0;
-        for ( size_t j = 0; j < dim[ 1 ]; j++ )
+        for ( size_t j = 0; j < M_arrayDimensions[ 1 ]; j++ )
         {
-            for ( size_t i = 0; i < dim[ 0 ]; i++ )
+            for ( size_t i = 0; i < M_arrayDimensions[ 0 ]; i++ )
             {
-                index_cpp = i * dim[ 1 ] + j;
-                cpprep[ index_cpp ] = f77rep[ index_f77++ ];
+                index_cpp = i * M_arrayDimensions[ 1 ] + j;
+                M_cppRepresentation[ index_cpp ] = M_fortranRepresentation[ index_f77++ ];
             }
         }
     }
     // delete the FORTRAN copy of the arry
-    delete[] f77rep;
+    delete[] M_fortranRepresentation;
 }
 
 // ============================
@@ -252,17 +252,17 @@ template <class T>
 FMATRIX<T>::operator T*()
 {
     // Pass the FORTRAN representation when calling a function
-    return f77rep;
+    return M_fortranRepresentation;
 }
 
 template <class T>
 T& FMATRIX<T>::operator() ( size_t index1, size_t index2 )
 {
-    assert( ndim == 2 ); // only 2d arrays supported (so far)
+    assert( M_numDimensions == 2 ); // only 2d arrays supported (so far)
     // indexing according to F77 conventions
-    size_t index_f77 = index2 * dim[ 0 ] + index1;
+    size_t index_f77 = index2 * M_arrayDimensions[ 0 ] + index1;
     // return a reference to the array element
-    return *( f77rep + index_f77 );
+    return *( M_fortranRepresentation + index_f77 );
 }
 
 // =======================================
@@ -270,32 +270,32 @@ T& FMATRIX<T>::operator() ( size_t index1, size_t index2 )
 // =======================================
 
 inline CHARACTER::CHARACTER( char* cstring ):
-    rep( cstring ),
-    len( strlen( cstring ) )
+    M_representation( cstring ),
+    M_length( strlen( cstring ) )
 {}
 
-inline CHARACTER::CHARACTER( char* cstring, const size_t lstr ):
-    rep( cstring ),
-    len( lstr )
+inline CHARACTER::CHARACTER( char* cstring, const size_t stringLength ):
+    M_representation( cstring ),
+    M_length( stringLength )
 {
     // find position from where to start padding
-    size_t slen = strlen( rep ); // upper limit
-    size_t actual = ( slen < len ) ? slen : len; // actual <= len.
-    for ( size_t i = actual; i < len; i++ )
-        rep[ i ] = ' '; // Do the padding.
+    size_t slen = strlen( M_representation ); // upper limit
+    size_t actual = ( slen < M_length ) ? slen : M_length; // actual <= M_length.
+    for ( size_t i = actual; i < M_length; i++ )
+        M_representation[ i ] = ' '; // Do the padding.
 }
 
 inline CHARACTER::~CHARACTER()
 {
-    if ( rep[ len ] == '\0' )
+    if ( M_representation[ M_length ] == '\0' )
         return ; // catches string constants
-    for ( int i = len - 1; i >= 0; i-- )
+    for ( int i = M_length - 1; i >= 0; i-- )
     {
-        if ( rep[ i ] == '\0' )
+        if ( M_representation[ i ] == '\0' )
             break; // already zero terminated
-        if ( rep[ i ] != ' ' )
+        if ( M_representation[ i ] != ' ' )
         { // non-blank discovered, so
-            rep[ i + 1 ] = '\0'; // zero-terminate and jump out
+            M_representation[ i + 1 ] = '\0'; // zero-terminate and jump out
             break;
         }
     }
@@ -309,40 +309,40 @@ inline CHARACTER CHARACTER::operator() ( size_t index )
 {
     // Construct a temporary CHARACTER object for the array element
     // identified by "index" in order to zero-terminate that element
-    size_t pos = index * len; // start pos of array element
-    CHARACTER element( rep + pos, len ); // construct new CHARACTER.
+    size_t pos = index * M_length; // start pos of array element
+    CHARACTER element( M_representation + pos, M_length ); // construct new CHARACTER.
     return element; // destructor called here.
 }
 
 inline void CHARACTER::operator=( char* str )
 {
-    strncpy( rep, str, len ); // this will copy a zero if str < rep
-    rep[ len - 1 ] = '\0'; // zero terminate in case strncpy did not
-    size_t slen = strlen( rep ); // upper limit
-    size_t actual = ( slen < len ) ? slen : len; // actual <= len.
-    for ( size_t i = actual; i < len; i++ )
-        rep[ i ] = ' '; // Do the padding.
+    strncpy( M_representation, str, M_length ); // this will copy a zero if str < rep
+    M_representation[ M_length - 1 ] = '\0'; // zero terminate in case strncpy did not
+    size_t slen = strlen( M_representation ); // upper limit
+    size_t actual = ( slen < M_length ) ? slen : M_length; // actual <= M_length.
+    for ( size_t i = actual; i < M_length; i++ )
+        M_representation[ i ] = ' '; // Do the padding.
 }
 
 inline CHARACTER::operator char*()
 {
-    return rep;
+    return M_representation;
 }
 
 // ================================
 // CHARACTER Methods
 // ================================
 
-inline void CHARACTER::pad( size_t first, size_t howmany )
+inline void CHARACTER::pad( size_t first, size_t paddingSize )
 {
-    size_t pos = 0, i = 0, stop = first + howmany - 1;
+    size_t pos = 0, i = 0, stop = first + paddingSize - 1;
     for ( size_t index = first; index <= stop; index++ )
     {
-        pos = index * len;
-        size_t slen = strlen( rep + pos ); // upper limit
-        size_t actual = ( slen < len ) ? slen : len;
-        for ( i = pos + actual; i < pos + len; i++ )
-            rep[ i ] = ' '; // Do the padding.
+        pos = index * M_length;
+        size_t slen = strlen( M_representation + pos ); // upper limit
+        size_t actual = ( slen < M_length ) ? slen : M_length;
+        for ( i = pos + actual; i < pos + M_length; i++ )
+            M_representation[ i ] = ' '; // Do the padding.
     }
 }
 
