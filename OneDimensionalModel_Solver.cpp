@@ -126,8 +126,10 @@ OneDimensionalModel_Solver::buildConstantMatrices()
         grad( 0 , -M_coeffGrad, *M_elmatGrad, M_FESpace -> fe(), M_FESpace -> fe(), 0, 0 );
 
         // assemble the mass and grad matrices
-        assemb_mat( *M_massMatrix, *M_elmatMass, M_FESpace -> fe(), M_FESpace -> dof() , 0, 0 );
-        assemb_mat( *M_gradMatrix, *M_elmatGrad, M_FESpace -> fe(), M_FESpace -> dof() , 0, 0 );
+        //assemb_mat( *M_massMatrix, *M_elmatMass, M_FESpace -> fe(), M_FESpace -> dof() , 0, 0 );
+        //assemb_mat( *M_gradMatrix, *M_elmatGrad, M_FESpace -> fe(), M_FESpace -> dof() , 0, 0 );
+        assembleMatrix( *M_massMatrix, *M_elmatMass, M_FESpace -> fe(), M_FESpace -> dof() , 0, 0, 0, 0 );
+        assembleMatrix( *M_gradMatrix, *M_elmatGrad, M_FESpace -> fe(), M_FESpace -> dof() , 0, 0, 0, 0  );
     }
 
     // Dirichlet boundary conditions set in the mass matrix
@@ -868,10 +870,10 @@ OneDimensionalModel_Solver::setFESpace( const FESpacePtr_Type FESpace )
     M_rightInternalNodeId = M_rightNodeId - 1;
 
     //Elementary Matrices
-    M_elmatMass.reset ( new ElemMat ( M_FESpace -> fe().nbNode, 1, 1 ) );
-    M_elmatStiff.reset( new ElemMat ( M_FESpace -> fe().nbNode, 1, 1 ) );
-    M_elmatGrad.reset ( new ElemMat ( M_FESpace -> fe().nbNode, 1, 1 ) );
-    M_elmatDiv.reset  ( new ElemMat ( M_FESpace -> fe().nbNode, 1, 1 ) );
+    M_elmatMass.reset ( new ElemMat ( M_FESpace -> fe().nbFEDof(), 1, 1 ) );
+    M_elmatStiff.reset( new ElemMat ( M_FESpace -> fe().nbFEDof(), 1, 1 ) );
+    M_elmatGrad.reset ( new ElemMat ( M_FESpace -> fe().nbFEDof(), 1, 1 ) );
+    M_elmatDiv.reset  ( new ElemMat ( M_FESpace -> fe().nbFEDof(), 1, 1 ) );
 
     //Vectors
     M_rhs.resize(          2, vector_Type( M_FESpace -> map() ) );
@@ -1233,16 +1235,20 @@ OneDimensionalModel_Solver::matrixAssemble( const UInt& ii, const UInt& jj )
     ASSERT_BD( 0 < ii && ii < 3 && 0 < jj && jj < 3 );
 
     // assemble the mass matrix
-    assemb_mat( *M_massMatrixDiffSrc[ 2*(ii-1) + jj-1 ]  , *M_elmatMass, M_FESpace -> fe(), M_FESpace -> dof() , 0, 0 );
+    //assemb_mat( *M_massMatrixDiffSrc[ 2*(ii-1) + jj-1 ]  , *M_elmatMass, M_FESpace -> fe(), M_FESpace -> dof() , 0, 0 );
+    assembleMatrix( *M_massMatrixDiffSrc[ 2*(ii-1) + jj-1 ] , *M_elmatMass, M_FESpace -> fe(), M_FESpace -> dof(),0,0,0,0 );
 
     // assemble the stiffness matrix
-    assemb_mat( *M_stiffMatrixDiffFlux[ 2*(ii-1) + jj-1 ], *M_elmatStiff, M_FESpace -> fe(), M_FESpace -> dof() , 0, 0 );
+    //assemb_mat( *M_stiffMatrixDiffFlux[ 2*(ii-1) + jj-1 ], *M_elmatStiff, M_FESpace -> fe(), M_FESpace -> dof() , 0, 0 );
+    assembleMatrix( *M_stiffMatrixDiffFlux[ 2*(ii-1) + jj-1 ], *M_elmatStiff, M_FESpace -> fe(), M_FESpace -> dof(),0,0,0,0 );
 
     // assemble the gradient matrix
-    assemb_mat( *M_gradMatrixDiffFlux[ 2*(ii-1) + jj-1 ] , *M_elmatGrad, M_FESpace -> fe(), M_FESpace -> dof() , 0, 0 );
+    //assemb_mat( *M_gradMatrixDiffFlux[ 2*(ii-1) + jj-1 ] , *M_elmatGrad, M_FESpace -> fe(), M_FESpace -> dof() , 0, 0 );
+    assembleMatrix( *M_gradMatrixDiffFlux[ 2*(ii-1) + jj-1 ] , *M_elmatGrad, M_FESpace -> fe(), M_FESpace -> dof(),0,0,0,0 );
 
     // assemble the divergence matrix
-    assemb_mat( *M_divMatrixDiffSrc[ 2*(ii-1) + jj-1 ]   , *M_elmatDiv, M_FESpace -> fe(), M_FESpace -> dof() , 0, 0 );
+    //assemb_mat( *M_divMatrixDiffSrc[ 2*(ii-1) + jj-1 ]   , *M_elmatDiv, M_FESpace -> fe(), M_FESpace -> dof() , 0, 0 );
+    assembleMatrix( *M_divMatrixDiffSrc[ 2*(ii-1) + jj-1 ]   , *M_elmatDiv, M_FESpace -> fe(), M_FESpace -> dof(),0,0,0,0);
 }
 
 void
@@ -1304,9 +1310,9 @@ OneDimensionalModel_Solver::inertialFluxCorrection( const vector_Type& flux )
     matrix_Type matrixLHS(M_FESpace -> map());
     matrix_Type stiffRHS (M_FESpace -> map());
 
-    ElemMat elmatMassLHS  (M_FESpace -> fe().nbNode, 1, 1);
-    ElemMat elmatStiffLHS (M_FESpace -> fe().nbNode, 1, 1);
-    ElemMat elmatStiffRHS (M_FESpace -> fe().nbNode, 1, 1);
+    ElemMat elmatMassLHS  (M_FESpace -> fe().nbFEDof(), 1, 1);
+    ElemMat elmatStiffLHS (M_FESpace -> fe().nbFEDof(), 1, 1);
+    ElemMat elmatStiffRHS (M_FESpace -> fe().nbFEDof(), 1, 1);
 
     vector_Type rhs(M_FESpace -> map());
 
@@ -1349,10 +1355,14 @@ OneDimensionalModel_Solver::inertialFluxCorrection( const vector_Type& flux )
         stiff( - coeffStiff, elmatStiffRHS, M_FESpace -> fe(), 0, 0 );
 
         // assemble the mass and grad matrices
-        assemb_mat( matrixLHS, elmatMassLHS, M_FESpace -> fe(), M_FESpace -> dof() , 0, 0 );
-        assemb_mat( matrixLHS, elmatStiffLHS, M_FESpace -> fe(), M_FESpace -> dof() , 0, 0 );
+        //assemb_mat( matrixLHS, elmatMassLHS, M_FESpace -> fe(), M_FESpace -> dof() , 0, 0 );
+        assembleMatrix( matrixLHS, elmatMassLHS, M_FESpace -> fe(), M_FESpace -> dof() , 0, 0, 0, 0 );
 
-        assemb_mat( stiffRHS, elmatStiffRHS, M_FESpace -> fe(), M_FESpace -> dof() , 0, 0 );
+        //assemb_mat( matrixLHS, elmatStiffLHS, M_FESpace -> fe(), M_FESpace -> dof() , 0, 0 );
+        assembleMatrix( matrixLHS, elmatStiffLHS, M_FESpace -> fe(), M_FESpace -> dof() , 0, 0, 0, 0);
+
+        //assemb_mat( stiffRHS, elmatStiffRHS, M_FESpace -> fe(), M_FESpace -> dof() , 0, 0 );
+        assembleMatrix( stiffRHS, elmatStiffRHS, M_FESpace -> fe(), M_FESpace -> dof() , 0, 0, 0, 0 );
 
         Debug( 6310 ) << "\n\tm = "           << m
         << "\n\t_coeffMass = "  << coeffMass
@@ -1404,9 +1414,9 @@ OneDimensionalModel_Solver::viscoelasticFluxCorrection( const vector_Type& flux,
 
     //TriDiagCholesky< Real, matrix_Type, Vector > _tridiagsolver(M_FESpace -> dim());
 
-    ElemMat elmatMassLHS  (M_FESpace -> fe().nbNode,1,1);
-    ElemMat elmatStiffLHS (M_FESpace -> fe().nbNode,1,1);
-    ElemMat elmatStiffRHS (M_FESpace -> fe().nbNode,1,1);
+    ElemMat elmatMassLHS  (M_FESpace -> fe().nbFEDof(),1,1);
+    ElemMat elmatStiffLHS (M_FESpace -> fe().nbFEDof(),1,1);
+    ElemMat elmatStiffRHS (M_FESpace -> fe().nbFEDof(),1,1);
 
     vector_Type rhs(M_FESpace -> map());
 
@@ -1460,10 +1470,14 @@ OneDimensionalModel_Solver::viscoelasticFluxCorrection( const vector_Type& flux,
         stiff( - coeffStiff, elmatStiffRHS, M_FESpace -> fe(),0, 0 );
 
         // assemble the mass and grad matrices
-        assemb_mat( matrixLHS, elmatMassLHS, M_FESpace -> fe(), M_FESpace -> dof() , 0, 0 );
-        assemb_mat( matrixLHS, elmatStiffLHS, M_FESpace -> fe(), M_FESpace -> dof() , 0, 0 );
+        //assemb_mat( matrixLHS, elmatMassLHS, M_FESpace -> fe(), M_FESpace -> dof() , 0, 0 );
+        assembleMatrix( matrixLHS, elmatMassLHS, M_FESpace -> fe(), M_FESpace -> dof() , 0, 0, 0, 0 );
 
-        assemb_mat( stiffRHS, elmatStiffRHS, M_FESpace -> fe(), M_FESpace -> dof() , 0, 0 );
+        //assemb_mat( matrixLHS, elmatStiffLHS, M_FESpace -> fe(), M_FESpace -> dof() , 0, 0 );
+        assembleMatrix( matrixLHS, elmatStiffLHS, M_FESpace -> fe(), M_FESpace -> dof() , 0, 0, 0, 0 );
+
+        //assemb_mat( stiffRHS, elmatStiffRHS, M_FESpace -> fe(), M_FESpace -> dof() , 0, 0 );
+        assembleMatrix( stiffRHS, elmatStiffRHS, M_FESpace -> fe(), M_FESpace -> dof() , 0, 0, 0, 0 );
 
         Debug( 6310 ) << "\n\tgamma = " << gamma
         << "\n\t_coeffMass = " << coeffMass
@@ -1512,8 +1526,8 @@ OneDimensionalModel_Solver::longitudinalFluxCorrection()
 
     //TriDiagCholesky< Real, matrix_Type, Vector > _tridiagsolver(M_FESpace -> dim());
 
-    ElemMat elmatMassLHS (M_FESpace -> fe().nbNode,1,1);
-    ElemMat elmatMassRHS (M_FESpace -> fe().nbNode,1,1);
+    ElemMat elmatMassLHS (M_FESpace -> fe().nbFEDof(),1,1);
+    ElemMat elmatMassRHS (M_FESpace -> fe().nbFEDof(),1,1);
 
     vector_Type rhs(M_FESpace -> map());
     // let g = sqrt(A) - sqrt(A0)
@@ -1593,8 +1607,10 @@ OneDimensionalModel_Solver::longitudinalFluxCorrection()
         mass( coeffMassRHS, elmatMassRHS, M_FESpace -> fe(),0, 0 );
 
         // assemble the mass and grad matrices
-        assemb_mat( massLHS, elmatMassLHS, M_FESpace -> fe(), M_FESpace -> dof() , 0, 0 );
-        assemb_mat( massRHS, elmatMassRHS, M_FESpace -> fe(), M_FESpace -> dof() , 0, 0 );
+        //assemb_mat( massLHS, elmatMassLHS, M_FESpace -> fe(), M_FESpace -> dof() , 0, 0 );
+        assembleMatrix( massLHS, elmatMassLHS, M_FESpace -> fe(), M_FESpace -> dof() , 0, 0, 0, 0 );
+        //assemb_mat( massRHS, elmatMassRHS, M_FESpace -> fe(), M_FESpace -> dof() , 0, 0 );
+        assembleMatrix( massRHS, elmatMassRHS, M_FESpace -> fe(), M_FESpace -> dof() , 0, 0, 0, 0 );
 
         Debug( 6310 ) << "\n\t_coeffMassLHS = " << coeffMassLHS << "\n";
         Debug( 6310 ) << "\n\t_coeffMassRHS = " << coeffMassRHS << "\n";
@@ -1640,8 +1656,8 @@ OneDimensionalModel_Solver::_compute_d2Q_dx2( const ScalVec& flux )
 
     TriDiagCholesky< Real, matrix_Type, Vector > _tridiagsolver(M_FESpace -> dim());
 
-    ElemMat _elmatMassLHS (M_FESpace -> fe().nbNode,1,1);
-    ElemMat _elmatStiffRHS (M_FESpace -> fe().nbNode,1,1);
+    ElemMat _elmatMassLHS (M_FESpace -> fe().nbFEDof(),1,1);
+    ElemMat _elmatStiffRHS (M_FESpace -> fe().nbFEDof(),1,1);
 
     ScalVec _rhs(M_FESpace -> dim());
 

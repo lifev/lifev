@@ -89,7 +89,7 @@ template <typename Mesh, typename SolverType = LifeV::SolverTrilinos >
 class NonLinearVenantKirchhofSolver : public VenantKirchhofSolver<Mesh, SolverType>
 {
 public:
-  
+
     //! @name Type definition
     //@{
 
@@ -124,7 +124,7 @@ public:
 
     //! @name Methods
     //@{
-  
+
     /*!
       \param data_file GetPot data file
       \param refFE reference FE for the displacement
@@ -142,7 +142,7 @@ public:
       \param data_file GetPot data file
       \param refFE reference FE for the displacement
       \param comm
-    */  
+    */
     void setup(boost::shared_ptr<data_Type>        data,
 	       const boost::shared_ptr< FESpace<Mesh, EpetraMap> >& dFESpace,
 	       boost::shared_ptr<Epetra_Comm>&     comm
@@ -294,7 +294,7 @@ private:
                                  vector_type &rhs,
                                  bchandler_Type& BCh,
                                  UInt         offset=0);
-  
+
     //! time scheme coefficients
     // _theta and _zeta are the coefficient of the time discretization with Newmark scheme
     Real                            M_zeta;
@@ -546,7 +546,7 @@ void NonLinearVenantKirchhofSolver<Mesh, SolverType>::updateSystem(  source_Type
     // start of the non linear part
 
 #ifdef nonlinear
-    ElemVec dk_loc( this->M_FESpace->fe().nbNode, nDimensions );
+    ElemVec dk_loc( this->M_FESpace->fe().nbFEDof(), nDimensions );
 
     vector_type disp(*this->M_disp);
 
@@ -570,7 +570,7 @@ void NonLinearVenantKirchhofSolver<Mesh, SolverType>::updateSystem(  source_Type
 #endif
     // End of the nonlinear part
 
-    ElemVec M_elvec(this->M_FESpace->fe().nbNode, nDimensions);
+    ElemVec M_elvec(this->M_FESpace->fe().nbFEDof(), nDimensions);
     UInt nc = nDimensions;
 
 // loop on volumes: assembling source term
@@ -626,7 +626,7 @@ template <typename Mesh, typename SolverType>
 void NonLinearVenantKirchhofSolver<Mesh, SolverType>::updateNonlinearMatrix( matrix_ptrtype& stiff )
 {
     UInt totalDof   = this->M_FESpace->dof().numTotalDof();
-    ElemVec dk_loc( this->M_FESpace->fe().nbNode, nDimensions );
+    ElemVec dk_loc( this->M_FESpace->fe().nbFEDof(), nDimensions );
 
     vector_type disp(*this->M_disp);
 
@@ -639,13 +639,13 @@ void NonLinearVenantKirchhofSolver<Mesh, SolverType>::updateNonlinearMatrix( mat
 
         UInt eleID = this->M_FESpace->fe().currentLocalId();
 
-        for ( UInt iNode = 0 ; iNode < ( UInt ) this->M_FESpace->fe().nbNode ; iNode++ )
+        for ( UInt iNode = 0 ; iNode < ( UInt ) this->M_FESpace->fe().nbFEDof() ; iNode++ )
         {
             UInt  iloc = this->M_FESpace->fe().patternFirst( iNode );
             for ( UInt iComp = 0; iComp < nDimensions; ++iComp )
             {
                 UInt ig = this->M_FESpace->dof().localToGlobal( eleID, iloc + 1 ) + iComp*this->dim();
-                dk_loc[ iloc + iComp*this->M_FESpace->fe().nbNode ] = dRep[ig]; // BASEINDEX + 1
+                dk_loc[ iloc + iComp*this->M_FESpace->fe().nbFEDof() ] = dRep[ig]; // BASEINDEX + 1
             }
         }
 
@@ -696,7 +696,7 @@ void NonLinearVenantKirchhofSolver<Mesh, SolverType>::updateNonlinearTerms( matr
 {
 
     UInt totalDof   = this->M_FESpace->dof().numTotalDof();
-    ElemVec dk_loc( this->M_FESpace->fe().nbNode, nDimensions );
+    ElemVec dk_loc( this->M_FESpace->fe().nbFEDof(), nDimensions );
     vector_type disp(*this->M_disp);
 
     vector_type dRep(disp, Repeated);
@@ -709,13 +709,13 @@ void NonLinearVenantKirchhofSolver<Mesh, SolverType>::updateNonlinearTerms( matr
 
         UInt eleID = this->M_FESpace->fe().currentLocalId();
 
-        for ( UInt iNode = 0 ; iNode < ( UInt ) this->M_FESpace->fe().nbNode ; iNode++ )
+        for ( UInt iNode = 0 ; iNode < ( UInt ) this->M_FESpace->fe().nbFEDof() ; iNode++ )
         {
             UInt  iloc = this->M_FESpace->fe().patternFirst( iNode );
             for ( UInt iComp = 0; iComp < nDimensions; ++iComp )
             {
                 UInt ig = this->M_FESpace->dof().localToGlobal( eleID, iloc + 1 ) + iComp*this->dim() + this->M_offset;
-                dk_loc[ iloc + iComp*this->M_FESpace->fe().nbNode ] = dRep[ig]; // BASEINDEX + 1
+                dk_loc[ iloc + iComp*this->M_FESpace->fe().nbFEDof() ] = dRep[ig]; // BASEINDEX + 1
             }
         }
 
@@ -839,7 +839,7 @@ void NonLinearVenantKirchhofSolver<Mesh, SolverType>::computeMatrix( matrix_ptrt
     *stiff *= coef;
 
 
-    ElemVec dk_loc( this->M_FESpace->fe().nbNode, nDimensions );
+    ElemVec dk_loc( this->M_FESpace->fe().nbFEDof(), nDimensions );
 
     vector_type dRep(sol, Repeated);
 
@@ -920,7 +920,7 @@ void NonLinearVenantKirchhofSolver<Mesh, SolverType>::updateJacobian( vector_typ
 
     UInt ig;
 
-    ElemVec dk_loc( this->M_FESpace->fe().nbNode, nDimensions );
+    ElemVec dk_loc( this->M_FESpace->fe().nbFEDof(), nDimensions );
 
     vector_type dRep(sol, Repeated);
 
@@ -937,13 +937,13 @@ void NonLinearVenantKirchhofSolver<Mesh, SolverType>::updateJacobian( vector_typ
 
         UInt eleID = this->M_FESpace->fe().currentLocalId();
 
-        for ( UInt iNode = 0 ; iNode < ( UInt ) this->M_FESpace->fe().nbNode ; iNode++ )
+        for ( UInt iNode = 0 ; iNode < ( UInt ) this->M_FESpace->fe().nbFEDof() ; iNode++ )
         {
             UInt  iloc = this->M_FESpace->fe().patternFirst( iNode );
             for ( UInt iComp = 0; iComp < nDimensions; ++iComp )
             {
                 UInt ig = this->M_FESpace->dof().localToGlobal( eleID, iloc + 1 ) + iComp*this->dim() + this->M_offset;
-                dk_loc[iloc + iComp*this->M_FESpace->fe().nbNode] = dRep[ig]; // BASEINDEX + 1
+                dk_loc[iloc + iComp*this->M_FESpace->fe().nbFEDof()] = dRep[ig]; // BASEINDEX + 1
             }
         }
 
@@ -966,7 +966,7 @@ void NonLinearVenantKirchhofSolver<Mesh, SolverType>::updateJacobian( vector_typ
         //  \lambda * ( (\div u) \grad u_k : \grad v  )
         stiff_divgrad_2(  this->M_zeta * this->M_data->lambda(), dk_loc, *this->M_elmatK, this->M_FESpace->fe() );
 
-        // the sum of these terms is the Jacobian of the gradgrad term 
+        // the sum of these terms is the Jacobian of the gradgrad term
         // 6): 1/2 * \lambda * ( \grad u_k : \grad  u_k) *( \grad \delta u : \grad v  )
         stiff_gradgrad(  this->M_zeta * 0.5 * this->M_data->lambda(), dk_loc, *this->M_elmatK, this->M_FESpace->fe() );
 
