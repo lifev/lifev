@@ -155,7 +155,8 @@ public:
     /*!
      * @param order BDF order
      */
-    void setBDF_order( const UInt& orderBDF ) { M_orderBDF = orderBDF; }
+    void setOrderBDF( const UInt& orderBDF ) { M_orderBDF = orderBDF; }
+    void __attribute__ ((__deprecated__)) setBDF_order( const UInt& orderBDF ) { setOrderBDF(orderBDF); }
 
     //! Set the theta of Newmark scheme
     /*!
@@ -167,7 +168,8 @@ public:
     /*!
      * @param gamma- coefficient of Newmark scheme
      */
-    void setZeta( const Real& gamma ) { M_gamma = gamma; }
+    void setGamma( const Real& gamma ) { M_gamma = gamma; }
+    void __attribute__ ((__deprecated__)) setZeta ( const Real& gamma ) { setGamma(gamma); }
 
     //@}
 
@@ -179,37 +181,41 @@ public:
     /*!
      * @return initial time step value
      */
-    const Real& getInitialTime() const { return M_initialTime; }
+    const Real& initialTime() const { return M_initialTime; }
+    const Real& __attribute__ ((__deprecated__)) getInitialTime() const { return initialTime(); }
 
     //! Get the final time step
     /*!
      * @return final time step value
      */
-    const Real& getEndTime() const { return M_endTime; }
+    const Real& endTime() const { return M_endTime; }
+    const Real& __attribute__ ((__deprecated__)) getEndTime() const{return endTime();}
 
     //! Get the period
     /*!
      * @return period value
      */
-    const Real& getPeriodTime() const { return M_periodTime; }
-
+    const Real& periodTime() const { return M_periodTime; }
+    const Real& __attribute__ ((__deprecated__))  getPeriodTime() const {return periodTime();}
     //! Get the present time
     /*!
      * @return time value
      */
-    const Real& getTime() const { return M_time; }
+    const Real& time() const { return M_time; }
+    const Real& __attribute__ ((__deprecated__)) getTime() const { return time(); }
 
     //! Get the time left
     /*!
      * @return time left value
      */
-    Real getLeftTime() const { return round( M_endTime - M_time ); }
-
+    Real leftTime() const { return round( M_endTime - M_time ); }
+    Real getLeftTime() const { return leftTime();}
     //! Get the elapsed time
     /*!
      * @return elapsed time value
     */
-    Real getElapsedTime() const { return round( M_time - M_initialTime ); }
+    Real elapsedTime() const { return round( M_time - M_initialTime ); }
+  Real __attribute__((__deprecated__))  getElapsedTime() const{ return  elapsedTime();}
 
     //! Get the present time shifted inside the first cycle
     //! (i.e. in the interval (M_initialTime,M_periodTime)).
@@ -217,37 +223,43 @@ public:
     /*!
      * @return time value in first cycle
      */
-    Real getInCycleTime() const { return (M_time - static_cast<int>(floor((M_time-M_timeStep/2)/M_periodTime)) * M_periodTime); }
+    Real inCycleTime() const { return (M_time - static_cast<int>(floor((M_time-M_timeStep/2)/M_periodTime)) * M_periodTime); }
+    Real __attribute__ ((__deprecated__))getInCycleTime() const { return inCycleTime();}
 
-    //! Get the previous time
+                    //! Get the previous time
     /*!
      * @return previous time value
      */
-    Real getPreviousTime()   const { return M_time - M_timeStep; }
+    Real previousTime()   const { return M_time - M_timeStep; }
+    Real __attribute__ ((__deprecated__)) getPreviousTime()   const { return previousTime(); }
 
     //! Get the next time
     /*!
      * @return next time value
      */
-    Real getNextTime()       const { return M_time + M_timeStep; }
+    Real nextTime()       const { return M_time + M_timeStep; }
+    Real __attribute__ ((__deprecated__)) getNextTime() const { return nextTime(); }
 
     //! Get the time step used for advancing
     /*!
      * @return time step value
      */
-    const Real& getTimeStep()		 const { return M_timeStep; }
+    const Real& timeStep()       const { return M_timeStep; }
+    const Real& __attribute__ ((__deprecated__))   getTimeStep()		 const { return timeStep(); }
 
     //! Get the number of time step performed
     /*!
      * @return time step performed
      */
-    const UInt& getTimeStepNumber() const { return M_timeStepNumber; }
+    const UInt& timeStepNumber() const { return M_timeStepNumber; }
+    const UInt& __attribute__ ((__deprecated__)) getTimeStepNumber() const { timeStepNumber();}
 
     //! Get the BDF order used
     /*!
      * @return BDF order value
      */
-    const UInt& getBDF_order()		 const { return M_orderBDF; }
+    const UInt& orderBDF()		 const { return M_orderBDF; }
+    const UInt& __attribute__ ((__deprecated__)) getBDF_order()      const { return orderBDF(); }
 
     //! Return theta parameter of Newmark scheme
     /*!
@@ -259,11 +271,12 @@ public:
     /*!
      * @return gamma value
      */
-    const Real& zeta()              const { return M_gamma; }
-
+    const Real& gamma()              const { return M_gamma; }
+  const Real& __attribute__ ((__deprecated__)) zeta()     const { return gamma(); }
     //! Return Newmark parameters (\f$theta\f$, $\gamma$)
-    std::vector<Real> getNewmark_parameters();
 
+    std::vector<Real> coefficientsNewmark();
+  std::vector<Real>  __attribute__ ((__deprecated__)) getNewmark_parameters();
     //@}
 
 private:

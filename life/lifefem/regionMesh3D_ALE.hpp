@@ -107,21 +107,24 @@ public:
     //! @name Get Methods
     //@{
 
-    //! Get the reference RefFE object associated to this mesh.
+    //! Get the reference Finite Element object associated to this mesh.
     /*!
-      Get the reference RefFE object associated to this mesh.
+      Get the reference Finite Element object associated to this mesh.
       It is necessary when implementing mesh movement routines based on
       harmonic reconstruction, in order to build the finite element discretisation.
     */
-    const RefFE& getRefFE() const;
+    const RefFE& getReferenceFiniteElement() const; 
+    const __attribute__ ((__deprecated__)) RefFE& getRefFE() const; 
 
-    //! Get the reference GeoMap object  associated to the mesh
+    //! Get the reference Geometric Map object  associated to the mesh
     /*!
-      Get the reference GeoMap object associated to this mesh.
+      Get the reference Geometric Map object associated to this mesh.
       It is necessary when implementing mesh movement routines based on
       harmonic reconstruction, in order to build the finite element discretisation.
     */
-    const GeoMap& getGeoMap() const;
+    const GeoMap& getGeometricMap() const;
+    const __attribute__ ((__deprecated__)) GeoMap& getGeoMap() const;
+
 }; // Class RegionMesh3D_ALE
 
 // ===================================================
@@ -165,7 +168,7 @@ RegionMesh3D_ALE<GEOSHAPE, MC>::operator=( RegionMesh3D_ALE<GEOSHAPE, MC> const 
 
 // Get the reference RefFE object associated to the mesh
 template <typename GEOSHAPE, typename MC>
-const RefFE& RegionMesh3D_ALE<GEOSHAPE, MC>::getRefFE() const
+const RefFE& RegionMesh3D_ALE<GEOSHAPE, MC>::getReferenceFiniteElement() const
 {
     switch ( ElementShape::Shape )
     {
@@ -184,11 +187,11 @@ const RefFE& RegionMesh3D_ALE<GEOSHAPE, MC>::getRefFE() const
     default:
         ERROR_MSG( "Finite Element not implemented for the mesh motion" );
     }
-} // Method RegionMesh3D_ALE<GEOSHAPE, MC>::getRefFE
+} // Method RegionMesh3D_ALE<GEOSHAPE, MC>::getReferenceFiniteElement
 
-// Get the reference GeoMap object  associated to the mesh
+// Get the reference Geometric Map object  associated to the mesh
 template <typename GEOSHAPE, typename MC>
-const GeoMap& RegionMesh3D_ALE<GEOSHAPE, MC>::getGeoMap() const
+const GeoMap& RegionMesh3D_ALE<GEOSHAPE, MC>::getGeometricMap() const
 {
     switch ( ElementShape::Shape )
     {
@@ -207,6 +210,19 @@ const GeoMap& RegionMesh3D_ALE<GEOSHAPE, MC>::getGeoMap() const
     default:
         ERROR_MSG( "Finite Element not implemented for ALE" );
     }
+} // Method RegionMesh3D_ALE<GEOSHAPE, MC>::getGeometricMap
+
+template <typename GEOSHAPE, typename MC>
+const RefFE& __attribute__ ((__deprecated__)) RegionMesh3D_ALE<GEOSHAPE, MC>::getRefFE() const
+{
+    return getReferenceFiniteElement();
+} // Method RegionMesh3D_ALE<GEOSHAPE, MC>::getRefFE
+
+template <typename GEOSHAPE, typename MC>
+const GeoMap& __attribute__ ((__deprecated__)) RegionMesh3D_ALE<GEOSHAPE, MC>::getGeoMap() const
+{
+    return getGeometricMap();
 } // Method RegionMesh3D_ALE<GEOSHAPE, MC>::getGeoMap
+
 } // Namespace LifeV
 #endif  /* REGIONMESH3D_ALE_H */

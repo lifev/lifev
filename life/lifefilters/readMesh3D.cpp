@@ -47,84 +47,88 @@ namespace LifeV
 // ===================================================
 
 bool
-readMppFileHead( std::ifstream & mystream,
-                 UInt & numVertices,
-                 UInt & numBVertices,
-                 UInt & numBFaces,
-                 UInt & numBEdges,
-                 UInt & numVolumes )
+readMppFileHead( std::ifstream & myStream,
+                 UInt          & numberVertices,
+                 UInt          & numberBoundaryVertices,
+                 UInt          & numberBoundaryFaces,
+                 UInt          & numberBoundaryEdges,
+                 UInt          & numberVolumes )
 {
-    UInt done = 0;
     std::string line;
-    Real x, y, z;
-    Int ity, ity_id;
-    UInt p1, p2, p3;
-    UInt i, ibc;
 
-    while ( next_good_line( mystream, line ).good() )
+    Real x, y, z;
+
+    Int ity, ity_id;
+
+    UInt done = 0;
+    UInt i, ibc;
+    UInt p1, p2, p3;
+
+    while ( next_good_line( myStream, line ).good() )
     {
         if ( line.find( "odes" ) != std::string::npos )
         {
             std::string node_s = line.substr( line.find_last_of( ":" ) + 1 );
-            numVertices = atoi( node_s );
+            numberVertices = atoi( node_s );
             done++;
-            numBVertices = 0;
-            for ( i = 0; i < numVertices; i++ )
+            numberBoundaryVertices = 0;
+
+            for ( i = 0; i < numberVertices; i++ )
             {
-                mystream >> x >> y >> z >> ity >> ibc;
+                myStream >> x >> y >> z >> ity >> ibc;
                 if ( ity != 3 )
                 {
 
 #ifndef OLDMPPFILE
-                    mystream >> ibc;
+                    myStream >> ibc;
 #endif
 
-                    numBVertices++;
+                    numberBoundaryVertices++;
                 }
             }
         }
 
-
         if ( line.find( "iangular" ) != std::string::npos )
         {
             std::string node_s = line.substr( line.find_last_of( ":" ) + 1 );
-            numBFaces = atoi( node_s );
+            numberBoundaryFaces = atoi( node_s );
             done++;
-            for ( i = 0; i < numBFaces; i++ )
+
+            for ( i = 0; i < numberBoundaryFaces; i++ )
             {
 #ifdef OLDMPPFILE
-                mystream >> p1 >> p2 >> p3 >> ity >> ibc;
+                myStream >> p1 >> p2 >> p3 >> ity >> ibc;
 #else
 
-                mystream >> p1 >> p2 >> p3 >> ity >> ity_id >> ibc;
+                myStream >> p1 >> p2 >> p3 >> ity >> ity_id >> ibc;
 #endif
-
             }
         }
 
         if ( line.find( "oundary" ) != std::string::npos )
         {
             std::string node_s = line.substr( line.find_last_of( ":" ) + 1 );
-            numBEdges = atoi( node_s );
-            for ( i = 0; i < numBEdges; i++ )
+            numberBoundaryEdges = atoi( node_s );
+
+            for ( i = 0; i < numberBoundaryEdges; i++ )
             {
 #ifdef OLDMPPFILE
-                mystream >> p1 >> p2 >> ity >> ibc;
+                myStream >> p1 >> p2 >> ity >> ibc;
 #else
-
-                mystream >> p1 >> p2 >> ity >> ity_id >> ibc;
+                myStream >> p1 >> p2 >> ity >> ity_id >> ibc;
 #endif
-
             }
             done++;
         }
+
         if ( line.find( "etrahedral" ) != std::string::npos )
         {
             std::string node_s = line.substr( line.find_last_of( ":" ) + 1 );
-            numVolumes = atoi( node_s );
+            numberVolumes = atoi( node_s );
             done++;
         }
     }
+
     return done == 4 ;
 }// Function readMppFileHead
 
@@ -132,7 +136,9 @@ readMppFileHead( std::ifstream & mystream,
 // INRIA mesh readers
 // ===================================================
 
-Int nextIntINRIAMeshField( std::string const & line, std::istream & mystream )
+Int 
+nextIntINRIAMeshField( std::string const & line, 
+                       std::istream      & myStream )
 {
     /*
      first control if line has something.
@@ -140,11 +146,17 @@ Int nextIntINRIAMeshField( std::string const & line, std::istream & mystream )
      to extract the integer.
      Otherwise get if from the input stream
      */
+
     for ( std::string::const_iterator is = line.begin(); is != line.end(); ++is )
+       {
         if ( *is != ' ' )
+          {
             return atoi( line );
+          }
+         }
     Int dummy;
-    mystream >> dummy;
+    myStream >> dummy;
+    
     return dummy;
 }// Function nextIntINRIAMeshField
 
@@ -153,60 +165,60 @@ Int nextIntINRIAMeshField( std::string const & line, std::istream & mystream )
  so as to be able to properly dimension all arrays
 */
 bool
-readINRIAMeshFileHead( std::ifstream & mystream,
-                       UInt & numVertices,
-                       UInt & numBVertices,
-                       UInt & numBFaces,
-                       UInt & numBEdges,
-                       UInt & numVolumes,
-                       UInt & numStoredFaces,
-                       ReferenceShapes & shape,
-                       InternalEntitySelector iSelect )
+readINRIAMeshFileHead( std::ifstream          & myStream,
+                       UInt                   & numberVertices,
+                       UInt                   & numberBoundaryVertices,
+                       UInt                   & numberBoundaryFaces,
+                       UInt                   & numberBoundaryEdges,
+                       UInt                   & numberVolumes,
+                       UInt                   & numStoredFaces,
+                       ReferenceShapes        & shape,
+                       InternalEntitySelector   iSelect )
 {
-    UInt done = 0;
     std::string line;
+
     Real x, y, z;
-    UInt p1, p2, p3, p4, p5, p6, p7, p8;
-    UInt i, ibc;
 
     Int idummy;
 
+    UInt i, ibc;
+    UInt done = 0;
+    UInt p1, p2, p3, p4, p5, p6, p7, p8;
     UInt numReadFaces = 0;
     numStoredFaces    = 0;
 
     //shape = NONE;
     std::vector<bool> isboundary;
-    //streampos start=mystream.tellg();
+    //streampos start=myStream.tellg();
 
-    while ( next_good_line( mystream, line ).good() )
+    while ( next_good_line( myStream, line ).good() )
     {
-
         if ( line.find( "MeshVersionFormatted" ) != std::string::npos )
         {
-            idummy = nextIntINRIAMeshField( line.substr( line.find_last_of( "d" ) + 1 ), mystream );
+            idummy = nextIntINRIAMeshField( line.substr( line.find_last_of( "d" ) + 1 ), myStream );
             ASSERT_PRE0( idummy == 1, "I can read only formatted INRIA Mesh files, sorry" );
         }
 
         if ( line.find( "Dimension" ) != std::string:: npos )
         {
-            idummy = nextIntINRIAMeshField( line.substr( line.find_last_of( "n" ) + 1 ), mystream );
+            idummy = nextIntINRIAMeshField( line.substr( line.find_last_of( "n" ) + 1 ), myStream );
             ASSERT_PRE0( idummy == 3, "I can read only 3D INRIA Mesh files, sorry" );
         }
 
         // I assume that internal vertices have their Ref value set to 0 (not clear from medit manual)
         if ( line.find( "Vertices" ) != std::string::npos )
         {
-            numVertices = nextIntINRIAMeshField( line.substr( line.find_last_of( "s" ) + 1 ), mystream );
+            numberVertices = nextIntINRIAMeshField( line.substr( line.find_last_of( "s" ) + 1 ), myStream );
             done++;
-            numBVertices = 0;
-            isboundary.resize( numVertices,false );
+            numberBoundaryVertices = 0;
+            isboundary.resize( numberVertices,false );
 
-            for ( i = 0; i < numVertices; ++i )
+            for ( i = 0; i < numberVertices; ++i )
             {
-                mystream >> x >> y >> z >> ibc;
+                myStream >> x >> y >> z >> ibc;
                 if ( ! iSelect( EntityFlag( ibc ) ) )
                 {
-                    numBVertices++;
+                    numberBoundaryVertices++;
                     isboundary[ i ] = true;
                 }
             }
@@ -216,14 +228,14 @@ readINRIAMeshFileHead( std::ifstream & mystream,
         {
             ASSERT_PRE0( shape != HEXA, " Cannot have triangular faces in an HEXA INRIA  MESH" );
             shape = TETRA;
-            numReadFaces = nextIntINRIAMeshField( line.substr( line.find_last_of( "s" ) + 1 ), mystream );
-            numBFaces = 0;
+            numReadFaces = nextIntINRIAMeshField( line.substr( line.find_last_of( "s" ) + 1 ), myStream );
+            numberBoundaryFaces = 0;
 
             done++;
 
             for ( UInt k = 0; k < numReadFaces; k++ )
             {
-                mystream >> p1 >> p2 >> p3 >> ibc;
+                myStream >> p1 >> p2 >> p3 >> ibc;
                 if ( isboundary[ p1 - 1 ] && isboundary [ p2 - 1 ] && isboundary[ p3 - 1 ])
                 {
                     if ( iSelect( EntityFlag( ibc ) ) )
@@ -234,7 +246,7 @@ readINRIAMeshFileHead( std::ifstream & mystream,
                                   << p3 << " has all vertices on the boundary yet is marked as interior: "
                                   << ibc << std::endl;
                     }
-                    ++numBFaces;
+                    ++numberBoundaryFaces;
                 }
                 else
                 {
@@ -257,12 +269,13 @@ readINRIAMeshFileHead( std::ifstream & mystream,
         {
             ASSERT_PRE0( shape != TETRA, " Cannot have quad faces in an TETRA INRIA MESH" );
             shape = HEXA;
-            numReadFaces = nextIntINRIAMeshField( line.substr( line.find_last_of( "s" ) + 1 ), mystream );
+            numReadFaces = nextIntINRIAMeshField( line.substr( line.find_last_of( "s" ) + 1 ), myStream );
             done++;
-            numBFaces = 0;
+            numberBoundaryFaces = 0;
+
             for ( UInt k = 0; k < numReadFaces; k++ )
             {
-               mystream >> p1 >> p2 >> p3 >> p4 >> ibc;
+               myStream >> p1 >> p2 >> p3 >> p4 >> ibc;
                if ( isboundary[ p1 - 1 ] && isboundary[ p2 - 1 ]
                     && isboundary[ p3 - 1 ] && isboundary[ p4 - 1 ] )
                 {
@@ -276,7 +289,7 @@ readINRIAMeshFileHead( std::ifstream & mystream,
                                   << " has all vertices on the boundary yet is marked as interior: "
                                   << ibc << std::endl;
                     }
-                    ++numBFaces;
+                    ++numberBoundaryFaces;
                 }
 
             }
@@ -287,11 +300,12 @@ readINRIAMeshFileHead( std::ifstream & mystream,
         {
             ASSERT_PRE0( shape != HEXA, " Cannot have tetras  in a HEXA INRIA MESH" );
             shape = TETRA;
-            numVolumes = nextIntINRIAMeshField( line.substr( line.find_last_of( "a" ) + 1 ), mystream );
+            numberVolumes = nextIntINRIAMeshField( line.substr( line.find_last_of( "a" ) + 1 ), myStream );
             done++;
-            for ( i = 0; i < numVolumes; i++ )
+
+            for ( i = 0; i < numberVolumes; i++ )
             {
-                mystream >> p1 >> p2 >> p3 >> p4 >> ibc;
+                myStream >> p1 >> p2 >> p3 >> p4 >> ibc;
             }
         }
 
@@ -299,28 +313,27 @@ readINRIAMeshFileHead( std::ifstream & mystream,
         {
             ASSERT_PRE0( shape != TETRA, " Cannot have Hexahedra in a TETRA INRIA MESH" );
             shape = HEXA;
-            numVolumes = nextIntINRIAMeshField( line.substr( line.find_last_of( "a" ) + 1 ), mystream );
+            numberVolumes = nextIntINRIAMeshField( line.substr( line.find_last_of( "a" ) + 1 ), myStream );
             done++;
 
-            for ( i = 0; i < numVolumes; i++ )
+            for ( i = 0; i < numberVolumes; i++ )
             {
-                mystream >> p1 >> p2 >> p3 >> p4 >> p5 >> p6 >> p7 >> p8 >> ibc;
+                myStream >> p1 >> p2 >> p3 >> p4 >> p5 >> p6 >> p7 >> p8 >> ibc;
             }
         }
         // I assume we are storing only boundary edges
         if ( line.find( "Edges" ) != std::string::npos )
         {
-            numBEdges = nextIntINRIAMeshField( line.substr( line.find_last_of( "a" ) + 1 ), mystream );
+            numberBoundaryEdges = nextIntINRIAMeshField( line.substr( line.find_last_of( "a" ) + 1 ), myStream );
             done++;
-            for ( i = 0; i < numBEdges; i++ )
+            for ( i = 0; i < numberBoundaryEdges; i++ )
             {
-                mystream >> p1 >> p2 >> ibc;
+                myStream >> p1 >> p2 >> ibc;
             }
         }
     }
+
     return true ;
-
 }// Function readINRIAMeshFileHead
-
 
 } // Namespace LifeV

@@ -112,15 +112,17 @@ DataTime::showMe( std::ostream& output ) const
 // Methods
 // ===================================================
 std::vector<Real>
-DataTime::getNewmark_parameters()
+DataTime::coefficientsNewmark()
 {
-    std::vector<Real> parameters;
+    std::vector<Real> coefficients;
 
-    parameters.push_back( M_theta );
-    parameters.push_back( M_gamma );
+    coefficients.push_back( M_theta );
+    coefficients.push_back( M_gamma );
 
-    return parameters;
+    return  coefficients;
 }
+ std::vector<Real>  __attribute__ ((__deprecated__)) 
+DataTime::getNewmark_parameters(){ return coefficientsNewmark();}
 
 // ===================================================
 // Private Methods

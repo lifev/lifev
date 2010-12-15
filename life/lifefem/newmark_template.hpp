@@ -59,7 +59,6 @@
 
 namespace LifeV
 {
-
 //! Newmark  - Class to deal the \f$theta\f$-method and Newmark scheme
 /*!
   @author Matteo Pozzoli <matteo1.pozzoli@mail.polimi.it>
@@ -124,19 +123,19 @@ namespace LifeV
       </ol>
 */
 
-template<typename VectorType = EpetraVector >
+template<typename feVectorType = EpetraVector >
 class Newmark :
-        public TimeAdvance < VectorType >
+        public TimeAdvance < feVectorType >
 {
 public:
 
     //! @name Public Types
     //@{
 
-    typedef TimeAdvance< VectorType >                 super;
-    typedef typename super::vectorVector_Type         vectorVector_Type ;
-    typedef typename super::vectorVectorPtr_Type      vectorVectorPtr_Type;
-    typedef typename vectorVectorPtr_Type::iterator   vectorVectorPtrIterator_Type;
+    typedef TimeAdvance< feVectorType >                    super;
+    typedef typename super::feVectorContainer_Type         feVectorContainer_Type ;
+    typedef typename super::feVectorContainerPtr_Type      feVectorContainerPtr_Type;
+    typedef typename feVectorContainerPtr_Type::iterator   feVectorContainerPtrIterate_Type;
 
     //@}
 
@@ -158,21 +157,26 @@ public:
     /*! Update the vectors of the previous time steps by shifting on the right  the old values.
     @param solution current (new) value of the state vector
     */
-    void shift_right(const VectorType& solution);
+    void shiftRight(const feVectorType& solution);
     
+    void __attribute__ ((__deprecated__))   shift_right(const feVectorType& solution);
+
     //! Update the right hand side \f$ f_V \f$ of the time derivative formula
     /*!
     Set and Return the right hand side \f$ f_V \f$ of the time derivative formula
-    @param dt defined the  time step need to compute the
+    @param timeStep defined the  time step need to compute the
     */
-    VectorType time_der(const Real& dt = 1 );
+    feVectorType updateRHSFirstDerivate(const Real& timeStep = 1 );
+    feVectorType __attribute__ ((__deprecated__))  time_der(const Real& timeStep = 1 );
 
     //! Update the right hand side \f$ f_W \f$ of the time derivative formula
     /*
     Set and Return the right hand side \f$ f_W \f$ of the time derivative formula
-    @param dt defined the  time step need to compute the \f$ f_W \f$
+    @param timeStep defined the  time step need to compute the \f$ f_W \f$
     */
-    VectorType time_derOrder2(const Real& dt = 1 );
+   feVectorType updateRHSSecondDerivate(const Real& timeStep = 1 );
+
+   feVectorType __attribute__ ((__deprecated__))  time_derOrder2(const Real& timeStep = 1 );
 
     //!Show the properties  of temporal scheme
     void showMe() const;
@@ -190,13 +194,13 @@ public:
      */
      void setup (const  std::vector<Real>&  coefficients, const  UInt& orderDerivate);
 
-    //! initialize parameters of time advance scheme;
+     //! initialize parameters of time advance scheme;
      /*
      Initialize parameters of time advance scheme used in BDF;
      @param  order define the order of BDF;
      @param  orderDerivate  define the order of derivate;
      */
-    void setup ( const UInt& order, const  UInt& orderDerivate);
+     void setup ( const UInt& order, const  UInt& orderDerivate);
     
      //! Initialize the StateVector
      /*!
@@ -204,7 +208,8 @@ public:
      this class is virtual because used in bdf;
      @param x0 is the initial solution;
      */
-     void initialize_unk( const VectorType& x0);
+     void setInitialCondition( const feVectorType& x0);
+     void  __attribute__ ((__deprecated__ )) initialize_unk( const feVectorType& x0);
 
      //! initialize the state vector
      /*!
@@ -213,7 +218,8 @@ public:
      @param x0 is the initial unk;
      @param v0 is the initial velocity
      */
-    void initialize_unk( const VectorType& x0, const VectorType& v0 );
+     void setInitialCondition( const feVectorType& x0, const feVectorType& v0 );
+     void  __attribute__ ((__deprecated__ )) initialize_unk( const feVectorType& x0, const feVectorType& v0 );
    
      //! initialize the state vector
      /*!
@@ -223,15 +229,16 @@ public:
      @param v0 is the initial velocity
      @param w0 is the initial accelerate
      */
-    void initialize_unk(const VectorType& x0, const VectorType& v0, const VectorType& w0 );
+     void setInitialCondition(const feVectorType& x0, const feVectorType& v0, const feVectorType& w0 );
+     void  __attribute__ ((__deprecated__ )) initialize_unk(const feVectorType& x0, const feVectorType& v0, const feVectorType& w0 );
 
   //! Initialize the state vector
     /*! Initialize all the entries of the unknown vector to be derived with a
      set of vectors x0
      note: this is taken as a copy (not a reference), since x0 is resized inside the method.
      */
-    void initialize_unk( const vectorVector_Type& x0);
-  
+    void setInitialCondition( const feVectorContainer_Type& x0);
+    void __attribute__ ((__deprecated__ ))  initialize_unk ( const feVectorContainer_Type& x0);
    //@}
 
   //!@name Get Methods
@@ -242,34 +249,43 @@ public:
    @param i index of  extrapolation coefficient
    @returns beta
    */
-   Real coeff_ext(const  UInt& i ) const;
-  
+   Real coefficientExtrapolation(const  UInt& i ) const;
+   Real __attribute__ ((__deprecated__)) coeff_ext(const  UInt& i ) const;
+
    //! Return the \f$i\f$-th coefficient of the velocity's extrapolation
    /*!
    @param \f$i\f$ index of velocity's extrapolation  coefficient
    @returns \f$\beta^V_i\f$
    */
-   Real coeff_extVelocity(const UInt& i ) const;
+   Real coefficientExtrapolationVelocity(const UInt& i ) const;
+
+   Real __attribute__ ((___deprecated___)) coeff_extVelocity(const UInt& i ) const;
 
     //! Compute the polynomial extrapolation of solution
     /*!
     Compute the polynomial extrapolation approximation of order \f$n-1\f$ of
     \f$u^{n+1}\f$ defined by the n stored state vectors
     */
-    VectorType extrap() const;
+   feVectorType   extrapolation() const;
+
+   feVectorType  __attribute__ ((___deprecated___)) extrap() const;
 
     //! Compute the polynomial extrapolation of velocity
     /*!
     Compute the polynomial extrapolation approximation of order \f$n-1\f$ of
     \f$u^{n+1}\f$ defined by the n stored state vectors
     */
-    VectorType extrapVelocity() const;
-  
+    feVectorType  extrapolationVelocity() const;
+
+    feVectorType __attribute__ ((___deprecated___)) extrapVelocity() const;
+
     //! Return the current velocity
-    VectorType vnk()  const;
+    feVectorType velocity()  const;
+    feVectorType __attribute__ ((___deprecated___)) vnk()  const;
 
     //!Return the current accelerate
-    VectorType wnk() const ;
+    feVectorType accelerate() const ;
+    feVectorType __attribute__ ((___deprecated___)) wnk() const ;
   
   //@}
 
@@ -286,22 +302,22 @@ private:
 // ==================================================
 // Constructors & Destructor
 // ==================================================
-template<typename VectorType>
-Newmark <VectorType> ::Newmark():super()
+template<typename feVectorType>
+Newmark <feVectorType> ::Newmark():super()
   {
   }
 
 // ===================================================
 // Methods
 // ===================================================
-template<typename VectorType>
-void Newmark <VectorType>::shift_right(const VectorType& solution)
+template<typename feVectorType>
+void Newmark <feVectorType>::shiftRight(const feVectorType& solution)
 {
-    ASSERT (  this->M_dt != 0 ,  "M_dt must be different to 0");
+    ASSERT (  this->M_timeStep != 0 ,  "M_timeStep must be different to 0");
 
-    vectorVectorPtrIterator_Type it   =  this->M_unknowns.end();
-    vectorVectorPtrIterator_Type itb1 =  this->M_unknowns.begin() +  static_cast<Real>(this->M_size)/2;
-    vectorVectorPtrIterator_Type itb  =  this->M_unknowns.begin();
+    feVectorContainerPtrIterate_Type it   =  this->M_unknowns.end();
+    feVectorContainerPtrIterate_Type itb1 =  this->M_unknowns.begin() +  static_cast<Real>(this->M_size)/2;
+    feVectorContainerPtrIterate_Type itb  =  this->M_unknowns.begin();
 
     for ( ; itb1 != it; ++itb1, ++itb)
         *itb1 = *itb;
@@ -309,72 +325,94 @@ void Newmark <VectorType>::shift_right(const VectorType& solution)
     itb  =  this->M_unknowns.begin();
 
     // insert unk in unknowns[0];
-    *itb = new VectorType( solution );
+    *itb = new feVectorType( solution );
 
     itb++;
 
     //update velocity
-    VectorType velocityTemp(solution);
-    velocityTemp *=  this->M_alpha[0] / this-> M_dt;
-    velocityTemp -= *this->M_rhs[0];
+    feVectorType velocityTemp(solution);
+    velocityTemp *=  this->M_alpha[0] / this->M_timeStep;
+    velocityTemp -= *this->M_rhsContribution[0];
 
     // update unknows[1] with velocityTemp is current velocity
-    *itb = new VectorType(velocityTemp);
+    *itb = new feVectorType(velocityTemp);
 
     if ( this->M_orderDerivate == 2 )
     {
      itb++;
 
       //update accelerate
-      VectorType accelerateTemp( solution );
-      accelerateTemp *= this->M_xi[ 0 ] / ( this->M_dt * this->M_dt);
-      accelerateTemp -= * this->M_rhs[ 1 ];
+      feVectorType accelerateTemp( solution );
+      accelerateTemp *= this->M_xi[ 0 ] / ( this->M_timeStep * this->M_timeStep);
+      accelerateTemp -= * this->M_rhsContribution[ 1 ];
 
-      *itb = new VectorType( accelerateTemp );
+      *itb = new feVectorType( accelerateTemp );
     }
     return;
 }
 
-template<typename VectorType>
-VectorType
-Newmark<VectorType>::time_der(const Real& dt )
+template<typename feVectorType>
+void __attribute__((__deprecated)) Newmark <feVectorType>::shift_right(const feVectorType& solution)
 {
-    vectorVectorPtrIterator_Type it  =  this->M_rhs.begin();
+    // you should replace any call to shift_right() with a call to shiftRight()
+  return shiftRight(solution);
+}
 
-    VectorType fv(* this->M_unknowns[0]);
 
-    fv *=  this->M_alpha[ 1 ] / dt ;
+
+template<typename feVectorType>
+feVectorType
+Newmark<feVectorType>::updateRHSFirstDerivate(const Real& timeStep )
+{
+    feVectorContainerPtrIterate_Type it  =  this->M_rhsContribution.begin();
+
+    feVectorType fv(* this->M_unknowns[0]);
+
+    fv *=  this->M_alpha[ 1 ] / timeStep ;
 
     for (UInt i= 1; i  < this->M_firstOrderDerivateSize; ++i )
-        fv += ( this->M_alpha[ i+1 ] * pow( dt, static_cast<Real>(i - 1 ) ) ) *  (* this->M_unknowns[ i ]);
+        fv += ( this->M_alpha[ i+1 ] * pow( timeStep, static_cast<Real>(i - 1 ) ) ) *  (* this->M_unknowns[ i ]);
 
-    *it = new VectorType(fv);
+    *it = new feVectorType(fv);
 
     return fv;
 }
-
-template<typename VectorType>
-VectorType
-Newmark<VectorType>::time_derOrder2(const Real& dt )
+template<typename feVectorType>
+feVectorType __attribute__((__deprecated__))
+Newmark<feVectorType>::time_der(const Real& timeStep )
 {
-    vectorVectorPtrIterator_Type it  =  this->M_rhs.end()-1;
+  return updateRHSFirstDerivate( timeStep );
+}
 
-    VectorType fw(* this->M_unknowns[0]);
+template<typename feVectorType>
+feVectorType
+Newmark<feVectorType>::updateRHSSecondDerivate(const Real& timeStep )
+{
+    feVectorContainerPtrIterate_Type it  =  this->M_rhsContribution.end()-1;
 
-    fw *=  this->M_xi[ 1 ] /(dt * dt) ;
+    feVectorType fw(* this->M_unknowns[0]);
+
+    fw *=  this->M_xi[ 1 ] /(timeStep * timeStep) ;
 
     for ( UInt i = 1;  i < this->M_secondOrderDerivateSize; ++i )
 
-      fw += ( this->M_xi[ i+1 ] * pow(dt, static_cast<Real>(i - 2) ) ) * ( *this->M_unknowns[ i ]);
+      fw += ( this->M_xi[ i+1 ] * pow(timeStep, static_cast<Real>(i - 2) ) ) * ( *this->M_unknowns[ i ]);
 
-    *it = new VectorType(fw);
+    *it = new feVectorType(fw);
 
     return fw;
 }
 
-template<typename VectorType>
+template<typename feVectorType>
+feVectorType __attribute__((__deprecated__))
+Newmark<feVectorType>::time_derOrder2(const Real& timeStep )
+{
+  return updateRHSSecondDerivate( timeStep );
+}
+
+template<typename feVectorType>
 void
-Newmark<VectorType>::showMe() const
+Newmark<feVectorType>::showMe() const
 {
     std::cout << "*** NewmarkTime discretization maximum order of derivate "
                     << this->M_orderDerivate<< " ***"<< std::endl;
@@ -392,7 +430,7 @@ Newmark<VectorType>::showMe() const
             std::cout << "       xi(" << i << ") = " <<  this->M_xi[ i ] << std::endl;
     }
 
-    std::cout <<"Delta Time : "<< this->M_dt<<"\n";
+    std::cout <<"Delta Time : "<< this->M_timeStep<<"\n";
     std::cout <<"*************************************\n";
 }
 
@@ -400,16 +438,16 @@ Newmark<VectorType>::showMe() const
 // Set Methods
 // ===================================================
 
-template<typename VectorType>
+template<typename feVectorType>
 void
-Newmark<VectorType>::setup (const UInt& /*order*/, const  UInt& /*orderDerivate*/)
+Newmark<feVectorType>::setup (const UInt& /*order*/, const  UInt& /*orderDerivate*/)
 {
     ERROR_MSG("use setup for BDF but the time advance scheme is Newmark or  theta-method");
 }
 
-template<typename VectorType>
+template<typename feVectorType>
 void
-Newmark<VectorType>::setup(const std::vector<Real>& coefficients, const  UInt& orderDerivate)
+Newmark<feVectorType>::setup(const std::vector<Real>& coefficients, const  UInt& orderDerivate)
 {
     //initialize theta
     M_theta = coefficients[0];
@@ -483,7 +521,7 @@ Newmark<VectorType>::setup(const std::vector<Real>& coefficients, const  UInt& o
             this->M_coefficientsSize  = 4;
         }
         this->M_unknowns.reserve(this->M_size);
-        this-> M_rhs.reserve(2);
+        this-> M_rhsContribution.reserve(2);
         // check order  scheme
         if (this->M_alpha[0] == 0.5)
             this->M_order = 2;
@@ -495,172 +533,249 @@ Newmark<VectorType>::setup(const std::vector<Real>& coefficients, const  UInt& o
     }
 }
 
-template<typename VectorType>
-void Newmark<VectorType>::initialize_unk( const VectorType& x0)
+template<typename feVectorType>
+void Newmark<feVectorType>::setInitialCondition( const feVectorType& x0)
 {
-    vectorVectorPtrIterator_Type iter     = this->M_unknowns.begin();
-    vectorVectorPtrIterator_Type iter_end = this->M_unknowns.end();
+    feVectorContainerPtrIterate_Type iter     = this->M_unknowns.begin();
+    feVectorContainerPtrIterate_Type iter_end = this->M_unknowns.end();
+
+    feVectorType zero(x0);
+    zero *=0;
 
     for ( ; iter != iter_end; ++iter )
     {
         delete *iter;
-        *iter = new VectorType(x0.getMap(), Unique);
+        *iter = new feVectorType(zero, Unique);
     }
 
     for ( UInt i(this->M_unknowns.size()) ; i < this->M_size; ++i )
-        this->M_unknowns.push_back(new VectorType(x0));
+        this->M_unknowns.push_back(new feVectorType(x0));
 
-    vectorVectorPtrIterator_Type iterRhs     = this->M_rhs.begin();
-    vectorVectorPtrIterator_Type iterRhs_end = this->M_rhs.end();
+    feVectorContainerPtrIterate_Type iterRhs     = this->M_rhsContribution.begin();
+    feVectorContainerPtrIterate_Type iterRhs_end = this->M_rhsContribution.end();
 
     for ( ; iterRhs !=iterRhs_end ; ++iterRhs)
     {
         delete *iterRhs;
-        *iterRhs = new VectorType(x0.getMap(), Unique);
+        *iterRhs = new feVectorType(zero, Unique);
     }
 }
 
-template<typename VectorType>
-void Newmark<VectorType>::initialize_unk( const VectorType& x0, const VectorType& v0)
+template<typename feVectorType>
+void __attribute ((__deprecated))
+Newmark<feVectorType>::initialize_unk( const feVectorType& x0)
 {
-    vectorVectorPtrIterator_Type iter       = this->M_unknowns.begin();
-    vectorVectorPtrIterator_Type iter_end   = this->M_unknowns.end();
+    // you should replace any call to initial_unk() with a call to setInitialCondition()
+    return setInitialCondition(x0);
+}
+
+template<typename feVectorType>
+void Newmark<feVectorType>::setInitialCondition( const feVectorType& x0, const feVectorType& v0)
+{
+    feVectorContainerPtrIterate_Type iter       = this->M_unknowns.begin();
+    feVectorContainerPtrIterate_Type iter_end   = this->M_unknowns.end();
+ 
+   //!initialize zero 
+    feVectorType zero(x0);
+    zero *=0;
 
     for ( ; iter != iter_end; ++iter )
     {
         delete *iter;
-        *iter = new VectorType(x0.getMap(), Unique);
+        *iter = new feVectorType(zero, Unique);
     }
 
-    this->M_unknowns.push_back(new VectorType(x0));
-    this->M_unknowns.push_back(new VectorType(v0));
+    this->M_unknowns.push_back(new feVectorType(x0));
+    this->M_unknowns.push_back(new feVectorType(v0));
 
     for (UInt i=0; i<4; ++i )
     {
-        this->M_unknowns.push_back(new VectorType(x0.getMap(), Unique));
+        this->M_unknowns.push_back(new feVectorType(zero, Unique));
         *this->M_unknowns[i+2]  *=0;
     }
-    for (UInt i=0; i<2; ++i )
-    {
-        this->M_rhs.push_back(new VectorType(x0.getMap(), Unique));
-        *this->M_rhs[i]  *=0;
-    }
+    this->setInitialRHS(zero);
 }
 
-template<typename VectorType>
-void Newmark<VectorType>::initialize_unk( const VectorType& x0, const VectorType& v0, const VectorType& w0)
+template<typename feVectorType>
+void  __attribute__((__deprecated__))
+Newmark<feVectorType>::initialize_unk( const feVectorType& x0, const feVectorType& v0)
 {
-    vectorVectorPtrIterator_Type iter       = this->M_unknowns.begin();
-    vectorVectorPtrIterator_Type iter_end   = this->M_unknowns.end();
+   return setInitialCondition(x0, v0);
+}
+
+template<typename feVectorType>
+void Newmark<feVectorType>::setInitialCondition( const feVectorType& x0, const feVectorType& v0, const feVectorType& w0)
+{
+    feVectorContainerPtrIterate_Type iter       = this->M_unknowns.begin();
+    feVectorContainerPtrIterate_Type iter_end   = this->M_unknowns.end();
+
+  //!initialize zero 
+    feVectorType zero(x0);
+    zero *=0;
 
     for ( ; iter != iter_end; ++iter )
     {
         delete *iter;
-        *iter = new VectorType(x0.getMap(), Unique);
+        *iter = new feVectorType(zero, Unique);
     }
 
-    this->M_unknowns.push_back(new VectorType(x0));
-    this->M_unknowns.push_back(new VectorType(v0));
-    this->M_unknowns.push_back(new VectorType(w0));
+    this->M_unknowns.push_back(new feVectorType(x0));
+    this->M_unknowns.push_back(new feVectorType(v0));
+    this->M_unknowns.push_back(new feVectorType(w0));
 
     for (UInt i=0; i<3; ++i )
     {
-        this->M_unknowns.push_back(new VectorType(x0.getMap(), Unique));
+        this->M_unknowns.push_back(new feVectorType(zero, Unique));
         *this->M_unknowns[i+3] *=0;
     }
-    for (UInt i=0; i<2; ++i )
-    {
-        this->M_rhs.push_back(new VectorType(x0.getMap(), Unique));
-        *this->M_rhs[i] *=0;
-    }
+    this->setInitialRHS(zero);
 }
 
-template<typename VectorType>
-void Newmark<VectorType>::initialize_unk( const vectorVector_Type& x0)
+template<typename feVectorType>  __attribute__ ((__deprecated__))
+void Newmark<feVectorType>::initialize_unk( const feVectorType& x0, const feVectorType& v0, const feVectorType& w0)
+{
+    // you should replace any call to initialize_unk() with a call to setInitialCondition()
+    return setInitialCondition( x0, v0,  w0) ;
+}
+
+template<typename feVectorType>
+void Newmark<feVectorType>::setInitialCondition( const feVectorContainer_Type& x0)
 {
     const UInt n0 = x0.size();
 
     ASSERT( n0 != 0, "vector null " );
 
-    vectorVectorPtrIterator_Type iter     = this->M_unknowns.begin();
-    vectorVectorPtrIterator_Type iter_end = this->M_unknowns.end();
+    feVectorContainerPtrIterate_Type iter     = this->M_unknowns.begin();
+    feVectorContainerPtrIterate_Type iter_end = this->M_unknowns.end();
 
     UInt i(0);
+
+    //!initialize zero 
+    feVectorType zero(x0[0]);
+    zero *=0;
 
     for ( ; iter != iter_end && i< n0 ; ++iter, ++i )
     {
         delete *iter;
-        *iter = new VectorType(x0[i]);
+        *iter = new feVectorType(x0[i]);
     }
 
     for ( i = this->M_unknowns.size() ; i < this->M_size && i< n0; ++i )
-        this->M_unknowns.push_back(new VectorType(x0[i]));
+        this->M_unknowns.push_back(new feVectorType(x0[i]));
 
     for ( i = this->M_unknowns.size() ; i < this->M_size; i++ )
-        this->M_unknowns.push_back(new VectorType( x0[ n0-1 ] ) );
+        this->M_unknowns.push_back(new feVectorType( x0[ n0-1 ] ) );
 
-    for (UInt i=0; i<2; i++ )
-    {
-        this->M_rhs.push_back(new VectorType(x0[0].getMap(), Unique));
-        *this->M_rhs[i] *=0;
-    }
+    this->setInitialRHS(zero);
+}
+
+template<typename feVectorType>   __attribute__((__deprecated__))
+void Newmark<feVectorType>::initialize_unk( const feVectorContainer_Type& x0)
+{ // you should replace any call to initialize_unk() with a call to setInitialCondition()
+  return  setInitialCondition(x0);
 }
 
 // ===================================================
 // Get Methods
 // ===================================================
 
-template<typename VectorType>
+template<typename feVectorType>
 Real
-Newmark<VectorType>::coeff_ext(const UInt& i) const
+Newmark<feVectorType>::coefficientExtrapolation(const UInt& i) const
 {
-  ASSERT ( i <  3 ,  "coeff_der i must equal 0 or 1 because U^*= U^n + dt*V^n + dt^2 / 2 W^n");
-  return  this->M_beta(i)*pow( this->M_dt, static_cast<Real>(i) );
+  ASSERT ( i <  3 ,  "coeff_der i must equal 0 or 1 because U^*= U^n + timeStep*V^n + timeStep^2 / 2 W^n");
+  return  this->M_beta(i)*pow( this->M_timeStep, static_cast<Real>(i) );
 }
 
-template<typename VectorType>
-Real
-Newmark<VectorType>::coeff_extVelocity(const UInt& i ) const
+template<typename feVectorType>
+Real __attribute__ ((__deprecated__))
+Newmark<feVectorType>::coeff_ext(const UInt& i) const
 {
-ASSERT (i < 3,  "coeff_der i must equal 0 or 1 because V^* =  V^n + dt W^n");
- return  this->M_betaVelocity(i)*pow( this->M_dt, static_cast<Real>(i));
+    // you should replace any call to coeff_ext() with a call to coefficientExaptrapolation()
+    return coefficientExtrapolation(i);
 }
 
-template<typename VectorType>
-VectorType
-Newmark<VectorType>::extrap()  const
+template<typename feVectorType>
+Real
+Newmark<feVectorType>::coefficientExtrapolationVelocity(const UInt& i ) const
 {
-    VectorType extrapolation(*this->M_unknowns[0]);
-    extrapolation += this->M_dt * ( *this->M_unknowns[ 1 ]);
+ return  this->M_betaVelocity(i)*pow( this->M_timeStep, static_cast<Real>(i));
+}
+
+template<typename feVectorType>
+Real __attribute__ ((__deprecated__))
+Newmark<feVectorType>::coeff_extVelocity(const UInt& i ) const
+{
+    // you should replace any call to coeff_ext() with a call to coefficientExatrapolation()
+  return  coefficientExtrapolationVelocity(i);
+}
+
+template<typename feVectorType>
+feVectorType
+Newmark<feVectorType>::extrapolation()  const
+{
+    feVectorType extrapolation(*this->M_unknowns[0]);
+    extrapolation += this->M_timeStep * ( *this->M_unknowns[ 1 ]);
     if ( this->M_orderDerivate == 2 )
-        extrapolation += ( this->M_dt * this->M_dt ) / 2.0 * ( *this->M_unknowns[2]);
+        extrapolation += ( this->M_timeStep * this->M_timeStep ) / 2.0 * ( *this->M_unknowns[2]);
     return extrapolation;
 }
 
-template<typename VectorType>
-VectorType
-Newmark<VectorType>::extrapVelocity() const
+template<typename feVectorType>
+feVectorType  __attribute__ ((__deprecated__))
+Newmark<feVectorType>::extrap()  const
 {
-    VectorType extrapolation( *this->M_unknowns[1]);
-    extrapolation += this->M_dt * ( *this->M_unknowns[ 2 ]);
+    // you should replace any call to extrap() with a call to extrapolation()
+   return extrapolation();
+}
+
+template<typename feVectorType>
+feVectorType
+Newmark<feVectorType>::extrapolationVelocity() const
+{
+    feVectorType extrapolation( *this->M_unknowns[1]);
+    extrapolation += this->M_timeStep * ( *this->M_unknowns[ 2 ]);
 
     return extrapolation;
 }
 
-template<typename VectorType>
-VectorType
-Newmark<VectorType>::vnk() const
+template<typename feVectorType>
+feVectorType __attribute__ ((__deprecated__))
+Newmark<feVectorType>::extrapVelocity() const
 {
-    VectorType velocity( *this->M_unknowns[1]);
+    // you should replace any call to extrapVelocity() with a call to extrapolationVelocity()
+    return extrapolationVelocity();
+}
+
+template<typename feVectorType>
+feVectorType
+Newmark<feVectorType>::velocity() const
+{
+    feVectorType velocity( *this->M_unknowns[1]);
     return velocity;
 }
 
-template<typename VectorType>
-VectorType
-Newmark<VectorType>::wnk() const
+template<typename feVectorType>
+feVectorType __attribute__ ((__deprecated__))
+Newmark<feVectorType>::vnk() const
 {
-    VectorType accelerate( *this->M_unknowns[2]);
+    // you should replace any call to vnk() with a call to velocity()
+    return velocity();
+}
+
+template<typename feVectorType>
+feVectorType
+Newmark<feVectorType>::accelerate() const
+{
+    feVectorType accelerate( *this->M_unknowns[2]);
     return accelerate;
+}
+
+template<typename feVectorType>
+feVectorType __attribute__ ((__deprecated__))
+Newmark<feVectorType>::wnk() const
+{   // you should replace any call to wnk() with a call to accelerate()
+  return accelerate();
 }
 
 // ===================================================
