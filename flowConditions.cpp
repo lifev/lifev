@@ -59,48 +59,48 @@ FlowConditions::FlowConditions():
 }
 
 
-void FlowConditions::initParameters( FSIOperator&  oper,
+void FlowConditions::initParameters( FSIOperator&  Oper,
                                      const int&    outflowFlag)
 {
 
     Epetra_SerialDenseVector fluidQuantities(1); // M_area0
     Epetra_SerialDenseVector solidQuantities(2); // M_beta and M_rhos
 
-    if (oper.isFluid())
+    if (Oper.isFluid())
     {
-        fluidQuantities(0) = oper.fluid().area(outflowFlag);
+        fluidQuantities(0) = Oper.fluid().area(outflowFlag);
     }
 
     M_area0      = fluidQuantities(0);
     M_outRadius0 = std::sqrt(M_area0/pi);
     M_inRadius0 = M_outRadius0;
 
-    oper.displayer().leaderPrint( "  Outflow BC : area0     = ", M_area0 );
-    oper.displayer().leaderPrint( "  Outflow BC : radius    = ", M_outRadius0 );
+    Oper.displayer().leaderPrint( "  Outflow BC : area0     = ", M_area0 );
+    Oper.displayer().leaderPrint( "  Outflow BC : radius    = ", M_outRadius0 );
 
 
-    if (oper.isSolid())
+    if (Oper.isSolid())
     {
-        solidQuantities(0) =  ( ( oper.solid().thickness()*oper.solid().young()     ) /
-                                ( 1 - oper.solid().poisson()*oper.solid().poisson() )*
+        solidQuantities(0) =  ( ( Oper.solid().thickness()*Oper.solid().young()     ) /
+                                ( 1 - Oper.solid().poisson()*Oper.solid().poisson() )*
                                 pi/M_area0 );
 
-        solidQuantities(1) = oper.solid().rho();
+        solidQuantities(1) = Oper.solid().rho();
 
-        oper.displayer().leaderPrint( "  Outflow BC : thickness = " , oper.solid().thickness() );
-        oper.displayer().leaderPrint( "  Outflow BC : young     = " , oper.solid().young() );
-        oper.displayer().leaderPrint( "  Outflow BC : poisson   = " , oper.solid().poisson() );
+        Oper.displayer().leaderPrint( "  Outflow BC : thickness = " , Oper.solid().thickness() );
+        Oper.displayer().leaderPrint( "  Outflow BC : young     = " , Oper.solid().young() );
+        Oper.displayer().leaderPrint( "  Outflow BC : poisson   = " , Oper.solid().poisson() );
 
     }
 
-    //oper.worldComm().Broadcast( solidQuantities.Values(), solidQuantities.Length(),
-    //oper.getSolidLeaderId() );
+    //Oper.worldComm().Broadcast( solidQuantities.Values(), solidQuantities.Length(),
+    //Oper.getSolidLeaderId() );
 
 
     M_beta  = solidQuantities(0);
     M_rhos  = solidQuantities(1);
-    oper.displayer().leaderPrint( "  Outflow BC : beta      = " , M_beta );
-    oper.displayer().leaderPrint( "  Outflow BC : rho       = " , M_rhos );
+    Oper.displayer().leaderPrint( "  Outflow BC : beta      = " , M_beta );
+    Oper.displayer().leaderPrint( "  Outflow BC : rho       = " , M_rhos );
 
 
 }
@@ -111,16 +111,16 @@ void FlowConditions::renewParameters ( FSISolver&  oper_,
 
     Epetra_SerialDenseVector fluidQuantities(2); // Flux and Area
     //Epetra_SerialDenseVector solidQuantities(0); // M_beta and M_rhos
-    FSIOperator* oper(oper_.FSIOper().get());
+    FSIOperator* Oper(oper_.FSIOper().get());
 
-    if (oper->isFluid())
+    if (Oper->isFluid())
     {
-        fluidQuantities(0) = oper->fluid().flux(outflowFlag, oper_.displacement());
-        fluidQuantities(1) = oper->fluid().area(outflowFlag);
+        fluidQuantities(0) = Oper->fluid().flux(outflowFlag, oper_.displacement());
+        fluidQuantities(1) = Oper->fluid().area(outflowFlag);
     }
 
-    oper->worldComm()->Broadcast( fluidQuantities.Values(), fluidQuantities.Length(),
-                                  oper->getFluidLeaderId() );
+    Oper->worldComm()->Broadcast( fluidQuantities.Values(), fluidQuantities.Length(),
+                                  Oper->getFluidLeaderId() );
 
 
     Real qn;
@@ -137,8 +137,8 @@ void FlowConditions::renewParameters ( FSISolver&  oper_,
                   - M_beta*sqrt(M_area0);
         FlowConditions::outputVector[conditionNumber]=M_outP;
 
-        oper->displayer().leaderPrint( " Flow rate = " , qn );
-        oper->displayer().leaderPrint( " outflow pressure   = " , M_outP );
+        Oper->displayer().leaderPrint( " Flow rate = " , qn );
+        Oper->displayer().leaderPrint( " outflow pressure   = " , M_outP );
 
         M_outDeltaRadius = 0;
 
@@ -158,10 +158,10 @@ void FlowConditions::renewParameters ( FSISolver&  oper_,
 
         M_outDeltaRadius = std::sqrt( area / pi  ) - M_outRadius0;
 
-        oper->displayer().leaderPrint( " outflow A = " , area );
-        oper->displayer().leaderPrint( " outflow dr = " , M_outDeltaRadius );
-        oper->displayer().leaderPrint( " Flow rate = " , qn );
-        oper->displayer().leaderPrint( " outflow pressure   = " , M_outP );
+        Oper->displayer().leaderPrint( " outflow A = " , area );
+        Oper->displayer().leaderPrint( " outflow dr = " , M_outDeltaRadius );
+        Oper->displayer().leaderPrint( " Flow rate = " , qn );
+        Oper->displayer().leaderPrint( " outflow pressure   = " , M_outP );
 #endif
 
     }
@@ -180,37 +180,37 @@ Real FlowConditions::fZero(const Real& /*t*/, const Real& /*x*/, const Real& /*y
     return 0.0;
 }
 
-Real FlowConditions::outPressure0(const Real&/*t*/, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& i)
+Real FlowConditions::outPressure0(const Real&/*t*/, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& /*i*/)
 {
     return -FlowConditions::outputVector[0];
 }
 
-Real FlowConditions::outPressure1(const Real&/*t*/, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& i)
+Real FlowConditions::outPressure1(const Real&/*t*/, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& /*i*/)
 {
     return -FlowConditions::outputVector[1];
 }
 
-Real FlowConditions::outPressure2(const Real&/*t*/, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& i)
+Real FlowConditions::outPressure2(const Real&/*t*/, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& /*i*/)
 {
     return -FlowConditions::outputVector[2];
 }
-Real FlowConditions::outPressure3(const Real&/*t*/, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& i)
+Real FlowConditions::outPressure3(const Real&/*t*/, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& /*i*/)
 {
     return -FlowConditions::outputVector[4];
 }
 
-Real FlowConditions::outPressure5(const Real&/*t*/, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& i)
+Real FlowConditions::outPressure5(const Real&/*t*/, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& /*i*/)
 {
     return -FlowConditions::outputVector[5];
 }
 
-Real FlowConditions::outPressure6(const Real&/*t*/, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& i)
+Real FlowConditions::outPressure6(const Real&/*t*/, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& /*i*/)
 {
     return -FlowConditions::outputVector[6];
 }
 
 
-Real FlowConditions::inDeltaRadius (const Real& t, const Real& x, const Real& y, const Real& z, const ID& i)
+Real FlowConditions::inDeltaRadius (const Real& /*t*/, const Real& x, const Real& y, const Real& /*z*/, const ID& i)
 {
     if (i == 3) return 0;
 
@@ -228,7 +228,7 @@ Real FlowConditions::inDeltaRadius (const Real& t, const Real& x, const Real& y,
     return 0.;
 }
 
-Real FlowConditions::outDeltaRadius(const Real& t, const Real& x, const Real& y, const Real& z, const ID& i)
+Real FlowConditions::outDeltaRadius(const Real& /*t*/, const Real& x, const Real& y, const Real& /*z*/, const ID& i)
 {
     if (i == 3) return 0;
 

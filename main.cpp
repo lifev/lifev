@@ -199,12 +199,12 @@ public:
 #ifdef DEBUG
         Debug( 10000 ) << "Setting up the BC \n";
 #endif
-        M_fsi->setFluidBC( BCh_monolithicFlux( ) );
+        M_fsi->setFluidBC( BCh_monolithicFlux( false ) );
         M_fsi->setSolidBC( BCh_monolithicRobin( *M_fsi->FSIOper( ) ) );
 
         M_fsi->setup(/*data_file*/);
 
-        M_fsi->setFluidBC( BCh_monolithicFluid( *M_fsi->FSIOper( ) ) );
+        M_fsi->setFluidBC( BCh_monolithicFluid( *M_fsi->FSIOper( ), false ) );
         M_fsi->setHarmonicExtensionBC( BCh_harmonicExtension( *M_fsi->FSIOper( ) ) );
         M_fsi->setSolidBC( BCh_monolithicSolid( *M_fsi->FSIOper( ) ) );
 #ifdef DEBUG

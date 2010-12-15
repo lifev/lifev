@@ -102,7 +102,7 @@ FSIOperator::fluid_bchandler_type BCh_harmonicExtension(FSIOperator &_oper)
 }
 
 
-FSIOperator::fluid_bchandler_type BCh_monolithicFlux(bool isOpen=true)
+FSIOperator::fluid_bchandler_type BCh_monolithicFlux(const bool /*isOpen=true*/)
 {
     FSIOperator::fluid_bchandler_type BCh_fluid( new FSIOperator::fluid_bchandler_raw_type );
 
@@ -120,7 +120,7 @@ FSIOperator::fluid_bchandler_type BCh_monolithicFlux(bool isOpen=true)
     return BCh_fluid;
 }
 
-FSIOperator::fluid_bchandler_type BCh_monolithicFluid(FSIOperator &_oper, bool const & isOpen=true)
+FSIOperator::fluid_bchandler_type BCh_monolithicFluid(FSIOperator &_oper, const bool& /*isOpen=true*/)
 {
     // Boundary conditions for the fluid velocity
     Debug( 10000 ) << "Boundary condition for the fluid\n";
