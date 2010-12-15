@@ -64,33 +64,31 @@ namespace LifeV
 template <typename IdentifierType, class AbstractProduct>
 struct factoryDefaultError
 {
-    class Exception
-            :
+    class Exception :
             public std::exception
     {
     public:
 //!\todo uncomment this line
 //        Exception( const std::string& id )
-        Exception( IdentifierType id )
-                :
+        Exception( IdentifierType id ) :
                 std::exception(),
-                _M_ex()
+                M_exception()
         {
-            std::ostringstream __ex_str;
+            std::ostringstream ex_str;
             //!\todo uncomment this line
-            //__ex_str << "[factory] Unknown Type : " + id;
-            __ex_str << "[factory] Unknown Type : ";
-            _M_ex = __ex_str.str();
+            //ex_str << "[factory] Unknown Type : " + id;
+            ex_str << "[factory] Unknown Type : ";
+            M_exception = ex_str.str();
 
         }
         ~Exception() throw()
         {}
         const char* what() const throw ()
         {
-            return _M_ex.c_str();
+            return M_exception.c_str();
         }
     private:
-        std::string _M_ex;
+        std::string M_exception;
     };
 
     //!\todo uncomment this line
@@ -131,7 +129,7 @@ public:
     typedef ProductCreator creator_type;
     //!\todo uncomment this line
     //typedef factoryErrorPolicy<product_type> super;
-    typedef factoryErrorPolicy<identifier_type,product_type> super;
+    typedef factoryErrorPolicy<identifier_type, product_type> super;
     //@}
 
     //! @name  Methods
@@ -153,7 +151,7 @@ public:
     bool registerProduct( const identifier_type& id, creator_type creator )
     {
         LifeV::Debug( 2200 ) << "Registered type with id : " << id << "\n";
-        return _M_associations.insert( typename id_to_product_type::value_type( id, creator ) ).second;
+        return M_associations.insert( typename id_to_product_type::value_type( id, creator ) ).second;
     }
 
     /**
@@ -166,7 +164,7 @@ public:
     bool unregisterProduct( const identifier_type& id )
     {
         LifeV::Debug( 2200 ) << "Unregistered type with id : " << id << "\n";
-        return _M_associations.erase( id ) == 1;
+        return M_associations.erase( id ) == 1;
     }
 
     /**
@@ -179,8 +177,8 @@ public:
      */
     product_type* createObject( const identifier_type& id )
     {
-        typename id_to_product_type::const_iterator i = _M_associations.find( id );
-        if (i != _M_associations.end())
+        typename id_to_product_type::const_iterator i = M_associations.find( id );
+        if (i != M_associations.end())
         {
             LifeV::Debug ( 2200 ) << "Creating type with id : " << id << "\n";
             return (i->second)();
@@ -192,7 +190,7 @@ public:
 
 private:
     typedef std::map<identifier_type, creator_type> id_to_product_type;
-    id_to_product_type _M_associations;
+    id_to_product_type M_associations;
 };
 
 /*!
@@ -224,20 +222,20 @@ public:
     //@{
     bool registerProduct(const TypeInfo& id, ProductCreator creator)
     {
-        return _M_associations.insert( typename id_to_product_type::value_type( id, creator ) ).second;
+        return M_associations.insert( typename id_to_product_type::value_type( id, creator ) ).second;
     }
 
     bool unregisterProduct( const TypeInfo& id )
     {
-        return _M_associations.erase(id) == 1;
+        return M_associations.erase(id) == 1;
     }
 
     AbstractProduct* createObject( const AbstractProduct* model )
     {
         if ( model == 0 ) return 0;
 
-        typename id_to_product_type::const_iterator i = _M_associations.find( typeid(*model) );
-        if ( i != _M_associations.end() )
+        typename id_to_product_type::const_iterator i = M_associations.find( typeid(*model) );
+        if ( i != M_associations.end() )
         {
             return (i->second)(model);
         }
@@ -249,7 +247,7 @@ public:
 
 private:
     typedef std::map<TypeInfo, ProductCreator> id_to_product_type;
-    id_to_product_type _M_associations;
+    id_to_product_type M_associations;
 };
 
 }
