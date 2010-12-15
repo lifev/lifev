@@ -54,27 +54,27 @@ MultiscaleModel1D::MultiscaleModel1D() :
 #ifdef HAVE_HDF5
         M_exporter                     ( new IOFile_Type() ),
         M_importer                     ( new IOFile_Type() ),
-        M_exporterMesh                 ( new Mesh_Type() ),
+        M_exporterMesh                 ( new mesh_Type() ),
 #endif
 #ifdef JACOBIAN_WITH_FINITEDIFFERENCE
-        M_linearBC                     ( new BC_Type() ),
-        M_linearSolution               ( new Solution_Type() ),
+        M_linearBC                     ( new bc_Type() ),
+        M_linearSolution               ( new solution_Type() ),
         M_bcPreviousTimeSteps          (),
         M_bcBaseDelta                  (),
         M_bcDelta                      (),
         M_bcDeltaType                  (),
         M_bcDeltaSide                  (),
 #endif
-        M_data                         ( new Data_Type() ),
-        M_bc                           ( new BCInterface_Type() ),
+        M_data                         ( new data_Type() ),
+        M_bc                           ( new bcInterface_Type() ),
         M_physics                      (),
         M_flux                         (),
         M_source                       (),
-        M_solver                       ( new Solver_Type() ),
+        M_solver                       ( new solver_Type() ),
         M_linearSolver                 (),
         M_FESpace                      (),
-        M_solution_tn                  ( new Solution_Type() ),
-        M_solution                     ( new Solution_Type() )
+        M_solution_tn                  ( new solution_Type() ),
+        M_solution                     ( new solution_Type() )
 {
 
 #ifdef HAVE_LIFEV_DEBUG
@@ -84,7 +84,7 @@ MultiscaleModel1D::MultiscaleModel1D() :
     M_type = OneDimensional;
 
     //Define the maps of the OneDimensionalModel objects
-    OneDimensionalModel_MapsDefinition();
+    oneDimensionalMapsDefinition();
 
     //Register the objects
 //!\todo pass a std::string to the factories
@@ -137,24 +137,24 @@ MultiscaleModel1D::setupData( const std::string& fileName )
 
     //1D Model Physics
     //!\todo pass a std::string to the factories
-    //M_physics = Physics_PtrType( factoryOneDimensionalPhysics_Type::instance().createObject( "M_data->physicsType()" ) );
-    M_physics = Physics_PtrType( factoryOneDimensionalPhysics_Type::instance().createObject( M_data->physicsType() ) );
+    //M_physics = physicsPtr_Type( factoryOneDimensionalPhysics_Type::instance().createObject( "M_data->physicsType()" ) );
+    M_physics = physicsPtr_Type( factoryOneDimensionalPhysics_Type::instance().createObject( M_data->physicsType() ) );
     M_physics->setData( M_data );
 
     //1D Model Flux
     //!\todo pass a std::string to the factories
-    //M_flux = Flux_PtrType( factoryOneDimensionalFlux_Type::instance().createObject( "M_data->fluxType()" ) );
-    M_flux = Flux_PtrType( factoryOneDimensionalFlux_Type::instance().createObject( M_data->fluxType() ) );
+    //M_flux = fluxPtr_Type( factoryOneDimensionalFlux_Type::instance().createObject( "M_data->fluxType()" ) );
+    M_flux = fluxPtr_Type( factoryOneDimensionalFlux_Type::instance().createObject( M_data->fluxType() ) );
     M_flux->setPhysics( M_physics );
 
     //1D Model Source
     //!\todo pass a std::string to the factories
-    //M_source = Source_PtrType( factoryOneDimensionalSource_Type::instance().createObject( "M_data->sourceType()" ) );
-    M_source = Source_PtrType( factoryOneDimensionalSource_Type::instance().createObject( M_data->sourceType() ) );
+    //M_source = sourcePtr_Type( factoryOneDimensionalSource_Type::instance().createObject( "M_data->sourceType()" ) );
+    M_source = sourcePtr_Type( factoryOneDimensionalSource_Type::instance().createObject( M_data->sourceType() ) );
     M_source->setPhysics( M_physics );
 
     //Linear Solver
-    M_linearSolver.reset( new LinearSolver_Type( M_comm ) );
+    M_linearSolver.reset( new linearSolver_Type( M_comm ) );
     M_linearSolver->setUpPrec        ( dataFile, "1D_Model/prec" );
     M_linearSolver->setDataFromGetPot( dataFile, "1D_Model/solver" );
     M_linearSolver->setParameters();
@@ -344,18 +344,18 @@ MultiscaleModel1D::setupLinearModel()
     Debug( 8130 ) << "MultiscaleModel1D::SetupLinearModel( ) \n";
 #endif
 
-    // Define BCFunction for linear problem
+    // Define bcFunction for linear problem
     M_bcBaseDelta.setFunction( boost::bind( &MultiscaleModel1D::bcFunctionDelta, this, _1 ) );
 
     // The linear BCHandler is a copy of the original BCHandler with the LinearSolution instead of the true solution
     //M_LinearBC.reset( new bc_Type( *M_bc->handler() ) ); // COPY CONSTRUCTOR NOT WORKING
 
     //Set left and right BC + default BC
-    M_linearBC->setBC( OneD_left, OneD_first, M_bc->handler()->BC( OneD_left )->type( OneD_first ),
-                       M_bc->handler()->BC( OneD_left )->BCFunction( OneD_first ) );
+    M_linearBC->setBC( OneD_left, OneD_first, M_bc->handler()->bc( OneD_left )->type( OneD_first ),
+                       M_bc->handler()->bc( OneD_left )->bcFunction( OneD_first ) );
 
-    M_linearBC->setBC( OneD_right, OneD_first, M_bc->handler()->BC( OneD_right )->type( OneD_first ),
-                       M_bc->handler()->BC( OneD_right )->BCFunction( OneD_first ) );
+    M_linearBC->setBC( OneD_right, OneD_first, M_bc->handler()->bc( OneD_right )->type( OneD_first ),
+                       M_bc->handler()->bc( OneD_right )->bcFunction( OneD_first ) );
 
     M_linearBC->setDefaultBC();
 
@@ -440,7 +440,7 @@ MultiscaleModel1D::boundaryStress( const BCFlag& flag, const stress_Type& stress
 Real
 MultiscaleModel1D::boundaryDeltaFlowRate( const BCFlag& flag, bool& solveLinearSystem )
 {
-    OneD_BCSide bcSide = flagConverter( flag );
+    bcSide_Type bcSide = flagConverter( flag );
 
     solveLinearModel( solveLinearSystem );
 
@@ -477,7 +477,7 @@ MultiscaleModel1D::boundaryDeltaFlowRate( const BCFlag& flag, bool& solveLinearS
 Real
 MultiscaleModel1D::boundaryDeltaPressure( const BCFlag& flag, bool& solveLinearSystem )
 {
-    OneD_BCSide bcSide = flagConverter( flag );
+    bcSide_Type bcSide = flagConverter( flag );
 
     solveLinearModel( solveLinearSystem );
 
@@ -639,7 +639,7 @@ MultiscaleModel1D::setupFESpace()
 //    const QuadRule* qR    = &quadRuleSeg3pt;
 //    const QuadRule* bdQr  = &quadRuleSeg1pt;
 
-    M_FESpace.reset( new FESpace_Type( M_data->mesh(), *refFE, *qR, *bdQr, 1, M_comm ) );
+    M_FESpace.reset( new feSpace_Type( M_data->mesh(), *refFE, *qR, *bdQr, 1, M_comm ) );
     M_solver->setFESpace( M_FESpace );
 }
 
@@ -676,7 +676,7 @@ MultiscaleModel1D::initializeSolution()
 }
 
 void
-MultiscaleModel1D::updateSolution( const Solution_Type& solution1, Solution_Type& solution2 )
+MultiscaleModel1D::updateSolution( const solution_Type& solution1, solution_Type& solution2 )
 {
 
 #ifdef HAVE_LIFEV_DEBUG
@@ -684,12 +684,12 @@ MultiscaleModel1D::updateSolution( const Solution_Type& solution1, Solution_Type
 #endif
 
     // Here we make a true copy (not a copy of the shared_ptr, but a copy of its content)
-    for ( Solution_ConstIterator i = solution1.begin() ; i != solution1.end() ; ++i )
+    for ( solutionConstIterator_Type i = solution1.begin() ; i != solution1.end() ; ++i )
         *solution2[i->first] = *i->second;
 }
 
 void
-MultiscaleModel1D::solve( BC_Type& bc, Solution_Type& solution, const std::string& solverType )
+MultiscaleModel1D::solve( bc_Type& bc, solution_Type& solution, const std::string& solverType )
 {
 
 #ifdef HAVE_LIFEV_DEBUG
@@ -736,17 +736,17 @@ MultiscaleModel1D::createLinearBC()
     M_bcPreviousTimeSteps.reserve( std::max( M_couplings[0]->timeInterpolationOrder(), M_couplings[1]->timeInterpolationOrder() ) );
 
     // Create bcSide map
-    std::map< OneD_BCSide, std::map< OneD_BC, Real > > bcSideMap;
+    std::map< bcSide_Type, std::map< bcType_Type, Real > > bcSideMap;
     M_bcPreviousTimeSteps.push_back( bcSideMap );
 
     // Create bcType map
-    std::map< OneD_BC, Real > bcTypeMap;
+    std::map< bcType_Type, Real > bcTypeMap;
     M_bcPreviousTimeSteps[0][OneD_left]  = bcTypeMap;
     M_bcPreviousTimeSteps[0][OneD_right] = bcTypeMap;
 }
 
 void
-MultiscaleModel1D::updateLinearBC( const Solution_Type& solution )
+MultiscaleModel1D::updateLinearBC( const solution_Type& solution )
 {
     M_bcPreviousTimeSteps[0][OneD_left][OneD_A]  = M_solver->boundaryValue( solution, OneD_A, OneD_left );
     M_bcPreviousTimeSteps[0][OneD_left][OneD_P]  = M_solver->boundaryValue( solution, OneD_P, OneD_left );
@@ -769,16 +769,16 @@ MultiscaleModel1D::imposePerturbation()
         {
             // Find the side to perturb and apply the perturbation
             M_bcDeltaSide = flagConverter( ( *i )->flag( ( *i )->modelGlobalToLocalID( M_ID ) ) );
-            M_linearBC->BC( M_bcDeltaSide )->setBCFunction( OneD_first, M_bcBaseDelta );
+            M_linearBC->bc( M_bcDeltaSide )->setBCFunction( OneD_first, M_bcBaseDelta );
 
             // Compute the range
-            M_bcDeltaType = M_linearBC->BC( M_bcDeltaSide )->type( OneD_first );
+            M_bcDeltaType = M_linearBC->bc( M_bcDeltaSide )->type( OneD_first );
 
 #ifdef JACOBIAN_WITH_FINITEDIFFERENCE_AREA
             // We replace pressure BC with area BC for the perturbed problem
             if ( M_bcDeltaType == OneD_P )
             {
-                M_linearBC->BC( M_bcDeltaSide )->setType( OneD_first, OneD_A );
+                M_linearBC->bc( M_bcDeltaSide )->setType( OneD_first, OneD_A );
                 M_bcDeltaType = OneD_A;
             }
 #endif
@@ -827,12 +827,12 @@ MultiscaleModel1D::resetPerturbation()
     Debug( 8130 ) << "MultiscaleModel1D::ResetPerturbation() \n";
 #endif
 
-    M_linearBC->BC( M_bcDeltaSide )->setBCFunction( OneD_first, M_bc->handler()->BC( M_bcDeltaSide )->BCFunction( OneD_first ) );
+    M_linearBC->bc( M_bcDeltaSide )->setBCFunction( OneD_first, M_bc->handler()->bc( M_bcDeltaSide )->bcFunction( OneD_first ) );
 
 #ifdef JACOBIAN_WITH_FINITEDIFFERENCE_AREA
     // Restoring the original BC
     if ( M_bcDeltaType == OneD_A )
-        M_linearBC->BC( M_bcDeltaSide )->setType( OneD_first, OneD_P );
+        M_linearBC->bc( M_bcDeltaSide )->setType( OneD_first, OneD_P );
 #endif
 
 }
@@ -868,7 +868,7 @@ MultiscaleModel1D::bcFunctionDelta( const Real& t )
 #else
 
 Real
-MultiscaleModel1D::tangentProblem( const OneD_BCSide& bcOutputSide, const OneD_BC& bcOutputType )
+MultiscaleModel1D::tangentProblem( const bcSide_Type& bcOutputSide, const bcType_Type& bcOutputType )
 {
 
 #ifdef HAVE_LIFEV_DEBUG
@@ -881,7 +881,7 @@ MultiscaleModel1D::tangentProblem( const OneD_BCSide& bcOutputSide, const OneD_B
         if ( ( *i )->isPerturbed() )
         {
             // Find the perturbed side
-            OneD_BCSide bcSide = flagConverter( ( *i )->flag( ( *i )->modelGlobalToLocalID( M_ID ) ) );
+            bcSide_Type bcSide = flagConverter( ( *i )->flag( ( *i )->modelGlobalToLocalID( M_ID ) ) );
 
             // Perturbation has no effect on the other sides (which also means that dQ/dQ and dP/dP are always zero)
             if ( bcSide != bcOutputSide )

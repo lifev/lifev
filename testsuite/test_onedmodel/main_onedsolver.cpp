@@ -103,12 +103,12 @@ int main(int argc, char** argv)
     // *********************************
     // Useful typedefs
     // *********************************
-    typedef MultiscaleModel1D::Physics_Type          physics_Type;
-    typedef MultiscaleModel1D::Flux_Type             flux_Type;
-    typedef MultiscaleModel1D::Source_Type           source_Type;
+    typedef MultiscaleModel1D::physics_Type          physics_Type;
+    typedef MultiscaleModel1D::flux_Type             flux_Type;
+    typedef MultiscaleModel1D::source_Type           source_Type;
 
-    typedef MultiscaleModel1D::BC_Type               bc_Type;
-    typedef bc_Type::BCFunction_Type                 bcFunction_Type;
+    typedef MultiscaleModel1D::bc_Type               bc_Type;
+    typedef bc_Type::bcFunction_Type                 bcFunction_Type;
 
     // *********************************
     // Reading from data file
@@ -160,7 +160,7 @@ int main(int argc, char** argv)
     bcFunction_Type sinusoidalFunction( boost::bind( &Sin::operator(), &sinus, _1 ) );
 
     // Absorbing
-    bc_Type::BCFunction_Default_PtrType absorbing ( new OneDimensionalModel_BCFunction_Absorbing( OneD_right, OneD_W2 ) );
+    bc_Type::bcFunctionDefaultPtr_Type absorbing ( new OneDimensionalModel_BCFunction_Absorbing( OneD_right, OneD_W2 ) );
     absorbing->setSolution( oneDModel.solution() );
     absorbing->setFluxSource( oneDModel.flux(), oneDModel.source() );
 

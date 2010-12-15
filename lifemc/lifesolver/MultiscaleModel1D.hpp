@@ -86,37 +86,37 @@ class MultiscaleModel1D: public virtual multiscaleModel_Type
 {
 public:
 
-    typedef OneDimensionalModel_Physics                            Physics_Type;
-    typedef boost::shared_ptr< Physics_Type >                      Physics_PtrType;
+    typedef OneDimensionalModel_Physics                            physics_Type;
+    typedef boost::shared_ptr< physics_Type >                      physicsPtr_Type;
 
-    typedef OneDimensionalModel_Flux                               Flux_Type;
-    typedef boost::shared_ptr< Flux_Type >                         Flux_PtrType;
+    typedef OneDimensionalModel_Flux                               flux_Type;
+    typedef boost::shared_ptr< flux_Type >                         fluxPtr_Type;
 
-    typedef OneDimensionalModel_Source                             Source_Type;
-    typedef boost::shared_ptr< Source_Type >                       Source_PtrType;
+    typedef OneDimensionalModel_Source                             source_Type;
+    typedef boost::shared_ptr< source_Type >                       sourcePtr_Type;
 
-    typedef OneDimensionalModel_Solver                             Solver_Type;
-    typedef boost::shared_ptr< Solver_Type >                       Solver_PtrType;
+    typedef OneDimensionalModel_Solver                             solver_Type;
+    typedef boost::shared_ptr< solver_Type >                       solverPtr_Type;
 
-    typedef Solver_Type::data_Type                                 Data_Type;
-    typedef Solver_Type::mesh_Type                                 Mesh_Type;
-    typedef Solver_Type::vector_Type                               Vector_Type;
-    typedef Solver_Type::vectorPtr_Type                            Vector_PtrType;
-    typedef Solver_Type::solution_Type                             Solution_Type;
-    typedef Solver_Type::solutionPtr_Type                          Solution_PtrType;
-    typedef Solver_Type::solutionConstIterator_Type                Solution_ConstIterator;
-    typedef Solver_Type::linearSolver_Type                         LinearSolver_Type;
+    typedef solver_Type::data_Type                                 data_Type;
+    typedef solver_Type::mesh_Type                                 mesh_Type;
+    typedef solver_Type::vector_Type                               vector_Type;
+    typedef solver_Type::vectorPtr_Type                            vectorPtr_Type;
+    typedef solver_Type::solution_Type                             solution_Type;
+    typedef solver_Type::solutionPtr_Type                          solutionPtr_Type;
+    typedef solver_Type::solutionConstIterator_Type                solutionConstIterator_Type;
+    typedef solver_Type::linearSolver_Type                         linearSolver_Type;
 
-    typedef Solver_Type::FESpace_Type                              FESpace_Type;
-    typedef Solver_Type::FESpacePtr_Type                           FESpace_PtrType;
+    typedef solver_Type::feSpace_Type                              feSpace_Type;
+    typedef solver_Type::feSpacePtr_Type                           feSpacePtr_Type;
 
-    typedef BCInterface1D< Solver_Type >                           BCInterface_Type;
-    typedef boost::shared_ptr< BCInterface_Type >                  BCInterface_PtrType;
-    typedef OneDimensionalModel_BCHandler                          BC_Type;
-    typedef boost::shared_ptr< BC_Type >                           BC_PtrType;
+    typedef BCInterface1D< solver_Type >                           bcInterface_Type;
+    typedef boost::shared_ptr< bcInterface_Type >                  bcInterfacePtr_Type;
+    typedef OneDimensionalModel_BCHandler                          bc_Type;
+    typedef boost::shared_ptr< bc_Type >                           bcPtr_Type;
 
 #ifdef HAVE_HDF5
-    typedef Hdf5exporter< Mesh_Type >                              IOFile_Type;
+    typedef Hdf5exporter< mesh_Type >                              IOFile_Type;
 #endif
 
     //! @name Constructors & Destructor
@@ -187,7 +187,7 @@ public:
     /*!
      * @return BCInterface container
      */
-    BCInterface_Type& bcInterface() const { return *M_bc; }
+    bcInterface_Type& bcInterface() const { return *M_bc; }
 
     //! Get the density on a specific boundary face of the model
     /*!
@@ -282,56 +282,56 @@ public:
     /*!
      * @return BC handler
      */
-    BC_Type& bc() const { return *(M_bc->handler()); }
+    bc_Type& bc() const { return *(M_bc->handler()); }
 
     //! Get the data container of the 1D model.
     /*!
      * @return 1D Model data container.
      */
-    Data_Type& data() const { return *M_data; }
+    data_Type& data() const { return *M_data; }
 
     //! Get the Physics of the 1D model.
     /*!
      * @return 1D Model physics.
      */
-    Physics_PtrType physics() const { return M_physics; }
+    physicsPtr_Type physics() const { return M_physics; }
 
     //! Get the Flux of the 1D model.
     /*!
      * @return 1D Model Flux.
      */
-    Flux_PtrType flux() const { return M_flux; }
+    fluxPtr_Type flux() const { return M_flux; }
 
     //! Get the Source of the 1D model.
     /*!
      * @return 1D Model Source.
      */
-    Source_PtrType source() const { return M_source; }
+    sourcePtr_Type source() const { return M_source; }
 
     //! Get the FESpace of the 1D model.
     /*!
      * @return 1D model FESpace
      */
-    FESpace_PtrType FESpace() const { return M_FESpace; }
+    feSpacePtr_Type FESpace() const { return M_FESpace; }
 
     //! Get the Solver of the 1D model.
     /*!
      * @return 1D model solver.
      */
-    Solver_PtrType solver() const { return M_solver; }
+    solverPtr_Type solver() const { return M_solver; }
 
     //! Get the solution container of the 1D model.
     /*!
      * @return 1D model solution.
      */
-    const Solution_PtrType& solution() const { return M_solution; }
+    const solutionPtr_Type& solution() const { return M_solution; }
 
     //! Get a specific quantity of the solution container of the 1D model.
     /*!
      * @param quantity solution quantity.
      * @return 1D model solution.
      */
-    const Vector_PtrType& solution( const std::string& quantity) const { return (*M_solution)[quantity]; }
+    const vectorPtr_Type& solution( const std::string& quantity) const { return (*M_solution)[quantity]; }
 
     //@}
 
@@ -370,7 +370,7 @@ private:
      * @param solution1 solution to be copied.
      * @param solution2 copy of solution1.
      */
-    void updateSolution( const Solution_Type& solution1, Solution_Type& solution2 );
+    void updateSolution( const solution_Type& solution1, solution_Type& solution2 );
 
     //! Solve the 1D hyperbolic problem
     /*!
@@ -378,9 +378,9 @@ private:
      * @param solution solution container.
      * @param solverType string containing the prefix ID to display when solving the system.
      */
-    void solve( BC_Type& bc, Solution_Type& solution, const std::string& solverType = " 1D-" );
+    void solve( bc_Type& bc, solution_Type& solution, const std::string& solverType = " 1D-" );
 
-    OneD_BCSide flagConverter( const BCFlag& flag ) const { return (flag == 0) ? OneD_left : OneD_right; }
+    bcSide_Type flagConverter( const BCFlag& flag ) const { return (flag == 0) ? OneD_left : OneD_right; }
 
 #ifdef JACOBIAN_WITH_FINITEDIFFERENCE
 
@@ -389,7 +389,7 @@ private:
     void createLinearBC();
 
     //! Update linear BC
-    void updateLinearBC( const Solution_Type& solution );
+    void updateLinearBC( const solution_Type& solution );
 
     //! Impose the coupling perturbation on the correct BC inside the BCHandler
     void imposePerturbation();
@@ -407,7 +407,7 @@ private:
      * @param bcOutputType type of the quantity to be computed.
      * @return Jacobian coefficient.
      */
-    Real tangentProblem( const OneD_BCSide& bcOutputSide, const OneD_BC& bcOutputType );
+    Real tangentProblem( const bcSide_Type& bcOutputSide, const bcType_Type& bcOutputType );
 
 #endif
     //@}
@@ -416,42 +416,42 @@ private:
     boost::shared_ptr< IOFile_Type >       M_exporter;
     boost::shared_ptr< IOFile_Type >       M_importer;
 
-    boost::shared_ptr< Mesh_Type >         M_exporterMesh;
+    boost::shared_ptr< mesh_Type >         M_exporterMesh;
 #endif
 
 #ifdef JACOBIAN_WITH_FINITEDIFFERENCE
     // Linear BC
-    BC_PtrType                             M_linearBC;
+    bcPtr_Type                             M_linearBC;
 
-    Solution_PtrType                       M_linearSolution; // Solution of the perturbed problem
+    solutionPtr_Type                       M_linearSolution; // Solution of the perturbed problem
 
     // BC perturbation
-    std::vector< std::map< OneD_BCSide, std::map< OneD_BC, Real > > > M_bcPreviousTimeSteps;
+    std::vector< std::map< bcSide_Type, std::map< bcType_Type, Real > > > M_bcPreviousTimeSteps;
 
     // BC Functions for tangent problem
     OneDimensionalModel_BCFunction         M_bcBaseDelta;
 
     Real                                   M_bcDelta;
-    OneD_BC                                M_bcDeltaType;
-    OneD_BCSide                            M_bcDeltaSide;
+    bcType_Type                                M_bcDeltaType;
+    bcSide_Type                            M_bcDeltaSide;
 #endif
 
     // 1D problem
-    boost::shared_ptr< Data_Type >         M_data;
-    BCInterface_PtrType                    M_bc;
-    Physics_PtrType                        M_physics;
-    Flux_PtrType                           M_flux;
-    Source_PtrType                         M_source;
-    Solver_PtrType                         M_solver;
+    boost::shared_ptr< data_Type >         M_data;
+    bcInterfacePtr_Type                    M_bc;
+    physicsPtr_Type                        M_physics;
+    fluxPtr_Type                           M_flux;
+    sourcePtr_Type                         M_source;
+    solverPtr_Type                         M_solver;
 
     // Linear solver
-    boost::shared_ptr< LinearSolver_Type > M_linearSolver;
+    boost::shared_ptr< linearSolver_Type > M_linearSolver;
 
     // FE spaces
-    boost::shared_ptr< FESpace_Type >      M_FESpace;
+    boost::shared_ptr< feSpace_Type >      M_FESpace;
 
-    Solution_PtrType                       M_solution_tn;    // Solution at time t_n
-    Solution_PtrType                       M_solution;       // Solution at time t_n+1
+    solutionPtr_Type                       M_solution_tn;    // Solution at time t_n
+    solutionPtr_Type                       M_solution;       // Solution at time t_n+1
 
 };
 
