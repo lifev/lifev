@@ -25,22 +25,28 @@
 //@HEADER
 
 /*!
-    @file
-    @brief Containers Of Vectors
-
-    @date 29-09-2009
-    @author Cristiano Malossi <cristiano.malossi@epfl.ch>
-
-    @contributor Simone Rossi <simone.rossi@epfl.ch>
-
-    @mantainer  Cristiano Malossi <cristiano.malossi@epfl.ch>
+ *  @file
+ *  @brief Containers Of Vectors
+ *
+ *  @date 29-09-2009
+ *  @author Cristiano Malossi <cristiano.malossi@epfl.ch>
+ *
+ *  @contributor Simone Rossi <simone.rossi@epfl.ch>
+ *  @mantainer Cristiano Malossi <cristiano.malossi@epfl.ch>
  */
 
 
 #ifndef ContainerOfVectors_H
 #define ContainerOfVectors_H 1
 
+#pragma GCC diagnostic ignored "-Wunused-variable"
+#pragma GCC diagnostic ignored "-Wunused-parameter"
+
 #include <boost/shared_ptr.hpp>
+
+// Tell the compiler to restore the warning previously silented
+#pragma GCC diagnostic warning "-Wunused-variable"
+#pragma GCC diagnostic warning "-Wunused-parameter"
 
 namespace LifeV
 {
@@ -87,11 +93,17 @@ class ContainerOfVectors
 {
 public:
 
+    //! @name Constructors & Destructor
+    //@{
+
     typedef VectorType                               vector_Type;
     typedef boost::shared_ptr < vector_Type >        vectorPtr_Type;
     typedef ContainerType                            container_Type;
     typedef typename container_Type::iterator        iterator_Type;
     typedef typename container_Type::const_iterator  constIterator_Type;
+
+    //@}
+
 
     //! @name Constructors & Destructor
     //@{
@@ -335,7 +347,7 @@ public:
      * Scalar product of the vectors
      * @param containerOfVectors - ContainerOfVectors
      */
-    Real Dot( const ContainerOfVectors< vector_Type, container_Type >& containerOfVectors ) const;
+    Real dot( const ContainerOfVectors< vector_Type, container_Type >& containerOfVectors ) const;
 
     //! Dot - Scalar product
     /*!
@@ -343,25 +355,25 @@ public:
      * @param containerOfVectors - ContainerOfVectors
      * @param scalarProduct - result
      */
-    void Dot( const ContainerOfVectors< vector_Type, container_Type >& containerOfVectors, Real& scalarProduct );
+    void dot( const ContainerOfVectors< vector_Type, container_Type >& containerOfVectors, Real& scalarProduct );
 
     //! Abs
     /*!
      * Replace all the elements in the containerOfVectors with their abs.
      */
-    void Abs();
+    void abs();
 
     /*!
      * Compute the abs of the ContainerOfVectors and return it in a new container.
      * @param containerOfVectors - The output containerOfVectors containing the abs of the vector.
      */
-    void Abs( ContainerOfVectors< vector_Type, container_Type >& containerOfVectors );
+    void abs( ContainerOfVectors< vector_Type, container_Type >& containerOfVectors );
 
     //! Norm2
     /*!
      * Compute the weight Norm2 of the vector
      */
-    Real WeightNorm2();
+    Real weightNorm2();
 
     //! push_back
     /*!
@@ -396,19 +408,19 @@ public:
      * @param vector_ptr - Shared pointer to the new vector
      * @param ID - ID of the vector that has to be replaced
      */
-    void Replace( const vectorPtr_Type& vector_ptr, const UInt& ID );
+    void replace( const vectorPtr_Type& vector_ptr, const UInt& ID ) { M_container[ID] = vector_ptr; }
 
     //! resize
     /*!
      * @param size - New size of the container
      */
-    void resize( const UInt& size );
+    void resize( const UInt& size ) { M_container.resize( size ); }
 
     //! Clear
-    void clear();
+    void clear() { M_container.clear(); }
 
     //! ShowMe
-    void ShowMe( std::ostream& output = std::cout ) const;
+    void showMe( std::ostream& output = std::cout ) const;
 
     //@}
 
@@ -1010,7 +1022,7 @@ ContainerOfVectors< VectorType, ContainerType >::operator!()
 // ===================================================
 template< class VectorType, class ContainerType >
 Real
-ContainerOfVectors< VectorType, ContainerType >::Dot( const ContainerOfVectors< vector_Type, container_Type >& containerOfVectors ) const
+ContainerOfVectors< VectorType, ContainerType >::dot( const ContainerOfVectors< vector_Type, container_Type >& containerOfVectors ) const
 {
 
 #ifdef HAVE_LIFEV_DEBUG
@@ -1027,7 +1039,7 @@ ContainerOfVectors< VectorType, ContainerType >::Dot( const ContainerOfVectors< 
 
 template< class VectorType, class ContainerType >
 void
-ContainerOfVectors< VectorType, ContainerType >::Dot( const ContainerOfVectors< vector_Type, container_Type >& containerOfVectors,
+ContainerOfVectors< VectorType, ContainerType >::dot( const ContainerOfVectors< vector_Type, container_Type >& containerOfVectors,
                                                       Real& scalarProduct )
 {
 
@@ -1041,7 +1053,7 @@ ContainerOfVectors< VectorType, ContainerType >::Dot( const ContainerOfVectors< 
 
 template< class VectorType, class ContainerType >
 void
-ContainerOfVectors< VectorType, ContainerType >::Abs()
+ContainerOfVectors< VectorType, ContainerType >::abs()
 {
 
 #ifdef HAVE_LIFEV_DEBUG
@@ -1054,7 +1066,7 @@ ContainerOfVectors< VectorType, ContainerType >::Abs()
 
 template< class VectorType, class ContainerType >
 void
-ContainerOfVectors< VectorType, ContainerType >::Abs( ContainerOfVectors< vector_Type,
+ContainerOfVectors< VectorType, ContainerType >::abs( ContainerOfVectors< vector_Type,
                                                       container_Type >& containerOfVectors )
 {
 
@@ -1064,12 +1076,12 @@ ContainerOfVectors< VectorType, ContainerType >::Abs( ContainerOfVectors< vector
 
     containerOfVectors = *this;
 
-    containerOfVectors.Abs();
+    containerOfVectors.abs();
 }
 
 template< class VectorType, class ContainerType >
 Real
-ContainerOfVectors< VectorType, ContainerType >::WeightNorm2()
+ContainerOfVectors< VectorType, ContainerType >::weightNorm2()
 {
 
 #ifdef HAVE_LIFEV_DEBUG
@@ -1147,44 +1159,7 @@ ContainerOfVectors< VectorType, ContainerType >::push_front( const vectorPtr_Typ
 
 template< class VectorType, class ContainerType >
 void
-ContainerOfVectors< VectorType, ContainerType >::Replace( const vectorPtr_Type& vector_ptr,
-                                                          const UInt& ID )
-{
-
-#ifdef HAVE_LIFEV_DEBUG
-    Debug( 3100 ) << "ContainerOfVectors::Replace( vector_ptr, ID )" << "\n";
-#endif
-
-    M_container[ID] = vector_ptr;
-}
-
-template< class VectorType, class ContainerType >
-void
-ContainerOfVectors< VectorType, ContainerType >::resize( const UInt& size )
-{
-
-#ifdef HAVE_LIFEV_DEBUG
-    Debug( 3100 ) << "ContainerOfVectors::resize( size )" << "\n";
-#endif
-
-    M_container.resize( size );
-}
-
-template< class VectorType, class ContainerType >
-void
-ContainerOfVectors< VectorType, ContainerType >::clear()
-{
-
-#ifdef HAVE_LIFEV_DEBUG
-    Debug( 3100 ) << "ContainerOfVectors::clear()" << "\n";
-#endif
-
-    M_container.clear();
-}
-
-template< class VectorType, class ContainerType >
-void
-ContainerOfVectors< VectorType, ContainerType >::ShowMe( std::ostream& output ) const
+ContainerOfVectors< VectorType, ContainerType >::showMe( std::ostream& output ) const
 {
 
 #ifdef HAVE_LIFEV_DEBUG
