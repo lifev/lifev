@@ -1,26 +1,26 @@
 //@HEADER
 /*
-************************************************************************
+*******************************************************************************
 
- This file is part of the LifeV Applications.
- Copyright (C) 2001-2010 EPFL, Politecnico di Milano, INRIA
+    Copyright (C) 2004, 2005, 2007 EPFL, Politecnico di Milano, INRIA
+    Copyright (C) 2010 EPFL, Politecnico di Milano, Emory University
 
- This library is free software; you can redistribute it and/or modify
- it under the terms of the GNU Lesser General Public License as
- published by the Free Software Foundation; either version 2.1 of the
- License, or (at your option) any later version.
+    This file is part of LifeV.
 
- This library is distributed in the hope that it will be useful, but
- WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- Lesser General Public License for more details.
+    LifeV is free software; you can redistribute it and/or modify
+    it under the terms of the GNU Lesser General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
 
- You should have received a copy of the GNU Lesser General Public
- License along with this library; if not, write to the Free Software
- Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
- USA
+    LifeV is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+    Lesser General Public License for more details.
 
-************************************************************************
+    You should have received a copy of the GNU Lesser General Public License
+    along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
+
+*******************************************************************************
 */
 //@HEADER
 
@@ -36,6 +36,8 @@
  *  @version 2.0
  *  @author Cristiano Malossi <cristiano.malossi@epfl.ch>
  *  @date 20-04-2010
+ *
+ *  @maintainer Cristiano Malossi <cristiano.malossi@epfl.ch>
  */
 
 #ifndef ONED_FUNCTIONS_1D_H
@@ -54,16 +56,13 @@ class Constant
 {
 public:
 
-    Constant( const Real& value ) :
+    explicit Constant( const Real& value ) :
             M_value ( value )
     {}
 
-    ~Constant() {}
+    virtual ~Constant() {}
 
-    Real operator()( const Real& /*time*/ )
-    {
-        return M_value;
-    }
+    Real operator()( const Real& /*time*/ ) { return M_value; }
 
 private:
 
@@ -88,14 +87,14 @@ public:
       \param[in] period the sinus period \f$ T \f$
       \param[in] phase the sinus phase \f$ \phi \f$
     */
-    Sin( const Real mean   = 0, const Real scale  = 10, const Real period = .01, const Real phase  = 0. ) :
+    explicit Sin( const Real mean   = 0, const Real scale  = 10, const Real period = .01, const Real phase  = 0. ) :
             M_mean(mean),
             M_scale(scale),
             M_period(period),
             M_phase(phase)
     {}
 
-    ~Sin() {}
+    virtual ~Sin() {}
 
     /*!
       \brief Compute the sinus at the specified time
@@ -149,7 +148,7 @@ public:
       \param[in] frequency_sin the sinus period \f$ T_s \f$
       \param[in] phase_sin the sinus phase \f$ \phi_s \f$
     */
-    Cos_min_Sin(const Real coeff_exp_t_cos = 0, const Real mean_cos = 0,
+    explicit Cos_min_Sin(const Real coeff_exp_t_cos = 0, const Real mean_cos = 0,
                 const Real amplitude_cos = 10, const Real frequency_cos = 8.*atan(1.),
                 const Real phase_cos = 0.,
                 const Real coeff_exp_t_sin = 0, const Real mean_sin = 0,
@@ -167,7 +166,7 @@ public:
             M_phase_sin(phase_sin)
     {}
 
-    ~Cos_min_Sin() {}
+    virtual ~Cos_min_Sin() {}
 
     /*!
       \brief Compute the wave at the specified time
@@ -243,7 +242,7 @@ public:
       \param[in] kappa_Im the imaginary part of the wave number \f$ k \f$
       \param[in] omega the wave time frequency \f$ \omega \f$ (supposed to be real)
     */
-    Analytical_Solution( Real const& sol_amplitude_Re, Real const& sol_amplitude_Im,
+    explicit Analytical_Solution( Real const& sol_amplitude_Re, Real const& sol_amplitude_Im,
                          Real const& kappa_Re, Real const& kappa_Im,
                          Real const& omega ) :
             Cos_min_Sin(0., 0., sol_amplitude_Re, omega, 0.,
@@ -254,7 +253,7 @@ public:
             M_kappa_Im(kappa_Im)
     {}
 
-    ~Analytical_Solution() {}
+    virtual ~Analytical_Solution() {}
 
     /*!
       \brief Compute the wave at the specified time
@@ -300,13 +299,13 @@ class PhysiologicalFlux
 {
 public:
 
-    PhysiologicalFlux() :
+    explicit PhysiologicalFlux() :
             M_rampT(),
             M_time_step(),
             M_scale()
     {}
 
-    ~PhysiologicalFlux() {}
+    virtual ~PhysiologicalFlux() {}
 
     Real operator()( const Real& time );
 
@@ -451,11 +450,11 @@ PhysiologicalFlux::operator()( const Real& t )
 class PressureRamp
 {
 public:
-    PressureRamp( const Real& startT   = .001,
+    explicit PressureRamp( const Real& startT   = .001,
                   const Real& duration = 0.7,
                   const Real& endvalue = 106400 );
 
-    ~PressureRamp() {}
+    virtual ~PressureRamp() {}
 
     Real operator()( const Real& time );
 

@@ -1,46 +1,48 @@
 //@HEADER
 /*
-************************************************************************
+*******************************************************************************
 
- This file is part of the LifeV Applications.
- Copyright (C) 2001-2010 EPFL, Politecnico di Milano, INRIA
+    Copyright (C) 2004, 2005, 2007 EPFL, Politecnico di Milano, INRIA
+    Copyright (C) 2010 EPFL, Politecnico di Milano, Emory University
 
- This library is free software; you can redistribute it and/or modify
- it under the terms of the GNU Lesser General Public License as
- published by the Free Software Foundation; either version 2.1 of the
- License, or (at your option) any later version.
+    This file is part of LifeV.
 
- This library is distributed in the hope that it will be useful, but
- WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- Lesser General Public License for more details.
+    LifeV is free software; you can redistribute it and/or modify
+    it under the terms of the GNU Lesser General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
 
- You should have received a copy of the GNU Lesser General Public
- License along with this library; if not, write to the Free Software
- Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
- USA
+    LifeV is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+    Lesser General Public License for more details.
 
-************************************************************************
+    You should have received a copy of the GNU Lesser General Public License
+    along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
+
+*******************************************************************************
 */
 //@HEADER
 
 /*!
  *  @file
- *  @brief OneDimensionalModel Test
+ *  @brief File containing the One Dimensional Test
  *
- *  @version 1.0
- *  @author Vincent Martin
  *  @date 01-09-2004
+ *  @author Vincent Martin
  *
  *  @version 2.0
- *  @author Gilles Fourestey <gilles.fourestey@epfl.ch>
  *  @date 01-01-2010
+ *  @author Gilles Fourestey <gilles.fourestey@epfl.ch>
+ *
+ *  @maintainer Cristiano Malossi <cristiano.malossi@epfl.ch>
+ *
+ *  This is a test to verify that the One Dimensional Model works correctly.
  */
 
-#include <life/lifecore/life.hpp>
-#include <life/lifecore/chrono.hpp>
-#include <life/lifecore/GetPot.hpp>
-#include <life/lifealg/EpetraMap.hpp>
+// Tell the compiler to ignore specific kind of warnings:
+#pragma GCC diagnostic ignored "-Wunused-variable"
+#pragma GCC diagnostic ignored "-Wunused-parameter"
 
 #ifdef EPETRA_MPI
 #include "Epetra_MpiComm.h"
@@ -49,9 +51,19 @@
 #include "Epetra_SerialComm.h"
 #endif
 
+// Tell the compiler to restore the warning previously silented
+#pragma GCC diagnostic warning "-Wunused-variable"
+#pragma GCC diagnostic warning "-Wunused-parameter"
+
+// LifeV includes
+#include <life/lifecore/life.hpp>
+#include <life/lifecore/chrono.hpp>
+#include <life/lifecore/GetPot.hpp>
+#include <life/lifealg/EpetraMap.hpp>
+
+// Mathcard includes
 #include <lifemc/lifefem/OneDimensionalModel_BCHandler.hpp>
 #include <lifemc/lifesolver/OneDimensionalModel_Solver.hpp>
-
 #include <lifemc/lifesolver/MultiscaleModel1D.hpp>
 
 #include "ud_functions.hpp"
