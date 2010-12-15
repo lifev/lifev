@@ -33,7 +33,7 @@
 
 #include <life/lifecore/life.hpp>
 
-#include <lifemc/lifearray/ContainerOfVectors.hpp>
+#include <lifemc/lifearray/VectorContainer.hpp>
 
 #include <boost/shared_ptr.hpp>
 
