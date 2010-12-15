@@ -42,7 +42,7 @@ namespace LifeV
 {
 CurrentFE::CurrentFE( const RefFE& refFE, const GeoMap& geoMap, const QuadRule& qr )
         :
-        nbNode( refFE.nbDof() ),
+        M_nbNode( refFE.nbDof() ),
         M_nbCoor( refFE.nbCoor() ),
         M_nbDiag( refFE.nbDiag() ),
         M_nbUpper( refFE.nbUpper() ) ,
@@ -65,14 +65,14 @@ CurrentFE::CurrentFE( const RefFE& refFE, const GeoMap& geoMap, const QuadRule& 
         M_wDetJacobian(boost::extents[M_nbQuadPt]),
         M_tInverseJacobian(boost::extents[M_nbCoor][M_nbCoor][M_nbQuadPt]),
 
-        M_phi(boost::extents[nbNode][M_refFE->FEDim()][M_nbQuadPt]),
-        M_dphi(boost::extents[nbNode][M_nbCoor][M_nbQuadPt]),
-        M_d2phi(boost::extents[nbNode][M_nbCoor][M_nbCoor][M_nbQuadPt]),
-        M_phiVect(boost::extents[nbNode][M_refFE->FEDim()][M_nbQuadPt]),
+        M_phi(boost::extents[M_nbNode][M_refFE->FEDim()][M_nbQuadPt]),
+        M_dphi(boost::extents[M_nbNode][M_nbCoor][M_nbQuadPt]),
+        M_d2phi(boost::extents[M_nbNode][M_nbCoor][M_nbCoor][M_nbQuadPt]),
+        M_phiVect(boost::extents[M_nbNode][M_refFE->FEDim()][M_nbQuadPt]),
 
-        M_dphiRef(boost::extents[nbNode][M_nbCoor][M_nbQuadPt]),
-        M_d2phiRef(boost::extents[nbNode][M_nbCoor][M_nbCoor][M_nbQuadPt]),
-        M_divPhiRef(boost::extents[nbNode][M_nbQuadPt]),
+        M_dphiRef(boost::extents[M_nbNode][M_nbCoor][M_nbQuadPt]),
+        M_d2phiRef(boost::extents[M_nbNode][M_nbCoor][M_nbCoor][M_nbQuadPt]),
+        M_divPhiRef(boost::extents[M_nbNode][M_nbQuadPt]),
 
         M_cellNodesUpdated(false),
         M_quadNodesUpdated(false),
@@ -97,7 +97,7 @@ CurrentFE::CurrentFE( const RefFE& refFE, const GeoMap& geoMap, const QuadRule& 
 
     for ( UInt iterQuad(0); iterQuad < M_nbQuadPt; ++iterQuad )
     {
-        for ( UInt iterNode(0); iterNode < nbNode; ++iterNode )
+        for ( UInt iterNode(0); iterNode < M_nbNode; ++iterNode )
         {
             // --- PHI ---
             if (M_refFE->hasPhi())
@@ -161,7 +161,7 @@ CurrentFE::CurrentFE( const RefFE& refFE, const GeoMap& geoMap, const QuadRule& 
 
 CurrentFE::CurrentFE( const RefFE& refFE, const GeoMap& geoMap )
         :
-        nbNode( refFE.nbDof() ),
+        M_nbNode( refFE.nbDof() ),
         M_nbCoor( refFE.nbCoor() ),
         M_nbDiag( refFE.nbDiag() ),
         M_nbUpper( refFE.nbUpper() ) ,
@@ -739,14 +739,14 @@ void CurrentFE::setQuadRule(const QuadRule& newQuadRule)
     M_wDetJacobian.resize(boost::extents[M_nbQuadPt]);
     M_tInverseJacobian.resize(boost::extents[M_nbCoor][M_nbCoor][M_nbQuadPt]);
 
-    M_phi.resize(boost::extents[nbNode][M_refFE->FEDim()][M_nbQuadPt]);
-    M_dphi.resize(boost::extents[nbNode][M_nbCoor][M_nbQuadPt]);
-    M_d2phi.resize(boost::extents[nbNode][M_nbCoor][M_nbCoor][M_nbQuadPt]);
-    M_phiVect.resize(boost::extents[nbNode][M_refFE->FEDim()][M_nbQuadPt]);
+    M_phi.resize(boost::extents[M_nbNode][M_refFE->FEDim()][M_nbQuadPt]);
+    M_dphi.resize(boost::extents[M_nbNode][M_nbCoor][M_nbQuadPt]);
+    M_d2phi.resize(boost::extents[M_nbNode][M_nbCoor][M_nbCoor][M_nbQuadPt]);
+    M_phiVect.resize(boost::extents[M_nbNode][M_refFE->FEDim()][M_nbQuadPt]);
 
-    M_dphiRef.resize(boost::extents[nbNode][M_nbCoor][M_nbQuadPt]);
-    M_d2phiRef.resize(boost::extents[nbNode][M_nbCoor][M_nbCoor][M_nbQuadPt]);
-    M_divPhiRef.resize(boost::extents[nbNode][M_nbQuadPt]);
+    M_dphiRef.resize(boost::extents[M_nbNode][M_nbCoor][M_nbQuadPt]);
+    M_d2phiRef.resize(boost::extents[M_nbNode][M_nbCoor][M_nbCoor][M_nbQuadPt]);
+    M_divPhiRef.resize(boost::extents[M_nbNode][M_nbQuadPt]);
 
     // All the updates have to be done again
     M_cellNodesUpdated=false;
@@ -770,7 +770,7 @@ void CurrentFE::setQuadRule(const QuadRule& newQuadRule)
     // Update what can be updated
     for ( UInt iterQuad(0); iterQuad < M_nbQuadPt; ++iterQuad )
     {
-        for ( UInt iterNode(0); iterNode < nbNode; ++iterNode )
+        for ( UInt iterNode(0); iterNode < M_nbNode; ++iterNode )
         {
             // --- PHI ---
             if (M_refFE->hasPhi())
@@ -862,7 +862,7 @@ void CurrentFE::computePhi()
 {
     for (UInt iterQuad(0); iterQuad< M_nbQuadPt ; ++iterQuad)
     {
-        for (UInt iterNode(0); iterNode< nbNode; ++iterNode)
+        for (UInt iterNode(0); iterNode< M_nbNode; ++iterNode)
         {
             for (UInt iterFEDim(0); iterFEDim < M_refFE->FEDim(); ++iterFEDim)
             {
@@ -1063,7 +1063,7 @@ void CurrentFE::computeDphiRef()
 {
     for (UInt iterQuad(0); iterQuad< M_nbQuadPt ; ++iterQuad)
     {
-        for (UInt iterNode(0); iterNode< nbNode; ++iterNode)
+        for (UInt iterNode(0); iterNode< M_nbNode; ++iterNode)
         {
             for (UInt iterCoor(0); iterCoor < M_nbCoor; ++iterCoor)
             {
@@ -1084,7 +1084,7 @@ void CurrentFE::computeDphi()
 
     for (UInt iterQuad(0); iterQuad< M_nbQuadPt ; ++iterQuad)
     {
-        for (UInt iterNode(0); iterNode< nbNode; ++iterNode)
+        for (UInt iterNode(0); iterNode< M_nbNode; ++iterNode)
         {
             for (UInt iterCoor(0); iterCoor < M_nbCoor; ++iterCoor)
             {
@@ -1105,7 +1105,7 @@ void CurrentFE::computeD2phiRef()
 {
     for (UInt iterQuad(0); iterQuad< M_nbQuadPt ; ++iterQuad)
     {
-        for (UInt iterNode(0); iterNode< nbNode; ++iterNode)
+        for (UInt iterNode(0); iterNode< M_nbNode; ++iterNode)
         {
             for (UInt iterCoor(0); iterCoor < M_nbCoor; ++iterCoor)
             {
@@ -1129,7 +1129,7 @@ void CurrentFE::computeD2phi()
     Real partialSum(0);
     for ( UInt iterQuad (0); iterQuad < M_nbQuadPt ; ++iterQuad )
     {
-        for ( UInt iterNode(0); iterNode < nbNode; ++iterNode )
+        for ( UInt iterNode(0); iterNode < M_nbNode; ++iterNode )
         {
             for ( UInt icoor(0); icoor < M_nbCoor; ++icoor )
             {
@@ -1162,7 +1162,7 @@ void CurrentFE::computePhiVect()
     Real sum(0.);
     for ( UInt ig(0); ig < M_nbQuadPt; ++ig )
     {
-        for ( UInt idof(0); idof < nbNode; ++idof )
+        for ( UInt idof(0); idof < M_nbNode; ++idof )
         {
             for ( UInt icoor(0); icoor < M_nbCoor; ++icoor )
             {

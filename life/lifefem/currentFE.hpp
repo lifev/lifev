@@ -382,7 +382,7 @@ public:
     //! Getter for the number of nodes
     inline const UInt& nbFEDof() const
     {
-        return nbNode;
+        return M_nbNode;
     }
 
     //! Getter for the reference FE
@@ -612,9 +612,8 @@ private:
     void computePhiVect();
 
     // Constants
-public:
-    UInt nbNode;
 private:
+    const UInt M_nbNode;
     const UInt M_nbCoor;
     const UInt M_nbDiag;
     const UInt M_nbUpper;
