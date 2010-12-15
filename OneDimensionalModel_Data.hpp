@@ -25,18 +25,19 @@
 //@HEADER
 
 /*!
-    @file
-    @brief File containing a class for 1D model data handling.
-
-    @version 1.0
-    @author Vincent Martin
-    @date 01-07-2004
-
-    @version 2.0
-    @author Cristiano Malossi <cristiano.malossi@epfl.ch>
-    @date 12-04-2010
-    @contributors Ricardo Ruiz-Baier <ricardo.ruiz@epfl.ch>
-    @mantainer  Cristiano Malossi <cristiano.malossi@epfl.ch>
+ *  @file
+ *  @brief File containing a class for 1D model data handling.
+ *
+ *  @version 1.0
+ *  @date 01-07-2004
+ *  @author Vincent Martin
+ *
+ *  @version 2.0
+ *  @date 12-04-2010
+ *  @author Cristiano Malossi <cristiano.malossi@epfl.ch>
+ *
+ *  @contributors Ricardo Ruiz-Baier <ricardo.ruiz@epfl.ch>
+ *  @mantainer  Cristiano Malossi <cristiano.malossi@epfl.ch>
  */
 
 #ifndef ONEDIMENSIONALMODEL_DATA_H
@@ -52,14 +53,6 @@
 
 namespace LifeV
 {
-
-/*
-enum OneD_Initialize { OneD_InitializeArea,
-                       OneD_InitializeFlux,
-                       OneD_InitializeRiemann1,
-                       OneD_InitializeRiemann2,
-                       OneD_InitializePressure };
-*/
 
 //! OneDimensionalModel_Data - Class which read and holds all the data for the One Dimensional Model Solver.
 /*!
@@ -124,11 +117,11 @@ public:
     //! @name Type definitions
     //@{
 
-    typedef DataTime                                                  Time_Type;
-    typedef boost::shared_ptr< Time_Type >                            Time_PtrType;
+    typedef DataTime                                                  time_Type;
+    typedef boost::shared_ptr< time_Type >                            timePtr_Type;
 
-    typedef RegionMesh1D< LinearLine >                                Mesh_Type;
-    typedef boost::shared_ptr< Mesh_Type >                            Mesh_PtrType;
+    typedef RegionMesh1D< LinearLine >                                mesh_Type;
+    typedef boost::shared_ptr< mesh_Type >                            meshPtr_Type;
 
     enum OneD_distributionLaw
     {
@@ -192,7 +185,7 @@ public:
     /*!
      * @param DataTime shared_ptr to dataTime container
      */
-    void setDataTime( const Time_PtrType dataTime ) { M_time = dataTime; }
+    void setDataTime( const timePtr_Type dataTime ) { M_time = dataTime; }
 
     void setDensity( const Real& density ) { M_density = density; }
 
@@ -224,27 +217,27 @@ public:
     /*!
      * @return Physics Type
      */
-    const OneDimensionalModel_PhysicsTypes& physicsType() const { return M_physicsType; }
+    const oneDimensionalPhysics_Type& physicsType() const { return M_physicsType; }
 
     //! Get the flux type
     /*!
      * @return Flux Type
      */
-    const OneDimensionalModel_FluxTypes& fluxType() const { return M_fluxType; }
+    const oneDimensionalFlux_Type& fluxType() const { return M_fluxType; }
 
     //! Get the source type
     /*!
      * @return Source Type
      */
-    const OneDimensionalModel_SourceTypes& sourceType() const { return M_sourceType; }
+    const oneDimensionalSource_Type& sourceType() const { return M_sourceType; }
 
     //! Get data time container
     /*!
      * @return shared_ptr to dataTime container
      */
-    Time_PtrType dataTime() const { return M_time; }
+    timePtr_Type dataTime() const { return M_time; }
 
-    Mesh_PtrType mesh() const { return M_mesh; }
+    meshPtr_Type mesh() const { return M_mesh; }
     Real length() const { return M_mesh->pointList( M_mesh->numVertices() ).x() - M_mesh->pointList( 1 ).x(); }
     UInt numberOfElements() const { return M_mesh->numElements(); }
     UInt numberOfNodes() const { return M_mesh->numPoints(); }
@@ -254,7 +247,6 @@ public:
 
     const Int& verbose() const { return M_verbose; }
 
-    const bool& UW() const { return M_UW; }
     const bool& inertialWall() const { return M_inertialWall; }
     const bool& viscoelasticWall() const { return M_viscoelasticWall; }
     const bool& linearizeStringModel() const { return M_linearizeStringModel; }
@@ -263,7 +255,7 @@ public:
 
     const bool& fluxSecondDer() const { return M_fluxSecondDer; }
 
-    const Int& DPdtSteps() const { return M_dP_dt_steps; }
+    const Int& dPdtSteps() const { return M_dP_dt_steps; }
     const Real& CFLmax() const { return M_CFLmax; }
 
 //    const OneD_Initialize& initialVariable() const;
@@ -350,36 +342,29 @@ private:
     //@}
 
     //! Model
-    OneDimensionalModel_PhysicsTypes M_physicsType;
-    OneDimensionalModel_FluxTypes    M_fluxType;
-    OneDimensionalModel_SourceTypes  M_sourceType;
+    oneDimensionalPhysics_Type M_physicsType;
+    oneDimensionalFlux_Type    M_fluxType;
+    oneDimensionalSource_Type  M_sourceType;
 
     //! Data containers for time and mesh
-    Time_PtrType      M_time;
-    Mesh_PtrType      M_mesh;
+    timePtr_Type M_time;
+    meshPtr_Type M_mesh;
 
     //! Miscellaneous
-    std::string       M_postprocessingDirectory; //! full directory name (including path)
-    std::string       M_postprocessingFile;      //! output file name
-    Int               M_verbose;
-    bool              M_UW;
+    std::string M_postprocessingDirectory; //! full directory name (including path)
+    std::string M_postprocessingFile;      //! output file name
+    Int         M_verbose;
     //! boolean: activate inertial/ viscoelastic/ longitudinal term in pressure-area relationship?
-    bool              M_inertialWall;
-    bool              M_viscoelasticWall;
-    bool              M_linearizeStringModel;
-    bool              M_linearizeEquations;
-    bool              M_longitudinalWall;
+    bool        M_inertialWall;
+    bool        M_viscoelasticWall;
+    bool        M_linearizeStringModel;
+    bool        M_linearizeEquations;
+    bool        M_longitudinalWall;
     //! boolean: compute second spatial derivative of flux?
-    bool              M_fluxSecondDer;
+    bool        M_fluxSecondDer;
     //! approximation of pressure temporal derivative: how many time steps?
-    Int               M_dP_dt_steps;
-    Real              M_CFLmax;
-
-    //! initialize
-//    OneD_Initialize   M_initialVariable;
-//    Real              M_initialValue;
-//    Real              M_restValue;
-//    Real              M_multiplier;
+    Int         M_dP_dt_steps;
+    Real        M_CFLmax;
 
     //! Jacobian perturbation
     Real M_jacobianPerturbationArea;

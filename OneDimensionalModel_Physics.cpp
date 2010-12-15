@@ -25,20 +25,19 @@
 //@HEADER
 
 /*!
-    @file
-    @brief File containing a base class providing physical operations for the 1D model data.
-
-    @version 1.0
-    @date 01-07-2004
-    @author Vincent Martin
-
-    @version 2.0
-    @date 13-04-2010
-    @author Cristiano Malossi <cristiano.malossi@epfl.ch>
-
-    @contributor Simone Rossi <simone.rossi@epfl.ch>
-
-    @mantainer  Cristiano Malossi <cristiano.malossi@epfl.ch>
+ *  @file
+ *  @brief File containing a base class providing physical operations for the 1D model data.
+ *
+ *  @version 1.0
+ *  @date 01-07-2004
+ *  @author Vincent Martin
+ *
+ *  @version 2.0
+ *  @date 13-04-2010
+ *  @author Cristiano Malossi <cristiano.malossi@epfl.ch>
+ *
+ *  @contributor Simone Rossi <simone.rossi@epfl.ch>
+ *  @mantainer  Cristiano Malossi <cristiano.malossi@epfl.ch>
  */
 
 #include <lifemc/lifesolver/OneDimensionalModel_Physics.hpp>
@@ -46,86 +45,9 @@
 namespace LifeV
 {
 
-std::map< std::string, OneDimensionalModel_PhysicsTypes > OneDimensionalModel_PhysicsMap;
-
-
 // ===================================================
 // Methods
 // ===================================================
-Real
-OneDimensionalModel_Physics::celerity0( const UInt& i ) const
-{
-    return std::sqrt( M_data -> beta0(i) * M_data ->
-                                beta1(i) / M_data -> densityRho() );
-}
-
-Real
-OneDimensionalModel_Physics::elasticPressure( const Real& A, const UInt& i ) const
-{
-    return ( M_data -> beta0(i) * ( std::pow( A/M_data -> area0(i), M_data ->
-                       beta1(i) ) - 1 ) ) + M_data -> externalPressure();
-}
-
-Real
-OneDimensionalModel_Physics::viscoelasticPressure( const Real& Anp1, const Real& An, const Real& Anm1, const Real& timeStep, const UInt& i ) const
-{
-    Real area(Anp1);
-    if ( M_data -> linearizeStringModel() )
-        area = M_data -> area0(i);
-
-    return M_data -> viscoelasticModulus() / ( 2*sqrt( Pi*area ) ) * dAdt(Anp1, An, Anm1, timeStep);
-}
-
-Real
-OneDimensionalModel_Physics::dAdt( const Real& Anp1, const Real& An, const Real& Anm1, const Real& timeStep ) const
-{
-    if ( M_data -> DPdtSteps() == 0 )
-        return ( Anp1 - An ) / timeStep;
-    else
-        return ( 3 / 2 * Anp1 - 2 * An + 1 / 2 * Anm1 ) / timeStep;
-}
-
-Real
-OneDimensionalModel_Physics::dPdA( const Real& A, const UInt& i ) const
-{
-    return M_data -> beta0(i) * M_data -> beta1(i)
-                              * std::pow( A / M_data -> area0(i), M_data -> beta1(i) ) / A;
-}
-
-Real
-OneDimensionalModel_Physics::dAdP( const Real& P, const UInt& i ) const
-{
-    return M_data -> area0(i) / ( M_data -> beta0(i) * M_data -> beta1(i) )
-                              * std::pow( 1 + ( P - M_data -> externalPressure() )
-                              / M_data -> beta0(i), 1 / M_data -> beta1(i) - 1 );
-}
-
-Real
-OneDimensionalModel_Physics::fromPToA( const Real& P, const UInt& i ) const
-{
-    return ( M_data -> area0(i) * std::pow( ( P - M_data -> externalPressure() )
-                                                / M_data -> beta0(i) + 1, 1/M_data -> beta1(i) )  );
-}
-
-Real
-OneDimensionalModel_Physics::totalPressure( const Real& A, const Real& Q, const UInt& i ) const
-{
-    return elasticPressure( A, i ) + M_data -> densityRho() / 2 * Q * Q / ( A * A );
-}
-
-Real
-OneDimensionalModel_Physics::totalPressureDiff( const Real& A, const Real& Q, const ID& id, const UInt& i) const
-{
-    if ( id == 1 ) // dPt/dA
-        return dPdA( A, i ) - M_data -> densityRho() * Q * Q / ( A * A * A );
-
-    if ( id == 2 ) // dPt/dQ
-        return M_data -> densityRho() * Q / ( A * A);
-
-    ERROR_MSG("Total pressure's differential function has only 2 components.");
-    return -1.;
-}
-
 void
 OneDimensionalModel_Physics::stiffenVesselLeft( const Real& xl,         const Real& xr,
                                                 const Real& factor,     const Real& alpha,
@@ -265,7 +187,9 @@ OneDimensionalModel_Physics::stiffenVesselRight( const Real& xl,     const Real&
                                                  const Real& delta,  const Real& n,
                                                  const Real& minDeltaX, const UInt& yesAdaptive )
 {
+#ifdef HAVE_LIFEV_DEBUG
     Debug( 6320 ) << "stiffenVesselright ...\n";
+#endif
     /* Stiffen Left boundary with a fifth order polynomial law
 
        if (alpha-delta/2) <= x < alpha

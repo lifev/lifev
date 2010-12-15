@@ -118,19 +118,19 @@ public:
     /*!
      * @param flag Boundary condition side
      */
-    void setSide( const OneD_BCSide& side ) { M_side = side; }
+    void setSide( const bcSide_Type& side ) { M_side = side; }
 
     //! Set the line of the boundary condition
     /*!
      * @param line Boundary condition line
      */
-    void setLine( const OneD_BCLine& line ) { M_line = line; }
+    void setLine( const bcLine_Type& line ) { M_line = line; }
 
     //! Set the quantity of the boundary condition
     /*!
      * @param quantity Boundary condition quantity
      */
-    void setQuantity( const OneD_BC& quantity ) { M_quantity = quantity; }
+    void setQuantity( const bcType_Type& quantity ) { M_quantity = quantity; }
 
     //! Set the base string of the boundary condition
     /*!
@@ -151,13 +151,13 @@ public:
     //@{
 
     //! Get the flag of the boundary condition
-    const OneD_BCSide& side() const { return M_side; }
+    const bcSide_Type& side() const { return M_side; }
 
     //! Get the mode of the boundary condition
-    const OneD_BCLine& line() const { return M_line; }
+    const bcLine_Type& line() const { return M_line; }
 
     //! Get the quantity of the boundary condition
-    const OneD_BC& quantity() const { return M_quantity; }
+    const bcType_Type& quantity() const { return M_quantity; }
 
     //! Get the base string of the boundary condition
     const std::string& baseString() const { return M_baseString; }
@@ -189,18 +189,18 @@ private:
 
     //@}
 
-    OneD_BCSide                               M_side;
-    OneD_BCLine                               M_line;
-    OneD_BC                                   M_quantity;
+    bcSide_Type                               M_side;
+    bcLine_Type                               M_line;
+    bcType_Type                                   M_quantity;
     std::string                               M_baseString;
     std::pair< std::string, bcBaseList_Type > M_base;
 
     resistanceContainer_Type                  M_resistance;
 
     // Maps
-    std::map< std::string, OneD_BCSide >      M_mapSide;
-    std::map< std::string, OneD_BC >          M_mapQuantity;
-    std::map< std::string, OneD_BCLine >      M_mapLine;
+    std::map< std::string, bcSide_Type >      M_mapSide;
+    std::map< std::string, bcType_Type >          M_mapQuantity;
+    std::map< std::string, bcLine_Type >      M_mapLine;
     std::map< std::string, bcBaseList_Type >  M_mapBase;
 };
 

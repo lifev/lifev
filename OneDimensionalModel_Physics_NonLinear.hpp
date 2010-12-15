@@ -25,20 +25,19 @@
 //@HEADER
 
 /*!
-    @file
-    @brief File containing a class providing non linear physical operations for the 1D model data.
-
-    @version 1.0
-    @date 01-07-2004
-    @author Vincent Martin
-
-    @version 2.0
-    @date 13-04-2010
-    @author Cristiano Malossi <cristiano.malossi@epfl.ch>
-
-    @contributor Simone Rossi <simone.rossi@epfl.ch>
-
-    @mantainer  Cristiano Malossi <cristiano.malossi@epfl.ch>
+ *  @file
+ *  @brief File containing a class providing non linear physical operations for the 1D model data.
+ *
+ *  @version 1.0
+ *  @date 01-07-2004
+ *  @author Vincent Martin
+ *
+ *  @version 2.0
+ *  @date 13-04-2010
+ *  @author Cristiano Malossi <cristiano.malossi@epfl.ch>
+ *
+ *  @contributor Simone Rossi <simone.rossi@epfl.ch>
+ *  @mantainer  Cristiano Malossi <cristiano.malossi@epfl.ch>
  */
 
 #ifndef ONEDIMENSIONALMODEL_PHYSICS_NONLINEAR_H
@@ -68,7 +67,13 @@ class OneDimensionalModel_Physics_NonLinear : public OneDimensionalModel_Physics
 {
 public :
 
+    //! @name Type definitions and Enumerators
+    //@{
+
     typedef OneDimensionalModel_Physics           super;
+
+    //@}
+
 
     //! @name Constructors & Destructor
     //@{
@@ -84,7 +89,7 @@ public :
     //@}
 
 
-    //! @name Methods
+    //! @name Conversion methods
     //@{
 
     //! Compute W from U
@@ -93,9 +98,7 @@ public :
      *  W1,2 = (Q / A) +- (2 / beta1) * sqrt(chi) * (celerity - celerity0)
      *  being chi the correction coefficient proposed by A. Robertson and H. Zakaria
      */
-    void fromUToW( Real& W1, Real& W2,
-                   const Real& U1, const Real& U2,
-                   const UInt& indz ) const;
+    void fromUToW( Real& W1, Real& W2, const Real& U1, const Real& U2, const UInt& indz ) const;
 
     //! Compute U from W
     /*!
@@ -105,25 +108,13 @@ public :
      *
      *  Q = A (W1 + W2) / 2
      */
-    void fromWToU( Real& U1, Real& U2,
-                   const Real& W1, const Real& W2,
-                   const UInt& indz ) const;
+    void fromWToU( Real& U1, Real& U2, const Real& W1, const Real& W2, const UInt& indz ) const;
 
     //! Compute the pressure as a fuction of W1, W2
     /*!
      *  P = beta0 * ( rho / (beta0 * beta1) * ( beta1 / (4 * sqrt(chi)) * (W1 - W2) + celerity0 )^2 - 1 )
      */
     Real fromWToP( const Real& W1, const Real& W2, const UInt& indz = 0 ) const;
-
-    //! Compute the derivative of pressure with respect to W1 and W2
-    /*!
-     *  Derivative of pressure as a function of (W1, W2)
-     *  dP(W1,W2)/dW_1 = rho / (2 * sqrt(chi)) * ( beta1 / (4 * sqrt(chi)) * (W1 - W2) + celerity0 )
-     *  dP(W1,W2)/dW_2 = - rho / (2 * sqrt(chi)) * ( beta1 / (4 * sqrt(chi)) * (W1 - W2) + celerity0 )
-     */
-    Real dPdW( const Real& W1, const Real& W2,
-                         const ID& i,
-                         const UInt& indz = 0) const;
 
     //! Compute W1 or W2 given the pressure:
     /*!
@@ -142,6 +133,20 @@ public :
      *  K1 = A0 / 2 * ( rho / (beta0*beta1) )^(1/beta1) * K0^(2/beta1)
      */
     Real fromQToW( const Real& Q, const Real& W_n, const Real& W, const ID& i, const UInt& indz ) const;
+
+    //@}
+
+
+    //! @name Derivatives methods
+    //@{
+
+    //! Compute the derivative of pressure with respect to W1 and W2
+    /*!
+     *  Derivative of pressure as a function of (W1, W2)
+     *  dP(W1,W2)/dW_1 = rho / (2 * sqrt(chi)) * ( beta1 / (4 * sqrt(chi)) * (W1 - W2) + celerity0 )
+     *  dP(W1,W2)/dW_2 = - rho / (2 * sqrt(chi)) * ( beta1 / (4 * sqrt(chi)) * (W1 - W2) + celerity0 )
+     */
+    Real dPdW( const Real& W1, const Real& W2, const ID& i, const UInt& indz = 0) const;
 
     //@}
 

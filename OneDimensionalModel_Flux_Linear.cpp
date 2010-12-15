@@ -25,31 +25,30 @@
 //@HEADER
 
 /*!
-    @file
-    @brief File containing a base class for linear 1D model flux function.
-
-    @version 1.0
-    @author Vincent Martin
-
-    @version 2.0
-    @date 15-04-2010
-    @author Cristiano Malossi <cristiano.malossi@epfl.ch>
-
-    @contributors Simone Rossi <simone.rossi@epfl.ch>, Ricardo Ruiz-Baier <ricardo.ruiz@epfl.ch>
-
-    @mantainer  Cristiano Malossi <cristiano.malossi@epfl.ch>
+ *  @file
+ *  @brief File containing a base class for linear 1D model flux function.
+ *
+ *  @version 1.0
+ *  @author Vincent Martin
+ *
+ *  @version 2.0
+ *  @date 15-04-2010
+ *  @author Cristiano Malossi <cristiano.malossi@epfl.ch>
+ *
+ *  @contributor Simone Rossi <simone.rossi@epfl.ch>
+ *  @mantainer  Cristiano Malossi <cristiano.malossi@epfl.ch>
  */
 
 #include "OneDimensionalModel_Flux_Linear.hpp"
 
 namespace LifeV
 {
+
 // ===================================================
 // Methods
 // ===================================================
 Real
-OneDimensionalModel_Flux_Linear::operator()( const Real& U1, const Real& U2,
-                                             const ID& ii,    const UInt& i ) const
+OneDimensionalModel_Flux_Linear::flux( const Real& U1, const Real& U2, const ID& ii, const UInt& i ) const
 {
     if ( ii == 1 ) // F1
     {
@@ -64,8 +63,7 @@ OneDimensionalModel_Flux_Linear::operator()( const Real& U1, const Real& U2,
 }
 
 Real
-OneDimensionalModel_Flux_Linear::diff( const Real& /*U1*/, const Real& /*U2*/,
-                                       const ID& ii, const ID& jj, const UInt& i) const
+OneDimensionalModel_Flux_Linear::dFdU( const Real& /*U1*/, const Real& /*U2*/, const ID& ii, const ID& jj, const UInt& i) const
 {
     if ( ii == 1 && jj == 1 ) // dF1/dU1
     {

@@ -25,14 +25,14 @@
 //@HEADER
 
 /*!
-    @file
-    @brief One Dimensional Model Global Definitions
-
-    @version 1.0
-    @author Cristiano Malossi <cristiano.malossi@epfl.ch>
-    @date 15-04-2010
-
-    @mantainer  Cristiano Malossi <cristiano.malossi@epfl.ch>
+ *  @file
+ *  @brief One Dimensional Model Global Definitions
+ *
+ *  @version 1.0
+ *  @date 15-04-2010
+ *  @author Cristiano Malossi <cristiano.malossi@epfl.ch>
+ *
+ *  @mantainer Cristiano Malossi <cristiano.malossi@epfl.ch>
  */
 
 #ifndef ONEDIMENSIONALMODEL_DEFINITIONS_H
@@ -74,7 +74,7 @@ namespace LifeV
 
 /*! @enum Physics Types
  */
-enum OneDimensionalModel_PhysicsTypes
+enum oneDimensionalPhysics_Type
 {
     OneD_LinearPhysics,        /*!< Use Linear Physics */
     OneD_NonLinearPhysics      /*!< Use Non Linear Physics */
@@ -82,7 +82,7 @@ enum OneDimensionalModel_PhysicsTypes
 
 /*! @enum Flux Types
  */
-enum OneDimensionalModel_FluxTypes
+enum oneDimensionalFlux_Type
 {
     OneD_LinearFlux,        /*!< Use Linear Flux */
     OneD_NonLinearFlux      /*!< Use Non Linear Flux */
@@ -90,16 +90,16 @@ enum OneDimensionalModel_FluxTypes
 
 /*! @enum Physics Types
  */
-enum OneDimensionalModel_SourceTypes
+enum oneDimensionalSource_Type
 {
     OneD_LinearSource,        /*!< Use Linear Source */
     OneD_NonLinearSource      /*!< Use Non Linear Source */
 };
 
 // Map objects
-extern std::map< std::string, OneDimensionalModel_PhysicsTypes > OneDimensionalModel_PhysicsMap;
-extern std::map< std::string, OneDimensionalModel_FluxTypes >    OneDimensionalModel_FluxMap;
-extern std::map< std::string, OneDimensionalModel_SourceTypes >  OneDimensionalModel_SourceMap;
+extern std::map< std::string, oneDimensionalPhysics_Type > oneDimensionalPhysicsMap;
+extern std::map< std::string, oneDimensionalFlux_Type >    oneDimensionalFluxMap;
+extern std::map< std::string, oneDimensionalSource_Type >  oneDimensionalSourceMap;
 
 // Forward class declarations
 class OneDimensionalModel_Physics;
@@ -108,21 +108,16 @@ class OneDimensionalModel_Source;
 class OneDimensionalModel_BCFunction;
 
 // Type definitions
-typedef singleton< factory< OneDimensionalModel_Physics,
-OneDimensionalModel_PhysicsTypes > > factoryOneDimensionalPhysics_Type;
-typedef singleton< factory< OneDimensionalModel_Flux,
-OneDimensionalModel_FluxTypes > >    factoryOneDimensionalFlux_Type;
-typedef singleton< factory< OneDimensionalModel_Source,
-OneDimensionalModel_SourceTypes > >  factoryOneDimensionalSource_Type;
-
-//typedef singleton< factoryClone< OneDimensionalModel_BCFunction > > FactoryClone_OneDimensionalModel_BCFunction;
+typedef singleton< factory< OneDimensionalModel_Physics, oneDimensionalPhysics_Type > > factoryOneDimensionalPhysics_Type;
+typedef singleton< factory< OneDimensionalModel_Flux, oneDimensionalFlux_Type > >       factoryOneDimensionalFlux_Type;
+typedef singleton< factory< OneDimensionalModel_Source, oneDimensionalSource_Type > >   factoryOneDimensionalSource_Type;
 
 typedef boost::array< Real, 2 >                 container2D_Type;
 
 // ScalVec SHOULD BE REPLACED EVERYWHERE BY EPETRAVECTOR FOR PARALLEL COMPUTATION
 typedef ublas::vector< Real >                   scalVec_Type;
 
-enum OneD_BC
+enum bcType_Type
 {
     OneD_W1,
     OneD_W2,
@@ -131,13 +126,13 @@ enum OneD_BC
     OneD_P
 };
 
-enum OneD_BCSide
+enum bcSide_Type
 {
     OneD_left,
     OneD_right
 };
 
-enum OneD_BCLine
+enum bcLine_Type
 {
     OneD_first,
     OneD_second
@@ -149,22 +144,21 @@ enum OneD_BCLine
 
 //! Define the map of the OneDimensionalModel objects
 inline void
-OneDimensionalModel_MapsDefinition()
+oneDimensionalMapsDefinition()
 {
-    OneDimensionalModel_PhysicsMap["OneD_LinearPhysics"]    = OneD_LinearPhysics;
-    OneDimensionalModel_PhysicsMap["OneD_NonLinearPhysics"] = OneD_NonLinearPhysics;
+    oneDimensionalPhysicsMap["OneD_LinearPhysics"]    = OneD_LinearPhysics;
+    oneDimensionalPhysicsMap["OneD_NonLinearPhysics"] = OneD_NonLinearPhysics;
 
-    OneDimensionalModel_FluxMap["OneD_LinearFlux"]          = OneD_LinearFlux;
-    OneDimensionalModel_FluxMap["OneD_NonLinearFlux"]       = OneD_NonLinearFlux;
+    oneDimensionalFluxMap["OneD_LinearFlux"]          = OneD_LinearFlux;
+    oneDimensionalFluxMap["OneD_NonLinearFlux"]       = OneD_NonLinearFlux;
 
-    OneDimensionalModel_SourceMap["OneD_LinearSource"]      = OneD_LinearSource;
-    OneDimensionalModel_SourceMap["OneD_NonLinearSource"]   = OneD_NonLinearSource;
+    oneDimensionalSourceMap["OneD_LinearSource"]      = OneD_LinearSource;
+    oneDimensionalSourceMap["OneD_NonLinearSource"]   = OneD_NonLinearSource;
 }
 
 //! Scalar product between 2D vectors
 inline Real
-dot( const container2D_Type& vector1,
-     const container2D_Type& vector2 )
+dot( const container2D_Type& vector1, const container2D_Type& vector2 )
 {
     ASSERT_PRE( vector1.size() == 2 && vector2.size() == 2, "dot works only for 2D vectors" );
 

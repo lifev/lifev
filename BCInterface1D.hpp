@@ -131,9 +131,9 @@ public:
     typedef OneDimensionalModel_BCHandler                                                             bcHandler_Type;
     typedef boost::shared_ptr< bcHandler_Type >                                                       bcHandlerPtr_Type;
 
-    typedef bcHandler_Type::Solution_PtrType                                                          solutionPtr_Type;
-    typedef bcHandler_Type::Flux_PtrType                                                              fluxPtr_Type;
-    typedef bcHandler_Type::Source_PtrType                                                            sourcePtr_Type;
+    typedef bcHandler_Type::solutionPtr_Type                                                          solutionPtr_Type;
+    typedef bcHandler_Type::fluxPtr_Type                                                              fluxPtr_Type;
+    typedef bcHandler_Type::sourcePtr_Type                                                            sourcePtr_Type;
 
     typedef std::vector< boost::shared_ptr< BCInterface1DFunction< physicalSolver_Type > > >          vectorFunction_Type;
     typedef std::vector< boost::shared_ptr< BCInterface1DFunctionDefault< physicalSolver_Type > > >   vectorDefaultFunction_Type;
@@ -194,7 +194,7 @@ public:
      * @param base base of the condition
      */
     template< class BCBaseType >
-    void setBC( const OneD_BCSide& bcSide, const OneD_BCLine& bcLine, const OneD_BC& bcType, const BCBaseType& base ) { M_handler->setBC( bcSide, bcLine, bcType, base ); }
+    void setBC( const bcSide_Type& bcSide, const bcLine_Type& bcLine, const bcType_Type& bcType, const BCBaseType& base ) { M_handler->setBC( bcSide, bcLine, bcType, base ); }
 
     //@}
 

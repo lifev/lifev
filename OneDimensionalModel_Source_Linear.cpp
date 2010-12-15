@@ -25,19 +25,18 @@
 //@HEADER
 
 /*!
-    @file
-    @brief File containing a class for the linear source function B of the 1D hyperbolic problem
-
-    @version 1.0
-    @author Vincent Martin
-
-    @version 2.0
-    @date 15-04-2010
-    @author Cristiano Malossi <cristiano.malossi@epfl.ch>
-
-    @contributor Simone Rossi <simone.rossi@epfl.ch>
-
-    @mantainer  Cristiano Malossi <cristiano.malossi@epfl.ch>
+ *  @file
+ *  @brief File containing a class for the linear source function B of the 1D hyperbolic problem
+ *
+ *  @version 1.0
+ *  @author Vincent Martin
+ *
+ *  @version 2.0
+ *  @date 15-04-2010
+ *  @author Cristiano Malossi <cristiano.malossi@epfl.ch>
+ *
+ *  @contributor Simone Rossi <simone.rossi@epfl.ch>
+ *  @mantainer Cristiano Malossi <cristiano.malossi@epfl.ch>
  */
 
 #include "OneDimensionalModel_Source_Linear.hpp"
@@ -48,8 +47,7 @@ namespace LifeV
 // Methods
 // ===================================================
 Real
-OneDimensionalModel_Source_Linear::operator()( const Real& U1, const Real& U2,
-                                               const ID& ii,    const UInt& indz ) const
+OneDimensionalModel_Source_Linear::source( const Real& U1, const Real& U2, const ID& ii, const UInt& indz ) const
 {
     if ( ii == 1 ) // S1
     {
@@ -68,9 +66,7 @@ OneDimensionalModel_Source_Linear::operator()( const Real& U1, const Real& U2,
 }
 
 Real
-OneDimensionalModel_Source_Linear::diff( const Real& /*_U1*/, const Real& /*_U2*/,
-                                         const ID& ii,        const ID& jj,
-                                         const UInt& indz ) const
+OneDimensionalModel_Source_Linear::dSdU( const Real& /*_U1*/, const Real& /*_U2*/, const ID& ii, const ID& jj, const UInt& indz ) const
 {
     if ( ii == 1 && jj == 1) // dS1/dU1 = 0
     {
@@ -110,7 +106,7 @@ OneDimensionalModel_Source_Linear::interpolatedQuasiLinearSource( const Real& U1
                                                                   const ID& ii,    const container2D_Type& bcNodes, const Real& /*cfl*/ ) const
 {
     //TODO Implement the interpolation as done for the non-linear case
-    return this->operator()(U1, U2, ii, bcNodes[0]);
+    return this->source(U1, U2, ii, bcNodes[0]);
 }
 
 }

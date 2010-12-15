@@ -25,15 +25,14 @@
 //@HEADER
 
 /*!
-    @file
-    @brief File containing a base class for the source function of the 1D hyperbolic problem.
-
-    @date 15-04-2010
-    @author Cristiano Malossi <cristiano.malossi@epfl.ch>
-
-    @contributor Simone Rossi <simone.rossi@epfl.ch>
-
-    @mantainer  Cristiano Malossi <cristiano.malossi@epfl.ch>
+ *  @file
+ *  @brief File containing a base class for the source function of the 1D hyperbolic problem.
+ *
+ *  @date 15-04-2010
+ *  @author Cristiano Malossi <cristiano.malossi@epfl.ch>
+ *
+ *  @contributor Simone Rossi <simone.rossi@epfl.ch>
+ *  @mantainer  Cristiano Malossi <cristiano.malossi@epfl.ch>
  */
 
 #ifndef ONEDIMENSIONALMODEL_SOURCE_H
@@ -56,8 +55,14 @@ class OneDimensionalModel_Source
 {
 public:
 
+    //! @name Type definitions and Enumerators
+    //@{
+
     typedef OneDimensionalModel_Physics              physics_Type;
     typedef boost::shared_ptr< physics_Type >        physicsPtr_Type;
+
+    //@}
+
 
     //! @name Constructors & Destructor
     //@{
@@ -88,13 +93,10 @@ public:
      *
      *  \param indz : is the index position for the parameter
      */
-    virtual Real operator()( const Real& A, const Real& Q,
-                             const ID& ii,   const UInt& indz = 0 ) const = 0;
+    virtual Real source( const Real& A, const Real& Q, const ID& ii, const UInt& indz = 0 ) const = 0;
 
     //! Jacobian matrix dBi/dxj
-    virtual Real diff( const Real& A, const Real& Q,
-                       const ID& ii,   const ID& jj,
-                       const UInt& indz = 0 ) const = 0;
+    virtual Real dSdU( const Real& A, const Real& Q, const ID& ii, const ID& jj, const UInt& indz = 0 ) const = 0;
 
     //! Second derivative tensor d2Bi/(dxj dxk)
 //    virtual Real diff2( const Real& _A, const Real& _Q,
@@ -110,7 +112,7 @@ public:
      *  \param indz : is the index position for the parameter
      */
     virtual Real interpolatedQuasiLinearSource( const Real& _U1, const Real& _U2,
-                                                const ID& ii,    const container2D_Type& bcNodes, const Real& cfl ) const = 0;
+                                                const ID& ii, const container2D_Type& bcNodes, const Real& cfl ) const = 0;
 
     //@}
 

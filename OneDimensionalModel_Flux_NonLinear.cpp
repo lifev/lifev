@@ -25,19 +25,18 @@
 //@HEADER
 
 /*!
-    @file
-    @brief File containing a base class for non linear 1D model flux function.
-
-    @version 1.0
-    @author Vincent Martin
-
-    @version 2.0
-    @date 15-04-2010
-    @author Cristiano Malossi <cristiano.malossi@epfl.ch>
-
-    @contributors Simone Rossi <simone.rossi@epfl.ch>, Ricardo Ruiz-Baier <ricardo.ruiz@epfl.ch>
-
-    @mantainer  Cristiano Malossi <cristiano.malossi@epfl.ch>
+ *  @file
+ *  @brief File containing a base class for non linear 1D model flux function.
+ *
+ *  @version 1.0
+ *  @author Vincent Martin
+ *
+ *  @version 2.0
+ *  @date 15-04-2010
+ *  @author Cristiano Malossi <cristiano.malossi@epfl.ch>
+ *
+ *  @contributors Simone Rossi <simone.rossi@epfl.ch>, Ricardo Ruiz-Baier <ricardo.ruiz@epfl.ch>
+ *  @mantainer Cristiano Malossi <cristiano.malossi@epfl.ch>
  */
 
 #include "OneDimensionalModel_Flux_NonLinear.hpp"
@@ -48,8 +47,7 @@ namespace LifeV
 // Methods
 // ===================================================
 Real
-OneDimensionalModel_Flux_NonLinear::operator()( const Real& A, const Real& Q,
-                                                const ID& ii,  const UInt& i ) const
+OneDimensionalModel_Flux_NonLinear::flux( const Real& A, const Real& Q, const ID& ii,  const UInt& i ) const
 {
     if ( ii == 1 ) // F1
     {
@@ -72,8 +70,7 @@ OneDimensionalModel_Flux_NonLinear::operator()( const Real& A, const Real& Q,
 }
 
 Real
-OneDimensionalModel_Flux_NonLinear::diff( const Real& A, const Real& Q,
-                                          const ID& ii,   const ID& jj, const UInt& i ) const
+OneDimensionalModel_Flux_NonLinear::dFdU( const Real& A, const Real& Q, const ID& ii,   const ID& jj, const UInt& i ) const
 {
     if ( ii == 1 && jj == 1 ) // dF1/dA
     {
@@ -148,7 +145,9 @@ OneDimensionalModel_Flux_NonLinear::eigenValuesEigenVectors( const Real& A,
                                                              container2D_Type& leftEigenvector2,
                                                              const UInt& i ) const
 {
+#ifdef HAVE_LIFEV_DEBUG
     Debug(6312) << "[OneDimensionalModel_Flux_NonLinear]::jabocian_EigenValues_Vectors\n";
+#endif
 
     Real celerity;
     celerity       = std::sqrt( M_physics -> data() -> alpha(i) * ( M_physics

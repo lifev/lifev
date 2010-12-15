@@ -25,19 +25,18 @@
 //@HEADER
 
 /*!
-    @file
-    @brief File containing a base class for linear 1D model flux function.
-
-    @version 1.0
-    @author Vincent Martin
-
-    @version 2.0
-    @date 15-04-2010
-    @author Cristiano Malossi <cristiano.malossi@epfl.ch>
-
-    @contributor Simone Rossi <simone.rossi@epfl.ch>
-
-    @mantainer  Cristiano Malossi <cristiano.malossi@epfl.ch>
+ *  @file
+ *  @brief File containing a base class for linear 1D model flux function.
+ *
+ *  @version 1.0
+ *  @author Vincent Martin
+ *
+ *  @version 2.0
+ *  @date 15-04-2010
+ *  @author Cristiano Malossi <cristiano.malossi@epfl.ch>
+ *
+ *  @contributor Simone Rossi <simone.rossi@epfl.ch>
+ *  @mantainer  Cristiano Malossi <cristiano.malossi@epfl.ch>
  */
 
 #ifndef ONEDIMENSIONALMODEL_FLUX_LINEAR_H
@@ -63,7 +62,13 @@ class OneDimensionalModel_Flux_Linear : public OneDimensionalModel_Flux
 
 public:
 
+    //! @name Type definitions and Enumerators
+    //@{
+
     typedef OneDimensionalModel_Flux           super;
+
+    //@}
+
 
     //! @name Constructors & Destructor
     //@{
@@ -89,8 +94,7 @@ public:
      *  when they are space dependent.
      *  This is NOT pretty. I should try to remove this dependency. VM 09/04
      */
-    Real operator()( const Real& U1, const Real& U2,
-                     const ID& ii,    const UInt& indz = 0) const ;
+    Real flux( const Real& U1, const Real& U2, const ID& ii, const UInt& indz = 0) const ;
 
     //! Jacobian matrix
     /*!
@@ -99,8 +103,7 @@ public:
      *  diff(1,1) = dF1/dx1    diff(1,2) = dF1/dx2
      *  diff(2,1) = dF2/dx1    diff(2,2) = dF2/dx2
      */
-    Real diff( const Real& U1, const Real& U2,
-               const ID& ii,    const ID& jj, const UInt& indz = 0) const;
+    Real dFdU( const Real& U1, const Real& U2, const ID& ii, const ID& jj, const UInt& indz = 0) const;
 
     //! Second derivative tensor d2Fi/(dxj dxk)
     /*!

@@ -25,20 +25,19 @@
 //@HEADER
 
 /*!
-    @file
-    @brief File containing a class providing linear physical operations for the 1D model data.
-
-    @version 1.0
-    @date 01-07-2004
-    @author Vincent Martin
-
-    @version 2.0
-    @date 13-04-2010
-    @author Cristiano Malossi <cristiano.malossi@epfl.ch>
-
-    @contributor Simone Rossi <simone.rossi@epfl.ch>
-
-    @mantainer  Cristiano Malossi <cristiano.malossi@epfl.ch>
+ *  @file
+ *  @brief File containing a class providing linear physical operations for the 1D model data.
+ *
+ *  @version 1.0
+ *  @date 01-07-2004
+ *  @author Vincent Martin
+ *
+ *  @version 2.0
+ *  @date 13-04-2010
+ *  @author Cristiano Malossi <cristiano.malossi@epfl.ch>
+ *
+ *  @contributor Simone Rossi <simone.rossi@epfl.ch>
+ *  @mantainer  Cristiano Malossi <cristiano.malossi@epfl.ch>
  */
 
 #ifndef ONEDIMENSIONALMODEL_PHYSICS_LINEAR_H
@@ -78,7 +77,13 @@ class OneDimensionalModel_Physics_Linear : public OneDimensionalModel_Physics
 {
 public:
 
+    //! @name Type definitions and Enumerators
+    //@{
+
     typedef OneDimensionalModel_Physics           super;
+
+    //@}
+
 
     //! @name Constructors & Destructor
     //@{
@@ -94,7 +99,7 @@ public:
     //@}
 
 
-    //! @name Methods
+    //! @name Conversion methods
     //@{
 
     //! Compute W from U
@@ -102,9 +107,7 @@ public:
      *  Riemann Invariants corresponding to data (Q, A) at node indz
      *  W1,2 = Q +- celerity * ( A - A0 )
      */
-    void fromUToW( Real& W1, Real& W2,
-                   const Real& U1, const Real& U2,
-                   const UInt& indz ) const;
+    void fromUToW( Real& W1, Real& W2, const Real& U1, const Real& U2, const UInt& indz ) const;
 
     //! Compute U from W
     /*!
@@ -112,24 +115,13 @@ public:
      *  A = A0 + (W1 - W2) / (2 * celerity)
      *  Q = (W1 + W2) / 2
      */
-    void fromWToU( Real& U1, Real& U2,
-                   const Real& W1, const Real& W2,
-                   const UInt& indz ) const;
+    void fromWToU( Real& U1, Real& U2, const Real& W1, const Real& W2, const UInt& indz ) const;
 
     //! Compute the pressure as a function of W1, W2:
     /*!
      *  P = beta0 * ( ( 1 / Area0 )^(beta1) * ( (W1 - W2) / (2 * celerity0) + Area0 )^(beta1) - 1 )
      */
     Real fromWToP( const Real& W1, const Real& W2, const UInt& indz = 0 ) const;
-
-    //! Compute the derivative of pressure with respect to W1 and W2
-    /*!
-     *  dP(W1,W2)/dW_1 = beta0 * beta1 / ( 2 * celerity0 * Area0^(beta1) ) * ( (W1 - W2) / ( 2 * celerity0 ) + Area0 )^(beta1-1)
-     *  dP(W1,W2)/dW_2 = - dP(W1,W2)/dW_1
-     */
-    Real dPdW( const Real& W1, const Real&_W2,
-                         const ID& i,
-                         const UInt& indz = 0) const;
 
     //! Compute W1 or W2 given the pressure:
     /*!
@@ -143,6 +135,19 @@ public:
      *  W1 + W2 = 2 * Q
      */
     Real fromQToW( const Real& Q, const Real& W_n, const Real& W, const ID& i, const UInt& indz ) const;
+
+    //@}
+
+
+    //! @name Derivatives methods
+    //@{
+
+    //! Compute the derivative of pressure with respect to W1 and W2
+    /*!
+     *  dP(W1,W2)/dW_1 = beta0 * beta1 / ( 2 * celerity0 * Area0^(beta1) ) * ( (W1 - W2) / ( 2 * celerity0 ) + Area0 )^(beta1-1)
+     *  dP(W1,W2)/dW_2 = - dP(W1,W2)/dW_1
+     */
+    Real dPdW( const Real& W1, const Real&_W2, const ID& i, const UInt& indz = 0) const;
 
     //@}
 
