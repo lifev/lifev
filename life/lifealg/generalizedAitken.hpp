@@ -36,8 +36,8 @@
  *  @maintainer Cristiano Malossi <cristiano.malossi@epfl.ch>
  */
 
-#ifndef _GENERALIZEDAITKEN_HPP
-#define _GENERALIZEDAITKEN_HPP
+#ifndef GENERALIZEDAITKEN_H
+#define GENERALIZEDAITKEN_H
 
 // Tell the compiler to ignore specific kind of warnings:
 #pragma GCC diagnostic ignored "-Wunused-variable"
@@ -86,7 +86,7 @@ public:
     //@{
 
     //! Constructor
-    generalizedAitken();
+    explicit generalizedAitken();
 
     //! Destructor
     virtual ~generalizedAitken() {}
@@ -580,4 +580,4 @@ generalizedAitken< VectorType >::checkRange( Real& omega )
 
 } // end namespace LifeV
 
-#endif
+#endif // GENERALIZEDAITKEN_H
