@@ -29,13 +29,15 @@
  *  @brief File containing a class for the boundary conditions handling of the 1D model.
  *
  *  @version 1.0
+ *  @date 01-28-2006
  *  @author Lucia Mirabella <lucia@mathcs.emory.edu>
  *  @author Tiziano Passerini <tiziano@mathcs.emory.edu>
- *  @date 01-28-2006
  *
  *  @version 2.0
- *  @author Cristiano Malossi <cristiano.malossi@epfl.ch>
  *  @date 20-04-2010
+ *  @author Cristiano Malossi <cristiano.malossi@epfl.ch>
+ *
+ *  @maintainer Cristiano Malossi <cristiano.malossi@epfl.ch>
  */
 
 #ifndef ONEDIMENSIONALMODEL_BCHANDLER_H
@@ -59,18 +61,18 @@ public:
     //! @name Type definitions
     //@{
 
-    typedef OneDimensionalModel_BC              BC_Type;
-    typedef boost::shared_ptr< BC_Type >        BC_PtrType;
+    typedef OneDimensionalModel_BC              bc_Type;
+    typedef boost::shared_ptr< bc_Type >        bcPtr_Type;
 
-    typedef BC_Type::BCFunction_Type            BCFunction_Type;
-    typedef BC_Type::BCFunction_PtrType         BCFunction_PtrType;
-    typedef BC_Type::BCFunction_Default_Type    BCFunction_Default_Type;
-    typedef BC_Type::BCFunction_Default_PtrType BCFunction_Default_PtrType;
+    typedef bc_Type::bcFunction_Type            bcFunction_Type;
+    typedef bc_Type::bcFunctionPtr_Type         bcFunctionPtr_Type;
+    typedef bc_Type::bcFunction_Default_Type    bcFunctionDefault_Type;
+    typedef bc_Type::bcFunctionDefaultPtr_Type  bcFunctionDefaultPtr_Type;
 
-    typedef BC_Type::Flux_PtrType               Flux_PtrType;
-    typedef BC_Type::Source_PtrType             Source_PtrType;
-    typedef BC_Type::Solution_Type              Solution_Type;
-    typedef BC_Type::Solution_PtrType           Solution_PtrType;
+    typedef bc_Type::fluxPtr_Type               fluxPtr_Type;
+    typedef bc_Type::sourcePtr_Type             sourcePtr_Type;
+    typedef bc_Type::solution_Type              solution_Type;
+    typedef bc_Type::solutionPtr_Type           solutionPtr_Type;
 
     //@}
 
@@ -97,12 +99,7 @@ public:
     //@{
 
     //! Apply boundary conditions
-    void applyBC ( const Real&             time,
-                   const Real&             timeStep,
-                   const Solution_Type&    solution,
-                   const Flux_PtrType&     flux,
-                   container2D_Type& leftBC,
-                   container2D_Type& rightBC );
+    void applyBC( const Real& time, const Real& timeStep, const solution_Type& solution, const fluxPtr_Type& flux, container2D_Type& leftBC, container2D_Type& rightBC );
 
     //@}
 
@@ -110,16 +107,15 @@ public:
     //! @name Set Methods
     //@{
 
-    void setBC( const OneD_BCSide& side, const OneD_BCLine& line,
-                const OneD_BC& bcType,   const BCFunction_Type& BCfunction );
+    void setBC( const bcSide_Type& bcSide, const bcLine_Type& line, const bcType_Type& bcType, const bcFunction_Type& BCfunction );
 
     void setDefaultBC();
 
-    void setSolution( const Solution_PtrType& solution );
+    void setSolution( const solutionPtr_Type& solution );
 
-    void setFluxSource( const Flux_PtrType& flux, const Source_PtrType& source );
+    void setFluxSource( const fluxPtr_Type& flux, const sourcePtr_Type& source );
 
-    void setInternalNode( const OneD_BCSide& side );
+    void setInternalNode( const bcSide_Type& bcSide ) { M_boundary[bcSide]->setInternalFlag( true ); }
 
     //@}
 
@@ -127,18 +123,25 @@ public:
     //! @name Get Methods
     //@{
 
-    const BC_PtrType& BC( const OneD_BCSide& side ) { return M_boundary[side]; }
+    const bcPtr_Type& bc( const bcSide_Type& bcSide ) { return M_boundary[bcSide]; }
 
-    const bool& BCReady( const OneD_BCSide& side, const OneD_BCLine& line ) {     return M_boundarySet[side][line]; }
+    const bool& bcReady( const bcSide_Type& bcSide, const bcLine_Type& line ) { return M_boundarySet[bcSide][line]; }
 
     //@}
 
 private:
 
-    std::map< OneD_BCSide, BC_PtrType >                      M_boundary;
-    std::map< OneD_BCSide, std::map< OneD_BCLine, bool > >   M_boundarySet;
+    //! @name Unimplemented Methods
+    //@{
 
-    std::vector < BCFunction_Default_PtrType >               M_defaultFunctions;
+    OneDimensionalModel_BCHandler& operator=( const OneDimensionalModel_BCHandler& bcHandler );
+
+    //@}
+
+    std::map< bcSide_Type, bcPtr_Type >                      M_boundary;
+    std::map< bcSide_Type, std::map< bcLine_Type, bool > >   M_boundarySet;
+
+    std::vector < bcFunctionDefaultPtr_Type >                M_defaultFunctions;
 };
 
 }

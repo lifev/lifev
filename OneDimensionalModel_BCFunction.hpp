@@ -29,13 +29,14 @@
  *  @brief File containing the interface class for the boundary function of 1D model.
  *
  *  @version 1.0
- *  @author Lucia Mirabella  <lucia.mirabella@gmail.com>
  *  @date 01-08-2006
+ *  @author Lucia Mirabella  <lucia.mirabella@gmail.com>
  *
  *  @version 2.0
- *  @author Cristiano Malossi <cristiano.malossi@epfl.ch>
  *  @date 20-04-2010
+ *  @author Cristiano Malossi <cristiano.malossi@epfl.ch>
  *
+ *  @maintainer Cristiano Malossi <cristiano.malossi@epfl.ch>
  */
 
 #ifndef ONEDIMENSIONALMODEL_BCFUNCTION_H
@@ -58,24 +59,25 @@ public:
     //! @name Type definitions and Enumerators
     //@{
 
-    typedef boost::function<Real ( const Real&, const Real&  )> Function_Type;
+    typedef boost::function<Real ( const Real&, const Real&  )> function_Type;
 
     //@}
+
 
     //! @name Constructors & Destructor
     //@{
 
     //! Constructor
-    explicit OneDimensionalModel_BCFunction() : M_function  () {}
+    explicit OneDimensionalModel_BCFunction() : M_function() {}
 
     //! Constructor by function
     /*!
       @param function the user defined function
     */
-    explicit OneDimensionalModel_BCFunction( const Function_Type& function ) : M_function( function ) {}
+    explicit OneDimensionalModel_BCFunction( const function_Type& function ) : M_function( function ) {}
 
     //! Copy constructor
-    explicit OneDimensionalModel_BCFunction( const OneDimensionalModel_BCFunction& BCFunction ) : M_function  ( BCFunction.M_function ) {}
+    explicit OneDimensionalModel_BCFunction( const OneDimensionalModel_BCFunction& bcFunction ) : M_function  ( bcFunction.M_function ) {}
 
     //! Destructor
     virtual ~OneDimensionalModel_BCFunction() {}
@@ -86,9 +88,9 @@ public:
     //! @name Operators
     //@{
 
-    OneDimensionalModel_BCFunction& operator= ( const OneDimensionalModel_BCFunction& BCFunction );
+    OneDimensionalModel_BCFunction& operator=( const OneDimensionalModel_BCFunction& bcFunction ) { if( this != &bcFunction ) { M_function = bcFunction.M_function; } return *this; }
 
-    Real operator() ( const Real& time, const Real& timeStep = 0. ) const { return M_function( time, timeStep ); }
+    Real operator()( const Real& time, const Real& timeStep = 0. ) const { return M_function( time, timeStep ); }
 
     //@}
 
@@ -100,7 +102,7 @@ public:
     /*!
       @param function the user defined function
     */
-    void setFunction( const Function_Type& function ) { M_function = function; }
+    void setFunction( const function_Type& function ) { M_function = function; }
 
     //@}
 
@@ -112,21 +114,21 @@ public:
     /*!
       @return the user defined function
     */
-    const Function_Type& Function() const { return M_function; }
+    const function_Type& function() const { return M_function; }
 
     //@}
 
 private:
 
-    Function_Type M_function;
+    function_Type M_function;
 };
 
 /*
 //! Factory create function
 inline OneDimensionalModel_BCFunction*
-Create_OneDimensionalModel_BCFunction( const OneDimensionalModel_BCFunction* BCFunction )
+Create_OneDimensionalModel_BCFunction( const OneDimensionalModel_BCFunction* bcFunction )
 {
-    return new OneDimensionalModel_BCFunction( (const OneDimensionalModel_BCFunction&)* BCFunction );
+    return new OneDimensionalModel_BCFunction( (const OneDimensionalModel_BCFunction&)* bcFunction );
 }
 
 namespace

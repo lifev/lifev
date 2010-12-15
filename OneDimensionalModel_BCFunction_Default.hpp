@@ -29,13 +29,15 @@
  *  @brief File containing some functions for the boundary conditions of 1D models.
  *
  *  @version 1.0
- *  @author Lucia Mirabella  <lucia.mirabella@gmail.com>
  *  @date 01-08-2006
+ *  @author Lucia Mirabella  <lucia.mirabella@gmail.com>
  *
  *  @version 2.0
- *  @author Cristiano Malossi <cristiano.malossi@epfl.ch>
  *  @date 20-04-2010
+ *  @author Cristiano Malossi <cristiano.malossi@epfl.ch>
  *
+ *  @contributors Ricardo Ruiz-Baier <ricardo.ruiz@epfl.ch>
+ *  @maintainer Cristiano Malossi <cristiano.malossi@epfl.ch>
  */
 
 #ifndef ONEDIMENSIONALMODEL_BCSOLVERFUNCTIONS_H
@@ -61,24 +63,24 @@ public:
     //! @name Type definitions and Enumerators
     //@{
 
-    typedef OneDimensionalModel_BCFunction          BCFunction_Type;
-    typedef boost::shared_ptr<BCFunction_Type>      BCFunction_PtrType;
+    typedef OneDimensionalModel_BCFunction          bcFunction_Type;
+    typedef boost::shared_ptr<bcFunction_Type>      bcFunctionPtr_Type;
 
-    typedef OneDimensionalModel_Flux                Flux_Type;
-    typedef boost::shared_ptr< Flux_Type >          Flux_PtrType;
+    typedef OneDimensionalModel_Flux                flux_Type;
+    typedef boost::shared_ptr< flux_Type >          fluxPtr_Type;
 
-    typedef OneDimensionalModel_Source              Source_Type;
-    typedef boost::shared_ptr< Source_Type >        Source_PtrType;
+    typedef OneDimensionalModel_Source              source_Type;
+    typedef boost::shared_ptr< source_Type >        sourcePtr_Type;
 
-    typedef OneDimensionalModel_Data                Data_Type;
-    typedef Data_Type::Mesh_Type                    Mesh_Type;
+    typedef OneDimensionalModel_Data                data_Type;
+    typedef data_Type::mesh_Type                    mesh_Type;
 
-    typedef SolverAmesos                            LinearSolver_Type;
-    typedef LinearSolver_Type::vector_type          Vector_Type;
-    typedef boost::shared_ptr< Vector_Type >        Vector_PtrType;
+    typedef SolverAmesos                            linearSolver_Type;
+    typedef linearSolver_Type::vector_type          vector_Type;
+    typedef boost::shared_ptr< vector_Type >        vectorPtr_Type;
 
-    typedef std::map< std::string, Vector_PtrType > Solution_Type;
-    typedef boost::shared_ptr< Solution_Type >      Solution_PtrType;
+    typedef std::map< std::string, vectorPtr_Type > solution_Type;
+    typedef boost::shared_ptr< solution_Type >      solutionPtr_Type;
 
     //@}
 
@@ -87,13 +89,13 @@ public:
     //@{
 
     //! Constructor
-    explicit OneDimensionalModel_BCFunction_Default( const OneD_BCSide& side, const OneD_BC& bcType );
+    explicit OneDimensionalModel_BCFunction_Default( const bcSide_Type& bcSide, const bcType_Type& bcType );
 
     //! Copy constructor
     /*!
      * @param BCF_Default OneDimensionalModel_BCFunction_Default
      */
-    explicit OneDimensionalModel_BCFunction_Default( const OneDimensionalModel_BCFunction_Default& BCF_Default );
+    explicit OneDimensionalModel_BCFunction_Default( const OneDimensionalModel_BCFunction_Default& bcFunctionDefault );
 
     //! Destructor
     virtual ~OneDimensionalModel_BCFunction_Default() {}
@@ -108,12 +110,13 @@ public:
 
     //@}
 
+
     //! @name Set Methods
     //@{
 
-    void setSolution( const Solution_PtrType& solution ) { M_Solution = solution; }
+    void setSolution( const solutionPtr_Type& solution ) { M_solution = solution; }
 
-    void setFluxSource( const Flux_PtrType& flux, const Source_PtrType& source );
+    void setFluxSource( const fluxPtr_Type& flux, const sourcePtr_Type& source );
 
     //@}
 
@@ -126,13 +129,13 @@ protected:
 
     //@}
 
-    Flux_PtrType                             M_Flux;
-    Source_PtrType                           M_Source;
-    Solution_PtrType                         M_Solution;
+    fluxPtr_Type                             M_flux;
+    sourcePtr_Type                           M_source;
+    solutionPtr_Type                         M_solution;
 
     UInt                                     M_bcNode;
-    OneD_BCSide                              M_bcSide;
-    OneD_BC                                  M_bcType;
+    bcSide_Type                              M_bcSide;
+    bcType_Type                              M_bcType;
 };
 
 
@@ -151,13 +154,13 @@ public:
     //@{
 
     //! Constructor
-    explicit OneDimensionalModel_BCFunction_Riemann( const OneD_BCSide& side, const OneD_BC& bcType );
+    explicit OneDimensionalModel_BCFunction_Riemann( const bcSide_Type& bcSide, const bcType_Type& bcType );
 
     //! Copy constructor
     /*!
      * @param BCF_Riemann OneDimensionalModel_BCFunction_Riemann
      */
-    explicit OneDimensionalModel_BCFunction_Riemann( const OneDimensionalModel_BCFunction_Riemann& BCF_Riemann );
+    explicit OneDimensionalModel_BCFunction_Riemann( const OneDimensionalModel_BCFunction_Riemann& bcFunctionRiemann );
 
     //! Destructor
     virtual ~OneDimensionalModel_BCFunction_Riemann() {}
@@ -203,11 +206,11 @@ public:
 
     typedef OneDimensionalModel_BCFunction_Riemann       super;
 
-    typedef super::Flux_PtrType                          Flux_PtrType;
-    typedef super::Source_PtrType                        Source_PtrType;
-    typedef super::Solution_PtrType                      Solution_PtrType;
+    typedef super::fluxPtr_Type                          fluxPtr_Type;
+    typedef super::sourcePtr_Type                        sourcePtr_Type;
+    typedef super::solutionPtr_Type                      solutionPtr_Type;
 
-    typedef super::Mesh_Type                             Mesh_Type;
+    typedef super::mesh_Type                             mesh_Type;
 
     //@}
 
@@ -216,13 +219,13 @@ public:
     //@{
 
     //! Constructor
-    explicit OneDimensionalModel_BCFunction_Compatibility( const OneD_BCSide& side,  const OneD_BC& bcType );
+    explicit OneDimensionalModel_BCFunction_Compatibility( const bcSide_Type& bcSide,  const bcType_Type& bcType );
 
     //! Copy constructor
     /*!
      * @param BCF_Compatibility OneDimensionalModel_BCFunction_Compatibility
      */
-    explicit OneDimensionalModel_BCFunction_Compatibility( const OneDimensionalModel_BCFunction_Compatibility& BCF_Compatibility );
+    explicit OneDimensionalModel_BCFunction_Compatibility( const OneDimensionalModel_BCFunction_Compatibility& bcFunctionCompatibility );
 
     //! Destructor
     virtual ~OneDimensionalModel_BCFunction_Compatibility() {}
@@ -287,11 +290,11 @@ public:
 
     typedef OneDimensionalModel_BCFunction_Compatibility super;
 
-    typedef super::Flux_PtrType                          Flux_PtrType;
-    typedef super::Source_PtrType                        Source_PtrType;
-    typedef super::Solution_PtrType                      Solution_PtrType;
+    typedef super::fluxPtr_Type                          fluxPtr_Type;
+    typedef super::sourcePtr_Type                        sourcePtr_Type;
+    typedef super::solutionPtr_Type                      solutionPtr_Type;
 
-    typedef super::Mesh_Type                             Mesh_Type;
+    typedef super::mesh_Type                             mesh_Type;
 
     //@}
 
@@ -300,13 +303,13 @@ public:
     //@{
 
     //! Constructor
-    explicit OneDimensionalModel_BCFunction_Absorbing( const OneD_BCSide& bcSide, const OneD_BC& bcType ) : super( bcSide, bcType ) {}
+    explicit OneDimensionalModel_BCFunction_Absorbing( const bcSide_Type& bcSide, const bcType_Type& bcType ) : super( bcSide, bcType ) {}
 
     //! Copy constructor
     /*!
      * @param BCF_Absorbing OneDimensionalModel_BCFunction_Absorbing
      */
-    explicit OneDimensionalModel_BCFunction_Absorbing( const OneDimensionalModel_BCFunction_Absorbing& BCF_Absorbing ) : super( BCF_Absorbing ) {}
+    explicit OneDimensionalModel_BCFunction_Absorbing( const OneDimensionalModel_BCFunction_Absorbing& bcFunctionAbsorbing ) : super( bcFunctionAbsorbing ) {}
 
     //! Destructor
     virtual ~OneDimensionalModel_BCFunction_Absorbing() {}
@@ -343,9 +346,9 @@ public:
 
     typedef OneDimensionalModel_BCFunction_Absorbing     super;
 
-    typedef super::Flux_PtrType                          Flux_PtrType;
-    typedef super::Source_PtrType                        Source_PtrType;
-    typedef super::Solution_PtrType                      Solution_PtrType;
+    typedef super::fluxPtr_Type                          fluxPtr_Type;
+    typedef super::sourcePtr_Type                        sourcePtr_Type;
+    typedef super::solutionPtr_Type                      solutionPtr_Type;
 
     //@}
 
@@ -354,13 +357,13 @@ public:
     //@{
 
     //! Constructor
-    explicit OneDimensionalModel_BCFunction_Resistance( const OneD_BCSide& side,  const OneD_BC& bcType, const Real& resistance );
+    explicit OneDimensionalModel_BCFunction_Resistance( const bcSide_Type& bcSide,  const bcType_Type& bcType, const Real& resistance );
 
     //! Copy constructor
     /*!
      * @param BCF_Resistance OneDimensionalModel_BCFunction_Resistance
      */
-    explicit OneDimensionalModel_BCFunction_Resistance( const OneDimensionalModel_BCFunction_Resistance& BCF_Resistance );
+    explicit OneDimensionalModel_BCFunction_Resistance( const OneDimensionalModel_BCFunction_Resistance& bcFunctionResistance );
 
     //! Destructor
     virtual ~OneDimensionalModel_BCFunction_Resistance() {}
@@ -410,9 +413,9 @@ public:
 
     typedef OneDimensionalModel_BCFunction_Compatibility super;
 
-    typedef super::Flux_PtrType                          Flux_PtrType;
-    typedef super::Source_PtrType                        Source_PtrType;
-    typedef super::Solution_PtrType                      Solution_PtrType;
+    typedef super::fluxPtr_Type                          fluxPtr_Type;
+    typedef super::sourcePtr_Type                        sourcePtr_Type;
+    typedef super::solutionPtr_Type                      solutionPtr_Type;
 
     //@}
 
@@ -421,7 +424,7 @@ public:
     //@{
 
     //! Constructor
-    explicit OneDimensionalModel_BCFunction_Windkessel3( const OneD_BCSide& side, const OneD_BC& bcType,
+    explicit OneDimensionalModel_BCFunction_Windkessel3( const bcSide_Type& bcSide, const bcType_Type& bcType,
                                                          const Real& resistance1, const Real& resistance2,
                                                          const Real& compliance,
                                                          const bool& absorbing1 = false,
@@ -431,7 +434,7 @@ public:
     /*!
      * @param BCF_Resistance OneDimensionalModel_BCFunction_Resistance
      */
-    explicit OneDimensionalModel_BCFunction_Windkessel3( const OneDimensionalModel_BCFunction_Windkessel3& BCF_Windkessel3 );
+    explicit OneDimensionalModel_BCFunction_Windkessel3( const OneDimensionalModel_BCFunction_Windkessel3& bcFunctionWindkessel3 );
 
     //! Destructor
     virtual ~OneDimensionalModel_BCFunction_Windkessel3() {}

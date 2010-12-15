@@ -29,13 +29,15 @@
  *  @brief File containing a class for the boundary conditions handling of the 1D model.
  *
  *  @version 1.0
+ *  @date 01-28-2006
  *  @author Lucia Mirabella <lucia@mathcs.emory.edu>
  *  @author Tiziano Passerini <tiziano@mathcs.emory.edu>
- *  @date 01-28-2006
  *
  *  @version 2.0
- *  @author Cristiano Malossi <cristiano.malossi@epfl.ch>
  *  @date 20-04-2010
+ *  @author Cristiano Malossi <cristiano.malossi@epfl.ch>
+ *
+ *  @maintainer Cristiano Malossi <cristiano.malossi@epfl.ch>
  */
 
 #include <lifemc/lifefem/OneDimensionalModel_BCHandler.hpp>
@@ -51,10 +53,13 @@ OneDimensionalModel_BCHandler::OneDimensionalModel_BCHandler() :
         M_boundarySet       (),
         M_defaultFunctions  ()
 {
-    Debug( 6311 ) << "[OneDimensionalModel_BCHandler::OneDimensionalModel_BCHandler] Creating OneDimensionalModel_BC classes.\n";
 
-    M_boundary[ OneD_left ].reset(  new BC_Type( OneD_left ) );
-    M_boundary[ OneD_right ].reset( new BC_Type( OneD_right ) );
+#ifdef HAVE_LIFEV_DEBUG
+    Debug( 6311 ) << "[OneDimensionalModel_BCHandler::OneDimensionalModel_BCHandler] Creating OneDimensionalModel_BC classes.\n";
+#endif
+
+    M_boundary[ OneD_left ].reset(  new bc_Type( OneD_left ) );
+    M_boundary[ OneD_right ].reset( new bc_Type( OneD_right ) );
 
     M_boundarySet[ OneD_left ].insert(  std::make_pair( OneD_first,  false ) );
     M_boundarySet[ OneD_left ].insert(  std::make_pair( OneD_second, false ) );
@@ -62,18 +67,18 @@ OneDimensionalModel_BCHandler::OneDimensionalModel_BCHandler() :
     M_boundarySet[ OneD_right ].insert( std::make_pair( OneD_second, false ) );
 }
 
-OneDimensionalModel_BCHandler::OneDimensionalModel_BCHandler( const OneDimensionalModel_BCHandler& BCH ) :
+OneDimensionalModel_BCHandler::OneDimensionalModel_BCHandler( const OneDimensionalModel_BCHandler& bcHandler ) :
         M_boundary          (),
-        M_boundarySet       ( BCH.M_boundarySet ),
+        M_boundarySet       ( bcHandler.M_boundarySet ),
         M_defaultFunctions  ()
 {
-    M_boundary[ OneD_left ].reset(  new BC_Type( *BCH.M_boundary.find( OneD_left )->second ) );
-    M_boundary[ OneD_right ].reset( new BC_Type( *BCH.M_boundary.find( OneD_right )->second ) );
+    M_boundary[ OneD_left ].reset(  new bc_Type( *bcHandler.M_boundary.find( OneD_left )->second ) );
+    M_boundary[ OneD_right ].reset( new bc_Type( *bcHandler.M_boundary.find( OneD_right )->second ) );
 
-    for ( std::vector < BCFunction_Default_PtrType >::const_iterator i = BCH.M_defaultFunctions.begin();
-            i != BCH.M_defaultFunctions.end() ; ++i )
+    for ( std::vector < bcFunctionDefaultPtr_Type >::const_iterator i = bcHandler.M_defaultFunctions.begin();
+            i != bcHandler.M_defaultFunctions.end() ; ++i )
     {
-        BCFunction_Default_PtrType BCDefaultFunction( new BCFunction_Default_Type( *i->get() ) );
+        bcFunctionDefaultPtr_Type BCDefaultFunction( new bcFunctionDefault_Type( *i->get() ) );
         M_defaultFunctions.push_back( BCDefaultFunction );
     }
 
@@ -88,131 +93,131 @@ OneDimensionalModel_BCHandler::OneDimensionalModel_BCHandler( const OneDimension
 // Methods
 // ===================================================
 void
-OneDimensionalModel_BCHandler::applyBC( const Real&              time,
-                                        const Real&              timeStep,
-                                        const Solution_Type&     solution,
-                                        const Flux_PtrType&      flux,
-                                        container2D_Type&  leftBC,
-                                        container2D_Type&  rightBC )
+OneDimensionalModel_BCHandler::applyBC( const Real& time, const Real& timeStep, const solution_Type& solution, const fluxPtr_Type& flux,
+                                        container2D_Type& leftBC, container2D_Type& rightBC )
 {
+#ifdef HAVE_LIFEV_DEBUG
     ASSERT_PRE( leftBC.size() == 2 && rightBC.size() == 2, "applyBC works only for 2D vectors" );
+#endif
 
     M_boundary[ OneD_left  ]->applyBC( time, timeStep, solution, flux, leftBC  );
     M_boundary[ OneD_right ]->applyBC( time, timeStep, solution, flux, rightBC );
 
+#ifdef HAVE_LIFEV_DEBUG
     Debug(6311) << "[OneDimensionalModel_BCHandler::applyBC] at left "
     << " imposing [ A, Q ] = [ " << leftBC[0]
     << ", " << leftBC[1] << " ]\n";
     Debug(6311) << "[OneDimensionalModel_BCHandler::applyBC] at right "
     << " imposing [ A, Q ] = [ " << rightBC[0]
     << ", " << rightBC[1] << " ]\n";
+#endif
 }
 
 // ===================================================
 // Set Methods
 // ===================================================
 void
-OneDimensionalModel_BCHandler::setBC( const OneD_BCSide&     side,
-                                      const OneD_BCLine&     line,
-                                      const OneD_BC&         bcType,
-                                      const BCFunction_Type& BCfunction )
+OneDimensionalModel_BCHandler::setBC( const bcSide_Type& bcSide, const bcLine_Type& bcLine,
+                                      const bcType_Type& bcType, const bcFunction_Type& BCfunction )
 {
-    M_boundarySet[side][line] = true;
-    M_boundary[side]->setType( line, bcType );
-    M_boundary[side]->setBCFunction( line, BCfunction );
+    M_boundarySet[bcSide][bcLine] = true;
+    M_boundary[bcSide]->setType( bcLine, bcType );
+    M_boundary[bcSide]->setBCFunction( bcLine, BCfunction );
+
+#ifdef HAVE_LIFEV_DEBUG
     Debug( 6311 ) << "[OneDimensionalModel_BCHandler::setBC] imposing function at "
-                  << side << " boundary ("
-                  << line << " line), variable "
-                  << bcType << ".\n";
+                  << bcSide << " boundary (" << bcLine << " bcLine), variable " << bcType << ".\n";
+#endif
 }
 
 void
 OneDimensionalModel_BCHandler::setDefaultBC()
 {
+#ifdef HAVE_LIFEV_DEBUG
     Debug( 6311 ) << "[OneDimensionalModel_BCHandler::OneDimensionalModel_BCHandler] Set Default BC ... \n";
+#endif
 
     if ( !M_boundarySet[ OneD_left ][OneD_first] )
     {
-        //BCFunction_Default_PtrType BCFunction ( new OneDimensionalModel_BCFunction_Default( OneD_left, OneD_W1 ) );
-        BCFunction_Default_PtrType BCDefaultFunction ( new OneDimensionalModel_BCFunction_Riemann( OneD_left, OneD_W1 ) );
-        M_defaultFunctions.push_back( BCDefaultFunction );
+        //bcFunctionDefaultPtr_Type bcFunction( new OneDimensionalModel_BCFunction_Default( OneD_left, OneD_W1 ) );
+        bcFunctionDefaultPtr_Type bcDefaultFunction( new OneDimensionalModel_BCFunction_Riemann( OneD_left, OneD_W1 ) );
+        M_defaultFunctions.push_back( bcDefaultFunction );
 
-        //BCFunction_PtrType BCFunction ( new BCFunction_Type() );
-        BCFunction_Type BCFunction;
-        BCFunction.setFunction( boost::bind( &OneDimensionalModel_BCFunction_Riemann::operator(),
+        //bcFunctionPtr_Type bcFunction( new bcFunction_Type() );
+        bcFunction_Type bcFunction;
+        bcFunction.setFunction( boost::bind( &OneDimensionalModel_BCFunction_Riemann::operator(),
                                              dynamic_cast<OneDimensionalModel_BCFunction_Riemann *> ( &( *M_defaultFunctions.back() ) ), _1, _2 ) );
 
+#ifdef HAVE_LIFEV_DEBUG
         Debug( 6311 ) << "[OneDimensionalModel_BCHandler::setDefaultBC] left-first-W1 Invoking setBC.\n";
-        setBC( OneD_left, OneD_first, OneD_W1, BCFunction );
+#endif
+        setBC( OneD_left, OneD_first, OneD_W1, bcFunction );
     }
 
     if ( !M_boundarySet[ OneD_left ][OneD_second] )
     {
-        //BCFunction_PtrType BCFunction ( new OneDimensionalModel_BCFunction_Compatibility( OneD_left, OneD_W2 ) );
-        BCFunction_Default_PtrType BCDefaultFunction ( new OneDimensionalModel_BCFunction_Compatibility( OneD_left, OneD_W2 ) );
-        M_defaultFunctions.push_back( BCDefaultFunction );
+        //bcFunctionPtr_Type bcFunction( new OneDimensionalModel_BCFunction_Compatibility( OneD_left, OneD_W2 ) );
+        bcFunctionDefaultPtr_Type bcDefaultFunction( new OneDimensionalModel_BCFunction_Compatibility( OneD_left, OneD_W2 ) );
+        M_defaultFunctions.push_back( bcDefaultFunction );
 
-        //BCFunction_PtrType BCFunction ( new BCFunction_Type() );
-        BCFunction_Type BCFunction;
-        BCFunction.setFunction( boost::bind( &OneDimensionalModel_BCFunction_Compatibility::operator(),
+        //bcFunctionPtr_Type bcFunction ( new bcFunction_Type() );
+        bcFunction_Type bcFunction;
+        bcFunction.setFunction( boost::bind( &OneDimensionalModel_BCFunction_Compatibility::operator(),
                                              dynamic_cast<OneDimensionalModel_BCFunction_Compatibility *> ( &( *M_defaultFunctions.back() ) ), _1, _2 ) );
 
-
+#ifdef HAVE_LIFEV_DEBUG
         Debug( 6311 ) << "[OneDimensionalModel_BCHandler::setDefaultBC] left-second-W2 Invoking setBC.\n";
-        setBC( OneD_left, OneD_second, OneD_W2, BCFunction );
+#endif
+        setBC( OneD_left, OneD_second, OneD_W2, bcFunction );
     }
 
     if ( !M_boundarySet[ OneD_right ][ OneD_first ] )
     {
-        //BCFunction_PtrType BCFunction ( new OneDimensionalModel_BCFunction_Riemann( OneD_right, OneD_W2 ) );
-        BCFunction_Default_PtrType BCDefaultFunction ( new OneDimensionalModel_BCFunction_Riemann( OneD_right, OneD_W2 ) );
-        M_defaultFunctions.push_back( BCDefaultFunction );
+        //bcFunctionPtr_Type bcFunction( new OneDimensionalModel_BCFunction_Riemann( OneD_right, OneD_W2 ) );
+        bcFunctionDefaultPtr_Type bcDefaultFunction( new OneDimensionalModel_BCFunction_Riemann( OneD_right, OneD_W2 ) );
+        M_defaultFunctions.push_back( bcDefaultFunction );
 
-        //BCFunction_PtrType BCFunction ( new BCFunction_Type() );
-        BCFunction_Type BCFunction;
-        BCFunction.setFunction( boost::bind( &OneDimensionalModel_BCFunction_Riemann::operator(),
+        //bcFunctionPtr_Type bcFunction ( new bcFunction_Type() );
+        bcFunction_Type bcFunction;
+        bcFunction.setFunction( boost::bind( &OneDimensionalModel_BCFunction_Riemann::operator(),
                                              dynamic_cast<OneDimensionalModel_BCFunction_Riemann *> ( &( *M_defaultFunctions.back() ) ), _1, _2 ) );
 
+#ifdef HAVE_LIFEV_DEBUG
         Debug( 6311 ) << "[OneDimensionalModel_BCHandler::setDefaultBC] right-first-W2 Invoking setBC.\n";
-        setBC( OneD_right, OneD_first, OneD_W2, BCFunction );
+#endif
+        setBC( OneD_right, OneD_first, OneD_W2, bcFunction );
     }
 
     if ( !M_boundarySet[ OneD_right ][ OneD_second ] )
     {
-        //BCFunction_PtrType BCFunction ( new OneDimensionalModel_BCFunction_Compatibility( OneD_right, OneD_W1 ) );
-        BCFunction_Default_PtrType BCDefaultFunction ( new OneDimensionalModel_BCFunction_Compatibility( OneD_right, OneD_W1 ) );
-        M_defaultFunctions.push_back( BCDefaultFunction );
+        //bcFunctionPtr_Type bcFunction( new OneDimensionalModel_BCFunction_Compatibility( OneD_right, OneD_W1 ) );
+        bcFunctionDefaultPtr_Type bcDefaultFunction( new OneDimensionalModel_BCFunction_Compatibility( OneD_right, OneD_W1 ) );
+        M_defaultFunctions.push_back( bcDefaultFunction );
 
-        //BCFunction_PtrType BCFunction ( new BCFunction_Type() );
-        BCFunction_Type BCFunction;
-        BCFunction.setFunction( boost::bind( &OneDimensionalModel_BCFunction_Compatibility::operator(),
+        //bcFunctionPtr_Type bcFunction ( new bcFunction_Type() );
+        bcFunction_Type bcFunction;
+        bcFunction.setFunction( boost::bind( &OneDimensionalModel_BCFunction_Compatibility::operator(),
                                              dynamic_cast<OneDimensionalModel_BCFunction_Compatibility *> ( &( *M_defaultFunctions.back() ) ), _1, _2 ) );
 
+#ifdef HAVE_LIFEV_DEBUG
         Debug( 6311 ) << "[OneDimensionalModel_BCHandler::setDefaultBC] right-second-W1 Invoking setBC.\n";
-        setBC( OneD_right, OneD_second, OneD_W1, BCFunction );
+#endif
+        setBC( OneD_right, OneD_second, OneD_W1, bcFunction );
     }
 }
 
-
 void
-OneDimensionalModel_BCHandler::setSolution( const Solution_PtrType& solution )
+OneDimensionalModel_BCHandler::setSolution( const solutionPtr_Type& solution )
 {
-    for ( std::vector < BCFunction_Default_PtrType >::const_iterator i = M_defaultFunctions.begin() ; i < M_defaultFunctions.end() ; ++i )
+    for ( std::vector < bcFunctionDefaultPtr_Type >::const_iterator i = M_defaultFunctions.begin() ; i < M_defaultFunctions.end() ; ++i )
         ( *i )->setSolution( solution );
 }
 
 void
-OneDimensionalModel_BCHandler::setFluxSource( const Flux_PtrType& flux, const Source_PtrType& source )
+OneDimensionalModel_BCHandler::setFluxSource( const fluxPtr_Type& flux, const sourcePtr_Type& source )
 {
-    for ( std::vector < BCFunction_Default_PtrType >::const_iterator i = M_defaultFunctions.begin() ; i < M_defaultFunctions.end() ; ++i )
+    for ( std::vector < bcFunctionDefaultPtr_Type >::const_iterator i = M_defaultFunctions.begin() ; i < M_defaultFunctions.end() ; ++i )
         ( *i )->setFluxSource( flux, source );
 }
-
-void
-OneDimensionalModel_BCHandler::setInternalNode( const OneD_BCSide& side )
-{
-    M_boundary[ side ]->setInternalFlag( true );
-}
-
 
 }

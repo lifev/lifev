@@ -29,14 +29,16 @@
  *  @brief File containing a class for the boundary conditions of the 1D model.
  *
  *  @version 1.0
+ *  @date 01-28-2006
  *  @author Lucia Mirabella <lucia@mathcs.emory.edu>
  *  @author Tiziano Passerini <tiziano@mathcs.emory.edu>
- *  @date 01-28-2006
  *
  *  @version 2.0
- *  @author Cristiano Malossi <cristiano.malossi@epfl.ch>
  *  @date 20-04-2010
+ *  @author Cristiano Malossi <cristiano.malossi@epfl.ch>
+ *
  *  @contributors Ricardo Ruiz-Baier <ricardo.ruiz@epfl.ch>
+ *  @maintainer Cristiano Malossi <cristiano.malossi@epfl.ch>
  */
 
 #include <lifemc/lifefem/OneDimensionalModel_BC.hpp>
@@ -47,9 +49,9 @@ namespace LifeV
 // ===================================================
 // Constructors & Destructor
 // ===================================================
-OneDimensionalModel_BC::OneDimensionalModel_BC( const OneD_BCSide& side ) :
+OneDimensionalModel_BC::OneDimensionalModel_BC( const bcSide_Type& bcSide ) :
         M_bcType                    (),
-        M_bcSide                    ( side ),
+        M_bcSide                    ( bcSide ),
         M_bcFunction                (),
         M_isInternal                ( false ),
         M_bcMatrix                  (),
@@ -59,45 +61,43 @@ OneDimensionalModel_BC::OneDimensionalModel_BC( const OneD_BCSide& side ) :
     M_bcMatrix[ OneD_second ] = container2D_Type();
 }
 
-OneDimensionalModel_BC::OneDimensionalModel_BC( const OneDimensionalModel_BC& BC ) :
-        M_bcType                    ( BC.M_bcType ),
-        M_bcSide                    ( BC.M_bcSide ),
-        M_bcFunction                ( BC.M_bcFunction ),
-        M_isInternal                ( BC.M_isInternal ),
-        M_bcMatrix                  ( BC.M_bcMatrix ),
-        M_bcRHS                     ( BC.M_bcRHS )
+OneDimensionalModel_BC::OneDimensionalModel_BC( const OneDimensionalModel_BC& bc ) :
+        M_bcType                    ( bc.M_bcType ),
+        M_bcSide                    ( bc.M_bcSide ),
+        M_bcFunction                ( bc.M_bcFunction ),
+        M_isInternal                ( bc.M_isInternal ),
+        M_bcMatrix                  ( bc.M_bcMatrix ),
+        M_bcRHS                     ( bc.M_bcRHS )
 {}
 
 // ===================================================
 // Methods
 // ===================================================
 void
-OneDimensionalModel_BC::applyBC( const Real&             time,
-                                 const Real&             timeStep,
-                                 const Solution_Type&    solution,
-                                 const Flux_PtrType&     flux,
-                                 container2D_Type& BC )
+OneDimensionalModel_BC::applyBC( const Real& time, const Real& timeStep, const solution_Type& solution,
+                                 const fluxPtr_Type& flux, container2D_Type& bc )
 {
-    ASSERT_PRE( BC.size() == 2, "applyBC works only for 2D vectors");
+
+#ifdef HAVE_LIFEV_DEBUG
+    ASSERT_PRE( bc.size() == 2, "applyBC works only for 2D vectors");
 
     if ( M_isInternal )
         Debug(6311) << "[OneDimensionalModel_BC::compute_resBC] found internal boundary\n";
     else
+#endif
     {
-        //Container2D_Type leftEigenvector_first, leftEigenvector_second;
-
         UInt dof;
         ( M_bcSide == OneD_left ) ? dof = 0 : dof = flux->physics()->data()->numberOfNodes() - 1;
 
-        container2D_Type U_boundary;
-        U_boundary[0] = (*solution.find("A")->second)(dof + 1);
-        U_boundary[1] = (*solution.find("Q")->second)(dof + 1);
+        container2D_Type boundaryU;
+        boundaryU[0] = (*solution.find("A")->second)(dof + 1);
+        boundaryU[1] = (*solution.find("Q")->second)(dof + 1);
 
         // Eigenvalues and eigenvectors of the jacobian diffFlux (= dF/dU = H)
         container2D_Type eigenvalues;
         container2D_Type leftEigenvector1, leftEigenvector2;
 
-        flux->eigenValuesEigenVectors( U_boundary[0], U_boundary[1],
+        flux->eigenValuesEigenVectors( boundaryU[0], boundaryU[1],
                                        eigenvalues, leftEigenvector1, leftEigenvector2, dof );
 
         computeMatrixAndRHS( time, timeStep, flux, OneD_first,
@@ -106,24 +106,19 @@ OneDimensionalModel_BC::applyBC( const Real&             time,
         computeMatrixAndRHS( time, timeStep, flux, OneD_second,
                              leftEigenvector1, leftEigenvector2, dof, M_bcRHS[1]);
 
-        BC = solveLinearSystem( M_bcMatrix[OneD_first], M_bcMatrix[OneD_second], M_bcRHS );
+        bc = solveLinearSystem( M_bcMatrix[OneD_first], M_bcMatrix[OneD_second], M_bcRHS );
     }
 
-    Debug(6311) << "[OneDimensionalModel_BC::applyBC] on side " << M_bcSide
-    << " imposing [ A, Q ] = [ " << BC[0] << ", " << BC[1] << " ]\n";
+#ifdef HAVE_LIFEV_DEBUG
+    Debug(6311) << "[OneDimensionalModel_BC::applyBC] on bcSide " << M_bcSide << " imposing [ A, Q ] = [ " << bc[0] << ", " << bc[1] << " ]\n";
+#endif
 }
-/*
-void
-OneDimensionalModel_BC::setMatrixRow( const OneD_BCLine& line, const Container2D_Type& matrixrow )
-{
-    M_bcMatrix[line] = matrixrow;
-}
-*/
+
 // ===================================================
 // Private Methods
 // ===================================================
 void
-OneDimensionalModel_BC::computeMatrixAndRHS( const Real& time, const Real& timeStep, const Flux_PtrType& flux, const OneD_BCLine& line,
+OneDimensionalModel_BC::computeMatrixAndRHS( const Real& time, const Real& timeStep, const fluxPtr_Type& flux, const bcLine_Type& line,
                                              const container2D_Type& leftEigenvector1, const container2D_Type& leftEigenvector2,
                                              const UInt& dof, Real& rhs )
 {
@@ -162,13 +157,15 @@ OneDimensionalModel_BC::computeMatrixAndRHS( const Real& time, const Real& timeS
         break;
     default:
         std::cout << "\n[OneDimensionalModel_BC::compute_resBC] Wrong boundary variable as " << line
-                  << " condition on side " << M_bcSide;
+                  << " condition on bcSide " << M_bcSide;
     }
 
+#ifdef HAVE_LIFEV_DEBUG
     Debug(6311) << "[OneDimensionalModel_BC::compute_MatrixAndRHS] to impose variable "
     << M_bcType[line] << ", " << line << " line = "
     << M_bcMatrix[line][0] << ", "
     << M_bcMatrix[line][1] << "\n";
+#endif
 }
 
 container2D_Type
@@ -176,14 +173,18 @@ OneDimensionalModel_BC::solveLinearSystem( const container2D_Type& line1,
                                            const container2D_Type& line2,
                                            const container2D_Type& rhs ) const
 {
+#ifdef HAVE_LIFEV_DEBUG
     ASSERT_PRE( line1.size() == 2 && line2.size() == 2 && rhs.size() == 2,
                 "_solveLinearSyst2x2 works only for 2D vectors");
+#endif
 
     Real determinant = line1[0] * line2[1] - line1[1] * line2[0];
 
+#ifdef HAVE_LIFEV_DEBUG
     ASSERT( determinant != 0,
             "Error: the 2x2 system on the boundary is not invertible."
             "\nCheck the boundary conditions.");
+#endif
 
     container2D_Type solution;
 

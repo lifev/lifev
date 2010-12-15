@@ -29,13 +29,16 @@
  *  @brief File containing a class for the boundary conditions of the 1D model.
  *
  *  @version 1.0
+ *  @date 01-28-2006
  *  @author Lucia Mirabella <lucia@mathcs.emory.edu>
  *  @author Tiziano Passerini <tiziano@mathcs.emory.edu>
- *  @date 01-28-2006
  *
  *  @version 2.0
- *  @author Cristiano Malossi <cristiano.malossi@epfl.ch>
  *  @date 20-04-2010
+ *  @author Cristiano Malossi <cristiano.malossi@epfl.ch>
+ *
+ *  @contributors Ricardo Ruiz-Baier <ricardo.ruiz@epfl.ch>
+ *  @maintainer Cristiano Malossi <cristiano.malossi@epfl.ch>
  */
 
 #ifndef ONEDIMENSIONALMODEL_BC_H
@@ -59,16 +62,16 @@ public:
     //! @name Type definitions
     //@{
 
-    typedef OneDimensionalModel_BCFunction_Default::BCFunction_Type      BCFunction_Type;
-    typedef OneDimensionalModel_BCFunction_Default::BCFunction_PtrType   BCFunction_PtrType;
+    typedef OneDimensionalModel_BCFunction_Default::bcFunction_Type      bcFunction_Type;
+    typedef OneDimensionalModel_BCFunction_Default::bcFunctionPtr_Type   bcFunctionPtr_Type;
 
-    typedef OneDimensionalModel_BCFunction_Default                       BCFunction_Default_Type;
-    typedef boost::shared_ptr< BCFunction_Default_Type >                 BCFunction_Default_PtrType;
+    typedef OneDimensionalModel_BCFunction_Default                       bcFunction_Default_Type;
+    typedef boost::shared_ptr< bcFunction_Default_Type >                 bcFunctionDefaultPtr_Type;
 
-    typedef OneDimensionalModel_BCFunction_Default::Flux_PtrType         Flux_PtrType;
-    typedef OneDimensionalModel_BCFunction_Default::Source_PtrType       Source_PtrType;
-    typedef OneDimensionalModel_BCFunction_Default::Solution_Type        Solution_Type;
-    typedef OneDimensionalModel_BCFunction_Default::Solution_PtrType     Solution_PtrType;
+    typedef OneDimensionalModel_BCFunction_Default::fluxPtr_Type         fluxPtr_Type;
+    typedef OneDimensionalModel_BCFunction_Default::sourcePtr_Type       sourcePtr_Type;
+    typedef OneDimensionalModel_BCFunction_Default::solution_Type        solution_Type;
+    typedef OneDimensionalModel_BCFunction_Default::solutionPtr_Type     solutionPtr_Type;
 
     //@}
 
@@ -77,7 +80,7 @@ public:
     //@{
 
     //! Constructor
-    explicit OneDimensionalModel_BC( const OneD_BCSide& side );
+    explicit OneDimensionalModel_BC( const bcSide_Type& bcSide );
 
     //! Copy constructor
     /*!
@@ -94,12 +97,8 @@ public:
     //! @name Methods
     //@{
 
-    //! Compute [A,Q] at the boundary
-    container2D_Type Uboundary( const scalVec_Type& U1, const scalVec_Type& U2 ) const;
-
     //! Apply boundary conditions
-    void applyBC( const Real& time, const Real& timeStep, const Solution_Type& solution,
-                  const Flux_PtrType& flux, container2D_Type& BC );
+    void applyBC( const Real& time, const Real& timeStep, const solution_Type& solution, const fluxPtr_Type& flux, container2D_Type& BC );
 
     //@}
 
@@ -107,13 +106,11 @@ public:
     //! @name Set Methods
     //@{
 
-    void setType( const OneD_BCLine& line, const OneD_BC& bc ) { M_bcType[line] = bc; }
+    void setType( const bcLine_Type& bcLine, const bcType_Type& bc ) { M_bcType[bcLine] = bc; }
 
-    void setBCFunction( const OneD_BCLine& line, const BCFunction_Type& rhs ) { M_bcFunction[line] = rhs; }
+    void setBCFunction( const bcLine_Type& bcLine, const bcFunction_Type& rhs ) { M_bcFunction[bcLine] = rhs; }
 
-    void setInternalFlag( const bool& flag ) { M_isInternal = flag; }
-
-    //void setMatrixRow( const OneD_BCLine& line, const container2D_Type& matrixrow );
+    void setInternalFlag( const bool& bcFlag ) { M_isInternal = bcFlag; }
 
     //@}
 
@@ -121,9 +118,9 @@ public:
     //! @name Get Methods
     //@{
 
-    const OneD_BC& type( const OneD_BCLine& line ) { return M_bcType[line]; }
+    const bcType_Type& type( const bcLine_Type& bcLine ) { return M_bcType[bcLine]; }
 
-    BCFunction_Type& BCFunction( const OneD_BCLine& line ) { return M_bcFunction[line]; }
+    bcFunction_Type& bcFunction( const bcLine_Type& bcLine ) { return M_bcFunction[bcLine]; }
 
     const bool& isInternal() { return M_isInternal; }
 
@@ -131,11 +128,19 @@ public:
 
 private:
 
+    //! @name Unimplemented Methods
+    //@{
+
+    OneDimensionalModel_BC& operator=( const OneDimensionalModel_BC& bc );
+
+    //@}
+
+
     //! @name Private Methods
     //@{
 
     //! Compute the matrix and the RHS for the BC 2x2 linear system
-    void computeMatrixAndRHS( const Real& time, const Real& timeStep, const Flux_PtrType& flux, const OneD_BCLine& line,
+    void computeMatrixAndRHS( const Real& time, const Real& timeStep, const fluxPtr_Type& flux, const bcLine_Type& bcLine,
                               const container2D_Type& leftEigenvector1, const container2D_Type& leftEigenvector2,
                               const UInt& dof, Real& rhs );
 
@@ -146,21 +151,19 @@ private:
      *       M_matrixrow_at_line["second"] ]
      * @return A^{-1} * rhs2d
      */
-    container2D_Type solveLinearSystem( const container2D_Type& line1,
-                                        const container2D_Type& line2,
-                                        const container2D_Type& rhs ) const;
+    container2D_Type solveLinearSystem( const container2D_Type& line1, const container2D_Type& line2, const container2D_Type& rhs ) const;
 
     //@}
 
-    std::map<OneD_BCLine, OneD_BC>                M_bcType;
+    std::map<bcLine_Type, bcType_Type>            M_bcType;
 
-    OneD_BCSide                                   M_bcSide;
+    bcSide_Type                                   M_bcSide;
 
-    std::map<OneD_BCLine, BCFunction_Type>        M_bcFunction;
+    std::map<bcLine_Type, bcFunction_Type>        M_bcFunction;
 
     bool                                          M_isInternal;
 
-    std::map<OneD_BCLine, container2D_Type>       M_bcMatrix;
+    std::map<bcLine_Type, container2D_Type>       M_bcMatrix;
 
     container2D_Type                              M_bcRHS;
 };
