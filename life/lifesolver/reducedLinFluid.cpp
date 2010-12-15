@@ -96,7 +96,8 @@ void reducedLinFluid::solveReducedLinearFluid()
             M_elmatC.zero();
 
             stiff(1.0, M_elmatC, M_fe );
-            assemb_mat(M_CAux, M_elmatC, M_fe, M_dof, 0, 0);
+            //assemb_mat(M_CAux, M_elmatC, M_fe, M_dof, 0, 0);
+            assembleMatrix(M_CAux, M_elmatC, M_fe, M_dof, 0, 0, 0,0);
         }
 
         M_BCh_dp->bdUpdate(M_fluid->mesh(), M_feBd, M_dof);
@@ -144,7 +145,8 @@ void reducedLinFluid::solveInvReducedLinearFluid()
             M_elmatC.zero();
 
             stiff(1.0, M_elmatC, M_fe );
-            assemb_mat(M_CAux, M_elmatC, M_fe, M_dof, 0, 0);
+            //assemb_mat(M_CAux, M_elmatC, M_fe, M_dof, 0, 0);
+            assembleMatrix(M_CAux, M_elmatC, M_fe, M_dof, 0, 0, 0,0);
         }
 
         M_BCh_dp_inv->bdUpdate(M_fluid->mesh(), M_feBd, M_dof);

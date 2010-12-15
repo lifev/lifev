@@ -308,7 +308,10 @@ void SDStabilization<MeshType, DofType>::applySUPG(const Real dt, MatrixType& ma
         chronoAssembly.start();
         for ( UInt iComp = 0; iComp <= nDimensions; ++iComp )
             for ( UInt jComp = 0; jComp <= nDimensions; ++jComp )
-                assemb_mat( matrix, M_elMat, M_fe, M_dof, iComp, jComp );
+                //assemb_mat( matrix, M_elMat, M_fe, M_dof, iComp, jComp );
+                assembleMatrix( matrix, M_elMat, M_fe, M_dof,
+                                iComp, jComp,
+                                iComp*M_dof.numTotalDof(), jComp*M_dof.numTotalDof() );
         chronoAssembly.stop();
 
 
@@ -444,7 +447,8 @@ void SDStabilization<MeshType, DofType>::applyRHS(const Real dt, VectorType& vec
 
         chronoAssembly.start();
         for ( UInt iComp = 0; iComp <= nDimensions; ++iComp )
-            assemb_vec( vector, M_elVec, M_fe, M_dof, iComp);
+            //assemb_vec( vector, M_elVec, M_fe, M_dof, iComp);
+            assembleVector( vector, M_elVec, M_fe, M_dof, iComp, iComp*M_dof.numTotalDof());
         chronoAssembly.stop();
 
 

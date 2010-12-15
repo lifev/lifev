@@ -318,7 +318,7 @@ assembleTransposeMatrix( EpetraMatrix<Real>&   globalMatrix,
 
 }
 
-
+/*
 template < typename DofType>
 void
 __attribute__ (( __deprecated__))
@@ -368,7 +368,7 @@ assemb_mat( EpetraMatrix<Real>& M,
     ElemMat::matrix_view mat = elmat.block( iblock, jblock );
     UInt totdof = dof.numTotalDof();
     return assembleMatrix( M, feId, feId, mat, fe, fe, dof, dof, iblock * totdof, jblock * totdof);
-}
+    }
 
 template <typename DOF, typename ElemVec>
 void
@@ -402,11 +402,10 @@ assemb_vec( EpetraVector& V,
         ig = dof.localToGlobal( feId, i + 1 ) - 1 + iblock * totdof;
         V[ ig ] += vec( i );
     }
-}
+}*/
 
 template <typename DOF, typename ElemVec>
 void
-__attribute__ (( __deprecated__))
 extract_vec( EpetraVector& V,
              ElemVec& elvec,
              const LocalDofPattern& fe,
