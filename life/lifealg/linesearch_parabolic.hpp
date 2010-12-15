@@ -79,7 +79,7 @@ namespace LifeV
     @param verbose    Option for detailed description
 */
 template <class Fct, class VectorType>
-Int lineSearch_parab( Fct& f, VectorType& residual, VectorType& sol, VectorType& step, Real& normRes,
+Int LineSearchParabolic ( Fct& f, VectorType& residual, VectorType& sol, VectorType& step, Real& normRes,
                       Real& lambda, UInt iter, bool const verbose = true)
 {
 
@@ -148,6 +148,17 @@ Int lineSearch_parab( Fct& f, VectorType& residual, VectorType& sol, VectorType&
 
     return EXIT_SUCCESS;
 
+}
+
+
+
+template <class Fct, class VectorType>
+Int __attribute__ ((__deprecated__)) lineSearch_parab( Fct& f, VectorType& residual, VectorType& sol, VectorType& step, Real& normRes,
+                      Real& lambda, UInt iter, bool const verbose = true)
+{
+
+    // you should replace any call to lineSearch_parab with a call to LineSearchParabolic
+    return  LineSearchParabolic (  f, residual, sol, step,  normRes, lambda, iter, verbose );
 }
 
 } // Namespace LifeV
