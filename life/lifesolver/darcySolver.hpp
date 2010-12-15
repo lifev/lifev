@@ -443,9 +443,14 @@ public:
       @return Constant boolean with value true if the boundary condition is setted,
       false otherwise
     */
-    bool BCset () const
+    bool isBCset () const
     {
         return M_setBC;
+    }
+
+    bool __attribute__ ((__deprecated__)) BCset () const
+    {
+	return isBCset();
     }
 
     //! Returns boundary conditions handler.

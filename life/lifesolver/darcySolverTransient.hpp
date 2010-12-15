@@ -335,11 +335,16 @@ public:
       By defaul it does not depend on time.
       @param mass Mass term for the problem.
     */
-    void setMassTerm ( const Function& mass )
+
+    void setMass ( const Function& mass )
     {
         M_mass = mass;
     }
 
+    void __attribute__ ((__deprecated__)) setMassTerm ( const Function& mass )
+    {
+	return setMass(mass);
+    }
     //@}
 
 protected:

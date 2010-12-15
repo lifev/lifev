@@ -341,7 +341,12 @@ public:
       Set the function for the first iteration for the fixed point method. The default is the zero function.
       @param primalZeroIteration The function for the first iteration.
     */
-    void setZeroItarationPrimal ( const Function& primalZeroIteration );
+    void setPrimalZeroIteration ( const Function& primalZeroIteration );
+
+    void __attribute__ ((__deprecated__)) setZeroItarationPrimal ( const Function& primalZeroIteration )
+    {
+	return setPrimalZeroIteration(primalZeroIteration);
+    }
 
     //! Set the inverse of diffusion tensor,
     /*!
@@ -367,18 +372,28 @@ public:
       Returns the number of iteration of the fixed point scheme.
       @return Final number of iterations of the fixed point method as a constant UInt.
     */
-    UInt IterationFixedPoint () const
+    UInt fixedPointNumIteration () const
     {
-        return M_iterationFixedPoint;
+        return M_fixedPointNumIteration;
+    }
+
+    UInt  __attribute__ ((__deprecated__)) IterationFixedPoint () const
+    {
+        return fixedPointNumIteration ();
     }
 
     //!  Returns the residual between two iterations of the fixed point scheme.
     /*!
       @return Final residual of the fixed point method as a constant Real.
     */
-    Real residualFixedPoint () const
+    Real fixedPointResidual () const
     {
-        return M_residualFixedPoint;
+        return M_fixedPointResidual;
+    }
+
+    Real __attribute__ ((__deprecated__)) residualFixedPoint () const
+    {
+        return fixedPointResidual();
     }
 
     //!  Returns the pointer of the primal solution vector at previous step.
@@ -413,16 +428,16 @@ protected:
     //@{
 
     //! The maximum number of iterations for the fixed point method.
-    UInt           M_maxIterationFixedPoint;
+    UInt           M_fixedPointMaxIteration;
 
     //! The current iterations for the fixed point method.
-    UInt           M_iterationFixedPoint;
+    UInt           M_fixedPointNumIteration;
 
     //! Tollerance for the stopping criteria for the fixed point method.
-    Real           M_tollFixedPoint;
+    Real           M_fixedPointTolerance;
 
     //! The residual between two iteration of the fixed point scheme.
-    Real           M_residualFixedPoint;
+    Real           M_fixedPointResidual;
 
     //! Primal solution at previous iteration step.
     vectorPtr_Type M_primalPreviousIteration;
@@ -455,10 +470,10 @@ DarcySolverNonLinear ( const data_Type&           dataFile,
         // Standard Darcy solver constructor.
         DarcySolver<Mesh, SolverType>::DarcySolver( dataFile, primal_FESpace, dual_FESpace, hybrid_FESpace, VdotN_FESpace, bcHandler, comm),
         // Non-linear stuff.
-        M_maxIterationFixedPoint        ( static_cast<UInt>(10) ),
-        M_iterationFixedPoint           ( static_cast<UInt>(0) ),
-        M_tollFixedPoint                ( static_cast<Real>(1.e-8) ),
-        M_residualFixedPoint            ( M_tollFixedPoint + static_cast<Real>(1) ),
+        M_fixedPointMaxIteration        ( static_cast<UInt>(10) ),
+        M_fixedPointNumIteration        ( static_cast<UInt>(0) ),
+        M_fixedPointTolerance           ( static_cast<Real>(1.e-8) ),
+        M_fixedPointResidual            ( M_fixedPointTolerance + static_cast<Real>(1) ),
         M_primalPreviousIteration       ( new vector_Type ( this->M_primal_FESpace.map() ) ),
         M_primalZeroIteration           ( DarcyDefaultStartUpFunction() )
 
@@ -483,10 +498,10 @@ DarcySolverNonLinear ( const data_Type&           dataFile,
         // Standard Darcy solver constructor.
         DarcySolver<Mesh, SolverType>::DarcySolver( dataFile, primal_FESpace, dual_FESpace, hybrid_FESpace, VdotN_FESpace, comm),
         // Non-linear stuff.
-        M_maxIterationFixedPoint        ( static_cast<UInt>(10) ),
-        M_iterationFixedPoint           ( static_cast<UInt>(0) ),
-        M_tollFixedPoint                ( static_cast<Real>(1.e-8) ),
-        M_residualFixedPoint            ( M_tollFixedPoint + static_cast<Real>(1) ),
+        M_fixedPointMaxIteration        ( static_cast<UInt>(10) ),
+        M_fixedPointNumIteration        ( static_cast<UInt>(0) ),
+        M_fixedPointTolerance           ( static_cast<Real>(1.e-8) ),
+        M_fixedPointResidual            ( M_fixedPointTolerance + static_cast<Real>(1) ),
         M_primalPreviousIteration       ( new vector_Type ( this->M_primal_FESpace.map() ) ),
         M_primalZeroIteration           ( DarcyDefaultStartUpFunction() )
 {
@@ -523,11 +538,11 @@ setup ()
     DarcySolver<Mesh, SolverType>::setup();
 
     // Set the maximum number of iteration for the fixed point iteration scheme.
-    M_maxIterationFixedPoint = static_cast<UInt>( dataFile( ( this->M_data.section()
+    M_fixedPointMaxIteration = static_cast<UInt>( dataFile( ( this->M_data.section()
                                                               + "/non-linear/fixed_point_iteration" ).data(), 10 ) );
 
     // Set the tollerance for the fixed point iteration scheme.
-    M_tollFixedPoint = dataFile( ( this->M_data.section() + "/non-linear/fixed_point_toll" ).data(), 1.e-8 );
+    M_fixedPointTolerance = dataFile( ( this->M_data.section() + "/non-linear/fixed_point_toll" ).data(), 1.e-8 );
 
 } // setup
 
@@ -539,17 +554,17 @@ fixedPointScheme ()
 {
 
     // Current iteration.
-    M_iterationFixedPoint = static_cast<UInt>(0);
+    M_fixedPointNumIteration = static_cast<UInt>(0);
 
     // Error between two iterations, it is the relative error between two step of the primal vector
-    M_residualFixedPoint =  M_tollFixedPoint + 1;
+    M_fixedPointResidual =  M_fixedPointTolerance + 1;
 
     /* A loop for the fixed point scheme, with exit condition based on stagnate of the
        primal variable and the maximum iteration. */
-    while ( M_residualFixedPoint > M_tollFixedPoint && M_iterationFixedPoint < M_maxIterationFixedPoint )
+    while ( M_fixedPointResidual > M_fixedPointTolerance && M_fixedPointNumIteration < M_fixedPointMaxIteration )
     {
         // Increment the iteration number.
-        ++M_iterationFixedPoint;
+        ++M_fixedPointNumIteration;
 
         // Build the linear system and the right hand side.
         this->buildSystem();
@@ -561,31 +576,31 @@ fixedPointScheme ()
         this->computePrimalAndDual();
 
         // Compute the error.
-        M_residualFixedPoint = ( *(this->M_primal) - *M_primalPreviousIteration ).Norm2() / this->M_primal->Norm2();
+        M_fixedPointResidual = ( *(this->M_primal) - *M_primalPreviousIteration ).Norm2() / this->M_primal->Norm2();
 
         // The leader process prints the iteration data.
         this->M_displayer.leaderPrint( "Fixed point scheme           \n" );
 
         // Print the maximum number of iterations
         this->M_displayer.leaderPrint( "Maximum number of iterations ",
-                                       M_maxIterationFixedPoint, "\n" );
+                                       M_fixedPointMaxIteration, "\n" );
 
         // Print the actual iterations
         this->M_displayer.leaderPrint( "Iteration number             ",
-                                       M_iterationFixedPoint, "\n" );
+                                       M_fixedPointNumIteration, "\n" );
 
         // Print the tollerance
         this->M_displayer.leaderPrint( "Tolerance                   ",
-                                       M_tollFixedPoint, "\n" );
+                                       M_fixedPointTolerance, "\n" );
 
         // Print the error reached
         this->M_displayer.leaderPrint( "Error                        ",
-                                       M_residualFixedPoint, "\n" );
+                                       M_fixedPointResidual, "\n" );
 
     }
 
     // Check if the fixed point method reach the tollerance.
-    ASSERT( M_maxIterationFixedPoint > M_iterationFixedPoint, "Attention the fixed point scheme did not reach convergence." );
+    ASSERT( M_fixedPointMaxIteration > M_fixedPointNumIteration, "Attention the fixed point scheme did not reach convergence." );
 
 } // fixedPointScheme
 
@@ -593,7 +608,7 @@ fixedPointScheme ()
 template<typename Mesh, typename SolverType>
 void
 DarcySolverNonLinear<Mesh, SolverType>::
-setZeroItarationPrimal ( const Function& primalZeroIteration )
+setPrimalZeroIteration ( const Function& primalZeroIteration )
 {
     // Set the function for the first iteration.
     M_primalZeroIteration = primalZeroIteration;
