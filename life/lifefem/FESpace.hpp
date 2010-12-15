@@ -70,7 +70,7 @@ namespace LifeV
 /*!
  *  @author Gilles Fourestey
  *
- *  Here write a long and detailed description of the class.
+ *  Class representing the FE space, i.e. the reference FE and the geometric mapping.
  *
  */
 
@@ -84,13 +84,12 @@ public:
     //@{
 
     typedef boost::function<Real ( Real const&, Real const&, Real const&,
-                                   Real const&, ID const& )> Function;
-
-    typedef MeshType                         mesh_type;
-    typedef boost::shared_ptr<mesh_type> mesh_ptrtype;
-    typedef MapType                          map_type;
-    typedef boost::shared_ptr<MapType>       map_ptrtype;
-    typedef typename MapType::comm_ptrtype   comm_ptrtype;
+                                   Real const&, ID const& )> function_Type;
+    typedef MeshType                                         mesh_Type;
+    typedef boost::shared_ptr<mesh_Type>                     meshPtr_Type;
+    typedef MapType                                          map_Type;
+    typedef boost::shared_ptr<map_Type>                      mapPtr_Type;
+    typedef typename map_Type::comm_ptrtype                  commPtr_Type;
 
     //@}
 
@@ -115,27 +114,27 @@ public:
              const QuadRule&			Qr,
              const QuadRule&			bdQr,
              const Int				fDim,
-             comm_ptrtype&			commptr
+             commPtr_Type&			commptr
            );
 
     FESpace(	partitionMesh<MeshType>&	mesh,
              const std::string&		space,
              const Int				fDim,
-             comm_ptrtype&			commptr
+             commPtr_Type&			commptr
            );
 
-    FESpace(	mesh_ptrtype			mesh,
+    FESpace(	meshPtr_Type			mesh,
              const RefFE&			refFE,
              const QuadRule&			Qr,
              const QuadRule&			bdQr,
              const Int				fDim,
-             comm_ptrtype&			commptr
+             commPtr_Type&			commptr
            );
 
-    FESpace(	mesh_ptrtype			mesh,
+    FESpace( meshPtr_Type			mesh,
              const std::string&		space,
              const Int				fDim,
-             comm_ptrtype&			commptr
+             commPtr_Type&			commptr
            );
 
     //! Do nothing destructor
@@ -149,7 +148,7 @@ public:
 
     //! Interpolate a given velocity function nodally onto a velocity vector
     template<typename vector_type>
-    void interpolate( const Function& fct, vector_type& vect, const Real time = 0. );
+    void interpolate( const function_Type& fct, vector_type& vect, const Real time = 0. );
 
     template<typename vector_type>
     void interpolateBC( BCHandler& BCh, vector_type&    vect, const Real      time);
@@ -161,19 +160,19 @@ public:
 
     // this computes vec = \int fct phi_i
     template<typename vector_type>
-    void L2ScalarProduct(	const Function&		fct,
+    void L2ScalarProduct(	const function_Type&		fct,
                           vector_type&		vec,
                           const Real			t
                         );
 
     template<typename vector_type>
-    Real L20Error(			const Function& 	fexact,
+    Real L20Error(			const function_Type& 	fexact,
                      const vector_type& 	vec,
                      const Real 			time,
                      Real* 				relError = 0 );
 
     template<typename vector_type>
-    Real L2Error(			const Function&		fexact,
+    Real L2Error(			const function_Type&		fexact,
                     const vector_type&	vec,
                     const Real			time,
                     Real*				relError=0 );
@@ -201,9 +200,9 @@ public:
       The usual L2 error norm can be retrieved by using \f$ w=1 \f$
      */
     template<typename vector_type>
-    Real L2ErrorWeighted(const Function&    exactSolution,
+    Real L2ErrorWeighted(const function_Type&    exactSolution,
                          const vector_type& solution,
-                         const Function&    weight,
+                         const function_Type&    weight,
                          const Real         time);
 
 
@@ -315,7 +314,7 @@ public:
      */
 
     template <typename vector_type>
-    vector_type FeToFeInterpolate(const FESpace<mesh_type,map_type>& originalSpace,
+    vector_type FeToFeInterpolate(const FESpace<mesh_Type,map_Type>& originalSpace,
                                   const vector_type& originalVector) const;
 
     //! This method reconstruct a gradient of a solution in the present FE space.
@@ -368,12 +367,12 @@ public:
     //    const mesh_type& mesh() const {return *M_mesh;}
     //    mesh_type& mesh() {return *M_mesh;}
 
-    const mesh_ptrtype 	mesh()	const { return M_mesh; }
-    mesh_ptrtype 		mesh()		  { return M_mesh; }
+    const meshPtr_Type 	mesh()	const { return M_mesh; }
+    meshPtr_Type 		mesh()		  { return M_mesh; }
 
     //! Returns map
-    const map_type&		map()	const { return *M_map; }
-    map_type&			map()		  { return *M_map; }
+    const map_Type&		map()	const { return *M_map; }
+    map_Type&			map()		  { return *M_map; }
     const boost::shared_ptr<const MapType>			mapPtr() const  { return M_map; }
 
     //! Returns the velocity dof
@@ -424,7 +423,7 @@ private:
      */
 
     template<typename vector_type>
-    vector_type P2ToP1Interpolate(const FESpace<mesh_type,map_type>& originalSpace,
+    vector_type P2ToP1Interpolate(const FESpace<mesh_Type,map_Type>& originalSpace,
                                   const vector_type& originalVector) const;
 
 
@@ -435,7 +434,7 @@ private:
      */
 
     template<typename vector_type>
-    vector_type P1bToP1Interpolate(const FESpace<mesh_type,map_type>& original_space,
+    vector_type P1bToP1Interpolate(const FESpace<mesh_Type,map_Type>& original_space,
                                    const vector_type& original_vector) const;
 
     //! This is a specialized function called by FeToFeInterpolate method for P_1 to P_2 interpolation
@@ -445,7 +444,7 @@ private:
      */
 
     template<typename vector_type>
-    vector_type P1ToP2Interpolate(const FESpace<mesh_type,map_type>& original_space,
+    vector_type P1ToP2Interpolate(const FESpace<mesh_Type,map_Type>& original_space,
                                   const vector_type& original_vector) const;
 
 
@@ -456,7 +455,7 @@ private:
      */
 
     template<typename vector_type>
-    vector_type P1ToP1bInterpolate(const FESpace<mesh_type,map_type>& original_space,
+    vector_type P1ToP1bInterpolate(const FESpace<mesh_Type,map_Type>& original_space,
                                    const vector_type& original_vector) const;
 
 
@@ -467,7 +466,7 @@ private:
      */
 
     template<typename vector_type>
-    vector_type P1bToP2Interpolate(const FESpace<mesh_type,map_type>& original_space,
+    vector_type P1bToP2Interpolate(const FESpace<mesh_Type,map_Type>& original_space,
                                    const vector_type& original_vector) const;
 
 
@@ -478,7 +477,7 @@ private:
      */
 
     template<typename vector_type>
-    vector_type P2ToP1bInterpolate(const FESpace<mesh_type,map_type>& original_space,
+    vector_type P2ToP1bInterpolate(const FESpace<mesh_Type,map_Type>& original_space,
                                    const vector_type& original_vector) const;
 
 
@@ -489,7 +488,7 @@ private:
      */
 
     template<typename vector_type>
-    vector_type RT0ToP0Interpolate(const FESpace<mesh_type,map_type>& original_space,
+    vector_type RT0ToP0Interpolate(const FESpace<mesh_Type,map_Type>& original_space,
                                    const vector_type& original_vector) const;
     //@}
 
@@ -501,7 +500,7 @@ private:
     std::map<std::string, spaceData>	M_spaceMap;
 
     //! reference to the mesh
-    mesh_ptrtype						M_mesh;
+    meshPtr_Type						M_mesh;
 
     //! Reference FE for the velocity
     const RefFE*    					M_refFE;
@@ -526,7 +525,7 @@ private:
     boost::shared_ptr<CurrentBdFE>		M_feBd;
 
     //! Map
-    map_ptrtype							M_map;
+    mapPtr_Type							M_map;
 
 };
 
@@ -541,7 +540,7 @@ FESpace(	partitionMesh<MeshType>& 	mesh,
          const QuadRule&      	Qr,
          const QuadRule&      	bdQr,
          const Int            	fDim,
-         comm_ptrtype&         	commptr
+         commPtr_Type&         	commptr
        ) :
         M_mesh			( mesh.mesh() ),
         M_refFE			( &refFE ),
@@ -552,7 +551,7 @@ FESpace(	partitionMesh<MeshType>& 	mesh,
         M_dim			( M_dof->numTotalDof() ),
         M_fe			( new CurrentFE  ( *M_refFE,              getGeoMap( *M_mesh ),               *M_Qr ) ),
         M_feBd			( ),
-        M_map			( new map_type() )
+        M_map			( new map_Type() )
 {
     if (M_refFE->hasBoundaryFE())
     {
@@ -568,14 +567,14 @@ FESpace<MeshType, MapType>::
 FESpace(	partitionMesh<MeshType>&	mesh,
          const std::string&		space,
          const Int				fDim,
-         comm_ptrtype&			commptr
+         commPtr_Type&			commptr
        ) :
         M_mesh			( mesh.mesh() ),
         M_fieldDim		( fDim ),
         M_dof			( ),
         M_fe			( ),
         M_feBd			( ),
-        M_map			( new map_type() )
+        M_map			( new map_Type() )
 {
     // Set spaceMap
     M_spaceMap["P1"]		= P1;
@@ -605,12 +604,12 @@ FESpace(	partitionMesh<MeshType>&	mesh,
 
 template <typename MeshType, typename MapType>
 FESpace<MeshType, MapType>::
-FESpace(	mesh_ptrtype			mesh,
+FESpace(	meshPtr_Type			mesh,
          const RefFE&			refFE,
          const QuadRule&			Qr,
          const QuadRule&			bdQr,
          const Int				fDim,
-         comm_ptrtype&			commptr
+         commPtr_Type&			commptr
        ) :
         M_mesh			( mesh ),
         M_refFE			( &refFE ),
@@ -621,7 +620,7 @@ FESpace(	mesh_ptrtype			mesh,
         M_dim			( M_dof->numTotalDof() ),
         M_fe			( new CurrentFE( *M_refFE, getGeoMap( *M_mesh ), *M_Qr ) ),
         M_feBd			( ),
-        M_map			( new map_type() )
+        M_map			( new map_Type() )
 {
     MapType map( *M_refFE, *M_mesh, commptr );
     for ( UInt ii = 0; ii < M_fieldDim; ++ii )
@@ -635,17 +634,17 @@ FESpace(	mesh_ptrtype			mesh,
 
 template <typename MeshType, typename MapType>
 FESpace<MeshType, MapType>::
-FESpace(	mesh_ptrtype			mesh,
+FESpace(	meshPtr_Type			mesh,
          const std::string&		space,
          const Int				fDim,
-         comm_ptrtype&			commptr
+         commPtr_Type&			commptr
        ) :
         M_mesh			( mesh ),
         M_fieldDim		( fDim ),
         M_dof			( ),
         M_fe			( ),
         M_feBd			( ),
-        M_map			( new map_type() )
+        M_map			( new map_Type() )
 {
     // Set spaceMap
     M_spaceMap["P1"]		= P1;
@@ -681,7 +680,7 @@ FESpace(	mesh_ptrtype			mesh,
 template <typename MeshType, typename MapType>
 template<typename vector_type>
 void
-FESpace<MeshType, MapType>::interpolate( const Function& fct,
+FESpace<MeshType, MapType>::interpolate( const function_Type& fct,
                                  vector_type&    vect,
                                  const Real      time)
 {
@@ -795,7 +794,7 @@ FESpace<MeshType, MapType>::interpolateBC( BCHandler& BCh,
 template <typename MeshType, typename MapType>
 template<typename vector_type>
 void
-FESpace<MeshType, MapType>::L2ScalarProduct( const Function& fct, vector_type& vec, const Real t)
+FESpace<MeshType, MapType>::L2ScalarProduct( const function_Type& fct, vector_type& vec, const Real t)
 {
 
     for ( UInt iVol = 1; iVol <= this->mesh()->numElements(); iVol++ )
@@ -834,7 +833,7 @@ FESpace<MeshType, MapType>::L2ScalarProduct( const Function& fct, vector_type& v
 template <typename MeshType, typename MapType>
 template<typename vector_type>
 Real
-FESpace<MeshType, MapType>::L20Error( const Function& fexact,
+FESpace<MeshType, MapType>::L20Error( const function_Type& fexact,
                               const vector_type& vec,
                               const Real time,
                               Real* relError )
@@ -888,7 +887,7 @@ FESpace<MeshType, MapType>::L20Error( const Function& fexact,
 template <typename MeshType, typename MapType>
 template<typename vector_type>
 Real
-FESpace<MeshType, MapType>::L2Error( const Function&    fexact,
+FESpace<MeshType, MapType>::L2Error( const function_Type&    fexact,
                              const vector_type& vec,
                              const Real       time,
                              Real*            relError )
@@ -966,9 +965,9 @@ FESpace<MeshType, MapType>::L2NormFunction( const function& f, const Real time)
 template<typename MeshType, typename MapType>
 template<typename vector_type>
 Real
-FESpace<MeshType,MapType>:: L2ErrorWeighted(const Function&    exactSolution,
+FESpace<MeshType,MapType>:: L2ErrorWeighted(const function_Type&    exactSolution,
                                     const vector_type& solution,
-                                    const Function&    weight,
+                                    const function_Type&    weight,
                                     const Real         time)
 {
     // Check that the vector is repeated (needed!)
@@ -1347,7 +1346,7 @@ template<typename MeshType, typename MapType>
 template<typename vector_type>
 vector_type
 FESpace<MeshType,MapType>::
-FeToFeInterpolate(const FESpace<mesh_type,map_type>& OriginalSpace,
+FeToFeInterpolate(const FESpace<mesh_Type,map_Type>& OriginalSpace,
                   const vector_type& OriginalVector) const
 {
     // This method just check that everything is alright and then call the
@@ -1624,7 +1623,7 @@ template<typename MeshType, typename MapType>
 template<typename vector_type>
 vector_type
 FESpace<MeshType,MapType>::
-P2ToP1Interpolate(const FESpace<mesh_type,map_type>& OriginalSpace,
+P2ToP1Interpolate(const FESpace<mesh_Type,map_Type>& OriginalSpace,
                   const vector_type& OriginalVector) const
 {
     // Create a zero vector.
@@ -1675,7 +1674,7 @@ template<typename MeshType, typename MapType>
 template<typename vector_type>
 vector_type
 FESpace<MeshType,MapType>::
-P1bToP1Interpolate(const FESpace<mesh_type,map_type>& OriginalSpace,
+P1bToP1Interpolate(const FESpace<mesh_Type,map_Type>& OriginalSpace,
                    const vector_type& OriginalVector) const
 {
 // Create a zero vector.
@@ -1726,7 +1725,7 @@ template<typename MeshType, typename MapType>
 template<typename vector_type>
 vector_type
 FESpace<MeshType,MapType>::
-P1ToP2Interpolate(const FESpace<mesh_type,map_type>& OriginalSpace,
+P1ToP2Interpolate(const FESpace<mesh_Type,map_Type>& OriginalSpace,
                   const vector_type& OriginalVector) const
 {
 // Create a zero vector.
@@ -1795,7 +1794,7 @@ template<typename MeshType, typename MapType>
 template<typename vector_type>
 vector_type
 FESpace<MeshType,MapType>::
-P1ToP1bInterpolate(const FESpace<mesh_type,map_type>& OriginalSpace,
+P1ToP1bInterpolate(const FESpace<mesh_Type,map_Type>& OriginalSpace,
                    const vector_type& OriginalVector) const
 {
 // Create a zero vector.
@@ -1859,7 +1858,7 @@ template<typename MeshType, typename MapType>
 template<typename vector_type>
 vector_type
 FESpace<MeshType,MapType>::
-P1bToP2Interpolate(const FESpace<mesh_type,map_type>& OriginalSpace,
+P1bToP2Interpolate(const FESpace<mesh_Type,map_Type>& OriginalSpace,
                    const vector_type& OriginalVector) const
 {
     // Create a zero vector.
@@ -1930,7 +1929,7 @@ template<typename MeshType, typename MapType>
 template<typename vector_type>
 vector_type
 FESpace<MeshType,MapType>::
-P2ToP1bInterpolate(const FESpace<mesh_type,map_type>& OriginalSpace,
+P2ToP1bInterpolate(const FESpace<mesh_Type,map_Type>& OriginalSpace,
                    const vector_type& OriginalVector) const
 {
     // Create a zero vector.
@@ -2008,7 +2007,7 @@ template<typename MeshType, typename MapType>
 template<typename vector_type>
 vector_type
 FESpace<MeshType,MapType>::
-RT0ToP0Interpolate(const FESpace<mesh_type,map_type>& OriginalSpace,
+RT0ToP0Interpolate(const FESpace<mesh_Type,map_Type>& OriginalSpace,
                    const vector_type& OriginalVector) const
 {
     // Create a zero vector.
