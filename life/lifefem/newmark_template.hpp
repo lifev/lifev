@@ -29,9 +29,9 @@
     @brief File containing a class to  deal the time advancing scheme.
     This class consider \f$\theta\f$-method for first order problems and
     Newmark scheme for the second order problems.
- 
+
     @date
- 
+
     @author Matteo Pozzoli <matteo1.pozzoli@mail.polimi.it>
     @contributor Matteo Pozzoli <matteo1.pozzoli@mail.polimi.it>
     @maintainer Matteo Pozzoli <matteo1.pozzoli@mail.polimi.it>
@@ -144,10 +144,10 @@ public:
 
     //! Empty  Constructor
     Newmark();
-    
+
      //! Destructor
     ~Newmark() {}
-  
+
     //@}
 
     //! @name Methods
@@ -158,7 +158,7 @@ public:
     @param solution current (new) value of the state vector
     */
     void shiftRight(const feVectorType& solution);
-    
+
     void __attribute__ ((__deprecated__))   shift_right(const feVectorType& solution);
 
     //! Update the right hand side \f$ f_V \f$ of the time derivative formula
@@ -201,7 +201,7 @@ public:
      @param  orderDerivate  define the order of derivate;
      */
      void setup ( const UInt& order, const  UInt& orderDerivate);
-    
+
      //! Initialize the StateVector
      /*!
      Initialize all the entries of the unknown vector to be derived with the vector x0 (duplicated).
@@ -220,7 +220,7 @@ public:
      */
      void setInitialCondition( const feVectorType& x0, const feVectorType& v0 );
      void  __attribute__ ((__deprecated__ )) initialize_unk( const feVectorType& x0, const feVectorType& v0 );
-   
+
      //! initialize the state vector
      /*!
      Initialize all the entries of the unknown vector to be derived with the vector x0, v0,w0 (duplicated).
@@ -286,7 +286,7 @@ public:
     //!Return the current accelerate
     feVectorType accelerate() const ;
     feVectorType __attribute__ ((___deprecated___)) wnk() const ;
-  
+
   //@}
 
 private:
@@ -352,7 +352,7 @@ void Newmark <feVectorType>::shiftRight(const feVectorType& solution)
 }
 
 template<typename feVectorType>
-void __attribute__((__deprecated)) Newmark <feVectorType>::shift_right(const feVectorType& solution)
+void __attribute__((__deprecated__)) Newmark <feVectorType>::shift_right(const feVectorType& solution)
 {
     // you should replace any call to shift_right() with a call to shiftRight()
   return shiftRight(solution);
@@ -562,7 +562,7 @@ void Newmark<feVectorType>::setInitialCondition( const feVectorType& x0)
 }
 
 template<typename feVectorType>
-void __attribute ((__deprecated))
+void __attribute ((__deprecated__))
 Newmark<feVectorType>::initialize_unk( const feVectorType& x0)
 {
     // you should replace any call to initial_unk() with a call to setInitialCondition()
@@ -574,8 +574,8 @@ void Newmark<feVectorType>::setInitialCondition( const feVectorType& x0, const f
 {
     feVectorContainerPtrIterate_Type iter       = this->M_unknowns.begin();
     feVectorContainerPtrIterate_Type iter_end   = this->M_unknowns.end();
- 
-   //!initialize zero 
+
+   //!initialize zero
     feVectorType zero(x0);
     zero *=0;
 
@@ -609,7 +609,7 @@ void Newmark<feVectorType>::setInitialCondition( const feVectorType& x0, const f
     feVectorContainerPtrIterate_Type iter       = this->M_unknowns.begin();
     feVectorContainerPtrIterate_Type iter_end   = this->M_unknowns.end();
 
-  //!initialize zero 
+  //!initialize zero
     feVectorType zero(x0);
     zero *=0;
 
@@ -650,7 +650,7 @@ void Newmark<feVectorType>::setInitialCondition( const feVectorContainer_Type& x
 
     UInt i(0);
 
-    //!initialize zero 
+    //!initialize zero
     feVectorType zero(x0[0]);
     zero *=0;
 
