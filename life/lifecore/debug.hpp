@@ -78,14 +78,13 @@ public:
 
     //! @name Operators
     //@{
-    DebugStream& operator<<( char const* );
-    DebugStream& operator<<( double );
-    DebugStream& operator<<( std::string const& );
-    DebugStream& operator<<( LManipFunction f );
+    DebugStream& operator<<( char const* c);
+    DebugStream& operator<<( double d);
+    DebugStream& operator<<( std::string const& str);
+    DebugStream& operator<<( LManipFunction f);
     //@}
 
-    /** @name  Methods
-     */
+    //! @name  Methods
     //@{
     void setFlush( stprintf = 0 );
     void flush();
@@ -115,7 +114,7 @@ DebugStream& operator<< ( DebugStream& stream, T const* data )
 
 #ifdef HAVE_BACKTRACE
 std::string backtrace ();
-std::string backtrace ( int );
+std::string backtrace ( int val);
 #endif
 
 
@@ -135,10 +134,10 @@ public:
 
     //! @name Operators
     //@{
-    NdebugStream& operator<<( char const* /*code*/ ) { return *this; }
-    NdebugStream& operator<<( std::string const& /*str*/) { return *this; }
-    NdebugStream& operator<<( double /*code*/) { return *this; }
-    NdebugStream& operator<<( LNManipFunction /*f*/ ) { return *this; }
+    NdebugStream& operator<<( char const* code ) { return *this; }
+    NdebugStream& operator<<( std::string const& str) { return *this; }
+    NdebugStream& operator<<( double code) { return *this; }
+    NdebugStream& operator<<( LNManipFunction f ) { return *this; }
     //@}
 
     //! @name  Methods
@@ -172,7 +171,6 @@ DebugStream Fatal( bool cond, int area = 0 );
 
 LifeV::DebugStream& perror( LifeV::DebugStream& s );
 LifeV::DebugStream& endl( LifeV::DebugStream& s );
-LifeV::DebugStream& flush( LifeV::DebugStream& );
-
+LifeV::DebugStream& flush( LifeV::DebugStream& s );
 
 #endif // DEBUG_H

@@ -85,12 +85,12 @@ struct DebugStream::Private
     {}
 
     bool debug;
-    std::ostringstream _M_output;
+    std::ostringstream M_output;
 
     stprintf flushFunction;
 
-    static bool _S_attached;
-    static std::ofstream _S_logfile;
+    static bool S_attached;
+    static std::ofstream S_logfile;
 
 };
 
@@ -118,10 +118,10 @@ void initDebugAreas ()
 
 
         // read entries in sdebug.areas
-        std::ostringstream __path;
-        __path << LIFE_PREFIX << "/share/" << PACKAGE << "/debug.areas";
+        std::ostringstream path;
+        path << LIFE_PREFIX << "/share/" << PACKAGE << "/debug.areas";
 
-        std::ifstream fin ( __path.str().c_str() );
+        std::ifstream fin ( path.str().c_str() );
         if ( fin.fail () )
         {
             fin.open ( "../debug.areas" );
@@ -129,35 +129,35 @@ void initDebugAreas ()
             {
                 Warning() << "The file debug.areas was not found.\n"
                 << "                 searched at ../debug.areas and\n"
-                << "                 " << __path.str() << "\n";
+                << "                 " << path.str() << "\n";
             }
         }
         while ( fin )
         {
-            char __line[256];
-            fin.getline ( __line, 256 );
-            if ( __line[ 0 ] == '\0' ||
-                    __line[ 0 ] == '\n' ||
-                    __line[ 0 ] == '#' ||
-                    isspace ( __line[ 0 ] ) )
+            char line[256];
+            fin.getline ( line, 256 );
+            if ( line[ 0 ] == '\0' ||
+                    line[ 0 ] == '\n' ||
+                    line[ 0 ] == '#' ||
+                    isspace ( line[ 0 ] ) )
                 continue;
-            std::istringstream __sentry ( __line );
-            std::vector<std::string> __l;
-            std::copy ( std::istream_iterator<std::string,char> ( __sentry ),
+            std::istringstream sentry ( line );
+            std::vector<std::string> l;
+            std::copy ( std::istream_iterator<std::string,char> ( sentry ),
                         std::istream_iterator<std::string,char> (),
-                        std::back_inserter ( __l ) );
-            DebugAreas->insert ( std::make_pair ( std::atoi ( __l[0].c_str() ), __l[2] ) );
+                        std::back_inserter ( l ) );
+            DebugAreas->insert ( std::make_pair ( std::atoi ( l[0].c_str() ), l[2] ) );
         }
 
-        char * __env = getenv("DEBUG");
-        if ( __env )
+        char * env = getenv("DEBUG");
+        if ( env )
         {
-            *DEBUG_AREA = __env;
+            *DEBUG_AREA = env;
         }
-        std::istringstream __is ( *DEBUG_AREA );
+        std::istringstream is ( *DEBUG_AREA );
 
 
-        std::copy ( std::istream_iterator<int,char> ( __is ),
+        std::copy ( std::istream_iterator<int,char> ( is ),
                     std::istream_iterator<int,char> (),
                     std::back_inserter ( *AREAS ) );
 
@@ -165,17 +165,17 @@ void initDebugAreas ()
 
     }
 }
-std::string getDescription ( unsigned int __area )
+std::string getDescription ( unsigned int area )
 {
     if ( DebugAreas->empty() )
-        return std::string( "Area " ) + boost::lexical_cast<std::string>(__area);
+        return std::string( "Area " ) + boost::lexical_cast<std::string>(area);
 
-    std::map<unsigned int, std::string>::iterator entry_it = DebugAreas->find ( __area );
+    std::map<unsigned int, std::string>::iterator entry_it = DebugAreas->find ( area );
 
     if ( entry_it != DebugAreas->end() )
         return entry_it->second;
     else
-        return std::string( "Area " ) + boost::lexical_cast<std::string>(__area);
+        return std::string( "Area " ) + boost::lexical_cast<std::string>(area);
 
 
 }
@@ -185,7 +185,7 @@ std::string getDescription ( unsigned int __area )
 // DebugStream - Constructors
 // =============================================
 
-DebugStream::DebugStream( int area, int /*level*/, bool print )
+DebugStream::DebugStream( int area, int level, bool print )
         :
         M_data( new Private )
 {
@@ -202,11 +202,11 @@ DebugStream::DebugStream( int area, int /*level*/, bool print )
         M_data->debug =  ( print && !area );
     }
     if ( M_data->debug )
-        M_data->_M_output << getDescription ( area ) << ": ";
+        M_data->M_output << getDescription ( area ) << ": ";
 
 }
 
-DebugStream::DebugStream( const char* initialString, int area, int /*level*/, bool print )
+DebugStream::DebugStream( const char* initialString, int area, int level, bool print )
         :
         M_data( new Private )
 {
@@ -222,7 +222,7 @@ DebugStream::DebugStream( const char* initialString, int area, int /*level*/, bo
         M_data->debug =  ( print && !area );
     }
     if ( M_data->debug )
-        M_data->_M_output << getDescription ( area ) << ": "
+        M_data->M_output << getDescription ( area ) << ": "
         << initialString;
 }
 
@@ -245,7 +245,7 @@ DebugStream::~DebugStream()
 DebugStream& DebugStream::operator<<( char const* s)
 {
     if ( M_data->debug )
-        M_data->_M_output  << s;
+        M_data->M_output  << s;
     if ( s[strlen(s)-1] == '\n')
         flush();
     return *this;
@@ -255,7 +255,7 @@ DebugStream& DebugStream::operator<<( double s)
 {
     if ( M_data->debug )
     {
-        M_data->_M_output  << s;
+        M_data->M_output  << s;
         flush();
     }
     return *this;
@@ -264,17 +264,17 @@ DebugStream& DebugStream::operator<<( double s)
 DebugStream& DebugStream::operator<<( std::string const& s)
 {
     if ( M_data->debug )
-        M_data->_M_output  << s;
+        M_data->M_output  << s;
     if ( s[s.size() -1] == '\n')
         flush();
     return *this;
 }
 
-DebugStream& DebugStream::operator<<( LifeV::LManipFunction __f )
+DebugStream& DebugStream::operator<<( LifeV::LManipFunction f )
 {
     if ( M_data->debug )
     {
-        (*__f)( *this );
+        (*f)( *this );
     }
     return *this;
 }
@@ -290,21 +290,21 @@ void DebugStream::setFlush( stprintf func )
 
 void DebugStream::flush(  )
 {
-    if ( !M_data->_M_output.str().empty() )
+    if ( !M_data->M_output.str().empty() )
     {
-        if ( Private::_S_attached )
+        if ( Private::S_attached )
         {
-            Private::_S_logfile << M_data->_M_output.str();
+            Private::S_logfile << M_data->M_output.str();
         }
         else if ( M_data->flushFunction == 0 )
         {
-            std::cerr << M_data->_M_output.str();
+            std::cerr << M_data->M_output.str();
         }
         else
         {
-            M_data->flushFunction( "%s", M_data->_M_output.str().c_str() );
+            M_data->flushFunction( "%s", M_data->M_output.str().c_str() );
         }
-        M_data->_M_output.str( "" );
+        M_data->M_output.str( "" );
     }
 
 }
@@ -313,39 +313,39 @@ void DebugStream::flush(  )
 // DebugStream Static Methods
 // ==============================================
 
-bool DebugStream::Private::_S_attached = false;
-std::ofstream DebugStream::Private::_S_logfile;
+bool DebugStream::Private::S_attached = false;
+std::ofstream DebugStream::Private::S_logfile;
 
-void DebugStream::attach( std::string const& __logfile )
+void DebugStream::attach( std::string const& logfile )
 {
-    std::ostringstream __filename;
-    __filename <<  __logfile;
+    std::ostringstream filename;
+    filename <<  logfile;
 
-    if ( Private::_S_logfile.is_open() )
+    if ( Private::S_logfile.is_open() )
     {
-        Private::_S_logfile.close();
+        Private::S_logfile.close();
     }
 
-    Private::_S_logfile.open( __filename.str().c_str(), std::ios::out );
+    Private::S_logfile.open( filename.str().c_str(), std::ios::out );
 
-    if ( Private::_S_logfile.fail() )
+    if ( Private::S_logfile.fail() )
     {
-        Warning() << "DebugStream::attach( " << __logfile.c_str() << " ) failed to open "  << __filename.str() << "\n";
+        Warning() << "DebugStream::attach( " << logfile.c_str() << " ) failed to open "  << filename.str() << "\n";
         Warning() << "Redirecting to default output\n";
-        Private::_S_attached = false;
+        Private::S_attached = false;
     }
-    else if ( Private::_S_logfile.is_open() )
+    else if ( Private::S_logfile.is_open() )
     {
-        Private::_S_logfile << __filename.str() << " is opened for debug" << std::endl;
-        Private::_S_attached = true;
+        Private::S_logfile << filename.str() << " is opened for debug" << std::endl;
+        Private::S_attached = true;
     }
 }
 
-void DebugStream::attach( std::string const& /*__logfile*/, int /*__area*/ )
+void DebugStream::attach( std::string const& logfile, int area )
 {
 }
 
-void DebugStream::detach( std::string const& /*__logfile*/, int /*__area*/ )
+void DebugStream::detach( std::string const& logfile, int area )
 {
 }
 
@@ -362,7 +362,7 @@ Debug( int area, DebugStream::stprintf func )
     return s;
 }
 
-DebugStream Debug( bool cond, int area, DebugStream::stprintf /*func*/ )
+DebugStream Debug( bool cond, int area, DebugStream::stprintf func )
 {
     if ( cond )
         return DebugStream( area, DEBUG_INFO );
@@ -423,7 +423,7 @@ std::string backtrace ()
     return backtrace( -1 );
 }
 
-std::string backtrace ( int __levels )
+std::string backtrace ( int levels )
 {
     std::ostringstream os;
 
@@ -431,8 +431,8 @@ std::string backtrace ( int __levels )
     int n = backtrace ( trace, 256 );
     char** strings = backtrace_symbols ( trace, n );
 
-    if ( __levels != -1 )
-        n = ( std::min ) ( n, __levels );
+    if ( levels != -1 )
+        n = ( std::min ) ( n, levels );
     os << "[\n";
 
     for (int i = 0; i < n; ++i)
