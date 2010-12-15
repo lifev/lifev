@@ -1,31 +1,40 @@
-/* -*- mode: c++ -*-
-   This program is part of the LifeV library
-   Copyright (C) 2001,2002,2003,2004 EPFL, INRIA, Politechnico di Milano
+//@HEADER
+/*
+*******************************************************************************
 
-   This program is free software; you can redistribute it and/or
-   modify it under the terms of the GNU General Public License
-   as published by the Free Software Foundation; either version 2
-   of the License, or (at your option) any later version.
+    Copyright (C) 2004, 2005, 2007 EPFL, Politecnico di Milano, INRIA
+    Copyright (C) 2010 EPFL, Politecnico di Milano, Emory University
 
-   This program is distributed in the hope that it will be useful,
-   but WITHOUT ANY WARRANTY; without even the implied warranty of
-   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-   GNU General Public License for more details.
+    This file is part of LifeV.
 
-   You should have received a copy of the GNU General Public License
-   along with this program; if not, write to the Free Software
-   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+    LifeV is free software; you can redistribute it and/or modify
+    it under the terms of the GNU Lesser General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    LifeV is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+    Lesser General Public License for more details.
+
+    You should have received a copy of the GNU Lesser General Public License
+    along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
+
+*******************************************************************************
 */
+//@HEADER
 
-/**
-   \file main.cpp
-   \author Paolo Crosetto <paolo.crosetto@epfl.ch>
-   \date 2009-04-09
-*/
-
-/**
- *\include fluidstructure.dox
- * @file
+/*!
+ *  @include fluidstructure.dox
+ *  @file
+ *  @brief File containing the Monolithic Test
+ *
+ *  @date 2009-04-09
+ *  @author Paolo Crosetto <crosetto@iacspc70.epfl.ch>
+ *
+ *  @contributor Cristiano Malossi <cristiano.malossi@epfl.ch>
+ *  @maintainer Paolo Crosetto <crosetto@iacspc70.epfl.ch>
+ *
  * Monolithic problem. Features:
  * - fullMonolithic (CE):
  *  -# solution with exact Newton (semiImplicit = false, useShapeDerivatives = true, domainVelImplicit = false, convectiveTermDer = false)
@@ -46,27 +55,42 @@
  *
  * \b Features:
  * This test by default solves the FSI probem discretized in time using the GCE or CE methods, implemented respectively
- in the files monolithicGE.hpp and monolithicGI.hpp . The geometry is that of a tube (benchmark test introduced in \ref GV03).
- In this test the boundary conditions assigned are of type:
- - flux (defective b.c.) at the inlet
- - absorbing (see \ref BNV08) at the outlet
- - Robin b.c. on the solid external wall
- - Dirichlet homogeneous at the solid rings on the inlet-outlet (clamped tube).
+ * in the files monolithicGE.hpp and monolithicGI.hpp . The geometry is that of a tube (benchmark test introduced in \ref GV03).
+ * In this test the boundary conditions assigned are of type:
+ * - flux (defective b.c.) at the inlet
+ * - absorbing (see \ref BNV08) at the outlet
+ * - Robin b.c. on the solid external wall
+ * - Dirichlet homogeneous at the solid rings on the inlet-outlet (clamped tube).
+ *
+ * The output is written at every timestep, in both ensight and HDF5 (if available) formats.
+ */
 
- The output is written at every timestep, in both ensight and HDF5 (if available) formats.
-*/
-
-#ifdef TWODIM
-#error test_monolithic cannot be compiled in 2D
-#endif
+// Tell the compiler to ignore specific kind of warnings:
+#pragma GCC diagnostic ignored "-Wunused-variable"
+#pragma GCC diagnostic ignored "-Wunused-parameter"
 
 #include <cassert>
 #include <cstdlib>
 
+#include <boost/timer.hpp>
+
+#include "Epetra_config.h"
+#ifdef HAVE_MPI
+#include "Epetra_MpiComm.h"
+#else
+#include "Epetra_SerialComm.h"
+#endif
+
+// Tell the compiler to ignore specific kind of warnings:
+#pragma GCC diagnostic warning "-Wunused-variable"
+#pragma GCC diagnostic warning "-Wunused-parameter"
+
+// LifeV includes
 #include <life/lifefem/bcHandler.hpp>
 #include <life/lifecore/life.hpp>
 
-#include <boost/timer.hpp>
+#include <life/lifealg/IfpackPreconditioner.hpp>
+#include <life/lifealg/MLPreconditioner.hpp>
 
 #include <life/lifesolver/FSISolver.hpp>
 //#include <life/lifesolver/NonLinearVenantKirchhofSolver.hpp>
@@ -81,22 +105,13 @@
 #include <life/lifefilters/hdf5exporter.hpp>
 #endif
 
-#include <life/lifealg/IfpackPreconditioner.hpp>
-#include <life/lifealg/MLPreconditioner.hpp>
-
-#include "Epetra_config.h"
-#ifdef HAVE_MPI
-#include "Epetra_MpiComm.h"
-#else
-#include "Epetra_SerialComm.h"
-#endif
-
+// Mathcard includes
+#include <lifemc/lifesolver/MonolithicGI.hpp>
 
 #include "ud_functions.hpp"
 #include "boundaryConditions.hpp"
 #include "flowConditions.hpp"
 #include "lumpedHeart.hpp"
-
 
 class Problem
 {
@@ -128,7 +143,7 @@ public:
       -# initialize and setup the FSIsolver
     */
 
-    Problem( GetPot const& data_file, std::string _oper = "" )
+    Problem( GetPot const& data_file )
     {
         using namespace LifeV;
 
@@ -422,15 +437,6 @@ struct FSIChecker
 {
     FSIChecker( GetPot const& _data_file ):
             data_file( _data_file ),
-            oper     ( _data_file( "problem/method", "exactJacobian" ) ),
-            prec     ( ( LifeV::Preconditioner )_data_file( "problem/precond", LifeV::NEUMANN_NEUMANN ) )
-    {}
-
-    FSIChecker( GetPot const& _data_file,
-                std::string _oper,
-                LifeV::Preconditioner _prec = LifeV::NO_PRECONDITIONER ):
-            data_file( _data_file ),
-            oper     ( _oper ),
             prec     ( ( LifeV::Preconditioner )_data_file( "problem/precond", LifeV::NEUMANN_NEUMANN ) )
     {}
 
@@ -440,7 +446,7 @@ struct FSIChecker
 
         try
         {
-            fsip = boost::shared_ptr<Problem>( new Problem( data_file, oper ) );
+            fsip = boost::shared_ptr<Problem>( new Problem( data_file ) );
 
             fsip->fsiData()->setPreconditioner( prec );
 
@@ -455,7 +461,6 @@ struct FSIChecker
     }
 
     GetPot                data_file;
-    std::string           oper;
     LifeV::Preconditioner prec;
     LifeV::Vector         disp;
 };
@@ -514,7 +519,7 @@ int main(int argc, char** argv)
 
 }
 
-void Problem::initialize(std::string& loadInitSol,  GetPot const& data_file)
+void Problem::initialize(std::string& /*loadInitSol*/,  GetPot const& data_file)
 {
 
     using namespace LifeV;

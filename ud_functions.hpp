@@ -1,38 +1,48 @@
-/* -*- mode: c++ -*-
-   This program is part of the LifeV library
-   Copyright (C) 2001,2002,2003,2004 EPFL, INRIA, Politechnico di Milano
+//@HEADER
+/*
+*******************************************************************************
 
-   This program is free software; you can redistribute it and/or
-   modify it under the terms of the GNU General Public License
-   as published by the Free Software Foundation; either version 2
-   of the License, or (at your option) any later version.
+    Copyright (C) 2004, 2005, 2007 EPFL, Politecnico di Milano, INRIA
+    Copyright (C) 2010 EPFL, Politecnico di Milano, Emory University
 
-   This program is distributed in the hope that it will be useful,
-   but WITHOUT ANY WARRANTY; without even the implied warranty of
-   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-   GNU General Public License for more details.
+    This file is part of LifeV.
 
-   You should have received a copy of the GNU General Public License
-   along with this program; if not, write to the Free Software
-   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+    LifeV is free software; you can redistribute it and/or modify
+    it under the terms of the GNU Lesser General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    LifeV is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+    Lesser General Public License for more details.
+
+    You should have received a copy of the GNU Lesser General Public License
+    along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
+
+*******************************************************************************
 */
+//@HEADER
 
-/**
-   \file main.cpp
-   \author Paolo Crosetto <paolo.crosetto@epfl.ch>
-   \date 2009-04-09
-*/
+/*!
+ *  @file
+ *  @brief File containing the boundary conditions for the Monolithic Test
+ *
+ *  @date 2009-04-09
+ *  @author Paolo Crosetto <crosetto@iacspc70.epfl.ch>
+ *
+ *  @contributor Cristiano Malossi <cristiano.malossi@epfl.ch>
+ *  @maintainer Paolo Crosetto <crosetto@iacspc70.epfl.ch>
+ *
+ *  Contains the functions to be assigned as boundary conditions, in the file boundaryConditions.hpp . The functions
+ *  can depend on time and space, while they can take in input an ID specifying one of the three principal axis
+ *  if the functions to assign is vectorial and the boundary condition is of type \c Full \c.
+ */
 
-/**
-
-   contains the functions to be assigned as boundary conditions, in the file boundaryConditions.hpp . The functions
-   can depend on time and space, while they can take in input an ID specifying one of the three principal axis
-   if the functions to
-   assign is vectorial and the boundary condition is of type \c Full \c.
-*/
 #ifndef UDF_HPP
 #define UDF_HPP
 
+// LifeV includes
 #include <life/lifecore/life.hpp>
 
 namespace LifeV

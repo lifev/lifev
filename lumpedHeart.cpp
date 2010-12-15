@@ -1,46 +1,59 @@
 //@HEADER
 /*
-************************************************************************
+*******************************************************************************
 
- This file is part of the LifeV Applications.
- Copyright (C) 2001-2010 EPFL, Politecnico di Milano, INRIA
+    Copyright (C) 2004, 2005, 2007 EPFL, Politecnico di Milano, INRIA
+    Copyright (C) 2010 EPFL, Politecnico di Milano, Emory University
 
- This library is free software; you can redistribute it and/or modify
- it under the terms of the GNU Lesser General Public License as
- published by the Free Software Foundation; either version 2.1 of the
- License, or (at your option) any later version.
+    This file is part of LifeV.
 
- This library is distributed in the hope that it will be useful, but
- WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- Lesser General Public License for more details.
+    LifeV is free software; you can redistribute it and/or modify
+    it under the terms of the GNU Lesser General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
 
- You should have received a copy of the GNU Lesser General Public
- License along with this library; if not, write to the Free Software
- Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
- USA
+    LifeV is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+    Lesser General Public License for more details.
 
-************************************************************************
+    You should have received a copy of the GNU Lesser General Public License
+    along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
+
+*******************************************************************************
 */
 //@HEADER
 
-/**
-   \file lumpedHeart.cpp
-   \author Paolo Crosetto <crosetto@iacspc70.epfl.ch>
-   \date 2009-06-03
-*/
+/*!
+ *  @file
+ *  @brief File containing the lumped heart for the Monolithic Test
+ *
+ *  @date 2009-06-03
+ *  @author Paolo Crosetto <crosetto@iacspc70.epfl.ch>
+ *
+ *  @contributor Cristiano Malossi <cristiano.malossi@epfl.ch>
+ *  @maintainer Paolo Crosetto <crosetto@iacspc70.epfl.ch>
+ */
 
+// Tell the compiler to ignore specific kind of warnings:
+#pragma GCC diagnostic ignored "-Wunused-variable"
+#pragma GCC diagnostic ignored "-Wunused-parameter"
 
-#include <math.h>
+#include <cmath>
+
+// Tell the compiler to ignore specific kind of warnings:
+#pragma GCC diagnostic warning "-Wunused-variable"
+#pragma GCC diagnostic warning "-Wunused-parameter"
+
 #include "lumpedHeart.hpp"
+
 #define TESTING
 #define PI 3.14159265
 
 namespace LifeV
 {
 
-void LumpedHeart::initParameters( FSIOperator&  oper,
-                                  const std::string&    FileName )
+void LumpedHeart::initParameters( FSIOperator&  /*oper*/, const std::string&    FileName )
 {
     M_ODEscheme.initialize_unk(0.);
 
@@ -59,12 +72,12 @@ void LumpedHeart::initParameters( FSIOperator&  oper,
     M_Tpw        =dataFile("problem/Tpw", 0.55);
 }
 
-Real& LumpedHeart::outPressure         (const Real& t, const Real& x, const Real& y, const Real& z, const ID& i)
+Real& LumpedHeart::outPressure         (const Real& /*t*/, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& /*i*/)
 {
     return LumpedHeart::M_pressure;
 }
 
-void LumpedHeart::renewParameters ( FSIOperator&  oper, const int& flag, const Real& time , const Real& flux)
+void LumpedHeart::renewParameters ( FSIOperator&  /*oper*/, const int& /*flag*/, const Real& time , const Real& flux)
 {
     M_intFlux += flux*M_dt;
     //should have a different sign, but it is assigned as a Normal bc so we take the opposite
