@@ -69,9 +69,9 @@ Some utilities for handling ascii files
 */
 std::istream & eatline( std::istream & s );
 //!skip lines starting with '!%#;$'
-std::istream & eat_comments( std::istream & s );
+std::istream & __attribute__((deprecated)) eat_comments( std::istream & s );
 //!  gets next uncommented line
-std::istream & next_good_line( std::istream & s, std::string & line );
+std::istream & __attribute__((deprecated)) next_good_line( std::istream & s, std::string & line );
 /*!
     always return a std::string with len characters
       - if the s has more than len characters : keep only the first len
@@ -87,11 +87,10 @@ std::string operator+( const std::string & str, const int i );
 std::string operator+( const std::string & str, const long int i );
 std::string operator+( const std::string & str, const unsigned int i );
 
-template <typename T>
-void parseList( const std::string& slist, std::list<T>& list )
+template <typename EntryType>
+void parseList( const std::string& slist, std::list<EntryType>& list )
 {
     std::string stringList = slist;
-//     std::set<T> setList;
     if ( slist == "" )
     {
         return;
@@ -106,7 +105,7 @@ void parseList( const std::string& slist, std::list<T>& list )
         std::stringstream stream;
         stream <<  stringList.substr( 0, commaPos ).c_str();
 
-        T var;
+        EntryType var;
         stream >> var;
         list.push_back( var );
 
@@ -130,9 +129,8 @@ string2number( const std::string& s )
 
 // @author Cristiano Malossi
 // Convert a number ( Int, bool, Real, ... ) to a std::string
-template <typename number>
-inline std::string
-number2string( const number& n )
+template <typename NumberType>
+inline std::string number2string( const NumberType& n )
 {
     std::stringstream out;
     out << n;
@@ -143,10 +141,12 @@ number2string( const number& n )
 // @author Cristiano Malossi
 // Convert an Enum to a std::string using a map as a library for conversion
 template < typename EnumeratorType >
-inline std::string
-Enum2String( const EnumeratorType& Enum, const std::map<std::string, EnumeratorType>& Map )
+inline std::string Enum2String( const EnumeratorType& Enum,
+                                const std::map<std::string,
+                                EnumeratorType>& Map )
 {
-    for ( typename std::map<std::string, EnumeratorType>::const_iterator j = Map.begin() ; j != Map.end() ; ++j )
+    for ( typename std::map<std::string, EnumeratorType>::const_iterator j = Map.begin();
+          j != Map.end() ; ++j )
         if ( j->second == Enum )
             return j->first;
 
@@ -154,18 +154,18 @@ Enum2String( const EnumeratorType& Enum, const std::map<std::string, EnumeratorT
 }
 
 // @author Cristiano Malossi
-// Convert a string made by numbers separated by commas, to a vector of numbers
-template< typename number >
-void
-string2numbersVector( const std::string& string, std::vector< number >& numberVector )
+// Convert a string made by NumberTypes separated by commas, to a vector of numbers
+template< typename NumberType >
+void string2numbersVector( const std::string& string,
+                           std::vector< NumberType >& numberVector )
 {
     //Split the string
     std::vector< std::string > stringVector;
     boost::split( stringVector, string, boost::is_any_of( "," ) );
 
     //Convert to the right type
-    for ( UInt i( 0 ); i < static_cast< UInt > ( stringVector.size() ); ++i )
-        numberVector.push_back( static_cast< number > ( std::atoi( stringVector[i].c_str() ) ) );
+    for ( UInt i( 0 ); i < static_cast<UInt> ( stringVector.size() ); ++i )
+        numberVector.push_back( static_cast<NumberType>( std::atoi( stringVector[i].c_str())));
 }
 
 } // Namespace LifeV
