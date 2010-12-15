@@ -28,13 +28,13 @@
 /*!
      @file
      @brief File containing a class for handling temporal discretization
- 
+
     @author M.A. Fernandez
     @author Cristiano Malossi <cristiano.malossi@epfl.ch>
     @date 01-06-2009
-   
+
     @contributor Matteo Pozzoli <matteo1.pozzoli@mail.polimi.it>
-  
+
     @maintainer Matteo Pozzoli <matteo1.pozzoli@mail.polimi.it>
  */
 
@@ -252,7 +252,7 @@ public:
      * @return time step performed
      */
     const UInt& timeStepNumber() const { return M_timeStepNumber; }
-    const UInt& __attribute__ ((__deprecated__)) getTimeStepNumber() const { timeStepNumber();}
+    const UInt& __attribute__ ((__deprecated__)) getTimeStepNumber() const { return timeStepNumber();}
 
     //! Get the BDF order used
     /*!
