@@ -42,7 +42,8 @@ along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <life/lifecore/SmartAssert.hpp>
 
-
+// TODO: TO BE REMOVED: ARGUABLY USELESS AND BREAKS COMPILATION ON SOME
+// SYSTEMS (BG/P etc.)
 void breakIntoDebugger()
 {
     // MSVC, BCB,

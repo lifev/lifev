@@ -69,66 +69,75 @@ enum
 */
 class AssertContext
 {
-    typedef std::string string;
 public:
+    //! @name Public typedefs
+    //@{
+    typedef std::pair< std::string, std::string> val_and_str;
+    typedef std::vector< val_and_str> vals_array;
+    //@}
+
     //! @name Constructor
     //@{
-    AssertContext() : _M_level( lvl_debug) {}
+    AssertContext() : M_level( lvl_debug) {}
     //@}
 
     //! @name Public methods
     //@{
-    // where the assertion failed: file & line
+    // adds one value and its corresponding string
+    void add_val( const std::string & val, const std::string & str)
+    {
+        M_vals.push_back( val_and_str( val, str) );
+    }
+    //@}
+
+    //! @name Set methods
+    //@{
     void setFileLine( const char * file, int line)
     {
-        _M_file = file;
-        _M_line = line;
-    }
-    const string & getContextFile() const { return _M_file; }
-    int getContextLine() const { return _M_line; }
-
-    // get/ set expression
-    void setExpression( const string & str) { _M_expression = str; }
-    const string & expression() const { return _M_expression; }
-
-    typedef std::pair< string, string> val_and_str;
-    typedef std::vector< val_and_str> vals_array;
-    // return values array as a vector of pairs:
-    // [Value, corresponding string]
-    const vals_array & get_vals_array() const { return _M_vals; }
-    // adds one value and its corresponding string
-    void add_val( const string & val, const string & str)
-    {
-        _M_vals.push_back( val_and_str( val, str) );
+        M_file = file;
+        M_line = line;
     }
 
-    // get/set level of assertion
-    void setLevel( int nLevel) { _M_level = nLevel; }
-    int get_level() const { return _M_level; }
+    void setExpression( const std::string & str) { M_expression = str; }
 
-    // get/set (user-friendly) message
+    void setLevel( int nLevel) { M_level = nLevel; }
+
     void setLevelMsg( const char * strMsg)
     {
         if ( strMsg)
-            _M_msg = strMsg;
+            M_msg = strMsg;
         else
-            _M_msg.erase();
+            M_msg.erase();
     }
-    const string & get_level_msg() const { return _M_msg; }
+    //@}
+
+    //! @name Get methods
+    //@{
+    const std::string & getContextFile() const __attribute__ ((deprecated)) { return M_file; }
+
+    int getContextLine() const __attribute__ ((deprecated)) { return M_line; }
+
+    const std::string & expression() const { return M_expression; }
+
+    const vals_array & get_vals_array() const __attribute__ ((deprecated)) { return M_vals; }
+
+    int get_level() const __attribute__ ((deprecated)) { return M_level; }
+
+    const std::string & get_level_msg() const __attribute__ ((deprecated)) { return M_msg; }
     //@}
 
 private:
     // where the assertion occured
-    string _M_file;
-    int _M_line;
+    std::string M_file;
+    int M_line;
 
     // expression and values
-    string _M_expression;
-    vals_array _M_vals;
+    std::string M_expression;
+    vals_array M_vals;
 
     // level and message
-    int _M_level;
-    string _M_msg;
+    int M_level;
+    std::string M_msg;
 };
 
 
@@ -138,7 +147,7 @@ namespace SmartAssert
 typedef void (*assert_function_type)( const AssertContext & context);
 
 // helpers
-std::string getTypeofLevel( int nLevel);
+std::std::string getTypeofLevel( int nLevel);
 void dumpContextSummary( const AssertContext & context, std::ostream & out);
 void dumpContextDetail( const AssertContext & context, std::ostream & out);
 
@@ -187,9 +196,7 @@ struct isNullFinder< const char*>
     }
 };
 
-
 } // namespace Private
-
 
 struct Assert
 {
@@ -204,12 +211,12 @@ struct Assert
 
     //! @name Constructors and destructor
     //@{
-    Assert( const char * expr)
-            : SMART_ASSERT_A( *this),
-            SMART_ASSERT_B( *this),
-            _M_needs_handling( true)
+    Assert( const char * expr):
+        SMART_ASSERT_A( *this),
+        SMART_ASSERT_B( *this),
+        M_needs_handling( true)
     {
-        _M_context.setExpression( expr);
+        M_context.setExpression( expr);
 
         if ( ( logger() == 0) || handlers().size() < 4)
         {
@@ -218,18 +225,18 @@ struct Assert
         }
     }
 
-    Assert( const Assert & other)
-            : SMART_ASSERT_A( *this),
-            SMART_ASSERT_B( *this),
-            _M_context( other._M_context),
-            _M_needs_handling( true)
+    Assert( const Assert & other):
+        SMART_ASSERT_A( *this),
+        SMART_ASSERT_B( *this),
+        M_context( other.M_context),
+        M_needs_handling( true)
     {
-        other._M_needs_handling = false;
+        other.M_needs_handling = false;
     }
 
     ~Assert()
     {
-        if ( _M_needs_handling)
+        if ( M_needs_handling)
             handleAssert();
     }
     //@}
@@ -248,26 +255,26 @@ struct Assert
         else
             // null string
             out << "null";
-        _M_context.add_val( out.str(), msg);
+        M_context.add_val( out.str(), msg);
         return *this;
     }
 
     Assert & printContext( const char * file, int line)
     {
-        _M_context.setFileLine( file, line);
+        M_context.setFileLine( file, line);
         return *this;
     }
 
     Assert & msg( const char * strMsg)
     {
-        _M_context.setLevelMsg( strMsg);
+        M_context.setLevelMsg( strMsg);
         return *this;
     }
 
     Assert & level( int nLevel, const char * strMsg = 0)
     {
-        _M_context.setLevel( nLevel);
-        _M_context.setLevelMsg( strMsg);
+        M_context.setLevel( nLevel);
+        M_context.setLevelMsg( strMsg);
         return *this;
     }
 
@@ -332,8 +339,8 @@ private:
     // handles the current assertion.
     void handleAssert()
     {
-        logger()( _M_context);
-        get_handler( _M_context.get_level() )( _M_context);
+        logger()( M_context);
+        get_handler( M_context.get_level() )( M_context);
     }
 
     /*
@@ -376,11 +383,9 @@ private:
     //@}
 
 private:
-    AssertContext _M_context;
-    mutable bool _M_needs_handling;
-
+    AssertContext M_context;
+    mutable bool M_needs_handling;
 };
-
 
 namespace SmartAssert
 {
