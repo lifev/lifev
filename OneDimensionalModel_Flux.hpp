@@ -25,17 +25,15 @@
 //@HEADER
 
 /*!
-    @file
-    @brief File containing a base class for 1D model flux function.
-
-    @date 15-04-2010
-    @author Cristiano Malossi <cristiano.malossi@epfl.ch>
-
-    @contributors Simone Rossi <simone.rossi@epfl.ch>, Ricardo Ruiz-Baier <ricardo.ruiz@epfl.ch>
-
-    @mantainer  Cristiano Malossi <cristiano.malossi@epfl.ch>
+ *  @file
+ *  @brief File containing a base class for 1D model flux function.
+ *
+ *  @date 15-04-2010
+ *  @author Cristiano Malossi <cristiano.malossi@epfl.ch>
+ *
+ *  @contributors Simone Rossi <simone.rossi@epfl.ch>, Ricardo Ruiz-Baier <ricardo.ruiz@epfl.ch>
+ *  @mantainer  Cristiano Malossi <cristiano.malossi@epfl.ch>
  */
-
 
 #ifndef ONEDIMENSIONALMODEL_FLUX_H
 #define ONEDIMENSIONALMODEL_FLUX_H
@@ -55,8 +53,14 @@ class OneDimensionalModel_Flux
 
 public:
 
-    typedef OneDimensionalModel_Physics              physics_Type;
-    typedef boost::shared_ptr< physics_Type >        physicsPtr_Type;
+    //! @name Type definitions and Enumerators
+    //@{
+
+    typedef OneDimensionalModel_Physics        physics_Type;
+    typedef boost::shared_ptr< physics_Type >  physicsPtr_Type;
+
+    //@}
+
 
     //! @name Constructors & Destructor
     //@{
@@ -82,8 +86,7 @@ public:
      *  when they are space dependent.
      *  This is NOT pretty. I should try to remove this dependency. VM 09/04
      */
-    virtual Real operator()( const Real& A, const Real& Q,
-                             const ID& ii,   const UInt& indz = 0 ) const = 0;
+    virtual Real flux( const Real& A, const Real& Q, const ID& ii, const UInt& indz = 0 ) const = 0;
 
 
     //! Jacobian matrix
@@ -93,8 +96,7 @@ public:
      *  diff(1,1) = dF1/dx1    diff(1,2) = dF1/dx2
      *  diff(2,1) = dF2/dx1    diff(2,2) = dF2/dx2
      */
-    virtual Real diff( const Real& A, const Real& Q,
-                       const ID& ii,   const ID& jj, const UInt& indz = 0 ) const  = 0;
+    virtual Real dFdU( const Real& A, const Real& Q, const ID& ii, const ID& jj, const UInt& indz = 0 ) const  = 0;
 
     //! Second derivative tensor d2Fi/(dxj dxk)
     /*!

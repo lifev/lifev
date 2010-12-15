@@ -25,19 +25,18 @@
 //@HEADER
 
 /*!
-    @file
-    @brief File containing a class for the non linear source function B of the 1D hyperbolic problem
-
-    @version 1.0
-    @author Vincent Martin
-
-    @version 2.0
-    @date 15-04-2010
-    @author Cristiano Malossi <cristiano.malossi@epfl.ch>
-
-    @contributor Simone Rossi <simone.rossi@epfl.ch>
-
-    @mantainer  Cristiano Malossi <cristiano.malossi@epfl.ch>
+ *  @file
+ *  @brief File containing a class for the non linear source function B of the 1D hyperbolic problem
+ *
+ *  @version 1.0
+ *  @author Vincent Martin
+ *
+ *  @version 2.0
+ *  @date 15-04-2010
+ *  @author Cristiano Malossi <cristiano.malossi@epfl.ch>
+ *
+ *  @contributor Simone Rossi <simone.rossi@epfl.ch>
+ *  @mantainer  Cristiano Malossi <cristiano.malossi@epfl.ch>
  */
 
 #include "OneDimensionalModel_Source_NonLinear.hpp"
@@ -48,8 +47,7 @@ namespace LifeV
 // Methods
 // ===================================================
 Real
-OneDimensionalModel_Source_NonLinear::operator()( const Real& A, const Real& Q,
-                                                  const ID& ii,  const UInt& i ) const
+OneDimensionalModel_Source_NonLinear::source( const Real& A, const Real& Q, const ID& ii, const UInt& i ) const
 {
     if ( ii == 1 ) // B1
     {
@@ -82,9 +80,7 @@ OneDimensionalModel_Source_NonLinear::operator()( const Real& A, const Real& Q,
 }
 
 Real
-OneDimensionalModel_Source_NonLinear::diff( const Real& A, const Real& Q,
-                                            const ID& ii,  const ID& jj,
-                                            const UInt& i) const
+OneDimensionalModel_Source_NonLinear::dSdU( const Real& A, const Real& Q, const ID& ii, const ID& jj, const UInt& i) const
 {
     if ( ii == 1 ) // B1
     {

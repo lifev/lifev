@@ -171,7 +171,7 @@ protected:
     boost::shared_ptr< PhysicalSolverType >    M_physicalSolver;
     solutionPtr_Type                           M_solution;
 
-    OneD_BCSide                                M_side;
+    bcSide_Type                                M_side;
     std::set< physicalSolverList >             M_list;
 
 private:

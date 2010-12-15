@@ -25,27 +25,27 @@
 //@HEADER
 
 /*!
-    @file
-    @brief File containing a solver class for the 1D model.
-
-    @version 1.0
-    @date 01-10-2006
-    @author Vincent Martin
-    @author Tiziano Passerini
-    @author Lucia Mirabella
-
-    @version 2.0
-    @author Gilles Fourestey <gilles.fourestey@epfl.ch>
-    @date 01-08-2009
-
-    @version 2.1
-    @date 21-04-2010
-    @author Cristiano Malossi <cristiano.malossi@epfl.ch>
-
-    @contributor Simone Rossi <simone.rossi@epfl.ch>
-
-    @mantainer  Cristiano Malossi <cristiano.malossi@epfl.ch>
+ *  @file
+ *  @brief File containing a solver class for the 1D model.
+ *
+ *  @version 1.0
+ *  @date 01-10-2006
+ *  @author Vincent Martin
+ *  @author Tiziano Passerini
+ *  @author Lucia Mirabella
+ *
+ *  @version 2.0
+ *  @author Gilles Fourestey <gilles.fourestey@epfl.ch>
+ *  @date 01-08-2009
+ *
+ *  @version 2.1
+ *  @date 21-04-2010
+ *  @author Cristiano Malossi <cristiano.malossi@epfl.ch>
+ *
+ *  @contributors Simone Rossi <simone.rossi@epfl.ch>, Ricardo Ruiz-Baier <ricardo.ruiz@epfl.ch>
+ *  @mantainer Cristiano Malossi <cristiano.malossi@epfl.ch>
  */
+
 
 
 #ifndef ONEDMODELSOLVER_H
@@ -171,10 +171,10 @@ public:
     typedef boost::shared_ptr< source_Type >        sourcePtr_Type;
 
     typedef OneDimensionalModel_Data                data_Type;
-    typedef data_Type::Mesh_Type                    mesh_Type;
+    typedef data_Type::mesh_Type                    mesh_Type;
 
-    typedef FESpace< mesh_Type, EpetraMap >         FESpace_Type;
-    typedef boost::shared_ptr< FESpace_Type >       FESpacePtr_Type;
+    typedef FESpace< mesh_Type, EpetraMap >         feSpace_Type;
+    typedef boost::shared_ptr< feSpace_Type >       feSpacePtr_Type;
 
     typedef Epetra_Comm                             comm_Type;
     typedef boost::shared_ptr< comm_Type >          commPtr_Type;
@@ -251,41 +251,6 @@ public:
      */
     void computeArea( solution_Type& solution );
 
-    //! Sets initial condition for the unknowns
-    /*!
-     *  Initialize variables with non constant values in space.
-     *  A step profile is approximated by smoothing the edges with a gaussian "bell".
-     *  Read options from data file: section [initialize]
-     *  var = { A, Q, P, W1, W2} the variable to be initialized
-     *  rest_value = rest value
-     *  firstnode =,
-     *  lastnode = domain of the step
-     *  multiplier = step value (= multiplier * value)
-     *  amplitude = width of the gaussian bell
-     *  X = rest_value ( 1 + multiplier * exp( - ( z - node ) / ( 2 * width^2 ) ) )
-     *  where node is alternatively firstnode or lastnode
-     */
-    //void initialize( solution_Type& solution );
-
-    //! Sets initial condition for the unknowns
-    /*!
-     * @param var if var == "physical" then A  = u10 and Q  = u20
-     *            if var == "Riemann"  then W1 = u10 and W2 = u20
-     */
-    //void initialize( solution_Type& solution, const Real& u10, const Real& u20, const std::string& var = "physical" );
-
-    //! Sets initial condition for the unknowns
-    /*!
-     *  Initialize with vectors containing all the nodal values
-     */
-    //void initialize( solution_Type& solution, const vector_Type& u10, const vector_Type& u20 );
-
-    //! Sets initial condition for the unknowns
-    /*!
-     *  Initialize only Flux ( Area read from OneDNonLinParam )
-     */
-    //void initialize( solution_Type& solution, const Real& u20 );
-
     //! Compute the right hand side
     /*!
      *  @param timeStep The time step.
@@ -307,35 +272,11 @@ public:
      */
     Real computeCFL( const solution_Type& solution, const Real& timeStep ) const;
 
-    //! Save the solution for the next timestep
-    //void savesol();
-
-    //! Recover the solution at previous timestep (keep unaltered the boundary values)
-    //void loadsol();
-
     //! Reset the output files
     void resetOutput( const solution_Type& solution );
 
     //! Save results on output files
     void postProcess( const solution_Type& solution );
-
-    //! Create matlab file for postprocessing
-    //void create_movie_file();
-
-    //! Prepare ostringstream buffer to receive the solution before sending it to file stream
-    //void openFileBuffers( const solution_Type& solution );
-
-    //! Empty the buffers
-    //void resetFileBuffers( const solution_Type& solution );
-
-    //! Move the pointer to the stored position in the ostringstream
-    //void seekpFileBuffers();
-
-    //! Store in private variable a desired stream position
-    //void tellpFileBuffers();
-
-    //! Close the buffers
-    //void closeFileBuffers();
 
     //@}
 
@@ -352,7 +293,7 @@ public:
     void setCommunicator( const commPtr_Type comm );
 
     //! Set the FEspace
-    void setFESpace( const FESpacePtr_Type FESpace );
+    void setFESpace( const feSpacePtr_Type FESpace );
 
     //! Set the linear solver
     void setLinearSolver( const linearSolverPtr_Type linearSolver );
@@ -409,7 +350,7 @@ public:
      *  @param bcSide Side of the boundary.
      *  @return value of the quantity on the specified side.
      */
-    Real boundaryValue( const solution_Type& solution, const OneD_BC& bcType, const OneD_BCSide& bcSide ) const;
+    Real boundaryValue( const solution_Type& solution, const bcType_Type& bcType, const bcSide_Type& bcSide ) const;
 
     //! Return the value of the eigenvalues and eigenvectors on a specified boundary.
     /*!
@@ -419,7 +360,7 @@ public:
      *  @param leftEigenvector1 output left eigenvector associated to the first eigenvalue.
      *  @param leftEigenvector1 output left eigenvector associated to the second eigenvalue.
      */
-    void boundaryEigenValuesEigenVectors( const OneD_BCSide& bcSide, const solution_Type& solution,
+    void boundaryEigenValuesEigenVectors( const bcSide_Type& bcSide, const solution_Type& solution,
                                           container2D_Type& eigenvalues,
                                           container2D_Type& leftEigenvector1,
                                           container2D_Type& leftEigenvector2 );
@@ -537,7 +478,7 @@ private:
     physicsPtr_Type                    M_physics;
     fluxPtr_Type                       M_flux;
     sourcePtr_Type                     M_source;
-    FESpacePtr_Type                    M_FESpace;
+    feSpacePtr_Type                    M_FESpace;
     commPtr_Type                       M_comm;
     Displayer                          M_displayer;
 
@@ -606,6 +547,7 @@ private:
     //@{
 
     OneDimensionalModel_Solver( const physicsPtr_Type physics );
+
     OneDimensionalModel_Solver& operator=( const physicsPtr_Type physics);
 
     //@}

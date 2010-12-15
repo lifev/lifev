@@ -24,20 +24,20 @@
 */
 //@HEADER
 
-
 /*!
-    @file
-    @brief File containing a class for 1D model data handling.
-
-    @version 1.0
-    @author Vincent Martin
-    @date 01-07-2004
-
-    @version 2.0
-    @author Cristiano Malossi <cristiano.malossi@epfl.ch>
-    @date 12-04-2010
-    @contributors Ricardo Ruiz-Baier <ricardo.ruiz@epfl.ch>
-    @mantainer  Cristiano Malossi <cristiano.malossi@epfl.ch>
+ *  @file
+ *  @brief File containing a class for 1D model data handling.
+ *
+ *  @version 1.0
+ *  @date 01-07-2004
+ *  @author Vincent Martin
+ *
+ *  @version 2.0
+ *  @date 12-04-2010
+ *  @author Cristiano Malossi <cristiano.malossi@epfl.ch>
+ *
+ *  @contributors Ricardo Ruiz-Baier <ricardo.ruiz@epfl.ch>
+ *  @mantainer  Cristiano Malossi <cristiano.malossi@epfl.ch>
  */
 
 #include <lifemc/lifesolver/OneDimensionalModel_Data.hpp>
@@ -53,26 +53,21 @@ OneDimensionalModel_Data::OneDimensionalModel_Data():
     M_fluxType                  (),
     M_sourceType                (),
     M_time                      (),
-    M_mesh                      ( new Mesh_Type() ),
+    M_mesh                      ( new mesh_Type() ),
     M_postprocessingDirectory   (),
     M_postprocessingFile        (),
     M_verbose                   (),
-    M_UW                        (),
-    M_inertialWall             (),
-    M_viscoelasticWall         (),
-    M_linearizeStringModel    (),
-    M_linearizeEquations       (),
-    M_longitudinalWall         (),
-    M_fluxSecondDer           (),
+    M_inertialWall              (),
+    M_viscoelasticWall          (),
+    M_linearizeStringModel      (),
+    M_linearizeEquations        (),
+    M_longitudinalWall          (),
+    M_fluxSecondDer             (),
     M_dP_dt_steps               (),
     M_CFLmax                    (),
     M_jacobianPerturbationArea  (),
     M_jacobianPerturbationFlowRate(),
     M_jacobianPerturbationPressure(),
-//    M_initialVariable           (),
-//    M_initialValue              (),
-//    M_restValue                 (),
-//    M_multiplier                (),
     M_computeCoefficients       (),
     M_powerLawCoefficient       (),
     M_density                   (),
@@ -121,13 +116,13 @@ void
 OneDimensionalModel_Data::setup( const GetPot& dataFile, const std::string& section )
 {
     // Model Type
-    M_physicsType = OneDimensionalModel_PhysicsMap[ dataFile( ( section + "/Model/PhysicsType" ).data(), "OneD_1DLinearPhysics" ) ];
-    M_fluxType    = OneDimensionalModel_FluxMap[    dataFile( ( section + "/Model/FluxType"    ).data(), "OneD_1DLinearFlux" ) ];
-    M_sourceType  = OneDimensionalModel_SourceMap[  dataFile( ( section + "/Model/SourceType"  ).data(), "OneD_1DLinearSource" ) ];
+    M_physicsType = oneDimensionalPhysicsMap[ dataFile( ( section + "/Model/PhysicsType" ).data(), "OneD_1DLinearPhysics" ) ];
+    M_fluxType    = oneDimensionalFluxMap[    dataFile( ( section + "/Model/FluxType"    ).data(), "OneD_1DLinearFlux" ) ];
+    M_sourceType  = oneDimensionalSourceMap[  dataFile( ( section + "/Model/SourceType"  ).data(), "OneD_1DLinearSource" ) ];
 
     // If data time has not been set
     if ( !M_time.get() )
-        M_time.reset( new Time_Type( dataFile, (section + "/time_discretization" ).data() ) );
+        M_time.reset( new time_Type( dataFile, (section + "/time_discretization" ).data() ) );
 
     // Mesh setup - Space Discretization
     M_mesh->setup( dataFile( ( section + "/space_discretization/Length"           ).data(), 1. ),
@@ -140,7 +135,6 @@ OneDimensionalModel_Data::setup( const GetPot& dataFile, const std::string& sect
     M_postprocessingDirectory= dataFile( ( section + "/miscellaneous/post_dir"                       ).data(), "./" );
     M_postprocessingFile     = dataFile( ( section + "/miscellaneous/post_file"                      ).data(), "sol" );
     M_verbose                = dataFile( ( section + "/miscellaneous/verbose"                        ).data(), 1 );
-    M_UW                     = dataFile( ( section + "/miscellaneous/alternate_solver"               ).data(), false );
     M_inertialWall          = dataFile( ( section + "/miscellaneous/inertial_wall"                  ).data(), false );
     M_viscoelasticWall      = dataFile( ( section + "/miscellaneous/viscoelastic_wall"              ).data(), false );
     M_linearizeStringModel = dataFile( ( section + "/miscellaneous/linearize_string_model"         ).data(), true );
@@ -157,21 +151,6 @@ OneDimensionalModel_Data::setup( const GetPot& dataFile, const std::string& sect
     M_jacobianPerturbationArea     = dataFile( ( section + "/JacobianPerturbation/deltaArea"         ).data(), 0.001 );
     M_jacobianPerturbationFlowRate = dataFile( ( section + "/JacobianPerturbation/deltaFlowRate"     ).data(), 0.001 );
     M_jacobianPerturbationPressure = dataFile( ( section + "/JacobianPerturbation/deltaPressure"     ).data(), 1 );
-
-    /*
-        // Initialize
-        std::map< std::string, OneD_Initialize > initializeMap;
-        initializeMap["A"]       = OneD_InitializeArea;
-        initializeMap["Q"]       = OneD_InitializeFlux;
-        initializeMap["W1"]      = OneD_InitializeRiemann1;
-        initializeMap["W2"]      = OneD_InitializeRiemann2;
-        initializeMap["P"]       = OneD_InitializePressure;
-
-        M_initialVariable        = initializeMap[ dataFile( ( section + "/initialize/variable"           ).data(), "Q" ) ];
-        M_initialValue           = dataFile( ( section + "/initialize/initialValue"                      ).data(), 0. );
-        M_restValue              = dataFile( ( section + "/initialize/restValue"                         ).data(), 0. );
-        M_multiplier             = dataFile( ( section + "/initialize/multiplier"                        ).data(), 1. );
-    */
 
     // Physical Parameters
     M_computeCoefficients    = dataFile( ( section + "/PhysicalParameters/ComputeCoefficients"       ).data(), false );
@@ -339,13 +318,13 @@ void
 OneDimensionalModel_Data::oldStyleSetup( const GetPot& dataFile, const std::string& section )
 {
     // Model Type
-    M_physicsType = OneDimensionalModel_PhysicsMap[ dataFile( ( section + "/Model/PhysicsType" ).data(), "OneD_1DLinearPhysics" ) ];
-    M_fluxType    = OneDimensionalModel_FluxMap[    dataFile( ( section + "/Model/FluxType"    ).data(), "OneD_1DLinearFlux" ) ];
-    M_sourceType  = OneDimensionalModel_SourceMap[  dataFile( ( section + "/Model/SourceType"  ).data(), "OneD_1DLinearSource" ) ];
+    M_physicsType = oneDimensionalPhysicsMap[ dataFile( ( section + "/Model/PhysicsType" ).data(), "OneD_1DLinearPhysics" ) ];
+    M_fluxType    = oneDimensionalFluxMap[    dataFile( ( section + "/Model/FluxType"    ).data(), "OneD_1DLinearFlux" ) ];
+    M_sourceType  = oneDimensionalSourceMap[  dataFile( ( section + "/Model/SourceType"  ).data(), "OneD_1DLinearSource" ) ];
 
     // If data time has not been set
     if ( !M_time.get() )
-        M_time.reset( new Time_Type( dataFile, (section + "/time_discretization" ).data() ) );
+        M_time.reset( new time_Type( dataFile, (section + "/time_discretization" ).data() ) );
 
     // Mesh setup - Space Discretization
     Real length = dataFile( ( section + "/discretization/x_right" ).data(), 1. ) -
@@ -360,7 +339,6 @@ OneDimensionalModel_Data::oldStyleSetup( const GetPot& dataFile, const std::stri
     M_postprocessingDirectory= dataFile( ( section + "/miscellaneous/post_dir"                       ).data(), "./" );
     M_postprocessingFile     = dataFile( ( section + "/miscellaneous/post_file"                      ).data(), "sol" );
     M_verbose                = dataFile( ( section + "/miscellaneous/verbose"                        ).data(), 1 );
-    M_UW                     = dataFile( ( section + "/miscellaneous/alternate_solver"               ).data(), false );
     M_inertialWall          = dataFile( ( section + "/miscellaneous/inertial_wall"                  ).data(), false );
     M_viscoelasticWall      = dataFile( ( section + "/miscellaneous/viscoelastic_wall"              ).data(), false );
     M_linearizeStringModel = dataFile( ( section + "/miscellaneous/linearize_string_model"         ).data(), true );
@@ -377,21 +355,6 @@ OneDimensionalModel_Data::oldStyleSetup( const GetPot& dataFile, const std::stri
     M_jacobianPerturbationArea     = dataFile( ( section + "JacobianPerturbation/deltaArea"          ).data(), 0.001 );
     M_jacobianPerturbationFlowRate = dataFile( ( section + "JacobianPerturbation/deltaFlowRate"      ).data(), 0.001 );
     M_jacobianPerturbationPressure = dataFile( ( section + "JacobianPerturbation/deltaPressure"      ).data(), 1 );
-
-    /*
-        // Initialize
-        std::map< std::string, OneD_Initialize > initializeMap;
-        initializeMap["A"]       = OneD_InitializeArea;
-        initializeMap["Q"]       = OneD_InitializeFlux;
-        initializeMap["W1"]      = OneD_InitializeRiemann1;
-        initializeMap["W2"]      = OneD_InitializeRiemann2;
-        initializeMap["P"]       = OneD_InitializePressure;
-
-        M_initialVariable        = initializeMap[ dataFile( ( section + "/initialize/variable"           ).data(), "Q" ) ];
-        M_initialValue           = dataFile( ( section + "/initialize/initialValue"                      ).data(), 0. );
-        M_restValue              = dataFile( ( section + "/initialize/restValue"                         ).data(), 0. );
-        M_multiplier             = dataFile( ( section + "/initialize/multiplier"                        ).data(), 1. );
-    */
 
     // Physical Parameters
     M_computeCoefficients    = dataFile( ( section + "/parameters/use_physical_values"               ).data(), false );
@@ -563,9 +526,9 @@ OneDimensionalModel_Data::showMe( std::ostream& output ) const
     // Model
     //output << std::scientific << std::setprecision(15);
     output << "\n*** Values for data [Model]\n\n";
-    output << "Physics Type           = " << Enum2String( M_physicsType, OneDimensionalModel_PhysicsMap ) << std::endl;
-    output << "Flux Type              = " << Enum2String( M_fluxType,    OneDimensionalModel_FluxMap    ) << std::endl;
-    output << "Source Type            = " << Enum2String( M_sourceType,  OneDimensionalModel_SourceMap  ) << std::endl;
+    output << "Physics Type           = " << Enum2String( M_physicsType, oneDimensionalPhysicsMap ) << std::endl;
+    output << "Flux Type              = " << Enum2String( M_fluxType,    oneDimensionalFluxMap    ) << std::endl;
+    output << "Source Type            = " << Enum2String( M_sourceType,  oneDimensionalSourceMap  ) << std::endl;
 
     // Time
     output << "\n*** Values for data [time_discretization]\n\n";
@@ -581,7 +544,6 @@ OneDimensionalModel_Data::showMe( std::ostream& output ) const
     output << "Postprocessing Dir.    = " << M_postprocessingDirectory << std::endl;
     output << "Postprocessing File    = " << M_postprocessingFile << std::endl;
     output << "verbose                = " << M_verbose << std::endl;
-    output << "UW                     = " << M_UW << std::endl;
     output << "Use Inertial Wall      = " << M_inertialWall << std::endl;
     output << "Use Viscoelastic Wall  = " << M_viscoelasticWall << std::endl;
     output << "Linearize Model        = " << M_linearizeStringModel << std::endl;
@@ -596,14 +558,6 @@ OneDimensionalModel_Data::showMe( std::ostream& output ) const
     output << "Jacobian perturbation Flow Rate = " << M_jacobianPerturbationFlowRate << std::endl;
     output << "Jacobian perturbation Pressure  = " << M_jacobianPerturbationPressure << std::endl;
 
-    /*
-        // Initialize
-        output << "\n*** Values for data [initialize]\n\n";
-        output << "Initial Variable       = " << M_initialVariable << std::endl;
-        output << "Initial Value          = " << M_initialValue << std::endl;
-        output << "Rest Value             = " << M_restValue << std::endl;
-        output << "Multiplier             = " << M_multiplier << std::endl;
-    */
     // Physical Parameters
     output << "\n*** Values for data [PhysicalParameters]\n\n";
     output << "Compute Coefficients   = " << M_computeCoefficients << "\n";
@@ -651,33 +605,6 @@ OneDimensionalModel_Data::showMe( std::ostream& output ) const
     output << "Source21               = " << M_source21 << "\n";
     output << "Source22               = " << M_source22 << "\n";
 }
-
-
-/*
-const OneD_Initialize&
-OneDimensionalModel_Data::initialVariable() const
-{
-    return M_initialVariable;
-}
-
-const Real&
-OneDimensionalModel_Data::initialValue() const
-{
-    return M_initialValue;
-}
-
-const Real&
-OneDimensionalModel_Data::restValue() const
-{
-    return M_restValue;
-}
-
-const Real&
-OneDimensionalModel_Data::multiplier() const
-{
-    return M_multiplier;
-}
-*/
 
 // ===================================================
 // Get Methods - Physical Parameters

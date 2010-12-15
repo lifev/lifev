@@ -25,19 +25,18 @@
 //@HEADER
 
 /*!
-    @file
-    @brief File containing a class for the linear source function B of the 1D hyperbolic problem
-
-    @version 1.0
-    @author Vincent Martin
-
-    @version 2.0
-    @date 15-04-2010
-    @author Cristiano Malossi <cristiano.malossi@epfl.ch>
-
-    @contributor Simone Rossi <simone.rossi@epfl.ch>
-
-    @mantainer  Cristiano Malossi <cristiano.malossi@epfl.ch>
+ *  @file
+ *  @brief File containing a class for the linear source function B of the 1D hyperbolic problem
+ *
+ *  @version 1.0
+ *  @author Vincent Martin
+ *
+ *  @version 2.0
+ *  @date 15-04-2010
+ *  @author Cristiano Malossi <cristiano.malossi@epfl.ch>
+ *
+ *  @contributor Simone Rossi <simone.rossi@epfl.ch>
+ *  @mantainer Cristiano Malossi <cristiano.malossi@epfl.ch>
  */
 
 #ifndef ONEDIMENSIONALMODEL_SOURCE_LINEAR_H
@@ -61,7 +60,13 @@ class OneDimensionalModel_Source_Linear : public OneDimensionalModel_Source
 
 public:
 
+    //! @name Type definitions and Enumerators
+    //@{
+
     typedef OneDimensionalModel_Source         super;
+
+    //@}
+
 
     //! @name Constructors & Destructor
     //@{
@@ -88,14 +93,10 @@ public:
      *
      * \param indz : is the index position for the parameter
      */
-    Real operator()( const Real& U1, const Real& U2,
-                     const ID& ii,
-                     const UInt& indz = 0 ) const ;
+    Real source( const Real& U1, const Real& U2, const ID& ii, const UInt& indz = 0 ) const ;
 
     //! Jacobian matrix dSi/dxj
-    Real diff( const Real& U1, const Real& U2,
-               const ID& ii,    const ID& jj,
-               const UInt& indz = 0 ) const;
+    Real dSdU( const Real& U1, const Real& U2, const ID& ii, const ID& jj, const UInt& indz = 0 ) const;
 
     //! Second derivative tensor d2Si/(dxj dxk)
 //    Real diff2( const Real& _U1, const Real& _U2,

@@ -25,33 +25,30 @@
 //@HEADER
 
 /*!
-    @file
-    @brief File containing a class providing non linear physical operations for the 1D model data.
-
-    @version 1.0
-    @date 01-07-2004
-    @author Vincent Martin
-
-    @version 2.0
-    @date 13-04-2010
-    @author Cristiano Malossi <cristiano.malossi@epfl.ch>
-
-    @contributor Simone Rossi <simone.rossi@epfl.ch>
-
-    @mantainer  Cristiano Malossi <cristiano.malossi@epfl.ch>
+ *  @file
+ *  @brief File containing a class providing non linear physical operations for the 1D model data.
+ *
+ *  @version 1.0
+ *  @date 01-07-2004
+ *  @author Vincent Martin
+ *
+ *  @version 2.0
+ *  @date 13-04-2010
+ *  @author Cristiano Malossi <cristiano.malossi@epfl.ch>
+ *
+ *  @contributor Simone Rossi <simone.rossi@epfl.ch>
+ *  @mantainer  Cristiano Malossi <cristiano.malossi@epfl.ch>
  */
-
 
 #include <lifemc/lifesolver/OneDimensionalModel_Physics_NonLinear.hpp>
 
 namespace LifeV
 {
 // ===================================================
-// Methods
+// Conversion methods
 // ===================================================
 void
-OneDimensionalModel_Physics_NonLinear::fromUToW(       Real& W1,       Real& W2,
-                                                       const Real& A,  const Real& Q, const UInt& indz ) const
+OneDimensionalModel_Physics_NonLinear::fromUToW( Real& W1, Real& W2, const Real& A,  const Real& Q, const UInt& indz ) const
 {
     Real celerity( celerity0(indz) * std::sqrt( std::pow( A / M_data -> area0(indz), M_data -> beta1(indz) ) ) );
 
@@ -64,8 +61,7 @@ OneDimensionalModel_Physics_NonLinear::fromUToW(       Real& W1,       Real& W2,
 }
 
 void
-OneDimensionalModel_Physics_NonLinear::fromWToU(       Real& A,        Real& Q,
-                                                       const Real& W1, const Real& W2, const UInt& indz ) const
+OneDimensionalModel_Physics_NonLinear::fromWToU( Real& A, Real& Q, const Real& W1, const Real& W2, const UInt& indz ) const
 {
     Real rhooverbeta0beta1 ( M_data -> densityRho() / ( M_data -> beta0(indz) * M_data -> beta1(indz) ) );
 
@@ -89,34 +85,7 @@ OneDimensionalModel_Physics_NonLinear::fromWToP( const Real& W1, const Real& W2,
 }
 
 Real
-OneDimensionalModel_Physics_NonLinear::dPdW( const Real& W1, const Real& W2,
-                                                       const ID& i,     const UInt& indz ) const
-{
-    Real rhoover2SQRTchi ( M_data -> densityRho() / ( std::sqrt(M_data -> robertsonCorrection()) * 2 ) );
-
-    Real beta1over4SQRTchi( M_data -> beta1(indz) / ( std::sqrt(M_data -> robertsonCorrection()) * 4 ) );
-
-    Real result( beta1over4SQRTchi * (W1 - W2)  );
-    result += celerity0(indz);
-    result *= rhoover2SQRTchi;
-
-    if ( i == 1 ) //! dP/dW1
-    {
-        return result;
-    }
-
-    if ( i == 2 ) //! dP/dW2
-    {
-        return -result;
-    }
-
-    ERROR_MSG("P(W1,W2)'s differential function has only 2 components.");
-    return -1.;
-}
-
-Real
-OneDimensionalModel_Physics_NonLinear::fromPToW( const Real& P, const Real& W,
-                                                 const ID& i, const UInt& indz ) const
+OneDimensionalModel_Physics_NonLinear::fromPToW( const Real& P, const Real& W, const ID& i, const UInt& indz ) const
 {
     Real SQRTbeta0beta1overrho( M_data -> beta0(indz) * M_data -> beta1(indz) / M_data -> densityRho() );
     SQRTbeta0beta1overrho = std::sqrt( SQRTbeta0beta1overrho );
@@ -126,11 +95,13 @@ OneDimensionalModel_Physics_NonLinear::fromPToW( const Real& P, const Real& W,
     Real add( SQRTchi4overbeta1 * SQRTbeta0beta1overrho
               * ( pow( ( P / M_data -> beta0(indz) + 1 ), 0.5 ) - 1 ) );
 
+#ifdef HAVE_LIFEV_DEBUG
     Debug(6320) << "[OneDimensionalModel_Physics_NonLinear::W_fromP] "
     << "SQRTchi4overbeta1 = " << SQRTchi4overbeta1
     << ", beta0beta1overrho = " << SQRTbeta0beta1overrho
     << ", pow( ( P / M_data -> beta0(indz) + 1 ), 0.5 ) = " << pow( ( P / M_data -> beta0(indz) + 1 ), 0.5 ) << "\n";
     Debug(6320) << "[OneDimensionalModel_Physics_NonLinear::W_fromP] add term = " << add << "\n";
+#endif
 
     if ( i == 1 )
         return W - add;
@@ -142,8 +113,7 @@ OneDimensionalModel_Physics_NonLinear::fromPToW( const Real& P, const Real& W,
 }
 
 Real
-OneDimensionalModel_Physics_NonLinear::fromQToW( const Real& Q, const Real& W_n,
-                                                 const Real& W, const ID& i, const UInt& indz ) const
+OneDimensionalModel_Physics_NonLinear::fromQToW( const Real& Q, const Real& W_n, const Real& W, const ID& i, const UInt& indz ) const
 {
     Real K0( M_data -> beta1(indz) / ( std::sqrt(M_data -> robertsonCorrection()) * 4 ) );
 
@@ -171,25 +141,44 @@ OneDimensionalModel_Physics_NonLinear::fromQToW( const Real& Q, const Real& W_n,
     df_k *= (W + w_k);
     df_k += f_k;
 
+#ifdef HAVE_LIFEV_DEBUG
     Debug(6320) << "[OneDimensionalModel_Physics_NonLinear::W_fromQ] "
     << "K0 = " << K0
     << ", K1 = " << K1
     << ", tau_k = " << tau_k << "\n";
+#endif
 
     Real w_kp1 = Q / (K1 * tau_k) - W;
 
-    /* for debugging purposes
-    std::ofstream ofile;
-    ofile.open( "imposedW_fromQ.m", std::ios::app );
-    ofile << Q << "\t"
-      << w_kp1 << "\n";
-    ofile.close();
-    */
-
     return w_kp1;
+}
 
-    //    ERROR_MSG("You can only find W1 or W2 as function of P");
-    //    return -1.;
+// ===================================================
+// Derivatives methods
+// ===================================================
+Real
+OneDimensionalModel_Physics_NonLinear::dPdW( const Real& W1, const Real& W2, const ID& i, const UInt& indz ) const
+{
+    Real rhoover2SQRTchi ( M_data -> densityRho() / ( std::sqrt(M_data -> robertsonCorrection()) * 2 ) );
+
+    Real beta1over4SQRTchi( M_data -> beta1(indz) / ( std::sqrt(M_data -> robertsonCorrection()) * 4 ) );
+
+    Real result( beta1over4SQRTchi * (W1 - W2)  );
+    result += celerity0(indz);
+    result *= rhoover2SQRTchi;
+
+    if ( i == 1 ) //! dP/dW1
+    {
+        return result;
+    }
+
+    if ( i == 2 ) //! dP/dW2
+    {
+        return -result;
+    }
+
+    ERROR_MSG("P(W1,W2)'s differential function has only 2 components.");
+    return -1.;
 }
 
 }

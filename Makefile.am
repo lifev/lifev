@@ -60,11 +60,9 @@ liblifemcsolver_la_SOURCES   = BCInterface1DData.cpp \
                                OneDimensionalModel_Physics.cpp \
                                OneDimensionalModel_Physics_Linear.cpp \
                                OneDimensionalModel_Physics_NonLinear.cpp \
-                               OneDimensionalModel_Flux.cpp \
                                OneDimensionalModel_Flux_Linear.cpp \
                                OneDimensionalModel_Flux_NonLinear.cpp \
                                OneDimensionalModel_Solver.cpp \
-                               OneDimensionalModel_Source.cpp \
                                OneDimensionalModel_Source_Linear.cpp \
                                OneDimensionalModel_Source_NonLinear.cpp
 
