@@ -36,8 +36,6 @@
 #ifndef _DATAHYPERBOLIC_H_
 #define _DATAHYPERBOLIC_H_ 1
 
-#include <life/lifearray/tab.hpp>
-
 #include <life/lifemesh/dataMesh.hpp>
 
 #include <life/lifefem/dataTime.hpp>
