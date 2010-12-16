@@ -40,7 +40,6 @@
 #define _DATADARCY_H_ 1
 
 #include <life/lifemesh/dataMesh.hpp>
-#include <life/lifearray/tab.hpp>
 #include <life/lifefem/dataTime.hpp>
 #include <life/lifefem/assemb.hpp>
 
@@ -290,7 +289,7 @@ public:
     inversePermeability ( const permeability_type& invPerm, FESpace<Mesh, EpetraMap>& fESpace ):
 	M_fields              ( std::vector< const vector_ptrtype* >(0) ),
 	M_inversePermeability ( invPerm ),
-	M_fESpace             ( fESpace ) 
+	M_fESpace             ( fESpace )
     {
     };
 
