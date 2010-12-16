@@ -49,10 +49,19 @@ quadRuleTetra.plt ==> Show the Convergence Rate of all the quadrature rules on T
 #include <life/lifefem/quadRule.hpp>
 #include <string>
 #include <fstream>
+
+#pragma GCC diagnostic ignored "-Wunused-variable"
+#pragma GCC diagnostic ignored "-Wunused-parameter"
+
+#include <boost/numeric/ublas/vector.hpp>
+
+#pragma GCC diagnostic warning "-Wunused-variable"
+#pragma GCC diagnostic warning "-Wunused-parameter"
+
 #include "SetOfFun.hpp"
 namespace LifeV
 {
-
+typedef boost::numeric::ublas::vector<Real> Vector;
 typedef std::vector<QuadRule const *> container_Type;
 typedef container_Type::const_iterator constIterator_Type;
 
