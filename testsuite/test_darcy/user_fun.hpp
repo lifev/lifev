@@ -35,12 +35,23 @@
 #include <vector>
 
 #include <life/lifecore/life.hpp>
-#include <life/lifearray/tab.hpp>
+
+#pragma GCC diagnostic ignored "-Wunused-variable"
+#pragma GCC diagnostic ignored "-Wunused-parameter"
+
+#include <boost/numeric/ublas/vector.hpp>
+#include <boost/numeric/ublas/matrix.hpp>
+
+#pragma GCC diagnostic warning "-Wunused-variable"
+#pragma GCC diagnostic warning "-Wunused-parameter"
 
 namespace dataProblem
 {
 
 using namespace LifeV;
+
+typedef boost::numeric::ublas::vector<Real> Vector;
+typedef boost::numeric::ublas::matrix<Real> Matrix;
 
 // ===================================================
 //!                    Problem data
