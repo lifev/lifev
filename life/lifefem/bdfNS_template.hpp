@@ -26,7 +26,7 @@
 
 /*!
     @file
-    @brief File containing a class for an easy handling of different order time 
+    @brief File containing a class for an easy handling of different order time
             discretizations/extrapolations BDF based specific for the Navier-Stokes problem
 
     @date 01-04-2003
@@ -34,7 +34,7 @@
 
     @contributor Laura Cattaneo
     @mantainer Laura Cattaneo
-    
+
  */
 
 #ifndef _BDF_NS_TEMPLATE_H
@@ -51,7 +51,7 @@
 namespace LifeV
 {
 
-//! \class BdfTNS 
+//! \class BdfTNS
 /*!
     @author Alessandro Veneziani
     @see Van Kan, Prohl, Guermond
@@ -112,20 +112,22 @@ public:
     /*!
         @return Reference to a new Bdf template which holds the velocity field
      */
-    BdfT<VectorType>& bdf_u( ) { return M_bdfVelocity; }
+    BdfT<VectorType>& __attribute__ ((__deprecated__)) bdf_u() { return bdfVelocity(); }
+    BdfT<VectorType>& bdfVelocity() { return M_bdfVelocity; }
 
     //! The method returns the Bdf pressure
     /*!
         @return Reference to a new Bdf template which holds the pressure
      */
-    BdfT<VectorType>& bdf_p( ) { return M_bdfPressure; }
+    BdfT<VectorType>& __attribute__ ((__deprecated__)) bdf_p() { return bdfPressure(); }
+    BdfT<VectorType>& bdfPressure() { return M_bdfPressure; }
 
     //@}
 
 private:
 
     //! Bdf velocity
-    BdfT<VectorType> M_bdfVelocity; 
+    BdfT<VectorType> M_bdfVelocity;
 
     //! Bdf pressure
     BdfT<VectorType> M_bdfPressure;
@@ -133,7 +135,7 @@ private:
 
 
 // ===================================================
-// Constructors 
+// Constructors
 // ===================================================
 template<typename VectorType>
 BdfTNS<VectorType>::BdfTNS( const UInt order )
