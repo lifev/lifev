@@ -32,9 +32,17 @@
  @date 2-12-2009
  */
 
+#pragma GCC diagnostic ignored "-Wunused-variable"
+#pragma GCC diagnostic ignored "-Wunused-parameter"
+
+#include <boost/numeric/ublas/vector.hpp>
+
+#pragma GCC diagnostic warning "-Wunused-variable"
+#pragma GCC diagnostic warning "-Wunused-parameter"
 
 namespace LifeV
 {
+typedef boost::numeric::ublas::matrix<Real> Tab2d;
 
 template <class vector_type>
 void stiff(const Real sigma_l, const Real sigma_t, const vector_type& cos, ElemMat& elmat, const CurrentFE& fe, const Dof& dof, UInt iblock, UInt jblock);
