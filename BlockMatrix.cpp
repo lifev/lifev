@@ -60,7 +60,7 @@ void BlockMatrix::GlobalAssemble()
     //    M_globalMatrix->spy("Prec");
 }
 
-void BlockMatrix::coupler(map_shared_ptrtype& map,
+void BlockMatrix::coupler(mapPtr_Type& map,
                           const std::map<ID, ID>& locDofMap,
                           const vectorPtr_Type& numerationInterface,
                           const Real& timeStep
@@ -68,38 +68,38 @@ void BlockMatrix::coupler(map_shared_ptrtype& map,
 {
     ASSERT(!M_coupling.get(), "coupler must not be called twice \n");
     M_coupling.reset(new matrix_Type(*map));
-    super::couplingMatrix( M_coupling,  M_couplingFlag, super::M_FESpace, super::M_offset, locDofMap, numerationInterface, timeStep);
+    super_Type::couplingMatrix( M_coupling,  M_couplingFlag, super_Type::M_FESpace, super_Type::M_offset, locDofMap, numerationInterface, timeStep);
 }
 
-void BlockMatrix::coupler(map_shared_ptrtype& map,
+void BlockMatrix::coupler(mapPtr_Type& map,
                           const std::map<ID, ID>& locDofMap,
                           const vectorPtr_Type& numerationInterface,
                           const Real& timeStep,
                           UInt /*flag1*/
                          )
 {
-    super::couplingMatrix( M_coupling,  M_couplingFlag, super::M_FESpace, super::M_offset, locDofMap, numerationInterface, timeStep);
+    super_Type::couplingMatrix( M_coupling,  M_couplingFlag, super_Type::M_FESpace, super_Type::M_offset, locDofMap, numerationInterface, timeStep);
 }
 
 
-int BlockMatrix::solveSystem( const vector_Type& rhs, vector_Type& step, solver_ptrtype& linearSolver)
+int BlockMatrix::solveSystem( const vector_Type& rhs, vector_Type& step, solverPtr_Type& linearSolver)
 {
     return linearSolver->solveSystem(rhs, step, M_globalMatrix);
 }
 
 void BlockMatrix::push_back_matrix( const matrixPtr_Type& Mat, bool /*recompute*/)
 {
-    super::M_blocks.push_back(Mat);
+    super_Type::M_blocks.push_back(Mat);
 }
 
 
 void BlockMatrix::replace_matrix( const matrixPtr_Type& Mat, UInt index)
 {
-    super::M_blocks[index] = Mat;
+    super_Type::M_blocks[index] = Mat;
 }
 
 
-void BlockMatrix::replace_precs( const epetra_operator_ptrtype& Mat, UInt index)
+void BlockMatrix::replace_precs( const epetraOperatorPtr_Type& Mat, UInt index)
 {
     assert(false);
 }
@@ -211,24 +211,24 @@ void BlockMatrix::createInterfaceMap( const EpetraMap& interfaceMap , const std:
 
 void BlockMatrix::applyBoundaryConditions(const Real& time)
 {
-    for ( UInt i = 0; i < super::M_blocks.size(); ++i )
+    for ( UInt i = 0; i < super_Type::M_blocks.size(); ++i )
         applyBoundaryConditions( time, i );
 }
 
 void BlockMatrix::applyBoundaryConditions(const Real& time, vectorPtr_Type& rhs)
 {
-    for ( UInt i = 0; i < super::M_blocks.size(); ++i )
+    for ( UInt i = 0; i < super_Type::M_blocks.size(); ++i )
         applyBoundaryConditions( time, rhs, i );
 }
 
 void BlockMatrix::applyBoundaryConditions(const Real& time, vectorPtr_Type& rhs, const UInt block)
 {
-    bcManage( *M_globalMatrix , *rhs, *super::M_FESpace[block]->mesh(), super::M_FESpace[block]->dof(), *super::M_bch[block], super::M_FESpace[block]->feBd(), 1., time);
+    bcManage( *M_globalMatrix , *rhs, *super_Type::M_FESpace[block]->mesh(), super_Type::M_FESpace[block]->dof(), *super_Type::M_bch[block], super_Type::M_FESpace[block]->feBd(), 1., time);
 }
 
 void BlockMatrix::applyBoundaryConditions(const Real& time, const UInt block)
 {
-    bcManageMatrix( *M_globalMatrix , *super::M_FESpace[block]->mesh(), super::M_FESpace[block]->dof(), *super::M_bch[block], super::M_FESpace[block]->feBd(), 1., time);
+    bcManageMatrix( *M_globalMatrix , *super_Type::M_FESpace[block]->mesh(), super_Type::M_FESpace[block]->dof(), *super_Type::M_bch[block], super_Type::M_FESpace[block]->feBd(), 1., time);
 }
 
 void BlockMatrix::addToCoupling( const matrixPtr_Type& Mat, UInt /*position*/)

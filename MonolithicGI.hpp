@@ -85,7 +85,7 @@ class MonolithicGI : public Monolithic
 {
 public:
 
-    typedef Monolithic                                         super;
+    typedef Monolithic                                         super_Type;
     typedef EpetraPreconditioner                               prec_Type;
     typedef boost::shared_ptr<prec_Type>                   prec_type;
 

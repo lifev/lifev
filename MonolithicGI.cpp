@@ -45,7 +45,7 @@ namespace LifeV
 {
 
 MonolithicGI::MonolithicGI():
-        super(),
+        super_Type(),
         M_mapWithoutMesh(),
         M_uk(),
         M_domainVelImplicit(true),
@@ -64,7 +64,7 @@ MonolithicGI::MonolithicGI():
 void
 MonolithicGI::setUp( const GetPot& dataFile )
 {
-    super::setUp(dataFile);
+    super_Type::setUp(dataFile);
 
     M_domainVelImplicit     = dataFile( "fluid/domainVelImplicit", true);
     M_convectiveTermDer     = dataFile( "fluid/convectiveTermDer", false);
@@ -73,7 +73,7 @@ MonolithicGI::setUp( const GetPot& dataFile )
 void
 MonolithicGI::setupFluidSolid( UInt const fluxes )
 {
-    super::setupFluidSolid( fluxes );
+    super_Type::setupFluidSolid( fluxes );
     UInt offset = M_monolithicMap->getMap(Unique)->NumGlobalElements();
     M_mapWithoutMesh.reset(new EpetraMap(*M_monolithicMap));
 
@@ -126,14 +126,14 @@ MonolithicGI::updateSystem()
     vectorPtr_Type meshDispDiff(new vector_Type(M_mmFESpace->map()));
     meshDispDiff->subset(*M_uk, offset); //if the conv. term is to be condidered implicitly
     M_meshMotion->initialize(*meshDispDiff);//M_disp is set to the total mesh disp.`
-    super::updateSystem();
+    super_Type::updateSystem();
     M_un.reset(new vector_Type(*M_uk));
 }
 
 void
 MonolithicGI::buildSystem ()
 {
-    super::buildSystem();
+    super_Type::buildSystem();
     M_meshMotion->computeMatrix();
 }
 
@@ -197,7 +197,7 @@ MonolithicGI::evalResidual( vector_Type&       res,
 
     applyBoundaryConditions();
 
-    super::evalResidual( disp, M_rhsFull, res, false );
+    super_Type::evalResidual( disp, M_rhsFull, res, false );
 }
 
 void
@@ -276,7 +276,7 @@ void MonolithicGI::initialize( FSIOperator::fluidPtr_Type::value_type::Function 
                                FSIOperator::solidPtr_Type::value_type::Function const& w0,
                                FSIOperator::solidPtr_Type::value_type::Function const& df0 )
 {
-    super::initialize(u0, p0, d0, w0, df0);
+    super_Type::initialize(u0, p0, d0, w0, df0);
 
     vector_Type df(M_mmFESpace->map());
     M_mmFESpace->interpolate(df0, df, M_data->dataSolid()->dataTime()->getTime());
@@ -287,7 +287,7 @@ void MonolithicGI::initialize( FSIOperator::fluidPtr_Type::value_type::Function 
 
 int MonolithicGI::setupBlockPrec( )
 {
-    super::setupBlockPrec( );
+    super_Type::setupBlockPrec( );
 
     if (M_data->dataFluid()->useShapeDerivatives())
     {

@@ -37,7 +37,7 @@ namespace LifeV
 //! Public Methods
 // ===================================================
 
-void ComposedDNND::coupler(map_shared_ptrtype& map,
+void ComposedDNND::coupler(mapPtr_Type& map,
                            const std::map<ID, ID>& locDofMap,
                            const vectorPtr_Type& numerationInterface,
                            const Real& timeStep)

@@ -104,7 +104,7 @@ public:
 
     //!@name Typedefs
     //@{
-    typedef FSIOperator                                        super;
+    typedef FSIOperator                                        super_Type;
     typedef FSIOperator::fluidPtr_Type::value_type::matrix_type/*matrix_Type*/   matrix_Type;
     typedef boost::shared_ptr<matrix_Type>                     matrixPtr_Type;
     typedef BlockInterface                                     prec_Type;
@@ -333,7 +333,7 @@ public:
     */
     virtual void setFluidBC     ( const fluidBchandlerPtr_Type& bc_fluid )
     {
-        super::setFluidBC(bc_fluid);
+        super_Type::setFluidBC(bc_fluid);
         //bc_fluid->merge(*M_BCh_flux);
     }
 
@@ -342,7 +342,7 @@ public:
     */
     virtual void setSolidBC     ( const fluidBchandlerPtr_Type& bc_solid )
     {
-        super::setSolidBC(bc_solid);
+        super_Type::setSolidBC(bc_solid);
         //bc_solid->merge(*M_BCh_Robin);
     }
 

@@ -74,18 +74,18 @@ public:
     typedef boost::shared_ptr< vector_Type >                           vectorPtr_Type;
     typedef EpetraMatrix< Real >                                       matrix_Type;
     typedef boost::shared_ptr< matrix_Type >                           matrixPtr_Type;
-    typedef boost::shared_ptr< Epetra_Operator >                       epetra_operator_ptrtype;
+    typedef boost::shared_ptr< Epetra_Operator >                       epetraOperatorPtr_Type;
     typedef boost::shared_ptr< EpetraPreconditioner >                  epetra_preconditioner_ptrtype;
-    typedef matrix_Type::matrix_type/*matrix_Type*/                                   epetra_matrix_Type;
+    typedef matrix_Type::matrix_type/*matrix_Type*/                    epetraMatrix_Type;
     typedef SolverTrilinos                                             solver_Type;
-    typedef boost::shared_ptr< SolverTrilinos >                        solver_ptrtype;
-    typedef boost::shared_ptr< FESpace<RegionMesh3D<LinearTetra>, EpetraMap> >  fespace_shared_ptrtype;
-    typedef fespace_shared_ptrtype                                     fespace_ptrtype;
-    //    typedef FESpace<RegionMesh3D<LinearTetra>, EpetraMap>*                 fespace_ptrtype;
-    typedef EpetraMap*                                                 map_ptrtype;
-    typedef boost::shared_ptr< EpetraMap >                             map_shared_ptrtype;
-    //typedef BCHandler*                                                 bchandler_ptrtype;
-    typedef boost::shared_ptr< BCHandler >                             bchandler_ptrtype;
+    typedef boost::shared_ptr< SolverTrilinos >                        solverPtr_Type;
+    typedef boost::shared_ptr< FESpace<RegionMesh3D<LinearTetra>, EpetraMap> >  fespacePtr_Type;
+    //typedef fespacePtr_Type                                     fespacePtr_Type;
+    //    typedef FESpace<RegionMesh3D<LinearTetra>, EpetraMap>*                 fespacePtr_Type;
+    //typedef EpetraMap*                                                 mapPtr_Type;
+    typedef boost::shared_ptr< EpetraMap >                             mapPtr_Type;
+    //typedef BCHandler*                                                 bchandlerPtr_Type;
+    typedef boost::shared_ptr< BCHandler >                             bchandlerPtr_Type;
     //@}
 
 
@@ -129,7 +129,7 @@ public:
         @param result output result
         @param linearSolver the linear system
      */
-    virtual int  solveSystem( const vector_Type& rhs, vector_Type& result, solver_ptrtype& linearSolver)=0;
+    virtual int  solveSystem( const vector_Type& rhs, vector_Type& result, solverPtr_Type& linearSolver)=0;
 
     //! Sets the parameters needed by the preconditioner from data file
     /*!
@@ -199,7 +199,7 @@ public:
       the subproblems
       @param numerationInterface vector containing the correspondence of the Lagrange multipliers with the interface dofs
      */
-    virtual void coupler(map_shared_ptrtype& map,
+    virtual void coupler(mapPtr_Type& map,
                          const std::map<ID, ID>& locDofMap,
                          const vectorPtr_Type& numerationInterface,
                          const Real& timeStep)=0;
@@ -223,7 +223,7 @@ public:
       @param numerationInterface vector containing the correspondence of the Lagrange multipliers with the interface dofs
       @param couplingBlock: flag specifying the block associated with the coupling
      */
-    virtual void coupler(map_shared_ptrtype& map,
+    virtual void coupler(mapPtr_Type& map,
                          const std::map<ID, ID>& locDofMap,
                          const vectorPtr_Type& numerationInterface,
                          const Real& timeStep,
@@ -245,14 +245,14 @@ public:
     /*!
       (only used if the operator is a preconditioner)
      */
-    virtual void replace_precs ( const epetra_operator_ptrtype& /*Mat*/, UInt /*index*/)
+    virtual void replace_precs ( const epetraOperatorPtr_Type& /*Mat*/, UInt /*index*/)
     {ERROR_MSG("this method should not be implemented");}
 
     //!pushes back a block preconditioner
     /*!
       (only used if the operator is a preconditioner)
      */
-    virtual void push_back_precs (const epetra_operator_ptrtype& /*Mat*/)
+    virtual void push_back_precs (const epetraOperatorPtr_Type& /*Mat*/)
     {ERROR_MSG("this method should not be implemented");}
     //@}
 
@@ -262,7 +262,7 @@ public:
       \param bch: input BCHandler to replace
       \param position: position
      */
-    virtual void replace_bch(bchandler_ptrtype& /*bch*/, UInt /*position*/) {};
+    virtual void replace_bch(bchandlerPtr_Type& /*bch*/, UInt /*position*/) {};
 
     //!Applies the correspondent boundary conditions to every block
     /*!
@@ -334,7 +334,7 @@ public:
      */
     void couplingMatrix(matrixPtr_Type& bigMatrix,
                         Int coupling,
-                        const std::vector<fespace_ptrtype>& problem,
+                        const std::vector<fespacePtr_Type>& problem,
                         const std::vector<UInt>& offset,
                         const std::map<ID, ID>& locDofMap,
                         const vectorPtr_Type& numerationInterface,
@@ -348,7 +348,7 @@ public:
       position in the vector of matrix pointers M_blocks. An arbitrary number of raw pointers can be passed.
       \param blocks: total number of blocks
      */
-    void setConditions(std::vector<bchandler_ptrtype>& vec );
+    void setConditions(std::vector<bchandlerPtr_Type>& vec );
 
 
     //!sets the vector of raw pointer to the FESpaces
@@ -356,14 +356,14 @@ public:
       An arbitrary number of raw pointers can be passed.
       \param blocks: total number of input FESpaces
      */
-    void setSpaces    ( std::vector<fespace_ptrtype>& vec );
+    void setSpaces    ( std::vector<fespacePtr_Type>& vec );
 
     //!sets the vector of raw pointer to the offsets of the different blocks
     /*!
       An arbitrary number of raw pointers can be passed.
       \param blocks: total number of input offsets
      */
-    void setOffsets    ( UInt blocks, .../*fespace_ptrtype ptr1, fespace_ptrtype ptr2*/);
+    void setOffsets    ( UInt blocks, .../*fespacePtr_Type ptr1, fespacePtr_Type ptr2*/);
 
 
     //!computes the Robin coupling matrix
@@ -390,9 +390,9 @@ public:
                         Real& alphaf,
                         Real& alphas,
                         UInt coupling,
-                        const BlockInterface::fespace_ptrtype& FESpace1,
+                        const BlockInterface::fespacePtr_Type& FESpace1,
                         const UInt& offset1,
-                        const BlockInterface::fespace_ptrtype& FESpace2,
+                        const BlockInterface::fespacePtr_Type& FESpace2,
                         const UInt& offset2,
                         const std::map<ID, ID>& locDofMap,
                         const BlockInterface::vectorPtr_Type& numerationInterface );
@@ -418,10 +418,10 @@ public:
     const std::vector<matrixPtr_Type>&    getBlockVector(){return M_blocks;}
 
     //! returns the vector of pointers to the BCHandlers (by const reference).
-    const std::vector<bchandler_ptrtype>& getBChVector() {return M_bch;}
+    const std::vector<bchandlerPtr_Type>& getBChVector() {return M_bch;}
 
     //! returns the vector of pointers to the FE spaces (by const reference).
-    const std::vector<fespace_ptrtype>&   getFESpaceVector() {return M_FESpace;}
+    const std::vector<fespacePtr_Type>&   getFESpaceVector() {return M_FESpace;}
 
     //! returns the vector of the offsets (by const reference).
     const std::vector<UInt>&              getOffsetVector() {return M_offset;}
@@ -460,9 +460,9 @@ protected:
     //! @name Protected Members
     //@{
     //ComposedOperator<Epetra_Operator>                      M_blocks;
-    std::vector<bchandler_ptrtype>                               M_bch;
+    std::vector<bchandlerPtr_Type>                               M_bch;
     std::vector<matrixPtr_Type>                                  M_blocks;
-    std::vector<fespace_ptrtype>                                 M_FESpace;
+    std::vector<fespacePtr_Type>                                 M_FESpace;
     std::vector<UInt>                                            M_offset;
     vectorPtr_Type                                               M_numerationInterface;
     boost::shared_ptr<Epetra_Comm>                               M_comm;

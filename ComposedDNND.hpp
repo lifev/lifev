@@ -117,13 +117,13 @@ class ComposedDNND : public ComposedNN
 {
 public:
 
-    typedef ComposedNN super;
+    typedef ComposedNN super_Type;
 
     //! @name Constructor and Destructor
     //@{
 
     ComposedDNND( const std::vector<Int>& flag, const std::vector<Block>& order ):
-            super( flag, order )
+            super_Type( flag, order )
     {
     }
 
@@ -157,7 +157,7 @@ public:
       @param numerationInterface vector containing the correspondence of the Lagrange multipliers with the interface dofs
       @param timestep the timestep chosen
      */
-    void coupler(map_shared_ptrtype&      map,
+    void coupler(mapPtr_Type&      map,
                  const std::map<ID, ID>& locDofMap,
                  const vectorPtr_Type&    numerationInterface,
                  const Real& timeStep);

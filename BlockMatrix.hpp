@@ -57,15 +57,15 @@ public:
 
     //! @name Public Types
     //@{
-    typedef  BlockInterface                 super;
-    typedef  super::fespace_shared_ptrtype  fespace_ptrtype;
-    typedef  super::vector_Type             vector_Type;
-    typedef  super::vectorPtr_Type          vectorPtr_Type;
-    typedef  super::solver_ptrtype          solver_ptrtype;
-    typedef  super::matrix_Type          matrix_Type;
-    typedef  super::matrixPtr_Type          matrixPtr_Type;
-    typedef  super::epetra_operator_ptrtype epetra_operator_ptrtype;
-    typedef  super::map_shared_ptrtype      map_shared_ptrtype;
+    typedef  BlockInterface                 super_Type;
+    typedef  super_Type::fespacePtr_Type  fespacePtr_Type;
+    typedef  super_Type::vector_Type             vector_Type;
+    typedef  super_Type::vectorPtr_Type          vectorPtr_Type;
+    typedef  super_Type::solverPtr_Type          solverPtr_Type;
+    typedef  super_Type::matrix_Type             matrix_Type;
+    typedef  super_Type::matrixPtr_Type          matrixPtr_Type;
+    typedef  super_Type::epetraOperatorPtr_Type  epetraOperatorPtr_Type;
+    typedef  super_Type::mapPtr_Type             mapPtr_Type;
     typedef singleton<factory<BlockMatrix,  std::string> >     Factory;
     //@}
 
@@ -74,7 +74,7 @@ public:
     //@{
 
     BlockMatrix(UInt coupling):
-            super(),
+            super_Type(),
             M_globalMatrix(),
             M_coupling(),
             M_interfaceMap(),
@@ -118,7 +118,7 @@ public:
       the subproblems
       @param numerationInterface vector containing the correspondence of the Lagrange multipliers with the interface dofs
      */
-    virtual void coupler(map_shared_ptrtype& map,
+    virtual void coupler(mapPtr_Type& map,
                          const std::map<ID, ID>& locDofMap,
                          const vectorPtr_Type& numerationInterface,
                          const Real& timeStep);
@@ -141,7 +141,7 @@ public:
       @param numerationInterface vector containing the correspondence of the Lagrange multipliers with the interface dofs
       @param  unused flag kept for compliance with the base class
      */
-    void coupler(map_shared_ptrtype& map,
+    void coupler(mapPtr_Type& map,
                  const std::map<ID, ID>& locDofMap,
                  const vectorPtr_Type& numerationInterface,
                  const Real& timeStep,
@@ -150,7 +150,7 @@ public:
     //! returns true if the operator has at least one block
     /*!
     */
-    virtual bool  set() {return (bool) super::M_blocks.size();}
+    virtual bool  set() {return (bool) super_Type::M_blocks.size();}
 
     //@}
     //! @name Public methods
@@ -164,7 +164,7 @@ public:
       @param result output result
       @param linearSolver the linear system
     */
-    int   solveSystem( const vector_Type& rhs, vector_Type& step, solver_ptrtype& linearSolver);
+    int   solveSystem( const vector_Type& rhs, vector_Type& step, solverPtr_Type& linearSolver);
 
 
     //! pushes a block at the end of the vector
@@ -201,7 +201,7 @@ public:
     /*!
       runs assert(false) when called. This method is used only when the preconditioner is a composed operator
      */
-    void  replace_precs( const epetra_operator_ptrtype& Mat, UInt index);
+    void  replace_precs( const epetraOperatorPtr_Type& Mat, UInt index);
 
     //!sums the coupling matrix in the specified position with the global matrix
     /*!
@@ -315,7 +315,7 @@ public:
     UInt getInterface(){return M_interface;}
 
     //! returns the map built for theLagrange multipliers
-    map_shared_ptrtype getInterfaceMap() const { return M_interfaceMap; }
+    mapPtr_Type getInterfaceMap() const { return M_interfaceMap; }
 
     //! returns the numeration of the interface
     /*!
@@ -340,7 +340,7 @@ protected:
     //@{
     matrixPtr_Type                              M_globalMatrix;
     matrixPtr_Type                              M_coupling;
-    map_shared_ptrtype                          M_interfaceMap;
+    mapPtr_Type                          M_interfaceMap;
     UInt                                        M_interface;
     //@}
 

@@ -58,7 +58,7 @@ class ComposedNN: public ComposedBlockOper
 {
 public:
 
-    typedef ComposedBlockOper          super;
+    typedef ComposedBlockOper          super_Type;
     typedef  ComposedOperator<Ifpack_Preconditioner> composed_prec;
 
 
@@ -67,7 +67,7 @@ public:
 
     //! Empty Constructor
     ComposedNN(const std::vector<Int>& flag, const std::vector<Block>& order):
-            super( flag, order ),
+            super_Type( flag, order ),
             M_blockPrecs(),
             M_prec()
     {}
@@ -99,7 +99,7 @@ public:
         @param result output result
         @param linearSolver the linear system
      */
-    virtual int   solveSystem( const vector_Type& rhs, vector_Type& step, solver_ptrtype& linearSolver);
+    virtual int   solveSystem( const vector_Type& rhs, vector_Type& step, solverPtr_Type& linearSolver);
 
 
     //! Computes the coupling
@@ -115,7 +115,7 @@ public:
       the subproblems
       @param numerationInterface vector containing the correspondence of the Lagrange multipliers with the interface dofs
      */
-    virtual void coupler( map_shared_ptrtype& map,
+    virtual void coupler( mapPtr_Type& map,
                           const std::map<ID, ID>& locDofMap,
                           const vectorPtr_Type& numerationInterface,
                           const Real& timeStep);
@@ -129,14 +129,14 @@ public:
      */
     void applyBoundaryConditions(const Real& time, const UInt i);
 
-    //! Multiplies the block times 2 and calls super::push_back_matrix(...)
+    //! Multiplies the block times 2 and calls super_Type::push_back_matrix(...)
     /*!
       \param Mat: block matrix
       \param recompute: flag stating if the matrix need to be recomputed
      */
     void push_back_matrix( const  matrixPtr_Type& Mat, const  bool recompute );
 
-    /*! Multiplies the block times 2 and calls super::replace_matrix(...) in the position "position" specified in
+    /*! Multiplies the block times 2 and calls super_Type::replace_matrix(...) in the position "position" specified in
       input and in the shifted position "position"+2
       \param oper: input matrix
       \param position: position

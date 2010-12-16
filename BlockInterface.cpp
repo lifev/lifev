@@ -39,7 +39,7 @@ namespace LifeV
 
 void BlockInterface::couplingMatrix(matrixPtr_Type & bigMatrix,
                                     Int flag,
-                                    const std::vector<fespace_ptrtype>& problem,
+                                    const std::vector<fespacePtr_Type>& problem,
                                     const std::vector<UInt>& offset,
                                     const std::map<ID, ID>& locDofMap,
                                     const vectorPtr_Type& numerationInterface,
@@ -50,7 +50,7 @@ void BlockInterface::couplingMatrix(matrixPtr_Type & bigMatrix,
     {
         Int subFlag(flag);
         subFlag -= 31;
-        std::vector<fespace_ptrtype> newProblem(problem.begin()+3, problem.end());
+        std::vector<fespacePtr_Type> newProblem(problem.begin()+3, problem.end());
         std::vector<UInt> newOffset(offset.begin()+3, offset.end());
 
         couplingMatrix( bigMatrix, subFlag, newProblem, newOffset, locDofMap, numerationInterface, timeStep, value);
@@ -131,13 +131,13 @@ void BlockInterface::applyBoundaryConditions(const Real& time, const UInt i)
     bcManageMatrix( *M_blocks[i] , *M_FESpace[i]->mesh(), M_FESpace[i]->dof(), *M_bch[i], M_FESpace[i]->feBd(), 1., time);
 }
 
-void BlockInterface::setConditions( std::vector<bchandler_ptrtype>& vec )
+void BlockInterface::setConditions( std::vector<bchandlerPtr_Type>& vec )
 {
     M_bch = vec;
 }
 
 void
-BlockInterface::setSpaces(std::vector<fespace_ptrtype>& vec )
+BlockInterface::setSpaces(std::vector<fespacePtr_Type>& vec )
 {
     M_FESpace = vec;
 }
@@ -161,9 +161,9 @@ BlockInterface::robinCoupling( matrixPtr_Type& matrix,
                                Real&  alphaf,
                                Real&  alphas,
                                UInt  coupling,
-                               const BlockInterface::fespace_ptrtype& FESpace1,
+                               const BlockInterface::fespacePtr_Type& FESpace1,
                                const UInt& /*offset1*/,
-                               const BlockInterface::fespace_ptrtype& FESpace2,
+                               const BlockInterface::fespacePtr_Type& FESpace2,
                                const UInt& offset2,
                                const std::map<ID, ID>& locDofMap,
                                const BlockInterface::vectorPtr_Type& numerationInterface ) // not working with non-matching grids

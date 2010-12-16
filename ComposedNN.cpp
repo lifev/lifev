@@ -38,7 +38,7 @@ namespace LifeV
 //! Public Methods
 // ===================================================
 
-int ComposedNN::solveSystem( const vector_Type& rhs, vector_Type& step, solver_ptrtype& linearSolver )
+int ComposedNN::solveSystem( const vector_Type& rhs, vector_Type& step, solverPtr_Type& linearSolver )
 {
     M_firstCompPrec .reset(new composed_prec(M_comm));
     M_secondCompPrec.reset(new composed_prec(M_comm));
@@ -119,7 +119,7 @@ void ComposedNN::setDataFromGetPot(const GetPot& data, const std::string& sectio
     IfpackPreconditioner::createIfpackList( M_list, data, section, "");
 }
 
-void ComposedNN::coupler(map_shared_ptrtype& map,
+void ComposedNN::coupler(mapPtr_Type& map,
                          const std::map<ID, ID>& locDofMap,
                          const vectorPtr_Type& numerationInterface,
                          const Real& timeStep)
@@ -184,7 +184,7 @@ void ComposedNN::push_back_matrix(const matrixPtr_Type& Mat, const  bool recompu
 {
     Mat->GlobalAssemble();
     *Mat *= 2.;
-    super::push_back_matrix(Mat, recompute);
+    super_Type::push_back_matrix(Mat, recompute);
 }
 
 

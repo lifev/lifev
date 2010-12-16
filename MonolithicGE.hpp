@@ -109,7 +109,7 @@ public:
     void setupFluidSolid( UInt const fluxes );
 
     //! setup of the dofs
-    /** calls super::setupDof and instantiate the boundary condition vector needed to couple fluid--structure and harmonic extention*/
+    /** calls super_Type::setupDof and instantiate the boundary condition vector needed to couple fluid--structure and harmonic extention*/
     void setupDOF();
 
     //! setUp from data file

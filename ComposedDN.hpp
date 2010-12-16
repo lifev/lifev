@@ -86,10 +86,10 @@ namespace LifeV {
 class ComposedDN : public ComposedBlockOper
 {
 public:
-    typedef ComposedBlockOper super;
+    typedef ComposedBlockOper super_Type;
 
     ComposedDN( const std::vector<Int>& flag, const std::vector<Block>& order):
-            super( flag, order ),
+            super_Type( flag, order ),
             M_blockPrecs(),
             M_uMap(),
             M_pMap(),
@@ -118,7 +118,7 @@ public:
         @param result output result
         @param linearSolver the linear system
      */
-    int     solveSystem( const vector_Type& rhs, vector_Type& step, solver_ptrtype& linearSolver);
+    int     solveSystem( const vector_Type& rhs, vector_Type& step, solverPtr_Type& linearSolver);
 
     //! Computes the coupling
     /*!
@@ -153,7 +153,7 @@ public:
       the subproblems
       @param numerationInterface vector containing the correspondence of the Lagrange multipliers with the interface dofs
      */
-    virtual void coupler(map_shared_ptrtype& map,
+    virtual void coupler(mapPtr_Type& map,
                          const std::map<ID, ID>& locDofMap,
                          const vectorPtr_Type& numerationInterface,
                          const Real& timeStep);
@@ -223,10 +223,10 @@ protected:
       Pointer to an ComposedPreconditioner object containing the preconditioners for each block
     */
     boost::shared_ptr<ComposedPreconditioner>            M_blockPrecs;
-    map_ptrtype                                      M_uMap;
-    map_ptrtype                                      M_pMap;
-    map_ptrtype                                      M_dMap;
-    map_ptrtype                                      M_interfaceMap;
+    mapPtr_Type                                      M_uMap;
+    mapPtr_Type                                      M_pMap;
+    mapPtr_Type                                      M_dMap;
+    mapPtr_Type                                      M_interfaceMap;
     UInt                                             M_multipliers;
     //@}
 

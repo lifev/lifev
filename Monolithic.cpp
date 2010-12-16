@@ -38,7 +38,7 @@ namespace LifeV
 // ===================================================
 
 Monolithic::Monolithic():
-    super(),
+    super_Type(),
     M_monolithicMap(),
     M_interfaceMap(),
     M_beta(),
@@ -84,7 +84,7 @@ Monolithic::~Monolithic()
 void
 Monolithic::setupFEspace()
 {
-    super::setupFEspace();
+    super_Type::setupFEspace();
 
     // Monolitic: In the beginning I need a non-partitioned mesh. later we will do the partitioning
     M_dFESpace.reset( new FESpace<mesh_Type, EpetraMap>( M_solidMesh,
@@ -172,7 +172,7 @@ void
 Monolithic::setupFluidSolid( UInt const fluxes )
 {
 
-    super::setupFluidSolid(fluxes);
+    super_Type::setupFluidSolid(fluxes);
 
     // Note: up to now it works only with matching grids (and poly order) on the interface
     assert(M_fluidInterfaceMap->getMap(Unique)->NumGlobalElements() == M_solidInterfaceMap->getMap(Unique)->NumGlobalElements());

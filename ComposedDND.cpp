@@ -36,13 +36,13 @@ void ComposedDND::blockAssembling( )
 {
     if (!M_swapped)
     {
-        super::super::super::swap(M_coupling[2], M_coupling[3]);
+        super_Type::super_Type::super_Type::swap(M_coupling[2], M_coupling[3]);
         M_swapped = true;
     }
 
     addToCoupling(M_coupling[3], 2);
 
-    super::blockAssembling();
+    super_Type::blockAssembling();
 }
 
 } // Namespace LifeV

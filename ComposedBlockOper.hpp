@@ -71,8 +71,8 @@ public:
 
     //! @name Public Types
     //@{
-    typedef BlockInterface                           super;
-    typedef super::fespace_shared_ptrtype            fespace_ptrtype;
+    typedef BlockInterface                           super_Type;
+    typedef super_Type::fespacePtr_Type            fespacePtr_Type;
     typedef ComposedOperator<Epetra_Operator>  operatorPtr_Type;
     //@}
 
@@ -86,7 +86,7 @@ public:
        \param order: vector specifying the order of the blocks.
      */
     ComposedBlockOper(const std::vector<Int>& flags, const std::vector<Block>& order):
-            super(),
+            super_Type(),
             M_recompute(order.size()),
             M_coupling(),
             M_couplingFlags(new std::vector<Int>(flags)),// here I copy, so that the input param can be destroyed
@@ -107,7 +107,7 @@ public:
         @param result output result
         @param linearSolver the linear system
      */
-    virtual int   solveSystem( const vector_Type& rhs, vector_Type& step, solver_ptrtype& linearSolver)=0;
+    virtual int   solveSystem( const vector_Type& rhs, vector_Type& step, solverPtr_Type& linearSolver)=0;
 
     //! Sets the parameters needed by the preconditioner from data file
     /*!
@@ -151,7 +151,7 @@ public:
       @param timeStep: time step
       @param couplingBlock: UInt specifying the position of the coupling block to be added.
      */
-    void coupler(map_shared_ptrtype& map,
+    void coupler(mapPtr_Type& map,
                  const std::map<ID, ID>& locDofMap,
                  const vectorPtr_Type& numerationInterface,
                  const Real& timeStep,

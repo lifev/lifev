@@ -57,14 +57,14 @@ public:
     //! @name Public Types
     //@{
 
-    typedef ComposedDN super;
+    typedef ComposedDN super_Type;
 
     //@}
     //! @name Constructors and destructor
     //@{
 
     ComposedDND( const std::vector<Int>& flag, const std::vector<Block>& order ):
-            super(flag, order),
+            super_Type(flag, order),
             M_swapped(false)
     {
     }

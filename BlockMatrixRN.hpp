@@ -66,7 +66,7 @@ public:
 
     //! @name Public Types
     //@{
-    typedef BlockMatrix super;
+    typedef BlockMatrix super_Type;
     typedef RobinInterface  superRobin;
     //@}
 
@@ -76,7 +76,7 @@ public:
 
     //! Empty Constructor
     BlockMatrixRN(UInt flag):
-            super(flag),
+            super_Type(flag),
             superRobin()
     {}
 
@@ -108,7 +108,7 @@ public:
       the subproblems
       @param numerationInterface vector containing the correspondence of the Lagrange multipliers with the interface dofs
      */
-    void coupler(map_shared_ptrtype& map,
+    void coupler(mapPtr_Type& map,
                  const std::map<ID, ID>& locDofMap,
                  const vectorPtr_Type& numerationInterface,
                  const Real& timeStep);

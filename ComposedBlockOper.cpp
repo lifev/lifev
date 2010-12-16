@@ -60,7 +60,7 @@ void ComposedBlockOper::blockAssembling()
 }
 
 
-void ComposedBlockOper::coupler( map_shared_ptrtype& map,
+void ComposedBlockOper::coupler( mapPtr_Type& map,
                                  const std::map<ID, ID>& locDofMap,
                                  const vectorPtr_Type& numerationInterface,
                                  const Real& timeStep,
@@ -89,7 +89,7 @@ void ComposedBlockOper::push_back_matrix(const matrixPtr_Type& Mat, const  bool 
 
 void ComposedBlockOper::push_back_oper( ComposedBlockOper& Oper)
 {
-    super::push_back_oper( Oper );
+    super_Type::push_back_oper( Oper );
     M_coupling.insert(M_coupling.end(), Oper.getCouplingVector().begin(), Oper.getCouplingVector().end());
 }
 
@@ -136,10 +136,10 @@ void ComposedBlockOper::blockAssembling(const UInt k)
 
 void ComposedBlockOper::swap(const UInt i, const UInt j)
 {
-    super::swap(M_blocks[i], M_blocks[j]);
-    super::swap(M_bch[i], M_bch[j]);
-    super::swap(M_FESpace[i], M_FESpace[j]);
-    super::swap(M_coupling[i], M_coupling[j]);
+    super_Type::swap(M_blocks[i], M_blocks[j]);
+    super_Type::swap(M_bch[i], M_bch[j]);
+    super_Type::swap(M_FESpace[i], M_FESpace[j]);
+    super_Type::swap(M_coupling[i], M_coupling[j]);
 
     bool tmpRecompute = this->M_recompute[i];
     this->M_recompute[i] = this->M_recompute[j];

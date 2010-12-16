@@ -39,16 +39,16 @@ namespace LifeV {
 
 void BlockMatrixRN::setDataFromGetPot( const GetPot& data, const std::string& section )
 {
-    super::setDataFromGetPot(data, section);
+    super_Type::setDataFromGetPot(data, section);
     setRobinData(data, section + "/robin");
 }
 
-void BlockMatrixRN::coupler(map_shared_ptrtype& map,
+void BlockMatrixRN::coupler(mapPtr_Type& map,
                             const std::map<ID, ID>& locDofMap,
                             const vectorPtr_Type& numerationInterface,
                             const Real& timeStep)
 {
-    super::coupler( map,/* M_FESpace[0], M_offset[0], M_FESpace[1], M_offset[1],*/ locDofMap, numerationInterface, timeStep );
+    super_Type::coupler( map,/* M_FESpace[0], M_offset[0], M_FESpace[1], M_offset[1],*/ locDofMap, numerationInterface, timeStep );
     M_robinCoupling.reset(new matrix_Type(M_coupling->getMap(), 0));
     robinCoupling( M_robinCoupling, M_alphaf, M_alphas, 7, M_FESpace[1], M_offset[1], M_FESpace[0], M_offset[0], locDofMap, numerationInterface );
     M_robinCoupling->GlobalAssemble( );
@@ -57,7 +57,7 @@ void BlockMatrixRN::coupler(map_shared_ptrtype& map,
 
 void BlockMatrixRN::GlobalAssemble()
 {
-    super::GlobalAssemble();
+    super_Type::GlobalAssemble();
     vector_Type rhs((*M_robinCoupling)*(*M_rhsVec));
     *M_rhsVec += rhs;
 }
@@ -67,9 +67,9 @@ void BlockMatrixRN::blockAssembling()
     M_coupling->GlobalAssemble();
     M_globalMatrix.reset(new matrix_Type(M_coupling->getMap()));
     *M_globalMatrix += *M_coupling;
-    for (UInt k=0; k<super::M_blocks.size(); ++k)
+    for (UInt k=0; k<super_Type::M_blocks.size(); ++k)
     {
-        super::M_blocks[k]->GlobalAssemble();
+        super_Type::M_blocks[k]->GlobalAssemble();
     }
 
     applyRobinCoupling(M_blocks);
