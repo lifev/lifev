@@ -380,7 +380,7 @@ integral_n( const FunctorType & f ) const
     for ( UInt iQuadPt(0); iQuadPt < M_nbQuadPt; ++iQuadPt )
     {
         coorQuadPt( x, y, z, iQuadPt );
-        f( x, y, z, &ret.front() );
+        f( x, y, z, &(ret[0]) );
         tmp = 0;
         for ( UInt d(0); d <= M_nbCoor; ++d )
         {
