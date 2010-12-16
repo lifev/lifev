@@ -68,8 +68,6 @@ public:
     /** @name Typedefs
      */
     //@{
-    //     typedef super::prec_Type                 prec_Type;
-    //     typedef super::precPtr_Type                     precPtr_Type;
 
     typedef EpetraPreconditioner                                       super_Type;
     typedef ComposedOperator<EpetraPreconditioner>                     prec_Type;
