@@ -39,16 +39,19 @@
 #ifndef QUADPOINT_H
 #define QUADPOINT_H 1
 
-#include <life/lifearray/tab.hpp>
-
 #include <life/lifecore/life.hpp>
 
 #include <boost/array.hpp>
+#include <boost/numeric/ublas/vector.hpp>
 
 #include <iostream>
 
 namespace LifeV
 {
+//! @name Public typedefs
+//@{
+typedef boost::numeric::ublas::vector<Real> GeoVector;
+//@}
 
 //! QuadPoint - Simple container for a point of a quadrature rule.
 /*!
