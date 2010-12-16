@@ -82,11 +82,11 @@ public:
     //@{
     // Make the template's type available to the outside
     typedef MeshType mesh_Type;
-    typedef boost::shared_ptr<MeshType> mesh_ptrtype;
-    typedef std::vector<std::vector<Int> > graph_type;
-    typedef boost::shared_ptr<graph_type> graph_ptrtype;
-    typedef std::vector<mesh_ptrtype> partmesh_type;
-    typedef boost::shared_ptr<partmesh_type> partmesh_ptrtype;
+    typedef boost::shared_ptr<MeshType> meshPtr_Type;
+    typedef std::vector<std::vector<Int> > graph_Type;
+    typedef boost::shared_ptr<graph_Type> graphPtr_Type;
+    typedef std::vector<meshPtr_Type> partMesh_Type;
+    typedef boost::shared_ptr<partMesh_Type> partMeshPtr_Type;
     //@}
     //! \name Constructors & Destructors
     //@{
@@ -105,10 +105,10 @@ public:
       \param interfaceMap - Epetra_Map*
       \param interfaceMapRep - Epetra_Map*
     */
-    partitionMesh(mesh_ptrtype &mesh, boost::shared_ptr<Epetra_Comm> comm, Epetra_Map* interfaceMap = 0,
+    partitionMesh(meshPtr_Type &mesh, boost::shared_ptr<Epetra_Comm> comm, Epetra_Map* interfaceMap = 0,
                   Epetra_Map* interfaceMapRep = 0);
     //! Empty destructor
-    ~partitionMesh() {}
+    virtual ~partitionMesh() {}
     //@}
 
     //! \name Public Methods
@@ -137,7 +137,7 @@ public:
       \param interfaceMap - Epetra_Map* - pointer to the interface map (default value 0)
       \param interfaceMapRep - Epetra_Map* - pointer to the repeated interface map (default value 0)
     */
-    void attachUnpartitionedMesh(mesh_ptrtype &mesh, Epetra_Map* interfaceMap = 0,
+    void attachUnpartitionedMesh(meshPtr_Type &mesh, Epetra_Map* interfaceMap = 0,
                                  Epetra_Map* interfaceMapRep = 0);
     //! Releases the original unpartitioned mesh
     /*!
@@ -165,19 +165,19 @@ public:
     //! Return a reference to M_vertexDistribution
     const std::vector<Int>&  vertexDist()           const {return M_vertexDistribution;};
     //! Return a const pointer to M_meshPartitions[0] - for parallel
-    const mesh_ptrtype&      mesh()                 const {return (*M_meshPartitions)[0];}
+    const meshPtr_Type&      mesh()                 const {return (*M_meshPartitions)[0];}
     // Next method should become a set method
     //! Return a pointer to M_meshPartitions[0] - for parallel
-    mesh_ptrtype&            mesh()                 {return (*M_meshPartitions)[0];}
+    meshPtr_Type&            mesh()                 {return (*M_meshPartitions)[0];}
     // Next method should be renamed and become a regular method
     //! Return a pointer to the mesh partition with rank k
-    const mesh_ptrtype&      mesh(Int k)            const {return (*M_meshPartitions)[k];}
+    const meshPtr_Type&      mesh(Int k)            const {return (*M_meshPartitions)[k];}
     //! Return a pointer to M_meshPartitions
-    const partmesh_ptrtype&  meshAllPartitions()    const {return M_meshPartitions;}
+    const partMeshPtr_Type&  meshAllPartitions()    const {return M_meshPartitions;}
     //! Return a pointer to M_graphVertexLocations
     const std::vector<Int>&  part()                 const {return M_graphVertexLocations;}
     //! Return a pointer to M_elementDomains
-    const graph_ptrtype&     graph()                const {return M_elementDomains;}
+    const graphPtr_Type&     graph()                const {return M_elementDomains;}
     //! Return a reference to M_repeatedNodeVector
     const std::vector<Int>&  repeatedNodeVector()   const {return M_repeatedNodeVector[0];}
     //! Return a reference to M_repeatedEdgeVector
@@ -189,6 +189,9 @@ public:
     //@}
 
 private:
+    // Private copy constructor and assignment operator. No implementation
+    partitionMesh(const partitionMesh&);
+    partitionMesh& operator=(const partitionMesh&);
     //! Private Methods
     //@{
     //! Execute mesh partitioning using the configured MPI processes (online partitioning)
@@ -293,7 +296,7 @@ private:
     //! Private Data Members
     //@{
     UInt                                 M_numPartitions;
-    partmesh_ptrtype                     M_meshPartitions;
+    partMeshPtr_Type                     M_meshPartitions;
     std::vector<Int>                     M_vertexDistribution;
     std::vector<Int>                     M_adjacencyGraphKeys;
     std::vector<Int>                     M_adjacencyGraphValues;
@@ -315,7 +318,7 @@ private:
     std::vector<UInt>                    M_nBoundaryFaces;
     // The following are utility variables used throughout the partitioning
     // process
-    mesh_ptrtype                         M_originalMesh;
+    meshPtr_Type                         M_originalMesh;
     Epetra_Map*                          M_interfaceMap;
     Epetra_Map*                          M_interfaceMapRep;
     //! Number of partitions handled. 1 for parallel (old way), != 1 for serial
@@ -326,7 +329,7 @@ private:
     boost::shared_ptr<std::vector<Int> > M_repeatedFace;
     boost::shared_ptr<std::vector<Int> > M_isOnProc;
     std::vector<Int>                     M_graphVertexLocations;
-    graph_ptrtype                        M_elementDomains;
+    graphPtr_Type                        M_elementDomains;
     bool                                 M_serialMode; // how to tell if running serial partition mode
     //@}
 }; // class partitionMesh
@@ -346,7 +349,7 @@ partitionMesh<MeshType>::partitionMesh()
 }
 
 template<typename MeshType>
-partitionMesh<MeshType>::partitionMesh(mesh_ptrtype &mesh, boost::shared_ptr<Epetra_Comm> comm,
+partitionMesh<MeshType>::partitionMesh(meshPtr_Type &mesh, boost::shared_ptr<Epetra_Comm> comm,
                                    Epetra_Map* interfaceMap,
                                    Epetra_Map* interfaceMapRep):
     M_numPartitions (1),
@@ -354,13 +357,13 @@ partitionMesh<MeshType>::partitionMesh(mesh_ptrtype &mesh, boost::shared_ptr<Epe
     M_originalMesh (mesh),
     M_interfaceMap (interfaceMap),
     M_interfaceMapRep (interfaceMapRep),
-    M_elementDomains (new graph_type),
+    M_elementDomains (new graph_Type),
     M_serialMode (false)
 {
     M_me = M_comm->MyPID();
 
-    mesh_ptrtype newMesh (new MeshType);
-    M_meshPartitions.reset(new partmesh_type(M_numPartitions, newMesh));
+    meshPtr_Type newMesh (new MeshType);
+    M_meshPartitions.reset(new partMesh_Type(M_numPartitions, newMesh));
     newMesh.reset();
 
     M_localNodes.resize(1);
@@ -394,8 +397,8 @@ void partitionMesh<MeshType>::setup(UInt numPartitions, boost::shared_ptr<Epetra
 
     M_numPartitions = numPartitions;
 
-    M_meshPartitions.reset(new partmesh_type);
-    mesh_ptrtype newMesh;
+    M_meshPartitions.reset(new partMesh_Type);
+    meshPtr_Type newMesh;
     for (UInt i = 0; i < M_numPartitions; ++i)
     {
         newMesh.reset(new MeshType);
@@ -403,7 +406,7 @@ void partitionMesh<MeshType>::setup(UInt numPartitions, boost::shared_ptr<Epetra
     }
     newMesh.reset();
 
-    M_elementDomains.reset(new graph_type);
+    M_elementDomains.reset(new graph_Type);
 
     M_localNodes.resize(M_numPartitions);
     M_localEdges.resize(M_numPartitions);
@@ -446,7 +449,7 @@ void partitionMesh<MeshType>::update()
 }
 
 template<typename MeshType>
-void partitionMesh<MeshType>::attachUnpartitionedMesh(mesh_ptrtype &mesh,
+void partitionMesh<MeshType>::attachUnpartitionedMesh(meshPtr_Type &mesh,
                                                   Epetra_Map* interfaceMap,
                                                   Epetra_Map* interfaceMapRep)
 {
