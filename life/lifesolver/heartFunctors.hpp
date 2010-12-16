@@ -51,6 +51,7 @@
 
 #include <life/lifecore/GetPot.hpp>
 #include <life/lifearray/EpetraMatrix.hpp>
+#include <life/lifearray/RNM.hpp>
 
 namespace LifeV
 {
