@@ -47,6 +47,7 @@
 #include <boost/lambda/bind.hpp>
 #include <boost/lambda/if.hpp>
 #include <boost/lambda/lambda.hpp>
+#include <boost/numeric/ublas/vector.hpp>
 
 #pragma GCC diagnostic warning "-Wunused-variable"
 #pragma GCC diagnostic warning "-Wunused-parameter"
@@ -60,6 +61,10 @@
 
 namespace LifeV
 {
+// @name Public typedefs
+//@{
+typedef boost::numeric::ublas::vector<Real> Vector;
+//@}
 
 struct FiveNumbers
 {
