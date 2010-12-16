@@ -54,10 +54,23 @@
 #include <life/lifefem/currentFE.hpp>
 #include <life/lifefem/dof.hpp>
 
+#pragma GCC diagnostic ignored "-Wunused-variable"
+#pragma GCC diagnostic ignored "-Wunused-parameter"
+
 #include <boost/shared_ptr.hpp>
+#include <boost/numeric/ublas/vector.hpp>
+#include <boost/numeric/ublas/matrix.hpp>
+
+#pragma GCC diagnostic warning "-Wunused-variable"
+#pragma GCC diagnostic warning "-Wunused-parameter"
 
 namespace LifeV
 {
+//! @name Public typedefs
+//@{
+typedef boost::numeric::ublas::matrix<Real> Matrix;
+typedef boost::numeric::ublas::zero_matrix<Real> ZeroMatrix;
+//@}
 
 /*! /namespace ElemOper
 
@@ -281,10 +294,10 @@ template<typename UsrFct>
 void advection( Real coef, const UsrFct & beta,
                 ElemMat& elmat, const CurrentFE& fe, int iblock, int jblock, int nb, Real t=0. )
 {
-    Tab2d mat_tmp( fe.nbFEDof(), fe.nbFEDof() );
+    Matrix mat_tmp( fe.nbFEDof(), fe.nbFEDof() );
     Real v, s;
     Real x,y,z;
-    Tab2d v_grad(ZeroMatrix(fe.nbFEDof(), fe.nbQuadPt()));
+    Matrix v_grad(ZeroMatrix(fe.nbFEDof(), fe.nbQuadPt()));
 
     //Evaluate the velocity field at the quadrature nodes
     for ( UInt iq = 0; iq < fe.nbQuadPt(); iq++ )

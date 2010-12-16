@@ -198,7 +198,7 @@ void mass( Real coef, ElemMat& elmat, const CurrentFE& fe,
   Mass matrix: \int v_i v_j (nb blocks on the diagonal, nb>1)
 */
 {
-    Tab2d mat_tmp( fe.nbFEDof(), fe.nbFEDof() );
+    Matrix mat_tmp( fe.nbFEDof(), fe.nbFEDof() );
     UInt i, ig;
     int iloc, jloc;
     Real s, coef_s;
@@ -258,7 +258,7 @@ void mass( const std::vector<Real>& coef, ElemMat& elmat, const CurrentFE& fe,
   Mass matrix: \int v_i v_j (nb blocks on the diagonal, nb>1)
 */
 {
-    Tab2d mat_tmp( fe.nbFEDof(), fe.nbFEDof() );
+    Matrix mat_tmp( fe.nbFEDof(), fe.nbFEDof() );
     UInt i, ig;
     int iloc, jloc;
     Real s;//, coef_s;
@@ -1650,7 +1650,7 @@ void stiff( Real coef, ElemMat& elmat, const CurrentFE& fe,
 {
 
 
-    Tab2d mat_tmp( fe.nbFEDof(), fe.nbFEDof() );
+    Matrix mat_tmp( fe.nbFEDof(), fe.nbFEDof() );
     mat_tmp = ZeroMatrix( fe.nbFEDof(), fe.nbFEDof() );
 
     UInt iloc, jloc;
@@ -1717,7 +1717,7 @@ void stiff( const std::vector<Real>& coef, ElemMat& elmat, const CurrentFE& fe,
 */
 {
 
-    Tab2d mat_tmp( fe.nbFEDof(), fe.nbFEDof() );
+    Matrix mat_tmp( fe.nbFEDof(), fe.nbFEDof() );
     mat_tmp = ZeroMatrix( fe.nbFEDof(), fe.nbFEDof() );
 
     UInt iloc, jloc;
@@ -1787,25 +1787,25 @@ void stiff_curl( Real coef, ElemMat& elmat, const CurrentFE& fe,
 {
 
 
-    Tab2d mat_tmp( fe.nbFEDof(), fe.nbFEDof() );
+    Matrix mat_tmp( fe.nbFEDof(), fe.nbFEDof() );
     mat_tmp = ZeroMatrix( fe.nbFEDof(), fe.nbFEDof() );
-    Tab2d mat_tmp11( fe.nbFEDof(), fe.nbFEDof() );
+    Matrix mat_tmp11( fe.nbFEDof(), fe.nbFEDof() );
     mat_tmp11 = ZeroMatrix( fe.nbFEDof(), fe.nbFEDof() );
-    Tab2d mat_tmp12( fe.nbFEDof(), fe.nbFEDof() );
+    Matrix mat_tmp12( fe.nbFEDof(), fe.nbFEDof() );
     mat_tmp12 = ZeroMatrix( fe.nbFEDof(), fe.nbFEDof() );
-    Tab2d mat_tmp13( fe.nbFEDof(), fe.nbFEDof() );
+    Matrix mat_tmp13( fe.nbFEDof(), fe.nbFEDof() );
     mat_tmp13 = ZeroMatrix( fe.nbFEDof(), fe.nbFEDof() );
-    Tab2d mat_tmp21( fe.nbFEDof(), fe.nbFEDof() );
+    Matrix mat_tmp21( fe.nbFEDof(), fe.nbFEDof() );
     mat_tmp21 = ZeroMatrix( fe.nbFEDof(), fe.nbFEDof() );
-    Tab2d mat_tmp22( fe.nbFEDof(), fe.nbFEDof() );
+    Matrix mat_tmp22( fe.nbFEDof(), fe.nbFEDof() );
     mat_tmp22 = ZeroMatrix( fe.nbFEDof(), fe.nbFEDof() );
-    Tab2d mat_tmp23( fe.nbFEDof(), fe.nbFEDof() );
+    Matrix mat_tmp23( fe.nbFEDof(), fe.nbFEDof() );
     mat_tmp23 = ZeroMatrix( fe.nbFEDof(), fe.nbFEDof() );
-    Tab2d mat_tmp31( fe.nbFEDof(), fe.nbFEDof() );
+    Matrix mat_tmp31( fe.nbFEDof(), fe.nbFEDof() );
     mat_tmp31 = ZeroMatrix( fe.nbFEDof(), fe.nbFEDof() );
-    Tab2d mat_tmp32( fe.nbFEDof(), fe.nbFEDof() );
+    Matrix mat_tmp32( fe.nbFEDof(), fe.nbFEDof() );
     mat_tmp32 = ZeroMatrix( fe.nbFEDof(), fe.nbFEDof() );
-    Tab2d mat_tmp33( fe.nbFEDof(), fe.nbFEDof() );
+    Matrix mat_tmp33( fe.nbFEDof(), fe.nbFEDof() );
     mat_tmp33 = ZeroMatrix( fe.nbFEDof(), fe.nbFEDof() );
 
 
@@ -2463,7 +2463,7 @@ void mass_divw( Real coef, const ElemVec& w_loc, ElemMat& elmat, const CurrentFE
 */
 {
 
-    Tab2d mat_tmp( fe.nbFEDof(), fe.nbFEDof() );
+    Matrix mat_tmp( fe.nbFEDof(), fe.nbFEDof() );
     mat_tmp = ZeroMatrix( fe.nbFEDof(), fe.nbFEDof() );
 
     UInt i, icomp, ig, icoor, iloc, jloc;
@@ -2532,7 +2532,7 @@ void mass_divw(const std::vector<Real>& coef, const ElemVec& w_loc, ElemMat& elm
 */
 {
 
-    Tab2d mat_tmp( fe.nbFEDof(), fe.nbFEDof() );
+    Matrix mat_tmp( fe.nbFEDof(), fe.nbFEDof() );
     mat_tmp = ZeroMatrix( fe.nbFEDof(), fe.nbFEDof() );
 
     UInt i, icomp, ig, icoor, iloc, jloc;
@@ -2852,9 +2852,9 @@ void stab_stokes( Real visc, Real coef_stab, ElemMat& elmat,
 void advection( Real coef, ElemVec& vel,
                 ElemMat& elmat, const CurrentFE& fe, int iblock, int jblock, int nb )
 {
-    Tab2d mat_tmp( fe.nbFEDof(), fe.nbFEDof() );
+    Matrix mat_tmp( fe.nbFEDof(), fe.nbFEDof() );
     Real v_grad, s;
-    Tab2d v( fe.nbQuadPt(), nDimensions );
+    Matrix v( fe.nbQuadPt(), nDimensions );
 
     //Evaluate the advective field at the quadrature nodes
     for ( UInt icoor = 0; icoor < nDimensions; icoor++ )
