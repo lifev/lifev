@@ -124,11 +124,6 @@ public:
     /** @name Typedefs
      */
     //@{
-    //typedef VenantKirchhofSolver   < RegionMesh3D_ALE<LinearTetra> > solid_raw_type;
-    //typedef NavierStokesAleSolverPC< RegionMesh3D_ALE<LinearTetra> > fluid_raw_type;
-    //typedef NonLinearVenantKirchhofSolver   <mesh_Type>     solid_Type;
-    //typedef NonLinearVenantKirchhofSolver   <mesh_Type>     solidlin_raw_type;
-
 
     typedef RegionMesh3D<LinearTetra>                                               mesh_Type;
 #ifdef HAVE_HDF5
@@ -165,46 +160,7 @@ public:
     typedef singleton<factory<FSIOperator, std::string> >                           FSIFactory_Type;
     typedef Displayer::comm_PtrType/*Displayer::commPtr_Type*/                      commPtr_Type;
 
-
-
-
-// //! OBSOLETE typedefs
-//     typedef      mesh_Type                                                  mesh_type;
-// #ifdef HAVE_HDF5
-//     typedef      meshFilter_Type                                            mesh_filtertype;
-// #endif
-//     typedef      fluid_Type                                                 fluid_raw_type;
-//     typedef      solid_Type                                                 solid_raw_type;
-//     typedef      meshMotion_Type                                            meshmotion_raw_type;
-//     typedef      fluidLin_Type                                              fluidlin_raw_type;
-//     typedef      solidLin_Type                                              solidlin_raw_type;
-//     typedef      fluidPtr_Type                                              fluid_type;
-//     typedef      solidPtr_Type                                              solid_type;
-//     typedef      meshMotionPtr_Type                                         meshmotion_type;
-//     typedef      fluidLinPtr_Type                                           fluidlin_type;
-//     typedef      solidLinPtr_Type                                           solidlin_type;
-//     typedef      vector_Type                                                vector_Type;
-//     typedef      vectorPtr_Type                                             vector_ptrtype;
-//     typedef      fluidSource_Type                                           fluidSource_Type;
-//     typedef      solidSource_Type                                           solid_source_type;
-//     typedef      function_Type                                              function_type;
-//     typedef      bcFunction_Type                                            bc_function_type;
-//     typedef      dofInterface3DPtr_Type                                     dof_interface_type3D;
-//     typedef      dofInterface2DPtr_Type                                     dof_interface_type2D;
-//     typedef      bcVectorInterfacePtr_Type                                  bc_vector_interface;
-//     typedef      fluidBchandlerPtr_Type                                     fluid_bchandler_type;
-//     typedef      fluidBchandler_Type                                        fluid_bchandler_raw_type;
-//     typedef      solidBchandler_Type                                        solidBchandler_Type;
-//     typedef      solidBchandlerPtr_Type                                     solid_bchandler_type;
-//   //typedef      data_Type                                                  data_Type;
-//     typedef      dataPtr_Type                                               data_PtrType;
-//     typedef      iterator_Type                                              Iterator;
-//     typedef      FSIFactory_Type                                            FSIFactory;
-//     typedef      commPtr_Type                                               comm_PtrType;
-// //END of OBSOLETE typedefs
-// //     typedef boost::shared_ptr<reducedLinFluid>    quasi_newton_type;
-// /*BCHandler, fluid, structure*/
-//     //@}
+     //@}
 
 
 

@@ -184,8 +184,6 @@ public:
      */
     //@{
 
-    //     bool setFluid				(bool fluid) { M_fluid = fluid; M_oper->set }
-    //     bool setSolid				(bool solid) { M_solid = solid; }
     void initSol                 ( const vector_Type& solInit ) { M_oper->setSolution(solInit); }
 
     void setSourceTerms          ( const fluidSource_Type& fluidSource,
@@ -208,8 +206,6 @@ public:
     void setFluxBC              (const fluidBchandlerPtr_Type& bc_fluid);
     //!\todo{kill this method}
     void setRobinBC              (const fluidBchandlerPtr_Type& bc_fluid);
-//     void setReducedLinFluidBC    ( const fluidBchandlerPtr_Type& bc_dredfluid );
-//     void setInvReducedLinFluidBC ( const fluidBchandlerPtr_Type& bc_dredfluid_inv );
 
     //@}
 
