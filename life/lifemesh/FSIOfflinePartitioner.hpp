@@ -75,31 +75,31 @@ public:
     //@{
     typedef MeshType mesh_Type;
     typedef MeshType uncutMesh_Type;
-    typedef boost::shared_ptr<uncutMesh_Type> uncutMesh_ptrType;
-    typedef std::vector<uncutMesh_ptrType> uncutMesh_vector_Type;
-    typedef boost::shared_ptr<uncutMesh_vector_Type> uncutMesh_vector_ptrType;
+    typedef boost::shared_ptr<uncutMesh_Type> uncutMeshPtr_Type;
+    typedef std::vector<uncutMeshPtr_Type> uncutMeshVector_Type;
+    typedef boost::shared_ptr<uncutMeshVector_Type> uncutMeshVectorPtr_Type;
 
     typedef std::vector<std::vector<Int> > graph_Type;
-    typedef boost::shared_ptr<graph_Type> graph_ptrType;
+    typedef boost::shared_ptr<graph_Type> graphPtr_Type;
 
     typedef Epetra_Comm comm_Type;
-    typedef boost::shared_ptr<comm_Type> comm_ptrType;
+    typedef boost::shared_ptr<comm_Type> commPtr_Type;
 
     typedef FESpace<uncutMesh_Type, EpetraMap> feSpace_Type;
-    typedef boost::shared_ptr<feSpace_Type> feSpace_ptrType;
-    typedef std::vector<feSpace_ptrType> feSpace_vector_Type;
-    typedef boost::shared_ptr<feSpace_vector_Type> feSpace_vector_ptrType;
+    typedef boost::shared_ptr<feSpace_Type> feSpacePtr_Type;
+    typedef std::vector<feSpacePtr_Type> feSpaceVector_Type;
+    typedef boost::shared_ptr<feSpaceVector_Type> feSpaceVectorPtr_Type;
 
     typedef DofInterface3Dto3D interface_Type;
-    typedef boost::shared_ptr<interface_Type> interface_ptrType;
-    typedef std::vector<interface_ptrType> interface_vector_Type;
+    typedef boost::shared_ptr<interface_Type> interfacePtr_Type;
+    typedef std::vector<interfacePtr_Type> interfaceVector_Type;
     // The vector contains pointers to each fluid partition's interface with
     // the solid. The vector must be wrapped in a pointer so it can be stored
     // inside HDF5Filter3DMesh when doing output.
-    typedef boost::shared_ptr<interface_vector_Type> interface_vector_ptrType;
+    typedef boost::shared_ptr<interfaceVector_Type> interfaceVectorPtr_Type;
 
     typedef partitionMesh<uncutMesh_Type> meshCutter_Type;
-    typedef boost::scoped_ptr<meshCutter_Type> meshCutter_ptrType;
+    typedef boost::scoped_ptr<meshCutter_Type> meshCutterPtr_Type;
 
     typedef MarkerTraits_Base::EntityFlag entityFlag_Type;
     //@}
@@ -135,8 +135,8 @@ public:
       @param fluidInterfaceVertexFlag Int
       @param comm boost::shared_ptr to a Epetra_Comm object
     */
-    void setup(const uncutMesh_ptrType& uncutFluidMesh,
-               const uncutMesh_ptrType& uncutSolidMesh,
+    void setup(const uncutMeshPtr_Type& uncutFluidMesh,
+               const uncutMeshPtr_Type& uncutSolidMesh,
                const Int& fluidPartitionNumber,
                const Int& solidPartitionNumber,
                const std::string& velocityOrder,
@@ -146,7 +146,7 @@ public:
                const Real& interfaceTolerance,
                const Int& fluidInterfaceVertexFlag,
                const Int& solidInterfaceVertexFlag,
-               const comm_ptrType& comm);
+               const commPtr_Type& comm);
 
     //! Execute the partitioning and create the interface map
     /*!
@@ -166,53 +166,53 @@ public:
 
     //! @name Get Methods
     //@{
-    const Int fluidInterfaceFlag() const
+    const Int& fluidInterfaceFlag() const
     {
         return M_fluidInterfaceFlag;
     }
-    const Int solidInterfaceFlag() const
+    const Int& solidInterfaceFlag() const
     {
         return M_solidInterfaceFlag;
     }
-    const graph_ptrType& fluidGraph() const
+    const graphPtr_Type& fluidGraph() const
     {
         return M_fluidMeshCutter->graph();
     }
-    const graph_ptrType& solidGraph() const
+    const graphPtr_Type& solidGraph() const
     {
         return M_solidMeshCutter->graph();
     }
-    const uncutMesh_vector_ptrType& fluidPartitions() const
+    const uncutMeshVectorPtr_Type& fluidPartitions() const
     {
         return M_fluidMeshCutter->meshAllPartitions();
     }
 
-    const uncutMesh_vector_ptrType& solidPartitions() const
+    const uncutMeshVectorPtr_Type& solidPartitions() const
     {
         return M_solidMeshCutter->meshAllPartitions();
     }
     /*
-      const interface_vector_ptrType& dofFluidToStructure()
+      const interfaceVectorPtr_Type& dofFluidToStructure()
       {
       return M_dofFluidToStructure;
       }
     */
-    const interface_vector_ptrType& dofStructureToHarmonicExtension() const
+    const interfaceVectorPtr_Type& dofStructureToHarmonicExtension() const
     {
         return M_dofStructureToHarmonicExtension;
     }
     /*
-      const interface_vector_ptrType& dofStructureToSolid()
+      const interfaceVectorPtr_Type& dofStructureToSolid()
       {
       return M_dofStructureToSolid;
       }
 
-      const interface_vector_ptrType& dofStructureToFluid()
+      const interfaceVectorPtr_Type& dofStructureToFluid()
       {
       return M_dofStructureToFluid;
       }
 
-      const interface_vector_ptrType& dofHarmonicExtensionToFluid()
+      const interfaceVectorPtr_Type& dofHarmonicExtensionToFluid()
       {
       return M_dofHarmonicExtensionToFluid;
       }
@@ -256,7 +256,7 @@ private:
 
     //@}
 
-    comm_ptrType M_comm;
+    commPtr_Type M_comm;
 
     Int M_fluidPartitionNumber;
     Int M_solidPartitionNumber;
@@ -272,20 +272,20 @@ private:
     std::string M_velocityOrder;
     std::string M_displacementOrder;
 
-    uncutMesh_ptrType M_uncutFluidMesh;
-    uncutMesh_ptrType M_uncutSolidMesh;
+    uncutMeshPtr_Type M_uncutFluidMesh;
+    uncutMeshPtr_Type M_uncutSolidMesh;
 
-    meshCutter_ptrType M_fluidMeshCutter;
-    meshCutter_ptrType M_solidMeshCutter;
+    meshCutterPtr_Type M_fluidMeshCutter;
+    meshCutterPtr_Type M_solidMeshCutter;
 
-    feSpace_vector_ptrType M_velocityFESpaces;
-    feSpace_ptrType M_displacementFESpace;
+    feSpaceVectorPtr_Type M_velocityFESpaces;
+    feSpacePtr_Type M_displacementFESpace;
 
-    interface_vector_ptrType M_dofFluidToStructure;
-    interface_vector_ptrType M_dofStructureToHarmonicExtension;
-    interface_vector_ptrType M_dofStructureToSolid;
-    interface_vector_ptrType M_dofStructureToFluid;
-    interface_vector_ptrType M_dofHarmonicExtensionToFluid;
+    interfaceVectorPtr_Type M_dofFluidToStructure;
+    interfaceVectorPtr_Type M_dofStructureToHarmonicExtension;
+    interfaceVectorPtr_Type M_dofStructureToSolid;
+    interfaceVectorPtr_Type M_dofStructureToFluid;
+    interfaceVectorPtr_Type M_dofHarmonicExtensionToFluid;
 };
 
 ///////////////////////////
@@ -297,8 +297,8 @@ private:
 // ===============================
 
 template<typename MeshType>
-void FSIOfflinePartitioner<MeshType>::setup(const uncutMesh_ptrType& uncutFluidMesh,
-                                            const uncutMesh_ptrType& uncutSolidMesh,
+void FSIOfflinePartitioner<MeshType>::setup(const uncutMeshPtr_Type& uncutFluidMesh,
+                                            const uncutMeshPtr_Type& uncutSolidMesh,
                                             const Int& fluidPartitionNumber,
                                             const Int& solidPartitionNumber,
                                             const std::string& velocityOrder,
@@ -308,7 +308,7 @@ void FSIOfflinePartitioner<MeshType>::setup(const uncutMesh_ptrType& uncutFluidM
                                             const Real& interfaceTolerance,
                                             const Int& fluidInterfaceVertexFlag,
                                             const Int& solidInterfaceVertexFlag,
-                                            const comm_ptrType& comm)
+                                            const commPtr_Type& comm)
 {
     M_comm = comm;
 
@@ -487,7 +487,7 @@ void FSIOfflinePartitioner<MeshType>::createSpaces()
 
     // Create finite element spaces for velocity and displacement
     std::cout << "Creating velocity finite element space... ";
-    M_velocityFESpaces.reset(new feSpace_vector_Type);
+    M_velocityFESpaces.reset(new feSpaceVector_Type);
     M_velocityFESpaces->resize(M_fluidPartitionNumber);
     for (Int i = 0; i < M_fluidPartitionNumber; ++i)
     {
@@ -520,13 +520,13 @@ void FSIOfflinePartitioner<MeshType>::mapTheInterface()
     std::cout << "Solid interface flag is: " << M_solidInterfaceFlag << std::endl;
     std::cout << std::endl;
 
-    M_dofStructureToHarmonicExtension.reset(new interface_vector_Type);
+    M_dofStructureToHarmonicExtension.reset(new interfaceVector_Type);
     M_dofStructureToHarmonicExtension->resize(M_fluidPartitionNumber);
 
     for (Int i = 0; i < M_fluidPartitionNumber; ++i)
     {
-        interface_ptrType& ifPtr = (*M_dofStructureToHarmonicExtension)[i];
-        feSpace_ptrType& velSpacePtr = (*M_velocityFESpaces)[i];
+        interfacePtr_Type& ifPtr = (*M_dofStructureToHarmonicExtension)[i];
+        feSpacePtr_Type& velSpacePtr = (*M_velocityFESpaces)[i];
         ifPtr.reset(new interface_Type);
         ifPtr->setup(velSpacePtr->refFE(),
                      velSpacePtr->dof(),
