@@ -86,8 +86,8 @@ class MonolithicGI : public Monolithic
 public:
 
     typedef Monolithic                                         super;
-    typedef EpetraPreconditioner                               prec_raw_type;
-    typedef boost::shared_ptr<prec_raw_type>                   prec_type;
+    typedef EpetraPreconditioner                               prec_Type;
+    typedef boost::shared_ptr<prec_Type>                   prec_type;
 
     //!@name Constructor and Destructor
     //@{
@@ -127,8 +127,8 @@ public:
        \param _sol: fluid domain displacement solution
        \param iter: current nonLinRichardson (block Gauss Seidel for the tangent system) iteration
     */
-    void                      evalResidual(vector_type&        res,
-                                           const vector_type& _sol,
+    void                      evalResidual(vector_Type&        res,
+                                           const vector_Type& _sol,
                                            const UInt          _iter);
 
 
@@ -142,15 +142,15 @@ public:
        \param _res: linear residual
        \param _linearRelTol: not used
     */
-    void                        solveJac(vector_type       &_muk,
-                                         const vector_type &_res,
+    void                        solveJac(vector_Type       &_muk,
+                                         const vector_Type &_res,
                                          const Real       _linearRelTol);
     //! initialize the system with functions
-    void                        initialize( FSIOperator::fluid_type::value_type::Function const& u0,
-                                            FSIOperator::solid_type::value_type::Function const& p0,
-                                            FSIOperator::solid_type::value_type::Function const& d0,
-                                            FSIOperator::solid_type::value_type::Function const& w0,
-                                            FSIOperator::solid_type::value_type::Function const& df0 );
+    void                        initialize( FSIOperator::fluidPtr_Type::value_type::Function const& u0,
+                                            FSIOperator::solidPtr_Type::value_type::Function const& p0,
+                                            FSIOperator::solidPtr_Type::value_type::Function const& d0,
+                                            FSIOperator::solidPtr_Type::value_type::Function const& w0,
+                                            FSIOperator::solidPtr_Type::value_type::Function const& df0 );
 
     //@}
     //!@name Get Methods
@@ -163,28 +163,28 @@ public:
     const matrixPtr_Type        getMatrixPtr() const {return this->M_monolithicMatrix->getMatrix();}
 
     //! getter for the current iteration solution
-    const vector_ptrtype  uk()  const      {return M_uk;}
+    const vectorPtr_Type  uk()  const      {return M_uk;}
 
     //! getter for the domain displacement at the previous time step (to correctly visualize the solition of both GE
     //! and GI)
-    const vector_type&          meshDisp()const
+    const vector_Type&          meshDisp()const
     {
         return this->M_meshMotion->dispOld();
     }
 
     //! get the solution.
-    const vector_type& getSolution() const { return *M_uk; }
+    const vector_Type& getSolution() const { return *M_uk; }
 
     //! get the solution.
-    vector_ptrtype& solutionPtr() { return M_uk; }
+    vectorPtr_Type& solutionPtr() { return M_uk; }
 
     //@}
     //!@name Set Methods
     //@{
     //! set the solution
-    void setSolution( const vector_type& solution ) { M_uk.reset( new vector_type( solution ) ); }
+    void setSolution( const vector_Type& solution ) { M_uk.reset( new vector_Type( solution ) ); }
 
-    void setSolutionPtr                     ( const vector_ptrtype& sol) { M_uk = sol; }
+    void setSolutionPtr                     ( const vectorPtr_Type& sol) { M_uk = sol; }
     //@}
 
 protected:
@@ -212,7 +212,7 @@ private:
        \param rhsShapeDerivatives: output. Shape derivative terms.
        \param meshDeltaDisp: input. Mesh displacement increment.
     */
-    void shapeDerivatives(matrixPtr_Type sdMatrix, const vector_type& sol,  bool fullImplicit, bool convectiveTerm);
+    void shapeDerivatives(matrixPtr_Type sdMatrix, const vector_Type& sol,  bool fullImplicit, bool convectiveTerm);
 
     //! assembles the mesh motion matrix.
     /*!In Particular it diagonalize the part of the matrix corresponding to the
@@ -226,14 +226,14 @@ private:
     //@{
 
     boost::shared_ptr<EpetraMap>         M_mapWithoutMesh;
-    vector_ptrtype                       M_uk;
+    vectorPtr_Type                       M_uk;
     bool                                 M_domainVelImplicit;
     bool                                 M_convectiveTermDer;
     UInt                                 M_interface;
     matrixPtr_Type                       M_meshBlock;
     matrixPtr_Type                       M_shapeDerivativesBlock;
     matrixPtr_Type                       M_solidDerBlock;
-    //std::vector<fluid_bchandler_type>    M_BChsLin;
+    //std::vector<fluidBchandlerPtr_Type>    M_BChsLin;
     static bool                          reg;
     //@}
 };

@@ -107,7 +107,7 @@ public:
         @param result output result
         @param linearSolver the linear system
      */
-    virtual int   solveSystem( const vector_type& rhs, vector_type& step, solver_ptrtype& linearSolver)=0;
+    virtual int   solveSystem( const vector_Type& rhs, vector_Type& step, solver_ptrtype& linearSolver)=0;
 
     //! Sets the parameters needed by the preconditioner from data file
     /*!
@@ -153,7 +153,7 @@ public:
      */
     void coupler(map_shared_ptrtype& map,
                  const std::map<ID, ID>& locDofMap,
-                 const vector_ptrtype& numerationInterface,
+                 const vectorPtr_Type& numerationInterface,
                  const Real& timeStep,
                  UInt couplingBlock
                  );

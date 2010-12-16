@@ -62,7 +62,7 @@ void ComposedBlockOper::blockAssembling()
 
 void ComposedBlockOper::coupler( map_shared_ptrtype& map,
                                  const std::map<ID, ID>& locDofMap,
-                                 const vector_ptrtype& numerationInterface,
+                                 const vectorPtr_Type& numerationInterface,
                                  const Real& timeStep,
                                  UInt couplingBlock )
 {

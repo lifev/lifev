@@ -59,8 +59,8 @@ public:
     //@{
     typedef  BlockInterface                 super;
     typedef  super::fespace_shared_ptrtype  fespace_ptrtype;
-    typedef  super::vector_type             vector_type;
-    typedef  super::vector_ptrtype          vector_ptrtype;
+    typedef  super::vector_Type             vector_Type;
+    typedef  super::vectorPtr_Type          vectorPtr_Type;
     typedef  super::solver_ptrtype          solver_ptrtype;
     typedef  super::matrix_Type          matrix_Type;
     typedef  super::matrixPtr_Type          matrixPtr_Type;
@@ -120,7 +120,7 @@ public:
      */
     virtual void coupler(map_shared_ptrtype& map,
                          const std::map<ID, ID>& locDofMap,
-                         const vector_ptrtype& numerationInterface,
+                         const vectorPtr_Type& numerationInterface,
                          const Real& timeStep);
 
 
@@ -143,7 +143,7 @@ public:
      */
     void coupler(map_shared_ptrtype& map,
                  const std::map<ID, ID>& locDofMap,
-                 const vector_ptrtype& numerationInterface,
+                 const vectorPtr_Type& numerationInterface,
                  const Real& timeStep,
                  UInt /*flag*/ );
 
@@ -164,7 +164,7 @@ public:
       @param result output result
       @param linearSolver the linear system
     */
-    int   solveSystem( const vector_type& rhs, vector_type& step, solver_ptrtype& linearSolver);
+    int   solveSystem( const vector_Type& rhs, vector_Type& step, solver_ptrtype& linearSolver);
 
 
     //! pushes a block at the end of the vector
@@ -223,7 +223,7 @@ public:
       \param prec preconditioner matrix
       \param rhs right hand side of the system
     */
-    void applyPreconditioner(   matrixPtr_Type robinCoupling, matrixPtr_Type prec, vector_ptrtype& rhs);
+    void applyPreconditioner(   matrixPtr_Type robinCoupling, matrixPtr_Type prec, vectorPtr_Type& rhs);
 
     //! multiplies two matrices
     /*!
@@ -240,7 +240,7 @@ public:
       \param matrix the preconditioning matrix
       \param rhsFull the right hand side of the system
      */
-    void applyPreconditioner( const matrixPtr_Type matrix, vector_ptrtype& rhsFull);
+    void applyPreconditioner( const matrixPtr_Type matrix, vectorPtr_Type& rhsFull);
 
     //!creates the map for the coupling
     /*!
@@ -269,10 +269,10 @@ public:
     void applyBoundaryConditions(const Real& time, const UInt block );
 
     //! applies all the b.c.s to the global matrix, updates the rhs
-    void applyBoundaryConditions(const Real& time, vector_ptrtype& rhs);
+    void applyBoundaryConditions(const Real& time, vectorPtr_Type& rhs);
 
     //! applies the b.c. to the a specific block, updates the rhs
-    void applyBoundaryConditions(const Real& time, vector_ptrtype& rhs, const UInt block);
+    void applyBoundaryConditions(const Real& time, vectorPtr_Type& rhs, const UInt block);
 
     //! adds a block to the coupling matrix
     /*!
@@ -321,7 +321,7 @@ public:
     /*!
       \param numeration: output vector
      */
-    void getNumerationInterface( vector_ptrtype& numeration ) { numeration =  M_numerationInterface; }
+    void getNumerationInterface( vectorPtr_Type& numeration ) { numeration =  M_numerationInterface; }
 
     //@}
 
@@ -349,7 +349,7 @@ private:
     //! @name Private Members
     //@{
     const UInt                                  M_couplingFlag;
-    vector_ptrtype                              M_numerationInterface;
+    vectorPtr_Type                              M_numerationInterface;
     //@}
 };
 

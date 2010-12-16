@@ -110,7 +110,7 @@ public:
      */
     void coupler(map_shared_ptrtype& map,
                  const std::map<ID, ID>& locDofMap,
-                 const vector_ptrtype& numerationInterface,
+                 const vectorPtr_Type& numerationInterface,
                  const Real& timeStep);
 
     //! Sums all the blocks and the couplings into the system matrix, adds the robin coupling part
@@ -119,7 +119,7 @@ public:
     //! sets the matrix where the Robin contribution will be assembled (which have to passed from outside) and the
     /*! right hand side vector of the linear system, which will be updated with the Robin part.
      */
-    void setRobin( matrixPtr_Type& matrix, vector_ptrtype& vec ){setRobinMatrix( matrix ); setRobinRhs( vec );}
+    void setRobin( matrixPtr_Type& matrix, vectorPtr_Type& vec ){setRobinMatrix( matrix ); setRobinRhs( vec );}
 
     //! sets the matrix where the Robin contribution will be assembled
     void setRobin( matrixPtr_Type& matrix ){setRobinMatrix( matrix ); }

@@ -50,10 +50,10 @@ namespace LifeV
 void MonolithicGE::setupFluidSolid( UInt const fluxes )
 {
     super_Type::setupFluidSolid( fluxes );
-    M_meshMotion.reset(new FSIOperator::meshmotion_raw_type(*M_mmFESpace,
-                                                            M_epetraComm));
+    M_meshMotion.reset(new FSIOperator::meshMotion_Type(*M_mmFESpace,
+                                                        M_epetraComm));
 
-    M_fluid.reset(new FSIOperator::fluid_raw_type(M_data->dataFluid(),
+    M_fluid.reset(new FSIOperator::fluid_Type(M_data->dataFluid(),
                                                   *M_uFESpace,
                                                   *M_pFESpace,
                                                   M_epetraComm,
@@ -64,12 +64,12 @@ void MonolithicGE::setupFluidSolid( UInt const fluxes )
     //                                                                    *M_uFESpace,
     //                                                                    *M_pFESpace,
     //                                                                    *M_epetraComm));
-    M_un.reset (new vector_type(*this->M_monolithicMap));
-    M_rhs.reset(new vector_type(*this->M_monolithicMap));
-    M_rhsFull.reset(new vector_type(*this->M_monolithicMap));
-    M_beta.reset  (new vector_type(M_uFESpace->map()));
+    M_un.reset (new vector_Type(*this->M_monolithicMap));
+    M_rhs.reset(new vector_Type(*this->M_monolithicMap));
+    M_rhsFull.reset(new vector_Type(*this->M_monolithicMap));
+    M_beta.reset  (new vector_Type(M_uFESpace->map()));
 
-    M_solid.reset(solid_raw_type::StructureSolverFactory::instance().createObject( M_data->dataSolid()->solidType() ));
+    M_solid.reset(solid_Type::StructureSolverFactory::instance().createObject( M_data->dataSolid()->solidType() ));
 
     M_solid->setup(M_data->dataSolid(),
                    M_dFESpace,
@@ -112,8 +112,8 @@ MonolithicGE::updateSystem( )
 
 
 void
-MonolithicGE::evalResidual( vector_type&       res,
-                            const vector_type& disp,
+MonolithicGE::evalResidual( vector_Type&       res,
+                            const vector_Type& disp,
                             const UInt          iter )
 {
 
@@ -125,8 +125,8 @@ MonolithicGE::evalResidual( vector_type&       res,
         // Update displacement
         M_meshMotion->updateDispDiff();
 
-        M_beta.reset(new vector_type(M_uFESpace->map()));
-        vector_type meshDispDiff( M_meshMotion->disp(), Repeated );
+        M_beta.reset(new vector_Type(M_uFESpace->map()));
+        vector_Type meshDispDiff( M_meshMotion->disp(), Repeated );
 
         this->moveMesh(meshDispDiff);//initialize the mesh position with the total displacement
 
@@ -135,7 +135,7 @@ MonolithicGE::evalResidual( vector_type&       res,
 
         *this->M_beta /= -M_data->dataFluid()->dataTime()->getTimeStep(); //mesh velocity w
 
-        vector_ptrtype fluid(new vector_type(this->M_uFESpace->map()));
+        vectorPtr_Type fluid(new vector_Type(this->M_uFESpace->map()));
         fluid->subset(*M_un, (UInt)0);
         *this->M_beta += *fluid/*M_un*/;//relative velocity beta=un-w
 
@@ -150,9 +150,9 @@ MonolithicGE::evalResidual( vector_type&       res,
 }
 
 void
-MonolithicGE::iterateMesh(const vector_type& disp)
+MonolithicGE::iterateMesh(const vector_Type& disp)
 {
-    vector_type lambdaFluid(*M_interfaceMap, Unique);
+    vector_Type lambdaFluid(*M_interfaceMap, Unique);
 
     monolithicToInterface(lambdaFluid, disp);
 
@@ -209,7 +209,7 @@ void MonolithicGE::applyBoundaryConditions( )
 //! Products registration
 // ===================================================
 
-bool MonolithicGE::reg = FSIFactory::instance().registerProduct( "monolithicGE", &MonolithicGE::createM )  &&
+bool MonolithicGE::reg = FSIFactory_Type::instance().registerProduct( "monolithicGE", &MonolithicGE::createM )  &&
                          BlockPrecFactory::instance().registerProduct("ComposedDNND"  , &ComposedDNND::createComposedDNND) &&
                          BlockPrecFactory::instance().registerProduct("AdditiveSchwarz"  , &BlockMatrix::createAdditiveSchwarz) &&
                          BlockMatrix::Factory::instance().registerProduct("AdditiveSchwarz"  , &BlockMatrix::createAdditiveSchwarz ) &&

@@ -42,7 +42,7 @@ void BlockInterface::couplingMatrix(matrixPtr_Type & bigMatrix,
                                     const std::vector<fespace_ptrtype>& problem,
                                     const std::vector<UInt>& offset,
                                     const std::map<ID, ID>& locDofMap,
-                                    const vector_ptrtype& numerationInterface,
+                                    const vectorPtr_Type& numerationInterface,
                                     const Real& timeStep,
                                     const Real& value) // not working with non-matching grids
 {// coupling from 1 to 31, working as chmod
@@ -166,7 +166,7 @@ BlockInterface::robinCoupling( matrixPtr_Type& matrix,
                                const BlockInterface::fespace_ptrtype& FESpace2,
                                const UInt& offset2,
                                const std::map<ID, ID>& locDofMap,
-                               const BlockInterface::vector_ptrtype& numerationInterface ) // not working with non-matching grids
+                               const BlockInterface::vectorPtr_Type& numerationInterface ) // not working with non-matching grids
 {//coupling: flag from 1 to 4 working as chmod
     UInt interface(numerationInterface->getMap().getMap(Unique)->NumGlobalElements());
     std::map<ID, ID>::const_iterator ITrow;

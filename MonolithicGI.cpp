@@ -87,27 +87,27 @@ MonolithicGI::setupFluidSolid( UInt const fluxes )
     //std::cout<<"map global elements : "<<M_monolithicMap->getMap(Unique)->NumGlobalElements()<<std::endl;
     M_interface=M_monolithicMatrix->getInterface();
 
-    vector_type u0(*this->M_monolithicMap);
-    M_bdf.reset(new BdfT<vector_type>(M_data->dataFluid()->dataTime()->getBDF_order()));
+    vector_Type u0(*this->M_monolithicMap);
+    M_bdf.reset(new BdfT<vector_Type>(M_data->dataFluid()->dataTime()->getBDF_order()));
     M_bdf->initialize_unk(u0);
-    this->M_rhs.reset(new vector_type(*this->M_monolithicMap));
-    this->M_rhsFull.reset(new vector_type(*this->M_monolithicMap));
+    this->M_rhs.reset(new vector_Type(*this->M_monolithicMap));
+    this->M_rhsFull.reset(new vector_Type(*this->M_monolithicMap));
     if(M_data->dataFluid()->useShapeDerivatives())
         M_shapeDerivativesBlock.reset(new matrix_Type(*M_monolithicMap));
-    M_uk.reset (new vector_type(*this->M_monolithicMap));
-    M_un.reset (new vector_type(*this->M_monolithicMap));
+    M_uk.reset (new vector_Type(*this->M_monolithicMap));
+    M_un.reset (new vector_Type(*this->M_monolithicMap));
 
-    M_meshMotion.reset(new meshmotion_raw_type(*M_mmFESpace,
+    M_meshMotion.reset(new meshMotion_Type(*M_mmFESpace,
                                                M_epetraComm,
                                                *M_monolithicMap,
                                                offset));
-    M_fluid.reset     (new fluid_raw_type(M_data->dataFluid(),
+    M_fluid.reset     (new fluid_Type(M_data->dataFluid(),
                                           *M_uFESpace,
                                           *M_pFESpace,
                                           *M_mmFESpace,
                                           M_epetraComm,
                                           *M_monolithicMap));
-    M_solid.reset(solid_raw_type::StructureSolverFactory::instance().createObject( M_data->dataSolid()->solidType( ) ));
+    M_solid.reset(solid_Type::StructureSolverFactory::instance().createObject( M_data->dataSolid()->solidType( ) ));
     M_solid->setup(M_data->dataSolid(),
                    M_dFESpace,
                    M_epetraComm,
@@ -123,11 +123,11 @@ MonolithicGI::updateSystem()
     //M_meshMotion->updateSystem();
 
     UInt offset(M_solidAndFluidDim + nDimensions*M_interface);
-    vector_ptrtype meshDispDiff(new vector_type(M_mmFESpace->map()));
+    vectorPtr_Type meshDispDiff(new vector_Type(M_mmFESpace->map()));
     meshDispDiff->subset(*M_uk, offset); //if the conv. term is to be condidered implicitly
     M_meshMotion->initialize(*meshDispDiff);//M_disp is set to the total mesh disp.`
     super::updateSystem();
-    M_un.reset(new vector_type(*M_uk));
+    M_un.reset(new vector_Type(*M_uk));
 }
 
 void
@@ -138,8 +138,8 @@ MonolithicGI::buildSystem ()
 }
 
 void
-MonolithicGI::evalResidual( vector_type&       res,
-                            const vector_type& disp,
+MonolithicGI::evalResidual( vector_Type&       res,
+                            const vector_Type& disp,
                             const UInt          iter )
 {
     setDispSolid(disp);
@@ -147,12 +147,12 @@ MonolithicGI::evalResidual( vector_type&       res,
     {
         this->M_solid->updateVel();
     }
-    M_uk.reset(new vector_type( disp ));
-    this->M_beta.reset( new vector_type(M_uFESpace->map()) );
+    M_uk.reset(new vector_Type( disp ));
+    this->M_beta.reset( new vector_Type(M_uFESpace->map()) );
     UInt offset( M_solidAndFluidDim + nDimensions*M_interface );
 
-    vector_ptrtype meshDispDiff( new vector_type(M_mmFESpace->map()) );
-    vector_ptrtype meshDispOld( new vector_type(M_mmFESpace->map()) );
+    vectorPtr_Type meshDispDiff( new vector_Type(M_mmFESpace->map()) );
+    vectorPtr_Type meshDispOld( new vector_Type(M_mmFESpace->map()) );
 
     meshDispDiff->subset(disp, offset); //if the conv. term is to be condidered implicitly
 
@@ -162,7 +162,7 @@ MonolithicGI::evalResidual( vector_type&       res,
     //meshDispDiff->subset(*M_un, offset); //if we linearize in a semi-implicit way
     M_meshMotion->initialize(*meshDispDiff);//M_disp is set to the total mesh disp.
     double alpha = 1/M_data->dataFluid()->dataTime()->getTimeStep();
-    vector_type mmRep(*meshDispDiff, Repeated);// just to repeat dispDiff. No way witout copying?
+    vector_Type mmRep(*meshDispDiff, Repeated);// just to repeat dispDiff. No way witout copying?
     this->moveMesh(mmRep);// re-initialize the mesh points
     *meshDispDiff -= *meshDispOld;//relative displacement
     if (!M_domainVelImplicit)
@@ -175,7 +175,7 @@ MonolithicGI::evalResidual( vector_type&       res,
 
     this->interpolateVelocity(mmRep, *this->M_beta);
     //            *this->M_beta *= -alpha; //HE solution scaled!
-    vector_ptrtype fluid(new vector_type(this->M_uFESpace->map()));
+    vectorPtr_Type fluid(new vector_Type(this->M_uFESpace->map()));
     if (!M_convectiveTermDer)
         fluid->subset(*M_un/**M_unOld*/, 0);
     else
@@ -248,8 +248,8 @@ MonolithicGI::applyBoundaryConditions()
 }
 
 
-void MonolithicGI::solveJac(vector_type       &_step,
-                            const vector_type &_res,
+void MonolithicGI::solveJac(vector_Type       &_step,
+                            const vector_Type &_res,
                             const Real       /*_linearRelTol*/)
 {
 
@@ -270,15 +270,15 @@ void MonolithicGI::solveJac(vector_type       &_step,
     M_solid->getDisplayer().leaderPrint("  M-  Jacobian NormInf res:                    ", _step.NormInf(), "\n");
 }
 
-void MonolithicGI::initialize( FSIOperator::fluid_type::value_type::Function const& u0,
-                               FSIOperator::solid_type::value_type::Function const& p0,
-                               FSIOperator::solid_type::value_type::Function const& d0,
-                               FSIOperator::solid_type::value_type::Function const& w0,
-                               FSIOperator::solid_type::value_type::Function const& df0 )
+void MonolithicGI::initialize( FSIOperator::fluidPtr_Type::value_type::Function const& u0,
+                               FSIOperator::solidPtr_Type::value_type::Function const& p0,
+                               FSIOperator::solidPtr_Type::value_type::Function const& d0,
+                               FSIOperator::solidPtr_Type::value_type::Function const& w0,
+                               FSIOperator::solidPtr_Type::value_type::Function const& df0 )
 {
     super::initialize(u0, p0, d0, w0, df0);
 
-    vector_type df(M_mmFESpace->map());
+    vector_Type df(M_mmFESpace->map());
     M_mmFESpace->interpolate(df0, df, M_data->dataSolid()->dataTime()->getTime());
     M_un->add(df, M_solidAndFluidDim+getDimInterface());
     M_meshMotion->setDisplacement(df);
@@ -345,20 +345,20 @@ int MonolithicGI::setupBlockPrec( )
 }
 
 
-void MonolithicGI::shapeDerivatives(matrixPtr_Type sdMatrix, const vector_type& sol, bool domainVelImplicit, bool convectiveTermDer)
+void MonolithicGI::shapeDerivatives(matrixPtr_Type sdMatrix, const vector_Type& sol, bool domainVelImplicit, bool convectiveTermDer)
 {
     double alpha = 1./M_data->dataFluid()->dataTime()->getTimeStep();
-    vector_ptrtype rhsNew(new vector_type(*M_monolithicMap));
-    vector_type un(M_uFESpace->map()/*+M_pFESpace->map()*/);
-    vector_type uk(M_uFESpace->map()+M_pFESpace->map());
+    vectorPtr_Type rhsNew(new vector_Type(*M_monolithicMap));
+    vector_Type un(M_uFESpace->map()/*+M_pFESpace->map()*/);
+    vector_Type uk(M_uFESpace->map()+M_pFESpace->map());
 
-    //vector_type meshVel(M_meshMotion->dispDiff(), Repeated);
-    vector_ptrtype meshVel(new vector_type(M_mmFESpace->map()));
+    //vector_Type meshVel(M_meshMotion->dispDiff(), Repeated);
+    vectorPtr_Type meshVel(new vector_Type(M_mmFESpace->map()));
 
     UInt offset(M_solidAndFluidDim + nDimensions*M_interface);
     if (domainVelImplicit)
     {
-        vector_type meshDispOld(M_mmFESpace->map());
+        vector_Type meshDispOld(M_mmFESpace->map());
         meshVel->subset(sol, offset); //if the conv. term is to be condidered implicitly
         meshDispOld.subset(*M_un, offset);
         *meshVel -= meshDispOld;
@@ -375,12 +375,12 @@ void MonolithicGI::shapeDerivatives(matrixPtr_Type sdMatrix, const vector_type& 
         un.subset(*this->M_un, 0);
 
     *meshVel *= alpha;
-    vector_ptrtype meshVelRep(new vector_type(M_mmFESpace->map(), Repeated));
+    vectorPtr_Type meshVelRep(new vector_Type(M_mmFESpace->map(), Repeated));
     *meshVelRep = *meshVel;
 
     uk.subset(sol, 0);
-    vector_type dvfm(M_uFESpace->map(), Repeated);
-    vector_type vfm(M_uFESpace->map(), Repeated);
+    vector_Type dvfm(M_uFESpace->map(), Repeated);
+    vector_Type vfm(M_uFESpace->map(), Repeated);
     this->transferMeshMotionOnFluid(*meshVelRep, vfm);
 
     M_fluid->updateShapeDerivatives(*sdMatrix,
@@ -408,7 +408,7 @@ MonolithicGI::assembleMeshBlock(UInt /*iter*/)
 
     /******************alternative way************************/
 //     BCFunctionBase bcf(fZero);
-//     fluid_bchandler_type BCh(new fluid_bchandler_raw_type() );
+//     fluidBchandlerPtr_Type BCh(new fluid_bchandler_raw_type() );
 //     BCh->addBC("Interface", 1, Essential, Full,
 //                bcf, 3);
 
@@ -497,7 +497,7 @@ bool MonolithicGI::reg =  BlockPrecFactory::instance().registerProduct("Additive
                           &&
                           BlockMatrix::Factory::instance().registerProduct( "AdditiveSchwarzRNGI", &createAdditiveSchwarzRNGI )
                           &&
-                          FSIFactory::instance().registerProduct( "monolithicGI", &createFM )
+                          FSIFactory_Type::instance().registerProduct( "monolithicGI", &createFM )
                           &&
                           BlockPrecFactory::instance().registerProduct("ComposedDNDGI"  , &createComposedDNDGI )
                           &&

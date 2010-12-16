@@ -62,7 +62,7 @@ void BlockMatrix::GlobalAssemble()
 
 void BlockMatrix::coupler(map_shared_ptrtype& map,
                           const std::map<ID, ID>& locDofMap,
-                          const vector_ptrtype& numerationInterface,
+                          const vectorPtr_Type& numerationInterface,
                           const Real& timeStep
                          )
 {
@@ -73,7 +73,7 @@ void BlockMatrix::coupler(map_shared_ptrtype& map,
 
 void BlockMatrix::coupler(map_shared_ptrtype& map,
                           const std::map<ID, ID>& locDofMap,
-                          const vector_ptrtype& numerationInterface,
+                          const vectorPtr_Type& numerationInterface,
                           const Real& timeStep,
                           UInt /*flag1*/
                          )
@@ -82,7 +82,7 @@ void BlockMatrix::coupler(map_shared_ptrtype& map,
 }
 
 
-int BlockMatrix::solveSystem( const vector_type& rhs, vector_type& step, solver_ptrtype& linearSolver)
+int BlockMatrix::solveSystem( const vector_Type& rhs, vector_Type& step, solver_ptrtype& linearSolver)
 {
     return linearSolver->solveSystem(rhs, step, M_globalMatrix);
 }
@@ -119,14 +119,14 @@ void BlockMatrix::blockAssembling()
 
 
 
-void BlockMatrix::applyPreconditioner(const matrixPtr_Type matrix, vector_ptrtype& rhsFull)
+void BlockMatrix::applyPreconditioner(const matrixPtr_Type matrix, vectorPtr_Type& rhsFull)
 {
     this->applyPreconditioner(matrix, M_globalMatrix);
     *rhsFull = (*matrix)*(*rhsFull);
 }
 
 
-void BlockMatrix::applyPreconditioner( matrixPtr_Type robinCoupling, matrixPtr_Type prec, vector_ptrtype& rhs)
+void BlockMatrix::applyPreconditioner( matrixPtr_Type robinCoupling, matrixPtr_Type prec, vectorPtr_Type& rhs)
 {
     applyPreconditioner(robinCoupling, prec);
     applyPreconditioner(robinCoupling, M_globalMatrix);
@@ -159,7 +159,7 @@ void BlockMatrix::createInterfaceMap( const EpetraMap& interfaceMap , const std:
     numInterfaceDof[pid]=numMyElements;
     EpetraMap subMap(*interfaceMap.getMap(Unique), (UInt)0, subdomainMaxId);
 
-    M_numerationInterface.reset(new vector_type(subMap,Unique));
+    M_numerationInterface.reset(new vector_Type(subMap,Unique));
     //should be an int vector instead of double
     //                    M_numerationInterfaceInt.reset(new Epetra_IntVector(*M_interfaceMap.getMap(Unique)));
 
@@ -215,13 +215,13 @@ void BlockMatrix::applyBoundaryConditions(const Real& time)
         applyBoundaryConditions( time, i );
 }
 
-void BlockMatrix::applyBoundaryConditions(const Real& time, vector_ptrtype& rhs)
+void BlockMatrix::applyBoundaryConditions(const Real& time, vectorPtr_Type& rhs)
 {
     for ( UInt i = 0; i < super::M_blocks.size(); ++i )
         applyBoundaryConditions( time, rhs, i );
 }
 
-void BlockMatrix::applyBoundaryConditions(const Real& time, vector_ptrtype& rhs, const UInt block)
+void BlockMatrix::applyBoundaryConditions(const Real& time, vectorPtr_Type& rhs, const UInt block)
 {
     bcManage( *M_globalMatrix , *rhs, *super::M_FESpace[block]->mesh(), super::M_FESpace[block]->dof(), *super::M_bch[block], super::M_FESpace[block]->feBd(), 1., time);
 }

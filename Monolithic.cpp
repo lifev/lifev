@@ -87,7 +87,7 @@ Monolithic::setupFEspace()
     super::setupFEspace();
 
     // Monolitic: In the beginning I need a non-partitioned mesh. later we will do the partitioning
-    M_dFESpace.reset( new FESpace<mesh_type, EpetraMap>( M_solidMesh,
+    M_dFESpace.reset( new FESpace<mesh_Type, EpetraMap>( M_solidMesh,
                                                          M_data->dataSolid()->order(),
                                                          nDimensions,
                                                          M_epetraComm));
@@ -110,7 +110,7 @@ Monolithic::setupDOF( void )
 }
 
 void
-Monolithic::setupDOF( mesh_filtertype& filterMesh )
+Monolithic::setupDOF( meshFilter_Type& filterMesh )
 {
     boost::shared_ptr< std::map<UInt, UInt> > locDofMap;
     locDofMap = filterMesh.getStoredInterface( 0 );
@@ -129,7 +129,7 @@ void
 Monolithic::setUp( const GetPot& dataFile )
 {
 
-    M_linearSolver.reset(new solver_type(M_epetraComm));
+    M_linearSolver.reset(new solver_Type(M_epetraComm));
 
     M_linearSolver->setDataFromGetPot( dataFile, "linear_system/solver" );
     M_linearSolver->setUpPrec(dataFile, "linear_system/prec");//to avoid if we have already a prec.
@@ -197,7 +197,7 @@ Monolithic::setupFluidSolid( UInt const fluxes )
 
     //the map for the interface coupling matrices should be done with respect to the coarser mesh.
     M_monolithicMatrix->getNumerationInterface(M_numerationInterface);
-    M_beta.reset  (new vector_type(/*M_monolithicMap*/M_uFESpace->map()));
+    M_beta.reset  (new vector_Type(/*M_monolithicMap*/M_uFESpace->map()));
 
     M_offset = M_uFESpace->dof().numTotalDof()*nDimensions + M_fluxes +  M_pFESpace->dof().numTotalDof();
     M_solidAndFluidDim= M_offset + M_dFESpace->dof().numTotalDof()*nDimensions;
@@ -210,39 +210,39 @@ Monolithic::setupFluidSolid( UInt const fluxes )
 
 
 void
-Monolithic::monolithicToInterface(vector_type& lambdaSolid, const vector_type& disp)
+Monolithic::monolithicToInterface(vector_Type& lambdaSolid, const vector_Type& disp)
 {
     if (disp.getMaptype() == Repeated)
     {
-        vector_type const  dispUnique(disp, Unique);
+        vector_Type const  dispUnique(disp, Unique);
         monolithicToInterface(lambdaSolid, dispUnique);
         return;
     }
     if (lambdaSolid.getMaptype() == Repeated)
     {
-        vector_type  lambdaSolidUn(lambdaSolid.getMap(), Unique);
+        vector_Type  lambdaSolidUn(lambdaSolid.getMap(), Unique);
         monolithicToInterface( lambdaSolidUn, disp);
         lambdaSolid = lambdaSolidUn;
         return;
     }
     /* UInt MyOffset(M_uFESpace->map().getMap(Unique)->NumMyElements()+M_pFESpace->map().getMap(Unique)->NumMyElements());
-       vector_type subDisp(this->M_dFESpace->map(), Unique);
+       vector_Type subDisp(this->M_dFESpace->map(), Unique);
        subDisp.mySubset(disp, MyOffset);
        lambdaSolid=subDisp;*/
 
     EpetraMap subMap(*disp.getMap().getMap(Unique), M_offset,disp.getMap().getMap(Unique)->NumGlobalElements() );
-    vector_type subDisp(subMap, Unique);
+    vector_Type subDisp(subMap, Unique);
     subDisp.subset(disp, M_offset);
     lambdaSolid=subDisp;
 }
 
 
 void
-Monolithic::monolithicToX(const vector_type& disp, vector_type& dispFluid, EpetraMap& map, UInt offset)
+Monolithic::monolithicToX(const vector_Type& disp, vector_Type& dispFluid, EpetraMap& map, UInt offset)
 {
     if(disp.getMaptype()== Repeated)
     {
-        vector_type dispUnique(disp, Unique);
+        vector_Type dispUnique(disp, Unique);
         monolithicToX(dispUnique, dispFluid, map, offset);
         dispFluid = dispUnique;
         return;
@@ -251,9 +251,9 @@ Monolithic::monolithicToX(const vector_type& disp, vector_type& dispFluid, Epetr
 }
 
 void
-Monolithic::setDispSolid( const vector_type& solution )
+Monolithic::setDispSolid( const vector_Type& solution )
 {
-    vector_type disp(*M_monolithicMap);
+    vector_Type disp(*M_monolithicMap);
     monolithicToX(solution, disp, M_dFESpace->map(), M_offset);
     this->M_solid->setDisp(disp);
 }
@@ -313,9 +313,9 @@ Monolithic::computeMaxSingularValue( )
 #endif
 
 void
-Monolithic::computeFNormals( vector_type& normals)
+Monolithic::computeFNormals( vector_Type& normals)
 {
-    BCNormalManager<mesh_type, matrix_Type> normalManager(*M_uFESpace->mesh());
+    BCNormalManager<mesh_Type, matrix_Type> normalManager(*M_uFESpace->mesh());
     if ( !M_BChWSS->bdUpdateDone() )//possibly to avoid
         M_BChWSS->bdUpdate(*M_uFESpace->mesh(), M_uFESpace->feBd(), M_uFESpace->dof() );
     normalManager.init((*M_BChWSS)[0], 0.);
@@ -323,8 +323,8 @@ Monolithic::computeFNormals( vector_type& normals)
 }
 
 void
-Monolithic::solveJac(vector_type         &_step,
-                     const vector_type   &_res,
+Monolithic::solveJac(vector_Type         &_step,
+                     const vector_Type   &_res,
                      const Real         /*_linearRelTol*/)
 {
     setupBlockPrec( );
@@ -345,7 +345,7 @@ Monolithic::solveJac(vector_type         &_step,
 void
 Monolithic::updateSystem()
 {
-    vector_type solution(*this->M_monolithicMap);
+    vector_Type solution(*this->M_monolithicMap);
     monolithicToX(*this->M_un, solution, M_uFESpace->map(), UInt(0));
     this->M_bdf->shift_right(solution);
 
@@ -358,32 +358,32 @@ Monolithic::updateSystem()
 }
 
 void
-Monolithic::initialize( FSIOperator::fluid_type::value_type::Function const& u0,
-                        FSIOperator::solid_type::value_type::Function const& p0,
-                        FSIOperator::solid_type::value_type::Function const& d0,
-                        FSIOperator::solid_type::value_type::Function const& /*w0*/,
-                        FSIOperator::solid_type::value_type::Function const& /*w0*/ )
+Monolithic::initialize( FSIOperator::fluidPtr_Type::value_type::Function const& u0,
+                        FSIOperator::solidPtr_Type::value_type::Function const& p0,
+                        FSIOperator::solidPtr_Type::value_type::Function const& d0,
+                        FSIOperator::solidPtr_Type::value_type::Function const& /*w0*/,
+                        FSIOperator::solidPtr_Type::value_type::Function const& /*w0*/ )
 {
-    vector_type u(M_uFESpace->map());
+    vector_Type u(M_uFESpace->map());
     M_uFESpace->interpolate(u0, u, M_data->dataFluid()->dataTime()->getTime());
 
-    vector_type p(M_pFESpace->map());
+    vector_Type p(M_pFESpace->map());
     M_pFESpace->interpolate(p0, p, M_data->dataFluid()->dataTime()->getTime());
 
-    vector_type d(M_dFESpace->map());
+    vector_Type d(M_dFESpace->map());
     M_dFESpace->interpolate(d0, d, M_data->dataSolid()->dataTime()->getTime());
 
     initialize(u, p, d);
 }
 
 void
-Monolithic::initializeMesh(vector_ptrtype fluid_dispOld)
+Monolithic::initializeMesh(vectorPtr_Type fluid_dispOld)
 {
     meshMotion().setDisplacement(*fluid_dispOld);
 }
 
 void
-Monolithic::initialize( const vector_type& u0, const vector_type& p0, const vector_type& d0)
+Monolithic::initialize( const vector_Type& u0, const vector_Type& p0, const vector_Type& d0)
 {
     *M_un=u0;
     M_un->add(p0, nDimensions*M_uFESpace->dof().numTotalDof());
@@ -398,7 +398,7 @@ Monolithic::initialize( const vector_type& u0, const vector_type& p0, const vect
 
 void
 Monolithic::
-iterateMonolithic(const vector_type& rhs, vector_type& step)
+iterateMonolithic(const vector_Type& rhs, vector_Type& step)
 {
     Chrono chrono;
 
@@ -426,13 +426,13 @@ iterateMonolithic(const vector_type& rhs, vector_type& step)
 }
 
 void
-Monolithic::couplingRhs(vector_ptrtype rhs, vector_ptrtype un) // not working with non-matching grids
+Monolithic::couplingRhs(vectorPtr_Type rhs, vectorPtr_Type un) // not working with non-matching grids
 {
     std::map<ID, ID> const& locDofMap = M_dofStructureToHarmonicExtension->locDofMap();
     std::map<ID, ID>::const_iterator ITrow;
     //    UInt solidDim=M_dFESpace->map().getMap(Unique)->NumGlobalElements()/nDimensions;
 
-    vector_type lambda(*M_interfaceMap, Unique);
+    vector_Type lambda(*M_interfaceMap, Unique);
     this->monolithicToInterface(lambda, *un);
     UInt interface(M_monolithicMatrix->getInterface());
     //Real rescale(M_solid->rescaleFactor());
@@ -454,7 +454,7 @@ Monolithic::couplingRhs(vector_ptrtype rhs, vector_ptrtype un) // not working wi
 
 void
 Monolithic::
-evalResidual( const vector_type& sol,const vector_ptrtype& rhs, vector_type& res, bool diagonalScaling)
+evalResidual( const vector_Type& sol,const vectorPtr_Type& rhs, vector_Type& res, bool diagonalScaling)
 {
     if( diagonalScaling )
         diagonalScale(*rhs, M_monolithicMatrix->getMatrix());
@@ -465,7 +465,7 @@ evalResidual( const vector_type& sol,const vector_ptrtype& rhs, vector_type& res
 
 void
 Monolithic::
-updateSolidSystem( vector_ptrtype & rhsFluidCoupling )
+updateSolidSystem( vectorPtr_Type & rhsFluidCoupling )
 {
     M_solid->updateSystem();
 
@@ -476,7 +476,7 @@ updateSolidSystem( vector_ptrtype & rhsFluidCoupling )
 
 void
 Monolithic::
-diagonalScale(vector_type& rhs, matrixPtr_Type matrFull)
+diagonalScale(vector_Type& rhs, matrixPtr_Type matrFull)
 {
     Epetra_Vector diagonal(*rhs.getMap().getMap(Unique));
     //M_matrFull->getMatrixPtr()->InvRowSums(diagonal);
@@ -490,7 +490,7 @@ diagonalScale(vector_type& rhs, matrixPtr_Type matrFull)
 void
 Monolithic::solidInit(std::string const& dOrder)
 {   // Monolitic: In the beginning I need a non-partitioned mesh. later we will do the partitioning
-    M_dFESpace.reset(new FESpace<mesh_type, EpetraMap>(M_solidMesh,
+    M_dFESpace.reset(new FESpace<mesh_Type, EpetraMap>(M_solidMesh,
                                                        dOrder,
                                                        nDimensions,
                                                        M_epetraComm));
@@ -499,14 +499,14 @@ Monolithic::solidInit(std::string const& dOrder)
 void
 Monolithic::variablesInit(const std::string& dOrder)
 {
-    M_dFESpace.reset(new FESpace<mesh_type, EpetraMap>(*M_solidMeshPart,
+    M_dFESpace.reset(new FESpace<mesh_Type, EpetraMap>(*M_solidMeshPart,
                                                        dOrder,
                                                        3,
                                                        M_epetraComm));
 
     // INITIALIZATION OF THE VARIABLES
-    M_lambdaFluid.reset(new vector_type(*M_fluidInterfaceMap, Unique) );
-    M_lambdaFluidRepeated.reset(new vector_type(*M_fluidInterfaceMap, Repeated) );
+    M_lambdaFluid.reset(new vector_Type(*M_fluidInterfaceMap, Unique) );
+    M_lambdaFluidRepeated.reset(new vector_Type(*M_fluidInterfaceMap, Repeated) );
 }
 
 int Monolithic::setupBlockPrec( )
@@ -529,7 +529,7 @@ int Monolithic::setupBlockPrec( )
 }
 
 void
-Monolithic::assembleSolidBlock( UInt iter, vector_ptrtype& solution )
+Monolithic::assembleSolidBlock( UInt iter, vectorPtr_Type& solution )
 {
     if (iter == 0)
     {
@@ -550,7 +550,7 @@ Monolithic::assembleSolidBlock( UInt iter, vector_ptrtype& solution )
 }
 
 void
-Monolithic::assembleFluidBlock(UInt iter, vector_ptrtype& solution)
+Monolithic::assembleFluidBlock(UInt iter, vectorPtr_Type& solution)
 {
     M_fluidBlock.reset(new matrix_Type(*M_monolithicMap));
 

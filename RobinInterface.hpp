@@ -103,7 +103,7 @@ public:
     /*!
       \param vec: the rhs vector
      */
-    void setRobinRhs( BlockInterface::vector_ptrtype& vec ) { M_rhsVec = vec; }
+    void setRobinRhs( BlockInterface::vectorPtr_Type& vec ) { M_rhsVec = vec; }
 
     //! method to apply the robin coupling to the blocks.
     /*!
@@ -132,7 +132,7 @@ protected:
     Real                                 M_alphas;
     BlockInterface::matrixPtr_Type       M_robinCoupling;
     BlockInterface::matrixPtr_Type       M_robinPart;
-    BlockInterface::vector_ptrtype       M_rhsVec;
+    BlockInterface::vectorPtr_Type       M_rhsVec;
     //@}
 
 };

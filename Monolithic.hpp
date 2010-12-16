@@ -40,7 +40,7 @@
  0&I&H
  \end{array}\right)\f$
  if the time discretization at hand is the Geometry-Implicit one (implemented in monolithicGI.hpp)
- */
+*/
 #ifndef _MONOLITHIC_HPP
 #define _MONOLITHIC_HPP
 
@@ -105,35 +105,35 @@ public:
     //!@name Typedefs
     //@{
     typedef FSIOperator                                        super;
-    typedef FSIOperator::fluid_type::value_type::matrix_type/*matrix_Type*/   matrix_Type;
+    typedef FSIOperator::fluidPtr_Type::value_type::matrix_type/*matrix_Type*/   matrix_Type;
     typedef boost::shared_ptr<matrix_Type>                     matrixPtr_Type;
-    typedef BlockInterface                                     prec_raw_type;
-    typedef boost::shared_ptr<prec_raw_type>                   prec_ptrtype;
+    typedef BlockInterface                                     prec_Type;
+    typedef boost::shared_ptr<prec_Type>                       precPtr_Type;
 
-    typedef BlockMatrix                                        block_matrix_raw_type;
-    typedef boost::shared_ptr<block_matrix_raw_type>           block_matrix_ptrtype;
-    typedef SolverTrilinos                                     solver_type;
+    typedef BlockMatrix                                        blockMatrix_Type;
+    typedef boost::shared_ptr<blockMatrix_Type>                blockMatrixPtr_Type;
+    typedef SolverTrilinos                                     solver_Type;
     //@}
 
     //! OBSOLETE typedefs
     // typedef BlockInterface                                     prec_raw_type;
-//     typedef boost::shared_ptr<prec_raw_type>                   prec_ptrtype;
+    //     typedef boost::shared_ptr<prec_raw_type>                   precPtr_Type;
 
-//     typedef BlockMatrix                                        block_matrix_raw_type;
-//     typedef boost::shared_ptr<block_matrix_raw_type>           block_matrix_ptrtype;
-//     typedef SolverTrilinos                                     solver_type;
+    //     typedef BlockMatrix                                        blockMatrix_Type;
+    //     typedef boost::shared_ptr<blockMatrix_Type>           blockMatrixPtr_Type;
+    //     typedef SolverTrilinos                                     solver_Type;
     // END of OBSOLETE typedefs
 
     // constructors
 
-//!@name Constructors, Destructor
-//!@{
+    //!@name Constructors, Destructor
+    //!@{
     Monolithic();
     ~Monolithic();
-//!@}
+    //!@}
 
-//!@name Public Setup Methods
-//!@{
+    //!@name Public Setup Methods
+    //!@{
 
     /**
        create FEspace
@@ -150,21 +150,21 @@ public:
     /**
        reads the interface map between the fluid and solid meshes from file.
     */
-    void setupDOF( mesh_filtertype& filterMesh );
+    void setupDOF( meshFilter_Type& filterMesh );
 
     //! sets the parameters from data file
     /**
        Calls the setup of the fluid problem and the setUp method.
-     */
+    */
     virtual void setupSystem( );
 
-//     /** stores the data file into a member */
-//     virtual void setDataFile( const GetPot& dataFile );
+    //     /** stores the data file into a member */
+    //     virtual void setDataFile( const GetPot& dataFile );
 
-//! setup method for the Monolithic solver
-/**
-   sets some parameters specific to the Monolithic class
-*/
+    //! setup method for the Monolithic solver
+    /**
+       sets some parameters specific to the Monolithic class
+    */
     virtual void setUp( const GetPot& dataFile );
 
     //! builds the global Epetra map
@@ -191,7 +191,7 @@ public:
        \param _lambdasolid: vector on the solid interface
        \param _disp: monolithic vector
     */
-    void monolithicToInterface(    vector_type& _lambdaSolid, const vector_type& _sol) ;
+    void monolithicToInterface(    vector_Type& _lambdaSolid, const vector_Type& _sol) ;
 
 
     //!Transfer a vector to a subdomain
@@ -201,12 +201,12 @@ public:
        \param _dispFluid: vector on the fluid domain
        \param _disp: monolithic vector
     */
-    void monolithicToX(const vector_type& _disp, vector_type& _dispFluid, EpetraMap& map, UInt offset=(UInt)0);
+    void monolithicToX(const vector_Type& _disp, vector_Type& _dispFluid, EpetraMap& map, UInt offset=(UInt)0);
 
     /**
        sets the vector M_solid->dispSolid() to the monolithic solution M_solid->disp() in the solid nodes, to 0 in the fluid nodes
     */
-    void setDispSolid(const vector_type& sol);
+    void setDispSolid(const vector_Type& sol);
 
     /**
        builds the constant part of the monolithic matrix
@@ -218,14 +218,14 @@ public:
        \small initializes the current solution vector. Note: this is not sufficient for the correct initialization
        of bdf!
     */
-    void initialize( vector_ptrtype u0)
+    void initialize( vectorPtr_Type u0)
     {
         M_un=u0;
 
-//         M_BCh_u->merge(*M_BCh_flux);
-//         M_BCh_flux.reset();
-//         M_BCh_d->merge(*M_BCh_Robin);
-//         M_BCh_Robin.reset();
+        //         M_BCh_u->merge(*M_BCh_flux);
+        //         M_BCh_flux.reset();
+        //         M_BCh_d->merge(*M_BCh_Robin);
+        //         M_BCh_Robin.reset();
 
     }
 
@@ -252,7 +252,7 @@ public:
        to use the boundary conditions methods to compute the normal field on
        a surface.
     */
-    void computeFNormals( vector_type& normals);
+    void computeFNormals( vector_Type& normals);
 
 
     //!Evaluates the nonlinear residual
@@ -262,9 +262,9 @@ public:
        \param _sol: monolithic solution
        \param iter: current nonLinRichardson (Newton) iteration
     */
-    virtual void   evalResidual(vector_type&        res,
-                        const vector_type& _sol,
-                        const UInt          _iter) = 0 ;
+    virtual void   evalResidual(vector_Type&        res,
+                                const vector_Type& _sol,
+                                const UInt          _iter) = 0 ;
 
     /**
        solves the Jacobian system
@@ -276,7 +276,7 @@ public:
        assigned to the field DDBlockPrec in the data file correspond to different variants:
 
        - DDBlockPrec = AdditiveSchwarz is AAS on a the system matrix
-      Only for the Monolithic Geometry Explicit:
+       Only for the Monolithic Geometry Explicit:
        - DDBlockPrec = ComposedDN is AAS on a Dirichlet-Neumann preconditioner using the ComposedOperator strategy
        - DDBlockPrec = ComposedDN2 is AAS on an alternative Dirichlet-Neumann preconditioner using the ComposedOperator strategy
        - DDBlockPrec = ComposedNN is AAS on a Neumann-Neumann preconditioner using the ComposedOperator strategy
@@ -290,8 +290,8 @@ public:
        - DDBlockPrec = 12 is AAS on an alternative matrix obtained with the ComposedOperator strategy, composing
        3 preconditioners
     */
-    virtual void   solveJac(vector_type&       _muk,
-                            const vector_type& _res,
+    virtual void   solveJac(vector_Type&       _muk,
+                            const vector_Type& _res,
                             const Real       _linearRelTol);
 
     /**
@@ -304,16 +304,16 @@ public:
     /**
        \small initialize with functions
     */
-    virtual void initialize( FSIOperator::fluid_type::value_type::Function const& u0,
-                             FSIOperator::solid_type::value_type::Function const& p0,
-                             FSIOperator::solid_type::value_type::Function const& d0,
-                             FSIOperator::solid_type::value_type::Function const& w0,
-                             FSIOperator::solid_type::value_type::Function const& df0);
+    virtual void initialize( FSIOperator::fluidPtr_Type::value_type::Function const& u0,
+                             FSIOperator::solidPtr_Type::value_type::Function const& p0,
+                             FSIOperator::solidPtr_Type::value_type::Function const& d0,
+                             FSIOperator::solidPtr_Type::value_type::Function const& w0,
+                             FSIOperator::solidPtr_Type::value_type::Function const& df0);
 
     /**
        \small initialize the mesh displacement
     */
-    virtual void initializeMesh(vector_ptrtype fluid_dispOld);
+    virtual void initializeMesh(vectorPtr_Type fluid_dispOld);
 
     //@}
 
@@ -323,15 +323,15 @@ public:
     void  setRestarts( bool restarts ){ M_restarts = restarts; }
 
     //! returns a non-const pointer to the preconditioner. Can be used either as a setter or a getter.
-    prec_ptrtype& precPtr(){ return M_precPtr; }
+    precPtr_Type& precPtr(){ return M_precPtr; }
 
     //! returns a non-const pointer to the preconditioner. Can be used either as a setter or a getter.
-    block_matrix_ptrtype& operatorPtr(){ return M_monolithicMatrix; }
+    blockMatrixPtr_Type& operatorPtr(){ return M_monolithicMatrix; }
 
     /**
        \small sets the fluid BCHandler and merges it with the flux BCHandler
     */
-    virtual void setFluidBC     ( const fluid_bchandler_type& bc_fluid )
+    virtual void setFluidBC     ( const fluidBchandlerPtr_Type& bc_fluid )
     {
         super::setFluidBC(bc_fluid);
         //bc_fluid->merge(*M_BCh_flux);
@@ -340,7 +340,7 @@ public:
     /**
        \small sets the solid BCHandler and merges it with the Robin BCHandler
     */
-    virtual void setSolidBC     ( const fluid_bchandler_type& bc_solid )
+    virtual void setSolidBC     ( const fluidBchandlerPtr_Type& bc_solid )
     {
         super::setSolidBC(bc_solid);
         //bc_solid->merge(*M_BCh_Robin);
@@ -350,10 +350,10 @@ public:
     /*!
       \param sol: input pointer
     */
-    virtual void setSolutionPtr                     ( const vector_ptrtype& sol)=0;
+    virtual void setSolutionPtr                     ( const vectorPtr_Type& sol)=0;
 
     //! set the solution
-    virtual void setSolution( const vector_type& solution ) = 0;
+    virtual void setSolution( const vector_Type& solution ) = 0;
 
     //!@}
     //!@name Get Methods
@@ -361,17 +361,17 @@ public:
 
     //! Returns the wall stress
     //!@note still not fixed in parallel
-//     vector_ptrtype getWS( )
-//     {
-//         return M_wss;
-//     }
+    //     vectorPtr_Type getWS( )
+    //     {
+    //         return M_wss;
+    //     }
 
     //! returns a boost shared pointer to the preconditioner
     //prec_raw_type & getPrec(){return M_prec.getPrec();}
 
 #ifdef OBSOLETE
     /** get the shape derivatives vector*/
-    vector_type getRhsShapeDerivatives(){return *M_rhsShapeDerivatives;}
+    vector_Type getRhsShapeDerivatives(){return *M_rhsShapeDerivatives;}
 #endif
     //    const boost::shared_ptr<EpetraMap>& monolithicMap() {return M_monolithicMap;}
 
@@ -379,7 +379,7 @@ public:
     UInt getDimInterface() const {return nDimensions*M_monolithicMatrix->getInterface();}
 
     //! Returns the solution at the previous time step
-    vector_ptrtype const&       un(){return M_un;}
+    vectorPtr_Type const&       un(){return M_un;}
 
     //! Returns true if CE of FI methods are used, false otherwise (GCE)
     //bool const isFullMonolithic(){return M_fullMonolithic;}
@@ -392,7 +392,7 @@ public:
     /*!
       \param soliddisp: input vector
     */
-    void getSolidDisp(vector_type& soliddisp)
+    void getSolidDisp(vector_Type& soliddisp)
     {
         soliddisp.subset(*un(), M_offset);
         soliddisp *= dataFluid()->dataTime()->getTimeStep()*M_solid->rescaleFactor();
@@ -400,10 +400,10 @@ public:
 
     //!Get the solid velocity
     /*!
-       fills an input vector with the solid displacement trom the solution M_un.
+      fills an input vector with the solid displacement trom the solution M_un.
       \param solidvel: input vector (output solid velocity)
-     */
-    void getSolidVel(vector_type& solidvel)
+    */
+    void getSolidVel(vector_Type& solidvel)
     {
         solidvel.subset(M_solid->vel(), M_offset);
         solidvel *= dataFluid()->dataTime()->getTimeStep()*M_solid->rescaleFactor();
@@ -415,7 +415,7 @@ public:
        It performs an Import. Thus it works also for the velocity, depending on the map of the input vector
        \param sol: input vector
     */
-    void getFluidVelAndPres(vector_type& sol)
+    void getFluidVelAndPres(vector_Type& sol)
     {
         sol = *un();
     }
@@ -425,9 +425,9 @@ public:
     virtual    boost::shared_ptr<EpetraMap>& getCouplingVariableMap(){return M_monolithicMap;}
 
     //! get the solution vector
-    virtual const vector_type& getSolution() const = 0;
+    virtual const vector_Type& getSolution() const = 0;
 
-    //virtual vector_ptrtype& solutionPtr() = 0;
+    //virtual vectorPtr_Type& solutionPtr() = 0;
     //@}
 
 
@@ -443,14 +443,14 @@ protected:
     /**
        \small solves the monolithic system, once a solver, a preconditioner and a rhs have been defined.
     */
-    void iterateMonolithic(const vector_type& rhs, vector_type& step);
+    void iterateMonolithic(const vector_Type& rhs, vector_Type& step);
 
     /**
        \small adds the part due to coupling to the rhs
        \param rhs: right hand side
        \param un: current solution
     */
-    void couplingRhs( vector_ptrtype rhs , vector_ptrtype un );
+    void couplingRhs( vectorPtr_Type rhs , vectorPtr_Type un );
 
 
     /**\small evaluates the linear residual
@@ -459,24 +459,24 @@ protected:
        \param res: the output residual
        \param diagonalScaling: flag stating wether to perform diagonal scaling
     */
-    void evalResidual( const vector_type& sol, const vector_ptrtype& rhs,  vector_type& res, bool diagonalScaling=false);
+    void evalResidual( const vector_Type& sol, const vectorPtr_Type& rhs,  vector_Type& res, bool diagonalScaling=false);
 
     //!\small says if the preconditioner will be recomputed
     bool recomputePrec() {return(!M_reusePrec || M_resetPrec);}
 
     //!\small updates the rhs of the solid block.
-    void updateSolidSystem(vector_ptrtype& rhsFluidCoupling);
+    void updateSolidSystem(vectorPtr_Type& rhsFluidCoupling);
 
     /**\small scales matrix and rhs
        \param rhs: the output rhs
        \param matrFull: the output matrix*/
-    void    diagonalScale(vector_type& rhs, matrixPtr_Type matrFull);
+    void    diagonalScale(vector_Type& rhs, matrixPtr_Type matrFull);
 
     //!Empty method kept for compatibility with FSIOperator.
     void shiftSolution(){}
 
     //!Empty method kept for compatibility with FSIOperator.
-    void couplingVariableExtrap(vector_ptrtype& /*lambda*/, vector_ptrtype& /*lambdaDot*/, bool& /*firstIter*/)
+    void couplingVariableExtrap(vectorPtr_Type& /*lambda*/, vectorPtr_Type& /*lambdaDot*/, bool& /*firstIter*/)
     { }
 
     //! Constructs the solid FESpace
@@ -485,14 +485,14 @@ protected:
        at the interface. The solid FESpace will be reset in variablesInit using the partitioned mesh.
        If the interface map is created offline this method is never called.
        \param dOrder: discretization order
-     */
+    */
     void solidInit(std::string const& dOrder);
 
     //! Constructs the solid FESpace and initializes the coupling variables at the interface
     /**
        If the mesh is partitioned online the previous FESpace constructed with the unpartitioned mesh is discarded and
        replaced with one using a partitioned mesh.
-     */
+    */
     void variablesInit(std::string const& dOrder);
 
     //!
@@ -505,21 +505,21 @@ protected:
     //! assembles the solid problem (the matrix and the rhs due to the time derivative)
     /*
       \param iter: current nonlinear iteration: used as flag to distinguish the first nonlinear iteration from the others
-     */
-    void assembleSolidBlock(UInt iter, vector_ptrtype& solution);
+    */
+    void assembleSolidBlock(UInt iter, vectorPtr_Type& solution);
 
 
     //! assembles the fluid problem (the matrix and the rhs due to the time derivative)
     /*
       \param iter: current nonlinear iteration: used as flag to distinguish the first nonlinear iteration from the others
-     */
-    void assembleFluidBlock(UInt iter, vector_ptrtype& solution);
+    */
+    void assembleFluidBlock(UInt iter, vectorPtr_Type& solution);
 
     //! Updates the right hand side
     /**
        Adds to the rhs the fluid time discretization terms
        \todo this should be handled externally
-     */
+    */
     void updateRHS();
     //!@}
 
@@ -528,16 +528,16 @@ protected:
     //@{
     boost::shared_ptr<EpetraMap>                      M_monolithicMap;
     boost::shared_ptr< EpetraMap >                    M_interfaceMap;///the solid interface map
-    boost::shared_ptr<vector_type>                    M_beta;
+    boost::shared_ptr<vector_Type>                    M_beta;
     boost::shared_ptr<BlockMatrix >                   M_monolithicMatrix;
     //matrixPtr_Type                                    M_precMatrPtr;
-    prec_ptrtype                                      M_precPtr;
-    boost::shared_ptr<vector_type>                    M_rhsFull;
+    precPtr_Type                                      M_precPtr;
+    boost::shared_ptr<vector_Type>                    M_rhsFull;
 
-    fluid_bchandler_type                              M_BCh_flux;
-    solid_bchandler_type                              M_BCh_Robin;
+    fluidBchandlerPtr_Type                              M_BCh_flux;
+    solidBchandlerPtr_Type                              M_BCh_Robin;
     //UInt                                              M_fluxes;
-    solid_bchandler_type                              M_BChWSS;
+    solidBchandlerPtr_Type                              M_BChWSS;
     BCFunctionMixte                                   M_bcfWss;
     //    matrixPtr_Type                                    M_robinCoupling;
     UInt                                              M_offset;
@@ -546,10 +546,10 @@ protected:
     matrixPtr_Type                                    M_solidBlock;
     matrixPtr_Type                                    M_solidBlockPrec;
     matrixPtr_Type                                    M_robinCoupling; //uninitialized if not needed
-    boost::shared_ptr<solver_type>                    M_linearSolver;
-    boost::shared_ptr<vector_type>                    M_numerationInterface;
-    std::vector<fluid_bchandler_type>                 M_BChs;
-    std::vector<boost::shared_ptr<FESpace<mesh_type, EpetraMap> > >          M_FESpaces;
+    boost::shared_ptr<solver_Type>                    M_linearSolver;
+    boost::shared_ptr<vector_Type>                    M_numerationInterface;
+    std::vector<fluidBchandlerPtr_Type>                 M_BChs;
+    std::vector<boost::shared_ptr<FESpace<mesh_Type, EpetraMap> > >          M_FESpaces;
     bool                                              M_diagonalScale;
     bool                                              M_reusePrec;//!\todo to move to private
     bool                                              M_resetPrec;//!\todo to move to private
@@ -560,14 +560,14 @@ protected:
 private:
     //!@name Private methods
     //!@{
-    void initialize( vector_type const& u0, vector_type const& p0, vector_type const& d0);
+    void initialize( vector_Type const& u0, vector_Type const& p0, vector_Type const& d0);
     //!@}
     //!@name Private attributes
     //!@{
     //! operator \f$P^{-1}AA^TP^{-T}\f$, where P is the preconditioner and A is the monolithic matrix
     boost::shared_ptr<ComposedOperator<Epetra_Operator> > M_preconditionedSymmetrizedMatrix;
 #ifdef OBSOLETE
-    boost::shared_ptr<vector_type>                    M_rhsShapeDerivatives;
+    boost::shared_ptr<vector_Type>                    M_rhsShapeDerivatives;
 #endif
     static bool                                       reg;
     //@}

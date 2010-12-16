@@ -70,14 +70,14 @@ public:
     //! @name Public Types
     //@{
 
-    typedef EpetraVector                                               vector_type;
-    typedef boost::shared_ptr< vector_type >                           vector_ptrtype;
+    typedef EpetraVector                                               vector_Type;
+    typedef boost::shared_ptr< vector_Type >                           vectorPtr_Type;
     typedef EpetraMatrix< Real >                                       matrix_Type;
     typedef boost::shared_ptr< matrix_Type >                           matrixPtr_Type;
     typedef boost::shared_ptr< Epetra_Operator >                       epetra_operator_ptrtype;
     typedef boost::shared_ptr< EpetraPreconditioner >                  epetra_preconditioner_ptrtype;
     typedef matrix_Type::matrix_type/*matrix_Type*/                                   epetra_matrix_Type;
-    typedef SolverTrilinos                                             solver_type;
+    typedef SolverTrilinos                                             solver_Type;
     typedef boost::shared_ptr< SolverTrilinos >                        solver_ptrtype;
     typedef boost::shared_ptr< FESpace<RegionMesh3D<LinearTetra>, EpetraMap> >  fespace_shared_ptrtype;
     typedef fespace_shared_ptrtype                                     fespace_ptrtype;
@@ -129,7 +129,7 @@ public:
         @param result output result
         @param linearSolver the linear system
      */
-    virtual int  solveSystem( const vector_type& rhs, vector_type& result, solver_ptrtype& linearSolver)=0;
+    virtual int  solveSystem( const vector_Type& rhs, vector_Type& result, solver_ptrtype& linearSolver)=0;
 
     //! Sets the parameters needed by the preconditioner from data file
     /*!
@@ -201,7 +201,7 @@ public:
      */
     virtual void coupler(map_shared_ptrtype& map,
                          const std::map<ID, ID>& locDofMap,
-                         const vector_ptrtype& numerationInterface,
+                         const vectorPtr_Type& numerationInterface,
                          const Real& timeStep)=0;
 
 
@@ -225,7 +225,7 @@ public:
      */
     virtual void coupler(map_shared_ptrtype& map,
                          const std::map<ID, ID>& locDofMap,
-                         const vector_ptrtype& numerationInterface,
+                         const vectorPtr_Type& numerationInterface,
                          const Real& timeStep,
                          UInt couplingBlock
                         )=0;
@@ -311,7 +311,7 @@ public:
     /*!
       Applies the robin preconditioners when needed, otherwise does nothing
      */
-    virtual void setRobin(matrixPtr_Type& /*mat*/, vector_ptrtype& /*rhs*/){}
+    virtual void setRobin(matrixPtr_Type& /*mat*/, vectorPtr_Type& /*rhs*/){}
 
 
     //! builds the coupling matrix.
@@ -337,7 +337,7 @@ public:
                         const std::vector<fespace_ptrtype>& problem,
                         const std::vector<UInt>& offset,
                         const std::map<ID, ID>& locDofMap,
-                        const vector_ptrtype& numerationInterface,
+                        const vectorPtr_Type& numerationInterface,
                         const Real& timeStep=1.e-3,
                         const Real& value=1.); // not working with non-matching grids
 
@@ -395,7 +395,7 @@ public:
                         const BlockInterface::fespace_ptrtype& FESpace2,
                         const UInt& offset2,
                         const std::map<ID, ID>& locDofMap,
-                        const BlockInterface::vector_ptrtype& numerationInterface );
+                        const BlockInterface::vectorPtr_Type& numerationInterface );
 
 
     //!
@@ -464,7 +464,7 @@ protected:
     std::vector<matrixPtr_Type>                                  M_blocks;
     std::vector<fespace_ptrtype>                                 M_FESpace;
     std::vector<UInt>                                            M_offset;
-    vector_ptrtype                                               M_numerationInterface;
+    vectorPtr_Type                                               M_numerationInterface;
     boost::shared_ptr<Epetra_Comm>                               M_comm;
     //Int                                                          M_superCouplingFlag;
     //@}

@@ -45,7 +45,7 @@ void BlockMatrixRN::setDataFromGetPot( const GetPot& data, const std::string& se
 
 void BlockMatrixRN::coupler(map_shared_ptrtype& map,
                             const std::map<ID, ID>& locDofMap,
-                            const vector_ptrtype& numerationInterface,
+                            const vectorPtr_Type& numerationInterface,
                             const Real& timeStep)
 {
     super::coupler( map,/* M_FESpace[0], M_offset[0], M_FESpace[1], M_offset[1],*/ locDofMap, numerationInterface, timeStep );
@@ -58,7 +58,7 @@ void BlockMatrixRN::coupler(map_shared_ptrtype& map,
 void BlockMatrixRN::GlobalAssemble()
 {
     super::GlobalAssemble();
-    vector_type rhs((*M_robinCoupling)*(*M_rhsVec));
+    vector_Type rhs((*M_robinCoupling)*(*M_rhsVec));
     *M_rhsVec += rhs;
 }
 

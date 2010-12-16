@@ -44,7 +44,7 @@ void ComposedDN::setDataFromGetPot( const GetPot& dataFile,
 }
 
 
-int ComposedDN::solveSystem( const vector_type& rhs, vector_type& step, solver_ptrtype& linearSolver )
+int ComposedDN::solveSystem( const vector_Type& rhs, vector_Type& step, solver_ptrtype& linearSolver )
 {
     assert(M_blockPrecs.get());
 
@@ -72,7 +72,7 @@ int ComposedDN::solveSystem( const vector_type& rhs, vector_type& step, solver_p
 
 void ComposedDN::coupler(map_shared_ptrtype& map,
                          const std::map<ID, ID>& locDofMap,
-                         const vector_ptrtype& numerationInterface,
+                         const vectorPtr_Type& numerationInterface,
                          const Real& timeStep)
 {
     UInt totalDofs( map->getMap(Unique)->NumGlobalElements() );

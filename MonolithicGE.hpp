@@ -131,34 +131,34 @@ public:
        \param _sol: monolithic solution
        \param iter: current nonLinRichardson (Newton) iteration
     */
-    void   evalResidual(vector_type&        res,
-                        const vector_type& _sol,
+    void   evalResidual(vector_Type&        res,
+                        const vector_Type& _sol,
                         const UInt          _iter);
 
     /**
       iterates the mesh
       \param disp: monolithic solution
     */
-    void iterateMesh( const vector_type& disp );
+    void iterateMesh( const vector_Type& disp );
 
     //@}
     //!@name Getter Methods
     //@{
 
     //! Gets the solution
-    const vector_type& getSolution() const { return *M_un; }
+    const vector_Type& getSolution() const { return *M_un; }
 
     //! Gets the solution ptr
-    vector_ptrtype& solutionPtr() { return M_un; }
+    vectorPtr_Type& solutionPtr() { return M_un; }
 
     //! Sets the solution
-    void setSolution( const vector_type& solution ) { M_un.reset( new vector_type( solution ) ); }
+    void setSolution( const vector_Type& solution ) { M_un.reset( new vector_Type( solution ) ); }
     //@}
 
     //!@name Setter Methods
     //@{
     //! Sets the solution ptr
-    void setSolutionPtr( const vector_ptrtype& sol) { M_un = sol; }
+    void setSolutionPtr( const vectorPtr_Type& sol) { M_un = sol; }
 
     //! Applies the bounsary conditions to the matrix
     void applyBoundaryConditions();

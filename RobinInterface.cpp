@@ -46,6 +46,7 @@ void RobinInterface::setRobinData(const GetPot& data, const std::string& section
 void RobinInterface::applyRobinCoupling( std::vector<BlockInterface::matrixPtr_Type> blockVector)
 {
     M_robinPart.reset(new BlockInterface::matrix_Type(M_robinCoupling->getMap(), 0));
+
     for( UInt ITBlock = 0; ITBlock < blockVector.size(); ++ITBlock )
         applyRobinCoupling( blockVector[ITBlock] );
 }

@@ -87,8 +87,8 @@ MultiscaleModelFSI3D::MultiscaleModelFSI3D() :
     BlockMatrix::Factory::instance().registerProduct("AdditiveSchwarz",   &BlockMatrix::createAdditiveSchwarz ) ;
     BlockMatrix::Factory::instance().registerProduct("AdditiveSchwarzRN", &BlockMatrixRN::createAdditiveSchwarzRN ) ;
 
-    FSIOperator_Type::solid_raw_type::StructureSolverFactory::instance().registerProduct( "linearVenantKirchhof", &FSIOperator_Type::createLinearStructure );
-//    FSIOperator_Type::solid_raw_type::StructureSolverFactory::instance().registerProduct( "nonLinearVenantKirchhof", &FSIOperator_Type::createNonLinearStructure );
+    FSIOperator_Type::solid_Type::StructureSolverFactory::instance().registerProduct( "linearVenantKirchhof", &FSIOperator_Type::createLinearStructure );
+//    FSIOperator_Type::solid_Type::StructureSolverFactory::instance().registerProduct( "nonLinearVenantKirchhof", &FSIOperator_Type::createNonLinearStructure );
 }
 
 // ===================================================
@@ -108,7 +108,7 @@ MultiscaleModelFSI3D::setupData( const std::string& fileName )
         setupGlobalData( fileName );
 
     // Create FSIOperator
-    M_FSIoperator = FSIOperatorPtr_Type( FSIOperator::FSIFactory::instance().createObject( M_data->method() ) );
+    M_FSIoperator = FSIOperatorPtr_Type( FSIOperator::FSIFactory_Type::instance().createObject( M_data->method() ) );
 
     // Setup Communicator
     setupCommunicator();
