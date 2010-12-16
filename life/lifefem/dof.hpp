@@ -144,7 +144,7 @@ public:
     //! @name Set Methods
     //@{
 
-    inline void setTotalDof(const UInt totalDof)
+    void setTotalDof(const UInt& totalDof)
     {
         M_totalDof = totalDof;
     }
@@ -156,15 +156,15 @@ public:
     //@{
 
     //! The total number of Dof
-    inline UInt numTotalDof() const
+    const UInt& numTotalDof() const
     {
         return M_totalDof;
     }
 
     //! The number of local Dof (nodes) in the finite element
-    inline UInt numLocalDof() const
+    const UInt& numLocalDof() const
     {
-        return fe.nbLocalDof();
+        return M_fe.nbLocalDof();
     }
 
     //! Return the specified entries of the localToGlobal table
@@ -174,37 +174,37 @@ public:
       \param localNode the local DOF numbering (starting from 1)
       \return The numbering of the DOF
     */
-    inline ID localToGlobal( const ID ElId, const ID localNode) const
+    const ID& localToGlobal( const ID ElId, const ID localNode) const
     {
         return M_localToGlobal( localNode, ElId );
     }
 
     //! Number of elements in mesh
-    UInt numElements() const
+    const UInt& numElements() const
     {
         return M_numElement;
     }
 
     //! Number of faces in the mesh
-    UInt numFaces() const
+    const UInt& numFaces() const
     {
         return M_nbFace;
     }
 
     //! Number of local vertices (in a elment)
-    UInt numLocalVertices() const
+    const UInt& numLocalVertices() const
     {
         return M_nbLocalVertex;
     }
 
     //! Number of local edges (in a elment)
-    UInt numLocalEdges() const
+    const UInt& numLocalEdges() const
     {
         return M_nbLocalEdge;
     }
 
     //! Number of local faces (in a elment)
-    UInt numLocalFaces() const
+    const UInt& numLocalFaces() const
     {
         return M_nbLocalFace;
     }
@@ -212,22 +212,29 @@ public:
     //Internal data
 
     //! Number of Local DofByFace
-    UInt numLocalDofByFace() const
+    const UInt& numLocalDofByFace() const
     {
         ASSERT_PRE( (M_numLocalDofByFace>0) , "This data are not available for this reference element");
         return M_numLocalDofByFace;
     }
 
+    //! Getter for the localDofPattern
+    const LocalDofPattern& localDofPattern() const
+    {
+        return M_fe;
+    }
+
+
     //@}
 
 
-    //! The pattern of the local degrees of freedom.
-    /*! It is exposed so that is is possible to interrogate it directly.*/
-    const LocalDofPattern& fe; // be careful : use fe.nbLocalDof (fe.nbDof does not exist !)
 
 private:
 
     typedef ID ( *faceToPoint_type )( ID const localFace, ID const point );
+
+    //! The pattern of the local degrees of freedom.
+    const LocalDofPattern& M_fe;
 
     // Offset for the first degree of freedom numerated
     UInt M_offset;
@@ -273,7 +280,7 @@ private:
 //! Constructor that builds the localToglobal table
 template <typename MeshType>
 Dof::Dof( MeshType& mesh, const LocalDofPattern& fePattern, UInt offset ) :
-        fe       ( fePattern ),
+        M_fe       ( fePattern ),
         M_offset  ( offset ),
         M_totalDof( 0 ),
         M_numElement     ( 0 ),
@@ -335,10 +342,10 @@ void Dof::update( MeshType& mesh )
     typedef typename MeshType::ElementShape GeoShapeType;
 
     // Some useful local variables, to save some typing
-    UInt nbLocalDofPerEdge = fe.nbDofPerEdge();
-    UInt nbLocalDofPerVertex = fe.nbDofPerVertex();
-    UInt nbLocalDofPerFace = fe.nbDofPerFace();
-    UInt nbLocalDofPerVolume = fe.nbDofPerVolume();
+    UInt nbLocalDofPerEdge = M_fe.nbDofPerEdge();
+    UInt nbLocalDofPerVertex = M_fe.nbDofPerVertex();
+    UInt nbLocalDofPerFace = M_fe.nbDofPerFace();
+    UInt nbLocalDofPerVolume = M_fe.nbDofPerVolume();
 
     M_nbLocalVertex = GeoShapeType::numVertices;
     M_nbLocalEdge = GeoShapeType::numEdges;
@@ -360,7 +367,7 @@ void Dof::update( MeshType& mesh )
         + nbLocalDofPerFace * M_nbLocalFace;
 
     // Consistency check
-    ASSERT_PRE( nldof == UInt( fe.nbLocalDof() ), "Something wrong in FE specification" ) ;
+    ASSERT_PRE( nldof == UInt( M_fe.nbLocalDof() ), "Something wrong in FE specification" ) ;
 
     // Global total of degrees of freedom
     M_totalDof = nbGlobalVolume * nbLocalDofPerVolume

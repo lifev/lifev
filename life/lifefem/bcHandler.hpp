@@ -600,9 +600,9 @@ BCHandler::bdUpdate( Mesh& mesh, CurrentBdFE& boundaryFE, const Dof& dof )
     typedef typename Mesh::ElementShape geoShape_Type;
 
     // Some useful local variables
-    UInt nDofPerVert = dof.fe.nbDofPerVertex(); // number of Dof per vertices
-    UInt nDofPerEdge = dof.fe.nbDofPerEdge();   // number of Dof per edges
-    UInt nDofPerFace = dof.fe.nbDofPerFace();   // number of Dof per faces
+    UInt nDofPerVert = dof.localDofPattern().nbDofPerVertex(); // number of Dof per vertices
+    UInt nDofPerEdge = dof.localDofPattern().nbDofPerEdge();   // number of Dof per edges
+    UInt nDofPerFace = dof.localDofPattern().nbDofPerFace();   // number of Dof per faces
 
     UInt numBElements = mesh.numBElements();    // number of boundary elements
 
@@ -932,9 +932,9 @@ BCHandler::bdUpdate( Mesh& mesh, CurrentBdFE& boundaryFE, const Dof& dof )
     typedef typename Mesh::ElementShape geoShape_Type;
 
     // Some useful local variables, to save some typing
-    UInt nDofPerVert = dof.fe.nbDofPerVertex(); // number of Dof per vertices
-    UInt nDofPerEdge = dof.fe.nbDofPerEdge();   // number of Dof per edges
-    UInt nDofPerFace = dof.fe.nbDofPerFace();   // number of Dof per faces
+    UInt nDofPerVert = dof.localDofPattern().nbDofPerVertex(); // number of Dof per vertices
+    UInt nDofPerEdge = dof.localDofPattern().nbDofPerEdge();   // number of Dof per edges
+    UInt nDofPerFace = dof.localDofPattern().nbDofPerFace();   // number of Dof per faces
 
     UInt numBElements = mesh.numBElements();    // number of boundary elements
 

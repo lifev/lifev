@@ -47,7 +47,7 @@ namespace LifeV
 // Constructors & Destructor
 // ===================================================
 
-Dof::Dof( const LocalDofPattern& fePattern, UInt offset ) : fe( fePattern ), M_offset( offset ), M_totalDof( 0 ),
+Dof::Dof( const LocalDofPattern& fePattern, UInt offset ) : M_fe( fePattern ), M_offset( offset ), M_totalDof( 0 ),
         M_numElement( 0 ), M_nbLocalVertex( 0 ), M_nbLocalEdge( 0 ), M_nbLocalFace( 0 ), M_localToGlobal(),
         M_nbFace(0),M_localToGlobalByFace(),M_globalToLocalByFace()
 {
@@ -88,7 +88,7 @@ Dof::Dof( const LocalDofPattern& fePattern, UInt offset ) : fe( fePattern ), M_o
         M_dofPositionByEntity[ i ] = 0;
 }
 
-Dof::Dof( const Dof & dof2 ) : fe( dof2.fe ), M_offset( dof2.M_offset ),
+Dof::Dof( const Dof & dof2 ) : M_fe( dof2.M_fe ), M_offset( dof2.M_offset ),
         M_totalDof( dof2.M_totalDof ), M_numElement( dof2.M_numElement ),
         M_nbLocalVertex( dof2.M_nbLocalVertex ), M_nbLocalEdge( dof2.M_nbLocalEdge ), M_nbLocalFace( dof2.M_nbLocalFace ),
         M_localToGlobal( dof2.M_localToGlobal ),M_nbFace(dof2.M_nbFace),

@@ -434,9 +434,9 @@ void PostProc<MeshType>::build_vectors()
         numBoundaryDofVector[iFESpace] = 1;
 
         // Some useful local variables, to save some typing
-        M_numDofPerVertexVector[iFESpace] = M_dofPtrVector[iFESpace]->fe.nbDofPerVertex(); // number of Dof per vertices
-        M_numDofPerEdgeVector[iFESpace] = M_dofPtrVector[iFESpace]->fe.nbDofPerEdge();   // number of Dof per edges
-        M_numDofPerFaceVector[iFESpace] = M_dofPtrVector[iFESpace]->fe.nbDofPerFace();   // number of Dof per faces
+        M_numDofPerVertexVector[iFESpace] = M_dofPtrVector[iFESpace]->localDofPattern().nbDofPerVertex(); // number of Dof per vertices
+        M_numDofPerEdgeVector[iFESpace] = M_dofPtrVector[iFESpace]->localDofPattern().nbDofPerEdge();   // number of Dof per edges
+        M_numDofPerFaceVector[iFESpace] = M_dofPtrVector[iFESpace]->localDofPattern().nbDofPerFace();   // number of Dof per faces
 
         // number of vertex's Dof on a face
         M_numVertexDofPerFaceVector[iFESpace] = M_numDofPerVertexVector[iFESpace] * M_numVerticesPerFace;
