@@ -11,4 +11,13 @@
 #
 ###################################################################################################
 
-SUBDIRS		= NavierStokes
+lib_LTLIBRARIES	= liblifefunctions.la
+
+liblifefunctions_la_SOURCES   = RossEthierSteinmanDec.cpp RossEthierSteinmanInc.cpp Womersley.cpp \
+                             bessel/bessik.cpp  bessel/bessjy.cpp \
+                             bessel/cbessik.cpp bessel/cbessjy.cpp \
+                             bessel/gamma.cpp
+
+liblifefunctions_la_LIBADD    =  ../lifecore/liblifecore.la
+
+include $(top_srcdir)/Doxyfile.am

@@ -12,7 +12,7 @@
 //      pi/2    M_PI_2
 //
 #include <math.h>
-#include <testsuite/functions/bessel/bessel.hpp>
+#include <life/lifefunctions/bessel/bessel.hpp>
 
 double gamma(double x);
 //

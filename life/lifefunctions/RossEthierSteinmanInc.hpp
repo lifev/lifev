@@ -59,12 +59,10 @@ US: http://dx.doi.org/10.1002/fld.1650190502
  */
 
 #ifndef __ETHIER_STEINMAN_INC_HPP
-#define __ETHIER_STEINMAN2_INC_HPP 1
+#define __ETHIER_STEINMAN_INC_HPP 1
 
-#include <life/lifearray/tab.hpp>
 #include <life/lifecore/life.hpp>
 #include <life/lifecore/GetPot.hpp>
-//#include <testsuite/functions/AnalyticSol.hpp>
 
 namespace LifeV
 {

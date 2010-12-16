@@ -25,7 +25,6 @@ SUFFIXES	= .cpp .hpp .idl .c .h .f .F .o .moc
 DO_NOT_COMPILE=
 
 SUBDIRS		= data  \
-              functions \
 			  lifealg \
 			  lifearray \
 			  lifecore \

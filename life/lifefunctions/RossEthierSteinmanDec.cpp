@@ -40,7 +40,7 @@
 
 #include <lifeconfig.h>
 
-#include <testsuite/functions/NavierStokes/RossEthierSteinmanDec.hpp>
+#include <life/lifefunctions/RossEthierSteinmanDec.hpp>
 
 namespace LifeV
 {
