@@ -45,8 +45,16 @@
 #include <string>
 #include <iostream>
 #include <numeric>
+
+#pragma GCC diagnostic ignored "-Wunused-variable"
+#pragma GCC diagnostic ignored "-Wunused-parameter"
+
+#include <boost/numeric/ublas/vector.hpp>
+
+#pragma GCC diagnostic warning "-Wunused-variable"
+#pragma GCC diagnostic warning "-Wunused-parameter"
+
 #include <life/lifearray/EpetraVector.hpp>
-#include <life/lifearray/tab.hpp>
 
 
 namespace LifeV
@@ -102,6 +110,8 @@ public:
 
     //! @name Public Types
     //@{
+    typedef boost::numeric::ublas::vector<Real> Vector;
+    typedef boost::numeric::ublas::scalar_vector<Real> ScalarVector;
     typedef Vector                               container_Type;
     typedef FEVectorType                         feVector_Type;
     typedef boost::shared_ptr< feVector_Type >   feVectorPtr_Type;
@@ -175,7 +185,7 @@ public:
     //!Initialize all the entries of the unknonwn vectors with a given function
     /*!
         The array of initial conditions needed by the selected BDF is
-        initialized as follows: M_unknown=[ u0Function(t0), 
+        initialized as follows: M_unknown=[ u0Function(t0),
         u0Function(t0-dt), u0Function(t0-2*dt), ...]
         For the space dependence of the initial conditions we need informations
         on:
@@ -192,7 +202,7 @@ public:
                           Real t0, Real timeStep );
 
     template<typename FunctionType, typename FESpaceType>
-    void __attribute__ ((__deprecated__)) initialize_unk( const FunctionType& u0Function, feVector_Type& u0Vector, 
+    void __attribute__ ((__deprecated__)) initialize_unk( const FunctionType& u0Function, feVector_Type& u0Vector,
                                                             FESpaceType& feSpace, Real t0, Real timeStep )
     {
         setInitialCondition( u0Function, u0Vector, feSpace, t0, timeStep );
@@ -244,7 +254,7 @@ public:
 
     void __attribute__ ((__deprecated__)) shift_right( feVector_Type const& uCurrent, Real timeStepNew )
     {
-        return shiftRight( uCurrent, timeStepNew ); 
+        return shiftRight( uCurrent, timeStepNew );
     }
 
     //! Save the current vector M_unknowns and the current vector M_timeStep
