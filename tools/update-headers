@@ -3,19 +3,19 @@
 findhpp()
 {
 # find life/$1 -name '*.hpp' | xargs -ithehppheader echo "thehppheader \\ "
- find $1 -name '*.hpp' | xargs -ithehppheader echo -n "thehppheader "
+ find life/$1 -name '*.hpp' | xargs -ithehppheader echo -n "thehppheader "
 }
 
 cp /dev/null Makefile.headers
 
-lifecore=`findhpp  "life/lifecore"`
-lifearray=`findhpp  "life/lifearray"`
-lifealg=`findhpp  "life/lifealg"`
-lifemesh=`findhpp  "life/lifemesh"`
-lifefem=`findhpp  "life/lifefem"`
-lifesolver=`findhpp  "life/lifesolver"`
-lifefilters=`findhpp  "life/lifefilters"`
-testsuite=`findhpp "testsuite/functions/NavierStokes"`
+lifecore=`findhpp  "lifecore"`
+lifearray=`findhpp  "lifearray"`
+lifealg=`findhpp  "lifealg"`
+lifemesh=`findhpp  "lifemesh"`
+lifefem=`findhpp  "lifefem"`
+lifesolver=`findhpp  "lifesolver"`
+lifefilters=`findhpp  "lifefilters"`
+lifefunctions=`findhpp  "lifefunctions"`
 
 echo -n "creating Makefile.headers..."
     cat > Makefile.headers <<EOF
@@ -37,7 +37,7 @@ LIFESOLVER_HDRS=$lifesolver
 
 LIFEFILTERS_HDRS=$lifefilters
 
-TESTSUITE_HDRS=$testsuite
+LIFEFUNCTIONS_HDRS=$lifefunctions
 
 nobase_include_HEADERS=lifeconfig.h\\
 \$(LIFECORE_HDRS)\\
@@ -47,7 +47,7 @@ nobase_include_HEADERS=lifeconfig.h\\
 \$(LIFEFEM_HDRS)\\
 \$(LIFESOLVER_HDRS)\\
 \$(LIFEFILTERS_HDRS)\\
-\$(TESTSUITE_HDRS)
+\$(LIFEFUNCTIONS_HDRS)
 EOF
 echo " done."
 

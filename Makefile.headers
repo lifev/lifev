@@ -16,7 +16,7 @@ LIFESOLVER_HDRS=life/lifesolver/nsipterms.hpp life/lifesolver/FSISolver.hpp life
 
 LIFEFILTERS_HDRS=life/lifefilters/HDF5Filter3DMesh.hpp life/lifefilters/importer.hpp life/lifefilters/mesh_util.hpp life/lifefilters/readMesh2D.hpp life/lifefilters/noexport.hpp life/lifefilters/hdf5exporter.hpp life/lifefilters/exporter.hpp life/lifefilters/selectMarker.hpp life/lifefilters/readMesh3D.hpp life/lifefilters/ensight.hpp 
 
-TESTSUITE_HDRS=testsuite/functions/NavierStokes/Womersley.hpp testsuite/functions/NavierStokes/RossEthierSteinmanInc.hpp testsuite/functions/NavierStokes/RossEthierSteinmanDec.hpp 
+LIFEFUNCTIONS_HDRS=life/lifefunctions/Womersley.hpp life/lifefunctions/bessel/bessel.hpp life/lifefunctions/RossEthierSteinmanInc.hpp life/lifefunctions/RossEthierSteinmanDec.hpp 
 
 nobase_include_HEADERS=lifeconfig.h\
 $(LIFECORE_HDRS)\
@@ -26,4 +26,4 @@ $(LIFEMESH_HDRS)\
 $(LIFEFEM_HDRS)\
 $(LIFESOLVER_HDRS)\
 $(LIFEFILTERS_HDRS)\
-$(TESTSUITE_HDRS)
+$(LIFEFUNCTIONS_HDRS)
