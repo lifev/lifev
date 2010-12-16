@@ -108,7 +108,7 @@ template <typename GeoShape, typename MC>
 bool
 readMppFile( RegionMesh3D<GeoShape, MC> & mesh,
              const std::string          & fileName,
-             EntityFlag                   regionFlag,
+             entityFlag_Type              regionFlag,
              bool                         verbose = false )
 {
     std::string line;
@@ -254,7 +254,7 @@ readMppFile( RegionMesh3D<GeoShape, MC> & mesh,
                 {
                     ++count;
                     pp = &mesh.addPoint( true );
- 
+
                   //Boundary point. Boundary switch set by the mesh method.
 
                     pp->setMarker( EntityFlag( ibc ) );
@@ -360,9 +360,9 @@ readMppFile( RegionMesh3D<GeoShape, MC> & mesh,
     // This part is to build a P2 mesh from a P1 geometry
 
     if ( GeoShape::numPoints > 4 )
-      {
-        p1top2( mesh );
-      }
+    {
+    	p2MeshFromP1Data( mesh );
+    }
 
     myStream.close();
 
@@ -456,7 +456,7 @@ template <typename GeoShape, typename MC>
 bool
 readINRIAMeshFile( RegionMesh3D<GeoShape, MC>&      mesh,
                    std::string const&               fileName,
-                   EntityFlag                       regionFlag,
+                   entityFlag_Type                  regionFlag,
                    bool                             verbose = false,
                    InternalEntitySelector           iSelect = InternalEntitySelector() )
 {
@@ -652,7 +652,7 @@ readINRIAMeshFile( RegionMesh3D<GeoShape, MC>&      mesh,
                 {
                     ++count;
                 // Boundary point. Boundary switch set by the mesh method.
-                    pp = &mesh.addPoint( true ); 
+                    pp = &mesh.addPoint( true );
                     pp->setMarker( EntityFlag( ibc ) );
                 }
 
@@ -849,7 +849,7 @@ readINRIAMeshFile( RegionMesh3D<GeoShape, MC>&      mesh,
 //                mesh.globalToLocalElem().insert(std::make_pair(i+1, i+1));
                 count++;
             }
-            oStr << "size of the volume storage is " << sizeof( VolumeType ) * count / 1024. / 1024. 
+            oStr << "size of the volume storage is " << sizeof( VolumeType ) * count / 1024. / 1024.
                  << " Mo." << std::endl;
             oStr << count << " Volume elements Read" << std::endl;
             done++;
@@ -896,22 +896,22 @@ readINRIAMeshFile( RegionMesh3D<GeoShape, MC>&      mesh,
 
     // This part is to build a P2 mesh from a P1 geometry
     if ( shape == TETRA && GeoShape::numPoints > 4 )
-       {
-        p1top2( mesh );
-       }
+    {
+        p2MeshFromP1Data( mesh );
+    }
 
     myStream.close();
 
     Real vols[ 3 ];
     getVolumeFromFaces( mesh, vols, oStr );
 
-    oStr << "   VOLUME ENCLOSED BY THE MESH COMPUTED BY INTEGRATION ON" 
+    oStr << "   VOLUME ENCLOSED BY THE MESH COMPUTED BY INTEGRATION ON"
          << " BOUNDARY FACES" << std::endl;
-    oStr << "INT(X)     INT(Y)      INT(Z) <- they should be equal and equal to" << std::endl 
+    oStr << "INT(X)     INT(Y)      INT(Z) <- they should be equal and equal to" << std::endl
          << "                                 the voulume enclosed by the mesh " << std::endl;
     oStr << vols[ 0 ] << " " << vols[ 1 ] << " " << vols[ 2 ] << std::endl;
-    oStr << "   BOUNDARY FACES ARE DEFINING A CLOSED SURFACE IF " 
-         << testClosedDomain( mesh, oStr ) << std::endl 
+    oStr << "   BOUNDARY FACES ARE DEFINING A CLOSED SURFACE IF "
+         << testClosedDomain( mesh, oStr ) << std::endl
          << " IS (ALMOST) ZERO" << std::endl;
 
     return done == 4 ;
@@ -936,7 +936,7 @@ template <typename GeoShape, typename MC>
 bool
 readGmshFile( RegionMesh3D<GeoShape, MC> & mesh,
               const std::string &          fileName,
-              EntityFlag                   regionFlag,
+              entityFlag_Type              regionFlag,
               bool                         verbose = false )
 {
     std::ifstream __is ( fileName.c_str() );
@@ -1288,7 +1288,7 @@ template<typename GeoShape, typename MC>
 bool
 readNetgenMesh(RegionMesh3D<GeoShape,MC> & mesh,
                const std::string  &        fileName,
-               EntityFlag                  regionFlag,
+               entityFlag_Type             regionFlag,
                bool                        verbose = false )
 {
     // I will extract lines from iostream
@@ -1310,7 +1310,7 @@ readNetgenMesh(RegionMesh3D<GeoShape,MC> & mesh,
     BareItemsHandler<BareEdge> bihBedges;
 
     // flags for boundary entities
-    std::vector<EntityFlag> bcnsurf, bcnpoints;
+    std::vector<entityFlag_Type> bcnsurf, bcnpoints;
 
     // bitstream to check which file section has already been visited
     UInt flag;
@@ -1375,10 +1375,10 @@ readNetgenMesh(RegionMesh3D<GeoShape,MC> & mesh,
                 pointcoor[ i * nDimensions + 1 ] = y;
                 pointcoor[ i * nDimensions + 2 ] = z;
                 bpoints  [ i ] = false;
-                bcnpoints[ i ] = NULLFLAG;
+                bcnpoints[ i ] = S_NULLFLAG;
             }
             bpoints  [ nVe ] = false;
-            bcnpoints[ nVe ] = NULLFLAG;
+            bcnpoints[ nVe ] = S_NULLFLAG;
 
             // done parsing point section
             flag&=~1;
@@ -1493,7 +1493,7 @@ readNetgenMesh(RegionMesh3D<GeoShape,MC> & mesh,
 
             facepointID.resize( 3 * nBFa );
             bcnsurf.resize( nBFa + 1 );
-            bcnsurf[ 0 ] = NULLFLAG;
+            bcnsurf[ 0 ] = S_NULLFLAG;
 
             for ( UInt i = 0; i < nBFa; i++ )
             {
@@ -1547,15 +1547,15 @@ readNetgenMesh(RegionMesh3D<GeoShape,MC> & mesh,
                 // may be useful even in the TWODIM case
                 // (I've found this silly but easy way MM)
                 BareEdge bed = setBareEdge( p1, p2 );
-                bihBedges.addIfNotThere( bed, ( ID )NULLFLAG );
+                bihBedges.addIfNotThere( bed, ( ID )S_NULLFLAG );
                 bihBedges[ bed ] = ( ID )EMarker.setStrongerMarker( bihBedges[ bed ], bcnr );
 
                 bed = setBareEdge( p2, p3 );
-                bihBedges.addIfNotThere( bed,( ID )NULLFLAG );
+                bihBedges.addIfNotThere( bed,( ID )S_NULLFLAG );
                 bihBedges[ bed ] = ( ID )EMarker.setStrongerMarker( bihBedges[ bed ], bcnr );
 
                 bed = setBareEdge( p3, p1 );
-                bihBedges.addIfNotThere( bed,( ID )NULLFLAG );
+                bihBedges.addIfNotThere( bed,( ID )S_NULLFLAG );
                 bihBedges[ bed ] = ( ID )EMarker.setStrongerMarker( bihBedges[ bed ], bcnr );
 
             }
@@ -1667,7 +1667,7 @@ readNetgenMesh(RegionMesh3D<GeoShape,MC> & mesh,
        here I set the real boundary edges that I stored
        in bihBedges
     */
-    
+
     BareItemsHandler<BareEdge>::const_iterator bedge = bihBedges.begin();
 
     for ( UInt i=0; i < nBEd; i++ )
@@ -1723,9 +1723,9 @@ readNetgenMesh(RegionMesh3D<GeoShape,MC> & mesh,
 
     // This part is to build a P2 mesh from a P1 geometry
 
-    if ( GeoShape::numPoints > 4 ) 
+    if ( GeoShape::numPoints > 4 )
     {
-    p1top2( mesh );
+    p2MeshFromP1Data( mesh );
     }
 
     // Test mesh
@@ -1734,7 +1734,7 @@ readNetgenMesh(RegionMesh3D<GeoShape,MC> & mesh,
     ///// CORRECTION JFG
     //if (mesh.check(1, true,true))done=0;
 
-    if ( !checkMesh3D( mesh, sw, true, verbose, oStr, std::cerr, oStr ) ) 
+    if ( !checkMesh3D( mesh, sw, true, verbose, oStr, std::cerr, oStr ) )
     {
     std::abort(); // CORRECTION JFG
     }
@@ -1747,7 +1747,7 @@ readNetgenMesh(RegionMesh3D<GeoShape,MC> & mesh,
          << "INT(X)     INT(Y)      INT(Z) <- they should be equal and equal to" << std::endl
          << "                                 the voulume enclosed by the mesh " << std::endl
          << vols[ 0 ] << " " << vols[ 1 ] << " " << vols[ 2 ] << std::endl
-         << "   BOUNDARY FACES ARE DEFINING A CLOSED SURFACE IF " 
+         << "   BOUNDARY FACES ARE DEFINING A CLOSED SURFACE IF "
          << testClosedDomain( mesh, oStr ) << std::endl
          << " IS (ALMOST) ZERO" << std::endl;
 

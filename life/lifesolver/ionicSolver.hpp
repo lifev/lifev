@@ -79,7 +79,7 @@ public:
                                  const Real&,
                                  const ID& );
 
-    typedef boost::function<Real (const EntityFlag& ref,
+    typedef boost::function<Real (const entityFlag_Type& ref,
                                   const Real& x,
                                   const Real& y,
                                   const Real& z,
@@ -236,7 +236,7 @@ public:
 
     void setHeteroTauClose(fct_TauClose);
 
-    Real fct_Tau_Close(const EntityFlag& ref,
+    Real fct_Tau_Close(const entityFlag_Type& ref,
                        const Real& x,
                        const Real& y,
                        const Real& z,
@@ -309,7 +309,7 @@ void MitchellSchaeffer<Mesh, SolverType>::setHeteroTauClose(fct_TauClose fct)
 }
 
 template<typename Mesh, typename SolverType>
-Real MitchellSchaeffer<Mesh, SolverType>::fct_Tau_Close(const EntityFlag& ref,
+Real MitchellSchaeffer<Mesh, SolverType>::fct_Tau_Close(const entityFlag_Type& ref,
                                                         const Real& x,
                                                         const Real& y,
                                                         const Real& z, const ID& i) const
@@ -339,7 +339,7 @@ void MitchellSchaeffer<Mesh, SolverType>::ionModelSolve( const vector_Type& u, c
 
 	IonicSolver<Mesh, SolverType>::M_comm->Barrier();
 	Real x, y, z;
-	EntityFlag ref;
+	entityFlag_Type ref;
 	UInt ID;
 	for ( UInt i = 0 ; i < u.getEpetraVector().MyLength() ; ++i )
 	{

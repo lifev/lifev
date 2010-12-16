@@ -123,13 +123,13 @@ int main()
     ///THIS PART IS ONLY TO VERIFY IF THESE ROUTINES COMPILE PROPERLY
     cerr<<"Fixing bpoints"<<endl;
 
-    fixBPoints(aMesh, ofile,cerr, true);
+    fixBoundaryPoints(aMesh, ofile,cerr, true);
     cerr<<"Fixing edge markers"<<endl;
-    setBEdgesMarker(aMesh, ofile,cerr, true);
+    setBoundaryEdgesMarker(aMesh, ofile,cerr, true);
     cerr<<"Fixing faces marker"<<endl;
-    setBFacesMarker(aMesh, ofile,cerr, true);
+    setBoundaryFacesMarker(aMesh, ofile,cerr, true);
     cerr<<"Fixing points marker"<<endl;
-    setBPointsMarker(aMesh, ofile,cerr, true);
+    setBoundaryPointsMarker(aMesh, ofile,cerr, true);
     cerr<<endl;
     vector<Real> disp(3*aMesh.numPoints());
     //aMesh.moveMesh(disp,3); // TO MAKE IT WORKING disp SHOULD BE AN EPETRA VECTOR!

@@ -52,17 +52,26 @@
 namespace LifeV
 {
 
+// namespace MeshUtilities
+// {
+/*
+   todo change the class names:
+       "EnquireBEntity --> EnquireBoundaryEntity" and so on
+       "GetCoordComponent --> GetCoordinatesComponent" and so on
+ */
+
+
 //! A locally used structure, not meant for general use
 typedef std::map<BareFace, std::pair<ID, ID >,
 cmpBareItem<BareFace> > temporaryFaceContainer_Type;
 // deprecated
-typedef temporaryFaceContainer_Type TempFaceContainer;
+typedef temporaryFaceContainer_Type __attribute__ (( deprecated )) TempFaceContainer;
 
 //! A locally used structure, not meant for general use
 typedef std::map<BareEdge, std::pair<ID, ID>,
 cmpBareItem<BareEdge> > temporaryEdgeContainer_Type;
 // deprecated
-typedef temporaryEdgeContainer_Type TempEdgeContainer;
+typedef temporaryEdgeContainer_Type __attribute__ (( deprecated )) TempEdgeContainer;
 
 /*
 *******************************************************************************
@@ -95,9 +104,9 @@ public:
     typedef typename mesh_Type::PointType point_Type;
 
     // The following should be removed
-    typedef typename mesh_Type::FaceType  FaceType;
-    typedef typename mesh_Type::EdgeType  EdgeType;
-    typedef typename mesh_Type::PointType PointType;
+    // typedef typename mesh_Type::FaceType  FaceType;
+    // typedef typename mesh_Type::EdgeType  EdgeType;
+    // typedef typename mesh_Type::PointType PointType;
     //@}
 
     //! @name Constructor & Destructor
@@ -111,8 +120,8 @@ public:
     {}
 
     //! Copy Constructor
-    EnquireBEntity( EnquireBEntity const & enquireBEntity ) :
-            meshPtr( enquireBEntity.meshPtr )
+    EnquireBEntity( EnquireBEntity const & enquireBoundaryEntity ) :
+            meshPtr( enquireBoundaryEntity.meshPtr )
     {}
 
     //! Virtual Destructor
@@ -128,7 +137,7 @@ public:
         @param face a face entity in the mesh_Type
         @return true if the face is on the boundary, false otherwise
      */
-    bool operator() ( face_Type & face )
+    bool operator() ( const face_Type & face ) const
     {
         bool isBoundary = true;
         for ( UInt kPointId = 1; kPointId <= face_Type::numVertices; ++kPointId )
@@ -143,7 +152,7 @@ public:
         @param edge an edge entity in the mesh_Type
         @return true if the edge is on the boundary, false otherwise
      */
-    bool operator() ( edge_Type & edge )
+    bool operator() ( const edge_Type & edge ) const
     {
         bool isBoundary = true;
         for ( UInt kPointId = 1; kPointId <= edge_Type::numVertices; ++kPointId )
@@ -158,7 +167,7 @@ public:
         @param point a point entity in the mesh_Type
         @return true if the point is on the boundary, false otherwise
      */
-    inline bool operator() ( point_Type & point )
+    inline bool operator() ( const point_Type & point ) const
     {
         return point.boundary();
     }
@@ -201,8 +210,8 @@ public:
     typedef typename mesh_Type::FaceShape       faceShape_Type;
     typedef temporaryFaceContainer_Type const * temporaryFaceContainerPtr_Type;
     // The following should be removed
-    typedef typename mesh_Type::FaceType  FaceType;
-    typedef typename mesh_Type::FaceShape FaceShape;
+    // typedef typename mesh_Type::FaceType  FaceType;
+    // typedef typename mesh_Type::FaceShape FaceShape;
     //@}
 
     //! @name Constructor & Destructor
@@ -220,9 +229,9 @@ public:
     {}
 
     //! Copy Constructor
-    EnquireBFace( EnquireBFace const & enquireBFace ) :
-            meshPtr                 ( enquireBFace.meshPtr ),
-            boundaryFaceContainerPtr( enquireBFace.boundaryFaceContainerPtr )
+    EnquireBFace( EnquireBFace const & enquireBoundaryFace ) :
+            meshPtr                 ( enquireBoundaryFace.meshPtr ),
+            boundaryFaceContainerPtr( enquireBoundaryFace.boundaryFaceContainerPtr )
     {}
 
     //! Virtual Destructor
@@ -238,7 +247,7 @@ public:
         @param face a face entity in the mesh_Type
         @return true if the face is on the boundary, false otherwise
      */
-    bool operator() ( face_Type & face )
+    bool operator() ( const face_Type & face ) const
     {
         ID point1Id, point2Id, point3Id, point4Id;
         BareFace bareFace;
@@ -315,9 +324,9 @@ public:
     {}
 
     //! Copy Constructor
-    EnquireBEdge( EnquireBEdge const & enquireBEdge ) :
-            meshPtr                 ( enquireBEdge.meshPtr ),
-            boundaryEdgeContainerPtr( enquireBEdge.boundaryEdgeContainerPtr )
+    EnquireBEdge( EnquireBEdge const & enquireBoundaryEdge ) :
+            meshPtr                 ( enquireBoundaryEdge.meshPtr ),
+            boundaryEdgeContainerPtr( enquireBoundaryEdge.boundaryEdgeContainerPtr )
     {}
 
     //! Virtual Destructor
@@ -333,7 +342,7 @@ public:
         @param edge an edge entity in the mesh_Type
         @return true if the edge is on the boundary, false otherwise
      */
-    bool operator() ( edge_Type & edge )
+    bool operator() ( const edge_Type & edge ) const
     {
         ID point1Id, point2Id;
         BareEdge bareEdge;
@@ -390,8 +399,8 @@ public:
     {}
 
     //! Copy Constructor
-    EnquireBPoint( EnquireBPoint const & enquireBPoint ) :
-            meshPtr( enquireBPoint.meshPtr )
+    EnquireBPoint( EnquireBPoint const & enquireBoundaryPoint ) :
+            meshPtr( enquireBoundaryPoint.meshPtr )
     {}
 
     //! Virtual Destructor
@@ -407,7 +416,7 @@ public:
         @param meshEntityWithBoundary a mesh entity with boundary indicator
         @return true if the entity is on the boundary, false otherwise
      */
-    bool operator() ( MeshEntityWithBoundary & meshEntityWithBoundary )
+    bool operator() ( const MeshEntityWithBoundary & meshEntityWithBoundary ) const
     {
         return meshEntityWithBoundary.boundary();
     }
@@ -476,8 +485,8 @@ public:
         @param[in] z third component of the input vector
         @param[out] ret output vector
      */
-    void operator() ( Real const x, Real const y,
-                      Real const z, Real ret[ 3 ] ) const;
+    void operator() ( Real const& x, Real const& y,
+                      Real const& z, Real ret[ 3 ] ) const;
 
     //@}
 private:
@@ -520,8 +529,8 @@ public:
         @param[in] z third component of the input vector
         @param[out] ret output vector (always a vector of ones)
      */
-    void operator() ( Real const x, Real const y,
-                      Real const z, Real ret[ 3 ] ) const;
+    void operator() ( Real const& x, Real const& y,
+                      Real const& z, Real ret[ 3 ] ) const;
     //@}
 };
 
@@ -769,15 +778,22 @@ UInt findInternalEdges( const MeshType & mesh,
     @ingroup marker_handlers
 
     It gets the stronger marker of the GeoElement points. The marker
-    hierarchy is defined in the markers.hpp file.  It returns a bool indicating if
-    the flag has changed. If any of the vertices has an unset marker the result
-    is an unset flag for the GeoElement.
+    hierarchy is defined in the markers.hpp file. It returns the new
+    flag for the GeoElement. If any of the vertices has an unset marker
+    the result is an unset flag for the GeoElement.
 
     @sa markers.hpp
     @warning It overrides the original marker flag.
+    @return the new flag for geoElement
 */
 template <typename GeoElementType>
-EntityFlag inheritStrongerMarker( GeoElementType & geoElement )
+EntityFlag __attribute__ (( deprecated ))
+inheritStrongerMarker( GeoElementType & geoElement )
+{
+	return inheritPointsStrongerMarker( geoElement );
+}
+template <typename GeoElementType>
+EntityFlag inheritPointsStrongerMarker( GeoElementType & geoElement )
 {
     ASSERT_PRE( GeoElementType::nDim > 0,
                 "A GeoElement with ndim<1 cannot inherit marker flags" );
@@ -795,15 +811,22 @@ EntityFlag inheritStrongerMarker( GeoElementType & geoElement )
 //! @brief Sets the marker flag of a GeoElement of dimension greater one
 
     It gets the weaker marker of the GeoElement points. The marker
-    hierarchy is defined in the markers.hpp file.  It returns a bool indicating if
-    the flag has changed. If any of the vertices has an unset marker the result
-    is an unset flag for the GeoElement.
+    hierarchy is defined in the markers.hpp file. It returns the new
+    flag for the GeoElement. If any of the vertices has an unset marker
+    the result is an unset flag for the GeoElement.
 
     @sa markers.hpp
     @warning It overrides the original marker flag.
+    @return the new flag for geoElement
 */
 template <typename GeoElementType>
-EntityFlag inheritWeakerMarker( GeoElementType & geoElement )
+EntityFlag __attribute__ (( deprecated ))
+inheritWeakerMarker( GeoElementType & geoElement )
+{
+	return inheritPointsWeakerMarker( geoElement );
+}
+template <typename GeoElementType>
+EntityFlag inheritPointsWeakerMarker( GeoElementType & geoElement )
 {
     ASSERT_PRE( GeoElementType::nDim > 0,
                 "A GeoElement with ndim<1 cannot inherit marker flags" );
@@ -828,7 +851,13 @@ EntityFlag inheritWeakerMarker( GeoElementType & geoElement )
     @warning numBoundaryEdges is properly set only if the test has been passed.
 */
 template <typename MeshType>
-UInt testClosedDomain_Top( MeshType const & mesh, UInt & numBoundaryEdges )
+UInt __attribute__ (( deprecated ))
+testClosedDomain_Top( MeshType const & mesh, UInt & numBoundaryEdges )
+{
+	return testClosedDomain( mesh, numBoundaryEdges );
+}
+template <typename MeshType>
+UInt testClosedDomain( MeshType const & mesh, UInt & numBoundaryEdges )
 {
 
     typedef std::set <BareEdge, cmpBareItem<BareEdge> > localTemporaryEdgeContainer_Type;
@@ -883,7 +912,13 @@ UInt testClosedDomain_Top( MeshType const & mesh, UInt & numBoundaryEdges )
 
 //! Check whether all markers of a the geometry entities stored in a list are set
 template <typename MeshEntityListType>
-bool checkMarkerSet( const MeshEntityListType & meshEntityList )
+bool __attribute__ (( deprecated ))
+checkMarkerSet( const MeshEntityListType & meshEntityList )
+{
+	return checkIsMarkerSetInEntityList( meshEntityList );
+}
+template <typename MeshEntityListType>
+bool checkIsMarkerSetInEntityList( const MeshEntityListType & meshEntityList )
 {
     typedef typename MeshEntityListType::const_iterator MeshEntityListTypeConstIterator_Type;
     bool ok( true );
@@ -911,8 +946,16 @@ bool checkMarkerSet( const MeshEntityListType & meshEntityList )
     @todo errorStream is unused
 */
 template <typename MeshType>
-void
+void __attribute__ (( deprecated ))
 setBEdgesMarker( MeshType & mesh, std::ostream & logStream = std::cout,
+                 std::ostream & errorStream = std::cerr, bool verbose = true )
+{
+	setBoundaryEdgesMarker( mesh, logStream, errorStream, verbose );
+
+}
+template <typename MeshType>
+void
+setBoundaryEdgesMarker( MeshType & mesh, std::ostream & logStream = std::cout,
                  std::ostream & /*errorStream*/ = std::cerr, bool verbose = true )
 {
     typename MeshType::EdgeType * edgePtr = 0;
@@ -927,7 +970,7 @@ setBEdgesMarker( MeshType & mesh, std::ostream & logStream = std::cout,
         edgePtr = &( mesh.edge( kEdgeId ) );
         if ( edgePtr->isMarkerUnset() )
         {
-            inheritWeakerMarker( *edgePtr );
+        	inheritPointsWeakerMarker( *edgePtr );
             if ( verbose )
             {
                 logStream << edgePtr->id() << " -> ";
@@ -959,8 +1002,16 @@ setBEdgesMarker( MeshType & mesh, std::ostream & logStream = std::cout,
     wrapped into a class
 */
 template <typename MeshType>
-void
+void __attribute__ (( deprecated ))
 setBFacesMarker( MeshType & mesh, std::ostream & logStream = std::cout,
+                 std::ostream & errorStream = std::cerr, bool verbose = true )
+{
+	setBoundaryFacesMarker( mesh, logStream, errorStream, verbose );
+
+}
+template <typename MeshType>
+void
+setBoundaryFacesMarker( MeshType & mesh, std::ostream & logStream = std::cout,
                  std::ostream & /*errorStream*/ = std::cerr, bool verbose = true )
 {
     typename MeshType::FaceType * facePtr = 0;
@@ -977,7 +1028,7 @@ setBFacesMarker( MeshType & mesh, std::ostream & logStream = std::cout,
         facePtr = &( mesh.face( kFaceId ) );
         if ( facePtr->isMarkerUnset() )
         {
-            inheritWeakerMarker( *facePtr );
+        	inheritPointsWeakerMarker( *facePtr );
             if ( verbose )
             {
                 logStream << facePtr->id() << " -> ";
@@ -1007,8 +1058,16 @@ setBFacesMarker( MeshType & mesh, std::ostream & logStream = std::cout,
 
 */
 template <typename MeshType>
-void
+void __attribute__ (( deprecated ))
 setBPointsMarker( MeshType & mesh, std::ostream & logStream = std::cout,
+                 std::ostream & errorStream = std::cerr, bool verbose = false )
+{
+	setBoundaryPointsMarker( mesh, logStream, errorStream, verbose );
+
+}
+template <typename MeshType>
+void
+setBoundaryPointsMarker( MeshType & mesh, std::ostream & logStream = std::cout,
                   std::ostream& /*errorStream*/ = std::cerr, bool verbose = false )
 {
     // First looks at points whose marker has already been set
@@ -1073,7 +1132,13 @@ setBPointsMarker( MeshType & mesh, std::ostream & logStream = std::cout,
    compliant container and its elements must have the method id().
 */
 template <typename MeshEntityListType>
-bool checkIdnumber( const MeshEntityListType & meshEntityList )
+bool __attribute__ (( deprecated ))
+checkIdnumber( const MeshEntityListType & meshEntityList )
+{
+	return checkIdInEntityList( meshEntityList );
+}
+template <typename MeshEntityListType>
+bool checkIdInEntityList( const MeshEntityListType & meshEntityList )
 {
     typedef typename MeshEntityListType::const_iterator MeshEntityListTypeConstIterator_Type;
     bool ok( true );
@@ -1092,9 +1157,14 @@ bool checkIdnumber( const MeshEntityListType & meshEntityList )
    @pre The template argument MeshEntityListType must be a stl
    compliant container and its elements must have the method UInt &id().
 */
-template
-<typename MeshEntityListType>
-void fixIdnumber( MeshEntityListType & meshEntityList )
+template <typename MeshEntityListType>
+void __attribute__ (( deprecated ))
+fixIdnumber( MeshEntityListType & meshEntityList )
+{
+	fixIdInEntityList( meshEntityList );
+}
+template <typename MeshEntityListType>
+void fixIdInEntityList( MeshEntityListType & meshEntityList )
 {
     UInt counter( 0 );
     typedef typename MeshEntityListType::iterator Iter;
@@ -1107,14 +1177,20 @@ void fixIdnumber( MeshEntityListType & meshEntityList )
 /*! @brief Fixes boundary points counter
   It fix the boundary points counter by counting
   how many points have the boundary flag set.
-  It also resets the Bpoints list.
+  It also resets the boundary points list.
 
   @pre It assumes that the points have the boundary flag correctly set
 */
 
 template <typename MeshType>
-void
+void __attribute__ (( deprecated ))
 setBPointsCounters( MeshType & mesh )
+{
+	setBoundaryPointsCounters( mesh );
+}
+template <typename MeshType>
+void
+setBoundaryPointsCounters( MeshType & mesh )
 {
 
     UInt boundaryPointCounter( 0 );
@@ -1167,8 +1243,15 @@ BOUNDARY INDICATOR FIXING
   @pre mesh point list must exists and boundary face list must have been set properly.
 */
 template <typename MeshType>
-void
+void __attribute__ (( deprecated ))
 fixBPoints( MeshType & mesh, std::ostream & logStream = std::cout,
+            std::ostream & errorStream = std::cerr, bool verbose = true )
+{
+	fixBoundaryPoints( mesh, logStream, errorStream, verbose );
+}
+template <typename MeshType>
+void
+fixBoundaryPoints( MeshType & mesh, std::ostream & logStream = std::cout,
             std::ostream & /* errorStream */ = std::cerr, bool verbose = true )
 {
     ASSERT_PRE( mesh.numPoints() > 0, "The point list should not be empty" );
@@ -1201,45 +1284,57 @@ fixBPoints( MeshType & mesh, std::ostream & logStream = std::cout,
     std::vector<bool> temp;
     boundaryPoints.swap(temp);
     // Fix now the number of vertices/points
-    setBPointsCounters( mesh );
+    setBoundaryPointsCounters( mesh );
 }
 
 
 //!It makes sure that boundary edges are stored first
 /*!
-    Calls fixIdnumber (@sa fixIdnumber)
+    Calls fixIdInEntityList (@sa fixIdInEntityList)
     @pre It assumes that boundary points are properly stored in the mesh
 */
 template <typename MeshType>
-void
+void __attribute__ (( deprecated ))
 setBoundaryEdgesFirst( MeshType & mesh )
+{
+	correctEdgesStoringOrder( mesh );
+}
+template <typename MeshType>
+void
+correctEdgesStoringOrder( MeshType & mesh )
 {
 
     typedef typename MeshType::Edges Edges;
     // set the functor
-    EnquireBEntity<MeshType > enquireBEdge( mesh );
+    EnquireBEntity<MeshType > enquireBoundaryEdge( mesh );
 
-    std::partition( mesh.edgeList.begin(), mesh.edgeList.end(), enquireBEdge );
-    fixIdnumber( mesh.edgeList );
+    std::partition( mesh.edgeList.begin(), mesh.edgeList.end(), enquireBoundaryEdge );
+    fixIdInEntityList( mesh.edgeList );
 }
 
 
 //!It makes sure that boundary faces are stored first
 /*!
-    Calls fixIdnumber (@sa fixIdnumber)
+    Calls fixIdInEntityList (@sa fixIdInEntityList)
     @pre It assumes that boundary points are properly stored in the mesh
 */
 template <typename MeshType>
-void
+void __attribute__ (( deprecated ))
 setBoundaryFacesFirst( MeshType & mesh )
+{
+	correctFacesStoringOrder( mesh );
+}
+template <typename MeshType>
+void
+correctFacesStoringOrder( MeshType & mesh )
 {
 
     typedef typename MeshType::Faces faceContainer_Type;
     // set the functor
-    EnquireBEntity<MeshType> enquireBFace( mesh );
+    EnquireBEntity<MeshType> enquireBoundaryFace( mesh );
 
-    std::partition( mesh.faceList.begin(), mesh.faceList.end(), enquireBFace );
-    fixIdnumber( mesh.faceList );
+    std::partition( mesh.faceList.begin(), mesh.faceList.end(), enquireBoundaryFace );
+    fixIdInEntityList( mesh.faceList );
 }
 
 
@@ -1247,19 +1342,25 @@ setBoundaryFacesFirst( MeshType & mesh )
 /*! @return true if boundary faces are indeed stored first
   @pre It assumes that boundary points are set */
 template <typename MeshType>
-bool checkBoundaryFacesFirst( const MeshType & mesh )
+bool __attribute__ (( deprecated ))
+checkBoundaryFacesFirst( const MeshType & mesh )
+{
+	return checkFacesStoringOrder( mesh );
+}
+template <typename MeshType>
+bool checkFacesStoringOrder( const MeshType & mesh )
 {
 
     typedef typename MeshType::Faces faceContainer_Type;
 
     // set the functor
-    EnquireBEntity<MeshType> enquireBFace( mesh );
+    EnquireBEntity<MeshType> enquireBoundaryFace( mesh );
     bool ok( true );
 
     for ( UInt kFacetId = 1; kFacetId <= mesh.numFacets(); ++kFacetId )
-        ok = ok && enquireBFace( mesh.boundaryFace( kFacetId ) );
+        ok = ok && enquireBoundaryFace( mesh.boundaryFace( kFacetId ) );
     for ( UInt kFacetId = mesh.numBElements() + 1; kFacetId <= mesh.storedFaces(); ++kFacetId )
-        ok = ok && ! enquireBFace( mesh.face( kFacetId ) );
+        ok = ok && ! enquireBoundaryFace( mesh.face( kFacetId ) );
 
     return ok;
 }
@@ -1269,19 +1370,25 @@ bool checkBoundaryFacesFirst( const MeshType & mesh )
 /*! @return true if boundary edges are indeed stored first
   @pre It assumes that boundary points are set */
 template <typename MeshType>
-bool checkBoundaryEdgesFirst( const MeshType & mesh )
+bool __attribute__ (( deprecated ))
+checkBoundaryEdgesFirst( const MeshType & mesh )
+{
+	return checkEdgesStoringOrder( mesh );
+}
+template <typename MeshType>
+bool checkEdgesStoringOrder( const MeshType & mesh )
 {
 
     typedef typename MeshType::Edges Edges;
 
     // set the functor
-    EnquireBEntity<MeshType> enquireBEdge( mesh );
+    EnquireBEntity<MeshType> enquireBoundaryEdge( mesh );
     bool ok( true );
 
     for ( UInt kBEdgeId = 1; kBEdgeId <= mesh.numBEdges(); ++kBEdgeId )
-        ok = ok && enquireBEdge( mesh.bareEdge( kBEdgeId ) );
+        ok = ok && enquireBoundaryEdge( mesh.bareEdge( kBEdgeId ) );
     for ( UInt kBEdgeId = mesh.numBEdges() + 1; kBEdgeId <= mesh.storedEdges(); ++kBEdgeId )
-        ok = ok && ! enquireBEdge( mesh.edge( kBEdgeId ) );
+        ok = ok && ! enquireBoundaryEdge( mesh.edge( kBEdgeId ) );
     return ok;
 }
 
@@ -1467,7 +1574,7 @@ bool fixBoundaryFaces( MeshType & mesh,
             faceContainerIterator->pos_first() = jFaceLocalId;
             if ( faceContainerIterator->isMarkerUnset() )
             {
-                inheritWeakerMarker( *faceContainerIterator );
+                inheritPointsWeakerMarker( *faceContainerIterator );
                 if ( verbose )
                 {
                     logStream << faceContainerIterator->id() << " -> ";
@@ -1625,7 +1732,7 @@ bool buildFaces( MeshType & mesh,
             face.ad_first() = volumeId;
             face.pos_first() = jFaceLocalId;
             // Get marker value
-            inheritWeakerMarker( face );
+            inheritPointsWeakerMarker( face );
             newFaceId = mesh.addFace( face, true ).id();
             if ( verbose )
             {
@@ -1886,7 +1993,7 @@ bool buildEdges( MeshType & mesh,
             }
 
             // Get marker value inheriting from points
-            inheritWeakerMarker( edge );
+            inheritPointsWeakerMarker( edge );
 
             newEdgeId = mesh.addEdge( edge, true ).id();
             if ( verbose )
@@ -1955,15 +2062,21 @@ bool buildEdges( MeshType & mesh,
 	@param logStream[out] Log stream for information on the newly created markers for boundary edges
 */
 template <typename MeshType>
+void __attribute__ (( deprecated ))
+p1top2( MeshType & mesh, std::ostream & logStream = std::cout )
+{
+	p2MeshFromP1Data( mesh, logStream );
+}
+template <typename MeshType>
 void
-p1top2( MeshType & mesh, std::ostream & outputStream = std::cout )
+p2MeshFromP1Data( MeshType & mesh, std::ostream & logStream = std::cout )
 {
 
     typedef typename MeshType::ElementShape  GeoShape;
     typedef typename MeshType::BElementShape GeoBShape;
-    ASSERT_PRE( GeoShape::numPoints > 4, "p1top2 ERROR: we need a P2 mesh" );
+    ASSERT_PRE( GeoShape::numPoints > 4, "p2MeshFromP1Data ERROR: we need a P2 mesh" );
 
-    outputStream << "Building P2 mesh points and connectivities from P1 data"
+    logStream << "Building P2 mesh points and connectivities from P1 data"
     << std::endl;
 
 
@@ -1980,7 +2093,7 @@ p1top2( MeshType & mesh, std::ostream & outputStream = std::cout )
     std::pair<BareEdge, bool>            bareEdgeToBoolPair;
     typename MeshType::ElementShape      elementShape;
 
-    outputStream << "Processing " << mesh.storedEdges() << " P1 Edges" << std::endl;
+    logStream << "Processing " << mesh.storedEdges() << " P1 Edges" << std::endl;
     UInt numBoundaryEdges = mesh.numBEdges();
     for ( UInt jEdgeId = 1; jEdgeId <= mesh.storedEdges(); ++jEdgeId )
     {
@@ -2001,7 +2114,7 @@ p1top2( MeshType & mesh, std::ostream & outputStream = std::cout )
           created point) gets the WORST marker among the two end Vertices
         */
         if ( edgePtr->isMarkerUnset() )
-            inheritWeakerMarker( *edgePtr );
+            inheritPointsWeakerMarker( *edgePtr );
         pointPtr->setMarker( edgePtr->marker() );
         // todo check that the id() of the new point is correctly set
         edgePtr->setPoint( 3, pointPtr ); //use overloaded version that takes a pointer
@@ -2014,7 +2127,7 @@ p1top2( MeshType & mesh, std::ostream & outputStream = std::cout )
     {
         UInt numBoundaryFaces = mesh.numBFaces();
 
-        outputStream << "Processing " << mesh.storedFaces() << " Face Edges"
+        logStream << "Processing " << mesh.storedFaces() << " Face Edges"
         << std::endl;
         for ( UInt kFaceId = 1; kFaceId <= mesh.storedFaces(); ++kFaceId )
         {
@@ -2051,7 +2164,7 @@ p1top2( MeshType & mesh, std::ostream & outputStream = std::cout )
         }
     }
 
-    outputStream << "Processing " << mesh.numElements() << " Mesh Elements"
+    logStream << "Processing " << mesh.numElements() << " Mesh Elements"
     << std::endl;
     UInt nev = GeoShape::numVertices;
     for ( UInt kElementId = 1; kElementId <= mesh.numElements(); ++kElementId )
@@ -2086,7 +2199,7 @@ p1top2( MeshType & mesh, std::ostream & outputStream = std::cout )
         }
     }
     /*=============================*/
-    outputStream << " ******* Done Construction of P2 Mmesh *******"
+    logStream << " ******* Done Construction of P2 Mesh *******"
     << std::endl << std::endl;
 }
 
@@ -2131,7 +2244,7 @@ p1top2( MeshType & mesh, std::ostream & outputStream = std::cout )
 //   }
 
 
-}
+// } // namespace MeshUtilities
 
-
+} // namespace LifeV
 #endif

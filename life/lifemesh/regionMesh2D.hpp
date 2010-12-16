@@ -54,7 +54,7 @@ namespace LifeV
 /**
  *  @class RegionMesh2D
  *  @brief Class for 2D Mesh
- * 
+ *
  *  @author Luca Formaggia <luca.formaggia@polimi.it>
  *  @author Christophe Prud'homme <christophe.prudhomme@epfl.ch>
  *
@@ -62,7 +62,7 @@ namespace LifeV
  *
  *  In a region elements are all of the same type.
  */
-template <typename GEOSHAPE, typename MC = DefMarkerCommon >
+template <typename GEOSHAPE, typename MC = defaultMarkerCommon_Type >
 class RegionMesh2D
         :
         public MeshEntity,
@@ -73,10 +73,10 @@ public:
     /** @name Marker Types
      *  @ingroup public_types
      *  Markers for Point, Edge, Face and Region.
-     * 
+     *
      *  @{
      */
-    
+
     //! Point Marker
     typedef typename MC::PointMarker PointMarker;
     //! Edge Marker
@@ -138,14 +138,14 @@ public:
 
     /** @name Generic Types
      *  @ingroup public_types
-     * 
+     *
      *  Generic types for all regionMeshes.
-     * 
+     *
      *  These are part of the generic generic interface common for all RegionMeshes (3D -- 1D).
-     * 
+     *
      *  @{
      */
-    
+
     //! Element Geometric Shape
     typedef GEOSHAPE                     ElementShape;
     //! Boundary Element Geometric Shape
@@ -171,7 +171,7 @@ public:
 
     //! Default constructor
     explicit RegionMesh2D();
-    
+
     //! Default constructor
     /**
      *  @param id marker of the RegionMesh2D
@@ -186,7 +186,7 @@ public:
 
     //! Destructor
     ~RegionMesh2D<GEOSHAPE, MC>();
-     
+
     /** @} */ // End of group Constructors & Destructor
 
 
@@ -307,7 +307,7 @@ public:
      *  @note Alias to numFaces()
      */
     UInt numElements() const;
-    
+
     //! Number of elements in mesh.
     /**
      *  @return Number of elements in mesh.
@@ -315,7 +315,7 @@ public:
      *  @note Alias to numFaces()
      */
     UInt & numElements();
-    
+
     //! Number of Boundary faces.
     /**
      *  @return Number of Boundary faces.
@@ -387,11 +387,11 @@ public:
     /**
      *  Returns number of Face elements in the mesh
      *  as given by the internal counter.
-     * 
+     *
      *  @return Number of Faces.
      */
     UInt numFaces() const;
-    
+
     //! Returns Global Number of Faces
     /**
      *  Returns global number of Face elements in the mesh
@@ -426,12 +426,12 @@ public:
     //! Changes Current capacity of Faces.
     /**
      *  Changes Current capacity of Faces (Optionally sets internal counter).
-     * 
+     *
      *  @param n Maximum number of faces.
      *  @param setcounter true to set the counter, false otherwise.
      */
     void setMaxNumFaces( UInt const n, bool const setcounter = false );
-    
+
     //! Changes Current capacity of Global Faces.
     /**
      *  Changes Current capacity of Global Faces (Optionally sets internal counter).
@@ -721,7 +721,7 @@ public:
     bool isFullEdge( UInt const & id ) const;
 
     /** @} */ // End of group Edges Methods
-    
+
 
     /** @name Points Methods
      *  @ingroup public_methods
@@ -804,7 +804,7 @@ public:
      *  @param n Maximum number of storable global points in the mesh.
      */
     void setMaxNumGlobalPoints( UInt const n);
-    
+
     //! Adds a Point in the mesh.
     /**
      *  Adds a Point inside the mesh, eventually specifing if it's a boundary point or a vertex.
@@ -845,7 +845,7 @@ public:
      *  @return Reference to the last mesh Point.
      */
     PointType & lastPoint();
-    
+
     //! Returns the i-th mesh Point.
     /**
      *  Returns the i-th Point in the mesh.
@@ -897,7 +897,7 @@ public:
      *  @param n Number Boundary Points.
      */
     void setNumBPoints( UInt const n );
-    
+
     /** @} */ // End of group Points Methods
 
 
@@ -990,7 +990,7 @@ public:
      */
     bool isBoundaryPoint ( PointType const & p ) const;
 
-    
+
     //! Changes number of Vertices.
     /**
      *  Allows to change number of vertices in Region.
@@ -998,7 +998,7 @@ public:
      *  @param n Number of vertices in the mesh.
      */
     void setNumVertices(UInt const n);
-    
+
     //! Set the number of vertices in the mesh.
     /**
      *  Set the internal counter of vertices points in the mesh.
@@ -1006,7 +1006,7 @@ public:
      *  @param n Number of vertices in the mesh.
      */
     void setNumGlobalVertices( UInt const n ) { M_numGlobalVertices = n; }
-    
+
     //! Changes number of Boundary Vertices.
     /**
      *  Allows to change number of boundary vertices in Region.
@@ -1014,7 +1014,7 @@ public:
      *  @param n Number of boundary vertices in the mesh.
      */
     void setNumBVertices(UInt const n);
-    
+
     /** @} */ // End of group Vertices Methods
 
 
@@ -2269,7 +2269,7 @@ RegionMesh2D<GEOSHAPE, MC>::updateElementEdges( bool ce, UInt ee )
                     // gets the marker from the RegionMesh
 
                     edg.setMarker( this->marker() );
-                    //        inheritWeakerMarker( edg );
+                    //        inheritPointsWeakerMarker( edg );
                     addEdge( edg, false ); //The id should be correct
                 }
                 else

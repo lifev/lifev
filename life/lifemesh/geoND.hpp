@@ -214,7 +214,7 @@ public:
         @return TRUE if the point is set
     	@warning A const_cast to M_points is done in order to change the flag
     */
-    EntityFlag setStrongerMarkerAtPoint( const ID& identity, EntityFlag const & flag );
+    entityFlag_Type setStrongerMarkerAtPoint( const ID& identity, entityFlag_Type const & flag );
 
     //@}
 
@@ -407,7 +407,7 @@ bool __attribute__ ((__deprecated__)) GeoND<GEOSHAPE, POINTTYPE>::setPointBD( ID
 }
 
 template <typename GEOSHAPE, typename POINTTYPE>
-EntityFlag GeoND<GEOSHAPE, POINTTYPE>::setStrongerMarkerAtPoint( const ID& identity, EntityFlag const & flag )
+entityFlag_Type GeoND<GEOSHAPE, POINTTYPE>::setStrongerMarkerAtPoint( const ID& identity, entityFlag_Type const & flag )
 {
     return (const_cast<POINTTYPE *> ( M_points[identity -1]) ) -> setStrongerMarker(flag);
 }

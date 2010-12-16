@@ -191,7 +191,7 @@ public:
       @param components storing the list of components involved in this boundary condition
     */
     void addBC( const std::string& name,
-                const EntityFlag& flag,
+                const entityFlag_Type& flag,
                 const BCType& type,
                 const BCMode& mode,
                 BCFunctionBase& bcFunction,
@@ -207,7 +207,7 @@ public:
       @param bcFunction  The container holding the user defined function involved in this boundary condition
     */
     void addBC( const std::string& name,
-                const EntityFlag& flag,
+                const entityFlag_Type& flag,
                 const BCType& type,
                 const BCMode& mode,
                 BCFunctionBase& bcFunction );
@@ -223,7 +223,7 @@ public:
      @param numberOfComponents The number of components involved in this boundary condition
     */
     void addBC( const std::string& name,
-                const EntityFlag& flag,
+                const entityFlag_Type& flag,
                 const BCType& type,
                 const BCMode& mode,
                 BCFunctionBase& bcFunction,
@@ -240,7 +240,7 @@ public:
       @param components storing the list of components involved in this boundary condition
     */
     void addBC( const std::string& name,
-                const EntityFlag& flag,
+                const entityFlag_Type& flag,
                 const BCType& type,
                 const BCMode& mode,
                 BCVectorBase& bcVector,
@@ -256,7 +256,7 @@ public:
       @param bcVector The container holding the finite element vector involved in this boundary condition
      */
     void addBC( const std::string& name,
-                const EntityFlag& flag,
+                const entityFlag_Type& flag,
                 const BCType& type,
                 const BCMode& mode,
                 BCVectorBase& bcVector );
@@ -272,7 +272,7 @@ public:
       @param numberOfComponents The number of components involved in this boundary condition
     */
     void addBC( const std::string& name,
-                const EntityFlag& flag,
+                const entityFlag_Type& flag,
                 const BCType& type,
                 const BCMode& mode,
                 BCVectorBase& bcVector,
@@ -288,7 +288,7 @@ public:
       @param  bcFunctionFEVectorDependent  The container holding the user defined function, depending on a FE vector, involved in this boundary condition
     */
     void addBC( const std::string& name,
-                const EntityFlag& flag,
+                const entityFlag_Type& flag,
                 const BCType& type,
                 const BCMode& mode,
                 BCFunctionUDepBase&  bcFunctionFEVectorDependent );
@@ -321,21 +321,21 @@ public:
       @param aFlag The flag associated with the boundary condition to be modified
       @param bcFunction The container holding the user defined function which will replace the existing one
      */
-    void modifyBC( EntityFlag const& aFlag, BCFunctionBase const& bcFunction );
+    void modifyBC( entityFlag_Type const& aFlag, BCFunctionBase const& bcFunction );
 
     //! Modify the boundary condition associated with flag @c aFlag, assigning the FE vector in @c bcVector
     /*!
       @param aFlag The flag associated with the boundary condition to be modified
       @param bcVector The container holding the user FE vector which will replace the existing one
      */
-    void modifyBC( EntityFlag const& aFlag, BCVectorBase const& bcVector );
+    void modifyBC( entityFlag_Type const& aFlag, BCVectorBase const& bcVector );
 
     //! Modify the boundary condition associated with flag @c aFlag, assigning the function in @c  bcFunctionFEVectorDependent
     /*!
       @param aFlag The flag associated with the boundary condition to be modified
       @param  bcFunctionFEVectorDependent The container holding the user defined function, depending on an FE vector, which will replace the existing one
      */
-    void modifyBC( EntityFlag const& aFlag, BCFunctionUDepBase const&  bcFunctionFEVectorDependent );
+    void modifyBC( entityFlag_Type const& aFlag, BCFunctionUDepBase const&  bcFunctionFEVectorDependent );
 
 
     //! Update all the boundary conditions
@@ -410,14 +410,14 @@ public:
       @param aFlag The flag associated with the boundary condition
       @return Type of boundary condition associated with flag aFlag
      */
-    BCType boundaryType(const EntityFlag& aFlag) const;
+    BCType boundaryType(const entityFlag_Type& aFlag) const;
 
     //! Extract a BC in the list according to its flag
     /*!
       @param aFlag The flag associated with the boundary condition
       @return constant Reference to the  boundary condition associated with flag aFlag
      */
-    BCBase& GetBCWithFlag(const EntityFlag& aFlag);
+    BCBase& GetBCWithFlag(const entityFlag_Type& aFlag);
 
 
     //! Extract a BC in the list according to its flag (non const)
@@ -425,7 +425,7 @@ public:
       @param aFlag The flag associated with the boundary condition
       @return constant Reference to the  boundary condition associated with flag aFlag
      */
-    const BCBase& GetBCWithFlag(const EntityFlag& aFlag) const;
+    const BCBase& GetBCWithFlag(const entityFlag_Type& aFlag) const;
 
     //! Get a vector list of BC with specific type. The list contains the BCName of the BC.
     /*!
@@ -519,7 +519,7 @@ private:
 
        @return A pointer to @c BCBase
     */
-    BCBase* findBC( const EntityFlag& aFlag);
+    BCBase* findBC( const entityFlag_Type& aFlag);
 
 
     //! Determine whether all the boundary conditions in M_bcList are of type EssentialXXX
@@ -584,7 +584,7 @@ private:
     UInt M_offset;
 
     //! set of markers which are in the mesh but not in the list
-    std::set<EntityFlag> M_notFoundMarkers;
+    std::set<entityFlag_Type> M_notFoundMarkers;
 
 };
 
@@ -606,8 +606,8 @@ BCHandler::bdUpdate( Mesh& mesh, CurrentBdFE& boundaryFE, const Dof& dof )
 
     UInt numBElements = mesh.numBElements();    // number of boundary elements
 
-    EntityFlag marker; //will store the marker of each geometric entity
-    EntityFlag elementMarker; //will store the marker of the element
+    entityFlag_Type marker; //will store the marker of each geometric entity
+    entityFlag_Type elementMarker; //will store the marker of the element
 
     typedef typename geoShape_Type::GeoBShape geoBShape_Type;
 
@@ -646,7 +646,7 @@ BCHandler::bdUpdate( Mesh& mesh, CurrentBdFE& boundaryFE, const Dof& dof )
     Real x, y, z;
 
     //sets containing markers of boundary elements which have not been found in the boundary conditions' flags
-    std::set<EntityFlag> notFoundMarkers;
+    std::set<entityFlag_Type> notFoundMarkers;
 
     bool marker_found(false);
 

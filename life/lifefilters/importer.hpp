@@ -113,7 +113,7 @@ public:
       @param mesh mesh data structure to fill in
       @param regionFlag marker for the region to load
     */
-    void import( RegionMesh3D<LinearTetra> & mesh, EntityFlag regionFlag );
+    void import( RegionMesh3D<LinearTetra> & mesh, entityFlag_Type regionFlag );
 
 
     //! Import mesh with linear hexahedras
@@ -121,14 +121,14 @@ public:
       @param mesh mesh data structure to fill in
       @param regionFlag marker for the region to load
     */
-    void import( RegionMesh3D<LinearHexa> & mesh, EntityFlag regionFlag );
+    void import( RegionMesh3D<LinearHexa> & mesh, entityFlag_Type regionFlag );
 
     //! Import mesh with linear triangles
     /*!
       @param mesh mesh data structure to fill in
       @param regionFlag marker for the region to load
     */
-    void import( RegionMesh2D<LinearTriangle> & mesh, EntityFlag regionFlag );
+    void import( RegionMesh2D<LinearTriangle> & mesh, entityFlag_Type regionFlag );
 
 
     //! Import mesh with linear quadrangles
@@ -136,7 +136,7 @@ public:
       @param mesh mesh data structure to fill in
       @param regionFlag marker for the region to load
     */
-    void import( RegionMesh2D<LinearQuad> & mesh, EntityFlag regionFlag );
+    void import( RegionMesh2D<LinearQuad> & mesh, entityFlag_Type regionFlag );
 
     //! Print attributes of the class
     /*!

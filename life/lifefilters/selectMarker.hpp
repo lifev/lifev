@@ -58,7 +58,7 @@ class InternalEntitySelector
 {
 public:
     //! The default watermark used when standard contructor is adopted.
-    static const EntityFlag defMarkFlag;
+    static const entityFlag_Type defMarkFlag;
 
     //! @name Constructors & Destructor
     //@{
@@ -72,7 +72,7 @@ public:
         @param w, the costant EntityFlag which is required in order 
         to create an InternalEntitySelector object.
      */
-    InternalEntitySelector(const EntityFlag & w);
+    InternalEntitySelector(const entityFlag_Type & w);
     //@}
 
 
@@ -86,13 +86,13 @@ public:
         @param test, it is the reference to geometric entity.
         @return true, if the flag corresponds to an internal entity.
      */
-    bool operator()(EntityFlag const & test) const;
+    bool operator()(entityFlag_Type const & test) const;
     //@}
 
 private:
 
     //! The current watermark
-    EntityFlag M_watermarkFlag;
+    entityFlag_Type M_watermarkFlag;
 
     //! Unsed operator equivalence
     InternalEntitySelector& operator=( const InternalEntitySelector& example );

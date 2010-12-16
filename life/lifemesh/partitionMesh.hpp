@@ -1144,7 +1144,7 @@ void partitionMesh<MeshType>::constructVolumes()
 
             Int ibc = M_originalMesh->volume(*it + 1).marker();
 
-            pv->setMarker(EntityFlag( ibc ));
+            pv->setMarker(entityFlag_Type( ibc ));
         }
     }
 }

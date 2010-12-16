@@ -129,9 +129,9 @@ public:
 
     template <typename MeshType>
     void update( MeshType& mesh1,
-                 const EntityFlag& flag1,
+                 const entityFlag_Type& flag1,
                  MeshType& mesh2,
-                 const EntityFlag& flag2,
+                 const entityFlag_Type& flag2,
                  const Real& tol,
                  Int const* const flag3 = 0 );
 
@@ -178,8 +178,8 @@ private:
       \param tol tolerance for connecting points of both meshes at the interface
      */
     template <typename MeshType>
-    void updateFaceConnections( const MeshType& mesh1, const EntityFlag& flag1,
-                                 const MeshType& mesh2, const EntityFlag& flag2, const Real& tol );
+    void updateFaceConnections( const MeshType& mesh1, const entityFlag_Type& flag1,
+                                 const MeshType& mesh2, const entityFlag_Type& flag2, const Real& tol );
     //! This method builds the connections between Dof at the interface (M_dofToDofConnectionList container)
     /*!
       \param mesh1 the mesh in which we want to make the computations
@@ -237,8 +237,8 @@ bool coincide( const Real& x1, const Real& y1, const Real& z1, const Real& x2, c
 // ===================================================
 
 template <typename MeshType>
-void DofInterface3Dto3D::update( MeshType& mesh1, const EntityFlag& flag1,
-                                 MeshType& mesh2, const EntityFlag& flag2,
+void DofInterface3Dto3D::update( MeshType& mesh1, const entityFlag_Type& flag1,
+                                 MeshType& mesh2, const entityFlag_Type& flag2,
                                  const Real& tol, Int const* const flag3 )
 {
 
@@ -403,14 +403,14 @@ void DofInterface3Dto3D::interpolate( MeshType& mesh2, const UInt nbComp, const 
 // ===================================================
 
 template <typename MeshType>
-void DofInterface3Dto3D::updateFaceConnections( const MeshType& mesh1, const EntityFlag& flag1,
-                                                 const MeshType& mesh2, const EntityFlag& flag2, const Real& tol )
+void DofInterface3Dto3D::updateFaceConnections( const MeshType& mesh1, const entityFlag_Type& flag1,
+                                                 const MeshType& mesh2, const entityFlag_Type& flag2, const Real& tol )
 {
 
     UInt bdnF1 = mesh1.numBFaces(); // Number of boundary faces in mesh1
     UInt bdnF2 = mesh2.numBFaces(); // Number of boundary faces in mesh2
 
-    EntityFlag marker1, marker2;
+    entityFlag_Type marker1, marker2;
 
     typedef typename MeshType::FaceShape GeoBShape; // Shape of the faces
 

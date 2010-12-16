@@ -161,7 +161,7 @@ public:
 
        \param flag is the marker of the considered boundary section
      */
-    Real area( const EntityFlag& flag );
+    Real area( const entityFlag_Type& flag );
 
     /*!
        This method computes the flux of vectorField across boundary section "flag"
@@ -174,7 +174,7 @@ public:
       \param nDim is the dimension of vectorField
      */
     template< typename VectorType >
-    Real flux( const VectorType& vectorField, const EntityFlag& flag, UInt feSpace = 0, UInt nDim = nDimensions);
+    Real flux( const VectorType& vectorField, const entityFlag_Type& flag, UInt feSpace = 0, UInt nDim = nDimensions);
 
     /*!
        This method computes the average value of a field on the boundary section "flag"
@@ -188,7 +188,7 @@ public:
        \return the averaged vector
      */
     template< typename VectorType >
-    Vector average( const VectorType& field, const EntityFlag& flag, UInt feSpace = 0, UInt nDim = 1);
+    Vector average( const VectorType& field, const entityFlag_Type& flag, UInt feSpace = 0, UInt nDim = 1);
 
 // NOT READY!
 #if 0
@@ -280,7 +280,7 @@ private:
     std::vector<Vector >              M_patchIntegratedPhiVector;
 
     // store once for all a map, with key={boundary flag}, value={ID list}
-    std::map< EntityFlag, std::list<ID> >        M_boundaryMarkerToFacetIdMap;
+    std::map< entityFlag_Type, std::list<ID> >        M_boundaryMarkerToFacetIdMap;
 
     // for each boundary face, it contains the numbering of the dof of the face
     std::vector< std::vector< SimpleVect<ID> > > M_vectorNumberingPerFacetVector;
@@ -426,7 +426,7 @@ void PostProc<MeshType>::build_vectors()
     ID                        dofLocalId, dofGlobalId, dofAuxiliaryId;
     std::vector<ID>           numBoundaryDofVector(M_numFESpaces);
     std::vector<ID>::iterator dofGlobalIdVectorIterator;
-    EntityFlag                boundaryFlag;
+    entityFlag_Type                boundaryFlag;
 
     for (UInt iFESpace=0; iFESpace<M_numFESpaces; ++iFESpace)
     {
@@ -598,7 +598,7 @@ void PostProc<MeshType>::build_vectors()
 
 // Area of faces with a certain marker
 template<typename MeshType>
-Real PostProc<MeshType>::area( const EntityFlag& flag )
+Real PostProc<MeshType>::area( const entityFlag_Type& flag )
 {
     // Each processor computes the area across his own flagged faces --> areaScatter
     // At the end I'll reduce the process areas --> area
@@ -629,7 +629,7 @@ Real PostProc<MeshType>::area( const EntityFlag& flag )
 // flux of vector field "field" through faces with a certain marker
 template<typename MeshType>
 template<typename VectorType>
-Real PostProc<MeshType>::flux( const VectorType& field, const EntityFlag& flag, UInt feSpace,
+Real PostProc<MeshType>::flux( const VectorType& field, const entityFlag_Type& flag, UInt feSpace,
                            UInt nDim )
 {
     // Each processor computes the flux across his own flagged faces --> fluxScatter
@@ -695,7 +695,7 @@ Real PostProc<MeshType>::flux( const VectorType& field, const EntityFlag& flag, 
 // Average value of field on faces with a certain marker
 template<typename MeshType>
 template<typename VectorType>
-Vector PostProc<MeshType>::average( const VectorType& field, const EntityFlag& flag,
+Vector PostProc<MeshType>::average( const VectorType& field, const entityFlag_Type& flag,
                                 UInt feSpace, UInt nDim )
 {
     // Each processor computes the average value on his own flagged faces --> fieldAverageScatter

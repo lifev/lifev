@@ -214,7 +214,7 @@ HeartFunctors::HeartFunctors( GetPot& dataFile ):
 // Set Methods
 // ===================================================
 Real
-HeartFunctors::Iapp ( const Real& x, const Real& y, const Real& z, const Real& t, const EntityFlag& id ) const
+HeartFunctors::Iapp ( const Real& x, const Real& y, const Real& z, const Real& t, const entityFlag_Type& id ) const
 {
     Real appliedCurrent                 = 0.0;
     Real pi                             = std::acos( -1.0 );
@@ -291,7 +291,7 @@ HeartFunctors::IappZygote(const double& t,
                           const double& y,
                           const double& z,
                           const ID& i,
-                          const EntityFlag& ref)
+                          const entityFlag_Type& ref)
 {
     // double pi = acos(-1.0);
     Real appliedCurrent = 0.0;

@@ -87,14 +87,16 @@ public:
     //! entityFlag_Type is the type used to store the geometric entity flags
     typedef ID entityFlag_Type;
     // Old typedef to delete
-    typedef ID EntityFlag;
+    typedef ID EntityFlag __attribute__ ((deprecated));
 
     //@}
 
     /*! Nullflag is the value indicating a null flag, i.e a flag not yet
       set to a usable value
     */
-    static const entityFlag_Type NULLFLAG;
+    static const entityFlag_Type S_NULLFLAG;
+
+    static const entityFlag_Type NULLFLAG __attribute__ ((deprecated));
 
 
     //! Selects the stronger between two flags
@@ -287,7 +289,7 @@ public:
 //  ***********************************************************************************************************
 
 template <typename MarkerTraits>
-Marker_Base<MarkerTraits>::Marker_Base() : M_flag( MarkerTraits::NULLFLAG )
+Marker_Base<MarkerTraits>::Marker_Base() : M_flag( MarkerTraits_Base::S_NULLFLAG )
 {
     // nothing to be done here
 }
@@ -313,7 +315,7 @@ typename MarkerTraits::entityFlag_Type Marker_Base<MarkerTraits>::marker() const
 template <typename MarkerTraits>
 typename MarkerTraits::entityFlag_Type const & Marker_Base<MarkerTraits>::nullFlag() const
 {
-    return MarkerTraits::NULLFLAG;
+    return MarkerTraits_Base::S_NULLFLAG;
 }
 
 template <typename MarkerTraits>

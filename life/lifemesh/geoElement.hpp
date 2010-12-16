@@ -53,7 +53,7 @@ namespace LifeV
 
     @sa markers.h
  */
-template <typename MC = DefMarkerCommon>
+template <typename MC = defaultMarkerCommon_Type>
 class GeoElement0D: public Geo0D, public MC::PointMarker
 {
 public:
@@ -130,7 +130,7 @@ public:
 	@warning In the 2D case, Identities of the adjacent 2Delements and their relative position are stored
  */
 template
-<typename GEOSHAPE, typename MC = DefMarkerCommon>
+<typename GEOSHAPE, typename MC = defaultMarkerCommon_Type>
 class GeoElement1D : public GeoND<GEOSHAPE, GeoElement0D<MC> >, public MC::EdgeMarker
 {
 public:
@@ -328,7 +328,7 @@ private:
 	@warning In the 3D case, Identities of the adjacent 3D elements and their relative position are stored
  */
 template
-<typename GEOSHAPE, typename MC = DefMarkerCommon>
+<typename GEOSHAPE, typename MC = defaultMarkerCommon_Type>
 class GeoElement2D: public GeoND<GEOSHAPE, GeoElement0D<MC> >, public MC::FaceMarker
 {
 
@@ -532,7 +532,7 @@ private:
     @author Luca Formaggia
  */
 template
-<typename GEOSHAPE, typename MC = DefMarkerCommon>
+<typename GEOSHAPE, typename MC = defaultMarkerCommon_Type>
 class GeoElement3D: public GeoND<GEOSHAPE, GeoElement0D<MC> >, public MC::VolumeMarker
 {
 public:

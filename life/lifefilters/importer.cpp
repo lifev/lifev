@@ -50,7 +50,7 @@ void
 import( std::string const&  fileName,
         MeshFormat const&   format,
         RegionMesh3D<Elt>&  mesh,
-        EntityFlag          regionFlag )
+        entityFlag_Type     regionFlag )
 {
     // Select the right mesh format
     switch ( format )
@@ -80,7 +80,7 @@ void
 import( std::string const& fileName,
         MeshFormat const&  format,
         RegionMesh2D<Elt>& mesh,
-        EntityFlag         regionFlag )
+        entityFlag_Type    regionFlag )
 {
     // Select the right mesh format, only Gmsh allowed
     switch ( format )
@@ -127,7 +127,7 @@ importer& importer::operator= ( const importer& import )
 // Import mesh with tetrahedras
 void
 importer::import( RegionMesh3D<LinearTetra> & mesh,
-                  EntityFlag                  regionFlag )
+                  entityFlag_Type                  regionFlag )
 {
     detail::import( M_fileName, M_format, mesh, regionFlag );
 } // import
@@ -135,7 +135,7 @@ importer::import( RegionMesh3D<LinearTetra> & mesh,
 // Import mesh with linear hexahedras
 void
 importer::import( RegionMesh3D<LinearHexa> & mesh,
-                  EntityFlag                 regionFlag )
+                  entityFlag_Type                 regionFlag )
 {
     detail::import( M_fileName, M_format, mesh, regionFlag );
 } // import
@@ -143,7 +143,7 @@ importer::import( RegionMesh3D<LinearHexa> & mesh,
 // Import mesh with linear triangles
 void
 importer::import( RegionMesh2D<LinearTriangle> & mesh,
-                  EntityFlag                     regionFlag )
+                  entityFlag_Type                 regionFlag )
 {
     detail::import( M_fileName, M_format, mesh, regionFlag );
 } // import
@@ -151,7 +151,7 @@ importer::import( RegionMesh2D<LinearTriangle> & mesh,
 // Import mesh with linear quadrangles
 void
 importer::import( RegionMesh2D<LinearQuad> & mesh,
-                  EntityFlag                 regionFlag )
+                  entityFlag_Type                 regionFlag )
 {
     detail::import( M_fileName, M_format, mesh, regionFlag );
 } // import

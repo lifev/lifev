@@ -178,7 +178,7 @@ public:
        @param components vector of IDs storing the list of components involved in this boundary condition
      */
     BCBase( const std::string& name,
-            const EntityFlag& flag,
+            const entityFlag_Type& flag,
             const BCType& type,
             const BCMode& mode,
             BCFunctionBase& bcFunction,
@@ -195,7 +195,7 @@ public:
        involved in this boundary condition
      */
     BCBase( const std::string& name,
-            const EntityFlag& flag,
+            const entityFlag_Type& flag,
             const BCType& type,
             const BCMode& mode,
             BCFunctionBase& bcFunction );
@@ -212,7 +212,7 @@ public:
        in this boundary condition
      */
     BCBase( const std::string& name,
-            const EntityFlag& flag,
+            const entityFlag_Type& flag,
             const BCType& type,
             const BCMode& mode,
             BCFunctionBase& bcFunction,
@@ -230,7 +230,7 @@ public:
        @param components vector of IDs storing the list of components involved in this boundary condition
      */
     BCBase( const std::string& name,
-            const EntityFlag& flag,
+            const entityFlag_Type& flag,
             const BCType& type,
             const BCMode& mode,
             BCVectorBase& vector,
@@ -247,7 +247,7 @@ public:
        @param bcVector the vector containing the dof values to be prescribed as boundary data
      */
     BCBase( const std::string& name,
-            const EntityFlag& flag,
+            const entityFlag_Type& flag,
             const BCType& type,
             const BCMode& mode,
             BCVectorBase& bcVector );
@@ -264,7 +264,7 @@ public:
        @param numberOfComponents number of components involved in this boundary condition
      */
     BCBase( const std::string& name,
-            const EntityFlag& flag,
+            const entityFlag_Type& flag,
             const BCType& type,
             const BCMode& mode,
             BCVectorBase& bcVector,
@@ -282,7 +282,7 @@ public:
        @param components vector of IDs storing the list of components involved in this boundary condition
      */
     BCBase( const std::string& name,
-            const EntityFlag& flag,
+            const entityFlag_Type& flag,
             const BCType& type,
             const BCMode& mode,
             BCFunctionUDepBase& bcFunctionFEVectorDependent,
@@ -298,7 +298,7 @@ public:
        @param bcFunctionFEVectorDependent the BCFunctionUDepBase holding the function (depending on a generic finite element vector ) defining the boundary condition
      */
     BCBase( const std::string& name,
-            const EntityFlag& flag,
+            const entityFlag_Type& flag,
             const BCType& type,
             const BCMode& mode,
             BCFunctionUDepBase& bcFunctionFEVectorDependent);
@@ -314,7 +314,7 @@ public:
        @param numberOfComponents number of components involved in this boundary condition
      */
     BCBase( const std::string& name,
-            const EntityFlag& flag,
+            const entityFlag_Type& flag,
             const BCType& type,
             const BCMode& mode,
             BCFunctionUDepBase& bcFunctionFEVectorDependent,
@@ -526,7 +526,7 @@ public:
        @param flag EntityFlag to be compared with bcBase flag
        @return True if bcBase's flag is equal to flag
      */
-    friend bool operator==( const BCBase& bcBase, const EntityFlag flag )
+    friend bool operator==( const BCBase& bcBase, const entityFlag_Type flag )
     {
         return bcBase.flag() == flag;
     }
@@ -575,7 +575,7 @@ public:
     /*!
        @return boundary condition flag
      */
-    EntityFlag flag() const;
+    entityFlag_Type flag() const;
 
     //! Returns the boundary condition type
     /*!
@@ -657,7 +657,7 @@ private:
 
     std::string                           M_name; 	//!< name of the boundary condition
 
-    EntityFlag                            M_flag;  //!< flag identifying a specific part of the mesh boundary
+    entityFlag_Type                       M_flag;  //!< flag identifying a specific part of the mesh boundary
 
     BCType                                M_type;  //!< the boundary condition type
 

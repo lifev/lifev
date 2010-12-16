@@ -103,7 +103,7 @@ const Int TOPCORNER4    = 26;
   The labels 7-18 are reserved for the 12 edges.
   The labels 19-26 are reserved for the 8 corners.
 */
-EntityFlag regularMeshPointPosition( const UInt& i_x,
+entityFlag_Type regularMeshPointPosition( const UInt& i_x,
                                      const UInt& i_y,
                                      const UInt& i_z,
                                      const UInt& n_x,
@@ -124,7 +124,7 @@ EntityFlag regularMeshPointPosition( const UInt& i_x,
 */
 template <typename GeoShape, typename MC>
 void regularMesh3D( RegionMesh3D<GeoShape,MC>& mesh,
-                    EntityFlag regionFlag,
+                    entityFlag_Type regionFlag,
                     const UInt& m_x,
                     const UInt& m_y,
                     const UInt& m_z,
@@ -256,7 +256,7 @@ void regularMesh3D( RegionMesh3D<GeoShape,MC>& mesh,
     // Build the points of the mesh
     std::cout << "building the points of the mesh...";
     Real xPosition( 0.0 ), yPosition( 0.0 ), zPosition( 0.0 );
-    EntityFlag nodeFlag( 0 );
+    entityFlag_Type nodeFlag( 0 );
     UInt nodeID( 0 );
     UInt P0( 0 ), P1( 0 ), P2( 0 ), P3( 0 ), P4( 0 ), P5( 0 ), P6( 0 ), P7( 0 );
 
@@ -1005,7 +1005,7 @@ void regularMesh3D( RegionMesh3D<GeoShape,MC>& mesh,
     std::cout << "done" << std::endl;
 
     // Build a P2 mesh from a P1 geometry
-    if ( GeoShape::numPoints > 4 ) p1top2( mesh );
+    if ( GeoShape::numPoints > 4 ) p2MeshFromP1Data( mesh );
 
     // Test mesh
     Switch sw;

@@ -41,7 +41,7 @@
 
 namespace LifeV
 {
-const EntityFlag InternalEntitySelector::defMarkFlag(EntityFlag(1000));
+const entityFlag_Type InternalEntitySelector::defMarkFlag(entityFlag_Type(1000));
 
 // ===================================================
 // Constructors & Destructor
@@ -51,7 +51,7 @@ InternalEntitySelector::InternalEntitySelector():
 M_watermarkFlag( defMarkFlag )
 {};
 
-InternalEntitySelector::InternalEntitySelector(const EntityFlag & w): 
+InternalEntitySelector::InternalEntitySelector(const entityFlag_Type & w):
 M_watermarkFlag( w )
 {};
 
@@ -60,7 +60,7 @@ M_watermarkFlag( w )
 // ===================================================
 
 bool
-InternalEntitySelector::operator()(EntityFlag const & test) const
+InternalEntitySelector::operator()(entityFlag_Type const & test) const
 {
     return (test==EntityFlag(0) || test > M_watermarkFlag );
 }

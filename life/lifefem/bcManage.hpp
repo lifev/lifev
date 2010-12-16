@@ -1293,7 +1293,7 @@ bcNaturalManage( VectorType& rightHandSide,
                 for ( ID l = 1; l <= nDofF; ++l )
                 {
 
-                    gDof = pId->bdLocalToGlobal( l );
+                    gDof = pId->localToGlobalMap( l );
 
                     // Loop on components involved in this boundary condition
                     for ( UInt ic = 0; ic < nComp; ++ic )
@@ -1306,7 +1306,7 @@ bcNaturalManage( VectorType& rightHandSide,
                             sum=0.0;
                             // data on quadrature point
                             for ( ID m = 1; m <= nDofF; ++m )
-                                sum +=  boundaryCond( pId->bdLocalToGlobal( m ) , 1 ) * currentBdFE.phi( int( m - 1 ), iq );
+                                sum +=  boundaryCond( pId->localToGlobalMap( m ) , 1 ) * currentBdFE.phi( int( m - 1 ), iq );
                             // Adding right hand side contribution
                             rhsRepeated[ icDof ] += sum * currentBdFE.phi( int( l - 1 ), iq ) * currentBdFE.normal( int( ic ), iq )
                                                     * currentBdFE.weightMeas( iq );
@@ -1340,7 +1340,7 @@ bcNaturalManage( VectorType& rightHandSide,
                 for ( ID idofF = 1; idofF <= nDofF; ++idofF )
                 {
 
-                    gDof = pId->bdLocalToGlobal( idofF );
+                    gDof = pId->localToGlobalMap( idofF );
 
                     // Loop on space dimensions
                     for ( ID ic = 1; ic <= nComp; ++ic )
@@ -1354,7 +1354,7 @@ bcNaturalManage( VectorType& rightHandSide,
                             sum = 0;
                             // data on quadrature point
                             for ( ID m = 1; m <= nDofF; ++m )
-                                sum +=  boundaryCond( pId->bdLocalToGlobal( m ) , boundaryCond.component( ic ) ) * currentBdFE.phi( int( m - 1 ), iq );  //Components passed separatedly
+                                sum +=  boundaryCond( pId->localToGlobalMap( m ) , boundaryCond.component( ic ) ) * currentBdFE.phi( int( m - 1 ), iq );  //Components passed separatedly
 
                             // Adding right hand side contribution
                             rhsRepeated[ icDof ] += sum *  currentBdFE.phi( int( idofF - 1 ), iq ) *
@@ -1395,7 +1395,7 @@ bcNaturalManage( VectorType& rightHandSide,
                 for ( ID j = 1; j <= nComp; ++j )
                 {
                     //global Dof
-                    idDof = pId->bdLocalToGlobal( idofF ) + ( boundaryCond.component( j ) - 1 ) * totalDof + offset;
+                    idDof = pId->localToGlobalMap( idofF ) + ( boundaryCond.component( j ) - 1 ) * totalDof + offset;
                     // Loop on quadrature points
                     for ( int iq = 0; iq < (int)currentBdFE.nbQuadPt; ++iq )
                     {
@@ -1586,7 +1586,7 @@ bcMixteManage( MatrixType& matrix,
 
                     sum = 0;
 
-                    idDof = pId->bdLocalToGlobal( idofF ) + ( boundaryCond.component( j ) - 1 ) * totalDof + offset;
+                    idDof = pId->localToGlobalMap( idofF ) + ( boundaryCond.component( j ) - 1 ) * totalDof + offset;
 
                     // Loop on quadrature points
                     for ( int l = 0; l < (int)currentBdFE.nbQuadPt; ++l )
@@ -1595,7 +1595,7 @@ bcMixteManage( MatrixType& matrix,
                         mbcb = 0.0;
                         for ( ID n = 1; n <= nDofF; ++n)
                         {
-                            kdDof=pId->bdLocalToGlobal( n ); // + ( boundaryCond.component( j ) - 1 ) * totalDof;
+                            kdDof=pId->localToGlobalMap( n ); // + ( boundaryCond.component( j ) - 1 ) * totalDof;
                             if (boundaryCond.ismixteVec())
                                 mcoef += boundaryCond.MixteVec( kdDof, boundaryCond.component( j ) ) * currentBdFE.phi( int( n - 1 ), l );
 
@@ -1629,8 +1629,8 @@ bcMixteManage( MatrixType& matrix,
 
                         sum = 0;
 
-                        idDof = pId->bdLocalToGlobal( idofF ) + ( boundaryCond.component( j ) - 1 ) * totalDof + offset;
-                        jdDof = pId->bdLocalToGlobal( k ) + ( boundaryCond.component( j ) - 1 ) * totalDof + offset;
+                        idDof = pId->localToGlobalMap( idofF ) + ( boundaryCond.component( j ) - 1 ) * totalDof + offset;
+                        jdDof = pId->localToGlobalMap( k ) + ( boundaryCond.component( j ) - 1 ) * totalDof + offset;
 
                         // Loop on quadrature points
                         for ( int l = 0; l < (int)currentBdFE.nbQuadPt; ++l )
@@ -1638,7 +1638,7 @@ bcMixteManage( MatrixType& matrix,
                             mcoef = 0.0;
                             for ( ID n = 1; n <= nDofF; ++n)
                             {
-                                kdDof=pId->bdLocalToGlobal( n ); // + ( boundaryCond.component( j ) - 1 ) * totalDof;
+                                kdDof=pId->localToGlobalMap( n ); // + ( boundaryCond.component( j ) - 1 ) * totalDof;
                                 if (boundaryCond.ismixteVec())
                                     mcoef += boundaryCond.MixteVec( kdDof, boundaryCond.component( j ) ) * currentBdFE.phi( int( n - 1 ), l );
 
@@ -1690,7 +1690,7 @@ bcMixteManage( MatrixType& matrix,
                     sum = 0;
 
                     // Global Dof (outside the quad point loop. V. Martin)
-                    idDof = pId->bdLocalToGlobal( idofF ) + ( boundaryCond.component( j ) - 1 ) * totalDof + offset;
+                    idDof = pId->localToGlobalMap( idofF ) + ( boundaryCond.component( j ) - 1 ) * totalDof + offset;
 
                     // Loop on quadrature points
                     for ( int l = 0; l < (int)currentBdFE.nbQuadPt; ++l )
@@ -1733,8 +1733,8 @@ bcMixteManage( MatrixType& matrix,
                         }
 
                         // Globals Dof: row and columns
-                        idDof = pId->bdLocalToGlobal( idofF ) + ( boundaryCond.component( j ) - 1 ) * totalDof + offset;
-                        jdDof = pId->bdLocalToGlobal( k ) + ( boundaryCond.component( j ) - 1 ) * totalDof + offset;
+                        idDof = pId->localToGlobalMap( idofF ) + ( boundaryCond.component( j ) - 1 ) * totalDof + offset;
+                        jdDof = pId->localToGlobalMap( k ) + ( boundaryCond.component( j ) - 1 ) * totalDof + offset;
 
                         // Assembling upper entry.  The boundary mass matrix is symetric
                         matrix.set_mat_inc( idDof - 1, jdDof - 1, sum );
@@ -1879,7 +1879,7 @@ bcMixteManageMatrix( MatrixType& matrix,
                     sum = 0;
 
                     // Global Dof (outside the quad point loop. V. Martin)
-                    idDof = pId->bdLocalToGlobal( idofF ) + ( boundaryCond.component( j ) - 1 ) * totalDof + offset;
+                    idDof = pId->localToGlobalMap( idofF ) + ( boundaryCond.component( j ) - 1 ) * totalDof + offset;
 
                     // Loop on quadrature points
                     for ( int l = 0; l < (int)currentBdFE.nbQuadPt; ++l )
@@ -1919,8 +1919,8 @@ bcMixteManageMatrix( MatrixType& matrix,
                         }
 
                         // Globals Dof: row and columns
-                        idDof = pId->bdLocalToGlobal( idofF ) + ( boundaryCond.component( j ) - 1 ) * totalDof + offset;
-                        jdDof = pId->bdLocalToGlobal( k ) + ( boundaryCond.component( j ) - 1 ) * totalDof + offset;
+                        idDof = pId->localToGlobalMap( idofF ) + ( boundaryCond.component( j ) - 1 ) * totalDof + offset;
+                        jdDof = pId->localToGlobalMap( k ) + ( boundaryCond.component( j ) - 1 ) * totalDof + offset;
 
                         // Assembling upper entry.  The boundary mas matrix is symetric
                         matrix.set_mat_inc( idDof - 1, jdDof - 1, sum );
@@ -2020,7 +2020,7 @@ bcMixteManageVector( VectorType& rightHandSide,
                 {
 
                     // Global Dof (outside the quad point loop. V. Martin)
-                    idDof = pId->bdLocalToGlobal( idofF ) + ( boundaryCond.component( j ) - 1 ) * totalDof + offset;
+                    idDof = pId->localToGlobalMap( idofF ) + ( boundaryCond.component( j ) - 1 ) * totalDof + offset;
 
                     // Loop on quadrature points
                     for ( int l = 0; l < (int)currentBdFE.nbQuadPt; ++l )
@@ -2123,7 +2123,7 @@ bcFluxManageMatrix( MatrixType&     matrix,
             {
                 for ( int ic = 1; ic <= (int)nComp; ++ic)
                 {
-                    idDof = pId->bdLocalToGlobal( idofF ) + (ic - 1)*totalDof;
+                    idDof = pId->localToGlobalMap( idofF ) + (ic - 1)*totalDof;
 
                     sum = 0.;
                     for ( int iq = 0; iq < (int)currentBdFE.nbQuadPt; ++iq )
@@ -2195,7 +2195,7 @@ bcResistanceManage( MatrixType& matrix,
                 // Loop on components involved in this boundary condition
                 for ( ID j = 1; j <= nComp; ++j )
                 {
-                    idDof = pId->bdLocalToGlobal( idofF ) + ( boundaryCond.component( j ) - 1 ) * totalDof + offset;
+                    idDof = pId->localToGlobalMap( idofF ) + ( boundaryCond.component( j ) - 1 ) * totalDof + offset;
 
                     // Loop on quadrature points
                     for ( int l = 0; l < (int)currentBdFE.nbQuadPt; ++l )
@@ -2207,7 +2207,7 @@ bcResistanceManage( MatrixType& matrix,
                         // data on quadrature point
                         for ( ID n = 1; n <= nDofF; ++n)
                         {
-                            kdDof=pId->bdLocalToGlobal( n );
+                            kdDof=pId->localToGlobalMap( n );
                             mbcb += boundaryCond( kdDof, boundaryCond.component( j ) )* currentBdFE.phi( int( n - 1 ), l ) ;
                         }
 

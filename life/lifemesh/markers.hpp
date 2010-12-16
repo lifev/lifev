@@ -48,18 +48,20 @@ namespace LifeV
 {
 
 //! The simples MarkerCommon: uses all defaults
-typedef MarkerCommon<MarkerTraits_Base> defMarkerCommon_Type;
+typedef MarkerCommon<MarkerTraits_Base> defaultMarkerCommon_Type;
 
-//!Expose EntityFlag
+//!Expose entityFlag_Type
 typedef MarkerTraits_Base::entityFlag_Type entityFlag_Type;
 
 //!Expose NULLFLAG
-//static const entityFlag_Type S_NULLFLAG = MarkerTraits_Base::S_NULLFLAG;
-static const entityFlag_Type NULLFLAG = MarkerTraits_Base::NULLFLAG;
+static const entityFlag_Type S_NULLFLAG = MarkerTraits_Base::S_NULLFLAG;
+
+// Old static variable to delete after the make check
+//static const entityFlag_Type NULLFLAG __attribute__ ((deprecated)) = MarkerTraits_Base::S_NULLFLAG;
 
 // Old typedefs to delete
-typedef MarkerCommon<MarkerTraits_Base> DefMarkerCommon;
-typedef MarkerTraits_Base::EntityFlag EntityFlag;
+typedef MarkerCommon<MarkerTraits_Base> DefMarkerCommon __attribute__ ((deprecated));
+typedef MarkerTraits_Base::EntityFlag EntityFlag __attribute__ ((deprecated));
 
 } // Namespace LifeV
 

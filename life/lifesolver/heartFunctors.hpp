@@ -86,9 +86,9 @@ public:
      *
      * Define the stimulation current
      */
-    Real Iapp ( const Real& x, const Real& y, const Real& z, const Real& t, const EntityFlag& id ) const;
+    Real Iapp ( const Real& x, const Real& y, const Real& z, const Real& t, const entityFlag_Type& id ) const;
 
-    Real IappZygote(const double& t, const double& x, const double& y, const double& z, const ID& i, const EntityFlag& ref);
+    Real IappZygote(const double& t, const double& x, const double& y, const double& z, const ID& i, const entityFlag_Type& ref);
 
     Real stim ( const Real& t, const Real& x, const Real& y, const Real& z, const ID&   id) const;
 

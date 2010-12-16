@@ -50,7 +50,7 @@ GetCoordComponent::GetCoordComponent( Int i ) : componentIndex( i )
 // ===================================================
 // Operators
 // ===================================================
-void GetCoordComponent::operator() ( Real const x, Real const y, Real const z, Real ret[ 3 ] ) const
+void GetCoordComponent::operator() ( Real const& x, Real const& y, Real const& z, Real ret[ 3 ] ) const
 {
     switch ( componentIndex )
     {
@@ -76,7 +76,7 @@ void GetCoordComponent::operator() ( Real const x, Real const y, Real const z, R
     }
 }
 
-void GetOnes::operator() ( Real const /*x*/, Real const /*y*/, Real const /*z*/, Real ret[ 3 ] )
+void GetOnes::operator() ( Real const& /*x*/, Real const& /*y*/, Real const& /*z*/, Real ret[ 3 ] )
 const
 {
     ret[ 0 ] = 1.0;
