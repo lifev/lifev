@@ -40,7 +40,7 @@
 
 #include <life/lifecore/life.hpp>
 #include <iomanip>
-#include <life/lifearray/tab.hpp>
+#include <life/lifearray/RNM.hpp>
 
 namespace LifeV
 {
