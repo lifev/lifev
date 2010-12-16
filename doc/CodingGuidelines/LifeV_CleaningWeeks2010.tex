@@ -1,0 +1,1345 @@
+\documentclass[10p]{article}
+
+% PACKAGES %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\usepackage{a4wide}
+\usepackage[left=2.5cm,top=2.5cm,right=2.5cm,bottom=2.5cm,nohead]{geometry}
+\usepackage{graphicx}
+\usepackage{subfigure}
+\usepackage{lscape} 
+\usepackage{caption}
+\usepackage{hyperref}
+\usepackage{url}
+\usepackage{amsmath,amssymb,amsfonts,amsthm}
+\usepackage[all]{xy}
+\usepackage{xtab} 
+\usepackage{tabularx}
+\usepackage{multirow}
+\usepackage{multicol}
+\usepackage[latin1]{inputenc}
+\usepackage[english]{babel}
+\usepackage[T1]{fontenc}
+\usepackage[bw,framed]{mcode}  
+ 
+%remove this package when the review of the document is done:
+% Cristiano: black
+% Tiziano: red
+% Umberto: blue
+% Mauro: green
+\usepackage{color}
+ 
+% FIGURES %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\graphicspath{{./Figures/}}
+
+% NEWCOMMANDS %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\newcommand{\mib}{\boldsymbol}
+\newcommand{\fb}{{\mib f}}
+\newcommand{\Ib}{{\mib I}}
+\newcommand{\nb}{{\mib n}}
+\newcommand{\rb}{{\mib r}}
+\newcommand{\taub}{{\mib \tau}}
+\newcommand{\ub}{{\mib u}}
+\newcommand{\vb}{{\mib v}}
+\newcommand{\lambdab }{{\mib\lambda}}
+\newcommand{\Acb }{\mib{{\mathcal{A}}}}
+\newcommand{\Bcb }{\mib{{\mathcal{B}}}}
+\newcommand{\Ccb }{\mib{{\mathcal{C}}}}
+\newcommand{\Ucb }{\mib{{\mathcal{U}}}}
+\newcommand{\Vcb }{\mib{{\mathcal{V}}}}
+\newcommand{\sigmab }{{\mib\sigma}}
+\newcommand{\epsilonb }{{\mib\epsilon}}
+\newcommand{\nablab}{\mib \nabla}
+\newcommand{\zerob}{{\mib 0}}
+\newcommand{\oneb}{{\mib 1}}
+\renewcommand{\Dot}   {\mib \cdot}
+\newcommand{\Int }{\displaystyle\int}
+\newcommand{\Sum }{\displaystyle\sum}
+\newcommand{\Bigcup }{\displaystyle\bigcup}
+%\newcommand{\PD}[1]{\Delta {#1}}
+%\newcommand{\PD}[2]{\dfrac{\partial {#1}}{\partial {#2}}}
+\newcommand{\PD}[2]{\partial_{#2} {#1}}
+\definecolor{orange}{rgb}{1,0.6,0}
+\newcommand{\cristiano}[1]{\textcolor{black}{#1}}
+\newcommand{\todo}[1]{\textcolor{red}{#1}}
+\newcommand{\tiziano}[1]{\textcolor{black}{#1}}
+\newcommand{\newparts}[1]{\textcolor{black}{#1}}
+\newcommand{\newpartsVC}[1]{\textcolor{black}{#1}}
+
+\theoremstyle{definition}
+\newtheorem{remark}{Remark}
+
+\title{\Huge \textbf{LifeV Cleaning Weeks}}
+\author{Cristiano Malossi, Tiziano Passerini, Umberto Villa}
+\date{Last updated: \today}
+
+\begin{document}
+ 
+\maketitle
+
+
+\section*{Introduction}
+This document describes all the phases of the LifeV \emph{cleaning weeks}. The project involves both LifeV and Mathcard master repositories. It is extremely important that all the developers involved in the project follow and apply the instructions contained in this document respecting the official timetable of the project. Thank you for the collaboration!
+
+\section*{Before \newparts{November 30th} - Prerequisites}
+\newparts{Simone Deparis will take care of these changes:}
+  \begin{enumerate}
+\item \texttt{life.*pp} is the core of the library and should be very clear and ordered:
+  \begin{itemize}
+      \item only few useful includes should be present here; 
+      \item only few useful types should be defined here;
+      \item no namespace definitions should be present here.
+  \end{itemize}
+  \item A new folder \texttt{examples} will be created. After the cleaning weeks, it will contain tests from the \texttt{testsuite}
+  which are considered redundant or without a final check on the results. In the future it will host applications showing possible
+  uses of the library. As such, code in the examples folder will be checked for compilation errors during the nightly build, but
+  the software will not be run automatically.
+  \end{enumerate}
+  
+\section*{\newparts{Tuesday, November 30th} - Preliminary and Indentation day}
+
+\subsection*{Morning - Preliminaries}
+By the noon of this day (Lausanne time) all the developers have to:
+\begin{enumerate}
+  \item commit (and push) their work in the LifeV and Mathcard master repositories. Note that merging uncommitted changes after the cleaning weeks may be difficult as the methods in the classes will be reordered;
+  \item read carefully this document;
+  \item read carefully the last version (dated November \newpartsVC{24th}, 2010) of the LifeV \emph{Development Guidelines};
+  \item have a working version of doxygen installed on their own machine;
+  \item \newpartsVC{test on their own machines the GCC attribute "deprecated" used during the interfaces week}.
+\end{enumerate}
+After noon, Simone Deparis will run a full check of the libraries (as done during the night-build) and will tag the repositories for an internal minor release. 
+
+\subsection*{Afternoon - Indentation}
+Before proceeding to the reordering / cleaning of the code, it might be useful to run an automatic indentation tool (e.g. astyle \todo{(TO DO: test it - Malossi, Passerini, Villa)}). In this case, after the indentation process the libraries have to be tested (and tagged) again. This double-tagging procedure will allow a double lifejacket system, so that we will still be able to retrieve the "old indentation" for backtracking the history of the code.
+
+
+
+
+\section*{\newparts{Wednesday - Friday, December 1st - 10th, - Reordering and documentation days}}
+This week is focused on the general reordering of the libraries and on the extension of the present documentation. A group of files has been assigned to each developer who has the responsibility to follow and apply the modifications listed in the following pages to the files and classes under his own responsibility (both \texttt{*.hpp} and \texttt{*.cpp} files). This work will be done in a full parallel way, as the modifications performed during these days do not have cross dependencies among the files.
+
+\vspace{2ex}
+\noindent Important notes:
+\begin{itemize}
+  \item each developer has to complete and commit this work by the end of Friday;
+  \item each developer has to work and commit only on the classes under his own responsibility;
+  \item each developer should complete Part 1 before starting Part 2, even if the two parts are independent;
+  \item no interface changes are expected during this week. However, upon
+  completion of the scheduled tasks, you may bring forward Phase 1 of the second week.
+\end{itemize}
+
+
+
+\subsection*{Part 1: reordering the libraries}
+Follow and apply the following changes to all the assigned files and classes:
+\begin{enumerate}
+  \item replace the existing header with the following:
+\begin{lstlisting}
+//@HEADER
+/*
+*******************************************************************************
+
+    Copyright (C) 2004, 2005, 2007 EPFL, Politecnico di Milano, INRIA
+    Copyright (C) 2010 EPFL, Politecnico di Milano, Emory University
+
+    This file is part of LifeV.
+
+    LifeV is free software; you can redistribute it and/or modify
+    it under the terms of the GNU Lesser General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    LifeV is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+    Lesser General Public License for more details.
+
+    You should have received a copy of the GNU Lesser General Public License
+    along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
+
+*******************************************************************************
+*/
+//@HEADER
+
+/*!
+ *  @file
+ *  @brief File containing ...
+ *
+ *  @date 00-00-0000
+ *  @author Name Surname <name.surname@epfl.ch>
+ *  
+ *  @contributor Name Surname <name.surname@epfl.ch>
+ *  @maintainer Name Surname <name.surname@epfl.ch>
+ */
+\end{lstlisting}
+  do not forget to:
+  \begin{itemize}
+	  \item add a short description of the content of the file;
+	  \item copy from the old header the name of the original author(s);
+	  \item \newpartsVC{add your name to the list of contributors (if you are one of the authors leave this field empty);}
+	  \item \newparts{put your name as the maintainer;}
+	  \item copy from the old header the date;
+	  \item do not add anything after \mcode{@file}! This is very important for doxygen output;
+  \end{itemize}
+  \item reorder all the method in the files following p.9 of Section 2.2 of the \emph{Development Guidelines};
+  \item apply p.1, 6, 7, 8, 9, 10, 11, \newparts{14}, and 15 of Section 1 of the \emph{Development Guidelines} to all the variables (both temporary and members);
+  \item apply p.2 of Section 1 of the \emph{Development Guidelines} to the types that are locally used only;
+  \item apply p.2 of Section 2.1 of the \emph{Development Guidelines}: in particular, avoid the use of native C++ types and use the available LifeV typedefs instead (int$\rightarrow$Int, unsigned int$\rightarrow$UInt, double$\rightarrow$Real);
+  \item apply p.7 \newpartsVC{and 10} of Section 2.1 of the \emph{Development Guidelines};
+  \item remove the \texttt{\#ifndef TWODIM} definitions if present;
+  \item clean (as much as possible) the implementation of the methods in the files. In particular,
+  \begin{itemize}
+	  \item rename local variables to help the understanding of the methods;
+	  \item add comments where possible;
+	  \item check that the indentation style is correct (see p.1 Section 2.2 of the \emph{Development Guidelines} );
+	  \item break too long lines in the source code: a line should typically be no more than 110 columns long.
+	  Exceptions are allowed where breaking the line makes the code less clear / readable.
+  \end{itemize}
+  \item apply p.1 of Section 2.1 of the \emph{Development Guidelines}. As a general rule,
+    \begin{itemize}
+	\item if the type is available (via typedef) through the public interface of the classes used in the file, then
+  include the header of the class exposing the typedef \newparts{(see the example below)};
+\begin{lstlisting}
+// File A.hpp
+class A
+{
+    //! @name Public Types
+    //@{
+
+    typedef std::vector< Real >                vector_Type;
+
+    //@}
+    
+    ...
+}
+
+// File B.hpp
+#include <FileA.hpp>
+
+class B
+{
+    //! @name Public Types
+    //@{
+
+    typedef A::vector_Type                     vector_Type;
+
+    //@}
+    
+    ...
+}
+\end{lstlisting}
+	\item otherwise, include the header where the needed type is declared;
+	\end{itemize}
+  \item check that the \texttt{lifeconfig.h} file is included only in the \texttt{*.cpp} files of the library (it will \texttt{define} the name and version of LifeV in the object and library files);
+  %\item replace the inclusion of \texttt{Epetra\_MPIComm.h} by the inclusion of \texttt{Epetra\_Comm.h};
+  \item \newpartsVC{create a list of the unused methods present in each class (use \texttt{grep --color=auto -rnw \$LIFE\_SRC \$MATCHARD\_SRC methodName} to search in the library for the case sensitive \texttt{methodName}) and send it to the lifev-dev mailing to discuss their removal.}
+  \item \newpartsVC{get rid it of the annoying compilation warnings caused by third party libraries, temporarily overridding the default warning level with a \texttt{pragma} instruction}:
+\begin{lstlisting}
+//tell the compiler to ignore specific kind of warnings:
+#pragma GCC diagnostic ignored "-Wunused-variable"
+#pragma GCC diagnostic ignored "-Wunused-parameter"
+
+//Include all trilinos header
+......
+#include <AztecOO_config.h>
+#include <AztecOO.h>
+#include <Teuchos_ParameterList.hpp>
+
+//Tell the compiler to restore the warning previously silented
+#pragma GCC diagnostic warning "-Wunused-variable"
+#pragma GCC diagnostic warning "-Wunused-parameter"
+
+// include all LifeV headers
+#include <life/lifearray/EpetraVector.hpp>
+#include <life/lifearray/EpetraMatrix.hpp>
+....
+  \end{lstlisting}
+
+\end{enumerate}
+
+\vspace{2ex}
+\noindent Additional notes for this phase:
+\begin{itemize}
+  \item the order of the methods in the \texttt{*.cpp} files has to be the same of the one in the \texttt{*.hpp} files. Add a section separator also in the \texttt{*.cpp} file, as described at page 8 of the \emph{Development Guidelines}:
+\begin{lstlisting}
+// ===================================================
+// Name of the group
+// ===================================================
+\end{lstlisting}
+\textbf{Note 1:} for template classes, whose implementation is at the end of the \texttt{*.hpp} file, use the same convention;\\
+\newparts{\textbf{Note 2:} this rule has to be applied also for protected and private methods, which should be grouped correctly as described at p.9 of Section 2.2 of the \emph{Development Guidelines};}
+  \item the location of the implementation of some methods may migrate (from \texttt{*.hpp} to \texttt{*.cpp}) as required by p.1 of Section 1;
+  \item members, input/output variables, and local variables may change name during this phase (indeed, ``apply p.6, 7, 8, 9, 10, of Section 1'' means change the name if it does not follow the \emph{Development Guidelines}).
+\end{itemize}
+
+
+
+\subsection*{Part 2: documenting the libraries}
+Follow and apply the following changes to all the assigned files and classes:
+\begin{enumerate}
+  \item write a general description at the beginning of each class, explaining its main features;
+  \item move documentation erroneously placed in the \texttt{*.cpp} files to the \texttt{*.hpp} files. For template classes, documentation should stay ONLY in the class definition and not in its implementation at the bottom of the file; 
+  \item add doxygen documentation to all the methods, describing also input and output variables;%.
+  \item add bibliographic references when possible.
+\end{enumerate}
+
+\noindent Additional notes for this phase:
+\begin{itemize}
+  \item follow carefully the example of the \mcode{TemplateClass.hpp} class described in the \emph{Development Guidelines};
+  \item at the end of the work, check the resulting output for each class in order to verify that everything was correctly added and that the new parts are correctly visible in the generated doxygen;
+  \item for additional information on doxygen, please refer to Section 4 of the \emph{Development Guidelines}.
+\end{itemize}
+
+\subsection*{Part 3: testsuite cleaning}
+The \newpartsVC{LifeV and Mathcard} testsuite cleaning \newpartsVC{will be done by the Emory group. In particular:}
+\begin{itemize}
+\item every test should not take more than 2 minutes to execute when it is compiled with debug flags;
+\item the structure of each test should follow the directive of p. 6 of Section 3.1 of the \emph{Development
+	Guidelines}; in particular, a correct execution check is necessary at the end of the main file; 
+%\item the tests contained in (testsuite/life*) should be maintained, updated, substituted with similar tests;
+\item obsolete test should be removed;
+\item applications which are particularly heavy to execute or do not have a correctness test should be moved to the \texttt{examples} folder;
+\item redundant tests (i.e. tests which check the same part of the library) should be moved to the \texttt{examples} folder;
+\item the main.cpp files should not contain any implementation, but only instantiate a default constructable class, whose name should coincide with the name of the folder. Such class should implement a method setup(...) and a method run(...). The method run should return a boolean variable. The MPI directive MPI\_Init(..., ...) and MPI\_Finalize should be contained in the main.cpp, while the class constructor should allocate the Epetra\_Comm.
+\item The postprocess should be allocated through a factory able to support \texttt{noexporter}, \texttt{ensight}, and \texttt{hdf5}, in order to ensure an homogeneous management of the post process across all the testsuite.
+\item The tests should be cleaned following a similar procedure with respect to Parts 1 and 2. In particular:
+\begin{itemize}
+\item rename variables to help understanding;
+\item add comments where possible;
+\item apply p. 1, 3, 4, 6, 7, 8, 9, 10, 11, \newpartsVC{12, 13, and 14} of Section 1 of the \emph{Development Guidelines};
+\item \newpartsVC{apply all the points of Section 2.1 of the \emph{Development Guidelines}}; 
+\item add documentation.
+\end{itemize}
+\end{itemize}
+
+\subsection*{Additional tasks of the week }
+\begin{itemize}
+  \item \newparts{Simone Deparis - } some files are unused and have to be removed: see the list in the appendix section;
+  \item \newparts{Simone Deparis -} \texttt{HOWTO.merge}, \texttt{README.g++}, \texttt{REDESIGN.txt} files in the main folder have to be removed;
+  \item \newparts{Simone Deparis -} \texttt{AUTHORS} and \texttt{HOWTO.release} have to be updated;
+  \item \newparts{Umberto Villa -} the content of folders \texttt{testsuite/life*} has to be removed. \texttt{test\_GetPot} should be moved to \texttt{testsuite/lifecore} (or \texttt{testsuite/lifefilters}) and \texttt{test\_CurrentFE} should go in \texttt{testsuite/lifefem}. In addition some useful tests of this kind will be imported from LifeV-serial.
+\end{itemize}
+
+
+
+
+\section*{Saturday/Sunday, December 11th/12th - Lifejacket days}
+At the end of the first week, the code will contain significant changes in the organization, but unaltered functionality. The library will be tested and tagged by Simone Deparis to a new minor version that will be considered the starting point for the second week.
+
+
+\section*{Monday/Friday, December 13th/17th - Interfaces week}
+This week is focused on the improvement of the interfaces following the \emph{Development Guidelines}. This phase involves cross dependencies among the classes therefore developers should stay in contact between each other. Interfaces should be improved following the \emph{Development Guidelines}. In particular, each developer have to
+\begin{enumerate}
+  \item apply p.2 of Section 1 to all type definitions;
+  \item apply p.3, of Section 1 to all classes;
+  \item apply p.6, 7 and 8 of Section 1 to all methods and interfaces;
+  \item apply p.12 and 13 of Section 1 to all setters and getters;
+  \item \newparts{apply p.4 and 5 of Section 2.1 of the \emph{Development Guidelines}};
+  \item \newpartsVC{remove all the LifeV warnings, as suggested by p.4 of Section 2.2 of the \emph{Development Guidelines}};
+  \item \newpartsVC{apply p.9 of Section 2.1 of the \emph{Development Guidelines}}. \newparts{In particular, the use of non-empty constructors is deprecated;}
+  \item \newpartsVC{replace the \texttt{Epetra\_Comm} and \texttt{Displayer} members with the new \texttt{CommunicatorEpetra} class \todo{(under development)};}
+  \item \newpartsVC{Alessio Fumagalli - \texttt{cblas.hpp} and \texttt{clapack.hpp} should be removed and replaced
+  by the inclusion of the proper BLAS / LaPACK wrappers from Trilinos/Epetra}.
+\end{enumerate}
+
+%In addition, developers are forced to edit and commit also on classes that are not under their own responsibility.
+In order to avoid conflicts due to concurrent modification to the repository the improvement of the interfaces have been divided into three phases.
+
+\subsection*{Phase 1 - Monday}
+During the first phase each developer should modify only files under his own responsibility. In particular, each developer has to mark deprecated interfaces with the attribute "deprecated". As an example, consider the following:\\
+Old deprecated code:
+\begin{lstlisting}
+    Real getnum(){ return M_numberOfData; }
+\end{lstlisting}
+New code following the guidelines:
+\begin{lstlisting}
+ 	Real getNumberOfData(){ return M_numberOfData; }
+\end{lstlisting}
+Code for backward compatibility, showing a warning at compilation time:
+\begin{lstlisting}
+    Real  __attribute__ ((__deprecated__)) getnum()
+{
+    // you should replace any call to getnum() with a call to getNumberOfData()
+	return getNumberOfData();
+}
+  \end{lstlisting}
+For the sake of easiness and readability, all these old temporary methods should be moved at the bottom of each class/file. These lines of code will be entirely removed during the third phase.\\
+\textbf{IMPORTANT NOTICE:} the \texttt{\_\_attribute\_\_} keyword is GCC specific. Please notify whether you are using a different compiler, we will consider case by case an alternative strategy.
+
+
+\subsection*{Phase 2 - Tuesday/Wednesday/Thursday}
+During the second phase each developer will adapt the class under his own responsibility to use the new interfaces instead of the deprecated ones, checking also that the whole library is compiling and that the testsuite is working. Note that in this second phase, developers may commit modification also to classes not assigned to them. At the end of this phase the library should compiler without ANY warnings of the kind "this method is deprecated!".
+
+\newparts{At the end of the day, Simone Deparis will tag again the code. This tag is important because this is the last day with the old interfaces.}
+
+\subsection*{Phase 3 - Friday}
+Finally during the last day, each developer will remove deprecated interfaces from his own files, as they are no more necessary.
+
+\subsection*{Important notes for the week}
+\begin{itemize}
+  \item each developer has to update his version of the libraries before starting this work;
+  \item each developer has to complete and commit his work respecting the three phases. \newpartsVC{In particular, at the end/begin of each phase all the working groups have to be syncronized with the master repository.} 
+  \item no reordering of classes and methods is allowed during this week (to avoid conflicts);
+  %\item \textcolor{blue}{developers are forced to modify only classes that are under their own responsibility. They should add code for backward compatibility for each interface change that they are implementing.}
+  %  \item \textcolor{blue}{at the end of the week, when the library is considered stable, remove all the code for backward compatibility. In this phase cross-commit is admitted on classes/files not under the direct responsibility of each developer.}
+  \item if needed, groups for specific tasks can be created during this week.
+\end{itemize}
+
+
+
+
+\newparts{
+\section*{Saturday/Sunday, December 18th/19th - Lifejacket days}
+At the end of the second week, the code will be tested and tagged again by Simone Deparis to a new minor version that will be considered the starting point for the renaming day.
+}
+
+
+
+\section*{Monday, December 20th - File/classes rename day}
+This day is focused on the reorganization of files and classes in the library, following p.5 of Section 1 of the \emph{Development Guidelines}. This work will improve the layout of the library and its global organization. The list of the new names for the file and classes is reported in Appendix \emph{File/classes rename}. In particular, each developer has to:
+\begin{itemize}
+  \item rename each file under his own responsibility (see Section \emph{How to rename a file with GIT});
+  \item rename the class inside each file following p.4 of Section 1 of the \emph{Development Guidelines};
+  \item check and fix the includes and the type and variable definitions in all the classes of the library;
+\end{itemize}
+
+%In order to stress the importance of reorganization of files and classes in the library let us consider the directory lifefem. In such such directory we can find mixed together classes to deal with space discretization (continuous and discontinuous Galerkin, Raviat-Tomar elements), time discretization, assembling, boundary conditions management, and others random classes (for example the file stiffnessFibers.hpp which appears definitely misplaced in such folder). Adding a prefix, like SD\_ (space discretization), TD\_ (time discretization), AS\_ (assembling), BC\_ (boundary conditions) may improve the readability of the code and make the maintenance process easier. Again ordering the lifesolver in a similar way, like ADR\_ (advection diffusion reaction), NS\_ (navier-stokes), HYP\_ (hyperbolic solvers), DAR\_ (Darcy), may give an idea at glance of what it is supported be the library. Moreover if no one is no more interested in maintaining a particular physical solver having a specific tag will help in branching it in and out.
+
+\subsection*{How to rename a file with GIT}
+GIT allows to rename files in the library without loosing the previous history. Just follow these instructions \todo{(TO DO: test these commands)}:
+\begin{itemize}
+  \item do not move files with uncommitted changes: first do a separate commit and push with all the changes;
+  \item to move (rename) a file type: \texttt{git mv oldName newName};
+  %\item then type \texttt{git add newName} and \texttt{git rm oldName};
+  \item commit these changes;
+\end{itemize}
+Only after the commit you can start editing the new file: these changes will be added by a separate commit. \newpartsVC{For more information see the \emph{Working with Git topic branches in LifeV} appendix by Radu Popescu.}
+
+\subsection*{Important notes for the day}
+\begin{itemize}
+  \item each developer has to update his version of the libraries before starting this work;
+  \item each developer has to complete and commit this work by the end of the day;
+\end{itemize}
+
+% \subsection*{Plan of the changes}
+% %\textbf{Tiziano/Umberto}, qui va fatto un piano dettagliato dei files/classi che vogliamo rinominare. Inoltre bisogna descrivere la procedura da seguire. In %particolare, dopo aver rinominato il file e fatto il commit (come spiegato sopra) bisogna rinominare la classe all'interno del file e bisogna cambiare l'include e i%l typedef nelle classi dipendenti. 
+% For each folder we propose the following tags
+% \begin{itemize}
+% 	\item \textbf{LIFEALG}
+% 	\begin{itemize}
+% 		\item DM\_ : dense matrices utility (clas, clapack)
+% 		\item LS\_ : linear solvers (the class SolverTrilinos should actually became SolverAztecOO)
+% 		\item PR\_ : preconditioners
+% 		\item NL\_ : non linear algorithm
+% 	\end{itemize}	
+% 	\item \textbf{LIFEARRAY}
+% 	\begin{itemize}
+% 		\item EL\_ : data structures for elementary matrices and vectors
+% 		\item FE\_ : data structures for handling FE matrices and vectors
+% 	\end{itemize}
+% 	\item \textbf{LIFEFILTERS}
+% 	\begin{itemize}
+% 		\item RD\_ : mesh readers
+% 		\item EX\_ : exporters
+% 	\end{itemize}
+% 	\item \textbf{LIFEMESH}
+% 	\begin{itemize}
+% 		\item MSH\_ : mesh handlers
+% 		\item PRT\_ : partitioners
+% 	\end{itemize}
+% 	\item \textbf{LIFEFEM}
+% 	\begin{itemize}
+% 		\item SD\_ : space discretization. We may want to have (CG\_ and DG\_ if we want to keep continuous and discontinuous elements separated);
+% 		\item TD\_ : time discretization.
+% 		\item AS\_ : assembling
+% 		\item BC\_ : boundary conditions
+% 	\end{itemize}
+% 	\item \textbf{LIFESOLVER}
+% 	\begin{itemize}
+% 		\item ADR\_ : advection diffusion reaction
+% 		\item F\_   : Fluid
+% 		\item S\_   : Solid
+% 		\item FSI\_ : fluid structure interface solver
+% 		\item HYP\_ : hyperbolic problems
+% 		\item DAR\_ : Darcy
+% 		\item HRT\_ : heart
+% 	\end{itemize}
+% \end{itemize}
+
+\subsection*{Additional tasks of the day}
+\begin{itemize}
+  \item \newparts{Simone Deparis -} \texttt{EpetraMap} class has to be moved from \texttt{lifealg} to \texttt{lifearray}; 
+  \item \newparts{Simone Deparis -} \texttt{GetPot} class has to be moved from \texttt{lifecore} to \texttt{lifefilters};
+  \item \newparts{Simone Deparis -} \texttt{RegionMesh3D\_ALE} has to be moved from \texttt{lifefem} to \texttt{lifemesh}; 
+  \item \newparts{Simone Deparis -} SolverTrilinos should be a virtual abstract class, while the actual \texttt{SolverTrilinos.*pp} should be renamed in \texttt{SolverAztecOO.*pp}. 
+\end{itemize}
+
+
+\section*{Tuesday, December 21th - Armageddon day}
+This is the final day of the LifeV \emph{cleaning weeks}. If everything goes smooth, there will be nothing to do today, otherwise keep ready for ``last minute changes''.
+
+\newparts{
+\section*{Friday, December 24th - Release day}
+Simone Deparis will prepare the LifeV public release $1.4$ (\emph{Christmas Special}).}
+
+
+
+
+\newpage
+\section*{Appendix: list of obsolete files to be removed}
+\begin{enumerate}
+\item life/lifealg: \texttt{dataAztec.cpp} and \texttt{SolverAztec.cpp}.
+\item life/lifearray: \texttt{variables.hpp}, and \texttt{vecUnknown.*pp} (which is included by other files, but it is just a result of copy and paste from legacy code and is not required).
+\item life/lifefilters: \texttt{medit\_writer.*pp}.
+\item life/lifecore: \texttt{about.*pp} and \texttt{application.*pp}. Some test in the testsuite dependent from those, so we need to remove these dependencies first.
+\item life/lifefem: \texttt{bcHandlerObsolete.hpp} \texttt{bdf.*pp}, \texttt{bdfNS.*pp} and \texttt{currentBFDG.*pp}.
+\item life/lifesolver: \texttt{AdvectionDiffusionReaction.hpp}, \texttt{AdvectionDiffusionReactionSolver.hpp}, \\ 
+\texttt{NavierStokesHandler.hpp}, \texttt{NavierStokesSolver.hpp}, \texttt{NavierStokesSolverPC.hpp},\\ 
+and \newparts{\texttt{StructureSimplifiedData.hpp}}.
+\end{enumerate}
+
+\newparts{In addition we are considering to remove the following files: \texttt{steklovPoincareBase.*pp}, \texttt{RegionMesh3D\_ALE.hpp}, and \texttt{reducedLinFluid.*pp} as they are currently unused and unmaintained (the code is not working since more than 2 years).}
+
+
+
+\section*{Appendix: Proposed work groups}
+
+\newparts{For each group there is one responsible who is in charge for:
+\begin{itemize}
+  \item organize and distribute the work among the other members;
+  \item ensure that everything is done in a proper way and in time;
+  \item coordinate with the other groups for the syncronization phases. 
+\end{itemize}
+}
+
+\begin{table}[!h]
+\begin{tabular}{c|c|c|c|c|c}
+            & \textbf{CMCS 1} & \textbf{CMCS 2}        & \textbf{CMCS 3} & \textbf{EMORY} & \textbf{MOX}\\
+\hline
+Responsible & Malossi         & Quinodoz               & \newparts{Popescu}   & Passerini \& Villa & Fumagalli\\
+\hline
+            & Ruiz-Baier      & Grandperrin            & Crosetto  & Perego            & Pezzuto\\
+            & Rossi           & Astorino               & Tricerri  & Mirabella         & Fadel\\ 
+            &                 & (Cattaneo \& Colciago) & \newparts{(Deparis)} & Bertagna           & Pozzoli\\
+            &                 &                        &           & Aposporidis        & \newpartsVC{Melani}\\
+            &                 &                        &           & Wang               & \newpartsVC{(Kern)}\\
+            &                 &                        &           & \newpartsVC{(D'Elia)} & 
+\end{tabular}
+\end{table}
+
+\newpage
+
+\begin{landscape}
+\section*{Appendix: LifeV File/classes rename}
+\begin{table}[!h]
+\fontsize{7}{7}\selectfont
+\begin{multicols}{4}
+\begin{xtabular}{
+p{0.20\textwidth}<{}
+p{0.10\textwidth}<{}
+}
+\textbf{LIFEALG} \\
+NonLinearAitken.hpp & \\
+NonLinearBrent.hpp & \\
+NonLinearLinesearchCubic.hpp & \\
+NonLinearLinesearchParabolic.hpp & \\
+NonLinearNewton.hpp & \\
+NonLinearNewtonData.*pp & \\
+NonLinearPicard.hpp & \\
+NonLinearRichardson.hpp & \\
+\newparts{LinearEpetraOperatorBlock.*pp} & \\
+\newparts{LinearEpetraOperator.hpp} & \\
+PreconditionerAztecOO.*pp & \\
+\newparts{Preconditioner.*pp} & \\
+PreconditionerIfpack.*pp & \\
+PreconditionerML.*pp & \\
+SolverAmesos.*pp & \\
+SolverAztecOO.*pp & \\
+SolverTrilinos.*pp & \\
+& \\
+\end{xtabular}
+\begin{xtabular}{
+p{0.20\textwidth}<{}
+p{0.10\textwidth}<{}
+}
+\textbf{LIFEARRAY} \\
+\newparts{MapEpetra.*pp} & \\
+MatrixContainer.hpp &\\
+\newparts{MatrixElementary.*pp} & \\
+\newparts{MatrixEpetra.hpp} & \\
+RNM.hpp &\\
+RNMOperator.hpp &\\
+RNMOperatorConstant.hpp &\\
+RNMTemplate.hpp &\\
+\newparts{VectorElementary.*pp} & \\
+\newparts{VectorEpetra.*pp} & \\
+\newparts{VectorSimple.hpp} & \\
+Tab.hpp &\\
+& \\
+\end{xtabular}
+\begin{xtabular}{
+p{0.20\textwidth}<{}
+p{0.1\textwidth}<{}
+}
+\textbf{LIFEFILTERS} \\
+Exporter.*pp & \\
+ExporterEmpty.hpp & \\
+ExporterEnsight.*pp & \\
+ExporterHDF5.hpp & \\
+ExporterHDF5Mesh3D.hpp & \\
+GetPot.hpp & \\
+Importer.*pp & \\
+MeshUtility.hpp & \\
+ReadMesh2D.hpp & \\
+ReadMesh3D.*pp & \\
+SelectMarker.*pp & \\
+& \\
+\end{xtabular}
+\begin{xtabular}{
+p{0.15\textwidth}<{}
+p{0.1\textwidth}<{}
+}
+\textbf{LIFECORE} \\
+\newpartsVC{CommunicatorEpetra.*pp} & \\
+Factory.hpp & \\
+FactoryPolicy.hpp & \\
+FactorySingleton.hpp & \\
+FactoryTypeInfo.*pp & \\
+FortranWrapper.hpp & \\
+Life.*pp & \\
+LifeAssert.hpp & \\
+LifeAssertSmart.*pp & \\
+LifeChrono.hpp & \\
+LifeDebug.*pp & \\
+LifeMacros.hpp & \\
+LifeVersion.*pp & \\
+StringData.*pp & \\
+StringUtility.*pp & \\
+Switch.*pp & \\
+& \\
+\end{xtabular}
+
+\begin{xtabular}{
+p{0.18\textwidth}<{}
+p{0.1\textwidth}<{}
+}
+\textbf{LIFEMESH} \\
+BareItems.*pp & \\
+BasisElSh.*pp & \\
+Identifier.*pp & \\
+MarkersBase.*pp & \\
+Markers.hpp & \\
+MeshData.*pp & \\
+\newpartsVC{MeshElementBase.hpp} & (geoND)\\
+MeshEntity.hpp & \\
+\newpartsVC{MeshGeometricElement.hpp} & (geoElement)\\
+MeshUtilityBase.*pp & \\
+\newpartsVC{MeshVertex.*pp} & (geo0D)\\
+RegionMesh1D.hpp & \\
+RegionMesh2D.hpp & \\
+RegionMesh3D.*pp & \\
+RegionMesh3DALE.*pp & \\
+\newparts{RegionMesh3DStructured.*pp} & \\
+\newparts{MeshPartitionerOfflineFSI.hpp} & \\
+MeshPartitioner.hpp & \\
+& \\
+\end{xtabular}
+\begin{xtabular}{
+p{0.18\textwidth}<{}
+p{0.1\textwidth}<{}
+}
+\textbf{LIFEFEM} \\
+AssembleOperator.*pp & \\
+BCBase.*pp & \\
+BCFunction.*pp & \\
+BCHandler.*pp & \\
+BCManage.*pp & \\
+BCNormalManager.hpp & \\
+BCVector.*pp & \\
+\newparts{CurrentBdFEBase.*pp} & \\
+CurrentBdFE.*pp & \\
+CurrentBFDG.*pp & \\
+CurrentFE.*pp & \\
+DOF.*pp & \\
+DOFInterface3Dto2D.*pp & \\
+DOFInterface3Dto3D.*pp & \\
+DOFInterfaceBase.*pp & \\
+DOFInterfaceHandler.*pp & \\
+DOFLocalPattern.*pp & \\
+\newparts{ElementaryOperator.*pp} & \\
+FESpace.hpp & \\
+HyperbolicFluxNumerical.hpp & \\
+PostProcessing.hpp & \\
+QuadraturePoint.*pp & \\
+QuadratureRule.*pp & \\
+QuadratureRuleDefinitionFE.cpp & \\
+\newpartsVC{ReferenceElement.*pp} & \\
+\newpartsVC{ReferenceFEHdiv.*pp} & \\
+\newpartsVC{ReferenceFE.*pp} & \\
+\newpartsVC{ReferenceFEHybrid.*pp} & \\
+\newpartsVC{ReferenceFEScalar.*pp} & \\
+\newpartsVC{ReferenceToCurrentMap.*pp} & (geoMap)\\
+SobolevNorms.hpp & \\
+\newpartsVC{TimeBDF.hpp} & \\
+\newpartsVC{TimeBDFNavierStokes.hpp} & \\
+\newpartsVC{TimeBDFVariableStep.hpp} & \\
+\newpartsVC{TimeScheme.hpp} & \\
+\newpartsVC{TimeSchemeNewmark.hpp} & \\
+TimeData.*pp & \\
+& \\
+\end{xtabular}
+\begin{xtabular}{
+p{0.28\textwidth}<{}
+p{0.1\textwidth}<{}
+}
+\textbf{LIFESOLVER} \\
+ADRAssembler.hpp & \\
+\newparts{ADRAssemblerIP.hpp} & \\
+ADRData.*pp & \\
+ADRDataSecondOrder.hpp & \\
+ADRSecondOrderSolver.hpp & \\
+DarcyData.hpp & \\
+DarcySolver.hpp & \\
+DarcySolverNonLinear.hpp & \\
+DarcySolverTransient.hpp & \\
+DarcySolverTransientNonLinear.hpp & \\
+FSIData.*pp & \\
+FSIFluidToMaster.hpp & \\
+FSIOperator.*pp & \\
+FSIOperatorExactJacobian.*pp & \\
+FSIOperatorFixedPoint.*pp & \\
+FSIOperatorSteklovPoincare.*pp & \\
+FSIReducedLinearFluidSolver.*pp & \\
+FSISolver.*pp & \\
+HarmonicExtensionSolver.hpp & \\
+HeartBidomainSolver.hpp & \\
+HeartBidomainData.*pp & \\
+HeartFunctors.*pp & \\
+HeartIonicData.*pp & \\
+HeartIonicSolver.hpp & \\
+HeartMonodomainData.*pp & \\
+HeartMonodomainSolver.hpp & \\
+HeartStiffnessFibers.hpp & \\
+HyperbolicData.hpp & \\
+HyperbolicSolver.hpp & \\
+\newparts{LevelSetData.*pp} & \\
+\newparts{LevelSetSolver.hpp} & \\
+OseenData.*pp & \\
+\newparts{OseenSolver.hpp} & \\
+OseenShapeDerivative.hpp & \\
+StabilizationSD.hpp & \\
+StabilizationIP.hpp & \\
+StabilizationIPTerms.hpp & \\
+\newparts{VenantKirchhoffElasticData.*pp} & \\
+\newparts{VenantKirchhoffElasticHandler.hpp} & \\
+VenantKirchhoffSolver.hpp & \\
+VenantKirchhoffSolverLinear.hpp & \\
+\newparts{VenantKirchhoffSolverViscoelastic.*pp} & (SecondOrderSolver)\\
+& \\
+\end{xtabular}
+
+\end{multicols}
+\normalsize\selectfont
+\end{table}
+\end{landscape}
+
+
+
+
+
+
+
+
+\newpage
+\begin{landscape}
+\section*{\newparts{Appendix: Mathcard file/classes rename}}
+\begin{table}[!h]
+\fontsize{7}{7}\selectfont
+\begin{multicols}{3}
+\begin{xtabular}{
+p{0.36\textwidth}<{}
+}
+\textbf{LIFESOLVER} \\
+\newpartsVC{BCInterface1DData.*pp}\\
+\newpartsVC{BCInterface1DDefaultFunctions.hpp}\\
+\newpartsVC{BCInterface1DDefinitions.hpp}\\
+\newpartsVC{BCInterface1DFunctionFile.hpp}\\
+\newpartsVC{BCInterface1DFunction.hpp}\\
+\newpartsVC{BCInterface1D.hpp}\\
+\newpartsVC{BCInterface1DOperatorFunctionFile.hpp}\\
+\newpartsVC{BCInterface1DOperatorFunction.hpp}\\
+\newpartsVC{BCInterface3DData.*pp}\\
+\newpartsVC{BCInterface3DDefinitions.hpp}\\
+\newpartsVC{BCInterface3DFSI.*pp}\\
+\newpartsVC{BCInterface3DFunctionFile.hpp}\\
+\newpartsVC{BCInterface3DFunction.hpp}\\
+\newpartsVC{BCInterface3D.hpp}\\
+\newpartsVC{BCInterface3DOperatorFunctionFile.hpp}\\
+\newpartsVC{BCInterface3DOperatorFunction.hpp}\\
+FSIOperatorMonolithic.*pp\\
+FSIOperatorMonolithicGE.*pp\\
+FSIOperatorMonolithicGI.*pp\\
+HeartNonLinearMonodomainSolver.hpp\\
+MonolithicBlock.*pp\\
+MonolithicBlockMatrix.*pp\\
+MonolithicBlockMatrixRN.*pp\\
+MonolithicBlockOperator.*pp\\
+MonolithicBlockOperatorDN.*pp\\
+MonolithicBlockOperatorDND.*pp\\
+MonolithicBlockOperatorDNND.*pp\\
+MonolithicBlockOperatorNN.*pp\\
+\newpartsVC{MultiscaleAlgorithm.*pp}\\
+\newpartsVC{MultiscaleAlgorithmAitken.*pp}\\
+\newpartsVC{MultiscaleAlgorithmExplicit.*pp}\\
+\newpartsVC{MultiscaleAlgorithmNewton.*pp}\\
+\newpartsVC{MultiscaleCoupling.*pp}\\
+\newpartsVC{MultiscaleCouplingBoundaryCondition.*pp}\\
+\newpartsVC{MultiscaleCouplingFluxStress.*pp}\\
+\newpartsVC{MultiscaleCouplingStress.*pp}\\
+\newpartsVC{MultiscaleDefinitions.hpp}\\
+\newpartsVC{MultiscaleModel.*pp}\\
+\newpartsVC{MultiscaleModel1D.*pp}\\
+\newpartsVC{MultiscaleModelFluid3D.*pp}\\
+\newpartsVC{MultiscaleModelFSI3D.*pp}\\
+\newpartsVC{MultiscaleModelMultiscale.*pp}\\
+\newpartsVC{MultiscaleData.*pp}\\
+\newpartsVC{MultiscaleSolver.*pp}\\
+\newpartsVC{OneDimensionalData.*pp}\\
+\newpartsVC{OneDimensionalDefinitions.hpp}\\
+\newpartsVC{OneDimensionalFlux.*pp}\\
+\newpartsVC{OneDimensionalFluxLinear.*pp}\\
+\newpartsVC{OneDimensionalFluxNonLinear.*pp}\\
+\newpartsVC{OneDimensionalPhysics.*pp}\\
+\newpartsVC{OneDimensionalPhysicsLinear.*pp}\\
+\newpartsVC{OneDimensionalPhysicsNonLinear.*pp}\\
+\newpartsVC{OneDimensionalSolver.*pp}\\
+\newpartsVC{OneDimensionalSource.*pp}\\
+\newpartsVC{OneDimensionalSourceLinear.*pp}\\
+\newpartsVC{OneDimensionalSourceNonLinear.*pp}\\
+RobinInterface.*pp\\
+VenantKirchhoffSolverNonLinear.hpp \\
+\\
+\end{xtabular}
+\begin{xtabular}{
+p{0.36\textwidth}<{}
+}
+\textbf{LIFEARRAY} \\
+ContainerOfVectors.hpp\\
+\\
+\end{xtabular}
+\begin{xtabular}{
+p{0.36\textwidth}<{}
+}
+\textbf{LIFECORE} \\
+Parser.*pp\\
+ParserDefinitions.hpp\\
+ParserSpiritGrammar.hpp\\
+\\
+\end{xtabular}
+\begin{xtabular}{
+p{0.36\textwidth}<{}
+}
+\textbf{LIFEFEM} \\
+\newpartsVC{OneDimensionalBC.*pp}\\
+\newpartsVC{OneDimensionalBCFunction.*pp}\\
+\newpartsVC{OneDimensionalBCFunctionDefault.*pp}\\
+\newpartsVC{OneDimensionalBCHandler.*pp}\\
+\\
+\end{xtabular}
+\begin{xtabular}{
+p{0.36\textwidth}<{}
+}
+\textbf{LIFEALG} \\
+EigenSolver.*pp\\
+PreconditionerComposedOperator.hpp\\
+PreconditionerComposed.*pp\\
+\\
+\end{xtabular}
+\end{multicols}
+\normalsize\selectfont
+\end{table}
+\end{landscape}
+
+
+
+
+\newpage
+
+\begin{landscape}
+%\section*{Classes distribution}
+\begin{table}[!h]
+\fontsize{7}{7}\selectfont
+\begin{multicols}{4}
+\begin{xtabular}{
+p{0.20\textwidth}<{}|
+p{0.10\textwidth}<{}
+}
+\textbf{LIFEALG} \\
+AztecOOPreconditioner.*pp & CMCS 2\\
+brent.hpp & MOX\\
+cblas.hpp & MOX\\
+clapack.hpp & MOX\\
+dataAztec.cpp & REMOVE\\
+dataNewton.*pp & CMCS 3\\
+EpetraMap.*pp & CMCS 2\\
+EpetraPreconditioner.*pp & CMCS 2\\
+generalizedAitken.hpp & MOX\\
+IfpackPreconditioner.*pp & CMCS 2\\
+linesearch\_cubic.hpp & MOX\\
+linesearch\_parabolic.hpp & MOX\\
+MLPreconditioner.*pp & CMCS 2\\
+newton.hpp & CMCS 3\\
+nonLinRichardson.hpp & MOX\\
+OP\_BlockOperator.*pp & EMORY\\
+OP\_LinearOperator.hpp & EMORY\\
+picard.hpp & CMCS 3\\
+SolverAmesos.*pp & CMCS 2\\
+SolverAztec.cpp & REMOVE\\
+SolverTrilinos.*pp & CMCS 2\\
+& \\
+\end{xtabular}
+\begin{xtabular}{
+p{0.20\textwidth}<{}|
+p{0.10\textwidth}<{}
+}
+\textbf{LIFEARRAY} \\
+elemMat.*pp & CMCS 2\\
+elemVec.*pp & CMCS 2\\
+EpetraMatrix.hpp & CMCS 2\\
+EpetraVector.*pp & CMCS 2\\
+MatrixContainer.*pp & CMCS 2\\
+RNM.hpp & CMCS 2\\
+RNM\_opc.hpp & CMCS 2\\
+RNM\_op.hpp & CMCS 2\\
+RNM\_tpl.hpp & CMCS 2\\
+SimpleVect.hpp & CMCS 2\\
+tab.hpp & CMCS 3\\
+variables.hpp & REMOVE\\
+vecUnknown.*pp & REMOVE\\
+& \\
+\end{xtabular}
+\begin{xtabular}{
+p{0.20\textwidth}<{}|
+p{0.1\textwidth}<{}
+}
+\textbf{LIFEFILTERS} \\
+ensight.hpp & CMCS 3\\
+exporter.*pp & CMCS 3\\
+hdf5exporter.hpp & CMCS 3\\
+HDF5Filter3DMesh.hpp & CMCS 3\\
+importer.*pp & MOX\\
+medit\_wrtrs.*pp & REMOVE\\
+mesh\_util.hpp & CMCS 3\\
+noexport.hpp & CMCS 3\\
+readMesh2D.hpp & MOX\\
+readMesh3D.*pp & MOX\\
+selectMarker.*pp & MOX\\
+& \\
+\end{xtabular}
+\begin{xtabular}{
+p{0.18\textwidth}<{}|
+p{0.1\textwidth}<{}
+}
+\textbf{LIFECORE} \\
+about.*pp & REMOVE\\
+application.*pp & REMOVE\\
+chrono.hpp & CMCS 3\\
+dataString.*pp & CMCS 3\\
+debug.*pp & CMCS 3\\
+displayer.*pp & CMCS 3\\
+factory.hpp & CMCS 3\\
+fortran\_wrap.hpp & CMCS 3\\
+GetPot.hpp & CMCS 3\\
+lifeassert.hpp & CMCS 3\\
+life.*pp & CMCS 3\\
+lifemacros.hpp & CMCS 3\\
+lifeversion.*pp & CMCS 3\\
+policy.hpp & CMCS 3\\
+singleton.hpp & CMCS 3\\
+SmartAssert.*pp & CMCS 3\\
+switch.*pp & CMCS 3\\
+typeInfo.*pp & CMCS 3\\
+util\_string.*pp & CMCS 3\\
+& \\
+\end{xtabular}
+
+\begin{xtabular}{
+p{0.18\textwidth}<{}|
+p{0.1\textwidth}<{}
+}
+\textbf{LIFEMESH} \\
+bareItems.*pp & EMORY\\
+basisElSh.*pp & EMORY\\
+dataMesh.*pp & EMORY\\
+FSIOfflinePartitioner.hpp & CMCS 3\\
+geo0D.*pp & EMORY\\
+geoElement.hpp & EMORY\\
+geoND.hpp & EMORY\\
+identifier.*pp & EMORY\\
+markers\_base.*pp & EMORY\\
+markers.hpp & EMORY\\
+meshEntity.hpp & EMORY\\
+mesh\_util\_base.*pp & EMORY\\
+partitionMesh.hpp & CMCS 3\\
+regionMesh1D.hpp & MOX \\
+regionMesh2D.hpp & MOX\\
+regionMesh3D.*pp & MOX\\
+structuredMesh3D.*pp & CMCS 2\\
+& \\
+\end{xtabular}
+\begin{xtabular}{
+p{0.18\textwidth}<{}|
+p{0.1\textwidth}<{}
+}
+\textbf{LIFEFEM} \\
+assemb.*pp & CMCS 2\\
+bcCond.*pp & EMORY\\
+bcFunction.*pp & EMORY\\
+bcHandler.*pp & EMORY\\
+bcHandlerObsolete.hpp & REMOVE\\
+bcManage.*pp & EMORY\\
+BCNormalManager.hpp & EMORY\\
+bcVector.*pp & EMORY\\
+bdf.*pp & REMOVE\\
+bdfNS.*pp & REMOVE\\
+bdfNS\_template.hpp & CMCS 2\\
+bdf\_template.hpp & CMCS 2\\
+bdfVariableStep.hpp & CMCS 2\\
+currentBdFE.*pp & CMCS 2\\
+currentBFDG.*pp & CMCS 2\\
+currentFE.*pp & CMCS 2\\
+dataTime.*pp & MOX\\
+defQuadRuleFE.cpp & CMCS 2\\
+dof.*pp & CMCS 2\\
+dofInterface3Dto2D.*pp & CMCS 2\\
+dofInterface3Dto3D.*pp & CMCS 2\\
+dofInterfaceBase.*pp & CMCS 2\\
+dofInterfaceHandler.*pp & CMCS 2\\
+elemOper.*pp & CMCS 2\\
+FESpace.hpp & CMCS 2\\
+geoMap.*pp & CMCS 2\\
+localDofPattern.*pp & CMCS 2\\
+newmark\_template.hpp & MOX\\
+NumericalFluxes.hpp & MOX\\
+postProc.hpp & EMORY\\
+quadPoint.*pp & CMCS 2\\
+quadRule.*pp & CMCS 2\\
+refEle.*pp & CMCS 2\\
+refFEHdiv.*pp & CMCS 2\\
+refFE.*pp & CMCS 2\\
+refFEHybrid.*pp & CMCS 2\\
+refFEScalar.*pp & CMCS 2\\
+regionMesh3D\_ALE.*pp & MOX\\
+sobolevNorms.hpp & CMCS 2\\
+staticBdFE.*pp & CMCS 2\\
+stiffnessFibers.hpp & CMCS 1\\
+\newpartsVC{timeAdvance\_template.hpp} & MOX\\
+& \\
+\end{xtabular}
+\begin{xtabular}{
+p{0.28\textwidth}<{}|
+p{0.1\textwidth}<{}
+}
+\textbf{LIFESOLVER} \\
+ADRAssembler.hpp & CMCS 2\\
+\newparts{ADRAssemblerIP.hpp} & CMCS 2\\
+AdvectionDiffusionReaction.hpp & REMOVE\\
+AdvectionDiffusionReactionSolver.hpp & REMOVE\\
+bidomainSolver.hpp & CMCS 1\\
+darcySolver.hpp & MOX\\
+darcySolverNonLinear.hpp & MOX\\
+darcySolverTransient.hpp & MOX\\
+darcySolverTransientNonLinear.hpp & MOX\\
+dataADR.*pp & CMCS 2\\
+dataBidomain.*pp & CMCS 1\\
+dataDarcy.hpp & MOX\\
+dataElasticStructure.*pp & CMCS 3\\
+DataFSI.*pp & CMCS 3\\
+dataHyperbolic.hpp & MOX\\
+dataIonic.*pp & CMCS 1\\
+\newparts{dataLevelSet.*pp} & CMCS 2\\
+dataMonodomain.*pp & CMCS 1\\
+dataNavierStokes.*pp & EMORY\\
+dataSecondOrder.hpp & MOX\\
+dataSimplifiedStructure.hpp & REMOVE\\
+ElasticStructureHandler.hpp & CMCS 3\\
+exactJacobianBase.*pp & CMCS 3\\
+fixedPointBase.*pp & CMCS 3\\
+fluidToMaster.hpp & CMCS 3\\
+FSIOperator.*pp & CMCS 3\\
+FSISolver.*pp & CMCS 3\\
+HarmonicExtensionSolver.hpp & CMCS 3\\
+heartFunctors.*pp & CMCS 1\\
+hyperbolicSolver.hpp & MOX\\
+ionicSolver.hpp & CMCS 1\\
+ipStabilization.hpp & EMORY\\
+\newparts{LevelSetSolver.hpp} & CMCS 2\\
+LinearVenantKirchhofSolver.hpp & CMCS 3\\
+monodomainSolver.hpp & CMCS 1\\
+NavierStokesHandler.hpp & REMOVE\\
+NavierStokesSolver.hpp & REMOVE\\
+NavierStokesSolverPC.hpp & REMOVE\\
+nsipterms.hpp & EMORY\\
+%\newparts{OP\_BlockOperator.*pp} & EMORY\\
+%\newparts{OP\_LinearOperator.hpp} & EMORY\\
+Oseen.hpp & EMORY\\
+OseenShapeDerivative.hpp & EMORY\\
+reducedLinFluid.*pp & CMCS 3\\
+sdStabilization.hpp & EMORY\\
+SecondOrderSolver.hpp & MOX\\
+steklovPoincareBase.*pp & CMCS 3\\
+VenantKirchhofSolver.hpp & CMCS 3\\
+& \\
+\end{xtabular}
+
+\end{multicols}
+\normalsize\selectfont
+\end{table}
+\end{landscape}
+
+\newpage
+\begin{landscape}
+%\section*{Classes distribution}
+\begin{table}[!h]
+\fontsize{7}{7}\selectfont
+\begin{multicols}{3}
+\begin{xtabular}{
+p{0.36\textwidth}<{}|
+p{0.1\textwidth}<{}
+}
+\textbf{LIFESOLVER} \\
+BCInterface1D\_Data.*pp & CMCS 1\\
+BCInterface1D\_DefaultFunctions.hpp & CMCS 1\\
+BCInterface1D\_Definitions.hpp & CMCS 1\\
+BCInterface1D\_FunctionFile.hpp & CMCS 1\\
+BCInterface1D\_Function.hpp & CMCS 1\\
+BCInterface1D.hpp & CMCS 1\\
+BCInterface1D\_OperatorFunctionFile.hpp & CMCS 1\\
+BCInterface1D\_OperatorFunction.hpp & CMCS 1\\
+BCInterface\_Data.*pp & CMCS 1\\
+BCInterface\_Definitions.hpp & CMCS 1\\
+BCInterface\_FSI.*pp & CMCS 1\\
+BCInterface\_FunctionFile.hpp & CMCS 1\\
+BCInterface\_Function.hpp & CMCS 1\\
+BCInterface.hpp & CMCS 1\\
+BCInterface\_OperatorFunctionFile.hpp & CMCS 1\\
+BCInterface\_OperatorFunction.hpp & CMCS 1\\
+BlockInterface.*pp & CMCS 3\\
+BlockMatrix.*pp & CMCS 3\\
+BlockMatrixRN.*pp & CMCS 3\\
+ComposedBlockOper.*pp & CMCS 3\\
+ComposedDN.*pp & CMCS 3\\
+ComposedDND.*pp & CMCS 3\\
+ComposedDNND.*pp & CMCS 3\\
+ComposedNN.*pp & CMCS 3\\
+ionicSolver.hpp & REMOVE\\
+Monolithic.*pp & CMCS 3\\
+MonolithicGE.*pp & CMCS 3\\
+MonolithicGI.*pp & CMCS 3\\
+MS\_Algorithm\_Aitken.*pp & CMCS 1\\
+MS\_Algorithm\_Explicit.*pp & CMCS 1\\
+MS\_Algorithm.*pp & CMCS 1\\
+MS\_Algorithm\_Newton.*pp & CMCS 1\\
+MS\_Coupling\_BoundaryCondition.*pp & CMCS 1\\
+MS\_Coupling\_FluxStress.*pp & CMCS 1\\
+MS\_Coupling\_Stress.*pp & CMCS 1\\
+MS\_Definitions.hpp & CMCS 1\\
+MS\_Model\_1D.*pp & CMCS 1\\
+MS\_Model\_Fluid3D.*pp & CMCS 1\\
+MS\_Model\_FSI3D.*pp & CMCS 1\\
+MS\_Model\_MultiScale.*pp & CMCS 1\\
+MS\_PhysicalCoupling.*pp & CMCS 1\\
+MS\_PhysicalData.*pp & CMCS 1\\
+MS\_PhysicalModel.*pp & CMCS 1\\
+MS\_Solver.*pp & CMCS 1\\
+nonlinearMonodomain.hpp & CMCS 1\\
+NonLinearVenantKirchhofSolver.hpp & CMCS 3\\
+OneDimensionalModel\_Data.*pp & CMCS 1\\
+OneDimensionalModel\_Definitions.hpp & CMCS 1\\
+OneDimensionalModel\_Flux.*pp & CMCS 1\\
+OneDimensionalModel\_Flux\_Linear.*pp & CMCS 1\\
+OneDimensionalModel\_Flux\_NonLinear.*pp & CMCS 1\\
+OneDimensionalModel\_Physics.*pp & CMCS 1\\
+OneDimensionalModel\_Physics\_Linear.*pp & CMCS 1\\
+OneDimensionalModel\_Physics\_NonLinear.*pp & CMCS 1\\
+OneDimensionalModel\_Solver.*pp & CMCS 1\\
+OneDimensionalModel\_Source.*pp & CMCS 1\\
+OneDimensionalModel\_Source\_Linear.*pp & CMCS 1\\
+OneDimensionalModel\_Source\_NonLinear.*pp & CMCS 1\\
+RobinInterface.*pp & CMCS 3\\
+& \\
+\end{xtabular}
+\begin{xtabular}{
+p{0.36\textwidth}<{}|
+p{0.10\textwidth}<{}
+}
+\textbf{LIFEARRAY} \\
+ContainerOfVectors.hpp & CMCS 1\\
+& \\
+\end{xtabular}
+\begin{xtabular}{
+p{0.36\textwidth}<{}|
+p{0.1\textwidth}<{}
+}
+\textbf{LIFECORE} \\
+Parser.*pp & CMCS 1\\
+Parser\_Definitions.hpp & CMCS 1\\
+Parser\_SpiritGrammar.hpp & CMCS 1\\
+& \\
+\end{xtabular}
+\begin{xtabular}{
+p{0.36\textwidth}<{}|
+p{0.1\textwidth}<{}
+}
+\textbf{LIFEFEM} \\
+OneDimensionalModel\_BC.*pp & CMCS 1\\
+OneDimensionalModel\_BCFunction.*pp & CMCS 1\\
+OneDimensionalModel\_BCFunction\_Default.*pp & CMCS 1\\
+OneDimensionalModel\_BCFunction\_Default.hpp & CMCS 1\\
+OneDimensionalModel\_BCHandler.*pp & CMCS 1\\
+& \\
+\end{xtabular}
+\begin{xtabular}{
+p{0.36\textwidth}<{}|
+p{0.10\textwidth}<{}
+}
+\textbf{LIFEALG} \\
+ComposedOperator.hpp & CMCS 3\\
+ComposedPreconditioner.*pp & CMCS 3\\
+eigenSolver.*pp & CMCS 3\\
+& \\
+\end{xtabular}
+\end{multicols}
+\normalsize\selectfont
+\end{table}
+\end{landscape}
+
+
+\newpage
+\section*{\newpartsVC{Appendix: Working with Git topic branches in LifeV, by R. Popescu}}
+
+\subsection*{Moving files inside a Git repository}
+
+The operation of moving or renaming files is supported by the Git source control tool, no external tools being necessary. To rename or move a file, simply issue:
+
+\begin{lstlisting}
+$ git mv old_name new_name
+\end{lstlisting}
+
+Proceed with care, as there is one caveat: renaming and modifying a file in the same commit will make the repository loose it's history. Therefore, the procedure is to always rename a file in one commit and modify it in the next one.
+
+
+\subsection*{Rebasing}
+
+Rebasing is one of the most powerful features in Git but has to be used with care: it can ensure that the history of a project remains linear, which is easier to understand, but it also has the power to rewrite the history of a project. In a distributed developer environment this means that a lot of developers can end up with invalid commits if one of them decides to rebase the common commits.
+
+For a branch that has diverged at some point, meaning there are both new local commits and new remote commits, rebasing the local vesion of the branch on the remote one works by first temporarily removing all local commits back to the most recent common commit, applying the remote commits and finally applying the new local commits on top.
+
+The basic syntax of the rebase command is the following:
+
+\begin{lstlisting}
+$ git rebase upstream [branch]
+\end{lstlisting}
+
+where: "upstream" is the remote branch to rebase the current active branch on. "Branch" is optional and, if provided, makes git do a:
+
+\begin{lstlisting}
+$ git checkout branch
+\end{lstlisting}
+
+on that branch first.
+
+Due to the fact that the pull command is setup to do a branch merge by default (the changes on the remote branch are first fetched into a temporary local branch and then merged with the local branch that has to be updated. At the point where two branches are merged a new merge commit is introduced) it is necessary to append the ``--rebase'' parameter to the pull command in order to do a rebase instead of a merge.
+
+\subsection*{Topic branches}
+
+Git branches, used together with rebasing, represent a very powerful solution to organize local and remote work. The following are the steps that need to be taken to create, use and maintain local and remote topic branches.
+
+\subsubsection*{Creating a new local topic branch}
+
+Suppose you are starting to experiment with new code, but want to do the development in a sandboxed environment, without affecting the existing stable part of the code. Creating a new branch for this topic is easy:
+
+\begin{lstlisting}
+$ git branch new_topic
+$ git checkout new_topic
+\end{lstlisting}
+
+or issue the following command to create and checkout the new branch at the same time:
+
+\begin{lstlisting}
+$ git checkout -b new_topic
+\end{lstlisting}
+
+At this point you can begin to develop and make commits to this new branch.
+
+\subsubsection*{Merging a topic branch into another}
+
+At some point you may desire to bring the changes introduced by the new branch into an existing branch, for example into the master. All you have to do is issue:
+
+\begin{lstlisting}
+$ git checkout master
+$ git rebase new_topic
+\end{lstlisting}
+
+As stated earlier, the rebase command ensures the history will remain linear. An alternative to this would be a simple merge:
+
+\begin{lstlisting}
+$ git checkout master
+$ git merge new_topic
+\end{lstlisting}
+
+In effect, by using a branch and rebase the other developers don't even have to be aware that a new branch exists.
+
+\subsubsection*{Publishing the topic branch upstream}
+
+If it is desired that the new branch is to be shared among developers, it can be published to a shared repository, for example the ``origin'' repository which you cloned:
+
+\begin{lstlisting}
+$ git push origin new_topic:remote_new_topic
+\end{lstlisting}
+
+At this point, the branch is available in the "origin" repository and can be fetched and modified by others.
+
+\subsubsection*{Updating local branch}
+
+After publishing it, the development of the branch may diverge: your local copy has commits you haven't pushed upstream and the upstream copy has new commits you haven't downloaded. The solution is rebasing the local branch with the remote one. First, make sure that the information on the origin repo is up-to-date:
+
+\begin{lstlisting}
+$ git fetch
+\end{lstlisting}
+
+and then rebase the local branch with the remote one:
+
+\begin{lstlisting}
+$ git checkout new_topic
+$ git rebase origin/remote_new_topic
+\end{lstlisting}
+
+\subsubsection*{Updating remote branch}
+
+After the local branch has been updated with the remote changes, it may be desired that the remote branch be update with the local changes too. To do this, push the local branch on the remote one. This operation will only succeed if the push operation is a fast forward operation, to prevent data loss:
+
+\begin{lstlisting}
+$ git push origin new_topic:remote_new_topic
+\end{lstlisting}
+
+\subsubsection*{Deleting the local and the remote branches}
+
+If the local topic branch is no longer needed, it can be deleted with:
+
+\begin{lstlisting}
+$ git branch -d new_topic
+\end{lstlisting}
+
+If this branch contains unique commits that haven't been merged into master yet, a stronger form of the command is required:
+
+\begin{lstlisting}
+$ git branch -D new_topic
+\end{lstlisting}
+
+When the remote branch is no longer neeeded, the push command is used to delete it:
+
+\begin{lstlisting}
+$ git push origin :remote_new_topic
+\end{lstlisting}
+
+
+\end{document}

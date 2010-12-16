@@ -1,0 +1,282 @@
+
+============================
+LIFEV FILES TO BE REMOVED
+============================
+
+LIFECORE:   lifemacros.hpp                                                     CMCS3
+
+LIFEALG:    dataNewton.*pp                                                     CMCS3
+            newton.hpp                                                         CMCS3
+            picard.hpp                                                         CMCS3
+            
+LIFEARRAY:  tab.hpp                                                            CMCS3
+
+LIFEFEM:    assemb.cpp                                                         CMCS2
+            dofInterfaceHandler.*pp                                            CMCS2 
+            regionMesh3D_ALE.hpp                                               MOX
+
+LIFESOLVER: fluidToMaster.hpp                                                  CMCS3
+            reducedLinFluid.*pp                                                CMCS3
+            steklovPoincareBase.*pp                                            CMCS3
+
+============================
+LIFEV FILES TO BE MOVED
+============================
+
+EpetraMap:      from LIFEALG  to LIFEARRAY                                     CMCS2
+GetPot:         from LIFECORE to LIFEFILTERS                                   CMCS3
+identifier      from LIFEMESH to LIFEFEM                                       EMORY
+stiffnessFibers from LIFEFEM  to LIFESOLVER                                    CMCS1
+
+============================
+LIFEV FILES TO BE RENAMED
+============================
+
+LIFECORE
+============================
+Factory                                factory                                 CMCS3
+FactoryPolicy                          policy                                  CMCS3
+FactorySingleton                       singleton                               CMCS3
+FactoryTypeInfo                        typeInfo                                CMCS3
+FortranWrapper                         fortran_wrap                            CMCS3
+Life                                   life                                    CMCS3
+LifeAssert                             lifeassert                              CMCS3
+LifeAssertSmart                        SmartAssert                             CMCS3
+LifeChrono                             chrono                                  CMCS3
+LifeDebug                              debug                                   CMCS3
+LifeVersion                            lifeversion                             CMCS3
+StringData                             dataString                              CMCS3
+StringUtility                          util_string                             CMCS3
+Switch                                 switch                                  CMCS3
+
+LIFEALG
+============================
+NonLinearAitken                        generalizedAitken                       CMCS1
+NonLinearBrent                         brent                                   MOX
+NonLinearLinesearch                    linesearch_*                            MOX
+NonLinearRichardson                    nonLinRichardson                        CMCS3
+LinearEpetraOperatorBlock              OP_BlockOperator                        EMORY
+LinearEpetraOperator                   OP_LinearOperator                       EMORY
+PreconditionerAztecOO                  AztecOOPreconditioner                   CMCS2                   
+Preconditioner                         EpetraPreconditioner                    CMCS2
+PreconditionerIfpack                   IfPackPreconditioner                    CMCS2
+PreconditionerML                       MLPreconditioner                        CMCS2
+SolverAmesos                           -                                       CMCS2     DONE
+SolverAztecOO                          SolverTrilinos                          CMCS2
+
+LIFEARRAY
+============================
+MapEpetra                              EpetraMap                               CMCS2
+MatrixContainer                        -                                       EMORY     DONE
+MatrixElementary                       elemMat                                 CMCS2
+MatrixEpetra                           EpetraMatrix                            CMCS2
+RNM                                    -                                       CMCS2     DONE
+RNMOperator                            RNM_op                                  CMCS2
+RNMOperatorConstant                    RNM_opc                                 CMCS2
+RNMTemplate                            RNM_tpl                                 CMCS2
+VectorElementary                       elemVec                                 CMCS2
+VectorEpetra                           EpetraVector                            CMCS2
+VectorSimple                           SimpleVect                              CMCS2
+
+LIFEMESH
+============================
+BareItems                              bareItems                               EMORY
+BasisElementShapes                     basisElSh                               EMORY
+MarkersTraits                          markers_base                            EMORY
+Markers                                markers                                 EMORY
+MeshData                               dataMesh                                EMORY
+MeshElementBase                        geoND                                   EMORY
+MeshEntity                             meshEntity                              EMORY
+MeshGeometricElement                   geoElement                              EMORY
+MeshUtility                            mesh_util_base                          EMORY
+MeshVertex                             geo0D                                   EMORY
+RegionMesh1D                           regionMesh1D                            MOX
+RegionMesh2D                           regionMesh2D                            MOX
+RegionMesh3D                           regionMesh3D                            MOX
+RegionMesh3DStructured                 structuredMesh3D                        CMCS2
+MeshPartitionerOfflineFSI              FSIOfflinePartitioner                   CMCS3
+MeshPartitioner                        partitionMesh                           CMCS3
+
+LIFEFILTERS
+============================
+Exporter                               exporter                                CMCS3
+ExporterEmpty                          noexport                                CMCS3
+ExporterEnsight                        ensight                                 CMCS3
+ExporterHDF5                           hdf5exporter                            CMCS3
+ExporterHDF5Mesh3D                     HDF5Filter3DMesh                        CMCS3
+GetPot                                 -                                       CMCS3     DONE
+Importer                               importer                                MOX
+InternalEntitySelector                 selectMarker                            MOX
+MeshUtility                            mesh_util                               CMCS3
+ReadMesh2D                             readMesh2D                              MOX
+ReadMesh3D                             readMesh3D                              MOX
+
+LIFEFEM
+============================
+AssembleOperator                       assemb                                  CMCS2
+BCBase                                 bcCond                                  EMORY
+BCFunction                             bcFunction                              EMORY
+BCHandler                              bcHandler                               EMORY
+BCIdentifier                           identifier                              EMORY
+BCManage                               bcManage                                EMORY
+BCManageNormal                         BCNormalManager                         EMORY
+BCVector                               bcVector                                EMORY
+CurrentBoundaryFEBase                  staticBdFE                              CMCS2
+CurrentBoundaryFE                      currentBdFE                             CMCS2
+CurrentFE                              currentFE                               CMCS2
+DOF                                    dof                                     CMCS2
+DOFInterface3Dto2D                     dofInterface3Dto2D                      CMCS2
+DOFInterface3Dto3D                     dofInterface3Dto3D                      CMCS2
+DOFInterface                           dofInterfaceBase                        CMCS2
+DOFInterfaceHandler                    dofInterfaceHandler                     CMCS2
+DOFLocalPattern                        localDofPattern                         CMCS2
+ElementaryOperator                     elemOper                                CMCS2
+FESpace                                -                                       CMCS2     DONE
+HyperbolicFluxNumerical                NumericalFluxes                         MOX
+PostProcessing                         postProc                                EMORY
+QuadraturePoint                        quadPoint                               CMCS2
+QuadratureRule                         quadRule                                CMCS2
+QuadratureRuleDefinitionFE             defQuadRuleFE                           CMCS2
+ReferenceElement                       refEle                                  CMCS2
+ReferenceFE                            refFE                                   CMCS2
+ReferenceFEHdiv                        refFEHdiv                               CMCS2
+ReferenceFEHybrid                      refFEHybrid                             CMCS2
+ReferenceFEScalar                      refFEScalar                             CMCS2
+ReferenceToCurrentMap                  geoMap                                  CMCS2
+SobolevNorms                           sobolevNorms                            CMCS2
+TimeAdvanceBDF                         bdf_template                            MOX
+TimeAdvanceBDFNavierStokes             bdfNS_template                          CMCS2
+TimeAdvanceBDFVariableStep             bdfVariableStep                         CMCS2
+TimeAdvance                            timeAdvance_template                    MOX
+TimeAdvanceNewmark                     newmark_template                        MOX
+TimeData                               dataTime                                MOX
+
+LIFESOLVER
+============================
+ADRAssembler                           -                                       CMCS2     DONE
+ADRAssemblerIP                         -                                       CMCS2     DONE
+ADRData                                dataADR                                 CMCS2
+DarcyData                              dataDarcy                               MOX
+DarcySolver                            darcySolver                             MOX
+DarcySolverNonLinear                   darcySolverNonLinear                    MOX
+DarcySolverTransient                   darcySolverTransient                    MOX
+DarcySolverTransientNonLinear          darcySolverTransientNonLinear           MOX
+FSIData                                DataFSI                                 CMCS3
+FSI                                    FSIOperator                             CMCS3
+FSIExactJacobian                       exactJacobianBase                       CMCS3
+FSIFixedPoint                          fixedPointBase                          CMCS3
+FSISolver                              -                                       CMCS3     DONE
+HarmonicExtensionSolver                -                                       CMCS3     DONE
+HeartBidomainSolver                    bidomainSolver                          CMCS1
+HeartBidomainData                      dataBidomain                            CMCS1
+HeartFunctors                          heartFunctors                           CMCS1
+HeartIonicData                         dataIonic                               CMCS1
+HeartIonicSolver                       ionicSolver                             CMCS1
+HeartMonodomainData                    dataMonodomain                          CMCS1
+HeartMonodomainSolver                  monodomainSolver                        CMCS1
+HeartStiffnessFibers                   stiffnessFibers                         CMCS1
+HyperbolicData                         dataHyperbolic                          MOX
+HyperbolicSolver                       hyperbolicSolver                        MOX
+LevelSetData                           dataLevelSet                            CMCS2
+LevelSetSolver                         -                                       CMCS2     DONE
+OseenData                              dataNavierStokes                        EMORY
+OseenSolver                            Oseen                                   EMORY
+OseenSolverShapeDerivative             OseenShapeDerivatives                   EMORY
+StabilizationSD                        sdStabilization                         EMORY
+StabilizationIP                        ipStabilization                         EMORY
+StabilizationIPTerms                   nsipterms                               EMORY
+VenantKirchhoffElasticData             dataElasticStructure                    CMCS3  
+VenantKirchhoffElasticHandler          ElasticStructureHandler                 CMCS3
+VenantKirchhoffSolver                  VenantKirchhofSolver                    CMCS3
+VenantKirchhoffSolverLinear            LinearVenantKirchhofSolver              CMCS3
+VenantKirchhoffViscoelasticData        dataSecondOrder                         MOX
+VenantKirchhoffViscoelasticSolver      SecondOrderSolver                       MOX
+
+============================
+MATHCARD FILES TO BE RENAMED
+============================
+
+LIFECORE
+============================
+Parser                                 -                                       CMCS1     DONE
+ParserDefinitions                      -                                       CMCS1     DONE
+ParserSpiritGrammar                    -                                       CMCS1     DONE
+
+LIFEALG
+============================ 
+ComposedOperator                       ComposedOperator                        CMCS3
+EigenSolver                            eigenSolver                             CMCS3
+PreconditionerComposed                 ComposedPreconditioner                  CMCS3
+
+LIFEARRAY
+============================
+VectorContainer                        -                                       CMCS1     DONE
+
+LIFEFEM
+============================
+OneDimensionalBC                       OneDimensionalModel_BC                  CMCS1
+OneDimensionalBCFunction               OneDimensionalModel_BCFunction          CMCS1
+OneDimensionalBCFunctionDefault        OneDimensionalModel_BCFunction_Default  CMCS1
+OneDimensionalBCHandler                OneDimensionalModel_BCHandler           CMCS1
+
+LIFESOLVER
+============================
+BCInterface1D                          -                                       CMCS1     DONE
+BCInterface1DData                      -                                       CMCS1     DONE
+BCInterface1DDefinitions               -                                       CMCS1     DONE
+BCInterface1DFunction                  -                                       CMCS1     DONE
+BCInterface1DFunctionDefault           -                                       CMCS1     DONE
+BCInterface1DFunctionFile              -                                       CMCS1     DONE
+BCInterface1DFunctionFileSolver        -                                       CMCS1     DONE
+BCInterface1DFunctionSolver            -                                       CMCS1     DONE
+BCInterface3D                          -                                       CMCS1     DONE
+BCInterface3DData                      -                                       CMCS1     DONE
+BCInterface3DDefinitions               -                                       CMCS1     DONE
+BCInterface3DFunction                  -                                       CMCS1     DONE
+BCInterface3DFunctionFile              -                                       CMCS1     DONE
+BCInterface3DFunctionFileSolver        -                                       CMCS1     DONE
+BCInterface3DFunctionFSI               -                                       CMCS1     DONE
+BCInterface3DFunctionSolver            -                                       CMCS1     DONE
+FSIMonolithic                          Monolithic                              CMCS3
+FSIMonolithicGE                        MonolithicGE                            CMCS3
+FSIMonolithicGI                        MonolithicGI                            CMCS3
+HeartNonLinearMonodomainSolver         nonLinearMonodomain                     CMCS1
+MonolithicBlock                        BlockInterface                          CMCS3
+MonolithicBlockMatrix                  BlockMatrixRN                           CMCS3
+MonolithicBlockMatrixRN                BlockMatrixRN                           CMCS3
+MonolithicBlockOperator                ComposedBlockOper                       CMCS3
+MonolithicBlockOperatorDN              ComposedDN                              CMCS3
+MonolithicBlockOperatorDND             ComposedDND                             CMCS3
+MonolithicBlockOperatorDNND            ComposedDNND                            CMCS3
+MonolithicBlockOperatorNN              ComposedNN                              CMCS3
+MonolithicRobinInterface               RobinInterface                          CMCS3
+MultiscaleAlgorithm                    -                                       CMCS1     DONE
+MultiscaleAlgorithmAitken              -                                       CMCS1     DONE
+MultiscaleAlgorithmExplicit            -                                       CMCS1     DONE
+MultiscaleAlgorithmNewton              -                                       CMCS1     DONE
+MultiscaleCoupling                     -                                       CMCS1     DONE
+MultiscaleCouplingBoundaryCondition    -                                       CMCS1     DONE
+MultiscaleCouplingFlowRateStress       -                                       CMCS1     DONE
+MultiscaleCouplingStress               -                                       CMCS1     DONE
+MultiscaleDefinitions                  -                                       CMCS1     DONE
+MultiscaleModel                        -                                       CMCS1     DONE
+MultiscaleModel1D                      -                                       CMCS1     DONE
+MultiscaleModelFluid3D                 -                                       CMCS1     DONE
+MultiscaleModelFSI3D                   -                                       CMCS1     DONE
+MultiscaleModelMultiscale              -                                       CMCS1     DONE
+MultiscaleData                         -                                       CMCS1     DONE
+MultiscaleSolver                       -                                       CMCS1     DONE
+OneDimensionalData                     OneDimensionalModel_Data                CMCS1
+OneDimensionalDefinitions              OneDimensionalModel_Definitions         CMCS1
+OneDimensionalFlux                     OneDimensionalModel_Flux                CMCS1
+OneDimensionalFluxLinear               OneDimensionalModel_FluxLinear          CMCS1
+OneDimensionalFluxNonLinear            OneDimensionalModel_FluxNonLinear       CMCS1
+OneDimensionalPhysics                  OneDimensionalModel_Physics             CMCS1
+OneDimensionalPhysicsLinear            OneDimensionalModel_PhysicsLinear       CMCS1
+OneDimensionalPhysicsNonLinear         OneDimensionalModel_PhysicsNonLinear    CMCS1
+OneDimensionalSolver                   OneDimensionalModel_Solver              CMCS1
+OneDimensionalSource                   OneDimensionalModel_Source              CMCS1
+OneDimensionalSourceLinear             OneDimensionalModel_SourceLinear        CMCS1
+OneDimensionalSourceNonLinear          OneDimensionalModel_SourceNonLinear     CMCS1
+VenantKirchhoffSolverNonLinear         NonLinearVenantKirchhofSolver           CMCS3
+
