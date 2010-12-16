@@ -39,7 +39,14 @@
 #ifndef REFELE_H
 #define REFELE_H 1
 
-#include <life/lifearray/tab.hpp>
+#pragma GCC diagnostic ignored "-Wunused-variable"
+#pragma GCC diagnostic ignored "-Wunused-parameter"
+
+#include <boost/numeric/ublas/vector.hpp>
+
+#pragma GCC diagnostic warning "-Wunused-variable"
+#pragma GCC diagnostic warning "-Wunused-parameter"
+
 
 #include <life/lifecore/life.hpp>
 
@@ -48,7 +55,7 @@
 
 namespace LifeV
 {
-
+    typedef boost::numeric::ublas::vector<Real> GeoVector;
 
 //! RefEle - The basis class for the geometric mapping and the reference finite elements.
 /*!
