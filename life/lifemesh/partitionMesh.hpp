@@ -51,7 +51,6 @@ along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
 #include <boost/shared_ptr.hpp>
 #include <parmetis.h>
 #include <Epetra_MpiComm.h>
-#include <EpetraExt_HDF5.h>
 
 #pragma GCC diagnostic warning "-Wunused-variable"
 #pragma GCC diagnostic warning "-Wunused-parameter"
@@ -155,29 +154,27 @@ public:
       Builds the partitioned mesh using the partitioned graph
     */
     void doPartitionMesh();
-    //@}
+
+    // Next method should be renamed and become a regular method
+    //! Return a pointer to the mesh partition with rank k
+    const meshPtr_Type&      getPartition(Int k)    const {return (*M_meshPartitions)[k];}
 
     //! Prints information about the state (data) of the object
     void showMe(std::ostream& output = std::cout) const;
+    //@}
 
     //! \name Get Methods
     //@{
     //! Return a reference to M_vertexDistribution
-    const std::vector<Int>&  vertexDist()           const {return M_vertexDistribution;};
+    const std::vector<Int>&  vertexDistribution()   const {return M_vertexDistribution;};
     //! Return a const pointer to M_meshPartitions[0] - for parallel
-    const meshPtr_Type&      mesh()                 const {return (*M_meshPartitions)[0];}
-    // Next method should become a set method
-    //! Return a pointer to M_meshPartitions[0] - for parallel
-    meshPtr_Type&            mesh()                 {return (*M_meshPartitions)[0];}
-    // Next method should be renamed and become a regular method
-    //! Return a pointer to the mesh partition with rank k
-    const meshPtr_Type&      mesh(Int k)            const {return (*M_meshPartitions)[k];}
+    const meshPtr_Type&      meshPartition()        const {return (*M_meshPartitions)[0];}
     //! Return a pointer to M_meshPartitions
-    const partMeshPtr_Type&  meshAllPartitions()    const {return M_meshPartitions;}
+    const partMeshPtr_Type&  meshPartitions()       const {return M_meshPartitions;}
     //! Return a pointer to M_graphVertexLocations
-    const std::vector<Int>&  part()                 const {return M_graphVertexLocations;}
+    const std::vector<Int>&  graphVertexLocations() const {return M_graphVertexLocations;}
     //! Return a pointer to M_elementDomains
-    const graphPtr_Type&     graph()                const {return M_elementDomains;}
+    const graphPtr_Type&     elementDomains()       const {return M_elementDomains;}
     //! Return a reference to M_repeatedNodeVector
     const std::vector<Int>&  repeatedNodeVector()   const {return M_repeatedNodeVector[0];}
     //! Return a reference to M_repeatedEdgeVector
@@ -186,6 +183,14 @@ public:
     const std::vector<Int>&  repeatedFaceVector()   const {return M_repeatedFaceVector[0];}
     //! Return a reference to M_repeatedVolumeVector
     const std::vector<Int>&  repeatedVolumeVector() const {return M_repeatedVolumeVector[0];}
+
+    // DEPRECATED METHODS
+    const std::vector<Int>& __attribute__((__deprecated__)) vertexDist() const {return M_vertexDistribution;};
+    const meshPtr_Type& __attribute__((__deprecated__)) mesh() const {return (*M_meshPartitions)[0];}
+    const partMeshPtr_Type& __attribute__((__deprecated__)) meshAllPartitions() const {return M_meshPartitions;}
+    const std::vector<Int>& __attribute__((__deprecated__)) part() const {return M_graphVertexLocations;}
+    const graphPtr_Type& __attribute__((__deprecated__)) graph() const {return M_elementDomains;}
+    const meshPtr_Type& __attribute__((__deprecated__)) mesh(Int k) const {return (*M_meshPartitions)[k];}
     //@}
 
 private:
