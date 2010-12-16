@@ -28,6 +28,7 @@
 
 namespace LifeV
 {
+const Real Pi = 3.14159265358979323846264338328;
 Real Pi2=Pi*Pi;
 
 class AnalyticalSol
