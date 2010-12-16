@@ -42,6 +42,7 @@
 #define _DOFINTERFACE3DTO3D_HH
 
 #include <boost/shared_ptr.hpp>
+#include <boost/numeric/ublas/vector.hpp>
 
 #include <life/lifefem/dofInterfaceBase.hpp>
 
@@ -50,7 +51,6 @@
 #include <life/lifefem/dof.hpp>
 #include <iostream>
 #include <map>
-#include <life/lifearray/tab.hpp>
 #include <life/lifemesh/markers.hpp>
 #include <life/lifefem/currentBdFE.hpp>
 #include <ext/slist>
@@ -74,6 +74,10 @@ class DofInterface3Dto3D:
         public DofInterfaceBase
 {
 public:
+    //! @name Public typedefs
+    //@{
+    typedef boost::numeric::ublas::vector<Real> Vector;
+    //@}
 
     //! @name Constructor & Destructor
     //@{
