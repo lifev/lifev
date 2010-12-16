@@ -34,8 +34,16 @@
 
 #include <vector>
 
+#pragma GCC diagnostic ignored "-Wunused-variable"
+#pragma GCC diagnostic ignored "-Wunused-parameter"
+
+#include <boost/numeric/ublas/vector.hpp>
+#include <boost/numeric/ublas/matrix.hpp>
+
+#pragma GCC diagnostic warning "-Wunused-variable"
+#pragma GCC diagnostic warning "-Wunused-parameter"
+
 #include <life/lifecore/life.hpp>
-#include <life/lifearray/tab.hpp>
 
 using namespace LifeV;
 
@@ -44,9 +52,13 @@ using namespace LifeV;
 // ===================================================
 namespace dataProblem
 {
+typedef boost::numeric::ublas::matrix<Real> Matrix;
+typedef boost::numeric::ublas::vector<Real> Vector;
 
 namespace dataPhysical
 {
+typedef boost::numeric::ublas::matrix<Real> Matrix;
+typedef boost::numeric::ublas::vector<Real> Vector;
 
 // Porosity
 const Real Phi ( const Real& x, const Real& y, const Real& z );
