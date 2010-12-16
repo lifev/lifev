@@ -188,7 +188,7 @@ void MonolithicGE::applyBoundaryConditions( )
              M_monolithicMatrix->setConditions(M_BChs);
              M_monolithicMatrix->setSpaces(M_FESpaces);
              M_monolithicMatrix->setOffsets(2, M_offset, 0);
-             M_monolithicMatrix->coupler(M_monolithicMap, M_dofStructureToHarmonicExtension->locDofMap(), M_numerationInterface, M_data->dataFluid()->dataTime()->getTimeStep());
+             M_monolithicMatrix->coupler(M_monolithicMap, M_dofStructureToHarmonicExtension->localDofMap(), M_numerationInterface, M_data->dataFluid()->dataTime()->getTimeStep());
          }
          else
          {

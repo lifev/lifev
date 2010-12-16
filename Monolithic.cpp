@@ -106,15 +106,15 @@ Monolithic::setupDOF( void )
                                                M_data->interfaceTolerance(),
                                                M_data->fluidInterfaceVertexFlag() );
 
-    createInterfaceMaps(M_dofStructureToHarmonicExtension->locDofMap());
+    createInterfaceMaps(M_dofStructureToHarmonicExtension->localDofMap());
 }
 
 void
 Monolithic::setupDOF( meshFilter_Type& filterMesh )
 {
-    boost::shared_ptr< std::map<UInt, UInt> > locDofMap;
-    locDofMap = filterMesh.getStoredInterface( 0 );
-    createInterfaceMaps(*locDofMap);
+    boost::shared_ptr< std::map<UInt, UInt> > localDofMap;
+    localDofMap = filterMesh.getStoredInterface( 0 );
+    createInterfaceMaps(*localDofMap);
 }
 
 
@@ -179,7 +179,7 @@ Monolithic::setupFluidSolid( UInt const fluxes )
 
     M_interfaceMap = M_solidInterfaceMap;
 
-    //std::map<ID, ID> const& locDofMap = M_dofStructureToHarmonicExtension->locDofMap();
+    //std::map<ID, ID> const& localDofMap = M_dofStructureToHarmonicExtension->localDofMap();
     std::map<ID, ID>::const_iterator ITrow;
 
     M_monolithicMap.reset(new EpetraMap(M_uFESpace->map()));
@@ -192,7 +192,7 @@ Monolithic::setupFluidSolid( UInt const fluxes )
     *M_monolithicMap+= M_fluxes;
     *M_monolithicMap+= M_dFESpace->map();
 
-    M_monolithicMatrix->createInterfaceMap( *M_interfaceMap, M_dofStructureToHarmonicExtension->locDofMap(), M_dFESpace->map().getMap(Unique)->NumGlobalElements()/nDimensions, M_epetraWorldComm );
+    M_monolithicMatrix->createInterfaceMap( *M_interfaceMap, M_dofStructureToHarmonicExtension->localDofMap(), M_dFESpace->map().getMap(Unique)->NumGlobalElements()/nDimensions, M_epetraWorldComm );
     *M_monolithicMap += *M_monolithicMatrix->getInterfaceMap();
 
     //the map for the interface coupling matrices should be done with respect to the coarser mesh.
@@ -428,7 +428,7 @@ iterateMonolithic(const vector_Type& rhs, vector_Type& step)
 void
 Monolithic::couplingRhs(vectorPtr_Type rhs, vectorPtr_Type un) // not working with non-matching grids
 {
-    std::map<ID, ID> const& locDofMap = M_dofStructureToHarmonicExtension->locDofMap();
+    std::map<ID, ID> const& localDofMap = M_dofStructureToHarmonicExtension->localDofMap();
     std::map<ID, ID>::const_iterator ITrow;
     //    UInt solidDim=M_dFESpace->map().getMap(Unique)->NumGlobalElements()/nDimensions;
 
@@ -441,7 +441,7 @@ Monolithic::couplingRhs(vectorPtr_Type rhs, vectorPtr_Type un) // not working wi
 
     for(UInt dim = 0; dim < nDimensions; ++dim)
     {
-        for( ITrow = locDofMap.begin(); ITrow != locDofMap.end() ; ++ITrow)
+        for( ITrow = localDofMap.begin(); ITrow != localDofMap.end() ; ++ITrow)
         {
             if(M_interfaceMap->getMap(Unique)->LID(ITrow->second /*+ dim*solidDim*/) >= 0 )//to avoid repeated stuff
             {
@@ -518,7 +518,7 @@ int Monolithic::setupBlockPrec( )
         M_precPtr->setConditions(M_BChs);
         M_precPtr->setSpaces(M_FESpaces);
         M_precPtr->setOffsets(2, M_offset, 0);
-        M_precPtr->coupler(M_monolithicMap, M_dofStructureToHarmonicExtension->locDofMap(), M_numerationInterface, M_data->dataFluid()->dataTime()->getTimeStep());
+        M_precPtr->coupler(M_monolithicMap, M_dofStructureToHarmonicExtension->localDofMap(), M_numerationInterface, M_data->dataFluid()->dataTime()->getTimeStep());
      }
      else
      {

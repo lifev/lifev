@@ -222,7 +222,7 @@ MonolithicGI::applyBoundaryConditions()
         M_monolithicMatrix->setConditions(M_BChs);
         M_monolithicMatrix->setSpaces(M_FESpaces);
         M_monolithicMatrix->setOffsets(3, M_offset, 0, M_solidAndFluidDim + nDimensions*M_interface);
-        M_monolithicMatrix->coupler(M_monolithicMap, M_dofStructureToHarmonicExtension->locDofMap(), M_numerationInterface, M_data->dataFluid()->dataTime()->getTimeStep());
+        M_monolithicMatrix->coupler(M_monolithicMap, M_dofStructureToHarmonicExtension->localDofMap(), M_numerationInterface, M_data->dataFluid()->dataTime()->getTimeStep());
     }
     else
     {
@@ -324,7 +324,7 @@ int MonolithicGI::setupBlockPrec( )
         M_precPtr->setConditions( M_BChs );
         M_precPtr->setSpaces( M_FESpaces );
         M_precPtr->setOffsets( 3, M_offset, 0,  M_solidAndFluidDim + nDimensions*M_interface );
-        M_precPtr->coupler( M_monolithicMap, M_dofStructureToHarmonicExtension->locDofMap(), M_numerationInterface, M_data->dataFluid()->dataTime()->getTimeStep(), 2 );
+        M_precPtr->coupler( M_monolithicMap, M_dofStructureToHarmonicExtension->localDofMap(), M_numerationInterface, M_data->dataFluid()->dataTime()->getTimeStep(), 2 );
 
         if (M_data->dataFluid()->useShapeDerivatives())
         {
@@ -404,7 +404,7 @@ MonolithicGI::assembleMeshBlock(UInt /*iter*/)
     M_meshBlock->GlobalAssemble();
     UInt offset(M_solidAndFluidDim+nDimensions*M_interface);
     std::map<ID, ID>::const_iterator ITrow;
-    std::map<ID, ID> locdofmap(M_dofStructureToHarmonicExtension->locDofMap());
+    std::map<ID, ID> locdofmap(M_dofStructureToHarmonicExtension->localDofMap());
 
     /******************alternative way************************/
 //     BCFunctionBase bcf(fZero);
