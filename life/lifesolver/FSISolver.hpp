@@ -60,8 +60,6 @@
 
 #include <life/lifecore/life.hpp>
 
-#include <life/lifearray/tab.hpp>
-
 //#include <life/lifealg/newton.hpp>
 
 #include <life/lifesolver/FSIOperator.hpp>
