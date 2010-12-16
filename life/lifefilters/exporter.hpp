@@ -58,7 +58,6 @@ along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
 #pragma GCC diagnostic warning "-Wunused-parameter"
 
 #include <life/lifearray/EpetraVector.hpp>
-#include <life/lifearray/tab.hpp>
 #include <life/lifecore/GetPot.hpp>
 #include <life/lifecore/chrono.hpp>
 #include <life/lifecore/life.hpp>
