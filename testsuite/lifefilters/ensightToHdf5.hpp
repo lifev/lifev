@@ -33,6 +33,8 @@
 
 #include <boost/shared_ptr.hpp>
 
+// Didn't know where to put this
+const double Pi = 3.14159265358979323846264338328;
 
 class EnsightToHdf5
 
