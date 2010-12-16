@@ -286,7 +286,7 @@ public:
                            FESpace<Mesh, EpetraMap>& hybrid_FESpace,
                            FESpace<Mesh, EpetraMap>& VdotN_FESpace,
                            bchandler_Type&           bcHandler,
-                           commPtr_Type&             comm );
+                           const commPtr_Type&             comm );
     /*!
       Constructor for the class without boundary condition handler.
       @param dataFile Data for the problem.
@@ -301,7 +301,7 @@ public:
                            FESpace<Mesh, EpetraMap>& dual_FESpace,
                            FESpace<Mesh, EpetraMap>& hybrid_FESpace,
                            FESpace<Mesh, EpetraMap>& VdotN_FESpace,
-                           commPtr_Type&             comm );
+                           const commPtr_Type&             comm );
 
     //! Virtual destructor.
     virtual ~DarcySolverTransient ();
@@ -380,6 +380,17 @@ protected:
 
     //@}
 
+    //! @name Protected data
+    //@{
+
+    //! Primal solution at previous time.
+    vectorPtr_Type  M_primalOld;
+
+    //@}
+
+
+private:
+
     // Data of the problem.
     //! @name Data of the problem
     //@{
@@ -395,9 +406,6 @@ protected:
     // Algebraic stuff.
     //! @name Algebraic stuff
     //@{
-
-    //! Primal solution at previous time.
-    vectorPtr_Type  M_primalOld;
 
     //! Boolean that indicates if the preconditioner is re-used or not.
     bool            M_reusePrec;
@@ -438,7 +446,7 @@ DarcySolverTransient ( const data_Type&           dataFile,
                        FESpace<Mesh, EpetraMap>&  hybrid_FESpace,
                        FESpace<Mesh, EpetraMap>&  VdotN_FESpace,
                        bchandler_Type&            bcHandler,
-                       commPtr_Type&              comm ):
+                       const commPtr_Type&              comm ):
         // Standard Darcy solver constructor.
         DarcySolver<Mesh, SolverType>::DarcySolver( dataFile, primal_FESpace, dual_FESpace, hybrid_FESpace, VdotN_FESpace, bcHandler, comm),
         // Data of the problem
@@ -464,7 +472,7 @@ DarcySolverTransient ( const data_Type&           dataFile,
                        FESpace<Mesh, EpetraMap>&  dual_FESpace,
                        FESpace<Mesh, EpetraMap>&  hybrid_FESpace,
                        FESpace<Mesh, EpetraMap>&  VdotN_FESpace,
-                       commPtr_Type&              comm ):
+                       const commPtr_Type&              comm ):
         // Standard Darcy solver constructor.
         DarcySolver<Mesh, SolverType>::DarcySolver( dataFile, primal_FESpace, dual_FESpace, hybrid_FESpace, VdotN_FESpace, comm),
         // Data of the problem

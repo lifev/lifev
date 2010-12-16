@@ -298,7 +298,7 @@ public:
                            FESpace<Mesh, EpetraMap>& hybrid_FESpace,
                            FESpace<Mesh, EpetraMap>& VdotN_FESpace,
                            bchandler_raw_Type&       bcHandler,
-                           commPtr_Type&             comm );
+                           const commPtr_Type&             comm );
 
     /*!
       Constructor for the class without the definition of the boundary handler.
@@ -315,7 +315,7 @@ public:
                            FESpace<Mesh, EpetraMap>& dual_FESpace,
                            FESpace<Mesh, EpetraMap>& hybrid_FESpace,
                            FESpace<Mesh, EpetraMap>& VdotN_FESpace,
-                           commPtr_Type&             comm );
+                           const commPtr_Type&             comm );
 
     //! Virtual destructor.
     virtual ~DarcySolverNonLinear ();
@@ -353,14 +353,14 @@ public:
       The default inverse of permeability is the identity matrix.
       @param invPerm Inverse of the permeability tensor for the problem.
     */
-    inline void setInversePermeability ( const permeability_Type& invPerm )
+    void setInversePermeability ( const permeability_Type& invPerm )
     {
 
         // Call the standard set inverse permeability
         DarcySolver<Mesh, SolverType>::setInversePermeability( invPerm );
 
         // Set the dependence of the previous solution in the permeability
-        this->M_inversePermeability->setField( M_primalPreviousIteration );
+        this->M_inversePermeability->setField( primalPreviousIteration() );
     }
 
     //@}
@@ -372,7 +372,7 @@ public:
       Returns the number of iteration of the fixed point scheme.
       @return Final number of iterations of the fixed point method as a constant UInt.
     */
-    UInt fixedPointNumIteration () const
+    UInt fixedPointNumIteration ()
     {
         return M_fixedPointNumIteration;
     }
@@ -386,7 +386,7 @@ public:
     /*!
       @return Final residual of the fixed point method as a constant Real.
     */
-    Real fixedPointResidual () const
+    Real fixedPointResidual ()
     {
         return M_fixedPointResidual;
     }
@@ -396,11 +396,43 @@ public:
         return fixedPointResidual();
     }
 
+    //! Returns fixed point tolerance
+    /*!
+      @return M_fixedPointTolerance
+     */
+    const Real fixedPointTolerance () const 
+    {
+	return M_fixedPointTolerance;
+    }
+          Real fixedPointTolerance ()
+    {
+	return M_fixedPointTolerance;
+    }
+    
+    //! Returns maximum number of fixed point iterations allowed
+    /*!
+      @return max possible number of fixed point iterations
+    */
+    const UInt fixedPointMaxIteration () const
+    {
+	return M_fixedPointMaxIteration;
+    } 
+
+          UInt fixedPointMaxIteration ()
+    {
+	return M_fixedPointMaxIteration;
+    } 
+
     //!  Returns the pointer of the primal solution vector at previous step.
     /*!
       @return Constant vector_Type reference of the primal solution at previous step.
     */
-    inline const vectorPtr_Type& primalPreviousIteration () const
+    const vectorPtr_Type& primalPreviousIteration () const
+    {
+        return M_primalPreviousIteration;
+    }
+ 
+          vectorPtr_Type& primalPreviousIteration ()
     {
         return M_primalPreviousIteration;
     }
@@ -423,6 +455,39 @@ protected:
 
     //@}
 
+    //! @name Set methods
+    //@{
+
+    /*!
+      Set fixed point tolerance
+      @param tol requested tolerance
+    */
+    void setFixedPointTolerance ( const Real& tol)
+    {
+	M_fixedPointTolerance = tol;
+    }
+
+    /*!
+      Set maximum number of fixed point iterations permitted
+      @param maxit requested maximum
+     */
+    void setFixedPointMaxIteration ( const UInt& maxit)
+    {
+	M_fixedPointMaxIteration = maxit;
+    }
+
+    //@}
+
+    //! @name protected variables
+    //@{
+
+    //! Primal solution at previous iteration step.
+    vectorPtr_Type M_primalPreviousIteration;
+    
+    //@}
+
+private:
+    
     // Non-linear stuff.
     //! @name Non-linear stuff
     //@{
@@ -438,9 +503,6 @@ protected:
 
     //! The residual between two iteration of the fixed point scheme.
     Real           M_fixedPointResidual;
-
-    //! Primal solution at previous iteration step.
-    vectorPtr_Type M_primalPreviousIteration;
 
     //! Primal solution at zero time step.
     Function       M_primalZeroIteration;
@@ -466,7 +528,7 @@ DarcySolverNonLinear ( const data_Type&           dataFile,
                        FESpace<Mesh, EpetraMap>&  hybrid_FESpace,
                        FESpace<Mesh, EpetraMap>&  VdotN_FESpace,
                        bchandler_raw_Type&        bcHandler,
-                       commPtr_Type&              comm ):
+                       const commPtr_Type&              comm ):
         // Standard Darcy solver constructor.
         DarcySolver<Mesh, SolverType>::DarcySolver( dataFile, primal_FESpace, dual_FESpace, hybrid_FESpace, VdotN_FESpace, bcHandler, comm),
         // Non-linear stuff.
@@ -494,7 +556,7 @@ DarcySolverNonLinear ( const data_Type&           dataFile,
                        FESpace<Mesh, EpetraMap>&  dual_FESpace,
                        FESpace<Mesh, EpetraMap>&  hybrid_FESpace,
                        FESpace<Mesh, EpetraMap>&  VdotN_FESpace,
-                       commPtr_Type&              comm ):
+                       const commPtr_Type&              comm ):
         // Standard Darcy solver constructor.
         DarcySolver<Mesh, SolverType>::DarcySolver( dataFile, primal_FESpace, dual_FESpace, hybrid_FESpace, VdotN_FESpace, comm),
         // Non-linear stuff.
@@ -538,11 +600,11 @@ setup ()
     DarcySolver<Mesh, SolverType>::setup();
 
     // Set the maximum number of iteration for the fixed point iteration scheme.
-    M_fixedPointMaxIteration = static_cast<UInt>( dataFile( ( this->M_data.section()
-                                                              + "/non-linear/fixed_point_iteration" ).data(), 10 ) );
+    setFixedPointMaxIteration(static_cast<UInt>( dataFile( ( this->M_data.section()
+							     + "/non-linear/fixed_point_iteration" ).data(), 10 ) ));
 
     // Set the tollerance for the fixed point iteration scheme.
-    M_fixedPointTolerance = dataFile( ( this->M_data.section() + "/non-linear/fixed_point_toll" ).data(), 1.e-8 );
+    setFixedPointTolerance(dataFile( ( this->M_data.section() + "/non-linear/fixed_point_toll" ).data(), 1.e-8 ));
 
 } // setup
 
@@ -557,11 +619,12 @@ fixedPointScheme ()
     M_fixedPointNumIteration = static_cast<UInt>(0);
 
     // Error between two iterations, it is the relative error between two step of the primal vector
-    M_fixedPointResidual =  M_fixedPointTolerance + 1;
+    M_fixedPointResidual =  fixedPointTolerance() + 1;
 
     /* A loop for the fixed point scheme, with exit condition based on stagnate of the
        primal variable and the maximum iteration. */
-    while ( M_fixedPointResidual > M_fixedPointTolerance && M_fixedPointNumIteration < M_fixedPointMaxIteration )
+    while (    fixedPointResidual() > fixedPointTolerance() 
+	       && fixedPointNumIteration() < fixedPointMaxIteration() )
     {
         // Increment the iteration number.
         ++M_fixedPointNumIteration;
@@ -583,24 +646,24 @@ fixedPointScheme ()
 
         // Print the maximum number of iterations
         this->M_displayer.leaderPrint( "Maximum number of iterations ",
-                                       M_fixedPointMaxIteration, "\n" );
+                                       fixedPointMaxIteration(), "\n" );
 
         // Print the actual iterations
         this->M_displayer.leaderPrint( "Iteration number             ",
-                                       M_fixedPointNumIteration, "\n" );
+                                       fixedPointNumIteration(), "\n" );
 
         // Print the tollerance
         this->M_displayer.leaderPrint( "Tolerance                   ",
-                                       M_fixedPointTolerance, "\n" );
+                                       fixedPointTolerance(), "\n" );
 
         // Print the error reached
         this->M_displayer.leaderPrint( "Error                        ",
-                                       M_fixedPointResidual, "\n" );
+                                       fixedPointResidual(), "\n" );
 
     }
 
-    // Check if the fixed point method reach the tollerance.
-    ASSERT( M_fixedPointMaxIteration > M_fixedPointNumIteration, "Attention the fixed point scheme did not reach convergence." );
+    // Check if the fixed point method reach the tolerance.
+    ASSERT( fixedPointMaxIteration() > fixedPointNumIteration(), "Attention the fixed point scheme did not reach convergence." );
 
 } // fixedPointScheme
 

@@ -220,10 +220,10 @@ struct darcy::Private
         return f;
     }
 
-    fct_type getZeroItarationPrimal ( )
+    fct_type getPrimalZeroIteration ( )
     {
         fct_type f;
-        f = boost::bind( &dataProblem::zeroItarationPrimal, _1, _2, _3, _4, _5 );
+        f = boost::bind( &dataProblem::primalZeroIteration, _1, _2, _3, _4, _5 );
         return f;
     }
 
@@ -607,7 +607,7 @@ darcy::run()
 
     case DARCY_NON_LINEAR:
         // Set the initial primal variable
-        ( dynamic_pointer_cast< darcyNonLinearSolver_type >( darcySolver ) )->setZeroItarationPrimal( Members->getZeroItarationPrimal() );
+        ( dynamic_pointer_cast< darcyNonLinearSolver_type >( darcySolver ) )->setPrimalZeroIteration( Members->getPrimalZeroIteration() );
 
         break;
 
@@ -618,7 +618,7 @@ darcy::run()
         ( dynamic_pointer_cast< darcyTransientSolver_type >( darcySolver ) )->setInitialPrimal( Members->getInitialPrimal() );
 
         // Set the mass function
-        ( dynamic_pointer_cast< darcyTransientSolver_type >( darcySolver ) )->setMassTerm( Members->getMass() );
+        ( dynamic_pointer_cast< darcyTransientSolver_type >( darcySolver ) )->setMass( Members->getMass() );
 
         break;
     }

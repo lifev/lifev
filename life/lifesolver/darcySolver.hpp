@@ -290,13 +290,13 @@ public:
       @param bcHandler Boundary conditions for the problem.
       @param comm Shared pointer of the Epetra communicator.
     */
-    DarcySolver ( const data_Type&          dataFile,
-                  FESpace<Mesh, EpetraMap>& primal_FESpace,
-                  FESpace<Mesh, EpetraMap>& dual_FESpace,
-                  FESpace<Mesh, EpetraMap>& hybrid_FESpace,
-                  FESpace<Mesh, EpetraMap>& VdotN_FESpace,
-                  bchandler_raw_Type&       bcHandler,
-                  commPtr_Type&             comm );
+    DarcySolver ( const data_Type&                dataFile,
+                        FESpace<Mesh, EpetraMap>& primal_FESpace,
+                        FESpace<Mesh, EpetraMap>& dual_FESpace,
+                        FESpace<Mesh, EpetraMap>& hybrid_FESpace,
+                        FESpace<Mesh, EpetraMap>& VdotN_FESpace,
+                  const bchandler_raw_Type&       bcHandler,
+                  const commPtr_Type&             comm );
 
     //! Constructor for the class without the definition of the boundary handler.
 
@@ -308,12 +308,12 @@ public:
       @param VdotN_FESpace Dual basis function dot outward unit normal at each face (3D) or edge (2D) finite element space.
       @param comm Shared pointer of the Epetra communicator.
     */
-    DarcySolver ( const data_Type&          dataFile,
-                  FESpace<Mesh, EpetraMap>& primal_FESpace,
-                  FESpace<Mesh, EpetraMap>& dual_FESpace,
-                  FESpace<Mesh, EpetraMap>& hybrid_FESpace,
-                  FESpace<Mesh, EpetraMap>& VdotN_FESpace,
-                  commPtr_Type&             comm );
+    DarcySolver ( const data_Type&                dataFile,
+                        FESpace<Mesh, EpetraMap>& primal_FESpace,
+                        FESpace<Mesh, EpetraMap>& dual_FESpace,
+                        FESpace<Mesh, EpetraMap>& hybrid_FESpace,
+                        FESpace<Mesh, EpetraMap>& VdotN_FESpace,
+                  const commPtr_Type&             comm );
 
     //! Virtual destructor.
     virtual ~DarcySolver ();
@@ -411,11 +411,21 @@ public:
         return M_hybrid;
     }
 
+          vectorPtr_Type& hybridSolution ()
+    {
+        return M_hybrid;
+    }
+
     //! Returns pointer to the primal solution vector.
     /*!
       @return Constant vector_Type reference of the primal solution.
     */
     const vectorPtr_Type& primalSolution () const
+    {
+        return M_primal;
+    }
+
+          vectorPtr_Type& primalSolution ()
     {
         return M_primal;
     }
@@ -429,6 +439,11 @@ public:
         return M_dual;
     }
 
+          vectorPtr_Type& dualSolution ()
+    {
+        return M_dual;
+    }
+
     /*!
       Returns the pointer of the residual vector.
       @return Constant vectorPtr_Type reference of the residual.
@@ -438,12 +453,17 @@ public:
         return M_residual;
     }
 
+          vectorPtr_Type& residual ()
+    {
+        return M_residual;
+    }
+
     //! Returns whether bounday conditions is set
     /*!
       @return Constant boolean with value true if the boundary condition is setted,
       false otherwise
     */
-    bool isBCset () const
+    bool isBCset ()
     {
         return M_setBC;
     }
@@ -457,7 +477,12 @@ public:
     /*!
       @return Reference of boundary conditions handler.
     */
-    bchandler_Type& bcHandler ()
+    const bchandler_Type& bcHandler () const
+    {
+        return M_BCh;
+    }
+
+          bchandler_Type& bcHandler ()
     {
         return M_BCh;
     }
@@ -466,7 +491,12 @@ public:
     /*!
       @return Constant EpetraMap reference of the problem.
     */
-    EpetraMap const& getMap () const
+    const EpetraMap& getMap () const
+    {
+        return M_localMap;
+    }
+
+          EpetraMap& getMap ()
     {
         return M_localMap;
     }
@@ -475,7 +505,12 @@ public:
     /*!
       @return Constant reference of the shared pointer of the communicator of the problem.
     */
-    commPtr_Type const & getComm () const
+    const commPtr_Type & getComm () const
+    {
+        return M_displayer.comm();
+    }
+
+          commPtr_Type & getComm ()
     {
         return M_displayer.comm();
     }
@@ -484,7 +519,12 @@ public:
     /*!
       @return Constant reference of the displayer of the problem.
     */
-    Displayer const & getDisplayer() const
+    const Displayer & getDisplayer() const
+    {
+        return M_displayer;
+    }
+
+          Displayer & getDisplayer()
     {
         return M_displayer;
     }
@@ -626,7 +666,7 @@ protected:
     vectorPtr_Type                          M_residual;
 
     //! Linear solver.
-    solver_Type                              M_linearSolver;
+    solver_Type                             M_linearSolver;
 
     //! Epetra preconditioner for the linear system.
     boost::shared_ptr<EpetraPreconditioner> M_prec;
@@ -689,13 +729,13 @@ protected:
 // Complete constructor.
 template<typename Mesh, typename SolverType>
 DarcySolver<Mesh, SolverType>::
-DarcySolver ( const data_Type&           dataFile,
+DarcySolver ( const data_Type&                 dataFile,
               FESpace<Mesh, EpetraMap>&  primal_FESpace,
               FESpace<Mesh, EpetraMap>&  dual_FESpace,
               FESpace<Mesh, EpetraMap>&  hybrid_FESpace,
               FESpace<Mesh, EpetraMap>&  VdotN_FESpace,
-              bchandler_raw_Type&        bcHandler,
-              commPtr_Type&              comm ):
+              const bchandler_raw_Type&        bcHandler,
+              const commPtr_Type&              comm ):
         // Parallel stuff.
         M_me                     ( comm->MyPID() ),
         M_localMap               ( hybrid_FESpace.map() ),
@@ -737,12 +777,12 @@ DarcySolver ( const data_Type&           dataFile,
 // Constructor without boundary condition handler.
 template<typename Mesh, typename SolverType>
 DarcySolver<Mesh, SolverType>::
-DarcySolver ( const data_Type&           dataFile,
+DarcySolver ( const data_Type&                 dataFile,
               FESpace<Mesh, EpetraMap>&  primal_FESpace,
               FESpace<Mesh, EpetraMap>&  dual_FESpace,
               FESpace<Mesh, EpetraMap>&  hybrid_FESpace,
               FESpace<Mesh, EpetraMap>&  VdotN_FESpace,
-              commPtr_Type&              comm ):
+              const commPtr_Type&              comm ):
         // Parallel stuff.
         M_me                     ( comm->MyPID() ),
         M_localMap               ( hybrid_FESpace.map() ),

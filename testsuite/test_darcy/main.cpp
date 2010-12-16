@@ -48,7 +48,9 @@ Solve the problem
 
 #include <Epetra_ConfigDefs.h>
 #ifdef EPETRA_MPI
+#pragma GCC diagnostic ignored "-Wunused-parameter"
 #include <mpi.h>
+#pragma GCC diagnostic ignored "-Wunused-parameter"
 #include <Epetra_MpiComm.h>
 #else
 #include <Epetra_SerialComm.h>

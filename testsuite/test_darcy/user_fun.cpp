@@ -45,9 +45,9 @@ K = [2 1 0
      0 0 1]
 */
 Matrix inversePermeability( const Real& /*t*/,
-                            const Real& x,
-                            const Real& y,
-                            const Real& z, const std::vector<Real>& )
+                            const Real& /*x*/,
+                            const Real& /*y*/,
+                            const Real& /*z*/, const std::vector<Real>& )
 {
     Matrix inversePermeabilityMatrix( static_cast<UInt>(3), static_cast<UInt>(3) );
 
@@ -125,17 +125,17 @@ Real source_in( const Real& /*t*/,
 // Initial time primal variable for transient and non-linear transient solvers
 Real initialPrimal( const Real& /*t*/,
                     const Real& x,
-                    const Real& y,
-                    const Real& z,
+                    const Real& /*y*/,
+                    const Real& /*z*/,
                     const ID& /*ic*/)
 {
     return 6.*x;
 }
 
 // Zero iteration primal variable for non-linear solver
-Real zeroItarationPrimal( const Real& /*t*/,
-                          const Real& x,
-                          const Real& y,
+Real primalZeroIteration( const Real& /*t*/,
+                          const Real& /*x*/,
+                          const Real& /*y*/,
                           const Real& /*z*/,
                           const ID& /*ic*/)
 {
@@ -144,9 +144,9 @@ Real zeroItarationPrimal( const Real& /*t*/,
 
 // Mass function for time dependent problem
 Real mass( const Real& /*t*/,
-           const Real& x,
-           const Real& y,
-           const Real& z,
+           const Real& /*x*/,
+           const Real& /*y*/,
+           const Real& /*z*/,
            const ID&   /*ic*/)
 {
     return 1.;
@@ -171,7 +171,7 @@ Real dirichlet( const Real& /* t */,
 Real neumann1( const Real& /* t */,
                const Real& x,
                const Real& y,
-               const Real& z,
+               const Real& /*z*/,
                const ID&   icomp)
 {
     switch (icomp)
@@ -192,7 +192,7 @@ Real neumann1( const Real& /* t */,
 Real neumann2( const Real& /* t */,
                const Real& x,
                const Real& y,
-               const Real& z,
+               const Real& /*z*/,
                const ID&   icomp)
 {
     switch (icomp)
@@ -240,7 +240,7 @@ Real analyticalSolution( const Real&/*t*/,
 Real analyticalFlux( const Real& /*t*/,
                      const Real& x,
                      const Real& y,
-                     const Real& z,
+                     const Real& /*z*/,
                      const ID& icomp)
 {
 

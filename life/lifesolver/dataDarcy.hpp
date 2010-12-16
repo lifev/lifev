@@ -172,7 +172,7 @@ public:
     //@}
 
 
-protected:
+private:
 
     //! Data containers for time and mesh
     Data_ptrType      M_data;
@@ -274,10 +274,10 @@ public:
 
     typedef boost::function<Matrix ( const Real&, const Real&,
                                      const Real&, const Real&,
-                                     const std::vector<Real> & )> permeability_type;
+                                     const std::vector<Real> & )> permeability_Type;
 
-    typedef typename SolverType::vector_type      vector_type;
-    typedef boost::shared_ptr<vector_type>        vector_ptrtype;
+    typedef typename SolverType::vector_type      vector_Type;
+    typedef boost::shared_ptr<vector_Type>        vectorPtr_Type;
 
     //@}
 
@@ -286,8 +286,8 @@ public:
     //@{
 
     // Copy constructor
-    inversePermeability ( const permeability_type& invPerm, FESpace<Mesh, EpetraMap>& fESpace ):
-	M_fields              ( std::vector< const vector_ptrtype* >(0) ),
+    inversePermeability ( const permeability_Type& invPerm, FESpace<Mesh, EpetraMap>& fESpace ):
+	M_fields              ( std::vector< const vectorPtr_Type* >(0) ),
 	M_inversePermeability ( invPerm ),
 	M_fESpace             ( fESpace )
     {
@@ -303,9 +303,9 @@ public:
     //@{
 
     // Add one field
-    inline void setField ( const vector_ptrtype & field ) { M_fields.push_back( &field ); };
+    inline void setField ( const vectorPtr_Type & field ) { M_fields.push_back( &field ); };
 
-    inline void setFunction ( const permeability_type & invPerm ) { M_inversePermeability = invPerm; };
+    inline void setFunction ( const permeability_Type & invPerm ) { M_inversePermeability = invPerm; };
 
     //@}
 
@@ -320,10 +320,10 @@ public:
 private:
 
     // Vector of pointers for the dependences of the permeability to an external field.
-    std::vector< const vector_ptrtype* > M_fields;
+    std::vector< const vectorPtr_Type* > M_fields;
 
     // Inverse permeability function
-    permeability_type             M_inversePermeability;
+    permeability_Type             M_inversePermeability;
 
     // Finite element space
     FESpace<Mesh, EpetraMap>&     M_fESpace;

@@ -67,7 +67,7 @@ Real source_in( const Real&, const Real&, const Real&, const Real&, const ID& );
 Real initialPrimal( const Real&, const Real&, const Real&, const Real&, const ID& );
 
 // Zero iteration primal variable for non-linear solver
-Real zeroItarationPrimal( const Real&, const Real&, const Real&, const Real&, const ID& );
+Real primalZeroIteration( const Real&, const Real&, const Real&, const Real&, const ID& );
 
 // Mass function for time dependent problem
 Real mass( const Real&, const Real&, const Real&, const Real&, const ID& );

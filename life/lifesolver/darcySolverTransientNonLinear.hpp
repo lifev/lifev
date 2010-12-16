@@ -446,10 +446,10 @@ setup ()
     DarcySolverTransient<Mesh, solver_Type>::setup();
 
     // Set the maximum number of iteration for the fixed point iteration scheme.
-    this->M_fixedPointMaxIteration = static_cast<UInt>( dataFile( ( this->M_data.section() + "/non-linear/fixed_point_iteration" ).data(), 10 ) );
+    this->setFixedPointMaxIteration(static_cast<UInt>( dataFile( ( this->M_data.section() + "/non-linear/fixed_point_iteration" ).data(), 10 ) ));
 
     // Set the tollerance for the fixed point iteration scheme.
-    this->M_fixedPointTolerance = dataFile( ( this->M_data.section() + "/non-linear/fixed_point_toll" ).data(), 1.e-8 );
+    this->setFixedPointTolerance(dataFile( ( this->M_data.section() + "/non-linear/fixed_point_toll" ).data(), 1.e-8 ));
 
 } // setup
 
