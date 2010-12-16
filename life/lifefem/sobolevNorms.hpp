@@ -38,7 +38,14 @@
 #ifndef _SOBOLEVNORMS_H_INCLUDED
 #define _SOBOLEVNORMS_H_INCLUDED
 
+#pragma GCC diagnostic ignored "-Wunused-variable"
+#pragma GCC diagnostic ignored "-Wunused-parameter"
+
 #include <boost/function.hpp>
+#include <boost/numeric/ublas/vector.hpp>
+
+#pragma GCC diagnostic warning "-Wunused-variable"
+#pragma GCC diagnostic warning "-Wunused-parameter"
 
 #include <life/lifecore/life.hpp>
 #include <life/lifefem/dof.hpp>
@@ -46,6 +53,11 @@
 
 namespace LifeV
 {
+//! @name Public typedefs
+//@{
+typedef boost::numeric::ublas::vector<Real> Vector;
+typedef boost::numeric::ublas::zero_vector<Real> ZeroVector;
+//@}
 
 //! version for vectorial problem
 template <typename VectorType>
