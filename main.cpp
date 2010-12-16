@@ -120,20 +120,20 @@ public:
     typedef boost::shared_ptr<LifeV::FSISolver> fsi_solver_ptr;
 
     typedef LifeV::FSIOperator::data_Type                          data_Type;
-    typedef LifeV::FSIOperator::data_PtrType                       data_PtrType;
+    typedef LifeV::FSIOperator::dataPtr_Type                       dataPtr_Type;
 
-    typedef LifeV::FSIOperator::vector_type        vector_type;
-    typedef LifeV::FSIOperator::vector_ptrtype     vector_ptrtype;
+    typedef LifeV::FSIOperator::vector_Type        vector_Type;
+    typedef LifeV::FSIOperator::vectorPtr_Type     vectorPtr_Type;
 
-    typedef boost::shared_ptr< LifeV::Exporter<LifeV::RegionMesh3D<LifeV::LinearTetra> > > filter_ptrtype;
+    typedef boost::shared_ptr< LifeV::Exporter<LifeV::RegionMesh3D<LifeV::LinearTetra> > > filterPtr_Type;
 
-    typedef LifeV::Ensight<LifeV::FSIOperator::mesh_type>  ensightfilter_type;
-    typedef boost::shared_ptr<ensightfilter_type>                 ensightfilter_ptrtype;
+    typedef LifeV::Ensight<LifeV::FSIOperator::mesh_Type>  ensightFilter_Type;
+    typedef boost::shared_ptr<ensightFilter_Type>                 ensightFilterPtr_Type;
 #ifdef HAVE_HDF5
-    typedef LifeV::Hdf5exporter<LifeV::FSIOperator::mesh_type>  hdf5filter_type;
-    typedef boost::shared_ptr<hdf5filter_type>                  hdf5filter_ptrtype;
+    typedef LifeV::Hdf5exporter<LifeV::FSIOperator::mesh_Type>  hdf5Filter_Type;
+    typedef boost::shared_ptr<hdf5Filter_Type>                  hdf5FilterPtr_Type;
 #endif
-    typedef LifeV::singleton<LifeV::factory<LifeV::FSIOperator,  std::string> > FSIFactory;
+    typedef LifeV::singleton<LifeV::factory<LifeV::FSIOperator,  std::string> > FSIFactory_Type;
     /*!
       This routine sets up the problem:
 
@@ -147,11 +147,11 @@ public:
     {
         using namespace LifeV;
 
-        VenantKirchhofSolver< FSIOperator::mesh_type, SolverTrilinos >::StructureSolverFactory::instance().registerProduct( "linearVenantKirchhof", &FSIOperator::createLinearStructure );
+        VenantKirchhofSolver< FSIOperator::mesh_Type, SolverTrilinos >::StructureSolverFactory::instance().registerProduct( "linearVenantKirchhof", &FSIOperator::createLinearStructure );
 
-        //VenantKirchhofSolver< FSIOperator::mesh_type, SolverTrilinos >::StructureSolverFactory::instance().registerProduct( "nonLinearVenantKirchhof", &FSIOperator::createNonLinearStructure );
+        //VenantKirchhofSolver< FSIOperator::mesh_Type, SolverTrilinos >::StructureSolverFactory::instance().registerProduct( "nonLinearVenantKirchhof", &FSIOperator::createNonLinearStructure );
 
-        M_data = data_PtrType( new data_Type() );
+        M_data = dataPtr_Type( new data_Type() );
         M_data->setup( data_file );
         M_data->dataSolid()->setDataTime( M_data->dataFluid()->dataTime() ); //Same dataTime for fluid & solid
         //M_data->showMe();
@@ -175,9 +175,9 @@ public:
         std::string  solidMeshPartitioned    =  data_file( "problem/solidMeshPartitioned", "none" );
         if ( fluidMeshPartitioned.compare( "none" ) )
         {
-            FSIOperator::mesh_filtertype fluidMeshFilter( data_file, fluidMeshPartitioned );
+            FSIOperator::meshFilter_Type fluidMeshFilter( data_file, fluidMeshPartitioned );
             fluidMeshFilter.setComm( M_fsi->FSIOper()->worldComm() );
-            FSIOperator::mesh_filtertype solidMeshFilter( data_file, solidMeshPartitioned );
+            FSIOperator::meshFilter_Type solidMeshFilter( data_file, solidMeshPartitioned );
             solidMeshFilter.setComm( M_fsi->FSIOper( )->worldComm( ) );
             M_fsi->FSIOper( )->partitionMeshes( fluidMeshFilter, solidMeshFilter );
             M_fsi->FSIOper( )->setupFEspace( );
@@ -218,8 +218,8 @@ public:
 #ifdef HAVE_HDF5
         if (exporterType.compare("hdf5") == 0)
         {
-            M_exporterFluid.reset( new  hdf5filter_type( data_file, fluidName) );
-            M_exporterSolid.reset( new  hdf5filter_type ( data_file,solidName));
+            M_exporterFluid.reset( new  hdf5Filter_Type( data_file, fluidName) );
+            M_exporterSolid.reset( new  hdf5Filter_Type ( data_file,solidName));
         }
         else
 #endif
@@ -231,12 +231,12 @@ public:
             }
             else
             {
-                M_exporterFluid.reset( new  ensightfilter_type( data_file, fluidName) );
-                M_exporterSolid.reset( new  ensightfilter_type ( data_file, solidName) );
+                M_exporterFluid.reset( new  ensightFilter_Type( data_file, fluidName) );
+                M_exporterSolid.reset( new  ensightFilter_Type ( data_file, solidName) );
             }
         }
-        M_velAndPressure.reset( new vector_type( M_fsi->FSIOper()->fluid().getMap(), M_exporterFluid->mapType() ));
-        M_fluidDisp.reset     ( new vector_type( M_fsi->FSIOper()->mmFESpace().map(), M_exporterFluid->mapType() ));
+        M_velAndPressure.reset( new vector_Type( M_fsi->FSIOper()->fluid().getMap(), M_exporterFluid->mapType() ));
+        M_fluidDisp.reset     ( new vector_Type( M_fsi->FSIOper()->mmFESpace().map(), M_exporterFluid->mapType() ));
 
         M_exporterFluid->setMeshProcId(M_fsi->FSIOper()->uFESpace().mesh(), M_fsi->FSIOper()->uFESpace().map().Comm().MyPID());
         M_exporterSolid->setMeshProcId(M_fsi->FSIOper()->dFESpace().mesh(), M_fsi->FSIOper()->dFESpace().map().Comm().MyPID());
@@ -251,8 +251,8 @@ public:
 
 
 
-        M_solidDisp.reset( new vector_type( M_fsi->FSIOper()->dFESpace().map(), M_exporterSolid->mapType() ));
-        M_solidVel.reset ( new vector_type( M_fsi->FSIOper()->dFESpace().map(), M_exporterSolid->mapType() ));
+        M_solidDisp.reset( new vector_Type( M_fsi->FSIOper()->dFESpace().map(), M_exporterSolid->mapType() ));
+        M_solidVel.reset ( new vector_Type( M_fsi->FSIOper()->dFESpace().map(), M_exporterSolid->mapType() ));
 
         M_exporterSolid->addVariable( ExporterData::Vector, "s-displacement", M_solidDisp,
                                       UInt(0), M_fsi->FSIOper()->dFESpace().dof().numTotalDof() );
@@ -282,7 +282,7 @@ public:
 
     fsi_solver_ptr fsiSolver() { return M_fsi; }
 
-    data_PtrType fsiData() { return M_data; }
+    dataPtr_Type fsiData() { return M_data; }
 
     /*!
       This routine runs the temporal loop
@@ -409,16 +409,16 @@ private:
     void checkGCEResult(const LifeV::Real& time);
 
     fsi_solver_ptr M_fsi;
-    data_PtrType   M_data;
+    dataPtr_Type   M_data;
 
-    filter_ptrtype M_exporterSolid;
-    filter_ptrtype M_exporterFluid;
-    filter_ptrtype M_importerSolid;
-    filter_ptrtype M_importerFluid;
-    vector_ptrtype M_velAndPressure;
-    vector_ptrtype M_fluidDisp;
-    vector_ptrtype M_solidDisp;
-    vector_ptrtype M_solidVel;
+    filterPtr_Type M_exporterSolid;
+    filterPtr_Type M_exporterFluid;
+    filterPtr_Type M_importerSolid;
+    filterPtr_Type M_importerFluid;
+    vectorPtr_Type M_velAndPressure;
+    vectorPtr_Type M_fluidDisp;
+    vectorPtr_Type M_solidDisp;
+    vectorPtr_Type M_solidVel;
     LifeV::FlowConditions FC0;
     LifeV::LumpedHeart LH;
     LifeV::Real    M_Tstart;
@@ -531,8 +531,8 @@ void Problem::initialize(std::string& /*loadInitSol*/,  GetPot const& data_file)
 #ifdef HAVE_HDF5
     if (importerType.compare("hdf5") == 0)
     {
-        M_importerFluid.reset( new  hdf5filter_type( data_file, fluidName) );
-        M_importerSolid.reset( new  hdf5filter_type ( data_file,solidName));// M_fsi->FSIOper()->solidMesh().mesh(), "solid", M_fsi->FSIOper()->dFESpace().map().Comm().MyPID()) );
+        M_importerFluid.reset( new  hdf5Filter_Type( data_file, fluidName) );
+        M_importerSolid.reset( new  hdf5Filter_Type ( data_file,solidName));// M_fsi->FSIOper()->solidMesh().mesh(), "solid", M_fsi->FSIOper()->dFESpace().map().Comm().MyPID()) );
 
     }
     else
@@ -545,8 +545,8 @@ void Problem::initialize(std::string& /*loadInitSol*/,  GetPot const& data_file)
         }
         else
         {
-            M_importerFluid.reset( new  ensightfilter_type( data_file, fluidName) );
-            M_importerSolid.reset( new  ensightfilter_type ( data_file, solidName) );
+            M_importerFluid.reset( new  ensightFilter_Type( data_file, fluidName) );
+            M_importerSolid.reset( new  ensightFilter_Type ( data_file, solidName) );
         }
     }
 
@@ -573,7 +573,7 @@ void Problem::initialize(std::string& /*loadInitSol*/,  GetPot const& data_file)
 
 
     using namespace LifeV;
-    typedef EpetraVector vector_type;
+    typedef EpetraVector vector_Type;
 
     std::string loadInitSolPrev(data_file("problem/initSolPrev","-1"));
 
@@ -593,20 +593,20 @@ void Problem::initialize(std::string& /*loadInitSol*/,  GetPot const& data_file)
     M_importerFluid->import(M_Tstart-dt, dt);
     M_importerSolid->import(M_Tstart-dt, dt);
 
-    UniqueVFDOld.reset(new vector_type(*M_fluidDisp, Unique, Zero));
+    UniqueVFDOld.reset(new vector_Type(*M_fluidDisp, Unique, Zero));
     dynamic_cast<LifeV::Monolithic*>(M_fsi->FSIOper().get())->initializeMesh(UniqueVFDOld);
 
     M_importerFluid->import(M_Tstart);
     M_importerSolid->import(M_Tstart);
 
 
-    UniqueV.reset( new vector_type(*M_velAndPressure, Unique, Zero));
+    UniqueV.reset( new vector_Type(*M_velAndPressure, Unique, Zero));
     *initSol=*UniqueV;
     M_fsi->FSIOper()->fluid().initialize(*initSol);
 
 
 
-    UniqueV.reset(new vector_type(*M_fsi->FSIOper()->getCouplingVariableMap(), Unique, Zero));
+    UniqueV.reset(new vector_Type(*M_fsi->FSIOper()->getCouplingVariableMap(), Unique, Zero));
     UniqueV->subset(*M_solidDisp, M_solidDisp->getMap(), (UInt)0, offset);
     *UniqueV*=1/(M_fsi->FSIOper()->solid().rescaleFactor()*M_data->dataFluid()->dataTime()->getTimeStep());
     M_fsi->FSIOper()->solid().initialize(UniqueV);
@@ -614,12 +614,12 @@ void Problem::initialize(std::string& /*loadInitSol*/,  GetPot const& data_file)
 
     if (!M_data->method().compare("monolithicGI"))
     {
-        UniqueVFD.reset(new vector_type(*M_fsi->FSIOper()->getCouplingVariableMap(), Unique, Zero));
+        UniqueVFD.reset(new vector_Type(*M_fsi->FSIOper()->getCouplingVariableMap(), Unique, Zero));
         UniqueVFD->subset(*M_fluidDisp, M_fluidDisp->getMap(), (UInt)0, dynamic_cast<LifeV::MonolithicGI*>(M_fsi->FSIOper().get())->mapWithoutMesh().getMap(Unique)->NumGlobalElements());
         *initSol+=*UniqueVFD;
     }
 
-    initSolSVel.reset(new vector_type(*M_fsi->FSIOper()->getCouplingVariableMap(), Unique, Zero));
+    initSolSVel.reset(new vector_Type(*M_fsi->FSIOper()->getCouplingVariableMap(), Unique, Zero));
     initSolSVel->subset(*M_solidVel,M_solidVel->getMap(), (UInt)0, offset);
     *initSolSVel*=1/(M_fsi->FSIOper()->solid().rescaleFactor()*M_data->dataSolid()->dataTime()->getTimeStep());
     M_fsi->FSIOper()->solid().initializeVel(*initSolSVel);

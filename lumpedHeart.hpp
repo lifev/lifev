@@ -54,8 +54,8 @@ class LumpedHeart
 {
 public:
     typedef BCInterface3D< FSIOperator >                                                   bc_type;
-    typedef FSIOperator::vector_type                                                       vector_type;
-    typedef FSIOperator::vector_ptrtype                                                    vector_ptrtype;
+    typedef FSIOperator::vector_Type                                                       vector_Type;
+    typedef FSIOperator::vectorPtr_Type                                                    vectorPtr_Type;
 
     LumpedHeart()
             :

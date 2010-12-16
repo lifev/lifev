@@ -68,10 +68,10 @@
 namespace LifeV
 {
 
-typedef FSIOperator::fluid_raw_type fluid;
-typedef FSIOperator::solid_raw_type solid;
+typedef FSIOperator::fluid_Type fluid;
+typedef FSIOperator::solid_Type solid;
 
-FSIOperator::fluid_bchandler_type BCh_harmonicExtension(FSIOperator &_oper)
+FSIOperator::fluidBchandlerPtr_Type BCh_harmonicExtension(FSIOperator &_oper)
 {
 
     // Boundary condition for the mesh
@@ -79,7 +79,7 @@ FSIOperator::fluid_bchandler_type BCh_harmonicExtension(FSIOperator &_oper)
 
     BCFunctionBase bcf(fZero);
 
-    FSISolver::fluid_bchandler_type BCh_he(new FSIOperator::fluid_bchandler_raw_type );
+    FSISolver::fluidBchandlerPtr_Type BCh_he(new FSIOperator::fluidBchandler_Type );
 
     BCh_he->addBC("Edges", INOUTEDGE, Essential, Full, bcf,   3);
     BCh_he->addBC("Edges", INEDGE, Essential, Full, bcf,   3);
@@ -102,9 +102,9 @@ FSIOperator::fluid_bchandler_type BCh_harmonicExtension(FSIOperator &_oper)
 }
 
 
-FSIOperator::fluid_bchandler_type BCh_monolithicFlux(const bool /*isOpen=true*/)
+FSIOperator::fluidBchandlerPtr_Type BCh_monolithicFlux(bool /*isOpen=true*/)
 {
-    FSIOperator::fluid_bchandler_type BCh_fluid( new FSIOperator::fluid_bchandler_raw_type );
+    FSIOperator::fluidBchandlerPtr_Type BCh_fluid( new FSIOperator::fluidBchandler_Type );
 
     BCFunctionBase flow_3 (fluxFunction);
     BCFunctionBase bcf      (fZero);
@@ -120,15 +120,15 @@ FSIOperator::fluid_bchandler_type BCh_monolithicFlux(const bool /*isOpen=true*/)
     return BCh_fluid;
 }
 
-FSIOperator::fluid_bchandler_type BCh_monolithicFluid(FSIOperator &_oper, const bool& /*isOpen=true*/)
+FSIOperator::fluidBchandlerPtr_Type BCh_monolithicFluid(FSIOperator &_oper, bool const & /*isOpen=true*/)
 {
     // Boundary conditions for the fluid velocity
     Debug( 10000 ) << "Boundary condition for the fluid\n";
 
     if (! _oper.isFluid() )
-        return FSIOperator::fluid_bchandler_type();
+        return FSIOperator::fluidBchandlerPtr_Type();
 
-    FSIOperator::fluid_bchandler_type BCh_fluid( new FSIOperator::fluid_bchandler_raw_type );
+    FSIOperator::fluidBchandlerPtr_Type BCh_fluid( new FSIOperator::fluidBchandler_Type );
 
     BCFunctionBase bcf      (fZero);
     BCFunctionBase in_flow  (/*uInterpolated*/u2normal/*aortaPhisPress*/);
@@ -145,10 +145,10 @@ FSIOperator::fluid_bchandler_type BCh_monolithicFluid(FSIOperator &_oper, const 
     return BCh_fluid;
 }
 
-FSIOperator::solid_bchandler_type BCh_monolithicRobin(FSIOperator &_oper)
+FSIOperator::solidBchandlerPtr_Type BCh_monolithicRobin(FSIOperator &_oper)
 {
 
-    FSIOperator::solid_bchandler_type BCh_solid( new FSIOperator::solid_bchandler_raw_type );
+    FSIOperator::solidBchandlerPtr_Type BCh_solid( new FSIOperator::solidBchandler_Type );
     BCFunctionBase hyd(fZero);
     BCFunctionBase young (E);
 
@@ -159,15 +159,15 @@ FSIOperator::solid_bchandler_type BCh_monolithicRobin(FSIOperator &_oper)
     return BCh_solid;
 }
 
-FSIOperator::solid_bchandler_type BCh_monolithicSolid(FSIOperator &_oper)
+FSIOperator::solidBchandlerPtr_Type BCh_monolithicSolid(FSIOperator &_oper)
 {
 
     if (! _oper.isSolid() )
-        return FSIOperator::solid_bchandler_type();
+        return FSIOperator::solidBchandlerPtr_Type();
 
     // Boundary conditions for the solid displacement
     Debug( 10000 ) << "Boundary condition for the solid\n";
-    FSIOperator::solid_bchandler_type BCh_solid( new FSIOperator::solid_bchandler_raw_type );
+    FSIOperator::solidBchandlerPtr_Type BCh_solid( new FSIOperator::solidBchandler_Type );
 
     BCFunctionBase bcf(fZero);
     //BCFunctionBase young (E);
