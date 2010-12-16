@@ -83,9 +83,6 @@ public:
     //! @name Public Types
     //@{
 
-    //! Type for the localToGlobal table.
-    typedef SimpleArray<UInt> Container;
-
     //@}
 
 
@@ -99,6 +96,7 @@ public:
     */
     Dof( const LocalDofPattern& fePattern, UInt offset = 1 );
 
+    //! Copy constructor
     Dof( const Dof & dof2 );
 
     //! Constructor accepting a mesh as parameter
@@ -164,7 +162,7 @@ public:
     //! The number of local Dof (nodes) in the finite element
     const UInt& numLocalDof() const
     {
-        return M_fe.nbLocalDof();
+        return M_elementDofPattern.nbLocalDof();
     }
 
     //! Return the specified entries of the localToGlobal table
@@ -209,8 +207,6 @@ public:
         return M_nbLocalFace;
     }
 
-    //Internal data
-
     //! Number of Local DofByFace
     const UInt& numLocalDofByFace() const
     {
@@ -221,7 +217,7 @@ public:
     //! Getter for the localDofPattern
     const LocalDofPattern& localDofPattern() const
     {
-        return M_fe;
+        return M_elementDofPattern;
     }
 
 
@@ -231,10 +227,12 @@ public:
 
 private:
 
-    typedef ID ( *faceToPoint_type )( ID const localFace, ID const point );
+    typedef SimpleArray<UInt> Container_Type;
+
+    typedef ID ( *faceToPointPtr_Type )( ID const localFace, ID const point );
 
     //! The pattern of the local degrees of freedom.
-    const LocalDofPattern& M_fe;
+    const LocalDofPattern& M_elementDofPattern;
 
     // Offset for the first degree of freedom numerated
     UInt M_offset;
@@ -251,7 +249,7 @@ private:
     UInt M_nbLocalFace;
 
     // The local to global table
-    Container M_localToGlobal;
+    Container_Type M_localToGlobal;
 
     // number of faces in the mesh
     UInt M_nbFace;
@@ -263,7 +261,7 @@ private:
     std::map<ID,ID> M_globalToLocalByFace;
 
     // local array that maps the local dof of the
-    faceToPoint_type M_faceToPoint;
+    faceToPointPtr_Type M_faceToPoint;
 
     // face to the local dof the the element
     UInt M_numLocalDofByFace;
@@ -280,7 +278,7 @@ private:
 //! Constructor that builds the localToglobal table
 template <typename MeshType>
 Dof::Dof( MeshType& mesh, const LocalDofPattern& fePattern, UInt offset ) :
-        M_fe       ( fePattern ),
+        M_elementDofPattern       ( fePattern ),
         M_offset  ( offset ),
         M_totalDof( 0 ),
         M_numElement     ( 0 ),
@@ -342,10 +340,10 @@ void Dof::update( MeshType& mesh )
     typedef typename MeshType::ElementShape GeoShapeType;
 
     // Some useful local variables, to save some typing
-    UInt nbLocalDofPerEdge = M_fe.nbDofPerEdge();
-    UInt nbLocalDofPerVertex = M_fe.nbDofPerVertex();
-    UInt nbLocalDofPerFace = M_fe.nbDofPerFace();
-    UInt nbLocalDofPerVolume = M_fe.nbDofPerVolume();
+    UInt nbLocalDofPerEdge = M_elementDofPattern.nbDofPerEdge();
+    UInt nbLocalDofPerVertex = M_elementDofPattern.nbDofPerVertex();
+    UInt nbLocalDofPerFace = M_elementDofPattern.nbDofPerFace();
+    UInt nbLocalDofPerVolume = M_elementDofPattern.nbDofPerVolume();
 
     M_nbLocalVertex = GeoShapeType::numVertices;
     M_nbLocalEdge = GeoShapeType::numEdges;
@@ -367,7 +365,7 @@ void Dof::update( MeshType& mesh )
         + nbLocalDofPerFace * M_nbLocalFace;
 
     // Consistency check
-    ASSERT_PRE( nldof == UInt( M_fe.nbLocalDof() ), "Something wrong in FE specification" ) ;
+    ASSERT_PRE( nldof == UInt( M_elementDofPattern.nbLocalDof() ), "Something wrong in FE specification" ) ;
 
     // Global total of degrees of freedom
     M_totalDof = nbGlobalVolume * nbLocalDofPerVolume
