@@ -28,11 +28,12 @@
 
 
 /*!
- \include ../../doc/api/bibliography/newton
- \include ../../doc/api/bibliography/fluidstructure
 
     @file
     @brief Pure virtual operator class for FSI solvers
+
+    \include ../../doc/api/bibliography/newton
+    \include ../../doc/api/bibliography/fluidstructure
 
     @author Simone Deparis <simone.deparis@epfl.ch>
     @contributor Gilles Fourestey <fourestey@cscs.ch>
@@ -98,25 +99,25 @@
 
 namespace LifeV
 {
+/*!
+
+  \include ../../doc/api/bibliography/fluidstructure.dox
+  \include ../../doc/api/bibliography/newton.dox
+  @class FSIOperator
+  @brief Fluid-Structure Interface operator class
+
+  This is the base class for the FSI solvers in LifeV. It contains the methods to evaluate the residual and compute the
+  Jacobian matrix, which make it suited for the generalized Newton algorithm implemented in NonlinearRichardson.hpp. The fluid
+  and structure classes are members of this class and different formulations (e.g. Monolithic \ref CDFQ10 , segregated
+  Newton \ref{FM05} , Dirichlet--Neumann \ref DDFQ06 , Robin Neumann \ref BNV08 ) are implemented in the derived classes.
+
+  @see
+  FSIExactJacobian
+  FSIFixedPoint
+  FSIMonolithic
+*/
 class FSIOperator
 {
-/*!
-\include ../../doc/api/bibliography/fluidstructure.dox
-\include ../../doc/api/bibliography/newton.dox
-
-    \class FSIOperator
-    \brief Fluid-Structure Interface operator class
-
-    This is the base class for the FSI solvers in LifeV. It contains the methods to evaluate the residual and compute the
-    Jacobian matrix, which make it suited for the generalized Newton method implemente in NonlinearRichardson. The fluid
-    and structure classes are member of this class and different formulations (e.g. Monolithic \ref CDFQ10 , segregated
-    Newton \ref{FM05} , Dirichlet--Neumann \ref DDFQ06 , Robin Neumann \ref BNV08 )
-
-    @see
-    FSIExactJacobian
-    FSIFixedPoint
-    FSIMonolithic
-*/
 
 public:
 
@@ -167,43 +168,43 @@ public:
 
 
 
-//! OBSOLETE typedefs
-    typedef      mesh_Type                                                  mesh_type;
-#ifdef HAVE_HDF5
-    typedef      meshFilter_Type                                            mesh_filtertype;
-#endif
-    typedef      fluid_Type                                                 fluid_raw_type;
-    typedef      solid_Type                                                 solid_raw_type;
-    typedef      meshMotion_Type                                            meshmotion_raw_type;
-    typedef      fluidLin_Type                                              fluidlin_raw_type;
-    typedef      solidLin_Type                                              solidlin_raw_type;
-    typedef      fluidPtr_Type                                              fluid_type;
-    typedef      solidPtr_Type                                              solid_type;
-    typedef      meshMotionPtr_Type                                         meshmotion_type;
-    typedef      fluidLinPtr_Type                                           fluidlin_type;
-    typedef      solidLinPtr_Type                                           solidlin_type;
-    typedef      vector_Type                                                vector_type;
-    typedef      vectorPtr_Type                                             vector_ptrtype;
-    typedef      fluidSource_Type                                           fluid_source_type;
-    typedef      solidSource_Type                                           solid_source_type;
-    typedef      function_Type                                              function_type;
-    typedef      bcFunction_Type                                            bc_function_type;
-    typedef      dofInterface3DPtr_Type                                     dof_interface_type3D;
-    typedef      dofInterface2DPtr_Type                                     dof_interface_type2D;
-    typedef      bcVectorInterfacePtr_Type                                  bc_vector_interface;
-    typedef      fluidBchandlerPtr_Type                                     fluid_bchandler_type;
-    typedef      fluidBchandler_Type                                        fluid_bchandler_raw_type;
-    typedef      solidBchandler_Type                                        solid_bchandler_raw_type;
-    typedef      solidBchandlerPtr_Type                                     solid_bchandler_type;
-  //typedef      data_Type                                                  data_Type;
-    typedef      dataPtr_Type                                               data_PtrType;
-    typedef      iterator_Type                                              Iterator;
-    typedef      FSIFactory_Type                                            FSIFactory;
-    typedef      commPtr_Type                                               comm_PtrType;
-//END of OBSOLETE typedefs
-//     typedef boost::shared_ptr<reducedLinFluid>    quasi_newton_type;
-/*BCHandler, fluid, structure*/
-    //@}
+// //! OBSOLETE typedefs
+//     typedef      mesh_Type                                                  mesh_type;
+// #ifdef HAVE_HDF5
+//     typedef      meshFilter_Type                                            mesh_filtertype;
+// #endif
+//     typedef      fluid_Type                                                 fluid_raw_type;
+//     typedef      solid_Type                                                 solid_raw_type;
+//     typedef      meshMotion_Type                                            meshmotion_raw_type;
+//     typedef      fluidLin_Type                                              fluidlin_raw_type;
+//     typedef      solidLin_Type                                              solidlin_raw_type;
+//     typedef      fluidPtr_Type                                              fluid_type;
+//     typedef      solidPtr_Type                                              solid_type;
+//     typedef      meshMotionPtr_Type                                         meshmotion_type;
+//     typedef      fluidLinPtr_Type                                           fluidlin_type;
+//     typedef      solidLinPtr_Type                                           solidlin_type;
+//     typedef      vector_Type                                                vector_Type;
+//     typedef      vectorPtr_Type                                             vector_ptrtype;
+//     typedef      fluidSource_Type                                           fluidSource_Type;
+//     typedef      solidSource_Type                                           solid_source_type;
+//     typedef      function_Type                                              function_type;
+//     typedef      bcFunction_Type                                            bc_function_type;
+//     typedef      dofInterface3DPtr_Type                                     dof_interface_type3D;
+//     typedef      dofInterface2DPtr_Type                                     dof_interface_type2D;
+//     typedef      bcVectorInterfacePtr_Type                                  bc_vector_interface;
+//     typedef      fluidBchandlerPtr_Type                                     fluid_bchandler_type;
+//     typedef      fluidBchandler_Type                                        fluid_bchandler_raw_type;
+//     typedef      solidBchandler_Type                                        solidBchandler_Type;
+//     typedef      solidBchandlerPtr_Type                                     solid_bchandler_type;
+//   //typedef      data_Type                                                  data_Type;
+//     typedef      dataPtr_Type                                               data_PtrType;
+//     typedef      iterator_Type                                              Iterator;
+//     typedef      FSIFactory_Type                                            FSIFactory;
+//     typedef      commPtr_Type                                               comm_PtrType;
+// //END of OBSOLETE typedefs
+// //     typedef boost::shared_ptr<reducedLinFluid>    quasi_newton_type;
+// /*BCHandler, fluid, structure*/
+//     //@}
 
 
 

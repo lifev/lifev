@@ -49,7 +49,7 @@ class reducedLinFluid
 
     typedef FSIOperator::fluid_type           fluid_type;
     typedef FSIOperator::solid_type           solid_type;
-    typedef FSIOperator::fluid_bchandler_type bchandler_type;
+    typedef FSIOperator::fluidBchandlerPtr_type bchandler_type;
 
 public:
 

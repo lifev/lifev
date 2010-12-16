@@ -79,17 +79,17 @@ public:
     //typedef super::fluid_Type               fluid_Type;
     typedef super::solid_Type               solid_Type;
 
-    //! OBSOLETE typedefs
-    //typedef super::fluidBchandler_Type      fluidBchandler_Type;
+//     //! OBSOLETE typedefs
+//     //typedef super::fluidBchandler_Type      fluidBchandler_Type;
 
-    typedef super::fluid_Type               fluid_type;
-    typedef super::solid_Type               solid_type;
-    typedef super::vector_Type              vector_type;
+//     typedef super::fluid_Type               fluid_type;
+//     typedef super::solid_Type               solid_type;
+//     typedef super::vector_Type              vector_Type;
 
-    typedef super::fluidBchandler_Type      bchandler_type;
+//     typedef super::fluidBchandler_Type      bchandler_type;
 
-    typedef fluid_Type::matrix_Type         matrix_types;
-    typedef fluid_Type::matrixPtr_Type      matrix_ptrtype;
+//     typedef fluid_Type::matrix_Type         matrix_types;
+//     typedef fluid_Type::matrixPtr_Type      matrix_ptrtype;
 
     //@}
 
@@ -114,8 +114,8 @@ public:
        \param linearRelTol: tolerance for the nonlinear solver
        \todo{replace Real with Real& }
      */
-    void solveJac     (vector_type&       _muk,
-                       const vector_type& _res,
+    void solveJac     (vector_Type&       _muk,
+                       const vector_Type& _res,
                        const Real       _linearRelTol);
 
 
@@ -126,8 +126,8 @@ public:
        \param disp: current unknown solution
        \param iter: nonlinear iteration counter. The part of th rhs related to the time discretization is computed only for iter=0
     */
-    void evalResidual(vector_type&        _res,
-                      const vector_type&  _disp,
+    void evalResidual(vector_Type&        _res,
+                      const vector_Type&  _disp,
                       const UInt           _iter);
 
 
@@ -177,7 +177,7 @@ private:
 inline FSIOperator* createFP() { return new fixedPoint();}
 namespace
 {
-static bool registerFP = FSIOperator::FSIFactory::instance().registerProduct( "fixedPoint", &createFP );
+static bool registerFP = FSIOperator::FSIFactory_Type::instance().registerProduct( "fixedPoint", &createFP );
 }
 
 }   // Namespace LifeV

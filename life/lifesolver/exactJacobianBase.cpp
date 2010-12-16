@@ -224,7 +224,7 @@ exactJacobian::setDataFile( const GetPot& dataFile )
 
 void exactJacobian::registerMyProducts( )
 {
-    FSIFactory::instance().registerProduct( "exactJacobian", &createEJ );
+    FSIFactory_Type::instance().registerProduct( "exactJacobian", &createEJ );
     solid_Type::StructureSolverFactory::instance().registerProduct( "LinearVenantKirchhof", &createLinearStructure );
 //solid_raw_type::StructureSolverFactory::instance().registerProduct( "NonLinearVenantKirchhof", &createNonLinearStructure );
 }

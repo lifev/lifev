@@ -119,7 +119,7 @@ FSIOperator::FSIOperator():
     M_lambdaDot                          ( ),
     M_un                                 ( ),
     M_rhs                                ( ),
-    M_Alphaf                             ( ), //vector_type, for alphaf robin
+    M_Alphaf                             ( ), //vector_Type, for alphaf robin
     M_AlphafCoef                         ( 0 ),
     M_betamedio                          ( ),
     M_fluxes                             ( 0 ),

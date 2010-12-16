@@ -86,10 +86,10 @@ namespace LifeV
 {
 namespace
 {
-LifeV::VenantKirchhofSolver< LifeV::FSIOperator::mesh_type, LifeV::SolverTrilinos >*    createLinearStructure() { return new LinearVenantKirchhofSolver< LifeV::FSIOperator::mesh_type, LifeV::SolverTrilinos >(); }
+LifeV::VenantKirchhofSolver< LifeV::FSIOperator::mesh_Type, LifeV::SolverTrilinos >*    createLinearStructure() { return new LinearVenantKirchhofSolver< LifeV::FSIOperator::mesh_Type, LifeV::SolverTrilinos >(); }
 
 //NOTE: the nonlinear structure solver is still in development in the FSI framework
-//LifeV::VenantKirchhofSolver< LifeV::FSIOperator::mesh_type, LifeV::SolverTrilinos >*    createNonLinearStructure(){ return new NonLinearVenantKirchhofSolver< LifeV::FSIOperator::mesh_type, LifeV::SolverTrilinos >(); }
+//LifeV::VenantKirchhofSolver< LifeV::FSIOperator::mesh_Type, LifeV::SolverTrilinos >*    createNonLinearStructure(){ return new NonLinearVenantKirchhofSolver< LifeV::FSIOperator::mesh_Type, LifeV::SolverTrilinos >(); }
 }
 }
 
@@ -174,12 +174,12 @@ public:
 
     typedef boost::shared_ptr<FSISolver>                    fsi_solver_ptr;
     typedef FSIOperator::data_Type                          data_Type;
-    typedef FSIOperator::data_PtrType                       data_PtrType;
+    typedef FSIOperator::dataPtr_Type                       dataPtr_Type;
 
-    typedef FSIOperator::vector_type                        vector_type;
-    typedef FSIOperator::vector_ptrtype                     vector_ptrtype;
+    typedef FSIOperator::vector_Type                        vector_Type;
+    typedef FSIOperator::vectorPtr_Type                     vectorPtr_Type;
 
-    typedef Exporter<FSIOperator::mesh_type>                filter_type;
+    typedef Exporter<FSIOperator::mesh_Type>                filter_type;
     typedef boost::shared_ptr<filter_type>                  filter_ptrtype;
 
     /*!
@@ -193,12 +193,12 @@ public:
     Problem( const std::string& dataFileName, std::string method = "" )
     {
 
-        VenantKirchhofSolver< FSIOperator::mesh_type, SolverTrilinos >::StructureSolverFactory::instance().registerProduct( "linearVenantKirchhof", &createLinearStructure );
-        //        VenantKirchhofSolver< FSIOperator::mesh_type, SolverTrilinos >::StructureSolverFactory::instance().registerProduct( "nonLinearVenantKirchhof", &createNonLinearStructure );
+        VenantKirchhofSolver< FSIOperator::mesh_Type, SolverTrilinos >::StructureSolverFactory::instance().registerProduct( "linearVenantKirchhof", &createLinearStructure );
+        //        VenantKirchhofSolver< FSIOperator::mesh_Type, SolverTrilinos >::StructureSolverFactory::instance().registerProduct( "nonLinearVenantKirchhof", &createNonLinearStructure );
 
         Debug( 10000 ) << "Setting up data from GetPot \n";
         GetPot dataFile( dataFileName );
-        M_data = data_PtrType( new data_Type() );
+        M_data = dataPtr_Type( new data_Type() );
         M_data->setup( dataFile );
         M_data->dataSolid()->setDataTime( M_data->dataFluid()->dataTime() ); //Same dataTime for fluid & solid
         //M_data->showMe();
@@ -252,8 +252,8 @@ public:
 
             M_exporterFluid->setMeshProcId(M_fsi->FSIOper()->uFESpace().mesh(), M_fsi->FSIOper()->uFESpace().map().Comm().MyPID());
 
-            M_velAndPressure.reset( new vector_type( M_fsi->FSIOper()->fluid().getMap(),      M_exporterFluid->mapType() ));
-            M_fluidDisp.reset     ( new vector_type( M_fsi->FSIOper()->meshMotion().getMap(), M_exporterFluid->mapType() ));
+            M_velAndPressure.reset( new vector_Type( M_fsi->FSIOper()->fluid().getMap(),      M_exporterFluid->mapType() ));
+            M_fluidDisp.reset     ( new vector_Type( M_fsi->FSIOper()->meshMotion().getMap(), M_exporterFluid->mapType() ));
 
             M_exporterFluid->addVariable( ExporterData::Vector, "f-velocity", M_velAndPressure,
                                           UInt(0), M_fsi->FSIOper()->uFESpace().dof().numTotalDof() );
@@ -276,8 +276,8 @@ public:
 
             M_exporterSolid->setMeshProcId(M_fsi->FSIOper()->dFESpace().mesh(), M_fsi->FSIOper()->dFESpace().map().Comm().MyPID());
 
-            M_solidDisp.reset( new vector_type( M_fsi->FSIOper()->solid().getMap(), M_exporterSolid->mapType() ));
-            M_solidVel.reset ( new vector_type( M_fsi->FSIOper()->solid().getMap(), M_exporterSolid->mapType() ));
+            M_solidDisp.reset( new vector_Type( M_fsi->FSIOper()->solid().getMap(), M_exporterSolid->mapType() ));
+            M_solidVel.reset ( new vector_Type( M_fsi->FSIOper()->solid().getMap(), M_exporterSolid->mapType() ));
             M_exporterSolid->addVariable( ExporterData::Vector, "s-displacement", M_solidDisp,
                                           UInt(0), M_fsi->FSIOper()->dFESpace().dof().numTotalDof() );
             M_exporterSolid->addVariable( ExporterData::Vector, "s-velocity", M_solidVel,
@@ -321,7 +321,7 @@ public:
 
     fsi_solver_ptr fsiSolver() { return M_fsi; }
 
-    data_PtrType fsiData() { return M_data; }
+    dataPtr_Type fsiData() { return M_data; }
 
     /*!
       This routine runs the temporal loop
@@ -427,7 +427,7 @@ private:
     }
 
     fsi_solver_ptr M_fsi;
-    data_PtrType   M_data;
+    dataPtr_Type   M_data;
     Real           M_Tstart;
 
     bool           M_absorbingBC;
@@ -435,10 +435,10 @@ private:
     filter_ptrtype M_exporterFluid;
     filter_ptrtype M_exporterSolid;
 
-    vector_ptrtype M_velAndPressure;
-    vector_ptrtype M_fluidDisp;
-    vector_ptrtype M_solidDisp;
-    vector_ptrtype M_solidVel;
+    vectorPtr_Type M_velAndPressure;
+    vectorPtr_Type M_fluidDisp;
+    vectorPtr_Type M_solidDisp;
+    vectorPtr_Type M_solidVel;
 
     struct RESULT_CHANGED_EXCEPTION
     {

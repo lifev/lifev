@@ -32,12 +32,12 @@ class steklovPoincare : public FSIOperator
 public:
 
     typedef FSIOperator super;
-    typedef super::fluid_type fluid_type;
-    typedef super::solid_type solid_type;
+    typedef super::fluid_Type fluid_type;
+    typedef super::solid_Type solid_type;
 
-    typedef super::fluid_bchandler_type bchandler_type;
+    typedef super::fluidBchandlerPtr_type bchandler_type;
 
-    typedef super::vector_type vector_type;
+    typedef super::vector_Type vector_Type;
 
     // default constructor
     steklovPoincare();
@@ -160,36 +160,36 @@ private:
     Real                    M_defOmegaS;
     Real                    M_defOmegaF;
 
-    generalizedAitken<vector_type, Real> M_aitkFS;
+    generalizedAitken<vector_Type, Real> M_aitkFS;
 
-    boost::shared_ptr<vector_type>       M_dz;
+    boost::shared_ptr<vector_Type>       M_dz;
 
-    boost::shared_ptr<vector_type>       M_residualFSI;
+    boost::shared_ptr<vector_Type>       M_residualFSI;
 
-    boost::shared_ptr<vector_type>       M_interfaceDisplacement;
-    boost::shared_ptr<vector_type>       M_interfaceStress;
+    boost::shared_ptr<vector_Type>       M_interfaceDisplacement;
+    boost::shared_ptr<vector_Type>       M_interfaceStress;
 
-    boost::shared_ptr<vector_type>       M_rhsNew;
-    boost::shared_ptr<vector_type>       M_beta;
+    boost::shared_ptr<vector_Type>       M_rhsNew;
+    boost::shared_ptr<vector_Type>       M_beta;
 
 
-    void eval           (const  vector_type &disp,
+    void eval           (const  vector_Type &disp,
                          int    status,
-                         vector_type &dispNew,
-                         vector_type &veloStruct);
+                         vector_Type &dispNew,
+                         vector_Type &veloStruct);
 
-    void  invSfPrime    (const vector_type &res,
+    void  invSfPrime    (const vector_Type &res,
                          double       linear_rel_tol,
-                         vector_type       &step);
+                         vector_Type       &step);
 
-    void  invSsPrime    (const vector_type &res,
+    void  invSsPrime    (const vector_Type &res,
                          double       linear_rel_tol,
-                         vector_type       &step);
+                         vector_Type       &step);
 
 
-    void  invSfSsPrime  (const vector_type &res,
+    void  invSfSsPrime  (const vector_Type &res,
                          double       linear_rel_tol,
-                         vector_type       &step);
+                         vector_Type       &step);
 
     void computeStrongResidualFSI();
 

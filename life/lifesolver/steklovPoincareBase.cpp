@@ -79,14 +79,14 @@ steklovPoincare::setup()
 
     super::setup();
 
-    M_dz.reset    (new vector_type(*this->M_solidInterfaceMap));
+    M_dz.reset    (new vector_Type(*this->M_solidInterfaceMap));
 
     M_epetraOper.reset( new Epetra_SteklovPoincare(this));
 
     if ( this->isFluid() )
     {
-        M_rhsNew.reset(new vector_type(this->M_fluid->getMap()));
-        M_beta.reset  (new vector_type(this->M_fluid->getMap()));
+        M_rhsNew.reset(new vector_Type(this->M_fluid->getMap()));
+        M_beta.reset  (new vector_Type(this->M_fluid->getMap()));
     }
 
 
@@ -102,10 +102,10 @@ steklovPoincare::setup()
 
 
 
-void steklovPoincare::eval(const vector_type& disp,
+void steklovPoincare::eval(const vector_Type& disp,
                            int                status,
-                           vector_type&       dispNew,
-                           vector_type&       velo)
+                           vector_Type&       dispNew,
+                           vector_Type&       velo)
 {
 
     if (status)
@@ -127,7 +127,7 @@ void steklovPoincare::eval(const vector_type& disp,
     {
         this->M_meshMotion->iterate();
 
-        vector_type const meshDisplacement( M_meshMotion->displacement(), this->M_meshMotion->getRepeatedEpetraMap() );
+        vector_Type const meshDisplacement( M_meshMotion->displacement(), this->M_meshMotion->getRepeatedEpetraMap() );
         this->moveMesh(meshDisplacement);
 
         this->transferMeshMotionOnFluid(meshDisplacement,
@@ -143,7 +143,7 @@ void steklovPoincare::eval(const vector_type& disp,
 
         *M_beta *= 0.;
 
-        vector_type const meshDispDiff( M_meshMotion->dispDiff(), this->M_meshMotion->getRepeatedEpetraMap() );
+        vector_Type const meshDispDiff( M_meshMotion->dispDiff(), this->M_meshMotion->getRepeatedEpetraMap() );
 
         this->interpolateVelocity(meshDispDiff, *M_beta);
 
@@ -167,8 +167,8 @@ void steklovPoincare::eval(const vector_type& disp,
 
     if ( true && this->isFluid() )
     {
-        vector_type vel  (this->fluid().velFESpace().map());
-        vector_type press(this->fluid().pressFESpace().map());
+        vector_Type vel  (this->fluid().velFESpace().map());
+        vector_Type press(this->fluid().pressFESpace().map());
 
         vel.subset(this->M_fluid->solution());
         press.subset(this->M_fluid->solution(), this->fluid().velFESpace().dim()*this->fluid().pressFESpace().fieldDim());
@@ -260,12 +260,12 @@ void steklovPoincare::evalResidual(Vector       &res,
 //
 
 
-void  steklovPoincare::solveJac(vector_type        &muk,
-                                const vector_type  &_res,
+void  steklovPoincare::solveJac(vector_Type        &muk,
+                                const vector_Type  &_res,
                                 double        _linearRelTol)
 {
-    vector_type muF(_res.size());
-    vector_type muS(_res.size());
+    vector_Type muF(_res.size());
+    vector_Type muS(_res.size());
 
     Debug(  6215 ) << "steklovPoincare::solveJac _linearRelTol  : " << _linearRelTol << "\n";
     Debug(  6215 ) << "steklovPoincare::solveJac preconditioner : "  << this->preconditioner() << "\n";
@@ -360,9 +360,9 @@ void steklovPoincare::solveInvLinearSolid()
 //
 
 
-void  steklovPoincare::invSfPrime(const vector_type& res,
+void  steklovPoincare::invSfPrime(const vector_Type& res,
                                   double /*linear_rel_tol*/,
-                                  vector_type& step)
+                                  vector_Type& step)
 {
     setResidualFSI(res);
 
@@ -377,7 +377,7 @@ void  steklovPoincare::invSfPrime(const vector_type& res,
     double dt  = this->M_fluid->getTimeStep();
     double rho = this->M_fluid->density();
 
-    vector_type deltaLambda = dt*dt/rho*M_reducedLinFluid->residual();
+    vector_Type deltaLambda = dt*dt/rho*M_reducedLinFluid->residual();
 
     transferOnInterface(deltaLambda,
                         M_fluid->bcHandler(),
@@ -393,9 +393,9 @@ void  steklovPoincare::invSfPrime(const vector_type& res,
 //
 //
 
-void  steklovPoincare::invSsPrime(const vector_type& res,
+void  steklovPoincare::invSsPrime(const vector_Type& res,
                                   double /*linear_rel_tol*/,
-                                  vector_type& step)
+                                  vector_Type& step)
 {
     setResidualFSI(res);
     solveLinearSolid();
@@ -407,9 +407,9 @@ void  steklovPoincare::invSsPrime(const vector_type& res,
 }
 
 
-void steklovPoincare::invSfSsPrime(const vector_type& _res,
+void steklovPoincare::invSfSsPrime(const vector_Type& _res,
                                    double _linearRelTol,
-                                   vector_type& _muk)
+                                   vector_Type& _muk)
 {
     // AZTEC specifications for the second system
     int    data_org   [AZ_COMM_SIZE];     // data organisation for J
@@ -450,7 +450,7 @@ void steklovPoincare::invSfSsPrime(const vector_type& _res,
     std::cout << "  N-  Solving Jacobian system... ";
     Chrono chrono;
 
-    vector_type res = _res;
+    vector_Type res = _res;
 
 //     for (UInt ii = 0; ii < 20; ++ii)
 //     {
@@ -497,7 +497,7 @@ void my_matvecSfSsPrime(double *z, double *Jz, AZ_MATRIX *J, int proc_config[])
 //    Vector jz(dim);
 //    jz = ZeroVector(dim);
 
-    vector_type zSolid(dim);
+    vector_Type zSolid(dim);
 
     for (UInt ii = 0; ii < dim; ++ii)
     {
@@ -528,11 +528,11 @@ void my_matvecSfSsPrime(double *z, double *Jz, AZ_MATRIX *J, int proc_config[])
         }
         else
         {
-            vector_type da(dim);
+            vector_Type da(dim);
             double dt = my_data->M_pFS->fluid().getTimeStep();
             double dti2 = 1.0/(dt*dt) ;
 
-            vector_type zSolidPrec(dim);
+            vector_Type zSolidPrec(dim);
             zSolidPrec = my_data->M_pFS->DDNprecond(zSolid);
 
             if (my_data->M_pFS->fluidMpi())
@@ -567,11 +567,11 @@ void my_matvecSfSsPrime(double *z, double *Jz, AZ_MATRIX *J, int proc_config[])
 }
 
 
-vector_type steklovPoincare::DDNprecond(vector_type const &_z)
+vector_Type steklovPoincare::DDNprecond(vector_Type const &_z)
 {
     std::cout << "DD-Newton Precond. using ";
 
-    vector_type Pz(_z.size());
+    vector_Type Pz(_z.size());
 
     //setResidualFSI(_z);
 
@@ -596,7 +596,7 @@ vector_type steklovPoincare::DDNprecond(vector_type const &_z)
         double dt  = this->M_fluid->getTimeStep();
         double rho = this->M_fluid->density();
 
-        vector_type deltaLambda = dt*dt/rho*M_reducedLinFluid->residual();
+        vector_Type deltaLambda = dt*dt/rho*M_reducedLinFluid->residual();
 
         transferOnInterface(deltaLambda,
                             M_fluid->bcHandler(),

@@ -301,7 +301,7 @@ void fixedPoint::eval( const vector_Type& _disp,
 
 void fixedPoint::registerMyProducts( )
 {
-    FSIFactory::instance().registerProduct( "fixedPoint", &createFP );
+    FSIFactory_Type::instance().registerProduct( "fixedPoint", &createFP );
     solid_Type::StructureSolverFactory::instance().registerProduct( "LinearVenantKirchhof", &FSIOperator::createLinearStructure );
     //solid_Type::StructureSolverFactory::instance().registerProduct( "NonLinearVenantKirchhof", &FSIOperator::createNonLinearStructure );
 }

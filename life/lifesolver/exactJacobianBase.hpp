@@ -79,16 +79,16 @@ public:
     typedef super::solid_Type               solid_Type;
 
     //! OBSOLETE typedefs
-    //typedef super::fluidBchandler_Type      fluidBchandler_Type;
+//     //typedef super::fluidBchandler_Type      fluidBchandler_Type;
 
-    typedef super::fluid_Type               fluid_type;
-    typedef super::solid_Type               solid_type;
-    typedef super::vector_Type              vector_type;
+//     typedef super::fluid_Type               fluid_type;
+//     typedef super::solid_Type               solid_type;
+//     typedef super::vector_Type              vector_Type;
 
-    typedef super::fluidBchandler_Type      bchandler_type;
+//     typedef super::fluidBchandler_Type      bchandler_type;
 
-    typedef fluid_Type::matrix_Type         matrix_types;
-    typedef fluid_Type::matrixPtr_Type      matrix_ptrtype;
+//     typedef fluid_Type::matrix_Type         matrix_types;
+//     typedef fluid_Type::matrixPtr_Type      matrix_ptrtype;
 
     //@}
 
@@ -198,7 +198,7 @@ private:
         typedef boost::shared_ptr<map_Type> mapPtr_Type;
 
         // OBSOLETE typedef
-        typedef exactJacobian::vector_Type  vector_type;
+//         typedef exactJacobian::vector_Type  vector_Type;
 
         //! @name Constructor & Destructor
         //@{
@@ -267,7 +267,7 @@ inline FSIOperator* createEJ() { return new exactJacobian(); }
 
 namespace
 {
-static bool registerEJ = FSIOperator::FSIFactory::instance().registerProduct( "exactJacobian", &createEJ );
+static bool registerEJ = FSIOperator::FSIFactory_Type::instance().registerProduct( "exactJacobian", &createEJ );
 }
 
 }  // Namespace LifeV

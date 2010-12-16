@@ -65,7 +65,7 @@ FSISolver::FSISolver():
 // Methods
 // ===================================================
 void
-FSISolver::setData( const data_PtrType& data )
+FSISolver::setData( const dataPtr_Type& data )
 {
     M_data = data;
 
@@ -252,11 +252,11 @@ FSISolver::initialize( const std::string& /*velFName*/,
 
 
 void
-FSISolver::initialize(vector_ptrtype u0, vector_ptrtype v0)
+FSISolver::initialize(vectorPtr_Type u0, vectorPtr_Type v0)
 {
     if (!u0.get())
     {
-        u0.reset(new vector_type(*M_oper->getCouplingVariableMap()));
+        u0.reset(new vector_Type(*M_oper->getCouplingVariableMap()));
         M_oper->setSolution(*u0); // couplingVariableMap()
         M_oper->initializeBDF(*u0);
     }
@@ -275,11 +275,11 @@ FSISolver::initialize(vector_ptrtype u0, vector_ptrtype v0)
 }
 
 void
-FSISolver::initialize( fluid_function const& u0,
-                       fluid_function const& p0,
-                       solid_function const& d0,
-                       solid_function const& w0,
-                       fluid_function const& df0)
+FSISolver::initialize( fluidFunction_Type const& u0,
+                       fluidFunction_Type const& p0,
+                       solidFunction_Type const& d0,
+                       solidFunction_Type const& w0,
+                       fluidFunction_Type const& df0)
 {
     M_oper->initialize(u0, p0 , d0, w0, df0);
 }
@@ -297,7 +297,7 @@ FSISolver::iterate()
     M_oper->updateSystem( );
 
     // We extract a pointer to the solution
-    vector_ptrtype lambda(new vector_type(M_oper->getSolution()));
+    vectorPtr_Type lambda(new vector_Type(M_oper->getSolution()));
     //M_oper->solutionPtr(lambda);//copy of a shared_ptr
 
     // the newton solver
@@ -343,8 +343,8 @@ FSISolver::iterate()
 // Set Functions
 // ===================================================
 void
-FSISolver::setSourceTerms( const fluid_source_type& fluidSource,
-                           const solid_source_type& solidSource )
+FSISolver::setSourceTerms( const fluidSource_Type& fluidSource,
+                           const solidSource_Type& solidSource )
 {
     M_oper->fluid().setSourceTerm( fluidSource );
     M_oper->solid().setSourceTerm( solidSource );
@@ -354,60 +354,60 @@ void
 FSISolver::setFSIOperator( )
 {
     Debug( 6220 ) << "FSISolver::setFSIOperator with operator " << M_data->method() << "\n";
-    M_oper = oper_fsi_ptr_mpi( FSIOperator::FSIFactory_Type::instance().createObject( M_data->method() ) );
+    M_oper = FSIOperPtr_Type( FSIOperator::FSIFactory_Type::instance().createObject( M_data->method() ) );
 }
 
 void
-FSISolver::setFluidBC( const fluid_bchandler_type& bc_fluid )
+FSISolver::setFluidBC( const fluidBchandlerPtr_Type& bc_fluid )
 {
     if ( this->isFluid() )
         M_oper->setFluidBC( bc_fluid );
 }
 
 void
-FSISolver::setLinFluidBC( const fluid_bchandler_type& bc_dfluid )
+FSISolver::setLinFluidBC( const fluidBchandlerPtr_Type& bc_dfluid )
 {
     if ( this->isFluid() )
         M_oper->setLinFluidBC( bc_dfluid );
 }
 
 void
-FSISolver::setInvLinFluidBC( const fluid_bchandler_type& bc_dfluid_inv )
+FSISolver::setInvLinFluidBC( const fluidBchandlerPtr_Type& bc_dfluid_inv )
 {
     if ( this->isFluid() )
         M_oper->setInvLinFluidBC( bc_dfluid_inv );
 }
 
 void
-FSISolver::setHarmonicExtensionBC( const fluid_bchandler_type& bc_he )
+FSISolver::setHarmonicExtensionBC( const fluidBchandlerPtr_Type& bc_he )
 {
     if ( this->isFluid() )
         M_oper->setHarmonicExtensionBC( bc_he );
 }
 
 void
-FSISolver::setSolidBC( const solid_bchandler_type& bc_solid )
+FSISolver::setSolidBC( const solidBchandlerPtr_Type& bc_solid )
 {
     if ( this->isSolid() )
         M_oper->setSolidBC( bc_solid );
 }
 
 void
-FSISolver::setLinSolidBC( const solid_bchandler_type& bc_dsolid )
+FSISolver::setLinSolidBC( const solidBchandlerPtr_Type& bc_dsolid )
 {
     if ( this->isSolid() )
         M_oper->setLinSolidBC( bc_dsolid );
 }
 
 void
-FSISolver::setInvLinSolidBC( const solid_bchandler_type& bc_dsolid_inv )
+FSISolver::setInvLinSolidBC( const solidBchandlerPtr_Type& bc_dsolid_inv )
 {
     if ( this->isSolid() )
         M_oper->setInvLinSolidBC( bc_dsolid_inv );
 }
 
 //!\todo{kill this method}
-void FSISolver::setFluxBC(fluid_bchandler_type const& bc_fluid)
+void FSISolver::setFluxBC(fluidBchandlerPtr_Type const& bc_fluid)
 {
     if (this->isFluid())
         M_oper->setFluxBC(bc_fluid);
@@ -415,20 +415,20 @@ void FSISolver::setFluxBC(fluid_bchandler_type const& bc_fluid)
 
 //!\todo{kill this method}
 void
-FSISolver::setRobinBC(fluid_bchandler_type const& bc_Robin)
+FSISolver::setRobinBC(fluidBchandlerPtr_Type const& bc_Robin)
 {
     if (this->isFluid())
         M_oper->setRobinBC(bc_Robin);
 }
 
 // void
-// FSISolver::setReducedLinFluidBC( const fluid_bchandler_type& bc_dredfluid )
+// FSISolver::setReducedLinFluidBC( const fluidBchandlerPtr_Type& bc_dredfluid )
 // {
 //     M_oper->setReducedLinFluidBC( bc_dredfluid );
 // }
 
 // void
-// FSISolver::setInvReducedLinFluidBC( const fluid_bchandler_type& bc_dredfluid_inv )
+// FSISolver::setInvReducedLinFluidBC( const fluidBchandlerPtr_Type& bc_dredfluid_inv )
 // {
 //     M_oper->setInvReducedLinFluidBC( bc_dredfluid_inv );
 // }
