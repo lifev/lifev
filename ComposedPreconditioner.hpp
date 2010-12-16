@@ -73,23 +73,13 @@ public:
 
     typedef EpetraPreconditioner                                       super_Type;
     typedef ComposedOperator<EpetraPreconditioner>                     prec_Type;
-    typedef boost::shared_ptr<prec_Type>                            precPtr_Type;
+    typedef boost::shared_ptr<prec_Type>                               precPtr_Type;
     typedef boost::shared_ptr<EpetraPreconditioner>                    epetraPrecPtr_Type;
     typedef boost::shared_ptr<ML_Epetra::MultiLevelPreconditioner>     mlPrecPtr_Type;
-    typedef super_Type::operator_raw_type                                  operator_Type;
+    typedef super_Type::operator_raw_type                              operator_Type;
     typedef boost::shared_ptr<operator_Type>                           operatorPtr_Type;
     typedef super_Type::list_Type                                      list_Type;
-
-    // OBSOLETE typedefs
-      typedef EpetraPreconditioner                                       super;
-      typedef ComposedOperator<EpetraPreconditioner>                     prec_raw_type;
-      typedef boost::shared_ptr<prec_raw_type>                           prec_type;
-      typedef boost::shared_ptr<EpetraPreconditioner>                    epetra_prec_type;
-    //typedef boost::shared_ptr<ML_Epetra::MultiLevelPreconditioner>     mlPrecPtr_Type;
-    // typedef super::operator_Type                                   operator_Type;
-    //  typedef boost::shared_ptr<operatorPtr_Type>                       operatorPtr_Type;
-    // END of OBSOLET typedefs
-    //@}
+    typedef boost::shared_ptr<EpetraPreconditioner>                    epetraPrec_Type;
 
 
     /** @name Constructors, destructor

@@ -27,8 +27,6 @@
    \date 2009-05-07
  */
 
-#include <lifeconfig.h>
-
 #include <lifemc/lifealg/ComposedPreconditioner.hpp>
 #include <life/lifealg/IfpackPreconditioner.hpp>
 #include <life/lifealg/MLPreconditioner.hpp>
@@ -45,15 +43,15 @@ namespace LifeV
 
 ComposedPreconditioner::ComposedPreconditioner( boost::shared_ptr<Epetra_Comm> comm):
     super_Type (comm ),
-    M_prec(new prec_raw_type(comm)),
+    M_prec(new prec_Type(comm)),
     M_operVector(0)
     //M_precType()
 {
 }
 
 ComposedPreconditioner::ComposedPreconditioner(ComposedPreconditioner& P):
-    super(P, boost::dynamic_pointer_cast<ComposedOperator<Ifpack_Preconditioner> >(P.getPrecPtr())->getCommPtr()),
-    M_prec(new prec_raw_type(*boost::dynamic_pointer_cast<prec_raw_type>(P.getPrecPtr()))),
+    super_Type(P, boost::dynamic_pointer_cast<ComposedOperator<Ifpack_Preconditioner> >(P.getPrecPtr())->getCommPtr()),
+    M_prec(new prec_Type(*boost::dynamic_pointer_cast<prec_Type>(P.getPrecPtr()))),
     M_operVector(P.getOperVector())
     //M_precType(P.precType())
 {
@@ -88,7 +86,7 @@ ComposedPreconditioner::createList(       list_Type& /*list*/,
     ASSERT( !M_prec->getNumber(), "Error, when initializing the preconditioner, it must be empty" );
     for ( UInt i(0); i < dataFile.vector_variable_size( ( section + "/" + subSection + "/list" ).data() ); ++i )
     {
-        epetra_prec_type tmp( PRECFactory::instance().createObject( dataFile( ( section + "/" + subSection + "/list" ).data(), "ML", i ) ) );
+        epetraPrec_Type tmp( PRECFactory::instance().createObject( dataFile( ( section + "/" + subSection + "/list" ).data(), "ML", i ) ) );
         M_prec->push_back(tmp);
         M_prec->P()[i]->createList(M_prec->P()[i]->list(), dataFile, section, dataFile( ( section + "/" + subSection + "/sections" ).data(), "ML", i ));
     }
@@ -129,7 +127,7 @@ ComposedPreconditioner::push_back(operatorPtr_Type& oper,
                               )
 {
     if(!M_prec.get())
-        M_prec.reset(new prec_raw_type(M_displayer.comm()));
+        M_prec.reset(new prec_Type(M_displayer.comm()));
     M_operVector.push_back(oper);
     Chrono chrono;
     epetraPrecPtr_Type prec;
