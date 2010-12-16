@@ -848,14 +848,14 @@ FESpace<MeshType, MapType>::L20Error( const function_Type& fexact,
     {
         this->fe().updateFirstDeriv( this->mesh()->element( iVol ) );
 
-        normU += elem_L2_diff_2( vec, fexact, this->fe(), this->dof(), time, M_fieldDim );
+        normU += elementaryDifferenceL2NormSquare( vec, fexact, this->fe(), this->dof(), time, M_fieldDim );
 
-        meanU += elem_integral_diff( vec, fexact, this->fe(), this->dof(), time, M_fieldDim );
+        meanU += elementaryDifferenceIntegral( vec, fexact, this->fe(), this->dof(), time, M_fieldDim );
         mass += this->fe().measure();
         if (relError)
         {
-            sumExact2 += elem_f_L2_2( fexact, this->fe(), time, 1 );
-            sumExact1 += elem_integral( fexact, this->fe(), time, 1 );
+            sumExact2 += elementaryFctL2NormSquare( fexact, this->fe(), time, 1 );
+            sumExact1 += elementaryFctIntegral( fexact, this->fe(), time, 1 );
         }
     }
 
@@ -902,18 +902,18 @@ FESpace<MeshType, MapType>::L2Error( const function_Type&    fexact,
         CurrentFE newFE(this->fe().refFE(),this->fe().geoMap(),quadRuleTetra64pt);
         newFE.update(this->mesh()->element( iVol ),UPDATE_DPHI | UPDATE_WDET);
 
-        normU += elem_L2_diff_2( vec, fexact,
-                                 //this->fe(),
-                                 newFE,
-                                 this->dof(),
-                                 time,
-                                 M_fieldDim );
+        normU += elementaryDifferenceL2NormSquare( vec, fexact,
+                                                   //this->fe(),
+                                                   newFE,
+                                                   this->dof(),
+                                                   time,
+                                                   M_fieldDim );
         if (relError)
         {
-            sumExact += elemL22( fexact,
-                                 this->fe(),
-                                 time,
-                                 M_fieldDim );
+            sumExact += elementaryFctL2NormSquare( fexact,
+                                                   this->fe(),
+                                                   time,
+                                                   M_fieldDim );
         }
     }
 
@@ -948,7 +948,7 @@ FESpace<MeshType, MapType>::L2NormFunction( const function& f, const Real time)
     {
         this->fe().update( this->mesh()->element( ielem ), UPDATE_WDET  );
 
-        sumExact += elemL22( f, this->fe(), time, M_fieldDim );
+        sumExact += elementaryFctL2NormSquare( f, this->fe(), time, M_fieldDim );
     }
 
     Real sendbuff[1] = {sumExact};
@@ -1040,19 +1040,19 @@ FESpace<MeshType, MapType>::H1Error( const function&    fexact,
     {
         this->fe().updateFirstDeriv( this->mesh()->element( iVol ) );
 
-        normU += elem_H1_diff_2( vec, fexact,
-                                 this->fe(),
-                                 //p1,
-                                 this->dof(),
-                                 time,
-                                 M_fieldDim );
+        normU += elementaryDifferenceH1NormSquare( vec, fexact,
+                                                   this->fe(),
+                                                   //p1,
+                                                   this->dof(),
+                                                   time,
+                                                   M_fieldDim );
         if (relError)
         {
-            sumExact += elem_H1_2( fexact,
-                                   this->fe(),
-                                   //p1,
-                                   time,
-                                   M_fieldDim );
+            sumExact += elementaryFctH1NormSquare( fexact,
+                                                this->fe(),
+                                                //p1,
+                                                time,
+                                                M_fieldDim );
         }
     }
 
@@ -1095,7 +1095,7 @@ FESpace<MeshType, MapType>::L2Norm( const vector_type& vec)
         //UInt elem = M_FESpace.mesh()->element( ielem ).id();
         this->fe().updateJacQuadPt( this->mesh()->element( ielem ) );
         //
-        norm += elem_L2_2( vec, this->fe(), this->dof(), nbComp );
+        norm += elementaryL2NormSquare( vec, this->fe(), this->dof(), nbComp );
     }
 
     Real sendbuff[1] = {norm};

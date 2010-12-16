@@ -226,11 +226,6 @@ public:
      */
     void vtkExport( const std::string& filename) const;
 
-    void VTKExport( const std::string& filename) const
-    {
-        return vtkExport(filename);
-    }
-
     //@}
 
 

@@ -111,11 +111,10 @@ public:
     //@{
 
     //! This method returns the number of dof that live on the interface
-    ID nbInterfaceDof() const;
+    const ID& nbInterfaceDof() const;
 
     //! Return the correspondance map
     const std::map<ID, ID> & localDofMap() {return M_localDofMap;}
-    const std::map<ID, ID> & __attribute__ (( __deprecated__)) locDofMap() {return localDofMap();}
 
     //@}
 
