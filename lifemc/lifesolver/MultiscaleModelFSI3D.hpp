@@ -80,15 +80,15 @@ public:
     typedef boost::shared_ptr< FSIOperator_Type>                                           FSIOperatorPtr_Type;
 
     typedef FSIOperator::data_Type                                                         data_Type;
-    typedef FSIOperator::data_PtrType                                                      dataPtr_Type;
+    typedef FSIOperator::dataPtr_Type                                                      dataPtr_Type;
 
-    typedef FSIOperator::mesh_type                                                         mesh_Type;
+    typedef FSIOperator::mesh_Type                                                         mesh_Type;
 
-    typedef FSIOperator::fluid_raw_type                                                    fluid_Type;
-    typedef FSIOperator::solid_raw_type                                                    solid_Type;
+    typedef FSIOperator::fluid_Type                                                        fluid_Type;
+    typedef FSIOperator::solid_Type                                                        solid_Type;
 
-    typedef FSIOperator::vector_type                                                       vector_Type;
-    typedef FSIOperator::vector_ptrtype                                                    vectorPtr_Type;
+    typedef FSIOperator::vector_Type                                                       vector_Type;
+    typedef FSIOperator::vectorPtr_Type                                                    vectorPtr_Type;
 
     typedef Exporter< mesh_Type >                                                          IOFile_Type;
     typedef boost::shared_ptr< IOFile_Type >                                               IOFilePtr_Type;
