@@ -429,7 +429,7 @@ FSIOperator::setupDOF( void )
     M_epetraWorldComm->Barrier();
     disp.leaderPrint("done\n");
 
-    createInterfaceMaps( M_dofStructureToHarmonicExtension->locDofMap() );
+    createInterfaceMaps( M_dofStructureToHarmonicExtension->localDofMap() );
 }
 
 void
@@ -739,7 +739,7 @@ FSIOperator::transferFluidOnInterface(const vector_Type &_vec1, vector_Type &_ve
 
     _vec2 *= 0;
 
-    std::map<ID, ID> const& locDofMap = M_dofStructureToHarmonicExtension->locDofMap();
+    std::map<ID, ID> const& locDofMap = M_dofStructureToHarmonicExtension->localDofMap();
 
     int numTotalDofSolid = M_dFESpace->dof().numTotalDof();
     int numTotalDofFluid = M_uFESpace->dof().numTotalDof();
@@ -783,7 +783,7 @@ FSIOperator::transferSolidOnFluid(const vector_Type &_vec1, vector_Type &_vec2)
 
     _vec2 *= 0;
 
-    std::map<ID, ID> const& locDofMap = M_dofFluidToStructure->locDofMap();
+    std::map<ID, ID> const& locDofMap = M_dofFluidToStructure->localDofMap();
 
 
     int numTotalDofSolid = M_dFESpace->dof().numTotalDof();
@@ -828,7 +828,7 @@ FSIOperator::transferSolidOnInterface(const vector_Type &_vec1, vector_Type &_ve
 
     _vec2 *= 0;
 
-    std::map<ID, ID> const& locDofMap = M_dofStructureToSolid->locDofMap();
+    std::map<ID, ID> const& locDofMap = M_dofStructureToSolid->localDofMap();
 
     int numTotalDofSolid = M_dFESpace->dof().numTotalDof();
 
@@ -869,7 +869,7 @@ FSIOperator::transferInterfaceOnSolid(const vector_Type& _vec1, vector_Type& _ve
 
     _vec2 *= 0;
 
-    std::map<ID, ID> const& locDofMap = M_dofStructureToHarmonicExtension->locDofMap();
+    std::map<ID, ID> const& locDofMap = M_dofStructureToHarmonicExtension->localDofMap();
     int numTotalDofSolid = M_dFESpace->dof().numTotalDof();
 
     typedef std::map<ID, ID>::const_iterator iterator_Type;
@@ -1641,7 +1641,7 @@ FSIOperator::interpolateInterfaceDofs( const FESpace<mesh_Type, EpetraMap>& _fes
     //UInt numTotalVol2  = _fespace2.mesh()->numGlobalVolumes();
 
 
-    std::map<ID, ID> const& locDofMap = _dofInterface->locDofMap();
+    std::map<ID, ID> const& locDofMap = _dofInterface->localDofMap();
     std::map<ID, ID>::const_iterator iter;
 
     //Real x, y, z;

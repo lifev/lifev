@@ -99,7 +99,7 @@ int main(int argc, char** argv)
             *mesh, FluidInterfaceFlag,
             *mesh, SolidInterfaceFlag,
             0., &edgeFlag);
-        mesh2->edgeMarkers(dofEdgeFluidToEdgeSolid->locDofMap(), newMarker);
+        mesh2->edgeMarkers(dofEdgeFluidToEdgeSolid->localDofMap(), newMarker);
         /* We have removed mesh_wrt, but here it was called ...
             writeMesh( mesh_output , *mesh2);
         */

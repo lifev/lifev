@@ -97,7 +97,7 @@ void DofInterfaceHandler::initVectors()
         ASSERT_PRE( M_neighborList[ iter ]->finalized(),
                     "The DofInterface3Dto2D should be updated before calling initVectors (OutIBC)." );
 
-        M_referenceToIndexMap[ M_neighborList[ iter ]->InterfaceRef() ] = iter;
+        M_referenceToIndexMap[ M_neighborList[ iter ]->interfaceFlag() ] = iter;
     }
 }
 
@@ -155,7 +155,7 @@ void DofInterfaceHandler::ClearSomeDofInterface3Dto2DList()
     {
         ASSERT_PRE( M_neighborList[ iter ]->finalized(),
                     "The DofInterface3Dto2D should be updated before calling ClearDofInterface3Dto2DList()." );
-        M_neighborList[ iter ]->ClearLists();
+        M_neighborList[ iter ]->clearLists();
     }
 }
 

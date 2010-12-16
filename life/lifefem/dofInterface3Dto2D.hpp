@@ -116,20 +116,8 @@ public:
     template <typename MeshType>
     void generate2DMesh( std::string fname, const MeshType& mesh1 ) const;
 
-    template <typename MeshType>
-    void
-    __attribute__ ((__deprecated__))
-    Generate2DMesh( std::string fname, const MeshType& mesh1 ) const
-    {
-        return generate2DMesh(fname, mesh1 );
-    }
-
     //! removes all unuseful list (all except M_faceList). use it properly!
     void clearLists();
-    void __attribute__ ((__deprecated__)) ClearLists()
-    {
-        return clearLists();
-    }
 
     //! output
     std::ostream& showMe( bool verbose = false, std::ostream& out = std::cout ) const ;
@@ -159,13 +147,8 @@ public:
         return M_interfaceFlag;
     }
 
-    entityFlag_Type __attribute__ ((__deprecated__)) InterfaceRef() const
-    {
-        return interfaceFlag();
-    }
-
     //! true if the lists have been updated.
-    bool finalized() const
+    const bool& finalized() const
     {
         return M_finalized;
     }

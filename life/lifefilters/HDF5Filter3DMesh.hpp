@@ -1311,7 +1311,7 @@ void HDF5Filter3DMesh<MeshType>::writeInterfaces()
         {
             interface_Type& currentInterface = *(currentInterfaceSet[j]);
 
-            const std::map<UInt, UInt>& locDofMap = currentInterface.locDofMap();
+            const std::map<UInt, UInt>& locDofMap = currentInterface.localDofMap();
 
             Int size = locDofMap.size();
 
