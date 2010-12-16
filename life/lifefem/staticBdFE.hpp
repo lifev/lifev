@@ -41,12 +41,19 @@
 
 #include <vector>
 
+#pragma GCC diagnostic ignored "-Wunused-variable"
+#pragma GCC diagnostic ignored "-Wunused-parameter"
+
+#include <boost/numeric/ublas/vector.hpp>
+
+#pragma GCC diagnostic warning "-Wunused-variable"
+#pragma GCC diagnostic warning "-Wunused-parameter"
 
 #include <life/lifecore/life.hpp>
 #include <life/lifefem/geoMap.hpp>
 #include <life/lifefem/refFE.hpp>
 #include <life/lifefem/geoMap.hpp>
-#include <life/lifearray/tab.hpp>
+#include <life/lifearray/RNM.hpp>
 #include <life/lifefem/quadRule.hpp>
 
 namespace LifeV
@@ -69,6 +76,11 @@ class StaticBdFE
 {
 
 public:
+    //! @name Public typedefs
+    //@{
+    typedef boost::numeric::ublas::vector<Real> Vector;
+    typedef boost::numeric::ublas::zero_vector<Real> ZeroVector;
+    //@}
 
     //! @name Constructor & Destructor
     //@{
