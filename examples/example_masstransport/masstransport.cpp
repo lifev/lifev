@@ -303,7 +303,7 @@ MassTransport::run()
     if (verbose) std::cout << std::endl;
     if (verbose) std::cout << "Time discretization order " << dataNavierStokes.dataTime()->getBDF_order() << std::endl;
 
-    dataNavierStokes.dataMesh()->setMesh(meshPart.mesh());
+    dataNavierStokes.dataMesh()->setMesh(meshPart.meshPartition());
 
     if (verbose)
         std::cout << "Building the velocity FE space ... " << std::flush;
@@ -386,7 +386,7 @@ MassTransport::run()
         bdQr_adr  = &quadRuleTria3pt;   // DoE 2
     }
 
-    dataADR.setMesh(meshPart.mesh());
+    dataADR.setMesh(meshPart.meshPartition());
 
     if (verbose) std::cout << std::endl;
     if (verbose) std::cout << "Time discretization order " << dataADR.getBDF_order() << std::endl;
@@ -471,11 +471,11 @@ MassTransport::run()
 
     boost::shared_ptr< Exporter<RegionMesh3D<LinearTetra> > > exporter;
 
-    exporter.reset( new Ensight<RegionMesh3D<LinearTetra> > ( dataFile, meshPart.mesh(), "rclux", d->comm->MyPID()) );
+    exporter.reset( new Ensight<RegionMesh3D<LinearTetra> > ( dataFile, meshPart.meshPartition(), "rclux", d->comm->MyPID()) );
     // hdf5 exporter, still under development
-    //    exporter.reset( new Hdf5exporter<RegionMesh3D<LinearTetra> > ( dataFile, meshPart.mesh(), "ethiersteinman", d->comm->MyPID()) );
+    //    exporter.reset( new Hdf5exporter<RegionMesh3D<LinearTetra> > ( dataFile, meshPart.meshPartition(), "ethiersteinman", d->comm->MyPID()) );
 
-    //    Ensight<RegionMesh3D<LinearTetra> > exporter( dataFile, meshPart.mesh(), "ethiersteinman", d->comm->MyPID());
+    //    Ensight<RegionMesh3D<LinearTetra> > exporter( dataFile, meshPart.meshPartition(), "ethiersteinman", d->comm->MyPID());
 
 
     // adr solver initial solution
