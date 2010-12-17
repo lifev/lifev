@@ -188,8 +188,7 @@ public:
       \param meshPartition - shared_ptr<Mesh> - shared pointer to mesh partition object
       \param comm -shared_ptr<Epetra_Comm> - shared pointer to the Epetra communicator to be used
     */
-    void __attribute__((__deprecated__)) loadMyPartition(meshPtr_Type meshPartition,
-                                                         boost::shared_ptr<Epetra_Comm>& comm);
+    void loadMyPartition(meshPtr_Type& meshPartition, boost::shared_ptr<Epetra_Comm>& comm);
 
     //! Get the number of stored DOF interfaces
     Int queryStoredInterfaceNumber();
@@ -310,9 +309,8 @@ void HDF5Filter3DMesh<MeshType>::loadGraph(graphPtr_Type graph, boost::shared_pt
     }
 }
 
-// TODO: MARK AS DEPRECATED AND REMOVE -> FIX TEST PARTITION AND MAYBE THE FSI PARTITIONER
-/*template<typename MeshType>
-void HDF5Filter3DMesh<MeshType>::loadMyPartition(meshPtr_Type meshPartition,
+template<typename MeshType>
+void HDF5Filter3DMesh<MeshType>::loadMyPartition(meshPtr_Type& meshPartition,
                                                  boost::shared_ptr<Epetra_Comm>& comm)
 {
     UInt elementNodes, faceNodes;
@@ -575,7 +573,7 @@ void HDF5Filter3DMesh<MeshType>::loadMyPartition(meshPtr_Type meshPartition,
     meshPartition->updateElementEdges(false, false);
     meshPartition->updateElementFaces(false, false);
 
-}*/
+}
 
 template<typename MeshType>
 void HDF5Filter3DMesh<MeshType>::postProcess(const Real& time)
