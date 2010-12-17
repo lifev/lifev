@@ -414,9 +414,9 @@ Cylinder::run()
     meshPart.setup(1, (d->comm));
 
     HDF5Filter3DMesh<RegionMesh3D<LinearTetra> > HDF5Input(dataFile, "cylinderPart");
-    HDF5Input.loadGraph(meshPart.graph(), d->comm);
+    HDF5Input.loadGraph(meshPart.elementDomains(), d->comm);
     meshPart.update();
-    HDF5Input.loadMyPartition(meshPart.mesh(), d->comm);
+    HDF5Input.loadMyPartition(meshPart.meshPartition(), d->comm);
     HDF5Input.CloseFile();
 
     if (verbose) std::cout << std::endl;
@@ -482,9 +482,9 @@ Cylinder::run()
     vector_type rhs ( fullMap );
 
 #ifdef HAVE_HDF5
-    HDF5Filter3DMesh<RegionMesh3D<LinearTetra> > ensight( dataFile, meshPart.mesh(), "cylinder", d->comm->MyPID());
+    HDF5Filter3DMesh<RegionMesh3D<LinearTetra> > ensight( dataFile, meshPart.meshPartition(), "cylinder", d->comm->MyPID());
 #else
-    Ensight<RegionMesh3D<LinearTetra> > ensight( dataFile, meshPart.mesh(), "cylinder", d->comm->MyPID());
+    Ensight<RegionMesh3D<LinearTetra> > ensight( dataFile, meshPart.meshPartition(), "cylinder", d->comm->MyPID());
 #endif
 
     vector_ptrtype velAndPressure ( new vector_type(*fluid.solution(), ensight.mapType() ) );
