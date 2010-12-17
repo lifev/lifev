@@ -39,24 +39,6 @@
  */
 
 
-/*******************************************************************************
-* Comment (Alexis Aposporidis, 09-12-2010):
-* The following methods in this class appear to be unused and we may consider
-* removing them:
-*
-* computeMeanValuesPerSection()
-* verbose()
-* dumpInit()
-* dumpPeriod()
-* nbZSections()
-* toleranceSection()
-* xSectionFrontier()
-* zSectionInit()
-* zSectionFinal()
-*
-*******************************************************************************/
-
-
 #ifndef _DATANAVIERSTOKES_H_
 #define _DATANAVIERSTOKES_H_
 
@@ -119,11 +101,6 @@ public:
 
     //! @name Public Types
     //@{
-
-    //delete***********************
-    typedef DataTime                               Time_Type;
-    typedef boost::shared_ptr< Time_Type >         Time_ptrType;
-    //delete***********************
 
     typedef DataTime							   time_Type;
     typedef boost::shared_ptr<time_Type>	       timePtr_Type;
@@ -193,10 +170,6 @@ public:
      * @param density
      * @param nfluid the fluid number
      */
-    inline void __attribute__ ((__deprecated__)) density ( const Real& density, const UInt nfluid=0 )
-    {
-        setDensity( density, nfluid );
-    }
     inline void setDensity ( const Real& density, const UInt nfluid=0 )
     {
         ASSERT(nfluid< M_fluidNumber,"Undeclared fluid");
@@ -208,10 +181,6 @@ public:
      * @param viscosity
      * @param nfluid the fluid number
      */
-    inline void __attribute__ ((__deprecated__)) viscosity ( const Real& viscosity, const UInt nfluid=0 )
-    {
-        setViscosity( viscosity, nfluid );
-    }
     inline void setViscosity ( const Real& viscosity, const UInt nfluid=0 )
     {
         ASSERT(nfluid< M_fluidNumber,"Undeclared fluid");
@@ -330,7 +299,7 @@ public:
      * @return M_stokes Boolean that is "true" for a Stokes and "false" for a Navier-Stokes
      *                  problem
      */
-    inline bool     Stokes()                      const { return M_stokes; }
+    inline bool     isStokes()                      const { return M_stokes; }
 
     //! Find out if a semi-implicit scheme is used
     /*!
