@@ -82,7 +82,15 @@ class BCVectorBase
 {
 public:
 
-    //! @name Constructors and Destructor
+	//! @name Public Types
+	//@{
+
+	typedef EpetraVector vector_Type;
+    typedef vector_Type const* vectorConstPtr_Type;
+
+	//@}
+
+    //! @name Constructors and Detypedef BCVectorBase::vector_Type vector_Type;structor
     //@{
 
 
@@ -100,7 +108,7 @@ public:
       @param type The type can assume the following values (0, 1, 2); see BCVector class description for their meaning
     */
 
-    BCVectorBase( const EpetraVector& rightHandSideVector, const UInt numberOfTotalDof, UInt type = 0 );
+    BCVectorBase( const vector_Type& rightHandSideVector, const UInt numberOfTotalDof, UInt type = 0 );
 
 
     //! Copy Constructor
@@ -150,13 +158,6 @@ public:
     virtual Real BetaVec( const ID& globalDofId, const ID& component ) const;
 
 
-    //!  Return the value of the selected component of the gamma coefficient vector at position dofID
-    /*!
-      @param globalDofId The global DOF id
-      @param component The vector component
-    */
-    virtual Real GammaVec( const ID& globalDofId, const ID& component ) const;
-
     //! showMe
     /*!
      * @param verbose The verbosity
@@ -192,11 +193,6 @@ public:
     //true if beta coefficient is a Vector
     inline bool isbetaVec() const  {return M_isBetaCoeffAVector;}
 
-
-    //true if gamma coefficient is a Vector
-    inline bool isgammaVec() const {return M_isGammaCoeffAVector;}
-
-
     //! Return the value of the boundary mass coefficient of Robin conditions
     inline Real mixteCoef() const { return M_robinBoundaryMassCoeff; }
 
@@ -207,10 +203,6 @@ public:
 
     //! Return the value of the beta coefficient
     inline Real betaCoef() const { return M_betaCoeff; }
-
-
-    //! Return the value of the gamma coefficient
-    inline Real gammaCoef() const { return M_gammaCoeff; }
 
     //@}
 
@@ -239,13 +231,6 @@ public:
     inline void setisbeta( bool isBetaCoeffAVector) { M_isBetaCoeffAVector = isBetaCoeffAVector; }
 
 
-    //! set M_isGammaCoeffAVector
-    /*!
-      @param isGammaCoeffAVector Boolean value saying whether the gamma coefficient is a vector
-     */
-    inline void setisgamma( bool isGammaCoeffAVector ) { M_isGammaCoeffAVector = isGammaCoeffAVector; }
-
-
     //! set the boundary mass coefficient of Robin bc
     /*!
       @param robinBoundaryMassCoeff The boundary mass coefficient of robin conditions
@@ -269,20 +254,12 @@ public:
     inline void setBetaCoef( const Real& betaCoeff ) { M_betaCoeff = betaCoeff;}
 
 
-    //! set the Gamma coefficient FE vector
-    /*!
-      @param gammaCoeff The gamma coefficient
-     */
-
-    void setGammaCoef( const Real& gammaCoeff ) { M_gammaCoeff = gammaCoeff; }
-
-
     //! set the boundary mass coefficient FE vector for Robin boundary conditions
     /*!
       @param robinBoundaryMassCoeff The boundary mass coefficient of robin conditions
      */
 
-    void setMixteVec( const EpetraVector& robinBoundaryMassCoeffVector );
+    void setMixteVec( const vector_Type& robinBoundaryMassCoeffVector );
 
 
 
@@ -290,14 +267,7 @@ public:
     /*!
       @param betaCoeffVector The beta coefficient FE vector
      */
-    void setBetaVec( const EpetraVector& betaCoeffVector );
-
-
-    //! set the gamma coefficient FE vector
-    /*!
-      @param gammaCoeffVector The gamaa coefficient FE vector
-     */
-    void setGammaVec( const EpetraVector& gammaCoeffVector );
+    void setBetaVec( const vector_Type& betaCoeffVector );
 
 
     //! set the right hand side FE vector
@@ -306,19 +276,18 @@ public:
       @param numberOfTotalDOF
       @param type
      */
-    void setVector( const EpetraVector& righHandSideVector, UInt numberOfTotalDOF, UInt type=0 );
+    void setVector( const vector_Type& righHandSideVector, UInt numberOfTotalDOF, UInt type=0 );
 
     //@}
 
 protected:
 
     //! The pointer to  FE vector for the right hand side part of the equation
-    const EpetraVector* M_rightHandSideVectorPtr;
+    vectorConstPtr_Type M_rightHandSideVectorPtr;
 
     //! The pointer to FE Vector holding the robin boundary Mass coefficients
-    const EpetraVector* M_robinBoundaryMassCoeffVectorPtr;
-    const EpetraVector* M_betaCoeffVectorPtr;
-    const EpetraVector* M_gammaCoeffVectorPtr;
+    vectorConstPtr_Type M_robinBoundaryMassCoeffVectorPtr;
+    vectorConstPtr_Type M_betaCoeffVectorPtr;
 
     //! Number of total dof in the vector of data
     UInt M_numberOfTotalDof;
@@ -333,18 +302,11 @@ protected:
     //! Coefficient for the beta coefficient
     Real M_betaCoeff;
 
-    //! Coefficient for gamma coefficient
-    Real M_gammaCoeff;
-
     //! boolean determining whether the boundary mass coefficient is a FE Vector
     bool M_isRobinBdMassCoeffAVector;
 
     //! boolean determining whether the boundary mass coefficient is a FE Vector
     bool M_isBetaCoeffAVector;
-
-    //! boolean determining whether the boundary mass coefficient is a FE Vector
-    bool M_isGammaCoeffAVector;
-
 
     //!  Type of boundary condition; see the BCBase class description
     UInt M_type;
@@ -404,6 +366,8 @@ public:
     //! super class
     typedef BCVectorBase super; //deprecated
     typedef BCVectorBase bcVectorBase_Type;
+    typedef BCVectorBase::vector_Type vector_Type;
+    typedef BCVectorBase::vectorConstPtr_Type vectorConstPtr_Type;
 
     //@}
 
@@ -422,7 +386,7 @@ public:
     	@param numberOfTotalDof number of total dof in the vector of data
     	@param type The type can assume the following values (0, 1, 2); see BCVector class description for their meaning
     */
-    BCVector( EpetraVector& rightHandSideVector, UInt const numberOfTotalDof, UInt type=0 );
+    BCVector( const vector_Type& rightHandSideVector, UInt const numberOfTotalDof, UInt type=0 );
 
 
     //Copy Constructor
@@ -505,6 +469,8 @@ public:
 
     typedef BCVectorBase bcVectorBase_Type;
     typedef boost::shared_ptr<DofInterfaceBase> dofInterfacePtr_Type;
+    typedef BCVectorBase::vector_Type vector_Type;
+    typedef BCVectorBase::vectorConstPtr_Type vectorConstPtr_Type;
 
     //@}
 
@@ -526,7 +492,7 @@ public:
       @param interfaceDofPtr The pointer to the container of connections between the DOFs on two matching meshes
       @param type The type can assume the following values (0, 1, 2); see BCVector class description for their meaning
     */
-    BCVectorInterface( const EpetraVector& rightHandSideVector, UInt numberOfTotalDof, const dofInterfacePtr_Type& interfaceDofPtr, UInt type=0 );
+    BCVectorInterface( const vector_Type& rightHandSideVector, UInt numberOfTotalDof, const dofInterfacePtr_Type& interfaceDofPtr, UInt type=0 );
 
 
     //! Copy Constructor
@@ -568,7 +534,7 @@ public:
           @param interfaceDofPtr The pointer to the container of connections between the DOFs on two matching meshes
           @param type The type can assume the following values (0, 1, 2); see BCVectorInterface class description for their meaning
         */
-    void setup ( const EpetraVector& rightHandSideVector, UInt numberOfTotalDof, const dofInterfacePtr_Type& interfaceDofPtr, UInt type=0 );
+    void setup ( const vector_Type& rightHandSideVector, UInt numberOfTotalDof, const dofInterfacePtr_Type& interfaceDofPtr, UInt type=0 );
 
 
     //! set the BC vector (after default construction)
@@ -578,7 +544,7 @@ public:
       @param interfaceDofPtr The pointer to the container of connections between the DOFs on two matching meshes
       @param type The type can assume the following values (0, 1, 2); see BCVectorInterface class description for their meaning
     */
-    void setVector( const EpetraVector& rightHandSideVector, UInt numberOfTotalDof, const dofInterfacePtr_Type& interfaceDofPtr, UInt type=0);
+    void setVector( const vector_Type& rightHandSideVector, UInt numberOfTotalDof, const dofInterfacePtr_Type& interfaceDofPtr, UInt type=0);
 
 
 
@@ -599,15 +565,6 @@ public:
       @param component The vector component
     */
     Real BetaVec( const ID& globalDofId, const ID& component ) const;
-
-
-    //!  Return the value of the selected component of the gamma coefficient vector at position dofID
-    /*!
-      @param globalDofId The global DOF id
-      @param component The vector component
-    */
-    Real GammaVec( const ID& globalDofId, const ID& component ) const;
-
 
 
     //! showMe

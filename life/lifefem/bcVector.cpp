@@ -56,40 +56,36 @@ BCVectorBase::BCVectorBase()
         M_robinBoundaryMassCoeff( 0.0 ),
         M_resistanceCoeff( 0.0 ),
         M_betaCoeff(1.0),
-        M_gammaCoeff(1.0),
         M_isRobinBdMassCoeffAVector( false ),
         M_isBetaCoeffAVector( false  ),
-        M_isGammaCoeffAVector( false ),
         M_type( 0 ),
         M_finalized( false )
 {}
 
 
-BCVectorBase::BCVectorBase( const EpetraVector& rightHandSideVector , const UInt numberOfTotalDof, UInt type )
+BCVectorBase::BCVectorBase( const vector_Type& rightHandSideVector , const UInt numberOfTotalDof, UInt type )
         :
         M_rightHandSideVectorPtr       ( &rightHandSideVector  ),
         M_numberOfTotalDof( numberOfTotalDof ),
         M_robinBoundaryMassCoeff ( 0.0 ),
         M_resistanceCoeff( 0.0 ),
         M_betaCoeff(1.0),
-        M_gammaCoeff(1.0),
         M_isRobinBdMassCoeffAVector( false ),
         M_isBetaCoeffAVector( false  ),
-        M_isGammaCoeffAVector( false ),
         M_type      ( type ),
         M_finalized ( false )
 {}
 
 BCVectorBase::BCVectorBase( BCVectorBase const& bcVectorBase ):
         M_rightHandSideVectorPtr ( bcVectorBase.M_rightHandSideVectorPtr ),
+        M_robinBoundaryMassCoeffVectorPtr ( bcVectorBase.M_robinBoundaryMassCoeffVectorPtr),
+        M_betaCoeffVectorPtr( bcVectorBase.M_betaCoeffVectorPtr ),
         M_numberOfTotalDof ( bcVectorBase.M_numberOfTotalDof ),
         M_robinBoundaryMassCoeff ( bcVectorBase.M_robinBoundaryMassCoeff ),
         M_resistanceCoeff ( bcVectorBase.M_resistanceCoeff ),
         M_betaCoeff ( bcVectorBase.M_betaCoeff ),
-        M_gammaCoeff ( bcVectorBase.M_gammaCoeff ),
         M_isRobinBdMassCoeffAVector ( bcVectorBase.M_isRobinBdMassCoeffAVector ),
         M_isBetaCoeffAVector ( bcVectorBase.M_isBetaCoeffAVector ),
-        M_isGammaCoeffAVector ( bcVectorBase.M_isGammaCoeffAVector ),
         M_type ( bcVectorBase.M_type ),
         M_finalized ( bcVectorBase.M_finalized )
 {
@@ -107,15 +103,16 @@ BCVectorBase::operator=( BCVectorBase const& bcVectorBase )
     if ( this != &bcVectorBase )
     {
         M_rightHandSideVectorPtr        = bcVectorBase.M_rightHandSideVectorPtr;
+        M_robinBoundaryMassCoeffVectorPtr = bcVectorBase.M_robinBoundaryMassCoeffVectorPtr;
+        M_betaCoeffVectorPtr =  bcVectorBase.M_betaCoeffVectorPtr;
         M_numberOfTotalDof = bcVectorBase.M_numberOfTotalDof;
         M_robinBoundaryMassCoeff  = bcVectorBase.M_robinBoundaryMassCoeff;
+        M_betaCoeffVectorPtr =  bcVectorBase.M_betaCoeffVectorPtr;
         M_resistanceCoeff  = bcVectorBase.M_resistanceCoeff;
         M_betaCoeff   = bcVectorBase.M_betaCoeff;
-        M_gammaCoeff  = bcVectorBase.M_gammaCoeff;
         M_type       = bcVectorBase.M_type;
         M_isRobinBdMassCoeffAVector = bcVectorBase.M_isRobinBdMassCoeffAVector;
         M_isBetaCoeffAVector  = bcVectorBase.M_isBetaCoeffAVector;
-        M_isGammaCoeffAVector = bcVectorBase.M_isGammaCoeffAVector;
         M_finalized  = bcVectorBase.M_finalized;
     }
     return *this;
@@ -138,7 +135,7 @@ Real
 BCVectorBase::MixteVec ( const ID& globalDofId, const ID& component ) const
 {
     ASSERT_PRE( this->isFinalized(), "BC Vector should be finalized before being accessed." );
-    return ( *M_rightHandSideVectorPtr ) ( ( component - 1 ) * M_numberOfTotalDof + globalDofId );
+    return ( *M_robinBoundaryMassCoeffVectorPtr ) ( ( component - 1 ) * M_numberOfTotalDof + globalDofId );
 }
 
 
@@ -152,20 +149,13 @@ BCVectorBase::BetaVec ( const ID& globalDofId, const ID& component ) const
     return ( *M_betaCoeffVectorPtr ) ( ( component - 1 ) * M_numberOfTotalDof + globalDofId );
 }
 
-Real
-BCVectorBase::GammaVec ( const ID& globalDofId, const ID& component ) const
-{
-    ASSERT_PRE( this->isFinalized(), "BC Vector should be finalized before being accessed." );
-    return ( *M_gammaCoeffVectorPtr ) ( ( component - 1 ) * M_numberOfTotalDof + globalDofId );
-}
-
 
 // ===================================
 // Set Methods
 //====================================
 
 void
-BCVectorBase::setVector( const EpetraVector& rightHandSideVector , UInt numberOfTotalDof, UInt type )
+BCVectorBase::setVector( const vector_Type& rightHandSideVector , UInt numberOfTotalDof, UInt type )
 {
     M_rightHandSideVectorPtr = &rightHandSideVector  ;
     M_numberOfTotalDof = numberOfTotalDof;
@@ -174,27 +164,18 @@ BCVectorBase::setVector( const EpetraVector& rightHandSideVector , UInt numberOf
 }
 
 void
-BCVectorBase::setMixteVec( const EpetraVector& robinBoundaryMassCoeffVector )
+BCVectorBase::setMixteVec( const vector_Type& robinBoundaryMassCoeffVector )
 {
     M_isRobinBdMassCoeffAVector = true;
     M_robinBoundaryMassCoeffVectorPtr= &robinBoundaryMassCoeffVector;
 }
 
 void
-BCVectorBase::setBetaVec( const EpetraVector& betaCoeffVector )
+BCVectorBase::setBetaVec( const vector_Type& betaCoeffVector )
 {
     M_isBetaCoeffAVector = true;
     M_betaCoeffVectorPtr= &betaCoeffVector;
 }
-
-void
-BCVectorBase::setGammaVec( const EpetraVector& gammaCoeffVector )
-{
-    M_isGammaCoeffAVector = true;
-    M_gammaCoeffVectorPtr= &gammaCoeffVector;
-}
-
-
 
 
 // ===================================
@@ -208,7 +189,7 @@ BCVectorBase::setGammaVec( const EpetraVector& gammaCoeffVector )
 //====================================
 
 
-BCVector::BCVector( EpetraVector& rightHandSideVector, UInt const numberOfTotalDof, UInt type )
+BCVector::BCVector( const vector_Type& rightHandSideVector, UInt const numberOfTotalDof, UInt type )
         :
         BCVectorBase( rightHandSideVector, numberOfTotalDof, type )
 {
@@ -318,25 +299,23 @@ BCVectorInterface::operator() ( const ID& globalDofId, const ID& component ) con
 // methods
 //====================================
 
-void BCVectorInterface::setup( const EpetraVector& rightHandSideVector, UInt numberOfTotalDof, const dofInterfacePtr_Type& interfaceDofPtr, UInt type )
+void BCVectorInterface::setup( const vector_Type& rightHandSideVector, UInt numberOfTotalDof, const dofInterfacePtr_Type& interfaceDofPtr, UInt type )
 {
     M_rightHandSideVectorPtr        = &rightHandSideVector;
     M_numberOfTotalDof = numberOfTotalDof;
     M_robinBoundaryMassCoeff  = 0.0;
     M_resistanceCoeff  = 0.0;
     M_betaCoeff   = 1.0;
-    M_gammaCoeff  = 1.0;
     M_type       = type;
     M_interfaceDofPtr      = interfaceDofPtr;
     M_isRobinBdMassCoeffAVector = false;
     M_isBetaCoeffAVector  = false;
-    M_isGammaCoeffAVector = false;
     this->setFinalized( true );
 }
 
 
 void
-BCVectorInterface::setVector( const EpetraVector& rightHandSideVector, UInt numberOfTotalDof, const dofInterfacePtr_Type& interfaceDofPtr, UInt type )
+BCVectorInterface::setVector( const vector_Type& rightHandSideVector, UInt numberOfTotalDof, const dofInterfacePtr_Type& interfaceDofPtr, UInt type )
 {
     ASSERT_PRE( !this->isFinalized(), "BC Vector cannot be set twice." );
 
@@ -360,13 +339,6 @@ BCVectorInterface::BetaVec( const ID& globalDofId, const ID& component ) const
 {
     ASSERT_PRE( this->isFinalized(), "BC Vector should be finalized before being accessed." );
     return ( *M_betaCoeffVectorPtr ) (( component - 1 ) * M_numberOfTotalDof + M_interfaceDofPtr->getInterfaceDof( globalDofId ));
-}
-
-Real
-BCVectorInterface::GammaVec( const ID& globalDofId, const ID& component ) const
-{
-    ASSERT_PRE( this->isFinalized(), "BC Vector should be finalized before being accessed." );
-    return ( *M_gammaCoeffVectorPtr ) (( component - 1 ) * M_numberOfTotalDof + M_interfaceDofPtr->getInterfaceDof( globalDofId ));
 }
 
 
