@@ -442,29 +442,29 @@ void IPStabilization<MESH, DOF>::apply( MATRIX& matrix,  const VECTOR& state, co
         std::cout << std::endl;
         std::cout << state.BlockMap().Comm().MyPID()
                   <<  "  .   Updating of element   done in "
-                  << chronoUpdate.diff_cumul()   << " s." << std::endl;
+                  << chronoUpdate.diffCumul()   << " s." << std::endl;
         std::cout << "   .   Determination of beta done in "
-                  << chronoBeta.diff_cumul()     << " s." << std::endl;
+                  << chronoBeta.diffCumul()     << " s." << std::endl;
         std::cout << "   .   Element computations  done in "
-                  << chronoElemComp.diff_cumul() << " s." << std::endl;
+                  << chronoElemComp.diffCumul() << " s." << std::endl;
         std::cout << "   .   chrono 1              done in "
-                  << chronoAssembly1.diff_cumul() << " s." << std::endl;
+                  << chronoAssembly1.diffCumul() << " s." << std::endl;
         std::cout << "   .   chrono 2              done in "
-                  << chronoAssembly2.diff_cumul() << " s." << std::endl;
+                  << chronoAssembly2.diffCumul() << " s." << std::endl;
         std::cout << "   .   chrono 3              done in "
-                  << chronoAssembly3.diff_cumul() << " s." << std::endl;
+                  << chronoAssembly3.diffCumul() << " s." << std::endl;
         std::cout << "   .   chrono 4              done in "
-                  << chronoAssembly4.diff_cumul() << " s." << std::endl;
+                  << chronoAssembly4.diffCumul() << " s." << std::endl;
         std::cout << "   .   chrono 5              done in "
-                  << chronoAssembly5.diff_cumul() << " s." << std::endl;
+                  << chronoAssembly5.diffCumul() << " s." << std::endl;
         std::cout << "   .   chrono 6              done in "
-                  << chronoAssembly6.diff_cumul() << " s." << std::endl;
+                  << chronoAssembly6.diffCumul() << " s." << std::endl;
         std::cout << "   .   chrono 7              done in "
-                  << chronoAssembly7.diff_cumul() << " s." << std::endl;
+                  << chronoAssembly7.diffCumul() << " s." << std::endl;
         std::cout << "   .   chrono 8              done in "
-                  << chronoAssembly8.diff_cumul() << " s." << std::endl;
+                  << chronoAssembly8.diffCumul() << " s." << std::endl;
         std::cout << "   .   total                                   "
-                  << chronoAssembly.diff_cumul() << " s."
+                  << chronoAssembly.diffCumul() << " s."
                   << " myFaces = " << myFaces << std::endl;
     }
 
@@ -652,7 +652,7 @@ void IPStabilization<MESH, DOF>::apply_expl(VECTOR& vector, const VECTOR& state)
     chronoAssembly.stop();
 
     std::cout << "  ip-  IP terms assembling: " <<
-              chronoAssembly.diff_cumul() << " sec." << std::endl;
+              chronoAssembly.diffCumul() << " sec." << std::endl;
 
 }  // apply_expl
 
