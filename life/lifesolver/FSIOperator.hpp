@@ -912,6 +912,13 @@ protected:
 
     //@}
 private:
+
+    //!@name Private Methods
+    //@{
+    //!Private Copy Constructor
+    FSIOperator( const FSIOperator& copy){}
+    //@}
+
     //! @name Private Attributes
     //@{
     // displacement on the interface
