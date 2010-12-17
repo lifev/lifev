@@ -38,7 +38,7 @@
 
 namespace LifeV
 {
-namespace multiscale
+namespace Multiscale
 {
 
 // ===================================================
@@ -55,5 +55,5 @@ MultiscaleAlgorithmExplicit::MultiscaleAlgorithmExplicit() :
     M_type = Explicit;
 }
 
-} // Namespace multiscale
+} // Namespace Multiscale
 } // Namespace LifeV

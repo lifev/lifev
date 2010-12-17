@@ -86,7 +86,7 @@
 #include <lifemc/lifesolver/MultiscaleSolver.hpp>
 
 using namespace LifeV;
-using namespace multiscale;
+using namespace Multiscale;
 
 Int
 main( Int argc, char** argv )

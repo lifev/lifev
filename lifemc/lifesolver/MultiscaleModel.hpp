@@ -44,7 +44,7 @@
 
 namespace LifeV
 {
-namespace multiscale
+namespace Multiscale
 {
 
 //! MultiscaleModel - The MultiScale Physical Model

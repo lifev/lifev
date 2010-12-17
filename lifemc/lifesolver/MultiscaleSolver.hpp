@@ -48,7 +48,7 @@
 
 namespace LifeV
 {
-namespace multiscale
+namespace Multiscale
 {
 
 //! MultiscaleSolver - The MultiScale problem solver

@@ -38,7 +38,7 @@
 
 namespace LifeV
 {
-namespace multiscale
+namespace Multiscale
 {
 
 // ===================================================
@@ -527,5 +527,5 @@ MultiscaleCouplingFlowRateStress::functionStress( const Real& t, const Real&, co
     return interpolatedCouplingVariables[1];
 }
 
-} // Namespace multiscale
+} // Namespace Multiscale
 } // Namespace LifeV

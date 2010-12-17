@@ -38,7 +38,7 @@
 
 namespace LifeV
 {
-namespace multiscale
+namespace Multiscale
 {
 
 std::string multiscaleProblemFolder = "./";
@@ -91,7 +91,6 @@ MultiscaleSolver::MultiscaleSolver() :
     multiscaleAlgorithmFactory_Type::instance().registerProduct( Aitken,              &createMultiscaleAlgorithmAitken );
     multiscaleAlgorithmFactory_Type::instance().registerProduct( Explicit,            &createMultiscaleAlgorithmExplicit );
     multiscaleAlgorithmFactory_Type::instance().registerProduct( Newton,              &createMultiscaleAlgorithmNewton );
-
 }
 
 // ===================================================

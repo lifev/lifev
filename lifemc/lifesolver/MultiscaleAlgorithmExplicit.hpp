@@ -41,7 +41,7 @@
 
 namespace LifeV
 {
-namespace multiscale
+namespace Multiscale
 {
 
 //! MultiscaleAlgorithmExplicit - The MultiScale Algorithm implementation of Explicit
@@ -97,7 +97,7 @@ inline multiscaleAlgorithm_Type* createMultiscaleAlgorithmExplicit()
     return new MultiscaleAlgorithmExplicit();
 }
 
-} // Namespace multiscale
+} // Namespace Multiscale
 } // Namespace LifeV
 
 #endif /* MultiscaleAlgorithmExplicit_H */

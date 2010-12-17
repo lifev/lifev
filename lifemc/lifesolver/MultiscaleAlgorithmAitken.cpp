@@ -38,7 +38,7 @@
 
 namespace LifeV
 {
-namespace multiscale
+namespace Multiscale
 {
 
 // ===================================================
@@ -183,5 +183,5 @@ MultiscaleAlgorithmAitken::showMe()
     }
 }
 
-} // Namespace multiscale
+} // Namespace Multiscale
 } // Namespace LifeV

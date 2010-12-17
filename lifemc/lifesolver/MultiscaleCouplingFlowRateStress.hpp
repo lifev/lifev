@@ -44,7 +44,7 @@
 
 namespace LifeV
 {
-namespace multiscale
+namespace Multiscale
 {
 
 //! MultiscaleCouplingFlowRateStress - FlowRate-Stress coupling condition
@@ -62,6 +62,15 @@ namespace multiscale
 class MultiscaleCouplingFlowRateStress: public virtual multiscaleCoupling_Type
 {
 public:
+
+    //! @name Type definitions
+    //@{
+
+    typedef BCFunctionBase                                  bcFunction3D_Type;
+    typedef OneDimensionalModel_BCFunction                  bcFunction1D_Type;
+
+    //@}
+
 
     //! @name Constructors & Destructor
     //@{
@@ -167,13 +176,13 @@ private:
 
     //@}
 
-    BCFunctionBase                 M_baseFlowRate3D;
-    BCFunctionBase                 M_baseStress3D;
+    bcFunction3D_Type M_baseFlowRate3D;
+    bcFunction3D_Type M_baseStress3D;
 
-    OneDimensionalModel_BCFunction M_baseFlowRate1D;
-    OneDimensionalModel_BCFunction M_baseStress1D;
+    bcFunction1D_Type M_baseFlowRate1D;
+    bcFunction1D_Type M_baseStress1D;
 
-    stress_Type                    M_stressType;
+    stress_Type       M_stressType;
 };
 
 //! Factory create function
@@ -209,7 +218,7 @@ MultiscaleCouplingFlowRateStress::imposeFlowRate1D( const UInt& i )
 {
     ModelType *model = multiscaleDynamicCast< ModelType >( M_models[i] );
 
-    model->bcInterface().setBC( (M_flags[i] == 0) ? OneD_left : OneD_right, OneD_first, OneD_Q, M_baseFlowRate1D );
+    model->bcInterface().setBC( (M_flags[i] == 0) ? OneDimensional::left : OneDimensional::right, OneDimensional::first, OneDimensional::Q, M_baseFlowRate1D );
 }
 
 template< class ModelType >
@@ -218,10 +227,10 @@ MultiscaleCouplingFlowRateStress::imposeStress1D( const UInt& i )
 {
     ModelType *model = multiscaleDynamicCast< ModelType >( M_models[i] );
 
-    model->bcInterface().setBC( (M_flags[i] == 0) ? OneD_left : OneD_right, OneD_first, OneD_P, M_baseStress1D );
+    model->bcInterface().setBC( (M_flags[i] == 0) ? OneDimensional::left : OneDimensional::right, OneDimensional::first, OneDimensional::P, M_baseStress1D );
 }
 
-} // Namespace multiscale
+} // Namespace Multiscale
 } // Namespace LifeV
 
 #endif /* MultiscaleCouplingFlowRateStress_H */

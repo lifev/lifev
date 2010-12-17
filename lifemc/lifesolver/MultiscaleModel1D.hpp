@@ -72,7 +72,7 @@
 
 namespace LifeV
 {
-namespace multiscale
+namespace Multiscale
 {
 
 //! MultiscaleModel1D - MultiScale model for 1D Fluid simulations
@@ -114,6 +114,12 @@ public:
     typedef boost::shared_ptr< bcInterface_Type >                  bcInterfacePtr_Type;
     typedef OneDimensionalModel_BCHandler                          bc_Type;
     typedef boost::shared_ptr< bc_Type >                           bcPtr_Type;
+
+    typedef OneDimensionalModel_BCFunction                         bcFunction_Type;
+
+    typedef OneDimensional::bcType_Type                            bcType_Type;
+    typedef OneDimensional::bcSide_Type                            bcSide_Type;
+    typedef OneDimensional::bcLine_Type                            bcLine_Type;
 
 #ifdef HAVE_HDF5
     typedef Hdf5exporter< mesh_Type >                              IOFile_Type;
@@ -208,21 +214,21 @@ public:
      * @param flag flag of the boundary face
      * @return area value
      */
-    Real boundaryArea( const BCFlag& flag ) const { return M_solver->boundaryValue( *M_solution, OneD_A, flagConverter( flag ) ); }
+    Real boundaryArea( const BCFlag& flag ) const { return M_solver->boundaryValue( *M_solution, OneDimensional::A, flagConverter( flag ) ); }
 
     //! Get the flux on a specific boundary face of the model
     /*!
      * @param flag flag of the boundary face
      * @return flux value
      */
-    Real boundaryFlowRate( const BCFlag& flag ) const { return M_solver->boundaryValue( *M_solution, OneD_Q, flagConverter( flag ) ); }
+    Real boundaryFlowRate( const BCFlag& flag ) const { return M_solver->boundaryValue( *M_solution, OneDimensional::Q, flagConverter( flag ) ); }
 
     //! Get the integral of the pressure (on a specific boundary face)
     /*!
      * @param flag flag of the boundary face
      * @return pressure value
      */
-    Real boundaryPressure( const BCFlag& flag ) const { return M_solver->boundaryValue( *M_solution, OneD_P, flagConverter( flag ) ); }
+    Real boundaryPressure( const BCFlag& flag ) const { return M_solver->boundaryValue( *M_solution, OneDimensional::P, flagConverter( flag ) ); }
 
     //! Get the integral of the dynamic pressure (on a specific boundary face)
     /*!
@@ -380,7 +386,7 @@ private:
      */
     void solve( bc_Type& bc, solution_Type& solution, const std::string& solverType = " 1D-" );
 
-    bcSide_Type flagConverter( const BCFlag& flag ) const { return (flag == 0) ? OneD_left : OneD_right; }
+    bcSide_Type flagConverter( const BCFlag& flag ) const { return (flag == 0) ? OneDimensional::left : OneDimensional::right; }
 
 #ifdef JACOBIAN_WITH_FINITEDIFFERENCE
 
@@ -429,10 +435,10 @@ private:
     std::vector< std::map< bcSide_Type, std::map< bcType_Type, Real > > > M_bcPreviousTimeSteps;
 
     // BC Functions for tangent problem
-    OneDimensionalModel_BCFunction         M_bcBaseDelta;
+    bcFunction_Type                        M_bcBaseDelta;
 
     Real                                   M_bcDelta;
-    bcType_Type                                M_bcDeltaType;
+    bcType_Type                            M_bcDeltaType;
     bcSide_Type                            M_bcDeltaSide;
 #endif
 

@@ -44,7 +44,7 @@
 
 namespace LifeV
 {
-namespace multiscale
+namespace Multiscale
 {
 
 //! MultiscaleCouplingStress - Stress coupling condition
@@ -57,6 +57,15 @@ namespace multiscale
 class MultiscaleCouplingStress: public virtual multiscaleCoupling_Type
 {
 public:
+
+    //! @name Type definitions
+    //@{
+
+    typedef BCFunctionBase                                  bcFunction3D_Type;
+    typedef OneDimensionalModel_BCFunction                  bcFunction1D_Type;
+
+    //@}
+
 
     //! @name Constructors & Destructor
     //@{
@@ -152,11 +161,11 @@ private:
 
     //@}
 
-    BCFunctionBase                 M_baseStress3D;
+    bcFunction3D_Type M_baseStress3D;
 
-    OneDimensionalModel_BCFunction M_baseStress1D;
+    bcFunction1D_Type M_baseStress1D;
 
-    stress_Type                    M_stressType;
+    stress_Type       M_stressType;
 };
 
 //! Factory create function
@@ -184,10 +193,10 @@ MultiscaleCouplingStress::imposeStress1D( const UInt& i )
 {
     ModelType *model = multiscaleDynamicCast< ModelType >( M_models[i] );
 
-    model->bcInterface().setBC( (M_flags[i] == 0) ? OneD_left : OneD_right, OneD_first, OneD_P, M_baseStress1D );
+    model->bcInterface().setBC( (M_flags[i] == 0) ? OneDimensional::left : OneDimensional::right, OneDimensional::first, OneDimensional::P, M_baseStress1D );
 }
 
-} // Namespace multiscale
+} // Namespace Multiscale
 } // Namespace LifeV
 
 #endif /* MultiscaleCouplingStress_H */

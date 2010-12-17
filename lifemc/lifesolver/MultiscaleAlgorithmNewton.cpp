@@ -38,7 +38,7 @@
 
 namespace LifeV
 {
-namespace multiscale
+namespace Multiscale
 {
 
 // ===================================================
@@ -153,5 +153,5 @@ MultiscaleAlgorithmNewton::subIterate()
                         " (required: " + number2string( M_tolerance ) + ")\n" );
 }
 
-} // Namespace multiscale
+} // Namespace Multiscale
 } // Namespace LifeV

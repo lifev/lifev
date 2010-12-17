@@ -49,7 +49,7 @@
 
 namespace LifeV
 {
-namespace multiscale
+namespace Multiscale
 {
 
 //! MultiscaleModelMultiscale - MultiScale model

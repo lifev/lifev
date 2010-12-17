@@ -56,7 +56,7 @@
 
 namespace LifeV
 {
-namespace multiscale
+namespace Multiscale
 {
 
 //! MultiscaleModelFluid3D - MultiScale model for 3D Fluid simulations
