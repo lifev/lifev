@@ -575,29 +575,29 @@ void IPStabilization<MeshType, DofType>::apply( MatrixType& matrix,  const Vecto
         Debug(7101) << "\n";
         Debug(7101) << static_cast<UInt>(state.BlockMap().Comm().MyPID())
         <<  "  .   Updating of element   done in "
-        << chronoUpdate.diff_cumul()   << " s." << "\n";
+        << chronoUpdate.diffCumul()   << " s." << "\n";
         Debug(7101) << "   .   Determination of beta done in "
-        << chronoBeta.diff_cumul()     << " s." << "\n";
+        << chronoBeta.diffCumul()     << " s." << "\n";
         Debug(7101) << "   .   Element computations  done in "
-        << chronoElemComp.diff_cumul() << " s." << "\n";
+        << chronoElemComp.diffCumul() << " s." << "\n";
         Debug(7101) << "   .   chrono 1              done in "
-        << chronoAssembly1.diff_cumul() << " s." << "\n";
+        << chronoAssembly1.diffCumul() << " s." << "\n";
         Debug(7101) << "   .   chrono 2              done in "
-        << chronoAssembly2.diff_cumul() << " s." << "\n";
+        << chronoAssembly2.diffCumul() << " s." << "\n";
         Debug(7101) << "   .   chrono 3              done in "
-        << chronoAssembly3.diff_cumul() << " s." << "\n";
+        << chronoAssembly3.diffCumul() << " s." << "\n";
         Debug(7101) << "   .   chrono 4              done in "
-        << chronoAssembly4.diff_cumul() << " s." << "\n";
+        << chronoAssembly4.diffCumul() << " s." << "\n";
         Debug(7101) << "   .   chrono 5              done in "
-        << chronoAssembly5.diff_cumul() << " s." << "\n";
+        << chronoAssembly5.diffCumul() << " s." << "\n";
         Debug(7101) << "   .   chrono 6              done in "
-        << chronoAssembly6.diff_cumul() << " s." << "\n";
+        << chronoAssembly6.diffCumul() << " s." << "\n";
         Debug(7101) << "   .   chrono 7              done in "
-        << chronoAssembly7.diff_cumul() << " s." << "\n";
+        << chronoAssembly7.diffCumul() << " s." << "\n";
         Debug(7101) << "   .   chrono 8              done in "
-        << chronoAssembly8.diff_cumul() << " s." << "\n";
+        << chronoAssembly8.diffCumul() << " s." << "\n";
         Debug(7101) << "   .   total                                   "
-        << chronoAssembly.diff_cumul() << " s."
+        << chronoAssembly.diffCumul() << " s."
         << " myFaces = " << myFaces << "\n";
     }
 
