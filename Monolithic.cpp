@@ -112,9 +112,7 @@ Monolithic::setupDOF( void )
 void
 Monolithic::setupDOF( meshFilter_Type& filterMesh )
 {
-    boost::shared_ptr< std::map<UInt, UInt> > localDofMap;
-    localDofMap = filterMesh.getStoredInterface( 0 );
-    createInterfaceMaps(*localDofMap);
+    createInterfaceMaps(*filterMesh.getStoredInterface(0));
 }
 
 
@@ -428,7 +426,7 @@ iterateMonolithic(const vector_Type& rhs, vector_Type& step)
 void
 Monolithic::couplingRhs(vectorPtr_Type rhs, vectorPtr_Type un) // not working with non-matching grids
 {
-    std::map<ID, ID> const& locDofMap = M_dofStructureToHarmonicExtension->localDofMap();
+    std::map<ID, ID> const& localDofMap = M_dofStructureToHarmonicExtension->localDofMap();
     std::map<ID, ID>::const_iterator ITrow;
     //    UInt solidDim=M_dFESpace->map().getMap(Unique)->NumGlobalElements()/nDimensions;
 

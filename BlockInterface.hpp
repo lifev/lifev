@@ -40,6 +40,7 @@
 
 #include <cstdarg>
 #include <life/lifecore/GetPot.hpp>
+#include <life/lifecore/life.hpp>
 
 #include <life/lifealg/SolverTrilinos.hpp>
 #include <life/lifealg/IfpackPreconditioner.hpp>
@@ -49,7 +50,6 @@
 
 #include <lifemc/lifealg/ComposedOperator.hpp>
 
-#include <life/lifecore/life.hpp>
 
 namespace LifeV {
 
@@ -69,7 +69,6 @@ public:
 
     //! @name Public Types
     //@{
-
     typedef EpetraVector                                               vector_Type;
     typedef boost::shared_ptr< vector_Type >                           vectorPtr_Type;
     typedef EpetraMatrix< Real >                                       matrix_Type;
@@ -479,7 +478,7 @@ private:
       If you need a copy you should implement it, so that it copies the shared pointer one by one, without copying
       the content.
      */
-    BlockInterface( matrixPtr_Type& T);
+    BlockInterface( const BlockInterface& T){}
     //@}
 };
 
