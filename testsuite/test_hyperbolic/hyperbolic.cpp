@@ -657,14 +657,14 @@ hyperbolic::run()
     hyperbolicSolver.getDisplayer().leaderPrint( "\nERROR\n" );
 
     // Compute the L2 norm for the solution
-    L2Norm = fESpace.L2Norm( *hyperbolicSolver.solution() );
+    L2Norm = fESpace.l2Norm( *hyperbolicSolver.solution() );
 
     // Display the L2 norm for the solution
     hyperbolicSolver.getDisplayer().leaderPrint( " L2 norm of solution:            ",
                                                  L2Norm, "\n" );
 
     // Compute the L2 norm for the analytical solution
-    exactL2Norm = fESpace.L2NormFunction( Members->getAnalyticalSolution(),
+    exactL2Norm = fESpace.l2NormFunction( Members->getAnalyticalSolution(),
                                           dataHyperbolic.dataTime()->getEndTime() );
 
     // Display the L2 norm for the analytical solution
@@ -672,7 +672,7 @@ hyperbolic::run()
                                                  exactL2Norm, "\n" );
 
     // Compute the L2 error for the solution
-    L2Error = fESpace.L2ErrorWeighted( Members->getAnalyticalSolution(),
+    L2Error = fESpace.l2ErrorWeighted( Members->getAnalyticalSolution(),
                                        *hyperbolicSolver.solution(),
                                        Members->getUOne(),
                                        dataHyperbolic.dataTime()->getEndTime() );

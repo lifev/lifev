@@ -68,7 +68,7 @@ The goal of these notes is to give developers and users a guide about
 the time advancing schemes implemented in \verb"lifev-parallel".\\
 We consider the following problem:
  \begin{equation}\label{PD}
- \displaystyle\frac{\partial^m \ubf}{\partial t^m}+\mathcal{L} \Big(\ubf,\cdots,\displaystyle\frac{\partial^{m-1} \ubf}{\partial t^{m-1}} \Big)= \fbf\qquad \textrm{in}\quad\Omega\times [0, T], 
+ \displaystyle\frac{\partial^m \ubf}{\partial t^m}+\mathcal{L} \Big(\ubf,\cdots,\displaystyle\frac{\partial^{m-1} \ubf}{\partial t^{m-1}} \Big)= \fbf\qquad \textrm{in}\quad\Omega\times [0, T],
  \end{equation}
 where $m = 1, 2$ is the maximum order of temporal derivate and
 $\Omega\subset \mathbb{R}^3$  is a domain,
@@ -81,7 +81,7 @@ each time step (or each itaration of a nonlinear solver at each time step)
  \begin{equation}\label{modello}
  K \xx U^{n+1}=\Fbf^{n+1},
  \end{equation}
-where $K$  is an opportune matrix, $\Ubf^{n+1}$ is the {\sl unknown} vector 
+where $K$  is an opportune matrix, $\Ubf^{n+1}$ is the {\sl unknown} vector
  and $\Fbf^{n+1}$ is the right hand side vector at the time
  $t^{n+1}$. \\
 To determine $\Fbf^{n+1}$ we define the {\sl state} vector $\Xbf^{n+1}$ that contained the
@@ -96,7 +96,7 @@ For example two derivated classes are \verb"bdf_template.hpp" and
 time ($m=2$) with {\sl Newmark}.
 In the following we present the main features of a generic time
 advance scheme for a problem of first  and  second  order, in
-time. 
+time.
 Then we describe the principal attributes and members of these classes
 and then we show some examples.
 
@@ -136,17 +136,17 @@ Then, a semi-implicit version of
 \end{equation}
 where $A(\Ubf^*)\Ubf^{n+1}$ is a suitable linearization of
 $\mathcal{A}(\Ubf^{n+1})$ based on extrapolated value  of $\Ubf^*$.\\
-By comparing \eqref{modello} and \eqref{m1}  $K$ and $\Fbf^{n+1}$ 
-are 
+By comparing \eqref{modello} and \eqref{m1}  $K$ and $\Fbf^{n+1}$
+are
 \begin{eqnarray*}
 \displaystyle K =\Big(\frac{\alpha_0}{\Delta t} M +A(\Ubf^*)\Big),& \xx F^{n+1}=\xx f^{n+1} + M \fbf_V^{n+1}.
 \end{eqnarray*}
-A generic time advance scheme, at each time step $n+1$, must 
+A generic time advance scheme, at each time step $n+1$, must
 \begin{enumerate}
 \item build the vector $\Xbf^{n+1}$, that remember the useful information about the early solutions;
 \item define the coefficients $\alpha_i$;
 \item define the coefficients $\beta_i$ of the extrapolation term;
-\item build and update the right hand side of velocity $\fbf_V^{n+1}$; 
+\item build and update the right hand side of velocity $\fbf_V^{n+1}$;
 \item evaluate the velocity $\Wbf^{n+1}$ defined in \eqref{Wbf};
 \item build the extrapolation $\Ubf^*$;
 \end{enumerate}
@@ -154,7 +154,7 @@ Now we adapt this formulation to {\sl backward difference formulae}
 and $\theta${\sl-method}.
 
 \subsubsection{backwark difference formulae}\label{bdf}% }\label{bdf}
-We apply  {\sl backward difference formulae}  to evaluate  the velocity $\Wbf^{n+1}$   
+We apply  {\sl backward difference formulae}  to evaluate  the velocity $\Wbf^{n+1}$
 \begin{equation}
 \Wbf^{n+1}= \frac{\alpha_0}{\Delta t}\Ubf^{n+1}-\sum_{i=1}^p\frac{\alpha_i}{\Delta t} \xx U^{n+1-i},
 \end{equation}
@@ -164,7 +164,7 @@ following way
 \frac{\partial \xx Y}{\partial t}\Big|_{t=t^{n+1}} =
 \frac{\alpha_0}{\Delta t}  \xx
 Y(t^{n+1})-\sum_{i=1}^p\frac{\alpha_i}{\Delta t}\xx
-Y(t^{n+1-i})+\textsl{O}(\Delta t^p),\quad \forall\, \xx Y(t). 
+Y(t^{n+1-i})+\textsl{O}(\Delta t^p),\quad \forall\, \xx Y(t).
 \end{equation*}
 if $\xx Y$ is regular enough.\\
 In Table \ref{alpha}  some coefficients
@@ -205,7 +205,7 @@ $$\Xbf^{n+1}=(\Ubf^{n}, \Ubf^n,..., \Ubf^{n+1-p}).$$
 
 
 \subsubsection{$\theta$-method}\label{TM}
-We consider the following  $\theta$-method to approximate the problem \eqref{order1}: 
+We consider the following  $\theta$-method to approximate the problem \eqref{order1}:
 \begin{equation} \label{vel}
 \Ubf^{n+1}=\Ubf^n+ \Delta t\big(\theta \Wbf^{n+1}+ (1-\theta)\Wbf^n\big),
 \end{equation}
@@ -214,18 +214,18 @@ then we evaluate the velocity $\Wbf^{n+1}$ as:
 \Wbf^{n+1}=\frac{1}{\theta\Delta t}\big(\Ubf^{n+1}-\Ubf^n\big)+\Big(1-\frac{1}{\theta}\Big)\Wbf^n.
 \end{equation}
 Then,  the quantities in equation
-\eqref{Wbf} are given by  
+\eqref{Wbf} are given by
 $$\displaystyle\alpha_0=\frac{1}{\theta}, \qquad
 %\begin{displaymath}
 \displaystyle \fbf_V^{n+1}=\frac{1}{\theta\Delta t}\Ubf^n+\Big(\frac{1}{\theta}-1\Big)\,\Wbf^n,$$
 %\end{displaymath}
 and the coefficients $\alpha_i$ are
 \begin{equation}\label{alphatheta}
-\displaystyle\alpha_{1}=\frac{1}{\theta}, \, 
+\displaystyle\alpha_{1}=\frac{1}{\theta}, \,
 \displaystyle\alpha_2=\left(\frac{1}{\theta}-1\right).
 \end{equation}
 % \begin{equation}\label{alphatheta}
-% \displaystyle\alpha_{1}=\frac{1}{\theta\Delta t}, \, 
+% \displaystyle\alpha_{1}=\frac{1}{\theta\Delta t}, \,
 % \displaystyle\alpha_2=\left(\frac{1}{\theta}-1\right).
 % \end{equation}
 We consider the following extrapolation:
@@ -237,7 +237,7 @@ order method  if  $\theta=1/2$. \\
 When we choose $\theta = 0$, the $\theta$-method becomes a {\sl
   explicit} method, where the $\alpha_i$ coefficients are:
 $$
-\alpha_0=1, \qquad \alpha_1=1, \quad \alpha_2=1.  
+\alpha_0=1, \qquad \alpha_1=1, \quad \alpha_2=1.
 $$
 If $\Wbf^0$ is unknown we can solve the following system:
 $$M\Wbf^0= \Fbf^0-A\Ubf^0.$$
@@ -258,7 +258,7 @@ where $M$ is the mass matrix, $\fbf$ the forcing term
  and $\Ubf$ is the  vector of unknowns.\\
 We assume that the possibly non linear operator
 $\mathcal{A}\left(\Ubf,\frac{\rm{d}\Ubf}{\rm{d} t}\right)$ can be written
-(eventually upon  suitable linearization) as 
+(eventually upon  suitable linearization) as
 $$
 \mathcal{A}\left(\Ubf,\frac{\rm{d}\Ubf}{\rm{d} t}\right)=
 D\left(\Ubf,\frac{\rm{d}\Ubf}{\rm{d} t}\right)\frac{\rm{d}\Ubf}{\rm{d}
@@ -282,7 +282,7 @@ $\Wbf$ and $\Abf$:
 \Wbf^{n+1}=\frac{\alpha_0}{\Delta t}\Ubf^{n+1}-\fbf_V^{n+1},
 \end{equation}
 \begin{equation}\label{Wbf2}
-\Abf^{n+1}=\frac{\xi_0}{\Delta t^2}\Ubf^{n+1}-\fbf_W^{n+1}, 
+\Abf^{n+1}=\frac{\xi_0}{\Delta t^2}\Ubf^{n+1}-\fbf_W^{n+1},
 \end{equation}
 where $\fbf_V^{n+1}$ and $\fbf_W^{n+1}$ are  linear combinations of the previous  solutions with
 suitable coefficients $\alpha_i$ and $\xi_i$, respectively.
@@ -297,12 +297,12 @@ we obtain the system   \eqref{modello} with $K$ and $\Fbf$ given by:
      t}D(\Ubf^*, \Wbf^*)+A(\Ubf^*, \Wbf^*)\right],&
 \Fbf^{n+1}=\fbf^{n+1}+D\fbf_V^{n+1}+M\fbf_W^{n+1}.
 \end{eqnarray*}
-In this case the class \verb"timeAdvance" must 
+In this case the class \verb"timeAdvance" must
 \begin{itemize}
 \item define the coefficients $\xi_i$ for the approximation of $\Abf$;
 \item define the coefficients $\alpha_i$ for the approssimation of $\Wbf$;
-\item define the coefficients $\beta_i^U$ and $\beta_i^W$ for  the extrapolations  $\Ubf^{*}$ and $\Wbf^{*}$;  
-\item build the right hand side  $\fbf_V^{n+1}$ and $\fbf_W^{n+1}$; 
+\item define the coefficients $\beta_i^U$ and $\beta_i^W$ for  the extrapolations  $\Ubf^{*}$ and $\Wbf^{*}$;
+\item build the right hand side  $\fbf_V^{n+1}$ and $\fbf_W^{n+1}$;
 \item evaluate  $\Wbf^{n+1}$ and $\Abf^{n+1}$ defined by $\Ubf^{n+1}$,
   by \eqref{Wbf1}, \eqref{Wbf2}.
 \end{itemize}
@@ -311,14 +311,14 @@ Now we apply this approach to {\sl backward difference formulae } and
 
 \subsubsection{backwark difference formulae}
 We apply {\sl backward difference formulae } to evaluate the $\fbf_V^{n+1}$
-and $\fbf_W^{n+1}$  given by \eqref{Wbf1} and \eqref{Wbf2}: 
+and $\fbf_W^{n+1}$  given by \eqref{Wbf1} and \eqref{Wbf2}:
 \begin{eqnarray*}
 %\Wbf^{n+1}=\frac{\alpha_0}{\Delta t}\Ubf^{n+1}-\fbf_V,
 %&
 \displaystyle\fbf_V^{n+1}=\sum_{i=1}^{p+1}\frac{\alpha_i}{\Delta
   t^2}\Ubf^{n+1-i},
 \\
-%\Abf^{n+1}=\frac{\xi_0}{\Delta t^2}\Ubf^{n+1}-\fbf_W, & 
+%\Abf^{n+1}=\frac{\xi_0}{\Delta t^2}\Ubf^{n+1}-\fbf_W, &
 \displaystyle\fbf_W^{n+1}=\sum_{i=1}^p\frac{\xi_i}{\Delta t}\Ubf^{n+1-i}.
 \end{eqnarray*}
 In case of a non linear problem and semi-implicit discretization we
@@ -328,13 +328,13 @@ following way:
 \Wbf^*=\sum_{i=0}^p \frac{\beta_i^V}{\Delta t}\Ubf^{n-i}=\Wbf^{n+1}+O(\Delta t^p),
 \end{equation}
 The coefficients $\xi_i$ and $\beta_i^V$ are summarized in Table \ref{xi} for some values
-of $p$. The values of $\alpha$ and $\beta_i^U$ are the same of  Table \ref{alpha}. 
+of $p$. The values of $\alpha$ and $\beta_i^U$ are the same of  Table \ref{alpha}.
 \begin{table}[!htp]
 \begin{center}
 \begin{tabular}{| c | c c c c c | c c c c | }
 \hline
 p & $\xi_0$ & $\xi_1$ &  $\xi_2$  & $\xi_3$ & $\xi_4$ & $\beta_0^V$
-&$\beta_1^V$ &$\beta_2^V$ &$\beta_3^V$  \\  
+&$\beta_1^V$ &$\beta_2^V$ &$\beta_3^V$  \\
 \hline
 1 &  1      &   2    &    -1      &   -    &    -  & 2 & -1 & - & -  \\
 2 &  2      &   5    &    -4      &   1   &    -   & 3 & -3 & 1 & -  \\
@@ -344,7 +344,7 @@ p & $\xi_0$ & $\xi_1$ &  $\xi_2$  & $\xi_3$ & $\xi_4$ & $\beta_0^V$
 \end{center}
 \caption{The coefficients $\xi_i$  for some values of
 $p$ }\label{xi}
-\end{table} 
+\end{table}
 \\
 For  {\sl backward difference formulae} the vector $\Xbf^{n+1}$ is:
 $$\Xbf^{n+1}=(\Ubf^{n}, \Ubf^n,..., \Ubf^{n-p}).$$
@@ -361,7 +361,7 @@ $\gamma$, which determine  the stability and the accuracy of the method:
 \end{eqnarray}
 In the following we report how to obtain the system   \eqref{modello} by Newmark's  method.
 \begin{enumerate}
-\item[]From \eqref{uw1} we determine $\Abf^{n+1}$ by 
+\item[]From \eqref{uw1} we determine $\Abf^{n+1}$ by
 \begin{equation}\label{aa}
 \Abf^{n+1}=\frac{1}{\theta \Delta t^2}  (\Ubf^{n+1}-\Ubf^n) - \frac{1}{\theta
   \Delta t}\Wbf^n+\Big(1-\frac{1}{2\theta}\Big)\Abf^n.
@@ -382,13 +382,13 @@ t\Abf^n.
 \end{eqnarray}
 \end{enumerate}
 Then, if we introduce  the following notation $\fbf_V^{n+1}$ and $\fbf_W^{n+1}$ we
-can obtain  the standard representation of $\Wbf^{n+1}$, $\Abf^{n+1}$ as 
+can obtain  the standard representation of $\Wbf^{n+1}$, $\Abf^{n+1}$ as
 \begin{eqnarray*}
-%\Wbf^{n+1}=\frac{\alpha_0}{\Delta t}\Ubf^{n+1}-\fbf_V, 
+%\Wbf^{n+1}=\frac{\alpha_0}{\Delta t}\Ubf^{n+1}-\fbf_V,
 &\displaystyle\fbf_V^{n+1}=\frac{\gamma}{\theta\Delta t}\Ubf^n+
 \Big(\frac{\gamma}{\theta}-1\Big)\Wbf^n+\Big(\frac{\gamma}{2\theta}-1\Big)\Delta
 t\Abf^n,\\
-%\Abf^{n+1}=\frac{\xi_0}{\Delta t^2}\Ubf^{n+1}-\fbf_W, 
+%\Abf^{n+1}=\frac{\xi_0}{\Delta t^2}\Ubf^{n+1}-\fbf_W,
 & \displaystyle\fbf_W^{n+1}=\frac{1}{\theta \Delta t^2} \Ubf^n + \frac{1}{\theta
   \Delta t}\Wbf^n+\Big(\frac{1}{2\theta}-1\Big)\Abf^n.
 \end{eqnarray*}
@@ -396,14 +396,14 @@ t\Abf^n,\\
  combination of previous solution for  suitable coefficients $\alpha_i$
  and $\xi_i$, respectively. \\
 The coefficients $\alpha_i$ are
-\begin{equation}\label{alphaNewmark} 
+\begin{equation}\label{alphaNewmark}
 \displaystyle\alpha_{0}=\frac{\gamma}{\theta}, \qquad
 \displaystyle\alpha_{1}=\frac{\gamma}{\theta},
 \quad\displaystyle\alpha_2=\left(\frac{\gamma}{\theta}-1\right),\quad
 \displaystyle\alpha_3=\left(\frac{\gamma}{2\theta}-1\right),
 \end{equation}
 and $\xi_i$ are:
-\begin{equation}\label{xiNewmark}  
+\begin{equation}\label{xiNewmark}
 \xi_{0}=\frac{1}{\theta},\quad\displaystyle\xi_{1}=\frac{1}{\theta},
 \quad \displaystyle\xi_2=\frac{1}{\theta},\quad
 \displaystyle\xi_3=(\frac{1}{2\theta}-1).
@@ -416,7 +416,7 @@ $\theta$-method.\\
 The method is second order  accurate if  $\gamma=1/2$,
 otherwise it is  first order accurate.
  When $\gamma=2\theta$ the velocity $\Wbf^{n+1}$, defined in
- \eqref{uw0}, does not depend on $\Abf^{n+1}$, in fact we have 
+ \eqref{uw0}, does not depend on $\Abf^{n+1}$, in fact we have
 \begin{equation*}
 \Wbf^{n+1}=\frac{2}{\Delta
   t}\big(\Ubf^{n+1}-\Ubf^n\big)-\Wbf^{n},
@@ -441,21 +441,21 @@ $$\Xbf^{n+1}=(\Ubf^{n+1},\Wbf^{n+1}, \Abf^{n+1}, \Ubf^n, \Wbf^n, \Abf^n).$$
 
 \subsection{Implementation of time advancing schemes}
 We have shown how these temporal discretitation schemes  can be set in
-the framework: then we have developed a class 
+the framework: then we have developed a class
 \verb"timeAdvance_template.hpp".\\
-The common attribues are 
+The common attribues are
 \begin{itemize}
   \item \verb"_M_unknowns"  is a {\sl state} vector $\Xbf^{n+1}$ of \verb"Epetra_Vector" and
     depends on the temporal scheme.
     \begin{enumerate}
-    \item[]For \verb"BDF", this vector has dimension 
+    \item[]For \verb"BDF", this vector has dimension
       $p+m$, where $p$ is the order of accuracy and $m$ maximum order,
       and at the time $n$ contains  the last  $p+m$ solutions of problem
-      \begin{displaymath} 
+      \begin{displaymath}
         \verb"_M_unknowns"=(\Ubf^{n+1}, \Ubf^n,..., \Ubf^{n+2-p-m}).
       \end{displaymath}
     \item[] For \verb"Newmark" this vector has dimension $2(m+1)$ and contains $\Ubf$, $\Wbf$, $\Abf$, at the time  steps $t^{n+1}$ e $t^n$:
-      \begin{eqnarray*} 
+      \begin{eqnarray*}
         \verb"_M_unknowns"=(\Ubf^{n+1},\Wbf^{n+1}, \Ubf^n,
         \Wbf^n), \qquad \text{if}\quad m\,=\,1,
         \\
@@ -480,14 +480,14 @@ The common attribues are
     parameters of time advance
     scheme:
 \begin{verbatim}
-void setup ( const  UInt orderDev ) { _M_orderDev = orderDev;} 
+void setup ( const  UInt orderDev ) { _M_orderDev = orderDev;}
  //  BDF setup:
 virtual void setup ( const UInt order,  const  UInt orderDev ) = 0;
 //  Newmark setup:
-virtual void setup ( const std::vector<double>  coefficients, 
+virtual void setup ( const std::vector<double>  coefficients,
                      const UInt orderDev ) = 0;
 \end{verbatim}
-\item \verb"setDeltaT" sets time step; 
+\item \verb"setDeltaT" sets time step;
   \item \verb"initialize_unk()" initializes all the entries of the
     ustate vector.
   \item \verb"shift_right()" updates the vectors of the previous time
@@ -530,7 +530,7 @@ virtual void setup ( const std::vector<double>  coefficients,
  \verb"rhs_i" where $i$ defines
  the number of times that the
  functions \verb"spy_rhs" is called.
- \end{itemize} 
+ \end{itemize}
   The class
   \verb"newmark_template.hpp"
   defines the $\theta$-method for
@@ -543,7 +543,7 @@ virtual void setup ( const std::vector<double>  coefficients,
 In the
 \verb"timeAdvance_template.hpp"
 there is the macro
-\verb"TimeAdvanceFactory". 
+\verb"TimeAdvanceFactory".
 This macro is a {\sl singleton}, and
 it is need to define the factory for
 time advance scheme.
@@ -555,11 +555,11 @@ the BDF scheme.  Alike,  in the class \verb"newmark_template.hpp",
 there is the method
 \verb"createNewmark()" that registers
 the \verb"TimeAdvanceFactory" with
-the Newmark scheme. 
+the Newmark scheme.
 \section{Test cases}
 In this section we apply the time advance schemes to two problems to study the accuracy  and to show a
 possible implementation.
-\subsection{Problem I} 
+\subsection{Problem I}
 We consider the problem
 \begin{equation}\label{ex1}
 \left\{
@@ -573,7 +573,7 @@ We consider the problem
 \end{equation}
 where $\Omega=[-0.5, 0.5]^3$ and $T=4$.\\
 We choose $\fbf$, $\psibf$ and $\ubf_0$, such that the exact solution
-is 
+is
 \begin{equation}\label{u1ex1}
 \ubf = (x+y+z)\exp(-\sin(\frac{\pi
   t}{2})).
@@ -615,9 +615,9 @@ In file  \verb"data" we choose the parameters of time scheme:
 \begin{verbatim}
 [../time_discretitation]
 //Newmark or theta-method
-theta           = 0.5  #0.5 
+theta           = 0.5  #0.5
 
-BDF_order       = 1  # 1, 2, 3, 4        
+BDF_order       = 1  # 1, 2, 3, 4
 \end{verbatim}
 In the \verb"main" of the program we must choose the time advance scheme for
 example:
@@ -628,14 +628,14 @@ example:
                                  "problem/time_discretization/method",
                                  "Newmark");
 
- TimeAdvance_type 
- timeAdvance(TimeAdvanceFactory::instance().createObject(TimeAdvanceMethod)); 
+ TimeAdvance_type
+ timeAdvance(TimeAdvanceFactory::instance().createObject(TimeAdvanceMethod));
 
   UInt OrderDev = 1;
- 
+
 if (TimeAdvanceMethod =="Newmark")
     timeAdvance->setup( dataProblem.getNewmark_parameters() , OrderDev);
-   
+
   if (TimeAdvanceMethod =="BDF")
     timeAdvance->setup(dataProblem.getBDF_order() , OrderDev);
 \end{verbatim}
@@ -645,15 +645,15 @@ file; while \verb"timeAdvance" is an object coupled with a temporal scheme,
 the builder  have two variables: the first define the parameters of
 the temporal scheme and the second
 defines the maximum order of the
-time derivate (1 or 2).\\ 
+time derivate (1 or 2).\\
 Given that in this case we known the initial condition and the exact
 solution,  we can initialize the vector \verb"_M_unknowns" as:
 \begin{verbatim}
 
 //evaluate disp and vel as interpolate the bcFunction d0 and v0
-    
+
    std::vector<vector_type> uv0;
-  
+
    if(TimeAdvanceMethod =="Newmark")
      {
     uv0.push_back(*U);
@@ -661,7 +661,7 @@ solution,  we can initialize the vector \verb"_M_unknowns" as:
      }
     if(TimeAdvanceMethod =="BDF")
       {
-	for ( int previousPass=0; previousPass < dataProblem.getBDF_order() ; 
+	for ( int previousPass=0; previousPass < dataProblem.getBDF_order() ;
               previousPass++)
 	  {
 	   Real previousTimeStep = -previousPass*dt;
@@ -693,14 +693,14 @@ of solution:
 \begin{verbatim}
  AnalyticalSol uExact;
  Real H1_Error, H1_RelError, L2_Error, L2_RelError;
- L2_Error = FESpace.L2Error(uExact, uComputed, time ,&L2_RelError);
- H1_Error = FESpace.H1Error(uExact, uComputed, time ,&H1_RelError);
+ L2_Error = FESpace.l2Error(uExact, uComputed, time ,&L2_RelError);
+ H1_Error = FESpace.h1Error(uExact, uComputed, time ,&H1_RelError);
 \end{verbatim}
 where \verb"AnaliticalSol" is a
 bcfunction in which is defined the
 solution and the gradient of  the solution.\\
 
-\subsection{Problem II} 
+\subsection{Problem II}
 We consider the following problem
 \begin{equation}\label{ex2}
 \left\{
@@ -741,9 +741,9 @@ Newmark scheme or the order $p$ of BDF.
 \begin{verbatim}
 [../time_discretitation]
 //Newmark or theta-method
-theta           = 0.25  # 0.5  
-gamma           = 0.5   # 0.7    
-BDF_order       = 1     # 1, 2, 3, 4        
+theta           = 0.25  # 0.5
+gamma           = 0.5   # 0.7
+BDF_order       = 1     # 1, 2, 3, 4
 \end{verbatim}
 In the main the variable \verb"orderdev" is $2$ and in the temporal
 loop we have
@@ -768,12 +768,12 @@ loop we have
 %  \end{equation}
 % where $\textbf{T}_s$ is a Cauchy tensor.\\
 % An analitical solution of \eqref{SVK} is:
-% $$ \etabf = 
+% $$ \etabf =
 %  \begin{bmatrix}
 %    X_1(\cos\theta-1) -X_2\sin\theta \\
 %    X_1\sin\theta+X_2 (\cos\theta-1) \\
 %    0
-%  \end{bmatrix}, 
+%  \end{bmatrix},
 % $$
 % and the force term is:
 % $$
@@ -799,15 +799,15 @@ to build {\sl state} vector \verb"_M_unknowns":
 \begin{itemize}
 \item the first order problem  given by \eqref{order1}.
 \begin{equation}\label{Vbf00}
-M \Wbf^0= \Fbf^0\quad\text{where}\quad \Fbf^0= \fbf^0 - A \Ubf^0 
+M \Wbf^0= \Fbf^0\quad\text{where}\quad \Fbf^0= \fbf^0 - A \Ubf^0
 \end{equation}
 \item[]We show a possible implementation. In the main we build right
   hand side and evaluate the solution $\Wbf_0$ with the function
   \verb"solve0" of the solver.
 \begin{verbatim}
   vector_type v0(problem.U().getMap(), Repeated ); //v0 is Zero EpetraVector;
-  FESpace.L2ScalarProduct(source_in, rhs0, 0); 
-  rhs0 -= *problem.getStiff()*u0; 
+  FESpace.L2ScalarProduct(source_in, rhs0, 0);
+  rhs0 -= *problem.getStiff()*u0;
   rhs0.GlobalAssemble();
   problem.solver0(v0, bch, rhs0);  //evaluate v0;
 \end{verbatim}
@@ -821,7 +821,7 @@ M\Abf_0= \Fbf^0, \quad\text{where}\quad \Fbf^0= \fbf^0- D\Wbf_0-A \Ubf_0.
 \begin{verbatim}
   vector_type a0(problem.U().getMap(), Repeated ); //a0 is  Zero EpetraVector;
   FESpace.L2ScalarProduct(source_in, rhs0, 0);
-  rhs0 -= *problem.getStiff() * u0; 
+  rhs0 -= *problem.getStiff() * u0;
   rhs0 -= *problem.getDamping() *v0;
   rhs0.GlobalAssemble();
   problem.solver0(a0, bch, rhs0);  //evaluate a0
@@ -833,7 +833,7 @@ template <typename Mesh, typename SolverType>
 void SecondOrderSolver<Mesh, SolverType>::
 solver0( vector_type& sol0,  bchandler_raw_type& bch, vector_type  rhs0 )
 {
-  vector_type rhsFull(rhs0); 
+  vector_type rhsFull(rhs0);
   applyBoundaryConditions( *matrFull, rhsFull, bch);
   prec_type prec;
   std::string precType ="Ifpack" ;

@@ -319,7 +319,7 @@ Ethiersteinman::check()
 
         if (L2proj)
         {
-            uFESpace.L2ScalarProduct(Problem::uderexact, rhs, time);
+            uFESpace.l2ScalarProduct(Problem::uderexact, rhs, time);
             rhs *= -1.;
         }
 
@@ -458,8 +458,8 @@ Ethiersteinman::check()
     double ul2error;
     double pl2error;
 
-    ul2error = uFESpace.L2Error (Problem::uexact, vel  , time, &urelerr );
-    pl2error = pFESpace.L20Error(Problem::pexact, press, time, &prelerr );
+    ul2error = uFESpace.l2Error (Problem::uexact, vel  , time, &urelerr );
+    pl2error = pFESpace.l20Error(Problem::pexact, press, time, &prelerr );
 
     double testTol(0.02);
 
@@ -738,7 +738,7 @@ Ethiersteinman::run()
                 if (L2proj)
                 {
                     uFESpace.interpolate(Problem::uderexact, rhs, time);
-                    //uFESpace.L2ScalarProduct(Problem::uderexact, rhs, time);
+                    //uFESpace.l2ScalarProduct(Problem::uderexact, rhs, time);
                     rhs *= -1.;
                     rhs = fluid.matrMass()*rhs;
                     fluid.updateSystem( 0., beta, rhs );
@@ -759,8 +759,8 @@ Ethiersteinman::run()
                 double ul2error;
                 double pl2error;
 
-                ul2error = uFESpace.L2Error (Problem::uexact, vel  , time, &urelerr );
-                pl2error = pFESpace.L20Error(Problem::pexact, press, time, &prelerr );
+                ul2error = uFESpace.l2Error (Problem::uexact, vel  , time, &urelerr );
+                pl2error = pFESpace.l20Error(Problem::pexact, press, time, &prelerr );
 
 
                 bool verbose = (d->comm->MyPID() == 0);
@@ -894,8 +894,8 @@ Ethiersteinman::run()
                 double ul2error;
                 double pl2error;
 
-                ul2error = uFESpace.L2Error (Problem::uexact, vel  , time, &urelerr );
-                pl2error = pFESpace.L20Error(Problem::pexact, press, time, &prelerr );
+                ul2error = uFESpace.l2Error (Problem::uexact, vel  , time, &urelerr );
+                pl2error = pFESpace.l20Error(Problem::pexact, press, time, &prelerr );
 
 
                 bool verbose = (d->comm->MyPID() == 0);

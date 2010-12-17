@@ -160,38 +160,38 @@ public:
 
     // this computes vec = \int fct phi_i
     template<typename vector_type>
-    void L2ScalarProduct(	const function_Type&		fct,
+    void l2ScalarProduct(	const function_Type&		fct,
                           vector_type&		vec,
                           const Real			t
                         );
 
     template<typename vector_type>
-    Real L20Error(			const function_Type& 	fexact,
+    Real l20Error(			const function_Type& 	fexact,
                      const vector_type& 	vec,
                      const Real 			time,
                      Real* 				relError = 0 );
 
     template<typename vector_type>
-    Real L2Error(			const function_Type&		fexact,
+    Real l2Error(			const function_Type&		fexact,
                     const vector_type&	vec,
                     const Real			time,
                     Real*				relError=0 );
 
     template<typename function, typename vector_type>
-    Real H1Error(			const function&		fexact,
+    Real h1Error(			const function&		fexact,
                     const vector_type&	vec,
                     const Real			time,
                     Real*				relError=0 );
 
 
     template<typename vector_type>
-    Real L2Norm( const vector_type& vec );
+    Real l2Norm( const vector_type& vec );
 
     template<typename function>
-    Real L2NormFunction( const function& f, const Real time = 0);
+    Real l2NormFunction( const function& f, const Real time = 0);
 
     template<typename vector_type>
-    Real H1Norm( const vector_type& vec );
+    Real h1Norm( const vector_type& vec );
 
 
     //! Method to computes the L2 error when using a weight function
@@ -200,7 +200,7 @@ public:
       The usual L2 error norm can be retrieved by using \f$ w=1 \f$
      */
     template<typename vector_type>
-    Real L2ErrorWeighted(const function_Type&    exactSolution,
+    Real l2ErrorWeighted(const function_Type&    exactSolution,
                          const vector_type& solution,
                          const function_Type&    weight,
                          const Real         time);
@@ -367,7 +367,7 @@ public:
     //    const mesh_type& mesh() const {return *M_mesh;}
     //    mesh_type& mesh() {return *M_mesh;}
 
-    const meshPtr_Type 	mesh()	const { return M_mesh; }
+    const meshPtr_Type	mesh()	const { return M_mesh; }
     meshPtr_Type 		mesh()		  { return M_mesh; }
 
     //! Returns map
@@ -794,7 +794,7 @@ FESpace<MeshType, MapType>::interpolateBC( BCHandler& BCh,
 template <typename MeshType, typename MapType>
 template<typename vector_type>
 void
-FESpace<MeshType, MapType>::L2ScalarProduct( const function_Type& fct, vector_type& vec, const Real t)
+FESpace<MeshType, MapType>::l2ScalarProduct( const function_Type& fct, vector_type& vec, const Real t)
 {
 
     for ( UInt iVol = 1; iVol <= this->mesh()->numElements(); iVol++ )
@@ -833,7 +833,7 @@ FESpace<MeshType, MapType>::L2ScalarProduct( const function_Type& fct, vector_ty
 template <typename MeshType, typename MapType>
 template<typename vector_type>
 Real
-FESpace<MeshType, MapType>::L20Error( const function_Type& fexact,
+FESpace<MeshType, MapType>::l20Error( const function_Type& fexact,
                               const vector_type& vec,
                               const Real time,
                               Real* relError )
@@ -887,7 +887,7 @@ FESpace<MeshType, MapType>::L20Error( const function_Type& fexact,
 template <typename MeshType, typename MapType>
 template<typename vector_type>
 Real
-FESpace<MeshType, MapType>::L2Error( const function_Type&    fexact,
+FESpace<MeshType, MapType>::l2Error( const function_Type&    fexact,
                              const vector_type& vec,
                              const Real       time,
                              Real*            relError )
@@ -937,7 +937,7 @@ FESpace<MeshType, MapType>::L2Error( const function_Type&    fexact,
 template <typename MeshType, typename MapType>
 template<typename function>
 Real
-FESpace<MeshType, MapType>::L2NormFunction( const function& f, const Real time)
+FESpace<MeshType, MapType>::l2NormFunction( const function& f, const Real time)
 {
     //
     ID nbComp = M_fieldDim; // Number of components of the mesh velocity
@@ -965,7 +965,7 @@ FESpace<MeshType, MapType>::L2NormFunction( const function& f, const Real time)
 template<typename MeshType, typename MapType>
 template<typename vector_type>
 Real
-FESpace<MeshType,MapType>:: L2ErrorWeighted(const function_Type&    exactSolution,
+FESpace<MeshType,MapType>:: l2ErrorWeighted(const function_Type&    exactSolution,
                                     const vector_type& solution,
                                     const function_Type&    weight,
                                     const Real         time)
@@ -973,7 +973,7 @@ FESpace<MeshType,MapType>:: L2ErrorWeighted(const function_Type&    exactSolutio
     // Check that the vector is repeated (needed!)
     if (solution.getMaptype() == Unique)
     {
-        return L2ErrorWeighted(exactSolution, EpetraVector(solution,Repeated), weight,time);
+        return l2ErrorWeighted(exactSolution, EpetraVector(solution,Repeated), weight,time);
     }
 
     Real sumOfSquare(0.0);
@@ -1028,7 +1028,7 @@ FESpace<MeshType,MapType>:: L2ErrorWeighted(const function_Type&    exactSolutio
 template <typename MeshType, typename MapType>
 template<typename function, typename vector_type>
 Real
-FESpace<MeshType, MapType>::H1Error( const function&    fexact,
+FESpace<MeshType, MapType>::h1Error( const function&    fexact,
                              const vector_type& vec,
                              const Real       time,
                              Real*            relError )
@@ -1083,7 +1083,7 @@ FESpace<MeshType, MapType>::H1Error( const function&    fexact,
 template <typename MeshType, typename MapType>
 template<typename vector_type>
 Real
-FESpace<MeshType, MapType>::L2Norm( const vector_type& vec)
+FESpace<MeshType, MapType>::l2Norm( const vector_type& vec)
 {
     //
     ID nbComp = M_fieldDim; // Number of components of the mesh velocity
@@ -1113,7 +1113,7 @@ FESpace<MeshType, MapType>::L2Norm( const vector_type& vec)
 template <typename MeshType, typename MapType>
 template<typename vector_type>
 Real
-FESpace<MeshType, MapType>::H1Norm(const vector_type& vec)
+FESpace<MeshType, MapType>::h1Norm(const vector_type& vec)
 {
     //
     ID nbComp = M_fieldDim; // Number of components of the mesh velocity

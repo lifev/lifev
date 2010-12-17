@@ -880,14 +880,14 @@ darcy::run()
     darcySolver->getDisplayer().leaderPrint( "\nPRESSURE ERROR\n" );
 
     // Compute the L2 norm for the primal solution
-    primalL2Norm = p_FESpace.L2Norm( *( darcySolver->primalSolution() ) );
+    primalL2Norm = p_FESpace.l2Norm( *( darcySolver->primalSolution() ) );
 
     // Display the L2 norm for the primal solution
     darcySolver->getDisplayer().leaderPrint( " L2 norm of primal unknown:            ",
                                              primalL2Norm, "\n" );
 
     // Compute the L2 norm for the analytical primal
-    exactPrimalL2Norm = p_FESpace.L2NormFunction( Members->getAnalyticalSolution(),
+    exactPrimalL2Norm = p_FESpace.l2NormFunction( Members->getAnalyticalSolution(),
                                                   dataDarcy.dataTime()->getEndTime() );
 
     // Display the L2 norm for the analytical primal
@@ -895,7 +895,7 @@ darcy::run()
                                              exactPrimalL2Norm, "\n" );
 
     // Compute the L2 error for the primal solution
-    primalL2Error = p_FESpace.L2ErrorWeighted( Members->getAnalyticalSolution(),
+    primalL2Error = p_FESpace.l2ErrorWeighted( Members->getAnalyticalSolution(),
                                                *( darcySolver->primalSolution() ),
                                                Members->getUOne(),
                                                dataDarcy.dataTime()->getEndTime() );
@@ -915,14 +915,14 @@ darcy::run()
     darcySolver->getDisplayer().leaderPrint( "\n\nINTERPOLATED DARCY VELOCITY ERROR\n" );
 
     // Compute the L2 norm for the interpolated dual solution
-    dualL2Norm = uInterpolate_FESpace.L2Norm( *dualInterpolated );
+    dualL2Norm = uInterpolate_FESpace.l2Norm( *dualInterpolated );
 
     // Display the L2 norm for the interpolated dual solution
     darcySolver->getDisplayer().leaderPrint( " L2 norm of dual unknown:              ",
                                              dualL2Norm, "\n" );
 
     // Compute the L2 norm for the analytical dual
-    exactDualL2Norm = uInterpolate_FESpace.L2NormFunction( Members->getAnalyticalFlux(),
+    exactDualL2Norm = uInterpolate_FESpace.l2NormFunction( Members->getAnalyticalFlux(),
                                                            dataDarcy.dataTime()->getEndTime() );
 
     // Display the L2 norm for the analytical dual
@@ -930,7 +930,7 @@ darcy::run()
                                              exactDualL2Norm, "\n" );
 
     // Compute the L2 error for the dual solution
-    dualL2Error = uInterpolate_FESpace.L2Error( Members->getAnalyticalFlux(),
+    dualL2Error = uInterpolate_FESpace.l2Error( Members->getAnalyticalFlux(),
                                                 *dualInterpolated,
                                                 dataDarcy.dataTime()->getEndTime(),
                                                 NULL );

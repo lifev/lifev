@@ -416,7 +416,7 @@ problem::run()
         rhsV = timeAdvance->time_der(dt);
         //evaluate rhs
 
-        feSpace->L2ScalarProduct(source_in, rhs, time);
+        feSpace->l2ScalarProduct(source_in, rhs, time);
         rhs += problem.matrMass() *rhsW;
 
         //update system
@@ -448,8 +448,8 @@ problem::run()
 
         Real H1_Error,H1_Error1, H1_RelError, L2_Error1, L2_Error, L2_RelError, vL2_Error, vL2_RelError;
 
-        L2_Error = feSpace->L2Error(uexact, u, time ,&L2_RelError);
-        H1_Error = feSpace->H1Error(uExact, u, time ,&H1_RelError);
+        L2_Error = feSpace->l2Error(uexact, u, time ,&L2_RelError);
+        H1_Error = feSpace->h1Error(uExact, u, time ,&H1_RelError);
 
         //save the norm
         out_norm.open("norm.txt", std::ios::app);

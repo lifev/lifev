@@ -307,7 +307,7 @@ main( int argc, char** argv )
     uFESpace->interpolate(exactSolution,solutionErr,0.0);
     solutionErr-=solution;
     solutionErr.Abs();
-    Real l2error(uFESpace->L2Error(exactSolution,vector_type(solution,Repeated),0.0));
+    Real l2error(uFESpace->l2Error(exactSolution,vector_type(solution,Repeated),0.0));
     if (verbose) std::cout << " -- done ! " << std::endl;
     if (verbose) std::cout << " ---> Norm L2  : " << l2error << std::endl;
     Real linferror( solutionErr.NormInf());

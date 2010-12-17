@@ -286,7 +286,7 @@ void test_bdf::run()
 
         // Handling of the right hand side
         f = (matM*bdf.rhsContribution());       //f = M*\sum_{i=1}^{orderBdf} \alpha_i u_{n-i}
-        FeSpace.L2ScalarProduct(sf, f, t);  //f +=\int_\Omega{ volumeForces *v dV}
+        FeSpace.l2ScalarProduct(sf, f, t);  //f +=\int_\Omega{ volumeForces *v dV}
         Members->comm->Barrier();
 
         // Treatment of the Boundary conditions
@@ -321,7 +321,7 @@ void test_bdf::run()
 
         Real L2_Error, L2_RelError;
 
-        L2_Error = FeSpace.L2Error(AnalyticalSol::u, uComputed, t, &L2_RelError);
+        L2_Error = FeSpace.l2Error(AnalyticalSol::u, uComputed, t, &L2_RelError);
 
         if (verbose)
             std::cout << "Error Norm L2: " << L2_Error
