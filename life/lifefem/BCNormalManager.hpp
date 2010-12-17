@@ -52,17 +52,13 @@ namespace LifeV
   */
 
 
-//TODO remove M_meshPtr and make the class template only on MatrixType
-template<typename MeshType,typename MatrixType>
+template<typename MatrixType>
 class BCNormalManager
 {
 public:
 
     //! @name Public Types
     //@{
-    typedef std::map<ID,ID> FlagsMap;  //deprecated
-    typedef std::map<ID, Vector > NormalsMap;  //deprecated
-
     typedef std::map<ID,ID> flagsMap_Type;
     typedef std::map<ID, Vector > versorsMap_Type;
     typedef MatrixType matrix_Type;
@@ -78,14 +74,6 @@ public:
 
     //! Empty Constructor
     BCNormalManager();
-
-    //!Constructor
-    /*!
-     * @warning This constructor is deprecated and will be removed soon
-     * @param mesh The mesh where the normal should be calculated
-     */
-    BCNormalManager(const MeshType& mesh);
-
 
     //! Copy constructor
     /*!
@@ -149,6 +137,7 @@ public:
     	@param offset The boundary condition offset
     	@param commPtr pointer to Epetra_Comm object
      */
+    template<typename MeshType>
     void build(const MeshType& mesh, const Dof& dof, CurrentBdFE& currentBdFE, matrix_Type& systemMatrix, UInt offset, EpetraMap::comm_ptrtype& commPtr);
 
 
@@ -185,7 +174,7 @@ public:
         @param normals The output vector
         @param mesh The mesh
      */
-    template <typename VectorType>
+    template <typename VectorType, typename MeshType>
     void computeIntegratedNormals(const Dof& dof, CurrentBdFE& currentBdFE, VectorType& normals,  const MeshType& mesh);
 
 
@@ -207,6 +196,7 @@ private:
     /*!
        @param mesh The mesh
      */
+    template<typename MeshType>
     void M_calculateCoordinates(const MeshType& mesh);
 
 
@@ -233,6 +223,7 @@ private:
         @param dof the dof class
         @param currentBdFE the current boundary finite element
      */
+    template<typename MeshType>
     void M_calculateNormals(const MeshType& mesh, const Dof& dof,CurrentBdFE& currentBdFE);
 
 
@@ -258,9 +249,6 @@ private:
 
     //! true when there are stored normals
     bool          M_dataBuilt;
-
-    //! The mesh, this member will be removed soon
-    const MeshType* const M_meshPtr;
 
     //! Shared pointer to the rotation matrix
     matrixPtr_Type M_rotationMatrixPtr;
@@ -303,30 +291,19 @@ private:
 
 
 //Empty Constructor
-template<typename MeshType,typename MatrixType>
-BCNormalManager<MeshType,MatrixType>::BCNormalManager():
+template<typename MatrixType>
+BCNormalManager<MatrixType>::BCNormalManager():
         M_dataBuilt(false),
-        M_meshPtr(0),
         M_numDof(0),
         M_numInvoledDof(0)
 {
 
 }
 
-//Constructor
-template<typename MeshType,typename MatrixType>
-BCNormalManager<MeshType,MatrixType>::BCNormalManager(const MeshType& mesh):
-        M_dataBuilt(false),
-        M_meshPtr(&mesh),
-        M_numDof(0),
-        M_numInvoledDof(0)
-{
-
-}
 
 //Copy Constructor
-template<typename MeshType,typename MatrixType>
-BCNormalManager<MeshType,MatrixType>::BCNormalManager( const BCNormalManager & bcNormalManager ):
+template<typename MatrixType>
+BCNormalManager<MatrixType>::BCNormalManager( const BCNormalManager & bcNormalManager ):
         M_dataBuilt(bcNormalManager.M_dataBuilt),
         M_rotationMatrixPtr(new matrix_Type(*bcNormalManager.M_rotationMatrixPtr) ),
         M_localEpetraMapPtr(new EpetraMap(*bcNormalManager.M_localEpetraMapPtr) ),
@@ -343,8 +320,8 @@ BCNormalManager<MeshType,MatrixType>::BCNormalManager( const BCNormalManager & b
 }
 
 // Destructor.
-template<typename MeshType,typename MatrixType>
-BCNormalManager<MeshType,MatrixType>::~BCNormalManager()
+template<typename MatrixType>
+BCNormalManager<MatrixType>::~BCNormalManager()
 {
 
 }
@@ -356,9 +333,9 @@ BCNormalManager<MeshType,MatrixType>::~BCNormalManager()
 
 
 // Assignment operator
-template<typename MeshType,typename MatrixType>
-BCNormalManager<MeshType,MatrixType>&
-BCNormalManager<MeshType,MatrixType>::operator= ( const BCNormalManager & bcNormalManager )
+template<typename MatrixType>
+BCNormalManager<MatrixType>&
+BCNormalManager<MatrixType>::operator= ( const BCNormalManager & bcNormalManager )
 {
     if (this != &bcNormalManager)
     {
@@ -384,8 +361,8 @@ BCNormalManager<MeshType,MatrixType>::operator= ( const BCNormalManager & bcNorm
 
 
 
-template<typename MeshType,typename MatrixType>
-void BCNormalManager<MeshType,MatrixType>::init(const BCBase& boundaryCondition,const Real& time)
+template<typename MatrixType>
+void BCNormalManager<MatrixType>::init(const BCBase& boundaryCondition,const Real& time)
 {
     // Loop on BC identifiers
     for ( ID i = 1; i <= boundaryCondition.list_size(); ++i )
@@ -409,15 +386,9 @@ void BCNormalManager<MeshType,MatrixType>::init(const BCBase& boundaryCondition,
     M_dataBuilt = true; //Since vectors has been given we must apply the basis change.
 }
 
-template<typename MeshType,typename MatrixType>
-void BCNormalManager<MeshType,MatrixType>::build(const Dof& dof,CurrentBdFE& currentBdFE,MatrixType& systemMatrix, UInt offset,EpetraMap::comm_ptrtype& commPtr)
-{
-    build(M_meshPtr, dof, currentBdFE, systemMatrix, offset, commPtr);
-}
-
-
-template<typename MeshType,typename MatrixType>
-void BCNormalManager<MeshType,MatrixType>::build(const MeshType& mesh, const Dof& dof,CurrentBdFE& currentBdFE,MatrixType& systemMatrix, UInt offset,EpetraMap::comm_ptrtype& commPtr)
+template<typename MatrixType>
+template<typename MeshType>
+void BCNormalManager<MatrixType>::build(const MeshType& mesh, const Dof& dof,CurrentBdFE& currentBdFE,MatrixType& systemMatrix, UInt offset,EpetraMap::comm_ptrtype& commPtr)
 {
     if (M_dataBuilt)
     {
@@ -470,8 +441,9 @@ void BCNormalManager<MeshType,MatrixType>::build(const MeshType& mesh, const Dof
 
 
 
-template<typename MeshType,typename MatrixType> template <typename VectorType>
-void BCNormalManager<MeshType,MatrixType>::bcShiftToNormalTangentialCoordSystem(matrix_Type& systemMatrix, VectorType& rightHandSide) const
+template<typename MatrixType>
+template <typename VectorType>
+void BCNormalManager<MatrixType>::bcShiftToNormalTangentialCoordSystem(matrix_Type& systemMatrix, VectorType& rightHandSide) const
 {
     if (M_dataBuilt)
     {
@@ -496,8 +468,9 @@ void BCNormalManager<MeshType,MatrixType>::bcShiftToNormalTangentialCoordSystem(
 }
 
 
-template<typename MeshType,typename MatrixType> template <typename VectorType>
-void BCNormalManager<MeshType,MatrixType>::bcShiftToCartesianCoordSystem(matrix_Type& systemMatrix, VectorType& rightHandSide) const
+template<typename MatrixType>
+template <typename VectorType>
+void BCNormalManager<MatrixType>::bcShiftToCartesianCoordSystem(matrix_Type& systemMatrix, VectorType& rightHandSide) const
 {
     if (M_dataBuilt)
     {
@@ -520,8 +493,9 @@ void BCNormalManager<MeshType,MatrixType>::bcShiftToCartesianCoordSystem(matrix_
 
 
 
-template<typename MeshType, typename MatrixType> template< typename VectorType>
-void BCNormalManager<MeshType, MatrixType>::computeIntegratedNormals(const Dof& dof,CurrentBdFE& currentBdFE, VectorType& normals,  const MeshType& mesh)
+template<typename MatrixType>
+template<typename VectorType, typename MeshType>
+void BCNormalManager<MatrixType>::computeIntegratedNormals(const Dof& dof,CurrentBdFE& currentBdFE, VectorType& normals,  const MeshType& mesh)
 {
 
     //-----------------------------------------------------
@@ -611,8 +585,8 @@ void BCNormalManager<MeshType, MatrixType>::computeIntegratedNormals(const Dof& 
 }
 
 //TODO this function can be improved using the vtk writers
-template<typename MeshType,typename MatrixType>
-void BCNormalManager<MeshType,MatrixType>::exportToParaview(std::string fileName) const
+template<typename MatrixType>
+void BCNormalManager<MatrixType>::exportToParaview(std::string fileName) const
 {
     if (M_dataBuilt)
     {
@@ -722,8 +696,9 @@ void BCNormalManager<MeshType,MatrixType>::exportToParaview(std::string fileName
 //==============================================
 
 
-template<typename MeshType,typename MatrixType>
-void BCNormalManager<MeshType,MatrixType>::M_calculateCoordinates(MeshType const& mesh)
+template< typename MatrixType>
+template< typename MeshType >
+void BCNormalManager<MatrixType>::M_calculateCoordinates(MeshType const& mesh)
 {
     M_coordPtr.reset( new EpetraVector(*M_localEpetraMapPtr,Unique) );
 
@@ -756,15 +731,15 @@ void BCNormalManager<MeshType,MatrixType>::M_calculateCoordinates(MeshType const
 }
 
 
-template<typename MeshType,typename MatrixType>
-void BCNormalManager<MeshType,MatrixType>::M_addBoundaryPoint(const ID& idof,const ID& flag)
+template<typename MatrixType>
+void BCNormalManager<MatrixType>::M_addBoundaryPoint(const ID& idof,const ID& flag)
 {
     M_flags.insert(std::pair<ID,ID>(idof,flag));
 }
 
 
-template<typename MeshType,typename MatrixType>
-void BCNormalManager<MeshType,MatrixType>::M_addVersor(const ID& idof,const Real& vx,const Real& vy, const Real& vz)
+template<typename MatrixType>
+void BCNormalManager<MatrixType>::M_addVersor(const ID& idof,const Real& vx,const Real& vy, const Real& vz)
 {
     Vector n(3);
     n[0] = vx;
@@ -774,8 +749,9 @@ void BCNormalManager<MeshType,MatrixType>::M_addVersor(const ID& idof,const Real
 }
 
 
-template<typename MeshType,typename MatrixType>
-void BCNormalManager<MeshType,MatrixType>::M_calculateNormals(const MeshType& mesh, const Dof& dof,CurrentBdFE& currentBdFE)
+template< typename MatrixType>
+template< typename MeshType>
+void BCNormalManager< MatrixType>::M_calculateNormals(const MeshType& mesh, const Dof& dof,CurrentBdFE& currentBdFE)
 {
     //-----------------------------------------------------
     // STEP 1: Calculating the normals
@@ -794,8 +770,8 @@ void BCNormalManager<MeshType,MatrixType>::M_calculateNormals(const MeshType& me
 }
 
 //! Save the imposed normal vectors.
-template<typename MeshType,typename MatrixType>
-void BCNormalManager<MeshType,MatrixType>::M_storeGivenVersors()
+template<typename MatrixType>
+void BCNormalManager<MatrixType>::M_storeGivenVersors()
 {
     //-----------------------------------------------------
     // STEP 1: Retrieve the normals
@@ -834,8 +810,8 @@ void BCNormalManager<MeshType,MatrixType>::M_storeGivenVersors()
 }
 
 //! Calculate the tangential vectors for each triad in the vector triad.
-template<typename MeshType,typename MatrixType>
-void BCNormalManager<MeshType,MatrixType>::M_calculateTangentVectors()
+template<typename MatrixType>
+void BCNormalManager<MatrixType>::M_calculateTangentVectors()
 {
     //-----------------------------------------------------
     // STEP 1: Initialization
@@ -925,8 +901,8 @@ void BCNormalManager<MeshType,MatrixType>::M_calculateTangentVectors()
 }
 
 
-template<typename MeshType,typename MatrixType>
-void BCNormalManager<MeshType,MatrixType>::M_buildRotationMatrix(matrix_Type& systemMatrix, UInt offset)
+template<typename MatrixType>
+void BCNormalManager<MatrixType>::M_buildRotationMatrix(matrix_Type& systemMatrix, UInt offset)
 {
     //Initialization of the map to store the normal vectors
     std::map< ID,std::vector< Real > >::iterator mapIt;
