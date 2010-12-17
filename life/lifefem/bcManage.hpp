@@ -1141,66 +1141,6 @@ bcEssentialManageVector( VectorType&     rightHandSide,
     rightHandSide.setCoefficients( idDofVec, datumVec);
 }
 
-
-template <typename MatrixType, typename DataType>
-void
-bcManageMtimeUDep( MatrixType& matrix,
-                   const Dof& dof,
-                   const BCHandler& bcHandler,
-                   const DataType diagonalizeCoef)
-{
-    // Loop on boundary conditions
-    for ( ID i = 0; i < bcHandler.size(); ++i )
-    {
-
-        if ( bcHandler[ i ].type()>=Essential )
-        {
-            if ( (bcHandler[ i ].mode() == Tangential) || (bcHandler[ i ].mode() == Normal) || (bcHandler[ i ].mode() == Directional) )
-            {
-                ERROR_MSG( "This BC mode is not yet implemented for this setting" );
-            }
-            const BCBase& boundaryCond=bcHandler[i];
-            ID idDof;
-
-            // Number of components involved in this boundary condition
-            UInt nComp = boundaryCond.numberOfComponents();
-
-            // Number of total scalar Dof
-            UInt totalDof = dof.numTotalDof();
-
-            if ( boundaryCond.dataVector() )
-            { //! If BC is given under a vectorial form
-
-                //not possible
-                ERROR_MSG( "This type of BCVector does not exists on bc dependent on solution" );
-            }
-            else
-            { //! If BC is given under a functional form
-
-                std::vector<ID>   idDofVec(0);
-                idDofVec.reserve(boundaryCond.list_size()*nComp);
-
-                // Loop on BC identifiers
-                for ( ID i = 1; i <= boundaryCond.list_size(); ++i )
-                {
-                    // Loop on components involved in this boundary condition
-                    for ( ID j = 1; j <= nComp; ++j )
-                    {
-                        // Global Dof
-                        idDof = boundaryCond( i ) ->id() + ( boundaryCond.component( j ) - 1 ) * totalDof + bcHandler.offset();
-                        idDofVec.push_back(idDof-1);
-
-                    }
-                }
-                // Modifying ONLY matrix
-                matrix.diagonalize( idDofVec, diagonalizeCoef );
-
-            }
-        }
-    }
-}
-
-
 // ===================================================
 // Natural BC
 // ===================================================
@@ -1259,8 +1199,7 @@ bcNaturalManage( VectorType& rightHandSide,
                     idDofVec.push_back( idDof);
 
                     // Modifying right hand side (assuming BCvector is a flux)
-                    if (boundaryCond.isgammaVec())  datumVec.push_back( boundaryCond.GammaVec(id, boundaryCond.component(j) )* boundaryCond( id , boundaryCond.component( j ) )) ;
-                    else  datumVec.push_back( boundaryCond.gammaCoef()* boundaryCond( id , boundaryCond.component( j ) ));
+                    datumVec.push_back( boundaryCond( id , boundaryCond.component( j ) ));
                 }
             }
 
@@ -1376,7 +1315,6 @@ bcNaturalManage( VectorType& rightHandSide,
     else
     {  //! If BC is given under a functional form
 
-        //std::cout << "BC Natural manage w/ function" << std::endl;
         DataType x, y, z;
         VectorType rhsRepeated(rightHandSide.map(),Repeated);
 
@@ -1598,12 +1536,11 @@ bcMixteManage( MatrixType& matrix,
                             kdDof=pId->localToGlobalMap( n ); // + ( boundaryCond.component( j ) - 1 ) * totalDof;
                             if (boundaryCond.ismixteVec())
                                 mcoef += boundaryCond.MixteVec( kdDof, boundaryCond.component( j ) ) * currentBdFE.phi( int( n - 1 ), l );
-
                             else  mcoef += boundaryCond.mixteCoef() * currentBdFE.phi( int( n - 1 ), l );
 
-                            if (boundaryCond.isbetaVec())  mbcb += boundaryCond.BetaVec( kdDof, boundaryCond.component( j ) )
-                                                                       * boundaryCond( kdDof, boundaryCond.component( j )) * currentBdFE.phi( int( n - 1 ), l );
-
+                            if (boundaryCond.isbetaVec())
+                                mbcb += boundaryCond.BetaVec( kdDof, boundaryCond.component( j ) )
+                                                                      * boundaryCond( kdDof, boundaryCond.component( j )) * currentBdFE.phi( int( n - 1 ), l );
                             else  mbcb += boundaryCond.betaCoef() * boundaryCond( kdDof, boundaryCond.component( j )) * currentBdFE.phi( int( n - 1 ), l );
                         }
 
@@ -2156,6 +2093,8 @@ bcResistanceManage( MatrixType& matrix,
                     const DataType& /*time*/,
                     UInt offset )
 {
+    if ( matrix.getMatrixPtr()->Filled() )
+        matrix.openCrsMatrix();
 
     // Number of local Dof in this face
     UInt nDofF = currentBdFE.nbNode();
@@ -2166,7 +2105,7 @@ bcResistanceManage( MatrixType& matrix,
     // Number of components involved in this boundary condition
     UInt nComp = boundaryCond.numberOfComponents();
 
-    // DataType sum;
+    std::set<ID> resistanceDofs;
 
     const IdentifierNatural* pId;
     ID ibF, idDof, jdDof, kdDof;
@@ -2192,6 +2131,8 @@ bcResistanceManage( MatrixType& matrix,
             // Loop on total Dof per Face
             for ( ID idofF = 1; idofF <= nDofF; ++idofF )
             {
+            	resistanceDofs.insert( pId->localToGlobalMap( idofF ) );
+
                 // Loop on components involved in this boundary condition
                 for ( ID j = 1; j <= nComp; ++j )
                 {
@@ -2219,28 +2160,30 @@ bcResistanceManage( MatrixType& matrix,
             }
         }
 
-        for ( UInt jj = 1; jj <= boundaryCond.list_size_IdGlobal() ; jj++ )
-        {
-            for ( UInt  j= 1; j <= nComp; ++j)
-            {
-                jdDof = boundaryCond.IdGlobal( jj )  + ( boundaryCond.component( j ) - 1 ) * totalDof + offset;
 
-                for (UInt kk = 1; kk <= boundaryCond.list_size_IdGlobal() ; kk++)
-                {
-                    for ( UInt k = 1; k <= nComp; ++k)
-                    {
-                        kdDof = boundaryCond.IdGlobal( kk )  + ( boundaryCond.component( k ) - 1 ) * totalDof + offset;
-                        matrix.addToCoefficient( jdDof - 1,  kdDof - 1, boundaryCond.resistanceCoef() * vv[jdDof] * vv[kdDof] );
-                    }
-                }
-            }
+        for ( std::set<ID>::iterator iDofIt = resistanceDofs.begin();
+                     iDofIt != resistanceDofs.end(); ++iDofIt )
+		 {
+        	 for ( UInt iComp = 1; iComp <= nComp; ++iComp )
+			 {
+				 idDof = *iDofIt + ( boundaryCond.component( iComp ) - 1 ) * totalDof + offset;
+				 for ( std::set<ID>::iterator jDofIt = resistanceDofs.begin();
+						 jDofIt != resistanceDofs.end(); ++jDofIt )
+				 {
+					 for ( UInt jComp = 1; jComp <= nComp; ++jComp )
+					 {
+						 jdDof = *jDofIt + ( boundaryCond.component( jComp ) - 1 ) * totalDof + offset;
+
+						 matrix.addToCoefficient( idDof-1,  jdDof-1, boundaryCond.resistanceCoef() * vv[idDof] * vv[jdDof] );
+					 }
+				 }
+			 }
         }
 
     }
     else
         ERROR_MSG( "This BC type is not yet implemented" );
 } //bcResistanceManage
-
 
 } // end of namespace LifeV
 #endif
