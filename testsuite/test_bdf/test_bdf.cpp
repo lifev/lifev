@@ -227,16 +227,16 @@ void test_bdf::run()
     {
         if (exporterType.compare("none") == 0)
         {
-            exporter.reset( new NoExport<RegionMesh > ( dataFile, meshPart.mesh(), "bdf_test", Members->comm->MyPID()) );
+            exporter.reset( new NoExport<RegionMesh > ( dataFile, meshPart.meshPartition(), "bdf_test", Members->comm->MyPID()) );
         }
         else
         {
-            exporter.reset( new Ensight<RegionMesh > ( dataFile, meshPart.mesh(), "bdf_test", Members->comm->MyPID()) );
+            exporter.reset( new Ensight<RegionMesh > ( dataFile, meshPart.meshPartition(), "bdf_test", Members->comm->MyPID()) );
         }
     }
 
     exporter->setDirectory( "./" );
-    exporter->setMeshProcId( meshPart.mesh(), Members->comm->MyPID() );
+    exporter->setMeshProcId( meshPart.meshPartition(), Members->comm->MyPID() );
 
     boost::shared_ptr<EpetraVector> u_display_ptr(new EpetraVector(
                                                       FeSpace.map(), exporter->mapType()));
