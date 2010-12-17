@@ -443,8 +443,8 @@ Cylinder::run()
     if (verbose)
         std::cout << "ok." << std::endl;
 
-    UInt totalVelDof   = uFESpace.map().getMap(Unique)->NumGlobalElements();
-    UInt totalPressDof = pFESpace.map().getMap(Unique)->NumGlobalElements();
+    UInt totalVelDof   = uFESpace.map().map(Unique)->NumGlobalElements();
+    UInt totalPressDof = pFESpace.map().map(Unique)->NumGlobalElements();
 
 
 

@@ -228,7 +228,7 @@ assembleMatrix( EpetraMatrix<Real>&   globalMatrix,
 
     assert(localMatrix.indexij( Int (1), Int(0) ) == 1);
 
-    globalMatrix.set_mat_inc( fe1NbDof, fe2NbDof, iList, jList, matPtr, Epetra_FECrsMatrix::COLUMN_MAJOR );
+    globalMatrix.addToCoefficients( fe1NbDof, fe2NbDof, iList, jList, matPtr, Epetra_FECrsMatrix::COLUMN_MAJOR );
 }
 
 //! Assembly procedure for the matrix
@@ -313,7 +313,7 @@ assembleTransposeMatrix( EpetraMatrix<Real>&   globalMatrix,
 
     assert(localView.indexij( Int (1), Int(0) ) == 1);
 
-    globalMatrix.set_mat_inc( currentFE1.nbFEDof(), currentFE2.nbFEDof(),
+    globalMatrix.addToCoefficients( currentFE1.nbFEDof(), currentFE2.nbFEDof(),
                               ilist, jlist, matPtr, Epetra_FECrsMatrix::ROW_MAJOR );
 
 }

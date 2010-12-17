@@ -208,11 +208,11 @@ main( int argc, char** argv )
 #endif
 
     if (verbose) std::cout << " -- Closing the matrix ... " << std::flush;
-    systemMatrix->GlobalAssemble();
+    systemMatrix->globalAssemble();
     if (verbose) std::cout << " done ! " << std::endl;
 
 #ifdef TEST_RHS
-    Real matrixNorm(systemMatrix->NormOne());
+    Real matrixNorm(systemMatrix->norm1());
     if (verbose) std::cout << " ---> Norm 1 : " << matrixNorm << std::endl;
     if ( abs(matrixNorm - 1.68421 ) > 1e-3)
     {
@@ -233,7 +233,7 @@ main( int argc, char** argv )
     fInterpolated*=0.0;
     uFESpace->interpolate(fRhs,fInterpolated,0.0);
     adrAssembler.addMassRhs(rhs,fInterpolated);
-    rhs.GlobalAssemble();
+    rhs.globalAssemble();
 #endif
 
     if (verbose) std::cout << " done ! " << std::endl;
@@ -306,11 +306,11 @@ main( int argc, char** argv )
     solutionErr*=0.0;
     uFESpace->interpolate(exactSolution,solutionErr,0.0);
     solutionErr-=solution;
-    solutionErr.Abs();
+    solutionErr.abs();
     Real l2error(uFESpace->l2Error(exactSolution,vector_type(solution,Repeated),0.0));
     if (verbose) std::cout << " -- done ! " << std::endl;
     if (verbose) std::cout << " ---> Norm L2  : " << l2error << std::endl;
-    Real linferror( solutionErr.NormInf());
+    Real linferror( solutionErr.normInf());
     if (verbose) std::cout << " ---> Norm Inf : " << linferror << std::endl;
 
 

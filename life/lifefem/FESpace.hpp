@@ -727,7 +727,7 @@ FESpace<MeshType, MapType>::interpolate( const function_Type& fct,
                 ID globalDofID(M_dof->localToGlobal(iterVolume,iterDof+1) + iDim*M_dim);
 
                 // Compute the value of the function and set it
-                vect.checkAndSet(globalDofID,FEValues[iterDof]);
+                vect.setCoefficient(globalDofID,FEValues[iterDof]);
 
             }
         }
@@ -778,7 +778,7 @@ FESpace<MeshType, MapType>::interpolateBC( BCHandler& BCh,
                     idDof = BCh[ibc]( i ) ->id() + ( BCh[ibc].component( j ) - 1 ) * totalDof;
                     Real val = BCh[ibc]( time, x, y, z, BCh[ibc].component( j ) );
 
-                    vect.checkAndSet(idDof,val);
+                    vect.setCoefficient(idDof,val);
                 }
             }
         }
@@ -825,7 +825,7 @@ FESpace<MeshType, MapType>::l2ScalarProduct( const function_Type& fct, vector_ty
         }
     }
 
-    vec.GlobalAssemble();
+    vec.globalAssemble();
 }
 
 
@@ -921,7 +921,7 @@ FESpace<MeshType, MapType>::l2Error( const function_Type&    fexact,
     Real sendbuff[2] = {normU, sumExact};
     Real recvbuff[2];
 
-    this->map().Comm().SumAll(&sendbuff[0], &recvbuff[0], 2);
+    this->map().comm().SumAll(&sendbuff[0], &recvbuff[0], 2);
 
     normU    = recvbuff[0];
     sumExact = recvbuff[1];
@@ -954,7 +954,7 @@ FESpace<MeshType, MapType>::l2NormFunction( const function& f, const Real time)
     Real sendbuff[1] = {sumExact};
     Real recvbuff[1];
 
-    this->map().Comm().SumAll(&sendbuff[0], &recvbuff[0], 1);
+    this->map().comm().SumAll(&sendbuff[0], &recvbuff[0], 1);
 
     sumExact    = recvbuff[0];
 
@@ -971,7 +971,7 @@ FESpace<MeshType,MapType>:: l2ErrorWeighted(const function_Type&    exactSolutio
                                     const Real         time)
 {
     // Check that the vector is repeated (needed!)
-    if (solution.getMaptype() == Unique)
+    if (solution.mapType() == Unique)
     {
         return l2ErrorWeighted(exactSolution, EpetraVector(solution,Repeated), weight,time);
     }
@@ -1015,7 +1015,7 @@ FESpace<MeshType,MapType>:: l2ErrorWeighted(const function_Type&    exactSolutio
     Real sendbuff (sumOfSquare);
     Real recvbuff;
 
-    this->map().Comm().SumAll(&sendbuff,&recvbuff,1);
+    this->map().comm().SumAll(&sendbuff,&recvbuff,1);
 
     sumOfSquare = recvbuff;
 
@@ -1060,7 +1060,7 @@ FESpace<MeshType, MapType>::h1Error( const function&    fexact,
     Real sendbuff[2] = {normU, sumExact};
     Real recvbuff[2];
 
-    this->map().Comm().SumAll(&sendbuff[0], &recvbuff[0], 2);
+    this->map().comm().SumAll(&sendbuff[0], &recvbuff[0], 2);
 
 
 //    int me = this->map().Comm().MyPID();
@@ -1101,7 +1101,7 @@ FESpace<MeshType, MapType>::l2Norm( const vector_type& vec)
     Real sendbuff[1] = {norm};
     Real recvbuff[1];
 
-    this->map().Comm().SumAll(&sendbuff[0], &recvbuff[0], 1);
+    this->map().comm().SumAll(&sendbuff[0], &recvbuff[0], 1);
 
     norm    = recvbuff[0];
 
@@ -1149,7 +1149,7 @@ FESpace<MeshType, MapType>::
 feInterpolateValue(const ID& elementID, const vector_type& solutionVector, const point_type& pt, const UInt& component ) const
 {
     // The vector has to be repeated, so if it is not, we make is repeated and call this function again.
-    if (solutionVector.getMaptype() != Repeated )
+    if (solutionVector.mapType() != Repeated )
     {
         vector_type repeatedSolutionVector(solutionVector,Repeated);
         return feInterpolateValue(elementID, repeatedSolutionVector, pt, component);
@@ -1364,7 +1364,7 @@ feToFEInterpolate(const FESpace<mesh_Type,map_Type>& OriginalSpace,
 
     // Then, check that the original vector is repeated.
     // If not, make it repeated and recall this method.
-    if ( OriginalVector.getMaptype() == Unique )
+    if ( OriginalVector.mapType() == Unique )
     {
         const vector_type OriginalRepeated(OriginalVector,Repeated);
         return feToFEInterpolate(OriginalSpace,OriginalRepeated);

@@ -65,7 +65,7 @@ IfpackPreconditioner::~IfpackPreconditioner()
 Int
 IfpackPreconditioner::buildPreconditioner( operator_type& matrix )
 {
-    M_operator     = matrix->getMatrixPtr();
+    M_operator     = matrix->matrixPtr();
 
     M_overlapLevel = this->M_list.get( "overlap level", -1 );
 

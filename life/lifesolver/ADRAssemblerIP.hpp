@@ -328,7 +328,7 @@ addIPStabilizationStencil(const matrix_ptrType& matrixGalerkin,
                           const vector_type& beta,
                           const Real& coef)
 {
-    if (beta.getMaptype() != Repeated)
+    if (beta.mapType() != Repeated)
     {
         addIPStabilizationStencil(matrixGalerkin,matrixExtended,vector_type(beta,Repeated),coef);
         return;

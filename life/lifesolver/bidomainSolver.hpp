@@ -603,7 +603,7 @@ BidomainSolver( const data_type&          dataType,
                 M_sol_uiue = ui0;
                 M_sol_uiue.add(ue0, M_uFESpace.dof().numTotalDof());
 
-                for ( Int i = 0 ; i < M_sol_u.getEpetraVector().MyLength() ; i++ )
+                for ( Int i = 0 ; i < M_sol_u.epetraVector().MyLength() ; i++ )
                 {
                     Int ig=M_sol_u.BlockMap().MyGlobalElements()[i];
                     M_sol_u[ig] = M_sol_uiue[ig] - M_sol_uiue[ig+dim_u()]; // BASEINDEX + 1
@@ -806,7 +806,7 @@ BidomainSolver( const data_type&          dataType,
                 }
 
 
-                for ( Int i = 0 ; i < M_sol_u.getEpetraVector().MyLength() ; i++ )
+                for ( Int i = 0 ; i < M_sol_u.epetraVector().MyLength() ; i++ )
                 {
                     UInt ig=M_sol_u.BlockMap().MyGlobalElements()[i];
                     M_sol_ue[ig] = M_sol_uiue[ig+dim_u()]; // BASEINDEX + 1
@@ -814,7 +814,7 @@ BidomainSolver( const data_type&          dataType,
                 Real meanue=computeMean(M_sol_ue);
                 removeValue(M_sol_uiue, meanue);
 
-                for ( Int i = 0 ; i < M_sol_u.getEpetraVector().MyLength() ; i++ )
+                for ( Int i = 0 ; i < M_sol_u.epetraVector().MyLength() ; i++ )
                 {
                     UInt ig=M_sol_u.BlockMap().MyGlobalElements()[i];
                     M_sol_u[ig] = M_sol_uiue[ig] - M_sol_uiue[ig+dim_u()]; // BASEINDEX + 1
@@ -824,7 +824,7 @@ BidomainSolver( const data_type&          dataType,
                 M_bdf_uiue.shift_right(M_sol_uiue);
                 M_sol_uiue_extrap = M_bdf_uiue.extrap();
 
-                for ( Int i = 0 ; i < M_sol_u.getEpetraVector().MyLength() ; i++ )
+                for ( Int i = 0 ; i < M_sol_u.epetraVector().MyLength() ; i++ )
                 {
                     UInt ig=M_sol_u.BlockMap().MyGlobalElements()[i];
                     M_sol_u_extrap[ig] = M_sol_uiue_extrap[ig] - M_sol_uiue_extrap[ig+dim_u()]; // BASEINDEX + 1
@@ -870,7 +870,7 @@ BidomainSolver( const data_type&          dataType,
             Real BidomainSolver<Mesh, SolverType>::computeMean( vector_Type& x )
             {
                 Real mean_ue(0.);
-                x.getEpetraVector().MeanValue(&mean_ue);
+                x.epetraVector().MeanValue(&mean_ue);
                 return mean_ue;
 
             } // computeMean()
@@ -878,7 +878,7 @@ BidomainSolver( const data_type&          dataType,
             template<typename Mesh, typename SolverType>
             void BidomainSolver<Mesh, SolverType>::removeValue( vector_Type& x, Real& value )
             {
-                for ( Int i = 0 ; i < x.getEpetraVector().MyLength() ; i++ )
+                for ( Int i = 0 ; i < x.epetraVector().MyLength() ; i++ )
                 {
                     Int ig=x.BlockMap().MyGlobalElements()[i];
                     x[ig] -= value; // BASEINDEX + 1

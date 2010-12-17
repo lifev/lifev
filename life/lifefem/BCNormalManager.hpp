@@ -480,18 +480,18 @@ void BCNormalManager<MeshType,MatrixType>::bcShiftToNormalTangentialCoordSystem(
         int errCode(0);
 
         //C = R*A
-        matrix_Type C(systemMatrix.getMap(), systemMatrix.getMeanNumEntries());
-        errCode = M_rotationMatrixPtr->Multiply(false,systemMatrix,false,C);
+        matrix_Type C(systemMatrix.map(), systemMatrix.meanNumEntries());
+        errCode = M_rotationMatrixPtr->multiply(false,systemMatrix,false,C);
 
         //A = C*Rt"
-        matrix_Type D(systemMatrix.getMap(), systemMatrix.getMeanNumEntries());
-        errCode = C.Multiply(false,*M_rotationMatrixPtr,true,D);
+        matrix_Type D(systemMatrix.map(), systemMatrix.meanNumEntries());
+        errCode = C.multiply(false,*M_rotationMatrixPtr,true,D);
         //std::cout<< errCode <<std::endl;
         systemMatrix.swapCrsMatrix(D);
 
         //b = R*b
         VectorType c(rightHandSide);
-        errCode = M_rotationMatrixPtr->Multiply(false,c,rightHandSide);
+        errCode = M_rotationMatrixPtr->multiply(false,c,rightHandSide);
     }
 }
 
@@ -504,17 +504,17 @@ void BCNormalManager<MeshType,MatrixType>::bcShiftToCartesianCoordSystem(matrix_
         int errCode(0);
 
         // C = Rt*A;
-        matrix_Type C(systemMatrix.getMap(), systemMatrix.getMeanNumEntries());
-        errCode = M_rotationMatrixPtr->Multiply(true,systemMatrix,false,C);
+        matrix_Type C(systemMatrix.map(), systemMatrix.meanNumEntries());
+        errCode = M_rotationMatrixPtr->multiply(true,systemMatrix,false,C);
 
         // A = C*R";
-        matrix_Type D(systemMatrix.getMap(), systemMatrix.getMeanNumEntries());
-        errCode = C.Multiply(false,*M_rotationMatrixPtr,false,D);
+        matrix_Type D(systemMatrix.map(), systemMatrix.meanNumEntries());
+        errCode = C.multiply(false,*M_rotationMatrixPtr,false,D);
         systemMatrix.swapCrsMatrix(D);
 
         // b = Rt*b;
         VectorType c(rightHandSide);
-        errCode = M_rotationMatrixPtr->Multiply(true,c,rightHandSide);
+        errCode = M_rotationMatrixPtr->multiply(true,c,rightHandSide);
     }
 }
 
@@ -529,7 +529,7 @@ void BCNormalManager<MeshType, MatrixType>::computeIntegratedNormals(const Dof& 
     //-----------------------------------------------------
 
 
-    VectorType repNormals(normals.getMap(), Repeated);
+    VectorType repNormals(normals.map(), Repeated);
     //Loop on the Faces
     for ( UInt iFace = 1; iFace<= mesh.numBElements(); ++iFace )
     {
@@ -583,9 +583,9 @@ void BCNormalManager<MeshType, MatrixType>::computeIntegratedNormals(const Dof& 
     //-----------------------------------------------------
 
     //We obtain the ID of the element
-    int NumMyElements = normals.getMap().getMap(Unique)->NumMyElements();
+    int NumMyElements = normals.map().map(Unique)->NumMyElements();
     int MyGlobalElements[NumMyElements];
-    normals.getMap().getMap(Unique)->MyGlobalElements(MyGlobalElements);
+    normals.map().map(Unique)->MyGlobalElements(MyGlobalElements);
 
     //We normalize the normal
     Real norm;
@@ -618,7 +618,7 @@ void BCNormalManager<MeshType,MatrixType>::exportToParaview(std::string fileName
     {
         fileName.append("_proc");
         std::ostringstream ossMyPid;
-        ossMyPid << M_localEpetraMapPtr->Comm().MyPID();
+        ossMyPid << M_localEpetraMapPtr->comm().MyPID();
         fileName.append( ossMyPid.str() );
         fileName.append(".vtk");
         std::ofstream file(fileName.c_str());
@@ -631,9 +631,9 @@ void BCNormalManager<MeshType,MatrixType>::exportToParaview(std::string fileName
         else
         {
             //We obtain the ID of the element
-            int NumMyElements = M_localEpetraMapPtr->getMap(Unique)->NumMyElements();
+            int NumMyElements = M_localEpetraMapPtr->map(Unique)->NumMyElements();
             int MyGlobalElements[NumMyElements];
-            M_localEpetraMapPtr->getMap(Unique)->MyGlobalElements(MyGlobalElements);
+            M_localEpetraMapPtr->map(Unique)->MyGlobalElements(MyGlobalElements);
             ID idof(0);
 
             //Writing the header
@@ -728,9 +728,9 @@ void BCNormalManager<MeshType,MatrixType>::M_calculateCoordinates(MeshType const
     M_coordPtr.reset( new EpetraVector(*M_localEpetraMapPtr,Unique) );
 
     //We obtain the ID of the element
-    int NumMyElements = M_localEpetraMapPtr->getMap(Unique)->NumMyElements();
+    int NumMyElements = M_localEpetraMapPtr->map(Unique)->NumMyElements();
     int MyGlobalElements[NumMyElements];
-    M_localEpetraMapPtr->getMap(Unique)->MyGlobalElements(MyGlobalElements);
+    M_localEpetraMapPtr->map(Unique)->MyGlobalElements(MyGlobalElements);
 
     UInt id;
     for ( int i(0); i<NumMyElements; ++i )
@@ -802,9 +802,9 @@ void BCNormalManager<MeshType,MatrixType>::M_storeGivenVersors()
     //-----------------------------------------------------
 
     //We obtain the ID of the element
-    int NumMyElements = M_localEpetraMapPtr->getMap(Unique)->NumMyElements();
+    int NumMyElements = M_localEpetraMapPtr->map(Unique)->NumMyElements();
     int MyGlobalElements[NumMyElements];
-    M_localEpetraMapPtr->getMap(Unique)->MyGlobalElements(MyGlobalElements);
+    M_localEpetraMapPtr->map(Unique)->MyGlobalElements(MyGlobalElements);
 
     //We normalize the normal
     Real norm;
@@ -842,9 +842,9 @@ void BCNormalManager<MeshType,MatrixType>::M_calculateTangentVectors()
     //-----------------------------------------------------
 
     //We obtain the ID of the element
-    int NumMyElements = M_localEpetraMapPtr->getMap(Unique)->NumMyElements();
+    int NumMyElements = M_localEpetraMapPtr->map(Unique)->NumMyElements();
     int MyGlobalElements[NumMyElements];
-    M_localEpetraMapPtr->getMap(Unique)->MyGlobalElements(MyGlobalElements);
+    M_localEpetraMapPtr->map(Unique)->MyGlobalElements(MyGlobalElements);
 
     //Building the tangential vectors
     M_firstTangentPtr.reset ( new EpetraVector(*M_localEpetraMapPtr,Unique) );
@@ -932,7 +932,7 @@ void BCNormalManager<MeshType,MatrixType>::M_buildRotationMatrix(matrix_Type& sy
     std::map< ID,std::vector< Real > >::iterator mapIt;
 
     //Creating the matrix
-    M_rotationMatrixPtr.reset( new matrix_Type(systemMatrix.getMap(), systemMatrix.getMeanNumEntries() ) );
+    M_rotationMatrixPtr.reset( new matrix_Type(systemMatrix.map(), systemMatrix.meanNumEntries() ) );
 
     //Adding one to the diagonal
     M_rotationMatrixPtr->insertOneDiagonal();
@@ -954,9 +954,9 @@ void BCNormalManager<MeshType,MatrixType>::M_buildRotationMatrix(matrix_Type& sy
     std::vector<int> cols;
 
     //We obtain the ID of the element
-    int NumMyElements = M_localEpetraMapPtr->getMap(Unique)->NumMyElements();
+    int NumMyElements = M_localEpetraMapPtr->map(Unique)->NumMyElements();
     int MyGlobalElements[NumMyElements];
-    M_localEpetraMapPtr->getMap(Unique)->MyGlobalElements(MyGlobalElements);
+    M_localEpetraMapPtr->map(Unique)->MyGlobalElements(MyGlobalElements);
 
     UInt id;
     for ( int i(0); i<NumMyElements; ++i )
@@ -991,7 +991,7 @@ void BCNormalManager<MeshType,MatrixType>::M_buildRotationMatrix(matrix_Type& sy
             values[2][0] = (*M_firstTangentPtr)[id+2*M_numDof];
 
             //-1 because we added one to the diagonal
-            M_rotationMatrixPtr->set_mat_inc(Indices[0],Indices[0],-1.0);
+            M_rotationMatrixPtr->addToCoefficient(Indices[0],Indices[0],-1.0);
 
             //Line j (second tangential vector)
             values[0][1] = (*M_secondTangentPtr)[id];
@@ -999,7 +999,7 @@ void BCNormalManager<MeshType,MatrixType>::M_buildRotationMatrix(matrix_Type& sy
             values[2][1]= (*M_secondTangentPtr)[id+2*M_numDof];
 
             //-1 because we added one to the diagonal
-            M_rotationMatrixPtr->set_mat_inc(Indices[1],Indices[1],-1.0);
+            M_rotationMatrixPtr->addToCoefficient(Indices[1],Indices[1],-1.0);
 
             //Line k (normal vector)
             values[0][2] = (*M_normalPtr)[id];
@@ -1007,9 +1007,9 @@ void BCNormalManager<MeshType,MatrixType>::M_buildRotationMatrix(matrix_Type& sy
             values[2][2] = (*M_normalPtr)[id+2*M_numDof];
 
             //-1 because we added one to the diagonal
-            M_rotationMatrixPtr->set_mat_inc(Indices[2],Indices[2],-1.0);
+            M_rotationMatrixPtr->addToCoefficient(Indices[2],Indices[2],-1.0);
 
-            M_rotationMatrixPtr->set_mat_inc(nbCols, nbRows, cols, rows, values);
+            M_rotationMatrixPtr->addToCoefficients(nbCols, nbRows, cols, rows, values);
         }
 
     }
@@ -1019,7 +1019,7 @@ void BCNormalManager<MeshType,MatrixType>::M_buildRotationMatrix(matrix_Type& sy
         delete values[n];
     }
 
-    M_rotationMatrixPtr->GlobalAssemble();
+    M_rotationMatrixPtr->globalAssemble();
 }
 
 

@@ -75,10 +75,10 @@ SolverTrilinos::SolverTrilinos( const boost::shared_ptr<Epetra_Comm>& comm ) :
 Int
 SolverTrilinos::solve( vector_type& solution, const vector_type& rhs )
 {
-    M_solver.SetLHS( &solution.getEpetraVector() );
+    M_solver.SetLHS( &solution.epetraVector() );
     // The Solver from Aztecoo takes a non const (because of rescaling?)
     // We should be careful if you use scaling
-    Epetra_FEVector* rhsVectorPtr ( const_cast<Epetra_FEVector*> (&rhs.getEpetraVector()) );
+    Epetra_FEVector* rhsVectorPtr ( const_cast<Epetra_FEVector*> (&rhs.epetraVector()) );
     M_solver.SetRHS( rhsVectorPtr );
 
     Int  maxiter(M_maxIter);
@@ -124,16 +124,16 @@ SolverTrilinos::solve( vector_type& solution, const vector_type& rhs )
 Real
 SolverTrilinos::computeResidual( vector_type& solution, vector_type& rhs )
 {
-    vector_type Ax ( solution.getMap() );
+    vector_type Ax ( solution.map() );
     vector_type res( rhs );
 
-    M_solver.GetUserMatrix()->Apply( solution.getEpetraVector(), Ax.getEpetraVector() );
+    M_solver.GetUserMatrix()->Apply( solution.epetraVector(), Ax.epetraVector() );
 
-    res.getEpetraVector().Update( 1, Ax.getEpetraVector(), -1 );
+    res.epetraVector().Update( 1, Ax.epetraVector(), -1 );
 
     Real residual;
 
-    res.Norm2( &residual );
+    res.norm2( &residual );
 
     return residual;
 }
@@ -273,7 +273,7 @@ SolverTrilinos::setCommunicator( const boost::shared_ptr<Epetra_Comm>& comm )
 
 void SolverTrilinos::setMatrix( matrix_type& matrix )
 {
-    M_matrix = matrix.getMatrixPtr();
+    M_matrix = matrix.matrixPtr();
     M_solver.SetUserMatrix( M_matrix.get() );
 }
 

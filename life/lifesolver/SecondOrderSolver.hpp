@@ -248,7 +248,7 @@ public:
       chrono.start();
 
      *M_rhsNoBC = rhs;
-      M_rhsNoBC->GlobalAssemble();
+      M_rhsNoBC->globalAssemble();
 
       chrono.stop();
       M_displayer->leaderPrintMax("done in ", chrono.diff());
@@ -600,7 +600,7 @@ buildSystem(const Real& xi, const Real& alpha)
      M_matrDamping.reset(new matrix_type(*M_localMap));
    this->buildDamping(M_matrSystem, alpha);
    }
- M_matrSystem->GlobalAssemble();
+ M_matrSystem->globalAssemble();
 
  chrono.stop();
  M_displayer->leaderPrintMax( "done in ", chrono.diff() );
@@ -674,8 +674,8 @@ buildSystem(matrix_ptrtype matrSystem, const Real& xi)
                         0, 0, 0, 0);
     }
 
-    M_matrMass->GlobalAssemble();
-    M_matrLinearStiffness->GlobalAssemble();
+    M_matrMass->globalAssemble();
+    M_matrLinearStiffness->globalAssemble();
     chrono.stop();
     M_displayer->leaderPrintMax("done in ", chrono.diff());
 
@@ -725,7 +725,7 @@ buildDamping(matrix_ptrtype damping, const Real& alpha)
 
      *M_matrSystem += *M_matrDamping * alpha;
 
-     M_matrDamping->GlobalAssemble();
+     M_matrDamping->globalAssemble();
      M_displayer->leaderPrintMax( " done in ", chrono.diff() );
 }
 
@@ -835,10 +835,10 @@ iterate( bchandler_raw_type& bch )
 
     chrono.start();
 
-    matrix_ptrtype matrFull( new matrix_type(*M_localMap,M_matrSystem->getMeanNumEntries()));
+    matrix_ptrtype matrFull( new matrix_type(*M_localMap,M_matrSystem->meanNumEntries()));
     *matrFull += *M_matrSystem;
 
-    M_rhsNoBC->GlobalAssemble();
+    M_rhsNoBC->globalAssemble();
 
     vector_type rhsFull (*M_rhsNoBC);
 

@@ -69,7 +69,7 @@ MLPreconditioner::buildPreconditioner( operator_type& matrix )
     //the Trilinos::MultiLevelPreconditioner unsafely access to the area of memory co-owned by M_operator.
     //to avoid the risk of dandling pointers always deallocate M_preconditioner first and then M_operator
     M_preconditioner.reset();
-    M_operator = matrix->getMatrixPtr();
+    M_operator = matrix->matrixPtr();
 
     M_precType = M_list.get( "prec type", "undefined??" );
     M_precType += "_ML";

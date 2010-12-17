@@ -250,7 +250,7 @@ public:
                 M_exporterFluid.reset( new Ensight<RegionMesh3D<LinearTetra> > ( dataFile, exporterName+"Fluid" ) );
 
 
-            M_exporterFluid->setMeshProcId(M_fsi->FSIOper()->uFESpace().mesh(), M_fsi->FSIOper()->uFESpace().map().Comm().MyPID());
+            M_exporterFluid->setMeshProcId(M_fsi->FSIOper()->uFESpace().mesh(), M_fsi->FSIOper()->uFESpace().map().comm().MyPID());
 
             M_velAndPressure.reset( new vector_Type( M_fsi->FSIOper()->fluid().getMap(),      M_exporterFluid->mapType() ));
             M_fluidDisp.reset     ( new vector_Type( M_fsi->FSIOper()->meshMotion().getMap(), M_exporterFluid->mapType() ));
@@ -274,7 +274,7 @@ public:
 #endif
                 M_exporterSolid.reset( new Ensight<RegionMesh3D<LinearTetra> > ( dataFile, exporterName+"Solid" ) );
 
-            M_exporterSolid->setMeshProcId(M_fsi->FSIOper()->dFESpace().mesh(), M_fsi->FSIOper()->dFESpace().map().Comm().MyPID());
+            M_exporterSolid->setMeshProcId(M_fsi->FSIOper()->dFESpace().mesh(), M_fsi->FSIOper()->dFESpace().map().comm().MyPID());
 
             M_solidDisp.reset( new vector_Type( M_fsi->FSIOper()->solid().getMap(), M_exporterSolid->mapType() ));
             M_solidVel.reset ( new vector_Type( M_fsi->FSIOper()->solid().getMap(), M_exporterSolid->mapType() ));
@@ -389,7 +389,7 @@ public:
             std::cout << "[fsi_run] Iteration " << _i << " was done in : " << _timer.elapsed() << "\n";
 
             std::cout << "solution norm " << _i << " : "
-                      << M_fsi->displacement().Norm2() << "\n";
+                      << M_fsi->displacement().norm2() << "\n";
 
             // CHECKING THE RESULTS OF THE TEST AT EVERY TIMESTEP
             checkResult( M_data->dataFluid()->dataTime()->getTime() );
@@ -403,7 +403,7 @@ private:
     void checkResult(const LifeV::Real& time)
     {
         assert(M_data->dataFluid()->dataTime()->getTimeStep()==0.001);
-        double dispNorm(M_fsi->displacement().Norm2());
+        double dispNorm(M_fsi->displacement().norm2());
 
         const LifeV::Real relTol(5e-3);
 

@@ -419,7 +419,7 @@ public:
     void bcManageVectorRHS( const fluidBchandlerPtr_Type& bch, vector_Type& rhs );
 
     //! Method to set the Robin vector coefficient of the Robin--Neumann coupling scheme (as a constant vector vector)
-    void setAlphaf     () { M_Alphaf->getEpetraVector().PutScalar( M_AlphafCoef ); }
+    void setAlphaf     () { M_Alphaf->epetraVector().PutScalar( M_AlphafCoef ); }
     //! Method to compute the scalar coefficient \f$\alpha\f$ of the Robin--Neumann coupling scheme
     void setAlphafCoef ();
     //! Method calling setAlphaf and setAlphafCoef

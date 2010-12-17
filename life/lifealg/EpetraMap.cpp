@@ -267,7 +267,7 @@ EpetraMap::operator + ( const EpetraMap& epetraMap )
 EpetraMap &
 EpetraMap::operator += ( Int const size )
 {
-    EpetraMap  lagrMap( size, CommPtr() );
+    EpetraMap  lagrMap( size, commPtr() );
 
     ASSERT( this->getUniqueMap(), "operator+=(const Int) works only for an existing EpetraMap" );
 
@@ -296,7 +296,7 @@ EpetraMap::createRootMap( Int const root )   const
 }
 
 bool
-EpetraMap::MapsAreSimilar( EpetraMap const& epetraMap ) const
+EpetraMap::mapsAreSimilar( EpetraMap const& epetraMap ) const
 {
     if ( this == &epetraMap )
         return true;
@@ -315,7 +315,7 @@ EpetraMap::showMe( std::ostream& output ) const
 // Get Methods
 // ===================================================
 EpetraMap::map_ptrtype const &
-EpetraMap::getMap( EpetraMapType mapType )   const
+EpetraMap::map( EpetraMapType mapType )   const
 {
     switch ( mapType )
     {
@@ -328,14 +328,14 @@ EpetraMap::getMap( EpetraMapType mapType )   const
 }
 
 Epetra_Export const&
-EpetraMap::getExporter()
+EpetraMap::exporter()
 {
     createImportExport();
     return **M_exporter;
 }
 
 Epetra_Import const&
-EpetraMap::getImporter()
+EpetraMap::importer()
 {
     createImportExport();
     return **M_importer;

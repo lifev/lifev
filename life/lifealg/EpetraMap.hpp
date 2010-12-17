@@ -255,7 +255,7 @@ public:
     boost::shared_ptr<EpetraMap> createRootMap( Int const root ) const;
 
     //! This method return true if both the unique map and the repeated map are identical
-    bool MapsAreSimilar( EpetraMap const& epetraMap ) const;
+    bool mapsAreSimilar( EpetraMap const& epetraMap ) const;
 
     //! Show informations about the map
     void showMe( std::ostream& output = std::cout ) const;
@@ -266,21 +266,50 @@ public:
     //@{
 
     //! Return the communicator
-    comm_type const& Comm() const { return *M_commPtr; }
+    comm_type const& comm() const { return *M_commPtr; }
 
     //! Return a shared pointer on the communicator
-    comm_ptrtype& CommPtr() { return M_commPtr; }
+    comm_ptrtype& commPtr() { return M_commPtr; }
 
     //! Return a shared pointer on the internal Epetra_Map
-    map_ptrtype const & getMap  ( EpetraMapType mapType ) const;
+    map_ptrtype const & map  ( EpetraMapType mapType ) const;
 
     //! Getter for the Epetra_Export
-    Epetra_Export const& getExporter();
+    Epetra_Export const& exporter();
 
     //! Getter for the Epetra_Import
-    Epetra_Import const& getImporter();
+    Epetra_Import const& importer();
 
     //@}
+
+    bool __attribute__ ((__deprecated__)) MapsAreSimilart( EpetraMap const& epetraMap ) const
+    {
+        return mapsAreSimilar(epetraMap);
+    }
+    comm_type __attribute__ ((__deprecated__)) const& Commt() const
+    {
+        return comm();
+    }
+    comm_ptrtype& __attribute__ ((__deprecated__)) CommPtrt()
+    {
+        return commPtr();
+    }
+
+    map_ptrtype const & __attribute__ ((__deprecated__)) getMapt  ( EpetraMapType mapType ) const
+    {
+        return map(mapType);
+    }
+
+    Epetra_Export const& __attribute__ ((__deprecated__)) getExportert()
+    {
+        return exporter();
+    }
+
+    //! Getter for the Epetra_Import
+    Epetra_Import const& __attribute__ ((__deprecated__)) getImportert()
+    {
+        return importer();
+    }
 
 private:
 

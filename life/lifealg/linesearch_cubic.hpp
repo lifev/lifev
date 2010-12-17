@@ -104,7 +104,7 @@ Int LineSearchCubic( Fct& f, VectorType& residual, VectorType& sol, VectorType& 
     S_solCurrent = sol;
     sol += lambda * step;
     f.evalResidual( residual, sol, iter );
-    normResTest = residual.NormInf();
+    normResTest = residual.normInf();
     ftest = 0.5 * normResTest * normResTest;
     fold = ftest;
     iterLinesearch = 0;
@@ -122,7 +122,7 @@ Int LineSearchCubic( Fct& f, VectorType& residual, VectorType& sol, VectorType& 
         if (verbose)
             std::cout << "    line search iter : " << iterLinesearch << " residual test = "
                       << normResTest << ", lambda = " << lambda << std::endl;
-        normResTest = residual.NormInf();
+        normResTest = residual.normInf();
         ftest = 0.5 * normResTest * normResTest;
     }
     if ( iterLinesearch == maxIterations )
@@ -177,7 +177,7 @@ Int LineSearchCubic( Fct& f, VectorType& residual, VectorType& sol, VectorType& 
         if (verbose)
             std::cout << "--- line search (cubic interpolation, Armijo rule)" << std::endl;
         f.evalResidual( residual, sol, iter );
-        normResTest = residual.NormInf();
+        normResTest = residual.normInf();
         if (verbose)
             std::cout << "    line search iter : " << iterLinesearch << " residual test = "
                       << normResTest << ", lambda = " << lambda << std::endl;

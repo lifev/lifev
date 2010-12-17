@@ -101,7 +101,7 @@ Int LineSearchParabolic ( Fct& f, VectorType& residual, VectorType& sol, VectorT
     S_solCurrent = sol;
     sol += lambda * step;
     f.evalResidual( residual, sol, iter );
-    normResTest = residual.NormInf();
+    normResTest = residual.normInf();
     resTest2 = normResTest * normResTest;
     resTestOld2 = resTest2;
     iterLinesearch = 0;
@@ -132,7 +132,7 @@ Int LineSearchParabolic ( Fct& f, VectorType& residual, VectorType& sol, VectorT
         lambdaCurrent = lambda;
         // eval norms
         f.evalResidual( residual, sol, iter );
-        normResTest = residual.NormInf();
+        normResTest = residual.normInf();
         resTestOld2 = resTest2;
         resTest2 = normResTest * normResTest;
         if ( iterLinesearch > maxIterations )

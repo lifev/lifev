@@ -385,14 +385,14 @@ generalizedAitken< VectorType >::computeDeltaLambdaScalar( const vector_Type& so
     if ( M_inverseOmega )
     {
         // Minimization of the inverse omega
-        omega = deltaX.Dot( deltaX );
-        norm  = deltaR.Dot( deltaX );
+        omega = deltaX.dot( deltaX );
+        norm  = deltaR.dot( deltaX );
     }
     else
     {
         //Minimization of the original omega
-        omega = deltaX.Dot( deltaR );
-        norm  = deltaR.Dot( deltaR );
+        omega = deltaX.dot( deltaR );
+        norm  = deltaR.dot( deltaR );
     }
 
     omega = - omega / norm ;

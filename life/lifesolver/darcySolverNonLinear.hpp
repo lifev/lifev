@@ -400,7 +400,7 @@ public:
     /*!
       @return M_fixedPointTolerance
      */
-    const Real fixedPointTolerance () const 
+    const Real fixedPointTolerance () const
     {
 	return M_fixedPointTolerance;
     }
@@ -408,7 +408,7 @@ public:
     {
 	return M_fixedPointTolerance;
     }
-    
+
     //! Returns maximum number of fixed point iterations allowed
     /*!
       @return max possible number of fixed point iterations
@@ -416,12 +416,12 @@ public:
     const UInt fixedPointMaxIteration () const
     {
 	return M_fixedPointMaxIteration;
-    } 
+    }
 
           UInt fixedPointMaxIteration ()
     {
 	return M_fixedPointMaxIteration;
-    } 
+    }
 
     //!  Returns the pointer of the primal solution vector at previous step.
     /*!
@@ -431,7 +431,7 @@ public:
     {
         return M_primalPreviousIteration;
     }
- 
+
           vectorPtr_Type& primalPreviousIteration ()
     {
         return M_primalPreviousIteration;
@@ -483,11 +483,11 @@ protected:
 
     //! Primal solution at previous iteration step.
     vectorPtr_Type M_primalPreviousIteration;
-    
+
     //@}
 
 private:
-    
+
     // Non-linear stuff.
     //! @name Non-linear stuff
     //@{
@@ -623,7 +623,7 @@ fixedPointScheme ()
 
     /* A loop for the fixed point scheme, with exit condition based on stagnate of the
        primal variable and the maximum iteration. */
-    while (    fixedPointResidual() > fixedPointTolerance() 
+    while (    fixedPointResidual() > fixedPointTolerance()
 	       && fixedPointNumIteration() < fixedPointMaxIteration() )
     {
         // Increment the iteration number.
@@ -639,7 +639,7 @@ fixedPointScheme ()
         this->computePrimalAndDual();
 
         // Compute the error.
-        M_fixedPointResidual = ( *(this->M_primal) - *M_primalPreviousIteration ).Norm2() / this->M_primal->Norm2();
+        M_fixedPointResidual = ( *(this->M_primal) - *M_primalPreviousIteration ).norm2() / this->M_primal->norm2();
 
         // The leader process prints the iteration data.
         this->M_displayer.leaderPrint( "Fixed point scheme           \n" );

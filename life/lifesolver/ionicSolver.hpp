@@ -341,7 +341,7 @@ void MitchellSchaeffer<Mesh, SolverType>::ionModelSolve( const vector_Type& u, c
 	Real x, y, z;
 	entityFlag_Type ref;
 	UInt ID;
-	for ( UInt i = 0 ; i < u.getEpetraVector().MyLength() ; ++i )
+	for ( UInt i = 0 ; i < u.epetraVector().MyLength() ; ++i )
 	{
         Int ig=u.BlockMap().MyGlobalElements()[i];
 		ID 	= ig;
@@ -387,7 +387,7 @@ template<typename Mesh, typename SolverType>
 void MitchellSchaeffer<Mesh, SolverType>::
 initialize( )
 {
-	M_sol_w.getEpetraVector().PutScalar(1.0 /
+	M_sol_w.epetraVector().PutScalar(1.0 /
                                         ((this->M_data.M_potentialMaximum-
                                           this->M_data.M_potentialMinimum)*
                                          (this->M_data.M_potentialMaximum-
@@ -492,7 +492,7 @@ void RogersMcCulloch<Mesh, SolverType>::ionModelSolve( const vector_Type& u, con
 
 	M_sol_w*=1/timeStep;
 	vector_Type temp(u);
-	temp.getEpetraVector().PutScalar (G*this->M_data.M_restPotential);
+	temp.epetraVector().PutScalar (G*this->M_data.M_restPotential);
 	M_sol_w+= G*u;
 	M_sol_w-= temp;
 	M_sol_w*=1/alpha;
@@ -537,7 +537,7 @@ template<typename Mesh, typename SolverType>
 void RogersMcCulloch<Mesh, SolverType>::
 initialize( )
 {
-	M_sol_w.getEpetraVector().PutScalar (0.);
+	M_sol_w.epetraVector().PutScalar (0.);
 }
 
 template< typename Mesh,
@@ -737,7 +737,7 @@ void LuoRudy<Mesh, SolverType>::ionModelSolve( const vector_Type& u, const Real 
 	chronoionmodelsolve.start();
 	IonicSolver<Mesh, SolverType>::M_comm->Barrier();
 
-	for ( Int i = 0 ; i < u.getEpetraVector().MyLength() ; i++ )
+	for ( Int i = 0 ; i < u.epetraVector().MyLength() ; i++ )
 	{
 		Int ig=u.BlockMap().MyGlobalElements()[i];
 		Real u_ig=u[ig];
@@ -748,7 +748,7 @@ void LuoRudy<Mesh, SolverType>::ionModelSolve( const vector_Type& u, const Real 
 		//slow inward current
 		M_Islow = 0.09 * M_sol_d[ig] * M_sol_f[ig] * (u_ig - M_Esi);
         //change in ioniq concentration
-        M_vectorIonicChange.getEpetraVector().ReplaceGlobalValue(ig,
+        M_vectorIonicChange.epetraVector().ReplaceGlobalValue(ig,
                                                                  0,
                                                                  -1e-4 * M_Islow + 0.07*(1e-4 - M_sol_Ca[ig]));
         //time dependent potassium current
@@ -762,43 +762,43 @@ void LuoRudy<Mesh, SolverType>::ionModelSolve( const vector_Type& u, const Real 
         //Total time independent potassium current
         M_Ik1t = M_Ik1 + M_Ikp + M_Iback;
         // adding up the six ionic currents
-        Iion.getEpetraVector().ReplaceGlobalValue(ig,
+        Iion.epetraVector().ReplaceGlobalValue(ig,
                                                   0,
                                                   M_Ina + M_Islow + M_Ik + M_Ik1t);
-		M_vectorExponentialh.getEpetraVector().ReplaceGlobalValue(ig,
+		M_vectorExponentialh.epetraVector().ReplaceGlobalValue(ig,
                                                                   0,
                                                                   exp(-timeStep / M_tauh));
-		M_vectorExponentialj.getEpetraVector().ReplaceGlobalValue(ig,
+		M_vectorExponentialj.epetraVector().ReplaceGlobalValue(ig,
                                                                   0,
                                                                   exp(-timeStep / M_tauj));
-		M_vectorExponentialm.getEpetraVector().ReplaceGlobalValue(ig,
+		M_vectorExponentialm.epetraVector().ReplaceGlobalValue(ig,
                                                                   0,
                                                                   exp(-timeStep / M_taum));
-		M_vectorExponentiald.getEpetraVector().ReplaceGlobalValue(ig,
+		M_vectorExponentiald.epetraVector().ReplaceGlobalValue(ig,
                                                                   0,
                                                                   exp(-timeStep / M_taud));
-		M_vectorExponentialf.getEpetraVector().ReplaceGlobalValue(ig,
+		M_vectorExponentialf.epetraVector().ReplaceGlobalValue(ig,
                                                                   0,
                                                                   exp(-timeStep / M_tauf));
-		M_vectorExponentialX.getEpetraVector().ReplaceGlobalValue(ig,
+		M_vectorExponentialX.epetraVector().ReplaceGlobalValue(ig,
                                                                   0,
                                                                   exp(-timeStep / M_tauX));
-		M_vectorInfimumh.getEpetraVector().ReplaceGlobalValue(ig,
+		M_vectorInfimumh.epetraVector().ReplaceGlobalValue(ig,
                                                               0,
                                                               M_hinf);
-		M_vectorInfimumj.getEpetraVector().ReplaceGlobalValue(ig,
+		M_vectorInfimumj.epetraVector().ReplaceGlobalValue(ig,
                                                               0,
                                                               M_jinf);
-		M_vectorInfimumm.getEpetraVector().ReplaceGlobalValue(ig,
+		M_vectorInfimumm.epetraVector().ReplaceGlobalValue(ig,
                                                               0,
                                                               M_minf);
-		M_vectorInfimumd.getEpetraVector().ReplaceGlobalValue(ig,
+		M_vectorInfimumd.epetraVector().ReplaceGlobalValue(ig,
                                                               0,
                                                               M_dinf);
-		M_vectorInfimumf.getEpetraVector().ReplaceGlobalValue(ig,
+		M_vectorInfimumf.epetraVector().ReplaceGlobalValue(ig,
                                                               0,
                                                               M_finf);
-		M_vectorInfimumX.getEpetraVector().ReplaceGlobalValue(ig,
+		M_vectorInfimumX.epetraVector().ReplaceGlobalValue(ig,
                                                               0,
                                                               M_Xinf);
 	}
@@ -818,43 +818,43 @@ void LuoRudy<Mesh, SolverType>::ionModelSolve( const vector_Type& u, const Real 
 	M_vectorIonicChange.GlobalAssemble();
 
 	M_sol_h-=M_vectorInfimumh;
-	M_sol_h.getEpetraVector().Multiply(1.,
-                                       M_sol_h.getEpetraVector(),
-                                       M_vectorExponentialh.getEpetraVector(),
+	M_sol_h.epetraVector().Multiply(1.,
+                                       M_sol_h.epetraVector(),
+                                       M_vectorExponentialh.epetraVector(),
                                        0.);
 	M_sol_h+=M_vectorInfimumh;
 	M_sol_j-=M_vectorInfimumj;
 
-	M_sol_j.getEpetraVector().Multiply(1.,
-                                       M_sol_j.getEpetraVector(),
-                                       M_vectorExponentialj.getEpetraVector(),
+	M_sol_j.epetraVector().Multiply(1.,
+                                       M_sol_j.epetraVector(),
+                                       M_vectorExponentialj.epetraVector(),
                                        0.);
 	M_sol_j+=M_vectorInfimumj;
 	M_sol_m-=M_vectorInfimumm;
-	M_sol_m.getEpetraVector().Multiply(1.,
-                                       M_sol_m.getEpetraVector(),
-                                       M_vectorExponentialm.getEpetraVector(),
+	M_sol_m.epetraVector().Multiply(1.,
+                                       M_sol_m.epetraVector(),
+                                       M_vectorExponentialm.epetraVector(),
                                        0.);
 	M_sol_m+=M_vectorInfimumm;
 	M_sol_d-=M_vectorInfimumd;
 
-	M_sol_d.getEpetraVector().Multiply(1.,
-                                       M_sol_d.getEpetraVector(),
-                                       M_vectorExponentiald.getEpetraVector(),
+	M_sol_d.epetraVector().Multiply(1.,
+                                       M_sol_d.epetraVector(),
+                                       M_vectorExponentiald.epetraVector(),
                                        0.);
 	M_sol_d+=M_vectorInfimumd;
 	M_sol_f-=M_vectorInfimumf;
 
-	M_sol_f.getEpetraVector().Multiply(1.,
-                                       M_sol_f.getEpetraVector(),
-                                       M_vectorExponentialf.getEpetraVector(),
+	M_sol_f.epetraVector().Multiply(1.,
+                                       M_sol_f.epetraVector(),
+                                       M_vectorExponentialf.epetraVector(),
                                        0.);
 	M_sol_f+=M_vectorInfimumf;
 	M_sol_X-=M_vectorInfimumX;
 
-	M_sol_X.getEpetraVector().Multiply(1.,
-                                       M_sol_X.getEpetraVector(),
-                                       M_vectorExponentialX.getEpetraVector(),
+	M_sol_X.epetraVector().Multiply(1.,
+                                       M_sol_X.epetraVector(),
+                                       M_vectorExponentialX.epetraVector(),
                                        0.);
 	M_sol_X+=M_vectorInfimumX;
 	M_sol_Ca+=timeStep*M_vectorIonicChange;
@@ -957,13 +957,13 @@ template<typename Mesh, typename SolverType>
 void LuoRudy<Mesh, SolverType>::
 initialize( )
 {
-    M_sol_h.getEpetraVector().PutScalar(1.);
-    M_sol_j.getEpetraVector().PutScalar(1.);
-    M_sol_m.getEpetraVector().PutScalar(0.);
-    M_sol_d.getEpetraVector().PutScalar(0.);
-    M_sol_f.getEpetraVector().PutScalar(1.);
-    M_sol_X.getEpetraVector().PutScalar(0.);
-    M_sol_Ca.getEpetraVector().PutScalar(0.0002);
+    M_sol_h.epetraVector().PutScalar(1.);
+    M_sol_j.epetraVector().PutScalar(1.);
+    M_sol_m.epetraVector().PutScalar(0.);
+    M_sol_d.epetraVector().PutScalar(0.);
+    M_sol_f.epetraVector().PutScalar(1.);
+    M_sol_X.epetraVector().PutScalar(0.);
+    M_sol_Ca.epetraVector().PutScalar(0.0002);
     M_sol_h.GlobalAssemble();
     M_sol_j.GlobalAssemble();
     M_sol_m.GlobalAssemble();

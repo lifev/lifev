@@ -72,14 +72,14 @@ SolverAmesos::SolverAmesos( const comm_PtrType& comm ) :
 Real
 SolverAmesos::computeResidual( const vector_type& solution, const vector_type& rhs )
 {
-    vector_type Ax(solution.getMap());
+    vector_type Ax(solution.map());
     vector_type res(rhs);
 
-    res.getEpetraVector().Update(1, Ax.getEpetraVector(), -1);
+    res.epetraVector().Update(1, Ax.epetraVector(), -1);
 
     Real residual;
 
-    res.Norm2(&residual);
+    res.norm2(&residual);
 
     return residual;
 }
@@ -93,8 +93,8 @@ SolverAmesos::solveSystem( vector_type&    rhsFull,
     Chrono chrono;
     chrono.start();
 
-    M_problem.SetLHS( &solution.getEpetraVector() );
-    M_problem.SetRHS( &rhsFull.getEpetraVector() );
+    M_problem.SetLHS( &solution.epetraVector() );
+    M_problem.SetRHS( &rhsFull.epetraVector() );
 
     M_solver->Solve();
 
@@ -167,7 +167,7 @@ void SolverAmesos::showMe( std::ostream& output ) const
 // ===================================================
 void SolverAmesos::setMatrix( const matrix_type& matrix )
 {
-    M_matrix = matrix.getMatrixPtr();
+    M_matrix = matrix.matrixPtr();
     M_problem.SetOperator( M_matrix.get() );
 
     // After setting the matrix we can perform symbolic & numeric factorization

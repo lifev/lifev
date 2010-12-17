@@ -1771,7 +1771,7 @@ void RegionMesh3D<GEOSHAPE, MC>::moveMesh( const VECTOR & disp, UInt dim )
         for ( UInt j = 1; j <= nDimensions; ++j )
         {
             int id = pointList[i].id();
-            if ( disp.BlockMap().LID(id + dim*(j - 1)) >= 0 )
+            if ( disp.blockMap().LID(id + dim*(j - 1)) >= 0 )
             {
                 pointList[ i ].coordinate( j ) = _pointList[ i ].coordinate( j ) + disp[ ( j - 1 ) * dim + id ];
             }

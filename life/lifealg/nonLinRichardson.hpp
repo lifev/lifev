@@ -110,12 +110,12 @@ Int nonLinRichardson( EpetraVector& sol,
 
     //----------------------------------------------------------------------
 
-    bool const verbose(sol.Comm().MyPID() == 0);
+    bool const verbose(sol.comm().MyPID() == 0);
 
     //UInt iter = 0;
 
-    EpetraVector residual ( sol.getMap() );
-    EpetraVector step     ( sol.getMap() );
+    EpetraVector residual ( sol.map() );
+    EpetraVector step     ( sol.map() );
 
     step *= 0.;
 
@@ -133,7 +133,7 @@ Int nonLinRichardson( EpetraVector& sol,
     }
     functional.evalResidual( residual, sol, iter );
 
-    Real normRes      = residual.NormInf();
+    Real normRes      = residual.normInf();
     Real stop_tol     = abstol + reltol*normRes;
     Real linearRelTol = fabs(eta_max);
     Real eta_old;
@@ -145,7 +145,7 @@ Int nonLinRichardson( EpetraVector& sol,
 
     //
 
-    Real solNormInf(sol.NormInf());
+    Real solNormInf(sol.normInf());
     Real stepNormInf;
     if (verbose)
     {
@@ -177,13 +177,13 @@ Int nonLinRichardson( EpetraVector& sol,
 
         ratio      = normRes/normResOld;
         normResOld = normRes;
-        normRes    = residual.NormInf();
+        normRes    = residual.normInf();
 
         residual *= -1;
         functional.solveJac(step, residual, linearRelTol); // J*step = -R
 
-        solNormInf = sol.NormInf();
-        stepNormInf = step.NormInf();
+        solNormInf = sol.normInf();
+        stepNormInf = step.normInf();
         if (verbose)
         {
             out_res   << std::setw(5) << iter
@@ -219,7 +219,7 @@ Int nonLinRichardson( EpetraVector& sol,
 
 
 
-        normRes = residual.NormInf();
+        normRes = residual.normInf();
 
         if (verbose)
             out_res << std::setw(15) << normRes << std::endl;

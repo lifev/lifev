@@ -334,7 +334,7 @@ VenantKirchhofSolver<Mesh, SolverType>::iterateLin( bchandler_type& bch )
     M_rhsNoBC->GlobalAssemble();
     M_rhsW->GlobalAssemble();
 
-    vector_type rhsFull (M_rhsNoBC->getMap());
+    vector_type rhsFull (M_rhsNoBC->map());
 
     M_Displayer->leaderPrint(" LS-  Applying boundary conditions ...         ");
     Chrono chrono;

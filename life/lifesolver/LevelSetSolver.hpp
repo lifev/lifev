@@ -347,8 +347,8 @@ LevelSetSolver( fespace_ptrType fespace, fespace_ptrType betaFESpace )
 {
     M_adrAssembler.setup(fespace,betaFESpace);
     M_ipAssembler.setup(fespace,betaFESpace);
-    
-    M_linearSolver.setCommunicator(fespace->map().CommPtr());
+
+    M_linearSolver.setCommunicator(fespace->map().commPtr());
 }
 
 // ===================================================
@@ -388,7 +388,7 @@ updateSystem(const vector_type& beta, BCHandler& bcHandler, const Real& time)
     {
         M_massMatrix.reset(new matrix_type(M_fespace->map()));
         M_adrAssembler.addMass(M_massMatrix,1.0);
-        M_massMatrix->GlobalAssemble();
+        M_massMatrix->globalAssemble();
     }
 
     M_systemMatrix.reset(new matrix_type(M_fespace->map()));
@@ -424,8 +424,8 @@ updateSystem(const vector_type& beta, BCHandler& bcHandler, const Real& time)
 
     // Global Assembly
 
-    M_systemMatrix->GlobalAssemble();
-    M_rhsMatrix->GlobalAssemble();
+    M_systemMatrix->globalAssemble();
+    M_rhsMatrix->globalAssemble();
 
 
     // Erase old rhs
@@ -482,7 +482,7 @@ reinitializationDirect()
     int nb_proc(0);
     int my_rank(0);
 
-    const Epetra_MpiComm* my_comm = dynamic_cast<Epetra_MpiComm const*>(&(M_fespace->map().Comm()));
+    const Epetra_MpiComm* my_comm = dynamic_cast<Epetra_MpiComm const*>(&(M_fespace->map().comm()));
 
     unsigned int dim(3);
     int nPt (M_fespace->mesh()->storedPoints());

@@ -129,7 +129,7 @@ public:
     */
     inline int apply(const EpetraVector & X, EpetraVector & Y) const
     {
-        return Apply(X.getEpetraVector(), Y.getEpetraVector());
+        return Apply(X.epetraVector(), Y.epetraVector());
     }
 
     //! Returns the result of a Epetra_Operator inverse applied to an Epetra_MultiVector X in Y.
@@ -161,7 +161,7 @@ public:
 
     inline int applyInverse(const EpetraVector & X, EpetraVector Y)
     {
-        return ApplyInverse(X.getEpetraVector(), Y.getEpetraVector());
+        return ApplyInverse(X.epetraVector(), Y.epetraVector());
     }
 
     //! Returns the infinity norm of the global matrix.

@@ -156,7 +156,7 @@ void fixedPoint::eval( const vector_Type& _disp,
     if (M_data->algorithm()=="RobinNeumann")   this->setMinusSigmaFluid( this->sigmaSolid() );
 
 
-    vector_Type sigmaFluidUnique (this->sigmaFluid().getMap(), Unique);
+    vector_Type sigmaFluidUnique (this->sigmaFluid().map(), Unique);
 
     if (this->isFluid())
     {
@@ -222,8 +222,8 @@ void fixedPoint::eval( const vector_Type& _disp,
         vel.subset(*this->M_fluid->solution());
         press.subset(*this->M_fluid->solution(), this->fluid().velFESpace().dim()*this->fluid().pressFESpace().fieldDim());
 
-        std::cout << "norm_inf( vel ) " << vel.NormInf() << std::endl;
-        std::cout << "norm_inf( press ) " << press.NormInf() << std::endl;
+        std::cout << "norm_inf( vel ) " << vel.normInf() << std::endl;
+        std::cout << "norm_inf( press ) " << press.normInf() << std::endl;
 
     }
 
@@ -235,9 +235,9 @@ void fixedPoint::eval( const vector_Type& _disp,
     MPI_Barrier(MPI_COMM_WORLD);
 
 
-    vector_Type lambdaSolidUnique   (this->lambdaSolid().getMap(),    Unique);
-    vector_Type lambdaDotSolidUnique(this->lambdaDotSolid().getMap(), Unique);
-    vector_Type sigmaSolidUnique    (this->sigmaSolid().getMap(),     Unique);
+    vector_Type lambdaSolidUnique   (this->lambdaSolid().map(),    Unique);
+    vector_Type lambdaDotSolidUnique(this->lambdaDotSolid().map(), Unique);
+    vector_Type sigmaSolidUnique    (this->sigmaSolid().map(),     Unique);
 
     if (this->isSolid())
     {
@@ -257,39 +257,39 @@ void fixedPoint::eval( const vector_Type& _disp,
     // Some displays:
     Real norm;
 
-    norm = _disp.NormInf();
+    norm = _disp.normInf();
     if (this->isSolid() && this->isLeader())
         std::cout << " ::: norm(disp     )    = " << norm << std::endl;
 
-    norm = this->lambdaSolid().NormInf();
+    norm = this->lambdaSolid().normInf();
     if (this->isSolid() && this->isLeader())
         std::cout << " ::: norm(dispNew  )    = " << norm << std::endl;
 
-    norm = this->lambdaDotSolid().NormInf();
+    norm = this->lambdaDotSolid().normInf();
     if (this->isSolid() && this->isLeader())
         std::cout << " ::: norm(velo     )    = " << norm << std::endl;
 
-    norm = this->sigmaFluid().NormInf();
+    norm = this->sigmaFluid().normInf();
     if (this->isSolid() && this->isLeader())
         std::cout << " ::: max Residual Fluid = " << norm << std::endl;
 
-    norm = this->sigmaSolid().NormInf();
+    norm = this->sigmaSolid().normInf();
     if (this->isSolid() && this->isLeader())
         std::cout << " ::: max Residual Solid = " << norm  << std::endl;
 
     if (this->isFluid())
     {
-        norm = M_fluid->residual().NormInf();
+        norm = M_fluid->residual().normInf();
         if (this->isLeader())
             std::cout << "Max ResidualF        = " << norm << std::endl;
     }
     if (this->isSolid())
     {
-        norm = M_solid->disp().Norm2();
+        norm = M_solid->disp().norm2();
         if (this->isLeader())
             std::cout << "NL2 DiplacementS     = " << norm << std::endl;
 
-        norm = M_solid->residual().NormInf();
+        norm = M_solid->residual().normInf();
         if (this->isLeader())
             std::cout << "Max ResidualS        = " << norm << std::endl;
     }

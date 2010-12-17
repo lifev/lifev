@@ -562,8 +562,8 @@ void FSIOperator::couplingVariableExtrap( )
     }
 
     *M_lambdaDot   = lambdaDotSolid();
-    displayer().leaderPrint("FSI-  norm( disp  ) init =                     ", M_lambda->NormInf(), "\n" );
-    displayer().leaderPrint("FSI-  norm( velo )  init =                     ", M_lambdaDot->NormInf(), "\n");
+    displayer().leaderPrint("FSI-  norm( disp  ) init =                     ", M_lambda->normInf(), "\n" );
+    displayer().leaderPrint("FSI-  norm( velo )  init =                     ", M_lambdaDot->normInf(), "\n");
 }
 
 void
@@ -583,8 +583,8 @@ FSIOperator::imposeFlux( void )
         std::vector<BCName> fluxVector = M_BCh_u->getBCWithType( Flux );
         UInt numLM = static_cast<UInt>( fluxVector.size() );
 
-        UInt offset = M_uFESpace->map().getMap(Unique)->NumGlobalElements()
-                      + M_pFESpace->map().getMap(Unique)->NumGlobalElements();
+        UInt offset = M_uFESpace->map().map(Unique)->NumGlobalElements()
+                      + M_pFESpace->map().map(Unique)->NumGlobalElements();
 
         for ( UInt i = 0; i < numLM; ++i )
             M_BCh_u->setOffset( fluxVector[i], offset + i );
@@ -722,14 +722,14 @@ FSIOperator::transferFluidOnInterface(const vector_Type &_vec1, vector_Type &_ve
     // e.g.: vec1=M_fluid->residual(), vec2=M_sigmaFluid
 //     _vec2 = ZeroVector(_vec2.size());
 
-    if (_vec1.getMaptype() == Unique)
+    if (_vec1.mapType() == Unique)
     {
         vector_Type const  vec1Repeated(_vec1, Repeated);
         transferFluidOnInterface(vec1Repeated, _vec2);
         return;
     }
 
-    if (_vec2.getMaptype() == Repeated)
+    if (_vec2.mapType() == Repeated)
     {
         vector_Type  vec2Unique(_vec2, Unique);
         transferFluidOnInterface(_vec1, vec2Unique);
@@ -752,8 +752,8 @@ FSIOperator::transferFluidOnInterface(const vector_Type &_vec1, vector_Type &_ve
 //                 std::cout <<  it->second + dim*numTotalDofFluid << " to "
 //                           <<  it->first + dim*numTotalDofSolid << " : "
 //                           << _vec1[it->second + dim*numTotalDofFluid] << std::endl;
-            _vec2.checkAndSet( it->second + dim*numTotalDofSolid,
-                               _vec1[it->first + dim*numTotalDofFluid] );
+            _vec2.setCoefficient( it->second + dim*numTotalDofSolid,
+                                  _vec1[it->first + dim*numTotalDofFluid] );
         }
 }
 
@@ -766,14 +766,14 @@ FSIOperator::transferSolidOnFluid(const vector_Type &_vec1, vector_Type &_vec2)
     //    e.g.: vec2=M_fluid->residual(), vec1=M_sigmaFluid
     //     _vec2 = ZeroVector(_vec2.size());
 
-    if (_vec1.getMaptype() == Unique)
+    if (_vec1.mapType() == Unique)
     {
         vector_Type const  vec1Repeated(_vec1, Repeated);
         transferSolidOnInterface(vec1Repeated, _vec2);
         return;
     }
 
-    if (_vec2.getMaptype() == Repeated)
+    if (_vec2.mapType() == Repeated)
     {
         vector_Type  vec2Unique(_vec2, Unique);
         transferSolidOnInterface(_vec1, vec2Unique);
@@ -794,8 +794,8 @@ FSIOperator::transferSolidOnFluid(const vector_Type &_vec1, vector_Type &_vec2)
     for (UInt dim = 0; dim < nDimensions; ++dim)
         for ( iterator_Type it = locDofMap.begin(); it != locDofMap.end(); ++it )
         {
-            _vec2.checkAndSet( it->second + dim*numTotalDofFluid,
-                               _vec1[it->first + dim*numTotalDofSolid]);
+            _vec2.setCoefficient( it->second + dim*numTotalDofFluid,
+                                  _vec1[it->first + dim*numTotalDofSolid]);
         }
 }
 
@@ -811,14 +811,14 @@ FSIOperator::transferSolidOnInterface(const vector_Type &_vec1, vector_Type &_ve
        M_solid->residual() M_sigmaSolid
     */
 
-    if (_vec1.getMaptype() == Unique)
+    if (_vec1.mapType() == Unique)
     {
         vector_Type const  vec1Repeated(_vec1, Repeated);
         transferSolidOnInterface(vec1Repeated, _vec2);
         return;
     }
 
-    if (_vec2.getMaptype() == Repeated)
+    if (_vec2.mapType() == Repeated)
     {
         vector_Type  vec2Unique(_vec2, Unique);
         transferSolidOnInterface(_vec1, vec2Unique);
@@ -837,8 +837,8 @@ FSIOperator::transferSolidOnInterface(const vector_Type &_vec1, vector_Type &_ve
     for (UInt dim = 0; dim < nDimensions; ++dim)
         for ( iterator_Type it = locDofMap.begin(); it != locDofMap.end(); ++it )
         {
-            _vec2.checkAndSet( it->second + dim*numTotalDofSolid,
-                               _vec1[it->first + dim*numTotalDofSolid] );
+            _vec2.setCoefficient( it->second + dim*numTotalDofSolid,
+                                  _vec1[it->first + dim*numTotalDofSolid] );
         }
 }
 
@@ -852,14 +852,14 @@ FSIOperator::transferInterfaceOnSolid(const vector_Type& _vec1, vector_Type& _ve
        M_solid->residual() M_sigmaSolid
     */
 
-    if (_vec1.getMaptype() == Unique)
+    if (_vec1.mapType() == Unique)
     {
         vector_Type const  vec1Repeated(_vec1, Repeated);
         transferInterfaceOnSolid(vec1Repeated, _vec2);
         return;
     }
 
-    if (_vec2.getMaptype() == Repeated)
+    if (_vec2.mapType() == Repeated)
     {
         vector_Type  vec2Unique(_vec2, Unique);
         transferInterfaceOnSolid(_vec1, vec2Unique);
@@ -877,8 +877,8 @@ FSIOperator::transferInterfaceOnSolid(const vector_Type& _vec1, vector_Type& _ve
     for (UInt dim = 0; dim < nDimensions; ++dim)
         for ( iterator_Type it = locDofMap.begin(); it != locDofMap.end(); ++it )
         {
-            _vec2.checkAndSet( it->second + dim*numTotalDofSolid,
-                               _vec1[it->second + dim*numTotalDofSolid] );
+            _vec2.setCoefficient( it->second + dim*numTotalDofSolid,
+                                  _vec1[it->second + dim*numTotalDofSolid] );
         }
 }
 
@@ -1061,7 +1061,7 @@ FSIOperator::setSolidBC( const solidBchandlerPtr_Type& bc_solid )
 void
 FSIOperator::setLambdaFluid( const vector_Type& lambda )
 {
-    if ( lambda.getMaptype() == Unique )
+    if ( lambda.mapType() == Unique )
         *M_lambdaFluid = lambda;
     else // to be coded, I am not sure we need this functionality.
         assert(false); // if you get here, reformulate your problem in order to get a unique map as entry
@@ -1074,7 +1074,7 @@ FSIOperator::setLambdaFluid( const vector_Type& lambda )
 void
 FSIOperator::setLambdaSolid( const vector_Type& lambda )
 {
-    if ( lambda.getMaptype() == Unique )
+    if ( lambda.mapType() == Unique )
         *M_lambdaSolid = lambda;
     else // to be coded, I am not sure we need this functionality.
         assert(false); // if you get here, reformulate your problem in order to get a unique map as entry
@@ -1087,7 +1087,7 @@ FSIOperator::setLambdaSolid( const vector_Type& lambda )
 void
 FSIOperator::setLambdaSolidOld( const vector_Type& lambda )
 {
-    if ( lambda.getMaptype() == Unique )
+    if ( lambda.mapType() == Unique )
         *M_lambdaSolidOld = lambda;
     else // to be coded, I am not sure we need this functionality.
         assert(false); // if you get here, reformulate your problem in order to get a unique map as entry
@@ -1098,7 +1098,7 @@ FSIOperator::setLambdaSolidOld( const vector_Type& lambda )
 void
 FSIOperator::setLambdaDotSolid( const vector_Type& lambda )
 {
-    if ( lambda.getMaptype() == Unique )
+    if ( lambda.mapType() == Unique )
         *M_lambdaDotSolid = lambda;
     else // to be coded, I am not sure we need this functionality.
         assert(false); // if you get here, reformulate your problem in order to get a unique map as entry
@@ -1111,7 +1111,7 @@ FSIOperator::setLambdaDotSolid( const vector_Type& lambda )
 void
 FSIOperator::setSigmaSolid( const vector_Type& sigma )
 {
-    if ( sigma.getMaptype() == Unique )
+    if ( sigma.mapType() == Unique )
         *M_sigmaSolid = sigma;
     else // to be coded, I am not sure we need this functionality.
         assert(false); // if you get here, reformulate your problem in order to get a unique map as entry
@@ -1123,7 +1123,7 @@ FSIOperator::setSigmaSolid( const vector_Type& sigma )
 void
 FSIOperator::setSigmaFluid( const vector_Type& sigma )
 {
-    if ( sigma.getMaptype() == Unique )
+    if ( sigma.mapType() == Unique )
         *M_sigmaFluid = sigma;
     else // to be coded, I am not sure we need this functionality.
         assert(false); // if you get here, reformulate your problem in order to get a unique map as entry
@@ -1137,7 +1137,7 @@ FSIOperator::setSigmaFluid( const vector_Type& sigma )
 void
 FSIOperator::setMinusSigmaFluid( const vector_Type& sigma )
 {
-    if ( sigma.getMaptype() == Unique )
+    if ( sigma.mapType() == Unique )
     {
         *M_minusSigmaFluid  = sigma;
         *M_minusSigmaFluid *= -1;
@@ -1375,14 +1375,14 @@ void
 FSIOperator::transferMeshMotionOnFluid( const vector_Type& _vec1, vector_Type& _vec2 )
 {
     //transferMeshMotionOnFluid should handle the repetition of the interface nodes.
-    if (_vec1.getMaptype() == Unique)
+    if (_vec1.mapType() == Unique)
     {
         vector_Type const  vec1Repeated(_vec1, Repeated);
         transferMeshMotionOnFluid(vec1Repeated, _vec2);
         return;
     }
 
-    if (_vec2.getMaptype() == Repeated)
+    if (_vec2.mapType() == Repeated)
     {
         vector_Type  vec2Unique(_vec2, Unique);
         transferMeshMotionOnFluid(_vec1, vec2Unique);
@@ -1400,8 +1400,8 @@ FSIOperator::transferMeshMotionOnFluid( const vector_Type& _vec1, vector_Type& _
 void
 FSIOperator::interpolateVelocity( const vector_Type& _vec1, vector_Type& _vec2 )
 {
-    assert(_vec1.getMaptype() == Repeated);
-    assert(_vec2.getMaptype() == Unique);
+    assert(_vec1.mapType() == Repeated);
+    assert(_vec2.mapType() == Unique);
 
     typedef mesh_Type::VolumeShape GeoShape; // Element shape
 
@@ -1469,7 +1469,7 @@ FSIOperator::interpolateVelocity( const vector_Type& _vec1, vector_Type& _vec2 )
 
                         // Updating interpolated mesh velocity
                         int iDof = icmp * M_uFESpace->dof().numTotalDof() + M_uFESpace->dof().localToGlobal( iElem, lDof  );
-                        _vec2.checkAndSet( iDof ,__sum);
+                        _vec2.setCoefficient( iDof ,__sum);
 
                     }
                 }
@@ -1505,7 +1505,7 @@ FSIOperator::interpolateVelocity( const vector_Type& _vec1, vector_Type& _vec2 )
 
                         // Updating interpolating vector
                         int iDof = icmp * M_uFESpace->dof().numTotalDof() + M_uFESpace->dof().localToGlobal( iElem, lDof );
-                        _vec2.checkAndSet( iDof ,__sum);
+                        _vec2.setCoefficient( iDof ,__sum);
 
                     }
                 }
@@ -1542,7 +1542,7 @@ FSIOperator::interpolateVelocity( const vector_Type& _vec1, vector_Type& _vec2 )
 
                         // Updating interpolating vector
                         int iDof = icmp * M_uFESpace->dof().numTotalDof() + M_uFESpace->dof().localToGlobal( iElem, lDof + 1);
-                        _vec2.checkAndSet( iDof ,__sum);
+                        _vec2.setCoefficient( iDof ,__sum);
                     }
                 }
             }
@@ -1573,7 +1573,7 @@ FSIOperator::interpolateVelocity( const vector_Type& _vec1, vector_Type& _vec2 )
 //                std::cout << icmp * M_uFESpace->dof().numTotalDof() + M_uFESpace->dof().localToGlobal( elemId, lDof ) << std::endl;
 
                 int iDof = icmp * M_uFESpace->dof().numTotalDof() + M_uFESpace->dof().localToGlobal( elemId, lDof );
-                _vec2.checkAndSet( iDof, __sum);
+                _vec2.setCoefficient( iDof, __sum);
             }
         }
     }
@@ -1591,8 +1591,8 @@ FSIOperator::interpolateInterfaceDofs( const FESpace<mesh_Type, EpetraMap>& _fes
                                        vector_Type&                         _vec2,
                                        dofInterface3DPtr_Type&                _dofInterface)
 {
-    assert(_vec1.getMaptype() == Repeated);
-    assert(_vec2.getMaptype() == Unique);
+    assert(_vec1.mapType() == Repeated);
+    assert(_vec2.mapType() == Unique);
 
     typedef mesh_Type::VolumeShape GeoShape; // Element shape
 
@@ -1670,7 +1670,7 @@ FSIOperator::interpolateInterfaceDofs( const FESpace<mesh_Type, EpetraMap>& _fes
                     int iDof = icmp*numTotalDof2 + iter->second;
                     //                                    std::cout << " transfering " << value << " from P1 " << nodeID << " to P1 " << iDof  << " ( " << iter->second << " ) " << std::endl;
                     // Updating interpolated mesh velocity
-                    _vec2.checkAndSet( iDof, value );
+                    _vec2.setCoefficient( iDof, value );
                 }
             }
         }
@@ -1704,7 +1704,7 @@ FSIOperator::interpolateInterfaceDofs( const FESpace<mesh_Type, EpetraMap>& _fes
                         // now what to what boundary node ( in the solid numerotation ) should we send this value ?
                         //                                            std::cout << " transfering " << value << " from P2 " << edgeID << " to P2 " << iDof  << " ( " << iter->second << " ) " << std::endl;
                         // Updating interpolated mesh velocity
-                        _vec2.checkAndSet( iDof, value );
+                        _vec2.setCoefficient( iDof, value );
                     }
                 }
             }
@@ -1723,7 +1723,7 @@ FSIOperator::interpolateInterfaceDofs( const FESpace<mesh_Type, EpetraMap>& _fes
                         int iDof1 = icmp*numTotalDof2 + iter->second;
                         value = 0.5*_vec1( icmp*numTotalDof1 + iDofEdge  ) + _vec2[iDof1];
                         //                                            std::cout << " transfering " << value << " from P2 " << iDofEdge << " to P1 " << iDof1 << " ( " << iter->second << " ) " << std::endl;
-                        _vec2.checkAndSet( iDof1, value );
+                        _vec2.setCoefficient( iDof1, value );
                         //
                         // ID of the 2nd node of the edge
                         ID node2 = _fespace1.mesh()->edgeList(iEdge).point(2).id();
@@ -1732,11 +1732,11 @@ FSIOperator::interpolateInterfaceDofs( const FESpace<mesh_Type, EpetraMap>& _fes
                         int iDof2 = icmp*numTotalDof2 + iter->second;
                         value = 0.5*_vec1( icmp*numTotalDof1 + iDofEdge ) + _vec2[iDof2];
                         //                                            std::cout << " transfering " << value << " from P2 " << iDofEdge << " to P1 " << iDof2 << " ( " << iter->second << " ) " << std::endl;
-                        _vec2.checkAndSet( iDof2, value );
+                        _vec2.setCoefficient( iDof2, value );
                         // now what to what boundary node ( in the solid numerotation ) should we send this value ?
                         //std::cout << "" << std::endl;
                         // Updating interpolated mesh velocity
-                        //                                                     _vec2.checkAndSet( iDof2, value );
+                        //                                                     _vec2.setCoefficient( iDof2, value );
                         //                                                     std::cout << std::endl;
                     }
                 }
@@ -1769,7 +1769,7 @@ FSIOperator::interpolateInterfaceDofs( const FESpace<mesh_Type, EpetraMap>& _fes
                     ID node1 = _fespace2.mesh()->edgeList(iEdge).point(1).id();
                     ID node2 = _fespace2.mesh()->edgeList(iEdge).point(2).id();
                     value = 0.5*(_vec2(icmp*numTotalDof2 + node1) + _vec2(icmp*numTotalDof2 + node2));
-                    _vec2.checkAndSet(iDofEdge, value);
+                    _vec2.setCoefficient(iDofEdge, value);
                 }
             }
         }
@@ -1806,7 +1806,7 @@ FSIOperator::interpolateInterfaceDofs( const FESpace<mesh_Type, EpetraMap>& _fes
 
 //                         // Updating interpolating vector
 //                         int iDof = icmp * _fespace1.dof().numTotalDof() + _fespace1.dof().localToGlobal( iElem, lDof + 1);
-//                         _vec2.checkAndSet( iDof ,__sum);
+//                         _vec2.setCoefficient( iDof ,__sum);
 //                     }
 //                 }
 //             }
@@ -1835,7 +1835,7 @@ FSIOperator::interpolateInterfaceDofs( const FESpace<mesh_Type, EpetraMap>& _fes
 //                 // Updating interpolating vector
 
 //                 int iDof = icmp * _fespace1.dof().numTotalDof() + _fespace1.dof().localToGlobal( elemId, lDof );
-//                 _vec2.checkAndSet( iDof, __sum);
+//                 _vec2.setCoefficient( iDof, __sum);
 //             }
 //         }
 }

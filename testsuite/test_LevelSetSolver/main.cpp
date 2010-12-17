@@ -201,7 +201,7 @@ main( int argc, char** argv )
         if (verbose) std::cout << " done " << std::endl;
     }
 
-    Real N(level_set.solution().Norm1());
+    Real N(level_set.solution().norm1());
     if (verbose) std::cout << "Final norm of the solution : " << N << std::endl;
 
     if ((N < 6900) || (N>7100))

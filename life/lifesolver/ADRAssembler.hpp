@@ -538,7 +538,7 @@ ADRAssembler< mesh_type, matrix_type, vector_type>::
 addAdvection(matrix_ptrType matrix, const vector_type& beta, const UInt& offsetLeft, const UInt& offsetUp)
 {
     // Beta has to be repeated!
-    if (beta.getMaptype() == Unique)
+    if (beta.mapType() == Unique)
     {
         addAdvection(matrix,vector_type(beta,Repeated));
         return;
@@ -645,7 +645,7 @@ ADRAssembler< mesh_type, matrix_type, vector_type>::
 addMassRhs(vector_type& rhs, const vector_type& f)
 {
     // f has to be repeated!
-    if (f.getMaptype() == Unique)
+    if (f.mapType() == Unique)
     {
         addMassRhs(rhs,vector_type(f,Repeated));
         return;

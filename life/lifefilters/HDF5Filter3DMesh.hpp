@@ -582,7 +582,7 @@ void HDF5Filter3DMesh<MeshType>::postProcess(const Real& time)
     {
         if (this->M_listData.size() != 0)
         {
-            this->M_HDF5.reset(new hdf5_Type(this->M_listData.begin()->storedArray()->Comm()));
+            this->M_HDF5.reset(new hdf5_Type(this->M_listData.begin()->storedArray()->comm()));
         }
         else
         {

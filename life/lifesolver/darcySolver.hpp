@@ -927,7 +927,7 @@ buildSystem ()
     chronoGlobalAssembleMatrix.start();
 
     // Assemble the global hybrid matrix.
-    M_matrHybrid->GlobalAssemble();
+    M_matrHybrid->globalAssemble();
 
     chronoGlobalAssembleMatrix.stop();
 
@@ -938,7 +938,7 @@ buildSystem ()
     chronoGlobalAssembleVector.start();
 
     // Assemble the global hybrid vector.
-    M_rhs->GlobalAssemble();
+    M_rhs->globalAssemble();
 
     chronoGlobalAssembleVector.stop();
 
@@ -1070,7 +1070,7 @@ computePrimalAndDual ()
     //---------------------------------------
 
     // Assemble the primal variable.
-    M_primal->GlobalAssemble();
+    M_primal->globalAssemble();
 
     // It is wrong to assemble the dual variable, no communications required.
 

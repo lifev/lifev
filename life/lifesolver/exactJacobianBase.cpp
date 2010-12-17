@@ -58,7 +58,7 @@ void  exactJacobian::solveJac(vector_Type         &_muk,
     if (this->isFluid() && this->isLeader()) std::cout << "  f- ";
     if (this->isSolid() && this->isLeader()) std::cout << "  s- ";
 
-    this->displayer().leaderPrint( "solveJac: NormInf res " , _res.NormInf(), "\n" );
+    this->displayer().leaderPrint( "solveJac: NormInf res " , _res.normInf(), "\n" );
     _muk *= 0.;
 
     M_linearSolver.setTolMaxiter(_linearRelTol, 100);
@@ -92,9 +92,9 @@ void exactJacobian::evalResidual(vector_Type&       res,
     res  = this->lambdaSolid();
     res -=  disp;
 
-    this->displayer().leaderPrint("      NormInf res        =                     " , res.NormInf(), "\n" );
+    this->displayer().leaderPrint("      NormInf res        =                     " , res.normInf(), "\n" );
     if (this->isSolid())
-        this->displayer().leaderPrint("      NormInf res_d      =                     " , this->solid().residual().NormInf(), "\n" );
+        this->displayer().leaderPrint("      NormInf res_d      =                     " , this->solid().residual().normInf(), "\n" );
 
 }
 
@@ -102,9 +102,9 @@ void exactJacobian::evalResidual(vector_Type&       res,
 void  exactJacobian::solveLinearFluid()
 {
     //vector_Type dispFluidDomainRep( M_fluid->matrNoBC().getMap(), Repeated);
-    vector_Type dispFluidDomain( M_fluid->matrNoBC().getMap(), Unique, Zero);
+    vector_Type dispFluidDomain( M_fluid->matrNoBC().map(), Unique, Zero);
     dispFluidDomain.setCombineMode(Zero);
-    vector_Type dispFluidMesh(this->derVeloFluidMesh().getMap(), Repeated);
+    vector_Type dispFluidMesh(this->derVeloFluidMesh().map(), Repeated);
 //if statement: in order not to iterate the mesh for each linear residual calculation, needed just for exact Jac case.
     if (false && this->M_data->dataFluid()->isSemiImplicit()==true)// not working in parallel
     {//to be corrected: up to now also in the semi implicit case the harmonic extension eq.
@@ -129,7 +129,7 @@ void  exactJacobian::solveLinearFluid()
     dispFluidDomain=dispFluidMesh;//import
     this->derVeloFluidMesh() = dispFluidMesh;
     this->derVeloFluidMesh() *= 1./(M_data->dataFluid()->dataTime()->getTimeStep());
-    this->displayer().leaderPrint( " norm inf dw = " , this->derVeloFluidMesh().NormInf(), "\n" );
+    this->displayer().leaderPrint( " norm inf dw = " , this->derVeloFluidMesh().normInf(), "\n" );
     *M_rhsNew *= 0.;
 
     double alpha = this->M_bdf->coeff_der( 0 ) / M_data->dataFluid()->dataTime()->getTimeStep();
@@ -151,7 +151,7 @@ void  exactJacobian::solveLinearFluid()
         if (M_recomputeShapeDer)
         {
             M_recomputeShapeDer=false;
-            M_matrShapeDer.reset(new matrix_Type(M_fluid->matrNoBC().getMap()/*, M_mmFESpace->map()*/));
+            M_matrShapeDer.reset(new matrix_Type(M_fluid->matrNoBC().map()/*, M_mmFESpace->map()*/));
             this->M_fluid->updateShapeDerivatives(
                 *M_matrShapeDer,
                 alpha,
@@ -166,7 +166,7 @@ void  exactJacobian::solveLinearFluid()
                 //this->derVeloFluidMesh(),
                 //*M_rhsNew
             );
-            M_matrShapeDer->GlobalAssemble();
+            M_matrShapeDer->globalAssemble();
             *M_matrShapeDer*=-1;
             //M_matrShapeDer->spy("matrsd");
         }
@@ -247,8 +247,8 @@ exactJacobian::imposeFlux( void )
             ERROR_MSG("Different number of fluxes imposed on Fluid and on LinearFluid");
         }
 
-        UInt offset = M_uFESpace->map().getMap(Unique)->NumGlobalElements()
-                      + M_pFESpace->map().getMap(Unique)->NumGlobalElements();
+        UInt offset = M_uFESpace->map().map(Unique)->NumGlobalElements()
+                      + M_pFESpace->map().map(Unique)->NumGlobalElements();
 
         for ( UInt i = 0; i < numLM; ++i )
             M_BCh_du->setOffset( fluxVector[i], offset + i );
@@ -347,8 +347,8 @@ void exactJacobian::eval(const vector_Type& _disp,
         vel.subset(*this->M_fluid->solution());
         press.subset(*this->M_fluid->solution(), this->fluid().velFESpace().dim()*this->fluid().pressFESpace().fieldDim());
 
-        std::cout << "norm_inf( vel ) " << vel.NormInf() << std::endl;
-        std::cout << "norm_inf( press ) " << press.NormInf() << std::endl;
+        std::cout << "norm_inf( vel ) " << vel.normInf() << std::endl;
+        std::cout << "norm_inf( press ) " << press.normInf() << std::endl;
 
         //this->M_fluid->postProcess();
     }
@@ -403,18 +403,18 @@ void exactJacobian::eval(const vector_Type& _disp,
 
 // possibly unsafe when using more cpus, since both has repeated maps
 
-    this->displayer().leaderPrint("      Norm(disp     )    =                     ", _disp.NormInf(), "\n");
-    this->displayer().leaderPrint("      Norm(dispNew  )    =                     " , this->lambdaSolid().NormInf(), "\n" );
-    this->displayer().leaderPrint("      Norm(velo     )    =                     " , this->lambdaDotSolid().NormInf(), "\n" );
-    this->displayer().leaderPrint("      Max Residual Fluid =                     " , this->sigmaFluid().NormInf(), "\n" );
-    this->displayer().leaderPrint("      Max Residual Solid =                     " , this->sigmaSolid().NormInf(), "\n" );
+    this->displayer().leaderPrint("      Norm(disp     )    =                     ", _disp.normInf(), "\n");
+    this->displayer().leaderPrint("      Norm(dispNew  )    =                     " , this->lambdaSolid().normInf(), "\n" );
+    this->displayer().leaderPrint("      Norm(velo     )    =                     " , this->lambdaDotSolid().normInf(), "\n" );
+    this->displayer().leaderPrint("      Max Residual Fluid =                     " , this->sigmaFluid().normInf(), "\n" );
+    this->displayer().leaderPrint("      Max Residual Solid =                     " , this->sigmaSolid().normInf(), "\n" );
 
     if ( this->isFluid() )
-        this->displayer().leaderPrint("      Max ResidualF      =                     " , M_fluid->residual().NormInf(), "\n" );
+        this->displayer().leaderPrint("      Max ResidualF      =                     " , M_fluid->residual().normInf(), "\n" );
     if ( this->isSolid() )
     {
-        this->displayer().leaderPrint("      NL2 Diplacement S. =                     " , M_solid->disp().Norm2(), "\n" );
-        this->displayer().leaderPrint("      Max Residual Solid =                     " , M_solid->residual().NormInf(), "\n" );
+        this->displayer().leaderPrint("      NL2 Diplacement S. =                     " , M_solid->disp().norm2(), "\n" );
+        this->displayer().leaderPrint("      Max Residual Solid =                     " , M_solid->residual().normInf(), "\n" );
     }
 }
 
@@ -447,8 +447,8 @@ void exactJacobian::Epetra_ExactJacobian::setOperator(exactJacobian* ej)
 {
     ASSERT(ej != 0, "passing NULL pointer to se operator");
     M_ej                = ej;
-    M_operatorDomainMap = M_ej->solidInterfaceMap()->getMap(Repeated);
-    M_operatorRangeMap  = M_ej->solidInterfaceMap()->getMap(Repeated);
+    M_operatorDomainMap = M_ej->solidInterfaceMap()->map(Repeated);
+    M_operatorRangeMap  = M_ej->solidInterfaceMap()->map(Repeated);
     M_comm              = M_ej->worldComm();
 }
 
@@ -477,7 +477,7 @@ int exactJacobian::Epetra_ExactJacobian::Apply(const Epetra_MultiVector &X, Epet
     {
         vector_Type const z(X,  M_ej->solidInterfaceMap(), Unique);
 
-        M_ej->displayer().leaderPrint( "NormInf res   " , z.NormInf(), "\n" );
+        M_ej->displayer().leaderPrint( "NormInf res   " , z.normInf(), "\n" );
 
         //M_ej->solid().residual() *= 0.;
         //M_ej->transferInterfaceOnSolid(z, M_ej->solid().residual());
@@ -508,7 +508,7 @@ int exactJacobian::Epetra_ExactJacobian::Apply(const Epetra_MultiVector &X, Epet
                 //std::cout<<" mesh motion iterated!!!"<<std::endl;
             }
 
-            M_ej->displayer().leaderPrint( " norm inf dx = " , M_ej->meshMotion().disp().NormInf(), "\n" );
+            M_ej->displayer().leaderPrint( " norm inf dx = " , M_ej->meshMotion().disp().normInf(), "\n" );
 
             M_ej->solveLinearFluid();
 
@@ -549,7 +549,7 @@ int exactJacobian::Epetra_ExactJacobian::Apply(const Epetra_MultiVector &X, Epet
         chronoInterface.stop();
         M_ej->displayer().leaderPrintMax( "Interface linear transfer: total time : " , chronoInterface.diffCumul() );
 
-        dz = lambdaSolidUnique.getEpetraVector();
+        dz = lambdaSolidUnique.epetraVector();
 
     }
 

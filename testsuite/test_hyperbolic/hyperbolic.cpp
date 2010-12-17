@@ -571,7 +571,7 @@ hyperbolic::run()
 
     // Display the total number of unknowns
     hyperbolicSolver.getDisplayer().leaderPrint( "Number of unknowns : ",
-                                                 fESpace.map().getMap(Unique)->NumGlobalElements(), "\n" );
+                                                 fESpace.map().map(Unique)->NumGlobalElements(), "\n" );
 
     // Solve the problem
 

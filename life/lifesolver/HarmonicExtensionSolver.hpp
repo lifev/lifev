@@ -272,9 +272,9 @@ HarmonicExtensionSolver( FESpace<Mesh, EpetraMap>& mmFESpace,
         M_verbose               ( M_me == 0 ),
         M_elmat                 ( M_FESpace.fe().nbFEDof(), nDimensions, nDimensions ),
         M_disp                  ( mmFESpace.map() ),
-        M_dispOld               ( M_disp.getMap() ),
-        M_dispDiff              ( M_disp.getMap() ),
-        M_secondRHS             ( M_disp.getMap() ),
+        M_dispOld               ( M_disp.map() ),
+        M_dispDiff              ( M_disp.map() ),
+        M_secondRHS             ( M_disp.map() ),
         M_linearSolver          ( comm ),
         M_diffusion             ( 1. ),
         M_offset                (offset)
@@ -380,7 +380,7 @@ void HarmonicExtensionSolver<Mesh, SolverType>::computeMatrix( )
         }
     }
 
-    M_matrHE->GlobalAssemble();
+    M_matrHE->globalAssemble();
 
     chrono.stop();
     M_Displayer.leaderPrintMax("done in " , chrono.diff() );

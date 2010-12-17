@@ -650,15 +650,15 @@ void VenantKirchhofSolver<Mesh, SolverType>::updateSystem( matrix_ptrtype& /*sti
   vector_type z = *M_disp;
   z             += coef*(*M_vel);
 
-  std::cout<< "M_disp in solid" << M_disp->Norm2()<<std::endl;
+  std::cout<< "M_disp in solid" << M_disp->norm2()<<std::endl;
 
   *M_rhsNoBC  = *M_mass * z;
 
-  std::cout<< "rhsNoBC in solid 1" << M_rhsNoBC->Norm2()<<std::endl;
+  std::cout<< "rhsNoBC in solid 1" << M_rhsNoBC->norm2()<<std::endl;
 
   *M_rhsNoBC -= *M_linearStiff * (*M_disp);
 
-  std::cout<< "rhsNoBC in solid 2" << M_rhsNoBC->Norm2()<<std::endl;
+  std::cout<< "rhsNoBC in solid 2" << M_rhsNoBC->norm2()<<std::endl;
 
   coef = 2.0/M_data->dataTime()->getTimeStep();
 
@@ -680,7 +680,7 @@ VenantKirchhofSolver<Mesh, SolverType>::buildSystem()
 
   M_massStiff.reset(new matrix_type(*M_localMap));
   buildSystem(M_massStiff);
-  M_massStiff->GlobalAssemble();
+  M_massStiff->globalAssemble();
 
   chrono.stop();
   M_Displayer->leaderPrintMax( "done in ", chrono.diff() );
@@ -738,9 +738,9 @@ VenantKirchhofSolver<Mesh, SolverType>::buildSystem(matrix_ptrtype massStiff, co
 
   comm()->Barrier();
 
-  M_linearStiff->GlobalAssemble();
-  massStiff->GlobalAssemble();
-  M_mass->GlobalAssemble();
+  M_linearStiff->globalAssemble();
+  massStiff->globalAssemble();
+  M_mass->globalAssemble();
   *massStiff *= factor; //M_data.dataTime()->getTimeStep() * M_rescaleFactor;
 }
 
@@ -765,11 +765,11 @@ void
 VenantKirchhofSolver<Mesh, SolverType>::iterate( bchandler_Type& bch )
 {
   // matrix and vector assembling communication
-  matrix_ptrtype matrFull( new matrix_type( *M_localMap, M_massStiff->getMeanNumEntries()));
+  matrix_ptrtype matrFull( new matrix_type( *M_localMap, M_massStiff->meanNumEntries()));
   *matrFull += *M_massStiff;
 
-  M_rhsNoBC->GlobalAssemble();
-  M_rhsW->GlobalAssemble();
+  M_rhsNoBC->globalAssemble();
+  M_rhsW->globalAssemble();
 
   vector_type rhsFull (*M_rhsNoBC);
 
@@ -805,13 +805,13 @@ void
 VenantKirchhofSolver<Mesh, SolverType>::iterateLin( bchandler_Type& bch )
 {
 
-  matrix_ptrtype matrFull( new matrix_type( *M_localMap, M_massStiff->getMeanNumEntries()));
+  matrix_ptrtype matrFull( new matrix_type( *M_localMap, M_massStiff->meanNumEntries()));
   *matrFull += *M_massStiff;
 
-  M_rhsNoBC->GlobalAssemble();
-  M_rhsW->GlobalAssemble();
+  M_rhsNoBC->globalAssemble();
+  M_rhsW->globalAssemble();
 
-  vector_type rhsFull (M_rhsNoBC->getMap());
+  vector_type rhsFull (M_rhsNoBC->map());
 
   M_Displayer->leaderPrint(" LS-  Applying boundary conditions ...         ");
   Chrono chrono;

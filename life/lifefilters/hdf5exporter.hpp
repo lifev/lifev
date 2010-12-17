@@ -278,7 +278,7 @@ void Hdf5exporter<MeshType>::postProcess(const Real& time)
 {
     if ( M_HDF5.get() == 0)
     {
-        M_HDF5.reset(new hdf5_Type(this->M_listData.begin()->storedArray()->Comm()));
+        M_HDF5.reset(new hdf5_Type(this->M_listData.begin()->storedArray()->comm()));
         M_outputFileName=this->M_prefix+".h5";
         M_HDF5->Create(this->M_postDir+M_outputFileName);
 
@@ -366,7 +366,7 @@ UInt Hdf5exporter<MeshType>::importFromTime( const Real& Time )
             if ( std::abs( SelectedTimeAndPostfix.first - Time ) >= std::abs( (*i).first - Time ) )
                 SelectedTimeAndPostfix = *i;
     }
-    this->M_listData.begin()->storedArray()->Comm().Broadcast( &SelectedTimeAndPostfix.second, 1, 0 );
+    this->M_listData.begin()->storedArray()->comm().Broadcast( &SelectedTimeAndPostfix.second, 1, 0 );
     this->M_startIndex = SelectedTimeAndPostfix.second;
     this->computePostfix();
 
@@ -498,7 +498,7 @@ void Hdf5exporter<MeshType>::import(const Real& time)
 {
     if ( M_HDF5.get() == 0)
     {
-        M_HDF5.reset(new hdf5_Type(this->M_listData.begin()->storedArray()->Comm()));
+        M_HDF5.reset(new hdf5_Type(this->M_listData.begin()->storedArray()->comm()));
         M_HDF5->Open(this->M_postDir+this->M_prefix+".h5"); //!! Simone
     }
 
@@ -525,7 +525,7 @@ void Hdf5exporter<MeshType>::readVariable(ExporterData& dvar)
 {
     if ( M_HDF5.get() == 0)
     {
-        M_HDF5.reset(new hdf5_Type(dvar.storedArray()->BlockMap().Comm()));
+        M_HDF5.reset(new hdf5_Type(dvar.storedArray()->blockMap().Comm()));
         M_HDF5->Open(this->M_postDir+this->M_prefix+".h5"); //!! Simone
     }
     super::readVariable(dvar);
@@ -880,13 +880,13 @@ void Hdf5exporter<MeshType>::writeScalar(const ExporterData& dvar)
     UInt size  = dvar.size();
     UInt start = dvar.start();
 
-    EpetraMap subMap(dvar.storedArray()->BlockMap(), start, size);
+    EpetraMap subMap(dvar.storedArray()->blockMap(), start, size);
     vector_Type subVar(subMap);
     subVar.subset(*dvar.storedArray(),start);
 
     std::string varname (dvar.variableName()+ this->M_postfix); // see also in writeAttributes
     bool writeTranspose (true);
-    M_HDF5->Write(varname, subVar.getEpetraVector(), writeTranspose );
+    M_HDF5->Write(varname, subVar.epetraVector(), writeTranspose );
 }
 
 template <typename MeshType>
@@ -914,15 +914,15 @@ void Hdf5exporter<MeshType>::writeVector(const ExporterData& dvar)
 
     for (UInt d ( 0 ); d < nDimensions; ++d)
     {
-        EpetraMap subMap(dvar.storedArray()->BlockMap(), start+d*size, size);
+        EpetraMap subMap(dvar.storedArray()->blockMap(), start+d*size, size);
         ArrayOfVectors[d].reset(new  vector_Type(subMap));
         ArrayOfVectors[d]->subset(*dvar.storedArray(),start+d*size);
 
-        ArrayOfVectors[d]->getEpetraVector().ExtractView(&ArrayOfPointers[d], &MyLDA);
+        ArrayOfVectors[d]->epetraVector().ExtractView(&ArrayOfPointers[d], &MyLDA);
     }
 
-    EpetraMap subMap(dvar.storedArray()->BlockMap(), start, size);
-    Epetra_MultiVector multiVector(View, *subMap.getMap(Unique), ArrayOfPointers, nDimensions);
+    EpetraMap subMap(dvar.storedArray()->blockMap(), start, size);
+    Epetra_MultiVector multiVector(View, *subMap.map(Unique), ArrayOfPointers, nDimensions);
 
 
     bool writeTranspose (true);
@@ -977,7 +977,7 @@ void Hdf5exporter<MeshType>::writeGeometry()
     Epetra_Map connectionsMap(this->M_mesh->numGlobalElements()*numberOfPoints,
                               this->M_mesh->numElements()*numberOfPoints,
                               &elementList[0],
-                              0, this->M_listData.begin()->storedArray()->Comm());
+                              0, this->M_listData.begin()->storedArray()->comm());
 
     Epetra_IntVector connections(connectionsMap);
     for (ID i=1; i <= this->M_mesh->numElements(); ++i)
@@ -990,7 +990,7 @@ void Hdf5exporter<MeshType>::writeGeometry()
         }
     }
 
-    this->M_listData.begin()->storedArray()->Comm().Barrier();
+    this->M_listData.begin()->storedArray()->comm().Barrier();
 
     // this offset is needed by hdf5 since it starts numbering from 0
     Int const hdf5Offset(0);
@@ -1007,7 +1007,7 @@ void Hdf5exporter<MeshType>::writeGeometry()
     {
         const RefFE & refFEP1 = feTetraP1;
         EpetraMap tmpMapP1(refFEP1, *this->M_mesh,
-                           this->M_listData.begin()->storedArray()->getMap_ptr()->CommPtr());
+                           this->M_listData.begin()->storedArray()->mapPtr()->commPtr());
         subMap = tmpMapP1;
         break;
     }
@@ -1015,7 +1015,7 @@ void Hdf5exporter<MeshType>::writeGeometry()
     {
         const RefFE & refFEQ1 = feHexaQ1;
         EpetraMap tmpMapQ1(refFEQ1, *this->M_mesh,
-                           this->M_listData.begin()->storedArray()->getMap_ptr()->CommPtr());
+                           this->M_listData.begin()->storedArray()->mapPtr()->commPtr());
         subMap = tmpMapQ1;
         break;
     }
@@ -1023,7 +1023,7 @@ void Hdf5exporter<MeshType>::writeGeometry()
     {
         const RefFE & refFEP11D = feSegP1;
         EpetraMap tmpMapQ11D(refFEP11D, *this->M_mesh,
-                             this->M_listData.begin()->storedArray()->getMap_ptr()->CommPtr());
+                             this->M_listData.begin()->storedArray()->mapPtr()->commPtr());
         subMap = tmpMapQ11D;
         break;
     }
@@ -1046,9 +1046,9 @@ void Hdf5exporter<MeshType>::writeGeometry()
         bool insertedY(true);
         bool insertedZ(true);
 
-        insertedX = insertedX && pointsX.checkAndSet(gid, point.x());
-        insertedY = insertedY && pointsY.checkAndSet(gid, point.y());
-        insertedZ = insertedZ && pointsZ.checkAndSet(gid, point.z());
+        insertedX = insertedX && pointsX.setCoefficient(gid, point.x());
+        insertedY = insertedY && pointsY.setCoefficient(gid, point.y());
+        insertedZ = insertedZ && pointsZ.setCoefficient(gid, point.z());
     }
 
     // Now we are ready to export the vectors to the hdf5 file
@@ -1068,9 +1068,9 @@ void Hdf5exporter<MeshType>::writeGeometry()
 
     M_HDF5->Write(connectionsVarname, connections);
     // bool writeTranspose (true);
-    M_HDF5->Write(pointsXVarname, pointsX.getEpetraVector(), true);
-    M_HDF5->Write(pointsYVarname, pointsY.getEpetraVector(), true);
-    M_HDF5->Write(pointsZVarname, pointsZ.getEpetraVector(), true);
+    M_HDF5->Write(pointsXVarname, pointsX.epetraVector(), true);
+    M_HDF5->Write(pointsYVarname, pointsY.epetraVector(), true);
+    M_HDF5->Write(pointsZVarname, pointsZ.epetraVector(), true);
 }
 
 template <typename MeshType>
@@ -1080,7 +1080,7 @@ void Hdf5exporter<MeshType>::readScalar(ExporterData& dvar)
     UInt size  = dvar.size();
     UInt start = dvar.start();
 
-    EpetraMap subMap(dvar.storedArray()->BlockMap(), start, size);
+    EpetraMap subMap(dvar.storedArray()->blockMap(), start, size);
     Epetra_MultiVector* subVar(0);
 
     std::string varname (dvar.variableName()); // see also in writeAttributes
@@ -1089,7 +1089,7 @@ void Hdf5exporter<MeshType>::readScalar(ExporterData& dvar)
         varname += this->M_postfix;
     }
     bool readTranspose (true);
-    M_HDF5->Read(varname, *subMap.getMap(this->mapType()), subVar, readTranspose);
+    M_HDF5->Read(varname, *subMap.map(this->mapType()), subVar, readTranspose);
 
     dvar.storedArray()->subset(*subVar, subMap, 0, start );
 
@@ -1108,7 +1108,7 @@ void Hdf5exporter<MeshType>::readVector( ExporterData& dvar)
     // solution array has first to be read has Multivector.
 
     // first read the multivector:
-    EpetraMap subMap(dvar.storedArray()->BlockMap(), start, size);
+    EpetraMap subMap(dvar.storedArray()->blockMap(), start, size);
     Epetra_MultiVector* subVar(0);
 
     bool readTranspose (true);
@@ -1119,7 +1119,7 @@ void Hdf5exporter<MeshType>::readVector( ExporterData& dvar)
         varname += this->M_postfix;
     }
 
-    M_HDF5->Read(varname, *subMap.getMap(this->mapType()), subVar, readTranspose);
+    M_HDF5->Read(varname, *subMap.map(this->mapType()), subVar, readTranspose);
 
 
     // then put back value in our EpetraVector

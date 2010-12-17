@@ -263,7 +263,7 @@ public:
     virtual void updateRHS( const vector_Type& rightHandSide )
     {
         M_rightHandSideNoBC = rightHandSide;
-        M_rightHandSideNoBC.GlobalAssemble();
+        M_rightHandSideNoBC.globalAssemble();
     }
 
     //! Update convective term, boundary condition and solve the linearized ns system
@@ -1192,7 +1192,7 @@ Oseen<MeshType, SolverType>::buildSystem()
 
     if ( M_isDiagonalBlockPreconditioner == true )
     {
-        M_blockPreconditioner->GlobalAssemble();
+        M_blockPreconditioner->globalAssemble();
         *M_matrixStokes += *M_blockPreconditioner;
     }
     comm()->Barrier();
@@ -1204,8 +1204,8 @@ Oseen<MeshType, SolverType>::buildSystem()
 
     chrono.start();
 
-    M_matrixStokes->GlobalAssemble();
-    M_matrixMass->GlobalAssemble();
+    M_matrixStokes->globalAssemble();
+    M_matrixMass->globalAssemble();
 
     chrono.stop();
     M_Displayer.leaderPrintMax( "done in " , chrono.diff() );
@@ -1233,13 +1233,13 @@ updateSystem( const Real         alpha,
               const vector_Type& sourceVector )
 {
     if ( M_matrixNoBC.get() )
-        M_matrixNoBC.reset( new matrix_Type( M_localMap, M_matrixNoBC->getMeanNumEntries() ) );
+        M_matrixNoBC.reset( new matrix_Type( M_localMap, M_matrixNoBC->meanNumEntries() ) );
     else
         M_matrixNoBC.reset( new matrix_Type( M_localMap ) );
 
     updateSystem( alpha, betaVector, sourceVector, M_matrixNoBC, M_un );
     if ( alpha != 0. )
-        M_matrixNoBC->GlobalAssemble();
+        M_matrixNoBC->globalAssemble();
 
 }
 
@@ -1287,7 +1287,7 @@ updateSystem( const Real         alpha,
     {
         matrixPtr_Type tempMatrix( M_blockPreconditioner );
         M_blockPreconditioner.reset( new matrix_Type( M_localMap,
-                                                      M_blockPreconditioner->getMeanNumEntries() ) );
+                                                      M_blockPreconditioner->meanNumEntries() ) );
         *M_blockPreconditioner += *tempMatrix;
     }
 
@@ -1301,7 +1301,7 @@ updateSystem( const Real         alpha,
     //! managing the convective term
 
     Real normInf;
-    betaVector.NormInf( &normInf );
+    betaVector.normInf( &normInf );
 
     if ( normInf != 0. )
     {
@@ -1406,7 +1406,7 @@ updateSystem( const Real         alpha,
             chrono.start();
             M_matrixStabilization.reset ( new matrix_Type( M_localMap ) );
             M_ipStabilization.apply( *M_matrixStabilization, betaVectorRepeated, false );
-            M_matrixStabilization->GlobalAssemble();
+            M_matrixStabilization->globalAssemble();
             M_resetStabilization = false;
             chrono.stop();
             M_Displayer.leaderPrintMax( "done in " , chrono.diff() );
@@ -1424,7 +1424,7 @@ updateSystem( const Real         alpha,
             {
                 M_matrixStabilization.reset( new matrix_Type( M_localMap ) );
                 M_ipStabilization.apply( *M_matrixStabilization, betaVector, false );
-                M_matrixStabilization->GlobalAssemble();
+                M_matrixStabilization->globalAssemble();
                 M_resetStabilization = false;
             }
             else
@@ -1441,12 +1441,12 @@ updateSystem( const Real         alpha,
         *matrixNoBC += (*M_matrixMass) * alpha;
         if ( M_isDiagonalBlockPreconditioner == true )
         {
-            matrixNoBC->GlobalAssemble();
+            matrixNoBC->globalAssemble();
             *M_blockPreconditioner += *matrixNoBC;
             matrix_Type tempMatrix( *matrixNoBC );
-            matrixNoBC.reset( new matrix_Type( M_localMap, tempMatrix.getMeanNumEntries() ) );
+            matrixNoBC.reset( new matrix_Type( M_localMap, tempMatrix.meanNumEntries() ) );
             *matrixNoBC += tempMatrix;
-            M_blockPreconditioner->GlobalAssemble();
+            M_blockPreconditioner->globalAssemble();
         }
     }
     *matrixNoBC += *M_matrixStokes;
@@ -1477,9 +1477,9 @@ Oseen<MeshType, SolverType>::iterate( bcHandler_Type& bcHandler )
 
     chrono.start();
 
-    M_matrixNoBC->GlobalAssemble();
+    M_matrixNoBC->globalAssemble();
 
-    matrixPtr_Type matrixFull( new matrix_Type( M_localMap, M_matrixNoBC->getMeanNumEntries() ) );
+    matrixPtr_Type matrixFull( new matrix_Type( M_localMap, M_matrixNoBC->meanNumEntries() ) );
 
     updateStab( *matrixFull );
     getFluidMatrix( *matrixFull );
@@ -1499,7 +1499,7 @@ Oseen<MeshType, SolverType>::iterate( bcHandler_Type& bcHandler )
     chrono.start();
     applyBoundaryConditions( *matrixFull, rightHandSideFull, bcHandler );
 
-    matrixFull->GlobalAssemble();
+    matrixFull->globalAssemble();
     chrono.stop();
 
     M_Displayer.leaderPrintMax( "done in " , chrono.diff() );
@@ -1575,7 +1575,7 @@ template<typename MeshType, typename SolverType>
 void
 Oseen<MeshType, SolverType>::getFluidMatrix( matrix_Type& matrixFull )
 {
-    M_matrixNoBC->GlobalAssemble();
+    M_matrixNoBC->globalAssemble();
     matrixFull += *M_matrixNoBC;
 }
 

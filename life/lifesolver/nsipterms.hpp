@@ -309,7 +309,7 @@ void IPStabilization<MeshType, DofType>::apply( MatrixType& matrix,  const Vecto
     const UInt nDof = M_dof->numTotalDof();
 
     Real normInf;
-    state.NormInf(&normInf);
+    state.normInf(&normInf);
 
     // local trace of the velocity
     ElemVec beta( M_feBd->nbNode(), nDimensions );
@@ -573,7 +573,7 @@ void IPStabilization<MeshType, DofType>::apply( MatrixType& matrix,  const Vecto
     if (verbose)
     {
         Debug(7101) << "\n";
-        Debug(7101) << static_cast<UInt>(state.BlockMap().Comm().MyPID())
+        Debug(7101) << static_cast<UInt>(state.blockMap().Comm().MyPID())
         <<  "  .   Updating of element   done in "
         << chronoUpdate.diffCumul()   << " s." << "\n";
         Debug(7101) << "   .   Determination of beta done in "

@@ -494,11 +494,11 @@ void OseenShapeDerivative<MeshType, SolverType>::iterateLin( bcHandler_Type& bcH
     chrono.start();
 
     // matrix and vector assembling communication
-    this->M_matrixNoBC->GlobalAssemble();
+    this->M_matrixNoBC->globalAssemble();
 
-    M_linearRightHandSideNoBC.GlobalAssemble();
+    M_linearRightHandSideNoBC.globalAssemble();
 
-    matrix_ptrtype matrixFull( new matrix_Type( this->M_localMap, this->M_matrixNoBC->getMeanNumEntries() ) );
+    matrix_ptrtype matrixFull( new matrix_Type( this->M_localMap, this->M_matrixNoBC->meanNumEntries() ) );
 
     updateStab( *matrixFull );
     getFluidMatrix( *matrixFull );
@@ -521,7 +521,7 @@ void OseenShapeDerivative<MeshType, SolverType>::iterateLin( bcHandler_Type& bcH
 
     // using the same preconditioner as for the non linear problem (the matrix changes only in the
     // boundary terms).
-    matrixFull->GlobalAssemble();
+    matrixFull->globalAssemble();
     this->M_linearSolver.setMatrix( *matrixFull );
     this->M_linearSolver.setReusePreconditioner( M_reuseLinearPreconditioner );
     this->M_linearSolver.solveSystem( rightHandSideFull, M_linearSolution, matrixFull );
@@ -569,7 +569,7 @@ OseenShapeDerivative<MeshType, SolverType>::updateLinearSystem( const matrix_Typ
         //     std::cout << dwRepeated.NormInf() << std::endl;
         //     std::cout << dispRepeated.NormInf() << std::endl;
 
-        vector_Type rhsLinNoBC( M_linearRightHandSideNoBC.getMap(), Repeated );
+        vector_Type rhsLinNoBC( M_linearRightHandSideNoBC.map(), Repeated );
 
         for ( UInt i = 1; i <= this->M_velocityFESpace.mesh()->numVolumes(); i++ )
         {
@@ -721,7 +721,7 @@ OseenShapeDerivative<MeshType, SolverType>::updateLinearSystem( const matrix_Typ
             }
         }
 
-        rhsLinNoBC.GlobalAssemble();
+        rhsLinNoBC.globalAssemble();
         M_linearRightHandSideNoBC += rhsLinNoBC;
 //       M_linearRightHandSideNoBC *= -1.;
 //       if( S_verbose )
@@ -776,7 +776,7 @@ updateShapeDerivatives( matrix_Type&                   matrix,
 //     std::cout << dwRepeated.NormInf() << std::endl;
 //     std::cout << dispRepeated.NormInf() << std::endl;
 
-//            vector_Type rhsLinNoBC( M_linearRightHandSideNoBC.getMap(), Repeated);
+//            vector_Type rhsLinNoBC( M_linearRightHandSideNoBC.map(), Repeated);
 
         for ( UInt i = 1; i <= this->M_velocityFESpace.mesh()->numVolumes(); i++ )
         {

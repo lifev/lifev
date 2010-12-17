@@ -70,7 +70,7 @@ AztecOOPreconditioner::buildPreconditioner( operator_type& matrix )
     if ( this->M_preconditionerCreated )
         precReset();
 
-    M_solver->getSolver().SetPrecMatrix( matrix->getMatrixPtr().get() );
+    M_solver->getSolver().SetPrecMatrix( matrix->matrixPtr().get() );
 
     M_solver->getSolver().SetAztecOption( AZ_pre_calc, AZ_calc );
     M_solver->getSolver().SetAztecOption( AZ_keep_info, 1 );

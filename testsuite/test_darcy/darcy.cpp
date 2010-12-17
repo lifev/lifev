@@ -696,7 +696,7 @@ darcy::run()
 
     // Display the total number of unknowns
     darcySolver->getDisplayer().leaderPrint( "Number of unknowns : ",
-                                             hybrid_FESpace.map().getMap(Unique)->NumGlobalElements(), "\n" );
+                                             hybrid_FESpace.map().map(Unique)->NumGlobalElements(), "\n" );
 
     switch ( solverType )
     {

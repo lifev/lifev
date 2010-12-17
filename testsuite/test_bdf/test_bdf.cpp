@@ -165,7 +165,7 @@ void test_bdf::run()
 
     if (verbose)
         std::cout << "  Number of unknowns : "
-                  << FeSpace.map().getMap(Unique)->NumGlobalElements()
+                  << FeSpace.map().map(Unique)->NumGlobalElements()
                   << std::endl;
 
     bc.bdUpdate(*(FeSpace.mesh()), FeSpace.feBd(), FeSpace.dof());
@@ -191,7 +191,7 @@ void test_bdf::run()
         assembleMatrix(matM, elmat, FeSpace.fe(), FeSpace.fe(), FeSpace.dof(),
                        FeSpace.dof(), 0, 0, 0, 0);
     }
-    matM.GlobalAssemble();
+    matM.globalAssemble();
     Members->comm->Barrier();
     chrono.stop();
     if (verbose)
@@ -294,7 +294,7 @@ void test_bdf::run()
         Real tgv = 1.;
         chrono.start();
         bcManage(*matA_ptr, f, *FeSpace.mesh(), FeSpace.dof(), bc, FeSpace.feBd(), tgv, t);
-        matA_ptr->GlobalAssemble();
+        matA_ptr->globalAssemble();
         chrono.stop();
         if (verbose) cout << chrono.diff() << "s." << endl;
 

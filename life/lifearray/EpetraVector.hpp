@@ -404,7 +404,7 @@ public:
        with a the given operation
        @param mode Combining mode used to gather the data
     */
-    Int GlobalAssemble( Epetra_CombineMode mode = Add )
+    Int globalAssemble( Epetra_CombineMode mode = Add )
     {
         return M_epetraVector->GlobalAssemble( mode );
     }
@@ -418,7 +418,7 @@ public:
       <li> if row is not mine and if the numCpus == 1, asserts
       </ol>
      */
-    Int checkLID( const UInt row ) const;
+    Int globalToLocalRowId( const UInt row ) const;
 
     //! Look for the given global row and set its value
     /*!
@@ -431,14 +431,14 @@ public:
       @param value Value to be set at the given row
       @param offset Offset used in the map numbering
      */
-    bool checkAndSet( const UInt row, const data_type& value, UInt offset = 0 );
+    bool setCoefficient( const UInt row, const data_type& value, UInt offset = 0 );
 
     //! Set the row of the vector to the given value
     /*!
       @param rowsVector Vector containing the row Ids
       @param valuesVector Vector containing the values
      */
-    Int replaceGlobalValues( std::vector< Int >& rowsVector, std::vector< Real >& valuesVector );
+    Int setCoefficients( std::vector< Int >& rowsVector, std::vector< Real >& valuesVector );
 
     //! insert a global value
     /*!
@@ -507,104 +507,104 @@ public:
     /*!
       @param result Variable where the result should be stored
      */
-    void MeanValue ( Real* result ) const;
+    void meanValue ( Real* result ) const;
 
     //! Compute and return the norm 1
-    Real Norm1   () const;
+    Real norm1   () const;
 
     //! Compute and store the norm 1 in the given pointed variable
     /*!
       @param result Pointer on the variable  where the result should be stored
      */
-    void Norm1   ( Real* result ) const;
+    void norm1   ( Real* result ) const;
 
     //! Compute and store the norm 1 in the given variable
     /*!
       @param result Variable where the result should be stored
      */
-    void Norm1   ( Real& result ) const;
+    void norm1   ( Real& result ) const;
 
     //! Compute and return the norm 2
-    Real Norm2   () const;
+    Real norm2   () const;
 
     //! Compute and store the norm 2 in the given pointed variable
     /*!
       @param result Pointer on the variable  where the result should be stored
      */
-    void Norm2   ( Real* result ) const;
+    void norm2   ( Real* result ) const;
 
     //! Compute and store the norm 2 in the given variable
     /*!
       @param result Variable where the result should be stored
      */
-    void Norm2   ( Real& result ) const;
+    void norm2   ( Real& result ) const;
 
     //! Compute and return the norm inf
-    Real NormInf () const;
+    Real normInf () const;
 
     //! Compute and store the norm inf in the given pointed variable
     /*!
       @param result Pointer on the variable  where the result should be stored
      */
-    void NormInf ( Real* result ) const;
+    void normInf ( Real* result ) const;
 
     //! Compute and store the norm inf in the given variable
     /*!
       @param result Variable where the result should be stored
      */
-    void NormInf ( Real& result ) const;
+    void normInf ( Real& result ) const;
 
     //! Compute and return the minimum value in the vector
-    Real MinValue() const;
+    Real minValue() const;
 
     //! Compute and store the minimum value of the vector in the given pointed variable
     /*!
       @param result Pointer on the variable  where the result should be stored
      */
-    void MinValue( Real* result ) const;
+    void minValue( Real* result ) const;
 
     //! Compute and store the minimum value of the vector in the given variable
     /*!
       @param result Variable where the result should be stored
      */
-    void MinValue( Real& result ) const;
+    void minValue( Real& result ) const;
 
     //! Compute and return the maximum value in the vector
-    Real MaxValue() const;
+    Real maxValue() const;
 
     //! Compute and store the maximum value of the vector in the given pointed variable
     /*!
       @param result Pointer on the variable  where the result should be stored
      */
-    void MaxValue( Real* result ) const;
+    void maxValue( Real* result ) const;
 
     //! Compute and store the maximum value of the vector in the given variable
     /*!
       @param result Variable where the result should be stored
      */
-    void MaxValue( Real& result ) const;
+    void maxValue( Real& result ) const;
 
     //! Replace the vector with his absolute value
-    void Abs( void );
+    void abs( void );
 
     //! Compute the absolute value of a vector and store it in an other vector
     /*!
       @param vector Output vector to store the absolute value of the vector
      */
-    void Abs( EpetraVector& vector );
+    void abs( EpetraVector& vector );
 
     //! Compute the scalar product of two vectors
     /*!
       @param vector Second vector for the scalar product
      */
-    data_type Dot( const EpetraVector& vector ) const;
+    data_type dot( const EpetraVector& vector ) const;
 
     //! Compute the scalar product of two vectors and store the result in a given variable
     /*!
       @param vector Second vector for the scalar product
       @param scalarProduct Variable to store the result
      */
-    void Dot( const EpetraVector& vector, data_type& scalarProduct );
+    void dot( const EpetraVector& vector, data_type& scalarProduct );
 
     //! Save the values of the matrix into a file
     /*!
@@ -624,7 +624,7 @@ public:
     /*!
       @param output Stream where the informations must be printed
      */
-    void ShowMe( std::ostream& output = std::cout ) const;
+    void showMe( std::ostream& output = std::cout ) const;
 
     //@}
 
@@ -662,51 +662,51 @@ public:
     //@{
 
     //! Return the communicator of the vector
-    const Epetra_Comm& Comm() const
+    const Epetra_Comm& comm() const
     {
-        return BlockMap().Comm();
+        return blockMap().Comm();
     }
 
     //! Return the EpetraVector in the wrapper
-    vector_type& getEpetraVector()
+    vector_type& epetraVector()
     {
         return *M_epetraVector;
     }
 
     //! Return the EpetraVector in the wrapper
-    const vector_type& getEpetraVector() const
+    const vector_type& epetraVector() const
     {
         return *M_epetraVector;
     }
 
     //! Return the Epetra_BlockMap of the vector
-    const Epetra_BlockMap& BlockMap() const
+    const Epetra_BlockMap& blockMap() const
     {
         return M_epetraVector->Map();
     }
 
     //! Return the map type of the vector (Unique or Repeated)
-    EpetraMapType getMaptype() const
+    EpetraMapType mapType() const
     {
         return M_mapType;
     }
 
     //! Return the EpetraMap of the vector
-    const EpetraMap& getMap() const
+    const EpetraMap& map() const
     {
         return *M_epetraMap;
     }
 
     //! Return a shared pointer on the EpetraMap
-    const boost::shared_ptr< EpetraMap > getMap_ptr() const
+    const boost::shared_ptr< EpetraMap > mapPtr() const
     {
         return M_epetraMap;
     }
 
     //! Return the EpetraMap of the vector
-    const Epetra_Map& getEpetra_Map() const
+    const Epetra_Map& epetraMap() const
     {
-        return *( M_epetraMap->getMap( M_mapType ) );
+        return *( M_epetraMap->map( M_mapType ) );
     }
 
     //! Return the size of the vector

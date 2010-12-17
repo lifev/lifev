@@ -617,7 +617,7 @@ solveOneTimeStep ()
     }
 
     // Assemble the global hybrid vector.
-    M_globalFlux->GlobalAssemble();
+    M_globalFlux->globalAssemble();
 
     // Update the value of the solution
     (*M_u) = (*M_uOld) - M_data.dataTime()->getTimeStep() * (*M_globalFlux);

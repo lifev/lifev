@@ -176,9 +176,9 @@ EnsightToHdf5::run()
 
 
 
-    UInt totalVelDof   = uFESpace.map().getMap(Unique)->NumGlobalElements();
-    UInt totalPressDof = pFESpace.map().getMap(Unique)->NumGlobalElements();
-    UInt totalP0PresDof = p0FESpace.map().getMap(Unique)->NumGlobalElements();
+    UInt totalVelDof   = uFESpace.map().map(Unique)->NumGlobalElements();
+    UInt totalPressDof = pFESpace.map().map(Unique)->NumGlobalElements();
+    UInt totalP0PresDof = p0FESpace.map().map(Unique)->NumGlobalElements();
 
     if (verbose) std::cout << "Total Velocity Dof = " << totalVelDof << std::endl;
     if (verbose) std::cout << "Total Pressure Dof = " << totalPressDof << std::endl;
@@ -324,8 +324,8 @@ computeP0pressure(FESpace< Mesh, Map >& pFESpace,
         }
     }
 
-    P0pres.replaceGlobalValues(gid0Vec, val0Vec);
-    P0pres.GlobalAssemble();
+    P0pres.setCoefficients(gid0Vec, val0Vec);
+    P0pres.globalAssemble();
     MPI_Barrier(MPI_COMM_WORLD);
 
 }

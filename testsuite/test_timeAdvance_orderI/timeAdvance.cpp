@@ -301,7 +301,7 @@ problem::run()
     if (verbose ) std::cout << "ok." << std::endl;
 
     // building some vectors:
-    EpetraMap uMap = problem.solution()->getMap();
+    EpetraMap uMap = problem.solution()->map();
 
     // computing the rhs
     vector_type rhs ( uMap, Unique );

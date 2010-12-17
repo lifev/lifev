@@ -559,7 +559,7 @@ bcManage( MatrixType& matrix,
           DataType const& time = 0 )
 {
 
-    VectorType rhsRepeated(rightHandSide.getMap(), Repeated);
+    VectorType rhsRepeated(rightHandSide.map(), Repeated);
     bool globalassemble=false;
 
 
@@ -598,13 +598,13 @@ bcManage( MatrixType& matrix,
         }
     }
 
-    rhsRepeated.GlobalAssemble();
+    rhsRepeated.globalAssemble();
     rightHandSide += rhsRepeated;
     if (globalassemble)
-        matrix.GlobalAssemble();
+        matrix.globalAssemble();
 
     //Build the internal structure, if needed
-    bcNormalManager.build(mesh, dof,currentBdFE,matrix,bcHandler.offset(),rightHandSide.getMap_ptr()->CommPtr());
+    bcNormalManager.build(mesh, dof,currentBdFE,matrix,bcHandler.offset(),rightHandSide.mapPtr()->commPtr());
     bcNormalManager.exportToParaview("normalAndTangents");
 
     //Applying the basis change, if needed
@@ -757,7 +757,7 @@ bcManageMatrix( MatrixType&      matrix,
         }
     }
     if (globalassemble)
-        matrix.GlobalAssemble();
+        matrix.globalAssemble();
 
     // Loop on boundary conditions
     for ( ID i = 0; i < bcHandler.size(); ++i )
@@ -794,7 +794,7 @@ bcManageVector( VectorType&      rightHandSide,
                 const DataType&  time,
                 const DataType&  diagonalizeCoef )
 {
-    VectorType rhsRepeated(rightHandSide.getMap(),Repeated);
+    VectorType rhsRepeated(rightHandSide.map(),Repeated);
 
     // Loop on boundary conditions
     for ( ID i = 0; i < bcHandler.size(); ++i )
@@ -825,7 +825,7 @@ bcManageVector( VectorType&      rightHandSide,
         }
     }
 
-    rhsRepeated.GlobalAssemble();
+    rhsRepeated.globalAssemble();
 
     rightHandSide += rhsRepeated;
 }
@@ -1138,7 +1138,7 @@ bcEssentialManageVector( VectorType&     rightHandSide,
         }
     }
 
-    rightHandSide.replaceGlobalValues( idDofVec, datumVec);
+    rightHandSide.setCoefficients( idDofVec, datumVec);
 }
 
 
@@ -1237,7 +1237,7 @@ bcNaturalManage( VectorType& rightHandSide,
         {
         case 0:  // if the BC is a vector which values don'time need to be integrated
         {
-            VectorType bUnique(rightHandSide.getMap(),Unique);
+            VectorType bUnique(rightHandSide.map(),Unique);
 
             std::vector<int>  idDofVec(0);
             idDofVec.reserve(boundaryCond.list_size()*nComp);
@@ -1264,10 +1264,10 @@ bcNaturalManage( VectorType& rightHandSide,
                 }
             }
 
-            bUnique.replaceGlobalValues(idDofVec, datumVec);
-            bUnique.GlobalAssemble(Insert);
+            bUnique.setCoefficients(idDofVec, datumVec);
+            bUnique.globalAssemble(Insert);
 
-            ASSERT( rightHandSide.getMaptype() == Unique , "rightHandSide must have unique map, otherwise data will be multiply added on cpu interfaces." );
+            ASSERT( rightHandSide.mapType() == Unique , "rightHandSide must have unique map, otherwise data will be multiply added on cpu interfaces." );
             rightHandSide += bUnique;
 
         }
@@ -1275,7 +1275,7 @@ bcNaturalManage( VectorType& rightHandSide,
 
         case 1:  // if the BC is a vector of values to be integrated
         {
-            VectorType rhsRepeated(rightHandSide.getMap(),Repeated);
+            VectorType rhsRepeated(rightHandSide.map(),Repeated);
 
             // Loop on BC identifiers
             for ( ID i = 1; i <= boundaryCond.list_size(); ++i )
@@ -1315,14 +1315,14 @@ bcNaturalManage( VectorType& rightHandSide,
                 }
             }
 
-            rhsRepeated.GlobalAssemble();
-            ASSERT( rightHandSide.getMaptype() == Unique , "here rightHandSide should passed as repeated, otherwise not sure of what happens at the cpu interfaces ." );
+            rhsRepeated.globalAssemble();
+            ASSERT( rightHandSide.mapType() == Unique , "here rightHandSide should passed as repeated, otherwise not sure of what happens at the cpu interfaces ." );
             rightHandSide += rhsRepeated;
         }
         break;
         case 2:  // if the BC is a vector of values with components to be integrated
         {
-            VectorType rhsRepeated(rightHandSide.getMap(),Repeated);
+            VectorType rhsRepeated(rightHandSide.map(),Repeated);
 
             // Loop on BC identifiers
             for ( ID i = 1; i <= boundaryCond.list_size(); ++i )
@@ -1363,8 +1363,8 @@ bcNaturalManage( VectorType& rightHandSide,
                     }
                 }
             }
-            rhsRepeated.GlobalAssemble();
-            ASSERT( rightHandSide.getMaptype() == Unique , "here rightHandSide should passed as unique, otherwise not sure of what happens at the cpu interfaces ." );
+            rhsRepeated.globalAssemble();
+            ASSERT( rightHandSide.mapType() == Unique , "here rightHandSide should passed as unique, otherwise not sure of what happens at the cpu interfaces ." );
             rightHandSide += rhsRepeated;
         }
         break;
@@ -1378,7 +1378,7 @@ bcNaturalManage( VectorType& rightHandSide,
 
         //std::cout << "BC Natural manage w/ function" << std::endl;
         DataType x, y, z;
-        VectorType rhsRepeated(rightHandSide.getMap(),Repeated);
+        VectorType rhsRepeated(rightHandSide.map(),Repeated);
 
         // Loop on BC identifiers
         for ( ID i = 1; i <= boundaryCond.list_size(); ++i )
@@ -1423,8 +1423,8 @@ bcNaturalManage( VectorType& rightHandSide,
                 }
             }
         }
-        rhsRepeated.GlobalAssemble();
-        ASSERT( rightHandSide.getMaptype() == Unique , "here rightHandSide should passed as unique, otherwise not sure of what happens at the cpu interfaces ." );
+        rhsRepeated.globalAssemble();
+        ASSERT( rightHandSide.mapType() == Unique , "here rightHandSide should passed as unique, otherwise not sure of what happens at the cpu interfaces ." );
         //  rightHandSide=rhsRepeated;
         rightHandSide+= rhsRepeated;
     }
@@ -1616,7 +1616,7 @@ bcMixteManage( MatrixType& matrix,
                     }
 
                     // Assembling diagonal entry
-                    matrix.set_mat_inc( idDof - 1, idDof - 1, sum );
+                    matrix.addToCoefficient( idDof - 1, idDof - 1, sum );
                 }
 
                 // Upper diagonal columns of the elementary boundary mass matrix
@@ -1652,8 +1652,8 @@ bcMixteManage( MatrixType& matrix,
                         }
 
                         // Assembling upper entry.  The boundary mass matrix is symetric
-                        matrix.set_mat_inc( idDof - 1, jdDof - 1, sum );
-                        matrix.set_mat_inc( jdDof - 1, idDof - 1, sum );
+                        matrix.addToCoefficient( idDof - 1, jdDof - 1, sum );
+                        matrix.addToCoefficient( jdDof - 1, idDof - 1, sum );
                     }
                 }
             }
@@ -1708,7 +1708,7 @@ bcMixteManage( MatrixType& matrix,
                     }
 
                     // Assembling diagonal entry
-                    matrix.set_mat_inc( idDof - 1, idDof - 1, sum );
+                    matrix.addToCoefficient( idDof - 1, idDof - 1, sum );
                 }
 
                 // Upper diagonal columns of the elementary boundary mass matrix
@@ -1737,8 +1737,8 @@ bcMixteManage( MatrixType& matrix,
                         jdDof = pId->localToGlobalMap( k ) + ( boundaryCond.component( j ) - 1 ) * totalDof + offset;
 
                         // Assembling upper entry.  The boundary mass matrix is symetric
-                        matrix.set_mat_inc( idDof - 1, jdDof - 1, sum );
-                        matrix.set_mat_inc( jdDof - 1, idDof - 1, sum );
+                        matrix.addToCoefficient( idDof - 1, jdDof - 1, sum );
+                        matrix.addToCoefficient( jdDof - 1, idDof - 1, sum );
                     }
                 }
             }
@@ -1757,7 +1757,7 @@ bcMixteManageMatrix( MatrixType& matrix,
                      const DataType& time,
                      UInt offset )
 {
-    if ( matrix.getMatrixPtr()->Filled() )
+    if ( matrix.matrixPtr()->Filled() )
         matrix.openCrsMatrix();
     // Number of local Dof in this face
     UInt nDofF = currentBdFE.nbNode();
@@ -1814,7 +1814,7 @@ bcMixteManageMatrix( MatrixType& matrix,
                     }
 
                     // Assembling diagonal entry
-                    matrix.set_mat_inc( idDof - 1, idDof - 1, sum );
+                    matrix.addToCoefficient( idDof - 1, idDof - 1, sum );
                 }
 
                 // Upper diagonal columns of the elementary boundary mass matrix
@@ -1841,8 +1841,8 @@ bcMixteManageMatrix( MatrixType& matrix,
                         jdDof = boundaryCond( k ) ->id() + ( boundaryCond.component( j ) - 1 ) * totalDof + offset;
 
                         // Assembling upper entry.  The boundary mass matrix is symetric
-                        matrix.set_mat_inc( idDof - 1, jdDof - 1, sum );
-                        matrix.set_mat_inc( jdDof - 1, idDof - 1, sum );
+                        matrix.addToCoefficient( idDof - 1, jdDof - 1, sum );
+                        matrix.addToCoefficient( jdDof - 1, idDof - 1, sum );
                     }
                 }
             }
@@ -1894,7 +1894,7 @@ bcMixteManageMatrix( MatrixType& matrix,
 
 
                     // Assembling diagonal entry
-                    matrix.set_mat_inc( idDof - 1, idDof - 1, sum );
+                    matrix.addToCoefficient( idDof - 1, idDof - 1, sum );
                 }
 
                 // Upper diagonal columns of the elementary boundary mass matrix
@@ -1923,8 +1923,8 @@ bcMixteManageMatrix( MatrixType& matrix,
                         jdDof = pId->localToGlobalMap( k ) + ( boundaryCond.component( j ) - 1 ) * totalDof + offset;
 
                         // Assembling upper entry.  The boundary mas matrix is symetric
-                        matrix.set_mat_inc( idDof - 1, jdDof - 1, sum );
-                        matrix.set_mat_inc( jdDof - 1, idDof - 1, sum );
+                        matrix.addToCoefficient( idDof - 1, jdDof - 1, sum );
+                        matrix.addToCoefficient( jdDof - 1, idDof - 1, sum );
                     }
                 }
             }
@@ -2075,7 +2075,7 @@ bcFluxManageVector(
     UInt            offset)
 
 {
-    rightHandSide.checkAndSet(offset + 1,boundaryCond(time, 0., 0., 0., 1));
+    rightHandSide.setCoefficient(offset + 1,boundaryCond(time, 0., 0., 0., 1));
 }  //bcFluxManageVector
 
 
@@ -2091,7 +2091,7 @@ bcFluxManageMatrix( MatrixType&     matrix,
                     const DataType& /*time*/,
                     UInt            offset )
 {
-    if ( matrix.getMatrixPtr()->Filled() )
+    if ( matrix.matrixPtr()->Filled() )
         matrix.openCrsMatrix();
 
     // Number of local Dof in this face
@@ -2135,8 +2135,8 @@ bcFluxManageMatrix( MatrixType&     matrix,
 
                     jdDof = offset;
 
-                    matrix.set_mat_inc( idDof - 1, jdDof    , sum );
-                    matrix.set_mat_inc( jdDof    , idDof - 1, sum );
+                    matrix.addToCoefficient( idDof - 1, jdDof    , sum );
+                    matrix.addToCoefficient( jdDof    , idDof - 1, sum );
                 }
             }
         }
@@ -2174,7 +2174,7 @@ bcResistanceManage( MatrixType& matrix,
     if ( boundaryCond.dataVector() )
     {
         //auxiliary vector
-        VectorType vv(rightHandSide.getMap(), Repeated);
+        VectorType vv(rightHandSide.map(), Repeated);
 
         DataType  mbcb;
 
@@ -2230,7 +2230,7 @@ bcResistanceManage( MatrixType& matrix,
                     for ( UInt k = 1; k <= nComp; ++k)
                     {
                         kdDof = boundaryCond.IdGlobal( kk )  + ( boundaryCond.component( k ) - 1 ) * totalDof + offset;
-                        matrix.set_mat_inc( jdDof - 1,  kdDof - 1, boundaryCond.resistanceCoef() * vv[jdDof] * vv[kdDof] );
+                        matrix.addToCoefficient( jdDof - 1,  kdDof - 1, boundaryCond.resistanceCoef() * vv[jdDof] * vv[kdDof] );
                     }
                 }
             }

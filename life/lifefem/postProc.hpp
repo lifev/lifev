@@ -620,7 +620,7 @@ Real PostProc<MeshType>::area( const entityFlag_Type& flag )
     }
 
     // reducing per-processor information
-    M_epetraMapPtr->Comm().SumAll( &areaScatter, &area, 1 );
+    M_epetraMapPtr->comm().SumAll( &areaScatter, &area, 1 );
 
     return area;
 }
@@ -686,7 +686,7 @@ Real PostProc<MeshType>::flux( const VectorType& field, const entityFlag_Type& f
         }
     }
     // Reducing per-processor values
-    M_epetraMapPtr->Comm().SumAll( &fluxScatter, &flux, 1 );
+    M_epetraMapPtr->comm().SumAll( &fluxScatter, &flux, 1 );
 
     return flux;
 }
@@ -767,13 +767,13 @@ Vector PostProc<MeshType>::average( const VectorType& field, const entityFlag_Ty
         areaScatter += M_currentBdFEPtrVector[feSpace]->measure();
     }
 
-    M_epetraMapPtr->Comm().SumAll( &areaScatter, &area, 1 );
+    M_epetraMapPtr->comm().SumAll( &areaScatter, &area, 1 );
 
     // Reducing per-processor values
     for ( UInt iComponent=0; iComponent < nDim; ++iComponent )
     {
 //      fieldAverageScatter[iComponent] /= area;
-        M_epetraMapPtr->Comm().SumAll( &fieldAverageScatter[iComponent], &fieldAverage[iComponent], 1 );
+        M_epetraMapPtr->comm().SumAll( &fieldAverageScatter[iComponent], &fieldAverage[iComponent], 1 );
     }
 
     return fieldAverage / area;
