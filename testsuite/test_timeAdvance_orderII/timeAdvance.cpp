@@ -323,7 +323,7 @@ problem::run()
         else
             exporter.reset( new Ensight<RegionMesh3D<LinearTetra> > ( dataFile, meshPart.meshPartition(), "problem",   members->comm->MyPID()) );
     }
-    exporter->setDirectory( "./" ); // This is a test to see if M_post_dir is working
+    exporter->setPostDir( "./" ); // This is a test to see if M_post_dir is working
     exporter->setMeshProcId( meshPart.meshPartition(),  members->comm->MyPID() );
 
     vector_ptrtype U ( new vector_type(*problem.solution(), exporter->mapType() ) );
