@@ -209,7 +209,7 @@ main( int argc, char** argv )
         return (EXIT_FAILURE);
     }
 
-    exporter.CloseFile();
+    exporter.closeFile();
 
 #ifdef HAVE_MPI
     MPI_Finalize();
