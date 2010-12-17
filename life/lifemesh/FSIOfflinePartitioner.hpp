@@ -176,20 +176,20 @@ public:
     }
     const graphPtr_Type& fluidGraph() const
     {
-        return M_fluidMeshCutter->graph();
+        return M_fluidMeshCutter->elementDomains();
     }
     const graphPtr_Type& solidGraph() const
     {
-        return M_solidMeshCutter->graph();
+        return M_solidMeshCutter->elementDomains();
     }
     const uncutMeshVectorPtr_Type& fluidPartitions() const
     {
-        return M_fluidMeshCutter->meshAllPartitions();
+        return M_fluidMeshCutter->meshPartitions();
     }
 
     const uncutMeshVectorPtr_Type& solidPartitions() const
     {
-        return M_solidMeshCutter->meshAllPartitions();
+        return M_solidMeshCutter->meshPartitions();
     }
     /*
       const interfaceVectorPtr_Type& dofFluidToStructure()
@@ -491,7 +491,7 @@ void FSIOfflinePartitioner<MeshType>::createSpaces()
     M_velocityFESpaces->resize(M_fluidPartitionNumber);
     for (Int i = 0; i < M_fluidPartitionNumber; ++i)
     {
-        (*M_velocityFESpaces)[i].reset(new feSpace_Type(M_fluidMeshCutter->mesh(i),
+        (*M_velocityFESpaces)[i].reset(new feSpace_Type(M_fluidMeshCutter->getPartition(i),
                                                         *refFE_vel,
                                                         *qR_vel,
                                                         *bdQr_vel,
