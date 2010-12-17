@@ -3635,7 +3635,7 @@ template <typename GEOSHAPE, typename MC>
 void
 RegionMesh3D<GEOSHAPE, MC>::cleanElementFaces()
 {
-    M_VToF.clean();
+    M_VToF.clearArray();
 
     unsetLinkSwitch( "HAS_VOLUME_TO_FACES" );
 }
@@ -3644,7 +3644,7 @@ template <typename GEOSHAPE, typename MC>
 void
 RegionMesh3D<GEOSHAPE, MC>::cleanElementEdges()
 {
-    M_VToE.clean();
+    M_VToE.clearArray();
     unsetLinkSwitch( "HAS_VOLUME_TO_EDGES" );
 }
 

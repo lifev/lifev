@@ -45,16 +45,8 @@
 #include <string>
 #include <iostream>
 #include <numeric>
-
-#pragma GCC diagnostic ignored "-Wunused-variable"
-#pragma GCC diagnostic ignored "-Wunused-parameter"
-
-#include <boost/numeric/ublas/vector.hpp>
-
-#pragma GCC diagnostic warning "-Wunused-variable"
-#pragma GCC diagnostic warning "-Wunused-parameter"
-
 #include <life/lifearray/EpetraVector.hpp>
+#include <life/lifearray/tab.hpp>
 
 
 namespace LifeV
@@ -110,8 +102,6 @@ public:
 
     //! @name Public Types
     //@{
-    typedef boost::numeric::ublas::vector<Real> Vector;
-    typedef boost::numeric::ublas::scalar_vector<Real> ScalarVector;
     typedef Vector                               container_Type;
     typedef FEVectorType                         feVector_Type;
     typedef boost::shared_ptr< feVector_Type >   feVectorPtr_Type;
@@ -124,12 +114,6 @@ public:
 
     //! Empty constructor
     BdfVS();
-
-    //! Constructor
-    /*!
-        @param order order of the BDF
-     */
-    explicit __attribute__ ((__deprecated__)) BdfVS( const UInt order ){ setup(order); }
 
     //!Destructor
     ~BdfVS();
@@ -164,11 +148,6 @@ public:
      */
     void setInitialCondition( feVector_Type u0, Real const timeStep, bool startup = 0 );
 
-    void __attribute__ ((__deprecated__)) initialize_unk( feVector_Type u0, Real const timeStep, bool startup = 0 )
-    {
-        setInitialCondition( u0, timeStep, startup );
-    }
-
     //! Initialize all the entries of the unknown vector to be derived with a
     //! set of vectors u0s
     /*!
@@ -177,15 +156,10 @@ public:
      */
     void setInitialCondition( std::vector<feVector_Type> u0s, Real const timeStep );
 
-    void __attribute__ ((__deprecated__)) initialize_unk( std::vector<feVector_Type> u0s, Real const timeStep )
-    {
-        setInitialCondition( u0s, timeStep );
-    }
-
     //!Initialize all the entries of the unknonwn vectors with a given function
     /*!
         The array of initial conditions needed by the selected BDF is
-        initialized as follows: M_unknown=[ u0Function(t0),
+        initialized as follows: M_unknown=[ u0Function(t0), 
         u0Function(t0-dt), u0Function(t0-2*dt), ...]
         For the space dependence of the initial conditions we need informations
         on:
@@ -201,13 +175,6 @@ public:
     void setInitialCondition( const FunctionType& u0Function, feVector_Type& u0Vector, FESpaceType& feSpace,
                           Real t0, Real timeStep );
 
-    template<typename FunctionType, typename FESpaceType>
-    void __attribute__ ((__deprecated__)) initialize_unk( const FunctionType& u0Function, feVector_Type& u0Vector,
-                                                            FESpaceType& feSpace, Real t0, Real timeStep )
-    {
-        setInitialCondition( u0Function, u0Vector, feSpace, t0, timeStep );
-    }
-
     //! Returns the right hand side \f$ \bar{p} \f$ of the time derivative
     //! formula divided by dt
     /*!
@@ -215,8 +182,6 @@ public:
      */
 
     feVector_Type rhsContribution() const;
-
-    feVector_Type __attribute__ ((__deprecated__)) time_der_dt(){ return rhsContribution(); }
 
     //! Returns the right hand side \f$ \bar{p} \f$ of the time derivative
     //! formula divided by timeStep (backward compatibility version, will be discontinued)
@@ -226,13 +191,9 @@ public:
      */
     feVector_Type rhsContributionTimeStep( Real timeStep = 1 ) const;
 
-    feVector_Type __attribute__ ((__deprecated__)) time_der(){ return rhsContributionTimeStep(); }
-
     //! Compute the polynomial extrapolation approximation of order n-1 of
     //! u^{n+1} defined by the n stored state vectors
     feVector_Type extrapolateSolution() const;
-
-    feVector_Type __attribute__ ((__deprecated__)) extrap(){ extrapolateSolution(); }
 
     //! Update the vectors of the previous time steps by shifting on the right
     //! the old values.
@@ -240,8 +201,6 @@ public:
         @param uCurrent current (new) value of the state vector
      */
     void shiftRight( feVector_Type const& uCurrent );
-
-    void __attribute__ ((__deprecated__)) shift_right( feVector_Type const& uCurrent ){ return shiftRight( uCurrent ); }
 
     //! Update the vectors of the previous time steps by shifting on the right
     //! the old values.
@@ -252,28 +211,17 @@ public:
      */
     void shiftRight( feVector_Type const& uCurrent, Real timeStepNew );
 
-    void __attribute__ ((__deprecated__)) shift_right( feVector_Type const& uCurrent, Real timeStepNew )
-    {
-        return shiftRight( uCurrent, timeStepNew );
-    }
-
     //! Save the current vector M_unknowns and the current vector M_timeStep
     void storeSolution();
 
-    void __attribute__ ((__deprecated__)) store_unk(){ return storeSolution();}
-
     //! Restore the vector M_unknowns and the vector M_timeStep with the ones saved with store_unk()
     void restoreSolution();
-
-    void __attribute__ ((__deprecated__)) restore_unk(){ return restoreSolution();}
 
     //! It is equivalent to do : storeSolution() + setTimeStep()
     /*!
         @param timeStep new time step
      */
     void restoreSolution( Real timeStep );
-
-    void __attribute__ ((__deprecated__)) restore_unk( Real timeStep ){ return restoreSolution( timeStep);}
 
     //! Show informations about the BDF
     void showMe() const;
@@ -288,7 +236,6 @@ public:
      */
     void setTimeStep( Real timeStep );
 
-    void __attribute__ ((__deprecated__)) set_deltat( Real timeStep ){ return setTimeStep( timeStep);}
     //@}
 
 
@@ -300,15 +247,11 @@ public:
      */
     const Real coefficientDerivative( UInt i ) const;
 
-    const Real __attribute__ ((__deprecated__)) coeff_der( UInt i ) const { return coefficientDerivative( i );}
-
     //! Return the i-th coefficient of the time derivative alpha_i divided by dt
     /*!
         @param i index of the coefficient
      */
     const Real coefficientDerivativeOverTimeStep( UInt i ) const;
-
-    const Real __attribute__ ((__deprecated__)) coeff_der_dt( UInt i ) const { return coefficientDerivativeOverTimeStep( i );}
 
     //! Return the i-th coefficient of the time extrapolation beta_i
     /*!
@@ -316,21 +259,13 @@ public:
      */
     const Real coefficientExtrapolation( UInt i ) const;
 
-    const Real __attribute__ ((__deprecated__)) coeff_ext( UInt i ) const { return coefficientExtrapolation( i );}
-
     //! Return the vector of the time steps, ordered starting from the most recent one.
     const container_Type& timeStepVector() const {return M_timeStep;}
-
-    const container_Type& __attribute__ ((__deprecated__)) vec_deltat( UInt i ) const { return timeStepVector( i );}
 
     //! Return a vector with the last n state vectors
     const feVectorPtrContainer_Type& stateVector() const {return M_unknowns;}
 
-    const feVectorPtrContainer_Type& __attribute__ ((__deprecated__))  unk() const {return stateVector();}
-
     const feVectorPtrContainer_Type& stateVectorBack() const {return M_unknownsBack;}
-
-    const feVectorPtrContainer_Type& __attribute__ ((__deprecated__))  unk_bk() const {return stateVectorBack();}
 
     //@}
 

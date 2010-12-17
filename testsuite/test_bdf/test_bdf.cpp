@@ -205,10 +205,11 @@ void test_bdf::run()
     Real delta_t = dataFile("bdf/timestep", 0.5);
     Real t0 = 1.;
     UInt ord_bdf = dataFile("bdf/order", 3);
-    BdfVS<EpetraVector> bdf(ord_bdf);
+    BdfVS<EpetraVector> bdf;
+    bdf.setup(ord_bdf);
 
     //Initialization
-    bdf.initialize_unk(AnalyticalSol::u, u, FeSpace, t0, delta_t);
+    bdf.setInitialCondition(AnalyticalSol::u, u, FeSpace, t0, delta_t);
     if (verbose) bdf.showMe();
     Members->comm->Barrier();
 
@@ -266,7 +267,7 @@ void test_bdf::run()
 
         chrono.start();
         //Assemble A
-        Real coeff = bdf.coeff_der(0) / delta_t;
+        Real coeff = bdf.coefficientDerivative(0) / delta_t;
         Real visc = nu(t);
         Real s = sigma(t);
         for (UInt i = 1; i <= FeSpace.mesh()->numElements(); i++)
@@ -284,7 +285,7 @@ void test_bdf::run()
             cout << "A has been constructed in "<< chrono.diff() << "s." << endl;
 
         // Handling of the right hand side
-        f = (matM*bdf.time_der_dt());       //f = M*\sum_{i=1}^{orderBdf} \alpha_i u_{n-i}
+        f = (matM*bdf.rhsContribution());       //f = M*\sum_{i=1}^{orderBdf} \alpha_i u_{n-i}
         FeSpace.L2ScalarProduct(sf, f, t);  //f +=\int_\Omega{ volumeForces *v dV}
         Members->comm->Barrier();
 
@@ -307,7 +308,7 @@ void test_bdf::run()
         az_A.solveSystem(f, u, matA_ptr);
         chrono.stop();
 
-        bdf.shift_right(u);
+        bdf.shiftRight(u);
 
         if (verbose)
             cout << "*** Solution computed in " << chrono.diff() << "s."

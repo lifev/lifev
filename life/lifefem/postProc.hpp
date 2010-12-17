@@ -469,7 +469,7 @@ void PostProc<MeshType>::build_vectors()
         for (UInt iFESpace=0; iFESpace<M_numFESpaces; ++iFESpace)
         {
 
-            boundaryDofGlobalIdVector.clean();
+            boundaryDofGlobalIdVector.clearVector();
             boundaryDofGlobalIdVector.resize( M_numTotalDofPerFaceVector[iFESpace] );
 
             // updating finite element information
