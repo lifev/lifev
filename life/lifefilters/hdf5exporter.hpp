@@ -96,15 +96,15 @@ public:
     //@{
     typedef MeshType mesh_Type;
     typedef Exporter<MeshType> super;
-    typedef typename super::mesh_ptrtype mesh_ptrtype;
-    typedef typename super::vector_rawtype vector_type;
-    typedef typename super::vector_ptrtype vector_ptrtype;
+    typedef typename super::meshPtr_Type meshPtr_Type;
+    typedef typename super::vectorRaw_Type vector_Type;
+    typedef typename super::vectorPtr_Type vectorPtr_Type;
 
-    typedef EpetraExt::HDF5 hdf5_type;
-    typedef boost::shared_ptr<hdf5_type> hdf5_ptrtype;
-    typedef std::vector<std::vector<Int> > graph_type;
-    typedef boost::shared_ptr<graph_type> graph_ptrtype;
-    typedef boost::shared_ptr<std::vector<mesh_ptrtype> > serial_mesh_ptrtype;
+    typedef EpetraExt::HDF5 hdf5_Type;
+    typedef boost::shared_ptr<hdf5_Type> hdf5Ptr_Type;
+    typedef std::vector<std::vector<Int> > graph_Type;
+    typedef boost::shared_ptr<graph_Type> graphPtr_Type;
+    typedef boost::shared_ptr<std::vector<meshPtr_Type> > serial_meshPtr_Type;
     //@}
 
     //! @name Constructor & Destructor
@@ -123,7 +123,7 @@ public:
       @param the prefix for the case file (ex. "test" for test.case)
       @param the procId determines de CPU id. if negative, it ussemes there is only one processor
     */
-    Hdf5exporter(const GetPot& dfile, mesh_ptrtype mesh, const std::string& prefix, const Int& procId);
+    Hdf5exporter(const GetPot& dfile, meshPtr_Type mesh, const std::string& prefix, const Int& procId);
 
     //! Constructor for Hdf5exporter without prefix and procID
     /*!
@@ -173,15 +173,11 @@ public:
     //! Close the Hdf5 file
     /*!
       Close the HDF5 file.
-      TODO:: RENAME to closeFile()
     */
-    void CloseFile() {M_HDF5->Close();}
+    void closeFile() {M_HDF5->Close();}
 
     //! Read variable
-    /*!
-      TODO: RENAME to readVariable()
-    */
-    void rd_var( ExporterData& dvar);
+    void readVariable( ExporterData& dvar);
 
     //@}
 
@@ -190,6 +186,10 @@ public:
 
     //! returns the type of the map to use for the EpetraVector
     EpetraMapType mapType() const;
+
+    // DEPRECATED
+    void __attribute__((__deprecated__)) CloseFile() {M_HDF5->Close();}
+    void __attribute__((__deprecated__)) rd_var( ExporterData& dvar);
     //@}
 
 protected:
@@ -225,7 +225,7 @@ protected:
 
     //! @name Protected data members
     //@{
-    hdf5_ptrtype      M_HDF5;
+    hdf5Ptr_Type      M_HDF5;
     std::ofstream     M_xdmf;
 
     const std::string M_closingLines;
@@ -250,7 +250,7 @@ Hdf5exporter<MeshType>::Hdf5exporter():
 }
 
 template<typename MeshType>
-Hdf5exporter<MeshType>::Hdf5exporter(const GetPot& dfile, mesh_ptrtype mesh, const std::string& prefix,
+Hdf5exporter<MeshType>::Hdf5exporter(const GetPot& dfile, meshPtr_Type mesh, const std::string& prefix,
                                      const Int& procId) :
     super               ( dfile, prefix ),
     M_HDF5              (),
@@ -278,7 +278,7 @@ void Hdf5exporter<MeshType>::postProcess(const Real& time)
 {
     if ( M_HDF5.get() == 0)
     {
-        M_HDF5.reset(new hdf5_type(this->M_listData.begin()->storedArray()->Comm()));
+        M_HDF5.reset(new hdf5_Type(this->M_listData.begin()->storedArray()->Comm()));
         M_outputFileName=this->M_prefix+".h5";
         M_HDF5->Create(this->M_postDir+M_outputFileName);
 
@@ -367,7 +367,7 @@ UInt Hdf5exporter<MeshType>::importFromTime( const Real& Time )
                 SelectedTimeAndPostfix = *i;
     }
     this->M_listData.begin()->storedArray()->Comm().Broadcast( &SelectedTimeAndPostfix.second, 1, 0 );
-    this->M_count = SelectedTimeAndPostfix.second;
+    this->M_startIndex = SelectedTimeAndPostfix.second;
     this->computePostfix();
 
     // Importing
@@ -377,7 +377,7 @@ UInt Hdf5exporter<MeshType>::importFromTime( const Real& Time )
     Chrono chrono;
     chrono.start();
     for ( std::list< ExporterData >::iterator i=this->M_listData.begin(); i != this->M_listData.end(); ++i )
-        this->rd_var(*i);
+        this->readVariable(*i);
 
     chrono.stop();
     if ( !this->M_procId )
@@ -444,12 +444,12 @@ Real Hdf5exporter<MeshType>::importFromIter( const UInt& iter )
     }
 
     this->M_listData.begin()->storedArray()->Comm().Broadcast( &SelectedTimeAndPostfix.second, 1, 0 );
-    this->M_count = SelectedTimeAndPostfix.second;
+    this->M_startIndex = SelectedTimeAndPostfix.second;
 
     std::ostringstream index;
     index.fill('0');
 
-    index << std::setw(5) << this->M_count;
+    index << std::setw(5) << this->M_startIndex;
     this->M_postfix = "." + index.str();
 
     // Importing
@@ -464,7 +464,7 @@ Real Hdf5exporter<MeshType>::importFromIter( const UInt& iter )
     for ( std::list< ExporterData >::iterator i = this->M_listData.begin();
           i != this->M_listData.end(); ++i )
     {
-        this->rd_var(*i);
+        this->readVariable(*i);
     }
     chrono.stop();
 
@@ -480,9 +480,9 @@ template<typename MeshType>
 void Hdf5exporter<MeshType>::import(const Real& Tstart, const Real& dt)
 {
     // dt is used to rebuild the history up to now
-    Real time(Tstart - this->M_count*dt);
+    Real time(Tstart - this->M_startIndex*dt);
 
-    for ( UInt count(0); count < this->M_count; ++count )
+    for ( UInt count(0); count < this->M_startIndex; ++count )
     {
         this->M_timeSteps.push_back(time);
         time += dt;
@@ -498,7 +498,7 @@ void Hdf5exporter<MeshType>::import(const Real& time)
 {
     if ( M_HDF5.get() == 0)
     {
-        M_HDF5.reset(new hdf5_type(this->M_listData.begin()->storedArray()->Comm()));
+        M_HDF5.reset(new hdf5_Type(this->M_listData.begin()->storedArray()->Comm()));
         M_HDF5->Open(this->M_postDir+this->M_prefix+".h5"); //!! Simone
     }
 
@@ -514,21 +514,21 @@ void Hdf5exporter<MeshType>::import(const Real& time)
     chrono.start();
     for (std::list< ExporterData >::iterator i=this->M_listData.begin(); i != this->M_listData.end(); ++i)
     {
-        this->rd_var(*i); ///!!! Simone
+        this->readVariable(*i); ///!!! Simone
     }
     chrono.stop();
     if (!this->M_procId) std::cout << "      done in " << chrono.diff() << " s." << std::endl;
 }
 
 template <typename MeshType>
-void Hdf5exporter<MeshType>::rd_var(ExporterData& dvar)
+void Hdf5exporter<MeshType>::readVariable(ExporterData& dvar)
 {
     if ( M_HDF5.get() == 0)
     {
-        M_HDF5.reset(new hdf5_type(dvar.storedArray()->BlockMap().Comm()));
+        M_HDF5.reset(new hdf5_Type(dvar.storedArray()->BlockMap().Comm()));
         M_HDF5->Open(this->M_postDir+this->M_prefix+".h5"); //!! Simone
     }
-    super::rd_var(dvar);
+    super::readVariable(dvar);
 }
 
 // ===================================================
@@ -881,7 +881,7 @@ void Hdf5exporter<MeshType>::writeScalar(const ExporterData& dvar)
     UInt start = dvar.start();
 
     EpetraMap subMap(dvar.storedArray()->BlockMap(), start, size);
-    vector_type subVar(subMap);
+    vector_Type subVar(subMap);
     subVar.subset(*dvar.storedArray(),start);
 
     std::string varname (dvar.variableName()+ this->M_postfix); // see also in writeAttributes
@@ -901,7 +901,7 @@ void Hdf5exporter<MeshType>::writeVector(const ExporterData& dvar)
     // solution array has to be reordered and stored in a Multivector.
     // Using auxiliary arrays:
     Real **                                 ArrayOfPointers(new Real*[nDimensions]);
-    shared_array< shared_ptr<vector_type> > ArrayOfVectors (new shared_ptr<vector_type>[nDimensions]);
+    shared_array< shared_ptr<vector_Type> > ArrayOfVectors (new shared_ptr<vector_Type>[nDimensions]);
 
     Int MyLDA;
 
@@ -915,7 +915,7 @@ void Hdf5exporter<MeshType>::writeVector(const ExporterData& dvar)
     for (UInt d ( 0 ); d < nDimensions; ++d)
     {
         EpetraMap subMap(dvar.storedArray()->BlockMap(), start+d*size, size);
-        ArrayOfVectors[d].reset(new  vector_type(subMap));
+        ArrayOfVectors[d].reset(new  vector_Type(subMap));
         ArrayOfVectors[d]->subset(*dvar.storedArray(),start+d*size);
 
         ArrayOfVectors[d]->getEpetraVector().ExtractView(&ArrayOfPointers[d], &MyLDA);
