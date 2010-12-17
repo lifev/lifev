@@ -365,7 +365,7 @@ MultiscaleModelFSI3D::setupLinearModel()
     M_linearBC = LinearBCHandler;
 
     // Set all the BCFunctions to zero
-    for ( bc_Type::BCBase_Iterator i = M_linearBC->begin() ; i != M_linearBC->end() ; ++i )
+    for ( bc_Type::bcBaseIterator_Type i = M_linearBC->begin() ; i != M_linearBC->end() ; ++i )
         i->setBCFunction( M_bcBaseDeltaZero );
 
     // Setup linear solution & the RHS
@@ -713,7 +713,7 @@ MultiscaleModelFSI3D::imposePerturbation()
     for ( multiscaleCouplingsVectorConstIterator_Type i = M_couplings.begin(); i < M_couplings.end(); ++i )
         if ( ( *i )->isPerturbed() )
         {
-            M_linearBC->GetBCWithFlag( ( *i )->flag( ( *i )->modelGlobalToLocalID( M_ID ) ) ).setBCFunction( M_bcBaseDeltaOne );
+            M_linearBC->findBCWithFlag( ( *i )->flag( ( *i )->modelGlobalToLocalID( M_ID ) ) ).setBCFunction( M_bcBaseDeltaOne );
 
             break;
         }
@@ -730,7 +730,7 @@ MultiscaleModelFSI3D::resetPerturbation()
     for ( multiscaleCouplingsVectorConstIterator_Type i = M_couplings.begin(); i < M_couplings.end(); ++i )
         if ( ( *i )->isPerturbed() )
         {
-            M_linearBC->GetBCWithFlag( ( *i )->flag( ( *i )->modelGlobalToLocalID( M_ID ) ) ).setBCFunction( M_bcBaseDeltaZero );
+            M_linearBC->findBCWithFlag( ( *i )->flag( ( *i )->modelGlobalToLocalID( M_ID ) ) ).setBCFunction( M_bcBaseDeltaZero );
 
             break;
         }

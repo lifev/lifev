@@ -160,7 +160,7 @@ private:
 
     std::string           M_fileName;
 
-    std::vector< BCName > M_list;
+    std::vector< bcName_Type > M_list;
     UInt                  M_listSize;
 };
 

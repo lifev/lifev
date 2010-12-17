@@ -736,7 +736,7 @@ MultiscaleModel1D::createLinearBC()
     M_bcPreviousTimeSteps.reserve( std::max( M_couplings[0]->timeInterpolationOrder(), M_couplings[1]->timeInterpolationOrder() ) );
 
     // Create bcSide map
-    std::map< bcSide_Type, std::map< bcType_Type, Real > > bcSideMap;
+    std::map< bcSide_Type, std::map< bcTypeOneD_Type, Real > > bcSideMap;
     M_bcPreviousTimeSteps.push_back( bcSideMap );
 
     // Create bcType map
@@ -868,7 +868,7 @@ MultiscaleModel1D::bcFunctionDelta( const Real& t )
 #else
 
 Real
-MultiscaleModel1D::tangentProblem( const bcSide_Type& bcOutputSide, const bcType_Type& bcOutputType )
+MultiscaleModel1D::tangentProblem( const bcSide_Type& bcOutputSide, const bcTypeOneD_Type& bcOutputType )
 {
 
 #ifdef HAVE_LIFEV_DEBUG
