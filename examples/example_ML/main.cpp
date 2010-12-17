@@ -235,7 +235,7 @@ main( int argc, char** argv )
     // finally, let's create an exporter in order to view the results
     // here, we use the ensight exporter
 
-    Ensight<RegionMesh3D<LinearTetra> > ensight( dataFile, meshPart.mesh(), "cavity", comm.MyPID());
+    Ensight<RegionMesh3D<LinearTetra> > ensight( dataFile, meshPart.meshPartition(), "cavity", comm.MyPID());
 
     // we have to define a variable that will store the solution
     vector_ptrtype velAndPressure ( new vector_type(fluid.solution(), Repeated ) );
