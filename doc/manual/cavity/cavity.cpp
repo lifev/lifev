@@ -284,7 +284,7 @@ int main(int argc, char** argv)
     std::string const exporterType =  dataFile( "exporter/type", "ensight");
 
     exporter.reset( new LifeV::Hdf5exporter<LifeV::RegionMesh3D<LifeV::LinearTetra> > ( dataFile, "cavity_example" ) );
-    exporter->setDirectory( "./" ); // This is a test to see if M_post_dir is working
+    exporter->setPostDir( "./" ); // This is a test to see if M_post_dir is working
     exporter->setMeshProcId( meshPart.meshPartition(), comm->MyPID() );
 
     velAndPressure.reset( new vector_type(*fluid.solution(), exporter->mapType() ) );
@@ -360,7 +360,7 @@ int main(int argc, char** argv)
     globalChrono.stop();
     if (verbose) std::cout << "Total simulation time:  " << globalChrono.diff() << " s." << std::endl;
 
-    exporter->CloseFile();
+    exporter->closeFile();
 
 #ifdef HAVE_MPI
     MPI_Finalize();
