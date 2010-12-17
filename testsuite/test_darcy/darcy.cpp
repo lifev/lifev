@@ -719,7 +719,7 @@ darcy::run()
         *primalExporter = *( darcySolver->primalSolution() );
 
         // Interpolate the dual vector field spammed as Raviart-Thomas into a P0 vector field
-        *dualInterpolated = uInterpolate_FESpace.FeToFeInterpolate( u_FESpace,
+        *dualInterpolated = uInterpolate_FESpace.feToFEInterpolate( u_FESpace,
                                                                     *( darcySolver->dualSolution() ) );
 
         // Copy the dual interpolated solution to the exporter
@@ -743,7 +743,7 @@ darcy::run()
         *primalExporter = *( darcySolver->primalSolution() );
 
         // Interpolate the dual vector field spammed as Raviart-Thomas into a P0 vector field
-        *dualInterpolated = uInterpolate_FESpace.FeToFeInterpolate( u_FESpace,
+        *dualInterpolated = uInterpolate_FESpace.feToFEInterpolate( u_FESpace,
                                                                     *( darcySolver->dualSolution() ) );
 
         // Copy the dual interpolated solution to the exporter
@@ -794,7 +794,7 @@ darcy::run()
             *primalExporter = *( darcySolver->primalSolution() );
 
             // Interpolate the dual vector field spammed as Raviart-Thomas into a P0 vector field
-            *dualInterpolated = uInterpolate_FESpace.FeToFeInterpolate( u_FESpace,
+            *dualInterpolated = uInterpolate_FESpace.feToFEInterpolate( u_FESpace,
                                                                         *( darcySolver->dualSolution() ) );
 
             // Copy the dual interpolated solution to the exporter
@@ -843,7 +843,7 @@ darcy::run()
             *primalExporter = *( darcySolver->primalSolution() );
 
             // Interpolate the dual vector field spammed as Raviart-Thomas into a P0 vector field
-            *dualInterpolated = uInterpolate_FESpace.FeToFeInterpolate( u_FESpace,
+            *dualInterpolated = uInterpolate_FESpace.feToFEInterpolate( u_FESpace,
                                                                         *( darcySolver->dualSolution() ) );
 
             // Copy the dual interpolated solution to the exporter

@@ -230,13 +230,13 @@ public:
      */
 
     template<typename point_type, typename vector_type>
-    Real FEinterpolateValue(const ID& elementID, const vector_type& solutionVector,
+    Real feInterpolateValue(const ID& elementID, const vector_type& solutionVector,
                             const point_type& pt, const UInt& component = 0) const;
 
 
     //! This method computes the interpolate value of a given FE function in a given point.
     /*!
-     * This method is the same as FEinterpolateValue, but for the definition of the solution
+     * This method is the same as feInterpolateValue, but for the definition of the solution
      * vector. Here, the solution is given only for the degrees of freedom of the given
      * element. The parameter solutionVector is typically a std::vector<Real> containing
      * the values in the dofs.
@@ -249,13 +249,13 @@ public:
      */
 
     template<typename point_type, typename vector_type>
-    Real FEinterpolateValueLocal(const ID& elementID, const vector_type& solutionVector,
+    Real feInterpolateValueLocal(const ID& elementID, const vector_type& solutionVector,
                                  const point_type& pt ) const;
 
 
     //! This method computes the interpolated gradient of a given FE function in a given point.
     /*!
-     * This method is the same as FEinterpolateValue, but it computes the gradient insted of
+     * This method is the same as feInterpolateValue, but it computes the gradient insted of
      * the value. Therefor, the desired element of the gradient has to be expressed using the
      * parameter gradientElement.
      *
@@ -269,14 +269,14 @@ public:
      */
 
     template<typename point_type, typename vector_type>
-    Real FEinterpolateGradient(const ID& elementID, const vector_type& solutionVector, const point_type& pt,
+    Real feInterpolateGradient(const ID& elementID, const vector_type& solutionVector, const point_type& pt,
                                const UInt& gradientElement, const UInt& component=0 ) const;
 
 
     //! This method computes the interpolated gradient of a given FE function in a given point.
     /*!
-     * This method is the same as FEinterpolateGradient, but it works with local values only,
-     * just as FEinterpolateValueLocal.
+     * This method is the same as feInterpolateGradient, but it works with local values only,
+     * just as feInterpolateValueLocal.
      *
      * Warning: This method has not been tested deeply, buggy behaviour is possible.
      *
@@ -285,7 +285,7 @@ public:
      */
 
     template<typename point_type, typename vector_type>
-    Real FEinterpolateGradientLocal(const ID& elementID, const vector_type& solutionVector, const point_type& pt,
+    Real feInterpolateGradientLocal(const ID& elementID, const vector_type& solutionVector, const point_type& pt,
                                     const UInt& gradientElement ) const;
 
 
@@ -314,7 +314,7 @@ public:
      */
 
     template <typename vector_type>
-    vector_type FeToFeInterpolate(const FESpace<mesh_Type,map_Type>& originalSpace,
+    vector_type feToFEInterpolate(const FESpace<mesh_Type,map_Type>& originalSpace,
                                   const vector_type& originalVector) const;
 
     //! This method reconstruct a gradient of a solution in the present FE space.
@@ -333,17 +333,17 @@ public:
       @Note Results might be very wrong if you are not using lagrangian FE for tetrahedra
      */
     template <typename vector_type>
-    vector_type GradientRecovery(const vector_type& solution, const UInt& component);
+    vector_type gradientRecovery(const vector_type& solution, const UInt& component);
 
-    //! Reconstruction of the laplacian using GradientRecovery procedures.
+    //! Reconstruction of the laplacian using gradientRecovery procedures.
     /*!
-      This method simply uses the FESpace::GradientRecovery method several times so
+      This method simply uses the FESpace::gradientRecovery method several times so
       that one can get a continuous approximation of the laplacian of the given solution.
 
       @Note Results might be very wrong if you are not using lagrangian FE for tetrahedra
      */
     template <typename vector_type>
-    vector_type LaplacianRecovery(const vector_type& solution);
+    vector_type laplacianRecovery(const vector_type& solution);
 
 
     //@}
@@ -416,7 +416,7 @@ private:
     inline void setSpace( const std::string& space );
 
 
-    //! This is a specialized function called by FeToFeInterpolate method for P_2 to P_1 interpolation
+    //! This is a specialized function called by feToFEInterpolate method for P_2 to P_1 interpolation
     /*!
      *  @author Samuel Quinodoz
      *  @date 13-01-2010
@@ -427,7 +427,7 @@ private:
                                   const vector_type& originalVector) const;
 
 
-    //! This is a specialized function called by FeToFeInterpolate method for P_1 Bubble to P_1 interpolation
+    //! This is a specialized function called by feToFEInterpolate method for P_1 Bubble to P_1 interpolation
     /*!
      *  @author Samuel Quinodoz
      *  @date 13-01-2010
@@ -437,7 +437,7 @@ private:
     vector_type P1bToP1Interpolate(const FESpace<mesh_Type,map_Type>& original_space,
                                    const vector_type& original_vector) const;
 
-    //! This is a specialized function called by FeToFeInterpolate method for P_1 to P_2 interpolation
+    //! This is a specialized function called by feToFEInterpolate method for P_1 to P_2 interpolation
     /*!
      *  @author Samuel Quinodoz
      *  @date 13-01-2010
@@ -448,7 +448,7 @@ private:
                                   const vector_type& original_vector) const;
 
 
-    //! This is a specialized function called by FeToFeInterpolate method for P_1 to P_1 Bubble interpolation
+    //! This is a specialized function called by feToFEInterpolate method for P_1 to P_1 Bubble interpolation
     /*!
      *  @author Samuel Quinodoz
      *  @date 13-01-2010
@@ -459,7 +459,7 @@ private:
                                    const vector_type& original_vector) const;
 
 
-    //! This is a specialized function called by FeToFeInterpolate method for P_1 Bubble to P_2 interpolation
+    //! This is a specialized function called by feToFEInterpolate method for P_1 Bubble to P_2 interpolation
     /*!
      *  @author Samuel Quinodoz
      *  @date 13-01-2010
@@ -470,7 +470,7 @@ private:
                                    const vector_type& original_vector) const;
 
 
-    //! This is a specialized function called by FESpace::FeToFeInterpolate method for P_1 Bubble to P_2 interpolation
+    //! This is a specialized function called by FESpace::feToFEInterpolate method for P_1 Bubble to P_2 interpolation
     /*!
      *  @author Samuel Quinodoz
      *  @date 13-01-2010
@@ -481,7 +481,7 @@ private:
                                    const vector_type& original_vector) const;
 
 
-    //! This is a specialized function called by FESpace::FeToFeInterpolate method for RT0 to P0 interpolation
+    //! This is a specialized function called by FESpace::feToFEInterpolate method for RT0 to P0 interpolation
     /*!
      *  @author Alessio Fumagalli
      *  @date 13-01-2010
@@ -1146,13 +1146,13 @@ template<typename MeshType, typename MapType>
 template<typename point_type,typename vector_type>
 Real
 FESpace<MeshType, MapType>::
-FEinterpolateValue(const ID& elementID, const vector_type& solutionVector, const point_type& pt, const UInt& component ) const
+feInterpolateValue(const ID& elementID, const vector_type& solutionVector, const point_type& pt, const UInt& component ) const
 {
     // The vector has to be repeated, so if it is not, we make is repeated and call this function again.
     if (solutionVector.getMaptype() != Repeated )
     {
         vector_type repeatedSolutionVector(solutionVector,Repeated);
-        return FEinterpolateValue(elementID, repeatedSolutionVector, pt, component);
+        return feInterpolateValue(elementID, repeatedSolutionVector, pt, component);
     };
 
     // Make sur everything is up to date
@@ -1199,7 +1199,7 @@ template<typename MeshType, typename MapType>
 template<typename point_type,typename vector_type>
 Real
 FESpace<MeshType, MapType>::
-FEinterpolateValueLocal(const ID& elementID, const vector_type& solutionVector, const point_type& pt ) const
+feInterpolateValueLocal(const ID& elementID, const vector_type& solutionVector, const point_type& pt ) const
 {
     // Make sur everything is up to date
     M_fe->updateFirstDeriv( M_mesh->element( elementID ));
@@ -1240,14 +1240,14 @@ template<typename MeshType, typename MapType>
 template<typename point_type,typename vector_type>
 Real
 FESpace<MeshType, MapType>::
-FEinterpolateGradient(const ID& elementID, const vector_type& solutionVector, const point_type& pt,
+feInterpolateGradient(const ID& elementID, const vector_type& solutionVector, const point_type& pt,
                       const UInt& gradientElement, const UInt& component ) const
 {
     // The vector has to be repeated, so if it is not, we make is repeated and call this function again.
     if (solutionVector.getMaptype() != Repeated )
     {
         vector_type repeatedSolutionVector(solutionVector,Repeated);
-        return FEinterpolateGradient(elementID, repeatedSolutionVector, pt, gradientElement, component);
+        return feInterpolateGradient(elementID, repeatedSolutionVector, pt, gradientElement, component);
     };
 
 
@@ -1301,7 +1301,7 @@ template<typename MeshType, typename MapType>
 template<typename point_type,typename vector_type>
 Real
 FESpace<MeshType, MapType>::
-FEinterpolateGradientLocal(const ID& elementID, const vector_type& solutionVector, const point_type& pt,
+feInterpolateGradientLocal(const ID& elementID, const vector_type& solutionVector, const point_type& pt,
                            const UInt& gradientElement ) const
 {
     // Make sur everything is up to date
@@ -1346,7 +1346,7 @@ template<typename MeshType, typename MapType>
 template<typename vector_type>
 vector_type
 FESpace<MeshType,MapType>::
-FeToFeInterpolate(const FESpace<mesh_Type,map_Type>& OriginalSpace,
+feToFEInterpolate(const FESpace<mesh_Type,map_Type>& OriginalSpace,
                   const vector_type& OriginalVector) const
 {
     // This method just check that everything is alright and then call the
@@ -1367,7 +1367,7 @@ FeToFeInterpolate(const FESpace<mesh_Type,map_Type>& OriginalSpace,
     if ( OriginalVector.getMaptype() == Unique )
     {
         const vector_type OriginalRepeated(OriginalVector,Repeated);
-        return FeToFeInterpolate(OriginalSpace,OriginalRepeated);
+        return feToFEInterpolate(OriginalSpace,OriginalRepeated);
     };
 
     // Distinguish the other cases
@@ -1441,11 +1441,11 @@ template<typename MeshType, typename MapType>
 template<typename vector_type>
 vector_type
 FESpace<MeshType,MapType>::
-GradientRecovery(const vector_type& solution, const UInt& dxi)
+gradientRecovery(const vector_type& solution, const UInt& dxi)
 {
     if (solution.getMaptype() != Repeated)
     {
-        return GradientRecovery(vector_type(solution,Repeated),dxi);
+        return gradientRecovery(vector_type(solution,Repeated),dxi);
     };
 
     // Define a special quadrature rule for the interpolation
@@ -1500,11 +1500,11 @@ template<typename MeshType, typename MapType>
 template<typename vector_type>
 vector_type
 FESpace<MeshType,MapType>::
-LaplacianRecovery(const vector_type& solution)
+laplacianRecovery(const vector_type& solution)
 {
     if (solution.getMaptype() != Repeated)
     {
-        return LaplacianRecovery(vector_type(solution,Repeated));
+        return laplacianRecovery(vector_type(solution,Repeated));
     }
 
     vector_type laplacian(solution);
@@ -1512,7 +1512,7 @@ LaplacianRecovery(const vector_type& solution)
 
     for (UInt iterDim(0); iterDim< 3; ++iterDim)
     {
-        laplacian+= GradientRecovery(GradientRecovery(solution,iterDim),iterDim);
+        laplacian+= gradientRecovery(gradientRecovery(solution,iterDim),iterDim);
     }
     return laplacian;
 }
@@ -1979,7 +1979,7 @@ P2ToP1bInterpolate(const FESpace<mesh_Type,map_Type>& OriginalSpace,
             };
 
             Real gravityCenterValue(0);
-            gravityCenterValue = FEinterpolateValue(elemId,OriginalVector,gravityCenter,iComponent);
+            gravityCenterValue = feInterpolateValue(elemId,OriginalVector,gravityCenter,iComponent);
 
             // Here we do the combinaison because it is not Lagrangian.
             DofValues[4] = 256*(gravityCenterValue - (DofValues[0]+DofValues[1]+DofValues[2]+DofValues[3])/4.0);

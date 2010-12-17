@@ -757,7 +757,7 @@ impes::run()
         pressureSolver.computePrimalAndDual();
 
         // Interpolate the Darcy velocity
-        *pressure_dualInterpolated = pressure_uInterpolate_FESpace.FeToFeInterpolate( pressure_u_FESpace,
+        *pressure_dualInterpolated = pressure_uInterpolate_FESpace.feToFEInterpolate( pressure_u_FESpace,
                                                                                       *pressureSolver.dualSolution() );
 
         // Solve the saturation equation.
