@@ -296,7 +296,7 @@ void Ensight<MeshType>::setMeshProcId( const meshPtr_Type mesh, const Int& procI
 
     typedef typename MeshType::ElementShape ElementShape;
 
-    switch ( ElementShape::Shape )
+    switch ( ElementShape::S_shape )
     {
     case TETRA:
         M_FEstr = "tetra4";

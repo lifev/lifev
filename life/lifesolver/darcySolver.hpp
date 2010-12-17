@@ -1040,7 +1040,7 @@ computePrimalAndDual ()
                         M_primal_FESpace.dof(), 0 );
 
 
-        for ( UInt iLocalFace(1); iLocalFace <=  M_dual_FESpace.mesh()->element( iElem ).numLocalFaces; ++iLocalFace )
+        for ( UInt iLocalFace(1); iLocalFace <=  M_dual_FESpace.mesh()->element( iElem ).S_numLocalFaces; ++iLocalFace )
         {
             UInt iGlobalFace( M_dual_FESpace.mesh()->localFaceId( iElem, iLocalFace ) );
             if ( M_dual_FESpace.mesh()->faceElement( iGlobalFace, 1 ) != iElem )

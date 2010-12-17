@@ -1356,14 +1356,14 @@ template <typename GEOSHAPE, typename MC>
 UInt
 RegionMesh2D<GEOSHAPE, MC>::numLocalVertices() const
 {
-    return FaceType::numLocalVertices;
+    return FaceType::S_numLocalVertices;
 }
 
 template <typename GEOSHAPE, typename MC>
 UInt
 RegionMesh2D<GEOSHAPE, MC>::numLocalEdges() const
 {
-    return FaceType::numLocalEdges;
+    return FaceType::S_numLocalEdges;
 }
 
 // ************** Generic Methods
@@ -1792,7 +1792,7 @@ RegionMesh2D<GEOSHAPE, MC>::isBoundaryEdge( EdgeType const & e ) const
 #ifdef NOT_BDATA_FIRST
     //ASSERT(false,"In this version Boundary edges must be stored first");
     bool isboundary = true;
-    for ( UInt k = 1; k <= EdgeType::numVertices; ++k )
+    for ( UInt k = 1; k <= EdgeType::S_numVertices; ++k )
     {
         isboundary = isboundary & e.point( k ).boundary();
     }
@@ -2127,11 +2127,11 @@ UInt
 RegionMesh2D<GEOSHAPE, MC>::localEdgeId( const FaceType & ifac, UInt const locE ) const
 {
     ASSERT_PRE( !_FToE.empty(), "Face to Edges array not  set" );
-    ASSERT_BD( locE > 0 && locE <= FaceType::numLocalEdges );
+    ASSERT_BD( locE > 0 && locE <= FaceType::S_numLocalEdges );
     std::pair<BareEdge, bool> it;
     UInt i1, i2;
-    i1 = GEOSHAPE::eToP( locE, 1 );
-    i2 = GEOSHAPE::eToP( locE, 2 );
+    i1 = GEOSHAPE::edgeToPoint( locE, 1 );
+    i2 = GEOSHAPE::edgeToPoint( locE, 2 );
     i1 = ( ifac.point( i1 ) ).id();
     i2 = ( ifac.point( i2 ) ).id();
     it = makeBareEdge( i1, i2 );
@@ -2166,7 +2166,7 @@ const
 {
     ASSERT_PRE( !_FToE.empty(), "Face to Edges array not  set" );
     ASSERT_BD( facId > 0 && facId <= M_numFaces );
-    ASSERT_BD( locE > 0 && locE <= FaceType::numLocalEdges );
+    ASSERT_BD( locE > 0 && locE <= FaceType::S_numLocalEdges );
     return _FToE( locE, facId );
 }
 
@@ -2248,8 +2248,8 @@ RegionMesh2D<GEOSHAPE, MC>::updateElementEdges( bool ce, UInt ee )
         fid = iface->localId();
         for ( UInt j = 1; j <= numLocalEdges(); j++ )
         {
-            i1 = ele.eToP( j, 1 );
-            i2 = ele.eToP( j, 2 );
+            i1 = ele.edgeToPoint( j, 1 );
+            i2 = ele.edgeToPoint( j, 2 );
             i1 = ( iface->point( i1 ) ).localId();
             i2 = ( iface->point( i2 ) ).localId();
             _edge = makeBareEdge( i1, i2);
@@ -2260,9 +2260,9 @@ RegionMesh2D<GEOSHAPE, MC>::updateElementEdges( bool ce, UInt ee )
                 if ( e.second )
                 {
                     // a new face It must be internal.
-                    for ( UInt k = 1; k <= EdgeType::numPoints; ++k )//
-                        //iface->point( ele.eToP( j, k ) );
-                        edg.setPoint( k, iface->point( ele.eToP( j, k ) ) );
+                    for ( UInt k = 1; k <= EdgeType::S_numPoints; ++k )//
+                        //iface->point( ele.edgeToPoint( j, k ) );
+                        edg.setPoint( k, iface->point( ele.edgeToPoint( j, k ) ) );
                     edg.ad_first()  = fid;
                     edg.pos_first() = j;
 

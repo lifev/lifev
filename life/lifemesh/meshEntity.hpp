@@ -85,7 +85,7 @@ public:
     /*!
        @param id The value for both identifers.
      */
-    MeshEntity( ID id ):
+    MeshEntity( const ID& id ):
             M_id( id ),
             M_localId( id )
     {};
@@ -95,7 +95,7 @@ public:
        @param id The value for the global ID.
        @param lid The value for the local ID.
      */
-    MeshEntity( ID id, ID lid ):
+    MeshEntity( const ID& id, const ID& lid ):
             M_id( id ),
             M_localId( lid )
     {};
@@ -162,7 +162,7 @@ public:
     /*!
       @param id The new global identifier.
     */
-    inline void setId( ID id)
+    inline void setId( const ID& id)
     {
         M_id = id;
     };
@@ -171,7 +171,7 @@ public:
     /*!
       @param id The new local identifier.
     */
-    inline void setLocalId( ID id)
+    inline void setLocalId( const ID& id)
     {
         M_localId = id;
     };
@@ -245,7 +245,7 @@ public:
       a set method if you want different identifiers.
       @param boundary The value of the boundary indicator.
     */
-    MeshEntityWithBoundary( ID id, bool boundary = false ) :
+    MeshEntityWithBoundary( const ID& id, bool boundary = false ) :
             MeshEntity( id ),
             M_boundary( boundary )
     {};

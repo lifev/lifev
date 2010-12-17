@@ -268,15 +268,15 @@ void DofInterface3Dto3D::interpolate( MeshType& mesh2, const UInt nbComp, const 
     typedef typename MeshType::VolumeShape GeoShape; // Element shape
     typedef typename MeshType::FaceShape GeoBShape;  // Face Shape
 
-    UInt nbVertexPerFace = GeoBShape::numVertices; // Number of face's vertices
-    UInt nbEdgePerFace = GeoBShape::numEdges;    // Number of face's edges
+    UInt nbVertexPerFace = GeoBShape::S_numVertices; // Number of face's vertices
+    UInt nbEdgePerFace = GeoBShape::S_numEdges;    // Number of face's edges
 
     UInt nbDofPerVertex = M_refFE1->nbDofPerVertex; // number of Dof per vertices
     UInt nbDofPerEdge = M_refFE1->nbDofPerEdge;   // number of Dof per edges
     UInt nbDofPerFace = M_refFE1->nbDofPerFace;   // number of Dof per faces
 
-    UInt nbVertexPerElement = GeoShape::numVertices; // Number of element's vertices
-    UInt nbEdgePerElement = GeoShape::numEdges;    // Number of element's edges
+    UInt nbVertexPerElement = GeoShape::S_numVertices; // Number of element's vertices
+    UInt nbEdgePerElement = GeoShape::S_numEdges;    // Number of element's edges
 
     UInt nbDofPerElement = M_refFE2->nbDof(); // Number of Dof per element in the lowDof mesh
 
@@ -312,7 +312,7 @@ void DofInterface3Dto3D::interpolate( MeshType& mesh2, const UInt nbComp, const 
             for ( ID iVeFa = 1; iVeFa <= nbVertexPerFace; ++iVeFa )
             {
 
-                iVeEl = GeoShape::fToP( iFaEl, iVeFa ); // local vertex number (in element)
+                iVeEl = GeoShape::faceToPoint( iFaEl, iVeFa ); // local vertex number (in element)
 
                 // Loop number of Dof per vertex
                 for ( ID l = 1; l <= nbDofPerVertex; ++l )
@@ -348,7 +348,7 @@ void DofInterface3Dto3D::interpolate( MeshType& mesh2, const UInt nbComp, const 
             for ( ID iEdFa = 1; iEdFa <= nbEdgePerFace; ++iEdFa )
             {
 
-                iEdEl = GeoShape::fToE( iFaEl, iEdFa ).first; // local edge number (in element)
+                iEdEl = GeoShape::faceToEdge( iFaEl, iEdFa ).first; // local edge number (in element)
 
                 // Loop number of Dof per edge
                 for ( ID l = 1; l <= nbDofPerEdge; ++l )
@@ -418,7 +418,7 @@ void DofInterface3Dto3D::updateFaceConnections( const MeshType& mesh1, const ent
 
     typedef typename MeshType::FaceShape GeoBShape; // Shape of the faces
 
-    UInt nbVertexPerFace = GeoBShape::numVertices; // Number of face's vertices
+    UInt nbVertexPerFace = GeoBShape::S_numVertices; // Number of face's vertices
 
     KN<Real> v1( nbVertexPerFace * nDimensions ), v2( nDimensions );
 
@@ -507,8 +507,8 @@ void DofInterface3Dto3D::updateDofConnections( const Mesh& mesh1, const Dof& dof
     typedef typename Mesh::VolumeShape GeoShape;
     typedef typename Mesh::FaceShape GeoBShape;
 
-    UInt nbVertexPerFace = GeoBShape::numVertices; // Number of face's vertices
-    UInt nbEdgePerFace = GeoBShape::numEdges;    // Number of face's edges
+    UInt nbVertexPerFace = GeoBShape::S_numVertices; // Number of face's vertices
+    UInt nbEdgePerFace = GeoBShape::S_numEdges;    // Number of face's edges
 
     UInt nbDofPerVertex1 = M_refFE1->nbDofPerVertex(); // number of Dof per vertices on mesh1
     UInt nbDofPerEdge1 = M_refFE1->nbDofPerEdge();   // number of Dof per edges on mesh1
@@ -518,8 +518,8 @@ void DofInterface3Dto3D::updateDofConnections( const Mesh& mesh1, const Dof& dof
     UInt nbDofPerEdge2 = M_refFE2->nbDofPerEdge();   // number of Dof per edges on mesh2
     UInt nbDofPerFace2 = M_refFE2->nbDofPerFace();   // number of Dof per faces on mesh2
 
-    UInt nbVertexPerElement = GeoShape::numVertices; // Number of element's vertices
-    UInt nbEdgePerElement = GeoShape::numEdges;    // Number of element's edges
+    UInt nbVertexPerElement = GeoShape::S_numVertices; // Number of element's vertices
+    UInt nbEdgePerElement = GeoShape::S_numEdges;    // Number of element's edges
 
     UInt nbVertexDofPerFace1 = nbDofPerVertex1 * nbVertexPerFace; // number of vertex's Dof on a face on mesh1
     UInt nbEdgeDofPerFace1 = nbDofPerEdge1 * nbEdgePerFace; // number of edge's Dof on a face on mesh1
@@ -563,7 +563,7 @@ void DofInterface3Dto3D::updateDofConnections( const Mesh& mesh1, const Dof& dof
             for ( ID iVeFa1 = 1; iVeFa1 <= nbVertexPerFace; ++iVeFa1 )
             {
 
-                iVeEl1 = GeoShape::fToP( iFaEl1, iVeFa1 ); // local vertex number (in element)
+                iVeEl1 = GeoShape::faceToPoint( iFaEl1, iVeFa1 ); // local vertex number (in element)
 
                 if ( flag1 != 0 && mesh1.boundaryFace(i->first).point(iVeFa1).marker() != *flag1) continue;
 
@@ -577,7 +577,7 @@ void DofInterface3Dto3D::updateDofConnections( const Mesh& mesh1, const Dof& dof
                     for ( ID iVeFa2 = 1; iVeFa2 <= nbVertexPerFace; ++iVeFa2 )
                     {
 
-                        iVeEl2 = GeoShape::fToP( iFaEl2, iVeFa2 ); // local vertex number (in element)
+                        iVeEl2 = GeoShape::faceToPoint( iFaEl2, iVeFa2 ); // local vertex number (in element)
 
                         // Loop on number of Dof per vertex (mesh2)
                         for ( ID k = 1; k <= nbDofPerVertex2; ++k )
@@ -614,7 +614,7 @@ void DofInterface3Dto3D::updateDofConnections( const Mesh& mesh1, const Dof& dof
             for ( ID iEdFa1 = 1; iEdFa1 <= nbEdgePerFace; ++iEdFa1 )
             {
 
-                iEdEl1 = GeoShape::fToE( iFaEl1, iEdFa1 ).first; // local edge number (in element)
+                iEdEl1 = GeoShape::faceToEdge( iFaEl1, iEdFa1 ).first; // local edge number (in element)
 
                 // Loop number of Dof per edge (mesh1)
                 for ( ID l = 1; l <= nbDofPerEdge1; ++l )
@@ -627,7 +627,7 @@ void DofInterface3Dto3D::updateDofConnections( const Mesh& mesh1, const Dof& dof
                     for ( ID iEdFa2 = 1; iEdFa2 <= nbVertexPerFace; ++iEdFa2 )
                     {
 
-                        iEdEl2 = GeoShape::fToE( iFaEl2, iEdFa2 ).first; // local edge number (in element)
+                        iEdEl2 = GeoShape::faceToEdge( iFaEl2, iEdFa2 ).first; // local edge number (in element)
 
                         // Loop number of Dof per edge (mesh1)
                         for ( ID k = 1; k <= nbDofPerEdge2; ++k )

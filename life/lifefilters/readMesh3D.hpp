@@ -132,9 +132,9 @@ readMppFile( RegionMesh3D<GeoShape, MC> & mesh,
 
     std::ostream& oStr = verbose ? std::cout : discardedLog;
 
-    ASSERT_PRE0( GeoShape::Shape == TETRA ,  "readMppFiles reads only tetra meshes" ) ;
-    ASSERT_PRE0( GeoShape::Shape == TETRA,   "Sorry, readMppFiles reads only tetra meshes" );
-    ASSERT_PRE0( GeoShape::numVertices <= 6, "Sorry, readMppFiles handles only liner&quad tetras" );
+    ASSERT_PRE0( GeoShape::S_shape == TETRA ,  "readMppFiles reads only tetra meshes" ) ;
+    ASSERT_PRE0( GeoShape::S_shape == TETRA,   "Sorry, readMppFiles reads only tetra meshes" );
+    ASSERT_PRE0( GeoShape::S_numVertices <= 6, "Sorry, readMppFiles handles only liner&quad tetras" );
 
     // open stream to read header
 
@@ -172,7 +172,7 @@ readMppFile( RegionMesh3D<GeoShape, MC> & mesh,
     nEd = nVo + nVe + ( 3 * nBFa - 2 * nBVe ) / 4;
 
     // Be a little verbose
-    if ( GeoShape::numPoints > 4 )
+    if ( GeoShape::S_numPoints > 4 )
     {
         std::cout << "Quadratic Tetra  Mesh (from Linear geometry)"
                   << std::endl;
@@ -364,7 +364,7 @@ readMppFile( RegionMesh3D<GeoShape, MC> & mesh,
     }
     // This part is to build a P2 mesh from a P1 geometry
 
-    if ( GeoShape::numPoints > 4 )
+    if ( GeoShape::S_numPoints > 4 )
     {
     	p2MeshFromP1Data( mesh );
     }
@@ -526,7 +526,7 @@ readINRIAMeshFile( RegionMesh3D<GeoShape, MC>&      mesh,
         std::abort();
     }
 
-    ASSERT_PRE0( GeoShape::Shape == shape, "INRIA Mesh file and mesh element shape is not consistent" );
+    ASSERT_PRE0( GeoShape::S_shape == shape, "INRIA Mesh file and mesh element shape is not consistent" );
 
     // Euler formulas to get number of faces and number of edges
     nFa = 2 * nVo + ( nBFa / 2 );
@@ -543,16 +543,16 @@ readINRIAMeshFile( RegionMesh3D<GeoShape, MC>&      mesh,
     {
 
     case HEXA:
-        ASSERT_PRE0( GeoShape::numPoints == 8, "Sorry I can read only bilinear Hexa meshes" );
+        ASSERT_PRE0( GeoShape::S_numPoints == 8, "Sorry I can read only bilinear Hexa meshes" );
         std::cout << "Linear Hexa Mesh" << std::endl;
         nPo =  nVe;
         nBPo = nBVe;
         break;
 
     case TETRA:
-        if ( GeoShape::numPoints > 4 )
+        if ( GeoShape::S_numPoints > 4 )
         {
-            //    if (GeoShape::numPoints ==6 )
+            //    if (GeoShape::S_numPoints ==6 )
             std::cout << "Quadratic Tetra  Mesh (from Linear geometry)" << std::endl;
             nPo = nVe + nEd;
 
@@ -900,7 +900,7 @@ readINRIAMeshFile( RegionMesh3D<GeoShape, MC>&      mesh,
        }
 
     // This part is to build a P2 mesh from a P1 geometry
-    if ( shape == TETRA && GeoShape::numPoints > 4 )
+    if ( shape == TETRA && GeoShape::S_numPoints > 4 )
     {
         p2MeshFromP1Data( mesh );
     }
@@ -1584,7 +1584,7 @@ readNetgenMesh(RegionMesh3D<GeoShape,MC> & mesh,
     nEd = nVo + nVe + ( 3 * nBFa - 2 * nBVe ) / 4;
 
     // Be a little verbose
-    if ( GeoShape::numPoints > 4 )
+    if ( GeoShape::S_numPoints > 4 )
     {
         std::cout << "Quadratic Tetra  Mesh (from Linear geometry)" <<std::endl;
         nPo = nVe + nEd;
@@ -1728,7 +1728,7 @@ readNetgenMesh(RegionMesh3D<GeoShape,MC> & mesh,
 
     // This part is to build a P2 mesh from a P1 geometry
 
-    if ( GeoShape::numPoints > 4 )
+    if ( GeoShape::S_numPoints > 4 )
     {
     p2MeshFromP1Data( mesh );
     }

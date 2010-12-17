@@ -95,8 +95,8 @@ template <typename RegionMesh2D>
 
 bool
 readMesh2D( RegionMesh2D      & mesh, //readMesh2D
-            const std::string & fileName, 
-            EntityFlag          regionFlag )
+            const std::string & fileName,
+            entityFlag_Type     regionFlag )
 {
     UInt i, i1, i2, i3;
     UInt nVe, nBVe, nFa, nPo, nBPo, nEd, nBEd;
@@ -106,13 +106,13 @@ readMesh2D( RegionMesh2D      & mesh, //readMesh2D
 
     typedef typename RegionMesh2D::ElementShape ElementShape;
 
-    if ( ElementShape::Shape != TRIANGLE )
+    if ( ElementShape::S_shape != TRIANGLE )
     {
         std::cerr << "Sorry, readMesh2D reads only triangle meshes" << std::endl;
          std::abort();
     }
 
-    if ( ElementShape::numPoints > 6 )
+    if ( ElementShape::S_numPoints > 6 )
     {
         std::cerr << "Sorry, readMppFiles handles only liner&quad triangles" << std::endl;
         std::abort();
@@ -188,13 +188,13 @@ readMesh2D( RegionMesh2D      & mesh, //readMesh2D
     nVe =  UInt( np );
     nBVe = UInt( nb );
 
-    /* 
+    /*
     I Assume that the mesh is OK, so the number of boundary vertices coincides
-    with the number of boundary sides: mesh checkers have still to be implemented 
+    with the number of boundary sides: mesh checkers have still to be implemented
     */
 
     // Do I want a P2 mesh?
-    p2meshwanted = ( ElementShape::numPoints == 6 );
+    p2meshwanted = ( ElementShape::S_numPoints == 6 );
 
     // Do I have a P2 mesh?
     p2meshstored = ( npe == 6 );
@@ -243,7 +243,7 @@ readMesh2D( RegionMesh2D      & mesh, //readMesh2D
 
     // Only Boundary Edges
     mesh.setMaxNumEdges( nBEd );
-    mesh.numEdges() = nEd; 
+    mesh.numEdges() = nEd;
 
     /*
     Here the REAL number of edges (all of them) even if I store only BEdges.
@@ -377,7 +377,7 @@ template <typename GeoShape, typename MC>
 bool
 readGmshFile( RegionMesh2D<GeoShape, MC> & mesh,
               const std::string          & fileName,
-              EntityFlag                   regionFlag )
+              entityFlag_Type              regionFlag )
 {
     std::ifstream __is ( fileName.c_str() );
 
@@ -602,7 +602,7 @@ template <typename GeoShape, typename MC>
 bool
 readFreeFemFile( RegionMesh2D<GeoShape, MC> & mesh,
                  const std::string          & fileName,
-                 EntityFlag                   regionFlag, bool useless )
+                 entityFlag_Type              regionFlag, bool useless )
 {
     BareItemsHandler<BareEdge> _be;
     std::pair<BareEdge, bool> _edge;
@@ -629,7 +629,7 @@ readFreeFemFile( RegionMesh2D<GeoShape, MC> & mesh,
     std::vector<bool> __isonboundary(__nv);
     std::vector<UInt> __whichboundary(__nv);
 
-#ifdef DEBUG    
+#ifdef DEBUG
     std::debug( 3000 ) << "reading "<< __nv << " nodes\n";
 #endif
 
@@ -649,7 +649,7 @@ readFreeFemFile( RegionMesh2D<GeoShape, MC> & mesh,
     std::vector<int> __triangle_nodes( 3 * __nt );
     std::vector<int> __triangle_label( __nt );
 
-#ifdef DEBUG  
+#ifdef DEBUG
     std::debug( 3000 ) << "reading "<< __nt << " triangles\n";
 #endif
 
@@ -781,10 +781,10 @@ readFreeFemFile( RegionMesh2D<GeoShape, MC> & mesh,
 } // Function readFreeFemFile
 
 template <typename RegionMesh2D>
-bool __attribute__ ((__deprecated__)) 
+bool __attribute__ ((__deprecated__))
 readMesh2d( RegionMesh2D      & mesh,
-            const std::string & fileName, 
-            EntityFlag          regionFlag )
+            const std::string & fileName,
+            entityFlag_Type     regionFlag )
 {
 return readMesh2D( mesh, fileName, regionFlag );
 }

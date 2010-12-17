@@ -59,23 +59,23 @@ Dof::Dof( const LocalDofPattern& fePattern, UInt offset ) : M_elementDofPattern(
         M_numLocalDofByFace = 1;
         break;
     case 4:
-        M_faceToPoint = LinearTetra::fToP;
+        M_faceToPoint = LinearTetra::faceToPoint;
         M_numLocalDofByFace = 3;
         break;
     case 5:
-        M_faceToPoint = LinearTetraBubble::fToP;
+        M_faceToPoint = LinearTetraBubble::faceToPoint;
         M_numLocalDofByFace = 3;
         break;
     case 10:
-        M_faceToPoint = QuadraticTetra::fToP;
+        M_faceToPoint = QuadraticTetra::faceToPoint;
         M_numLocalDofByFace = 6;
         break;
     case 8:
-        M_faceToPoint = LinearHexa::fToP;
+        M_faceToPoint = LinearHexa::faceToPoint;
         M_numLocalDofByFace = 4;
         break;
     case 27:
-        M_faceToPoint = QuadraticHexa::fToP;
+        M_faceToPoint = QuadraticHexa::faceToPoint;
         M_numLocalDofByFace = 27;
         break;
     default:

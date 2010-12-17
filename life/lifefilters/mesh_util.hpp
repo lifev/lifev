@@ -119,7 +119,7 @@ Real checkVolumes( RegionMesh3D const & mesh,
     elSign.reserve( mesh.numVolumes() );
     typedef typename RegionMesh3D::VolumeShape GeoShape;
 
-    switch ( GeoShape::Shape )
+    switch ( GeoShape::S_shape )
     {
     case TETRA:
     {
@@ -191,7 +191,7 @@ void fixVolumes( RegionMesh3D & mesh,
 
         if ( ! elSign( i ) )
         {
-            switch ( GeoShape::Shape )
+            switch ( GeoShape::S_shape )
             {
             case TETRA:
                 mesh.volume( i ).exchangePoints( otn_Tetra );
@@ -234,7 +234,7 @@ void getVolumeFromFaces( RegionMesh3D const & mesh,
 
     current_fe_type bdfe;
 
-    switch ( GeoBShape::Shape )
+    switch ( GeoBShape::S_shape )
     {
     case TRIANGLE:
         bdfe = current_fe_type( new CurrentBdFE( feTriaP1, geoLinearTria,
@@ -280,7 +280,7 @@ Real testClosedDomain( RegionMesh3D const & mesh,
     GetOnes ones;
     Real test( 0.0 );
 
-    switch ( RegionMesh3D::FaceShape::Shape )
+    switch ( RegionMesh3D::FaceShape::S_shape )
     {
     case TRIANGLE:
         bdfe = current_fe_type( new CurrentBdFE( feTriaP1, geoLinearTria,
@@ -819,7 +819,7 @@ bool checkMesh3D( RegionMesh3D & mesh,
 
     bool eulok2( true );
 
-    if ( RegionMesh3D::ElementShape::Shape == TETRA )
+    if ( RegionMesh3D::ElementShape::S_shape == TETRA )
     {
         out << std::endl << "Checking Euler formulae: ";
         eulok2 = ( mesh.numEdges() -

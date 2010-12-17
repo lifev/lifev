@@ -194,7 +194,7 @@ void regularMesh3D( RegionMesh3D<GeoShape,MC>& mesh,
 
     UInt pointsNumber( 0 );
     UInt boundaryPointsNumber( 0 );
-    if ( GeoShape::numPoints>4 )
+    if ( GeoShape::S_numPoints>4 )
     {
         std::cout << "Quadratic Tetra Mesh ( from Linear geometry )" << std::endl;
         // In this case there is one extra points on each edge
@@ -1005,7 +1005,7 @@ void regularMesh3D( RegionMesh3D<GeoShape,MC>& mesh,
     std::cout << "done" << std::endl;
 
     // Build a P2 mesh from a P1 geometry
-    if ( GeoShape::numPoints > 4 ) p2MeshFromP1Data( mesh );
+    if ( GeoShape::S_numPoints > 4 ) p2MeshFromP1Data( mesh );
 
     // Test mesh
     Switch sw;

@@ -676,7 +676,7 @@ void Hdf5exporter<MeshType>::writeTopology  ( std::ofstream& xdmf )
 {
     std::string FEstring;
 
-    switch ( MeshType::ElementShape::Shape )
+    switch ( MeshType::ElementShape::S_shape )
     {
     case TETRA:
         FEstring = "Tetrahedron";
@@ -960,7 +960,7 @@ void Hdf5exporter<MeshType>::writeGeometry()
 
     // Connections
     // Need to use elements not dofs for this map. Recover local element lists
-    UInt numberOfPoints = MeshType::ElementShape::numPoints;
+    UInt numberOfPoints = MeshType::ElementShape::S_numPoints;
 
     std::vector<Int> elementList;
     elementList.reserve(this->M_mesh->numElements()*numberOfPoints);
@@ -1001,7 +1001,7 @@ void Hdf5exporter<MeshType>::writeGeometry()
     // This gives the right map for the coordinate arrays
 
     EpetraMap subMap;
-    switch ( MeshType::ElementShape::Shape )
+    switch ( MeshType::ElementShape::S_shape )
     {
     case TETRA:
     {

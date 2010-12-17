@@ -1925,28 +1925,28 @@ template <typename GEOSHAPE, typename MC>
 UInt
 RegionMesh3D<GEOSHAPE, MC>::numLocalVertices() const
 {
-    return VolumeType::numLocalVertices;
+    return VolumeType::S_numLocalVertices;
 }
 
 template <typename GEOSHAPE, typename MC>
 UInt
 RegionMesh3D<GEOSHAPE, MC>::numLocalFaces() const
 {
-    return VolumeType::numLocalFaces;
+    return VolumeType::S_numLocalFaces;
 }
 
 template <typename GEOSHAPE, typename MC>
 UInt
 RegionMesh3D<GEOSHAPE, MC>::numLocalEdges() const
 {
-    return VolumeType::numLocalEdges;
+    return VolumeType::S_numLocalEdges;
 }
 
 template <typename GEOSHAPE, typename MC>
 UInt
 RegionMesh3D<GEOSHAPE, MC>::numLocalEdgesOfFace() const
 {
-    return FaceType::numLocalEdges;
+    return FaceType::S_numLocalEdges;
 }
 
 // Generic Methods
@@ -3254,7 +3254,7 @@ RegionMesh3D<GEOSHAPE, MC>::localFaceId( UInt const volId, UInt const locF ) con
 {
     ASSERT_PRE( !M_VToF.empty(), "Volume to Face array not  set" );
     ASSERT_BD( volId > 0 && volId <= M_numVolumes );
-    ASSERT_BD( locF > 0 && locF <= VolumeType::numLocalFaces );
+    ASSERT_BD( locF > 0 && locF <= VolumeType::S_numLocalFaces );
     return M_VToF.operator() ( locF, volId );
 }
 
@@ -3266,7 +3266,7 @@ const
 {
     ASSERT_PRE( !M_VToE.empty(), "Volume to Edges array not  set" );
     ASSERT_BD( volId > 0 && volId <= M_numVolumes );
-    ASSERT_BD( locE > 0 && locE <= VolumeType::numLocalEdges );
+    ASSERT_BD( locE > 0 && locE <= VolumeType::S_numLocalEdges );
     return M_VToE( locE, volId );
 }
 
@@ -3276,7 +3276,7 @@ UInt
 RegionMesh3D<GEOSHAPE, MC>::localFaceId( const VolumeType & iv, UInt const locF ) const
 {
     ASSERT_PRE( !M_VToF.empty(), "Volume to Face array not  set" );
-    ASSERT_BD( locF > 0 && locF <= VolumeType::numLocalFaces );
+    ASSERT_BD( locF > 0 && locF <= VolumeType::S_numLocalFaces );
     return M_VToF( locF, iv.id() );
 }
 
@@ -3287,7 +3287,7 @@ RegionMesh3D<GEOSHAPE, MC>::localEdgeId( const VolumeType & iv, UInt const locE 
 const
 {
     ASSERT_PRE( !M_VToE.empty(), "Volume to Edges array not  set" );
-    ASSERT_BD( locE > 0 && locE <= VolumeType::numLocalEdges );
+    ASSERT_BD( locE > 0 && locE <= VolumeType::S_numLocalEdges );
     return M_VToE.operator() ( locE, iv.id() );
 }
 
@@ -3323,7 +3323,7 @@ RegionMesh3D<GEOSHAPE, MC>::updateElementEdges( bool ce, bool verbose, UInt ee )
         std::cout << "     Updating element edges ... " << std::flush;
 
     if ( ce && ee == 0 )
-        ee = M_numEdges > M_numBEdges ? M_numEdges : ( GEOSHAPE::numFaces / 2 - 1 ) * numVolumes() + M_numBFaces / 2 + numVertices();
+        ee = M_numEdges > M_numBEdges ? M_numEdges : ( GEOSHAPE::S_numFaces / 2 - 1 ) * numVolumes() + M_numBFaces / 2 + numVertices();
 
 
     if ( ce )
@@ -3371,8 +3371,8 @@ RegionMesh3D<GEOSHAPE, MC>::updateElementEdges( bool ce, bool verbose, UInt ee )
 
             for ( UInt j = 1; j <= numLocalEdgesOfFace(); j++ )
             {
-                i1 = bele.eToP( j, 1 );
-                i2 = bele.eToP( j, 2 );
+                i1 = bele.edgeToPoint( j, 1 );
+                i2 = bele.edgeToPoint( j, 2 );
                 // go to global
                 i1 = ( ifa->point( i1 ) ).id();
                 i2 = ( ifa->point( i2 ) ).id();
@@ -3383,9 +3383,9 @@ RegionMesh3D<GEOSHAPE, MC>::updateElementEdges( bool ce, bool verbose, UInt ee )
 
                 if ( ce && e.second )
                 {
-                    for ( UInt k = 1; k <= 2 + FaceShape::nbPtsPerEdge; k++ )
+                    for ( UInt k = 1; k <= 2 + FaceShape::S_numPointsPerEdge; k++ )
                     {
-                        UInt inode = bele.eToP(j, k);
+                        UInt inode = bele.edgeToPoint(j, k);
                         edg.setPoint( k, ifa->point( inode ) );
                     }
                     inheritPointsWeakerMarker( edg );
@@ -3410,8 +3410,8 @@ RegionMesh3D<GEOSHAPE, MC>::updateElementEdges( bool ce, bool verbose, UInt ee )
         // REMEMBER: numbering from 1
         for ( UInt j = 1; j <= numLocalEdges(); j++ )
         {
-            i1 = ele.eToP( j, 1 );
-            i2 = ele.eToP( j, 2 );
+            i1 = ele.edgeToPoint( j, 1 );
+            i2 = ele.edgeToPoint( j, 2 );
             // go to global
             i1 = ( iv->point( i1 ) ).id();
             i2 = ( iv->point( i2 ) ).id();
@@ -3421,9 +3421,9 @@ RegionMesh3D<GEOSHAPE, MC>::updateElementEdges( bool ce, bool verbose, UInt ee )
             M_VToE.operator() ( j, vid ) = e.first;
             if ( ce && e.second )
             {
-                for ( UInt k = 1; k <= 2 + VolumeShape::nbPtsPerEdge; k++ )
+                for ( UInt k = 1; k <= 2 + VolumeShape::S_numPointsPerEdge; k++ )
                 {
-                    UInt inode = ele.eToP(j, k);
+                    UInt inode = ele.edgeToPoint(j, k);
                     edg.setPoint( k, iv->point( inode ) );
                 }
                 inheritPointsWeakerMarker( edg );
@@ -3478,7 +3478,7 @@ RegionMesh3D<GEOSHAPE, MC>::updateElementFaces( bool cf, const bool verbose, UIn
     // If the counter is set we trust it! Otherwise we use Euler formula
 
     if ( cf && ef == 0 )
-        ef = M_numFaces > M_numBFaces ? M_numFaces : ( GEOSHAPE::numFaces * numVolumes() + M_numBFaces ) / 2;
+        ef = M_numFaces > M_numBFaces ? M_numFaces : ( GEOSHAPE::S_numFaces * numVolumes() + M_numBFaces ) / 2;
 
     ASSERT( cf || numFaces() > 0 , "Mesh is not properly set!" );
 
@@ -3534,7 +3534,7 @@ RegionMesh3D<GEOSHAPE, MC>::updateElementFaces( bool cf, const bool verbose, UIn
             i1 = ( faceList[ j ].point( 1 ) ).localId();
             i2 = ( faceList[ j ].point( 2 ) ).localId();
             i3 = ( faceList[ j ].point( 3 ) ).localId();
-            if ( FaceShape::numVertices == 4 )
+            if ( FaceShape::S_numVertices == 4 )
             {
                 i4 = ( faceList[ j ].point( 4 ) ).localId();
                 _face = makeBareFace( i1, i2, i3, i4 );
@@ -3553,15 +3553,15 @@ RegionMesh3D<GEOSHAPE, MC>::updateElementFaces( bool cf, const bool verbose, UIn
         vid = iv->localId();
         for ( UInt j = 1; j <= numLocalFaces(); j++ )
         {
-            i1 = ele.fToP( j, 1 );
-            i2 = ele.fToP( j, 2 );
-            i3 = ele.fToP( j, 3 );
+            i1 = ele.faceToPoint( j, 1 );
+            i2 = ele.faceToPoint( j, 2 );
+            i3 = ele.faceToPoint( j, 3 );
             i1 = ( iv->point( i1 ) ).localId();
             i2 = ( iv->point( i2 ) ).localId();
             i3 = ( iv->point( i3 ) ).localId();
-            if ( FaceShape::numVertices == 4 )
+            if ( FaceShape::S_numVertices == 4 )
             {
-                i4 = ele.fToP( j, 4 );
+                i4 = ele.faceToPoint( j, 4 );
                 i4 = ( iv->point( i4 ) ).localId();
                 _face = makeBareFace( i1, i2, i3, i4 );
             }
@@ -3577,8 +3577,8 @@ RegionMesh3D<GEOSHAPE, MC>::updateElementFaces( bool cf, const bool verbose, UIn
                 if ( e.second )
                 {
                     // a new face It must be internal.
-                    for ( UInt k = 1; k <= FaceType::numPoints; ++k )
-                        face.setPoint( k, iv->point( ele.fToP( j, k ) ) );
+                    for ( UInt k = 1; k <= FaceType::S_numPoints; ++k )
+                        face.setPoint( k, iv->point( ele.faceToPoint( j, k ) ) );
 
                     face.ad_first()  = vid;
                     face.pos_first() = j;
@@ -3683,7 +3683,7 @@ orderMesh(MPI_Comm comm) // serial reordering:
 
     typedef VolumeShape ElementShape;
 
-    switch ( ElementShape::Shape )
+    switch ( ElementShape::S_shape )
     {
     case HEXA:
         elementNodes = 8;
@@ -3696,7 +3696,7 @@ orderMesh(MPI_Comm comm) // serial reordering:
     }
 
 
-    switch ( FaceShape::Shape )
+    switch ( FaceShape::S_shape )
     {
     case QUAD:
         elementFaces = 6;

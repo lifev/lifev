@@ -229,7 +229,7 @@ private:
 
     typedef SimpleArray<UInt> Container_Type;
 
-    typedef ID ( *faceToPointPtr_Type )( ID const localFace, ID const point );
+    typedef ID ( *faceToPointPtr_Type )( ID const& localFace, ID const& point );
 
     //! The pattern of the local degrees of freedom.
     const LocalDofPattern& M_elementDofPattern;
@@ -298,23 +298,23 @@ Dof::Dof( MeshType& mesh, const LocalDofPattern& fePattern, UInt offset ) :
         M_numLocalDofByFace = 1;
         break;
     case 4:
-        M_faceToPoint = LinearTetra::fToP;
+        M_faceToPoint = LinearTetra::faceToPoint;
         M_numLocalDofByFace = 3;
         break;
     case 5:
-        M_faceToPoint = LinearTetraBubble::fToP;
+        M_faceToPoint = LinearTetraBubble::faceToPoint;
         M_numLocalDofByFace = 3;
         break;
     case 10:
-        M_faceToPoint = QuadraticTetra::fToP;
+        M_faceToPoint = QuadraticTetra::faceToPoint;
         M_numLocalDofByFace = 6;
         break;
     case 8:
-        M_faceToPoint = LinearHexa::fToP;
+        M_faceToPoint = LinearHexa::faceToPoint;
         M_numLocalDofByFace = 4;
         break;
     case 27:
-        M_faceToPoint = QuadraticHexa::fToP;
+        M_faceToPoint = QuadraticHexa::faceToPoint;
         M_numLocalDofByFace = 27;
         break;
     default:
@@ -345,9 +345,9 @@ void Dof::update( MeshType& mesh )
     UInt nbLocalDofPerFace = M_elementDofPattern.nbDofPerFace();
     UInt nbLocalDofPerVolume = M_elementDofPattern.nbDofPerVolume();
 
-    M_nbLocalVertex = GeoShapeType::numVertices;
-    M_nbLocalEdge = GeoShapeType::numEdges;
-    M_nbLocalFace = GeoShapeType::numFaces;
+    M_nbLocalVertex = GeoShapeType::S_numVertices;
+    M_nbLocalEdge = GeoShapeType::S_numEdges;
+    M_nbLocalFace = GeoShapeType::S_numFaces;
 
     M_numElement = mesh.numElements();
 

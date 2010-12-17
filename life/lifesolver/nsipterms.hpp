@@ -105,7 +105,7 @@ public:
     //@{
 
     //! Default Constructor
-    IPStabilization() {};
+    IPStabilization();
 
     //! Constructor
     /*!
@@ -120,7 +120,7 @@ public:
      * @param gammaPress Real          the stabilization parameter @f$\gamma_p@f$ for @f$\Sigma_{f\in\mathcal{F}}\int_{f} [\nabla p] \cdot [\nabla q]@f$
      * @param viscosity  Real          the fluid viscosity @f$\nu@f$
      */
-    IPStabilization( const meshPtr_Type&     mesh,
+    __attribute__((__deprecated__)) IPStabilization( const meshPtr_Type&     mesh,
                      const dof_Type&        dof,
                      const RefFE&           refFE,
                      CurrentBdFE&           feBd,
@@ -185,13 +185,16 @@ public:
     void setMesh(const meshPtr_Type mesh) { M_mesh = mesh; }
     //! Set Discretization
     void setDiscretization(const dofPtr_Type& dof, const RefFE& refFE, CurrentBdFE& feBd, const QuadRule& quadRule);
+    //! Set the fespace
+    template<typename MapType>
+    void setFeSpaceVelocity(FESpace<mesh_Type, MapType> & feSpaceVelocity);
     //@}
 private:
 
     //! @name Private Types
     //@{
-    //! fToP(i,j) = localId of jth point on ith local face
-    typedef ID ( *FTOP )( ID const localFace, ID const point );
+    //! faceToPoint(i,j) = localId of jth point on ith local face
+    typedef ID ( *FTOP )( ID const& localFace, ID const& point );
     //@}
 
     //! @name Private Constructor
@@ -203,9 +206,9 @@ private:
     //! @name Private Attributes
     //@{
     //! Pointer to the mesh object
-    const meshPtr_Type  M_mesh;
+    meshPtr_Type  M_mesh;
     //! reference to the DofType data structure
-    const dofPtr_Type   M_dof;
+    dofPtr_Type   M_dof;
     //! current Fe on side 1 of the current face
     boost::shared_ptr<CurrentFE>    M_feOnSide1;
     //! current Fe on side 2 of the current face
@@ -220,12 +223,8 @@ private:
     Real         M_gammaPress;
     //! Fluid viscosity @f$\nu@f$
     Real         M_viscosity;
-    //! Elementary matrix
-    ElemMat      M_elMatU;
-    //! Elementary matrix
-    ElemMat      M_elMatP;
-    //! fToP(i,j) = localId of jth point on ith local face
-    FTOP         M_fToP;
+    //! faceToPoint(i,j) = localId of jth point on ith local face
+    FTOP         M_faceToPoint;
     //@}
 }; // class IPStabilization
 
@@ -233,6 +232,15 @@ private:
 //=============================================================================
 // Constructor
 //=============================================================================
+
+template<typename MeshType, typename DofType>
+IPStabilization<MeshType, DofType>::IPStabilization():
+        M_gammaBeta ( 0.0 ),
+        M_gammaDiv  ( 0.0 ),
+        M_gammaPress( 0.0 ),
+        M_viscosity ( 0.0 )
+        {}
+
 
 template<typename MeshType, typename DofType>
 IPStabilization<MeshType, DofType>::IPStabilization( const meshPtr_Type & mesh,
@@ -252,26 +260,24 @@ IPStabilization<MeshType, DofType>::IPStabilization( const meshPtr_Type & mesh,
         M_gammaBeta ( gammaBeta ),
         M_gammaDiv  ( gammaDiv ),
         M_gammaPress( gammaPress ),
-        M_viscosity ( viscosity ),
-        M_elMatU    ( M_feOnSide1->nbFEDof(), nDimensions    , nDimensions   ),
-        M_elMatP    ( M_feOnSide1->nbFEDof(), nDimensions + 1, nDimensions+1 )
+        M_viscosity ( viscosity )
 {
     switch ( M_feOnSide1->nbFEDof() )
     {
     case 4:
-        M_fToP = LinearTetra::fToP;
+        M_faceToPoint = LinearTetra::faceToPoint;
         break;
     case 5:
-        M_fToP = LinearTetra::fToP;
+        M_faceToPoint = LinearTetra::faceToPoint;
         break;
     case 10:
-        M_fToP = QuadraticTetra::fToP;
+        M_faceToPoint = QuadraticTetra::faceToPoint;
         break;
     case 8:
-        M_fToP = LinearHexa::fToP;
+        M_faceToPoint = LinearHexa::faceToPoint;
         break;
     case 20:
-        M_fToP = QuadraticHexa::fToP;
+        M_faceToPoint = QuadraticHexa::faceToPoint;
         break;
     default:
 //            ERROR_MSG( "This refFE is not allowed with IP stabilisation" );
@@ -305,6 +311,10 @@ void IPStabilization<MeshType, DofType>::apply( MatrixType& matrix,  const Vecto
     ChronoFake chronoAssembly8;
     ChronoFake chronoAssembly9;
     Chrono chronoAssembly;
+
+    ElemMat elMatU( M_feOnSide1->nbFEDof(), nDimensions    , nDimensions   );
+    ElemMat elMatP( M_feOnSide1->nbFEDof(), nDimensions + 1, nDimensions+1 );
+
 
     const UInt nDof = M_dof->numTotalDof();
 
@@ -357,7 +367,7 @@ void IPStabilization<MeshType, DofType>::apply( MatrixType& matrix,  const Vecto
             UInt iFaEl ( M_mesh->face( iFace ).pos_first() );
             for ( UInt iNode ( 0 ); iNode < M_feBd->nbNode(); ++iNode )
             {
-                UInt iloc ( M_fToP( iFaEl, iNode+1 ) );
+                UInt iloc ( M_faceToPoint( iFaEl, iNode+1 ) );
                 for ( UInt iCoor ( 0 ); iCoor < M_feOnSide1->nbCoor(); ++iCoor )
                 {
                     UInt ig ( M_dof->localToGlobal( iElAd1, iloc + 1 ) - 1 +iCoor*nDof );
@@ -389,51 +399,51 @@ void IPStabilization<MeshType, DofType>::apply( MatrixType& matrix,  const Vecto
                               std::max<Real>( bmax, M_viscosity/sqrt( hK2 ) );
 #endif
 
-            M_elMatP.zero();
+            elMatP.zero();
             chronoElemComp.start();
             // coef*\int_{face} grad u1 . grad v1
-            ipstab_grad( coeffPress, M_elMatP, *M_feOnSide1, *M_feOnSide1, *M_feBd,
+            ipstab_grad( coeffPress, elMatP, *M_feOnSide1, *M_feOnSide1, *M_feBd,
                          nDimensions, nDimensions);
             chronoElemComp.stop();
             chronoAssembly1.start();
 
-            assembleMatrix(matrix, M_elMatP, *M_feOnSide1, *M_dof,
+            assembleMatrix(matrix, elMatP, *M_feOnSide1, *M_dof,
                            nDimensions, nDimensions, nDimensions*nDof, nDimensions*nDof);
             chronoAssembly1.stop();
 
-            M_elMatP.zero();
+            elMatP.zero();
             chronoElemComp.start();
             // coef*\int_{face} grad u2 . grad v2
-            ipstab_grad( coeffPress, M_elMatP, *M_feOnSide2, *M_feOnSide2, *M_feBd,
+            ipstab_grad( coeffPress, elMatP, *M_feOnSide2, *M_feOnSide2, *M_feBd,
                          nDimensions, nDimensions);
             chronoElemComp.stop();
             chronoAssembly2.start();
 
-            assembleMatrix(matrix, M_elMatP, *M_feOnSide2, *M_dof,
+            assembleMatrix(matrix, elMatP, *M_feOnSide2, *M_dof,
                            nDimensions, nDimensions, nDimensions*nDof, nDimensions*nDof);
             chronoAssembly2.stop();
 
-            M_elMatP.zero();
+            elMatP.zero();
             chronoElemComp.start();
             // - coef*\int_{face} grad u1 . grad v2
-            ipstab_grad(- coeffPress, M_elMatP, *M_feOnSide1, *M_feOnSide2, *M_feBd,
+            ipstab_grad(- coeffPress, elMatP, *M_feOnSide1, *M_feOnSide2, *M_feBd,
                         nDimensions, nDimensions);
             chronoElemComp.stop();
             chronoAssembly3.start();
 
-            assembleMatrix(matrix, M_elMatP, *M_feOnSide1, *M_feOnSide2, *M_dof, *M_dof,
+            assembleMatrix(matrix, elMatP, *M_feOnSide1, *M_feOnSide2, *M_dof, *M_dof,
                            nDimensions, nDimensions, nDimensions*nDof, nDimensions*nDof);
             chronoAssembly3.stop();
 
-            M_elMatP.zero();
+            elMatP.zero();
             chronoElemComp.start();
             // - coef*\int_{face} grad u2 . grad v1
-            ipstab_grad(- coeffPress, M_elMatP, *M_feOnSide2, *M_feOnSide1, *M_feBd,
+            ipstab_grad(- coeffPress, elMatP, *M_feOnSide2, *M_feOnSide1, *M_feBd,
                         nDimensions, nDimensions);
             chronoElemComp.stop();
             chronoAssembly4.start();
 
-            assembleMatrix(matrix, M_elMatP, *M_feOnSide2, *M_feOnSide1, *M_dof, *M_dof,
+            assembleMatrix(matrix, elMatP, *M_feOnSide2, *M_feOnSide1, *M_dof, *M_dof,
                            nDimensions, nDimensions, nDimensions*nDof, nDimensions*nDof);
             chronoAssembly4.stop();
         }
@@ -476,17 +486,17 @@ void IPStabilization<MeshType, DofType>::apply( MatrixType& matrix,  const Vecto
 
             Real coeffGrad = hK2 * (M_gammaBeta*bnmax + M_gammaDiv*bcmax);
 #endif
-            M_elMatU.zero();
+            elMatU.zero();
             chronoElemComp.start();
 #if WITH_DIVERGENCE
             // coef*\int_{face} (\beta1 . grad u1) (\beta2 . grad v2)
-            ipstab_bgrad( coeffBeta, M_elMatU, *M_feOnSide1, *M_feOnSide1, beta,
+            ipstab_bgrad( coeffBeta, elMatU, *M_feOnSide1, *M_feOnSide1, beta,
                           *M_feBd, 0, 0, nDimensions );
             // coef*\int_{face} div u1 . div v1
-            ipstab_div( coeffDiv, M_elMatU, *M_feOnSide1, *M_feOnSide1, *M_feBd );
+            ipstab_div( coeffDiv, elMatU, *M_feOnSide1, *M_feOnSide1, *M_feBd );
 #else
             // coef*\int_{face} grad u1 . grad v1
-            ipstab_grad( coeffGrad, M_elMatU, *M_feOnSide1, *M_feOnSide1, *M_feBd, 0, 0,
+            ipstab_grad( coeffGrad, elMatU, *M_feOnSide1, *M_feOnSide1, *M_feBd, 0, 0,
                          nDimensions );
 #endif
             chronoElemComp.stop();
@@ -494,22 +504,22 @@ void IPStabilization<MeshType, DofType>::apply( MatrixType& matrix,  const Vecto
             for ( UInt iComp ( 0 ); iComp<nDimensions; ++iComp )
                 for ( UInt jComp ( 0 ); jComp<nDimensions; ++jComp )
                 {
-                    assembleMatrix( matrix, M_elMatU, *M_feOnSide1, *M_dof,
+                    assembleMatrix( matrix, elMatU, *M_feOnSide1, *M_dof,
                                     iComp, jComp, iComp*nDof, jComp*nDof );
                 }
             chronoAssembly5.stop();
 
-            M_elMatU.zero();
+            elMatU.zero();
             chronoElemComp.start();
 #if WITH_DIVERGENCE
             // coef*\int_{face} (\beta2 . grad u2) (\beta2 . grad v2)
-            ipstab_bgrad( coeffBeta, M_elMatU, *M_feOnSide2, *M_feOnSide2, beta,
+            ipstab_bgrad( coeffBeta, elMatU, *M_feOnSide2, *M_feOnSide2, beta,
                           *M_feBd, 0, 0, nDimensions );
             // coef*\int_{face} div u2 . div v2
-            ipstab_div( coeffDiv, M_elMatU, *M_feOnSide2, *M_feOnSide2, *M_feBd );
+            ipstab_div( coeffDiv, elMatU, *M_feOnSide2, *M_feOnSide2, *M_feBd );
 #else
             // coef*\int_{face} grad u2 . grad v2
-            ipstab_grad( coeffGrad, M_elMatU, *M_feOnSide2, *M_feOnSide2, *M_feBd, 0, 0,
+            ipstab_grad( coeffGrad, elMatU, *M_feOnSide2, *M_feOnSide2, *M_feBd, 0, 0,
                          nDimensions );
 #endif
             chronoElemComp.stop();
@@ -517,22 +527,22 @@ void IPStabilization<MeshType, DofType>::apply( MatrixType& matrix,  const Vecto
             for ( UInt iComp ( 0 ); iComp<nDimensions; ++iComp )
                 for ( UInt jComp ( 0 ); jComp<nDimensions; ++jComp )
                 {
-                    assembleMatrix( matrix, M_elMatU, *M_feOnSide2, *M_dof,
+                    assembleMatrix( matrix, elMatU, *M_feOnSide2, *M_dof,
                                     iComp, jComp, iComp*nDof, jComp*nDof );
                 }
             chronoAssembly6.stop();
 
-            M_elMatU.zero();
+            elMatU.zero();
             chronoElemComp.start();
 #if WITH_DIVERGENCE
             // - coef*\int_{face} (\beta1 . grad u1) (\beta2 . grad v2)
-            ipstab_bgrad( -coeffBeta, M_elMatU, *M_feOnSide1, *M_feOnSide2, beta,
+            ipstab_bgrad( -coeffBeta, elMatU, *M_feOnSide1, *M_feOnSide2, beta,
                           *M_feBd, 0, 0, nDimensions );
             // - coef*\int_{face} div u1 . div v2
-            ipstab_div( -coeffDiv, M_elMatU, *M_feOnSide1, *M_feOnSide2, *M_feBd );
+            ipstab_div( -coeffDiv, elMatU, *M_feOnSide1, *M_feOnSide2, *M_feBd );
 #else
             // - coef*\int_{face} grad u1 . grad v2
-            ipstab_grad( -coeffGrad, M_elMatU, *M_feOnSide1, *M_feOnSide2, *M_feBd, 0, 0,
+            ipstab_grad( -coeffGrad, elMatU, *M_feOnSide1, *M_feOnSide2, *M_feBd, 0, 0,
                          nDimensions );
 #endif
             chronoElemComp.stop();
@@ -540,22 +550,22 @@ void IPStabilization<MeshType, DofType>::apply( MatrixType& matrix,  const Vecto
             for ( UInt iComp = 0; iComp<nDimensions; ++iComp )
                 for ( UInt jComp = 0; jComp<nDimensions; ++jComp )
                 {
-                    assembleMatrix( matrix, M_elMatU, *M_feOnSide1, *M_feOnSide2, *M_dof, *M_dof,
+                    assembleMatrix( matrix, elMatU, *M_feOnSide1, *M_feOnSide2, *M_dof, *M_dof,
                                     iComp, jComp, iComp*nDof, jComp*nDof );
                 }
             chronoAssembly7.stop();
 
-            M_elMatU.zero();
+            elMatU.zero();
             chronoElemComp.start();
 #if WITH_DIVERGENCE
             // - coef*\int_{face} (\beta2 . grad u2) (\beta1 . grad v1)
-            ipstab_bgrad( -coeffBeta, M_elMatU, *M_feOnSide2, *M_feOnSide1, beta,
+            ipstab_bgrad( -coeffBeta, elMatU, *M_feOnSide2, *M_feOnSide1, beta,
                           *M_feBd, 0, 0, nDimensions );
             // - coef*\int_{face} div u2 . div v1
-            ipstab_div( -coeffDiv, M_elMatU, *M_feOnSide2, *M_feOnSide1, *M_feBd );
+            ipstab_div( -coeffDiv, elMatU, *M_feOnSide2, *M_feOnSide1, *M_feBd );
 #else
             // - coef*\int_{face} grad u2 . grad v1
-            ipstab_grad( -coeffGrad, M_elMatU, *M_feOnSide2, *M_feOnSide1, *M_feBd, 0, 0,
+            ipstab_grad( -coeffGrad, elMatU, *M_feOnSide2, *M_feOnSide1, *M_feBd, 0, 0,
                          nDimensions );
 #endif
             chronoElemComp.stop();
@@ -563,7 +573,7 @@ void IPStabilization<MeshType, DofType>::apply( MatrixType& matrix,  const Vecto
             for ( UInt iComp ( 0 ); iComp<nDimensions; ++iComp )
                 for ( UInt jComp ( 0 ); jComp<nDimensions; ++jComp )
                 {
-                    assembleMatrix( matrix, M_elMatU, *M_feOnSide2, *M_feOnSide1, *M_dof, *M_dof,
+                    assembleMatrix( matrix, elMatU, *M_feOnSide2, *M_feOnSide1, *M_dof, *M_dof,
                                     iComp, jComp, iComp*nDof, jComp*nDof );
                 }
             chronoAssembly8.stop();
@@ -625,29 +635,37 @@ void IPStabilization<MeshType, DofType>::setDiscretization(const dofPtr_Type& do
     M_dof = dof;
     M_feOnSide1.reset( new CurrentFE(refFE, getGeoMap(*M_mesh), quadRule) );
     M_feOnSide2.reset( new CurrentFE(refFE, getGeoMap(*M_mesh), quadRule) );
-    M_feBd      ( &feBd );
+    M_feBd = &feBd;
     switch ( M_feOnSide1->nbFEDof() )
     {
     case 4:
-        M_fToP = LinearTetra::fToP;
+        M_faceToPoint = LinearTetra::faceToPoint;
         break;
     case 5:
-        M_fToP = LinearTetra::fToP;
+        M_faceToPoint = LinearTetra::faceToPoint;
         break;
     case 10:
-        M_fToP = QuadraticTetra::fToP;
+        M_faceToPoint = QuadraticTetra::faceToPoint;
         break;
     case 8:
-        M_fToP = LinearHexa::fToP;
+        M_faceToPoint = LinearHexa::faceToPoint;
         break;
     case 20:
-        M_fToP = QuadraticHexa::fToP;
+        M_faceToPoint = QuadraticHexa::faceToPoint;
         break;
     default:
 //            ERROR_MSG( "This refFE is not allowed with IP stabilisation" );
         break;
     }
+}
 
+template<typename MeshType, typename DofType>
+template<typename MapType>
+void IPStabilization<MeshType, DofType>::setFeSpaceVelocity(FESpace<mesh_Type, MapType> & feSpaceVelocity)
+{
+	setMesh(feSpaceVelocity.mesh());
+	setDiscretization(feSpaceVelocity.dofPtr(), feSpaceVelocity.refFE(),
+			          feSpaceVelocity.feBd(), feSpaceVelocity.qr() );
 }
 
 } // namespace details

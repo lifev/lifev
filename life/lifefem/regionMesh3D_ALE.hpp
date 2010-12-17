@@ -113,8 +113,8 @@ public:
       It is necessary when implementing mesh movement routines based on
       harmonic reconstruction, in order to build the finite element discretisation.
     */
-    const RefFE& getReferenceFiniteElement() const; 
-    const __attribute__ ((__deprecated__)) RefFE& getRefFE() const; 
+    const RefFE& getReferenceFiniteElement() const;
+    const __attribute__ ((__deprecated__)) RefFE& getRefFE() const;
 
     //! Get the reference Geometric Map object  associated to the mesh
     /*!
@@ -170,16 +170,16 @@ RegionMesh3D_ALE<GEOSHAPE, MC>::operator=( RegionMesh3D_ALE<GEOSHAPE, MC> const 
 template <typename GEOSHAPE, typename MC>
 const RefFE& RegionMesh3D_ALE<GEOSHAPE, MC>::getReferenceFiniteElement() const
 {
-    switch ( ElementShape::Shape )
+    switch ( ElementShape::S_shape )
     {
     case HEXA:
-        if ( ElementShape::numPoints == 8 )
+        if ( ElementShape::S_numPoints == 8 )
             return feHexaQ1;
         else
             ERROR_MSG( "Finite Element not implemented for the mesh motion" );
         break;
     case TETRA:
-        if ( ElementShape::numPoints == 4 )
+        if ( ElementShape::S_numPoints == 4 )
             return feTetraP1;
         else
             ERROR_MSG( "Finite Element not implemented for the mesh motion" );
@@ -193,16 +193,16 @@ const RefFE& RegionMesh3D_ALE<GEOSHAPE, MC>::getReferenceFiniteElement() const
 template <typename GEOSHAPE, typename MC>
 const GeoMap& RegionMesh3D_ALE<GEOSHAPE, MC>::getGeometricMap() const
 {
-    switch ( ElementShape::Shape )
+    switch ( ElementShape::S_shape )
     {
     case HEXA:
-        if ( ElementShape::numPoints == 8 )
+        if ( ElementShape::S_numPoints == 8 )
             return geoBilinearHexa;
         else
             ERROR_MSG( "Finite Element not implemented for the mesh motion" );
         break;
     case TETRA:
-        if ( ElementShape::numPoints == 4 )
+        if ( ElementShape::S_numPoints == 4 )
             return geoLinearTetra;
         else
             ERROR_MSG( "Finite Element not implemented for ALE" );

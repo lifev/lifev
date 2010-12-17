@@ -211,7 +211,7 @@ private:
     //! Sets the element parameters according to the type of mesh element used.
     /*!
       Sets element parameters (nodes, faces, edges and number of nodes on each
-      face according to the type of mesh element used (Mesh::ElementShape::Shape).
+      face according to the type of mesh element used (Mesh::ElementShape::S_shape).
       Updates M_elementNodes, M_elementFaces, M_elementEdges, M_faceNodes.
     */
     void setElementParameters();
@@ -514,7 +514,7 @@ void partitionMesh<MeshType>::showMe(std::ostream& output) const
 template<typename MeshType>
 void partitionMesh<MeshType>::setElementParameters()
 {
-    switch (MeshType::ElementShape::Shape)
+    switch (MeshType::ElementShape::S_shape)
     {
     case HEXA:
         M_elementNodes = 8;
@@ -1296,7 +1296,7 @@ void partitionMesh<MeshType>::constructFaces()
             }
 
 
-            for (ID id = 1; id <= M_originalMesh->face(*is).numLocalVertices; ++id)
+            for (ID id = 1; id <= M_originalMesh->face(*is).S_numLocalVertices; ++id)
             {
                 inode = M_originalMesh->face(*is).point(id).id();
                 im = M_globalToLocalNode[i].find(inode);

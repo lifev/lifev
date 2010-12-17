@@ -70,7 +70,7 @@ SUBROUTINE_F77 F77NAME( readmesh2dhead ) ( I_F77 & ne, I_F77 & np,
 // readMesh2d - Reads a mesh in mesh2d (LF) format.
 template <typename RegionMesh2D>
 bool
-readMesh2d( RegionMesh2D & mesh, const std::string & fname, EntityFlag regionFlag )
+readMesh2d( RegionMesh2D & mesh, const std::string & fname, entityFlag_Type regionFlag )
 {
     UInt p1, p2, p3;
     UInt nVe, nBVe, nFa, nPo, nBPo, nEd, nBEd;
@@ -79,13 +79,13 @@ readMesh2d( RegionMesh2D & mesh, const std::string & fname, EntityFlag regionFla
 
     typedef typename RegionMesh2D::ElementShape ElementShape;
 
-    if ( ElementShape::Shape != TRIANGLE )
+    if ( ElementShape::S_shape != TRIANGLE )
     {
         std::cerr << "Sorry, readMesh2d reads only triangle meshes" << std::endl;
         abort();
     }
 
-    if ( ElementShape::numPoints > 6 )
+    if ( ElementShape::S_numPoints > 6 )
     {
         std::cerr << "Sorry, readMppFiles handles only liner&quad triangles" << std::endl;
         abort();
@@ -159,13 +159,13 @@ readMesh2d( RegionMesh2D & mesh, const std::string & fname, EntityFlag regionFla
     nVe = UInt( np );
     nBVe = UInt( nb );
 
-    /* 
+    /*
     I Assume that the mesh is OK, so the number of boundary vertices coincides
-    with the number of boundary sides: mesh checkers have still to be implemented 
+    with the number of boundary sides: mesh checkers have still to be implemented
     */
 
     // Do I want a P2 mesh?
-    p2meshwanted = ( ElementShape::numPoints == 6 );
+    p2meshwanted = ( ElementShape::S_numPoints == 6 );
 
     // Do I have a P2 mesh?
     p2meshstored = ( npe == 6 );
@@ -213,7 +213,7 @@ readMesh2d( RegionMesh2D & mesh, const std::string & fname, EntityFlag regionFla
 
     // Only Boundary Edges
     mesh.setMaxNumEdges( nBEd );
-    mesh.numEdges() = nEd; 
+    mesh.numEdges() = nEd;
 
     /*
     Here the REAL number of edges (all of them) even if I store only BEdges.
@@ -254,7 +254,7 @@ readMesh2d( RegionMesh2D & mesh, const std::string & fname, EntityFlag regionFla
     // now the boundary edges
     ID ia1;
     Int test;
-    EntityFlag ibc;
+    entityFlag_Type ibc;
 
     for ( i = 0; i < nBEd; i++ )
     {
@@ -334,7 +334,7 @@ template <typename GeoShape, typename MC>
 bool
 readGmshFile( RegionMesh2D<GeoShape, MC> & mesh,
               const std::string & filename,
-              EntityFlag regionFlag )
+              entityFlag_Type regionFlag )
 {
     std::ifstream __is ( filename.c_str() );
 
@@ -549,7 +549,7 @@ template <typename GeoShape, typename MC>
 bool
 readFreeFemFile( RegionMesh2D<GeoShape, MC> & mesh,
                  const std::string & filename,
-                 EntityFlag regionFlag,
+                 entityFlag_Type regionFlag,
                  bool )
 {
     BareItemsHandler<BareEdge> _be;
@@ -577,7 +577,7 @@ readFreeFemFile( RegionMesh2D<GeoShape, MC> & mesh,
     std::vector<bool> __isonboundary(__nv);
     std::vector<UInt> __whichboundary(__nv);
 
-#ifdef DEBUG    
+#ifdef DEBUG
     Debug( 3000 ) << "reading "<< __nv << " nodes\n";
 #endif
 
@@ -597,7 +597,7 @@ readFreeFemFile( RegionMesh2D<GeoShape, MC> & mesh,
     std::vector<int> __triangle_nodes( 3 * __nt );
     std::vector<int> __triangle_label( __nt );
 
-#ifdef DEBUG  
+#ifdef DEBUG
     Debug( 3000 ) << "reading "<< __nt << " triangles\n";
 #endif
 

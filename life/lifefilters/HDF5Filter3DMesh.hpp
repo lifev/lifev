@@ -314,7 +314,7 @@ void HDF5Filter3DMesh<MeshType>::loadMyPartition(meshPtr_Type& meshPartition,
                                                  boost::shared_ptr<Epetra_Comm>& comm)
 {
     UInt elementNodes, faceNodes;
-    switch (MeshType::ElementShape::Shape)
+    switch (MeshType::ElementShape::S_shape)
     {
     case HEXA:
         elementNodes = 8;
@@ -709,7 +709,7 @@ boost::shared_ptr<MeshType>& HDF5Filter3DMesh<MeshType>::getMeshPartition()
     boost::shared_ptr<MeshType> tempMesh(new MeshType);
 
     UInt elementNodes, faceNodes;
-    switch (MeshType::ElementShape::Shape)
+    switch (MeshType::ElementShape::S_shape)
     {
     case HEXA:
         elementNodes = 8;
@@ -1056,7 +1056,7 @@ template <typename MeshType>
 void HDF5Filter3DMesh<MeshType>::writePartition(meshPtr_Type mesh, std::string& suffix)
 {
     UInt elementNodes, faceNodes;
-    switch (MeshType::ElementShape::Shape)
+    switch (MeshType::ElementShape::S_shape)
     {
     case HEXA:
         elementNodes = 8;

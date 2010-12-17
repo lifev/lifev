@@ -64,7 +64,7 @@ namespace LifeV
  *  @author Tiziano Passerini <tiziano.passerini@gmail.com>
  *
  *  This is the class that stores the mesh entities for a single 1D region.
- * 
+ *
  *  In a region elements are all of the same type.
  */
 template <typename GEOSHAPE, typename MC = DefMarkerCommon >
@@ -73,7 +73,7 @@ class RegionMesh1D : public MeshEntity,
 {
 public:
     /** @defgroup public_types Public Types
-     * 
+     *
      */
 
     /** @name Marker Types
@@ -128,7 +128,7 @@ public:
     /** @name Geometric Element Container Types
      *  @ingroup public_types
      *  Typedefs for STL compliant containers of mesh geometric entities.
-     * 
+     *
      *  I Use SimpleVect container for addressing from 1.
      *  @{
      */
@@ -173,7 +173,7 @@ public:
      */
 
     //! Default constructor
-    /** 
+    /**
      *  @param id marker of the RegionMesh1D
      */
     explicit RegionMesh1D( UInt id = 0 );
@@ -212,7 +212,7 @@ public:
      *
      *  @{
      */
-    
+
     //! Display general information about the content of the class.
     /**
      *  Pretty output of information about the mesh.
@@ -222,7 +222,7 @@ public:
      *  @return Output stream (for concatenation).
      */
     std::ostream & showMe( bool verbose = false, std::ostream & out = std::cout );
-    
+
     //! Basic tests for mesh consistency.
     /**
      *  Check consistency of the mesh and fix errors.
@@ -244,7 +244,7 @@ public:
      *
      *  @{
      */
-    
+
     //! Setup mesh
     /**
      *  @param Length Total length of the mesh.
@@ -356,7 +356,7 @@ public:
      *  elements.
      *
      *  It is a generic interface common for all RegionMeshes (3D -- 1D).
-     * 
+     *
      *  @{
      */
 
@@ -441,7 +441,7 @@ public:
      *  @ingroup public_methods
      *
      *  These are generic methods related to volumes.
-     * 
+     *
      *  @note For compatibility reasons this methods do the same as edge methods.
      *
      *  @{
@@ -515,7 +515,7 @@ public:
      *
      *  @note To have more information on the Edge methods
      *  look at the documentation of th eanalogous Edges methods.
-     * 
+     *
      *  @{
      */
 
@@ -523,11 +523,11 @@ public:
     /**
      *  Returns number of Edge elements in the mesh
      *  as given by the internal counter.
-     * 
+     *
      *  @return Number of Edges.
      */
     UInt numEdges() const;
-    
+
     //! Global number of Edges.
     /**
      *  Returns global number of Edge elements in the mesh
@@ -540,15 +540,15 @@ public:
     //! Access number of Edges.
     /**
      *  Access to the internal counter.
-     * 
+     *
      *  @return Access number of Edges.
      */
     UInt & numEdges();
 
     //! Number of stored Edges.
-    /** 
+    /**
      *  Edges actually stored in list.
-     * 
+     *
      *  @return number of edges actually stored in list.
      */
     UInt storedEdges() const;
@@ -565,7 +565,7 @@ public:
     //! Changes Current capacity of Edges.
     /**
      *  Optionally sets internal counter.
-     * 
+     *
      *  @param n Maximum number of edges.
      *  @param setcounter true to set the counter, false otherwise.
      */
@@ -574,7 +574,7 @@ public:
     //! Adds Edges.
     /**
      *  Adds edges. Id computed automatically.
-     * 
+     *
      *  @return Reference to added edge.
      */
     EdgeType & addEdge();
@@ -614,7 +614,7 @@ public:
     //! i-th mesh 1D Element.
     /**
      *  Returns the i-th mesh Element.
-     * 
+     *
      *  @param i Index of the mesh 1D Element.
      *  @return The i-th edge.
      */
@@ -632,7 +632,7 @@ public:
     //! i-th mesh 1D Element length.
     /**
      *  Returns the i-th mesh 1D Element length.
-     * 
+     *
      *  @param i Index of the mesh 1D Element.
      *  @return Length of the i-th Edge.
      */
@@ -644,7 +644,7 @@ public:
      *  @return Reference to the newly added edge.
      */
     EdgeType & addEdge( bool const boundary = false );
-    
+
     //! Adds a edge to the end of the list and adjourn its ID.
     /**
      *  @param f Reference of edge to be added.
@@ -652,7 +652,7 @@ public:
      *  @return Reference to the newly added edge.
      */
     EdgeType & addEdge( EdgeType const & f, bool const boundary = false );
-    
+
     //! Adds a edge to the end of the list and adjourn its ID.
     /**
      *  @param f Reference of edge to be added.
@@ -661,7 +661,7 @@ public:
      *  @return Reference to the newly added edge.
      */
     EdgeType & setEdge( EdgeType const & f, UInt position, bool const boundary = false );
-    
+
     //! i-th mesh 1D Boundary Element.
     /**
      *  Returns the i-th mesh Boundary Element.
@@ -670,7 +670,7 @@ public:
      *  @return i-th boundary edge.
      */
     EdgeType const & boundaryEdge( UInt const i ) const;
-    
+
     //! i-th mesh 1D Boundary Element Reference.
     /**
      *  Returns a reference to the i-th mesh Boundary Element.
@@ -679,7 +679,7 @@ public:
      *  @return Reference to the i-th boundary edge.
      */
     EdgeType & boundaryEdge( UInt const i );
-    
+
     //! Set boundary Edge counter.
     /**
      *  Set the Boundary Edges counter to a given number.
@@ -687,7 +687,7 @@ public:
      *  @param n Count of Boundary Edge.
      */
     void setNumBEdges( UInt const n );
-    
+
     //! Do I store mesh edges?
     /**
      *  Returns true if edges are stored.
@@ -695,7 +695,7 @@ public:
      *  @return true if edge are stored, false otherwise.
      */
     bool hasEdges() const;
-    
+
     //! Do I store mesh internal edges?
     /**
      *  Returns true if internal edges are stored.
@@ -703,7 +703,7 @@ public:
      *  @return true if internal edge are stored, false otherwise.
      */
     bool hasInternalEdges() const;
-    
+
     //! Number of Boundary Edges.
     /**
      *  Returns the number of boundary edges.
@@ -711,7 +711,7 @@ public:
      *  @return Number of boundary Edges.
      */
     UInt numBEdges() const;
-    
+
     //! Edge on boundary check.
     /**
      *  Is this edge on boundary?
@@ -720,7 +720,7 @@ public:
      *  @return true if the edge is on the boundary, false otherwise.
      */
     bool isBoundaryEdge( EdgeType const & f ) const;
-    
+
     //! Edge on boundary check by id.
     /**
      *  Is this edge, of given id, on boundary?
@@ -729,7 +729,7 @@ public:
      *  @return true if the edge is on the boundary, false otherwise.
      */
     bool isBoundaryEdge( UInt const & id ) const;
-    
+
     //! Full Edge check by id.
     /**
      *  Does this ID corresponds to a full edge?
@@ -765,7 +765,7 @@ public:
      *
      *   @note To have more information on the Point methods look at the
      *   documentation of the analogous Edges methods.
-     * 
+     *
      *  @{
      */
 
@@ -776,7 +776,7 @@ public:
      *  @return Number of points in the mesh.
      */
     UInt numPoints() const;
-    
+
     //! Returns a reference to number of points in the mesh.
     /**
      *  Returns a reference to the internal counter of the number of points in the mesh.
@@ -784,7 +784,7 @@ public:
      *  @return Reference to the internal counter of number of points in the mesh.
      */
     UInt & numPoints();
-    
+
     //! Returns number of points in the mesh actually stored.
     /**
      *  Returns number of points in the mesh actually stored interrogating the internal counter.
@@ -800,7 +800,7 @@ public:
      *  @return Number of stored boundary points in the mesh.
      */
     UInt storedBPoints() const;
-    
+
     //! Returns the number of storable points in the mesh.
     /**
      *  Returns the number of storable points in the mesh interrogating the internal counter.
@@ -817,7 +817,7 @@ public:
      *  @param setcounter If true, it sets the internal counter, otherwise not (default).
      */
     void setMaxNumPoints( UInt const n, bool const setcounter = false );
-    
+
     //! Adds a Point in the mesh.
     /**
      *  Adds a Point inside the mesh, eventually specifing if it's a boundary point or a vertex.
@@ -858,7 +858,7 @@ public:
      *  @return Reference to the first mesh Point.
      */
     PointType & firstPoint();
-    
+
     //! Returns the last mesh Point.
     /**
      *  Returns the last Point in the mesh.
@@ -866,7 +866,7 @@ public:
      *  @return Reference to the last mesh Point.
      */
     PointType & lastPoint();
-    
+
     //! Returns the i-th mesh Point.
     /**
      *  Returns the i-th Point in the mesh.
@@ -884,7 +884,7 @@ public:
      *  @return Reference i-th mesh Point.
      */
     PointType & point( UInt const i );
-    
+
     //! Returns a reference to the i-th mesh Boundary Point.
     /**
      *  Returns the i-th Boundary Point in the mesh.
@@ -893,7 +893,7 @@ public:
      *  @return Reference i-th mesh Boundary Point.
      */
     PointType const & boundaryPoint( UInt const i ) const;
-    
+
     //! Returns a reference to the i-th mesh Boundary Point.
     /**
      *  Returns the i-th Boundary Point in the mesh.
@@ -902,7 +902,7 @@ public:
      *  @return Reference i-th mesh Boundary Point.
      */
     PointType & boundaryPoint( UInt const i );
-    
+
     //! Returns the number of Boundary Points.
     /**
      *  Returns the counter of the number of Boundary Points.
@@ -910,7 +910,7 @@ public:
      *  @return Number Boundary Points.
      */
     UInt numBPoints() const;
-    
+
     //! Sets the number of Boundary Points.
     /**
      *  Sets the counter of the number of Boundary Points.
@@ -928,7 +928,7 @@ public:
      *
      *  @{
      */
-    
+
     //! Number of Vertices in Region.
     /**
      *  Returns the number of Vertices in Region.
@@ -944,7 +944,7 @@ public:
      *  @return Reference to the counter of Vertices in Region.
      */
     UInt& numVertices ();
-    
+
     //! Number of Boundary Vertices in Region.
     /**
      *  Returns the number of Boundary Vertices in Region.
@@ -968,7 +968,7 @@ public:
      *  @return Number of vertices in the mesh.
      */
     UInt numGlobalVertices() const;
-    
+
     //! Set the number of vertices in the mesh.
     /**
      *  Set the internal counter of vertices points in the mesh.
@@ -985,7 +985,7 @@ public:
      *  @return true if the Point is a Vertex, false otherwise.
      */
     bool isVertex        ( UInt const & id )       const;
-    
+
     //! Vertex check.
     /**
      *  Is this Point a Vertex?
@@ -994,7 +994,7 @@ public:
      *  @return true if the Point is a Vertex, false otherwise.
      */
     bool isVertex        ( PointType const & p ) const;
-   
+
     //! Vertex on boundary check.
     /**
      *  Is this Point on boundary?
@@ -1019,17 +1019,17 @@ public:
     /** @name Element Adjacency Methods
      *  @ingroup public_methods
      *  Methods to obtain the ID of Edges belonging to an element.
-     * 
+     *
      *  Accessing this information requires that the appropriate data
      *  structures have been set up by using the updateElementEdges() method.
      *
      *  Often, it is NOT required to have the full information about edges and faces:
      *  The ID of the Face and Edge entities may be calculated without
      *  contructing the corresponding Edge of Face Object. This saves memory.
-     * 
+     *
      *  @{
      */
-    
+
     //! Is the array for local Edges set up?
     /**
      *  It does not use switches, but interrogates the container directly.
@@ -1037,7 +1037,7 @@ public:
      *  @return true if edges information are available, false otherwise.
      */
     bool hasLocalEdges() const { return true; }
-    
+
     //! Edge Id of a certain edge number around a Face.
     /**
      *  Returns always zero. Parameters not used.
@@ -1047,7 +1047,7 @@ public:
      *  @return Edge Id.
      */
     UInt localEdgeId( const FaceType& iface, const UInt locE ) const { return 0; }
-    
+
     //! Edge Id of a certain edge number around a Face.
     /**
      *  Returns always zero. Parameters not used.
@@ -1068,7 +1068,7 @@ public:
      *  @param ee Edge count for memory reservation (0 default).
      */
     void updateElementEdges(bool ce=false, UInt ee=0 );
-    
+
     //! Destroys Edge-To-Face lookup table.
     /**
      *  Destroys the lookup table for adjacency queries (not used).
@@ -1153,10 +1153,10 @@ public:
      *
      *  @{
      */
-    
+
     //! Switches
     Switch switches;
-    
+
     /** @} */ // End of group Switches
 
 
@@ -1201,11 +1201,11 @@ protected:
 
     /** @name Face-To-Edge and Boundary Edges Containers
      *  @ingroup protected_attributes
-     * 
+     *
      *  Arrays containing the ids of Edges and Edges of each element
      *  I use a Define to use localto global array or directly the
      *  bareedges.
-     * 
+     *
      *  - \c SAVEMEMORY defined: Try to save some memory.
      *  - \c NOT_BDATA_FIRST defined: boundary edge are stored apart.
      *
@@ -1225,7 +1225,7 @@ protected:
 #endif
 
     /** @} */ // End of group Face-To-Edge and Boundary Containers
-    
+
     /** @name Internal Counters
      *  @ingroup protected_attributes
      *
@@ -1541,7 +1541,7 @@ template <typename GEOSHAPE, typename MC>
 UInt
 RegionMesh1D<GEOSHAPE, MC>::numLocalVertices() const
 {
-    return EdgeType::numLocalVertices;
+    return EdgeType::S_numLocalVertices;
 }
 
 // ************** Generic Methods
@@ -1926,7 +1926,7 @@ RegionMesh1D<GEOSHAPE, MC>::isBoundaryEdge( EdgeType const & e ) const
 #ifdef NOT_BDATA_FIRST
     //ASSERT(false,"In this version Boundary edges must be stored first");
     bool isboundary = true;
-    for ( UInt k = 1; k <= EdgeType::numVertices; ++k )
+    for ( UInt k = 1; k <= EdgeType::S_numVertices; ++k )
     {
         isboundary = isboundary & e.point( k ).boundary();
     }

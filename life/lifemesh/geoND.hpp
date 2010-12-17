@@ -64,9 +64,9 @@ public:
     //@{
 
     //! Number of points associated to the entity
-    static const UInt numLocalPoints = GEOSHAPE::numPoints;
+    static const UInt S_numLocalPoints = GEOSHAPE::S_numPoints;
     //! Number of Vertices associated to the entity
-    static const UInt numLocalVertices = GEOSHAPE::numVertices;
+    static const UInt S_numLocalVertices = GEOSHAPE::S_numVertices;
 
     typedef GEOSHAPE geoShape_Type;
     typedef POINTTYPE point_Type;
@@ -140,7 +140,7 @@ public:
         @param oldToNew New local identity of a point (numbering starts from 1)
         @warning Function to be used only by routines for checking or amending meshes
      */
-    void exchangePoints( const ID oldToNew[ GEOSHAPE::numPoints ] );
+    void exchangePoints( const ID oldToNew[ GEOSHAPE::S_numPoints ] );
 
     //! Returns the point of identity indicated in the argument
     /*!
@@ -234,7 +234,7 @@ public:
     //@}
 
 private:
-    PointType const* M_points[ GEOSHAPE::numPoints ];
+    PointType const* M_points[ GEOSHAPE::S_numPoints ];
 };
 
 
@@ -242,10 +242,10 @@ private:
                  GeoND
 ---------------------------------------------------------------*/
 template <typename GEOSHAPE, typename POINTTYPE>
-const UInt GeoND<GEOSHAPE, POINTTYPE>::numLocalPoints;
+const UInt GeoND<GEOSHAPE, POINTTYPE>::S_numLocalPoints;
 
 template <typename GEOSHAPE, typename POINTTYPE>
-const UInt GeoND<GEOSHAPE, POINTTYPE>::numLocalVertices;
+const UInt GeoND<GEOSHAPE, POINTTYPE>::S_numLocalVertices;
 
 template <typename GEOSHAPE, typename POINTTYPE>
 GeoND<GEOSHAPE, POINTTYPE>::GeoND() :
@@ -272,7 +272,7 @@ template <typename GEOSHAPE, typename POINTTYPE>
 GeoND<GEOSHAPE, POINTTYPE>::GeoND( GeoND<GEOSHAPE, POINTTYPE> const & element ) :
         MeshEntity( element.id(), element.localId() )
 {
-    for ( UInt i = 0; i < GeoND<GEOSHAPE, POINTTYPE>::numLocalPoints; ++i )
+    for ( UInt i = 0; i < GeoND<GEOSHAPE, POINTTYPE>::S_numLocalPoints; ++i )
     {
         M_points[ i ] = element.M_points[ i ];
     }
@@ -292,7 +292,7 @@ GeoND<GEOSHAPE, POINTTYPE>::operator=( GeoND<GEOSHAPE, POINTTYPE> const & elemen
     {
         this->setId     (element.id());
         this->setLocalId(element.localId());
-        for ( UInt i = 0; i < GeoND<GEOSHAPE, POINTTYPE>::numLocalPoints; ++i )
+        for ( UInt i = 0; i < GeoND<GEOSHAPE, POINTTYPE>::S_numLocalPoints; ++i )
         {
             M_points[ i ] = element.M_points[ i ];
         }
@@ -305,14 +305,14 @@ std::ostream & GeoND<GEOSHAPE, POINTTYPE>::
 showMe( bool verbose, std::ostream & out ) const
 {
     out << "----- GeoND object -----" << std::endl;
-    out << " Number of Vertices = " << GEOSHAPE::numVertices << std::endl;
-    out << " Number of Points   = " << GEOSHAPE::numPoints << std::endl;
+    out << " Number of Vertices = " << GEOSHAPE::S_numVertices << std::endl;
+    out << " Number of Points   = " << GEOSHAPE::S_numPoints << std::endl;
     out << " ID                 = " << id() << std::endl;
     out << " local ID           = " << localId() << std::endl;
     if ( verbose )
     {
         out << " POINTS INFORMATION" << std::endl << std::endl;
-        for ( unsigned i = 1 ; i <= GEOSHAPE::numVertices; i++ )
+        for ( unsigned i = 1 ; i <= GEOSHAPE::S_numVertices; i++ )
         {
             out << "POINT ID. " << i << std::endl;
             out << point( i ).showMe( verbose, out );
@@ -331,14 +331,14 @@ void GeoND<GEOSHAPE, POINTTYPE>::swapPoints( const ID & firstIdentity, const ID 
 }
 
 template <typename GEOSHAPE, typename POINTTYPE>
-void GeoND<GEOSHAPE, POINTTYPE>::exchangePoints( const ID oldToNew[ GEOSHAPE::numPoints ] )
+void GeoND<GEOSHAPE, POINTTYPE>::exchangePoints( const ID oldToNew[ GEOSHAPE::S_numPoints ] )
 {
-    PointType const* tmp[ GEOSHAPE::numPoints ];
-    for ( UInt i = 0; i < GEOSHAPE::numPoints; ++i )
+    PointType const* tmp[ GEOSHAPE::S_numPoints ];
+    for ( UInt i = 0; i < GEOSHAPE::S_numPoints; ++i )
     {
         tmp[ i ] = M_points[ i ];
     }
-    for ( UInt i = 0; i < GEOSHAPE::numPoints; ++i )
+    for ( UInt i = 0; i < GEOSHAPE::S_numPoints; ++i )
     {
         M_points[ i ] = tmp[ oldToNew[ i ] - 1 ];
     }
@@ -348,7 +348,7 @@ template <typename GEOSHAPE, typename POINTTYPE>
 INLINE
 POINTTYPE const & GeoND<GEOSHAPE, POINTTYPE>::point( ID const identity ) const
 {
-    ASSERT_BD( ( identity > 0 && identity <= GeoND<GEOSHAPE, POINTTYPE>::numLocalPoints ) );
+    ASSERT_BD( ( identity > 0 && identity <= GeoND<GEOSHAPE, POINTTYPE>::S_numLocalPoints ) );
     return *( static_cast<POINTTYPE const*>( M_points[ identity - 1 ] ) );
 }
 
@@ -356,7 +356,7 @@ template <typename GEOSHAPE, typename POINTTYPE>
 INLINE
 POINTTYPE const & GeoND<GEOSHAPE, POINTTYPE>::reversepoint( ID const identity ) const
 {
-    ASSERT_BD( ( identity > 0 && identity <= GeoND<GEOSHAPE, POINTTYPE>::numLocalPoints ) );
+    ASSERT_BD( ( identity > 0 && identity <= GeoND<GEOSHAPE, POINTTYPE>::S_numLocalPoints ) );
     return *( static_cast<POINTTYPE const*>( M_points[ reversePoint<GEOSHAPE>::operate( identity ) - 1 ] ) );
 }
 
@@ -364,15 +364,15 @@ template <typename GEOSHAPE, typename POINTTYPE>
 INLINE
 void GeoND<GEOSHAPE, POINTTYPE>::setPoint( ID const identity, PointType const & point )
 {
-    ASSERT_BD( ( identity > 0 && identity <= GeoND<GEOSHAPE, POINTTYPE>::numLocalPoints ) ) ;
+    ASSERT_BD( ( identity > 0 && identity <= GeoND<GEOSHAPE, POINTTYPE>::S_numLocalPoints ) ) ;
     M_points[ identity - 1 ] = ( &point );
 }
 
 template <typename GEOSHAPE, typename POINTTYPE>
 bool GeoND<GEOSHAPE, POINTTYPE>::setPointWithBoundaryCheck( ID const identity, PointType const & point )
 {
-    ASSERT_BD0( ( identity > 0 && identity <= GeoND<GEOSHAPE, POINTTYPE>::numLocalPoints ) ) ;
-    if ( identity <= 0 || identity > GeoND<GEOSHAPE, POINTTYPE>::numLocalVertices )
+    ASSERT_BD0( ( identity > 0 && identity <= GeoND<GEOSHAPE, POINTTYPE>::S_numLocalPoints ) ) ;
+    if ( identity <= 0 || identity > GeoND<GEOSHAPE, POINTTYPE>::S_numLocalVertices )
         return false;
     M_points[ identity -1 ] = ( &point );
     return true;
@@ -387,15 +387,15 @@ template <typename GEOSHAPE, typename POINTTYPE>
 INLINE
 void GeoND<GEOSHAPE, POINTTYPE>::setPoint( ID const identity, PointType const * point )
 {
-    ASSERT_BD( ( identity > 0 && identity <= GeoND<GEOSHAPE, POINTTYPE>::numLocalPoints ) ) ;
+    ASSERT_BD( ( identity > 0 && identity <= GeoND<GEOSHAPE, POINTTYPE>::S_numLocalPoints ) ) ;
     M_points[ identity - 1 ] = ( point );
 }
 
 template <typename GEOSHAPE, typename POINTTYPE>
 bool GeoND<GEOSHAPE, POINTTYPE>::setPointWithBoundaryCheck( ID const identity, PointType const * point )
 {
-    ASSERT_BD0( ( identity > 0 && identity <= GeoND<GEOSHAPE, POINTTYPE>::numLocalPoints ) ) ;
-    if ( identity <= 0 || identity > GeoND<GEOSHAPE, POINTTYPE>::numLocalVertices )
+    ASSERT_BD0( ( identity > 0 && identity <= GeoND<GEOSHAPE, POINTTYPE>::S_numLocalPoints ) ) ;
+    if ( identity <= 0 || identity > GeoND<GEOSHAPE, POINTTYPE>::S_numLocalVertices )
         return false;
     M_points[ identity -1 ] = ( point );
     return true;

@@ -611,11 +611,11 @@ BCHandler::bdUpdate( Mesh& mesh, CurrentBdFE& boundaryFE, const Dof& dof )
 
     typedef typename geoShape_Type::GeoBShape geoBShape_Type;
 
-    UInt nBElemVertices = geoBShape_Type::numVertices; // Number of boundary element's vertices
-    UInt nBElemEdges = geoBShape_Type::numEdges;    // Number of boundary element's edges
+    UInt nBElemVertices = geoBShape_Type::S_numVertices; // Number of boundary element's vertices
+    UInt nBElemEdges = geoBShape_Type::S_numEdges;    // Number of boundary element's edges
 
-    UInt nElemVertices = geoShape_Type::numVertices; // Number of element's vertices
-    UInt nElemEdges = geoShape_Type::numEdges;    // Number of element's edges
+    UInt nElemVertices = geoShape_Type::S_numVertices; // Number of element's vertices
+    UInt nElemEdges = geoShape_Type::S_numEdges;    // Number of element's edges
 
     UInt nDofBElemVertices = nDofPerVert * nBElemVertices; // number of vertex's Dof on a boundary element
     UInt nDofBElemEdges = nDofPerEdge * nBElemEdges; // number of edge's Dof on a boundary element
@@ -685,7 +685,7 @@ BCHandler::bdUpdate( Mesh& mesh, CurrentBdFE& boundaryFE, const Dof& dof )
         //loop on Dofs associated with vertices
         for ( ID iBElemVert = 1; iBElemVert <= nBElemVertices; ++iBElemVert )
         {
-            iElemVertex = geoShape_Type::fToP( iElemBElement, iBElemVert ); // local vertex number (in element)
+            iElemVertex = geoShape_Type::faceToPoint( iElemBElement, iBElemVert ); // local vertex number (in element)
             for ( ID l = 1; l <= nDofPerVert; ++l )
                 localToGlobalMapOnBElem( lDof++) = dof.localToGlobal( iAdjacentElem, ( iElemVertex - 1 ) * nDofPerVert + l );
         }
@@ -693,7 +693,7 @@ BCHandler::bdUpdate( Mesh& mesh, CurrentBdFE& boundaryFE, const Dof& dof )
         //loop on Dofs associated with Edges
         for ( ID iBElemEdge = 1; iBElemEdge <= nBElemEdges; ++iBElemEdge )
         {
-            iElemEdge = geoShape_Type::fToE( iElemBElement, iBElemEdge ).first; // local edge number (in element)
+            iElemEdge = geoShape_Type::faceToEdge( iElemBElement, iBElemEdge ).first; // local edge number (in element)
             for ( ID l = 1; l <= nDofPerEdge; ++l )
                 localToGlobalMapOnBElem( lDof++) = dof.localToGlobal( iAdjacentElem,  nDofElemVertices + ( iElemEdge - 1 ) * nDofPerEdge + l ); // global Dof
         }
@@ -798,14 +798,14 @@ BCHandler::bdUpdate( Mesh& mesh, CurrentBdFE& boundaryFE, const Dof& dof )
             for ( ID iBElemEdge = 1; iBElemEdge <= nBElemEdges; ++iBElemEdge )
             {
                 //index of edge in element
-                iElemEdge = geoShape_Type::fToE( iElemBElement, iBElemEdge ).first;
+                iElemEdge = geoShape_Type::faceToEdge( iElemBElement, iBElemEdge ).first;
 
                 //marker on boundary edge
                 marker = mesh.boundaryEdge( mesh.localEdgeId( iAdjacentElem, iElemEdge ) ).marker(); // edge marker
 
                 //indices of edge's vertices
-                UInt iEdgeFirstVert =  geoBShape_Type::eToP( iBElemEdge, 1)-1;
-                UInt iEdgeSecondVert = geoBShape_Type::eToP( iBElemEdge, 2)-1;
+                UInt iEdgeFirstVert =  geoBShape_Type::edgeToPoint( iBElemEdge, 1)-1;
+                UInt iEdgeSecondVert = geoBShape_Type::edgeToPoint( iBElemEdge, 2)-1;
 
                 // Finding this marker on the BC list
                 bcBaseIterator = beginEssEdges;
@@ -943,11 +943,11 @@ BCHandler::bdUpdate( Mesh& mesh, CurrentBdFE& boundaryFE, const Dof& dof )
 
     typedef typename geoShape_Type::GeoBShape geoBShape_Type;
 
-    UInt nBElemVertices = geoBShape_Type::numVertices; // Number of boundary element's vertices
-    UInt nBElemEdges = geoBShape_Type::numEdges;    // Number of boundary element's edges
+    UInt nBElemVertices = geoBShape_Type::S_numVertices; // Number of boundary element's vertices
+    UInt nBElemEdges = geoBShape_Type::S_numEdges;    // Number of boundary element's edges
 
-    UInt nElemVertices = geoShape_Type::numVertices; // Number of element's vertices
-    UInt nElemEdges = geoShape_Type::numEdges;    // Number of element's edges
+    UInt nElemVertices = geoShape_Type::S_numVertices; // Number of element's vertices
+    UInt nElemEdges = geoShape_Type::S_numEdges;    // Number of element's edges
 
     UInt nDofBElemVertices = nDofPerVert * nBElemVertices; // number of vertex's Dof on a boundary element
     UInt nDofBElemEdges = nDofPerEdge * nBElemEdges; // number of edge's Dof on a boundary element
@@ -990,7 +990,7 @@ BCHandler::bdUpdate( Mesh& mesh, CurrentBdFE& boundaryFE, const Dof& dof )
             {
 
                 marker = mesh.bElement( iBoundaryElement ).point( iBElemVert ).marker(); // vertex marker
-                iElemVertex = geoShape_Type::fToP( iElemBElement, iBElemVert ); // local vertex number (in element)
+                iElemVertex = geoShape_Type::faceToPoint( iElemBElement, iBElemVert ); // local vertex number (in element)
 
                 // Finding this marker on the BC list
                 whereList.clear();
@@ -1115,7 +1115,7 @@ BCHandler::bdUpdate( Mesh& mesh, CurrentBdFE& boundaryFE, const Dof& dof )
             // loop on boundary element's edges
             for ( ID iBElemEdge = 1; iBElemEdge <= nBElemEdges; ++iBElemEdge )
             {
-                iElemEdge = geoShape_Type::fToE( iElemBElement, iBElemEdge ).first; // local edge number (in element)
+                iElemEdge = geoShape_Type::faceToEdge( iElemBElement, iBElemEdge ).first; // local edge number (in element)
                 marker = mesh.boundaryEdge( mesh.localEdgeId( iAdjacentElem, iElemEdge ) ).marker(); // edge marker
                 //if(marker!= elementMarker){continue;}
                 // Finding this marker on the BC list

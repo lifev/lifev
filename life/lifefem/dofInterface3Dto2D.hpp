@@ -278,7 +278,7 @@ generate2DMesh( std::string fname, const MeshType& mesh1 ) const
     ID idface3D;
 
     typedef typename MeshType::FaceShape FaceShape;
-    UInt numVertexPerFace = FaceShape::numVertices;
+    UInt numVertexPerFace = FaceShape::S_numVertices;
 
     ofile << "MeshVersionFormatted 1\n";
     ofile << "Dimension 3\n";
@@ -298,7 +298,7 @@ generate2DMesh( std::string fname, const MeshType& mesh1 ) const
     }
     ofile << std::endl;
 
-    switch ( FaceShape::Shape )
+    switch ( FaceShape::S_shape )
     {
     case FaceShape::QUAD:
         ofile << "Quadrilaterals\n";
@@ -373,7 +373,7 @@ updateVertices( const MeshType& mesh1 )
 
     typedef typename MeshType::FaceShape GeoBShape; // Shape of the faces
 
-    UInt numVertexPerFace = GeoBShape::numVertices;
+    UInt numVertexPerFace = GeoBShape::S_numVertices;
 
     // Loop on faces at the interface (matching faces)
     for ( std::vector< std::pair<ID, ID> >::iterator i = M_faceList.begin(); i != M_faceList.end(); ++i )
@@ -398,15 +398,15 @@ updateDofConnections( const MeshType& mesh1 )
     typedef typename MeshType::VolumeShape GeoShape;
     typedef typename MeshType::FaceShape GeoBShape;
 
-    UInt nbVertexPerFace = GeoBShape::numVertices; // Number of face's vertices
-    UInt nbEdgePerFace = GeoBShape::numEdges;    // Number of face's edges
+    UInt nbVertexPerFace = GeoBShape::S_numVertices; // Number of face's vertices
+    UInt nbEdgePerFace = GeoBShape::S_numEdges;    // Number of face's edges
 
     UInt nbDofPerVertex1 = M_refFE1->nbDofPerVertex; // number of Dof per vertices on mesh1
     UInt nbDofPerEdge1 = M_refFE1->nbDofPerEdge;   // number of Dof per edges on mesh1
     UInt nbDofPerFace1 = M_refFE1->nbDofPerFace;   // number of Dof per faces on mesh1
 
-    UInt nbVertexPerElement = GeoShape::numVertices; // Number of element's vertices
-    UInt nbEdgePerElement = GeoShape::numEdges;    // Number of element's edges
+    UInt nbVertexPerElement = GeoShape::S_numVertices; // Number of element's vertices
+    UInt nbEdgePerElement = GeoShape::S_numEdges;    // Number of element's edges
 
     UInt nDofElemV1 = nbVertexPerElement * nbDofPerVertex1; // number of vertex's Dof on a Element on mesh1
     UInt nDofElemE1 = nbEdgePerElement * nbDofPerEdge1; // number of edge's Dof on a Element on mesh1
@@ -433,7 +433,7 @@ updateDofConnections( const MeshType& mesh1 )
             for ( ID iVeFa1 = 1; iVeFa1 <= nbVertexPerFace; ++iVeFa1 )
             {
 
-                iVeEl1 = GeoShape::fToP( iFaEl1, iVeFa1 ); // local vertex number (in element)
+                iVeEl1 = GeoShape::faceToPoint( iFaEl1, iVeFa1 ); // local vertex number (in element)
 
                 // Loop number of Dof per vertex (mesh1)
                 for ( ID l = 1; l <= nbDofPerVertex1; ++l )
@@ -457,7 +457,7 @@ updateDofConnections( const MeshType& mesh1 )
             for ( ID iEdFa1 = 1; iEdFa1 <= nbEdgePerFace; ++iEdFa1 )
             {
 
-                iEdEl1 = GeoShape::fToE( iFaEl1, iEdFa1 ).first; // local edge number (in element)
+                iEdEl1 = GeoShape::faceToEdge( iFaEl1, iEdFa1 ).first; // local edge number (in element)
 
                 // Loop number of Dof per edge (mesh1)
                 for ( ID l = 1; l <= nbDofPerEdge1; ++l )

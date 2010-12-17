@@ -338,7 +338,7 @@ public:
     //@{
 
     //! Number of element edges, for compatibility
-    static const UInt numLocalEdges = GeoND<GEOSHAPE, GeoElement0D<MC> >::numEdges;
+    static const UInt S_numLocalEdges = GeoND<GEOSHAPE, GeoElement0D<MC> >::S_numEdges;
 
     typedef GEOSHAPE geoShape_Type;
     typedef typename MC::FaceMarker marker_Type;
@@ -541,11 +541,11 @@ public:
     //@{
 
     //! Number of local Vertices
-    static const UInt numLocalVertices = GeoND<GEOSHAPE, GeoElement0D<MC> >::numVertices;
+    static const UInt S_numLocalVertices = GeoND<GEOSHAPE, GeoElement0D<MC> >::S_numVertices;
     //! Number of local Faces
-    static const UInt numLocalFaces = GeoND<GEOSHAPE, GeoElement0D<MC> >::numFaces;
+    static const UInt S_numLocalFaces = GeoND<GEOSHAPE, GeoElement0D<MC> >::S_numFaces;
     //! Number of local Edges (using Euler Formula)
-    static const UInt numLocalEdges = GeoND<GEOSHAPE, GeoElement0D<MC> >::numEdges;
+    static const UInt S_numLocalEdges = GeoND<GEOSHAPE, GeoElement0D<MC> >::S_numEdges;
 
     typedef GEOSHAPE geoShape_Type;
     typedef typename MC::VolumeMarker marker_Type;
@@ -658,7 +658,7 @@ GeoElement1D<GEOSHAPE, MC>::GeoElement1D( ID identity ) :
         GeoND<GEOSHAPE, GeoElement0D<MC> >( identity )
 #endif
 {
-    ASSERT_PRE( GEOSHAPE::nDim == 1 , "geoElement2D with incorrect GeoShape" ) ;
+    ASSERT_PRE( GEOSHAPE::S_nDimensions == 1 , "geoElement2D with incorrect GeoShape" ) ;
 }
 
 #ifdef TWODIM
@@ -677,7 +677,7 @@ GeoElement1D<GEOSHAPE, MC>::GeoElement1D( const GeoElement1D<GEOSHAPE, MC>& Elem
         MC::EdgeMarker                    ( Element )
 #endif
 {
-    ASSERT_PRE( GEOSHAPE::nDim == 1 , "geoElement2D with incorrect GeoShape" ) ;
+    ASSERT_PRE( GEOSHAPE::S_nDimensions == 1 , "geoElement2D with incorrect GeoShape" ) ;
 }
 
 
@@ -689,7 +689,7 @@ GeoElement1D<GEOSHAPE, MC>::GeoElement1D( const GeoElement1D<GEOSHAPE, MC>& Elem
 // Constructor & Destructor
 // ==========================================
 template <typename GEOSHAPE, typename MC>
-const UInt GeoElement2D<GEOSHAPE, MC>::numLocalEdges;
+const UInt GeoElement2D<GEOSHAPE, MC>::S_numLocalEdges;
 
 #ifdef TWODIM
 template <typename GEOSHAPE, typename MC>
@@ -705,7 +705,7 @@ GeoElement2D<GEOSHAPE, MC>::GeoElement2D( ID identity ) :
         M_secondAdjacentElementPosition  ( 0 )
 #endif
 {
-    ASSERT_PRE( GEOSHAPE::nDim == 2 , "geoElement2D with incorrect GeoShape" ) ;
+    ASSERT_PRE( GEOSHAPE::S_nDimensions == 2 , "geoElement2D with incorrect GeoShape" ) ;
 }
 
 #ifdef TWODIM
@@ -724,7 +724,7 @@ GeoElement2D<GEOSHAPE, MC>::GeoElement2D( const GeoElement2D<GEOSHAPE, MC>& Elem
         M_secondAdjacentElementPosition   ( Element.M_secondAdjacentElementPosition )
 #endif
 {
-    ASSERT_PRE( GEOSHAPE::nDim == 2 , "geoElement2D with incorrect GeoShape" ) ;
+    ASSERT_PRE( GEOSHAPE::S_nDimensions == 2 , "geoElement2D with incorrect GeoShape" ) ;
 }
 
 
@@ -732,11 +732,11 @@ GeoElement2D<GEOSHAPE, MC>::GeoElement2D( const GeoElement2D<GEOSHAPE, MC>& Elem
                  GeoElement3D
  --------------------------------------------------------------------------*/
 template <typename GEOSHAPE, typename MC>
-const UInt GeoElement3D<GEOSHAPE, MC>::numLocalVertices;
+const UInt GeoElement3D<GEOSHAPE, MC>::S_numLocalVertices;
 template <typename GEOSHAPE, typename MC>
-const UInt GeoElement3D<GEOSHAPE, MC>::numLocalFaces;
+const UInt GeoElement3D<GEOSHAPE, MC>::S_numLocalFaces;
 template <typename GEOSHAPE, typename MC>
-const UInt GeoElement3D<GEOSHAPE, MC>::numLocalEdges;
+const UInt GeoElement3D<GEOSHAPE, MC>::S_numLocalEdges;
 
 // ==========================================
 // Constructor & Destructor
@@ -745,7 +745,7 @@ template <typename GEOSHAPE, typename MC>
 GeoElement3D<GEOSHAPE, MC>::GeoElement3D( ID identity ) :
         GeoND<GEOSHAPE, GeoElement0D<MC> >( identity )
 {
-    ASSERT_PRE( GEOSHAPE::nDim == 3 , "geoElement3D with incorrect GeoShape" )
+    ASSERT_PRE( GEOSHAPE::S_nDimensions == 3 , "geoElement3D with incorrect GeoShape" )
 }
 
 template <typename GEOSHAPE, typename MC>
@@ -753,7 +753,7 @@ GeoElement3D<GEOSHAPE, MC>::GeoElement3D( const GeoElement3D<GEOSHAPE, MC>& Elem
         GeoND<GEOSHAPE, GeoElement0D<MC> >( Element ),
         MC::VolumeMarker                  ( Element )
 {
-    ASSERT_PRE( GEOSHAPE::nDim == 3 , "geoElement3D with incorrect GeoShape" )
+    ASSERT_PRE( GEOSHAPE::S_nDimensions == 3 , "geoElement3D with incorrect GeoShape" )
 }
 }
 #endif
