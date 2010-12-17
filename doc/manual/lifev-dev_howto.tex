@@ -20,13 +20,13 @@ GeoMap is the base class, two kinds of classes can be derived from it:
 
 The basis functions may be used  to define the geometrical mappings and
 the finite element shape functions. A lot of basis functions are already
-implemented in the file {\verb basisFct.h}. To create a new set of basis 
+implemented in the file \verb#basisFct.h#. To create a new set of basis 
 functions you must create a class which derives from the class 
 {\verb BasisFct_Base<Shape,nbFct>}, where Shape is either Line or 
 Quad or Triangle or Tetra or Hexa, and nbFct is the number of basis functions.
 Your class has just to contain a constructor which fills the arrays fct[i] 
 ($0\leq i < nbFct$), and fctDer[i][icoor], ($0\leq i < nbFct$ and 
-$0<icoor<Shape::nDim$). These arrays contain pointers to the basis
+$0<icoor<Shape::S_nDimensions$). These arrays contain pointers to the basis
 functions and their derivatives. These function are staightforwardly
 coded as global function which take the coordinates $x,y,z$ as 
 arguments and return the value of the function (see examples in the file   
@@ -70,13 +70,13 @@ the comptationnal cost may be  more expensive than with a
 
 - have a look at the end of the file \texttt{geoMap.h}, you will
   find many geometrical mapping together with integration rules. Choose
-  one, say {\verb GeoMap_Linear_Tetra_4pt}. If you don't like the
+  one, say \verb#GeoMap_Linear_Tetra_4pt#. If you don't like the
   geometrical mappings already defined, you have to create a new one.
   Remember that a geomapQR class is the ``tensorial product'' (template
   in fact...) of a set of basis function (in this example,
-  {\verb BasisFct_P1_3D}, see \texttt{basisFct.h}), a geometric element (here,
+  \verb#BasisFct_P1_3D#, see \texttt{basisFct.h}), a geometric element (here,
   GeoElement3D<LinearTetra>, see \texttt{basisElSh.h}) and a quadrature
-  rule (here, {\verb QuadRule_Tetra_4pt}, see \texttt{quadRule.h}).
+  rule (here, \verb#QuadRule_Tetra_4pt#, see \texttt{quadRule.h}).
 
 - in \texttt{finiteEleQR.h}: create a typedef correponding to the
   ``product'' of your base finite element and the geomap:
@@ -103,7 +103,7 @@ for your operator than those of \texttt{elemOper.h}, a code
 that works with a ``general'' FE (i.e. with a quadrature rule)
 will work without any change with your new element.
 
-You can have a look at {\verb fe_p1_tetra_exact.h}. But I emphasize that 
+You can have a look at \verb#fe_p1_tetra_exact.h#. But I emphasize that 
 this is just a test, and it should probably be improved (in particular,
 the geometrical quantities stored in the geomap class...).
 

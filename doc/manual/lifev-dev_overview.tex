@@ -440,11 +440,11 @@ public:
   typedef Tetra BasRefSha;
   typedef QuadraticTriangle GeoBShape;
   static const UInt numPoints=10;
-  static const UInt  nbPtsPerEdge    = 1;
-  static const UInt  nbPtsPerFace    = 0;
-  static const UInt  nbPtsPerVolume  = 0;
-  static UInt eToP(UInt const _localEdge, UInt const _point);
-   static UInt fToP(UInt const _localFace, UInt const _point);
+  static const UInt  numPointsPerEdge    = 1;
+  static const UInt  numPointsPerFace    = 0;
+  static const UInt  numPointsPerVolume  = 0;
+  static UInt edgeToPoint(UInt const _localEdge, UInt const _point);
+   static UInt faceToPoint(UInt const _localFace, UInt const _point);
 };
 \end{verbatim}
 Again all data are public and static, due to the basic nature of those
@@ -455,20 +455,20 @@ classes (which are in fact \texttt{struct}s).
 \texttt{BasRefSha} & We export the type of the base \emph{BasRefSha}.\\
 \texttt{GeoBShape}  & We export the \emph{GeoShape} of the boundary.\\
 \texttt{numPoints} & Number of Points\\
-\texttt{nbPtsPerEdge} & Number of Points \textbf{internal} to an edge\\
-\texttt{nbPtsPerFace} & Number of Points \textbf{internal} to a face\\
-\texttt{nbPtsPerVolume} & Number of Points \textbf{internal} to the volume
+\texttt{numPointsPerEdge} & Number of Points \textbf{internal} to an edge\\
+\texttt{numPointsPerFace} & Number of Points \textbf{internal} to a face\\
+\texttt{numPointsPerVolume} & Number of Points \textbf{internal} to the volume
 (i.e.\  to the tetrahedron itself).\\
-\texttt{eToP(i,j)} & $j$-th point on the $i$-the edge (numbering from 1)\\
-\texttt{fToP(i,j)} & $j$-th point on the $i$-the face (numbering from 1) \\
+\texttt{edgeToPoint(i,j)} & $j$-th point on the $i$-the edge (numbering from 1)\\
+\texttt{faceToPoint(i,j)} & $j$-th point on the $i$-the face (numbering from 1) \\
 \hline
 \end{tabularx}
 
-The quantity \texttt{nbPtsPerVertex} is not stored because always equal to $1$.
-We may note that other pieces of information are immediately deduced. If we take
+The quantity \texttt{numPointsPerVertex} is not stored because always equal to
+$1$. We may note that other pieces of information are immediately deduced. If we take
 the example of the Quadratic Tetra we have that the total number of point on each 
-face is \texttt{GeoBShape::numPoints} while that for the Edges is 
-given by \texttt{GeoBShape::GeoBShape::numPoints}. The Points numbering follow the
+face is \texttt{GeoBShape::S_numPoints} while that for the Edges is 
+given by \texttt{GeoBShape::GeoBShape::S_numPoints}. The Points numbering follow the
 general convention
 \begin{itemize}
 \item Vertices are numbered first;
@@ -482,8 +482,8 @@ given in figure  \ref{fig:basrefsha};
 Thus, if I want to know the maximum numbering of points on the
 edges of a \texttt{QuadraticHexa} I compute
 \begin{displaymath}
-\text{\texttt{QuadraticHexa::numVertices +
-QuadraticHexa::nbPtsPerEdge*QuadraticHexa::numEdges}}
+\text{\texttt{QuadraticHexa::S_numVertices +
+QuadraticHexa::S_numPointsPerEdge*QuadraticHexa::S_numEdges}}
 \end{displaymath}
 \subsection{Mesh Classes}
 \label{sec:meshhandler}
@@ -552,14 +552,14 @@ class GeoND {
   GeoND(const GeoND<GeoShape> &);
   GeoND & operator=(GeoND const & G); 
   
-  static const UInt numLocalPoints=GeoShape::numPoints;
-  static const UInt numLocalVertices=GeoShape::numVertices;
+  static const UInt numLocalPoints=GeoShape::S_numPoints;
+  static const UInt numLocalVertices=GeoShape::S_numVertices;
   
   Geo0D & point(UInt const i); 
   Geo0D const & point (UInt const i) const;
   
-  // UInt const nPoints() const { return GeoShape::numPoints; };
-  // UInt const nVertices() const { return GeoShape::numVertices;};
+  // UInt const nPoints() const { return GeoShape::S_numPoints; };
+  // UInt const nVertices() const { return GeoShape::S_numVertices;};
   
   UInt const & id() const { return _id;}; 
   
@@ -622,7 +622,7 @@ public:
 
   GeoElement2D();
 
-  static const UInt numLocalEdges=GeoShape::numVertices;
+  static const UInt numLocalEdges=GeoShape::S_numVertices;
 
   typedef typename GeoShape::GeoBShape EdgeShape;
   typedef  GeoElement1D<EdgeShape> EdgeType;
@@ -650,8 +650,8 @@ public:
   typedef  GeoElement1D<EdgeShape> EdgeType;
   typedef  GeoElement2D<FaceShape> FaceType;
 
-  static  const UInt numLocalFaces=GeoShape::numFaces;
-  static  const UInt numLocalEdges=numLocalFaces+GeoShape::numVertices-2;
+  static  const UInt numLocalFaces=GeoShape::S_numFaces;
+  static  const UInt numLocalEdges=numLocalFaces+GeoShape::S_numVertices-2;
 };
 \end{verbatim}
 The name of the variables and methods should be self explanatory.
@@ -1598,7 +1598,7 @@ template<typename BRS,UInt _nbFct>
 class BasisFct_Base
 {
 public:
-  static const UInt nbCoor = BRS::nDim;/* For Compatibility
+  static const UInt nbCoor = BRSE::S_nDimensions;/* For Compatibility
                                           the name will be made uniform */
   static const UInt nbFct  = _nbFct; // Numero of Shape Functions
   typedef BRS BasRefSha; // Basic Reference Shape.
@@ -1707,7 +1707,7 @@ template<class QuadRule,class BasisFct,class GeoEle>
 class GeoMap
 /*
 |   #Prerequisites
-|   BasisFct:nbFct must be less than equal Geoele::numPoints
+|   BasisFct:nbFct must be less than equal Geoele::S_numPoints
 */
 {
 public:
@@ -1798,7 +1798,7 @@ class QuadRule
 public:
   QuadRule();
   static const UInt nbQuadPt = _nbQuadPt;
-  static const UInt nbCoor   = BasRefSha::nDim;
+  static const UInt nbCoor   = BasRefShaE::S_nDimensions;
   // For sake of simplicity it returns 0 if we are asking a coordinate
   // outide the scope of the Basis REference Shape 
   // (for example the z coordinate for a triangle)
@@ -1837,7 +1837,7 @@ class QuadRule<BasRefSha,0>
 {
 public:
   static const UInt nbQuadPt = 0;
-  static const UInt nbCoor   = BasRefSha::nDim;
+  static const UInt nbCoor   = BasRefShaE::S_nDimensions;
   Real const & quadPtCoor(UInt const ig,UInt const icoor) const 
     {return nbQuadPt;};
   Real const * quadPtCoor(UInt const ig) const {return 0;};
