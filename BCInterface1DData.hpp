@@ -58,6 +58,9 @@ public:
 
     typedef baseList1D_Type                                                            bcBaseList_Type;
     typedef std::vector< Real >                                                        resistanceContainer_Type;
+    typedef OneDimensional::bcLine_Type                                                bcLine_Type;
+    typedef OneDimensional::bcSide_Type                                                bcSide_Type;
+    typedef OneDimensional::bcType_Type                                                bcType_Type;
 
     //@}
 

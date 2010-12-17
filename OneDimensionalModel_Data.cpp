@@ -116,9 +116,9 @@ void
 OneDimensionalModel_Data::setup( const GetPot& dataFile, const std::string& section )
 {
     // Model Type
-    M_physicsType = oneDimensionalPhysicsMap[ dataFile( ( section + "/Model/PhysicsType" ).data(), "OneD_1DLinearPhysics" ) ];
-    M_fluxType    = oneDimensionalFluxMap[    dataFile( ( section + "/Model/FluxType"    ).data(), "OneD_1DLinearFlux" ) ];
-    M_sourceType  = oneDimensionalSourceMap[  dataFile( ( section + "/Model/SourceType"  ).data(), "OneD_1DLinearSource" ) ];
+    M_physicsType = OneDimensional::physicsMap[ dataFile( ( section + "/Model/PhysicsType" ).data(), "OneD_1DLinearPhysics" ) ];
+    M_fluxType    = OneDimensional::fluxMap[    dataFile( ( section + "/Model/FluxType"    ).data(), "OneD_1DLinearFlux" ) ];
+    M_sourceType  = OneDimensional::sourceMap[  dataFile( ( section + "/Model/SourceType"  ).data(), "OneD_1DLinearSource" ) ];
 
     // If data time has not been set
     if ( !M_time.get() )
@@ -318,9 +318,9 @@ void
 OneDimensionalModel_Data::oldStyleSetup( const GetPot& dataFile, const std::string& section )
 {
     // Model Type
-    M_physicsType = oneDimensionalPhysicsMap[ dataFile( ( section + "/Model/PhysicsType" ).data(), "OneD_1DLinearPhysics" ) ];
-    M_fluxType    = oneDimensionalFluxMap[    dataFile( ( section + "/Model/FluxType"    ).data(), "OneD_1DLinearFlux" ) ];
-    M_sourceType  = oneDimensionalSourceMap[  dataFile( ( section + "/Model/SourceType"  ).data(), "OneD_1DLinearSource" ) ];
+    M_physicsType = OneDimensional::physicsMap[ dataFile( ( section + "/Model/PhysicsType" ).data(), "OneD_1DLinearPhysics" ) ];
+    M_fluxType    = OneDimensional::fluxMap[    dataFile( ( section + "/Model/FluxType"    ).data(), "OneD_1DLinearFlux" ) ];
+    M_sourceType  = OneDimensional::sourceMap[  dataFile( ( section + "/Model/SourceType"  ).data(), "OneD_1DLinearSource" ) ];
 
     // If data time has not been set
     if ( !M_time.get() )
@@ -526,9 +526,9 @@ OneDimensionalModel_Data::showMe( std::ostream& output ) const
     // Model
     //output << std::scientific << std::setprecision(15);
     output << "\n*** Values for data [Model]\n\n";
-    output << "Physics Type           = " << Enum2String( M_physicsType, oneDimensionalPhysicsMap ) << std::endl;
-    output << "Flux Type              = " << Enum2String( M_fluxType,    oneDimensionalFluxMap    ) << std::endl;
-    output << "Source Type            = " << Enum2String( M_sourceType,  oneDimensionalSourceMap  ) << std::endl;
+    output << "Physics Type           = " << Enum2String( M_physicsType, OneDimensional::physicsMap ) << std::endl;
+    output << "Flux Type              = " << Enum2String( M_fluxType,    OneDimensional::fluxMap    ) << std::endl;
+    output << "Source Type            = " << Enum2String( M_sourceType,  OneDimensional::sourceMap  ) << std::endl;
 
     // Time
     output << "\n*** Values for data [time_discretization]\n\n";
@@ -620,7 +620,7 @@ OneDimensionalModel_Data::robertsonCorrection() const
 // Private methods
 // ===================================================
 void
-OneDimensionalModel_Data::linearInterpolation( scalVec_Type& vector,
+OneDimensionalModel_Data::linearInterpolation( scalarVector_Type& vector,
                                                const GetPot& dataFile,
                                                const std::string& quantity,
                                                const Real& defaultValue,
@@ -667,4 +667,4 @@ OneDimensionalModel_Data::computeDerivatives()
     M_dAlphadz /= M_mesh->meanH();
 }
 
-}
+} // LifeV namespace

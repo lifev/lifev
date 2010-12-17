@@ -173,6 +173,9 @@ public:
     typedef OneDimensionalModel_Data                data_Type;
     typedef data_Type::mesh_Type                    mesh_Type;
 
+    typedef data_Type::container2D_Type             container2D_Type;
+    typedef data_Type::scalarVector_Type            scalarVector_Type;
+
     typedef FESpace< mesh_Type, EpetraMap >         feSpace_Type;
     typedef boost::shared_ptr< feSpace_Type >       feSpacePtr_Type;
 
@@ -190,6 +193,10 @@ public:
     typedef std::map< std::string, vectorPtr_Type > solution_Type;
     typedef boost::shared_ptr< solution_Type >      solutionPtr_Type;
     typedef solution_Type::const_iterator           solutionConstIterator_Type;
+
+    typedef OneDimensional::bcLine_Type             bcLine_Type;
+    typedef OneDimensional::bcSide_Type             bcSide_Type;
+    typedef OneDimensional::bcType_Type             bcType_Type;
 
     //@}
 
@@ -471,7 +478,7 @@ private:
     vector_Type longitudinalFluxCorrection();
 
     //! L2 Projection of the second derivative of Q over P1 space.
-    //scalVec_Type                       _compute_d2Q_dx2( const scalVec_Type& );
+    //scalarVector_Type                       _compute_d2Q_dx2( const scalarVector_Type& );
 
     //@}
 
@@ -509,13 +516,13 @@ private:
     std::vector<vector_Type>           M_fluxVector;
 
     //! diffFlux = dF(U)/dU (in P0)
-    std::vector<scalVec_Type>          M_diffFlux;
+    std::vector< scalarVector_Type >   M_diffFlux;
 
     //! Source term S (in P1)
     std::vector<vector_Type>           M_sourceVector;
 
     //! diffSrc = dSource(U)/dU (in P0)
-    std::vector<scalVec_Type>          M_diffSrc;
+    std::vector< scalarVector_Type >   M_diffSrc;
 
     //! tridiagonal mass matrix
     matrixPtr_Type                     M_massMatrix;

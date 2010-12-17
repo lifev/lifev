@@ -194,7 +194,7 @@ public:
      * @param base base of the condition
      */
     template< class BCBaseType >
-    void setBC( const bcSide_Type& bcSide, const bcLine_Type& bcLine, const bcType_Type& bcType, const BCBaseType& base ) { M_handler->setBC( bcSide, bcLine, bcType, base ); }
+    void setBC( const data_Type::bcSide_Type& bcSide, const data_Type::bcLine_Type& bcLine, const data_Type::bcType_Type& bcType, const BCBaseType& base ) { M_handler->setBC( bcSide, bcLine, bcType, base ); }
 
     //@}
 

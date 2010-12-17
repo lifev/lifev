@@ -56,19 +56,19 @@ BCInterface1DData::BCInterface1DData() :
         M_mapBase            ()
 {
     //Set mapSide
-    M_mapSide["left"]   = OneD_left;
-    M_mapSide["right"]  = OneD_right;
+    M_mapSide["left"]   = OneDimensional::left;
+    M_mapSide["right"]  = OneDimensional::right;
 
     //Set mapQuantity
-    M_mapQuantity["A"]      = OneD_A;
-    M_mapQuantity["Q"]      = OneD_Q;
-    M_mapQuantity["W1"]     = OneD_W1;
-    M_mapQuantity["W2"]     = OneD_W2;
-    M_mapQuantity["P"]      = OneD_P;
+    M_mapQuantity["A"]  = OneDimensional::A;
+    M_mapQuantity["Q"]  = OneDimensional::Q;
+    M_mapQuantity["W1"] = OneDimensional::W1;
+    M_mapQuantity["W2"] = OneDimensional::W2;
+    M_mapQuantity["P"]  = OneDimensional::P;
 
     //Set mapLine
-    M_mapLine["first"]  = OneD_first;
-    M_mapLine["second"] = OneD_second;
+    M_mapLine["first"]  = OneDimensional::first;
+    M_mapLine["second"] = OneDimensional::second;
 
     //Set mapBase
     M_mapBase["function"]         = BCI1DFunction;
