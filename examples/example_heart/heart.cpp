@@ -254,7 +254,7 @@ Heart::run()
     {
         exporter.reset( new Hdf5exporter<RegionMesh3D<LinearTetra> > ( M_heart_fct->M_dataFile,
                                                                        "heart" ) );
-        exporter->setDirectory( "./" ); // This is a test to see if M_post_dir is working
+        exporter->setPostDir( "./" ); // This is a test to see if M_post_dir is working
         exporter->setMeshProcId( meshPart.meshPartition(), M_heart_fct->M_comm->MyPID() );
     }
     else
