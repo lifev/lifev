@@ -416,8 +416,8 @@ Cylinder::run()
     HDF5Filter3DMesh<RegionMesh3D<LinearTetra> > HDF5Input(dataFile, "cylinderPart");
     HDF5Input.loadGraph(meshPart.elementDomains(), d->comm);
     meshPart.update();
-    HDF5Input.loadMyPartition(meshPart.meshPartition(), d->comm);
-    HDF5Input.CloseFile();
+    meshPart.meshPartition() = HDF5Input.getMeshPartition();
+    HDF5Input.closeFile();
 
     if (verbose) std::cout << std::endl;
     if (verbose) std::cout << "Time discretization order " << dataNavierStokes->dataTime()->getBDF_order() << std::endl;
