@@ -319,13 +319,13 @@ void SDStabilization<MeshType, DofType>::applySUPG(const Real dt, MatrixType& ma
 
     Debug(7100) << std::endl;
     Debug(7100) << "      Updating of element   done in "
-    << chronoUpdate.diff_cumul()   << "s." << std::endl;
+    << chronoUpdate.diffCumul()   << "s." << std::endl;
     Debug(7100) << "      Determination of parameters done in "
-    << chronoBeta.diff_cumul()     << "s." << std::endl;
+    << chronoBeta.diffCumul()     << "s." << std::endl;
     Debug(7100) << "      Element computations  done in "
-    << chronoElemComp.diff_cumul() << "s." << std::endl;
+    << chronoElemComp.diffCumul() << "s." << std::endl;
     Debug(7100) << "      Assembly              done in "
-    << chronoAssembly.diff_cumul() << "s." << std::endl;
+    << chronoAssembly.diffCumul() << "s." << std::endl;
 
 
 } // applySUPG(...)
@@ -389,13 +389,13 @@ void SDStabilization<MeshType, DofType>::applySD(const Real dt, MatrixType& matr
 
     Debug(7100) << std::endl;
     Debug(7100) << "      Updating of element   done in "
-    << chronoUpdate.diff_cumul()   << "s." << std::endl;
+    << chronoUpdate.diffCumul()   << "s." << std::endl;
     Debug(7100) << "      Determination of parameters done in "
-    << chronoBeta.diff_cumul()     << "s." << std::endl;
+    << chronoBeta.diffCumul()     << "s." << std::endl;
     Debug(7100) << "      Element computations  done in "
-    << chronoElemComp.diff_cumul() << "s." << std::endl;
+    << chronoElemComp.diffCumul() << "s." << std::endl;
     Debug(7100) << "      Assembly              done in "
-    << chronoAssembly.diff_cumul() << "s." << std::endl;
+    << chronoAssembly.diffCumul() << "s." << std::endl;
 
 
 } // applySD(...)
@@ -456,13 +456,13 @@ void SDStabilization<MeshType, DofType>::applyRHS(const Real dt, VectorType& vec
 
     Debug(7100) << std::endl;
     Debug(7100) << "      Updating of element   done in "
-    << chronoUpdate.diff_cumul()   << "s." << std::endl;
+    << chronoUpdate.diffCumul()   << "s." << std::endl;
     Debug(7100) << "      Determination of parameters done in "
-    << chronoBeta.diff_cumul()     << "s." << std::endl;
+    << chronoBeta.diffCumul()     << "s." << std::endl;
     Debug(7100) << "      Element computations  done in "
-    << chronoElemComp.diff_cumul() << "s." << std::endl;
+    << chronoElemComp.diffCumul() << "s." << std::endl;
     Debug(7100) << "      Assembly              done in "
-    << chronoAssembly.diff_cumul() << "s." << std::endl;
+    << chronoAssembly.diffCumul() << "s." << std::endl;
 
 
 } // applyRHS(...)
