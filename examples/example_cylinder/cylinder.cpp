@@ -412,7 +412,7 @@ Cylinder::run()
     if (verbose) std::cout << std::endl;
     if (verbose) std::cout << "Time discretization order " << dataNavierStokes->dataTime()->getBDF_order() << std::endl;
 
-    //dataNavierStokes.dataMesh()->setMesh(meshPart.mesh());
+    //dataNavierStokes.dataMesh()->setMesh(meshPart.meshPartition());
 
     std::string uOrder =  dataFile( "fluid/space_discretization/vel_order", "P1");
     if (verbose)
@@ -474,9 +474,9 @@ Cylinder::run()
     vector_type rhs ( fullMap );
 
 #ifdef HAVE_HDF5
-    Hdf5exporter<RegionMesh3D<LinearTetra> > ensight( dataFile, meshPart.mesh(), "cylinder", d->comm->MyPID());
+    Hdf5exporter<RegionMesh3D<LinearTetra> > ensight( dataFile, meshPart.meshPartition(), "cylinder", d->comm->MyPID());
 #else
-    Ensight<RegionMesh3D<LinearTetra> > ensight( dataFile, meshPart.mesh(), "cylinder", d->comm->MyPID());
+    Ensight<RegionMesh3D<LinearTetra> > ensight( dataFile, meshPart.meshPartition(), "cylinder", d->comm->MyPID());
 #endif
 
     vector_ptrtype velAndPressure ( new vector_type(*fluid.solution(), ensight.mapType() ) );
