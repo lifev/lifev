@@ -262,16 +262,16 @@ Structure::run3d()
     {
         if (exporterType.compare("none") == 0)
         {
-            exporter.reset( new NoExport<RegionMesh3D<LinearTetra> > ( dataFile, meshPart.mesh(), "structure", parameters->comm->MyPID()) );
+            exporter.reset( new NoExport<RegionMesh3D<LinearTetra> > ( dataFile, meshPart.meshPartition(), "structure", parameters->comm->MyPID()) );
         }
         else
         {
-            exporter.reset( new Ensight<RegionMesh3D<LinearTetra> > ( dataFile, meshPart.mesh(), "structure", parameters->comm->MyPID()) );
+            exporter.reset( new Ensight<RegionMesh3D<LinearTetra> > ( dataFile, meshPart.meshPartition(), "structure", parameters->comm->MyPID()) );
         }
     }
 
     exporter->setDirectory( "./" ); // This is a test to see if M_post_dir is working
-    exporter->setMeshProcId( meshPart.mesh(), parameters->comm->MyPID() );
+    exporter->setMeshProcId( meshPart.meshPartition(), parameters->comm->MyPID() );
 
     vector_ptrtype solidDisp ( new vector_type(solid.disp(), exporter->mapType() ) );
     vector_ptrtype solidVel  ( new vector_type(solid.vel(),  exporter->mapType() ) );
