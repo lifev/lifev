@@ -1032,7 +1032,7 @@ VectorContainer< VectorType, ContainerType >::dot( const VectorContainer< vector
     Real scalarProduct = 0;
 
     for ( UInt i( 0 ); i < vectorsNumber(); ++i )
-        scalarProduct += M_container[i]->Dot( *( vectorContainer.M_container[i] ) );
+        scalarProduct += M_container[i]->dot( *( vectorContainer.M_container[i] ) );
 
     return scalarProduct;
 }
@@ -1060,7 +1060,7 @@ VectorContainer< VectorType, ContainerType >::abs()
 #endif
 
     for ( constIterator_Type i = M_container.begin(); i < M_container.end(); ++i )
-        ( *i )->Abs();
+        ( *i )->abs();
 }
 
 template< class VectorType, class ContainerType >
@@ -1091,7 +1091,7 @@ VectorContainer< VectorType, ContainerType >::weightNorm2()
 
     for ( constIterator_Type i = M_container.begin(); i < M_container.end(); ++i )
     {
-        ( *i )->Norm2( PartialNorm );
+        ( *i )->norm2( PartialNorm );
         TotalNorm += PartialNorm * ( *i )->size();
     }
 
@@ -1169,7 +1169,7 @@ VectorContainer< VectorType, ContainerType >::showMe( std::ostream& output ) con
     output << "Global vector size: " << size() << std::endl;
 
     for ( constIterator_Type i = M_container.begin(); i < M_container.end(); ++i )
-        ( *i )->ShowMe( output );
+        ( *i )->showMe( output );
 //    for ( UInt i( 0 ); i < size(); ++i )
 //        output << "V[" << i << "] = " << this->operator[]( i ) << std::endl;
 
