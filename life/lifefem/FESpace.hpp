@@ -542,7 +542,7 @@ FESpace(	partitionMesh<MeshType>& 	mesh,
          const Int            	fDim,
          commPtr_Type&         	commptr
        ) :
-        M_mesh			( mesh.mesh() ),
+        M_mesh			( mesh.meshPartition() ),
         M_refFE			( &refFE ),
         M_Qr			( &Qr ),
         M_bdQr			( &bdQr ),
@@ -569,7 +569,7 @@ FESpace(	partitionMesh<MeshType>&	mesh,
          const Int				fDim,
          commPtr_Type&			commptr
        ) :
-        M_mesh			( mesh.mesh() ),
+        M_mesh			( mesh.meshPartition() ),
         M_fieldDim		( fDim ),
         M_dof			( ),
         M_fe			( ),
