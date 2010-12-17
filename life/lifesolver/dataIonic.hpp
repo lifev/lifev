@@ -61,6 +61,8 @@ public:
     //! Constructors
     DataIonic();
 
+    virtual ~DataIonic()
+    { std::cout << "DataIonic descrutor" << std::endl;}
     DataIonic( const GetPot& dataFile );
 
     DataIonic( const DataIonic& dataIonic );

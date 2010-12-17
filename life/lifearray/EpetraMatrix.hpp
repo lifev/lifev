@@ -1144,7 +1144,7 @@ EpetraMatrix<DataType>::insertValueDiagonal( const DataType entry, const EpetraM
 {
     for ( UInt i=0 ; i<Map.map(Unique)->NumMyElements(); ++i )//num from 1
     {
-        set_mat_inc( offset + Map.map(Unique)->GID(i)-1 , offset + Map.map(Unique)->GID(i)-1, entry );
+        addToCoefficient( offset + Map.map(Unique)->GID(i)-1 , offset + Map.map(Unique)->GID(i)-1, entry );
     }
 }
 

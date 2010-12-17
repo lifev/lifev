@@ -417,8 +417,8 @@ Cylinder::run()
     if (verbose)
         std::cout << "ok." << std::endl;
 
-    UInt totalVelDof   = uFESpace.map().getMap(Unique)->NumGlobalElements();
-    UInt totalPressDof = pFESpace.map().getMap(Unique)->NumGlobalElements();
+    UInt totalVelDof   = uFESpace.map().map(Unique)->NumGlobalElements();
+    UInt totalPressDof = pFESpace.map().map(Unique)->NumGlobalElements();
 
 
     if (verbose) std::cout << "Total Velocity Dof = " << totalVelDof << std::endl;
@@ -556,7 +556,7 @@ Cylinder::run()
         std::cout << "ok." << std::endl;
         exporter.postProcess( 0. );
 
-        double norm = velAndPressure->Norm2();
+        double norm = velAndPressure->norm2();
         if (verbose)
             std::cout << "   f- restart solution norm = " << norm << std::endl;
         fluid.initialize(*velAndPressure);

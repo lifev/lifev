@@ -80,18 +80,18 @@ public:
                                  const Real& z,
                                  const ID& id );
     typedef boost::function<Real ( Real const&, Real const&, Real const&,
-                                   Real const&, ID const& )> source_type;
+                                   Real const&, ID const& )> source_Type;
 
-    typedef Mesh mesh_type;
-    typedef BCHandler                             bchandler_raw_type;
-    typedef boost::shared_ptr<bchandler_raw_type> bchandler_type;
+    typedef Mesh mesh_Type;
+    typedef BCHandler                               bcHandlerRaw_Type;
+    typedef boost::shared_ptr<bcHandlerRaw_Type>    bcHandler_Type;
 
-    typedef typename SolverType::matrix_type      matrix_Type;
-    typedef boost::shared_ptr<matrix_Type>        matrixPtr_Type;
-    typedef typename SolverType::vector_type      vector_Type;
+    typedef typename SolverType::matrix_type        matrix_Type;
+    typedef boost::shared_ptr<matrix_Type>          matrixPtr_Type;
+    typedef typename SolverType::vector_type        vector_Type;
 
-    typedef typename SolverType::prec_raw_type    prec_raw_type;
-    typedef typename SolverType::prec_type        prec_type;
+    typedef typename SolverType::prec_raw_type      preconditionerRaw_Type;
+    typedef typename SolverType::prec_type          preconditioner_Type;
 
 
      //@}
@@ -112,7 +112,7 @@ public:
     MonodomainSolver( const data_type& dataType,
                       FESpace<Mesh, EpetraMap>& uFESpace,
                       BCHandler& bcHandler,
-                      Epetra_Comm& comm);
+                      boost::shared_ptr<Epetra_Comm>& comm);
 
     //! Destructor
     virtual ~MonodomainSolver();
@@ -123,31 +123,29 @@ public:
     //@{
 
     //! Updates sources, bc treatment and solve the monodomain system
-    virtual void PDEiterate( bchandler_raw_type& bch );
+    virtual void PDEiterate( bcHandlerRaw_Type& bch );
 
     //! Sets up the system solver
-    virtual void setUp        ( const GetPot& dataFile );
+    virtual void setup        ( const GetPot& dataFile );
 
     //! Builds time independent parts of PDE system
     virtual void buildSystem();
 
     //! Updates time dependent parts of PDE system
-    virtual void updatePDESystem(Real       alpha,
-                              vector_Type& sourceVec
-                              );
+    virtual void updatePDESystem(Real alpha, vector_Type&  sourceVec);
 
     //! Updates time dependent parts of PDE system
     virtual void updatePDESystem( vector_Type& sourceVec );
 
     //! Initialize
-    void initialize( const source_type& );
+    void initialize( const source_Type& );
     void initialize( const Function&  );
     void initialize( const vector_Type& );
 
     //! Returns the local solution vector
-    const vector_Type& solution_u() const {return M_sol_u;}
+    const vector_Type& solutionTransmembranePotential() const {return M_solutionTransmembranePotential;}
 
-    const vector_Type& fiber_vector() const {return M_fiber_vector;}
+    const vector_Type& fiberVector() const {return M_fiberVector;}
 
     //! Returns the local residual vector
     const vector_Type& residual() const {return M_residual;}
@@ -156,41 +154,35 @@ public:
     FESpace<Mesh, EpetraMap>& potentialFESpace() {return M_uFESpace;}
 
     //! Setting of the boundary conditions
-    void setBC(BCHandler &BCh_u)
-        {
-            M_BCh_electric = &BCh_u; M_setBC = true;
-        }
+    void setBC( BCHandler &BCh_u )
+    {
+        M_BChandlerElectric = &BCh_u; M_setBC = true;
+    }
 
     //! Postprocessing
-    void postProcess(bool _writeMesh = false);
+    void postProcessing(bool _writeMesh = false);
 
-    void resetPrec() {M_resetPrec = true;}
+    void resetPreconditioner() {M_resetPreconditioner = true;}
 
     //! Return maps
-    Epetra_Map const& getRepeatedEpetraMap() const { return *M_localMap.getMap(Repeated); }
+    Epetra_Map const& getRepeatedEpetraMap() const { return *M_localMap.map(Repeated); }
 
-    Epetra_Map const& getRepeatedEpetraMapVec() const { return *M_localMapVec.getMap(Repeated); }
+    Epetra_Map const& getRepeatedEpetraMapVec() const { return *M_localMapVector.map(Repeated); }
 
     EpetraMap const& getMap() const { return M_localMap; }
 
     void recomputeMatrix(bool const recomp){M_recomputeMatrix = recomp;}
 
-    matrix_Type& matrMass()
-        {
-            return *M_matrMass;
-        }
+    matrix_Type& massMatrix() { return *M_massMatrix; }
 
     //@}
 protected:
 
 	//! Solves PDE system
-    void solveSystem            (  matrixPtr_Type matrFull,
-                                   vector_Type&   rhsFull );
+    void solveSystem (  matrixPtr_Type matrFull, vector_Type&   rhsFull );
 
     //! Apply BC
-    void applyBoundaryConditions(  matrix_Type&        matrix,
-                                   vector_Type&        rhs,
-                                   bchandler_raw_type& BCh);
+    void applyBoundaryConditions( matrix_Type& matrix, vector_Type& rhs, bcHandlerRaw_Type& BCh );
 
     //! Data
     const data_type&               M_data;
@@ -199,22 +191,23 @@ protected:
     FESpace<Mesh, EpetraMap>&      M_uFESpace;
 
     //! MPI communicator
-    Epetra_Comm*                   M_comm;
+    //Epetra_Comm*                   M_comm;
+    const boost::shared_ptr<Epetra_Comm> M_comm;
     Int                            M_me;
 
     //! Monodomain BC
-    BCHandler*                     M_BCh_electric;
+    BCHandler*                     M_BChandlerElectric;
     bool                           M_setBC;
 
     //! Map
     EpetraMap                      M_localMap;
-    EpetraMap                      M_localMapVec;
+    EpetraMap                      M_localMapVector;
 
     //! mass matrix
-    matrixPtr_Type                 M_matrMass;
+    matrixPtr_Type                 M_massMatrix;
 
     //! Stiff matrix: D*stiff
-    matrixPtr_Type                 M_matrStiff;
+    matrixPtr_Type                 M_stiffnessMatrix;
 
     matrixPtr_Type                 M_matrNoBC;
 
@@ -222,10 +215,10 @@ protected:
     vector_Type                    M_rhsNoBC;
 
     //! Global solution _u
-    vector_Type                    M_sol_u;
+    vector_Type                    M_solutionTransmembranePotential;
 
     //! Local fibers vector
-    vector_Type                    M_fiber_vector;
+    vector_Type                    M_fiberVector;
 
     //! residual
     vector_Type                    M_residual;
@@ -233,7 +226,7 @@ protected:
     //! Solver
     SolverType                     M_linearSolver;
 
-    prec_type                      M_prec;
+    preconditioner_Type            M_preconditioner;
 
     Real                         M_diagonalize;
 
@@ -244,11 +237,11 @@ protected:
     bool                           M_updated;
 
     //! Boolean that indicates if the precond has to be recomputed
-    bool                           M_reusePrec;
-    bool                           M_resetPrec;
+    bool                           M_reusePreconditioner;
+    bool                           M_resetPreconditioner;
 
     //! Integer storing the max number of solver iteration with prec recomputing
-    Int                            M_maxIterSolver;
+    Int                            M_maxIteration;
 
     //! Boolean that indicates if the matrix has to be recomputed
     bool                           M_recomputeMatrix;
@@ -256,9 +249,9 @@ protected:
 private:
 
     //! Elementary matrices
-    ElemMat                        M_elmatStiff;
-    ElemMat                        M_elmatMass;
-    Real 						   massCoeff;
+    ElemMat                        M_stiffnessElementaryMatrix;
+    ElemMat                        M_massElementaryMatrix;
+    Real 						   massCoefficient;
     UInt dim_u() const           { return M_uFESpace.dim(); }
 
 }; // class MonodomainSolver
@@ -273,52 +266,52 @@ private:
 template<typename Mesh, typename SolverType>
 MonodomainSolver<Mesh, SolverType>::
 MonodomainSolver( const data_type&          dataType,
-       FESpace<Mesh, EpetraMap>& uFESpace,
-       BCHandler&                BCh_u,
-       Epetra_Comm&              comm ):
+                  FESpace<Mesh, EpetraMap>& uFESpace,
+                  BCHandler&                BCh_u,
+                  boost::shared_ptr<Epetra_Comm>&              comm ):
     M_data                   ( dataType ),
     M_uFESpace               ( uFESpace ),
-    M_comm                   ( &comm ),
+    M_comm                   ( comm ),
     M_me                     ( M_comm->MyPID() ),
-    M_BCh_electric           ( &BCh_u ),
+    M_BChandlerElectric      ( &BCh_u ),
     M_setBC                  ( true ),
     M_localMap               ( M_uFESpace.map() ),
-    M_localMapVec              (M_localMap+M_localMap+M_localMap),
-    M_matrMass               ( ),
-    M_matrStiff	             ( ),
+    M_localMapVector         (M_localMap+M_localMap+M_localMap),
+    M_massMatrix             ( ),
+    M_stiffnessMatrix	     ( ),
     M_matrNoBC               ( ),
     M_rhsNoBC                ( M_localMap ),
-    M_sol_u                  ( M_localMap ),
-    M_fiber_vector           ( M_localMapVec, Repeated ),
+    M_solutionTransmembranePotential      ( M_localMap ),
+    M_fiberVector                  ( M_localMapVector, Repeated ),
     M_residual               ( M_localMap ),
     M_linearSolver           ( ),
-    M_prec                   ( ),
+    M_preconditioner         ( ),
     M_verbose                ( M_me == 0),
     M_updated                ( false ),
-    M_reusePrec              ( true ),
-    M_resetPrec              ( true ),
-    M_maxIterSolver          ( -1 ),
+    M_reusePreconditioner    ( true ),
+    M_resetPreconditioner    ( true ),
+    M_maxIteration           ( -1 ),
     M_recomputeMatrix        ( false ),
-    M_elmatStiff             ( M_uFESpace.fe().nbNode, 1, 1 ),
-    M_elmatMass              ( M_uFESpace.fe().nbNode, 1, 1 )
+    M_stiffnessElementaryMatrix ( M_uFESpace.fe().nbFEDof(), 1, 1 ),
+    M_massElementaryMatrix   ( M_uFESpace.fe().nbFEDof(), 1, 1 )
 {
 
-	if (M_data.has_fibers() )
+	if (M_data.hasFibers() )
 	    {
 	    	std::stringstream MyPID;
-	        ifstream fibers(M_data.fibers_file().c_str());
+	        ifstream fibers(M_data.fibersFile().c_str());
 
-	        std::cout << "fiber_file: " <<  M_data.fibers_file().c_str() << std::endl;
-	        UInt NumGlobalElements= M_localMapVec.getMap(Repeated)->NumGlobalElements();
+	        std::cout << "fiber_file: " <<  M_data.fibersFile().c_str() << std::endl;
+	        UInt NumGlobalElements= M_localMapVector.map(Repeated)->NumGlobalElements();
 	        std::vector<Real> fiber_global_vector(NumGlobalElements);
 
 	        for( UInt i=0; i< NumGlobalElements; ++i)
 	    		fibers>>fiber_global_vector[i];
-	    	 UInt NumMyElements = M_localMapVec.getMap(Repeated)->NumMyElements();
+	    	 UInt NumMyElements = M_localMapVector.map(Repeated)->NumMyElements();
 	    	for(UInt j=0; j< NumMyElements; ++j)
 	    	{
-	    		UInt ig= M_localMapVec.getMap(Repeated)->MyGlobalElements()[j];
-	    		M_fiber_vector[ig]= fiber_global_vector[ig-1];
+	    		UInt ig= M_localMapVector.map(Repeated)->MyGlobalElements()[j];
+	    		M_fiberVector[ig]= fiber_global_vector[ig-1];
 	    		}
 	    	std::cout << std::endl;
 	    	fiber_global_vector.clear();
@@ -331,35 +324,38 @@ template<typename Mesh, typename SolverType>
 MonodomainSolver<Mesh, SolverType>::
 ~MonodomainSolver()
 {
+std::cout << "MonodomainSolver destrutor" << std::endl;
 }
 
 
 template<typename Mesh, typename SolverType>
-void MonodomainSolver<Mesh, SolverType>::setUp( const GetPot& dataFile )
+void MonodomainSolver<Mesh, SolverType>::setup( const GetPot& dataFile )
 {
 
     M_diagonalize = dataFile( "electric/space_discretization/diagonalize",  1. );
 
-    M_reusePrec   = dataFile( "electric/prec/reuse", true);
+    M_reusePreconditioner   = dataFile( "electric/prec/reuse", true);
+
+    M_linearSolver.setCommunicator(M_comm);
 
     M_linearSolver.setDataFromGetPot( dataFile, "electric/solver" );
 
-    M_maxIterSolver = dataFile( "electric/solver/max_iter", -1);
+    M_maxIteration = dataFile( "electric/solver/max_iter", -1);
 
     std::string precType = dataFile( "electric/prec/prectype", "Ifpack");
 
-    M_prec.reset( PRECFactory::instance().createObject( precType ) );
-    ASSERT(M_prec.get() != 0, "monodomainSolver : Preconditioner not set");
+    M_preconditioner.reset( PRECFactory::instance().createObject( precType ) );
+    ASSERT(M_preconditioner.get() != 0, "monodomainSolver : Preconditioner not set");
 
-    M_prec->setDataFromGetPot( dataFile, "electric/prec" );
+    M_preconditioner->setDataFromGetPot( dataFile, "electric/prec" );
 }
 
 
 template<typename Mesh, typename SolverType>
 void MonodomainSolver<Mesh, SolverType>::buildSystem()
 {
-    M_matrMass.reset  ( new matrix_Type(M_localMap) );
-    M_matrStiff.reset( new matrix_Type(M_localMap) );
+    M_massMatrix.reset  ( new matrix_Type(M_localMap) );
+    M_stiffnessMatrix.reset( new matrix_Type(M_localMap) );
 
     if (M_verbose) std::cout << "  f-  Computing constant matrices ...        ";
 
@@ -385,22 +381,22 @@ void MonodomainSolver<Mesh, SolverType>::buildSystem()
     {
         chronoZero.start();
 
-        M_elmatStiff.zero();
-        M_elmatMass.zero();
+        M_stiffnessElementaryMatrix.zero();
+        M_massElementaryMatrix.zero();
 
         chronoZero.stop();
 
         chronoStiff.start();
-        switch(M_data.heart_diff_fct() )
+        switch(M_data.heartDiffusionFactor() )
         {
         case 0:
             M_uFESpace.fe().updateFirstDeriv( M_uFESpace.mesh()->volumeList( iVol ) );
-            if (M_data.has_fibers() )
+            if (M_data.hasFibers() )
             {
-                stiff( M_data.sigmal(),
-                       M_data.sigmat(),
-                       M_fiber_vector,
-                       M_elmatStiff,
+                stiff( M_data.longitudinalConductivity(),
+                       M_data.transversalConductivity(),
+                       M_fiberVector,
+                       M_stiffnessElementaryMatrix,
                        M_uFESpace.fe(),
                        M_uFESpace.dof(),
                        0,
@@ -408,26 +404,26 @@ void MonodomainSolver<Mesh, SolverType>::buildSystem()
             }
             else
             {
-                stiff( M_data.D(), M_elmatStiff,  M_uFESpace.fe(), 0, 0 );
+                stiff( M_data.diffusivity(), M_stiffnessElementaryMatrix,  M_uFESpace.fe(), 0, 0 );
             }
 	        break;
 
         	case 1:
         		M_uFESpace.fe().updateFirstDerivQuadPt( M_uFESpace.mesh()->volumeList( iVol ) );
-        	    if (M_data.has_fibers() )
+        	    if (M_data.hasFibers() )
         	    {
-        	        stiff( M_data.red_sigma_sphere,
-                           M_data.sigmal(),
-                           M_data.sigmat(),
-                           M_fiber_vector,
-                           M_elmatStiff,
+        	        stiff( M_data.M_reducedConductivitySphere,
+                           M_data.longitudinalConductivity(),
+                           M_data.transversalConductivity(),
+                           M_fiberVector,
+                           M_stiffnessElementaryMatrix,
                            M_uFESpace.fe(),
                            M_uFESpace.dof(), 0, 0);
         	    }
         	    else
         	    {
-        	        stiff( M_data.red_sigma_sphere,
-                           M_data.D(), M_elmatStiff,
+        	        stiff( M_data.M_reducedConductivitySphere,
+                           M_data.diffusivity(), M_stiffnessElementaryMatrix,
                            M_uFESpace.fe(),
                            M_uFESpace.dof(),
                            0,
@@ -436,13 +432,13 @@ void MonodomainSolver<Mesh, SolverType>::buildSystem()
         		break;
         case 2:
             M_uFESpace.fe().updateFirstDerivQuadPt( M_uFESpace.mesh()->volumeList( iVol ) );
-            if (M_data.has_fibers() )
+            if (M_data.hasFibers() )
             {
-                stiff( M_data.red_sigma_cyl,
-                       M_data.sigmal(),
-                       M_data.sigmat(),
-                       M_fiber_vector,
-                       M_elmatStiff,
+                stiff( M_data.M_reducedConductivityCylinder,
+                       M_data.longitudinalConductivity(),
+                       M_data.transversalConductivity(),
+                       M_fiberVector,
+                       M_stiffnessElementaryMatrix,
                        M_uFESpace.fe(),
                        M_uFESpace.dof(),
                        0,
@@ -450,9 +446,9 @@ void MonodomainSolver<Mesh, SolverType>::buildSystem()
             }
             else
             {
-                stiff( M_data.red_sigma_cyl,
-                       M_data.D(),
-                       M_elmatStiff,
+                stiff( M_data.M_reducedConductivityCylinder,
+                       M_data.diffusivity(),
+                       M_stiffnessElementaryMatrix,
                        M_uFESpace.fe(),
                        M_uFESpace.dof(),
                        0,
@@ -461,13 +457,13 @@ void MonodomainSolver<Mesh, SolverType>::buildSystem()
             break;
         case 3:
             M_uFESpace.fe().updateFirstDerivQuadPt( M_uFESpace.mesh()->volumeList( iVol ) );
-            if (M_data.has_fibers() )
+            if (M_data.hasFibers() )
             {
-                stiff( M_data.red_sigma_box,
-                       M_data.sigmal(),
-                       M_data.sigmat(),
-                       M_fiber_vector,
-                       M_elmatStiff,
+                stiff( M_data.M_reducedConductivityBox,
+                       M_data.longitudinalConductivity(),
+                       M_data.transversalConductivity(),
+                       M_fiberVector,
+                       M_stiffnessElementaryMatrix,
                        M_uFESpace.fe(),
                        M_uFESpace.dof(),
                        0,
@@ -475,9 +471,9 @@ void MonodomainSolver<Mesh, SolverType>::buildSystem()
             }
             else
             {
-                stiff( M_data.red_sigma_box,
-                       M_data.D(),
-                       M_elmatStiff,
+                stiff( M_data.M_reducedConductivityBox,
+                       M_data.diffusivity(),
+                       M_stiffnessElementaryMatrix,
                        M_uFESpace.fe(),
                        M_uFESpace.dof(),
                        0,
@@ -488,13 +484,13 @@ void MonodomainSolver<Mesh, SolverType>::buildSystem()
         chronoStiff.stop();
 
         chronoMass.start();
-        mass( 1., M_elmatMass, M_uFESpace.fe(), 0, 0 );
+        mass( 1., M_massElementaryMatrix, M_uFESpace.fe(), 0, 0 );
         chronoMass.stop();
 
 
         chronoStiffAssemble.start();
-        assembleMatrix( *M_matrStiff,
-                        M_elmatStiff,
+        assembleMatrix( *M_stiffnessMatrix,
+                        M_stiffnessElementaryMatrix,
                         M_uFESpace.fe(),
                         M_uFESpace.fe(),
                         M_uFESpace.dof(),
@@ -505,8 +501,8 @@ void MonodomainSolver<Mesh, SolverType>::buildSystem()
 
 
         chronoMassAssemble.start();
-        assembleMatrix( *M_matrMass,
-                        M_elmatMass,
+        assembleMatrix( *M_massMatrix,
+                        M_massElementaryMatrix,
                         M_uFESpace.fe(),
                         M_uFESpace.fe(),
                         M_uFESpace.dof(),
@@ -517,7 +513,7 @@ void MonodomainSolver<Mesh, SolverType>::buildSystem()
 
     }
 
-    massCoeff = M_data.Chi() * M_data.Cm() / M_data.getTimeStep();
+    massCoefficient = M_data.volumeSurfaceRatio() * M_data.membraneCapacitance() / M_data.getTimeStep();
 
     M_comm->Barrier();
 
@@ -527,39 +523,39 @@ void MonodomainSolver<Mesh, SolverType>::buildSystem()
     if (M_verbose) std::cout << "  f-  Finalizing the matrices     ...        " << std::flush;
     chrono.start();
 
-    M_matrStiff->GlobalAssemble();
-    M_matrMass->GlobalAssemble();
+    M_stiffnessMatrix->globalAssemble();
+    M_massMatrix->globalAssemble();
 
     M_comm->Barrier();
 
-    M_matrNoBC.reset(new matrix_Type(M_localMap, M_matrStiff->getMeanNumEntries() ));
+    M_matrNoBC.reset(new matrix_Type(M_localMap, M_stiffnessMatrix->meanNumEntries() ));
 
     //! Computing 1/dt * M + K
 
-    *M_matrNoBC += *M_matrStiff;
+    *M_matrNoBC += *M_stiffnessMatrix;
 
-    *M_matrNoBC += *M_matrMass*massCoeff;
+    *M_matrNoBC += *M_massMatrix*massCoefficient;
 
-    M_matrNoBC->GlobalAssemble();
+    M_matrNoBC->globalAssemble();
 
     chrono.stop();
     if (M_verbose) std::cout << "done in " << chrono.diff() << " s." << std::endl;
 
     if (false)
         std::cout << "partial times:  \n"
-                  << " Der            " << chronoDer.diffCumul() << " s.\n"
-                  << " Zero           " << chronoZero.diffCumul() << " s.\n"
-                  << " Stiff          " << chronoStiff.diffCumul() << " s.\n"
-                  << " Stiff Assemble " << chronoStiffAssemble.diffCumul() << " s.\n"
-                  << " Mass           " << chronoMass.diffCumul() << " s.\n"
-                  << " Mass Assemble  " << chronoMassAssemble.diffCumul() << " s.\n"
+                  << " Der            " << chronoDer.diff_cumul() << " s.\n"
+                  << " Zero           " << chronoZero.diff_cumul() << " s.\n"
+                  << " Stiff          " << chronoStiff.diff_cumul() << " s.\n"
+                  << " Stiff Assemble " << chronoStiffAssemble.diff_cumul() << " s.\n"
+                  << " Mass           " << chronoMass.diff_cumul() << " s.\n"
+                  << " Mass Assemble  " << chronoMassAssemble.diff_cumul() << " s.\n"
                   << std::endl;
 
 }
 
 template<typename Mesh, typename SolverType>
 void MonodomainSolver<Mesh, SolverType>::
-initialize( const source_type& u0 )
+initialize( const source_Type& u0 )
 {
 
     vector_Type u(M_uFESpace.map());
@@ -588,16 +584,15 @@ void MonodomainSolver<Mesh, SolverType>::
 initialize( const vector_Type& u0 )
 {
 
-    M_sol_u = u0;
+    M_solutionTransmembranePotential = u0;
 
 }
 
 
 template<typename Mesh, typename SolverType>
 void MonodomainSolver<Mesh, SolverType>::
-updatePDESystem(Real       alpha,
-             vector_Type& sourceVec
-             )
+updatePDESystem(Real         alpha,
+                vector_Type& sourceVec )
 {
 
     Chrono chrono;
@@ -609,7 +604,7 @@ updatePDESystem(Real       alpha,
     chrono.start();
 
     M_rhsNoBC = sourceVec;
-    M_rhsNoBC.GlobalAssemble();
+    M_rhsNoBC.globalAssemble();
 
     chrono.stop();
 
@@ -627,11 +622,11 @@ updatePDESystem(Real       alpha,
 
     chrono.start();
 
-    M_matrNoBC.reset(new matrix_Type(M_localMap, M_matrStiff->getMeanNumEntries() ));
+    M_matrNoBC.reset(new matrix_Type(M_localMap, M_stiffnessMatrix->meanNumEntries() ));
 
-    *M_matrNoBC += *M_matrStiff;
+    *M_matrNoBC += *M_stiffnessMatrix;
 
-    *M_matrNoBC += *M_matrMass*alpha;
+    *M_matrNoBC += *M_massMatrix*alpha;
 
 
     chrono.stop();
@@ -641,7 +636,7 @@ updatePDESystem(Real       alpha,
 
 
     M_updated = true;
-    M_matrNoBC->GlobalAssemble();
+    M_matrNoBC->globalAssemble();
 
 }
 
@@ -659,7 +654,7 @@ updatePDESystem(vector_Type& sourceVec )
     chrono.start();
 
     M_rhsNoBC = sourceVec;
-    M_rhsNoBC.GlobalAssemble();
+    M_rhsNoBC.globalAssemble();
 
     chrono.stop();
 
@@ -671,14 +666,11 @@ updatePDESystem(vector_Type& sourceVec )
 
 
 template<typename Mesh, typename SolverType>
-void MonodomainSolver<Mesh, SolverType>::PDEiterate( bchandler_raw_type& bch )
+void MonodomainSolver<Mesh, SolverType>::PDEiterate( bcHandlerRaw_Type& bch )
 {
 
     Chrono chrono;
-
-
     chrono.start();
-
 
     matrixPtr_Type matrFull( new matrix_Type(*M_matrNoBC) );
     vector_Type    rhsFull = M_rhsNoBC;
@@ -707,8 +699,8 @@ void MonodomainSolver<Mesh, SolverType>::PDEiterate( bchandler_raw_type& bch )
     //! Solving the system
     solveSystem( matrFull, rhsFull );
 
-    M_residual  = M_rhsNoBC;
-    M_residual -= *M_matrNoBC*M_sol_u;
+    //  M_residual  = M_rhsNoBC;
+    //  M_residual -= *M_matrNoBC*M_solutionTransmembranePotential;
 
 } // iterate()
 
@@ -716,7 +708,7 @@ void MonodomainSolver<Mesh, SolverType>::PDEiterate( bchandler_raw_type& bch )
 
 template<typename Mesh, typename SolverType>
 void MonodomainSolver<Mesh, SolverType>::solveSystem( matrixPtr_Type  matrFull,
-                                           vector_Type&    rhsFull )
+                                                      vector_Type&    rhsFull )
 {
     Chrono chrono;
 
@@ -731,18 +723,18 @@ void MonodomainSolver<Mesh, SolverType>::solveSystem( matrixPtr_Type  matrFull,
         std::cout << "done in " << chrono.diff() << " s.\n"
                   << std::flush;
 
-    if ( !M_reusePrec || M_resetPrec )
+    if ( !M_reusePreconditioner || M_resetPreconditioner )
     {
         chrono.start();
 
         if (M_verbose)
             std::cout << "  f-  Computing the precond ...                ";
 
-        M_prec->buildPreconditioner(matrFull);
+        M_preconditioner->buildPreconditioner(matrFull);
 
-        Real condest = M_prec->Condest();
+        Real condest = M_preconditioner->Condest();
 
-        M_linearSolver.setPreconditioner(M_prec);
+        M_linearSolver.setPreconditioner(M_preconditioner);
 
         chrono.stop();
         if (M_verbose)
@@ -751,7 +743,7 @@ void MonodomainSolver<Mesh, SolverType>::solveSystem( matrixPtr_Type  matrFull,
           	std::cout << "Estimated condition number = " << condest << "\n" <<  std::flush;
         }
 
-        M_resetPrec = false;
+        M_resetPreconditioner = false;
     }
     else
     {
@@ -765,7 +757,7 @@ void MonodomainSolver<Mesh, SolverType>::solveSystem( matrixPtr_Type  matrFull,
     if (M_verbose)
         std::cout << "f-  Solving system ...                                ";
 
-    Int numIter = M_linearSolver.solve(M_sol_u, rhsFull);
+    Int numIter = M_linearSolver.solve(M_solutionTransmembranePotential, rhsFull);
 
     chrono.stop();
 
@@ -777,9 +769,9 @@ void MonodomainSolver<Mesh, SolverType>::solveSystem( matrixPtr_Type  matrFull,
     }
 
 
-    if (numIter > M_maxIterSolver)
+    if (numIter > M_maxIteration)
     {
-        M_resetPrec = true;
+        M_resetPreconditioner = true;
     }
 
     M_comm->Barrier();
@@ -790,8 +782,8 @@ void MonodomainSolver<Mesh, SolverType>::solveSystem( matrixPtr_Type  matrFull,
 
 template<typename Mesh, typename SolverType>
 void MonodomainSolver<Mesh, SolverType>::applyBoundaryConditions( matrix_Type&        matrix,
-                                                       vector_Type&        rhs,
-                                                       bchandler_raw_type& BCh )
+                                                                  vector_Type&        rhs,
+                                                                  bcHandlerRaw_Type&  BCh )
 {
 
     // BC manage for the PDE
@@ -800,10 +792,12 @@ void MonodomainSolver<Mesh, SolverType>::applyBoundaryConditions( matrix_Type&  
         BCh.bdUpdate( *M_uFESpace.mesh(), M_uFESpace.feBd(), M_uFESpace.dof() );
     }
 
+    vector_Type rhsFull(M_rhsNoBC,Repeated, Zero);
+
     bcManage( matrix, rhs, *M_uFESpace.mesh(), M_uFESpace.dof(),
               BCh, M_uFESpace.feBd(), 1.,M_data.getTime() );
 
-
+    rhs = rhsFull;
     if ( BCh.hasOnlyEssential() && M_diagonalize )
     {
         matrix.diagonalize( 1*dim_u(),

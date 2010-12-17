@@ -36,7 +36,7 @@
 #ifndef __HEART_H
 #define __HEART_H
 
-#define BIDOMAIN
+#define MONODOMAIN
 
 #include <life/lifearray/EpetraMatrix.hpp>
 #include <life/lifealg/EpetraMap.hpp>
@@ -89,8 +89,8 @@ public:
     Heart( Int argc,
            char** argv );
 
-    ~Heart()
-    {}
+    virtual ~Heart()
+    {std::cout << "Heart descrutor" << std::endl;}
 
     //@}
 
@@ -120,7 +120,6 @@ private:
     UInt ion_model;
     UInt nbeq;
     boost::shared_ptr<HeartFunctors> M_heart_fct;
-
 };
 }
 #endif /* __HEART_H */

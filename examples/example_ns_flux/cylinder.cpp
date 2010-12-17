@@ -321,8 +321,8 @@ Cylinder::run()
 
 
 
-    UInt totalVelDofs   = uFESpace.map().getMap(Unique)->NumGlobalElements();
-    UInt totalPressDofs = pFESpace.map().getMap(Unique)->NumGlobalElements();
+    UInt totalVelDofs   = uFESpace.map().map(Unique)->NumGlobalElements();
+    UInt totalPressDofs = pFESpace.map().map(Unique)->NumGlobalElements();
     UInt totalDofs      = totalVelDofs + totalPressDofs;
 
 
@@ -349,8 +349,8 @@ Cylinder::run()
     if (verbose) std::cout << "Total Pressure Dofs = " << totalPressDofs << std::endl;
     if (verbose) std::cout << "Total Dofs          = " << totalDofs << std::endl;
 
-    UInt myTotalVelDofs   = uFESpace.map().getMap(Unique)->NumMyElements();
-    UInt myTotalPressDofs = pFESpace.map().getMap(Unique)->NumMyElements();
+    UInt myTotalVelDofs   = uFESpace.map().map(Unique)->NumMyElements();
+    UInt myTotalPressDofs = pFESpace.map().map(Unique)->NumMyElements();
     UInt myTotalDofs      = myTotalVelDofs + myTotalPressDofs;
 
 

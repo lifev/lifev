@@ -75,10 +75,10 @@ heart_diff_fct = 0
 # case 2: reduced diffusion in cyl region
 # case 3: reduced diffusion in box region
 
-stim_center_1 	= '-0.137 0.64 -3.27'  
-stim_radius_1 	= 1.5 
+stim_center_1 	= '-0.137 0.64 -3.27'
+stim_radius_1 	= 1.5
 stim_start_1 	= 0
-stim_stop_1 	= 1 
+stim_stop_1 	= 1
 stim_value_1 	= 100
 stim_period_1 	= 500 #350
 
@@ -95,17 +95,17 @@ sphere_radius 	= 0.5
 
 [../time_discretization]
 initialtime		= 0.
-endtime			= 20
-timestep		= 0.5
+endtime			= 2
+timestep		= 1
 BDF_order		= 1
 
 [../space_discretization]
 mesh_dir        = ./Mesh/
-mesh_file       = ellipsoid5272.mesh 
+mesh_file       = lid16.mesh #ellipsoid5272.mesh
 mesh_type       = .mesh
-has_fibers = 1
+has_fibers = 0
 fibers_dir = ./Mesh/
-fibers_file = ellipsoid5272fibers 
+fibers_file = ellipsoid5272fibers
 fibers_format =  0  # 1 Ensight 0 BB
 
 verbose         = 1                     # verbose during mesh-reading
@@ -113,6 +113,59 @@ diagonalize     = 1 #0 # weight, 0=off
 
 [../miscellaneous]
 verbose         = 1
+
+		[./smoother]
+			# smoother type
+			# Aztec, IFPACK, Jacobi, ML symmetric Gauss-Seidel, symmetric Gauss-Seidel,
+			# ML Gauss-Seidel, Gauss-Seidel, Chebyshev, MLS, Hiptmair, Amesos-KLU,
+			# Amesos-Superlu, Amesos-UMFPACK, Amesos-Superludist, Amesos-MUMPS,
+			# user-defined, SuperLU, IFPACK-Chebyshev, self, do-nothing,
+			# IC, ICT, ILU, ILUT
+			type                    = IFPACK
+			pre_or_post             = pre
+			sweeps                  = 3
+			damping_factor          = 1
+
+			[../coarse]
+			type                    = Amesos-UMFPACK
+			#type                    = Amesos-KLU
+			sweeps                  = 1
+			pre_or_post             = both
+			max_size                = 200
+
+			[../repartition]
+			enable                  = 1
+			partitioner             = ParMETIS
+			max_min_ration          = 1.3
+			min_per_proc            = 500
+
+			[../energy_minimization]
+			enable			= true
+			type			= 3
+			[../]
+
+        # ifpack
+        [../ifpack]
+        overlap		= 2
+
+           	[./fact]
+           	ilut_level-of-fill            = 1
+           	drop_tolerance                = 1.e-5
+           	relax_value                   = 0
+
+           	[../amesos]
+           	solvertype =  Amesos_UMFPACK # Amesos_KLU or Amesos_Umfpack
+
+           	[../partitioner]
+           	overlap = 2
+
+           	[../schwarz]
+           	reordering_type = none #metis, rcm, none
+           	filter_singletons = true
+
+			[../]
+		[../]
+
 
 
 [../solver]
@@ -128,7 +181,7 @@ overlap         = 1
 ilut_fill       = 5 #2
 graph_fill      = 0
 drop            = 1.e-5 #1.e-4
-tol             = 1.00e-7 #1.00e-5 
+tol             = 1.00e-7 #1.00e-5
 keep_info       = 1
 
 [../prec]

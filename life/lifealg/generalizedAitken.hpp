@@ -446,12 +446,12 @@ generalizedAitken< VectorType >::computeDeltaLambdaVector( const vector_Type& so
     else if ( M_inverseOmega )
     {
         omega *= deltaX;
-        norm = deltaR.Dot( deltaX );
+        norm = deltaR.dot( deltaX );
     }
     else
     {
         omega *= deltaR;
-        norm = deltaR.Dot( deltaR );
+        norm = deltaR.dot( deltaR );
     }
 
     omega /= -norm;
@@ -462,7 +462,7 @@ generalizedAitken< VectorType >::computeDeltaLambdaVector( const vector_Type& so
 
 #ifdef HAVE_LIFEV_DEBUG
     Debug(7020) << "generalizedAitken: omega = " << "\n";
-    omega.ShowMe();
+    omega.showMe();
 #endif
 
     omega *= residual;

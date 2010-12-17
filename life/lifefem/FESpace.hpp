@@ -863,7 +863,7 @@ FESpace<MeshType, MapType>::l20Error( const function_Type& fexact,
     Real sendbuff[5] = {mass, meanU, normU, sumExact1, sumExact2};
     Real recvbuff[5];
 
-    this->map().Comm().SumAll(&sendbuff[0], &recvbuff[0], 5);
+    this->map().comm().SumAll(&sendbuff[0], &recvbuff[0], 5);
 
 
     mass       = recvbuff[0];
@@ -1132,7 +1132,7 @@ FESpace<MeshType, MapType>::h1Norm(const vector_type& vec)
     Real sendbuff[1] = {norm};
     Real recvbuff[1];
 
-    this->map().Comm().SumAll(&sendbuff[0], &recvbuff[0], 1);
+    this->map().comm().SumAll(&sendbuff[0], &recvbuff[0], 1);
 
     norm    = recvbuff[0];
 

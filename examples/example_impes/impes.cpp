@@ -719,8 +719,8 @@ impes::run()
 
     // Display the total number of unknowns.
     pressureSolver.getDisplayer().leaderPrint( "Number of unknowns : ",
-                                               2.*pressure_hybrid_FESpace.map().getMap(Unique)->NumGlobalElements() +
-                                               saturation_hyperbolic_FESpace.map().getMap(Unique)->NumGlobalElements(), "\n" );
+                                               2.*pressure_hybrid_FESpace.map().map(Unique)->NumGlobalElements() +
+                                               saturation_hyperbolic_FESpace.map().map(Unique)->NumGlobalElements(), "\n" );
 
     // Solve the problem.
 

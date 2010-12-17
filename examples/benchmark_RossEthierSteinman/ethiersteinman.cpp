@@ -251,8 +251,8 @@ Ethiersteinman::check()
 
 
 
-    UInt totalVelDof   = uFESpace.map().getMap(Unique)->NumGlobalElements();
-    UInt totalPressDof = pFESpace.map().getMap(Unique)->NumGlobalElements();
+    UInt totalVelDof   = uFESpace.map().map(Unique)->NumGlobalElements();
+    UInt totalPressDof = pFESpace.map().map(Unique)->NumGlobalElements();
 
 
     if (verbose) std::cout << "Total Velocity Dof = " << totalVelDof << std::endl;
@@ -327,9 +327,9 @@ Ethiersteinman::check()
 
         beta = *fluid.solution();
 
-        fluid.getDisplayer().leaderPrint("norm beta ", beta.Norm2());
+        fluid.getDisplayer().leaderPrint("norm beta ", beta.norm2());
         fluid.getDisplayer().leaderPrint("\n");
-        fluid.getDisplayer().leaderPrint("norm rhs  ", rhs.Norm2());
+        fluid.getDisplayer().leaderPrint("norm rhs  ", rhs.norm2());
         fluid.getDisplayer().leaderPrint("\n");
 
 
@@ -421,9 +421,9 @@ Ethiersteinman::check()
 
         fluid.getDisplayer().leaderPrint("alpha ", alpha);
         fluid.getDisplayer().leaderPrint("\n");
-        fluid.getDisplayer().leaderPrint("norm beta ", beta.Norm2());
+        fluid.getDisplayer().leaderPrint("norm beta ", beta.norm2());
         fluid.getDisplayer().leaderPrint("\n");
-        fluid.getDisplayer().leaderPrint("norm rhs  ", rhs.Norm2());
+        fluid.getDisplayer().leaderPrint("norm rhs  ", rhs.norm2());
         fluid.getDisplayer().leaderPrint("\n");
 
         fluid.updateSystem( alpha, beta, rhs );
@@ -659,8 +659,8 @@ Ethiersteinman::run()
 
 
 
-            UInt totalVelDof   = uFESpace.map().getMap(Unique)->NumGlobalElements();
-            UInt totalPressDof = pFESpace.map().getMap(Unique)->NumGlobalElements();
+            UInt totalVelDof   = uFESpace.map().map(Unique)->NumGlobalElements();
+            UInt totalPressDof = pFESpace.map().map(Unique)->NumGlobalElements();
 
             // If we change the FE we have to update the BCHandler (internal data)
             bcH.bdUpdate( *meshPart.meshPartition(), uFESpace.feBd(), uFESpace.dof());
@@ -870,9 +870,9 @@ Ethiersteinman::run()
 
                 fluid.getDisplayer().leaderPrint("alpha ", alpha);
                 fluid.getDisplayer().leaderPrint("\n");
-                fluid.getDisplayer().leaderPrint("norm beta ", beta.Norm2());
+                fluid.getDisplayer().leaderPrint("norm beta ", beta.norm2());
                 fluid.getDisplayer().leaderPrint("\n");
-                fluid.getDisplayer().leaderPrint("norm rhs  ", rhs.Norm2());
+                fluid.getDisplayer().leaderPrint("norm rhs  ", rhs.norm2());
                 fluid.getDisplayer().leaderPrint("\n");
 
                 fluid.updateSystem( alpha, beta, rhs );

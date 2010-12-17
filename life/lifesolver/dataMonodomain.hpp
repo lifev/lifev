@@ -61,7 +61,12 @@ public:
     //@{
 
 
-    typedef boost::function<Real ( Real const& x, Real const& y, Real const& z, Real const& t, ID const& id, Real const&)> region_Type;
+    typedef boost::function<Real ( Real const& x,
+                                   Real const& y,
+                                   Real const& z,
+                                   Real const& t,
+                                   ID const& id,
+                                   Real const&)> region_Type;
 
     //@}
 
@@ -72,6 +77,8 @@ public:
 
     //! Constructors
     DataMonodomain();
+    virtual ~DataMonodomain()
+    {std::cout << "DataMonodomain descrutor" << std::endl;}
 
     DataMonodomain( boost::shared_ptr<HeartFunctors> heart);
 
@@ -111,42 +118,47 @@ public:
     //@{
 
     //! verbose
-    const Real&        verbose() const {return M_verbose;};
+    const Real verbose() const {return M_verbose;};
 
     //! FE space order
-    std::string uOrder()         const {return M_uOrder;};
+    std::string        uOrder()         const {return M_uOrder;};
 
     //! Chi
-    const Real&        Chi()            const {return M_volumeSurfaceRatio;}
+    const Real&        volumeSurfaceRatio()            const {return M_volumeSurfaceRatio;}
 
     //! lambda, key parameter in the derivation of Monodomain equations
-    const Real&        lambda()            const {return M_conductivityRatio;}
+    const Real&        conductivityRatio()            const {return M_conductivityRatio;}
 
     //! fiber File
-    string      fibers_file()    const {return M_fibersFile;}
+    string             fibersFile()    const {return M_fibersFile;}
 
     //local change of the diffusivity
-    const Int&         heart_diff_fct() const {return M_heartDiffusionFactor;}
+    const Int&         heartDiffusionFactor() const {return M_heartDiffusionFactor;}
 
     //would you consider the fibers?
-    bool        has_fibers()     const {return M_hasFibers;}
+    bool               hasFibers()     const {return M_hasFibers;}
 
     //! sigma_l
-    const Real&        sigmal()         const 	{return M_longitudinalConductivity;}
+    const Real&        longitudinalConductivity()         const 	{return M_longitudinalConductivity;}
 
     //! sigma_t
-    const Real&        sigmat()         const 	{return M_transversalConductivity;}
+    const Real&        transversalConductivity()         const 	{return M_transversalConductivity;}
 
     //! Cm
-    const Real&        Cm()             const 	{return M_membraneCapacitance;}
+    const Real&        membraneCapacitance()             const 	{return M_membraneCapacitance;}
 
     //! D
-    const Real&        D()              const 	{return M_diffusivity;}
+    const Real&        diffusivity()              const 	{return M_diffusivity;}
 
     //! Post_dir
-    std::string post_dir()       const {return M_postProcessingDirectory;}
+    std::string        postProcessingDirectory()       const {return M_postProcessingDirectory;}
 
     //@}
+
+    region_Type M_reducedConductivityBox;
+    region_Type M_reducedConductivityCylinder;
+    region_Type M_reducedConductivitySphere;
+
 
 private:
 
@@ -167,10 +179,6 @@ private:
     std::string M_fibersFile;
     std::string M_postProcessingDirectory; //! full name
     std::string M_uOrder;
-
-    region_Type M_reducedConductivityBox;
-    region_Type M_reducedConductivityCylinder;
-    region_Type M_reducedConductivitySphere;
 
 };
 

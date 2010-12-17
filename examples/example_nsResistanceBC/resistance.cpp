@@ -293,8 +293,8 @@ ResistanceProblem::run()
     if (verbose)
         std::cout << "ok." << std::endl;
 
-    UInt totalVelDof   = uFESpace.map().getMap(Unique)->NumGlobalElements();
-    UInt totalPressDof = pFESpace.map().getMap(Unique)->NumGlobalElements();
+    UInt totalVelDof   = uFESpace.map().map(Unique)->NumGlobalElements();
+    UInt totalPressDof = pFESpace.map().map(Unique)->NumGlobalElements();
 
     if (verbose) std::cout << "Total Velocity Dof = " << totalVelDof << std::endl;
     if (verbose) std::cout << "Total Pressure Dof = " << totalPressDof << std::endl;
@@ -354,7 +354,7 @@ ResistanceProblem::run()
 
     vector_type bcvector(fluid.getMap(),Repeated);
 
-    bcvector.getEpetraVector().PutScalar(0.0);
+    bcvector.epetraVector().PutScalar(0.0);
 
     BCVector bcResistance(bcvector,uFESpace.dof().numTotalDof(),1);
 

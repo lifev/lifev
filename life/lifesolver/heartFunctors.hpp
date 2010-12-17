@@ -51,7 +51,9 @@
 
 #include <life/lifecore/GetPot.hpp>
 #include <life/lifearray/EpetraMatrix.hpp>
-#include <life/lifearray/RNM.hpp>
+
+#include <life/lifefem/FESpace.hpp>
+
 
 namespace LifeV
 {
@@ -73,6 +75,8 @@ public:
     //@{
 
     HeartFunctors();
+    virtual ~HeartFunctors()
+    { std::cout << "HeartFunctor descrutor" << std::endl; M_comm.reset();}
 
     HeartFunctors( GetPot& dataFile );
 
@@ -87,11 +91,11 @@ public:
      *
      * Define the stimulation current
      */
-    Real Iapp ( const Real& x, const Real& y, const Real& z, const Real& t, const entityFlag_Type& id ) const;
+    Real setAppliedCurrent ( const Real& x, const Real& y, const Real& z, const Real& t, const EntityFlag& id ) const;
 
-    Real IappZygote(const double& t, const double& x, const double& y, const double& z, const ID& i, const entityFlag_Type& ref);
+    Real setAppliedCurrentZygote(const double& t, const double& x, const double& y, const double& z, const ID& i, const EntityFlag& ref);
 
-    Real stim ( const Real& t, const Real& x, const Real& y, const Real& z, const ID&   id) const;
+    Real setStimulus ( const Real& t, const Real& x, const Real& y, const Real& z, const ID&   id) const;
 
 
 
@@ -102,41 +106,43 @@ public:
      * Reduces the conductivity in a sphere
      *
      */
-    Real reduced_sigma_sphere( const Real& x, const Real& y, const Real& z, const Real& t, const ID&   id, const Real& sigma) const;
+    Real setReducedConductivitySphere( const Real& x, const Real& y, const Real& z, const Real& t, const ID&   id, const Real& sigma) const;
 
     /**
      *
      * Reduces the conductivity in a cylinder
      *
      */
-    Real reduced_sigma_cylinder( const Real& x, const Real& y, const Real& z, const Real& t, const ID&   id, const Real& sigma ) const;
+    Real setReducedConductivityCylinder( const Real& x, const Real& y, const Real& z, const Real& t, const ID&   id, const Real& sigma ) const;
 
-    Real reduced_sigma_box( const Real& x, const Real& y, const Real& z, const Real& t, const ID& id, const Real& sigma ) const;
+    Real setReducedConductivityBox( const Real& x, const Real& y, const Real& z, const Real& t, const ID& id, const Real& sigma ) const;
 
+
+    Real setInitialScalar( const Real& t, const Real& x, const Real& y, const Real& z, const ID& id );
+
+    Real setZeroScalar( const Real& t, const Real& x, const Real& y, const Real& z , const ID& id );
     //@}
 
 
     //! @name Get Methods
     //@{
 
-    Real initial_scalar( const Real& t, const Real& x, const Real& y, const Real& z, const ID& id );
-
-    Real zero_scalar( const Real& t, const Real& x, const Real& y, const Real& z , const ID& id );
 
 
-    region1_Type get_Iapp();
 
-    region1_Type get_stim();
+    region1_Type appliedCurrent();
 
-    const region_Type get_reduced_sigma_sphere();
+    region1_Type stimulus();
 
-    const region_Type get_reduced_sigma_cylinder();
+    const region_Type reducedConductivitySphere();
 
-    const region_Type get_reduced_sigma_box();
+    const region_Type reducedConductivityCylinder();
 
-    const region1_Type get_initial_scalar();
+    const region_Type reducedConductivityBox();
 
-    const region1_Type get_zero_scalar();
+    const region1_Type initialScalar();
+
+    const region1_Type zeroScalar();
 
     //@}
 
@@ -162,7 +168,7 @@ public:
     Real M_stimulusStop2;
     Real M_stimulusValue2;
     Real M_stimulusRadius2;
-    KN<Real> M_stimulusCenter2;
+    KN<Real>  M_stimulusCenter2;
 
     Real M_stimulusStart3;
     Real M_stimulusStop3;
@@ -192,7 +198,7 @@ public:
     Real M_sphereY;
     Real M_sphereZ;
     Real M_sphereR;
-    KN<Real> M_sigmaReduction;
+    KN<Real> M_conductivityReduction;
 
     Real M_cylinderX;
     Real M_cylinderY;

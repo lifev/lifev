@@ -169,8 +169,8 @@ int main(int argc, char** argv)
     if (verbose) std::cout << "ok." << std::endl;
 
     // Total degrees of freedom (elements of matrix)
-    LifeV::UInt totalVelDof   = uFESpace.map().getMap(LifeV::Unique)->NumGlobalElements();
-    LifeV::UInt totalPressDof = pFESpace.map().getMap(LifeV::Unique)->NumGlobalElements();
+    LifeV::UInt totalVelDof   = uFESpace.map().map(LifeV::Unique)->NumGlobalElements();
+    LifeV::UInt totalPressDof = pFESpace.map().map(LifeV::Unique)->NumGlobalElements();
 
     if (verbose) std::cout << "Total Velocity Dof: " << totalVelDof << std::endl;
     if (verbose) std::cout << "Total Pressure Dof: " << totalPressDof << std::endl;
@@ -202,8 +202,8 @@ int main(int argc, char** argv)
     std::vector<LifeV::BCName> fluxVector = bcH.getBCWithType( LifeV::Flux );
     LifeV::UInt numLM = static_cast<LifeV::UInt>( fluxVector.size() );
 
-    LifeV::UInt offset = uFESpace.map().getMap(LifeV::Unique)->NumGlobalElements()
-                         + pFESpace.map().getMap(LifeV::Unique)->NumGlobalElements();
+    LifeV::UInt offset = uFESpace.map().map(LifeV::Unique)->NumGlobalElements()
+                         + pFESpace.map().map(LifeV::Unique)->NumGlobalElements();
 
     for ( LifeV::UInt i = 0; i < numLM; ++i )
         bcH.setOffset( fluxVector[i], offset + i );
@@ -323,9 +323,9 @@ int main(int argc, char** argv)
 
         fluid.getDisplayer().leaderPrint("alpha ", alpha);
         fluid.getDisplayer().leaderPrint("\n");
-        fluid.getDisplayer().leaderPrint("norm beta ", beta.Norm2());
+        fluid.getDisplayer().leaderPrint("norm beta ", beta.norm2());
         fluid.getDisplayer().leaderPrint("\n");
-        fluid.getDisplayer().leaderPrint("norm rhs  ", rhs.Norm2());
+        fluid.getDisplayer().leaderPrint("norm rhs  ", rhs.norm2());
         fluid.getDisplayer().leaderPrint("\n");
 
         fluid.updateSystem( alpha, beta, rhs );

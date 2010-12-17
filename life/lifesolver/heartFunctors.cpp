@@ -88,7 +88,7 @@ HeartFunctors::HeartFunctors():
     M_sphereY           ( ),
     M_sphereZ           ( ),
     M_sphereR           ( ),
-    M_sigmaReduction    (2),
+    M_conductivityReduction    (2),
     M_cylinderX         ( ),
     M_cylinderY         ( ),
     M_cylinderZ         ( ),
@@ -161,7 +161,7 @@ HeartFunctors::HeartFunctors( GetPot& dataFile ):
     M_sphereY           (dataFile("electric/physics/sphere_center",0.,1)),
     M_sphereZ           (dataFile("electric/physics/sphere_center",0.,2)),
     M_sphereR           (dataFile("electric/physics/sphere_radius",0.)),
-    M_sigmaReduction    (2),
+    M_conductivityReduction    (2),
     M_cylinderX         (dataFile("electric/physics/x_cylinder",0.)),
     M_cylinderY         (dataFile("electric/physics/y_cylinder",0.)),
     M_cylinderZ         (dataFile("electric/physics/z_cylinder",0.)),
@@ -188,8 +188,8 @@ HeartFunctors::HeartFunctors( GetPot& dataFile ):
     M_fibrillationSources                       (dataFile("electric/physics/fibrillation_sources",0)),
     M_restPotential                             (dataFile("electric/physics/u0",0.))
 {
-    M_sigmaReduction(0)  = dataFile("electric/physics/sigma_reduction",1.,0);
-    M_sigmaReduction(1)  = dataFile("electric/physics/sigma_reduction",1.,1);
+    M_conductivityReduction(0)  = dataFile("electric/physics/sigma_reduction",1.,0);
+    M_conductivityReduction(1)  = dataFile("electric/physics/sigma_reduction",1.,1);
     M_stimulusCenter1(0) = dataFile("electric/physics/stim_center_1",0.,0);
     M_stimulusCenter1(1) = dataFile("electric/physics/stim_center_1",0.,1);
     M_stimulusCenter1(2) = dataFile("electric/physics/stim_center_1",0.,2);
@@ -214,7 +214,7 @@ HeartFunctors::HeartFunctors( GetPot& dataFile ):
 // Set Methods
 // ===================================================
 Real
-HeartFunctors::Iapp ( const Real& x, const Real& y, const Real& z, const Real& t, const entityFlag_Type& id ) const
+HeartFunctors::setAppliedCurrent ( const Real& x, const Real& y, const Real& z, const Real& t, const EntityFlag& id ) const
 {
     Real appliedCurrent                 = 0.0;
     Real pi                             = std::acos( -1.0 );
@@ -286,12 +286,12 @@ HeartFunctors::Iapp ( const Real& x, const Real& y, const Real& z, const Real& t
 
 
 Real
-HeartFunctors::IappZygote(const double& t,
+HeartFunctors::setAppliedCurrentZygote(const double& t,
                           const double& x,
                           const double& y,
                           const double& z,
                           const ID& i,
-                          const entityFlag_Type& ref)
+                          const EntityFlag& ref)
 {
     // double pi = acos(-1.0);
     Real appliedCurrent = 0.0;
@@ -331,7 +331,7 @@ HeartFunctors::IappZygote(const double& t,
 
 
 Real
-HeartFunctors::stim( const Real& t, const Real& x, const Real& y, const Real& z, const ID&   id) const
+HeartFunctors::setStimulus( const Real& t, const Real& x, const Real& y, const Real& z, const ID&   id) const
 {
     Real returnValue1;
     Real returnValue2;
@@ -416,7 +416,7 @@ HeartFunctors::stim( const Real& t, const Real& x, const Real& y, const Real& z,
 
 
 Real
-HeartFunctors::reduced_sigma_sphere( const Real& x,
+HeartFunctors::setReducedConductivitySphere( const Real& x,
                                      const Real& y,
                                      const Real& z,
                                      const Real& /*t*/,
@@ -426,14 +426,14 @@ HeartFunctors::reduced_sigma_sphere( const Real& x,
     if ( ( ( x - M_sphereX ) * ( x - M_sphereX ) +
            ( y - M_sphereY ) * ( y - M_sphereY ) +
            ( z - M_sphereZ ) * ( z - M_sphereZ ) ) < M_sphereR * M_sphereR )
-        return sigma * M_sigmaReduction(id);
+        return sigma * M_conductivityReduction(id);
     else return sigma;
 }
 
 
 
 Real
-HeartFunctors::reduced_sigma_cylinder( const Real& x,
+HeartFunctors::setReducedConductivityCylinder( const Real& x,
                                        const Real& y,
                                        const Real& z,
                                        const Real& t,
@@ -460,7 +460,7 @@ HeartFunctors::reduced_sigma_cylinder( const Real& x,
 
         if ( ( distance2 < M_cylinderR * M_cylinderR ) && ( x < M_maximumCylinderX ) && ( x > M_minimumCylinderX ) )
         {
-            return sigma * M_sigmaReduction(id);
+            return sigma * M_conductivityReduction(id);
         }
         else return sigma;
     }
@@ -469,7 +469,7 @@ HeartFunctors::reduced_sigma_cylinder( const Real& x,
 
 
 Real
-HeartFunctors::reduced_sigma_box( const Real& x,
+HeartFunctors::setReducedConductivityBox( const Real& x,
                                   const Real& y,
                                   const Real& z,
                                   const Real& t,
@@ -480,16 +480,13 @@ HeartFunctors::reduced_sigma_box( const Real& x,
           ( y > M_minimumBoxY ) && ( y < M_maximumBoxY ) &&
           ( z > M_minimumBoxZ ) && ( z < M_maximumBoxZ ) )
     {
-        return sigma * M_sigmaReduction(id);
+        return sigma * M_conductivityReduction(id);
     }
     else return sigma;
 }
 
-// ===================================================
-// Get Methods
-// ===================================================
 Real
-HeartFunctors::initial_scalar( const Real& t ,
+HeartFunctors::setInitialScalar( const Real& t ,
                                const Real& x,
                                const Real& y,
                                const Real& z,
@@ -501,7 +498,7 @@ HeartFunctors::initial_scalar( const Real& t ,
 
 
 Real
-HeartFunctors::zero_scalar( const Real& t,
+HeartFunctors::setZeroScalar( const Real& t,
                             const Real& x,
                             const Real& y,
                             const Real& z,
@@ -509,60 +506,64 @@ HeartFunctors::zero_scalar( const Real& t,
 {
     return 0.;
 }
+// ===================================================
+// Get Methods
+// ===================================================
 
 
-HeartFunctors::region1_Type
-HeartFunctors::get_Iapp()
-{
-    region1_Type f;
-    f = boost::bind(&HeartFunctors::Iapp, this, _1, _2, _3, _4, _5 );
-    return f;
-}
 
 HeartFunctors::region1_Type
-HeartFunctors::get_stim()
+HeartFunctors::appliedCurrent()
 {
     region1_Type f;
-    f = boost::bind(&HeartFunctors::stim, this, _1, _2, _3, _4, _5);
+    f = boost::bind(&HeartFunctors::setAppliedCurrent, this, 1, 2, 3, 4, 5 );
+    return f;
+}
+
+HeartFunctors::region1_Type
+HeartFunctors::stimulus()
+{
+    region1_Type f;
+    f = boost::bind(&HeartFunctors::setStimulus, this, 1, 2, 3, 4, 5);
     return f;
 }
 
 const HeartFunctors::region_Type
-HeartFunctors::get_reduced_sigma_sphere()
+HeartFunctors::reducedConductivitySphere()
 {
     region_Type f;
-    f = boost::bind(&HeartFunctors::reduced_sigma_sphere, this, _1, _2, _3, _4, _5, _6);
+    f = boost::bind(&HeartFunctors::setReducedConductivitySphere, this, 1, 2, 3, 4, 5, 6);
     return f;
 }
 
 const HeartFunctors::region_Type
-HeartFunctors::get_reduced_sigma_cylinder()
+HeartFunctors::reducedConductivityCylinder()
 {
     region_Type f;
-    f = boost::bind(&HeartFunctors::reduced_sigma_cylinder, this, _1, _2, _3, _4, _5, _6);
+    f = boost::bind(&HeartFunctors::setReducedConductivityCylinder, this, 1, 2, 3, 4, 5, 6);
     return f;
 }
 
 const HeartFunctors::region_Type
-HeartFunctors::get_reduced_sigma_box()
+HeartFunctors::reducedConductivityBox()
 {
     region_Type f;
-    f = boost::bind(&HeartFunctors::reduced_sigma_box, this, _1, _2, _3, _4, _5, _6);
+    f = boost::bind(&HeartFunctors::setReducedConductivityBox, this, 1, 2, 3, 4, 5, 6);
     return f;
 }
 
 const HeartFunctors::region1_Type
-HeartFunctors::get_initial_scalar()
+HeartFunctors::initialScalar()
 {
     region1_Type f;
-    f = boost::bind(&HeartFunctors::initial_scalar, this, _1, _2, _3, _4, _5);
+    f = boost::bind(&HeartFunctors::setInitialScalar, this, 1, 2, 3, 4, 5);
     return f;
 }
 
 const HeartFunctors::region1_Type
-HeartFunctors::get_zero_scalar()
+HeartFunctors::zeroScalar()
 {
     region1_Type f;
-    f = boost::bind(&HeartFunctors::zero_scalar, this, _1, _2, _3, _4, _5);
+    f = boost::bind(&HeartFunctors::setZeroScalar, this, 1, 2, 3, 4, 5);
     return f;
 }

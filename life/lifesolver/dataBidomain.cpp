@@ -48,9 +48,9 @@ namespace LifeV
 DataBidomain::DataBidomain( boost::shared_ptr<HeartFunctors> heart ) :
     DataMesh                            ( heart -> M_dataFile, "electric/space_discretization" ),
     DataTime                            ( heart -> M_dataFile, "electric/time_discretization" ),
-    M_reducedConductivityBox            ( heart -> get_reduced_sigma_box() ),
-    M_reducedConductivityCylinder       ( heart -> get_reduced_sigma_cylinder() ),
-    M_reducedConductivitySphere         ( heart -> get_reduced_sigma_sphere() )
+    M_reducedConductivityBox            ( heart -> reducedConductivityBox() ),
+    M_reducedConductivityCylinder       ( heart -> reducedConductivityCylinder() ),
+    M_reducedConductivitySphere         ( heart -> reducedConductivitySphere() )
 
 
 {
