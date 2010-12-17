@@ -361,7 +361,7 @@ Ethiersteinman::check()
     if (exporterType.compare("hdf5") == 0)
     {
         exporter.reset( new Hdf5exporter<RegionMesh3D<LinearTetra> > ( dataFile, "ethiersteinman" ) );
-        exporter->setDirectory( "./" ); // This is a test to see if M_post_dir is working
+        exporter->setPostDir( "./" ); // This is a test to see if M_post_dir is working
         exporter->setMeshProcId( meshPart.meshPartition(), d->comm->MyPID() );
     }
     else
@@ -801,7 +801,7 @@ Ethiersteinman::run()
             if (exporterType.compare("hdf5") == 0)
             {
                 exporter.reset( new Hdf5exporter<RegionMesh3D<LinearTetra> > ( dataFile, "ethiersteinman" ) );
-                exporter->setDirectory( "./" ); // This is a test to see if M_post_dir is working
+                exporter->setPostDir( "./" ); // This is a test to see if M_post_dir is working
                 exporter->setMeshProcId( meshPart.meshPartition(), d->comm->MyPID() );
             }
             else
