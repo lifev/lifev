@@ -311,9 +311,9 @@ ResistanceProblem::run()
 
 
 #ifdef HAVE_HDF5
-    Hdf5exporter<RegionMesh3D<LinearTetra> > ensight( dataFile, meshPart.mesh(), "resistance", d->comm->MyPID());
+    Hdf5exporter<RegionMesh3D<LinearTetra> > ensight( dataFile, meshPart.meshPartition(), "resistance", d->comm->MyPID());
 #else
-    Ensight<RegionMesh3D<LinearTetra> > ensight( dataFile, meshPart.mesh(), "resistance", d->comm->MyPID());
+    Ensight<RegionMesh3D<LinearTetra> > ensight( dataFile, meshPart.meshPartition(), "resistance", d->comm->MyPID());
 #endif
 
     vector_ptrtype velAndPressure ( new vector_type(*fluid.solution(), ensight.mapType() ) );
