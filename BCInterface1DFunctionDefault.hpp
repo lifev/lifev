@@ -75,13 +75,14 @@ public:
     typedef PhysicalSolverType                                                    physicalSolver_Type;
     typedef BCInterface1DData                                                     data_Type;
 
-    typedef OneDimensionalModel_BC::bcFunction_Type                               bcFunction_Type;
-    typedef OneDimensionalModel_BC::bcFunctionPtr_Type                            bcFunction_PtrType;
-    typedef OneDimensionalModel_BC::bcFunctionDefaultPtr_Type                    bcFunction_Default_PtrType;
+    typedef OneDimensionalModel_BC                                                bc_Type;
+    typedef bc_Type::bcFunction_Type                                              bcFunction_Type;
+    typedef bc_Type::bcFunctionPtr_Type                                           bcFunction_PtrType;
+    typedef bc_Type::bcFunctionDefaultPtr_Type                                    bcFunction_Default_PtrType;
 
-    typedef OneDimensionalModel_BC::fluxPtr_Type                                  fluxPtr_Type;
-    typedef OneDimensionalModel_BC::sourcePtr_Type                                sourcePtr_Type;
-    typedef OneDimensionalModel_BC::solutionPtr_Type                              solutionPtr_Type;
+    typedef bc_Type::fluxPtr_Type                                                 fluxPtr_Type;
+    typedef bc_Type::sourcePtr_Type                                               sourcePtr_Type;
+    typedef bc_Type::solutionPtr_Type                                             solutionPtr_Type;
 
     //@}
 

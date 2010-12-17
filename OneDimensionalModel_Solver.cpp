@@ -51,9 +51,9 @@
 namespace LifeV
 {
 
-std::map< std::string, oneDimensionalPhysics_Type > oneDimensionalPhysicsMap;
-std::map< std::string, oneDimensionalFlux_Type >    oneDimensionalFluxMap;
-std::map< std::string, oneDimensionalSource_Type >  oneDimensionalSourceMap;
+std::map< std::string, OneDimensional::physicsType_Type > OneDimensional::physicsMap;
+std::map< std::string, OneDimensional::fluxTerm_Type >    OneDimensional::fluxMap;
+std::map< std::string, OneDimensional::sourceTerm_Type >  OneDimensional::sourceMap;
 
 // ===================================================
 // Constructors & Destructor
@@ -474,7 +474,7 @@ OneDimensionalModel_Solver::setBCValuesRight( const Real& bcR1, const Real& bcR2
 // ===================================================
 // Get Methods
 // ===================================================
-container2D_Type
+OneDimensionalModel_Solver::container2D_Type
 OneDimensionalModel_Solver::bcValuesLeft( const solution_Type& solution ) const
 {
     container2D_Type temp;
@@ -485,7 +485,7 @@ OneDimensionalModel_Solver::bcValuesLeft( const solution_Type& solution ) const
     return temp;
 }
 
-container2D_Type
+OneDimensionalModel_Solver::container2D_Type
 OneDimensionalModel_Solver::bcValuesInternalLeft( const solution_Type& solution ) const
 {
     container2D_Type temp;
@@ -496,7 +496,7 @@ OneDimensionalModel_Solver::bcValuesInternalLeft( const solution_Type& solution 
     return temp;
 }
 
-container2D_Type
+OneDimensionalModel_Solver::container2D_Type
 OneDimensionalModel_Solver::bcValuesRight( const solution_Type& solution ) const
 {
     container2D_Type temp;
@@ -507,7 +507,7 @@ OneDimensionalModel_Solver::bcValuesRight( const solution_Type& solution ) const
     return temp;
 }
 
-container2D_Type
+OneDimensionalModel_Solver::container2D_Type
 OneDimensionalModel_Solver::bcValuesInternalRight( const solution_Type& solution ) const
 {
     container2D_Type temp;
@@ -525,10 +525,10 @@ OneDimensionalModel_Solver::boundaryValue( const solution_Type& solution, const 
 
     switch ( bcSide )
     {
-    case OneD_left:
+    case OneDimensional::left:
         boundaryDof = 1;
         break;
-    case OneD_right:
+    case OneDimensional::right:
 
         boundaryDof = M_flux -> physics() -> data() -> numberOfElements() + 1;
 
@@ -543,16 +543,16 @@ OneDimensionalModel_Solver::boundaryValue( const solution_Type& solution, const 
 
     switch ( bcType )
     {
-    case OneD_A:
+    case OneDimensional::A:
         return (*solution.find("A") -> second)( boundaryDof );
-    case OneD_Q:
+    case OneDimensional::Q:
         // Flow rate is positive with respect to the outgoing normal
-        return (*solution.find("Q") -> second)( boundaryDof ) * ( ( bcSide == OneD_left ) ? -1. : 1. );
-    case OneD_W1:
+        return (*solution.find("Q") -> second)( boundaryDof ) * ( ( bcSide == OneDimensional::left ) ? -1. : 1. );
+    case OneDimensional::W1:
         return (*solution.find("W1") -> second)( boundaryDof );
-    case OneD_W2:
+    case OneDimensional::W2:
         return (*solution.find("W2") -> second)( boundaryDof );
-    case OneD_P:
+    case OneDimensional::P:
         return (*solution.find("P") -> second)( boundaryDof );
     default:
         std::cout << "Warning: bcType \"" << bcType << "\"not available!" << std::endl;
@@ -571,10 +571,10 @@ OneDimensionalModel_Solver::boundaryEigenValuesEigenVectors( const bcSide_Type& 
 
     switch ( bcSide )
     {
-    case OneD_left:
+    case OneDimensional::left:
         boundaryDof = 0;
         break;
-    case OneD_right:
+    case OneDimensional::right:
 
         boundaryDof = M_flux -> physics() -> data() -> numberOfElements();
 

@@ -171,7 +171,7 @@ protected:
     boost::shared_ptr< PhysicalSolverType >    M_physicalSolver;
     solutionPtr_Type                           M_solution;
 
-    bcSide_Type                                M_side;
+    data_Type::bcSide_Type                     M_side;
     std::set< physicalSolverList >             M_list;
 
 private:
@@ -263,9 +263,9 @@ BCInterface1DFunctionSolver< PhysicalSolverType >::updatePhysicalSolverVariables
         case f_area:
 
 #ifdef HAVE_LIFEV_DEBUG
-            Debug( 5023 ) << "                                                   f_area(" << static_cast<Real> (M_side) << "): " << M_physicalSolver->boundaryValue( OneD_A, M_side ) << "\n";
+            Debug( 5023 ) << "                                                   f_area(" << static_cast<Real> (M_side) << "): " << M_physicalSolver->boundaryValue( OneDimensional::A, M_side ) << "\n";
 #endif
-            setVariable( "f_area", M_physicalSolver->boundaryValue( *M_solution, OneD_A, M_side ) );
+            setVariable( "f_area", M_physicalSolver->boundaryValue( *M_solution, OneDimensional::A, M_side ) );
 
             break;
 
@@ -281,20 +281,20 @@ BCInterface1DFunctionSolver< PhysicalSolverType >::updatePhysicalSolverVariables
         case f_flux:
 
 #ifdef HAVE_LIFEV_DEBUG
-            Debug( 5023 ) << "                                                   f_flux(" << static_cast<Real> (M_side) << "): " << M_physicalSolver->boundaryValue( OneD_Q, M_side ) << "\n";
+            Debug( 5023 ) << "                                                   f_flux(" << static_cast<Real> (M_side) << "): " << M_physicalSolver->boundaryValue( OneDimensional::Q, M_side ) << "\n";
 #endif
 
-            setVariable( "f_flux", M_physicalSolver->boundaryValue( *M_solution, OneD_Q, M_side ) );
+            setVariable( "f_flux", M_physicalSolver->boundaryValue( *M_solution, OneDimensional::Q, M_side ) );
 
             break;
 
         case f_pressure:
 
 #ifdef HAVE_LIFEV_DEBUG
-            Debug( 5023 ) << "                                               f_pressure(" << static_cast<Real> (M_side) << "): " << M_physicalSolver->boundaryValue( OneD_P, M_side ) << "\n";
+            Debug( 5023 ) << "                                               f_pressure(" << static_cast<Real> (M_side) << "): " << M_physicalSolver->boundaryValue( OneDimensional::P, M_side ) << "\n";
 #endif
 
-            setVariable( "f_pressure", M_physicalSolver->boundaryValue( *M_solution, OneD_P, M_side ) );
+            setVariable( "f_pressure", M_physicalSolver->boundaryValue( *M_solution, OneDimensional::P, M_side ) );
 
             break;
 

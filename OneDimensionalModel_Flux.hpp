@@ -56,8 +56,12 @@ public:
     //! @name Type definitions and Enumerators
     //@{
 
-    typedef OneDimensionalModel_Physics        physics_Type;
-    typedef boost::shared_ptr< physics_Type >  physicsPtr_Type;
+    typedef singleton< factory< OneDimensionalModel_Flux, OneDimensional::fluxTerm_Type > > factoryFlux_Type;
+
+    typedef OneDimensionalModel_Physics                       physics_Type;
+    typedef boost::shared_ptr< physics_Type >                 physicsPtr_Type;
+
+    typedef OneDimensionalModel_Data::container2D_Type        container2D_Type;
 
     //@}
 

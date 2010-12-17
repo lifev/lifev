@@ -60,6 +60,8 @@ public :
     //! @name Type definitions and Enumerators
     //@{
 
+    typedef singleton< factory< OneDimensionalModel_Physics, OneDimensional::physicsType_Type > > factoryPhysics_Type;
+
     typedef OneDimensionalModel_Data              data_Type;
     typedef boost::shared_ptr< data_Type >        dataPtr_Type;
 

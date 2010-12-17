@@ -71,35 +71,37 @@ namespace ublas = boost::numeric::ublas;
 
 namespace LifeV
 {
+namespace OneDimensional
+{
 
 /*! @enum Physics Types
  */
-enum oneDimensionalPhysics_Type
+enum physicsType_Type
 {
-    OneD_LinearPhysics,        /*!< Use Linear Physics */
-    OneD_NonLinearPhysics      /*!< Use Non Linear Physics */
+    LinearPhysics,        /*!< Use Linear Physics */
+    NonLinearPhysics      /*!< Use Non Linear Physics */
 };
 
 /*! @enum Flux Types
  */
-enum oneDimensionalFlux_Type
+enum fluxTerm_Type
 {
-    OneD_LinearFlux,        /*!< Use Linear Flux */
-    OneD_NonLinearFlux      /*!< Use Non Linear Flux */
+    LinearFlux,        /*!< Use Linear Flux */
+    NonLinearFlux      /*!< Use Non Linear Flux */
 };
 
 /*! @enum Physics Types
  */
-enum oneDimensionalSource_Type
+enum sourceTerm_Type
 {
-    OneD_LinearSource,        /*!< Use Linear Source */
-    OneD_NonLinearSource      /*!< Use Non Linear Source */
+    LinearSource,        /*!< Use Linear Source */
+    NonLinearSource      /*!< Use Non Linear Source */
 };
 
 // Map objects
-extern std::map< std::string, oneDimensionalPhysics_Type > oneDimensionalPhysicsMap;
-extern std::map< std::string, oneDimensionalFlux_Type >    oneDimensionalFluxMap;
-extern std::map< std::string, oneDimensionalSource_Type >  oneDimensionalSourceMap;
+extern std::map< std::string, physicsType_Type > physicsMap;
+extern std::map< std::string, fluxTerm_Type >    fluxMap;
+extern std::map< std::string, sourceTerm_Type >  sourceMap;
 
 // Forward class declarations
 class OneDimensionalModel_Physics;
@@ -107,35 +109,25 @@ class OneDimensionalModel_Flux;
 class OneDimensionalModel_Source;
 class OneDimensionalModel_BCFunction;
 
-// Type definitions
-typedef singleton< factory< OneDimensionalModel_Physics, oneDimensionalPhysics_Type > > factoryOneDimensionalPhysics_Type;
-typedef singleton< factory< OneDimensionalModel_Flux, oneDimensionalFlux_Type > >       factoryOneDimensionalFlux_Type;
-typedef singleton< factory< OneDimensionalModel_Source, oneDimensionalSource_Type > >   factoryOneDimensionalSource_Type;
-
-typedef boost::array< Real, 2 >                 container2D_Type;
-
-// ScalVec SHOULD BE REPLACED EVERYWHERE BY EPETRAVECTOR FOR PARALLEL COMPUTATION
-typedef ublas::vector< Real >                   scalVec_Type;
-
 enum bcType_Type
 {
-    OneD_W1,
-    OneD_W2,
-    OneD_A,
-    OneD_Q,
-    OneD_P
+    W1,
+    W2,
+    A,
+    Q,
+    P
 };
 
 enum bcSide_Type
 {
-    OneD_left,
-    OneD_right
+    left,
+    right
 };
 
 enum bcLine_Type
 {
-    OneD_first,
-    OneD_second
+    first,
+    second
 };
 
 // ===================================================
@@ -144,27 +136,19 @@ enum bcLine_Type
 
 //! Define the map of the OneDimensionalModel objects
 inline void
-oneDimensionalMapsDefinition()
+mapsDefinition()
 {
-    oneDimensionalPhysicsMap["OneD_LinearPhysics"]    = OneD_LinearPhysics;
-    oneDimensionalPhysicsMap["OneD_NonLinearPhysics"] = OneD_NonLinearPhysics;
+    physicsMap["OneD_LinearPhysics"]    = LinearPhysics;
+    physicsMap["OneD_NonLinearPhysics"] = NonLinearPhysics;
 
-    oneDimensionalFluxMap["OneD_LinearFlux"]          = OneD_LinearFlux;
-    oneDimensionalFluxMap["OneD_NonLinearFlux"]       = OneD_NonLinearFlux;
+    fluxMap["OneD_LinearFlux"]          = LinearFlux;
+    fluxMap["OneD_NonLinearFlux"]       = NonLinearFlux;
 
-    oneDimensionalSourceMap["OneD_LinearSource"]      = OneD_LinearSource;
-    oneDimensionalSourceMap["OneD_NonLinearSource"]   = OneD_NonLinearSource;
+    sourceMap["OneD_LinearSource"]      = LinearSource;
+    sourceMap["OneD_NonLinearSource"]   = NonLinearSource;
 }
 
-//! Scalar product between 2D vectors
-inline Real
-dot( const container2D_Type& vector1, const container2D_Type& vector2 )
-{
-    ASSERT_PRE( vector1.size() == 2 && vector2.size() == 2, "dot works only for 2D vectors" );
-
-    return vector1[0]*vector2[0] + vector1[1]*vector2[1];
-}
-
-}
+} // OneDimensional namespace
+} // LifeV namespace
 
 #endif // ONEDIMENSIONALMODEL_DEFINITIONS_H

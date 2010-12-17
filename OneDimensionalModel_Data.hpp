@@ -123,6 +123,10 @@ public:
     typedef RegionMesh1D< LinearLine >                                mesh_Type;
     typedef boost::shared_ptr< mesh_Type >                            meshPtr_Type;
 
+    // ScalVec SHOULD BE REPLACED EVERYWHERE BY EPETRAVECTOR FOR PARALLEL COMPUTATION
+    typedef ublas::vector< Real >                                     scalarVector_Type;
+    typedef boost::array< Real, 2 >                                   container2D_Type;
+
     enum OneD_distributionLaw
     {
         none,
@@ -217,19 +221,19 @@ public:
     /*!
      * @return Physics Type
      */
-    const oneDimensionalPhysics_Type& physicsType() const { return M_physicsType; }
+    const OneDimensional::physicsType_Type& physicsType() const { return M_physicsType; }
 
     //! Get the flux type
     /*!
      * @return Flux Type
      */
-    const oneDimensionalFlux_Type& fluxType() const { return M_fluxType; }
+    const OneDimensional::fluxTerm_Type& fluxType() const { return M_fluxType; }
 
     //! Get the source type
     /*!
      * @return Source Type
      */
-    const oneDimensionalSource_Type& sourceType() const { return M_sourceType; }
+    const OneDimensional::sourceTerm_Type& sourceType() const { return M_sourceType; }
 
     //! Get data time container
     /*!
@@ -327,7 +331,7 @@ private:
     /*!
      * Useful for tapering.
      */
-    void linearInterpolation( scalVec_Type& vector,
+    void linearInterpolation( scalarVector_Type& vector,
                               const GetPot& dataFile,
                               const std::string& quantity,
                               const Real& defaultValue,
@@ -342,9 +346,9 @@ private:
     //@}
 
     //! Model
-    oneDimensionalPhysics_Type M_physicsType;
-    oneDimensionalFlux_Type    M_fluxType;
-    oneDimensionalSource_Type  M_sourceType;
+    OneDimensional::physicsType_Type M_physicsType;
+    OneDimensional::fluxTerm_Type    M_fluxType;
+    OneDimensional::sourceTerm_Type  M_sourceType;
 
     //! Data containers for time and mesh
     timePtr_Type M_time;
@@ -389,45 +393,45 @@ private:
     Real M_inertialModulus;
     Real M_robertsonCorrection;
 
-    scalVec_Type M_thickness;
+    scalarVector_Type M_thickness;
     Real M_friction; // Friction parameter
 
-    scalVec_Type M_area0;      // area
-    scalVec_Type M_alpha;      // Coriolis coefficient (often called alpha)
-    scalVec_Type M_beta0;      // homogeneous to a pressure
-    scalVec_Type M_beta1;      // power coeff (>0, often=1/2)
+    scalarVector_Type M_area0;      // area
+    scalarVector_Type M_alpha;      // Coriolis coefficient (often called alpha)
+    scalarVector_Type M_beta0;      // homogeneous to a pressure
+    scalarVector_Type M_beta1;      // power coeff (>0, often=1/2)
 
     //! Derivatives of main coefficients
-    scalVec_Type M_dArea0dz;
-    scalVec_Type M_dAlphadz;
-    scalVec_Type M_dBeta0dz; // homogeneous to a pressure
-    scalVec_Type M_dBeta1dz; // power coeff (>0, often=1/2)
+    scalarVector_Type M_dArea0dz;
+    scalarVector_Type M_dAlphadz;
+    scalarVector_Type M_dBeta0dz; // homogeneous to a pressure
+    scalarVector_Type M_dBeta1dz; // power coeff (>0, often=1/2)
 
     //! Flux matrix
-    scalVec_Type M_flux11;
-    scalVec_Type M_flux12;
-    scalVec_Type M_flux21;
-    scalVec_Type M_flux22;
+    scalarVector_Type M_flux11;
+    scalarVector_Type M_flux12;
+    scalarVector_Type M_flux21;
+    scalarVector_Type M_flux22;
 
     //! Celerities of the linear problem (eigenvalues of the flux matrix)
-    scalVec_Type M_celerity1;
-    scalVec_Type M_celerity2;
+    scalarVector_Type M_celerity1;
+    scalarVector_Type M_celerity2;
 
     //! Eigenvector for first and second eigenvalue
-    scalVec_Type M_celerity1LeftEigenvector1;
-    scalVec_Type M_celerity1LeftEigenvector2;
-    scalVec_Type M_celerity2LeftEigenvector1;
-    scalVec_Type M_celerity2LeftEigenvector2;
+    scalarVector_Type M_celerity1LeftEigenvector1;
+    scalarVector_Type M_celerity1LeftEigenvector2;
+    scalarVector_Type M_celerity2LeftEigenvector1;
+    scalarVector_Type M_celerity2LeftEigenvector2;
 
     //! Source matrix
-    scalVec_Type M_source10;
-    scalVec_Type M_source20;
-    scalVec_Type M_source11;
-    scalVec_Type M_source12;
-    scalVec_Type M_source21;
-    scalVec_Type M_source22;
+    scalarVector_Type M_source10;
+    scalarVector_Type M_source20;
+    scalarVector_Type M_source11;
+    scalarVector_Type M_source12;
+    scalarVector_Type M_source21;
+    scalarVector_Type M_source22;
 };
 
-}
+} // OneDimensional namespace
 
 #endif //ONEDIMENSIONALMODEL_DATA_H
