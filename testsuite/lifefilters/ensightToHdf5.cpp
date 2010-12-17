@@ -220,7 +220,7 @@ EnsightToHdf5::run()
         exporter.reset( new Ensight<RegionMesh3D<LinearTetra> > ( dataFile, exporterName ) );
 
     exporter->setDirectory( exportDir ); // This is a test to see if M_post_dir is working
-    exporter->setMeshProcId( meshPart.mesh(), d->comm->MyPID() );
+    exporter->setMeshProcId( meshPart.meshPartition(), d->comm->MyPID() );
 
 #ifdef HAVE_HDF5
     if (importerType.compare("hdf5") == 0)
@@ -231,7 +231,7 @@ EnsightToHdf5::run()
 
     // todo this will not work with the Ensight filter (it uses M_importDir, a private variable)
     importer->setDirectory( importDir ); // This is a test to see if M_post_dir is working
-    importer->setMeshProcId( meshPart.mesh(), d->comm->MyPID() );
+    importer->setMeshProcId( meshPart.meshPartition(), d->comm->MyPID() );
 
     vector_ptrtype velAndPressureExport ( new vector_type(*fluid.solution(), exporter->mapType() ) );
     vector_ptrtype velAndPressureImport ( new vector_type(*fluid.solution(), importer->mapType() ) );
