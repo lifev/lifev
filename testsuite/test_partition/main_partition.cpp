@@ -96,10 +96,10 @@ int main( int argc, char** argv )
     meshPart.releaseUnpartitionedMesh();
     fullMeshPtr.reset();
 
-    HDF5Filter3DMesh<RegionMesh3D<LinearTetra> > HDF5Output(dataFile, meshPart.mesh(), "cylinderPart",
+    HDF5Filter3DMesh<RegionMesh3D<LinearTetra> > HDF5Output(dataFile, meshPart.meshPartition(), "cylinderPart",
                                                             comm->MyPID());
-    HDF5Output.addPartitionGraph(meshPart.graph(), comm);
-    HDF5Output.addMeshPartitionAll(meshPart.meshAllPartitions(), comm);
+    HDF5Output.addPartitionGraph(meshPart.elementDomains(), comm);
+    HDF5Output.addMeshPartitionAll(meshPart.meshPartitions(), comm);
     HDF5Output.postProcess(0);
     HDF5Output.CloseFile();
 
