@@ -285,7 +285,7 @@ int main(int argc, char** argv)
 
     exporter.reset( new LifeV::Hdf5exporter<LifeV::RegionMesh3D<LifeV::LinearTetra> > ( dataFile, "cavity_example" ) );
     exporter->setDirectory( "./" ); // This is a test to see if M_post_dir is working
-    exporter->setMeshProcId( meshPart.mesh(), comm->MyPID() );
+    exporter->setMeshProcId( meshPart.meshPartition(), comm->MyPID() );
 
     velAndPressure.reset( new vector_type(*fluid.solution(), exporter->mapType() ) );
 
