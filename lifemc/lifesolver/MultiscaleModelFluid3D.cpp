@@ -153,7 +153,7 @@ MultiscaleModelFluid3D::setupModel()
     M_rhs.reset ( new fluidVector_Type( M_map ) );
 
     //Post-processing
-    M_exporter->setMeshProcId( M_mesh->mesh(), M_comm->MyPID() );
+    M_exporter->setMeshProcId( M_mesh->meshPartition(), M_comm->MyPID() );
 
     M_solution.reset( new fluidVector_Type( *M_fluid->solution(), M_exporter->mapType() ) );
     if ( M_exporter->mapType() == Unique )
@@ -311,8 +311,8 @@ MultiscaleModelFluid3D::showMe()
                   << "Pressure DOF        = " << M_pFESpace->dof().numTotalDof() << std::endl
                   << "lmDOF               = " << M_lmDOF << std::endl << std::endl;
 
-        std::cout << "Fluid mesh maxH     = " << M_mesh->mesh()->maxH() << std::endl
-                  << "Fluid mesh meanH    = " << M_mesh->mesh()->meanH() << std::endl << std::endl;
+        std::cout << "Fluid mesh maxH     = " << M_mesh->meshPartition()->maxH() << std::endl
+                  << "Fluid mesh meanH    = " << M_mesh->meshPartition()->meanH() << std::endl << std::endl;
 
         std::cout << "NS SubITMax         = " << M_subiterationsMaximumNumber << std::endl
                   << "NS Tolerance        = " << M_tolerance << std::endl << std::endl << std::endl << std::endl;
@@ -671,7 +671,7 @@ MultiscaleModelFluid3D::initializeSolution()
 
     if ( multiscaleProblemStep > 0 )
     {
-        M_importer->setMeshProcId( M_mesh->mesh(), M_comm->MyPID() );
+        M_importer->setMeshProcId( M_mesh->meshPartition(), M_comm->MyPID() );
 
         M_importer->addVariable( ExporterData::Vector, "Fluid Velocity", M_solution, static_cast <UInt> ( 0 ),            M_uFESpace->dof().numTotalDof() );
         M_importer->addVariable( ExporterData::Scalar, "Fluid Pressure", M_solution, 3 * M_uFESpace->dof().numTotalDof(), M_pFESpace->dof().numTotalDof());
