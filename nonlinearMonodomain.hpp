@@ -490,12 +490,12 @@ void NonlinearMonodomain<Mesh, SolverType>::buildSystem()
 
     if (false)
         std::cout << "partial times:  \n"
-                  << " Der            " << chronoDer.diff_cumul() << " s.\n"
-                  << " Zero           " << chronoZero.diff_cumul() << " s.\n"
-                  << " Stiff          " << chronoStiff.diff_cumul() << " s.\n"
-                  << " Stiff Assemble " << chronoStiffAssemble.diff_cumul() << " s.\n"
-                  << " Mass           " << chronoMass.diff_cumul() << " s.\n"
-                  << " Mass Assemble  " << chronoMassAssemble.diff_cumul() << " s.\n"
+                  << " Der            " << chronoDer.diffCumul() << " s.\n"
+                  << " Zero           " << chronoZero.diffCumul() << " s.\n"
+                  << " Stiff          " << chronoStiff.diffCumul() << " s.\n"
+                  << " Stiff Assemble " << chronoStiffAssemble.diffCumul() << " s.\n"
+                  << " Mass           " << chronoMass.diffCumul() << " s.\n"
+                  << " Mass Assemble  " << chronoMassAssemble.diffCumul() << " s.\n"
                   << std::endl;
 
 }
