@@ -70,22 +70,22 @@ class HDF5Filter3DMesh : public Hdf5exporter<MeshType>
 public:
     typedef MeshType mesh_Type;
     typedef Hdf5exporter<MeshType> base;
-    typedef typename base::mesh_ptrtype mesh_ptrtype;
-    typedef typename base::vector_rawtype vector_type;
-    typedef typename base::vector_ptrtype vector_ptrtype;
+    typedef typename base::meshPtr_Type meshPtr_Type;
+    typedef typename base::vectorRaw_Type vector_Type;
+    typedef typename base::vectorPtr_Type vectorPtr_Type;
 
-    typedef EpetraExt::HDF5 hdf5_type;
-    typedef boost::shared_ptr<hdf5_type> hdf5_ptrtype;
-    typedef std::vector<std::vector<Int> > graph_type;
-    typedef boost::shared_ptr<graph_type> graph_ptrtype;
-    typedef boost::shared_ptr<std::vector<mesh_ptrtype> > serial_mesh_ptrtype;
+    typedef EpetraExt::HDF5 hdf5_Type;
+    typedef boost::shared_ptr<hdf5_Type> hdf5Ptr_Type;
+    typedef std::vector<std::vector<Int> > graph_Type;
+    typedef boost::shared_ptr<graph_Type> graphPtr_Type;
+    typedef boost::shared_ptr<std::vector<meshPtr_Type> > serialMeshPtr_Type;
 
     typedef DofInterface3Dto3D interface_Type;
-    typedef boost::shared_ptr<interface_Type> interface_ptrType;
-    typedef std::vector<interface_ptrType> interface_vector_Type;
+    typedef boost::shared_ptr<interface_Type> interfacePtr_Type;
+    typedef std::vector<interfacePtr_Type> interfaceVector_Type;
     // The vector contains pointers to each fluid partition's interface with
     // the solid.
-    typedef boost::shared_ptr<interface_vector_Type> interface_vector_ptrType;
+    typedef boost::shared_ptr<interfaceVector_Type> interfaceVectorPtr_Type;
 
 
     //! @name Constructor & Destructor
@@ -104,7 +104,7 @@ public:
       @param the prefix for the case file (ex. "test" for test.case)
       @param the procId determines de CPU id. if negative, it ussemes there is only one processor
     */
-    HDF5Filter3DMesh(const GetPot& dataFile, mesh_ptrtype mesh, const std::string& prefix, const Int& procId);
+    HDF5Filter3DMesh(const GetPot& dataFile, meshPtr_Type mesh, const std::string& prefix, const Int& procId);
 
     //! Constructor for HDF5Filter3DMesh without prefix and procID
     /*!
@@ -132,7 +132,7 @@ public:
       (as returned by partitionMesh::graph() )
       \param comm - Epetra_Comm* - raw pointer to the Epetra communicator to be used
     */
-    void addPartitionGraph(const graph_ptrtype& graph, boost::shared_ptr<Epetra_Comm>& comm)
+    void addPartitionGraph(const graphPtr_Type& graph, boost::shared_ptr<Epetra_Comm>& comm)
     {M_graph = graph; M_comm = comm;}
 
     //! Add all of the mesh partitions to the post processing data file (serial operation)
@@ -142,7 +142,7 @@ public:
       pointers to the mesh partitions (as returned by partitionMesh::meshAllPartitions() )
       \param comm - Epetra_Comm* - raw pointer to the Epetra communicator to be used
     */
-    void addMeshPartitionAll(const serial_mesh_ptrtype& meshPointer, boost::shared_ptr<Epetra_Comm>& comm)
+    void addMeshPartitionAll(const serialMeshPtr_Type& meshPointer, boost::shared_ptr<Epetra_Comm>& comm)
     {M_serialMesh = meshPointer; M_parallelMesh.reset(); M_comm = comm;}
 
     //! Add to HDF5 file the mesh partition that belongs to the current process (parallel operation)
@@ -155,7 +155,7 @@ public:
       partitionMesh::mesh() )
       \param comm - Epetra_Comm* - raw pointer to the Epetra communicator to be used
     */
-    void addMyMeshPartition(const mesh_ptrtype& meshPointer, boost::shared_ptr<Epetra_Comm>& comm)
+    void addMyMeshPartition(const meshPtr_Type& meshPointer, boost::shared_ptr<Epetra_Comm>& comm)
     {/*M_parallelMesh = meshPointer; M_serialMesh.reset(); M_comm = comm;*/}
 
     //! Add a DOF interface for writing to file
@@ -163,7 +163,7 @@ public:
       Add a DOF interface to the member vector M_interfaceData, for writing to the HDF5
       file. Call once for each interface that is to be written.
     */
-    void addDOFInterface(const interface_vector_ptrType& interfaces,
+    void addDOFInterface(const interfaceVectorPtr_Type& interfaces,
                          const std::string& type,
                          const Int& firstInterfaceFlag,
                          const Int& secondInterfaceFlag,
@@ -177,7 +177,7 @@ public:
       partitionMesh object (as returned by partitionMesh::graph() )
       \param comm - Epetra_Comm* - a raw pointer to the Epetra communicator to be used
     */
-    void loadGraph(graph_ptrtype graph, boost::shared_ptr<Epetra_Comm>& comm);
+    void loadGraph(graphPtr_Type graph, boost::shared_ptr<Epetra_Comm>& comm);
 
     //! Load a mesh partition according to the MPI PID
     /*!
@@ -188,7 +188,8 @@ public:
       \param meshPartition - shared_ptr<Mesh> - shared pointer to mesh partition object
       \param comm -shared_ptr<Epetra_Comm> - shared pointer to the Epetra communicator to be used
     */
-    void loadMyPartition(mesh_ptrtype meshPartition, boost::shared_ptr<Epetra_Comm>& comm);
+    void __attribute__((__deprecated__)) loadMyPartition(meshPtr_Type meshPartition,
+                                                         boost::shared_ptr<Epetra_Comm>& comm);
 
     //! Get the number of stored DOF interfaces
     Int queryStoredInterfaceNumber();
@@ -206,7 +207,7 @@ public:
     // This is intended for use with getMeshPartition and getStoredInterface
     //! Set the M_comm data member.
     void setComm( const boost::shared_ptr<Epetra_Comm>& comm ) {M_comm = comm;}
-
+    //@}
 
 private:
 
@@ -215,17 +216,17 @@ private:
     // The following private methods are for writing the partitioned graph
     // and mesh to the output file
     void writeGraph();
-    void writePartition(mesh_ptrtype partition, std::string& suffix);
+    void writePartition(meshPtr_Type partition, std::string& suffix);
     void writeParallelMesh();
     void writeSerialMesh();
     void writeInterfaces();
 //@}
 
-    serial_mesh_ptrtype                    M_serialMesh;
-    mesh_ptrtype                           M_parallelMesh;
-    graph_ptrtype                          M_graph;
+    serialMeshPtr_Type                     M_serialMesh;
+    meshPtr_Type                           M_parallelMesh;
+    graphPtr_Type                          M_graph;
     // Use a vector to store the data of all interfaces we wish to write to disk
-    std::vector<interface_vector_ptrType>  M_DOFInterfaces;
+    std::vector<interfaceVectorPtr_Type>  M_DOFInterfaces;
     std::vector<std::string>               M_interfaceTypes;
     std::vector<Int>                       M_firstInterfaceFlags;
     std::vector<Int>                       M_secondInterfaceFlags;
@@ -238,7 +239,7 @@ private:
 // ===================================================
 
 template<typename MeshType>
-HDF5Filter3DMesh<MeshType>::HDF5Filter3DMesh(const GetPot& dataFile, mesh_ptrtype mesh,
+HDF5Filter3DMesh<MeshType>::HDF5Filter3DMesh(const GetPot& dataFile, meshPtr_Type mesh,
                                              const std::string& prefix,
                                              const Int& procId) :
     base                ( dataFile, mesh, prefix, procId )
@@ -256,7 +257,7 @@ HDF5Filter3DMesh<MeshType>::HDF5Filter3DMesh(const GetPot& dataFile, const std::
 // ===================================================
 
 template<typename MeshType>
-void HDF5Filter3DMesh<MeshType>::addDOFInterface(const interface_vector_ptrType& interfaces,
+void HDF5Filter3DMesh<MeshType>::addDOFInterface(const interfaceVectorPtr_Type& interfaces,
                                                  const std::string& type,
                                                  const Int& firstInterfaceFlag,
                                                  const Int& secondInterfaceFlag,
@@ -271,11 +272,11 @@ void HDF5Filter3DMesh<MeshType>::addDOFInterface(const interface_vector_ptrType&
 }
 
 template<typename MeshType>
-void HDF5Filter3DMesh<MeshType>::loadGraph(graph_ptrtype graph, boost::shared_ptr<Epetra_Comm>& comm)
+void HDF5Filter3DMesh<MeshType>::loadGraph(graphPtr_Type graph, boost::shared_ptr<Epetra_Comm>& comm)
 {
     if (this->M_HDF5.get() == 0)
     {
-        this->M_HDF5.reset(new hdf5_type(*comm));
+        this->M_HDF5.reset(new hdf5_Type(*comm));
     }
     if (! this->M_HDF5->IsOpen())
     {
@@ -310,8 +311,8 @@ void HDF5Filter3DMesh<MeshType>::loadGraph(graph_ptrtype graph, boost::shared_pt
 }
 
 // TODO: MARK AS DEPRECATED AND REMOVE -> FIX TEST PARTITION AND MAYBE THE FSI PARTITIONER
-template<typename MeshType>
-void HDF5Filter3DMesh<MeshType>::loadMyPartition(mesh_ptrtype meshPartition,
+/*template<typename MeshType>
+void HDF5Filter3DMesh<MeshType>::loadMyPartition(meshPtr_Type meshPartition,
                                                  boost::shared_ptr<Epetra_Comm>& comm)
 {
     UInt elementNodes, faceNodes;
@@ -328,7 +329,7 @@ void HDF5Filter3DMesh<MeshType>::loadMyPartition(mesh_ptrtype meshPartition,
 
     if (this->M_HDF5.get() == 0)
     {
-        this->M_HDF5.reset(new hdf5_type(*comm));
+        this->M_HDF5.reset(new hdf5_Type(*comm));
     }
     if (! this->M_HDF5->IsOpen())
     {
@@ -574,7 +575,7 @@ void HDF5Filter3DMesh<MeshType>::loadMyPartition(mesh_ptrtype meshPartition,
     meshPartition->updateElementEdges(false, false);
     meshPartition->updateElementFaces(false, false);
 
-}
+}*/
 
 template<typename MeshType>
 void HDF5Filter3DMesh<MeshType>::postProcess(const Real& time)
@@ -583,11 +584,11 @@ void HDF5Filter3DMesh<MeshType>::postProcess(const Real& time)
     {
         if (this->M_listData.size() != 0)
         {
-            this->M_HDF5.reset(new hdf5_type(this->M_listData.begin()->storedArray()->Comm()));
+            this->M_HDF5.reset(new hdf5_Type(this->M_listData.begin()->storedArray()->Comm()));
         }
         else
         {
-            this->M_HDF5.reset(new hdf5_type(*M_comm));
+            this->M_HDF5.reset(new hdf5_Type(*M_comm));
         }
         this->M_outputFileName=this->M_prefix+".h5";
         this->M_HDF5->Create(this->M_postDir+this->M_outputFileName);
@@ -665,7 +666,7 @@ int HDF5Filter3DMesh<MeshType>::queryStoredInterfaceNumber()
 {
     if (this->M_HDF5.get() == 0)
     {
-        this->M_HDF5.reset(new hdf5_type(*M_comm));
+        this->M_HDF5.reset(new hdf5_Type(*M_comm));
     }
     if (! this->M_HDF5->IsOpen())
     {
@@ -683,7 +684,7 @@ std::vector<std::string>& HDF5Filter3DMesh<MeshType>::queryStoredInterfaceTypes(
 {
     if (this->M_HDF5.get() == 0)
     {
-        this->M_HDF5.reset(new hdf5_type(*M_comm));
+        this->M_HDF5.reset(new hdf5_Type(*M_comm));
     }
     if (! this->M_HDF5->IsOpen())
     {
@@ -723,7 +724,7 @@ boost::shared_ptr<MeshType>& HDF5Filter3DMesh<MeshType>::getMeshPartition()
 
     if (this->M_HDF5.get() == 0)
     {
-        this->M_HDF5.reset(new hdf5_type(*M_comm));
+        this->M_HDF5.reset(new hdf5_Type(*M_comm));
     }
     if (! this->M_HDF5->IsOpen())
     {
@@ -977,7 +978,7 @@ boost::shared_ptr< std::map<UInt, UInt> >& HDF5Filter3DMesh<MeshType>::getStored
 {
     if (this->M_HDF5.get() == 0)
     {
-        this->M_HDF5.reset(new hdf5_type(*M_comm));
+        this->M_HDF5.reset(new hdf5_Type(*M_comm));
     }
     if (! this->M_HDF5->IsOpen())
     {
@@ -1054,7 +1055,7 @@ void HDF5Filter3DMesh<MeshType>::writeGraph()
 }
 
 template <typename MeshType>
-void HDF5Filter3DMesh<MeshType>::writePartition(mesh_ptrtype mesh, std::string& suffix)
+void HDF5Filter3DMesh<MeshType>::writePartition(meshPtr_Type mesh, std::string& suffix)
 {
     UInt elementNodes, faceNodes;
     switch (MeshType::ElementShape::Shape)
@@ -1292,7 +1293,7 @@ void HDF5Filter3DMesh<MeshType>::writeInterfaces()
 
     for (Int i = 0; i < interfaceNumber; ++i)
     {
-        interface_vector_Type& currentInterfaceSet = *(M_DOFInterfaces[i]);
+        interfaceVector_Type& currentInterfaceSet = *(M_DOFInterfaces[i]);
 
         Int partitionNumber = currentInterfaceSet.size();
         std::stringstream idx;
