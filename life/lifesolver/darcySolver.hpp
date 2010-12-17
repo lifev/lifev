@@ -468,11 +468,6 @@ public:
         return M_setBC;
     }
 
-    bool __attribute__ ((__deprecated__)) BCset () const
-    {
-	return isBCset();
-    }
-
     //! Returns boundary conditions handler.
     /*!
       @return Reference of boundary conditions handler.

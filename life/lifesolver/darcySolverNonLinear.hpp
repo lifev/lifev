@@ -343,11 +343,6 @@ public:
     */
     void setPrimalZeroIteration ( const Function& primalZeroIteration );
 
-    void __attribute__ ((__deprecated__)) setZeroItarationPrimal ( const Function& primalZeroIteration )
-    {
-	return setPrimalZeroIteration(primalZeroIteration);
-    }
-
     //! Set the inverse of diffusion tensor,
     /*!
       The default inverse of permeability is the identity matrix.
@@ -377,11 +372,6 @@ public:
         return M_fixedPointNumIteration;
     }
 
-    UInt  __attribute__ ((__deprecated__)) IterationFixedPoint () const
-    {
-        return fixedPointNumIteration ();
-    }
-
     //!  Returns the residual between two iterations of the fixed point scheme.
     /*!
       @return Final residual of the fixed point method as a constant Real.
@@ -389,11 +379,6 @@ public:
     Real fixedPointResidual ()
     {
         return M_fixedPointResidual;
-    }
-
-    Real __attribute__ ((__deprecated__)) residualFixedPoint () const
-    {
-        return fixedPointResidual();
     }
 
     //! Returns fixed point tolerance

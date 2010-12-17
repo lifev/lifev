@@ -341,10 +341,6 @@ public:
         M_mass = mass;
     }
 
-    void __attribute__ ((__deprecated__)) setMassTerm ( const Function& mass )
-    {
-	return setMass(mass);
-    }
     //@}
 
 protected:
