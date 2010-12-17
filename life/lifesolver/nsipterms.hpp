@@ -361,7 +361,7 @@ void IPStabilization<MeshType, DofType>::apply( MatrixType& matrix,  const Vecto
                 for ( UInt iCoor ( 0 ); iCoor < M_feOnSide1->nbCoor(); ++iCoor )
                 {
                     UInt ig ( M_dof->localToGlobal( iElAd1, iloc + 1 ) - 1 +iCoor*nDof );
-                    if (state.BlockMap().LID(ig + 1) >= 0)
+                    if (state.blockMap().LID(ig + 1) >= 0)
                         beta.vec()[ iCoor*M_feBd->nbNode() + iNode ] = state( ig + 1); // BASEINDEX + 1
                 }
             }
