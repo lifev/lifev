@@ -681,7 +681,7 @@ void steklovPoincare::computeStrongResidualFSI()
     BCh.addBC("Interface", 1, Natural,   Full, f0, 3);
     BCh.addBC("interface", 1, Essential, Full, f0, 3);
 
-    BCh.bdUpdate(this->fluid().mesh(),
+    BCh.bcUpdate(this->fluid().mesh(),
                  this->fluid().feBd_u(),
                  this->fluid().uDof());
 

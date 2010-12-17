@@ -532,8 +532,8 @@ void NS_Assembler<Mesh>::applyBoundaryConditions( matrix_type& C,
                                                   Real time)
 {
     // BC manage for the velocity
-    if ( !BCh.bdUpdateDone() )
-        BCh.bdUpdate( *M_uFESpace.mesh(), M_uFESpace.feBd(), M_uFESpace.dof() );
+    if ( !BCh.bcUpdateDone() )
+        BCh.bcUpdate( *M_uFESpace.mesh(), M_uFESpace.feBd(), M_uFESpace.dof() );
 
     bcManageMatrix( C, *M_uFESpace.mesh(), M_uFESpace.dof(), BCh, M_uFESpace.feBd(),
                     M_tgv, time );
@@ -552,8 +552,8 @@ void NS_Assembler<Mesh>::applyBoundaryConditions( vector_type & rhs,
                                                   Real time)
 {
     // BC manage for the velocity
-    if ( !BCh.bdUpdateDone() )
-        BCh.bdUpdate( *M_uFESpace.mesh(), M_uFESpace.feBd(), M_uFESpace.dof() );
+    if ( !BCh.bcUpdateDone() )
+        BCh.bcUpdate( *M_uFESpace.mesh(), M_uFESpace.feBd(), M_uFESpace.dof() );
 
 
     bcManageVector( rhs, *M_uFESpace.mesh(), M_uFESpace.dof(), BCh, M_uFESpace.feBd(), time, M_tgv);

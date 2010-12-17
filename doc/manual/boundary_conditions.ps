@@ -2015,10 +2015,10 @@ b(conditions)0 5502 y Fb(3.1)112 b(Boundary)39 b(condition)e(t)m(yp)s
 b(the)h(sequel)f(w)m(e)h(shall)g(consider)g(b)s(oundary)d(conditions)j
 (of)g(three)g(t)m(yp)s(es:)39 b(essen)m(tial,)29 b(natural)e(and)f
 (mixte,)0 5787 y(i.e)31 b(Diric)m(hlet,)i(Neumann,)d(Robin.)40
-b(The)30 b(follo)m(wing)j Fg(enum)46 b(BCType)1867 6024
+b(The)30 b(follo)m(wing)j Fg(enum)46 b(bcType_Type)1867 6024
 y Fh(3)p eop
 %%Page: 4 4
-4 3 bop 0 209 a Fg(enum)47 b(BCType{Essential,)c(Natural,)i(Mixte};)0
+4 3 bop 0 209 a Fg(enum)47 b(bcType_Type{Essential,)c(Natural,)i(Mixte};)0
 392 y Fh(allo)m(w)32 b(us)e(to)h(hold)f(this)g(terminology)-8
 b(.)141 505 y(In)29 b(the)h(same)g(w)m(a)m(y)g(for)g(eac)m(h)h(\(or)e
 (almost)i(all\))g(t)m(yp)s(e)f(w)m(e)g(can)g(attribute)g(a)g(mo)s(de)f
@@ -2034,8 +2034,8 @@ g(whic)m(h)g(are)227 1285 y(in)m(v)m(olv)m(ed\);)136
 (for)f(Essen)m(tial\);)136 1656 y Fd(\017)46 b Fg(Tangential)p
 Fh(:)37 b(for)27 b(v)m(ector)i(problems)e(dealing)h(with)f(tangen)m
 (tial)j(comp)s(onen)m(ts)d(\(only)h(for)g(Essen)m(tial\);)0
-1838 y(Again,)j(the)g(follo)m(wing)i Fg(enum)47 b(BCMode)0
-2021 y(enum)g(BCMode{Scalar,)d(Full,)i(Component,)f(Normal,)h
+1838 y(Again,)j(the)g(follo)m(wing)i Fg(enum)47 b(bcMode_Type)0
+2021 y(enum)g(bcMode_Type{Scalar,)d(Full,)i(Component,)f(Normal,)h
 (Tangential};)0 2204 y Fh(allo)m(w)32 b(us)e(to)h(hold)f(this)g
 (terminology)-8 b(.)0 2446 y Fb(3.2)112 b(The)38 b(b)s(oundary)h
 (condition)f(class)0 2618 y Fh(What)29 b(is)f(the)h(minimal)g
@@ -2067,9 +2067,9 @@ i(class)h Fg(BC)p 1292 4363 29 4 v 34 w(Base)d Fh(allo)m(w)k(us)d(to)h
 b(Returns)d(the)i(name)g(of)g(the)g(boundary)f(condition)f(\(BC\))95
 4771 y(string)i(name\(\))f(const;)95 4997 y(//)i(Returns)d(the)i(BC)h
 (associated)d(flag)95 5110 y(EntityFlag)g(flag\(\))i(const;)95
-5336 y(//)h(Returns)d(the)i(BC)h(type)95 5449 y(BCType)f(type\(\))f
+5336 y(//)h(Returns)d(the)i(BC)h(type)95 5449 y(bcType_Type)f(type\(\))f
 (const;)95 5674 y(//)i(Returns)d(the)i(BC)h(mode)95 5787
-y(BCMode)f(mode\(\))f(const;)1867 6024 y Fh(4)p eop
+y(bcMode_Type)f(mode\(\))f(const;)1867 6024 y Fh(4)p eop
 %%Page: 5 5
 5 4 bop 95 322 a Fg(//)48 b(Returns)d(the)i(number)f(of)i(components)d
 (involved)g(in)i(this)g(boundary)f(condition)95 435 y(UInt)h
@@ -2092,7 +2092,7 @@ b(This)38 b(list)h(shall)f(allo)m(w)i(us)d(to)i(treat)g(the)g(b)s
 (oundary)d(condition)j(once)g(the)f(global)0 2323 y(matrix)30
 b(and)g(the)g(righ)m(t)g(hand)f(side)h(ha)m(v)m(e)h(b)s(een)f(assem)m
 (bled.)41 b(This)29 b(list)h(is)g(up)s(dated)f(in)h(the)g(new)h
-Fg(bdUpdate)0 2436 y Fh(metho)s(d)f(of)g(the)h Fg(Dof)e
+Fg(bcUpdate)0 2436 y Fh(metho)s(d)f(of)g(the)h Fg(Dof)e
 Fh(class.)42 b(The)30 b(follo)m(wing)i(metho)s(ds)d(allo)m(w)j(us)e(to)
 h(deal)g(with)f(this)g(list)95 2659 y Fg(//)48 b(Returns)d(a)j(pointer)
 93 b(to)48 b(the)f(i-th)f(elements)g(in)h(the)g(\(finalised\))e(list)95
@@ -2138,17 +2138,17 @@ y(//)i(Iterators)e(for)i(the)g(begining)f(and)h(end)g(of)g(the)g(BC)g
 1113 y(Iterator)g(end\(\))94 b({return)45 b(_bcList.end\(\);})0
 1339 y(//)i(Add)g(a)h(new)e(BC)i(to)f(the)g(list)0 1451
 y(void)g(addBC\(const)d(string&)i(name,)h(const)f(EntityFlag&)f(flag,)h
-(const)g(BCType&)g(type,)525 1564 y(const)g(BCMode&)g(mode,)h
+(const)g(bcType_Type&)g(type,)525 1564 y(const)g(bcMode_Type&)g(mode,)h
 (BCFunction_Base&)c(bdf,)k(const)f(vector<ID>&)f(comp\);)0
 1790 y(//)i(Add)g(a)h(new)e(BC)i(to)f(the)g(list)94 b(without)46
 b(specified)f(components)g(for)i(Scalar,)0 1903 y(//)g(Tangential)e(or)
 i(Normal)94 b(mode)47 b(problems)0 2016 y(void)g(addBC\(const)d
-(string&)i(name,)h(const)f(EntityFlag&)f(flag,)h(const)g(BCType&)g
-(type,)525 2129 y(const)g(BCMode&)g(mode,)h(BCFunction_Base&)c(bcf\);)0
+(string&)i(name,)h(const)f(EntityFlag&)f(flag,)h(const)g(bcType_Type&)g
+(type,)525 2129 y(const)g(bcMode_Type&)g(mode,)h(BCFunction_Base&)c(bcf\);)0
 2355 y(//)k(Add)g(a)h(new)e(BC)i(to)f(the)g(list)f(without)g(list)h(of)
 g(components)e(for)i(Full)g(mode)f(problems)0 2468 y(void)h
 (addBC\(const)d(string&)i(name,)h(const)f(EntityFlag&)f(flag,)h(const)g
-(BCType&)g(type,)525 2581 y(const)g(BCMode&)g(mode,)h(BCFunction_Base&)
+(bcType_Type&)g(type,)525 2581 y(const)g(bcMode_Type&)g(mode,)h(BCFunction_Base&)
 c(bcf,)k(const)f(UInt&)g(nComp\);)0 2806 y(//)h(Extracting)e(a)j(BC)f
 (from)f(the)h(list)0 2919 y(BC_Base&)f(operator[]\(const)d(Index_t&)i
 (\);)0 3032 y(const)h(BC_Base&)g(operator[]\(const)d(Index_t&\))j
@@ -2207,7 +2207,7 @@ b(to)f(glob)-5 b(al)28 b Fh(table)g(for)f(eac)m(h)g(elemen)m(t)i(on)d
 (iden)m(ti\014ers)0 1263 y(\(see)c(section)h(2)f(ab)s(o)m(v)m(e\).)42
 b(This)29 b(is)i(done)f(using)g(the)h(follo)m(wing)g(metho)s(d)0
 1451 y Fg(template)46 b(<typename)f(GeoShape,)g(typename)h(MC>)0
-1564 y(void)h(bdUpdate\(RegionMesh3D<G)o(eoSh)o(ape)o(,MC>)o(&)42
+1564 y(void)h(bcUpdate\(RegionMesh3D<G)o(eoSh)o(ape)o(,MC>)o(&)42
 b(mesh,)k(CurrentBdFE)f(&)i(feBd,)668 1677 y(BC_Handler&)e(BCh\);)1867
 6024 y Fh(7)p eop
 %%Trailer

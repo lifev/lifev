@@ -1811,16 +1811,16 @@ Oseen<MeshType, SolverType>::lagrangeMultiplier( const entityFlag_Type&  flag,
                                                  bcHandler_Type& bcHandler,
                                                  const vector_Type& solution )
 {
-    // Create a list of Flux BCName ??
-    std::vector< BCName > fluxBCVector = bcHandler.getBCWithType( Flux );
-    BCName fluxBCName = bcHandler.GetBCWithFlag( flag ).name();
+    // Create a list of Flux bcName_Type ??
+    std::vector< bcName_Type > fluxBCVector = bcHandler.findAllBCWithType( Flux );
+    bcName_Type fluxbcName_Type = bcHandler.findBCWithFlag( flag ).name();
 
     // Create a Repeated vector for looking to the lambda
     vector_Type velocityPressureLambda( solution, Repeated );
 
     // Find the index associated to the correct Lagrange multiplier
     for ( UInt lmIndex = 0; lmIndex < static_cast <UInt> ( fluxBCVector.size() ); ++lmIndex )
-        if ( fluxBCName.compare( fluxBCVector[ lmIndex ] ) == 0 )
+        if ( fluxbcName_Type.compare( fluxBCVector[ lmIndex ] ) == 0 )
             return velocityPressureLambda[3 * M_velocityFESpace.dof().numTotalDof()
                                           + M_pressureFESpace.dof().numTotalDof() + 1 + lmIndex];
 
@@ -1894,9 +1894,9 @@ Oseen<MeshType, SolverType>::applyBoundaryConditions( matrix_Type&       matrix,
     // M_rightHandSideFull = M_rightHandSideNoBC;
 
     // BC manage for the velocity
-    if ( !bcHandler.bdUpdateDone() || M_recomputeMatrix )
+    if ( !bcHandler.bcUpdateDone() || M_recomputeMatrix )
     {
-        bcHandler.bdUpdate( *M_velocityFESpace.mesh(),
+        bcHandler.bcUpdate( *M_velocityFESpace.mesh(),
                             M_velocityFESpace.feBd(),
                             M_velocityFESpace.dof() );
     }

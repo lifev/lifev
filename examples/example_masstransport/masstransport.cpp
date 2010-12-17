@@ -282,7 +282,7 @@ MassTransport::run()
 
     // Boundary conditions
 
-    BCHandler      bcH  ( 5, BCHandler::HINT_BC_NONE );
+    BCHandler      bcH;
     BCFunctionBase uIn  (  d->getU_3d() );
     BCFunctionBase uZero(  fZero );
 
@@ -354,7 +354,7 @@ MassTransport::run()
 
     // the boundary conditions
 
-    BCHandler bcADR( 5, BCHandler::HINT_BC_NONE );
+    BCHandler bcADR;
     BCFunctionBase uADR  (  d->getCC_3d() );
 
     //cylinder

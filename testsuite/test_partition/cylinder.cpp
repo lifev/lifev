@@ -80,9 +80,6 @@ using namespace LifeV;
 const int INLET       = 2;
 const int WALL        = 1;
 const int OUTLET      = 3;
-const int RINGIN      = 20;
-const int RINGOUT     = 30;
-
 
 Real zero_scalar( const Real& /* t */,
                   const Real& /* x */,
@@ -124,7 +121,7 @@ postProcessFluxesPressures( Oseen< RegionMesh3D<LinearTetra> >& nssolver,
     LifeV::Real Q, P;
     UInt flag;
 
-    for ( BCHandler::BCBase_Iterator it = bcHandler.begin();
+    for ( BCHandler::bcBaseIterator_Type it = bcHandler.begin();
             it != bcHandler.end(); ++it )
     {
         flag = it->flag();
@@ -387,7 +384,7 @@ Cylinder::run()
     bool verbose = (d->comm->MyPID() == 0);
 
     // Boundary conditions
-    BCHandler bcH( 5, BCHandler::HINT_BC_NONE );
+    BCHandler bcH;
     BCFunctionBase uZero( zero_scalar );
     std::vector<ID> zComp(1);
     zComp[0] = 3;

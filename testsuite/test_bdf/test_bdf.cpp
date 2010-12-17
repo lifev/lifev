@@ -141,7 +141,7 @@ void test_bdf::run()
     // the boundary conditions
     BCFunctionBase g_Ess(AnalyticalSol::u);
 
-    BCHandler bc(6, BCHandler::HINT_BC_ONLY_ESSENTIAL);
+    BCHandler bc;
 
     bc.addBC("Top", TOP, Essential, Full, g_Ess, 1);
     bc.addBC("Bottom", BOTTOM, Essential, Full, g_Ess, 1);
@@ -168,7 +168,7 @@ void test_bdf::run()
                   << FeSpace.map().map(Unique)->NumGlobalElements()
                   << std::endl;
 
-    bc.bdUpdate(*(FeSpace.mesh()), FeSpace.feBd(), FeSpace.dof());
+    bc.bcUpdate(*(FeSpace.mesh()), FeSpace.feBd(), FeSpace.dof());
 
     //=============================================================================
     //Fe Matrices and vectors

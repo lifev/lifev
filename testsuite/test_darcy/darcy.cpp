@@ -399,7 +399,7 @@ darcy::run()
     mixteBDfun.setFunctions_Mixte( dataProblem::mixte,
                                    Members->getUOne() );
 
-    BCHandler bcDarcy( 6 );
+    BCHandler bcDarcy;
 
     bcDarcy.addBC( "Top",     TOP,     Natural,    Full,    neumannBDfun1, 1 );
     bcDarcy.addBC( "Bottom",  BOTTOM,  Mixte,      Scalar,  mixteBDfun      );

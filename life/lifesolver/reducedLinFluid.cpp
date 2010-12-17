@@ -100,7 +100,7 @@ void reducedLinFluid::solveReducedLinearFluid()
             assembleMatrix(M_CAux, M_elmatC, M_fe, M_dof, 0, 0, 0,0);
         }
 
-        M_BCh_dp->bdUpdate(M_fluid->mesh(), M_feBd, M_dof);
+        M_BCh_dp->bcUpdate(M_fluid->mesh(), M_feBd, M_dof);
         M_computedC = true;
     }
 
@@ -149,7 +149,7 @@ void reducedLinFluid::solveInvReducedLinearFluid()
             assembleMatrix(M_CAux, M_elmatC, M_fe, M_dof, 0, 0, 0,0);
         }
 
-        M_BCh_dp_inv->bdUpdate(M_fluid->mesh(), M_feBd, M_dof);
+        M_BCh_dp_inv->bcUpdate(M_fluid->mesh(), M_feBd, M_dof);
         M_computedC = true;
     }
 
@@ -189,7 +189,7 @@ void reducedLinFluid::evalResidual()
                              1);
 
     BCh.addBC("Interface", 1, Natural, Full, p_wall, 3);
-    BCh.bdUpdate(this->M_fluid->mesh(),
+    BCh.bcUpdate(this->M_fluid->mesh(),
                  this->M_feBd,
                  this->M_dof);
 

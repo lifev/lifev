@@ -199,7 +199,7 @@ ResistanceProblem::run()
 
 
     // Boundary conditions
-    BCHandler bcH( 5, BCHandler::HINT_BC_NONE );
+    BCHandler bcH;
 
     // fluid solver
 

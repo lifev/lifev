@@ -241,7 +241,7 @@ exactJacobian::imposeFlux( void )
     {
         UInt numLM = super::imposeFlux();
 
-        std::vector<BCName> fluxVector = M_BCh_du->getBCWithType( Flux );
+        std::vector<bcName_Type> fluxVector = M_BCh_du->findAllBCWithType( Flux );
         if ( numLM != ( static_cast<UInt> ( fluxVector.size() ) ) )
         {
             ERROR_MSG("Different number of fluxes imposed on Fluid and on LinearFluid");

@@ -1,4 +1,3 @@
-/* -*- mode: c++ -*- */
 //@HEADER
 /*
 *******************************************************************************
@@ -580,7 +579,7 @@ FSIOperator::imposeFlux( void )
 {
     if ( this->isFluid() )
     {
-        std::vector<BCName> fluxVector = M_BCh_u->getBCWithType( Flux );
+        std::vector<bcName_Type> fluxVector = M_BCh_u->findAllBCWithType( Flux );
         UInt numLM = static_cast<UInt>( fluxVector.size() );
 
         UInt offset = M_uFESpace->map().map(Unique)->NumGlobalElements()
@@ -885,8 +884,8 @@ FSIOperator::transferInterfaceOnSolid(const vector_Type& _vec1, vector_Type& _ve
 void
 FSIOperator::bcManageVectorRHS( const fluidBchandlerPtr_Type& bch, vector_Type& rhs )
 {
-    if ( !bch->bdUpdateDone() || M_fluid->recomputeMatrix() )
-        bch->bdUpdate( *M_uFESpace->mesh(), M_uFESpace->feBd(), M_uFESpace->dof() );
+    if ( !bch->bcUpdateDone() || M_fluid->recomputeMatrix() )
+        bch->bcUpdate( *M_uFESpace->mesh(), M_uFESpace->feBd(), M_uFESpace->dof() );
 
     bcManageVector( rhs, *M_uFESpace->mesh(), M_uFESpace->dof(),  *bch, M_uFESpace->feBd(), 1., 0. );
 }

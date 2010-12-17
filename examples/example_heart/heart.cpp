@@ -107,7 +107,7 @@ Heart::run()
 
     //! Boundary conditions handler and function
     BCFunctionBase uZero( zero_scalar );
-    BCHandler bcH( 3, BCHandler::HINT_BC_NONE );
+    BCHandler bcH;
     bcH.addBC( "Endo",   	ENDOCARDIUM,	Natural,	Full,	uZero,  1 );
     bcH.addBC( "Epi",   	EPICARDIUM, 	Natural,   	Full,   uZero, 	1 );
     bcH.addBC( "Trunc",    	TRUNC_SEC,  	Natural, 	Full,   uZero, 	1 );

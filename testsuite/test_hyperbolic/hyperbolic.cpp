@@ -403,7 +403,7 @@ hyperbolic::run()
 
     dirichletBDfun.setFunction( dataProblem::dirichlet );
 
-    BCHandler bcHyperbolic( 6 );
+    BCHandler bcHyperbolic;
 
     bcHyperbolic.addBC(   "Top",    TOP,    Essential,  Scalar,  dirichletBDfun  );
     bcHyperbolic.addBC("Bottom", BOTTOM,    Essential,  Scalar,  dirichletBDfun  );

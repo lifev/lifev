@@ -750,9 +750,9 @@ FESpace<MeshType, MapType>::interpolateBC( BCHandler& BCh,
     //
     ID idDof;
 
-    if ( !BCh.bdUpdateDone() )
+    if ( !BCh.bcUpdateDone() )
     {
-        BCh.bdUpdate( *mesh(), feBd(), dof() );
+        BCh.bcUpdate( *mesh(), feBd(), dof() );
     }
 
 

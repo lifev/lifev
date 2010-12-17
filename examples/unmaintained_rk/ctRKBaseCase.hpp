@@ -59,8 +59,8 @@ public:
     // BC allocation w.r.t. their number
     void create_bcs()
     {
-        C_bcHu.reset(new BCHandler(C_num_bcs, BCHandler::HINT_BC_NONE));
-        C_bcHp.reset(new BCHandler(C_num_bcs, BCHandler::HINT_BC_NONE));
+        C_bcHu.reset(new BCHandler());
+        C_bcHp.reset(new BCHandler());
     }
 
     // User bcs interface

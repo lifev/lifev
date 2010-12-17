@@ -183,13 +183,10 @@ int main(int argc, char** argv)
     LifeV::BCFunctionBase uZero(fZero);
     LifeV::BCFunctionBase uLid(lidBC);
 
-    LifeV::BCHandler::BCHints hint;
-    hint = LifeV::BCHandler::HINT_BC_NONE;
-
     std::vector<LifeV::ID> xComp(1);
     xComp[0] = 1;
 
-    LifeV::BCHandler bcH( 0, hint );
+    LifeV::BCHandler bcH;
     // A boundary condition in every face
     bcH.addBC( "Top"   , TOP   , LifeV::Essential, LifeV::Full     , uLid , 3     );
     bcH.addBC( "Left"  , LEFT  , LifeV::Essential, LifeV::Full     , uZero, 3     );
@@ -199,7 +196,7 @@ int main(int argc, char** argv)
     bcH.addBC( "Bottom", BOTTOM, LifeV::Essential, LifeV::Full     , uZero, 3     );
 
     // Get the number of Lagrange Multiplyers (LM) and set the offsets
-    std::vector<LifeV::BCName> fluxVector = bcH.getBCWithType( LifeV::Flux );
+    std::vector<LifeV::bcName_Type> fluxVector = bcH.findAllBCWithType( LifeV::Flux );
     LifeV::UInt numLM = static_cast<LifeV::UInt>( fluxVector.size() );
 
     LifeV::UInt offset = uFESpace.map().map(LifeV::Unique)->NumGlobalElements()

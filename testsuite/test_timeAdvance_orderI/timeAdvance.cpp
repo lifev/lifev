@@ -248,7 +248,7 @@ problem::run()
     BCFunctionBase uZero ( members->getUZero()  );
     BCFunctionBase uEx(uexact);
 
-    BCHandler bcH( 6, BCHandler::HINT_BC_ONLY_ESSENTIAL );
+    BCHandler bcH;
 
     bcH.addBC( "Top",     TOP,    Essential, Full,      uEx, 1 );
     bcH.addBC( "Bottom",  BOTTOM, Essential, Full,      uEx, 1 );

@@ -885,8 +885,8 @@ applyBoundaryConditions(matrix_type&        matrix,
     if (offset)
         BCh.setOffset(offset);
 
-    if ( !BCh.bdUpdateDone() )
-        BCh.bdUpdate( *this->M_FESpace->mesh(), this->M_FESpace->feBd(), this->M_FESpace->dof() );
+    if ( !BCh.bcUpdateDone() )
+        BCh.bcUpdate( *this->M_FESpace->mesh(), this->M_FESpace->feBd(), this->M_FESpace->dof() );
 
      vector_type rhsFull(rhs, Unique);  // bcManages now manages the also repeated parts
 

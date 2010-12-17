@@ -862,8 +862,8 @@ VenantKirchhofSolver<Mesh, SolverType>::evalResidual( vector_type &res, const ve
   M_stiff = M_massStiff;
 
   M_Displayer->leaderPrint("updating the boundary conditions ... ");
-  if ( !M_BCh->bdUpdateDone() )
-    M_BCh->bdUpdate( M_FESpace->mesh(), M_FESpace->feBd(), M_FESpace->dof() );
+  if ( !M_BCh->bcUpdateDone() )
+    M_BCh->bcUpdate( M_FESpace->mesh(), M_FESpace->feBd(), M_FESpace->dof() );
 
   bcManageMatrix( M_stiff, *M_FESpace->mesh(), M_FESpace->dof(), *M_BCh, M_FESpace->feBd(), 1.0 );
 
@@ -1099,8 +1099,8 @@ VenantKirchhofSolver<Mesh, SolverType>::applyBoundaryConditions( matrix_type&   
   // BC manage for the velocity
   if (offset)
     BCh->setOffset(offset);
-  if ( !BCh->bdUpdateDone() )
-    BCh->bdUpdate( *M_FESpace->mesh(), M_FESpace->feBd(), M_FESpace->dof() );
+  if ( !BCh->bcUpdateDone() )
+    BCh->bcUpdate( *M_FESpace->mesh(), M_FESpace->feBd(), M_FESpace->dof() );
 
   // vector_type rhsFull(rhs, Repeated, Zero); // ignoring non-local entries, Otherwise they are summed up lately
   vector_type rhsFull(rhs, Unique);  // bcManages now manages the also repeated parts

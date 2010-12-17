@@ -981,37 +981,9 @@ boundary condition. Different types will correspond to \emph{different
 if he wants to enucleate some data and methods specific to a
 particular boundary treatment.
 
-\paragraph{name} The \emph{name} of a boundary condition is what \emph{uniquely}
-distinguish a \texttt{BC} obiect to another within a container.
-That is, whithin a given \texttt{BC\_Handler} object there cannot be two
-\texttt{BC} objects with the same \textit{name}.
-Furthermore, the tests for equality of two boundary condition objects is done
-by checking the name.
-In figure \ref{fig:bccond} we illustrate (graphically) the heirarchy 
-of the \texttt{BC} classes.
-\begin{figure}[hb]
-\includegraphics[width=0.7\linewidth]{BCCond}
-\caption{The organization of the \texttt{BC} classes.\label{fig:bccond}}
-\end{figure}
+\paragraph{name} The \emph{name} of a boundary condition. It can be used to find a particular
+boundary conditions (if different names are used for different boundary conditions. 
 
-The name type is alaised to \texttt{BCName}. Depending on a compiler
-DEFINE flag (called \texttt{INT\_BCNAME})
-\texttt{BCName}\index{INT\_BCNAME} may be a STL \texttt{string}
-(default) or simply an \texttt{int}. A special constant,
-\texttt{nullBCName} indicates a name which is associated to a null
-boundary condition. It defaults to the empty string or to zero,
-depending on the use of the compiler flag \texttt{INT\_BCNAME}, as
-illustrated in the following code snapshot.
-
-\begin{verbatim}
-#ifdef INT_BCNAME
-typedef int  BCName;
-const BCName nullBCName=0;
-#else
-typedef string BCName;
-const BCName nullBCName; // The empty string!
-#endif
-\end{verbatim}
 
 We now detail the various classes.
 \subsubsection{BC\_Base and BC\_Base\_WL}
@@ -1025,16 +997,16 @@ public:
   template <typename T>
   T& asLeaf(T  * _t);
   virtual ~BC_Base(){}
-  BC_Base(BCName const _n);
+  BC_Base(bcName_Type const _n);
 #ifndef INT_BCNAME
   BC_Base(char const * _n);
 #endif
   BC_Base();
-  BCName & name();
-  BCName const & name()const;
+  bcName_Type & name();
+  bcName_Type const & name()const;
   bool unset()const;
 protected:
-  BCName _name;
+  bcName_Type _name;
 };
 \end{verbatim}
 The class is very simple. It provides methods for explicit dynamic
@@ -1051,7 +1023,7 @@ class
 BC_Base_WL: public BC_Base
 {
 public:
-  BC_Base_WL(BCName const _n):BC_Base(_n){};
+  BC_Base_WL(bcName_Type const _n):BC_Base(_n){};
 #ifndef  INT_BCNAME
   BC_Base_WL(char const * _n):BC_Base(_n){};
 #endif
@@ -1095,9 +1067,9 @@ objects with the same name may be present in the container.
   inline bool add(BC_Base & _bc);
 
   
-  bool erase_BC(BCName const  _n); /* Deletes entry with name _n
+  bool erase_BC(bcName_Type const  _n); /* Deletes entry with name _n
   
-  inline bool  isThere(BCName const _n) const;
+  inline bool  isThere(bcName_Type const _n) const;
   inline bool  isThere(BC_Base * const  _p) const;
   inline bool  isThere(BC_Base & _p) const;
   void showMe()const;
@@ -1106,7 +1078,7 @@ objects with the same name may be present in the container.
 The method \texttt{names()} returns a STL vector with all the names in the 
 container.
 \begin{verbatim}
-  vector<BCName> & names()const;
+  vector<bcName_Type> & names()const;
 \end{verbatim}  
 \subsubsection{Helper functions}
 There are a set of helper function, some of which are quite important.
@@ -1121,12 +1093,12 @@ compiler has made it necessary having \emph{global functions}:
 template
 <typename BC=BC_Base>
 BC &
-addBC(BC_Handler & bh, BCName const _n)
+addBC(BC_Handler & bh, bcName_Type const _n)
 
 template
 <typename BC=BC_Base>
 BC *
-addBC_ptr(BC_Handler & bh, BCName const _n)
+addBC_ptr(BC_Handler & bh, bcName_Type const _n)
 \end{verbatim}
 
 The functions CREATES a new BC object on the memory heap, add it to
@@ -1141,7 +1113,7 @@ example, where both the reference and the pointer version are used.
 class Dirichlet: public BC_Base
 {
 public:
-  Dirichlet(BCName _n): BC_Base(_n)
+  Dirichlet(bcName_Type _n): BC_Base(_n)
     {};
   static char* const type="Dirichlet";
   void showMe(){cout << type<< " " <<name()<<endl;}
@@ -1150,7 +1122,7 @@ public:
 class Neumann: public BC_Base_WL
 {
 public:
-  Neumann(BCName const  _n): BC_Base_WL(_n)
+  Neumann(bcName_Type const  _n): BC_Base_WL(_n)
     {};
   static char* const type="Neumann";
   void showMe(){cout << type<< " " <<name()<<endl;}

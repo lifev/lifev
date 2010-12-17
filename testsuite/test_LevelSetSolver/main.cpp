@@ -159,10 +159,10 @@ main( int argc, char** argv )
     vector_type beta(betaFESpace->map());
     betaFESpace->interpolate(betaFct,beta,0.0);
 
-    BCHandler bchandler(26);
+    BCHandler bchandler;
     BCFunctionBase BCu( exactSolution );
     bchandler.addBC("Dirichlet",1,Essential,Full,BCu,1);
-    for (UInt i(2); i<=26; ++i)
+    for (UInt i(2); i<=6; ++i)
     {
         bchandler.addBC("Dirichlet",i,Essential,Full,BCu,1);
     }

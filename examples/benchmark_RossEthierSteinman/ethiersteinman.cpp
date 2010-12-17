@@ -182,21 +182,7 @@ Ethiersteinman::check()
     std::string neumannList = dataFile( "fluid/problem/neumannList", "" );
     std::set<UInt> neumannMarkers = parseList( neumannList );
 
-
-    BCHandler::BCHints hint;
-    if (neumannMarkers.size() != 0)
-    {
-        hint = BCHandler::HINT_BC_NONE;
-    }
-    else
-    {
-        if (verbose)
-        {
-            std::cout << "Warning: only Dirichlet boundary conditions have been imposed!" << std::endl;
-        }
-        hint = BCHandler::HINT_BC_ONLY_ESSENTIAL;
-    }
-    BCHandler bcH( 0, hint );
+    BCHandler bcH;
     BCFunctionBase uWall( Problem::uexact );
     BCFunctionBase uNeumann( Problem::fNeumann );
 
@@ -583,20 +569,7 @@ Ethiersteinman::run()
             std::set<UInt> neumannMarkers = parseList( neumannList );
 
 
-            BCHandler::BCHints hint;
-            if (neumannMarkers.size() != 0)
-            {
-                hint = BCHandler::HINT_BC_NONE;
-            }
-            else
-            {
-                if (verbose)
-                {
-                    std::cout << "Warning: only Dirichlet boundary conditions have been imposed!" << std::endl;
-                }
-                hint = BCHandler::HINT_BC_ONLY_ESSENTIAL;
-            }
-            BCHandler bcH( 0, hint );
+            BCHandler bcH;
             BCFunctionBase uWall( Problem::uexact );
             BCFunctionBase uNeumann( Problem::fNeumann );
 

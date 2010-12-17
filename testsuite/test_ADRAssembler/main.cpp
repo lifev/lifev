@@ -241,17 +241,17 @@ main( int argc, char** argv )
 // Definition and application of the BCs
 
     if (verbose) std::cout << " -- Building the BCHandler ... " << std::flush;
-    BCHandler bchandler(26);
+    BCHandler bchandler;
     BCFunctionBase BCu( exactSolution );
     bchandler.addBC("Dirichlet",1,Essential,Full,BCu,1);
-    for (UInt i(2); i<=26; ++i)
+    for (UInt i(2); i<=6; ++i)
     {
         bchandler.addBC("Dirichlet",i,Essential,Full,BCu,1);
     }
     if (verbose) std::cout << " done ! " << std::endl;
 
     if (verbose) std::cout << " -- Updating the BCs ... " << std::flush;
-    bchandler.bdUpdate(*uFESpace->mesh(),uFESpace->feBd(),uFESpace->dof());
+    bchandler.bcUpdate(*uFESpace->mesh(),uFESpace->feBd(),uFESpace->dof());
     if (verbose) std::cout << " done ! " << std::endl;
 
     if (verbose) std::cout << " -- Applying the BCs ... " << std::flush;

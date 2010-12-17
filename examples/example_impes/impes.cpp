@@ -347,14 +347,11 @@ impes::run()
     //pressureMixteBDfun.setFunctions_Mixte ( dataProblem::saturationMixte,
     //                                      Members->getUOne() );
 
-    // Total number of different boundary contitions.
-    const UInt bcNumber( 5 );
-
     // Boundary condition handler for the pressure equation.
-    BCHandler bcPressure( bcNumber );
+    BCHandler bcPressure;
 
     // Boundary condition handler for the saturation equation.
-    BCHandler bcSaturation( bcNumber );
+    BCHandler bcSaturation;
 
     bcPressure.addBC( "Top",            FLUX0,          Natural,   Full,    pressureNeumannBDfun, 0 );
     bcPressure.addBC( "Top2",           FLUX1,          Natural,   Full,    pressureNeumannBDfun, 0 );

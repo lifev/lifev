@@ -1465,14 +1465,14 @@ applyBoundaryConditions ()
     Chrono chronoBC;
 
     // Check if the boundary conditions were updated.
-    if ( !M_BCh->bdUpdateDone() )
+    if ( !M_BCh->bcUpdateDone() )
     {
 
         M_displayer.leaderPrint( "                 Updating the BC               ...          ");
         chronoBC.start();
 
         // Update the boundary conditions handler. We use the finite element of the boundary of the dual variable.
-        M_BCh->bdUpdate( *M_dual_FESpace.mesh(),
+        M_BCh->bcUpdate( *M_dual_FESpace.mesh(),
                          M_dual_FESpace.feBd(),
                          M_dual_FESpace.dof() );
 

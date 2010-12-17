@@ -840,17 +840,17 @@ localEvolve ( const UInt& iElem )
             rightValue.zero();
 
             // Check if the boundary conditions were updated.
-            if ( !M_BCh->bdUpdateDone() )
+            if ( !M_BCh->bcUpdateDone() )
             {
                 // Update the boundary conditions handler. We use the finite element of the boundary of the dual variable.
-                M_BCh->bdUpdate( *M_FESpace.mesh(), M_FESpace.feBd(), M_FESpace.dof() );
+                M_BCh->bcUpdate( *M_FESpace.mesh(), M_FESpace.feBd(), M_FESpace.dof() );
             }
 
             // Take the boundary marker for the current boundary face
             const ID faceMarker ( M_FESpace.mesh()->bElement( iGlobalFace ).marker() );
 
             // Take the corrispective boundary function
-            const BCBase& bcBase ( M_BCh->GetBCWithFlag( faceMarker ) );
+            const BCBase& bcBase ( M_BCh->findBCWithFlag( faceMarker ) );
 
             // Check if the bounday condition is of type Essential, useful for operator splitting strategies
             if ( bcBase.type() == Essential )

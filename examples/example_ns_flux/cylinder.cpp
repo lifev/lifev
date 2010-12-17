@@ -254,7 +254,7 @@ Cylinder::run()
     bool verbose = (me == 0);
 
     // Boundary conditions
-    BCHandler bcH( 4, BCHandler::HINT_BC_NONE );
+    BCHandler bcH;
     BCFunctionBase uZero( zero_scalar );
     std::vector<ID> zComp(1);
     zComp[0] = 3;

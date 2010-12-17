@@ -199,7 +199,7 @@ int main(int argc, char** argv)
     bcH.addBC( "Bottom", BOTTOM, LifeV::Essential, LifeV::Full     , uZero, 3     );
 
     // Get the number of Lagrange Multiplyers (LM) and set the offsets
-    std::vector<LifeV::BCName> fluxVector = bcH.getBCWithType( LifeV::Flux );
+    std::vector<LifeV::bcName_Type> fluxVector = bcH.getBCWithType( LifeV::Flux );
     LifeV::UInt numLM = static_cast<LifeV::UInt>( fluxVector.size() );
 
     LifeV::UInt offset = uFESpace.map().getMap(LifeV::Unique)->NumGlobalElements()

@@ -338,10 +338,10 @@ HarmonicExtensionSolver<Mesh, SolverType>::applyBoundaryConditions(vector_Type& 
     // CHANGED BY S. QUINODOZ !
     // "if" exchanged
 
-    if (  ! BCh.bdUpdateDone() )
+    if (  ! BCh.bcUpdateDone() )
     {
         // BC boundary information update
-        BCh.bdUpdate( *M_FESpace.mesh(), M_FESpace.feBd(), M_FESpace.dof() );
+        BCh.bcUpdate( *M_FESpace.mesh(), M_FESpace.feBd(), M_FESpace.dof() );
     }
 
     if (M_offset)//mans that this is the fullMonolithic case

@@ -439,7 +439,7 @@ updateSystem(const vector_type& beta, BCHandler& bcHandler, const Real& time)
 
 
     // Manage the BCs
-    bcHandler.bdUpdate(*M_fespace->mesh(),M_fespace->feBd(),M_fespace->dof());
+    bcHandler.bcUpdate(*M_fespace->mesh(),M_fespace->feBd(),M_fespace->dof());
     bcManage(*M_systemMatrix,M_rhs,*M_fespace->mesh(),M_fespace->dof(),bcHandler,M_fespace->feBd(),1.0,time);
 }
 

@@ -168,7 +168,7 @@ Structure::run3d()
     bool verbose = (parameters->comm->MyPID() == 0);
     // Number of boundary conditions for the velocity and mesh motion
     //
-    boost::shared_ptr<BCHandler> BCh( new BCHandler(2) );
+    boost::shared_ptr<BCHandler> BCh( new BCHandler() );
     BCFunctionBase dZero( zero_scalar );
     //
     // dataElasticStructure

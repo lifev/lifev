@@ -787,9 +787,9 @@ void MonodomainSolver<Mesh, SolverType>::applyBoundaryConditions( matrix_Type&  
 {
 
     // BC manage for the PDE
-    if ( !BCh.bdUpdateDone() )
+    if ( !BCh.bcUpdateDone() )
     {
-        BCh.bdUpdate( *M_uFESpace.mesh(), M_uFESpace.feBd(), M_uFESpace.dof() );
+        BCh.bcUpdate( *M_uFESpace.mesh(), M_uFESpace.feBd(), M_uFESpace.dof() );
     }
 
     vector_Type rhsFull(M_rhsNoBC,Repeated, Zero);

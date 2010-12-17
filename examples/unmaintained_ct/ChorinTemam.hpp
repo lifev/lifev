@@ -1696,9 +1696,9 @@ void ChorinTemam<Mesh, SolverType>::applyBC_u( matrix_type&        matrix_u,
                                                vector_type&        rhs_u,
                                                bchandler_raw_type& BCh_u)
 {
-    if ( !BCh_u.bdUpdateDone() )
+    if ( !BCh_u.bcUpdateDone() )
     {
-        BCh_u.bdUpdate( *M_uFESpace.mesh(), M_uFESpace.feBd(), M_uFESpace.dof() );
+        BCh_u.bcUpdate( *M_uFESpace.mesh(), M_uFESpace.feBd(), M_uFESpace.dof() );
     }
 
     vector_type rhsFull_u (rhs_u, Repeated, Zero);
@@ -1722,9 +1722,9 @@ void ChorinTemam<Mesh, SolverType>::applyBC_p( matrix_type&	   matrix_p,
                                                vector_type&	   rhs_p,
                                                bchandler_raw_type& BCh_p )
 {
-    if ( !BCh_p.bdUpdateDone() )
+    if ( !BCh_p.bcUpdateDone() )
     {
-        BCh_p.bdUpdate( *M_pFESpace.mesh(), M_pFESpace.feBd(), M_pFESpace.dof() );
+        BCh_p.bcUpdate( *M_pFESpace.mesh(), M_pFESpace.feBd(), M_pFESpace.dof() );
     }
 
     vector_type rhsFull_p (rhs_p, Repeated, Zero);
