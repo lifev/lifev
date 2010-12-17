@@ -48,15 +48,15 @@ namespace LifeV
 // Constructor
 // =================
 
-ExporterData::ExporterData( const  ExporterData::Type& type,
+ExporterData::ExporterData( const ExporterData::Type& type,
                             const std::string& variableName,
-                            const vector_ptrtype& vr,
+                            const vectorPtr_Type& vec,
                             const UInt& start,
                             const UInt& size,
                             const UInt& steady,
                             const ExporterData::Where& where):
         M_variableName  ( variableName ),
-        M_vr            ( vr ),
+        M_vr            ( vec ),
         M_size          ( size ),
         M_start         ( start ),
         M_type          ( type ),
@@ -78,7 +78,7 @@ Real& ExporterData::operator()( const UInt i )
     return (*M_vr)[i];
 }
 
-std::string ExporterData::typeName() const
+const std::string& ExporterData::typeName() const
 {
     switch (M_type)
     {
@@ -91,7 +91,7 @@ std::string ExporterData::typeName() const
     return "ERROR string";
 }
 
-UInt ExporterData::typeDim() const
+const UInt& ExporterData::typeDim() const
 {
     switch ( M_type )
     {
