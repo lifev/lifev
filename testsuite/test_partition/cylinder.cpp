@@ -411,10 +411,12 @@ Cylinder::run()
     meshPart.setup(1, (d->comm));
 
     HDF5Filter3DMesh<RegionMesh3D<LinearTetra> > HDF5Input(dataFile, "cylinderPart");
-    HDF5Input.loadGraph(meshPart.elementDomains(), d->comm);
+    HDF5Input.setComm(d->comm);
+//    HDF5Input.loadGraph(meshPart.elementDomains(), d->comm);
+    meshPart.elementDomains() = HDF5Input.getGraph();
     meshPart.update();
-//    meshPart.meshPartition() = HDF5Input.getMeshPartition();
-    HDF5Input.loadMyPartition(meshPart.meshPartition(), d->comm);
+    meshPart.meshPartition() = HDF5Input.getMeshPartition();
+//    HDF5Input.loadMyPartition(meshPart.meshPartition(), d->comm);
     HDF5Input.closeFile();
 
     if (verbose) std::cout << std::endl;

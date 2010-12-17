@@ -176,6 +176,7 @@ public:
     const std::vector<Int>&  graphVertexLocations() const {return M_graphVertexLocations;}
     //! Return a pointer to M_elementDomains
     const graphPtr_Type&     elementDomains()       const {return M_elementDomains;}
+    graphPtr_Type&           elementDomains()             {return M_elementDomains;}
     //! Return a reference to M_repeatedNodeVector
     const std::vector<Int>&  repeatedNodeVector()   const {return M_repeatedNodeVector[0];}
     //! Return a reference to M_repeatedEdgeVector

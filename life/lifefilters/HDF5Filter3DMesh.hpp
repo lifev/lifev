@@ -177,7 +177,8 @@ public:
       partitionMesh object (as returned by partitionMesh::graph() )
       \param comm - Epetra_Comm* - a raw pointer to the Epetra communicator to be used
     */
-    void loadGraph(graphPtr_Type graph, boost::shared_ptr<Epetra_Comm>& comm);
+    void __attribute__((__deprecated__)) loadGraph(graphPtr_Type graph,
+                                                   boost::shared_ptr<Epetra_Comm>& comm);
 
     //! Load a mesh partition according to the MPI PID
     /*!
@@ -188,7 +189,8 @@ public:
       \param meshPartition - shared_ptr<Mesh> - shared pointer to mesh partition object
       \param comm -shared_ptr<Epetra_Comm> - shared pointer to the Epetra communicator to be used
     */
-    void loadMyPartition(meshPtr_Type& meshPartition, boost::shared_ptr<Epetra_Comm>& comm);
+    void __attribute__((__deprecated__)) loadMyPartition(meshPtr_Type& meshPartition,
+                                                         boost::shared_ptr<Epetra_Comm>& comm);
 
     //! Get the number of stored DOF interfaces
     Int queryStoredInterfaceNumber();
@@ -196,8 +198,11 @@ public:
     //! Get the types of the stored DOF interfaces
     std::vector<std::string>& queryStoredInterfaceTypes();
 
+    //! Return a pointer to the graph
+    graphPtr_Type getGraph();
+
     //! Return a pointer to the mesh partition that corresponds to the current MPI rank
-    boost::shared_ptr<MeshType>& getMeshPartition();
+    meshPtr_Type  getMeshPartition();
 
     //! Return a pointer to the k-th interface stored inside the file
     boost::shared_ptr< std::map<UInt, UInt> >& getStoredInterface(Int k) ;
@@ -270,6 +275,7 @@ void HDF5Filter3DMesh<MeshType>::addDOFInterface(const interfaceVectorPtr_Type& 
     M_comm = comm;
 }
 
+// REMOVE ON MONDAY
 template<typename MeshType>
 void HDF5Filter3DMesh<MeshType>::loadGraph(graphPtr_Type graph, boost::shared_ptr<Epetra_Comm>& comm)
 {
@@ -309,6 +315,7 @@ void HDF5Filter3DMesh<MeshType>::loadGraph(graphPtr_Type graph, boost::shared_pt
     }
 }
 
+// REMOVE ON MONDAY
 template<typename MeshType>
 void HDF5Filter3DMesh<MeshType>::loadMyPartition(meshPtr_Type& meshPartition,
                                                  boost::shared_ptr<Epetra_Comm>& comm)
@@ -704,9 +711,52 @@ std::vector<std::string>& HDF5Filter3DMesh<MeshType>::queryStoredInterfaceTypes(
 }
 
 template <typename MeshType>
-boost::shared_ptr<MeshType>& HDF5Filter3DMesh<MeshType>::getMeshPartition()
+typename HDF5Filter3DMesh<MeshType>::graphPtr_Type HDF5Filter3DMesh<MeshType>::getGraph()
 {
-    boost::shared_ptr<MeshType> tempMesh(new MeshType);
+    graphPtr_Type tempGraph(new graphPtr_Type::element_type);
+
+    if (this->M_HDF5.get() == 0)
+    {
+        this->M_HDF5.reset(new hdf5_Type(*M_comm));
+    }
+    if (! this->M_HDF5->IsOpen())
+    {
+        this->M_HDF5->Open(this->M_postDir + this->M_prefix + ".h5", H5F_ACC_RDONLY);
+    }
+
+    Int nPartitions;
+
+    this->M_HDF5->Read("Graph", "number_partitions", nPartitions);
+
+    std::vector<Int> partitionSizes(nPartitions);
+    this->M_HDF5->Read("Graph", "partition_sizes", H5T_NATIVE_INT, nPartitions,
+                       &partitionSizes[0]);
+
+    tempGraph->resize(0);
+    tempGraph->reserve(nPartitions);
+
+    std::vector<Int> partBuffer;
+    std::stringstream index;
+
+    for (UInt i = 0; i < nPartitions; ++i)
+    {
+        partBuffer.resize(partitionSizes[i]);
+        index << i;
+        this->M_HDF5->Read("Graph", "partition_graph_" + index.str(),
+                           H5T_NATIVE_INT, partitionSizes[i],
+                           &partBuffer[0]);
+        tempGraph->push_back(partBuffer);
+        index.str(std::string());
+        index.clear();
+    }
+
+    return tempGraph;
+}
+
+template <typename MeshType>
+typename HDF5Filter3DMesh<MeshType>::meshPtr_Type HDF5Filter3DMesh<MeshType>::getMeshPartition()
+{
+    meshPtr_Type tempMesh(new MeshType);
 
     UInt elementNodes, faceNodes;
     switch (MeshType::ElementShape::S_shape)
