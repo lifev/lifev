@@ -288,18 +288,18 @@ int main(int argc, char** argv)
     {
         exporter.reset( new LifeV::Hdf5exporter<LifeV::RegionMesh3D<LifeV::LinearTetra> > ( dataFile, "cavity_example" ) );
         exporter->setDirectory( "./" ); // This is a test to see if M_post_dir is working
-        exporter->setMeshProcId( meshPart.mesh(), comm->MyPID() );
+        exporter->setMeshProcId( meshPart.meshPartition(), comm->MyPID() );
     }
     else
 #endif
     {
         if (exporterType.compare("none") == 0)
         {
-            exporter.reset( new LifeV::NoExport<LifeV::RegionMesh3D<LifeV::LinearTetra> > ( dataFile, meshPart.mesh(), "cavity_example", comm->MyPID()) );
+            exporter.reset( new LifeV::NoExport<LifeV::RegionMesh3D<LifeV::LinearTetra> > ( dataFile, meshPart.meshPartition(), "cavity_example", comm->MyPID()) );
         }
         else
         {
-            exporter.reset( new LifeV::Ensight<LifeV::RegionMesh3D<LifeV::LinearTetra> > ( dataFile, meshPart.mesh(), "cavity_example", comm->MyPID()) );
+            exporter.reset( new LifeV::Ensight<LifeV::RegionMesh3D<LifeV::LinearTetra> > ( dataFile, meshPart.meshPartition(), "cavity_example", comm->MyPID()) );
         }
     }
 
