@@ -201,7 +201,7 @@ Heart::run()
     {
         if (verbose) std::cout<<"Ion Model = Rogers-McCulloch"<<std::endl<<std::flush;
         ionicModel.reset(new RogersMcCulloch< RegionMesh3D<LinearTetra> >(_dataIonic,
-                                                                           *meshPart.mesh(),
+                                                                           *meshPart.meshPartition(),
                                                                            uFESpace,
                                                                            *M_heart_fct->M_comm));
     }
@@ -209,7 +209,7 @@ Heart::run()
     {
         if (verbose) std::cout<<"Ion Model = Luo-Rudy"<<std::endl<<std::flush;
         ionicModel.reset(new LuoRudy< RegionMesh3D<LinearTetra> >(_dataIonic,
-                                                                   *meshPart.mesh(),
+                                                                   *meshPart.meshPartition(),
                                                                    uFESpace,
                                                                    *M_heart_fct->M_comm));
     }
@@ -217,7 +217,7 @@ Heart::run()
     {
         if (verbose) std::cout<<"Ion Model = Mitchell-Schaeffer"<<std::endl<<std::flush;
         ionicModel.reset(new MitchellSchaeffer< RegionMesh3D<LinearTetra> >(_dataIonic,
-                                                                   *meshPart.mesh(),
+                                                                   *meshPart.meshPartition(),
                                                                    uFESpace,
                                                                    *M_heart_fct->M_comm));
     }
@@ -255,7 +255,7 @@ Heart::run()
         exporter.reset( new Hdf5exporter<RegionMesh3D<LinearTetra> > ( M_heart_fct->M_dataFile,
                                                                        "heart" ) );
         exporter->setDirectory( "./" ); // This is a test to see if M_post_dir is working
-        exporter->setMeshProcId( meshPart.mesh(), M_heart_fct->M_comm->MyPID() );
+        exporter->setMeshProcId( meshPart.meshPartition(), M_heart_fct->M_comm->MyPID() );
     }
     else
 #endif
@@ -263,14 +263,14 @@ Heart::run()
         if (exporterType.compare("none") == 0)
         {
             exporter.reset( new NoExport<RegionMesh3D<LinearTetra> > ( M_heart_fct->M_dataFile,
-                                                                       meshPart.mesh(),
+                                                                       meshPart.meshPartition(),
                                                                        "heart",
                                                                        M_heart_fct->M_comm->MyPID()) );
         }
         else
         {
             exporter.reset( new Ensight<RegionMesh3D<LinearTetra> > ( M_heart_fct->M_dataFile,
-                                                                      meshPart.mesh(),
+                                                                      meshPart.meshPartition(),
                                                                       "heart",
                                                                       M_heart_fct->M_comm->MyPID()) );
         }
