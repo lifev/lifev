@@ -52,14 +52,14 @@ public:
     //@{
     typedef MeshType mesh_Type;
     typedef Exporter<MeshType> super;
-    typedef typename super::mesh_ptrtype  mesh_ptrtype;
-    typedef typename super::vector_ptrtype vector_ptrtype;
+    typedef typename super::meshPtr_Type  meshPtr_Type;
+    typedef typename super::vectorPtr_Type vectorPtr_Type;
     //@}
 
     //! @name Constructors
     //@{
     NoExport();
-    NoExport(const GetPot& dfile, mesh_ptrtype mesh, const std::string& prefix, const int& procId);
+    NoExport(const GetPot& dfile, meshPtr_Type mesh, const std::string& prefix, const int& procId);
     NoExport(const GetPot& dfile, const std::string& prefix);
     //@}
 
@@ -100,7 +100,7 @@ NoExport<MeshType>::NoExport():
 }
 
 template<typename MeshType>
-NoExport<MeshType>::NoExport(const GetPot& dfile, mesh_ptrtype mesh, const std::string& prefix,
+NoExport<MeshType>::NoExport(const GetPot& dfile, meshPtr_Type mesh, const std::string& prefix,
                          const int& procId):
         super(dfile, prefix)
 {
