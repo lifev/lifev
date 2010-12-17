@@ -132,7 +132,7 @@ MultiscaleModelFluid3D::setupModel()
     setupFEspace();
 
     //Add flow rate offset to BC
-    M_lmDOF = M_bc->handler()->getNumberBCWithType( Flux );
+    M_lmDOF = M_bc->handler()->numberOfBCWithType( Flux );
     setupBCOffset( M_bc->handler() );
 
     //Fluid
@@ -340,7 +340,7 @@ MultiscaleModelFluid3D::setupLinearModel()
     M_linearBC = LinearBCHandler;
 
     // Set all te BCFunctions to zero
-    for ( bc_Type::BCBase_Iterator i = M_linearBC->begin() ; i != M_linearBC->end() ; ++i )
+    for ( bc_Type::bcBaseIterator_Type i = M_linearBC->begin() ; i != M_linearBC->end() ; ++i )
         i->setBCFunction( M_bcBaseDeltaZero );
 }
 
@@ -640,7 +640,7 @@ MultiscaleModelFluid3D::setupDOF()
     Debug( 8120 ) << "MultiscaleModelFluid3D::SetupDOF \n";
 #endif
 
-    M_lmDOF = M_bc->handler()->getNumberBCWithType( Flux );
+    M_lmDOF = M_bc->handler()->numberOfBCWithType( Flux );
 
     //M_uDOF = M_uFESpace->map().getMap(Unique)->NumGlobalElements();
     //M_pFESpace->dof().numTotalDof() = M_pFESpace->map().getMap(Unique)->NumGlobalElements();
@@ -656,7 +656,7 @@ MultiscaleModelFluid3D::setupBCOffset( const bcPtr_Type& BC )
 
     UInt offset = M_uFESpace->map().map( Unique )->NumGlobalElements() + M_pFESpace->map().map( Unique )->NumGlobalElements();
 
-    std::vector< BCName > FluxVector = BC->getBCWithType( Flux );
+    std::vector< bcName_Type > FluxVector = BC->findAllBCWithType( Flux );
     for ( UInt i = 0; i < M_lmDOF; ++i )
         BC->setOffset( FluxVector[i], offset + i );
 }
@@ -696,7 +696,7 @@ MultiscaleModelFluid3D::imposePerturbation()
     for ( multiscaleCouplingsVectorConstIterator_Type i = M_couplings.begin(); i < M_couplings.end(); ++i )
         if ( ( *i )->isPerturbed() )
         {
-            M_linearBC->GetBCWithFlag( ( *i )->flag( ( *i )->modelGlobalToLocalID( M_ID ) ) ).setBCFunction( M_bcBaseDeltaOne );
+            M_linearBC->findBCWithFlag( ( *i )->flag( ( *i )->modelGlobalToLocalID( M_ID ) ) ).setBCFunction( M_bcBaseDeltaOne );
 
             break;
         }
@@ -713,7 +713,7 @@ MultiscaleModelFluid3D::resetPerturbation()
     for ( multiscaleCouplingsVectorConstIterator_Type i = M_couplings.begin(); i < M_couplings.end(); ++i )
         if ( ( *i )->isPerturbed() )
         {
-            M_linearBC->GetBCWithFlag( ( *i )->flag( ( *i )->modelGlobalToLocalID( M_ID ) ) ).setBCFunction( M_bcBaseDeltaZero );
+            M_linearBC->findBCWithFlag( ( *i )->flag( ( *i )->modelGlobalToLocalID( M_ID ) ) ).setBCFunction( M_bcBaseDeltaZero );
 
             break;
         }

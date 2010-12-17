@@ -268,10 +268,10 @@ private:
     FSIFunction                               M_FSIFunction;
 
     // These are required since FSI BC are applied a posteriori
-    BCName                                    M_name;
+    bcName_Type                                    M_name;
     BCFlag                                    M_flag;
-    BCType                                    M_type;
-    BCMode                                    M_mode;
+    bcType_Type                                    M_type;
+    bcMode_Type                                    M_mode;
     BCComV                                    M_comV;
 
     boost::shared_ptr< bcFunction_Type >      M_base;

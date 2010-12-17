@@ -175,7 +175,7 @@ public:
      * @param dataSection section in the data file
      * @param name name of the boundary condition
      */
-    void readBC( const std::string& fileName, const std::string& dataSection, const BCName& name ) { M_data.readBC( fileName, dataSection, name ); }
+    void readBC( const std::string& fileName, const std::string& dataSection, const bcName_Type& name ) { M_data.readBC( fileName, dataSection, name ); }
 
     //! Insert the current boundary condition in the BChandler
     void insertBC() { buildBase(); }

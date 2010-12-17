@@ -736,9 +736,9 @@ void NonlinearMonodomain<Mesh, SolverType>::applyBoundaryConditions( matrix_Type
                                                                      vector_Type&        rhs,
                                                                      bchandler_raw_type& BCh )
 {
-    if ( !BCh.bdUpdateDone() )
+    if ( !BCh.bcUpdateDone() )
     {
-        BCh.bdUpdate( *M_uFESpace.mesh(),
+        BCh.bcUpdate( *M_uFESpace.mesh(),
                       M_uFESpace.feBd(),
                       M_uFESpace.dof() );
     }

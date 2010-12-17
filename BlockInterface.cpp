@@ -122,9 +122,9 @@ void BlockInterface::applyBoundaryConditions(const Real& time)
 void BlockInterface::applyBoundaryConditions(const Real& time, const UInt i)
 {
     M_blocks[i]->openCrsMatrix();
-    if ( !M_bch[i]->bdUpdateDone() )
+    if ( !M_bch[i]->bcUpdateDone() )
     {
-        M_bch[i]->bdUpdate( *M_FESpace[i]->mesh(), M_FESpace[i]->feBd(), M_FESpace[i]->dof() );
+        M_bch[i]->bcUpdate( *M_FESpace[i]->mesh(), M_FESpace[i]->feBd(), M_FESpace[i]->dof() );
         M_bch[i]->setOffset(M_offset[i]);
     }
     //M_blocks[i]->GlobalAssemble();

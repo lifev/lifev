@@ -167,11 +167,11 @@ MonolithicGE::iterateMesh(const vector_Type& disp)
 void MonolithicGE::applyBoundaryConditions( )
 {
 
-         if ( !M_BCh_u->bdUpdateDone() )
-             M_BCh_u->bdUpdate( *M_uFESpace->mesh(), M_uFESpace->feBd(), M_uFESpace->dof() );
+         if ( !M_BCh_u->bcUpdateDone() )
+             M_BCh_u->bcUpdate( *M_uFESpace->mesh(), M_uFESpace->feBd(), M_uFESpace->dof() );
          M_BCh_d->setOffset(M_offset);
-         if ( !M_BCh_d->bdUpdateDone() )
-             M_BCh_d->bdUpdate( *M_dFESpace->mesh(), M_dFESpace->feBd(), M_dFESpace->dof() );
+         if ( !M_BCh_d->bcUpdateDone() )
+             M_BCh_d->bcUpdate( *M_dFESpace->mesh(), M_dFESpace->feBd(), M_dFESpace->dof() );
 
          M_monolithicMatrix->setRobin( M_robinCoupling, M_rhsFull );
          M_precPtr->setRobin(M_robinCoupling, M_rhsFull);

@@ -413,7 +413,7 @@ private:
      * @param bcOutputType type of the quantity to be computed.
      * @return Jacobian coefficient.
      */
-    Real tangentProblem( const bcSide_Type& bcOutputSide, const bcType_Type& bcOutputType );
+    Real tangentProblem( const bcSide_Type& bcOutputSide, const bcTypeOneD_Type& bcOutputType );
 
 #endif
     //@}

@@ -878,8 +878,8 @@ void NonLinearVenantKirchhofSolver<Mesh, SolverType>::evalResidual( vector_type 
     this->M_Displayer->leaderPrint("    NonLin S- Updating the boundary conditions ... \t");
     Chrono chrono;
     chrono.start();
-    if ( !this->M_BCh->bdUpdateDone() )
-        this->M_BCh->bdUpdate( *this->M_FESpace->mesh(), this->M_FESpace->feBd(), this->M_FESpace->dof() );
+    if ( !this->M_BCh->bcUpdateDone() )
+        this->M_BCh->bcUpdate( *this->M_FESpace->mesh(), this->M_FESpace->feBd(), this->M_FESpace->dof() );
 
     bcManageMatrix( *this->M_stiff, *this->M_FESpace->mesh(), this->M_FESpace->dof(), *this->M_BCh, this->M_FESpace->feBd(), 1.0 );
 
@@ -1084,8 +1084,8 @@ applyBoundaryConditions(matrix_type&        matrix,
     // BC manage for the velocity
     if (offset)
         BCh->setOffset(offset);
-    if ( !BCh->bdUpdateDone() )
-        BCh->bdUpdate( *this->M_FESpace->mesh(), this->M_FESpace->feBd(), this->M_FESpace->dof() );
+    if ( !BCh->bcUpdateDone() )
+        BCh->bcUpdate( *this->M_FESpace->mesh(), this->M_FESpace->feBd(), this->M_FESpace->dof() );
 
     // vector_type rhsFull(rhs, Repeated, Zero); // ignoring non-local entries, Otherwise they are summed up lately
     //    vector_type rhsFull(rhs, Unique);  // bcManages now manages the also repeated parts

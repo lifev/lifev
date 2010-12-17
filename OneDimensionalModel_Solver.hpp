@@ -357,7 +357,7 @@ public:
      *  @param bcSide Side of the boundary.
      *  @return value of the quantity on the specified side.
      */
-    Real boundaryValue( const solution_Type& solution, const bcType_Type& bcType, const bcSide_Type& bcSide ) const;
+    Real boundaryValue( const solution_Type& solution, const bcTypeOneD_Type& bcType, const bcSide_Type& bcSide ) const;
 
     //! Return the value of the eigenvalues and eigenvectors on a specified boundary.
     /*!

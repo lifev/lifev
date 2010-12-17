@@ -233,14 +233,14 @@ MonolithicGI::applyBoundaryConditions()
 
     M_monolithicMatrix->blockAssembling();
 
-    if ( !M_BCh_u->bdUpdateDone() )
-        M_BCh_u->bdUpdate( *M_uFESpace->mesh(), M_uFESpace->feBd(), M_uFESpace->dof() );
+    if ( !M_BCh_u->bcUpdateDone() )
+        M_BCh_u->bcUpdate( *M_uFESpace->mesh(), M_uFESpace->feBd(), M_uFESpace->dof() );
     M_BCh_d->setOffset(M_offset);
-    if ( !M_BCh_d->bdUpdateDone() )
-        M_BCh_d->bdUpdate( *M_dFESpace->mesh(), M_dFESpace->feBd(), M_dFESpace->dof() );
+    if ( !M_BCh_d->bcUpdateDone() )
+        M_BCh_d->bcUpdate( *M_dFESpace->mesh(), M_dFESpace->feBd(), M_dFESpace->dof() );
     M_BCh_mesh->setOffset(M_solidAndFluidDim + nDimensions*M_interface);
-    if ( !M_BCh_mesh->bdUpdateDone() )
-        M_BCh_mesh->bdUpdate( *M_mmFESpace->mesh(), M_mmFESpace->feBd(), M_mmFESpace->dof() );
+    if ( !M_BCh_mesh->bcUpdateDone() )
+        M_BCh_mesh->bcUpdate( *M_mmFESpace->mesh(), M_mmFESpace->feBd(), M_mmFESpace->dof() );
 
     M_monolithicMatrix->applyBoundaryConditions(dataFluid()->dataTime()->getTime(), M_rhsFull);
     M_monolithicMatrix->GlobalAssemble();
@@ -414,8 +414,8 @@ MonolithicGI::assembleMeshBlock(UInt /*iter*/)
 
 //     BCh->setOffset(M_solidAndFluidDim + nDimensions*M_interface);
 
-//     if ( !BCh->bdUpdateDone() )
-//         BCh->bdUpdate( *M_mmFESpace->mesh(), M_mmFESpace->feBd(), M_mmFESpace->dof() );
+//     if ( !BCh->bcUpdateDone() )
+//         BCh->bcUpdate( *M_mmFESpace->mesh(), M_mmFESpace->feBd(), M_mmFESpace->dof() );
 
 //     bcManage( *M_meshBlock, *M_rhsFull, *M_mmFESpace->mesh(), M_mmFESpace->dof(), *BCh, M_mmFESpace->feBd(), 1., dataFluid().dataTime()->getTime());
     /********************************************************/

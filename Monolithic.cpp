@@ -314,8 +314,8 @@ void
 Monolithic::computeFNormals( vector_Type& normals)
 {
     BCNormalManager<mesh_Type, matrix_Type> normalManager(*M_uFESpace->mesh());
-    if ( !M_BChWSS->bdUpdateDone() )//possibly to avoid
-        M_BChWSS->bdUpdate(*M_uFESpace->mesh(), M_uFESpace->feBd(), M_uFESpace->dof() );
+    if ( !M_BChWSS->bcUpdateDone() )//possibly to avoid
+        M_BChWSS->bcUpdate(*M_uFESpace->mesh(), M_uFESpace->feBd(), M_uFESpace->dof() );
     normalManager.init((*M_BChWSS)[0], 0.);
     normalManager.computeIntegratedNormals(M_uFESpace->dof(), M_uFESpace->feBd(), normals, *M_uFESpace->mesh());
 }
