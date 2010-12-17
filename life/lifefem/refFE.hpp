@@ -173,7 +173,7 @@ public:
            const RefFE*         bdRefFE );
 
     //! Destructor
-    ~RefFE();
+    virtual ~RefFE();
 
     //@}
 

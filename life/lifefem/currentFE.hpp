@@ -336,12 +336,6 @@ public:
      */
     void quadRuleVTKexport( const std::string& filename) const;
 
-    void __attribute__ ((__deprecated__)) QuadRuleVTKexport( const std::string& filename) const
-    {
-        return quadRuleVTKexport(filename);
-    }
-
-
     //@}
 
 

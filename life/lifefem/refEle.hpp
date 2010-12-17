@@ -254,10 +254,10 @@ public:
     {
         return M_feDim;
     }
-    const UInt& __attribute__ (( __deprecated__)) FEDim() const
+/*    const UInt& __attribute__ (( __deprecated__)) FEDim() const
     {
         return feDim();
-    }
+        }*/
 
 
     //! Return the shape of the element

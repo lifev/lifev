@@ -58,7 +58,7 @@ public:
     //@{
 
     typedef RefFE::function_Type function_Type;
-    typedef std::vector<Real> (*ValuesToValuesFct) (const std::vector<Real>&);
+    typedef std::vector<Real> (*ValuesToValuesFunction_Type) (const std::vector<Real>&);
 
     //@}
 
@@ -109,7 +109,7 @@ public:
                  const Real*          refCoor,
                  DofPatternType       patternType,
                  const RefFE*         bdRefFE,
-                 const ValuesToValuesFct nodalToFE);
+                 const ValuesToValuesFunction_Type nodalToFE);
 
     ~RefFEScalar(){};
 
@@ -129,7 +129,7 @@ public:
 
 private:
 
-    const ValuesToValuesFct M_nodalToFEValues;
+    const ValuesToValuesFunction_Type M_nodalToFEValues;
 
 };
 

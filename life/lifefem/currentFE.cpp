@@ -65,10 +65,10 @@ CurrentFE::CurrentFE( const RefFE& refFE, const GeoMap& geoMap, const QuadRule& 
         M_wDetJacobian(boost::extents[M_nbQuadPt]),
         M_tInverseJacobian(boost::extents[M_nbCoor][M_nbCoor][M_nbQuadPt]),
 
-        M_phi(boost::extents[M_nbNode][M_refFE->FEDim()][M_nbQuadPt]),
+        M_phi(boost::extents[M_nbNode][M_refFE->feDim()][M_nbQuadPt]),
         M_dphi(boost::extents[M_nbNode][M_nbCoor][M_nbQuadPt]),
         M_d2phi(boost::extents[M_nbNode][M_nbCoor][M_nbCoor][M_nbQuadPt]),
-        M_phiVect(boost::extents[M_nbNode][M_refFE->FEDim()][M_nbQuadPt]),
+        M_phiVect(boost::extents[M_nbNode][M_refFE->feDim()][M_nbQuadPt]),
 
         M_dphiRef(boost::extents[M_nbNode][M_nbCoor][M_nbQuadPt]),
         M_d2phiRef(boost::extents[M_nbNode][M_nbCoor][M_nbCoor][M_nbQuadPt]),
@@ -102,7 +102,7 @@ CurrentFE::CurrentFE( const RefFE& refFE, const GeoMap& geoMap, const QuadRule& 
             // --- PHI ---
             if (M_refFE->hasPhi())
             {
-                for (UInt iterFEDim(0); iterFEDim < M_refFE->FEDim(); ++iterFEDim)
+                for (UInt iterFEDim(0); iterFEDim < M_refFE->feDim(); ++iterFEDim)
                 {
 
                     M_phi[iterNode][iterFEDim][iterQuad] = M_refFE->phi( iterNode,iterFEDim,
@@ -739,10 +739,10 @@ void CurrentFE::setQuadRule(const QuadRule& newQuadRule)
     M_wDetJacobian.resize(boost::extents[M_nbQuadPt]);
     M_tInverseJacobian.resize(boost::extents[M_nbCoor][M_nbCoor][M_nbQuadPt]);
 
-    M_phi.resize(boost::extents[M_nbNode][M_refFE->FEDim()][M_nbQuadPt]);
+    M_phi.resize(boost::extents[M_nbNode][M_refFE->feDim()][M_nbQuadPt]);
     M_dphi.resize(boost::extents[M_nbNode][M_nbCoor][M_nbQuadPt]);
     M_d2phi.resize(boost::extents[M_nbNode][M_nbCoor][M_nbCoor][M_nbQuadPt]);
-    M_phiVect.resize(boost::extents[M_nbNode][M_refFE->FEDim()][M_nbQuadPt]);
+    M_phiVect.resize(boost::extents[M_nbNode][M_refFE->feDim()][M_nbQuadPt]);
 
     M_dphiRef.resize(boost::extents[M_nbNode][M_nbCoor][M_nbQuadPt]);
     M_d2phiRef.resize(boost::extents[M_nbNode][M_nbCoor][M_nbCoor][M_nbQuadPt]);
@@ -775,7 +775,7 @@ void CurrentFE::setQuadRule(const QuadRule& newQuadRule)
             // --- PHI ---
             if (M_refFE->hasPhi())
             {
-                for (UInt iterFEDim(0); iterFEDim < M_refFE->FEDim(); ++iterFEDim)
+                for (UInt iterFEDim(0); iterFEDim < M_refFE->feDim(); ++iterFEDim)
                 {
                     M_phi[iterNode][iterFEDim][iterQuad] = M_refFE->phi( iterNode,iterFEDim,
                                                                          M_quadRule->quadPointCoor(iterQuad));
@@ -864,7 +864,7 @@ void CurrentFE::computePhi()
     {
         for (UInt iterNode(0); iterNode< M_nbNode; ++iterNode)
         {
-            for (UInt iterFEDim(0); iterFEDim < M_refFE->FEDim(); ++iterFEDim)
+            for (UInt iterFEDim(0); iterFEDim < M_refFE->feDim(); ++iterFEDim)
             {
                 M_phi[iterNode][iterFEDim][iterQuad] = M_refFE->phi( iterNode,iterFEDim,
                                                                      M_quadRule->quadPointCoor(iterQuad));
