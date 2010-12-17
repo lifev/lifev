@@ -548,7 +548,7 @@ int main( int argc, char** argv )
     FSIChecker FSIProblem( dataFileName );
     FSIProblem();
 
-    std::cout << "Total sum up " << chrono.diff_cumul() << " s." << std::endl;
+    std::cout << "Total sum up " << chrono.diffCumul() << " s." << std::endl;
 
 #ifdef HAVE_MPI
     std::cout << "MPI Finalization" << std::endl;
