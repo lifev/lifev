@@ -292,7 +292,7 @@ MultiscaleModelFluid3D::saveSolution()
 
 #ifdef HAVE_HDF5
     if ( M_data->dataTime()->isLastTimeStep() )
-        ( multiscaleDynamicCast< hdf5IOFile_Type >( M_exporter ) )->CloseFile();
+        ( multiscaleDynamicCast< hdf5IOFile_Type >( M_exporter ) )->closeFile();
 #endif
 
 }
@@ -535,7 +535,7 @@ MultiscaleModelFluid3D::setupExporterImporter( const std::string& fileName )
 
     M_exporter->setDataFromGetPot( dataFile );
     M_exporter->setPrefix( "Step_" + number2string( multiscaleProblemStep ) + "_Model_" + number2string( M_ID ) );
-    M_exporter->setDirectory( multiscaleProblemFolder );
+    M_exporter->setPostDir( multiscaleProblemFolder );
 
     //Importer
     const std::string importerType = dataFile( "importer/type", "ensight" );
@@ -549,7 +549,7 @@ MultiscaleModelFluid3D::setupExporterImporter( const std::string& fileName )
 
     M_importer->setDataFromGetPot( dataFile );
     M_importer->setPrefix( "Step_" + number2string( multiscaleProblemStep - 1 ) + "_Model_" + number2string( M_ID ) );
-    M_importer->setDirectory( multiscaleProblemFolder );
+    M_importer->setPostDir( multiscaleProblemFolder );
 }
 
 void
