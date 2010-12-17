@@ -101,7 +101,7 @@ int main( int argc, char** argv )
     HDF5Output.addPartitionGraph(meshPart.elementDomains(), comm);
     HDF5Output.addMeshPartitionAll(meshPart.meshPartitions(), comm);
     HDF5Output.postProcess(0);
-    HDF5Output.CloseFile();
+    HDF5Output.closeFile();
 
 #ifdef HAVE_MPI
     MPI_Finalize();
