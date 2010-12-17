@@ -123,7 +123,7 @@ BCInterface3DData::operator=( const BCInterface3DData& data )
 void
 BCInterface3DData::readBC( const std::string& fileName,
                           const std::string& dataSection,
-                          const BCName& name )
+                          const bcName_Type& name )
 {
     GetPot dataFile( fileName );
 

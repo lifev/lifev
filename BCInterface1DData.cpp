@@ -119,7 +119,7 @@ BCInterface1DData::operator=( const BCInterface1DData& data )
 // Methods
 // ===================================================
 void
-BCInterface1DData::readBC( const std::string& fileName, const std::string& dataSection, const BCName& name )
+BCInterface1DData::readBC( const std::string& fileName, const std::string& dataSection, const bcName_Type& name )
 {
     GetPot dataFile( fileName );
 

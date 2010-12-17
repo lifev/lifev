@@ -99,7 +99,7 @@ public:
      * @param dataSection BC section
      * @param name name of the boundary condition
      */
-    void readBC( const std::string& fileName, const std::string& dataSection, const BCName& name );
+    void readBC( const std::string& fileName, const std::string& dataSection, const bcName_Type& name );
 
 
     //! Display general information about the content of the class
@@ -118,7 +118,7 @@ public:
     /*!
      * @param name Boundary condition name
      */
-    void setName( const BCName& name ) { M_name = name; }
+    void setName( const bcName_Type& name ) { M_name = name; }
 
     //! Set the flag of the boundary condition
     /*!
@@ -130,13 +130,13 @@ public:
     /*!
      * @param type Boundary condition type
      */
-    void setType( const BCType& type ) { M_type = type; }
+    void setType( const bcType_Type& type ) { M_type = type; }
 
     //! Set the mode of the boundary condition
     /*!
      * @param mode Boundary condition mode
      */
-    void setMode( const BCMode& mode ) { M_mode = mode; }
+    void setMode( const bcMode_Type& mode ) { M_mode = mode; }
 
     //! Set the components vector of the boundary condition
     /*!
@@ -185,7 +185,7 @@ public:
     /*!
      * @return Boundary condition name
      */
-    const BCName& name() const { return M_name; }
+    const bcName_Type& name() const { return M_name; }
 
     //! Get the flag of the boundary condition
     /*!
@@ -197,13 +197,13 @@ public:
     /*!
      * @return Boundary condition type
      */
-    const BCType& type() const { return M_type; }
+    const bcType_Type& type() const { return M_type; }
 
     //! Get the mode of the boundary condition
     /*!
      * @return Boundary condition mode
      */
-    const BCMode& mode() const { return M_mode; }
+    const bcMode_Type& mode() const { return M_mode; }
 
     //! Get the vector of components of the boundary condition
     /*!
@@ -258,18 +258,18 @@ private:
 
     //@}
 
-    BCName                                    M_name;
+    bcName_Type                                    M_name;
     BCFlag                                    M_flag;
-    BCType                                    M_type;
-    BCMode                                    M_mode;
+    bcType_Type                                    M_type;
+    bcMode_Type                                    M_mode;
     BCComV                                    M_comV;
     std::string                               M_direction;
     std::string                               M_baseString;
     std::pair< std::string, bcBaseList_Type > M_base;
 
     // Maps
-    std::map< std::string, BCType >           M_mapType;
-    std::map< std::string, BCMode >           M_mapMode;
+    std::map< std::string, bcType_Type >           M_mapType;
+    std::map< std::string, bcMode_Type >           M_mapMode;
     std::map< std::string, bcBaseList_Type >  M_mapBase;
 };
 

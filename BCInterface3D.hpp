@@ -111,13 +111,8 @@ namespace LifeV
  *
  *  5) Finally, to get the handler you can use:
  *     M_fluidBC->handler();
- *
- *  NOTE:
- *
- *  a) You can add manually more conditions by using addBC() after the call to buildHandler() function.
- *     In this case you have to manually set the TOTAL number of boundary conditions
- *     by using setHandlerParameters() function BEFORE building the handler.
  */
+
 template< class PhysicalSolverType >
 class BCInterface3D
 {
@@ -161,7 +156,7 @@ public:
     void updatePhysicalSolverVariables();
 
     //! Create the bcHandler.
-    void createHandler() { M_handler.reset( new bcHandler_Type( M_bcNumber, M_hint ) ); }
+    void createHandler() { M_handler.reset( new bcHandler_Type( ) ); }
 
     //! Fill the bcHandler with the BC provided in the file.
     /*!
@@ -176,7 +171,7 @@ public:
      * @param dataSection section in the data file
      * @param name name of the boundary condition
      */
-    void readBC( const std::string& fileName, const std::string& dataSection, const BCName& name ) { M_data.readBC( fileName, dataSection, name ); }
+    void readBC( const std::string& fileName, const std::string& dataSection, const bcName_Type& name ) { M_data.readBC( fileName, dataSection, name ); }
 
     //! Insert the current boundary condition in the BChandler
     void insertBC() { buildBase(); }
@@ -196,7 +191,7 @@ public:
      * @param base base of the condition
      */
     template< class BCBaseType >
-    void addBC( const BCName& name, const BCFlag& flag, const BCType& type, const BCMode& mode, BCBaseType& base );
+    void addBC( const bcName_Type& name, const BCFlag& flag, const bcType_Type& type, const bcMode_Type& mode, BCBaseType& base );
 
     //! Add a Boundary Condition with component using the standard interface of the BCHandler
     /*!
@@ -208,7 +203,7 @@ public:
      * @param comp component of the condition
      */
     template< class BCBaseType, class BCCompType >
-    void addBC( const BCName& name, const BCFlag& flag, const BCType& type, const BCMode& mode, BCBaseType& base, const BCCompType& comp );
+    void addBC( const bcName_Type& name, const BCFlag& flag, const bcType_Type& type, const bcMode_Type& mode, BCBaseType& base, const BCCompType& comp );
 
     //@}
 
@@ -227,13 +222,6 @@ public:
      * @param handler BCHandler
      */
     void setHandler( const bcHandlerPtr_Type& handler ) { M_handler = handler; }
-
-    //! Set manually Handler parameters: you need it only if you are adding manually some parameters by calling addBC
-    /*!
-     * @param bcNumber total number of the boundary conditions (files + added manually)
-     * @param hint hint
-     */
-    void setHandlerParameters( const ID& bcNumber, const bcHandler_Type::BCHints& hint = bcHandler_Type::HINT_BC_NONE );
 
     //@}
 
@@ -288,8 +276,6 @@ private:
 
     // Handler and parameters
     bcHandlerPtr_Type               M_handler;
-    ID                              M_bcNumber;
-    bcHandler_Type::BCHints         M_hint;
 
     // Data
     data_Type                       M_data;
@@ -310,8 +296,6 @@ private:
 template< class PhysicalSolverType >
 BCInterface3D< PhysicalSolverType >::BCInterface3D( ) :
         M_handler                 (),
-        M_bcNumber                ( 0 ),
-        M_hint                    ( bcHandler_Type::HINT_BC_NONE ),
         M_data                    (),
         M_vectorFunction          (),
         M_vectorFunctionDirection (),
@@ -374,7 +358,7 @@ BCInterface3D< PhysicalSolverType >::updatePhysicalSolverVariables()
 
 template< class PhysicalSolverType > template< class BCBaseType >
 void
-BCInterface3D< PhysicalSolverType >::addBC( const BCName& name, const BCFlag& flag, const BCType& type, const BCMode& mode, BCBaseType& base )
+BCInterface3D< PhysicalSolverType >::addBC( const bcName_Type& name, const BCFlag& flag, const bcType_Type& type, const bcMode_Type& mode, BCBaseType& base )
 {
 
 #ifdef HAVE_LIFEV_DEBUG
@@ -386,7 +370,7 @@ BCInterface3D< PhysicalSolverType >::addBC( const BCName& name, const BCFlag& fl
 
 template< class PhysicalSolverType > template< class BCBaseType, class BCCompType >
 void
-BCInterface3D< PhysicalSolverType >::addBC( const BCName& name, const BCFlag& flag, const BCType& type, const BCMode& mode, BCBaseType& base, const BCCompType& comp )
+BCInterface3D< PhysicalSolverType >::addBC( const bcName_Type& name, const BCFlag& flag, const bcType_Type& type, const bcMode_Type& mode, BCBaseType& base, const BCCompType& comp )
 {
 
 #ifdef HAVE_LIFEV_DEBUG
@@ -421,19 +405,6 @@ BCInterface3D< PhysicalSolverType >::setPhysicalSolver( const boost::shared_ptr<
     }
 }
 
-template< class PhysicalSolverType >
-inline void
-BCInterface3D< PhysicalSolverType >::setHandlerParameters( const ID& bcNumber, const bcHandler_Type::BCHints& hint )
-{
-    M_bcNumber = bcNumber;
-    M_hint     = hint;
-
-#ifdef HAVE_LIFEV_DEBUG
-    Debug( 5020 ) << "BCInterface3D::setHandlerParameters          M_bcNumber: " << M_bcNumber << "\n";
-    Debug( 5020 ) << "                                               M_hint: " << M_hint << "\n";
-#endif
-
-}
 
 // ===================================================
 // Private Methods
