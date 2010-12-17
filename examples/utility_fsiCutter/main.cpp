@@ -118,7 +118,7 @@ int main( int argc, char** argv )
                                 cutter->solidInterfaceFlag(),
                                 comm);
     fluidOutput.postProcess(0);
-    fluidOutput.CloseFile();
+    fluidOutput.closeFile();
 
     HDF5Filter3DMesh<Mesh> solidOutput(dataFile, uncutSolidMesh, "FSISolidPartitions",
                                        comm->MyPID());
@@ -130,7 +130,7 @@ int main( int argc, char** argv )
                                 cutter->solidInterfaceFlag(),
                                 comm);
     solidOutput.postProcess(0);
-    solidOutput.CloseFile();
+    solidOutput.closeFile();
 
 
 #ifdef HAVE_MPI
