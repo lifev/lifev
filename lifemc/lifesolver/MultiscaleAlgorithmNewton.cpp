@@ -90,7 +90,7 @@ MultiscaleAlgorithmNewton::subIterate()
     // Verify tolerance
     if ( toleranceSatisfied() )
     {
-        save( 0, M_couplingResiduals->Norm2() );
+        save( 0, M_couplingResiduals->norm2() );
         return;
     }
 
@@ -104,9 +104,9 @@ MultiscaleAlgorithmNewton::subIterate()
     for ( UInt subIT = 1; subIT <= M_subiterationsMaximumNumber; ++subIT )
     {
         // Compute the Jacobian (we completery delete the previous matrix)
-        M_jacobian.reset( new multiscaleMatrix_Type( M_couplingVariables->getMap(), 50, 0 ) );
+        M_jacobian.reset( new multiscaleMatrix_Type( M_couplingVariables->map(), 50, 0 ) );
         M_multiscale->exportJacobian( *M_jacobian );
-        M_jacobian->GlobalAssemble();
+        M_jacobian->globalAssemble();
         M_solver.setMatrix( *M_jacobian );
 
         //M_jacobian->spy( "Jacobian" );
@@ -142,14 +142,14 @@ MultiscaleAlgorithmNewton::subIterate()
         // Verify tolerance
         if ( toleranceSatisfied() )
         {
-            save( subIT, M_couplingResiduals->Norm2() );
+            save( subIT, M_couplingResiduals->norm2() );
             return;
         }
     }
 
-    save( M_subiterationsMaximumNumber, M_couplingResiduals->Norm2() );
+    save( M_subiterationsMaximumNumber, M_couplingResiduals->norm2() );
 
-    multiscaleErrorCheck( Tolerance, "Newton algorithm residual: " + number2string( M_couplingResiduals->Norm2() ) +
+    multiscaleErrorCheck( Tolerance, "Newton algorithm residual: " + number2string( M_couplingResiduals->norm2() ) +
                         " (required: " + number2string( M_tolerance ) + ")\n" );
 }
 

@@ -112,7 +112,7 @@ MultiscaleAlgorithm::computeResidual() const
 {
     // Compute computeResidual
     M_multiscale->exportCouplingResiduals( *M_couplingResiduals );
-    return M_couplingResiduals->Norm2();
+    return M_couplingResiduals->norm2();
 }
 
 // ===================================================

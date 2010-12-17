@@ -243,7 +243,7 @@ MultiscaleModelFluid3D::solveSystem()
 
     if ( M_subiterationsMaximumNumber > 0 )
     {
-        Real residual = ( *M_beta - *M_fluid->solution() ).Norm2(); // residual is computed on the whole solution vector;
+        Real residual = ( *M_beta - *M_fluid->solution() ).norm2(); // residual is computed on the whole solution vector;
 
         if ( M_displayer->isLeader() )
             std::cout << "  F-  Residual:                                " << residual << std::endl;
@@ -266,7 +266,7 @@ MultiscaleModelFluid3D::solveSystem()
             M_fluid->iterate( *M_bc->handler() );
 
             // Check the new residual
-            residual = ( *M_beta - *M_fluid->solution() ).Norm2(); // residual is computed on the whole solution vector
+            residual = ( *M_beta - *M_fluid->solution() ).norm2(); // residual is computed on the whole solution vector
 
             // Display subiteration information
             if ( M_displayer->isLeader() )
@@ -654,7 +654,7 @@ MultiscaleModelFluid3D::setupBCOffset( const bcPtr_Type& BC )
     Debug( 8120 ) << "MultiscaleModelFluid3D::SetupBCOffset( BC ) \n";
 #endif
 
-    UInt offset = M_uFESpace->map().getMap( Unique )->NumGlobalElements() + M_pFESpace->map().getMap( Unique )->NumGlobalElements();
+    UInt offset = M_uFESpace->map().map( Unique )->NumGlobalElements() + M_pFESpace->map().map( Unique )->NumGlobalElements();
 
     std::vector< BCName > FluxVector = BC->getBCWithType( Flux );
     for ( UInt i = 0; i < M_lmDOF; ++i )

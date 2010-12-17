@@ -99,7 +99,7 @@ MultiscaleAlgorithmAitken::subIterate()
     // Verify tolerance
     if ( toleranceSatisfied() )
     {
-        save( 0, M_couplingResiduals->Norm2() );
+        save( 0, M_couplingResiduals->norm2() );
         return;
     }
 
@@ -160,14 +160,14 @@ MultiscaleAlgorithmAitken::subIterate()
         // Verify tolerance
         if ( toleranceSatisfied() )
         {
-            save( subIT, M_couplingResiduals->Norm2() );
+            save( subIT, M_couplingResiduals->norm2() );
             return;
         }
     }
 
-    save( M_subiterationsMaximumNumber, M_couplingResiduals->Norm2() );
+    save( M_subiterationsMaximumNumber, M_couplingResiduals->norm2() );
 
-    multiscaleErrorCheck( Tolerance, "Aitken algorithm residual: " + number2string( M_couplingResiduals->Norm2() ) +
+    multiscaleErrorCheck( Tolerance, "Aitken algorithm residual: " + number2string( M_couplingResiduals->norm2() ) +
                         " (required: " + number2string( M_tolerance ) + ")\n" );
 }
 
