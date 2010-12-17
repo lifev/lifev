@@ -83,8 +83,8 @@ public:
     //! @name Public Types
     //@{
 
-    typedef EpetraVector                      vector_rawtype;
-    typedef boost::shared_ptr<vector_rawtype> vector_ptrtype;
+    typedef EpetraVector                      vectorRaw_Type;
+    typedef boost::shared_ptr<vectorRaw_Type> vectorPtr_Type;
 
     //! Type of data stored.
     enum Type
@@ -119,7 +119,7 @@ public:
     */
     ExporterData(const Type&           type,
                  const std::string&    variableName,
-                 const vector_ptrtype& vec,
+                 const vectorPtr_Type& vec,
                  const UInt&           start,
                  const UInt&           size,
                  const UInt&           steady,
@@ -148,8 +148,7 @@ public:
     //@{
 
     //! file name for postprocessing has to include time dependency
-    // TODO: RENAME TO setSteady
-    void set_steady(UInt i) {M_steady = i;}
+    void setSteady(UInt i) {M_steady = i;}
 
     //@}
 
@@ -179,19 +178,19 @@ public:
     }
 
     //! shared pointer to array
-    const vector_ptrtype storedArray() const
+    const vectorPtr_Type& storedArray() const
     {
         return M_vr;
     }
 
     //! returns 0 if file name for postprocessing has to include time dependency
-    UInt steady() const {return M_steady; }
+    const UInt& steady() const {return M_steady; }
 
     //! returns Scalar or Vector strings
-    std::string typeName() const;
+    const std::string& typeName() const;
 
     //! returns 1 (if Scalar) or 3 (if Vector)
-    UInt typeDim() const;
+    const UInt& typeDim() const;
 
     //! Node or Cell centered ?
     const Where& where() const
@@ -202,6 +201,11 @@ public:
     //! returns Node or Cell centered string
     std::string whereName() const;
 
+    // DEPRECATED
+    //! file name for postprocessing has to include time dependency
+    void __attribute__((__deprecated__)) set_steady(UInt i) {M_steady = i;}
+
+
     //@}
 
 private:
@@ -210,7 +214,7 @@ private:
     //@{
 
     //! shared pointer to array, replaced by storedArray() and will be removed
-    const vector_ptrtype getPtr() const { assert(false); return M_vr; }
+    const vectorPtr_Type __attribute__((__deprecated__)) getPtr() const { assert(false); return M_vr; }
 
     //@}
 
@@ -220,7 +224,7 @@ private:
     std::string M_variableName;
 
     //! pointer to storedArray
-    const vector_ptrtype M_vr;
+    const vectorPtr_Type M_vr;
 
     //! address of first datum in the array
     UInt M_size;
@@ -256,9 +260,9 @@ public:
     //! @name Public typedefs
     //@{
     typedef MeshType mesh_Type;
-    typedef boost::shared_ptr<MeshType>      mesh_ptrtype;
-    typedef ExporterData::vector_rawtype vector_rawtype;
-    typedef ExporterData::vector_ptrtype vector_ptrtype;
+    typedef boost::shared_ptr<MeshType>    meshPtr_Type;
+    typedef ExporterData::vectorRaw_Type vectorRaw_Type;
+    typedef ExporterData::vectorPtr_Type vectorPtr_Type;
     //@}
 
     //! @name Constructor & Destructor
@@ -295,7 +299,7 @@ public:
     */
     void addVariable(const ExporterData::Type& type,
                      const std::string& variableName,
-                     const vector_ptrtype& vector,
+                     const vectorPtr_Type& vector,
                      const UInt& start,
                      const UInt& size,
                      const UInt& steady = 0,
@@ -323,37 +327,9 @@ public:
     //! Read  only last timestep
     virtual void import(const Real& startTime) = 0;
 
-    virtual void rd_var(ExporterData& dvar);
+    virtual void readVariable(ExporterData& dvar);
     //@}
 
-protected:
-
-    //! @name Protected methods
-    //@{
-    //! compute postfix
-    void computePostfix();
-
-    virtual void readScalar( ExporterData& dvar ) = 0;
-    virtual void readVector( ExporterData& dvar ) = 0;
-
-    //@}
-
-    //! @name Protected data members
-    //@{
-    std::string                 M_prefix;
-    std::string                 M_postDir;
-    UInt                        M_count;
-    UInt                        M_save;
-    bool                        M_multimesh;
-    mesh_ptrtype                M_mesh;
-    int                         M_procId;
-    std::string                 M_postfix;
-
-    std::list<ExporterData>     M_listData;
-    std::list<Real>             M_timeSteps;
-    //@}
-
-public:
     //! @name Set Methods
     //@{
 
@@ -377,7 +353,7 @@ public:
     /*!
      * @param Directory output folder
      */
-    void setDirectory( const std::string& Directory )
+    void setPostDir( const std::string& Directory )
     {
         M_postDir = Directory;
     }
@@ -388,7 +364,7 @@ public:
      */
     void setStartIndex( const UInt& StartIndex )
     {
-        M_count = StartIndex;
+        M_startIndex = StartIndex;
     }
 
     //! Set how many time step between two saves.
@@ -409,29 +385,62 @@ public:
         M_multimesh = multimesh;
     }
 
-    virtual void setMeshProcId( const mesh_ptrtype mesh, const int& procId );
+    virtual void setMeshProcId( const meshPtr_Type mesh, const int& procId );
 
     //! Close the output file
     /*!
          This method is only used by  some of the exporter which derived from this class.
      */
-    virtual void CloseFile() {}
-
+    virtual void closeFile() {}
     //@}
-
 
     //! @name Get Methods
     //@{
 
-    const UInt& getStartIndex( void )
-    {
-        return M_count;
-    }
-
+    const UInt& startIndex() const { return M_startIndex; }
 
     //! returns the type of the map to use for the EpetraVector
     virtual EpetraMapType mapType() const = 0;
+    //@}
 
+    // DEPRECATED
+    // const UInt& __attribute__((__deprecated__)) count() const { return M_startIndex; }
+//    void __attribute__((__deprecated__)) setDirectory( const std::string& Directory )
+//    {
+//        M_postDir = Directory;
+//    }
+    // const UInt& __attribute__((__deprecated__)) getStartIndex( void )
+    // {
+    //     return M_startIndex;
+    // }
+    // virtual void __attribute__((__deprecated__)) CloseFile() {}
+    // virtual void __attribute__((__deprecated__)) rd_var(ExporterData& dvar);
+
+protected:
+
+    //! @name Protected methods
+    //@{
+    //! compute postfix
+    void computePostfix();
+
+    virtual void readScalar( ExporterData& dvar ) = 0;
+    virtual void readVector( ExporterData& dvar ) = 0;
+
+    //@}
+
+    //! @name Protected data members
+    //@{
+    std::string                 M_prefix;
+    std::string                 M_postDir;
+    UInt                        M_startIndex;
+    UInt                        M_save;
+    bool                        M_multimesh;
+    meshPtr_Type                M_mesh;
+    int                         M_procId;
+    std::string                 M_postfix;
+
+    std::list<ExporterData>     M_listData;
+    std::list<Real>             M_timeSteps;
     //@}
 };
 
@@ -446,7 +455,7 @@ template<typename MeshType>
 Exporter<MeshType>::Exporter():
         M_prefix        ( "output"),
         M_postDir      ( "./" ),
-        M_count         ( 0 ),
+        M_startIndex         ( 0 ),
         M_save          ( 1 ),
         M_multimesh     ( true )
 {}
@@ -455,7 +464,7 @@ template<typename MeshType>
 Exporter<MeshType>::Exporter( const GetPot& dfile, const std::string& prefix ):
         M_prefix        ( prefix ),
         M_postDir      ( dfile("exporter/post_dir", "./") ),
-        M_count         ( dfile("exporter/start",0) ),
+        M_startIndex         ( dfile("exporter/start",0) ),
         M_save          ( dfile("exporter/save",1) ),
         M_multimesh     ( dfile("exporter/multimesh",true) )
 {}
@@ -466,7 +475,7 @@ Exporter<MeshType>::Exporter( const GetPot& dfile, const std::string& prefix ):
 template<typename MeshType>
 void Exporter<MeshType>::addVariable(const ExporterData::Type&  type,
                                  const std::string&         variableName,
-                                 const vector_ptrtype&      vr,
+                                 const vectorPtr_Type&      vr,
                                  const UInt&                start,
                                  const UInt&                size,
                                  const UInt&                steady,
@@ -476,7 +485,7 @@ void Exporter<MeshType>::addVariable(const ExporterData::Type&  type,
 }
 
 template <typename MeshType>
-void Exporter<MeshType>::rd_var(ExporterData& dvar)
+void Exporter<MeshType>::readVariable(ExporterData& dvar)
 {
     switch ( dvar.type() )
     {
@@ -495,16 +504,16 @@ void Exporter<MeshType>::computePostfix()
     std::ostringstream index;
     index.fill( '0' );
 
-    if (M_count % M_save == 0)
+    if (M_startIndex % M_save == 0)
     {
-        index << std::setw(5) << ( M_count / M_save );
+        index << std::setw(5) << ( M_startIndex / M_save );
 
         M_postfix = "." + index.str();
     }
     else
         M_postfix = "*****";
 
-    ++M_count;
+    ++M_startIndex;
 }
 
 // ===================================================
@@ -514,13 +523,13 @@ template<typename MeshType>
 void Exporter<MeshType>::setDataFromGetPot( const GetPot& dataFile, const std::string& section )
 {
     M_postDir      = dataFile( ( section + "/post_dir"  ).data(), "./" );
-    M_count         = dataFile( ( section + "/start"     ).data(), 0 );
+    M_startIndex   = dataFile( ( section + "/start"     ).data(), 0 );
     M_save          = dataFile( ( section + "/save"      ).data(), 1 );
     M_multimesh     = dataFile( ( section + "/multimesh" ).data(), true );
 }
 
 template<typename MeshType>
-void Exporter<MeshType>::setMeshProcId( const mesh_ptrtype mesh , const int& procId )
+void Exporter<MeshType>::setMeshProcId( const meshPtr_Type mesh , const int& procId )
 {
     M_mesh   = mesh;
     M_procId = procId;
