@@ -38,7 +38,7 @@
 
 namespace LifeV
 {
-namespace multiscale
+namespace Multiscale
 {
 
 std::map< std::string, algorithms_Type > multiscaleAlgorithmsMap;
@@ -197,5 +197,5 @@ MultiscaleAlgorithm::toleranceSatisfied()
         return false;
 }
 
-} // Namespace multiscale
+} // Namespace Multiscale
 } // Namespace LifeV

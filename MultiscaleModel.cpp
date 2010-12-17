@@ -38,7 +38,7 @@
 
 namespace LifeV
 {
-namespace multiscale
+namespace Multiscale
 {
 
 std::map< std::string, models_Type > multiscaleModelsMap;

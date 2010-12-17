@@ -38,7 +38,7 @@
 
 namespace LifeV
 {
-namespace multiscale
+namespace Multiscale
 {
 
 std::map< std::string, stress_Type > multiscaleStressesMap;
@@ -437,5 +437,5 @@ MultiscaleCouplingStress::functionStress( const Real& t, const Real&, const Real
     return interpolatedCouplingVariables[0];
 }
 
-} // Namespace multiscale
+} // Namespace Multiscale
 } // Namespace LifeV

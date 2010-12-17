@@ -38,7 +38,7 @@
 
 namespace LifeV
 {
-namespace multiscale
+namespace Multiscale
 {
 
 // ===================================================
@@ -206,5 +206,5 @@ MultiscaleCouplingBoundaryCondition::displayCouplingValues( std::ostream& output
     }
 }
 
-} // Namespace multiscale
+} // Namespace Multiscale
 } // Namespace LifeV

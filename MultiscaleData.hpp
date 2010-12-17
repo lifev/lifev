@@ -41,7 +41,7 @@
 
 namespace LifeV
 {
-namespace multiscale
+namespace Multiscale
 {
 
 //! MultiscaleData - Global data container for the physical quantities of the problem
@@ -183,7 +183,7 @@ private:
 
 };
 
-} // Namespace multiscale
+} // Namespace Multiscale
 } // Namespace LifeV
 
 #endif /* MultiscaleData_H */

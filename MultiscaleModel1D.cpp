@@ -43,7 +43,7 @@
 
 namespace LifeV
 {
-namespace multiscale
+namespace Multiscale
 {
 
 // ===================================================
@@ -84,7 +84,7 @@ MultiscaleModel1D::MultiscaleModel1D() :
     M_type = OneDimensional;
 
     //Define the maps of the OneDimensionalModel objects
-    oneDimensionalMapsDefinition();
+    OneDimensional::mapsDefinition();
 
     //Register the objects
 //!\todo pass a std::string to the factories
@@ -97,14 +97,14 @@ MultiscaleModel1D::MultiscaleModel1D() :
 //     factoryOneDimensionalSource_Type::instance().registerProduct(  "OneD_LinearSource",     &createOneDimensionalSourceLinear );
 //     factoryOneDimensionalSource_Type::instance().registerProduct(  "OneD_NonLinearSource",  &createOneDimensionalSourceNonLinear );
 
-    factoryOneDimensionalPhysics_Type::instance().registerProduct( OneD_LinearPhysics,    &createOneDimensionalPhysicsLinear );
-    factoryOneDimensionalPhysics_Type::instance().registerProduct( OneD_NonLinearPhysics, &createOneDimensionalPhysicsNonLinear );
+    physics_Type::factoryPhysics_Type::instance().registerProduct( OneDimensional::LinearPhysics,    &createOneDimensionalPhysicsLinear );
+    physics_Type::factoryPhysics_Type::instance().registerProduct( OneDimensional::NonLinearPhysics, &createOneDimensionalPhysicsNonLinear );
 
-    factoryOneDimensionalFlux_Type::instance().registerProduct(    OneD_LinearFlux,       &createOneDimensionalFluxLinear );
-    factoryOneDimensionalFlux_Type::instance().registerProduct(    OneD_NonLinearFlux,    &createOneDimensionalFluxNonLinear );
+    flux_Type::factoryFlux_Type::instance().registerProduct(       OneDimensional::LinearFlux,       &createOneDimensionalFluxLinear );
+    flux_Type::factoryFlux_Type::instance().registerProduct(       OneDimensional::NonLinearFlux,    &createOneDimensionalFluxNonLinear );
 
-    factoryOneDimensionalSource_Type::instance().registerProduct(  OneD_LinearSource,     &createOneDimensionalSourceLinear );
-    factoryOneDimensionalSource_Type::instance().registerProduct(  OneD_NonLinearSource,  &createOneDimensionalSourceNonLinear );
+    source_Type::factorySource_Type::instance().registerProduct(   OneDimensional::LinearSource,     &createOneDimensionalSourceLinear );
+    source_Type::factorySource_Type::instance().registerProduct(   OneDimensional::NonLinearSource,  &createOneDimensionalSourceNonLinear );
 }
 
 // ===================================================
@@ -138,19 +138,19 @@ MultiscaleModel1D::setupData( const std::string& fileName )
     //1D Model Physics
     //!\todo pass a std::string to the factories
     //M_physics = physicsPtr_Type( factoryOneDimensionalPhysics_Type::instance().createObject( "M_data->physicsType()" ) );
-    M_physics = physicsPtr_Type( factoryOneDimensionalPhysics_Type::instance().createObject( M_data->physicsType() ) );
+    M_physics = physicsPtr_Type( physics_Type::factoryPhysics_Type::instance().createObject( M_data->physicsType() ) );
     M_physics->setData( M_data );
 
     //1D Model Flux
     //!\todo pass a std::string to the factories
     //M_flux = fluxPtr_Type( factoryOneDimensionalFlux_Type::instance().createObject( "M_data->fluxType()" ) );
-    M_flux = fluxPtr_Type( factoryOneDimensionalFlux_Type::instance().createObject( M_data->fluxType() ) );
+    M_flux = fluxPtr_Type( flux_Type::factoryFlux_Type::instance().createObject( M_data->fluxType() ) );
     M_flux->setPhysics( M_physics );
 
     //1D Model Source
     //!\todo pass a std::string to the factories
     //M_source = sourcePtr_Type( factoryOneDimensionalSource_Type::instance().createObject( "M_data->sourceType()" ) );
-    M_source = sourcePtr_Type( factoryOneDimensionalSource_Type::instance().createObject( M_data->sourceType() ) );
+    M_source = sourcePtr_Type( source_Type::factorySource_Type::instance().createObject( M_data->sourceType() ) );
     M_source->setPhysics( M_physics );
 
     //Linear Solver
@@ -351,11 +351,11 @@ MultiscaleModel1D::setupLinearModel()
     //M_LinearBC.reset( new bc_Type( *M_bc->handler() ) ); // COPY CONSTRUCTOR NOT WORKING
 
     //Set left and right BC + default BC
-    M_linearBC->setBC( OneD_left, OneD_first, M_bc->handler()->bc( OneD_left )->type( OneD_first ),
-                       M_bc->handler()->bc( OneD_left )->bcFunction( OneD_first ) );
+    M_linearBC->setBC( OneDimensional::left, OneDimensional::first, M_bc->handler()->bc( OneDimensional::left )->type( OneDimensional::first ),
+                       M_bc->handler()->bc( OneDimensional::left )->bcFunction( OneDimensional::first ) );
 
-    M_linearBC->setBC( OneD_right, OneD_first, M_bc->handler()->bc( OneD_right )->type( OneD_first ),
-                       M_bc->handler()->bc( OneD_right )->bcFunction( OneD_first ) );
+    M_linearBC->setBC( OneDimensional::right, OneDimensional::first, M_bc->handler()->bc( OneDimensional::right )->type( OneDimensional::first ),
+                       M_bc->handler()->bc( OneDimensional::right )->bcFunction( OneDimensional::first ) );
 
     M_linearBC->setDefaultBC();
 
@@ -444,8 +444,8 @@ MultiscaleModel1D::boundaryDeltaFlowRate( const BCFlag& flag, bool& solveLinearS
 
     solveLinearModel( solveLinearSystem );
 
-    Real Q      = M_solver->boundaryValue( *M_solution, OneD_Q, bcSide );
-    Real Qdelta = M_solver->boundaryValue( *M_linearSolution, OneD_Q, bcSide );
+    Real Q      = M_solver->boundaryValue( *M_solution, OneDimensional::Q, bcSide );
+    Real Qdelta = M_solver->boundaryValue( *M_linearSolution, OneDimensional::Q, bcSide );
 
 #ifdef HAVE_LIFEV_DEBUG
     Debug( 8130 ) << "MultiscaleModel1D::GetBoundaryDeltaFlowRate( flag, solveLinearSystem ) \n";
@@ -455,10 +455,10 @@ MultiscaleModel1D::boundaryDeltaFlowRate( const BCFlag& flag, bool& solveLinearS
 
 #ifdef JACOBIAN_WITH_FINITEDIFFERENCE_AREA
 
-    if ( M_bcDeltaType == OneD_A )
+    if ( M_bcDeltaType == OneDimensional::A )
     {
         // dQ/dP
-        return ( (Qdelta - Q) / M_bcDelta ) * M_physics->dAdP( M_solver->boundaryValue( *M_solution, OneD_P, bcSide ), 0 );
+        return ( (Qdelta - Q) / M_bcDelta ) * M_physics->dAdP( M_solver->boundaryValue( *M_solution, OneDimensional::P, bcSide ), 0 );
     }
     else
     {
@@ -483,8 +483,8 @@ MultiscaleModel1D::boundaryDeltaPressure( const BCFlag& flag, bool& solveLinearS
 
 #ifdef JACOBIAN_WITH_FINITEDIFFERENCE_AREA
 
-    Real A      = M_solver->boundaryValue( *M_solution, OneD_A, bcSide );
-    Real Adelta = M_solver->boundaryValue( *M_linearSolution, OneD_A, bcSide );
+    Real A      = M_solver->boundaryValue( *M_solution, OneDimensional::A, bcSide );
+    Real Adelta = M_solver->boundaryValue( *M_linearSolution, OneDimensional::A, bcSide );
 
 #ifdef HAVE_LIFEV_DEBUG
     Debug( 8130 ) << "MultiscaleModel1D::GetBoundaryDeltaPressure( flag, solveLinearSystem ) \n";
@@ -492,22 +492,22 @@ MultiscaleModel1D::boundaryDeltaPressure( const BCFlag& flag, bool& solveLinearS
     Debug( 8130 ) << "Adelta:     " << Adelta <<  "\n";
 #endif
 
-    if ( M_bcDeltaType == OneD_A )
+    if ( M_bcDeltaType == OneDimensional::A )
     {
         // dP/dP
-        return ( (Adelta - A) / M_bcDelta ) * M_physics->dPdA( M_solver->boundaryValue( *M_solution, OneD_A, bcSide ), 0 )
-               * M_physics->dAdP( M_solver->boundaryValue( *M_solution, OneD_P, bcSide ), 0 );
+        return ( (Adelta - A) / M_bcDelta ) * M_physics->dPdA( M_solver->boundaryValue( *M_solution, OneDimensional::A, bcSide ), 0 )
+               * M_physics->dAdP( M_solver->boundaryValue( *M_solution, OneDimensional::P, bcSide ), 0 );
     }
     else
     {
         // dP/dQ
-        return ( (Adelta - A) / M_bcDelta ) * M_physics->dPdA( M_solver->boundaryValue( *M_solution, OneD_A, bcSide ), 0 );
+        return ( (Adelta - A) / M_bcDelta ) * M_physics->dPdA( M_solver->boundaryValue( *M_solution, OneDimensional::A, bcSide ), 0 );
     }
 
 #else
 
-    Real P      = M_solver->boundaryValue( *M_solution, OneD_P, bcSide );
-    Real Pdelta = M_solver->boundaryValue( *M_linearSolution, OneD_P, bcSide );
+    Real P      = M_solver->boundaryValue( *M_solution, OneDimensional::P, bcSide );
+    Real Pdelta = M_solver->boundaryValue( *M_linearSolution, OneDimensional::P, bcSide );
 
 #ifdef HAVE_LIFEV_DEBUG
     Debug( 8130 ) << "MultiscaleModel1D::GetBoundaryDeltaPressure( flag, solveLinearSystem ) \n";
@@ -526,13 +526,13 @@ MultiscaleModel1D::boundaryDeltaPressure( const BCFlag& flag, bool& solveLinearS
 Real
 MultiscaleModel1D::boundaryDeltaFlowRate( const BCFlag& flag, bool& /*solveLinearSystem*/ )
 {
-    return tangentProblem( flagConverter( flag ), OneD_Q );
+    return tangentProblem( flagConverter( flag ), OneDimensional::Q );
 }
 
 Real
 MultiscaleModel1D::boundaryDeltaPressure( const BCFlag& flag, bool& /*solveLinearSystem*/ )
 {
-    return tangentProblem( flagConverter( flag ), OneD_P );
+    return tangentProblem( flagConverter( flag ), OneDimensional::P );
 }
 
 #endif
@@ -741,19 +741,19 @@ MultiscaleModel1D::createLinearBC()
 
     // Create bcType map
     std::map< bcType_Type, Real > bcTypeMap;
-    M_bcPreviousTimeSteps[0][OneD_left]  = bcTypeMap;
-    M_bcPreviousTimeSteps[0][OneD_right] = bcTypeMap;
+    M_bcPreviousTimeSteps[0][OneDimensional::left]  = bcTypeMap;
+    M_bcPreviousTimeSteps[0][OneDimensional::right] = bcTypeMap;
 }
 
 void
 MultiscaleModel1D::updateLinearBC( const solution_Type& solution )
 {
-    M_bcPreviousTimeSteps[0][OneD_left][OneD_A]  = M_solver->boundaryValue( solution, OneD_A, OneD_left );
-    M_bcPreviousTimeSteps[0][OneD_left][OneD_P]  = M_solver->boundaryValue( solution, OneD_P, OneD_left );
-    M_bcPreviousTimeSteps[0][OneD_left][OneD_Q]  = M_solver->boundaryValue( solution, OneD_Q, OneD_left );
-    M_bcPreviousTimeSteps[0][OneD_right][OneD_A] = M_solver->boundaryValue( solution, OneD_A, OneD_right );
-    M_bcPreviousTimeSteps[0][OneD_right][OneD_P] = M_solver->boundaryValue( solution, OneD_P, OneD_right );
-    M_bcPreviousTimeSteps[0][OneD_right][OneD_Q] = M_solver->boundaryValue( solution, OneD_Q, OneD_right );
+    M_bcPreviousTimeSteps[0][OneDimensional::left][OneDimensional::A]  = M_solver->boundaryValue( solution, OneDimensional::A, OneDimensional::left );
+    M_bcPreviousTimeSteps[0][OneDimensional::left][OneDimensional::P]  = M_solver->boundaryValue( solution, OneDimensional::P, OneDimensional::left );
+    M_bcPreviousTimeSteps[0][OneDimensional::left][OneDimensional::Q]  = M_solver->boundaryValue( solution, OneDimensional::Q, OneDimensional::left );
+    M_bcPreviousTimeSteps[0][OneDimensional::right][OneDimensional::A] = M_solver->boundaryValue( solution, OneDimensional::A, OneDimensional::right );
+    M_bcPreviousTimeSteps[0][OneDimensional::right][OneDimensional::P] = M_solver->boundaryValue( solution, OneDimensional::P, OneDimensional::right );
+    M_bcPreviousTimeSteps[0][OneDimensional::right][OneDimensional::Q] = M_solver->boundaryValue( solution, OneDimensional::Q, OneDimensional::right );
 }
 
 void
@@ -769,17 +769,17 @@ MultiscaleModel1D::imposePerturbation()
         {
             // Find the side to perturb and apply the perturbation
             M_bcDeltaSide = flagConverter( ( *i )->flag( ( *i )->modelGlobalToLocalID( M_ID ) ) );
-            M_linearBC->bc( M_bcDeltaSide )->setBCFunction( OneD_first, M_bcBaseDelta );
+            M_linearBC->bc( M_bcDeltaSide )->setBCFunction( OneDimensional::first, M_bcBaseDelta );
 
             // Compute the range
-            M_bcDeltaType = M_linearBC->bc( M_bcDeltaSide )->type( OneD_first );
+            M_bcDeltaType = M_linearBC->bc( M_bcDeltaSide )->type( OneDimensional::first );
 
 #ifdef JACOBIAN_WITH_FINITEDIFFERENCE_AREA
             // We replace pressure BC with area BC for the perturbed problem
-            if ( M_bcDeltaType == OneD_P )
+            if ( M_bcDeltaType == OneDimensional::P )
             {
-                M_linearBC->bc( M_bcDeltaSide )->setType( OneD_first, OneD_A );
-                M_bcDeltaType = OneD_A;
+                M_linearBC->bc( M_bcDeltaSide )->setType( OneDimensional::first, OneDimensional::A );
+                M_bcDeltaType = OneDimensional::A;
             }
 #endif
 
@@ -789,18 +789,18 @@ MultiscaleModel1D::imposePerturbation()
             //if ( std::abs( M_BCDelta ) < 1e-6 || std::abs( M_BCDelta ) > 1e6 )
             switch ( M_bcDeltaType )
             {
-            case OneD_A:
+            case OneDimensional::A:
 
                 M_bcDelta = M_data->jacobianPerturbationArea();
                 break;
 
-            case OneD_Q:
+            case OneDimensional::Q:
 
                 M_bcDelta = M_data->jacobianPerturbationFlowRate();
 
                 break;
 
-            case OneD_P:
+            case OneDimensional::P:
 
                 M_bcDelta = 5; //M_Data->jacobianPerturbationPressure();
 
@@ -827,12 +827,12 @@ MultiscaleModel1D::resetPerturbation()
     Debug( 8130 ) << "MultiscaleModel1D::ResetPerturbation() \n";
 #endif
 
-    M_linearBC->bc( M_bcDeltaSide )->setBCFunction( OneD_first, M_bc->handler()->bc( M_bcDeltaSide )->bcFunction( OneD_first ) );
+    M_linearBC->bc( M_bcDeltaSide )->setBCFunction( OneDimensional::first, M_bc->handler()->bc( M_bcDeltaSide )->bcFunction( OneDimensional::first ) );
 
 #ifdef JACOBIAN_WITH_FINITEDIFFERENCE_AREA
     // Restoring the original BC
-    if ( M_bcDeltaType == OneD_A )
-        M_linearBC->bc( M_bcDeltaSide )->setType( OneD_first, OneD_P );
+    if ( M_bcDeltaType == OneDimensional::A )
+        M_linearBC->bc( M_bcDeltaSide )->setType( OneDimensional::first, OneDimensional::P );
 #endif
 
 }
@@ -893,31 +893,31 @@ MultiscaleModel1D::tangentProblem( const bcSide_Type& bcOutputSide, const bcType
 
             switch ( bcSide )
             {
-            case OneD_left:
+            case OneDimensional::left:
                 switch ( bcOutputType )
                 {
-                case OneD_Q: // dQ_L/dP_L
+                case OneDimensional::Q: // dQ_L/dP_L
                     JacobianCoefficient = leftEigenvector2[0] / leftEigenvector2[1]
-                                          * M_physics->dAdP( M_solver->boundaryValue( *M_solution, OneD_P, OneD_left ), 0 );
+                                          * M_physics->dAdP( M_solver->boundaryValue( *M_solution, OneDimensional::P, OneDimensional::left ), 0 );
                     break;
-                case OneD_P: // dP_L/dQ_L
+                case OneDimensional::P: // dP_L/dQ_L
                     JacobianCoefficient = leftEigenvector2[1] / leftEigenvector2[0]
-                                          * M_physics->dPdA( M_solver->boundaryValue( *M_solution, OneD_A, OneD_left ), 0 );
+                                          * M_physics->dPdA( M_solver->boundaryValue( *M_solution, OneDimensional::A, OneDimensional::left ), 0 );
                     break;
                 default:
                     std::cout << "Warning: bcType \"" << bcOutputType << "\"not available!" << std::endl;
                 }
                 break;
-            case OneD_right:
+            case OneDimensional::right:
                 switch ( bcOutputType )
                 {
-                case OneD_Q: // dQ_R/dP_R
+                case OneDimensional::Q: // dQ_R/dP_R
                     JacobianCoefficient = -leftEigenvector1[0] / leftEigenvector1[1]
-                                          * M_physics->dAdP( M_solver->boundaryValue( *M_solution, OneD_P, OneD_right ), M_data->NumberOfElements() );
+                                          * M_physics->dAdP( M_solver->boundaryValue( *M_solution, OneDimensional::P, OneDimensional::right ), M_data->NumberOfElements() );
                     break;
-                case OneD_P: // dP_R/dQ_R
+                case OneDimensional::P: // dP_R/dQ_R
                     JacobianCoefficient = -leftEigenvector1[1] / leftEigenvector1[0]
-                                          * M_physics->dPdA( M_solver->boundaryValue( *M_solution, OneD_A, OneD_right ), M_data->NumberOfElements() );
+                                          * M_physics->dPdA( M_solver->boundaryValue( *M_solution, OneDimensional::A, OneDimensional::right ), M_data->NumberOfElements() );
                     break;
                 default:
                     std::cout << "Warning: bcType \"" << bcOutputType << "\"not available!" << std::endl;

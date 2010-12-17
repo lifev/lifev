@@ -46,7 +46,7 @@
 
 namespace LifeV
 {
-namespace multiscale
+namespace Multiscale
 {
 
 //! MultiscaleAlgorithmNewton - The MultiScale Algorithm implementation of Newton
@@ -114,7 +114,7 @@ inline multiscaleAlgorithm_Type* createMultiscaleAlgorithmNewton()
     return new MultiscaleAlgorithmNewton();
 }
 
-} // Namespace multiscale
+} // Namespace Multiscale
 } // Namespace LifeV
 
 #endif /* MultiscaleAlgorithmNewton_H */

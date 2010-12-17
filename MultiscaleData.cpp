@@ -38,7 +38,7 @@
 
 namespace LifeV
 {
-namespace multiscale
+namespace Multiscale
 {
 
 // ===================================================
@@ -122,5 +122,5 @@ MultiscaleData::showMe()
               << "TimeStep                      = " << M_dataTime->getTimeStep() << std::endl << std::endl;
 }
 
-} // Namespace multiscale
+} // Namespace Multiscale
 } // Namespace LifeV

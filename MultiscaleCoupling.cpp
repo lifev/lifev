@@ -38,7 +38,7 @@
 
 namespace LifeV
 {
-namespace multiscale
+namespace Multiscale
 {
 
 std::map< std::string, couplings_Type > multiscaleCouplingsMap;
@@ -84,7 +84,7 @@ MultiscaleCoupling::setupData( const std::string& fileName )
 
     GetPot dataFile( fileName );
 
-    // Read multiscale parameters
+    // Read Multiscale parameters
     M_couplingName = dataFile( "MultiScale/couplingName", "couplingName" );
     M_timeInterpolationOrder = dataFile( "MultiScale/timeInterpolationOrder", 0 );
 
@@ -341,5 +341,5 @@ MultiscaleCoupling::switchErrorMessage( const multiscaleModelPtr_Type& model )
                         "] for coupling type [" + Enum2String( M_type, multiscaleCouplingsMap ) +"]\n" );
 }
 
-} // Namespace multiscale
+} // Namespace Multiscale
 } // Namespace LifeV

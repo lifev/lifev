@@ -62,7 +62,7 @@
 
 namespace LifeV
 {
-namespace multiscale
+namespace Multiscale
 {
 
 //! MultiscaleModelFSI3D - MultiScale model for 3D FSI simulations

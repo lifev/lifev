@@ -47,7 +47,7 @@
 
 namespace LifeV
 {
-namespace multiscale
+namespace Multiscale
 {
 
 //! MultiscaleCouplingBoundaryCondition - Coupling condition for standard boundary conditions
@@ -183,7 +183,7 @@ MultiscaleCouplingBoundaryCondition::applyBoundaryConditions1D( const UInt& i )
     {
         model->bcInterface().readBC( M_fileName, "boundary_conditions/", M_list[j] );
 
-        model->bcInterface().dataContainer().setSide( (M_flags[i] == 0) ? OneD_left : OneD_right );
+        model->bcInterface().dataContainer().setSide( (M_flags[i] == 0) ? OneDimensional::left : OneDimensional::right );
 
         model->bcInterface().insertBC();
     }
@@ -206,7 +206,7 @@ MultiscaleCouplingBoundaryCondition::applyBoundaryConditions3D( const UInt& i )
     }
 }
 
-} // Namespace multiscale
+} // Namespace Multiscale
 } // Namespace LifeV
 
 #endif /* MultiscaleCouplingBoundaryCondition_H */
