@@ -192,7 +192,7 @@ main( int argc, char** argv )
     if (verbose) std::cout << " -- Adding the diffusion ... " << std::flush;
     adrAssembler.addDiffusion(systemMatrix,epsilon);
     if (verbose) std::cout << " done! " << std::endl;
-    if (verbose) std::cout << " Time needed : " << adrAssembler.diffusionAssemblyChrono().diff_cumul() << std::endl;
+    if (verbose) std::cout << " Time needed : " << adrAssembler.diffusionAssemblyChrono().diffCumul() << std::endl;
 
 #ifdef TEST_ADVECTION
     if (verbose) std::cout << " -- Adding the advection ... " << std::flush;
@@ -328,7 +328,7 @@ main( int argc, char** argv )
 // Exporter definition and use
 
     if (verbose) std::cout << " -- Defining the exporter ... " << std::flush;
-    Ensight<mesh_type> exporter ( dataFile, meshPart.mesh(), "solution", Comm->MyPID()) ;
+    Ensight<mesh_type> exporter ( dataFile, meshPart.meshPartition(), "solution", Comm->MyPID()) ;
     if (verbose) std::cout << " done ! " << std::endl;
 
     if (verbose) std::cout << " -- Defining the exported quantities ... " << std::flush;
