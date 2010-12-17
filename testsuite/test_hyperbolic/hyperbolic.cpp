@@ -531,7 +531,7 @@ hyperbolic::run()
         // Set directory where to save the solution
         exporter->setDirectory( dataFile( "exporter/folder", "./" ) );
 
-        exporter->setMeshProcId( meshPart.mesh(), Members->comm->MyPID() );
+        exporter->setMeshProcId( meshPart.meshPartition(), Members->comm->MyPID() );
     }
     else
 #endif
@@ -543,7 +543,7 @@ hyperbolic::run()
             // Set directory where to save the solution
             exporter->setDirectory( dataFile( "exporter/folder", "./" ) );
 
-            exporter->setMeshProcId( meshPart.mesh(), Members->comm->MyPID() );
+            exporter->setMeshProcId( meshPart.meshPartition(), Members->comm->MyPID() );
         }
         else
         {
@@ -552,7 +552,7 @@ hyperbolic::run()
             // Set directory where to save the solution
             exporter->setDirectory( dataFile( "exporter/folder", "./" ) );
 
-            exporter->setMeshProcId( meshPart.mesh(), Members->comm->MyPID() );
+            exporter->setMeshProcId( meshPart.meshPartition(), Members->comm->MyPID() );
         }
     }
 
