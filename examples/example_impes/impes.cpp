@@ -672,7 +672,7 @@ impes::run()
         exporter.reset( new Hdf5exporter< RegionMesh > ( dataFile, dataFile( "exporter/file_name", "PressureSaturation"  ) ) );
 
         // Set directory where to save the solution.
-        exporter->setDirectory( dataFile( "exporter/folder", "./" ) );
+        exporter->setPostDir( dataFile( "exporter/folder", "./" ) );
 
         exporter->setMeshProcId( meshPart.meshPartition(), Members->comm->MyPID() );
     }
@@ -684,7 +684,7 @@ impes::run()
             exporter.reset( new NoExport< RegionMesh > ( dataFile, dataFile( "exporter/file_name", "PressureSaturation"  ) ) );
 
             // Set directory where to save the solution.
-            exporter->setDirectory( dataFile( "exporter/folder", "./" ) );
+            exporter->setPostDir( dataFile( "exporter/folder", "./" ) );
 
             exporter->setMeshProcId( meshPart.meshPartition(), Members->comm->MyPID() );
         }
@@ -693,7 +693,7 @@ impes::run()
             exporter.reset( new Ensight< RegionMesh > ( dataFile, dataFile( "exporter/file_name", "PressureSaturation"  ) ) );
 
             // Set directory where to save the solution.
-            exporter->setDirectory( dataFile( "exporter/folder", "./" ) );
+            exporter->setPostDir( dataFile( "exporter/folder", "./" ) );
 
             exporter->setMeshProcId( meshPart.meshPartition(), Members->comm->MyPID() );
         }
