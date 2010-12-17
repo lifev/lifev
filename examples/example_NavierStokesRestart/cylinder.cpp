@@ -395,7 +395,7 @@ Cylinder::run()
     if (verbose) std::cout << std::endl;
     if (verbose) std::cout << "Time discretization order " << dataNavierStokes->dataTime()->getBDF_order() << std::endl;
 
-    //dataNavierStokes.dataMesh()->setMesh(meshPart.mesh());
+    //dataNavierStokes.dataMesh()->setMesh(meshPart.meshPartition());
 
     std::string uOrder =  dataFile( "fluid/space_discretization/vel_order", "P1");
     if (verbose)
@@ -457,7 +457,7 @@ Cylinder::run()
 
 
     std::string expFileName = dataFile( "exporter/filename", "fluid");
-    LifeV::Hdf5exporter<Mesh> exporter( dataFile, meshPart.mesh(), expFileName, d->comm->MyPID());
+    LifeV::Hdf5exporter<Mesh> exporter( dataFile, meshPart.meshPartition(), expFileName, d->comm->MyPID());
 
     vector_ptrtype velAndPressure ( new vector_type(*fluid.solution(), exporter.mapType() ) );
 
