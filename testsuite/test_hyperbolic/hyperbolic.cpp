@@ -312,6 +312,12 @@ hyperbolic::hyperbolic( int argc,
     Members->comm.reset( new Epetra_MpiComm( MPI_COMM_WORLD ) );
     int ntasks;
     MPI_Comm_size(MPI_COMM_WORLD, &ntasks);
+    if(Members->comm->NumProc() > 1)
+    {
+    	std::cout<<"HyperbolicSolver works only in serial \n";
+    	MPI_Finalize();
+    	exit(1);
+    }
 #else
     Members->comm.reset( new Epetra_SerialComm() );
 #endif

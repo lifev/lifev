@@ -36,9 +36,11 @@ Solve the problem
 
 
 /**
-   @file main.hpp
+   @file
    @author A. Fumagalli <alessio.fumagalli@mail.polimi.it>
    @date 2010-07-29
+
+   NOTE: HyperbolicSolver works only in serial.
 */
 
 
