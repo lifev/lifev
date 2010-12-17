@@ -76,15 +76,16 @@ public:
     //@{
 
     ///////// old: to be removed
+
     typedef Oseen< MeshType, SolverType >                     oseenSolver_Type;
-    typedef typename oseenSolver_Type::vector_type            vector_type;
-    typedef typename oseenSolver_Type::matrix_type            matrix_type;
-    typedef typename oseenSolver_Type::matrix_ptrtype         matrix_ptrtype;
-    typedef typename oseenSolver_Type::data_type              data_type;
-    typedef typename oseenSolver_Type::prec_type              prec_type;
-    typedef typename oseenSolver_Type::prec_raw_type          prec_raw_type;
-    typedef typename oseenSolver_Type::bchandler_raw_type     bchandler_raw_type;
-    /////////
+    typedef typename oseenSolver_Type::vector_type            vector_type __attribute__ ((deprecated));
+    typedef typename oseenSolver_Type::matrix_type            matrix_type __attribute__ ((deprecated));
+    typedef typename oseenSolver_Type::matrix_ptrtype         matrix_ptrtype __attribute__ ((deprecated));
+    typedef typename oseenSolver_Type::data_type              data_type __attribute__ ((deprecated));
+    typedef typename oseenSolver_Type::prec_type              prec_type __attribute__ ((deprecated));
+    typedef typename oseenSolver_Type::prec_raw_type          prec_raw_type __attribute__ ((deprecated));
+    typedef typename oseenSolver_Type::bchandler_raw_type     bchandler_raw_type __attribute__ ((deprecated));
+    ///////
 
     typedef MeshType                                          mesh_Type;
     typedef SolverType                                        linearSolver_Type;
@@ -93,8 +94,8 @@ public:
     typedef typename oseenSolver_Type::matrix_Type            matrix_Type;
     typedef typename oseenSolver_Type::matrixPtr_Type         matrixPtr_Type;
     typedef typename oseenSolver_Type::data_Type              data_Type;
-    typedef typename oseenSolver_Type::preconditionerPtr_Type preconditionerPtr_type;
     typedef typename oseenSolver_Type::preconditioner_Type    preconditioner_Type;
+    typedef typename oseenSolver_Type::preconditionerPtr_Type preconditionerPtr_type;
     typedef typename oseenSolver_Type::bcHandler_Type         bcHandler_Type;
 
     //@}
@@ -172,7 +173,7 @@ public:
     /*!
         @param bcHandler BC handler
      */
-    void iterateLin( bcHandler_Type& bcHandler );
+    void solveLinearSystem( bcHandler_Type& bcHandler );
 
     //! Update linear system.
     /*!
@@ -228,7 +229,7 @@ public:
     /*!
         @param rightHandSide
      */
-    void updateRhsLinNoBC( const vector_Type& rightHandSide)
+    void updateLinearRightHandSideNoBC( const vector_Type& rightHandSide)
     {
         M_linearRightHandSideNoBC = rightHandSide;
     }
@@ -242,12 +243,12 @@ public:
     /*!
         @return M_linearRightHandSideNoBC
      */
-    vector_Type& rhsLinNoBC()
+    vector_Type& linearRightHandSideNoBC()
     {
         return M_linearRightHandSideNoBC;
     }
 
-    const vector_Type& rhsLinNoBC() const
+    const vector_Type& linearRightHandSideNoBC() const
     {
         return M_linearRightHandSideNoBC;
     }
@@ -256,21 +257,21 @@ public:
     /*!
         @return vector containing the solution of the Shape Derivative problem.
      */
-    const vector_Type& LinearSolution() const
+    const vector_Type& linearSolution() const
     {
         return M_linearSolution;
     }
 
     //! Return
     /*!
-        @return stab
+        @return stabilization
      */
-    bool stab()
+    bool stabilization()
     {
         return this->M_stabilization;
     }
 
-    const bool& stab() const
+    const bool& stabilization() const
     {
         return this->M_stabilization;
     }
@@ -279,13 +280,13 @@ public:
     /*!
         @return linear flux
      */
-    Real GetLinearFlux ( const entityFlag_Type& flag );
+    Real getLinearFlux ( const entityFlag_Type& flag );
 
     //! Return
     /*!
         @return linear pressure
      */
-    Real GetLinearPressure( const entityFlag_Type& flag );
+    Real getLinearPressure( const entityFlag_Type& flag );
 
     //! Get the Lagrange multiplier related to a flux imposed on a given part of the boundary.
     /*!
@@ -293,12 +294,72 @@ public:
         @param BC BChandler containing the boundary conditions of the problem.
         @return Lagrange multiplier
      */
-    Real LinearLagrangeMultiplier( const entityFlag_Type& flag, bcHandler_Type& bcHandler );
+    Real getLinearLagrangeMultiplier( const entityFlag_Type& flag, bcHandler_Type& bcHandler );
 
     //@}
 
+    //@{ deprecated methods
+
+    void  __attribute__ ((__deprecated__)) iterateLin( bcHandler_Type& bcHandler )
+    {
+        return solveLinearSystem( bcHandler );
+    }
+
+    void  __attribute__ ((__deprecated__)) updateRhsLinNoBC( const vector_Type& rightHandSide)
+    {
+        return updateLinearRightHandSideNoBC( rightHandSide );
+    }
+
+    vector_Type&  __attribute__ ((__deprecated__)) rhsLinNoBC( )
+    {
+        return linearRightHandSideNoBC( );
+    }
+
+    const vector_Type&  __attribute__ ((__deprecated__)) rhsLinNoBC( ) const
+    {
+        return linearRightHandSideNoBC( );
+    }
+
+    const vector_Type&  __attribute__ ((__deprecated__)) LinearSolution( ) const
+    {
+        return linearSolution( );
+    }
+
+    bool  __attribute__ ((__deprecated__)) stab( )
+    {
+        return stabilization( );
+    }
+
+    const bool&  __attribute__ ((__deprecated__)) stab( ) const
+    {
+        return stabilization( );
+    }
+
+    Real  __attribute__ ((__deprecated__)) GetLinearFlux ( const entityFlag_Type& flag )
+    {
+        return getLinearFlux( flag );
+    }
+
+    Real  __attribute__ ((__deprecated__)) GetLinearPressure( const entityFlag_Type& flag )
+    {
+        return getLinearPressure( flag );
+    }
+
+    Real  __attribute__ ((__deprecated__)) LinearLagrangeMultiplier( const entityFlag_Type& flag, bcHandler_Type& bcHandler )
+    {
+        return getLinearLagrangeMultiplier( flag, bcHandler );
+    }
+
+    //@}
 
 private:
+
+    //@{
+
+    //! Empty copy constructor
+    OseenShapeDerivative( const OseenShapeDerivative& oseenShapeDerivative );
+
+    //@}
 
     vector_Type               M_linearRightHandSideNoBC;
     vector_Type               M_linearRightHandSideFull;
@@ -306,7 +367,7 @@ private:
     vector_Type               M_linearSolution;
 
     linearSolver_Type         M_linearLinSolver;
-    prec_type                 M_linearPreconditioner;
+    preconditionerPtr_type    M_linearPreconditioner;
 
 
     ElemVec                   M_elementVectorVelocity; // Elementary right hand side for the linearized velocity
@@ -447,21 +508,21 @@ OseenShapeDerivative<MeshType, SolverType>::
 
 template<typename MeshType, typename SolverType>
 Real
-OseenShapeDerivative<MeshType, SolverType>::GetLinearFlux( const entityFlag_Type& flag )
+OseenShapeDerivative<MeshType, SolverType>::getLinearFlux( const entityFlag_Type& flag )
 {
     return flux( flag, M_linearSolution );
 }
 
 template<typename MeshType, typename SolverType>
 Real
-OseenShapeDerivative<MeshType, SolverType>::GetLinearPressure( const entityFlag_Type& flag )
+OseenShapeDerivative<MeshType, SolverType>::getLinearPressure( const entityFlag_Type& flag )
 {
     return pressure( flag, M_linearSolution );
 }
 
 template<typename MeshType, typename SolverType>
 Real
-OseenShapeDerivative<MeshType, SolverType>::LinearLagrangeMultiplier( const entityFlag_Type& flag, bcHandler_Type& bcHandler )
+OseenShapeDerivative<MeshType, SolverType>::getLinearLagrangeMultiplier( const entityFlag_Type& flag, bcHandler_Type& bcHandler )
 {
     return LagrangeMultiplier( flag, bcHandler, M_linearSolution );
 }
@@ -486,7 +547,7 @@ void OseenShapeDerivative<MeshType, SolverType>::setUp( const GetPot& dataFile )
 
 
 template<typename MeshType, typename SolverType>
-void OseenShapeDerivative<MeshType, SolverType>::iterateLin( bcHandler_Type& bcHandler )
+void OseenShapeDerivative<MeshType, SolverType>::solveLinearSystem( bcHandler_Type& bcHandler )
 {
     this->M_Displayer.leaderPrint( " LF-  Finalizing the matrix and vectors ...    " );
 
@@ -498,9 +559,9 @@ void OseenShapeDerivative<MeshType, SolverType>::iterateLin( bcHandler_Type& bcH
 
     M_linearRightHandSideNoBC.globalAssemble();
 
-    matrix_ptrtype matrixFull( new matrix_Type( this->M_localMap, this->M_matrixNoBC->meanNumEntries() ) );
+    matrixPtr_Type matrixFull( new matrix_Type( this->M_localMap, this->M_matrixNoBC->meanNumEntries() ) );
 
-    updateStab( *matrixFull );
+    updateStabilization( *matrixFull );
     getFluidMatrix( *matrixFull );
 
     vector_Type    rightHandSideFull( M_linearRightHandSideNoBC );
@@ -534,7 +595,7 @@ void OseenShapeDerivative<MeshType, SolverType>::iterateLin( bcHandler_Type& bcH
 //             this->M_Displayer.leaderPrintMax( "NormInf Residual Lin = " , this->M_residual.NormInf());
 //             this->M_Displayer.leaderPrintMax( "NormInf Solution Lin = " , this->M_linearSolution.NormInf());
 //         }
-} // iterateLin
+} // solveLinearSystem
 
 template<typename MeshType, typename SolverType>
 void
@@ -569,7 +630,7 @@ OseenShapeDerivative<MeshType, SolverType>::updateLinearSystem( const matrix_Typ
         //     std::cout << dwRepeated.NormInf() << std::endl;
         //     std::cout << dispRepeated.NormInf() << std::endl;
 
-        vector_Type rhsLinNoBC( M_linearRightHandSideNoBC.map(), Repeated );
+        vector_Type linearRightHandSideNoBC( M_linearRightHandSideNoBC.map(), Repeated );
 
         for ( UInt i = 1; i <= this->M_velocityFESpace.mesh()->numVolumes(); i++ )
         {
@@ -587,7 +648,7 @@ OseenShapeDerivative<MeshType, SolverType>::updateLinearSystem( const matrix_Typ
 
                 for ( Int iComponent = 0; iComponent < numVelocityComponent; ++iComponent )
                 {
-                    UInt iGlobal = this->M_velocityFESpace.dof().localToGlobal( i, iLocal + 1 ) + iComponent * this->dim_u();
+                    UInt iGlobal = this->M_velocityFESpace.dof().localToGlobal( i, iLocal + 1 ) + iComponent * this->dimVelocity();
 
                     // u^n - w^iNode local
                     M_elementConvectionVelocity.vec( )  [ iLocal + iComponent*this->M_velocityFESpace.fe().nbFEDof() ] = unRepeated(iGlobal)
@@ -615,7 +676,7 @@ OseenShapeDerivative<MeshType, SolverType>::updateLinearSystem( const matrix_Typ
             for ( UInt iNode = 0 ; iNode < this->M_pressureFESpace.fe().nbFEDof() ; iNode++ )
             {
                 UInt iLocal = this->M_pressureFESpace.fe().patternFirst( iNode ); // iLocal = iNode
-                UInt iGlobal   = this->M_pressureFESpace.dof().localToGlobal( i, iLocal + 1 ) + numVelocityComponent*this->dim_u();
+                UInt iGlobal   = this->M_pressureFESpace.dof().localToGlobal( i, iLocal + 1 ) + numVelocityComponent*this->dimVelocity();
                 M_elementPressure[ iLocal ] = ukRepeated[ iGlobal ];  // p^iNode local
 
             }
@@ -701,28 +762,28 @@ OseenShapeDerivative<MeshType, SolverType>::updateLinearSystem( const matrix_Typ
               std::cout << "fin   ====================" << std::endl;
             */
             // assembling pressure right hand side
-            assembleVector( rhsLinNoBC,
+            assembleVector( linearRightHandSideNoBC,
                             M_elementVectorPressure,
                             this->M_pressureFESpace.fe(),
                             this->M_pressureFESpace.dof(),
                             0,
-                            numVelocityComponent*this->dim_u() );
+                            numVelocityComponent*this->dimVelocity() );
 
             // loop on velocity components
             for ( Int iComponent = 0; iComponent < numVelocityComponent; iComponent++ )
             {
                 // assembling velocity right hand side
-                assembleVector( rhsLinNoBC,
+                assembleVector( linearRightHandSideNoBC,
                                 M_elementVectorVelocity,
                                 this->M_velocityFESpace.fe(),
                                 this->M_velocityFESpace.dof(),
                                 iComponent,
-                                iComponent*this->dim_u() );
+                                iComponent*this->dimVelocity() );
             }
         }
 
-        rhsLinNoBC.globalAssemble();
-        M_linearRightHandSideNoBC += rhsLinNoBC;
+        linearRightHandSideNoBC.globalAssemble();
+        M_linearRightHandSideNoBC += linearRightHandSideNoBC;
 //       M_linearRightHandSideNoBC *= -1.;
 //       if( S_verbose )
 //           this->M_Displayer.leaderPrint( "norm( M_linearRightHandSideNoBC)  = " , M_linearRightHandSideNoBC.NormInf() );
@@ -826,7 +887,7 @@ updateShapeDerivatives( matrix_Type&                   matrix,
 
                 for ( UInt iComponent = 0; iComponent < numVelocityComponent; ++iComponent )
                 {
-                    UInt iGlobal = this->M_velocityFESpace.dof().localToGlobal( i, iLocal + 1 ) + iComponent * this->dim_u();
+                    UInt iGlobal = this->M_velocityFESpace.dof().localToGlobal( i, iLocal + 1 ) + iComponent * this->dimVelocity();
 
                     // if(!wImplicit)
                     // u^n - w^iNode local
@@ -860,7 +921,7 @@ updateShapeDerivatives( matrix_Type&                   matrix,
             {
                 // iLocal = iNode
                 UInt iLocal = this->M_pressureFESpace.fe().patternFirst( iNode );
-                UInt iGlobal = this->M_pressureFESpace.dof().localToGlobal( i, iLocal + 1 ) + numVelocityComponent*this->dim_u();
+                UInt iGlobal = this->M_pressureFESpace.dof().localToGlobal( i, iLocal + 1 ) + numVelocityComponent*this->dimVelocity();
                 // p^iNode local
                 M_elementPressure[ iLocal ] = ukRepeated[ iGlobal ];
             }

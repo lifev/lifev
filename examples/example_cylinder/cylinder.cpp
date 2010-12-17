@@ -509,7 +509,7 @@ Cylinder::run()
 
         *velAndPressure = *fluid.solution();
         ensight.postProcess( 0 );
-        fluid.resetPrec();
+        fluid.resetPreconditioner();
     }
 
     bdf.bdf_u().initialize_unk( *fluid.solution() );
@@ -537,7 +537,7 @@ Cylinder::run()
 
         beta = bdf.bdf_u().extrap();
 
-        rhs  = fluid.matrMass()*bdf.bdf_u().time_der( dataNavierStokes->dataTime()->getTimeStep() );
+        rhs  = fluid.matrixMass()*bdf.bdf_u().time_der( dataNavierStokes->dataTime()->getTimeStep() );
 
         fluid.updateSystem( alpha, beta, rhs );
         fluid.iterate( bcH );

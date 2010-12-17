@@ -1,4 +1,4 @@
-/* -*- mode: c++ -*-
+/* -*- mode: c++ -*- */
 //@HEADER
 /*
 *******************************************************************************
@@ -139,9 +139,9 @@ public:
     typedef boost::shared_ptr<meshMotion_Type>                                      meshMotionPtr_Type;
     typedef boost::shared_ptr<fluidLin_Type>                                        fluidLinPtr_Type;
     typedef boost::shared_ptr<solidLin_Type>                                        solidLinPtr_Type;
-    typedef fluid_Type::vector_type/*fluidPtr_Type::vector_Type*/                   vector_Type;
+    typedef fluid_Type::vector_Type/*fluidPtr_Type::vector_Type*/                   vector_Type;
     typedef boost::shared_ptr<vector_Type>                                          vectorPtr_Type;
-    typedef fluid_Type::source_type/*fluidPtr_Type::source_Type*/                   fluidSource_Type;
+    typedef fluid_Type::source_Type/*fluidPtr_Type::source_Type*/                   fluidSource_Type;
     typedef solid_Type::source_Type                                                 solidSource_Type;
     typedef boost::function<Real ( const Real&, const Real&,
                                    const Real&, const Real&, const ID& )>           function_Type;
@@ -150,8 +150,8 @@ public:
     typedef boost::shared_ptr<DofInterface3Dto3D>                                   dofInterface3DPtr_Type;
     typedef boost::shared_ptr<DofInterface3Dto2D>                                   dofInterface2DPtr_Type;
     typedef boost::shared_ptr<BCVectorInterface>                                    bcVectorInterfacePtr_Type;
-    typedef fluid_Type::bchandler_type/*fluidPtr_Type::bchandlerPtr_Type*/          fluidBchandlerPtr_Type;
-    typedef fluid_Type::bchandler_raw_type/*fluidPtr_Type::bchandler_Type*/         fluidBchandler_Type;
+    typedef fluid_Type::bcHandlerPtr_Type/*fluidPtr_Type::bchandlerPtr_Type*/       fluidBchandlerPtr_Type;
+    typedef fluid_Type::bcHandler_Type/*fluidPtr_Type::bchandler_Type*/             fluidBchandler_Type;
     typedef BCHandler                                                               solidBchandler_Type;
     typedef boost::shared_ptr<solidBchandler_Type>                                  solidBchandlerPtr_Type;
     typedef DataFSI                                                                 data_Type;
@@ -295,11 +295,11 @@ public:
        \param d0: initial solid displacement
        \param w0: initial mesh velocity
      */
-    virtual void initialize( FSIOperator::fluidPtr_Type::value_type::Function const& u0,
-                             FSIOperator::fluidPtr_Type::value_type::Function const& p0,
+    virtual void initialize( FSIOperator::fluidPtr_Type::value_type::function_Type const& u0,
+                             FSIOperator::fluidPtr_Type::value_type::function_Type const& p0,
                              FSIOperator::solidPtr_Type::value_type::Function const& d0,
                              FSIOperator::solidPtr_Type::value_type::Function const& w0,
-                             FSIOperator::fluidPtr_Type::value_type::Function const& /*df0=FSIOperator::solidPtr_Type::value_type::Function()*/)
+                             FSIOperator::fluidPtr_Type::value_type::function_Type const& /*df0=FSIOperator::solidPtr_Type::value_type::Function()*/)
     {
         Debug( 6220 ) << "FSIOperator:: solid init \n";
         if (this->isSolid())

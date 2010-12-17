@@ -376,7 +376,7 @@ Cylinder::run()
 
 {
 
-    typedef Oseen< RegionMesh3D<LinearTetra> >::vector_type  vector_type;
+    typedef Oseen< RegionMesh3D<LinearTetra> >::vector_Type  vector_type;
     typedef boost::shared_ptr<vector_type> vector_ptrtype;
     // Reading from data file
     //
@@ -518,7 +518,7 @@ Cylinder::run()
 
         *velAndPressure = *fluid.solution();
         ensight.postProcess( 0 );
-        fluid.resetPrec();
+        fluid.resetPreconditioner();
     }
 
     bdf.bdf_u().initialize_unk( *fluid.solution() );
@@ -546,7 +546,7 @@ Cylinder::run()
 
         beta = bdf.bdf_u().extrap();
 
-        rhs  = fluid.matrMass()*bdf.bdf_u().time_der( dataNavierStokes->dataTime()->getTimeStep() );
+        rhs  = fluid.matrixMass()*bdf.bdf_u().time_der( dataNavierStokes->dataTime()->getTimeStep() );
 
         fluid.updateSystem( alpha, beta, rhs );
         fluid.iterate( bcH );

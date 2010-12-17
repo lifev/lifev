@@ -60,7 +60,7 @@
 using namespace LifeV;
 
 
-typedef Oseen< RegionMesh3D<LinearTetra> >::vector_type  vector_type;
+typedef Oseen< RegionMesh3D<LinearTetra> >::vector_Type  vector_type;
 typedef boost::shared_ptr<vector_type> vector_ptrtype;
 
 

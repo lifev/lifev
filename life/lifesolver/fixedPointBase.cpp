@@ -140,7 +140,7 @@ void fixedPoint::eval( const vector_Type& _disp,
 
     if (iter == 0 && this->isFluid())
     {
-        this->M_fluid->resetPrec();
+        this->M_fluid->resetPreconditioner();
         //this->M_solid->resetPrec();
     }
 
@@ -199,7 +199,7 @@ void fixedPoint::eval( const vector_Type& _disp,
         }
         else
         {
-            this->M_fluid->updateRHS( *M_rhs );
+            this->M_fluid->updateRightHandSide( *M_rhs );
         }
 
         //	if(this->algorithm()=="RobinNeumann") this->updatealphaf(this->veloFluidMesh());// this->setAlphaf();
@@ -216,11 +216,11 @@ void fixedPoint::eval( const vector_Type& _disp,
 
     if ( true && this->isFluid() )
     {
-        vector_Type vel  (this->fluid().velFESpace().map());
-        vector_Type press(this->fluid().pressFESpace().map());
+        vector_Type vel  (this->fluid().velocityFESpace().map());
+        vector_Type press(this->fluid().pressureFESpace().map());
 
         vel.subset(*this->M_fluid->solution());
-        press.subset(*this->M_fluid->solution(), this->fluid().velFESpace().dim()*this->fluid().pressFESpace().fieldDim());
+        press.subset(*this->M_fluid->solution(), this->fluid().velocityFESpace().dim()*this->fluid().pressureFESpace().fieldDim());
 
         std::cout << "norm_inf( vel ) " << vel.normInf() << std::endl;
         std::cout << "norm_inf( press ) " << press.normInf() << std::endl;

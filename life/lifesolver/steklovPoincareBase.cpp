@@ -167,11 +167,11 @@ void steklovPoincare::eval(const vector_Type& disp,
 
     if ( true && this->isFluid() )
     {
-        vector_Type vel  (this->fluid().velFESpace().map());
-        vector_Type press(this->fluid().pressFESpace().map());
+        vector_Type vel  (this->fluid().velocityFESpace().map());
+        vector_Type press(this->fluid().pressureFESpace().map());
 
         vel.subset(this->M_fluid->solution());
-        press.subset(this->M_fluid->solution(), this->fluid().velFESpace().dim()*this->fluid().pressFESpace().fieldDim());
+        press.subset(this->M_fluid->solution(), this->fluid().velocityFESpace().dim()*this->fluid().pressureFESpace().fieldDim());
 
 
         std::cout << "norm_inf( vel ) " << vel.NormInf() << std::endl;
@@ -319,13 +319,13 @@ void  steklovPoincare::solveJac(vector_Type        &muk,
 
 void steklovPoincare::solveLinearFluid()
 {
-    this->M_fluid->iterateLin(time(), *M_BCh_du);
+    this->M_fluid->solveLinearSystem(time(), *M_BCh_du);
 }
 
 
 void steklovPoincare::solveInvLinearFluid()
 {
-    this->M_fluid->iterateLin(time(), *M_BCh_du_inv);
+    this->M_fluid->solveLinearSystem(time(), *M_BCh_du_inv);
     this->M_dzFluid = M_fluid->getDeltaLambda();
 }
 

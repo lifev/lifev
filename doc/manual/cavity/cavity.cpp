@@ -275,7 +275,7 @@ int main(int argc, char** argv)
 
     // We erase the preconditioner build for Stokes
     // (A new one should be built for Navier-Stokes)
-    fluid.resetPrec();
+    fluid.resetPreconditioner();
 
     boost::shared_ptr< LifeV::Hdf5exporter<LifeV::RegionMesh3D<LifeV::LinearTetra> > > exporter;
 
@@ -319,7 +319,7 @@ int main(int argc, char** argv)
 
         beta = bdf.bdf_u().extrap(); // Extrapolation for the convective term
 
-        rhs  = fluid.matrMass()*bdf.bdf_u().time_der( dataNavierStokes->dataTime()->getTimeStep() );
+        rhs  = fluid.matrixMass()*bdf.bdf_u().time_der( dataNavierStokes->dataTime()->getTimeStep() );
 
         fluid.getDisplayer().leaderPrint("alpha ", alpha);
         fluid.getDisplayer().leaderPrint("\n");
@@ -360,7 +360,7 @@ int main(int argc, char** argv)
     globalChrono.stop();
     if (verbose) std::cout << "Total simulation time:  " << globalChrono.diff() << " s." << std::endl;
 
-    exporter->closeFile();
+    exporter->CloseFile();
 
 #ifdef HAVE_MPI
     MPI_Finalize();

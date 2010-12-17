@@ -384,7 +384,7 @@ ResistanceProblem::run()
 
     MPI_Barrier(MPI_COMM_WORLD);
 
-    fluid.resetPrec();
+    fluid.resetPreconditioner();
 
     // Temporal loop
 
@@ -401,7 +401,7 @@ ResistanceProblem::run()
         double alpha = bdf.bdf_u().coeff_der( 0 ) / dataNavierStokes->dataTime()->getTimeStep();
 
         beta = bdf.bdf_u().extrap();
-        rhs  = fluid.matrMass()*bdf.bdf_u().time_der( dataNavierStokes->dataTime()->getTimeStep() );
+        rhs  = fluid.matrixMass()*bdf.bdf_u().time_der( dataNavierStokes->dataTime()->getTimeStep() );
 
         fluid.updateSystem( alpha, beta, rhs );
         fluid.iterate( bcH );

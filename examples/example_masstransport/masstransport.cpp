@@ -467,7 +467,7 @@ MassTransport::run()
 
     bdf.bdf_u().initialize_unk( fluid.solution() );
 
-    fluid.resetPrec();
+    fluid.resetPreconditioner();
 
     boost::shared_ptr< Exporter<RegionMesh3D<LinearTetra> > > exporter;
 
@@ -548,7 +548,7 @@ MassTransport::run()
 //         betaFluid = bdf.bdf_u().extrap();
 
         betaFluid.subset(bdf.bdf_u().extrap());
-        rhsFluid  = fluid.matrMass()*bdf.bdf_u().time_der( dataNavierStokes.dataTime()->getTimeStep() );
+        rhsFluid  = fluid.matrixMass()*bdf.bdf_u().time_der( dataNavierStokes.dataTime()->getTimeStep() );
 
 
 //         std::cout << "alphaNS " << alphaNS << std::endl;

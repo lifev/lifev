@@ -56,6 +56,7 @@
 #include <life/lifearray/EpetraVector.hpp>
 
 #include <life/lifecore/chrono.hpp>
+
 #include <life/lifefem/assemb.hpp>
 #include <life/lifefem/bcManage.hpp>
 #include <life/lifefem/elemOper.hpp>
@@ -67,7 +68,6 @@
 
 #include <life/lifesolver/nsipterms.hpp>
 #include <life/lifesolver/dataNavierStokes.hpp>
-//#include <life/lifesolver/dataMesh.hpp>
 
 #include <boost/shared_ptr.hpp>
 
@@ -95,25 +95,26 @@ public:
     //@{
 
     ///////// old: to be removed
+
     typedef MeshType                              mesh_type;
-    typedef DataNavierStokes                      data_type;
+    typedef DataNavierStokes                      data_type __attribute__ ((deprecated));
 
     typedef boost::function<Real ( const Real& t, const Real& x, const Real& y,
-                                   const Real& z, const ID& i )> Function;
+                                   const Real& z, const ID& i )> Function __attribute__ ((deprecated));
 
     typedef boost::function<Real ( const Real& t, const Real& x, const Real& y,
-                                   const Real& z, const ID& i )> source_type;
+                                   const Real& z, const ID& i )> source_type __attribute__ ((deprecated));
 
-    typedef BCHandler                             bchandler_raw_type;
-    typedef boost::shared_ptr<bchandler_raw_type> bchandler_type;
+    typedef BCHandler                             bchandler_raw_type __attribute__ ((deprecated));
+    typedef boost::shared_ptr<bchandler_raw_type> bchandler_type __attribute__ ((deprecated));
 
-    typedef typename SolverType::matrix_type      matrix_type;
-    typedef boost::shared_ptr<matrix_type>        matrix_ptrtype;
-    typedef typename SolverType::vector_type      vector_type;
-    typedef boost::shared_ptr<vector_type>        vector_ptrtype;
+    typedef typename SolverType::matrix_type      matrix_type __attribute__ ((deprecated));
+    typedef boost::shared_ptr<matrix_type>        matrix_ptrtype __attribute__ ((deprecated));
+    typedef typename SolverType::vector_type      vector_type __attribute__ ((deprecated));
+    typedef boost::shared_ptr<vector_type>        vector_ptrtype __attribute__ ((deprecated));
 
-    typedef typename SolverType::prec_raw_type    prec_raw_type;
-    typedef typename SolverType::prec_type        prec_type;
+    typedef typename SolverType::prec_raw_type    prec_raw_type __attribute__ ((deprecated));
+    typedef typename SolverType::prec_type        prec_type __attribute__ ((deprecated));
     /////////
 
     typedef MeshType                              mesh_Type;
@@ -254,13 +255,13 @@ public:
     /*!
         @param matrixFull
      */
-    void updateStab( matrix_Type& matrixFull );
+    void updateStabilization( matrix_Type& matrixFull );
 
     //! Update the right hand side
     /*!
         @param rightHandSide right hand side
      */
-    virtual void updateRHS( const vector_Type& rightHandSide )
+    virtual void updateRightHandSide( const vector_Type& rightHandSide )
     {
         M_rightHandSideNoBC = rightHandSide;
         M_rightHandSideNoBC.globalAssemble();
@@ -298,13 +299,13 @@ public:
     void getFluidMatrix( matrix_Type& matrixFull );
 
     //! Set up post processing structures
-    void post_proc_set_area();
+    void postProcessingSetArea();
 
     //! Set up post processing
-    void post_proc_set_normal();
+    void postProcessingSetNormal();
 
     //! Set up post processing
-    void post_proc_set_phi();
+    void postProcessingSetPhi();
 
     //! Set up post processing
     void setupPostProc( const entityFlag_Type& flag, const mesh_Type meshPart );
@@ -353,7 +354,7 @@ public:
         @param bcHandler BChandler containing the boundary conditions of the problem.
         @return          Lagrange multiplier
      */
-    Real LagrangeMultiplier( const entityFlag_Type& flag, bcHandler_Type& bcHandler );
+    Real lagrangeMultiplier( const entityFlag_Type& flag, bcHandler_Type& bcHandler );
 
     //! Get the Lagrange multiplier related to a flux imposed on a given part of the boundary
     /*!
@@ -364,7 +365,7 @@ public:
                          (and also the Lagrange multipliers at the end).
         @return          Lagrange multiplier
      */
-    Real LagrangeMultiplier( const entityFlag_Type&  flag,
+    Real lagrangeMultiplier( const entityFlag_Type&  flag,
                              bcHandler_Type& bcHandler,
                              const vector_Type& solution );
 
@@ -372,14 +373,14 @@ public:
     /*!
         @param reset Reset preconditioner.
      */
-    void resetPrec( bool reset = true )
+    void resetPreconditioner( bool reset = true )
     {
         if ( reset )
             M_linearSolver.precReset();
     }
 
     //! Reset stabilization matrix at the same time as the preconditioner
-    void resetStab()
+    void resetStabibilization()
     {
         M_resetStabilization = true;
     }
@@ -430,7 +431,7 @@ public:
         @param tolerance Tolerance
         @param maxIteration maximum number of iterations
      */
-    void setTolMaxiter( const Real& tolerance, const Int& maxIteration = -1 );
+    void setTolMaxIteration( const Real& tolerance, const Int& maxIteration = -1 );
 
     //@}
 
@@ -476,12 +477,12 @@ public:
     /*!
         @return velocity FE space
      */
-    FESpace<mesh_Type, EpetraMap>& velFESpace()
+    FESpace<mesh_Type, EpetraMap>& velocityFESpace()
     {
         return M_velocityFESpace;
     }
 
-    const FESpace<mesh_Type, EpetraMap>& velFESpace() const
+    const FESpace<mesh_Type, EpetraMap>& velocityFESpace() const
     {
         return M_velocityFESpace;
     }
@@ -490,11 +491,12 @@ public:
     /*!
         @return pressure FE space
      */
-    FESpace<mesh_Type, EpetraMap>& pressFESpace()
+    FESpace<mesh_Type, EpetraMap>& pressureFESpace()
     {
         return M_pressureFESpace;
     }
-    const FESpace<mesh_Type, EpetraMap>& pressFESpace() const
+
+    const FESpace<mesh_Type, EpetraMap>& pressureFESpace() const
     {
         return M_pressureFESpace;
     }
@@ -512,11 +514,12 @@ public:
     /*!
         @return Post processing
     */
-    PostProc<mesh_Type>& post_proc()
+    PostProc<mesh_Type>& postProcessing()
     {
         return *M_postProcessing;
     }
-    const PostProc<mesh_Type>& post_proc() const
+
+    const PostProc<mesh_Type>& postProcessing() const
     {
         return *M_postProcessing;
     }
@@ -561,11 +564,12 @@ public:
     /*!
         @return Matrix without boundary conditions
      */
-    matrix_Type& matrNoBC()
+    matrix_Type& matrixNoBC()
     {
         return *M_matrixNoBC;
     }
-    const matrix_Type& matrNoBC() const
+
+    const matrix_Type& matrixNoBC() const
     {
         return *M_matrixNoBC;
     }
@@ -574,11 +578,12 @@ public:
     /*!
         @return Mass matrix
      */
-    matrix_Type& matrMass()
+    matrix_Type& matrixMass()
     {
         return *M_matrixMass;
     }
-    const matrix_Type& matrMass() const
+
+    const matrix_Type& matrixMass() const
     {
         return *M_matrixMass;
     }
@@ -587,19 +592,144 @@ public:
     /*!
         @return A bool value if using diagonal block preconditioner
      */
-    bool getIsDiagonalBlockPrec()
+    bool getIsDiagonalBlockPreconditioner()
     {
         return M_isDiagonalBlockPreconditioner;
     }
 
-    const bool& getIsDiagonalBlockPrec() const
+    const bool& getIsDiagonalBlockPreconditioner() const
     {
         return M_isDiagonalBlockPreconditioner;
     }
 
     //@}
 
+
+    //@{ deprecated methods
+
+    void __attribute__ ((__deprecated__)) updateStab( matrix_Type& matrixFull )
+                {
+    return updateStabilization( matrixFull );
+                }
+
+    virtual void __attribute__ ((__deprecated__)) updateRHS( const vector_Type& rightHandSide )
+                {
+    return updateRightHandSide( rightHandSide );
+                }
+
+    void __attribute__ ((__deprecated__)) post_proc_set_normal( )
+                {
+    return postProcessingSetNormal( );
+                }
+
+    void __attribute__ ((__deprecated__)) post_proc_set_phi( )
+                {
+    return postProcessingSetPhi( );
+                }
+
+    void __attribute__ ((__deprecated__)) post_proc_set_area( )
+                {
+    return postProcessingSetArea( );
+                }
+
+    Real __attribute__ ((__deprecated__)) LagrangeMultiplier( const entityFlag_Type& flag, bcHandler_Type& bcHandler )
+                {
+    return lagrangeMultiplier( flag, bcHandler );
+                }
+
+    Real __attribute__ ((__deprecated__)) LagrangeMultiplier( const entityFlag_Type&  flag,
+                                                              bcHandler_Type& bcHandler,
+                                                              const vector_Type& solution )
+                {
+    return lagrangeMultiplier( flag, bcHandler, solution );
+                }
+
+    void __attribute__ ((__deprecated__)) resetPrec( bool reset = true )
+                {
+    return resetPreconditioner( reset );
+                }
+
+    void __attribute__ ((__deprecated__)) resetStab( )
+                {
+    return resetStabibilization( );
+                }
+
+    void __attribute__ ((__deprecated__)) setTolMaxiter( const Real& tolerance, const Int& maxIteration = -1 )
+                {
+    return setTolMaxIteration( tolerance, maxIteration);
+                }
+
+    FESpace<mesh_Type, EpetraMap>& __attribute__ ((__deprecated__)) velFESpace( )
+    {
+        return velocityFESpace( );
+    }
+
+    const FESpace<mesh_Type, EpetraMap>& __attribute__ ((__deprecated__)) velFESpace( ) const
+    {
+        return velocityFESpace( );
+    }
+
+    FESpace<mesh_Type, EpetraMap>& __attribute__ ((__deprecated__)) pressFESpace( )
+    {
+        return pressureFESpace( );
+    }
+
+    const FESpace<mesh_Type, EpetraMap>& __attribute__ ((__deprecated__)) pressFESpace( ) const
+    {
+        return pressureFESpace( );
+    }
+
+    PostProc<mesh_Type>&  __attribute__ ((__deprecated__)) post_proc( )
+    {
+        return postProcessing( );
+    }
+
+    const PostProc<mesh_Type>&  __attribute__ ((__deprecated__)) post_proc( ) const
+    {
+        return postProcessing( );
+    }
+
+    matrix_Type&  __attribute__ ((__deprecated__)) matrNoBC( )
+    {
+        return matrixNoBC( );
+    }
+
+    const matrix_Type&  __attribute__ ((__deprecated__)) matrNoBC( ) const
+    {
+        return matrixNoBC( );
+    }
+
+    matrix_Type&  __attribute__ ((__deprecated__)) matrMass( )
+    {
+        return matrixMass( );
+    }
+
+    const matrix_Type&  __attribute__ ((__deprecated__)) matrMass( ) const
+    {
+        return matrixMass( );
+    }
+
+    bool  __attribute__ ((__deprecated__)) getIsDiagonalBlockPrec( ) const
+    {
+        return getIsDiagonalBlockPreconditioner( );
+    }
+
+    bool  __attribute__ ((__deprecated__)) getIsDiagonalBlockPrec( )
+    {
+        return getIsDiagonalBlockPreconditioner( );
+    }
+
+    //@}
+
 protected:
+
+    //! @name Constructor
+    //@{
+
+    //! Empty copy constructor
+    Oseen( const Oseen& oseen);
+
+    //@}
 
     //! @name Private Methods
     //@{
@@ -628,15 +758,29 @@ protected:
     void echo( std::string message );
 
     //! Return the dim of velocity FE space
-    const UInt& dim_u() const
+    const UInt& dimVelocity() const
     {
         return M_velocityFESpace.dim();
     }
 
     //! Return the dim of pressure FE space
-    const UInt& dim_p() const
+    const UInt& dimPressure() const
     {
         return M_pressureFESpace.dim();
+    }
+
+    //@}
+
+    //@{ deprecated methods
+
+    const UInt&  __attribute__ ((__deprecated__)) dim_u( ) const
+    {
+        return dimVelocity( );
+    }
+
+    const UInt&  __attribute__ ((__deprecated__)) dim_p( ) const
+    {
+        return dimPressure( );
     }
 
     //@}
@@ -774,13 +918,13 @@ Oseen( boost::shared_ptr<data_Type>    dataType,
         M_reuseStabilization     ( false ),
         M_resetStabilization     ( false ),
         M_iterReuseStabilization ( -1 ),
-        M_ipStabilization        ( M_velocityFESpace.mesh(),
-                                   M_velocityFESpace.dof(),
-                                   M_velocityFESpace.refFE(),
-                                   M_velocityFESpace.feBd(),
-                                   M_velocityFESpace.qr(),
-                                   0., 0., 0.,
-                                   M_dataNavierStokes->viscosity() ),
+//        M_ipStabilization        ( M_velocityFESpace.mesh(),
+//                                   M_velocityFESpace.dof(),
+//                                   M_velocityFESpace.refFE(),
+//                                   M_velocityFESpace.feBd(),
+//                                   M_velocityFESpace.qr(),
+//                                   0., 0., 0.,
+//                                   M_dataNavierStokes->viscosity() ),
         M_betaFunction           ( 0 ),
         M_divBetaUv              ( false ),
         M_stiffStrain            ( false ),
@@ -801,6 +945,8 @@ Oseen( boost::shared_ptr<data_Type>    dataType,
         M_un                     ( new vector_Type(M_localMap) )
 {
     M_stabilization = ( &M_velocityFESpace.refFE() == &M_pressureFESpace.refFE() );
+    M_ipStabilization.setFeSpaceVelocity(M_velocityFESpace);
+    M_ipStabilization.setViscosity(M_dataNavierStokes->viscosity() );
 }
 
 template<typename MeshType, typename SolverType>
@@ -835,13 +981,13 @@ Oseen( boost::shared_ptr<data_Type>    dataType,
         M_reuseStabilization     ( false ),
         M_resetStabilization     ( false ),
         M_iterReuseStabilization ( -1 ),
-        M_ipStabilization        ( M_velocityFESpace.mesh(),
-                                   M_velocityFESpace.dof(),
-                                   M_velocityFESpace.refFE(),
-                                   M_velocityFESpace.feBd(),
-                                   M_velocityFESpace.qr(),
-                                   0., 0., 0.,
-                                   M_dataNavierStokes->viscosity() ),
+//        M_ipStabilization        ( M_velocityFESpace.mesh(),
+//                                   M_velocityFESpace.dof(),
+//                                   M_velocityFESpace.refFE(),
+//                                   M_velocityFESpace.feBd(),
+//                                   M_velocityFESpace.qr(),
+//                                   0., 0., 0.,
+//                                   M_dataNavierStokes->viscosity() ),
         M_betaFunction           ( 0 ),
         M_divBetaUv              ( false ),
         M_stiffStrain            ( false ),
@@ -862,6 +1008,8 @@ Oseen( boost::shared_ptr<data_Type>    dataType,
         M_un                     ( new vector_Type(M_localMap) )
 {
     M_stabilization = ( &M_velocityFESpace.refFE() == &M_pressureFESpace.refFE() );
+    M_ipStabilization.setFeSpaceVelocity(M_velocityFESpace);
+    M_ipStabilization.setViscosity(M_dataNavierStokes->viscosity() );
 }
 
 template<typename MeshType, typename SolverType>
@@ -895,13 +1043,13 @@ Oseen( boost::shared_ptr<data_Type>    dataType,
         M_reuseStabilization     ( false ),
         M_resetStabilization     ( false ),
         M_iterReuseStabilization ( -1 ),
-        M_ipStabilization        ( M_velocityFESpace.mesh(),
-                                   M_velocityFESpace.dof(),
-                                   M_velocityFESpace.refFE(),
-                                   M_velocityFESpace.feBd(),
-                                   M_velocityFESpace.qr(),
-                                   0., 0., 0.,
-                                   M_dataNavierStokes->viscosity() ),
+//        M_ipStabilization        ( M_velocityFESpace.mesh(),
+//                                   M_velocityFESpace.dof(),
+//                                   M_velocityFESpace.refFE(),
+//                                   M_velocityFESpace.feBd(),
+//                                   M_velocityFESpace.qr(),
+//                                   0., 0., 0.,
+//                                   M_dataNavierStokes->viscosity() ),
         M_betaFunction           ( 0 ),
         M_divBetaUv              ( false ),
         M_stiffStrain            ( false ),
@@ -922,6 +1070,8 @@ Oseen( boost::shared_ptr<data_Type>    dataType,
         M_un                     ( new vector_Type(M_localMap) )
 {
     M_stabilization = ( &M_velocityFESpace.refFE() == &M_pressureFESpace.refFE() );
+    M_ipStabilization.setFeSpaceVelocity(M_velocityFESpace);
+    M_ipStabilization.setViscosity(M_dataNavierStokes->viscosity() );
 }
 
 template<typename MeshType, typename SolverType>
@@ -1187,7 +1337,7 @@ Oseen<MeshType, SolverType>::buildSystem()
         }
     }
 
-    //    for (UInt ii = nDimensions*dim_u(); ii < nDimensions*dim_u() + dim_p(); ++ii)
+    //    for (UInt ii = nDimensions*dimVelocity(); ii < nDimensions*dimVelocity() + dimPressure(); ++ii)
     //  M_matrixStokes->set_mat_inc( ii ,ii, 0. ); not scalable!!!
 
     if ( M_isDiagonalBlockPreconditioner == true )
@@ -1267,7 +1417,7 @@ updateSystem( const Real         alpha,
 
     // Right hand side for the velocity at time
 
-    updateRHS( sourceVector );
+    updateRightHandSide( sourceVector );
 
     chrono.stop();
 
@@ -1337,7 +1487,7 @@ updateSystem( const Real         alpha,
                 for ( UInt iComponent = 0; iComponent < numVelocityComponent; ++iComponent )
                 {
                     UInt iGlobal = M_velocityFESpace.dof().localToGlobal( elementID, iLocal + 1 )
-                                   + iComponent * dim_u();
+                                   + iComponent * dimVelocity();
                     M_elementRightHandSide.vec() [ iLocal + iComponent * M_velocityFESpace.fe().nbFEDof() ]
                     = betaVectorRepeated[iGlobal]; // BASEINDEX + 1
 
@@ -1455,7 +1605,7 @@ updateSystem( const Real         alpha,
 
 template<typename MeshType, typename SolverType>
 void
-Oseen<MeshType, SolverType>::updateStab( matrix_Type& matrixFull )
+Oseen<MeshType, SolverType>::updateStabilization( matrix_Type& matrixFull )
 {
 
     if ( M_stabilization )
@@ -1481,7 +1631,7 @@ Oseen<MeshType, SolverType>::iterate( bcHandler_Type& bcHandler )
 
     matrixPtr_Type matrixFull( new matrix_Type( M_localMap, M_matrixNoBC->meanNumEntries() ) );
 
-    updateStab( *matrixFull );
+    updateStabilization( *matrixFull );
     getFluidMatrix( *matrixFull );
 
     vector_Type rightHandSideFull ( M_rightHandSideNoBC );
@@ -1513,7 +1663,7 @@ Oseen<MeshType, SolverType>::iterate( bcHandler_Type& bcHandler )
     // if the preconditioner has been rese the stab terms are to be updated
     if ( numIter < 0 || numIter > M_iterReuseStabilization )
     {
-        resetStab();
+        resetStabibilization();
     }
 
     M_residual  = M_rightHandSideNoBC;
@@ -1531,16 +1681,16 @@ Oseen<MeshType, SolverType>::reduceSolution( Vector& velocityVector, Vector& pre
 
     if ( false /*S_verbose*/ )
     {
-        for ( UInt iDof = 0; iDof < nDimensions * dim_u(); ++iDof )
+        for ( UInt iDof = 0; iDof < nDimensions * dimVelocity(); ++iDof )
         {
             // BASEINDEX + 1
             velocityVector[ iDof ] = solution[ iDof + 1 ];
         }
 
-        for ( UInt iDof = 0; iDof < dim_p(); ++iDof )
+        for ( UInt iDof = 0; iDof < dimPressure(); ++iDof )
         {
             // BASEINDEX + 1
-            pressureVector[ iDof ] = solution[ iDof + nDimensions * dim_u() + 1 ];
+            pressureVector[ iDof ] = solution[ iDof + nDimensions * dimVelocity() + 1 ];
         }
     }
 
@@ -1554,7 +1704,7 @@ Oseen<MeshType, SolverType>::reduceResidual( Vector& residualVector )
 
     if ( false /*S_verbose*/ )
     {
-        for ( UInt iDof = 0; iDof < nDimensions * dim_u(); ++iDof )
+        for ( UInt iDof = 0; iDof < nDimensions * dimVelocity(); ++iDof )
         {
             // BASEINDEX + 1
             residualVector[ iDof ] = residual[ iDof + 1 ];
@@ -1581,21 +1731,21 @@ Oseen<MeshType, SolverType>::getFluidMatrix( matrix_Type& matrixFull )
 
 template<typename MeshType, typename SolverType>
 void
-Oseen<MeshType, SolverType>::post_proc_set_area()
+Oseen<MeshType, SolverType>::postProcessingSetArea()
 {
     M_postProcessing->set_area();
 }
 
 template<typename MeshType, typename SolverType>
 void
-Oseen<MeshType, SolverType>::post_proc_set_normal()
+Oseen<MeshType, SolverType>::postProcessingSetNormal()
 {
     M_postProcessing->set_normal();
 }
 
 template<typename MeshType, typename SolverType>
 void
-Oseen<MeshType, SolverType>::post_proc_set_phi()
+Oseen<MeshType, SolverType>::postProcessingSetPhi()
 {
     M_postProcessing->set_phi();
 }
@@ -1623,7 +1773,7 @@ template<typename MeshType, typename SolverType>
 Real
 Oseen<MeshType, SolverType>::area( const entityFlag_Type& flag )
 {
-    return M_postProcessing->area( flag );
+    return M_postProcessing->measure( flag );
 }
 
 template<typename MeshType, typename SolverType>
@@ -1649,15 +1799,15 @@ Oseen<MeshType, SolverType>::pressure(const entityFlag_Type& flag,
 
 template<typename MeshType, typename SolverType>
 Real
-Oseen<MeshType, SolverType>::LagrangeMultiplier( const entityFlag_Type& flag,
+Oseen<MeshType, SolverType>::lagrangeMultiplier( const entityFlag_Type& flag,
                                                  bcHandler_Type& bcHandler )
 {
-    return LagrangeMultiplier( flag, bcHandler, *M_solution );
+    return lagrangeMultiplier( flag, bcHandler, *M_solution );
 }
 
 template<typename MeshType, typename SolverType>
 Real
-Oseen<MeshType, SolverType>::LagrangeMultiplier( const entityFlag_Type&  flag,
+Oseen<MeshType, SolverType>::lagrangeMultiplier( const entityFlag_Type&  flag,
                                                  bcHandler_Type& bcHandler,
                                                  const vector_Type& solution )
 {
@@ -1768,7 +1918,7 @@ Oseen<MeshType, SolverType>::applyBoundaryConditions( matrix_Type&       matrix,
 
     if ( bcHandler.hasOnlyEssential() && M_diagonalize )
     {
-        matrix.diagonalize( nDimensions*dim_u(),
+        matrix.diagonalize( nDimensions*dimVelocity(),
                             M_diagonalize,
                             rightHandSide,
                             0. );
@@ -1794,9 +1944,9 @@ Oseen<MeshType, SolverType>::setupPostProc( const entityFlag_Type& flag, const m
 
 template<typename MeshType, typename SolverType>
 void
-Oseen<MeshType, SolverType>::setTolMaxiter( const Real& tolerance, const Int& maxIteration )
+Oseen<MeshType, SolverType>::setTolMaxIteration( const Real& tolerance, const Int& maxIteration )
 {
-    M_linearSolver.setTolMaxiter( tolerance, maxIteration );
+    M_linearSolver.setTolMaxIteration( tolerance, maxIteration );
 }
 
 

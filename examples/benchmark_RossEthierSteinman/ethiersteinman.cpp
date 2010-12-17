@@ -349,7 +349,7 @@ Ethiersteinman::check()
         std::cout << d->comm->MyPID() << " Total init time" << chrono.diff() << " s." << std::endl;
     // end initialization step
 
-    fluid.resetPrec();
+    fluid.resetPreconditioner();
 
     boost::shared_ptr< Exporter<RegionMesh3D<LinearTetra> > > exporter;
 
@@ -415,7 +415,7 @@ Ethiersteinman::check()
 
         beta = bdf.bdf_u().extrap();
 
-        rhs  = fluid.matrMass()*bdf.bdf_u().time_der( dataNavierStokes->dataTime()->getTimeStep() );
+        rhs  = fluid.matrixMass()*bdf.bdf_u().time_der( dataNavierStokes->dataTime()->getTimeStep() );
         // rhs *= alpha;
         // rhs  = bdf.bdf_u().time_der( dataNavierStokes->getTimeStep() );
 
@@ -740,7 +740,7 @@ Ethiersteinman::run()
                     uFESpace.interpolate(Problem::uderexact, rhs, time);
                     //uFESpace.l2ScalarProduct(Problem::uderexact, rhs, time);
                     rhs *= -1.;
-                    rhs = fluid.matrMass()*rhs;
+                    rhs = fluid.matrixMass()*rhs;
                     fluid.updateSystem( 0., beta, rhs );
                     fluid.iterate(bcH);
                 }
@@ -785,7 +785,7 @@ Ethiersteinman::run()
                 std::cout << d->comm->MyPID() << " Total init time " << chrono.diff() << " s." << std::endl;
             // end initialization step
 
-            fluid.resetPrec();
+            fluid.resetPreconditioner();
 
             boost::shared_ptr< Exporter<RegionMesh3D<LinearTetra> > > exporter;
 
@@ -866,7 +866,7 @@ Ethiersteinman::run()
                 //beta *= 0;
                 //uFESpace.interpolate(Problem::uexact, beta, time);
 
-                rhs  = fluid.matrMass()*bdf.bdf_u().time_der( dataNavierStokes->dataTime()->getTimeStep() );
+                rhs  = fluid.matrixMass()*bdf.bdf_u().time_der( dataNavierStokes->dataTime()->getTimeStep() );
 
                 fluid.getDisplayer().leaderPrint("alpha ", alpha);
                 fluid.getDisplayer().leaderPrint("\n");

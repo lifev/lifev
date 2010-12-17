@@ -346,7 +346,7 @@ SolverTrilinos::setParameters( bool cerrWarningIfUnused )
 }
 
 void
-SolverTrilinos::setTolMaxiter( const Real tolerance, const Int maxIter )
+SolverTrilinos::setTolMaxIteration( const Real tolerance, const Int maxIter )
 {
     if ( tolerance > 0 )
     {

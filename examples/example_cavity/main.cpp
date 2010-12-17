@@ -296,7 +296,7 @@ main( int argc, char** argv )
     // ok, we are all set to proceed to the time loop
 
     // first, we reset the preconditoner so that the solver will recompute it
-    fluid.resetPrec();
+    fluid.resetPreconditioner();
 
     // a chrono object to monitor the performances
     Chrono chrono;
@@ -331,7 +331,7 @@ main( int argc, char** argv )
         beta = bdf.bdf_u().extrap();
 
         // rhs  part of the time-derivative
-        rhs  = fluid.matrMass()*bdf.bdf_u().time_der( dataNavierStokes.dataTime()->getTimeStep() );
+        rhs  = fluid.matrixMass()*bdf.bdf_u().time_der( dataNavierStokes.dataTime()->getTimeStep() );
 
         // the we update the Oseen system
         fluid.updateSystem( alpha, beta, rhs );

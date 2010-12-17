@@ -61,7 +61,7 @@ void  exactJacobian::solveJac(vector_Type         &_muk,
     this->displayer().leaderPrint( "solveJac: NormInf res " , _res.normInf(), "\n" );
     _muk *= 0.;
 
-    M_linearSolver.setTolMaxiter(_linearRelTol, 100);
+    M_linearSolver.setTolMaxIteration(_linearRelTol, 100);
 
     vector_Type res(_res);
 
@@ -101,8 +101,8 @@ void exactJacobian::evalResidual(vector_Type&       res,
 
 void  exactJacobian::solveLinearFluid()
 {
-    //vector_Type dispFluidDomainRep( M_fluid->matrNoBC().getMap(), Repeated);
-    vector_Type dispFluidDomain( M_fluid->matrNoBC().map(), Unique, Zero);
+    //vector_Type dispFluidDomainRep( M_fluid->matrixNoBC().getMap(), Repeated);
+    vector_Type dispFluidDomain( M_fluid->matrixNoBC().map(), Unique, Zero);
     dispFluidDomain.setCombineMode(Zero);
     vector_Type dispFluidMesh(this->derVeloFluidMesh().map(), Repeated);
 //if statement: in order not to iterate the mesh for each linear residual calculation, needed just for exact Jac case.
@@ -134,10 +134,10 @@ void  exactJacobian::solveLinearFluid()
 
     double alpha = this->M_bdf->coeff_der( 0 ) / M_data->dataFluid()->dataTime()->getTimeStep();
 
-    if (!this->M_fluid->stab())//if using P1Bubble
+    if (!this->M_fluid->stabilization())//if using P1Bubble
     {
 
-        this->M_fluid->updateLinearSystem( M_fluid->matrNoBC(),
+        this->M_fluid->updateLinearSystem( M_fluid->matrixNoBC(),
                                            alpha,
                                            *M_un,
                                            *M_fluid->solution(),
@@ -151,7 +151,7 @@ void  exactJacobian::solveLinearFluid()
         if (M_recomputeShapeDer)
         {
             M_recomputeShapeDer=false;
-            M_matrShapeDer.reset(new matrix_Type(M_fluid->matrNoBC().map()/*, M_mmFESpace->map()*/));
+            M_matrShapeDer.reset(new matrix_Type(M_fluid->matrixNoBC().map()/*, M_mmFESpace->map()*/));
             this->M_fluid->updateShapeDerivatives(
                 *M_matrShapeDer,
                 alpha,
@@ -171,11 +171,11 @@ void  exactJacobian::solveLinearFluid()
             //M_matrShapeDer->spy("matrsd");
         }
         *M_rhsNew=(*M_matrShapeDer)*dispFluidDomain;
-        M_fluid->updateRhsLinNoBC(*M_rhsNew);
+        M_fluid->updateLinearRightHandSideNoBC(*M_rhsNew);
     }
 
 
-    this->M_fluid->iterateLin( *this->M_BCh_du );
+    this->M_fluid->solveLinearSystem( *this->M_BCh_du );
 }
 
 
@@ -275,7 +275,7 @@ void exactJacobian::eval(const vector_Type& _disp,
     if (iter == 0)
     {
         if (isFluid())
-            this->M_fluid->resetPrec();
+            this->M_fluid->resetPreconditioner();
         //this->M_solid->resetPrec();
     }
 
@@ -325,7 +325,7 @@ void exactJacobian::eval(const vector_Type& _disp,
             }
             else
             {
-                this->M_fluid->updateRHS( *M_rhs );
+                this->M_fluid->updateRightHandSide( *M_rhs );
             }
         }
 
@@ -341,11 +341,11 @@ void exactJacobian::eval(const vector_Type& _disp,
 
     if ( false && this->isFluid() )
     {
-        vector_Type vel  (this->fluid().velFESpace().map());
-        vector_Type press(this->fluid().pressFESpace().map());
+        vector_Type vel  (this->fluid().velocityFESpace().map());
+        vector_Type press(this->fluid().pressureFESpace().map());
 
         vel.subset(*this->M_fluid->solution());
-        press.subset(*this->M_fluid->solution(), this->fluid().velFESpace().dim()*this->fluid().pressFESpace().fieldDim());
+        press.subset(*this->M_fluid->solution(), this->fluid().velocityFESpace().dim()*this->fluid().pressureFESpace().fieldDim());
 
         std::cout << "norm_inf( vel ) " << vel.normInf() << std::endl;
         std::cout << "norm_inf( press ) " << press.normInf() << std::endl;

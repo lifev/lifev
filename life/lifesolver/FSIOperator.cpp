@@ -1,4 +1,4 @@
-/* -*- mode: c++ -*-
+/* -*- mode: c++ -*- */
 //@HEADER
 /*
 *******************************************************************************
@@ -535,7 +535,7 @@ FSIOperator::updateSystem( )
 
         if ( M_fluid->solution().get() )
             M_un.reset( new vector_Type( *M_fluid->solution() ) );
-        *M_rhs = M_fluid->matrMass()*M_bdf->time_der( M_data->dataFluid()->dataTime()->getTimeStep() );
+        *M_rhs = M_fluid->matrixMass()*M_bdf->time_der( M_data->dataFluid()->dataTime()->getTimeStep() );
     }
 
     if ( this->isSolid() )
@@ -1154,8 +1154,8 @@ FSIOperator::setMinusSigmaFluid( const vector_Type& sigma )
 void
 FSIOperator::setAlphafbcf( const bcFunction_Type& alphafbcf )
 {
-    vector_Type vec( M_fluid->velFESpace().map());
-    M_fluid->velFESpace().interpolate(alphafbcf, vec, 0.0);
+    vector_Type vec( M_fluid->velocityFESpace().map());
+    M_fluid->velocityFESpace().interpolate(alphafbcf, vec, 0.0);
     *M_Alphaf = vec ;
 }
 
@@ -1410,9 +1410,9 @@ FSIOperator::interpolateVelocity( const vector_Type& _vec1, vector_Type& _vec2 )
     UInt nDofpF = M_uFESpace->refFE().nbDofPerFace();   // number of Dof per face
     UInt nDofpEl = M_uFESpace->refFE().nbDofPerVolume(); // number of Dof per Volume
 
-    UInt nElemV = GeoShape::numVertices; // Number of element's vertices
-    UInt nElemE = GeoShape::numEdges;    // Number of element's edges
-    UInt nElemF = GeoShape::numFaces;    // Number of element's faces
+    UInt nElemV = GeoShape::S_numVertices; // Number of element's vertices
+    UInt nElemE = GeoShape::S_numEdges;    // Number of element's edges
+    UInt nElemF = GeoShape::S_numFaces;    // Number of element's faces
 
     //    UInt nDofElem = M_uFESpace->refFE().nbDof; // Number of local dof per element of the M_uFESpace->mesh() (_mesh.getRefFE().nbDof)
     UInt nDofElemMesh = M_mmFESpace->refFE().nbDof();
@@ -1607,13 +1607,13 @@ FSIOperator::interpolateInterfaceDofs( const FESpace<mesh_Type, EpetraMap>& _fes
     //UInt nDofPerFace2  = _fespace2.refFE().nbDofPerFace;   // number of Dof per face
     //UInt nDofPerElem2  = _fespace2.refFE().nbDofPerVolume; // number of Dof per Volume
 
-    //UInt nElemV        = GeoShape::numVertices; // Number of element's vertices
-    //UInt nElemE        = GeoShape::numEdges;    // Number of element's edges
-    //UInt nElemF        = GeoShape::numFaces;    // Number of element's faces
+    //UInt nElemV        = GeoShape::S_numVertices; // Number of element's vertices
+    //UInt nElemE        = GeoShape::S_numEdges;    // Number of element's edges
+    //UInt nElemF        = GeoShape::S_numFaces;    // Number of element's faces
 
-    //UInt nBFacesVert   = GeoShape::GeoBShape::numVertices;
-    //UInt nBFacesEdge   = GeoShape::GeoBShape::numEdges;
-    //UInt nBFacesFace   = GeoShape::GeoBShape::numFaces;
+    //UInt nBFacesVert   = GeoShape::GeoBShape::S_numVertices;
+    //UInt nBFacesEdge   = GeoShape::GeoBShape::S_numEdges;
+    //UInt nBFacesFace   = GeoShape::GeoBShape::S_numFaces;
 
     UInt nBEdges1      = _fespace1.mesh()->numBFaces();
     UInt nBEdges2      = _fespace2.mesh()->numBFaces();

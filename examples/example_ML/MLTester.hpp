@@ -155,19 +155,19 @@ testML( bchandler_raw_type& bch )
     chrono.start();
 
 
-    this->M_matrNoBC->GlobalAssemble();
+    this->M_matrixNoBC->GlobalAssemble();
 
     if (this->M_stab)
         this->M_matrStab->GlobalAssemble();
 
-    matrix_ptrtype matrFull( new matrix_type( this->M_localMap, this->M_matrNoBC->getMeanNumEntries()));
+    matrix_ptrtype matrFull( new matrix_type( this->M_localMap, this->M_matrixNoBC->getMeanNumEntries()));
 
-    updateStab(*matrFull);
+    updateStabilization(*matrFull);
     getFluidMatrix(*matrFull);
 
     vector_type rhsFull (this->M_rhsNoBC);
 
-//     matrFull.reset(new matrix_type(*M_matrNoBC));
+//     matrFull.reset(new matrix_type(*M_matrixNoBC));
 //     M_rhsFull = M_rhsNoBC;
 
     chrono.stop();
@@ -348,7 +348,7 @@ testML( bchandler_raw_type& bch )
                             this->M_linearSolver.solveSystem( rhsFull, this->M_sol, matrFull );
 
 
-                            this->resetPrec();
+                            this->resetPreconditioner();
 
                             double status[AZ_STATUS_SIZE];
                             this->M_linearSolver.getAztecStatus( status );

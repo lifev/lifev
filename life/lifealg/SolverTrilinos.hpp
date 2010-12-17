@@ -247,7 +247,7 @@ public:
       @param tolerance Tolerance for the solver
       @param maxIter Maximum number of iteration
      */
-    void setTolMaxiter( const Real tolerance, const Int maxIter = -1 );
+    void setTolMaxIteration( const Real tolerance, const Int maxIter = -1 );
 
     //! Specify if the preconditioner should be reuse or not
     /*!
