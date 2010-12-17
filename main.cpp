@@ -226,8 +226,8 @@ public:
         {
             if (exporterType.compare("none") == 0)
             {
-                M_exporterFluid.reset( new NoExport<RegionMesh3D<LinearTetra> > ( data_file, M_fsi->FSIOper()->uFESpace().mesh(), fluidName, M_fsi->FSIOper()->uFESpace().map().Comm().MyPID()) );
-                M_exporterSolid.reset( new NoExport<RegionMesh3D<LinearTetra> > ( data_file, M_fsi->FSIOper()->dFESpace().mesh(), solidName, M_fsi->FSIOper()->uFESpace().map().Comm().MyPID()) );
+                M_exporterFluid.reset( new NoExport<RegionMesh3D<LinearTetra> > ( data_file, M_fsi->FSIOper()->uFESpace().mesh(), fluidName, M_fsi->FSIOper()->uFESpace().map().comm().MyPID()) );
+                M_exporterSolid.reset( new NoExport<RegionMesh3D<LinearTetra> > ( data_file, M_fsi->FSIOper()->dFESpace().mesh(), solidName, M_fsi->FSIOper()->uFESpace().map().comm().MyPID()) );
             }
             else
             {
@@ -238,8 +238,8 @@ public:
         M_velAndPressure.reset( new vector_Type( M_fsi->FSIOper()->fluid().getMap(), M_exporterFluid->mapType() ));
         M_fluidDisp.reset     ( new vector_Type( M_fsi->FSIOper()->mmFESpace().map(), M_exporterFluid->mapType() ));
 
-        M_exporterFluid->setMeshProcId(M_fsi->FSIOper()->uFESpace().mesh(), M_fsi->FSIOper()->uFESpace().map().Comm().MyPID());
-        M_exporterSolid->setMeshProcId(M_fsi->FSIOper()->dFESpace().mesh(), M_fsi->FSIOper()->dFESpace().map().Comm().MyPID());
+        M_exporterFluid->setMeshProcId(M_fsi->FSIOper()->uFESpace().mesh(), M_fsi->FSIOper()->uFESpace().map().comm().MyPID());
+        M_exporterSolid->setMeshProcId(M_fsi->FSIOper()->dFESpace().mesh(), M_fsi->FSIOper()->dFESpace().map().comm().MyPID());
         M_exporterFluid->addVariable( ExporterData::Vector, "f-velocity", M_velAndPressure,
                                       UInt(0), M_fsi->FSIOper()->uFESpace().dof().numTotalDof() );
         M_exporterFluid->addVariable( ExporterData::Scalar, "f-pressure", M_velAndPressure,
@@ -367,7 +367,7 @@ public:
                       << _timer.elapsed() << "\n";
 
             std::cout << "solution norm " << _i << " : "
-                      << M_fsi->displacement().Norm2() << "\n";
+                      << M_fsi->displacement().norm2() << "\n";
 
             ///////// CHECKING THE RESULTS OF THE TEST AT EVERY TIMESTEP
             try
@@ -540,8 +540,8 @@ void Problem::initialize(std::string& /*loadInitSol*/,  GetPot const& data_file)
     {
         if (importerType.compare("none") == 0)
         {
-            M_importerFluid.reset( new NoExport<RegionMesh3D<LinearTetra> > ( data_file, M_fsi->FSIOper()->uFESpace().mesh(), "fluid", M_fsi->FSIOper()->uFESpace().map().Comm().MyPID()) );
-            M_importerSolid.reset( new NoExport<RegionMesh3D<LinearTetra> > ( data_file, M_fsi->FSIOper()->dFESpace().mesh(), "solid", M_fsi->FSIOper()->uFESpace().map().Comm().MyPID()) );
+            M_importerFluid.reset( new NoExport<RegionMesh3D<LinearTetra> > ( data_file, M_fsi->FSIOper()->uFESpace().mesh(), "fluid", M_fsi->FSIOper()->uFESpace().map().comm().MyPID()) );
+            M_importerSolid.reset( new NoExport<RegionMesh3D<LinearTetra> > ( data_file, M_fsi->FSIOper()->dFESpace().mesh(), "solid", M_fsi->FSIOper()->uFESpace().map().comm().MyPID()) );
         }
         else
         {
@@ -550,8 +550,8 @@ void Problem::initialize(std::string& /*loadInitSol*/,  GetPot const& data_file)
         }
     }
 
-    M_importerFluid->setMeshProcId(M_fsi->FSIOper()->uFESpace().mesh(), M_fsi->FSIOper()->uFESpace().map().Comm().MyPID());
-    M_importerSolid->setMeshProcId(M_fsi->FSIOper()->dFESpace().mesh(), M_fsi->FSIOper()->dFESpace().map().Comm().MyPID());
+    M_importerFluid->setMeshProcId(M_fsi->FSIOper()->uFESpace().mesh(), M_fsi->FSIOper()->uFESpace().map().comm().MyPID());
+    M_importerSolid->setMeshProcId(M_fsi->FSIOper()->dFESpace().mesh(), M_fsi->FSIOper()->dFESpace().map().comm().MyPID());
 
     M_importerFluid->addVariable( ExporterData::Vector, "f-velocity", M_velAndPressure,
                                   UInt(0), M_fsi->FSIOper()->uFESpace().dof().numTotalDof() );
@@ -607,7 +607,7 @@ void Problem::initialize(std::string& /*loadInitSol*/,  GetPot const& data_file)
 
 
     UniqueV.reset(new vector_Type(*M_fsi->FSIOper()->getCouplingVariableMap(), Unique, Zero));
-    UniqueV->subset(*M_solidDisp, M_solidDisp->getMap(), (UInt)0, offset);
+    UniqueV->subset(*M_solidDisp, M_solidDisp->map(), (UInt)0, offset);
     *UniqueV*=1/(M_fsi->FSIOper()->solid().rescaleFactor()*M_data->dataFluid()->dataTime()->getTimeStep());
     M_fsi->FSIOper()->solid().initialize(UniqueV);
     *initSol+=*UniqueV;
@@ -615,12 +615,12 @@ void Problem::initialize(std::string& /*loadInitSol*/,  GetPot const& data_file)
     if (!M_data->method().compare("monolithicGI"))
     {
         UniqueVFD.reset(new vector_Type(*M_fsi->FSIOper()->getCouplingVariableMap(), Unique, Zero));
-        UniqueVFD->subset(*M_fluidDisp, M_fluidDisp->getMap(), (UInt)0, dynamic_cast<LifeV::MonolithicGI*>(M_fsi->FSIOper().get())->mapWithoutMesh().getMap(Unique)->NumGlobalElements());
+        UniqueVFD->subset(*M_fluidDisp, M_fluidDisp->map(), (UInt)0, dynamic_cast<LifeV::MonolithicGI*>(M_fsi->FSIOper().get())->mapWithoutMesh().map(Unique)->NumGlobalElements());
         *initSol+=*UniqueVFD;
     }
 
     initSolSVel.reset(new vector_Type(*M_fsi->FSIOper()->getCouplingVariableMap(), Unique, Zero));
-    initSolSVel->subset(*M_solidVel,M_solidVel->getMap(), (UInt)0, offset);
+    initSolSVel->subset(*M_solidVel,M_solidVel->map(), (UInt)0, offset);
     *initSolSVel*=1/(M_fsi->FSIOper()->solid().rescaleFactor()*M_data->dataSolid()->dataTime()->getTimeStep());
     M_fsi->FSIOper()->solid().initializeVel(*initSolSVel);
     M_fsi->initialize(initSol);
@@ -628,7 +628,7 @@ void Problem::initialize(std::string& /*loadInitSol*/,  GetPot const& data_file)
 
 void Problem::checkGCEResult(const LifeV::Real& time)
 {
-    LifeV::Real dispNorm=M_fsi->displacement().Norm2();
+    LifeV::Real dispNorm=M_fsi->displacement().norm2();
     if (time==0.001 && (dispNorm-684898)     /dispNorm*(dispNorm-684898)     /dispNorm>1e-5) throw Problem::RESULT_CHANGED_EXCEPTION(time);
     else if (time==0.002 && (dispNorm-854345)     /dispNorm*(dispNorm-850537)     /dispNorm>1e-5) throw Problem::RESULT_CHANGED_EXCEPTION(time);
     else if (time==0.003 && (dispNorm-1.11118e+06)/dispNorm*(dispNorm-1.10523e+06)/dispNorm>1e-5) throw Problem::RESULT_CHANGED_EXCEPTION(time);
@@ -643,7 +643,7 @@ void Problem::checkGCEResult(const LifeV::Real& time)
 
 void Problem::checkCEResult(const LifeV::Real& time)
 {
-    LifeV::Real dispNorm=M_fsi->displacement().Norm2();
+    LifeV::Real dispNorm=M_fsi->displacement().norm2();
     if (time==0.001 && (dispNorm-615015)/dispNorm*(dispNorm-615015)/dispNorm>1e-3) throw Problem::RESULT_CHANGED_EXCEPTION(time);
     else if (time==0.002 && (dispNorm-1.00181e+06)/dispNorm*(dispNorm-1.00181e+06)/dispNorm>1e-3) throw Problem::RESULT_CHANGED_EXCEPTION(time);
     else if (time==0.003 && (dispNorm-1.01128e+06)/dispNorm*(dispNorm-1.01128e+06)/dispNorm>1e-3) throw Problem::RESULT_CHANGED_EXCEPTION(time);
