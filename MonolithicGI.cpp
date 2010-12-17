@@ -74,7 +74,7 @@ void
 MonolithicGI::setupFluidSolid( UInt const fluxes )
 {
     super_Type::setupFluidSolid( fluxes );
-    UInt offset = M_monolithicMap->getMap(Unique)->NumGlobalElements();
+    UInt offset = M_monolithicMap->map(Unique)->NumGlobalElements();
     M_mapWithoutMesh.reset(new EpetraMap(*M_monolithicMap));
 
     *this->M_monolithicMap += this->M_mmFESpace->map();
@@ -263,11 +263,11 @@ void MonolithicGI::solveJac(vector_Type       &_step,
 
     M_linearSolver->setMatrix(*M_monolithicMatrix->getMatrix());
 
-    M_solid->getDisplayer().leaderPrint("  M-  Jacobian NormInf res:                    ", _res.NormInf(), "\n");
+    M_solid->getDisplayer().leaderPrint("  M-  Jacobian NormInf res:                    ", _res.normInf(), "\n");
     M_solid->getDisplayer().leaderPrint("  M-  Solving Jacobian system ...              \n" );
 
     this->iterateMonolithic(_res, _step);
-    M_solid->getDisplayer().leaderPrint("  M-  Jacobian NormInf res:                    ", _step.NormInf(), "\n");
+    M_solid->getDisplayer().leaderPrint("  M-  Jacobian NormInf res:                    ", _step.normInf(), "\n");
 }
 
 void MonolithicGI::initialize( FSIOperator::fluidPtr_Type::value_type::Function const& u0,
@@ -295,7 +295,7 @@ int MonolithicGI::setupBlockPrec( )
         M_shapeDerivativesBlock->openCrsMatrix( );
         shapeDerivatives( M_shapeDerivativesBlock ,*M_uk/*subX*/, M_domainVelImplicit, M_convectiveTermDer );
         //*M_shapeDerivativesBlock += *M_monolithicMatrix->getMatrix();
-        M_shapeDerivativesBlock->GlobalAssemble( );
+        M_shapeDerivativesBlock->globalAssemble( );
         M_monolithicMatrix->addToGlobalMatrix( M_shapeDerivativesBlock );
     }
 
@@ -310,7 +310,7 @@ int MonolithicGI::setupBlockPrec( )
         // doing nothing if linear
         M_solidBlockPrec.reset(new matrix_Type(*M_monolithicMap, 1));
         *M_solidBlockPrec += *M_solidDerBlock;
-        M_solidBlockPrec->GlobalAssemble();
+        M_solidBlockPrec->globalAssemble();
         M_precPtr->replace_matrix( M_solidBlockPrec, 0 );
         M_monolithicMatrix->blockAssembling();
         M_monolithicMatrix->applyBoundaryConditions( dataFluid()->dataTime()->getTime());
@@ -401,7 +401,7 @@ MonolithicGI::assembleMeshBlock(UInt /*iter*/)
 {
     M_meshBlock.reset(new matrix_Type(*M_monolithicMap));
     M_meshMotion->setMatrix(M_meshBlock);
-    M_meshBlock->GlobalAssemble();
+    M_meshBlock->globalAssemble();
     UInt offset(M_solidAndFluidDim+nDimensions*M_interface);
     std::map<ID, ID>::const_iterator ITrow;
     std::map<ID, ID> locdofmap(M_dofStructureToHarmonicExtension->localDofMap());

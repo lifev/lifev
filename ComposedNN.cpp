@@ -56,7 +56,7 @@ int ComposedNN::solveSystem( const vector_Type& rhs, vector_Type& step, solverPt
         {
             M_blockPrecs->displayer().leaderPrint("  M-  Computing double prec. factorization ...        ");
             chrono.start();
-            M_prec[k].reset(factory.Create(precType, M_blocks[(*M_blockReordering)[k]]->getMatrixPtr().get(), overlapLevel));
+            M_prec[k].reset(factory.Create(precType, M_blocks[(*M_blockReordering)[k]]->matrixPtr().get(), overlapLevel));
             if ( !M_prec[k].get() )
             {
                 ERROR_MSG( "Preconditioner not set, something went wrong in its computation\n" );
@@ -76,7 +76,7 @@ int ComposedNN::solveSystem( const vector_Type& rhs, vector_Type& step, solverPt
             {
                 M_blockPrecs->displayer().leaderPrint("  M-  Computing double prec. factorization ...        ");
                 chrono.start();
-                M_prec[k].reset(factory.Create(precType, M_blocks[(*M_blockReordering)[k]]->getMatrixPtr().get(), overlapLevel));
+                M_prec[k].reset(factory.Create(precType, M_blocks[(*M_blockReordering)[k]]->matrixPtr().get(), overlapLevel));
                 if ( !M_prec[k].get() )
                 {
                     ERROR_MSG( "Preconditioner not set, something went wrong in its computation\n" );
@@ -124,12 +124,12 @@ void ComposedNN::coupler(mapPtr_Type& map,
                          const vectorPtr_Type& numerationInterface,
                          const Real& timeStep)
 {
-    UInt totalDofs=map->getMap(Unique)->NumGlobalElements()+1;
-    UInt fluidSolid=M_offset[0]+1+M_FESpace[0]->map().getMap(Unique)->NumGlobalElements();
+    UInt totalDofs=map->map(Unique)->NumGlobalElements()+1;
+    UInt fluidSolid=M_offset[0]+1+M_FESpace[0]->map().map(Unique)->NumGlobalElements();
 
     for (ID k=0; k<2; ++k)
     {
-        M_blocks[k]->GlobalAssemble();
+        M_blocks[k]->globalAssemble();
         matrixPtr_Type block(new matrix_Type(*M_blocks[k]));
         M_blocks.push_back(block);
         M_bch.push_back(M_bch[k]);
@@ -182,7 +182,7 @@ void ComposedNN::applyBoundaryConditions(const Real& time, const UInt i)
 
 void ComposedNN::push_back_matrix(const matrixPtr_Type& Mat, const  bool recompute)
 {
-    Mat->GlobalAssemble();
+    Mat->globalAssemble();
     *Mat *= 2.;
     super_Type::push_back_matrix(Mat, recompute);
 }
@@ -191,7 +191,7 @@ void ComposedNN::push_back_matrix(const matrixPtr_Type& Mat, const  bool recompu
 
 void ComposedNN::replace_matrix( const matrixPtr_Type& oper, UInt position )
 {
-    oper->GlobalAssemble();
+    oper->globalAssemble();
     *oper *= 2.;
     M_blocks[position]=oper;
     M_blocks[position]=oper;

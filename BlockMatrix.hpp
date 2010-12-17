@@ -289,10 +289,10 @@ public:
      */
     void addToGlobalMatrix( const matrixPtr_Type& Mat)
     {
-        matrixPtr_Type tmp(new matrix_Type(M_globalMatrix->getMap()));
+        matrixPtr_Type tmp(new matrix_Type(M_globalMatrix->map()));
         *tmp += *M_globalMatrix;
         *tmp += *Mat;
-        tmp->GlobalAssemble();
+        tmp->globalAssemble();
         M_globalMatrix = tmp;
     }
 

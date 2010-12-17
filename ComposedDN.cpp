@@ -75,8 +75,8 @@ void ComposedDN::coupler(mapPtr_Type& map,
                          const vectorPtr_Type& numerationInterface,
                          const Real& timeStep)
 {
-    UInt totalDofs( map->getMap(Unique)->NumGlobalElements() );
-    UInt solidAndFluid(M_offset[solid]+1+M_FESpace[solid]->map().getMap(Unique)->NumGlobalElements());
+    UInt totalDofs( map->map(Unique)->NumGlobalElements() );
+    UInt solidAndFluid(M_offset[solid]+1+M_FESpace[solid]->map().map(Unique)->NumGlobalElements());
 
     matrixPtr_Type coupling(new matrix_Type(*map));
     couplingMatrix( coupling,  (*M_couplingFlags)[solid], M_FESpace, M_offset, locDofMap, numerationInterface, timeStep);
@@ -87,7 +87,7 @@ void ComposedDN::coupler(mapPtr_Type& map,
     coupling.reset(new matrix_Type(*map));
     couplingMatrix( coupling,  (*M_couplingFlags)[fluid], M_FESpace, M_offset, locDofMap, numerationInterface, timeStep);
     coupling->insertValueDiagonal( 1. , M_offset[solid], solidAndFluid );
-    coupling->insertValueDiagonal( 1. , solidAndFluid + nDimensions*numerationInterface->getMap().getMap(Unique)->NumGlobalElements(), totalDofs +1 );
+    coupling->insertValueDiagonal( 1. , solidAndFluid + nDimensions*numerationInterface->map().map(Unique)->NumGlobalElements(), totalDofs +1 );
     M_coupling.push_back(coupling);
 
 }

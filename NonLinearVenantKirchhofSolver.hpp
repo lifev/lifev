@@ -427,10 +427,10 @@ buildSystem(matrix_ptrtype massStiff, Real const & factor)
         }
     }
 
-    this->M_linearStiff->GlobalAssemble();
-    massStiff->GlobalAssemble();
+    this->M_linearStiff->globalAssemble();
+    massStiff->globalAssemble();
     //*M_massStiff *= factor; //Used in monolithic
-    this->M_mass->GlobalAssemble();
+    this->M_mass->globalAssemble();
 
     chrono.stop();
 
@@ -476,11 +476,11 @@ void NonLinearVenantKirchhofSolver<Mesh, SolverType>::updateSystem( matrix_ptrty
 
     matrix_ptrtype tmp( new matrix_type(*this->M_localMap, 1) );
     updateNonlinearTerms(tmp);
-    tmp->GlobalAssemble();
+    tmp->globalAssemble();
     *stiff += *tmp;
     *stiff += *this->M_linearStiff;
 
-    stiff->GlobalAssemble();
+    stiff->globalAssemble();
 
     //_rhsWithoutBC -= _K * this->_d;
 
@@ -508,9 +508,9 @@ void NonLinearVenantKirchhofSolver<Mesh, SolverType>::updateSystem( matrix_ptrty
 
     std::cout << std::endl;
 
-    std::cout << "rhsWithoutBC norm = " << this->M_rhsNoBC->Norm2() << std::endl;
-    std::cout << "rhs_w norm        = " << this->M_rhsW->Norm2() << std::endl;
-    std::cout << "    w norm        = " << this->M_vel->Norm2() << std::endl;
+    std::cout << "rhsWithoutBC norm = " << this->M_rhsNoBC->norm2() << std::endl;
+    std::cout << "rhs_w norm        = " << this->M_rhsW->norm2() << std::endl;
+    std::cout << "    w norm        = " << this->M_vel->norm2() << std::endl;
 
     chrono.stop();
     this->M_Displayer->leaderPrintMax("done in ", chrono.diff());
@@ -797,9 +797,9 @@ iterate( bchandler_Type& bch )
 
     updateVel();
 
-    std::cout << "iterate: d norm       = " << this->M_disp->Norm2() << std::endl;
-    std::cout << "iterate: w norm       = " << this->M_vel->Norm2() << std::endl;
-    std::cout << "iterate: a norm       = " << M_acc->Norm2() << std::endl;
+    std::cout << "iterate: d norm       = " << this->M_disp->norm2() << std::endl;
+    std::cout << "iterate: w norm       = " << this->M_vel->norm2() << std::endl;
+    std::cout << "iterate: a norm       = " << M_acc->norm2() << std::endl;
 
     *this->M_residual_d = *this->M_mass*(*this->M_disp);
     *this->M_residual_d -= *this->M_rhsNoBC;
@@ -848,14 +848,14 @@ void NonLinearVenantKirchhofSolver<Mesh, SolverType>::computeMatrix( matrix_ptrt
 
     matrix_ptrtype tmp(new matrix_type(*this->M_localMap, 1));
     updateNonlinearMatrix( tmp );
-    tmp->GlobalAssemble();
+    tmp->globalAssemble();
     *tmp *= factor;
     *stiff += *tmp;
 
 #endif
 
     *stiff += *this->M_mass;
-    stiff->GlobalAssemble();
+    stiff->globalAssemble();
 
     chrono.stop();
     this->M_Displayer->leaderPrintMax("done in ", chrono.diff() );
@@ -1007,7 +1007,7 @@ void NonLinearVenantKirchhofSolver<Mesh, SolverType>::updateJacobian( vector_typ
 
     *jacobian += *this->M_mass;
 
-    jacobian->GlobalAssemble();
+    jacobian->globalAssemble();
 
     chrono.stop();
     this->M_Displayer->leaderPrintMax("   ... done in ", chrono.diff() );
@@ -1044,8 +1044,8 @@ solveJacobian( vector_type&           step,
 
     this->M_Displayer->leaderPrint("\tS'-  Applying boundary conditions      ... ");
 
-    this->M_rhsNoBC->GlobalAssemble();
-    this->M_rhsW->GlobalAssemble();
+    this->M_rhsNoBC->globalAssemble();
+    this->M_rhsW->globalAssemble();
 
     vector_type rhsFull (res);
 

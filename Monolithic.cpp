@@ -173,7 +173,7 @@ Monolithic::setupFluidSolid( UInt const fluxes )
     super_Type::setupFluidSolid(fluxes);
 
     // Note: up to now it works only with matching grids (and poly order) on the interface
-    assert(M_fluidInterfaceMap->getMap(Unique)->NumGlobalElements() == M_solidInterfaceMap->getMap(Unique)->NumGlobalElements());
+    assert(M_fluidInterfaceMap->map(Unique)->NumGlobalElements() == M_solidInterfaceMap->map(Unique)->NumGlobalElements());
 
     M_interfaceMap = M_solidInterfaceMap;
 
@@ -190,7 +190,7 @@ Monolithic::setupFluidSolid( UInt const fluxes )
     *M_monolithicMap+= M_fluxes;
     *M_monolithicMap+= M_dFESpace->map();
 
-    M_monolithicMatrix->createInterfaceMap( *M_interfaceMap, M_dofStructureToHarmonicExtension->localDofMap(), M_dFESpace->map().getMap(Unique)->NumGlobalElements()/nDimensions, M_epetraWorldComm );
+    M_monolithicMatrix->createInterfaceMap( *M_interfaceMap, M_dofStructureToHarmonicExtension->localDofMap(), M_dFESpace->map().map(Unique)->NumGlobalElements()/nDimensions, M_epetraWorldComm );
     *M_monolithicMap += *M_monolithicMatrix->getInterfaceMap();
 
     //the map for the interface coupling matrices should be done with respect to the coarser mesh.
@@ -210,15 +210,15 @@ Monolithic::setupFluidSolid( UInt const fluxes )
 void
 Monolithic::monolithicToInterface(vector_Type& lambdaSolid, const vector_Type& disp)
 {
-    if (disp.getMaptype() == Repeated)
+    if (disp.mapType() == Repeated)
     {
         vector_Type const  dispUnique(disp, Unique);
         monolithicToInterface(lambdaSolid, dispUnique);
         return;
     }
-    if (lambdaSolid.getMaptype() == Repeated)
+    if (lambdaSolid.mapType() == Repeated)
     {
-        vector_Type  lambdaSolidUn(lambdaSolid.getMap(), Unique);
+        vector_Type  lambdaSolidUn(lambdaSolid.map(), Unique);
         monolithicToInterface( lambdaSolidUn, disp);
         lambdaSolid = lambdaSolidUn;
         return;
@@ -228,7 +228,7 @@ Monolithic::monolithicToInterface(vector_Type& lambdaSolid, const vector_Type& d
        subDisp.mySubset(disp, MyOffset);
        lambdaSolid=subDisp;*/
 
-    EpetraMap subMap(*disp.getMap().getMap(Unique), M_offset,disp.getMap().getMap(Unique)->NumGlobalElements() );
+    EpetraMap subMap(*disp.map().map(Unique), M_offset,disp.map().map(Unique)->NumGlobalElements() );
     vector_Type subDisp(subMap, Unique);
     subDisp.subset(disp, M_offset);
     lambdaSolid=subDisp;
@@ -238,7 +238,7 @@ Monolithic::monolithicToInterface(vector_Type& lambdaSolid, const vector_Type& d
 void
 Monolithic::monolithicToX(const vector_Type& disp, vector_Type& dispFluid, EpetraMap& map, UInt offset)
 {
-    if(disp.getMaptype()== Repeated)
+    if(disp.mapType()== Repeated)
     {
         vector_Type dispUnique(disp, Unique);
         monolithicToX(dispUnique, dispFluid, map, offset);
@@ -261,7 +261,7 @@ Monolithic::buildSystem()
 {
     M_solidBlock.reset(new matrix_Type(*M_monolithicMap, 1));//since it is constant, we keep this throughout the simulation
     M_solid->buildSystem(M_solidBlock, M_data->dataSolid()->dataTime()->getTimeStep()*M_solid->rescaleFactor());//M_data->dataSolid()->rescaleFactor());
-    M_solidBlock->GlobalAssemble();
+    M_solidBlock->globalAssemble();
     M_solid->rescaleMatrices();
 }
 
@@ -277,7 +277,7 @@ Monolithic::computeMaxSingularValue( )
     boost::shared_ptr<operatorPtr_Type>  ComposedPrecPtr(M_linearSolver->getPrec()->getPrec());
 
     //M_monolithicMatrix->getMatrixPtr()->OptimizeStorage();
-    boost::shared_ptr<Epetra_FECrsMatrix> matrCrsPtr(new Epetra_FECrsMatrix(*M_monolithicMatrix->getMatrix()->getMatrixPtr()));
+    boost::shared_ptr<Epetra_FECrsMatrix> matrCrsPtr(new Epetra_FECrsMatrix(*M_monolithicMatrix->getMatrix()->matrixPtr()));
 
     M_preconditionedSymmetrizedMatrix->push_back(boost::dynamic_pointer_cast<operatorPtr_Type>(/*ComposedPrecPtr*/matrCrsPtr));
     M_preconditionedSymmetrizedMatrix->push_back(boost::dynamic_pointer_cast<operatorPtr_Type>(ComposedPrecPtr/*matrCrsPtr*/), true);
@@ -331,13 +331,13 @@ Monolithic::solveJac(vector_Type         &_step,
     M_precPtr->applyBoundaryConditions(dataFluid()->dataTime()->getTime());
     M_precPtr->GlobalAssemble();
 
-    M_solid->getDisplayer().leaderPrint("  M-  Jacobian NormInf res:                    ", _res.NormInf(), "\n");
+    M_solid->getDisplayer().leaderPrint("  M-  Jacobian NormInf res:                    ", _res.normInf(), "\n");
     M_solid->getDisplayer().leaderPrint("  M-  Solving Jacobian system ...              \n" );
 
     //M_monolithicMatrix->getMatrix()->spy("J");
     this->iterateMonolithic(_res, _step);
 
-    M_solid->getDisplayer().leaderPrint("  M-  Jacobian NormInf res:                    ", _step.NormInf(), "\n");
+    M_solid->getDisplayer().leaderPrint("  M-  Jacobian NormInf res:                    ", _step.normInf(), "\n");
 }
 
 void
@@ -404,7 +404,7 @@ iterateMonolithic(const vector_Type& rhs, vector_Type& step)
 
     //M_monolithicMatrix->GlobalAssemble();
     //necessary if we did not imposed Dirichlet b.c.
-    M_linearSolver->setOperator(*M_monolithicMatrix->getMatrix()->getMatrixPtr());
+    M_linearSolver->setOperator(*M_monolithicMatrix->getMatrix()->matrixPtr());
 
     M_linearSolver->setReusePreconditioner( (M_reusePrec) && (!M_resetPrec) );
 
@@ -441,7 +441,7 @@ Monolithic::couplingRhs(vectorPtr_Type rhs, vectorPtr_Type un) // not working wi
     {
         for( ITrow = localDofMap.begin(); ITrow != localDofMap.end() ; ++ITrow)
         {
-            if(M_interfaceMap->getMap(Unique)->LID(ITrow->second /*+ dim*solidDim*/) >= 0 )//to avoid repeated stuff
+            if(M_interfaceMap->map(Unique)->LID(ITrow->second /*+ dim*solidDim*/) >= 0 )//to avoid repeated stuff
             {
                 if(rhs.get())
                     (*rhs)[  (int)(*M_numerationInterface)[ITrow->second ] + dim*interface +M_solidAndFluidDim ] = -lambda( ITrow->second + dim*totalDofs )/**rescale*/;
@@ -467,7 +467,7 @@ updateSolidSystem( vectorPtr_Type & rhsFluidCoupling )
 {
     M_solid->updateSystem();
 
-    std::cout<<"rhs solid: "<<M_solid->rhsWithoutBC()->Norm2()<<std::endl;
+    std::cout<<"rhs solid: "<<M_solid->rhsWithoutBC()->norm2()<<std::endl;
 
     *rhsFluidCoupling += *M_solid->rhsWithoutBC();
 }
@@ -476,13 +476,13 @@ void
 Monolithic::
 diagonalScale(vector_Type& rhs, matrixPtr_Type matrFull)
 {
-    Epetra_Vector diagonal(*rhs.getMap().getMap(Unique));
-    //M_matrFull->getMatrixPtr()->InvRowSums(diagonal);
-    //M_matrFull->getMatrixPtr()->InvRowMaxs(diagonal);
-    //M_matrFull->getMatrixPtr()->InvColSums(diagonal);
-    matrFull->getMatrixPtr()->InvColMaxs(diagonal);
-    matrFull->getMatrixPtr()->LeftScale(diagonal);
-    rhs.getEpetraVector().Multiply(1, rhs.getEpetraVector(), diagonal,0);
+    Epetra_Vector diagonal(*rhs.map().map(Unique));
+    //M_matrFull->matrixPtr()->InvRowSums(diagonal);
+    //M_matrFull->matrixPtr()->InvRowMaxs(diagonal);
+    //M_matrFull->matrixPtr()->InvColSums(diagonal);
+    matrFull->matrixPtr()->InvColMaxs(diagonal);
+    matrFull->matrixPtr()->LeftScale(diagonal);
+    rhs.epetraVector().Multiply(1, rhs.epetraVector(), diagonal,0);
 }
 
 void

@@ -56,8 +56,8 @@ void BlockInterface::couplingMatrix(matrixPtr_Type & bigMatrix,
         couplingMatrix( bigMatrix, subFlag, newProblem, newOffset, locDofMap, numerationInterface, timeStep, value);
     }
     std::map<ID, ID>::const_iterator ITrow;
-    UInt interface(numerationInterface->getMap().getMap(Unique)->NumGlobalElements());
-    UInt totalSize(offset[0]+problem[0]->map().getMap(Unique)->NumGlobalElements());
+    UInt interface(numerationInterface->map().map(Unique)->NumGlobalElements());
+    UInt totalSize(offset[0]+problem[0]->map().map(Unique)->NumGlobalElements());
 
     if (flag-16>=0)//coupling the mesh in FSI
     {
@@ -68,9 +68,9 @@ void BlockInterface::couplingMatrix(matrixPtr_Type & bigMatrix,
         {
             for ( ITrow = locDofMap.begin(); ITrow != locDofMap.end() ; ++ITrow )
             {
-                if ( numerationInterface->getMap().getMap(Unique)->LID(ITrow->second /*+ dim*solidDim*/) >= 0 )//to avoid repeated stuff
+                if ( numerationInterface->map().map(Unique)->LID(ITrow->second /*+ dim*solidDim*/) >= 0 )//to avoid repeated stuff
                 {
-                    bigMatrix->set_mat_inc(solidFluidInterface + ITrow->first + dim*problem[2]->dof().numTotalDof() - 1, offset[0] + ITrow->second-1 + dim* problem[0]->dof().numTotalDof(), (-value)*timeStep/**1.e-2*//*scaling of the solid matrix*/ );
+                    bigMatrix->addToCoefficient(solidFluidInterface + ITrow->first + dim*problem[2]->dof().numTotalDof() - 1, offset[0] + ITrow->second-1 + dim* problem[0]->dof().numTotalDof(), (-value)*timeStep/**1.e-2*//*scaling of the solid matrix*/ );
                 }
             }
         }
@@ -83,27 +83,27 @@ void BlockInterface::couplingMatrix(matrixPtr_Type & bigMatrix,
     {
         for ( ITrow = locDofMap.begin(); ITrow != locDofMap.end() ; ++ITrow, newFlag = flag )
         {
-            if (numerationInterface->getMap().getMap(Unique)->LID(ITrow->second /*+ dim*solidDim*/) >= 0 )//to avoid repeated stuff
+            if (numerationInterface->map().map(Unique)->LID(ITrow->second /*+ dim*solidDim*/) >= 0 )//to avoid repeated stuff
             {
                 if (newFlag-8>=0)//right low
                 {
-                    bigMatrix->set_mat_inc( offset[0] + ITrow->second-1 + dim* problem[0]->dof().numTotalDof(),(int)(*numerationInterface)[ITrow->second/*+ dim*solidDim*/ ] - 1 + dim*interface + totalSize, value );//right low
+                    bigMatrix->addToCoefficient( offset[0] + ITrow->second-1 + dim* problem[0]->dof().numTotalDof(),(int)(*numerationInterface)[ITrow->second/*+ dim*solidDim*/ ] - 1 + dim*interface + totalSize, value );//right low
                     newFlag -= 8;
                 }
                 if (newFlag-4>=0)// right up
                 {
-                    bigMatrix->set_mat_inc( offset[1] + ITrow->first-1 + dim* problem[1]->dof().numTotalDof(), (int)(*numerationInterface)[ITrow->second/*+ dim*solidDim*/ ] - 1 + dim*interface + totalSize, -value );//right up
+                    bigMatrix->addToCoefficient( offset[1] + ITrow->first-1 + dim* problem[1]->dof().numTotalDof(), (int)(*numerationInterface)[ITrow->second/*+ dim*solidDim*/ ] - 1 + dim*interface + totalSize, -value );//right up
                     newFlag -= 4;
                 }
                 if (newFlag-2>=0)//low left
                 {
-                    bigMatrix->set_mat_inc( (int)(*numerationInterface)[ITrow->second/*+ dim*solidDim*/ ] - 1 + dim*interface + totalSize, (ITrow->first)-1 + dim* problem[1]->dof().numTotalDof(), value);//low left
+                    bigMatrix->addToCoefficient( (int)(*numerationInterface)[ITrow->second/*+ dim*solidDim*/ ] - 1 + dim*interface + totalSize, (ITrow->first)-1 + dim* problem[1]->dof().numTotalDof(), value);//low left
                     newFlag -= 2;
                 }
                 if (newFlag-1>=0)//low right
-                    bigMatrix->set_mat_inc( (int)(*numerationInterface)[ITrow->second/*+ dim*solidDim*/ ] - 1 + dim*interface + totalSize, (offset[0] + ITrow->second)-1 + dim* problem[0]->dof().numTotalDof(), -value);//low right
+                    bigMatrix->addToCoefficient( (int)(*numerationInterface)[ITrow->second/*+ dim*solidDim*/ ] - 1 + dim*interface + totalSize, (offset[0] + ITrow->second)-1 + dim* problem[0]->dof().numTotalDof(), -value);//low right
 
-                bigMatrix->set_mat_inc( (int)(*numerationInterface)[ITrow->second/*+ dim*solidDim*/ ] - 1 + dim*interface + totalSize , (int)(*numerationInterface)[ITrow->second /*+ dim*solidDim*/ ] - 1 + dim*interface + totalSize, 0.0);
+                bigMatrix->addToCoefficient( (int)(*numerationInterface)[ITrow->second/*+ dim*solidDim*/ ] - 1 + dim*interface + totalSize , (int)(*numerationInterface)[ITrow->second /*+ dim*solidDim*/ ] - 1 + dim*interface + totalSize, 0.0);
             }
         }
     }
@@ -168,20 +168,20 @@ BlockInterface::robinCoupling( matrixPtr_Type& matrix,
                                const std::map<ID, ID>& locDofMap,
                                const BlockInterface::vectorPtr_Type& numerationInterface ) // not working with non-matching grids
 {//coupling: flag from 1 to 4 working as chmod
-    UInt interface(numerationInterface->getMap().getMap(Unique)->NumGlobalElements());
+    UInt interface(numerationInterface->map().map(Unique)->NumGlobalElements());
     std::map<ID, ID>::const_iterator ITrow;
-    UInt totalSize(offset2+FESpace2->map().getMap(Unique)->NumGlobalElements());
+    UInt totalSize(offset2+FESpace2->map().map(Unique)->NumGlobalElements());
 
 
     if (((Int)coupling)-4 >= 0)
     {
         for ( ITrow = locDofMap.begin(); ITrow != locDofMap.end() ; ++ITrow)
         {
-            if (numerationInterface->getMap().getMap(Unique)->LID(ITrow->second /*+ dim*solidDim*/) >= 0 )//to avoid repeated stuff
+            if (numerationInterface->map().map(Unique)->LID(ITrow->second /*+ dim*solidDim*/) >= 0 )//to avoid repeated stuff
             {
                 for (UInt dim = 0; dim < nDimensions; ++dim)
                 {
-                    matrix->set_mat_inc( (int)(*numerationInterface)[ITrow->second ] - 1 + dim*interface + totalSize, (offset2 + ITrow->second)-1 + dim* FESpace2->dof().numTotalDof(), alphas);//low right
+                    matrix->addToCoefficient( (int)(*numerationInterface)[ITrow->second ] - 1 + dim*interface + totalSize, (offset2 + ITrow->second)-1 + dim* FESpace2->dof().numTotalDof(), alphas);//low right
                 }
             }
         }
@@ -191,11 +191,11 @@ BlockInterface::robinCoupling( matrixPtr_Type& matrix,
     {
         for ( ITrow = locDofMap.begin(); ITrow != locDofMap.end() ; ++ITrow)
         {
-            if (numerationInterface->getMap().getMap(Unique)->LID(ITrow->second /*+ dim*solidDim*/) >= 0 )//to avoid repeated stuff
+            if (numerationInterface->map().map(Unique)->LID(ITrow->second /*+ dim*solidDim*/) >= 0 )//to avoid repeated stuff
             {
                 for (UInt dim = 0; dim < nDimensions; ++dim)
                 {
-                    matrix->set_mat_inc( ITrow->first-1 + dim* FESpace1->dof().numTotalDof(), (int)(*numerationInterface)[ITrow->second ] - 1 + dim*interface + totalSize, alphaf );//right up
+                    matrix->addToCoefficient( ITrow->first-1 + dim* FESpace1->dof().numTotalDof(), (int)(*numerationInterface)[ITrow->second ] - 1 + dim*interface + totalSize, alphaf );//right up
                 }
             }
         }
@@ -205,11 +205,11 @@ BlockInterface::robinCoupling( matrixPtr_Type& matrix,
     {
         for ( ITrow = locDofMap.begin(); ITrow != locDofMap.end() ; ++ITrow)
         {
-            if (numerationInterface->getMap().getMap(Unique)->LID(ITrow->second /*+ dim*solidDim*/) >= 0 )//to avoid repeated stuff
+            if (numerationInterface->map().map(Unique)->LID(ITrow->second /*+ dim*solidDim*/) >= 0 )//to avoid repeated stuff
             {
                 for (UInt dim = 0; dim < nDimensions; ++dim)
                 {
-                    matrix->set_mat_inc( (int)(*numerationInterface)[ITrow->second ] - 1 + dim*interface + totalSize, (ITrow->first)-1 + dim* FESpace1->dof().numTotalDof(), alphas);//low left
+                    matrix->addToCoefficient( (int)(*numerationInterface)[ITrow->second ] - 1 + dim*interface + totalSize, (ITrow->first)-1 + dim* FESpace1->dof().numTotalDof(), alphas);//low left
                 }
             }
         }

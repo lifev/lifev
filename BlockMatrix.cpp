@@ -56,7 +56,7 @@ void BlockMatrix::setDataFromGetPot(const GetPot& data, const std::string& secti
 
 void BlockMatrix::GlobalAssemble()
 {
-    M_globalMatrix->GlobalAssemble();
+    M_globalMatrix->globalAssemble();
     //    M_globalMatrix->spy("Prec");
 }
 
@@ -107,12 +107,12 @@ void BlockMatrix::replace_precs( const epetraOperatorPtr_Type& Mat, UInt index)
 
 void BlockMatrix::blockAssembling()
 {
-    M_coupling->GlobalAssemble();
-    M_globalMatrix.reset(new matrix_Type(M_coupling->getMap()));
+    M_coupling->globalAssemble();
+    M_globalMatrix.reset(new matrix_Type(M_coupling->map()));
     *M_globalMatrix += *M_coupling;
     for (UInt k=0; k<M_blocks.size(); ++k)
     {
-        M_blocks[k]->GlobalAssemble();
+        M_blocks[k]->globalAssemble();
         *M_globalMatrix += *M_blocks[k];
     }
 }
@@ -136,12 +136,12 @@ void BlockMatrix::applyPreconditioner( matrixPtr_Type robinCoupling, matrixPtr_T
 
 void BlockMatrix::applyPreconditioner( const matrixPtr_Type prec, matrixPtr_Type& oper )
 {
-    matrix_Type tmpMatrix(prec->getMap(), 1);
-    EpetraExt::MatrixMatrix::Multiply( *prec->getMatrixPtr(),
+    matrix_Type tmpMatrix(prec->map(), 1);
+    EpetraExt::MatrixMatrix::Multiply( *prec->matrixPtr(),
                                        false,
-                                       *oper->getMatrixPtr(),
+                                       *oper->matrixPtr(),
                                        false,
-                                       *tmpMatrix.getMatrixPtr());
+                                       *tmpMatrix.matrixPtr());
     oper->swapCrsMatrix(tmpMatrix);
 }
 
@@ -155,9 +155,9 @@ void BlockMatrix::createInterfaceMap( const EpetraMap& interfaceMap , const std:
     MPI_Comm_size(MPI_COMM_WORLD, &numtasks);
     int* numInterfaceDof(new int[numtasks]);
     int pid=epetraWorldComm->MyPID();
-    int numMyElements = interfaceMap.getMap(Unique)->NumMyElements();
+    int numMyElements = interfaceMap.map(Unique)->NumMyElements();
     numInterfaceDof[pid]=numMyElements;
-    EpetraMap subMap(*interfaceMap.getMap(Unique), (UInt)0, subdomainMaxId);
+    EpetraMap subMap(*interfaceMap.map(Unique), (UInt)0, subdomainMaxId);
 
     M_numerationInterface.reset(new vector_Type(subMap,Unique));
     //should be an int vector instead of double
@@ -177,11 +177,11 @@ void BlockMatrix::createInterfaceMap( const EpetraMap& interfaceMap , const std:
     UInt k=1;
     UInt l=0;
 
-    M_interface = (UInt) interfaceMap.getMap(Unique)->NumGlobalElements()/nDimensions;
-//UInt solidDim=M_dFESpace->map().getMap(Unique)->NumGlobalElements()/nDimensions;
+    M_interface = (UInt) interfaceMap.map(Unique)->NumGlobalElements()/nDimensions;
+//UInt solidDim=M_dFESpace->map().map(Unique)->NumGlobalElements()/nDimensions;
     for (l=0, ITrow=locDofMap.begin(); ITrow!=locDofMap.end() ; ++ITrow)
     {
-        if (interfaceMap.getMap(Unique)->LID(ITrow->second /*+ dim*solidDim*/)>=0)
+        if (interfaceMap.map(Unique)->LID(ITrow->second /*+ dim*solidDim*/)>=0)
         {
             (*M_numerationInterface)[ITrow->second /*+ dim*solidDim*/ ]=l+1+ (int)(numInterfaceDof[pid]/nDimensions)/*+ dim*localInterface*/      ;
             //                                    (*M_numerationInterfaceInt)[ITrow->second /*+ dim*solidDim*/ ]=l+1+ (int)(M_numInterfaceDof[pid]/nDimensions)/*+ dim*localInterface*/      ;
@@ -192,13 +192,13 @@ void BlockMatrix::createInterfaceMap( const EpetraMap& interfaceMap , const std:
     }
 
     std::vector<int> couplingVector;
-    couplingVector.reserve((int)(interfaceMap.getMap(Unique)->NumMyElements()));
+    couplingVector.reserve((int)(interfaceMap.map(Unique)->NumMyElements()));
 
     for (int dim=0; dim<nDimensions; ++dim)
     {
         for ( ITrow=locDofMap.begin(); ITrow!=locDofMap.end() ; ++ITrow)
         {
-            if (interfaceMap.getMap(Unique)->LID(ITrow->second)>=0)
+            if (interfaceMap.map(Unique)->LID(ITrow->second)>=0)
             {
                 couplingVector.push_back((*M_numerationInterface)(ITrow->second /*+ dim * solidDim*/)+ dim * M_interface );
                 //couplingVector.push_back((*M_numerationInterfaceInt)[ITrow->second /*+ dim * solidDim*/]+ dim * M_interface );
@@ -206,7 +206,7 @@ void BlockMatrix::createInterfaceMap( const EpetraMap& interfaceMap , const std:
         }
     }// so the map for the coupling part of the matrix is just Unique
 
-    M_interfaceMap.reset(new EpetraMap(-1, static_cast< Int> ( couplingVector.size() ), &couplingVector[0], interfaceMap.getMap(Repeated)->IndexBase()/*1*/, epetraWorldComm));
+    M_interfaceMap.reset(new EpetraMap(-1, static_cast< Int> ( couplingVector.size() ), &couplingVector[0], interfaceMap.map(Repeated)->IndexBase()/*1*/, epetraWorldComm));
 }
 
 void BlockMatrix::applyBoundaryConditions(const Real& time)
@@ -233,11 +233,11 @@ void BlockMatrix::applyBoundaryConditions(const Real& time, const UInt block)
 
 void BlockMatrix::addToCoupling( const matrixPtr_Type& Mat, UInt /*position*/)
 {
-    if (!M_coupling->getMatrixPtr()->Filled())
+    if (!M_coupling->matrixPtr()->Filled())
         *M_coupling += *Mat;
     else
     {
-        matrixPtr_Type tmp(new matrix_Type(M_coupling->getMap()));
+        matrixPtr_Type tmp(new matrix_Type(M_coupling->map()));
         *tmp += *M_coupling;
         *tmp += *Mat;
         M_coupling = tmp;

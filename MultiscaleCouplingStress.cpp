@@ -311,8 +311,8 @@ MultiscaleCouplingStress::insertJacobianConstantCoefficients( multiscaleMatrix_T
     if ( M_comm->MyPID() == 0 )
         for ( UInt i( 1 ); i < modelsNumber(); ++i )
         {
-            jacobian.set_mat_inc( row,     column + i,  1 );
-            jacobian.set_mat_inc( row + i, column + i, -1 );
+            jacobian.addToCoefficient( row,     column + i,  1 );
+            jacobian.addToCoefficient( row + i, column + i, -1 );
         }
 }
 
@@ -358,7 +358,7 @@ MultiscaleCouplingStress::insertJacobianDeltaCoefficients( multiscaleMatrix_Type
     // Add coefficient to the matrix
     row = M_couplingIndex.second + modelLocalID;
     if ( M_comm->MyPID() == 0 )
-        jacobian.set_mat_inc( row, column, coefficient );
+        jacobian.addToCoefficient( row, column, coefficient );
 
 #ifdef HAVE_LIFEV_DEBUG
     Debug( 8220 ) << "J(" << row << "," << column << ") = " << coefficient  << "\n";

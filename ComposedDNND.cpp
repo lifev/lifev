@@ -42,12 +42,12 @@ void ComposedDNND::coupler(mapPtr_Type& map,
                            const vectorPtr_Type& numerationInterface,
                            const Real& timeStep)
 {
-    UInt totalDofs=map->getMap(Unique)->NumGlobalElements()+1;
-    UInt fluidSolid=M_offset[0]+1+M_FESpace[0]->map().getMap(Unique)->NumGlobalElements();
+    UInt totalDofs=map->map(Unique)->NumGlobalElements()+1;
+    UInt fluidSolid=M_offset[0]+1+M_FESpace[0]->map().map(Unique)->NumGlobalElements();
 
     for (ID k=0; k<2; ++k)
     {
-        M_blocks[k]->GlobalAssemble();
+        M_blocks[k]->globalAssemble();
         matrixPtr_Type block(new matrix_Type(*M_blocks[k]));
         M_blocks.push_back(block);
         M_bch.push_back(M_bch[k]);

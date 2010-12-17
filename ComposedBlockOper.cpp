@@ -41,7 +41,7 @@ void ComposedBlockOper::GlobalAssemble()
 {
     for (UInt k=0; k<M_blocks.size(); ++k)
     {
-        M_blocks[k]->GlobalAssemble();
+        M_blocks[k]->globalAssemble();
     }
 //             M_blocks[0]->spy("first");
 //             M_blocks[1]->spy("second");
@@ -68,10 +68,10 @@ void ComposedBlockOper::coupler( mapPtr_Type& map,
 {
     matrixPtr_Type coupling(new matrix_Type(*map));
     couplingMatrix( coupling,  (*M_couplingFlags)[couplingBlock], M_FESpace, M_offset, locDofMap, numerationInterface, timeStep);
-    UInt totalDofs( map->getMap(Unique)->NumGlobalElements() );
+    UInt totalDofs( map->map(Unique)->NumGlobalElements() );
 
     coupling->insertValueDiagonal( 1., 1 , M_offset[couplingBlock]+1 );
-    coupling->insertValueDiagonal( 1., M_offset[couplingBlock]+M_FESpace[couplingBlock]->map().getMap(Unique)->NumGlobalElements()+1, totalDofs+1 );
+    coupling->insertValueDiagonal( 1., M_offset[couplingBlock]+M_FESpace[couplingBlock]->map().map(Unique)->NumGlobalElements()+1, totalDofs+1 );
 
     if(couplingBlock != M_coupling.size()+1)
     {
@@ -111,7 +111,7 @@ void ComposedBlockOper::replace_coupling( const matrixPtr_Type& Mat, UInt positi
 
 void ComposedBlockOper::addToCoupling( const matrixPtr_Type& Mat, UInt position)
 {
-     Mat->GlobalAssemble();
+     Mat->globalAssemble();
     *M_coupling[position] += *Mat;
 }
 
@@ -124,13 +124,13 @@ void ComposedBlockOper::addToCoupling( const matrixPtr_Type& Mat, UInt position)
 
 void ComposedBlockOper::blockAssembling(const UInt k)
 {
-    if(M_blocks[k]->getMatrixPtr()->Filled())
+    if(M_blocks[k]->matrixPtr()->Filled())
     {
-        matrixPtr_Type tmp(new matrix_Type(M_blocks[0]->getMap(), 1));
+        matrixPtr_Type tmp(new matrix_Type(M_blocks[0]->map(), 1));
         *tmp += *M_blocks[k];
         M_blocks[k]=tmp;
     }
-    M_coupling[k]->GlobalAssemble();
+    M_coupling[k]->globalAssemble();
     *M_blocks[k] += *M_coupling[k];
 }
 

@@ -366,8 +366,8 @@ MultiscaleCouplingFlowRateStress::insertJacobianConstantCoefficients( multiscale
 
     if ( M_comm->MyPID() == 0 )
     {
-        jacobian.set_mat_inc( row,     row,     -1 );
-        jacobian.set_mat_inc( row + 1, row + 1, -1 );
+        jacobian.addToCoefficient( row,     row,     -1 );
+        jacobian.addToCoefficient( row + 1, row + 1, -1 );
     }
 }
 
@@ -434,7 +434,7 @@ MultiscaleCouplingFlowRateStress::insertJacobianDeltaCoefficients( multiscaleMat
 
     // Add coefficient to the matrix
     if ( M_comm->MyPID() == 0 )
-        jacobian.set_mat_inc( row, column, coefficient );
+        jacobian.addToCoefficient( row, column, coefficient );
 
 #ifdef HAVE_LIFEV_DEBUG
     Debug( 8230 ) << "J(" << row << "," << column << ") = " << coefficient  << "\n";

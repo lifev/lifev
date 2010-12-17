@@ -125,9 +125,9 @@ MultiscaleCoupling::createCouplingMap( EpetraMap& couplingMap )
     Debug( 8200 ) << "MultiscaleCoupling::CreateCouplingMap( couplingMap ) \n";
 #endif
 
-    M_couplingIndex.second = couplingMap.getMap( Unique )->NumGlobalElements();
+    M_couplingIndex.second = couplingMap.map( Unique )->NumGlobalElements();
 
-    couplingMap += M_localCouplingVariables[0]->getMap();
+    couplingMap += M_localCouplingVariables[0]->map();
 }
 
 void
