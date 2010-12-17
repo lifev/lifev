@@ -167,7 +167,7 @@ main( int argc, char** argv )
         bchandler.addBC("Dirichlet",i,Essential,Full,BCu,1);
     }
 
-    Hdf5exporter<mesh_type> exporter ( dataFile, meshPart.mesh(), "solution", Comm->MyPID());
+    Hdf5exporter<mesh_type> exporter ( dataFile, meshPart.meshPartition(), "solution", Comm->MyPID());
     exporter.setMultimesh(false);
     boost::shared_ptr<vector_type> solutionPtr (new vector_type(level_set.solution(),Repeated));
     exporter.addVariable( ExporterData::Scalar, "level-set", solutionPtr, UInt(0), uFESpace->dof().numTotalDof() );
