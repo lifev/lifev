@@ -30,10 +30,10 @@
     A class for an easy handling of different order time
     discretizations/extrapolations BDF based for first and second order problem
     @date
- 
+
     @author Simone Deparis  <simone.deparis@epfl.ch>
     @author Matteo Pozzoli <matteo1.pozzoli@mail.polimi.it>
- 
+
     @contributor Matteo Pozzoli <matteo1.pozzoli@mail.polimi.it>
     @maintainer Matteo Pozzoli <matteo1.pozzoli@mail.polimi.it>
  */
@@ -166,10 +166,10 @@ public:
     //@{
 
     //! Empty  Constructor
-    
+
     BdfT();
      //! Constructor
-     /*! 
+     /*!
      @param  order of the BDF
      */
     BdfT( const UInt& order);
@@ -187,7 +187,7 @@ public:
 
     //! @name Methods
     //@{
-  
+
      //!Update the state vector
      /*! Update the vectors of the previous time steps by shifting on the right  the old values.
      @param solution current (new) value of the state vector
@@ -203,7 +203,7 @@ public:
      */
      feVectorType updateRHSFirstDerivate(const Real& timeStep = 1 );
      feVectorType __attribute__ ((__deprecated__)) time_der(const Real& timeStep = 1 );
-  
+
      //! Update the right hand side \f$ f_W \f$ of the time derivative formula
      /*
      Sets and Returns the right hand side \f$ f_W \f$ of the time derivative formula
@@ -243,11 +243,11 @@ public:
 
     //! Initialize the StateVector used in Newmark
     void setInitialCondition(const feVectorType& x0, const feVectorType& v0 );
-    void __attribute__((__depreated__)) initialize_unk(const feVectorType& x0, const feVectorType& v0 );
-    
+    void __attribute__((__deprecated__)) initialize_unk(const feVectorType& x0, const feVectorType& v0 );
+
     //! Initialize the StateVector used in Newmark
     void setInitialCondition(const feVectorType& x0, const feVectorType& v0, const feVectorType&  w0 );
-    void __attribute__((__depreated__)) initialize_unk(const feVectorType& x0, const feVectorType& v0, const feVectorType&  w0 );
+    void __attribute__((__deprecated__)) initialize_unk(const feVectorType& x0, const feVectorType& v0, const feVectorType&  w0 );
 
     //! Initialize all the entries of the unknown vector to be derived with a
     //! set of vectors x0
@@ -279,7 +279,7 @@ public:
     /*!
     Compute the polynomial extrapolation approximation of order \f$n-1\f$ of
     \f$u^{n+1}\f$ defined by the n stored state vectors
-    */ 
+    */
     feVectorType extrapolation() const;
     feVectorType __attribute__((__deprecated__)) extrap() const;
 
@@ -298,7 +298,7 @@ public:
     //!Return the current accelerate
    feVectorType accelerate() const;
    feVectorType __attribute__((__deprecated__)) wnk() const;
- 
+
    //@}
 
 };
@@ -657,7 +657,7 @@ void BdfT<feVectorType>::setInitialCondition( const feVectorType& x0)
     feVectorType zero(x0);
     zero *=0;
     this->setInitialRHS(zero);
-   
+
     ASSERT ( this->M_unknowns.size() == this->M_order,
              "M_unknowns.size() and  M_order must be equal" );
 }
@@ -733,14 +733,14 @@ void BdfT<feVectorType>::setInitialCondition( const feVectorContainer_Type& x0)
                  "M_unknowns.size() and  M_order must be equal" );
     }
 
-    //!initialize zero 
+    //!initialize zero
     feVectorType zero(x0[0]);
     zero *=0;
     this->setInitialRHS(zero);
 }
 
 template<typename feVectorType>
-void  __attribute__((__depreacated__))
+void  __attribute__((__deprecated__))
 BdfT<feVectorType>::initialize_unk( const feVectorContainer_Type& x0)
 {
     // you should replace any call to initialize_unk() with a call to setInitalCondition()
@@ -749,7 +749,7 @@ BdfT<feVectorType>::initialize_unk( const feVectorContainer_Type& x0)
 
 // ===================================================
 // Get Methods
-// ===================================================  
+// ===================================================
 
 template<typename feVectorType>
 Real
