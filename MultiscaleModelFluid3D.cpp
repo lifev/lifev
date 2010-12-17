@@ -184,7 +184,7 @@ MultiscaleModelFluid3D::buildSystem()
     M_bdf->bdf_u().initialize_unk( *M_fluid->solution() );
 
     //Define problem coefficients
-    if ( M_data->Stokes() )
+    if ( M_data->isStokes() )
     {
         M_alpha  = 0.0;
         *M_beta  = *M_fluid->solution(); //It is a stationary Navier-Stokes
