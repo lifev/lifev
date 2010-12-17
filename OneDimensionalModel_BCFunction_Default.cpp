@@ -49,7 +49,7 @@ namespace LifeV
 // Constructors & Destructor
 // ===================================================
 OneDimensionalModel_BCFunction_Default::OneDimensionalModel_BCFunction_Default( const bcSide_Type& bcSide,
-                                                                                const bcType_Type& bcType ):
+                                                                                const bcTypeOneD_Type& bcType ):
         M_flux                          (),
         M_source                        (),
         M_bcNode                        (),
@@ -117,7 +117,7 @@ OneDimensionalModel_BCFunction_Default::setupNode()
 // Constructors & Destructor
 // ===================================================
 OneDimensionalModel_BCFunction_Riemann::OneDimensionalModel_BCFunction_Riemann( const bcSide_Type& bcSide,
-                                                                                const bcType_Type& bcType ) :
+                                                                                const bcTypeOneD_Type& bcType ) :
         super                           ( bcSide, bcType ),
         M_bcU                           (),
         M_bcW                           ()
@@ -158,7 +158,7 @@ OneDimensionalModel_BCFunction_Riemann::updateBCVariables()
 // Constructors & Destructor
 // ===================================================
 OneDimensionalModel_BCFunction_Compatibility::OneDimensionalModel_BCFunction_Compatibility( const bcSide_Type& bcSide,
-                                                                                            const bcType_Type& bcType ):
+                                                                                            const bcTypeOneD_Type& bcType ):
         super                           ( bcSide, bcType ),
         M_bcInternalNode                (),
         M_boundaryPoint                 (),
@@ -390,7 +390,7 @@ OneDimensionalModel_BCFunction_Absorbing::resistance( Real& resistance )
 // Constructors & Destructor
 // ===================================================
 OneDimensionalModel_BCFunction_Resistance::OneDimensionalModel_BCFunction_Resistance( const bcSide_Type& bcSide,
-                                                                                      const bcType_Type& bcType,
+                                                                                      const bcTypeOneD_Type& bcType,
                                                                                       const Real& resistance ):
         super                           ( bcSide, bcType ),
         M_resistance                    ( resistance )
@@ -404,7 +404,7 @@ OneDimensionalModel_BCFunction_Resistance::OneDimensionalModel_BCFunction_Resist
 // Constructors & Destructor
 // ===================================================
 OneDimensionalModel_BCFunction_Windkessel3::OneDimensionalModel_BCFunction_Windkessel3( const bcSide_Type& bcSide,
-                                                                                        const bcType_Type& bcType,
+                                                                                        const bcTypeOneD_Type& bcType,
                                                                                         const Real&        resistance1,
                                                                                         const Real&        resistance2,
                                                                                         const Real&        compliance,

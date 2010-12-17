@@ -118,7 +118,7 @@ OneDimensionalModel_BCHandler::applyBC( const Real& time, const Real& timeStep, 
 // ===================================================
 void
 OneDimensionalModel_BCHandler::setBC( const bcSide_Type& bcSide, const bcLine_Type& bcLine,
-                                      const bcType_Type& bcType, const bcFunction_Type& BCfunction )
+                                      const bcTypeOneD_Type& bcType, const bcFunction_Type& BCfunction )
 {
     M_boundarySet[bcSide][bcLine] = true;
     M_boundary[bcSide]->setType( bcLine, bcType );
