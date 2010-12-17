@@ -182,8 +182,8 @@ public:
             M_fsi->FSIOper( )->partitionMeshes( fluidMeshFilter, solidMeshFilter );
             M_fsi->FSIOper( )->setupFEspace( );
             M_fsi->FSIOper( )->setupDOF( fluidMeshFilter );
-            fluidMeshFilter.CloseFile( );
-            solidMeshFilter.CloseFile( );
+            fluidMeshFilter.closeFile( );
+            solidMeshFilter.closeFile( );
         }
         else
         {
