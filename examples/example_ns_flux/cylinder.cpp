@@ -437,7 +437,7 @@ Cylinder::run()
 
     fluid.resetPrec();
 
-    Ensight<RegionMesh3D<LinearTetra> > ensight( dataFile, meshPart.mesh(), "cylinder", d->comm->MyPID());
+    Ensight<RegionMesh3D<LinearTetra> > ensight( dataFile, meshPart.meshPartition(), "cylinder", d->comm->MyPID());
 
     vector_ptrtype velAndPressure ( new vector_type(*fluid.solution(), Repeated ) );
 
