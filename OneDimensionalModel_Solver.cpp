@@ -134,8 +134,8 @@ OneDimensionalModel_Solver::buildConstantMatrices()
     }
 
     // Dirichlet boundary conditions set in the mass matrix
-    M_massMatrix -> GlobalAssemble();
-    M_gradMatrix -> GlobalAssemble();
+    M_massMatrix -> globalAssemble();
+    M_gradMatrix -> globalAssemble();
 
     // In the classical case the linear system use a mass matrix (with Dirichlet BC)
     //matrixPtr_Type matrFull( new matrix_Type( M_FESpace -> map() ) );
@@ -274,19 +274,19 @@ OneDimensionalModel_Solver::updateRHS( const solution_Type& solution, const Real
         for ( UInt j(0); j < 2; ++j )
         {
             // rhs = rhs - dt^2/2 * gradDiffFlux * S(Un)
-            M_gradMatrixDiffFlux[2*i + j] -> GlobalAssemble();
+            M_gradMatrixDiffFlux[2*i + j] -> globalAssemble();
             M_rhs[i] += *M_gradMatrixDiffFlux[2*i + j] * ( -dt2over2 * M_sourceVector[j] );
 
             // rhs = rhs + dt^2/2 * divDiffSrc * F(Un)
-            M_divMatrixDiffSrc[2*i + j] -> GlobalAssemble();
+            M_divMatrixDiffSrc[2*i + j] -> globalAssemble();
             M_rhs[i] += *M_divMatrixDiffSrc[2*i + j] * ( dt2over2 * M_fluxVector[j] );
 
             // rhs = rhs - dt^2/2 * stiffDiffFlux * F(Un)
-            M_stiffMatrixDiffFlux[2*i + j] -> GlobalAssemble();
+            M_stiffMatrixDiffFlux[2*i + j] -> globalAssemble();
             M_rhs[i] += *M_stiffMatrixDiffFlux[2*i + j]*(-dt2over2*M_fluxVector[j]);
 
             // rhs = rhs + dt^2/2 * massDiffSrc * S(Un)
-            M_massMatrixDiffSrc[2*i + j] -> GlobalAssemble();
+            M_massMatrixDiffSrc[2*i + j] -> globalAssemble();
             M_rhs[i] += *M_massMatrixDiffSrc[2*i + j] * ( dt2over2 * M_sourceVector[j] );
         }
     }
