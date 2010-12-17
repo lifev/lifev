@@ -270,7 +270,7 @@ Structure::run3d()
         }
     }
 
-    exporter->setDirectory( "./" ); // This is a test to see if M_post_dir is working
+    exporter->setPostDir( "./" ); // This is a test to see if M_post_dir is working
     exporter->setMeshProcId( meshPart.meshPartition(), parameters->comm->MyPID() );
 
     vector_ptrtype solidDisp ( new vector_type(solid.disp(), exporter->mapType() ) );
