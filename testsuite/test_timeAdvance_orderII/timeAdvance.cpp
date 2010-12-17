@@ -177,7 +177,7 @@ problem::run()
     GetPot dataFile( members->data_file_name.c_str() );
     boost::shared_ptr<DataSecondOrder> dataProblem(new DataSecondOrder( ));
      dataProblem->setup(dataFile, "problem");
-   
+
     DataMesh             dataMesh;
     dataMesh.setup(dataFile, "problem/space_discretization");
 
@@ -227,7 +227,7 @@ problem::run()
 
 
     // finite element space of the solution
-   
+
     std::string dOrder =  dataFile( "problem/space_discretization/order", "P1");
 
     FESpace_ptrtype feSpace( new FESpace_type(meshPart,dOrder,1,members->comm) );
@@ -289,7 +289,7 @@ problem::run()
     dataProblem->setup(dataFile, "problem");
 
     chrono.start();
-    
+
     double xi = timeAdvance->coeff_derOrder2( 0 ) / ( dataProblem->dataTime()->getTimeStep()*dataProblem->dataTime()->getTimeStep());
 
     problem.buildSystem(xi);
@@ -319,12 +319,12 @@ problem::run()
 #endif
     {
         if (exporterType.compare("none") == 0)
-            exporter.reset( new NoExport<RegionMesh3D<LinearTetra> > ( dataFile, meshPart.mesh(), "problem",members ->comm->MyPID()) );
+            exporter.reset( new NoExport<RegionMesh3D<LinearTetra> > ( dataFile, meshPart.meshPartition(), "problem",members ->comm->MyPID()) );
         else
-            exporter.reset( new Ensight<RegionMesh3D<LinearTetra> > ( dataFile, meshPart.mesh(), "problem",   members->comm->MyPID()) );
+            exporter.reset( new Ensight<RegionMesh3D<LinearTetra> > ( dataFile, meshPart.meshPartition(), "problem",   members->comm->MyPID()) );
     }
     exporter->setDirectory( "./" ); // This is a test to see if M_post_dir is working
-    exporter->setMeshProcId( meshPart.mesh(),  members->comm->MyPID() );
+    exporter->setMeshProcId( meshPart.meshPartition(),  members->comm->MyPID() );
 
     vector_ptrtype U ( new vector_type(*problem.solution(), exporter->mapType() ) );
     vector_ptrtype V  ( new vector_type(*problem.solution(),  exporter->mapType() ) );
