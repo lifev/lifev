@@ -362,18 +362,18 @@ Ethiersteinman::check()
     {
         exporter.reset( new Hdf5exporter<RegionMesh3D<LinearTetra> > ( dataFile, "ethiersteinman" ) );
         exporter->setDirectory( "./" ); // This is a test to see if M_post_dir is working
-        exporter->setMeshProcId( meshPart.mesh(), d->comm->MyPID() );
+        exporter->setMeshProcId( meshPart.meshPartition(), d->comm->MyPID() );
     }
     else
 #endif
     {
         if (exporterType.compare("none") == 0)
         {
-            exporter.reset( new NoExport<RegionMesh3D<LinearTetra> > ( dataFile, meshPart.mesh(), "ethiersteinman", d->comm->MyPID()) );
+            exporter.reset( new NoExport<RegionMesh3D<LinearTetra> > ( dataFile, meshPart.meshPartition(), "ethiersteinman", d->comm->MyPID()) );
         }
         else
         {
-            exporter.reset( new Ensight<RegionMesh3D<LinearTetra> > ( dataFile, meshPart.mesh(), "ethiersteinman", d->comm->MyPID()) );
+            exporter.reset( new Ensight<RegionMesh3D<LinearTetra> > ( dataFile, meshPart.meshPartition(), "ethiersteinman", d->comm->MyPID()) );
         }
     }
 
@@ -639,7 +639,7 @@ Ethiersteinman::run()
             if (verbose) std::cout << std::endl;
             if (verbose) std::cout << "Time discretization order " << dataNavierStokes->dataTime()->getBDF_order() << std::endl;
 
-            //dataNavierStokes->dataMesh()->setMesh(meshPart.mesh());
+            //dataNavierStokes->dataMesh()->setMesh(meshPart.meshPartition());
 
             if (verbose)
                 std::cout << "Building the velocity FE space ... " << std::flush;
@@ -663,7 +663,7 @@ Ethiersteinman::run()
             UInt totalPressDof = pFESpace.map().getMap(Unique)->NumGlobalElements();
 
             // If we change the FE we have to update the BCHandler (internal data)
-            bcH.bdUpdate( *meshPart.mesh(), uFESpace.feBd(), uFESpace.dof());
+            bcH.bdUpdate( *meshPart.meshPartition(), uFESpace.feBd(), uFESpace.dof());
 
             if (verbose) std::cout << "Total Velocity Dof = " << totalVelDof << std::endl;
             if (verbose) std::cout << "Total Pressure Dof = " << totalPressDof << std::endl;
@@ -802,18 +802,18 @@ Ethiersteinman::run()
             {
                 exporter.reset( new Hdf5exporter<RegionMesh3D<LinearTetra> > ( dataFile, "ethiersteinman" ) );
                 exporter->setDirectory( "./" ); // This is a test to see if M_post_dir is working
-                exporter->setMeshProcId( meshPart.mesh(), d->comm->MyPID() );
+                exporter->setMeshProcId( meshPart.meshPartition(), d->comm->MyPID() );
             }
             else
 #endif
             {
                 if (exporterType.compare("none") == 0)
                 {
-                    exporter.reset( new NoExport<RegionMesh3D<LinearTetra> > ( dataFile, meshPart.mesh(), "ethiersteinman", d->comm->MyPID()) );
+                    exporter.reset( new NoExport<RegionMesh3D<LinearTetra> > ( dataFile, meshPart.meshPartition(), "ethiersteinman", d->comm->MyPID()) );
                 }
                 else
                 {
-                    exporter.reset( new Ensight<RegionMesh3D<LinearTetra> > ( dataFile, meshPart.mesh(), "ethiersteinman", d->comm->MyPID()) );
+                    exporter.reset( new Ensight<RegionMesh3D<LinearTetra> > ( dataFile, meshPart.meshPartition(), "ethiersteinman", d->comm->MyPID()) );
                 }
             }
 
