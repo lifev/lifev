@@ -74,7 +74,7 @@ BCBase::BCBase()
 }
 
 BCBase::BCBase( const std::string& name, const entityFlag_Type& flag,
-                const BCType& type, const BCMode& mode,
+                const bcType_Type& type, const bcMode_Type& mode,
                 BCFunctionBase& bcFunction, const std::vector<ID>& components )
         :
         M_name( name ),
@@ -96,10 +96,10 @@ BCBase::BCBase( const std::string& name, const entityFlag_Type& flag,
     }
 }
 
-BCBase::BCBase( const std::string& name,
+BCBase::BCBase( const bcName_Type& name,
                 const entityFlag_Type&  flag,
-                const BCType&      type,
-                const BCMode&      mode,
+                const bcType_Type&      type,
+                const bcMode_Type&      mode,
                 BCFunctionBase&    bcFunction ):
         M_name( name ),
         M_flag( flag ),
@@ -154,10 +154,10 @@ BCBase::BCBase( const std::string& name,
     }
 }
 
-BCBase::BCBase( const std::string& name,
+BCBase::BCBase( const bcName_Type& name,
                 const entityFlag_Type&  flag,
-                const BCType&      type,
-                const BCMode&      mode,
+                const bcType_Type&      type,
+                const bcMode_Type&      mode,
                 BCFunctionBase&    bcFunction,
                 const UInt&        numberOfComponents )
         :
@@ -185,10 +185,10 @@ BCBase::BCBase( const std::string& name,
 }
 
 
-BCBase::BCBase( const std::string& name,
+BCBase::BCBase( const bcName_Type& name,
                 const entityFlag_Type& flag,
-                const BCType& type,
-                const BCMode& mode,
+                const bcType_Type& type,
+                const bcMode_Type& mode,
                 BCVectorBase& bcVector,
                 const std::vector<ID>& components )
         :
@@ -211,10 +211,10 @@ BCBase::BCBase( const std::string& name,
     }
 }
 
-BCBase::BCBase( const std::string& name,
+BCBase::BCBase( const bcName_Type& name,
                 const entityFlag_Type& flag,
-                const BCType& type,
-                const BCMode& mode,
+                const bcType_Type& type,
+                const bcMode_Type& mode,
                 BCVectorBase& bcVector )
         :
         M_name( name ),
@@ -262,10 +262,10 @@ BCBase::BCBase( const std::string& name,
 }
 
 
-BCBase::BCBase( const std::string& name,
+BCBase::BCBase( const bcName_Type& name,
                 const entityFlag_Type& flag,
-                const BCType& type,
-                const BCMode& mode,
+                const bcType_Type& type,
+                const bcMode_Type& mode,
                 BCVectorBase& bcVector,
                 const UInt& numberOfComponents )
         :
@@ -293,10 +293,10 @@ BCBase::BCBase( const std::string& name,
 
 }
 
-BCBase::BCBase( const std::string&     name,
+BCBase::BCBase( const bcName_Type&     name,
                 const entityFlag_Type&      flag,
-                const BCType&          type,
-                const BCMode&          mode,
+                const bcType_Type&          type,
+                const bcMode_Type&          mode,
                 BCFunctionUDepBase&    bcFunctionFEVectorDependent,
                 const std::vector<ID>& components ):
         M_name( name ),
@@ -317,10 +317,10 @@ BCBase::BCBase( const std::string&     name,
     }
 }
 
-BCBase::BCBase( const std::string&  name,
+BCBase::BCBase( const bcName_Type&  name,
                 const entityFlag_Type&   flag,
-                const BCType&       type,
-                const BCMode&       mode,
+                const bcType_Type&       type,
+                const bcMode_Type&       mode,
                 BCFunctionUDepBase& bcFunctionFEVectorDependent):
         M_name( name ),
         M_flag( flag ),
@@ -366,10 +366,10 @@ BCBase::BCBase( const std::string&  name,
 
 }
 
-BCBase::BCBase( const std::string&  name,
+BCBase::BCBase( const bcName_Type&  name,
                 const entityFlag_Type&   flag,
-                const BCType&       type,
-                const BCMode&       mode,
+                const bcType_Type&       type,
+                const bcMode_Type&       mode,
                 BCFunctionUDepBase& bcFunctionFEVectorDependent,
                 const UInt&         numberOfComponents )
         :
@@ -411,16 +411,12 @@ BCBase::BCBase( const BCBase& bcBase )
         M_isStored_BcVector( bcBase.M_isStored_BcVector ),
         M_isStored_BcFunctionVectorDependent(bcBase.M_isStored_BcFunctionVectorDependent),
         M_idSet( ),
-        M_idGlobalSet( ),
-        M_IdGlobalVector( ),
         M_idList( ),
-        M_idGlobalList( ),
         M_offset   ( bcBase.M_offset ),
-        M_finalized( bcBase.M_finalized ),
-        M_finalizedIdGlobal()
+        M_finalized( bcBase.M_finalized )
 {
     // Important!!: The set member M_idSet is always empty at this point, it is just
-    // an auxiliary container used at the moment of the boundary update (see BCHandler::bdUpdate)
+    // an auxiliary container used at the moment of the boundary update (see BCHandler::bcUpdate)
 
     // The list of ID's must be empty
     if ( !M_idList.empty() || !bcBase.M_idList.empty() )
@@ -471,19 +467,6 @@ bool BCBase::isbetaVec()   const
     }
 }
 
-bool BCBase::isgammaVec()  const
-{
-    if ( M_isStored_BcVector )
-    {
-
-        return (*M_bcVector).isgammaVec();
-    }
-    else
-    {
-        ERROR_MSG( "BCBase::gamma : A data vector must be specified before calling this method" );
-        return 0.;
-    }
-}
 
 Real BCBase::MixteVec( const ID& iDof, const ID& iComponent ) const
 {
@@ -500,18 +483,6 @@ Real BCBase::BetaVec( const ID& iDof, const ID& iComponent ) const
 {
     if ( M_isStored_BcVector )
         return ( *M_bcVector).BetaVec( iDof, iComponent );
-    else
-    {
-        ERROR_MSG( "BCBase::MixteVec : A data vector must be specified before calling this method" );
-        return 0.;
-    }
-
-}
-
-Real BCBase::GammaVec( const ID& iDof, const ID& iComponent ) const
-{
-    if ( M_isStored_BcVector )
-        return ( *M_bcVector).GammaVec( iDof, iComponent );
     else
     {
         ERROR_MSG( "BCBase::MixteVec : A data vector must be specified before calling this method" );
@@ -542,40 +513,11 @@ BCBase::addIdentifier( IdentifierBase* identifierToAddPtr )
     M_idSet.insert( boost::shared_ptr<IdentifierBase>( identifierToAddPtr ) );
 }
 
-void
-BCBase::addIdentifierIdGlobal( IdentifierBase* identifierToAddPtr )
-{
-    UInt temp = M_idGlobalSet.size();
-    M_idGlobalSet.insert( boost::shared_ptr<IdentifierBase>( identifierToAddPtr ) );
-
-    if ( temp==0 )
-    {
-        M_IdGlobalVector.push_back(0);
-        M_IdGlobalVector.push_back((identifierToAddPtr ) -> id());
-        temp ++ ;
-    }
-    if ( temp != M_idGlobalSet.size())
-    {
-        M_IdGlobalVector.push_back((identifierToAddPtr ) -> id());
-    }
-}
 
 UInt
 BCBase::list_size() const
 {
     return M_idList.size();
-}
-
-UInt
-BCBase::list_size_IdGlobal() const
-{
-    return M_idGlobalList.size();
-}
-
-int
-BCBase::IdGlobal( int id) const
-{
-    return M_IdGlobalVector[id];
 }
 
 std::ostream&
@@ -593,11 +535,6 @@ BCBase::showMe( bool verbose, std::ostream & out ) const
     out << std::endl;
     out << "Offset               : " << M_offset << std::endl;
     out << "Number of stored ID's: " << M_idList.size() << std::endl;
-
-    if ( M_type== Resistance)
-    {
-        out << "Number of stored IdGlobal's: " << M_idGlobalList.size() << std::endl;
-    }
 
     if ( verbose && M_finalized )
     {
@@ -649,7 +586,7 @@ BCBase & BCBase::operator=( const BCBase& BCb )
 
     // Important!!: The set member M_idSet is always empty at this
     // point, it is just an auxiliary container used at the moment of
-    // the boundary update (see BCHandler::bdUpdate)
+    // the boundary update (see BCHandler::bcUpdate)
 
     // The list of ID's must be empty
     if ( !M_idList.empty() || !BCb.M_idList.empty() )
@@ -744,12 +681,12 @@ entityFlag_Type BCBase::flag() const
     return M_flag;
 }
 
-BCType BCBase::type() const
+bcType_Type BCBase::type() const
 {
     return M_type;
 }
 
-BCMode BCBase::mode() const
+bcMode_Type BCBase::mode() const
 {
     return M_mode;
 }
@@ -795,18 +732,6 @@ Real BCBase::betaCoef() const
 
 }
 
-Real BCBase::gammaCoef() const
-{
-    if ( M_isStored_BcVector )
-        return ( *M_bcVector ).gammaCoef();
-    else
-    {
-        ERROR_MSG( "BCBase::mixteCoef : A data vector must be specified before calling this method" );
-        return 0.;
-    }
-
-}
-
 bool BCBase::dataVector() const
 {
     return M_isStored_BcVector;
@@ -815,11 +740,6 @@ bool BCBase::dataVector() const
 bool BCBase::finalized() const
 {
     return M_finalized;
-}
-
-bool BCBase::finalizedIdGlobal() const
-{
-    return M_finalizedIdGlobal;
 }
 
 bool BCBase::isUDep() const
@@ -843,22 +763,6 @@ BCBase::finalize()
         M_idSet.clear();
     }
     M_finalized = true;
-}
-
-void
-BCBase::finalizeIdGlobal()
-{
-    if ( ! M_idGlobalSet.empty() )
-    {
-        M_idGlobalList.clear();
-        M_idGlobalList.reserve( M_idGlobalSet.size() );
-        std::copy( M_idGlobalSet.begin(), M_idGlobalSet.end(), std::inserter( M_idGlobalList, M_idGlobalList.end() ) );
-        M_idGlobalSet.clear();
-    }
-
-    M_finalizedIdGlobal = true;
-    M_IdGlobalVector.size();
-
 }
 
 

@@ -83,10 +83,10 @@
 namespace LifeV
 {
 
-/*! @enum BCType
+/*! @enum bcType_Type
 	Boundary condition basic types: Natural, Mixte, Flux, Resistance, Periodic, Essential, EssentialEdges, EssentialVertices
  */
-enum BCType
+enum bcType_Type
 {
     Natural, 			/*!< Neumann boundary conditions */
     Mixte, 				/*!< Robin boundary conditions */
@@ -98,10 +98,10 @@ enum BCType
     EssentialVertices, 	/*!< Dirichlet boundary conditions on vertices */
 };
 
-/*! @enum BCMode
+/*! @enum bcMode_Type
   	Type for boundary conditions application modes
  */
-enum BCMode
+enum bcMode_Type
 {
     Scalar, 	/*!< To be used for scalar problems */
     Full, 		/*!< To be used for vector problems, when the boundary condition involves all components*/
@@ -115,10 +115,7 @@ enum BCMode
 
 /*! Type of the name of the Boundary conditions
  */
-typedef std::string BCName;
-const BCName nullBCName; 		//!< Empty string
-
-
+typedef std::string bcName_Type;
 
 //! BCBase - Base class which holds the boundary condition information
 /*!
@@ -142,7 +139,7 @@ const BCName nullBCName; 		//!< Empty string
   this boundary condition.
 </ol>
   Finally the list of pointers to identifiers will be updated in the
-  Dof class (\c BCHandler::bdUpdate method).
+  Dof class (\c BCHandler::bcUpdate method).
 
   \warning The idea is to not use inheritance from this class
 
@@ -177,10 +174,10 @@ public:
        @param bcFunction the function holding the user defined function defining the boundary condition
        @param components vector of IDs storing the list of components involved in this boundary condition
      */
-    BCBase( const std::string& name,
+    BCBase( const bcName_Type& name,
             const entityFlag_Type& flag,
-            const BCType& type,
-            const BCMode& mode,
+            const bcType_Type& type,
+            const bcMode_Type& mode,
             BCFunctionBase& bcFunction,
             const std::vector<ID>& components );
 
@@ -194,10 +191,10 @@ public:
        @param bcFunction the BCFunctionBase holding the function defining the boundary condition
        involved in this boundary condition
      */
-    BCBase( const std::string& name,
+    BCBase( const bcName_Type& name,
             const entityFlag_Type& flag,
-            const BCType& type,
-            const BCMode& mode,
+            const bcType_Type& type,
+            const bcMode_Type& mode,
             BCFunctionBase& bcFunction );
 
     //! Constructor for BCBase without specifying components for without list of components for Full mode problems
@@ -211,10 +208,10 @@ public:
        @param numberOfComponents number of components involved
        in this boundary condition
      */
-    BCBase( const std::string& name,
+    BCBase( const bcName_Type& name,
             const entityFlag_Type& flag,
-            const BCType& type,
-            const BCMode& mode,
+            const bcType_Type& type,
+            const bcMode_Type& mode,
             BCFunctionBase& bcFunction,
             const UInt& numberOfComponents );
 
@@ -229,10 +226,10 @@ public:
        @param vector the vector containing the dof values to be prescribed as boundary data
        @param components vector of IDs storing the list of components involved in this boundary condition
      */
-    BCBase( const std::string& name,
+    BCBase( const bcName_Type& name,
             const entityFlag_Type& flag,
-            const BCType& type,
-            const BCMode& mode,
+            const bcType_Type& type,
+            const bcMode_Type& mode,
             BCVectorBase& vector,
             const std::vector<ID>& components );
 
@@ -246,10 +243,10 @@ public:
        Component, Normal, Tangential, Directional
        @param bcVector the vector containing the dof values to be prescribed as boundary data
      */
-    BCBase( const std::string& name,
+    BCBase( const bcName_Type& name,
             const entityFlag_Type& flag,
-            const BCType& type,
-            const BCMode& mode,
+            const bcType_Type& type,
+            const bcMode_Type& mode,
             BCVectorBase& bcVector );
 
     //! Constructor for BCBase to prescribe a boundary condition from a vector of dof values  without specifying components for Full mode problems
@@ -263,10 +260,10 @@ public:
        @param bcVector the vector containing the dof values to be prescribed as boundary data
        @param numberOfComponents number of components involved in this boundary condition
      */
-    BCBase( const std::string& name,
+    BCBase( const bcName_Type& name,
             const entityFlag_Type& flag,
-            const BCType& type,
-            const BCMode& mode,
+            const bcType_Type& type,
+            const bcMode_Type& mode,
             BCVectorBase& bcVector,
             const UInt& numberOfComponents );
 
@@ -281,10 +278,10 @@ public:
        @param bcFunctionFEVectorDependent the BCFunctionUDepBase holding the function (depending on a generic finite element vector ) defining the boundary condition
        @param components vector of IDs storing the list of components involved in this boundary condition
      */
-    BCBase( const std::string& name,
+    BCBase( const bcName_Type& name,
             const entityFlag_Type& flag,
-            const BCType& type,
-            const BCMode& mode,
+            const bcType_Type& type,
+            const bcMode_Type& mode,
             BCFunctionUDepBase& bcFunctionFEVectorDependent,
             const std::vector<ID>& components );
 
@@ -297,10 +294,10 @@ public:
        @param mode the boundary condition mode: Scalar, Normal, Tangential
        @param bcFunctionFEVectorDependent the BCFunctionUDepBase holding the function (depending on a generic finite element vector ) defining the boundary condition
      */
-    BCBase( const std::string& name,
+    BCBase( const bcName_Type& name,
             const entityFlag_Type& flag,
-            const BCType& type,
-            const BCMode& mode,
+            const bcType_Type& type,
+            const bcMode_Type& mode,
             BCFunctionUDepBase& bcFunctionFEVectorDependent);
 
     //! Constructor for BCBase without specifying components for Full mode problems. The BC function depends on a generic FE vector (e.g. the solution at the previous time step)
@@ -313,10 +310,10 @@ public:
        @param bcFunctionFEVectorDependent the BCFunctionUDepBase holding the function (depending on a generic finite element vector ) defining the boundary condition
        @param numberOfComponents number of components involved in this boundary condition
      */
-    BCBase( const std::string& name,
+    BCBase( const bcName_Type& name,
             const entityFlag_Type& flag,
-            const BCType& type,
-            const BCMode& mode,
+            const bcType_Type& type,
+            const bcMode_Type& mode,
             BCFunctionUDepBase& bcFunctionFEVectorDependent,
             const UInt& numberOfComponents );
 
@@ -356,12 +353,6 @@ public:
      */
     bool isbetaVec() const;
 
-    //! Returns true if gamma (in BC Vector ) is a EpetraVector (gammaVec) (default gammaCoef=1)
-    /*!
-       @return true if gamma (in BC Vector ) is a EpetraVector (gammaVec)
-     */
-    bool isgammaVec() const;
-
     //! Returns the value of the mixte coefficient vector (in BC Vector)
     /*!
        corresponding to DOF iDof and component iComponent
@@ -379,16 +370,6 @@ public:
        @return value of the Beta coefficient vector (in BC Vector) corresponding to iDof and iComponent
      */
     Real BetaVec( const ID& iDof, const ID& iComponent ) const;
-
-    //! Returns the value of the gamma coefficient vector (in BC Vector)
-    /*!
-       corresponding to DOF iDof and component iComponent
-       @param iDof DOF we are looking for in GammaVec
-       @param iComponent component we are looking for in GammaVec
-       @return value of the Gamma coefficient vector (in BC Vector) corresponding to iDof and iComponent
-     */
-    Real GammaVec( const ID& iDof, const ID& iComponent ) const;
-
 
     //! Returns a pointer to the BCFunctionBase object
     /*!
@@ -414,26 +395,11 @@ public:
      */
     void addIdentifier( IdentifierBase* identifierToAddPtr );
 
-    //! Adds a new identifier to the list of IdGlobal
-    /*!
-       @param identifierToAddPtr pointer to the IdentifierBase object to be added
-     */
-    void addIdentifierIdGlobal( IdentifierBase* identifierToAddPtr);
-
     //! Returns the size of the identifiers list
     /*!
        @return the size of the identifiers list
      */
     UInt list_size() const;
-
-    //! Returns the size of global identifiers list
-    /*!
-       @return the size of global identifiers list
-     */
-    UInt list_size_IdGlobal() const;
-
-    //! Returns element of M_IdGlobal vector
-    int IdGlobal( int id) const;
 
     //! Method that writes info in output
     /*!
@@ -581,13 +547,13 @@ public:
     /*!
        @return boundary condition type
      */
-    BCType type() const;
+    bcType_Type type() const;
 
     //! Returns the boundary condition mode
     /*!
        @return boundary condition mode
      */
-    BCMode mode() const;
+    bcMode_Type mode() const;
 
     //! Returns the number of components involved in this boundary condition
     /*!
@@ -620,12 +586,6 @@ public:
      */
     Real betaCoef() const;
 
-    //! Returns the value of the gamma coefficient (in BC Vector)
-    /*!
-       @return value of the gamma coefficient (in BC Vector)
-     */
-    Real gammaCoef() const;
-
     //! Returns True if a FE BCVector has been provided to the class, False otherwise
     /*!
        @return True if FE BCVector has been provided to the class, False otherwise
@@ -637,13 +597,6 @@ public:
       @return M_finalized private member
      */
     bool finalized() const;
-
-    //! Returns whether the list is finalized and the vector of IDGlobal's is then accessible.
-    /*!
-      @return M_finalizedIdGlobal private member
-     */
-    bool finalizedIdGlobal() const;
-
 
     //! Returns True if the BCBase is based on a BCFunctionUDepBase function, False otherwise
     /*!
@@ -659,9 +612,9 @@ private:
 
     entityFlag_Type                       M_flag;  //!< flag identifying a specific part of the mesh boundary
 
-    BCType                                M_type;  //!< the boundary condition type
+    bcType_Type                                M_type;  //!< the boundary condition type
 
-    BCMode                                M_mode;  //!< the boundary condition mode of application
+    bcMode_Type                                M_mode;  //!< the boundary condition mode of application
 
     std::vector<ID>                       M_components;		//! the list of components involved in this BC
 
@@ -677,23 +630,13 @@ private:
 
     std::set<boost::shared_ptr<IdentifierBase>, identifierComp> M_idSet; //!< set of pointers to identifiers allowing the user to get hold the DOF to which the BC applies
 
-    std::set<boost::shared_ptr<IdentifierBase>, identifierComp> M_idGlobalSet; //!< set of pointers to identifiers allowing the user to get hold the global DOF to which the BC applies
-
-    std::vector<int> M_IdGlobalVector; //!< vector of IdGlobal
-
     std::vector<boost::shared_ptr<IdentifierBase> > M_idList; //!< container for id's when the list is finalized
-
-    std::vector<boost::shared_ptr<IdentifierBase> > M_idGlobalList; //!< container for global id's when the list is finalized
 
     int M_offset; //!< boundary condition offset
 
     bool M_finalized; //!< True, when M_idList is finalized
 
-    bool M_finalizedIdGlobal; //!< True, when M_idGlobalList is finalized
-
     void finalize(); //!< Transfer information from M_idSet to M_idList
-
-    void  finalizeIdGlobal(); //!< Transfer information from M_idGlobalSet to M_idGlobalList
 };
 
 

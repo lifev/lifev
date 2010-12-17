@@ -52,23 +52,13 @@ namespace LifeV
 // Constructors & Destructor
 // ===================================================
 BCHandler::BCHandler():
-        M_bdUpdateDone    ( 0 ),
-        M_hint            ( HINT_BC_NONE ),
+        M_bcUpdateDone    ( 0 ),
         M_offset          ( 0 )
 {
-}
-
-BCHandler::BCHandler( const ID& nbc, const BCHints& hint ):
-        M_bdUpdateDone    ( 0 ),
-        M_hint            ( hint ),
-        M_offset          ( 0 )
-{
-    M_bcList.reserve( nbc );
 }
 
 BCHandler::BCHandler( const BCHandler& BCh ):
-        M_bdUpdateDone    ( false ), //TODO change this! (related with BCBase copy constructor)
-        M_hint            ( BCh.M_hint ),
+        M_bcUpdateDone    ( false ), //TODO change this! (related with BCBase copy constructor)
         M_bcList          ( BCh.M_bcList ),
         M_offset          ( BCh.M_offset ),
         M_notFoundMarkers ( BCh.M_notFoundMarkers )
@@ -90,8 +80,7 @@ BCHandler::operator = (const BCHandler &BCh)
 {
     if (this != &BCh)
     {
-        M_bdUpdateDone    = BCh.M_bdUpdateDone;
-        M_hint            = BCh.M_hint;
+        M_bcUpdateDone    = BCh.M_bcUpdateDone;
         M_bcList          = BCh.M_bcList;
         M_notFoundMarkers = BCh.M_notFoundMarkers;
     }
@@ -116,10 +105,10 @@ BCHandler::operator[] ( const ID& i ) const
 // ===================================================
 
 void
-BCHandler::addBC( const BCName& name,
+BCHandler::addBC( const bcName_Type& name,
                   const entityFlag_Type& flag,
-                  const BCType& type,
-                  const BCMode& mode,
+                  const bcType_Type& type,
+                  const bcMode_Type& mode,
                   BCFunctionBase& bcFunction,
                   const std::vector<ID>& components )
 {
@@ -129,10 +118,10 @@ BCHandler::addBC( const BCName& name,
 
 
 void
-BCHandler::addBC( const BCName& name,
+BCHandler::addBC( const bcName_Type& name,
                   const entityFlag_Type& flag,
-                  const BCType& type,
-                  const BCMode& mode,
+                  const bcType_Type& type,
+                  const bcMode_Type& mode,
                   BCFunctionBase& bcFunction )
 {
     M_bcList.push_back( BCBase( name, flag, type, mode, bcFunction ) );
@@ -140,10 +129,10 @@ BCHandler::addBC( const BCName& name,
 }
 
 void
-BCHandler::addBC( const BCName& name,
+BCHandler::addBC( const bcName_Type& name,
                   const entityFlag_Type& flag,
-                  const BCType& type,
-                  const BCMode& mode,
+                  const bcType_Type& type,
+                  const bcMode_Type& mode,
                   BCFunctionBase& bcFunction,
                   const UInt& numComponents )
 {
@@ -152,10 +141,10 @@ BCHandler::addBC( const BCName& name,
 }
 
 void
-BCHandler::addBC( const BCName& name,
+BCHandler::addBC( const bcName_Type& name,
                   const entityFlag_Type& flag,
-                  const BCType& type,
-                  const BCMode& mode,
+                  const bcType_Type& type,
+                  const bcMode_Type& mode,
                   BCVectorBase& bcVector,
                   const std::vector<ID>& numComponents )
 {
@@ -164,10 +153,10 @@ BCHandler::addBC( const BCName& name,
 }
 
 void
-BCHandler::addBC( const BCName& name,
+BCHandler::addBC( const bcName_Type& name,
                   const entityFlag_Type& flag,
-                  const BCType& type,
-                  const BCMode& mode,
+                  const bcType_Type& type,
+                  const bcMode_Type& mode,
                   BCVectorBase& bcVector )
 {
     M_bcList.push_back( BCBase( name, flag, type, mode, bcVector ) );
@@ -175,10 +164,10 @@ BCHandler::addBC( const BCName& name,
 }
 
 void
-BCHandler::addBC( const BCName& name,
+BCHandler::addBC( const bcName_Type& name,
                   const entityFlag_Type& flag,
-                  const BCType& type,
-                  const BCMode& mode,
+                  const bcType_Type& type,
+                  const bcMode_Type& mode,
                   BCVectorBase& bcVector,
                   const UInt& numComponents )
 {
@@ -187,10 +176,10 @@ BCHandler::addBC( const BCName& name,
 }
 
 void
-BCHandler::addBC( const BCName& name,
+BCHandler::addBC( const bcName_Type& name,
                   const entityFlag_Type& flag,
-                  const BCType& type,
-                  const BCMode& mode,
+                  const bcType_Type& type,
+                  const bcMode_Type& mode,
                   BCFunctionUDepBase& bcUDepFunction )
 {
     M_bcList.push_back( BCBase( name, flag, type, mode, bcUDepFunction ) );
@@ -198,17 +187,17 @@ BCHandler::addBC( const BCName& name,
 }
 
 void
-BCHandler::modifyBC( BCName const& name, BCFunctionBase const& bcFunction )
+BCHandler::modifyBC( bcName_Type const& name, BCFunctionBase const& bcFunction )
 {
-    BCBase* bcBasePtr = findBC( name );
+    BCBase* bcBasePtr = M_findBC( name );
 
     bcBasePtr->setBCFunction( bcFunction );
 }
 
 void
-BCHandler::modifyBC( BCName const& name, BCVectorBase const& bcVector )
+BCHandler::modifyBC( bcName_Type const& name, BCVectorBase const& bcVector )
 {
-    BCBase* bcBasePtr = findBC( name );
+    BCBase* bcBasePtr = M_findBC( name );
 
     bcBasePtr->setBCVector( bcVector );
 }
@@ -216,7 +205,7 @@ BCHandler::modifyBC( BCName const& name, BCVectorBase const& bcVector )
 void
 BCHandler::modifyBC( std::string const& name, BCFunctionUDepBase const& bcUDepFunction )
 {
-    BCBase* bcBasePtr = findBC( name );
+    BCBase* bcBasePtr = M_findBC( name );
 
     bcBasePtr->setBCFunction( bcUDepFunction );
 }
@@ -224,7 +213,7 @@ BCHandler::modifyBC( std::string const& name, BCFunctionUDepBase const& bcUDepFu
 void
 BCHandler::modifyBC( entityFlag_Type const& aFlag, BCFunctionBase const& bcFunction )
 {
-    BCBase* bcBasePtr = findBC( aFlag );
+    BCBase* bcBasePtr = M_findBC( aFlag );
 
     bcBasePtr->setBCFunction( bcFunction );
 }
@@ -232,7 +221,7 @@ BCHandler::modifyBC( entityFlag_Type const& aFlag, BCFunctionBase const& bcFunct
 void
 BCHandler::modifyBC( entityFlag_Type const& aFlag, BCVectorBase const& bcVector )
 {
-    BCBase* bcBasePtr = findBC( aFlag );
+    BCBase* bcBasePtr = M_findBC( aFlag );
 
     bcBasePtr->setBCVector( bcVector );
 }
@@ -240,7 +229,7 @@ BCHandler::modifyBC( entityFlag_Type const& aFlag, BCVectorBase const& bcVector 
 void
 BCHandler::modifyBC( entityFlag_Type const& aFlag, BCFunctionUDepBase const& bcFunction )
 {
-    BCBase* bcBasePtr = findBC( aFlag );
+    BCBase* bcBasePtr = M_findBC( aFlag );
 
     bcBasePtr->setBCFunction( bcFunction );
 }
@@ -248,10 +237,10 @@ BCHandler::modifyBC( entityFlag_Type const& aFlag, BCFunctionUDepBase const& bcF
 void
 BCHandler::merge( BCHandler& bcHandler )
 {
-    sumOffsets();
-    bcHandler.sumOffsets();
+    M_sumOffsets();
+    bcHandler.M_sumOffsets();
     M_bcList.insert(M_bcList.end(), bcHandler.M_bcList.begin(), bcHandler.M_bcList.end());
-    M_bdUpdateDone = M_bdUpdateDone && bcHandler.M_bdUpdateDone;
+    M_bcUpdateDone = M_bcUpdateDone && bcHandler.M_bcUpdateDone;
     M_offset = 0;
 }
 
@@ -277,9 +266,9 @@ BCHandler::setOffset( const UInt& offset )
 }
 
 void
-BCHandler::setOffset( const BCName& name, Int offset )
+BCHandler::setOffset( const bcName_Type& name, Int offset )
 {
-    BCBase* bc = findBC( name );
+    BCBase* bc = M_findBC( name );
 
     if (bc == 0)
         std::cout << "BCHandler::setOffset : BC " << name << " not found ... ";
@@ -287,28 +276,9 @@ BCHandler::setOffset( const BCName& name, Int offset )
     bc->setOffset(offset);
 }
 
-// ===================================================
-// Get Methods
-// ===================================================
-BCType
-BCHandler::boundaryType(const entityFlag_Type& aFlag) const
-{
-    BCType CurrType(Natural);
-
-    for (UInt i = 0; i <= M_bcList.size(); i++)
-    {
-        if (aFlag == M_bcList[i].flag())
-        {
-            CurrType = M_bcList[i].type();
-            break;
-        }
-    }
-
-    return CurrType;
-}
 
 BCBase&
-BCHandler::GetBCWithFlag(const entityFlag_Type& aFlag)
+BCHandler::findBCWithFlag(const entityFlag_Type& aFlag)
 {
     ID i;
 
@@ -320,7 +290,7 @@ BCHandler::GetBCWithFlag(const entityFlag_Type& aFlag)
 }
 
 const BCBase&
-BCHandler::GetBCWithFlag(const entityFlag_Type& aFlag) const
+BCHandler::findBCWithFlag(const entityFlag_Type& aFlag) const
 {
     ID i;
 
@@ -331,10 +301,10 @@ BCHandler::GetBCWithFlag(const entityFlag_Type& aFlag) const
     return M_bcList[i];
 }
 
-std::vector<BCName>
-BCHandler::getBCWithType( const BCType& type ) const
+std::vector<bcName_Type>
+BCHandler::findAllBCWithType( const bcType_Type& type ) const
 {
-    std::vector<BCName> vectorName;
+    std::vector<bcName_Type> vectorName;
 
     for ( std::size_t i = 0; i < M_bcList.size(); ++i )
         if ( M_bcList[i].type() == type)
@@ -344,7 +314,7 @@ BCHandler::getBCWithType( const BCType& type ) const
 }
 
 UInt
-BCHandler::getNumberBCWithType( const BCType& type ) const
+BCHandler::numberOfBCWithType( const bcType_Type& type ) const
 {
     UInt typeNumber = 0;
 
@@ -356,7 +326,7 @@ BCHandler::getNumberBCWithType( const BCType& type ) const
 }
 
 UInt
-BCHandler::getBCbyName(BCName const & name) const
+BCHandler::findBCWithName(bcName_Type const & name) const
 {
     UInt iBC( 0 );
 
@@ -379,70 +349,50 @@ BCHandler::getBCbyName(BCName const & name) const
     return iBC;
 }
 
-UInt
-BCHandler::offset() const
-{
-    return M_offset;
-}
 
-BCHandler::BCBase_Iterator
-BCHandler::begin()
-{
-    return M_bcList.begin();
-}
-
-BCHandler::BCBase_Iterator
-BCHandler::end()
-{
-    return M_bcList.end();
-}
-
-ID
-BCHandler::size() const
-{
-    return M_bcList.size();
-}
-
-bool
-BCHandler::empty() const
-{
-    return M_bcList.empty();
-}
-
-bool
-BCHandler::bdUpdateDone() const
-{
-    return M_bdUpdateDone;
-}
 
 bool
 BCHandler::hasOnlyEssential() const
 {
-    if ( empty() )
-        return M_hint == HINT_BC_ONLY_ESSENTIAL;
-    else if ( M_hint == HINT_BC_ONLY_ESSENTIAL )
-    {
-        if ( listHasOnlyEssential() != true )
-        {
-            std::ostringstream __ex;
-            __ex << "BCHandler::hasOnlyEssential(): state is not consistent:"
-            << "\nhint from constructor says:    yes"
-            << "\nadded boundary conditions say: no";
-            std::cerr << std::endl << "Throwing exception:\n"
-                      << __ex.str() << std::endl;
-            throw std::logic_error( __ex.str() );
-        }
-        return true;
-    }
+	std::map<entityFlag_Type, std::set<ID> > nonEssentialConditions;
+	std::set<ID> nonEssentialComponents;
+	for(UInt i=1; i<=nDimensions; i++)
+		nonEssentialComponents.insert(i);
 
-    return listHasOnlyEssential();
+	for ( bcBaseConstIterator_Type it = M_bcList.begin(); it != M_bcList.end(); ++it )
+		nonEssentialConditions.insert(std::make_pair(it->flag(), nonEssentialComponents) );
+
+	for ( bcBaseConstIterator_Type it = begin(); it != end(); ++it )
+	{
+		if( it->type() == Essential )
+		{
+			switch(it->mode())
+			{
+			case Full:
+			case Normal:
+				nonEssentialConditions.erase(it->flag());
+				break;
+			case Scalar:
+				nonEssentialConditions.find(it->flag())->second.erase(1);
+				break;
+			case Component:
+				for (UInt iComp=1; iComp<=it->numberOfComponents(); ++iComp)
+					nonEssentialConditions.find(it->flag())->second.erase(it->component(iComp));
+				break;
+			default:
+				break;
+			}
+		}
+	}
+
+	return ( nonEssentialConditions.size() == 0 );
 }
 
 // ===================================================
 // Private Methods
 // ===================================================
 BCBase*
-BCHandler::findBC( BCName const& name )
+BCHandler::M_findBC( bcName_Type const& name )
 {
     BCBase* bcBasePtr = 0;
     std::for_each( M_bcList.begin(),
@@ -466,7 +416,7 @@ BCHandler::findBC( BCName const& name )
 }
 
 BCBase*
-BCHandler::findBC( entityFlag_Type const& aFlag)
+BCHandler::M_findBC( entityFlag_Type const& aFlag)
 {
     BCBase* bcBasePtr = 0;
     std::for_each( M_bcList.begin(),
@@ -477,67 +427,10 @@ BCHandler::findBC( entityFlag_Type const& aFlag)
     return bcBasePtr;
 }
 
-bool
-BCHandler::listHasOnlyEssential() const
-{
-    std::map<entityFlag_Type, EssentialStatus> statusMap;
-    for ( BCBase_ConstIterator it = M_bcList.begin(); it != M_bcList.end(); ++it )
-    {
-        // make sure that this flag is in the map
-        EssentialStatus& status = statusMap[it->flag()];
-        if ( it->type() == Essential )
-        {
-            switch ( it->mode() )
-            {
-            case Scalar:
-                status.setAllComponents();
-                break;
-            case Full:
-                status.setAllComponents();
-                break;
-            case Component:
-            {
-                UInt nComp = it->numberOfComponents();
-                for (UInt iComp=1; iComp<=nComp; ++iComp)
-                {
-                    status.setComponent( it->component(iComp) );
-                }
-            }
-            break;
-            case Normal:
-                status.setNormal();
-                break;
-            case Tangential:
-                status.setTangential();
-                break;
-            case Directional:
-                status.setDirectional();
-                break;
-            default:
-            {
-                std::ostringstream __ex;
-                __ex << "BCHandler::hasOnlyEssential(): BC mode "
-                << "unknown\n";
-                std::cerr << std::endl << "Throwing exception:\n"
-                          << __ex.str() << std::endl;
-                throw std::logic_error( __ex.str() );
-            }
-            break;
-            }
-        }
-    }
 
-    bool listOnlyEssential = true;
-    for (std::map<entityFlag_Type, EssentialStatus>::const_iterator
-            it = statusMap.begin(); it != statusMap.end(); ++it)
-    {
-        listOnlyEssential &= it->second.isEssential();
-    }
-    return listOnlyEssential;
-}
 
 void
-BCHandler::sumOffsets()
+BCHandler::M_sumOffsets()
 {
     for ( bcBaseIterator_Type it = M_bcList.begin(); it != M_bcList.end(); ++it )
         it->setOffset(it->offset()+M_offset);
