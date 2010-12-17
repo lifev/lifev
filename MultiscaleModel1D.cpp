@@ -175,13 +175,13 @@ MultiscaleModel1D::setupData( const std::string& fileName )
 #ifdef HAVE_HDF5
     M_exporter->setDataFromGetPot( dataFile );
     M_exporter->setPrefix( "Step_" + number2string( multiscaleProblemStep ) + "_Model_" + number2string( M_ID ) );
-    M_exporter->setDirectory( multiscaleProblemFolder );
+    M_exporter->setPostDir( multiscaleProblemFolder );
 
     M_exporterMesh->setup( M_data->length(), M_data->numberOfElements() );
 
     M_importer->setDataFromGetPot( dataFile );
     M_importer->setPrefix( "Step_" + number2string( multiscaleProblemStep - 1 ) + "_Model_" + number2string( M_ID ) );
-    M_importer->setDirectory( multiscaleProblemFolder );
+    M_importer->setPostDir( multiscaleProblemFolder );
 #endif
 
 }
@@ -306,7 +306,7 @@ MultiscaleModel1D::saveSolution()
     M_exporter->postProcess( M_data->dataTime()->getTime() );
 
     if ( M_data->dataTime()->isLastTimeStep() )
-        M_exporter->CloseFile();
+        M_exporter->closeFile();
 #endif
 
 #ifdef HAVE_MATLAB_POSTPROCESSING
