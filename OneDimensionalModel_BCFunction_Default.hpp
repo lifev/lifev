@@ -75,12 +75,18 @@ public:
     typedef OneDimensionalModel_Data                data_Type;
     typedef data_Type::mesh_Type                    mesh_Type;
 
+    typedef data_Type::container2D_Type             container2D_Type;
+
     typedef SolverAmesos                            linearSolver_Type;
     typedef linearSolver_Type::vector_type          vector_Type;
     typedef boost::shared_ptr< vector_Type >        vectorPtr_Type;
 
     typedef std::map< std::string, vectorPtr_Type > solution_Type;
     typedef boost::shared_ptr< solution_Type >      solutionPtr_Type;
+
+    typedef OneDimensional::bcLine_Type             bcLine_Type;
+    typedef OneDimensional::bcSide_Type             bcSide_Type;
+    typedef OneDimensional::bcType_Type             bcType_Type;
 
     //@}
 
@@ -148,7 +154,14 @@ class OneDimensionalModel_BCFunction_Riemann : public OneDimensionalModel_BCFunc
 {
 public:
 
+    //! @name Type definitions and Enumerators
+    //@{
+
     typedef OneDimensionalModel_BCFunction_Default      super;
+    typedef super::container2D_Type                     container2D_Type;
+
+    //@}
+
 
     //! @name Constructors & Destructor
     //@{
@@ -211,6 +224,7 @@ public:
     typedef super::solutionPtr_Type                      solutionPtr_Type;
 
     typedef super::mesh_Type                             mesh_Type;
+    typedef super::container2D_Type                      container2D_Type;
 
     //@}
 
@@ -254,6 +268,9 @@ protected:
     Real evaluateRHS( const Real& eigenvalue, const container2D_Type& eigenvector, const container2D_Type& deltaEigenvector, const Real& timeStep );
 
     Real computeCFL( const Real& eigenvalue, const Real& timeStep ) const;
+
+    //! Scalar product between 2D vectors
+    Real scalarProduct( const container2D_Type& vector1, const container2D_Type& vector2 ) { return vector1[0]*vector2[0] + vector1[1]*vector2[1]; }
 
     //@}
 

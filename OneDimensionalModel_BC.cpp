@@ -57,8 +57,8 @@ OneDimensionalModel_BC::OneDimensionalModel_BC( const bcSide_Type& bcSide ) :
         M_bcMatrix                  (),
         M_bcRHS                     ()
 {
-    M_bcMatrix[ OneD_first ]  = container2D_Type();
-    M_bcMatrix[ OneD_second ] = container2D_Type();
+    M_bcMatrix[ OneDimensional::first ]  = container2D_Type();
+    M_bcMatrix[ OneDimensional::second ] = container2D_Type();
 }
 
 OneDimensionalModel_BC::OneDimensionalModel_BC( const OneDimensionalModel_BC& bc ) :
@@ -87,7 +87,7 @@ OneDimensionalModel_BC::applyBC( const Real& time, const Real& timeStep, const s
 #endif
     {
         UInt dof;
-        ( M_bcSide == OneD_left ) ? dof = 0 : dof = flux->physics()->data()->numberOfNodes() - 1;
+        ( M_bcSide == OneDimensional::left ) ? dof = 0 : dof = flux->physics()->data()->numberOfNodes() - 1;
 
         container2D_Type boundaryU;
         boundaryU[0] = (*solution.find("A")->second)(dof + 1);
@@ -100,13 +100,13 @@ OneDimensionalModel_BC::applyBC( const Real& time, const Real& timeStep, const s
         flux->eigenValuesEigenVectors( boundaryU[0], boundaryU[1],
                                        eigenvalues, leftEigenvector1, leftEigenvector2, dof );
 
-        computeMatrixAndRHS( time, timeStep, flux, OneD_first,
+        computeMatrixAndRHS( time, timeStep, flux, OneDimensional::first,
                              leftEigenvector1, leftEigenvector2, dof, M_bcRHS[0]);
 
-        computeMatrixAndRHS( time, timeStep, flux, OneD_second,
+        computeMatrixAndRHS( time, timeStep, flux, OneDimensional::second,
                              leftEigenvector1, leftEigenvector2, dof, M_bcRHS[1]);
 
-        bc = solveLinearSystem( M_bcMatrix[OneD_first], M_bcMatrix[OneD_second], M_bcRHS );
+        bc = solveLinearSystem( M_bcMatrix[OneDimensional::first], M_bcMatrix[OneDimensional::second], M_bcRHS );
     }
 
 #ifdef HAVE_LIFEV_DEBUG
@@ -133,24 +133,24 @@ OneDimensionalModel_BC::computeMatrixAndRHS( const Real& time, const Real& timeS
     rhs = M_bcFunction[ line ](time, timeStep);
     switch ( M_bcType[line] )
     {
-    case OneD_W1:
+    case OneDimensional::W1:
         M_bcMatrix[line] = leftEigenvector1;
         break;
-    case OneD_W2:
+    case OneDimensional::W2:
         M_bcMatrix[line] = leftEigenvector2;
         break;
-    case OneD_A:
+    case OneDimensional::A:
         M_bcMatrix[line][0] = 1.;
         M_bcMatrix[line][1] = 0.;
         break;
-    case OneD_P:
+    case OneDimensional::P:
         rhs = flux->physics()->fromPToA( rhs, dof );
         M_bcMatrix[line][0] = 1.;
         M_bcMatrix[line][1] = 0.;
         break;
-    case OneD_Q:
+    case OneDimensional::Q:
         // Flow rate is positive with respect to the outgoing normal
-        if ( M_bcSide == OneD_left )
+        if ( M_bcSide == OneDimensional::left )
             rhs *= -1;
         M_bcMatrix[line][0] = 0.;
         M_bcMatrix[line][1] = 1.;
@@ -168,7 +168,7 @@ OneDimensionalModel_BC::computeMatrixAndRHS( const Real& time, const Real& timeS
 #endif
 }
 
-container2D_Type
+OneDimensionalModel_BC::container2D_Type
 OneDimensionalModel_BC::solveLinearSystem( const container2D_Type& line1,
                                            const container2D_Type& line2,
                                            const container2D_Type& rhs ) const

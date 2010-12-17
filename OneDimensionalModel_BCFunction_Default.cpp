@@ -98,11 +98,11 @@ OneDimensionalModel_BCFunction_Default::setupNode()
 {
     switch ( M_bcSide )
     {
-    case OneD_left:
+    case OneDimensional::left:
         M_bcNode = 1;
         break;
 
-    case OneD_right:
+    case OneDimensional::right:
         M_bcNode = M_flux->physics()->data()->numberOfNodes();
         break;
 
@@ -137,7 +137,7 @@ OneDimensionalModel_BCFunction_Riemann::operator()( const Real& /*time*/, const 
 {
     updateBCVariables();
 
-    return ( ( M_bcType == OneD_W1 ) ? M_bcW[0] : M_bcW[1] );
+    return ( ( M_bcType == OneDimensional::W1 ) ? M_bcW[0] : M_bcW[1] );
 }
 
 // ===================================================
@@ -197,7 +197,7 @@ OneDimensionalModel_BCFunction_Compatibility::setupNode()
     mesh_Type::EdgeType boundaryEdge;
     switch ( M_bcSide )
     {
-    case OneD_left:
+    case OneDimensional::left:
         M_bcInternalNode      = M_bcNode + 1;
         boundaryEdge          = M_flux->physics()->data()->mesh()->edgeList(1);
         M_boundaryPoint[0]    = boundaryEdge.point(1).x();
@@ -208,7 +208,7 @@ OneDimensionalModel_BCFunction_Compatibility::setupNode()
         M_internalBdPoint[2]  = boundaryEdge.point(2).z();
         break;
 
-    case OneD_right:
+    case OneDimensional::right:
         M_bcInternalNode      = M_bcNode - 1;
         boundaryEdge          = M_flux->physics()->data()->mesh()->edgeList(M_bcNode - 1);
         M_boundaryPoint[0]    = boundaryEdge.point(2).x();
@@ -232,11 +232,11 @@ OneDimensionalModel_BCFunction_Compatibility::computeRHS( const Real& timeStep )
 
     switch ( M_bcType )
     {
-    case OneD_W1:
+    case OneDimensional::W1:
         return evaluateRHS( M_eigenvalues[0], M_leftEigenvector1, M_deltaLeftEigenvector1, timeStep );
         break;
 
-    case OneD_W2:
+    case OneDimensional::W2:
         return evaluateRHS( M_eigenvalues[1], M_leftEigenvector2, M_deltaLeftEigenvector2, timeStep );
         break;
 
@@ -273,12 +273,12 @@ OneDimensionalModel_BCFunction_Compatibility::evaluateRHS( const Real& eigenvalu
     container2D_Type bcNodes;
     switch ( M_bcSide )
     {
-    case OneD_left:
+    case OneDimensional::left:
         bcNodes[0] = M_bcNode - 1; // Boundary node
         bcNodes[1] = M_bcNode;     // Inner node
         break;
 
-    case OneD_right:
+    case OneDimensional::right:
         bcNodes[0] = M_bcNode - 1; // Boundary node
         bcNodes[1] = M_bcNode - 2; // Inner node
         break;
@@ -292,7 +292,7 @@ OneDimensionalModel_BCFunction_Compatibility::evaluateRHS( const Real& eigenvalu
     U[0] = U_interpolated[0] - timeStep * M_source->interpolatedQuasiLinearSource( U_interpolated[0], U_interpolated[1], 1, bcNodes, cfl );
     U[1] = U_interpolated[1] - timeStep * M_source->interpolatedQuasiLinearSource( U_interpolated[0], U_interpolated[1], 2, bcNodes, cfl );
 
-    return dot( eigenvector, U ) + timeStep * eigenvalue * dot( deltaEigenvector, U_interpolated );
+    return scalarProduct( eigenvector, U ) + timeStep * eigenvalue * scalarProduct( deltaEigenvector, U_interpolated );
 }
 
 Real
@@ -301,11 +301,11 @@ OneDimensionalModel_BCFunction_Compatibility::computeCFL( const Real& eigenvalue
     Real deltaX(0);
     switch ( M_bcSide )
     {
-    case OneD_left:
+    case OneDimensional::left:
         deltaX = M_flux->physics()->data()->mesh()->edgeLength( 0 );
         break;
 
-    case OneD_right:
+    case OneDimensional::right:
         deltaX = M_flux->physics()->data()->mesh()->edgeLength( M_bcNode - 2 );
         break;
 
@@ -342,14 +342,14 @@ OneDimensionalModel_BCFunction_Absorbing::operator()( const Real& /*time*/, cons
     Real W_out(0.), W_out_old(0.);
     switch ( M_bcType )
     {
-    case OneD_W1:
-        W_out = M_bcW[1] + evaluateRHS( M_eigenvalues[1], M_leftEigenvector2, M_deltaLeftEigenvector2, timeStep ) - dot( M_leftEigenvector2, M_bcU );
-        W_out_old = -M_bcW[0] + dot( M_leftEigenvector1, M_bcU );
+    case OneDimensional::W1:
+        W_out = M_bcW[1] + evaluateRHS( M_eigenvalues[1], M_leftEigenvector2, M_deltaLeftEigenvector2, timeStep ) - scalarProduct( M_leftEigenvector2, M_bcU );
+        W_out_old = -M_bcW[0] + scalarProduct( M_leftEigenvector1, M_bcU );
         break;
 
-    case OneD_W2:
-        W_out = M_bcW[0] + evaluateRHS( M_eigenvalues[0], M_leftEigenvector1, M_deltaLeftEigenvector1, timeStep ) - dot( M_leftEigenvector1, M_bcU );
-        W_out_old = -M_bcW[1] + dot( M_leftEigenvector2, M_bcU );
+    case OneDimensional::W2:
+        W_out = M_bcW[0] + evaluateRHS( M_eigenvalues[0], M_leftEigenvector1, M_deltaLeftEigenvector1, timeStep ) - scalarProduct( M_leftEigenvector1, M_bcU );
+        W_out_old = -M_bcW[1] + scalarProduct( M_leftEigenvector2, M_bcU );
         break;
     default:
         std::cout << "Warning: bcType \"" << M_bcType  << "\"not available!" << std::endl;
@@ -446,11 +446,11 @@ OneDimensionalModel_BCFunction_Windkessel3::operator()( const Real& time, const 
 
     switch ( M_bcType )
     {
-    case OneD_W1:
+    case OneDimensional::W1:
         W_outID = 2;
         W_out = computeRHS( timeStep );
         break;
-    case OneD_W2:
+    case OneDimensional::W2:
         W_outID = 1;
         W_out = computeRHS( timeStep );
         break;

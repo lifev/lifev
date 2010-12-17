@@ -62,16 +62,22 @@ public:
     //! @name Type definitions
     //@{
 
-    typedef OneDimensionalModel_BCFunction_Default::bcFunction_Type      bcFunction_Type;
-    typedef OneDimensionalModel_BCFunction_Default::bcFunctionPtr_Type   bcFunctionPtr_Type;
+    typedef OneDimensionalModel_BCFunction_Default       bcFunctionDefault_Type;
+    typedef boost::shared_ptr< bcFunctionDefault_Type >  bcFunctionDefaultPtr_Type;
 
-    typedef OneDimensionalModel_BCFunction_Default                       bcFunction_Default_Type;
-    typedef boost::shared_ptr< bcFunction_Default_Type >                 bcFunctionDefaultPtr_Type;
+    typedef bcFunctionDefault_Type::bcFunction_Type      bcFunction_Type;
+    typedef bcFunctionDefault_Type::bcFunctionPtr_Type   bcFunctionPtr_Type;
 
-    typedef OneDimensionalModel_BCFunction_Default::fluxPtr_Type         fluxPtr_Type;
-    typedef OneDimensionalModel_BCFunction_Default::sourcePtr_Type       sourcePtr_Type;
-    typedef OneDimensionalModel_BCFunction_Default::solution_Type        solution_Type;
-    typedef OneDimensionalModel_BCFunction_Default::solutionPtr_Type     solutionPtr_Type;
+    typedef bcFunctionDefault_Type::fluxPtr_Type         fluxPtr_Type;
+    typedef bcFunctionDefault_Type::sourcePtr_Type       sourcePtr_Type;
+    typedef bcFunctionDefault_Type::solution_Type        solution_Type;
+    typedef bcFunctionDefault_Type::solutionPtr_Type     solutionPtr_Type;
+
+    typedef bcFunctionDefault_Type::container2D_Type     container2D_Type;
+
+    typedef bcFunctionDefault_Type::bcLine_Type          bcLine_Type;
+    typedef bcFunctionDefault_Type::bcSide_Type          bcSide_Type;
+    typedef bcFunctionDefault_Type::bcType_Type          bcType_Type;
 
     //@}
 

@@ -66,13 +66,19 @@ public:
 
     typedef bc_Type::bcFunction_Type            bcFunction_Type;
     typedef bc_Type::bcFunctionPtr_Type         bcFunctionPtr_Type;
-    typedef bc_Type::bcFunction_Default_Type    bcFunctionDefault_Type;
+    typedef bc_Type::bcFunctionDefault_Type     bcFunctionDefault_Type;
     typedef bc_Type::bcFunctionDefaultPtr_Type  bcFunctionDefaultPtr_Type;
 
     typedef bc_Type::fluxPtr_Type               fluxPtr_Type;
     typedef bc_Type::sourcePtr_Type             sourcePtr_Type;
     typedef bc_Type::solution_Type              solution_Type;
     typedef bc_Type::solutionPtr_Type           solutionPtr_Type;
+
+    typedef bc_Type::container2D_Type           container2D_Type;
+
+    typedef bc_Type::bcLine_Type                bcLine_Type;
+    typedef bc_Type::bcSide_Type                bcSide_Type;
+    typedef bc_Type::bcType_Type                bcType_Type;
 
     //@}
 
