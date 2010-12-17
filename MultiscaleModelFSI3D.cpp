@@ -304,9 +304,9 @@ MultiscaleModelFSI3D::saveSolution()
     if ( M_data->dataFluid()->dataTime()->isLastTimeStep() )
     {
         if ( M_FSIoperator->isFluid() )
-            ( multiscaleDynamicCast< hdf5IOFile_Type >( M_exporterFluid ) )->CloseFile();
+            ( multiscaleDynamicCast< hdf5IOFile_Type >( M_exporterFluid ) )->closeFile();
         if ( M_FSIoperator->isSolid() )
-            ( multiscaleDynamicCast< hdf5IOFile_Type >( M_exporterSolid ) )->CloseFile();
+            ( multiscaleDynamicCast< hdf5IOFile_Type >( M_exporterSolid ) )->closeFile();
     }
 #endif
 
@@ -590,7 +590,7 @@ MultiscaleModelFSI3D::setupExporter( IOFilePtr_Type& exporter, const GetPot& dat
         exporter.reset( new ensightIOFile_Type( dataFile, label ) );
 
     exporter->setPrefix( "Step_" + number2string( multiscaleProblemStep ) + "_Model_" + number2string( M_ID ) + label );
-    exporter->setDirectory( multiscaleProblemFolder );
+    exporter->setPostDir( multiscaleProblemFolder );
 }
 
 void
@@ -605,7 +605,7 @@ MultiscaleModelFSI3D::setupImporter( IOFilePtr_Type& importer, const GetPot& dat
         importer.reset( new ensightIOFile_Type( dataFile, label ) );
 
     importer->setPrefix( "Step_" + number2string( multiscaleProblemStep - 1 ) + "_Model_" + number2string( M_ID ) + label );
-    importer->setDirectory( multiscaleProblemFolder );
+    importer->setPostDir( multiscaleProblemFolder );
 }
 
 void
