@@ -313,7 +313,7 @@ Monolithic::computeMaxSingularValue( )
 void
 Monolithic::computeFNormals( vector_Type& normals)
 {
-    BCNormalManager<mesh_Type, matrix_Type> normalManager(*M_uFESpace->mesh());
+    BCNormalManager<matrix_Type> normalManager;
     if ( !M_BChWSS->bcUpdateDone() )//possibly to avoid
         M_BChWSS->bcUpdate(*M_uFESpace->mesh(), M_uFESpace->feBd(), M_uFESpace->dof() );
     normalManager.init((*M_BChWSS)[0], 0.);
