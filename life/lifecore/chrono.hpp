@@ -53,7 +53,7 @@ public:
 
     //! @name Constructor
     //@{
-    Chrono() :
+    Chrono():
         M_t1(0),
         M_t2(0),
         M_dt(0),
@@ -64,8 +64,7 @@ public:
 
     //! @name Public methods
     //@{
-    //! Reset the timer
-    void Reset()
+    void reset()
     {
         M_dt = 0;
         M_running = false;
@@ -99,7 +98,22 @@ public:
     }
 
     //! Return a cumulative time difference
-    Real diff_cumul()
+    Real diffCumul()
+    {
+        if (M_running)
+            return ( 1. * ( M_dt +  clock() - M_t1 ) ) / CLOCKS_PER_SEC;
+
+        return ( 1. * M_dt / CLOCKS_PER_SEC );
+    }
+
+    // DEPRECATED
+    //! Reset the timer
+    void __attribute__((__deprecated__)) Reset()
+    {
+        M_dt = 0;
+        M_running = false;
+    }
+    Real __attribute__((__deprecated__)) diff_cumul()
     {
         if (M_running)
             return ( 1. * ( M_dt +  clock() - M_t1 ) ) / CLOCKS_PER_SEC;
@@ -133,7 +147,7 @@ public:
 
     //! @name Public methods
     //@{
-    void Reset()
+    void reset()
     {
     }
     void start()
@@ -146,7 +160,16 @@ public:
     {
         return -1.;
     };
-    Real diff_cumul()
+    Real diffCumul()
+    {
+        return -1.;
+    };
+
+    // // DEPRECATED
+    void __attribute__((__deprecated__)) Reset()
+    {
+    }
+    Real __attribute__((__deprecated__)) diff_cumul()
     {
         return -1.;
     };
