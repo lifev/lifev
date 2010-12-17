@@ -159,7 +159,7 @@ public:
     //!Initialize all the entries of the unknonwn vectors with a given function
     /*!
         The array of initial conditions needed by the selected BDF is
-        initialized as follows: M_unknown=[ u0Function(t0), 
+        initialized as follows: M_unknown=[ u0Function(t0),
         u0Function(t0-dt), u0Function(t0-2*dt), ...]
         For the space dependence of the initial conditions we need informations
         on:

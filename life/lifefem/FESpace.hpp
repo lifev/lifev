@@ -378,6 +378,7 @@ public:
     //! Returns the velocity dof
     const Dof&			dof()	const { return *M_dof; }
     Dof&				dof() 		  { return *M_dof; }
+    const boost::shared_ptr<Dof> & dofPtr() const{ return M_dof; }
 
     //! Returns the current FE
     const CurrentFE&	fe()	const { return *M_fe; }
