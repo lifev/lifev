@@ -394,7 +394,7 @@ void exactJacobian::eval(const vector_Type& _disp,
     this->setSigmaSolid(     sigmaSolidUnique);
 
     chronoInterface.stop();
-    this->displayer().leaderPrintMax("      Interface transfer total time:           ", chronoInterface.diff_cumul() );
+    this->displayer().leaderPrintMax("      Interface transfer total time:           ", chronoInterface.diffCumul() );
 
     if ( false && this->isSolid() )
     {
@@ -547,7 +547,7 @@ int exactJacobian::Epetra_ExactJacobian::Apply(const Epetra_MultiVector &X, Epet
         M_ej->setLambdaSolid(lambdaSolidUnique);
 
         chronoInterface.stop();
-        M_ej->displayer().leaderPrintMax( "Interface linear transfer: total time : " , chronoInterface.diff_cumul() );
+        M_ej->displayer().leaderPrintMax( "Interface linear transfer: total time : " , chronoInterface.diffCumul() );
 
         dz = lambdaSolidUnique.getEpetraVector();
 
