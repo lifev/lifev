@@ -57,8 +57,8 @@ public:
     //@{
     typedef MeshType mesh_Type;
     typedef Exporter<MeshType> super;
-    typedef typename super::mesh_ptrtype  mesh_ptrtype;
-    typedef typename super::vector_ptrtype vector_ptrtype;
+    typedef typename super::meshPtr_Type  meshPtr_Type;
+    typedef typename super::vectorPtr_Type vectorPtr_Type;
     //@}
 
     //! @name Constructors and destructor
@@ -80,7 +80,7 @@ public:
 
       @param the procId determines de CPU id. if negative, it ussemes there is only one processor
     */
-    Ensight(const GetPot& dfile, mesh_ptrtype mesh, const std::string& prefix, const Int& procId );
+    Ensight(const GetPot& dfile, meshPtr_Type mesh, const std::string& prefix, const Int& procId );
 
     //! Constructor for Ensight
     Ensight(const GetPot& dfile, const std::string& prefix);
@@ -101,7 +101,7 @@ public:
 
       Not yet implemented for Ensight
     */
-    UInt importFromTime( const Real& /*time*/ ) { assert(false); return 0; }
+    UInt importFromTime( const Real& time ) { assert(false); return 0; }
 
     //! Import data from previous simulations
     /*!
@@ -115,11 +115,10 @@ public:
     void import(const Real& startTime);
 
     //! Read variable
-    // TODO: RENAME ro readVariable(...) DURING INTERFACE WEEK
-    void rd_var(ExporterData& dvar) {super::rd_var(dvar);}
+    void readVariable(ExporterData& dvar) {super::readVariable(dvar);}
 
     //! Set the mesh and the processor id
-    void setMeshProcId( const mesh_ptrtype mesh, const Int& procId );
+    void setMeshProcId( const meshPtr_Type mesh, const Int& procId );
     //@}
 
     //! @name Get methods
@@ -127,6 +126,9 @@ public:
 
     //! returns the type of the map to use for the EpetraVector
     EpetraMapType mapType() const;
+
+    // DEPRECATED
+    void __attribute__((__deprecated__)) rd_var(ExporterData& dvar) {super::rd_var(dvar);}
 
     //@}
 
@@ -187,7 +189,7 @@ Ensight<MeshType>::Ensight():
 }
 
 template<typename MeshType>
-Ensight<MeshType>::Ensight(const GetPot& dfile, mesh_ptrtype mesh, const std::string& prefix,
+Ensight<MeshType>::Ensight(const GetPot& dfile, meshPtr_Type mesh, const std::string& prefix,
                        const Int& procId)
     :
     super(dfile, prefix),
@@ -229,7 +231,7 @@ void Ensight<MeshType>::postProcess(const Real& time)
         {
             if (i->steady() < 2 )
                 writeAscii(*i);
-            if (i->steady() == 1) i->set_steady(2);
+            if (i->steady() == 1) i->setSteady(2);
         }
         writeCase(time);
 
@@ -244,9 +246,9 @@ template<typename MeshType>
 void Ensight<MeshType>::import(const Real& startTime, const Real& dt)
 {
     // dt is used to rebuild the history up to now
-    Real time(startTime - this->M_count * dt);
+    Real time(startTime - this->M_startIndex * dt);
 
-    for ( UInt count(0); count < this->M_count; ++count)
+    for ( UInt count(0); count < this->M_startIndex; ++count)
     {
         this->M_timeSteps.push_back(time);
         ++this->M_steps;
@@ -277,7 +279,7 @@ void Ensight<MeshType>::import(const Real& time)
     chrono.start();
     for (Iterator i=this->M_listData.begin(); i != this->M_listData.end(); ++i)
     {
-        this->rd_var(*i);
+        this->readVariable(*i);
     }
     chrono.stop();
     if (!this->M_procId) std::cout << "      done in " << chrono.diff() << " s." << std::endl;
@@ -285,7 +287,7 @@ void Ensight<MeshType>::import(const Real& time)
 }
 
 template<typename MeshType>
-void Ensight<MeshType>::setMeshProcId( const mesh_ptrtype mesh, const Int& procId )
+void Ensight<MeshType>::setMeshProcId( const meshPtr_Type mesh, const Int& procId )
 {
     super::setMeshProcId( mesh, procId );
 
