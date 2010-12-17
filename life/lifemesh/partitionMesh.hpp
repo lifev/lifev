@@ -169,6 +169,7 @@ public:
     const std::vector<Int>&  vertexDistribution()   const {return M_vertexDistribution;};
     //! Return a const pointer to M_meshPartitions[0] - for parallel
     const meshPtr_Type&      meshPartition()        const {return (*M_meshPartitions)[0];}
+    meshPtr_Type&            meshPartition()              {return (*M_meshPartitions)[0];}
     //! Return a pointer to M_meshPartitions
     const partMeshPtr_Type&  meshPartitions()       const {return M_meshPartitions;}
     //! Return a pointer to M_graphVertexLocations
