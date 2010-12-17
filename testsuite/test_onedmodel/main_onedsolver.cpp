@@ -44,11 +44,12 @@
 #pragma GCC diagnostic ignored "-Wunused-variable"
 #pragma GCC diagnostic ignored "-Wunused-parameter"
 
+#include <Epetra_ConfigDefs.h>
 #ifdef EPETRA_MPI
-#include "Epetra_MpiComm.h"
 #include <mpi.h>
+#include <Epetra_MpiComm.h>
 #else
-#include "Epetra_SerialComm.h"
+#include <Epetra_SerialComm.h>
 #endif
 
 // Tell the compiler to restore the warning previously silented
@@ -69,7 +70,7 @@
 #include "ud_functions.hpp"
 
 using namespace LifeV;
-using namespace multiscale;
+using namespace Multiscale;
 
 bool checkValue(const double val, const double test, const double tol = 1.e-5, const bool verbose = true)
 {
@@ -172,7 +173,7 @@ int main(int argc, char** argv)
     bcFunction_Type sinusoidalFunction( boost::bind( &Sin::operator(), &sinus, _1 ) );
 
     // Absorbing
-    bc_Type::bcFunctionDefaultPtr_Type absorbing ( new OneDimensionalModel_BCFunction_Absorbing( OneD_right, OneD_W2 ) );
+    bc_Type::bcFunctionDefaultPtr_Type absorbing ( new OneDimensionalModel_BCFunction_Absorbing( OneDimensional::right, OneDimensional::W2 ) );
     absorbing->setSolution( oneDModel.solution() );
     absorbing->setFluxSource( oneDModel.flux(), oneDModel.source() );
 
@@ -186,11 +187,11 @@ int main(int argc, char** argv)
     //Constant constantPressure( 24695.0765959599 );
     //bcFunction_Type constantPressureFunction( boost::bind( &Constant::operator(), &constantPressure, _1 ) );
 
-    oneDModel.bc().setBC( OneD_left,  OneD_first, OneD_Q,  sinusoidalFunction  );
-    oneDModel.bc().setBC( OneD_right, OneD_first, OneD_W2, absorbingFunction );
+    oneDModel.bc().setBC( OneDimensional::left,  OneDimensional::first, OneDimensional::Q,  sinusoidalFunction  );
+    oneDModel.bc().setBC( OneDimensional::right, OneDimensional::first, OneDimensional::W2, absorbingFunction );
 
-    //oneDModel.GetBC().setBC( OneD_right, OneD_first, OneD_A,   constantAreaFunction );
-    //oneDModel.GetBC().setBC( OneD_right, OneD_first, OneD_P,   constantPressureFunction );
+    //oneDModel.GetBC().setBC( OneDimensional::right, OneDimensional::first, OneDimensional::A,   constantAreaFunction );
+    //oneDModel.GetBC().setBC( OneDimensional::right, OneDimensional::first, OneDimensional::P,   constantPressureFunction );
 
     oneDModel.setupModel();
 
