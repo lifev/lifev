@@ -235,7 +235,7 @@ void test_bdf::run()
         }
     }
 
-    exporter->setDirectory( "./" );
+    exporter->setPostDir( "./" );
     exporter->setMeshProcId( meshPart.meshPartition(), Members->comm->MyPID() );
 
     boost::shared_ptr<EpetraVector> u_display_ptr(new EpetraVector(
