@@ -312,7 +312,7 @@ void IPStabilization<MeshType, DofType>::apply( MatrixType& matrix,  const Vecto
     state.NormInf(&normInf);
 
     // local trace of the velocity
-    ElemVec beta( M_feBd->nbNode, nDimensions );
+    ElemVec beta( M_feBd->nbNode(), nDimensions );
 
     UInt myFaces(0);
 
@@ -355,19 +355,19 @@ void IPStabilization<MeshType, DofType>::apply( MatrixType& matrix,  const Vecto
 
             // local id of the face in its adjacent element
             UInt iFaEl ( M_mesh->face( iFace ).pos_first() );
-            for ( UInt iNode ( 0 ); iNode < M_feBd->nbNode; ++iNode )
+            for ( UInt iNode ( 0 ); iNode < M_feBd->nbNode(); ++iNode )
             {
                 UInt iloc ( M_fToP( iFaEl, iNode+1 ) );
                 for ( UInt iCoor ( 0 ); iCoor < M_feOnSide1->nbCoor(); ++iCoor )
                 {
                     UInt ig ( M_dof->localToGlobal( iElAd1, iloc + 1 ) - 1 +iCoor*nDof );
                     if (state.BlockMap().LID(ig + 1) >= 0)
-                        beta.vec()[ iCoor*M_feBd->nbNode + iNode ] = state( ig + 1); // BASEINDEX + 1
+                        beta.vec()[ iCoor*M_feBd->nbNode() + iNode ] = state( ig + 1); // BASEINDEX + 1
                 }
             }
 
             // second, calculate its max norm
-            for ( UInt l ( 0 ); l < static_cast<UInt>( M_feOnSide1->nbCoor()*M_feBd->nbNode ); ++l )
+            for ( UInt l ( 0 ); l < static_cast<UInt>( M_feOnSide1->nbCoor()*M_feBd->nbNode() ); ++l )
             {
                 if ( bmax < fabs( beta.vec()[ l ] ) )
                     bmax = fabs( beta.vec()[ l ] );

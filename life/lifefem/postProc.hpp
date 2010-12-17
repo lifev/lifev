@@ -657,7 +657,7 @@ Real PostProc<MeshType>::flux( const VectorType& field, const entityFlag_Type& f
 
         // Quadrature formula
         // Loop on quadrature points
-        for (Int iq=0; iq< M_currentBdFEPtrVector[feSpace]->nbQuadPt; ++iq)
+        for (Int iq=0; iq< M_currentBdFEPtrVector[feSpace]->nbQuadPt(); ++iq)
         {
 
             // Dot product
@@ -740,7 +740,7 @@ Vector PostProc<MeshType>::average( const VectorType& field, const entityFlag_Ty
 
             // Quadrature formula
             // Loop on quadrature points
-            for (Int iq=0; iq< M_currentBdFEPtrVector[feSpace]->nbQuadPt; ++iq)
+            for (Int iq=0; iq< M_currentBdFEPtrVector[feSpace]->nbQuadPt(); ++iq)
             {
 
                 // Interpolation
@@ -898,7 +898,7 @@ void PostProc<MeshType>::set_normal()
             {
                 sum = 0.;
                 // Loop on the quadrature points
-                for ( Int iQuadraturePoint = 0; iQuadraturePoint < M_currentBdFEPtrVector[iFESpace]->nbQuadPt;
+                for ( Int iQuadraturePoint = 0; iQuadraturePoint < M_currentBdFEPtrVector[iFESpace]->nbQuadPt();
                 		++iQuadraturePoint )
                 {
                     sum += M_currentBdFEPtrVector[iFESpace]->normal( iComponent, iQuadraturePoint ) *
@@ -984,7 +984,7 @@ void PostProc<MeshType>::set_phi()
                 dofVectorIndex = M_vectorNumberingPerFacetVector[iFESpace][ ( UInt ) iboundaryFace - 1 ][ iDof - 1 ];
 
                 // Loop on the quadrature points
-                for ( Int iQuadraturePoint = 0; iQuadraturePoint < M_currentBdFEPtrVector[iFESpace]->nbQuadPt;
+                for ( Int iQuadraturePoint = 0; iQuadraturePoint < M_currentBdFEPtrVector[iFESpace]->nbQuadPt();
                 		++iQuadraturePoint )
                 {
                     sum += M_currentBdFEPtrVector[iFESpace]->phi( ( Int ) ( iDof - 1 ), iQuadraturePoint )

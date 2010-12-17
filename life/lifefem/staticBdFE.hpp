@@ -211,16 +211,16 @@ public:
 
 
     //! Number of geometrical nodes
-    const UInt      nbGeoNode;
+    const UInt& nbGeoNode() const {return M_nbGeoNode; }
 
     //! Number of finite element node
-    const UInt       nbNode;
+    const UInt& nbNode() const {return M_nbNode; }
 
     //! Number of coordinates
-    const UInt       nbCoor;
+    const UInt& nbCoor() const {return M_nbCoor; }
 
     //! Number of quadrature points
-    const UInt       nbQuadPt;
+    const UInt& nbQuadPt() const {return M_nbQuadPt; }
 
     //! The point that define the geometry
     const Real& point(const UInt& i, const UInt& coor) const
@@ -229,7 +229,7 @@ public:
     }
 
     //! The reference finite element
-    const RefFE&    refFE;
+    const RefFE& refFE;
 
     //! The geometical mapping
     const GeoMap&   geoMap;
@@ -323,6 +323,11 @@ protected:
     bool M_hasQuadPtCoor;
 #endif
 
+    const UInt M_nbGeoNode;
+    const UInt M_nbNode;
+    const UInt M_nbCoor;
+    const UInt M_nbQuadPt;
+
     KNM<Real>  M_point;
 
 
@@ -349,7 +354,7 @@ integral( const FunctorType & f ) const
     ASSERT_PRE( M_hasMeasure, "integral needs measure. Call an update function" );
     Real integ( 0.0 );
     Real x, y, z;
-    for ( UInt iQuadPt(0); iQuadPt < nbQuadPt; ++iQuadPt )
+    for ( UInt iQuadPt(0); iQuadPt < M_nbQuadPt; ++iQuadPt )
     {
         coorQuadPt( x, y, z, iQuadPt );
         integ += f( x, y, z ) * M_weightMeas( iQuadPt );
@@ -365,14 +370,14 @@ integral_n( const FunctorType & f ) const
     ASSERT_PRE( M_hasNormal, "integral_n needs measure and normal. Call the appropriate update function" );
     Real integ( 0.0 );
     Real x, y, z;
-    std::vector<Real> ret( nbCoor + 1 );
+    std::vector<Real> ret( M_nbCoor + 1 );
     Real tmp;
-    for ( UInt iQuadPt(0); iQuadPt < nbQuadPt; ++iQuadPt )
+    for ( UInt iQuadPt(0); iQuadPt < M_nbQuadPt; ++iQuadPt )
     {
         coorQuadPt( x, y, z, iQuadPt );
         f( x, y, z, &ret.front() );
         tmp = 0;
-        for ( UInt d(0); d <= nbCoor; ++d )
+        for ( UInt d(0); d <= M_nbCoor; ++d )
         {
             tmp += ret[ d ] * normal( d, iQuadPt );
         }

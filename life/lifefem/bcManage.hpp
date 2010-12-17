@@ -1218,7 +1218,7 @@ bcNaturalManage( VectorType& rightHandSide,
 {
 
     // Number of local Dof (i.e. nodes) in this face
-    UInt nDofF = currentBdFE.nbNode;
+    UInt nDofF = currentBdFE.nbNode();
 
     // Number of total scalar Dof
     UInt totalDof = dof.numTotalDof();
@@ -1301,7 +1301,7 @@ bcNaturalManage( VectorType& rightHandSide,
                         icDof = gDof + ic * totalDof + offset;
 
                         // Loop on quadrature points
-                        for ( int iq = 0; iq < (int)currentBdFE.nbQuadPt; ++iq )
+                        for ( int iq = 0; iq < (int)currentBdFE.nbQuadPt(); ++iq )
                         {
                             sum=0.0;
                             // data on quadrature point
@@ -1349,7 +1349,7 @@ bcNaturalManage( VectorType& rightHandSide,
                         icDof = gDof + ( boundaryCond.component( ic ) - 1 ) * totalDof+ offset;   //Components passed separately
 
                         // Loop on quadrature points
-                        for ( int iq = 0; iq < (int)currentBdFE.nbQuadPt; ++iq )
+                        for ( int iq = 0; iq < (int)currentBdFE.nbQuadPt(); ++iq )
                         {
                             sum = 0;
                             // data on quadrature point
@@ -1397,7 +1397,7 @@ bcNaturalManage( VectorType& rightHandSide,
                     //global Dof
                     idDof = pId->localToGlobalMap( idofF ) + ( boundaryCond.component( j ) - 1 ) * totalDof + offset;
                     // Loop on quadrature points
-                    for ( int iq = 0; iq < (int)currentBdFE.nbQuadPt; ++iq )
+                    for ( int iq = 0; iq < (int)currentBdFE.nbQuadPt(); ++iq )
                     {
                         currentBdFE.coorQuadPt( x, y, z, iq ); // quadrature point coordinates
                         switch (boundaryCond.mode())
@@ -1545,7 +1545,7 @@ bcMixteManage( MatrixType& matrix,
 {
 
     // Number of local Dof in this face
-    UInt nDofF = currentBdFE.nbNode;
+    UInt nDofF = currentBdFE.nbNode();
 
     // Number of total scalar Dof
     UInt totalDof = dof.numTotalDof();
@@ -1589,7 +1589,7 @@ bcMixteManage( MatrixType& matrix,
                     idDof = pId->localToGlobalMap( idofF ) + ( boundaryCond.component( j ) - 1 ) * totalDof + offset;
 
                     // Loop on quadrature points
-                    for ( int l = 0; l < (int)currentBdFE.nbQuadPt; ++l )
+                    for ( int l = 0; l < (int)currentBdFE.nbQuadPt(); ++l )
                     {
                         mcoef = 0.0;
                         mbcb = 0.0;
@@ -1633,7 +1633,7 @@ bcMixteManage( MatrixType& matrix,
                         jdDof = pId->localToGlobalMap( k ) + ( boundaryCond.component( j ) - 1 ) * totalDof + offset;
 
                         // Loop on quadrature points
-                        for ( int l = 0; l < (int)currentBdFE.nbQuadPt; ++l )
+                        for ( int l = 0; l < (int)currentBdFE.nbQuadPt(); ++l )
                         {
                             mcoef = 0.0;
                             for ( ID n = 1; n <= nDofF; ++n)
@@ -1693,7 +1693,7 @@ bcMixteManage( MatrixType& matrix,
                     idDof = pId->localToGlobalMap( idofF ) + ( boundaryCond.component( j ) - 1 ) * totalDof + offset;
 
                     // Loop on quadrature points
-                    for ( int l = 0; l < (int)currentBdFE.nbQuadPt; ++l )
+                    for ( int l = 0; l < (int)currentBdFE.nbQuadPt(); ++l )
                     {
 
                         currentBdFE.coorQuadPt( x, y, z, l ); // quadrature point coordinates
@@ -1722,7 +1722,7 @@ bcMixteManage( MatrixType& matrix,
                         sum = 0;
 
                         // Loop on quadrature points
-                        for ( int l = 0; l < (int)currentBdFE.nbQuadPt; ++l )
+                        for ( int l = 0; l < (int)currentBdFE.nbQuadPt(); ++l )
                         {
 
                             currentBdFE.coorQuadPt( x, y, z, l ); // quadrature point coordinates
@@ -1760,7 +1760,7 @@ bcMixteManageMatrix( MatrixType& matrix,
     if ( matrix.getMatrixPtr()->Filled() )
         matrix.openCrsMatrix();
     // Number of local Dof in this face
-    UInt nDofF = currentBdFE.nbNode;
+    UInt nDofF = currentBdFE.nbNode();
 
     // Number of total scalar Dof
     UInt totalDof = dof.numTotalDof();
@@ -1805,7 +1805,7 @@ bcMixteManageMatrix( MatrixType& matrix,
                     idDof = boundaryCond( i ) ->id() + ( boundaryCond.component( j ) - 1 ) * totalDof + offset;
 
                     // Loop on quadrature points
-                    for ( int l = 0; l < (int)currentBdFE.nbQuadPt; ++l )
+                    for ( int l = 0; l < (int)currentBdFE.nbQuadPt(); ++l )
                     {
 
                         // Contribution to the diagonal entry of the elementary boundary mass matrix
@@ -1828,7 +1828,7 @@ bcMixteManageMatrix( MatrixType& matrix,
                         sum = 0;
 
                         // Loop on quadrature points
-                        for ( int l = 0; l < (int)currentBdFE.nbQuadPt; ++l )
+                        for ( int l = 0; l < (int)currentBdFE.nbQuadPt(); ++l )
                         {
 
                             // Upper diagonal entry of the elementary boundary mass matrix
@@ -1882,7 +1882,7 @@ bcMixteManageMatrix( MatrixType& matrix,
                     idDof = pId->localToGlobalMap( idofF ) + ( boundaryCond.component( j ) - 1 ) * totalDof + offset;
 
                     // Loop on quadrature points
-                    for ( int l = 0; l < (int)currentBdFE.nbQuadPt; ++l )
+                    for ( int l = 0; l < (int)currentBdFE.nbQuadPt(); ++l )
                     {
 
                         currentBdFE.coorQuadPt( x, y, z, l ); // quadrature point coordinates
@@ -1908,7 +1908,7 @@ bcMixteManageMatrix( MatrixType& matrix,
                         sum = 0;
 
                         // Loop on quadrature points
-                        for ( int l = 0; l < (int)currentBdFE.nbQuadPt; ++l )
+                        for ( int l = 0; l < (int)currentBdFE.nbQuadPt(); ++l )
                         {
 
                             currentBdFE.coorQuadPt( x, y, z, l ); // quadrature point coordinates
@@ -1946,7 +1946,7 @@ bcMixteManageVector( VectorType& rightHandSide,
 {
 
     // Number of local Dof in this face
-    UInt nDofF = currentBdFE.nbNode;
+    UInt nDofF = currentBdFE.nbNode();
 
     // Number of total scalar Dof
     UInt totalDof = dof.numTotalDof();
@@ -1983,7 +1983,7 @@ bcMixteManageVector( VectorType& rightHandSide,
                     idDof = boundaryCond( i ) ->id() + ( boundaryCond.component( j ) - 1 ) * totalDof + offset;
 
                     // Loop on quadrature points
-                    for ( int l = 0; l < (int)currentBdFE.nbQuadPt; ++l )
+                    for ( int l = 0; l < (int)currentBdFE.nbQuadPt(); ++l )
                     {
                         // Adding right hand side contribution
                         rightHandSide[ idDof ] += currentBdFE.phi( int( idofF - 1 ), l ) * boundaryCond( boundaryCond( i ) ->id(), boundaryCond.component( j ) ) * // BASEINDEX + 1
@@ -2023,7 +2023,7 @@ bcMixteManageVector( VectorType& rightHandSide,
                     idDof = pId->localToGlobalMap( idofF ) + ( boundaryCond.component( j ) - 1 ) * totalDof + offset;
 
                     // Loop on quadrature points
-                    for ( int l = 0; l < (int)currentBdFE.nbQuadPt; ++l )
+                    for ( int l = 0; l < (int)currentBdFE.nbQuadPt(); ++l )
                     {
 
                         currentBdFE.coorQuadPt( x, y, z, l ); // quadrature point coordinates
@@ -2095,7 +2095,7 @@ bcFluxManageMatrix( MatrixType&     matrix,
         matrix.openCrsMatrix();
 
     // Number of local Dof in this face
-    UInt nDofF = currentBdFE.nbNode;
+    UInt nDofF = currentBdFE.nbNode();
 
     // Number of total scalar Dof
     UInt totalDof = dof.numTotalDof();
@@ -2126,7 +2126,7 @@ bcFluxManageMatrix( MatrixType&     matrix,
                     idDof = pId->localToGlobalMap( idofF ) + (ic - 1)*totalDof;
 
                     sum = 0.;
-                    for ( int iq = 0; iq < (int)currentBdFE.nbQuadPt; ++iq )
+                    for ( int iq = 0; iq < (int)currentBdFE.nbQuadPt(); ++iq )
                     {
                         sum += currentBdFE.phi( int( idofF - 1 ), iq )*
                                currentBdFE.normal(int(ic - 1), iq)*
@@ -2158,7 +2158,7 @@ bcResistanceManage( MatrixType& matrix,
 {
 
     // Number of local Dof in this face
-    UInt nDofF = currentBdFE.nbNode;
+    UInt nDofF = currentBdFE.nbNode();
 
     // Number of total scalar Dof
     UInt totalDof = dof.numTotalDof();
@@ -2198,7 +2198,7 @@ bcResistanceManage( MatrixType& matrix,
                     idDof = pId->localToGlobalMap( idofF ) + ( boundaryCond.component( j ) - 1 ) * totalDof + offset;
 
                     // Loop on quadrature points
-                    for ( int l = 0; l < (int)currentBdFE.nbQuadPt; ++l )
+                    for ( int l = 0; l < (int)currentBdFE.nbQuadPt(); ++l )
                     {
                         vv[idDof] += currentBdFE.phi( int( idofF-1 ), l ) *  currentBdFE.normal( int( j-1 ), l ) * currentBdFE.weightMeas( l );
 

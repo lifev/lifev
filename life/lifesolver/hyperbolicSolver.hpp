@@ -700,7 +700,7 @@ CFL() const
             const Real e( M_FESpace.feBd().measure() );
 
             // Loop on all the quadrature points
-            for ( UInt ig(0); ig < M_FESpace.feBd().nbQuadPt; ++ig )
+            for ( UInt ig(0); ig < M_FESpace.feBd().nbQuadPt(); ++ig )
             {
 
                 // Coordinates of the current quadrature point
@@ -857,7 +857,7 @@ localEvolve ( const UInt& iElem )
             {
 
                 // Loop on all the quadrature points
-                for ( UInt ig(0); ig < M_FESpace.feBd().nbQuadPt; ++ig)
+                for ( UInt ig(0); ig < M_FESpace.feBd().nbQuadPt(); ++ig)
                 {
 
                     // Coordinates of the current quadrature point
@@ -918,7 +918,7 @@ localEvolve ( const UInt& iElem )
         localFaceFluxWeight.zero();
 
         // Loop on all the quadrature points
-        for ( UInt ig(0); ig < M_FESpace.feBd().nbQuadPt; ++ig )
+        for ( UInt ig(0); ig < M_FESpace.feBd().nbQuadPt(); ++ig )
         {
 
             // Coordinates of the current quadrature point

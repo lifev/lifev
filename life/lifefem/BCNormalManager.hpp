@@ -536,7 +536,7 @@ void BCNormalManager<MeshType, MatrixType>::computeIntegratedNormals(const Dof& 
         //Update the currentBdFE with the face data
         currentBdFE.updateMeasNormalQuadPt( mesh.bElement( iFace ) );
         ID idFace = mesh.bElement( iFace ).id();
-        UInt nDofF = currentBdFE.nbNode;
+        UInt nDofF = currentBdFE.nbNode();
 
         //For each node on the face
         for (UInt icheck = 1; icheck<= nDofF; ++icheck)

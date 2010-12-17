@@ -925,14 +925,14 @@ void ipstab_grad( const Real         coef,
     UInt icoor,jcoor,i,j;
     int ig;
     Real x[ 3 ], rx1[ 3 ], drp1[ 3 ], rx2[ 3 ], drp2[ 3 ];
-    Real phid1[ fe1.nbFEDof() ][ fe1.nbCoor() ][ bdfe.nbQuadPt ];
-    Real phid2[ fe2.nbFEDof() ][ fe2.nbCoor() ][ bdfe.nbQuadPt ];
+    Real phid1[ fe1.nbFEDof() ][ fe1.nbCoor() ][ bdfe.nbQuadPt() ];
+    Real phid2[ fe2.nbFEDof() ][ fe2.nbCoor() ][ bdfe.nbQuadPt() ];
     Real b1[ 3 ], b2[ 3 ];
 
     fe1.coorMap( b1[ 0 ], b1[ 1 ], b1[ 2 ], 0, 0, 0 ); // translation fe1
     fe2.coorMap( b2[ 0 ], b2[ 1 ], b2[ 2 ], 0, 0, 0 ); // translation fe2
 
-    for ( int ig = 0; ig < bdfe.nbQuadPt; ++ig )
+    for ( int ig = 0; ig < bdfe.nbQuadPt(); ++ig )
     {  // first derivatives on quadrature points
         bdfe.coorQuadPt( x[ 0 ], x[ 1 ], x[ 2 ], ig );       // quadrature points coordinates
 
@@ -987,7 +987,7 @@ void ipstab_grad( const Real         coef,
             sum = 0.0;
             // Loop on coordinates
             for ( icoor = 0; icoor < fe1.nbCoor(); ++icoor )
-                for ( ig = 0; ig < bdfe.nbQuadPt ; ++ig )
+                for ( ig = 0; ig < bdfe.nbQuadPt() ; ++ig )
                     sum += phid1[ i ][ icoor ][ ig ] * phid2[ j ][ icoor ][ ig ] * bdfe.weightMeas( ig );
             mat( i, j ) += coef * sum;
         }
@@ -1020,14 +1020,14 @@ void ipstab_grad( const Real         coef,
     UInt icoor,jcoor,i,j;
     int ig;
     Real x[ 3 ], rx1[ 3 ], drp1[ 3 ], rx2[ 3 ], drp2[ 3 ];
-    Real phid1[ fe1.nbFEDof() ][ fe1.nbCoor() ][ bdfe.nbQuadPt ];
-    Real phid2[ fe2.nbFEDof() ][ fe2.nbCoor() ][ bdfe.nbQuadPt ];
+    Real phid1[ fe1.nbFEDof() ][ fe1.nbCoor() ][ bdfe.nbQuadPt() ];
+    Real phid2[ fe2.nbFEDof() ][ fe2.nbCoor() ][ bdfe.nbQuadPt() ];
     Real b1[ 3 ], b2[ 3 ];
 
     fe1.coorMap( b1[ 0 ], b1[ 1 ], b1[ 2 ], 0, 0, 0 ); // translation fe1
     fe2.coorMap( b2[ 0 ], b2[ 1 ], b2[ 2 ], 0, 0, 0 ); // translation fe2
 
-    for ( int ig = 0; ig < bdfe.nbQuadPt; ++ig )
+    for ( int ig = 0; ig < bdfe.nbQuadPt(); ++ig )
     {  // first derivatives on quadrature points
         bdfe.coorQuadPt( x[ 0 ], x[ 1 ], x[ 2 ], ig );       // quadrature points coordinates
 
@@ -1081,7 +1081,7 @@ void ipstab_grad( const Real         coef,
             sum = 0.0;
             // Loop on coordinates
             for ( icoor = 0; icoor < fe1.nbCoor(); ++icoor )
-                for ( ig = 0; ig < bdfe.nbQuadPt ; ++ig )
+                for ( ig = 0; ig < bdfe.nbQuadPt() ; ++ig )
                     sum += phid1[ i ][ icoor ][ ig ] * phid2[ j ][ icoor ][ ig ] * bdfe.weightMeas( ig );
             mat_tmp( i, j ) = coef * sum;
         }
@@ -1123,16 +1123,16 @@ void ipstab_bgrad( const Real         coef,
     //
     // convection velocity \beta on the boundary quadrature points
     //
-    Real b[ fe1.nbCoor() ][ bdfe.nbQuadPt ];
+    Real b[ fe1.nbCoor() ][ bdfe.nbQuadPt() ];
 
     for ( icoor = 0; icoor < fe1.nbCoor(); ++icoor )
     {
-        for ( ig = 0; ig < bdfe.nbQuadPt; ig++ )
+        for ( ig = 0; ig < bdfe.nbQuadPt(); ig++ )
         {
             sum = 0;
-            for ( i = 0; i < bdfe.nbNode; ++i )
+            for ( i = 0; i < bdfe.nbNode(); ++i )
             {
-                sum += bdfe.phi( i, ig ) * beta.vec() [ icoor * bdfe.nbCoor + i ];
+                sum += bdfe.phi( i, ig ) * beta.vec() [ icoor * bdfe.nbCoor() + i ];
             }
             b[ icoor ][ ig ] = sum;
         }
@@ -1146,14 +1146,14 @@ void ipstab_bgrad( const Real         coef,
     //
 
     Real x[ 3 ], rx1[ 3 ], drp1[ 3 ], rx2[ 3 ], drp2[ 3 ];
-    Real phid1[ fe1.nbFEDof() ][ fe1.nbCoor() ][ bdfe.nbQuadPt ];
-    Real phid2[ fe2.nbFEDof() ][ fe2.nbCoor() ][ bdfe.nbQuadPt ];
+    Real phid1[ fe1.nbFEDof() ][ fe1.nbCoor() ][ bdfe.nbQuadPt() ];
+    Real phid2[ fe2.nbFEDof() ][ fe2.nbCoor() ][ bdfe.nbQuadPt() ];
     Real b1[ 3 ], b2[ 3 ];
 
     fe1.coorMap( b1[ 0 ], b1[ 1 ], b1[ 2 ], 0, 0, 0 ); // translation fe1
     fe2.coorMap( b2[ 0 ], b2[ 1 ], b2[ 2 ], 0, 0, 0 ); // translation fe2
 
-    for ( int ig = 0; ig < bdfe.nbQuadPt; ++ig )
+    for ( int ig = 0; ig < bdfe.nbQuadPt(); ++ig )
     {  // first derivatives on quadrature points
         bdfe.coorQuadPt( x[ 0 ], x[ 1 ], x[ 2 ], ig );       // quadrature points coordinates
 
@@ -1207,7 +1207,7 @@ void ipstab_bgrad( const Real         coef,
             // Loop on coordinates
             for ( icoor = 0; icoor < fe1.nbCoor(); ++icoor )
                 for ( jcoor = 0; jcoor < fe1.nbCoor(); ++jcoor )
-                    for ( ig = 0; ig < bdfe.nbQuadPt; ig++ )
+                    for ( ig = 0; ig < bdfe.nbQuadPt(); ig++ )
                         sum += phid1[ i ][ icoor ][ ig ]*phid2[ j ][ jcoor ][ ig ]
                                *b[ icoor ][ ig ]*b[ jcoor ][ ig ]
                                *bdfe.weightMeas( ig );
@@ -1239,14 +1239,14 @@ void ipstab_div( const Real coef, ElemMat& elmat, const CurrentFE& fe1, const Cu
     UInt i,j,icoor,jcoor;
     int ig;
     Real x[ 3 ], rx1[ 3 ], drp1[ 3 ], rx2[ 3 ], drp2[ 3 ];
-    Real phid1[ fe1.nbFEDof() ][ fe1.nbCoor() ][ bdfe.nbQuadPt ];
-    Real phid2[ fe2.nbFEDof() ][ fe2.nbCoor() ][ bdfe.nbQuadPt ];
+    Real phid1[ fe1.nbFEDof() ][ fe1.nbCoor() ][ bdfe.nbQuadPt() ];
+    Real phid2[ fe2.nbFEDof() ][ fe2.nbCoor() ][ bdfe.nbQuadPt() ];
     Real b1[ 3 ], b2[ 3 ];
 
     fe1.coorMap( b1[ 0 ], b1[ 1 ], b1[ 2 ], 0, 0, 0 ); // translation fe1
     fe2.coorMap( b2[ 0 ], b2[ 1 ], b2[ 2 ], 0, 0, 0 ); // translation fe2
 
-    for ( int ig = 0; ig < bdfe.nbQuadPt; ++ig )
+    for ( int ig = 0; ig < bdfe.nbQuadPt(); ++ig )
     {  // first derivatives on quadrature points
         bdfe.coorQuadPt( x[ 0 ], x[ 1 ], x[ 2 ], ig );       // quadrature points coordinates
 
@@ -1302,7 +1302,7 @@ void ipstab_div( const Real coef, ElemMat& elmat, const CurrentFE& fe1, const Cu
                 for ( j = 0; j < fe2.nbFEDof(); ++j )
                 {
                     sum = 0.0;
-                    for ( ig = 0; ig < bdfe.nbQuadPt; ig++ )
+                    for ( ig = 0; ig < bdfe.nbQuadPt(); ig++ )
                         sum += phid1[ i ][ icoor ][ ig ] * phid2[ j ][ jcoor ][ ig ] * bdfe.weightMeas( ig );
                     mat_icomp( i, j ) += coef * sum;
                 }
@@ -1326,8 +1326,8 @@ void ipstab_bagrad( const Real coef, ElemMat& elmat,
     Real sum, sum1, sum2;
     int icoor,jcoor;
     int i, j, ig;
-    Real phid1[ fe1.nbFEDof() ][ fe1.nbCoor() ][ bdfe.nbQuadPt ];
-    Real phid2[ fe2.nbFEDof() ][ fe2.nbCoor() ][ bdfe.nbQuadPt ];
+    Real phid1[ fe1.nbFEDof() ][ fe1.nbCoor() ][ bdfe.nbQuadPt() ];
+    Real phid2[ fe2.nbFEDof() ][ fe2.nbCoor() ][ bdfe.nbQuadPt() ];
 
     std::vector<Real> x(3), rx1(3), drp1(3), rx2(3), drp2(3);
     std::vector<Real> b1(3), b2(3);
@@ -1339,18 +1339,18 @@ void ipstab_bagrad( const Real coef, ElemMat& elmat,
     // convection velocity term |\beta . n|^2 / |\beta|
     // on the boundary quadrature points
     //
-    Real ba2[ bdfe.nbQuadPt ];
+    Real ba2[ bdfe.nbQuadPt() ];
 
-    for ( ig = 0; ig < bdfe.nbQuadPt; ig++ )
+    for ( ig = 0; ig < bdfe.nbQuadPt(); ig++ )
     {
         sum1 = 0;
         sum2 = 0;
         for ( icoor = 0; icoor < fe1.nbCoor(); ++icoor )
         {
-            for ( i = 0; i < bdfe.nbCoor; ++i )
+            for ( i = 0; i < bdfe.nbCoor(); ++i )
             {
                 Real betaLoc = bdfe.phi( i, ig ) *
-                               beta.vec() [ icoor * bdfe.nbCoor + i ];
+                    beta.vec() [ icoor * bdfe.nbCoor() + i ];
                 sum1 += betaLoc * bdfe.normal(icoor, ig);
                 sum2 += betaLoc * betaLoc;
             }
@@ -1358,7 +1358,7 @@ void ipstab_bagrad( const Real coef, ElemMat& elmat,
         ba2[ ig ] = sum2 == 0 ? 0 : sum1 * sum1 / pow( sum2, 0.5 );
     }
 
-    for ( int ig = 0; ig < bdfe.nbQuadPt; ++ig )
+    for ( int ig = 0; ig < bdfe.nbQuadPt(); ++ig )
     {  // first derivatives on quadrature points
         bdfe.coorQuadPt( x[ 0 ], x[ 1 ], x[ 2 ], ig );       // quadrature points coordinates
 
@@ -1413,7 +1413,7 @@ void ipstab_bagrad( const Real coef, ElemMat& elmat,
             sum = 0.0;
             // Loop on coordinates
             for ( icoor = 0; icoor < fe1.nbCoor(); ++icoor )
-                for ( ig = 0; ig < bdfe.nbQuadPt ; ++ig )
+                for ( ig = 0; ig < bdfe.nbQuadPt() ; ++ig )
                     sum += ba2[ ig ] *
                            phid1[ i ][ icoor ][ ig ] *
                            phid2[ j ][ icoor ][ ig ] *
@@ -1449,8 +1449,8 @@ void ipstab_bagrad( const Real         coef,
     Real sum, sum1, sum2;
     int icoor,jcoor;
     int i, j, ig;
-    Real phid1[ fe1.nbFEDof() ][ fe1.nbCoor() ][ bdfe.nbQuadPt ];
-    Real phid2[ fe2.nbFEDof() ][ fe2.nbCoor() ][ bdfe.nbQuadPt ];
+    Real phid1[ fe1.nbFEDof() ][ fe1.nbCoor() ][ bdfe.nbQuadPt() ];
+    Real phid2[ fe2.nbFEDof() ][ fe2.nbCoor() ][ bdfe.nbQuadPt() ];
 
     std::vector<Real> x(3), rx1(3), drp1(3), rx2(3), drp2(3);
     std::vector<Real> b1(3), b2(3);
@@ -1462,9 +1462,9 @@ void ipstab_bagrad( const Real         coef,
     // convection velocity term |\beta . n|
     // on the boundary quadrature points
     //
-    Real bn[ bdfe.nbQuadPt ];
+    Real bn[ bdfe.nbQuadPt() ];
 
-    for ( ig = 0; ig < bdfe.nbQuadPt; ig++ )
+    for ( ig = 0; ig < bdfe.nbQuadPt(); ig++ )
     {
         sum1 = 0;
         sum2 = 0;
@@ -1481,7 +1481,7 @@ void ipstab_bagrad( const Real         coef,
         bn[ ig ] = std::abs(sum1);
     }
 
-    for ( int ig = 0; ig < bdfe.nbQuadPt; ++ig )
+    for ( int ig = 0; ig < bdfe.nbQuadPt(); ++ig )
     {  // first derivatives on quadrature points
         bdfe.coorQuadPt( x[ 0 ], x[ 1 ], x[ 2 ], ig );       // quadrature points coordinates
 
@@ -1536,7 +1536,7 @@ void ipstab_bagrad( const Real         coef,
             sum = 0.0;
             // Loop on coordinates
             for ( icoor = 0; icoor < fe1.nbCoor(); ++icoor )
-                for ( ig = 0; ig < bdfe.nbQuadPt ; ++ig )
+                for ( ig = 0; ig < bdfe.nbQuadPt() ; ++ig )
                     sum += bn[ ig ] *
                            phid1[ i ][ icoor ][ ig ] *
                            phid2[ j ][ icoor ][ ig ] *
@@ -4552,7 +4552,7 @@ void TP_VdotN_Hdiv( Real coef, ElemMat& elmat, const RefFEHybrid& hybridFE,
         const StaticBdFE & boundaryElementHybridFE( hybridFE[ nf ] );
         // Take the staticBdFE of the Hdiv function dot product outward unit normal.
         const StaticBdFE & boundaryElementDualDotNFE( dualDotNFE[ nf ] );
-        nbnode = boundaryElementHybridFE.nbNode;
+        nbnode = boundaryElementHybridFE.nbNode();
 
         // Loop over all the the degrees of freedom of the dual dot normal variable.
         for ( UInt i(0); i < nbnode; ++i )
@@ -4562,7 +4562,7 @@ void TP_VdotN_Hdiv( Real coef, ElemMat& elmat, const RefFEHybrid& hybridFE,
             {
                 sum = 0.;
                 // Loop over all the quadrature point.
-                for ( UInt ig(0); ig < boundaryElementHybridFE.nbQuadPt; ++ig )
+                for ( UInt ig(0); ig < boundaryElementHybridFE.nbQuadPt(); ++ig )
                     // Using the Piola transform properties.
                     sum += boundaryElementHybridFE.phi( j , ig ) *
                            boundaryElementDualDotNFE.phi( i , ig ) *
@@ -4588,7 +4588,7 @@ void TP_TP_Hdiv( Real coef, ElemMat& elmat, const RefFEHybrid& hybridFE, int ibl
     {
         // Take the staticBdFE of the hybrid finite element.
         const StaticBdFE & boundaryElementHybridFE( hybridFE[ nf ] );
-        nbnode = boundaryElementHybridFE.nbNode;
+        nbnode = boundaryElementHybridFE.nbNode();
 
         // Loop over all the degrees of freedom of the first hybrid variable.
         for ( UInt i(0); i < nbnode; ++i )
@@ -4598,7 +4598,7 @@ void TP_TP_Hdiv( Real coef, ElemMat& elmat, const RefFEHybrid& hybridFE, int ibl
             {
                 sum = 0.;
                 // Loop over all the quadrature point.
-                for ( UInt ig(0); ig < boundaryElementHybridFE.nbQuadPt ; ++ig )
+                for ( UInt ig(0); ig < boundaryElementHybridFE.nbQuadPt() ; ++ig )
                     // Using the Piola transform properties.
                     sum += boundaryElementHybridFE.phi( j , ig ) *
                            boundaryElementHybridFE.phi( i , ig ) *

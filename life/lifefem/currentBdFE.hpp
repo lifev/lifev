@@ -141,7 +141,7 @@ update( const GeometricType& geometricEntity )
 
     M_currentID = geometricEntity.id();
     // update the definition of the geo points
-    for ( UInt i(0); i < nbGeoNode; i++ )
+    for ( UInt i(0); i < M_nbGeoNode; i++ )
     {
         for (UInt icoor(0); icoor < nDimensions; icoor++)
         {
@@ -166,7 +166,7 @@ updateMeas( const GeometricType& geometricEntity )
     M_currentID = geometricEntity.id();
     // update the definition of the geo points
 
-    for ( UInt i = 0; (int)i < nbGeoNode; i++ )
+    for ( UInt i = 0; (int)i < M_nbGeoNode; i++ )
     {
         for (UInt icoor=0; icoor<nDimensions; icoor++)
         {
@@ -194,7 +194,7 @@ updateMeasQuadPt( const GeometricType& geometricEntity )
     M_currentID = geometricEntity.id();
     // update the definition of the geo points
 
-    for ( UInt i = 0; i < nbGeoNode; i++ )
+    for ( UInt i = 0; i < M_nbGeoNode; i++ )
     {
         for (UInt icoor=0; icoor<nDimensions; icoor++)
         {
@@ -224,7 +224,7 @@ updateMeasNormal( const GeometricType& geometricEntity )
     M_currentID = geometricEntity.id();
     // update the definition of the geo points
 
-    for ( UInt i = 0; (int)i < nbGeoNode; i++ )
+    for ( UInt i = 0; (int)i < M_nbGeoNode; i++ )
     {
         for (UInt icoor=0; icoor<nDimensions; icoor++)
         {
@@ -252,7 +252,7 @@ updateMeasNormalQuadPt( const GeometricType& geometricEntity )
     M_currentID = geometricEntity.id();
     // update the definition of the geo points
 
-    for ( UInt i = 0; (int)i < nbGeoNode; i++ )
+    for ( UInt i = 0; (int)i < M_nbGeoNode; i++ )
     {
         for (UInt icoor=0; icoor<nDimensions; icoor++)
         {
