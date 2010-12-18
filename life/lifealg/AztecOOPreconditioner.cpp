@@ -35,8 +35,8 @@
     @date 17-11-2009
  */
 
-#include <life/lifecore/life.hpp>
 #include "AztecOOPreconditioner.hpp"
+#include <life/lifecore/life.hpp>
 
 namespace LifeV
 {
