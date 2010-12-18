@@ -1,6 +1,6 @@
 ###################################################################################################
 #
-#                       This file is part of the LifeV Library                       
+#                       This file is part of the LifeV Library
 #                Copyright (C) 2004, 2005, 2007 EPFL, Politecnico di Milano, INRIA
 #                Copyright (C) 2010 EPFL, Politecnico di Milano, Emory University
 #
@@ -25,7 +25,7 @@ AT_DATA([data],[[# -*- getpot -*- (GetPot mode activation for emacs)
 	endtime  = 1.5
     timestep = 0.1
     order    = 1
-	
+
 	[./space_discretization]
 	order     = P2
 	mesh_dir  = ./  # the directory where the mesh file is
@@ -115,7 +115,8 @@ AT_DATA([data],[[# -*- getpot -*- (GetPot mode activation for emacs)
     multimesh  =    false   # actually we export also the displacement
     start      = 0
     save       = 1
-    
+    type       = none
+
 [errorNorms]
     l2Error = 3e-2
 
@@ -137,7 +138,7 @@ AT_DATA([data],[[# -*- getpot -*- (GetPot mode activation for emacs)
 	endtime  = 1.5
     timestep = 0.1
     order    = 2
-	
+
 	[./space_discretization]
 	order     = P2
 	mesh_dir  = ./  # the directory where the mesh file is
@@ -227,6 +228,7 @@ AT_DATA([data],[[# -*- getpot -*- (GetPot mode activation for emacs)
     multimesh  =    false   # actually we export also the displacement
     start      = 0
     save       = 1
+    type       = none
 
 [errorNorms]
     l2Error = 1e-7
@@ -249,7 +251,7 @@ AT_DATA([data],[[# -*- getpot -*- (GetPot mode activation for emacs)
 	endtime  = 1.5
     timestep = 0.1
     order    = 3
-	
+
 	[./space_discretization]
 	order     = P2
 	mesh_dir  = ./  # the directory where the mesh file is
@@ -339,6 +341,7 @@ AT_DATA([data],[[# -*- getpot -*- (GetPot mode activation for emacs)
     multimesh  =    false   # actually we export also the displacement
     start      = 0
     save       = 1
+    type       = none
 
 [errorNorms]
     l2Error = 1e-7

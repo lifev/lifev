@@ -49,7 +49,6 @@
 
 #include <life/lifecore/life.hpp>
 #include <life/lifesolver/FSIOperator.hpp>
-//#include <life/lifesolver/reducedLinFluid.hpp>
 
 namespace LifeV
 {
@@ -1278,48 +1277,6 @@ void FSIOperator::setMixteOuterWall(function_Type const& dload, function_Type co
     M_bcfMixteOuterWall.setFunctions_Mixte(dload,
                                            E);
 }
-
-
-// void
-// FSIOperator::setDerReducedFluidLoadToStructure(Vector &dload, UInt type )
-// {
-//     M_bcvDerReducedFluidLoadToStructure->setup( dload,
-//                                                 M_uFESpace->dof().numTotalDof(),
-//                                                 M_dofReducedFluidToStructure,
-//                                                 type );
-// }
-
-
-
-// void
-// FSIOperator::setDerStructureAccToReducedFluid(Vector &acc, UInt type )
-// {
-//     M_bcvDerStructureAccToReducedFluid->setup( acc,
-//                                                M_dofStructureToReducedFluid,
-//                                                type );
-// }
-
-
-
-// void
-// FSIOperator::setReducedLinFluidBC(fluidBchandlerPtr_Type bc_dredfluid )
-// {
-//     M_BCh_dp     = bc_dredfluid;
-//     M_reducedLinFluid->setUpBC(bc_dredfluid);
-// }
-
-
-
-// void
-// FSIOperator::setInvReducedLinFluidBC(fluidBchandlerPtr_Type bc_invdredfluid )
-// {
-//     M_BCh_dp_inv = bc_invdredfluid;
-// }
-
-//
-
-
-
 
 
 // ===================================================

@@ -614,9 +614,6 @@ public:
     vectorPtr_Type const& getRHS       ( ) const {return M_rhs;}
 
 
-//     quasi_newton_type getReducedLinFluid()                              { return M_reducedLinFluid; }
-//     UInt reducedFluid()                                                 { return M_reducedFluid; }
-
     //@}
 
 
@@ -845,8 +842,6 @@ protected:
     boost::shared_ptr<DataMesh>                       M_dataMeshSolid;
 
     dataPtr_Type                                      M_data;
-
-//     quasi_newton_type         M_reducedLinFluid;
 
     boost::shared_ptr<EpetraMap>                      M_fluidInterfaceMap;
     boost::shared_ptr<EpetraMap>                      M_solidInterfaceMap;

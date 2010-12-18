@@ -15,11 +15,6 @@
 #include "ud_functions.hpp"
 #include <life/lifefem/bcHandler.hpp>
 #include <life/lifefem/bcFunction.hpp>
-//#include "life/lifesolver/reducedLinFluid.hpp"
-
-// #include "life/lifesolver/steklovPoincareBase.hpp"
-// #include "life/lifesolver/exactJacobianBase.hpp"
-#include <life/lifesolver/fixedPointBase.hpp>
 
 
 namespace LifeV
