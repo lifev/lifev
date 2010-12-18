@@ -34,6 +34,11 @@ e.g.:
 
  nohup make distcheck DISTCHECK_CONFIGURE_FLAGS="--with-trilinos=/u/cmcs/deparis/local/debug64-openmpi/trilinos-9 --prefix=/usr/scratch/deparis/lifev-clean/local --enable-debug --disable-shared --enable-static --with-hdf5=/usr --with-mpi --with-mpi=/usr/lib/openmpi --with-superlu=/usr --with-umfpack-include=-I/usr/include/suitesparse --with-libs='-lsuperlu -lumfpack -lamd'  F77=gfortran"
 
+e.g.:
+
+ nohup make distcheck DISTCHECK_CONFIGURE_FLAGS="--prefix=/Users/simone/local/debug/lifev --with-trilinos=/Users/simone/local/debug/trilinos10.6 --with-mpi=/usr --with-parmetis=/Users/simone/local/opt/parmetis/ --with-boost-include=/Users/simone/local/opt/boost1.45.0/include --with-boost-lib=/Users/simone/local/opt/boost1.45.0/lib --with-hdf5=/Users/simone/local/opt/hdf5-1.8.5/ GCC=gcc-4.2 GXX=g++-4.2 F77=gfortran CPPFLAGS=-DH5_USE_16_API"
+
+
 
    o ensures that the generated tarball is complete
    o runs all tests from the tarball
