@@ -178,19 +178,19 @@ public:
     }
 
     //! shared pointer to array
-    const vectorPtr_Type& storedArray() const
+    const vectorPtr_Type storedArray() const
     {
         return M_vr;
     }
 
     //! returns 0 if file name for postprocessing has to include time dependency
-    const UInt& steady() const {return M_steady; }
+    UInt steady() const {return M_steady; }
 
     //! returns Scalar or Vector strings
-    const std::string& typeName() const;
+    std::string typeName() const;
 
     //! returns 1 (if Scalar) or 3 (if Vector)
-    const UInt& typeDim() const;
+    UInt typeDim() const;
 
     //! Node or Cell centered ?
     const Where& where() const

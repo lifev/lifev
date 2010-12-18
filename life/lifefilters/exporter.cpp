@@ -78,7 +78,7 @@ Real& ExporterData::operator()( const UInt i )
     return (*M_vr)[i];
 }
 
-const std::string& ExporterData::typeName() const
+std::string ExporterData::typeName() const
 {
     switch (M_type)
     {
@@ -91,7 +91,7 @@ const std::string& ExporterData::typeName() const
     return "ERROR string";
 }
 
-const UInt& ExporterData::typeDim() const
+UInt ExporterData::typeDim() const
 {
     switch ( M_type )
     {
