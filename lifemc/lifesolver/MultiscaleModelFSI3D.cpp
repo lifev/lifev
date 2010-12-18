@@ -298,7 +298,7 @@ MultiscaleModelFSI3D::saveSolution()
     if ( M_FSIoperator->isFluid() )
         M_exporterFluid->postProcess( M_data->dataFluid()->dataTime()->time() - M_data->dataFluid()->dataTime()->timeStep() );
     if ( M_FSIoperator->isSolid() )
-        M_exporterSolid->postProcess( M_data->dataSolid()->dataTime()->time() - M_data->dataSolid()->dataTime()->timeStep() );
+        M_exporterSolid->postProcess( M_data->dataSolid()->getDataTime()->time() - M_data->dataSolid()->dataTime()->timeStep() );
 
 #ifdef HAVE_HDF5
     if ( M_data->dataFluid()->dataTime()->isLastTimeStep() )
@@ -331,7 +331,7 @@ MultiscaleModelFSI3D::showMe()
 
         std::cout << "Velocity FE order   = " << M_FSIoperator->dataFluid()->uOrder() << std::endl
                   << "Pressure FE order   = " << M_FSIoperator->dataFluid()->pOrder() << std::endl
-                  << "Structure FE order  = " << M_FSIoperator->dataSolid()->order() << std::endl<< std::endl;
+                  << "Structure FE order  = " << M_FSIoperator->dataSolid()->getOrder() << std::endl<< std::endl;
 
         std::cout << "Velocity DOF        = " << 3 * M_FSIoperator->uFESpace().dof().numTotalDof() << std::endl
                   << "Pressure DOF        = " << M_FSIoperator->pFESpace().dof().numTotalDof() << std::endl
@@ -659,7 +659,7 @@ MultiscaleModelFSI3D::initializeSolution()
 
         // Import
         M_exporterFluid->setStartIndex( M_importerFluid->importFromTime( M_data->dataFluid()->dataTime()->initialTime() ) + 1 );
-        M_exporterSolid->setStartIndex( M_importerSolid->importFromTime( M_data->dataSolid()->dataTime()->initialTime() ) + 1 );
+        M_exporterSolid->setStartIndex( M_importerSolid->importFromTime( M_data->dataSolid()->getDataTime()->initialTime() ) + 1 );
 
         // Set Initial solution
         // IMPORTANT NOTE:
@@ -675,6 +675,7 @@ MultiscaleModelFSI3D::initializeSolution()
 
         UniqueV.reset( new vector_Type( *M_FSIoperator->couplingVariableMap(), Unique, Zero ) );
         UInt offset = dynamic_cast<Monolithic*>(M_FSIoperator.get())->getOffset();
+
         UniqueV->subset( *M_solidDisplacement, M_solidDisplacement->map(), (UInt)0, offset );
         *UniqueV *= 1 / ( M_FSIoperator->solid().getRescaleFactor() * M_data->dataFluid()->dataTime()->timeStep() );
         M_FSIoperator->solid().initialize( UniqueV );
@@ -689,7 +690,7 @@ MultiscaleModelFSI3D::initializeSolution()
 
         vectorPtr_Type initSolSVel( new vector_Type( *M_FSIoperator->couplingVariableMap(), Unique, Zero ) );
         initSolSVel->subset( *M_solidVelocity,M_solidVelocity->map(), (UInt)0, offset );
-        *initSolSVel *= 1 / ( M_FSIoperator->solid().getRescaleFactor() * M_data->dataSolid()->dataTime()->timeStep() );
+        *initSolSVel *= 1 / ( M_FSIoperator->solid().getRescaleFactor() * M_data->dataSolid()->getDataTime()->timeStep() );
         M_FSIoperator->solid().initializeVel( *initSolSVel );
 
         M_FSIoperator->setSolution( *initSol );
