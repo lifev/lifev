@@ -177,7 +177,7 @@ main( int argc, char** argv )
     partitionMesh< RegionMesh3D<LinearTetra> >   meshPart(*dataNavierStokes.dataMesh()->mesh(), comm);
 
     if (verbose) std::cout << std::endl;
-    if (verbose) std::cout << "Time discretization order " << dataNavierStokes.dataTime()->getBDF_order() << std::endl;
+    if (verbose) std::cout << "Time discretization order " << dataNavierStokes.dataTime()->orderBDF() << std::endl;
 
     dataNavierStokes.dataMesh()->setMesh(meshPart.meshPartition());
 
@@ -264,7 +264,7 @@ main( int argc, char** argv )
     if (verbose) std::cout << std::endl;
     if (verbose) std::cout << "Computing the stokes solution ... " << std::endl << std::endl;
 
-    Real t0     = dataNavierStokes.dataTime()->getInitialTime();
+    Real t0     = dataNavierStokes.dataTime()->initialTime();
     dataNavierStokes.dataTime()->setTime(t0);
 
     // advection speed (beta) and rhs definition using the full map
@@ -289,9 +289,9 @@ main( int argc, char** argv )
     ensight.postProcess( 0 );
 
     // bdf object to store the previous solutions
-    BdfTNS<vector_type> bdf(dataNavierStokes.dataTime()->getBDF_order());
+    BdfTNS<vector_type> bdf(dataNavierStokes.dataTime()->orderBDF());
     // bdf initialization with the stokes problem solution
-    bdf.bdf_u().initialize_unk( fluid.solution() );
+    bdf.bdfVelocity().setInitialCondition( fluid.solution() );
 
     // ok, we are all set to proceed to the time loop
 
@@ -303,8 +303,8 @@ main( int argc, char** argv )
 
     // Initialization of the time loop
 
-    Real dt     = dataNavierStokes.dataTime()->getTimeStep();
-    Real tFinal = dataNavierStokes.dataTime()->getEndTime();
+    Real dt     = dataNavierStokes.dataTime()->timeStep();
+    Real tFinal = dataNavierStokes.dataTime()->endTime();
 
 
     int iter = 1;
@@ -318,20 +318,20 @@ main( int argc, char** argv )
         if (verbose)
         {
             std::cout << std::endl;
-            std::cout << "We are now at time "<< dataNavierStokes.dataTime()->getTime() << " s. " << std::endl;
+            std::cout << "We are now at time "<< dataNavierStokes.dataTime()->time() << " s. " << std::endl;
             std::cout << std::endl;
         }
 
         chrono.start();
 
         // alpha coefficient for the mass matrix
-        double alpha = bdf.bdf_u().coeff_der( 0 ) / dataNavierStokes.dataTime()->getTimeStep();
+        double alpha = bdf.bdfVelocity().coefficientFirstDerivative( 0 ) / dataNavierStokes.dataTime()->timeStep();
 
         // extrapolation of the advection term
-        beta = bdf.bdf_u().extrap();
+        beta = bdf.bdfVelocity().extrapolation();
 
         // rhs  part of the time-derivative
-        rhs  = fluid.matrixMass()*bdf.bdf_u().time_der( dataNavierStokes.dataTime()->getTimeStep() );
+        rhs  = fluid.matrixMass()*bdf.bdfVelocity().time_der( dataNavierStokes.dataTime()->timeStep() );
 
         // the we update the Oseen system
         fluid.updateSystem( alpha, beta, rhs );
@@ -340,7 +340,7 @@ main( int argc, char** argv )
         fluid.iterate( bcH );
 
         // shifting the previous solutions
-        bdf.bdf_u().shift_right( fluid.solution() );
+        bdf.bdfVelocity().shiftRight( fluid.solution() );
 
         // and we postprocess
 
