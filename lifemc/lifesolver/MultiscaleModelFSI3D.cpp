@@ -246,7 +246,7 @@ MultiscaleModelFSI3D::solveSystem( )
                                     M_data->errorTolerance(),
                                     M_data->linesearch(),
                                     outRes,
-                                    M_data->dataFluid()->dataTime()->getTime(),
+                                    M_data->dataFluid()->dataTime()->time(),
                                     M_nonLinearRichardsonIteration
                                   );
     if (M_nonLinearRichardsonIteration == 0)
@@ -296,9 +296,9 @@ MultiscaleModelFSI3D::saveSolution()
 //         *M_fluidDisplacement = M_FSIoperator->meshDisp();
 
     if ( M_FSIoperator->isFluid() )
-        M_exporterFluid->postProcess( M_data->dataFluid()->dataTime()->getTime() - M_data->dataFluid()->dataTime()->getTimeStep() );
+        M_exporterFluid->postProcess( M_data->dataFluid()->dataTime()->time() - M_data->dataFluid()->dataTime()->timeStep() );
     if ( M_FSIoperator->isSolid() )
-        M_exporterSolid->postProcess( M_data->dataSolid()->dataTime()->getTime() - M_data->dataSolid()->dataTime()->getTimeStep() );
+        M_exporterSolid->postProcess( M_data->dataSolid()->dataTime()->time() - M_data->dataSolid()->dataTime()->timeStep() );
 
 #ifdef HAVE_HDF5
     if ( M_data->dataFluid()->dataTime()->isLastTimeStep() )
@@ -658,8 +658,8 @@ MultiscaleModelFSI3D::initializeSolution()
         M_importerSolid->addVariable( ExporterData::Vector, "Solid Displacement", M_solidDisplacement, UInt(0), M_FSIoperator->dFESpace().dof().numTotalDof() );
 
         // Import
-        M_exporterFluid->setStartIndex( M_importerFluid->importFromTime( M_data->dataFluid()->dataTime()->getInitialTime() ) + 1 );
-        M_exporterSolid->setStartIndex( M_importerSolid->importFromTime( M_data->dataSolid()->dataTime()->getInitialTime() ) + 1 );
+        M_exporterFluid->setStartIndex( M_importerFluid->importFromTime( M_data->dataFluid()->dataTime()->initialTime() ) + 1 );
+        M_exporterSolid->setStartIndex( M_importerSolid->importFromTime( M_data->dataSolid()->dataTime()->initialTime() ) + 1 );
 
         // Set Initial solution
         // IMPORTANT NOTE:
@@ -676,7 +676,7 @@ MultiscaleModelFSI3D::initializeSolution()
         UniqueV.reset( new vector_Type( *M_FSIoperator->couplingVariableMap(), Unique, Zero ) );
         UInt offset = dynamic_cast<Monolithic*>(M_FSIoperator.get())->getOffset();
         UniqueV->subset( *M_solidDisplacement, M_solidDisplacement->map(), (UInt)0, offset );
-        *UniqueV *= 1 / ( M_FSIoperator->solid().rescaleFactor() * M_data->dataFluid()->dataTime()->getTimeStep() );
+        *UniqueV *= 1 / ( M_FSIoperator->solid().rescaleFactor() * M_data->dataFluid()->dataTime()->timeStep() );
         M_FSIoperator->solid().initialize( UniqueV );
         *initSol += *UniqueV;
 
@@ -689,7 +689,7 @@ MultiscaleModelFSI3D::initializeSolution()
 
         vectorPtr_Type initSolSVel( new vector_Type( *M_FSIoperator->couplingVariableMap(), Unique, Zero ) );
         initSolSVel->subset( *M_solidVelocity,M_solidVelocity->map(), (UInt)0, offset );
-        *initSolSVel *= 1 / ( M_FSIoperator->solid().rescaleFactor() * M_data->dataSolid()->dataTime()->getTimeStep() );
+        *initSolSVel *= 1 / ( M_FSIoperator->solid().rescaleFactor() * M_data->dataSolid()->dataTime()->timeStep() );
         M_FSIoperator->solid().initializeVel( *initSolSVel );
 
         M_FSIoperator->setSolution( *initSol );

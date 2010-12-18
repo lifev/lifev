@@ -303,7 +303,7 @@ MultiscaleModel1D::saveSolution()
 #endif
 
 #ifdef HAVE_HDF5
-    M_exporter->postProcess( M_data->dataTime()->getTime() );
+    M_exporter->postProcess( M_data->dataTime()->time() );
 
     if ( M_data->dataTime()->isLastTimeStep() )
         M_exporter->closeFile();
@@ -663,7 +663,7 @@ MultiscaleModel1D::initializeSolution()
         M_importer->addVariable( ExporterData::Scalar, "Fluid Pressure",  (*M_solution)["P"],    static_cast <UInt> ( 0 ), M_FESpace->dof().numTotalDof() );
 
         // Import
-        M_exporter->setStartIndex( M_importer->importFromTime( M_data->dataTime()->getInitialTime() ) + 1 );
+        M_exporter->setStartIndex( M_importer->importFromTime( M_data->dataTime()->initialTime() ) + 1 );
 
         // Compute A from AreaRatio
         M_solver->computeArea( *M_solution );
@@ -701,9 +701,9 @@ MultiscaleModel1D::solve( bc_Type& bc, solution_Type& solution, const std::strin
 
     // Subiterate to respect CFL
     UInt SubiterationNumber(1);
-    Real timeStep = M_data->dataTime()->getTimeStep();
+    Real timeStep = M_data->dataTime()->timeStep();
 
-    Real CFL = M_solver->computeCFL( solution, M_data->dataTime()->getTimeStep() );
+    Real CFL = M_solver->computeCFL( solution, M_data->dataTime()->timeStep() );
     if ( CFL > M_data->CFLmax() )
     {
         SubiterationNumber = std::ceil( CFL / M_data->CFLmax() );
@@ -711,19 +711,19 @@ MultiscaleModel1D::solve( bc_Type& bc, solution_Type& solution, const std::strin
     }
 
     if ( M_displayer->isLeader() )
-        std::cout << solverType << "  CFL                                      " << CFL*timeStep/M_data->dataTime()->getTimeStep() << std::endl;
+        std::cout << solverType << "  CFL                                      " << CFL*timeStep/M_data->dataTime()->timeStep() << std::endl;
 
     for ( UInt i(1) ; i <= SubiterationNumber ; ++i )
     {
         if ( M_displayer->isLeader() )
         {
             std::cout << solverType << "  Subiteration                             " << i << "/" << SubiterationNumber << std::endl;
-            std::cout << solverType << "  Time                                     " <<  M_data->dataTime()->getPreviousTime() + i*timeStep << std::endl;
+            std::cout << solverType << "  Time                                     " <<  M_data->dataTime()->previousTime() + i*timeStep << std::endl;
         }
         //bc.updateOperatorVariables();
 
         M_solver->updateRHS( solution, timeStep );
-        M_solver->iterate( bc, solution, M_data->dataTime()->getPreviousTime() + i*timeStep, timeStep );
+        M_solver->iterate( bc, solution, M_data->dataTime()->previousTime() + i*timeStep, timeStep );
     }
 }
 
@@ -847,7 +847,7 @@ MultiscaleModel1D::bcFunctionDelta( const Real& t )
     // Time container for interpolation
     std::vector< Real > timeContainer( M_bcPreviousTimeSteps.size(), 0 );
     for ( UInt i(0) ; i < M_bcPreviousTimeSteps.size() ; ++i )
-        timeContainer[i] = M_globalData->dataTime()->getTime() - i * M_globalData->dataTime()->getTimeStep();
+        timeContainer[i] = M_globalData->dataTime()->time() - i * M_globalData->dataTime()->timeStep();
 
     for ( UInt i(0) ; i < M_bcPreviousTimeSteps.size() ; ++i )
     {

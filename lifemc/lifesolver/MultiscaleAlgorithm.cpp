@@ -173,7 +173,7 @@ MultiscaleAlgorithm::save( const UInt& subiterationsNumber, const Real& residual
         else
             output.open( filename.c_str(), std::ios::app );
 
-        output << M_multiscale->globalData()->dataTime()->getTime() << "      "
+        output << M_multiscale->globalData()->dataTime()->time() << "      "
                << subiterationsNumber << "                  " << residual << std::endl;
 
         output.close();
