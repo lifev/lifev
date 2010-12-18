@@ -159,8 +159,8 @@ DataElasticStructure::showMe( std::ostream& output ) const
 
     for ( MaterialContainer_ConstIterator i = M_poisson.begin() ; i != M_poisson.end() ; ++i )
     {
-        output << "Lame - lambda[" << i->first << "]                 = " << lambda( i->first ) << std::endl;
-        output << "Lame - mu[" << i->first << "]                     = " << mu( i->first ) << std::endl;
+        output << "Lame - lambda[" << i->first << "]                 = " << getLambda( i->first ) << std::endl;
+        output << "Lame - mu[" << i->first << "]                     = " << getMu( i->first ) << std::endl;
     }
 
     output << "\n*** Values for data [solid/miscellaneous]\n\n";
@@ -178,7 +178,7 @@ DataElasticStructure::showMe( std::ostream& output ) const
 // Set Method
 // ===================================================
 void
-DataElasticStructure::setDataTime( const Time_ptrType DataTime )
+DataElasticStructure::setDataTime( const TimePtr_Type DataTime )
 {
     M_time = DataTime;
 }
@@ -210,26 +210,26 @@ DataElasticStructure::setYoung( const Real& young, const UInt& material )
 // ===================================================
 // Get Method
 // ===================================================
-DataElasticStructure::Time_ptrType
-DataElasticStructure::dataTime() const
+const DataElasticStructure::TimePtr_Type
+DataElasticStructure::getDataTime() const
 {
     return M_time;
 }
 
 const Real&
-DataElasticStructure::rho() const
+DataElasticStructure::getRho() const
 {
     return M_density;
 }
 
 const Real&
-DataElasticStructure::thickness() const
+DataElasticStructure::getThickness() const
 {
     return M_thickness;
 }
 
 const Real&
-DataElasticStructure::poisson( const UInt& material ) const
+DataElasticStructure::getPoisson( const UInt& material ) const
 {
     MaterialContainer_Type::const_iterator IT = M_poisson.find( material );
     if (IT != M_poisson.end())
@@ -242,7 +242,7 @@ DataElasticStructure::poisson( const UInt& material ) const
 }
 
 const Real&
-DataElasticStructure::young( const UInt& material ) const
+DataElasticStructure::getYoung( const UInt& material ) const
 {
     MaterialContainer_Type::const_iterator IT = M_young.find( material );
     if (IT != M_young.end())
@@ -255,44 +255,44 @@ DataElasticStructure::young( const UInt& material ) const
 }
 
 Real
-DataElasticStructure::lambda( const UInt& material ) const
+DataElasticStructure::getLambda( const UInt& material ) const
 {
     return M_young.find( material )->second * M_poisson.find( material )->second /
            ( ( 1.0 + M_poisson.find( material )->second ) * ( 1.0 - 2.0 * M_poisson.find( material )->second ) );
 }
 
 Real
-DataElasticStructure::mu( const UInt& material ) const
+DataElasticStructure::getMu( const UInt& material ) const
 {
     return M_young.find( material )->second/( 2.0 * ( 1.0 + M_poisson.find( material )->second ) );
 }
 
 const std::string&
-DataElasticStructure::order() const
+DataElasticStructure::getOrder() const
 {
     return M_order;
 }
 
 const Real&
-DataElasticStructure::factor() const
+DataElasticStructure::getFactor() const
 {
     return M_factor;
 }
 
 const UInt&
-DataElasticStructure::verbose() const
+DataElasticStructure::getVerbose() const
 {
     return M_verbose;
 }
 
 const std::string&
-DataElasticStructure::solidType()
+DataElasticStructure::getSolidType()
 {
     return M_solidType;
 }
 
 const bool&
-DataElasticStructure::useExactJacobian() const
+DataElasticStructure::getUseExactJacobian() const
 {
     return M_useExactJacobian;
 }

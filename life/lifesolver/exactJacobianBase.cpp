@@ -94,7 +94,7 @@ void exactJacobian::evalResidual(vector_Type&       res,
 
     this->displayer().leaderPrint("      NormInf res        =                     " , res.normInf(), "\n" );
     if (this->isSolid())
-        this->displayer().leaderPrint("      NormInf res_d      =                     " , this->solid().residual().normInf(), "\n" );
+        this->displayer().leaderPrint("      NormInf res_d      =                     " , this->solid().getResidual().NormInf(), "\n" );
 
 }
 
@@ -117,7 +117,7 @@ void  exactJacobian::solveLinearFluid()
         //            vector_Type repLambdaSolid(lambdaSolid(), Repeated);
 
         //this->transferInterfaceOnFluid(repLambdaSolid, dispFluidMesh);
-        this->transferSolidOnFluid(this->M_solid->disp(), dispFluidMesh);
+        this->transferSolidOnFluid(this->M_solid->getDisplacement(), dispFluidMesh);
     }
     else
     {
@@ -384,9 +384,9 @@ void exactJacobian::eval(const vector_Type& _disp,
 
     if (this->isSolid())
     {
-        this->transferSolidOnInterface(this->M_solid->disp(),     lambdaSolidUnique);
-        this->transferSolidOnInterface(this->M_solid->vel(),      lambdaDotSolidUnique);
-        this->transferSolidOnInterface(this->M_solid->residual(), sigmaSolidUnique);
+        this->transferSolidOnInterface(this->M_solid->getDisplacement(),     lambdaSolidUnique);
+        this->transferSolidOnInterface(this->M_solid->getVelocity(),      lambdaDotSolidUnique);
+        this->transferSolidOnInterface(this->M_solid->getResidual(), sigmaSolidUnique);
     }
 
     this->setLambdaSolid(    lambdaSolidUnique);
@@ -413,8 +413,8 @@ void exactJacobian::eval(const vector_Type& _disp,
         this->displayer().leaderPrint("      Max ResidualF      =                     " , M_fluid->residual().normInf(), "\n" );
     if ( this->isSolid() )
     {
-        this->displayer().leaderPrint("      NL2 Diplacement S. =                     " , M_solid->disp().norm2(), "\n" );
-        this->displayer().leaderPrint("      Max Residual Solid =                     " , M_solid->residual().normInf(), "\n" );
+        this->displayer().leaderPrint("      NL2 Diplacement S. =                     " , M_solid->getDisplacement().Norm2(), "\n" );
+        this->displayer().leaderPrint("      Max Residual Solid =                     " , M_solid->getResidual().NormInf(), "\n" );
     }
 }
 
@@ -536,7 +536,7 @@ int exactJacobian::Epetra_ExactJacobian::Apply(const Epetra_MultiVector &X, Epet
         if (M_ej->isSolid())
         {
             M_ej->solveLinearSolid();
-            M_ej->transferSolidOnInterface(M_ej->solid().disp(), lambdaSolidUnique);
+            M_ej->transferSolidOnInterface(M_ej->solid().getDisplacement(), lambdaSolidUnique);
         }
 
         M_comm->Barrier();

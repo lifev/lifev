@@ -54,7 +54,7 @@ namespace LifeV
 class DataNewton
 {
 public:
-    
+
   //! @name Constructor & Destructor
   //@{
   //! Constructor
@@ -63,10 +63,10 @@ public:
   //! Virtual destructor
   virtual ~DataNewton();
   //@}
-  
+
   //! @name Methods
   //@{
-  
+
   //! Ouptut
   virtual void showMe( std::ostream& c = std::cout ) const;
 
@@ -76,24 +76,49 @@ public:
   //@{
 
   //! The max number of interations
-  UInt maxiter() const;
-  
+  const UInt getMaxiter() const;
+
   //! The absolute tolerance
-  Real abstol() const;
-  
+  const Real getAbstol() const;
+
   //! The relative tolerance
-  Real reltol() const;
-  
+  const Real getReltol() const;
+
   //! The maximum error tolerance for residual in linear solver.
-  Real etamax() const;
-  
+  const Real getEtamax() const;
+
   //! The linesearch option
-  UInt linesearch() const;
+  const UInt getLinesearch() const;
 
   //@}
 
+  /*const UInt __attribute__ ((__deprecated__)) maxiter()
+  {
+    return getMaxiter();
+  }
+
+  const UInt __attribute__ ((__deprecated__)) abstol()
+  {
+    return getAbstol();
+  }
+
+  const UInt __attribute__ ((__deprecated__)) reltol()
+  {
+    return getReltol();
+  }
+
+  const UInt __attribute__ ((__deprecated__)) etamax()
+  {
+    return getEtamax();
+  }
+
+  const UInt __attribute__ ((__deprecated__)) linesearch()
+  {
+    return getLinesearch();
+    }*/
+
 protected:
-  
+
   UInt M_maxiter;      // max number of iterations
   Real M_abstol;       // the stopping criteria is abstol+reltol*norm(residual_0)
   Real M_reltol;       //

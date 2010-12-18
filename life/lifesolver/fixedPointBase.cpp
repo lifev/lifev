@@ -242,9 +242,9 @@ void fixedPoint::eval( const vector_Type& _disp,
     if (this->isSolid())
     {
         this->M_solid->iterate( M_BCh_d );
-        this->transferSolidOnInterface(this->M_solid->disp(),     lambdaSolidUnique);
-        this->transferSolidOnInterface(this->M_solid->vel(),      lambdaDotSolidUnique);
-        this->transferSolidOnInterface(this->M_solid->residual(), sigmaSolidUnique);
+        this->transferSolidOnInterface(this->M_solid->getDisplacement(),     lambdaSolidUnique);
+        this->transferSolidOnInterface(this->M_solid->getVelocity(),      lambdaDotSolidUnique);
+        this->transferSolidOnInterface(this->M_solid->getResidual(), sigmaSolidUnique);
     }
 
     this->setLambdaSolid( lambdaSolidUnique );
@@ -285,11 +285,12 @@ void fixedPoint::eval( const vector_Type& _disp,
     }
     if (this->isSolid())
     {
-        norm = M_solid->disp().norm2();
+        norm = M_solid->getDisplacement().Norm2();
         if (this->isLeader())
             std::cout << "NL2 DiplacementS     = " << norm << std::endl;
 
-        norm = M_solid->residual().normInf();
+        norm = M_solid->getResidual().NormInf();
+
         if (this->isLeader())
             std::cout << "Max ResidualS        = " << norm << std::endl;
     }

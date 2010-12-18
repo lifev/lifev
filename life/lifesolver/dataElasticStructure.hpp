@@ -49,7 +49,7 @@
 #include <life/lifecore/GetPot.hpp>
 #include <boost/shared_ptr.hpp>
 #include <life/lifecore/life.hpp>
-#include <life/lifecore/util_string.hpp> 
+#include <life/lifecore/util_string.hpp>
 #include <life/lifefem/dataTime.hpp>
 
 namespace LifeV
@@ -64,7 +64,7 @@ public:
     //@{
 
     typedef DataTime                                                  Time_Type;
-    typedef boost::shared_ptr< Time_Type >                            Time_ptrType;
+    typedef boost::shared_ptr< Time_Type >                            TimePtr_Type;
 
     typedef std::map<UInt, Real>                                      MaterialContainer_Type;
     typedef MaterialContainer_Type::const_iterator                    MaterialContainer_ConstIterator;
@@ -122,7 +122,7 @@ public:
     /*!
      * @param DataTime shared_ptr to dataTime container
      */
-    void setDataTime( const Time_ptrType DataTime );
+    void setDataTime( const TimePtr_Type DataTime );
 
     //! Set density
     /*!
@@ -160,84 +160,177 @@ public:
     /*!
      * @return shared_ptr to dataTime container
      */
-    Time_ptrType dataTime() const;
+    const TimePtr_Type getDataTime() const;
 
     //! Get solid density
     /*!
      * @return Solid density
      */
-    const Real& rho() const;
+    const Real& getRho() const;
 
     //! Get solid thickness
     /*!
      * @return Solid thickness
      */
-    const Real& thickness() const;
+    const Real& getThickness() const;
 
     //! Get solid poisson coefficient
     /*!
      * @param material material ID (1 by default)
      * @return Solid poisson coefficient
      */
-    const Real& poisson( const UInt& material = 1 ) const;
+    const Real& getPoisson( const UInt& material = 1 ) const;
 
     //! Get solid young modulus
     /*!
      * @param material material ID (1 by default)
      * @return Solid young modulus
      */
-    const Real& young( const UInt& material = 1 ) const;
+    const Real& getYoung( const UInt& material = 1 ) const;
 
     //! Get solid first lame coefficient
     /*!
      * @param material material ID (1 by default)
      * @return Solid first Lame coefficient
      */
-    Real lambda( const UInt& material = 1 ) const;
+    Real getLambda( const UInt& material = 1 ) const;
 
     //! Get solid second Lame coefficient
     /*!
      * @param material material ID (1 by default)
      * @return Solid second Lame coefficient
      */
-    Real mu( const UInt& material = 1 ) const;
+    Real getMu( const UInt& material = 1 ) const;
 
     //! Get FE order
     /*!
      * @return FE order
      */
-    const std::string& order() const;
+    const std::string& getOrder() const;
 
     //! Get solid amplification factor
     /*!
      * @return Solid amplification factor
      */
-    const Real& factor() const;
+    const Real& getFactor() const;
 
     //! Get verbose level
     /*!
      * @return verbose level
      */
-    const UInt& verbose() const;
+    const UInt& getVerbose() const;
 
     //! Get solid type
     /*!
      * @return solid type
      */
-    const std::string& solidType();
+    const std::string& getSolidType();
 
     //! Get whether to use or not exact Jacobian
     /*!
      * @return true: if using exact Jacobian, false: otherwise
      */
-    const bool& useExactJacobian() const;
+    const bool& getUseExactJacobian() const;
 
     //@}
+
+
+    //List of Deprecated Methods
+
+    //! Get whether to use or not exact Jacobian //Deprecated
+    /*!
+     * @return true: if using exact Jacobian, false: otherwise
+     */
+    /*
+    const bool& __attribute__ ((__deprecated__)) useExactJacobian() const
+    {return getUseExactJacobian();}
+
+    //! Get solid type //Deprecated
+    /*!
+     * @return solid type
+     */
+    /*const std::string& __attribute__ ((__deprecated__)) solidType()
+    {return getSolidType();}
+
+    //! Get verbose level //Deprecated
+    /*!
+     * @return verbose level
+     */
+    /*const UInt& __attribute__ ((__deprecated__)) verbose() const
+    {return getVerbose();}
+
+    //! Get solid amplification factor //Deprecated
+    /*!
+     * @return Solid amplification factor
+     */
+    /*const Real& __attribute__ ((__deprecated__)) factor() const
+    {return getFactor();}
+
+    //! Get FE order //Deprecated
+    /*!
+     * @return FE order
+     */
+    /*const std::string& __attribute__ ((__deprecated__)) order() const
+    {return getOrder();}
+
+    //! Get solid second Lame coefficient //Deprecated
+    /*!
+     * @param material material ID (1 by default)
+     * @return Solid second Lame coefficient
+     */
+    /* Real __attribute__ ((__deprecated__)) mu( const UInt& material = 1 ) const
+     {return getMu(material);}
+
+    //! Get solid first lame coefficient //Deprecated
+    /*!
+     * @param material material ID (1 by default)
+     * @return Solid first Lame coefficient
+     */
+    /* Real __attribute__ ((__deprecated__)) lambda( const UInt& material = 1 ) const
+     {return getLambda(material);}
+
+    //! Get solid young modulus //Deprecated
+    /*!
+     * @param material material ID (1 by default)
+     * @return Solid young modulus
+     */
+    /*const Real& __attribute__ ((__deprecated__)) young( const UInt& material = 1 ) const
+    {return getYoung(material);}
+
+    //! Get solid poisson coefficient //Deprecated
+    /*!
+     * @param material material ID (1 by default)
+     * @return Solid poisson coefficient
+     */
+    /*const Real& __attribute__ ((__deprecated__)) poisson( const UInt& material = 1 ) const
+     {return getPoisson(material);}
+
+    //! Get solid thickness //Deprecated
+    /*!
+     * @return Solid thickness
+     */
+    /*const Real& __attribute__ ((__deprecated__)) thickness() const
+    {return getThickness();}
+
+    //! Get solid density //Deprecated
+    /*!
+     * @return Solid density
+     */
+    /*const Real& __attribute__ ((__deprecated__)) rho() const
+    {return getRho();}
+
+    //! Get data time container //Deprecated
+    /*!
+     * @return shared_ptr to dataTime container
+     */
+    /* TimePtr_Type __attribute__ ((__deprecated__)) dataTime() const
+     {return getDataTime();}
+    */
 
 private:
 
     //! Data containers for time and mesh
-    Time_ptrType           M_time;
+    TimePtr_Type           M_time;
 
     //! Physics
     Real                   M_density;

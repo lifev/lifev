@@ -602,10 +602,10 @@ public:
     virtual vectorPtr_Type& solutionPtr()                               { return M_lambda; }
 
     //! gets the solid displacement by copy
-    virtual void getSolidDisp( vector_Type& soliddisp )                 { soliddisp = M_solid->disp(); }
+    virtual void getSolidDisp( vector_Type& soliddisp )                 { soliddisp = M_solid->getDisplacement(); }
 
     //! gets the solid velocity by copy
-    virtual void getSolidVel( vector_Type& solidvel )                   { solidvel = M_solid->vel(); }
+    virtual void getSolidVel( vector_Type& solidvel )                   { solidvel = M_solid->getVelocity(); }
 
     //! gets the fluid velocity and pressure by copy
     virtual void getFluidVelAndPres( vector_Type& sol )                 { sol = *M_fluid->solution(); }

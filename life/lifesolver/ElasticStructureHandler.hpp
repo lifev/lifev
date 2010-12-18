@@ -75,6 +75,8 @@ public:
   //! @name Constructors & Destructor
   //@{
 
+  ElasticStructureHandler();
+
   /*!
     \param data_file GetPot data file
     \param refFE reference FE for the displacement
@@ -82,11 +84,11 @@ public:
     \param bdQr surface quadrature
     \param BCh boundary conditions for the displacement
   */
-  ElasticStructureHandler( const DataElasticStructure<Mesh>& data,
-			   const RefFE&                      refFE,
-			   const QuadRule&                   Qr,
-			   const QuadRule&                   bdQr,
-			   BCHandler&                        BCh );
+  setUp( const DataElasticStructure<Mesh>& data,
+	 const RefFE&                      refFE,
+	 const QuadRule&                   Qr,
+	 const QuadRule&                   bdQr,
+	 BCHandler&                        BCh );
 
   /*!
     \param data_file GetPot data file
@@ -94,11 +96,11 @@ public:
     \param Qr volumic quadrature rule
     \param bdQr surface quadrature
   */
+  setUp( const DataElasticStructure<Mesh>& data,
+	 const RefFE&                      refFE,
+	 const QuadRule&                   Qr,
+	 const QuadRule&                   bdQr);
 
-  ElasticStructureHandler( const DataElasticStructure<Mesh>& data,
-			   const RefFE&                      refFE,
-			   const QuadRule&                   Qr,
-			   const QuadRule&                   bdQr);
 
   //! Destructor
   virtual ~ElasticStructureHandler()
@@ -160,34 +162,41 @@ public:
   //@{
 
   //! Returns the displacement vector
-  PhysVectUnknown<Vector>& disp();
+  PhysVectUnknown<Vector>& getDisplacement();
 
   //! Returns the velocity vector
-  PhysVectUnknown<Vector>& w();
+  PhysVectUnknown<Vector>& getVelocity();
 
   //! Returns the number of unknowns
-  const UInt dim() const {return M_dim;}
+  const UInt getDimension() const {return M_dim;}
 
   //! Returns the reference FE object
-  const RefFE&          refFE() const {return M_refFE;}
+  const RefFE&          getRefFE() const {return M_refFE;}
 
   //! Returns the current FE object
-  CurrentFE&            fe() {return M_fe;}
+  CurrentFE&            getFe() {return M_fe;}
   //! Returns the current FE object
-  const CurrentFE&      fe() const  {return M_fe;}
+  const CurrentFE&      getFe() const  {return M_fe;}
   //! Returns the current boundary FE object
-  CurrentBdFE&    feBd() {return M_feBd;}
-  //! Returns the current boundary FE object
-  const CurrentBdFE&    feBd() const {return M_feBd;}
-
+  CurrentBdFE&    getFeBd() {return M_feBd;}
   //! Returns the Dof object
-  const Dof&            dDof() const {return M_dof;}
+  const Dof&            getdDof() const {return M_dof;}
 
   //! Returns the BCHandler object
-  BCHandler &BCh_solid() {return *M_BCh_solid;}
+  BCHandler & getBCh_solid() {return *M_BCh_solid;}
   //@}
 
 private:
+
+  //! @name Provate Methods
+  /*!@{
+
+  //!private copy constructor:this class should not be copied
+  /*!
+    if you need a copy you should implement it, so that it copies the shared pointer one by one, without copying the content.
+  */
+  ElasticStructureHandler(ElasticStructureHandler& T);
+  {}
 
   /*!
     \param name string containing the name of the file
@@ -241,52 +250,73 @@ private:
 //=========================================
 // Constructor
 //=========================================
+
 template <typename Mesh>
 ElasticStructureHandler<Mesh>::
-ElasticStructureHandler( const DataElasticStructure<Mesh>& data,
-			 const RefFE&                      refFE,
-			 const QuadRule&                   Qr,
-			 const QuadRule&                   bdQr,
-			 BCHandler&                        BCh ):
-  DataElasticStructure<Mesh>( data ),
-  M_refFE                    ( refFE ),
-  M_dof                      ( this->mesh(), M_refFE ),
-  M_dim                      ( M_dof.numTotalDof() ),
-  M_Qr                       ( Qr ),
-  M_bdQr                     ( bdQr ),
-  M_fe                       ( M_refFE, getGeoMap( this->mesh() ), M_Qr ),
-  M_feBd                     ( M_refFE.boundaryFE(), getGeoMap( this->mesh() ).boundaryMap(), M_bdQr ),
-  M_d                        ( M_dim ),
-  M_dRhs                     ( M_dim ),
-  M_w                        ( M_dim ),
-  M_time                     ( 0 ),
-  M_count                    ( 0 ),
-  M_BCh_solid               ( &BCh )
+ElasticStructureHandler( ):
+  DataElasticStructure<Mesh> (  ),
+  M_refFE                    (  ),
+  M_dof                      (  ),
+  M_dim                      (  ),
+  M_Qr                       (  ),
+  M_bdQr                     (  ),
+  M_fe                       (  ),
+  M_feBd                     (  ),
+  M_d                        (  ),
+  M_dRhs                     (  ),
+  M_w                        (  ),
+  M_time                     (  ),
+  M_count                    (  ),
+  M_BCh_solid                (  )
 {}
 
 template <typename Mesh>
 ElasticStructureHandler<Mesh>::
-ElasticStructureHandler( const DataElasticStructure<Mesh>& data,
-			 const RefFE&                      refFE,
-			 const QuadRule&                   Qr,
-			 const QuadRule&                   bdQr):
-  DataElasticStructure<Mesh>( data ),
-  M_refFE                    ( refFE ),
+setUp( const DataElasticStructure<Mesh>& data,
+       const RefFE&                      refFE,
+       const QuadRule&                   Qr,
+       const QuadRule&                   bdQr,
+       BCHandler&                        BCh )
+{
+  DataElasticStructure<Mesh> = data;
+  M_refFE                    = refFE;
   M_dof                      ( this->mesh(), M_refFE ),
-  M_dim                      ( M_dof.numTotalDof() ),
-  M_Qr                       ( Qr ),
-  M_bdQr                     ( bdQr ),
-  M_fe                       ( M_refFE, getGeoMap( this->mesh() ), M_Qr ),
-  M_feBd                     ( M_refFE.boundaryFE(), getGeoMap( this->mesh() ).boundaryMap(), M_bdQr ),
-  M_d                        ( M_dim ),
-  M_dRhs                     ( M_dim ),
-  M_w                        ( M_dim ),
+  M_dim                      = M_dof.numTotalDof();
+  M_Qr                       = Qr;
+  M_bdQr                     = bdQr;
+  M_fe                       ( M_refFE, getGeoMap( this->mesh() ), M_Qr )
+  M_feBd                     ( M_refFE.boundaryFE(), getGeoMap( this->mesh() ).boundaryMap(), M_bdQr );
+  M_d                        = M_dim;
+  M_dRhs                     = M_dim;
+  M_w                        = M_dim;
+  M_time                     = 0;
+  M_count                    = 0;
+  M_BCh_solid                = &BCh;
+}
+
+template <typename Mesh>
+ElasticStructureHandler<Mesh>::
+setUp( const DataElasticStructure<Mesh>& data,
+       const RefFE&                      refFE,
+       const QuadRule&                   Qr,
+       const QuadRule&                   bdQr)
+{
+  DataElasticStructure<Mesh> = data;
+  M_refFE                    = refFE;
+  M_dof                      ( this->mesh(), M_refFE ),
+  M_dim                      = M_dof.numTotalDof();
+  M_Qr                       = Qr;
+  M_bdQr                     = bdQr;
+  M_fe                       ( M_refFE, getGeoMap( this->mesh() ), M_Qr );
+  M_feBd                     ( M_refFE.boundaryFE(), getGeoMap( this->mesh() ).boundaryMap(), M_bdQr );
+  M_d                        = M_dim;
+  M_dRhs                   = M_dim;
+  M_w                        = M_dim ;
   //    _BCh( new BCHandler(0)),
-  M_time                     ( 0 ),
-  M_count                    ( 0 ),
-  M_BCh_solid               ( 0 )
-{}
-
+  M_time                     = 0;
+  M_count                    = 0;
+  M_BCh_solid                = 0;
+}
 
 // Returns the displacement vector
 template <typename Mesh>

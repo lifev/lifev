@@ -61,31 +61,31 @@ DataNewton::~DataNewton()
 //=====================================
 
 // The max number of interations
-UInt DataNewton::maxiter() const
+const UInt DataNewton::getMaxiter() const
 {
     return M_maxiter;
 }
 
 // The absolute tolerance
-Real DataNewton::abstol() const
+const Real DataNewton::getAbstol() const
 {
     return M_abstol;
 }
 
 // The relative tolerance
-Real DataNewton::reltol() const
+const Real DataNewton::getReltol() const
 {
     return M_reltol;
 }
 
 // The relative tolerance
-Real DataNewton::etamax() const
+const Real DataNewton::getEtamax() const
 {
     return M_etamax;
 }
 
 // The linesearch option
-UInt DataNewton::linesearch() const
+const UInt DataNewton::getLinesearch() const
 {
     return M_linesearch;
 }
