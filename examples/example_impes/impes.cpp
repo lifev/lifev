@@ -627,7 +627,7 @@ impes::run()
     saturationHyperbolicSolver.setMassTerm( Members->getSaturationMass() );
 
     // Set the boudary conditions.
-    saturationHyperbolicSolver.setBC( bcSaturation );
+    saturationHyperbolicSolver.setBoundaryCondition( bcSaturation );
 
     // Set up for the non-linear and transient Darcy solver in the saturation equation.
 
@@ -727,7 +727,7 @@ impes::run()
     *saturationExporter = *saturationDarcySolver.primalSolution();
 
     // Save the initial solution into the exporter.
-    exporter->postProcess( dataSaturationHyperbolic.dataTime()->getInitialTime() );
+    exporter->postProcess( dataSaturationHyperbolic.dataTime()->initialTime() );
 
     // Update the time for the simulation
     dataSaturationDarcyNonLinear.dataTime()->updateTime();
@@ -767,13 +767,13 @@ impes::run()
         // Set the time parameters for the hyperbolic part of the saturation equation.
 
         // Set the initial time.
-        dataSaturationHyperbolic.dataTime()->setInitialTime( dataSaturationDarcyNonLinear.dataTime()->getTime() );
+        dataSaturationHyperbolic.dataTime()->setInitialTime( dataSaturationDarcyNonLinear.dataTime()->time() );
 
         // Set the current time as initial time.
-        dataSaturationHyperbolic.dataTime()->setTime( dataSaturationDarcyNonLinear.dataTime()->getTime() );
+        dataSaturationHyperbolic.dataTime()->setTime( dataSaturationDarcyNonLinear.dataTime()->time() );
 
         // Set the end time.
-        dataSaturationHyperbolic.dataTime()->setEndTime( dataSaturationDarcyNonLinear.dataTime()->getNextTime() );
+        dataSaturationHyperbolic.dataTime()->setEndTime( dataSaturationDarcyNonLinear.dataTime()->nextTime() );
 
         // Define the inner time step.
         Real innerTimeStep( 0. );
@@ -786,7 +786,7 @@ impes::run()
         {
 
             // The leader process prints the temporal data for the inner loop.
-            saturationHyperbolicSolver.getDisplayer().leaderPrint( "Inner loop for sub-temporal iteration for the hyperbolic equation.\n" );
+            saturationHyperbolicSolver.displayer().leaderPrint( "Inner loop for sub-temporal iteration for the hyperbolic equation.\n" );
 
             // Compute the new time step according to the CFL condition.
             //innerTimeStep = saturationHyperbolicSolver.CFL();
@@ -795,7 +795,7 @@ impes::run()
             if ( dataSaturationHyperbolic.dataTime()->isLastTimeStep() )
             {
                 // Compute the last time step.
-                innerTimeStep = dataSaturationHyperbolic.dataTime()->getLeftTime();
+                innerTimeStep = dataSaturationHyperbolic.dataTime()->leftTime();
 
                 // This is the last time step in the simulation
                 isLastTimeStep = true;
@@ -806,13 +806,13 @@ impes::run()
             //dataSaturationHyperbolic.dataTime()->setTimeStep( innerTimeStep );
 
             // The leader process prints the temporal data for the inner loop.
-            if ( saturationHyperbolicSolver.getDisplayer().isLeader() )
+            if ( saturationHyperbolicSolver.displayer().isLeader() )
             {
                 dataSaturationHyperbolic.dataTime()->showMe();
             }
 
             // solve one step of the hyperbolic problem.
-            saturationHyperbolicSolver.solveOneStep();
+            saturationHyperbolicSolver.solveOneTimeStep();
 
         }
 
@@ -834,7 +834,7 @@ impes::run()
         *saturationExporter = *saturationDarcySolver.primalSolution();
 
         // Save the solution into the exporter.
-        exporter->postProcess( dataSaturationDarcyNonLinear.dataTime()->getTime() );
+        exporter->postProcess( dataSaturationDarcyNonLinear.dataTime()->time() );
     }
 
 
