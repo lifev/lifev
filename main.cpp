@@ -387,9 +387,8 @@ public:
 
             M_solidDisp->subset(M_fsi->displacement(), offset);
             M_solidVel->subset(M_fsi->FSIOper()->solid().getVelocity(), offset);
-//             *M_solidDisp *= 1/(M_fsi->FSIOper()->solid().rescaleFactor()*M_data->dataFluid()->dataTime()->timeStep());
-//             *M_solidVel  *= 1/(M_fsi->FSIOper()->solid().rescaleFactor()*M_data->dataFluid()->dataTime()->timeStep());
-
+//             *M_solidDisp *= 1/(M_fsi->FSIOper()->solid().rescaleFactor()*M_data->dataFluid()->dataTime()->getTimeStep());
+//             *M_solidVel  *= 1/(M_fsi->FSIOper()->solid().rescaleFactor()*M_data->dataFluid()->dataTime()->getTimeStep());
 
             *M_velAndPressure = M_fsi->displacement();
             M_exporterSolid->postProcess( M_data->dataFluid()->dataTime()->time() );
@@ -606,10 +605,14 @@ void Problem::initialize(std::string& /*loadInitSol*/,  GetPot const& data_file)
     M_fsi->FSIOper()->fluid().initialize(*initSol);
 
 
+    UniqueV.reset(new vector_type(*M_fsi->FSIOper()->getCouplingVariableMap(), Unique, Zero));
+    UniqueV->subset(*M_solidDisp, M_solidDisp->getMap(), (UInt)0, offset);
+    *UniqueV*=1/(M_fsi->FSIOper()->solid().getRescaleFactor()*M_data->dataFluid()->dataTime()->getTimeStep());
 
     UniqueV.reset(new vector_Type(*M_fsi->FSIOper()->couplingVariableMap(), Unique, Zero));
     UniqueV->subset(*M_solidDisp, M_solidDisp->map(), (UInt)0, offset);
     *UniqueV*=1/(M_fsi->FSIOper()->solid().getRescaleFactor()*M_data->dataFluid()->dataTime()->timeStep());
+
     M_fsi->FSIOper()->solid().initialize(UniqueV);
     *initSol+=*UniqueV;
 
@@ -620,9 +623,10 @@ void Problem::initialize(std::string& /*loadInitSol*/,  GetPot const& data_file)
         *initSol+=*UniqueVFD;
     }
 
-    initSolSVel.reset(new vector_Type(*M_fsi->FSIOper()->couplingVariableMap(), Unique, Zero));
-    initSolSVel->subset(*M_solidVel,M_solidVel->map(), (UInt)0, offset);
-    *initSolSVel*=1/(M_fsi->FSIOper()->solid().getRescaleFactor()*M_data->dataSolid()->dataTime()->timeStep());
+    initSolSVel.reset(new vector_type(*M_fsi->FSIOper()->getCouplingVariableMap(), Unique, Zero));
+    initSolSVel->subset(*M_solidVel,M_solidVel->getMap(), (UInt)0, offset);
+    *initSolSVel*=1/(M_fsi->FSIOper()->solid().getRescaleFactor()*M_data->dataSolid()->getDataTime()->getTimeStep());
+
     M_fsi->FSIOper()->solid().initializeVel(*initSolSVel);
     M_fsi->initialize(initSol);
 }
