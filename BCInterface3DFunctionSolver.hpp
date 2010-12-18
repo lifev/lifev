@@ -163,7 +163,7 @@ protected:
     };
 
     boost::shared_ptr< PhysicalSolverType >    M_physicalSolver;
-    BCFlag                                     M_flag;
+    bcFlag_Type                                     M_flag;
     std::set< physicalSolverList >             M_list;
 
 private:

@@ -412,7 +412,7 @@ MultiscaleModel1D::solveLinearModel( bool& solveLinearSystem )
 // Get Methods (couplings)
 // ===================================================
 Real
-MultiscaleModel1D::boundaryStress( const BCFlag& flag, const stress_Type& stressType ) const
+MultiscaleModel1D::boundaryStress( const bcFlag_Type& flag, const stress_Type& stressType ) const
 {
     switch ( stressType )
     {
@@ -438,7 +438,7 @@ MultiscaleModel1D::boundaryStress( const BCFlag& flag, const stress_Type& stress
 #ifdef JACOBIAN_WITH_FINITEDIFFERENCE
 
 Real
-MultiscaleModel1D::boundaryDeltaFlowRate( const BCFlag& flag, bool& solveLinearSystem )
+MultiscaleModel1D::boundaryDeltaFlowRate( const bcFlag_Type& flag, bool& solveLinearSystem )
 {
     bcSide_Type bcSide = flagConverter( flag );
 
@@ -475,7 +475,7 @@ MultiscaleModel1D::boundaryDeltaFlowRate( const BCFlag& flag, bool& solveLinearS
 }
 
 Real
-MultiscaleModel1D::boundaryDeltaPressure( const BCFlag& flag, bool& solveLinearSystem )
+MultiscaleModel1D::boundaryDeltaPressure( const bcFlag_Type& flag, bool& solveLinearSystem )
 {
     bcSide_Type bcSide = flagConverter( flag );
 
@@ -524,13 +524,13 @@ MultiscaleModel1D::boundaryDeltaPressure( const BCFlag& flag, bool& solveLinearS
 #else
 
 Real
-MultiscaleModel1D::boundaryDeltaFlowRate( const BCFlag& flag, bool& /*solveLinearSystem*/ )
+MultiscaleModel1D::boundaryDeltaFlowRate( const bcFlag_Type& flag, bool& /*solveLinearSystem*/ )
 {
     return tangentProblem( flagConverter( flag ), OneDimensional::Q );
 }
 
 Real
-MultiscaleModel1D::boundaryDeltaPressure( const BCFlag& flag, bool& /*solveLinearSystem*/ )
+MultiscaleModel1D::boundaryDeltaPressure( const bcFlag_Type& flag, bool& /*solveLinearSystem*/ )
 {
     return tangentProblem( flagConverter( flag ), OneDimensional::P );
 }
@@ -538,14 +538,14 @@ MultiscaleModel1D::boundaryDeltaPressure( const BCFlag& flag, bool& /*solveLinea
 #endif
 
 Real
-MultiscaleModel1D::boundaryDeltaDynamicPressure( const BCFlag& flag, bool& solveLinearSystem )
+MultiscaleModel1D::boundaryDeltaDynamicPressure( const bcFlag_Type& flag, bool& solveLinearSystem )
 {
     // Untested
     return boundaryDensity( flag ) * boundaryDeltaFlowRate( flag, solveLinearSystem ) * boundaryFlowRate( flag ) / ( boundaryArea( flag ) * boundaryArea( flag ) );
 }
 
 Real
-MultiscaleModel1D::boundaryDeltaStress( const BCFlag& flag, bool& solveLinearSystem, const stress_Type& stressType )
+MultiscaleModel1D::boundaryDeltaStress( const bcFlag_Type& flag, bool& solveLinearSystem, const stress_Type& stressType )
 {
     switch ( stressType )
     {
@@ -736,7 +736,7 @@ MultiscaleModel1D::createLinearBC()
     M_bcPreviousTimeSteps.reserve( std::max( M_couplings[0]->timeInterpolationOrder(), M_couplings[1]->timeInterpolationOrder() ) );
 
     // Create bcSide map
-    std::map< bcSide_Type, std::map< bcTypeOneD_Type, Real > > bcSideMap;
+    std::map< bcSide_Type, std::map< bcType_Type, Real > > bcSideMap;
     M_bcPreviousTimeSteps.push_back( bcSideMap );
 
     // Create bcType map
@@ -868,7 +868,7 @@ MultiscaleModel1D::bcFunctionDelta( const Real& t )
 #else
 
 Real
-MultiscaleModel1D::tangentProblem( const bcSide_Type& bcOutputSide, const bcTypeOneD_Type& bcOutputType )
+MultiscaleModel1D::tangentProblem( const bcSide_Type& bcOutputSide, const bcType_Type& bcOutputType )
 {
 
 #ifdef HAVE_LIFEV_DEBUG

@@ -410,7 +410,7 @@ MultiscaleModelFluid3D::setSolution( const fluidVectorPtr_Type& solution )
 // Get Methods (couplings)
 // ===================================================
 Real
-MultiscaleModelFluid3D::boundaryStress( const BCFlag& flag, const stress_Type& stressType ) const
+MultiscaleModelFluid3D::boundaryStress( const bcFlag_Type& flag, const stress_Type& stressType ) const
 {
     switch ( stressType )
     {
@@ -438,7 +438,7 @@ MultiscaleModelFluid3D::boundaryStress( const BCFlag& flag, const stress_Type& s
 }
 
 Real
-MultiscaleModelFluid3D::boundaryDeltaFlowRate( const BCFlag& flag, bool& solveLinearSystem )
+MultiscaleModelFluid3D::boundaryDeltaFlowRate( const bcFlag_Type& flag, bool& solveLinearSystem )
 {
     solveLinearModel( solveLinearSystem );
 
@@ -446,7 +446,7 @@ MultiscaleModelFluid3D::boundaryDeltaFlowRate( const BCFlag& flag, bool& solveLi
 }
 
 Real
-MultiscaleModelFluid3D::boundaryDeltaPressure( const BCFlag& flag, bool& solveLinearSystem )
+MultiscaleModelFluid3D::boundaryDeltaPressure( const bcFlag_Type& flag, bool& solveLinearSystem )
 {
     solveLinearModel( solveLinearSystem );
 
@@ -454,13 +454,13 @@ MultiscaleModelFluid3D::boundaryDeltaPressure( const BCFlag& flag, bool& solveLi
 }
 
 Real
-MultiscaleModelFluid3D::boundaryDeltaDynamicPressure( const BCFlag& flag, bool& solveLinearSystem )
+MultiscaleModelFluid3D::boundaryDeltaDynamicPressure( const bcFlag_Type& flag, bool& solveLinearSystem )
 {
     return boundaryDensity( flag ) * boundaryDeltaFlowRate( flag, solveLinearSystem ) * boundaryFlowRate( flag ) / ( boundaryArea( flag ) * boundaryArea( flag ) );
 }
 
 Real
-MultiscaleModelFluid3D::boundaryDeltaLagrangeMultiplier( const BCFlag& flag, bool& solveLinearSystem )
+MultiscaleModelFluid3D::boundaryDeltaLagrangeMultiplier( const bcFlag_Type& flag, bool& solveLinearSystem )
 {
     solveLinearModel( solveLinearSystem );
 
@@ -468,7 +468,7 @@ MultiscaleModelFluid3D::boundaryDeltaLagrangeMultiplier( const BCFlag& flag, boo
 }
 
 Real
-MultiscaleModelFluid3D::boundaryDeltaStress( const BCFlag& flag, bool& solveLinearSystem, const stress_Type& stressType )
+MultiscaleModelFluid3D::boundaryDeltaStress( const bcFlag_Type& flag, bool& solveLinearSystem, const stress_Type& stressType )
 {
     switch ( stressType )
     {

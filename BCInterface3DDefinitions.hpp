@@ -76,9 +76,6 @@ enum baseList3D_Type
     BCI3DFunctionFSI
 };
 
-// Type definitions
-typedef EntityFlag        BCFlag;
-typedef std::vector< ID > BCComV;
 
 } // Namespace LifeV
 

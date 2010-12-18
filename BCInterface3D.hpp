@@ -191,7 +191,7 @@ public:
      * @param base base of the condition
      */
     template< class BCBaseType >
-    void addBC( const bcName_Type& name, const BCFlag& flag, const bcType_Type& type, const bcMode_Type& mode, BCBaseType& base );
+    void addBC( const bcName_Type& name, const bcFlag_Type& flag, const bcType_Type& type, const bcMode_Type& mode, BCBaseType& base );
 
     //! Add a Boundary Condition with component using the standard interface of the BCHandler
     /*!
@@ -203,7 +203,7 @@ public:
      * @param comp component of the condition
      */
     template< class BCBaseType, class BCCompType >
-    void addBC( const bcName_Type& name, const BCFlag& flag, const bcType_Type& type, const bcMode_Type& mode, BCBaseType& base, const BCCompType& comp );
+    void addBC( const bcName_Type& name, const bcFlag_Type& flag, const bcType_Type& type, const bcMode_Type& mode, BCBaseType& base, const BCCompType& comp );
 
     //@}
 
@@ -358,7 +358,7 @@ BCInterface3D< PhysicalSolverType >::updatePhysicalSolverVariables()
 
 template< class PhysicalSolverType > template< class BCBaseType >
 void
-BCInterface3D< PhysicalSolverType >::addBC( const bcName_Type& name, const BCFlag& flag, const bcType_Type& type, const bcMode_Type& mode, BCBaseType& base )
+BCInterface3D< PhysicalSolverType >::addBC( const bcName_Type& name, const bcFlag_Type& flag, const bcType_Type& type, const bcMode_Type& mode, BCBaseType& base )
 {
 
 #ifdef HAVE_LIFEV_DEBUG
@@ -370,7 +370,7 @@ BCInterface3D< PhysicalSolverType >::addBC( const bcName_Type& name, const BCFla
 
 template< class PhysicalSolverType > template< class BCBaseType, class BCCompType >
 void
-BCInterface3D< PhysicalSolverType >::addBC( const bcName_Type& name, const BCFlag& flag, const bcType_Type& type, const bcMode_Type& mode, BCBaseType& base, const BCCompType& comp )
+BCInterface3D< PhysicalSolverType >::addBC( const bcName_Type& name, const bcFlag_Type& flag, const bcType_Type& type, const bcMode_Type& mode, BCBaseType& base, const BCCompType& comp )
 {
 
 #ifdef HAVE_LIFEV_DEBUG

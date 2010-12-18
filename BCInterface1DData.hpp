@@ -133,7 +133,7 @@ public:
     /*!
      * @param quantity Boundary condition quantity
      */
-    void setQuantity( const bcTypeOneD_Type& quantity ) { M_quantity = quantity; }
+    void setQuantity( const bcType_Type& quantity ) { M_quantity = quantity; }
 
     //! Set the base string of the boundary condition
     /*!
@@ -160,7 +160,7 @@ public:
     const bcLine_Type& line() const { return M_line; }
 
     //! Get the quantity of the boundary condition
-    const bcTypeOneD_Type& quantity() const { return M_quantity; }
+    const bcType_Type& quantity() const { return M_quantity; }
 
     //! Get the base string of the boundary condition
     const std::string& baseString() const { return M_baseString; }
@@ -194,7 +194,7 @@ private:
 
     bcSide_Type                               M_side;
     bcLine_Type                               M_line;
-    bcTypeOneD_Type                                   M_quantity;
+    bcType_Type                                   M_quantity;
     std::string                               M_baseString;
     std::pair< std::string, bcBaseList_Type > M_base;
 
@@ -202,7 +202,7 @@ private:
 
     // Maps
     std::map< std::string, bcSide_Type >      M_mapSide;
-    std::map< std::string, bcTypeOneD_Type >          M_mapQuantity;
+    std::map< std::string, bcType_Type >          M_mapQuantity;
     std::map< std::string, bcLine_Type >      M_mapLine;
     std::map< std::string, bcBaseList_Type >  M_mapBase;
 };
