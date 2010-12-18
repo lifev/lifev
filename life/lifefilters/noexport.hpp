@@ -65,10 +65,10 @@ public:
 
     //! @name Public methods
     //@{
-    void postProcess(const Real& time) {}
-    UInt importFromTime( const Real& time ) { assert(false); return 0; }
-    void import(const Real& startTime, const Real& dt) {}
-    void import(const Real& startTime) {}
+    void postProcess(const Real& /*time*/) {}
+    UInt importFromTime( const Real& /*time*/ ) { assert(false); return 0; }
+    void import(const Real& /*startTime*/, const Real& /*dt*/) {}
+    void import(const Real& /*startTime*/) {}
     //@}
 
     //! @name Get methods
@@ -79,8 +79,8 @@ public:
 private:
     //! @name Private methods
     //@{
-    virtual void readScalar( ExporterData& dvar) {}
-    virtual void readVector( ExporterData& dvar) {}
+    virtual void readScalar( ExporterData& /*dvar*/) {}
+    virtual void readVector( ExporterData& /*dvar*/) {}
     //@}
 
 };
