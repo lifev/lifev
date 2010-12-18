@@ -208,7 +208,7 @@ int main(int argc, char** argv)
     chronoTotal.start();
     for ( ; oneDModel.data().dataTime()->canAdvance() ; oneDModel.data().dataTime()->updateTime(), ++count )
     {
-        std::cout << std::endl << "--------- Iteration " << count << " time = " << oneDModel.data().dataTime()->getTime() << std::endl;
+        std::cout << std::endl << "--------- Iteration " << count << " time = " << oneDModel.data().dataTime()->time() << std::endl;
 
         chronoIteration.start();
 
