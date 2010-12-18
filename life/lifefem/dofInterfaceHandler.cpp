@@ -115,7 +115,7 @@ void DofInterfaceHandler::initBCVectorInterface()
         ASSERT_PRE( M_neighborList[ iter ]->finalized(),
                     "The DofInterface3Dto2D should be updated before calling initBCVectorInterface." );
 
-        BCVectorInterface::dof_interface_type di = M_neighborList[ iter ];
+        BCVectorInterface::dofInterfacePtr_Type di = M_neighborList[ iter ];
         M_BCVectorList.push_back( BCVectorInterface( M_inputBCList[ iter ],
                                                      M_neighborList[ iter ]->nbInterfaceDof(), di ) );
     }

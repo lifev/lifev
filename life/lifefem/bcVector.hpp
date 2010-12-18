@@ -82,13 +82,13 @@ class BCVectorBase
 {
 public:
 
-	//! @name Public Types
-	//@{
+    //! @name Public Types
+    //@{
 
-	typedef EpetraVector vector_Type;
+    typedef EpetraVector vector_Type;
     typedef vector_Type const* vectorConstPtr_Type;
 
-	//@}
+    //@}
 
     //! @name Constructors and Detypedef BCVectorBase::vector_Type vector_Type;structor
     //@{
@@ -364,7 +364,6 @@ public:
     //! @name Public Types
     //@{
     //! super class
-    typedef BCVectorBase super; //deprecated
     typedef BCVectorBase bcVectorBase_Type;
     typedef BCVectorBase::vector_Type vector_Type;
     typedef BCVectorBase::vectorConstPtr_Type vectorConstPtr_Type;
@@ -463,9 +462,6 @@ public:
     //! @name Public Types
     //@{
 
-
-    typedef BCVectorBase super;  //deprecated
-    typedef boost::shared_ptr<DofInterfaceBase> dof_interface_type; //deprecated
 
     typedef BCVectorBase bcVectorBase_Type;
     typedef boost::shared_ptr<DofInterfaceBase> dofInterfacePtr_Type;

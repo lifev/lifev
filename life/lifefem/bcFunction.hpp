@@ -84,7 +84,6 @@ public:
     //! @name Public Types
     //@{
 
-    typedef boost::function<Real ( const Real&, const Real&, const Real&, const Real&, const ID& )> function_type; //deprecated
     typedef boost::function<Real ( const Real&, const Real&, const Real&, const Real&, const ID& )> function_Type;
 
     //@}
@@ -216,7 +215,6 @@ public:
     //! @name Public Types
     //@{
 
-    typedef BCFunctionBase::function_Type function_type; //deprecated
     typedef BCFunctionBase::function_Type function_Type;
 
     //@}
@@ -474,7 +472,6 @@ public:
     //! @name Public Types
     //@{
 
-    typedef BCFunctionUDepBase::function_Type function_type; //deprecated
     typedef BCFunctionUDepBase::function_Type function_Type;
 
     //@}
@@ -621,7 +618,6 @@ public:
     //! @name Public Types
     //@{
 
-    typedef BCFunctionBase::function_Type function_type; //deprecated
     typedef BCFunctionBase::function_Type function_Type;
 
     //@}

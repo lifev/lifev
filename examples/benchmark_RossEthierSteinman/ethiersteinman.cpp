@@ -636,7 +636,7 @@ Ethiersteinman::run()
             UInt totalPressDof = pFESpace.map().map(Unique)->NumGlobalElements();
 
             // If we change the FE we have to update the BCHandler (internal data)
-            bcH.bdUpdate( *meshPart.meshPartition(), uFESpace.feBd(), uFESpace.dof());
+            bcH.bcUpdate( *meshPart.meshPartition(), uFESpace.feBd(), uFESpace.dof());
 
             if (verbose) std::cout << "Total Velocity Dof = " << totalVelDof << std::endl;
             if (verbose) std::cout << "Total Pressure Dof = " << totalPressDof << std::endl;

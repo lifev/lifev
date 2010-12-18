@@ -73,9 +73,9 @@ BCBase::BCBase()
 {
 }
 
-BCBase::BCBase( const std::string& name, const entityFlag_Type& flag,
+BCBase::BCBase( const std::string& name, const bcFlag_Type& flag,
                 const bcType_Type& type, const bcMode_Type& mode,
-                BCFunctionBase& bcFunction, const std::vector<ID>& components )
+                BCFunctionBase& bcFunction, const bcComponentsVec_Type& components )
         :
         M_name( name ),
         M_flag( flag ),
@@ -97,7 +97,7 @@ BCBase::BCBase( const std::string& name, const entityFlag_Type& flag,
 }
 
 BCBase::BCBase( const bcName_Type& name,
-                const entityFlag_Type&  flag,
+                const bcFlag_Type&  flag,
                 const bcType_Type&      type,
                 const bcMode_Type&      mode,
                 BCFunctionBase&    bcFunction ):
@@ -155,7 +155,7 @@ BCBase::BCBase( const bcName_Type& name,
 }
 
 BCBase::BCBase( const bcName_Type& name,
-                const entityFlag_Type&  flag,
+                const bcFlag_Type&  flag,
                 const bcType_Type&      type,
                 const bcMode_Type&      mode,
                 BCFunctionBase&    bcFunction,
@@ -186,11 +186,11 @@ BCBase::BCBase( const bcName_Type& name,
 
 
 BCBase::BCBase( const bcName_Type& name,
-                const entityFlag_Type& flag,
+                const bcFlag_Type& flag,
                 const bcType_Type& type,
                 const bcMode_Type& mode,
                 BCVectorBase& bcVector,
-                const std::vector<ID>& components )
+                const bcComponentsVec_Type& components )
         :
         M_name( name ),
         M_flag( flag ),
@@ -212,7 +212,7 @@ BCBase::BCBase( const bcName_Type& name,
 }
 
 BCBase::BCBase( const bcName_Type& name,
-                const entityFlag_Type& flag,
+                const bcFlag_Type& flag,
                 const bcType_Type& type,
                 const bcMode_Type& mode,
                 BCVectorBase& bcVector )
@@ -263,7 +263,7 @@ BCBase::BCBase( const bcName_Type& name,
 
 
 BCBase::BCBase( const bcName_Type& name,
-                const entityFlag_Type& flag,
+                const bcFlag_Type& flag,
                 const bcType_Type& type,
                 const bcMode_Type& mode,
                 BCVectorBase& bcVector,
@@ -294,11 +294,11 @@ BCBase::BCBase( const bcName_Type& name,
 }
 
 BCBase::BCBase( const bcName_Type&     name,
-                const entityFlag_Type&      flag,
+                const bcFlag_Type&      flag,
                 const bcType_Type&          type,
                 const bcMode_Type&          mode,
                 BCFunctionUDepBase&    bcFunctionFEVectorDependent,
-                const std::vector<ID>& components ):
+                const bcComponentsVec_Type& components ):
         M_name( name ),
         M_flag( flag ),
         M_type( type ),
@@ -318,7 +318,7 @@ BCBase::BCBase( const bcName_Type&     name,
 }
 
 BCBase::BCBase( const bcName_Type&  name,
-                const entityFlag_Type&   flag,
+                const bcFlag_Type&   flag,
                 const bcType_Type&       type,
                 const bcMode_Type&       mode,
                 BCFunctionUDepBase& bcFunctionFEVectorDependent):
@@ -367,7 +367,7 @@ BCBase::BCBase( const bcName_Type&  name,
 }
 
 BCBase::BCBase( const bcName_Type&  name,
-                const entityFlag_Type&   flag,
+                const bcFlag_Type&   flag,
                 const bcType_Type&       type,
                 const bcMode_Type&       mode,
                 BCFunctionUDepBase& bcFunctionFEVectorDependent,
@@ -676,7 +676,7 @@ std::string BCBase::name() const
     return M_name;
 }
 
-entityFlag_Type BCBase::flag() const
+bcFlag_Type BCBase::flag() const
 {
     return M_flag;
 }

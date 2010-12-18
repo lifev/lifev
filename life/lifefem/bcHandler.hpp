@@ -171,11 +171,11 @@ public:
       @param components storing the list of components involved in this boundary condition
     */
     void addBC( const std::string& name,
-                const entityFlag_Type& flag,
+                const bcFlag_Type& flag,
                 const bcType_Type& type,
                 const bcMode_Type& mode,
                 BCFunctionBase& bcFunction,
-                const std::vector<ID>& components );
+                const bcComponentsVec_Type& components );
 
 
     //! Add new BC to the list for Scalar, Tangential or Normal mode problems (user defined function case)
@@ -187,7 +187,7 @@ public:
       @param bcFunction  The container holding the user defined function involved in this boundary condition
     */
     void addBC( const std::string& name,
-                const entityFlag_Type& flag,
+                const bcFlag_Type& flag,
                 const bcType_Type& type,
                 const bcMode_Type& mode,
                 BCFunctionBase& bcFunction );
@@ -203,7 +203,7 @@ public:
      @param numberOfComponents The number of components involved in this boundary condition
     */
     void addBC( const std::string& name,
-                const entityFlag_Type& flag,
+                const bcFlag_Type& flag,
                 const bcType_Type& type,
                 const bcMode_Type& mode,
                 BCFunctionBase& bcFunction,
@@ -220,11 +220,11 @@ public:
       @param components storing the list of components involved in this boundary condition
     */
     void addBC( const std::string& name,
-                const entityFlag_Type& flag,
+                const bcFlag_Type& flag,
                 const bcType_Type& type,
                 const bcMode_Type& mode,
                 BCVectorBase& bcVector,
-                const std::vector<ID>& components );
+                const bcComponentsVec_Type& components );
 
 
     //! Add new BC to the list for Scalar, Tangential or Normal  mode problems (data vector case)
@@ -236,7 +236,7 @@ public:
       @param bcVector The container holding the finite element vector involved in this boundary condition
      */
     void addBC( const std::string& name,
-                const entityFlag_Type& flag,
+                const bcFlag_Type& flag,
                 const bcType_Type& type,
                 const bcMode_Type& mode,
                 BCVectorBase& bcVector );
@@ -252,7 +252,7 @@ public:
       @param numberOfComponents The number of components involved in this boundary condition
     */
     void addBC( const std::string& name,
-                const entityFlag_Type& flag,
+                const bcFlag_Type& flag,
                 const bcType_Type& type,
                 const bcMode_Type& mode,
                 BCVectorBase& bcVector,
@@ -268,7 +268,7 @@ public:
       @param  bcFunctionFEVectorDependent  The container holding the user defined function, depending on a FE vector, involved in this boundary condition
     */
     void addBC( const std::string& name,
-                const entityFlag_Type& flag,
+                const bcFlag_Type& flag,
                 const bcType_Type& type,
                 const bcMode_Type& mode,
                 BCFunctionUDepBase&  bcFunctionFEVectorDependent );
@@ -301,21 +301,21 @@ public:
       @param aFlag The flag associated with the boundary condition to be modified
       @param bcFunction The container holding the user defined function which will replace the existing one
      */
-    void modifyBC( entityFlag_Type const& aFlag, BCFunctionBase const& bcFunction );
+    void modifyBC( bcFlag_Type const& aFlag, BCFunctionBase const& bcFunction );
 
     //! Modify the boundary condition associated with flag @c aFlag, assigning the FE vector in @c bcVector
     /*!
       @param aFlag The flag associated with the boundary condition to be modified
       @param bcVector The container holding the user FE vector which will replace the existing one
      */
-    void modifyBC( entityFlag_Type const& aFlag, BCVectorBase const& bcVector );
+    void modifyBC( bcFlag_Type const& aFlag, BCVectorBase const& bcVector );
 
     //! Modify the boundary condition associated with flag @c aFlag, assigning the function in @c  bcFunctionFEVectorDependent
     /*!
       @param aFlag The flag associated with the boundary condition to be modified
       @param  bcFunctionFEVectorDependent The container holding the user defined function, depending on an FE vector, which will replace the existing one
      */
-    void modifyBC( entityFlag_Type const& aFlag, BCFunctionUDepBase const&  bcFunctionFEVectorDependent );
+    void modifyBC( bcFlag_Type const& aFlag, BCFunctionUDepBase const&  bcFunctionFEVectorDependent );
 
 
     //! Update all the boundary conditions
@@ -383,7 +383,7 @@ public:
       @param aFlag The flag associated with the boundary condition
       @return constant Reference to the  boundary condition associated with flag aFlag
      */
-    BCBase& findBCWithFlag(const entityFlag_Type& aFlag);
+    BCBase& findBCWithFlag(const bcFlag_Type& aFlag);
 
 
     //! Extract a BC in the list according to its flag (non const)
@@ -391,7 +391,7 @@ public:
       @param aFlag The flag associated with the boundary condition
       @return constant Reference to the  boundary condition associated with flag aFlag
      */
-    const BCBase& findBCWithFlag(const entityFlag_Type& aFlag) const;
+    const BCBase& findBCWithFlag(const bcFlag_Type& aFlag) const;
 
     //! Get a vector list of BC with specific type. The list contains the bcName_Type of the BC.
     /*!
@@ -487,7 +487,7 @@ private:
 
        @return A pointer to @c BCBase
     */
-    BCBase* M_findBC( const entityFlag_Type& aFlag);
+    BCBase* M_findBC( const bcFlag_Type& aFlag);
 
     //! Sum the M_offset to boundary conditions offsets
     void M_sumOffsets();
@@ -502,7 +502,7 @@ private:
     UInt M_offset;
 
     //! set of markers which are in the mesh but not in the list
-    std::set<entityFlag_Type> M_notFoundMarkers;
+    std::set<bcFlag_Type> M_notFoundMarkers;
 
 };
 
@@ -524,8 +524,8 @@ BCHandler::bcUpdate( Mesh& mesh, CurrentBdFE& boundaryFE, const Dof& dof )
 
     UInt numBElements = mesh.numBElements();    // number of boundary elements
 
-    entityFlag_Type marker; //will store the marker of each geometric entity
-    entityFlag_Type elementMarker; //will store the marker of the element
+    bcFlag_Type marker; //will store the marker of each geometric entity
+    bcFlag_Type elementMarker; //will store the marker of the element
 
     typedef typename geoShape_Type::GeoBShape geoBShape_Type;
 
@@ -549,8 +549,8 @@ BCHandler::bcUpdate( Mesh& mesh, CurrentBdFE& boundaryFE, const Dof& dof )
     // BCbase Iterator
     bcBaseIterator_Type bcBaseIterator;
 
-    // Iterators which point to the beginning of Essential, EssentialEdges and EssentialVertices conditions
-    bcBaseIterator_Type beginEssential, beginEssVertices, beginEssEdges;
+    // Iterators which point to the beginning of EssentialEdges and EssentialVertices conditions
+    bcBaseIterator_Type beginEssVertices, beginEssEdges;
 
     ID iAdjacentElem; // index of Adjacent Element
 
@@ -564,7 +564,7 @@ BCHandler::bcUpdate( Mesh& mesh, CurrentBdFE& boundaryFE, const Dof& dof )
     Real x, y, z;
 
     //sets containing markers of boundary elements which have not been found in the boundary conditions' flags
-    std::set<entityFlag_Type> notFoundMarkers;
+    std::set<bcFlag_Type> notFoundMarkers;
 
     bool marker_found(false);
 
@@ -572,11 +572,7 @@ BCHandler::bcUpdate( Mesh& mesh, CurrentBdFE& boundaryFE, const Dof& dof )
     //(Notice that essential bc are positioned at the end of M_bcList, in the order
     // Essential, EssentialEdges, EssentialVertices)
 
-    beginEssential = M_bcList.begin();
-    while ((beginEssential != M_bcList.end())&&(beginEssential->type() < Essential))
-        beginEssential++;
-
-    beginEssEdges = beginEssential;
+    beginEssEdges = M_bcList.begin();
     while ((beginEssEdges != M_bcList.end())&&(beginEssEdges->type() < EssentialEdges))
         beginEssEdges++;
 
@@ -683,7 +679,7 @@ BCHandler::bcUpdate( Mesh& mesh, CurrentBdFE& boundaryFE, const Dof& dof )
                 if ( bcBaseIterator->dataVector() )
                 {
                     bcBaseIterator->addIdentifier( new IdentifierNatural( iBoundaryElement, localToGlobalMapOnBElem ) );
-               }
+                }
                 break;
             case Flux:
                 //providing Flux boundary conditions with global DOFs on element
@@ -808,7 +804,7 @@ BCHandler::bcUpdate( Mesh& mesh, CurrentBdFE& boundaryFE, const Dof& dof )
         "WARNING -- BCHandler::bcUpdate()\n" <<
         "  boundary degrees of freedom with the following markers\n" <<
         "  have no boundary condition set: ";
-        for ( std::set<EntityFlag>::iterator it = notFoundMarkers.begin();
+        for ( std::set<bcFlag_Type>::iterator it = notFoundMarkers.begin();
                 it != notFoundMarkers.end(); ++it )
         {
             Debug(5010) << *it << " ";
@@ -849,8 +845,8 @@ BCHandler::bcUpdateOldVersion( Mesh& mesh, CurrentBdFE& boundaryFE, const Dof& d
 
     UInt numBElements = mesh.numBElements();    // number of boundary elements
 
-    EntityFlag marker; //will store the marker of each geometric entity
-    EntityFlag elementMarker; //will store the marker of the element
+    bcFlag_Type marker; //will store the marker of each geometric entity
+    bcFlag_Type elementMarker; //will store the marker of the element
 
     typedef typename geoShape_Type::GeoBShape geoBShape_Type;
 
@@ -877,7 +873,7 @@ BCHandler::bcUpdateOldVersion( Mesh& mesh, CurrentBdFE& boundaryFE, const Dof& d
     ID lDof, gDof;
     Real x, y, z;
 
-    std::set<EntityFlag> notFoundMarkersCurrent;
+    std::set<bcFlag_Type> notFoundMarkersCurrent;
 
     // ===================================================
     // Loop on boundary faces
@@ -1214,9 +1210,9 @@ BCHandler::bcUpdateOldVersion( Mesh& mesh, CurrentBdFE& boundaryFE, const Dof& d
 
     }
 
-    std::set<EntityFlag> notFoundMarkersNew;
+    std::set<bcFlag_Type> notFoundMarkersNew;
 
-    for ( std::set<EntityFlag>::iterator it = notFoundMarkersCurrent.begin(); it != notFoundMarkersCurrent.end(); ++it )
+    for ( std::set<bcFlag_Type>::iterator it = notFoundMarkersCurrent.begin(); it != notFoundMarkersCurrent.end(); ++it )
     {
         if ( M_notFoundMarkers.find( *it ) == M_notFoundMarkers.end() )
         {
@@ -1233,7 +1229,7 @@ BCHandler::bcUpdateOldVersion( Mesh& mesh, CurrentBdFE& boundaryFE, const Dof& d
         "WARNING -- BCHandler::bcUpdate()\n" <<
         "  boundary degrees of freedom with the following markers\n" <<
         "  have no boundary condition set: ";
-        for ( std::set<EntityFlag>::iterator it = notFoundMarkersNew.begin();
+        for ( std::set<bcFlag_Type>::iterator it = notFoundMarkersNew.begin();
                 it != notFoundMarkersNew.end(); ++it )
         {
             Debug(5010) << *it << " ";

@@ -117,6 +117,10 @@ enum bcMode_Type
  */
 typedef std::string bcName_Type;
 
+typedef entityFlag_Type bcFlag_Type;
+
+typedef std::vector<ID> bcComponentsVec_Type;
+
 //! BCBase - Base class which holds the boundary condition information
 /*!
     @author M.A. Fernandez
@@ -175,11 +179,11 @@ public:
        @param components vector of IDs storing the list of components involved in this boundary condition
      */
     BCBase( const bcName_Type& name,
-            const entityFlag_Type& flag,
+            const bcFlag_Type& flag,
             const bcType_Type& type,
             const bcMode_Type& mode,
             BCFunctionBase& bcFunction,
-            const std::vector<ID>& components );
+            const bcComponentsVec_Type& components );
 
     //! Constructor for BCBase without specifying components for Scalar, Tangential or Normal mode problems
     /*!
@@ -192,7 +196,7 @@ public:
        involved in this boundary condition
      */
     BCBase( const bcName_Type& name,
-            const entityFlag_Type& flag,
+            const bcFlag_Type& flag,
             const bcType_Type& type,
             const bcMode_Type& mode,
             BCFunctionBase& bcFunction );
@@ -209,7 +213,7 @@ public:
        in this boundary condition
      */
     BCBase( const bcName_Type& name,
-            const entityFlag_Type& flag,
+            const bcFlag_Type& flag,
             const bcType_Type& type,
             const bcMode_Type& mode,
             BCFunctionBase& bcFunction,
@@ -227,11 +231,11 @@ public:
        @param components vector of IDs storing the list of components involved in this boundary condition
      */
     BCBase( const bcName_Type& name,
-            const entityFlag_Type& flag,
+            const bcFlag_Type& flag,
             const bcType_Type& type,
             const bcMode_Type& mode,
             BCVectorBase& vector,
-            const std::vector<ID>& components );
+            const bcComponentsVec_Type& components );
 
     //! Constructor for BCBase to prescribe a boundary condition from a vector of dof values  without specifying components for Scalar, Tangential or Normal mode problems
     /*!
@@ -244,7 +248,7 @@ public:
        @param bcVector the vector containing the dof values to be prescribed as boundary data
      */
     BCBase( const bcName_Type& name,
-            const entityFlag_Type& flag,
+            const bcFlag_Type& flag,
             const bcType_Type& type,
             const bcMode_Type& mode,
             BCVectorBase& bcVector );
@@ -261,7 +265,7 @@ public:
        @param numberOfComponents number of components involved in this boundary condition
      */
     BCBase( const bcName_Type& name,
-            const entityFlag_Type& flag,
+            const bcFlag_Type& flag,
             const bcType_Type& type,
             const bcMode_Type& mode,
             BCVectorBase& bcVector,
@@ -279,11 +283,11 @@ public:
        @param components vector of IDs storing the list of components involved in this boundary condition
      */
     BCBase( const bcName_Type& name,
-            const entityFlag_Type& flag,
+            const bcFlag_Type& flag,
             const bcType_Type& type,
             const bcMode_Type& mode,
             BCFunctionUDepBase& bcFunctionFEVectorDependent,
-            const std::vector<ID>& components );
+            const bcComponentsVec_Type& components );
 
     //! Constructor for BCBase without specifying components for Scalar, Tangential or Normal mode problems. The BC function depends on a generic FE vector (e.g. the solution at the previous time step)
     /*!
@@ -295,7 +299,7 @@ public:
        @param bcFunctionFEVectorDependent the BCFunctionUDepBase holding the function (depending on a generic finite element vector ) defining the boundary condition
      */
     BCBase( const bcName_Type& name,
-            const entityFlag_Type& flag,
+            const bcFlag_Type& flag,
             const bcType_Type& type,
             const bcMode_Type& mode,
             BCFunctionUDepBase& bcFunctionFEVectorDependent);
@@ -311,7 +315,7 @@ public:
        @param numberOfComponents number of components involved in this boundary condition
      */
     BCBase( const bcName_Type& name,
-            const entityFlag_Type& flag,
+            const bcFlag_Type& flag,
             const bcType_Type& type,
             const bcMode_Type& mode,
             BCFunctionUDepBase& bcFunctionFEVectorDependent,
@@ -489,10 +493,10 @@ public:
     /*!
        Check if the flag of bcBase is equal to flag argument
        @param bcBase BCBase to check
-       @param flag EntityFlag to be compared with bcBase flag
+       @param flag bcFlag_Type to be compared with bcBase flag
        @return True if bcBase's flag is equal to flag
      */
-    friend bool operator==( const BCBase& bcBase, const entityFlag_Type flag )
+    friend bool operator==( const BCBase& bcBase, const bcFlag_Type flag )
     {
         return bcBase.flag() == flag;
     }
@@ -541,7 +545,7 @@ public:
     /*!
        @return boundary condition flag
      */
-    entityFlag_Type flag() const;
+    bcFlag_Type flag() const;
 
     //! Returns the boundary condition type
     /*!
@@ -610,13 +614,13 @@ private:
 
     std::string                           M_name; 	//!< name of the boundary condition
 
-    entityFlag_Type                       M_flag;  //!< flag identifying a specific part of the mesh boundary
+    bcFlag_Type                       M_flag;  //!< flag identifying a specific part of the mesh boundary
 
     bcType_Type                                M_type;  //!< the boundary condition type
 
     bcMode_Type                                M_mode;  //!< the boundary condition mode of application
 
-    std::vector<ID>                       M_components;		//! the list of components involved in this BC
+    bcComponentsVec_Type                       M_components;		//! the list of components involved in this BC
 
     boost::shared_ptr<BCFunctionBase>     M_bcFunction;   //!< Pointer to a user defined BC function
 

@@ -563,7 +563,7 @@ bcManage( MatrixType& matrix,
     bool globalassemble=false;
 
 
-    BCNormalManager<MeshType, MatrixType> bcNormalManager;
+    BCNormalManager<MatrixType> bcNormalManager;
 
 
     // Loop on boundary conditions
@@ -677,8 +677,8 @@ bcManage( Real (*mu)(Real time,Real x, Real y, Real z, Real u),
 
             if (bcHandler[ i ].isUDep())
                 ERROR_MSG( "This BC mode is not yet implemented for this setting" );    //not implemented yet
-                else
-                    bcMixteManage( matrix, rhsRepeated, mesh, dof, bcHandler[ i ], currentBdFE, time, bcHandler.offset() );
+            else
+                bcMixteManage( matrix, rhsRepeated, mesh, dof, bcHandler[ i ], currentBdFE, time, bcHandler.offset() );
             break;
         default:
             ERROR_MSG( "This BC type is not yet implemented" );
@@ -1540,7 +1540,7 @@ bcMixteManage( MatrixType& matrix,
 
                             if (boundaryCond.isbetaVec())
                                 mbcb += boundaryCond.BetaVec( kdDof, boundaryCond.component( j ) )
-                                                                      * boundaryCond( kdDof, boundaryCond.component( j )) * currentBdFE.phi( int( n - 1 ), l );
+                                        * boundaryCond( kdDof, boundaryCond.component( j )) * currentBdFE.phi( int( n - 1 ), l );
                             else  mbcb += boundaryCond.betaCoef() * boundaryCond( kdDof, boundaryCond.component( j )) * currentBdFE.phi( int( n - 1 ), l );
                         }
 
@@ -2093,9 +2093,6 @@ bcResistanceManage( MatrixType& matrix,
                     const DataType& /*time*/,
                     UInt offset )
 {
-    if ( matrix.getMatrixPtr()->Filled() )
-        matrix.openCrsMatrix();
-
     // Number of local Dof in this face
     UInt nDofF = currentBdFE.nbNode();
 
@@ -2131,7 +2128,7 @@ bcResistanceManage( MatrixType& matrix,
             // Loop on total Dof per Face
             for ( ID idofF = 1; idofF <= nDofF; ++idofF )
             {
-            	resistanceDofs.insert( pId->localToGlobalMap( idofF ) );
+                resistanceDofs.insert( pId->localToGlobalMap( idofF ) );
 
                 // Loop on components involved in this boundary condition
                 for ( ID j = 1; j <= nComp; ++j )
