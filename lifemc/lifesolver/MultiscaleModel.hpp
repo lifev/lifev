@@ -221,13 +221,13 @@ public:
      * @param id id of the boundary flag
      * @return flag
      */
-    const BCFlag& flag( const UInt& id ) const { return M_flags[id]; }
+    const bcFlag_Type& flag( const UInt& id ) const { return M_flags[id]; }
 
     //! Get the flag vector of the model
     /*!
      * @return vector of flags available for coupling
      */
-    const std::vector< BCFlag >& flags() const { return M_flags; }
+    const std::vector< bcFlag_Type >& flags() const { return M_flags; }
 
     //! Get the name of the model
     /*!
@@ -272,7 +272,7 @@ protected:
 
     multiscaleCouplingsVector_Type       M_couplings;          // Container for the couplings
     std::string                          M_modelName;          // Name of the model
-    std::vector< BCFlag >                M_flags;              // Free flags, available for the couplings
+    std::vector< bcFlag_Type >                M_flags;              // Free flags, available for the couplings
 
     multiscaleDataPtr_Type               M_globalData;         // GlobalDataContainer
 

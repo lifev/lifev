@@ -177,49 +177,49 @@ public:
      * @param flag flag of the boundary face
      * @return density value
      */
-    Real boundaryDensity( const BCFlag& /*flag*/) const { return M_FSIoperator->dataFluid()->density(); }
+    Real boundaryDensity( const bcFlag_Type& /*flag*/) const { return M_FSIoperator->dataFluid()->density(); }
 
     //! Get the viscosity on a specific boundary face of the model
     /*!
      * @param flag flag of the boundary face
      * @return viscosity value
      */
-    Real boundaryViscosity( const BCFlag& /*flag*/) const { return M_FSIoperator->dataFluid()->viscosity(); }
+    Real boundaryViscosity( const bcFlag_Type& /*flag*/) const { return M_FSIoperator->dataFluid()->viscosity(); }
 
     //! Get the area on a specific boundary face of the model
     /*!
      * @param flag flag of the boundary face
      * @return area value
      */
-    Real boundaryArea( const BCFlag& flag ) const { return M_FSIoperator->fluid().area( flag ); }
+    Real boundaryArea( const bcFlag_Type& flag ) const { return M_FSIoperator->fluid().area( flag ); }
 
     //! Get the flow rate on a specific boundary face of the model
     /*!
      * @param flag flag of the boundary face
      * @return flow rate value
      */
-    Real boundaryFlowRate( const BCFlag& flag ) const { return M_FSIoperator->fluid().flux( flag, *M_FSIoperator->solutionPtr() ); }
+    Real boundaryFlowRate( const bcFlag_Type& flag ) const { return M_FSIoperator->fluid().flux( flag, *M_FSIoperator->solutionPtr() ); }
 
     //! Get the integral of the pressure (on a specific boundary face)
     /*!
      * @param flag flag of the boundary face
      * @return pressure value
      */
-    Real boundaryPressure( const BCFlag& flag ) const { return M_FSIoperator->fluid().pressure( flag, *M_FSIoperator->solutionPtr() ); }
+    Real boundaryPressure( const bcFlag_Type& flag ) const { return M_FSIoperator->fluid().pressure( flag, *M_FSIoperator->solutionPtr() ); }
 
     //! Get the integral of the dynamic pressure (on a specific boundary face)
     /*!
      * @param flag flag of the boundary face
      * @return dynamic pressure value
      */
-    Real boundaryDynamicPressure( const BCFlag& flag ) const { return 0.5 * boundaryDensity( flag ) * ( boundaryFlowRate( flag ) * boundaryFlowRate( flag ) ) / ( boundaryArea( flag ) * boundaryArea( flag ) ); }
+    Real boundaryDynamicPressure( const bcFlag_Type& flag ) const { return 0.5 * boundaryDensity( flag ) * ( boundaryFlowRate( flag ) * boundaryFlowRate( flag ) ) / ( boundaryArea( flag ) * boundaryArea( flag ) ); }
 
     //! Get the value of the Lagrange multiplier associated to a specific boundary face
     /*!
      * @param flag flag of the boundary face
      * @return Lagrange multiplier value
      */
-    Real boundaryLagrangeMultiplier( const BCFlag& flag ) const { return M_FSIoperator->fluid().LagrangeMultiplier(flag, *M_fluidBC->handler(), M_FSIoperator->getSolution() ); }
+    Real boundaryLagrangeMultiplier( const bcFlag_Type& flag ) const { return M_FSIoperator->fluid().LagrangeMultiplier(flag, *M_fluidBC->handler(), M_FSIoperator->getSolution() ); }
 
     //! Get the integral of the normal stress (on a specific boundary face)
     /*!
@@ -227,7 +227,7 @@ public:
      * @param stressType Type of approximation for the stress
      * @return stress value
      */
-    Real boundaryStress( const BCFlag& flag, const stress_Type& stressType = StaticPressure ) const;
+    Real boundaryStress( const bcFlag_Type& flag, const stress_Type& stressType = StaticPressure ) const;
 
     //! Get the variation of the flow rate (on a specific boundary face) using the linear model
     /*!
@@ -235,7 +235,7 @@ public:
      * @param solveLinearSystem a flag to which determine if the linear system has to be solved
      * @return variation of the flow rate
      */
-    Real boundaryDeltaFlowRate( const BCFlag& flag, bool& solveLinearSystem );
+    Real boundaryDeltaFlowRate( const bcFlag_Type& flag, bool& solveLinearSystem );
 
     //! Get the variation of the pressure (on a specific boundary face) using the linear model
     /*!
@@ -243,7 +243,7 @@ public:
      * @param solveLinearSystem a flag to which determine if the linear system has to be solved
      * @return variation of the pressure
      */
-    Real boundaryDeltaPressure( const BCFlag& flag, bool& solveLinearSystem );
+    Real boundaryDeltaPressure( const bcFlag_Type& flag, bool& solveLinearSystem );
 
     //! Get the variation of the total pressure (on a specific boundary face) using the linear model
     /*!
@@ -251,7 +251,7 @@ public:
      * @param solveLinearSystem a flag to which determine if the linear system has to be solved
      * @return variation of the dynamic pressure
      */
-    Real boundaryDeltaDynamicPressure( const BCFlag& flag, bool& solveLinearSystem );
+    Real boundaryDeltaDynamicPressure( const bcFlag_Type& flag, bool& solveLinearSystem );
 
     //! Get the variation of the Lagrange multiplier associated to a specific boundary face, using the linear model
     /*!
@@ -259,7 +259,7 @@ public:
      * @param solveLinearSystem a flag to which determine if the linear system has to be solved
      * @return Lagrange multiplier value
      */
-    Real boundaryDeltaLagrangeMultiplier( const BCFlag& flag, bool& solveLinearSystem );
+    Real boundaryDeltaLagrangeMultiplier( const bcFlag_Type& flag, bool& solveLinearSystem );
 
     //! Get the variation of the integral of the normal stress (on a specific boundary face)
     /*!
@@ -268,7 +268,7 @@ public:
      * @param stressType Type of approximation for the stress
      * @return variation of the stress
      */
-    Real boundaryDeltaStress( const BCFlag& flag, bool& solveLinearSystem, const stress_Type& stressType = StaticPressure );
+    Real boundaryDeltaStress( const bcFlag_Type& flag, bool& solveLinearSystem, const stress_Type& stressType = StaticPressure );
 
     //@}
 

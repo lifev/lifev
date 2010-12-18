@@ -180,7 +180,7 @@ public:
     /*!
      * @param flag flag of the model
      */
-    void addFlag( const BCFlag& flag ) { M_flags.push_back( flag ); }
+    void addFlag( const bcFlag_Type& flag ) { M_flags.push_back( flag ); }
 
     //! Add a flag of one of the models to couple
     /*!
@@ -249,7 +249,7 @@ public:
      * @param LocalID local ID of the model
      * @return Coupling flag of the model
      */
-    const BCFlag& flag( const UInt& localID ) const { return M_flags[localID]; }
+    const bcFlag_Type& flag( const UInt& localID ) const { return M_flags[localID]; }
 
     //! Get the number of the coupling variables
     /*!
@@ -360,7 +360,7 @@ protected:
 
     multiscaleModelsVector_Type          M_models;
     std::string                          M_couplingName;
-    std::vector< BCFlag >                M_flags;
+    std::vector< bcFlag_Type >                M_flags;
 
     multiscaleDataPtr_Type               M_globalData;
 

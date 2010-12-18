@@ -200,42 +200,42 @@ public:
      * @param flag flag of the boundary face
      * @return density value
      */
-    Real boundaryDensity( const BCFlag& /*flag*/) const { return M_data->densityRho(); }
+    Real boundaryDensity( const bcFlag_Type& /*flag*/) const { return M_data->densityRho(); }
 
     //! Get the viscosity on a specific boundary face of the model
     /*!
      * @param flag flag of the boundary face
      * @return viscosity value
      */
-    Real boundaryViscosity( const BCFlag& /*flag*/) const { return M_data->viscosity(); }
+    Real boundaryViscosity( const bcFlag_Type& /*flag*/) const { return M_data->viscosity(); }
 
     //! Get the area on a specific boundary face of the model
     /*!
      * @param flag flag of the boundary face
      * @return area value
      */
-    Real boundaryArea( const BCFlag& flag ) const { return M_solver->boundaryValue( *M_solution, OneDimensional::A, flagConverter( flag ) ); }
+    Real boundaryArea( const bcFlag_Type& flag ) const { return M_solver->boundaryValue( *M_solution, OneDimensional::A, flagConverter( flag ) ); }
 
     //! Get the flux on a specific boundary face of the model
     /*!
      * @param flag flag of the boundary face
      * @return flux value
      */
-    Real boundaryFlowRate( const BCFlag& flag ) const { return M_solver->boundaryValue( *M_solution, OneDimensional::Q, flagConverter( flag ) ); }
+    Real boundaryFlowRate( const bcFlag_Type& flag ) const { return M_solver->boundaryValue( *M_solution, OneDimensional::Q, flagConverter( flag ) ); }
 
     //! Get the integral of the pressure (on a specific boundary face)
     /*!
      * @param flag flag of the boundary face
      * @return pressure value
      */
-    Real boundaryPressure( const BCFlag& flag ) const { return M_solver->boundaryValue( *M_solution, OneDimensional::P, flagConverter( flag ) ); }
+    Real boundaryPressure( const bcFlag_Type& flag ) const { return M_solver->boundaryValue( *M_solution, OneDimensional::P, flagConverter( flag ) ); }
 
     //! Get the integral of the dynamic pressure (on a specific boundary face)
     /*!
      * @param flag flag of the boundary face
      * @return dynamic pressure value
      */
-    Real boundaryDynamicPressure( const BCFlag& flag ) const { return 0.5 * boundaryDensity( flag ) * std::pow( boundaryFlowRate( flag ) / boundaryArea( flag ), 2 ); }
+    Real boundaryDynamicPressure( const bcFlag_Type& flag ) const { return 0.5 * boundaryDensity( flag ) * std::pow( boundaryFlowRate( flag ) / boundaryArea( flag ), 2 ); }
 
     //! Get the integral of the normal stress (on a specific boundary face)
     /*!
@@ -243,7 +243,7 @@ public:
      * @param stressType Type of approximation for the stress
      * @return stress value
      */
-    Real boundaryStress( const BCFlag& flag, const stress_Type& stressType = StaticPressure ) const;
+    Real boundaryStress( const bcFlag_Type& flag, const stress_Type& stressType = StaticPressure ) const;
 
     //! Get the variation of the flow rate (on a specific boundary face) using the linear model
     /*!
@@ -251,7 +251,7 @@ public:
      * @param solveLinearSystem a flag to which determine if the linear system has to be solved
      * @return variation of the flow rate
      */
-    Real boundaryDeltaFlowRate( const BCFlag& flag, bool& solveLinearSystem );
+    Real boundaryDeltaFlowRate( const bcFlag_Type& flag, bool& solveLinearSystem );
 
     //! Get the variation of the pressure (on a specific boundary face) using the linear model
     /*!
@@ -259,7 +259,7 @@ public:
      * @param solveLinearSystem a flag to which determine if the linear system has to be solved
      * @return variation of the pressure
      */
-    Real boundaryDeltaPressure( const BCFlag& flag, bool& solveLinearSystem );
+    Real boundaryDeltaPressure( const bcFlag_Type& flag, bool& solveLinearSystem );
 
     //! Get the variation of the total pressure (on a specific boundary face) using the linear model
     /*!
@@ -267,7 +267,7 @@ public:
      * @param solveLinearSystem a flag to which determine if the linear system has to be solved
      * @return variation of the dynamic pressure
      */
-    Real boundaryDeltaDynamicPressure( const BCFlag& flag, bool& solveLinearSystem );
+    Real boundaryDeltaDynamicPressure( const bcFlag_Type& flag, bool& solveLinearSystem );
 
     //! Get the variation of the integral of the normal stress (on a specific boundary face)
     /*!
@@ -276,7 +276,7 @@ public:
      * @param stressType Type of approximation for the stress
      * @return variation of the stress
      */
-    Real boundaryDeltaStress( const BCFlag& flag, bool& solveLinearSystem, const stress_Type& stressType = StaticPressure );
+    Real boundaryDeltaStress( const bcFlag_Type& flag, bool& solveLinearSystem, const stress_Type& stressType = StaticPressure );
 
     //@}
 
@@ -386,7 +386,7 @@ private:
      */
     void solve( bc_Type& bc, solution_Type& solution, const std::string& solverType = " 1D-" );
 
-    bcSide_Type flagConverter( const BCFlag& flag ) const { return (flag == 0) ? OneDimensional::left : OneDimensional::right; }
+    bcSide_Type flagConverter( const bcFlag_Type& flag ) const { return (flag == 0) ? OneDimensional::left : OneDimensional::right; }
 
 #ifdef JACOBIAN_WITH_FINITEDIFFERENCE
 
@@ -413,7 +413,7 @@ private:
      * @param bcOutputType type of the quantity to be computed.
      * @return Jacobian coefficient.
      */
-    Real tangentProblem( const bcSide_Type& bcOutputSide, const bcTypeOneD_Type& bcOutputType );
+    Real tangentProblem( const bcSide_Type& bcOutputSide, const bcType_Type& bcOutputType );
 
 #endif
     //@}
