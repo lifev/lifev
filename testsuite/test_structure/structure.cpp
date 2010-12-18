@@ -228,6 +228,7 @@ Structure::run3d()
     //
     // Temporal data and initial conditions
     //
+
     Real dt = dataStructure->getDataTime()->getTimeStep();
     Real T  = dataStructure->getDataTime()->getEndTime();
 
@@ -297,7 +298,11 @@ Structure::run3d()
         if (verbose)
         {
             std::cout << std::endl;
+<<<<<<< HEAD:testsuite/test_structure/structure.cpp
             std::cout << "S- Now we are at time " << dataStructure->getDataTime()->getTime() << " s." << std::endl;
+=======
+            std::cout << "S- Now we are at time " << dataStructure->dataTime()->time() << " s." << std::endl;
+>>>>>>> Cleaning week: updating list of file and classes to be renamed/moved/removed.:testsuite/test_structure/structure.cpp
         }
 
         //solid.updateSystem(dZero);    // Computes the rigth hand side
