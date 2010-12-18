@@ -212,7 +212,7 @@ int main(int argc, char** argv)
     boost::shared_ptr<LifeV::DataNavierStokes> dataNavierStokes(new LifeV::DataNavierStokes());
     dataNavierStokes->setup( dataFile );
 
-    if (verbose) std::cout << "Time discretization order " << dataNavierStokes->dataTime()->getBDF_order() << std::endl;
+    if (verbose) std::cout << "Time discretization order " << dataNavierStokes->dataTime()->orderBDF() << std::endl;
 
     // The problem (matrix and rhs) is packed in an object called fluid
     LifeV::Oseen< LifeV::RegionMesh3D<LifeV::LinearTetra> > fluid (dataNavierStokes,
@@ -236,15 +236,16 @@ int main(int argc, char** argv)
     // |       Initialization of the simulation        |
     // +-----------------------------------------------+
     if (verbose) std::cout<< std::endl << "[Initialization of the simulation]" << std::endl;
-    LifeV::Real dt     = dataNavierStokes->dataTime()->getTimeStep();
-    LifeV::Real t0     = dataNavierStokes->dataTime()->getInitialTime();
-    LifeV::Real tFinal = dataNavierStokes->dataTime()->getEndTime ();
+    LifeV::Real dt     = dataNavierStokes->dataTime()->timeStep();
+    LifeV::Real t0     = dataNavierStokes->dataTime()->initialTime();
+    LifeV::Real tFinal = dataNavierStokes->dataTime()->endTime ();
 
     // bdf object to store the previous solutions
-    LifeV::BdfTNS<vector_type> bdf(dataNavierStokes->dataTime()->getBDF_order());
+    LifeV::BdfTNS<vector_type> bdf;
+    bdf.setup(dataNavierStokes->dataTime()->orderBDF());
 
     // Initialization with exact solution: either interpolation or "L2-NS"-projection
-    t0 -= dt * bdf.bdf_u().order();
+    t0 -= dt * bdf.bdfVelocity().order();
 
     vector_type beta( fullMap );
     vector_type rhs ( fullMap );
@@ -258,16 +259,16 @@ int main(int argc, char** argv)
     rhs  *= 0.;
     fluid.updateSystem(0.0,beta,rhs);
     fluid.iterate(bcH);
-    bdf.bdf_u().initialize_unk( *fluid.solution() );
+    bdf.bdfVelocity().setInitialCondition( *fluid.solution() );
 
     LifeV::Real time = t0 + dt;
-    for (  ; time <=  dataNavierStokes->dataTime()->getInitialTime() + dt/2.; time += dt)
+    for (  ; time <=  dataNavierStokes->dataTime()->initialTime() + dt/2.; time += dt)
     {
         dataNavierStokes->dataTime()->setTime(time);
 
         fluid.updateSystem(0.0,beta,rhs);
         fluid.iterate(bcH);
-        bdf.bdf_u().shift_right( *fluid.solution() );
+        bdf.bdfVelocity().shiftRight( *fluid.solution() );
     }
 
     // We erase the preconditioner build for Stokes
@@ -308,15 +309,15 @@ int main(int argc, char** argv)
 
         dataNavierStokes->dataTime()->setTime(time);
 
-        if (verbose) std::cout << "[t = "<< dataNavierStokes->dataTime()->getTime() << " s.]" << std::endl;
+        if (verbose) std::cout << "[t = "<< dataNavierStokes->dataTime()->time() << " s.]" << std::endl;
 
         iterChrono.start();
 
-        double alpha = bdf.bdf_u().coeff_der( 0 ) / dataNavierStokes->dataTime()->getTimeStep();
+        double alpha = bdf.bdfVelocity().coefficientFirstDerivative( 0 ) / dataNavierStokes->dataTime()->timeStep();
 
-        beta = bdf.bdf_u().extrap(); // Extrapolation for the convective term
-
-        rhs  = fluid.matrixMass()*bdf.bdf_u().time_der( dataNavierStokes->dataTime()->getTimeStep() );
+        beta = bdf.bdfVelocity().extrapolation(); // Extrapolation for the convective term
+	bdf.bdfVelocity().updateRHSContribution(dataNavierStokes->dataTime()->timeStep() );
+        rhs  = fluid.matrixMass()*bdf.bdfVelocity().rhsContributionFirstDerivative();
 
         fluid.getDisplayer().leaderPrint("alpha ", alpha);
         fluid.getDisplayer().leaderPrint("\n");
@@ -328,7 +329,7 @@ int main(int argc, char** argv)
         fluid.updateSystem( alpha, beta, rhs );
         fluid.iterate( bcH );
 
-        bdf.bdf_u().shift_right( *fluid.solution() );
+        bdf.bdfVelocity().shiftRight( *fluid.solution() );
 
         // Computation of the error
         vector_type vel  (uFESpace.map(), LifeV::Repeated);
