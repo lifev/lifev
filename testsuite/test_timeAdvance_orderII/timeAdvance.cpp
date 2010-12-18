@@ -277,12 +277,12 @@ problem::run()
 
     //! initialization of parameters of time Advance method:
     if (TimeAdvanceMethod =="Newmark")
-        timeAdvance->setup( dataProblem->dataTime()->getNewmark_parameters() , OrderDev);
+        timeAdvance->setup( dataProblem->dataTime()->coefficientsNewmark() , OrderDev);
 
     if (TimeAdvanceMethod =="BDF")
-        timeAdvance->setup(dataProblem->dataTime()->getBDF_order() , OrderDev);
+        timeAdvance->setup(dataProblem->dataTime()->orderBDF() , OrderDev);
 
-    timeAdvance->setDeltaT(dataProblem->dataTime()->getTimeStep());
+    timeAdvance->setTimeStep(dataProblem->dataTime()->timeStep());
     timeAdvance->showMe();
 
 
@@ -290,7 +290,7 @@ problem::run()
 
     chrono.start();
 
-    double xi = timeAdvance->coeff_derOrder2( 0 ) / ( dataProblem->dataTime()->getTimeStep()*dataProblem->dataTime()->getTimeStep());
+    double xi = timeAdvance->coefficientSecondDerivative( 0 ) / ( dataProblem->dataTime()->timeStep()*dataProblem->dataTime()->timeStep());
 
     problem.buildSystem(xi);
 
@@ -304,8 +304,7 @@ problem::run()
 
     // computing the rhs
     vector_type rhs ( uMap, Unique );
-    vector_type rhsV ( uMap, Unique );
-    vector_type rhsW( uMap, Unique );
+   
 
     // postProcess
     boost::shared_ptr< Exporter<RegionMesh3D<LinearTetra> > > exporter;
@@ -353,8 +352,8 @@ problem::run()
 
     std::vector<vector_type> uv0;
 
-  Real dt = dataProblem->dataTime()->getTimeStep();
-    Real T  = dataProblem->dataTime()->getEndTime();
+  Real dt = dataProblem->dataTime()->timeStep();
+    Real T  = dataProblem->dataTime()->endTime();
 
     if (TimeAdvanceMethod =="Newmark")
     {
@@ -364,7 +363,7 @@ problem::run()
     }
     if (TimeAdvanceMethod =="BDF")
     {
-        for ( int previousPass=0; previousPass < dataProblem->getBDF_order() ; previousPass++)
+        for ( int previousPass=0; previousPass < dataProblem->orderBDF() ; previousPass++)
         {
             Real previousTimeStep = -previousPass*dt;
             feSpace->interpolate(uexact, *U, previousTimeStep );
@@ -372,12 +371,11 @@ problem::run()
         }
     }
 
-    timeAdvance->initialize_unk(uv0);
+    timeAdvance->setInitialCondition(uv0);
 
-    timeAdvance-> setDeltaT(dataProblem->dataTime()->getTimeStep());
+    timeAdvance-> setTimeStep(dataProblem->dataTime()->timeStep());
 
-    timeAdvance->time_der();
-    timeAdvance->time_derOrder2();
+    timeAdvance->updateRHSContribution(dataProblem->dataTime()->timeStep());
 
     vector_type uComputed(uMap, Repeated );
     vector_type uExa(uMap, Repeated );
@@ -388,9 +386,9 @@ problem::run()
     feSpace->interpolate(v0,     *vExact , 0);
     feSpace->interpolate(a0,     *wExact , 0);
 
-    *U = timeAdvance->unk(0);
-    *V = timeAdvance->vnk();
-    *W = timeAdvance->wnk();
+    *U = timeAdvance->solution();
+    *V = timeAdvance->velocity();
+    *W = timeAdvance->accelerate();
 
 
     exporter->postProcess( 0 );
@@ -405,19 +403,17 @@ problem::run()
         if (verbose)
         {
             std::cout << std::endl;
-            std::cout << " P - Now we are at time " << dataProblem->dataTime()->getTime() << " s." << std::endl;
+            std::cout << " P - Now we are at time " << dataProblem->dataTime()->time() << " s." << std::endl;
         }
 
          rhs *=0;
-        rhsW *=0;
-        rhsV *=0;
 
-        rhsW = timeAdvance->time_derOrder2(dt);
-        rhsV = timeAdvance->time_der(dt);
-        //evaluate rhs
+	timeAdvance->updateRHSContribution( dt );
+   
+       //evaluate rhs
 
         feSpace->l2ScalarProduct(source_in, rhs, time);
-        rhs += problem.matrMass() *rhsW;
+        rhs += problem.matrMass() *timeAdvance->rhsContributionSecondDerivative();
 
         //update system
         problem.updateRHS(rhs );
@@ -426,16 +422,16 @@ problem::run()
         problem.iterate( bcH );    // Computes the matrices and solves the system
 
         //update unknowns of timeAdvance
-        timeAdvance->shift_right(*problem.solution());
+        timeAdvance->shiftRight(*problem.solution());
 
         //evaluate uexact solution
         feSpace->interpolate(uexact, *Exact , time);
         feSpace->interpolate(v0, *vExact , time);
         feSpace->interpolate(a0, *wExact , time);
 
-        *U =  timeAdvance->unk(0);
-        *V = timeAdvance->vnk();
-        *W = timeAdvance->wnk();
+        *U =  timeAdvance->solution();
+        *V = timeAdvance->velocity();
+        *W = timeAdvance->accelerate();
 
         //postProcess
         exporter->postProcess( time );
