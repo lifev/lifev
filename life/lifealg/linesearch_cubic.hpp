@@ -49,6 +49,7 @@
 
 namespace LifeV
 {
+//! Implementation of Line Search method with cubic interpolation
 /*!
 
     @author
@@ -193,14 +194,6 @@ Int LineSearchCubic( Fct& f, VectorType& residual, VectorType& sol, VectorType& 
     if (verbose)
         std::cout << "Parabolic line search: final residual = " << normRes << std::endl;
     return EXIT_SUCCESS;
-}
-
-
-template <class Fct, class VectorType>
-Int __attribute__ ((__deprecated__)) lineSearch_cubic( Fct& f, VectorType& residual, VectorType& sol, VectorType& step,
-                      Real& normRes, Real& lambda, Real slope, UInt iter, bool const verbose = true )
-{
-    return  LineSearchCubic(  f, residual, sol, step, normRes, lambda, slope, iter, verbose );
 }
 
 } // Namespace LifeV

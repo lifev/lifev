@@ -244,14 +244,6 @@ Real BrentAlgorithm( const Function& f, const Real& leftExtremeBase, const Real&
 
 }
 
-template <class Function>
-Real __attribute__ ((__deprecated__)) brent( const Function& f, const Real& leftExtremeBase, const Real& rightExtremeBase, const Real& toll, const UInt& maxIter )
-{
-
-    // you should replace any call to brent with a call to BrentAlgorithm
-    return  BrentAlgorithm( f, leftExtremeBase, rightExtremeBase, toll, maxIter );
-}
-
 } // Namespace LifeV
 
 #endif /* _BRENTALGORITHM_ */

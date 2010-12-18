@@ -204,10 +204,10 @@ Int nonLinRichardson( EpetraVector& sol,
 //                normRes = residual.NormInf();
             break;
         case 1:
-            status = lineSearch_parab( functional, residual, sol, step, normRes, lambda, iter, verbose );
+            status = LineSearchParabolic( functional, residual, sol, step, normRes, lambda, iter, verbose );
             break;
         case 2:  // recommended
-            status = lineSearch_cubic( functional, residual, sol, step, normRes, lambda, slope, iter, verbose );
+            status = LineSearchCubic( functional, residual, sol, step, normRes, lambda, slope, iter, verbose );
             break;
         default:
             std::cout << "Unknown linesearch \n";
