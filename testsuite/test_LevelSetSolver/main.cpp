@@ -173,9 +173,9 @@ main( int argc, char** argv )
     exporter.addVariable( ExporterData::Scalar, "level-set", solutionPtr, UInt(0), uFESpace->dof().numTotalDof() );
     exporter.postProcess(0);
 
-    Real current_time( data_level_set->dataTime()->getInitialTime() );
-    Real dt( data_level_set->dataTime()->getTimeStep() );
-    Real final_time( data_level_set->dataTime()->getEndTime() );
+    Real current_time( data_level_set->dataTime()->initialTime() );
+    Real dt( data_level_set->dataTime()->timeStep() );
+    Real final_time( data_level_set->dataTime()->endTime() );
 
     while ( current_time < final_time)
     {
