@@ -420,7 +420,7 @@ Cylinder::run()
     HDF5Input.closeFile();
 
     if (verbose) std::cout << std::endl;
-    if (verbose) std::cout << "Time discretization order " << dataNavierStokes->dataTime()->getBDF_order() << std::endl;
+    if (verbose) std::cout << "Time discretization order " << dataNavierStokes->dataTime()->orderBDF() << std::endl;
 
     std::string uOrder =  dataFile( "fluid/space_discretization/vel_order", "P1");
     if (verbose)
@@ -469,14 +469,15 @@ Cylinder::run()
 
     // Initialization
 
-    Real dt     = dataNavierStokes->dataTime()->getTimeStep();
-    Real t0     = dataNavierStokes->dataTime()->getInitialTime();
-    Real tFinal = dataNavierStokes->dataTime()->getEndTime();
+    Real dt     = dataNavierStokes->dataTime()->timeStep();
+    Real t0     = dataNavierStokes->dataTime()->initialTime();
+    Real tFinal = dataNavierStokes->dataTime()->endTime();
 
 
     // bdf object to store the previous solutions
 
-    BdfTNS<vector_type> bdf(dataNavierStokes->dataTime()->getBDF_order());
+    BdfTNS<vector_type> bdf;
+    bdf.setup(dataNavierStokes->dataTime()->orderBDF());
 
     vector_type beta( fullMap );
     vector_type rhs ( fullMap );
@@ -520,7 +521,7 @@ Cylinder::run()
         fluid.resetPreconditioner();
     }
 
-    bdf.bdf_u().initialize_unk( *fluid.solution() );
+    bdf.bdfVelocity().setInitialCondition( *fluid.solution() );
 
     // Temporal loop
 
@@ -535,22 +536,22 @@ Cylinder::run()
         if (verbose)
         {
             std::cout << std::endl;
-            std::cout << "We are now at time "<< dataNavierStokes->dataTime()->getTime() << " s. " << std::endl;
+            std::cout << "We are now at time "<< dataNavierStokes->dataTime()->time() << " s. " << std::endl;
             std::cout << std::endl;
         }
 
         chrono.start();
 
-        double alpha = bdf.bdf_u().coeff_der( 0 ) / dataNavierStokes->dataTime()->getTimeStep();
+        double alpha = bdf.bdfVelocity().coefficientFirstDerivative( 0 ) / dataNavierStokes->dataTime()->timeStep();
 
-        beta = bdf.bdf_u().extrap();
-
-        rhs  = fluid.matrixMass()*bdf.bdf_u().time_der( dataNavierStokes->dataTime()->getTimeStep() );
+        beta = bdf.bdfVelocity().extrapolation();
+        bdf.bdfVelocity().updateRHSContribution( dataNavierStokes->dataTime()->timeStep());
+        rhs  = fluid.matrMass()*bdf.bdfVelocity().rhsContributionFirstDerivative();
 
         fluid.updateSystem( alpha, beta, rhs );
         fluid.iterate( bcH );
 
-        bdf.bdf_u().shift_right( *fluid.solution() );
+        bdf.bdfVelocity().shiftRight( *fluid.solution() );
 
 //         if (((iter % save == 0) || (iter == 1 )))
 //         {
