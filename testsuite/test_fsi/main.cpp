@@ -300,21 +300,21 @@ public:
 
             if ( M_fsi->isFluid() )
             {
-                M_exporterFluid->import(M_Tstart, M_data->dataFluid()->dataTime()->getTimeStep());
+                M_exporterFluid->import(M_Tstart, M_data->dataFluid()->dataTime()->timeStep());
                 M_fsi->FSIOper()->initializeFluid( *M_velAndPressure, *M_fluidDisp );
             }
             if ( M_fsi->isSolid() )
             {
-                M_exporterSolid->import(M_Tstart, M_data->dataSolid()->getDataTime()->getTimeStep());
-                M_fsi->FSIOper()->initializeSolid( M_solidDisp, M_solidVel );
+               M_exporterSolid->import(M_Tstart, M_data->dataSolid()->getDataTime()->timeStep());
+               M_fsi->FSIOper()->initializeSolid( M_solidDisp, M_solidVel );
             }
         }
         else
         {
             M_fsi->initialize();
         }
-        M_data->dataFluid()->dataTime()->setInitialTime( M_Tstart + M_data->dataFluid()->dataTime()->getTimeStep() );
-        M_data->dataFluid()->dataTime()->setTime( M_data->dataFluid()->dataTime()->getInitialTime() );
+        M_data->dataFluid()->dataTime()->setInitialTime( M_Tstart + M_data->dataFluid()->dataTime()->timeStep() );
+        M_data->dataFluid()->dataTime()->setTime( M_data->dataFluid()->dataTime()->initialTime() );
         //std::cout << "in problem" << std::endl;
         //M_fsi->FSIOper()->fluid().postProcess();
     }
@@ -356,7 +356,7 @@ public:
             if ( M_fsi->isFluid() )
             {
                 if ( isFluidLeader )
-                    ofile << M_data->dataFluid()->dataTime()->getTime() << " ";
+                    ofile << M_data->dataFluid()->dataTime()->time() << " ";
 
                 flux = M_fsi->FSIOper()->fluid().flux(2);
                 if ( isFluidLeader )
@@ -376,14 +376,20 @@ public:
 
                 *M_velAndPressure = *M_fsi->FSIOper()->fluid().solution();
                 *M_fluidDisp      = M_fsi->FSIOper()->meshMotion().disp();
-                M_exporterFluid->postProcess( M_data->dataFluid()->dataTime()->getTime() );
+                M_exporterFluid->postProcess( M_data->dataFluid()->dataTime()->time() );
             }
 
             if ( M_fsi->isSolid() )
             {
+<<<<<<< HEAD:testsuite/test_fsi/main.cpp
                 *M_solidDisp = M_fsi->FSIOper()->solid().getDisplacement();
                 *M_solidVel = M_fsi->FSIOper()->solid().getVelocity();
                 M_exporterSolid->postProcess( M_data->dataFluid()->dataTime()->getTime() );
+=======
+                *M_solidDisp = M_fsi->FSIOper()->solid().disp();
+                *M_solidVel = M_fsi->FSIOper()->solid().vel();
+                M_exporterSolid->postProcess( M_data->dataFluid()->dataTime()->time() );
+>>>>>>> Cleaning week: updating list of file and classes to be renamed/moved/removed.:testsuite/test_fsi/main.cpp
             }
 
             std::cout << "[fsi_run] Iteration " << _i << " was done in : " << _timer.elapsed() << "\n";
@@ -392,7 +398,7 @@ public:
                       << M_fsi->displacement().norm2() << "\n";
 
             // CHECKING THE RESULTS OF THE TEST AT EVERY TIMESTEP
-            checkResult( M_data->dataFluid()->dataTime()->getTime() );
+            checkResult( M_data->dataFluid()->dataTime()->time() );
         }
         std::cout << "Total computation time = " << _overall_timer.elapsed() << "s" << "\n";
         ofile.close();
@@ -402,7 +408,7 @@ private:
 
     void checkResult(const LifeV::Real& time)
     {
-        assert(M_data->dataFluid()->dataTime()->getTimeStep()==0.001);
+        assert(M_data->dataFluid()->dataTime()->timeStep()==0.001);
         double dispNorm(M_fsi->displacement().norm2());
 
         const LifeV::Real relTol(5e-3);
