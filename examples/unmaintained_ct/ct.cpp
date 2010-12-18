@@ -160,9 +160,9 @@ CT::run()
     MPI_Barrier(MPI_COMM_WORLD);
 
     // Initialization
-    Real dt     = dataNavierStokes.dataTime()->getTimeStep();
-    Real t0     = dataNavierStokes.dataTime()->getInitialTime();
-    Real tFinal = dataNavierStokes.dataTime()->getEndTime();
+    Real dt     = dataNavierStokes.dataTime()->timeStep();
+    Real t0     = dataNavierStokes.dataTime()->initialTime();
+    Real tFinal = dataNavierStokes.dataTime()->endTime();
 
 
     // initialization with stokes solution
@@ -208,7 +208,7 @@ CT::run()
         if (verbose)
         {
             std::cout << std::endl;
-            std::cout << "l-  We are now at time "<< dataNavierStokes.dataTime()->getTime() << " s. " << std::endl;
+            std::cout << "l-  We are now at time "<< dataNavierStokes.dataTime()->time() << " s. " << std::endl;
             std::cout << std::endl;
         }
 

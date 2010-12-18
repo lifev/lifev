@@ -623,7 +623,7 @@ void ChorinTemam<Mesh, SolverType>::buildSystem_u_p()
         if ( !M_steady )
         {
             chronoMass.start();
-            mass( M_data.density()/M_data.dataTime()->getTimeStep(), M_elmatMass, M_uFESpace.fe(), 0, 0, nDimensions );
+            mass( M_data.density()/M_data.dataTime()->timeStep(), M_elmatMass, M_uFESpace.fe(), 0, 0, nDimensions );
             chronoMass.stop();
         }
 
@@ -733,11 +733,11 @@ initialize( const vector_type& u0, const vector_type& p0 )
 
     if (M_verbose)
         std::cout << "  f-  Initializing velocity bdf object ..." << std::endl;
-    M_bdf_u.initialize_unk(M_sol_u);
+    M_bdf_u.setInitialCondition(M_sol_u);
 
     if (M_verbose)
         std::cout << "  f-  Initializing projector field bdf object ..." << std::endl;
-    M_bdf_p_phi.initialize_unk(M_sol_p_phi);
+    M_bdf_p_phi.setInitialCondition(M_sol_p_phi);
 
     if (M_verbose)
     {
@@ -747,7 +747,7 @@ initialize( const vector_type& u0, const vector_type& p0 )
             std::cout << "  f-  Standard Chorin-Temam projection ..." << std::endl;
     }
     if (M_pBdfOrder > 0)
-        M_bdf_p.initialize_unk(M_sol_p);
+        M_bdf_p.setInitialCondition(M_sol_p);
 
 }
 
@@ -755,7 +755,7 @@ template<typename Mesh, typename SolverType>
 void ChorinTemam<Mesh, SolverType>::updateSystem_u(vector_type& betaVec)
 {
 
-    Real alpha = M_bdf_u.coeff_der(0) / M_data.dataTime()->getTimeStep();
+    Real alpha = M_bdf_u.coefficientFirstDerivative(0) / M_data.dataTime()->timeStep();
 
     if (M_recomputeMatrix)
         buildSystem_u_p();
@@ -862,7 +862,7 @@ void ChorinTemam<Mesh, SolverType>::updateSystem_u(vector_type& betaVec)
             std::cout << "  f-  Adding SD stabilization (implicit) terms" << std::endl;
             // We must multiply betaVecRep by density before this step
             betaVecRep *= M_data.density();
-            M_sdStab->applyCT(M_data.dataTime()->getTimeStep(), *M_matrNoBC_u, betaVecRep);
+            M_sdStab->applyCT(M_data.dataTime()->timeStep(), *M_matrNoBC_u, betaVecRep);
         }
         else if (M_stabType == IP_STAB_EXPL)
         {
@@ -970,7 +970,7 @@ template<typename Mesh, typename SolverType>
 void ChorinTemam<Mesh, SolverType>::computeCTRHS_p(vector_type& u_sol)
 {
     Chrono chronoCTrhs;
-    Real bdf_coeff = M_bdf_u.coeff_der(0);
+    Real bdf_coeff = M_bdf_u.coefficientFirstDerivative(0);
 
     UInt velTotalDof   = M_uFESpace.dof().numTotalDof();
 
@@ -1011,7 +1011,7 @@ void ChorinTemam<Mesh, SolverType>::computeCTRHS_p(vector_type& u_sol)
         // get local -\rho/dt ( div \tilde u^{n+1} | q ) rhs term
         // (wrt pressure system)
 
-        source_divuq( - bdf_coeff * M_data.density() / M_data.dataTime()->getTimeStep(), M_elvec_u,
+        source_divuq( - bdf_coeff * M_data.density() / M_data.dataTime()->timeStep(), M_elvec_u,
                       M_elemrhs_p, M_uFESpace.fe(), M_pFESpace.fe() );
         assembleVector ( _rhsNoBC_p, M_elemrhs_p, M_pFESpace.fe(),
                          M_pFESpace.dof(),0);
@@ -1243,7 +1243,7 @@ void ChorinTemam<Mesh, SolverType>::applyRES_expl(vector_type& vector)
     int nRes = M_resFlag.size();
     vector_type _u_extrap( M_localMap_u );
     _u_extrap *= 0.;
-    _u_extrap = M_bdf_u.extrap();
+    _u_extrap = M_bdf_u.extrapolation();
 
     for (int iRes=0; iRes < nRes; ++iRes)
     {
@@ -1272,7 +1272,7 @@ void ChorinTemam<Mesh, SolverType>::iterate_u( bchandler_raw_type& bch_u)
     // little bs as usual w/ epetra things
     vector_type _u_extrap( M_localMap_u );
     _u_extrap *= 0.;
-    _u_extrap = M_bdf_u.extrap();
+    _u_extrap = M_bdf_u.extrapolation();
     updateSystem_u( _u_extrap );
 
     // set resistance boundary conditions if any
@@ -1344,7 +1344,7 @@ void ChorinTemam<Mesh, SolverType>::iterate_u( bchandler_raw_type& bch_u)
     computeCTRHS_p(M_sol_u);
 
     // update velocity bdf components
-    M_bdf_u.shift_right(M_sol_u);
+    M_bdf_u.shiftRight(M_sol_u);
 
 } // iterate_u()
 
@@ -1406,12 +1406,12 @@ void ChorinTemam<Mesh, SolverType>::iterate_p(bchandler_raw_type& bch_p )
     M_sol_p *= 0;
     M_sol_p += M_sol_p_phi;
     if (M_pBdfOrder > 0)
-        M_sol_p += M_bdf_p.extrap();
+        M_sol_p += M_bdf_p.extrapolation();
 
     // update pressure and projector bdf
-    M_bdf_p_phi.shift_right(M_sol_p_phi);
+    M_bdf_p_phi.shiftRight(M_sol_p_phi);
     if (M_pBdfOrder > 0)
-        M_bdf_p.shift_right(M_sol_p);
+        M_bdf_p.shiftRight(M_sol_p);
 
 } // iterate_p()
 
@@ -1419,7 +1419,7 @@ template<typename Mesh, typename SolverType>
 void ChorinTemam<Mesh, SolverType>::time_advance(Real const& time)
 {
 
-    Real dt = M_data.dataTime()->getTimeStep();
+    Real dt = M_data.dataTime()->timeStep();
 
     // what to do at first time step
     if (M_firstTimeStep)
@@ -1437,9 +1437,9 @@ void ChorinTemam<Mesh, SolverType>::time_advance(Real const& time)
     vector_type _p_corr( M_localMap_p );
     _p_corr *= 0.;
     if (M_pBdfOrder > 0)
-        _p_corr = M_bdf_p.extrap();
+        _p_corr = M_bdf_p.extrapolation();
     _p_corr += M_bdf_p_phi.time_der(1);
-    _p_corr *= 1./M_bdf_p_phi.coeff_der(0);
+    _p_corr *= 1./M_bdf_p_phi.coefficientFirstDerivative(0);
 
     // compute Chorin-Temam coupling term
     computeCTRHS_u(_p_corr);
@@ -1448,7 +1448,7 @@ void ChorinTemam<Mesh, SolverType>::time_advance(Real const& time)
     if (M_verbose)
         std::cout << "  f-  Adding velocity mass term on rhs ..." << std::endl;
 
-    // note: this is 1 and not M_data.getTimeStep() as M_matrMass already contains
+    // note: this is 1 and not M_data.timeStep() as M_matrMass already contains
     // the timestep term to avoid recomputation (constant matrix)
     M_rhsNoBC_u += *M_matrMass * M_bdf_u.time_der( 1 );
 
@@ -1704,7 +1704,7 @@ void ChorinTemam<Mesh, SolverType>::applyBC_u( matrix_type&        matrix_u,
     vector_type rhsFull_u (rhs_u, Repeated, Zero);
 
     bcManage( matrix_u, rhsFull_u, *M_uFESpace.mesh(), M_uFESpace.dof(),
-              BCh_u, M_uFESpace.feBd(), 1., M_data.dataTime()->getTime() );
+              BCh_u, M_uFESpace.feBd(), 1., M_data.dataTime()->time() );
 
     rhs_u = rhsFull_u;
 
@@ -1730,7 +1730,7 @@ void ChorinTemam<Mesh, SolverType>::applyBC_p( matrix_type&	   matrix_p,
     vector_type rhsFull_p (rhs_p, Repeated, Zero);
 
     bcManage( matrix_p, rhsFull_p, *M_pFESpace.mesh(), M_pFESpace.dof(),
-              BCh_p, M_pFESpace.feBd(), 1., M_data.dataTime()->getTime() );
+              BCh_p, M_pFESpace.feBd(), 1., M_data.dataTime()->time() );
 
     rhs_p = rhsFull_p;
 
