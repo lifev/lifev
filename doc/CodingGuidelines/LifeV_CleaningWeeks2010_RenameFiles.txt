@@ -31,7 +31,6 @@ identifier      from LIFEMESH    to LIFEFEM                                    E
 mesh_util       from LIFEFILTERS to LIFEMESH                                   CMCS3
 selectMarker    from LIFEFILTERS to LIFEMESH                                   MOX
 stiffnessFibers from LIFEFEM     to LIFESOLVER                                 CMCS1
-postProc        from LIFEFEM     to LIFEMESH                                   EMORY
 
 ============================
 LIFEV FILES TO BE RENAMED
@@ -85,16 +84,15 @@ VectorSimple                           SimpleVect                              C
 
 LIFEMESH
 ============================
-BareGeometries                         bareItems                               EMORY
 ElementShapes                          basisElSh                               EMORY
 InternalEntitySelector                 selectMarker                            MOX
 Markers                                markers_base                            EMORY
 MarkersDefinitions                     markers                                 EMORY
-MeshBoundaryAttributes                 postProc                                EMORY
 MeshChecks                             mesh_util                               CMCS3
 MeshData                               dataMesh                                EMORY
-MeshElementBase                        geoND                                   EMORY
-MeshElement                            geoElement                              EMORY
+MeshElementBare                        bareItems                               EMORY
+MeshElement                            geoND                                   EMORY
+MeshElementMarked                      geoElement                              EMORY
 MeshEntity                             meshEntity                              EMORY
 MeshUtility                            mesh_util_base                          EMORY
 MeshVertex                             geo0D                                   EMORY
@@ -142,6 +140,7 @@ DOFLocalPattern                        localDofPattern                         C
 FESpace                                -                                       CMCS2     DONE
 GeometricMap                           geoMap                                  CMCS2
 HyperbolicFluxNumerical                NumericalFluxes                         MOX
+PostProcessingBoundary                 postProc                                EMORY
 QuadraturePoint                        quadPoint                               CMCS2
 QuadratureRule                         quadRule                                CMCS2
 ReferenceElement                       refEle                                  CMCS2
