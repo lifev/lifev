@@ -664,7 +664,7 @@ setPrimalZeroIteration ( const Function& primalZeroIteration )
     // Interpolate the primal variable for the first iteration.
     this->M_primal_FESpace.interpolate( M_primalZeroIteration,
                                         *(this->M_primal),
-                                        this->M_data.dataTime()->getInitialTime() );
+                                        this->M_data.dataTime()->initialTime() );
 
 } // SetZeroIterationPrimal
 

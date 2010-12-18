@@ -187,7 +187,7 @@ DataNavierStokes::setup( const GetPot& dataFile, const std::string& section )
 
     // Miscellaneous
     M_verbose      = dataFile( ( section + "/miscellaneous/verbose" ).data(), 1 );
-    M_dumpInit    = dataFile( ( section + "/miscellaneous/dump_init" ).data(), M_time->getInitialTime() );
+    M_dumpInit    = dataFile( ( section + "/miscellaneous/dump_init" ).data(), M_time->initialTime() );
     M_dumpPeriod  = dataFile( ( section + "/miscellaneous/dump_period" ).data(), 1 );
     M_factor       = dataFile( ( section + "/miscellaneous/factor" ).data(), 0. );
     M_stokes       = dataFile( ( section + "/miscellaneous/Stokes" ).data(), false );

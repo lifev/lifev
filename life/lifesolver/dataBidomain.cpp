@@ -203,7 +203,7 @@ void
 DataBidomain::showMe( std::ostream& output )
 {
     output << "\n*** Values for data [fluid/physics]\n\n";
-    output << "endtime   = " << getEndTime() << std::endl;
+    output << "endtime   = " << endTime() << std::endl;
     output << "\n*** Values for data [fluid/miscellaneous]\n\n";
     output << "verbose   = " << M_verbose << std::endl;
 }
