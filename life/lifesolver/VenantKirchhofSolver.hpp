@@ -432,7 +432,7 @@ public:
   const Real& getRho()       const { return M_data->getRho(); }
 
   //@}
-    /*
+
   //Deprecated Interfaces
 
   //! Get the density //Deprecated
@@ -455,7 +455,7 @@ public:
     are applied and the matrices are assembled.
   */ //Deprecated
 
-    /*  const UInt& __attribute__ ((__deprecated__)) offset() const
+    const UInt& __attribute__ ((__deprecated__)) offset() const
   { return getOffset(); }
 
   //! Get the rescaleFactor //Deprecated
@@ -493,7 +493,6 @@ public:
   //! Get the FESpace object //Deprecated
   FESpace<Mesh, EpetraMap>& __attribute__ ((__deprecated__ )) dFESpace()
   {return getDFESpace();}
-    */
 
 protected:
 

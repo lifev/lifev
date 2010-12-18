@@ -236,7 +236,6 @@ public:
 
 
     //List of Deprecated Methods
-#if 0 // disabling deprecated methods
     //! Get whether to use or not exact Jacobian //Deprecated
     /*!
      * @return true: if using exact Jacobian, false: otherwise
@@ -325,7 +324,6 @@ public:
      */
     TimePtr_Type __attribute__ ((__deprecated__)) dataTime() const
     {return getDataTime();}
-#endif
 
 private:
 
