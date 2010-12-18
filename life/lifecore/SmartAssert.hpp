@@ -121,7 +121,9 @@ public:
 
     const vals_array & get_vals_array() const __attribute__ ((deprecated)) { return M_vals; }
 
-    int get_level() const __attribute__ ((deprecated)) { return M_level; }
+    int get_level() const __attribute__ ((deprecated)) { return level(); }
+
+    const int& level() const  { return M_level; }
 
     const std::string & get_level_msg() const __attribute__ ((deprecated)) { return M_msg; }
     //@}
@@ -340,7 +342,7 @@ private:
     void handleAssert()
     {
         logger()( M_context);
-        get_handler( M_context.get_level() )( M_context);
+        get_handler( M_context.level() )( M_context);
     }
 
     /*
