@@ -764,7 +764,7 @@ darcy::run()
         *primalExporter = *( darcySolver->primalSolution() );
 
         // Save the initial primal solution into the exporter
-        exporter->postProcess( dataDarcy.dataTime()->getInitialTime() );
+        exporter->postProcess( dataDarcy.dataTime()->initialTime() );
 
         // A loop for the simulation, it starts from \Delta t and end in N \Delta t = T
         while ( !dataDarcy.dataTime()->isLastTimeStep() )
@@ -801,7 +801,7 @@ darcy::run()
             *dualExporter = *dualInterpolated;
 
             // Save the solution into the exporter
-            exporter->postProcess( dataDarcy.dataTime()->getTime() );
+            exporter->postProcess( dataDarcy.dataTime()->time() );
 
         }
 
@@ -817,7 +817,7 @@ darcy::run()
         *primalExporter = *( darcySolver->primalSolution() );
 
         // Save the initial primal solution into the exporter
-        exporter->postProcess( dataDarcy.dataTime()->getInitialTime() );
+        exporter->postProcess( dataDarcy.dataTime()->initialTime() );
 
         // A loop for the simulation, it starts from \Delta t and end in N \Delta t = T
         while ( !dataDarcy.dataTime()->isLastTimeStep() )
@@ -850,7 +850,7 @@ darcy::run()
             *dualExporter = *dualInterpolated;
 
             // Save the solution into the exporter
-            exporter->postProcess( dataDarcy.dataTime()->getTime() );
+            exporter->postProcess( dataDarcy.dataTime()->time() );
 
         }
 
@@ -888,7 +888,7 @@ darcy::run()
 
     // Compute the L2 norm for the analytical primal
     exactPrimalL2Norm = p_FESpace.l2NormFunction( Members->getAnalyticalSolution(),
-                                                  dataDarcy.dataTime()->getEndTime() );
+                                                  dataDarcy.dataTime()->endTime() );
 
     // Display the L2 norm for the analytical primal
     darcySolver->getDisplayer().leaderPrint( " L2 norm of primal exact:              ",
@@ -898,7 +898,7 @@ darcy::run()
     primalL2Error = p_FESpace.l2ErrorWeighted( Members->getAnalyticalSolution(),
                                                *( darcySolver->primalSolution() ),
                                                Members->getUOne(),
-                                               dataDarcy.dataTime()->getEndTime() );
+                                               dataDarcy.dataTime()->endTime() );
 
     // Display the L2 error for the primal solution
     darcySolver->getDisplayer().leaderPrint( " L2 error of primal unknown:           ",
@@ -923,7 +923,7 @@ darcy::run()
 
     // Compute the L2 norm for the analytical dual
     exactDualL2Norm = uInterpolate_FESpace.l2NormFunction( Members->getAnalyticalFlux(),
-                                                           dataDarcy.dataTime()->getEndTime() );
+                                                           dataDarcy.dataTime()->endTime() );
 
     // Display the L2 norm for the analytical dual
     darcySolver->getDisplayer().leaderPrint( " L2 norm of dual exact:                ",
@@ -932,7 +932,7 @@ darcy::run()
     // Compute the L2 error for the dual solution
     dualL2Error = uInterpolate_FESpace.l2Error( Members->getAnalyticalFlux(),
                                                 *dualInterpolated,
-                                                dataDarcy.dataTime()->getEndTime(),
+                                                dataDarcy.dataTime()->endTime(),
                                                 NULL );
 
     // Display the L2 error for the dual solution
