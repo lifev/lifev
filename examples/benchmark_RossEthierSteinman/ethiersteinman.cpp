@@ -215,7 +215,7 @@ Ethiersteinman::check()
     std::string pOrder =  dataFile( "fluid/space_discretization/press_order", "P1");
 
     if (verbose) std::cout << std::endl;
-    if (verbose) std::cout << "Time discretization order " << dataNavierStokes->dataTime()->getBDF_order() << std::endl;
+    if (verbose) std::cout << "Time discretization order " << dataNavierStokes->dataTime()->orderBDF() << std::endl;
 
     //dataNavierStokes->dataMesh()->setMesh(meshPart.mesh());
 
@@ -264,17 +264,18 @@ Ethiersteinman::check()
 
     // Initialization
 
-    Real dt     = dataNavierStokes->dataTime()->getTimeStep();
-    Real t0     = dataNavierStokes->dataTime()->getInitialTime();
-    Real tFinal = dataNavierStokes->dataTime()->getEndTime ();
+    Real dt     = dataNavierStokes->dataTime()->timeStep();
+    Real t0     = dataNavierStokes->dataTime()->initialTime();
+    Real tFinal = dataNavierStokes->dataTime()->endTime ();
 
 
     // bdf object to store the previous solutions
 
-    BdfTNS<vector_type> bdf(dataNavierStokes->dataTime()->getBDF_order());
+    BdfTNS<vector_type> bdf;
+    bdf.setup(dataNavierStokes->dataTime()->orderBDF());
 
     // initialization with exact solution: either interpolation or "L2-NS"-projection
-    t0 -= dt * bdf.bdf_u().order();
+    t0 -= dt * bdf.bdfVelocity().order();
 
     if (verbose) std::cout << std::endl;
     if (verbose) std::cout << "Computing the initial solution ... " << std::endl << std::endl;
@@ -287,7 +288,7 @@ Ethiersteinman::check()
     dataNavierStokes->dataTime()->setTime(t0);
     fluid.initialize( Problem::uexact, Problem::pexact );
 
-    bdf.bdf_u().initialize_unk( *fluid.solution() );
+    bdf.bdfVelocity().setInitialCondition( *fluid.solution() );
 
     std::string const proj =  dataFile( "fluid/space_discretization/initialization", "proj");
     bool const L2proj( !proj.compare("proj") );
@@ -295,7 +296,7 @@ Ethiersteinman::check()
 
 
     Real time = t0 + dt;
-    for (  ; time <=  dataNavierStokes->dataTime()->getInitialTime() + dt/2.; time += dt)
+    for (  ; time <=  dataNavierStokes->dataTime()->initialTime() + dt/2.; time += dt)
     {
 
         dataNavierStokes->dataTime()->setTime(time);
@@ -326,7 +327,7 @@ Ethiersteinman::check()
         }
 
 
-        bdf.bdf_u().shift_right( *fluid.solution() );
+        bdf.bdfVelocity().shiftRight( *fluid.solution() );
 
     }
 
@@ -391,19 +392,20 @@ Ethiersteinman::check()
         if (verbose)
         {
             std::cout << std::endl;
-            std::cout << "We are now at time "<< dataNavierStokes->dataTime()->getTime() << " s. " << std::endl;
+            std::cout << "We are now at time "<< dataNavierStokes->dataTime()->time() << " s. " << std::endl;
             std::cout << std::endl;
         }
 
         chrono.start();
 
-        double alpha = bdf.bdf_u().coeff_der( 0 ) / dataNavierStokes->dataTime()->getTimeStep();
+        double alpha = bdf.bdfVelocity().coefficientFirstDerivative( 0 ) / dataNavierStokes->dataTime()->timeStep();
 
-        beta = bdf.bdf_u().extrap();
+        beta = bdf.bdfVelocity().extrapolation();
+        bdf.bdfVelocity().updateRHSContribution( dataNavierStokes->dataTime()->timeStep());
+        rhs  = fluid.matrMass()*bdf.bdfVelocity().rhsContributionFirstDerivative();
 
-        rhs  = fluid.matrixMass()*bdf.bdf_u().time_der( dataNavierStokes->dataTime()->getTimeStep() );
         // rhs *= alpha;
-        // rhs  = bdf.bdf_u().time_der( dataNavierStokes->getTimeStep() );
+        // rhs  = bdf.bdfVelocity().time_der( dataNavierStokes->timeStep() );
 
         fluid.getDisplayer().leaderPrint("alpha ", alpha);
         fluid.getDisplayer().leaderPrint("\n");
@@ -415,7 +417,7 @@ Ethiersteinman::check()
         fluid.updateSystem( alpha, beta, rhs );
         fluid.iterate( bcH );
 
-        bdf.bdf_u().shift_right( *fluid.solution() );
+        bdf.bdfVelocity().shiftRight( *fluid.solution() );
 
         *velAndPressure = *fluid.solution();
         exporter->postProcess( time );
@@ -610,7 +612,7 @@ Ethiersteinman::run()
             std::string pOrder =  pFE[iElem];
 
             if (verbose) std::cout << std::endl;
-            if (verbose) std::cout << "Time discretization order " << dataNavierStokes->dataTime()->getBDF_order() << std::endl;
+            if (verbose) std::cout << "Time discretization order " << dataNavierStokes->dataTime()->orderBDF() << std::endl;
 
             //dataNavierStokes->dataMesh()->setMesh(meshPart.meshPartition());
 
@@ -661,17 +663,18 @@ Ethiersteinman::run()
 
             // Initialization
 
-            Real dt     = dataNavierStokes->dataTime()->getTimeStep();
-            Real t0     = dataNavierStokes->dataTime()->getInitialTime();
-            Real tFinal = dataNavierStokes->dataTime()->getEndTime ();
+            Real dt     = dataNavierStokes->dataTime()->timeStep();
+            Real t0     = dataNavierStokes->dataTime()->initialTime();
+            Real tFinal = dataNavierStokes->dataTime()->endTime();
 
 
             // bdf object to store the previous solutions
 
-            BdfTNS<vector_type> bdf(dataNavierStokes->dataTime()->getBDF_order());
+            BdfTNS<vector_type> bdf;
+            bdf.setup(dataNavierStokes->dataTime()->orderBDF());
 
             // initialization with exact solution: either interpolation or "L2-NS"-projection
-            t0 -= dt*bdf.bdf_u().order();
+            t0 -= dt*bdf.bdfVelocity().order();
 
             if (verbose) std::cout << std::endl;
             if (verbose) std::cout << "Computing the initial solution ... " << std::endl << std::endl;
@@ -684,7 +687,7 @@ Ethiersteinman::run()
             dataNavierStokes->dataTime()->setTime(t0);
             fluid.initialize( Problem::uexact, Problem::pexact );
 
-            bdf.bdf_u().initialize_unk( *fluid.solution() );
+            bdf.bdfVelocity().setInitialCondition( *fluid.solution() );
 
             std::string const proj =  dataFile( "fluid/space_discretization/initialization", "proj");
             bool const L2proj( !proj.compare("proj") );
@@ -696,7 +699,7 @@ Ethiersteinman::run()
             // Initial solution loading (interpolation or projection)
             //
             Real time = t0 + dt;
-            for (  ; time <=  dataNavierStokes->dataTime()->getInitialTime() + dt/2.; time += dt)
+            for (  ; time <=  dataNavierStokes->dataTime()->initialTime() + dt/2.; time += dt)
             {
 
                 dataNavierStokes->dataTime()->setTime(time);
@@ -749,7 +752,7 @@ Ethiersteinman::run()
 
 
                 // Updating bdf
-                bdf.bdf_u().shift_right( *fluid.solution() );
+                bdf.bdfVelocity().shiftRight( *fluid.solution() );
 
             }
 
@@ -827,19 +830,19 @@ Ethiersteinman::run()
                 if (verbose)
                 {
                     std::cout << std::endl;
-                    std::cout << "We are now at time "<< dataNavierStokes->dataTime()->getTime() << " s. " << std::endl;
+                    std::cout << "We are now at time "<< dataNavierStokes->dataTime()->time() << " s. " << std::endl;
                     std::cout << std::endl;
                 }
 
                 chrono.start();
 
-                double alpha = bdf.bdf_u().coeff_der( 0 ) / dataNavierStokes->dataTime()->getTimeStep();
+                double alpha = bdf.bdfVelocity().coefficientFirstDerivative( 0 ) / dataNavierStokes->dataTime()->timeStep();
 
-                beta = bdf.bdf_u().extrap(); // Extrapolation for the convective term
+                beta = bdf.bdfVelocity().extrapolation(); // Extrapolation for the convective term
                 //beta *= 0;
                 //uFESpace.interpolate(Problem::uexact, beta, time);
-
-                rhs  = fluid.matrixMass()*bdf.bdf_u().time_der( dataNavierStokes->dataTime()->getTimeStep() );
+                bdf.bdfVelocity().updateRHSContribution( dataNavierStokes->dataTime()->timeStep());
+                rhs  = fluid.matrMass()*bdf.bdfVelocity().rhsContributionFirstDerivative();
 
                 fluid.getDisplayer().leaderPrint("alpha ", alpha);
                 fluid.getDisplayer().leaderPrint("\n");
@@ -851,7 +854,7 @@ Ethiersteinman::run()
                 fluid.updateSystem( alpha, beta, rhs );
                 fluid.iterate( bcH );
 
-                bdf.bdf_u().shift_right( *fluid.solution() );
+                bdf.bdfVelocity().shiftRight( *fluid.solution() );
 
                 // Computation of the error
                 vector_type vel  (uFESpace.map(), Repeated);
