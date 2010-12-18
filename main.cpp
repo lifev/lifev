@@ -579,9 +579,9 @@ void Problem::initialize(std::string& /*loadInitSol*/,  GetPot const& data_file)
     std::string loadInitSolPrev(data_file("problem/initSolPrev","-1"));
 
 
-    boost::shared_ptr<LifeV::EpetraVector> initSol(new LifeV::EpetraVector(*M_fsi->FSIOper()->getCouplingVariableMap()));
-    boost::shared_ptr<LifeV::EpetraVector> initSolSVel(new LifeV::EpetraVector(*M_fsi->FSIOper()->getCouplingVariableMap()));
-    boost::shared_ptr<LifeV::EpetraVector> UniqueV(new LifeV::EpetraVector(*M_fsi->FSIOper()->getCouplingVariableMap(), Unique));
+    boost::shared_ptr<LifeV::EpetraVector> initSol(new LifeV::EpetraVector(*M_fsi->FSIOper()->couplingVariableMap()));
+    boost::shared_ptr<LifeV::EpetraVector> initSolSVel(new LifeV::EpetraVector(*M_fsi->FSIOper()->couplingVariableMap()));
+    boost::shared_ptr<LifeV::EpetraVector> UniqueV(new LifeV::EpetraVector(*M_fsi->FSIOper()->couplingVariableMap(), Unique));
     boost::shared_ptr<LifeV::EpetraVector> UniqueVFD;
     boost::shared_ptr<LifeV::EpetraVector> UniqueVFDOld;
 
@@ -607,7 +607,7 @@ void Problem::initialize(std::string& /*loadInitSol*/,  GetPot const& data_file)
 
 
 
-    UniqueV.reset(new vector_Type(*M_fsi->FSIOper()->getCouplingVariableMap(), Unique, Zero));
+    UniqueV.reset(new vector_Type(*M_fsi->FSIOper()->couplingVariableMap(), Unique, Zero));
     UniqueV->subset(*M_solidDisp, M_solidDisp->map(), (UInt)0, offset);
     *UniqueV*=1/(M_fsi->FSIOper()->solid().rescaleFactor()*M_data->dataFluid()->dataTime()->getTimeStep());
     M_fsi->FSIOper()->solid().initialize(UniqueV);
@@ -615,12 +615,12 @@ void Problem::initialize(std::string& /*loadInitSol*/,  GetPot const& data_file)
 
     if (!M_data->method().compare("monolithicGI"))
     {
-        UniqueVFD.reset(new vector_Type(*M_fsi->FSIOper()->getCouplingVariableMap(), Unique, Zero));
+        UniqueVFD.reset(new vector_Type(*M_fsi->FSIOper()->couplingVariableMap(), Unique, Zero));
         UniqueVFD->subset(*M_fluidDisp, M_fluidDisp->map(), (UInt)0, dynamic_cast<LifeV::MonolithicGI*>(M_fsi->FSIOper().get())->mapWithoutMesh().map(Unique)->NumGlobalElements());
         *initSol+=*UniqueVFD;
     }
 
-    initSolSVel.reset(new vector_Type(*M_fsi->FSIOper()->getCouplingVariableMap(), Unique, Zero));
+    initSolSVel.reset(new vector_Type(*M_fsi->FSIOper()->couplingVariableMap(), Unique, Zero));
     initSolSVel->subset(*M_solidVel,M_solidVel->map(), (UInt)0, offset);
     *initSolSVel*=1/(M_fsi->FSIOper()->solid().rescaleFactor()*M_data->dataSolid()->dataTime()->getTimeStep());
     M_fsi->FSIOper()->solid().initializeVel(*initSolSVel);
