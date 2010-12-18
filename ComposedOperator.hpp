@@ -158,7 +158,7 @@ public:
        calls clear on the std::vector
        \todo change name in e.g. resetOperator
      */
-    void resetP(){M_operator.clear();}
+    void resetOperator(){M_operator.clear();}
     //@}
 
     /** @name Implementation of Epetra_Operator Methods
@@ -195,7 +195,7 @@ public:
 
     const Epetra_Comm & Comm() const;
 
-    const boost::shared_ptr<Epetra_Comm> getCommPtr() const;
+    const boost::shared_ptr<Epetra_Comm> commPtr() const;
 
     const Epetra_Map & OperatorDomainMap() const;
 
@@ -207,24 +207,22 @@ public:
 
     //!returns a const reference tor the std::vector of factors
     /**
-       \todo change name in e.g. getOperator
      */
-    const std::vector<operatorPtr_Type>& getP() const  {return M_operator;}
+    const std::vector<operatorPtr_Type>& getOperator() const  {return M_operator;}
 
     //!returns the std::vector of factors by (non const) reference
     /**
-       \todo change name in e.g. operator
      */
-    std::vector<operatorPtr_Type>& P() const {return M_operator;}
+    std::vector<operatorPtr_Type>& Operator() const {return M_operator;}
 
     //! Returns true if the operator is transposed
     /**
        The operator transposed means that all its factors have to be considered transposed
      */
-    bool getAllTranspose() const {return M_allTranspose;}
+    bool allTranspose() const {return M_allTranspose;}
 
     //! Returns a vector saying for each factor if it is considered transposed or not
-    const std::vector<bool>&  getTranspose() const {return M_transpose;}
+    const std::vector<bool>&  transpose() const {return M_transpose;}
 
     //! Returns a vector of UInt specifying the form of the operator
     /**
@@ -232,17 +230,16 @@ public:
        Each element of the output vector says how many factors are there between two '+' operation. For instance for
        the operator AB+CDE the vector M_summed returned would be [2,3]
      */
-    const std::vector<ID>&  getSummed() const {return M_summed;}
+    const std::vector<ID>&  summed() const {return M_summed;}
 
     //! Returns a vector saying which factors have to be considered as inverse
-    const std::vector<bool>& getInverse() const {return M_inverse;}
-
+    const std::vector<bool>& inverse() const {return M_inverse;}
     //! returns the number of factors present in the operator
-    UInt getNumber() const {return M_set;}
+    UInt number() const {return M_set;}
 
-    const double& getMeanIter() const {return M_meanIter;}
+    const double& meanIter() const {return M_meanIter;}
 
-    int getNumCalled() const {return M_numCalled;}
+    int numCalled() const {return M_numCalled;}
 
     const Displayer& displayer(){return M_displayer;}
     //@}
@@ -303,18 +300,18 @@ template <typename operator_Type>
 ComposedOperator<operator_Type>::ComposedOperator( const ComposedOperator<operator_Type>& P)
     :
     M_operator(),
-    M_inverse(P.getInverse()),
-    M_transpose(P.getTranspose()),
-    M_summed(P.getSummed()),
-    M_allTranspose(P.getAllTranspose()),
-    M_set(P.getNumber()),
-    M_meanIter(P.getMeanIter()),
-    M_numCalled(P.getNumCalled()),
-    M_displayer(P.getCommPtr())
+    M_inverse(P.inverse()),
+    M_transpose(P.transpose()),
+    M_summed(P.summed()),
+    M_allTranspose(P.allTranspose()),
+    M_set(P.number()),
+    M_meanIter(P.meanIter()),
+    M_numCalled(P.numCalled()),
+    M_displayer(P.commPtr())
 {
     for(UInt i=0; i<M_set; ++i)
     {
-        M_operator.push_back(P.getP()[i]);
+        M_operator.push_back(P.getOperator()[i]);
     }
 }
 
@@ -524,7 +521,7 @@ Comm() const
 
 template <typename operator_Type>
 const boost::shared_ptr<Epetra_Comm> ComposedOperator<operator_Type>::
-getCommPtr() const
+commPtr() const
 {
     return( M_displayer.comm());
 }

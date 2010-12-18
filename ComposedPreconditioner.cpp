@@ -50,7 +50,7 @@ ComposedPreconditioner::ComposedPreconditioner( boost::shared_ptr<Epetra_Comm> c
 }
 
 ComposedPreconditioner::ComposedPreconditioner(ComposedPreconditioner& P):
-    super_Type(P, boost::dynamic_pointer_cast<ComposedOperator<Ifpack_Preconditioner> >(P.getPrecPtr())->getCommPtr()),
+    super_Type(P, boost::dynamic_pointer_cast<ComposedOperator<Ifpack_Preconditioner> >(P.getPrecPtr())->commPtr()),
     M_prec(new prec_Type(*boost::dynamic_pointer_cast<prec_Type>(P.getPrecPtr()))),
     M_operVector(P.getOperVector())
     //M_precType(P.precType())
@@ -83,12 +83,12 @@ ComposedPreconditioner::createList(       list_Type& /*list*/,
     //M_list.resize(listNumber);
     //! See http://trilinos.sandia.gov/packages/docs/r9.0/packages/ifpack/doc/html/index.html
     //! for more informations on the parameters
-    ASSERT( !M_prec->getNumber(), "Error, when initializing the preconditioner, it must be empty" );
+    ASSERT( !M_prec->number(), "Error, when initializing the preconditioner, it must be empty" );
     for ( UInt i(0); i < dataFile.vector_variable_size( ( section + "/" + subSection + "/list" ).data() ); ++i )
     {
         epetraPrec_Type tmp( PRECFactory::instance().createObject( dataFile( ( section + "/" + subSection + "/list" ).data(), "ML", i ) ) );
         M_prec->push_back(tmp);
-        M_prec->P()[i]->createList(M_prec->P()[i]->list(), dataFile, section, dataFile( ( section + "/" + subSection + "/sections" ).data(), "ML", i ));
+        M_prec->Operator()[i]->createList(M_prec->Operator()[i]->list(), dataFile, section, dataFile( ( section + "/" + subSection + "/sections" ).data(), "ML", i ));
     }
 }
 
@@ -132,13 +132,13 @@ ComposedPreconditioner::push_back(operatorPtr_Type& oper,
     Chrono chrono;
     epetraPrecPtr_Type prec;
 
-    this->M_displayer.leaderPrint(std::string("ICP-  Computing prec. factorization, type:") + M_prec->P()[M_operVector.size()-1]->precType() + " ...        ");
+    this->M_displayer.leaderPrint(std::string("ICP-  Computing prec. factorization, type:") + M_prec->Operator()[M_operVector.size()-1]->precType() + " ...        ");
     chrono.start();
-    createPrec(oper, M_prec->P()[M_operVector.size()-1]);
+    createPrec(oper, M_prec->Operator()[M_operVector.size()-1]);
     chrono.stop();
     this->M_displayer.leaderPrintMax("done in ", chrono.diff());
     M_prec->replace(prec, useInverse, useTranspose);// \TODO to reset as push_back
-    if( M_prec->P().size() == M_operVector.size() )
+    if( M_prec->Operator().size() == M_operVector.size() )
         this->M_preconditionerCreated=true;
     return EXIT_SUCCESS;
 }
@@ -154,13 +154,13 @@ ComposedPreconditioner::replace(operatorPtr_Type& oper,
     M_operVector[index] = oper;
     Chrono chrono;
     //ifpack_prec_type prec;
-    this->M_displayer.leaderPrint(std::string("ICP-  Computing prec. factorization, type:") + (M_prec->P()[index]->precType()) + " ...        ");
+    this->M_displayer.leaderPrint(std::string("ICP-  Computing prec. factorization, type:") + (M_prec->Operator()[index]->precType()) + " ...        ");
     chrono.start();
-    createPrec(oper, M_prec->P()[index]);
+    createPrec(oper, M_prec->Operator()[index]);
     chrono.stop();
     this->M_displayer.leaderPrintMax("done in ", chrono.diff());
 
-    M_prec->replace(M_prec->P()[index], index, useInverse, useTranspose);
+    M_prec->replace(M_prec->Operator()[index], index, useInverse, useTranspose);
 
     return EXIT_SUCCESS;
 }

@@ -111,14 +111,6 @@ public:
     void                   createList( list_Type& /*list*/, const GetPot& dataFile, const std::string& section, const std::string& subSection );
     double                 Condest ();
 
-    super_Type::prec_raw_type*  getPrec ();
-
-    UInt getNumber() const {return M_prec->getNumber();}
-
-    super_Type::prec_type              getPrecPtr(){return M_prec;}
-
-    std::string            precType() {return "composedPreconditioner";}
-
     int                    buildPreconditioner(operatorPtr_Type& A);
     int                    buildPreconditioner(operatorPtr_Type& A,
                                                const bool useInverse,
@@ -172,6 +164,17 @@ public:
 
     const Epetra_Map & OperatorDomainMap() const
     {return M_prec->OperatorDomainMap();}
+    //@}
+
+    //!@name Get Methods
+    //@{
+    super_Type::prec_raw_type*  getPrec ();
+
+    UInt number() const {return M_prec->number();}
+
+    super_Type::prec_type              getPrecPtr(){return M_prec;}
+
+    std::string            precType() {return "composedPreconditioner";}
     //@}
 
     //!@name Static Methods
