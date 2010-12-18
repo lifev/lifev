@@ -307,7 +307,7 @@ Structure::run3d()
 
         *solidDisp = solid.getDisplacement();
         *solidVel  = solid.getVelocity();
-            CheckResults(solid.disp().norm2(),time);
+            CheckResults(solid.getDisplacement().norm2(),time);
 
         exporter->postProcess( time );
 
