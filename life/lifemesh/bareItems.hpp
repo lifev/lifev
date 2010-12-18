@@ -458,11 +458,6 @@ public:
     typedef typename container_Type::iterator 							containerIterator_Type;
     typedef typename container_Type::const_iterator 					containerConstIterator_Type;
     typedef std::pair<const bareItem_Type, UInt> 						value_Type;
-
-    //    typedef std::map<BareItem, UInt, cmpBareItem<BareItem> > container;
-    //    typedef typename container::iterator iterator;
-    //    typedef typename container::const_iterator const_iterator;
-    //    typedef std::pair<const BareItem, UInt> value_type;
     //@}
 
     //! @name Constructors & Destructor
@@ -501,6 +496,14 @@ public:
         @param item Item to be removed
     	@return True if the item has been erased and False otherwise
      */
+    bool deleteIfThere( bareItem_Type const & item);
+
+    //! Method that removes a bareItem_Type if it is there (the ID is then lost)
+    /*!
+        @deprecated
+        @param item Item to be removed
+    	@return True if the item has been erased and False otherwise
+     */
     bool isThereDel( bareItem_Type const & item);
 
     //! Method that counts how many items are stored
@@ -522,13 +525,29 @@ public:
     /*!
      */
     void showMe() const;
+
+    //! Method that returns the ID of a BareItem. It returns 0 if the item doesn't exist
+    /*!
+        @param item Item we are looking for
+        @return ID of the item. 0 if the item doesn't exist
+     */
+    ID id( bareItem_Type const & item ) const;
+
     //@}
 
     //! @name Set Methods
     //@{
+    //! Method that returns the ID of a BareItem. It returns 0 if the item doesn't exist
+    /*!
+        @param item Item to modify
+        @param id new ID to assign to item
+    	@return True if the item has been found and modified, False otherwise
+     */
+    bool setId( bareItem_Type const & item, const ID& id );
 
     //! Method that returns the ID of a BareItem. It returns 0 if the item doesn't exist
     /*!
+     	@deprecated
         @param item Item to modify
         @param id new ID to assign to item
     	@return True if the item has been found and modified, False otherwise
@@ -539,12 +558,7 @@ public:
     //! @name Get Methods
     //@{
 
-    //! Method that returns the ID of a BareItem. It returns 0 if the item doesn't exist
-    /*!
-        @param item Item we are looking for
-        @return ID of the item. 0 if the item doesn't exist
-     */
-    ID id( bareItem_Type const & item ) const;
+
     //@}
 private:
     UInt M_idCount;
@@ -553,26 +567,6 @@ private:
 /*********************************************************************************
                IMPLEMENTATIONS
  *********************************************************************************/
-//
-/*! \defgroup Helper Some helper functions
- */
-
-//!\ingroup Helper
-template <typename BareItemType>
-inline
-ID getId( std::pair<BareItemType, ID> const & i )
-{
-    return i.second;
-}
-
-//!\ingroup Helper
-template <typename BareItemType>
-inline
-BareItemType getItem( std::pair<BareItemType, ID> const & i )
-{
-    return i.first;
-}
-
 
 // ===================================================
 // Constructors & Destructor
@@ -613,9 +607,15 @@ BareItemsHandler<BareItemType>::addIfNotThere( const bareItem_Type & item, const
     ( i.first ) ->second = id; // Set new id in any case.
     return std::make_pair( id, i.second ); // for consistency with other version.
 }
-
 template <class BareItemType>
 bool
+BareItemsHandler<BareItemType>::deleteIfThere( bareItem_Type const & item )
+{
+    return erase( item ) != 0;
+}
+
+template <class BareItemType>
+bool  __attribute__ ((__deprecated__))
 BareItemsHandler<BareItemType>::isThereDel( bareItem_Type const & item )
 {
     return erase( item ) != 0;
@@ -639,9 +639,40 @@ void BareItemsHandler<BareItemType>::showMe() const
     std::cout << "End of Information";
 }
 
+template <class BareItemType>
+inline
+ID
+BareItemsHandler<BareItemType>::id( const bareItem_Type & item ) const
+{
+    containerConstIterator_Type i = this->find( item );
+    if ( i != container_Type::end() )
+        return i->second;
+    else
+        return 0;
+}
+
 // ===================================================
 // Set Methods
 // ===================================================
+template <class BareItemType>
+inline
+bool  __attribute__ ((__deprecated__))
+BareItemsHandler<BareItemType>::setId( const bareItem_Type & item, const ID& id )
+{
+    containerConstIterator_Type i = find( item );
+    if ( i != container_Type::end() )
+    {
+        i->second = id;
+        return true;
+    }
+    else
+    {
+        return false;
+    }
+
+}
+
+
 template <class BareItemType>
 inline
 bool
@@ -663,18 +694,7 @@ BareItemsHandler<BareItemType>::setId( const bareItem_Type & item, ID const id )
 // ===================================================
 // Get Methods
 // ===================================================
-template <class BareItemType>
-inline
-ID
-BareItemsHandler<BareItemType>::id( const bareItem_Type & item ) const
-{
-    containerConstIterator_Type i = this->find( item );
-    if ( i != container_Type::end() )
-        return i->second;
-    else
-        return 0;
-}
+
 
 }
 #endif
-
