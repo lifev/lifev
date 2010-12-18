@@ -484,7 +484,7 @@ hyperbolic::run()
     chronoProblem.stop();
 
     // The leader process print chronoProblem
-    hyperbolicSolver.getDisplayer().leaderPrint( "Time for create the problem ",
+    hyperbolicSolver.displayer().leaderPrint( "Time for create the problem ",
                                                  chronoProblem.diff(), "\n" );
 
     // Process the problem
@@ -518,7 +518,7 @@ hyperbolic::run()
     hyperbolicSolver.setNumericalFlux( numericalFlux );
 
     // Set the boudary conditions
-    hyperbolicSolver.setBC( bcHyperbolic );
+    hyperbolicSolver.setBoundaryCondition( bcHyperbolic );
 
     // Set the exporter for the solution
     boost::shared_ptr< Exporter< RegionMesh > > exporter;
@@ -577,7 +577,7 @@ hyperbolic::run()
                            ExporterData::Cell );
 
     // Display the total number of unknowns
-    hyperbolicSolver.getDisplayer().leaderPrint( "Number of unknowns : ",
+    hyperbolicSolver.displayer().leaderPrint( "Number of unknowns : ",
                                                  fESpace.map().map(Unique)->NumGlobalElements(), "\n" );
 
     // Solve the problem
@@ -588,7 +588,7 @@ hyperbolic::run()
     *exporterSolution = *hyperbolicSolver.solution();
 
     // Save the initial solution into the exporter
-    exporter->postProcess( dataHyperbolic.dataTime()->getInitialTime() );
+    exporter->postProcess( dataHyperbolic.dataTime()->initialTime() );
 
     // Changing time step for the simulation
     Real timeStep(0.);
@@ -610,7 +610,7 @@ hyperbolic::run()
         if ( dataHyperbolic.dataTime()->isLastTimeStep() )
         {
             // Compute the last time step.
-            timeStep = dataHyperbolic.dataTime()->getLeftTime();
+            timeStep = dataHyperbolic.dataTime()->leftTime();
 
             // This is the last time step in the simulation
             isLastTimeStep = true;
@@ -620,13 +620,13 @@ hyperbolic::run()
         dataHyperbolic.dataTime()->setTimeStep( timeStep );
 
         // The leader process prints the temporal data.
-        if ( hyperbolicSolver.getDisplayer().isLeader() )
+        if ( hyperbolicSolver.displayer().isLeader() )
         {
             dataHyperbolic.dataTime()->showMe();
         }
 
         // solve one step of the hyperbolic problem.
-        hyperbolicSolver.solveOneStep();
+        hyperbolicSolver.solveOneTimeStep();
 
         // Save the solution
 
@@ -634,13 +634,13 @@ hyperbolic::run()
         *exporterSolution = *hyperbolicSolver.solution();
 
         // Save the solution into the exporter
-        exporter->postProcess( dataHyperbolic.dataTime()->getTime() );
+        exporter->postProcess( dataHyperbolic.dataTime()->time() );
 
         // Stop chronoTimeStep
         chronoTimeStep.stop();
 
         // The leader process print chronoTimeStep
-        hyperbolicSolver.getDisplayer().leaderPrint( "Time for current time step ",
+        hyperbolicSolver.displayer().leaderPrint( "Time for current time step ",
                                                      chronoTimeStep.diff(), "\n" );
 
     }
@@ -649,7 +649,7 @@ hyperbolic::run()
     chronoProcess.stop();
 
     // The leader process print chronoProcess
-    hyperbolicSolver.getDisplayer().leaderPrint( "Time for process ",
+    hyperbolicSolver.displayer().leaderPrint( "Time for process ",
                                                  chronoProcess.diff(), "\n" );
 
     // Compute the errors
@@ -661,52 +661,52 @@ hyperbolic::run()
     Real L2Norm(0), exactL2Norm(0), L2Error(0), L2RelativeError(0);
 
     // Norms and errors for the pressure
-    hyperbolicSolver.getDisplayer().leaderPrint( "\nERROR\n" );
+    hyperbolicSolver.displayer().leaderPrint( "\nERROR\n" );
 
     // Compute the L2 norm for the solution
     L2Norm = fESpace.l2Norm( *hyperbolicSolver.solution() );
 
     // Display the L2 norm for the solution
-    hyperbolicSolver.getDisplayer().leaderPrint( " L2 norm of solution:            ",
+    hyperbolicSolver.displayer().leaderPrint( " L2 norm of solution:            ",
                                                  L2Norm, "\n" );
 
     // Compute the L2 norm for the analytical solution
     exactL2Norm = fESpace.l2NormFunction( Members->getAnalyticalSolution(),
-                                          dataHyperbolic.dataTime()->getEndTime() );
+                                          dataHyperbolic.dataTime()->endTime() );
 
     // Display the L2 norm for the analytical solution
-    hyperbolicSolver.getDisplayer().leaderPrint( " L2 norm of exact solution:      ",
+    hyperbolicSolver.displayer().leaderPrint( " L2 norm of exact solution:      ",
                                                  exactL2Norm, "\n" );
 
     // Compute the L2 error for the solution
     L2Error = fESpace.l2ErrorWeighted( Members->getAnalyticalSolution(),
                                        *hyperbolicSolver.solution(),
                                        Members->getUOne(),
-                                       dataHyperbolic.dataTime()->getEndTime() );
+                                       dataHyperbolic.dataTime()->endTime() );
 
     // Display the L2 error for the solution
-    hyperbolicSolver.getDisplayer().leaderPrint( " L2 error:                       ",
+    hyperbolicSolver.displayer().leaderPrint( " L2 error:                       ",
                                                  L2Error, "\n" );
 
     // Compute the L2 realative error for the solution
     L2RelativeError = L2Error / L2Norm;
 
     // Display the L2 relative error for the solution
-    hyperbolicSolver.getDisplayer().leaderPrint( " L2 relative error:              ",
+    hyperbolicSolver.displayer().leaderPrint( " L2 relative error:              ",
                                                  L2RelativeError, "\n" );
 
     // Stop chronoError
     chronoError.stop();
 
     // The leader process print chronoError
-    hyperbolicSolver.getDisplayer().leaderPrint( "Time for compute errors ",
+    hyperbolicSolver.displayer().leaderPrint( "Time for compute errors ",
                                                  chronoError.diff(), "\n" );
 
     // Stop chronoTotal
     chronoTotal.stop();
 
     // The leader process print chronoTotal
-    hyperbolicSolver.getDisplayer().leaderPrint( "Total time for the computation ",
+    hyperbolicSolver.displayer().leaderPrint( "Total time for the computation ",
                                                  chronoTotal.diff(), "\n" );
 
     // Return the error, needed for the succes/failure of the test
