@@ -264,7 +264,7 @@ ResistanceProblem::run()
     }
 
     if (verbose) std::cout << std::endl;
-    if (verbose) std::cout << "Time discretization order " << dataNavierStokes->dataTime()->getBDF_order() << std::endl;
+    if (verbose) std::cout << "Time discretization order " << dataNavierStokes->dataTime()->orderBDF() << std::endl;
 
 
 
@@ -327,13 +327,14 @@ ResistanceProblem::run()
 
     // Initialization
 
-    Real dt     = dataNavierStokes->dataTime()->getTimeStep();
-    Real t0     = dataNavierStokes->dataTime()->getInitialTime();
-    Real tFinal = dataNavierStokes->dataTime()->getEndTime();
+    Real dt     = dataNavierStokes->dataTime()->timeStep();
+    Real t0     = dataNavierStokes->dataTime()->initialTime();
+    Real tFinal = dataNavierStokes->dataTime()->endTime();
 
     // bdf object to store the previous solutions
 
-    BdfTNS<vector_type> bdf(dataNavierStokes->dataTime()->getBDF_order());
+    BdfTNS<vector_type> bdf;
+    bdf.setup(dataNavierStokes->dataTime()->orderBDF());
 
     // initialization with stokes solution
     if (verbose) std::cout << "Computing the stokes solution ... " << std::endl << std::endl;
@@ -376,7 +377,7 @@ ResistanceProblem::run()
     fluid.initialize(velocity, zero_scalar);
     //  fluid.initialize(zero_scalar, zero_scalar);
 
-    bdf.bdf_u().initialize_unk(*fluid.solution());
+    bdf.bdfVelocity().setInitialCondition(*fluid.solution());
 
     fluid.setUp(dataFile);
 
@@ -398,15 +399,17 @@ ResistanceProblem::run()
 
         chrono.start();
 
-        double alpha = bdf.bdf_u().coeff_der( 0 ) / dataNavierStokes->dataTime()->getTimeStep();
+        double alpha = bdf.bdfVelocity().coefficientFirstDerivative( 0 ) / dataNavierStokes->dataTime()->timeStep();
 
-        beta = bdf.bdf_u().extrap();
-        rhs  = fluid.matrixMass()*bdf.bdf_u().time_der( dataNavierStokes->dataTime()->getTimeStep() );
+        beta = bdf.bdfVelocity().extrapolation();
+
+        bdf.bdfVelocity().updateRHSContribution( dataNavierStokes->dataTime()->timeStep());
+        rhs  = fluid.matrMass()*bdf.bdfVelocity().rhsContributionFirstDerivative();
 
         fluid.updateSystem( alpha, beta, rhs );
         fluid.iterate( bcH );
 
-        bdf.bdf_u().shift_right( *fluid.solution() );
+        bdf.bdfVelocity().shiftRight( *fluid.solution() );
         *velAndPressure = *fluid.solution();
 
         ensight.postProcess( time );
