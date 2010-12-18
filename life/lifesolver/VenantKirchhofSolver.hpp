@@ -838,7 +838,7 @@ void
 VenantKirchhofSolver<Mesh, SolverType>::iterate( bchandler_Type& bch )
 {
   // matrix and vector assembling communication
-  matrixPtr_Type matrFull( new matrix_Type( *M_localMap, M_massStiff->getMeanNumEntries()));
+  matrixPtr_Type matrFull( new matrix_Type( *M_localMap, M_massStiff->meanNumEntries()));
 
   *matrFull += *M_massStiff;
 
@@ -878,14 +878,14 @@ template <typename Mesh, typename SolverType>
 void
 VenantKirchhofSolver<Mesh, SolverType>::iterateLin( bchandler_Type& bch )
 {
-  matrixPtr_Type matrFull( new matrix_Type( *M_localMap, M_massStiff->getMeanNumEntries()));
+  matrixPtr_Type matrFull( new matrix_Type( *M_localMap, M_massStiff->meanNumEntries()));
 
   *matrFull += *M_massStiff;
 
   M_rhsNoBC->globalAssemble();
   M_rhsW->globalAssemble();
 
-  vector_Type rhsFull (M_rhsNoBC->getMap());
+  vector_Type rhsFull (M_rhsNoBC->map());
 
   M_Displayer->leaderPrint(" LS-  Applying boundary conditions ...         ");
   Chrono chrono;

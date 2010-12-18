@@ -285,11 +285,11 @@ void fixedPoint::eval( const vector_Type& _disp,
     }
     if (this->isSolid())
     {
-        norm = M_solid->getDisplacement().Norm2();
+        norm = M_solid->getDisplacement().norm2();
         if (this->isLeader())
             std::cout << "NL2 DiplacementS     = " << norm << std::endl;
 
-        norm = M_solid->getResidual().NormInf();
+        norm = M_solid->getResidual().normInf();
 
         if (this->isLeader())
             std::cout << "Max ResidualS        = " << norm << std::endl;

@@ -94,7 +94,7 @@ void exactJacobian::evalResidual(vector_Type&       res,
 
     this->displayer().leaderPrint("      NormInf res        =                     " , res.normInf(), "\n" );
     if (this->isSolid())
-        this->displayer().leaderPrint("      NormInf res_d      =                     " , this->solid().getResidual().NormInf(), "\n" );
+        this->displayer().leaderPrint("      NormInf res_d      =                     " , this->solid().getResidual().normInf(), "\n" );
 
 }
 
@@ -413,8 +413,8 @@ void exactJacobian::eval(const vector_Type& _disp,
         this->displayer().leaderPrint("      Max ResidualF      =                     " , M_fluid->residual().normInf(), "\n" );
     if ( this->isSolid() )
     {
-        this->displayer().leaderPrint("      NL2 Diplacement S. =                     " , M_solid->getDisplacement().Norm2(), "\n" );
-        this->displayer().leaderPrint("      Max Residual Solid =                     " , M_solid->getResidual().NormInf(), "\n" );
+        this->displayer().leaderPrint("      NL2 Diplacement S. =                     " , M_solid->getDisplacement().norm2(), "\n" );
+        this->displayer().leaderPrint("      Max Residual Solid =                     " , M_solid->getResidual().normInf(), "\n" );
     }
 }
 

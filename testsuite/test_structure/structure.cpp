@@ -307,12 +307,34 @@ Structure::run3d()
 
         *solidDisp = solid.getDisplacement();
         *solidVel  = solid.getVelocity();
+            CheckResults(solid.disp().norm2(),time);
+
         exporter->postProcess( time );
 
     }
 
 
 }
+
+
+void Structure::CheckResults(const LifeV::Real& dispNorm,const LifeV::Real& time)
+{
+    if ( time == 0.005 && abs(dispNorm-1.55991)>1e-4 )
+        RESULT_CHANGED_EXCEPTION(time);
+    else if ( time == 0.01  && abs(dispNorm-1.49237)>1e-4 )
+        RESULT_CHANGED_EXCEPTION(time);
+    else if ( time == 0.015  && abs(dispNorm-1.34538)>1e-4 )
+        RESULT_CHANGED_EXCEPTION(time);
+    else if ( time == 0.02  && abs(dispNorm-1.11341)>1e-4 )
+        RESULT_CHANGED_EXCEPTION(time);
+}
+
+LifeV::UInt Structure::RESULT_CHANGED_EXCEPTION(const LifeV::Real time)
+  {
+      LifeV::UInt value = EXIT_SUCCESS;
+      std::cout << "Some modifications led to changes in the l2 norm of the solution at time" << time << std::endl;
+      return value = EXIT_FAILURE;
+  }
 
 
 //////////////////////

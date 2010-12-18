@@ -109,6 +109,7 @@ public:
 //                 return;
 //             }
         run3d();
+        void CheckResults(const LifeV::Real& dispNorm, const LifeV::Real& time);
     }
 
     //@}
@@ -128,6 +129,8 @@ private:
      * run the 3D driven cylinder simulation
      */
     void run3d();
+    void CheckResults(const LifeV::Real& dispNorm, const LifeV::Real& time);
+    LifeV::UInt RESULT_CHANGED_EXCEPTION(const LifeV::Real time);
 
 private:
     struct Private;
