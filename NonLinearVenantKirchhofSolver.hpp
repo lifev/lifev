@@ -380,7 +380,7 @@ buildSystem(matrix_ptrtype massStiff, Real const & factor)
     UInt nc = nDimensions;
 
     //inverse of dt:
-    Real PTemp =  this->M_data->dataTime()->getTimeStep();
+    Real PTemp =  this->M_data->dataTime()->timeStep();
     Real dti2  = 2.0 / ( PTemp * PTemp );
 
     // Elementary computation and matrix assembling
@@ -482,14 +482,14 @@ void NonLinearVenantKirchhofSolver<Mesh, SolverType>::updateSystem( matrix_ptrty
 
     stiff->globalAssemble();
 
-    //_rhsWithoutBC -= _K * this->_d;
+    //_rhsContributionSecondDerivativeithoutBC -= _K * this->_d;
 
 #endif
 
     // end of the nonlinear part
     //Computation of the right hand sides
 
-    Real DeltaT    = this->M_data->dataTime()->getTimeStep();
+    Real DeltaT    = this->M_data->dataTime()->timeStep();
     vector_type z = *this->M_disp;
 
      z            +=  DeltaT*(*this->M_vel);
@@ -504,12 +504,12 @@ void NonLinearVenantKirchhofSolver<Mesh, SolverType>::updateSystem( matrix_ptrty
     *M_rhsA = (2.0 / ( M_zeta * pow(DeltaT,2) )) * z + ((1.0 - M_zeta ) / ( M_zeta )) * (*M_acc);
 
     // velocity rhs
-    *this->M_rhsW = *this->M_vel + ( 1 - M_theta  ) * DeltaT *  (*M_acc);
+    *this->M_rhsContributionSecondDerivative = *this->M_vel + ( 1 - M_theta  ) * DeltaT *  (*M_acc);
 
     std::cout << std::endl;
 
-    std::cout << "rhsWithoutBC norm = " << this->M_rhsNoBC->norm2() << std::endl;
-    std::cout << "rhs_w norm        = " << this->M_rhsW->norm2() << std::endl;
+    std::cout << "rhsContributionSecondDerivativeithoutBC norm = " << this->M_rhsNoBC->norm2() << std::endl;
+    std::cout << "rhs_w norm        = " << this->M_rhsContributionSecondDerivative->norm2() << std::endl;
     std::cout << "    w norm        = " << this->M_vel->norm2() << std::endl;
 
     chrono.stop();
@@ -564,7 +564,7 @@ void NonLinearVenantKirchhofSolver<Mesh, SolverType>::updateSystem(  source_Type
 
     this->M_stiff->GlobalAssemble();
 
-    //_rhsWithoutBC -= _K * this->_d;
+    //_rhsContributionSecondDerivativeithoutBC -= _K * this->_d;
 
 
 #endif
@@ -583,7 +583,7 @@ void NonLinearVenantKirchhofSolver<Mesh, SolverType>::updateSystem(  source_Type
 
         for ( UInt ic = 0; ic < nc; ++ic )
         {
-            compute_vec( source, M_elvec, this->M_FESpace->fe(),  this->M_data->dataTime()->getTime(), ic ); // compute local vector
+            compute_vec( source, M_elvec, this->M_FESpace->fe(),  this->M_data->dataTime()->time(), ic ); // compute local vector
             assembleVector( *this->M_rhsNoBC, M_elvec, this->M_FESpace->fe(), this->M_FESpace->dof(), ic, ic*this->M_FESpace->dim() ); // assemble local vector into global one
         }
     }
@@ -592,7 +592,7 @@ void NonLinearVenantKirchhofSolver<Mesh, SolverType>::updateSystem(  source_Type
 
     //Computation of the right hand sides
 
-    Real DeltaT    = this->M_data->dataTime()->getTimeStep();
+    Real DeltaT    = this->M_data->dataTime()->timeStep();
     vector_type z  = *this->M_disp;
 
     z             +=  DeltaT * (*this->M_vel);
@@ -607,12 +607,12 @@ void NonLinearVenantKirchhofSolver<Mesh, SolverType>::updateSystem(  source_Type
     *M_rhsA = (2.0 / ( M_zeta * pow(DeltaT,2) )) * z + ((1.0 - M_zeta ) / ( M_zeta )) * (*M_acc);
 
     // velocity rhs
-    *this->M_rhsW = *this->M_vel + ( 1 - M_theta  ) * DeltaT *  (*M_acc);
+    *this->M_rhsContributionSecondDerivative = *this->M_vel + ( 1 - M_theta  ) * DeltaT *  (*M_acc);
 
     std::cout << std::endl;
 
-    std::cout << "rhsWithoutBC norm = " << this->M_rhsNoBC->Norm2() << std::endl;
-    std::cout << "rhs_w norm       = " << this->M_rhsW->Norm2() << std::endl;
+    std::cout << "rhsContributionSecondDerivativeithoutBC norm = " << this->M_rhsNoBC->Norm2() << std::endl;
+    std::cout << "rhs_w norm       = " << this->M_rhsContributionSecondDerivative->Norm2() << std::endl;
     std::cout << "    w norm       = " << this->M_vel->Norm2() << std::endl;
 
     chrono.stop();
@@ -772,11 +772,11 @@ iterate( bchandler_Type& bch )
     Real etamax  = 0;
     Int linesearch = 0;
 
-    Real time = this->M_data->getTime();
+    Real time = this->M_data->time();
 
     Int status = 0;
 
-    status = nonLinRichardson( *this->M_disp, *this, abstol, reltol, maxiter, etamax, linesearch, this->M_out_res, this->M_data->dataTime()->getTime() );
+    status = nonLinRichardson( *this->M_disp, *this, abstol, reltol, maxiter, etamax, linesearch, this->M_out_res, this->M_data->dataTime()->time() );
 
 
     if ( status == 1 )
@@ -791,7 +791,7 @@ iterate( bchandler_Type& bch )
 
         std::cout <<" Number of inner iterations       : " << maxiter <<  std::endl;
 
-        std::cout <<" We are at the time step          : "  << this->M_data->dataTime()->getTime() << std::endl;
+        std::cout <<" We are at the time step          : "  << this->M_data->dataTime()->time() << std::endl;
         this->M_out_iter << time << " " << maxiter << std::endl;
     }
 
@@ -815,9 +815,9 @@ template <typename Mesh, typename SolverType> // for monolithic
 void NonLinearVenantKirchhofSolver<Mesh, SolverType>::
 updateVel()
 {
-    Real DeltaT = this->M_data->dataTime()->getTimeStep();
+    Real DeltaT = this->M_data->dataTime()->timeStep();
     *M_acc = (2.0 /( M_zeta * pow(DeltaT,2) ))  * (*this->M_disp)  - *M_rhsA;
-    *this->M_vel = *this->M_rhsW + M_theta * DeltaT * (*M_acc) ;
+    *this->M_vel = *this->M_rhsContributionSecondDerivative + M_theta * DeltaT * (*M_acc) ;
 }
 
 
@@ -885,7 +885,7 @@ void NonLinearVenantKirchhofSolver<Mesh, SolverType>::evalResidual( vector_type 
 
     vector_type rhsFull(*this->M_rhsNoBC, Unique); // ignoring non-local entries, Otherwise they are summed up lately
 
-    bcManageVector( rhsFull, *this->M_FESpace->mesh(), this->M_FESpace->dof(), *this->M_BCh, this->M_FESpace->feBd(),  this->M_data->dataTime()->getTime(), 1.0 );
+    bcManageVector( rhsFull, *this->M_FESpace->mesh(), this->M_FESpace->dof(), *this->M_BCh, this->M_FESpace->feBd(),  this->M_data->dataTime()->time(), 1.0 );
     *this->M_rhs = rhsFull;
 
     res  = *this->M_stiff*sol;
@@ -1045,7 +1045,7 @@ solveJacobian( vector_type&           step,
     this->M_Displayer->leaderPrint("\tS'-  Applying boundary conditions      ... ");
 
     this->M_rhsNoBC->globalAssemble();
-    this->M_rhsW->globalAssemble();
+    this->M_rhsContributionSecondDerivative->globalAssemble();
 
     vector_type rhsFull (res);
 
@@ -1092,10 +1092,10 @@ applyBoundaryConditions(matrix_type&        matrix,
 
 
     //In the original versione it was not commented, modified by Paolo Tricerri
-//  bcManage( matrix, rhsFull, *this->M_FESpace->mesh(), this->M_FESpace->dof(), BCh, this->M_FESpace->feBd(), 1., this->M_data->getTime() );
+//  bcManage( matrix, rhsFull, *this->M_FESpace->mesh(), this->M_FESpace->dof(), BCh, this->M_FESpace->feBd(), 1., this->M_data->time() );
 
 
-    bcManageMatrix( matrix, *this->M_FESpace->mesh(), this->M_FESpace->dof(), *BCh, this->M_FESpace->feBd(), 1.,  this->M_data->getTime() );
+    bcManageMatrix( matrix, *this->M_FESpace->mesh(), this->M_FESpace->dof(), *BCh, this->M_FESpace->feBd(), 1.,  this->M_data->time() );
 
     // matrix should be GlobalAssembled by  bcManage
 
@@ -1110,10 +1110,10 @@ getSolidMatrix( matrix_ptrtype& matrix)
 {
     //updateSystem(/*matrix*/);
     matrix.reset(new matrix_type(*this->M_localMap));
-    //*this->M_stiff *= this->M_data->dataTime()->getTimeStep() * this->M_rescaleFactor;
+    //*this->M_stiff *= this->M_data->dataTime()->timeStep() * this->M_rescaleFactor;
     *matrix  += *this->M_stiff;
     matrix->GlobalAssemble();
-    matrix *= this->M_data->dataTime()->getTimeStep() * this->M_rescaleFactor;
+    matrix *= this->M_data->dataTime()->timeStep() * this->M_rescaleFactor;
 }
 
 }

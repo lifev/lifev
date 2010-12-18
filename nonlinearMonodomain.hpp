@@ -460,7 +460,7 @@ void NonlinearMonodomain<Mesh, SolverType>::buildSystem()
 
     }
 
-    massCoeff = M_data.Chi()*M_data.Cm() / M_data.getTimeStep();
+    massCoeff = M_data.Chi()*M_data.Cm() / M_data.timeStep();
 
     M_comm->Barrier();
 
@@ -752,7 +752,7 @@ void NonlinearMonodomain<Mesh, SolverType>::applyBoundaryConditions( matrix_Type
               BCh,
               M_uFESpace.feBd(),
               1.,
-              M_data.getTime() );
+              M_data.time() );
 
     rhs=rhsFull;
 

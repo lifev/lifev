@@ -170,7 +170,7 @@ MultiscaleSolver::solveProblem( const Real& externalResidual )
 
     // Move to the "true" first time-step
     M_globalData->dataTime()->updateTime();
-    M_globalData->dataTime()->setInitialTime( M_globalData->dataTime()->getTime() );
+    M_globalData->dataTime()->setInitialTime( M_globalData->dataTime()->time() );
 
     for ( ; M_globalData->dataTime()->canAdvance(); M_globalData->dataTime()->updateTime() )
     {
@@ -181,8 +181,8 @@ MultiscaleSolver::solveProblem( const Real& externalResidual )
             std::cout << std::endl;
             std::cout << "$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$" << std::endl;
             std::cout << "                    MULTISCALE SIMULATION" << std::endl;
-            std::cout << "             time = " << M_globalData->dataTime()->getTime() << " s; "  <<
-                      "time step number = " << M_globalData->dataTime()->getTimeStepNumber()  << std::endl;
+            std::cout << "             time = " << M_globalData->dataTime()->time() << " s; "  <<
+                      "time step number = " << M_globalData->dataTime()->timeStepNumber()  << std::endl;
             std::cout << "$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$" << std::endl << std::endl;
         }
 

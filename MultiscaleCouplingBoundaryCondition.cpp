@@ -197,7 +197,7 @@ MultiscaleCouplingBoundaryCondition::displayCouplingValues( std::ostream& output
         }
 
         if ( M_comm->MyPID() == 0 )
-            output << "  " << M_globalData->dataTime()->getTime() << "    " << M_models[i]->ID()
+            output << "  " << M_globalData->dataTime()->time() << "    " << M_models[i]->ID()
             << "    " << M_flags[i]
             << "    " << flowRate
             << "    " << "NaN                   "

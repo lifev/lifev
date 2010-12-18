@@ -196,7 +196,7 @@ OneDimensionalModel_Solver::initialize( solution_Type& solution )
     computeAreaRatio( solution );
 
     // Compute initial pressure (taking into account the viscoelastic wall)
-    computePressure( solution, M_physics -> data() -> dataTime() -> getTimeStep() );
+    computePressure( solution, M_physics -> data() -> dataTime() -> timeStep() );
 }
 
 void
@@ -1096,7 +1096,7 @@ OneDimensionalModel_Solver::longitudinalFluxCorrection()
         coeffMassLHS = 1./ coeffMassLHS;
 
         a = M_physics -> data() -> inertialModulus() / std::sqrt(4*std::atan(1));
-        coeffMassRHS = M_physics -> data() -> dataTime() -> getTimeStep() * a / M_physics -> data() -> densityRho();
+        coeffMassRHS = M_physics -> data() -> dataTime() -> timeStep() * a / M_physics -> data() -> densityRho();
 
         // backward differentiation when near to the left boundary
         // d3 A (xi)/ dz3 = (1/h^3) * ( -A(xi) + A(xi+3) - 3A(xi+2) + 3A(xi+1) )
