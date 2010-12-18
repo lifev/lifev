@@ -683,7 +683,7 @@ MultiscaleModelFSI3D::initializeSolution()
         if ( !M_data->method().compare("monolithicGI") )
         {
             vectorPtr_Type UniqueVFD ( new vector_Type( *M_FSIoperator->couplingVariableMap(), Unique, Zero ) );
-            UniqueVFD->subset( *M_fluidDisplacement, M_fluidDisplacement->map(), (UInt)0, dynamic_cast<MonolithicGI*>(M_FSIoperator.get())->mapWithoutMesh().ap(Unique)->NumGlobalElements());
+            UniqueVFD->subset( *M_fluidDisplacement, M_fluidDisplacement->map(), (UInt)0, dynamic_cast<MonolithicGI*>(M_FSIoperator.get())->mapWithoutMesh().map(Unique)->NumGlobalElements());
             *initSol += *UniqueVFD;
         }
 
