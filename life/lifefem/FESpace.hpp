@@ -397,8 +397,8 @@ public:
     const QuadRule&		bdQr()	const { return *M_bdQr; }
 
     //! Returns FE space dimension
-    /*const*/ UInt		dim()      const { return M_dim; }
-    /*const*/ UInt		fieldDim() const { return M_fieldDim; }
+    const UInt&         dim()      const { return M_dim; }
+    const UInt&         fieldDim() const { return M_fieldDim; }
 
     //@}
 
