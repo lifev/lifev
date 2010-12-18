@@ -200,7 +200,7 @@ void MonolithicGE::applyBoundaryConditions( )
          M_monolithicMatrix->applyBoundaryConditions(dataFluid()->dataTime()->getTime(), M_rhsFull);
 
          M_monolithicMatrix->GlobalAssemble();
-         //M_monolithicMatrix->getMatrix()->spy("M");
+         //M_monolithicMatrix->matrix()->spy("M");
 }
 
 

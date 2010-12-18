@@ -146,7 +146,7 @@ public:
     //@{
 
     //! Gets the solution
-    const vector_Type& getSolution() const { return *M_un; }
+    const vector_Type& solution() const { return *M_un; }
 
     //! Gets the solution ptr
     vectorPtr_Type& solutionPtr() { return M_un; }

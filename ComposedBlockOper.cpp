@@ -90,7 +90,7 @@ void ComposedBlockOper::push_back_matrix(const matrixPtr_Type& Mat, const  bool 
 void ComposedBlockOper::push_back_oper( ComposedBlockOper& Oper)
 {
     super_Type::push_back_oper( Oper );
-    M_coupling.insert(M_coupling.end(), Oper.getCouplingVector().begin(), Oper.getCouplingVector().end());
+    M_coupling.insert(M_coupling.end(), Oper.couplingVector().begin(), Oper.couplingVector().end());
 }
 
 void

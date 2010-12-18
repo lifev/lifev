@@ -224,15 +224,15 @@ void BlockInterface::addToBlock( const matrixPtr_Type& Mat, UInt position)
 
 void BlockInterface::push_back_oper( BlockInterface& Oper)
 {
-//     M_blocks.reserve(M_blocks.size()+Oper.getBlockVector().size());
-//     M_bch.reserve(M_bch.size()+Oper.getBChVector().size());
-//     M_FESpace.reserve(M_FESpace.size()+Oper.getFESpaceVector().size());
+//     M_blocks.reserve(M_blocks.size()+Oper.blockVector().size());
+//     M_bch.reserve(M_bch.size()+Oper.BChVector().size());
+//     M_FESpace.reserve(M_FESpace.size()+Oper.FESpaceVector().size());
 //     M_offset.reserve(M_offset.size()+Oper.getOffestVector().size());
 
-    M_blocks.insert(M_blocks.end(), Oper.getBlockVector().begin(), Oper.getBlockVector().end());
-    M_bch.insert(M_bch.end(), Oper.getBChVector().begin(), Oper.getBChVector().end());
-    M_FESpace.insert(M_FESpace.end(), Oper.getFESpaceVector().begin(), Oper.getFESpaceVector().end());
-    M_offset.insert(M_offset.end(), Oper.getOffsetVector().begin(), Oper.getOffsetVector().end());
+    M_blocks.insert(M_blocks.end(), Oper.blockVector().begin(), Oper.blockVector().end());
+    M_bch.insert(M_bch.end(), Oper.BChVector().begin(), Oper.BChVector().end());
+    M_FESpace.insert(M_FESpace.end(), Oper.FESpaceVector().begin(), Oper.FESpaceVector().end());
+    M_offset.insert(M_offset.end(), Oper.offsetVector().begin(), Oper.offsetVector().end());
 }
 
 } // Namespace LifeV

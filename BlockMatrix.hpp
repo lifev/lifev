@@ -212,7 +212,7 @@ public:
     //! returns the global matrix, with all the blocks and the coupling parts
     /*!
     */
-    matrixPtr_Type& getMatrix( ){return M_globalMatrix;}
+    matrixPtr_Type& matrix( ){return M_globalMatrix;}
 
     //! multiplies the whole system times a matrix
     /*!
@@ -312,16 +312,16 @@ public:
     /*!
       NOTE: it has to be multiplied times nDimensions to get the number of interface dofs
      */
-    UInt getInterface(){return M_interface;}
+    UInt interface(){return M_interface;}
 
     //! returns the map built for theLagrange multipliers
-    mapPtr_Type getInterfaceMap() const { return M_interfaceMap; }
+    mapPtr_Type interfaceMap() const { return M_interfaceMap; }
 
     //! returns the numeration of the interface
     /*!
       \param numeration: output vector
      */
-    void getNumerationInterface( vectorPtr_Type& numeration ) { numeration =  M_numerationInterface; }
+    void numerationInterface( vectorPtr_Type& numeration ) { numeration =  M_numerationInterface; }
 
     //@}
 

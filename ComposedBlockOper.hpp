@@ -200,16 +200,20 @@ public:
     //!@name Get Methods
     //@{
     //! returns the vector of flags (by const reference).
-    const std::vector<bool>& getRecompute() {return M_recompute;}
+    const std::vector<bool>& recompute() {return M_recompute;}
+
+    //! returns the vector of pointers to the coupling blocks (by const reference).
+    const std::vector<matrixPtr_Type> couplingVector(){return M_coupling;}
+
+    //@}
+
+    //!@name Set Methods
+    //@{
 
     //! turns on/off the recomputation of the preconditioner for a specified factor
     void setRecompute( UInt position, bool flag ) { M_recompute[position] = flag; }
 
-    //! returns the vector of pointers to the coupling blocks (by const reference).
-    const std::vector<matrixPtr_Type> getCouplingVector(){return M_coupling;}
-
     //@}
-
 protected:
 
     //! @name Protected Methods

@@ -160,7 +160,7 @@ public:
     const EpetraMap&            mapWithoutMesh() const {return *M_mapWithoutMesh;}
 
     //! getter for the global matrix of the system
-    const matrixPtr_Type        getMatrixPtr() const {return this->M_monolithicMatrix->getMatrix();}
+    const matrixPtr_Type        matrixPtr() const {return this->M_monolithicMatrix->matrix();}
 
     //! getter for the current iteration solution
     const vectorPtr_Type  uk()  const      {return M_uk;}
@@ -173,7 +173,7 @@ public:
     }
 
     //! get the solution.
-    const vector_Type& getSolution() const { return *M_uk; }
+    const vector_Type& solution() const { return *M_uk; }
 
     //! get the solution.
     vectorPtr_Type& solutionPtr() { return M_uk; }

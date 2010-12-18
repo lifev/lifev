@@ -25,16 +25,6 @@
 */
 //@HEADER
 
-/*!
-    @file
-    @brief A short description of the file content
-
-    @author Paolo Crosetto <crosetto@iacspc70.epfl.ch>
-    @date 08 Jun 2010
-
-    A more detailed description of the file (if necessary)
- */
-
 #include <life/lifecore/life.hpp>
 
 #include <BlockMatrix.hpp>

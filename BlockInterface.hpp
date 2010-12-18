@@ -414,16 +414,16 @@ public:
     //!@name Get Methods
     //@{
     //! returns the vector of pointers to the blocks (by const reference).
-    const std::vector<matrixPtr_Type>&    getBlockVector(){return M_blocks;}
+    const std::vector<matrixPtr_Type>&    blockVector(){return M_blocks;}
 
     //! returns the vector of pointers to the BCHandlers (by const reference).
-    const std::vector<bchandlerPtr_Type>& getBChVector() {return M_bch;}
+    const std::vector<bchandlerPtr_Type>& BChVector() {return M_bch;}
 
     //! returns the vector of pointers to the FE spaces (by const reference).
-    const std::vector<fespacePtr_Type>&   getFESpaceVector() {return M_FESpace;}
+    const std::vector<fespacePtr_Type>&   FESpaceVector() {return M_FESpace;}
 
     //! returns the vector of the offsets (by const reference).
-    const std::vector<UInt>&              getOffsetVector() {return M_offset;}
+    const std::vector<UInt>&              offsetVector() {return M_offset;}
     //@}
 
 protected:

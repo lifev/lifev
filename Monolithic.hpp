@@ -74,6 +74,9 @@
 
 namespace LifeV
 {
+
+class WRONG_PREC_EXCEPTION;
+
 //! Monolithic.hpp pure virtual class containing the core methods of the monolithic FSI solver
 /*!
  * Class handling the monolithic solver for FSI problems. The block structure of the matrix can be
@@ -95,8 +98,6 @@ namespace LifeV
  * The flag semiImplicit in the data file is used to distinguish between the GCE and CE (with quasi Newton) time discretizations.
  * Exact Newton method and full implicit time discretization are implemented in the MonolithicGI class.
  */
-
-class WRONG_PREC_EXCEPTION;
 
 class Monolithic : public FSIOperator
 {
@@ -323,10 +324,10 @@ public:
     void  setRestarts( bool restarts ){ M_restarts = restarts; }
 
     //! returns a non-const pointer to the preconditioner. Can be used either as a setter or a getter.
-    precPtr_Type& precPtr(){ return M_precPtr; }
+    precPtr_Type& precPtrView(){ return M_precPtr; }
 
     //! returns a non-const pointer to the preconditioner. Can be used either as a setter or a getter.
-    blockMatrixPtr_Type& operatorPtr(){ return M_monolithicMatrix; }
+    blockMatrixPtr_Type& operatorPtrView(){ return M_monolithicMatrix; }
 
     /**
        \small sets the fluid BCHandler and merges it with the flux BCHandler
@@ -376,7 +377,7 @@ public:
     //    const boost::shared_ptr<EpetraMap>& monolithicMap() {return M_monolithicMap;}
 
     //!get the total dimension of the FS interface
-    UInt getDimInterface() const {return nDimensions*M_monolithicMatrix->getInterface();}
+    UInt getDimInterface() const {return nDimensions*M_monolithicMatrix->interface();}
 
     //! Returns the solution at the previous time step
     vectorPtr_Type const&       un(){return M_un;}
@@ -422,10 +423,10 @@ public:
 
 
     //! Returns the monolithic map
-    virtual    boost::shared_ptr<EpetraMap>& getCouplingVariableMap(){return M_monolithicMap;}
+    virtual    boost::shared_ptr<EpetraMap>& couplingVariableMap(){return M_monolithicMap;}
 
     //! get the solution vector
-    virtual const vector_Type& getSolution() const = 0;
+    virtual const vector_Type& solution() const = 0;
 
     //virtual vectorPtr_Type& solutionPtr() = 0;
     //@}
