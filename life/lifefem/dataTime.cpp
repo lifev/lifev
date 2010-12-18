@@ -87,7 +87,7 @@ DataTime::setup( const GetPot& dfile, const std::string& section )
     M_periodTime = dfile(( section + "/periodtime"      ).data(), 1.);
     M_time = M_initialTime;
     M_timeStep = dfile(( section + "/timestep" ).data(), M_endTime );
-    M_orderBDF = dfile(( section + "/orderBDF" ).data(), 1 );
+    M_orderBDF = dfile(( section + "/BDF_order" ).data(), 1 );
     M_theta = dfile((section + "/theta").data(),0.25);
     M_gamma = dfile(( section + "/zeta").data(),0.5);
 }
