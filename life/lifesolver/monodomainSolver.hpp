@@ -513,7 +513,7 @@ void MonodomainSolver<Mesh, SolverType>::buildSystem()
 
     }
 
-    massCoefficient = M_data.volumeSurfaceRatio() * M_data.membraneCapacitance() / M_data.getTimeStep();
+    massCoefficient = M_data.volumeSurfaceRatio() * M_data.membraneCapacitance() / M_data.timeStep();
 
     M_comm->Barrier();
 
@@ -795,7 +795,7 @@ void MonodomainSolver<Mesh, SolverType>::applyBoundaryConditions( matrix_Type&  
     vector_Type rhsFull(M_rhsNoBC,Repeated, Zero);
 
     bcManage( matrix, rhs, *M_uFESpace.mesh(), M_uFESpace.dof(),
-              BCh, M_uFESpace.feBd(), 1.,M_data.getTime() );
+              BCh, M_uFESpace.feBd(), 1.,M_data.time() );
 
     rhs = rhsFull;
     if ( BCh.hasOnlyEssential() && M_diagonalize )

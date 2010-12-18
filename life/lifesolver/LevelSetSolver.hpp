@@ -361,7 +361,8 @@ LevelSetSolver<mesh_type,solver_type>::
 setup(const data_ptrType& data)
 {
     M_data=data;
-    M_bdf.reset(new bdf_type(data->dataTime()->getBDF_order()));
+    M_bdf.reset(new bdf_type());
+    M_bdf->setup(data->dataTime()->orderBDF());
 }
 
 
@@ -372,7 +373,7 @@ initialize(const vector_type& init)
 {
     ASSERT(M_bdf!=0, "Bdf structure not initialized. Use the setup method before initialize.");
     M_solution = init;
-    M_bdf->initialize_unk(init);
+    M_bdf->setInitialCondition(init);
 }
 
 template< typename mesh_type, typename solver_type>
@@ -400,7 +401,7 @@ updateSystem(const vector_type& beta, BCHandler& bcHandler, const Real& time)
 
 
     // Mass matrix
-    *M_systemMatrix += (*M_massMatrix)*( M_bdf->coeff_der(0)/M_data->dataTime()->getTimeStep() );
+    *M_systemMatrix += (*M_massMatrix)*( M_bdf->coefficientFirstDerivative(0)/M_data->dataTime()->timeStep() );
 
     // advection matrix
     M_adrAssembler.addAdvection(M_systemMatrix,beta);
@@ -432,8 +433,9 @@ updateSystem(const vector_type& beta, BCHandler& bcHandler, const Real& time)
     M_rhs *=0.0;
 
     // Rhs time
-    M_rhs += *M_massMatrix *M_bdf->time_der(M_data->dataTime()->getTimeStep());
-
+     M_bdf->updateRHSContribution(M_data->dataTime()->timeStep());
+     M_rhs += *M_massMatrix *M_bdf->rhsContributionFirstDerivative();
+    
     // Rhs stab
     M_rhs += *M_rhsMatrix*M_solution;
 
@@ -465,7 +467,7 @@ iterate()
 
     M_linearSolver.solveSystem(M_rhs, M_solution, M_systemMatrix);
 
-    M_bdf->shift_right(M_solution);
+    M_bdf->shiftRight(M_solution);
 }
 
 

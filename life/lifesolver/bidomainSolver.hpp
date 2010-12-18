@@ -533,7 +533,7 @@ void BidomainSolver<Mesh, SolverType>::buildSystem()
     }
 
     massCoeff = M_data.volumeSurfaceRatio() * M_data.membraneCapacitance() *
-        M_BDFIntraExtraPotential.coeff_der(0) / M_data.getTimeStep();
+        M_BDFIntraExtraPotential.coefficientFirstDerivative(0) / M_data.timeStep();
 
     M_comm->Barrier();
     chrono.stop();
@@ -607,7 +607,7 @@ initialize( const vector_Type& ui0, const vector_Type& ue0 )
     }
     M_solutionIntraExtraPotentialExtrapolated = M_solutionIntraExtraPotential;
     M_solutionTransmembranePotentialExtrapolated = M_solutionTransmembranePotential;
-    M_BDFIntraExtraPotential.initialize_unk(M_solutionIntraExtraPotential);
+    M_BDFIntraExtraPotential.setInitialCondition(M_solutionIntraExtraPotential);
     M_BDFIntraExtraPotential.showMe();
 }
 
@@ -795,8 +795,8 @@ void BidomainSolver<Mesh, SolverType>::solveSystem( matrixPtr_Type  matrFull,
         M_solutionExtraPotential[ig] = M_solutionIntraExtraPotential[ig+potentialFESpaceDimension()]; // BASEINDEX + 1
     }
 
-    M_BDFIntraExtraPotential.shift_right(M_solutionIntraExtraPotential);
-    M_solutionIntraExtraPotentialExtrapolated = M_BDFIntraExtraPotential.extrap();
+    M_BDFIntraExtraPotential.shiftRight(M_solutionIntraExtraPotential);
+    M_solutionIntraExtraPotentialExtrapolated = M_BDFIntraExtraPotential.extrapolation();
 
     for ( Int i = 0 ; i < M_solutionTransmembranePotential.epetraVector().MyLength() ; i++ )
     {
@@ -821,7 +821,7 @@ void BidomainSolver<Mesh, SolverType>::applyBoundaryConditions(matrix_Type& matr
     //    rhsFull.Import(M_rhsNoBC, Zero); // ignoring non-local entries, Otherwise they are summed up lately
 
     bcManage( matrix, rhs, *M_pFESpace.mesh(), M_pFESpace.dof(), BCh, M_pFESpace.feBd(), 1.,
-              M_data.getTime() );
+              M_data.time() );
     rhs = rhsFull;
 
     if ( BCh.hasOnlyEssential() && M_diagonalize )

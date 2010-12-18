@@ -272,10 +272,10 @@ MitchellSchaeffer( const data_Type& dataType,
     M_solutionGatingW ( IonicSolver<Mesh, SolverType>::M_localMap ),
     M_solutionGatingWRepeated( M_solutionGatingW, Repeated ),
     M_elvec ( IonicSolver<Mesh, SolverType>::M_uFESpace.fe().nbFEDof(), 1 ),
-    BDForder ( IonicSolver<Mesh, SolverType>::M_data.M_BDForder ),
-    bdf_w( BDForder )
+    BDForder( IonicSolver<Mesh, SolverType>::M_data.M_BDForder ),
+    bdf_w( )
 {
-
+  bdf_w.setup( BDForder );
 }
 
 template<typename Mesh, typename SolverType>
@@ -326,17 +326,18 @@ void MitchellSchaeffer<Mesh, SolverType>::solveIonicModel( const vector_Type& u,
 	//! dw/dt ={
 	//!            -w/tau_close   if u > vcrit
 
-	Real aux1 = 1.0 / (bdf_w.coeff_der(0)/timeStep +
+	Real aux1 = 1.0 / (bdf_w.coefficientFirstDerivative(0)/timeStep +
                        1.0/this->M_data.M_tau_open );
 	Real aux = 1.0/((this->M_data.M_potentialMaximum -
                      this->M_data.M_potentialMinimum) *
                     (this->M_data.M_potentialMaximum -
                      this->M_data.M_potentialMinimum) *
                     this->M_data.M_tau_open);
-	Real aux2 = 1.0 / (bdf_w.coeff_der(0)/timeStep +
+	Real aux2 = 1.0 / (bdf_w.coefficientFirstDerivative(0)/timeStep +
                        1.0/this->M_data.M_tau_close);
 
-	vector_Type M_time_der=bdf_w.time_der(timeStep);
+	bdf_w.updateRHSContribution(timeStep);
+	vector_Type M_time_der=bdf_w.rhsContributionFirstDerivative();
 
 	IonicSolver<Mesh, SolverType>::M_comm->Barrier();
 	Real x, y, z;
@@ -353,13 +354,13 @@ void MitchellSchaeffer<Mesh, SolverType>::solveIonicModel( const vector_Type& u,
    		if (u[ig] < this->M_data.M_criticalPotential)
             M_solutionGatingW[ig] = aux1 * (aux + M_time_der[ig]);
         else if (this->M_data.M_hasHeterogeneousTauClose)
-            M_solutionGatingW[ig] = (1.0 / (bdf_w.coeff_der(0)/timeStep  +
+            M_solutionGatingW[ig] = (1.0 / (bdf_w.coefficientFirstDerivative(0)/timeStep  +
                                   1.0/*fct_Tau_Close(ref,x,y,z,ID)*/)) *
                 M_time_der[ig];//aux2 * M_time_der[ig];
         else
             M_solutionGatingW[ig] = aux2 *  M_time_der[ig];
 	}
-	bdf_w.shift_right(M_solutionGatingW);
+	bdf_w.shiftRight(M_solutionGatingW);
 
 	IonicSolver<Mesh, SolverType>::M_comm->Barrier();
 }
@@ -393,7 +394,7 @@ initialize( )
                                           this->M_data.M_potentialMinimum)*
                                          (this->M_data.M_potentialMaximum-
                                           this->M_data.M_potentialMinimum)));
-	bdf_w.initialize_unk(M_solutionGatingW);
+	bdf_w.setInitialCondition(M_solutionGatingW);
 	bdf_w.showMe();
 }
 

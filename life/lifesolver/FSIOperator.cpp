@@ -533,14 +533,15 @@ FSIOperator::updateSystem( )
 
         if ( M_fluid->solution().get() )
             M_un.reset( new vector_Type( *M_fluid->solution() ) );
-        *M_rhs = M_fluid->matrixMass()*M_bdf->time_der( M_data->dataFluid()->dataTime()->getTimeStep() );
+	M_bdf->updateRHSContribution( M_data->dataFluid()->dataTime()->timeStep() );
+        *M_rhs = M_fluid->matrixMass()*M_bdf->rhsContributionFirstDerivative();
     }
 
     if ( this->isSolid() )
     {
         this->M_solid->updateSystem();
     }
-    couplingVariableExtrap();
+   this->couplingVariableExtrap( );
 }
 
 
@@ -551,12 +552,12 @@ void FSIOperator::couplingVariableExtrap( )
     if (!M_lambdaDot.get())
     {
         M_lambdaDot.reset        ( new vector_Type(*M_fluidInterfaceMap, Unique) );
-        *M_lambda     += M_data->dataFluid()->dataTime()->getTimeStep()*lambdaDotSolid();
+        *M_lambda     += M_data->dataFluid()->dataTime()->timeStep()*lambdaDotSolid();
     }
     else
     {
-        *M_lambda     += 1.5*M_data->dataFluid()->dataTime()->getTimeStep()*lambdaDotSolid(); // *1.5
-        *M_lambda     -= M_data->dataFluid()->dataTime()->getTimeStep()*0.5*(*M_lambdaDot);
+        *M_lambda     += 1.5*M_data->dataFluid()->dataTime()->timeStep()*lambdaDotSolid(); // *1.5
+        *M_lambda     -= M_data->dataFluid()->dataTime()->timeStep()*0.5*(*M_lambdaDot);
     }
 
     *M_lambdaDot   = lambdaDotSolid();
@@ -569,7 +570,7 @@ FSIOperator::shiftSolution()
 {
     if ( this->isFluid() )
     {
-        this->M_bdf->shift_right( *M_fluid->solution() );
+        this->M_bdf->shiftRight( *M_fluid->solution() );
     }
 }
 
@@ -599,8 +600,9 @@ FSIOperator::imposeFlux( void )
 
 void FSIOperator::initializeBDF( const vector_Type& un )
 {
-    M_bdf.reset( new BdfT<vector_Type>( M_data->dataFluid()->dataTime()->getBDF_order() ) );
-    M_bdf->initialize_unk( un );
+  M_bdf.reset( new BdfT<vector_Type>( ));
+  M_bdf->setup(M_data->dataFluid()->dataTime()->orderBDF() ) ;
+ M_bdf->setInitialCondition( un );
 }
 
 void FSIOperator::createInterfaceMaps( std::map<ID, ID> const& locDofMap )
@@ -886,9 +888,8 @@ void
 FSIOperator::setAlphafCoef( )
 {
     Real h=0.1, R=0.5;
-
-    M_AlphafCoef  = 2*(this->dataSolid()->getRho()*h)/this->dataFluid()->dataTime()->getTimeStep();
-    M_AlphafCoef += h*this->dataSolid()->getYoung(0)*this->dataFluid()->dataTime()->getTimeStep() /
+    M_AlphafCoef  = 2*(this->dataSolid()->getRho()*h)/this->dataFluid()->dataTime()->timeStep();
+    M_AlphafCoef += h*this->dataSolid()->getYoung(0)*this->dataFluid()->dataTime()->timeStep() /
                     (2*pow(R,2) *(1-pow(dataSolid()->getPoisson(0),2)));
 }
 

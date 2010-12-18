@@ -318,37 +318,6 @@ public:
 
     //@}
 
-    inline void __attribute__ ((__deprecated__)) setBC ( bchandler_Type& bcHandler )
-    {
-        // Deprecated method
-        setBoundaryCondition( bcHandler );
-    }
-
-    inline bool __attribute__ ((__deprecated__)) BCset () const
-    {
-        return isBoundaryConditionSet();
-    }
-
-    inline  bchandlerPtr_Type& __attribute__ ((__deprecated__)) bcHandler ()
-    {
-        return boundaryConditionHandler();
-    }
-
-    inline EpetraMap __attribute__ ((__deprecated__)) const& getMap () const
-    {
-        return map();
-    }
-
-    inline Displayer __attribute__ ((__deprecated__))const & getDisplayer() const
-    {
-        return displayer();
-    }
-
-    void __attribute__ ((__deprecated__)) solveOneStep()
-    {
-         solveOneTimeStep();
-    }
-
 protected:
 
     //! @name Protected Methods
@@ -620,7 +589,7 @@ solveOneTimeStep ()
     M_globalFlux->globalAssemble();
 
     // Update the value of the solution
-    (*M_u) = (*M_uOld) - M_data.dataTime()->getTimeStep() * (*M_globalFlux);
+    (*M_u) = (*M_uOld) - M_data.dataTime()->timeStep() * (*M_globalFlux);
 
     // Clean the vector of fluxes
     M_globalFlux.reset( new vector_Type( M_FESpace.map(), Repeated ) );
@@ -715,7 +684,7 @@ CFL() const
 
                 // Compute the local CFL without the time step
                 localCFL = e / K * M_numericalFlux->getNormInfty ( leftValue[0], rightValue[0], normal, iElem,
-                                                                   M_data.dataTime()->getTime(), x, y, z );
+                                                                   M_data.dataTime()->time(), x, y, z );
 
                 // Select the maximum between the old CFL condition and the new CFL condition
                 if ( localCFL > localCFLOld  )
@@ -755,7 +724,7 @@ setInitialSolution ( const Function_Type& initialSolution )
     // Interpolate the initial solution.
     M_FESpace.interpolate( initialSolution,
                            *M_uOld,
-                           M_data.dataTime()->getInitialTime() );
+                           M_data.dataTime()->initialTime() );
 
     // Update the solution
     *M_u = *M_uOld;
@@ -867,14 +836,14 @@ localEvolve ( const UInt& iElem )
                     z = M_FESpace.feBd().quadPt( ig, static_cast<UInt>(2) );
 
                     // Compute the boundary contribution
-                    rightValue[0] = bcBase( M_data.dataTime()->getTime(), x, y, z, 0 );
+                    rightValue[0] = bcBase( M_data.dataTime()->time(), x, y, z, 0 );
 
                     // Compute the outward unit normal of the boundary
                     const KN<Real> normal ( M_FESpace.feBd().normal('.', static_cast<Int>(ig) ) );
 
                     const Real localFaceFlux = M_numericalFlux->getFirstDerivativePhysicalFluxDotNormal ( normal,
                                                                                                           iElem,
-                                                                                                          M_data.dataTime()->getTime(),
+                                                                                                          M_data.dataTime()->time(),
                                                                                                           x, y, z, rightValue[ 0 ] );
                     // Update the local flux of the current face with the quadrature weight
                     localFaceFluxWeight[0] += localFaceFlux * M_FESpace.feBd().weightMeas( ig );
@@ -943,7 +912,7 @@ localEvolve ( const UInt& iElem )
                                                            rightValue[ 0 ],
                                                            normal,
                                                            iElem,
-                                                           M_data.dataTime()->getTime(), x, y, z );
+                                                           M_data.dataTime()->time(), x, y, z );
 
             // Update the local flux of the current face with the quadrature weight
             localFaceFluxWeight[0] += localFaceFlux * M_FESpace.feBd().weightMeas( ig );

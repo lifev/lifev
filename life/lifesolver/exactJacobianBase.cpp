@@ -127,11 +127,11 @@ void  exactJacobian::solveLinearFluid()
     //dispFluidDomainRep = dispFluidMesh;//import
     dispFluidDomain=dispFluidMesh;//import
     this->derVeloFluidMesh() = dispFluidMesh;
-    this->derVeloFluidMesh() *= 1./(M_data->dataFluid()->dataTime()->getTimeStep());
+    this->derVeloFluidMesh() *= 1./(M_data->dataFluid()->dataTime()->timeStep());
     this->displayer().leaderPrint( " norm inf dw = " , this->derVeloFluidMesh().normInf(), "\n" );
     *M_rhsNew *= 0.;
 
-    double alpha = this->M_bdf->coeff_der( 0 ) / M_data->dataFluid()->dataTime()->getTimeStep();
+    double alpha = this->M_bdf->coefficientFirstDerivative( 0 ) / M_data->dataFluid()->dataTime()->timeStep();
 
     if (!this->M_fluid->stabilization())//if using P1Bubble
     {
@@ -296,7 +296,7 @@ void exactJacobian::eval(const vector_Type& _disp,
                                         this->veloFluidMesh());
 
         this->veloFluidMesh()    -= dispFluidMeshOld();
-        this->veloFluidMesh()    *= 1./(M_data->dataFluid()->dataTime()->getTimeStep());
+        this->veloFluidMesh()    *= 1./(M_data->dataFluid()->dataTime()->timeStep());
 
         if ( iter==0 || !this->M_data->dataFluid()->isSemiImplicit() )
         {
@@ -313,13 +313,13 @@ void exactJacobian::eval(const vector_Type& _disp,
             vector_Type meshDispDiff( M_meshMotion->dispDiff(), Repeated );
             this->interpolateVelocity(meshDispDiff, *M_beta);
 
-            *M_beta *= -1./M_data->dataFluid()->dataTime()->getTimeStep();
+            *M_beta *= -1./M_data->dataFluid()->dataTime()->timeStep();
 
             *M_beta  += *this->M_un;
 
             if (recomputeMatrices)
             {
-                double alpha = 1./M_data->dataFluid()->dataTime()->getTimeStep();
+                double alpha = 1./M_data->dataFluid()->dataTime()->timeStep();
                 this->M_fluid->updateSystem( alpha, *M_beta, *M_rhs );
             }
             else
