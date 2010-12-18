@@ -188,8 +188,8 @@ MultiscaleModelFSI3D::buildSystem()
     M_FSIoperator->updateSystem();
 
     // Update solution at time n
-    M_fluidVelocityPressure_tn.reset( new vector_Type( M_FSIoperator->getSolution() ) );
-    M_rhs_tn.reset( new vector_Type( M_FSIoperator->getSolution().map() ) );
+    M_fluidVelocityPressure_tn.reset( new vector_Type( M_FSIoperator->solution() ) );
+    M_rhs_tn.reset( new vector_Type( M_FSIoperator->solution().map() ) );
     M_solidDisplacement_tn.reset( new vector_Type( M_FSIoperator->meshDisp() ) );
     M_solidDisplacementOld_tn.reset( new vector_Type( M_FSIoperator->meshDisp() ) );
 }
@@ -211,7 +211,7 @@ MultiscaleModelFSI3D::updateSystem()
 
     M_nonLinearRichardsonIteration = 0;
 
-    boost::dynamic_pointer_cast<Monolithic>(M_FSIoperator)->precPtr()->setRecompute( 1, true );
+    boost::dynamic_pointer_cast<Monolithic>(M_FSIoperator)->precPtrView()->setRecompute( 1, true );
 }
 
 void
@@ -234,7 +234,7 @@ MultiscaleModelFSI3D::solveSystem( )
 
     if (M_nonLinearRichardsonIteration != 0)
     {
-        boost::dynamic_pointer_cast<Monolithic>(M_FSIoperator)->precPtr()->setRecompute( 1, false );
+        boost::dynamic_pointer_cast<Monolithic>(M_FSIoperator)->precPtrView()->setRecompute( 1, false );
         M_FSIoperator->updateRHS();
         M_FSIoperator->applyBoundaryConditions( );
     }
@@ -668,12 +668,12 @@ MultiscaleModelFSI3D::initializeSolution()
         vectorPtr_Type UniqueVFDOld( new vector_Type( *M_fluidDisplacement, Unique, Zero ) );
         dynamic_cast< Monolithic* >( M_FSIoperator.get())->initializeMesh( UniqueVFDOld );
 
-        vectorPtr_Type initSol( new EpetraVector( *M_FSIoperator->getCouplingVariableMap() ) );
+        vectorPtr_Type initSol( new EpetraVector( *M_FSIoperator->couplingVariableMap() ) );
         vectorPtr_Type UniqueV( new vector_Type( *M_fluidVelocityPressure, Unique, Zero ) );
         *initSol = *UniqueV;
         M_FSIoperator->fluid().initialize( *initSol );
 
-        UniqueV.reset( new vector_Type( *M_FSIoperator->getCouplingVariableMap(), Unique, Zero ) );
+        UniqueV.reset( new vector_Type( *M_FSIoperator->couplingVariableMap(), Unique, Zero ) );
         UInt offset = dynamic_cast<Monolithic*>(M_FSIoperator.get())->getOffset();
         UniqueV->subset( *M_solidDisplacement, M_solidDisplacement->map(), (UInt)0, offset );
         *UniqueV *= 1 / ( M_FSIoperator->solid().rescaleFactor() * M_data->dataFluid()->dataTime()->getTimeStep() );
@@ -682,12 +682,12 @@ MultiscaleModelFSI3D::initializeSolution()
 
         if ( !M_data->method().compare("monolithicGI") )
         {
-            vectorPtr_Type UniqueVFD ( new vector_Type( *M_FSIoperator->getCouplingVariableMap(), Unique, Zero ) );
-            UniqueVFD->subset( *M_fluidDisplacement, M_fluidDisplacement->map(), (UInt)0, dynamic_cast<MonolithicGI*>(M_FSIoperator.get())->mapWithoutMesh().map(Unique)->NumGlobalElements());
+            vectorPtr_Type UniqueVFD ( new vector_Type( *M_FSIoperator->couplingVariableMap(), Unique, Zero ) );
+            UniqueVFD->subset( *M_fluidDisplacement, M_fluidDisplacement->map(), (UInt)0, dynamic_cast<MonolithicGI*>(M_FSIoperator.get())->mapWithoutMesh().ap(Unique)->NumGlobalElements());
             *initSol += *UniqueVFD;
         }
 
-        vectorPtr_Type initSolSVel( new vector_Type( *M_FSIoperator->getCouplingVariableMap(), Unique, Zero ) );
+        vectorPtr_Type initSolSVel( new vector_Type( *M_FSIoperator->couplingVariableMap(), Unique, Zero ) );
         initSolSVel->subset( *M_solidVelocity,M_solidVelocity->map(), (UInt)0, offset );
         *initSolSVel *= 1 / ( M_FSIoperator->solid().rescaleFactor() * M_data->dataSolid()->dataTime()->getTimeStep() );
         M_FSIoperator->solid().initializeVel( *initSolSVel );
