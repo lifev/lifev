@@ -191,10 +191,10 @@ Monolithic::setupFluidSolid( UInt const fluxes )
     *M_monolithicMap+= M_dFESpace->map();
 
     M_monolithicMatrix->createInterfaceMap( *M_interfaceMap, M_dofStructureToHarmonicExtension->localDofMap(), M_dFESpace->map().map(Unique)->NumGlobalElements()/nDimensions, M_epetraWorldComm );
-    *M_monolithicMap += *M_monolithicMatrix->getInterfaceMap();
+    *M_monolithicMap += *M_monolithicMatrix->interfaceMap();
 
     //the map for the interface coupling matrices should be done with respect to the coarser mesh.
-    M_monolithicMatrix->getNumerationInterface(M_numerationInterface);
+    M_monolithicMatrix->numerationInterface(M_numerationInterface);
     M_beta.reset  (new vector_Type(/*M_monolithicMap*/M_uFESpace->map()));
 
     M_offset = M_uFESpace->dof().numTotalDof()*nDimensions + M_fluxes +  M_pFESpace->dof().numTotalDof();
@@ -277,8 +277,7 @@ Monolithic::computeMaxSingularValue( )
     boost::shared_ptr<operatorPtr_Type>  ComposedPrecPtr(M_linearSolver->getPrec()->getPrec());
 
     //M_monolithicMatrix->getMatrixPtr()->OptimizeStorage();
-    boost::shared_ptr<Epetra_FECrsMatrix> matrCrsPtr(new Epetra_FECrsMatrix(*M_monolithicMatrix->getMatrix()->matrixPtr()));
-
+    boost::shared_ptr<Epetra_FECrsMatrix> matrCrsPtr(new Epetra_FECrsMatrix(*M_monolithicMatrix->matrix()->matrixPtr()));
     M_preconditionedSymmetrizedMatrix->push_back(boost::dynamic_pointer_cast<operatorPtr_Type>(/*ComposedPrecPtr*/matrCrsPtr));
     M_preconditionedSymmetrizedMatrix->push_back(boost::dynamic_pointer_cast<operatorPtr_Type>(ComposedPrecPtr/*matrCrsPtr*/), true);
     M_preconditionedSymmetrizedMatrix->push_back(boost::dynamic_pointer_cast<operatorPtr_Type>(ComposedPrecPtr/*matrCrsPtr*/), true, true);
@@ -334,7 +333,7 @@ Monolithic::solveJac(vector_Type         &_step,
     M_solid->getDisplayer().leaderPrint("  M-  Jacobian NormInf res:                    ", _res.normInf(), "\n");
     M_solid->getDisplayer().leaderPrint("  M-  Solving Jacobian system ...              \n" );
 
-    //M_monolithicMatrix->getMatrix()->spy("J");
+    //M_monolithicMatrix->matrix()->spy("J");
     this->iterateMonolithic(_res, _step);
 
     M_solid->getDisplayer().leaderPrint("  M-  Jacobian NormInf res:                    ", _step.normInf(), "\n");
@@ -404,7 +403,7 @@ iterateMonolithic(const vector_Type& rhs, vector_Type& step)
 
     //M_monolithicMatrix->GlobalAssemble();
     //necessary if we did not imposed Dirichlet b.c.
-    M_linearSolver->setOperator(*M_monolithicMatrix->getMatrix()->matrixPtr());
+    M_linearSolver->setOperator(*M_monolithicMatrix->matrix()->matrixPtr());
 
     M_linearSolver->setReusePreconditioner( (M_reusePrec) && (!M_resetPrec) );
 
@@ -432,7 +431,7 @@ Monolithic::couplingRhs(vectorPtr_Type rhs, vectorPtr_Type un) // not working wi
 
     vector_Type lambda(*M_interfaceMap, Unique);
     this->monolithicToInterface(lambda, *un);
-    UInt interface(M_monolithicMatrix->getInterface());
+    UInt interface(M_monolithicMatrix->interface());
     //Real rescale(M_solid->rescaleFactor());
     UInt totalDofs(M_dFESpace->dof().numTotalDof());
 
@@ -455,9 +454,9 @@ Monolithic::
 evalResidual( const vector_Type& sol,const vectorPtr_Type& rhs, vector_Type& res, bool diagonalScaling)
 {
     if( diagonalScaling )
-        diagonalScale(*rhs, M_monolithicMatrix->getMatrix());
+        diagonalScale(*rhs, M_monolithicMatrix->matrix());
 
-    res = *(M_monolithicMatrix->getMatrix())*sol;
+    res = *(M_monolithicMatrix->matrix())*sol;
     res -= *rhs; // Ax-b
 }
 
