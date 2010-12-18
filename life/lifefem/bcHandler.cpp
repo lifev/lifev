@@ -354,39 +354,39 @@ BCHandler::findBCWithName(bcName_Type const & name) const
 bool
 BCHandler::hasOnlyEssential() const
 {
-	std::map<bcFlag_Type, std::set<ID> > nonEssentialConditions;
-	std::set<ID> nonEssentialComponents;
-	for(UInt i=1; i<=nDimensions; i++)
-		nonEssentialComponents.insert(i);
+    std::map<bcFlag_Type, std::set<ID> > nonEssentialConditions;
+    std::set<ID> nonEssentialComponents;
+    for (UInt i=1; i<=nDimensions; i++)
+        nonEssentialComponents.insert(i);
 
-	for ( bcBaseConstIterator_Type it = M_bcList.begin(); it != M_bcList.end(); ++it )
-		nonEssentialConditions.insert(std::make_pair(it->flag(), nonEssentialComponents) );
+    for ( bcBaseConstIterator_Type it = M_bcList.begin(); it != M_bcList.end(); ++it )
+        nonEssentialConditions.insert(std::make_pair(it->flag(), nonEssentialComponents) );
 
-	for ( bcBaseConstIterator_Type it = begin(); it != end(); ++it )
-	{
-		if( it->type() == Essential )
-		{
-			switch(it->mode())
-			{
-			case Full:
-			case Normal:
-				nonEssentialConditions.erase(it->flag());
-				break;
-			case Scalar:
-				nonEssentialConditions.find(it->flag())->second.erase(1);
-				break;
-			case Component:
-				for ( UInt iComp = 1; iComp <= it->numberOfComponents(); ++iComp )
-					nonEssentialConditions.find(it->flag())->second.erase( it->component(iComp) );
-				if ( nonEssentialConditions.find(it->flag())->second.empty() )
-					nonEssentialConditions.erase(it->flag());
-				break;
-			default:
-				break;
-			}
-		}
-	}
-	return ( nonEssentialConditions.empty() );
+    for ( bcBaseConstIterator_Type it = begin(); it != end(); ++it )
+    {
+        if ( it->type() == Essential )
+        {
+            switch (it->mode())
+            {
+            case Full:
+            case Normal:
+                nonEssentialConditions.erase(it->flag());
+                break;
+            case Scalar:
+                nonEssentialConditions.find(it->flag())->second.erase(1);
+                break;
+            case Component:
+                for ( UInt iComp = 1; iComp <= it->numberOfComponents(); ++iComp )
+                    nonEssentialConditions.find(it->flag())->second.erase( it->component(iComp) );
+                if ( nonEssentialConditions.find(it->flag())->second.empty() )
+                    nonEssentialConditions.erase(it->flag());
+                break;
+            default:
+                break;
+            }
+        }
+    }
+    return ( nonEssentialConditions.empty() );
 }
 
 // ===================================================

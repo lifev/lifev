@@ -2159,22 +2159,22 @@ bcResistanceManage( MatrixType& matrix,
 
 
         for ( std::set<ID>::iterator iDofIt = resistanceDofs.begin();
-                     iDofIt != resistanceDofs.end(); ++iDofIt )
-		 {
-        	 for ( UInt iComp = 1; iComp <= nComp; ++iComp )
-			 {
-				 idDof = *iDofIt + ( boundaryCond.component( iComp ) - 1 ) * totalDof + offset;
-				 for ( std::set<ID>::iterator jDofIt = resistanceDofs.begin();
-						 jDofIt != resistanceDofs.end(); ++jDofIt )
-				 {
-					 for ( UInt jComp = 1; jComp <= nComp; ++jComp )
-					 {
-						 jdDof = *jDofIt + ( boundaryCond.component( jComp ) - 1 ) * totalDof + offset;
+                iDofIt != resistanceDofs.end(); ++iDofIt )
+        {
+            for ( UInt iComp = 1; iComp <= nComp; ++iComp )
+            {
+                idDof = *iDofIt + ( boundaryCond.component( iComp ) - 1 ) * totalDof + offset;
+                for ( std::set<ID>::iterator jDofIt = resistanceDofs.begin();
+                        jDofIt != resistanceDofs.end(); ++jDofIt )
+                {
+                    for ( UInt jComp = 1; jComp <= nComp; ++jComp )
+                    {
+                        jdDof = *jDofIt + ( boundaryCond.component( jComp ) - 1 ) * totalDof + offset;
 
-						 matrix.addToCoefficient( idDof-1,  jdDof-1, boundaryCond.resistanceCoef() * vv[idDof] * vv[jdDof] );
-					 }
-				 }
-			 }
+                        matrix.addToCoefficient( idDof-1,  jdDof-1, boundaryCond.resistanceCoef() * vv[idDof] * vv[jdDof] );
+                    }
+                }
+            }
         }
 
     }
