@@ -97,8 +97,8 @@ int ComposedNN::solveSystem( const vector_Type& rhs, vector_Type& step, solverPt
     M_secondCompPrec->push_back(M_prec[2], false, false);
     M_secondCompPrec->push_back(M_prec[3], false, false);
 
-    //M_blockPrecs->resetP();
-    if (!(M_blockPrecs->getNumber()))
+    //M_blockPrecs->resetOperator();
+    if (!(M_blockPrecs->number()))
     {
         M_blockPrecs->push_back(M_firstCompPrec, false, false, false);
         M_blockPrecs->push_back(M_secondCompPrec, false, false, true /*sum*/);

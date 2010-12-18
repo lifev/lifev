@@ -143,7 +143,7 @@ public:
      */
     void replace_matrix( const matrixPtr_Type& oper, UInt position );
 
-    bool set(){return (bool) M_blockPrecs.get() && M_blockPrecs->getNumber();}
+    bool set(){return (bool) M_blockPrecs.get() && M_blockPrecs->number();}
 
     //@}
     //!@name Factory Method
