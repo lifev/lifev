@@ -191,9 +191,9 @@ CTRK::run()
     MPI_Barrier(MPI_COMM_WORLD);
 
     // Initialization
-    Real dt     = dataNavierStokes.dataTime()->getTimeStep();
-    Real t0     = dataNavierStokes.dataTime()->getInitialTime();
-    Real tFinal = dataNavierStokes.dataTime()->getEndTime();
+    Real dt     = dataNavierStokes.dataTime()->timeStep();
+    Real t0     = dataNavierStokes.dataTime()->initialTime();
+    Real tFinal = dataNavierStokes.dataTime()->endTime();
 
 
     // initialization with stokes solution
@@ -236,7 +236,7 @@ CTRK::run()
 
         if (verbose)
         {
-            std::cout << "\nl-  We are now at time "<< dataNavierStokes.dataTime()->getTime()
+            std::cout << "\nl-  We are now at time "<< dataNavierStokes.dataTime()->time()
                       << " s.\n" << std::endl;
         }
 

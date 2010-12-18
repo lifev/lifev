@@ -533,7 +533,7 @@ void ChorinTemamRK<Mesh, SolverType>::buildSystem_u_p()
         if ( !M_steady )
         {
             chronoMass.start();
-            mass( M_data.density()/M_data.dataTime()->getTimeStep(), M_elmatMass, M_uFESpace.fe(), 0, 0, nDimensions );
+            mass( M_data.density()/M_data.dataTime()->timeStep(), M_elmatMass, M_uFESpace.fe(), 0, 0, nDimensions );
             chronoMass.stop();
         }
 
@@ -637,7 +637,7 @@ void ChorinTemamRK<Mesh, SolverType>::updateSYS_u(vector_type& betaVec,
                                                   step_type step)
 {
 
-    Real dt = M_data.dataTime()->getTimeStep();
+    Real dt = M_data.dataTime()->timeStep();
 
     // first update matrices for velocity system
 
@@ -977,7 +977,7 @@ void ChorinTemamRK<Mesh, SolverType>::iterate_u(bchandler_raw_type& bch_u, step_
         solveSystem_u(matrFull_u, rhsFull_u, M_sol_u);
         M_residual_u  = M_rhsNoBC_u;
         M_residual_u -= *M_matrNoBC_u * M_sol_u;
-        computeCTRHS_p(M_sol_u, M_rhsNoBC_p, M_data.dataTime()->getTimeStep());
+        computeCTRHS_p(M_sol_u, M_rhsNoBC_p, M_data.dataTime()->timeStep());
     }
 
 } // iterate_u()
@@ -1323,7 +1323,7 @@ void ChorinTemamRK<Mesh, SolverType>::applyBC_u( matrix_type&        matrix_u,
     vector_type rhsFull_u (rhs_u, Repeated, Zero);
 
     bcManage( matrix_u, rhsFull_u, *M_uFESpace.mesh(), M_uFESpace.dof(),
-              BCh_u, M_uFESpace.feBd(), 1., M_data.dataTime()->getTime() );
+              BCh_u, M_uFESpace.feBd(), 1., M_data.dataTime()->time() );
 
     rhs_u = rhsFull_u;
 
@@ -1349,7 +1349,7 @@ void ChorinTemamRK<Mesh, SolverType>::applyBC_p( matrix_type&	   matrix_p,
     vector_type rhsFull_p (rhs_p, Repeated, Zero);
 
     bcManage( matrix_p, rhsFull_p, *M_pFESpace.mesh(), M_pFESpace.dof(),
-              BCh_p, M_pFESpace.feBd(), 1., M_data.dataTime()->getTime() );
+              BCh_p, M_pFESpace.feBd(), 1., M_data.dataTime()->time() );
 
     rhs_p = rhsFull_p;
 
