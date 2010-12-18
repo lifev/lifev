@@ -62,7 +62,7 @@ return !(sizeof(size_t)==sizeof(uint));
 [
    AC_MSG_RESULT(yes)
    size_t_same_as_uint=yes
-   AC_DEFINE(LIFEV_SIZET_SAME_AS_UINT, 1, [sizeof(size_t)==sizeof(uint)])
+   AC_DEFINE(LIFEV_SIZET_SAME_AS_UINT, 1, [sizeof(size_t)==sizeof(unsigned int)])
 ],
 [
   AC_MSG_RESULT(no)
