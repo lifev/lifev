@@ -162,8 +162,8 @@ void
 Structure::run3d()
 {
 
-    typedef VenantKirchhofSolver< RegionMesh3D<LinearTetra> >::vector_type  vector_type;
-    typedef boost::shared_ptr<vector_type> vector_ptrtype;
+    typedef VenantKirchhofSolver< RegionMesh3D<LinearTetra> >::vector_Type  vector_Type;
+    typedef boost::shared_ptr<vector_Type> vectorPtr_Type;
 
     bool verbose = (parameters->comm->MyPID() == 0);
     // Number of boundary conditions for the velocity and mesh motion
@@ -228,11 +228,11 @@ Structure::run3d()
     //
     // Temporal data and initial conditions
     //
-    Real dt = dataStructure->dataTime()->getTimeStep();
-    Real T  = dataStructure->dataTime()->getEndTime();
+    Real dt = dataStructure->getDataTime()->getTimeStep();
+    Real T  = dataStructure->getDataTime()->getEndTime();
 
-    vector_ptrtype disp(new vector_type(solid.disp(), Unique));
-    vector_ptrtype vel(new vector_type(solid.vel(), Unique));
+    vectorPtr_Type disp(new vector_Type(solid.getDisplacement(), Unique));
+    vectorPtr_Type vel(new vector_Type(solid.getVelocity(), Unique));
 
     dFESpace->interpolate(d0, *disp, 0.0);
     dFESpace->interpolate(w0, *vel , 0.0);
@@ -273,8 +273,8 @@ Structure::run3d()
     exporter->setPostDir( "./" ); // This is a test to see if M_post_dir is working
     exporter->setMeshProcId( meshPart.meshPartition(), parameters->comm->MyPID() );
 
-    vector_ptrtype solidDisp ( new vector_type(solid.disp(), exporter->mapType() ) );
-    vector_ptrtype solidVel  ( new vector_type(solid.vel(),  exporter->mapType() ) );
+    vectorPtr_Type solidDisp ( new vector_Type(solid.getDisplacement(), exporter->mapType() ) );
+    vectorPtr_Type solidVel  ( new vector_Type(solid.getVelocity(),  exporter->mapType() ) );
 
     exporter->addVariable( ExporterData::Vector, "displacement", solidDisp,
                            UInt(0), dFESpace->dof().numTotalDof() );
@@ -292,12 +292,12 @@ Structure::run3d()
     for (Real time = dt; time <= T; time += dt)
     {
 
-        dataStructure->dataTime()->setTime(time);
+        dataStructure->getDataTime()->setTime(time);
 
         if (verbose)
         {
             std::cout << std::endl;
-            std::cout << "S- Now we are at time " << dataStructure->dataTime()->getTime() << " s." << std::endl;
+            std::cout << "S- Now we are at time " << dataStructure->getDataTime()->getTime() << " s." << std::endl;
         }
 
         //solid.updateSystem(dZero);    // Computes the rigth hand side
@@ -305,8 +305,8 @@ Structure::run3d()
         solid.iterate( BCh );                  // Computes the matrices and solves the system
         //if (parameters->comm->NumProc() == 1 )  solid.postProcess(); // Post-presssing
 
-        *solidDisp = solid.disp();
-        *solidVel  = solid.vel();
+        *solidDisp = solid.getDisplacement();
+        *solidVel  = solid.getVelocity();
         exporter->postProcess( time );
 
     }

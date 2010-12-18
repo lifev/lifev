@@ -111,19 +111,19 @@ public:
         //Real area0	= M_oper.fluid().area(3);
         Real area	= area0;
 
-        Real beta	= M_oper.solid().thickness()*M_oper.solid().young() /
-                    (1 - M_oper.solid().poisson()*M_oper.solid().poisson()) * PI/area0;
+        Real beta	= M_oper.solid().getThickness()*M_oper.solid().getYoung() /
+                    (1 - M_oper.solid().getPoisson()*M_oper.solid().getPoisson()) * PI/area0;
 
         Real qn		= M_oper.fluid().flux(3);
 
-        M_outflow			= std::pow(std::sqrt(M_oper.solid().rho())/(2*std::sqrt(2.))*qn/area + std::sqrt(beta*std::sqrt(area0)), 2)
+        M_outflow			= std::pow(std::sqrt(M_oper.solid().getRho())/(2*std::sqrt(2.))*qn/area + std::sqrt(beta*std::sqrt(area0)), 2)
                       - beta*std::sqrt(area0);
 
         std::cout << "--------------- Absorbing boundary condition ---------------" << std::endl;
-        std::cout << "  Outflow BC : density   = " << M_oper.solid().rho() << std::endl;
-        std::cout << "  Outflow BC : thickness = " << M_oper.solid().thickness() << std::endl;
-        std::cout << "  Outflow BC : young     = " << M_oper.solid().young() << std::endl;
-        std::cout << "  Outflow BC : poisson   = " << M_oper.solid().poisson() << std::endl;
+        std::cout << "  Outflow BC : density   = " << M_oper.solid().getRho() << std::endl;
+        std::cout << "  Outflow BC : thickness = " << M_oper.solid().getThickness() << std::endl;
+        std::cout << "  Outflow BC : young     = " << M_oper.solid().getYoung() << std::endl;
+        std::cout << "  Outflow BC : poisson   = " << M_oper.solid().getPoisson() << std::endl;
         std::cout << "  Outflow BC : area0     = " << area0 << std::endl;
         std::cout << "  Outflow BC : area      = " << M_oper.fluid().area(3) << std::endl;
         std::cout << "  Outflow BC : radius    = " << std::sqrt(area0/PI) << std::endl;
@@ -305,7 +305,7 @@ public:
             }
             if ( M_fsi->isSolid() )
             {
-                M_exporterSolid->import(M_Tstart, M_data->dataSolid()->dataTime()->getTimeStep());
+                M_exporterSolid->import(M_Tstart, M_data->dataSolid()->getDataTime()->getTimeStep());
                 M_fsi->FSIOper()->initializeSolid( M_solidDisp, M_solidVel );
             }
         }
@@ -381,8 +381,8 @@ public:
 
             if ( M_fsi->isSolid() )
             {
-                *M_solidDisp = M_fsi->FSIOper()->solid().disp();
-                *M_solidVel = M_fsi->FSIOper()->solid().vel();
+                *M_solidDisp = M_fsi->FSIOper()->solid().getDisplacement();
+                *M_solidVel = M_fsi->FSIOper()->solid().getVelocity();
                 M_exporterSolid->postProcess( M_data->dataFluid()->dataTime()->getTime() );
             }
 
