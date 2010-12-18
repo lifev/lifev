@@ -101,7 +101,7 @@ public:
 
       Not yet implemented for Ensight
     */
-    UInt importFromTime( const Real& time ) { assert(false); return 0; }
+    UInt importFromTime( const Real& /*time*/ ) { assert(false); return 0; }
 
     //! Import data from previous simulations
     /*!

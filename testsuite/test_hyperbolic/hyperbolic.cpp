@@ -145,6 +145,7 @@ Real dual( const Real& /*t*/,
         return 0.;
         break;
     }
+    return 0.;
 }
 
 // Initial time condition
