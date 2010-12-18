@@ -160,7 +160,7 @@ public:
     //FSIOperPtr_Type FSIOper() const { return M_oper; }
 
     //! get the displacement, which will be on the solidInterfaceMap
-    const vector_Type& displacement() const { return M_oper->getSolution(); }
+    const vector_Type& displacement() const { return M_oper->solution(); }
 
     //! get access to the \c bchandler_type for the velocity
 //    fluidBchandlerPtr_Type& bcHandlerU() { return M_BCh_u; }

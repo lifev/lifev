@@ -698,13 +698,6 @@ FSIOperator::initializeSolid( vectorPtr_Type displacement,
 
 
 void
-FSIOperator::updateJacobian( const vector_Type& /*sol*/, const int& /*iter*/)
-{
-}
-
-
-
-void
 FSIOperator::moveMesh( const vector_Type& dep )
 {
     displayer().leaderPrint("FSI-  Moving the mesh ...                      ");

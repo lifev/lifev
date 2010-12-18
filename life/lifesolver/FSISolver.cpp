@@ -256,7 +256,7 @@ FSISolver::initialize(vectorPtr_Type u0, vectorPtr_Type v0)
 {
     if (!u0.get())
     {
-        u0.reset(new vector_Type(*M_oper->getCouplingVariableMap()));
+        u0.reset(new vector_Type(*M_oper->couplingVariableMap()));
         M_oper->setSolution(*u0); // couplingVariableMap()
         M_oper->initializeBDF(*u0);
     }
@@ -297,7 +297,7 @@ FSISolver::iterate()
     M_oper->updateSystem( );
 
     // We extract a pointer to the solution
-    vectorPtr_Type lambda(new vector_Type(M_oper->getSolution()));
+    vectorPtr_Type lambda(new vector_Type(M_oper->solution()));
     //M_oper->solutionPtr(lambda);//copy of a shared_ptr
 
     // the newton solver
@@ -404,21 +404,6 @@ FSISolver::setInvLinSolidBC( const solidBchandlerPtr_Type& bc_dsolid_inv )
 {
     if ( this->isSolid() )
         M_oper->setInvLinSolidBC( bc_dsolid_inv );
-}
-
-//!\todo{kill this method}
-void FSISolver::setFluxBC(fluidBchandlerPtr_Type const& bc_fluid)
-{
-    if (this->isFluid())
-        M_oper->setFluxBC(bc_fluid);
-}
-
-//!\todo{kill this method}
-void
-FSISolver::setRobinBC(fluidBchandlerPtr_Type const& bc_Robin)
-{
-    if (this->isFluid())
-        M_oper->setRobinBC(bc_Robin);
 }
 
 // void

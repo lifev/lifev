@@ -262,7 +262,6 @@ public:
        \param muk: unknown solution at the k-th nonlinear iteration
        \param res: residual vector (the right hand side of the Jacobian system)
        \param linearRelTol: tolerance for the nonlinear solver
-       \todo{replace Real with Real& }
      */
     virtual void solveJac( vector_Type&       muk,
                            const vector_Type& res,
@@ -315,15 +314,15 @@ public:
     virtual UInt imposeFlux();
 
     // \todo{kill this method?}
-    virtual void mergeBCHandlers() {}
+    //virtual void mergeBCHandlers() {}
 
     //@}
 
     //!\todo{kill this method}
-    virtual void setFluxBC             (fluidBchandlerPtr_Type /*bc_fluid*/) {}
+    //virtual void setFluxBC             (fluidBchandlerPtr_Type /*bc_fluid*/) {}
 
     //!\todo{kill this method}
-    virtual void setRobinBC             (fluidBchandlerPtr_Type /*bc_solid*/) {}
+    //virtual void setRobinBC             (fluidBchandlerPtr_Type /*bc_solid*/) {}
 
 
 
@@ -377,7 +376,7 @@ public:
                           vectorPtr_Type velocity );
 
     //!\todo{kill this method}
-    void updateJacobian ( const vector_Type& sol, const int& iter );
+    //void updateJacobian ( const vector_Type& sol, const int& iter );
 
     //!moves the mesh using the solution of the harmonic extension equation
     /**
@@ -559,7 +558,7 @@ public:
     boost::shared_ptr<EpetraMap>& solidInterfaceMap()                   { return M_solidInterfaceMap; }
 
     //! Getter for the map of the variable used for the coupling
-    virtual boost::shared_ptr<EpetraMap>& getCouplingVariableMap()      { return M_solidInterfaceMap; }
+    virtual boost::shared_ptr<EpetraMap>& couplingVariableMap()      { return M_solidInterfaceMap; }
 
     //! Method to implement Robin boundary conditions on the external wall for the structure
     BCFunctionMixte& bcfMixteOuterWall()                                { return M_bcfMixteOuterWall; }
@@ -597,7 +596,7 @@ public:
     const solidBchandlerPtr_Type& BCh_dz_inv()                      const { return M_BCh_dz_inv; }
 
     //! gets the solution vector by reference
-    virtual const vector_Type& getSolution()                      const { return *M_lambda; }
+    virtual const vector_Type& solution()                      const { return *M_lambda; }
 
     //! gets a pointer to the solution vector by reference
     virtual vectorPtr_Type& solutionPtr()                               { return M_lambda; }
@@ -935,9 +934,9 @@ private:
     vectorPtr_Type                    M_sigmaFluidRepeated;
     vectorPtr_Type                    M_sigmaSolidRepeated;
 
-    //\todo{try to set as deprecated}
+    //\todo{try to remove}
     vectorPtr_Type                    M_minusSigmaFluid;
-    //\todo{try to set as deprecated}
+    //\todo{try to remove}
     vectorPtr_Type                    M_minusSigmaFluidRepeated;
 
     vectorPtr_Type                    M_dispFluidMeshOld;
