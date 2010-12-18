@@ -108,7 +108,8 @@ MonolithicGI::setupFluidSolid( UInt const fluxes )
                                           *M_mmFESpace,
                                           M_epetraComm,
                                           *M_monolithicMap));
-    M_solid.reset(solid_Type::StructureSolverFactory::instance().createObject( M_data->dataSolid()->solidType( ) ));
+    M_solid.reset(solid_raw_type::StructureSolverFactory::instance().createObject( M_data->dataSolid()->getSolidType( ) ));
+
     M_solid->setup(M_data->dataSolid(),
                    M_dFESpace,
                    M_epetraComm,
@@ -278,9 +279,13 @@ void MonolithicGI::initialize( FSIOperator::fluidPtr_Type::value_type::Function 
                                FSIOperator::solidPtr_Type::value_type::Function const& df0 )
 {
     super_Type::initialize(u0, p0, d0, w0, df0);
+    vector_type df(M_mmFESpace->map());
+    M_mmFESpace->interpolate(df0, df, M_data->dataSolid()->getDataTime()->time());
+
 
     vector_Type df(M_mmFESpace->map());
-    M_mmFESpace->interpolate(df0, df, M_data->dataSolid()->dataTime()->time());
+    M_mmFESpace->interpolate(df0, df, M_data->dataSolid()->getDataTime()->time());
+
     M_un->add(df, M_solidAndFluidDim+getDimInterface());
     M_meshMotion->setDisplacement(df);
 }
@@ -304,7 +309,7 @@ int MonolithicGI::setupBlockPrec( )
 
     //The following part accounts for a possibly nonlinear structure model, should not be run when linear
     //elasticity is used
-    if ( M_data->dataSolid()->useExactJacobian() )
+    if ( M_data->dataSolid()->getUseExactJacobian() )
     {
         M_solid->updateJacobian( *M_uk, M_solidDerBlock ); // computing the derivatives if nonlinear (comment this for inexact Newton);
         *M_monolithicMatrix->matrix() *= 0;

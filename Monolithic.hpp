@@ -397,6 +397,7 @@ public:
     {
         soliddisp.subset(*un(), M_offset);
         soliddisp *= dataFluid()->dataTime()->timeStep()*M_solid->getRescaleFactor();
+
     }
 
     //!Get the solid velocity

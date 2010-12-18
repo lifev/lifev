@@ -69,7 +69,7 @@ void MonolithicGE::setupFluidSolid( UInt const fluxes )
     M_rhsFull.reset(new vector_Type(*this->M_monolithicMap));
     M_beta.reset  (new vector_Type(M_uFESpace->map()));
 
-    M_solid.reset(solid_Type::StructureSolverFactory::instance().createObject( M_data->dataSolid()->solidType() ));
+    M_solid.reset(solid_raw_type::StructureSolverFactory::instance().createObject( M_data->dataSolid()->getSolidType() ));
 
     M_solid->setup(M_data->dataSolid(),
                    M_dFESpace,
@@ -156,7 +156,7 @@ MonolithicGE::iterateMesh(const vector_Type& disp)
 
     monolithicToInterface(lambdaFluid, disp);
 
-    lambdaFluid *= (M_data->dataFluid()->dataTime()->timeStep()*M_solid->getRescaleFactor());//(M_data->dataSolid()->rescaleFactor()));
+    lambdaFluid *= (M_data->dataFluid()->dataTime()->getTimeStep()*M_solid->getRescaleFactor());//(M_data->dataSolid()->rescaleFactor()));
 
     this->setLambdaFluid(lambdaFluid); // it must be _disp restricted to the interface
 
