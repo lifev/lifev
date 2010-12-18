@@ -301,40 +301,40 @@ BCInterface3DFunctionSolver< FSIOperator >::updatePhysicalSolverVariables()
         case s_density:
 
 #ifdef HAVE_LIFEV_DEBUG
-            Debug( 5023 ) << "                                                   s_density: " << M_physicalSolver->solid().rho() << "\n";
+            Debug( 5023 ) << "                                                   s_density: " << M_physicalSolver->solid().getRho() << "\n";
 #endif
 
-            setVariable( "s_density", M_physicalSolver->solid().rho() );
+            setVariable( "s_density", M_physicalSolver->solid().getRho() );
 
             break;
 
         case s_poisson:
 
 #ifdef HAVE_LIFEV_DEBUG
-            Debug( 5023 ) << "                                                   s_poisson: " << M_physicalSolver->solid().poisson() << "\n";
+            Debug( 5023 ) << "                                                   s_poisson: " << M_physicalSolver->solid().getPoisson() << "\n";
 #endif
 
-            setVariable( "s_poisson", M_physicalSolver->solid().poisson() );
+            setVariable( "s_poisson", M_physicalSolver->solid().getPoisson() );
 
             break;
 
         case s_thickness:
 
 #ifdef HAVE_LIFEV_DEBUG
-            Debug( 5023 ) << "                                                 s_thickness: " << M_physicalSolver->solid().thickness() << "\n";
+            Debug( 5023 ) << "                                                 s_thickness: " << M_physicalSolver->solid().getThickness() << "\n";
 #endif
 
-            setVariable( "s_thickness", M_physicalSolver->solid().thickness() );
+            setVariable( "s_thickness", M_physicalSolver->solid().getThickness() );
 
             break;
 
         case s_young:
 
 #ifdef HAVE_LIFEV_DEBUG
-            Debug( 5023 ) << "                                                     s_young: " << M_physicalSolver->solid().young() << "\n";
+            Debug( 5023 ) << "                                                     s_young: " << M_physicalSolver->solid().getYoung() << "\n";
 #endif
 
-            setVariable( "s_young", M_physicalSolver->solid().young() );
+            setVariable( "s_young", M_physicalSolver->solid().getYoung() );
 
             break;
 
