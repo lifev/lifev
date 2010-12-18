@@ -124,7 +124,7 @@ public:
     /*!
      * @param flag Boundary condition flag
      */
-    void setFlag( const BCFlag& flag ) { M_flag = flag; }
+    void setFlag( const bcFlag_Type& flag ) { M_flag = flag; }
 
     //! Set the type of the boundary condition
     /*!
@@ -142,7 +142,7 @@ public:
     /*!
      * @param comV Boundary condition components vector
      */
-    void setComV( const BCComV& comV ) { M_comV = comV; }
+    void setComV( const bcComponentsVec_Type& comV ) { M_comV = comV; }
 
     //! Set the i-component of the components vector of the boundary condition
     /*!
@@ -191,7 +191,7 @@ public:
     /*!
      * @return Boundary condition flag
      */
-    const BCFlag& flag() const { return M_flag; }
+    const bcFlag_Type& flag() const { return M_flag; }
 
     //! Get the type of the boundary condition
     /*!
@@ -209,7 +209,7 @@ public:
     /*!
      * @return Boundary condition vector of components
      */
-    const BCComV& comV() const { return M_comV; }
+    const bcComponentsVec_Type& comV() const { return M_comV; }
 
     //! Get the number of components of the boundary condition
     /*!
@@ -259,10 +259,10 @@ private:
     //@}
 
     bcName_Type                                    M_name;
-    BCFlag                                    M_flag;
+    bcFlag_Type                                    M_flag;
     bcType_Type                                    M_type;
     bcMode_Type                                    M_mode;
-    BCComV                                    M_comV;
+    bcComponentsVec_Type                                    M_comV;
     std::string                               M_direction;
     std::string                               M_baseString;
     std::pair< std::string, bcBaseList_Type > M_base;

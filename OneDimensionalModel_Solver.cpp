@@ -519,7 +519,7 @@ OneDimensionalModel_Solver::bcValuesInternalRight( const solution_Type& solution
 }
 
 Real
-OneDimensionalModel_Solver::boundaryValue( const solution_Type& solution, const bcTypeOneD_Type& bcType, const bcSide_Type& bcSide ) const
+OneDimensionalModel_Solver::boundaryValue( const solution_Type& solution, const bcType_Type& bcType, const bcSide_Type& bcSide ) const
 {
     UInt boundaryDof;
 
