@@ -259,7 +259,7 @@ public:
    */
    Real coefficientExtrapolationVelocity(const UInt& i ) const;
 
-   Real __attribute__ ((___deprecated___)) coeff_extVelocity(const UInt& i ) const;
+   Real __attribute__ ((__deprecated__)) coeff_extVelocity(const UInt& i ) const;
 
     //! Compute the polynomial extrapolation of solution
     /*!
@@ -268,7 +268,7 @@ public:
     */
    feVectorType   extrapolation() const;
 
-   feVectorType  __attribute__ ((___deprecated___)) extrap() const;
+   feVectorType  __attribute__ ((__deprecated__)) extrap() const;
 
     //! Compute the polynomial extrapolation of velocity
     /*!
@@ -277,15 +277,15 @@ public:
     */
     feVectorType  extrapolationVelocity() const;
 
-    feVectorType __attribute__ ((___deprecated___)) extrapVelocity() const;
+    feVectorType __attribute__ ((__deprecated__)) extrapVelocity() const;
 
     //! Return the current velocity
     feVectorType velocity()  const;
-    feVectorType __attribute__ ((___deprecated___)) vnk()  const;
+    feVectorType __attribute__ ((__deprecated__)) vnk()  const;
 
     //!Return the current accelerate
     feVectorType accelerate() const ;
-    feVectorType __attribute__ ((___deprecated___)) wnk() const ;
+    feVectorType __attribute__ ((__deprecated__)) wnk() const ;
 
   //@}
 
