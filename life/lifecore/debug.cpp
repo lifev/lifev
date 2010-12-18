@@ -206,7 +206,7 @@ DebugStream::DebugStream( int area, int level, bool print )
 
 }
 
-DebugStream::DebugStream( const char* initialString, int area, int level, bool print )
+DebugStream::DebugStream( const char* initialString, int area, int /*level*/, bool print )
         :
         M_data( new Private )
 {
@@ -341,11 +341,11 @@ void DebugStream::attach( std::string const& logfile )
     }
 }
 
-void DebugStream::attach( std::string const& logfile, int area )
+void DebugStream::attach( std::string const& /*logfile*/, int /*area*/ )
 {
 }
 
-void DebugStream::detach( std::string const& logfile, int area )
+void DebugStream::detach( std::string const& /*logfile*/, int /*area*/ )
 {
 }
 
@@ -362,7 +362,7 @@ Debug( int area, DebugStream::stprintf func )
     return s;
 }
 
-DebugStream Debug( bool cond, int area, DebugStream::stprintf func )
+DebugStream Debug( bool cond, int area, DebugStream::stprintf /*func*/l )
 {
     if ( cond )
         return DebugStream( area, DEBUG_INFO );
