@@ -85,7 +85,7 @@ MonolithicGI::setupFluidSolid( UInt const fluxes )
        M_solid->setOperator(*M_epetraOper);
        }*/
     //std::cout<<"map global elements : "<<M_monolithicMap->getMap(Unique)->NumGlobalElements()<<std::endl;
-    M_interface=M_monolithicMatrix->getInterface();
+    M_interface=M_monolithicMatrix->interface();
 
     vector_Type u0(*this->M_monolithicMap);
     M_bdf.reset(new BdfT<vector_Type>(M_data->dataFluid()->dataTime()->getBDF_order()));
@@ -244,7 +244,7 @@ MonolithicGI::applyBoundaryConditions()
 
     M_monolithicMatrix->applyBoundaryConditions(dataFluid()->dataTime()->getTime(), M_rhsFull);
     M_monolithicMatrix->GlobalAssemble();
-    //M_monolithicMatrix->getMatrix()->spy("FM");
+    //M_monolithicMatrix->matrix()->spy("FM");
 }
 
 
@@ -259,9 +259,9 @@ void MonolithicGI::solveJac(vector_Type       &_step,
     M_precPtr->applyBoundaryConditions( dataFluid()->dataTime()->getTime() );
     M_precPtr->GlobalAssemble( );
 
-    //boost::dynamic_pointer_cast<BlockMatrix>(M_precPtr)->getMatrix()->spy("P");
+    //boost::dynamic_pointer_cast<BlockMatrix>(M_precPtr)->matrix()->spy("P");
 
-    M_linearSolver->setMatrix(*M_monolithicMatrix->getMatrix());
+    M_linearSolver->setMatrix(*M_monolithicMatrix->matrix());
 
     M_solid->getDisplayer().leaderPrint("  M-  Jacobian NormInf res:                    ", _res.normInf(), "\n");
     M_solid->getDisplayer().leaderPrint("  M-  Solving Jacobian system ...              \n" );
@@ -294,7 +294,7 @@ int MonolithicGI::setupBlockPrec( )
         *M_shapeDerivativesBlock *= 0.;
         M_shapeDerivativesBlock->openCrsMatrix( );
         shapeDerivatives( M_shapeDerivativesBlock ,*M_uk/*subX*/, M_domainVelImplicit, M_convectiveTermDer );
-        //*M_shapeDerivativesBlock += *M_monolithicMatrix->getMatrix();
+
         M_shapeDerivativesBlock->globalAssemble( );
         M_monolithicMatrix->addToGlobalMatrix( M_shapeDerivativesBlock );
     }
@@ -306,7 +306,7 @@ int MonolithicGI::setupBlockPrec( )
     if ( M_data->dataSolid()->useExactJacobian() )
     {
         M_solid->updateJacobian( *M_uk, M_solidDerBlock ); // computing the derivatives if nonlinear (comment this for inexact Newton);
-        *M_monolithicMatrix->getMatrix() *= 0;
+        *M_monolithicMatrix->matrix() *= 0;
         // doing nothing if linear
         M_solidBlockPrec.reset(new matrix_Type(*M_monolithicMap, 1));
         *M_solidBlockPrec += *M_solidDerBlock;
@@ -315,10 +315,10 @@ int MonolithicGI::setupBlockPrec( )
         M_monolithicMatrix->blockAssembling();
         M_monolithicMatrix->applyBoundaryConditions( dataFluid()->dataTime()->getTime());
         M_monolithicMatrix->GlobalAssemble();
-        *M_monolithicMatrix->getMatrix() *= M_data->dataFluid()->dataTime()->getTimeStep();
+        *M_monolithicMatrix->matrix() *= M_data->dataFluid()->dataTime()->getTimeStep();
     }
 
-    if ( M_precPtr->getBlockVector( ).size( )<3 )
+    if ( M_precPtr->blockVector( ).size( )<3 )
     {
         M_precPtr->push_back_matrix( M_meshBlock, false );
         M_precPtr->setConditions( M_BChs );
