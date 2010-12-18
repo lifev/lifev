@@ -97,7 +97,6 @@ EnsightToHdf5::EnsightToHdf5( int argc,
 
     // MPI_Init(&argc,&argv);
     d->comm.reset( new Epetra_MpiComm( MPI_COMM_WORLD ) );
-    int ntasks;
     // int err = MPI_Comm_size(MPI_COMM_WORLD, &ntasks);
 #else
     d->comm.reset( new Epetra_SerialComm() );
@@ -105,7 +104,7 @@ EnsightToHdf5::EnsightToHdf5( int argc,
 
     if (!d->comm->MyPID())
     {
-        std::cout << "My PID = " << d->comm->MyPID() << " out of " << ntasks << " running." << std::endl;
+        std::cout << "My PID = " << d->comm->MyPID() << " out of " << d->comm->NumProc ()  << " running." << std::endl;
     }
 }
 
