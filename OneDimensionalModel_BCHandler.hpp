@@ -113,7 +113,7 @@ public:
     //! @name Set Methods
     //@{
 
-    void setBC( const bcSide_Type& bcSide, const bcLine_Type& line, const bcTypeOneD_Type& bcType, const bcFunction_Type& BCfunction );
+    void setBC( const bcSide_Type& bcSide, const bcLine_Type& line, const bcType_Type& bcType, const bcFunction_Type& BCfunction );
 
     void setDefaultBC();
 

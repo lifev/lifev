@@ -95,7 +95,7 @@ public:
     //@{
 
     //! Constructor
-    explicit OneDimensionalModel_BCFunction_Default( const bcSide_Type& bcSide, const bcTypeOneD_Type& bcType );
+    explicit OneDimensionalModel_BCFunction_Default( const bcSide_Type& bcSide, const bcType_Type& bcType );
 
     //! Copy constructor
     /*!
@@ -141,7 +141,7 @@ protected:
 
     UInt                                     M_bcNode;
     bcSide_Type                              M_bcSide;
-    bcTypeOneD_Type                              M_bcType;
+    bcType_Type                              M_bcType;
 };
 
 
@@ -167,7 +167,7 @@ public:
     //@{
 
     //! Constructor
-    explicit OneDimensionalModel_BCFunction_Riemann( const bcSide_Type& bcSide, const bcTypeOneD_Type& bcType );
+    explicit OneDimensionalModel_BCFunction_Riemann( const bcSide_Type& bcSide, const bcType_Type& bcType );
 
     //! Copy constructor
     /*!
@@ -233,7 +233,7 @@ public:
     //@{
 
     //! Constructor
-    explicit OneDimensionalModel_BCFunction_Compatibility( const bcSide_Type& bcSide,  const bcTypeOneD_Type& bcType );
+    explicit OneDimensionalModel_BCFunction_Compatibility( const bcSide_Type& bcSide,  const bcType_Type& bcType );
 
     //! Copy constructor
     /*!
@@ -320,7 +320,7 @@ public:
     //@{
 
     //! Constructor
-    explicit OneDimensionalModel_BCFunction_Absorbing( const bcSide_Type& bcSide, const bcTypeOneD_Type& bcType ) : super( bcSide, bcType ) {}
+    explicit OneDimensionalModel_BCFunction_Absorbing( const bcSide_Type& bcSide, const bcType_Type& bcType ) : super( bcSide, bcType ) {}
 
     //! Copy constructor
     /*!
@@ -374,7 +374,7 @@ public:
     //@{
 
     //! Constructor
-    explicit OneDimensionalModel_BCFunction_Resistance( const bcSide_Type& bcSide,  const bcTypeOneD_Type& bcType, const Real& resistance );
+    explicit OneDimensionalModel_BCFunction_Resistance( const bcSide_Type& bcSide,  const bcType_Type& bcType, const Real& resistance );
 
     //! Copy constructor
     /*!
@@ -441,7 +441,7 @@ public:
     //@{
 
     //! Constructor
-    explicit OneDimensionalModel_BCFunction_Windkessel3( const bcSide_Type& bcSide, const bcTypeOneD_Type& bcType,
+    explicit OneDimensionalModel_BCFunction_Windkessel3( const bcSide_Type& bcSide, const bcType_Type& bcType,
                                                          const Real& resistance1, const Real& resistance2,
                                                          const Real& compliance,
                                                          const bool& absorbing1 = false,

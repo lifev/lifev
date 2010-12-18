@@ -112,7 +112,7 @@ public:
     //! @name Set Methods
     //@{
 
-    void setType( const bcLine_Type& bcLine, const bcTypeOneD_Type& bc ) { M_bcType[bcLine] = bc; }
+    void setType( const bcLine_Type& bcLine, const bcType_Type& bc ) { M_bcType[bcLine] = bc; }
 
     void setBCFunction( const bcLine_Type& bcLine, const bcFunction_Type& rhs ) { M_bcFunction[bcLine] = rhs; }
 
@@ -124,7 +124,7 @@ public:
     //! @name Get Methods
     //@{
 
-    const bcTypeOneD_Type& type( const bcLine_Type& bcLine ) { return M_bcType[bcLine]; }
+    const bcType_Type& type( const bcLine_Type& bcLine ) { return M_bcType[bcLine]; }
 
     bcFunction_Type& bcFunction( const bcLine_Type& bcLine ) { return M_bcFunction[bcLine]; }
 
@@ -161,7 +161,7 @@ private:
 
     //@}
 
-    std::map<bcLine_Type, bcTypeOneD_Type>            M_bcType;
+    std::map<bcLine_Type, bcType_Type>            M_bcType;
 
     bcSide_Type                                   M_bcSide;
 
