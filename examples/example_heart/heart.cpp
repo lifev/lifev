@@ -237,9 +237,9 @@ Heart::run()
     electricModel.buildSystem( );
     std::cout<<"buildsystem ok"<<std::endl;
     //! Initialization
-    Real dt     = _data.getTimeStep();
+    Real dt     = _data.timeStep();
     Real t0     = 0;
-    Real tFinal = _data.getEndTime ();
+    Real tFinal = _data.endTime();
     MPI_Barrier(MPI_COMM_WORLD);
 
     if (verbose) std::cout << "Setting the initial solution ... " << std::endl << std::endl;
@@ -313,12 +313,12 @@ Heart::run()
         if (verbose)
         {
             std::cout << std::endl;
-            std::cout << "We are now at time "<< _data.getTime() << " s. " << std::endl;
+            std::cout << "We are now at time "<< _data.time() << " s. " << std::endl;
             std::cout << std::endl;
         }
         chrono.start();
         MPI_Barrier(MPI_COMM_WORLD);
-        ionicModel->solveIonicModel( electricModel.solutionTransmembranePotential(), _data.getTimeStep() );
+        ionicModel->solveIonicModel( electricModel.solutionTransmembranePotential(), _data.timeStep() );
         rhs*=0;
         computeRhs( rhs, electricModel, ionicModel, _data );
         electricModel.updatePDESystem( rhs );
@@ -392,12 +392,12 @@ void Heart::computeRhs( vector_Type& rhs,
         source(M_heart_fct->stimulus(),
                elvec_Iapp,
                electricModel.potentialFESpace().fe(),
-               data.getTime(),
+               data.time(),
                0);
         source(M_heart_fct->stimulus(),
                elvec_Iapp,
                electricModel.potentialFESpace().fe(),
-               data.getTime(),
+               data.time(),
                1);
 
         //! Assembling the righthand side
@@ -410,7 +410,7 @@ void Heart::computeRhs( vector_Type& rhs,
         }
     }
     rhs.globalAssemble();
-    Real coeff= data.volumeSurfaceRatio()*data.membraneCapacitance()/ data.getTimeStep();
+    Real coeff= data.volumeSurfaceRatio()*data.membraneCapacitance()/ data.timeStep();
     vector_Type tmpvec(electricModel.solutionTransmembranePotential());
     tmpvec*=coeff;
     rhs+=electricModel.massMatrix()*tmpvec;
@@ -459,11 +459,11 @@ void Heart::computeRhs( vector_Type& rhs,
         source(M_heart_fct->stimulus(),
                elvec_Iapp,
                electricModel.potentialFESpace().fe(),
-               data.getTime(), 0);
+               data.time(), 0);
         source(M_heart_fct->stimulus(),
                elvec_Iapp,
                electricModel.potentialFESpace().fe(),
-               data.getTime(),
+               data.time(),
                1);
         UInt totalUDof  = electricModel.potentialFESpace().map().map(Unique)->NumGlobalElements();
 
@@ -480,7 +480,7 @@ void Heart::computeRhs( vector_Type& rhs,
     rhs.globalAssemble();
 
     rhs+=electricModel.matrMass() * data.volumeSurfaceRatio() *
-        data.membraneCapacitance() * electricModel.BDFIntraExtraPotential().time_der(data.getTimeStep());
+        data.membraneCapacitance() * electricModel.BDFIntraExtraPotential().time_der(data.timeStep());
 
     MPI_Barrier(MPI_COMM_WORLD);
 
