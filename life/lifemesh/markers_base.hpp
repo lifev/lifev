@@ -87,7 +87,7 @@ public:
     //! entityFlag_Type is the type used to store the geometric entity flags
     typedef ID entityFlag_Type;
     // Old typedef to delete
-    typedef ID EntityFlag __attribute__ ((deprecated));
+    typedef ID EntityFlag __attribute__ ((__deprecated__));
 
     //@}
 
@@ -96,7 +96,7 @@ public:
     */
     static const entityFlag_Type S_NULLFLAG;
 
-    static const entityFlag_Type NULLFLAG __attribute__ ((deprecated));
+    static const entityFlag_Type NULLFLAG __attribute__ ((__deprecated__));
 
 
     //! Selects the stronger between two flags
