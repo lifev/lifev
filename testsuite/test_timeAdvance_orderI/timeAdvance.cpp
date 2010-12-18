@@ -280,19 +280,19 @@ problem::run()
     //! initialization of parameters of time Advance method:
 
     if (TimeAdvanceMethod =="Newmark")
-        timeAdvance->setup( dataProblem->dataTime()->getNewmark_parameters() , OrderDev);
+        timeAdvance->setup( dataProblem->dataTime()->coefficientsNewmark() , OrderDev);
 
     if (TimeAdvanceMethod =="BDF")
-        timeAdvance->setup(dataProblem->dataTime()->getBDF_order() , OrderDev);
+        timeAdvance->setup(dataProblem->dataTime()->orderBDF() , OrderDev);
 
-    Real dt = dataProblem->dataTime()->getTimeStep();
-    Real T  = dataProblem->dataTime()->getEndTime();
+    Real dt = dataProblem->dataTime()->timeStep();
+    Real T  = dataProblem->dataTime()->endTime();
 
     chrono.start();
 
     dataProblem->setup(dataFile, "problem");
 
-    double alpha = timeAdvance->coeff_der( 0 ) / ( dataProblem->dataTime()->getTimeStep());
+    double alpha = timeAdvance->coefficientFirstDerivative( 0 ) / ( dataProblem->dataTime()->timeStep());
 
     problem.buildSystem(alpha);
 
@@ -362,7 +362,7 @@ problem::run()
     }
     if (TimeAdvanceMethod =="BDF")
     {
-        for ( UInt previousPass=0; previousPass < dataProblem->getBDF_order() ; previousPass++)
+        for ( UInt previousPass=0; previousPass < dataProblem->orderBDF() ; previousPass++)
         {
             Real previousTimeStep = -previousPass*dt;
             feSpace->interpolate(uexact, *U, previousTimeStep );
@@ -370,17 +370,17 @@ problem::run()
         }
     }
 
-    timeAdvance->initialize_unk(uv0);
+    timeAdvance->setInitialCondition(uv0);
 
-    timeAdvance-> setDeltaT(dataProblem->dataTime()->getTimeStep());
+    timeAdvance-> setTimeStep(dataProblem->dataTime()->timeStep());
 
     timeAdvance->showMe();
 
     feSpace->interpolate(uexact, *Exact , 0);
     feSpace->interpolate(v0, *vExact , 0);
 
-    *U = timeAdvance->unk(0);
-    *V = timeAdvance->unk(1);
+    *U = timeAdvance->solution();
+    *V = timeAdvance->velocity();
 
      for (Real time = dt; time <= T; time += dt)
     {
@@ -389,13 +389,13 @@ problem::run()
         if (verbose)
         {
             std::cout << std::endl;
-            std::cout << " P - Now we are at time " << dataProblem->getTime() << " s." << std::endl;
+            std::cout << " P - Now we are at time " << dataProblem->time() << " s." << std::endl;
         }
 
         //evaluate rhs
         rhs *=0;
-
-        rhsV = timeAdvance->time_der(dt);
+	timeAdvance->updateRHSContribution(dt);
+        rhsV = timeAdvance->rhsContributionFirstDerivative();
         feSpace->l2ScalarProduct(source_in, rhs, time);
         rhs += problem.matrMass() *rhsV;
 
@@ -406,13 +406,13 @@ problem::run()
 	 problem.iterate( bcH );    // Computes the matrices and solves the system
 
         //update unknowns of timeAdvance
-         timeAdvance->shift_right(*problem.solution());
+         timeAdvance->shiftRight(*problem.solution());
 
         //evaluate uexact solution
         feSpace->interpolate(uexact, *Exact , time);
         feSpace->interpolate(v0, *vExact , time);
-        *U =  timeAdvance->unk(0);
-        *V  =timeAdvance->vnk();
+        *U =  timeAdvance->solution();
+        *V  =timeAdvance->velocity();
 
         //postProcess
         exporter->postProcess(time);
