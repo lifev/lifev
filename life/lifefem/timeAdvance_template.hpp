@@ -164,8 +164,7 @@ public:
      @param solution  is  a (new) value of the state vector
      */
      virtual void shiftRight(const feVectorType& solution ) = 0;
-     virtual void __attribute__((__deprecated__ ))  shift_right(const feVectorType& solution ) = 0;
-
+  
     //!Update the right hand side 
     /*
     update rhs contributions: \f$f_V\f$ and \$f_W\f$
@@ -178,17 +177,15 @@ public:
      @param timeStep defined the  time step need to compute the
      @return  rhsV the first order Rhs
      */
-     virtual  feVectorType updateRHSFirstDerivate(const Real& timeStep = 1 )  = 0;
-     virtual  feVectorType  __attribute__((__deprecated__)) time_der(const Real& timeStep = 1 )  = 0;
-
+     virtual  feVectorType updateRHSFirstDerivative(const Real& timeStep = 1 )  = 0;
+ 
      //! Update the right hand side \f$ f_W \f$ of the time derivative formula
      /*
      Sets and Returns the right hand side \f$ f_W \f$ of the time derivative formula
      @param timeStep defined the  time step need to compute the \f$ f_W \f$
      @return  rhsW the fsecond order Rhs
      */
-     virtual feVectorType updateRHSSecondDerivate(const Real& timeStep = 1 ) = 0;
-     virtual feVectorType  __attribute__((__deprecated__)) time_derOrder2(const Real& timeStep = 1 ) = 0;
+     virtual feVectorType updateRHSSecondDerivative(const Real& timeStep = 1 ) = 0;
 
      //!Show the properties  of temporal scheme
      /*!
@@ -205,7 +202,7 @@ public:
      the index I defines the I-th time that this method is called;
      */
      void spyStateVector();
-     void __attribute__ ((__deprecated__)) spy();
+ 
      //! Spy rhs vector
      /*!
      Spy  of rhsVector;
@@ -213,8 +210,8 @@ public:
      the index J defines the J-element of rhsVector;
      the index I defines the I-th time that this method is called;
      */
-     void spy_rhs();
-     void __attribute__ ((__deprecated__)) spyRHS();
+     void spyRHS();
+   
      //@}
 
      //! @name Set Methods
@@ -248,7 +245,7 @@ public:
      @param x0 is the initial unk;
      */
      virtual void setInitialCondition( const feVectorType& x0) = 0;
-     virtual void __attribute__ ((__deprecated__)) initialize_unk( const feVectorType& x0) = 0;
+ 
 
      //! initialize the State Vector
      /*!
@@ -258,7 +255,7 @@ public:
      @param v0 is the initial velocity
      */
      virtual void setInitialCondition( const feVectorType& x0, const feVectorType& v0) = 0;
-     virtual  __attribute__ ((__deprecated__)) void initialize_unk  ( const feVectorType& x0, const feVectorType& v0) = 0;
+
      //! initialize the StateVector
      /*!
      Initialize all the entries of the unknown vector to be derived with the vector x0, v0,w0 (duplicated).
@@ -268,8 +265,7 @@ public:
      @param w0 is the initial accelerate
      */
      virtual void setInitialCondition( const feVectorType& x0, const feVectorType& v0, const feVectorType& w0) = 0;
-     virtual void __attribute__ ((__deprecated__)) initialize_unk ( const feVectorType& x0, const feVectorType& v0, const feVectorType& w0) = 0;
-
+ 
     //! initialize the StateVector
     /*!
     Initialize all the entries of the unknown vector to be derived with the vector x0.
@@ -278,9 +274,7 @@ public:
     */
     virtual void setInitialCondition( const feVectorContainer_Type& x0) = 0;
 
-    virtual void __attribute__ ((__deprecated__)) initialize_unk ( const feVectorContainer_Type& x0) = 0;
-
- //!Initialize the RhsVector:
+  //!Initialize the RhsVector:
     /*!
     Initialize all the entries of the unknown vector to be derived with the vector x0.
     this class is virtual because used in Newamrk scheme;
@@ -288,20 +282,12 @@ public:
     */
     void setInitialRHS(const feVectorType & rhs0 ) ;
 
-    void  __attribute__ ((__deprecated__)) initialize_rhs(const feVectorType & rhs0 ) ;
-
-
     //! Set time step
     /*!
     @param timeStep is time step
     */
     inline void setTimeStep(const Real& timeStep) {M_timeStep = timeStep; }
 
-    inline void __attribute__ ((__deprecated__)) setDeltaT(const Real& timeStep )
-    {
-     //you should replace any call to setDeltaT() with a call to setTimeStep()
-        M_timeStep = timeStep;
-    }
     //@}
 
    //!@name Get Methods
@@ -314,16 +300,12 @@ public:
    */
    Real coefficientFirstDerivative(const UInt& i) const;
 
-   Real  __attribute__ ((__deprecated__)) coeff_der (const UInt& i) const;
-
    //!Return the \f$i-\f$th coefficient of the second time derivative
    /*
    @param \f$i\f$ index of coefficient \f$xi\f$
    @returns the i-th coefficient of the second time derivative \f$xi_i\f$
    */
     Real coefficientSecondDerivative(const UInt& i) const;
-
-    Real __attribute__ ((__deprecated__))  coeff_derOrder2  (const UInt& i) const;
 
     //!Return the\f$ i-\f$th coefficient of the solution's extrapolation
     /*!
@@ -332,8 +314,6 @@ public:
     */
     virtual Real coefficientExtrapolation(const UInt& i )  const = 0;
 
-    virtual Real __attribute__ ((__deprecated__))coeff_ext(const UInt& i )  const = 0;
-
     //!Returns the \f$i-\f$th coefficient of the velocity's extrap
     /*!
     @param i index of velocity's extrapolation  coefficient
@@ -341,8 +321,7 @@ public:
    */
 
     virtual Real coefficientExtrapolationVelocity(const UInt& i ) const =0;
-
-    virtual Real __attribute__ ((__deprecated__)) coeff_extVelocity(const UInt& i ) const =0;
+;
     //! Compute the polynomial extrapolation of solution
     /*!
     Compute the polynomial extrapolation approximation of order \f$n-1\f$ of
@@ -351,8 +330,6 @@ public:
     */
     virtual feVectorType extrapolation() const  = 0;
 
-    virtual feVectorType  __attribute__ ((__deprecated__))  extrap() const  = 0;
-
     //! Compute the polynomial extrapolation of velocity
     /*!
     Compute the polynomial extrapolation approximation of order \f$n-1\f$ of
@@ -360,8 +337,6 @@ public:
     @returns  extrap of state vector \f$V^*\f$
     */
     virtual feVectorType extrapolationVelocity() const  = 0;
-
-    virtual feVectorType  __attribute__ ((__deprecated__))  extrapVelocity()  const = 0;
 
     //! Return the state vector
      /*!
@@ -376,17 +351,11 @@ public:
     */
     const  feVectorType singleElement(const UInt& i)  const;
 
-    const  feVectorType __attribute__((__deprecated__)) unk(const UInt& i)  const;
-
     //! Return the last solution (the first element of state vector)
     const  feVectorType solution()  const;
 
-    const  feVectorType __attribute__ ((__deprecated__)) unk()  const;
-
     //! Return the current velocity
     virtual  feVectorType velocity() const = 0;
-
-    virtual  feVectorType __attribute__ ((__deprecated__)) vnk() const = 0;
 
     //!Return the velocity
     /*!
@@ -397,12 +366,8 @@ public:
     */
     const feVectorType  velocity(const  feVectorType& u);
 
-    const feVectorType  __attribute__ ((__deprecated__))  vnk(const  feVectorType& u);
-
     //!Return the current accelerate
     virtual feVectorType accelerate() const =0;
-
-    virtual feVectorType  __attribute__ ((__deprecated__))  wnk() const =0;
 
     //! Return the accelerate
     /*!
@@ -412,30 +377,17 @@ public:
      */
     const feVectorType accelerate(const  feVectorType& u);
 
-    const feVectorType  __attribute__ ((__deprecated__))  wnk(const  feVectorType& u);
-
     //!Return velocity's right hand side
     /*!
     @returns velocity's right hand side
     */
-    inline const feVectorType rhsContributionFirstDerivate() {return M_rhsContribution[1];};
-
-    inline const feVectorType __attribute__ ((__deprecated__)) rhsV()
-    {
-     // you should replace any call to rhsV() with a call to rhsContributionFirstDerivate()
-     return M_rhsContribution[1];
-    }
+    inline const feVectorType rhsContributionFirstDerivative() {return *M_rhsContribution[0];}
 
     //! Return accelerate's right hand side
     /*!
     @return accelerate's right hand side
     */
-    inline const feVectorType rhsContributionSecondDerivate(){return M_rhsContribution[1];}
-
-    inline const feVectorType  __attribute__ ((__deprecated__)) rhsW() {
-    // you should replace any call to rhsW() with a call to rhsContributionSecondDerivate()
-    return M_rhsContribution[1];
-    }
+    inline const feVectorType rhsContributionSecondDerivative(){return *M_rhsContribution[1];}
 
     //! Return order of accuracy of the scheme
     /*!
@@ -525,11 +477,11 @@ TimeAdvance<feVectorType>::
 updateRHSContribution(const Real& timeStep )
 {
   //! update rhsContribution  of the first Derivate
-  this->updateRHSFirstDerivate( timeStep);
+  this->updateRHSFirstDerivative( timeStep);
   
   //! update rhsContribution  of the second Derivate
   if( M_orderDerivate == 2 )
-    this->updateRHSSecondDerivate( timeStep );
+    this->updateRHSSecondDerivative( timeStep );
 }
 
 
@@ -554,15 +506,6 @@ spyStateVector()
     saveUnknowns++;
 }
 
-
-template<typename feVectorType>
-void  __attribute__ ((__deprecated__))
-TimeAdvance<feVectorType>::
-spy()
-{// you should replace any call to spy() with a call to spyStateVector()
-    spyStateVector();
-}
-
 template<typename feVectorType>
 void
 TimeAdvance<feVectorType>::
@@ -582,13 +525,6 @@ spyRHS()
     saveRhs++;
 }
 
-template<typename feVectorType>
-void  __attribute__((__deprecated__))
-TimeAdvance<feVectorType>::spy_rhs()
-{// you should replace any call to spy_rhs() with a call to spyRHS()
-    spyRHS();
-}
-
 // ===================================================
 // Set Methods
 // ===================================================
@@ -602,15 +538,6 @@ TimeAdvance<feVectorType>::setInitialRHS(const feVectorType& rhs )
       M_rhsContribution.push_back(new feVectorType(rhs));
     }
 }
-
-template<typename feVectorType>
-void  __attribute__ ((__deprecated__))
-TimeAdvance<feVectorType>:: initialize_rhs(const feVectorType& rhs )
-{// you should replace any call to initialize_rhs() with a call to spyRHS()
-   setInitialRHS(rhs);
-}
-
-
 
 // ===================================================
 // Get Methods
@@ -626,13 +553,6 @@ TimeAdvance<feVectorType>::coefficientFirstDerivative(const UInt& i) const
 }
 
 template<typename feVectorType>
-Real  __attribute__ ( (__deprecated__))
-TimeAdvance<feVectorType>::coeff_der( const UInt& i ) const
-{// you should replace any call to coef_der() with a call to coefficientFirstDerivate()
-    return coefficientFirstDerivative(i);
-}
-
-template<typename feVectorType>
 Real
 TimeAdvance<feVectorType>::coefficientSecondDerivative( const UInt& i )  const
 { // you should replace any call to coef_derOrder2() with a call to coefficientSecondDerivative()
@@ -643,25 +563,11 @@ TimeAdvance<feVectorType>::coefficientSecondDerivative( const UInt& i )  const
 }
 
 template<typename feVectorType>
-Real  __attribute__ ( (__deprecated__))
-TimeAdvance<feVectorType>::coeff_derOrder2( const UInt& i )  const
-{ // you should replace any call to coef_derOrder2 with a call to coefficientSecondDerivate
-  return  coefficientSecondDerivative( i );
-}
-
-template<typename feVectorType>
 const feVectorType
 TimeAdvance<feVectorType>::solution() const
 {
     feVectorType solution(*M_unknowns[0]);
     return solution;
-}
-
-template<typename feVectorType>
-const feVectorType  __attribute__ ((__deprecated__))
-TimeAdvance<feVectorType>::unk() const
-{  // you should replace any call to unk() with a call to solution()
-   return solution();
 }
 
 template<typename feVectorType>
@@ -677,14 +583,6 @@ TimeAdvance<feVectorType>::singleElement( const UInt& i) const
 }
 
 template<typename feVectorType>
-const feVectorType __attribute__ ((__deprecated__))
-TimeAdvance<feVectorType>::unk( const UInt& i) const
-{
-    // you should replace any call to unk() with a call to singleElement()
-   return singleElement(i);
-}
-
-template<typename feVectorType>
 const feVectorType
 TimeAdvance<feVectorType>::velocity( const feVectorType& u)
 {  // you should replace any call to vnk() with a call to vnk()
@@ -692,13 +590,6 @@ TimeAdvance<feVectorType>::velocity( const feVectorType& u)
     velocity  *= M_alpha[ 0 ] /M_timeStep;
     velocity   -= (*this->M_rhsContribution[ 0 ]);
     return velocity;
-}
-
-template<typename feVectorType>
-const feVectorType __attribute__ ((__deprecated__))
-TimeAdvance<feVectorType>::vnk( const feVectorType& u)
-{  // you should replace any call to vnk() with a call to vnk()
-   return velocity(u);
 }
 
 template<typename feVectorType>
@@ -710,14 +601,6 @@ TimeAdvance<feVectorType>::accelerate(const feVectorType& u)
     accelerate  -= (*this->M_rhsContribution[1]);
     return accelerate;
 }
-
-template<typename feVectorType>
-const feVectorType __attribute__ ((__deprecated__))
-TimeAdvance<feVectorType>::wnk(const feVectorType& u)
-{ // you should replace any call to wnk() with a call to accelerate()
-   return accelerate(u);
-}
-
 
 // ===================================================
 // Macros

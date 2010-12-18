@@ -85,16 +85,23 @@ public:
     //@{
 
     //! Constructor
-    /*!
-        @param order Order q of the Bdf
-     */
-    BdfTNS( const UInt order );
+    BdfTNS();
 
     //! Destructor
-    ~BdfTNS( ) { }
+    ~BdfTNS() { }
 
     //@}
 
+    //! @name Set Methods
+    //@{
+
+    //! Setup the bdf velocity and the bdf pressure
+    /*!
+        @param order Order q of the bdf
+     */
+    void setup( const UInt order );
+
+    //@}
 
     //! @name Methods
     //@{
@@ -102,24 +109,16 @@ public:
     //! Show the contents of the object
     void showMe() const;
 
-    //@}
-
-
-    //! @name Get Methods
-    //@{
-
     //! The method returns the Bdf velocity
     /*!
         @return Reference to a new Bdf template which holds the velocity field
      */
-    BdfT<VectorType>& __attribute__ ((__deprecated__)) bdf_u() { return bdfVelocity(); }
     BdfT<VectorType>& bdfVelocity() { return M_bdfVelocity; }
 
     //! The method returns the Bdf pressure
     /*!
         @return Reference to a new Bdf template which holds the pressure
      */
-    BdfT<VectorType>& __attribute__ ((__deprecated__)) bdf_p() { return bdfPressure(); }
     BdfT<VectorType>& bdfPressure() { return M_bdfPressure; }
 
     //@}
@@ -138,15 +137,20 @@ private:
 // Constructors
 // ===================================================
 template<typename VectorType>
-BdfTNS<VectorType>::BdfTNS( const UInt order )
+BdfTNS<VectorType>::BdfTNS()
         :
-        M_bdfVelocity( order ),
-        M_bdfPressure( std::max( UInt( 1 ), order - 1 ) )
+        M_bdfVelocity( ),
+        M_bdfPressure( )
+{}
+
+
+template<typename VectorType>
+void
+BdfTNS<VectorType>::setup( const UInt order )
 {
     M_bdfVelocity.setup( order, 1 );
     M_bdfPressure.setup( std::max( UInt( 1 ), order - 1 ), 1 );
 }
-
 
 // ===================================================
 // Methods

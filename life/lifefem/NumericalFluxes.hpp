@@ -503,7 +503,7 @@ normInfinity ( const Real& leftState, const Real& rightState, const normal_Type&
                                               normal, t, x, y, z, -1, values );
 
     // Compute the minumum of minus absFunctionDotNormal
-    const Real maxValue = brent( absFunctionDotNormalBound, leftState, rightState,
+    const Real maxValue = BrentAlgorithm( absFunctionDotNormalBound, leftState, rightState,
                                  M_CFLBrentToll, M_CFLBrentMaxIter );
 
     // Return minus the value
@@ -711,7 +711,7 @@ operator() ( const Real& leftState, const Real& rightState, const normal_Type& n
         normalFlux = this->computeFunctionDotNormal( this->M_physicalFlux, normal, iElem, t, x, y, z, +1 );
 
         // Compute the argmin f \cdot n
-        minMax = brent( normalFlux, leftState, rightState, M_brentToll, M_brentMaxIter );
+        minMax = BrentAlgorithm( normalFlux, leftState, rightState, M_brentToll, M_brentMaxIter );
 
         // Compute the flux value
         fluxValue = normalFlux( minMax );
@@ -722,7 +722,7 @@ operator() ( const Real& leftState, const Real& rightState, const normal_Type& n
         normalFlux = this->computeFunctionDotNormal( this->M_physicalFlux, normal, iElem, t, x, y, z, -1 );
 
         // Compute the argmin - f \cdot n
-        minMax = brent( normalFlux, leftState, rightState, M_brentToll, M_brentMaxIter );
+        minMax = BrentAlgorithm( normalFlux, leftState, rightState, M_brentToll, M_brentMaxIter );
 
         // Compute the flux value
         fluxValue = - normalFlux( minMax );

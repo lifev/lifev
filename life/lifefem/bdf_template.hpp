@@ -30,10 +30,10 @@
     A class for an easy handling of different order time
     discretizations/extrapolations BDF based for first and second order problem
     @date
-
+ 
     @author Simone Deparis  <simone.deparis@epfl.ch>
     @author Matteo Pozzoli <matteo1.pozzoli@mail.polimi.it>
-
+ 
     @contributor Matteo Pozzoli <matteo1.pozzoli@mail.polimi.it>
     @maintainer Matteo Pozzoli <matteo1.pozzoli@mail.polimi.it>
  */
@@ -166,19 +166,19 @@ public:
     //@{
 
     //! Empty  Constructor
-
+    
     BdfT();
      //! Constructor
-     /*!
+     /*! 
      @param  order of the BDF
      */
-    BdfT( const UInt& order);
+    //  BdfT( const UInt& order);
 
     /*! Constructor
      @param order: is accurancy's order of the BDF,
      @param orderDerivate: is the maximum order of derivate
      */
-    BdfT( const UInt& order, const  UInt& orderDerivate );
+    //BdfT( const UInt& order, const  UInt& orderDerivate );
 
      //! Destructor
      ~BdfT() {}
@@ -187,13 +187,12 @@ public:
 
     //! @name Methods
     //@{
-
+  
      //!Update the state vector
      /*! Update the vectors of the previous time steps by shifting on the right  the old values.
      @param solution current (new) value of the state vector
      */
      void shiftRight(const feVectorType&  solution );
-     void __attribute__ ((__deprecated__ ))  shift_right(const feVectorType& solution );
 
      //! Update the right hand side \f$ f_V \f$ of the time derivative formula
      /*!
@@ -201,17 +200,15 @@ public:
      @param timeStep defined the  time step need to compute the
      @returns rhsV
      */
-     feVectorType updateRHSFirstDerivate(const Real& timeStep = 1 );
-     feVectorType __attribute__ ((__deprecated__)) time_der(const Real& timeStep = 1 );
-
+     feVectorType updateRHSFirstDerivative(const Real& timeStep = 1 );
+   
      //! Update the right hand side \f$ f_W \f$ of the time derivative formula
      /*
      Sets and Returns the right hand side \f$ f_W \f$ of the time derivative formula
      @param timeStep defined the  time step need to compute the \f$ f_W \f$
      @returns rhsW
      */
-     feVectorType updateRHSSecondDerivate(const Real& timeStep = 1 );
-     feVectorType __attribute__ ((__deprecated__)) time_derOrder2(const Real& timeStep = 1 );
+     feVectorType updateRHSSecondDerivative(const Real& timeStep = 1 );
 
      //!Show the properties  of temporal scheme
      void showMe() const;
@@ -226,7 +223,7 @@ public:
      @param  order define the order of BDF;
      @param  orderDerivate  define the order of derivate;
      */
-    void setup ( const UInt& order, const UInt& orderDerivate);
+    void setup ( const UInt& order, const UInt& orderDerivate = 1 );
 
     //! Initialize the parameters of time advance scheme used in Newmark
 
@@ -239,21 +236,18 @@ public:
      @param x0 is the initial unk;
      */
     void setInitialCondition( const feVectorType& x0);
-    void __attribute__((__deprecated__)) initialize_unk( const feVectorType& x0);
 
     //! Initialize the StateVector used in Newmark
     void setInitialCondition(const feVectorType& x0, const feVectorType& v0 );
-    void __attribute__((__deprecated__)) initialize_unk(const feVectorType& x0, const feVectorType& v0 );
 
     //! Initialize the StateVector used in Newmark
     void setInitialCondition(const feVectorType& x0, const feVectorType& v0, const feVectorType&  w0 );
-    void __attribute__((__deprecated__)) initialize_unk(const feVectorType& x0, const feVectorType& v0, const feVectorType&  w0 );
-
+   
     //! Initialize all the entries of the unknown vector to be derived with a
     //! set of vectors x0
     //! note: this is taken as a copy (not a reference), since x0 is resized inside the method.
     void setInitialCondition(const feVectorContainer_Type& x0 );
-    void __attribute__((__deprecated__))initialize_unk(const feVectorContainer_Type& x0 );
+  
     //@}
 
     //!@name Get Methods
@@ -265,23 +259,20 @@ public:
     @returns beta
     */
     Real coefficientExtrapolation(const UInt& i ) const;
-    Real __attribute__((__deprecated__)) coeff_ext(const UInt& i ) const;
-
+   
     //! Return the \f$i\f$-th coefficient of the velocity's extrapolation
     /*!
     @param \f$i\f$ index of velocity's extrapolation  coefficient
     @returns betaVelocity
     */
     Real coefficientExtrapolationVelocity(const UInt& i ) const;
-    Real __attribute__((__deprecated__))  coeff_extVelocity(const UInt& i ) const;
-
+   
     //! Compute the polynomial extrapolation of solution
     /*!
     Compute the polynomial extrapolation approximation of order \f$n-1\f$ of
     \f$u^{n+1}\f$ defined by the n stored state vectors
-    */
+    */ 
     feVectorType extrapolation() const;
-    feVectorType __attribute__((__deprecated__)) extrap() const;
 
     //! Compute the polynomial extrapolation of velocity
     /*!
@@ -289,15 +280,12 @@ public:
     \f$u^{n+1}\f$ defined by the n stored state vectors
     */
     feVectorType extrapolationVelocity() const;
-    feVectorType __attribute__((__deprecated__)) extrapVelocity() const;
 
     //! Return the current velocity
     feVectorType velocity()  const;
-   feVectorType __attribute__((__deprecated__)) vnk() const;
 
     //!Return the current accelerate
    feVectorType accelerate() const;
-   feVectorType __attribute__((__deprecated__)) wnk() const;
 
    //@}
 
@@ -311,120 +299,6 @@ template<typename feVectorType>
 BdfT <feVectorType> :: BdfT() :
         super()
 {
-}
-
-template<typename feVectorType>
-BdfT<feVectorType>::
-BdfT( const UInt& order )
-        :
-        super()
-{
-    if ( order <= 0 || order > BdfT_MAX_ORDER )
-    {
-        std::ostringstream __ex;
-        __ex << "Error: wrong BDF order\n"
-        << " you want to use BDF order " << order << "\n"
-        << " we support BDF order from 1 to " << BdfT_MAX_ORDER << "\n";
-        throw std::invalid_argument( __ex.str() );
-    }
-
-    this->M_order = order;
-
-    this->M_alpha.resize( order +1 );
-    this->M_beta.resize( order );
-    this->M_size = order ;
-    this->M_firstOrderDerivateSize = order;
-    this->M_secondOrderDerivateSize = order ;
-    this->M_coefficientsSize = order +1 ;
-    switch ( order )
-    {
-    case 1:
-        this->M_alpha[ 0 ] = 1.; // Backward Euler
-        this->M_alpha[ 1 ] = 1.;
-        this->M_beta[ 0 ] = 1.; // u^{n+1} \approx u^n
-        break;
-    case 2:
-        this->M_alpha[ 0 ] = 3. / 2.;
-        this->M_alpha[ 1 ] = 2.;
-        this->M_alpha[ 2 ] = -1. / 2.;
-        this->M_beta[ 0 ] = 2.;
-        this->M_beta[ 1 ] = -1.;
-        break;
-    case 3:
-        this->M_alpha[ 0 ] = 11. / 6.;
-        this->M_alpha[ 1 ] = 3.;
-        this->M_alpha[ 2 ] = -3. / 2.;
-        this->M_alpha[ 3 ] = 1. / 3.;
-        this->M_beta[ 0 ] = 3.;
-        this->M_beta[ 1 ] = -3.;
-        this->M_beta[ 2 ] = 1.;
-        break;
-    case 4:
-        this->M_alpha[ 0 ] = 25. / 12.;
-        this->M_alpha[ 1 ] = 4.;
-        this->M_alpha[ 2 ] = -3. ;
-        this->M_alpha[ 3 ] = 4. / 3.;
-        this->M_alpha[ 4 ] = - 1 / 4.;
-        this->M_beta[ 0 ] = 4.;
-        this->M_beta[ 1 ] = -6.;
-        this->M_beta[ 2 ] = 4.;
-        this->M_beta[ 3 ] = 4.;
-    }
-    this->M_unknowns.reserve(this->M_size );
-    this->M_rhsContribution.reserve(2);
-}
-
-template<typename feVectorType>
-BdfT <feVectorType> ::
-BdfT(const UInt& order, const UInt& orderDerivate )
-        :
-        BdfT( order )
-{
-
-    this->M_orderDerivate= orderDerivate ;
-    this->M_coefficientsSize = order + orderDerivate ;
-
-    if (this->M_orderDerivate== 2)
-    {
-        this->M_xi.resize( order + 2 );
-        this->M_betaVelocity.resize( order + 1 );
-
-        switch ( order )
-        {
-        case 1:
-            this->M_xi[ 0 ] = 1.0;
-            this->M_xi[ 1 ] = 2.0;
-            this->M_xi[ 2 ] = -1.0;
-            this->M_betaVelocity[0]=2.0;
-            this->M_betaVelocity[1]=-1.0;
-            break;
-        case 2:
-            this->M_xi[ 0 ] =  2.0;
-            this->M_xi[ 1 ] = 5.0;
-            this->M_xi[ 2 ] = -4.0;
-            this->M_xi[ 3 ] = 1.0;
-            this->M_betaVelocity[0] = 3.0;
-            this->M_betaVelocity[ 1 ] = -3.;
-            this->M_betaVelocity[ 2 ] = 1.;
-            break;
-        case 3:
-            this->M_beta[ 0 ] = 3.;
-            this->M_beta[ 1 ] = -3.;
-            this->M_beta[ 2 ] = 1.;
-            this->M_xi[ 0 ] =  35./12.;
-            this->M_xi[ 1 ] =  26./3.;
-            this->M_xi[ 2 ] =  -19./2;
-            this->M_xi[ 3 ] =  14./3.;
-            this->M_xi[ 4 ] =  -11./12.;
-            this->M_betaVelocity[ 0 ] = 4.;
-            this->M_betaVelocity[ 1 ] = -6.;
-            this->M_betaVelocity[ 2 ] = 4.;
-            this->M_betaVelocity[ 3 ] = -1;
-            break;
-        }
-        this->M_size++;
-        this->M_unknowns.reserve( this->M_size);
-    }
 }
 
 // ===================================================
@@ -454,16 +328,8 @@ BdfT<feVectorType>::shiftRight(feVectorType const&  solution )
 }
 
 template<typename feVectorType>
-void  __attribute__ ((__deprecated__))
-BdfT<feVectorType>::shift_right(feVectorType const&  solution )
-{
-    // you should replace any call to shift_right() with a call to shiftRight()
-    shiftRight(solution);
-}
-
-template<typename feVectorType>
 feVectorType
-BdfT<feVectorType>::updateRHSFirstDerivate(const Real& timeStep )
+BdfT<feVectorType>::updateRHSFirstDerivative(const Real& timeStep )
 {
     feVectorContainerPtrIterate_Type it  = this->M_rhsContribution.begin();
 
@@ -481,16 +347,8 @@ BdfT<feVectorType>::updateRHSFirstDerivate(const Real& timeStep )
 }
 
 template<typename feVectorType>
-feVectorType __attribute__((__deprecated__))
-BdfT<feVectorType>::time_der(const Real& timeStep )
-{
-    // you should replace any call to time_der() with a call to updateRHSFirstDerivate()
-   return updateRHSFirstDerivate(timeStep);
-}
-
-template<typename feVectorType>
 feVectorType
-BdfT<feVectorType>::updateRHSSecondDerivate(const Real& timeStep )
+BdfT<feVectorType>::updateRHSSecondDerivative(const Real& timeStep )
 {
     ASSERT ( this->M_orderDerivate== 2 ,
              " M_orderDerivatemust be equal two" );
@@ -507,14 +365,6 @@ BdfT<feVectorType>::updateRHSSecondDerivate(const Real& timeStep )
     *it = new feVectorType( fw );
 
     return fw;
-}
-
-template<typename feVectorType>
-feVectorType __attribute__((__deprecated__))
-BdfT<feVectorType>::time_derOrder2(const Real& timeStep )
-{
-    // you should replace any call to time_derOrder2() with a call to updateRHSSecondDerivate()
-    return updateRHSSecondDerivate(timeStep);
 }
 
 template<typename feVectorType>
@@ -657,16 +507,9 @@ void BdfT<feVectorType>::setInitialCondition( const feVectorType& x0)
     feVectorType zero(x0);
     zero *=0;
     this->setInitialRHS(zero);
-
+   
     ASSERT ( this->M_unknowns.size() == this->M_order,
              "M_unknowns.size() and  M_order must be equal" );
-}
-
-template<typename feVectorType>
-void __attribute__((__deprecated__))
-BdfT<feVectorType>::initialize_unk( const feVectorType& x0)
-{    // you should replace any call to initialize_unk() with a call to setInitialCondition()
-  setInitialCondition(x0);
 }
 
 template<typename feVectorType>
@@ -676,21 +519,7 @@ void  BdfT<feVectorType>::setInitialCondition( const feVectorType& /*x0*/, const
 }
 
 template<typename feVectorType>
-void __attribute__ ((__deprecated__))
-BdfT<feVectorType>::initialize_unk( const feVectorType& /*x0*/, const feVectorType& /*v0*/)
-{
-    ERROR_MSG( "this method  is not yet implemented" );
-}
-
-template<typename feVectorType>
 void BdfT<feVectorType>::setInitialCondition( const feVectorType& /*x0*/, const feVectorType& /*v0*/, const feVectorType& /*w0*/)
-{
-    ERROR_MSG( "this method  is not yet implemented" );
-}
-
-template<typename feVectorType>
-void   __attribute__ ((__deprecated__))
-BdfT<feVectorType>::initialize_unk( const feVectorType& /*x0*/, const feVectorType& /*v0*/, const feVectorType& /*w0*/)
 {
     ERROR_MSG( "this method  is not yet implemented" );
 }
@@ -733,23 +562,15 @@ void BdfT<feVectorType>::setInitialCondition( const feVectorContainer_Type& x0)
                  "M_unknowns.size() and  M_order must be equal" );
     }
 
-    //!initialize zero
+    //!initialize zero 
     feVectorType zero(x0[0]);
     zero *=0;
     this->setInitialRHS(zero);
 }
 
-template<typename feVectorType>
-void  __attribute__((__deprecated__))
-BdfT<feVectorType>::initialize_unk( const feVectorContainer_Type& x0)
-{
-    // you should replace any call to initialize_unk() with a call to setInitalCondition()
-    setInitialCondition(x0);
-}
-
 // ===================================================
 // Get Methods
-// ===================================================
+// ===================================================  
 
 template<typename feVectorType>
 Real
@@ -762,13 +583,6 @@ BdfT<feVectorType>::coefficientExtrapolation(const UInt& i ) const
 }
 
 template<typename feVectorType>
-Real __attribute__((__deprecated__))
-BdfT<feVectorType>::coeff_ext(const UInt& i ) const
-{
-  return coefficientExtrapolation(i);
-}
-
-template<typename feVectorType>
 double
 BdfT<feVectorType>::coefficientExtrapolationVelocity (const UInt& i ) const
 {
@@ -776,14 +590,6 @@ BdfT<feVectorType>::coefficientExtrapolationVelocity (const UInt& i ) const
     ASSERT( i < this->M_order+1,
             "Error in specification of the time derivative coefficient for the BDF formula (out of range error)" );
     return this->M_betaVelocity[ i +1];
-}
-
-
-template<typename feVectorType>
-Real __attribute__ ((__deprecated__))
-BdfT<feVectorType>::coeff_extVelocity(const UInt& i ) const
-{
- return coefficientExtrapolationVelocity(i);
 }
 
 template<typename feVectorType>
@@ -802,13 +608,6 @@ BdfT<feVectorType>::extrapolation() const
 }
 
 template<typename feVectorType>
-feVectorType __attribute__ ((__deprecated__))
-BdfT<feVectorType>::extrap() const
-{
- return extrapolation();
-}
-
-template<typename feVectorType>
 feVectorType
 BdfT<feVectorType>::extrapolationVelocity() const
 {
@@ -822,13 +621,6 @@ BdfT<feVectorType>::extrapolationVelocity() const
 }
 
 template<typename feVectorType>
-feVectorType __attribute__((__deprecated__))
-BdfT<feVectorType>::extrapVelocity() const
-{
- return extrapolationVelocity();
-}
-
-template<typename feVectorType>
 feVectorType
 BdfT<feVectorType>::velocity()  const
 {
@@ -839,13 +631,6 @@ BdfT<feVectorType>::velocity()  const
 }
 
 template<typename feVectorType>
-feVectorType __attribute__((__deprecated__))
-BdfT<feVectorType>::vnk()  const
-{
-  return velocity();
-}
-
-template<typename feVectorType>
 feVectorType
 BdfT<feVectorType>::accelerate() const
 {
@@ -853,13 +638,6 @@ BdfT<feVectorType>::accelerate() const
     accelerate  *= this->M_xi[ 0 ]  /  (this->M_timeStep*this->M_timeStep);
     accelerate  -=  ( *this->M_rhsContribution[1] );
     return accelerate;
-}
-
-template<typename feVectorType>
-feVectorType __attribute__ ((__deprecated__))
-BdfT<feVectorType>::wnk() const
-{
-return accelerate();
 }
 
 // ===================================================

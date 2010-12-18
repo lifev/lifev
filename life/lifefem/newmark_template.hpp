@@ -159,24 +159,19 @@ public:
     */
     void shiftRight(const feVectorType& solution);
 
-    void __attribute__ ((__deprecated__))   shift_right(const feVectorType& solution);
-
     //! Update the right hand side \f$ f_V \f$ of the time derivative formula
     /*!
     Set and Return the right hand side \f$ f_V \f$ of the time derivative formula
     @param timeStep defined the  time step need to compute the
     */
-    feVectorType updateRHSFirstDerivate(const Real& timeStep = 1 );
-    feVectorType __attribute__ ((__deprecated__))  time_der(const Real& timeStep = 1 );
-
+    feVectorType updateRHSFirstDerivative(const Real& timeStep = 1 );
+  
     //! Update the right hand side \f$ f_W \f$ of the time derivative formula
     /*
     Set and Return the right hand side \f$ f_W \f$ of the time derivative formula
     @param timeStep defined the  time step need to compute the \f$ f_W \f$
     */
-   feVectorType updateRHSSecondDerivate(const Real& timeStep = 1 );
-
-   feVectorType __attribute__ ((__deprecated__))  time_derOrder2(const Real& timeStep = 1 );
+   feVectorType updateRHSSecondDerivative(const Real& timeStep = 1 );
 
     //!Show the properties  of temporal scheme
     void showMe() const;
@@ -209,8 +204,7 @@ public:
      @param x0 is the initial solution;
      */
      void setInitialCondition( const feVectorType& x0);
-     void  __attribute__ ((__deprecated__ )) initialize_unk( const feVectorType& x0);
-
+     
      //! initialize the state vector
      /*!
      Initialize all the entries of the unknown vector to be derived with the vector x0, v0 (duplicated).
@@ -219,7 +213,6 @@ public:
      @param v0 is the initial velocity
      */
      void setInitialCondition( const feVectorType& x0, const feVectorType& v0 );
-     void  __attribute__ ((__deprecated__ )) initialize_unk( const feVectorType& x0, const feVectorType& v0 );
 
      //! initialize the state vector
      /*!
@@ -230,15 +223,14 @@ public:
      @param w0 is the initial accelerate
      */
      void setInitialCondition(const feVectorType& x0, const feVectorType& v0, const feVectorType& w0 );
-     void  __attribute__ ((__deprecated__ )) initialize_unk(const feVectorType& x0, const feVectorType& v0, const feVectorType& w0 );
-
-  //! Initialize the state vector
+    
+    //! Initialize the state vector
     /*! Initialize all the entries of the unknown vector to be derived with a
      set of vectors x0
      note: this is taken as a copy (not a reference), since x0 is resized inside the method.
      */
     void setInitialCondition( const feVectorContainer_Type& x0);
-    void __attribute__ ((__deprecated__ ))  initialize_unk ( const feVectorContainer_Type& x0);
+    
    //@}
 
   //!@name Get Methods
@@ -250,7 +242,6 @@ public:
    @returns beta
    */
    Real coefficientExtrapolation(const  UInt& i ) const;
-   Real __attribute__ ((__deprecated__)) coeff_ext(const  UInt& i ) const;
 
    //! Return the \f$i\f$-th coefficient of the velocity's extrapolation
    /*!
@@ -259,16 +250,12 @@ public:
    */
    Real coefficientExtrapolationVelocity(const UInt& i ) const;
 
-   Real __attribute__ ((__deprecated__)) coeff_extVelocity(const UInt& i ) const;
-
     //! Compute the polynomial extrapolation of solution
     /*!
     Compute the polynomial extrapolation approximation of order \f$n-1\f$ of
     \f$u^{n+1}\f$ defined by the n stored state vectors
     */
    feVectorType   extrapolation() const;
-
-   feVectorType  __attribute__ ((__deprecated__)) extrap() const;
 
     //! Compute the polynomial extrapolation of velocity
     /*!
@@ -277,15 +264,11 @@ public:
     */
     feVectorType  extrapolationVelocity() const;
 
-    feVectorType __attribute__ ((__deprecated__)) extrapVelocity() const;
-
     //! Return the current velocity
     feVectorType velocity()  const;
-    feVectorType __attribute__ ((__deprecated__)) vnk()  const;
-
+ 
     //!Return the current accelerate
     feVectorType accelerate() const ;
-    feVectorType __attribute__ ((__deprecated__)) wnk() const ;
 
   //@}
 
@@ -352,17 +335,8 @@ void Newmark <feVectorType>::shiftRight(const feVectorType& solution)
 }
 
 template<typename feVectorType>
-void __attribute__((__deprecated__)) Newmark <feVectorType>::shift_right(const feVectorType& solution)
-{
-    // you should replace any call to shift_right() with a call to shiftRight()
-  return shiftRight(solution);
-}
-
-
-
-template<typename feVectorType>
 feVectorType
-Newmark<feVectorType>::updateRHSFirstDerivate(const Real& timeStep )
+Newmark<feVectorType>::updateRHSFirstDerivative(const Real& timeStep )
 {
     feVectorContainerPtrIterate_Type it  =  this->M_rhsContribution.begin();
 
@@ -377,16 +351,10 @@ Newmark<feVectorType>::updateRHSFirstDerivate(const Real& timeStep )
 
     return fv;
 }
-template<typename feVectorType>
-feVectorType __attribute__((__deprecated__))
-Newmark<feVectorType>::time_der(const Real& timeStep )
-{
-  return updateRHSFirstDerivate( timeStep );
-}
 
 template<typename feVectorType>
 feVectorType
-Newmark<feVectorType>::updateRHSSecondDerivate(const Real& timeStep )
+Newmark<feVectorType>::updateRHSSecondDerivative(const Real& timeStep )
 {
     feVectorContainerPtrIterate_Type it  =  this->M_rhsContribution.end()-1;
 
@@ -401,13 +369,6 @@ Newmark<feVectorType>::updateRHSSecondDerivate(const Real& timeStep )
     *it = new feVectorType(fw);
 
     return fw;
-}
-
-template<typename feVectorType>
-feVectorType __attribute__((__deprecated__))
-Newmark<feVectorType>::time_derOrder2(const Real& timeStep )
-{
-  return updateRHSSecondDerivate( timeStep );
 }
 
 template<typename feVectorType>
@@ -562,14 +523,6 @@ void Newmark<feVectorType>::setInitialCondition( const feVectorType& x0)
 }
 
 template<typename feVectorType>
-void __attribute ((__deprecated__))
-Newmark<feVectorType>::initialize_unk( const feVectorType& x0)
-{
-    // you should replace any call to initial_unk() with a call to setInitialCondition()
-    return setInitialCondition(x0);
-}
-
-template<typename feVectorType>
 void Newmark<feVectorType>::setInitialCondition( const feVectorType& x0, const feVectorType& v0)
 {
     feVectorContainerPtrIterate_Type iter       = this->M_unknowns.begin();
@@ -594,13 +547,6 @@ void Newmark<feVectorType>::setInitialCondition( const feVectorType& x0, const f
         *this->M_unknowns[i+2]  *=0;
     }
     this->setInitialRHS(zero);
-}
-
-template<typename feVectorType>
-void  __attribute__((__deprecated__))
-Newmark<feVectorType>::initialize_unk( const feVectorType& x0, const feVectorType& v0)
-{
-   return setInitialCondition(x0, v0);
 }
 
 template<typename feVectorType>
@@ -629,13 +575,6 @@ void Newmark<feVectorType>::setInitialCondition( const feVectorType& x0, const f
         *this->M_unknowns[i+3] *=0;
     }
     this->setInitialRHS(zero);
-}
-
-template<typename feVectorType>  __attribute__ ((__deprecated__))
-void Newmark<feVectorType>::initialize_unk( const feVectorType& x0, const feVectorType& v0, const feVectorType& w0)
-{
-    // you should replace any call to initialize_unk() with a call to setInitialCondition()
-    return setInitialCondition( x0, v0,  w0) ;
 }
 
 template<typename feVectorType>
@@ -669,12 +608,6 @@ void Newmark<feVectorType>::setInitialCondition( const feVectorContainer_Type& x
     this->setInitialRHS(zero);
 }
 
-template<typename feVectorType>   __attribute__((__deprecated__))
-void Newmark<feVectorType>::initialize_unk( const feVectorContainer_Type& x0)
-{ // you should replace any call to initialize_unk() with a call to setInitialCondition()
-  return  setInitialCondition(x0);
-}
-
 // ===================================================
 // Get Methods
 // ===================================================
@@ -688,26 +621,10 @@ Newmark<feVectorType>::coefficientExtrapolation(const UInt& i) const
 }
 
 template<typename feVectorType>
-Real __attribute__ ((__deprecated__))
-Newmark<feVectorType>::coeff_ext(const UInt& i) const
-{
-    // you should replace any call to coeff_ext() with a call to coefficientExaptrapolation()
-    return coefficientExtrapolation(i);
-}
-
-template<typename feVectorType>
 Real
 Newmark<feVectorType>::coefficientExtrapolationVelocity(const UInt& i ) const
 {
  return  this->M_betaVelocity(i)*pow( this->M_timeStep, static_cast<Real>(i));
-}
-
-template<typename feVectorType>
-Real __attribute__ ((__deprecated__))
-Newmark<feVectorType>::coeff_extVelocity(const UInt& i ) const
-{
-    // you should replace any call to coeff_ext() with a call to coefficientExatrapolation()
-  return  coefficientExtrapolationVelocity(i);
 }
 
 template<typename feVectorType>
@@ -722,14 +639,6 @@ Newmark<feVectorType>::extrapolation()  const
 }
 
 template<typename feVectorType>
-feVectorType  __attribute__ ((__deprecated__))
-Newmark<feVectorType>::extrap()  const
-{
-    // you should replace any call to extrap() with a call to extrapolation()
-   return extrapolation();
-}
-
-template<typename feVectorType>
 feVectorType
 Newmark<feVectorType>::extrapolationVelocity() const
 {
@@ -737,14 +646,6 @@ Newmark<feVectorType>::extrapolationVelocity() const
     extrapolation += this->M_timeStep * ( *this->M_unknowns[ 2 ]);
 
     return extrapolation;
-}
-
-template<typename feVectorType>
-feVectorType __attribute__ ((__deprecated__))
-Newmark<feVectorType>::extrapVelocity() const
-{
-    // you should replace any call to extrapVelocity() with a call to extrapolationVelocity()
-    return extrapolationVelocity();
 }
 
 template<typename feVectorType>
@@ -756,26 +657,11 @@ Newmark<feVectorType>::velocity() const
 }
 
 template<typename feVectorType>
-feVectorType __attribute__ ((__deprecated__))
-Newmark<feVectorType>::vnk() const
-{
-    // you should replace any call to vnk() with a call to velocity()
-    return velocity();
-}
-
-template<typename feVectorType>
 feVectorType
 Newmark<feVectorType>::accelerate() const
 {
     feVectorType accelerate( *this->M_unknowns[2]);
     return accelerate;
-}
-
-template<typename feVectorType>
-feVectorType __attribute__ ((__deprecated__))
-Newmark<feVectorType>::wnk() const
-{   // you should replace any call to wnk() with a call to accelerate()
-  return accelerate();
 }
 
 // ===================================================
