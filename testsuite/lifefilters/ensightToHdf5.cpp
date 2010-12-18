@@ -196,9 +196,9 @@ EnsightToHdf5::run()
     fluid.setUp(dataFile);
 
     // Initialization
-    Real dt     = dataNavierStokes->dataTime()->getTimeStep();
-    Real t0     = dataNavierStokes->dataTime()->getInitialTime();
-    Real tFinal = dataNavierStokes->dataTime()->getEndTime();
+    Real dt     = dataNavierStokes->dataTime()->timeStep();
+    Real t0     = dataNavierStokes->dataTime()->initialTime();
+    Real tFinal = dataNavierStokes->dataTime()->endTime();
 
     boost::shared_ptr< Exporter<RegionMesh3D<LinearTetra> > > exporter;
     boost::shared_ptr< Exporter<RegionMesh3D<LinearTetra> > > importer;
