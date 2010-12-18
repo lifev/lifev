@@ -61,7 +61,7 @@ public:
             :
             M_time(0.),
             M_BC(),
-            M_ODEscheme(1),
+            M_ODEscheme(),
             M_dt(0.),
             M_T_max()  ,
             M_E_max()  ,
@@ -73,7 +73,9 @@ public:
             M_PV(),
             M_intFlux(),
             M_Vt_ao()
-    {}
+    {
+      M_ODEscheme.setup(1);
+    }
 
     void initParameters      ( FSIOperator&  Oper,
                                const std::string&    FileName);

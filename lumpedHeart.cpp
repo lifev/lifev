@@ -55,7 +55,7 @@ namespace LifeV
 
 void LumpedHeart::initParameters( FSIOperator&  /*oper*/, const std::string&    FileName )
 {
-    M_ODEscheme.initialize_unk(0.);
+    M_ODEscheme.setInitialCondition(0.);
 
     GetPot       dataFile(FileName);
     M_dt         =dataFile("problem/timestep", 0.001);
@@ -81,9 +81,10 @@ void LumpedHeart::renewParameters ( FSIOperator&  /*oper*/, const int& /*flag*/,
 {
     M_intFlux += flux*M_dt;
     //should have a different sign, but it is assigned as a Normal bc so we take the opposite
-    LumpedHeart::M_pressure = (-flux*(M_RV_art)-M_elastance(time)*(M_Vt_ao-M_intFlux-M_V_0))+(M_LV_art)*(-flux/M_dt+M_ODEscheme.time_der(M_dt));
+    M_ODEscheme.updateRHSContribution(M_dt);
+    LumpedHeart::M_pressure = (-flux*(M_RV_art)-M_elastance(time)*(M_Vt_ao-M_intFlux-M_V_0))+(M_LV_art)*(-flux/M_dt+M_ODEscheme.rhsContributionFirstDerivative());
     //    flux     = (M_ODEScheme.time_der(M_dt)-M_Pressure+M_elastance*(M_Vt_ao-M_intFlux-M_V_0))/(M_LV_art+M_elastance*M_dt+M_RV_art);
-    M_ODEscheme.shift_right(flux);
+    M_ODEscheme.shiftRight(flux);
 }
 
 Real LumpedHeart::M_elastance(const Real& t)

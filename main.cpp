@@ -277,8 +277,8 @@ public:
 
         FC0.initParameters( *M_fsi->FSIOper(), 3);
         LH.initParameters( *M_fsi->FSIOper(), "dataHM");
-//         M_data->dataFluid()->dataTime()->setInitialTime( M_data->dataFluid()->dataTime()->getInitialTime() + M_data->dataFluid()->dataTime()->getTimeStep() );
-//         M_data->dataFluid()->dataTime()->setTime( M_data->dataFluid()->dataTime()->getInitialTime() + M_data->dataFluid()->dataTime()->getTimeStep());
+//         M_data->dataFluid()->dataTime()->setInitialTime( M_data->dataFluid()->dataTime()->initialTime() + M_data->dataFluid()->dataTime()->timeStep() );
+//         M_data->dataFluid()->dataTime()->setTime( M_data->dataFluid()->dataTime()->initialTime() + M_data->dataFluid()->dataTime()->timeStep());
     }
 
     fsi_solver_ptr fsiSolver() { return M_fsi; }
@@ -292,7 +292,7 @@ public:
     run()
     {
         boost::timer _overall_timer;
-        M_Tstart=M_fsi->FSIOper()->dataFluid()->dataTime()->getInitialTime();
+        M_Tstart=M_fsi->FSIOper()->dataFluid()->dataTime()->initialTime();
         int _i = 1;
         LifeV::UInt offset=dynamic_cast<LifeV::Monolithic*>(M_fsi->FSIOper().get())->getOffset();
 
@@ -333,7 +333,7 @@ public:
 
             int flag =2;
             FC0.renewParameters( *M_fsi, 3 );
-            LH.renewParameters( *M_fsi->FSIOper(), flag, M_data->dataFluid()->dataTime()->getTime(), flux );
+            LH.renewParameters( *M_fsi->FSIOper(), flag, M_data->dataFluid()->dataTime()->time(), flux );
 
             //                 FC0.renewParameters( *M_fsi, 6 );
             //                 FC1.renewParameters( *M_fsi, 3, 4 );
@@ -345,18 +345,18 @@ public:
 
             M_fsi->FSIOper()->getSolidDisp(*M_solidDisp);//    displacement(), M_offset);
             M_fsi->FSIOper()->getSolidVel(*M_solidVel);//    displacement(), M_offset);
-//             *M_solidDisp *= 1/(M_fsi->FSIOper()->solid().rescaleFactor()*M_data->dataFluid()->dataTime()->getTimeStep());
-//             *M_solidVel  *= 1/(M_fsi->FSIOper()->solid().rescaleFactor()*M_data->dataFluid()->dataTime()->getTimeStep());
+//             *M_solidDisp *= 1/(M_fsi->FSIOper()->solid().rescaleFactor()*M_data->dataFluid()->dataTime()->timeStep());
+//             *M_solidVel  *= 1/(M_fsi->FSIOper()->solid().rescaleFactor()*M_data->dataFluid()->dataTime()->timeStep());
 
             M_fsi->FSIOper()->getFluidVelAndPres(*M_velAndPressure);
 
-            M_exporterSolid->postProcess( M_data->dataFluid()->dataTime()->getTime() );
+            M_exporterSolid->postProcess( M_data->dataFluid()->dataTime()->time() );
 
             M_fsi->iterate();
 
             *M_fluidDisp      = M_fsi->FSIOper()->meshDisp();
 
-            M_exporterFluid->postProcess( M_data->dataFluid()->dataTime()->getTime() );
+            M_exporterFluid->postProcess( M_data->dataFluid()->dataTime()->time() );
 
 
             M_fsi->FSIOper()->displayer().leaderPrint( "average inlet pressure  = ", M_fsi->FSIOper()->fluid().pressure(2, *M_velAndPressure));
@@ -374,9 +374,9 @@ public:
             try
             {
                 if (!M_data->method().compare("monolithicGI"))
-                    checkCEResult(M_data->dataFluid()->dataTime()->getTime());
+                    checkCEResult(M_data->dataFluid()->dataTime()->time());
                 else
-                    checkGCEResult(M_data->dataFluid()->dataTime()->getTime());
+                    checkGCEResult(M_data->dataFluid()->dataTime()->time());
             }
             catch (Problem::RESULT_CHANGED_EXCEPTION) {std::cout<<"res. changed"<<std::endl;}
             ///////// END OF CHECK
@@ -387,14 +387,14 @@ public:
 
             M_solidDisp->subset(M_fsi->displacement(), offset);
             M_solidVel->subset(M_fsi->FSIOper()->solid().vel(), offset);
-//             *M_solidDisp *= 1/(M_fsi->FSIOper()->solid().rescaleFactor()*M_data->dataFluid()->dataTime()->getTimeStep());
-//             *M_solidVel  *= 1/(M_fsi->FSIOper()->solid().rescaleFactor()*M_data->dataFluid()->dataTime()->getTimeStep());
+//             *M_solidDisp *= 1/(M_fsi->FSIOper()->solid().rescaleFactor()*M_data->dataFluid()->dataTime()->timeStep());
+//             *M_solidVel  *= 1/(M_fsi->FSIOper()->solid().rescaleFactor()*M_data->dataFluid()->dataTime()->timeStep());
 
 
             *M_velAndPressure = M_fsi->displacement();
-            M_exporterSolid->postProcess( M_data->dataFluid()->dataTime()->getTime() );
+            M_exporterSolid->postProcess( M_data->dataFluid()->dataTime()->time() );
             *M_fluidDisp      = M_fsi->FSIOper()->meshMotion().disp();
-            M_exporterFluid->postProcess( M_data->dataFluid()->dataTime()->getTime() );
+            M_exporterFluid->postProcess( M_data->dataFluid()->dataTime()->time() );
         }
 
         std::cout << "Total computation time = "
@@ -588,7 +588,7 @@ void Problem::initialize(std::string& /*loadInitSol*/,  GetPot const& data_file)
 
     UInt offset=dynamic_cast<LifeV::Monolithic*>(M_fsi->FSIOper().get())->getOffset();
 
-    Real dt= M_fsi->FSIOper()->dataFluid()->dataTime()->getTimeStep();//data_file("problem/Tstart"   ,0.);
+    Real dt= M_fsi->FSIOper()->dataFluid()->dataTime()->timeStep();//data_file("problem/Tstart"   ,0.);
     M_fsi->FSIOper()->displayer().leaderPrint( "Starting time = " ,M_Tstart);
 
     M_importerFluid->import(M_Tstart-dt, dt);
@@ -609,7 +609,7 @@ void Problem::initialize(std::string& /*loadInitSol*/,  GetPot const& data_file)
 
     UniqueV.reset(new vector_Type(*M_fsi->FSIOper()->couplingVariableMap(), Unique, Zero));
     UniqueV->subset(*M_solidDisp, M_solidDisp->map(), (UInt)0, offset);
-    *UniqueV*=1/(M_fsi->FSIOper()->solid().rescaleFactor()*M_data->dataFluid()->dataTime()->getTimeStep());
+    *UniqueV*=1/(M_fsi->FSIOper()->solid().rescaleFactor()*M_data->dataFluid()->dataTime()->timeStep());
     M_fsi->FSIOper()->solid().initialize(UniqueV);
     *initSol+=*UniqueV;
 
@@ -622,7 +622,7 @@ void Problem::initialize(std::string& /*loadInitSol*/,  GetPot const& data_file)
 
     initSolSVel.reset(new vector_Type(*M_fsi->FSIOper()->couplingVariableMap(), Unique, Zero));
     initSolSVel->subset(*M_solidVel,M_solidVel->map(), (UInt)0, offset);
-    *initSolSVel*=1/(M_fsi->FSIOper()->solid().rescaleFactor()*M_data->dataSolid()->dataTime()->getTimeStep());
+    *initSolSVel*=1/(M_fsi->FSIOper()->solid().rescaleFactor()*M_data->dataSolid()->dataTime()->timeStep());
     M_fsi->FSIOper()->solid().initializeVel(*initSolSVel);
     M_fsi->initialize(initSol);
 }
