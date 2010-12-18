@@ -185,7 +185,7 @@ std::string getDescription ( unsigned int area )
 // DebugStream - Constructors
 // =============================================
 
-DebugStream::DebugStream( int area, int level, bool print )
+DebugStream::DebugStream( int area, int /*level*/, bool print )
         :
         M_data( new Private )
 {
@@ -362,7 +362,7 @@ Debug( int area, DebugStream::stprintf func )
     return s;
 }
 
-DebugStream Debug( bool cond, int area, DebugStream::stprintf /*func*/l )
+DebugStream Debug( bool cond, int area, DebugStream::stprintf /*func*/ )
 {
     if ( cond )
         return DebugStream( area, DEBUG_INFO );
