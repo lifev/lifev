@@ -171,7 +171,7 @@ readINRIAMeshFileHead( std::ifstream          & myStream,
                        UInt                   & numberBoundaryFaces,
                        UInt                   & numberBoundaryEdges,
                        UInt                   & numberVolumes,
-                       UInt                   & numStoredFaces,
+                       UInt                   & numberStoredFaces,
                        ReferenceShapes        & shape,
                        InternalEntitySelector   iSelect )
 {
@@ -185,7 +185,7 @@ readINRIAMeshFileHead( std::ifstream          & myStream,
     UInt done = 0;
     UInt p1, p2, p3, p4, p5, p6, p7, p8;
     UInt numReadFaces = 0;
-    numStoredFaces    = 0;
+    numberStoredFaces = 0;
 
     //shape = NONE;
     std::vector<bool> isboundary;
@@ -261,7 +261,7 @@ readINRIAMeshFileHead( std::ifstream          & myStream,
                     }
                 }
             }
-            numStoredFaces = numReadFaces;
+            numberStoredFaces = numReadFaces;
         }
 
 
@@ -293,7 +293,7 @@ readINRIAMeshFileHead( std::ifstream          & myStream,
                 }
 
             }
-            numStoredFaces = numReadFaces;
+            numberStoredFaces = numReadFaces;
         }
         // To cope with a mistake in INRIA Mesh files
         if ( line.find( "Tetrahedra" ) != std::string::npos )
