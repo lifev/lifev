@@ -273,7 +273,7 @@ public:
         {
             M_fsi->initialize();
         }
-        M_fsi->FSIOper()->mergeBCHandlers();
+        //M_fsi->FSIOper()->mergeBCHandlers();
 
         FC0.initParameters( *M_fsi->FSIOper(), 3);
         LH.initParameters( *M_fsi->FSIOper(), "dataHM");
