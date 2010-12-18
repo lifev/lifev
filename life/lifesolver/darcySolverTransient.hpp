@@ -535,7 +535,7 @@ setInitialPrimal ( const Function& primalInitial )
     // Interpolate the primal initial value.
     this->M_primal_FESpace.interpolate( M_primalInitial,
                                         *(this->M_primal),
-                                        this->M_data.dataTime()->getInitialTime() );
+                                        this->M_data.dataTime()->initialTime() );
 
 } // setInitialPrimal
 
@@ -567,7 +567,7 @@ localElementComputation ( const UInt & iElem )
           this->M_primal_FESpace.fe(), 0, 0);
 
     // Store in the mass matrix for the primal variable also the time step.
-    M_elmatMassPrimal *= static_cast<Real>(1.) / this->M_data.dataTime()->getTimeStep();
+    M_elmatMassPrimal *= static_cast<Real>(1.) / this->M_data.dataTime()->timeStep();
 
 } // localElementComputation
 
@@ -689,7 +689,7 @@ staticCondensation ()
     source( this->M_source,
             this->M_elvecSource,
             this->M_primal_FESpace.fe(),
-            this->M_data.dataTime()->getTime(), 0 );
+            this->M_data.dataTime()->time(), 0 );
 
     // Take the pressure at the previews time step in the local element.
     ElemVec elvecPrimalOldLocal( this->M_primal_FESpace.refFE().nbDof(), 1 );
@@ -841,7 +841,7 @@ localComputePrimalAndDual ()
     source( this->M_source,
             this->M_elvecSource,
             this->M_primal_FESpace.fe(),
-            this->M_data.dataTime()->getTime(), 0 );
+            this->M_data.dataTime()->time(), 0 );
 
     // Take the pressure at the previews time step in the local element.
     ElemVec elvecPrimalOldLocal( this->M_primal_FESpace.refFE().nbDof(), 1 );
