@@ -1126,12 +1126,12 @@ initialize( const function_Type& velocityFunction, const function_Type& pressure
     vector_Type velocityInitialGuess( M_velocityFESpace.map() );
     M_velocityFESpace.interpolate( velocityFunction,
                                    velocityInitialGuess,
-                                   M_dataNavierStokes->dataTime()->getTime() );
+                                   M_dataNavierStokes->dataTime()->time() );
 
     vector_Type pressureInitialGuess( M_pressureFESpace.map() );
     M_pressureFESpace.interpolate( pressureFunction,
                                    pressureInitialGuess,
-                                   M_dataNavierStokes->dataTime()->getTime() );
+                                   M_dataNavierStokes->dataTime()->time() );
 
     initialize( velocityInitialGuess, pressureInitialGuess );
 }
@@ -1912,7 +1912,7 @@ Oseen<MeshType, SolverType>::applyBoundaryConditions( matrix_Type&       matrix,
               bcHandler,
               M_velocityFESpace.feBd(),
               1.,
-              M_dataNavierStokes->dataTime()->getTime() );
+              M_dataNavierStokes->dataTime()->time() );
 
     rightHandSide = rightHandSideFull;
 

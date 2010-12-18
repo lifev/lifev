@@ -341,7 +341,7 @@ public:
     /*
     @returns the right hand side without boundary conditions;
     */
-    vector_ptrtype& rhsWithoutBC() { return M_rhsNoBC; }
+    vector_ptrtype& rhsContributionSecondDerivativeithoutBC() { return M_rhsNoBC; }
 
     //!return the communicator
     /*!
@@ -806,7 +806,7 @@ updateSourceTerm(const  vector_type&  source)
           for ( ig = 0; ig < this->M_FESpace->fe().nbQuadPt(); ++ig )
           {
           this->M_FESpace->fe().coorQuadPt( x, y, z, ig );
-          f = M_source(M_data->dataTime()->getTime(), x, y, z, iComp + 1 );
+          f = M_source(M_data->dataTime()->time(), x, y, z, iComp + 1 );
           u_ig = 0.;
 
           for ( i = 0;i < M_FESpace->fe().nbFEDof(); ++i )
@@ -890,7 +890,7 @@ applyBoundaryConditions(matrix_type&        matrix,
 
      vector_type rhsFull(rhs, Unique);  // bcManages now manages the also repeated parts
 
-    bcManage( matrix, rhsFull, *this->M_FESpace->mesh(), this->M_FESpace->dof(), BCh, this->M_FESpace->feBd(), 1., M_data->dataTime()->getTime());
+    bcManage( matrix, rhsFull, *this->M_FESpace->mesh(), this->M_FESpace->dof(), BCh, this->M_FESpace->feBd(), 1., M_data->dataTime()->time());
 
     // matrix should be GlobalAssembled by  bcManage
 

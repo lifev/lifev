@@ -63,7 +63,7 @@ VenantKirchhofSolver<Mesh, SolverType>::VenantKirchhofSolver( ):
         M_disp                       ( ),
         M_vel                        ( ),
         M_rhs                        ( /*new vector_type(M_localMap)*/),//useful
-        M_rhsW                       ( ),
+        M_rhsContributionSecondDerivative                       ( ),
         M_rhsNoBC                    ( ),
         M_f                          ( ),//useless
         M_residual_d                 ( ),//useless
@@ -137,7 +137,7 @@ VenantKirchhofSolver<Mesh, SolverType>::setup(boost::shared_ptr<data_type>      
     M_localMap                        = monolithicMap;
     M_disp.reset                      (new vector_type(*M_localMap));
     M_vel.reset                       (new vector_type(*M_localMap));
-    M_rhsW.reset                      ( new vector_type(*M_localMap) );
+    M_rhsContributionSecondDerivative.reset                      ( new vector_type(*M_localMap) );
     M_rhsNoBC.reset                   ( new vector_type(*M_localMap) );
     M_mass.reset                      (new matrix_type(*M_localMap));
     M_linearStiff.reset               (new matrix_type(*M_localMap));
@@ -165,7 +165,7 @@ void VenantKirchhofSolver<Mesh, SolverType>::updateSystem( matrix_ptrtype& /*sti
 
     Real coef;
 
-    coef = (Real) M_data->dataTime()->getTimeStep();
+    coef = (Real) M_data->dataTime()->timeStep();
 
     vector_type _z = *M_disp;
     _z            += coef*(*M_vel);
@@ -180,10 +180,10 @@ void VenantKirchhofSolver<Mesh, SolverType>::updateSystem( matrix_ptrtype& /*sti
 
     std::cout<< "rhsNoBC in solid 2" << M_rhsNoBC->Norm2()<<std::endl;
 
-    coef = 2.0/M_data->dataTime()->getTimeStep();
+    coef = 2.0/M_data->dataTime()->timeStep();
 
-    *M_rhsW  = coef*(*M_disp);
-    *M_rhsW += *M_vel;
+    *M_rhsContributionSecondDerivative  = coef*(*M_disp);
+    *M_rhsContributionSecondDerivative += *M_vel;
 
     chrono.stop();
 
@@ -216,7 +216,7 @@ VenantKirchhofSolver<Mesh, SolverType>::buildSystem(matrix_ptrtype massStiff, co
     UInt nc = nDimensions;
 
     //inverse of dt:
-    Real dti2 = 2.0 / ( M_data->dataTime()->getTimeStep() * M_data->dataTime()->getTimeStep() );
+    Real dti2 = 2.0 / ( M_data->dataTime()->timeStep() * M_data->dataTime()->timeStep() );
 
     // Elementary computation and matrix assembling
     // Loop on elements
@@ -261,7 +261,7 @@ VenantKirchhofSolver<Mesh, SolverType>::buildSystem(matrix_ptrtype massStiff, co
     M_linearStiff->GlobalAssemble();
     massStiff->GlobalAssemble();
     M_mass->GlobalAssemble();
-    *massStiff *= factor; //M_data.dataTime()->getTimeStep() * M_rescaleFactor;
+    *massStiff *= factor; //M_data.dataTime()->timeStep() * M_rescaleFactor;
 }
 
 template <typename Mesh, typename SolverType>
@@ -271,8 +271,8 @@ void VenantKirchhofSolver<Mesh, SolverType>::iterate(vector_type &_sol)
 
     vector_type sol(*M_localMap);
 
-    *M_vel  = ( 2.0 / M_data->dataTime()->getTimeStep() ) * (*M_disp);
-    *M_vel -= *M_rhsW;
+    *M_vel  = ( 2.0 / M_data->dataTime()->timeStep() ) * (*M_disp);
+    *M_vel -= *M_rhsContributionSecondDerivative;
 
     //M_Displayer->leaderPrint("sol norm = ", norm(this->sol));
 
@@ -289,7 +289,7 @@ VenantKirchhofSolver<Mesh, SolverType>::iterate( bchandler_type& bch )
     *matrFull += *M_massStiff;
 
     M_rhsNoBC->GlobalAssemble();
-    M_rhsW->GlobalAssemble();
+    M_rhsContributionSecondDerivative->GlobalAssemble();
 
     vector_type rhsFull (*M_rhsNoBC);
 
@@ -315,8 +315,8 @@ VenantKirchhofSolver<Mesh, SolverType>::iterate( bchandler_type& bch )
 
     //M_disp.spy( "sol.dat" );
 
-    *M_vel  = ( 2.0 / M_data->dataTime()->getTimeStep() ) * (*M_disp);
-    *M_vel -= *M_rhsW;
+    *M_vel  = ( 2.0 / M_data->dataTime()->timeStep() ) * (*M_disp);
+    *M_vel -= *M_rhsContributionSecondDerivative;
 
     *M_residual_d =  *M_massStiff * (*M_disp);
     *M_residual_d -= *M_rhsNoBC;
@@ -332,7 +332,7 @@ VenantKirchhofSolver<Mesh, SolverType>::iterateLin( bchandler_type& bch )
     *matrFull += *M_massStiff;
 
     M_rhsNoBC->GlobalAssemble();
-    M_rhsW->GlobalAssemble();
+    M_rhsContributionSecondDerivative->GlobalAssemble();
 
     vector_type rhsFull (M_rhsNoBC->map());
 
@@ -381,7 +381,7 @@ VenantKirchhofSolver<Mesh, SolverType>::evalResidual( vector_type &res, const ve
 
     *M_rhs = *M_rhsNoBC;
 
-    bcManageVector( *M_rhs, *M_FESpace->mesh(), M_FESpace->dof(), *M_BCh, M_FESpace->feBd(), M_data->dataTime()->getTime(), 1.0 );
+    bcManageVector( *M_rhs, *M_FESpace->mesh(), M_FESpace->dof(), *M_BCh, M_FESpace->feBd(), M_data->dataTime()->time(), 1.0 );
 
     res  = M_stiff * sol;
 //    res -= M_rhs;
@@ -558,8 +558,8 @@ template <typename Mesh, typename SolverType> // for monolithic
 void
 VenantKirchhofSolver<Mesh, SolverType>::updateVel()
 {
-    *M_vel  = ( 2.0 / M_data->dataTime()->getTimeStep() ) * (*M_disp);
-    *M_vel -= *M_rhsW;
+    *M_vel  = ( 2.0 / M_data->dataTime()->timeStep() ) * (*M_disp);
+    *M_vel -= *M_rhsContributionSecondDerivative;
 }
 
 template<typename Mesh, typename SolverType>
@@ -583,8 +583,8 @@ template <typename Mesh, typename SolverType>
 void
 VenantKirchhofSolver<Mesh, SolverType>::rescaleMatrices()
 {
-    *M_mass *=(M_data->dataTime()->getTimeStep()*M_rescaleFactor);
-    *M_linearStiff *= (M_data->dataTime()->getTimeStep()*M_rescaleFactor);
+    *M_mass *=(M_data->dataTime()->timeStep()*M_rescaleFactor);
+    *M_linearStiff *= (M_data->dataTime()->timeStep()*M_rescaleFactor);
 }
 
 template <typename Mesh, typename SolverType>
@@ -619,7 +619,7 @@ VenantKirchhofSolver<Mesh, SolverType>::applyBoundaryConditions( matrix_type&   
     vector_type rhsFull(rhs, Unique);  // bcManages now manages the also repeated parts
 
     bcManage( matrix, rhsFull, *M_FESpace->mesh(), M_FESpace->dof(), *BCh, M_FESpace->feBd(), 1.,
-              M_data->dataTime()->getTime() );
+              M_data->dataTime()->time() );
 
     // matrix should be GlobalAssembled by  bcManage
 

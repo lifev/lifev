@@ -1135,7 +1135,7 @@ localElementComputation ( const UInt & iElem )
     /* Compute the Hdiv mass matrix. We pass the time at the inverse of the permeability
        because the DarcySolverTransient needs the pemeability time dependent. In this case
        we do not have a time evolution. */
-    mass_Hdiv( (*M_inversePermeability)( M_data.dataTime()->getTime(), xg, yg, zg, iElem ),
+    mass_Hdiv( (*M_inversePermeability)( M_data.dataTime()->time(), xg, yg, zg, iElem ),
                M_elmatMix,
                M_dual_FESpace.fe(), 0, 0 );
 
@@ -1494,7 +1494,7 @@ applyBoundaryConditions ()
               M_dual_FESpace.dof(),
               *M_BCh,
               M_dual_FESpace.feBd(), 1.,
-              M_data.dataTime()->getTime() );
+              M_data.dataTime()->time() );
 
     chronoBC.stop();
     M_displayer.leaderPrintMax( "done in " , chronoBC.diff() );

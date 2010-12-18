@@ -290,7 +290,7 @@ void
 FSISolver::iterate()
 {
     Debug( 6220 ) << "============================================================\n";
-    Debug( 6220 ) << "Solving FSI at time " << M_data->dataFluid()->dataTime()->getTime() << " with FSIOperator: " << M_data->method()  << "\n";
+    Debug( 6220 ) << "Solving FSI at time " << M_data->dataFluid()->dataTime()->time() << " with FSIOperator: " << M_data->method()  << "\n";
     Debug( 6220 ) << "============================================================\n";
 
     // Update the system
@@ -310,7 +310,7 @@ FSISolver::iterate()
                                     M_data->errorTolerance(),
                                     M_data->linesearch(),
                                     M_out_res,
-                                    M_data->dataFluid()->dataTime()->getTime() );
+                                    M_data->dataFluid()->dataTime()->time() );
 
     // We update the solution
     M_oper->setSolution( *lambda );
@@ -318,7 +318,7 @@ FSISolver::iterate()
     if (status == EXIT_FAILURE)
     {
         std::ostringstream __ex;
-        __ex << "FSISolver::iterate ( " << M_data->dataFluid()->dataTime()->getTime() << " ) Inners iterations failed to converge\n";
+        __ex << "FSISolver::iterate ( " << M_data->dataFluid()->dataTime()->time() << " ) Inners iterations failed to converge\n";
         throw std::logic_error( __ex.str() );
     }
     else
@@ -326,14 +326,14 @@ FSISolver::iterate()
         //M_oper->displayer().leaderPrint("FSI-  Number of inner iterations:              ", maxiter, "\n" );
         if (M_epetraWorldComm->MyPID() == 0)
         {
-            M_out_iter << M_data->dataFluid()->dataTime()->getTime() << " " << maxiter;
+            M_out_iter << M_data->dataFluid()->dataTime()->time() << " " << maxiter;
         }
     }
 
     M_oper->shiftSolution();
 
 
-    Debug( 6220 ) << "FSISolver iteration at time " << M_data->dataFluid()->dataTime()->getTime() << " done\n";
+    Debug( 6220 ) << "FSISolver iteration at time " << M_data->dataFluid()->dataTime()->time() << " done\n";
     Debug( 6220 ) << "============================================================\n";
     std::cout << std::flush;
 
