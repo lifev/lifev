@@ -31,6 +31,7 @@ identifier      from LIFEMESH    to LIFEFEM                                    E
 mesh_util       from LIFEFILTERS to LIFEMESH                                   CMCS3
 selectMarker    from LIFEFILTERS to LIFEMESH                                   MOX
 stiffnessFibers from LIFEFEM     to LIFESOLVER                                 CMCS1
+postProc        from LIFEFEM     to LIFEMESH                                   EMORY
 
 ============================
 LIFEV FILES TO BE RENAMED
@@ -84,17 +85,18 @@ VectorSimple                           SimpleVect                              C
 
 LIFEMESH
 ============================
-BareItems                              bareItems                               EMORY
-BasisElementShapes                     basisElSh                               EMORY
+BareGeometries                         bareItems                               EMORY
+ElementShapes                          basisElSh                               EMORY
 InternalEntitySelector                 selectMarker                            MOX
-Markers                                markers                                 EMORY
-MarkersTraits                          markers_base                            EMORY
+Markers                                markers_base                            EMORY
+MarkersDefinitions                     markers                                 EMORY
+MeshBoundaryAttributes                 postProc                                EMORY
+MeshChecks                             mesh_util                               CMCS3
 MeshData                               dataMesh                                EMORY
 MeshElementBase                        geoND                                   EMORY
+MeshElement                            geoElement                              EMORY
 MeshEntity                             meshEntity                              EMORY
-MeshGeometricElement                   geoElement                              EMORY
 MeshUtility                            mesh_util_base                          EMORY
-MeshUtilityChecks                      mesh_util                               CMCS3
 MeshVertex                             geo0D                                   EMORY
 RegionMesh1D                           regionMesh1D                            MOX
 RegionMesh2D                           regionMesh2D                            MOX
@@ -140,7 +142,6 @@ DOFLocalPattern                        localDofPattern                         C
 FESpace                                -                                       CMCS2     DONE
 GeometricMap                           geoMap                                  CMCS2
 HyperbolicFluxNumerical                NumericalFluxes                         MOX
-PostProcessing                         postProc                                EMORY
 QuadraturePoint                        quadPoint                               CMCS2
 QuadratureRule                         quadRule                                CMCS2
 ReferenceElement                       refEle                                  CMCS2
