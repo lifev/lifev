@@ -185,14 +185,6 @@ public:
     const std::vector<Int>&  repeatedFaceVector()   const {return M_repeatedFaceVector[0];}
     //! Return a reference to M_repeatedVolumeVector
     const std::vector<Int>&  repeatedVolumeVector() const {return M_repeatedVolumeVector[0];}
-
-    // DEPRECATED METHODS
-    const std::vector<Int>& __attribute__((__deprecated__)) vertexDist() const {return M_vertexDistribution;};
-    const meshPtr_Type& __attribute__((__deprecated__)) mesh() const {return (*M_meshPartitions)[0];}
-    const partMeshPtr_Type& __attribute__((__deprecated__)) meshAllPartitions() const {return M_meshPartitions;}
-    const std::vector<Int>& __attribute__((__deprecated__)) part() const {return M_graphVertexLocations;}
-    const graphPtr_Type& __attribute__((__deprecated__)) graph() const {return M_elementDomains;}
-    const meshPtr_Type& __attribute__((__deprecated__)) mesh(Int k) const {return (*M_meshPartitions)[k];}
     //@}
 
 private:
