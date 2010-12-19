@@ -83,7 +83,7 @@ public:
     //! Constructor
     Displayer();
     // This is dubious! Should avoid using default values for constructor parameters
-    Displayer( const commPtr_Type& comm );
+    explicit Displayer( const commPtr_Type& comm );
 
     //! Copy constructor
     /*!
