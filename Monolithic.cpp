@@ -88,7 +88,7 @@ Monolithic::setupFEspace()
 
     // Monolitic: In the beginning I need a non-partitioned mesh. later we will do the partitioning
     M_dFESpace.reset( new FESpace<mesh_Type, EpetraMap>( M_solidMesh,
-                                                         M_data->dataSolid()->order(),
+                                                         M_data->dataSolid()->getOrder(),
                                                          nDimensions,
                                                          M_epetraComm));
 }
@@ -260,7 +260,7 @@ void
 Monolithic::buildSystem()
 {
     M_solidBlock.reset(new matrix_Type(*M_monolithicMap, 1));//since it is constant, we keep this throughout the simulation
-    M_solid->buildSystem(M_solidBlock, M_data->dataSolid()->dataTime()->getTimeStep()*M_solid->rescaleFactor());//M_data->dataSolid()->rescaleFactor());
+    M_solid->buildSystem(M_solidBlock, M_data->dataSolid()->getDataTime()->timeStep()*M_solid->getRescaleFactor());//M_data->dataSolid()->rescaleFactor());
     M_solidBlock->globalAssemble();
     M_solid->rescaleMatrices();
 }
@@ -327,7 +327,7 @@ Monolithic::solveJac(vector_Type         &_step,
     setupBlockPrec( );
 
     M_precPtr->blockAssembling();
-    M_precPtr->applyBoundaryConditions(dataFluid()->dataTime()->getTime());
+    M_precPtr->applyBoundaryConditions(dataFluid()->dataTime()->time());
     M_precPtr->GlobalAssemble();
 
     M_solid->getDisplayer().leaderPrint("  M-  Jacobian NormInf res:                    ", _res.normInf(), "\n");
@@ -344,31 +344,31 @@ Monolithic::updateSystem()
 {
     vector_Type solution(*this->M_monolithicMap);
     monolithicToX(*this->M_un, solution, M_uFESpace->map(), UInt(0));
-    this->M_bdf->shift_right(solution);
+    this->M_bdf->shiftRight(solution);
 
     M_meshMotion->updateSystem();
 
     this->fluid().updateUn(*this->M_un);
     *M_rhs*=0;
     *M_rhsFull*=0;
-    this->M_fluid->resetStabilization();
+    this->M_fluid->resetStab();
 }
 
 void
-Monolithic::initialize( FSIOperator::fluidPtr_Type::value_type::function_Type const& u0,
+Monolithic::initialize( FSIOperator::fluidPtr_Type::value_type::Function const& u0,
                         FSIOperator::solidPtr_Type::value_type::Function const& p0,
                         FSIOperator::solidPtr_Type::value_type::Function const& d0,
                         FSIOperator::solidPtr_Type::value_type::Function const& /*w0*/,
                         FSIOperator::solidPtr_Type::value_type::Function const& /*w0*/ )
 {
     vector_Type u(M_uFESpace->map());
-    M_uFESpace->interpolate(u0, u, M_data->dataFluid()->dataTime()->getTime());
+    M_uFESpace->interpolate(u0, u, M_data->dataFluid()->dataTime()->time());
 
     vector_Type p(M_pFESpace->map());
-    M_pFESpace->interpolate(p0, p, M_data->dataFluid()->dataTime()->getTime());
+    M_pFESpace->interpolate(p0, p, M_data->dataFluid()->dataTime()->time());
 
     vector_Type d(M_dFESpace->map());
-    M_dFESpace->interpolate(d0, d, M_data->dataSolid()->dataTime()->getTime());
+    M_dFESpace->interpolate(d0, d, M_data->getDataSolid()->dataTime()->time());
 
     initialize(u, p, d);
 }
@@ -466,7 +466,7 @@ updateSolidSystem( vectorPtr_Type & rhsFluidCoupling )
 {
     M_solid->updateSystem();
 
-    std::cout<<"rhs solid: "<<M_solid->rhsWithoutBC()->norm2()<<std::endl;
+    std::cout<<"rhs solid: "<<M_solid->getRhsWithoutBC()->norm2()<<std::endl;
 
     *rhsFluidCoupling += *M_solid->getRhsWithoutBC();
 }
@@ -515,7 +515,7 @@ int Monolithic::setupBlockPrec( )
         M_precPtr->setConditions(M_BChs);
         M_precPtr->setSpaces(M_FESpaces);
         M_precPtr->setOffsets(2, M_offset, 0);
-        M_precPtr->coupler(M_monolithicMap, M_dofStructureToHarmonicExtension->localDofMap(), M_numerationInterface, M_data->dataFluid()->dataTime()->getTimeStep());
+        M_precPtr->coupler(M_monolithicMap, M_dofStructureToHarmonicExtension->localDofMap(), M_numerationInterface, M_data->dataFluid()->dataTime()->timeStep());
      }
      else
      {
@@ -551,14 +551,15 @@ Monolithic::assembleFluidBlock(UInt iter, vectorPtr_Type& solution)
 {
     M_fluidBlock.reset(new matrix_Type(*M_monolithicMap));
 
-    double alpha = 1./M_data->dataFluid()->dataTime()->getTimeStep();//mesh velocity w
+    double alpha = 1./M_data->dataFluid()->dataTime()->timeStep();//mesh velocity w
     M_fluid->updateSystem(alpha,*this->M_beta, *this->M_rhs, M_fluidBlock, solution );
-    this->M_fluid->updateStabilization(*M_fluidBlock);
+    this->M_fluid->updateStab(*M_fluidBlock);
 
     if (iter==0)
     {
         M_resetPrec=true;
-        *this->M_rhs += M_fluid->matrixMass()*M_bdf->time_der( M_data->dataFluid()->dataTime()->getTimeStep() );
+	M_bdf->updateRHSContribution(M_data->dataFluid()->dataTime()->timeStep() );
+        *this->M_rhs += M_fluid->matrMass()*M_bdf->rhsContributionFirstDerivative() ;
         couplingRhs(this->M_rhs, M_un);
     }
     *M_rhsFull = *M_rhs;
@@ -568,7 +569,8 @@ Monolithic::assembleFluidBlock(UInt iter, vectorPtr_Type& solution)
 
 void Monolithic::updateRHS(  )
 {
-    *this->M_rhs += M_fluid->matrixMass()*M_bdf->time_der( M_data->dataFluid()->dataTime()->getTimeStep() );
+    M_bdf->updateRHSContribution(M_data->dataFluid()->dataTime()->timeStep() );
+    *this->M_rhs += M_fluid->matrMass()*M_bdf->rhsContributionFirstDerivative() ;
     couplingRhs(this->M_rhs, M_un);
     *M_rhsFull = *M_rhs;
     //this->M_solid->updateVel();
