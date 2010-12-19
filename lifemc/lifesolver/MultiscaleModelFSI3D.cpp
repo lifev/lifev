@@ -676,7 +676,7 @@ MultiscaleModelFSI3D::initializeSolution()
         UniqueV.reset( new vector_Type( *M_FSIoperator->couplingVariableMap(), Unique, Zero ) );
         UInt offset = dynamic_cast<Monolithic*>(M_FSIoperator.get())->getOffset();
         UniqueV->subset( *M_solidDisplacement, M_solidDisplacement->map(), (UInt)0, offset );
-        *UniqueV *= 1 / ( M_FSIoperator->solid().rescaleFactor() * M_data->dataFluid()->dataTime()->timeStep() );
+        *UniqueV *= 1 / ( M_FSIoperator->solid().getRescaleFactor() * M_data->dataFluid()->dataTime()->timeStep() );
         M_FSIoperator->solid().initialize( UniqueV );
         *initSol += *UniqueV;
 
@@ -689,7 +689,7 @@ MultiscaleModelFSI3D::initializeSolution()
 
         vectorPtr_Type initSolSVel( new vector_Type( *M_FSIoperator->couplingVariableMap(), Unique, Zero ) );
         initSolSVel->subset( *M_solidVelocity,M_solidVelocity->map(), (UInt)0, offset );
-        *initSolSVel *= 1 / ( M_FSIoperator->solid().rescaleFactor() * M_data->dataSolid()->dataTime()->timeStep() );
+        *initSolSVel *= 1 / ( M_FSIoperator->solid().getRescaleFactor() * M_data->dataSolid()->dataTime()->timeStep() );
         M_FSIoperator->solid().initializeVel( *initSolSVel );
 
         M_FSIoperator->setSolution( *initSol );
