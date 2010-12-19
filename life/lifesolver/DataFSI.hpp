@@ -169,6 +169,8 @@ public:
      */
     inline const dataSolid_PtrType& dataSolid() const { return M_dataSolid; }
 
+    inline const dataSolid_PtrType& getDataSolid() const { return M_dataSolid; }
+
     //! Get maximum number of subiterations
     /*!
      * @return maximum number of subiterations
