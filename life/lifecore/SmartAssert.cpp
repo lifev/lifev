@@ -62,26 +62,26 @@ namespace LifeV
 namespace
 {
 // in case we're logging using the default logger...
-struct stream_holder
+struct StreamHolder
 {
-    stream_holder() : out_( 0), owns_( false) {}
-    ~stream_holder()
+    StreamHolder() : M_outputStream( 0), M_ownership( false) {}
+    ~StreamHolder()
     {
-        if ( owns_)
-            delete out_;
-        out_ = 0;
+        if ( M_ownership)
+            delete M_outputStream;
+        M_outputStream = 0;
     }
-    std::ostream * out_;
-    bool owns_;
+    std::ostream * M_outputStream;
+    bool M_ownership;
 };
 // information about the stream we write to, in case
 // we're using the default logger
-stream_holder default_logger_info;
+StreamHolder defaultLoggerInfo;
 
 // intitializes the SMART_ASSERT library
-struct assert_initializer
+struct assertInitializer
 {
-    assert_initializer()
+    assertInitializer()
     {
         Private::initAssert();
     }
@@ -118,10 +118,10 @@ std::string getTypeofLevel( int nLevel)
 void dumpContextSummary( const AssertContext & context, std::ostream & out)
 {
     out << "\n" << getTypeofLevel( context.get_level() )
-    << " in " << context.getContextFile() << ":" << context.getContextLine() << '\n';
-    if ( !context.get_level_msg().empty())
+    << " in " << context.getContextFile() << ":" << context.contextLine() << '\n';
+    if ( !context.message().empty())
         // we have a user-friendly message
-        out << context.get_level_msg();
+        out << context.message();
     else
         out << "\nExpression: " << context.expression();
     out << std::endl;
@@ -129,18 +129,18 @@ void dumpContextSummary( const AssertContext & context, std::ostream & out)
 
 void dumpContextDetail( const AssertContext & context, std::ostream & out)
 {
-    out << "\n" << getTypeofLevel( context.get_level() )
-    << " in " << context.getContextFile() << ":" << context.getContextLine() << '\n';
-    if ( !context.get_level_msg().empty())
-        out << "User-friendly msg: '" << context.get_level_msg() << "'\n";
+    out << "\n" << getTypeofLevel( context.level() )
+    << " in " << context.getContextFile() << ":" << context.contextLine() << '\n';
+    if ( !context.message().empty())
+        out << "User-friendly msg: '" << context.message() << "'\n";
     out << "\nExpression: '" << context.expression() << "'\n";
 
-    typedef AssertContext::vals_array vals_array;
-    const vals_array & aVals = context.get_vals_array();
+    typedef AssertContext::valueArray_Type valueArray_Type;
+    const valueArray_Type & aVals = context.values();
     if ( !aVals.empty() )
     {
         bool bFirstTime = true;
-        vals_array::const_iterator first = aVals.begin(), last = aVals.end();
+        valueArray_Type::const_iterator first = aVals.begin(), last = aVals.end();
         while ( first != last)
         {
             if ( bFirstTime)
@@ -164,9 +164,9 @@ void dumpContextDetail( const AssertContext & context, std::ostream & out)
 
 void defaultLogger( const AssertContext & context)
 {
-    if ( default_logger_info.out_ == 0)
+    if ( defaultLoggerInfo.M_outputStream == 0)
         return;
-    dumpContextDetail( context, *( default_logger_info.out_) );
+    dumpContextDetail( context, *( defaultLoggerInfo.M_outputStream) );
 }
 
 ///////////////////////////////////////////////////////
@@ -188,7 +188,7 @@ void defaultDebugHandler( const AssertContext & context)
         return;
     typedef std::pair< std::string, int> file_and_line;
     static std::set< file_and_line> ignorer;
-    if ( ignorer.find( file_and_line( context.getContextFile(), context.getContextLine())) != ignorer.end() )
+    if ( ignorer.find( file_and_line( context.getContextFile(), context.contextLine())) != ignorer.end() )
         // this is Ignored Forever
         return;
 
@@ -211,7 +211,7 @@ void defaultDebugHandler( const AssertContext & context)
         case 'f':
         case 'F':
             // ignore forever
-            ignorer.insert( file_and_line( context.getContextFile(), context.getContextLine()));
+            ignorer.insert( file_and_line( context.getContextFile(), context.contextLine()));
             break;
 
         case 'a':
@@ -274,16 +274,16 @@ void initAssert()
 // sets the default logger to write to this stream
 void setDefaultLogStream( std::ostream & out)
 {
-    default_logger_info.out_ = &out;
-    default_logger_info.owns_ = false;
+    defaultLoggerInfo.M_outputStream = &out;
+    defaultLoggerInfo.M_ownership = false;
 }
 
 // sets the default logger to write to this file
 void setDefaultLogName( const char * str)
 {
-    default_logger_info.owns_ = false;
-    default_logger_info.out_ = new std::ofstream( str);
-    default_logger_info.owns_ = true;
+    defaultLoggerInfo.M_ownership = false;
+    defaultLoggerInfo.M_outputStream = new std::ofstream( str);
+    defaultLoggerInfo.M_ownership = true;
 }
 
 

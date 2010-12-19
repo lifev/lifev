@@ -72,21 +72,23 @@ class AssertContext
 public:
     //! @name Public typedefs
     //@{
-    typedef std::pair< std::string, std::string> val_and_str;
-    typedef std::vector< val_and_str> vals_array;
+    typedef std::pair< std::string, std::string> valueAndString_Type;
+    typedef std::vector< valueAndString_Type> valueArray_Type;
     //@}
 
     //! @name Constructor
     //@{
+    AssertContext() {}
     AssertContext() : M_level( lvl_debug) {}
+    virtual ~AssertContext() {}
     //@}
 
     //! @name Public methods
     //@{
     // adds one value and its corresponding string
-    void add_val( const std::string & val, const std::string & str)
+    void addValue( const std::string & val, const std::string & str)
     {
-        M_vals.push_back( val_and_str( val, str) );
+        M_values.push_back( valueAndString_Type( val, str) );
     }
     //@}
 
@@ -95,7 +97,7 @@ public:
     void setFileLine( const char * file, int line)
     {
         M_file = file;
-        M_line = line;
+        M_contextLine = line;
     }
 
     void setExpression( const std::string & str) { M_expression = str; }
@@ -105,48 +107,46 @@ public:
     void setLevelMsg( const char * strMsg)
     {
         if ( strMsg)
-            M_msg = strMsg;
+            M_message = strMsg;
         else
-            M_msg.erase();
+            M_message.erase();
     }
     //@}
 
     //! @name Get methods
     //@{
-    const std::string & getContextFile() const __attribute__ ((deprecated)) { return M_file; }
+    const std::string & file() const { return M_file; }
 
-    int getContextLine() const __attribute__ ((deprecated)) { return M_line; }
+    int contextLine() const { return M_contextLine; }
 
     const std::string & expression() const { return M_expression; }
 
-    const vals_array & get_vals_array() const __attribute__ ((deprecated)) { return M_vals; }
+    const valueArray_Type & values() const { return M_values; }
 
-    int get_level() const __attribute__ ((deprecated)) { return level(); }
+    const int& level() const { return M_level; }
 
-    const int& level() const  { return M_level; }
-
-    const std::string & get_level_msg() const __attribute__ ((deprecated)) { return M_msg; }
+    const std::string & message() const { return M_message; }
     //@}
 
 private:
     // where the assertion occured
     std::string M_file;
-    int M_line;
+    int M_contextLine;
 
     // expression and values
     std::string M_expression;
-    vals_array M_vals;
+    valueArray_Type M_values;
 
     // level and message
     int M_level;
-    std::string M_msg;
+    std::string M_message;
 };
 
 
 namespace SmartAssert
 {
 
-typedef void (*assert_function_type)( const AssertContext & context);
+typedef void (*assertFunction_Type)( const AssertContext & context);
 
 // helpers
 std::string getTypeofLevel( int nLevel);
@@ -204,7 +204,7 @@ struct Assert
 {
     //! @name Helpers and Typedefs
     //@{
-    typedef SmartAssert::assert_function_type assert_function_type;
+    typedef SmartAssert::assertFunction_Type assertFunction_Type;
 
     // helpers, in order to be able to compile the code
     Assert & SMART_ASSERT_A;
@@ -216,7 +216,7 @@ struct Assert
     Assert( const char * expr):
         SMART_ASSERT_A( *this),
         SMART_ASSERT_B( *this),
-        M_needs_handling( true)
+        M_needsHandling( true)
     {
         M_context.setExpression( expr);
 
@@ -231,14 +231,14 @@ struct Assert
         SMART_ASSERT_A( *this),
         SMART_ASSERT_B( *this),
         M_context( other.M_context),
-        M_needs_handling( true)
+        M_needsHandling( true)
     {
-        other.M_needs_handling = false;
+        other.M_needsHandling = false;
     }
 
-    ~Assert()
+    virtual ~Assert()
     {
-        if ( M_needs_handling)
+        if ( M_needsHandling)
             handleAssert();
     }
     //@}
@@ -324,12 +324,12 @@ struct Assert
         logger() = &SmartAssert::defaultLogger;
     }
 
-    static void setLog( assert_function_type log)
+    static void setLog( assertFunction_Type log)
     {
         logger() = log;
     }
 
-    static void setHandler( int nLevel, assert_function_type handler)
+    static void setHandler( int nLevel, assertFunction_Type handler)
     {
         handlers()[ nLevel] = handler;
     }
@@ -342,7 +342,7 @@ private:
     void handleAssert()
     {
         logger()( M_context);
-        get_handler( M_context.level() )( M_context);
+        handler( M_context.level() )( M_context);
     }
 
     /*
@@ -359,23 +359,23 @@ private:
     //! @name Private static methods
     //@{
     // the log
-    static assert_function_type & logger()
+    static assertFunction_Type & logger()
     {
-        static assert_function_type inst;
+        static assertFunction_Type inst;
         return inst;
     }
 
     // the handler
-    typedef std::map< int, assert_function_type> handlers_collection;
-    static handlers_collection & handlers()
+    typedef std::map< int, assertFunction_Type> handlerCollection_Type;
+    static handlerCollection_Type & handlers()
     {
-        static handlers_collection inst;
+        static handlerCollection_Type inst;
         return inst;
     }
 
-    static assert_function_type get_handler( int nLevel)
+    static assertFunction_Type handler( int nLevel)
     {
-        handlers_collection::const_iterator found = handlers().find( nLevel);
+        handlerCollection_Type::const_iterator found = handlers().find( nLevel);
         if ( found != handlers().end() )
             return found->second;
         else
@@ -386,12 +386,12 @@ private:
 
 private:
     AssertContext M_context;
-    mutable bool M_needs_handling;
+    mutable bool M_needsHandling;
 };
 
 namespace SmartAssert
 {
-inline ::LifeV::Assert make_assert( const char * expr)
+inline ::LifeV::Assert makeAssert( const char * expr)
 {
     return ::LifeV::Assert( expr);
 }
