@@ -56,12 +56,12 @@ class Ethiersteinman
 //     public LifeV::Application
 {
 public:
-    typedef LifeV::RegionMesh3D<LifeV::LinearTetra>       mesh_type;
-    typedef LifeV::FESpace< mesh_type, LifeV::EpetraMap > fespace_type;
-    typedef LifeV::Oseen< mesh_type >                     fluid_type;
-    typedef fluid_type::vector_type                       vector_type;
-    typedef boost::shared_ptr<vector_type>                vector_ptrtype;
-    typedef fluid_type::matrix_type                       matrix_type;
+    typedef LifeV::RegionMesh3D<LifeV::LinearTetra>       mesh_Type;
+    typedef LifeV::FESpace< mesh_Type, LifeV::EpetraMap > fespace_Type;
+    typedef LifeV::Oseen< mesh_Type >                     fluid_Type;
+    typedef fluid_Type::vector_Type                       vector_Type;
+    typedef boost::shared_ptr<vector_Type>                vectorPtr_Type;
+    typedef fluid_Type::matrix_Type                       matrix_Type;
 
     // Problem definition
     typedef LifeV::EthierSteinmanUnsteady Problem;

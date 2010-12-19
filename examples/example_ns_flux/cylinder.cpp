@@ -113,7 +113,7 @@ struct Cylinder::Private
             lambda()
     {}
 
-    typedef boost::function<Real ( Real const&, Real const&, Real const&, Real const&, ID const& )> fct_type;
+    typedef boost::function<Real ( Real const&, Real const&, Real const&, Real const&, ID const& )> fct_Type;
 
     std::string data_file_name;
 
@@ -153,9 +153,9 @@ struct Cylinder::Private
         return 0.;
     }
 
-    fct_type getU_pois()
+    fct_Type getU_pois()
     {
-        fct_type f;
+        fct_Type f;
         f = boost::bind(&Cylinder::Private::poiseuille, this, _1, _2, _3, _4, _5);
         return f;
     }
@@ -171,9 +171,9 @@ struct Cylinder::Private
         return (Ubar() * flux( period*t, id ));
     }
 
-    fct_type get_flux3d()
+    fct_Type get_flux3d()
     {
-        fct_type f;
+        fct_Type f;
         f = boost::bind(&Cylinder::Private::flux3d, this, _1, _2);
         return f;
     }
@@ -193,9 +193,9 @@ struct Cylinder::Private
         //            return ( (*lambda)[0] );
     }
 
-    fct_type get_lambda3d()
+    fct_Type get_lambda3d()
     {
-        fct_type f;
+        fct_Type f;
         f = boost::bind(&Cylinder::Private::lambda3d, this, _1, _2, _3, _4, _5);
         return f;
     }
@@ -244,8 +244,8 @@ Cylinder::run()
 
 {
 
-    typedef Oseen< RegionMesh3D<LinearTetra> >::vector_type  vector_type;
-    typedef boost::shared_ptr<vector_type> vector_ptrtype;
+    typedef Oseen< RegionMesh3D<LinearTetra> >::vector_Type  vector_Type;
+    typedef boost::shared_ptr<vector_Type> vectorPtr_Type;
     // Reading from data file
     //
     GetPot dataFile( d->data_file_name.c_str() );
@@ -397,7 +397,7 @@ Cylinder::run()
 
     // bdf object to store the previous solutions
 
-    BdfTNS<vector_type> bdf;
+    BdfTNS<vector_Type> bdf;
     bdf.setup(dataNavierStokes->dataTime()->orderBDF());
 
     // initialization with stokes solution
@@ -407,8 +407,8 @@ Cylinder::run()
 
     dataNavierStokes->dataTime()->setTime(t0);
 
-    vector_type beta( fullMap );
-    vector_type rhs ( fullMap );
+    vector_Type beta( fullMap );
+    vector_Type rhs ( fullMap );
 
     MPI_Barrier(MPI_COMM_WORLD);
 
@@ -440,7 +440,7 @@ Cylinder::run()
 
     Ensight<RegionMesh3D<LinearTetra> > ensight( dataFile, meshPart.meshPartition(), "cylinder", d->comm->MyPID());
 
-    vector_ptrtype velAndPressure ( new vector_type(*fluid.solution(), Repeated ) );
+    vectorPtr_Type velAndPressure ( new vector_Type(*fluid.solution(), Repeated ) );
 
     ensight.addVariable( ExporterData::Vector, "velocity", velAndPressure,
                          UInt(0), uFESpace.dof().numTotalDof() );
@@ -472,7 +472,7 @@ Cylinder::run()
 
         beta = bdf.bdfVelocity().extrapolation();
         bdf.bdfVelocity().updateRHSContribution( dataNavierStokes->dataTime()->timeStep());
-        rhs  = fluid.matrMass()*bdf.bdfVelocity().rhsContributionFirstDerivative();
+        rhs  = fluid.matrixMass()*bdf.bdfVelocity().rhsContributionFirstDerivative();
 
 
         fluid.updateSystem( alpha, beta, rhs );

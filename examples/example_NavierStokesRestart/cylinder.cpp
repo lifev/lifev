@@ -148,7 +148,7 @@ struct Cylinder::Private
             //H(20), D(1)
             //H(0.41), D(0.1)
     {}
-    typedef boost::function<Real ( Real const&, Real const&, Real const&, Real const&, ID const& )> fct_type;
+    typedef boost::function<Real ( Real const&, Real const&, Real const&, Real const&, ID const& )> fct_Type;
 
     double Re;
 
@@ -209,9 +209,9 @@ struct Cylinder::Private
         }
     }
 
-    fct_type getU_3d()
+    fct_Type getU_3d()
     {
-        fct_type f;
+        fct_Type f;
         f = boost::bind(&Cylinder::Private::u3d, this, _1, _2, _3, _4, _5);
         return f;
     }
@@ -249,9 +249,9 @@ struct Cylinder::Private
         return 0;
     }
 
-    fct_type getU_2d()
+    fct_Type getU_2d()
     {
-        fct_type f;
+        fct_Type f;
         f = boost::bind(&Cylinder::Private::u2d, this, _1, _2, _3, _4, _5);
         return f;
     }
@@ -275,9 +275,9 @@ struct Cylinder::Private
         return 0.;
     }
 
-    fct_type getU_pois()
+    fct_Type getU_pois()
     {
-        fct_type f;
+        fct_Type f;
         f = boost::bind(&Cylinder::Private::poiseuille, this, _1, _2, _3, _4, _5);
         return f;
     }
@@ -295,9 +295,9 @@ struct Cylinder::Private
         return 0.;
     }
 
-    fct_type getU_one()
+    fct_Type getU_one()
     {
-        fct_type f;
+        fct_Type f;
         f = boost::bind(&Cylinder::Private::oneU, this, _1, _2, _3, _4, _5);
         return f;
     }
@@ -352,8 +352,8 @@ Cylinder::run()
 {
     typedef RegionMesh3D<LinearTetra>                        Mesh;
 
-    typedef Oseen< RegionMesh3D<LinearTetra> >::vector_type  vector_type;
-    typedef boost::shared_ptr<vector_type>                   vector_ptrtype;
+    typedef Oseen< RegionMesh3D<LinearTetra> >::vector_Type  vector_Type;
+    typedef boost::shared_ptr<vector_Type>                   vectorPtr_Type;
     // Reading from data file
     //
     GetPot dataFile( d->data_file_name );
@@ -450,17 +450,17 @@ Cylinder::run()
 
     // bdf object to store the previous solutions
 
-    BdfTNS<vector_type> bdf;
+    BdfTNS<vector_Type> bdf;
     bdf.setup(dataNavierStokes->dataTime()->orderBDF());
 
-    vector_type beta( fullMap );
-    vector_type rhs ( fullMap );
+    vector_Type beta( fullMap );
+    vector_Type rhs ( fullMap );
 
 
     std::string expFileName = dataFile( "exporter/filename", "fluid");
     LifeV::Hdf5exporter<Mesh> exporter( dataFile, meshPart.meshPartition(), expFileName, d->comm->MyPID());
 
-    vector_ptrtype velAndPressure ( new vector_type(*fluid.solution(), exporter.mapType() ) );
+    vectorPtr_Type velAndPressure ( new vector_Type(*fluid.solution(), exporter.mapType() ) );
 
     exporter.addVariable( ExporterData::Vector, "velocity", velAndPressure,
                           UInt(0), uFESpace.dof().numTotalDof() );
@@ -523,8 +523,8 @@ Cylinder::run()
 
         //
 #if 0
-        vector_ptrtype vel      (new LifeV::EpetraVector(uFESpace.map(), importer.mapType()));
-        vector_ptrtype pressure (new LifeV::EpetraVector(pFESpace.map(), importer.mapType()));
+        vectorPtr_Type vel      (new LifeV::EpetraVector(uFESpace.map(), importer.mapType()));
+        vectorPtr_Type pressure (new LifeV::EpetraVector(pFESpace.map(), importer.mapType()));
 
         LifeV::ExporterData initSolVel(LifeV::ExporterData::Vector,
                                        std::string("velocity." + start),
@@ -591,7 +591,7 @@ Cylinder::run()
 
         beta = bdf.bdfVelocity().extrapolation();
         bdf.bdfVelocity().updateRHSContribution( dataNavierStokes->dataTime()->timeStep());
-        rhs  = fluid.matrMass()*bdf.bdfVelocity().rhsContributionFirstDerivative();
+        rhs  = fluid.matrixMass()*bdf.bdfVelocity().rhsContributionFirstDerivative();
 
         fluid.updateSystem( alpha, beta, rhs );
         fluid.iterate( bcH );

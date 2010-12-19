@@ -119,7 +119,7 @@ struct  ResistanceProblem::Private
             nu(1)//,
     {}
 
-    typedef boost::function<Real ( Real const&, Real const&, Real const&, Real const&, ID const& )> fct_type;
+    typedef boost::function<Real ( Real const&, Real const&, Real const&, Real const&, ID const& )> fct_Type;
 
     double Re;
 
@@ -186,8 +186,8 @@ ResistanceProblem::run()
     Chrono chronoSet, chrono;
 
     chronoSet.start();
-    typedef Oseen< RegionMesh3D<LinearTetra> >::vector_type  vector_type;
-    typedef boost::shared_ptr<vector_type> vector_ptrtype;
+    typedef Oseen< RegionMesh3D<LinearTetra> >::vector_Type  vector_Type;
+    typedef boost::shared_ptr<vector_Type> vectorPtr_Type;
     // typedef boost::shared_ptr<BCVectorInterface>   bc_vector_interface;
     // Reading from data file
 
@@ -316,7 +316,7 @@ ResistanceProblem::run()
     Ensight<RegionMesh3D<LinearTetra> > ensight( dataFile, meshPart.meshPartition(), "resistance", d->comm->MyPID());
 #endif
 
-    vector_ptrtype velAndPressure ( new vector_type(*fluid.solution(), ensight.mapType() ) );
+    vectorPtr_Type velAndPressure ( new vector_Type(*fluid.solution(), ensight.mapType() ) );
 
     ensight.addVariable( ExporterData::Vector, "velocity", velAndPressure,
                          UInt(0), uFESpace.dof().numTotalDof() );
@@ -333,7 +333,7 @@ ResistanceProblem::run()
 
     // bdf object to store the previous solutions
 
-    BdfTNS<vector_type> bdf;
+    BdfTNS<vector_Type> bdf;
     bdf.setup(dataNavierStokes->dataTime()->orderBDF());
 
     // initialization with stokes solution
@@ -341,8 +341,8 @@ ResistanceProblem::run()
 
     dataNavierStokes->dataTime()->setTime(t0);
 
-    vector_type beta( fullMap );
-    vector_type rhs ( fullMap );
+    vector_Type beta( fullMap );
+    vector_Type rhs ( fullMap );
 
     BCFunctionBase uZero(zero_scalar);
 
@@ -353,7 +353,7 @@ ResistanceProblem::run()
 
     // Resistance condition:
 
-    vector_type bcvector(fluid.getMap(),Repeated);
+    vector_Type bcvector(fluid.getMap(),Repeated);
 
     bcvector.epetraVector().PutScalar(0.0);
 
@@ -404,7 +404,7 @@ ResistanceProblem::run()
         beta = bdf.bdfVelocity().extrapolation();
 
         bdf.bdfVelocity().updateRHSContribution( dataNavierStokes->dataTime()->timeStep());
-        rhs  = fluid.matrMass()*bdf.bdfVelocity().rhsContributionFirstDerivative();
+        rhs  = fluid.matrixMass()*bdf.bdfVelocity().rhsContributionFirstDerivative();
 
         fluid.updateSystem( alpha, beta, rhs );
         fluid.iterate( bcH );

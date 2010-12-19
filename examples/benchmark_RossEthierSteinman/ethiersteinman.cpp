@@ -111,7 +111,7 @@ struct Ethiersteinman::Private
             steady(0)
     {}
 
-    typedef boost::function<Real ( Real const&, Real const&, Real const&, Real const&, ID const& )> fct_type;
+    typedef boost::function<Real ( Real const&, Real const&, Real const&, Real const&, ID const& )> fct_Type;
 
     double         Re;
 
@@ -271,7 +271,7 @@ Ethiersteinman::check()
 
     // bdf object to store the previous solutions
 
-    BdfTNS<vector_type> bdf;
+    BdfTNS<vector_Type> bdf;
     bdf.setup(dataNavierStokes->dataTime()->orderBDF());
 
     // initialization with exact solution: either interpolation or "L2-NS"-projection
@@ -280,8 +280,8 @@ Ethiersteinman::check()
     if (verbose) std::cout << std::endl;
     if (verbose) std::cout << "Computing the initial solution ... " << std::endl << std::endl;
 
-    vector_type beta( fullMap );
-    vector_type rhs ( fullMap );
+    vector_Type beta( fullMap );
+    vector_Type rhs ( fullMap );
 
     MPI_Barrier(MPI_COMM_WORLD);
 
@@ -340,7 +340,7 @@ Ethiersteinman::check()
 
     boost::shared_ptr< Exporter<RegionMesh3D<LinearTetra> > > exporter;
 
-    vector_ptrtype velAndPressure;
+    vectorPtr_Type velAndPressure;
 
     std::string const exporterType =  dataFile( "exporter/type", "ensight");
 
@@ -364,7 +364,7 @@ Ethiersteinman::check()
         }
     }
 
-    velAndPressure.reset( new vector_type(*fluid.solution(), exporter->mapType() ) );
+    velAndPressure.reset( new vector_Type(*fluid.solution(), exporter->mapType() ) );
 
     exporter->addVariable( ExporterData::Vector, "velocity", velAndPressure,
                            UInt(0), uFESpace.dof().numTotalDof() );
@@ -402,7 +402,7 @@ Ethiersteinman::check()
 
         beta = bdf.bdfVelocity().extrapolation();
         bdf.bdfVelocity().updateRHSContribution( dataNavierStokes->dataTime()->timeStep());
-        rhs  = fluid.matrMass()*bdf.bdfVelocity().rhsContributionFirstDerivative();
+        rhs  = fluid.matrixMass()*bdf.bdfVelocity().rhsContributionFirstDerivative();
 
         // rhs *= alpha;
         // rhs  = bdf.bdfVelocity().time_der( dataNavierStokes->timeStep() );
@@ -433,9 +433,9 @@ Ethiersteinman::check()
     if (verbose) std::cout << "Total simulation time (time loop only) " << chronoGlobal.diff() << " s." << std::endl;
 
     // Computation of the error
-    vector_type vel  (uFESpace.map(), Repeated);
-    vector_type press(pFESpace.map(), Repeated);
-    vector_type velpressure ( *fluid.solution(), Repeated );
+    vector_Type vel  (uFESpace.map(), Repeated);
+    vector_Type press(pFESpace.map(), Repeated);
+    vector_Type velpressure ( *fluid.solution(), Repeated );
 
     velpressure = *fluid.solution();
     vel.subset(velpressure);
@@ -670,7 +670,7 @@ Ethiersteinman::run()
 
             // bdf object to store the previous solutions
 
-            BdfTNS<vector_type> bdf;
+            BdfTNS<vector_Type> bdf;
             bdf.setup(dataNavierStokes->dataTime()->orderBDF());
 
             // initialization with exact solution: either interpolation or "L2-NS"-projection
@@ -679,8 +679,8 @@ Ethiersteinman::run()
             if (verbose) std::cout << std::endl;
             if (verbose) std::cout << "Computing the initial solution ... " << std::endl << std::endl;
 
-            vector_type beta( fullMap );
-            vector_type rhs ( fullMap );
+            vector_Type beta( fullMap );
+            vector_Type rhs ( fullMap );
 
             MPI_Barrier(MPI_COMM_WORLD);
 
@@ -722,9 +722,9 @@ Ethiersteinman::run()
                 }
 
                 // Computation of the error
-                vector_type vel  (uFESpace.map(), Repeated);
-                vector_type press(pFESpace.map(), Repeated);
-                vector_type velpressure ( *fluid.solution(), Repeated );
+                vector_Type vel  (uFESpace.map(), Repeated);
+                vector_Type press(pFESpace.map(), Repeated);
+                vector_Type velpressure ( *fluid.solution(), Repeated );
 
                 velpressure = *fluid.solution();
                 vel.subset(velpressure);
@@ -765,11 +765,11 @@ Ethiersteinman::run()
 
             boost::shared_ptr< Exporter<RegionMesh3D<LinearTetra> > > exporter;
 
-            vector_ptrtype velAndPressure;
-            vector_ptrtype exactPressPtr;                     //DEBUG
-            vector_type exactPress(pFESpace.map(), Repeated); //DEBUG
-            vector_ptrtype exactVelPtr;                       //DEBUG
-            vector_type exactVel(uFESpace.map(), Repeated);   //DEBUG
+            vectorPtr_Type velAndPressure;
+            vectorPtr_Type exactPressPtr;                     //DEBUG
+            vector_Type exactPress(pFESpace.map(), Repeated); //DEBUG
+            vectorPtr_Type exactVelPtr;                       //DEBUG
+            vector_Type exactVel(uFESpace.map(), Repeated);   //DEBUG
 
             std::string const exporterType =  dataFile( "exporter/type", "ensight");
 
@@ -793,10 +793,10 @@ Ethiersteinman::run()
                 }
             }
 
-            velAndPressure.reset( new vector_type(*fluid.solution(), exporter->mapType() ) );
-            exactPressPtr.reset( new vector_type(exactPress, exporter->mapType() ) ); //DEBUG
+            velAndPressure.reset( new vector_Type(*fluid.solution(), exporter->mapType() ) );
+            exactPressPtr.reset( new vector_Type(exactPress, exporter->mapType() ) ); //DEBUG
             pFESpace.interpolate(Problem::pexact, *exactPressPtr, 0);                 //DEBUG
-            exactVelPtr.reset( new vector_type(exactVel, exporter->mapType() ) );     //DEBUG
+            exactVelPtr.reset( new vector_Type(exactVel, exporter->mapType() ) );     //DEBUG
             uFESpace.interpolate(Problem::uexact, *exactVelPtr, 0);                   //DEBUG
 
             exporter->addVariable( ExporterData::Vector, "velocity", velAndPressure,
@@ -842,7 +842,7 @@ Ethiersteinman::run()
                 //beta *= 0;
                 //uFESpace.interpolate(Problem::uexact, beta, time);
                 bdf.bdfVelocity().updateRHSContribution( dataNavierStokes->dataTime()->timeStep());
-                rhs  = fluid.matrMass()*bdf.bdfVelocity().rhsContributionFirstDerivative();
+                rhs  = fluid.matrixMass()*bdf.bdfVelocity().rhsContributionFirstDerivative();
 
                 fluid.getDisplayer().leaderPrint("alpha ", alpha);
                 fluid.getDisplayer().leaderPrint("\n");
@@ -857,9 +857,9 @@ Ethiersteinman::run()
                 bdf.bdfVelocity().shiftRight( *fluid.solution() );
 
                 // Computation of the error
-                vector_type vel  (uFESpace.map(), Repeated);
-                vector_type press(pFESpace.map(), Repeated);
-                vector_type velpressure ( *fluid.solution(), Repeated );
+                vector_Type vel  (uFESpace.map(), Repeated);
+                vector_Type press(pFESpace.map(), Repeated);
+                vector_Type velpressure ( *fluid.solution(), Repeated );
 
                 velpressure = *fluid.solution();
                 vel.subset(velpressure);
