@@ -546,7 +546,7 @@ Cylinder::run()
 
         beta = bdf.bdfVelocity().extrapolation();
         bdf.bdfVelocity().updateRHSContribution( dataNavierStokes->dataTime()->timeStep());
-        rhs  = fluid.matrMass()*bdf.bdfVelocity().rhsContributionFirstDerivative();
+        rhs  = fluid.matrixMass()*bdf.bdfVelocity().rhsContributionFirstDerivative();
 
         fluid.updateSystem( alpha, beta, rhs );
         fluid.iterate( bcH );
