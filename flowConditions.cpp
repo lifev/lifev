@@ -81,15 +81,13 @@ void FlowConditions::initParameters( FSIOperator&  Oper,
 
     if (Oper.isSolid())
     {
-        solidQuantities(0) =  ( ( oper.solid().getThickness()*oper.solid().getYoung()     ) /
-                                ( 1 - oper.solid().getPoisson()*oper.solid().getPoisson() )*
-                                pi/M_area0 );
+        solidQuantities(0) =  ( ( Oper.solid().getThickness()*Oper.solid().getYoung()     )/( 1 - Oper.solid().getPoisson()*Oper.solid().getPoisson() )*pi/M_area0 );
 
-        solidQuantities(1) = oper.solid().getRho();
+        solidQuantities(1) = Oper.solid().getRho();
 
-        oper.displayer().leaderPrint( "  Outflow BC : thickness = " , oper.solid().getThickness() );
-        oper.displayer().leaderPrint( "  Outflow BC : young     = " , oper.solid().getYoung() );
-        oper.displayer().leaderPrint( "  Outflow BC : poisson   = " , oper.solid().getPoisson() );
+        Oper.displayer().leaderPrint( "  Outflow BC : thickness = " , Oper.solid().getThickness() );
+        Oper.displayer().leaderPrint( "  Outflow BC : young     = " , Oper.solid().getYoung() );
+        Oper.displayer().leaderPrint( "  Outflow BC : poisson   = " , Oper.solid().getPoisson() );
 
     }
 
