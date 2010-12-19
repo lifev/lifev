@@ -166,11 +166,11 @@ public:
 
     //! @name Get Methods
     //@{
-    const Int& fluidInterfaceFlag() const
+    const entityFlag_Type& fluidInterfaceFlag() const
     {
         return M_fluidInterfaceFlag;
     }
-    const Int& solidInterfaceFlag() const
+    const entityFlag_Type& solidInterfaceFlag() const
     {
         return M_solidInterfaceFlag;
     }
