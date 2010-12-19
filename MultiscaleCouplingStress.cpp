@@ -411,7 +411,7 @@ MultiscaleCouplingStress::displayCouplingValues( std::ostream& output )
         }
 
         if ( M_comm->MyPID() == 0 )
-            output << "  " << M_globalData->dataTime()->getTime() << "    " << M_models[i]->ID()
+            output << "  " << M_globalData->dataTime()->time() << "    " << M_models[i]->ID()
             << "    " << M_flags[i]
             << "    " << flowRate
             << "    " << stress
@@ -430,7 +430,7 @@ MultiscaleCouplingStress::functionStress( const Real& t, const Real&, const Real
 
     timeContainer_Type timeContainer( M_timeInterpolationOrder + 1 );
     for ( UInt i(0) ; i <= M_timeInterpolationOrder ; ++i )
-        timeContainer[i] = M_globalData->dataTime()->getTime() - i * M_globalData->dataTime()->getTimeStep();
+        timeContainer[i] = M_globalData->dataTime()->time() - i * M_globalData->dataTime()->timeStep();
 
     interpolateCouplingVariables( timeContainer, t, interpolatedCouplingVariables );
 

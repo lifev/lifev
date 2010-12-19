@@ -504,12 +504,12 @@ void NonLinearVenantKirchhofSolver<Mesh, SolverType>::updateSystem( matrix_ptrty
     *M_rhsA = (2.0 / ( M_zeta * pow(DeltaT,2) )) * z + ((1.0 - M_zeta ) / ( M_zeta )) * (*M_acc);
 
     // velocity rhs
-    *this->M_rhsContributionSecondDerivative = *this->M_vel + ( 1 - M_theta  ) * DeltaT *  (*M_acc);
+    *this->M_rhsW = *this->M_vel + ( 1 - M_theta  ) * DeltaT *  (*M_acc);
 
     std::cout << std::endl;
 
     std::cout << "rhsContributionSecondDerivativeithoutBC norm = " << this->M_rhsNoBC->norm2() << std::endl;
-    std::cout << "rhs_w norm        = " << this->M_rhsContributionSecondDerivative->norm2() << std::endl;
+    std::cout << "rhs_w norm        = " << this->M_rhsW->norm2() << std::endl;
     std::cout << "    w norm        = " << this->M_vel->norm2() << std::endl;
 
     chrono.stop();
@@ -817,7 +817,7 @@ updateVel()
 {
     Real DeltaT = this->M_data->dataTime()->timeStep();
     *M_acc = (2.0 /( M_zeta * pow(DeltaT,2) ))  * (*this->M_disp)  - *M_rhsA;
-    *this->M_vel = *this->M_rhsContributionSecondDerivative + M_theta * DeltaT * (*M_acc) ;
+    *this->M_vel = *this->M_rhsW + M_theta * DeltaT * (*M_acc) ;
 }
 
 
@@ -1045,7 +1045,7 @@ solveJacobian( vector_type&           step,
     this->M_Displayer->leaderPrint("\tS'-  Applying boundary conditions      ... ");
 
     this->M_rhsNoBC->globalAssemble();
-    this->M_rhsContributionSecondDerivative->globalAssemble();
+    this->M_rhsW->globalAssemble();
 
     vector_type rhsFull (res);
 

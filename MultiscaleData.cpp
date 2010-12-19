@@ -117,9 +117,9 @@ MultiscaleData::showMe()
               //<< "Structure Thickness           = " << M_structureThickness << std::endl
               << "Structure Young modulus       = " << M_structureYoungModulus << std::endl << std::endl;
 
-    std::cout << "Initial time                  = " << M_dataTime->getInitialTime() << std::endl
-              << "End time                      = " << M_dataTime->getEndTime() << std::endl
-              << "TimeStep                      = " << M_dataTime->getTimeStep() << std::endl << std::endl;
+    std::cout << "Initial time                  = " << M_dataTime->initialTime() << std::endl
+              << "End time                      = " << M_dataTime->endTime() << std::endl
+              << "TimeStep                      = " << M_dataTime->timeStep() << std::endl << std::endl;
 }
 
 } // Namespace Multiscale
