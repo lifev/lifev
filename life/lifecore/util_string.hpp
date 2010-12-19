@@ -67,11 +67,11 @@ Some utilities for handling ascii files
 
 /*! It gets a the next line from std::istream
 */
-std::istream & eatline( std::istream & s );
+std::istream & eatLine( std::istream & s );
 //!skip lines starting with '!%#;$'
-std::istream & __attribute__((deprecated)) eat_comments( std::istream & s );
+std::istream & eatComments( std::istream & s );
 //!  gets next uncommented line
-std::istream & __attribute__((deprecated)) next_good_line( std::istream & s, std::string & line );
+std::istream & nextGoodLine( std::istream & s, std::string & line );
 /*!
     always return a std::string with len characters
       - if the s has more than len characters : keep only the first len

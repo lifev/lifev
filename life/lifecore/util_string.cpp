@@ -37,14 +37,14 @@ along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
 
 namespace LifeV
 {
-std::istream & eatline( std::istream & s )    // eat a whole line from std::istream
+std::istream & eatLine( std::istream & s )    // eat a whole line from std::istream
 {
     while ( s.get() != '\n' && s . good() )
         {}
     return s ;
 }
 
-std::istream & eat_comments( std::istream & s )    //eat lines starting with '!%#;$'
+std::istream & eatComments( std::istream & s )    //eat lines starting with '!%#;$'
 {
     char c = 'a';
     s.get( c ) ;
@@ -54,10 +54,17 @@ std::istream & eat_comments( std::istream & s )    //eat lines starting with '!%
             c == ';' ||
             c == '$' )
     {
-        s >> eatline ;
+        s >> eatLine ;
         s.get( c ) ;
     }
     return s.putback( c ) ;
+}
+
+std::istream & nextGoodLine( std::istream & s, std::string & line )
+{
+    s >> eatComments;
+    getline( s, line );
+    return s;
 }
 
 std::string& setStringLength( std::string& s, unsigned int len, char c )
@@ -80,13 +87,6 @@ std::string& setStringLength( std::string& s, unsigned int len, char c )
 int atoi( const std::string & s )
 {
     return ::atoi( s.c_str() );
-}
-
-std::istream & next_good_line( std::istream & s, std::string & line )
-{
-    s >> eat_comments;
-    getline( s, line );
-    return s;
 }
 
 std::string operator+( const std::string & str, const int i )
