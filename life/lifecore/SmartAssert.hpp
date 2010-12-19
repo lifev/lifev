@@ -78,7 +78,6 @@ public:
 
     //! @name Constructor
     //@{
-    AssertContext() {}
     AssertContext() : M_level( lvl_debug) {}
     virtual ~AssertContext() {}
     //@}
@@ -257,7 +256,7 @@ struct Assert
         else
             // null string
             out << "null";
-        M_context.add_val( out.str(), msg);
+        M_context.addValue( out.str(), msg);
         return *this;
     }
 
@@ -423,14 +422,14 @@ inline ::LifeV::Assert makeAssert( const char * expr)
 // "debug" mode
 #define LIFEV_SMART_ASSERT( expr) \
     if ( (expr) ) ; \
-    else ::LifeV::SmartAssert::make_assert( #expr).printContext( __FILE__, __LINE__).SMART_ASSERT_A \
+    else ::LifeV::SmartAssert::makeAssert( #expr).printContext( __FILE__, __LINE__).SMART_ASSERT_A \
     /**/
 
 #else
 // "release" mode
 #define LIFEV_SMART_ASSERT( expr) \
     if ( true ) ; \
-    else ::LifeV::SmartAssert::make_assert( "").SMART_ASSERT_A \
+    else ::LifeV::SmartAssert::makeAssert( "").SMART_ASSERT_A \
     /**/
 
 #endif // ifdef LIFEV_SMART_ASSERT_DEBUG
@@ -441,7 +440,7 @@ inline ::LifeV::Assert makeAssert( const char * expr)
 
 #define LIFEV_SMART_VERIFY( expr) \
     if ( (expr) ) ; \
-    else ::LifeV::SmartAssert::make_assert( #expr).error().printContext( __FILE__, __LINE__).SMART_ASSERT_A \
+    else ::LifeV::SmartAssert::makeAssert( #expr).error().printContext( __FILE__, __LINE__).SMART_ASSERT_A \
     /**/
 #define LIFEV_VERIFY( expr) LIFEV_SMART_VERIFY(expr)
 

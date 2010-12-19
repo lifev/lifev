@@ -117,8 +117,8 @@ std::string getTypeofLevel( int nLevel)
 // helpers, for dumping the assertion context
 void dumpContextSummary( const AssertContext & context, std::ostream & out)
 {
-    out << "\n" << getTypeofLevel( context.get_level() )
-    << " in " << context.getContextFile() << ":" << context.contextLine() << '\n';
+    out << "\n" << getTypeofLevel( context.level() )
+    << " in " << context.file() << ":" << context.contextLine() << '\n';
     if ( !context.message().empty())
         // we have a user-friendly message
         out << context.message();
@@ -130,7 +130,7 @@ void dumpContextSummary( const AssertContext & context, std::ostream & out)
 void dumpContextDetail( const AssertContext & context, std::ostream & out)
 {
     out << "\n" << getTypeofLevel( context.level() )
-    << " in " << context.getContextFile() << ":" << context.contextLine() << '\n';
+    << " in " << context.file() << ":" << context.contextLine() << '\n';
     if ( !context.message().empty())
         out << "User-friendly msg: '" << context.message() << "'\n";
     out << "\nExpression: '" << context.expression() << "'\n";
@@ -186,9 +186,9 @@ void defaultDebugHandler( const AssertContext & context)
     if ( ignore_all)
         // ignore All asserts
         return;
-    typedef std::pair< std::string, int> file_and_line;
-    static std::set< file_and_line> ignorer;
-    if ( ignorer.find( file_and_line( context.getContextFile(), context.contextLine())) != ignorer.end() )
+    typedef std::pair< std::string, int> fileAndLine;
+    static std::set< fileAndLine> ignorer;
+    if ( ignorer.find( fileAndLine( context.file(), context.contextLine())) != ignorer.end() )
         // this is Ignored Forever
         return;
 
@@ -211,7 +211,7 @@ void defaultDebugHandler( const AssertContext & context)
         case 'f':
         case 'F':
             // ignore forever
-            ignorer.insert( file_and_line( context.getContextFile(), context.contextLine()));
+            ignorer.insert( fileAndLine( context.file(), context.contextLine()));
             break;
 
         case 'a':
