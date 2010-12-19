@@ -358,7 +358,7 @@ int main(int argc, char** argv)
     globalChrono.stop();
     if (verbose) std::cout << "Total simulation time:  " << globalChrono.diff() << " s." << std::endl;
 
-    exporter->CloseFile();
+    exporter->closeFile();
 
 #ifdef HAVE_MPI
     MPI_Finalize();
