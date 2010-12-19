@@ -157,7 +157,7 @@ public:
     typedef boost::shared_ptr<data_Type>                                            dataPtr_Type;
     typedef std::map<ID, ID>::const_iterator                                        iterator_Type;
     typedef singleton<factory<FSIOperator, std::string> >                           FSIFactory_Type;
-    typedef Displayer::comm_PtrType/*Displayer::commPtr_Type*/                      commPtr_Type;
+    typedef Displayer::commPtr_Type/*Displayer::commPtr_Type*/                      commPtr_Type;
 
      //@}
 
