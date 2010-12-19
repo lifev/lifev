@@ -387,19 +387,9 @@ public:
   //! Get the velocity
   vector_Type& getVelocity()         { return *M_vel; }
 
-
-  //! Get the displacement
-  vector_Type& __attribute__ ((__deprecated__)) disp()        { getDisplacement(); }
-
-  //! Get the velocity
-  vector_Type&  __attribute__ ((__deprecated__)) vel()         { getVelocity(); }
-
   //! Get the right hand sde without BC
 
   vectorPtr_Type& getRhsWithoutBC() { return M_rhsNoBC; }
-
-  //! Get the right hand sinde sde without BC
-  vectorPtr_Type& __attribute__ ((__deprecated__))  rhsWithoutBC() { getRhsWithoutBC(); }
 
   //const Dof& dDof() const { return M_FESpace.dof(); }
 
@@ -468,10 +458,6 @@ public:
 
     const UInt& __attribute__ ((__deprecated__)) offset() const
   { return getOffset(); }
-
-  //! Get the rescaleFactor //Deprecated
-  Real __attribute__ ((__deprecated__)) rescaleFactor()
-  {return getRescaleFactor();}
 
   //! Get the comunicator object //Deprecated
   boost::shared_ptr<Epetra_Comm> const& __attribute__ ((__deprecated__)) comm() const
