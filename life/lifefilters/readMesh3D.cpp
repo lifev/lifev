@@ -64,7 +64,7 @@ readMppFileHead( std::ifstream & myStream,
     UInt i, ibc;
     UInt p1, p2, p3;
 
-    while ( next_good_line( myStream, line ).good() )
+    while ( nextGoodLine( myStream, line ).good() )
     {
         if ( line.find( "odes" ) != std::string::npos )
         {
@@ -136,8 +136,8 @@ readMppFileHead( std::ifstream & myStream,
 // INRIA mesh readers
 // ===================================================
 
-Int 
-nextIntINRIAMeshField( std::string const & line, 
+Int
+nextIntINRIAMeshField( std::string const & line,
                        std::istream      & myStream )
 {
     /*
@@ -156,7 +156,7 @@ nextIntINRIAMeshField( std::string const & line,
          }
     Int dummy;
     myStream >> dummy;
-    
+
     return dummy;
 }// Function nextIntINRIAMeshField
 
@@ -191,7 +191,7 @@ readINRIAMeshFileHead( std::ifstream          & myStream,
     std::vector<bool> isboundary;
     //streampos start=myStream.tellg();
 
-    while ( next_good_line( myStream, line ).good() )
+    while ( nextGoodLine( myStream, line ).good() )
     {
         if ( line.find( "MeshVersionFormatted" ) != std::string::npos )
         {

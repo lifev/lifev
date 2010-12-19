@@ -125,9 +125,9 @@ readMppFile( RegionMesh3D<GeoShape, MC> & mesh,
 
     UInt done = 0;
     UInt i;
-    UInt numberVertices( 0 ), numberBoundaryVertices( 0 ), 
-         numberFaces   ( 0 ), numberBoundaryFaces( 0 ), 
-         numberPoints  ( 0 ), numberBoundaryPoints( 0 ), 
+    UInt numberVertices( 0 ), numberBoundaryVertices( 0 ),
+         numberFaces   ( 0 ), numberBoundaryFaces( 0 ),
+         numberPoints  ( 0 ), numberBoundaryPoints( 0 ),
          numberEdges   ( 0 ), numberBoundaryEdges( 0 );
     UInt numberVolumes ( 0 );
     UInt p1, p2, p3, p4;
@@ -153,7 +153,7 @@ readMppFile( RegionMesh3D<GeoShape, MC> & mesh,
 
     std::cout << "Reading mesh++ file" << std::endl;
 
-    if ( ! readMppFileHead( hstream, numberVertices, numberBoundaryVertices, 
+    if ( ! readMppFileHead( hstream, numberVertices, numberBoundaryVertices,
                             numberBoundaryFaces, numberBoundaryEdges, numberVolumes ) )
     {
         std::cerr << " Error While reading mesh++ file headers" << std::endl;
@@ -174,7 +174,7 @@ readMppFile( RegionMesh3D<GeoShape, MC> & mesh,
 
     // Euler formulas
     numberFaces = 2 * numberVolumes + ( numberBoundaryFaces / 2 );
-    numberEdges = numberVolumes + numberVertices + 
+    numberEdges = numberVolumes + numberVertices +
                   ( 3 * numberBoundaryFaces - 2 * numberBoundaryVertices ) / 4;
 
     // Be a little verbose
@@ -242,7 +242,7 @@ readMppFile( RegionMesh3D<GeoShape, MC> & mesh,
     UInt count = 0;
     Int ibc;
 
-    while ( next_good_line( myStream, line ).good() )
+    while ( nextGoodLine( myStream, line ).good() )
     {
         if ( line.find( "odes" ) != std::string::npos )
         {
@@ -476,9 +476,9 @@ readINRIAMeshFile( RegionMesh3D<GeoShape, MC>&      mesh,
 
     UInt done = 0;
     UInt i;
-    UInt numberVertices( 0 ), numberBoundaryVertices( 0 ), 
-         numberFaces   ( 0 ), numberBoundaryFaces   ( 0 ), 
-         numberPoints  ( 0 ), numberBoundaryPoints  ( 0 ), 
+    UInt numberVertices( 0 ), numberBoundaryVertices( 0 ),
+         numberFaces   ( 0 ), numberBoundaryFaces   ( 0 ),
+         numberPoints  ( 0 ), numberBoundaryPoints  ( 0 ),
          numberEdges   ( 0 ), numberBoundaryEdges   ( 0 );
     UInt numberVolumes ( 0 );
     UInt numberStoredFaces( 0 );
@@ -515,8 +515,8 @@ readINRIAMeshFile( RegionMesh3D<GeoShape, MC>&      mesh,
     std::cout << "Reading INRIA mesh file" << fileName << std::endl;
     }
 
-    if ( ! readINRIAMeshFileHead( hstream, numberVertices, numberBoundaryVertices, 
-                                  numberBoundaryFaces, numberBoundaryEdges, 
+    if ( ! readINRIAMeshFileHead( hstream, numberVertices, numberBoundaryVertices,
+                                  numberBoundaryFaces, numberBoundaryEdges,
                                   numberVolumes, numberStoredFaces, shape, iSelect) )
     {
         std::cerr << " Error while reading INRIA mesh file headers" << std::endl;
@@ -566,18 +566,18 @@ readINRIAMeshFile( RegionMesh3D<GeoShape, MC>&      mesh,
             numberPoints = numberVertices + numberEdges;
 
             /*
-            numberBoundaryPoints=numberBoundaryVertices+numberBoundaryEdges; 
-            FALSE : numberBoundaryEdges is not known at this stage in a INRIA file 
+            numberBoundaryPoints=numberBoundaryVertices+numberBoundaryEdges;
+            FALSE : numberBoundaryEdges is not known at this stage in a INRIA file
             (JFG 07/2002)
             I use the relation  numberBoundaryVertices + numberBoundaryFaces - 2 = numberBoundaryEdges,
-            But, is it general (hole...)  
+            But, is it general (hole...)
             (JFG 07/2002)
 
-            numberBoundaryEdges = ( Int ( numberBoundaryVertices + numberBoundaryFaces - Int (2  ) ) 
+            numberBoundaryEdges = ( Int ( numberBoundaryVertices + numberBoundaryFaces - Int (2  ) )
                                   > 0 ? ( numberBoundaryVertices + numberBoundaryFaces - 2 ) : 0 );
-            numberBoundaryPoints = ( Int ( numberBoundaryVertices + 
-                                   ( numberBoundaryVertices + numberBoundaryFaces - Int ( 2 ) ) ) 
-                                   > 0 ?numberBoundaryVertices + 
+            numberBoundaryPoints = ( Int ( numberBoundaryVertices +
+                                   ( numberBoundaryVertices + numberBoundaryFaces - Int ( 2 ) ) )
+                                   > 0 ?numberBoundaryVertices +
                                    ( numberBoundaryVertices + numberBoundaryFaces - 2 ) : 0 );
              */
         }
@@ -591,7 +591,7 @@ readINRIAMeshFile( RegionMesh3D<GeoShape, MC>&      mesh,
 
             numberPoints  = numberVertices;
             numberBoundaryPoints = numberBoundaryVertices;
-            numberBoundaryEdges  = ( Int ( numberBoundaryVertices + numberBoundaryFaces - Int( 2 ) ) 
+            numberBoundaryEdges  = ( Int ( numberBoundaryVertices + numberBoundaryFaces - Int( 2 ) )
                                  > 0 ? ( numberBoundaryVertices + numberBoundaryFaces - 2 ) : 0 );
         }
 
@@ -662,7 +662,7 @@ readINRIAMeshFile( RegionMesh3D<GeoShape, MC>&      mesh,
 
     }
 
-    while ( next_good_line( myStream, line ).good() )
+    while ( nextGoodLine( myStream, line ).good() )
     {
         if ( line.find( "Vertices" ) != std::string::npos )
         {
@@ -678,7 +678,7 @@ readINRIAMeshFile( RegionMesh3D<GeoShape, MC>&      mesh,
                 {
                     ++count;
                 // Boundary point. Boundary switch set by the mesh method.
-                    pointerPoint = &mesh.addPoint( true ); 
+                    pointerPoint = &mesh.addPoint( true );
                     pointerPoint->setMarker( EntityFlag( ibc ) );
                 }
 
@@ -754,7 +754,7 @@ readINRIAMeshFile( RegionMesh3D<GeoShape, MC>&      mesh,
                 }
             }
 
-         for ( faceHelpIterator = faceHelp.begin(); 
+         for ( faceHelpIterator = faceHelp.begin();
                faceHelpIterator != faceHelp.end(); ++faceHelpIterator )
           {
               p1  = faceHelpIterator->i1;
@@ -821,7 +821,7 @@ readINRIAMeshFile( RegionMesh3D<GeoShape, MC>&      mesh,
 
             oStr << "Boundary faces read " << std::endl;
 
-            for ( faceHelpIterator=faceHelp.begin(); 
+            for ( faceHelpIterator=faceHelp.begin();
                   faceHelpIterator!=faceHelp.end(); ++faceHelpIterator )
             {
                 p1 = faceHelpIterator->i1;
@@ -934,11 +934,11 @@ readINRIAMeshFile( RegionMesh3D<GeoShape, MC>&      mesh,
     getVolumeFromFaces( mesh, vols, oStr );
 
     oStr << "Volume enclosed by the mesh computed by integration on boundary faces"  << std::endl;
-    oStr << "INT(X)     INT(Y)      INT(Z)     <- they should be equal and equal to" << std::endl 
+    oStr << "INT(X)     INT(Y)      INT(Z)     <- they should be equal and equal to" << std::endl
          << "                                     the voulume enclosed by the mesh"  << std::endl;
     oStr << vols[ 0 ] << "     " << vols[ 1 ] << "     " << vols[ 2 ] << std::endl;
-    oStr << "Boundary faces are defining a closed surface if " 
-         << testClosedDomain( mesh, oStr ) << std::endl 
+    oStr << "Boundary faces are defining a closed surface if "
+         << testClosedDomain( mesh, oStr ) << std::endl
          << "is (almost) zero" << std::endl;
 
     return done == 4 ;
@@ -1322,9 +1322,9 @@ readNetgenMesh(RegionMesh3D<GeoShape,MC> & mesh,
     std::string line;
 
     // number of Geo Elements
-    UInt numberVertices( 0 ), numberBoundaryVertices( 0 ), 
+    UInt numberVertices( 0 ), numberBoundaryVertices( 0 ),
          numberPoints  ( 0 ), numberBoundaryPoints  ( 0 ),
-         numberEdges   ( 0 ), numberBoundaryEdges   ( 0 ), 
+         numberEdges   ( 0 ), numberBoundaryEdges   ( 0 ),
          numberFaces   ( 0 ), numberBoundaryFaces   ( 0 ),
          numberVolumes ( 0 );
 
@@ -1777,7 +1777,7 @@ readNetgenMesh(RegionMesh3D<GeoShape,MC> & mesh,
          << "INT(X)     INT(Y)      INT(Z)      <- they should be equal and equal to" << std::endl
          << "                                   the volume enclosed by the mesh " << std::endl
          << vols[ 0 ] << "      " << vols[ 1 ] << "      " << vols[ 2 ] << std::endl
-         << "Boundary faces are defining aclosed surface if " 
+         << "Boundary faces are defining aclosed surface if "
          << testClosedDomain( mesh, oStr ) << std::endl
          << " is (almost) zero" << std::endl;
 
