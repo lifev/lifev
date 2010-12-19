@@ -603,9 +603,6 @@ hyperbolic::run()
         // Start chronoTimeStep for measure the time for the current time step
         chronoTimeStep.start();
 
-        // Compute the new time step according to the CFL condition.
-        timeStep = hyperbolicSolver.CFL();
-
         // Check if the time step is consistent, i.e. if innerTimeStep + currentTime < endTime.
         if ( dataHyperbolic.dataTime()->isLastTimeStep() )
         {
@@ -614,6 +611,11 @@ hyperbolic::run()
 
             // This is the last time step in the simulation
             isLastTimeStep = true;
+        }
+	else
+        {
+            // Compute the new time step according to the CFL condition.
+            timeStep = hyperbolicSolver.CFL();
         }
 
         // Set the last time step for the simulation.

@@ -12,7 +12,7 @@
 
 AT_SETUP([test_hyperbolic])    #Name of the test
 AT_KEYWORDS([hyperbolic])
-AT_DATA([data],               #Data file
+AT_DATA([data],
 [[
     [exporter]
     type       = hdf5
@@ -64,7 +64,6 @@ AT_DATA([data],               #Data file
     [../]
 
 ]])
-AT_XFAIL_IF([:])
-AT_CHECK([ln -sf ../../data/mesh/inria/cartesian_cube8.mesh &
-          mpirun -n 1 ../../test_hyperbolic/test_hyperbolic -c & exit 1],[0],[ignore],[ignore])
+AT_CHECK([ln -sf ../../data/mesh/inria/cartesian_cube8.mesh;
+          mpirun -np 1 ../../test_hyperbolic/test_hyperbolic -c],[0],[ignore],[ignore])
 AT_CLEANUP

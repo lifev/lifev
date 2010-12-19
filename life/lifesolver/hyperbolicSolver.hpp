@@ -672,19 +672,21 @@ CFL() const
             for ( UInt ig(0); ig < M_FESpace.feBd().nbQuadPt(); ++ig )
             {
 
-                // Coordinates of the current quadrature point
-                Real x(0), y(0), z(0);
+                // Cuurent quadrature point
+                KN<Real> quadPoint(3);
+                // normal vector
+                KN<Real> normal(3);
 
-                // Set the coordinates of the current quatrature point
-                x = M_FESpace.feBd().quadPt( ig, static_cast<UInt>(0) );
-                y = M_FESpace.feBd().quadPt( ig, static_cast<UInt>(1) );
-                z = M_FESpace.feBd().quadPt( ig, static_cast<UInt>(2) ) ;
-
-                const KN<Real> normal ( M_FESpace.feBd().normal( '.', static_cast<Int>(ig) ) );
+                for (UInt icoor(0); icoor<3; ++icoor)
+                {
+                    quadPoint(icoor) = M_FESpace.feBd().quadPt( ig, icoor );
+                    normal(icoor)    = M_FESpace.feBd().normal( icoor, ig ) ;
+		}
 
                 // Compute the local CFL without the time step
                 localCFL = e / K * M_numericalFlux->getNormInfty ( leftValue[0], rightValue[0], normal, iElem,
-                                                                   M_data.dataTime()->time(), x, y, z );
+                                                                   M_data.dataTime()->time(), 
+                                                                   quadPoint(0), quadPoint(1), quadPoint(2) );
 
                 // Select the maximum between the old CFL condition and the new CFL condition
                 if ( localCFL > localCFLOld  )
