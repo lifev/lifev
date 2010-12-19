@@ -43,6 +43,14 @@ namespace LifeV
 // ===================================================
 // Constructors & Destructor
 // ===================================================
+Displayer::Displayer():
+    M_comm (commPtr_Type()),
+    M_verbose (true)
+{
+    if (M_comm)
+        M_verbose = M_comm->MyPID() == 0;
+}
+
 Displayer::Displayer( const commPtr_Type& comm ):
         M_comm          ( comm ),
         M_verbose       ( true )

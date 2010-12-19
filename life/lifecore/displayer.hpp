@@ -81,9 +81,9 @@ public:
     //@{
 
     //! Constructor
-    Displayer () {}
-
-    Displayer( const commPtr_Type& comm = commPtr_Type() );
+    Displayer();
+    // This is dubious! Should avoid using default values for constructor parameters
+    Displayer( const commPtr_Type& comm );
 
     //! Copy constructor
     /*!
