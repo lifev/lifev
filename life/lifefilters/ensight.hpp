@@ -127,9 +127,6 @@ public:
     //! returns the type of the map to use for the EpetraVector
     EpetraMapType mapType() const;
 
-    // DEPRECATED
-    void __attribute__((__deprecated__)) rd_var(ExporterData& dvar) {super::rd_var(dvar);}
-
     //@}
 
 private:
