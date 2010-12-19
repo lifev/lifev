@@ -187,9 +187,6 @@ public:
     //! returns the type of the map to use for the EpetraVector
     EpetraMapType mapType() const;
 
-    // DEPRECATED
-    void __attribute__((__deprecated__)) CloseFile() {M_HDF5->Close();}
-    void __attribute__((__deprecated__)) rd_var( ExporterData& dvar);
     //@}
 
 protected:
