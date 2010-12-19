@@ -46,10 +46,10 @@
 #endif
 
 // Object type definitions
-typedef LifeV::RegionMesh3D<LifeV::LinearTetra>       mesh_type;
-typedef LifeV::Oseen< mesh_type >                     fluid_type;
-typedef fluid_type::vector_type                       vector_type;
-typedef boost::shared_ptr<vector_type>                vector_ptrtype;   //Pointer
+typedef LifeV::RegionMesh3D<LifeV::LinearTetra>       mesh_Type;
+typedef LifeV::Oseen< mesh_Type >                     fluid_Type;
+typedef fluid_Type::vector_Type                       vector_Type;
+typedef boost::shared_ptr<vector_Type>                vectorPtr_Type;   //Pointer
 
 // +-----------------------------------------------+
 // | Data and functions for the boundary conditions|
@@ -241,14 +241,14 @@ int main(int argc, char** argv)
     LifeV::Real tFinal = dataNavierStokes->dataTime()->endTime ();
 
     // bdf object to store the previous solutions
-    LifeV::BdfTNS<vector_type> bdf;
+    LifeV::BdfTNS<vector_Type> bdf;
     bdf.setup(dataNavierStokes->dataTime()->orderBDF());
 
     // Initialization with exact solution: either interpolation or "L2-NS"-projection
     t0 -= dt * bdf.bdfVelocity().order();
 
-    vector_type beta( fullMap );
-    vector_type rhs ( fullMap );
+    vector_Type beta( fullMap );
+    vector_Type rhs ( fullMap );
 
     MPI_Barrier(MPI_COMM_WORLD);
 
@@ -277,7 +277,7 @@ int main(int argc, char** argv)
 
     boost::shared_ptr< LifeV::Hdf5exporter<LifeV::RegionMesh3D<LifeV::LinearTetra> > > exporter;
 
-    vector_ptrtype velAndPressure;
+    vectorPtr_Type velAndPressure;
 
     std::string const exporterType =  dataFile( "exporter/type", "ensight");
 
@@ -285,7 +285,7 @@ int main(int argc, char** argv)
     exporter->setPostDir( "./" ); // This is a test to see if M_post_dir is working
     exporter->setMeshProcId( meshPart.meshPartition(), comm->MyPID() );
 
-    velAndPressure.reset( new vector_type(*fluid.solution(), exporter->mapType() ) );
+    velAndPressure.reset( new vector_Type(*fluid.solution(), exporter->mapType() ) );
 
     exporter->addVariable( LifeV::ExporterData::Vector, "velocity", velAndPressure,
                            LifeV::UInt(0), uFESpace.dof().numTotalDof() );
@@ -332,9 +332,9 @@ int main(int argc, char** argv)
         bdf.bdfVelocity().shiftRight( *fluid.solution() );
 
         // Computation of the error
-        vector_type vel  (uFESpace.map(), LifeV::Repeated);
-        vector_type press(pFESpace.map(), LifeV::Repeated);
-        vector_type velpressure ( *fluid.solution(), LifeV::Repeated );
+        vector_Type vel  (uFESpace.map(), LifeV::Repeated);
+        vector_Type press(pFESpace.map(), LifeV::Repeated);
+        vector_Type velpressure ( *fluid.solution(), LifeV::Repeated );
 
         velpressure = *fluid.solution();
         vel.subset(velpressure);
