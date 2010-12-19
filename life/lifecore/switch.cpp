@@ -45,7 +45,7 @@ namespace LifeV
 
 bool Switch::set ( std::string const & a )
 {
-    iterator i = find( a );
+    iterator_Type i = find( a );
     if ( i == end() )
     {
         return false;
@@ -67,7 +67,7 @@ bool Switch::set ( const char * a )
 
 bool Switch::unset( std::string const & a )
 {
-    iterator i = find( a );
+    iterator_Type i = find( a );
     if ( i == end() )
     {
         return false;
@@ -89,7 +89,7 @@ bool Switch::unset( const char * a )
 
 bool Switch::toggle( std::string const & a )
 {
-    iterator i = find( a );
+    iterator_Type i = find( a );
     if ( i == end() )
     {
         return false;
@@ -111,7 +111,7 @@ bool Switch::toggle( const char * a )
 
 void Switch::create( std::string const & a, bool status )
 {
-    iterator i = find( a );
+    iterator_Type i = find( a );
     if ( i == end() )
     {
         insert( std::make_pair( a, status ) );
@@ -132,7 +132,7 @@ void Switch::create( const char * a, bool status )
 
 std::pair<bool, bool> Switch::status( std::string const & a ) const
 {
-    const_iterator i = find( a );
+    iteratorConst_Type i = find( a );
     if ( i == end() )
     {
         return std::make_pair( false, false );
@@ -154,7 +154,7 @@ std::pair<bool, bool> Switch::status( const char * a ) const
 bool
 Switch::test( std::string const & a ) const
 {
-    const_iterator i = find( a );
+    iteratorConst_Type i = find( a );
     if ( i == end() )
     {
         return false;
@@ -171,10 +171,10 @@ bool Switch::test( const char * a ) const
     return test( temp );
 }
 
-std::ostream & Switch::showMe( bool /*verbose*/, std::ostream & out ) const
+std::ostream & Switch::showMe( bool verbose, std::ostream & out ) const
 {
     out << std::endl << " Status of switches" << std::endl;
-    for ( const_iterator i = begin(); i != end(); ++i )
+    for ( iteratorConst_Type i = begin(); i != end(); ++i )
     {
         out << "Switch named: " << i->first << " Value= " << i->second << std::endl;
     }

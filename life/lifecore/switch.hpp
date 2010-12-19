@@ -53,7 +53,8 @@ class Switch: public std::map<std::string, bool>
 public:
     //! @name Public typedefs
     //@{
-    typedef std::map<std::string, bool>::iterator iterator;
+    typedef std::map<std::string, bool>::iterator iterator_Type;
+    typedef std::map<std::string, bool>::const_iterator iteratorConst_Type;
     //@}
 
     //! @name Public methods
