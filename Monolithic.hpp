@@ -396,7 +396,7 @@ public:
     void getSolidDisp(vector_Type& soliddisp)
     {
         soliddisp.subset(*un(), M_offset);
-        soliddisp *= dataFluid()->dataTime()->getTimeStep()*M_solid->rescaleFactor();
+        soliddisp *= dataFluid()->dataTime()->timeStep()*M_solid->rescaleFactor();
     }
 
     //!Get the solid velocity
@@ -407,7 +407,7 @@ public:
     void getSolidVel(vector_Type& solidvel)
     {
         solidvel.subset(M_solid->vel(), M_offset);
-        solidvel *= dataFluid()->dataTime()->getTimeStep()*M_solid->rescaleFactor();
+        solidvel *= dataFluid()->dataTime()->timeStep()*M_solid->rescaleFactor();
     }
 
     //! Gets the fluid and pressure
