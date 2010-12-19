@@ -146,8 +146,7 @@ MultiscaleModelFluid3D::setupModel()
     M_map.reset( new EpetraMap( M_fluid->getMap() ) );
 
     //BDF
-    M_bdf.reset( new bdf_Type);
-    M_bdf->setup(M_data->dataTime()->orderBDF() );
+    M_bdf.reset( new bdf_Type( M_data->dataTime()->getBDF_order() ) );
 
     //Problem coefficients
     M_beta.reset( new fluidVector_Type( M_map ) );
@@ -182,7 +181,7 @@ MultiscaleModelFluid3D::buildSystem()
     M_fluid->buildSystem();
 
     //Initialize BDF
-    M_bdf->bdfVelocity().setInitialCondition( *M_fluid->solution() );
+    M_bdf->bdf_u().initialize_unk( *M_fluid->solution() );
 
     //Define problem coefficients
     if ( M_data->isStokes() )
@@ -193,10 +192,9 @@ MultiscaleModelFluid3D::buildSystem()
     }
     else
     {
-        M_alpha = M_bdf->bdfVelocity().coefficientFirstDerivative( 0 ) / M_data->dataTime()->timeStep();
-        *M_beta = M_bdf->bdfVelocity().extrapolation();
-	M_bdf->bdfVelocity().updateRHSContribution( M_data->dataTime()->timeStep() );
-        *M_rhs  = M_fluid->matrMass() * M_bdf->bdfVelocity().rhsContributionFirstDerivative(); 
+        M_alpha = M_bdf->bdf_u().coeff_der( 0 ) / M_data->dataTime()->getTimeStep();
+        *M_beta = M_bdf->bdf_u().extrap();
+        *M_rhs  = M_fluid->matrixMass() * M_bdf->bdf_u().time_der( M_data->dataTime()->getTimeStep() );
     }
 
     //Set problem coefficients
@@ -212,15 +210,12 @@ MultiscaleModelFluid3D::updateSystem()
 #endif
 
     //Update BDF
-    M_bdf->bdfVelocity().shiftRight( *M_fluid->solution() );
+    M_bdf->bdf_u().shift_right( *M_fluid->solution() );
 
     //Update problem coefficients
-    M_alpha = M_bdf->bdfVelocity().coefficientFirstDerivative( 0 ) / M_data->dataTime()->timeStep();
-    *M_beta = M_bdf->bdfVelocity().extrapolation();
-
-    M_bdf->bdfVelocity().updateRHSContribution( M_data->dataTime()->timeStep() );
-    *M_rhs  = M_fluid->matrMass() * M_bdf->bdfVelocity().rhsContributionFirstDerivative(); 
- 
+    M_alpha = M_bdf->bdf_u().coeff_der( 0 ) / M_data->dataTime()->getTimeStep();
+    *M_beta = M_bdf->bdf_u().extrap();
+    *M_rhs  = M_fluid->matrixMass() * M_bdf->bdf_u().time_der( M_data->dataTime()->getTimeStep() );
 
     //Set problem coefficients
     M_fluid->updateSystem( M_alpha, *M_beta, *M_rhs );
@@ -229,7 +224,7 @@ MultiscaleModelFluid3D::updateSystem()
     M_bc->updatePhysicalSolverVariables();
 
     //Recompute preconditioner
-    M_fluid->resetPrec( true );
+    M_fluid->resetPreconditioner( true );
 
     //Linear system need to be updated
     M_updateLinearModel = true;
@@ -293,7 +288,7 @@ MultiscaleModelFluid3D::saveSolution()
 
     //Post-processing
     *M_solution = *M_fluid->solution();
-    M_exporter->postProcess( M_data->dataTime()->time() );
+    M_exporter->postProcess( M_data->dataTime()->getTime() );
 
 #ifdef HAVE_HDF5
     if ( M_data->dataTime()->isLastTimeStep() )
@@ -362,7 +357,7 @@ MultiscaleModelFluid3D::updateLinearModel()
     vectorZero = 0.0;
 
     //updateLinearModel TODO REMOVE ?
-    M_fluid->updateLinearSystem( M_fluid->matrNoBC(),
+    M_fluid->updateLinearSystem( M_fluid->matrixNoBC(),
                                  M_alpha,
                                  *M_beta,
                                  *M_fluid->solution(),
@@ -392,7 +387,7 @@ MultiscaleModelFluid3D::solveLinearModel( bool& solveLinearSystem )
         updateLinearModel();
 
     //Solve the linear problem
-    M_fluid->iterateLin( *M_linearBC );
+    M_fluid->solveLinearSystem( *M_linearBC );
 
     resetPerturbation();
 
@@ -447,7 +442,7 @@ MultiscaleModelFluid3D::boundaryDeltaFlowRate( const bcFlag_Type& flag, bool& so
 {
     solveLinearModel( solveLinearSystem );
 
-    return M_fluid->GetLinearFlux( flag );
+    return M_fluid->getLinearFlux( flag );
 }
 
 Real
@@ -455,7 +450,7 @@ MultiscaleModelFluid3D::boundaryDeltaPressure( const bcFlag_Type& flag, bool& so
 {
     solveLinearModel( solveLinearSystem );
 
-    return M_fluid->GetLinearPressure( flag );
+    return M_fluid->getLinearPressure( flag );
 }
 
 Real
@@ -469,7 +464,7 @@ MultiscaleModelFluid3D::boundaryDeltaLagrangeMultiplier( const bcFlag_Type& flag
 {
     solveLinearModel( solveLinearSystem );
 
-    return M_fluid->LinearLagrangeMultiplier( flag, *M_linearBC );
+    return M_fluid->getLinearLagrangeMultiplier( flag, *M_linearBC );
 }
 
 Real
@@ -682,7 +677,7 @@ MultiscaleModelFluid3D::initializeSolution()
         M_importer->addVariable( ExporterData::Scalar, "Fluid Pressure", M_solution, 3 * M_uFESpace->dof().numTotalDof(), M_pFESpace->dof().numTotalDof());
 
         // Import
-        M_exporter->setStartIndex( M_importer->importFromTime( M_data->dataTime()->initialTime() ) + 1 );
+        M_exporter->setStartIndex( M_importer->importFromTime( M_data->dataTime()->getInitialTime() ) + 1 );
     }
     else
         *M_solution = 0.0;
