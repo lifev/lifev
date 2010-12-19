@@ -43,7 +43,7 @@ namespace LifeV
 
 class TypeInfo
 {
-public:j4 check
+public:
     //! @name Constructors, destructor
     //@{
     TypeInfo();
