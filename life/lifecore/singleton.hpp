@@ -61,9 +61,9 @@ class singleton
 public:
     //! @name Public typedefs
     //@{
-    typedef SingletonType singleton_type;
-    typedef policyLifeTimeDefault<singleton_type> lifetime_policy;
-    typedef policyCreationUsingNew<singleton_type> creation_policy;
+    typedef SingletonType singleton_Type;
+    typedef policyLifeTimeDefault<singleton_Type> lifetimePolicy_Type;
+    typedef policyCreationUsingNew<singleton_Type> creationPolicy_Type;
     //@}
 
     //! @name Public static methods
@@ -71,12 +71,12 @@ public:
     /**
        return the instance of the singleton
     */
-    static singleton_type& instance();
+    static singleton_Type& instance();
     //@}
 private:
     //! @name Private typedefs
     //@{
-    typedef singleton_type* instance_type;
+    typedef singleton_Type* instance_Type;
     //@}
 
     // Disable the constructor
@@ -92,7 +92,7 @@ private:
     static void destroySingleton();
 
     //@}
-    static instance_type S_instance;
+    static instance_Type S_instance;
     static bool S_destroyed;
 };
 
@@ -101,7 +101,7 @@ private:
 // ===================================
 
 template <class SingletonType>
-typename singleton<SingletonType>::instance_type singleton<SingletonType>::S_instance;
+typename singleton<SingletonType>::instance_Type singleton<SingletonType>::S_instance;
 
 template <class SingletonType>
 bool singleton<SingletonType>::S_destroyed;
@@ -123,11 +123,11 @@ void singleton<SingletonType>::makeInstance()
     {
         if ( S_destroyed )
         {
-            lifetime_policy::onDeadReference();
+            lifetimePolicy_Type::onDeadReference();
             S_destroyed = false;
         }
-        S_instance = creation_policy::create();
-        lifetime_policy::scheduleDestruction( S_instance, &destroySingleton );
+        S_instance = creationPolicy_Type::create();
+        lifetimePolicy_Type::scheduleDestruction( S_instance, &destroySingleton );
     }
 }
 
@@ -135,7 +135,7 @@ template <class SingletonType>
 void singleton<SingletonType>::destroySingleton()
 {
     assert( !S_destroyed );
-    creation_policy::destroy( S_instance );
+    creationPolicy_Type::destroy( S_instance );
     S_instance = 0;
     S_destroyed = true;
 }
