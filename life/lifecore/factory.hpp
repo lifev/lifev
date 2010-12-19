@@ -116,20 +116,26 @@ template <class AbstractProduct, typename IdentifierType,
           typename ProductCreator = boost::function<AbstractProduct*()>,
           template<typename, class> class factoryErrorPolicy = factoryDefaultError>
 class factory : public factoryErrorPolicy<IdentifierType,AbstractProduct>
-
 {
 public:
     //! @name Public Typedefs
     //@{
 
     //!\todo uncomment this line
-    //typedef std::string identifier_type;
-    typedef IdentifierType identifier_type;
-    typedef AbstractProduct product_type;
-    typedef ProductCreator creator_type;
+    //typedef std::string identifier_Type;
+    typedef IdentifierType identifier_Type;
+    typedef AbstractProduct product_Type;
+    typedef ProductCreator creator_Type;
     //!\todo uncomment this line
-    //typedef factoryErrorPolicy<product_type> super;
-    typedef factoryErrorPolicy<identifier_type, product_type> super;
+    //typedef factoryErrorPolicy<product_Type> super;
+    typedef factoryErrorPolicy<identifier_Type, product_Type> super;
+    //@}
+
+    //! @name Constructor and destructor
+    //@{
+    factory() {}
+
+    virtual ~factory() {}
     //@}
 
     //! @name  Methods
@@ -148,10 +154,10 @@ public:
      *
      * @return true if registration went fine, false otherwise
      */
-    bool registerProduct( const identifier_type& id, creator_type creator )
+    bool registerProduct( const identifier_Type& id, creator_Type creator )
     {
         LifeV::Debug( 2200 ) << "Registered type with id : " << id << "\n";
-        return M_associations.insert( typename id_to_product_type::value_type( id, creator ) ).second;
+        return M_associations.insert( typename id_to_product_Type::value_Type( id, creator ) ).second;
     }
 
     /**
@@ -161,7 +167,7 @@ public:
      * @sa registerProduct
      * @return true if unregistration went fine, false otherwise
      */
-    bool unregisterProduct( const identifier_type& id )
+    bool unregisterProduct( const identifier_Type& id )
     {
         LifeV::Debug( 2200 ) << "Unregistered type with id : " << id << "\n";
         return M_associations.erase( id ) == 1;
@@ -175,9 +181,9 @@ public:
      *
      * @return the object associate with \c id
      */
-    product_type* createObject( const identifier_type& id )
+    product_Type* createObject( const identifier_Type& id )
     {
-        typename id_to_product_type::const_iterator i = M_associations.find( id );
+        typename id_to_product_Type::const_iterator i = M_associations.find( id );
         if (i != M_associations.end())
         {
             LifeV::Debug ( 2200 ) << "Creating type with id : " << id << "\n";
@@ -189,8 +195,8 @@ public:
     //@}
 
 private:
-    typedef std::map<identifier_type, creator_type> id_to_product_type;
-    id_to_product_type M_associations;
+    typedef std::map<identifier_Type, creator_Type> id_to_product_Type;
+    id_to_product_Type M_associations;
 };
 
 /*!
@@ -218,11 +224,18 @@ public:
     typedef FactoryErrorPolicy<TypeInfo,AbstractProduct> super;
     //@}
 
+    //! @name Constructor and destructor
+    //@{
+    factoryClone() {}
+
+    virtual ~factoryClone() {}
+    //@}
+
     //! @name  Methods
     //@{
     bool registerProduct(const TypeInfo& id, ProductCreator creator)
     {
-        return M_associations.insert( typename id_to_product_type::value_type( id, creator ) ).second;
+        return M_associations.insert( typename id_to_product_Type::value_Type( id, creator ) ).second;
     }
 
     bool unregisterProduct( const TypeInfo& id )
@@ -234,7 +247,7 @@ public:
     {
         if ( model == 0 ) return 0;
 
-        typename id_to_product_type::const_iterator i = M_associations.find( typeid(*model) );
+        typename id_to_product_Type::const_iterator i = M_associations.find( typeid(*model) );
         if ( i != M_associations.end() )
         {
             return (i->second)(model);
@@ -246,8 +259,8 @@ public:
     //@}
 
 private:
-    typedef std::map<TypeInfo, ProductCreator> id_to_product_type;
-    id_to_product_type M_associations;
+    typedef std::map<TypeInfo, ProductCreator> id_to_product_Type;
+    id_to_product_Type M_associations;
 };
 
 }
