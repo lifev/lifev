@@ -468,7 +468,7 @@ MultiscaleModelFSI3D::boundaryDeltaLagrangeMultiplier( const bcFlag_Type& flag, 
 {
     solveLinearModel( solveLinearSystem );
 
-    return M_FSIoperator->fluid().LagrangeMultiplier( flag, *M_linearBC, *M_linearSolution );
+    return M_FSIoperator->fluid().lagrangeMultiplier( flag, *M_linearBC, *M_linearSolution );
 }
 
 Real
