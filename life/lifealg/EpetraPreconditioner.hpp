@@ -80,7 +80,7 @@ public:
     typedef boost::shared_ptr<operator_raw_type> operator_type;
 
     typedef Displayer::comm_Type                 comm_Type;
-    typedef Displayer::comm_PtrType              comm_PtrType;
+    typedef Displayer::commPtr_Type              commPtr_Type;
 
     typedef Teuchos::ParameterList               list_Type;
 
@@ -94,14 +94,14 @@ public:
     /*!
       @param comm Comminicator
      */
-    EpetraPreconditioner( const comm_PtrType& comm = comm_PtrType() );
+    EpetraPreconditioner( const commPtr_Type& comm = commPtr_Type() );
 
     //! Copy constructor
     /*!
       @param preconditioner EpetraPreconditioner
       @param comm Comminicator
      */
-    EpetraPreconditioner( const EpetraPreconditioner& preconditioner, const comm_PtrType& comm = comm_PtrType() );
+    EpetraPreconditioner( const EpetraPreconditioner& preconditioner, const commPtr_Type& comm = commPtr_Type() );
 
     //! Destructor
     virtual ~EpetraPreconditioner();

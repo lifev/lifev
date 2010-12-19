@@ -44,7 +44,7 @@ namespace LifeV
 // ===================================================
 // Constructors & Destructor
 // ===================================================
-EpetraPreconditioner::EpetraPreconditioner( const comm_PtrType& comm ):
+EpetraPreconditioner::EpetraPreconditioner( const commPtr_Type& comm ):
         M_precType              ( "EpetraPreconditioner" ),
         M_displayer             ( comm ),
         M_list                  (),
@@ -53,7 +53,7 @@ EpetraPreconditioner::EpetraPreconditioner( const comm_PtrType& comm ):
 
 }
 
-EpetraPreconditioner::EpetraPreconditioner( const EpetraPreconditioner& preconditioner, const comm_PtrType& comm ):
+EpetraPreconditioner::EpetraPreconditioner( const EpetraPreconditioner& preconditioner, const commPtr_Type& comm ):
         M_precType              ( preconditioner.M_precType ),
         M_displayer             ( comm ),
         M_list                  ( preconditioner.getList() ),
