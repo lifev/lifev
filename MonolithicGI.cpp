@@ -108,7 +108,7 @@ MonolithicGI::setupFluidSolid( UInt const fluxes )
                                           *M_mmFESpace,
                                           M_epetraComm,
                                           *M_monolithicMap));
-    M_solid.reset(solid_raw_type::StructureSolverFactory::instance().createObject( M_data->dataSolid()->getSolidType( ) ));
+    M_solid.reset(solid_Type::StructureSolverFactory::instance().createObject( M_data->dataSolid()->getSolidType( ) ));
 
     M_solid->setup(M_data->dataSolid(),
                    M_dFESpace,
@@ -279,10 +279,6 @@ void MonolithicGI::initialize( FSIOperator::fluidPtr_Type::value_type::Function 
                                FSIOperator::solidPtr_Type::value_type::Function const& df0 )
 {
     super_Type::initialize(u0, p0, d0, w0, df0);
-    vector_type df(M_mmFESpace->map());
-    M_mmFESpace->interpolate(df0, df, M_data->dataSolid()->getDataTime()->time());
-
-
     vector_Type df(M_mmFESpace->map());
     M_mmFESpace->interpolate(df0, df, M_data->dataSolid()->getDataTime()->time());
 

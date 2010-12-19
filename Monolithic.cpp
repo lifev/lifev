@@ -88,8 +88,7 @@ Monolithic::setupFEspace()
 
     // Monolitic: In the beginning I need a non-partitioned mesh. later we will do the partitioning
     M_dFESpace.reset( new FESpace<mesh_Type, EpetraMap>( M_solidMesh,
-                                                         M_data->dataSolid()->getOrder(),
-                                                         nDimensions,
+                                                         M_data->dataSolid()->getOrder(),                                                            nDimensions,
                                                          M_epetraComm));
 }
 
@@ -352,7 +351,10 @@ Monolithic::updateSystem()
     this->fluid().updateUn(*this->M_un);
     *M_rhs*=0;
     *M_rhsFull*=0;
-    this->M_fluid->resetStab();
+
+    this->M_fluid->stabilization();
+    //    this->M_fluid->resetStabilization();
+
 }
 
 void
@@ -369,6 +371,8 @@ Monolithic::initialize( FSIOperator::fluidPtr_Type::value_type::Function const& 
     M_pFESpace->interpolate(p0, p, M_data->dataFluid()->dataTime()->time());
 
     vector_Type d(M_dFESpace->map());
+
+    M_dFESpace->interpolate(d0, d, M_data->dataSolid()->getDataTime()->time());
 
     M_dFESpace->interpolate(d0, d, M_data->getDataSolid()->getDataTime()->time());
     initialize(u, p, d);
@@ -559,6 +563,7 @@ Monolithic::assembleFluidBlock(UInt iter, vectorPtr_Type& solution)
     if (iter==0)
     {
         M_resetPrec=true;
+
 	M_bdf->updateRHSContribution(M_data->dataFluid()->dataTime()->timeStep() );
         *this->M_rhs += M_fluid->matrMass()*M_bdf->rhsContributionFirstDerivative() ;
         couplingRhs(this->M_rhs, M_un);
@@ -570,6 +575,7 @@ Monolithic::assembleFluidBlock(UInt iter, vectorPtr_Type& solution)
 
 void Monolithic::updateRHS(  )
 {
+
     M_bdf->updateRHSContribution(M_data->dataFluid()->dataTime()->timeStep() );
     *this->M_rhs += M_fluid->matrMass()*M_bdf->rhsContributionFirstDerivative() ;
     couplingRhs(this->M_rhs, M_un);

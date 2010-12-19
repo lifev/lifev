@@ -678,6 +678,7 @@ MultiscaleModelFSI3D::initializeSolution()
 
         UniqueV->subset( *M_solidDisplacement, M_solidDisplacement->map(), (UInt)0, offset );
         *UniqueV *= 1 / ( M_FSIoperator->solid().getRescaleFactor() * M_data->dataFluid()->dataTime()->timeStep() );
+
         M_FSIoperator->solid().initialize( UniqueV );
         *initSol += *UniqueV;
 

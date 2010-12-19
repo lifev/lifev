@@ -383,7 +383,7 @@ buildSystem(matrixPtr_Type massStiff, Real const & factor)
     UInt nc = nDimensions;
 
     //inverse of dt:
-    Real PTemp =  this->M_data->getDataTime()->getTimeStep();
+    Real PTemp =  this->M_data->getDataTime()->timeStep();
     Real dti2  = 2.0 / ( PTemp * PTemp );
 
     // Elementary computation and matrix assembling
@@ -492,7 +492,7 @@ void NonLinearVenantKirchhofSolver<Mesh, SolverType>::updateSystem( matrixPtr_Ty
     // end of the nonlinear part
     //Computation of the right hand sides
 
-    Real DeltaT    = this->M_data->getDataTime()->getTimeStep();
+    Real DeltaT    = this->M_data->getDataTime()->timeStep();
     vector_Type z = *this->M_disp;
 
      z            +=  DeltaT*(*this->M_vel);
@@ -779,7 +779,7 @@ iterate( bchandler_Type& bch )
 
     Int status = 0;
 
-    status = nonLinRichardson( *this->M_disp, *this, abstol, reltol, maxiter, etamax, linesearch, this->M_out_res, this->M_data->getDataTime()->getTime() );
+    status = nonLinRichardson( *this->M_disp, *this, abstol, reltol, maxiter, etamax, linesearch, this->M_out_res, this->M_data->getDataTime()->time() );
 
     if ( status == 1 )
     {
@@ -793,7 +793,7 @@ iterate( bchandler_Type& bch )
 
         std::cout <<" Number of inner iterations       : " << maxiter <<  std::endl;
 
-        std::cout <<" We are at the time step          : "  << this->M_data->getDataTime()->getTime() << std::endl;
+        std::cout <<" We are at the time step          : "  << this->M_data->getDataTime()->time() << std::endl;
 
         this->M_out_iter << time << " " << maxiter << std::endl;
     }
@@ -818,7 +818,7 @@ template <typename Mesh, typename SolverType> // for monolithic
 void NonLinearVenantKirchhofSolver<Mesh, SolverType>::
 updateVel()
 {
-    Real DeltaT = this->M_data->getDataTime()->getTimeStep();
+    Real DeltaT = this->M_data->getDataTime()->timeStep();
 
     *M_acc = (2.0 /( M_zeta * pow(DeltaT,2) ))  * (*this->M_disp)  - *M_rhsA;
     *this->M_vel = *this->M_rhsW + M_theta * DeltaT * (*M_acc) ;
@@ -889,7 +889,7 @@ void NonLinearVenantKirchhofSolver<Mesh, SolverType>::evalResidual( vector_Type 
 
     vector_Type rhsFull(*this->M_rhsNoBC, Unique); // ignoring non-local entries, Otherwise they are summed up lately
 
-    bcManageVector( rhsFull, *this->M_FESpace->mesh(), this->M_FESpace->dof(), *this->M_BCh, this->M_FESpace->feBd(),  this->M_data->getDataTime()->getTime(), 1.0 );
+    bcManageVector( rhsFull, *this->M_FESpace->mesh(), this->M_FESpace->dof(), *this->M_BCh, this->M_FESpace->feBd(),  this->M_data->getDataTime()->time(), 1.0 );
 
     *this->M_rhs = rhsFull;
 
