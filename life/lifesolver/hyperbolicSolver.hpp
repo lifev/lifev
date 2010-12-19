@@ -831,22 +831,28 @@ localEvolve ( const UInt& iElem )
                 for ( UInt ig(0); ig < M_FESpace.feBd().nbQuadPt(); ++ig)
                 {
 
-                    // Coordinates of the current quadrature point
-                    Real x(0), y(0), z(0);
-                    x = M_FESpace.feBd().quadPt( ig, static_cast<UInt>(0) );
-                    y = M_FESpace.feBd().quadPt( ig, static_cast<UInt>(1) );
-                    z = M_FESpace.feBd().quadPt( ig, static_cast<UInt>(2) );
+                    // Current quadrature point
+                    KN<Real> quadPoint(3);
+
+                    // normal vector
+                    KN<Real> normal(3);
+
+                    for (UInt icoor(0); icoor<3; ++icoor)
+                    {
+                        quadPoint(icoor) = M_FESpace.feBd().quadPt( ig, icoor );
+                        normal(icoor)    = M_FESpace.feBd().normal( icoor, ig ) ;
+                    }
 
                     // Compute the boundary contribution
-                    rightValue[0] = bcBase( M_data.dataTime()->time(), x, y, z, 0 );
-
-                    // Compute the outward unit normal of the boundary
-                    const KN<Real> normal ( M_FESpace.feBd().normal('.', static_cast<Int>(ig) ) );
+                    rightValue[0] = bcBase( M_data.dataTime()->time(), quadPoint(0), quadPoint(1), quadPoint(2), 0 );
 
                     const Real localFaceFlux = M_numericalFlux->getFirstDerivativePhysicalFluxDotNormal ( normal,
                                                                                                           iElem,
                                                                                                           M_data.dataTime()->time(),
-                                                                                                          x, y, z, rightValue[ 0 ] );
+                                                                                                          quadPoint(0),
+                                                                                                          quadPoint(1),
+                                                                                                          quadPoint(2),
+                                                                                                          rightValue[ 0 ] );
                     // Update the local flux of the current face with the quadrature weight
                     localFaceFluxWeight[0] += localFaceFlux * M_FESpace.feBd().weightMeas( ig );
                 }
@@ -892,16 +898,17 @@ localEvolve ( const UInt& iElem )
         for ( UInt ig(0); ig < M_FESpace.feBd().nbQuadPt(); ++ig )
         {
 
-            // Coordinates of the current quadrature point
-            Real x(0), y(0), z(0);
+            // Current quadrature point
+            KN<Real> quadPoint(3);
 
-            // Set the coordinates of the current quatrature point
-            x = M_FESpace.feBd().quadPt( ig, static_cast<UInt>(0) );
-            y = M_FESpace.feBd().quadPt( ig, static_cast<UInt>(1) );
-            z = M_FESpace.feBd().quadPt( ig, static_cast<UInt>(2) ) ;
+            // normal vector
+            KN<Real> normal(3);
 
-            KN<Real> normal ( M_FESpace.feBd().normal( '.', static_cast<Int>(ig) ) );
-
+            for (UInt icoor(0); icoor<3; ++icoor)
+            {
+                quadPoint(icoor) = M_FESpace.feBd().quadPt( ig, icoor );
+                normal(icoor)    = M_FESpace.feBd().normal( icoor, ig ) ;
+            }
 
             // If the normal is orientated inward, we change its sign and swap the left and value of the solution
             if ( iElem == rightElement )
@@ -914,7 +921,10 @@ localEvolve ( const UInt& iElem )
                                                            rightValue[ 0 ],
                                                            normal,
                                                            iElem,
-                                                           M_data.dataTime()->time(), x, y, z );
+                                                           M_data.dataTime()->time(),
+                                                           quadPoint(0),
+                                                           quadPoint(1),
+                                                           quadPoint(2) );
 
             // Update the local flux of the current face with the quadrature weight
             localFaceFluxWeight[0] += localFaceFlux * M_FESpace.feBd().weightMeas( ig );
