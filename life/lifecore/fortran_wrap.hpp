@@ -100,9 +100,10 @@ public:
     typedef ScalarType scalar_Type;
     //! @name Constructors and destructor
     //@{
+    FMATRIX() {}
     FMATRIX( size_t dim1, size_t dim2 = 1 );
     FMATRIX( ScalarType* cppArray, size_t dim1, size_t dim2 = 1 );
-    ~FMATRIX();
+    virtual ~FMATRIX();
     //@}
 
     //! @name Operators
@@ -153,9 +154,10 @@ class CHARACTER
 public:
     //! @name Constructors and destructor
     //@{
+    ChARACTER() {}
     CHARACTER( char* cstring );
     CHARACTER( char* cstring, const size_t stringLength );
-    ~CHARACTER();
+    virtual ~CHARACTER();
     //@}
 
     //! @name Operators
