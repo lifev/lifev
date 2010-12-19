@@ -133,7 +133,7 @@ MonolithicGE::evalResidual( vector_Type&       res,
         meshDispDiff=M_meshMotion->dispDiff();//repeating the mesh dispDiff
         this->interpolateVelocity(meshDispDiff, *this->M_beta);
 
-        *this->M_beta /= -M_data->dataFluid()->dataTime()->getTimeStep(); //mesh velocity w
+        *this->M_beta /= -M_data->dataFluid()->dataTime()->timeStep(); //mesh velocity w
 
         vectorPtr_Type fluid(new vector_Type(this->M_uFESpace->map()));
         fluid->subset(*M_un, (UInt)0);
@@ -156,7 +156,7 @@ MonolithicGE::iterateMesh(const vector_Type& disp)
 
     monolithicToInterface(lambdaFluid, disp);
 
-    lambdaFluid *= (M_data->dataFluid()->dataTime()->getTimeStep()*M_solid->rescaleFactor());//(M_data->dataSolid()->rescaleFactor()));
+    lambdaFluid *= (M_data->dataFluid()->dataTime()->timeStep()*M_solid->rescaleFactor());//(M_data->dataSolid()->rescaleFactor()));
 
     this->setLambdaFluid(lambdaFluid); // it must be _disp restricted to the interface
 
@@ -188,7 +188,7 @@ void MonolithicGE::applyBoundaryConditions( )
              M_monolithicMatrix->setConditions(M_BChs);
              M_monolithicMatrix->setSpaces(M_FESpaces);
              M_monolithicMatrix->setOffsets(2, M_offset, 0);
-             M_monolithicMatrix->coupler(M_monolithicMap, M_dofStructureToHarmonicExtension->localDofMap(), M_numerationInterface, M_data->dataFluid()->dataTime()->getTimeStep());
+             M_monolithicMatrix->coupler(M_monolithicMap, M_dofStructureToHarmonicExtension->localDofMap(), M_numerationInterface, M_data->dataFluid()->dataTime()->timeStep());
          }
          else
          {
@@ -197,7 +197,7 @@ void MonolithicGE::applyBoundaryConditions( )
          }
 
          M_monolithicMatrix->blockAssembling();
-         M_monolithicMatrix->applyBoundaryConditions(dataFluid()->dataTime()->getTime(), M_rhsFull);
+         M_monolithicMatrix->applyBoundaryConditions(dataFluid()->dataTime()->time(), M_rhsFull);
 
          M_monolithicMatrix->GlobalAssemble();
          //M_monolithicMatrix->matrix()->spy("M");

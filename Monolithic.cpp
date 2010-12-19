@@ -88,7 +88,7 @@ Monolithic::setupFEspace()
 
     // Monolitic: In the beginning I need a non-partitioned mesh. later we will do the partitioning
     M_dFESpace.reset( new FESpace<mesh_Type, EpetraMap>( M_solidMesh,
-                                                         M_data->dataSolid()->order(),
+                                                         M_data->dataSolid()->getOrder(),
                                                          nDimensions,
                                                          M_epetraComm));
 }
@@ -260,7 +260,7 @@ void
 Monolithic::buildSystem()
 {
     M_solidBlock.reset(new matrix_Type(*M_monolithicMap, 1));//since it is constant, we keep this throughout the simulation
-    M_solid->buildSystem(M_solidBlock, M_data->dataSolid()->dataTime()->timeStep()*M_solid->rescaleFactor());//M_data->dataSolid()->rescaleFactor());
+    M_solid->buildSystem(M_solidBlock, M_data->dataSolid()->getDataTime()->timeStep()*M_solid->getRescaleFactor());//M_data->dataSolid()->rescaleFactor());
     M_solidBlock->globalAssemble();
     M_solid->rescaleMatrices();
 }
@@ -368,7 +368,7 @@ Monolithic::initialize( FSIOperator::fluidPtr_Type::value_type::Function const& 
     M_pFESpace->interpolate(p0, p, M_data->dataFluid()->dataTime()->time());
 
     vector_Type d(M_dFESpace->map());
-    M_dFESpace->interpolate(d0, d, M_data->dataSolid()->dataTime()->time());
+    M_dFESpace->interpolate(d0, d, M_data->getDataSolid()->dataTime()->time());
 
     initialize(u, p, d);
 }
@@ -466,7 +466,7 @@ updateSolidSystem( vectorPtr_Type & rhsFluidCoupling )
 {
     M_solid->updateSystem();
 
-    std::cout<<"rhs solid: "<<M_solid->rhsWithoutBC()->norm2()<<std::endl;
+    std::cout<<"rhs solid: "<<M_solid->getRhsWithoutBC()->norm2()<<std::endl;
 
     *rhsFluidCoupling += *M_solid->rhsWithoutBC();
 }
