@@ -144,10 +144,10 @@ MultiscaleCoupling::extrapolateCouplingVariables()
     // Time container for interpolation
     timeContainer_Type timeContainer( couplingVariablesSize, 0 );
     for ( UInt i(0) ; i < couplingVariablesSize ; ++i )
-        timeContainer[i] = M_globalData->dataTime()->getTime() - i * M_globalData->dataTime()->getTimeStep();
+        timeContainer[i] = M_globalData->dataTime()->time() - i * M_globalData->dataTime()->timeStep();
 
     // Interpolate the coupling variables at the next time
-    interpolateCouplingVariables( timeContainer, M_globalData->dataTime()->getNextTime(), extrapolatedCouplingVariables );
+    interpolateCouplingVariables( timeContainer, M_globalData->dataTime()->nextTime(), extrapolatedCouplingVariables );
 
     // If we have not yet enough samples for interpolation, we add a new one
     if ( couplingVariablesSize <= M_timeInterpolationOrder )
