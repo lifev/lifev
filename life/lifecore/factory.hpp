@@ -157,7 +157,7 @@ public:
     bool registerProduct( const identifier_Type& id, creator_Type creator )
     {
         LifeV::Debug( 2200 ) << "Registered type with id : " << id << "\n";
-        return M_associations.insert( typename id_to_product_Type::value_Type( id, creator ) ).second;
+        return M_associations.insert( typename productId_Type::value_type( id, creator ) ).second;
     }
 
     /**
@@ -183,7 +183,7 @@ public:
      */
     product_Type* createObject( const identifier_Type& id )
     {
-        typename id_to_product_Type::const_iterator i = M_associations.find( id );
+        typename productId_Type::const_iterator i = M_associations.find( id );
         if (i != M_associations.end())
         {
             LifeV::Debug ( 2200 ) << "Creating type with id : " << id << "\n";
@@ -195,8 +195,8 @@ public:
     //@}
 
 private:
-    typedef std::map<identifier_Type, creator_Type> id_to_product_Type;
-    id_to_product_Type M_associations;
+    typedef std::map<identifier_Type, creator_Type> productId_Type;
+    productId_Type M_associations;
 };
 
 /*!
@@ -235,7 +235,7 @@ public:
     //@{
     bool registerProduct(const TypeInfo& id, ProductCreator creator)
     {
-        return M_associations.insert( typename id_to_product_Type::value_Type( id, creator ) ).second;
+        return M_associations.insert( typename productId_Type::value_type( id, creator ) ).second;
     }
 
     bool unregisterProduct( const TypeInfo& id )
@@ -247,7 +247,7 @@ public:
     {
         if ( model == 0 ) return 0;
 
-        typename id_to_product_Type::const_iterator i = M_associations.find( typeid(*model) );
+        typename productId_Type::const_iterator i = M_associations.find( typeid(*model) );
         if ( i != M_associations.end() )
         {
             return (i->second)(model);
@@ -259,8 +259,8 @@ public:
     //@}
 
 private:
-    typedef std::map<TypeInfo, ProductCreator> id_to_product_Type;
-    id_to_product_Type M_associations;
+    typedef std::map<TypeInfo, ProductCreator> productId_Type;
+    productId_Type M_associations;
 };
 
 }
