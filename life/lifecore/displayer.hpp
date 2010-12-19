@@ -72,7 +72,7 @@ public:
     //@{
 
     typedef Epetra_Comm                              comm_Type;
-    typedef boost::shared_ptr< comm_Type >           comm_PtrType;
+    typedef boost::shared_ptr< comm_Type >           commPtr_Type;
 
     //@}
 
@@ -81,7 +81,9 @@ public:
     //@{
 
     //! Constructor
-    Displayer( const comm_PtrType& comm = comm_PtrType() );
+    Displayer () {}
+
+    Displayer( const commPtr_Type& comm = commPtr_Type() );
 
     //! Copy constructor
     /*!
@@ -90,7 +92,7 @@ public:
     Displayer( const Displayer& displayer );
 
     //! Destructor
-    ~Displayer() {}
+    virtual ~Displayer() {}
 
     //@}
 
@@ -146,7 +148,7 @@ public:
     /*!
      * @param comm the communicator
      */
-    void setCommunicator( const comm_PtrType& comm );
+    void setCommunicator( const commPtr_Type& comm );
 
     //! @name Get Methods
     //@{
@@ -155,7 +157,7 @@ public:
     /*!
      * @return the communicator
      */
-    const comm_PtrType& comm() const
+    const commPtr_Type& comm() const
     {
         return M_comm;
     }
@@ -164,7 +166,7 @@ public:
 
 protected:
 
-    comm_PtrType					    M_comm;
+    commPtr_Type					    M_comm;
     bool	           					M_verbose;
 
 };

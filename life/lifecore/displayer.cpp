@@ -43,7 +43,7 @@ namespace LifeV
 // ===================================================
 // Constructors & Destructor
 // ===================================================
-Displayer::Displayer( const comm_PtrType& comm ):
+Displayer::Displayer( const commPtr_Type& comm ):
         M_comm          ( comm ),
         M_verbose       ( true )
 {
@@ -71,7 +71,7 @@ Displayer::isLeader() const
 // =================
 
 void
-Displayer::setCommunicator( const comm_PtrType& comm )
+Displayer::setCommunicator( const commPtr_Type& comm )
 {
     M_comm = comm;
     if ( M_comm.get() )
