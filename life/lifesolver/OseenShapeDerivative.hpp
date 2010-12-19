@@ -75,21 +75,9 @@ public:
     //! @name Public Types
     //@{
 
-    ///////// old: to be removed
-
-    typedef Oseen< MeshType, SolverType >                     oseenSolver_Type;
-    typedef typename oseenSolver_Type::vector_type            vector_type __attribute__ ((deprecated));
-    typedef typename oseenSolver_Type::matrix_type            matrix_type __attribute__ ((deprecated));
-    typedef typename oseenSolver_Type::matrix_ptrtype         matrix_ptrtype __attribute__ ((deprecated));
-    typedef typename oseenSolver_Type::data_type              data_type __attribute__ ((deprecated));
-    typedef typename oseenSolver_Type::prec_type              prec_type __attribute__ ((deprecated));
-    typedef typename oseenSolver_Type::prec_raw_type          prec_raw_type __attribute__ ((deprecated));
-    typedef typename oseenSolver_Type::bchandler_raw_type     bchandler_raw_type __attribute__ ((deprecated));
-    ///////
-
     typedef MeshType                                          mesh_Type;
     typedef SolverType                                        linearSolver_Type;
-    // typedef Oseen< mesh_Type, linearSolver_Type >             oseenSolver_Type;
+    typedef Oseen< mesh_Type, linearSolver_Type >             oseenSolver_Type;
     typedef typename oseenSolver_Type::vector_Type            vector_Type;
     typedef typename oseenSolver_Type::matrix_Type            matrix_Type;
     typedef typename oseenSolver_Type::matrixPtr_Type         matrixPtr_Type;
@@ -298,59 +286,6 @@ public:
 
     //@}
 
-    //@{ deprecated methods
-
-    void  __attribute__ ((__deprecated__)) iterateLin( bcHandler_Type& bcHandler )
-    {
-        return solveLinearSystem( bcHandler );
-    }
-
-    void  __attribute__ ((__deprecated__)) updateRhsLinNoBC( const vector_Type& rightHandSide)
-    {
-        return updateLinearRightHandSideNoBC( rightHandSide );
-    }
-
-    vector_Type&  __attribute__ ((__deprecated__)) rhsLinNoBC( )
-    {
-        return linearRightHandSideNoBC( );
-    }
-
-    const vector_Type&  __attribute__ ((__deprecated__)) rhsLinNoBC( ) const
-    {
-        return linearRightHandSideNoBC( );
-    }
-
-    const vector_Type&  __attribute__ ((__deprecated__)) LinearSolution( ) const
-    {
-        return linearSolution( );
-    }
-
-    bool  __attribute__ ((__deprecated__)) stab( )
-    {
-        return stabilization( );
-    }
-
-    const bool&  __attribute__ ((__deprecated__)) stab( ) const
-    {
-        return stabilization( );
-    }
-
-    Real  __attribute__ ((__deprecated__)) GetLinearFlux ( const entityFlag_Type& flag )
-    {
-        return getLinearFlux( flag );
-    }
-
-    Real  __attribute__ ((__deprecated__)) GetLinearPressure( const entityFlag_Type& flag )
-    {
-        return getLinearPressure( flag );
-    }
-
-    Real  __attribute__ ((__deprecated__)) LinearLagrangeMultiplier( const entityFlag_Type& flag, bcHandler_Type& bcHandler )
-    {
-        return getLinearLagrangeMultiplier( flag, bcHandler );
-    }
-
-    //@}
 
 private:
 
@@ -524,7 +459,7 @@ template<typename MeshType, typename SolverType>
 Real
 OseenShapeDerivative<MeshType, SolverType>::getLinearLagrangeMultiplier( const entityFlag_Type& flag, bcHandler_Type& bcHandler )
 {
-    return LagrangeMultiplier( flag, bcHandler, M_linearSolution );
+    return lagrangeMultiplier( flag, bcHandler, M_linearSolution );
 }
 
 

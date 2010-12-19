@@ -94,29 +94,6 @@ public:
     //! @name Public Types
     //@{
 
-    ///////// old: to be removed
-
-    typedef MeshType                              mesh_type;
-    typedef DataNavierStokes                      data_type __attribute__ ((deprecated));
-
-    typedef boost::function<Real ( const Real& t, const Real& x, const Real& y,
-                                   const Real& z, const ID& i )> Function __attribute__ ((deprecated));
-
-    typedef boost::function<Real ( const Real& t, const Real& x, const Real& y,
-                                   const Real& z, const ID& i )> source_type __attribute__ ((deprecated));
-
-    typedef BCHandler                             bchandler_raw_type __attribute__ ((deprecated));
-    typedef boost::shared_ptr<bchandler_raw_type> bchandler_type __attribute__ ((deprecated));
-
-    typedef typename SolverType::matrix_type      matrix_type __attribute__ ((deprecated));
-    typedef boost::shared_ptr<matrix_type>        matrix_ptrtype __attribute__ ((deprecated));
-    typedef typename SolverType::vector_type      vector_type __attribute__ ((deprecated));
-    typedef boost::shared_ptr<vector_type>        vector_ptrtype __attribute__ ((deprecated));
-
-    typedef typename SolverType::prec_raw_type    prec_raw_type __attribute__ ((deprecated));
-    typedef typename SolverType::prec_type        prec_type __attribute__ ((deprecated));
-    /////////
-
     typedef MeshType                              mesh_Type;
     typedef SolverType                            linearSolver_Type;
     typedef DataNavierStokes                      data_Type;
@@ -298,15 +275,6 @@ public:
      */
     void getFluidMatrix( matrix_Type& matrixFull );
 
-    //! Set up post processing structures
-    void postProcessingSetArea();
-
-    //! Set up post processing
-    void postProcessingSetNormal();
-
-    //! Set up post processing
-    void postProcessingSetPhi();
-
     //! Set up post processing
     void setupPostProc( const entityFlag_Type& flag, const mesh_Type meshPart );
 
@@ -380,7 +348,7 @@ public:
     }
 
     //! Reset stabilization matrix at the same time as the preconditioner
-    void resetStabibilization()
+    void resetStabilization()
     {
         M_resetStabilization = true;
     }
@@ -588,10 +556,20 @@ public:
         return *M_matrixMass;
     }
 
+    //@}
+
+    //@{ unused methods
+
+    //! Set up post processing structures
+    void postProcessingSetArea();
+
+    //! Set up post processing
+    void postProcessingSetNormal();
+
+    //! Set up post processing
+    void postProcessingSetPhi();
+
     //! Return a bool value if using diagonal block preconditioner
-    /*!
-        @return A bool value if using diagonal block preconditioner
-     */
     bool getIsDiagonalBlockPreconditioner()
     {
         return M_isDiagonalBlockPreconditioner;
@@ -604,122 +582,6 @@ public:
 
     //@}
 
-
-    //@{ deprecated methods
-
-    void __attribute__ ((__deprecated__)) updateStab( matrix_Type& matrixFull )
-                {
-    return updateStabilization( matrixFull );
-                }
-
-    virtual void __attribute__ ((__deprecated__)) updateRHS( const vector_Type& rightHandSide )
-                {
-    return updateRightHandSide( rightHandSide );
-                }
-
-    void __attribute__ ((__deprecated__)) post_proc_set_normal( )
-                {
-    return postProcessingSetNormal( );
-                }
-
-    void __attribute__ ((__deprecated__)) post_proc_set_phi( )
-                {
-    return postProcessingSetPhi( );
-                }
-
-    void __attribute__ ((__deprecated__)) post_proc_set_area( )
-                {
-    return postProcessingSetArea( );
-                }
-
-    Real __attribute__ ((__deprecated__)) LagrangeMultiplier( const entityFlag_Type& flag, bcHandler_Type& bcHandler )
-                {
-    return lagrangeMultiplier( flag, bcHandler );
-                }
-
-    Real __attribute__ ((__deprecated__)) LagrangeMultiplier( const entityFlag_Type&  flag,
-                                                              bcHandler_Type& bcHandler,
-                                                              const vector_Type& solution )
-                {
-    return lagrangeMultiplier( flag, bcHandler, solution );
-                }
-
-    void __attribute__ ((__deprecated__)) resetPrec( bool reset = true )
-                {
-    return resetPreconditioner( reset );
-                }
-
-    void __attribute__ ((__deprecated__)) resetStab( )
-                {
-    return resetStabibilization( );
-                }
-
-    void __attribute__ ((__deprecated__)) setTolMaxiter( const Real& tolerance, const Int& maxIteration = -1 )
-                {
-    return setTolMaxIteration( tolerance, maxIteration);
-                }
-
-    FESpace<mesh_Type, EpetraMap>& __attribute__ ((__deprecated__)) velFESpace( )
-    {
-        return velocityFESpace( );
-    }
-
-    const FESpace<mesh_Type, EpetraMap>& __attribute__ ((__deprecated__)) velFESpace( ) const
-    {
-        return velocityFESpace( );
-    }
-
-    FESpace<mesh_Type, EpetraMap>& __attribute__ ((__deprecated__)) pressFESpace( )
-    {
-        return pressureFESpace( );
-    }
-
-    const FESpace<mesh_Type, EpetraMap>& __attribute__ ((__deprecated__)) pressFESpace( ) const
-    {
-        return pressureFESpace( );
-    }
-
-    PostProc<mesh_Type>&  __attribute__ ((__deprecated__)) post_proc( )
-    {
-        return postProcessing( );
-    }
-
-    const PostProc<mesh_Type>&  __attribute__ ((__deprecated__)) post_proc( ) const
-    {
-        return postProcessing( );
-    }
-
-    matrix_Type&  __attribute__ ((__deprecated__)) matrNoBC( )
-    {
-        return matrixNoBC( );
-    }
-
-    const matrix_Type&  __attribute__ ((__deprecated__)) matrNoBC( ) const
-    {
-        return matrixNoBC( );
-    }
-
-    matrix_Type&  __attribute__ ((__deprecated__)) matrMass( )
-    {
-        return matrixMass( );
-    }
-
-    const matrix_Type&  __attribute__ ((__deprecated__)) matrMass( ) const
-    {
-        return matrixMass( );
-    }
-
-    bool  __attribute__ ((__deprecated__)) getIsDiagonalBlockPrec( ) const
-    {
-        return getIsDiagonalBlockPreconditioner( );
-    }
-
-    bool  __attribute__ ((__deprecated__)) getIsDiagonalBlockPrec( )
-    {
-        return getIsDiagonalBlockPreconditioner( );
-    }
-
-    //@}
 
 protected:
 
@@ -1663,7 +1525,7 @@ Oseen<MeshType, SolverType>::iterate( bcHandler_Type& bcHandler )
     // if the preconditioner has been rese the stab terms are to be updated
     if ( numIter < 0 || numIter > M_iterReuseStabilization )
     {
-        resetStabibilization();
+        resetStabilization();
     }
 
     M_residual  = M_rightHandSideNoBC;
