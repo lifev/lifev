@@ -145,7 +145,7 @@ class MultiscaleData;
 // Type definitions
 typedef EntityFlag                                                        bcFlag_Type;
 
-typedef Displayer::comm_PtrType                                           multiscaleCommPtr_Type;
+typedef Displayer::commPtr_Type                                           multiscaleCommPtr_Type;
 
 typedef EpetraVector                                                      multiscaleVector_Type;
 typedef boost::shared_ptr< multiscaleVector_Type >                        multiscaleVectorPtr_Type;
