@@ -219,7 +219,7 @@ public:
      * @param flag flag of the boundary face
      * @return Lagrange multiplier value
      */
-    Real boundaryLagrangeMultiplier( const bcFlag_Type& flag ) const { return M_FSIoperator->fluid().lagrangeMultiplier(flag, *M_fluidBC->handler(), M_FSIoperator->solution() ); }
+    Real boundaryLagrangeMultiplier( const bcFlag_Type& flag ) const { return M_FSIoperator->fluid().LagrangeMultiplier(flag, *M_fluidBC->handler(), M_FSIoperator->solution() ); }
 
     //! Get the integral of the normal stress (on a specific boundary face)
     /*!

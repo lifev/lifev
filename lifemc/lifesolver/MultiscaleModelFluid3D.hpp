@@ -77,7 +77,7 @@ public:
     typedef partitionMesh< mesh_Type >            partitionMesh_Type;
 
     typedef OseenShapeDerivative< mesh_Type >     fluid_Type;
-    typedef fluid_Type::vector_Type               fluidVector_Type;
+    typedef fluid_Type::vector_type               fluidVector_Type;
     typedef boost::shared_ptr< fluidVector_Type > fluidVectorPtr_Type;
 
     typedef Exporter< mesh_Type >                 IOFile_Type;
@@ -227,7 +227,7 @@ public:
      * @param flag flag of the boundary face
      * @return Lagrange multiplier value
      */
-    Real boundaryLagrangeMultiplier( const bcFlag_Type& flag ) const { return M_fluid->lagrangeMultiplier(flag, *M_bc->handler() ); }
+    Real boundaryLagrangeMultiplier( const bcFlag_Type& flag ) const { return M_fluid->LagrangeMultiplier(flag, *M_bc->handler() ); }
 
     //! Get the integral of the normal stress (on a specific boundary face)
     /*!
