@@ -73,7 +73,7 @@ public:
 
     typedef Real                             value_type;
 
-    typedef Displayer::comm_PtrType          comm_PtrType;
+    typedef Displayer::commPtr_Type          commPtr_Type;
 
     typedef SolverAmesos                     solver_type;
 
@@ -95,7 +95,7 @@ public:
     /*!
      * @param comm The communicator.
      */
-    SolverAmesos( const comm_PtrType& comm );
+    SolverAmesos( const commPtr_Type& comm );
 
     //! Destructor
     ~SolverAmesos() {}

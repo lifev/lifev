@@ -57,7 +57,7 @@ namespace LifeV
 // ===================================================
 // Constructors & Destructor
 // ===================================================
-SolverAmesos::SolverAmesos( const comm_PtrType& comm ) :
+SolverAmesos::SolverAmesos( const commPtr_Type& comm ) :
         M_matrix               (),
         M_problem              (),
         M_solver               (),
