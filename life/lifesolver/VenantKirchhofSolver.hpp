@@ -545,11 +545,8 @@ protected:
   vectorPtr_Type                    M_rhs;
 
   //! right  hand  side velocity
-<<<<<<< HEAD:life/lifesolver/VenantKirchhofSolver.hpp
+
   vectorPtr_Type                    M_rhsW;
-=======
-  vector_ptrtype                    M_rhsContributionSecondDerivative;
->>>>>>> Cleaning week: updating list of file and classes to be renamed/moved/removed.:life/lifesolver/VenantKirchhofSolver.hpp
 
   //! right  hand  side
   vectorPtr_Type                    M_rhsNoBC;
@@ -619,13 +616,8 @@ VenantKirchhofSolver<Mesh, SolverType>::VenantKirchhofSolver( ):
   M_elmatC                     ( ),
   M_disp                       ( ),
   M_vel                        ( ),
-<<<<<<< HEAD:life/lifesolver/VenantKirchhofSolver.hpp
   M_rhs                        ( /*new vector_Type(M_localMap)*/),//useful
   M_rhsW                       ( ),
-=======
-  M_rhs                        ( /*new vector_type(M_localMap)*/),//useful
-  M_rhsContributionSecondDerivative                       ( ),
->>>>>>> Cleaning week: updating list of file and classes to be renamed/moved/removed.:life/lifesolver/VenantKirchhofSolver.hpp
   M_rhsNoBC                    ( ),
   M_f                          ( ),//useless
   M_residual_d                 ( ),//useless
@@ -697,21 +689,13 @@ VenantKirchhofSolver<Mesh, SolverType>::setup(boost::shared_ptr<data_Type>      
   M_elmatM.reset                    ( new ElemMat( M_FESpace->fe().nbFEDof(), nDimensions, nDimensions ) );
   M_elmatC.reset                    ( new ElemMat( M_FESpace->fe().nbFEDof(), nDimensions, nDimensions ) );
   M_localMap                        = monolithicMap;
-<<<<<<< HEAD:life/lifesolver/VenantKirchhofSolver.hpp
+
   M_disp.reset                      (new vector_Type(*M_localMap));
   M_vel.reset                       (new vector_Type(*M_localMap));
   M_rhsW.reset                      ( new vector_Type(*M_localMap) );
   M_rhsNoBC.reset                   ( new vector_Type(*M_localMap) );
   M_mass.reset                      (new matrix_Type(*M_localMap));
   M_linearStiff.reset               (new matrix_Type(*M_localMap));
-=======
-  M_disp.reset                      (new vector_type(*M_localMap));
-  M_vel.reset                       (new vector_type(*M_localMap));
-  M_rhsContributionSecondDerivative.reset                      ( new vector_type(*M_localMap) );
-  M_rhsNoBC.reset                   ( new vector_type(*M_localMap) );
-  M_mass.reset                      (new matrix_type(*M_localMap));
-  M_linearStiff.reset               (new matrix_type(*M_localMap));
->>>>>>> Cleaning week: updating list of file and classes to be renamed/moved/removed.:life/lifesolver/VenantKirchhofSolver.hpp
   M_offset                          = offset;
 }
 
@@ -735,12 +719,8 @@ void VenantKirchhofSolver<Mesh, SolverType>::updateSystem( matrixPtr_Type& /*sti
   //    UInt nc = nDimensions;
 
   Real coef;
+  coef = (Real) M_data->getDataTime()->timeStep();
 
-<<<<<<< HEAD:life/lifesolver/VenantKirchhofSolver.hpp
-  coef = (Real) M_data->getDataTime()->getTimeStep();
-=======
-  coef = (Real) M_data->dataTime()->timeStep();
->>>>>>> Cleaning week: updating list of file and classes to be renamed/moved/removed.:life/lifesolver/VenantKirchhofSolver.hpp
 
   vector_Type z = *M_disp;
   z             += coef*(*M_vel);
@@ -755,14 +735,9 @@ void VenantKirchhofSolver<Mesh, SolverType>::updateSystem( matrixPtr_Type& /*sti
 
   std::cout<< "rhsNoBC in solid 2" << M_rhsNoBC->norm2()<<std::endl;
 
-<<<<<<< HEAD:life/lifesolver/VenantKirchhofSolver.hpp
-  coef = 2.0/M_data->getDataTime()->getTimeStep();
-=======
-  coef = 2.0/M_data->dataTime()->timeStep();
->>>>>>> Cleaning week: updating list of file and classes to be renamed/moved/removed.:life/lifesolver/VenantKirchhofSolver.hpp
-
-  *M_rhsContributionSecondDerivative  = coef * (*M_disp);
-  *M_rhsContributionSecondDerivative += *M_vel;
+  coef = 2.0/M_data->getDataTime()->timeStep();
+  *M_rhsW  = coef * (*M_disp);
+  *M_rhsW += *M_vel;
 
   chrono.stop();
 
@@ -795,11 +770,7 @@ VenantKirchhofSolver<Mesh, SolverType>::buildSystem(matrixPtr_Type massStiff, co
   UInt nc = nDimensions;
 
   //inverse of dt square:
-<<<<<<< HEAD:life/lifesolver/VenantKirchhofSolver.hpp
-  Real dti2 = 2.0 / ( M_data->getDataTime()->getTimeStep() * M_data->getDataTime()->getTimeStep() );
-=======
-  Real dti2 = 2.0 / ( M_data->dataTime()->timeStep() * M_data->dataTime()->timeStep() );
->>>>>>> Cleaning week: updating list of file and classes to be renamed/moved/removed.:life/lifesolver/VenantKirchhofSolver.hpp
+  Real dti2 = 2.0 / ( M_data->getDataTime()->timeStep() * M_data->getDataTime()->timeStep() );
 
   // Elementary computation and matrix assembling
   // Loop on elements
@@ -854,13 +825,9 @@ void VenantKirchhofSolver<Mesh, SolverType>::iterate(vector_Type& solution)
 
   vector_Type sol(*M_localMap);
 
-<<<<<<< HEAD:life/lifesolver/VenantKirchhofSolver.hpp
-  *M_vel  = ( 2.0 / M_data->getDataTime()->getTimeStep() ) * (*M_disp);
+  *M_vel  = ( 2.0 / M_data->getDataTime()->timeStep() ) * (*M_disp);
   *M_vel -= *M_rhsW;
-=======
-  *M_vel  = ( 2.0 / M_data->dataTime()->timeStep() ) * (*M_disp);
-  *M_vel -= *M_rhsContributionSecondDerivative;
->>>>>>> Cleaning week: updating list of file and classes to be renamed/moved/removed.:life/lifesolver/VenantKirchhofSolver.hpp
+
 
   //M_Displayer->leaderPrint("sol norm = ", norm(this->sol));
 
@@ -878,7 +845,7 @@ VenantKirchhofSolver<Mesh, SolverType>::iterate( bchandler_Type& bch )
   *matrFull += *M_massStiff;
 
   M_rhsNoBC->globalAssemble();
-  M_rhsContributionSecondDerivative->globalAssemble();
+  M_rhsW->globalAssemble();
 
   vector_Type rhsFull (*M_rhsNoBC);
 
@@ -901,13 +868,9 @@ VenantKirchhofSolver<Mesh, SolverType>::iterate( bchandler_Type& bch )
   M_linearSolver->solveSystem( rhsFull, *M_disp, matrFull);
 
   // computing the velocity vector and the residual
-<<<<<<< HEAD:life/lifesolver/VenantKirchhofSolver.hpp
-  *M_vel  = ( 2.0 / M_data->getDataTime()->getTimeStep() ) * (*M_disp);
+
+  *M_vel  = ( 2.0 / M_data->getDataTime()->timeStep() ) * (*M_disp);
   *M_vel -= *M_rhsW;
-=======
-  *M_vel  = ( 2.0 / M_data->dataTime()->timeStep() ) * (*M_disp);
-  *M_vel -= *M_rhsContributionSecondDerivative;
->>>>>>> Cleaning week: updating list of file and classes to be renamed/moved/removed.:life/lifesolver/VenantKirchhofSolver.hpp
 
   *M_residual_d =  *M_massStiff * (*M_disp);
   *M_residual_d -= *M_rhsNoBC;
@@ -923,7 +886,7 @@ VenantKirchhofSolver<Mesh, SolverType>::iterateLin( bchandler_Type& bch )
   *matrFull += *M_massStiff;
 
   M_rhsNoBC->globalAssemble();
-  M_rhsContributionSecondDerivative->globalAssemble();
+  M_rhsW->globalAssemble();
 
   vector_Type rhsFull (M_rhsNoBC->map());
 
@@ -983,12 +946,7 @@ VenantKirchhofSolver<Mesh, SolverType>::evalResidual( vector_Type &residual, con
 
   *M_rhs = *M_rhsNoBC;
 
-<<<<<<< HEAD:life/lifesolver/VenantKirchhofSolver.hpp
-  bcManageVector( *M_rhs, *M_FESpace->mesh(), M_FESpace->dof(), *M_BCh, M_FESpace->feBd(), M_data->getDataTime()->getTime(), 1.0 );
-=======
-  bcManageVector( *M_rhs, *M_FESpace->mesh(), M_FESpace->dof(), *M_BCh, M_FESpace->feBd(), M_data->dataTime()->time(), 1.0 );
->>>>>>> Cleaning week: updating list of file and classes to be renamed/moved/removed.:life/lifesolver/VenantKirchhofSolver.hpp
-
+  bcManageVector( *M_rhs, *M_FESpace->mesh(), M_FESpace->dof(), *M_BCh, M_FESpace->feBd(), M_data->getDataTime()->time(), 1.0 );
   residual  = M_stiff * solution;
   //    res -= M_rhs;
 
@@ -1163,13 +1121,8 @@ template <typename Mesh, typename SolverType> // for monolithic
 void
 VenantKirchhofSolver<Mesh, SolverType>::updateVel()
 {
-<<<<<<< HEAD:life/lifesolver/VenantKirchhofSolver.hpp
-  *M_vel  = ( 2.0 / M_data->getDataTime()->getTimeStep() ) * (*M_disp);
+  *M_vel  = ( 2.0 / M_data->getDataTime()->timeStep() ) * (*M_disp);
   *M_vel -= *M_rhsW;
-=======
-  *M_vel  = ( 2.0 / M_data->dataTime()->timeStep() ) * (*M_disp);
-  *M_vel -= *M_rhsContributionSecondDerivative;
->>>>>>> Cleaning week: updating list of file and classes to be renamed/moved/removed.:life/lifesolver/VenantKirchhofSolver.hpp
 }
 
 template<typename Mesh, typename SolverType>
@@ -1193,13 +1146,8 @@ template <typename Mesh, typename SolverType>
 void
 VenantKirchhofSolver<Mesh, SolverType>::rescaleMatrices()
 {
-<<<<<<< HEAD:life/lifesolver/VenantKirchhofSolver.hpp
-  *M_mass *=(M_data->getDataTime()->getTimeStep()*M_rescaleFactor);
-  *M_linearStiff *= (M_data->getDataTime()->getTimeStep()*M_rescaleFactor);
-=======
-  *M_mass *=(M_data->dataTime()->timeStep()*M_rescaleFactor);
-  *M_linearStiff *= (M_data->dataTime()->timeStep()*M_rescaleFactor);
->>>>>>> Cleaning week: updating list of file and classes to be renamed/moved/removed.:life/lifesolver/VenantKirchhofSolver.hpp
+  *M_mass *=(M_data->getDataTime()->timeStep()*M_rescaleFactor);
+  *M_linearStiff *= (M_data->getDataTime()->timeStep()*M_rescaleFactor);
 }
 
 template <typename Mesh, typename SolverType>
@@ -1234,11 +1182,7 @@ VenantKirchhofSolver<Mesh, SolverType>::applyBoundaryConditions( matrix_Type&   
   vector_Type rhsFull(rhs, Unique);  // bcManages now manages the also repeated parts
 
   bcManage( matrix, rhsFull, *M_FESpace->mesh(), M_FESpace->dof(), *BCh, M_FESpace->feBd(), 1.,
-<<<<<<< HEAD:life/lifesolver/VenantKirchhofSolver.hpp
-              M_data->getDataTime()->getTime() );
-=======
-              M_data->dataTime()->time() );
->>>>>>> Cleaning week: updating list of file and classes to be renamed/moved/removed.:life/lifesolver/VenantKirchhofSolver.hpp
+              M_data->getDataTime()->time() );
 
   // matrix should be GlobalAssembled by  bcManage
 

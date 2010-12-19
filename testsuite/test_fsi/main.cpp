@@ -380,17 +380,11 @@ public:
             }
 
             if ( M_fsi->isSolid() )
-            {
-<<<<<<< HEAD:testsuite/test_fsi/main.cpp
+	      {
                 *M_solidDisp = M_fsi->FSIOper()->solid().getDisplacement();
                 *M_solidVel = M_fsi->FSIOper()->solid().getVelocity();
-                M_exporterSolid->postProcess( M_data->dataFluid()->dataTime()->getTime() );
-=======
-                *M_solidDisp = M_fsi->FSIOper()->solid().disp();
-                *M_solidVel = M_fsi->FSIOper()->solid().vel();
                 M_exporterSolid->postProcess( M_data->dataFluid()->dataTime()->time() );
->>>>>>> Cleaning week: updating list of file and classes to be renamed/moved/removed.:testsuite/test_fsi/main.cpp
-            }
+	      }
 
             std::cout << "[fsi_run] Iteration " << _i << " was done in : " << _timer.elapsed() << "\n";
 
