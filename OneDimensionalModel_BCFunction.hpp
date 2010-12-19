@@ -77,7 +77,7 @@ public:
     explicit OneDimensionalModel_BCFunction( const function_Type& function ) : M_function( function ) {}
 
     //! Copy constructor
-    explicit OneDimensionalModel_BCFunction( const OneDimensionalModel_BCFunction& bcFunction ) : M_function  ( bcFunction.M_function ) {}
+    OneDimensionalModel_BCFunction( const OneDimensionalModel_BCFunction& bcFunction ) : M_function  ( bcFunction.M_function ) {}
 
     //! Destructor
     virtual ~OneDimensionalModel_BCFunction() {}
