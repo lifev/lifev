@@ -53,16 +53,14 @@ TypeInfo::TypeInfo()
 
 }
 
-TypeInfo::TypeInfo(const std::type_info& ti)
-        :
-        M_info(&ti)
+TypeInfo::TypeInfo(const std::type_info& ti):
+    M_info(&ti)
 {
     assert( M_info != 0 );
 }
 
-TypeInfo::TypeInfo( TypeInfo const& ti )
-        :
-        M_info( ti.M_info )
+TypeInfo::TypeInfo( TypeInfo const& ti ):
+    M_info( ti.M_info )
 {
     assert( M_info != 0 );
 }

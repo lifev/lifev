@@ -43,13 +43,13 @@ namespace LifeV
 
 class TypeInfo
 {
-public:
+public:j4 check
     //! @name Constructors, destructor
     //@{
     TypeInfo();
     TypeInfo(const std::type_info&); // non-explicit
     TypeInfo( TypeInfo const & );
-    ~TypeInfo();
+    virtual ~TypeInfo();
     //@}
 
     //! @name Methods
