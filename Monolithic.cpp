@@ -468,7 +468,7 @@ updateSolidSystem( vectorPtr_Type & rhsFluidCoupling )
 
     std::cout<<"rhs solid: "<<M_solid->getRhsWithoutBC()->norm2()<<std::endl;
 
-    *rhsFluidCoupling += *M_solid->rhsWithoutBC();
+    *rhsFluidCoupling += *M_solid->getRhsWithoutBC();
 }
 
 void

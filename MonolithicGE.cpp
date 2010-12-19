@@ -156,7 +156,7 @@ MonolithicGE::iterateMesh(const vector_Type& disp)
 
     monolithicToInterface(lambdaFluid, disp);
 
-    lambdaFluid *= (M_data->dataFluid()->dataTime()->timeStep()*M_solid->rescaleFactor());//(M_data->dataSolid()->rescaleFactor()));
+    lambdaFluid *= (M_data->dataFluid()->dataTime()->timeStep()*M_solid->getRescaleFactor());//(M_data->dataSolid()->rescaleFactor()));
 
     this->setLambdaFluid(lambdaFluid); // it must be _disp restricted to the interface
 
