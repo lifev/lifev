@@ -70,9 +70,9 @@ void DataStringList::showMe( std::ostream& c, bool val ) const
     for ( std::vector<DataString>::const_iterator ds = M_list.begin();
           ds != M_list.end(); ds++ )
     {
-        c << "   " << ds->str() << " : " << ds->help();
+        c << "   " << ds->string() << " : " << ds->help();
         if ( val )
-            c << " (" << ds->val() << ")";
+            c << " (" << ds->value() << ")";
         c << std::endl;
     }
 }
@@ -82,8 +82,8 @@ Int DataStringList::value( const std::string& str ) const
     std::vector<DataString>::const_iterator ds = M_list.begin();
     while ( ds != M_list.end() )
     {
-        if ( ds->str() == str )
-            return ds->val();
+        if ( ds->string() == str )
+            return ds->value();
         ds++;
     };
     std::ostringstream exception;

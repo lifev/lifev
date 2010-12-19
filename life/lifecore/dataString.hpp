@@ -58,7 +58,10 @@ class DataString
 public:
     //! @name Constructor
     //@{
+    DataString() {}
     DataString( std::string str, Int val, std::string help );
+
+    virtual ~DataString() {}
     //@}
 
     //! @name Get methods
@@ -73,22 +76,22 @@ public:
         return M_help;
     }
 
-    inline const std::string& str () const
+    inline const std::string& string () const
     {
         return M_string;
     }
 
-    inline std::string& str ()
+    inline std::string& string ()
     {
         return M_string;
     }
 
-    inline const Int& val () const
+    inline const Int& value () const
     {
         return M_value;
     }
 
-    inline Int& val ()
+    inline Int& value ()
     {
         return M_value;
     }
@@ -136,7 +139,10 @@ class DataStringList
 public:
     //! @name Constructor
     //@{
+    DataStringList() {}
     DataStringList( std::string title );
+
+    virtual ~DataStringList() {}
     //@}
 
     //! @name Public methods
