@@ -115,7 +115,7 @@ public:
                       boost::shared_ptr<Epetra_Comm>& comm);
 
     //! Destructor
-    virtual ~MonodomainSolver();
+    virtual ~MonodomainSolver() {}
 
     //@}
 
@@ -319,15 +319,6 @@ MonodomainSolver( const data_type&          dataType,
 };
 
 
-
-template<typename Mesh, typename SolverType>
-MonodomainSolver<Mesh, SolverType>::
-~MonodomainSolver()
-{
-std::cout << "MonodomainSolver destrutor" << std::endl;
-}
-
-
 template<typename Mesh, typename SolverType>
 void MonodomainSolver<Mesh, SolverType>::setup( const GetPot& dataFile )
 {
@@ -412,7 +403,7 @@ void MonodomainSolver<Mesh, SolverType>::buildSystem()
         		M_uFESpace.fe().updateFirstDerivQuadPt( M_uFESpace.mesh()->volumeList( iVol ) );
         	    if (M_data.hasFibers() )
         	    {
-        	        stiff( M_data.M_reducedConductivitySphere,
+        	        stiff( M_data.reducedConductivitySphere(),
                            M_data.longitudinalConductivity(),
                            M_data.transversalConductivity(),
                            M_fiberVector,
@@ -422,7 +413,7 @@ void MonodomainSolver<Mesh, SolverType>::buildSystem()
         	    }
         	    else
         	    {
-        	        stiff( M_data.M_reducedConductivitySphere,
+        	        stiff( M_data.reducedConductivitySphere(),
                            M_data.diffusivity(), M_stiffnessElementaryMatrix,
                            M_uFESpace.fe(),
                            M_uFESpace.dof(),
@@ -434,7 +425,7 @@ void MonodomainSolver<Mesh, SolverType>::buildSystem()
             M_uFESpace.fe().updateFirstDerivQuadPt( M_uFESpace.mesh()->volumeList( iVol ) );
             if (M_data.hasFibers() )
             {
-                stiff( M_data.M_reducedConductivityCylinder,
+                stiff( M_data.reducedConductivityCylinder(),
                        M_data.longitudinalConductivity(),
                        M_data.transversalConductivity(),
                        M_fiberVector,
@@ -446,7 +437,7 @@ void MonodomainSolver<Mesh, SolverType>::buildSystem()
             }
             else
             {
-                stiff( M_data.M_reducedConductivityCylinder,
+                stiff( M_data.reducedConductivityCylinder(),
                        M_data.diffusivity(),
                        M_stiffnessElementaryMatrix,
                        M_uFESpace.fe(),
@@ -459,7 +450,7 @@ void MonodomainSolver<Mesh, SolverType>::buildSystem()
             M_uFESpace.fe().updateFirstDerivQuadPt( M_uFESpace.mesh()->volumeList( iVol ) );
             if (M_data.hasFibers() )
             {
-                stiff( M_data.M_reducedConductivityBox,
+                stiff( M_data.reducedConductivityBox(),
                        M_data.longitudinalConductivity(),
                        M_data.transversalConductivity(),
                        M_fiberVector,
@@ -471,7 +462,7 @@ void MonodomainSolver<Mesh, SolverType>::buildSystem()
             }
             else
             {
-                stiff( M_data.M_reducedConductivityBox,
+                stiff( M_data.reducedConductivityBox(),
                        M_data.diffusivity(),
                        M_stiffnessElementaryMatrix,
                        M_uFESpace.fe(),
@@ -543,12 +534,12 @@ void MonodomainSolver<Mesh, SolverType>::buildSystem()
 
     if (false)
         std::cout << "partial times:  \n"
-                  << " Der            " << chronoDer.diff_cumul() << " s.\n"
-                  << " Zero           " << chronoZero.diff_cumul() << " s.\n"
-                  << " Stiff          " << chronoStiff.diff_cumul() << " s.\n"
-                  << " Stiff Assemble " << chronoStiffAssemble.diff_cumul() << " s.\n"
-                  << " Mass           " << chronoMass.diff_cumul() << " s.\n"
-                  << " Mass Assemble  " << chronoMassAssemble.diff_cumul() << " s.\n"
+                  << " Der            " << chronoDer.diffCumul() << " s.\n"
+                  << " Zero           " << chronoZero.diffCumul() << " s.\n"
+                  << " Stiff          " << chronoStiff.diffCumul() << " s.\n"
+                  << " Stiff Assemble " << chronoStiffAssemble.diffCumul() << " s.\n"
+                  << " Mass           " << chronoMass.diffCumul() << " s.\n"
+                  << " Mass Assemble  " << chronoMassAssemble.diffCumul() << " s.\n"
                   << std::endl;
 
 }

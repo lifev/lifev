@@ -1,36 +1,44 @@
 //@HEADER
 /*
-************************************************************************
+*******************************************************************************
 
- This file is part of the LifeV Applications.
- Copyright (C) 2001-2009 EPFL, Politecnico di Milano, INRIA
+    Copyright (C) 2004, 2005, 2007 EPFL, Politecnico di Milano, INRIA
+    Copyright (C) 2010 EPFL, Politecnico di Milano, Emory University
 
- This library is free software; you can redistribute it and/or modify
- it under the terms of the GNU Lesser General Public License as
- published by the Free Software Foundation; either version 2.1 of the
- License, or (at your option) any later version.
+    This file is part of LifeV.
 
- This library is distributed in the hope that it will be useful, but
- WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- Lesser General Public License for more details.
+    LifeV is free software; you can redistribute it and/or modify
+    it under the terms of the GNU Lesser General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
 
- You should have received a copy of the GNU Lesser General Public
- License along with this library; if not, write to the Free Software
- Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
- USA
+    LifeV is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+    Lesser General Public License for more details.
 
-************************************************************************
+    You should have received a copy of the GNU Lesser General Public License
+    along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
+
+*******************************************************************************
 */
 //@HEADER
 
 /*!
-  @file stiffness_fibers.hpp
+  @file
   @brief Contains an extension to the elemOper for including
   @a the fibers in the stiffness term for the Bidomain, Monodomain, and
   @ Electromechanical problems
- @date 2-12-2009
+
+  @date 12-2009
+  @author Ricardo Ruiz-Baier <ricardo.ruiz@epfl.ch>
+
+  @contributors Simone Rossi <simone.rossi@epfl.ch>
+  @mantainer Simone Rossi <simone.rossi@epfl.ch>, Ricardo Ruiz-Baier <ricardo.ruiz@epfl.ch>
+
  */
+
+
 
 
 namespace LifeV
@@ -65,8 +73,8 @@ void stiff( const Real sigma_l, const Real sigma_t, const vector_type& cos, Elem
     //ASSERT_PRE( fe.hasFirstDeriv(),
     //            "Stiffness matrix needs at least the first derivatives" );
     ElemMat::matrix_view mat = elmat.block( iblock, jblock );
-    int iloc, jloc;
-    int i, icoor, jcoor, ig;
+    Int iloc, jloc;
+    UInt i, icoor, jcoor, ig;
     Real s;
     ID eleId=fe.currentLocalId();
     UInt dim = dof.numTotalDof();
@@ -150,8 +158,8 @@ void stiff( const reduced_sigma& red_sigma, const Real sigma_l, const Real sigma
 //     ASSERT_PRE( fe.hasFirstDeriv(),
 //                 "Stiffness matrix needs at least the first derivatives" );
     ElemMat::matrix_view mat = elmat.block( iblock, jblock );
-    int iloc, jloc;
-    int i, icoor, jcoor, ig;
+    Int iloc, jloc;
+    UInt i, icoor, jcoor, ig;
     Real s;
     ID eleId=fe.currentLocalId();
     Real x,y,z;
@@ -237,16 +245,16 @@ void stiff( const reduced_sigma& red_sigma, const Real sigma_l, const Real sigma
 
 
 template <class reduced_sigma>
-void stiff( reduced_sigma red_sigma, const Real D, ElemMat& elmat, const CurrentFE& fe, const Dof& dof, UInt iblock, UInt jblock, ID id)
+void stiff( reduced_sigma red_sigma, const Real D, ElemMat& elmat, const CurrentFE& fe, const Dof& /*dof*/, UInt iblock, UInt jblock, ID id)
 {
 
 //     ASSERT_PRE( fe.hasFirstDeriv(),
 //                 "Stiffness matrix needs at least the first derivatives" );
     ElemMat::matrix_view mat = elmat.block( iblock, jblock );
-    int iloc, jloc;
-    int i, icoor, ig;
-    double s, coef_s;
-    int iu;
+    Int iloc, jloc;
+    UInt i, icoor, ig;
+    Real s;
+
     Real x,y,z;
     for ( i = 0;i < fe.nbDiag();i++ )
     {
@@ -298,7 +306,7 @@ void stiffNL(vector_type& U, Real coef, ElemMat& elmat, const CurrentFE& fe,
     Int iu;
     std::vector<Real> locU(fe.nbFEDof());
     std::vector<Real> MM_l(fe.nbCoor());
-    double bPt;
+    Real bPt;
 
     for (i=0;i<fe.nbFEDof();i++){
         locU[i]=U[dof.localToGlobal(eleId,i+1)];    //(one component)
@@ -376,7 +384,7 @@ void stiffNL(vector_type& U, Real coef, ElemMat& elmat, const CurrentFE& fe,
     Int iu;
     std::vector<Real> locU(fe.nbFEDof());
     std::vector<Real> MM_l(fe.nbCoor());
-    double bPt;
+    Real bPt;
 
     for (i=0;i<fe.nbFEDof();i++){
         locU[i]=U[dof.localToGlobal(eleId,i+1)];    //(one component)
@@ -434,7 +442,7 @@ void stiffNL(vector_type& U, Real coef, ElemMat& elmat, const CurrentFE& fe,
         mat_tmp( jloc, iloc ) += coef_s;
     }
     // copy on the components
-    for ( int icomp = 0;icomp < nb;icomp++ )
+    for ( Int icomp = 0;icomp < nb;icomp++ )
     {ElemMat::matrix_view mat_icomp = elmat.block( iblock + icomp, jblock + icomp );
         for ( i = 0;i < fe.nbDiag();i++ )
         {
@@ -464,15 +472,15 @@ void stiffNL(const vector_type& U, const Real sigma_l, const Real sigma_t,
              const Dof& dof, UInt iblock, UInt jblock, const Real beta)
 {
     ElemMat::matrix_view mat = elmat.block( iblock, jblock );
-    int iloc, jloc;
-    int i, icoor, jcoor, ig;
+    Int iloc, jloc;
+    UInt i, icoor, jcoor, ig;
     Real s;
     ID eleId=fe.currentLocalId();
     UInt dim = dof.numTotalDof();
-    int iu;
+    Int iu;
     Vector locU(fe.nbFEDof());
     Vector MM_l(fe.nbCoor());
-    double bPt;
+    Real bPt;
     Vector a_l(fe.nbCoor());
     Vector u_x(fe.nbQuadPt());
     Vector u_y(fe.nbQuadPt());

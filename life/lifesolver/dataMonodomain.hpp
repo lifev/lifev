@@ -77,19 +77,18 @@ public:
 
     //! Constructors
     DataMonodomain();
-    virtual ~DataMonodomain()
-    {std::cout << "DataMonodomain descrutor" << std::endl;}
 
     DataMonodomain( boost::shared_ptr<HeartFunctors> heart);
 
     DataMonodomain( const DataMonodomain& dataMonodomain );
 
+    virtual           ~DataMonodomain() {}
     //@}
 
     //! @name Operators
     //@{
 
-    DataMonodomain& operator=( const DataMonodomain& dataMonodomain );
+    DataMonodomain&    operator=( const DataMonodomain& dataMonodomain );
 
     //@}
 
@@ -97,18 +96,15 @@ public:
     //@{
 
     //!output: show the data used for the simulation
-    void showMe( std::ostream& output = std::cout );
+    void               showMe( std::ostream& output = std::cout );
 
     //@}
-
-
 
     //! @name Set Methods
     //@{
 
-
     //! external setup: set all the data for the simulation
-    void        setup( const GetPot& dataFile );
+    void               setup( const GetPot& dataFile );
 
     //@}
 
@@ -117,50 +113,61 @@ public:
     //! @name Get Methods
     //@{
 
+    const region_Type& reducedConductivityBox()         const { return M_reducedConductivityBox; }
+
+    const region_Type& reducedConductivityCylinder()    const { return M_reducedConductivityCylinder; }
+
+    const region_Type& reducedConductivitySphere()      const { return M_reducedConductivitySphere; }
+
     //! verbose
-    const Real verbose() const {return M_verbose;};
+    const Real         verbose()                        const { return M_verbose; }
 
     //! FE space order
-    std::string        uOrder()         const {return M_uOrder;};
+    std::string        uOrder()                         const { return M_uOrder; }
 
     //! Chi
-    const Real&        volumeSurfaceRatio()            const {return M_volumeSurfaceRatio;}
+    const Real&        volumeSurfaceRatio()             const { return M_volumeSurfaceRatio; }
 
     //! lambda, key parameter in the derivation of Monodomain equations
-    const Real&        conductivityRatio()            const {return M_conductivityRatio;}
+    const Real&        conductivityRatio()              const { return M_conductivityRatio; }
 
     //! fiber File
-    string             fibersFile()    const {return M_fibersFile;}
+    string             fibersFile()                     const { return M_fibersFile; }
 
     //local change of the diffusivity
-    const Int&         heartDiffusionFactor() const {return M_heartDiffusionFactor;}
+    const Int&         heartDiffusionFactor()           const { return M_heartDiffusionFactor; }
 
     //would you consider the fibers?
-    bool               hasFibers()     const {return M_hasFibers;}
+    bool               hasFibers()                      const { return M_hasFibers; }
 
     //! sigma_l
-    const Real&        longitudinalConductivity()         const 	{return M_longitudinalConductivity;}
+    const Real&        longitudinalConductivity()       const { return M_longitudinalConductivity; }
 
     //! sigma_t
-    const Real&        transversalConductivity()         const 	{return M_transversalConductivity;}
+    const Real&        transversalConductivity()        const { return M_transversalConductivity; }
 
     //! Cm
-    const Real&        membraneCapacitance()             const 	{return M_membraneCapacitance;}
+    const Real&        membraneCapacitance()            const { return M_membraneCapacitance; }
 
     //! D
-    const Real&        diffusivity()              const 	{return M_diffusivity;}
+    const Real&        diffusivity()                    const { return M_diffusivity; }
 
     //! Post_dir
-    std::string        postProcessingDirectory()       const {return M_postProcessingDirectory;}
+    std::string        postProcessingDirectory()        const { return M_postProcessingDirectory; }
 
     //@}
+
+
+
+
+
+
+
+private:
 
     region_Type M_reducedConductivityBox;
     region_Type M_reducedConductivityCylinder;
     region_Type M_reducedConductivitySphere;
-
-
-private:
 
     bool        M_hasFibers;
 

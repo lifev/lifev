@@ -70,7 +70,7 @@ public:
                                    Real const& y,
                                    Real const& z,
                                    Real const& t,
-                                   ID const& id,
+                                   ID   const& id,
                                    Real const&)> region_Type;
 
     //@}
@@ -82,12 +82,12 @@ public:
 
     //! Constructors
     DataBidomain();
-    virtual ~DataBidomain()
-    {}
+
     DataBidomain( boost::shared_ptr<HeartFunctors> heart);
 
     DataBidomain( const DataBidomain& dataBidomain );
 
+    virtual ~DataBidomain() {}
     //@}
 
 
@@ -120,52 +120,56 @@ public:
     //! @name Get Methods
     //@{
 
+    const region_Type&      reducedConductivityBox()         const { return M_reducedConductivityBox; }
+
+    const region_Type&      reducedConductivityCylinder()    const { return M_reducedConductivityCylinder; }
+
+    const region_Type&      reducedConductivitySphere()      const { return M_reducedConductivitySphere; }
+
     //! verbose
-    Real        verbose()        const {return M_verbose;};
+    const Real&             verbose()                        const { return M_verbose; }
 
     //! FE space order
-    std::string uOrder()         const {return M_uOrder;};
+    std::string             uOrder()                         const { return M_uOrder; }
 
     //! Chi
-    const Real&  volumeSurfaceRatio()            const {return M_volumeSurfaceRatio;}
+    const Real&             volumeSurfaceRatio()             const { return M_volumeSurfaceRatio; }
     //! fiber File
-    std::string fibersFile()    const {return M_fibersFile;}
+    std::string             fibersFile()                     const { return M_fibersFile; }
 
-    const Int&   heartDiffusionFactor() const {return M_heartDiffusionFactor;}
+    const Int&              heartDiffusionFactor()           const { return M_heartDiffusionFactor; }
 
-    const bool&  hasFibers()     const {return M_hasFibers;}
+    const bool&             hasFibers()                      const { return M_hasFibers; }
 
     //! format vct
-    const bool&  fibersFormat()  const {return M_fibersFormat;}
+    const bool&             fibersFormat()                   const { return M_fibersFormat; }
 
     //! sigma_l
-    const Real&  longitudinalInternalConductivity()   const {return M_longitudinalInternalConductivity;}
-    const Real&  longitudinalExternalConductivity()   const {return M_longitudinalExternalConductivity;}
+    const Real&             longitudinalInternalConductivity()const { return M_longitudinalInternalConductivity; }
+    const Real&             longitudinalExternalConductivity()const { return M_longitudinalExternalConductivity; }
 
     //! sigma_t
-    const Real&  transversalInternalConductivity()    const 	{return M_transversalInternalConductivity;}
-    const Real&  transversalExternalConductivity()    const 	{return M_transversalExternalConductivity;}
+    const Real&             transversalInternalConductivity() const { return M_transversalInternalConductivity; }
+    const Real&             transversalExternalConductivity() const { return M_transversalExternalConductivity; }
 
     //! Cm
-    const Real&  membraneCapacitance()             const 	{return M_membraneCapacitance;}
+    const Real&             membraneCapacitance()             const	{return M_membraneCapacitance;}
     //! D
-    const Real&  internalDiffusivity()            const 	{return M_internalDiffusivity;}
+    const Real&             internalDiffusivity()             const	{return M_internalDiffusivity;}
     //! Post_dir
-    const Real&  externalDiffusivity()            const 	{return M_externalDiffusivity;}
+    const Real&             externalDiffusivity()             const	{return M_externalDiffusivity;}
     //! Post_dir
-    std::string postProcessingDirectory()       const {return M_postProcessingDirectory;}
+    std::string             postProcessingDirectory()         const {return M_postProcessingDirectory;}
 
-    UInt        BDForder()      const {return M_BDForder;}
+    UInt                    BDForder()                        const {return M_BDForder;}
 
     //@}
+
+private:
 
     region_Type M_reducedConductivityBox;
     region_Type M_reducedConductivityCylinder;
     region_Type M_reducedConductivitySphere;
-
-
-protected:
-private:
     // format of fibers file
     bool        M_fibersFormat;
     bool        M_hasFibers;

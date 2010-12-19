@@ -75,11 +75,10 @@ public:
     //@{
 
     HeartFunctors();
-    virtual ~HeartFunctors()
-    { std::cout << "HeartFunctor descrutor" << std::endl; M_comm.reset();}
 
     HeartFunctors( GetPot& dataFile );
 
+    virtual ~HeartFunctors() {}
     //@}
 
 
@@ -91,9 +90,9 @@ public:
      *
      * Define the stimulation current
      */
-    Real setAppliedCurrent ( const Real& x, const Real& y, const Real& z, const Real& t, const EntityFlag& id ) const;
+    Real setAppliedCurrent ( const Real& x, const Real& y, const Real& z, const Real& t ) const;
 
-    Real setAppliedCurrentZygote(const double& t, const double& x, const double& y, const double& z, const ID& i, const EntityFlag& ref);
+    Real setAppliedCurrentZygote(const double& t, const double& x, const double& y, const double& z, const ID& /*i*/, const entityFlag_Type& ref );
 
     Real setStimulus ( const Real& t, const Real& x, const Real& y, const Real& z, const ID&   id) const;
 
@@ -106,16 +105,16 @@ public:
      * Reduces the conductivity in a sphere
      *
      */
-    Real setReducedConductivitySphere( const Real& x, const Real& y, const Real& z, const Real& t, const ID&   id, const Real& sigma) const;
+    Real setReducedConductivitySphere( const Real& x, const Real& y, const Real& z, const Real& /*t*/, const ID&   id, const Real& sigma) const;
 
     /**
      *
      * Reduces the conductivity in a cylinder
      *
      */
-    Real setReducedConductivityCylinder( const Real& x, const Real& y, const Real& z, const Real& t, const ID&   id, const Real& sigma ) const;
+    Real setReducedConductivityCylinder( const Real& x, const Real& y, const Real& z, const Real& /*t*/, const ID&   id, const Real& sigma ) const;
 
-    Real setReducedConductivityBox( const Real& x, const Real& y, const Real& z, const Real& t, const ID& id, const Real& sigma ) const;
+    Real setReducedConductivityBox( const Real& x, const Real& y, const Real& z, const Real& /*t*/, const ID& id, const Real& sigma ) const;
 
 
     Real setInitialScalar( const Real& t, const Real& x, const Real& y, const Real& z, const ID& id );

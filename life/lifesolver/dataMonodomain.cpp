@@ -45,8 +45,8 @@ namespace LifeV
 // Constructors & Destructor
 // ===================================================
 DataMonodomain::DataMonodomain(   boost::shared_ptr<HeartFunctors> heart ) :
-    DataMesh                          ( heart-> M_dataFile, "electric/space_discretization" ),
-    DataTime                          ( heart-> M_dataFile, "electric/time_discretization" ),
+    DataMesh                        ( heart-> M_dataFile, "electric/space_discretization" ),
+    DataTime                        ( heart-> M_dataFile, "electric/time_discretization" ),
     M_reducedConductivityBox        ( heart-> reducedConductivityBox() ),
     M_reducedConductivityCylinder   ( heart-> reducedConductivityCylinder() ),
     M_reducedConductivitySphere     ( heart-> reducedConductivitySphere() )

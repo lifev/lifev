@@ -89,8 +89,7 @@ public:
     Heart( Int argc,
            char** argv );
 
-    virtual ~Heart()
-    {std::cout << "Heart descrutor" << std::endl;}
+    virtual ~Heart() {}
 
     //@}
 

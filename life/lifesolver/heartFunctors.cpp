@@ -214,7 +214,7 @@ HeartFunctors::HeartFunctors( GetPot& dataFile ):
 // Set Methods
 // ===================================================
 Real
-HeartFunctors::setAppliedCurrent ( const Real& x, const Real& y, const Real& z, const Real& t, const EntityFlag& id ) const
+HeartFunctors::setAppliedCurrent ( const Real& x, const Real& y, const Real& z, const Real& t ) const
 {
     Real appliedCurrent                 = 0.0;
     Real pi                             = std::acos( -1.0 );
@@ -290,8 +290,8 @@ HeartFunctors::setAppliedCurrentZygote(const double& t,
                           const double& x,
                           const double& y,
                           const double& z,
-                          const ID& i,
-                          const EntityFlag& ref)
+                          const ID& /*i*/,
+                          const entityFlag_Type& ref)
 {
     // double pi = acos(-1.0);
     Real appliedCurrent = 0.0;
@@ -417,11 +417,11 @@ HeartFunctors::setStimulus( const Real& t, const Real& x, const Real& y, const R
 
 Real
 HeartFunctors::setReducedConductivitySphere( const Real& x,
-                                     const Real& y,
-                                     const Real& z,
-                                     const Real& /*t*/,
-                                     const ID&   id,
-                                     const Real& sigma) const
+                                             const Real& y,
+                                             const Real& z,
+                                             const Real& /*t*/,
+                                             const ID&   id,
+                                             const Real& sigma) const
 {
     if ( ( ( x - M_sphereX ) * ( x - M_sphereX ) +
            ( y - M_sphereY ) * ( y - M_sphereY ) +
@@ -434,11 +434,11 @@ HeartFunctors::setReducedConductivitySphere( const Real& x,
 
 Real
 HeartFunctors::setReducedConductivityCylinder( const Real& x,
-                                       const Real& y,
-                                       const Real& z,
-                                       const Real& t,
-                                       const ID&   id,
-                                       const Real& sigma ) const
+                                               const Real& y,
+                                               const Real& z,
+                                               const Real& /*t*/,
+                                               const ID&   id,
+                                               const Real& sigma ) const
     {
         Real distance2, distanceX, distanceY, distanceZ;
         distanceX = ( ( M_cylinderB * M_cylinderB + M_cylinderC * M_cylinderC ) * ( M_cylinderX - x ) -
@@ -470,11 +470,11 @@ HeartFunctors::setReducedConductivityCylinder( const Real& x,
 
 Real
 HeartFunctors::setReducedConductivityBox( const Real& x,
-                                  const Real& y,
-                                  const Real& z,
-                                  const Real& t,
-                                  const ID&   id,
-                                  const Real& sigma ) const
+                                          const Real& y,
+                                          const Real& z,
+                                          const Real& /*t*/,
+                                          const ID&   id,
+                                          const Real& sigma ) const
 {
     if  ( ( x > M_minimumBoxX ) && ( x < M_maximumBoxX ) &&
           ( y > M_minimumBoxY ) && ( y < M_maximumBoxY ) &&
@@ -486,11 +486,11 @@ HeartFunctors::setReducedConductivityBox( const Real& x,
 }
 
 Real
-HeartFunctors::setInitialScalar( const Real& t ,
-                               const Real& x,
-                               const Real& y,
-                               const Real& z,
-                               const ID&   id )
+HeartFunctors::setInitialScalar( const Real& /*t*/ ,
+                                 const Real& /*x*/,
+                                 const Real& /*y*/,
+                                 const Real& /*z*/,
+                                 const ID&   /*id*/ )
 {
     return M_restPotential;
 }
@@ -498,11 +498,11 @@ HeartFunctors::setInitialScalar( const Real& t ,
 
 
 Real
-HeartFunctors::setZeroScalar( const Real& t,
-                            const Real& x,
-                            const Real& y,
-                            const Real& z,
-                            const ID&   id )
+HeartFunctors::setZeroScalar( const Real& /*t*/,
+                              const Real& /*x*/,
+                              const Real& /*y*/,
+                              const Real& /*z*/,
+                              const ID&   /*id*/ )
 {
     return 0.;
 }
@@ -516,7 +516,7 @@ HeartFunctors::region1_Type
 HeartFunctors::appliedCurrent()
 {
     region1_Type f;
-    f = boost::bind(&HeartFunctors::setAppliedCurrent, this, 1, 2, 3, 4, 5 );
+    f = boost::bind(&HeartFunctors::setAppliedCurrent, this, 1, 2, 3, 4 );
     return f;
 }
 

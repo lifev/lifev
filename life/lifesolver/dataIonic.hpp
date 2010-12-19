@@ -61,12 +61,12 @@ public:
     //! Constructors
     DataIonic();
 
-    virtual ~DataIonic()
-    { std::cout << "DataIonic descrutor" << std::endl;}
+
     DataIonic( const GetPot& dataFile );
 
     DataIonic( const DataIonic& dataIonic );
 
+    virtual ~DataIonic() {}
     //@}
 
 
@@ -94,6 +94,47 @@ public:
     //!external setup: set all the data for the simulation
     void setup( const GetPot& dataFile );
 
+    const Real& RMCParameterA() const { return M_RMCParameterA; }
+
+    const Real& RMCParameterB() const { return M_RMCParameterB; }
+
+    const Real& RMCParameterC1() const { return M_RMCParameterC1; }
+
+    const Real& RMCParameterC2() const { return M_RMCParameterC2; }
+
+    const Real& RMCParameterD() const { return M_RMCParameterD; }
+
+    const Real& RMCTimeUnit() const { return M_RMCTimeUnit; }
+
+    const Real& RMCPotentialAmplitude() const { return M_RMCPotentialAmplitude; }
+
+    const Real& RMCRestPotential() const { return M_RMCRestPotential; }
+
+    const Real& RMCInitialRepolarization() const { return M_RMCInitialRepolarization; }
+
+    const Real& MSTauIn() const { return M_MSTauIn; }
+
+    const Real& MSTauOut() const { return M_MSTauOut; }
+
+    const Real& MSTauOpen() const { return M_MSTauOpen; }
+
+    const Real& MSTauClose() const { return M_MSTauClose; }
+
+    const Real& MSCriticalPotential() const { return M_MSCriticalPotential; }
+
+    const Real& MSPotentialMinimum() const { return M_MSPotentialMinimum; }
+
+    const Real& MSPotentialMaximum() const { return M_MSPotentialMaximum; }
+
+    const Real& MSReactionAmplitude() const { return M_MSReactionAmplitude; }
+
+    const Real& MSInitialTime() const { return M_MSInitialTime; }
+
+    const Real& MSTend() const { return M_MSTend; }
+
+    const Real& MSBDForder() const { return M_MSBDForder; }
+
+    const bool& MSHasHeterogeneousTauClose() const { return M_MSHasHeterogeneousTauClose; }
     //@}
 
     /*//! End time
@@ -103,37 +144,40 @@ public:
     std::string wOrder() const;
 */
 
-    //! RogersMcCulloch 1994 Ionic Model parameters
-    Real        M_a;
-    Real        M_b;
-    Real        M_c1;
-    Real        M_c2;
-    Real        M_d;
-    Real        M_timeUnit;
-    Real        M_potentialAmplitude;
-    Real        M_restPotential;
-    Real        M_initialRepolarization;
 
-    //!Mitchell & Schaeffer
-    Real        M_tau_in;   // = 0.8
-    Real        M_tau_out;  // = 18.0
-    Real        M_tau_open; // = 300.0
-    Real        M_tau_close;// = 100.0
-    Real        M_criticalPotential;    // =  -67.0
-    Real        M_potentialMinimum;
-    Real        M_potentialMaximum;
-    Real        M_reactionAmplitude;
-    Real        M_initialTime;
-    Real        M_tend;
-    Real        M_BDForder;       //= 1
-
-    bool        M_hasHeterogeneousTauClose;
 private:
 
-    UInt        M_verbose;
+
 
     std::string M_meshFile;
     std::string M_meshDirectory;
+
+    UInt        M_verbose;
+    //! RogersMcCulloch (RMC) 1994 Ionic Model parameters
+    Real        M_RMCParameterA;
+    Real        M_RMCParameterB;
+    Real        M_RMCParameterC1;
+    Real        M_RMCParameterC2;
+    Real        M_RMCParameterD;
+    Real        M_RMCTimeUnit;
+    Real        M_RMCPotentialAmplitude;
+    Real        M_RMCRestPotential;
+    Real        M_RMCInitialRepolarization;
+
+    //!Mitchell & Schaeffer (MS)
+    Real        M_MSTauIn;   // = 0.8
+    Real        M_MSTauOut;  // = 18.0
+    Real        M_MSTauOpen; // = 300.0
+    Real        M_MSTauClose;// = 100.0
+    Real        M_MSCriticalPotential;    // =  -67.0
+    Real        M_MSPotentialMinimum;
+    Real        M_MSPotentialMaximum;
+    Real        M_MSReactionAmplitude;
+    Real        M_MSInitialTime;
+    Real        M_MSTend;
+    Real        M_MSBDForder;       //= 1
+
+    bool        M_MSHasHeterogeneousTauClose;
 
 
 };
