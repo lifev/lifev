@@ -200,24 +200,9 @@ public:
 
     //! returns Node or Cell centered string
     std::string whereName() const;
-
-    // DEPRECATED
-    //! file name for postprocessing has to include time dependency
-    void __attribute__((__deprecated__)) set_steady(UInt i) {M_steady = i;}
-
-
     //@}
 
 private:
-
-    //! @name Private Methods
-    //@{
-
-    //! shared pointer to array, replaced by storedArray() and will be removed
-    const vectorPtr_Type __attribute__((__deprecated__)) getPtr() const { assert(false); return M_vr; }
-
-    //@}
-
     //! @name Private data members
     //@{
     //! name assigned to this variable in output file
@@ -402,19 +387,6 @@ public:
     //! returns the type of the map to use for the EpetraVector
     virtual EpetraMapType mapType() const = 0;
     //@}
-
-    // DEPRECATED
-    // const UInt& __attribute__((__deprecated__)) count() const { return M_startIndex; }
-//    void __attribute__((__deprecated__)) setDirectory( const std::string& Directory )
-//    {
-//        M_postDir = Directory;
-//    }
-    // const UInt& __attribute__((__deprecated__)) getStartIndex( void )
-    // {
-    //     return M_startIndex;
-    // }
-    // virtual void __attribute__((__deprecated__)) CloseFile() {}
-    // virtual void __attribute__((__deprecated__)) rd_var(ExporterData& dvar);
 
 protected:
 
