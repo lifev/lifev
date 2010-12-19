@@ -272,7 +272,7 @@ void MonolithicGI::solveJac(vector_Type       &_step,
     M_solid->getDisplayer().leaderPrint("  M-  Jacobian NormInf res:                    ", _step.normInf(), "\n");
 }
 
-void MonolithicGI::initialize( FSIOperator::fluidPtr_Type::value_type::Function const& u0,
+void MonolithicGI::initialize( FSIOperator::fluidPtr_Type::value_type::function_Type const& u0,
                                FSIOperator::solidPtr_Type::value_type::Function const& p0,
                                FSIOperator::solidPtr_Type::value_type::Function const& d0,
                                FSIOperator::solidPtr_Type::value_type::Function const& w0,

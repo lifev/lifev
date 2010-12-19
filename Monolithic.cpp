@@ -88,7 +88,8 @@ Monolithic::setupFEspace()
 
     // Monolitic: In the beginning I need a non-partitioned mesh. later we will do the partitioning
     M_dFESpace.reset( new FESpace<mesh_Type, EpetraMap>( M_solidMesh,
-                                                         M_data->dataSolid()->getOrder(),                                                            nDimensions,
+                                                         M_data->dataSolid()->getOrder(),
+                                                         nDimensions,
                                                          M_epetraComm));
 }
 
@@ -259,7 +260,6 @@ void
 Monolithic::buildSystem()
 {
     M_solidBlock.reset(new matrix_Type(*M_monolithicMap, 1));//since it is constant, we keep this throughout the simulation
-
     M_solid->buildSystem(M_solidBlock, M_data->dataSolid()->getDataTime()->timeStep()*M_solid->getRescaleFactor());//M_data->dataSolid()->rescaleFactor());
     M_solidBlock->globalAssemble();
     M_solid->rescaleMatrices();
@@ -351,14 +351,11 @@ Monolithic::updateSystem()
     this->fluid().updateUn(*this->M_un);
     *M_rhs*=0;
     *M_rhsFull*=0;
-
-    this->M_fluid->stabilization();
-    //    this->M_fluid->resetStabilization();
-
+    this->M_fluid->resetStabilization();
 }
 
 void
-Monolithic::initialize( FSIOperator::fluidPtr_Type::value_type::Function const& u0,
+Monolithic::initialize( FSIOperator::fluidPtr_Type::value_type::function_Type const& u0,
                         FSIOperator::solidPtr_Type::value_type::Function const& p0,
                         FSIOperator::solidPtr_Type::value_type::Function const& d0,
                         FSIOperator::solidPtr_Type::value_type::Function const& /*w0*/,
@@ -371,6 +368,7 @@ Monolithic::initialize( FSIOperator::fluidPtr_Type::value_type::Function const& 
     M_pFESpace->interpolate(p0, p, M_data->dataFluid()->dataTime()->time());
 
     vector_Type d(M_dFESpace->map());
+    M_dFESpace->interpolate(d0, d, M_data->getDataSolid()->dataTime()->time());
 
     M_dFESpace->interpolate(d0, d, M_data->dataSolid()->getDataTime()->time());
 
@@ -558,14 +556,14 @@ Monolithic::assembleFluidBlock(UInt iter, vectorPtr_Type& solution)
 
     double alpha = 1./M_data->dataFluid()->dataTime()->timeStep();//mesh velocity w
     M_fluid->updateSystem(alpha,*this->M_beta, *this->M_rhs, M_fluidBlock, solution );
-    this->M_fluid->updateStab(*M_fluidBlock);
+    this->M_fluid->updateStabilization(*M_fluidBlock);
 
     if (iter==0)
     {
         M_resetPrec=true;
 
 	M_bdf->updateRHSContribution(M_data->dataFluid()->dataTime()->timeStep() );
-        *this->M_rhs += M_fluid->matrMass()*M_bdf->rhsContributionFirstDerivative() ;
+        *this->M_rhs += M_fluid->matrixMass()*M_bdf->rhsContributionFirstDerivative() ;
         couplingRhs(this->M_rhs, M_un);
     }
     *M_rhsFull = *M_rhs;
@@ -577,7 +575,7 @@ void Monolithic::updateRHS(  )
 {
 
     M_bdf->updateRHSContribution(M_data->dataFluid()->dataTime()->timeStep() );
-    *this->M_rhs += M_fluid->matrMass()*M_bdf->rhsContributionFirstDerivative() ;
+    *this->M_rhs += M_fluid->matrixMass()*M_bdf->rhsContributionFirstDerivative() ;
     couplingRhs(this->M_rhs, M_un);
     *M_rhsFull = *M_rhs;
     //this->M_solid->updateVel();

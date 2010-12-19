@@ -106,7 +106,7 @@ public:
     //!@name Typedefs
     //@{
     typedef FSIOperator                                        super_Type;
-    typedef FSIOperator::fluidPtr_Type::value_type::matrix_type/*matrix_Type*/   matrix_Type;
+    typedef FSIOperator::fluidPtr_Type::value_type::matrix_Type/*matrix_Type*/   matrix_Type;
     typedef boost::shared_ptr<matrix_Type>                     matrixPtr_Type;
     typedef BlockInterface                                     prec_Type;
     typedef boost::shared_ptr<prec_Type>                       precPtr_Type;
@@ -305,7 +305,7 @@ public:
     /**
        \small initialize with functions
     */
-    virtual void initialize( FSIOperator::fluidPtr_Type::value_type::Function const& u0,
+    virtual void initialize( FSIOperator::fluidPtr_Type::value_type::function_Type const& u0,
                              FSIOperator::solidPtr_Type::value_type::Function const& p0,
                              FSIOperator::solidPtr_Type::value_type::Function const& d0,
                              FSIOperator::solidPtr_Type::value_type::Function const& w0,
