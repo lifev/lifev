@@ -106,7 +106,7 @@ public:
     //!@name Typedefs
     //@{
     typedef FSIOperator                                        super_Type;
-    typedef FSIOperator::fluidPtr_Type::value_type::matrix_type/*matrix_Type*/   matrix_Type;
+    typedef FSIOperator::fluidPtr_Type::value_type::matrix_Type/*matrix_Type*/   matrix_Type;
     typedef boost::shared_ptr<matrix_Type>                     matrixPtr_Type;
     typedef BlockInterface                                     prec_Type;
     typedef boost::shared_ptr<prec_Type>                       precPtr_Type;
@@ -305,7 +305,7 @@ public:
     /**
        \small initialize with functions
     */
-    virtual void initialize( FSIOperator::fluidPtr_Type::value_type::Function const& u0,
+    virtual void initialize( FSIOperator::fluidPtr_Type::value_type::function_Type const& u0,
                              FSIOperator::solidPtr_Type::value_type::Function const& p0,
                              FSIOperator::solidPtr_Type::value_type::Function const& d0,
                              FSIOperator::solidPtr_Type::value_type::Function const& w0,
@@ -396,7 +396,7 @@ public:
     void getSolidDisp(vector_Type& soliddisp)
     {
         soliddisp.subset(*un(), M_offset);
-        soliddisp *= dataFluid()->dataTime()->timeStep()*M_solid->getRescaleFactor();
+        soliddisp *= dataFluid()->dataTime()->getTimeStep()*M_solid->rescaleFactor();
     }
 
     //!Get the solid velocity
@@ -406,8 +406,8 @@ public:
     */
     void getSolidVel(vector_Type& solidvel)
     {
-        solidvel.subset(M_solid->getVelocity(), M_offset);
-        solidvel *= dataFluid()->dataTime()->timeStep()*M_solid->getRescaleFactor();
+        solidvel.subset(M_solid->vel(), M_offset);
+        solidvel *= dataFluid()->dataTime()->getTimeStep()*M_solid->rescaleFactor();
     }
 
     //! Gets the fluid and pressure
