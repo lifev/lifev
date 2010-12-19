@@ -154,7 +154,7 @@ class CHARACTER
 public:
     //! @name Constructors and destructor
     //@{
-    ChARACTER() {}
+    CHARACTER() {}
     CHARACTER( char* cstring );
     CHARACTER( char* cstring, const size_t stringLength );
     virtual ~CHARACTER();
