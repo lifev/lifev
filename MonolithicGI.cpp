@@ -88,9 +88,8 @@ MonolithicGI::setupFluidSolid( UInt const fluxes )
     M_interface=M_monolithicMatrix->interface();
 
     vector_Type u0(*this->M_monolithicMap);
-    M_bdf.reset(new BdfT<vector_Type>());
-    M_bdf->setup(M_data->dataFluid()->dataTime()->orderBDF());
-    M_bdf->setInitialCondition(u0);
+    M_bdf.reset(new BdfT<vector_Type>(M_data->dataFluid()->dataTime()->getBDF_order()));
+    M_bdf->initialize_unk(u0);
     this->M_rhs.reset(new vector_Type(*this->M_monolithicMap));
     this->M_rhsFull.reset(new vector_Type(*this->M_monolithicMap));
     if(M_data->dataFluid()->useShapeDerivatives())
@@ -162,7 +161,7 @@ MonolithicGI::evalResidual( vector_Type&       res,
     //meshDispDiff->subset(*M_uk, offset); //if the mesh motion is at the previous nonlinear step (FP) in the convective term
     //meshDispDiff->subset(*M_un, offset); //if we linearize in a semi-implicit way
     M_meshMotion->initialize(*meshDispDiff);//M_disp is set to the total mesh disp.
-    double alpha = 1/M_data->dataFluid()->dataTime()->timeStep();
+    double alpha = 1/M_data->dataFluid()->dataTime()->getTimeStep();
     vector_Type mmRep(*meshDispDiff, Repeated);// just to repeat dispDiff. No way witout copying?
     this->moveMesh(mmRep);// re-initialize the mesh points
     *meshDispDiff -= *meshDispOld;//relative displacement
@@ -223,7 +222,7 @@ MonolithicGI::applyBoundaryConditions()
         M_monolithicMatrix->setConditions(M_BChs);
         M_monolithicMatrix->setSpaces(M_FESpaces);
         M_monolithicMatrix->setOffsets(3, M_offset, 0, M_solidAndFluidDim + nDimensions*M_interface);
-        M_monolithicMatrix->coupler(M_monolithicMap, M_dofStructureToHarmonicExtension->localDofMap(), M_numerationInterface, M_data->dataFluid()->dataTime()->timeStep());
+        M_monolithicMatrix->coupler(M_monolithicMap, M_dofStructureToHarmonicExtension->localDofMap(), M_numerationInterface, M_data->dataFluid()->dataTime()->getTimeStep());
     }
     else
     {
@@ -243,7 +242,7 @@ MonolithicGI::applyBoundaryConditions()
     if ( !M_BCh_mesh->bcUpdateDone() )
         M_BCh_mesh->bcUpdate( *M_mmFESpace->mesh(), M_mmFESpace->feBd(), M_mmFESpace->dof() );
 
-    M_monolithicMatrix->applyBoundaryConditions(dataFluid()->dataTime()->time(), M_rhsFull);
+    M_monolithicMatrix->applyBoundaryConditions(dataFluid()->dataTime()->getTime(), M_rhsFull);
     M_monolithicMatrix->GlobalAssemble();
     //M_monolithicMatrix->matrix()->spy("FM");
 }
@@ -257,7 +256,7 @@ void MonolithicGI::solveJac(vector_Type       &_step,
     setupBlockPrec( );
 
     M_precPtr->blockAssembling( );
-    M_precPtr->applyBoundaryConditions( dataFluid()->dataTime()->time() );
+    M_precPtr->applyBoundaryConditions( dataFluid()->dataTime()->getTime() );
     M_precPtr->GlobalAssemble( );
 
     //boost::dynamic_pointer_cast<BlockMatrix>(M_precPtr)->matrix()->spy("P");
@@ -271,7 +270,7 @@ void MonolithicGI::solveJac(vector_Type       &_step,
     M_solid->getDisplayer().leaderPrint("  M-  Jacobian NormInf res:                    ", _step.normInf(), "\n");
 }
 
-void MonolithicGI::initialize( FSIOperator::fluidPtr_Type::value_type::Function const& u0,
+void MonolithicGI::initialize( FSIOperator::fluidPtr_Type::value_type::function_Type const& u0,
                                FSIOperator::solidPtr_Type::value_type::Function const& p0,
                                FSIOperator::solidPtr_Type::value_type::Function const& d0,
                                FSIOperator::solidPtr_Type::value_type::Function const& w0,
@@ -280,7 +279,7 @@ void MonolithicGI::initialize( FSIOperator::fluidPtr_Type::value_type::Function 
     super_Type::initialize(u0, p0, d0, w0, df0);
 
     vector_Type df(M_mmFESpace->map());
-    M_mmFESpace->interpolate(df0, df, M_data->dataSolid()->dataTime()->time());
+    M_mmFESpace->interpolate(df0, df, M_data->dataSolid()->dataTime()->getTime());
     M_un->add(df, M_solidAndFluidDim+getDimInterface());
     M_meshMotion->setDisplacement(df);
 }
@@ -314,9 +313,9 @@ int MonolithicGI::setupBlockPrec( )
         M_solidBlockPrec->globalAssemble();
         M_precPtr->replace_matrix( M_solidBlockPrec, 0 );
         M_monolithicMatrix->blockAssembling();
-        M_monolithicMatrix->applyBoundaryConditions( dataFluid()->dataTime()->time());
+        M_monolithicMatrix->applyBoundaryConditions( dataFluid()->dataTime()->getTime());
         M_monolithicMatrix->GlobalAssemble();
-        *M_monolithicMatrix->matrix() *= M_data->dataFluid()->dataTime()->timeStep();
+        *M_monolithicMatrix->matrix() *= M_data->dataFluid()->dataTime()->getTimeStep();
     }
 
     if ( M_precPtr->blockVector( ).size( )<3 )
@@ -325,7 +324,7 @@ int MonolithicGI::setupBlockPrec( )
         M_precPtr->setConditions( M_BChs );
         M_precPtr->setSpaces( M_FESpaces );
         M_precPtr->setOffsets( 3, M_offset, 0,  M_solidAndFluidDim + nDimensions*M_interface );
-        M_precPtr->coupler( M_monolithicMap, M_dofStructureToHarmonicExtension->localDofMap(), M_numerationInterface, M_data->dataFluid()->dataTime()->timeStep(), 2 );
+        M_precPtr->coupler( M_monolithicMap, M_dofStructureToHarmonicExtension->localDofMap(), M_numerationInterface, M_data->dataFluid()->dataTime()->getTimeStep(), 2 );
 
         if (M_data->dataFluid()->useShapeDerivatives())
         {
@@ -348,7 +347,7 @@ int MonolithicGI::setupBlockPrec( )
 
 void MonolithicGI::shapeDerivatives(matrixPtr_Type sdMatrix, const vector_Type& sol, bool domainVelImplicit, bool convectiveTermDer)
 {
-    double alpha = 1./M_data->dataFluid()->dataTime()->timeStep();
+    double alpha = 1./M_data->dataFluid()->dataTime()->getTimeStep();
     vectorPtr_Type rhsNew(new vector_Type(*M_monolithicMap));
     vector_Type un(M_uFESpace->map()/*+M_pFESpace->map()*/);
     vector_Type uk(M_uFESpace->map()+M_pFESpace->map());
@@ -418,7 +417,7 @@ MonolithicGI::assembleMeshBlock(UInt /*iter*/)
 //     if ( !BCh->bcUpdateDone() )
 //         BCh->bcUpdate( *M_mmFESpace->mesh(), M_mmFESpace->feBd(), M_mmFESpace->dof() );
 
-//     bcManage( *M_meshBlock, *M_rhsFull, *M_mmFESpace->mesh(), M_mmFESpace->dof(), *BCh, M_mmFESpace->feBd(), 1., dataFluid().dataTime()->time());
+//     bcManage( *M_meshBlock, *M_rhsFull, *M_mmFESpace->mesh(), M_mmFESpace->dof(), *BCh, M_mmFESpace->feBd(), 1., dataFluid().dataTime()->getTime());
     /********************************************************/
 
     for ( ID dim=0; dim < nDimensions; ++dim )

@@ -146,7 +146,7 @@ public:
                                          const vector_Type &_res,
                                          const Real       _linearRelTol);
     //! initialize the system with functions
-    void                        initialize( FSIOperator::fluidPtr_Type::value_type::Function const& u0,
+    void                        initialize( FSIOperator::fluidPtr_Type::value_type::function_Type const& u0,
                                             FSIOperator::solidPtr_Type::value_type::Function const& p0,
                                             FSIOperator::solidPtr_Type::value_type::Function const& d0,
                                             FSIOperator::solidPtr_Type::value_type::Function const& w0,
