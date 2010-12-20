@@ -103,7 +103,7 @@ struct FactoryDefaultError
   @class factory
   @brief Implements a generic object factory
 
-  @sa factoryDefaultError, factoryClone, TypeInfo
+  @sa factoryDefaultError, factoryClone, FactoryTypeInfo
 */
 
 //!\todo uncomment this line
@@ -214,14 +214,14 @@ private:
 template <class AbstractProduct,
           class ProductCreator = boost::function<AbstractProduct* (const AbstractProduct*)>,
           template<typename, class> class FactoryErrorPolicy = FactoryDefaultError>
-class FactoryClone : public FactoryErrorPolicy<TypeInfo, AbstractProduct>
+class FactoryClone : public FactoryErrorPolicy<FactoryTypeInfo, AbstractProduct>
 {
 public:
     //! @name Typedefs
     //@{
     //!\todo uncomment this line
     //typedef FactoryErrorPolicy<AbstractProduct> super;
-    typedef FactoryErrorPolicy<TypeInfo,AbstractProduct> super;
+    typedef FactoryErrorPolicy<FactoryTypeInfo,AbstractProduct> super;
     //@}
 
     //! @name Constructor and destructor
@@ -233,12 +233,12 @@ public:
 
     //! @name  Methods
     //@{
-    bool registerProduct(const TypeInfo& id, ProductCreator creator)
+    bool registerProduct(const FactoryTypeInfo& id, ProductCreator creator)
     {
         return M_associations.insert( typename productId_Type::value_type( id, creator ) ).second;
     }
 
-    bool unregisterProduct( const TypeInfo& id )
+    bool unregisterProduct( const FactoryTypeInfo& id )
     {
         return M_associations.erase(id) == 1;
     }
@@ -259,7 +259,7 @@ public:
     //@}
 
 private:
-    typedef std::map<TypeInfo, ProductCreator> productId_Type;
+    typedef std::map<FactoryTypeInfo, ProductCreator> productId_Type;
     productId_Type M_associations;
 };
 
