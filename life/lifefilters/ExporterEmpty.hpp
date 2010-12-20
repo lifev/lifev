@@ -37,7 +37,7 @@ along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
 #ifndef EXPORTER_EMPTY_H
 #define EXPORTER_EMPTY_H 1
 
-#include <life/lifefilters/exporter.hpp>
+#include <life/lifefilters/Exporter.hpp>
 
 namespace LifeV
 {
