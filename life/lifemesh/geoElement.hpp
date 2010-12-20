@@ -60,7 +60,6 @@ public:
 
     //! @name Public Types
     //@{
-    typedef typename MC::PointMarker Marker; //to be removed
     typedef typename MC::PointMarker marker_Type;
 
     //@}
@@ -142,11 +141,7 @@ public:
     typedef typename MC::EdgeMarker marker_Type;
     typedef GeoElement0D<MC> geoBElement_Type;
     typedef GeoElement0D<MC> point_Type;
-    typedef GEOSHAPE GeoShape; // to be removed
-    typedef typename MC::EdgeMarker Marker; // to be removed
-    typedef GeoElement0D<MC> GeoBElement; // to be removed
-    typedef GeoElement0D<MC> PointType; // to be removed
-    //@}
+   //@}
 
     //! @name Constructor & Destructor
     //@{
@@ -197,12 +192,6 @@ public:
     typedef GeoElement0D<MC> point_Type;
     typedef edge_Type geoBElement_Type;
 
-    typedef GEOSHAPE GeoShape; // to be removed
-    typedef typename MC::FaceMarker Marker; // to be removed
-    typedef typename GEOSHAPE::GeoBShape EdgeShape; // to be removed
-    typedef GeoElement1D<EdgeShape, MC> EdgeType; // to be removed
-    typedef GeoElement0D<MC> PointType; // to be removed
-    typedef EdgeType GeoBElement; // to be removed
     //@}
 
     //! @name Constructor & Destructor
@@ -345,16 +334,6 @@ public:
     typedef GeoElement0D<MC> point_Type;
     typedef face_Type geoBElement_Type;
 
-    typedef GEOSHAPE GeoShape;
-    typedef typename MC::VolumeMarker Marker;
-    typedef typename GEOSHAPE::GeoBShape FaceShape;
-    typedef typename FaceShape::GeoBShape EdgeShape;
-
-    typedef GeoElement1D<EdgeShape, MC> EdgeType; // to be removed
-    typedef GeoElement2D<FaceShape, MC> FaceType; // to be removed
-    typedef GeoElement0D<MC> PointType; // to be removed
-    typedef FaceType GeoBElement; // to be removed
-
     //@}
 
     //! @name Constructor & Destructor
@@ -419,7 +398,7 @@ GeoElement0D<MC>::operator = ( GeoElement0D<MC> const & Element )
     if ( this != &Element )
     {
         Geo0D::operator=( Element );
-        Marker::operator=( Element );
+        marker_Type::operator=( Element );
     }
     return *this;
 }

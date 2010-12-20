@@ -46,7 +46,7 @@
 
   <li> a flag identifying a specific part of the mesh boundary,
 
-  <li> a type (Essential, Natural, Mixte, Flux, Resistance),
+  <li> a type (Essential, Natural, Robin, Flux, Resistance),
 
   <li> a mode of implementation (Scalar, Full, Component, Normal,
      Tangential, Resistance, Directional),
@@ -58,18 +58,12 @@
   <li> a list of pointers to identifiers allowing the user to know to
      which DOF the boundary condition applies.
 </ol>
-
+isBetaCoeffAVector
  */
 
 #ifndef BCCOND_H
 #define BCCOND_H
 
-#include <set>
-#include <map>
-
-#include <boost/shared_ptr.hpp>
-
-#include <life/lifecore/life.hpp>
 #include <life/lifemesh/identifier.hpp>
 #include <life/lifemesh/markers.hpp>
 #include <life/lifefem/dof.hpp>
@@ -85,12 +79,12 @@ namespace LifeV
 {
 
 /*! @enum bcType_Type
-	Boundary condition basic types: Natural, Mixte, Flux, Resistance, Periodic, Essential, EssentialEdges, EssentialVertices
+	Boundary condition basic types: Natural, Robin, Flux, Resistance, Periodic, Essential, EssentialEdges, EssentialVertices
  */
 enum bcType_Type
 {
     Natural, 			/*!< Neumann boundary conditions */
-    Mixte, 				/*!< Robin boundary conditions */
+    Robin, 				/*!< Robin boundary conditions */
     Flux, 				/*!< Flux boundary conditions */
     Resistance,			/*!< Resistance boundary conditions */
     Periodic,			/*!< Periodic boundary conditions */
@@ -173,7 +167,7 @@ public:
        @param name the name of the boundary condition
        @param flag the mesh flag identifying the part of the mesh where
        the boundary condition applies
-       @param type the boundary condition type: Natural, Essential, Mixte, Flux, Resistance
+       @param type the boundary condition type: Natural, Essential, Robin, Flux, Resistance
        @param mode the boundary condition mode: Scalar, Full,
        Component, Normal, Tangential, Directional
        @param bcFunction the function holding the user defined function defining the boundary condition
@@ -191,7 +185,7 @@ public:
        @param name the name of the boundary condition
        @param flag the mesh flag identifying the part of the mesh where
        the boundary condition applies
-       @param type the boundary condition type: Natural, Essential, Mixte, Flux, Resistance
+       @param type the boundary condition type: Natural, Essential, Robin, Flux, Resistance
        @param mode the boundary condition mode: Scalar, Normal, Tangential
        @param bcFunction the BCFunctionBase holding the function defining the boundary condition
        involved in this boundary condition
@@ -207,7 +201,7 @@ public:
        @param name the name of the boundary condition
        @param flag the mesh flag identifying the part of the mesh where
        the boundary condition applies
-       @param type the boundary condition type: Natural, Essential, Mixte, Flux, Resistance
+       @param type the boundary condition type: Natural, Essential, Robin, Flux, Resistance
        @param mode the boundary condition mode: Full
        @param bcFunction BCFunctionBase holding the function defining the boundary condition
        @param numberOfComponents number of components involved
@@ -225,7 +219,7 @@ public:
        @param name the name of the boundary condition
        @param flag the mesh flag identifying the part of the mesh where
        the boundary condition applies
-       @param type the boundary condition type: Natural, Essential, Mixte, Flux, Resistance
+       @param type the boundary condition type: Natural, Essential, Robin, Flux, Resistance
        @param mode the boundary condition mode: Scalar, Full,
        Component, Normal, Tangential, Directional
        @param vector the vector containing the dof values to be prescribed as boundary data
@@ -243,7 +237,7 @@ public:
        @param name the name of the boundary condition
        @param flag the mesh flag identifying the part of the mesh where
        the boundary condition applies
-       @param type the boundary condition type: Natural, Essential, Mixte, Flux, Resistance
+       @param type the boundary condition type: Natural, Essential, Robin, Flux, Resistance
        @param mode the boundary condition mode: Scalar, Full,
        Component, Normal, Tangential, Directional
        @param bcVector the vector containing the dof values to be prescribed as boundary data
@@ -259,7 +253,7 @@ public:
        @param name the name of the boundary condition
        @param flag the mesh flag identifying the part of the mesh where
        the boundary condition applies
-       @param type the boundary condition type: Natural, Essential, Mixte, Flux, Resistance
+       @param type the boundary condition type: Natural, Essential, Robin, Flux, Resistance
        @param mode the boundary condition mode: Scalar, Full,
        Component, Normal, Tangential, Directional
        @param bcVector the vector containing the dof values to be prescribed as boundary data
@@ -277,7 +271,7 @@ public:
        @param name the name of the boundary condition
        @param flag the mesh flag identifying the part of the mesh where
        the boundary condition applies
-       @param type the boundary condition type: Natural, Essential, Mixte, Flux, Resistance
+       @param type the boundary condition type: Natural, Essential, Robin, Flux, Resistance
        @param mode the boundary condition mode: Scalar, Full,
        Component, Normal, Tangential, Directional
        @param bcFunctionFEVectorDependent the BCFunctionUDepBase holding the function (depending on a generic finite element vector ) defining the boundary condition
@@ -295,7 +289,7 @@ public:
        @param name the name of the boundary condition
        @param flag the mesh flag identifying the part of the mesh where
        the boundary condition applies
-       @param type the boundary condition type: Natural, Essential, Mixte, Flux, Resistance
+       @param type the boundary condition type: Natural, Essential, Robin, Flux, Resistance
        @param mode the boundary condition mode: Scalar, Normal, Tangential
        @param bcFunctionFEVectorDependent the BCFunctionUDepBase holding the function (depending on a generic finite element vector ) defining the boundary condition
      */
@@ -310,7 +304,7 @@ public:
        @param name the name of the boundary condition
        @param flag the mesh flag identifying the part of the mesh where
        the boundary condition applies
-       @param type the boundary condition type: Natural, Essential, Mixte, Flux, Resistance
+       @param type the boundary condition type: Natural, Essential, Robin, Flux, Resistance
        @param mode the boundary condition mode:  Full
        @param bcFunctionFEVectorDependent the BCFunctionUDepBase holding the function (depending on a generic finite element vector ) defining the boundary condition
        @param numberOfComponents number of components involved in this boundary condition
@@ -346,26 +340,26 @@ public:
      */
     ID component( const ID i ) const;
 
-    //! Returns true if mixte (in BC Vector ) is a EpetraVector (mixteVec), false if it is scalar (default alphaCoef=1)
+    //! Returns true if robin coefficient (in BC Vector ) is a EpetraVector, false if it is scalar (default alphaCoef=1)
     /*!
-       @return true if mixte (in BC Vector ) is a EpetraVector (mixteVec), false if it is scalar
+       @return true if robin coefficient (in BC Vector ) is a EpetraVector, false if it is scalar
      */
-    bool ismixteVec() const;
+    bool isRobinCoeffAVector() const;
 
-    //! Returns true if beta (in BC Vector ) is a EpetraVector (betaVec) (default betaCoef=1)
+    //! Returns true if beta coefficient (in BC Vector ) is a EpetraVector (betaVec) (default betaCoef=1)
     /*!
-       @return true if beta (in BC Vector ) is a EpetraVector (betaVec)
+       @return true if beta coefficient (in BC Vector ) is a EpetraVector (betaVec)
      */
-    bool isbetaVec() const;
+    bool isBetaCoeffAVector() const;
 
-    //! Returns the value of the mixte coefficient vector (in BC Vector)
+    //! Returns the value of the robin coefficient vector (in BC Vector)
     /*!
        corresponding to DOF iDof and component iComponent
-       @param iDof DOF we are looking for in MixteVec
-       @param iComponent component we are looking for in MixteVec
-       @return value of the mixte coefficient vector (in BC Vector) corresponding to iDof and iComponent
+       @param iDof DOF we are looking for in RobinVec
+       @param iComponent component we are looking for in RobinVec
+       @return value of the robin coefficient vector (in BC Vector) corresponding to iDof and iComponent
      */
-    Real MixteVec( const ID& iDof, const ID& iComponent ) const;
+    Real robinCoeffVector( const ID& iDof, const ID& iComponent ) const;
 
     //! Returns the value of the beta coefficient vector (in BC Vector)
     /*!
@@ -374,7 +368,7 @@ public:
        @param iComponent component we are looking for in BetaVec
        @return value of the Beta coefficient vector (in BC Vector) corresponding to iDof and iComponent
      */
-    Real BetaVec( const ID& iDof, const ID& iComponent ) const;
+    Real betaCoeffVector( const ID& iDof, const ID& iComponent ) const;
 
     //! Returns a pointer to the BCFunctionBase object
     /*!
@@ -573,29 +567,29 @@ public:
      */
     const int& offset() const {return M_offset;}
 
-    //! Returns the value of the mixte coefficient (in BC Vector)
+    //! Returns the value of the robin coefficient (in BC Vector)
     /*!
-       @return value of the mixte coefficient (in BC Vector)
+       @return value of the robin coefficient (in BC Vector)
      */
-    Real mixteCoef() const;
+    Real robinCoeff() const;
 
     //! Returns the value of the resistance coefficient (in BC Vector)
     /*!
        @return value of the resistance coefficient (in BC Vector)
      */
-    Real resistanceCoef() const;
+    Real resistanceCoeff() const;
 
     //! Returns the value of the beta coefficient (in BC Vector)
     /*!
        @return value of the beta coefficient (in BC Vector)
      */
-    Real betaCoef() const;
+    Real betaCoeff() const;
 
     //! Returns True if a FE BCVector has been provided to the class, False otherwise
     /*!
        @return True if FE BCVector has been provided to the class, False otherwise
      */
-    bool dataVector() const;
+    bool isDataAVector() const;
 
     //! Returns whether the list is finalized and the vector of ID's is then accessible.
     /*!

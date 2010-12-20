@@ -64,7 +64,6 @@ public:
     //@{
 
     typedef GeoPoint geoShape_Type;
-    typedef GeoPoint GeoShape; //to be removed
 
     //@}
 

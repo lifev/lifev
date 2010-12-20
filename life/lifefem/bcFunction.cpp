@@ -94,21 +94,21 @@ const bool bcBaseFactory = FactoryCloneBCFunction::instance().registerProduct( t
 
 
 //==================================================
-// BCFunctionMixte
+// BCFunctionRobin
 //==================================================
 
 //==================================================
 // Constructors
 //==================================================
 
-BCFunctionMixte::BCFunctionMixte( const BCFunctionMixte& bcFunctionMixte )
+BCFunctionRobin::BCFunctionRobin( const BCFunctionRobin& bcFunctionRobin )
         :
-        BCFunctionBase( bcFunctionMixte ),
-        M_robinBoundaryMassCoeffFunction( bcFunctionMixte.M_robinBoundaryMassCoeffFunction )
+        BCFunctionBase( bcFunctionRobin ),
+        M_robinBoundaryMassCoeffFunction( bcFunctionRobin.M_robinBoundaryMassCoeffFunction )
 {
 }
 
-BCFunctionMixte::BCFunctionMixte( const function_Type& rightHandSideFunction, const function_Type& massCoeffFunction )
+BCFunctionRobin::BCFunctionRobin( const function_Type& rightHandSideFunction, const function_Type& massCoeffFunction )
         :
         BCFunctionBase( rightHandSideFunction ),
         M_robinBoundaryMassCoeffFunction( massCoeffFunction )
@@ -122,13 +122,13 @@ BCFunctionMixte::BCFunctionMixte( const function_Type& rightHandSideFunction, co
 //==================================================
 
 
-BCFunctionMixte&
-BCFunctionMixte::operator=( const BCFunctionMixte& bcFunctionMixte )
+BCFunctionRobin&
+BCFunctionRobin::operator=( const BCFunctionRobin& bcFunctionRobin )
 {
-    if ( this != &bcFunctionMixte )
+    if ( this != &bcFunctionRobin )
     {
-        this->BCFunctionBase::operator=( bcFunctionMixte );
-        M_robinBoundaryMassCoeffFunction = bcFunctionMixte.M_robinBoundaryMassCoeffFunction;
+        this->BCFunctionBase::operator=( bcFunctionRobin );
+        M_robinBoundaryMassCoeffFunction = bcFunctionRobin.M_robinBoundaryMassCoeffFunction;
     }
     return *this;
 }
@@ -139,7 +139,7 @@ BCFunctionMixte::operator=( const BCFunctionMixte& bcFunctionMixte )
 //==================================================
 
 void
-BCFunctionMixte::setFunctions_Mixte( const function_Type& rightHandSideFunction, const function_Type& massCoeffFunction )
+BCFunctionRobin::setFunctions_Robin( const function_Type& rightHandSideFunction, const function_Type& massCoeffFunction )
 {
     setFunction( rightHandSideFunction );
     M_robinBoundaryMassCoeffFunction = massCoeffFunction;
@@ -148,12 +148,12 @@ BCFunctionMixte::setFunctions_Mixte( const function_Type& rightHandSideFunction,
 
 
 BCFunctionBase*
-createBCFunctionMixte( BCFunctionBase const* __bc )
+createBCFunctionRobin( BCFunctionBase const* __bc )
 {
-    return new BCFunctionMixte( ( BCFunctionMixte const& )*__bc );
+    return new BCFunctionRobin( ( BCFunctionRobin const& )*__bc );
 }
-// register BCFunctionMixte in factory for cloning
-const bool __bcmixte = FactoryCloneBCFunction::instance().registerProduct( typeid(BCFunctionMixte), &createBCFunctionMixte );
+// register BCFunctionRobin in factory for cloning
+const bool __bcRobin = FactoryCloneBCFunction::instance().registerProduct( typeid(BCFunctionRobin), &createBCFunctionRobin );
 
 
 //==================================================
@@ -201,7 +201,7 @@ const bool bcFunctionUDepBase = FactoryCloneBCFunctionUDep::instance().registerP
 
 
 //==================================================
-// BCFunctionUDepMixte
+// BCFunctionUDepRobin
 //==================================================
 
 
@@ -209,14 +209,14 @@ const bool bcFunctionUDepBase = FactoryCloneBCFunctionUDep::instance().registerP
 // Constructor
 //==================================================
 
-BCFunctionUDepMixte::BCFunctionUDepMixte( const BCFunctionUDepMixte& bcFunctionUDepMixte )
+BCFunctionUDepRobin::BCFunctionUDepRobin( const BCFunctionUDepRobin& bcFunctionUDepRobin )
         :
-        BCFunctionUDepBase( bcFunctionUDepMixte ),
-        M_robinBoundaryMassCoeffFunction( bcFunctionUDepMixte.M_robinBoundaryMassCoeffFunction )
+        BCFunctionUDepBase( bcFunctionUDepRobin ),
+        M_robinBoundaryMassCoeffFunction( bcFunctionUDepRobin.M_robinBoundaryMassCoeffFunction )
 {
 }
 
-BCFunctionUDepMixte::BCFunctionUDepMixte( const function_Type& rightHandSideFunction, const function_Type& massCoeffFunction )
+BCFunctionUDepRobin::BCFunctionUDepRobin( const function_Type& rightHandSideFunction, const function_Type& massCoeffFunction )
         :
         BCFunctionUDepBase( rightHandSideFunction ),
         M_robinBoundaryMassCoeffFunction( massCoeffFunction )
@@ -229,13 +229,13 @@ BCFunctionUDepMixte::BCFunctionUDepMixte( const function_Type& rightHandSideFunc
 // Operators
 //==================================================
 
-BCFunctionUDepMixte&
-BCFunctionUDepMixte::operator=( const BCFunctionUDepMixte& bcFunctionUDepMixte )
+BCFunctionUDepRobin&
+BCFunctionUDepRobin::operator=( const BCFunctionUDepRobin& bcFunctionUDepRobin )
 {
-    if ( this != &bcFunctionUDepMixte )
+    if ( this != &bcFunctionUDepRobin )
     {
-        this->BCFunctionUDepBase::operator=( bcFunctionUDepMixte );
-        M_robinBoundaryMassCoeffFunction = bcFunctionUDepMixte.M_robinBoundaryMassCoeffFunction;
+        this->BCFunctionUDepBase::operator=( bcFunctionUDepRobin );
+        M_robinBoundaryMassCoeffFunction = bcFunctionUDepRobin.M_robinBoundaryMassCoeffFunction;
     }
     return *this;
 }
@@ -246,7 +246,7 @@ BCFunctionUDepMixte::operator=( const BCFunctionUDepMixte& bcFunctionUDepMixte )
 //==================================================
 
 void
-BCFunctionUDepMixte::setFunctions_Mixte( const function_Type& rightHandSideFunction, const function_Type& massCoeffFunction )
+BCFunctionUDepRobin::setFunctions_Robin( const function_Type& rightHandSideFunction, const function_Type& massCoeffFunction )
 {
     setFunction( rightHandSideFunction );
     M_robinBoundaryMassCoeffFunction = massCoeffFunction;
@@ -254,12 +254,12 @@ BCFunctionUDepMixte::setFunctions_Mixte( const function_Type& rightHandSideFunct
 
 
 BCFunctionUDepBase*
-createBCFunctionUDepMixte( BCFunctionUDepBase const* bcFunctionUDepMixte )
+createBCFunctionUDepRobin( BCFunctionUDepBase const* bcFunctionUDepRobin )
 {
-    return new BCFunctionUDepMixte( ( BCFunctionUDepMixte const& )* bcFunctionUDepMixte );
+    return new BCFunctionUDepRobin( ( BCFunctionUDepRobin const& )* bcFunctionUDepRobin );
 }
-const bool bcFunctionUDepMixte = FactoryCloneBCFunctionUDep::instance().registerProduct(
-                                     typeid(BCFunctionUDepMixte), &createBCFunctionUDepMixte );
+const bool bcFunctionUDepRobin = FactoryCloneBCFunctionUDep::instance().registerProduct(
+                                     typeid(BCFunctionUDepRobin), &createBCFunctionUDepRobin );
 
 
 //==================================================
@@ -316,7 +316,7 @@ createBCFunctionDirectional( BCFunctionBase const* bcFunctionDirectional )
 {
     return new BCFunctionDirectional( ( BCFunctionDirectional const& )* bcFunctionDirectional);
 }
-// register BCFunctionMixte in factory for cloning
+// register BCFunctionRobin in factory for cloning
 const bool bcFunctionDirectional = FactoryCloneBCFunction::instance().registerProduct( typeid(BCFunctionDirectional), &createBCFunctionDirectional );
 
 } //End of namespace LifeV

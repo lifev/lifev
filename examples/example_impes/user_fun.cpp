@@ -251,7 +251,7 @@ Real pressureNeumann( const Real& /* t */,
 }
 
 // Boundary condition of Robin
-Real pressureMixte( const Real& /* t */,
+Real pressureRobin( const Real& /* t */,
                     const Real& /* x */,
                     const Real& /* y */,
                     const Real& /* z */,
@@ -501,7 +501,7 @@ Real saturationNeumann( const Real& /* t */,
 }
 
 // Boundary condition of Robin
-Real saturationMixte( const Real& /* t */,
+Real saturationRobin( const Real& /* t */,
                       const Real& x,
                       const Real& y,
                       const Real& z,

@@ -165,7 +165,7 @@ public:
     /*!
       @param name The name of the boundary condition
       @param flag The mesh flag identifying the part of the mesh where the boundary condition applies
-      @param type The boundary condition type: Natural, Mixte, Flux, Resistance, Periodic, Essential, EssentialEdges, EssentialVertices
+      @param type The boundary condition type: Natural, Robin, Flux, Resistance, Periodic, Essential, EssentialEdges, EssentialVertices
       @param mode the boundary condition mode: Scalar, Full, Component, Normal, Tangential, Directional
       @param bcFunction  The container holding the user defined function involved in this boundary condition
       @param components storing the list of components involved in this boundary condition
@@ -182,7 +182,7 @@ public:
     /*!
       @param name The name of the boundary condition
       @param flag The mesh flag identifying the part of the mesh where the boundary condition applies
-      @param type The boundary condition type: Natural, Mixte, Flux, Resistance, Periodic, Essential, EssentialEdges, EssentialVertices
+      @param type The boundary condition type: Natural, Robin, Flux, Resistance, Periodic, Essential, EssentialEdges, EssentialVertices
       @param mode the boundary condition mode: Scalar, Full, Component, Normal, Tangential, Directional
       @param bcFunction  The container holding the user defined function involved in this boundary condition
     */
@@ -197,7 +197,7 @@ public:
     /*!
      @param name The name of the boundary condition
      @param flag The mesh flag identifying the part of the mesh where the boundary condition applies
-     @param type The boundary condition type: Natural, Mixte, Flux, Resistance, Periodic, Essential, EssentialEdges, EssentialVertices
+     @param type The boundary condition type: Natural, Robin, Flux, Resistance, Periodic, Essential, EssentialEdges, EssentialVertices
      @param mode The boundary condition mode: Scalar, Full, Component, Normal, Tangential, Directional
      @param bcFunction The container holding the user defined function involved in this boundary condition
      @param numberOfComponents The number of components involved in this boundary condition
@@ -214,7 +214,7 @@ public:
     /*!
       @param name The name of the boundary condition
       @param flag The mesh flag identifying the part of the mesh where the boundary condition applies
-      @param type The boundary condition type: Natural, Mixte, Flux, Resistance, Periodic, Essential, EssentialEdges, EssentialVertices
+      @param type The boundary condition type: Natural, Robin, Flux, Resistance, Periodic, Essential, EssentialEdges, EssentialVertices
       @param mode the boundary condition mode: Scalar, Full, Component, Normal, Tangential, Directional
       @param bcVector The container holding the finite element vector involved in this boundary condition
       @param components storing the list of components involved in this boundary condition
@@ -231,7 +231,7 @@ public:
     /*!
       @param name The name of the boundary condition
       @param flag The mesh flag identifying the part of the mesh where the boundary condition applies
-      @param type The boundary condition type: Natural, Mixte, Flux, Resistance, Periodic, Essential, EssentialEdges, EssentialVertices
+      @param type The boundary condition type: Natural, Robin, Flux, Resistance, Periodic, Essential, EssentialEdges, EssentialVertices
       @param mode the boundary condition mode: Scalar, Full, Component, Normal, Tangential, Directional
       @param bcVector The container holding the finite element vector involved in this boundary condition
      */
@@ -246,7 +246,7 @@ public:
     /*!
       @param name The name of the boundary condition
       @param flag The mesh flag identifying the part of the mesh where the boundary condition applies
-      @param type The boundary condition type: Natural, Mixte, Flux, Resistance, Periodic, Essential, EssentialEdges, EssentialVertices
+      @param type The boundary condition type: Natural, Robin, Flux, Resistance, Periodic, Essential, EssentialEdges, EssentialVertices
       @param mode the boundary condition mode: Scalar, Full, Component, Normal, Tangential, Directional
       @param bcVector The container holding the finite element vector involved in this boundary condition
       @param numberOfComponents The number of components involved in this boundary condition
@@ -263,7 +263,7 @@ public:
     /*!
       @param name The name of the boundary condition
       @param flag The mesh flag identifying the part of the mesh bcBaseIterator the boundary condition applies
-      @param type The boundary condition type: Natural, Mixte, Flux, Resistance, Periodic, Essential, EssentialEdges, EssentialVertices
+      @param type The boundary condition type: Natural, Robin, Flux, Resistance, Periodic, Essential, EssentialEdges, EssentialVertices
       @param mode the boundary condition mode: Scalar, Full, Component, Normal, Tangential, Directional
       @param  bcFunctionFEVectorDependent  The container holding the user defined function, depending on a FE vector, involved in this boundary condition
     */
@@ -641,7 +641,7 @@ BCHandler::bcUpdate( Mesh& mesh, CurrentBdFE& boundaryFE, const Dof& dof )
                     ID gDof = localToGlobalMapOnBElem( lDof+1); // global DOF
 
                     //providing Essential boundary conditions with needed data (global DOF id and their coordinates)
-                    if ( bcBaseIterator->dataVector())
+                    if ( bcBaseIterator->isDataAVector())
                         bcBaseIterator->addIdentifier( new IdentifierBase( gDof) );
                     else
                     { // With user defined functions
@@ -653,7 +653,7 @@ BCHandler::bcUpdate( Mesh& mesh, CurrentBdFE& boundaryFE, const Dof& dof )
 
             case Natural:
                 //providing Natural boundary conditions with global DOFs on element
-                if ( bcBaseIterator->dataVector() )
+                if ( bcBaseIterator->isDataAVector() )
                 { // With data vector
                     UInt type = bcBaseIterator->pointerToBCVector()->type() ;
                     if ( type == 0 )  // if the BC is a vector which values don't need to be integrated
@@ -670,13 +670,13 @@ BCHandler::bcUpdate( Mesh& mesh, CurrentBdFE& boundaryFE, const Dof& dof )
                     bcBaseIterator->addIdentifier( new IdentifierNatural( iBoundaryElement, localToGlobalMapOnBElem) );
                 break;
 
-            case Mixte:
+            case Robin:
                 //providing Robin boundary conditions with global DOFs on element
                 bcBaseIterator->addIdentifier( new IdentifierNatural( iBoundaryElement, localToGlobalMapOnBElem ) );
                 break;
             case Resistance:
                 //providing Resistance boundary conditions with global DOFs on element
-                if ( bcBaseIterator->dataVector() )
+                if ( bcBaseIterator->isDataAVector() )
                 {
                     bcBaseIterator->addIdentifier( new IdentifierNatural( iBoundaryElement, localToGlobalMapOnBElem ) );
                 }
@@ -745,7 +745,7 @@ BCHandler::bcUpdate( Mesh& mesh, CurrentBdFE& boundaryFE, const Dof& dof )
                         UInt gDof = localToGlobalMapOnBElem( lDof+1 ); // global DOF
 
                         //providing the boundary conditions with needed data
-                        if ( bcBaseIterator->dataVector() )
+                        if ( bcBaseIterator->isDataAVector() )
                             bcBaseIterator->addIdentifier( new IdentifierBase( gDof ) );
                         else
                         { // With user defined functions
@@ -779,7 +779,7 @@ BCHandler::bcUpdate( Mesh& mesh, CurrentBdFE& boundaryFE, const Dof& dof )
                         UInt gDof = localToGlobalMapOnBElem(lDof+1); // global Dof
 
                         //providing the boundary conditions with needed data
-                        if ( bcBaseIterator->dataVector() )
+                        if ( bcBaseIterator->isDataAVector() )
                             bcBaseIterator->addIdentifier( new IdentifierBase( gDof ) );
                         else
                         { // With user defined functions
@@ -932,7 +932,7 @@ BCHandler::bcUpdateOldVersion( Mesh& mesh, CurrentBdFE& boundaryFE, const Dof& d
                         case EssentialEdges:
                         case EssentialVertices:
                             // Which kind of data ?
-                            if ( where->dataVector() )
+                            if ( where->isDataAVector() )
                             { // With data vector
                                 where->addIdentifier( new IdentifierBase( gDof ) ); // We only need the dof number
                             }
@@ -943,7 +943,7 @@ BCHandler::bcUpdateOldVersion( Mesh& mesh, CurrentBdFE& boundaryFE, const Dof& d
                             }
                             break;
                         case Natural:
-                            if ( where->dataVector() )
+                            if ( where->isDataAVector() )
                             { // With data
                                 switch ( where->pointerToBCVector() ->type() )
                                 {
@@ -963,15 +963,15 @@ BCHandler::bcUpdateOldVersion( Mesh& mesh, CurrentBdFE& boundaryFE, const Dof& d
                             else
                                 {}
                             break;
-                        case Mixte:
+                        case Robin:
                             // Why kind of data ?
-                            // vincent please check again for your Mixte-FE it doesn't work for Q1
-                            //       if ( where->dataVector()  ) { // With data vector
+                            // vincent please check again for your Robin-FE it doesn't work for Q1
+                            //       if ( where->isDataAVector()  ) { // With data vector
                             //        where->addIdentifier( new IdentifierNatural(gDof) );
                             //       }
                             break;
                         case Flux:
-                            if ( where->dataVector() )
+                            if ( where->isDataAVector() )
                             { // With data
                                 switch ( where->pointerToBCVector() ->type() )
                                 {
@@ -1045,7 +1045,7 @@ BCHandler::bcUpdateOldVersion( Mesh& mesh, CurrentBdFE& boundaryFE, const Dof& d
                         case Essential:
                         case EssentialEdges:
                             // Which kind of data ?
-                            if ( where->dataVector() )
+                            if ( where->isDataAVector() )
                             { // With data vector
                                 where->addIdentifier( new IdentifierBase( gDof ) );
                             }
@@ -1057,7 +1057,7 @@ BCHandler::bcUpdateOldVersion( Mesh& mesh, CurrentBdFE& boundaryFE, const Dof& d
                             break;
                         case Natural:
                             // Which kind of data ?
-                            if ( where->dataVector() )
+                            if ( where->isDataAVector() )
                             { // With data vector
                                 switch ( where->pointerToBCVector() ->type() )
                                 {
@@ -1075,9 +1075,9 @@ BCHandler::bcUpdateOldVersion( Mesh& mesh, CurrentBdFE& boundaryFE, const Dof& d
                                 }
                             }
                             break;
-                        case Mixte:
+                        case Robin:
                             // Which kind of data ?
-                            if ( where->dataVector() )
+                            if ( where->isDataAVector() )
                             { // With data vector
                                 where->addIdentifier( new IdentifierNatural( gDof ) );
                             }
@@ -1127,7 +1127,7 @@ BCHandler::bcUpdateOldVersion( Mesh& mesh, CurrentBdFE& boundaryFE, const Dof& d
                     lDof = nDofBElemEdges + nDofBElemVertices + l; // local Dof
                     gDof = dof.localToGlobal( iAdjacentElem, nDofElemEdges +  nDofElemVertices + ( iElemBElement - 1 ) * nDofPerFace + l ); // global Dof
                     // Why kind of data ?
-                    if ( where->dataVector() )
+                    if ( where->isDataAVector() )
                     { // With data vector
                         where->addIdentifier( new IdentifierBase( gDof ) );
                     }
@@ -1141,8 +1141,8 @@ BCHandler::bcUpdateOldVersion( Mesh& mesh, CurrentBdFE& boundaryFE, const Dof& d
             case Natural:
 
                 // Why kind of data ?
-                // vincent please check again for your Mixte-FE it doesn't work for Q1
-                if ( where->dataVector() )
+                // vincent please check again for your Robin-FE it doesn't work for Q1
+                if ( where->isDataAVector() )
                 { // With data vector
                     UInt type = where->pointerToBCVector()->type() ;
                     if ( type == 0 )
@@ -1183,7 +1183,7 @@ BCHandler::bcUpdateOldVersion( Mesh& mesh, CurrentBdFE& boundaryFE, const Dof& d
                     where->addIdentifier( new IdentifierNatural( iBoundaryElement, bdltg ) );
                 }
                 break;
-            case Mixte:
+            case Robin:
                  for ( ID l = 1; l <= nDofPerFace; ++l )
                 {
                     lDof = nDofBElemEdges + nDofBElemVertices + l; // local Dof
@@ -1198,7 +1198,7 @@ BCHandler::bcUpdateOldVersion( Mesh& mesh, CurrentBdFE& boundaryFE, const Dof& d
                 break;
 
             case Resistance:
-                if ( where->dataVector()  )
+                if ( where->isDataAVector()  )
                 {
                   where->addIdentifier( new IdentifierNatural( iBoundaryElement, bdltg ) );
                 }

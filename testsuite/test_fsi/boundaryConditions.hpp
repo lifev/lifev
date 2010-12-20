@@ -148,7 +148,7 @@ FSIOperator::fluidBchandlerPtr_Type BCh_fluid(FSIOperator &_oper)
         _oper.setSolidLoadToStructure( _oper.minusSigmaFluidRepeated());
         _oper.setStructureToFluidParametres();
 
-        BCh_fluid->addBC("Interface",   1,  Mixte, Full,
+        BCh_fluid->addBC("Interface",   1,  Robin, Full,
                          *_oper.bcvStructureToFluid(),  3);
         BCh_fluid->addBC("Interface",   1,  Natural, Full,
                          *_oper.bcvSolidLoadToStructure(), 3);

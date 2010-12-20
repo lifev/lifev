@@ -258,7 +258,7 @@ readMesh2D( RegionMesh2D      & mesh, //readMesh2D
     mesh.setMarker( regionFlag );
 
     // Now put the whole lot into the RegionMesh2D structure
-    typename RegionMesh2D::PointType * pp = 0;
+    typename RegionMesh2D::point_Type * pp = 0;
     typename RegionMesh2D::EdgeType  * pe = 0;
     typename RegionMesh2D::FaceType  * pf = 0;
 
@@ -523,7 +523,7 @@ readGmshFile( RegionMesh2D<GeoShape, MC> & mesh,
         }
     }
     // add the point to the mesh
-    typename RegionMesh2D<GeoShape, MC>::PointType * pp = 0;
+    typename RegionMesh2D<GeoShape, MC>::point_Type * pp = 0;
 
     mesh.setMaxNumPoints( __n, true );
     mesh.setNumVertices (__n);
@@ -607,7 +607,7 @@ readFreeFemFile( RegionMesh2D<GeoShape, MC> & mesh,
     BareItemsHandler<BareEdge> _be;
     std::pair<BareEdge, bool> _edge;
 
-    typename RegionMesh2D<GeoShape, MC>::PointType * pp = 0;
+    typename RegionMesh2D<GeoShape, MC>::point_Type * pp = 0;
     typename RegionMesh2D<GeoShape, MC>::EdgeType * pe = 0;
     typename RegionMesh2D<GeoShape, MC>::FaceType * pf = 0;
 

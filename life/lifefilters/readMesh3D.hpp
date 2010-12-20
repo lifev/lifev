@@ -231,7 +231,7 @@ readMppFile( RegionMesh3D<GeoShape, MC> & mesh,
     mesh.setMarker             ( regionFlag ); // Mark the region
 
 
-    typename RegionMesh3D<GeoShape, MC>::PointType  * pointerPoint  = 0;
+    typename RegionMesh3D<GeoShape, MC>::point_Type  * pointerPoint  = 0;
     typename RegionMesh3D<GeoShape, MC>::EdgeType   * pointerEdge   = 0;
     typename RegionMesh3D<GeoShape, MC>::FaceType   * pointerFace   = 0;
     typename RegionMesh3D<GeoShape, MC>::VolumeType * pointerVolume = 0;
@@ -637,11 +637,11 @@ readINRIAMeshFile( RegionMesh3D<GeoShape, MC>&      mesh,
 
     mesh.setMarker             ( regionFlag ); // Add Marker to list of Markers
 
-    typedef typename RegionMesh3D<GeoShape, MC>::PointType  PointType;
+    typedef typename RegionMesh3D<GeoShape, MC>::point_Type  point_Type;
     typedef typename RegionMesh3D<GeoShape, MC>::VolumeType VolumeType;
 
 
-    typename RegionMesh3D<GeoShape, MC>::PointType  * pointerPoint  = 0;
+    typename RegionMesh3D<GeoShape, MC>::point_Type  * pointerPoint  = 0;
     typename RegionMesh3D<GeoShape, MC>::EdgeType   * pointerEdge   = 0;
     typename RegionMesh3D<GeoShape, MC>::FaceType   * pointerFace   = 0;
     typename RegionMesh3D<GeoShape, MC>::VolumeType * pointerVolume = 0;
@@ -700,7 +700,7 @@ readINRIAMeshFile( RegionMesh3D<GeoShape, MC>&      mesh,
 
             oStr << "Vertices read " << std::endl;
             oStr << "Size of the node storage is "
-                 << count * sizeof( PointType ) / 1024. / 1024. << std::endl;
+                 << count * sizeof( point_Type ) / 1024. / 1024. << std::endl;
             done++;
 
             if ( count != numberBoundaryVertices )
@@ -1173,7 +1173,7 @@ readGmshFile( RegionMesh3D<GeoShape, MC> & mesh,
         }
     }
     // add the point to the mesh
-    typename RegionMesh3D<GeoShape, MC>::PointType * pointerPoint = 0;
+    typename RegionMesh3D<GeoShape, MC>::point_Type * pointerPoint = 0;
 
     mesh.setMaxNumPoints( numberNodes, true );
     mesh.setNumVertices ( numberNodes );
@@ -1664,7 +1664,7 @@ readNetgenMesh(RegionMesh3D<GeoShape,MC> & mesh,
 
     mesh.setMarker             ( regionFlag ); // Add Marker to list of Markers
 
-    typename RegionMesh3D<GeoShape,MC>::PointType  * pointerPoint  = 0;
+    typename RegionMesh3D<GeoShape,MC>::point_Type  * pointerPoint  = 0;
     typename RegionMesh3D<GeoShape,MC>::EdgeType   * pointerEdge   = 0;
     typename RegionMesh3D<GeoShape,MC>::FaceType   * pointerFace   = 0;
     typename RegionMesh3D<GeoShape,MC>::VolumeType * pointerVolume = 0;

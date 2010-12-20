@@ -1074,13 +1074,13 @@ void partitionMesh<MeshType>::constructNodes()
 
         inode = 1;
 
-        typename MeshType::PointType *pp = 0;
+        typename MeshType::point_Type *pp = 0;
 
         // loop in the list of local nodes:
         // in this loop inode is the local numbering of the points
         for (it = M_localNodes[i].begin(); it != M_localNodes[i].end(); ++it, ++inode)
         {
-            typename MeshType::PointType point = 0;
+            typename MeshType::point_Type point = 0;
 
             // create a boundary point in the local mesh, if needed
             bool boundary = M_originalMesh->isBoundaryPoint(*it);

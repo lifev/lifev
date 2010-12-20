@@ -122,7 +122,7 @@ Real pressureDirichlet3( const Real& /* t */, const Real& x, const Real& y, cons
 Real pressureNeumann( const Real& /* t */, const Real& x, const Real& y, const Real& z, const ID& icomp);
 
 // Boundary condition of Robin
-Real pressureMixte( const Real& /* t */, const Real& x, const Real& y, const Real& z, const ID& /*icomp*/);
+Real pressureRobin( const Real& /* t */, const Real& x, const Real& y, const Real& z, const ID& /*icomp*/);
 
 // ===================================================
 //! User functions for the saturation equation
@@ -159,7 +159,7 @@ Real saturationDirichlet3( const Real& /* t */, const Real& x, const Real& y, co
 Real saturationNeumann( const Real& /* t */, const Real& x, const Real& y, const Real& z, const ID& icomp);
 
 // Boundary condition of Robin
-Real saturationMixte( const Real& /* t */, const Real& x, const Real& y, const Real& z, const ID& /*icomp*/);
+Real saturationRobin( const Real& /* t */, const Real& x, const Real& y, const Real& z, const ID& /*icomp*/);
 
 }
 

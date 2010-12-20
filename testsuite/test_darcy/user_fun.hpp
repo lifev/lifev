@@ -85,7 +85,7 @@ Real neumann1( const Real&, const Real&, const Real&, const Real&, const ID& );
 Real neumann2( const Real&, const Real&, const Real&, const Real&, const ID& );
 
 // Boundary condition of Robin
-Real mixte( const Real&, const Real&, const Real&, const Real&, const ID& );
+Real robin( const Real&, const Real&, const Real&, const Real&, const ID& );
 
 // ===================================================
 //!                 Analytical solution

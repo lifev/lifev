@@ -433,7 +433,7 @@ Bondary conditions \ixv{Boundary Conditions} part. Here is the prototype of the 
     /*!
       \param name the name of the boundary condition
       \param flag the mesh flag identifying the part of the mesh where the boundary condtion applies
-      \param type the boundary condition type: Natural, Essential, Mixte
+      \param type the boundary condition type: Natural, Essential, Robin
       \param mode the boundary condition mode: Scalar, Full, Component, Normal, Tangential
       \param bcf the function holding the user defined function involved in this boundary condition
       \param std::vector<ID> storing the list of components involved in this boundary condition
@@ -460,7 +460,7 @@ Name & Options & Description \\
 \hline \hline
 type &  Natural & Neumann\\
 & Essential & dirichlet \\
-& Mixte & Robin\\
+& Robin\\
 
 \hline
 mode & Scalar & 1 dimension BC \\

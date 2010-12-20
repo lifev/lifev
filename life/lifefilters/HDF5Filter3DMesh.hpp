@@ -525,7 +525,7 @@ typename HDF5Filter3DMesh<MeshType>::meshPtr_Type HDF5Filter3DMesh<MeshType>::ge
     tempMesh->pointList.reserve(numPoints);
     tempMesh->_bPoints.reserve(tempMesh->numBPoints());
 
-    typename MeshType::PointType *pp = 0;
+    typename MeshType::point_Type *pp = 0;
 
     for (UInt j = 0; j < numPoints; ++j)
     {

@@ -519,7 +519,7 @@ The implemented boundary conditions are the following:
 \end{equation}
 where $\mathbf{u}$ is the unknown, $\mathbf{g}$ a given function and $\Gamma$ the boundary of the domain. This condition is imposed by modifying the matrix $A=(a_{ij})$ and the right hand side (rhs) $\mathbf{b}=(b_j)$ in the following way. Suppose that we want to impose $u_i=c$. We set $b_i=c$ and $a_{ij}=\delta_{ij}$ where $\delta_{ij}=1$ if $i=j$ and $\delta_{ij}=0$ if $i\neq j$.
 \item Neumann (type = natural) boundary conditions. This condition derives naturally from the integration by parts in the weak formulation. It is imposed by modifying the right hand side only.
-\item Mixte boundary conditions.
+\item Robin boundary conditions.
 \item Dirichlet normal boundary condition. The value of the unknown in the normal direction can be imposed (i.e. $\mathbf{u}\cdot\mathbf{n}=g$, where $g$ is a known function).
 \item Directional boundary condition. Similar to the Dirichlet normal boundary condition but imposes the value in given direction.
 \end{itemize}

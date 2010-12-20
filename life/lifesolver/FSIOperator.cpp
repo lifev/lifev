@@ -110,7 +110,7 @@ FSIOperator::FSIOperator():
     M_bcvDerFluidLoadToStructure         ( ),
     M_bcvDerFluidLoadToFluid             ( ),
     M_bcvDerStructureDispToSolid         ( ),
-    M_bcfMixteOuterWall                  ( ),
+    M_bcfRobinOuterWall                  ( ),
     M_lambdaFluid                        ( ),
     M_lambdaFluidRepeated                ( ),
     M_lambda                             ( ),
@@ -902,13 +902,13 @@ FSIOperator::setStructureToFluidParametres()
     if (M_Alphaf.get()==0)
     {
         this->setAlphafCoef();
-        M_bcvStructureToFluid->setMixteCoef(M_AlphafCoef);
-        M_bcvStructureToFluid->setBetaCoef(M_AlphafCoef);
+        M_bcvStructureToFluid->setRobinCoeff(M_AlphafCoef);
+        M_bcvStructureToFluid->setBetaCoeff(M_AlphafCoef);
     }
     else
     {
-        M_bcvStructureToFluid->setMixteVec(this->Alphaf());
-        M_bcvStructureToFluid->setBetaVec(this->Alphaf());
+        M_bcvStructureToFluid->setRobinCoeffVector(this->Alphaf());
+        M_bcvStructureToFluid->setBetaCoeffVector(this->Alphaf());
     }
 }
 
@@ -1273,9 +1273,9 @@ FSIOperator::setDerFluidLoadToFluid( const vector_Type& dload, UInt type )
                                      type );
 }
 
-void FSIOperator::setMixteOuterWall(function_Type const& dload, function_Type const& E)
+void FSIOperator::setRobinOuterWall(function_Type const& dload, function_Type const& E)
 {
-    M_bcfMixteOuterWall.setFunctions_Mixte(dload,
+    M_bcfRobinOuterWall.setFunctions_Robin(dload,
                                            E);
 }
 

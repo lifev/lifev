@@ -561,7 +561,7 @@ public:
     virtual boost::shared_ptr<EpetraMap>& couplingVariableMap()      { return M_solidInterfaceMap; }
 
     //! Method to implement Robin boundary conditions on the external wall for the structure
-    BCFunctionMixte& bcfMixteOuterWall()                                { return M_bcfMixteOuterWall; }
+    BCFunctionRobin& bcfRobinOuterWall()                                { return M_bcfRobinOuterWall; }
 
     bcVectorInterfacePtr_Type bcvStructureDisptoFluid()                 const { return M_bcvStructureDispToFluid; }
     bcVectorInterfacePtr_Type bcvStructureToFluid()                     const { return M_bcvStructureToFluid; }
@@ -706,8 +706,8 @@ public:
 
 //     bool mpi(){return M_mpi;}
 
-//     void setMixteOuterWall                   ( function_Type const& dload,
-//                                                function_Type const& E ) { M_bcfMixteOuterWall.setFunctions_Mixte(dload, E); }
+//     void setRobinOuterWall                   ( function_Type const& dload,
+//                                                function_Type const& E ) { M_bcfRobinOuterWall.setFunctions_Robin(dload, E); }
     void setStructureDispToHarmonicExtension ( const vector_Type& disp,  UInt type = 0 );
     void setStructureToFluid                 ( const vector_Type& vel,   UInt type = 0 );
     void setStructureDispToFluid             ( const vector_Type& vel,   UInt type = 0 );
@@ -720,7 +720,7 @@ public:
     void setFluidLoadToStructure             ( const vector_Type& load,  UInt type = 0 );
     void setDerFluidLoadToStructure          ( const vector_Type& dload, UInt type = 0 );
     void setDerFluidLoadToFluid              ( const vector_Type& dload, UInt type = 0 );
-    void setMixteOuterWall                   ( const function_Type& dload, const function_Type& E);
+    void setRobinOuterWall                   ( const function_Type& dload, const function_Type& E);
 
     //! sets the solution vector by reference
     virtual void setSolutionPtr              ( const vectorPtr_Type& sol )      { M_lambda = sol; }
@@ -880,7 +880,7 @@ protected:
     bcVectorInterfacePtr_Type                               M_bcvDerFluidLoadToStructure;
     bcVectorInterfacePtr_Type                               M_bcvDerFluidLoadToFluid;
     bcVectorInterfacePtr_Type                               M_bcvDerStructureDispToSolid;
-    BCFunctionMixte                                   M_bcfMixteOuterWall;
+    BCFunctionRobin                                   M_bcfRobinOuterWall;
 
 //     bcVectorInterfacePtr_Type                               M_bcvDerReducedFluidLoadToStructure;
 //     bcVectorInterfacePtr_Type                               M_bcvDerStructureAccToReducedFluid;

@@ -157,13 +157,13 @@ Real source_in( const Real& /*t*/,
 // Boundary conditions
 
 // dp/dn = first_parameter + second_parameter * p
-mixteBDfun.setFunctions_Mixte( mixte,
+robinBDfun.setFunctions_Robin( robin,
                                Members->getUOne() );
 
 BCHandler bcDarcy( 6 );
 
 bcDarcy.addBC( "Top",     TOP,     Natural,    Full,    neumann1, 1 );
-bcDarcy.addBC( "Bottom",  BOTTOM,  Mixte,      Scalar,  mixteBDfun  );
+bcDarcy.addBC( "Bottom",  BOTTOM,  Robin,      Scalar,  robinBDfun  );
 bcDarcy.addBC(  "Left",   LEFT,    Essential,  Scalar,  dirichlet   );
 bcDarcy.addBC( "Right",  RIGHT,    Essential,  Scalar,  dirichlet   );
 bcDarcy.addBC( "Front",  FRONT,    Essential,  Scalar,  dirichlet   );
@@ -223,7 +223,7 @@ Real neumann2( const Real& /* t */,
 }
 
 // Boundary condition of Robin
-Real mixte( const Real& /* t */,
+Real robin( const Real& /* t */,
             const Real& x,
             const Real& y,
             const Real& z,
@@ -329,13 +329,13 @@ Real source_in( const Real& t,
 // Boundary conditions
 
 // dp/dn = first_parameter + second_parameter * p
-mixteBDfun.setFunctions_Mixte( mixte,
+robinBDfun.setFunctions_Robin( robin,
                                Members->getUOne() );
 
 BCHandler bcDarcy( 6 );
 
 bcDarcy.addBC( "Top",     TOP,     Natural,    Full,    neumann1, 1 );
-bcDarcy.addBC( "Bottom",  BOTTOM,  Mixte,      Scalar,  mixteBDfun  );
+bcDarcy.addBC( "Bottom",  BOTTOM,  Robin,      Scalar,  robinBDfun  );
 bcDarcy.addBC(  "Left",   LEFT,    Essential,  Scalar,  dirichlet   );
 bcDarcy.addBC( "Right",  RIGHT,    Essential,  Scalar,  dirichlet   );
 bcDarcy.addBC( "Front",  FRONT,    Essential,  Scalar,  dirichlet   );
@@ -396,7 +396,7 @@ Real neumann2( const Real& t,
 }
 
 // Boundary condition of Robin
-Real mixte( const Real& t,
+Real robin( const Real& t,
             const Real& x,
             const Real& y,
             const Real& z,
@@ -503,13 +503,13 @@ Real source_in( const Real& /*t*/,
 // Boundary conditions
 
 // dp/dn = first_parameter + second_parameter * p
-mixteBDfun.setFunctions_Mixte( mixte,
+robinBDfun.setFunctions_Robin( robin,
                                Members->getUOne() );
 
 BCHandler bcDarcy( 6 );
 
 bcDarcy.addBC( "Top",     TOP,     Natural,    Full,    neumann1, 1 );
-bcDarcy.addBC( "Bottom",  BOTTOM,  Mixte,      Scalar,  mixteBDfun  );
+bcDarcy.addBC( "Bottom",  BOTTOM,  Robin,      Scalar,  robinBDfun  );
 bcDarcy.addBC(  "Left",   LEFT,    Essential,  Scalar,  dirichlet   );
 bcDarcy.addBC( "Right",  RIGHT,    Essential,  Scalar,  dirichlet   );
 bcDarcy.addBC( "Front",  FRONT,    Essential,  Scalar,  dirichlet   );
@@ -570,7 +570,7 @@ Real neumann2( const Real& /*t*/,
 }
 
 // Boundary condition of Robin
-Real mixte( const Real& /*t*/,
+Real robin( const Real& /*t*/,
             const Real& x,
             const Real& y,
             const Real& z,
@@ -666,13 +666,13 @@ Real initialPrimal( const Real& /*t*/,
 // Boundary conditions
 
 // dp/dn = first_parameter + second_parameter * p
-mixteBDfun.setFunctions_Mixte( mixte,
+robinBDfun.setFunctions_Robin( robin,
                                Members->getUOne() );
 
 BCHandler bcDarcy( 6 );
 
 bcDarcy.addBC( "Top",     TOP,     Natural,    Full,    neumann1, 1 );
-bcDarcy.addBC( "Bottom",  BOTTOM,  Mixte,      Scalar,  mixteBDfun  );
+bcDarcy.addBC( "Bottom",  BOTTOM,  Robin,      Scalar,  robinBDfun  );
 bcDarcy.addBC(  "Left",   LEFT,    Essential,  Scalar,  dirichlet   );
 bcDarcy.addBC( "Right",  RIGHT,    Essential,  Scalar,  dirichlet   );
 bcDarcy.addBC( "Front",  FRONT,    Essential,  Scalar,  dirichlet   );
@@ -733,7 +733,7 @@ Real neumann2( const Real& t,
 }
 
 // Boundary condition of Robin
-Real mixte( const Real& t,
+Real robin( const Real& t,
             const Real& x,
             const Real& y,
             const Real& z,

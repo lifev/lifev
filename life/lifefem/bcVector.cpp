@@ -132,7 +132,7 @@ BCVectorBase::operator() ( const ID& globalDofId, const ID& component ) const
 //====================================
 
 Real
-BCVectorBase::MixteVec ( const ID& globalDofId, const ID& component ) const
+BCVectorBase::robinCoeffVector ( const ID& globalDofId, const ID& component ) const
 {
     ASSERT_PRE( this->isFinalized(), "BC Vector should be finalized before being accessed." );
     return ( *M_robinBoundaryMassCoeffVectorPtr ) ( ( component - 1 ) * M_numberOfTotalDof + globalDofId );
@@ -140,7 +140,7 @@ BCVectorBase::MixteVec ( const ID& globalDofId, const ID& component ) const
 
 
 Real
-BCVectorBase::BetaVec ( const ID& globalDofId, const ID& component ) const
+BCVectorBase::betaCoeffVector ( const ID& globalDofId, const ID& component ) const
 {
 
 
@@ -155,7 +155,7 @@ BCVectorBase::BetaVec ( const ID& globalDofId, const ID& component ) const
 //====================================
 
 void
-BCVectorBase::setVector( const vector_Type& rightHandSideVector , UInt numberOfTotalDof, UInt type )
+BCVectorBase::setRhsVector( const vector_Type& rightHandSideVector , UInt numberOfTotalDof, UInt type )
 {
     M_rightHandSideVectorPtr = &rightHandSideVector  ;
     M_numberOfTotalDof = numberOfTotalDof;
@@ -164,14 +164,14 @@ BCVectorBase::setVector( const vector_Type& rightHandSideVector , UInt numberOfT
 }
 
 void
-BCVectorBase::setMixteVec( const vector_Type& robinBoundaryMassCoeffVector )
+BCVectorBase::setRobinCoeffVector( const vector_Type& robinBoundaryMassCoeffVector )
 {
     M_isRobinBdMassCoeffAVector = true;
     M_robinBoundaryMassCoeffVectorPtr= &robinBoundaryMassCoeffVector;
 }
 
 void
-BCVectorBase::setBetaVec( const vector_Type& betaCoeffVector )
+BCVectorBase::setBetaCoeffVector( const vector_Type& betaCoeffVector )
 {
     M_isBetaCoeffAVector = true;
     M_betaCoeffVectorPtr= &betaCoeffVector;
@@ -193,7 +193,7 @@ BCVector::BCVector( const vector_Type& rightHandSideVector, UInt const numberOfT
         :
         BCVectorBase( rightHandSideVector, numberOfTotalDof, type )
 {
-    this->setFinalized( true );
+	M_finalized = true;
 }
 
 
@@ -262,7 +262,7 @@ BCVectorInterface::BCVectorInterface( const EpetraVector& rightHandSideVector, U
         BCVectorBase( rightHandSideVector, numberOfTotalDof, type ),
         M_interfaceDofPtr( interfaceDofPtr )
 {
-    this->setFinalized( true );
+	M_finalized = true;
 }
 
 
@@ -310,16 +310,16 @@ void BCVectorInterface::setup( const vector_Type& rightHandSideVector, UInt numb
     M_interfaceDofPtr      = interfaceDofPtr;
     M_isRobinBdMassCoeffAVector = false;
     M_isBetaCoeffAVector  = false;
-    this->setFinalized( true );
+    M_finalized = true;
 }
 
 
 void
-BCVectorInterface::setVector( const vector_Type& rightHandSideVector, UInt numberOfTotalDof, const dofInterfacePtr_Type& interfaceDofPtr, UInt type )
+BCVectorInterface::setRhsVector( const vector_Type& rightHandSideVector, UInt numberOfTotalDof, const dofInterfacePtr_Type& interfaceDofPtr, UInt type )
 {
     ASSERT_PRE( !this->isFinalized(), "BC Vector cannot be set twice." );
 
-    bcVectorBase_Type::setVector( rightHandSideVector, numberOfTotalDof, type );
+    bcVectorBase_Type::setRhsVector( rightHandSideVector, numberOfTotalDof, type );
 
     M_interfaceDofPtr = interfaceDofPtr;
 
@@ -327,7 +327,7 @@ BCVectorInterface::setVector( const vector_Type& rightHandSideVector, UInt numbe
 
 
 Real
-BCVectorInterface::MixteVec( const ID& globalDofId, const ID& component ) const
+BCVectorInterface::robinCoeffVector( const ID& globalDofId, const ID& component ) const
 {
     ASSERT_PRE( this->isFinalized(), "BC Vector should be finalized before being accessed." );
     return ( *M_robinBoundaryMassCoeffVectorPtr ) (( component - 1 ) * M_numberOfTotalDof + M_interfaceDofPtr->getInterfaceDof( globalDofId ));
@@ -335,7 +335,7 @@ BCVectorInterface::MixteVec( const ID& globalDofId, const ID& component ) const
 
 
 Real
-BCVectorInterface::BetaVec( const ID& globalDofId, const ID& component ) const
+BCVectorInterface::betaCoeffVector( const ID& globalDofId, const ID& component ) const
 {
     ASSERT_PRE( this->isFinalized(), "BC Vector should be finalized before being accessed." );
     return ( *M_betaCoeffVectorPtr ) (( component - 1 ) * M_numberOfTotalDof + M_interfaceDofPtr->getInterfaceDof( globalDofId ));

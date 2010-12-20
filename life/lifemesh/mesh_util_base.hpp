@@ -83,7 +83,7 @@ cmpBareItem<BareEdge> > temporaryEdgeContainer_Type;
     A geometric entity is on the boundary if all its vertices are boundary vertices.
 
     @pre It assumes that boundary points in the mesh are correctly set.
-    @pre The MeshType must export the typenames PointType, FaceType and EdgeType.
+    @pre The MeshType must export the typenames point_Type, FaceType and EdgeType.
 */
 template <typename MeshType>
 class EnquireBEntity
@@ -97,12 +97,12 @@ public:
     typedef mesh_Type const *             meshPtr_Type;
     typedef typename mesh_Type::FaceType  face_Type;
     typedef typename mesh_Type::EdgeType  edge_Type;
-    typedef typename mesh_Type::PointType point_Type;
+    typedef typename mesh_Type::point_Type point_Type;
 
     // The following should be removed
     // typedef typename mesh_Type::FaceType  FaceType;
     // typedef typename mesh_Type::EdgeType  EdgeType;
-    // typedef typename mesh_Type::PointType PointType;
+    // typedef typename mesh_Type::point_Type point_Type;
     //@}
 
     //! @name Constructor & Destructor
@@ -1972,7 +1972,7 @@ p2MeshFromP1Data( MeshType & mesh, std::ostream & logStream = std::cout )
     << std::endl;
 
 
-    typename MeshType::PointType *       pointPtr = 0;
+    typename MeshType::point_Type *       pointPtr = 0;
     typename MeshType::EdgeType *        edgePtr = 0;
     typename MeshType::ElementType *     elementPtr = 0;
     typename MeshType::BElementType *    facetPtr = 0;

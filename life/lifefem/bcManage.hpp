@@ -346,14 +346,14 @@ bcNaturalManageUDep( Real (*mu)(Real time,Real x, Real y, Real z, Real u),
 
 
 // ===================================================
-//! @name Mixte BC
+//! @name Robin BC
 // @{
 // ===================================================
 
 
-//! Prescribe Mixte boundary condition
+//! Prescribe Robin boundary condition
 /*!
- * The matrix and the right hand side are modified to take into account the Mixte boundary condition
+ * The matrix and the right hand side are modified to take into account the Robin boundary condition
  * @param matrix   The system matrix
  * @param rightHandSide   The system right hand side
  * @param mesh  The mesh
@@ -365,7 +365,7 @@ bcNaturalManageUDep( Real (*mu)(Real time,Real x, Real y, Real z, Real u),
  */
 template <typename MatrixType, typename VectorType, typename DataType, typename MeshType>
 void
-bcMixteManage( MatrixType& matrix,
+bcRobinManage( MatrixType& matrix,
                VectorType& rightHandSide,
                const MeshType& mesh,
                const Dof& dof,
@@ -375,9 +375,9 @@ bcMixteManage( MatrixType& matrix,
                UInt offset );
 
 
-//! Prescribe Mixte boundary condition only on the matrix
+//! Prescribe Robin boundary condition only on the matrix
 /*!
- * The matrix is modified to take into account the Mixte boundary condition
+ * The matrix is modified to take into account the Robin boundary condition
  * @param matrix   The system matrix
  * @param mesh  The mesh
  * @param dof  Container of the local to global map of DOFs
@@ -388,7 +388,7 @@ bcMixteManage( MatrixType& matrix,
  */
 template <typename MatrixType, typename DataType, typename MeshType>
 void
-bcMixteManageMatrix( MatrixType& matrix,
+bcRobinManageMatrix( MatrixType& matrix,
                      const MeshType& mesh,
                      const Dof& dof,
                      const BCBase& boundaryCond,
@@ -397,9 +397,9 @@ bcMixteManageMatrix( MatrixType& matrix,
                      UInt offset );
 
 
-//! Prescribe Mixte boundary condition only on the rightHandSide
+//! Prescribe Robin boundary condition only on the rightHandSide
 /*!
- * The matrix is modified to take into account the Mixte boundary condition
+ * The matrix is modified to take into account the Robin boundary condition
  * @param rightHandSide   The system right hand side
  * @param mesh  The mesh
  * @param dof  Container of the local to global map of DOFs
@@ -410,7 +410,7 @@ bcMixteManageMatrix( MatrixType& matrix,
  */
 template <typename VectorType, typename DataType, typename MeshType>
 void
-bcMixteManageVector( VectorType& rightHandSide,
+bcRobinManageVector( VectorType& rightHandSide,
                      const MeshType& mesh,
                      const Dof& dof,
                      const BCBase& boundaryCond,
@@ -584,8 +584,8 @@ bcManage( MatrixType& matrix,
         case Natural:    // Natural boundary conditions (Neumann)
             bcNaturalManage( rightHandSide, mesh, dof, bcHandler[ i ], currentBdFE, time, bcHandler.offset());
             break;
-        case Mixte:      // Mixte boundary conditions (Robin)
-            bcMixteManage( matrix, rhsRepeated, mesh, dof, bcHandler[ i ], currentBdFE, time, bcHandler.offset() );
+        case Robin:      // Robin boundary conditions (Robin)
+            bcRobinManage( matrix, rhsRepeated, mesh, dof, bcHandler[ i ], currentBdFE, time, bcHandler.offset() );
             break;
         case Flux:       // Flux boundary condition
             bcFluxManage( matrix, rightHandSide, mesh, dof, bcHandler[ i ], currentBdFE, time, bcHandler.offset()+bcHandler[i].offset());
@@ -621,7 +621,7 @@ bcManage( MatrixType& matrix,
             bcEssentialManage( matrix, rightHandSide, mesh, dof, bcHandler[ i ], currentBdFE, diagonalizeCoef, time, bcHandler.offset() );
             break;
         case Natural:   	// Natural boundary conditions (Neumann)
-        case Mixte:  	    // Mixte boundary conditions (Robin)
+        case Robin:  	    // Robin boundary conditions (Robin)
         case Flux:		    // Flux boundary condition
         case Resistance:    // Resistance boundary conditions
             break;
@@ -673,7 +673,7 @@ bcManage( Real (*mu)(Real time,Real x, Real y, Real z, Real u),
                 //in this case mu must be a constant, think about (not still implemented)
                 bcNaturalManage( rightHandSide, mesh, dof, bcHandler[ i ], currentBdFE, time, bcHandler.offset() );
             break;
-        case Mixte:  // Mixte boundary conditions (Robin)
+        case Robin:  // Robin boundary conditions (Robin)
 
             if (bcHandler[ i ].isUDep())
             {
@@ -681,7 +681,7 @@ bcManage( Real (*mu)(Real time,Real x, Real y, Real z, Real u),
             }
             else
             {
-                bcMixteManage( matrix, rhsRepeated, mesh, dof, bcHandler[ i ], currentBdFE, time, bcHandler.offset() );
+                bcRobinManage( matrix, rhsRepeated, mesh, dof, bcHandler[ i ], currentBdFE, time, bcHandler.offset() );
             }
             break;
         default:
@@ -712,7 +712,7 @@ bcManage( Real (*mu)(Real time,Real x, Real y, Real z, Real u),
             break;
         case Natural:// Natural boundary conditions (Neumann)
             break;
-        case Mixte:  // Mixte boundary conditions (Robin)
+        case Robin:  // Robin boundary conditions (Robin)
             break;
         default:
             ERROR_MSG( "This BC type is not yet implemented" );
@@ -750,8 +750,8 @@ bcManageMatrix( MatrixType&      matrix,
             break;
         case Natural:  // Natural boundary conditions (Neumann)
             break;
-        case Mixte:  // Mixte boundary conditions (Robin)
-            bcMixteManageMatrix( matrix, mesh, dof, bcHandler[ i ], currentBdFE, time, bcHandler.offset() );
+        case Robin:  // Robin boundary conditions (Robin)
+            bcRobinManageMatrix( matrix, mesh, dof, bcHandler[ i ], currentBdFE, time, bcHandler.offset() );
             break;
         case Flux:  // Flux boundary conditions
             bcFluxManageMatrix( matrix, mesh, dof, bcHandler[ i ], currentBdFE, time, bcHandler.offset()+bcHandler[i].offset());
@@ -777,9 +777,9 @@ bcManageMatrix( MatrixType&      matrix,
         case Natural:  // Natural boundary conditions (Neumann)
             // Do nothing
             break;
-        case Mixte:  // Mixte boundary conditions (Robin)
+        case Robin:  // Robin boundary conditions (Robin)
             break;
-        case Flux:  // Mixte boundary conditions (Robin)
+        case Flux:  // Robin boundary conditions (Robin)
             break;
         default:
             ERROR_MSG( "This BC type is not yet implemented" );
@@ -818,8 +818,8 @@ bcManageVector( VectorType&      rightHandSide,
         case Natural:  // Natural boundary conditions (Neumann)
             bcNaturalManage( rightHandSide, mesh, dof, bcHandler[ i ], currentBdFE, time, bcHandler.offset() );
             break;
-        case Mixte:  // Mixte boundary conditions (Robin)
-            bcMixteManageVector( rhsRepeated, mesh, dof, bcHandler[ i ], currentBdFE, time, bcHandler.offset() );
+        case Robin:  // Robin boundary conditions (Robin)
+            bcRobinManageVector( rhsRepeated, mesh, dof, bcHandler[ i ], currentBdFE, time, bcHandler.offset() );
             break;
         case Flux:  // Flux boundary conditions
             bcFluxManageVector( rightHandSide, bcHandler[ i ], time, bcHandler.offset()+bcHandler[i].offset() );
@@ -863,8 +863,8 @@ bcManageVector( VectorType&                     rightHandSide,
         case Natural:  // Natural boundary conditions (Neumann)
             bcNaturalManage( rightHandSide, *feSpace.mesh(), feSpace.dof(), bcHandler[ i ], feSpace.feBd(), time, bcHandler.offset() );
             break;
-        case Mixte:  // Mixte boundary conditions (Robin)
-            bcMixteManageVector( rhsRepeated, *feSpace.mesh(), feSpace.dof(), bcHandler[ i ], feSpace.feBd(), time, bcHandler.offset() );
+        case Robin:  // Robin boundary conditions (Robin)
+            bcRobinManageVector( rhsRepeated, *feSpace.mesh(), feSpace.dof(), bcHandler[ i ], feSpace.feBd(), time, bcHandler.offset() );
             break;
         case Flux:  // Flux boundary conditions
             bcFluxManageVector( rightHandSide, bcHandler[ i ], time, bcHandler.offset()+bcHandler[i].offset() );
@@ -913,7 +913,7 @@ bcEssentialManage( MatrixType& matrix,
     idDofVec.reserve(boundaryCond.list_size()*nComp);
     datumVec.reserve(boundaryCond.list_size()*nComp);
 
-    if ( boundaryCond.dataVector() )
+    if ( boundaryCond.isDataAVector() )
     { //! If BC is given under a vectorial form
 
         const BCVectorInterface* pId = static_cast< const BCVectorInterface* > (boundaryCond.pointerToBCVector());
@@ -992,7 +992,7 @@ bcEssentialManageUDep( MatrixType& matrix,
     // Number of total scalar Dof
     UInt totalDof = dof.numTotalDof();
 
-    if ( boundaryCond.dataVector() )
+    if ( boundaryCond.isDataAVector() )
     { //! If BC is given under a vectorial form
 
         //not possible
@@ -1099,7 +1099,7 @@ bcEssentialManageVector( VectorType&     rightHandSide,
     std::vector<Real> datumVec(0);
     datumVec.reserve(boundaryCond.list_size()*nComp);
 
-    if ( boundaryCond.dataVector() )
+    if ( boundaryCond.isDataAVector() )
     {  //! If BC is given under a vectorial form
 
         // Loop on BC identifiers
@@ -1174,7 +1174,7 @@ bcNaturalManage( VectorType& rightHandSide,
     ID ibF, idDof, icDof, gDof;
     Real sum;
 
-    if ( boundaryCond.dataVector() )
+    if ( boundaryCond.isDataAVector() )
     {
         //! If BC is given under a vectorial form
         switch ( boundaryCond.pointerToBCVector()->type() )
@@ -1399,7 +1399,7 @@ bcNaturalManageUDep( Real (*mu)(Real time,Real x, Real y, Real z, Real u),
     const IdentifierNatural* pId;
     ID ibF, idDof ;
 
-    if ( boundaryCond.dataVector() )
+    if ( boundaryCond.isDataAVector() )
     { //! If BC is given under a vectorial form
         ERROR_MSG( "This type of BCVector does not exists on bc depentent on solution\n" );
     }
@@ -1470,13 +1470,13 @@ bcNaturalManageUDep( Real (*mu)(Real time,Real x, Real y, Real z, Real u),
 
 
 // ===================================================
-// Mixte BC
+// Robin BC
 // ===================================================
 
 
 template <typename MatrixType, typename VectorType, typename DataType, typename MeshType>
 void
-bcMixteManage( MatrixType& matrix,
+bcRobinManage( MatrixType& matrix,
                VectorType& rightHandSide,
                const MeshType& mesh,
                const Dof& dof,
@@ -1500,7 +1500,7 @@ bcMixteManage( MatrixType& matrix,
     const IdentifierNatural* pId;
     ID ibF, idDof, jdDof, kdDof;
 
-    if ( boundaryCond.dataVector() )
+    if ( boundaryCond.isDataAVector() )
     {   //! If BC is given under a vectorial form
 
         //! for the moment, only one coefficient per BCvector.
@@ -1538,14 +1538,14 @@ bcMixteManage( MatrixType& matrix,
                         for ( ID n = 1; n <= nDofF; ++n)
                         {
                             kdDof=pId->localToGlobalMap( n ); // + ( boundaryCond.component( j ) - 1 ) * totalDof;
-                            if (boundaryCond.ismixteVec())
-                                mcoef += boundaryCond.MixteVec( kdDof, boundaryCond.component( j ) ) * currentBdFE.phi( int( n - 1 ), l );
-                            else  mcoef += boundaryCond.mixteCoef() * currentBdFE.phi( int( n - 1 ), l );
+                            if (boundaryCond.isRobinCoeffAVector())
+                                mcoef += boundaryCond.robinCoeffVector( kdDof, boundaryCond.component( j ) ) * currentBdFE.phi( int( n - 1 ), l );
+                            else  mcoef += boundaryCond.robinCoeff() * currentBdFE.phi( int( n - 1 ), l );
 
-                            if (boundaryCond.isbetaVec())
-                                mbcb += boundaryCond.BetaVec( kdDof, boundaryCond.component( j ) )
+                            if (boundaryCond.isBetaCoeffAVector())
+                                mbcb += boundaryCond.betaCoeffVector( kdDof, boundaryCond.component( j ) )
                                         * boundaryCond( kdDof, boundaryCond.component( j )) * currentBdFE.phi( int( n - 1 ), l );
-                            else  mbcb += boundaryCond.betaCoef() * boundaryCond( kdDof, boundaryCond.component( j )) * currentBdFE.phi( int( n - 1 ), l );
+                            else  mbcb += boundaryCond.betaCoeff() * boundaryCond( kdDof, boundaryCond.component( j )) * currentBdFE.phi( int( n - 1 ), l );
                         }
 
                         sum += mcoef* currentBdFE.phi( int( idofF - 1 ), l ) *
@@ -1580,10 +1580,10 @@ bcMixteManage( MatrixType& matrix,
                             for ( ID n = 1; n <= nDofF; ++n)
                             {
                                 kdDof=pId->localToGlobalMap( n ); // + ( boundaryCond.component( j ) - 1 ) * totalDof;
-                                if (boundaryCond.ismixteVec())
-                                    mcoef += boundaryCond.MixteVec( kdDof, boundaryCond.component( j ) ) * currentBdFE.phi( int( n - 1 ), l );
+                                if (boundaryCond.isRobinCoeffAVector())
+                                    mcoef += boundaryCond.robinCoeffVector( kdDof, boundaryCond.component( j ) ) * currentBdFE.phi( int( n - 1 ), l );
 
-                                else mcoef += boundaryCond.mixteCoef() * currentBdFE.phi( int( n - 1 ), l );
+                                else mcoef += boundaryCond.robinCoeff() * currentBdFE.phi( int( n - 1 ), l );
                             }
 
                             currentBdFE.weightMeas( l );
@@ -1606,7 +1606,7 @@ bcMixteManage( MatrixType& matrix,
 
         DataType x, y, z;
 
-        const BCFunctionMixte* pBcF = static_cast<const BCFunctionMixte*>( boundaryCond.pointerToFunctor() );
+        const BCFunctionRobin* pBcF = static_cast<const BCFunctionRobin*>( boundaryCond.pointerToFunctor() );
 
         // Loop on BC identifiers
         for ( ID i = 1; i <= boundaryCond.list_size(); ++i )
@@ -1685,12 +1685,12 @@ bcMixteManage( MatrixType& matrix,
             }
         }
     }
-}  //bcMixteManage
+}  //bcRobinManage
 
 
 template <typename MatrixType, typename DataType, typename MeshType>
 void
-bcMixteManageMatrix( MatrixType& matrix,
+bcRobinManageMatrix( MatrixType& matrix,
                      const MeshType& mesh,
                      const Dof& dof,
                      const BCBase& boundaryCond,
@@ -1714,11 +1714,11 @@ bcMixteManageMatrix( MatrixType& matrix,
     const IdentifierNatural* pId;
     ID ibF, idDof, jdDof;
 
-    if ( boundaryCond.dataVector() )
+    if ( boundaryCond.isDataAVector() )
     {   //! If BC is given under a vectorial form
 
         //! for the moment, only one coefficient per BCvector.
-        DataType mcoef = boundaryCond.mixteCoef();   //!< the mixte coefficient
+        DataType mcoef = boundaryCond.robinCoeff();   //!< the robin coefficient
 
         // Loop on BC identifiers
         for ( ID i = 1; i <= boundaryCond.list_size(); ++i )
@@ -1795,7 +1795,7 @@ bcMixteManageMatrix( MatrixType& matrix,
 
         DataType x, y, z;
 
-        const BCFunctionMixte* pBcF = static_cast<const BCFunctionMixte*>( boundaryCond.pointerToFunctor() );
+        const BCFunctionRobin* pBcF = static_cast<const BCFunctionRobin*>( boundaryCond.pointerToFunctor() );
 
         // Loop on BC identifiers
         for ( ID i = 1; i <= boundaryCond.list_size(); ++i )
@@ -1871,13 +1871,13 @@ bcMixteManageMatrix( MatrixType& matrix,
             }
         }
     }
-}   //bcMixteManageMatrix
+}   //bcRobinManageMatrix
 
 
 
 template <typename VectorType, typename DataType, typename MeshType>
 void
-bcMixteManageVector( VectorType& rightHandSide,
+bcRobinManageVector( VectorType& rightHandSide,
                      const MeshType& mesh,
                      const Dof& dof,
                      const BCBase& boundaryCond,
@@ -1898,7 +1898,7 @@ bcMixteManageVector( VectorType& rightHandSide,
     const IdentifierNatural* pId;
     ID ibF, idDof;
 
-    if ( boundaryCond.dataVector() )
+    if ( boundaryCond.isDataAVector() )
     {   //! If BC is given under a vectorial form
 
         // Loop on BC identifiers
@@ -1977,7 +1977,7 @@ bcMixteManageVector( VectorType& rightHandSide,
             }
         }
     }
-} //bcMixteManageVector
+} //bcRobinManageVector
 
 
 
@@ -2049,7 +2049,7 @@ bcFluxManageMatrix( MatrixType&     matrix,
     const IdentifierNatural* pId;
     ID ibF, idDof, jdDof/*, kdDof*/;
 
-    if ( !boundaryCond.dataVector() )
+    if ( !boundaryCond.isDataAVector() )
     {
         for ( ID i = 1; i <= boundaryCond.list_size(); ++i )
         {
@@ -2111,7 +2111,7 @@ bcResistanceManage( MatrixType& matrix,
     const IdentifierNatural* pId;
     ID ibF, idDof, jdDof, kdDof;
 
-    if ( boundaryCond.dataVector() )
+    if ( boundaryCond.isDataAVector() )
     {
         //auxiliary vector
         VectorType vv(rightHandSide.map(), Repeated);
@@ -2175,7 +2175,7 @@ bcResistanceManage( MatrixType& matrix,
                     {
                         jdDof = *jDofIt + ( boundaryCond.component( jComp ) - 1 ) * totalDof + offset;
 
-                        matrix.addToCoefficient( idDof-1,  jdDof-1, boundaryCond.resistanceCoef() * vv[idDof] * vv[jdDof] );
+                        matrix.addToCoefficient( idDof-1,  jdDof-1, boundaryCond.resistanceCoeff() * vv[idDof] * vv[jdDof] );
                     }
                 }
             }

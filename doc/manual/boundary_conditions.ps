@@ -1920,7 +1920,7 @@ y Fg(BCFunction_Base)44 b(Ftemper\(termperature\);)1867
 (from)g(the)g Fg(BCFunction)p 3670 209 29 4 v 32 w(Base)0
 322 y Fh(in)36 b(order)h(to)g(hold)g(sp)s(eci\014c)f(that)i(necessary)f
 (for)f(the)h(b)s(oundary)e(condition.)61 b(F)-8 b(or)37
-b(instance,)j(in)c(a)h(Mixte)0 435 y(b)s(oundary)28 b(condition)1557
+b(instance,)j(in)c(a)h(Robin)0 435 y(b)s(oundary)28 b(condition)1557
 524 y Ff(@)5 b(T)p 1557 565 120 4 v 1563 648 a(@)g(n)1706
 586 y Fh(+)20 b Ff(\013T)38 b Fh(=)25 b Ff(T)2095 601
 y Fe(r)r(ef)2207 586 y Ff(;)0 770 y Fh(it)e(w)m(ould)g(b)s(e)f(in)m
@@ -1929,11 +1929,11 @@ Ff(\013)e Fh(in)g(the)g(functor)f(holding)h Ff(T)2879
 785 y Fe(r)r(ef)2991 770 y Fh(.)38 b(Th)m(us,)24 b(for)e(this)h(kind)0
 883 y(of)30 b(b)s(oundary)e(condition)i(w)m(e)g(ha)m(v)m(e)h(a)f(sp)s
 (eci\014c)g(class)g Fg(BCFunction)p 2341 883 29 4 v 32
-w(Mixte)e Fh(with)h(the)h(follo)m(wing)i(de\014nition:)0
-1089 y Fg(class)46 b(BCFunction_Mixte:public)c(BCFunction_Base)h({)48
-1201 y(public:)95 1427 y(BCFunction_Mixte\(Function)e(g,)48
-b(Function)d(coef\);)95 1653 y(BCFunction_Mixte\(const)d
-(BCFunction_Mixte&)h(bcf\);)95 1879 y(Real)k(coef\(const)e(Real&)h(t,)i
+w(Robin)e Fh(with)h(the)h(follo)m(wing)i(de\014nition:)0
+1089 y Fg(class)46 b(BCFunction_Robin:public)c(BCFunction_Base)h({)48
+1201 y(public:)95 1427 y(BCFunction_Robin\(Function)e(g,)48
+b(Function)d(coef\);)95 1653 y(BCFunction_Robin\(const)d
+(BCFunction_Robin&)h(bcf\);)95 1879 y(Real)k(coef\(const)e(Real&)h(t,)i
 (const)e(Real&)g(x,)i(const)e(Real&)g(y,)191 1992 y(const)g(Real&)h(z,)
 g(const)f(ID&)h(i\))g(const;)48 2105 y(private:)95 2331
 y(Function)f(_coef;)0 2443 y(};)0 2649 y Fh(This)c(class)i(inherits)e
@@ -1955,7 +1955,7 @@ y(on)g(the)h(no)s(des)f(\(or)h(p)s(oin)m(ts\).)56 b(Th)m(us,)36
 b(to)h(imp)s(ose)e(this)g(b)s(oundary)f(condition)i(w)m(e)g(only)g
 (need)f(the)h(n)m(um)m(b)s(er)0 4251 y(of)i(the)g(DOF)h(and)e(the)h(co)
 s(ordinates)h(of)f(the)g(corresp)s(onding)f(no)s(de.)63
-b(F)-8 b(or)39 b(Natural)f(or)g(Mixte)h(b)s(oundary)0
+b(F)-8 b(or)39 b(Natural)f(or)g(Robin)h(b)s(oundary)0
 4364 y(conditions,)32 b(w)m(e)g(ha)m(v)m(e)h(to)f(ev)-5
 b(aluate)33 b(surface)f(in)m(tegrals)h(on)e(the)h(b)s(oundary)d(faces)j
 (and)f(then)g(assem)m(ble)i(this)0 4477 y(computations)e(in)m(to)h(the)
@@ -1993,7 +1993,7 @@ y(};)0 2814 y Fh(This)37 b(class,)j(inheriting)e(from)f
 Fg(Identifier)p 1592 2814 V 31 w(Base)p Fh(,)i(stores)f(the)g(DOF)g(n)m
 (um)m(b)s(er)e(and)h(the)g(corresp)s(onding)0 2927 y(no)s(de)30
 b(co)s(ordinates)h(necessary)g(for)f(the)g(treatmen)m(t.)141
-3040 y(F)-8 b(or)50 b(Natural)g(an)f(Mixte)i(b)s(oundary)c(conditions)j
+3040 y(F)-8 b(or)50 b(Natural)g(an)f(Robin)i(b)s(oundary)c(conditions)j
 (w)m(e)f(ha)m(v)m(e)i(in)m(tro)s(duced)d(another)i(inherited)f(class)0
 3153 y Fg(Identifier)p 486 3153 V 32 w(Natural)28 b Fh(as)j(follo)m
 (ws:)0 3344 y Fg(class)46 b(Identifier_Natural:)d(public)j
@@ -2006,7 +2006,7 @@ Fh(The)35 b(aim)h(of)g(this)g(class)g(is)g(to)g(store)g(a)h(b)s
 (oundary)c(face)k(n)m(um)m(b)s(er)d(and)h(the)h Fc(lo)-5
 b(c)g(al)39 b(to)f(glob)-5 b(al)37 b Fh(table)g(on)f(this)0
 4777 y(face.)42 b(This)29 b(is)i(su\016cien)m(t)g(for)f(Natural)h(and)f
-(Mixte)h(treatmen)m(ts.)141 4891 y(F)-8 b(or)45 b(more)e(details)i
+(Robin)h(treatmen)m(ts.)141 4891 y(F)-8 b(or)45 b(more)e(details)i
 (concerning)f(these)h(classes)f(see)h(\014les)e Fg(identifier.h)e
 Fh(and)i Fg(identifier.cc)d Fh(in)0 5003 y Fg(src/mesh)28
 b Fh(directory)-8 b(.)0 5294 y Fi(3)135 b(Boundary)44
@@ -2014,11 +2014,11 @@ b(conditions)0 5502 y Fb(3.1)112 b(Boundary)39 b(condition)e(t)m(yp)s
 (es)h(and)h(application)g(mo)s(des)0 5674 y Fh(In)26
 b(the)h(sequel)f(w)m(e)h(shall)g(consider)g(b)s(oundary)d(conditions)j
 (of)g(three)g(t)m(yp)s(es:)39 b(essen)m(tial,)29 b(natural)e(and)f
-(mixte,)0 5787 y(i.e)31 b(Diric)m(hlet,)i(Neumann,)d(Robin.)40
+(robin,)0 5787 y(i.e)31 b(Diric)m(hlet,)i(Neumann,)d(Robin.)40
 b(The)30 b(follo)m(wing)j Fg(enum)46 b(bcType_Type)1867 6024
 y Fh(3)p eop
 %%Page: 4 4
-4 3 bop 0 209 a Fg(enum)47 b(bcType_Type{Essential,)c(Natural,)i(Mixte};)0
+4 3 bop 0 209 a Fg(enum)47 b(bcType_Type{Essential,)c(Natural,)i(Robin};)0
 392 y Fh(allo)m(w)32 b(us)e(to)h(hold)f(this)g(terminology)-8
 b(.)141 505 y(In)29 b(the)h(same)g(w)m(a)m(y)g(for)g(eac)m(h)h(\(or)e
 (almost)i(all\))g(t)m(yp)s(e)f(w)m(e)g(can)g(attribute)g(a)g(mo)s(de)f

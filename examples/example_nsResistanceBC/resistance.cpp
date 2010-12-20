@@ -359,7 +359,7 @@ ResistanceProblem::run()
 
     BCVector bcResistance(bcvector,uFESpace.dof().numTotalDof(),1);
 
-    bcResistance.setResistanceCoef(d->resistance);
+    bcResistance.setResistanceCoeff(d->resistance);
 
     // Boundary conditions
 

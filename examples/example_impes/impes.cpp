@@ -324,7 +324,7 @@ impes::run()
     saturationDirichletBDfun3,
     saturationNeumannBDfun;
 
-    //BCFunctionMixte pressureMixteBDfun, saturationMixteBDfun;
+    //BCFunctionRobin pressureRobinBDfun, saturationRobinBDfun;
 
     // Set pressure bounday data.
     pressureDirichletBDfun1.setFunction ( dataProblem::pressureDirichlet1 );
@@ -334,7 +334,7 @@ impes::run()
     pressureNeumannBDfun.setFunction    ( dataProblem::pressureNeumann );
 
     // dp/dn = first_parameter + second_parameter * p.
-    //pressureMixteBDfun.setFunctions_Mixte ( dataProblem::pressureMixte,
+    //pressureRobinBDfun.setFunctions_Robin ( dataProblem::pressureRobin,
     //                                         Members->getUOne() );
 
     // Set pressure bounday data.
@@ -344,7 +344,7 @@ impes::run()
 
     saturationNeumannBDfun.setFunction    ( dataProblem::saturationNeumann );
     // dp/dn = first_parameter + second_parameter * p.
-    //pressureMixteBDfun.setFunctions_Mixte ( dataProblem::saturationMixte,
+    //pressureRobinBDfun.setFunctions_Robin ( dataProblem::saturationRobin,
     //                                      Members->getUOne() );
 
     // Boundary condition handler for the pressure equation.

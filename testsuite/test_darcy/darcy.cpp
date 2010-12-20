@@ -373,7 +373,7 @@ darcy::run()
 
     /*
     BCFunctionBase dirichletBDfun1, dirichletBDfun2, dirichletBDfun3, neumannBDfun1;
-    BCFunctionMixte mixteBDfun;
+    BCFunctionRobin robinBDfun;
 
     dirichletBDfun1.setFunction( dataProblem::dirichlet1 );
     dirichletBDfun2.setFunction( dataProblem::dirichlet2 );
@@ -390,19 +390,19 @@ darcy::run()
     */
 
     BCFunctionBase dirichletBDfun, neumannBDfun1, neumannBDfun2;
-    BCFunctionMixte mixteBDfun;
+    BCFunctionRobin robinBDfun;
 
     dirichletBDfun.setFunction ( dataProblem::dirichlet );
     neumannBDfun1.setFunction  ( dataProblem::neumann1 );
     neumannBDfun2.setFunction  ( dataProblem::neumann2 );
     // dp/dn = first_parameter + second_parameter * p
-    mixteBDfun.setFunctions_Mixte( dataProblem::mixte,
+    robinBDfun.setFunctions_Robin( dataProblem::robin,
                                    Members->getUOne() );
 
     BCHandler bcDarcy;
 
     bcDarcy.addBC( "Top",     TOP,     Natural,    Full,    neumannBDfun1, 1 );
-    bcDarcy.addBC( "Bottom",  BOTTOM,  Mixte,      Scalar,  mixteBDfun      );
+    bcDarcy.addBC( "Bottom",  BOTTOM,  Robin,      Scalar,  robinBDfun      );
     //bcDarcy.addBC(   "Top",    TOP,    Essential,  Scalar,  dirichletBDfun  );
     //bcDarcy.addBC("Bottom", BOTTOM,    Essential,  Scalar,  dirichletBDfun  );
     bcDarcy.addBC(  "Left",   LEFT,    Essential,  Scalar,  dirichletBDfun  );

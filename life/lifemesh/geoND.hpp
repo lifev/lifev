@@ -70,8 +70,6 @@ public:
 
     typedef GEOSHAPE geoShape_Type;
     typedef POINTTYPE point_Type;
-    typedef GEOSHAPE GeoShape; //to be removed
-    typedef POINTTYPE PointType; //to be removed
     //@}
 
     //! @name Constructor & Destructor
@@ -145,18 +143,18 @@ public:
     //! Returns the point of identity indicated in the argument
     /*!
     	@param identity Identity of the point (numbering starts from 1)
-        @return reference to a point object, possibly derived from PointType
+        @return reference to a point object, possibly derived from point_Type
     */
-    PointType const & point ( ID const identity ) const;
+    point_Type const & point ( ID const identity ) const;
     //! Returns the point of identity indicated in the argument
     /*!
      	It starts from the last point and it follows the rule: vertices first.
      	It may be used to access the points of a Geometry Element in a reverse way
      	(i.e. with the opposite GeoElement orientation)
     		@param identity Identity of the point (numbering starts from 1)
-        	@return reference to a point object, possibly derived from PointType
+        	@return reference to a point object, possibly derived from point_Type
     */
-    PointType const & reversepoint ( ID const identity ) const;
+    point_Type const & reversepoint ( ID const identity ) const;
 
     //@}
 
@@ -168,14 +166,14 @@ public:
         @param identity Identity of the point to be inserted
         @param point Point to be inserted
      */
-    void setPoint( ID const identity, PointType const & point );
+    void setPoint( ID const identity, point_Type const & point );
     //!Inserts a point using point references with forced boundary check
     /*!
         @param identity Identity of the point to be inserted
         @param point Point to be inserted
         @return TRUE if the point is set
      */
-    bool setPointWithBoundaryCheck( ID const identity, PointType const & point );
+    bool setPointWithBoundaryCheck( ID const identity, point_Type const & point );
 
 
     //!Inserts a point using pointers
@@ -183,14 +181,14 @@ public:
         @param identity Identity of the point to be inserted
         @param point Point to be inserted
      */
-    void setPoint( ID const identity, PointType const * point );
+    void setPoint( ID const identity, point_Type const * point );
     //!Inserts a point using pointers with forced boundary check
     /*!
         @param identity Identity of the point to be inserted
         @param point Point to be inserted
         @return %%%%
      */
-    bool setPointWithBoundaryCheck( ID const identity, PointType const * point );
+    bool setPointWithBoundaryCheck( ID const identity, point_Type const * point );
 
     //! Sets the flag of a point
     /*!
@@ -212,7 +210,7 @@ public:
         The method allows to access coordinates and modify them
     	@return Points vector
      */
-    PointType const* points ()
+    point_Type const* points ()
     {
         return M_points;
     }
@@ -220,7 +218,7 @@ public:
     //@}
 
 private:
-    PointType const* M_points[ GEOSHAPE::S_numPoints ];
+    point_Type const* M_points[ GEOSHAPE::S_numPoints ];
 };
 
 
@@ -311,7 +309,7 @@ showMe( bool verbose, std::ostream & out ) const
 template <typename GEOSHAPE, typename POINTTYPE>
 void GeoND<GEOSHAPE, POINTTYPE>::swapPoints( const ID & firstIdentity, const ID & secondIdentity )
 {
-    PointType const* tmp( M_points[ firstIdentity - 1 ] );
+    point_Type const* tmp( M_points[ firstIdentity - 1 ] );
     M_points[ firstIdentity - 1 ] = M_points[ secondIdentity - 1 ];
     M_points[ secondIdentity - 1 ] = tmp;
 }
@@ -319,7 +317,7 @@ void GeoND<GEOSHAPE, POINTTYPE>::swapPoints( const ID & firstIdentity, const ID 
 template <typename GEOSHAPE, typename POINTTYPE>
 void GeoND<GEOSHAPE, POINTTYPE>::exchangePoints( const ID oldToNew[ GEOSHAPE::S_numPoints ] )
 {
-    PointType const* tmp[ GEOSHAPE::S_numPoints ];
+    point_Type const* tmp[ GEOSHAPE::S_numPoints ];
     for ( UInt i = 0; i < GEOSHAPE::S_numPoints; ++i )
     {
         tmp[ i ] = M_points[ i ];
@@ -348,14 +346,14 @@ POINTTYPE const & GeoND<GEOSHAPE, POINTTYPE>::reversepoint( ID const identity ) 
 
 template <typename GEOSHAPE, typename POINTTYPE>
 inline
-void GeoND<GEOSHAPE, POINTTYPE>::setPoint( ID const identity, PointType const & point )
+void GeoND<GEOSHAPE, POINTTYPE>::setPoint( ID const identity, point_Type const & point )
 {
     ASSERT_BD( ( identity > 0 && identity <= GeoND<GEOSHAPE, POINTTYPE>::S_numLocalPoints ) ) ;
     M_points[ identity - 1 ] = ( &point );
 }
 
 template <typename GEOSHAPE, typename POINTTYPE>
-bool GeoND<GEOSHAPE, POINTTYPE>::setPointWithBoundaryCheck( ID const identity, PointType const & point )
+bool GeoND<GEOSHAPE, POINTTYPE>::setPointWithBoundaryCheck( ID const identity, point_Type const & point )
 {
     ASSERT_BD0( ( identity > 0 && identity <= GeoND<GEOSHAPE, POINTTYPE>::S_numLocalPoints ) ) ;
     if ( identity <= 0 || identity > GeoND<GEOSHAPE, POINTTYPE>::S_numLocalVertices )
@@ -366,14 +364,14 @@ bool GeoND<GEOSHAPE, POINTTYPE>::setPointWithBoundaryCheck( ID const identity, P
 
 template <typename GEOSHAPE, typename POINTTYPE>
 inline
-void GeoND<GEOSHAPE, POINTTYPE>::setPoint( ID const identity, PointType const * point )
+void GeoND<GEOSHAPE, POINTTYPE>::setPoint( ID const identity, point_Type const * point )
 {
     ASSERT_BD( ( identity > 0 && identity <= GeoND<GEOSHAPE, POINTTYPE>::S_numLocalPoints ) ) ;
     M_points[ identity - 1 ] = ( point );
 }
 
 template <typename GEOSHAPE, typename POINTTYPE>
-bool GeoND<GEOSHAPE, POINTTYPE>::setPointWithBoundaryCheck( ID const identity, PointType const * point )
+bool GeoND<GEOSHAPE, POINTTYPE>::setPointWithBoundaryCheck( ID const identity, point_Type const * point )
 {
     ASSERT_BD0( ( identity > 0 && identity <= GeoND<GEOSHAPE, POINTTYPE>::S_numLocalPoints ) ) ;
     if ( identity <= 0 || identity > GeoND<GEOSHAPE, POINTTYPE>::S_numLocalVertices )

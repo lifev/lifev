@@ -45,7 +45,7 @@
 
   <li> a flag identifying a specific part of the mesh boundary,
 
-  <li> a type (Essential, Natural, Mixte, Flux, Resistance),
+  <li> a type (Essential, Natural, Robin, Flux, Resistance),
 
   <li> a mode of implementation (Scalar, Full, Component, Normal,
      Tangential, Resistance, Directional),
@@ -441,25 +441,25 @@ ID BCBase::component( const ID i ) const
     return M_components[ i -1 ];
 }
 
-bool  BCBase::ismixteVec()  const
+bool  BCBase::isRobinCoeffAVector()  const
 {
     if ( M_isStored_BcVector )
     {
-        return  (*M_bcVector).ismixteVec();
+        return  (*M_bcVector).isRobinCoeffAVector();
     }
     else
     {
-        ERROR_MSG( "BCBase::mixte : A data vector must be specified before calling this method" );
+        ERROR_MSG( "BCBase::Robin : A data vector must be specified before calling this method" );
         return 0.;
     }
 }
 
-bool BCBase::isbetaVec()   const
+bool BCBase::isBetaCoeffAVector()   const
 {
     if ( M_isStored_BcVector )
     {
 
-        return   (*M_bcVector).isbetaVec();
+        return   (*M_bcVector).isBetaCoeffAVector();
     }
     else
     {
@@ -469,24 +469,24 @@ bool BCBase::isbetaVec()   const
 }
 
 
-Real BCBase::MixteVec( const ID& iDof, const ID& iComponent ) const
+Real BCBase::robinCoeffVector( const ID& iDof, const ID& iComponent ) const
 {
     if ( M_isStored_BcVector )
-        return ( *M_bcVector).MixteVec( iDof, iComponent );
+        return ( *M_bcVector).robinCoeffVector( iDof, iComponent );
     else
     {
-        ERROR_MSG( "BCBase::MixteVec : A data vector must be specified before calling this method" );
+        ERROR_MSG( "BCBase::RobinVec : A data vector must be specified before calling this method" );
         return 0.;
     }
 }
 
-Real BCBase::BetaVec( const ID& iDof, const ID& iComponent ) const
+Real BCBase::betaCoeffVector( const ID& iDof, const ID& iComponent ) const
 {
     if ( M_isStored_BcVector )
-        return ( *M_bcVector).BetaVec( iDof, iComponent );
+        return ( *M_bcVector).betaCoeffVector( iDof, iComponent );
     else
     {
-        ERROR_MSG( "BCBase::MixteVec : A data vector must be specified before calling this method" );
+        ERROR_MSG( "BCBase::RobinVec : A data vector must be specified before calling this method" );
         return 0.;
     }
 
@@ -554,7 +554,7 @@ BCBase::showMe( bool verbose, std::ostream & out ) const
         {
             out << std::endl;
         }
-        if ( dataVector() )
+        if ( isDataAVector() )
         {
             M_bcVector->showMe( verbose, out );
         }
@@ -697,22 +697,22 @@ UInt BCBase::numberOfComponents() const
     return M_components.size();
 }
 
-Real BCBase::mixteCoef() const
+Real BCBase::robinCoeff() const
 {
     if ( M_isStored_BcVector )
-        return ( *M_bcVector ).mixteCoef();
+        return ( *M_bcVector ).robinCoeff();
     else
     {
-        ERROR_MSG( "BCBase::mixteCoef : A data vector must be specified before calling this method" );
+        ERROR_MSG( "BCBase::robinCoef : A data vector must be specified before calling this method" );
         return 0.;
     }
 
 }
 
-Real BCBase::resistanceCoef() const
+Real BCBase::resistanceCoeff() const
 {
     if ( M_isStored_BcVector )
-        return ( *M_bcVector ).resistanceCoef();
+        return ( *M_bcVector ).resistanceCoeff();
     else
     {
         ERROR_MSG( "BCBase::resistanceCoef : A data vector must be specified before calling this method" );
@@ -721,19 +721,19 @@ Real BCBase::resistanceCoef() const
 
 }
 
-Real BCBase::betaCoef() const
+Real BCBase::betaCoeff() const
 {
     if ( M_isStored_BcVector )
-        return ( *M_bcVector ).betaCoef();
+        return ( *M_bcVector ).betaCoeff();
     else
     {
-        ERROR_MSG( "BCBase::mixteCoef : A data vector must be specified before calling this method" );
+        ERROR_MSG( "BCBase::robinCoef : A data vector must be specified before calling this method" );
         return 0.;
     }
 
 }
 
-bool BCBase::dataVector() const
+bool BCBase::isDataAVector() const
 {
     return M_isStored_BcVector;
 }

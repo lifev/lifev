@@ -179,7 +179,7 @@ typedef LifeV::singleton< LifeV::factoryClone< BCFunctionBase > > FactoryCloneBC
 
 
 
-//! BCFunctionMixte - class that holds the function used for prescribing Robin boundary conditions.
+//! BCFunctionRobin - class that holds the function used for prescribing Robin boundary conditions.
 /*!
    @author Miguel Fernandez
 
@@ -202,13 +202,13 @@ typedef LifeV::singleton< LifeV::factoryClone< BCFunctionBase > > FactoryCloneBC
   @endverbatim
   where u is the solution, phi the test function and @c ( , )_bd the L2 inner product on the boundary
 
-  Functions f and coeff are set using the correct constructor or using setFunctionMixte(f, coeff).<br>
+  Functions f and coeff are set using the correct constructor or using setFunctionRobin(f, coeff).<br>
   To get the function f use @c getFunction(), to evaluate it use the @c operator().  <br>
-  To get the function coeff use @c getFunction_Mixte(), to evaluate it use the method @c coef(...).
+  To get the function coeff use @c getFunction_Robin(), to evaluate it use the method @c coef(...).
 
 */
 
-class BCFunctionMixte : public BCFunctionBase
+class BCFunctionRobin : public BCFunctionBase
 {
 public:
 
@@ -225,26 +225,26 @@ public:
 
     //! Default constructor
     /*!
-      The user must supply the functions by calling setFunction_Mixte(..)
+      The user must supply the functions by calling setFunction_Robin(..)
     */
-    BCFunctionMixte() {}
+    BCFunctionRobin() {}
 
     //! Constructing from user defined functions
     /*!
       @param rightHandSideFunction The user defined function for @c f
       @param massTermFunction The user defined function for @c coeff
     */
-    BCFunctionMixte( const function_Type& rightHandSideFunction, const function_Type& massTermFunction  );
+    BCFunctionRobin( const function_Type& rightHandSideFunction, const function_Type& massTermFunction  );
 
 
     //! Copy Constructor
     /*!
-      @param bcFunctionUDepMixte The BCFunctionMixte object
+      @param bcFunctionUDepRobin The BCFunctionRobin object
     */
-    BCFunctionMixte( const BCFunctionMixte& bcFunctionUDepMixte );
+    BCFunctionRobin( const BCFunctionRobin& bcFunctionUDepRobin );
 
     //! Destructor
-    virtual ~BCFunctionMixte() {}
+    virtual ~BCFunctionRobin() {}
 
 
     //@}
@@ -254,11 +254,11 @@ public:
 
     //! Assignment operator
     /*!
-      @param bcFunctionUDepMixte The BCFunctionMixte object
-      @return Reference to a new BCFunctionMixte object which is a copy of bcFunctionMixt
+      @param bcFunctionUDepRobin The BCFunctionRobin object
+      @return Reference to a new BCFunctionRobin object which is a copy of bcFunctionMixt
     */
-    BCFunctionMixte&
-    operator=( const BCFunctionMixte& bcFunctionUDepMixte );
+    BCFunctionRobin&
+    operator=( const BCFunctionRobin& bcFunctionUDepRobin );
 
 
     //@}
@@ -291,7 +291,7 @@ public:
       @param rightHandSideFunction The user defined function for @c f
       @param massTermFunction The user defined function for @c coeff
     */
-    void setFunctions_Mixte( const function_Type& rightHandSideFunction, const function_Type& massCoeffFunction );
+    void setFunctions_Robin( const function_Type& rightHandSideFunction, const function_Type& massCoeffFunction );
 
     //@}
 
@@ -304,7 +304,7 @@ public:
     /*!
       @return user defined function for @c coeff
     */
-    inline const function_Type& Functions_Mixte() const {return M_robinBoundaryMassCoeffFunction;}
+    inline const function_Type& Functions_Robin() const {return M_robinBoundaryMassCoeffFunction;}
 
     //@}
 
@@ -436,7 +436,7 @@ protected:
 };
 
 
-//! BCFunctionUDepMixte - class that holds the function used for prescribing Robin boundary conditions.
+//! BCFunctionUDepRobin - class that holds the function used for prescribing Robin boundary conditions.
 /*!
    @author Miguel Fernandez
 
@@ -454,9 +454,9 @@ protected:
   @endverbatim
   where u is the solution, phi the test function and @c ( , )_bd the L2 inner product on the boundary
 
-  Functions f and coeff are set using the correct constructor or using setFunctionMixte(f, coeff). <br>
+  Functions f and coeff are set using the correct constructor or using setFunctionRobin(f, coeff). <br>
   To get the function f use @c getFunction(), to evaluate it use the @c operator(). <br>
-  To get the function coeff use @c getFunction_Mixte(), to evaluate it use the method @c coef(...).
+  To get the function coeff use @c getFunction_Robin(), to evaluate it use the method @c coef(...).
 
   Function f and coeff have the following signature:
   @verbatim
@@ -465,7 +465,7 @@ protected:
 
 
 */
-class BCFunctionUDepMixte: public BCFunctionUDepBase
+class BCFunctionUDepRobin: public BCFunctionUDepBase
 {
 public:
 
@@ -482,27 +482,27 @@ public:
 
     //! Empty constructor
     /*!
-      The user must supply the functions by calling setFunction_Mixte(..)
+      The user must supply the functions by calling setFunction_Robin(..)
     */
-    BCFunctionUDepMixte() {}
+    BCFunctionUDepRobin() {}
 
     //! Constructing from user defined functions
     /*!
       @param rightHandSideFunction The user defined function for f
       @param massTermFunction The user defined function for coeff
     */
-    BCFunctionUDepMixte( const function_Type& rightHandSideFunction, const function_Type& massTermFunction  );
+    BCFunctionUDepRobin( const function_Type& rightHandSideFunction, const function_Type& massTermFunction  );
 
 
     //! Copy Constructor
     /*!
-      @param bcFunctionUDepMixte The BCFunctionUDepMixte object
+      @param bcFunctionUDepRobin The BCFunctionUDepRobin object
     */
-    BCFunctionUDepMixte( const BCFunctionUDepMixte& bcFunctionUDepMixte );
+    BCFunctionUDepRobin( const BCFunctionUDepRobin& bcFunctionUDepRobin );
 
 
     //! Destructor
-    virtual ~BCFunctionUDepMixte() {}
+    virtual ~BCFunctionUDepRobin() {}
 
 
     //@}
@@ -514,11 +514,11 @@ public:
 
     //! Assignment operator
     /*!
-      @param bcFunctionUDepMixte The BCFunctionUDepMixte object
-      @return Reference to a new BCFunctionUDepMixte object which is a copy of bcFunctionMixt
+      @param bcFunctionUDepRobin The BCFunctionUDepRobin object
+      @return Reference to a new BCFunctionUDepRobin object which is a copy of bcFunctionMixt
     */
-    BCFunctionUDepMixte&
-    operator=( const BCFunctionUDepMixte& bcFunctionUDepMixte );
+    BCFunctionUDepRobin&
+    operator=( const BCFunctionUDepRobin& bcFunctionUDepRobin );
 
 
     //@}
@@ -555,7 +555,7 @@ public:
       @param rightHandSideFunction The user defined function for f
       @param massTermFunction The user defined function for @c coeff
     */
-    void setFunctions_Mixte( const function_Type& rightHandSideFunction, const function_Type& massCoeffFunction );
+    void setFunctions_Robin( const function_Type& rightHandSideFunction, const function_Type& massCoeffFunction );
 
     //@}
 
@@ -568,7 +568,7 @@ public:
     /*!
       @return user defined function for @c coeff
     */
-    inline const function_Type& Functions_Mixte() const {return M_robinBoundaryMassCoeffFunction;}
+    inline const function_Type& Functions_Robin() const {return M_robinBoundaryMassCoeffFunction;}
 
     //@}
 

@@ -248,7 +248,7 @@ void regularMesh3D( RegionMesh3D<GeoShape,MC>& mesh,
     std::cout << "done" << std::endl;
 
     // Declaration of pointers on the different mesh entities
-    typename RegionMesh3D<GeoShape,MC>::PointType*  pointPtr  = 0;
+    typename RegionMesh3D<GeoShape,MC>::point_Type*  pointPtr  = 0;
     //typename RegionMesh3D<GeoShape,MC>::EdgeType*   edgePtr   = 0;
     //typename RegionMesh3D<GeoShape,MC>::FaceType*   facePtr   = 0;
     typename RegionMesh3D<GeoShape,MC>::VolumeType* volumePtr = 0;

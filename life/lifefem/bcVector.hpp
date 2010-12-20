@@ -147,7 +147,7 @@ public:
       @param globalDofId The global DOF id
       @param component The vector component
     */
-    virtual Real MixteVec( const ID& globalDofId, const ID& component ) const;
+    virtual Real robinCoeffVector( const ID& globalDofId, const ID& component ) const;
 
 
     //!  Return the value of the selected component of the beta coefficient vector at position dofID
@@ -155,7 +155,7 @@ public:
       @param globalDofId The global DOF id
       @param component The vector component
     */
-    virtual Real BetaVec( const ID& globalDofId, const ID& component ) const;
+    virtual Real betaCoeffVector( const ID& globalDofId, const ID& component ) const;
 
 
     //! showMe
@@ -187,22 +187,22 @@ public:
 
 
     //! determine whether the boundary mass coefficient for Robin bc is a Vector
-    inline bool ismixteVec() const  {return M_isRobinBdMassCoeffAVector;}
+    inline bool isRobinCoeffAVector() const  {return M_isRobinBdMassCoeffAVector;}
 
 
     //true if beta coefficient is a Vector
-    inline bool isbetaVec() const  {return M_isBetaCoeffAVector;}
+    inline bool isBetaCoeffAVector() const  {return M_isBetaCoeffAVector;}
 
     //! Return the value of the boundary mass coefficient of Robin conditions
-    inline Real mixteCoef() const { return M_robinBoundaryMassCoeff; }
+    inline Real robinCoeff() const { return M_robinBoundaryMassCoeff; }
 
 
     //! Return the value of the resistance coefficient
-    inline Real resistanceCoef() const { return M_resistanceCoeff; }
+    inline Real resistanceCoeff() const { return M_resistanceCoeff; }
 
 
     //! Return the value of the beta coefficient
-    inline Real betaCoef() const { return M_betaCoeff; }
+    inline Real betaCoeff() const { return M_betaCoeff; }
 
     //@}
 
@@ -210,32 +210,11 @@ public:
     //! @name Set Methods
     //@{
 
-    //! set the finalize status
-    /*!
-      @param isFinalized Boolean value saying whether BCVectorBase have been updated
-    */
-    inline void setFinalized( bool isFinalized ) { M_finalized = isFinalized; }
-
-
-    //! set M_isRobinBdMassCoeffAVector
-    /*!
-      @param isRobinBdMassCoeffAVector Boolean value saying whether the boundary mass coefficient is a vector
-     */
-    inline void setmixte( bool isRobinBdMassCoeffAVector ) { M_isRobinBdMassCoeffAVector = isRobinBdMassCoeffAVector; }
-
-
-    //! set M_isBetaCoeffAVector
-    /*!
-      @param isRobinBdMassCoeffAVector Boolean value saying whether the beta coefficient is a vector
-     */
-    inline void setisbeta( bool isBetaCoeffAVector) { M_isBetaCoeffAVector = isBetaCoeffAVector; }
-
-
-    //! set the boundary mass coefficient of Robin bc
+   //! set the boundary mass coefficient of Robin bc
     /*!
       @param robinBoundaryMassCoeff The boundary mass coefficient of robin conditions
      */
-    inline void setMixteCoef( const Real& robinBoundaryMassCoeff ) { M_robinBoundaryMassCoeff = robinBoundaryMassCoeff;}
+    inline void setRobinCoeff( const Real& robinBoundaryMassCoeff ) { M_robinBoundaryMassCoeff = robinBoundaryMassCoeff;}
 
 
     //! set the Resistance coefficient
@@ -243,7 +222,7 @@ public:
       @param robinBoundaryMassCoeff The boundary mass coefficient of robin conditions
      */
 
-    inline void setResistanceCoef( const Real& resistanceCoeff ) { M_resistanceCoeff = resistanceCoeff; }
+    inline void setResistanceCoeff( const Real& resistanceCoeff ) { M_resistanceCoeff = resistanceCoeff; }
 
 
     //! set the Beta coefficient FE vector
@@ -251,7 +230,7 @@ public:
       @param betaCoeff The beta coefficient
      */
 
-    inline void setBetaCoef( const Real& betaCoeff ) { M_betaCoeff = betaCoeff;}
+    inline void setBetaCoeff( const Real& betaCoeff ) { M_betaCoeff = betaCoeff;}
 
 
     //! set the boundary mass coefficient FE vector for Robin boundary conditions
@@ -259,7 +238,7 @@ public:
       @param robinBoundaryMassCoeff The boundary mass coefficient of robin conditions
      */
 
-    void setMixteVec( const vector_Type& robinBoundaryMassCoeffVector );
+    void setRobinCoeffVector( const vector_Type& robinBoundaryMassCoeffVector );
 
 
 
@@ -267,7 +246,7 @@ public:
     /*!
       @param betaCoeffVector The beta coefficient FE vector
      */
-    void setBetaVec( const vector_Type& betaCoeffVector );
+    void setBetaCoeffVector( const vector_Type& betaCoeffVector );
 
 
     //! set the right hand side FE vector
@@ -276,7 +255,7 @@ public:
       @param numberOfTotalDOF
       @param type
      */
-    void setVector( const vector_Type& righHandSideVector, UInt numberOfTotalDOF, UInt type=0 );
+    void setRhsVector( const vector_Type& righHandSideVector, UInt numberOfTotalDOF, UInt type=0 );
 
     //@}
 
@@ -310,8 +289,6 @@ protected:
 
     //!  Type of boundary condition; see the BCBase class description
     UInt M_type;
-
-private:
 
     //! true when the BCVector is updated
     bool M_finalized;
@@ -540,7 +517,7 @@ public:
       @param interfaceDofPtr The pointer to the container of connections between the DOFs on two matching meshes
       @param type The type can assume the following values (0, 1, 2); see BCVectorInterface class description for their meaning
     */
-    void setVector( const vector_Type& rightHandSideVector, UInt numberOfTotalDof, const dofInterfacePtr_Type& interfaceDofPtr, UInt type=0);
+    void setRhsVector( const vector_Type& rightHandSideVector, UInt numberOfTotalDof, const dofInterfacePtr_Type& interfaceDofPtr, UInt type=0);
 
 
 
@@ -552,7 +529,7 @@ public:
       @param globalDofId The global DOF id
       @param component The vector component
     */
-    Real MixteVec( const ID& globalDofId, const ID& component ) const;
+    Real robinCoeffVector( const ID& globalDofId, const ID& component ) const;
 
 
     //!  Return the value of the selected component of the beta coefficient vector at position dofID
@@ -560,7 +537,7 @@ public:
       @param globalDofId The global DOF id
       @param component The vector component
     */
-    Real BetaVec( const ID& globalDofId, const ID& component ) const;
+    Real betaCoeffVector( const ID& globalDofId, const ID& component ) const;
 
 
     //! showMe

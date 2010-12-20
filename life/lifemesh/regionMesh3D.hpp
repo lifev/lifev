@@ -136,7 +136,7 @@ public:
     //! Edge Element (1D)
     typedef GeoElement1D<EdgeShape, MC> EdgeType;
     //! Point Element (0D)
-    typedef GeoElement0D<MC>            PointType;
+    typedef GeoElement0D<MC>            point_Type;
 
     /** @} */ // End of group Geometric Element Types
 
@@ -149,7 +149,7 @@ public:
      *  @{
      */
     //! Points Container.
-    typedef SimpleVect<PointType>   Points;
+    typedef SimpleVect<point_Type>   Points;
     //! Elements Container.
     typedef SimpleVect<VolumeType > Volumes;
     //! Faces Container: it may contain only Boundary faces.
@@ -1273,7 +1273,7 @@ public:
      *  @param vertices If true, it's a vertex, otherwise not (default).
      *  @return Reference to the newly added Point.
      */
-    PointType & addPoint( bool const boundary = false, bool const vertices = false );
+    point_Type & addPoint( bool const boundary = false, bool const vertices = false );
 
     //! Adds a Point in the mesh.
     /**
@@ -1284,7 +1284,7 @@ public:
      *  @param vertices If true, it's a vertex, otherwise not (default).
      *  @return Reference to the newly added Point.
      */
-    PointType & addPoint( PointType const & p, bool const boundary = false, bool const vertices = false );
+    point_Type & addPoint( point_Type const & p, bool const boundary = false, bool const vertices = false );
 
     //! Adds a Point in the mesh.
     /**
@@ -1307,7 +1307,7 @@ public:
      *  @param vertices If true, it's a vertex, otherwise not (default).
      *  @return Reference to the newly added Point.
      */
-    PointType & setPoint( PointType const & p, UInt const position, bool const boundary = false, bool const vertices = false );
+    point_Type & setPoint( point_Type const & p, UInt const position, bool const boundary = false, bool const vertices = false );
 
     //! Adds a Point in the mesh giving an id.
     /**
@@ -1318,7 +1318,7 @@ public:
      *  @param vertices If true, it's a vertex, otherwise not (default).
      *  @return Reference to the newly added Point.
      */
-    PointType & setPoint( UInt const & position, bool const boundary = false, bool const vertices = false );
+    point_Type & setPoint( UInt const & position, bool const boundary = false, bool const vertices = false );
 
     //! Returns the last mesh Point.
     /**
@@ -1326,7 +1326,7 @@ public:
      *
      *  @return Reference to the last mesh Point.
      */
-    PointType & lastPoint();
+    point_Type & lastPoint();
 
     //! Returns the i-th mesh Point.
     /**
@@ -1335,7 +1335,7 @@ public:
      *  @param i Id of the Point.
      *  @return i-th mesh Point.
      */
-    PointType const & point( UInt const i ) const;
+    point_Type const & point( UInt const i ) const;
 
     //! Returns a reference to the i-th mesh Point.
     /**
@@ -1344,7 +1344,7 @@ public:
      *  @param i Id of the Point.
      *  @return Reference i-th mesh Point.
      */
-    PointType & point( UInt const i );
+    point_Type & point( UInt const i );
 
     //! Returns a reference to the i-th mesh Boundary Point.
     /**
@@ -1353,7 +1353,7 @@ public:
      *  @param i Id of the Boundary Point.
      *  @return Reference i-th mesh Boundary Point.
      */
-    PointType const & boundaryPoint( UInt const i ) const;
+    point_Type const & boundaryPoint( UInt const i ) const;
 
     //! Returns a reference to the i-th mesh Boundary Point.
     /**
@@ -1362,7 +1362,7 @@ public:
      *  @param i Id of the Boundary Point.
      *  @return Reference i-th mesh Boundary Point.
      */
-    PointType & boundaryPoint( UInt const i );
+    point_Type & boundaryPoint( UInt const i );
 
     //! Returns the number of Boundary Points.
     /**
@@ -1387,7 +1387,7 @@ public:
      *  @param i Id of the Point.
      *  @return i-th mesh Point.
      */
-    PointType const & pointInitial ( UInt const i ) const ;
+    point_Type const & pointInitial ( UInt const i ) const ;
 
     //! Returns a reference to the i-th mesh Point.
     /**
@@ -1396,7 +1396,7 @@ public:
      *  @param i Id of the Point.
      *  @return Reference i-th mesh Point.
      */
-    PointType & pointInitial( UInt const i ) ;
+    point_Type & pointInitial( UInt const i ) ;
 
     //! Is this point on boundary?
     /**
@@ -1405,7 +1405,7 @@ public:
      *  @param p The Point.
      *  @return true if the point is on the boundary, false otherwise.
      */
-    bool isBoundaryPoint( PointType const & p ) const ;
+    bool isBoundaryPoint( point_Type const & p ) const ;
 
     //! Is this point on boundary?
     /**
@@ -1487,7 +1487,7 @@ public:
      *  @param p A Point.
      *  @return true if the Point is a Vertex, false otherwise.
      */
-    bool isVertex ( PointType const & p ) const;
+    bool isVertex ( point_Type const & p ) const;
 
     //! Changes number of Vertices.
     /**
@@ -1539,7 +1539,7 @@ public:
     //! Container of mesh 3D Elements
     Volumes volumeList;
     //! Boundary points list.
-    SimpleVect<PointType * > _bPoints;
+    SimpleVect<point_Type * > _bPoints;
     //! Container of mesh points/vertices (mesh movement)
     /**
      *  Used only by mesh node movement routines. It contains the
@@ -2580,23 +2580,23 @@ RegionMesh3D<GEOSHAPE, MC>::setMaxNumGlobalPoints( UInt const n )
 
 template <typename GEOSHAPE, typename MC>
 inline
-typename RegionMesh3D<GEOSHAPE, MC>::PointType &
+typename RegionMesh3D<GEOSHAPE, MC>::point_Type &
 RegionMesh3D<GEOSHAPE, MC>::addPoint( bool const boundary, bool const vertex )
 {
-    return addPoint( PointType(), boundary, vertex );
+    return addPoint( point_Type(), boundary, vertex );
 }
 
 template <typename GEOSHAPE, typename MC>
 inline
-typename RegionMesh3D<GEOSHAPE, MC>::PointType &
-RegionMesh3D<GEOSHAPE, MC>::addPoint( PointType const & p, bool const boundary, bool const /*vertex*/ )
+typename RegionMesh3D<GEOSHAPE, MC>::point_Type &
+RegionMesh3D<GEOSHAPE, MC>::addPoint( point_Type const & p, bool const boundary, bool const /*vertex*/ )
 {
     ASSERT_PRE( pointList.size() < pointList.capacity(), "Point list size exceeded" <<
                 pointList.size() + 1 << " " << pointList.capacity() ) ;
 
     pointList.push_back( p );
 
-    PointType * pp = & pointList.back();
+    point_Type * pp = & pointList.back();
 //        pp->id() = pointList.size();
 
     if ( boundary )
@@ -2611,8 +2611,8 @@ RegionMesh3D<GEOSHAPE, MC>::addPoint( PointType const & p, bool const boundary, 
 
 template <typename GEOSHAPE, typename MC>
 inline
-typename RegionMesh3D<GEOSHAPE, MC>::PointType &
-RegionMesh3D<GEOSHAPE, MC>::setPoint( PointType const & p, UInt position, bool const boundary, bool const vertex)
+typename RegionMesh3D<GEOSHAPE, MC>::point_Type &
+RegionMesh3D<GEOSHAPE, MC>::setPoint( point_Type const & p, UInt position, bool const boundary, bool const vertex)
 {
     ASSERT_PRE( position <= pointList.capacity(), "Position  exceed lpoint list capacity" <<
                 position << " " << pointList.capacity() ) ;
@@ -2621,7 +2621,7 @@ RegionMesh3D<GEOSHAPE, MC>::setPoint( PointType const & p, UInt position, bool c
 
 
     pointList.push_back( p );
-    PointType * pp = & pointList.back();
+    point_Type * pp = & pointList.back();
 
 
     if ( boundary )
@@ -2631,7 +2631,7 @@ RegionMesh3D<GEOSHAPE, MC>::setPoint( PointType const & p, UInt position, bool c
         // if point was already stored in the list!
         // No way to avoid it, sorry
 
-        for ( typename SimpleVect<PointType *>::iterator bp = _bPoints.begin(); bp != _bPoints.end(); ++bp )
+        for ( typename SimpleVect<point_Type *>::iterator bp = _bPoints.begin(); bp != _bPoints.end(); ++bp )
         {
             if ( ( *bp ) ->id() == position )
             {
@@ -2647,14 +2647,14 @@ RegionMesh3D<GEOSHAPE, MC>::setPoint( PointType const & p, UInt position, bool c
 
 template <typename GEOSHAPE, typename MC>
 inline
-typename RegionMesh3D<GEOSHAPE, MC>::PointType &
+typename RegionMesh3D<GEOSHAPE, MC>::point_Type &
 RegionMesh3D<GEOSHAPE, MC>::
 setPoint(UInt const & position, bool const boundary, bool const vertex)
 {
     ASSERT_PRE( position <= pointList.capacity(), "Position  exceed lpoint list capacity" <<
                 position << " " << pointList.capacity() ) ;
     bool found( false );
-    PointType * pp = & pointList( position );
+    point_Type * pp = & pointList( position );
     if ( boundary )
     {
         pp->boundary() = true;
@@ -2662,7 +2662,7 @@ setPoint(UInt const & position, bool const boundary, bool const vertex)
         // if point was already stored in the list!
         // No way to avoid it, sorry
 
-        for ( typename SimpleVect<PointType *>::iterator bp = _bPoints.begin(); bp != _bPoints.end(); ++bp )
+        for ( typename SimpleVect<point_Type *>::iterator bp = _bPoints.begin(); bp != _bPoints.end(); ++bp )
         {
             if ( ( *bp ) ->id() == position )
             {
@@ -2678,7 +2678,7 @@ setPoint(UInt const & position, bool const boundary, bool const vertex)
 
 template <typename GEOSHAPE, typename MC>
 inline
-//RegionMesh3D<GEOSHAPE,MC>::PointType &
+//RegionMesh3D<GEOSHAPE,MC>::point_Type &
 UInt
 RegionMesh3D<GEOSHAPE, MC>::addPoint( UInt const iden, bool const boundary, UInt const start )
 {
@@ -2688,8 +2688,8 @@ RegionMesh3D<GEOSHAPE, MC>::addPoint( UInt const iden, bool const boundary, UInt
         if ( pointList( i ).id() == iden )
             return i;
 
-    pointList.push_back( PointType() );
-    PointType * pp = & pointList.back();
+    pointList.push_back( point_Type() );
+    point_Type * pp = & pointList.back();
     pp->setId( iden );
     if ( boundary )
     {
@@ -2703,7 +2703,7 @@ RegionMesh3D<GEOSHAPE, MC>::addPoint( UInt const iden, bool const boundary, UInt
 
 template <typename GEOSHAPE, typename MC>
 inline
-typename RegionMesh3D<GEOSHAPE, MC>::PointType &
+typename RegionMesh3D<GEOSHAPE, MC>::point_Type &
 RegionMesh3D<GEOSHAPE, MC>::lastPoint()
 {
     return pointList.back();
@@ -2712,7 +2712,7 @@ RegionMesh3D<GEOSHAPE, MC>::lastPoint()
 
 template <typename GEOSHAPE, typename MC>
 inline
-typename RegionMesh3D<GEOSHAPE, MC>::PointType const &
+typename RegionMesh3D<GEOSHAPE, MC>::point_Type const &
 RegionMesh3D<GEOSHAPE, MC>::point( UInt const i ) const
 {
     ASSERT_BD( i > 0 && i <= pointList.size() ) ;
@@ -2722,7 +2722,7 @@ RegionMesh3D<GEOSHAPE, MC>::point( UInt const i ) const
 
 template <typename GEOSHAPE, typename MC>
 inline
-typename RegionMesh3D<GEOSHAPE, MC>::PointType &
+typename RegionMesh3D<GEOSHAPE, MC>::point_Type &
 RegionMesh3D<GEOSHAPE, MC>::point( UInt const i )
 {
     ASSERT_BD( i > 0 && i <= pointList.size() ) ;
@@ -2732,7 +2732,7 @@ RegionMesh3D<GEOSHAPE, MC>::point( UInt const i )
 
 template <typename GEOSHAPE, typename MC>
 inline
-typename RegionMesh3D<GEOSHAPE, MC>::PointType const &
+typename RegionMesh3D<GEOSHAPE, MC>::point_Type const &
 RegionMesh3D<GEOSHAPE, MC>::pointInitial( UInt const i ) const
 {
     ASSERT_BD( i > 0 && i <= pointList.size() ) ;
@@ -2742,7 +2742,7 @@ RegionMesh3D<GEOSHAPE, MC>::pointInitial( UInt const i ) const
 
 template <typename GEOSHAPE, typename MC>
 inline
-typename RegionMesh3D<GEOSHAPE, MC>::PointType &
+typename RegionMesh3D<GEOSHAPE, MC>::point_Type &
 RegionMesh3D<GEOSHAPE, MC>::pointInitial( UInt const i )
 {
     ASSERT_BD( i > 0 && i <= pointList.size() ) ;
@@ -2752,7 +2752,7 @@ RegionMesh3D<GEOSHAPE, MC>::pointInitial( UInt const i )
 
 template <typename GEOSHAPE, typename MC>
 inline
-typename RegionMesh3D<GEOSHAPE, MC>::PointType const &
+typename RegionMesh3D<GEOSHAPE, MC>::point_Type const &
 RegionMesh3D<GEOSHAPE, MC>::boundaryPoint( UInt const i ) const
 {
     ASSERT_PRE( _bPoints.size() != 0, " Boundary Points not Stored" ) ;
@@ -2762,7 +2762,7 @@ RegionMesh3D<GEOSHAPE, MC>::boundaryPoint( UInt const i ) const
 
 template <typename GEOSHAPE, typename MC>
 inline
-typename RegionMesh3D<GEOSHAPE, MC>::PointType &
+typename RegionMesh3D<GEOSHAPE, MC>::point_Type &
 RegionMesh3D<GEOSHAPE, MC>::boundaryPoint( UInt const i )
 {
     ASSERT_PRE( _bPoints.size() != 0, " Boundary Points not Stored" ) ;
@@ -3170,7 +3170,7 @@ RegionMesh3D<GEOSHAPE, MC>::hasFaces() const
 template <typename GEOSHAPE, typename MC>
 inline
 bool
-RegionMesh3D<GEOSHAPE, MC>::isVertex( PointType const & p ) const
+RegionMesh3D<GEOSHAPE, MC>::isVertex( point_Type const & p ) const
 {
     return p.id() <= M_numVertices;
 }
@@ -3195,7 +3195,7 @@ RegionMesh3D<GEOSHAPE, MC>::isBoundaryPoint( UInt const & id ) const
 template <typename GEOSHAPE, typename MC>
 inline
 bool
-RegionMesh3D<GEOSHAPE, MC>::isBoundaryPoint( PointType const & p ) const
+RegionMesh3D<GEOSHAPE, MC>::isBoundaryPoint( point_Type const & p ) const
 {
     return p.boundary();
 }

@@ -1036,7 +1036,7 @@ void Hdf5exporter<MeshType>::writeGeometry()
     Int gid;
     for (ID i=1; i <= this->M_mesh->numVertices(); ++i)
     {
-        typename MeshType::PointType const& point (this->M_mesh->pointList(i));
+        typename MeshType::point_Type const& point (this->M_mesh->pointList(i));
         gid = point.id() - hdf5Offset;
 
         bool insertedX(true);

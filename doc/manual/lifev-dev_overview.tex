@@ -565,8 +565,8 @@ class GeoND {
   
   void showMe(bool verbose) const;
   
-  void setPoint(UInt const identity, PointType  const & point); //put point 
-  bool setPointWithBoundaryCheck( ID const identity, PointType const & point ); //with forced bound check
+  void setPoint(UInt const identity, point_Type  const & point); //put point 
+  bool setPointWithBoundaryCheck( ID const identity, point_Type const & point ); //with forced bound check
   
   UInt & id() { return _id;};
   
@@ -725,12 +725,12 @@ which export to RegionMesh space the types used for the internal data.
   typedef  GeoElement3D<GeoShape,VolumeMarker> VolumeType;
   typedef  GeoElement2D<FaceShape,FaceMarker>  FaceType;
   typedef  GeoElement1D<EdgeShape,EdgeMarker>  EdgeType;
-  typedef  GeoElement0D<PointMarker>           PointType; 
+  typedef  GeoElement0D<PointMarker>           point_Type; 
 
   // Typedefs for STL compliant containers of mesh geometric entities
   // I Use SimpleVect for addressing from 1.
 
-  typedef SimpleVect<PointType>    Points;  // Point List
+  typedef SimpleVect<point_Type>    Points;  // Point List
   typedef SimpleVect<VolumeType >  Volumes; // 3DElements list
   typedef SimpleVect<FaceType> Faces;       /* Face list:Boundary Faces compulsory,
                                                if needed all faces. */
@@ -778,11 +778,11 @@ void showMe(bool verbose); // Prints some mesh info: must be done better!
 \end{verbatim}
 Now all the methods which allow to access mesh geometric entities
 \begin{verbatim}
-   PointType const & point(UInt const i) const; // ith mesh point/vertex
+   point_Type const & point(UInt const i) const; // ith mesh point/vertex
    FaceType const & face(UInt const i) const; // ith mesh face 
    EdgeType const & edge(UInt const i) const; // ith mesh edges  
    VolumeType const & volume(UInt const i) const; //ith mesh 3Delement
-   PointType const & boundaryPoint(UInt const i) const; // ith b. point/vertex
+   point_Type const & boundaryPoint(UInt const i) const; // ith b. point/vertex
    FaceType  const & boundaryFace(UInt const i) const; // ith b. face.
    EdgeType  const & boundaryEdge(UInt const i) const; // ith b. edge
 \end{verbatim}
@@ -804,8 +804,8 @@ geometry items (please note that they can take a reference to the
 object or its \texttt{id})
 
 \begin{verbatim}
-   bool isVertex(PointType const & p) const;  //Is this point a Vertex?
-   bool isBoundaryPoint(PointType const & p) const;  //Is this point on boundary?
+   bool isVertex(point_Type const & p) const;  //Is this point a Vertex?
+   bool isBoundaryPoint(point_Type const & p) const;  //Is this point on boundary?
    bool isBoundaryFace(FaceType const & f) const;  //Is this face on boundary?
    bool isBoundaryEdge(EdgeType const & e) const;  //Is this edge on boundary?
    bool isVertex(UInt const & id) const;  //Is this id a Vertex id?

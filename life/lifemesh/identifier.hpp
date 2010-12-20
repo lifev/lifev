@@ -257,11 +257,11 @@ private:
 };
 
 
-//! IdentifierNatural - Idenifier for Natural and Mixte Boundary Condiions
+//! IdentifierNatural - Idenifier for Natural and Robin Boundary Condiions
 /*!
 
     This class holds the Dof identifier and the bdLocalToGlobal information for implementing
-    Natural and Mixte boundary conditions
+    Natural and Robin boundary conditions
 
  */
 
