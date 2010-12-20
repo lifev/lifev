@@ -40,8 +40,8 @@
 #define _SDSTABILIZATION_HPP_
 
 
-#include <life/lifecore/GetPot.hpp>
-#include <life/lifecore/debug.hpp>
+#include <life/lifefilters/GetPot.hpp>
+#include <life/lifecore/LifeDebug.hpp>
 
 namespace LifeV
 {
