@@ -66,8 +66,6 @@
 
 #include <life/lifecore/chrono.hpp>
 
-#include <life/lifealg/dataNewton.hpp>
-#include <life/lifealg/newton.hpp>
 #include <life/lifealg/SolverTrilinos.hpp>
 
 #include <life/lifesolver/dataSecondOrder.hpp>

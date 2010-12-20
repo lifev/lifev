@@ -39,20 +39,20 @@
 #define LINEARVENANTKIRCHHOFSOLVER_H 1
 
 #include <life/lifecore/life.hpp>
-#include <life/lifesolver/VenantKirchhofSolver.hpp>
+#include <life/lifesolver/VenantKirchhoffSolver.hpp>
 
 namespace LifeV
 {
 
 template <typename Mesh, typename SolverType = LifeV::SolverTrilinos >
-class LinearVenantKirchhofSolver : public VenantKirchhofSolver<Mesh, SolverType>
+class VenantKirchhoffSolverLinear : public VenantKirchhoffSolver<Mesh, SolverType>
 {
 public:
 
     //! @name Type definitions
     //@{
 
-    typedef VenantKirchhofSolver<Mesh, SolverType>     super;
+    typedef VenantKirchhoffSolver<Mesh, SolverType>     super;
     typedef typename super::vector_Type                vector_Type;
     typedef typename super::matrixPtr_Type             matrixPtr_Type;
     typedef typename super::bchandler_Type             bchandler_Type;
@@ -61,8 +61,8 @@ public:
 
     //! @name Constructor
     //@{
-    
-    LinearVenantKirchhofSolver():
+
+    VenantKirchhoffSolverLinear():
             super()
     {}
 
@@ -71,7 +71,7 @@ public:
     //! @name Methods
     //@{
     /**
-       These methods are derived from the base class VenantKirchhoff 
+       These methods are derived from the base class VenantKirchhoff
      */
     void updateJacobian( vector_Type& /*sol*/, matrixPtr_Type& /*jac*/ )
     {

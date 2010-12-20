@@ -56,7 +56,7 @@ namespace LifeV
 {
 
 //! DataElasticStructure - Data container for solid problems with elastic structure
-class DataElasticStructure: public DataTime
+class VenantKirchhoffElasticData: public DataTime
 {
 public:
 
@@ -76,13 +76,13 @@ public:
     //@{
 
     //! Empty Constructor
-    DataElasticStructure();
+    VenantKirchhoffElasticData();
 
     //! Copy constructor
     /*!
-     * @param dataElasticStructure - DataElasticStructure
+     * @param VenantKirchhoffElasticData - VenantKirchhoffElasticData
      */
-    DataElasticStructure( const DataElasticStructure& dataElasticStructure );
+    VenantKirchhoffElasticData( const VenantKirchhoffElasticData& VenantKirchhoffElasticData );
 
     //@}
 
@@ -92,9 +92,9 @@ public:
 
     //! Operator=
     /*!
-     * @param dataElasticStructure - DataElasticStructure
+     * @param VenantKirchhoffElasticData - VenantKirchhoffElasticData
      */
-    DataElasticStructure& operator=( const DataElasticStructure& dataElasticStructure );
+    VenantKirchhoffElasticData& operator=( const VenantKirchhoffElasticData& VenantKirchhoffElasticData );
 
     //@}
 

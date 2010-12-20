@@ -53,12 +53,12 @@
 namespace LifeV
 {
 /*!
-  \class ElasticStructureHandler
+  \class VenantKirchhoffElasticHandler
 */
 
 template <typename Mesh>
-class ElasticStructureHandler:
-        public DataElasticStructure<Mesh>
+class VenantKirchhoffElasticHandler:
+        public VenantKirchhoffElasticData<Mesh>
 {
 
 public:
@@ -75,7 +75,7 @@ public:
   //! @name Constructors & Destructor
   //@{
 
-  ElasticStructureHandler();
+  VenantKirchhoffElasticHandler();
 
   /*!
     \param data_file GetPot data file
@@ -84,7 +84,7 @@ public:
     \param bdQr surface quadrature
     \param BCh boundary conditions for the displacement
   */
-  setUp( const DataElasticStructure<Mesh>& data,
+  setUp( const VenantKirchhoffElasticData<Mesh>& data,
 	 const RefFE&                      refFE,
 	 const QuadRule&                   Qr,
 	 const QuadRule&                   bdQr,
@@ -96,14 +96,14 @@ public:
     \param Qr volumic quadrature rule
     \param bdQr surface quadrature
   */
-  setUp( const DataElasticStructure<Mesh>& data,
+  setUp( const VenantKirchhoffElasticData<Mesh>& data,
 	 const RefFE&                      refFE,
 	 const QuadRule&                   Qr,
 	 const QuadRule&                   bdQr);
 
 
   //! Destructor
-  virtual ~ElasticStructureHandler()
+  virtual ~VenantKirchhoffElasticHandler()
   {}
 
   //@}
@@ -195,7 +195,7 @@ private:
   /*!
     if you need a copy you should implement it, so that it copies the shared pointer one by one, without copying the content.
   */
-  ElasticStructureHandler(ElasticStructureHandler& T);
+  VenantKirchhoffElasticHandler(VenantKirchhoffElasticHandler& T);
   {}
 
   /*!
@@ -252,9 +252,9 @@ private:
 //=========================================
 
 template <typename Mesh>
-ElasticStructureHandler<Mesh>::
-ElasticStructureHandler( ):
-  DataElasticStructure<Mesh> (  ),
+VenantKirchhoffElasticHandler<Mesh>::
+VenantKirchhoffElasticHandler( ):
+  VenantKirchhoffElasticData<Mesh> (  ),
   M_refFE                    (  ),
   M_dof                      (  ),
   M_dim                      (  ),
@@ -271,14 +271,14 @@ ElasticStructureHandler( ):
 {}
 
 template <typename Mesh>
-ElasticStructureHandler<Mesh>::
-setUp( const DataElasticStructure<Mesh>& data,
+VenantKirchhoffElasticHandler<Mesh>::
+setUp( VenantKirchhoffElasticData<Mesh>& data,
        const RefFE&                      refFE,
        const QuadRule&                   Qr,
        const QuadRule&                   bdQr,
        BCHandler&                        BCh )
 {
-  DataElasticStructure<Mesh> = data;
+  VenantKirchhoffElasticData<Mesh> = data;
   M_refFE                    = refFE;
   M_dof                      ( this->mesh(), M_refFE ),
   M_dim                      = M_dof.numTotalDof();
@@ -295,13 +295,13 @@ setUp( const DataElasticStructure<Mesh>& data,
 }
 
 template <typename Mesh>
-ElasticStructureHandler<Mesh>::
-setUp( const DataElasticStructure<Mesh>& data,
+VenantKirchhoffElasticHandler<Mesh>::
+setUp( const VenantKirchhoffElasticData<Mesh>& data,
        const RefFE&                      refFE,
        const QuadRule&                   Qr,
        const QuadRule&                   bdQr)
 {
-  DataElasticStructure<Mesh> = data;
+  VenantKirchhoffElasticData<Mesh> = data;
   M_refFE                    = refFE;
   M_dof                      ( this->mesh(), M_refFE ),
   M_dim                      = M_dof.numTotalDof();
@@ -321,7 +321,7 @@ setUp( const DataElasticStructure<Mesh>& data,
 // Returns the displacement vector
 template <typename Mesh>
 PhysVectUnknown<Vector> &
-ElasticStructureHandler<Mesh>::disp()
+VenantKirchhoffElasticHandler<Mesh>::disp()
 {
   return M_d;
 }
@@ -330,7 +330,7 @@ ElasticStructureHandler<Mesh>::disp()
 // Returns the velocity vector
 template <typename Mesh>
 PhysVectUnknown<Vector> &
-ElasticStructureHandler<Mesh>::w()
+VenantKirchhoffElasticHandler<Mesh>::w()
 {
   return M_w;
 }
@@ -338,7 +338,7 @@ ElasticStructureHandler<Mesh>::w()
 // Postprocessing
 template <typename Mesh>
 void
-ElasticStructureHandler<Mesh>::postProcess()
+VenantKirchhoffElasticHandler<Mesh>::postProcess()
 {
   std::ostringstream index;
   std::string name, namedef;
@@ -394,7 +394,7 @@ ElasticStructureHandler<Mesh>::postProcess()
 // Sets the initial condition
 template <typename Mesh>
 void
-ElasticStructureHandler<Mesh>::initialize( const Function& d0, const Function& w0 )
+VenantKirchhoffElasticHandler<Mesh>::initialize( const Function& d0, const Function& w0 )
 {
 
   // Initialize velocity
@@ -527,7 +527,7 @@ ElasticStructureHandler<Mesh>::initialize( const Function& d0, const Function& w
 // Sets the initial condition
 template <typename Mesh>
 void
-ElasticStructureHandler<Mesh>::initialize( const std::string& depName,
+VenantKirchhoffElasticHandler<Mesh>::initialize( const std::string& depName,
 					   const std::string& velName,
 					   Real             startT)
 {
@@ -547,7 +547,7 @@ ElasticStructureHandler<Mesh>::initialize( const std::string& depName,
 
 template <typename Mesh>
 void
-ElasticStructureHandler<Mesh>::readUnknown( const std::string       &name,
+VenantKirchhoffElasticHandler<Mesh>::readUnknown( const std::string       &name,
 					      PhysVectUnknown<Vector> &unknown)
 {
   std::string sdummy;

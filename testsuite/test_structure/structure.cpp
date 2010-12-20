@@ -41,8 +41,8 @@
 #include <life/lifealg/EpetraMap.hpp>
 #include <life/lifemesh/dataMesh.hpp>
 #include <life/lifemesh/partitionMesh.hpp>
-#include <life/lifesolver/dataElasticStructure.hpp>
-#include <life/lifesolver/LinearVenantKirchhofSolver.hpp>
+#include <life/lifesolver/VenantKirchhoffElasticData.hpp>
+#include <life/lifesolver/VenantKirchhoffSolverLinear.hpp>
 
 #include <life/lifefilters/ensight.hpp>
 #include <life/lifefilters/hdf5exporter.hpp>
@@ -162,7 +162,7 @@ void
 Structure::run3d()
 {
 
-    typedef VenantKirchhofSolver< RegionMesh3D<LinearTetra> >::vector_Type  vector_Type;
+    typedef VenantKirchhoffSolver< RegionMesh3D<LinearTetra> >::vector_Type  vector_Type;
     typedef boost::shared_ptr<vector_Type> vectorPtr_Type;
 
     bool verbose = (parameters->comm->MyPID() == 0);
@@ -176,7 +176,7 @@ Structure::run3d()
 
     GetPot dataFile( parameters->data_file_name.c_str() );
 
-    boost::shared_ptr<DataElasticStructure> dataStructure(new DataElasticStructure( ));
+    boost::shared_ptr<VenantKirchhoffElasticData> dataStructure(new VenantKirchhoffElasticData( ));
     dataStructure->setup(dataFile);
 
     DataMesh             dataMesh;
@@ -210,7 +210,7 @@ Structure::run3d()
         fullMap += structMap;
     }
 
-    LinearVenantKirchhofSolver< RegionMesh3D<LinearTetra> > solid;
+    VenantKirchhoffSolverLinear< RegionMesh3D<LinearTetra> > solid;
     solid.setup(dataStructure,
                 dFESpace,
                 parameters->comm);

@@ -40,7 +40,7 @@
 #define DATAFSI_H
 
 #include <life/lifesolver/dataNavierStokes.hpp>
-#include <life/lifesolver/dataElasticStructure.hpp>
+#include <life/lifesolver/VenantKirchhoffElasticData.hpp>
 
 #include <boost/array.hpp>
 #include <boost/scoped_ptr.hpp>
@@ -80,7 +80,7 @@ public:
     typedef DataNavierStokes                        dataFluid_Type;
     typedef boost::shared_ptr< dataFluid_Type >     dataFluid_PtrType;
 
-    typedef DataElasticStructure                    dataSolid_Type;
+    typedef VenantKirchhoffElasticData                    dataSolid_Type;
     typedef boost::shared_ptr< dataSolid_Type >     dataSolid_PtrType;
 
     //@}
