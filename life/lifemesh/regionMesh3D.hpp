@@ -41,9 +41,9 @@ along with LifeV. If not, see <http://www.gnu.org/licenses/>.
 #include <fstream>
 
 #include <life/lifecore/life.hpp>
-#include <life/lifecore/debug.hpp>
+#include <life/lifecore/LifeDebug.hpp>
 #include <life/lifemesh/geoElement.hpp>
-#include <life/lifecore/switch.hpp>
+#include <life/lifecore/Switch.hpp>
 #include <life/lifemesh/bareItems.hpp>
 
 #include <life/lifearray/SimpleVect.hpp>
