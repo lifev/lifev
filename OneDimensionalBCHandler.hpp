@@ -40,8 +40,8 @@
  *  @maintainer Cristiano Malossi <cristiano.malossi@epfl.ch>
  */
 
-#ifndef ONEDIMENSIONALMODEL_BCHANDLER_H
-#define ONEDIMENSIONALMODEL_BCHANDLER_H
+#ifndef OneDimensionalBCHandler_H
+#define OneDimensionalBCHandler_H
 
 // LIFEV - MATHCARD
 #include <lifemc/lifesolver/OneDimensionalModel_Definitions.hpp>
@@ -50,18 +50,18 @@
 namespace LifeV
 {
 
-//! OneDimensionalModel_BCHandler - Class featuring methods to handle boundary conditions.
+//! OneDimensionalBCHandler - Class featuring methods to handle boundary conditions.
 /*!
  *  @author Lucia Mirabella, Tiziano Passerini
  */
-class OneDimensionalModel_BCHandler
+class OneDimensionalBCHandler
 {
 public:
 
     //! @name Type definitions
     //@{
 
-    typedef OneDimensionalModel_BC              bc_Type;
+    typedef OneDimensionalBC                    bc_Type;
     typedef boost::shared_ptr< bc_Type >        bcPtr_Type;
 
     typedef bc_Type::bcFunction_Type            bcFunction_Type;
@@ -87,16 +87,16 @@ public:
     //@{
 
     //! Constructor
-    explicit OneDimensionalModel_BCHandler();
+    explicit OneDimensionalBCHandler();
 
     //! Copy constructor
     /*!
-     * @param BCH OneDimensionalModel_BCHandler
+     * @param BCH OneDimensionalBCHandler
      */
-    explicit OneDimensionalModel_BCHandler( const OneDimensionalModel_BCHandler& BCH );
+    explicit OneDimensionalBCHandler( const OneDimensionalBCHandler& BCH );
 
     //! Destructor
-    virtual ~OneDimensionalModel_BCHandler() {}
+    virtual ~OneDimensionalBCHandler() {}
 
     //@}
 
@@ -140,7 +140,7 @@ private:
     //! @name Unimplemented Methods
     //@{
 
-    OneDimensionalModel_BCHandler& operator=( const OneDimensionalModel_BCHandler& bcHandler );
+    OneDimensionalBCHandler& operator=( const OneDimensionalBCHandler& bcHandler );
 
     //@}
 
@@ -152,4 +152,4 @@ private:
 
 }
 
-#endif //ONEDIMENSIONALMODEL_BCHANDLER_H
+#endif //OneDimensionalBCHandler_H

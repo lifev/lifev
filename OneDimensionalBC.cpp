@@ -49,7 +49,7 @@ namespace LifeV
 // ===================================================
 // Constructors & Destructor
 // ===================================================
-OneDimensionalModel_BC::OneDimensionalModel_BC( const bcSide_Type& bcSide ) :
+OneDimensionalBC::OneDimensionalBC( const bcSide_Type& bcSide ) :
         M_bcType                    (),
         M_bcSide                    ( bcSide ),
         M_bcFunction                (),
@@ -61,7 +61,7 @@ OneDimensionalModel_BC::OneDimensionalModel_BC( const bcSide_Type& bcSide ) :
     M_bcMatrix[ OneDimensional::second ] = container2D_Type();
 }
 
-OneDimensionalModel_BC::OneDimensionalModel_BC( const OneDimensionalModel_BC& bc ) :
+OneDimensionalBC::OneDimensionalBC( const OneDimensionalBC& bc ) :
         M_bcType                    ( bc.M_bcType ),
         M_bcSide                    ( bc.M_bcSide ),
         M_bcFunction                ( bc.M_bcFunction ),
@@ -74,8 +74,8 @@ OneDimensionalModel_BC::OneDimensionalModel_BC( const OneDimensionalModel_BC& bc
 // Methods
 // ===================================================
 void
-OneDimensionalModel_BC::applyBC( const Real& time, const Real& timeStep, const solution_Type& solution,
-                                 const fluxPtr_Type& flux, container2D_Type& bc )
+OneDimensionalBC::applyBC( const Real& time, const Real& timeStep, const solution_Type& solution,
+                           const fluxPtr_Type& flux, container2D_Type& bc )
 {
 
 #ifdef HAVE_LIFEV_DEBUG
@@ -118,9 +118,9 @@ OneDimensionalModel_BC::applyBC( const Real& time, const Real& timeStep, const s
 // Private Methods
 // ===================================================
 void
-OneDimensionalModel_BC::computeMatrixAndRHS( const Real& time, const Real& timeStep, const fluxPtr_Type& flux, const bcLine_Type& line,
-                                             const container2D_Type& leftEigenvector1, const container2D_Type& leftEigenvector2,
-                                             const UInt& dof, Real& rhs )
+OneDimensionalBC::computeMatrixAndRHS( const Real& time, const Real& timeStep, const fluxPtr_Type& flux, const bcLine_Type& line,
+                                       const container2D_Type& leftEigenvector1, const container2D_Type& leftEigenvector2,
+                                       const UInt& dof, Real& rhs )
 {
     // This is not general (typical situation):
     //     on first line,  left boundary,  I impose W1
@@ -168,10 +168,10 @@ OneDimensionalModel_BC::computeMatrixAndRHS( const Real& time, const Real& timeS
 #endif
 }
 
-OneDimensionalModel_BC::container2D_Type
-OneDimensionalModel_BC::solveLinearSystem( const container2D_Type& line1,
-                                           const container2D_Type& line2,
-                                           const container2D_Type& rhs ) const
+OneDimensionalBC::container2D_Type
+OneDimensionalBC::solveLinearSystem( const container2D_Type& line1,
+                                     const container2D_Type& line2,
+                                     const container2D_Type& rhs ) const
 {
 #ifdef HAVE_LIFEV_DEBUG
     ASSERT_PRE( line1.size() == 2 && line2.size() == 2 && rhs.size() == 2,

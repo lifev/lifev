@@ -40,8 +40,8 @@
  *  @maintainer Cristiano Malossi <cristiano.malossi@epfl.ch>
  */
 
-#ifndef ONEDIMENSIONALMODEL_BCSOLVERFUNCTIONS_H
-#define ONEDIMENSIONALMODEL_BCSOLVERFUNCTIONS_H
+#ifndef OneDimensionalBCFunctionDefault_H
+#define OneDimensionalBCFunctionDefault_H
 
 // LIFEV - MATHCARD
 #include <lifemc/lifefem/OneDimensionalModel_BCFunction.hpp>
@@ -56,23 +56,23 @@ namespace LifeV
 /*!
  *  @author Lucia Mirabella
  */
-class OneDimensionalModel_BCFunction_Default
+class OneDimensionalBCFunctionDefault
 {
 public:
 
     //! @name Type definitions and Enumerators
     //@{
 
-    typedef OneDimensionalModel_BCFunction          bcFunction_Type;
+    typedef OneDimensionalBCFunction                bcFunction_Type;
     typedef boost::shared_ptr<bcFunction_Type>      bcFunctionPtr_Type;
 
-    typedef OneDimensionalModel_Flux                flux_Type;
+    typedef OneDimensionalFlux                      flux_Type;
     typedef boost::shared_ptr< flux_Type >          fluxPtr_Type;
 
-    typedef OneDimensionalModel_Source              source_Type;
+    typedef OneDimensionalSource                    source_Type;
     typedef boost::shared_ptr< source_Type >        sourcePtr_Type;
 
-    typedef OneDimensionalModel_Data                data_Type;
+    typedef OneDimensionalData                      data_Type;
     typedef data_Type::mesh_Type                    mesh_Type;
 
     typedef data_Type::container2D_Type             container2D_Type;
@@ -95,16 +95,16 @@ public:
     //@{
 
     //! Constructor
-    explicit OneDimensionalModel_BCFunction_Default( const bcSide_Type& bcSide, const bcType_Type& bcType );
+    explicit OneDimensionalBCFunctionDefault( const bcSide_Type& bcSide, const bcType_Type& bcType );
 
     //! Copy constructor
     /*!
-     * @param BCF_Default OneDimensionalModel_BCFunction_Default
+     * @param BCF_Default OneDimensionalBCFunctionDefault
      */
-    explicit OneDimensionalModel_BCFunction_Default( const OneDimensionalModel_BCFunction_Default& bcFunctionDefault );
+    explicit OneDimensionalBCFunctionDefault( const OneDimensionalBCFunctionDefault& bcFunctionDefault );
 
     //! Destructor
-    virtual ~OneDimensionalModel_BCFunction_Default() {}
+    virtual ~OneDimensionalBCFunctionDefault() {}
 
     //@}
 
@@ -150,14 +150,14 @@ protected:
 /*!
  *  @author Lucia Mirabella
  */
-class OneDimensionalModel_BCFunction_Riemann : public OneDimensionalModel_BCFunction_Default
+class OneDimensionalBCFunctionRiemann : public OneDimensionalBCFunctionDefault
 {
 public:
 
     //! @name Type definitions and Enumerators
     //@{
 
-    typedef OneDimensionalModel_BCFunction_Default      super;
+    typedef OneDimensionalBCFunctionDefault             super;
     typedef super::container2D_Type                     container2D_Type;
 
     //@}
@@ -167,16 +167,16 @@ public:
     //@{
 
     //! Constructor
-    explicit OneDimensionalModel_BCFunction_Riemann( const bcSide_Type& bcSide, const bcType_Type& bcType );
+    explicit OneDimensionalBCFunctionRiemann( const bcSide_Type& bcSide, const bcType_Type& bcType );
 
     //! Copy constructor
     /*!
-     * @param BCF_Riemann OneDimensionalModel_BCFunction_Riemann
+     * @param BCF_Riemann OneDimensionalBCFunctionRiemann
      */
-    explicit OneDimensionalModel_BCFunction_Riemann( const OneDimensionalModel_BCFunction_Riemann& bcFunctionRiemann );
+    explicit OneDimensionalBCFunctionRiemann( const OneDimensionalBCFunctionRiemann& bcFunctionRiemann );
 
     //! Destructor
-    virtual ~OneDimensionalModel_BCFunction_Riemann() {}
+    virtual ~OneDimensionalBCFunctionRiemann() {}
 
     //@}
 
@@ -210,14 +210,14 @@ protected:
 /*!
  *  @author Lucia Mirabella
  */
-class OneDimensionalModel_BCFunction_Compatibility : public OneDimensionalModel_BCFunction_Riemann
+class OneDimensionalBCFunctionCompatibility : public OneDimensionalBCFunctionRiemann
 {
 public:
 
     //! @name Type definitions
     //@{
 
-    typedef OneDimensionalModel_BCFunction_Riemann       super;
+    typedef OneDimensionalBCFunctionRiemann              super;
 
     typedef super::fluxPtr_Type                          fluxPtr_Type;
     typedef super::sourcePtr_Type                        sourcePtr_Type;
@@ -233,16 +233,16 @@ public:
     //@{
 
     //! Constructor
-    explicit OneDimensionalModel_BCFunction_Compatibility( const bcSide_Type& bcSide,  const bcType_Type& bcType );
+    explicit OneDimensionalBCFunctionCompatibility( const bcSide_Type& bcSide,  const bcType_Type& bcType );
 
     //! Copy constructor
     /*!
-     * @param BCF_Compatibility OneDimensionalModel_BCFunction_Compatibility
+     * @param BCF_Compatibility OneDimensionalBCFunctionCompatibility
      */
-    explicit OneDimensionalModel_BCFunction_Compatibility( const OneDimensionalModel_BCFunction_Compatibility& bcFunctionCompatibility );
+    explicit OneDimensionalBCFunctionCompatibility( const OneDimensionalBCFunctionCompatibility& bcFunctionCompatibility );
 
     //! Destructor
-    virtual ~OneDimensionalModel_BCFunction_Compatibility() {}
+    virtual ~OneDimensionalBCFunctionCompatibility() {}
 
     //@}
 
@@ -298,14 +298,14 @@ protected:
 /*!
  *  @author Lucia Mirabella
  */
-class OneDimensionalModel_BCFunction_Absorbing : public OneDimensionalModel_BCFunction_Compatibility
+class OneDimensionalBCFunctionAbsorbing : public OneDimensionalBCFunctionCompatibility
 {
 public:
 
     //! @name Type definitions
     //@{
 
-    typedef OneDimensionalModel_BCFunction_Compatibility super;
+    typedef OneDimensionalBCFunctionCompatibility        super;
 
     typedef super::fluxPtr_Type                          fluxPtr_Type;
     typedef super::sourcePtr_Type                        sourcePtr_Type;
@@ -320,16 +320,16 @@ public:
     //@{
 
     //! Constructor
-    explicit OneDimensionalModel_BCFunction_Absorbing( const bcSide_Type& bcSide, const bcType_Type& bcType ) : super( bcSide, bcType ) {}
+    explicit OneDimensionalBCFunctionAbsorbing( const bcSide_Type& bcSide, const bcType_Type& bcType ) : super( bcSide, bcType ) {}
 
     //! Copy constructor
     /*!
-     * @param BCF_Absorbing OneDimensionalModel_BCFunction_Absorbing
+     * @param BCF_Absorbing OneDimensionalBCFunctionAbsorbing
      */
-    explicit OneDimensionalModel_BCFunction_Absorbing( const OneDimensionalModel_BCFunction_Absorbing& bcFunctionAbsorbing ) : super( bcFunctionAbsorbing ) {}
+    explicit OneDimensionalBCFunctionAbsorbing( const OneDimensionalBCFunctionAbsorbing& bcFunctionAbsorbing ) : super( bcFunctionAbsorbing ) {}
 
     //! Destructor
-    virtual ~OneDimensionalModel_BCFunction_Absorbing() {}
+    virtual ~OneDimensionalBCFunctionAbsorbing() {}
 
     //@}
 
@@ -354,14 +354,14 @@ protected:
 /*!
  *  @author Lucia Mirabella
  */
-class OneDimensionalModel_BCFunction_Resistance : public OneDimensionalModel_BCFunction_Absorbing
+class OneDimensionalBCFunctionResistance : public OneDimensionalBCFunctionAbsorbing
 {
 public:
 
     //! @name Type definitions
     //@{
 
-    typedef OneDimensionalModel_BCFunction_Absorbing     super;
+    typedef OneDimensionalBCFunctionAbsorbing            super;
 
     typedef super::fluxPtr_Type                          fluxPtr_Type;
     typedef super::sourcePtr_Type                        sourcePtr_Type;
@@ -374,16 +374,16 @@ public:
     //@{
 
     //! Constructor
-    explicit OneDimensionalModel_BCFunction_Resistance( const bcSide_Type& bcSide,  const bcType_Type& bcType, const Real& resistance );
+    explicit OneDimensionalBCFunctionResistance( const bcSide_Type& bcSide,  const bcType_Type& bcType, const Real& resistance );
 
     //! Copy constructor
     /*!
-     * @param BCF_Resistance OneDimensionalModel_BCFunction_Resistance
+     * @param BCF_Resistance OneDimensionalBCFunctionResistance
      */
-    explicit OneDimensionalModel_BCFunction_Resistance( const OneDimensionalModel_BCFunction_Resistance& bcFunctionResistance );
+    explicit OneDimensionalBCFunctionResistance( const OneDimensionalBCFunctionResistance& bcFunctionResistance );
 
     //! Destructor
-    virtual ~OneDimensionalModel_BCFunction_Resistance() {}
+    virtual ~OneDimensionalBCFunctionResistance() {}
 
     //@}
 
@@ -421,14 +421,14 @@ protected:
  *
  *  @author Lucia Mirabella
  */
-class OneDimensionalModel_BCFunction_Windkessel3 : public OneDimensionalModel_BCFunction_Compatibility
+class OneDimensionalBCFunctionWindkessel3 : public OneDimensionalBCFunctionCompatibility
 {
 public:
 
     //! @name Type definitions
     //@{
 
-    typedef OneDimensionalModel_BCFunction_Compatibility super;
+    typedef OneDimensionalBCFunctionCompatibility        super;
 
     typedef super::fluxPtr_Type                          fluxPtr_Type;
     typedef super::sourcePtr_Type                        sourcePtr_Type;
@@ -441,7 +441,7 @@ public:
     //@{
 
     //! Constructor
-    explicit OneDimensionalModel_BCFunction_Windkessel3( const bcSide_Type& bcSide, const bcType_Type& bcType,
+    explicit OneDimensionalBCFunctionWindkessel3( const bcSide_Type& bcSide, const bcType_Type& bcType,
                                                          const Real& resistance1, const Real& resistance2,
                                                          const Real& compliance,
                                                          const bool& absorbing1 = false,
@@ -449,12 +449,12 @@ public:
 
     //! Copy constructor
     /*!
-     * @param BCF_Resistance OneDimensionalModel_BCFunction_Resistance
+     * @param BCF_Resistance OneDimensionalBCFunctionResistance
      */
-    explicit OneDimensionalModel_BCFunction_Windkessel3( const OneDimensionalModel_BCFunction_Windkessel3& bcFunctionWindkessel3 );
+    explicit OneDimensionalBCFunctionWindkessel3( const OneDimensionalBCFunctionWindkessel3& bcFunctionWindkessel3 );
 
     //! Destructor
-    virtual ~OneDimensionalModel_BCFunction_Windkessel3() {}
+    virtual ~OneDimensionalBCFunctionWindkessel3() {}
 
     //@}
 
@@ -489,4 +489,4 @@ protected:
 
 }
 
-#endif // ONEDIMENSIONALMODEL_BCSOLVERFUNCTIONS_H
+#endif // OneDimensionalBCFunctionDefault_H

@@ -39,8 +39,8 @@
  *  @maintainer Cristiano Malossi <cristiano.malossi@epfl.ch>
  */
 
-#ifndef ONEDIMENSIONALMODEL_BCFUNCTION_H
-#define ONEDIMENSIONALMODEL_BCFUNCTION_H
+#ifndef OneDimensionalBCFunction_H
+#define OneDimensionalBCFunction_H
 
 // LIFEV - MATHCARD
 #include <lifemc/lifesolver/OneDimensionalModel_Definitions.hpp>
@@ -48,11 +48,11 @@
 namespace LifeV
 {
 
-//! OneDimensionalModel_BCFunction - Base class for One Dimensional BC Functions.
+//! OneDimensionalBCFunction - Base class for One Dimensional BC Functions.
 /*!
  *  @author Lucia Mirabella
  */
-class OneDimensionalModel_BCFunction
+class OneDimensionalBCFunction
 {
 public:
 
@@ -68,19 +68,19 @@ public:
     //@{
 
     //! Constructor
-    explicit OneDimensionalModel_BCFunction() : M_function() {}
+    explicit OneDimensionalBCFunction() : M_function() {}
 
     //! Constructor by function
     /*!
       @param function the user defined function
     */
-    explicit OneDimensionalModel_BCFunction( const function_Type& function ) : M_function( function ) {}
+    explicit OneDimensionalBCFunction( const function_Type& function ) : M_function( function ) {}
 
     //! Copy constructor
-    OneDimensionalModel_BCFunction( const OneDimensionalModel_BCFunction& bcFunction ) : M_function  ( bcFunction.M_function ) {}
+    OneDimensionalBCFunction( const OneDimensionalBCFunction& bcFunction ) : M_function  ( bcFunction.M_function ) {}
 
     //! Destructor
-    virtual ~OneDimensionalModel_BCFunction() {}
+    virtual ~OneDimensionalBCFunction() {}
 
     //@}
 
@@ -88,7 +88,7 @@ public:
     //! @name Operators
     //@{
 
-    OneDimensionalModel_BCFunction& operator=( const OneDimensionalModel_BCFunction& bcFunction ) { if( this != &bcFunction ) { M_function = bcFunction.M_function; } return *this; }
+    OneDimensionalBCFunction& operator=( const OneDimensionalBCFunction& bcFunction ) { if( this != &bcFunction ) { M_function = bcFunction.M_function; } return *this; }
 
     Real operator()( const Real& time, const Real& timeStep = 0. ) const { return M_function( time, timeStep ); }
 
@@ -125,18 +125,18 @@ private:
 
 /*
 //! Factory create function
-inline OneDimensionalModel_BCFunction*
-Create_OneDimensionalModel_BCFunction( const OneDimensionalModel_BCFunction* bcFunction )
+inline OneDimensionalBCFunction*
+Create_OneDimensionalModel_BCFunction( const OneDimensionalBCFunction* bcFunction )
 {
-    return new OneDimensionalModel_BCFunction( (const OneDimensionalModel_BCFunction&)* bcFunction );
+    return new OneDimensionalBCFunction( (const OneDimensionalBCFunction&)* bcFunction );
 }
 
 namespace
 {
-    static bool registerOneD_BCFunction = FactoryClone_OneDimensionalModel_BCFunction::instance().registerProduct( typeid(OneDimensionalModel_BCFunction), &Create_OneDimensionalModel_BCFunction );
+    static bool registerOneD_BCFunction = FactoryClone_OneDimensionalModel_BCFunction::instance().registerProduct( typeid(OneDimensionalBCFunction), &Create_OneDimensionalModel_BCFunction );
 }
 */
 
 }
 
-#endif // ONEDIMENSIONALMODEL_BCFUNCTION_H
+#endif // OneDimensionalBCFunction_H

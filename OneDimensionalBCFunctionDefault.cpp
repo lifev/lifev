@@ -48,8 +48,7 @@ namespace LifeV
 // ===================================================
 // Constructors & Destructor
 // ===================================================
-OneDimensionalModel_BCFunction_Default::OneDimensionalModel_BCFunction_Default( const bcSide_Type& bcSide,
-                                                                                const bcType_Type& bcType ):
+OneDimensionalBCFunctionDefault::OneDimensionalBCFunctionDefault( const bcSide_Type& bcSide, const bcType_Type& bcType ):
         M_flux                          (),
         M_source                        (),
         M_bcNode                        (),
@@ -58,7 +57,7 @@ OneDimensionalModel_BCFunction_Default::OneDimensionalModel_BCFunction_Default( 
 {
 }
 
-OneDimensionalModel_BCFunction_Default::OneDimensionalModel_BCFunction_Default( const OneDimensionalModel_BCFunction_Default& bcFunctionDefault ) :
+OneDimensionalBCFunctionDefault::OneDimensionalBCFunctionDefault( const OneDimensionalBCFunctionDefault& bcFunctionDefault ) :
         M_flux                          ( bcFunctionDefault.M_flux ),        // Ptr copy
         M_source                        ( bcFunctionDefault.M_source ),      // Ptr copy
         M_solution                      ( bcFunctionDefault.M_solution ),    // Ptr copy
@@ -70,7 +69,7 @@ OneDimensionalModel_BCFunction_Default::OneDimensionalModel_BCFunction_Default( 
 // Methods
 // ===================================================
 Real
-OneDimensionalModel_BCFunction_Default::operator() ( const Real& /*time*/, const Real& /*timeStep*/ )
+OneDimensionalBCFunctionDefault::operator() ( const Real& /*time*/, const Real& /*timeStep*/ )
 {
 #ifdef HAVE_LIFEV_DEBUG
     assert( false );
@@ -82,7 +81,7 @@ OneDimensionalModel_BCFunction_Default::operator() ( const Real& /*time*/, const
 // Set Methods
 // ===================================================
 void
-OneDimensionalModel_BCFunction_Default::setFluxSource( const fluxPtr_Type& flux, const sourcePtr_Type& source )
+OneDimensionalBCFunctionDefault::setFluxSource( const fluxPtr_Type& flux, const sourcePtr_Type& source )
 {
     M_flux   = flux;
     M_source = source;
@@ -94,7 +93,7 @@ OneDimensionalModel_BCFunction_Default::setFluxSource( const fluxPtr_Type& flux,
 // Protected Methods
 // ===================================================
 void
-OneDimensionalModel_BCFunction_Default::setupNode()
+OneDimensionalBCFunctionDefault::setupNode()
 {
     switch ( M_bcSide )
     {
@@ -116,14 +115,13 @@ OneDimensionalModel_BCFunction_Default::setupNode()
 // ===================================================
 // Constructors & Destructor
 // ===================================================
-OneDimensionalModel_BCFunction_Riemann::OneDimensionalModel_BCFunction_Riemann( const bcSide_Type& bcSide,
-                                                                                const bcType_Type& bcType ) :
+OneDimensionalBCFunctionRiemann::OneDimensionalBCFunctionRiemann( const bcSide_Type& bcSide, const bcType_Type& bcType ) :
         super                           ( bcSide, bcType ),
         M_bcU                           (),
         M_bcW                           ()
 {}
 
-OneDimensionalModel_BCFunction_Riemann::OneDimensionalModel_BCFunction_Riemann( const OneDimensionalModel_BCFunction_Riemann& bcFunctionRiemann ) :
+OneDimensionalBCFunctionRiemann::OneDimensionalBCFunctionRiemann( const OneDimensionalBCFunctionRiemann& bcFunctionRiemann ) :
         super                           ( bcFunctionRiemann ),
         M_bcU                           ( bcFunctionRiemann.M_bcU ),
         M_bcW                           ( bcFunctionRiemann.M_bcW )
@@ -133,7 +131,7 @@ OneDimensionalModel_BCFunction_Riemann::OneDimensionalModel_BCFunction_Riemann( 
 // Methods
 // ===================================================
 Real
-OneDimensionalModel_BCFunction_Riemann::operator()( const Real& /*time*/, const Real& /*timeStep*/ )
+OneDimensionalBCFunctionRiemann::operator()( const Real& /*time*/, const Real& /*timeStep*/ )
 {
     updateBCVariables();
 
@@ -144,7 +142,7 @@ OneDimensionalModel_BCFunction_Riemann::operator()( const Real& /*time*/, const 
 // Protected Methods
 // ===================================================
 void
-OneDimensionalModel_BCFunction_Riemann::updateBCVariables()
+OneDimensionalBCFunctionRiemann::updateBCVariables()
 {
     M_bcU[0] = (*(*M_solution)["A"])(M_bcNode);
     M_bcU[1] = (*(*M_solution)["Q"])(M_bcNode);
@@ -157,8 +155,7 @@ OneDimensionalModel_BCFunction_Riemann::updateBCVariables()
 // ===================================================
 // Constructors & Destructor
 // ===================================================
-OneDimensionalModel_BCFunction_Compatibility::OneDimensionalModel_BCFunction_Compatibility( const bcSide_Type& bcSide,
-                                                                                            const bcType_Type& bcType ):
+OneDimensionalBCFunctionCompatibility::OneDimensionalBCFunctionCompatibility( const bcSide_Type& bcSide, const bcType_Type& bcType ):
         super                           ( bcSide, bcType ),
         M_bcInternalNode                (),
         M_boundaryPoint                 (),
@@ -172,7 +169,7 @@ OneDimensionalModel_BCFunction_Compatibility::OneDimensionalModel_BCFunction_Com
 {
 }
 
-OneDimensionalModel_BCFunction_Compatibility::OneDimensionalModel_BCFunction_Compatibility( const OneDimensionalModel_BCFunction_Compatibility& bcFunctionCompatibility ) :
+OneDimensionalBCFunctionCompatibility::OneDimensionalBCFunctionCompatibility( const OneDimensionalBCFunctionCompatibility& bcFunctionCompatibility ) :
         super                           ( bcFunctionCompatibility ),
         M_bcInternalNode                ( bcFunctionCompatibility.M_bcInternalNode ),
         M_boundaryPoint                 ( bcFunctionCompatibility.M_boundaryPoint ),
@@ -190,7 +187,7 @@ OneDimensionalModel_BCFunction_Compatibility::OneDimensionalModel_BCFunction_Com
 // Protected Methods
 // ===================================================
 void
-OneDimensionalModel_BCFunction_Compatibility::setupNode()
+OneDimensionalBCFunctionCompatibility::setupNode()
 {
     super::setupNode();
 
@@ -225,7 +222,7 @@ OneDimensionalModel_BCFunction_Compatibility::setupNode()
 }
 
 Real
-OneDimensionalModel_BCFunction_Compatibility::computeRHS( const Real& timeStep )
+OneDimensionalBCFunctionCompatibility::computeRHS( const Real& timeStep )
 {
     updateBCVariables();
     computeEigenValuesVectors();
@@ -247,7 +244,7 @@ OneDimensionalModel_BCFunction_Compatibility::computeRHS( const Real& timeStep )
 }
 
 void
-OneDimensionalModel_BCFunction_Compatibility::computeEigenValuesVectors()
+OneDimensionalBCFunctionCompatibility::computeEigenValuesVectors()
 {
     M_flux->eigenValuesEigenVectors( M_bcU[0], M_bcU[1],
                                      M_eigenvalues, M_leftEigenvector1, M_leftEigenvector2,
@@ -259,7 +256,7 @@ OneDimensionalModel_BCFunction_Compatibility::computeEigenValuesVectors()
 }
 
 Real
-OneDimensionalModel_BCFunction_Compatibility::evaluateRHS( const Real& eigenvalue, const container2D_Type& eigenvector,
+OneDimensionalBCFunctionCompatibility::evaluateRHS( const Real& eigenvalue, const container2D_Type& eigenvector,
                                                            const container2D_Type& deltaEigenvector, const Real& timeStep )
 {
     Real cfl = computeCFL( eigenvalue, timeStep );
@@ -296,7 +293,7 @@ OneDimensionalModel_BCFunction_Compatibility::evaluateRHS( const Real& eigenvalu
 }
 
 Real
-OneDimensionalModel_BCFunction_Compatibility::computeCFL( const Real& eigenvalue, const Real& timeStep ) const
+OneDimensionalBCFunctionCompatibility::computeCFL( const Real& eigenvalue, const Real& timeStep ) const
 {
     Real deltaX(0);
     switch ( M_bcSide )
@@ -334,7 +331,7 @@ OneDimensionalModel_BCFunction_Compatibility::computeCFL( const Real& eigenvalue
 // Methods
 // ===================================================
 Real
-OneDimensionalModel_BCFunction_Absorbing::operator()( const Real& /*time*/, const Real& timeStep )
+OneDimensionalBCFunctionAbsorbing::operator()( const Real& /*time*/, const Real& timeStep )
 {
     updateBCVariables();
     computeEigenValuesVectors();
@@ -379,7 +376,7 @@ OneDimensionalModel_BCFunction_Absorbing::operator()( const Real& /*time*/, cons
 // Protected Methods
 // ===================================================
 /*void
-OneDimensionalModel_BCFunction_Absorbing::resistance( Real& resistance )
+OneDimensionalBCFunctionAbsorbing::resistance( Real& resistance )
 {
     //Do nothing => absorbing!
 }*/
@@ -389,27 +386,25 @@ OneDimensionalModel_BCFunction_Absorbing::resistance( Real& resistance )
 // ===================================================
 // Constructors & Destructor
 // ===================================================
-OneDimensionalModel_BCFunction_Resistance::OneDimensionalModel_BCFunction_Resistance( const bcSide_Type& bcSide,
-                                                                                      const bcType_Type& bcType,
-                                                                                      const Real& resistance ):
+OneDimensionalBCFunctionResistance::OneDimensionalBCFunctionResistance( const bcSide_Type& bcSide, const bcType_Type& bcType, const Real& resistance ):
         super                           ( bcSide, bcType ),
         M_resistance                    ( resistance )
 {}
 
-OneDimensionalModel_BCFunction_Resistance::OneDimensionalModel_BCFunction_Resistance( const OneDimensionalModel_BCFunction_Resistance& bcFunctionResistance ) :
+OneDimensionalBCFunctionResistance::OneDimensionalBCFunctionResistance( const OneDimensionalBCFunctionResistance& bcFunctionResistance ) :
         super                           ( bcFunctionResistance ),
         M_resistance                    ( bcFunctionResistance.M_resistance )
 {}
 // ===================================================
 // Constructors & Destructor
 // ===================================================
-OneDimensionalModel_BCFunction_Windkessel3::OneDimensionalModel_BCFunction_Windkessel3( const bcSide_Type& bcSide,
-                                                                                        const bcType_Type& bcType,
-                                                                                        const Real&        resistance1,
-                                                                                        const Real&        resistance2,
-                                                                                        const Real&        compliance,
-                                                                                        const bool&        absorbing1,
-                                                                                        const Real&        venousPressure ):
+OneDimensionalBCFunctionWindkessel3::OneDimensionalBCFunctionWindkessel3( const bcSide_Type& bcSide,
+                                                                          const bcType_Type& bcType,
+                                                                          const Real&        resistance1,
+                                                                          const Real&        resistance2,
+                                                                          const Real&        compliance,
+                                                                          const bool&        absorbing1,
+                                                                          const Real&        venousPressure ):
         super                           ( bcSide, bcType ),
         M_resistance1                   ( resistance1 ),
         M_resistance2                   ( resistance2 ),
@@ -422,7 +417,7 @@ OneDimensionalModel_BCFunction_Windkessel3::OneDimensionalModel_BCFunction_Windk
         M_integral_tn                   ( 0. )
 {}
 
-OneDimensionalModel_BCFunction_Windkessel3::OneDimensionalModel_BCFunction_Windkessel3( const OneDimensionalModel_BCFunction_Windkessel3& bcFunctionWindkessel3 ) :
+OneDimensionalBCFunctionWindkessel3::OneDimensionalBCFunctionWindkessel3( const OneDimensionalBCFunctionWindkessel3& bcFunctionWindkessel3 ) :
         super                           ( bcFunctionWindkessel3 ),
         M_resistance1                   ( bcFunctionWindkessel3.M_resistance1 ),
         M_resistance2                   ( bcFunctionWindkessel3.M_resistance2 ),
@@ -439,7 +434,7 @@ OneDimensionalModel_BCFunction_Windkessel3::OneDimensionalModel_BCFunction_Windk
 // Methods
 // ===================================================
 Real
-OneDimensionalModel_BCFunction_Windkessel3::operator()( const Real& time, const Real& timeStep )
+OneDimensionalBCFunctionWindkessel3::operator()( const Real& time, const Real& timeStep )
 {
     UInt W_outID;
     Real W_out;
