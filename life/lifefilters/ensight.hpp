@@ -45,11 +45,11 @@ namespace LifeV
 {
 
 /**
- * @class Ensight
- * @brief Ensight data exporter
+ * @class ExporterEnsight
+ * @brief ExporterEnsight data exporter
  */
 template<typename MeshType>
-class Ensight : public Exporter<MeshType>
+class ExporterEnsight : public Exporter<MeshType>
 {
 
 public:
@@ -64,10 +64,10 @@ public:
     //! @name Constructors and destructor
     //@{
     //! Default constructor
-    Ensight();
+    ExporterEnsight();
 
 
-    //! Constructor for Ensight
+    //! Constructor for ExporterEnsight
     /*!
       @param dfile the GetPot data file where you must provide and [ensight] section with:
       "start" (start index for filenames 0 for 000, 1 for 001 etc.),
@@ -80,10 +80,10 @@ public:
 
       @param the procId determines de CPU id. if negative, it ussemes there is only one processor
     */
-    Ensight(const GetPot& dfile, meshPtr_Type mesh, const std::string& prefix, const Int& procId );
+    ExporterEnsight(const GetPot& dfile, meshPtr_Type mesh, const std::string& prefix, const Int& procId );
 
-    //! Constructor for Ensight
-    Ensight(const GetPot& dfile, const std::string& prefix);
+    //! Constructor for ExporterEnsight
+    ExporterEnsight(const GetPot& dfile, const std::string& prefix);
     //@}
 
     //! @name Public methods
@@ -99,7 +99,7 @@ public:
     /*!
       @param Time the time of the data to be imported
 
-      Not yet implemented for Ensight
+      Not yet implemented for ExporterEnsight
     */
     UInt importFromTime( const Real& /*time*/ ) { assert(false); return 0; }
 
@@ -176,7 +176,7 @@ private:
 // ==============
 
 template<typename MeshType>
-Ensight<MeshType>::Ensight():
+ExporterEnsight<MeshType>::ExporterEnsight():
     super(),
     M_importDir("./"),
     M_steps(0),
@@ -186,7 +186,7 @@ Ensight<MeshType>::Ensight():
 }
 
 template<typename MeshType>
-Ensight<MeshType>::Ensight(const GetPot& dfile, meshPtr_Type mesh, const std::string& prefix,
+ExporterEnsight<MeshType>::ExporterEnsight(const GetPot& dfile, meshPtr_Type mesh, const std::string& prefix,
                        const Int& procId)
     :
     super(dfile, prefix),
@@ -199,7 +199,7 @@ Ensight<MeshType>::Ensight(const GetPot& dfile, meshPtr_Type mesh, const std::st
 }
 
 template<typename MeshType>
-Ensight<MeshType>::Ensight(const GetPot& dfile, const std::string& prefix):
+ExporterEnsight<MeshType>::ExporterEnsight(const GetPot& dfile, const std::string& prefix):
     super(dfile,prefix),
     M_importDir(dfile("exporter/import_dir", "./")),
     M_steps(0),
@@ -213,7 +213,7 @@ Ensight<MeshType>::Ensight(const GetPot& dfile, const std::string& prefix):
 // =====================
 
 template<typename MeshType>
-void Ensight<MeshType>::postProcess(const Real& time)
+void ExporterEnsight<MeshType>::postProcess(const Real& time)
 {
     typedef std::list< ExporterData >::iterator Iterator;
 
@@ -221,7 +221,7 @@ void Ensight<MeshType>::postProcess(const Real& time)
 
     if ( this->M_postfix != "*****" )
     {
-        if (!this->M_procId) std::cout << "  x-  Ensight post-processing ...        " << std::flush;
+        if (!this->M_procId) std::cout << "  x-  ExporterEnsight post-processing ...        " << std::flush;
         Chrono chrono;
         chrono.start();
         for (Iterator i=this->M_listData.begin(); i != this->M_listData.end(); ++i)
@@ -240,7 +240,7 @@ void Ensight<MeshType>::postProcess(const Real& time)
 }
 
 template<typename MeshType>
-void Ensight<MeshType>::import(const Real& startTime, const Real& dt)
+void ExporterEnsight<MeshType>::import(const Real& startTime, const Real& dt)
 {
     // dt is used to rebuild the history up to now
     Real time(startTime - this->M_startIndex * dt);
@@ -259,7 +259,7 @@ void Ensight<MeshType>::import(const Real& startTime, const Real& dt)
 }
 
 template<typename MeshType>
-void Ensight<MeshType>::import(const Real& time)
+void ExporterEnsight<MeshType>::import(const Real& time)
 {
     this->M_timeSteps.push_back(time);
     ++this->M_steps;
@@ -270,7 +270,7 @@ void Ensight<MeshType>::import(const Real& time)
 
     assert( this->M_postfix != "*****" );
 
-    if (!this->M_procId) std::cout << "  x-  Ensight importing ..."<< std::endl;
+    if (!this->M_procId) std::cout << "  x-  ExporterEnsight importing ..."<< std::endl;
 
     Chrono chrono;
     chrono.start();
@@ -284,7 +284,7 @@ void Ensight<MeshType>::import(const Real& time)
 }
 
 template<typename MeshType>
-void Ensight<MeshType>::setMeshProcId( const meshPtr_Type mesh, const Int& procId )
+void ExporterEnsight<MeshType>::setMeshProcId( const meshPtr_Type mesh, const Int& procId )
 {
     super::setMeshProcId( mesh, procId );
 
@@ -320,7 +320,7 @@ void Ensight<MeshType>::setMeshProcId( const meshPtr_Type mesh, const Int& procI
         M_nbLocalDof = 3;
         break;
     default:
-        ERROR_MSG( "FE not allowed in Ensight writer" );
+        ERROR_MSG( "FE not allowed in ExporterEnsight writer" );
     }
 
     if (!this->M_multimesh)
@@ -332,7 +332,7 @@ void Ensight<MeshType>::setMeshProcId( const meshPtr_Type mesh, const Int& procI
 // ===================
 
 template<typename MeshType>
-EpetraMapType Ensight<MeshType>::mapType() const
+EpetraMapType ExporterEnsight<MeshType>::mapType() const
 {
     return Repeated;
 }
@@ -342,7 +342,7 @@ EpetraMapType Ensight<MeshType>::mapType() const
 // ===================
 
 template <typename MeshType>
-void Ensight<MeshType>::writeCase(const Real& time)
+void ExporterEnsight<MeshType>::writeCase(const Real& time)
 {
     std::ofstream casef( (this->M_postDir + this->M_prefix + this->M_me + ".case").c_str() );
     casef << "FORMAT\n";
@@ -353,7 +353,7 @@ void Ensight<MeshType>::writeCase(const Real& time)
 }
 
 template <typename MeshType>
-void Ensight<MeshType>::writeAsciiGeometry(const std::string gFile)
+void ExporterEnsight<MeshType>::writeAsciiGeometry(const std::string gFile)
 {
     using std::setw;
 
@@ -398,7 +398,7 @@ void Ensight<MeshType>::writeAsciiGeometry(const std::string gFile)
 }
 
 template <typename MeshType>
-void Ensight<MeshType>::writeAscii(const ExporterData& dvar)
+void ExporterEnsight<MeshType>::writeAscii(const ExporterData& dvar)
 {
 
     switch ( dvar.type() )
@@ -414,7 +414,7 @@ void Ensight<MeshType>::writeAscii(const ExporterData& dvar)
 }
 
 template <typename MeshType>
-void Ensight<MeshType>::writeAsciiScalar(const ExporterData& dvar)
+void ExporterEnsight<MeshType>::writeAsciiScalar(const ExporterData& dvar)
 {
     using std::setw;
 
@@ -450,7 +450,7 @@ void Ensight<MeshType>::writeAsciiScalar(const ExporterData& dvar)
     scalarFile << std::endl;
 }
 
-template <typename MeshType> void Ensight<MeshType>::writeAsciiVector(const ExporterData& dvar)
+template <typename MeshType> void ExporterEnsight<MeshType>::writeAsciiVector(const ExporterData& dvar)
 {
     using std::setw;
 
@@ -490,7 +490,7 @@ template <typename MeshType> void Ensight<MeshType>::writeAsciiVector(const Expo
 }
 
 template <typename MeshType>
-void Ensight<MeshType>::caseMeshSection(std::ofstream& casef)
+void ExporterEnsight<MeshType>::caseMeshSection(std::ofstream& casef)
 {
     casef << "GEOMETRY\n";
     if ( this->M_multimesh )
@@ -500,7 +500,7 @@ void Ensight<MeshType>::caseMeshSection(std::ofstream& casef)
 }
 
 template <typename MeshType>
-void Ensight<MeshType>::caseVariableSection(std::ofstream& casef)
+void ExporterEnsight<MeshType>::caseVariableSection(std::ofstream& casef)
 {
     typedef std::list< ExporterData >::const_iterator Iterator;
     casef << "VARIABLE\n";
@@ -525,7 +525,7 @@ void Ensight<MeshType>::caseVariableSection(std::ofstream& casef)
 }
 
 template <typename MeshType>
-void Ensight<MeshType>::caseTimeSection(std::ofstream& casef, const Real& time)
+void ExporterEnsight<MeshType>::caseTimeSection(std::ofstream& casef, const Real& time)
 {
     this->M_timeSteps.push_back(time);
     ++this->M_steps;
@@ -552,7 +552,7 @@ void Ensight<MeshType>::caseTimeSection(std::ofstream& casef, const Real& time)
 }
 
 template <typename MeshType>
-void Ensight<MeshType>::readScalar( ExporterData& dvar )
+void ExporterEnsight<MeshType>::readScalar( ExporterData& dvar )
 {
 
     std::string filename( M_importDir + super::M_prefix + "_" + dvar.variableName() +
@@ -591,7 +591,7 @@ void Ensight<MeshType>::readScalar( ExporterData& dvar )
                                                  filename).str().c_str() );
 }
 
-template <typename MeshType> void Ensight<MeshType>::readVector(ExporterData& dvar)
+template <typename MeshType> void ExporterEnsight<MeshType>::readVector(ExporterData& dvar)
 {
 
     std::string filename( M_importDir + super::M_prefix + "_" + dvar.variableName() +
@@ -630,7 +630,7 @@ template <typename MeshType> void Ensight<MeshType>::readVector(ExporterData& dv
 }
 
 template<typename MeshType>
-void Ensight<MeshType>::initProcId()
+void ExporterEnsight<MeshType>::initProcId()
 {
     std::ostringstream index;
     index.fill( '0' );
@@ -643,13 +643,13 @@ void Ensight<MeshType>::initProcId()
 }
 
 template<typename MeshType>
-void Ensight<MeshType>::setNodesMap( std::vector<Int> ltGNodesMap )
+void ExporterEnsight<MeshType>::setNodesMap( std::vector<Int> ltGNodesMap )
 {
     M_ltGNodesMap = ltGNodesMap;
 }
 
 template<typename MeshType>
-void Ensight<MeshType>::initNodesMap()
+void ExporterEnsight<MeshType>::initNodesMap()
 {
     UInt vertexNumber = this->M_mesh->numVertices();
     M_ltGNodesMap.resize(vertexNumber);
