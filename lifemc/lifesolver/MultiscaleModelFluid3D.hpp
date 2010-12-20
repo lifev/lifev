@@ -48,7 +48,7 @@
 #ifdef HAVE_HDF5
 #include <life/lifefilters/ExporterHDF5.hpp>
 #endif
-#include <life/lifesolver/OseenShapeDerivative.hpp>
+#include <life/lifesolver/OseenSolverShapeDerivative.hpp>
 
 // Mathcard includes
 #include <lifemc/lifesolver/BCInterface3D.hpp>
@@ -76,7 +76,7 @@ public:
     typedef RegionMesh3D< LinearTetra >           mesh_Type;
     typedef MeshPartitioner< mesh_Type >          MeshPartitioner_Type;
 
-    typedef OseenShapeDerivative< mesh_Type >     fluid_Type;
+    typedef OseenSolverShapeDerivative< mesh_Type >     fluid_Type;
     typedef fluid_Type::vector_Type               fluidVector_Type;
     typedef boost::shared_ptr< fluidVector_Type > fluidVectorPtr_Type;
 
