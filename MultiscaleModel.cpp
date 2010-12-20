@@ -105,7 +105,7 @@ MultiscaleModel::showMe()
 {
     std::cout << "Model id            = " << M_ID << std::endl
               << "Model name          = " << M_modelName << std::endl
-              << "Model type          = " << Enum2String( M_type, multiscaleModelsMap ) << std::endl;
+              << "Model type          = " << enum2String( M_type, multiscaleModelsMap ) << std::endl;
 
     std::cout << "Couplings number    = " << couplingsNumber() << std::endl;
     std::cout << "Couplings ID(s)     = ";
@@ -114,7 +114,7 @@ MultiscaleModel::showMe()
     std::cout << std::endl;
     std::cout << "Couplings type(s)   = ";
     for ( UInt i( 0 ); i < couplingsNumber(); ++i )
-        std::cout << Enum2String( M_couplings[i]->type(), multiscaleCouplingsMap ) << " ";
+        std::cout << enum2String( M_couplings[i]->type(), multiscaleCouplingsMap ) << " ";
     std::cout << std::endl;
     std::cout << "Flags list          = ";
     for ( UInt i( 0 ); i < couplingsNumber(); ++i )
