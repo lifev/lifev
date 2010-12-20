@@ -46,8 +46,8 @@
  * - boundary conditions:
  *  -# Neumann
  *  -# Dirichlet
- *  -# mixte
- *  -# fluxes (defective)
+ *  -# Robin
+ *  -# Fluxes (defective)
  *  -# absorbing \ref BNV08 :
  *   through the class flowConditions.
  * - optional: computation of wall shear stress (not properly tested in parallel)
