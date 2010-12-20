@@ -58,7 +58,7 @@ BCInterface3DData::BCInterface3DData() :
     //Set mapType
     M_mapType["Essential"]  = Essential;
     M_mapType["Natural"]    = Natural;
-    M_mapType["Mixte"]      = Mixte;
+    M_mapType["Robin"]      = Robin;
     M_mapType["Flux"]       = Flux;
     M_mapType["Resistance"] = Resistance;
 

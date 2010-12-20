@@ -73,7 +73,7 @@ namespace LifeV
  *
  *  NOTE: All the parameters are case sensitive.
  *
- *  type - can be: Essential Natural Mixte Flux
+ *  type - can be: Essential Natural Robin Flux
  *  flag - contains the flag
  *  mode - can be: Full Component Scalar Tangential Normal.
  *  component - if mode is Scalar, Tangential or Normal it is missing.

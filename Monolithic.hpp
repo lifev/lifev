@@ -540,7 +540,7 @@ protected:
     solidBchandlerPtr_Type                              M_BCh_Robin;
     //UInt                                              M_fluxes;
     solidBchandlerPtr_Type                              M_BChWSS;
-    BCFunctionMixte                                   M_bcfWss;
+    BCFunctionRobin                                   M_bcfWss;
     //    matrixPtr_Type                                    M_robinCoupling;
     UInt                                              M_offset;
     UInt                                              M_solidAndFluidDim;
