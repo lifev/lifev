@@ -52,14 +52,14 @@
 #define HAVE_MATLAB_POSTPROCESSING 1
 
 // Mathcard includes
-#include <lifemc/lifefem/OneDimensionalModel_BCHandler.hpp>
-#include <lifemc/lifesolver/OneDimensionalModel_Physics_Linear.hpp>
-#include <lifemc/lifesolver/OneDimensionalModel_Physics_NonLinear.hpp>
-#include <lifemc/lifesolver/OneDimensionalModel_Flux_Linear.hpp>
-#include <lifemc/lifesolver/OneDimensionalModel_Flux_NonLinear.hpp>
-#include <lifemc/lifesolver/OneDimensionalModel_Source_Linear.hpp>
-#include <lifemc/lifesolver/OneDimensionalModel_Source_NonLinear.hpp>
-#include <lifemc/lifesolver/OneDimensionalModel_Solver.hpp>
+#include <lifemc/lifefem/OneDimensionalBCHandler.hpp>
+#include <lifemc/lifesolver/OneDimensionalPhysicsLinear.hpp>
+#include <lifemc/lifesolver/OneDimensionalPhysicsNonLinear.hpp>
+#include <lifemc/lifesolver/OneDimensionalFluxLinear.hpp>
+#include <lifemc/lifesolver/OneDimensionalFluxNonLinear.hpp>
+#include <lifemc/lifesolver/OneDimensionalSourceLinear.hpp>
+#include <lifemc/lifesolver/OneDimensionalSourceNonLinear.hpp>
+#include <lifemc/lifesolver/OneDimensionalSolver.hpp>
 
 #include <lifemc/lifesolver/BCInterface1D.hpp>
 #include <lifemc/lifesolver/MultiscaleModel.hpp>
