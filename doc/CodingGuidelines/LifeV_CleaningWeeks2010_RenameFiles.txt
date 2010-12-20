@@ -143,7 +143,7 @@ HyperbolicFluxNumerical                NumericalFluxes                         M
 PostProcessingBoundary                 postProc                                EMORY
 QuadraturePoint                        quadPoint                               CMCS2     DONE
 QuadratureRule                         quadRule                                CMCS2     DONE
-ReferenceElement                       refEle                                  CMCS2
+ReferenceElement                       refEle                                  CMCS2     DONE
 ReferenceFE                            refFE                                   CMCS2
 ReferenceFEHdiv                        refFEHdiv                               CMCS2
 ReferenceFEHybrid                      refFEHybrid                             CMCS2

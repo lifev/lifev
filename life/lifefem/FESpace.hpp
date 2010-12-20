@@ -1644,7 +1644,7 @@ P2ToP1Interpolate(const FESpace<mesh_Type,map_Type>& OriginalSpace,
     {
         UInt elemId (mesh()->volume(iElem).localId());
 
-        // In the file /lifefem/refEle.hpp, we can see that the dofs pour P1
+        // In the file /lifefem/ReferenceElement.hpp, we can see that the dofs pour P1
         // are the first ones of the P2 dofs. We have 4 P1 dofs to report per
         // field dimension.
 
@@ -1695,7 +1695,7 @@ P1bToP1Interpolate(const FESpace<mesh_Type,map_Type>& OriginalSpace,
     {
         UInt elemId (mesh()->volume(iElem).localId());
 
-        // In the file /lifefem/refEle.hpp, we can see that the dofs pour P1
+        // In the file /lifefem/ReferenceElement.hpp, we can see that the dofs pour P1
         // are the first ones of the P1Bubble dofs. We have 4 P1 dofs to report per
         // field dimension.
 
@@ -1749,7 +1749,7 @@ P1ToP2Interpolate(const FESpace<mesh_Type,map_Type>& OriginalSpace,
     {
         UInt elemId (mesh()->volume(iElem).localId());
 
-        // In the file /lifefem/refEle.hpp, we can see that the dofs pour P1
+        // In the file /lifefem/ReferenceElement.hpp, we can see that the dofs pour P1
         // are the first ones of the P2 dofs. We have then to recompute the values
         // in the "face" dofs of the P2 element.
 
@@ -1818,7 +1818,7 @@ P1ToP1bInterpolate(const FESpace<mesh_Type,map_Type>& OriginalSpace,
     {
         UInt elemId (mesh()->volume(iElem).localId());
 
-        // In the file /lifefem/refEle.hpp, we can see that the dofs pour P1
+        // In the file /lifefem/ReferenceElement.hpp, we can see that the dofs pour P1
         // are the first ones of the P1Bubble dofs. The value of the Bubble is
         // zero when interpolating a P1 functions.
 
@@ -1882,7 +1882,7 @@ P1bToP2Interpolate(const FESpace<mesh_Type,map_Type>& OriginalSpace,
     {
         UInt elemId (mesh()->volume(iElem).localId());
 
-        // In the file /lifefem/refEle.hpp, we can see that the dofs pour P1
+        // In the file /lifefem/ReferenceElement.hpp, we can see that the dofs pour P1
         // are the first ones of the P2 dofs. We have then to recompute the values
         // in the "face" dofs of the P2 element. Moreover, the bubble is zero on the
         // faces of the element. It gives then no contribution.

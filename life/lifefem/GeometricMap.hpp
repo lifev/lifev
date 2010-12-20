@@ -43,7 +43,7 @@
 
 #include <life/lifecore/life.hpp>
 
-#include <life/lifefem/refEle.hpp>
+#include <life/lifefem/ReferenceElement.hpp>
 
 namespace LifeV
 {

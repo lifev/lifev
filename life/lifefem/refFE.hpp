@@ -39,7 +39,7 @@
 #define _REFFE_H
 
 #include <life/lifecore/life.hpp>
-#include <life/lifefem/refEle.hpp>
+#include <life/lifefem/ReferenceElement.hpp>
 #include <life/lifefem/DOFLocalPattern.hpp>
 
 namespace LifeV

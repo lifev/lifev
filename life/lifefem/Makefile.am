@@ -32,7 +32,7 @@ liblifefem_la_SOURCES	= bcCond.cpp bcFunction.cpp bcVector.cpp bcHandler.cpp \
           CurrentFE.cpp CurrentBoundaryFE.cpp defQuadRuleFE.cpp DOF.cpp \
           DOFInterface3Dto2D.cpp DOFInterface3Dto3D.cpp DOFInterface.cpp \
           AssemblyElemental.cpp  GeometricMap.cpp \
-          DOFLocalPattern.cpp QuadRule.cpp refEle.cpp refFE.cpp refFEScalar.cpp refFEHdiv.cpp \
+          DOFLocalPattern.cpp QuadRule.cpp ReferenceElement.cpp refFE.cpp refFEScalar.cpp refFEHdiv.cpp \
           refFEHybrid.cpp staticBdFE.cpp \
           bcManage.cpp QuadPoint.cpp
 
