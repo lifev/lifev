@@ -50,7 +50,7 @@
 
 #include <life/lifecore/life.hpp>
 
-#include <life/lifemesh/basisElSh.hpp>
+#include <life/lifemesh/ElementShapes.hpp>
 
 
 namespace LifeV
@@ -1952,7 +1952,7 @@ static const RefEle::function_Type fct_DIV_RT0_HEXA_3D[ 6 ] =
     |.       \
     1 ---------2
 
-SEE basisElSh.cc   for the ORIENTATION CONVENTIONS
+SEE ElementShapes.cc   for the ORIENTATION CONVENTIONS
 point 1: 0, 0, 0
 point 2: 1, 0, 0
 point 3: 0, 1, 0

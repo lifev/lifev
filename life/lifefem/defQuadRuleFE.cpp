@@ -3392,7 +3392,7 @@ Real fct6_DIV_RT0_HEXA_3D( const GeoVector& )
            /.       \!
          1 ----------2
 
-SEE basisElSh.cc   for the ORIENTATION CONVENTIONS
+SEE ElementShapes.cc   for the ORIENTATION CONVENTIONS
    point 1: 0, 0, 0
    point 2: 1, 0, 0
    point 3: 0, 1, 0
@@ -3940,7 +3940,7 @@ const RefFEHybrid feHexaRT0VdotNHyb( "Hybrid RT0 elements on a hexaedra", FE_RT0
            /.       \!
          1 ----------2
 
-SEE basisElSh.cc   for the ORIENTATION CONVENTIONS
+SEE ElementShapes.cc   for the ORIENTATION CONVENTIONS
    point 1: 0, 0, 0
    point 2: 1, 0, 0
    point 3: 0, 1, 0

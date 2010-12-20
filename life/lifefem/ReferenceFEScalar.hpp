@@ -73,7 +73,7 @@ public:
       @param type  the type of the f.e. (FE_P1_2D,... see the #define at the
       begining of refFE.h)
       @param shape  the geometry belongs to enum ReferenceShapes {NONE, POINT,
-      LINE, TRIANGLE, QUAD, HEXA, PRISM, TETRA}; (see basisElSh.h)
+      LINE, TRIANGLE, QUAD, HEXA, PRISM, TETRA}; (see ElementShapes.h)
       @param nbDofPerVertex  the number of degrees of freedom per vertex
       @param nbDofPerEdge  the number of degrees of freedom per edge
       @param nbDofPerFace  the number of degrees of freedom per face

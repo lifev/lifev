@@ -75,7 +75,7 @@ public:
     //! Full Constructor of a geo map
     /*!
       @param name : the name of the f.e.
-      @param shape : the geometry belongs to enum ReferenceShapes {NONE, POINT, LINE, TRIANGLE, QUAD, HEXA, PRISM, TETRA}; (see basisElSh.h)
+      @param shape : the geometry belongs to enum ReferenceShapes {NONE, POINT, LINE, TRIANGLE, QUAD, HEXA, PRISM, TETRA}; (see ElementShapes.h)
       @param nbDof : the total number of d.o.f.
       @param nbCoor : number of local coordinates
       @param phi : the static array containing the basis functions (defined in refEle.h)

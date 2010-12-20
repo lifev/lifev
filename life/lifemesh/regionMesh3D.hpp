@@ -48,7 +48,7 @@ along with LifeV. If not, see <http://www.gnu.org/licenses/>.
 
 #include <life/lifearray/SimpleVect.hpp>
 
-#include <life/lifemesh/basisElSh.hpp>
+#include <life/lifemesh/ElementShapes.hpp>
 #include <life/lifemesh/mesh_util_base.hpp>
 
 #include <boost/numeric/ublas/vector.hpp>

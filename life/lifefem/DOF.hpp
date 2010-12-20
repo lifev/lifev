@@ -53,7 +53,7 @@
 
 #include <life/lifefem/DOFLocalPattern.hpp>
 
-#include <life/lifemesh/basisElSh.hpp>
+#include <life/lifemesh/ElementShapes.hpp>
 
 #include <algorithm>
 #include <map>

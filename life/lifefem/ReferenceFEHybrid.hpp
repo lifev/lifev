@@ -121,7 +121,7 @@ public:
       Constructor of a reference hybrid finite element. The arguments are:
       @param name Name of the finite element
       @param type Type of the finite element (FE_P1_2D,... see the #define at the begining of refFE.h)
-      @param shape Geometry belongs to enum ReferenceShapes {NONE, POINT, LINE, TRIANGLE, QUAD, HEXA, PRISM, TETRA}; (see basisElSh.h)
+      @param shape Geometry belongs to enum ReferenceShapes {NONE, POINT, LINE, TRIANGLE, QUAD, HEXA, PRISM, TETRA}; (see ElementShapes.h)
       @param nbDofPerVertex Number of degrees of freedom per vertex
       @param nbDofPerEdge Number of degrees of freedom per edge
       @param nbDofPerFace Number of degrees of freedom per face
@@ -229,7 +229,7 @@ extern const RefFEHybrid feTetraRT0VdotNHyb;
      |.      |/
      1_______2
 
-SEE basisElSh.cc   for the ORIENTATION CONVENTIONS
+SEE ElementShapes.cc   for the ORIENTATION CONVENTIONS
    point 1: 0, 0, 0
    point 2: 1, 0, 0
    point 3: 1, 1, 0
@@ -332,7 +332,7 @@ static const Real refcoor_HYB_HEXA_FACE_6[ 12 ] =
            /.       \!
          1 ----------2
 
-SEE basisElSh.cc   for the ORIENTATION CONVENTIONS
+SEE ElementShapes.cc   for the ORIENTATION CONVENTIONS
    point 1: 0, 0, 0
    point 2: 1, 0, 0
    point 3: 0, 1, 0

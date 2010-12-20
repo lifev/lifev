@@ -42,7 +42,7 @@
 
 #include <boost/array.hpp>
 #include <life/lifemesh/meshEntity.hpp>
-#include <life/lifemesh/basisElSh.hpp>
+#include <life/lifemesh/ElementShapes.hpp>
 
 namespace LifeV
 {
