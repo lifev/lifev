@@ -39,8 +39,8 @@
  */
 
 
-#ifndef _DATANAVIERSTOKES_H_
-#define _DATANAVIERSTOKES_H_
+#ifndef OSEENDATA_H
+#define OSEENDATA_H
 
 #include <life/lifefilters/GetPot.hpp>
 #include <life/lifecore/life.hpp>
@@ -438,4 +438,4 @@ private:
 
 } // end namespace LifeV
 
-#endif
+#endif /* OSEENDATA_H */

@@ -33,7 +33,7 @@
     @contributor Luca Bertagna <lbertag@emory.edu>
  */
 
-#include <life/lifemesh/BCIdentifier.hpp>
+#include <life/lifefem/BCIdentifier.hpp>
 
 namespace LifeV
 {
