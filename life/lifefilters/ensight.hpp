@@ -36,8 +36,8 @@
  *  @maintainer Radu Popescu <radu.popescu@epfl.ch>
  */
 
-#ifndef ENSIGHT_H
-#define ENSIGHT_H
+#ifndef EXPORTER_ENSIGHT_H
+#define EXPORTER_ENSIGHT_H
 
 #include <life/lifefilters/exporter.hpp>
 
@@ -662,4 +662,4 @@ void ExporterEnsight<MeshType>::initNodesMap()
 
 } // Namespace LifeV
 
-#endif // ENSIGHT_H
+#endif // EXPORTER_ENSIGHT_H
