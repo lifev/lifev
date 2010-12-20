@@ -67,7 +67,7 @@
 
 #include <life/lifecore/LifeChrono.hpp>
 
-#include <life/lifealg/SolverTrilinos.hpp>
+#include <life/lifealg/SolverAztecOO.hpp>
 
 #include <life/lifesolver/VenantKirchhoffElasticData.hpp>
 #include <life/lifecore/Displayer.hpp>
@@ -84,7 +84,7 @@ namespace LifeV
 
 */
 template <typename Mesh,
-	  typename SolverType = LifeV::SolverTrilinos >
+	  typename SolverType = LifeV::SolverAztecOO >
 
 class VenantKirchhoffSolver
 {

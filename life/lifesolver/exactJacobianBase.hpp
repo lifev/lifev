@@ -254,7 +254,7 @@ private:
 
     NonLinearAitken<vector_Type> M_nonLinearAitken;
 
-    LifeV::SolverTrilinos  M_linearSolver;
+    LifeV::SolverAztecOO   M_linearSolver;
     Epetra_ExactJacobian   M_epetraOper;
 
     matrixPtr_Type M_matrShapeDer;

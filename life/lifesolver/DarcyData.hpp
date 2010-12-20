@@ -262,7 +262,7 @@ void DarcyData<Mesh>::setup( const Data_Type& dataFile, const std::string& secti
 
 /////////////////////////////////////////////////////////////////////////////////
 
-template< typename Mesh, typename SolverType = LifeV::SolverTrilinos >
+template< typename Mesh, typename SolverType = LifeV::SolverAztecOO >
 class inversePermeability
 {
 

@@ -38,7 +38,7 @@
 #ifndef AZTECOOPRECONDITIONER_HPP
 #define AZTECOOPRECONDITIONER_HPP 1
 
-#include <life/lifealg/SolverTrilinos.hpp>
+#include <life/lifealg/SolverAztecOO.hpp>
 #include <life/lifealg/EpetraPreconditioner.hpp>
 
 namespace LifeV
@@ -48,7 +48,7 @@ namespace LifeV
 /*!
   @author Cristiano Malossi <cristinao.malossi@epfl.ch>
 
-  This class provides the interface for using AztecOO preconditioners with SolverTrilinos.
+  This class provides the interface for using AztecOO preconditioners with SolverAztecOO.
  */
 class AztecOOPreconditioner : public EpetraPreconditioner
 {
@@ -62,7 +62,7 @@ public:
     typedef super::operator_raw_type operator_raw_type;
     typedef super::operator_type     operator_type;
 
-    typedef SolverTrilinos           Solver_Type;
+    typedef SolverAztecOO           Solver_Type;
 
     //@}
 
@@ -129,7 +129,7 @@ public:
     /*!
       @param solver reference to the AztecOO solver
      */
-    void setSolver( SolverTrilinos& solver ) { M_solver = &solver; }
+    void setSolver( SolverAztecOO& solver ) { M_solver = &solver; }
 
     //@}
 

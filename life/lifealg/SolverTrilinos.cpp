@@ -26,7 +26,7 @@
 
 /*!
     @file
-    @brief SolverTrilinos
+    @brief SolverAztecOO
 
     @author Simone Deparis   <simone.deparis@epfl.ch>
     @author Gilles Fourestey <gilles.fourestey@epfl.ch>
@@ -37,7 +37,7 @@
  */
 
 #include <life/lifecore/life.hpp>
-#include <life/lifealg/SolverTrilinos.hpp>
+#include <life/lifealg/SolverAztecOO.hpp>
 
 namespace LifeV
 {
@@ -45,7 +45,7 @@ namespace LifeV
 // ===================================================
 // Constructors & Destructor
 // ===================================================
-SolverTrilinos::SolverTrilinos() :
+SolverAztecOO::SolverAztecOO() :
         M_preconditioner       (),
         M_solver               (),
         M_TrilinosParameterList(),
@@ -57,7 +57,7 @@ SolverTrilinos::SolverTrilinos() :
 {
 }
 
-SolverTrilinos::SolverTrilinos( const boost::shared_ptr<Epetra_Comm>& comm ) :
+SolverAztecOO::SolverAztecOO( const boost::shared_ptr<Epetra_Comm>& comm ) :
         M_preconditioner       (),
         M_solver               (),
         M_TrilinosParameterList(),
@@ -73,7 +73,7 @@ SolverTrilinos::SolverTrilinos( const boost::shared_ptr<Epetra_Comm>& comm ) :
 // Methods
 // ===================================================
 Int
-SolverTrilinos::solve( vector_type& solution, const vector_type& rhs )
+SolverAztecOO::solve( vector_type& solution, const vector_type& rhs )
 {
     M_solver.SetLHS( &solution.epetraVector() );
     // The Solver from Aztecoo takes a non const (because of rescaling?)
@@ -122,7 +122,7 @@ SolverTrilinos::solve( vector_type& solution, const vector_type& rhs )
 }
 
 Real
-SolverTrilinos::computeResidual( vector_type& solution, vector_type& rhs )
+SolverAztecOO::computeResidual( vector_type& solution, vector_type& rhs )
 {
     vector_type Ax ( solution.map() );
     vector_type res( rhs );
@@ -139,7 +139,7 @@ SolverTrilinos::computeResidual( vector_type& solution, vector_type& rhs )
 }
 
 std::string
-SolverTrilinos::printStatus()
+SolverAztecOO::printStatus()
 {
 
     std::ostringstream stat;
@@ -162,7 +162,7 @@ SolverTrilinos::printStatus()
     return str;
 }
 
-Int SolverTrilinos::solveSystem( const vector_type& rhsFull,
+Int SolverAztecOO::solveSystem( const vector_type& rhsFull,
                                  vector_type&       solution,
                                  matrix_ptrtype&    baseMatrixForPreconditioner )
 
@@ -217,7 +217,7 @@ Int SolverTrilinos::solveSystem( const vector_type& rhsFull,
     return numIter;
 }
 
-void SolverTrilinos::setUpPrec( const GetPot& dataFile,  const std::string& section )
+void SolverAztecOO::setUpPrec( const GetPot& dataFile,  const std::string& section )
 {
     std::string precType = dataFile( (section + "/prectype").data(), "Ifpack" );
     M_preconditioner.reset( PRECFactory::instance().createObject( precType ) );
@@ -227,7 +227,7 @@ void SolverTrilinos::setUpPrec( const GetPot& dataFile,  const std::string& sect
     M_preconditioner->setDataFromGetPot( dataFile, section );
 }
 
-void SolverTrilinos::buildPreconditioner( matrix_ptrtype& preconditioner )
+void SolverAztecOO::buildPreconditioner( matrix_ptrtype& preconditioner )
 {
     LifeChrono chrono;
     Real condest(-1);
@@ -245,58 +245,58 @@ void SolverTrilinos::buildPreconditioner( matrix_ptrtype& preconditioner )
     M_displayer->leaderPrint( "      Estimated condition number               " , condest, "\n" );
 }
 
-void SolverTrilinos::precReset()
+void SolverAztecOO::precReset()
 {
     M_preconditioner->precReset();
 }
 
 bool
-SolverTrilinos::isPrecSet() const
+SolverAztecOO::isPrecSet() const
 {
     return ( M_preconditioner.get() !=0 && M_preconditioner->preconditionerCreated() );
 }
 
 void
-SolverTrilinos::showMe( std::ostream& output ) const
+SolverAztecOO::showMe( std::ostream& output ) const
 {
-    output << "showMe must be implemented for the SolverTrilinos class" << std::endl;
+    output << "showMe must be implemented for the SolverAztecOO class" << std::endl;
 }
 
 // ===================================================
 // Set Methods
 // ===================================================
 void
-SolverTrilinos::setCommunicator( const boost::shared_ptr<Epetra_Comm>& comm )
+SolverAztecOO::setCommunicator( const boost::shared_ptr<Epetra_Comm>& comm )
 {
     M_displayer->setCommunicator( comm );
 }
 
-void SolverTrilinos::setMatrix( matrix_type& matrix )
+void SolverAztecOO::setMatrix( matrix_type& matrix )
 {
     M_matrix = matrix.matrixPtr();
     M_solver.SetUserMatrix( M_matrix.get() );
 }
 
 void
-SolverTrilinos::setOperator( Epetra_Operator& oper )
+SolverAztecOO::setOperator( Epetra_Operator& oper )
 {
     M_solver.SetUserOperator( &oper );
 }
 
 void
-SolverTrilinos::setPreconditioner( prec_type& preconditioner )
+SolverAztecOO::setPreconditioner( prec_type& preconditioner )
 {
     M_preconditioner = preconditioner;
 }
 
 void
-SolverTrilinos::setPreconditioner( comp_prec_type& preconditioner )
+SolverAztecOO::setPreconditioner( comp_prec_type& preconditioner )
 {
     M_solver.SetPrecOperator( preconditioner.get() );
 }
 
 void
-SolverTrilinos::setDataFromGetPot( const GetPot& dataFile, const std::string& section )
+SolverAztecOO::setDataFromGetPot( const GetPot& dataFile, const std::string& section )
 {
     // SOLVER PARAMETERS
 
@@ -340,13 +340,13 @@ SolverTrilinos::setDataFromGetPot( const GetPot& dataFile, const std::string& se
 }
 
 void
-SolverTrilinos::setParameters( bool cerrWarningIfUnused )
+SolverAztecOO::setParameters( bool cerrWarningIfUnused )
 {
     M_solver.SetParameters( M_TrilinosParameterList, cerrWarningIfUnused );
 }
 
 void
-SolverTrilinos::setTolMaxIteration( const Real tolerance, const Int maxIter )
+SolverAztecOO::setTolMaxIteration( const Real tolerance, const Int maxIter )
 {
     if ( tolerance > 0 )
     {
@@ -362,13 +362,13 @@ SolverTrilinos::setTolMaxIteration( const Real tolerance, const Int maxIter )
 }
 
 void
-SolverTrilinos::setReusePreconditioner( const bool reusePreconditioner )
+SolverAztecOO::setReusePreconditioner( const bool reusePreconditioner )
 {
     M_reusePreconditioner = reusePreconditioner;
 }
 
 boost::shared_ptr<Displayer>
-SolverTrilinos::displayer()
+SolverAztecOO::displayer()
 {
     return M_displayer;
 }
@@ -377,44 +377,44 @@ SolverTrilinos::displayer()
 // Get Methods
 // ===================================================
 Int
-SolverTrilinos::NumIters() const
+SolverAztecOO::NumIters() const
 {
     return M_solver.NumIters();
 }
 
 Int
-SolverTrilinos::MaxIter() const
+SolverAztecOO::MaxIter() const
 {
     return M_maxIter;
 }
 
 
 Real
-SolverTrilinos::TrueResidual()
+SolverAztecOO::TrueResidual()
 {
     return M_solver.TrueResidual();
 }
 
-SolverTrilinos::prec_type&
-SolverTrilinos::getPrec()
+SolverAztecOO::prec_type&
+SolverAztecOO::getPrec()
 {
     return M_preconditioner;
 }
 
 void
-SolverTrilinos::getAztecStatus( Real status[AZ_STATUS_SIZE] )
+SolverAztecOO::getAztecStatus( Real status[AZ_STATUS_SIZE] )
 {
     M_solver.GetAllAztecStatus( status );
 }
 
 Teuchos::ParameterList&
-SolverTrilinos::getParameterList()
+SolverAztecOO::getParameterList()
 {
     return M_TrilinosParameterList;
 }
 
 AztecOO&
-SolverTrilinos::getSolver()
+SolverAztecOO::getSolver()
 {
     return M_solver;
 }

@@ -26,7 +26,7 @@
 
 /*!
     @file
-    @brief SolverTrilinos
+    @brief SolverAztecOO
 
     @author Simone Deparis   <simone.deparis@epfl.ch>
     @author Gilles Fourestey <gilles.fourestey@epfl.ch>
@@ -36,8 +36,8 @@
     @date 08-11-2006
  */
 
-#ifndef __SolverTrilinos_H
-#define __SolverTrilinos_H 1
+#ifndef __SOLVERAZTECOO_H
+#define __SOLVERAZTECOO_H 1
 
 #include <iomanip>
 
@@ -74,14 +74,14 @@
 namespace LifeV
 {
 
-//! SolverTrilinos - Class to wrap linear solver
+//! SolverAztecOO - Class to wrap linear solver
 /*!
   By default the solver is gmres and the preconditioner is ilu.
 
   @author Simone Deparis   <simone.deparis@epfl.ch>
   @author Gilles Fourestey <gilles.fourestey@epfl.ch>
 */
-class SolverTrilinos
+class SolverAztecOO
 {
 public:
 
@@ -90,7 +90,7 @@ public:
 
     typedef Real                               value_type;
 
-    typedef SolverTrilinos                     solver_type;
+    typedef SolverAztecOO                      solver_type;
 
     typedef EpetraMatrix<Real>                 matrix_type;
     typedef EpetraVector                       vector_type;
@@ -107,13 +107,13 @@ public:
     //@{
 
     //! Empty constructor
-    SolverTrilinos();
+    SolverAztecOO();
 
     //! Constructor
     /*!
       @param comm Communicator
      */
-    SolverTrilinos( const boost::shared_ptr<Epetra_Comm>& comm );
+    SolverAztecOO( const boost::shared_ptr<Epetra_Comm>& comm );
 
     //@}
 
@@ -303,7 +303,7 @@ private:
 };
 
 template <typename PrecPtrOperator>
-Int SolverTrilinos::solveSystem( const vector_type&  rhsFull,
+Int SolverAztecOO::solveSystem( const vector_type&  rhsFull,
                                  vector_type&        solution,
                                  PrecPtrOperator     preconditioner )
 
@@ -333,4 +333,4 @@ Int SolverTrilinos::solveSystem( const vector_type&  rhsFull,
 
 } // namespace LifeV
 
-#endif /* __SolverTrilinos_H */
+#endif /* __SOLVERAZTECOO_H */

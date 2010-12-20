@@ -48,7 +48,7 @@
 #endif
 
 
-#include <life/lifealg/SolverTrilinos.hpp>
+#include <life/lifealg/SolverAztecOO.hpp>
 
 #include <life/lifecore/life.hpp>
 
@@ -158,7 +158,7 @@ namespace LifeV
     @version 1.0
 */
 
-template< typename mesh_type, typename solver_type = LifeV::SolverTrilinos>
+template< typename mesh_type, typename solver_type = LifeV::SolverAztecOO>
 class LevelSetSolver
 {
 public:

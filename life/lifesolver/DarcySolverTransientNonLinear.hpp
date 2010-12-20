@@ -233,7 +233,7 @@ namespace LifeV
   conditions are imposed via BCHandler class.
   @todo Insert any scientific publications that use this solver.
 */
-template< typename Mesh, typename SolverType = LifeV::SolverTrilinos >
+template< typename Mesh, typename SolverType = LifeV::SolverAztecOO >
 class DarcySolverTransientNonLinear
         :
         public DarcySolverNonLinear<Mesh, SolverType>,
@@ -308,7 +308,7 @@ public:
     virtual ~DarcySolverTransientNonLinear ();
 
     //@}
- 
+
     //! @name Methods
     //@{
 

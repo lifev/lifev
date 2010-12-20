@@ -65,7 +65,7 @@ namespace LifeV
 
  */
 
-template< typename MeshType, typename SolverType = LifeV::SolverTrilinos >
+template< typename MeshType, typename SolverType = LifeV::SolverAztecOO >
 class OseenSolverShapeDerivative:
         public OseenSolver< MeshType, SolverType >
 {

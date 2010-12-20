@@ -36,7 +36,7 @@
 #include <life/lifefem/BCManage.hpp>
 #include <life/lifefilters/medit_wrtrs.hpp>
 
-#include <life/lifealg/SolverTrilinos.hpp>
+#include <life/lifealg/SolverAztecOO.hpp>
 #include <life/lifealg/EpetraMap.hpp>
 #include <life/lifearray/EpetraMatrix.hpp>
 #include <life/lifearray/EpetraVector.hpp>
@@ -58,7 +58,7 @@ namespace LifeV
 {
 
 template< typename Mesh,
-typename SolverType = LifeV::SolverTrilinos >
+typename SolverType = LifeV::SolverAztecOO >
 class ChorinTemam
 
 {

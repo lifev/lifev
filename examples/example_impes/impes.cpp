@@ -234,7 +234,7 @@ Real
 impes::run()
 {
     typedef RegionMesh3D<LinearTetra>                                RegionMesh;
-    typedef SolverTrilinos                                           solver_type;
+    typedef SolverAztecOO                                            solver_type;
     typedef DarcySolver< RegionMesh, solver_type >                   ds;
     typedef DarcySolverTransientNonLinear< RegionMesh, solver_type > dstnl;
     typedef HyperbolicSolver< RegionMesh, solver_type >              hyper;

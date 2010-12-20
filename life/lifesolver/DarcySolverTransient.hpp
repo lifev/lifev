@@ -237,7 +237,7 @@ namespace LifeV
   @todo Post process for the dual variable.
   @todo Use a better mass assembler
 */
-template< typename Mesh, typename SolverType = LifeV::SolverTrilinos >
+template< typename Mesh, typename SolverType = LifeV::SolverAztecOO >
 class DarcySolverTransient :
         virtual public DarcySolver<Mesh, SolverType>
 {

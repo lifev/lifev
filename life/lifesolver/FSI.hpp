@@ -331,12 +331,12 @@ public:
     virtual void applyBoundaryConditions() {}
     //@}
 
-    //    static VenantKirchhofSolver< FSI::mesh_Type, SolverTrilinos >*    createNonLinearStructure(){ return new NonLinearVenantKirchhofSolver< FSI::mesh_Type, SolverTrilinos >(); }
+    //    static VenantKirchhofSolver< FSI::mesh_Type, SolverAztecOO >*    createNonLinearStructure(){ return new NonLinearVenantKirchhofSolver< FSI::mesh_Type, SolverAztecOO >(); }
 
     //!@name Factory Methods
     //@{
     //! Factory method for the linear elasticity solver
-    static VenantKirchhoffSolver< FSI::mesh_Type, SolverTrilinos >*    createLinearStructure() { return new VenantKirchhoffSolverLinear< FSI::mesh_Type, SolverTrilinos >(); }
+    static VenantKirchhoffSolver< FSI::mesh_Type, SolverAztecOO >*    createLinearStructure() { return new VenantKirchhoffSolverLinear< FSI::mesh_Type, SolverAztecOO >(); }
     //@}
 
     //!@name Public Methods

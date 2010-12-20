@@ -44,7 +44,7 @@
 #include <life/lifefem/AssemblyElemental.hpp>
 #include <life/lifefem/Assembly.hpp>
 #include <life/lifefem/BCManage.hpp>
-#include <life/lifealg/SolverTrilinos.hpp>
+#include <life/lifealg/SolverAztecOO.hpp>
 #include <life/lifealg/EpetraMap.hpp>
 #include <life/lifearray/EpetraMatrix.hpp>
 #include <life/lifearray/EpetraVector.hpp>
@@ -63,7 +63,7 @@ namespace LifeV
 const UInt nbComp = 2;
 
 template< typename Mesh,
-typename SolverType = LifeV::SolverTrilinos >
+typename SolverType = LifeV::SolverAztecOO >
 class HeartBidomainSolver
 {
 

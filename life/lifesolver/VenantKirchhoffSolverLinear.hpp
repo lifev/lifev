@@ -44,7 +44,7 @@
 namespace LifeV
 {
 
-template <typename Mesh, typename SolverType = LifeV::SolverTrilinos >
+template <typename Mesh, typename SolverType = LifeV::SolverAztecOO >
 class VenantKirchhoffSolverLinear : public VenantKirchhoffSolver<Mesh, SolverType>
 {
 public:

@@ -44,7 +44,7 @@
 #ifndef OSEENSOLVER_H
 #define OSEENSOLVER_H 1
 
-#include <life/lifealg/SolverTrilinos.hpp>
+#include <life/lifealg/SolverAztecOO.hpp>
 #include <life/lifealg/EpetraPreconditioner.hpp>
 #include <life/lifealg/IfpackPreconditioner.hpp>
 #include <life/lifealg/AztecOOPreconditioner.hpp>
@@ -84,7 +84,7 @@ namespace LifeV
 
  */
 
-template< typename MeshType, typename SolverType = LifeV::SolverTrilinos >
+template< typename MeshType, typename SolverType = LifeV::SolverAztecOO >
 class OseenSolver
 {
 

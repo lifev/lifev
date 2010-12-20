@@ -60,7 +60,7 @@ namespace LifeV
 {
 
 // Forward declaration
-class SolverTrilinos;
+class SolverAztecOO;
 
 //! EpetraPreconditioner - Abstract preconditioner class
 /*!
@@ -187,9 +187,9 @@ public:
     //! Set the internal solver
     /*!
       Note: the argument is unused
-      @param solver SolverTrilinos
+      @param solver SolverAztecOO
      */
-    virtual void setSolver( SolverTrilinos& /*solver*/ );
+    virtual void setSolver( SolverAztecOO& /*solver*/ );
 
     //@}
 

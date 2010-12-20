@@ -38,7 +38,7 @@
 
 #include <boost/bind.hpp>
 #include <life/lifefem/FESpace.hpp>
-#include <life/lifealg/SolverTrilinos.hpp>
+#include <life/lifealg/SolverAztecOO.hpp>
 #include <life/lifefem/Assembly.hpp>
 #include <life/lifealg/NonLinearBrent.hpp>
 
@@ -133,7 +133,7 @@ namespace LifeV
         See the test case for an example.
 */
 template< typename Mesh,
-          typename SolverType = LifeV::SolverTrilinos >
+          typename SolverType = LifeV::SolverAztecOO >
 class AbstractNumericalFlux
 {
 
@@ -523,7 +523,7 @@ computeFunctionDotNormal ( const vectorFunction_Type& function, const normal_Typ
         See the test case for an example.
 */
 template< typename Mesh,
-typename SolverType = LifeV::SolverTrilinos >
+typename SolverType = LifeV::SolverAztecOO >
 class GodunovNumericalFlux : public AbstractNumericalFlux<Mesh, SolverType>
 {
 

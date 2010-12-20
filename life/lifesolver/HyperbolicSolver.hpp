@@ -36,7 +36,7 @@
 #ifndef _HYPERBOLICSOLVER_H_
 #define _HYPERBOLICSOLVER_H_ 1
 
-#include <life/lifealg/SolverTrilinos.hpp>
+#include <life/lifealg/SolverAztecOO.hpp>
 #include <life/lifealg/clapack.hpp>
 
 #include <life/lifefem/AssemblyElemental.hpp>
@@ -128,7 +128,7 @@ namespace LifeV
   @todo When we will pass to Trilinos >= 10.6 use Epetra wrapper for LAPACK functions.
 */
 template< typename Mesh,
-typename SolverType = LifeV::SolverTrilinos >
+typename SolverType = LifeV::SolverAztecOO >
 class HyperbolicSolver
 {
 

@@ -65,7 +65,7 @@
 
 #include <life/lifecore/LifeChrono.hpp>
 
-#include <life/lifealg/SolverTrilinos.hpp>
+#include <life/lifealg/SolverAztecOO.hpp>
 
 #include <life/lifesolver/VenantKirchhoffViscoelasticData.hpp>
 #include <life/lifecore/Displayer.hpp>
@@ -88,7 +88,7 @@ where \f$M\f$ is mass matrix, \f$A\f$  stiffness matrix and \f$D\f$ is  damping 
 */
 
 template <typename Mesh,
-typename SolverType = LifeV::SolverTrilinos >
+typename SolverType = LifeV::SolverAztecOO >
 
 class VenantKirchhoffViscoelasticSolver
 {

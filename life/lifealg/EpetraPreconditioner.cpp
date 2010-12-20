@@ -112,7 +112,7 @@ EpetraPreconditioner::setList( const list_Type& list )
 }
 
 void
-EpetraPreconditioner::setSolver( SolverTrilinos& /*solver*/ )
+EpetraPreconditioner::setSolver( SolverAztecOO& /*solver*/ )
 {
     //assert( false );
 }

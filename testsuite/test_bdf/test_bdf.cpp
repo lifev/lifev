@@ -47,7 +47,7 @@
 #include <life/lifealg/EpetraMap.hpp>
 #include <life/lifemesh/MeshData.hpp>
 #include <life/lifemesh/MeshPartitioner.hpp>
-#include <life/lifealg/SolverTrilinos.hpp>
+#include <life/lifealg/SolverAztecOO.hpp>
 #include <life/lifefem/Assembly.hpp>
 #include <life/lifefem/AssemblyElemental.hpp>
 #include <life/lifefem/BCManage.hpp>
@@ -124,7 +124,7 @@ void test_bdf::run()
 {
 
     //Useful typedef
-    typedef SolverTrilinos solver_type;
+    typedef SolverAztecOO solver_type;
     typedef EpetraVector vector_type;
     typedef boost::shared_ptr<vector_type> vector_ptrtype;
 
@@ -250,7 +250,7 @@ void test_bdf::run()
 
     //===================================================
     //Definition of the linear solver
-    SolverTrilinos az_A(Members->comm);
+    SolverAztecOO az_A(Members->comm);
     az_A.setDataFromGetPot(dataFile, "bdf/solver");
     az_A.setUpPrec(dataFile, "bdf/prec");
 

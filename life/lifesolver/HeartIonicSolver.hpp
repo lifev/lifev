@@ -44,7 +44,7 @@
 #include <life/lifefem/Assembly.hpp>
 #include <life/lifefem/AssemblyElemental.hpp>
 #include <life/lifefem/BCManage.hpp>
-#include <life/lifealg/SolverTrilinos.hpp>
+#include <life/lifealg/SolverAztecOO.hpp>
 #include <life/lifealg/EpetraMap.hpp>
 #include <life/lifearray/EpetraMatrix.hpp>
 #include <life/lifearray/EpetraVector.hpp>
@@ -62,7 +62,7 @@ namespace LifeV
 
 
 template< typename Mesh,
-          typename SolverType = LifeV::SolverTrilinos >
+          typename SolverType = LifeV::SolverAztecOO >
 class HeartIonicSolver
 {
 
@@ -196,7 +196,7 @@ HeartIonicSolver( const data_Type& dataType,
 }
 
 template< typename Mesh,
-	  typename SolverType = LifeV::SolverTrilinos >
+	  typename SolverType = LifeV::SolverAztecOO >
 class MitchellSchaeffer : public virtual HeartIonicSolver<Mesh, SolverType>
 {
 public:
@@ -389,7 +389,7 @@ initialize( )
 }
 
 template< typename Mesh,
-          typename SolverType = LifeV::SolverTrilinos >
+          typename SolverType = LifeV::SolverAztecOO >
 class RogersMcCulloch : public virtual HeartIonicSolver<Mesh, SolverType>
 {
 public:
@@ -532,7 +532,7 @@ initialize( )
 }
 
 template< typename Mesh,
-          typename SolverType = LifeV::SolverTrilinos >
+          typename SolverType = LifeV::SolverAztecOO >
 class LuoRudy : public virtual HeartIonicSolver<Mesh, SolverType>
 {
 public:

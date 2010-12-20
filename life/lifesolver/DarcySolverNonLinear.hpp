@@ -247,7 +247,7 @@ namespace LifeV
   @todo Add criteria to ensure convergence of the fixed point method.
 */
 template< typename Mesh,
-typename SolverType = LifeV::SolverTrilinos >
+typename SolverType = LifeV::SolverAztecOO >
 class DarcySolverNonLinear :
         virtual public DarcySolver<Mesh, SolverType>
 {

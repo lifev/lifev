@@ -47,7 +47,7 @@
 
 #include <mpi.h>
 
-#include <life/lifealg/SolverTrilinos.hpp>
+#include <life/lifealg/SolverAztecOO.hpp>
 
 #include <life/lifearray/EpetraMatrix.hpp>
 
@@ -268,7 +268,7 @@ main( int argc, char** argv )
 // Definition of the solver
 
     if (verbose) std::cout << " -- Building the solver ... " << std::flush;
-    SolverTrilinos linearSolver;
+    SolverAztecOO linearSolver;
     if (verbose) std::cout << " done ! " << std::endl;
 
     if (verbose) std::cout << " -- Setting up the solver ... " << std::flush;

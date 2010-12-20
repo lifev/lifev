@@ -67,7 +67,7 @@ namespace LifeV
 */
 
 template< typename Mesh,
-typename SolverType = LifeV::SolverTrilinos>
+typename SolverType = LifeV::SolverAztecOO>
 class HarmonicExtensionSolver
 {
 public:
