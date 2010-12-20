@@ -48,7 +48,7 @@
 #include <Epetra_SerialComm.h>
 #endif
 
-#include <life/lifecore/GetPot.hpp>
+#include <life/lifefilters/GetPot.hpp>
 #include <life/lifecore/life.hpp>
 
 
