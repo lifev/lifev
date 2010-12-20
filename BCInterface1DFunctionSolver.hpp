@@ -37,7 +37,7 @@
 #ifndef BCInterface1DFunctionSolver_H
 #define BCInterface1DFunctionSolver_H 1
 
-#include <lifemc/lifesolver/OneDimensionalModel_Solver.hpp>
+#include <lifemc/lifesolver/OneDimensionalSolver.hpp>
 
 #include <lifemc/lifesolver/BCInterface1DFunction.hpp>
 
