@@ -321,7 +321,7 @@ MultiscaleCouplingFlowRateStress::showMe()
     {
         multiscaleCoupling_Type::showMe();
 
-        std::cout << "Stress Type         = " << Enum2String( M_stressType, multiscaleStressesMap ) << std::endl;
+        std::cout << "Stress Type         = " << enum2String( M_stressType, multiscaleStressesMap ) << std::endl;
         std::cout << "Coupling FlowRate   = " << ( *M_localCouplingVariables[0] )[0] << std::endl
                   << "Coupling Stress     = " << ( *M_localCouplingVariables[0] )[1] << std::endl << std::endl;
         std::cout << std::endl << std::endl;
