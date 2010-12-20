@@ -222,7 +222,7 @@ void ExporterEnsight<MeshType>::postProcess(const Real& time)
     if ( this->M_postfix != "*****" )
     {
         if (!this->M_procId) std::cout << "  x-  ExporterEnsight post-processing ...        " << std::flush;
-        Chrono chrono;
+        LifeChrono chrono;
         chrono.start();
         for (Iterator i=this->M_listData.begin(); i != this->M_listData.end(); ++i)
         {
@@ -272,7 +272,7 @@ void ExporterEnsight<MeshType>::import(const Real& time)
 
     if (!this->M_procId) std::cout << "  x-  ExporterEnsight importing ..."<< std::endl;
 
-    Chrono chrono;
+    LifeChrono chrono;
     chrono.start();
     for (Iterator i=this->M_listData.begin(); i != this->M_listData.end(); ++i)
     {
