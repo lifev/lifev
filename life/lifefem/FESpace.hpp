@@ -109,7 +109,7 @@ public:
       \param ord_bdf order of the bdf time advancing scheme and incremental pressure approach (default: Backward Euler)
     */
 
-    FESpace(	partitionMesh<MeshType>&	mesh,
+    FESpace(	MeshPartitioner<MeshType>&	mesh,
              const RefFE&			refFE,
              const QuadRule&			Qr,
              const QuadRule&			bdQr,
@@ -117,7 +117,7 @@ public:
              commPtr_Type&			commptr
            );
 
-    FESpace(	partitionMesh<MeshType>&	mesh,
+    FESpace(	MeshPartitioner<MeshType>&	mesh,
              const std::string&		space,
              const Int				fDim,
              commPtr_Type&			commptr
@@ -536,7 +536,7 @@ private:
 
 template <typename MeshType, typename MapType>
 FESpace<MeshType, MapType>::
-FESpace(	partitionMesh<MeshType>& 	mesh,
+FESpace(	MeshPartitioner<MeshType>& 	mesh,
          const RefFE&         	refFE,
          const QuadRule&      	Qr,
          const QuadRule&      	bdQr,
@@ -565,7 +565,7 @@ FESpace(	partitionMesh<MeshType>& 	mesh,
 
 template <typename MeshType, typename MapType>
 FESpace<MeshType, MapType>::
-FESpace(	partitionMesh<MeshType>&	mesh,
+FESpace(	MeshPartitioner<MeshType>&	mesh,
          const std::string&		space,
          const Int				fDim,
          commPtr_Type&			commptr
