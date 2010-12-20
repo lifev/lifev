@@ -127,13 +127,13 @@ public:
 
     typedef boost::shared_ptr< LifeV::Exporter<LifeV::RegionMesh3D<LifeV::LinearTetra> > > filterPtr_Type;
 
-    typedef LifeV::Ensight<LifeV::FSI::mesh_Type>  ensightFilter_Type;
+    typedef LifeV::ExporterEnsight<LifeV::FSI::mesh_Type>  ensightFilter_Type;
     typedef boost::shared_ptr<ensightFilter_Type>                 ensightFilterPtr_Type;
 #ifdef HAVE_HDF5
-    typedef LifeV::Hdf5exporter<LifeV::FSI::mesh_Type>  hdf5Filter_Type;
+    typedef LifeV::ExporterHDF5<LifeV::FSI::mesh_Type>  hdf5Filter_Type;
     typedef boost::shared_ptr<hdf5Filter_Type>                  hdf5FilterPtr_Type;
 #endif
-    typedef LifeV::singleton<LifeV::factory<LifeV::FSI,  std::string> > FSIFactory_Type;
+    typedef LifeV::FactorySingleton<LifeV::Factory<LifeV::FSI,  std::string> > FSIFactory_Type;
     /*!
       This routine sets up the problem:
 
@@ -226,8 +226,8 @@ public:
         {
             if (exporterType.compare("none") == 0)
             {
-                M_exporterFluid.reset( new NoExport<RegionMesh3D<LinearTetra> > ( data_file, M_fsi->FSIOper()->uFESpace().mesh(), fluidName, M_fsi->FSIOper()->uFESpace().map().comm().MyPID()) );
-                M_exporterSolid.reset( new NoExport<RegionMesh3D<LinearTetra> > ( data_file, M_fsi->FSIOper()->dFESpace().mesh(), solidName, M_fsi->FSIOper()->uFESpace().map().comm().MyPID()) );
+                M_exporterFluid.reset( new ExporterEmpty<RegionMesh3D<LinearTetra> > ( data_file, M_fsi->FSIOper()->uFESpace().mesh(), fluidName, M_fsi->FSIOper()->uFESpace().map().comm().MyPID()) );
+                M_exporterSolid.reset( new ExporterEmpty<RegionMesh3D<LinearTetra> > ( data_file, M_fsi->FSIOper()->dFESpace().mesh(), solidName, M_fsi->FSIOper()->uFESpace().map().comm().MyPID()) );
             }
             else
             {
@@ -539,8 +539,8 @@ void Problem::initialize(std::string& /*loadInitSol*/,  GetPot const& data_file)
     {
         if (importerType.compare("none") == 0)
         {
-            M_importerFluid.reset( new NoExport<RegionMesh3D<LinearTetra> > ( data_file, M_fsi->FSIOper()->uFESpace().mesh(), "fluid", M_fsi->FSIOper()->uFESpace().map().comm().MyPID()) );
-            M_importerSolid.reset( new NoExport<RegionMesh3D<LinearTetra> > ( data_file, M_fsi->FSIOper()->dFESpace().mesh(), "solid", M_fsi->FSIOper()->uFESpace().map().comm().MyPID()) );
+            M_importerFluid.reset( new ExporterEmpty<RegionMesh3D<LinearTetra> > ( data_file, M_fsi->FSIOper()->uFESpace().mesh(), "fluid", M_fsi->FSIOper()->uFESpace().map().comm().MyPID()) );
+            M_importerSolid.reset( new ExporterEmpty<RegionMesh3D<LinearTetra> > ( data_file, M_fsi->FSIOper()->dFESpace().mesh(), "solid", M_fsi->FSIOper()->uFESpace().map().comm().MyPID()) );
         }
         else
         {
