@@ -25,7 +25,7 @@ along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
 //@HEADER
 /*!
   @file
-  @brief This file provides the class  Hdf5exporter for post-processing with hdf5
+  @brief This file provides the class  ExporterHDF5 for post-processing with hdf5
 
   @date 11-11-2008
   @author Simone Deparis <simone.deparis@epfl.ch>
@@ -34,8 +34,8 @@ along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
   @maintainer Radu Popescu <radu.popescu@epfl.ch>
 */
 
-#ifndef HDF5EXPORTER_H
-#define HDF5EXPORTER_H 1
+#ifndef EXPORTER_HDF5_H
+#define EXPORTER_HDF5_H 1
 
 
 #include <life/lifecore/life.hpp>
@@ -88,7 +88,7 @@ namespace LifeV
   </ol>
 */
 template<typename MeshType>
-class Hdf5exporter : public Exporter<MeshType>
+class ExporterHDF5 : public Exporter<MeshType>
 {
 
 public:
@@ -110,10 +110,10 @@ public:
     //! @name Constructor & Destructor
     //@{
 
-    //! Empty Constructor for Hdf5exporter
-    Hdf5exporter();
+    //! Empty Constructor for ExporterHDF5
+    ExporterHDF5();
 
-    //! Constructor for Hdf5exporter
+    //! Constructor for ExporterHDF5
     /*!
       @param dfile the GetPot data file where you must provide an [exporter] section with:
       "start"     (start index for sections in the hdf5 data structure 0 for 000, 1 for 001 etc.),
@@ -123,9 +123,9 @@ public:
       @param the prefix for the case file (ex. "test" for test.case)
       @param the procId determines de CPU id. if negative, it ussemes there is only one processor
     */
-    Hdf5exporter(const GetPot& dfile, meshPtr_Type mesh, const std::string& prefix, const Int& procId);
+    ExporterHDF5(const GetPot& dfile, meshPtr_Type mesh, const std::string& prefix, const Int& procId);
 
-    //! Constructor for Hdf5exporter without prefix and procID
+    //! Constructor for ExporterHDF5 without prefix and procID
     /*!
       @param dfile the GetPot data file where you must provide an [exporter] section with:
       "start"     (start index for sections in the hdf5 data structure 0 for 000, 1 for 001 etc.),
@@ -133,10 +133,10 @@ public:
       "multimesh" ( = true if the mesh has to be saved at each post-processing step)
       @param mesh the mesh
     */
-    Hdf5exporter(const GetPot& dfile, const std::string& prefix);
+    ExporterHDF5(const GetPot& dfile, const std::string& prefix);
 
-    //! Destructor for Hdf5exporter
-    virtual ~Hdf5exporter() {}
+    //! Destructor for ExporterHDF5
+    virtual ~ExporterHDF5() {}
 
     //@}
 
@@ -238,7 +238,7 @@ protected:
 // Constructors
 // ===================================================
 template<typename MeshType>
-Hdf5exporter<MeshType>::Hdf5exporter():
+ExporterHDF5<MeshType>::ExporterHDF5():
     super               (),
     M_HDF5              (),
     M_closingLines      ( "\n    </Grid>\n\n  </Domain>\n</Xdmf>\n"),
@@ -247,7 +247,7 @@ Hdf5exporter<MeshType>::Hdf5exporter():
 }
 
 template<typename MeshType>
-Hdf5exporter<MeshType>::Hdf5exporter(const GetPot& dfile, meshPtr_Type mesh, const std::string& prefix,
+ExporterHDF5<MeshType>::ExporterHDF5(const GetPot& dfile, meshPtr_Type mesh, const std::string& prefix,
                                      const Int& procId) :
     super               ( dfile, prefix ),
     M_HDF5              (),
@@ -258,7 +258,7 @@ Hdf5exporter<MeshType>::Hdf5exporter(const GetPot& dfile, meshPtr_Type mesh, con
 }
 
 template<typename MeshType>
-Hdf5exporter<MeshType>::Hdf5exporter(const GetPot& dfile, const std::string& prefix):
+ExporterHDF5<MeshType>::ExporterHDF5(const GetPot& dfile, const std::string& prefix):
     super               ( dfile, prefix ),
     M_HDF5              (),
     M_closingLines      ( "\n    </Grid>\n\n  </Domain>\n</Xdmf>\n"),
@@ -271,7 +271,7 @@ Hdf5exporter<MeshType>::Hdf5exporter(const GetPot& dfile, const std::string& pre
 // ===================================================
 
 template<typename MeshType>
-void Hdf5exporter<MeshType>::postProcess(const Real& time)
+void ExporterHDF5<MeshType>::postProcess(const Real& time)
 {
     if ( M_HDF5.get() == 0)
     {
@@ -322,7 +322,7 @@ void Hdf5exporter<MeshType>::postProcess(const Real& time)
 }
 
 template<typename MeshType>
-UInt Hdf5exporter<MeshType>::importFromTime( const Real& Time )
+UInt ExporterHDF5<MeshType>::importFromTime( const Real& Time )
 {
     // Container for the time and the postfix
     std::pair< Real, Int > SelectedTimeAndPostfix;
@@ -385,7 +385,7 @@ UInt Hdf5exporter<MeshType>::importFromTime( const Real& Time )
 }
 
 template<typename MeshType>
-Real Hdf5exporter<MeshType>::importFromIter( const UInt& iter )
+Real ExporterHDF5<MeshType>::importFromIter( const UInt& iter )
 {
     // Container for the time and the postfix
     std::pair< Real, Int > SelectedTimeAndPostfix;
@@ -474,7 +474,7 @@ Real Hdf5exporter<MeshType>::importFromIter( const UInt& iter )
 
 
 template<typename MeshType>
-void Hdf5exporter<MeshType>::import(const Real& Tstart, const Real& dt)
+void ExporterHDF5<MeshType>::import(const Real& Tstart, const Real& dt)
 {
     // dt is used to rebuild the history up to now
     Real time(Tstart - this->M_startIndex*dt);
@@ -491,7 +491,7 @@ void Hdf5exporter<MeshType>::import(const Real& Tstart, const Real& dt)
 }
 
 template<typename MeshType>
-void Hdf5exporter<MeshType>::import(const Real& time)
+void ExporterHDF5<MeshType>::import(const Real& time)
 {
     if ( M_HDF5.get() == 0)
     {
@@ -518,7 +518,7 @@ void Hdf5exporter<MeshType>::import(const Real& time)
 }
 
 template <typename MeshType>
-void Hdf5exporter<MeshType>::readVariable(ExporterData& dvar)
+void ExporterHDF5<MeshType>::readVariable(ExporterData& dvar)
 {
     if ( M_HDF5.get() == 0)
     {
@@ -532,7 +532,7 @@ void Hdf5exporter<MeshType>::readVariable(ExporterData& dvar)
 // Get Methods
 // ===================================================
 template<typename MeshType>
-EpetraMapType Hdf5exporter<MeshType>::mapType() const
+EpetraMapType ExporterHDF5<MeshType>::mapType() const
 {
     return Unique;
 }
@@ -541,13 +541,13 @@ EpetraMapType Hdf5exporter<MeshType>::mapType() const
 // Protected Methods
 // ===================================================
 template<typename MeshType>
-void Hdf5exporter<MeshType>::defineShape()
+void ExporterHDF5<MeshType>::defineShape()
 {
 }
 
 // write empty xdmf file
 template <typename MeshType>
-void Hdf5exporter<MeshType>::writeInitXdmf()
+void ExporterHDF5<MeshType>::writeInitXdmf()
 {
     if (this->M_procId == 0)
     {
@@ -578,7 +578,7 @@ void Hdf5exporter<MeshType>::writeInitXdmf()
 }
 
 template <typename MeshType>
-void Hdf5exporter<MeshType>::writeXdmf(const Real& time)
+void ExporterHDF5<MeshType>::writeXdmf(const Real& time)
 {
     /*
       strategy: write the topology,
@@ -650,7 +650,7 @@ void Hdf5exporter<MeshType>::writeXdmf(const Real& time)
 
 // save position and write closing lines
 template <typename MeshType>
-void Hdf5exporter<MeshType>::writeCloseLinesXdmf()
+void ExporterHDF5<MeshType>::writeCloseLinesXdmf()
 {
     // save position
     M_closingLinesPosition = M_xdmf.tellp();
@@ -663,13 +663,13 @@ void Hdf5exporter<MeshType>::writeCloseLinesXdmf()
 
 // remove closing lines
 template <typename MeshType>
-void Hdf5exporter<MeshType>::removeCloseLinesXdmf()
+void ExporterHDF5<MeshType>::removeCloseLinesXdmf()
 {
     M_xdmf.seekp(M_closingLinesPosition);
 }
 
 template <typename MeshType>
-void Hdf5exporter<MeshType>::writeTopology  ( std::ofstream& xdmf )
+void ExporterHDF5<MeshType>::writeTopology  ( std::ofstream& xdmf )
 {
     std::string FEstring;
 
@@ -708,7 +708,7 @@ void Hdf5exporter<MeshType>::writeTopology  ( std::ofstream& xdmf )
 }
 
 template <typename MeshType>
-void Hdf5exporter<MeshType>::writeGeometry  ( std::ofstream& xdmf )
+void ExporterHDF5<MeshType>::writeGeometry  ( std::ofstream& xdmf )
 {
 
     std::string postfix_string;
@@ -745,7 +745,7 @@ void Hdf5exporter<MeshType>::writeGeometry  ( std::ofstream& xdmf )
 }
 
 template <typename MeshType>
-void Hdf5exporter<MeshType>::writeAttributes  ( std::ofstream& xdmf )
+void ExporterHDF5<MeshType>::writeAttributes  ( std::ofstream& xdmf )
 {
 
     // Loop on the variables to output
@@ -775,7 +775,7 @@ void Hdf5exporter<MeshType>::writeAttributes  ( std::ofstream& xdmf )
 }
 
 template <typename MeshType>
-void Hdf5exporter<MeshType>::writeScalarDatastructure  ( std::ofstream& xdmf, const ExporterData& dvar )
+void ExporterHDF5<MeshType>::writeScalarDatastructure  ( std::ofstream& xdmf, const ExporterData& dvar )
 {
 
     Int globalUnknowns (0);
@@ -814,7 +814,7 @@ void Hdf5exporter<MeshType>::writeScalarDatastructure  ( std::ofstream& xdmf, co
 }
 
 template <typename MeshType>
-void Hdf5exporter<MeshType>::writeVectorDatastructure  ( std::ofstream& xdmf, const ExporterData& dvar )
+void ExporterHDF5<MeshType>::writeVectorDatastructure  ( std::ofstream& xdmf, const ExporterData& dvar )
 {
 
 
@@ -850,7 +850,7 @@ void Hdf5exporter<MeshType>::writeVectorDatastructure  ( std::ofstream& xdmf, co
 }
 
 template <typename MeshType>
-void Hdf5exporter<MeshType>::writeVariable(const ExporterData& dvar)
+void ExporterHDF5<MeshType>::writeVariable(const ExporterData& dvar)
 {
 
     switch ( dvar.type() )
@@ -865,7 +865,7 @@ void Hdf5exporter<MeshType>::writeVariable(const ExporterData& dvar)
 }
 
 template <typename MeshType>
-void Hdf5exporter<MeshType>::writeScalar(const ExporterData& dvar)
+void ExporterHDF5<MeshType>::writeScalar(const ExporterData& dvar)
 {
     /* Examples:
        M_HDF5->Write("map-" + toString(Comm.NumProc()), Map);
@@ -887,7 +887,7 @@ void Hdf5exporter<MeshType>::writeScalar(const ExporterData& dvar)
 }
 
 template <typename MeshType>
-void Hdf5exporter<MeshType>::writeVector(const ExporterData& dvar)
+void ExporterHDF5<MeshType>::writeVector(const ExporterData& dvar)
 {
 
     UInt size  = dvar.size();
@@ -930,7 +930,7 @@ void Hdf5exporter<MeshType>::writeVector(const ExporterData& dvar)
 }
 
 template <typename MeshType>
-void Hdf5exporter<MeshType>::writeGeometry()
+void ExporterHDF5<MeshType>::writeGeometry()
 {
     /*
       2 variables:
@@ -1071,7 +1071,7 @@ void Hdf5exporter<MeshType>::writeGeometry()
 }
 
 template <typename MeshType>
-void Hdf5exporter<MeshType>::readScalar(ExporterData& dvar)
+void ExporterHDF5<MeshType>::readScalar(ExporterData& dvar)
 {
 
     UInt size  = dvar.size();
@@ -1095,7 +1095,7 @@ void Hdf5exporter<MeshType>::readScalar(ExporterData& dvar)
 }
 
 template <typename MeshType>
-void Hdf5exporter<MeshType>::readVector( ExporterData& dvar)
+void ExporterHDF5<MeshType>::readVector( ExporterData& dvar)
 {
     UInt size  = dvar.size();
     UInt start = dvar.start();
@@ -1133,4 +1133,4 @@ void Hdf5exporter<MeshType>::readVector( ExporterData& dvar)
 
 #endif // HAVE_HDF5
 
-#endif // HDF5EXPORTER_H
+#endif // EXPORTER_HDF5_H
