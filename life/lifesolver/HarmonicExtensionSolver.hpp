@@ -313,7 +313,7 @@ template <typename Mesh, typename SolverType>
 void
 HarmonicExtensionSolver<Mesh, SolverType>::iterate( BCHandler& BCh )
 {
-    Chrono chrono;
+    LifeChrono chrono;
 
     // matrix and vector assembling communication
     M_Displayer.leaderPrint(" HE-  Applying boundary conditions ...         ");
@@ -358,7 +358,7 @@ HarmonicExtensionSolver<Mesh, SolverType>::applyBoundaryConditions(vector_Type& 
 template <typename Mesh, typename SolverType>
 void HarmonicExtensionSolver<Mesh, SolverType>::computeMatrix( )
 {
-    Chrono chrono;
+    LifeChrono chrono;
     chrono.start();
     M_Displayer.leaderPrint(" HE-  Computing constant matrices ...          ");
 
