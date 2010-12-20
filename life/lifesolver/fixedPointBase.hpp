@@ -166,10 +166,10 @@ private:
 
     //@}
 
+    NonLinearAitken<vector_Type> M_nonLinearAitken;
+
     vectorPtr_Type       M_rhsNew;
     vectorPtr_Type       M_beta;
-
-    NonLinearAitken<vector_Type> M_nonLinearAitken;
 
 
 }; // end class fixedPointBase
