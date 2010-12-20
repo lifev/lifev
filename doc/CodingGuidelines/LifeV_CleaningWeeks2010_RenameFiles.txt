@@ -13,7 +13,7 @@ LIFEARRAY:  tab.hpp                                                            C
 
 LIFEFEM:    assemb.cpp                                                         CMCS2     DONE
             dofInterfaceHandler.*pp                                            CMCS2     DONE
-            regionMesh3D_ALE.hpp                                               MOX
+            regionMesh3D_ALE.hpp                                               MOX       DONE
 
 LIFESOLVER: fluidToMaster.hpp                                                  CMCS3
             reducedLinFluid.*pp                                                CMCS3
@@ -85,7 +85,7 @@ VectorSimple                           SimpleVect                              C
 LIFEMESH
 ============================
 ElementShapes                          basisElSh                               EMORY
-InternalEntitySelector                 selectMarker                            MOX
+InternalEntitySelector                 selectMarker                            MOX       DONE
 Markers                                markers_base                            EMORY
 MarkersDefinitions                     markers                                 EMORY
 MeshChecks                             mesh_util                               CMCS3
@@ -112,8 +112,8 @@ ExporterHDF5                           hdf5exporter                            C
 ExporterHDF5Mesh3D                     HDF5Filter3DMesh                        CMCS3
 GetPot                                 -                                       CMCS3     DONE
 Importer                               importer                                MOX
-ImporterMesh2D                         readMesh2D                              MOX
-ImporterMesh3D                         readMesh3D                              MOX
+ImporterMesh2D                         readMesh2D                              MOX       DONE
+ImporterMesh3D                         readMesh3D                              MOX       DONE
 
 LIFEFEM
 ============================
