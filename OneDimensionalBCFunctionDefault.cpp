@@ -40,7 +40,7 @@
  *  @maintainer Cristiano Malossi <cristiano.malossi@epfl.ch>
  */
 
-#include <lifemc/lifefem/OneDimensionalModel_BCFunction_Default.hpp>
+#include <lifemc/lifefem/OneDimensionalBCFunctionDefault.hpp>
 
 namespace LifeV
 {

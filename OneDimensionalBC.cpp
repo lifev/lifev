@@ -41,7 +41,7 @@
  *  @maintainer Cristiano Malossi <cristiano.malossi@epfl.ch>
  */
 
-#include <lifemc/lifefem/OneDimensionalModel_BC.hpp>
+#include <lifemc/lifefem/OneDimensionalBC.hpp>
 
 namespace LifeV
 {

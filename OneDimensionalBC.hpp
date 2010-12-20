@@ -45,8 +45,8 @@
 #define OneDimensionalBC_H
 
 // LIFEV - MATHCARD
-#include <lifemc/lifefem/OneDimensionalModel_BCFunction_Default.hpp>
-#include <lifemc/lifesolver/OneDimensionalModel_Data.hpp>
+#include <lifemc/lifefem/OneDimensionalBCFunctionDefault.hpp>
+#include <lifemc/lifesolver/OneDimensionalData.hpp>
 
 namespace LifeV
 {
