@@ -45,13 +45,15 @@
 #include <string>
 #include <iostream>
 #include <numeric>
+#include <boost/numeric/ublas/vector.hpp>
+
 #include <life/lifearray/EpetraVector.hpp>
-#include <life/lifearray/tab.hpp>
 
 
 namespace LifeV
 {
 const UInt bdfMaxOrder = 6;
+typedef boost::numeric::ublas::vector<Real> ScalarVector;
 
 
 //!BdfVS - Backward differencing formula time discretization with non-uniform time step
