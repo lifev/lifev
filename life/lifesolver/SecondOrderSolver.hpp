@@ -242,7 +242,7 @@ public:
     {
       M_displayer->leaderPrint("  P-  Updating right hand side... ");
 
-      Chrono chrono;
+      LifeChrono chrono;
       chrono.start();
 
      *M_rhsNoBC = rhs;
@@ -587,7 +587,7 @@ SecondOrderSolver<Mesh, SolverType>::
 buildSystem(const Real& xi, const Real& alpha)
 {
  M_displayer->leaderPrint("  P-  Computing constant matrices ...          ");
- Chrono chrono;
+ LifeChrono chrono;
  chrono.start();
 
  // these lines must be removed next week
@@ -613,7 +613,7 @@ buildSystem(matrix_ptrtype matrSystem, const Real& xi)
 
     M_displayer->leaderPrint( "P-  Building the system             ... ");
 
-    Chrono chrono;
+    LifeChrono chrono;
     chrono.start();
 
     // Number of displacement components
@@ -685,7 +685,7 @@ buildDamping(matrix_ptrtype damping, const Real& alpha)
 {
     UInt totalDof = this->M_FESpace->dof().numTotalDof();
 
-    Chrono chrono;
+    LifeChrono chrono;
     chrono.start();
 
     // Number of displacement components
@@ -734,7 +734,7 @@ updateSystem(const vector_type& rhs,
              const Real&        alpha)
 {
 
-    Chrono chrono;
+    LifeChrono chrono;
 
     updateRHS(rhs);
 
@@ -788,7 +788,7 @@ void SecondOrderSolver<Mesh, SolverType>::
 updateSourceTerm(const  vector_type&  source)
 {
   M_displayer->leaderPrint("P - updating the Source Term....      ");
-  Chrono chrono;
+  LifeChrono chrono;
   chrono.start();
 
   for ( UInt iVol = 1; iVol <= this->M_FESpace->mesh()->numVolumes(); ++iVol )
@@ -826,7 +826,7 @@ template <typename Mesh, typename SolverType>
 void SecondOrderSolver<Mesh, SolverType>::
 iterate( bchandler_raw_type& bch )
 {
-    Chrono chrono;
+    LifeChrono chrono;
 
     // matrix and vector assembling communication
     M_displayer->leaderPrint("  P-  Solving the system ... \n");
