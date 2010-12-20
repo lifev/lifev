@@ -31,8 +31,8 @@
 // #include <life/lifecore/life.hpp>
 
 // #include <life/lifecore/life.hpp>
-// #include <life/lifecore/GetPot.hpp>
-// #include <life/lifecore/debug.hpp>
+// #include <life/lifefilters/GetPot.hpp>
+// #include <life/lifecore/LifeDebug.hpp>
 
 // #include <life/lifefilters/importer.hpp>
 
@@ -40,13 +40,14 @@
 
 #include <life/lifealg/EpetraMap.hpp>
 #include <life/lifemesh/dataMesh.hpp>
-#include <life/lifemesh/partitionMesh.hpp>
+
 #include <life/lifesolver/VenantKirchhoffElasticData.hpp>
 #include <life/lifesolver/VenantKirchhoffSolverLinear.hpp>
+#include <life/lifemesh/MeshPartitioner.hpp>
 
-#include <life/lifefilters/ensight.hpp>
-#include <life/lifefilters/hdf5exporter.hpp>
-#include <life/lifefilters/noexport.hpp>
+#include <life/lifefilters/ExporterEnsight.hpp>
+#include <life/lifefilters/ExporterHDF5.hpp>
+#include <life/lifefilters/ExporterEmpty.hpp>
 
 
 #include "structure.hpp"
