@@ -147,9 +147,9 @@ public:
     {
         using namespace LifeV;
 
-        VenantKirchhoffSolver< FSI::mesh_Type, SolverTrilinos >::StructureSolverFactory::instance().registerProduct( "linearVenantKirchhof", &FSI::createLinearStructure );
+        VenantKirchhoffSolver< FSI::mesh_Type, SolverAztecOO >::StructureSolverFactory::instance().registerProduct( "linearVenantKirchhof", &FSI::createLinearStructure );
 
-        //VenantKirchhofSolver< FSI::mesh_Type, SolverTrilinos >::StructureSolverFactory::instance().registerProduct( "nonLinearVenantKirchhof", &FSI::createNonLinearStructure );
+        //VenantKirchhofSolver< FSI::mesh_Type, SolverAztecOO >::StructureSolverFactory::instance().registerProduct( "nonLinearVenantKirchhof", &FSI::createNonLinearStructure );
 
         M_data = dataPtr_Type( new data_Type() );
         M_data->setup( data_file );
