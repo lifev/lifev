@@ -27,8 +27,7 @@ SUFFIXES	= .cpp .hpp .idl .c .h .f .F .o .moc .cc
 
 lib_LTLIBRARIES		= liblifefem.la
 
-liblifefem_la_SOURCES	= assemb.cpp\
-          bcCond.cpp bcFunction.cpp bcVector.cpp bcHandler.cpp \
+liblifefem_la_SOURCES	= bcCond.cpp bcFunction.cpp bcVector.cpp bcHandler.cpp \
           dataTime.cpp  \
           currentFE.cpp currentBdFE.cpp defQuadRuleFE.cpp dof.cpp \
           dofInterface3Dto2D.cpp dofInterface3Dto3D.cpp dofInterfaceBase.cpp dofInterfaceHandler.cpp \

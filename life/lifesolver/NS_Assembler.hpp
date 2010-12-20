@@ -29,7 +29,7 @@ This library is free software; you can redistribute it and/or
 //
 #include <life/lifecore/chrono.hpp>
 
-#include <life/lifefem/assemb.hpp>
+#include <life/lifefem/Assembly.hpp>
 #include <life/lifefem/bcManage.hpp>
 #include <life/lifefem/elemOper.hpp>
 #include <life/lifefem/bcHandler.hpp>

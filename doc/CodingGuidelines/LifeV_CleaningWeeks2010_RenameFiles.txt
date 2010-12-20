@@ -8,11 +8,11 @@ LIFECORE:   lifemacros.hpp                                                     C
 LIFEALG:    dataNewton.*pp                                                     CMCS3
             newton.hpp                                                         CMCS3
             picard.hpp                                                         CMCS3
-            
+
 LIFEARRAY:  tab.hpp                                                            CMCS3
 
-LIFEFEM:    assemb.cpp                                                         CMCS2
-            dofInterfaceHandler.*pp                                            CMCS2 
+LIFEFEM:    assemb.cpp                                                         CMCS2     DONE
+            dofInterfaceHandler.*pp                                            CMCS2
             regionMesh3D_ALE.hpp                                               MOX
 
 LIFESOLVER: fluidToMaster.hpp                                                  CMCS3
@@ -117,7 +117,7 @@ ImporterMesh3D                         readMesh3D                              M
 
 LIFEFEM
 ============================
-Assembly                               assemb                                  CMCS2
+Assembly                               assemb                                  CMCS2     DONE
 AssemblyElemental                      elemOper                                CMCS2
 BCBase                                 bcCond                                  EMORY
 BCFunction                             bcFunction                              EMORY
@@ -189,7 +189,7 @@ OseenSolver                            Oseen                                   E
 OseenSolverShapeDerivative             OseenShapeDerivatives                   EMORY
 StabilizationIP                        nsipterms                               EMORY
 StabilizationSD                        sdStabilization                         EMORY
-VenantKirchhoffElasticData             dataElasticStructure                    CMCS3  
+VenantKirchhoffElasticData             dataElasticStructure                    CMCS3
 VenantKirchhoffElasticHandler          ElasticStructureHandler                 CMCS3
 VenantKirchhoffSolver                  VenantKirchhofSolver                    CMCS3
 VenantKirchhoffSolverLinear            LinearVenantKirchhofSolver              CMCS3
@@ -207,7 +207,7 @@ ParserDefinitions                      -                                       C
 ParserSpiritGrammar                    -                                       CMCS1     DONE
 
 LIFEALG
-============================ 
+============================
 ComposedOperator                       -                                       CMCS3     DONE
 EigenSolver                            eigenSolver                             CMCS3
 PreconditionerComposed                 ComposedPreconditioner                  CMCS3

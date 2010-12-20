@@ -42,7 +42,7 @@
 #include <life/lifearray/elemMat.hpp>
 #include <life/lifearray/elemVec.hpp>
 #include <life/lifefem/elemOper.hpp>
-#include <life/lifefem/assemb.hpp>
+#include <life/lifefem/Assembly.hpp>
 #include <life/lifefem/bcManage.hpp>
 #include <life/lifealg/SolverTrilinos.hpp>
 #include <life/lifealg/EpetraMap.hpp>

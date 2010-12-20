@@ -43,7 +43,7 @@
 #include <life/lifecore/chrono.hpp>
 #include <life/lifecore/life.hpp>
 
-#include <life/lifefem/assemb.hpp>
+#include <life/lifefem/Assembly.hpp>
 #include <life/lifefem/FESpace.hpp>
 #include <life/lifefem/elemOper.hpp>
 

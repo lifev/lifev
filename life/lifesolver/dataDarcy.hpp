@@ -41,7 +41,7 @@
 
 #include <life/lifemesh/dataMesh.hpp>
 #include <life/lifefem/dataTime.hpp>
-#include <life/lifefem/assemb.hpp>
+#include <life/lifefem/Assembly.hpp>
 
 // LifeV namespace
 namespace LifeV

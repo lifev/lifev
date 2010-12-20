@@ -39,7 +39,7 @@
 #include <boost/bind.hpp>
 #include <life/lifefem/FESpace.hpp>
 #include <life/lifealg/SolverTrilinos.hpp>
-#include <life/lifefem/assemb.hpp>
+#include <life/lifefem/Assembly.hpp>
 #include <life/lifealg/brent.hpp>
 
 namespace
