@@ -46,11 +46,11 @@
 
 #include <life/lifecore/life.hpp>
 
-#include <life/lifemesh/partitionMesh.hpp>
+#include <life/lifemesh/MeshPartitioner.hpp>
 #include <life/lifesolver/dataNavierStokes.hpp>
 #include <life/lifemesh/dataMesh.hpp>
 #include <life/lifemesh/regionMesh3D.hpp>
-#include <life/lifefilters/HDF5Filter3DMesh.hpp>
+#include <life/lifefilters/ExporterHDF5Mesh3D.hpp>
 
 #include <iostream>
 #include <string>
