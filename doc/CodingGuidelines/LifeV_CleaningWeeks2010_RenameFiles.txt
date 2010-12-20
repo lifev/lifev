@@ -127,8 +127,8 @@ BCManage                               bcManage                                E
 BCManageNormal                         BCNormalManager                         EMORY
 BCVector                               bcVector                                EMORY
 CurrentBoundaryFEBase                  staticBdFE                              CMCS2
-CurrentBoundaryFE                      currentBdFE                             CMCS2
-CurrentFE                              currentFE                               CMCS2
+CurrentBoundaryFE                      currentBdFE                             CMCS2     DONE
+CurrentFE                              currentFE                               CMCS2     DONE
 DefinitionFE                           defQuadRuleFE (splitting)               CMCS2
 DefinitionQuadratureRule               defQuadRuleFE (splitting)               CMCS2
 DefinitionReferenceToCurrentMap        defQuadRuleFE (splitting)               CMCS2

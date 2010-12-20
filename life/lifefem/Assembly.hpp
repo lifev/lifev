@@ -56,7 +56,7 @@
 #include <life/lifearray/EpetraMatrix.hpp>
 #include <life/lifearray/EpetraVector.hpp>
 
-#include <life/lifefem/currentFE.hpp>
+#include <life/lifefem/CurrentFE.hpp>
 #include <life/lifefem/localDofPattern.hpp>
 
 #include <vector>

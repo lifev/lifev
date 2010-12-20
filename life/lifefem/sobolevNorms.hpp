@@ -49,7 +49,7 @@
 
 #include <life/lifecore/life.hpp>
 #include <life/lifefem/dof.hpp>
-#include <life/lifefem/currentFE.hpp>
+#include <life/lifefem/CurrentFE.hpp>
 
 namespace LifeV
 {

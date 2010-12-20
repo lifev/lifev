@@ -45,7 +45,7 @@
 
 #include <life/lifecore/life.hpp>
 
-#include <life/lifefem/currentFE.hpp>
+#include <life/lifefem/CurrentFE.hpp>
 
 #include <boost/shared_ptr.hpp>
 
