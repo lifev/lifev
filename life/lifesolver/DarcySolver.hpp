@@ -833,11 +833,11 @@ DarcySolver<Mesh, SolverType>::
 buildSystem ()
 {
 
-    // Chronos.
-    Chrono chronoStaticCondensation;
-    Chrono chronoConstantLocalMatrix;
-    Chrono chronoGlobalAssembleMatrix;
-    Chrono chronoGlobalAssembleVector;
+    // LifeChronos.
+    LifeChrono chronoStaticCondensation;
+    LifeChrono chronoConstantLocalMatrix;
+    LifeChrono chronoGlobalAssembleMatrix;
+    LifeChrono chronoGlobalAssembleVector;
 
     // The total number of elements in the mesh.
     UInt meshNumberOfElements = M_primal_FESpace.mesh()->numElements();
@@ -988,8 +988,8 @@ DarcySolver<Mesh, SolverType>::
 computePrimalAndDual ()
 {
 
-    // Chrono.
-    Chrono chronoComputePrimalAndDual;
+    // LifeChrono.
+    LifeChrono chronoComputePrimalAndDual;
 
     // The total number of elements in the mesh.
     UInt meshNumberOfElements = M_primal_FESpace.mesh()->numElements();
@@ -1461,8 +1461,8 @@ void
 DarcySolver<Mesh, SolverType>::
 applyBoundaryConditions ()
 {
-    // Chrono.
-    Chrono chronoBC;
+    // LifeChrono.
+    LifeChrono chronoBC;
 
     // Check if the boundary conditions were updated.
     if ( !M_BCh->bcUpdateDone() )
