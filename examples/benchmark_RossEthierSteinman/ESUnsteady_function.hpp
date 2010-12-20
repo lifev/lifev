@@ -31,7 +31,7 @@
 #define __ESUNSTEADY_HPP 1
 
 #include <life/lifecore/life.hpp>
-#include <life/lifecore/GetPot.hpp>
+#include <life/lifefilters/GetPot.hpp>
 
 namespace LifeV
 {
