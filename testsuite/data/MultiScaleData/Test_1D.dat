@@ -14,7 +14,7 @@
 
 [Problem] #########################################################################################
 ProblemType = MultiScale
-ProblemFile = ./MultiScaleData/Models/MultiScale/SinusoidalWave_1D_Hexagon_Robin.dat
+ProblemFile = ./MultiScaleData/Models/MultiScale/SinusoidalWave_1D_Hexagon_Mixed.dat
 
 [Solver] ##########################################################################################
 ###################################################################################################
