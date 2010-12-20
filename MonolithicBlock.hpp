@@ -483,8 +483,7 @@ private:
 };
 
 
-typedef singleton<factory<MonolithicBlock,  std::string> >     BlockPrecFactory;
-
+typedef FactorySingleton<Factory<MonolithicBlock,  std::string> >     BlockPrecFactory;
 
 template <typename Operator>
 void
