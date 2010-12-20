@@ -311,7 +311,7 @@ Int SolverTrilinos::solveSystem( const vector_type&  rhsFull,
     M_displayer->leaderPrint("      AztecOO solving system ...         ");
     setPreconditioner(preconditioner);
 
-    Chrono chrono;
+    LifeChrono chrono;
     chrono.start();
     Int numIter = solve( solution, rhsFull );
     chrono.stop();

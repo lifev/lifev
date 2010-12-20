@@ -170,7 +170,7 @@ Int SolverTrilinos::solveSystem( const vector_type& rhsFull,
 
     bool retry( true );
 
-    Chrono chrono;
+    LifeChrono chrono;
 
     M_displayer->leaderPrint( "      Setting up the solver ...                \n" );
 
@@ -229,7 +229,7 @@ void SolverTrilinos::setUpPrec( const GetPot& dataFile,  const std::string& sect
 
 void SolverTrilinos::buildPreconditioner( matrix_ptrtype& preconditioner )
 {
-    Chrono chrono;
+    LifeChrono chrono;
     Real condest(-1);
 
     chrono.start();
