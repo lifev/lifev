@@ -42,7 +42,7 @@
 #include <life/lifearray/EpetraVector.hpp>
 
 #include <life/lifefem/bcHandler.hpp>
-#include <life/lifecore/chrono.hpp>
+#include <life/lifecore/LifeChrono.hpp>
 #include <life/lifefem/geoMap.hpp>
 #include <life/lifesolver/dataNavierStokes.hpp>
 
