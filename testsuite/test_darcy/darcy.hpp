@@ -41,15 +41,15 @@
 
 #include <life/lifemesh/structuredMesh3D.hpp>
 #include <life/lifealg/EpetraMap.hpp>
-#include <life/lifemesh/partitionMesh.hpp>
+#include <life/lifemesh/MeshPartitioner.hpp>
 
 #include <life/lifesolver/DarcySolverTransientNonLinear.hpp>
 
 #ifdef HAVE_HDF5
-#include <life/lifefilters/hdf5exporter.hpp>
+#include <life/lifefilters/ExporterHDF5.hpp>
 #endif
-#include <life/lifefilters/noexport.hpp>
-#include <life/lifefilters/ensight.hpp>
+#include <life/lifefilters/ExporterEmpty.hpp>
+#include <life/lifefilters/ExporterEnsight.hpp>
 
 /*!
  @class darcy
