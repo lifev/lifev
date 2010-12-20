@@ -47,9 +47,9 @@
 
 #include <life/lifecore/life.hpp>
 #include <life/lifealg/SolverAmesos.hpp>
-#include <life/lifecore/debug.hpp>
-#include <life/lifecore/chrono.hpp>
-#include <life/lifecore/GetPot.hpp>
+#include <life/lifecore/LifeDebug.hpp>
+#include <life/lifecore/LifeChrono.hpp>
+#include <life/lifefilters/GetPot.hpp>
 
 namespace LifeV
 {
