@@ -407,10 +407,10 @@ Cylinder::run()
     boost::shared_ptr<DataNavierStokes> dataNavierStokes(new DataNavierStokes());
     dataNavierStokes->setup( dataFile );
 
-    partitionMesh< RegionMesh3D<LinearTetra> >   meshPart;
+    MeshPartitioner< RegionMesh3D<LinearTetra> >   meshPart;
     meshPart.setup(1, (d->comm));
 
-    HDF5Filter3DMesh<RegionMesh3D<LinearTetra> > HDF5Input(dataFile, "cylinderPart");
+    ExporterHDF5Mesh3D<RegionMesh3D<LinearTetra> > HDF5Input(dataFile, "cylinderPart");
     HDF5Input.setComm(d->comm);
 //    HDF5Input.loadGraph(meshPart.elementDomains(), d->comm);
     meshPart.elementDomains() = HDF5Input.getGraph();
@@ -483,7 +483,7 @@ Cylinder::run()
     vector_type rhs ( fullMap );
 
 #ifdef HAVE_HDF5
-    HDF5Filter3DMesh<RegionMesh3D<LinearTetra> > ensight( dataFile, meshPart.meshPartition(), "cylinder", d->comm->MyPID());
+    ExporterHDF5Mesh3D<RegionMesh3D<LinearTetra> > ensight( dataFile, meshPart.meshPartition(), "cylinder", d->comm->MyPID());
 #else
     Ensight<RegionMesh3D<LinearTetra> > ensight( dataFile, meshPart.meshPartition(), "cylinder", d->comm->MyPID());
 #endif
@@ -525,7 +525,7 @@ Cylinder::run()
 
     // Temporal loop
 
-    Chrono chrono;
+    LifeChrono chrono;
     int iter = 1;
 
     for ( Real time = t0 + dt ; time <= tFinal + dt/2.; time += dt, iter++)

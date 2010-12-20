@@ -85,18 +85,18 @@ int main( int argc, char** argv )
     boost::shared_ptr<RegionMesh3D<LinearTetra> > fullMeshPtr(new RegionMesh3D<LinearTetra>);
     readMesh(*fullMeshPtr, dataMesh);
 
-    partitionMesh<RegionMesh3D<LinearTetra> > meshPart;
+    MeshPartitioner<RegionMesh3D<LinearTetra> > meshPart;
     meshPart.setup(4, comm);
 
     meshPart.attachUnpartitionedMesh(fullMeshPtr);
     meshPart.doPartitionGraph();
     meshPart.doPartitionMesh();
 
-    // Release the original mesh from the partitionMesh object and delete the RegionMesh3D object
+    // Release the original mesh from the MeshPartitioner object and delete the RegionMesh3D object
     meshPart.releaseUnpartitionedMesh();
     fullMeshPtr.reset();
 
-    HDF5Filter3DMesh<RegionMesh3D<LinearTetra> > HDF5Output(dataFile, meshPart.meshPartition(), "cylinderPart",
+    ExporterHDF5Mesh3D<RegionMesh3D<LinearTetra> > HDF5Output(dataFile, meshPart.meshPartition(), "cylinderPart",
                                                             comm->MyPID());
     HDF5Output.addPartitionGraph(meshPart.elementDomains(), comm);
     HDF5Output.addMeshPartitionAll(meshPart.meshPartitions(), comm);
