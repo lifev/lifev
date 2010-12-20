@@ -37,8 +37,8 @@
 
 #include "life/lifecore/life.hpp"
 #include "ud_functions.hpp"
-#include "life/lifefem/bcHandler.hpp"
-#include "life/lifefem/bcFunction.hpp"
+#include "life/lifefem/BCHandler.hpp"
+#include "life/lifefem/BCFunction.hpp"
 
 #include "life/lifesolver/exactJacobianBase.hpp"
 #include "life/lifesolver/fixedPointBase.hpp"

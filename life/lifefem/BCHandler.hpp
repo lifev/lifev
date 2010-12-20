@@ -39,7 +39,7 @@
 #ifndef BCHANDLER_H
 #define BCHANDLER_H 1
 
-#include <life/lifefem/bcCond.hpp>
+#include <life/lifefem/BCBase.hpp>
 
 namespace LifeV
 {
@@ -331,7 +331,7 @@ public:
       In particular, if two Essential boundary conditions share the same DOF, it will be prescribed the condition with the largest flag.
       This behavior is due to the fact that the largest boundary condition is the last to be prescribed.
 
-      Finally M_bcUpdateDone is set to true, and it is possible to prescribed boundary conditions using functions in bcManage.hpp.
+      Finally M_bcUpdateDone is set to true, and it is possible to prescribed boundary conditions using functions in BCManage.hpp.
 
       @param mesh The mesh
       @param boundaryFE Current finite element on the boundary
@@ -339,6 +339,11 @@ public:
     */
     template <typename Mesh>
     void bcUpdate( Mesh& mesh, CurrentBdFE& boundaryFE, const Dof& dof );
+
+
+    //! old bcUpdate version.. deprecated!!
+    template <typename Mesh>
+    void  __attribute__ ((__deprecated__)) bcUpdateOldVersion( Mesh& mesh, CurrentBdFE& boundaryFE, const Dof& dof );
 
     //! Merges the boundary condition bcHandler (with its offset) with the stored one
     /*!
@@ -477,7 +482,7 @@ private:
 
        @return A pointer to @c BCBase
     */
-    BCBase* M_findBC( const std::string& name );
+    BCBase* findBC( const std::string& name );
 
 
     //! Find the BC named @c aFlag
@@ -487,7 +492,7 @@ private:
 
        @return A pointer to @c BCBase
     */
-    BCBase* M_findBC( const bcFlag_Type& aFlag);
+    BCBase* findBC( const bcFlag_Type& aFlag);
 
     //! Sum the M_offset to boundary conditions offsets
     void M_sumOffsets();
@@ -507,7 +512,6 @@ private:
 };
 
 
-//*
 // ===================================================
 // Template methods implementations
 // ===================================================
@@ -820,7 +824,7 @@ BCHandler::bcUpdate( Mesh& mesh, CurrentBdFE& boundaryFE, const Dof& dof )
     // ============================================================================
     for ( bcBaseIterator = M_bcList.begin(); bcBaseIterator != M_bcList.end(); ++bcBaseIterator )
     {
-        bcBaseIterator->finalize();
+        bcBaseIterator->copyIdSetIntoIdVector();
     }
 
     M_bcUpdateDone = true;
@@ -828,12 +832,10 @@ BCHandler::bcUpdate( Mesh& mesh, CurrentBdFE& boundaryFE, const Dof& dof )
 
 
 // =============================================================
-// Old implementation
+// Old implementation of bcUpdate.. WILL BE REMOVED SOON
 // =============================================================
-
-/*/
 template <typename Mesh>
-void
+void  __attribute__ ((__deprecated__))
 BCHandler::bcUpdateOldVersion( Mesh& mesh, CurrentBdFE& boundaryFE, const Dof& dof )
 {
     typedef typename Mesh::ElementShape geoShape_Type;
@@ -1247,12 +1249,11 @@ BCHandler::bcUpdateOldVersion( Mesh& mesh, CurrentBdFE& boundaryFE, const Dof& d
     // ============================================================================
     for ( Iterator it = M_bcList.begin(); it != M_bcList.end(); ++it )
     {
-        it->finalize();
+        it->copyIdSetIntoIdVector();
     }
 
     M_bcUpdateDone = true;
-} // bcUpdate
-//*/
+}
 
 
 } // namespace LifeV

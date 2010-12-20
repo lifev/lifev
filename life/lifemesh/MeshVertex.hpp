@@ -37,8 +37,8 @@
 */
 
 
-#ifndef _GEO0D_HH_
-#define _GEO0D_HH_
+#ifndef MESHVERTEX_H
+#define MESHVERTEX_H
 
 #include <boost/array.hpp>
 #include <life/lifemesh/meshEntity.hpp>
@@ -46,17 +46,17 @@
 
 namespace LifeV
 {
-//! Geo0D -  Zero dimensional entity.
+//! MeshVertex -  Zero dimensional entity.
 /*!
     @author
 	Intermediate class used to build the actual Geometry classes; it stores boundary information.
 
-	@warning Geo1D/2D/3D are template classes; in fact, information might not be known a priori.
+	@warning MeshVertex is a template class; in fact, information might not be known a priori.
 	All vector dimensions are determined at compile time to enhance memory access time.
 	A coherent GeoShape has to be provided by the user.
 
  */
-class Geo0D : public MeshEntityWithBoundary
+class MeshVertex : public MeshEntityWithBoundary
 {
 public:
 
@@ -71,14 +71,14 @@ public:
     //@{
 
     //! Empty Constructor
-    Geo0D();
+    MeshVertex();
 
     //! Declares item identity and states if it is on boundary
     /*!
     	@param identity Element identity
         @param boundary True if the element is on boundary
      */
-    explicit Geo0D( ID identity, bool boundary = false );
+    explicit MeshVertex( ID identity, bool boundary = false );
 
     //! Declares item identity, provides coordinate and states if it is on boundary
     /*!
@@ -88,16 +88,16 @@ public:
     	@param z Element z coordinate
     	@param boundary True if the element is on boundary
      */
-    Geo0D( ID identity, Real x, Real y, Real z, bool boundary = false );
+    MeshVertex( ID identity, Real x, Real y, Real z, bool boundary = false );
 
     //! Copy constructor
     /*!
-        @param Element Geo0D to be copied
+        @param Element MeshVertex to be copied
      */
-    Geo0D( Geo0D const & Element );
+    MeshVertex( MeshVertex const & Element );
 
     //! Destructor
-    virtual ~Geo0D()
+    virtual ~MeshVertex()
     {
         // nothing to be done
     }
@@ -109,10 +109,10 @@ public:
 
     //! The equivalence operator
     /*!
-        @param Element Equivalent GeoElement0D
-        @return Reference to a new GeoElement0D with the same content of GeoElement0D Element
+        @param Element Equivalent MeshElementMarked0D
+        @return Reference to a new MeshElementMarked0D with the same content of MeshElementMarked0D Element
      */
-    Geo0D & operator=( Geo0D const & Element );
+    MeshVertex & operator=( MeshVertex const & Element );
 
     //@}
 

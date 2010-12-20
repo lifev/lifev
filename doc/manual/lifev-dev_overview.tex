@@ -106,7 +106,7 @@ manipulation of the final linear system.
     Shape} (\emph{GeoShape}). The geometrical shape of the actual
   finite element (for instance \texttt{QuadraticTetra}).
   
-\item \textbf{\emph{Basis Geometric Element}} (\emph{GeoElement})
+\item \textbf{\emph{Basis Geometric Element}} (\emph{MeshElementMarked})
   \index{Basis Geometric Element}. The geometric entity associated to
   a finite element.
 
@@ -137,10 +137,10 @@ manipulation of the final linear system.
   which fully defines the actual shape of a GeoShape. The Vertices are
   a subset of Points. For instance, a quadratic triangle has 3
   vertices and 6 Points. In the \emph{Local Numbering} of a
-  GeoElement, the Points which are also Vertices are numbered first.
+  MeshElementMarked, the Points which are also Vertices are numbered first.
 
 \item \textbf{\emph{\ix{Id}}}. Unique identifier (type \texttt{UInt})
-for a GeoElement and  Region mesh. 
+for a MeshElementMarked and  Region mesh. 
 
 \item\textbf{\emph{Region Mesh!Mesh}}. The mesh on a
   region of the computational domain formed by basic geometric
@@ -162,8 +162,8 @@ for a GeoElement and  Region mesh.
 \label{sec:paradigms}
 Here the  main \textbf{paradigms} that we will follow
 \begin{enumerate}
-\item The \texttt{GeoElement} is the key entity. All major loops will
-  be done on the GeoElement. This is a Finite Element (an possible
+\item The \texttt{MeshElementMarked} is the key entity. All major loops will
+  be done on the MeshElementMarked. This is a Finite Element (an possible
   Spectral Element) oriented work;
 \item The \texttt{Dof} (degrees of freedoms) are associated to
   geometrical entities;
@@ -499,13 +499,13 @@ stores basic information about the actual mesh points. The second is
 the base for the build-up of the other, 1d, 2D and 3D  geometric entities.
 
 \begin{verbatim}
-class Geo0D
+class MeshVertex
 {
  public:
   
-  Geo0D();
-  Geo0D(Geo0D const & G);
-  Geo0D & operator=(Geo0D const & G);
+  MeshVertex();
+  MeshVertex(MeshVertex const & G);
+  MeshVertex & operator=(MeshVertex const & G);
 
   Real const * coor() const {return _coor;};  
   Real const & x() const;
@@ -545,18 +545,18 @@ id() & The unique identifier for the Point, numbering from 1.
 
 \begin{verbatim}
 template <typename GeoShape>
-class GeoND {
+class MeshElement {
  public:
   
-  GeoND();
-  GeoND(const GeoND<GeoShape> &);
-  GeoND & operator=(GeoND const & G); 
+  MeshElement();
+  MeshElement(const MeshElement<GeoShape> &);
+  MeshElement & operator=(MeshElement const & G); 
   
   static const UInt numLocalPoints=GeoShape::S_numPoints;
   static const UInt numLocalVertices=GeoShape::S_numVertices;
   
-  Geo0D & point(UInt const i); 
-  Geo0D const & point (UInt const i) const;
+  MeshVertex & point(UInt const i); 
+  MeshVertex const & point (UInt const i) const;
   
   // UInt const nPoints() const { return GeoShape::S_numPoints; };
   // UInt const nVertices() const { return GeoShape::S_numVertices;};
@@ -572,15 +572,15 @@ class GeoND {
   
 };
 \end{verbatim}
-The meaning of the variables is quite obvious. \texttt{GeoND} template class
+The meaning of the variables is quite obvious. \texttt{MeshElement} template class
 has a \texttt{GeoShape} as template parameter, since some of its
 attribute depend from the geometry of the mesh we are using.
 
-The \texttt{Geo0D} and \texttt{GeoND} classes are never instantiated
+The \texttt{MeshVertex} and \texttt{MeshElement} classes are never instantiated
 as such. They are building blocks for the actual
-\texttt{GeoElement$n$D} template classes ($n=1,2,3$), which add
+\texttt{MeshElementMarked$n$D} template classes ($n=1,2,3$), which add
 attributes more specific to a finite element mesh. The instance of a
-\texttt{GeoElement$n$D} template class is what we call a
+\texttt{MeshElementMarked$n$D} template class is what we call a
 \emph{Geometry Element}\index{geometry element}, which we generally
 indicate as \texttt{GeoEle}.
 
@@ -588,35 +588,35 @@ Here the public interfaces
 \begin{verbatim}
 template <typename MARKER=PMarker>
 class 
-GeoElement0D: public Geo0D, public MarkerHandler<MARKER>
+MeshElementMarked0D: public MeshVertex, public MarkerHandler<MARKER>
 {
  public:
-GeoElement0D();
-GeoElement0D(GeoElement0D const & g);
-GeoElement0D(Geo0D const & g, MARKER const & m);
-GeoElement0D & operator = (GeoElement0D const & g);
+MeshElementMarked0D();
+MeshElementMarked0D(MeshElementMarked0D const & g);
+MeshElementMarked0D(MeshVertex const & g, MARKER const & m);
+MeshElementMarked0D & operator = (MeshElementMarked0D const & g);
 };
 
 template 
 <typename GeoShape, typename MARKER=EMarker>
-class GeoElement1D : public GeoND<GeoShape>, public MarkerHandler<MARKER>
+class MeshElementMarked1D : public MeshElement<GeoShape>, public MarkerHandler<MARKER>
 {
 public:
-  GeoElement1D();
+  MeshElementMarked1D();
 };
 
 template 
 <typename GeoShape, typename MARKER=FMarker>
-class GeoElement2D : public GeoND<GeoShape>, public MarkerHandler<MARKER>
+class MeshElementMarked2D : public MeshElement<GeoShape>, public MarkerHandler<MARKER>
 {
 public:
 
-  GeoElement2D();
+  MeshElementMarked2D();
 
   static const UInt numLocalEdges=GeoShape::S_numVertices;
 
   typedef typename GeoShape::GeoBShape EdgeShape;
-  typedef  GeoElement1D<EdgeShape> EdgeType;
+  typedef  MeshElementMarked1D<EdgeShape> EdgeType;
   /* In the 3D case, we store the ids of the adjacent 3Delements.
      NOT THE POINTERS because we don't know the 3Delements type and 
      I don't want to complicate the template declaration */
@@ -628,16 +628,16 @@ public:
 
 template 
 <typename GeoShape, typename MARKER=VMarker>
-class GeoElement3D : public GeoND<GeoShape>, public MarkerHandler<MARKER>
+class MeshElementMarked3D : public MeshElement<GeoShape>, public MarkerHandler<MARKER>
 {
 public:
   
-  GeoElement3D();
+  MeshElementMarked3D();
 
   typedef typename GeoShape::GeoBShape FaceShape;
   typedef typename FaceShape::GeoBShape EdgeShape;
-  typedef  GeoElement1D<EdgeShape> EdgeType;
-  typedef  GeoElement2D<FaceShape> FaceType;
+  typedef  MeshElementMarked1D<EdgeShape> EdgeType;
+  typedef  MeshElementMarked2D<FaceShape> FaceType;
 
   static  const UInt numLocalFaces=GeoShape::S_numFaces;
   static  const UInt numLocalEdges=numLocalFaces+GeoShape::S_numVertices-2;
@@ -679,7 +679,7 @@ and its discussion is postponed until te layout of the Marker classes
 is more or less at steady state.  We mention only that it contains the
 typedefs of all the \texttt{Markers} for all the geometric elements
 (the one which have been defaulted to \texttt{PMarker},
-\texttt{EMarker} etc.\  in the definition of the \texttt{GeoElement}
+\texttt{EMarker} etc.\  in the definition of the \texttt{MeshElementMarked}
 classes.  Those types are exported to the \texttt{RegionMesh}, as
 usual, in order to be visible at class level without the need of
 applying the scope operator on the template argument:
@@ -722,10 +722,10 @@ which export to RegionMesh space the types used for the internal data.
   typedef typename GeoShape::GeoBShape FaceShape;
   typedef typename FaceShape::GeoBShape EdgeShape;
   
-  typedef  GeoElement3D<GeoShape,VolumeMarker> VolumeType;
-  typedef  GeoElement2D<FaceShape,FaceMarker>  FaceType;
-  typedef  GeoElement1D<EdgeShape,EdgeMarker>  EdgeType;
-  typedef  GeoElement0D<PointMarker>           point_Type; 
+  typedef  MeshElementMarked3D<GeoShape,VolumeMarker> VolumeType;
+  typedef  MeshElementMarked2D<FaceShape,FaceMarker>  FaceType;
+  typedef  MeshElementMarked1D<EdgeShape,EdgeMarker>  EdgeType;
+  typedef  MeshElementMarked0D<PointMarker>           point_Type; 
 
   // Typedefs for STL compliant containers of mesh geometric entities
   // I Use SimpleVect for addressing from 1.
@@ -742,9 +742,9 @@ wrap-around to the STL \texttt{vector<T>} template class (see header file
 \texttt{SimpleVector.h}) to store the list of the various 
 Geometrical entities which form the Region Mesh. We follow the following Paradigm
 \begin{description}
-\item A region mesh stores all the GeoElements (Volumes in 3D
+\item A region mesh stores all the MeshElementMarkeds (Volumes in 3D
   problems, Faces in 2D problems etc), all the Points and all the
-  Boundary GeoElements. For all the other entities (for instance edges
+  Boundary MeshElementMarkeds. For all the other entities (for instance edges
   in a 3D problem) the storage is done according to a switch which is
   passed to the mesh reader.  Details are still been worked out.
 \end{description}
@@ -853,8 +853,8 @@ data), the user may only access them through the appropriate
   list of Faces and Edges of the mesh.  This because one may want to
   have a numbering for Faces and Edges (for instance in order to build
   the Degrees of Freedom) without actually creating the corresponding
-Full Face or Edge object (i.e. the \texttt{GeoElement2D} and
-\texttt{GeoElement1D} object)! Therefore, if the user is interested in
+Full Face or Edge object (i.e. the \texttt{MeshElementMarked2D} and
+\texttt{MeshElementMarked1D} object)! Therefore, if the user is interested in
 the Full Face of Edge object, he/she must first check whether it exists.
 Again, some helper methods are provided to make life a little easier.}
 
@@ -1366,13 +1366,13 @@ Now we declare some geometric entities. Since we use only one
 template (the compulsory one which indicates the element basis shape) it
 means that we are using the default marker classes.
 \begin{verbatim}
-  GeoElement1D<LinearLine> line;
-  GeoElement2D<LinearTriangle> tri;
-  GeoElement2D<LinearTriangle> tri1;
-  GeoElement2D<LinearTriangle> tri2;
-  GeoElement3D<LinearTetra> tet;
+  MeshElementMarked1D<LinearLine> line;
+  MeshElementMarked2D<LinearTriangle> tri;
+  MeshElementMarked2D<LinearTriangle> tri1;
+  MeshElementMarked2D<LinearTriangle> tri2;
+  MeshElementMarked3D<LinearTetra> tet;
   RegionMesh3D<LinearTetra> mesh;
-  GeoElement0D<> point;
+  MeshElementMarked0D<> point;
 \end{verbatim}
 
 we now define a reference to the boundary condition handler,
@@ -1714,19 +1714,19 @@ Now some global typedefs are created to make life easier.
 
 \begin{verbatim}
 typedef
-GeoMap<QuadRule_Tetra_4pt,BasisFct_P1_3D,GeoElement3D<LinearTetra> >
+GeoMap<QuadRule_Tetra_4pt,BasisFct_P1_3D,MeshElementMarked3D<LinearTetra> >
 GeoMap_Linear_Tetra_4pt;
 typedef
-GeoMap<QuadRule_Tetra_1pt,BasisFct_P1_3D,GeoElement3D<LinearTetra> >
+GeoMap<QuadRule_Tetra_1pt,BasisFct_P1_3D,MeshElementMarked3D<LinearTetra> >
 GeoMap_Linear_Tetra_1pt;
 typedef
-GeoMap<QuadExact,BasisFct_P1_3D,GeoElement3D<LinearTetra> >
+GeoMap<QuadExact,BasisFct_P1_3D,MeshElementMarked3D<LinearTetra> >
 GeoMap_Linear_Tetra_Exact;
 typedef
-GeoMap<QuadRule_Tetra_4pt,BasisFct_P2_3D,GeoElement3D<QuadraticTetra> >
+GeoMap<QuadRule_Tetra_4pt,BasisFct_P2_3D,MeshElementMarked3D<QuadraticTetra> >
 GeoMap_Quadratic_Tetra_4pt;
 typedef
-GeoMap<QuadRule_Tetra_1pt,BasisFct_P2_3D,GeoElement3D<QuadraticTetra> >
+GeoMap<QuadRule_Tetra_1pt,BasisFct_P2_3D,MeshElementMarked3D<QuadraticTetra> >
 GeoMap_Quadratic_Tetra_1pt;
 \end{verbatim}
 The name of the types follws the pattern

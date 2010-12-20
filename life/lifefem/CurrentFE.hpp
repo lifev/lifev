@@ -291,8 +291,8 @@ public:
       @param geoele The cell that we are looking at
       @param upFlag The flag to explain the quantities that we want to update
      */
-    template<typename GeoElementType>
-    void update(const GeoElementType& geoele, const flag_Type& upFlag);
+    template<typename MeshElementMarkedType>
+    void update(const MeshElementMarkedType& geoele, const flag_Type& upFlag);
 
     //! Update method using only point coordinates. It used the flags, as defined in \ref update_procedure "this page".
     void update(const std::vector<std::vector<Real> >& pts, const flag_Type& upFlag);
@@ -563,8 +563,8 @@ private:
     CurrentFE( const CurrentFE& );
 
     //! Update the nodes of the cell to the current one.
-    template<typename GeoElementType>
-    void computeCellNodes(const GeoElementType& geoele);
+    template<typename MeshElementMarkedType>
+    void computeCellNodes(const MeshElementMarkedType& geoele);
 
     //! Update only the nodes of the cells to the current one.
     void computeCellNodes(const std::vector<std::vector< Real> >& pts);
@@ -728,56 +728,56 @@ public:
     /*!
       minimal update: we just identify the id of the current element
     */
-    template <class GeoElementType>
-    void update( const GeoElementType& geoele );
+    template <class MeshElementMarkedType>
+    void update( const MeshElementMarkedType& geoele );
     /*!
       compute the arrays detJac, weightDet, jacobian on
       the current element
     */
-    template <class GeoElementType>
-    void updateJac( const GeoElementType& geoele );
+    template <class MeshElementMarkedType>
+    void updateJac( const MeshElementMarkedType& geoele );
     /*!
       compute the arrays detJac, weightDet, jacobian and quadPt
       on the current element
     */
-    template <class GeoElementType>
-    void updateJacQuadPt( const GeoElementType& geoele );
+    template <class MeshElementMarkedType>
+    void updateJacQuadPt( const MeshElementMarkedType& geoele );
     /*!
       compute the arrays detJac, weightDet, jacobian,
       tInvJac, phiDer on the current element
     */
-    template <class GeoElementType>
-    void updateFirstDeriv( const GeoElementType& geoele );
+    template <class MeshElementMarkedType>
+    void updateFirstDeriv( const MeshElementMarkedType& geoele );
     /*!
       compute the arrays detJac, weightDet, jacobian,
       tInvJac, phiDer and quadPt on the current element
     */
-    template <class GeoElementType>
-    void updateFirstDerivQuadPt( const GeoElementType& geoele );
+    template <class MeshElementMarkedType>
+    void updateFirstDerivQuadPt( const MeshElementMarkedType& geoele );
     /*!
       compute the arrays detJac, weightDet, jacobian,
       tInvJac, phiDer2 on the current element
     */
-    template <class GeoElementType>
-    void updateSecondDeriv( const GeoElementType& geoele );
+    template <class MeshElementMarkedType>
+    void updateSecondDeriv( const MeshElementMarkedType& geoele );
     /*!
       compute the arrays detJac, weightDet, jacobian,
       tInvJac, phiDer2 on the current element
     */
-    template <class GeoElementType>
-    void updateSecondDerivQuadPt( const GeoElementType& geoele );
+    template <class MeshElementMarkedType>
+    void updateSecondDerivQuadPt( const MeshElementMarkedType& geoele );
     /*!
       compute the arrays detJac, weightDet, jacobian,
       tInvJac, phiDer, phiDer2 on the current element
     */
-    template <class GeoElementType>
-    void updateFirstSecondDeriv( const GeoElementType& geoele );
+    template <class MeshElementMarkedType>
+    void updateFirstSecondDeriv( const MeshElementMarkedType& geoele );
     /*!
       compute the arrays detJac, weightDet, jacobian,
       tInvJac, phiDer, phiDer2 on the current element
     */
-    template <class GeoElementType>
-    void updateFirstSecondDerivQuadPt( const GeoElementType& geoele );
+    template <class MeshElementMarkedType>
+    void updateFirstSecondDerivQuadPt( const MeshElementMarkedType& geoele );
 
     //@}
 
@@ -786,8 +786,8 @@ public:
 
 
 
-template<typename GeoElement>
-void CurrentFE::update(const GeoElement& geoele, const flag_Type& upFlag)
+template<typename MeshElementMarked>
+void CurrentFE::update(const MeshElementMarked& geoele, const flag_Type& upFlag)
 {
     M_currentId      = geoele.id();
     M_currentLocalId = geoele.localId();
@@ -805,8 +805,8 @@ void CurrentFE::update(const GeoElement& geoele, const flag_Type& upFlag)
 };
 
 
-template<typename GeoElement>
-void CurrentFE::computeCellNodes(const GeoElement& geoele)
+template<typename MeshElementMarked>
+void CurrentFE::computeCellNodes(const MeshElementMarked& geoele)
 {
     std::vector< std::vector <Real> > pts(M_nbGeoNode, std::vector<Real>(M_nbCoor));
 
@@ -828,8 +828,8 @@ void CurrentFE::computeCellNodes(const GeoElement& geoele)
 /*!
     minimal update: we just identify the id of the current element
   */
-template <class GeoElementType>
-void CurrentFE::update( const GeoElementType& geoele )
+template <class MeshElementMarkedType>
+void CurrentFE::update( const MeshElementMarkedType& geoele )
 {
     M_currentId      = geoele.id();
     M_currentLocalId = geoele.localId();
@@ -839,8 +839,8 @@ void CurrentFE::update( const GeoElementType& geoele )
     compute the arrays detJac, weightDet, jacobian on
     the current element
 */
-template <class GeoElementType>
-void CurrentFE::updateJac( const GeoElementType& geoele )
+template <class MeshElementMarkedType>
+void CurrentFE::updateJac( const MeshElementMarkedType& geoele )
 {
     ASSERT(M_nbQuadPt!=0," No quadrature rule defined, cannot update!");
     M_currentId      = geoele.id();
@@ -857,8 +857,8 @@ void CurrentFE::updateJac( const GeoElementType& geoele )
     compute the arrays detJac, weightDet, jacobian and quadPt
     on the current element
 */
-template <class GeoElementType>
-void CurrentFE::updateJacQuadPt( const GeoElementType& geoele )
+template <class MeshElementMarkedType>
+void CurrentFE::updateJacQuadPt( const MeshElementMarkedType& geoele )
 {
     ASSERT(M_nbQuadPt!=0," No quadrature rule defined, cannot update!");
     M_currentId      = geoele.id();
@@ -877,8 +877,8 @@ void CurrentFE::updateJacQuadPt( const GeoElementType& geoele )
     compute the arrays detJac, weightDet, jacobian,
     tInvJac, phiDer on the current element
 */
-template <class GeoElementType>
-void CurrentFE::updateFirstDeriv( const GeoElementType& geoele )
+template <class MeshElementMarkedType>
+void CurrentFE::updateFirstDeriv( const MeshElementMarkedType& geoele )
 {
     ASSERT(M_nbQuadPt!=0," No quadrature rule defined, cannot update!");
     M_currentId      = geoele.id();
@@ -899,8 +899,8 @@ void CurrentFE::updateFirstDeriv( const GeoElementType& geoele )
     compute the arrays detJac, weightDet, jacobian,
     tInvJac, phiDer and quadPt on the current element
 */
-template <class GeoElementType>
-void CurrentFE::updateFirstDerivQuadPt( const GeoElementType& geoele )
+template <class MeshElementMarkedType>
+void CurrentFE::updateFirstDerivQuadPt( const MeshElementMarkedType& geoele )
 {
     ASSERT(M_nbQuadPt!=0," No quadrature rule defined, cannot update!");
     M_currentId      = geoele.id();
@@ -924,8 +924,8 @@ void CurrentFE::updateFirstDerivQuadPt( const GeoElementType& geoele )
   compute the arrays detJac, weightDet, jacobian,
   tInvJac, phiDer2 on the current element
 */
-template <class GeoElementType>
-void CurrentFE::updateSecondDeriv( const GeoElementType& geoele )
+template <class MeshElementMarkedType>
+void CurrentFE::updateSecondDeriv( const MeshElementMarkedType& geoele )
 {
     ASSERT(M_nbQuadPt!=0," No quadrature rule defined, cannot update!");
     M_currentId      = geoele.id();
@@ -946,8 +946,8 @@ void CurrentFE::updateSecondDeriv( const GeoElementType& geoele )
     compute the arrays detJac, weightDet, jacobian,
     tInvJac, phiDer2 on the current element
   */
-template <class GeoElementType>
-void CurrentFE::updateSecondDerivQuadPt( const GeoElementType& geoele )
+template <class MeshElementMarkedType>
+void CurrentFE::updateSecondDerivQuadPt( const MeshElementMarkedType& geoele )
 {
     ASSERT(M_nbQuadPt!=0," No quadrature rule defined, cannot update!");
     M_currentId      = geoele.id();
@@ -969,8 +969,8 @@ void CurrentFE::updateSecondDerivQuadPt( const GeoElementType& geoele )
     compute the arrays detJac, weightDet, jacobian,
     tInvJac, phiDer, phiDer2 on the current element
   */
-template <class GeoElementType>
-void CurrentFE::updateFirstSecondDeriv( const GeoElementType& geoele )
+template <class MeshElementMarkedType>
+void CurrentFE::updateFirstSecondDeriv( const MeshElementMarkedType& geoele )
 {
     ASSERT(M_nbQuadPt!=0," No quadrature rule defined, cannot update!");
     M_currentId      = geoele.id();
@@ -992,8 +992,8 @@ void CurrentFE::updateFirstSecondDeriv( const GeoElementType& geoele )
     compute the arrays detJac, weightDet, jacobian,
     tInvJac, phiDer, phiDer2 on the current element
   */
-template <class GeoElementType>
-void CurrentFE::updateFirstSecondDerivQuadPt( const GeoElementType& geoele )
+template <class MeshElementMarkedType>
+void CurrentFE::updateFirstSecondDerivQuadPt( const MeshElementMarkedType& geoele )
 {
     ASSERT(M_nbQuadPt!=0," No quadrature rule defined, cannot update!");
     M_currentId      = geoele.id();

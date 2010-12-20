@@ -27,14 +27,14 @@ SUFFIXES	= .cpp .hpp .idl .c .h .f .F .o .moc .cc
 
 lib_LTLIBRARIES		= liblifefem.la
 
-liblifefem_la_SOURCES	= bcCond.cpp bcFunction.cpp bcVector.cpp bcHandler.cpp \
+liblifefem_la_SOURCES	= BCBase.cpp BCFunction.cpp BCVector.cpp BCHandler.cpp \
           dataTime.cpp  \
           CurrentFE.cpp CurrentBoundaryFE.cpp defQuadRuleFE.cpp DOF.cpp \
           DOFInterface3Dto2D.cpp DOFInterface3Dto3D.cpp DOFInterface.cpp \
           AssemblyElemental.cpp  GeometricMap.cpp \
           DOFLocalPattern.cpp QuadRule.cpp ReferenceElement.cpp ReferenceFE.cpp ReferenceFEScalar.cpp ReferenceFEHdiv.cpp \
           ReferenceFEHybrid.cpp CurrentBoundaryFEBase.cpp \
-          bcManage.cpp QuadPoint.cpp
+          BCManage.cpp QuadPoint.cpp
 
 liblifefem_la_LIBADD	= ../lifemesh/liblifemesh.la ../lifealg/liblifealg.la
 

@@ -40,7 +40,7 @@
 #include <life/lifealg/clapack.hpp>
 
 #include <life/lifefem/AssemblyElemental.hpp>
-#include <life/lifefem/bcManage.hpp>
+#include <life/lifefem/BCManage.hpp>
 #include <life/lifefem/HyperbolicFluxNumerical.hpp>
 
 #include <life/lifesolver/HyperbolicData.hpp>

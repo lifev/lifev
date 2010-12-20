@@ -50,7 +50,7 @@
 #include <life/lifealg/SolverTrilinos.hpp>
 #include <life/lifefem/Assembly.hpp>
 #include <life/lifefem/AssemblyElemental.hpp>
-#include <life/lifefem/bcManage.hpp>
+#include <life/lifefem/BCManage.hpp>
 #include <life/lifefem/FESpace.hpp>
 #include <life/lifefem/bdfVariableStep.hpp>
 

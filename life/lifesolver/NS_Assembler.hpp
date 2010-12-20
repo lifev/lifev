@@ -30,9 +30,8 @@ This library is free software; you can redistribute it and/or
 #include <life/lifecore/LifeChrono.hpp>
 
 #include <life/lifefem/Assembly.hpp>
-#include <life/lifefem/bcManage.hpp>
+#include <life/lifefem/BCManage.hpp>
 #include <life/lifefem/AssemblyElemental.hpp>
-#include <life/lifefem/bcHandler.hpp>
 #include <life/lifefem/GeometricMap.hpp>
 #include <life/lifefem/postProc.hpp>
 #include <life/lifefem/FESpace.hpp>

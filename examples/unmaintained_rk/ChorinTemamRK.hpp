@@ -31,7 +31,7 @@
 #include <life/lifearray/elemVec.hpp>
 #include <life/lifefem/elemOper.hpp>
 #include <life/lifefem/assemb.hpp>
-#include <life/lifefem/bcManage.hpp>
+#include <life/lifefem/BCManage.hpp>
 #include <life/lifefilters/medit_wrtrs.hpp>
 
 #include <life/lifealg/SolverTrilinos.hpp>
@@ -39,7 +39,6 @@
 #include <life/lifearray/EpetraMatrix.hpp>
 #include <life/lifearray/EpetraVector.hpp>
 
-#include <life/lifefem/bcHandler.hpp>
 #include <life/lifecore/LifeChrono.hpp>
 #include <life/lifefem/geoMap.hpp>
 #include <life/lifesolver/dataNavierStokes.hpp>

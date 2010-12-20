@@ -43,7 +43,7 @@
 #include <boost/lambda/bind.hpp>
 #include <boost/lambda/if.hpp>
 
-#include <life/lifefem/bcHandler.hpp>
+#include <life/lifefem/BCHandler.hpp>
 
 namespace LifeV
 {
@@ -189,7 +189,7 @@ BCHandler::addBC( const bcName_Type& name,
 void
 BCHandler::modifyBC( bcName_Type const& name, BCFunctionBase const& bcFunction )
 {
-    BCBase* bcBasePtr = M_findBC( name );
+    BCBase* bcBasePtr = findBC( name );
 
     bcBasePtr->setBCFunction( bcFunction );
 }
@@ -197,7 +197,7 @@ BCHandler::modifyBC( bcName_Type const& name, BCFunctionBase const& bcFunction )
 void
 BCHandler::modifyBC( bcName_Type const& name, BCVectorBase const& bcVector )
 {
-    BCBase* bcBasePtr = M_findBC( name );
+    BCBase* bcBasePtr = findBC( name );
 
     bcBasePtr->setBCVector( bcVector );
 }
@@ -205,7 +205,7 @@ BCHandler::modifyBC( bcName_Type const& name, BCVectorBase const& bcVector )
 void
 BCHandler::modifyBC( std::string const& name, BCFunctionUDepBase const& bcUDepFunction )
 {
-    BCBase* bcBasePtr = M_findBC( name );
+	BCBase* bcBasePtr = findBC( name );
 
     bcBasePtr->setBCFunction( bcUDepFunction );
 }
@@ -213,7 +213,7 @@ BCHandler::modifyBC( std::string const& name, BCFunctionUDepBase const& bcUDepFu
 void
 BCHandler::modifyBC( bcFlag_Type const& aFlag, BCFunctionBase const& bcFunction )
 {
-    BCBase* bcBasePtr = M_findBC( aFlag );
+    BCBase* bcBasePtr = findBC( aFlag );
 
     bcBasePtr->setBCFunction( bcFunction );
 }
@@ -221,7 +221,7 @@ BCHandler::modifyBC( bcFlag_Type const& aFlag, BCFunctionBase const& bcFunction 
 void
 BCHandler::modifyBC( bcFlag_Type const& aFlag, BCVectorBase const& bcVector )
 {
-    BCBase* bcBasePtr = M_findBC( aFlag );
+    BCBase* bcBasePtr = findBC( aFlag );
 
     bcBasePtr->setBCVector( bcVector );
 }
@@ -229,7 +229,7 @@ BCHandler::modifyBC( bcFlag_Type const& aFlag, BCVectorBase const& bcVector )
 void
 BCHandler::modifyBC( bcFlag_Type const& aFlag, BCFunctionUDepBase const& bcFunction )
 {
-    BCBase* bcBasePtr = M_findBC( aFlag );
+    BCBase* bcBasePtr = findBC( aFlag );
 
     bcBasePtr->setBCFunction( bcFunction );
 }
@@ -268,7 +268,7 @@ BCHandler::setOffset( const UInt& offset )
 void
 BCHandler::setOffset( const bcName_Type& name, Int offset )
 {
-    BCBase* bc = M_findBC( name );
+    BCBase* bc = findBC( name );
 
     if (bc == 0)
         std::cout << "BCHandler::setOffset : BC " << name << " not found ... ";
@@ -393,7 +393,7 @@ BCHandler::hasOnlyEssential() const
 // Private Methods
 // ===================================================
 BCBase*
-BCHandler::M_findBC( bcName_Type const& name )
+BCHandler::findBC( bcName_Type const& name )
 {
     BCBase* bcBasePtr = 0;
     std::for_each( M_bcList.begin(),
@@ -417,7 +417,7 @@ BCHandler::M_findBC( bcName_Type const& name )
 }
 
 BCBase*
-BCHandler::M_findBC( bcFlag_Type const& aFlag)
+BCHandler::findBC( bcFlag_Type const& aFlag)
 {
     BCBase* bcBasePtr = 0;
     std::for_each( M_bcList.begin(),

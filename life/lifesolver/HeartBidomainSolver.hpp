@@ -43,12 +43,11 @@
 #include <life/lifearray/elemVec.hpp>
 #include <life/lifefem/AssemblyElemental.hpp>
 #include <life/lifefem/Assembly.hpp>
-#include <life/lifefem/bcManage.hpp>
+#include <life/lifefem/BCManage.hpp>
 #include <life/lifealg/SolverTrilinos.hpp>
 #include <life/lifealg/EpetraMap.hpp>
 #include <life/lifearray/EpetraMatrix.hpp>
 #include <life/lifearray/EpetraVector.hpp>
-#include <life/lifefem/bcHandler.hpp>
 #include <life/lifefem/SobolevNorms.hpp>
 #include <life/lifefem/GeometricMap.hpp>
 #include <life/lifesolver/HeartBidomainData.hpp>

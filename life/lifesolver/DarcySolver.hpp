@@ -40,7 +40,7 @@
 #define _DARCYSOLVER_H_ 1
 
 #include <life/lifefem/AssemblyElemental.hpp>
-#include <life/lifefem/bcManage.hpp>
+#include <life/lifefem/BCManage.hpp>
 
 #include <life/lifealg/SolverTrilinos.hpp>
 #include <life/lifealg/clapack.hpp>

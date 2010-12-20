@@ -91,11 +91,11 @@ MarkersDefinitions                     markers                                 E
 MeshChecks                             mesh_util                               CMCS3
 MeshData                               dataMesh                                EMORY
 MeshElementBare                        bareItems                               EMORY
-MeshElement                            geoND                                   EMORY
-MeshElementMarked                      geoElement                              EMORY
+MeshElement                            geoND                                   EMORY	Done
+MeshElementMarked                      geoElement                              EMORY	Done
 MeshEntity                             meshEntity                              EMORY
 MeshUtility                            mesh_util_base                          EMORY
-MeshVertex                             geo0D                                   EMORY
+MeshVertex                             geo0D                                   EMORY	Done
 RegionMesh1D                           regionMesh1D                            MOX
 RegionMesh2D                           regionMesh2D                            MOX
 RegionMesh3D                           regionMesh3D                            MOX
@@ -119,13 +119,13 @@ LIFEFEM
 ============================
 Assembly                               assemb                                  CMCS2     DONE
 AssemblyElemental                      elemOper                                CMCS2     DONE
-BCBase                                 bcCond                                  EMORY
-BCFunction                             bcFunction                              EMORY
-BCHandler                              bcHandler                               EMORY
-BCIdentifier                           identifier                              EMORY
-BCManage                               bcManage                                EMORY
-BCManageNormal                         BCNormalManager                         EMORY
-BCVector                               bcVector                                EMORY
+BCBase                                 bcCond                                  EMORY	 DONE
+BCFunction                             bcFunction                              EMORY	 DONE
+BCHandler                              bcHandler                               EMORY	 DONE
+BCIdentifier                           identifier                              EMORY	 DONE
+BCManage                               bcManage                                EMORY	 DONE
+BCManageNormal                         BCNormalManager                         EMORY	 DONE
+BCVector                               bcVector                                EMORY	 DONE
 CurrentBoundaryFEBase                  staticBdFE                              CMCS2     DONE
 CurrentBoundaryFE                      currentBdFE                             CMCS2     DONE
 CurrentFE                              currentFE                               CMCS2     DONE

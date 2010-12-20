@@ -38,7 +38,7 @@
 
 
 #include <life/lifecore/life.hpp>
-#include <life/lifefem/bcFunction.hpp>
+#include <life/lifefem/BCFunction.hpp>
 
 namespace LifeV
 {

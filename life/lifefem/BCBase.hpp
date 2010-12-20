@@ -46,7 +46,8 @@
 
   <li> a flag identifying a specific part of the mesh boundary,
 
-  <li> a type (Essential, Natural, Robin, Flux, Resistance),
+  <li> a type (Natural, Robin, Flux, Resistance,
+	Essential, EssentialEdges, EssentialVertices),
 
   <li> a mode of implementation (Scalar, Full, Component, Normal,
      Tangential, Resistance, Directional),
@@ -58,11 +59,10 @@
   <li> a list of pointers to identifiers allowing the user to know to
      which DOF the boundary condition applies.
 </ol>
-isBetaCoeffAVector
  */
 
-#ifndef BCCOND_H
-#define BCCOND_H
+#ifndef BCBASE_H
+#define BCBASE_H
 
 #include <life/lifemesh/identifier.hpp>
 #include <life/lifemesh/markers.hpp>
@@ -70,8 +70,8 @@ isBetaCoeffAVector
 #include <life/lifefem/CurrentFE.hpp>
 #include <life/lifefem/CurrentBoundaryFE.hpp>
 
-#include <life/lifefem/bcVector.hpp>
-#include <life/lifefem/bcFunction.hpp>
+#include <life/lifefem/BCVector.hpp>
+#include <life/lifefem/BCFunction.hpp>
 #include <life/lifearray/EpetraVector.hpp>
 
 
@@ -87,7 +87,6 @@ enum bcType_Type
     Robin, 				/*!< Robin boundary conditions */
     Flux, 				/*!< Flux boundary conditions */
     Resistance,			/*!< Resistance boundary conditions */
-    Periodic,			/*!< Periodic boundary conditions */
     Essential, 			/*!< Dirichlet boundary conditions */
     EssentialEdges, 	/*!< Dirichlet boundary conditions on edges */
     EssentialVertices, 	/*!< Dirichlet boundary conditions on vertices */
@@ -629,13 +628,14 @@ private:
 
     std::set<boost::shared_ptr<IdentifierBase>, identifierComp> M_idSet; //!< set of pointers to identifiers allowing the user to get hold the DOF to which the BC applies
 
-    std::vector<boost::shared_ptr<IdentifierBase> > M_idList; //!< container for id's when the list is finalized
+    std::vector<boost::shared_ptr<IdentifierBase> > M_idVector; //!< container for id's when the list is finalized
 
     int M_offset; //!< boundary condition offset
 
-    bool M_finalized; //!< True, when M_idList is finalized
+    bool M_finalized; //!< True, when M_idVector is finalized
 
-    void finalize(); //!< Transfer information from M_idSet to M_idList
+    //!< Copy content of M_idSet into M_idVector, clear M_idSet
+    void copyIdSetIntoIdVector();
 };
 
 

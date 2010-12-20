@@ -75,8 +75,8 @@
 
 #include <life/lifefem/DOFInterface3Dto3D.hpp>
 #include <life/lifefem/DOFInterface3Dto2D.hpp>
-#include <life/lifefem/bcHandler.hpp>
-#include <life/lifefem/bcFunction.hpp>
+#include <life/lifefem/BCHandler.hpp>
+#include <life/lifefem/BCFunction.hpp>
 #include <life/lifefem/bdf_template.hpp>
 #include <life/lifefem/FESpace.hpp>
 

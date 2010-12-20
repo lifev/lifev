@@ -769,27 +769,27 @@ UInt findInternalEdges( const MeshType & mesh,
 */
 //! @defgroup marker_handlers Used to manage missing handlers
 
-/*! Sets the marker flag of a GeoElement of dimension greater than one
+/*! Sets the marker flag of a MeshElementMarked of dimension greater than one
 
     @ingroup marker_handlers
 
-    It gets the stronger marker of the GeoElement points. The marker
+    It gets the stronger marker of the MeshElementMarked points. The marker
     hierarchy is defined in the markers.hpp file. It returns the new
-    flag for the GeoElement. If any of the vertices has an unset marker
-    the result is an unset flag for the GeoElement.
+    flag for the MeshElementMarked. If any of the vertices has an unset marker
+    the result is an unset flag for the MeshElementMarked.
 
     @sa markers.hpp
     @warning It overrides the original marker flag.
     @return the new flag for geoElement
 */
-template <typename GeoElementType>
-entityFlag_Type inheritPointsStrongerMarker( GeoElementType & geoElement )
+template <typename MeshElementMarkedType>
+entityFlag_Type inheritPointsStrongerMarker( MeshElementMarkedType & geoElement )
 {
-    ASSERT_PRE( GeoElementType::S_nDimensions > 0,
-                "A GeoElement with ndim<1 cannot inherit marker flags" );
+    ASSERT_PRE( MeshElementMarkedType::S_nDimensions > 0,
+                "A MeshElementMarked with ndim<1 cannot inherit marker flags" );
 
     geoElement.setMarker( geoElement.point( 1 ).marker() );
-    for ( ID jPointId = 2; jPointId <= GeoElementType::S_numVertices; ++jPointId )
+    for ( ID jPointId = 2; jPointId <= MeshElementMarkedType::S_numVertices; ++jPointId )
         geoElement.setStrongerMarker( geoElement.point( jPointId ).marker() );
     return geoElement.marker();
 
@@ -798,25 +798,25 @@ entityFlag_Type inheritPointsStrongerMarker( GeoElementType & geoElement )
 
 /*! @ingroup marker_handlers
 
-//! @brief Sets the marker flag of a GeoElement of dimension greater one
+//! @brief Sets the marker flag of a MeshElementMarked of dimension greater one
 
-    It gets the weaker marker of the GeoElement points. The marker
+    It gets the weaker marker of the MeshElementMarked points. The marker
     hierarchy is defined in the markers.hpp file. It returns the new
-    flag for the GeoElement. If any of the vertices has an unset marker
-    the result is an unset flag for the GeoElement.
+    flag for the MeshElementMarked. If any of the vertices has an unset marker
+    the result is an unset flag for the MeshElementMarked.
 
     @sa markers.hpp
     @warning It overrides the original marker flag.
     @return the new flag for geoElement
 */
-template <typename GeoElementType>
-entityFlag_Type inheritPointsWeakerMarker( GeoElementType & geoElement )
+template <typename MeshElementMarkedType>
+entityFlag_Type inheritPointsWeakerMarker( MeshElementMarkedType & geoElement )
 {
-    ASSERT_PRE( GeoElementType::S_nDimensions > 0,
-                "A GeoElement with ndim<1 cannot inherit marker flags" );
+    ASSERT_PRE( MeshElementMarkedType::S_nDimensions > 0,
+                "A MeshElementMarked with ndim<1 cannot inherit marker flags" );
 
     geoElement.setMarker( geoElement.point( 1 ).marker() );
-    for ( ID jPointId = 2; jPointId <= GeoElementType::S_numVertices; ++jPointId )
+    for ( ID jPointId = 2; jPointId <= MeshElementMarkedType::S_numVertices; ++jPointId )
         geoElement.setWeakerMarker( geoElement.point( jPointId ).marker() );
     return geoElement.marker();
 

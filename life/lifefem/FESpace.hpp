@@ -53,7 +53,7 @@
 
 #include <life/lifecore/life.hpp>
 
-#include <life/lifefem/bcHandler.hpp>
+#include <life/lifefem/BCHandler.hpp>
 #include <life/lifefem/CurrentFE.hpp>
 #include <life/lifefem/CurrentBoundaryFE.hpp>
 #include <life/lifefem/DOF.hpp>
@@ -762,9 +762,6 @@ FESpace<MeshType, MapType>::interpolateBC( BCHandler& BCh,
         {
             // Number of components involved in this boundary condition
             UInt nComp = BCh[ibc].numberOfComponents();
-
-            //
-
 
             for ( ID i = 1; i <= BCh[ibc].list_size(); ++i )
             {

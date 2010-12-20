@@ -39,7 +39,7 @@
 #define BCMANAGE_H 1
 
 #include <life/lifefem/FESpace.hpp>
-#include <life/lifefem/BCNormalManager.hpp>
+#include <life/lifefem/BCManageNormal.hpp>
 
 
 namespace LifeV

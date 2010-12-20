@@ -38,7 +38,7 @@
 #ifndef BCMANAGENORMAL_H
 #define BCMANAGENORMAL_H
 
-#include <life/lifefem/bcHandler.hpp>
+#include <life/lifefem/BCHandler.hpp>
 
 namespace LifeV
 {

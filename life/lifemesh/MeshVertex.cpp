@@ -36,7 +36,7 @@
 
 */
 
-#include <life/lifemesh/geo0D.hpp>
+#include <life/lifemesh/MeshVertex.hpp>
 #include <life/lifecore/life.hpp>
 
 namespace LifeV
@@ -46,14 +46,14 @@ namespace LifeV
 // ==========================================
 // Constructor & Destructor
 // ==========================================
-Geo0D::Geo0D() :
+MeshVertex::MeshVertex() :
 		MeshEntityWithBoundary( 0 ),
         M_coordinates()
 {
     M_coordinates.assign( 0 );
 }
 
-Geo0D::Geo0D( ID identity, bool boundary )
+MeshVertex::MeshVertex( ID identity, bool boundary )
         :
         MeshEntityWithBoundary( identity, boundary ),
         M_coordinates()
@@ -61,7 +61,7 @@ Geo0D::Geo0D( ID identity, bool boundary )
     M_coordinates.assign( 0 );
 }
 
-Geo0D::Geo0D( ID identity, Real x, Real y, Real z, bool boundary )
+MeshVertex::MeshVertex( ID identity, Real x, Real y, Real z, bool boundary )
         :
         MeshEntityWithBoundary( identity, boundary ),
         M_coordinates()
@@ -71,7 +71,7 @@ Geo0D::Geo0D( ID identity, Real x, Real y, Real z, bool boundary )
 	M_coordinates[ 2 ] = z;
 }
 
-Geo0D::Geo0D( Geo0D const & Element )
+MeshVertex::MeshVertex( MeshVertex const & Element )
         :
         MeshEntityWithBoundary( Element.id(), Element.boundary() ),
         M_coordinates( Element.M_coordinates )
@@ -82,8 +82,8 @@ Geo0D::Geo0D( Geo0D const & Element )
 // ==========================================
 // Operators
 // ==========================================
-Geo0D &
-Geo0D::operator=( Geo0D const & Element )
+MeshVertex &
+MeshVertex::operator=( MeshVertex const & Element )
 {
     if (  this == &Element )
         return *this;
@@ -98,10 +98,10 @@ Geo0D::operator=( Geo0D const & Element )
 // Methods
 // ==========================================
 std::ostream &
-Geo0D::showMe( bool verbose, std::ostream & out ) const
+MeshVertex::showMe( bool verbose, std::ostream & out ) const
 {
     out.setf( std::ios::scientific, std::ios::floatfield );
-    out << "----- Geo0D object -----" << std::endl;
+    out << "----- MeshVertex object -----" << std::endl;
     if ( verbose )
     {
         unsigned i;
@@ -116,7 +116,7 @@ Geo0D::showMe( bool verbose, std::ostream & out ) const
     out << " ID       = " << id()      << std::endl;
     out << " local ID = " << localId() << std::endl;
 
-    out << "----- END OF Geo0D data ---" << std::endl << std::endl;
+    out << "----- END OF MeshVertex data ---" << std::endl << std::endl;
     return out;
 }
 

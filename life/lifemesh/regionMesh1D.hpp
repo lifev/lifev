@@ -43,7 +43,7 @@ along with LifeV. If not, see <http://www.gnu.org/licenses/>.
 #include <life/lifecore/LifeDebug.hpp>
 #include <life/lifecore/Switch.hpp>
 
-#include <life/lifemesh/geoElement.hpp>
+#include <life/lifemesh/MeshElementMarked.hpp>
 #include <life/lifemesh/bareItems.hpp>
 #include <life/lifemesh/basisElSh.hpp>
 #include <life/lifearray/SimpleVect.hpp>
@@ -116,13 +116,13 @@ public:
      */
 
     //! Volume Element (1D)
-    typedef GeoElement1D<EdgeShape, MC>  VolumeType;
+    typedef MeshElementMarked1D<EdgeShape, MC>  VolumeType;
     //! Face Element (1D)
-    typedef GeoElement1D<EdgeShape, MC>  FaceType;
+    typedef MeshElementMarked1D<EdgeShape, MC>  FaceType;
     //! Edge Element (1D)
-    typedef GeoElement1D<EdgeShape, MC>  EdgeType;
+    typedef MeshElementMarked1D<EdgeShape, MC>  EdgeType;
     //! Point Element (0D)
-    typedef GeoElement0D<MC>             point_Type;
+    typedef MeshElementMarked0D<MC>             point_Type;
 
     /** @} */ // End of group Geometric Element Types
 
@@ -157,9 +157,9 @@ public:
     typedef typename GEOSHAPE::GeoBShape BElementShape;
 
     //! Element Geometric Type
-    typedef GeoElement1D<GEOSHAPE, MC>   ElementType;
+    typedef MeshElementMarked1D<GEOSHAPE, MC>   ElementType;
     //! Boundary Element Geometric Type
-    typedef GeoElement0D<MC>             BElementType;
+    typedef MeshElementMarked0D<MC>             BElementType;
 
     //! Element Geometric Shape Container Type
     typedef SimpleVect<EdgeType>         Elements;
@@ -760,7 +760,7 @@ public:
      *  - <strong>Maximum number of stored points</strong>: The number of points that may
      *   stored before the container is resized.\n
      *   <strong>Very Important</strong>: This parameter has to be set <strong>BEFORE</strong>
-     *   inserting points in the container. Since GeoElements will contain POINTERS
+     *   inserting points in the container. Since MeshElementMarkeds will contain POINTERS
      *   into the container!\n
      *   This is a debatable point!
      *

@@ -61,7 +61,7 @@
  */
 
 #include <life/lifecore/life.hpp>
-#include <life/lifefem/bcCond.hpp>
+#include <life/lifefem/BCBase.hpp>
 
 namespace LifeV
 {
@@ -74,7 +74,7 @@ BCBase::BCBase()
 {
 }
 
-BCBase::BCBase( const std::string& name, const bcFlag_Type& flag,
+BCBase::BCBase( const bcName_Type& name, const bcFlag_Type& flag,
                 const bcType_Type& type, const bcMode_Type& mode,
                 BCFunctionBase& bcFunction, const bcComponentsVec_Type& components )
         :
@@ -412,7 +412,7 @@ BCBase::BCBase( const BCBase& bcBase )
         M_isStored_BcVector( bcBase.M_isStored_BcVector ),
         M_isStored_BcFunctionVectorDependent(bcBase.M_isStored_BcFunctionVectorDependent),
         M_idSet( ),
-        M_idList( ),
+        M_idVector( ),
         M_offset   ( bcBase.M_offset ),
         M_finalized( bcBase.M_finalized )
 {
@@ -420,7 +420,7 @@ BCBase::BCBase( const BCBase& bcBase )
     // an auxiliary container used at the moment of the boundary update (see BCHandler::bcUpdate)
 
     // The list of ID's must be empty
-    if ( !M_idList.empty() || !bcBase.M_idList.empty() )
+    if ( !M_idVector.empty() || !bcBase.M_idVector.empty() )
     {
         ERROR_MSG( "BCBase::BCBase : The BC copy constructor does not work with list of identifiers which are not empty" );
     }
@@ -518,7 +518,7 @@ BCBase::addIdentifier( IdentifierBase* identifierToAddPtr )
 UInt
 BCBase::list_size() const
 {
-    return M_idList.size();
+    return M_idVector.size();
 }
 
 std::ostream&
@@ -535,14 +535,14 @@ BCBase::showMe( bool verbose, std::ostream & out ) const
         out << M_components[ i ] << " ";
     out << std::endl;
     out << "Offset               : " << M_offset << std::endl;
-    out << "Number of stored ID's: " << M_idList.size() << std::endl;
+    out << "Number of stored ID's: " << M_idVector.size() << std::endl;
 
     if ( verbose && M_finalized )
     {
         unsigned int count( 0 ), lines( 10 );
         out << "IDs in list";
-        for ( std::vector<boost::shared_ptr<IdentifierBase> >::const_iterator i = M_idList.begin();
-                i != M_idList.end(); i++ )
+        for ( std::vector<boost::shared_ptr<IdentifierBase> >::const_iterator i = M_idVector.begin();
+                i != M_idVector.end(); i++ )
         {
             if ( count++ % lines == 0 )
             {
@@ -590,7 +590,7 @@ BCBase & BCBase::operator=( const BCBase& BCb )
     // the boundary update (see BCHandler::bcUpdate)
 
     // The list of ID's must be empty
-    if ( !M_idList.empty() || !BCb.M_idList.empty() )
+    if ( !M_idVector.empty() || !BCb.M_idVector.empty() )
     {
         ERROR_MSG( "BCBase::operator= : The BC assigment operator does not work with lists of identifiers which are not empty" );
     }
@@ -602,8 +602,8 @@ const IdentifierBase*
 BCBase::operator[] ( const ID& i ) const
 {
     ASSERT_PRE( M_finalized, "BC List should be finalized before being accessed" );
-    ASSERT_BD( i < M_idList.size() );
-    return M_idList[ i ].get();
+    ASSERT_BD( i < M_idVector.size() );
+    return M_idVector[ i ].get();
 }
 
 const IdentifierBase*
@@ -754,13 +754,13 @@ bool BCBase::isUDep() const
 // ===================================================
 
 void
-BCBase::finalize()
+BCBase::copyIdSetIntoIdVector()
 {
     if ( ! M_idSet.empty() )
     {
-        M_idList.clear();
-        M_idList.reserve( M_idSet.size() );
-        std::copy( M_idSet.begin(), M_idSet.end(), std::inserter( M_idList, M_idList.end() ) );
+        M_idVector.clear();
+        M_idVector.reserve( M_idSet.size() );
+        std::copy( M_idSet.begin(), M_idSet.end(), std::inserter( M_idVector, M_idVector.end() ) );
         M_idSet.clear();
     }
     M_finalized = true;

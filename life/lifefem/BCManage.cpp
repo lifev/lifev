@@ -34,7 +34,7 @@
     @date 11-04-2009
  */
 
-#include <life/lifefem/bcManage.hpp>
+#include <life/lifefem/BCManage.hpp>
 
 namespace LifeV
 {

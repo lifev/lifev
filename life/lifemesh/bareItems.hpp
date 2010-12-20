@@ -52,7 +52,7 @@
 	a P2 Tetra) in order to build the global numbering of the Dof and the
 	association between local (element-wise) and global numbering, we need to
 	identify edges and give them a unique ID. Yet, we may not want to
-	build a full Edge (GeoElement2D) object: we only need
+	build a full Edge (MeshElementMarked2D) object: we only need
 	the ID of the edge and a way of computing the ID's of the degrees of
 	freedom on the edge, all the remaining data of a full Edge object is not
 	necessarily needed.

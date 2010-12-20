@@ -51,7 +51,7 @@
 #include <life/lifefilters/ExporterEnsight.hpp>
 #include <life/lifefilters/ExporterHDF5.hpp>
 
-#include <life/lifefem/bcManage.hpp>
+#include <life/lifefem/BCManage.hpp>
 
 #include <life/lifemesh/MeshPartitioner.hpp>
 #include <life/lifemesh/structuredMesh3D.hpp>
