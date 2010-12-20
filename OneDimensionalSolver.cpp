@@ -58,7 +58,7 @@ std::map< std::string, OneDimensional::sourceTerm_Type >  OneDimensional::source
 // ===================================================
 // Constructors & Destructor
 // ===================================================
-OneDimensionalModel_Solver::OneDimensionalModel_Solver():
+OneDimensionalSolver::OneDimensionalSolver():
     M_physics               (),
     M_flux                  (),
     M_source                (),
@@ -97,7 +97,7 @@ OneDimensionalModel_Solver::OneDimensionalModel_Solver():
 // Methods
 // ===================================================
 void
-OneDimensionalModel_Solver::buildConstantMatrices()
+OneDimensionalSolver::buildConstantMatrices()
 {
     std::fill( M_diffFlux.begin(), M_diffFlux.end(), ublas::zero_vector<Real>( M_FESpace -> dim()) );
     std::fill( M_diffSrc.begin(),  M_diffSrc.end(),  ublas::zero_vector<Real>( M_FESpace -> dim()) );
@@ -147,7 +147,7 @@ OneDimensionalModel_Solver::buildConstantMatrices()
 }
 
 void
-OneDimensionalModel_Solver::setupSolution( solution_Type& solution )
+OneDimensionalSolver::setupSolution( solution_Type& solution )
 {
     solution["A"].reset( new vector_Type( M_FESpace -> map() ) );
     solution["A/A0-1"].reset( new vector_Type( M_FESpace -> map() ) );
@@ -181,7 +181,7 @@ OneDimensionalModel_Solver::setupSolution( solution_Type& solution )
 }
 
 void
-OneDimensionalModel_Solver::initialize( solution_Type& solution )
+OneDimensionalSolver::initialize( solution_Type& solution )
 {
     for ( UInt inode(M_leftNodeId); inode <= M_rightNodeId ; ++inode )
     {
@@ -200,7 +200,7 @@ OneDimensionalModel_Solver::initialize( solution_Type& solution )
 }
 
 void
-OneDimensionalModel_Solver::computeW1W2( solution_Type& solution )
+OneDimensionalSolver::computeW1W2( solution_Type& solution )
 {
     for (UInt ielem = 0; ielem < M_FESpace -> dim() ; ++ielem )
     {
@@ -210,7 +210,7 @@ OneDimensionalModel_Solver::computeW1W2( solution_Type& solution )
 }
 
 void
-OneDimensionalModel_Solver::computePressure( solution_Type& solution, const Real& timeStep )
+OneDimensionalSolver::computePressure( solution_Type& solution, const Real& timeStep )
 {
     for ( UInt i(0); i < M_FESpace -> dim() ; ++i )
     {
@@ -229,21 +229,21 @@ OneDimensionalModel_Solver::computePressure( solution_Type& solution, const Real
 }
 
 void
-OneDimensionalModel_Solver::computeAreaRatio( solution_Type& solution )
+OneDimensionalSolver::computeAreaRatio( solution_Type& solution )
 {
     for ( UInt inode(M_leftNodeId); inode <= M_rightNodeId ; ++inode )
         ( *solution["A/A0-1"] ) [inode] = ( *solution["A"] ) [inode] / M_physics -> data() -> area0(inode - 1) - 1;
 }
 
 void
-OneDimensionalModel_Solver::computeArea( solution_Type& solution )
+OneDimensionalSolver::computeArea( solution_Type& solution )
 {
     for ( UInt inode(M_leftNodeId); inode <= M_rightNodeId ; ++inode )
         ( *solution["A"] ) [inode] = ( (*solution["A/A0-1"] ) [inode] + 1 ) * M_physics -> data() -> area0(inode - 1);
 }
 
 void
-OneDimensionalModel_Solver::updateRHS( const solution_Type& solution, const Real& timeStep )
+OneDimensionalSolver::updateRHS( const solution_Type& solution, const Real& timeStep )
 {
     updateFluxDer( solution );   // Update the vector containing the values of the flux at the nodes and its jacobian
     updateSourceDer( solution ); // Update the vector containing the values of the source term at the nodes and its jacobian
@@ -293,7 +293,7 @@ OneDimensionalModel_Solver::updateRHS( const solution_Type& solution, const Real
 }
 
 void
-OneDimensionalModel_Solver::iterate( OneDimensionalModel_BCHandler& bcH, solution_Type& solution, const Real& time, const Real& timeStep )
+OneDimensionalSolver::iterate( OneDimensionalBCHandler& bcH, solution_Type& solution, const Real& time, const Real& timeStep )
 {
 
 #ifdef HAVE_LIFEV_DEBUG
@@ -354,7 +354,7 @@ OneDimensionalModel_Solver::iterate( OneDimensionalModel_BCHandler& bcH, solutio
 }
 
 Real
-OneDimensionalModel_Solver::computeCFL( const solution_Type& solution, const Real& timeStep ) const
+OneDimensionalSolver::computeCFL( const solution_Type& solution, const Real& timeStep ) const
 {
     Real lambdaMax = 0.;
 
@@ -376,7 +376,7 @@ OneDimensionalModel_Solver::computeCFL( const solution_Type& solution, const Rea
 }
 
 void
-OneDimensionalModel_Solver::resetOutput( const solution_Type& solution )
+OneDimensionalSolver::resetOutput( const solution_Type& solution )
 {
     std::ofstream outfile;
     for ( solutionConstIterator_Type i = solution.begin(); i != solution.end(); ++i )
@@ -388,7 +388,7 @@ OneDimensionalModel_Solver::resetOutput( const solution_Type& solution )
 }
 
 void
-OneDimensionalModel_Solver::postProcess( const solution_Type& solution )
+OneDimensionalSolver::postProcess( const solution_Type& solution )
 {
     std::ofstream outfile;
     for ( solutionConstIterator_Type i = solution.begin(); i != solution.end(); ++i )
@@ -408,7 +408,7 @@ OneDimensionalModel_Solver::postProcess( const solution_Type& solution )
 // Set Methods
 // ===================================================
 void
-OneDimensionalModel_Solver::setProblem( const physicsPtr_Type physics,
+OneDimensionalSolver::setProblem( const physicsPtr_Type physics,
                                         const fluxPtr_Type    flux,
                                         const sourcePtr_Type  source )
 {
@@ -418,14 +418,14 @@ OneDimensionalModel_Solver::setProblem( const physicsPtr_Type physics,
 }
 
 void
-OneDimensionalModel_Solver::setCommunicator( const commPtr_Type comm )
+OneDimensionalSolver::setCommunicator( const commPtr_Type comm )
 {
     M_comm = comm;
     M_displayer.setCommunicator( comm );
 }
 
 void
-OneDimensionalModel_Solver::setFESpace( const feSpacePtr_Type FESpace )
+OneDimensionalSolver::setFESpace( const feSpacePtr_Type FESpace )
 {
     M_FESpace = FESpace;
 
@@ -452,20 +452,20 @@ OneDimensionalModel_Solver::setFESpace( const feSpacePtr_Type FESpace )
 }
 
 void
-OneDimensionalModel_Solver::setLinearSolver( const linearSolverPtr_Type linearSolver )
+OneDimensionalSolver::setLinearSolver( const linearSolverPtr_Type linearSolver )
 {
     M_linearSolver = linearSolver;
 }
 
 void
-OneDimensionalModel_Solver::setBCValuesLeft( const Real& bcL1, const Real& bcL2 )
+OneDimensionalSolver::setBCValuesLeft( const Real& bcL1, const Real& bcL2 )
 {
     M_bcDirLeft[0] = bcL1;
     M_bcDirLeft[1] = bcL2;
 }
 
 void
-OneDimensionalModel_Solver::setBCValuesRight( const Real& bcR1, const Real& bcR2 )
+OneDimensionalSolver::setBCValuesRight( const Real& bcR1, const Real& bcR2 )
 {
     M_bcDirRight[0] = bcR1;
     M_bcDirRight[1] = bcR2;
@@ -474,8 +474,8 @@ OneDimensionalModel_Solver::setBCValuesRight( const Real& bcR1, const Real& bcR2
 // ===================================================
 // Get Methods
 // ===================================================
-OneDimensionalModel_Solver::container2D_Type
-OneDimensionalModel_Solver::bcValuesLeft( const solution_Type& solution ) const
+OneDimensionalSolver::container2D_Type
+OneDimensionalSolver::bcValuesLeft( const solution_Type& solution ) const
 {
     container2D_Type temp;
 
@@ -485,8 +485,8 @@ OneDimensionalModel_Solver::bcValuesLeft( const solution_Type& solution ) const
     return temp;
 }
 
-OneDimensionalModel_Solver::container2D_Type
-OneDimensionalModel_Solver::bcValuesInternalLeft( const solution_Type& solution ) const
+OneDimensionalSolver::container2D_Type
+OneDimensionalSolver::bcValuesInternalLeft( const solution_Type& solution ) const
 {
     container2D_Type temp;
 
@@ -496,8 +496,8 @@ OneDimensionalModel_Solver::bcValuesInternalLeft( const solution_Type& solution 
     return temp;
 }
 
-OneDimensionalModel_Solver::container2D_Type
-OneDimensionalModel_Solver::bcValuesRight( const solution_Type& solution ) const
+OneDimensionalSolver::container2D_Type
+OneDimensionalSolver::bcValuesRight( const solution_Type& solution ) const
 {
     container2D_Type temp;
 
@@ -507,8 +507,8 @@ OneDimensionalModel_Solver::bcValuesRight( const solution_Type& solution ) const
     return temp;
 }
 
-OneDimensionalModel_Solver::container2D_Type
-OneDimensionalModel_Solver::bcValuesInternalRight( const solution_Type& solution ) const
+OneDimensionalSolver::container2D_Type
+OneDimensionalSolver::bcValuesInternalRight( const solution_Type& solution ) const
 {
     container2D_Type temp;
 
@@ -519,7 +519,7 @@ OneDimensionalModel_Solver::bcValuesInternalRight( const solution_Type& solution
 }
 
 Real
-OneDimensionalModel_Solver::boundaryValue( const solution_Type& solution, const bcType_Type& bcType, const bcSide_Type& bcSide ) const
+OneDimensionalSolver::boundaryValue( const solution_Type& solution, const bcType_Type& bcType, const bcSide_Type& bcSide ) const
 {
     UInt boundaryDof;
 
@@ -561,7 +561,7 @@ OneDimensionalModel_Solver::boundaryValue( const solution_Type& solution, const 
 }
 
 void
-OneDimensionalModel_Solver::boundaryEigenValuesEigenVectors( const bcSide_Type& bcSide,
+OneDimensionalSolver::boundaryEigenValuesEigenVectors( const bcSide_Type& bcSide,
                                                              const solution_Type& solution,
                                                              container2D_Type& eigenvalues,
                                                              container2D_Type& leftEigenvector1,
@@ -596,7 +596,7 @@ OneDimensionalModel_Solver::boundaryEigenValuesEigenVectors( const bcSide_Type& 
 // Private Methods
 // ===================================================
 void
-OneDimensionalModel_Solver::updateFlux( const solution_Type& solution )
+OneDimensionalSolver::updateFlux( const solution_Type& solution )
 {
     Real Aii, Qii;
 
@@ -610,7 +610,7 @@ OneDimensionalModel_Solver::updateFlux( const solution_Type& solution )
 }
 
 void
-OneDimensionalModel_Solver::updateFluxDer( const solution_Type& solution )
+OneDimensionalSolver::updateFluxDer( const solution_Type& solution )
 {
     // first update the Flux vector
     updateFlux( solution );
@@ -647,7 +647,7 @@ OneDimensionalModel_Solver::updateFluxDer( const solution_Type& solution )
 }
 
 void
-OneDimensionalModel_Solver::updateSource( const solution_Type& solution )
+OneDimensionalSolver::updateSource( const solution_Type& solution )
 {
     Real Aii, Qii;
 
@@ -661,7 +661,7 @@ OneDimensionalModel_Solver::updateSource( const solution_Type& solution )
 }
 
 void
-OneDimensionalModel_Solver::updateSourceDer( const solution_Type& solution )
+OneDimensionalSolver::updateSourceDer( const solution_Type& solution )
 {
     // first update the Source vector
     updateSource( solution );
@@ -696,7 +696,7 @@ OneDimensionalModel_Solver::updateSourceDer( const solution_Type& solution )
 }
 
 void
-OneDimensionalModel_Solver::updateMatrices()
+OneDimensionalSolver::updateMatrices()
 {
     // Matrices initialization
     for ( UInt i = 0; i < 4; ++i )
@@ -731,7 +731,7 @@ OneDimensionalModel_Solver::updateMatrices()
 }
 
 void
-OneDimensionalModel_Solver::updateMatrixCoefficients( const UInt& ii, const UInt& jj , const UInt& iedge )
+OneDimensionalSolver::updateMatrixCoefficients( const UInt& ii, const UInt& jj , const UInt& iedge )
 {
     Real dFluxdUelem(0), dSrcdUelem(0);
 
@@ -747,7 +747,7 @@ OneDimensionalModel_Solver::updateMatrixCoefficients( const UInt& ii, const UInt
 }
 
 void
-OneDimensionalModel_Solver::updateElemMatrices()
+OneDimensionalSolver::updateElemMatrices()
 {
     // set the elementary matrices to 0.
     M_elmatMass -> zero();
@@ -796,7 +796,7 @@ OneDimensionalModel_Solver::updateElemMatrices()
 }
 
 void
-OneDimensionalModel_Solver::matrixAssemble( const UInt& ii, const UInt& jj )
+OneDimensionalSolver::matrixAssemble( const UInt& ii, const UInt& jj )
 {
     ASSERT_BD( 0 < ii && ii < 3 && 0 < jj && jj < 3 );
 
@@ -818,7 +818,7 @@ OneDimensionalModel_Solver::matrixAssemble( const UInt& ii, const UInt& jj )
 }
 
 void
-OneDimensionalModel_Solver::updateBCDirichletVector()
+OneDimensionalSolver::updateBCDirichletVector()
 {
 #ifdef HAVE_LIFEV_DEBUG
     Debug( 6310 ) << "[updateBCDirichletVector] \t firstDof = " << M_leftNodeId
@@ -841,14 +841,14 @@ OneDimensionalModel_Solver::updateBCDirichletVector()
 }
 
 void
-OneDimensionalModel_Solver::updateBCDirichletMatrix( matrix_Type& mat )
+OneDimensionalSolver::updateBCDirichletMatrix( matrix_Type& mat )
 {
     mat.diagonalize(M_leftNodeId - 1, 1, 0);
     mat.diagonalize(M_rightNodeId - 1, 1, 0);
 }
 
-OneDimensionalModel_Solver::vector_Type
-OneDimensionalModel_Solver::inertialFluxCorrection( const vector_Type& flux )
+OneDimensionalSolver::vector_Type
+OneDimensionalSolver::inertialFluxCorrection( const vector_Type& flux )
 {
     matrix_Type matrixLHS(M_FESpace -> map());
     matrix_Type stiffRHS (M_FESpace -> map());
@@ -941,8 +941,8 @@ OneDimensionalModel_Solver::inertialFluxCorrection( const vector_Type& flux )
     return sol;
 }
 
-OneDimensionalModel_Solver::vector_Type
-OneDimensionalModel_Solver::viscoelasticFluxCorrection( const vector_Type& flux, const Real& timeStep )
+OneDimensionalSolver::vector_Type
+OneDimensionalSolver::viscoelasticFluxCorrection( const vector_Type& flux, const Real& timeStep )
 {
     matrix_Type matrixLHS(M_FESpace -> map());
     matrix_Type stiffRHS (M_FESpace -> map());
@@ -1047,8 +1047,8 @@ OneDimensionalModel_Solver::viscoelasticFluxCorrection( const vector_Type& flux,
     return sol;
 }
 
-OneDimensionalModel_Solver::vector_Type
-OneDimensionalModel_Solver::longitudinalFluxCorrection()
+OneDimensionalSolver::vector_Type
+OneDimensionalSolver::longitudinalFluxCorrection()
 {
     matrix_Type massLHS(M_FESpace -> map());
     matrix_Type massRHS(M_FESpace -> map());
@@ -1184,7 +1184,7 @@ OneDimensionalModel_Solver::longitudinalFluxCorrection()
 /*
 template< class Params, class Flux, class Source >
 ScalVec
-OneDimensionalModel_Solver::_compute_d2Q_dx2( const ScalVec& flux )
+OneDimensionalSolver::_compute_d2Q_dx2( const ScalVec& flux )
 {
     matrix_Type _massLHS (M_FESpace -> dim());
     matrix_Type _stiffRHS(M_FESpace -> dim());

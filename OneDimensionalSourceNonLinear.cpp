@@ -47,7 +47,7 @@ namespace LifeV
 // Methods
 // ===================================================
 Real
-OneDimensionalModel_Source_NonLinear::source( const Real& A, const Real& Q, const ID& ii, const UInt& i ) const
+OneDimensionalSourceNonLinear::source( const Real& A, const Real& Q, const ID& ii, const UInt& i ) const
 {
     if ( ii == 1 ) // B1
     {
@@ -80,7 +80,7 @@ OneDimensionalModel_Source_NonLinear::source( const Real& A, const Real& Q, cons
 }
 
 Real
-OneDimensionalModel_Source_NonLinear::dSdU( const Real& A, const Real& Q, const ID& ii, const ID& jj, const UInt& i) const
+OneDimensionalSourceNonLinear::dSdU( const Real& A, const Real& Q, const ID& ii, const ID& jj, const UInt& i) const
 {
     if ( ii == 1 ) // B1
     {
@@ -118,7 +118,7 @@ OneDimensionalModel_Source_NonLinear::dSdU( const Real& A, const Real& Q, const 
 
 // Second derivative tensor d2Bi/(dxj dxk)
 //Real
-//OneDimensionalModel_Source_NonLinear::diff2( const Real& A, const Real& Q,
+//OneDimensionalSourceNonLinear::diff2( const Real& A, const Real& Q,
 //                                             const ID& ii,   const ID& jj, const ID& kk,
 //                                             const UInt& i ) const
 //{
@@ -192,8 +192,8 @@ OneDimensionalModel_Source_NonLinear::dSdU( const Real& A, const Real& Q, const 
 //}
 
 Real
-OneDimensionalModel_Source_NonLinear::interpolatedQuasiLinearSource( const Real& A, const Real& Q,
-                                                                     const ID& ii, const container2D_Type& bcNodes, const Real& cfl ) const
+OneDimensionalSourceNonLinear::interpolatedQuasiLinearSource( const Real& A, const Real& Q,
+                                                              const ID& ii, const container2D_Type& bcNodes, const Real& cfl ) const
 {
     if ( ii == 1 ) // QLS1
     {

@@ -48,7 +48,7 @@ namespace LifeV
 // ===================================================
 // Constructors
 // ===================================================
-OneDimensionalModel_Data::OneDimensionalModel_Data():
+OneDimensionalData::OneDimensionalData():
     M_physicsType               (),
     M_fluxType                  (),
     M_sourceType                (),
@@ -113,7 +113,7 @@ OneDimensionalModel_Data::OneDimensionalModel_Data():
 // Methods
 // ===================================================
 void
-OneDimensionalModel_Data::setup( const GetPot& dataFile, const std::string& section )
+OneDimensionalData::setup( const GetPot& dataFile, const std::string& section )
 {
     // Model Type
     M_physicsType = OneDimensional::physicsMap[ dataFile( ( section + "/Model/PhysicsType" ).data(), "OneD_1DLinearPhysics" ) ];
@@ -315,7 +315,7 @@ OneDimensionalModel_Data::setup( const GetPot& dataFile, const std::string& sect
 }
 
 void
-OneDimensionalModel_Data::oldStyleSetup( const GetPot& dataFile, const std::string& section )
+OneDimensionalData::oldStyleSetup( const GetPot& dataFile, const std::string& section )
 {
     // Model Type
     M_physicsType = OneDimensional::physicsMap[ dataFile( ( section + "/Model/PhysicsType" ).data(), "OneD_1DLinearPhysics" ) ];
@@ -443,7 +443,7 @@ OneDimensionalModel_Data::oldStyleSetup( const GetPot& dataFile, const std::stri
 }
 
 void
-OneDimensionalModel_Data::updateCoefficients()
+OneDimensionalData::updateCoefficients()
 {
     if ( M_computeCoefficients )
     {
@@ -483,7 +483,7 @@ OneDimensionalModel_Data::updateCoefficients()
 }
 
 void
-OneDimensionalModel_Data::initLinearParam( const GetPot& /*dataFile*/ )  // CHECK THIS!!!
+OneDimensionalData::initLinearParam( const GetPot& /*dataFile*/ )  // CHECK THIS!!!
 {
     /*
       The linearization of Euler model yields
@@ -521,7 +521,7 @@ OneDimensionalModel_Data::initLinearParam( const GetPot& /*dataFile*/ )  // CHEC
 }
 
 void
-OneDimensionalModel_Data::showMe( std::ostream& output ) const
+OneDimensionalData::showMe( std::ostream& output ) const
 {
     // Model
     //output << std::scientific << std::setprecision(15);
@@ -610,7 +610,7 @@ OneDimensionalModel_Data::showMe( std::ostream& output ) const
 // Get Methods - Physical Parameters
 // ===================================================
 const Real&
-OneDimensionalModel_Data::robertsonCorrection() const
+OneDimensionalData::robertsonCorrection() const
 {
     if ( M_robertsonCorrection != 1. )
         std::cout << "!!! WARNING: Robertson corretion has not been checked in this version of the code !!!" << std::endl;
@@ -620,7 +620,7 @@ OneDimensionalModel_Data::robertsonCorrection() const
 // Private methods
 // ===================================================
 void
-OneDimensionalModel_Data::linearInterpolation( scalarVector_Type& vector,
+OneDimensionalData::linearInterpolation( scalarVector_Type& vector,
                                                const GetPot& dataFile,
                                                const std::string& quantity,
                                                const Real& defaultValue,
@@ -638,7 +638,7 @@ OneDimensionalModel_Data::linearInterpolation( scalarVector_Type& vector,
 }
 
 void
-OneDimensionalModel_Data::computeDerivatives()
+OneDimensionalData::computeDerivatives()
 {
     Real nodes = M_mesh->numPoints();
 

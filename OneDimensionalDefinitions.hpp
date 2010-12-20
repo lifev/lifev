@@ -35,8 +35,8 @@
  *  @mantainer Cristiano Malossi <cristiano.malossi@epfl.ch>
  */
 
-#ifndef ONEDIMENSIONALMODEL_DEFINITIONS_H
-#define ONEDIMENSIONALMODEL_DEFINITIONS_H
+#ifndef OneDimensionalDefinitions_H
+#define OneDimensionalDefinitions_H
 
 #pragma GCC diagnostic ignored "-Wunused-variable"
 #pragma GCC diagnostic ignored "-Wunused-parameter"
@@ -151,4 +151,4 @@ mapsDefinition()
 } // OneDimensional namespace
 } // LifeV namespace
 
-#endif // ONEDIMENSIONALMODEL_DEFINITIONS_H
+#endif // OneDimensionalDefinitions_H

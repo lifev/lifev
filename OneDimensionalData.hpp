@@ -40,8 +40,8 @@
  *  @mantainer  Cristiano Malossi <cristiano.malossi@epfl.ch>
  */
 
-#ifndef ONEDIMENSIONALMODEL_DATA_H
-#define ONEDIMENSIONALMODEL_DATA_H
+#ifndef OneDimensionalData_H
+#define OneDimensionalData_H
 
 // LIFEV
 #include <life/lifecore/GetPot.hpp>
@@ -54,7 +54,7 @@
 namespace LifeV
 {
 
-//! OneDimensionalModel_Data - Class which read and holds all the data for the One Dimensional Model Solver.
+//! OneDimensionalData - Class which read and holds all the data for the One Dimensional Model Solver.
 /*!
  *  @author Vincent Martin, Cristiano Malossi
  *
@@ -110,7 +110,7 @@ namespace LifeV
  *  The flux matrix F = [F11, F12 ; F21 F22] has the eigenvalues
  *  celerity1, celerity2.
  */
-class OneDimensionalModel_Data
+class OneDimensionalData
 {
 public:
 
@@ -140,10 +140,10 @@ public:
     //! @name Constructors & Destructor
     //@{
 
-    explicit OneDimensionalModel_Data();
+    explicit OneDimensionalData();
 
     //! Destructor
-    virtual ~OneDimensionalModel_Data() {}
+    virtual ~OneDimensionalData() {}
 
     //@}
 
@@ -434,4 +434,4 @@ private:
 
 } // OneDimensional namespace
 
-#endif //ONEDIMENSIONALMODEL_DATA_H
+#endif //OneDimensionalData_H

@@ -67,7 +67,7 @@ public:
     //@{
 
     typedef BCFunctionBase                                  bcFunction3D_Type;
-    typedef OneDimensionalModel_BCFunction                  bcFunction1D_Type;
+    typedef OneDimensionalBCFunction                        bcFunction1D_Type;
 
     //@}
 

@@ -49,10 +49,10 @@ namespace LifeV
 // Methods
 // ===================================================
 void
-OneDimensionalModel_Physics::stiffenVesselLeft( const Real& xl,         const Real& xr,
-                                                const Real& factor,     const Real& alpha,
-                                                const Real& delta,      const Real& n,
-                                                const Real& minDeltaX, const UInt& yesAdaptive )
+OneDimensionalPhysics::stiffenVesselLeft( const Real& xl,        const Real& xr,
+                                          const Real& factor,    const Real& alpha,
+                                          const Real& delta,     const Real& n,
+                                          const Real& minDeltaX, const UInt& yesAdaptive )
 {
     /* Stiffen Left boundary with a fifth order polynomial law
        if (alpha-delta/2) <= x < alpha
@@ -182,10 +182,10 @@ OneDimensionalModel_Physics::stiffenVesselLeft( const Real& xl,         const Re
 }
 
 void
-OneDimensionalModel_Physics::stiffenVesselRight( const Real& xl,     const Real& xr,
-                                                 const Real& factor, const Real& alpha,
-                                                 const Real& delta,  const Real& n,
-                                                 const Real& minDeltaX, const UInt& yesAdaptive )
+OneDimensionalPhysics::stiffenVesselRight( const Real& xl,        const Real& xr,
+                                           const Real& factor,    const Real& alpha,
+                                           const Real& delta,     const Real& n,
+                                           const Real& minDeltaX, const UInt& yesAdaptive )
 {
 #ifdef HAVE_LIFEV_DEBUG
     Debug( 6320 ) << "stiffenVesselright ...\n";

@@ -39,8 +39,8 @@
  *  @mantainer Cristiano Malossi <cristiano.malossi@epfl.ch>
  */
 
-#ifndef ONEDIMENSIONALMODEL_SOURCE_LINEAR_H
-#define ONEDIMENSIONALMODEL_SOURCE_LINEAR_H
+#ifndef OneDimensionalSourceLinear_H
+#define OneDimensionalSourceLinear_H
 
 // LIFEV - MATHCARD
 #include <lifemc/lifesolver/OneDimensionalModel_Source.hpp>
@@ -48,14 +48,14 @@
 namespace LifeV
 {
 
-//! OneDimensionalModel_Source_Linear - Class for the linear source function S of the 1D hyperbolic problem.
+//! OneDimensionalSourceLinear - Class for the linear source function S of the 1D hyperbolic problem.
 /*!
  *  @author Vincent Martin, Cristiano Malossi
  *
  *  dU/dt + dF(U)/dz + S(U) = 0
  *  with U=[U1,U2]^T
  */
-class OneDimensionalModel_Source_Linear : public OneDimensionalModel_Source
+class OneDimensionalSourceLinear : public OneDimensionalSource
 {
 
 public:
@@ -63,7 +63,7 @@ public:
     //! @name Type definitions and Enumerators
     //@{
 
-    typedef OneDimensionalModel_Source         super;
+    typedef OneDimensionalSource         super;
 
     //@}
 
@@ -72,12 +72,12 @@ public:
     //@{
 
     //! Constructor
-    explicit OneDimensionalModel_Source_Linear() : super() {}
+    explicit OneDimensionalSourceLinear() : super() {}
 
-    explicit OneDimensionalModel_Source_Linear( const physicsPtr_Type physics ) : super( physics ) {}
+    explicit OneDimensionalSourceLinear( const physicsPtr_Type physics ) : super( physics ) {}
 
     //! Do nothing destructor
-    virtual ~OneDimensionalModel_Source_Linear() {}
+    virtual ~OneDimensionalSourceLinear() {}
 
     //@}
 
@@ -115,7 +115,7 @@ public:
      *  \param indz : is the index position for the parameter
      */
     Real interpolatedQuasiLinearSource( const Real& U1, const Real& U2,
-                                        const ID& ii,    const container2D_Type& bcNodes, const Real& cfl ) const ;
+                                        const ID& ii,   const container2D_Type& bcNodes, const Real& cfl ) const ;
 
     //@}
 private:
@@ -123,18 +123,18 @@ private:
     //! @name Unimplemented Methods
     //@{
 
-    OneDimensionalModel_Source_Linear& operator=( const physicsPtr_Type physics );
+    OneDimensionalSourceLinear& operator=( const physicsPtr_Type physics );
 
     //@}
 
 };
 
 //! Factory create function
-inline OneDimensionalModel_Source* createOneDimensionalSourceLinear()
+inline OneDimensionalSource* createOneDimensionalSourceLinear()
 {
-    return new OneDimensionalModel_Source_Linear();
+    return new OneDimensionalSourceLinear();
 }
 
 }
 
-#endif // ONEDIMENSIONALMODEL_SOURCE_LINEAR_H
+#endif // OneDimensionalSourceLinear_H

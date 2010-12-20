@@ -39,8 +39,8 @@
  *  @mantainer Cristiano Malossi <cristiano.malossi@epfl.ch>
  */
 
-#ifndef ONEDIMENSIONALMODEL_FLUX_NONLINEAR_H
-#define ONEDIMENSIONALMODEL_FLUX_NONLINEAR_H
+#ifndef OneDimensionalFluxNonLinear_H
+#define OneDimensionalFluxNonLinear_H
 
 // LIFEV - MATHCARD
 #include <lifemc/lifesolver/OneDimensionalModel_Flux.hpp>
@@ -48,14 +48,14 @@
 namespace LifeV
 {
 
-//! OneDimensionalModel_Flux_NonLinear - Class containing the non-linear flux function F of the 1D hyperbolic problem.
+//! OneDimensionalFluxNonLinear - Class containing the non-linear flux function F of the 1D hyperbolic problem.
 /*!
  *  @author Vincent Martin, Cristiano Malossi
  *
  *  dU/dt + dF(U)/dz + B(U) = 0
  *  with U=[A,Q]^T
  */
-class OneDimensionalModel_Flux_NonLinear : public OneDimensionalModel_Flux
+class OneDimensionalFluxNonLinear : public OneDimensionalFlux
 {
 
 public:
@@ -63,7 +63,7 @@ public:
     //! @name Type definitions and Enumerators
     //@{
 
-    typedef OneDimensionalModel_Flux           super;
+    typedef OneDimensionalFlux           super;
 
     //@}
 
@@ -72,12 +72,12 @@ public:
     //@{
 
     //! Constructor
-    explicit OneDimensionalModel_Flux_NonLinear() : super() {};
+    explicit OneDimensionalFluxNonLinear() : super() {};
 
-    explicit OneDimensionalModel_Flux_NonLinear( const physicsPtr_Type physics ) : super( physics ) {};
+    explicit OneDimensionalFluxNonLinear( const physicsPtr_Type physics ) : super( physics ) {};
 
     //! Do nothing destructor
-    virtual ~OneDimensionalModel_Flux_NonLinear() {}
+    virtual ~OneDimensionalFluxNonLinear() {}
 
     //@}
 
@@ -102,7 +102,7 @@ public:
      *  diff(1,1) = dF1/dx1    diff(1,2) = dF1/dx2
      *  diff(2,1) = dF2/dx1    diff(2,2) = dF2/dx2
      */
-    Real dFdU( const Real& A, const Real& Q, const ID& ii,   const ID& jj, const UInt& indz = 0 ) const;
+    Real dFdU( const Real& A, const Real& Q, const ID& ii, const ID& jj, const UInt& indz = 0 ) const;
 
     //! Second derivative tensor d2Fi/(dxj dxk)
     /*!
@@ -139,11 +139,11 @@ public:
 };
 
 //! Factory create function
-inline OneDimensionalModel_Flux* createOneDimensionalFluxNonLinear()
+inline OneDimensionalFlux* createOneDimensionalFluxNonLinear()
 {
-    return new OneDimensionalModel_Flux_NonLinear();
+    return new OneDimensionalFluxNonLinear();
 }
 
 }
 
-#endif // ONEDIMENSIONALMODEL_FLUX_NONLINEAR_H
+#endif // OneDimensionalFluxNonLinear_H

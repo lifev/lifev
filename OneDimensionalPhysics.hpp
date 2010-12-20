@@ -40,8 +40,8 @@
  *  @mantainer  Cristiano Malossi <cristiano.malossi@epfl.ch>
  */
 
-#ifndef ONEDIMENSIONALMODEL_PHYSICS_H
-#define ONEDIMENSIONALMODEL_PHYSICS_H
+#ifndef OneDimensionalPhysics_H
+#define OneDimensionalPhysics_H
 
 // LIFEV - MATHCARD
 #include <lifemc/lifesolver/OneDimensionalModel_Data.hpp>
@@ -49,20 +49,20 @@
 namespace LifeV
 {
 
-//! OneDimensionalModel_Physics - Base class providing physical operations for the 1D model data.
+//! OneDimensionalPhysics - Base class providing physical operations for the 1D model data.
 /*!
  *  @author Vincent Martin, Cristiano Malossi
  */
-class OneDimensionalModel_Physics
+class OneDimensionalPhysics
 {
 public :
 
     //! @name Type definitions and Enumerators
     //@{
 
-    typedef singleton< factory< OneDimensionalModel_Physics, OneDimensional::physicsType_Type > > factoryPhysics_Type;
+    typedef singleton< factory< OneDimensionalPhysics, OneDimensional::physicsType_Type > > factoryPhysics_Type;
 
-    typedef OneDimensionalModel_Data              data_Type;
+    typedef OneDimensionalData                    data_Type;
     typedef boost::shared_ptr< data_Type >        dataPtr_Type;
 
     //@}
@@ -72,12 +72,12 @@ public :
     //@{
 
     //! Constructor
-    explicit OneDimensionalModel_Physics() : M_data () {}
+    explicit OneDimensionalPhysics() : M_data () {}
 
-    explicit OneDimensionalModel_Physics( const dataPtr_Type data ) : M_data ( data ) {}
+    explicit OneDimensionalPhysics( const dataPtr_Type data ) : M_data ( data ) {}
 
     //! Destructor
-    virtual ~OneDimensionalModel_Physics() {}
+    virtual ~OneDimensionalPhysics() {}
 
     //@}
 
@@ -181,18 +181,18 @@ public :
      *  where the spatial derivative of the parameter will be maximum.
      *  However, the grid size is not allowed to be smaller than min_deltax
      */
-    void stiffenVesselLeft( const Real& xl,           const Real& xr,
-                            const Real& factor,       const Real& alpha,
-                            const Real& delta,        const Real& n,
+    void stiffenVesselLeft( const Real& xl,          const Real& xr,
+                            const Real& factor,      const Real& alpha,
+                            const Real& delta,       const Real& n,
                             const Real& minDeltaX=1, const UInt& yesAdaptive=0 );
 
     //! Make the vessel stiffer on the right side of interval [xl, xr]
     /*!
      * \sa stiffenVesselLeft
      */
-    void stiffenVesselRight( const Real& xl,           const Real& xr,
-                             const Real& factor,       const Real& alpha,
-                             const Real& delta,        const Real& n,
+    void stiffenVesselRight( const Real& xl,          const Real& xr,
+                             const Real& factor,      const Real& alpha,
+                             const Real& delta,       const Real& n,
                              const Real& minDeltaX=1, const UInt& yesAdaptive=0  );
 
     //@}
@@ -222,7 +222,7 @@ private:
     //! @name Unimplemented Methods
     //@{
 
-    OneDimensionalModel_Physics& operator=( const dataPtr_Type data );
+    OneDimensionalPhysics& operator=( const dataPtr_Type data );
 
     //@}
 };
@@ -231,7 +231,7 @@ private:
 // Inline conversion methods
 // ===================================================
 inline Real
-OneDimensionalModel_Physics::fromPToA( const Real& P, const UInt& i ) const
+OneDimensionalPhysics::fromPToA( const Real& P, const UInt& i ) const
 {
     return ( M_data->area0(i) * std::pow( ( P - M_data->externalPressure() )
                                           / M_data->beta0(i) + 1, 1/M_data->beta1(i) )  );
@@ -241,7 +241,7 @@ OneDimensionalModel_Physics::fromPToA( const Real& P, const UInt& i ) const
 // Inline derivatives methods
 // ===================================================
 inline Real
-OneDimensionalModel_Physics::dAdt( const Real& Anp1, const Real& An, const Real& Anm1, const Real& timeStep ) const
+OneDimensionalPhysics::dAdt( const Real& Anp1, const Real& An, const Real& Anm1, const Real& timeStep ) const
 {
     if ( M_data->dPdtSteps() == 0 )
         return ( Anp1 - An ) / timeStep;
@@ -250,14 +250,14 @@ OneDimensionalModel_Physics::dAdt( const Real& Anp1, const Real& An, const Real&
 }
 
 inline Real
-OneDimensionalModel_Physics::dPdA( const Real& A, const UInt& i ) const
+OneDimensionalPhysics::dPdA( const Real& A, const UInt& i ) const
 {
     return M_data->beta0(i) * M_data->beta1(i)
                               * std::pow( A / M_data->area0(i), M_data->beta1(i) ) / A;
 }
 
 inline Real
-OneDimensionalModel_Physics::dAdP( const Real& P, const UInt& i ) const
+OneDimensionalPhysics::dAdP( const Real& P, const UInt& i ) const
 {
     return M_data->area0(i) / ( M_data->beta0(i) * M_data->beta1(i) )
                             * std::pow( 1 + ( P - M_data->externalPressure() )
@@ -265,7 +265,7 @@ OneDimensionalModel_Physics::dAdP( const Real& P, const UInt& i ) const
 }
 
 inline Real
-OneDimensionalModel_Physics::dPTdU( const Real& A, const Real& Q, const ID& id, const UInt& i) const
+OneDimensionalPhysics::dPTdU( const Real& A, const Real& Q, const ID& id, const UInt& i) const
 {
     if ( id == 1 ) // dPt/dA
         return dPdA( A, i ) - M_data->densityRho() * Q * Q / ( A * A * A );
@@ -281,19 +281,19 @@ OneDimensionalModel_Physics::dPTdU( const Real& A, const Real& Q, const ID& id, 
 // Inline methods
 // ===================================================
 inline Real
-OneDimensionalModel_Physics::celerity0( const UInt& i ) const
+OneDimensionalPhysics::celerity0( const UInt& i ) const
 {
     return std::sqrt( M_data->beta0(i) * M_data->beta1(i) / M_data->densityRho() );
 }
 
 inline Real
-OneDimensionalModel_Physics::elasticPressure( const Real& A, const UInt& i ) const
+OneDimensionalPhysics::elasticPressure( const Real& A, const UInt& i ) const
 {
     return ( M_data->beta0(i) * ( std::pow( A/M_data->area0(i), M_data->beta1(i) ) - 1 ) ) + M_data->externalPressure();
 }
 
 inline Real
-OneDimensionalModel_Physics::viscoelasticPressure( const Real& Anp1, const Real& An, const Real& Anm1, const Real& timeStep, const UInt& i ) const
+OneDimensionalPhysics::viscoelasticPressure( const Real& Anp1, const Real& An, const Real& Anm1, const Real& timeStep, const UInt& i ) const
 {
     Real area(Anp1);
     if ( M_data->linearizeStringModel() )
@@ -303,11 +303,11 @@ OneDimensionalModel_Physics::viscoelasticPressure( const Real& Anp1, const Real&
 }
 
 inline Real
-OneDimensionalModel_Physics::totalPressure( const Real& A, const Real& Q, const UInt& i ) const
+OneDimensionalPhysics::totalPressure( const Real& A, const Real& Q, const UInt& i ) const
 {
     return elasticPressure( A, i ) + M_data->densityRho() / 2 * Q * Q / ( A * A );
 }
 
 }
 
-#endif //ONEDIMENSIONALMODEL_PHYSICS_H
+#endif // OneDimensionalPhysics_H

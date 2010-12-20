@@ -114,7 +114,7 @@ namespace LifeV
  *     In this case you have to manually set the TOTAL number of boundary conditions
  *     by using setHandlerParameters() function BEFORE building the handler.
  */
-template< class PhysicalSolverType = OneDimensionalModel_Solver >
+template< class PhysicalSolverType = OneDimensionalSolver >
 class BCInterface1D
 {
 public:
@@ -128,7 +128,7 @@ public:
 
     typedef singleton< factory< BCInterface1DFunction< physicalSolver_Type > , bcBaseList_Type > >    factoryFunction_Type;
 
-    typedef OneDimensionalModel_BCHandler                                                             bcHandler_Type;
+    typedef OneDimensionalBCHandler                                                                   bcHandler_Type;
     typedef boost::shared_ptr< bcHandler_Type >                                                       bcHandlerPtr_Type;
 
     typedef bcHandler_Type::solutionPtr_Type                                                          solutionPtr_Type;

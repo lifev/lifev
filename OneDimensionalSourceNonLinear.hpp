@@ -39,8 +39,8 @@
  *  @mantainer  Cristiano Malossi <cristiano.malossi@epfl.ch>
  */
 
-#ifndef ONEDIMENSIONALMODEL_SOURCE_NONLINEAR_H
-#define ONEDIMENSIONALMODEL_SOURCE_NONLINEAR_H
+#ifndef OneDimensionalSourceNonLinear_H
+#define OneDimensionalSourceNonLinear_H
 
 // LIFEV - MATHCARD
 #include <lifemc/lifesolver/OneDimensionalModel_Source.hpp>
@@ -48,21 +48,21 @@
 namespace LifeV
 {
 
-//! OneDimensionalModel_Source_NonLinear - Class for the non-linear source function B of the 1D hyperbolic problem.
+//! OneDimensionalSourceNonLinear - Class for the non-linear source function B of the 1D hyperbolic problem.
 /*!
  *  @author Vincent Martin, Cristiano Malossi
  *
  *  dU/dt + dF(U)/dz + B(U) = 0
  *  with U=[A,Q]^T
  */
-class OneDimensionalModel_Source_NonLinear : public OneDimensionalModel_Source
+class OneDimensionalSourceNonLinear : public OneDimensionalSource
 {
 public:
 
     //! @name Type definitions and Enumerators
     //@{
 
-    typedef OneDimensionalModel_Source         super;
+    typedef OneDimensionalSource         super;
 
     //@}
 
@@ -71,12 +71,12 @@ public:
     //@{
 
     //! Constructor
-    explicit OneDimensionalModel_Source_NonLinear() : super() {}
+    explicit OneDimensionalSourceNonLinear() : super() {}
 
-    explicit OneDimensionalModel_Source_NonLinear( const physicsPtr_Type physics ) : super( physics ) {}
+    explicit OneDimensionalSourceNonLinear( const physicsPtr_Type physics ) : super( physics ) {}
 
     //! Do nothing destructor
-    virtual ~OneDimensionalModel_Source_NonLinear() {}
+    virtual ~OneDimensionalSourceNonLinear() {}
 
     //@}
 
@@ -124,17 +124,17 @@ private:
     //! @name Unimplemented Methods
     //@{
 
-    OneDimensionalModel_Source_NonLinear& operator=( const physicsPtr_Type physics );
+    OneDimensionalSourceNonLinear& operator=( const physicsPtr_Type physics );
 
     //@}
 };
 
 //! Factory create function
-inline OneDimensionalModel_Source* createOneDimensionalSourceNonLinear()
+inline OneDimensionalSource* createOneDimensionalSourceNonLinear()
 {
-    return new OneDimensionalModel_Source_NonLinear();
+    return new OneDimensionalSourceNonLinear();
 }
 
 }
 
-#endif // ONEDIMENSIONALMODEL_SOURCE_NONLINEAR_H
+#endif // OneDimensionalSourceNonLinear_H

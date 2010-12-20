@@ -40,8 +40,8 @@
  *  @mantainer  Cristiano Malossi <cristiano.malossi@epfl.ch>
  */
 
-#ifndef ONEDIMENSIONALMODEL_PHYSICS_NONLINEAR_H
-#define ONEDIMENSIONALMODEL_PHYSICS_NONLINEAR_H
+#ifndef OneDimensionalPhysicsNonLinear_H
+#define OneDimensionalPhysicsNonLinear_H
 
 // LIFEV - MATHCARD
 #include <lifemc/lifesolver/OneDimensionalModel_Physics.hpp>
@@ -49,7 +49,7 @@
 namespace LifeV
 {
 
-//! OneDimensionalModel_Physics_NonLinear - Class providing non linear physical operations for the 1D model data.
+//! OneDimensionalPhysicsNonLinear - Class providing non linear physical operations for the 1D model data.
 /*!
  *  @author Vincent Martin, Cristiano Malossi
  *
@@ -63,14 +63,14 @@ namespace LifeV
  *  with
  *  P - P_ext = beta0 [ ( A / Area0 )^{beta1} - 1 ]
  */
-class OneDimensionalModel_Physics_NonLinear : public OneDimensionalModel_Physics
+class OneDimensionalPhysicsNonLinear : public OneDimensionalPhysics
 {
 public :
 
     //! @name Type definitions and Enumerators
     //@{
 
-    typedef OneDimensionalModel_Physics           super;
+    typedef OneDimensionalPhysics           super;
 
     //@}
 
@@ -79,12 +79,12 @@ public :
     //@{
 
     //! Constructor
-    explicit OneDimensionalModel_Physics_NonLinear() : super() {}
+    explicit OneDimensionalPhysicsNonLinear() : super() {}
 
-    explicit OneDimensionalModel_Physics_NonLinear( const dataPtr_Type data ) : super( data ) {}
+    explicit OneDimensionalPhysicsNonLinear( const dataPtr_Type data ) : super( data ) {}
 
     //! Destructor
-    virtual ~OneDimensionalModel_Physics_NonLinear() {}
+    virtual ~OneDimensionalPhysicsNonLinear() {}
 
     //@}
 
@@ -155,18 +155,18 @@ private:
     //! @name Unimplemented Methods
     //@{
 
-    OneDimensionalModel_Physics_NonLinear& operator=( const dataPtr_Type data );
+    OneDimensionalPhysicsNonLinear& operator=( const dataPtr_Type data );
 
     //@}
 
 };
 
 //! Factory create function
-inline OneDimensionalModel_Physics* createOneDimensionalPhysicsNonLinear()
+inline OneDimensionalPhysics* createOneDimensionalPhysicsNonLinear()
 {
-    return new OneDimensionalModel_Physics_NonLinear();
+    return new OneDimensionalPhysicsNonLinear();
 }
 
 }
 
-#endif // ONEDIMENSIONALMODEL_PHYSICS_NONLINEAR_H
+#endif // OneDimensionalPhysicsNonLinear_H
