@@ -53,7 +53,7 @@ MultiscaleModelFluid3D::MultiscaleModelFluid3D() :
         M_bc                           ( new bcInterface_Type() ),
         M_bdf                          (),
         M_data                         ( new data_Type() ),
-        M_dataMesh                     ( new DataMesh()),
+        M_meshData                     ( new MeshData()),
         M_mesh                         (),
         M_map                          (),
         M_solution                     (),
@@ -98,7 +98,7 @@ MultiscaleModelFluid3D::setupData( const std::string& fileName )
     if ( M_globalData.get() )
         setupGlobalData( fileName );
 
-    M_dataMesh->setup(dataFile, "fluid/space_discretization");
+    M_meshData->setup(dataFile, "fluid/space_discretization");
 
     // Parameters for the NS Iterations
     M_subiterationsMaximumNumber = dataFile( "fluid/miscellaneous/SubITMax", 0 );
@@ -562,7 +562,7 @@ MultiscaleModelFluid3D::setupMesh()
 {
     //Read fluid mesh from file
     boost::shared_ptr< mesh_Type > fluidMesh( new mesh_Type );
-    readMesh( *fluidMesh, *M_dataMesh );
+    readMesh( *fluidMesh, *M_meshData );
 
     //Transform mesh
     fluidMesh->transformMesh( M_geometryScale, M_geometryRotate, M_geometryTranslate );

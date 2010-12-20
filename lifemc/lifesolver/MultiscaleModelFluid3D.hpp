@@ -41,7 +41,7 @@
 // LifeV includes
 #include <life/lifemesh/MeshPartitioner.hpp>
 #include <life/lifesolver/dataNavierStokes.hpp>
-#include <life/lifemesh/dataMesh.hpp>
+#include <life/lifemesh/MeshData.hpp>
 #include <life/lifefem/FESpace.hpp>
 #include <life/lifefem/bdfNS_template.hpp>
 #include <life/lifefilters/ExporterEnsight.hpp>
