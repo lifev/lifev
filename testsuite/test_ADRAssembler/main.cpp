@@ -155,7 +155,7 @@ main( int argc, char** argv )
     if (verbose) std::cout << " done ! " << std::endl;
 
     if (verbose) std::cout << " -- Partitioning the mesh ... " << std::flush;
-    partitionMesh< mesh_type >   meshPart(fullMeshPtr, Comm);
+    MeshPartitioner< mesh_type >   meshPart(fullMeshPtr, Comm);
     if (verbose) std::cout << " done ! " << std::endl;
 
     if (verbose) std::cout << " -- Freeing the global mesh ... " << std::flush;
@@ -328,7 +328,7 @@ main( int argc, char** argv )
 // Exporter definition and use
 
     if (verbose) std::cout << " -- Defining the exporter ... " << std::flush;
-    Ensight<mesh_type> exporter ( dataFile, meshPart.meshPartition(), "solution", Comm->MyPID()) ;
+    ExporterEnsight<mesh_type> exporter ( dataFile, meshPart.meshPartition(), "solution", Comm->MyPID()) ;
     if (verbose) std::cout << " done ! " << std::endl;
 
     if (verbose) std::cout << " -- Defining the exported quantities ... " << std::flush;
