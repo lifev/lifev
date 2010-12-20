@@ -129,7 +129,7 @@ ComposedPreconditioner::push_back(operatorPtr_Type& oper,
     if(!M_prec.get())
         M_prec.reset(new prec_Type(M_displayer.comm()));
     M_operVector.push_back(oper);
-    Chrono chrono;
+    LifeChrono chrono;
     epetraPrecPtr_Type prec;
 
     this->M_displayer.leaderPrint(std::string("ICP-  Computing prec. factorization, type:") + M_prec->Operator()[M_operVector.size()-1]->precType() + " ...        ");
@@ -152,7 +152,7 @@ ComposedPreconditioner::replace(operatorPtr_Type& oper,
     ASSERT(index <= M_operVector.size(), "ComposedPreconditioner::replace: index too large");
 
     M_operVector[index] = oper;
-    Chrono chrono;
+    LifeChrono chrono;
     //ifpack_prec_type prec;
     this->M_displayer.leaderPrint(std::string("ICP-  Computing prec. factorization, type:") + (M_prec->Operator()[index]->precType()) + " ...        ");
     chrono.start();
