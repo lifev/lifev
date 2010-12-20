@@ -122,7 +122,7 @@ public:
     typedef OneDimensional::bcLine_Type                            bcLine_Type;
 
 #ifdef HAVE_HDF5
-    typedef Hdf5exporter< mesh_Type >                              IOFile_Type;
+    typedef ExporterHDF5< mesh_Type >                              IOFile_Type;
 #endif
 
     //! @name Constructors & Destructor
