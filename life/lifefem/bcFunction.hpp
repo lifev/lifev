@@ -41,8 +41,8 @@
 
 #include <boost/function.hpp>
 
-#include <life/lifecore/singleton.hpp>
-#include <life/lifecore/factory.hpp>
+#include <life/lifecore/FactorySingleton.hpp>
+#include <life/lifecore/Factory.hpp>
 
 namespace LifeV
 {
