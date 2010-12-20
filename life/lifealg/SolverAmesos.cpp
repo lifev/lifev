@@ -90,7 +90,7 @@ SolverAmesos::solveSystem( vector_type&    rhsFull,
                            matrix_ptrtype& /*basePrecMatrix*/ )
 {
     M_displayer.leaderPrint( "      Amesos solving system ...                " );
-    Chrono chrono;
+    LifeChrono chrono;
     chrono.start();
 
     M_problem.SetLHS( &solution.epetraVector() );
