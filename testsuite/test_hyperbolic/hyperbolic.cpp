@@ -65,8 +65,8 @@ const Real Pi = 3.14159265358979323846264338328;
 Real analyticalSolution( const Real& t,
                          const Real& x,
                          const Real& y,
-                         const Real& z,
-                         const ID& /*ic*/)
+                         const Real& /* z */,
+                         const ID&   /* ic */)
 {
     //Real u1 = 5;
     //if ( ( x <= u1*(t+0.25)/2 && x >= u1*(t - 0.15)/2 ) && ( y >= 0.25 && y <= 0.75 )  && ( z >= 0.25 && z <= 0.75 ) )
@@ -77,10 +77,10 @@ Real analyticalSolution( const Real& t,
 }
 
 // Physical flux function
-Vector physicalFlux( const Real& /*t*/,
+Vector physicalFlux( const Real& /* t */,
                      const Real& x,
                      const Real& y,
-                     const Real& z,
+                     const Real& /* z */,
                      const std::vector<Real>& u )
 {
     Vector physicalFluxVector( static_cast<UInt>(3) );
@@ -102,10 +102,10 @@ Vector physicalFlux( const Real& /*t*/,
 }
 
 // First derivative in u of the physical flux function
-Vector firstDerivativePhysicalFlux( const Real& /*t*/,
+Vector firstDerivativePhysicalFlux( const Real& /* t */,
                                     const Real& x,
                                     const Real& y,
-                                    const Real& z,
+                                    const Real& /* z */,
                                     const std::vector<Real>& u )
 {
     Vector firstDerivativePhysicalFluxVector( static_cast<UInt>(3) );
@@ -127,10 +127,10 @@ Vector firstDerivativePhysicalFlux( const Real& /*t*/,
 }
 
 // Initial time condition
-Real dual( const Real& /*t*/,
-           const Real& x,
-           const Real& y,
-           const Real& z,
+Real dual( const Real& /* t */,
+           const Real& /* x */,
+           const Real& /* y */,
+           const Real& /* z */,
            const ID&   ic )
 {
     switch ( ic )
@@ -149,7 +149,7 @@ Real dual( const Real& /*t*/,
 }
 
 // Initial time condition
-Real initialCondition( const Real& /*t*/,
+Real initialCondition( const Real& /* t */,
                        const Real& x,
                        const Real& y,
                        const Real& z,
@@ -159,11 +159,11 @@ Real initialCondition( const Real& /*t*/,
 }
 
 // Mass function
-Real mass( const Real& /*t*/,
-           const Real& x,
-           const Real& y,
-           const Real& z,
-           const ID&   ic )
+Real mass( const Real& /* t */,
+           const Real& /* x */,
+           const Real& /* y */,
+           const Real& /* z */,
+           const ID&   /* ic */ )
 {
     return 1.;
 }
@@ -180,11 +180,11 @@ Real dirichlet( const Real& t,
 
 
 // Source term
-Real source_in( const Real& /*t*/,
-                const Real& x,
-                const Real& y,
-                const Real& /*z*/,
-                const ID&  /*icomp*/)
+Real source_in( const Real& /* t */,
+                const Real& /* x */,
+                const Real& /* y */,
+                const Real& /* z */,
+                const ID&   /* icomp */)
 {
     return 0.;
 }
@@ -367,7 +367,7 @@ hyperbolic::run()
     chronoReadAndPartitionMesh.start();
 
     // Create the data file
-    DataHyperbolic<RegionMesh> dataHyperbolic;
+    HyperbolicData<RegionMesh> dataHyperbolic;
 
     // Set up the data
     dataHyperbolic.setup( dataFile );
@@ -484,7 +484,7 @@ hyperbolic::run()
     chronoProblem.stop();
 
     // The leader process print chronoProblem
-    hyperbolicSolver.displayer().leaderPrint( "Time for create the problem ",
+    hyperbolicSolver.getDisplayer().leaderPrint( "Time for create the problem ",
                                                  chronoProblem.diff(), "\n" );
 
     // Process the problem
@@ -512,7 +512,7 @@ hyperbolic::run()
                                                         "hyperbolic/numerical_flux/" );
 
     // Set the dependence field
-    numericalFlux.setField ( pressure_dualInterpolated );
+    numericalFlux.setExternalField ( pressure_dualInterpolated );
 
     // Set the numerical flux usign the physical flux
     hyperbolicSolver.setNumericalFlux( numericalFlux );
@@ -577,7 +577,7 @@ hyperbolic::run()
                            ExporterData::Cell );
 
     // Display the total number of unknowns
-    hyperbolicSolver.displayer().leaderPrint( "Number of unknowns : ",
+    hyperbolicSolver.getDisplayer().leaderPrint( "Number of unknowns : ",
                                                  fESpace.map().map(Unique)->NumGlobalElements(), "\n" );
 
     // Solve the problem
@@ -622,7 +622,7 @@ hyperbolic::run()
         dataHyperbolic.dataTime()->setTimeStep( timeStep );
 
         // The leader process prints the temporal data.
-        if ( hyperbolicSolver.displayer().isLeader() )
+        if ( hyperbolicSolver.getDisplayer().isLeader() )
         {
             dataHyperbolic.dataTime()->showMe();
         }
@@ -642,7 +642,7 @@ hyperbolic::run()
         chronoTimeStep.stop();
 
         // The leader process print chronoTimeStep
-        hyperbolicSolver.displayer().leaderPrint( "Time for current time step ",
+        hyperbolicSolver.getDisplayer().leaderPrint( "Time for current time step ",
                                                      chronoTimeStep.diff(), "\n" );
 
     }
@@ -651,7 +651,7 @@ hyperbolic::run()
     chronoProcess.stop();
 
     // The leader process print chronoProcess
-    hyperbolicSolver.displayer().leaderPrint( "Time for process ",
+    hyperbolicSolver.getDisplayer().leaderPrint( "Time for process ",
                                                  chronoProcess.diff(), "\n" );
 
     // Compute the errors
@@ -663,13 +663,13 @@ hyperbolic::run()
     Real L2Norm(0), exactL2Norm(0), L2Error(0), L2RelativeError(0);
 
     // Norms and errors for the pressure
-    hyperbolicSolver.displayer().leaderPrint( "\nERROR\n" );
+    hyperbolicSolver.getDisplayer().leaderPrint( "\nERROR\n" );
 
     // Compute the L2 norm for the solution
     L2Norm = fESpace.l2Norm( *hyperbolicSolver.solution() );
 
     // Display the L2 norm for the solution
-    hyperbolicSolver.displayer().leaderPrint( " L2 norm of solution:            ",
+    hyperbolicSolver.getDisplayer().leaderPrint( " L2 norm of solution:            ",
                                                  L2Norm, "\n" );
 
     // Compute the L2 norm for the analytical solution
@@ -677,7 +677,7 @@ hyperbolic::run()
                                           dataHyperbolic.dataTime()->endTime() );
 
     // Display the L2 norm for the analytical solution
-    hyperbolicSolver.displayer().leaderPrint( " L2 norm of exact solution:      ",
+    hyperbolicSolver.getDisplayer().leaderPrint( " L2 norm of exact solution:      ",
                                                  exactL2Norm, "\n" );
 
     // Compute the L2 error for the solution
@@ -687,28 +687,28 @@ hyperbolic::run()
                                        dataHyperbolic.dataTime()->endTime() );
 
     // Display the L2 error for the solution
-    hyperbolicSolver.displayer().leaderPrint( " L2 error:                       ",
+    hyperbolicSolver.getDisplayer().leaderPrint( " L2 error:                       ",
                                                  L2Error, "\n" );
 
     // Compute the L2 realative error for the solution
     L2RelativeError = L2Error / L2Norm;
 
     // Display the L2 relative error for the solution
-    hyperbolicSolver.displayer().leaderPrint( " L2 relative error:              ",
+    hyperbolicSolver.getDisplayer().leaderPrint( " L2 relative error:              ",
                                                  L2RelativeError, "\n" );
 
     // Stop chronoError
     chronoError.stop();
 
     // The leader process print chronoError
-    hyperbolicSolver.displayer().leaderPrint( "Time for compute errors ",
+    hyperbolicSolver.getDisplayer().leaderPrint( "Time for compute errors ",
                                                  chronoError.diff(), "\n" );
 
     // Stop chronoTotal
     chronoTotal.stop();
 
     // The leader process print chronoTotal
-    hyperbolicSolver.displayer().leaderPrint( "Total time for the computation ",
+    hyperbolicSolver.getDisplayer().leaderPrint( "Total time for the computation ",
                                                  chronoTotal.diff(), "\n" );
 
     // Return the error, needed for the succes/failure of the test

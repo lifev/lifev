@@ -42,7 +42,7 @@
 #include <life/lifemesh/structuredMesh3D.hpp>
 #include <life/lifealg/EpetraMap.hpp>
 #include <life/lifemesh/partitionMesh.hpp>
-#include <life/lifesolver/hyperbolicSolver.hpp>
+#include <life/lifesolver/HyperbolicSolver.hpp>
 
 #ifdef HAVE_HDF5
 #include <life/lifefilters/hdf5exporter.hpp>

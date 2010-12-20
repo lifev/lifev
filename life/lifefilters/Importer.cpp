@@ -35,7 +35,7 @@
 
 #include <life/lifefilters/readMesh3D.hpp>
 #include <life/lifefilters/readMesh2D.hpp>
-#include <life/lifefilters/importer.hpp>
+#include <life/lifefilters/Importer.hpp>
 
 
 namespace LifeV
@@ -108,13 +108,13 @@ import( std::string const& fileName,
 // ===================================================
 
 // Assign opertor overloading
-importer& importer::operator= ( const importer& import )
+Importer& Importer::operator= ( const Importer& importer )
 {
     // Avoid auto-copy
-    if ( this != &import )
+    if ( this != &importer )
     {
-        M_fileName = import.M_fileName;
-        M_format   = import.M_format;
+        M_fileName = importer.M_fileName;
+        M_format   = importer.M_format;
     }
 
     return *this;
@@ -126,39 +126,39 @@ importer& importer::operator= ( const importer& import )
 
 // Import mesh with tetrahedras
 void
-importer::import( RegionMesh3D<LinearTetra> & mesh,
-                  entityFlag_Type                  regionFlag )
+Importer::import( RegionMesh3D<LinearTetra> & mesh,
+                  entityFlag_Type             regionFlag )
 {
     detail::import( M_fileName, M_format, mesh, regionFlag );
 } // import
 
 // Import mesh with linear hexahedras
 void
-importer::import( RegionMesh3D<LinearHexa> & mesh,
-                  entityFlag_Type                 regionFlag )
+Importer::import( RegionMesh3D<LinearHexa> & mesh,
+                  entityFlag_Type            regionFlag )
 {
     detail::import( M_fileName, M_format, mesh, regionFlag );
 } // import
 
 // Import mesh with linear triangles
 void
-importer::import( RegionMesh2D<LinearTriangle> & mesh,
-                  entityFlag_Type                 regionFlag )
+Importer::import( RegionMesh2D<LinearTriangle> & mesh,
+                  entityFlag_Type                regionFlag )
 {
     detail::import( M_fileName, M_format, mesh, regionFlag );
 } // import
 
 // Import mesh with linear quadrangles
 void
-importer::import( RegionMesh2D<LinearQuad> & mesh,
-                  entityFlag_Type                 regionFlag )
+Importer::import( RegionMesh2D<LinearQuad> & mesh,
+                  entityFlag_Type            regionFlag )
 {
     detail::import( M_fileName, M_format, mesh, regionFlag );
 } // import
 
 // Print attributes of the class
 void
-importer::showMe( std::ostream& output ) const
+Importer::showMe( std::ostream& output ) const
 {
     output << "Class importer" << std::endl
            << "File Name   " << M_fileName << std::endl

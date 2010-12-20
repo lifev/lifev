@@ -272,7 +272,7 @@ impes::run()
     DataDarcy<RegionMesh> dataPressure;
 
     // Create the data file for the hyperbolic solver in the saturation equation.
-    DataHyperbolic<RegionMesh> dataSaturationHyperbolic;
+    HyperbolicData<RegionMesh> dataSaturationHyperbolic;
 
     // Create the data file for the non-linear and transient Darcy solver in the saturation equation.
     DataDarcy<RegionMesh> dataSaturationDarcyNonLinear;
@@ -618,7 +618,7 @@ impes::run()
                                                         "impes/hyperbolic/numerical_flux/" );
 
     // Set the dependence field
-    numericalFlux.setField ( pressure_dualInterpolated );
+    numericalFlux.setExternalField ( pressure_dualInterpolated );
 
     // Set the numerical flux usign the physical flux
     saturationHyperbolicSolver.setNumericalFlux( numericalFlux );
@@ -786,7 +786,7 @@ impes::run()
         {
 
             // The leader process prints the temporal data for the inner loop.
-            saturationHyperbolicSolver.displayer().leaderPrint( "Inner loop for sub-temporal iteration for the hyperbolic equation.\n" );
+            saturationHyperbolicSolver.getDisplayer().leaderPrint( "Inner loop for sub-temporal iteration for the hyperbolic equation.\n" );
 
             // Compute the new time step according to the CFL condition.
             //innerTimeStep = saturationHyperbolicSolver.CFL();
@@ -806,7 +806,7 @@ impes::run()
             //dataSaturationHyperbolic.dataTime()->setTimeStep( innerTimeStep );
 
             // The leader process prints the temporal data for the inner loop.
-            if ( saturationHyperbolicSolver.displayer().isLeader() )
+            if ( saturationHyperbolicSolver.getDisplayer().isLeader() )
             {
                 dataSaturationHyperbolic.dataTime()->showMe();
             }

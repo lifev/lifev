@@ -33,8 +33,8 @@
  *
  */
 
-#ifndef _NUMERICALFLUXES_H_
-#define _NUMERICALFLUXES_H_ 1
+#ifndef _HYPERBOLICNUMERICALFLUXES_H_
+#define _HYPERBOLICNUMERICALFLUXES_H_ 1
 
 #include <boost/bind.hpp>
 #include <life/lifefem/FESpace.hpp>
@@ -320,55 +320,6 @@ public:
                         const Real&        z = 0 ) const;
 
     //@}
-
-    inline void __attribute__ ((__deprecated__)) setField ( const vectorPtr_Type & field )
-    {
-        setExternalField ( field );
-    }
-
-    inline vectorFunction_Type __attribute__ ((__deprecated__)) getPhysicalFlux () const
-    {
-        return physicalFlux ();
-    }
-
-    inline vectorFunction_Type __attribute__ ((__deprecated__)) getFirstDerivativePhysicalFlux () const
-    {
-        return firstDerivativePhysicalFlux ();
-    }
-
-    inline Real __attribute__ ((__deprecated__)) getPhysicalFluxDotNormal ( const normal_Type& normal,
-                                                                            const UInt&        iElem,
-                                                                            const Real&        t,
-                                                                            const Real&        x,
-                                                                            const Real&        y,
-                                                                            const Real&        z,
-                                                                            const Real&        unknown ) const
-    {
-        return  physicalFluxDotNormal ( normal, iElem, t, x, y, z, unknown );
-    }
-
-    inline Real __attribute__ ((__deprecated__)) getFirstDerivativePhysicalFluxDotNormal ( const normal_Type& normal,
-                                                                                           const UInt&        iElem,
-                                                                                           const Real&        t,
-                                                                                           const Real&        x,
-                                                                                           const Real&        y,
-                                                                                           const Real&        z,
-                                                                                           const Real&        unknown ) const
-    {
-        return firstDerivativePhysicalFluxDotNormal ( normal, iElem, t, x, y, z, unknown );
-    }
-
-    Real __attribute__ ((__deprecated__)) getNormInfty ( const Real&        leftState,
-                                                         const Real&        rightState,
-                                                         const normal_Type& normal,
-                                                         const UInt&        iElem,
-                                                         const Real&        t = 0,
-                                                         const Real&        x = 0,
-                                                         const Real&        y = 0,
-                                                         const Real&        z = 0 ) const
-    {
-        return normInfinity( leftState, rightState, normal, iElem, t, x, y, z );
-    }
 
 protected:
 
@@ -734,4 +685,4 @@ operator() ( const Real& leftState, const Real& rightState, const normal_Type& n
 
 } // Namespace LifeV
 
-#endif //_NUMERICALFLUXES_H_
+#endif //_HYPERBOLICNUMERICALFLUXES_H_

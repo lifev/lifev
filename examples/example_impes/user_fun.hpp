@@ -61,7 +61,7 @@ typedef boost::numeric::ublas::matrix<Real> Matrix;
 typedef boost::numeric::ublas::vector<Real> Vector;
 
 // Porosity
-const Real Phi ( const Real& x, const Real& y, const Real& z );
+Real Phi ( const Real& x, const Real& y, const Real& z );
 
 // Dynamic viscosity
 const Real mu_w = 1; //1e-3; // [Pa * s]
@@ -72,8 +72,8 @@ const Real rho_w = 1; //960; // [Kg / m^3]
 const Real rho_n = 0.5; //700; // [Kg / m^3]
 
 // Relative permeability
-const Real k_rw ( const Real& S_w );
-const Real k_rn ( const Real& S_n );
+Real k_rw ( const Real& S_w );
+Real k_rn ( const Real& S_n );
 
 // Absolute inverse permeability
 const Matrix invK ( const Real& t, const Real& x, const Real& y, const Real& z ); // [m^2]
@@ -92,14 +92,14 @@ const Real pd = 1200.; // [Pa]
 const Real lambda = 1;
 
 // Capillary pressure
-const Real pc ( const Real& S_w ); // [Pa]
+Real pc ( const Real& S_w ); // [Pa]
 
 // First derivative of the relative permeability
-const Real Dk_rw ( const Real& S_w );
-const Real Dk_rn ( const Real& S_n );
+Real Dk_rw ( const Real& S_w );
+Real Dk_rn ( const Real& S_n );
 
 // First derivative of the capillary pressure
-const Real Dpc ( const Real& S_w ); // [Pa]
+Real Dpc ( const Real& S_w ); // [Pa]
 
 }
 

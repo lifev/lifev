@@ -41,13 +41,13 @@ namespace dataPhysical
 {
 
 // Porosity
-const Real Phi ( const Real& x, const Real& y, const Real& z )
+Real Phi ( const Real& /* x */, const Real& /* y */, const Real& /* z */ )
 {
     return 0.4;
 }
 
 // Relative permeability for the wetting phase
-const Real k_rw ( const Real& S_w )
+Real k_rw ( const Real& S_w )
 {
     // Define the effective saturation
     const Real barS_w = (S_w - S_wr) / (1. - S_wr - S_nr);
@@ -56,7 +56,7 @@ const Real k_rw ( const Real& S_w )
 }
 
 // First derivative of the relative permeability for the wetting phase
-const Real Dk_rw ( const Real& S_w )
+Real Dk_rw ( const Real& S_w )
 {
     // Define the effective saturation
     const Real barS_w = (S_w - S_wr) / (1. - S_wr - S_nr);
@@ -65,7 +65,7 @@ const Real Dk_rw ( const Real& S_w )
 }
 
 // Relative permeability for the non-wetting phase
-const Real k_rn ( const Real& S_n )
+Real k_rn ( const Real& S_n )
 {
     // Define the effective saturation
     const Real barS_n = (S_n - S_nr) / (1. - S_wr - S_nr);
@@ -74,7 +74,7 @@ const Real k_rn ( const Real& S_n )
 }
 
 // First derivative of the relative permeability for the non-wetting phase
-const Real Dk_rn ( const Real& S_n )
+Real Dk_rn ( const Real& S_n )
 {
     // Define the effective saturation
     const Real barS_n = (S_n - S_nr) / (1. - S_wr - S_nr);
@@ -85,7 +85,7 @@ const Real Dk_rn ( const Real& S_n )
 }
 
 // Capillary pressure
-const Real pc ( const Real& S_w ) // [Pa]
+Real pc ( const Real& S_w ) // [Pa]
 {
     // Define the effective saturation
     const Real barS_w = (S_w - S_wr) / (1. - S_wr - S_nr);
@@ -94,7 +94,7 @@ const Real pc ( const Real& S_w ) // [Pa]
 }
 
 // First derivative of the capillary pressure
-const Real Dpc ( const Real& S_w ) // [Pa]
+Real Dpc ( const Real& S_w ) // [Pa]
 {
     // Define the effective saturation
     const Real barS_w = (S_w - S_wr) / (1. - S_wr - S_nr);
@@ -103,7 +103,7 @@ const Real Dpc ( const Real& S_w ) // [Pa]
 }
 
 // Absolute inverse permeability
-const Matrix invK ( const Real& t, const Real& x, const Real& y, const Real& z ) // [m^2]
+const Matrix invK ( const Real& /* t */, const Real& x, const Real& y, const Real& /* z */ ) // [m^2]
 {
     Matrix inversePermeabilityMatrix( static_cast<UInt>(3), static_cast<UInt>(3) );
 
@@ -187,11 +187,11 @@ Matrix pressurePermeability( const Real& t,
 }
 
 // Source term
-Real pressureSource( const Real& /*t*/,
-                     const Real& x,
-                     const Real& y,
-                     const Real& /*z*/,
-                     const ID&  /*icomp*/)
+Real pressureSource( const Real& /* t */,
+                     const Real& /* x */,
+                     const Real& /* y */,
+                     const Real& /* z */,
+                     const ID&   /* icomp */)
 {
     return 0.;
 }
@@ -201,7 +201,7 @@ Real pressureDirichlet1( const Real& /* t */,
                          const Real& /* x */,
                          const Real& /* y */,
                          const Real& /* z */,
-                         const ID&   /*icomp*/)
+                         const ID&   /* icomp */)
 {
     return 11000000.;
 }
@@ -211,7 +211,7 @@ Real pressureDirichlet2( const Real& /* t */,
                          const Real& /* x */,
                          const Real& /* y */,
                          const Real& /* z */,
-                         const ID&   /*icomp*/)
+                         const ID&   /* icomp */)
 {
     return 10000000.;
 }
@@ -221,7 +221,7 @@ Real pressureDirichlet3( const Real& /* t */,
                          const Real& /* x */,
                          const Real& /* y */,
                          const Real& /* z */,
-                         const ID&   /*icomp*/)
+                         const ID&   /* icomp */)
 {
     return 10500000.;
 }
@@ -230,7 +230,7 @@ Real pressureDirichlet3( const Real& /* t */,
 Real pressureNeumann( const Real& /* t */,
                       const Real& x,
                       const Real& y,
-                      const Real& z,
+                      const Real& /* z */,
                       const ID&   icomp)
 {
     return 0.;
@@ -255,7 +255,7 @@ Real pressureRobin( const Real& /* t */,
                     const Real& /* x */,
                     const Real& /* y */,
                     const Real& /* z */,
-                    const ID&   /*icomp*/)
+                    const ID&   /* icomp */)
 {
     return 0.;
 }
@@ -414,31 +414,31 @@ Vector saturationFirstDerivativePhysicalFlux( const Real& t,
 }
 
 // Source term
-Real saturationSource( const Real& /*t*/,
-                       const Real& x,
-                       const Real& y,
-                       const Real& /*z*/,
-                       const ID&  /*icomp*/)
+Real saturationSource( const Real& /* t */,
+                       const Real& /* x */,
+                       const Real& /* y */,
+                       const Real& /* z */,
+                       const ID&   /* icomp */)
 {
     return 0.;
 }
 
 // Initial condition
 Real saturationInitialCondition( const Real& /* t */,
-                                 const Real& x,
-                                 const Real& y,
-                                 const Real& z,
-                                 const ID&   /*icomp*/ )
+                                 const Real& /* x */,
+                                 const Real& /* y */,
+                                 const Real& /* z */,
+                                 const ID&   /* icomp */ )
 {
     return 0.1;
 }
 
 // Mass function
-Real saturationMass( const Real& /*t*/,
+Real saturationMass( const Real& /* t */,
                      const Real& x,
                      const Real& y,
                      const Real& z,
-                     const ID&   /*icomp*/ )
+                     const ID&   /* icomp */ )
 {
     return dataPhysical::Phi( x, y, z );
 }
@@ -448,7 +448,7 @@ Real saturationDirichlet1( const Real& t,
                            const Real& /* x */,
                            const Real& /* y */,
                            const Real& /* z */,
-                           const ID&   /*icomp*/)
+                           const ID&   /* icomp */)
 {
     if ( t < 5.)
         return 0.8;
@@ -461,7 +461,7 @@ Real saturationDirichlet2( const Real& /* t */,
                            const Real& /* x */,
                            const Real& /* y */,
                            const Real& /* z */,
-                           const ID&   /*icomp*/)
+                           const ID&   /* icomp */)
 {
     return 0.5;
 }
@@ -471,16 +471,16 @@ Real saturationDirichlet3( const Real& /* t */,
                            const Real& /* x */,
                            const Real& /* y */,
                            const Real& /* z */,
-                           const ID&   /*icomp*/)
+                           const ID&   /* icomp */)
 {
     return 0.01;
 }
 
 // Boundary condition of Neumann
 Real saturationNeumann( const Real& /* t */,
-                        const Real& x,
-                        const Real& y,
-                        const Real& z,
+                        const Real& /* x */,
+                        const Real& /* y */,
+                        const Real& /* z */,
                         const ID&   icomp)
 {
     return 0.;
@@ -502,10 +502,10 @@ Real saturationNeumann( const Real& /* t */,
 
 // Boundary condition of Robin
 Real saturationRobin( const Real& /* t */,
-                      const Real& x,
-                      const Real& y,
-                      const Real& z,
-                      const ID&   /*icomp*/)
+                      const Real& /* x */,
+                      const Real& /* y */,
+                      const Real& /* z */,
+                      const ID&   /* icomp */)
 {
     return 0.;
 }

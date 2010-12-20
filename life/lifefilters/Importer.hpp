@@ -53,14 +53,14 @@ enum MeshFormat
     NETGEN  /*!< NetGen type mesh */
 };
 
-//! importer General interface for read different types of mesh.
+//! Importer General interface for read different types of mesh.
 /*!
   @author Christophe Prud'homme <christophe.prudhomme@epfl.ch>
 
   Import different type of mesh data formats into Life mesh data structure.
 
 */
-class importer
+class Importer
 {
 public:
 
@@ -68,7 +68,7 @@ public:
     //@{
 
     //! Empty constructor, use GMSH as default mesh format
-    importer():
+    Importer():
         M_fileName ( ),
         M_format   ( GMSH )
     {}
@@ -78,7 +78,7 @@ public:
       @param filename mesh filename to import
       @param format format of the file
     */
-    importer( std::string const& fileName, MeshFormat const&  format ):
+    Importer( std::string const& fileName, MeshFormat const&  format ):
         M_fileName ( fileName ),
         M_format   ( format )
     {}
@@ -87,9 +87,9 @@ public:
     /*!
       @param import Importer object to be copied
     */
-    importer( const importer& import ):
-        M_fileName ( import.M_fileName ),
-        M_format   ( import.M_format )
+    Importer( const Importer& importer ):
+        M_fileName ( importer.M_fileName ),
+        M_format   ( importer.M_format )
     {}
 
     //@}
@@ -101,7 +101,7 @@ public:
     /*!
       @param import Importer object to be copied
     */
-    importer& operator= ( const importer& import );
+    Importer& operator= ( const Importer& importer );
 
     //@}
 
@@ -168,11 +168,6 @@ public:
     }
 
     //@}
-
-    inline void __attribute__ ((__deprecated__)) setFilename( std::string const& fileName )
-    {
-        setFileName( fileName );
-    }
 
 private:
 

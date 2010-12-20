@@ -41,9 +41,9 @@
 
 #include <life/lifefem/AssemblyElemental.hpp>
 #include <life/lifefem/bcManage.hpp>
-#include <life/lifefem/NumericalFluxes.hpp>
+#include <life/lifefem/HyperbolicFluxNumerical.hpp>
 
-#include <life/lifesolver/dataHyperbolic.hpp>
+#include <life/lifesolver/HyperbolicData.hpp>
 
 namespace
 {
@@ -141,7 +141,7 @@ public:
                                    const Real&, const UInt& ) >
     Function_Type;
 
-    typedef DataHyperbolic< Mesh >                   data_Type;
+    typedef HyperbolicData< Mesh >                   data_Type;
 
     typedef BCHandler                                bchandler_Type;
     typedef boost::shared_ptr< bchandler_Type >      bchandlerPtr_Type;
@@ -311,7 +311,16 @@ public:
       Useful for parallel print in programs.
       @return Constant reference of the displayer of the problem.
     */
-    inline Displayer const & displayer() const
+    inline Displayer const & getDisplayer() const
+    {
+        return M_displayer;
+    }
+
+    //! Returns displayer.
+    /*!
+      @return Reference of the displayer of the problem.
+    */
+    inline Displayer & getDisplayer()
     {
         return M_displayer;
     }
@@ -684,9 +693,14 @@ CFL() const
 		}
 
                 // Compute the local CFL without the time step
-                localCFL = e / K * M_numericalFlux->getNormInfty ( leftValue[0], rightValue[0], normal, iElem,
+                localCFL = e / K * M_numericalFlux->normInfinity ( leftValue[0],
+                                                                   rightValue[0],
+                                                                   normal,
+                                                                   iElem,
                                                                    M_data.dataTime()->time(),
-                                                                   quadPoint(0), quadPoint(1), quadPoint(2) );
+                                                                   quadPoint(0),
+                                                                   quadPoint(1),
+                                                                   quadPoint(2) );
 
                 // Select the maximum between the old CFL condition and the new CFL condition
                 if ( localCFL > localCFLOld  )
@@ -705,7 +719,7 @@ CFL() const
     }
 
     // Compute the timeStep according to CLF
-    const Real timeStep( M_data.getCFLrelax() / localCFL );
+    const Real timeStep( M_data.getCFLRelaxParameter() / localCFL );
 
     // Return the correct value of the time step
     return timeStep;
@@ -741,7 +755,7 @@ setInitialSolution ( const Function_Type& initialSolution )
 template< typename Mesh,typename SolverType >
 void
 HyperbolicSolver< Mesh, SolverType >::
-localReconstruct ( const UInt& iElem )
+localReconstruct ( const UInt& /* iElem */ )
 {
 
     ;
@@ -846,13 +860,13 @@ localEvolve ( const UInt& iElem )
                     // Compute the boundary contribution
                     rightValue[0] = bcBase( M_data.dataTime()->time(), quadPoint(0), quadPoint(1), quadPoint(2), 0 );
 
-                    const Real localFaceFlux = M_numericalFlux->getFirstDerivativePhysicalFluxDotNormal ( normal,
-                                                                                                          iElem,
-                                                                                                          M_data.dataTime()->time(),
-                                                                                                          quadPoint(0),
-                                                                                                          quadPoint(1),
-                                                                                                          quadPoint(2),
-                                                                                                          rightValue[ 0 ] );
+                    const Real localFaceFlux = M_numericalFlux->firstDerivativePhysicalFluxDotNormal ( normal,
+                                                                                                       iElem,
+                                                                                                       M_data.dataTime()->time(),
+                                                                                                       quadPoint(0),
+                                                                                                       quadPoint(1),
+                                                                                                       quadPoint(2),
+                                                                                                       rightValue[ 0 ] );
                     // Update the local flux of the current face with the quadrature weight
                     localFaceFluxWeight[0] += localFaceFlux * M_FESpace.feBd().weightMeas( ig );
                 }
@@ -952,7 +966,7 @@ localEvolve ( const UInt& iElem )
 template< typename Mesh, typename SolverType >
 void
 HyperbolicSolver< Mesh, SolverType >::
-localAverage ( const UInt& iElem )
+localAverage ( const UInt& /* iElem */ )
 {
 
     ;

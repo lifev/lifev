@@ -33,8 +33,8 @@
  *
  */
 
-#ifndef _DATAHYPERBOLIC_H_
-#define _DATAHYPERBOLIC_H_ 1
+#ifndef _HYPERBOLICDATA_H_
+#define _HYPERBOLICDATA_H_ 1
 
 #include <life/lifemesh/dataMesh.hpp>
 
@@ -44,7 +44,7 @@
 namespace LifeV
 {
 /*!
-  @class DataHyperbolic
+  @class HyperbolicData
 
   @author Alessio Fumagalli <alessio.fumagalli@mail.polimi.it>
   @author Michel Kern       <michel.kern@inria.fr>
@@ -61,7 +61,7 @@ namespace LifeV
   @todo class not finished!
  */
 template <typename Mesh>
-class DataHyperbolic
+class HyperbolicData
 {
 public:
 
@@ -83,23 +83,23 @@ public:
     //@{
 
     //! Empty Constructor
-    DataHyperbolic();
+    HyperbolicData();
 
     //! Constructor using a data file.
     /*!
       @param dataFile GetPot data file for setup the problem
       @param section the section for the Darcy data
     */
-    DataHyperbolic( const GetPot& dataFile, const std::string& section = "hyperbolic" );
+    HyperbolicData( const GetPot& dataFile, const std::string& section = "hyperbolic" );
 
     //! Copy constructor.
     /*!
       @param dataDarcy object to take a copy
     */
-    DataHyperbolic( const DataHyperbolic &dataHyperbolic );
+    HyperbolicData( const HyperbolicData &hyperbolicData );
 
     //! Virtual destructor
-    virtual ~DataHyperbolic();
+    virtual ~HyperbolicData();
 
     //@}
 
@@ -110,7 +110,7 @@ public:
     /*!
       @param dataDarcy The DataDarcy to be copied
     */
-    DataHyperbolic& operator=( const DataHyperbolic& dataHyperbolic );
+    HyperbolicData& operator=( const HyperbolicData& hyperbolicData );
 
     //@}
 
@@ -203,11 +203,6 @@ public:
 
     //@}
 
-    inline Real __attribute__ ((__deprecated__)) getCFLrelax () const
-    {
-        return getCFLRelaxParameter ();
-    }
-
 protected:
 
     //! Data containers for time and mesh
@@ -229,7 +224,7 @@ protected:
 // ===================================================
 
 template < typename Mesh >
-DataHyperbolic<Mesh>::DataHyperbolic( ):
+HyperbolicData<Mesh>::HyperbolicData( ):
         // Data containers
         M_data          ( ),
         M_time          ( ),
@@ -245,23 +240,23 @@ DataHyperbolic<Mesh>::DataHyperbolic( ):
 
 // Copy constructor
 template < typename Mesh >
-DataHyperbolic<Mesh>::DataHyperbolic( const DataHyperbolic &dataHyperbolic ):
+HyperbolicData<Mesh>::HyperbolicData( const HyperbolicData &hyperbolicData ):
         // Data containers
-        M_data        ( dataHyperbolic.M_data ),
-        M_time        ( dataHyperbolic.M_time ),
-        M_mesh        ( dataHyperbolic.M_mesh ),
+        M_data        ( hyperbolicData.M_data ),
+        M_time        ( hyperbolicData.M_time ),
+        M_mesh        ( hyperbolicData.M_mesh ),
         // Miscellaneous
-        M_verbose     ( dataHyperbolic.M_verbose ),
-        M_section     ( dataHyperbolic.M_section ),
+        M_verbose     ( hyperbolicData.M_verbose ),
+        M_section     ( hyperbolicData.M_section ),
         // CFL
-        M_relaxCFL    ( dataHyperbolic.M_relaxCFL )
+        M_relaxCFL    ( hyperbolicData.M_relaxCFL )
 {
 
 }
 
 // Virtual destructor
 template < typename Mesh >
-DataHyperbolic<Mesh>::~DataHyperbolic()
+HyperbolicData<Mesh>::~HyperbolicData()
 {
 
 }
@@ -272,20 +267,20 @@ DataHyperbolic<Mesh>::~DataHyperbolic()
 
 // Overloading of the operator =
 template < typename Mesh >
-DataHyperbolic<Mesh>&
-DataHyperbolic<Mesh>::operator=( const DataHyperbolic& dataHyperbolic )
+HyperbolicData<Mesh>&
+HyperbolicData<Mesh>::operator=( const HyperbolicData& hyperbolicData )
 {
     // Avoid auto-copy
-    if ( this != &dataHyperbolic )
+    if ( this != &hyperbolicData )
     {
         // Data containers
-        M_data        = dataHyperbolic.M_data;
-        M_time        = dataHyperbolic.M_time;
-        M_mesh        = dataHyperbolic.M_mesh;
+        M_data        = hyperbolicData.M_data;
+        M_time        = hyperbolicData.M_time;
+        M_mesh        = hyperbolicData.M_mesh;
         // Mescellaneous
-        M_verbose     = dataHyperbolic.M_verbose;
+        M_verbose     = hyperbolicData.M_verbose;
         // CFL
-        M_relaxCFL    = dataHyperbolic.M_relaxCFL;
+        M_relaxCFL    = hyperbolicData.M_relaxCFL;
     }
 
     return *this;
@@ -299,7 +294,7 @@ DataHyperbolic<Mesh>::operator=( const DataHyperbolic& dataHyperbolic )
 // External set up method
 template < typename Mesh >
 void
-DataHyperbolic<Mesh>::setup( const Data_Type& dataFile,
+HyperbolicData<Mesh>::setup( const Data_Type& dataFile,
                              const std::string& section )
 {
 
@@ -328,9 +323,9 @@ DataHyperbolic<Mesh>::setup( const Data_Type& dataFile,
 // Print attiributes of the class
 template < typename Mesh >
 void
-DataHyperbolic<Mesh>::showMe( std::ostream& output ) const
+HyperbolicData<Mesh>::showMe( std::ostream& output ) const
 {
-    output << "Class DataHyperbolic:" << std::endl;
+    output << "Class HyperbolicData:" << std::endl;
     M_time->showMe( output );
     M_mesh->showMe( output );
     output << "Verbosity level     " << M_verbose << std::endl
@@ -341,4 +336,4 @@ DataHyperbolic<Mesh>::showMe( std::ostream& output ) const
 
 } // Namespace LifeV
 
-#endif /* _DATAHYPERBOLIC_H_ */
+#endif /* _HYPERBOLICDATA_H_ */
