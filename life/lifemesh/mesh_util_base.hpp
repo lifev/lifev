@@ -52,8 +52,8 @@
 namespace LifeV
 {
 
-// namespace MeshUtilities
-// {
+namespace MeshUtility
+{
 /*
    todo change the class names:
        "EnquireBEntity --> EnquireBoundaryEntity" and so on
@@ -854,10 +854,10 @@ template <typename MeshType>
 UInt __attribute__ (( deprecated ))
 testClosedDomain_Top( MeshType const & mesh, UInt & numBoundaryEdges )
 {
-	return testClosedDomain( mesh, numBoundaryEdges );
+	return testDomainTopology( mesh, numBoundaryEdges );
 }
 template <typename MeshType>
-UInt testClosedDomain( MeshType const & mesh, UInt & numBoundaryEdges )
+UInt testDomainTopology( MeshType const & mesh, UInt & numBoundaryEdges )
 {
 
     typedef std::set <BareEdge, cmpBareItem<BareEdge> > localTemporaryEdgeContainer_Type;
@@ -915,10 +915,10 @@ template <typename MeshEntityListType>
 bool __attribute__ (( deprecated ))
 checkMarkerSet( const MeshEntityListType & meshEntityList )
 {
-	return checkIsMarkerSetInEntityList( meshEntityList );
+	return checkIsMarkerSet( meshEntityList );
 }
 template <typename MeshEntityListType>
-bool checkIsMarkerSetInEntityList( const MeshEntityListType & meshEntityList )
+bool checkIsMarkerSet( const MeshEntityListType & meshEntityList )
 {
     typedef typename MeshEntityListType::const_iterator MeshEntityListTypeConstIterator_Type;
     bool ok( true );
@@ -1135,10 +1135,10 @@ template <typename MeshEntityListType>
 bool __attribute__ (( deprecated ))
 checkIdnumber( const MeshEntityListType & meshEntityList )
 {
-	return checkIdInEntityList( meshEntityList );
+	return checkId( meshEntityList );
 }
 template <typename MeshEntityListType>
-bool checkIdInEntityList( const MeshEntityListType & meshEntityList )
+bool checkId( const MeshEntityListType & meshEntityList )
 {
     typedef typename MeshEntityListType::const_iterator MeshEntityListTypeConstIterator_Type;
     bool ok( true );
@@ -1161,10 +1161,10 @@ template <typename MeshEntityListType>
 void __attribute__ (( deprecated ))
 fixIdnumber( MeshEntityListType & meshEntityList )
 {
-	fixIdInEntityList( meshEntityList );
+	fixId( meshEntityList );
 }
 template <typename MeshEntityListType>
-void fixIdInEntityList( MeshEntityListType & meshEntityList )
+void fixId( MeshEntityListType & meshEntityList )
 {
     UInt counter( 0 );
     typedef typename MeshEntityListType::iterator Iter;
@@ -1290,7 +1290,7 @@ fixBoundaryPoints( MeshType & mesh, std::ostream & logStream = std::cout,
 
 //!It makes sure that boundary edges are stored first
 /*!
-    Calls fixIdInEntityList (@sa fixIdInEntityList)
+    Calls fixId (@sa fixId)
     @pre It assumes that boundary points are properly stored in the mesh
 */
 template <typename MeshType>
@@ -1309,13 +1309,13 @@ correctEdgesStoringOrder( MeshType & mesh )
     EnquireBEntity<MeshType > enquireBoundaryEdge( mesh );
 
     std::partition( mesh.edgeList.begin(), mesh.edgeList.end(), enquireBoundaryEdge );
-    fixIdInEntityList( mesh.edgeList );
+    fixId( mesh.edgeList );
 }
 
 
 //!It makes sure that boundary faces are stored first
 /*!
-    Calls fixIdInEntityList (@sa fixIdInEntityList)
+    Calls fixId (@sa fixId)
     @pre It assumes that boundary points are properly stored in the mesh
 */
 template <typename MeshType>
@@ -1334,7 +1334,7 @@ correctFacesStoringOrder( MeshType & mesh )
     EnquireBEntity<MeshType> enquireBoundaryFace( mesh );
 
     std::partition( mesh.faceList.begin(), mesh.faceList.end(), enquireBoundaryFace );
-    fixIdInEntityList( mesh.faceList );
+    fixId( mesh.faceList );
 }
 
 
@@ -2244,7 +2244,7 @@ p2MeshFromP1Data( MeshType & mesh, std::ostream & logStream = std::cout )
 //   }
 
 
-// } // namespace MeshUtilities
+} // namespace MeshUtility
 
 } // namespace LifeV
 #endif
