@@ -125,7 +125,7 @@ public:
     typedef baseList3D_Type                                                                           bcBaseList_Type;
     typedef BCInterface3DData                                                                         data_Type;
 
-    typedef singleton< factory< BCInterface3DFunction< physicalSolver_Type > , bcBaseList_Type > >    factoryFunction_Type;
+    typedef FactorySingleton< Factory< BCInterface3DFunction< physicalSolver_Type > , bcBaseList_Type > >    factoryFunction_Type;
 
     typedef BCHandler                                                                                 bcHandler_Type;
     typedef boost::shared_ptr< bcHandler_Type >                                                       bcHandlerPtr_Type;
