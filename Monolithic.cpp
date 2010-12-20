@@ -368,11 +368,8 @@ Monolithic::initialize( FSIOperator::fluidPtr_Type::value_type::function_Type co
     M_pFESpace->interpolate(p0, p, M_data->dataFluid()->dataTime()->time());
 
     vector_Type d(M_dFESpace->map());
-    M_dFESpace->interpolate(d0, d, M_data->getDataSolid()->dataTime()->time());
-
     M_dFESpace->interpolate(d0, d, M_data->dataSolid()->getDataTime()->time());
 
-    M_dFESpace->interpolate(d0, d, M_data->getDataSolid()->getDataTime()->time());
     initialize(u, p, d);
 }
 
