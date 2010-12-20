@@ -513,9 +513,9 @@ MultiscaleModelFSI3D::setupGlobalData( const std::string& fileName )
 
     //Global physical quantities
     if ( !dataFile.checkVariable( "fluid/physics/density" ) )
-        M_data->dataFluid()->density( M_globalData->fluidDensity() );
+        M_data->dataFluid()->setDensity( M_globalData->fluidDensity() );
     if ( !dataFile.checkVariable( "fluid/physics/viscosity" ) )
-        M_data->dataFluid()->viscosity( M_globalData->fluidViscosity() );
+        M_data->dataFluid()->setViscosity( M_globalData->fluidViscosity() );
 
     if ( !dataFile.checkVariable( "solid/physics/density" ) )
         M_data->dataSolid()->setDensity( M_globalData->structureDensity() );

@@ -143,7 +143,7 @@ class MultiscaleCoupling;
 class MultiscaleData;
 
 // Type definitions
-typedef EntityFlag                                                        bcFlag_Type;
+typedef entityFlag_Type                                                   bcFlag_Type;
 
 typedef Displayer::commPtr_Type                                           multiscaleCommPtr_Type;
 
