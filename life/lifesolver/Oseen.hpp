@@ -55,7 +55,7 @@
 #include <life/lifearray/EpetraMatrix.hpp>
 #include <life/lifearray/EpetraVector.hpp>
 
-#include <life/lifecore/chrono.hpp>
+#include <life/lifecore/LifeChrono.hpp>
 
 #include <life/lifefem/Assembly.hpp>
 #include <life/lifefem/bcManage.hpp>
