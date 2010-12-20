@@ -75,7 +75,7 @@ QuadRule::QuadRule( const QuadRule& qr, const UInt dim) :
         M_pt( qr.M_nbQuadPt ), M_shape( qr.M_shape ), M_name( qr.M_name ),
         M_nbQuadPt( qr.M_nbQuadPt ), M_degOfExact( qr.M_degOfExact ), M_dimension(dim)
 {
-    ASSERT(dim >= getReferenceDimension(M_shape)," Downgrading quadrature rule is forbidden ")
+    ASSERT(dim >= shapeDimension(M_shape)," Downgrading quadrature rule is forbidden ")
 
     for (UInt i(0); i<M_nbQuadPt; ++i)
     {
@@ -92,7 +92,7 @@ QuadRule::QuadRule(std::string name, ReferenceShapes shape, UInt dimension, UInt
         M_degOfExact( degreeOfExactness),
         M_dimension( dimension)
 {
-    ASSERT(dimension >= getReferenceDimension(shape)," Downgrading quadrature rule is forbidden ");
+    ASSERT(dimension >= shapeDimension(shape)," Downgrading quadrature rule is forbidden ");
 
     va_list quadList;
     va_start(quadList,nbQuadPt);
@@ -236,7 +236,7 @@ void QuadRule::setExactness(const UInt& exactness)
 
 void QuadRule::setDimensionShape(const UInt& newDim, const ReferenceShapes& newShape)
 {
-    ASSERT(newDim >= getReferenceDimension(newShape)," Impossible shape-dimension combinaison ");
+    ASSERT(newDim >= shapeDimension(newShape)," Impossible shape-dimension combinaison ");
     M_dimension = newDim;
     M_shape = newShape;
 

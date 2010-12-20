@@ -41,10 +41,10 @@ namespace LifeV
 UInt __attribute__ ((__deprecated__)) getReferenceDimension(const ReferenceShapes& shape)
 {
 	// You should substitute any call to getReferenceDimension with a call to getReferenceShapeDimension
-	return getReferenceShapeDimension(shape);
+	return shapeDimension(shape);
 }
 
-UInt getReferenceShapeDimension(const ReferenceShapes& shape)
+UInt shapeDimension(const ReferenceShapes& shape)
 {
     switch (shape)
     {

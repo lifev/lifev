@@ -120,7 +120,7 @@ enum ReferenceShapes
     @return the geometric dimension of the shape
     @sa ReferenceShapes
  */
-UInt getReferenceShapeDimension(const ReferenceShapes& shape);
+UInt shapeDimension(const ReferenceShapes& shape);
 
 UInt __attribute__ ((__deprecated__)) getReferenceDimension(const ReferenceShapes& shape);
 
