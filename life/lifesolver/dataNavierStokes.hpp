@@ -431,7 +431,7 @@ private:
     Real             M_ZSectionFinal;
     UInt             M_NbPolygonEdges; // number of edges of the polygon (in mesh) describing the circle
 
-    DataStringList   M_stabilizationList;
+    StringDataList   M_stabilizationList;
 };
 
 
