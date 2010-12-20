@@ -41,8 +41,8 @@
 
 #include <life/lifearray/elemMat.hpp>
 #include <life/lifearray/elemVec.hpp>
-#include <life/lifefem/elemOper.hpp>
-#include <life/lifefem/assemb.hpp>
+#include <life/lifefem/AssemblyElemental.hpp>
+#include <life/lifefem/Assembly.hpp>
 #include <life/lifefem/bcManage.hpp>
 #include <life/lifealg/SolverTrilinos.hpp>
 #include <life/lifealg/EpetraMap.hpp>
@@ -50,8 +50,8 @@
 #include <life/lifearray/EpetraVector.hpp>
 #include <life/lifefem/bcHandler.hpp>
 #include <life/lifecore/chrono.hpp>
-#include <life/lifefem/sobolevNorms.hpp>
-#include <life/lifefem/geoMap.hpp>
+#include <life/lifefem/SobolevNorms.hpp>
+#include <life/lifefem/GeometricMap.hpp>
 #include <life/lifesolver/HeartMonodomainData.hpp>
 #include <boost/shared_ptr.hpp>
 #include <life/lifefem/FESpace.hpp>

@@ -120,7 +120,7 @@ public:
     const region_Type& reducedConductivitySphere()      const { return M_reducedConductivitySphere; }
 
     //! verbose
-    const Real         verbose()                        const { return M_verbose; }
+    const Real&        verbose()                        const { return M_verbose; }
 
     //! FE space order
     std::string        uOrder()                         const { return M_uOrder; }
