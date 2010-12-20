@@ -39,7 +39,7 @@
  */
 
 #include <life/lifecore/life.hpp>
-#include <life/lifemesh/structuredMesh3D.hpp>
+#include <life/lifemesh/RegionMesh3DStructured.hpp>
 
 namespace LifeV
 {

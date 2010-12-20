@@ -53,7 +53,7 @@
 #else // THREEDIM
 #include <life/lifemesh/regionMesh3D.hpp>
 #include <life/lifefilters/ImporterMesh3D.hpp>
-#include <life/lifemesh/structuredMesh3D.hpp>
+#include <life/lifemesh/RegionMesh3DStructured.hpp>
 #endif
 
 namespace LifeV

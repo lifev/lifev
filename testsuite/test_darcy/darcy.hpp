@@ -39,7 +39,7 @@
 
 #include <life/lifecore/life.hpp>
 
-#include <life/lifemesh/structuredMesh3D.hpp>
+#include <life/lifemesh/RegionMesh3DStructured.hpp>
 #include <life/lifealg/EpetraMap.hpp>
 #include <life/lifemesh/MeshPartitioner.hpp>
 

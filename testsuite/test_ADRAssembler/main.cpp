@@ -58,7 +58,7 @@
 #include <life/lifefem/BCManage.hpp>
 
 #include <life/lifemesh/MeshPartitioner.hpp>
-#include <life/lifemesh/structuredMesh3D.hpp>
+#include <life/lifemesh/RegionMesh3DStructured.hpp>
 #include <life/lifemesh/regionMesh3D.hpp>
 
 #include <life/lifesolver/ADRAssembler.hpp>

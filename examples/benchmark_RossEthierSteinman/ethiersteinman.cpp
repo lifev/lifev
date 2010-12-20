@@ -60,7 +60,7 @@
 #include <life/lifefilters/ExporterEnsight.hpp>
 #include <life/lifefilters/ExporterHDF5.hpp>
 #include <life/lifefilters/ExporterEmpty.hpp>
-#include <life/lifemesh/structuredMesh3D.hpp>
+#include <life/lifemesh/RegionMesh3DStructured.hpp>
 
 #include <iostream>
 #include <fstream>
