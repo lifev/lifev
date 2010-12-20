@@ -298,19 +298,19 @@ void IPStabilization<MeshType, DofType>::apply( MatrixType& matrix,  const Vecto
         return;
     }
 
-    ChronoFake chronoUpdate;
-    ChronoFake chronoBeta;
-    ChronoFake chronoElemComp;
-    ChronoFake chronoAssembly1;
-    ChronoFake chronoAssembly2;
-    ChronoFake chronoAssembly3;
-    ChronoFake chronoAssembly4;
-    ChronoFake chronoAssembly5;
-    ChronoFake chronoAssembly6;
-    ChronoFake chronoAssembly7;
-    ChronoFake chronoAssembly8;
-    ChronoFake chronoAssembly9;
-    Chrono chronoAssembly;
+    LifeChronoFake chronoUpdate;
+    LifeChronoFake chronoBeta;
+    LifeChronoFake chronoElemComp;
+    LifeChronoFake chronoAssembly1;
+    LifeChronoFake chronoAssembly2;
+    LifeChronoFake chronoAssembly3;
+    LifeChronoFake chronoAssembly4;
+    LifeChronoFake chronoAssembly5;
+    LifeChronoFake chronoAssembly6;
+    LifeChronoFake chronoAssembly7;
+    LifeChronoFake chronoAssembly8;
+    LifeChronoFake chronoAssembly9;
+    LifeChrono chronoAssembly;
 
     ElemMat elMatU( M_feOnSide1->nbFEDof(), nDimensions    , nDimensions   );
     ElemMat elMatP( M_feOnSide1->nbFEDof(), nDimensions + 1, nDimensions+1 );
