@@ -50,10 +50,10 @@
 #pragma GCC diagnostic warning "-Wunused-variable"
 #pragma GCC diagnostic warning "-Wunused-parameter"
 
-#include <life/lifecore/factory.hpp>
-#include <life/lifecore/singleton.hpp>
-#include <life/lifecore/GetPot.hpp>
-#include <life/lifecore/displayer.hpp>
+#include <life/lifecore/Factory.hpp>
+#include <life/lifecore/FactorySingleton.hpp>
+#include <life/lifefilters/GetPot.hpp>
+#include <life/lifecore/Displayer.hpp>
 #include <life/lifearray/EpetraMatrix.hpp>
 
 namespace LifeV
