@@ -33,16 +33,16 @@ along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
   @maintainer Radu Popescu <radu.popescu@epfl.ch>
 */
 
-#ifndef POLICY_H
-#define POLICY_H 1
+#ifndef FACTORY_POLICY_H
+#define FACTORY_POLICY_H 1
 
 namespace LifeV
 {
 /**
-   @class policyCreationUsingNew
+   @class FactoryPolicyCreationUsingNew
 */
 template <class T>
-struct policyCreationUsingNew
+struct FactoryPolicyCreationUsingNew
 {
     //! @name Static methods
     //@{
@@ -59,10 +59,10 @@ struct policyCreationUsingNew
 };
 
 /**
-   @class policyLifeTimeDefault
+   @class FactoryPolicyLifeTimeDefault
 */
 template <class T>
-struct policyLifeTimeDefault
+struct FactoryPolicyLifeTimeDefault
 {
     //! @name Static methods
     //@{
@@ -80,4 +80,4 @@ struct policyLifeTimeDefault
 
 } // Namespace LifeV
 
-#endif // POLICY_H
+#endif // FACTORY_POLICY_H
