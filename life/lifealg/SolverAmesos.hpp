@@ -52,7 +52,7 @@
 
 #include <life/lifearray/EpetraVector.hpp>
 #include <life/lifearray/EpetraMatrix.hpp>
-#include <life/lifecore/displayer.hpp>
+#include <life/lifecore/Displayer.hpp>
 
 class GetPot;
 
