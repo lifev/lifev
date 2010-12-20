@@ -147,7 +147,7 @@ EnsightToHdf5::run()
 
     fullMeshPtr->transformMesh( geometryScale, geometryRotate, geometryTranslate );
 
-    partitionMesh< RegionMesh3D<LinearTetra> >   meshPart(fullMeshPtr, d->comm);
+    MeshPartitioner< RegionMesh3D<LinearTetra> >   meshPart(fullMeshPtr, d->comm);
 
     std::string uOrder =  dataFile( "fluid/space_discretization/vel_order", "P1");
     std::string pOrder =  dataFile( "fluid/space_discretization/press_order", "P1");
@@ -213,22 +213,22 @@ EnsightToHdf5::run()
 
 #ifdef HAVE_HDF5
     if (exporterType.compare("hdf5") == 0)
-        exporter.reset( new Hdf5exporter<RegionMesh3D<LinearTetra> > ( dataFile, exporterName ) );
+        exporter.reset( new ExporterHDF5<RegionMesh3D<LinearTetra> > ( dataFile, exporterName ) );
     else
 #endif
-        exporter.reset( new Ensight<RegionMesh3D<LinearTetra> > ( dataFile, exporterName ) );
+        exporter.reset( new ExporterEnsight<RegionMesh3D<LinearTetra> > ( dataFile, exporterName ) );
 
     exporter->setPostDir( exportDir ); // This is a test to see if M_post_dir is working
     exporter->setMeshProcId( meshPart.meshPartition(), d->comm->MyPID() );
 
 #ifdef HAVE_HDF5
     if (importerType.compare("hdf5") == 0)
-        importer.reset( new Hdf5exporter<RegionMesh3D<LinearTetra> > ( dataFile, importerName ) );
+        importer.reset( new ExporterHDF5<RegionMesh3D<LinearTetra> > ( dataFile, importerName ) );
     else
 #endif
-        importer.reset( new Ensight<RegionMesh3D<LinearTetra> > ( dataFile, importerName ) );
+        importer.reset( new ExporterEnsight<RegionMesh3D<LinearTetra> > ( dataFile, importerName ) );
 
-    // todo this will not work with the Ensight filter (it uses M_importDir, a private variable)
+    // todo this will not work with the ExporterEnsight filter (it uses M_importDir, a private variable)
     importer->setPostDir( importDir ); // This is a test to see if M_post_dir is working
     importer->setMeshProcId( meshPart.meshPartition(), d->comm->MyPID() );
 
@@ -266,7 +266,7 @@ EnsightToHdf5::run()
     exporter->postProcess( t0 );
 
     // Temporal loop
-    Chrono chrono;
+    LifeChrono chrono;
     int iter = 1;
 
     for ( Real time = t0 + dt ; time <= tFinal + dt/2.; time += dt, iter++)
