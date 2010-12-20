@@ -205,7 +205,7 @@ void test_bdf::run()
     Real delta_t = dataFile("bdf/timestep", 0.5);
     Real t0 = 1.;
     UInt ord_bdf = dataFile("bdf/order", 3);
-    BdfVS<EpetraVector> bdf;
+    TimeAdvanceBDFVariableStep<EpetraVector> bdf;
     bdf.setup(ord_bdf);
 
     //Initialization
