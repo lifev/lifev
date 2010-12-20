@@ -196,7 +196,7 @@ MultiscaleModelFluid3D::buildSystem()
         M_alpha = M_bdf->bdfVelocity().coefficientFirstDerivative( 0 ) / M_data->dataTime()->timeStep();
         *M_beta = M_bdf->bdfVelocity().extrapolation();
 	M_bdf->bdfVelocity().updateRHSContribution( M_data->dataTime()->timeStep() );
-        *M_rhs  = M_fluid->matrixMass() * M_bdf->bdfVelocity().rhsContributionFirstDerivative(); 
+        *M_rhs  = M_fluid->matrixMass() * M_bdf->bdfVelocity().rhsContributionFirstDerivative();
     }
 
     //Set problem coefficients
@@ -219,8 +219,8 @@ MultiscaleModelFluid3D::updateSystem()
     *M_beta = M_bdf->bdfVelocity().extrapolation();
 
     M_bdf->bdfVelocity().updateRHSContribution( M_data->dataTime()->timeStep() );
-    *M_rhs  = M_fluid->matrixMass() * M_bdf->bdfVelocity().rhsContributionFirstDerivative(); 
- 
+    *M_rhs  = M_fluid->matrixMass() * M_bdf->bdfVelocity().rhsContributionFirstDerivative();
+
 
     //Set problem coefficients
     M_fluid->updateSystem( M_alpha, *M_beta, *M_rhs );
@@ -518,9 +518,9 @@ MultiscaleModelFluid3D::setupGlobalData( const std::string& fileName )
 
     //Global physical quantities
     if ( !dataFile.checkVariable( "fluid/physics/density" ) )
-        M_data->density( M_globalData->fluidDensity() );
+        M_data->setDensity( M_globalData->fluidDensity() );
     if ( !dataFile.checkVariable( "fluid/physics/viscosity" ) )
-        M_data->viscosity( M_globalData->fluidViscosity() );
+        M_data->setViscosity( M_globalData->fluidViscosity() );
 }
 
 void
