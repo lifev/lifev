@@ -345,11 +345,11 @@ BCInterface3DFunctionSolver< FSI >::updatePhysicalSolverVariables()
 
 template< >
 inline void
-BCInterface3DFunctionSolver< Oseen< RegionMesh3D< LinearTetra > > >::updatePhysicalSolverVariables()
+BCInterface3DFunctionSolver< OseenSolver< RegionMesh3D< LinearTetra > > >::updatePhysicalSolverVariables()
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 5023 ) << "BCInterface3DFunctionSolver<Oseen>::UpdateOperatorVariables  " << "\n";
+    Debug( 5023 ) << "BCInterface3DFunctionSolver<OseenSolver>::UpdateOperatorVariables  " << "\n";
 #endif
 
     // Create/Update variables for Oseen problem
@@ -412,14 +412,14 @@ BCInterface3DFunctionSolver< Oseen< RegionMesh3D< LinearTetra > > >::updatePhysi
 
 template< >
 inline void
-BCInterface3DFunctionSolver< OseenShapeDerivative< RegionMesh3D< LinearTetra > > >::updatePhysicalSolverVariables()
+BCInterface3DFunctionSolver< OseenSolverShapeDerivative< RegionMesh3D< LinearTetra > > >::updatePhysicalSolverVariables()
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 5023 ) << "BCInterface3DFunctionSolver<OseenShapeDerivative>::UpdateOperatorVariables  " << "\n";
+    Debug( 5023 ) << "BCInterface3DFunctionSolver<OseenSolverShapeDerivative>::UpdateOperatorVariables  " << "\n";
 #endif
 
-    // Create/Update variables for OseenShapeDerivative problem
+    // Create/Update variables for OseenSolverShapeDerivative problem
     for ( std::set< physicalSolverList >::iterator j = M_list.begin(); j != M_list.end(); ++j )
         switch ( *j )
         {
@@ -520,11 +520,11 @@ BCInterface3DFunctionSolver< FSI >::createAccessList( const data_Type& data )
 
 template< >
 inline void
-BCInterface3DFunctionSolver< Oseen< RegionMesh3D< LinearTetra > > >::createAccessList( const data_Type& data )
+BCInterface3DFunctionSolver< OseenSolver< RegionMesh3D< LinearTetra > > >::createAccessList( const data_Type& data )
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 5023 ) << "BCInterface3DFunctionSolver<Oseen>::createAccessList" << "\n";
+    Debug( 5023 ) << "BCInterface3DFunctionSolver<OseenSolver>::createAccessList" << "\n";
 #endif
 
     std::map< std::string, physicalSolverList > mapList;
@@ -538,11 +538,11 @@ BCInterface3DFunctionSolver< Oseen< RegionMesh3D< LinearTetra > > >::createAcces
 
 template< >
 inline void
-BCInterface3DFunctionSolver< OseenShapeDerivative< RegionMesh3D< LinearTetra > > >::createAccessList( const data_Type& data )
+BCInterface3DFunctionSolver< OseenSolverShapeDerivative< RegionMesh3D< LinearTetra > > >::createAccessList( const data_Type& data )
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 5023 ) << "BCInterface3DFunctionSolver<OseenShapeDerivative>::createAccessList" << "\n";
+    Debug( 5023 ) << "BCInterface3DFunctionSolver<OseenSolverShapeDerivative>::createAccessList" << "\n";
 #endif
 
     std::map< std::string, physicalSolverList > mapList;
