@@ -26,7 +26,7 @@
 
 /*!
     @file
-    @brief File contains BCNormalManager class for handling normal essential boundary conditions
+    @brief File contains BCManageNormal class for handling normal essential boundary conditions
 
 	@author Miguel Fernandez <miguel.fernandez@inria.fr>
     @contributor Christophe Prud'homme <christophe.prudhomme@epfl.ch>

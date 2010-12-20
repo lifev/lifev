@@ -373,7 +373,7 @@ void Ensight<MeshType>::writeAsciiGeometry(const std::string gFile)
     {
         geoFile << setw(8) << i ;
         for (UInt icoor=0; icoor<nDimensions; icoor++)
-            geoFile << setw(12) << float(this->M_mesh->pointList(i).coor()[icoor]);
+            geoFile << setw(12) << float(this->M_mesh->pointList(i).coordinatesArray()[icoor]);
         geoFile << "\n";
     }
 

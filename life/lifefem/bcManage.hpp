@@ -563,7 +563,7 @@ bcManage( MatrixType& matrix,
     bool globalassemble=false;
 
 
-    BCNormalManager<MatrixType> bcNormalManager;
+    BCManageNormal<MatrixType> bcManageNormal;
 
 
     // Loop on boundary conditions
@@ -575,7 +575,7 @@ bcManage( MatrixType& matrix,
             //Normal, Tangential or Directional boundary conditions
             if ( (bcHandler[ i ].mode() == Tangential) || (bcHandler[ i ].mode() == Normal) || (bcHandler[ i ].mode() == Directional) )
             {
-                bcNormalManager.init(bcHandler[ i ],time); //initialize bcNormalManager
+                bcManageNormal.init(bcHandler[ i ],time); //initialize bcManageNormal
             }
         case EssentialEdges:
         case EssentialVertices:
@@ -604,11 +604,11 @@ bcManage( MatrixType& matrix,
         matrix.globalAssemble();
 
     //Build the internal structure, if needed
-    bcNormalManager.build(mesh, dof,currentBdFE,matrix,bcHandler.offset(),rightHandSide.mapPtr()->commPtr());
-    bcNormalManager.exportToParaview("normalAndTangents");
+    bcManageNormal.build(mesh, dof,currentBdFE,matrix,bcHandler.offset(),rightHandSide.mapPtr()->commPtr());
+    bcManageNormal.exportToParaview("normalAndTangents");
 
     //Applying the basis change, if needed
-    bcNormalManager.bcShiftToNormalTangentialCoordSystem(matrix, rightHandSide);
+    bcManageNormal.bcShiftToNormalTangentialCoordSystem(matrix, rightHandSide);
 
     // Loop on boundary conditions
     for ( ID i = 0; i < bcHandler.size(); ++i )
@@ -631,7 +631,7 @@ bcManage( MatrixType& matrix,
     }
 
     //Return back to the initial basis
-    bcNormalManager.bcShiftToCartesianCoordSystem(matrix, rightHandSide);
+    bcManageNormal.bcShiftToCartesianCoordSystem(matrix, rightHandSide);
 }
 
 

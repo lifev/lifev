@@ -30,7 +30,8 @@
 
     @author M.A. Fernandez
     @contributor Lucia Mirabella <lucia.mirabell@gmail.com>
-    @maintainer Lucia Mirabella <lucia.mirabell@gmail.com>
+    @contributor Mauro Perego <perego.mauro@gmail.com>
+    @maintainer Mauro Perego <perego.mauro@gmail.com>
 
     @date 06-2002
 

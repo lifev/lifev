@@ -139,10 +139,10 @@ public:
     /*!
     	@return Pointer to coordinate vector
      */
-    Real const * __attribute__ ((__deprecated__)) coor() const
-    {
-        return coordinatesArray();
-    };
+//    Real const * __attribute__ ((__deprecated__)) coor() const
+//    {
+//        return coordinatesArray();
+//    };
 
     //! Returns the reference to the x-coordinate
     /*!
@@ -248,10 +248,10 @@ public:
         The method allows to access coordinates and modify them
     	@return Coordinates array
      */
-    boost::array<Real,NDIM>& __attribute__ ((__deprecated__)) coordinate ( void )
-    {
-        return coordinates();
-    }
+//    boost::array<Real,NDIM>& __attribute__ ((__deprecated__)) coordinate ( void )
+//    {
+//        return coordinates();
+//    }
 
     //@}
 

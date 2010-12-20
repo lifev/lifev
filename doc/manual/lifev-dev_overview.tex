@@ -565,8 +565,8 @@ class GeoND {
   
   void showMe(bool verbose) const;
   
-  void setPoint(UInt const i,Geo0D  const & p); //put point 
-  bool setPointBD(UInt const i,Geo0D  const & p); //with forced bound check
+  void setPoint(UInt const identity, PointType  const & point); //put point 
+  bool setPointWithBoundaryCheck( ID const identity, PointType const & point ); //with forced bound check
   
   UInt & id() { return _id;};
   
@@ -603,15 +603,6 @@ class GeoElement1D : public GeoND<GeoShape>, public MarkerHandler<MARKER>
 {
 public:
   GeoElement1D();
-#ifdef TWODIM
-  /* In the 2D case, we store the ids of the adjacent 2Delements.
-     NOT THE POINTERS because we don't know the 2Delements type and 
-     I don't want to complicate the template declaration */
-   UInt ad_first()const {return _first;};
-   UInt ad_second()const {return _second;};
-   UInt & ad_first(){return _first;}
-   UInt & ad_second(){return _second;}
-#endif
 };
 
 template 
@@ -626,15 +617,13 @@ public:
 
   typedef typename GeoShape::GeoBShape EdgeShape;
   typedef  GeoElement1D<EdgeShape> EdgeType;
-#ifdef THREEDIM
   /* In the 3D case, we store the ids of the adjacent 3Delements.
      NOT THE POINTERS because we don't know the 3Delements type and 
      I don't want to complicate the template declaration */
-   UInt ad_first()const {return _first;};
-   UInt ad_second()const {return _second;};
-   UInt & ad_first(){return _first;}
-   UInt & ad_second(){return _second;}
-#endif
+   ID firstAdjacentElementIdentity() { return M_firstAdjacentElementIdentity;}
+   ID secondAdjacentElementIdentity(){ return M_secondAdjacentElementIdentity;}
+   ID& firstAdjacentElementIdentity() { return M_firstAdjacentElementIdentity;}
+   ID& secondAdjacentElementIdentity(){ return M_secondAdjacentElementIdentity;}
 };
 
 template 

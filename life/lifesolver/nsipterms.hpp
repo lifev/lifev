@@ -331,8 +331,8 @@ void IPStabilization<MeshType, DofType>::apply( MatrixType& matrix,  const Vecto
     for ( UInt iFace( M_mesh->numBFaces() + 1 ); iFace<= M_mesh->numFaces();
             ++iFace )
     {
-        const UInt iElAd1 ( M_mesh->face( iFace ).ad_first()  );
-        const UInt iElAd2 ( M_mesh->face( iFace ).ad_second() );
+        const UInt iElAd1 ( M_mesh->face( iFace ).firstAdjacentElementIdentity()  );
+        const UInt iElAd2 ( M_mesh->face( iFace ).secondAdjacentElementIdentity() );
 
         if ( iElAd1 == iElAd2 || iElAd1 == 0 || iElAd2 == 0)
         {
@@ -364,7 +364,7 @@ void IPStabilization<MeshType, DofType>::apply( MatrixType& matrix,  const Vecto
             // first, get the local trace of the velocity into beta
 
             // local id of the face in its adjacent element
-            UInt iFaEl ( M_mesh->face( iFace ).pos_first() );
+            UInt iFaEl ( M_mesh->face( iFace ).firstAdjacentElementPosition() );
             for ( UInt iNode ( 0 ); iNode < M_feBd->nbNode(); ++iNode )
             {
                 UInt iloc ( M_faceToPoint( iFaEl, iNode+1 ) );

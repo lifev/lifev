@@ -3084,11 +3084,11 @@ RegionMesh3D<GEOSHAPE, MC>::faceElement( UInt const i, UInt const Pos ) const
     ASSERT_BD( i > 0 ) ;
     if ( Pos == 1 )
     {
-        return ( faceList[ i -1 ] ).ad_first();
+        return ( faceList[ i -1 ] ).firstAdjacentElementIdentity();
     }
     else
     {
-        return ( faceList[ i -1 ] ).ad_second();
+        return ( faceList[ i -1 ] ).secondAdjacentElementIdentity();
     }
 }
 
@@ -3102,11 +3102,11 @@ RegionMesh3D<GEOSHAPE, MC>::faceElement( FaceType const & f, UInt const Pos ) co
     //ASSERT_BD( i >0 ) ;
     if ( Pos == 1 )
     {
-        return f.ad_first();
+        return f.firstAdjacentElementIdentity();
     }
     else
     {
-        return f.ad_second();
+        return f.secondAdjacentElementIdentity();
     }
 }
 
@@ -3503,10 +3503,10 @@ RegionMesh3D<GEOSHAPE, MC>::updateElementFaces( bool cf, const bool verbose, UIn
     {
         for ( typename Faces::iterator itf = faceList.begin(); itf != faceList.end(); ++itf )
         {
-            if ( itf->pos_first() != 0 )
-                M_VToF( itf->pos_first() , itf->ad_first() ) = itf->localId();
-            if ( itf->pos_second() != 0 )
-                M_VToF( itf->pos_second(), itf->ad_second() ) = itf->localId();
+            if ( itf->firstAdjacentElementPosition() != 0 )
+                M_VToF( itf->firstAdjacentElementPosition() , itf->firstAdjacentElementIdentity() ) = itf->localId();
+            if ( itf->secondAdjacentElementPosition() != 0 )
+                M_VToF( itf->secondAdjacentElementPosition(), itf->secondAdjacentElementIdentity() ) = itf->localId();
         }
         // we finish here
         setLinkSwitch( "HAS_VOLUME_TO_FACES" );
@@ -3581,8 +3581,8 @@ RegionMesh3D<GEOSHAPE, MC>::updateElementFaces( bool cf, const bool verbose, UIn
                     for ( UInt k = 1; k <= FaceType::S_numPoints; ++k )
                         face.setPoint( k, iv->point( ele.faceToPoint( j, k ) ) );
 
-                    face.ad_first()  = vid;
-                    face.pos_first() = j;
+                    face.firstAdjacentElementIdentity()  = vid;
+                    face.firstAdjacentElementPosition() = j;
 
                     // gets the marker from the RegionMesh
 
@@ -3595,8 +3595,8 @@ RegionMesh3D<GEOSHAPE, MC>::updateElementFaces( bool cf, const bool verbose, UIn
                     // nothing if the face is on the boundary
                     if ( e.first > M_numBFaces )
                     {
-                        faceList( e.first ).ad_second() = vid;
-                        faceList( e.first ).pos_second() = j;
+                        faceList( e.first ).secondAdjacentElementIdentity() = vid;
+                        faceList( e.first ).secondAdjacentElementPosition() = j;
 
                     }
                     else

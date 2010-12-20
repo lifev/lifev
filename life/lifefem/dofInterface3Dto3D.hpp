@@ -296,8 +296,8 @@ void DofInterface3Dto3D::interpolate( MeshType& mesh2, const UInt nbComp, const 
 
         ibF = i->second; // Face number at the interface
 
-        iElAd = mesh2.boundaryFace( ibF ).ad_first();  // id of the element adjacent to the face
-        iFaEl = mesh2.boundaryFace( ibF ).pos_first(); // local id of the face in its adjacent element
+        iElAd = mesh2.boundaryFace( ibF ).firstAdjacentElementIdentity();  // id of the element adjacent to the face
+        iFaEl = mesh2.boundaryFace( ibF ).firstAdjacentElementPosition(); // local id of the face in its adjacent element
 
         // Updating the local dof of the data vector in the adjacent element
         for ( UInt icmp = 0; icmp < nbComp; ++icmp )
@@ -549,11 +549,11 @@ void DofInterface3Dto3D::updateDofConnections( const Mesh& mesh1, const Dof& dof
         feBd1.update( mesh1.boundaryFace( i->first ) );  // Updating face information on mesh1
         feBd2.update( mesh2.boundaryFace( i->second ) );  // Updating face information on mesh2
 
-        iElAd1 = mesh1.boundaryFace( i->first ).ad_first();  // id of the element adjacent to the face (mesh1)
-        iElAd2 = mesh2.boundaryFace( i->second ).ad_first();  // id of the element adjacent to the face (mesh2)
+        iElAd1 = mesh1.boundaryFace( i->first ).firstAdjacentElementIdentity();  // id of the element adjacent to the face (mesh1)
+        iElAd2 = mesh2.boundaryFace( i->second ).firstAdjacentElementIdentity();  // id of the element adjacent to the face (mesh2)
 
-        iFaEl1 = mesh1.boundaryFace( i->first ).pos_first(); // local id of the face in its adjacent element (mesh1)
-        iFaEl2 = mesh2.boundaryFace( i->second ).pos_first(); // local id of the face in its adjacent element (mesh2)
+        iFaEl1 = mesh1.boundaryFace( i->first ).firstAdjacentElementPosition(); // local id of the face in its adjacent element (mesh1)
+        iFaEl2 = mesh2.boundaryFace( i->second ).firstAdjacentElementPosition(); // local id of the face in its adjacent element (mesh2)
 
         // Vertex based Dof on mesh1
         if ( nbDofPerVertex1 )

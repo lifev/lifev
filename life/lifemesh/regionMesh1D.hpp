@@ -1973,11 +1973,11 @@ RegionMesh1D<GEOSHAPE, MC>::edgeElement( EdgeType const & f, UInt const Pos ) co
     ASSERT_PRE( Pos == 1 || Pos == 2 , "Wrong position (1 or 2)" ) ;
     if ( Pos == 1 )
     {
-        return f.ad_first();
+        return f.firstAdjacentElementIdentity();
     }
     else
     {
-        return f.ad_second();
+        return f.secondAdjacentElementIdentity();
     }
 };
 

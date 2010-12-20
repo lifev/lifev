@@ -1468,8 +1468,8 @@ bool fixBoundaryFaces( MeshType & mesh,
                 faceContainerIterator->setPoint( kPointId, volumePtr->point( volumeShape.faceToPoint( jFaceLocalId, kPointId ) ) );
             }
             // Correct extra info
-            faceContainerIterator->ad_first() = volumeId;
-            faceContainerIterator->pos_first() = jFaceLocalId;
+            faceContainerIterator->firstAdjacentElementIdentity() = volumeId;
+            faceContainerIterator->firstAdjacentElementPosition() = jFaceLocalId;
             if ( faceContainerIterator->isMarkerUnset() )
             {
                 inheritPointsWeakerMarker( *faceContainerIterator );
@@ -1627,8 +1627,8 @@ bool buildFaces( MeshType & mesh,
             for ( UInt kPointId = 1; kPointId <= face_Type::S_numPoints; ++kPointId )
                 face.setPoint( kPointId, volumePtr->point( volumeShape.faceToPoint( jFaceLocalId, kPointId ) ) );
             // Add extra info
-            face.ad_first() = volumeId;
-            face.pos_first() = jFaceLocalId;
+            face.firstAdjacentElementIdentity() = volumeId;
+            face.firstAdjacentElementPosition() = jFaceLocalId;
             // Get marker value
             inheritPointsWeakerMarker( face );
             newFaceId = mesh.addFace( face, true ).id();
@@ -1732,8 +1732,8 @@ bool buildFaces( MeshType & mesh,
                 // a new face It must be internal.
                 for ( UInt kPointId = 1; kPointId <= face_Type::S_numPoints; ++kPointId )
                     face.setPoint( kPointId, volumeContainerIterator->point( volumeShape.faceToPoint( jFaceLocalId, kPointId ) ) );
-                face.ad_first() = volumeId;
-                face.pos_first() = jFaceLocalId;
+                face.firstAdjacentElementIdentity() = volumeId;
+                face.firstAdjacentElementPosition() = jFaceLocalId;
                 // gets the marker from the MeshType
                 face.setMarker( meshMarker );
                 mesh.addFace( face, false ); //The id should be correct
@@ -1742,8 +1742,8 @@ bool buildFaces( MeshType & mesh,
             {
                 if ( faceIdToBoolPair.first > numBoundaryFaces )  // internal
                 {
-                    mesh.faceList( faceIdToBoolPair.first ).ad_second() = volumeId;
-                    mesh.faceList( faceIdToBoolPair.first ).pos_second() = jFaceLocalId;
+                    mesh.faceList( faceIdToBoolPair.first ).secondAdjacentElementIdentity() = volumeId;
+                    mesh.faceList( faceIdToBoolPair.first ).secondAdjacentElementPosition() = jFaceLocalId;
                 }
             }
         }
@@ -2129,7 +2129,7 @@ p2MeshFromP1Data( MeshType & mesh, std::ostream & logStream = std::cout )
 //     mesh.unsetLinkSwitch("HAS_BOUNDAY_EDGES");
 //   }
 //   if (mesh.storedFaces()>0){
-//     if(mesh.face(1).ad_first(
+//     if(mesh.face(1).firstAdjacentElementIdentity(
 //     mesh.setLinkSwitch("HAS_BOUNDARY_EDGES");
 //   }  else{
 //     mesh.unsetLinkSwitch("HAS_BOUNDAY_EDGES");

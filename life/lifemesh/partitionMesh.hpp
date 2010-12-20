@@ -576,10 +576,10 @@ void partitionMesh<MeshType>::findRepeatedFacesFSI()
         for (UInt iface = 1; iface <= M_elementFaces; ++iface)
         {
             UInt face = M_originalMesh->localFaceId(ie, iface);
-            UInt vol  = M_originalMesh->face(face).ad_first();
+            UInt vol  = M_originalMesh->face(face).firstAdjacentElementIdentity();
             if (vol == ie)
             {
-                vol = M_originalMesh->face(face).ad_second();
+                vol = M_originalMesh->face(face).secondAdjacentElementIdentity();
             }
             if (vol != 0)
             {
@@ -657,10 +657,10 @@ void partitionMesh<MeshType>::partitionConnectivityGraph(UInt numParts)
             // global ID of the iface-th face in element ie
             UInt face = M_originalMesh->localFaceId(ie, iface);
             // first adjacent element to face "face"
-            UInt elem = M_originalMesh->face(face).ad_first();
+            UInt elem = M_originalMesh->face(face).firstAdjacentElementIdentity();
             if (elem == ie)
             {
-                elem = M_originalMesh->face(face).ad_second();
+                elem = M_originalMesh->face(face).secondAdjacentElementIdentity();
             }
             if (elem != 0)
             {
@@ -1229,8 +1229,8 @@ void partitionMesh<MeshType>::constructFaces()
             pf->setId (M_originalMesh->face(*is).id());
             pf->setLocalId(count);
 
-            Int elem1 = M_originalMesh->face(*is).ad_first();
-            Int elem2 = M_originalMesh->face(*is).ad_second();
+            Int elem1 = M_originalMesh->face(*is).firstAdjacentElementIdentity();
+            Int elem2 = M_originalMesh->face(*is).secondAdjacentElementIdentity();
 
             // find the mesh elements adjacent to the face
             im =  M_globalToLocalVolume[i].find(elem1);
@@ -1268,24 +1268,24 @@ void partitionMesh<MeshType>::constructFaces()
 
             if ((localElem1 == 0) && !boundary)
             {
-                pf->ad_first() = localElem2;
-                pf->pos_first() = M_originalMesh->face(*is).pos_second();
+                pf->firstAdjacentElementIdentity() = localElem2;
+                pf->firstAdjacentElementPosition() = M_originalMesh->face(*is).secondAdjacentElementPosition();
             }
             else
             {
-                pf->ad_first() = localElem1;
-                pf->pos_first() = M_originalMesh->face(*is).pos_first();
+                pf->firstAdjacentElementIdentity() = localElem1;
+                pf->firstAdjacentElementPosition() = M_originalMesh->face(*is).firstAdjacentElementPosition();
             }
 
             if ((localElem2 == 0) && !boundary)
             {
-                pf->ad_second() = localElem1;
-                pf->pos_second() = M_originalMesh->face(*is).pos_first();
+                pf->secondAdjacentElementIdentity() = localElem1;
+                pf->secondAdjacentElementPosition() = M_originalMesh->face(*is).firstAdjacentElementPosition();
             }
             else
             {
-                pf->ad_second()  = localElem2;
-                pf->pos_second() = M_originalMesh->face(*is).pos_second();
+                pf->secondAdjacentElementIdentity()  = localElem2;
+                pf->secondAdjacentElementPosition() = M_originalMesh->face(*is).secondAdjacentElementPosition();
             }
 
 

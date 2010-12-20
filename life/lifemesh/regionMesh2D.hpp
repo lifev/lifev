@@ -1838,11 +1838,11 @@ RegionMesh2D<GEOSHAPE, MC>::edgeElement( EdgeType const & f, UInt const Pos ) co
     ASSERT_PRE( Pos == 1 || Pos == 2 , "Wrong position (1 or 2)" ) ;
     if ( Pos == 1 )
     {
-        return f.ad_first();
+        return f.firstAdjacentElementIdentity();
     }
     else
     {
-        return f.ad_second();
+        return f.secondAdjacentElementIdentity();
     }
 };
 
@@ -2208,10 +2208,10 @@ RegionMesh2D<GEOSHAPE, MC>::updateElementEdges( bool ce, UInt ee )
     {
         for ( typename Edges::iterator ite = edgeList.begin(); ite != edgeList.end(); ++ite )
         {
-            if ( ite->pos_first() != 0 )
-                _FToE( ite->pos_first() , ite->ad_first() ) = ite->localId();
-            if ( ite->pos_second() != 0 )
-                _FToE( ite->pos_second(), ite->ad_second() ) = ite->localId();
+            if ( ite->firstAdjacentElementPosition() != 0 )
+                _FToE( ite->firstAdjacentElementPosition() , ite->firstAdjacentElementIdentity() ) = ite->localId();
+            if ( ite->secondAdjacentElementPosition() != 0 )
+                _FToE( ite->secondAdjacentElementPosition(), ite->secondAdjacentElementIdentity() ) = ite->localId();
         }
         // we finish here
         setLinkSwitch( "HAS_FACE_TO_EDGES" );
@@ -2263,8 +2263,8 @@ RegionMesh2D<GEOSHAPE, MC>::updateElementEdges( bool ce, UInt ee )
                     for ( UInt k = 1; k <= EdgeType::S_numPoints; ++k )//
                         //iface->point( ele.edgeToPoint( j, k ) );
                         edg.setPoint( k, iface->point( ele.edgeToPoint( j, k ) ) );
-                    edg.ad_first()  = fid;
-                    edg.pos_first() = j;
+                    edg.firstAdjacentElementIdentity()  = fid;
+                    edg.firstAdjacentElementPosition() = j;
 
                     // gets the marker from the RegionMesh
 
@@ -2278,8 +2278,8 @@ RegionMesh2D<GEOSHAPE, MC>::updateElementEdges( bool ce, UInt ee )
                     // nothing if the edge is on the boundary
                     if ( e.first > M_numBEdges )
                     {
-                        edgeList( e.first ).ad_second() = fid;
-                        edgeList( e.first ).pos_second() = j;
+                        edgeList( e.first ).secondAdjacentElementIdentity() = fid;
+                        edgeList( e.first ).secondAdjacentElementPosition() = j;
 
                     }
                 }

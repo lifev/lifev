@@ -359,8 +359,8 @@ addIPStabilizationStencil(const matrix_ptrType& matrixGalerkin,
     for (UInt iFace(nbBoundaryFaces+1); iFace<= nbFaces; ++iFace)
     {
         // Get the adjacent elements ID
-        const UInt adjacentElement1(M_fespace->mesh()->face(iFace).ad_first());
-        const UInt adjacentElement2(M_fespace->mesh()->face(iFace).ad_second());
+        const UInt adjacentElement1(M_fespace->mesh()->face(iFace).firstAdjacentElementIdentity());
+        const UInt adjacentElement2(M_fespace->mesh()->face(iFace).secondAdjacentElementIdentity());
 
         // Here we check that the face is included in the IP
         // stabilization: it is not a boundary face (we do not
@@ -584,8 +584,8 @@ addIPStabilizationStencil(const matrix_ptrType& matrixGalerkin,
     for (UInt iFace(nbBoundaryFaces+1); iFace<= nbFaces; ++iFace)
     {
         // Get the adjacent elements ID
-        const UInt adjacentElement1(M_fespace->mesh()->face(iFace).ad_first());
-        const UInt adjacentElement2(M_fespace->mesh()->face(iFace).ad_second());
+        const UInt adjacentElement1(M_fespace->mesh()->face(iFace).firstAdjacentElementIdentity());
+        const UInt adjacentElement2(M_fespace->mesh()->face(iFace).secondAdjacentElementIdentity());
 
         // Here we check that the face is included in the IP
         // stabilization: it is not a boundary face (we do not

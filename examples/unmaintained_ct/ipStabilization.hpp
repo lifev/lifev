@@ -191,8 +191,8 @@ void IPStabilization<MESH, DOF>::apply( MATRIX& matrix,  const VECTOR& state, co
     for ( UInt iFace = M_mesh->numBFaces() + 1; iFace<= M_mesh->numFaces();
             ++iFace )
     {
-        const UInt iElAd1 = M_mesh->face( iFace ).ad_first();
-        const UInt iElAd2 = M_mesh->face( iFace ).ad_second();
+        const UInt iElAd1 = M_mesh->face( iFace ).firstAdjacentElementIdentity();
+        const UInt iElAd2 = M_mesh->face( iFace ).secondAdjacentElementIdentity();
 
         if ( iElAd1 == iElAd2 || iElAd1 == 0 || iElAd2 == 0)
         {
@@ -224,7 +224,7 @@ void IPStabilization<MESH, DOF>::apply( MATRIX& matrix,  const VECTOR& state, co
             // first, get the local trace of the velocity into beta
 
             // local id of the face in its adjacent element
-            UInt iFaEl = M_mesh->face( iFace ).pos_first();
+            UInt iFaEl = M_mesh->face( iFace ).firstAdjacentElementPosition();
             for ( int iNode = 0; iNode < M_feBd.nbNode; ++iNode )
             {
                 UInt iloc = M_fToP( iFaEl, iNode+1 );
@@ -506,8 +506,8 @@ void IPStabilization<MESH, DOF>::apply_expl(VECTOR& vector, const VECTOR& state)
     for ( UInt iFace = M_mesh->numBFaces() + 1; iFace<= M_mesh->numFaces();
             ++iFace )
     {
-        const UInt iElAd1 = M_mesh->face( iFace ).ad_first();
-        const UInt iElAd2 = M_mesh->face( iFace ).ad_second();
+        const UInt iElAd1 = M_mesh->face( iFace ).firstAdjacentElementIdentity();
+        const UInt iElAd2 = M_mesh->face( iFace ).secondAdjacentElementIdentity();
 
         if ( iElAd1 == iElAd2 || iElAd1 == 0 || iElAd2 == 0)
         {
@@ -535,7 +535,7 @@ void IPStabilization<MESH, DOF>::apply_expl(VECTOR& vector, const VECTOR& state)
             // first, get the local trace of the velocity into beta
             // local id of the face in its adjacent element
 
-            UInt iFaEl = M_mesh->face( iFace ).pos_first();
+            UInt iFaEl = M_mesh->face( iFace ).firstAdjacentElementPosition();
             for ( int iNode = 0; iNode < M_feBd.nbNode; ++iNode )
             {
                 UInt iloc = M_fToP( iFaEl, iNode+1 );

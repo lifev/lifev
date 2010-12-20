@@ -168,159 +168,9 @@ public:
     {
         // nothing to be done
     }
-
-    //@}
-
-#ifdef TWODIM
-    //! @name Get Methods
-    //@{
-
-    //! Returns the identity of the first adjacent element
-    /*!
-    	@return Identity of the first adjacent element
-     */
-    ID firstAdjacentElementIdentity() const
-    {
-        return M_FirstAdjacentElementIdentity;
-    };
-    //! Returns the identity of the first adjacent element
-    /*!
-    	@return Identity of the first adjacent element
-     */
-    ID __attribute__ ((__deprecated__)) ad_first() const
-    {
-        return firstAdjacentElementIdentity();
-    };
-
-
-    //! Returns the identity of the second adjacent element
-    /*!
-    	@return Identity of the second adjacent element
-     */
-    ID secondAdjacentElementIdentity() const
-    {
-        return M_secondAdjacentElementIdentity;
-    };
-    //! Returns the identity of the second adjacent element
-    /*!
-    	@return Identity of the second adjacent element
-     */
-    ID __attribute__ ((__deprecated__)) ad_second() const
-    {
-        return secondAdjacentElementIdentity();
-    };
-
-    //! Returns the identity of the first adjacent element
-    /*!
-    	@return Identity of the first adjacent element
-     */
-    ID & firstAdjacentElementIdentity()
-    {
-        return M_firstAdjacentElementIdentity;
-    };
-    //! Returns the identity of the first adjacent element
-    /*!
-    	@return Identity of the first adjacent element
-     */
-    ID & __attribute__ ((__deprecated__)) ad_first()
-    {
-        return firstAdjacentElementIdentity();
-    };
-
-    //! Returns the identity of the second adjacent element
-    /*!
-    	@return Identity of the second adjacent element
-     */
-    ID & secondAdjacentElementIdentity()
-    {
-        return M_secondAdjacentElementIdentity;
-    };
-    //! Returns the identity of the second adjacent element
-    /*!
-    	@return Identity of the second adjacent element
-     */
-    ID & __attribute__ ((__deprecated__)) ad_second()
-    {
-        return secondAdjacentElementIdentity();
-    };
-
-    //! Returns the position of the first adjacent element
-    /*!
-    	@return Position of the first adjacent element
-     */
-    ID firstAdjacentElementPosition() const
-    {
-        return M_firstAdjacentElementPosition;
-    };
-    //! Returns the position of the first adjacent element
-    /*!
-    	@return Position of the first adjacent element
-     */
-    ID __attribute__ ((__deprecated__)) pos_first() const
-    {
-        return firstAdjacentElementPosition();
-    };
-
-    //! Returns the position of the second adjacent element
-    /*!
-    	@return Position of the second adjacent element
-     */
-    ID secondAdjacentElementPosition() const
-    {
-        return M_secondAdjacentElementPosition;
-    };
-    //! Returns the position of the second adjacent element
-    /*!
-    	@return Position of the second adjacent element
-     */
-    ID __attribute__ ((__deprecated__)) pos_second() const
-    {
-        return secondAdjacentElementPosition();
-    };
-
-    //! Returns the position of the first adjacent element
-    /*!
-    	@return Position of the first adjacent element
-     */
-    ID & firstAdjacentElementPosition()
-    {
-        return M_firstAdjacentElementPosition;
-    };
-    //! Returns the position of the first adjacent element
-    /*!
-    	@return Position of the first adjacent element
-     */
-    ID & __attribute__ ((__deprecated__)) pos_first()
-    {
-        return firstAdjacentElementPosition();
-    };
-
-    //! Returns the position of the second adjacent element
-    /*!
-    	@return Position of the second adjacent element
-     */
-    ID & secondAdjacentElementPosition()
-    {
-        return M_secondAdjacentElementPosition;
-    };
-    //! Returns the position of the second adjacent element
-    /*!
-    	@return Position of the second adjacent element
-     */
-    ID & __attribute__ ((__deprecated__)) pos_second()
-    {
-        return secondAdjacentElementPosition();
-    };
-
-    //@}
-
-private:
-    ID M_firstAdjacentElementIdentity;
-    ID M_secondAdjacentElementIdentity;
-    ID M_firstAdjacentElementPosition;
-    ID M_secondAdjacentElementPosition;
-#endif
 };
+    //@}
+
 
 //! GeoElement2D - Class for Faces
 /*!
@@ -390,14 +240,6 @@ public:
 
     	return M_firstAdjacentElementIdentity;
     };
-    //! Returns the identity of the first adjacent element
-    /*!
-    	@return Identity of the first adjacent element
-     */
-    ID __attribute__ ((__deprecated__)) ad_first() const
-    {
-        return firstAdjacentElementIdentity();
-    };
 
     //! Returns the identity of the second adjacent element
     /*!
@@ -406,14 +248,6 @@ public:
     ID secondAdjacentElementIdentity() const
     {
         return M_secondAdjacentElementIdentity;
-    };
-    //! Returns the identity of the second adjacent element
-    /*!
-    	@return Identity of the second adjacent element
-     */
-    ID __attribute__ ((__deprecated__)) ad_second() const
-    {
-        return secondAdjacentElementIdentity();
     };
 
     //! Returns the identity of the first adjacent element
@@ -424,14 +258,6 @@ public:
     {
         return M_firstAdjacentElementIdentity;
     };
-    //! Returns the identity of the first adjacent element
-    /*!
-    	@return Identity of the first adjacent element
-     */
-    ID & __attribute__ ((__deprecated__)) ad_first()
-    {
-        return firstAdjacentElementIdentity();
-    };
 
     //! Returns the identity of the second adjacent element
     /*!
@@ -440,14 +266,6 @@ public:
     ID & secondAdjacentElementIdentity()
     {
         return M_secondAdjacentElementIdentity;
-    };
-    //! Returns the identity of the second adjacent element
-    /*!
-    	@return Identity of the second adjacent element
-     */
-    ID & __attribute__ ((__deprecated__)) ad_second()
-    {
-        return secondAdjacentElementIdentity();
     };
 
     //! Returns the position of the first adjacent element
@@ -458,14 +276,6 @@ public:
     {
         return M_firstAdjacentElementPosition;
     };
-    //! Returns the position of the first adjacent element
-    /*!
-    	@return Position of the first adjacent element
-     */
-    ID __attribute__ ((__deprecated__)) pos_first() const
-    {
-        return firstAdjacentElementPosition();
-    };
 
     //! Returns the position of the second adjacent element
     /*!
@@ -475,14 +285,7 @@ public:
     {
         return M_secondAdjacentElementPosition;
     };
-    //! Returns the position of the second adjacent element
-    /*!
-    	@return Position of the second adjacent element
-     */
-    ID __attribute__ ((__deprecated__)) pos_second() const
-    {
-        return secondAdjacentElementPosition();
-    };
+
 
     //! Returns the position of the first adjacent element
     /*!
@@ -491,14 +294,6 @@ public:
     ID & firstAdjacentElementPosition()
     {
         return M_firstAdjacentElementPosition;
-    };
-    //! Returns the position of the first adjacent element
-    /*!
-    	@return Position of the first adjacent element
-     */
-    ID & __attribute__ ((__deprecated__)) pos_first()
-    {
-        return firstAdjacentElementPosition();
     };
 
     //! Returns the position of the second adjacent element
@@ -509,14 +304,7 @@ public:
     {
         return M_secondAdjacentElementPosition;
     };
-    //! Returns the position of the second adjacent element
-    /*!
-    	@return Position of the second adjacent element
-     */
-    ID & __attribute__ ((__deprecated__)) pos_second()
-    {
-        return secondAdjacentElementPosition();
-    };
+
     //@}
 
 private:

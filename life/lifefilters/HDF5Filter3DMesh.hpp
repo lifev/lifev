@@ -625,10 +625,10 @@ typename HDF5Filter3DMesh<MeshType>::meshPtr_Type HDF5Filter3DMesh<MeshType>::ge
         pf->setLocalId(j + 1);
         pf->setId(faceGlobalId[j]);
 
-        pf->ad_first() = faceNeighbourId[0][j];
-        pf->ad_second() = faceNeighbourId[1][j];
-        pf->pos_first() = faceNeighbourPos[0][j];
-        pf->pos_second() = faceNeighbourPos[1][j];
+        pf->firstAdjacentElementIdentity() = faceNeighbourId[0][j];
+        pf->secondAdjacentElementIdentity() = faceNeighbourId[1][j];
+        pf->firstAdjacentElementPosition() = faceNeighbourPos[0][j];
+        pf->secondAdjacentElementPosition() = faceNeighbourPos[1][j];
 
         pf->setMarker(faceMarkers[j]);
         for (UInt k = 0; k < faceNodes; ++k)
@@ -895,10 +895,10 @@ void HDF5Filter3DMesh<MeshType>::writePartition(meshPtr_Type mesh, std::string& 
         faceMarkers[j] = mesh->faceList[j].marker();
         faceGlobalId[j] = mesh->faceList[j].id();
 
-        faceNeighbourId[0][j] = mesh->faceList[j].ad_first();
-        faceNeighbourId[1][j] = mesh->faceList[j].ad_second();
-        faceNeighbourPos[0][j] = mesh->faceList[j].pos_first();
-        faceNeighbourPos[1][j] = mesh->faceList[j].pos_second();
+        faceNeighbourId[0][j] = mesh->faceList[j].firstAdjacentElementIdentity();
+        faceNeighbourId[1][j] = mesh->faceList[j].secondAdjacentElementIdentity();
+        faceNeighbourPos[0][j] = mesh->faceList[j].firstAdjacentElementPosition();
+        faceNeighbourPos[1][j] = mesh->faceList[j].secondAdjacentElementPosition();
 
         if (mesh->isBoundaryFace(j+1))
         {

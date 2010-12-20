@@ -176,13 +176,6 @@ public:
         @return TRUE if the point is set
      */
     bool setPointWithBoundaryCheck( ID const identity, PointType const & point );
-    //!Inserts a point using point references with forced boundary check
-    /*!
-        @param identity Identity of the point to be inserted
-        @param point Point to be inserted
-        @return TRUE if the point is set
-     */
-    bool __attribute__ ((__deprecated__)) setPointBD( ID const identity, PointType const & point );
 
 
     //!Inserts a point using pointers
@@ -198,13 +191,6 @@ public:
         @return %%%%
      */
     bool setPointWithBoundaryCheck( ID const identity, PointType const * point );
-    //!Inserts a point using pointers with forced boundary check
-    /*!
-        @param identity Identity of the point to be inserted
-        @param point Point to be inserted
-        @return TRUE if the point is set
-     */
-    bool __attribute__ ((__deprecated__)) setPointBD( ID const identity, PointType const * point );
 
     //! Sets the flag of a point
     /*!
@@ -377,11 +363,6 @@ bool GeoND<GEOSHAPE, POINTTYPE>::setPointWithBoundaryCheck( ID const identity, P
     M_points[ identity -1 ] = ( &point );
     return true;
 }
-template <typename GEOSHAPE, typename POINTTYPE>
-bool __attribute__ ((__deprecated__)) GeoND<GEOSHAPE, POINTTYPE>::setPointBD( ID const identity, PointType const & point )
-{
-    return setPointWithBoundaryCheck( identity, point );
-}
 
 template <typename GEOSHAPE, typename POINTTYPE>
 inline
@@ -399,11 +380,6 @@ bool GeoND<GEOSHAPE, POINTTYPE>::setPointWithBoundaryCheck( ID const identity, P
         return false;
     M_points[ identity -1 ] = ( point );
     return true;
-}
-template <typename GEOSHAPE, typename POINTTYPE>
-bool __attribute__ ((__deprecated__)) GeoND<GEOSHAPE, POINTTYPE>::setPointBD( ID const identity, PointType const * point )
-{
-    return setPointWithBoundaryCheck( identity, point );
 }
 
 template <typename GEOSHAPE, typename POINTTYPE>

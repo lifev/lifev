@@ -305,7 +305,7 @@ readMesh2D( RegionMesh2D      & mesh, //readMesh2D
 
         // fix bedge adjacency information
         ia1 = ID( ie( i ) );
-        pe->ad_first() = ia1--; // Later I use ia1 to have an offset so I postdecrement it by 1
+        pe->firstAdjacentElementIdentity() = ia1--; // Later I use ia1 to have an offset so I postdecrement it by 1
 
         i1 = iel( 0, ia1 );
         i2 = iel( 1, ia1 );
@@ -315,17 +315,17 @@ readMesh2D( RegionMesh2D      & mesh, //readMesh2D
 
         if ( test == i1 )
             {
-            pe->pos_first() = 2;
+            pe->firstAdjacentElementPosition() = 2;
             }
 
         else if ( test == i2 )
             {
-            pe->pos_first() = 3;
+            pe->firstAdjacentElementPosition() = 3;
             }
 
         else if ( test == i3 )
             {
-            pe->pos_first() = 1;
+            pe->firstAdjacentElementPosition() = 1;
             }
 
         else
@@ -653,7 +653,7 @@ readFreeFemFile( RegionMesh2D<GeoShape, MC> & mesh,
     std::debug( 3000 ) << "reading "<< __nt << " triangles\n";
 #endif
 
-    std::map<UInt,UInt> edge_to_ad_first, edge_to_pos_first;
+    std::map<UInt,UInt> edge_to_firstAdjacentElementIdentity, edge_to_firstAdjacentElementPosition;
 
     // reading vertices
     for ( UInt __i = 0; __i < __nt; ++__i )
@@ -675,18 +675,18 @@ readFreeFemFile( RegionMesh2D<GeoShape, MC> & mesh,
 
         _edge                             = makeBareEdge( i1, i2 );
         _check                            = _be.addIfNotThere( _edge.first );
-        edge_to_ad_first[ _check.first ]  = __i + 1;
-        edge_to_pos_first[ _check.first ] = 1;
+        edge_to_firstAdjacentElementIdentity[ _check.first ]  = __i + 1;
+        edge_to_firstAdjacentElementPosition[ _check.first ] = 1;
 
         _edge                             = makeBareEdge( i2, i3 );
         _check                            = _be.addIfNotThere( _edge.first );
-        edge_to_ad_first[ _check.first ]  = __i + 1;
-        edge_to_pos_first[ _check.first ] = 2;
+        edge_to_firstAdjacentElementIdentity[ _check.first ]  = __i + 1;
+        edge_to_firstAdjacentElementPosition[ _check.first ] = 2;
 
         _edge                             = makeBareEdge( i3, i1 );
         _check                            = _be.addIfNotThere( _edge.first );
-        edge_to_ad_first[ _check.first ]  = __i + 1;
-        edge_to_pos_first[ _check.first ] = 3;
+        edge_to_firstAdjacentElementIdentity[ _check.first ]  = __i + 1;
+        edge_to_firstAdjacentElementPosition[ _check.first ] = 3;
     }
 
     //    ( __triangle[ 3 * i + 2] > __triangle[ 3 * i + 1 ] )
@@ -761,8 +761,8 @@ readFreeFemFile( RegionMesh2D<GeoShape, MC> & mesh,
         pe->setPoint( 2, mesh.point( __edge_nodes[ 2 * __i + 1 ] ) );
         _edge = makeBareEdge( __edge_nodes[ 2 * __i ], __edge_nodes[ 2 * __i + 1 ] );
         UInt map_it( _be.id( _edge.first ) );
-        pe->ad_first() = edge_to_ad_first[ map_it ];
-        pe->pos_first() = edge_to_pos_first[ map_it ];
+        pe->firstAdjacentElementIdentity() = edge_to_firstAdjacentElementIdentity[ map_it ];
+        pe->firstAdjacentElementPosition() = edge_to_firstAdjacentElementPosition[ map_it ];
     }
 
     // add the triangles to the mesh

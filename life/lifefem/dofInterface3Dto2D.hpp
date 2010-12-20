@@ -421,9 +421,9 @@ updateDofConnections( const MeshType& mesh1 )
     for ( std::vector< std::pair<ID, ID> >::iterator i = M_faceList.begin(); i != M_faceList.end(); ++i )
     {
 
-        iElAd1 = mesh1.boundaryFace( i->first ).ad_first();  // id of the element adjacent to the face (mesh1)
+        iElAd1 = mesh1.boundaryFace( i->first ).firstAdjacentElementIdentity();  // id of the element adjacent to the face (mesh1)
 
-        iFaEl1 = mesh1.boundaryFace( i->first ).pos_first(); // local id of the face in its adjacent element (mesh1)
+        iFaEl1 = mesh1.boundaryFace( i->first ).firstAdjacentElementPosition(); // local id of the face in its adjacent element (mesh1)
 
         // Vertex based Dof on mesh1
         if ( nbDofPerVertex1 )

@@ -591,8 +591,8 @@ BCHandler::bcUpdate( Mesh& mesh, CurrentBdFE& boundaryFE, const Dof& dof )
 
         boundaryFE.updateMeas( mesh.bElement( iBoundaryElement ) );  // updating finite element information
         elementMarker = mesh.bElement( iBoundaryElement ).marker(); // We keep the element marker
-        iAdjacentElem = mesh.bElement( iBoundaryElement ).ad_first();  // id of the element adjacent to the face
-        iElemBElement = mesh.bElement( iBoundaryElement ).pos_first(); // local id of the face in its adjacent element
+        iAdjacentElem = mesh.bElement( iBoundaryElement ).firstAdjacentElementIdentity();  // id of the element adjacent to the face
+        iElemBElement = mesh.bElement( iBoundaryElement ).firstAdjacentElementPosition(); // local id of the face in its adjacent element
 
         UInt lDof = 1; //local Dof on boundary element
 
@@ -880,8 +880,8 @@ BCHandler::bcUpdateOldVersion( Mesh& mesh, CurrentBdFE& boundaryFE, const Dof& d
     // ===================================================
     for ( ID iBoundaryElement = 1 ; iBoundaryElement <= numBElements; ++iBoundaryElement )
     {
-        iAdjacentElem = mesh.bElement( iBoundaryElement ).ad_first();  // id of the element adjacent to the face
-        iElemBElement = mesh.bElement( iBoundaryElement ).pos_first(); // local id of the face in its adjacent element
+        iAdjacentElem = mesh.bElement( iBoundaryElement ).firstAdjacentElementIdentity();  // id of the element adjacent to the face
+        iElemBElement = mesh.bElement( iBoundaryElement ).firstAdjacentElementPosition(); // local id of the face in its adjacent element
 
         boundaryFE.updateMeas( mesh.bElement( iBoundaryElement ) );  // updating finite element information
         elementMarker = mesh.bElement( iBoundaryElement ).marker(); // We keep the element marker (added by Gwenol Grandperrin)
