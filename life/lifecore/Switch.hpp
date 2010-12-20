@@ -40,7 +40,7 @@ along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
 #include<map>
 #include<string>
 
-#include <life/lifecore/util_string.hpp>
+#include <life/lifecore/StringUtility.hpp>
 
 namespace LifeV
 {
