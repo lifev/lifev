@@ -90,7 +90,7 @@ MultiscaleAlgorithm::subIterate()
 
     // Algorithm Type
     if ( M_displayer->isLeader() )
-        std::cout << " MS-  " << Enum2String( M_type, multiscaleAlgorithmsMap ) << " Algorithm" << std::endl;
+        std::cout << " MS-  " << enum2String( M_type, multiscaleAlgorithmsMap ) << " Algorithm" << std::endl;
 }
 
 void
@@ -98,7 +98,7 @@ MultiscaleAlgorithm::showMe()
 {
     std::cout << "=================== Algorithm Information ===================" << std::endl << std::endl;
 
-    std::cout << "Algorithm type      = " << Enum2String( M_type, multiscaleAlgorithmsMap ) << std::endl
+    std::cout << "Algorithm type      = " << enum2String( M_type, multiscaleAlgorithmsMap ) << std::endl
               << "Max Sub-iterations  = " << M_subiterationsMaximumNumber << std::endl
               << "Tolerance           = " << M_tolerance << std::endl << std::endl;
     std::cout << std::endl << std::endl;
@@ -165,7 +165,7 @@ MultiscaleAlgorithm::save( const UInt& subiterationsNumber, const Real& residual
         if ( M_multiscale->globalData()->dataTime()->isFirstTimeStep() )
         {
             output.open( filename.c_str(), std::ios::trunc );
-            output << "% Algorithm Type: " << Enum2String( M_type, multiscaleAlgorithmsMap ) << std::endl;
+            output << "% Algorithm Type: " << enum2String( M_type, multiscaleAlgorithmsMap ) << std::endl;
             output << "% Subiteration maximum number: " << M_subiterationsMaximumNumber << std::endl;
             output << "% Tolerance: " << M_tolerance << std::endl << std::endl;
             output << "% TIME                     Subiterations      Residual" << std::endl;
