@@ -27,7 +27,7 @@
 /*!
     @file
     @brief File containing a class to  deal the time advancing scheme
-  
+
     @date
     @author Matteo Pozzoli <matteo1.pozzoli@mail.polimi.it>
     @contributor Matteo Pozzoli <matteo1.pozzoli@mail.polimi.it>
@@ -164,12 +164,12 @@ public:
      @param solution  is  a (new) value of the state vector
      */
      virtual void shiftRight(const feVectorType& solution ) = 0;
-  
-    //!Update the right hand side 
+
+    //!Update the right hand side
     /*
     update rhs contributions: \f$f_V\f$ and \$f_W\f$
-    */ 
-    void updateRHSContribution( const Real& timeStep); 
+    */
+    void updateRHSContribution( const Real& timeStep);
 
      //! Update the right hand side \f$ f_V \f$ of the time derivative formula
      /*!
@@ -178,7 +178,7 @@ public:
      @return  rhsV the first order Rhs
      */
      virtual  feVectorType updateRHSFirstDerivative(const Real& timeStep = 1 )  = 0;
- 
+
      //! Update the right hand side \f$ f_W \f$ of the time derivative formula
      /*
      Sets and Returns the right hand side \f$ f_W \f$ of the time derivative formula
@@ -196,13 +196,13 @@ public:
      //! Spy state vector
      /*!
      Spy of stateVector;
-     this method saves  n-vectors  ( unknownsIJ.m) 
+     this method saves  n-vectors  ( unknownsIJ.m)
      containing the each  element of state vector;
      the index J defines the J-element of StateVector;
      the index I defines the I-th time that this method is called;
      */
      void spyStateVector();
- 
+
      //! Spy rhs vector
      /*!
      Spy  of rhsVector;
@@ -211,7 +211,7 @@ public:
      the index I defines the I-th time that this method is called;
      */
      void spyRHS();
-   
+
      //@}
 
      //! @name Set Methods
@@ -245,7 +245,7 @@ public:
      @param x0 is the initial unk;
      */
      virtual void setInitialCondition( const feVectorType& x0) = 0;
- 
+
 
      //! initialize the State Vector
      /*!
@@ -265,7 +265,7 @@ public:
      @param w0 is the initial accelerate
      */
      virtual void setInitialCondition( const feVectorType& x0, const feVectorType& v0, const feVectorType& w0) = 0;
- 
+
     //! initialize the StateVector
     /*!
     Initialize all the entries of the unknown vector to be derived with the vector x0.
@@ -292,7 +292,7 @@ public:
 
    //!@name Get Methods
    //@{
-  
+
    //! Return the i-th coefficient of the first time derivative
    /*!
    @param i index of coefficient alpha
@@ -325,7 +325,7 @@ public:
     //! Compute the polynomial extrapolation of solution
     /*!
     Compute the polynomial extrapolation approximation of order \f$n-1\f$ of
-    \f$u^{n+1}\f$ defined by the n stored state vectors 
+    \f$u^{n+1}\f$ defined by the n stored state vectors
    @returns  extrap of state vector u^*
     */
     virtual feVectorType extrapolation() const  = 0;
@@ -478,7 +478,7 @@ updateRHSContribution(const Real& timeStep )
 {
   //! update rhsContribution  of the first Derivate
   this->updateRHSFirstDerivative( timeStep);
-  
+
   //! update rhsContribution  of the second Derivate
   if( M_orderDerivate == 2 )
     this->updateRHSSecondDerivative( timeStep );
@@ -607,7 +607,7 @@ TimeAdvance<feVectorType>::accelerate(const feVectorType& u)
 // ===================================================
 
 //! create factory
-typedef singleton< factory < TimeAdvance<>,  std::string> > TimeAdvanceFactory;
+typedef FactorySingleton< Factory < TimeAdvance<>,  std::string> > TimeAdvanceFactory;
 
 }
 #endif  /* TIMEADVANCEBASE_H */
