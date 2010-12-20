@@ -40,7 +40,7 @@
 
 #include <life/lifecore/life.hpp>
 #include <life/lifefem/refEle.hpp>
-#include <life/lifefem/localDofPattern.hpp>
+#include <life/lifefem/DOFLocalPattern.hpp>
 
 namespace LifeV
 {

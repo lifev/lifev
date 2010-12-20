@@ -51,7 +51,7 @@
 
 #include <life/lifecore/life.hpp>
 
-#include <life/lifefem/localDofPattern.hpp>
+#include <life/lifefem/DOFLocalPattern.hpp>
 
 #include <life/lifemesh/basisElSh.hpp>
 
