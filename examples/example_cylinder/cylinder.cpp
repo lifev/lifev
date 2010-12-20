@@ -401,18 +401,18 @@ Cylinder::run()
     boost::shared_ptr<DataNavierStokes> dataNavierStokes(new DataNavierStokes());
     dataNavierStokes->setup( dataFile );
 
-    DataMesh dataMesh;
-    dataMesh.setup(dataFile, "fluid/space_discretization");
+    MeshData meshData;
+    meshData.setup(dataFile, "fluid/space_discretization");
 
     boost::shared_ptr<RegionMesh3D<LinearTetra> > fullMeshPtr (new RegionMesh3D<LinearTetra>);
-    readMesh(*fullMeshPtr, dataMesh);
+    readMesh(*fullMeshPtr, meshData);
 
     MeshPartitioner< RegionMesh3D<LinearTetra> >   meshPart(fullMeshPtr, d->comm);
 
     if (verbose) std::cout << std::endl;
     if (verbose) std::cout << "Time discretization order " << dataNavierStokes->dataTime()->orderBDF() << std::endl;
 
-    //dataNavierStokes.dataMesh()->setMesh(meshPart.meshPartition());
+    //dataNavierStokes.meshData()->setMesh(meshPart.meshPartition());
 
     std::string uOrder =  dataFile( "fluid/space_discretization/vel_order", "P1");
     if (verbose)

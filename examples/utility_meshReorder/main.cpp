@@ -5,7 +5,7 @@
 
 #include <Epetra_config.h>
 
-#include<life/lifemesh/dataMesh.hpp>
+#include<life/lifemesh/MeshData.hpp>
 
 #include<life/lifefilters/GetPot.hpp>
 #include <string>
@@ -26,7 +26,7 @@ int main(int argc, char** argv)
     std::string data_file_name = command_line.follow("data", 2, "-f","--file");
     GetPot data_file(data_file_name);
 
-    DataMesh mesh_data;
+    MeshData mesh_data;
     mesh_data.setup(data_file, "space_discretization");
 
     boost::shared_ptr<RegionMesh3D<LinearTetra> > mesh;
@@ -34,7 +34,7 @@ int main(int argc, char** argv)
 
     readMesh(*mesh, mesh_data);
 
-    //DataMesh<RegionMesh3D<LinearTetra> > solidData(data_file, "solid/space_discretization");
+    //MeshData<RegionMesh3D<LinearTetra> > solidData(data_file, "solid/space_discretization");
     //const char* mesh_input = command_line.follow(data_file("fluid/space_discretization/mesh_file", "mesh", 0), 2, "-i","--input");
 
     const std::string mesh_output = command_line.follow((data_file("space_discretization/output_mesh_file", "mesh").c_str()), 2, "-o", "--output");
@@ -74,7 +74,7 @@ int main(int argc, char** argv)
         int const edgeFlag                 (data_file("interface/edgeFlag",      2 ) );
 
         boost::shared_ptr<Epetra_Comm> uselessComm(new Epetra_MpiComm(MPI_COMM_WORLD));
-        DataMesh mesh_data2;
+        MeshData mesh_data2;
         mesh_data2.setup(data_file, "second_mesh/space_discretization");
 
         boost::shared_ptr<RegionMesh3D<LinearTetra> > mesh2;

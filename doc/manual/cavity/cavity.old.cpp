@@ -142,11 +142,11 @@ int main(int argc, char** argv)
     // |               Loading the mesh                |
     // +-----------------------------------------------+
     if (verbose) std::cout << std::endl << "[Loading the mesh]" << std::endl;
-    LifeV::DataMesh dataMesh;
-    dataMesh.setup(dataFile, "fluid/space_discretization");
-    if (verbose) std::cout << "Mesh file: " << dataMesh.meshDir() << dataMesh.meshFile() << std::endl;
+    LifeV::MeshData meshData;
+    meshData.setup(dataFile, "fluid/space_discretization");
+    if (verbose) std::cout << "Mesh file: " << meshData.meshDir() << meshData.meshFile() << std::endl;
     boost::shared_ptr< LifeV::RegionMesh3D<LifeV::LinearTetra> > fullMeshPtr(new LifeV::RegionMesh3D<LifeV::LinearTetra>);
-    LifeV::readMesh(*fullMeshPtr, dataMesh);
+    LifeV::readMesh(*fullMeshPtr, meshData);
     // Split the mesh between processors
     LifeV::partitionMesh< LifeV::RegionMesh3D<LifeV::LinearTetra> >   meshPart(fullMeshPtr, comm);
 

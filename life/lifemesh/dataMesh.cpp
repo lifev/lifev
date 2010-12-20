@@ -40,7 +40,7 @@
  */
 
 #include <life/lifecore/life.hpp>
-#include <life/lifemesh/dataMesh.hpp>
+#include <life/lifemesh/MeshData.hpp>
 
 namespace LifeV
 {
@@ -48,14 +48,14 @@ namespace LifeV
 // ===================================================
 // Constructors & Destructor
 // ===================================================
-DataMesh::DataMesh( ):
+MeshData::MeshData( ):
         M_meshDir  ( "./" ),
         M_meshFile ( "mesh.mesh" ),
         M_meshType ( ".mesh" ),
         M_verbose   ( false )
 {}
 
-DataMesh::DataMesh( const GetPot& dataFile, const std::string& section ):
+MeshData::MeshData( const GetPot& dataFile, const std::string& section ):
         M_meshDir  (),
         M_meshFile (),
         M_meshType (),
@@ -64,18 +64,18 @@ DataMesh::DataMesh( const GetPot& dataFile, const std::string& section ):
     setup( dataFile, section );
 }
 
-DataMesh::DataMesh( const DataMesh& dataMesh ):
-        M_meshDir    ( dataMesh.M_meshDir ),
-        M_meshFile   ( dataMesh.M_meshFile ),
-        M_meshType   ( dataMesh.M_meshType ),
-        M_verbose     ( dataMesh.M_verbose )
+MeshData::MeshData( const MeshData& meshData ):
+        M_meshDir    ( meshData.M_meshDir ),
+        M_meshFile   ( meshData.M_meshFile ),
+        M_meshType   ( meshData.M_meshType ),
+        M_verbose     ( meshData.M_verbose )
 {}
 
 // ===================================================
 // Methods
 // ===================================================
 void
-DataMesh::setup( const GetPot& dataFile, const std::string& section )
+MeshData::setup( const GetPot& dataFile, const std::string& section )
 {
     M_meshDir  = dataFile( ( section + "/mesh_dir"  ).data(), "./" );
     M_meshFile = dataFile( ( section + "/mesh_file" ).data(), "mesh.mesh" );
@@ -83,9 +83,9 @@ DataMesh::setup( const GetPot& dataFile, const std::string& section )
     M_verbose   = dataFile( ( section + "/verbose"   ).data(), false );
 }
 
-void DataMesh::showMe( std::ostream& output ) const
+void MeshData::showMe( std::ostream& output ) const
 {
-    output << "\n*** DataMesh: values for user-defined data\n\n";
+    output << "\n*** MeshData: values for user-defined data\n\n";
 
     output << "mesh_dir   = " << M_meshDir  << std::endl;
     output << "mesh_file  = " << M_meshFile << std::endl;

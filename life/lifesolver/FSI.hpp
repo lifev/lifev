@@ -68,7 +68,7 @@
 #include <life/lifecore/Factory.hpp>
 #include <life/lifecore/FactorySingleton.hpp>
 
-#include <life/lifemesh/dataMesh.hpp>
+#include <life/lifemesh/MeshData.hpp>
 #include <life/lifemesh/regionMesh3D.hpp>
 
 #include <life/lifealg/NonLinearAitken.hpp>
@@ -835,8 +835,8 @@ protected:
 
     GetPot                                            M_dataFile;
 
-    boost::shared_ptr<DataMesh>                       M_dataMeshFluid;
-    boost::shared_ptr<DataMesh>                       M_dataMeshSolid;
+    boost::shared_ptr<MeshData>                       M_meshDataFluid;
+    boost::shared_ptr<MeshData>                       M_meshDataSolid;
 
     dataPtr_Type                                      M_data;
 

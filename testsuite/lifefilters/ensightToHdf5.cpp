@@ -121,11 +121,11 @@ EnsightToHdf5::run()
     boost::shared_ptr<DataNavierStokes> dataNavierStokes(new DataNavierStokes());
     dataNavierStokes->setup( dataFile );
 
-    DataMesh dataMesh;
-    dataMesh.setup(dataFile, "fluid/space_discretization");
+    MeshData meshData;
+    meshData.setup(dataFile, "fluid/space_discretization");
 
     boost::shared_ptr<RegionMesh3D<LinearTetra> > fullMeshPtr(new RegionMesh3D<LinearTetra>);
-    readMesh(*fullMeshPtr, dataMesh);
+    readMesh(*fullMeshPtr, meshData);
 
     // writeMesh("test.mesh", *fullMeshPtr);
     // Scale, Rotate, Translate (if necessary)
@@ -152,7 +152,7 @@ EnsightToHdf5::run()
     std::string uOrder =  dataFile( "fluid/space_discretization/vel_order", "P1");
     std::string pOrder =  dataFile( "fluid/space_discretization/press_order", "P1");
 
-    //dataNavierStokes->dataMesh()->setMesh(meshPart.mesh());
+    //dataNavierStokes->meshData()->setMesh(meshPart.mesh());
 
     if (verbose) std::cout << "Building the velocity FE space ... " << std::flush;
 

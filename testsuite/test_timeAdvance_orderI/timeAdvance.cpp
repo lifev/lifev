@@ -181,11 +181,11 @@ problem::run()
      dataProblem->setup(dataFile, "problem");
 
 
-    DataMesh             dataMesh;
-    dataMesh.setup(dataFile, "problem/space_discretization");
+    MeshData             meshData;
+    meshData.setup(dataFile, "problem/space_discretization");
 
     boost::shared_ptr<RegionMesh3D<LinearTetra> > fullMeshPtr(new RegionMesh3D<LinearTetra>);
-    readMesh(*fullMeshPtr, dataMesh);
+    readMesh(*fullMeshPtr, meshData);
 
     MeshPartitioner< RegionMesh3D<LinearTetra> > meshPart( fullMeshPtr, members->comm );
 

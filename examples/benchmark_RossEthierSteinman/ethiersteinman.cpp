@@ -203,11 +203,11 @@ Ethiersteinman::check()
     boost::shared_ptr<DataNavierStokes> dataNavierStokes(new DataNavierStokes());
     dataNavierStokes->setup( dataFile );
 
-    DataMesh dataMesh;
-    dataMesh.setup(dataFile, "fluid/space_discretization");
+    MeshData meshData;
+    meshData.setup(dataFile, "fluid/space_discretization");
 
     boost::shared_ptr<RegionMesh3D<LinearTetra> > fullMeshPtr(new RegionMesh3D<LinearTetra>);
-    readMesh(*fullMeshPtr, dataMesh);
+    readMesh(*fullMeshPtr, meshData);
 
     MeshPartitioner< RegionMesh3D<LinearTetra> >   meshPart(fullMeshPtr, d->comm);
 
@@ -217,7 +217,7 @@ Ethiersteinman::check()
     if (verbose) std::cout << std::endl;
     if (verbose) std::cout << "Time discretization order " << dataNavierStokes->dataTime()->orderBDF() << std::endl;
 
-    //dataNavierStokes->dataMesh()->setMesh(meshPart.mesh());
+    //dataNavierStokes->meshData()->setMesh(meshPart.mesh());
 
     if (verbose)
         std::cout << "Building the velocity FE space ... " << std::flush;
@@ -593,8 +593,8 @@ Ethiersteinman::run()
             dataNavierStokes->setup( dataFile );
 
             // THE DATAMESH IS NOT REQUIRED WHEN WE BUILD THE MESH
-            //DataMesh dataMesh;
-            //dataMesh.setup(dataFile, "fluid/space_discratization");
+            //MeshData meshData;
+            //meshData.setup(dataFile, "fluid/space_discratization");
 
             boost::shared_ptr<RegionMesh3D<LinearTetra> > fullMeshPtr(new RegionMesh3D<LinearTetra>);
 
@@ -614,7 +614,7 @@ Ethiersteinman::run()
             if (verbose) std::cout << std::endl;
             if (verbose) std::cout << "Time discretization order " << dataNavierStokes->dataTime()->orderBDF() << std::endl;
 
-            //dataNavierStokes->dataMesh()->setMesh(meshPart.meshPartition());
+            //dataNavierStokes->meshData()->setMesh(meshPart.meshPartition());
 
             if (verbose)
                 std::cout << "Building the velocity FE space ... " << std::flush;

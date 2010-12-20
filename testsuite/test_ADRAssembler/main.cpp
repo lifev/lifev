@@ -62,7 +62,7 @@
 #include <life/lifemesh/regionMesh3D.hpp>
 
 #include <life/lifesolver/ADRAssembler.hpp>
-#include <life/lifemesh/dataMesh.hpp>
+#include <life/lifemesh/MeshData.hpp>
 
 using namespace LifeV;
 

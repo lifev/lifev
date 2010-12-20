@@ -87,7 +87,7 @@ CT::run()
     DataNavierStokes<RegionMesh3D<LinearTetra> > dataNavierStokes;
     dataNavierStokes.setup( dataFile );
 
-    partitionMesh< RegionMesh3D<LinearTetra> > meshPart(*dataNavierStokes.dataMesh()->mesh(), M_comm);
+    partitionMesh< RegionMesh3D<LinearTetra> > meshPart(*dataNavierStokes.meshData()->mesh(), M_comm);
 
     // fill in the space and time discretization orders
 
@@ -100,7 +100,7 @@ CT::run()
     if (verbose) std::cout << "  t-  Pressure time discretization order : "
                                << pBdfOrder << std::endl;
 
-    dataNavierStokes.dataMesh()->setMesh(meshPart.mesh());
+    dataNavierStokes.meshData()->setMesh(meshPart.mesh());
 
     std::string uOrder = dataFile( "fluid/space_discretization/vel_order", "P1");
     std::string pOrder =  dataFile( "fluid/space_discretization/press_order", "P1");

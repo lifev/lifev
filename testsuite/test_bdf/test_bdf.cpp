@@ -153,7 +153,7 @@ void test_bdf::run()
     //=============================================================================
     //Mesh stuff
     Members->comm->Barrier();
-    DataMesh dataMesh(dataFile, ("bdf/" + discretization_section).c_str());
+    MeshData meshData(dataFile, ("bdf/" + discretization_section).c_str());
     boost::shared_ptr<RegionMesh> meshPtr( new RegionMesh() );
     readMesh(*meshPtr,dataMesh);
     MeshPartitioner<RegionMesh> meshPart(meshPtr, Members->comm);

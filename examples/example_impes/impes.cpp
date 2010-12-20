@@ -287,16 +287,16 @@ impes::run()
     dataSaturationDarcyNonLinear.setup( dataFile, Members->discretization_section_darcy_nonlin_trans );
 
     // Create the mesh file handler.
-    DataMesh dataMesh;
+    MeshData meshData;
 
     // Set up the mesh file.
-    dataMesh.setup( dataFile,  Members->discretization_section + "/space_discretization");
+    meshData.setup( dataFile,  Members->discretization_section + "/space_discretization");
 
     // Create the mesh.
     boost::shared_ptr<RegionMesh> fullMeshPtr(new RegionMesh);
 
     // Set up the mesh.
-    readMesh( *fullMeshPtr, dataMesh );
+    readMesh( *fullMeshPtr, meshData );
 
     // Partition the mesh using ParMetis.
     MeshPartitioner< RegionMesh >  meshPart( fullMeshPtr, Members->comm );

@@ -59,7 +59,7 @@
 namespace LifeV
 {
 
-//! DataMesh - class for handling spatial discretization.
+//! MeshData - class for handling spatial discretization.
 /*!
 	@author M.A. Fernandez
 	@author Cristiano Malossi
@@ -67,7 +67,7 @@ namespace LifeV
 	The class is a container for mesh information.
  */
 
-class DataMesh
+class MeshData
 {
 public:
 
@@ -75,22 +75,22 @@ public:
     //@{
 
     //! Empty Constructor
-    DataMesh();
+    MeshData();
 
     //! Constructor
     /*!
       @param dataFile data file
       @param section the section in the data file
      */
-    DataMesh( const GetPot& dataFile, const std::string& section = "space_discretization" );
+    MeshData( const GetPot& dataFile, const std::string& section = "space_discretization" );
 
     //! Copy constructor
     /*!
      */
-    DataMesh( const DataMesh& dataMesh );
+    MeshData( const MeshData& meshData );
 
     //! Virtual destructor
-    virtual ~DataMesh() {};
+    virtual ~MeshData() {};
 
     //@}
 
@@ -138,7 +138,7 @@ private:
 };
 
 template <typename Mesh>
-void readMesh( Mesh& mesh, const DataMesh& data )
+void readMesh( Mesh& mesh, const MeshData& data )
 {
     if ( data.verbose() )
         std::cout << "\nBuilding mesh ... ";

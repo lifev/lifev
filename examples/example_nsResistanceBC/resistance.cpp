@@ -215,11 +215,11 @@ ResistanceProblem::run()
     boost::shared_ptr<DataNavierStokes> dataNavierStokes(new DataNavierStokes());
     dataNavierStokes->setup( dataFile );
 
-    DataMesh dataMesh;
-    dataMesh.setup(dataFile, "fluid/space_discretization");
+    MeshData meshData;
+    meshData.setup(dataFile, "fluid/space_discretization");
 
     boost::shared_ptr<RegionMesh3D<LinearTetra> > fullMeshPtr (new RegionMesh3D<LinearTetra>);
-    readMesh(*fullMeshPtr, dataMesh);
+    readMesh(*fullMeshPtr, meshData);
 
     MeshPartitioner< RegionMesh3D<LinearTetra> >   meshPart(fullMeshPtr, d->comm);
 

@@ -87,17 +87,17 @@ int main( int argc, char** argv )
     std::string fluidOrder(dataFile("fluid/space_discretization/vel_order", "P1"));
     std::string solidOrder(dataFile("solid/space_discretization/order", "P1"));
 
-    boost::shared_ptr<DataMesh> fluidDataMesh(new DataMesh);
-    fluidDataMesh->setup(dataFile, "fluid/space_discretization");
+    boost::shared_ptr<MeshData> fluidMeshData(new MeshData);
+    fluidMeshData->setup(dataFile, "fluid/space_discretization");
 
     boost::shared_ptr<Mesh> uncutFluidMesh(new Mesh);
-    readMesh(*uncutFluidMesh, *fluidDataMesh);
+    readMesh(*uncutFluidMesh, *fluidMeshData);
 
-    boost::shared_ptr<DataMesh> solidDataMesh(new DataMesh);
-    solidDataMesh->setup(dataFile, "solid/space_discretization");
+    boost::shared_ptr<MeshData> solidMeshData(new MeshData);
+    solidMeshData->setup(dataFile, "solid/space_discretization");
 
     boost::shared_ptr<Mesh> uncutSolidMesh(new Mesh);
-    readMesh(*uncutSolidMesh, *solidDataMesh);
+    readMesh(*uncutSolidMesh, *solidMeshData);
 
     boost::shared_ptr<MeshPartitionerOfflineFSI<Mesh> >
     cutter(new MeshPartitionerOfflineFSI<Mesh>);

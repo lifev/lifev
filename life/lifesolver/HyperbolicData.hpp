@@ -36,7 +36,7 @@
 #ifndef _HYPERBOLICDATA_H_
 #define _HYPERBOLICDATA_H_ 1
 
-#include <life/lifemesh/dataMesh.hpp>
+#include <life/lifemesh/MeshData.hpp>
 
 #include <life/lifefem/dataTime.hpp>
 
@@ -74,7 +74,7 @@ public:
     typedef DataTime                        Time_Type;
     typedef boost::shared_ptr< Time_Type >  TimePtr_Type;
 
-    typedef DataMesh                        Mesh_Type;
+    typedef MeshData                        Mesh_Type;
     typedef boost::shared_ptr< Mesh_Type >  MeshPtr_Type;
 
     //@}
@@ -146,11 +146,11 @@ public:
 
     //! Set mesh container
     /*!
-      @param DataMesh Boost shared_ptr to dataMesh container
+      @param MeshData Boost shared_ptr to meshData container
     */
-    inline void setDataMesh( const MeshPtr_Type DataMesh )
+    inline void setMeshData( const MeshPtr_Type MeshData )
     {
-        M_mesh = DataMesh;
+        M_mesh = MeshData;
     }
 
     //! @name Get Methods
@@ -185,9 +185,9 @@ public:
 
     //! Get mesh container
     /*!
-      @return shared_ptr to dataMesh container
+      @return shared_ptr to meshData container
     */
-    inline MeshPtr_Type dataMesh () const
+    inline MeshPtr_Type meshData () const
     {
         return M_mesh;
     }

@@ -174,12 +174,12 @@ main( int argc, char** argv )
     bcH.addBC( "Slipwall", SLIPWALL, Essential, Component, uZero, zComp );
 
     // partitioning the mesh
-    partitionMesh< RegionMesh3D<LinearTetra> >   meshPart(*dataNavierStokes.dataMesh()->mesh(), comm);
+    partitionMesh< RegionMesh3D<LinearTetra> >   meshPart(*dataNavierStokes.meshData()->mesh(), comm);
 
     if (verbose) std::cout << std::endl;
     if (verbose) std::cout << "Time discretization order " << dataNavierStokes.dataTime()->orderBDF() << std::endl;
 
-    dataNavierStokes.dataMesh()->setMesh(meshPart.meshPartition());
+    dataNavierStokes.meshData()->setMesh(meshPart.meshPartition());
 
 
     // Everything is ready to build the FE space

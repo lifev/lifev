@@ -175,7 +175,7 @@ main( int argc, char** argv )
     bcH.addBC( "Slipwall", SLIPWALL, Essential, Component, uZero, zComp );
 
     // partitioning the mesh
-    partitionMesh< RegionMesh3D<LinearTetra> >   meshPart(*dataNavierStokes.dataMesh()->mesh(), comm);
+    partitionMesh< RegionMesh3D<LinearTetra> >   meshPart(*dataNavierStokes.meshData()->mesh(), comm);
 
     // Now we proceed with the FESpace definition
     // here we decided to use P2/P1 elements

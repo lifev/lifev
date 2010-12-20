@@ -99,10 +99,10 @@ Heart::run()
 #endif
     HeartIonicData _dataIonic(M_heart_fct->M_dataFile);
 
-    DataMesh dataMesh;
-    dataMesh.setup(M_heart_fct->M_dataFile, "electric/space_discretization");
+    MeshData meshData;
+    meshData.setup(M_heart_fct->M_dataFile, "electric/space_discretization");
     boost::shared_ptr<RegionMesh3D<LinearTetra> > fullMeshPtr(new RegionMesh3D<LinearTetra>);
-    readMesh(*fullMeshPtr, dataMesh);
+    readMesh(*fullMeshPtr, meshData);
     bool verbose = (M_heart_fct->M_comm->MyPID() == 0);
 
     //! Boundary conditions handler and function

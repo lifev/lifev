@@ -48,14 +48,14 @@ namespace LifeV
 // ===================================================
 //! Constructors
 HeartIonicData::HeartIonicData( const GetPot& dataFile ) :
-        DataMesh( dataFile, "electric/space_discretization" ),
+        MeshData( dataFile, "electric/space_discretization" ),
         DataTime( dataFile, "electric/time_discretization" )
 {
     setup(dataFile);
 }
 
 HeartIonicData::HeartIonicData() :
-        DataMesh                        ( ),
+        MeshData                        ( ),
         DataTime                        ( ),
         M_verbose                       ( ),
         M_RMCParameterA                 ( ),
@@ -84,7 +84,7 @@ HeartIonicData::HeartIonicData() :
 }
 
 HeartIonicData::HeartIonicData( const HeartIonicData& dataIonic ) :
-        DataMesh		                ( dataIonic ),
+        MeshData		                ( dataIonic ),
         DataTime                        ( dataIonic ),
         M_verbose                       ( dataIonic.M_verbose ),
         M_RMCParameterA                 ( dataIonic.M_RMCParameterA ),

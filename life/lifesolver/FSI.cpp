@@ -82,8 +82,8 @@ FSI::FSI():
     //     M_solidLin                           ( ),
     M_bdf                                ( ),
     M_dataFile                           ( ),
-    M_dataMeshFluid                      ( new DataMesh()),
-    M_dataMeshSolid                      ( new DataMesh()),
+    M_meshDataFluid                      ( new MeshData()),
+    M_meshDataSolid                      ( new MeshData()),
     M_data                               ( ),
     M_fluidInterfaceMap                  ( ),
     M_solidInterfaceMap                  ( ),
@@ -162,12 +162,12 @@ FSI::setDataFile( const GetPot& dataFile )
 {
 
     M_fluidMesh.reset(new mesh_Type());
-    M_dataMeshFluid->setup(dataFile, "fluid/space_discretization");
-    readMesh(*M_fluidMesh, *M_dataMeshFluid);
+    M_meshDataFluid->setup(dataFile, "fluid/space_discretization");
+    readMesh(*M_fluidMesh, *M_meshDataFluid);
 
     M_solidMesh.reset(new mesh_Type());
-    M_dataMeshSolid->setup(dataFile, "solid/space_discretization");
-    readMesh(*M_solidMesh, *M_dataMeshSolid);
+    M_meshDataSolid->setup(dataFile, "solid/space_discretization");
+    readMesh(*M_solidMesh, *M_meshDataSolid);
 
     M_dataFile = dataFile;
 }

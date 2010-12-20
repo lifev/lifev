@@ -38,7 +38,7 @@
 #ifndef _DATAMONODOMAIN_H_
 #define _DATAMONODOMAIN_H_
 
-#include <life/lifemesh/dataMesh.hpp>
+#include <life/lifemesh/MeshData.hpp>
 #include <life/lifefem/dataTime.hpp>
 #include <life/lifesolver/HeartFunctors.hpp>
 
@@ -52,7 +52,7 @@ namespace LifeV
 
 */
 class HeartMonodomainData:
-    public DataMesh,
+    public MeshData,
     public DataTime
 {
 public:

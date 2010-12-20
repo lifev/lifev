@@ -298,12 +298,12 @@ MassTransport::run()
     dataNavierStokes.viscosity( d->nu/dataFile( "fluid/physics/density", 1. ));
 
 
-    partitionMesh< RegionMesh3D<LinearTetra> >   meshPart(*dataNavierStokes.dataMesh()->mesh(), *d->comm);
+    partitionMesh< RegionMesh3D<LinearTetra> >   meshPart(*dataNavierStokes.meshData()->mesh(), *d->comm);
 
     if (verbose) std::cout << std::endl;
     if (verbose) std::cout << "Time discretization order " << dataNavierStokes.dataTime()->orderBDF() << std::endl;
 
-    dataNavierStokes.dataMesh()->setMesh(meshPart.meshPartition());
+    dataNavierStokes.meshData()->setMesh(meshPart.meshPartition());
 
     if (verbose)
         std::cout << "Building the velocity FE space ... " << std::flush;

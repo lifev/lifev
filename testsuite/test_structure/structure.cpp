@@ -180,11 +180,11 @@ Structure::run3d()
     boost::shared_ptr<VenantKirchhoffElasticData> dataStructure(new VenantKirchhoffElasticData( ));
     dataStructure->setup(dataFile);
 
-    DataMesh             dataMesh;
-    dataMesh.setup(dataFile, "solid/space_discretization");
+    MeshData             meshData;
+    meshData.setup(dataFile, "solid/space_discretization");
 
     boost::shared_ptr<RegionMesh3D<LinearTetra> > fullMeshPtr(new RegionMesh3D<LinearTetra>);
-    readMesh(*fullMeshPtr, dataMesh);
+    readMesh(*fullMeshPtr, meshData);
 
 
     MeshPartitioner< RegionMesh3D<LinearTetra> > meshPart( fullMeshPtr, parameters->comm );

@@ -48,7 +48,7 @@
 
 #include <life/lifemesh/MeshPartitioner.hpp>
 #include <life/lifesolver/dataNavierStokes.hpp>
-#include <life/lifemesh/dataMesh.hpp>
+#include <life/lifemesh/MeshData.hpp>
 #include <life/lifemesh/regionMesh3D.hpp>
 #include <life/lifefilters/ExporterHDF5Mesh3D.hpp>
 
@@ -79,11 +79,11 @@ int main( int argc, char** argv )
     DataNavierStokes dataNavierStokes;
     dataNavierStokes.setup(dataFile);
 
-    DataMesh dataMesh;
-    dataMesh.setup(dataFile, "fluid/space_discretization");
+    MeshData meshData;
+    meshData.setup(dataFile, "fluid/space_discretization");
 
     boost::shared_ptr<RegionMesh3D<LinearTetra> > fullMeshPtr(new RegionMesh3D<LinearTetra>);
-    readMesh(*fullMeshPtr, dataMesh);
+    readMesh(*fullMeshPtr, meshData);
 
     MeshPartitioner<RegionMesh3D<LinearTetra> > meshPart;
     meshPart.setup(4, comm);

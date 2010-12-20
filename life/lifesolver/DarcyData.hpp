@@ -39,7 +39,7 @@
 #ifndef _DATADARCY_H_
 #define _DATADARCY_H_ 1
 
-#include <life/lifemesh/dataMesh.hpp>
+#include <life/lifemesh/MeshData.hpp>
 #include <life/lifefem/dataTime.hpp>
 #include <life/lifefem/Assembly.hpp>
 
@@ -67,7 +67,7 @@ public:
     typedef DataTime                        Time_Type;
     typedef boost::shared_ptr< Time_Type >  Time_ptrType;
 
-    typedef DataMesh                        Mesh_Type;
+    typedef MeshData                        Mesh_Type;
     typedef boost::shared_ptr< Mesh_Type >  Mesh_ptrType;
 
     //@}
@@ -124,11 +124,11 @@ public:
     }
 
     /*! Set mesh container
-        @param DataMesh Boost shared_ptr to dataMesh container
+        @param MeshData Boost shared_ptr to meshData container
     */
-    inline void setDataMesh( const Mesh_ptrType DataMesh )
+    inline void setMeshData( const Mesh_ptrType MeshData )
     {
-        M_mesh = DataMesh;
+        M_mesh = MeshData;
     }
 
     // Get methods.
@@ -162,9 +162,9 @@ public:
     }
 
     /*! Get mesh container
-       @return shared_ptr to dataMesh container
+       @return shared_ptr to meshData container
     */
-    inline Mesh_ptrType dataMesh( void ) const
+    inline Mesh_ptrType meshData( void ) const
     {
         return M_mesh;
     }

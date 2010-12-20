@@ -46,7 +46,7 @@ namespace LifeV
 // Constructors & Destructor
 // ===================================================
 HeartBidomainData::HeartBidomainData( boost::shared_ptr<HeartFunctors> heart ) :
-    DataMesh                            ( heart -> M_dataFile, "electric/space_discretization" ),
+    MeshData                            ( heart -> M_dataFile, "electric/space_discretization" ),
     DataTime                            ( heart -> M_dataFile, "electric/time_discretization" ),
     M_reducedConductivityBox            ( heart -> reducedConductivityBox() ),
     M_reducedConductivityCylinder       ( heart -> reducedConductivityCylinder() ),
@@ -58,7 +58,7 @@ HeartBidomainData::HeartBidomainData( boost::shared_ptr<HeartFunctors> heart ) :
 }
 
 HeartBidomainData::HeartBidomainData() :
-    DataMesh                            ( ),
+    MeshData                            ( ),
     DataTime                            ( ),
     M_fibersFormat                      ( ),
     M_hasFibers                         ( ),
@@ -84,7 +84,7 @@ HeartBidomainData::HeartBidomainData() :
 }
 
 HeartBidomainData::HeartBidomainData( const HeartBidomainData& dataBidomain ) :
-    DataMesh                            ( dataBidomain ),
+    MeshData                            ( dataBidomain ),
     DataTime                            ( dataBidomain ),
     M_fibersFormat                      ( dataBidomain.M_fibersFormat ),
     M_hasFibers                         ( dataBidomain.M_hasFibers ),

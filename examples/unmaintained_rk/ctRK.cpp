@@ -84,7 +84,7 @@ CTRK::run()
     DataNavierStokes<RegionMesh3D<LinearTetra> > dataNavierStokes;
     dataNavierStokes.setup( dataFile );
 
-    partitionMesh< RegionMesh3D<LinearTetra> > meshPart(*dataNavierStokes.dataMesh()->mesh(), *M_comm);
+    partitionMesh< RegionMesh3D<LinearTetra> > meshPart(*dataNavierStokes.meshData()->mesh(), *M_comm);
 
     // fill in the space and time discretization orders
     std::string uOrder = dataFile( "fluid/discretization/vel_order", "P1");
@@ -111,7 +111,7 @@ CTRK::run()
         bdQr_vel  = &quadRuleTria3pt;   // DoE 2
     }
 
-    Dof uDof(*dataNavierStokes.dataMesh()->mesh(), *refFE_vel);
+    Dof uDof(*dataNavierStokes.meshData()->mesh(), *refFE_vel);
 
     std::string pOrder =  dataFile( "fluid/discretization/press_order", "P1");
     if ( pOrder.compare("P2") == 0 )
@@ -132,7 +132,7 @@ CTRK::run()
         bdQr_press  = bdQr_vel;	 // test purpose
     }
 
-    dataNavierStokes.dataMesh()->setMesh(meshPart.mesh());
+    dataNavierStokes.meshData()->setMesh(meshPart.mesh());
 
     // building velocity and pressure FE spaces
     if (verbose)

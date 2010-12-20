@@ -364,9 +364,9 @@ to retreive all the information necessary to run the simulation.
 
     // everything ( mesh included ) will be stored in a class
     boost::shared_ptr< DataTime > dataTime( new DataTime( dataFile ) );
-    boost::shared_ptr< DataMesh< RegionMesh3D<LinearTetra> > > dataMesh( new DataMesh< RegionMesh3D<LinearTetra> >( dataFile ) );
+    boost::shared_ptr< MeshData< RegionMesh3D<LinearTetra> > > meshData( new MeshData< RegionMesh3D<LinearTetra> >( dataFile ) );
 
-    DataNavierStokes<RegionMesh3D<LinearTetra> > dataNavierStokes( dataFile, dataTime, dataMesh );
+    DataNavierStokes<RegionMesh3D<LinearTetra> > dataNavierStokes( dataFile, dataTime, meshData );
 
 \end{verbatim}
 
@@ -509,7 +509,7 @@ order to have the simulation running.
 \begin{verbatim}
     // partitioning the mesh
     partitionMesh< RegionMesh3D<LinearTetra> >
-             meshPart(*dataNavierStokes.dataMesh()->mesh(), comm);
+             meshPart(*dataNavierStokes.meshData()->mesh(), comm);
 \end{verbatim}
 
 In our case, after the call to the \verb!partitionMesh! constructor, \verb!meshPart! will store
