@@ -244,7 +244,7 @@ BCInterface3DFunctionSolver            -                                       C
 FSIModelMonolithic                     Monolithic                              CMCS3
 FSIModelMonolithicGE                   MonolithicGE                            CMCS3
 FSIModelMonolithicGI                   MonolithicGI                            CMCS3
-HeartNonLinearMonodomainSolver         nonLinearMonodomain                     CMCS1
+HeartNonLinearMonodomainSolver         nonLinearMonodomain                     CMCS1     DONE
 MonolithicBlock                        BlockInterface                          CMCS3
 MonolithicBlockMatrix                  BlockMatrixRN                           CMCS3
 MonolithicBlockMatrixRN                BlockMatrixRN                           CMCS3
