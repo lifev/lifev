@@ -163,7 +163,7 @@ MultiscaleModelMultiscale::setupData( const std::string& fileName )
 //!\todo pass a std::string to the factories
 //         M_modelsList[i]->setupData( path + model + "/"
 //                                     + dataFile( "Problem/models", "undefined", i * modelsColumnsNumber + 2 ) + ".dat" );
-        M_modelsList[i]->setupData( path + Enum2String( model, multiscaleModelsMap ) + "/"
+        M_modelsList[i]->setupData( path + enum2String( model, multiscaleModelsMap ) + "/"
                                     + dataFile( "Problem/models", "undefined", i * modelsColumnsNumber + 2 ) + ".dat" );
 
     }
@@ -182,7 +182,7 @@ MultiscaleModelMultiscale::setupData( const std::string& fileName )
         //!\todo pass a std::string to the factories
 //         M_couplingsList[i]->setupData( path + coupling + "/"
 //                                        + dataFile( "Problem/couplings", "undefined", i * couplingsColumnsNumber + 2 ) + ".dat" );
-        M_couplingsList[i]->setupData( path + Enum2String( coupling, multiscaleCouplingsMap ) + "/"
+        M_couplingsList[i]->setupData( path + enum2String( coupling, multiscaleCouplingsMap ) + "/"
                                        + dataFile( "Problem/couplings", "undefined", i * couplingsColumnsNumber + 2 ) + ".dat" );
 
         string2numbersVector< UInt > ( dataFile( "Problem/couplings", "undefined", i * couplingsColumnsNumber + 3 ), modelsIDVector );
