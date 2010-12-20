@@ -59,7 +59,7 @@
 #include <life/lifefem/DOF.hpp>
 #include <life/lifefem/SobolevNorms.hpp>
 
-#include <life/lifemesh/partitionMesh.hpp>
+#include <life/lifemesh/MeshPartitioner.hpp>
 
 
 namespace LifeV
