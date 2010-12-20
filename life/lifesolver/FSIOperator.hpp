@@ -78,7 +78,6 @@
 #include <life/lifefem/bcHandler.hpp>
 #include <life/lifefem/bcFunction.hpp>
 #include <life/lifefem/bdf_template.hpp>
-//#include <life/lifefem/dof.hpp>
 #include <life/lifefem/FESpace.hpp>
 
 #include <life/lifefilters/HDF5Filter3DMesh.hpp>

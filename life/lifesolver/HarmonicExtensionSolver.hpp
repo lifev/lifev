@@ -41,7 +41,7 @@
 #define HARMONICEXTENSIONSOLVER_H_
 
 #include <life/lifecore/life.hpp>
-#include <life/lifefem/dof.hpp>
+#include <life/lifefem/DOF.hpp>
 #include <life/lifearray/elemMat.hpp>
 #include <life/lifefem/elemOper.hpp>
 #include <life/lifefem/refFE.hpp>

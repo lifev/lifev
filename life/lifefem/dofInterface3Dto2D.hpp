@@ -48,7 +48,7 @@
 
 #include <life/lifefem/dofInterfaceBase.hpp>
 #include <life/lifefem/localDofPattern.hpp>
-#include <life/lifefem/dof.hpp>
+#include <life/lifefem/DOF.hpp>
 #include <life/lifemesh/markers.hpp>
 
 #include <iostream>

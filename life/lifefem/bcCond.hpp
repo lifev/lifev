@@ -66,7 +66,7 @@ isBetaCoeffAVector
 
 #include <life/lifemesh/identifier.hpp>
 #include <life/lifemesh/markers.hpp>
-#include <life/lifefem/dof.hpp>
+#include <life/lifefem/DOF.hpp>
 #include <life/lifefem/CurrentFE.hpp>
 #include <life/lifefem/CurrentBoundaryFE.hpp>
 

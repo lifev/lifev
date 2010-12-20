@@ -52,7 +52,7 @@
 
 #include <life/lifefem/CurrentBoundaryFE.hpp>
 #include <life/lifefem/CurrentFE.hpp>
-#include <life/lifefem/dof.hpp>
+#include <life/lifefem/DOF.hpp>
 
 #pragma GCC diagnostic ignored "-Wunused-variable"
 #pragma GCC diagnostic ignored "-Wunused-parameter"

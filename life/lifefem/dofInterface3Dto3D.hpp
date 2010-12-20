@@ -48,7 +48,7 @@
 
 
 #include <life/lifefem/refFE.hpp>
-#include <life/lifefem/dof.hpp>
+#include <life/lifefem/DOF.hpp>
 #include <iostream>
 #include <map>
 #include <life/lifemesh/markers.hpp>

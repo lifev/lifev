@@ -56,7 +56,7 @@
 #include <life/lifefem/bcHandler.hpp>
 #include <life/lifefem/CurrentFE.hpp>
 #include <life/lifefem/CurrentBoundaryFE.hpp>
-#include <life/lifefem/dof.hpp>
+#include <life/lifefem/DOF.hpp>
 #include <life/lifefem/sobolevNorms.hpp>
 
 #include <life/lifemesh/partitionMesh.hpp>
