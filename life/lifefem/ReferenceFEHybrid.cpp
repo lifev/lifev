@@ -36,7 +36,7 @@
     @mantainer Samuel Quinodoz <samuel.quinodoz@epfl.ch>
  */
 
-#include <refFEHybrid.hpp>
+#include <ReferenceFEHybrid.hpp>
 
 namespace LifeV
 {

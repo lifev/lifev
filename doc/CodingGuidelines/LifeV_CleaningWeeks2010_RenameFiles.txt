@@ -146,7 +146,7 @@ QuadratureRule                         quadRule                                C
 ReferenceElement                       refEle                                  CMCS2     DONE
 ReferenceFE                            refFE                                   CMCS2     DONE
 ReferenceFEHdiv                        refFEHdiv                               CMCS2     DONE
-ReferenceFEHybrid                      refFEHybrid                             CMCS2
+ReferenceFEHybrid                      refFEHybrid                             CMCS2     DONE
 ReferenceFEScalar                      refFEScalar                             CMCS2
 SobolevNorms                           sobolevNorms                            CMCS2
 TimeAdvance                            timeAdvance_template                    MOX

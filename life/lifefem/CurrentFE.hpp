@@ -45,9 +45,9 @@
 
 #include <life/lifefem/GeometricMap.hpp>
 
-#include <life/lifefem/refFEScalar.hpp>
+#include <life/lifefem/ReferenceFEScalar.hpp>
 #include <life/lifefem/ReferenceFEHdiv.hpp>
-#include <life/lifefem/refFEHybrid.hpp>
+#include <life/lifefem/ReferenceFEHybrid.hpp>
 
 #include <life/lifefem/QuadRule.hpp>
 
