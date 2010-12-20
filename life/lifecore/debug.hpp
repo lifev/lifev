@@ -33,8 +33,8 @@ along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
   @maintainer Radu Popescu <radu.popescu@epfl.ch>
 */
 
-#ifndef DEBUG_H
-#define DEBUG_H 1
+#ifndef LIFE_DEBUG_H
+#define LIFE_DEBUG_H 1
 
 #include <cstdio>
 #include <iosfwd>
@@ -173,4 +173,4 @@ LifeV::DebugStream& perror( LifeV::DebugStream& s );
 LifeV::DebugStream& endl( LifeV::DebugStream& s );
 LifeV::DebugStream& flush( LifeV::DebugStream& s );
 
-#endif // DEBUG_H
+#endif // LIFE_DEBUG_H
