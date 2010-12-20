@@ -215,7 +215,7 @@ int main(int argc, char** argv)
     if (verbose) std::cout << "Time discretization order " << oseenData->dataTime()->orderBDF() << std::endl;
 
     // The problem (matrix and rhs) is packed in an object called fluid
-    LifeV::OseenSolver< LifeV::RegionMesh3D<LifeV::LinearTetra> > fluid (oseenData,
+    LifeV::OseenSolver< LifeV::RegionMesh3D<LifeV::LinearTetra> > fluid (dataNavierStokes,
                                                                    uFESpace,
                                                                    pFESpace,
                                                                    comm,
