@@ -66,7 +66,7 @@ nonlinear_function.hpp:
 
 #include <life/lifealg/EpetraMap.hpp>
 #include <life/lifemesh/dataMesh.hpp>
-#include <life/lifemesh/partitionMesh.hpp>
+#include <life/lifemesh/MeshPartitioner.hpp>
 
 #include <life/lifesolver/SecondOrderSolver.hpp>
 #include <life/lifesolver/dataSecondOrder.hpp>
@@ -78,9 +78,9 @@ nonlinear_function.hpp:
 #include <life/lifefem/newmark_template.hpp>
 #include <life/lifefem/bdf_template.hpp>
 
-#include <life/lifefilters/ensight.hpp>
-#include <life/lifefilters/hdf5exporter.hpp>
-#include <life/lifefilters/noexport.hpp>
+#include <life/lifefilters/ExporterEnsight.hpp>
+#include <life/lifefilters/ExporterHDF5.hpp>
+#include <life/lifefilters/ExporterEmpty.hpp>
 
 #include <iostream>
 
