@@ -428,7 +428,7 @@ MultiscaleModel1D::boundaryStress( const bcFlag_Type& flag, const stress_Type& s
 
     default:
     {
-        std::cout << "ERROR: Invalid stress type [" << Enum2String( stressType, multiscaleStressesMap ) << "]" << std::endl;
+        std::cout << "ERROR: Invalid stress type [" << enum2String( stressType, multiscaleStressesMap ) << "]" << std::endl;
 
         return 0.0;
     }
@@ -561,7 +561,7 @@ MultiscaleModel1D::boundaryDeltaStress( const bcFlag_Type& flag, bool& solveLine
 
     default:
     {
-        std::cout << "ERROR: Invalid stress type [" << Enum2String( stressType, multiscaleStressesMap ) << "]" << std::endl;
+        std::cout << "ERROR: Invalid stress type [" << enum2String( stressType, multiscaleStressesMap ) << "]" << std::endl;
 
         return 0.0;
     }
