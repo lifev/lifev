@@ -75,7 +75,7 @@ namespace LifeV
 */
 
 template<typename MeshType>
-class partitionMesh
+class MeshPartitioner
 {
 public:
     //@{
@@ -90,7 +90,7 @@ public:
     //! \name Constructors & Destructors
     //@{
     //! Default empty constructor
-    partitionMesh();
+    MeshPartitioner();
     //! Constructor
     /*!
       This is a non-empty constructor. It takes as parameters the
@@ -98,16 +98,16 @@ public:
       use (reference) and pointers to the Epetra interface and
       repeated interface maps. The constructor initializes the
       data members and calls a private method
-      partitionMesh::execute which handles the mesh partitioning.
+      MeshPartitioner::execute which handles the mesh partitioning.
       \param mesh - Mesh& - the unpartitioned mesh
       \param _comm - Epetra_Comm& - Epetra communicator object
       \param interfaceMap - Epetra_Map*
       \param interfaceMapRep - Epetra_Map*
     */
-    partitionMesh(meshPtr_Type &mesh, boost::shared_ptr<Epetra_Comm> comm, Epetra_Map* interfaceMap = 0,
+    MeshPartitioner(meshPtr_Type &mesh, boost::shared_ptr<Epetra_Comm> comm, Epetra_Map* interfaceMap = 0,
                   Epetra_Map* interfaceMapRep = 0);
     //! Empty destructor
-    virtual ~partitionMesh() {}
+    virtual ~MeshPartitioner() {}
     //@}
 
     //! \name Public Methods
@@ -189,8 +189,8 @@ public:
 
 private:
     // Private copy constructor and assignment operator. No implementation
-    partitionMesh(const partitionMesh&);
-    partitionMesh& operator=(const partitionMesh&);
+    MeshPartitioner(const MeshPartitioner&);
+    MeshPartitioner& operator=(const MeshPartitioner&);
     //! Private Methods
     //@{
     //! Execute mesh partitioning using the configured MPI processes (online partitioning)
@@ -331,7 +331,7 @@ private:
     graphPtr_Type                        M_elementDomains;
     bool                                 M_serialMode; // how to tell if running serial partition mode
     //@}
-}; // class partitionMesh
+}; // class MeshPartitioner
 
 //
 // IMPLEMENTATION
@@ -343,12 +343,12 @@ private:
 // =================================
 
 template<typename MeshType>
-partitionMesh<MeshType>::partitionMesh()
+MeshPartitioner<MeshType>::MeshPartitioner()
 {
 }
 
 template<typename MeshType>
-partitionMesh<MeshType>::partitionMesh(meshPtr_Type &mesh, boost::shared_ptr<Epetra_Comm> comm,
+MeshPartitioner<MeshType>::MeshPartitioner(meshPtr_Type &mesh, boost::shared_ptr<Epetra_Comm> comm,
                                    Epetra_Map* interfaceMap,
                                    Epetra_Map* interfaceMapRep):
     M_numPartitions (1),
@@ -387,7 +387,7 @@ partitionMesh<MeshType>::partitionMesh(meshPtr_Type &mesh, boost::shared_ptr<Epe
 // =================================
 
 template<typename MeshType>
-void partitionMesh<MeshType>::setup(UInt numPartitions, boost::shared_ptr<Epetra_Comm> comm)
+void MeshPartitioner<MeshType>::setup(UInt numPartitions, boost::shared_ptr<Epetra_Comm> comm)
 {
     M_serialMode = true;
     M_comm = comm;
@@ -423,7 +423,7 @@ void partitionMesh<MeshType>::setup(UInt numPartitions, boost::shared_ptr<Epetra
 }
 
 template<typename MeshType>
-void partitionMesh<MeshType>::update()
+void MeshPartitioner<MeshType>::update()
 {
     M_numPartitions = M_elementDomains->size();
 
@@ -448,7 +448,7 @@ void partitionMesh<MeshType>::update()
 }
 
 template<typename MeshType>
-void partitionMesh<MeshType>::attachUnpartitionedMesh(meshPtr_Type &mesh,
+void MeshPartitioner<MeshType>::attachUnpartitionedMesh(meshPtr_Type &mesh,
                                                   Epetra_Map* interfaceMap,
                                                   Epetra_Map* interfaceMapRep)
 {
@@ -458,7 +458,7 @@ void partitionMesh<MeshType>::attachUnpartitionedMesh(meshPtr_Type &mesh,
 }
 
 template<typename MeshType>
-void partitionMesh<MeshType>::releaseUnpartitionedMesh()
+void MeshPartitioner<MeshType>::releaseUnpartitionedMesh()
 {
     M_originalMesh.reset();
     M_interfaceMap = 0;
@@ -466,7 +466,7 @@ void partitionMesh<MeshType>::releaseUnpartitionedMesh()
 }
 
 template<typename MeshType>
-void partitionMesh<MeshType>::doPartitionGraph()
+void MeshPartitioner<MeshType>::doPartitionGraph()
 {
     distributeElements(M_originalMesh->numElements());
     if (M_interfaceMap)
@@ -482,7 +482,7 @@ void partitionMesh<MeshType>::doPartitionGraph()
 }
 
 template<typename MeshType>
-void partitionMesh<MeshType>::doPartitionMesh()
+void MeshPartitioner<MeshType>::doPartitionMesh()
 {
     constructLocalMesh();
     constructNodes();
@@ -494,7 +494,7 @@ void partitionMesh<MeshType>::doPartitionMesh()
 }
 
 template<typename MeshType>
-void partitionMesh<MeshType>::showMe(std::ostream& output) const
+void MeshPartitioner<MeshType>::showMe(std::ostream& output) const
 {
     output << "Number of partitions: " << M_numPartitions << std::endl;
     output << "Serial mode:" << M_serialMode << std::endl;
@@ -505,7 +505,7 @@ void partitionMesh<MeshType>::showMe(std::ostream& output) const
 // =================================
 
 template<typename MeshType>
-void partitionMesh<MeshType>::setElementParameters()
+void MeshPartitioner<MeshType>::setElementParameters()
 {
     switch (MeshType::ElementShape::S_shape)
     {
@@ -522,12 +522,12 @@ void partitionMesh<MeshType>::setElementParameters()
         M_faceNodes    = 3;
         break;
     default:
-        ERROR_MSG( "Face Shape not implemented in partitionMesh" );
+        ERROR_MSG( "Face Shape not implemented in MeshPartitioner" );
     }
 }
 
 template<typename MeshType>
-void partitionMesh<MeshType>::distributeElements(UInt numElements)
+void MeshPartitioner<MeshType>::distributeElements(UInt numElements)
 {
     // ParMETIS is able to work in parallel: how many processors does it have at hand?
     Int numProcessors = M_comm->NumProc();
@@ -552,7 +552,7 @@ void partitionMesh<MeshType>::distributeElements(UInt numElements)
 }
 
 template<typename MeshType>
-void partitionMesh<MeshType>::findRepeatedFacesFSI()
+void MeshPartitioner<MeshType>::findRepeatedFacesFSI()
 {
     std::vector<Int>                    myRepeatedFace; // used for the solid partitioning
     boost::shared_ptr<std::vector<Int> > myIsOnProc;     // used for the solid partitioning
@@ -626,7 +626,7 @@ void partitionMesh<MeshType>::findRepeatedFacesFSI()
 }
 
 template<typename MeshType>
-void partitionMesh<MeshType>::partitionConnectivityGraph(UInt numParts)
+void MeshPartitioner<MeshType>::partitionConnectivityGraph(UInt numParts)
 {
     // This array's size is equal to the number of locally-stored vertices:
     // at the end of the partitioning process, "M_graphVertexLocations" will contain the partitioning array:
@@ -768,7 +768,7 @@ void partitionMesh<MeshType>::partitionConnectivityGraph(UInt numParts)
 }
 
 template<typename MeshType>
-void partitionMesh<MeshType>::matchFluidPartitionsFSI()
+void MeshPartitioner<MeshType>::matchFluidPartitionsFSI()
 {
     boost::shared_ptr<Epetra_MpiComm> mpiComm = boost::dynamic_pointer_cast <Epetra_MpiComm> (M_comm);
     MPI_Comm MPIcomm = mpiComm->Comm();
@@ -877,7 +877,7 @@ void partitionMesh<MeshType>::matchFluidPartitionsFSI()
 }
 
 template<typename MeshType>
-void partitionMesh<MeshType>::redistributeElements()
+void MeshPartitioner<MeshType>::redistributeElements()
 {
     boost::shared_ptr<Epetra_MpiComm> mpiComm = boost::dynamic_pointer_cast <Epetra_MpiComm> (M_comm);
     MPI_Comm MPIcomm = mpiComm->Comm();
@@ -998,7 +998,7 @@ void partitionMesh<MeshType>::redistributeElements()
 }
 
 template<typename MeshType>
-void partitionMesh<MeshType>::constructLocalMesh()
+void MeshPartitioner<MeshType>::constructLocalMesh()
 {
     if (!M_me)
     {
@@ -1059,7 +1059,7 @@ void partitionMesh<MeshType>::constructLocalMesh()
 }
 
 template<typename MeshType>
-void partitionMesh<MeshType>::constructNodes()
+void MeshPartitioner<MeshType>::constructNodes()
 {
     UInt inode;
     for (UInt i = 0; i < M_numPartitions; ++i)
@@ -1108,7 +1108,7 @@ void partitionMesh<MeshType>::constructNodes()
 }
 
 template<typename MeshType>
-void partitionMesh<MeshType>::constructVolumes()
+void MeshPartitioner<MeshType>::constructVolumes()
 {
     Int count;
     for (UInt i = 0; i < M_numPartitions; ++i)
@@ -1152,7 +1152,7 @@ void partitionMesh<MeshType>::constructVolumes()
 }
 
 template<typename MeshType>
-void partitionMesh<MeshType>::constructEdges()
+void MeshPartitioner<MeshType>::constructEdges()
 {
     Int count;
     for (UInt i = 0; i < M_numPartitions; ++i)
@@ -1198,7 +1198,7 @@ void partitionMesh<MeshType>::constructEdges()
 }
 
 template<typename MeshType>
-void partitionMesh<MeshType>::constructFaces()
+void MeshPartitioner<MeshType>::constructFaces()
 {
     Int count;
     for (UInt i = 0; i < M_numPartitions; ++i)
@@ -1305,7 +1305,7 @@ void partitionMesh<MeshType>::constructFaces()
 }
 
 template<typename MeshType>
-void partitionMesh<MeshType>::finalSetup()
+void MeshPartitioner<MeshType>::finalSetup()
 {
     for (UInt i = 0; i < M_numPartitions; ++i)
     {
@@ -1349,7 +1349,7 @@ void partitionMesh<MeshType>::finalSetup()
 }
 
 template<typename MeshType>
-void partitionMesh<MeshType>::createRepeatedMap()
+void MeshPartitioner<MeshType>::createRepeatedMap()
 {
     std::set<Int>    repeatedNodeList;
     std::set<Int>    repeatedEdgeList;
@@ -1434,7 +1434,7 @@ void partitionMesh<MeshType>::createRepeatedMap()
 }
 
 template<typename MeshType>
-void partitionMesh<MeshType>::execute()
+void MeshPartitioner<MeshType>::execute()
 {
     // Set element parameters (number of nodes, faces, edges and number of nodes
     // on each face according to the type of mesh element used.
