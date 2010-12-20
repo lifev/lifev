@@ -350,16 +350,16 @@ void HeartMonodomainSolver<Mesh, SolverType>::buildSystem()
 
     if (M_verbose) std::cout << "  f-  Computing constant matrices ...        ";
 
-    Chrono chrono;
+    LifeChrono chrono;
 
-    Chrono chronoDer;
-    Chrono chronoStiff;
-    Chrono chronoMass;
+    LifeChrono chronoDer;
+    LifeChrono chronoStiff;
+    LifeChrono chronoMass;
 
 
-    Chrono chronoStiffAssemble;
-    Chrono chronoMassAssemble;
-    Chrono chronoZero;
+    LifeChrono chronoStiffAssemble;
+    LifeChrono chronoMassAssemble;
+    LifeChrono chronoZero;
 
     M_comm->Barrier();
 
@@ -586,7 +586,7 @@ updatePDESystem(Real         alpha,
                 vector_Type& sourceVec )
 {
 
-    Chrono chrono;
+    LifeChrono chrono;
 
     if (M_verbose)
             std::cout << "  f-  Updating mass term and right hand side... "
@@ -636,7 +636,7 @@ void HeartMonodomainSolver<Mesh, SolverType>::
 updatePDESystem(vector_Type& sourceVec )
 {
 
-    Chrono chrono;
+    LifeChrono chrono;
 
     if (M_verbose)
             std::cout << "  f-  Updating right hand side... "
@@ -660,7 +660,7 @@ template<typename Mesh, typename SolverType>
 void HeartMonodomainSolver<Mesh, SolverType>::PDEiterate( bcHandlerRaw_Type& bch )
 {
 
-    Chrono chrono;
+    LifeChrono chrono;
     chrono.start();
 
     matrixPtr_Type matrFull( new matrix_Type(*M_matrNoBC) );
@@ -701,7 +701,7 @@ template<typename Mesh, typename SolverType>
 void HeartMonodomainSolver<Mesh, SolverType>::solveSystem( matrixPtr_Type  matrFull,
                                                       vector_Type&    rhsFull )
 {
-    Chrono chrono;
+    LifeChrono chrono;
 
     if (M_verbose)
         std::cout << "  f-  Setting up the solver ...                ";
