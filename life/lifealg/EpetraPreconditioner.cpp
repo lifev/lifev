@@ -97,7 +97,7 @@ EpetraPreconditioner::ApplyInverse( const Epetra_MultiVector& /*vector1*/, Epetr
 }
 
 void
-EpetraPreconditioner::showMe( std::ostream& output ) const
+EpetraPreconditioner::showMe( std::ostream& /*output*/ ) const
 {
     assert( false );
 }
