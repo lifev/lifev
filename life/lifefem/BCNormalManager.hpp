@@ -26,7 +26,7 @@
 
 /*!
     @file
-    @brief File contains BCNormalManager class for handling normal essential boundary conditions
+    @brief File contains BCManageNormal class for handling normal essential boundary conditions
 
     @author Gwenol Grandperrin <gwenol.grandperrin@epfl.ch>
     @contributor Mauro Perego <perego.mauro@gmail.com>
@@ -35,15 +35,15 @@
     @date 12-02-2009
  *///@HEADER
 
-#ifndef _BCNORMALMANAGER_
-#define _BCNORMALMANAGER_
+#ifndef BCMANAGENORMAL_H
+#define BCMANAGENORMAL_H
 
 #include <life/lifefem/bcHandler.hpp>
 
 namespace LifeV
 {
 
-//! BCNormalManager - class for handling normal essential boundary conditions
+//! BCManageNormal - class for handling normal essential boundary conditions
 /*!
    @author Gwenol Grandperrin
 
@@ -53,7 +53,7 @@ namespace LifeV
 
 
 template<typename MatrixType>
-class BCNormalManager
+class BCManageNormal
 {
 public:
 
@@ -73,18 +73,18 @@ public:
     //@{
 
     //! Empty Constructor
-    BCNormalManager();
+    BCManageNormal();
 
     //! Copy constructor
     /*!
-     * All the stored data are copied so that the pointers of bcNormalManager and this do not share the same objects
-       @param bcNormalManager BCNormalManager
+     * All the stored data are copied so that the pointers of bcManageNormal and this do not share the same objects
+       @param bcManageNormal BCManageNormal
      */
-    BCNormalManager( BCNormalManager const& bcNormalManager );
+    BCManageNormal( BCManageNormal const& bcManageNormal );
 
 
     //! Destructor
-    ~BCNormalManager();
+    ~BCManageNormal();
 
     //@}
 
@@ -94,11 +94,11 @@ public:
 
     //! Assignment operator
     /*!
-      Stored data are copied so that the pointers of bcNormalManager and of the returned class do not share the same objects
-      @param bcNormalManager BCNormalManager
-      @return Reference to a new BCNormalManager with the same content of bcNormalManager
+      Stored data are copied so that the pointers of bcManageNormal and of the returned class do not share the same objects
+      @param bcManageNormal BCManageNormal
+      @return Reference to a new BCManageNormal with the same content of bcManageNormal
      */
-    BCNormalManager& operator= ( const BCNormalManager& bcNormalManager );
+    BCManageNormal& operator= ( const BCManageNormal& bcManageNormal );
 
     //@}
 
@@ -292,7 +292,7 @@ private:
 
 //Empty Constructor
 template<typename MatrixType>
-BCNormalManager<MatrixType>::BCNormalManager():
+BCManageNormal<MatrixType>::BCManageNormal():
         M_dataBuilt(false),
         M_numDof(0),
         M_numInvoledDof(0)
@@ -303,25 +303,25 @@ BCNormalManager<MatrixType>::BCNormalManager():
 
 //Copy Constructor
 template<typename MatrixType>
-BCNormalManager<MatrixType>::BCNormalManager( const BCNormalManager & bcNormalManager ):
-        M_dataBuilt(bcNormalManager.M_dataBuilt),
-        M_rotationMatrixPtr(new matrix_Type(*bcNormalManager.M_rotationMatrixPtr) ),
-        M_localEpetraMapPtr(new EpetraMap(*bcNormalManager.M_localEpetraMapPtr) ),
-        M_firstTangentPtr(new EpetraVector(*bcNormalManager.M_firstTangentPtr) ),
-        M_secondTangentPtr(new EpetraVector(*bcNormalManager.M_secondTangentPtr) ),
-        M_normalPtr(new EpetraVector(*bcNormalManager.M_normalPtr) ),
-        M_coordPtr(new EpetraVector(*bcNormalManager.M_coordPtr) ),
-        M_numDof(bcNormalManager.M_numDof),
-        M_numInvoledDof(bcNormalManager.M_numInvoledDof),
-        M_flags(bcNormalManager.M_flags),
-        M_givenVersors(bcNormalManager.M_givenVersors)
+BCManageNormal<MatrixType>::BCManageNormal( const BCManageNormal & bcManageNormal ):
+        M_dataBuilt(bcManageNormal.M_dataBuilt),
+        M_rotationMatrixPtr(new matrix_Type(*bcManageNormal.M_rotationMatrixPtr) ),
+        M_localEpetraMapPtr(new EpetraMap(*bcManageNormal.M_localEpetraMapPtr) ),
+        M_firstTangentPtr(new EpetraVector(*bcManageNormal.M_firstTangentPtr) ),
+        M_secondTangentPtr(new EpetraVector(*bcManageNormal.M_secondTangentPtr) ),
+        M_normalPtr(new EpetraVector(*bcManageNormal.M_normalPtr) ),
+        M_coordPtr(new EpetraVector(*bcManageNormal.M_coordPtr) ),
+        M_numDof(bcManageNormal.M_numDof),
+        M_numInvoledDof(bcManageNormal.M_numInvoledDof),
+        M_flags(bcManageNormal.M_flags),
+        M_givenVersors(bcManageNormal.M_givenVersors)
 {
 
 }
 
 // Destructor.
 template<typename MatrixType>
-BCNormalManager<MatrixType>::~BCNormalManager()
+BCManageNormal<MatrixType>::~BCManageNormal()
 {
 
 }
@@ -334,22 +334,22 @@ BCNormalManager<MatrixType>::~BCNormalManager()
 
 // Assignment operator
 template<typename MatrixType>
-BCNormalManager<MatrixType>&
-BCNormalManager<MatrixType>::operator= ( const BCNormalManager & bcNormalManager )
+BCManageNormal<MatrixType>&
+BCManageNormal<MatrixType>::operator= ( const BCManageNormal & bcManageNormal )
 {
-    if (this != &bcNormalManager)
+    if (this != &bcManageNormal)
     {
-        M_dataBuilt(bcNormalManager.M_dataBuilt);
-        M_rotationMatrixPtr.reset(new matrix_Type(*bcNormalManager.M_rotationMatrixPtr) );
-        M_localEpetraMapPtr.reset(new EpetraMap(*bcNormalManager.M_localEpetraMapPtr) );
-        M_firstTangentPtr.reset(new EpetraVector(*bcNormalManager.M_firstTangentPtr) );
-        M_secondTangentPtr.reset(new EpetraVector(*bcNormalManager.M_secondTangentPtr) );
-        M_normalPtr.reset(new EpetraVector(*bcNormalManager.M_normalPtr) );
-        M_coordPtr.reset(new EpetraVector(*bcNormalManager.M_coordPtr) );
-        M_numDof = bcNormalManager.M_numDof;
-        M_numInvoledDof = bcNormalManager.M_numInvoledDof;
-        M_flags = bcNormalManager.M_flags;
-        M_givenVersors = bcNormalManager.M_givenVersors;
+        M_dataBuilt(bcManageNormal.M_dataBuilt);
+        M_rotationMatrixPtr.reset(new matrix_Type(*bcManageNormal.M_rotationMatrixPtr) );
+        M_localEpetraMapPtr.reset(new EpetraMap(*bcManageNormal.M_localEpetraMapPtr) );
+        M_firstTangentPtr.reset(new EpetraVector(*bcManageNormal.M_firstTangentPtr) );
+        M_secondTangentPtr.reset(new EpetraVector(*bcManageNormal.M_secondTangentPtr) );
+        M_normalPtr.reset(new EpetraVector(*bcManageNormal.M_normalPtr) );
+        M_coordPtr.reset(new EpetraVector(*bcManageNormal.M_coordPtr) );
+        M_numDof = bcManageNormal.M_numDof;
+        M_numInvoledDof = bcManageNormal.M_numInvoledDof;
+        M_flags = bcManageNormal.M_flags;
+        M_givenVersors = bcManageNormal.M_givenVersors;
     }
     return *this;
 }
@@ -362,7 +362,7 @@ BCNormalManager<MatrixType>::operator= ( const BCNormalManager & bcNormalManager
 
 
 template<typename MatrixType>
-void BCNormalManager<MatrixType>::init(const BCBase& boundaryCondition,const Real& time)
+void BCManageNormal<MatrixType>::init(const BCBase& boundaryCondition,const Real& time)
 {
     // Loop on BC identifiers
     for ( ID i = 1; i <= boundaryCondition.list_size(); ++i )
@@ -388,7 +388,7 @@ void BCNormalManager<MatrixType>::init(const BCBase& boundaryCondition,const Rea
 
 template<typename MatrixType>
 template<typename MeshType>
-void BCNormalManager<MatrixType>::build(const MeshType& mesh, const Dof& dof,CurrentBdFE& currentBdFE,MatrixType& systemMatrix, UInt offset,EpetraMap::comm_ptrtype& commPtr)
+void BCManageNormal<MatrixType>::build(const MeshType& mesh, const Dof& dof,CurrentBdFE& currentBdFE,MatrixType& systemMatrix, UInt offset,EpetraMap::comm_ptrtype& commPtr)
 {
     if (M_dataBuilt)
     {
@@ -443,7 +443,7 @@ void BCNormalManager<MatrixType>::build(const MeshType& mesh, const Dof& dof,Cur
 
 template<typename MatrixType>
 template <typename VectorType>
-void BCNormalManager<MatrixType>::bcShiftToNormalTangentialCoordSystem(matrix_Type& systemMatrix, VectorType& rightHandSide) const
+void BCManageNormal<MatrixType>::bcShiftToNormalTangentialCoordSystem(matrix_Type& systemMatrix, VectorType& rightHandSide) const
 {
     if (M_dataBuilt)
     {
@@ -470,7 +470,7 @@ void BCNormalManager<MatrixType>::bcShiftToNormalTangentialCoordSystem(matrix_Ty
 
 template<typename MatrixType>
 template <typename VectorType>
-void BCNormalManager<MatrixType>::bcShiftToCartesianCoordSystem(matrix_Type& systemMatrix, VectorType& rightHandSide) const
+void BCManageNormal<MatrixType>::bcShiftToCartesianCoordSystem(matrix_Type& systemMatrix, VectorType& rightHandSide) const
 {
     if (M_dataBuilt)
     {
@@ -495,7 +495,7 @@ void BCNormalManager<MatrixType>::bcShiftToCartesianCoordSystem(matrix_Type& sys
 
 template<typename MatrixType>
 template<typename VectorType, typename MeshType>
-void BCNormalManager<MatrixType>::computeIntegratedNormals(const Dof& dof,CurrentBdFE& currentBdFE, VectorType& normals,  const MeshType& mesh)
+void BCManageNormal<MatrixType>::computeIntegratedNormals(const Dof& dof,CurrentBdFE& currentBdFE, VectorType& normals,  const MeshType& mesh)
 {
 
     //-----------------------------------------------------
@@ -586,7 +586,7 @@ void BCNormalManager<MatrixType>::computeIntegratedNormals(const Dof& dof,Curren
 
 //TODO this function can be improved using the vtk writers
 template<typename MatrixType>
-void BCNormalManager<MatrixType>::exportToParaview(std::string fileName) const
+void BCManageNormal<MatrixType>::exportToParaview(std::string fileName) const
 {
     if (M_dataBuilt)
     {
@@ -698,7 +698,7 @@ void BCNormalManager<MatrixType>::exportToParaview(std::string fileName) const
 
 template< typename MatrixType>
 template< typename MeshType >
-void BCNormalManager<MatrixType>::M_calculateCoordinates(MeshType const& mesh)
+void BCManageNormal<MatrixType>::M_calculateCoordinates(MeshType const& mesh)
 {
     M_coordPtr.reset( new EpetraVector(*M_localEpetraMapPtr,Unique) );
 
@@ -732,14 +732,14 @@ void BCNormalManager<MatrixType>::M_calculateCoordinates(MeshType const& mesh)
 
 
 template<typename MatrixType>
-void BCNormalManager<MatrixType>::M_addBoundaryPoint(const ID& idof,const ID& flag)
+void BCManageNormal<MatrixType>::M_addBoundaryPoint(const ID& idof,const ID& flag)
 {
     M_flags.insert(std::pair<ID,ID>(idof,flag));
 }
 
 
 template<typename MatrixType>
-void BCNormalManager<MatrixType>::M_addVersor(const ID& idof,const Real& vx,const Real& vy, const Real& vz)
+void BCManageNormal<MatrixType>::M_addVersor(const ID& idof,const Real& vx,const Real& vy, const Real& vz)
 {
     Vector n(3);
     n[0] = vx;
@@ -751,7 +751,7 @@ void BCNormalManager<MatrixType>::M_addVersor(const ID& idof,const Real& vx,cons
 
 template< typename MatrixType>
 template< typename MeshType>
-void BCNormalManager< MatrixType>::M_calculateNormals(const MeshType& mesh, const Dof& dof,CurrentBdFE& currentBdFE)
+void BCManageNormal< MatrixType>::M_calculateNormals(const MeshType& mesh, const Dof& dof,CurrentBdFE& currentBdFE)
 {
     //-----------------------------------------------------
     // STEP 1: Calculating the normals
@@ -771,7 +771,7 @@ void BCNormalManager< MatrixType>::M_calculateNormals(const MeshType& mesh, cons
 
 //! Save the imposed normal vectors.
 template<typename MatrixType>
-void BCNormalManager<MatrixType>::M_storeGivenVersors()
+void BCManageNormal<MatrixType>::M_storeGivenVersors()
 {
     //-----------------------------------------------------
     // STEP 1: Retrieve the normals
@@ -811,7 +811,7 @@ void BCNormalManager<MatrixType>::M_storeGivenVersors()
 
 //! Calculate the tangential vectors for each triad in the vector triad.
 template<typename MatrixType>
-void BCNormalManager<MatrixType>::M_calculateTangentVectors()
+void BCManageNormal<MatrixType>::M_calculateTangentVectors()
 {
     //-----------------------------------------------------
     // STEP 1: Initialization
@@ -902,7 +902,7 @@ void BCNormalManager<MatrixType>::M_calculateTangentVectors()
 
 
 template<typename MatrixType>
-void BCNormalManager<MatrixType>::M_buildRotationMatrix(matrix_Type& systemMatrix, UInt offset)
+void BCManageNormal<MatrixType>::M_buildRotationMatrix(matrix_Type& systemMatrix, UInt offset)
 {
     //Initialization of the map to store the normal vectors
     std::map< ID,std::vector< Real > >::iterator mapIt;
