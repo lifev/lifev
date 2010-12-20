@@ -184,7 +184,7 @@ problem::run()
     boost::shared_ptr<RegionMesh3D<LinearTetra> > fullMeshPtr(new RegionMesh3D<LinearTetra>);
     readMesh(*fullMeshPtr, dataMesh);
 
-    partitionMesh< RegionMesh3D<LinearTetra> > meshPart( fullMeshPtr, members->comm );
+    MeshPartitioner< RegionMesh3D<LinearTetra> > meshPart( fullMeshPtr, members->comm );
 
     //
     // The Problem Solver
@@ -267,7 +267,7 @@ problem::run()
         out_norm.close();
     }
 
-    Chrono chrono;
+    LifeChrono chrono;
 
     std::string TimeAdvanceMethod =  dataFile( "problem/time_discretization/method", "Newmark");
 
@@ -304,7 +304,7 @@ problem::run()
 
     // computing the rhs
     vector_type rhs ( uMap, Unique );
-   
+
 
     // postProcess
     boost::shared_ptr< Exporter<RegionMesh3D<LinearTetra> > > exporter;
@@ -313,14 +313,14 @@ problem::run()
 
 #ifdef HAVE_HDF5
     if (exporterType.compare("hdf5") == 0)
-        exporter.reset( new Hdf5exporter<RegionMesh3D<LinearTetra> > ( dataFile, "problem" ) );
+        exporter.reset( new ExporterHDF5<RegionMesh3D<LinearTetra> > ( dataFile, "problem" ) );
     else
 #endif
     {
         if (exporterType.compare("none") == 0)
-            exporter.reset( new NoExport<RegionMesh3D<LinearTetra> > ( dataFile, meshPart.meshPartition(), "problem",members ->comm->MyPID()) );
+            exporter.reset( new ExporterEmpty<RegionMesh3D<LinearTetra> > ( dataFile, meshPart.meshPartition(), "problem",members ->comm->MyPID()) );
         else
-            exporter.reset( new Ensight<RegionMesh3D<LinearTetra> > ( dataFile, meshPart.meshPartition(), "problem",   members->comm->MyPID()) );
+            exporter.reset( new ExporterEnsight<RegionMesh3D<LinearTetra> > ( dataFile, meshPart.meshPartition(), "problem",   members->comm->MyPID()) );
     }
     exporter->setPostDir( "./" ); // This is a test to see if M_post_dir is working
     exporter->setMeshProcId( meshPart.meshPartition(),  members->comm->MyPID() );
@@ -409,7 +409,7 @@ problem::run()
          rhs *=0;
 
 	timeAdvance->updateRHSContribution( dt );
-   
+
        //evaluate rhs
 
         feSpace->l2ScalarProduct(source_in, rhs, time);
