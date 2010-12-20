@@ -200,9 +200,9 @@ int main(int argc, char** argv)
     // *********************************
     printf("\nTemporal loop:\n");
 
-    Chrono chronoTotal;
-    Chrono chronoSystem;
-    Chrono chronoIteration;
+    LifeChrono chronoTotal;
+    LifeChrono chronoSystem;
+    LifeChrono chronoIteration;
 
     int count = 0;
     chronoTotal.start();
