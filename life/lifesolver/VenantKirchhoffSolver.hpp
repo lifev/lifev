@@ -66,12 +66,12 @@
 #include <life/lifefem/bcHandler.hpp>
 #include <life/lifefem/FESpace.hpp>
 
-#include <life/lifecore/chrono.hpp>
+#include <life/lifecore/LifeChrono.hpp>
 
 #include <life/lifealg/SolverTrilinos.hpp>
 
 #include <life/lifesolver/VenantKirchhoffElasticData.hpp>
-#include <life/lifecore/displayer.hpp>
+#include <life/lifecore/Displayer.hpp>
 
 namespace LifeV
 {
