@@ -203,7 +203,8 @@ private:
     //! Factory method for the system matrix, of type MonolithicBlockBase
     void createOperator( std::string& operType )
     {
-        M_monolithicMatrix.reset(MonolithicBlockMatrix::Factory::instance().createObject( operType ));
+        M_monolithicMatrix.reset(MonolithicBlockMatrix::Factory_Type::instance().createObject( operType ));
+        M_monolithicMatrix.reset(MonolithicBlockMatrix::Factory_Type::instance().createObject( operType ));
     }
 
     /**
