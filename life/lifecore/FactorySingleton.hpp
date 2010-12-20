@@ -43,7 +43,7 @@ along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
 #include <new>
 #include <stdexcept>
 
-#include <life/lifecore/policy.hpp>
+#include <life/lifecore/FactoryPolicy.hpp>
 
 namespace LifeV
 {
