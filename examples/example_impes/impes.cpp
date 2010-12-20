@@ -241,13 +241,13 @@ impes::run()
     typedef ds::vector_Type                                          vector_type;
     typedef boost::shared_ptr<vector_type>                           vector_ptrtype;
 
-    Chrono chronoTotal;
-    Chrono chronoReadAndPartitionMesh;
-    Chrono chronoBoundaryCondition;
-    Chrono chronoFiniteElementSpace;
-    Chrono chronoProblem;
-    Chrono chronoProcess;
-    Chrono chronoError;
+    LifeChrono chronoTotal;
+    LifeChrono chronoReadAndPartitionMesh;
+    LifeChrono chronoBoundaryCondition;
+    LifeChrono chronoFiniteElementSpace;
+    LifeChrono chronoProblem;
+    LifeChrono chronoProcess;
+    LifeChrono chronoError;
 
     // Start chronoTotal for measure the total time for the computation.
     chronoTotal.start();
@@ -299,7 +299,7 @@ impes::run()
     readMesh( *fullMeshPtr, dataMesh );
 
     // Partition the mesh using ParMetis.
-    partitionMesh< RegionMesh >  meshPart( fullMeshPtr, Members->comm );
+    MeshPartitioner< RegionMesh >  meshPart( fullMeshPtr, Members->comm );
 
     // Stop chronoReadAndPartitionMesh.
     chronoReadAndPartitionMesh.stop();
@@ -666,7 +666,7 @@ impes::run()
 #ifdef HAVE_HDF5
     if ( exporterType.compare("hdf5") == 0 )
     {
-        exporter.reset( new Hdf5exporter< RegionMesh > ( dataFile, dataFile( "exporter/file_name", "PressureSaturation"  ) ) );
+        exporter.reset( new ExporterHDF5< RegionMesh > ( dataFile, dataFile( "exporter/file_name", "PressureSaturation"  ) ) );
 
         // Set directory where to save the solution.
         exporter->setPostDir( dataFile( "exporter/folder", "./" ) );
@@ -678,7 +678,7 @@ impes::run()
     {
         if ( exporterType.compare("none") == 0 )
         {
-            exporter.reset( new NoExport< RegionMesh > ( dataFile, dataFile( "exporter/file_name", "PressureSaturation"  ) ) );
+            exporter.reset( new ExporterEmpty< RegionMesh > ( dataFile, dataFile( "exporter/file_name", "PressureSaturation"  ) ) );
 
             // Set directory where to save the solution.
             exporter->setPostDir( dataFile( "exporter/folder", "./" ) );
@@ -687,7 +687,7 @@ impes::run()
         }
         else
         {
-            exporter.reset( new Ensight< RegionMesh > ( dataFile, dataFile( "exporter/file_name", "PressureSaturation"  ) ) );
+            exporter.reset( new ExporterEnsight< RegionMesh > ( dataFile, dataFile( "exporter/file_name", "PressureSaturation"  ) ) );
 
             // Set directory where to save the solution.
             exporter->setPostDir( dataFile( "exporter/folder", "./" ) );
