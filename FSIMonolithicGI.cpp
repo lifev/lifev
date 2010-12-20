@@ -494,9 +494,9 @@ bool FSIMonolithicGI::reg =  BlockPrecFactory::instance().registerProduct("Addit
                           &&
                           BlockPrecFactory::instance().registerProduct("ComposedDNGI"  , &createComposedDNGI )
                           &&
-                          MonolithicBlockMatrix::Factory::instance().registerProduct( "AdditiveSchwarzGI", &createAdditiveSchwarzGI )
+                          MonolithicBlockMatrix::Factory_Type::instance().registerProduct( "AdditiveSchwarzGI", &createAdditiveSchwarzGI )
                           &&
-                          MonolithicBlockMatrix::Factory::instance().registerProduct( "AdditiveSchwarzRNGI", &createAdditiveSchwarzRNGI )
+                          MonolithicBlockMatrix::Factory_Type::instance().registerProduct( "AdditiveSchwarzRNGI", &createAdditiveSchwarzRNGI )
                           &&
                           FSIFactory_Type::instance().registerProduct( "monolithicGI", &createFM )
                           &&
