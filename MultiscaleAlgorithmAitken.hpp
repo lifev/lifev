@@ -37,7 +37,7 @@
 #ifndef MultiscaleAlgorithmAitken_H
 #define MultiscaleAlgorithmAitken_H 1
 
-#include <life/lifealg/generalizedAitken.hpp>
+#include <life/lifealg/NonLinearAitken.hpp>
 
 #include <lifemc/lifesolver/MultiscaleAlgorithm.hpp>
 
@@ -100,7 +100,7 @@ protected:
 
     std::map< std::string, methodType >            M_methodMap;
     methodType                                     M_method;
-    generalizedAitken< multiscaleVector_Type >     M_generalizedAitken;
+    NonLinearAitken< multiscaleVector_Type >     M_generalizedAitken;
 
 private:
 

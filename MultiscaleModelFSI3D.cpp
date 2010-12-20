@@ -298,7 +298,7 @@ MultiscaleModelFSI3D::saveSolution()
     if ( M_FSIoperator->isFluid() )
         M_exporterFluid->postProcess( M_data->dataFluid()->dataTime()->time() - M_data->dataFluid()->dataTime()->timeStep() );
     if ( M_FSIoperator->isSolid() )
-        M_exporterSolid->postProcess( M_data->dataSolid()->getDataTime()->time() - M_data->dataSolid()->dataTime()->timeStep() );
+        M_exporterSolid->postProcess( M_data->dataSolid()->getDataTime()->time() - M_data->dataSolid()->getDataTime()->timeStep() );
 
 #ifdef HAVE_HDF5
     if ( M_data->dataFluid()->dataTime()->isLastTimeStep() )
