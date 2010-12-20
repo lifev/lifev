@@ -296,7 +296,7 @@ Cylinder::run()
     boost::shared_ptr<RegionMesh3D<LinearTetra> > fullMeshPtr(new RegionMesh3D<LinearTetra>);
     readMesh(*fullMeshPtr, dataMesh);
 
-    partitionMesh< RegionMesh3D<LinearTetra> >   meshPart(fullMeshPtr, d->comm);
+    MeshPartitioner< RegionMesh3D<LinearTetra> >   meshPart(fullMeshPtr, d->comm);
 
     if (verbose) std::cout << std::endl;
     if (verbose) std::cout << "    Time discretization order " << dataNavierStokes->dataTime()->orderBDF() << std::endl;
@@ -380,7 +380,7 @@ Cylinder::run()
 
     // intialization
 
-    Chrono chrono;
+    LifeChrono chrono;
     chrono.start();
 
     fluid.setUp(dataFile);
@@ -438,7 +438,7 @@ Cylinder::run()
 
     fluid.resetPreconditioner();
 
-    Ensight<RegionMesh3D<LinearTetra> > ensight( dataFile, meshPart.meshPartition(), "cylinder", d->comm->MyPID());
+    ExporterEnsight<RegionMesh3D<LinearTetra> > ensight( dataFile, meshPart.meshPartition(), "cylinder", d->comm->MyPID());
 
     vectorPtr_Type velAndPressure ( new vector_Type(*fluid.solution(), Repeated ) );
 
