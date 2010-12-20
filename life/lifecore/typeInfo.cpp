@@ -45,7 +45,7 @@ namespace LifeV
 // Constructors and Destructor
 // ===============================
 
-TypeInfo::TypeInfo()
+FactoryTypeInfo::FactoryTypeInfo()
 {
     class Nil {};
     M_info = &typeid(Nil);
@@ -53,19 +53,19 @@ TypeInfo::TypeInfo()
 
 }
 
-TypeInfo::TypeInfo(const std::type_info& ti):
+FactoryTypeInfo::FactoryTypeInfo(const std::type_info& ti):
     M_info(&ti)
 {
     assert( M_info != 0 );
 }
 
-TypeInfo::TypeInfo( TypeInfo const& ti ):
+FactoryTypeInfo::FactoryTypeInfo( FactoryTypeInfo const& ti ):
     M_info( ti.M_info )
 {
     assert( M_info != 0 );
 }
 
-TypeInfo::~TypeInfo()
+FactoryTypeInfo::~FactoryTypeInfo()
 {
 }
 
@@ -74,7 +74,7 @@ TypeInfo::~TypeInfo()
 // ===============================
 
 bool
-TypeInfo::before(const TypeInfo& rhs) const
+FactoryTypeInfo::before(const FactoryTypeInfo& rhs) const
 {
     assert( M_info != 0 );
     return M_info->before(*rhs.M_info);
@@ -85,14 +85,14 @@ TypeInfo::before(const TypeInfo& rhs) const
 // ======================
 
 const std::type_info&
-TypeInfo::typeInfo() const
+FactoryTypeInfo::typeInfo() const
 {
     assert( M_info != 0 );
     return *M_info;
 }
 
 const char*
-TypeInfo::name() const
+FactoryTypeInfo::name() const
 {
     assert( M_info != 0 );
     return M_info->name();

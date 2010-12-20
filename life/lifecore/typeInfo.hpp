@@ -33,29 +33,29 @@ along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
   @maintainer Radu Popescu <radu.popescu@epfl.ch>
 */
 
-#ifndef TYPEINFO_H
-#define TYPEINFO_H 1
+#ifndef FACTORY_TYPE_INFO_H
+#define FACTORY_TYPE_INFO_H 1
 
 #include <typeinfo>
 
 namespace LifeV
 {
 
-class TypeInfo
+class FactoryTypeInfo
 {
 public:
     //! @name Constructors, destructor
     //@{
-    TypeInfo();
-    TypeInfo(const std::type_info&); // non-explicit
-    TypeInfo( TypeInfo const & );
-    virtual ~TypeInfo();
+    FactoryTypeInfo();
+    FactoryTypeInfo(const std::type_info&); // non-explicit
+    FactoryTypeInfo( FactoryTypeInfo const & );
+    virtual ~FactoryTypeInfo();
     //@}
 
     //! @name Methods
     //@{
     //! Compatibility functions
-    bool before(const TypeInfo& rhs) const;
+    bool before(const FactoryTypeInfo& rhs) const;
     //@}
 
     //! @name Get methods
@@ -69,24 +69,24 @@ private:
     const std::type_info* M_info;
 };
 
-inline bool operator==(const TypeInfo& lhs, const TypeInfo& rhs)
+inline bool operator==(const FactoryTypeInfo& lhs, const FactoryTypeInfo& rhs)
 { return lhs.typeInfo() == rhs.typeInfo(); }
 
-inline bool operator<(const TypeInfo& lhs, const TypeInfo& rhs)
+inline bool operator<(const FactoryTypeInfo& lhs, const FactoryTypeInfo& rhs)
 { return lhs.before(rhs); }
 
-inline bool operator!=(const TypeInfo& lhs, const TypeInfo& rhs)
+inline bool operator!=(const FactoryTypeInfo& lhs, const FactoryTypeInfo& rhs)
 { return !(lhs == rhs); }
 
-inline bool operator>(const TypeInfo& lhs, const TypeInfo& rhs)
+inline bool operator>(const FactoryTypeInfo& lhs, const FactoryTypeInfo& rhs)
 { return rhs < lhs; }
 
-inline bool operator<=(const TypeInfo& lhs, const TypeInfo& rhs)
+inline bool operator<=(const FactoryTypeInfo& lhs, const FactoryTypeInfo& rhs)
 { return !(lhs > rhs); }
 
-inline bool operator>=(const TypeInfo& lhs, const TypeInfo& rhs)
+inline bool operator>=(const FactoryTypeInfo& lhs, const FactoryTypeInfo& rhs)
 { return !(lhs < rhs); }
 
 } // Namespace LifeV
 
-#endif // TYPEINFO_H
+#endif // FACTORY_TYPE_INFO_H
