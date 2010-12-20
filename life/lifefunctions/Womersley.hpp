@@ -55,9 +55,8 @@
 #ifndef __WOMERSLEY_HPP
 #define __WOMERSLEY_HPP 1
 
-#include <life/lifearray/tab.hpp>
 #include <life/lifecore/life.hpp>
-#include <life/lifecore/GetPot.hpp>
+#include <life/lifefilters/GetPot.hpp>
 
 
 
