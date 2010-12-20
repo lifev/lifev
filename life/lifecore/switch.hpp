@@ -33,8 +33,8 @@ along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
   @maintainer Radu Popescu <radu.popescu@epfl.ch>
 */
 
-#ifndef NEW_SWITCHES_H
-#define NEW_SWITCHES_H
+#ifndef SWITCH_H
+#define SWITCH_H
 
 #include<iostream>
 #include<map>
@@ -103,4 +103,4 @@ public:
 
 } // Namespace LifeV
 
-#endif // NEW_SWITCHES_H
+#endif // SWITCH_H
