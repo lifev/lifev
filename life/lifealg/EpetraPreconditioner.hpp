@@ -238,7 +238,7 @@ protected:
 
 };
 
-typedef singleton<factory<EpetraPreconditioner, std::string> > PRECFactory;
+typedef FactorySingleton<Factory<EpetraPreconditioner, std::string> > PRECFactory;
 
 } // namespace LifeV
 
