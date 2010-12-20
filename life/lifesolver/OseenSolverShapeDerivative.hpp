@@ -41,8 +41,8 @@
  */
 
 
-#ifndef OSEENSHAPEDERIVATIVE_H
-#define OSEENSHAPEDERIVATIVE_H 1
+#ifndef OSEENSOLVERSHAPEDERIVATIVE_H
+#define OSEENSOLVERSHAPEDERIVATIVE_H 1
 
 #include <life/lifesolver/OseenSolver.hpp>
 
@@ -966,4 +966,4 @@ updateShapeDerivatives( matrix_Type&                   matrix,
 
 } // namespace LifeV
 
-#endif // OSSENSHAPEDERIVATIVE_H
+#endif // OSEENSOLVERSHAPEDERIVATIVE_H

@@ -1640,7 +1640,7 @@ OseenSolver<MeshType, SolverType>::pressure(const entityFlag_Type& flag,
     pressure.subset( velocityAndPressure,
                      this->M_velocityFESpace.dim()*this->M_velocityFESpace.fieldDim() );
 
-    // third argument is 1, to use the pressure finite element space (see PostProc docs)
+    // third argument is 1, to use the pressure finite element space (see PostProcessingBoundary docs)
     return M_postProcessing->average( pressure, flag, 1 )[0];
 }
 
