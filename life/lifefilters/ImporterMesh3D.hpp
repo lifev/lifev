@@ -52,7 +52,7 @@
 #pragma GCC diagnostic warning "-Wunused-variable"
 #pragma GCC diagnostic warning "-Wunused-parameter"
 
-#include <life/lifecore/util_string.hpp>
+#include <life/lifecore/StringUtility.hpp>
 
 #include <life/lifemesh/bareItems.hpp>
 
