@@ -339,11 +339,11 @@ FSI::partitionMeshes()
 {
     if (this->isFluid())
     {
-        M_fluidMeshPart.reset(new  partitionMesh< mesh_Type > (M_fluidMesh, M_epetraComm));
+        M_fluidMeshPart.reset(new  MeshPartitioner< mesh_Type > (M_fluidMesh, M_epetraComm));
     }
     if (this->isSolid())
     {
-        M_solidMeshPart.reset( new  partitionMesh< mesh_Type > ( M_solidMesh, M_epetraComm ) );
+        M_solidMeshPart.reset( new  MeshPartitioner< mesh_Type > ( M_solidMesh, M_epetraComm ) );
     }
 
 }

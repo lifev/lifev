@@ -123,7 +123,7 @@ public:
 
     typedef RegionMesh3D<LinearTetra>                                               mesh_Type;
 #ifdef HAVE_HDF5
-    typedef HDF5Filter3DMesh<mesh_Type>                                             meshFilter_Type;
+    typedef ExporterHDF5Mesh3D<mesh_Type>                                           meshFilter_Type;
 #endif
     typedef OseenShapeDerivative   <mesh_Type>                                      fluid_Type;
     typedef VenantKirchhoffSolver  <mesh_Type>                                      solid_Type;
@@ -153,7 +153,7 @@ public:
     typedef DataFSI                                                                 data_Type;
     typedef boost::shared_ptr<data_Type>                                            dataPtr_Type;
     typedef std::map<ID, ID>::const_iterator                                        iterator_Type;
-    typedef singleton<factory<FSI, std::string> >                           FSIFactory_Type;
+    typedef FactorySingleton<Factory<FSI, std::string> >                    FSIFactory_Type;
     typedef Displayer::commPtr_Type/*Displayer::commPtr_Type*/                      commPtr_Type;
 
      //@}
@@ -524,9 +524,9 @@ public:
     // const mesh_Type& solidMesh()                                  const { return *M_solidMesh; }
 
     //!getter for the partitioned fluid mesh
-    const partitionMesh< mesh_Type >& fluidMeshPart()             const { return *M_fluidMeshPart; }
+    const MeshPartitioner< mesh_Type >& fluidMeshPart()             const { return *M_fluidMeshPart; }
     //!getter for the partitioned solid mesh
-    const partitionMesh< mesh_Type >& solidMeshPart()             const { return *M_solidMeshPart; }
+    const MeshPartitioner< mesh_Type >& solidMeshPart()             const { return *M_solidMeshPart; }
 
     //!getter for the fluid velocity FESpace
     const FESpace<mesh_Type, EpetraMap>& uFESpace()               const { return *M_uFESpace; }
@@ -807,8 +807,8 @@ protected:
     boost::shared_ptr<mesh_Type>                      M_fluidMesh;
     boost::shared_ptr<mesh_Type>                      M_solidMesh;
 
-    boost::shared_ptr<partitionMesh< mesh_Type > >    M_fluidMeshPart;
-    boost::shared_ptr<partitionMesh< mesh_Type > >    M_solidMeshPart;
+    boost::shared_ptr<MeshPartitioner< mesh_Type > >    M_fluidMeshPart;
+    boost::shared_ptr<MeshPartitioner< mesh_Type > >    M_solidMeshPart;
 
     fluidBchandlerPtr_Type                              M_BCh_u;
     solidBchandlerPtr_Type                              M_BCh_d;
