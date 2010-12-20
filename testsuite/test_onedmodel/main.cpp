@@ -63,8 +63,8 @@
 #include <life/lifealg/EpetraMap.hpp>
 
 // Mathcard includes
-#include <lifemc/lifefem/OneDimensionalModel_BCHandler.hpp>
-#include <lifemc/lifesolver/OneDimensionalModel_Solver.hpp>
+#include <lifemc/lifefem/OneDimensionalBCHandler.hpp>
+#include <lifemc/lifesolver/OneDimensionalSolver.hpp>
 #include <lifemc/lifesolver/MultiscaleModel1D.hpp>
 
 #include "ud_functions.hpp"
