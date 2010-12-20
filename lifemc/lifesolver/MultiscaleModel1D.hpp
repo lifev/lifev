@@ -86,16 +86,16 @@ class MultiscaleModel1D: public virtual multiscaleModel_Type
 {
 public:
 
-    typedef OneDimensionalModel_Physics                            physics_Type;
+    typedef OneDimensionalPhysics                                  physics_Type;
     typedef boost::shared_ptr< physics_Type >                      physicsPtr_Type;
 
-    typedef OneDimensionalModel_Flux                               flux_Type;
+    typedef OneDimensionalFlux                                     flux_Type;
     typedef boost::shared_ptr< flux_Type >                         fluxPtr_Type;
 
-    typedef OneDimensionalModel_Source                             source_Type;
+    typedef OneDimensionalSource                                   source_Type;
     typedef boost::shared_ptr< source_Type >                       sourcePtr_Type;
 
-    typedef OneDimensionalModel_Solver                             solver_Type;
+    typedef OneDimensionalSolver                                   solver_Type;
     typedef boost::shared_ptr< solver_Type >                       solverPtr_Type;
 
     typedef solver_Type::data_Type                                 data_Type;
@@ -112,10 +112,10 @@ public:
 
     typedef BCInterface1D< solver_Type >                           bcInterface_Type;
     typedef boost::shared_ptr< bcInterface_Type >                  bcInterfacePtr_Type;
-    typedef OneDimensionalModel_BCHandler                          bc_Type;
+    typedef OneDimensionalBCHandler                                bc_Type;
     typedef boost::shared_ptr< bc_Type >                           bcPtr_Type;
 
-    typedef OneDimensionalModel_BCFunction                         bcFunction_Type;
+    typedef OneDimensionalBCFunction                               bcFunction_Type;
 
     typedef OneDimensional::bcType_Type                            bcType_Type;
     typedef OneDimensional::bcSide_Type                            bcSide_Type;

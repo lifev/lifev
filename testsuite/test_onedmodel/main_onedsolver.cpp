@@ -173,12 +173,12 @@ int main(int argc, char** argv)
     bcFunction_Type sinusoidalFunction( boost::bind( &Sin::operator(), &sinus, _1 ) );
 
     // Absorbing
-    bc_Type::bcFunctionDefaultPtr_Type absorbing ( new OneDimensionalModel_BCFunction_Absorbing( OneDimensional::right, OneDimensional::W2 ) );
+    bc_Type::bcFunctionDefaultPtr_Type absorbing ( new OneDimensionalBCFunctionAbsorbing( OneDimensional::right, OneDimensional::W2 ) );
     absorbing->setSolution( oneDModel.solution() );
     absorbing->setFluxSource( oneDModel.flux(), oneDModel.source() );
 
-    bcFunction_Type absorbingFunction ( boost::bind( &OneDimensionalModel_BCFunction_Absorbing::operator(),
-                                                     dynamic_cast<OneDimensionalModel_BCFunction_Absorbing *> ( &( *absorbing ) ), _1, _2 ) );
+    bcFunction_Type absorbingFunction ( boost::bind( &OneDimensionalBCFunctionAbsorbing::operator(),
+                                                     dynamic_cast<OneDimensionalBCFunctionAbsorbing *> ( &( *absorbing ) ), _1, _2 ) );
 
     // BC to test A_from_P conversion
     //Constant constantArea( 1.05 );

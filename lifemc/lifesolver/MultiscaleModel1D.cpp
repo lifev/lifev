@@ -616,7 +616,7 @@ MultiscaleModel1D::setupFESpace()
     NullTransformation[1] = 0.;
     NullTransformation[2] = 0.;
 
-    //The real mesh can be only scaled due to OneDimensionalModel_Solver conventions
+    //The real mesh can be only scaled due to OneDimensionalSolver conventions
     M_data->mesh()->transformMesh( M_geometryScale, NullTransformation, NullTransformation ); // Scale the x dimension
 
     for ( UInt i(0); i < M_data->numberOfNodes() ; ++i )
