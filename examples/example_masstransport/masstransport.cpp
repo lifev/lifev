@@ -31,8 +31,8 @@
 // #include <life/lifecore/life.hpp>
 
 // #include <life/lifecore/life.hpp>
-// #include <life/lifecore/GetPot.hpp>
-// #include <life/lifecore/debug.hpp>
+// #include <life/lifefilters/GetPot.hpp>
+// #include <life/lifecore/LifeDebug.hpp>
 
 // #include <life/lifefilters/importer.hpp>
 
@@ -49,13 +49,13 @@
 //#include "life/lifesolver/NavierStokesSolver.hpp"
 #include <life/lifearray/EpetraMatrix.hpp>
 #include <life/lifealg/EpetraMap.hpp>
-#include <life/lifemesh/partitionMesh.hpp>
+#include <life/lifemesh/MeshPartitioner.hpp>
 #include <life/lifesolver/dataNavierStokes.hpp>
 #include <life/lifesolver/dataADR.hpp>
 #include <life/lifefem/FESpace.hpp>
 #include <life/lifefem/bdfNS_template.hpp>
-#include <life/lifefilters/ensight.hpp>
-//#include <life/lifefilters/hdf5exporter.hpp>
+#include <life/lifefilters/ExporterEnsight.hpp>
+//#include <life/lifefilters/ExporterHDF5.hpp>
 
 #include <life/lifesolver/AdvectionDiffusionReactionSolver.hpp>
 #include <life/lifesolver/Oseen.hpp>
