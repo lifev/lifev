@@ -59,7 +59,7 @@
 #include <life/lifearray/EpetraMatrix.hpp>
 #include <life/lifearray/EpetraVector.hpp>
 
-#include <life/lifefem/elemOper.hpp>
+#include <life/lifefem/AssemblyElemental.hpp>
 //#include <life/lifefem/values.hpp>
 //#include <life/lifearray/pattern.hpp>
 #include <life/lifefem/Assembly.hpp>
