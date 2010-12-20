@@ -123,7 +123,7 @@ main( int argc, char** argv )
     if (verbose) std::cout << " done ! " << std::endl;
 
     if (verbose) std::cout << " -- Partitioning the mesh ... " << std::flush;
-    partitionMesh< mesh_type >   meshPart(fullMeshPtr, Comm);
+    MeshPartitioner< mesh_type >   meshPart(fullMeshPtr, Comm);
     if (verbose) std::cout << " done ! " << std::endl;
 
     if (verbose) std::cout << " -- Freeing the global mesh ... " << std::flush;
@@ -167,7 +167,7 @@ main( int argc, char** argv )
         bchandler.addBC("Dirichlet",i,Essential,Full,BCu,1);
     }
 
-    Hdf5exporter<mesh_type> exporter ( dataFile, meshPart.meshPartition(), "solution", Comm->MyPID());
+    ExporterHDF5<mesh_type> exporter ( dataFile, meshPart.meshPartition(), "solution", Comm->MyPID());
     exporter.setMultimesh(false);
     boost::shared_ptr<vector_type> solutionPtr (new vector_type(level_set.solution(),Repeated));
     exporter.addVariable( ExporterData::Scalar, "level-set", solutionPtr, UInt(0), uFESpace->dof().numTotalDof() );
@@ -187,7 +187,7 @@ main( int argc, char** argv )
         level_set.updateSystem(beta,bchandler,current_time);
         if (verbose) std::cout << " done " << std::endl;
         if (verbose) std::cout << "[LS] Solving system ... " << std::flush;
-        Chrono c;
+        LifeChrono c;
         c.start();
         level_set.iterate();
         c.stop();
