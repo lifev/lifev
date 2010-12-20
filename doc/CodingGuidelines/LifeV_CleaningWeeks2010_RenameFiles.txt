@@ -55,7 +55,7 @@ Switch                                 switch                                  C
 
 LIFEALG
 ============================
-NonLinearAitken                        generalizedAitken                       CMCS1
+NonLinearAitken                        generalizedAitken                       CMCS1     DONE
 NonLinearBrent                         brent                                   MOX
 NonLinearLineSearch                    linesearch_* (merging 2 files)          MOX
 NonLinearRichardson                    nonLinRichardson                        CMCS3

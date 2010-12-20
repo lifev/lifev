@@ -71,7 +71,7 @@
 #include <life/lifemesh/dataMesh.hpp>
 #include <life/lifemesh/regionMesh3D.hpp>
 
-#include <life/lifealg/generalizedAitken.hpp>
+#include <life/lifealg/NonLinearAitken.hpp>
 
 #include <life/lifefem/DOFInterface3Dto3D.hpp>
 #include <life/lifefem/DOFInterface3Dto2D.hpp>

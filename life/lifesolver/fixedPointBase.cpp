@@ -28,7 +28,7 @@ namespace LifeV
 
 fixedPoint::fixedPoint():
         super(),
-        M_aitkFS(),
+        M_nonLinearAitken(),
         M_rhsNew(),
         M_beta()
 {
@@ -47,15 +47,15 @@ void  fixedPoint::solveJac(vector_Type        &muk,
                            const vector_Type  &res,
                            const Real   /*_linearRelTol*/)
 {
-    M_aitkFS.restart();
+    M_nonLinearAitken.restart();
 
     if (M_data->algorithm()=="RobinNeumann")
     {
-        muk = M_aitkFS.computeDeltaLambdaScalar(this->lambdaSolidOld(), res);
+        muk = M_nonLinearAitken.computeDeltaLambdaScalar(this->lambdaSolidOld(), res);
     }
     else
     {
-        muk = M_aitkFS.computeDeltaLambdaScalar(this->lambdaSolidOld(), -1.*res);
+        muk = M_nonLinearAitken.computeDeltaLambdaScalar(this->lambdaSolidOld(), -1.*res);
     }
 }
 
@@ -114,11 +114,11 @@ fixedPoint::setDataFile( GetPot const& dataFile )
 {
     super::setDataFile( dataFile );
 
-    M_aitkFS.setDefaultOmega(M_data->defaultOmega(), 0.001);
-    M_aitkFS.setOmegaRange( M_data->OmegaRange() );
+    M_nonLinearAitken.setDefaultOmega(M_data->defaultOmega(), 0.001);
+    M_nonLinearAitken.setOmegaRange( M_data->OmegaRange() );
 
     if ( M_data->algorithm() == "RobinNeumann" )
-        M_aitkFS.setDefaultOmega(-1, 1);
+        M_nonLinearAitken.setDefaultOmega(-1, 1);
 
 }
 

@@ -50,7 +50,6 @@
 #include <algorithm> // for min and max
 #include <life/lifealg/linesearch_parabolic.hpp>
 #include <life/lifealg/linesearch_cubic.hpp>
-#include <life/lifealg/generalizedAitken.hpp>
 #include <life/lifearray/EpetraVector.hpp>
 
 namespace LifeV

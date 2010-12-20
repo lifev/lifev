@@ -37,11 +37,11 @@ steklovPoincare::steklovPoincare():
         M_defOmega                           ( 0.005 ),
         M_defOmegaS                          ( 0.005 ),
         M_defOmegaF                          ( 0.005 ),
-        M_aitkFS                             ( ),
+        M_nonLinearAitken                             ( ),
 {
     this->setPreconditioner( NEWTON );
     this->setDDNPreconditioner( DDN_DIRICHLET_NEUMANN );
-//     M_aitkFS.setDefault( M_defOmegaS, M_defOmegaF );
+//     M_nonLinearAitken.setDefault( M_defOmegaS, M_defOmegaF );
 }
 
 

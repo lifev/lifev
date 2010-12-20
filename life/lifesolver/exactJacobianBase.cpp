@@ -32,7 +32,7 @@ exactJacobian::exactJacobian():
         super(),
         M_rhsNew(),
         M_beta(),
-        M_aitkFS(),
+        M_nonLinearAitken(),
         M_linearSolver(),
         M_epetraOper(),
         M_matrShapeDer(),
@@ -212,8 +212,8 @@ exactJacobian::setDataFile( const GetPot& dataFile )
 {
     super::setDataFile( dataFile );
 
-    M_aitkFS.setDefaultOmega( M_data->defaultOmega(), 0.001 );
-    M_aitkFS.setOmegaRange( M_data->OmegaRange() );
+    M_nonLinearAitken.setDefaultOmega( M_data->defaultOmega(), 0.001 );
+    M_nonLinearAitken.setOmegaRange( M_data->OmegaRange() );
 
     M_linearSolver.setCommunicator( M_epetraComm );
     M_linearSolver.setDataFromGetPot(dataFile, "jacobian");

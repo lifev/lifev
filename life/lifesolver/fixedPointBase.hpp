@@ -40,6 +40,7 @@
 #ifndef FIXEDPOINTBASE_HPP
 #define FIXEDPOINTBASE_HPP
 
+#include <life/lifealg/NonLinearAitken.hpp>
 #include <life/lifesolver/FSIOperator.hpp>
 
 namespace LifeV
@@ -168,7 +169,7 @@ private:
     vectorPtr_Type       M_rhsNew;
     vectorPtr_Type       M_beta;
 
-    generalizedAitken<vector_Type> M_aitkFS;
+    NonLinearAitken<vector_Type> M_nonLinearAitken;
 
 
 }; // end class fixedPointBase

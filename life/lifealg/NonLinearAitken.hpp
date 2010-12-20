@@ -26,7 +26,7 @@
 
 /*!
  *  @file
- *  @brief File containing the generalized Aitken algorithm
+ *  @brief File containing the non-linear generalized Aitken algorithm
  *
  *  @date 23-09-2004
  *  @author Simone Deparis <simone.deparis@epfl.ch>
@@ -36,8 +36,8 @@
  *  @maintainer Cristiano Malossi <cristiano.malossi@epfl.ch>
  */
 
-#ifndef GENERALIZEDAITKEN_H
-#define GENERALIZEDAITKEN_H
+#ifndef NonLinearAitken_H
+#define NonLinearAitken_H
 
 // Tell the compiler to ignore specific kind of warnings:
 #pragma GCC diagnostic ignored "-Wunused-variable"
@@ -58,7 +58,7 @@
 namespace LifeV
 {
 
-//! generalizedAitken - LifeV class for generalized Aitken algorithm
+//! NonLinearAitken - LifeV class for the non-linear generalized Aitken algorithm
 /*
  *  @author Simone Deparis, Gilles Fourestey, Cristiano Malossi
  *  @see S. Deparis, M. Discacciati and A. Quarteroni, A domain decompostion framework for fluid/structure interaction problems.
@@ -69,7 +69,7 @@ namespace LifeV
  *  to be more general, and the same for M_oldResidualSolid & M_oldResidualFluid.
  */
 template< typename VectorType >
-class generalizedAitken
+class NonLinearAitken
 {
 
 public:
@@ -87,10 +87,10 @@ public:
     //@{
 
     //! Constructor
-    explicit generalizedAitken();
+    explicit NonLinearAitken();
 
     //! Destructor
-    virtual ~generalizedAitken() {}
+    virtual ~NonLinearAitken() {}
 
     //@}
 
@@ -211,9 +211,9 @@ private:
     //! @name Private unimplemented Methods
     //@{
 
-    generalizedAitken( const generalizedAitken& aitken );
+    NonLinearAitken( const NonLinearAitken& aitken );
 
-    generalizedAitken& operator=( const generalizedAitken& aitken );
+    NonLinearAitken& operator=( const NonLinearAitken& aitken );
 
     //@}
 
@@ -255,7 +255,7 @@ private:
 // Constructors
 // ===================================================
 template < class VectorType >
-generalizedAitken< VectorType >::generalizedAitken() :
+NonLinearAitken< VectorType >::NonLinearAitken() :
         M_oldSolution      ( ),
         M_oldResidualFluid ( ),
         M_oldResidualSolid ( ),
@@ -275,10 +275,10 @@ generalizedAitken< VectorType >::generalizedAitken() :
 // Methods
 // ===================================================
 template < class VectorType >
-typename generalizedAitken< VectorType >::vector_Type
-generalizedAitken< VectorType >::computeDeltaLambdaFSI( const vector_Type& solution,
-                                                        const vector_Type& residualFluid,
-                                                        const vector_Type& residualSolid )
+typename NonLinearAitken< VectorType >::vector_Type
+NonLinearAitken< VectorType >::computeDeltaLambdaFSI( const vector_Type& solution,
+                                                      const vector_Type& residualFluid,
+                                                      const vector_Type& residualSolid )
 {
     if ( M_restart || M_useDefaultOmega )
     {
@@ -289,7 +289,7 @@ generalizedAitken< VectorType >::computeDeltaLambdaFSI( const vector_Type& solut
         M_oldResidualFluid.reset( new vector_Type( residualFluid) );
 
 #ifdef HAVE_LIFEV_DEBUG
-        Debug(7020) << "generalizedAitken: omegaFluid = " << M_defaultOmegaFluid << " omegaSolid = " << M_defaultOmegaSolid << "\n";
+        Debug(7020) << "NonLinearAitken: omegaFluid = " << M_defaultOmegaFluid << " omegaSolid = " << M_defaultOmegaSolid << "\n";
 #endif
         return M_defaultOmegaFluid * residualFluid + M_defaultOmegaSolid * residualSolid;
     }
@@ -324,7 +324,7 @@ generalizedAitken< VectorType >::computeDeltaLambdaFSI( const vector_Type& solut
         else if ( std::fabs( a22 ) == 0. )
         {
 #ifdef HAVE_LIFEV_DEBUG
-            Debug(7020) << "generalizedAitken:  a22 = " << std::fabs(a22) << "\n";
+            Debug(7020) << "NonLinearAitken:  a22 = " << std::fabs(a22) << "\n";
 #endif
             omegaFluid = -b1 / a11;
             omegaSolid = 0.;
@@ -332,16 +332,16 @@ generalizedAitken< VectorType >::computeDeltaLambdaFSI( const vector_Type& solut
         else if ( std::fabs(a11) == 0. )
         {
 #ifdef HAVE_LIFEV_DEBUG
-            Debug(7020) << "generalizedAitken:  a11 = " << std::fabs(a11) << "\n";
+            Debug(7020) << "NonLinearAitken:  a11 = " << std::fabs(a11) << "\n";
 #endif
             omegaFluid = 0.;
             omegaSolid = -b2 / a22;
         }
 #ifdef HAVE_LIFEV_DEBUG
         else
-            Debug(7020) << "generalizedAitken: Failure: Det=0!!" << fabs(det) << "\n";
+            Debug(7020) << "NonLinearAitken: Failure: Det=0!!" << fabs(det) << "\n";
 
-        Debug(7020) << " --------------- generalizedAitken: \n";
+        Debug(7020) << " --------------- NonLinearAitken: \n";
         Debug(7020) << " omegaSolid = " << omegaSolid << " omegaFluid = " << omegaFluid << "\n";
 #endif
 
@@ -355,9 +355,9 @@ generalizedAitken< VectorType >::computeDeltaLambdaFSI( const vector_Type& solut
 
 /*! one parameter version of the generalized aitken method. cf page 85 S. Deparis, PhD thesis */
 template < class VectorType >
-typename generalizedAitken< VectorType >::vector_Type
-generalizedAitken< VectorType >::computeDeltaLambdaScalar( const vector_Type& solution,
-                                                           const vector_Type& residual )
+typename NonLinearAitken< VectorType >::vector_Type
+NonLinearAitken< VectorType >::computeDeltaLambdaScalar( const vector_Type& solution,
+                                                         const vector_Type& residual )
 {
     if ( M_restart || M_useDefaultOmega )
     {
@@ -367,7 +367,7 @@ generalizedAitken< VectorType >::computeDeltaLambdaScalar( const vector_Type& so
         M_oldResidualFluid.reset( new vector_Type( residual ) );
 
 #ifdef HAVE_LIFEV_DEBUG
-        Debug(7020) << "generalizedAitken: omega = " << M_defaultOmegaFluid << "\n";
+        Debug(7020) << "NonLinearAitken: omega = " << M_defaultOmegaFluid << "\n";
 #endif
 
         return M_defaultOmegaFluid * residual;
@@ -402,17 +402,17 @@ generalizedAitken< VectorType >::computeDeltaLambdaScalar( const vector_Type& so
     checkRange(omega);
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug(7020) << "generalizedAitken: omega = " << omega << "\n";
+    Debug(7020) << "NonLinearAitken: omega = " << omega << "\n";
 #endif
 
     return omega * residual;
 }
 
 template < class VectorType >
-typename generalizedAitken< VectorType >::vector_Type
-generalizedAitken< VectorType >::computeDeltaLambdaVector( const vector_Type& solution,
-                                                           const vector_Type& residual,
-                                                           const bool&        independentOmega )
+typename NonLinearAitken< VectorType >::vector_Type
+NonLinearAitken< VectorType >::computeDeltaLambdaVector( const vector_Type& solution,
+                                                         const vector_Type& residual,
+                                                         const bool&        independentOmega )
 {
     if ( M_restart || M_useDefaultOmega )
     {
@@ -422,7 +422,7 @@ generalizedAitken< VectorType >::computeDeltaLambdaVector( const vector_Type& so
         M_oldResidualFluid.reset( new vector_Type( residual ) );
 
 #ifdef HAVE_LIFEV_DEBUG
-        Debug(7020) << "generalizedAitken: omega = " << M_defaultOmegaFluid << "\n";
+        Debug(7020) << "NonLinearAitken: omega = " << M_defaultOmegaFluid << "\n";
 #endif
 
         return M_defaultOmegaFluid * residual;
@@ -462,7 +462,7 @@ generalizedAitken< VectorType >::computeDeltaLambdaVector( const vector_Type& so
         checkRange(omega[i]);
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug(7020) << "generalizedAitken: omega = " << "\n";
+    Debug(7020) << "NonLinearAitken: omega = " << "\n";
     omega.showMe();
 #endif
 
@@ -472,11 +472,11 @@ generalizedAitken< VectorType >::computeDeltaLambdaVector( const vector_Type& so
 }
 
 template < class VectorType >
-typename generalizedAitken< VectorType >::vector_Type
-generalizedAitken< VectorType >::computeDeltaLambdaVectorBlock( const vector_Type& solution,
-                                                                const vector_Type& residual,
-                                                                const vector_Type& blocksVector,
-                                                                const UInt&        blocksNumber )
+typename NonLinearAitken< VectorType >::vector_Type
+NonLinearAitken< VectorType >::computeDeltaLambdaVectorBlock( const vector_Type& solution,
+                                                              const vector_Type& residual,
+                                                              const vector_Type& blocksVector,
+                                                              const UInt&        blocksNumber )
 {
     if ( M_restart || M_useDefaultOmega )
     {
@@ -486,7 +486,7 @@ generalizedAitken< VectorType >::computeDeltaLambdaVectorBlock( const vector_Typ
         M_oldResidualFluid.reset( new vector_Type( residual ) );
 
 #ifdef HAVE_LIFEV_DEBUG
-        Debug(7020) << "generalizedAitken: omega = " << M_defaultOmegaFluid << "\n";
+        Debug(7020) << "NonLinearAitken: omega = " << M_defaultOmegaFluid << "\n";
 #endif
 
         return M_defaultOmegaFluid * residual;
@@ -538,7 +538,7 @@ generalizedAitken< VectorType >::computeDeltaLambdaVectorBlock( const vector_Typ
     }
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug(7020) << "generalizedAitken: omega = " << "\n";
+    Debug(7020) << "NonLinearAitken: omega = " << "\n";
     omega.ShowMe();
 #endif
 
@@ -550,7 +550,7 @@ generalizedAitken< VectorType >::computeDeltaLambdaVectorBlock( const vector_Typ
 // ===================================================
 template < class VectorType >
 inline void
-generalizedAitken< VectorType >::setDefaultOmega( const Real& defaultOmegaFluid, const Real& defaultOmegaSolid )
+NonLinearAitken< VectorType >::setDefaultOmega( const Real& defaultOmegaFluid, const Real& defaultOmegaSolid )
 {
     M_defaultOmegaFluid = defaultOmegaFluid;
     M_defaultOmegaSolid = defaultOmegaSolid;
@@ -561,7 +561,7 @@ generalizedAitken< VectorType >::setDefaultOmega( const Real& defaultOmegaFluid,
 // ===================================================
 template < class VectorType >
 inline void
-generalizedAitken< VectorType >::checkRange( Real& omega )
+NonLinearAitken< VectorType >::checkRange( Real& omega )
 {
     if ( std::abs(omega) < std::abs(M_rangeOmega[0]) )
     {
@@ -581,4 +581,4 @@ generalizedAitken< VectorType >::checkRange( Real& omega )
 
 } // end namespace LifeV
 
-#endif // GENERALIZEDAITKEN_H
+#endif // NonLinearAitken_H
