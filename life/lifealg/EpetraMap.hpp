@@ -144,7 +144,7 @@ public:
      */
     template<typename Mesh>
     EpetraMap( const RefFE&               refFE,
-               const partitionMesh<Mesh>& meshPart,
+               const MeshPartitioner<Mesh>& meshPart,
                const comm_ptrtype&        commPtr );
 
     //! Constructor
@@ -383,7 +383,7 @@ private:
 template<typename Mesh>
 EpetraMap::
 EpetraMap( const RefFE&               refFE,
-           const partitionMesh<Mesh>& meshPart,
+           const MeshPartitioner<Mesh>& meshPart,
            const comm_ptrtype&        commPtr ):
         M_repeatedEpetraMap(),
         M_uniqueEpetraMap(),
