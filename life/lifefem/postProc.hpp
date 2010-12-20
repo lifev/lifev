@@ -36,8 +36,8 @@
     @date 09-2008
  */
 
-#ifndef POSTPROC_H
-#define POSTPROC_H 1
+#ifndef POSTPROCESSINGBOUNDARY_H
+#define POSTPROCESSINGBOUNDARY_H 1
 
 //#include <string>
 //#include <iostream>
@@ -75,7 +75,7 @@ namespace LifeV
     NB: here "global" is intended wrt the global mesh (prior to partitioning, if this applies)
  */
 template <typename MeshType>
-class PostProc
+class PostProcessingBoundary
 {
 
     //! @name Public Types
@@ -94,14 +94,14 @@ public:
     //@{
 
     //! Empty Constructor
-    PostProc<MeshType>()
+    PostProcessingBoundary<MeshType>()
     {}
 
     //! Copy constructor
     /*!
         @note all pointer members are copied (no new allocation is done in the class)
      */
-    PostProc( const PostProc& postProc )
+    PostProcessingBoundary( const PostProcessingBoundary& postProc )
     {}
 
     //! Constructor
@@ -116,7 +116,7 @@ public:
         \param epetraMap the map describing the partition over different processors
         \param nFESpaces number of elements in vectors currentBdFEVector, dofVector
      */
-    PostProc<MeshType>( meshPtr_Type mesh,
+    PostProcessingBoundary<MeshType>( meshPtr_Type mesh,
                     std::vector<currentBdFEPtr_Type > currentBdFEVector,
                     std::vector<dofPtr_Type > dofVector,
                     const EpetraMap& epetraMap, UInt nFESpaces = 1 );
@@ -124,7 +124,7 @@ public:
     /*!
      \brief Constructor for the case in which we have only one currentBdFE and dof
      */
-    PostProc<MeshType>( meshPtr_Type mesh,
+    PostProcessingBoundary<MeshType>( meshPtr_Type mesh,
                     currentBdFEPtr_Type currentBdFE, dofPtr_Type dof,
                     const EpetraMap& epetraMap );
 
@@ -134,7 +134,7 @@ public:
      This is the case of NS problem, in which we will want to consider both
      velocity and pressure dof/fe classes
      */
-    PostProc<MeshType>( meshPtr_Type mesh,
+    PostProcessingBoundary<MeshType>( meshPtr_Type mesh,
                     currentBdFEPtr_Type feBdu, dofPtr_Type dofu,
                     currentBdFEPtr_Type feBdp, dofPtr_Type dofp,
                     const EpetraMap& epetraMap );
@@ -306,7 +306,7 @@ private:
 // IMPLEMENTATIONS
 //
 template <typename MeshType>
-PostProc<MeshType>::PostProc( meshPtr_Type meshPtr,
+PostProcessingBoundary<MeshType>::PostProcessingBoundary( meshPtr_Type meshPtr,
                           std::vector<currentBdFEPtr_Type > currentBdFEVector,
                           std::vector<dofPtr_Type > dofVector,
                           const EpetraMap& epetraMap, UInt nvar ) :
@@ -346,7 +346,7 @@ PostProc<MeshType>::PostProc( meshPtr_Type meshPtr,
 }
 
 template <typename MeshType>
-PostProc<MeshType>::PostProc( meshPtr_Type mesh,
+PostProcessingBoundary<MeshType>::PostProcessingBoundary( meshPtr_Type mesh,
                           currentBdFEPtr_Type currentBdFE, dofPtr_Type dof,
                           const EpetraMap& epetraMap ) :
         M_numFESpaces(1),
@@ -382,7 +382,7 @@ PostProc<MeshType>::PostProc( meshPtr_Type mesh,
 }
 
 template <typename MeshType>
-PostProc<MeshType>::PostProc( meshPtr_Type mesh,
+PostProcessingBoundary<MeshType>::PostProcessingBoundary( meshPtr_Type mesh,
                           currentBdFEPtr_Type feBdu, dofPtr_Type dofu,
                           currentBdFEPtr_Type feBdp, dofPtr_Type dofp,
                           const EpetraMap& epetraMap ) :
@@ -422,7 +422,7 @@ PostProc<MeshType>::PostProc( meshPtr_Type mesh,
 
 // Measure of faces with a certain marker
 template<typename MeshType>
-void PostProc<MeshType>::buildVectors()
+void PostProcessingBoundary<MeshType>::buildVectors()
 {
     SimpleVect<ID>            boundaryDofGlobalIdVector;
 
@@ -602,7 +602,7 @@ void PostProc<MeshType>::buildVectors()
 
 // Measure of faces with a certain marker
 template<typename MeshType>
-Real PostProc<MeshType>::measure( const entityFlag_Type& flag )
+Real PostProcessingBoundary<MeshType>::measure( const entityFlag_Type& flag )
 {
     // Each processor computes the measure across his own flagged faces --> measureScatter
     // At the end I'll reduce the process measures --> measure
@@ -633,7 +633,7 @@ Real PostProc<MeshType>::measure( const entityFlag_Type& flag )
 // flux of vector field "field" through faces with a certain marker
 template<typename MeshType>
 template<typename VectorType>
-Real PostProc<MeshType>::flux( const VectorType& field, const entityFlag_Type& flag, UInt feSpace,
+Real PostProcessingBoundary<MeshType>::flux( const VectorType& field, const entityFlag_Type& flag, UInt feSpace,
                            UInt nDim )
 {
     // Each processor computes the flux across his own flagged faces --> fluxScatter
@@ -641,7 +641,7 @@ Real PostProc<MeshType>::flux( const VectorType& field, const entityFlag_Type& f
     Real fluxScatter(0.0), flux(0.);
 
     // I need the global Dof ID to query the vector
-    // dofVectorIndex is the index of the dof in the data structure of PostProc class
+    // dofVectorIndex is the index of the dof in the data structure of PostProcessingBoundary class
     // dofGlobalId is the corresponding ID in the GLOBAL mesh (prior to partitioning)
     UInt dofVectorIndex, dofGlobalId;
 
@@ -699,7 +699,7 @@ Real PostProc<MeshType>::flux( const VectorType& field, const entityFlag_Type& f
 // Average value of field on faces with a certain marker
 template<typename MeshType>
 template<typename VectorType>
-Vector PostProc<MeshType>::average( const VectorType& field, const entityFlag_Type& flag,
+Vector PostProcessingBoundary<MeshType>::average( const VectorType& field, const entityFlag_Type& flag,
                                 UInt feSpace, UInt nDim )
 {
     // Each processor computes the average value on his own flagged faces --> fieldAverageScatter
@@ -717,7 +717,7 @@ Vector PostProc<MeshType>::average( const VectorType& field, const entityFlag_Ty
     Real measureScatter(0.), measure;
 
     // I need the global Dof ID to query the Oseen solution vector
-    // dofVectorIndex is the id of the dof in the data structure of PostProc class
+    // dofVectorIndex is the id of the dof in the data structure of PostProcessingBoundary class
     // dofGlobalId is the corresponding ID in the GLOBAL mesh (prior to partitioning)
     UInt dofVectorIndex, dofGlobalId;
 
@@ -786,7 +786,7 @@ Vector PostProc<MeshType>::average( const VectorType& field, const entityFlag_Ty
 
 // Measure of patches on the boundary
 template<typename MeshType>
-void PostProc<MeshType>::computePatchesMeasure()
+void PostProcessingBoundary<MeshType>::computePatchesMeasure()
 {
     for ( UInt iFESpace=0; iFESpace<M_numFESpaces; ++iFESpace )
     {
@@ -818,7 +818,7 @@ void PostProc<MeshType>::computePatchesMeasure()
 }
 
 template <typename MeshType>
-void PostProc<MeshType>::showPatchesMeasure( std::ostream& output ) const
+void PostProcessingBoundary<MeshType>::showPatchesMeasure( std::ostream& output ) const
 {
     for ( UInt iFESpace=0; iFESpace<M_numFESpaces; ++iFESpace )
     {
@@ -839,7 +839,7 @@ void PostProc<MeshType>::showPatchesMeasure( std::ostream& output ) const
 }
 
 template<typename MeshType>
-void PostProc<MeshType>::showDOFIndexMap( std::ostream& output ) const
+void PostProcessingBoundary<MeshType>::showDOFIndexMap( std::ostream& output ) const
 {
     for ( UInt iFESpace=0; iFESpace<M_numFESpaces; ++iFESpace )
     {
@@ -879,7 +879,7 @@ void PostProc<MeshType>::showDOFIndexMap( std::ostream& output ) const
 
 // Normal vectors of patches on the boundary
 template<typename MeshType>
-void PostProc<MeshType>::computePatchesNormal()
+void PostProcessingBoundary<MeshType>::computePatchesNormal()
 {
     for ( UInt iFESpace=0; iFESpace<M_numFESpaces; ++iFESpace )
     {
@@ -929,7 +929,7 @@ void PostProc<MeshType>::computePatchesNormal()
 
 
 template <typename MeshType>
-void PostProc<MeshType>::showPatchesNormal( std::ostream& output ) const
+void PostProcessingBoundary<MeshType>::showPatchesNormal( std::ostream& output ) const
 {
     for ( UInt iFESpace=0; iFESpace<M_numFESpaces; ++iFESpace )
     {
@@ -964,7 +964,7 @@ void PostProc<MeshType>::showPatchesNormal( std::ostream& output ) const
 
 // Vector with the integral of the shape functions on the patches on the boundary
 template<typename MeshType>
-void PostProc<MeshType>::computePatchesPhi()
+void PostProcessingBoundary<MeshType>::computePatchesPhi()
 {
     for ( UInt iFESpace=0; iFESpace<M_numFESpaces; ++iFESpace )
     {
@@ -1004,7 +1004,7 @@ void PostProc<MeshType>::computePatchesPhi()
 
 
 template <typename MeshType>
-void PostProc<MeshType>::showPatchesPhi( std::ostream& output ) const
+void PostProcessingBoundary<MeshType>::showPatchesPhi( std::ostream& output ) const
 {
     for ( UInt iFESpace=0; iFESpace<M_numFESpaces; ++iFESpace )
     {
@@ -1034,7 +1034,7 @@ void PostProc<MeshType>::showPatchesPhi( std::ostream& output ) const
 ////////////////////////////////
 template<typename MeshType>
 template<typename VectorType>
-VectorType PostProc<MeshType>::compute_sstress( const VectorType& r, UInt ncomp, bool residual = true ) const
+VectorType PostProcessingBoundary<MeshType>::compute_sstress( const VectorType& r, UInt ncomp, bool residual = true ) const
 {
     ASSERT( ncomp = NDIM, "Error: Shear stress computation possible only for vector unknowns" );
 
@@ -1101,7 +1101,7 @@ VectorType PostProc<MeshType>::compute_sstress( const VectorType& r, UInt ncomp,
 ///////////////////////////////
 template<typename MeshType>
 template<typename VectorType>
-VectorType PostProc<MeshType>::compute_stress( const VectorType& grad, const UInt& dim,
+VectorType PostProcessingBoundary<MeshType>::compute_stress( const VectorType& grad, const UInt& dim,
                                   const Real& visc ) const
 {
     VectorType stress( M_numBoundaryDofVector[0] * NDIM );
@@ -1136,5 +1136,5 @@ VectorType PostProc<MeshType>::compute_stress( const VectorType& grad, const UIn
 #endif
 } // namespace LifeV
 
-#endif /* POSTPROC_H */
+#endif /* POSTPROCESSINGBOUNDARY_H */
 

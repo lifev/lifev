@@ -33,7 +33,7 @@ This library is free software; you can redistribute it and/or
 #include <life/lifefem/BCManage.hpp>
 #include <life/lifefem/AssemblyElemental.hpp>
 #include <life/lifefem/GeometricMap.hpp>
-#include <life/lifefem/postProc.hpp>
+#include <life/lifefem/PostProcessingBoundary.hpp>
 #include <life/lifefem/FESpace.hpp>
 
 #include <life/lifesolver/nsipterms.hpp>

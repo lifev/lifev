@@ -41,8 +41,8 @@
  */
 
 
-#ifndef OSEEN_H
-#define OSEEN_H 1
+#ifndef OSEENSOLVER_H
+#define OSEENSOLVER_H 1
 
 #include <life/lifealg/SolverTrilinos.hpp>
 #include <life/lifealg/EpetraPreconditioner.hpp>
@@ -62,7 +62,7 @@
 #include <life/lifefem/AssemblyElemental.hpp>
 #include <life/lifefem/SobolevNorms.hpp>
 #include <life/lifefem/GeometricMap.hpp>
-#include <life/lifefem/postProc.hpp>
+#include <life/lifefem/PostProcessingBoundary.hpp>
 #include <life/lifefem/FESpace.hpp>
 
 #include <life/lifesolver/nsipterms.hpp>
@@ -481,12 +481,12 @@ public:
     /*!
         @return Post processing
     */
-    PostProc<mesh_Type>& postProcessing()
+    PostProcessingBoundary<mesh_Type>& postProcessing()
     {
         return *M_postProcessing;
     }
 
-    const PostProc<mesh_Type>& postProcessing() const
+    const PostProcessingBoundary<mesh_Type>& postProcessing() const
     {
         return *M_postProcessing;
     }
@@ -684,7 +684,7 @@ protected:
     bool                           M_steady;
 
     //! Postprocessing class
-    boost::shared_ptr<PostProc<mesh_Type> > M_postProcessing;
+    boost::shared_ptr<PostProcessingBoundary<mesh_Type> > M_postProcessing;
 
     //! Stabilization
     bool                           M_stabilization;
@@ -755,7 +755,7 @@ OseenSolver( boost::shared_ptr<data_Type>    dataType,
         M_residual               ( M_localMap ),
         M_linearSolver           ( communicator ),
         M_steady                 ( ),
-        M_postProcessing         ( new PostProc<mesh_Type>( M_velocityFESpace.mesh(),
+        M_postProcessing         ( new PostProcessingBoundary<mesh_Type>( M_velocityFESpace.mesh(),
                                                             &M_velocityFESpace.feBd(),
                                                             &M_velocityFESpace.dof(),
                                                             &M_pressureFESpace.feBd(),
@@ -818,7 +818,7 @@ OseenSolver( boost::shared_ptr<data_Type>    dataType,
         M_solution               ( ),
         M_residual               ( M_localMap ),
         M_linearSolver           ( communicator ),
-        M_postProcessing         ( new PostProc<mesh_Type>(M_velocityFESpace.mesh(),
+        M_postProcessing         ( new PostProcessingBoundary<mesh_Type>(M_velocityFESpace.mesh(),
                                                            &M_velocityFESpace.feBd(),
                                                            &M_velocityFESpace.dof(),
                                                            &M_pressureFESpace.feBd(),
@@ -880,7 +880,7 @@ OseenSolver( boost::shared_ptr<data_Type>    dataType,
         M_solution               ( new vector_Type( M_localMap ) ),
         M_residual               ( M_localMap ),
         M_linearSolver           ( ),
-        M_postProcessing         ( new PostProc<mesh_Type>(M_velocityFESpace.mesh(),
+        M_postProcessing         ( new PostProcessingBoundary<mesh_Type>(M_velocityFESpace.mesh(),
                                                            &M_velocityFESpace.feBd(),
                                                            &M_velocityFESpace.dof(),
                                                            &M_pressureFESpace.feBd(),
@@ -1781,7 +1781,7 @@ template<typename MeshType, typename SolverType>
 void
 OseenSolver<MeshType, SolverType>::setupPostProc( const entityFlag_Type& flag, const mesh_Type meshPart )
 {
-    M_postProcessing.reset( new PostProc<mesh_Type>( M_velocityFESpace.mesh(),
+    M_postProcessing.reset( new PostProcessingBoundary<mesh_Type>( M_velocityFESpace.mesh(),
                                                      &M_velocityFESpace.feBd(),
                                                      &M_velocityFESpace.dof(),
                                                      &M_pressureFESpace.feBd(),
@@ -1799,4 +1799,4 @@ OseenSolver<MeshType, SolverType>::setTolMaxIteration( const Real& tolerance, co
 
 } // namespace LifeV
 
-#endif // OSEEN_H
+#endif // OSEENSOLVER_H
