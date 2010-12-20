@@ -39,10 +39,10 @@
 #ifndef _DATAADR_H_
 #define _DATAADR_H_
 
-#include <life/lifecore/GetPot.hpp>
+#include <life/lifefilters/GetPot.hpp>
 #include <life/lifecore/life.hpp>
 #include <life/lifefem/dataTime.hpp>
-#include <life/lifecore/dataString.hpp>
+#include <life/lifecore/StringData.hpp>
 
 #include <boost/shared_ptr.hpp>
 
