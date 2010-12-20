@@ -33,8 +33,8 @@ along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
   @maintainer Radu Popescu <radu.popescu@epfl.ch>
 */
 
-#ifndef FORTRAN_FROM_CPLUSPLUS
-#define FORTRAN_FROM_CPLUSPLUS
+#ifndef FORTRAN_WRAPPER_H
+#define FORTRAN_WRAPPER_H
 
 #include <cassert>
 #include <cstddef>
@@ -79,20 +79,20 @@ typedef int L_F77; // LOGICAL 4 bytes
 
   \paragraph Solution
 
-  (1) The FMATRIX class can take a C++ array as a constructor
+  (1) The FortranMatrix class can take a C++ array as a constructor
   parameter. A FORTRAN compatible copy of the array is
   then made. The destructor will then copy the result back
   to the original c++ array.
 
 
-  (2) The FMATRIX class provides "subscript operators" allowing
+  (2) The FortranMatrix class provides "subscript operators" allowing
   the programmer to read and write from the array, using
   FORTRAN-like syntax and indexing semantics.
 
   /author Carsten A. Arnholm, 04-MAR-1996 (Modified by L. Formaggia MAR 2002)
 */
 template <class ScalarType>
-class FMATRIX
+class FortranMatrix
 {
 public:
     //! @name Public typedefs
@@ -100,10 +100,10 @@ public:
     typedef ScalarType scalar_Type;
     //! @name Constructors and destructor
     //@{
-    FMATRIX() {}
-    FMATRIX( size_t dim1, size_t dim2 = 1 );
-    FMATRIX( ScalarType* cppArray, size_t dim1, size_t dim2 = 1 );
-    virtual ~FMATRIX();
+    FortranMatrix() {}
+    FortranMatrix( size_t dim1, size_t dim2 = 1 );
+    FortranMatrix( ScalarType* cppArray, size_t dim1, size_t dim2 = 1 );
+    virtual ~FortranMatrix();
     //@}
 
     //! @name Operators
@@ -123,22 +123,22 @@ public:
 /*!
  *
  A minimal class used when passing string arguments from C++ to FORTRAN 77
- (received as FORTRAN 77 CHARACTER strings), and subsequently returned back
+ (received as FORTRAN 77 FortranCharacterString strings), and subsequently returned back
  to C++ as properly zero terminated strings.
 
  \paragraph Method used for zero-termination:
 
- When the CHARACTER destructor is activated the zero-termination of the
+ When the FortranCharacterString destructor is activated the zero-termination of the
  c-string is automatically managed. Zero termination is also done each time
  a string array is subscripted using
 
  \verbatim
-     CHARACTER::operator()(size_t index)
+     FortranCharacterString::operator()(size_t index)
      \endverbatim
 
      \paragraph FORTRAN Assumptions:
 
-     (1) F77 truncates strings when CHARACTER variable is short
+     (1) F77 truncates strings when FortranCharacterString variable is short
 
      (2) F77 pads variable with blanks when assigned string is short
 
@@ -149,20 +149,20 @@ public:
      \author: Carsten A. Arnholm, 20-AUG-1995
 
 */
-class CHARACTER
+class FortranCharacterString
 {
 public:
     //! @name Constructors and destructor
     //@{
-    CHARACTER() {}
-    CHARACTER( char* cstring );
-    CHARACTER( char* cstring, const size_t stringLength );
-    virtual ~CHARACTER();
+    FortranCharacterString() {}
+    FortranCharacterString( char* cstring );
+    FortranCharacterString( char* cstring, const size_t stringLength );
+    virtual ~FortranCharacterString();
     //@}
 
     //! @name Operators
     //@{
-    CHARACTER operator() ( size_t index );
+    FortranCharacterString operator() ( size_t index );
     void operator=( char* str );
     operator char*();
     //@}
@@ -182,11 +182,11 @@ public:
 // ======================
 
 // =======================================
-// FMATRIX Constructors and destructor
+// FortranMatrix Constructors and destructor
 // =======================================
 
 template <class ScalarType>
-FMATRIX<ScalarType>::FMATRIX( size_t dim1, size_t dim2 ):
+FortranMatrix<ScalarType>::FortranMatrix( size_t dim1, size_t dim2 ):
     M_cppRepresentation( NULL ),
     M_fortranRepresentation( new ScalarType[ dim1*dim2 ] ),
     M_numDimensions( 2 )
@@ -201,7 +201,7 @@ FMATRIX<ScalarType>::FMATRIX( size_t dim1, size_t dim2 ):
 }
 
 template <class ScalarType>
-FMATRIX<ScalarType>::FMATRIX( ScalarType* cppArray, size_t dim1, size_t dim2 ):
+FortranMatrix<ScalarType>::FortranMatrix( ScalarType* cppArray, size_t dim1, size_t dim2 ):
     M_cppRepresentation( cppArray ),
     M_fortranRepresentation( new ScalarType[ dim1*dim2 ] ),
     M_numDimensions( 2 )
@@ -228,7 +228,7 @@ FMATRIX<ScalarType>::FMATRIX( ScalarType* cppArray, size_t dim1, size_t dim2 ):
 }
 
 template <class ScalarType>
-FMATRIX<ScalarType>::~FMATRIX()
+FortranMatrix<ScalarType>::~FortranMatrix()
 {
     if ( M_cppRepresentation )
     {
@@ -250,18 +250,18 @@ FMATRIX<ScalarType>::~FMATRIX()
 }
 
 // ============================
-// FMATRIX Operators
+// FortranMatrix Operators
 // ============================
 
 template <class ScalarType>
-FMATRIX<ScalarType>::operator ScalarType*()
+FortranMatrix<ScalarType>::operator ScalarType*()
 {
     // Pass the FORTRAN representation when calling a function
     return M_fortranRepresentation;
 }
 
 template <class ScalarType>
-ScalarType& FMATRIX<ScalarType>::operator() ( size_t index1, size_t index2 )
+ScalarType& FortranMatrix<ScalarType>::operator() ( size_t index1, size_t index2 )
 {
     assert( M_numDimensions == 2 ); // only 2d arrays supported (so far)
     // indexing according to F77 conventions
@@ -271,15 +271,15 @@ ScalarType& FMATRIX<ScalarType>::operator() ( size_t index1, size_t index2 )
 }
 
 // =======================================
-// CHARACTER Constructors and destructor
+// FortranCharacterString Constructors and destructor
 // =======================================
 
-inline CHARACTER::CHARACTER( char* cstring ):
+inline FortranCharacterString::FortranCharacterString( char* cstring ):
     M_representation( cstring ),
     M_length( strlen( cstring ) )
 {}
 
-inline CHARACTER::CHARACTER( char* cstring, const size_t stringLength ):
+inline FortranCharacterString::FortranCharacterString( char* cstring, const size_t stringLength ):
     M_representation( cstring ),
     M_length( stringLength )
 {
@@ -290,7 +290,7 @@ inline CHARACTER::CHARACTER( char* cstring, const size_t stringLength ):
         M_representation[ i ] = ' '; // Do the padding.
 }
 
-inline CHARACTER::~CHARACTER()
+inline FortranCharacterString::~FortranCharacterString()
 {
     if ( M_representation[ M_length ] == '\0' )
         return ; // catches string constants
@@ -307,19 +307,19 @@ inline CHARACTER::~CHARACTER()
 }
 
 // ================================
-// CHARACTER Operators
+// FortranCharacterString Operators
 // ================================
 
-inline CHARACTER CHARACTER::operator() ( size_t index )
+inline FortranCharacterString FortranCharacterString::operator() ( size_t index )
 {
-    // Construct a temporary CHARACTER object for the array element
+    // Construct a temporary FortranCharacterString object for the array element
     // identified by "index" in order to zero-terminate that element
     size_t pos = index * M_length; // start pos of array element
-    CHARACTER element( M_representation + pos, M_length ); // construct new CHARACTER.
+    FortranCharacterString element( M_representation + pos, M_length ); // construct new FortranCharacterString.
     return element; // destructor called here.
 }
 
-inline void CHARACTER::operator=( char* str )
+inline void FortranCharacterString::operator=( char* str )
 {
     strncpy( M_representation, str, M_length ); // this will copy a zero if str < rep
     M_representation[ M_length - 1 ] = '\0'; // zero terminate in case strncpy did not
@@ -329,16 +329,16 @@ inline void CHARACTER::operator=( char* str )
         M_representation[ i ] = ' '; // Do the padding.
 }
 
-inline CHARACTER::operator char*()
+inline FortranCharacterString::operator char*()
 {
     return M_representation;
 }
 
 // ================================
-// CHARACTER Methods
+// FortranCharacterString Methods
 // ================================
 
-inline void CHARACTER::pad( size_t first, size_t paddingSize )
+inline void FortranCharacterString::pad( size_t first, size_t paddingSize )
 {
     size_t pos = 0, i = 0, stop = first + paddingSize - 1;
     for ( size_t index = first; index <= stop; index++ )
@@ -353,4 +353,4 @@ inline void CHARACTER::pad( size_t first, size_t paddingSize )
 
 } // Namespace LifeV
 
-#endif // FORTRAN_FROM_CPLUSPLUS
+#endif // FORTRAN_WRAPPER_H
