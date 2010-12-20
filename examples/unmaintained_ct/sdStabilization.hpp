@@ -35,7 +35,7 @@
 #define _SDSTABILIZATION_HPP_
 
 
-#include <life/lifecore/GetPot.hpp>
+#include <life/lifefilters/GetPot.hpp>
 
 namespace LifeV
 {
