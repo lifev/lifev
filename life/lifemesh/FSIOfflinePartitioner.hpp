@@ -52,7 +52,7 @@ along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
 namespace LifeV
 {
 
-//! FSIOfflinePartitioner - Offline mesh partitioning for FSI
+//! MeshPartitionerOfflineFSI - Offline mesh partitioning for FSI
 /*!
   @author Radu Popescu
 
@@ -67,7 +67,7 @@ namespace LifeV
   call execute() method
 */
 template<typename MeshType>
-class FSIOfflinePartitioner
+class MeshPartitionerOfflineFSI
 {
 public:
 
@@ -108,10 +108,10 @@ public:
     //@{
 
     //! Empty Constructor
-    FSIOfflinePartitioner() {}
+    MeshPartitionerOfflineFSI() {}
 
     //! Destructor
-    virtual ~FSIOfflinePartitioner() {}
+    virtual ~MeshPartitionerOfflineFSI() {}
     //@}
 
     //! @name Methods
@@ -119,7 +119,7 @@ public:
 
     //! Setup the data members of the class after construction
     /*!
-      This methods is called to configure the FSIOfflinePartitioner object
+      This methods is called to configure the MeshPartitionerOfflineFSI object
       after it is constructed.
       @param uncutFluidMesh const boost::shared_ptr to the unpartitioned
       fluid mesh
@@ -225,8 +225,8 @@ private:
     // because there is no need for such operations in this case.
     // As a safety measure, there are no definitions for these
     // functions, so any attempts to use them result in link errors.
-    FSIOfflinePartitioner(const FSIOfflinePartitioner&);
-    FSIOfflinePartitioner& operator=(const FSIOfflinePartitioner&);
+    MeshPartitionerOfflineFSI(const MeshPartitionerOfflineFSI&);
+    MeshPartitionerOfflineFSI& operator=(const MeshPartitionerOfflineFSI&);
 
     //! @name Private Methods
     //@{
@@ -297,7 +297,7 @@ private:
 // ===============================
 
 template<typename MeshType>
-void FSIOfflinePartitioner<MeshType>::setup(const uncutMeshPtr_Type& uncutFluidMesh,
+void MeshPartitionerOfflineFSI<MeshType>::setup(const uncutMeshPtr_Type& uncutFluidMesh,
                                             const uncutMeshPtr_Type& uncutSolidMesh,
                                             const Int& fluidPartitionNumber,
                                             const Int& solidPartitionNumber,
@@ -354,7 +354,7 @@ void FSIOfflinePartitioner<MeshType>::setup(const uncutMeshPtr_Type& uncutFluidM
 }
 
 template<typename MeshType>
-void FSIOfflinePartitioner<MeshType>::execute()
+void MeshPartitionerOfflineFSI<MeshType>::execute()
 {
     // Cut the meshes ...
     runTheCutters();
@@ -367,11 +367,11 @@ void FSIOfflinePartitioner<MeshType>::execute()
 }
 
 template<typename MeshType>
-void FSIOfflinePartitioner<MeshType>::showMe(std::ostream& output) const
+void MeshPartitionerOfflineFSI<MeshType>::showMe(std::ostream& output) const
 {
     output << std::endl;
     output << "=======================================" << std::endl;
-    output << "Internal state of FSIOfflinePartitioner" << std::endl;
+    output << "Internal state of MeshPartitionerOfflineFSI" << std::endl;
     output << std::endl;
 
     output << "Number of fluid partitions: " << M_fluidPartitionNumber
@@ -411,7 +411,7 @@ void FSIOfflinePartitioner<MeshType>::showMe(std::ostream& output) const
 // ===============================
 
 template<typename MeshType>
-void FSIOfflinePartitioner<MeshType>::runTheCutters()
+void MeshPartitionerOfflineFSI<MeshType>::runTheCutters()
 {
     std::cout << "\nPartitioning fluid mesh...\n" << std::endl;
     M_fluidMeshCutter->doPartitionGraph();
@@ -425,7 +425,7 @@ void FSIOfflinePartitioner<MeshType>::runTheCutters()
 }
 
 template<typename MeshType>
-void FSIOfflinePartitioner<MeshType>::createSpaces()
+void MeshPartitionerOfflineFSI<MeshType>::createSpaces()
 {
     // Set the appropriate reference elements and quad rules
     const RefFE*    refFE_vel(0);
@@ -510,7 +510,7 @@ void FSIOfflinePartitioner<MeshType>::createSpaces()
 }
 
 template<typename MeshType>
-void FSIOfflinePartitioner<MeshType>::mapTheInterface()
+void MeshPartitionerOfflineFSI<MeshType>::mapTheInterface()
 {
     // Create the dofInterface3Dto3D objects for each fluid partition
     std::cout << std::endl;
