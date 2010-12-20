@@ -526,9 +526,9 @@ OneDimensionalData::showMe( std::ostream& output ) const
     // Model
     //output << std::scientific << std::setprecision(15);
     output << "\n*** Values for data [Model]\n\n";
-    output << "Physics Type           = " << Enum2String( M_physicsType, OneDimensional::physicsMap ) << std::endl;
-    output << "Flux Type              = " << Enum2String( M_fluxType,    OneDimensional::fluxMap    ) << std::endl;
-    output << "Source Type            = " << Enum2String( M_sourceType,  OneDimensional::sourceMap  ) << std::endl;
+    output << "Physics Type           = " << enum2String( M_physicsType, OneDimensional::physicsMap ) << std::endl;
+    output << "Flux Type              = " << enum2String( M_fluxType,    OneDimensional::fluxMap    ) << std::endl;
+    output << "Source Type            = " << enum2String( M_sourceType,  OneDimensional::sourceMap  ) << std::endl;
 
     // Time
     output << "\n*** Values for data [time_discretization]\n\n";
