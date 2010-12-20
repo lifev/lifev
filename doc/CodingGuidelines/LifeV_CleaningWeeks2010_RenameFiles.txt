@@ -132,10 +132,10 @@ CurrentFE                              currentFE                               C
 DefinitionFE                           defQuadRuleFE (splitting)               CMCS2
 DefinitionQuadratureRule               defQuadRuleFE (splitting)               CMCS2
 DefinitionReferenceToCurrentMap        defQuadRuleFE (splitting)               CMCS2
-DOF                                    dof                                     CMCS2
+DOF                                    dof                                     CMCS2     DONE
 DOFInterface                           dofInterfaceBase                        CMCS2
 DOFInterface3Dto2D                     dofInterface3Dto2D                      CMCS2
-DOFInterface3Dto3D                     dofInterface3Dto3D                      CMCS2
+DOFInterface3Dto3D                     dofInterface3Dto3D                      CMCS2     DONE
 DOFLocalPattern                        localDofPattern                         CMCS2
 FESpace                                -                                       CMCS2     DONE
 GeometricMap                           geoMap                                  CMCS2

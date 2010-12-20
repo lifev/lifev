@@ -73,7 +73,7 @@
 
 #include <life/lifealg/generalizedAitken.hpp>
 
-#include <life/lifefem/dofInterface3Dto3D.hpp>
+#include <life/lifefem/DOFInterface3Dto3D.hpp>
 #include <life/lifefem/dofInterface3Dto2D.hpp>
 #include <life/lifefem/bcHandler.hpp>
 #include <life/lifefem/bcFunction.hpp>

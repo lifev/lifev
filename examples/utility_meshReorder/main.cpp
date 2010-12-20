@@ -10,7 +10,7 @@
 #include<life/lifecore/GetPot.hpp>
 #include <string>
 
-#include <life/lifefem/dofInterface3Dto3D.hpp>
+#include <life/lifefem/DOFInterface3Dto3D.hpp>
 #include <life/lifefem/FESpace.hpp>
 
 #ifdef HAVE_MPI

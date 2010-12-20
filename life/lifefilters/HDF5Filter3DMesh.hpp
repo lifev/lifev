@@ -37,7 +37,7 @@ along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
 #define HDF5FILTER3DMESH_H 1
 
 #include <life/lifefilters/hdf5exporter.hpp>
-#include <life/lifefem/dofInterface3Dto3D.hpp>
+#include <life/lifefem/DOFInterface3Dto3D.hpp>
 
 namespace LifeV
 {
