@@ -27,7 +27,7 @@
 
 #include <life/lifecore/life.hpp>
 
-#include <life/lifefem/bcManage.hpp>
+#include <life/lifefem/BCManage.hpp>
 
 #include <lifemc/lifesolver/MonolithicBlockComposedNN.hpp>
 

@@ -46,7 +46,7 @@
 #include <life/lifealg/IfpackPreconditioner.hpp>
 
 #include <life/lifefem/FESpace.hpp>
-#include <life/lifefem/bcManage.hpp>
+#include <life/lifefem/BCManage.hpp>
 
 #include <lifemc/lifealg/ComposedOperator.hpp>
 
