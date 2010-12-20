@@ -84,11 +84,11 @@ MultiscaleModelFSI3D::MultiscaleModelFSI3D() :
     BlockPrecFactory::instance().registerProduct("ComposedDN",        &MonolithicBlockComposedDN::createComposedDN ) ;
     BlockPrecFactory::instance().registerProduct("ComposedDN2",       &MonolithicBlockComposedDN::createComposedDN2 );
 
-    MonolithicBlockMatrix::Factory::instance().registerProduct("AdditiveSchwarz",   &MonolithicBlockMatrix::createAdditiveSchwarz ) ;
-    MonolithicBlockMatrix::Factory::instance().registerProduct("AdditiveSchwarzRN", &MonolithicBlockMatrixRN::createAdditiveSchwarzRN ) ;
+    MonolithicBlockMatrix::Factory_Type::instance().registerProduct("AdditiveSchwarz",   &MonolithicBlockMatrix::createAdditiveSchwarz ) ;
+    MonolithicBlockMatrix::Factory_Type::instance().registerProduct("AdditiveSchwarzRN", &MonolithicBlockMatrixRN::createAdditiveSchwarzRN ) ;
 
     FSIOperator_Type::solid_Type::StructureSolverFactory::instance().registerProduct( "linearVenantKirchhof", &FSIOperator_Type::createLinearStructure );
-//    FSIOperator_Type::solid_Type::StructureSolverFactory::instance().registerProduct( "nonLinearVenantKirchhof", &FSIOperator_Type::createNonLinearStructure );
+//    FSIOperator_Type::solid_Type::StructureSolverFactory_Type::instance().registerProduct( "nonLinearVenantKirchhof", &FSIOperator_Type::createNonLinearStructure );
 }
 
 // ===================================================
@@ -435,7 +435,7 @@ MultiscaleModelFSI3D::boundaryStress( const bcFlag_Type& flag, const stress_Type
 
     default:
 
-        std::cout << "ERROR: Invalid stress type [" << Enum2String( stressType, multiscaleStressesMap ) << "]" << std::endl;
+        std::cout << "ERROR: Invalid stress type [" << enum2String( stressType, multiscaleStressesMap ) << "]" << std::endl;
 
         return 0.0;
     }
@@ -493,7 +493,7 @@ MultiscaleModelFSI3D::boundaryDeltaStress( const bcFlag_Type& flag, bool& solveL
 
     default:
 
-        std::cout << "ERROR: Invalid stress type [" << Enum2String( stressType, multiscaleStressesMap ) << "]" << std::endl;
+        std::cout << "ERROR: Invalid stress type [" << enum2String( stressType, multiscaleStressesMap ) << "]" << std::endl;
 
         return 0.0;
     }
