@@ -44,7 +44,7 @@ namespace LifeV
 
 //! @name Class that provides a dummy interface for post-processing
 template<typename MeshType>
-class NoExport : public Exporter<MeshType>
+class ExporterEmpty : public Exporter<MeshType>
 {
 
 public:
@@ -58,9 +58,9 @@ public:
 
     //! @name Constructors
     //@{
-    NoExport();
-    NoExport(const GetPot& dfile, meshPtr_Type mesh, const std::string& prefix, const int& procId);
-    NoExport(const GetPot& dfile, const std::string& prefix);
+    ExporterEmpty();
+    ExporterEmpty(const GetPot& dfile, meshPtr_Type mesh, const std::string& prefix, const int& procId);
+    ExporterEmpty(const GetPot& dfile, const std::string& prefix);
     //@}
 
     //! @name Public methods
@@ -94,13 +94,13 @@ private:
 // ======================
 
 template<typename MeshType>
-NoExport<MeshType>::NoExport():
+ExporterEmpty<MeshType>::ExporterEmpty():
         super()
 {
 }
 
 template<typename MeshType>
-NoExport<MeshType>::NoExport(const GetPot& dfile, meshPtr_Type mesh, const std::string& prefix,
+ExporterEmpty<MeshType>::ExporterEmpty(const GetPot& dfile, meshPtr_Type mesh, const std::string& prefix,
                          const int& procId):
         super(dfile, prefix)
 {
@@ -108,7 +108,7 @@ NoExport<MeshType>::NoExport(const GetPot& dfile, meshPtr_Type mesh, const std::
 }
 
 template<typename MeshType>
-NoExport<MeshType>::NoExport(const GetPot& dfile, const std::string& prefix):
+ExporterEmpty<MeshType>::ExporterEmpty(const GetPot& dfile, const std::string& prefix):
         super(dfile, prefix)
 {
 }
@@ -118,7 +118,7 @@ NoExport<MeshType>::NoExport(const GetPot& dfile, const std::string& prefix):
 // ====================
 
 template<typename MeshType>
-EpetraMapType NoExport<MeshType>::mapType() const
+EpetraMapType ExporterEmpty<MeshType>::mapType() const
 {
     return Unique;
 }
