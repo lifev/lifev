@@ -43,7 +43,7 @@
  */
 
 
-#include <life/lifefem/dofInterface3Dto2D.hpp>
+#include <life/lifefem/DOFInterface3Dto2D.hpp>
 
 namespace LifeV
 {
