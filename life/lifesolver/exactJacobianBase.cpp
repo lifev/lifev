@@ -265,7 +265,7 @@ exactJacobian::imposeFlux( void )
 void exactJacobian::eval(const vector_Type& _disp,
                          const UInt          iter)
 {
-    Chrono chronoFluid, chronoSolid, chronoInterface;
+    LifeChrono chronoFluid, chronoSolid, chronoInterface;
 
     bool recomputeMatrices ( iter == 0 || ( !this->M_data->dataFluid()->isSemiImplicit() &&
                                             ( M_data->updateEvery() > 0 &&
@@ -454,7 +454,7 @@ void exactJacobian::Epetra_ExactJacobian::setOperator(exactJacobian* ej)
 int exactJacobian::Epetra_ExactJacobian::Apply(const Epetra_MultiVector &X, Epetra_MultiVector &Y) const
 {
 
-    Chrono chronoFluid, chronoSolid, chronoInterface;
+    LifeChrono chronoFluid, chronoSolid, chronoInterface;
 
     M_comm->Barrier();
 
