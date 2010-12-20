@@ -59,8 +59,8 @@ along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
   -# #LIFEV_ISLIKELY and #LIFEV_ISUNLIKELY
 */
 
-#ifndef LIFEASSERT_HPP
-#define LIFEASSERT_HPP 1
+#ifndef LIFE_ASSERT_H
+#define LIFE_ASSERT_H 1
 
 #include <life/lifecore/SmartAssert.hpp>
 
@@ -113,5 +113,5 @@ along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
 #define ASSERT_BD(X)
 #endif
 
-#endif /* LIFEASSERT_HPP */
+#endif /* LIFE_ASSERT_H */
 
