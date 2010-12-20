@@ -58,7 +58,7 @@
 
 #include <life/lifefem/ReferenceFE.hpp>
 #include <life/lifecore/life.hpp>
-#include <life/lifemesh/partitionMesh.hpp>
+#include <life/lifemesh/MeshPartitioner.hpp>
 
 
 namespace LifeV
