@@ -35,12 +35,12 @@
     @date 19-08-1999
 
     Mesh reader that it is able to read 2D meshes from freefem and gmsh files.<br>
-    readMesh2D reads only triangle meshes.<br>
+    ImporterMesh2D reads only triangle meshes.<br>
     readMppFiles handles only liner&quad triangles.<br>
  */
 
-#ifndef _READMESH2D_HH_
-#define _READMESH2D_HH_ 1
+#ifndef _IMPORTERMESH2D_HH_
+#define _IMPORTERMESH2D_HH_ 1
 
 #pragma GCC diagnostic ignored "-Wunused-variable"
 #pragma GCC diagnostic ignored "-Wunused-parameter"
@@ -82,7 +82,7 @@ SUBROUTINE_F77 F77NAME( readmesh2dhead ) ( I_F77 & ne, I_F77 & np,
                                            I_F77 & nps, I_F77 & nx,
                                            I_F77 & npc, I_F77 & ierr, CHARACTER filename );
 
-//! readMesh2D - reads a mesh in mesh2D(LF) format.
+//! importerMesh2D - reads a mesh in mesh2D(LF) format.
 /*!
   It reads a gmsh mesh (2D) file and store it in a RegionMesh2D.
 
@@ -94,7 +94,7 @@ SUBROUTINE_F77 F77NAME( readmesh2dhead ) ( I_F77 & ne, I_F77 & np,
 template <typename RegionMesh2D>
 
 bool
-readMesh2D( RegionMesh2D      & mesh, //readMesh2D
+importerMesh2D( RegionMesh2D      & mesh, //importerMesh2D
             const std::string & fileName,
             entityFlag_Type     regionFlag )
 {
@@ -108,7 +108,7 @@ readMesh2D( RegionMesh2D      & mesh, //readMesh2D
 
     if ( ElementShape::S_shape != TRIANGLE )
     {
-        std::cerr << "Sorry, readMesh2D reads only triangle meshes" << std::endl;
+        std::cerr << "Sorry, importerMesh2D reads only triangle meshes" << std::endl;
          std::abort();
     }
 
@@ -126,7 +126,7 @@ readMesh2D( RegionMesh2D      & mesh, //readMesh2D
 
     if ( ierr != 0 )
     {
-        std::cout << " Error in readmesh2D: file " << fileName << std::endl
+        std::cout << " Error in importerMesh2D: file " << fileName << std::endl
                   << " not accessible or incorrectly formatted" << std::endl;
         std::abort();
     }
@@ -167,7 +167,7 @@ readMesh2D( RegionMesh2D      & mesh, //readMesh2D
     switch ( ierr )
     {
     case 1:
-        std::cerr << " Error in readmesh2D: file incorrectly formatted" << std::endl;
+        std::cerr << " Error in importerMesh2D: file incorrectly formatted" << std::endl;
         std::abort();
 
     case 0:
@@ -175,7 +175,7 @@ readMesh2D( RegionMesh2D      & mesh, //readMesh2D
         break;
 
     default:
-        std::cerr << " Error in readmesh2D: file incomplete" << std::endl;
+        std::cerr << " Error in importerMesh2D: file incomplete" << std::endl;
         std::abort();
     }
     /*
@@ -202,7 +202,7 @@ readMesh2D( RegionMesh2D      & mesh, //readMesh2D
     // I still have not yet implemented converters p1->p2 for 2D meshes
     if ( p2meshwanted && ! p2meshstored )
     {
-        std::cerr << " Warning in readmesh2D:" << std::endl;
+        std::cerr << " Warning in importerMesh2D:" << std::endl;
         std::cout << "file " << fileName << std::endl
                   << "contains a P1 mesh, while we request a P2 mesh" << std::endl
                   << "Construction of 2D P2 mesh from P1 data not yet implemented" << std::endl;
@@ -359,7 +359,7 @@ readMesh2D( RegionMesh2D      & mesh, //readMesh2D
     std::cout << "Triangular Faces Created " << std::endl;
 
     return ierr == 0;
-} // Function readMesh2D
+} // Function importerMesh2D
 
 
 //! readGmshFile - reads a mesh in GMSH 2D format.
@@ -786,9 +786,9 @@ readMesh2d( RegionMesh2D      & mesh,
             const std::string & fileName,
             entityFlag_Type     regionFlag )
 {
-return readMesh2D( mesh, fileName, regionFlag );
+return importerMesh2D( mesh, fileName, regionFlag );
 }
 
 } // Namespace LifeV
 
-#endif /* READMESH2D_H */
+#endif /* IMPORTERMESH2D_H */

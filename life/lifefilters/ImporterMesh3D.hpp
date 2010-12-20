@@ -38,8 +38,8 @@
     INRIAMesh used either spaces or CR as separators.<br>
  */
 
-#ifndef _READMESH3D_HH_
-#define _READMESH3D_HH_ 1
+#ifndef _IMPORTERMESH3D_HH_
+#define _IMPORTERMESH3D_HH_ 1
 
 #pragma GCC diagnostic ignored "-Wunused-variable"
 #pragma GCC diagnostic ignored "-Wunused-parameter"
@@ -57,7 +57,7 @@
 #include <life/lifemesh/bareItems.hpp>
 
 #include <life/lifefilters/mesh_util.hpp>
-#include <life/lifefilters/selectMarker.hpp>
+#include <life/lifemesh/InternalEntitySelector.hpp>
 
 namespace LifeV
 {
@@ -1672,7 +1672,7 @@ readNetgenMesh(RegionMesh3D<GeoShape,MC> & mesh,
     // addPoint()/Face()/Edge() returns a reference to the last stored point
     // I use that information to set all point info, by using a pointer.
 
-    std::cout << "[readmesh3D] boundaryPoint.size() = " << boundaryPoint.size()
+    std::cout << "[importerMesh3D] boundaryPoint.size() = " << boundaryPoint.size()
               << ", bcnpoints.size() = "          << bcnpoints.size()
               << std::endl;
 
@@ -1691,7 +1691,7 @@ readNetgenMesh(RegionMesh3D<GeoShape,MC> & mesh,
         pointerPoint->z() = pointCoordinates[ nDimensions * i + 2 ];
     }
 
-    std::cout << "[readmesh3D] added points." << std::endl;
+    std::cout << "[importerMesh3D] added points." << std::endl;
 
     /*
        here I set the real boundary edges that I stored
@@ -1714,7 +1714,7 @@ readNetgenMesh(RegionMesh3D<GeoShape,MC> & mesh,
         bedge++;
     }
 
-    std::cout << "[readmesh3D] added edges." << std::endl;
+    std::cout << "[importerMesh3D] added edges." << std::endl;
 
     for ( UInt i = 0; i < numberVolumes; i++ )
     {
@@ -1733,7 +1733,7 @@ readNetgenMesh(RegionMesh3D<GeoShape,MC> & mesh,
         pointerVolume->setPoint( 4, mesh.point( p4 ) );
     }
 
-    std::cout << "[readmesh3D] added volumes." << std::endl;
+    std::cout << "[importerMesh3D] added volumes." << std::endl;
 
     for ( UInt i = 0; i < numberBoundaryFaces; i++ )
     {
@@ -1749,7 +1749,7 @@ readNetgenMesh(RegionMesh3D<GeoShape,MC> & mesh,
         pointerFace->setPoint( 2, mesh.point( p2 ) ); // set face conn.
         pointerFace->setPoint( 3, mesh.point( p3 ) ); // set face conn.
     }
-    std::cout << "[readmesh3D] added faces." << std::endl;
+    std::cout << "[importerMesh3D] added faces." << std::endl;
 
     // This part is to build a P2 mesh from a P1 geometry
 
@@ -1814,4 +1814,4 @@ saveNetgenSolution(std::string       fileName,
 
 } // Namespace LifeV
 
-#endif /* READMESH3D_H */
+#endif /* IMPORTERMESH3D_H */

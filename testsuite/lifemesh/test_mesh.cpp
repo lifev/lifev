@@ -41,7 +41,7 @@
 #include <life/lifecore/GetPot.hpp>
 
 #include <life/lifemesh/markers.hpp>
-#include <life/lifefilters/readMesh3D.hpp>
+#include <life/lifefilters/ImporterMesh3D.hpp>
 #include <life/lifemesh/regionMesh3D.hpp>
 #include <life/lifemesh/bareItems.hpp>
 

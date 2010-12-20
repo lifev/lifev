@@ -37,7 +37,7 @@
     A more detailed description of the file (if necessary)
  */
 
-#include <life/lifefilters/selectMarker.hpp>
+#include <life/lifemesh/InternalEntitySelector.hpp>
 
 namespace LifeV
 {

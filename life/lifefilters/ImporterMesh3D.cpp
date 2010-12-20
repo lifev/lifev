@@ -37,7 +37,7 @@
     Mesh reader that it is able to read 3d meshes.<br>
  */
 
-#include <life/lifefilters/readMesh3D.hpp>
+#include <life/lifefilters/ImporterMesh3D.hpp>
 
 namespace LifeV
 {
