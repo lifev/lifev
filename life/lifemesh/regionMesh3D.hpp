@@ -46,7 +46,7 @@ along with LifeV. If not, see <http://www.gnu.org/licenses/>.
 #include <life/lifecore/Switch.hpp>
 #include <life/lifemesh/MeshElementBare.hpp>
 
-#include <life/lifearray/SimpleVect.hpp>
+#include <life/lifearray/VectorSimple.hpp>
 
 #include <life/lifemesh/ElementShapes.hpp>
 #include <life/lifemesh/MeshUtility.hpp>

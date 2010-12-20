@@ -39,7 +39,7 @@
 
 #include<iostream>
 
-#include <life/lifearray/SimpleVect.hpp>
+#include <life/lifearray/VectorSimple.hpp>
 
 int
 main()
