@@ -50,7 +50,7 @@
 #include <life/lifearray/EpetraVector.hpp>
 #include <life/lifefem/bcHandler.hpp>
 #include <life/lifecore/chrono.hpp>
-#include <life/lifefem/sobolevNorms.hpp>
+#include <life/lifefem/SobolevNorms.hpp>
 #include <life/lifefem/GeometricMap.hpp>
 #include <life/lifesolver/dataIonic.hpp>
 #include <boost/shared_ptr.hpp>
