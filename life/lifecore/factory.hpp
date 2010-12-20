@@ -55,14 +55,14 @@ along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
 namespace LifeV
 {
 
-//! @struct factoryDefaultError
+//! @struct FactoryDefaultError
 /*!
   Manages the "Unknown Type" error in an object factory.
 */
 //!\todo uncomment this line
 //template <class AbstractProduct>
 template <typename IdentifierType, class AbstractProduct>
-struct factoryDefaultError
+struct FactoryDefaultError
 {
     class Exception :
             public std::exception
@@ -109,13 +109,13 @@ struct factoryDefaultError
 //!\todo uncomment this line
 // template <class AbstractProduct, typename IdentifierType,
 //           typename ProductCreator = boost::function<AbstractProduct*()>,
-//           template<class> class factoryErrorPolicy = factoryDefaultError >
-// class factory : public factoryErrorPolicy<AbstractProduct>
+//           template<class> class factoryErrorPolicy = FactoryDefaultError >
+// class Factory : public FactoryErrorPolicy<AbstractProduct>
 
 template <class AbstractProduct, typename IdentifierType,
           typename ProductCreator = boost::function<AbstractProduct*()>,
-          template<typename, class> class factoryErrorPolicy = factoryDefaultError>
-class factory : public factoryErrorPolicy<IdentifierType,AbstractProduct>
+          template<typename, class> class FactoryErrorPolicy = FactoryDefaultError>
+class Factory : public FactoryErrorPolicy<IdentifierType,AbstractProduct>
 {
 public:
     //! @name Public Typedefs
@@ -127,15 +127,15 @@ public:
     typedef AbstractProduct product_Type;
     typedef ProductCreator creator_Type;
     //!\todo uncomment this line
-    //typedef factoryErrorPolicy<product_Type> super;
-    typedef factoryErrorPolicy<identifier_Type, product_Type> super;
+    //typedef FactoryErrorPolicy<product_Type> super;
+    typedef FactoryErrorPolicy<identifier_Type, product_Type> super;
     //@}
 
     //! @name Constructor and destructor
     //@{
-    factory() {}
+    Factory() {}
 
-    virtual ~factory() {}
+    virtual ~Factory() {}
     //@}
 
     //! @name  Methods
@@ -200,21 +200,21 @@ private:
 };
 
 /*!
-  @class factoryClone
+  @class FactoryClone
   @brief Implements a generic cloning object factory
 
-  @sa factory, factoryDefaultError
+  @sa Factory, FactoryDefaultError
 */
 //!\todo uncomment this line
 // template <class AbstractProduct,
 //           class ProductCreator = boost::function<AbstractProduct* (const AbstractProduct*)>,
-//           template<class> class FactoryErrorPolicy = factoryDefaultError>
-// class factoryClone : public FactoryErrorPolicy<AbstractProduct>
+//           template<class> class FactoryErrorPolicy = FactoryDefaultError>
+// class FactoryClone : public FactoryErrorPolicy<AbstractProduct>
 
 template <class AbstractProduct,
           class ProductCreator = boost::function<AbstractProduct* (const AbstractProduct*)>,
-          template<typename, class> class FactoryErrorPolicy = factoryDefaultError>
-class factoryClone : public FactoryErrorPolicy<TypeInfo, AbstractProduct>
+          template<typename, class> class FactoryErrorPolicy = FactoryDefaultError>
+class FactoryClone : public FactoryErrorPolicy<TypeInfo, AbstractProduct>
 {
 public:
     //! @name Typedefs
@@ -226,9 +226,9 @@ public:
 
     //! @name Constructor and destructor
     //@{
-    factoryClone() {}
+    FactoryClone() {}
 
-    virtual ~factoryClone() {}
+    virtual ~FactoryClone() {}
     //@}
 
     //! @name  Methods
