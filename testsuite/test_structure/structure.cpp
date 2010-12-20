@@ -186,7 +186,7 @@ Structure::run3d()
     readMesh(*fullMeshPtr, dataMesh);
 
 
-    partitionMesh< RegionMesh3D<LinearTetra> > meshPart( fullMeshPtr, parameters->comm );
+    MeshPartitioner< RegionMesh3D<LinearTetra> > meshPart( fullMeshPtr, parameters->comm );
 
 //    meshPart.rebuildMesh();
 
@@ -256,18 +256,18 @@ Structure::run3d()
 #ifdef HAVE_HDF5
     if (exporterType.compare("hdf5") == 0)
     {
-        exporter.reset( new Hdf5exporter<RegionMesh3D<LinearTetra> > ( dataFile, "structure" ) );
+        exporter.reset( new ExporterHDF5<RegionMesh3D<LinearTetra> > ( dataFile, "structure" ) );
     }
     else
 #endif
     {
         if (exporterType.compare("none") == 0)
         {
-            exporter.reset( new NoExport<RegionMesh3D<LinearTetra> > ( dataFile, meshPart.meshPartition(), "structure", parameters->comm->MyPID()) );
+            exporter.reset( new ExporterEmpty<RegionMesh3D<LinearTetra> > ( dataFile, meshPart.meshPartition(), "structure", parameters->comm->MyPID()) );
         }
         else
         {
-            exporter.reset( new Ensight<RegionMesh3D<LinearTetra> > ( dataFile, meshPart.meshPartition(), "structure", parameters->comm->MyPID()) );
+            exporter.reset( new ExporterEnsight<RegionMesh3D<LinearTetra> > ( dataFile, meshPart.meshPartition(), "structure", parameters->comm->MyPID()) );
         }
     }
 
