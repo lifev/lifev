@@ -44,7 +44,7 @@
 #include <vector>
 
 #include <life/lifecore/life.hpp>
-#include <life/lifecore/switch.hpp>
+#include <life/lifecore/Switch.hpp>
 #include <life/lifemesh/bareItems.hpp>
 #include <life/lifemesh/markers.hpp>
 #include <life/lifemesh/meshEntity.hpp>
