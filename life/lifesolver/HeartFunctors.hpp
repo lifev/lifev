@@ -49,7 +49,7 @@
 #pragma GCC diagnostic warning "-Wunused-parameter"
 
 
-#include <life/lifecore/GetPot.hpp>
+#include <life/lifefilters/GetPot.hpp>
 #include <life/lifearray/EpetraMatrix.hpp>
 
 #include <life/lifefem/FESpace.hpp>
