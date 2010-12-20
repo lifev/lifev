@@ -40,7 +40,7 @@
 #define DATAFSI_H
 
 #include <life/lifesolver/dataNavierStokes.hpp>
-#include <life/lifesolver/dataElasticStructure.hpp>
+#include <life/lifesolver/VenantKirchhoffElasticData.hpp>
 
 #include <boost/array.hpp>
 #include <boost/scoped_ptr.hpp>

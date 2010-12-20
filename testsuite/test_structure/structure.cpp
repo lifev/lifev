@@ -41,8 +41,8 @@
 #include <life/lifealg/EpetraMap.hpp>
 #include <life/lifemesh/dataMesh.hpp>
 #include <life/lifemesh/partitionMesh.hpp>
-#include <life/lifesolver/dataElasticStructure.hpp>
-#include <life/lifesolver/LinearVenantKirchhofSolver.hpp>
+#include <life/lifesolver/VenantKirchhoffElasticData.hpp>
+#include <life/lifesolver/VenantKirchhoffSolverLinear.hpp>
 
 #include <life/lifefilters/ensight.hpp>
 #include <life/lifefilters/hdf5exporter.hpp>

@@ -44,7 +44,7 @@
  */
 
 #include <life/lifecore/life.hpp>
-#include <life/lifesolver/dataElasticStructure.hpp>
+#include <life/lifesolver/VenantKirchhoffElasticData.hpp>
 
 //=====================================================
 // Constructors

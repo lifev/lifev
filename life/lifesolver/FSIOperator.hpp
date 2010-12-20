@@ -84,8 +84,7 @@
 
 #include <life/lifesolver/DataFSI.hpp>
 #include <life/lifesolver/OseenShapeDerivative.hpp>
-//#include <life/lifesolver/NonLinearVenantKirchhofSolver.hpp>
-#include <life/lifesolver/LinearVenantKirchhofSolver.hpp>
+#include <life/lifesolver/VenantKirchhoffSolverLinear.hpp>
 #include <life/lifesolver/HarmonicExtensionSolver.hpp>
 
 //#include <life/lifesolver/fixedPointBase.hpp>

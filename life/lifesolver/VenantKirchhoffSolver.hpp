@@ -70,7 +70,7 @@
 
 #include <life/lifealg/SolverTrilinos.hpp>
 
-#include <life/lifesolver/dataElasticStructure.hpp>
+#include <life/lifesolver/VenantKirchhoffElasticData.hpp>
 #include <life/lifecore/displayer.hpp>
 
 namespace LifeV
