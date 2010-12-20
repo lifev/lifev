@@ -39,7 +39,7 @@
  */
 
 #include <life/lifecore/life.hpp>
-#include <life/lifecore/GetPot.hpp>
+#include <life/lifefilters/GetPot.hpp>
 
 #include "converter.hpp"
 
