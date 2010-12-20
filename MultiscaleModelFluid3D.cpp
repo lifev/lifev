@@ -436,7 +436,7 @@ MultiscaleModelFluid3D::boundaryStress( const bcFlag_Type& flag, const stress_Ty
 
     default:
 
-        std::cout << "ERROR: Invalid stress type [" << Enum2String( stressType, multiscaleStressesMap ) << "]" << std::endl;
+        std::cout << "ERROR: Invalid stress type [" << enum2String( stressType, multiscaleStressesMap ) << "]" << std::endl;
 
         return 0.0;
     }
@@ -494,7 +494,7 @@ MultiscaleModelFluid3D::boundaryDeltaStress( const bcFlag_Type& flag, bool& solv
 
     default:
 
-        std::cout << "ERROR: Invalid stress type [" << Enum2String( stressType, multiscaleStressesMap ) << "]" << std::endl;
+        std::cout << "ERROR: Invalid stress type [" << enum2String( stressType, multiscaleStressesMap ) << "]" << std::endl;
 
         return 0.0;
     }
@@ -568,7 +568,7 @@ MultiscaleModelFluid3D::setupMesh()
     fluidMesh->transformMesh( M_geometryScale, M_geometryRotate, M_geometryTranslate );
 
     //Partition mesh
-    M_mesh.reset( new partitionMesh_Type( fluidMesh, M_comm ) );
+    M_mesh.reset( new MeshPartitioner_Type( fluidMesh, M_comm ) );
 }
 
 void
