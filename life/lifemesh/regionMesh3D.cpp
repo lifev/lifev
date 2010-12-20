@@ -33,7 +33,7 @@ along with LifeV. If not, see <http://www.gnu.org/licenses/>.
  *  @mantainer Simone Pezzuto <simone.pezzuto@mail.polimi.it>
  */
 
-#include <life/lifecore/switch.hpp>
+#include <life/lifecore/Switch.hpp>
 
 namespace LifeV
 {
