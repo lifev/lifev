@@ -144,7 +144,7 @@ PostProcessingBoundary                 postProc                                E
 QuadraturePoint                        quadPoint                               CMCS2     DONE
 QuadratureRule                         quadRule                                CMCS2     DONE
 ReferenceElement                       refEle                                  CMCS2     DONE
-ReferenceFE                            refFE                                   CMCS2
+ReferenceFE                            refFE                                   CMCS2     DONE
 ReferenceFEHdiv                        refFEHdiv                               CMCS2     DONE
 ReferenceFEHybrid                      refFEHybrid                             CMCS2
 ReferenceFEScalar                      refFEScalar                             CMCS2

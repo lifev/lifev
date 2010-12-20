@@ -44,7 +44,6 @@
 #include <life/lifefem/DOF.hpp>
 #include <life/lifearray/elemMat.hpp>
 #include <life/lifefem/AssemblyElemental.hpp>
-#include <life/lifefem/refFE.hpp>
 #include <life/lifefem/Assembly.hpp>
 #include <life/lifefem/bcManage.hpp>
 #include <life/lifefem/FESpace.hpp>

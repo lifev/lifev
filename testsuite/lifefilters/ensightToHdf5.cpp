@@ -50,7 +50,7 @@
 #include <life/lifefilters/ensight.hpp>
 #include <life/lifefilters/hdf5exporter.hpp>
 #include <life/lifesolver/Oseen.hpp>
-#include <life/lifefem/refFE.hpp>
+#include <life/lifefem/ReferenceFE.hpp>
 #include <life/lifefem/QuadRule.hpp>
 
 #include <iostream>

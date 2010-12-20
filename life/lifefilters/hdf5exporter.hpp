@@ -69,7 +69,7 @@ along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
 #include <life/lifealg/EpetraMap.hpp>
 #include <life/lifecore/life.hpp>
 #include <life/lifecore/util_string.hpp>
-#include <life/lifefem/refFE.hpp>
+#include <life/lifefem/ReferenceFE.hpp>
 #include <life/lifefem/refFEScalar.hpp>
 #include <life/lifefilters/exporter.hpp>
 

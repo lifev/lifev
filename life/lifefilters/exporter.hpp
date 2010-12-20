@@ -61,7 +61,7 @@ along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
 #include <life/lifecore/GetPot.hpp>
 #include <life/lifecore/chrono.hpp>
 #include <life/lifecore/life.hpp>
-#include <life/lifefem/refFE.hpp>
+#include <life/lifefem/ReferenceFE.hpp>
 #include <life/lifemesh/markers.hpp>
 
 namespace LifeV

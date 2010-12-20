@@ -88,7 +88,6 @@
 #include <life/lifesolver/LinearVenantKirchhofSolver.hpp>
 #include <life/lifesolver/HarmonicExtensionSolver.hpp>
 
-//#include <life/lifefem/refFE.hpp>
 //#include <life/lifesolver/fixedPointBase.hpp>
 
 
