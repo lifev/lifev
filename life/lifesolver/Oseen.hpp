@@ -1019,19 +1019,19 @@ Oseen<MeshType, SolverType>::buildSystem()
 
     M_Displayer.leaderPrint( "  F-  Computing constant matrices ...          " );
 
-    Chrono chrono;
+    LifeChrono chrono;
 
-    Chrono chronoDer;
-    Chrono chronoStiff;
-    Chrono chronoMass;
-    Chrono chronoGrad;
+    LifeChrono chronoDer;
+    LifeChrono chronoStiff;
+    LifeChrono chronoMass;
+    LifeChrono chronoGrad;
 
-    Chrono chronoStiffAssemble;
-    Chrono chronoMassAssemble;
-    Chrono chronoGradAssemble;
-    Chrono chronoDivAssemble;
-    Chrono chronoStab;
-    Chrono chronoZero;
+    LifeChrono chronoStiffAssemble;
+    LifeChrono chronoMassAssemble;
+    LifeChrono chronoGradAssemble;
+    LifeChrono chronoDivAssemble;
+    LifeChrono chronoStab;
+    LifeChrono chronoZero;
 
     // Number of velocity components
     UInt numVelocityComponent = nDimensions;
@@ -1250,7 +1250,7 @@ updateSystem( const Real         alpha,
               matrixPtr_Type     matrixNoBC,
               vectorPtr_Type     un )
 {
-    Chrono chrono;
+    LifeChrono chrono;
 
     // clearing pressure mass matrix in case we need it in removeMean;
     M_matrixMassPtr.reset( );
@@ -1468,7 +1468,7 @@ void
 Oseen<MeshType, SolverType>::iterate( bcHandler_Type& bcHandler )
 {
 
-    Chrono chrono;
+    LifeChrono chrono;
 
     // matrix and vector assembling communication
     M_Displayer.leaderPrint( "  F-  Updating the boundary conditions ...     " );
@@ -1682,7 +1682,7 @@ Real
 Oseen<MeshType, SolverType>::removeMean( vector_Type& x )
 {
 
-    Chrono chrono;
+    LifeChrono chrono;
     chrono.start();
 
     const UInt numVelocityComponent ( nDimensions );
