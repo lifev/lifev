@@ -37,7 +37,7 @@
 #ifndef BCInterface3DFunctionSolver_H
 #define BCInterface3DFunctionSolver_H 1
 
-#include <life/lifesolver/FSIOperator.hpp>
+#include <life/lifesolver/FSI.hpp>
 #include <life/lifesolver/OseenShapeDerivative.hpp>
 
 #include <lifemc/lifesolver/BCInterface3DFunction.hpp>
@@ -50,7 +50,7 @@ namespace LifeV
  *  @author Cristiano Malossi
  *
  *  This class is an interface between BCInterface, the grammar parser and a general
- *  LifeV solver (such as Oseen or FSIOperator). It allows to construct LifeV
+ *  LifeV solver (such as Oseen or FSI). It allows to construct LifeV
  *  functions type for boundary conditions, using a functions string loaded from
  *  a GetPot file in which are present some "solver" parameters.
  *
@@ -238,11 +238,11 @@ BCInterface3DFunctionSolver< PhysicalSolverType >::BCInterface3DFunctionSolver( 
 // ===================================================
 template< >
 inline void
-BCInterface3DFunctionSolver< FSIOperator >::updatePhysicalSolverVariables()
+BCInterface3DFunctionSolver< FSI >::updatePhysicalSolverVariables()
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 5023 ) << "BCInterface3DFunctionSolver<FSIOperator>::UpdateOperatorVariables  " << "\n";
+    Debug( 5023 ) << "BCInterface3DFunctionSolver<FSI>::UpdateOperatorVariables  " << "\n";
 #endif
 
     // Create/Update variables for FSI problem
@@ -501,11 +501,11 @@ BCInterface3DFunctionSolver< PhysicalSolverType >::setData( const data_Type& dat
 // ===================================================
 template< >
 inline void
-BCInterface3DFunctionSolver< FSIOperator >::createAccessList( const data_Type& data )
+BCInterface3DFunctionSolver< FSI >::createAccessList( const data_Type& data )
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 5023 ) << "BCInterface3DFunctionSolver<FSIOperator>::createAccessList" << "\n";
+    Debug( 5023 ) << "BCInterface3DFunctionSolver<FSI>::createAccessList" << "\n";
 #endif
 
     std::map< std::string, physicalSolverList > mapList;

@@ -48,7 +48,7 @@ namespace LifeV
  *  @author Cristiano Malossi
  *
  *  This class is an interface between BCInterface1D, SpiritParser and and a general
- *  LifeV operator (such as Oseen or FSIOperator). It allows to construct LifeV
+ *  LifeV operator (such as Oseen or FSI). It allows to construct LifeV
  *  functions type for boundary conditions, using a GetPot file containing a function string and a
  *  table of discrete data (for example a discrete Flux or Pressure depending on time).
  *  The function string can contain Operator parameters.

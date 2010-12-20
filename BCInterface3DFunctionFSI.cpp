@@ -42,7 +42,7 @@ namespace LifeV
 // ===================================================
 // Constructors
 // ===================================================
-BCInterface3DFunctionFSI< FSIOperator >::BCInterface3DFunctionFSI() :
+BCInterface3DFunctionFSI< FSI >::BCInterface3DFunctionFSI() :
         M_FSIFunction   (),
         M_name          (),
         M_flag          (),
@@ -58,7 +58,7 @@ BCInterface3DFunctionFSI< FSIOperator >::BCInterface3DFunctionFSI() :
 
 }
 
-BCInterface3DFunctionFSI< FSIOperator >::BCInterface3DFunctionFSI( const data_Type& data ) :
+BCInterface3DFunctionFSI< FSI >::BCInterface3DFunctionFSI( const data_Type& data ) :
         M_FSIFunction   (),
         M_name          (),
         M_flag          (),
@@ -79,7 +79,7 @@ BCInterface3DFunctionFSI< FSIOperator >::BCInterface3DFunctionFSI( const data_Ty
 // Methods
 // ===================================================
 void
-BCInterface3DFunctionFSI< FSIOperator >::exportData( data_Type& data )
+BCInterface3DFunctionFSI< FSI >::exportData( data_Type& data )
 {
 
 #ifdef HAVE_LIFEV_DEBUG
@@ -94,7 +94,7 @@ BCInterface3DFunctionFSI< FSIOperator >::exportData( data_Type& data )
 }
 
 void
-BCInterface3DFunctionFSI< FSIOperator >::checkMethod( const boost::shared_ptr< FSIOperator >& physicalSolver )
+BCInterface3DFunctionFSI< FSI >::checkMethod( const boost::shared_ptr< FSI >& physicalSolver )
 {
     //Set mapMethod
     std::map< std::string, FSIMethod > mapMethod;
@@ -133,7 +133,7 @@ BCInterface3DFunctionFSI< FSIOperator >::checkMethod( const boost::shared_ptr< F
         Debug( 5025 ) << "BCInterface3DFunctionFSI::checkMethod                            monolithicGE" << "\n";
 #endif
 
-        checkFunction< MonolithicGE >( physicalSolver );
+        checkFunction< FSIMonolithicGE >( physicalSolver );
 
         break;
 
@@ -143,7 +143,7 @@ BCInterface3DFunctionFSI< FSIOperator >::checkMethod( const boost::shared_ptr< F
         Debug( 5025 ) << "BCInterface3DFunctionFSI::checkMethod                            monolithicGI" << "\n";
 #endif
 
-        checkFunction< MonolithicGI >( physicalSolver );
+        checkFunction< FSIMonolithicGI >( physicalSolver );
 
         break;
 
@@ -163,7 +163,7 @@ BCInterface3DFunctionFSI< FSIOperator >::checkMethod( const boost::shared_ptr< F
 // Set Methods
 // ===================================================
 void
-BCInterface3DFunctionFSI< FSIOperator >::setData( const data_Type& data )
+BCInterface3DFunctionFSI< FSI >::setData( const data_Type& data )
 {
 
 #ifdef HAVE_LIFEV_DEBUG
