@@ -83,8 +83,8 @@ Heart::Heart( Int argc,
 void
 Heart::run()
 {
-    Chrono chronoinitialsettings;
-    Chrono chronototaliterations;
+    LifeChrono chronoinitialsettings;
+    LifeChrono chronototaliterations;
     chronoinitialsettings.start();
     Real normu;
     Real meanu;
@@ -122,7 +122,7 @@ Heart::run()
 
 
     //! Construction of the partitioned mesh
-    partitionMesh< RegionMesh3D<LinearTetra> >   meshPart(fullMeshPtr, M_heart_fct->M_comm);
+    MeshPartitioner< RegionMesh3D<LinearTetra> >   meshPart(fullMeshPtr, M_heart_fct->M_comm);
     std::string uOrder =  M_heart_fct->M_dataFile( "electric/space_discretization/u_order", "P1");
 
     //! Initialization of the FE type and quadrature rules for both the variables
@@ -253,7 +253,7 @@ Heart::run()
 #ifdef HAVE_HDF5
     if (exporterType.compare("hdf5") == 0)
     {
-        exporter.reset( new Hdf5exporter<RegionMesh3D<LinearTetra> > ( M_heart_fct->M_dataFile,
+        exporter.reset( new ExporterHDF5<RegionMesh3D<LinearTetra> > ( M_heart_fct->M_dataFile,
                                                                        "heart" ) );
         exporter->setPostDir( "./" ); // This is a test to see if M_post_dir is working
         exporter->setMeshProcId( meshPart.meshPartition(), M_heart_fct->M_comm->MyPID() );
@@ -263,14 +263,14 @@ Heart::run()
     {
         if (exporterType.compare("none") == 0)
         {
-            exporter.reset( new NoExport<RegionMesh3D<LinearTetra> > ( M_heart_fct->M_dataFile,
+            exporter.reset( new ExporterEmpty<RegionMesh3D<LinearTetra> > ( M_heart_fct->M_dataFile,
                                                                        meshPart.meshPartition(),
                                                                        "heart",
                                                                        M_heart_fct->M_comm->MyPID()) );
         }
         else
         {
-            exporter.reset( new Ensight<RegionMesh3D<LinearTetra> > ( M_heart_fct->M_dataFile,
+            exporter.reset( new ExporterEnsight<RegionMesh3D<LinearTetra> > ( M_heart_fct->M_dataFile,
                                                                       meshPart.meshPartition(),
                                                                       "heart",
                                                                       M_heart_fct->M_comm->MyPID()) );
@@ -304,7 +304,7 @@ Heart::run()
     chronoinitialsettings.stop();
 
     //! Temporal loop
-    Chrono chrono;
+    LifeChrono chrono;
     Int iter = 1;
     chronototaliterations.start();
     for ( Real time = t0 + dt ; time <= tFinal + dt / 2.; time += dt, iter++)
@@ -358,7 +358,7 @@ void Heart::computeRhs( vector_Type& rhs,
 {
     bool verbose = (M_heart_fct->M_comm->MyPID() == 0);
     if (verbose) std::cout << "  f-  Computing Rhs ...        "<<"\n"<<std::flush;
-    Chrono chrono;
+    LifeChrono chrono;
     chrono.start();
 
     //! u, w with repeated map
@@ -426,7 +426,7 @@ void Heart::computeRhs( vector_Type& rhs,
 {
     bool verbose = (M_heart_fct->M_comm->MyPID() == 0);
     if (verbose) std::cout << "  f-  Computing Rhs ...        "<<"\n"<<std::flush;
-    Chrono chrono;
+    LifeChrono chrono;
     chrono.start();
 
     //! u, w with repeated map
