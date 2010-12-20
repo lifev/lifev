@@ -94,8 +94,7 @@
 #include <life/lifealg/MLPreconditioner.hpp>
 
 #include <life/lifesolver/FSISolver.hpp>
-//#include <life/lifesolver/NonLinearVenantKirchhofSolver.hpp>
-#include <life/lifesolver/LinearVenantKirchhofSolver.hpp>
+#include <life/lifesolver/VenantKirchhoffSolverLinear.hpp>
 #include <lifemc/lifesolver/MonolithicGI.hpp>
 
 #include <life/lifesolver/DataFSI.hpp>
