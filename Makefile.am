@@ -56,15 +56,15 @@ liblifemcsolver_la_SOURCES   = BCInterface1DData.cpp \
                                MultiscaleCouplingBoundaryCondition.cpp \
                                MultiscaleCouplingStress.cpp \
                                MultiscaleCouplingFlowRateStress.cpp \
-                               OneDimensionalModel_Data.cpp \
-                               OneDimensionalModel_Physics.cpp \
-                               OneDimensionalModel_Physics_Linear.cpp \
-                               OneDimensionalModel_Physics_NonLinear.cpp \
-                               OneDimensionalModel_Flux_Linear.cpp \
-                               OneDimensionalModel_Flux_NonLinear.cpp \
-                               OneDimensionalModel_Solver.cpp \
-                               OneDimensionalModel_Source_Linear.cpp \
-                               OneDimensionalModel_Source_NonLinear.cpp
+                               OneDimensionalData.cpp \
+                               OneDimensionalPhysics.cpp \
+                               OneDimensionalPhysicsLinear.cpp \
+                               OneDimensionalPhysicsNonLinear.cpp \
+                               OneDimensionalFluxLinear.cpp \
+                               OneDimensionalFluxNonLinear.cpp \
+                               OneDimensionalSolver.cpp \
+                               OneDimensionalSourceLinear.cpp \
+                               OneDimensionalSourceNonLinear.cpp
 
 liblifemcsolver_la_LIBADD    = -llifesolver
 

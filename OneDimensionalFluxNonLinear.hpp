@@ -43,7 +43,7 @@
 #define OneDimensionalFluxNonLinear_H
 
 // LIFEV - MATHCARD
-#include <lifemc/lifesolver/OneDimensionalModel_Flux.hpp>
+#include <lifemc/lifesolver/OneDimensionalFlux.hpp>
 
 namespace LifeV
 {

@@ -39,7 +39,7 @@
  *  @mantainer  Cristiano Malossi <cristiano.malossi@epfl.ch>
  */
 
-#include "OneDimensionalModel_Flux_Linear.hpp"
+#include <OneDimensionalFluxLinear.hpp>
 
 namespace LifeV
 {
