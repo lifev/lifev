@@ -49,7 +49,7 @@
 #include <life/lifefem/DOFInterface.hpp>
 #include <life/lifefem/DOFLocalPattern.hpp>
 #include <life/lifefem/DOF.hpp>
-#include <life/lifemesh/markers.hpp>
+#include <life/lifemesh/MarkerDefinitions.hpp>
 
 #include <iostream>
 #include <fstream>

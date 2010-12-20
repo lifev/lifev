@@ -39,8 +39,8 @@
     reference.
 */
 
-#ifndef MARKERS_H
-#define MARKERS_H 1
+#ifndef MARKERDEFINITIONS_H
+#define MARKERDEFINITIONS_H 1
 
 #include <life/lifemesh/Marker.hpp>
 
@@ -65,4 +65,4 @@ typedef MarkerTraits::EntityFlag EntityFlag __attribute__ ((deprecated));
 
 } // Namespace LifeV
 
-#endif /* MARKERS_H */
+#endif /* MARKERDEFINITIONS_H */

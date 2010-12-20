@@ -778,7 +778,7 @@ UInt findInternalEdges( const MeshType & mesh,
     flag for the MeshElementMarked. If any of the vertices has an unset marker
     the result is an unset flag for the MeshElementMarked.
 
-    @sa markers.hpp
+    @sa MarkerDefinitions.hpp
     @warning It overrides the original marker flag.
     @return the new flag for geoElement
 */
@@ -805,7 +805,7 @@ entityFlag_Type inheritPointsStrongerMarker( MeshElementMarkedType & geoElement 
     flag for the MeshElementMarked. If any of the vertices has an unset marker
     the result is an unset flag for the MeshElementMarked.
 
-    @sa markers.hpp
+    @sa MarkerDefinitions.hpp
     @warning It overrides the original marker flag.
     @return the new flag for geoElement
 */

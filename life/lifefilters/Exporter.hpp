@@ -62,7 +62,7 @@ along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
 #include <life/lifecore/LifeChrono.hpp>
 #include <life/lifecore/life.hpp>
 #include <life/lifefem/ReferenceFE.hpp>
-#include <life/lifemesh/markers.hpp>
+#include <life/lifemesh/MarkerDefinitions.hpp>
 
 namespace LifeV
 {

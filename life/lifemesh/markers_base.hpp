@@ -63,8 +63,8 @@
     </ul>
  */
 
-#ifndef MARKERS_BASE_H
-#define MARKERS_BASE_H 1
+#ifndef MARKER_H
+#define MARKER_H 1
 
 #include <iostream>
 #include <life/lifecore/life.hpp>
@@ -418,4 +418,4 @@ void Marker<MarkerTraits>::showMe( std::ostream & output) const
 
 } //Namespace LifeV
 
-#endif /* MARKERS_BASE_H */
+#endif /* MARKER_H */

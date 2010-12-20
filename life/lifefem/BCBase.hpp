@@ -65,7 +65,7 @@
 #define BCBASE_H
 
 #include <life/lifemesh/BCIdentifier.hpp>
-#include <life/lifemesh/markers.hpp>
+#include <life/lifemesh/MarkerDefinitions.hpp>
 #include <life/lifefem/DOF.hpp>
 #include <life/lifefem/CurrentFE.hpp>
 #include <life/lifefem/CurrentBoundaryFE.hpp>
