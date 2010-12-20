@@ -43,7 +43,7 @@
 #define OneDimensionalSourceNonLinear_H
 
 // LIFEV - MATHCARD
-#include <lifemc/lifesolver/OneDimensionalModel_Source.hpp>
+#include <lifemc/lifesolver/OneDimensionalSource.hpp>
 
 namespace LifeV
 {

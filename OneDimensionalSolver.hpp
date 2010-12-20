@@ -63,8 +63,8 @@
 #include <life/lifefem/FESpace.hpp>
 
 // LIFEV - MATHCARD
-#include <lifemc/lifefem/OneDimensionalModel_BCHandler.hpp>
-#include <lifemc/lifesolver/OneDimensionalModel_Definitions.hpp>
+#include <lifemc/lifefem/OneDimensionalBCHandler.hpp>
+#include <lifemc/lifesolver/OneDimensionalDefinitions.hpp>
 
 
 namespace LifeV

@@ -49,7 +49,7 @@
 #include <life/lifemesh/regionMesh1D.hpp>
 
 // LIFEV - MATHCARD
-#include <lifemc/lifesolver/OneDimensionalModel_Definitions.hpp>
+#include <lifemc/lifesolver/OneDimensionalDefinitions.hpp>
 
 namespace LifeV
 {
