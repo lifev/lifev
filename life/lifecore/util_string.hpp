@@ -33,8 +33,8 @@ along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
   @maintainer Radu Popescu <radu.popescu@epfl.ch>
 */
 
-#ifndef UTIL_STRING_H
-#define UTIL_STRING_H
+#ifndef STRING_UTILITY_H
+#define STRING_UTILITY_H
 
 # include <cstdio>
 # include <cstdlib>
@@ -141,7 +141,7 @@ inline std::string number2string( const NumberType& n )
 // @author Cristiano Malossi
 // Convert an Enum to a std::string using a map as a library for conversion
 template < typename EnumeratorType >
-inline std::string Enum2String( const EnumeratorType& Enum,
+inline std::string enum2String( const EnumeratorType& Enum,
                                 const std::map<std::string,
                                 EnumeratorType>& Map )
 {
@@ -170,4 +170,4 @@ void string2numbersVector( const std::string& string,
 
 } // Namespace LifeV
 
-#endif //  UTIL_STRING_H
+#endif //  STRING_UTILITY_H
