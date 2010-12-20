@@ -26,7 +26,7 @@
 
 /*!
     @file
-    @brief Test SimpleVect class
+    @brief Test VectorSimple class
 
     @author
     @contributor
@@ -34,7 +34,7 @@
 
     @date 00-00-0000
 
-	Test if the template class SimpleVect compiles and works correctly.
+	Test if the template class VectorSimple compiles and works correctly.
  */
 
 #include<iostream>
@@ -46,10 +46,10 @@ main()
 {
     using namespace LifeV;
 
-    SimpleVect<int> a;
-    SimpleVect<float> b(10);
+    VectorSimple<int> a;
+    VectorSimple<float> b(10);
 
-    for (SimpleVect<float>::iterator p=b.begin(); p!= b.end(); ++p)
+    for (VectorSimple<float>::iterator p=b.begin(); p!= b.end(); ++p)
     {
         *p=10.0;
     }

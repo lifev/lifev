@@ -97,7 +97,7 @@ void BCIdentifierEssential::showMe( std::ostream& output) const
 //          Constructors & Destructor            //
 // ============================================= //
 
-BCIdentifierNatural::BCIdentifierNatural( const ID& id, const SimpleVect<ID>& localToGlobal ) : BCIdentifierBase( id )
+BCIdentifierNatural::BCIdentifierNatural( const ID& id, const VectorSimple<ID>& localToGlobal ) : BCIdentifierBase( id )
 {
     M_localToGlobal.reserve( localToGlobal.size() );
     M_localToGlobal.insert( M_localToGlobal.end(), localToGlobal.begin(), localToGlobal.end() );
@@ -124,7 +124,7 @@ void BCIdentifierNatural::showMe( std::ostream & output) const
 	output << "Local-to-global map:\n";
 
 	int i(1);
-	for( SimpleVect<ID>::const_iterator it = M_localToGlobal.begin(); it != M_localToGlobal.end(); ++it, ++i )
+	for( VectorSimple<ID>::const_iterator it = M_localToGlobal.begin(); it != M_localToGlobal.end(); ++it, ++i )
 		output << "Local id: " << i << "  -->  Global id: " << *it << '\n';
 }
 

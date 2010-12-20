@@ -130,18 +130,18 @@ public:
      *  @ingroup public_types
      *  Typedefs for STL compliant containers of mesh geometric entities.
      *
-     *  I Use SimpleVect container for addressing from 1.
+     *  I Use VectorSimple container for addressing from 1.
      *  @{
      */
 
     //! Points Container
-    typedef SimpleVect<point_Type>  Points;
+    typedef VectorSimple<point_Type>  Points;
     //! Elements Container - compatibility
-    typedef SimpleVect<VolumeType> Volumes;
+    typedef VectorSimple<VolumeType> Volumes;
     //! Faces Container - compatibility
-    typedef SimpleVect<FaceType>   Faces;
+    typedef VectorSimple<FaceType>   Faces;
     //! Edges Container: at least boundary edges
-    typedef SimpleVect<EdgeType>   Edges;
+    typedef VectorSimple<EdgeType>   Edges;
 
     /** @} */ // End of group Geometric Element Container Types
 
@@ -162,9 +162,9 @@ public:
     typedef MeshElementMarked0D<MC>             BElementType;
 
     //! Element Geometric Shape Container Type
-    typedef SimpleVect<EdgeType>         Elements;
+    typedef VectorSimple<EdgeType>         Elements;
     //! Boundary Element Geometric Shape Container Type
-    typedef SimpleVect<point_Type>        BElements;
+    typedef VectorSimple<point_Type>        BElements;
 
     /** @} */ // End of group Generic Types
 
@@ -1144,7 +1144,7 @@ public:
     //! Container of mesh Edges.
     Edges   edgeList;
     //! Boundary points list.
-    SimpleVect<point_Type * > _bPoints;
+    VectorSimple<point_Type * > _bPoints;
 
     /** @} */ // End of group Region Containers
 
@@ -1170,32 +1170,32 @@ protected:
     /**
      *  Returns the number of elements in a given list.
      *
-     *  @param list SimpleVect list of elements.
+     *  @param list VectorSimple list of elements.
      *  @return Number of elements in list.
      */
     template < typename T >
-    UInt numItems( SimpleVect< T> const & list ) const;
+    UInt numItems( VectorSimple< T> const & list ) const;
 
     //! Maximum number of Elements in a list.
     /**
      *  Returns maximum number of elements in a given list.
      *
-     *  @param list SimpleVect list of elements.
+     *  @param list VectorSimple list of elements.
      *  @return Maximum number of elements in list.
      */
     template < typename T >
-    UInt maxNumItems( SimpleVect< T> const & list ) const;
+    UInt maxNumItems( VectorSimple< T> const & list ) const;
 
     //! Set maximum number of Elements in a list.
     /**
      *  Set maximum number of elements in a given list.
      *
-     *  @param list SimpleVect list of elements.
+     *  @param list VectorSimple list of elements.
      *  @param n Number of elements.
      *  @param title Title for verbose output.
      */
     template < typename T >
-    void setMaxNumItems( SimpleVect< T> & list, UInt n, std::string title );
+    void setMaxNumItems( VectorSimple< T> & list, UInt n, std::string title );
 
     /** @defgroup protected_attributes Protected Attributes
      */
@@ -1217,12 +1217,12 @@ protected:
     MeshElementBareHandler<BareEdge> _FToE;
 #else
     //! Face-To-Edge Container.
-    SimpleArray<UInt> _FToE;
+    ArraySimple<UInt> _FToE;
 #endif
 
 #ifdef NOT_BDATA_FIRST
     //! Boundary Edges Container
-    SimpleVect<EdgeType * > _bEdges;
+    VectorSimple<EdgeType * > _bEdges;
 #endif
 
     /** @} */ // End of group Face-To-Edge and Boundary Containers
@@ -1618,7 +1618,7 @@ RegionMesh1D<GEOSHAPE, MC>::bElement( UInt const & i ) const
 template <typename GEOSHAPE, typename MC>
 template <typename T>
 UInt
-RegionMesh1D<GEOSHAPE, MC>::numItems( SimpleVect< T> const & list ) const
+RegionMesh1D<GEOSHAPE, MC>::numItems( VectorSimple< T> const & list ) const
 {
     return list.size();
 }
@@ -1626,7 +1626,7 @@ RegionMesh1D<GEOSHAPE, MC>::numItems( SimpleVect< T> const & list ) const
 template <typename GEOSHAPE, typename MC>
 template <typename T>
 UInt
-RegionMesh1D<GEOSHAPE, MC>::maxNumItems( SimpleVect< T> const & list ) const
+RegionMesh1D<GEOSHAPE, MC>::maxNumItems( VectorSimple< T> const & list ) const
 {
     return list.capacity();
 }
@@ -1634,7 +1634,7 @@ RegionMesh1D<GEOSHAPE, MC>::maxNumItems( SimpleVect< T> const & list ) const
 template <typename GEOSHAPE, typename MC>
 template <typename T>
 void
-RegionMesh1D<GEOSHAPE, MC>::setMaxNumItems( SimpleVect< T> & list, UInt n, std::string title )
+RegionMesh1D<GEOSHAPE, MC>::setMaxNumItems( VectorSimple< T> & list, UInt n, std::string title )
 {
     if ( list.capacity() == 0 )
     {
@@ -2074,7 +2074,7 @@ RegionMesh1D<GEOSHAPE, MC>::setPoint
         // if point was already stored in the list!
         // No way to avoid it, sorry
 
-        for ( typename SimpleVect<point_Type *>::iterator bp = _bPoints.begin(); bp != _bPoints.end(); ++bp )
+        for ( typename VectorSimple<point_Type *>::iterator bp = _bPoints.begin(); bp != _bPoints.end(); ++bp )
         {
             if ( ( *bp ) ->id() == position )
             {

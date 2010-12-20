@@ -227,7 +227,7 @@ public:
 
 private:
 
-    typedef SimpleArray<UInt> Container_Type;
+    typedef ArraySimple<UInt> Container_Type;
 
     typedef ID ( *faceToPointPtr_Type )( ID const& localFace, ID const& point );
 

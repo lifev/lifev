@@ -287,7 +287,7 @@ private:
     std::map< entityFlag_Type, std::list<ID> >   M_boundaryMarkerToFacetIdMap;
 
     // for each boundary face, it contains the numbering of the dof of the face
-    std::vector< std::vector< SimpleVect<ID> > > M_vectorNumberingPerFacetVector;
+    std::vector< std::vector< VectorSimple<ID> > > M_vectorNumberingPerFacetVector;
     // it converts from a local numbering over the boundary faces on the global numbering of the mesh
     std::vector< std::vector< ID > >             M_dofGlobalIdVector;
 
@@ -424,7 +424,7 @@ PostProcessingBoundary<MeshType>::PostProcessingBoundary( meshPtr_Type mesh,
 template<typename MeshType>
 void PostProcessingBoundary<MeshType>::buildVectors()
 {
-    SimpleVect<ID>            boundaryDofGlobalIdVector;
+    VectorSimple<ID>            boundaryDofGlobalIdVector;
 
     UInt                      iFirstAdjacentElement, iVertexLocalId, iFaceLocalId, iEdgeLocalId;
     ID                        dofLocalId, dofGlobalId, dofAuxiliaryId;
@@ -848,12 +848,12 @@ void PostProcessingBoundary<MeshType>::showDOFIndexMap( std::ostream& output ) c
         Int counter = 0;
         output << "\n***** Post Proc: Vector Indexes per Facet *****" << std::endl;
         output << M_vectorNumberingPerFacetVector[iFESpace].size() << std::endl;
-        for ( std::vector<SimpleVect<ID> >::iterator it1 = M_vectorNumberingPerFacetVector[iFESpace].begin();
+        for ( std::vector<VectorSimple<ID> >::iterator it1 = M_vectorNumberingPerFacetVector[iFESpace].begin();
                 it1<M_vectorNumberingPerFacetVector[iFESpace].end(); it1++ )
         {
             counter++;
             output << "Boundary Facet " << counter << ", indexes: " << std::endl;
-            for ( SimpleVect<ID>::iterator it2 = it1->begin(); it2<it1->end(); it2++ )
+            for ( VectorSimple<ID>::iterator it2 = it1->begin(); it2<it1->end(); it2++ )
             {
                 output << *it2 << ",";
             }

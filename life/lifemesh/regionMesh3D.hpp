@@ -145,17 +145,17 @@ public:
      *  @ingroup public_types
      *  Typedefs for STL compliant containers of mesh geometric entities.
      *
-     *  I Use SimpleVect container for addressing from 1.
+     *  I Use VectorSimple container for addressing from 1.
      *  @{
      */
     //! Points Container.
-    typedef SimpleVect<point_Type>   Points;
+    typedef VectorSimple<point_Type>   Points;
     //! Elements Container.
-    typedef SimpleVect<VolumeType > Volumes;
+    typedef VectorSimple<VolumeType > Volumes;
     //! Faces Container: it may contain only Boundary faces.
-    typedef SimpleVect<FaceType>    Faces;
+    typedef VectorSimple<FaceType>    Faces;
     //! Edges Container: it may be empty.
-    typedef SimpleVect<EdgeType>    Edges;
+    typedef VectorSimple<EdgeType>    Edges;
 
     /** @} */ // End of group Geometric Element Container Types
 
@@ -181,9 +181,9 @@ public:
     typedef MeshElementMarked2D<FaceShape, MC>  BElementType;
 
     //! Element Geometric Shape Container Type
-    typedef SimpleVect<VolumeType>       Elements;
+    typedef VectorSimple<VolumeType>       Elements;
     //! Boundary Element Geometric Shape Container Type
-    typedef SimpleVect<FaceType>         BElements;
+    typedef VectorSimple<FaceType>         BElements;
 
     /** @} */ // End of group Generic Types
 
@@ -1539,7 +1539,7 @@ public:
     //! Container of mesh 3D Elements
     Volumes volumeList;
     //! Boundary points list.
-    SimpleVect<point_Type * > _bPoints;
+    VectorSimple<point_Type * > _bPoints;
     //! Container of mesh points/vertices (mesh movement)
     /**
      *  Used only by mesh node movement routines. It contains the
@@ -1570,41 +1570,41 @@ private:
     /**
      *  Returns the number of elements in a given list.
      *
-     *  @param list SimpleVect list of elements.
+     *  @param list VectorSimple list of elements.
      *  @return Number of elements in list.
      *  @todo Move in a separate class and make it friend of regionMeshXD
      */
     template < typename T >
-    UInt numItems( SimpleVect< T> const & list ) const;
+    UInt numItems( VectorSimple< T> const & list ) const;
 
     //! Maximum number of Elements in a list.
     /**
      *  Returns maximum number of elements in a given list.
      *
-     *  @param list SimpleVect list of elements.
+     *  @param list VectorSimple list of elements.
      *  @return Maximum number of elements in list.
      *  @todo Move in a separate class and make it friend of regionMeshXD
      */
     template < typename T >
-    UInt maxNumItems( SimpleVect< T> const & list ) const;
+    UInt maxNumItems( VectorSimple< T> const & list ) const;
 
     //! Set maximum number of Elements in a list.
     /**
      *  Set maximum number of elements in a given list.
      *
-     *  @param list SimpleVect list of elements.
+     *  @param list VectorSimple list of elements.
      *  @param n Number of elements.
      *  @param title Title for verbose output.
      *  @todo Move in a separate class and make it friend of regionMeshXD
      */
     template < typename T >
-    void setMaxNumItems( SimpleVect< T> & list, UInt n, std::string title );
+    void setMaxNumItems( VectorSimple< T> & list, UInt n, std::string title );
 
     /*! Arrays containing the ids of Edges and Faces of each element
       I use a Define to use localto global array or directly the
       bareedges */
-    SimpleArray<UInt> M_VToF;
-    SimpleArray<UInt> M_VToE;
+    ArraySimple<UInt> M_VToF;
+    ArraySimple<UInt> M_VToE;
 
     UInt M_numVolumes;
 
@@ -2023,7 +2023,7 @@ RegionMesh3D<GEOSHAPE, MC>:: bElement( UInt const & i ) const
 template <typename GEOSHAPE, typename MC>
 template <typename T>
 UInt
-RegionMesh3D<GEOSHAPE, MC>::numItems( SimpleVect< T> const & list ) const
+RegionMesh3D<GEOSHAPE, MC>::numItems( VectorSimple< T> const & list ) const
 {
     return list.size();
 }
@@ -2031,7 +2031,7 @@ RegionMesh3D<GEOSHAPE, MC>::numItems( SimpleVect< T> const & list ) const
 template <typename GEOSHAPE, typename MC>
 template <typename T>
 UInt
-RegionMesh3D<GEOSHAPE, MC>::maxNumItems( SimpleVect< T> const & list ) const
+RegionMesh3D<GEOSHAPE, MC>::maxNumItems( VectorSimple< T> const & list ) const
 {
     return list.capacity();
 }
@@ -2040,7 +2040,7 @@ template <typename GEOSHAPE, typename MC>
 template <typename T>
 void
 RegionMesh3D<GEOSHAPE, MC>::
-setMaxNumItems( SimpleVect< T> & list, UInt n, std::string title )
+setMaxNumItems( VectorSimple< T> & list, UInt n, std::string title )
 {
     if ( list.capacity() == 0 )
     {
@@ -2631,7 +2631,7 @@ RegionMesh3D<GEOSHAPE, MC>::setPoint( point_Type const & p, UInt position, bool 
         // if point was already stored in the list!
         // No way to avoid it, sorry
 
-        for ( typename SimpleVect<point_Type *>::iterator bp = _bPoints.begin(); bp != _bPoints.end(); ++bp )
+        for ( typename VectorSimple<point_Type *>::iterator bp = _bPoints.begin(); bp != _bPoints.end(); ++bp )
         {
             if ( ( *bp ) ->id() == position )
             {
@@ -2662,7 +2662,7 @@ setPoint(UInt const & position, bool const boundary, bool const vertex)
         // if point was already stored in the list!
         // No way to avoid it, sorry
 
-        for ( typename SimpleVect<point_Type *>::iterator bp = _bPoints.begin(); bp != _bPoints.end(); ++bp )
+        for ( typename VectorSimple<point_Type *>::iterator bp = _bPoints.begin(); bp != _bPoints.end(); ++bp )
         {
             if ( ( *bp ) ->id() == position )
             {

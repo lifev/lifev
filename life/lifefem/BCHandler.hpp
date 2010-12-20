@@ -548,7 +548,7 @@ BCHandler::bcUpdate( Mesh& mesh, CurrentBdFE& boundaryFE, const Dof& dof )
     UInt nDofElemEdges = nElemEdges * nDofPerEdge; // number of edge's Dof on a Element
 
     //vector containing the local to global map on each elemenet
-    SimpleVect<ID> localToGlobalMapOnBElem( nDofBElem );
+    VectorSimple<ID> localToGlobalMapOnBElem( nDofBElem );
 
     // BCbase Iterator
     bcBaseIterator_Type bcBaseIterator;
@@ -866,7 +866,7 @@ BCHandler::bcUpdateOldVersion( Mesh& mesh, CurrentBdFE& boundaryFE, const Dof& d
     UInt  nDofElemVertices = nElemVertices * nDofPerVert; // number of vertex's Dof on a Element
     UInt nDofElemEdges = nElemEdges * nDofPerEdge; // number of edge's Dof on a Element
 
-    SimpleVect<ID> bdltg( nDofBElem );
+    VectorSimple<ID> bdltg( nDofBElem );
     typedef std::vector<BCBase>::iterator Iterator;
     Iterator where;
     std::vector<Iterator> whereList;

@@ -282,9 +282,9 @@ public:
     /*!
         Creates an BCIdentifier with a given ID and a given local-to-global map
         @param i The number of the boundary face
-        @param bdltg A SimpleVect holding the local-to-global map on this face
+        @param bdltg A VectorSimple holding the local-to-global map on this face
     */
-    BCIdentifierNatural( const ID& i, const SimpleVect<ID>& localToGlobal );
+    BCIdentifierNatural( const ID& i, const VectorSimple<ID>& localToGlobal );
 
     //! Constructor given the ID
     /*!
@@ -332,7 +332,7 @@ public:
 
 private:
 
-    SimpleVect<ID> M_localToGlobal;
+    VectorSimple<ID> M_localToGlobal;
 };
 
 } // Namespace LifeV

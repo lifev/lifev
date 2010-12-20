@@ -727,8 +727,8 @@ void steklovPoincare::computeStrongResidualFSI()
 
 //     const BCIdentifierNatural* pId;
 
-//     SimpleArray<UInt>  localToBoundary;
-//     SimpleArray<UInt>  boundaryToLocal;
+//     ArraySimple<UInt>  localToBoundary;
+//     ArraySimple<UInt>  boundaryToLocal;
 
 //     ID ibF, idDof, icDof, gDof;
 

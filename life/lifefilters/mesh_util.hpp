@@ -110,7 +110,7 @@ namespace LifeV
 */
 template <typename RegionMesh3D>
 Real checkVolumes( RegionMesh3D const & mesh,
-                   SimpleVect<bool> & elSign,
+                   VectorSimple<bool> & elSign,
                    Switch & sw )
 {
     Real meas = 0.0;
@@ -172,7 +172,7 @@ Real checkVolumes( RegionMesh3D const & mesh,
 */
 template <typename RegionMesh3D>
 void fixVolumes( RegionMesh3D & mesh,
-                 const SimpleVect<bool> & elSign,
+                 const VectorSimple<bool> & elSign,
                  Switch & sw )
 {
     typedef typename RegionMesh3D::VolumeShape GeoShape;
@@ -421,7 +421,7 @@ bool checkMesh3D( RegionMesh3D & mesh,
 
     // test now orientation
 
-    boost::shared_ptr<SimpleVect<bool> > elSign( new SimpleVect<bool> );
+    boost::shared_ptr<VectorSimple<bool> > elSign( new VectorSimple<bool> );
 
     Real meshMeasure = checkVolumes( mesh, *elSign, sw );
     UInt positive;
