@@ -94,7 +94,7 @@
 #include <iosfwd>
 #include <string>
 
-#include <life/lifecore/lifeassert.hpp>
+#include <life/lifecore/LifeAssert.hpp>
 
 namespace LifeV
 {
