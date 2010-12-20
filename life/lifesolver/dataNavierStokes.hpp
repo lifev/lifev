@@ -42,10 +42,10 @@
 #ifndef _DATANAVIERSTOKES_H_
 #define _DATANAVIERSTOKES_H_
 
-#include <life/lifecore/GetPot.hpp>
+#include <life/lifefilters/GetPot.hpp>
 #include <life/lifecore/life.hpp>
-#include <life/lifecore/dataString.hpp>
-#include <life/lifecore/util_string.hpp>
+#include <life/lifecore/StringData.hpp>
+#include <life/lifecore/StringUtility.hpp>
 #include <life/lifefem/dataTime.hpp>
 #include <boost/shared_ptr.hpp>
 #include <string>
