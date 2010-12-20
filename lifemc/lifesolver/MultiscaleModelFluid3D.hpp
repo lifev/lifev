@@ -94,7 +94,7 @@ public:
     typedef boost::shared_ptr< bcInterface_Type > bcInterfacePtr_Type;
 
     typedef BdfTNS< fluidVector_Type >            bdf_Type;
-    typedef DataNavierStokes		              data_Type;
+    typedef OseenData		              data_Type;
 
     typedef FESpace< mesh_Type, EpetraMap >       FESpace_Type;
     typedef boost::shared_ptr< FESpace_Type >     FESpacePtr_Type;
