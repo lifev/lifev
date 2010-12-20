@@ -156,7 +156,7 @@ void test_bdf::run()
     DataMesh dataMesh(dataFile, ("bdf/" + discretization_section).c_str());
     boost::shared_ptr<RegionMesh> meshPtr( new RegionMesh() );
     readMesh(*meshPtr,dataMesh);
-    partitionMesh<RegionMesh> meshPart(meshPtr, Members->comm);
+    MeshPartitioner<RegionMesh> meshPart(meshPtr, Members->comm);
 
     //=============================================================================
     //finite element space of the solution
@@ -179,7 +179,7 @@ void test_bdf::run()
     EpetraVector u(FeSpace.map(), Unique); // solution vector
     EpetraVector f(FeSpace.map(), Unique); // forcing term vector
 
-    Chrono chrono;
+    LifeChrono chrono;
     //Assembling Matrix M
     Members->comm->Barrier();
     chrono.start();
@@ -221,18 +221,18 @@ void test_bdf::run()
 #ifdef HAVE_HDF5
     if (exporterType.compare("hdf5") == 0)
     {
-        exporter.reset( new Hdf5exporter<RegionMesh > ( dataFile, "bdf_test" ) );
+        exporter.reset( new ExporterHDF5<RegionMesh > ( dataFile, "bdf_test" ) );
     }
     else
 #endif
     {
         if (exporterType.compare("none") == 0)
         {
-            exporter.reset( new NoExport<RegionMesh > ( dataFile, meshPart.meshPartition(), "bdf_test", Members->comm->MyPID()) );
+            exporter.reset( new ExporterEmpty<RegionMesh > ( dataFile, meshPart.meshPartition(), "bdf_test", Members->comm->MyPID()) );
         }
         else
         {
-            exporter.reset( new Ensight<RegionMesh > ( dataFile, meshPart.meshPartition(), "bdf_test", Members->comm->MyPID()) );
+            exporter.reset( new ExporterEnsight<RegionMesh > ( dataFile, meshPart.meshPartition(), "bdf_test", Members->comm->MyPID()) );
         }
     }
 
