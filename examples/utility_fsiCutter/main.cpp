@@ -99,8 +99,8 @@ int main( int argc, char** argv )
     boost::shared_ptr<Mesh> uncutSolidMesh(new Mesh);
     readMesh(*uncutSolidMesh, *solidDataMesh);
 
-    boost::shared_ptr<FSIOfflinePartitioner<Mesh> >
-    cutter(new FSIOfflinePartitioner<Mesh>);
+    boost::shared_ptr<MeshPartitionerOfflineFSI<Mesh> >
+    cutter(new MeshPartitionerOfflineFSI<Mesh>);
     cutter->setup(uncutFluidMesh, uncutSolidMesh, 4, 4, fluidOrder, solidOrder,
                   fluidInterfaceFlag, solidInterfaceFlag, interfaceTolerance,
                   fluidInterfaceVertexFlag, solidInterfaceVertexFlag, comm);
@@ -108,7 +108,7 @@ int main( int argc, char** argv )
 
     cutter->execute();
 
-    HDF5Filter3DMesh<Mesh> fluidOutput(dataFile, uncutFluidMesh, "FSIFluidPartitions",
+    ExporterHDF5Mesh3D<Mesh> fluidOutput(dataFile, uncutFluidMesh, "FSIFluidPartitions",
                                        comm->MyPID());
     fluidOutput.addPartitionGraph(cutter->fluidGraph(), comm);
     fluidOutput.addMeshPartitionAll(cutter->fluidPartitions(), comm);
@@ -120,7 +120,7 @@ int main( int argc, char** argv )
     fluidOutput.postProcess(0);
     fluidOutput.closeFile();
 
-    HDF5Filter3DMesh<Mesh> solidOutput(dataFile, uncutSolidMesh, "FSISolidPartitions",
+    ExporterHDF5Mesh3D<Mesh> solidOutput(dataFile, uncutSolidMesh, "FSISolidPartitions",
                                        comm->MyPID());
     solidOutput.addPartitionGraph(cutter->solidGraph(), comm);
     solidOutput.addMeshPartitionAll(cutter->solidPartitions(), comm);
