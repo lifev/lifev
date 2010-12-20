@@ -59,7 +59,7 @@
 namespace LifeV
 {
 /*!
-  \class DofInterface3Dto3D
+  \class DOFInterface3Dto3D
 
   Base class which holds the connections of the dof in two matching meshes
 
@@ -70,8 +70,8 @@ namespace LifeV
   method getInterfaceDof gives the connections.
 
 */
-class DofInterface3Dto3D:
-        public DofInterfaceBase
+class DOFInterface3Dto3D:
+        public DOFInterface
 {
 public:
     //! @name Public typedefs
@@ -83,7 +83,7 @@ public:
     //@{
 
     //! default constructor
-    DofInterface3Dto3D()
+    DOFInterface3Dto3D()
             :
             M_refFE1( 0 ),
             M_dof1( 0 ),
@@ -97,7 +97,7 @@ public:
      \param dof1 the Dof object of the mesh in which we want to make the computations
      \param dof2 the Dof object of the mesh which provides the data at the interface
     */
-    DofInterface3Dto3D( const RefFE& refFE, const Dof& dof1, const Dof& dof2 );
+    DOFInterface3Dto3D( const RefFE& refFE, const Dof& dof1, const Dof& dof2 );
 
     //! Constructor for interfacing Dof of different type (RefFE)
     /*!
@@ -106,7 +106,7 @@ public:
       \param refFe2 the reference FE used in the mesh which provides the data at the interface
       \param dof2 the Dof object of the mesh which provides the data at the interface
      */
-    DofInterface3Dto3D( const RefFE& refFE1, const Dof& dof1, const RefFE& refFE2, const Dof& dof2 );
+    DOFInterface3Dto3D( const RefFE& refFE1, const Dof& dof1, const RefFE& refFE2, const Dof& dof2 );
 
     //@}
 
@@ -241,7 +241,7 @@ bool coincide( const Real& x1, const Real& y1, const Real& z1, const Real& x2, c
 // ===================================================
 
 template <typename MeshType>
-void DofInterface3Dto3D::update( MeshType& mesh1, const entityFlag_Type& flag1,
+void DOFInterface3Dto3D::update( MeshType& mesh1, const entityFlag_Type& flag1,
                                  MeshType& mesh2, const entityFlag_Type& flag2,
                                  const Real& tol, Int const* const flag3 )
 {
@@ -262,7 +262,7 @@ void DofInterface3Dto3D::update( MeshType& mesh1, const entityFlag_Type& flag1,
 
 
 template <typename MeshType>
-void DofInterface3Dto3D::interpolate( MeshType& mesh2, const UInt nbComp, const Vector& v, Vector& vI )
+void DOFInterface3Dto3D::interpolate( MeshType& mesh2, const UInt nbComp, const Vector& v, Vector& vI )
 {
 
     typedef typename MeshType::VolumeShape GeoShape; // Element shape
@@ -407,7 +407,7 @@ void DofInterface3Dto3D::interpolate( MeshType& mesh2, const UInt nbComp, const 
 // ===================================================
 
 template <typename MeshType>
-void DofInterface3Dto3D::updateFaceConnections( const MeshType& mesh1, const entityFlag_Type& flag1,
+void DOFInterface3Dto3D::updateFaceConnections( const MeshType& mesh1, const entityFlag_Type& flag1,
                                                  const MeshType& mesh2, const entityFlag_Type& flag2, const Real& tol )
 {
 
@@ -500,7 +500,7 @@ void DofInterface3Dto3D::updateFaceConnections( const MeshType& mesh1, const ent
 
 */
 template <typename Mesh>
-void DofInterface3Dto3D::updateDofConnections( const Mesh& mesh1, const Dof& dof1,
+void DOFInterface3Dto3D::updateDofConnections( const Mesh& mesh1, const Dof& dof1,
                                                 const Mesh& mesh2, const Dof& dof2, const Real& tol, Int const* const flag1)
 {
 

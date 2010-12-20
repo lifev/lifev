@@ -80,7 +80,7 @@ public:
     typedef boost::shared_ptr<graph_Type> graphPtr_Type;
     typedef boost::shared_ptr<std::vector<meshPtr_Type> > serialMeshPtr_Type;
 
-    typedef DofInterface3Dto3D interface_Type;
+    typedef DOFInterface3Dto3D interface_Type;
     typedef boost::shared_ptr<interface_Type> interfacePtr_Type;
     typedef std::vector<interfacePtr_Type> interfaceVector_Type;
     // The vector contains pointers to each fluid partition's interface with

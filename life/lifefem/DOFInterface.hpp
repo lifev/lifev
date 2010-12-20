@@ -48,7 +48,7 @@
 namespace LifeV
 {
 /*!
-  \class DofInterfaceBase
+  \class DOFInterface
 
   Base class which holds the connections of the dof in two matching meshes
   The dof mapping (STL map) is set in the derived classes.
@@ -59,7 +59,7 @@ namespace LifeV
   To be deleted:
   buildInverse
 */
-class DofInterfaceBase
+class DOFInterface
 {
 public:
 
@@ -67,10 +67,10 @@ public:
     //@{
 
     //! Default Constructor
-    DofInterfaceBase();
+    DOFInterface();
 
     //! Virtual Destructor
-    virtual ~DofInterfaceBase(){};
+    virtual ~DOFInterface(){};
 
     //@}
 
@@ -94,8 +94,8 @@ public:
     //! output
     std::ostream& showMe( bool verbose = false, std::ostream& out = std::cout ) const;
 
-    //! Makes this DofInterfaceBase to be the inverse map as the one defined by dofBase.
-    void buildInverse( const DofInterfaceBase& dofBase);
+    //! Makes this DOFInterface to be the inverse map as the one defined by dofBase.
+    void buildInverse( const DOFInterface& dofBase);
 
     //@}
 

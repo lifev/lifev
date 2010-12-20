@@ -61,14 +61,14 @@
 namespace LifeV
 {
 /*!
-  \class DofInterface3Dto2D
+  \class DOFInterface3Dto2D
 
   Base class which holds the connections of the dof between a 3D mesh and its 2D interface
 
   The connections may be built by calling the update method.
 */
-class DofInterface3Dto2D:
-        public DofInterfaceBase
+class DOFInterface3Dto2D:
+        public DOFInterface
 {
 public:
 
@@ -76,7 +76,7 @@ public:
     //@{
 
     //! default constructor
-    DofInterface3Dto2D():
+    DOFInterface3Dto2D():
             M_refFE1( 0 ),
             M_dof1( 0 )
     {}
@@ -86,7 +86,7 @@ public:
       \param refFe the part of the reference FE that contains the dof patterns (nbDofPerEdge...)
       \param dof1 the Dof object of the mesh in which we want to make the computations
     */
-    DofInterface3Dto2D( const LocalDofPattern& refFE, const Dof& dof1 );
+    DOFInterface3Dto2D( const LocalDofPattern& refFE, const Dof& dof1 );
 
     //@}
 
@@ -132,8 +132,8 @@ public:
     //! (counting from 0 ' a la C')
     ID operator[] ( const UInt& i ) const;
 
-    //! Assignment operator (we have a vector of DofInterface3Dto2D)
-    DofInterface3Dto2D & operator=( const DofInterface3Dto2D& dofi );
+    //! Assignment operator (we have a vector of DOFInterface3Dto2D)
+    DOFInterface3Dto2D & operator=( const DOFInterface3Dto2D& dofi );
 
     //@}
 
@@ -243,7 +243,7 @@ void RemoveMultiple( const std::list<ID> & list0, std::list< std::pair<ID, ID> >
 // ===================================================
 
 template <typename MeshType>
-void DofInterface3Dto2D::
+void DOFInterface3Dto2D::
 update( const MeshType& mesh1, const entityFlag_Type& flag1 )
 {
 
@@ -264,7 +264,7 @@ update( const MeshType& mesh1, const entityFlag_Type& flag1 )
 }
 
 template <typename MeshType>
-void DofInterface3Dto2D::
+void DOFInterface3Dto2D::
 generate2DMesh( std::string fname, const MeshType& mesh1 ) const
 {
 
@@ -332,7 +332,7 @@ generate2DMesh( std::string fname, const MeshType& mesh1 ) const
 // ===================================================
 
 template <typename MeshType>
-void DofInterface3Dto2D::
+void DOFInterface3Dto2D::
 updateFaceConnections( const MeshType& mesh1, const entityFlag_Type& flag1 )
 {
 
@@ -367,7 +367,7 @@ updateFaceConnections( const MeshType& mesh1, const entityFlag_Type& flag1 )
 
 
 template <typename MeshType>
-void DofInterface3Dto2D::
+void DOFInterface3Dto2D::
 updateVertices( const MeshType& mesh1 )
 {
 
@@ -392,7 +392,7 @@ updateVertices( const MeshType& mesh1 )
 
 
 template <typename MeshType>
-void DofInterface3Dto2D::
+void DOFInterface3Dto2D::
 updateDofConnections( const MeshType& mesh1 )
 {
     typedef typename MeshType::VolumeShape GeoShape;

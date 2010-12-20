@@ -72,14 +72,14 @@ typedef boost::numeric::ublas::matrix<Real> Matrix;
 typedef boost::numeric::ublas::zero_matrix<Real> ZeroMatrix;
 //@}
 
-/*! /namespace ElemOper
+/*! /namespace AssemblyElemental
 
   This namespace is specially designed to contain the elementary
   operations (corresponding to differential operators) that build
   the local contributions to be used in the assembly procedures.
 
  */
-namespace ElemOper
+namespace AssemblyElemental
 {
 //! Elementary mass for constant mass coefficient
 /*!

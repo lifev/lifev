@@ -40,7 +40,7 @@
 namespace LifeV
 {
 
-namespace ElemOper
+namespace AssemblyElemental
 {
 void mass(ElemMat& localMass,
           const CurrentFE& massCFE,

@@ -89,7 +89,7 @@ int main(int argc, char** argv)
         secondFESpace.reset(new FESpace<RegionMesh3D<LinearTetra>, EpetraMap>(mesh2, "P1", 3, uselessComm));
 
 
-        boost::shared_ptr<DofInterface3Dto3D>  dofEdgeFluidToEdgeSolid( new DofInterface3Dto3D );
+        boost::shared_ptr<DOFInterface3Dto3D>  dofEdgeFluidToEdgeSolid( new DOFInterface3Dto3D );
 
         dofEdgeFluidToEdgeSolid->setup(firstFESpace->refFE(), firstFESpace->dof(),
                                        secondFESpace->refFE(), secondFESpace->dof()

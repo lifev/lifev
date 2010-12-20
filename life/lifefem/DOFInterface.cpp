@@ -47,7 +47,7 @@ namespace LifeV
 // Constructors & Destructor
 // ===================================================
 
-DofInterfaceBase::DofInterfaceBase()
+DOFInterface::DOFInterface()
 {}
 
 // ===================================================
@@ -55,24 +55,24 @@ DofInterfaceBase::DofInterfaceBase()
 // ===================================================
 
 
-ID DofInterfaceBase::getInterfaceDof( const ID& i ) const
+ID DOFInterface::getInterfaceDof( const ID& i ) const
 {
     std::map<ID, ID>::const_iterator it = M_localDofMap.find( i );
     if ( it == M_localDofMap.end() )
     {
         std::cout << i << " : " << std::flush;
-        ERROR_MSG( "DofInterfaceBase::getInterfaceDof : Dof number not found" );
+        ERROR_MSG( "DOFInterface::getInterfaceDof : Dof number not found" );
     }
     return it->second;
 }
 
-bool DofInterfaceBase::isMyInterfaceDof( const ID& i ) const
+bool DOFInterface::isMyInterfaceDof( const ID& i ) const
 {
     std::map<ID, ID>::const_iterator it = M_localDofMap.find( i );
     return ( it != M_localDofMap.end() );
 }
 
-std::ostream& DofInterfaceBase::showMe( bool verbose, std::ostream& out ) const
+std::ostream& DOFInterface::showMe( bool verbose, std::ostream& out ) const
 {
     out << "------------------------------" << std::endl;
     out << "\tNumber of Dof connections (M_localDofMap):" << M_localDofMap.size() << std::endl;
@@ -94,7 +94,7 @@ std::ostream& DofInterfaceBase::showMe( bool verbose, std::ostream& out ) const
     return out;
 }
 
-void DofInterfaceBase::buildInverse( const DofInterfaceBase& dofBase)
+void DOFInterface::buildInverse( const DOFInterface& dofBase)
 {
     for ( std::map<ID, ID>::const_iterator it = dofBase.M_localDofMap.begin(); it != dofBase.M_localDofMap.end(); ++it )
     {
@@ -107,7 +107,7 @@ void DofInterfaceBase::buildInverse( const DofInterfaceBase& dofBase)
 // Set Methods
 // ===================================================
 
-void DofInterfaceBase::set(const ID& key,const ID& value)
+void DOFInterface::set(const ID& key,const ID& value)
 {
     M_localDofMap.find(key)->second = value;
 }
@@ -116,7 +116,7 @@ void DofInterfaceBase::set(const ID& key,const ID& value)
 // Get Methods
 // ===================================================
 
-size_t DofInterfaceBase::nbInterfaceDof() const
+size_t DOFInterface::nbInterfaceDof() const
 {
     return M_localDofMap.size();
 }

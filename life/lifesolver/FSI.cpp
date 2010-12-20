@@ -366,15 +366,15 @@ FSI::setupDOF( void )
     Dof uDof(*M_fluidMesh, M_uFESpace->refFE()); // velocity dof related to unpartitioned mesh
     Dof dDof(*M_solidMesh, M_dFESpace->refFE()); // velocity dof related to unpartitioned mesh
 
-    M_dofFluidToStructure                .reset( new DofInterface3Dto3D );
-    M_dofStructureToFluid                .reset( new DofInterface3Dto3D );
-    M_dofStructureToSolid                .reset( new DofInterface3Dto3D );
-    M_dofStructureToHarmonicExtension    .reset( new DofInterface3Dto3D );
-    M_dofHarmonicExtensionToFluid        .reset( new DofInterface3Dto3D );
-    M_dofFluid                           .reset( new DofInterface3Dto2D );
-    M_dofSolid                           .reset( new DofInterface3Dto2D );
-    M_dofFluidInv                        .reset( new DofInterface3Dto2D );
-    M_dofSolidInv                        .reset( new DofInterface3Dto2D );
+    M_dofFluidToStructure                .reset( new DOFInterface3Dto3D );
+    M_dofStructureToFluid                .reset( new DOFInterface3Dto3D );
+    M_dofStructureToSolid                .reset( new DOFInterface3Dto3D );
+    M_dofStructureToHarmonicExtension    .reset( new DOFInterface3Dto3D );
+    M_dofHarmonicExtensionToFluid        .reset( new DOFInterface3Dto3D );
+    M_dofFluid                           .reset( new DOFInterface3Dto2D );
+    M_dofSolid                           .reset( new DOFInterface3Dto2D );
+    M_dofFluidInv                        .reset( new DOFInterface3Dto2D );
+    M_dofSolidInv                        .reset( new DOFInterface3Dto2D );
     M_bcvFluidInterfaceDisp              .reset( new  BCVectorInterface );
     M_bcvFluidLoadToStructure            .reset( new  BCVectorInterface );
     M_bcvSolidLoadToStructure            .reset( new  BCVectorInterface );

@@ -512,7 +512,7 @@ addMass(matrix_ptrType matrix, const Real& coefficient, const UInt& offsetLeft, 
         M_localMass->zero();
 
         // Local Mass
-        ElemOper::mass(*M_localMass,*M_massCFE,coefficient,fieldDim);
+        AssemblyElemental::mass(*M_localMass,*M_massCFE,coefficient,fieldDim);
 
         // Assembly
         for (UInt iFieldDim(0); iFieldDim<fieldDim; ++iFieldDim)
@@ -572,10 +572,10 @@ addAdvection(matrix_ptrType matrix, const vector_type& beta, const UInt& offsetL
         M_localAdv->zero();
 
         // Interpolate beta in the quadrature points
-        ElemOper::interpolate(localBetaValue,*M_advBetaCFE,3,M_betaFESpace->dof(),iterElement,beta);
+        AssemblyElemental::interpolate(localBetaValue,*M_advBetaCFE,3,M_betaFESpace->dof(),iterElement,beta);
 
         // Assemble the advection
-        ElemOper::advection(*M_localAdv,*M_advCFE,localBetaValue,fieldDim);
+        AssemblyElemental::advection(*M_localAdv,*M_advCFE,localBetaValue,fieldDim);
 
 
         // Assembly
@@ -620,7 +620,7 @@ addDiffusion(matrix_ptrType matrix, const Real& coefficient, const UInt& offsetL
         M_localDiff->zero();
 
         // local stiffness
-        ElemOper::stiffness(*M_localDiff,*M_diffCFE,coefficient,fieldDim);
+        AssemblyElemental::stiffness(*M_localDiff,*M_diffCFE,coefficient,fieldDim);
 
         // Assembly
         for (UInt iFieldDim(0); iFieldDim<fieldDim; ++iFieldDim)

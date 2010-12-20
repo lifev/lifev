@@ -441,7 +441,7 @@ public:
 
 
     typedef BCVectorBase bcVectorBase_Type;
-    typedef boost::shared_ptr<DofInterfaceBase> dofInterfacePtr_Type;
+    typedef boost::shared_ptr<DOFInterface> dofInterfacePtr_Type;
     typedef BCVectorBase::vector_Type vector_Type;
     typedef BCVectorBase::vectorConstPtr_Type vectorConstPtr_Type;
 
@@ -548,14 +548,14 @@ public:
     std::ostream & showMe( bool verbose = false, std::ostream & out = std::cout ) const;
 
 
-    //! Return reference to  DofInterfaceBase object, the container of connection of DOFs
-    inline DofInterfaceBase const & dofInterface() const { return *M_interfaceDofPtr; }
+    //! Return reference to  DOFInterface object, the container of connection of DOFs
+    inline DOFInterface const & dofInterface() const { return *M_interfaceDofPtr; }
 
     //@}
 
 protected:
 
-    //! DofInterfaceBase object holding the connections between the interface dofs
+    //! DOFInterface object holding the connections between the interface dofs
     dofInterfacePtr_Type M_interfaceDofPtr;
 
 };

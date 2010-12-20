@@ -143,8 +143,8 @@ public:
                                    const Real&, const Real&, const ID& )>           function_Type;
     typedef Real                                                                    ( *bcFunction_Type ) ( const Real&, const Real&,
                                                                                     const Real&, const Real&, const ID& );
-    typedef boost::shared_ptr<DofInterface3Dto3D>                                   dofInterface3DPtr_Type;
-    typedef boost::shared_ptr<DofInterface3Dto2D>                                   dofInterface2DPtr_Type;
+    typedef boost::shared_ptr<DOFInterface3Dto3D>                                   dofInterface3DPtr_Type;
+    typedef boost::shared_ptr<DOFInterface3Dto2D>                                   dofInterface2DPtr_Type;
     typedef boost::shared_ptr<BCVectorInterface>                                    bcVectorInterfacePtr_Type;
     typedef fluid_Type::bcHandlerPtr_Type/*fluidPtr_Type::bchandlerPtr_Type*/       fluidBchandlerPtr_Type;
     typedef fluid_Type::bcHandler_Type/*fluidPtr_Type::bchandler_Type*/             fluidBchandler_Type;

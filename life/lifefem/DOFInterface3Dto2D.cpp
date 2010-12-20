@@ -82,7 +82,7 @@ void RemoveMultiple( const std::list<ID> & listToTreat, std::list< std::pair<ID,
 // Constructors & Destructor
 // ===================================================
 
-DofInterface3Dto2D::DofInterface3Dto2D( const LocalDofPattern& refFE, const Dof& dof1 ) :
+DOFInterface3Dto2D::DOFInterface3Dto2D( const LocalDofPattern& refFE, const Dof& dof1 ) :
         M_interfaceFlag( 0 ), M_refFE1( &refFE ), M_dof1( &dof1 )
 {
     M_finalized = false;
@@ -93,7 +93,7 @@ DofInterface3Dto2D::DofInterface3Dto2D( const LocalDofPattern& refFE, const Dof&
 // ===================================================
 
 void
-DofInterface3Dto2D::setup( const LocalDofPattern& refFE1, const Dof& dof1 )
+DOFInterface3Dto2D::setup( const LocalDofPattern& refFE1, const Dof& dof1 )
 {
     M_refFE1    = &refFE1;
     M_dof1      = &dof1;
@@ -101,13 +101,13 @@ DofInterface3Dto2D::setup( const LocalDofPattern& refFE1, const Dof& dof1 )
     M_finalized = false;
 }
 
-void DofInterface3Dto2D::clearLists()
+void DOFInterface3Dto2D::clearLists()
 {
     M_vertexPerFaceList.clear();
     M_vertexList.clear();
 }
 
-std::ostream& DofInterface3Dto2D::showMe( bool verbose, std::ostream& out ) const
+std::ostream& DOFInterface3Dto2D::showMe( bool verbose, std::ostream& out ) const
 {
     out << "------------------------------" << std::endl;
     out << "myDofInterface reference: " << M_interfaceFlag << std::endl;
@@ -153,7 +153,7 @@ std::ostream& DofInterface3Dto2D::showMe( bool verbose, std::ostream& out ) cons
 // ===================================================
 
 
-ID DofInterface3Dto2D::operator[] ( const UInt& i ) const
+ID DOFInterface3Dto2D::operator[] ( const UInt& i ) const
 {
     ASSERT_PRE( M_finalized, "The face List should be finalised before being accessed" );
     ASSERT_BD( i < M_faceList.size() );
@@ -161,7 +161,7 @@ ID DofInterface3Dto2D::operator[] ( const UInt& i ) const
 }
 
 
-DofInterface3Dto2D & DofInterface3Dto2D::operator=( const DofInterface3Dto2D& dofi )
+DOFInterface3Dto2D & DOFInterface3Dto2D::operator=( const DOFInterface3Dto2D& dofi )
 {
     M_interfaceFlag = dofi.M_interfaceFlag;
     M_refFE1 = dofi.M_refFE1;
@@ -180,7 +180,7 @@ DofInterface3Dto2D & DofInterface3Dto2D::operator=( const DofInterface3Dto2D& do
 // Private Methods
 // ===================================================
 
-ID DofInterface3Dto2D::vertex3Dto2D( const ID& idpoint3D ) const
+ID DOFInterface3Dto2D::vertex3Dto2D( const ID& idpoint3D ) const
 {
     ASSERT_PRE( M_finalized, "The list of vertices must be finalized before accessing to the interface vertices." );
     for ( std::list< std::pair<ID, ID> >::const_iterator it = M_vertexList.begin(); it != M_vertexList.end(); ++it )

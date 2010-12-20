@@ -47,7 +47,7 @@ namespace LifeV
 // Constructors & Destructor
 // ===================================================
 
-DofInterface3Dto3D::DofInterface3Dto3D( const RefFE& refFE, const Dof& dof1,
+DOFInterface3Dto3D::DOFInterface3Dto3D( const RefFE& refFE, const Dof& dof1,
                                         const Dof& dof2 )
         :
         M_refFE1( &refFE ),
@@ -57,7 +57,7 @@ DofInterface3Dto3D::DofInterface3Dto3D( const RefFE& refFE, const Dof& dof1,
         M_dof( new Dof( refFE ) )
 {}
 
-DofInterface3Dto3D::DofInterface3Dto3D( const RefFE& refFE1, const Dof& dof1, const RefFE& refFE2,
+DOFInterface3Dto3D::DOFInterface3Dto3D( const RefFE& refFE1, const Dof& dof1, const RefFE& refFE2,
                                         const Dof& dof2 )
         :
         M_refFE1( &refFE1 ),
@@ -72,7 +72,7 @@ DofInterface3Dto3D::DofInterface3Dto3D( const RefFE& refFE1, const Dof& dof1, co
 // ===================================================
 
 void
-DofInterface3Dto3D::setup( const RefFE& refFE, const Dof& dof1, const Dof& dof2 )
+DOFInterface3Dto3D::setup( const RefFE& refFE, const Dof& dof1, const Dof& dof2 )
 {
     M_refFE1 = &refFE;
     M_dof1 = &dof1;
@@ -82,7 +82,7 @@ DofInterface3Dto3D::setup( const RefFE& refFE, const Dof& dof1, const Dof& dof2 
 }
 
 void
-DofInterface3Dto3D::setup( const RefFE& refFE1, const Dof& dof1, const RefFE& refFE2, const Dof& dof2 )
+DOFInterface3Dto3D::setup( const RefFE& refFE1, const Dof& dof1, const RefFE& refFE2, const Dof& dof2 )
 {
     M_refFE1 = &refFE1;
     M_dof1 = &dof1;
