@@ -34,8 +34,8 @@ along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
     @maintainer Radu Popescu <radu.popescu@epfl.ch>
  */
 
-#ifndef NOEXPORT_H
-#define NOEXPORT_H 1
+#ifndef EXPORTER_EMPTY_H
+#define EXPORTER_EMPTY_H 1
 
 #include <life/lifefilters/exporter.hpp>
 
@@ -125,4 +125,4 @@ EpetraMapType ExporterEmpty<MeshType>::mapType() const
 
 } // Namespace LifeV
 
-#endif // NOEXPORT_H
+#endif // EXPORTER_EMPTY_H
