@@ -46,7 +46,7 @@
 
 #include <life/lifealg/EpetraMap.hpp>
 #include <life/lifemesh/dataMesh.hpp>
-#include <life/lifemesh/partitionMesh.hpp>
+#include <life/lifemesh/MeshPartitioner.hpp>
 #include <life/lifealg/SolverTrilinos.hpp>
 #include <life/lifefem/Assembly.hpp>
 #include <life/lifefem/AssemblyElemental.hpp>
@@ -54,10 +54,10 @@
 #include <life/lifefem/FESpace.hpp>
 #include <life/lifefem/bdfVariableStep.hpp>
 
-#include <life/lifefilters/exporter.hpp>
-#include <life/lifefilters/noexport.hpp>
-#include <life/lifefilters/ensight.hpp>
-#include <life/lifefilters/hdf5exporter.hpp>
+#include <life/lifefilters/Exporter.hpp>
+#include <life/lifefilters/ExporterEmpty.hpp>
+#include <life/lifefilters/ExporterEnsight.hpp>
+#include <life/lifefilters/ExporterHDF5.hpp>
 
 #include "ud_functions.hpp"
 #include "test_bdf.hpp"
