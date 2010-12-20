@@ -57,7 +57,7 @@
 #include <life/lifesolver/ADRAssembler.hpp>
 #include <life/lifesolver/ADRAssemblerIP.hpp>
 
-#include <life/lifesolver/DataLevelSet.hpp>
+#include <life/lifesolver/LevelSetData.hpp>
 
 #include <vector>
 #include <limits>
@@ -434,7 +434,7 @@ updateSystem(const vector_type& beta, BCHandler& bcHandler, const Real& time)
     // Rhs time
      M_bdf->updateRHSContribution(M_data->dataTime()->timeStep());
      M_rhs += *M_massMatrix *M_bdf->rhsContributionFirstDerivative();
-    
+
     // Rhs stab
     M_rhs += *M_rhsMatrix*M_solution;
 

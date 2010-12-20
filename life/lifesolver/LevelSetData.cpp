@@ -36,7 +36,7 @@
 
  */
 
-#include <DataLevelSet.hpp>
+#include <LevelSetData.hpp>
 
 namespace LifeV
 {

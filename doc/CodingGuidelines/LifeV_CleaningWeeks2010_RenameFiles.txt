@@ -160,7 +160,7 @@ LIFESOLVER
 ============================
 ADRAssembler                           -                                       CMCS2     DONE
 ADRAssemblerIP                         -                                       CMCS2     DONE
-ADRData                                dataADR                                 CMCS2
+ADRData                                dataADR                                 CMCS2     DONE
 DarcyData                              dataDarcy                               MOX
 DarcySolver                            darcySolver                             MOX
 DarcySolverNonLinear                   darcySolverNonLinear                    MOX
@@ -182,7 +182,7 @@ HeartMonodomainSolver                  monodomainSolver                        C
 HeartStiffnessFibers                   stiffnessFibers                         CMCS1     DONE
 HyperbolicData                         dataHyperbolic                          MOX
 HyperbolicSolver                       hyperbolicSolver                        MOX
-LevelSetData                           dataLevelSet                            CMCS2
+LevelSetData                           dataLevelSet                            CMCS2     DONE
 LevelSetSolver                         -                                       CMCS2     DONE
 OseenData                              dataNavierStokes                        EMORY     DONE
 OseenSolver                            Oseen                                   EMORY     DONE

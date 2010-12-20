@@ -25,7 +25,7 @@
 
 */
 
-#include <life/lifesolver/dataADR.hpp>
+#include <life/lifesolver/ADRData.hpp>
 
 namespace LifeV
 {
