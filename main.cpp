@@ -148,7 +148,7 @@ public:
     {
         using namespace LifeV;
 
-        VenantKirchhofSolver< FSIOperator::mesh_Type, SolverTrilinos >::StructureSolverFactory::instance().registerProduct( "linearVenantKirchhof", &FSIOperator::createLinearStructure );
+        VenantKirchhoffSolver< FSIOperator::mesh_Type, SolverTrilinos >::StructureSolverFactory::instance().registerProduct( "linearVenantKirchhof", &FSIOperator::createLinearStructure );
 
         //VenantKirchhofSolver< FSIOperator::mesh_Type, SolverTrilinos >::StructureSolverFactory::instance().registerProduct( "nonLinearVenantKirchhof", &FSIOperator::createNonLinearStructure );
 
