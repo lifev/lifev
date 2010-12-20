@@ -57,7 +57,7 @@
 #include <life/lifefem/AssemblyElemental.hpp>
 #include <life/lifefem/Assembly.hpp>
 
-#include <life/lifealg/SolverTrilinos.hpp>
+#include <life/lifealg/SolverAztecOO.hpp>
 #include <life/lifealg/SolverAmesos.hpp>
 
 #include <life/lifefem/FESpace.hpp>

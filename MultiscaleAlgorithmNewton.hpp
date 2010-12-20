@@ -37,7 +37,7 @@
 #ifndef MultiscaleAlgorithmNewton_H
 #define MultiscaleAlgorithmNewton_H 1
 
-#include <life/lifealg/SolverTrilinos.hpp>
+#include <life/lifealg/SolverAztecOO.hpp>
 
 #include <life/lifealg/EpetraPreconditioner.hpp>
 #include <life/lifealg/IfpackPreconditioner.hpp>
@@ -93,7 +93,7 @@ protected:
 
     //@}
 
-    SolverTrilinos                           M_solver;
+    SolverAztecOO                            M_solver;
     multiscaleMatrixPtr_Type                 M_jacobian;
 
 private:

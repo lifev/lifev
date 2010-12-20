@@ -69,7 +69,7 @@
 #include <life/lifecore/LifeChrono.hpp>
 
 #include <life/lifealg/nonLinRichardson.hpp>
-#include <life/lifealg/SolverTrilinos.hpp>
+#include <life/lifealg/SolverAztecOO.hpp>
 
 #include <life/lifesolver/VenantKirchhoffElasticData.hpp>
 #include <life/lifesolver/VenantKirchhoffSolver.hpp>
@@ -87,7 +87,7 @@ namespace LifeV
   This class solves the linear elastodynamics equations for a  St. Venant-Kirchoff material.
 
 */
-template <typename Mesh, typename SolverType = LifeV::SolverTrilinos >
+template <typename Mesh, typename SolverType = LifeV::SolverAztecOO >
 class VenantKirchhoffSolverNonLinear : public VenantKirchhoffSolver<Mesh, SolverType>
 {
 public:

@@ -42,7 +42,7 @@
 #include <life/lifefilters/GetPot.hpp>
 #include <life/lifecore/life.hpp>
 
-#include <life/lifealg/SolverTrilinos.hpp>
+#include <life/lifealg/SolverAztecOO.hpp>
 #include <life/lifealg/IfpackPreconditioner.hpp>
 
 #include <life/lifefem/FESpace.hpp>
@@ -76,8 +76,8 @@ public:
     typedef boost::shared_ptr< Epetra_Operator >                       epetraOperatorPtr_Type;
     typedef boost::shared_ptr< EpetraPreconditioner >                  epetra_preconditioner_ptrtype;
     typedef matrix_Type::matrix_type/*matrix_Type*/                    epetraMatrix_Type;
-    typedef SolverTrilinos                                             solver_Type;
-    typedef boost::shared_ptr< SolverTrilinos >                        solverPtr_Type;
+    typedef SolverAztecOO                                              solver_Type;
+    typedef boost::shared_ptr< SolverAztecOO >                         solverPtr_Type;
     typedef boost::shared_ptr< FESpace<RegionMesh3D<LinearTetra>, EpetraMap> >  fespacePtr_Type;
     //typedef fespacePtr_Type                                     fespacePtr_Type;
     //    typedef FESpace<RegionMesh3D<LinearTetra>, EpetraMap>*                 fespacePtr_Type;
