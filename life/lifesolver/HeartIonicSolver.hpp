@@ -720,7 +720,7 @@ template<typename Mesh, typename SolverType>
 void LuoRudy<Mesh, SolverType>::solveIonicModel( const vector_Type& u, const Real timeStep )
 {
 	//! Solving dw/dt=eta2 (u/vp -  eta3 w)
-	Chrono chronoionmodelsolve;
+	LifeChrono chronoionmodelsolve;
 	chronoionmodelsolve.start();
 	HeartIonicSolver<Mesh, SolverType>::M_comm->Barrier();
 
