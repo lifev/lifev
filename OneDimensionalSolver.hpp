@@ -48,8 +48,8 @@
 
 
 
-#ifndef ONEDMODELSOLVER_H
-#define ONEDMODELSOLVER_H
+#ifndef OneDimensionalSolver_H
+#define OneDimensionalSolver_H
 
 // LIFEV
 #include <life/lifearray/elemMat.hpp>
@@ -70,7 +70,7 @@
 namespace LifeV
 {
 
-//! OneDimensionalModel_Solver - Solver class for the 1D model.
+//! OneDimensionalSolver - Solver class for the 1D model.
 /*!
  *  @author Vincent Martin, Tiziano Passerini, Lucia Mirabella, Gilles Fourestey
  *
@@ -154,23 +154,23 @@ namespace LifeV
  *  it.
  *  -----------------------------------------------------
  */
-class OneDimensionalModel_Solver
+class OneDimensionalSolver
 {
 public:
 
     //! @name Typedef & Enumerator
     //@{
 
-    typedef OneDimensionalModel_Physics             physics_Type;
+    typedef OneDimensionalPhysics                   physics_Type;
     typedef boost::shared_ptr< physics_Type >       physicsPtr_Type;
 
-    typedef OneDimensionalModel_Flux                flux_Type;
+    typedef OneDimensionalFlux                      flux_Type;
     typedef boost::shared_ptr< flux_Type >          fluxPtr_Type;
 
-    typedef OneDimensionalModel_Source              source_Type;
+    typedef OneDimensionalSource                    source_Type;
     typedef boost::shared_ptr< source_Type >        sourcePtr_Type;
 
-    typedef OneDimensionalModel_Data                data_Type;
+    typedef OneDimensionalData                      data_Type;
     typedef data_Type::mesh_Type                    mesh_Type;
 
     typedef data_Type::container2D_Type             container2D_Type;
@@ -208,10 +208,10 @@ public:
     /*!
      * Need a call to: setCommunicator, setProblem, setFESpace
      */
-    explicit OneDimensionalModel_Solver();
+    explicit OneDimensionalSolver();
 
     //! Destructor
-    virtual ~OneDimensionalModel_Solver() {}
+    virtual ~OneDimensionalSolver() {}
 
     //@}
 
@@ -270,7 +270,7 @@ public:
      * @param time the time
      * @param timeStep the time step
      */
-    void iterate( OneDimensionalModel_BCHandler& bcH, solution_Type& solution, const Real& time, const Real& timeStep );
+    void iterate( OneDimensionalBCHandler& bcH, solution_Type& solution, const Real& time, const Real& timeStep );
 
     //! CFL computation (correct for constant mesh)
     /*!
@@ -545,21 +545,21 @@ private:
     //! The linear solver
     boost::shared_ptr<linearSolver_Type> M_linearSolver;
 
-    container2D_Type                     M_bcDirLeft;  //! first -> U1, second ->U2
-    container2D_Type                     M_bcDirRight; //
+    container2D_Type                   M_bcDirLeft;  //! first -> U1, second ->U2
+    container2D_Type                   M_bcDirRight; //
 
 private:
 
     //! @name Unimplemented Methods
     //@{
 
-    OneDimensionalModel_Solver( const physicsPtr_Type physics );
+    OneDimensionalSolver( const physicsPtr_Type physics );
 
-    OneDimensionalModel_Solver& operator=( const physicsPtr_Type physics);
+    OneDimensionalSolver& operator=( const physicsPtr_Type physics);
 
     //@}
 };
 
 }
 
-#endif // ONEDMODELSOLVER_H
+#endif // OneDimensionalSolver_H

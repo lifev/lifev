@@ -48,7 +48,7 @@ namespace LifeV
 // Conversion Methods
 // ===================================================
 void
-OneDimensionalModel_Physics_Linear::fromUToW( Real& W1, Real& W2, const Real& U1, const Real& U2, const UInt& indz ) const
+OneDimensionalPhysicsLinear::fromUToW( Real& W1, Real& W2, const Real& U1, const Real& U2, const UInt& indz ) const
 {
     W1 = U2 + celerity0(indz) * ( U1 - M_data->area0(indz) );
 
@@ -64,7 +64,7 @@ OneDimensionalModel_Physics_Linear::fromUToW( Real& W1, Real& W2, const Real& U1
 }
 
 void
-OneDimensionalModel_Physics_Linear::fromWToU( Real& U1, Real& U2, const Real& W1, const Real& W2, const UInt& indz ) const
+OneDimensionalPhysicsLinear::fromWToU( Real& U1, Real& U2, const Real& W1, const Real& W2, const UInt& indz ) const
 {
     U1 = M_data -> area0(indz) + ( W1 - W2) / ( 2 * celerity0(indz) );
 
@@ -72,7 +72,7 @@ OneDimensionalModel_Physics_Linear::fromWToU( Real& U1, Real& U2, const Real& W1
 }
 
 Real
-OneDimensionalModel_Physics_Linear::fromWToP( const Real& W1, const Real& W2, const UInt& indz ) const
+OneDimensionalPhysicsLinear::fromWToP( const Real& W1, const Real& W2, const UInt& indz ) const
 {
     return ( M_data -> beta0(indz)
              * ( std::pow( 1 / M_data->area0(indz), M_data -> beta1(indz) )
@@ -82,7 +82,7 @@ OneDimensionalModel_Physics_Linear::fromWToP( const Real& W1, const Real& W2, co
 }
 
 Real
-OneDimensionalModel_Physics_Linear::fromPToW( const Real& P, const Real& W, const ID& i, const UInt& indz ) const
+OneDimensionalPhysicsLinear::fromPToW( const Real& P, const Real& W, const ID& i, const UInt& indz ) const
 {
     Real add( 2 * celerity0(indz) * M_data -> area0(indz) * ( pow( ( P / M_data -> beta0(indz) + 1 ), 1 / M_data -> beta1(indz) ) - 1 ) );
 
@@ -104,7 +104,7 @@ OneDimensionalModel_Physics_Linear::fromPToW( const Real& P, const Real& W, cons
 }
 
 Real
-OneDimensionalModel_Physics_Linear::fromQToW( const Real& Q, const Real& /*W_n*/, const Real& W, const ID& i, const UInt& /*indz*/ ) const
+OneDimensionalPhysicsLinear::fromQToW( const Real& Q, const Real& /*W_n*/, const Real& W, const ID& i, const UInt& /*indz*/ ) const
 {
     Real add( 2 * Q );
 
@@ -122,7 +122,7 @@ OneDimensionalModel_Physics_Linear::fromQToW( const Real& Q, const Real& /*W_n*/
 // Derivatives Methods
 // ===================================================
 Real
-OneDimensionalModel_Physics_Linear::dPdW( const Real& W1, const Real& W2, const ID& i, const UInt& indz ) const
+OneDimensionalPhysicsLinear::dPdW( const Real& W1, const Real& W2, const ID& i, const UInt& indz ) const
 {
     Real beta0beta1overA0beta1 ( M_data->beta0(indz) * M_data -> beta1(indz) / std::pow( M_data -> area0(indz), M_data -> beta1(indz) ) );
 

@@ -39,8 +39,8 @@
  *  @mantainer  Cristiano Malossi <cristiano.malossi@epfl.ch>
  */
 
-#ifndef ONEDIMENSIONALMODEL_FLUX_LINEAR_H
-#define ONEDIMENSIONALMODEL_FLUX_LINEAR_H
+#ifndef OneDimensionalFluxLinear_H
+#define OneDimensionalFluxLinear_H
 
 // LIFEV - MATHCARD
 #include <lifemc/lifesolver/OneDimensionalModel_Flux.hpp>
@@ -48,7 +48,7 @@
 namespace LifeV
 {
 
-//! OneDimensionalModel_Flux_Linear - Class containing the linear flux function F of the 1D hyperbolic problem.
+//! OneDimensionalFluxLinear - Class containing the linear flux function F of the 1D hyperbolic problem.
 /*!
  *  @author Vincent Martin, Cristiano Malossi
  *
@@ -57,7 +57,7 @@ namespace LifeV
  *
  *  Fij are constant.
  */
-class OneDimensionalModel_Flux_Linear : public OneDimensionalModel_Flux
+class OneDimensionalFluxLinear : public OneDimensionalFlux
 {
 
 public:
@@ -65,7 +65,7 @@ public:
     //! @name Type definitions and Enumerators
     //@{
 
-    typedef OneDimensionalModel_Flux           super;
+    typedef OneDimensionalFlux           super;
 
     //@}
 
@@ -74,12 +74,12 @@ public:
     //@{
 
     //! Constructor
-    explicit OneDimensionalModel_Flux_Linear() : super() {};
+    explicit OneDimensionalFluxLinear() : super() {};
 
-    explicit OneDimensionalModel_Flux_Linear( const physicsPtr_Type physics ) : super( physics ) {};
+    explicit OneDimensionalFluxLinear( const physicsPtr_Type physics ) : super( physics ) {};
 
     //! Do nothing destructor
-    virtual ~OneDimensionalModel_Flux_Linear() {}
+    virtual ~OneDimensionalFluxLinear() {}
 
     //@}
 
@@ -141,11 +141,11 @@ public:
 };
 
 //! Factory create function
-inline OneDimensionalModel_Flux* createOneDimensionalFluxLinear()
+inline OneDimensionalFlux* createOneDimensionalFluxLinear()
 {
-    return new OneDimensionalModel_Flux_Linear();
+    return new OneDimensionalFluxLinear();
 }
 
 }
 
-#endif // ONEDIMENSIONALMODEL_FLUX_LINEAR_H
+#endif // OneDimensionalFluxLinear_H

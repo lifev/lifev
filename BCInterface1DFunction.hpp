@@ -80,7 +80,7 @@ public:
 
     typedef PhysicalSolverType                                                    physicalSolver_Type;
     typedef BCInterface1DData                                                     data_Type;
-    typedef OneDimensionalModel_BCFunction                                        bcFunction_Type;
+    typedef OneDimensionalBCFunction                                              bcFunction_Type;
     typedef Parser                                                                parser_Type;
 
     //@}

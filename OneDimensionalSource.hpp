@@ -35,8 +35,8 @@
  *  @mantainer  Cristiano Malossi <cristiano.malossi@epfl.ch>
  */
 
-#ifndef ONEDIMENSIONALMODEL_SOURCE_H
-#define ONEDIMENSIONALMODEL_SOURCE_H
+#ifndef OneDimensionalSource_H
+#define OneDimensionalSource_H
 
 // LIFEV - MATHCARD
 #include <lifemc/lifesolver/OneDimensionalModel_Physics.hpp>
@@ -44,26 +44,26 @@
 namespace LifeV
 {
 
-//! OneDimensionalModel_Source - Base class for the source function of the 1D hyperbolic problem.
+//! OneDimensionalSource - Base class for the source function of the 1D hyperbolic problem.
 /*!
  *  @author Vincent Martin, Cristiano Malossi
  *
  *  dU/dt + dF(U)/dz + B(U) = 0
  *  with U=[A,Q]^T
  */
-class OneDimensionalModel_Source
+class OneDimensionalSource
 {
 public:
 
     //! @name Type definitions and Enumerators
     //@{
 
-    typedef singleton< factory< OneDimensionalModel_Source, OneDimensional::sourceTerm_Type > > factorySource_Type;
+    typedef singleton< factory< OneDimensionalSource, OneDimensional::sourceTerm_Type > > factorySource_Type;
 
-    typedef OneDimensionalModel_Physics                       physics_Type;
-    typedef boost::shared_ptr< physics_Type >                 physicsPtr_Type;
+    typedef OneDimensionalPhysics                       physics_Type;
+    typedef boost::shared_ptr< physics_Type >           physicsPtr_Type;
 
-    typedef OneDimensionalModel_Data::container2D_Type        container2D_Type;
+    typedef OneDimensionalData::container2D_Type        container2D_Type;
 
     //@}
 
@@ -72,12 +72,12 @@ public:
     //@{
 
     //! Constructor
-    explicit OneDimensionalModel_Source() : M_physics() {}
+    explicit OneDimensionalSource() : M_physics() {}
 
-    explicit OneDimensionalModel_Source( const physicsPtr_Type physics ) : M_physics( physics ) {}
+    explicit OneDimensionalSource( const physicsPtr_Type physics ) : M_physics( physics ) {}
 
     //! Do nothing destructor
-    virtual ~OneDimensionalModel_Source() {}
+    virtual ~OneDimensionalSource() {}
 
     //@}
 
@@ -145,11 +145,11 @@ private:
     //! @name Unimplemented Methods
     //@{
 
-    OneDimensionalModel_Source& operator=( const physicsPtr_Type physics );
+    OneDimensionalSource& operator=( const physicsPtr_Type physics );
 
     //@}
 };
 
 }
 
-#endif // ONEDIMENSIONALMODEL_SOURCE_H
+#endif // OneDimensionalSource_H

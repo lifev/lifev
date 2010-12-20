@@ -35,8 +35,8 @@
  *  @mantainer  Cristiano Malossi <cristiano.malossi@epfl.ch>
  */
 
-#ifndef ONEDIMENSIONALMODEL_FLUX_H
-#define ONEDIMENSIONALMODEL_FLUX_H
+#ifndef OneDimensionalFlux_H
+#define OneDimensionalFlux_H
 
 // LIFEV - MATHCARD
 #include <lifemc/lifesolver/OneDimensionalModel_Physics.hpp>
@@ -44,11 +44,11 @@
 namespace LifeV
 {
 
-//! OneDimensionalModel_Flux - Base class for the flux function F of the 1D hyperbolic problem.
+//! OneDimensionalFlux - Base class for the flux function F of the 1D hyperbolic problem.
 /*!
  *  @author Cristiano Malossi
  */
-class OneDimensionalModel_Flux
+class OneDimensionalFlux
 {
 
 public:
@@ -56,12 +56,12 @@ public:
     //! @name Type definitions and Enumerators
     //@{
 
-    typedef singleton< factory< OneDimensionalModel_Flux, OneDimensional::fluxTerm_Type > > factoryFlux_Type;
+    typedef singleton< factory< OneDimensionalFlux, OneDimensional::fluxTerm_Type > > factoryFlux_Type;
 
-    typedef OneDimensionalModel_Physics                       physics_Type;
-    typedef boost::shared_ptr< physics_Type >                 physicsPtr_Type;
+    typedef OneDimensionalPhysics                       physics_Type;
+    typedef boost::shared_ptr< physics_Type >           physicsPtr_Type;
 
-    typedef OneDimensionalModel_Data::container2D_Type        container2D_Type;
+    typedef OneDimensionalData::container2D_Type        container2D_Type;
 
     //@}
 
@@ -70,12 +70,12 @@ public:
     //@{
 
     //! Constructor
-    explicit OneDimensionalModel_Flux() : M_physics() {}
+    explicit OneDimensionalFlux() : M_physics() {}
 
-    explicit OneDimensionalModel_Flux( const physicsPtr_Type physics ) : M_physics( physics ) {}
+    explicit OneDimensionalFlux( const physicsPtr_Type physics ) : M_physics( physics ) {}
 
     //! Do nothing destructor
-    virtual ~OneDimensionalModel_Flux() {}
+    virtual ~OneDimensionalFlux() {}
 
     //@}
 
@@ -160,7 +160,7 @@ private:
     //! @name Unimplemented Methods
     //@{
 
-    OneDimensionalModel_Flux& operator=( const physicsPtr_Type& physics);
+    OneDimensionalFlux& operator=( const physicsPtr_Type& physics);
 
     //@}
 
@@ -168,4 +168,4 @@ private:
 
 }
 
-#endif // ONEDIMENSIONALMODEL_FLUX_H
+#endif // OneDimensionalFlux_H

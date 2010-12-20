@@ -47,7 +47,7 @@ namespace LifeV
 // Methods
 // ===================================================
 Real
-OneDimensionalModel_Flux_NonLinear::flux( const Real& A, const Real& Q, const ID& ii,  const UInt& i ) const
+OneDimensionalFluxNonLinear::flux( const Real& A, const Real& Q, const ID& ii,  const UInt& i ) const
 {
     if ( ii == 1 ) // F1
     {
@@ -70,7 +70,7 @@ OneDimensionalModel_Flux_NonLinear::flux( const Real& A, const Real& Q, const ID
 }
 
 Real
-OneDimensionalModel_Flux_NonLinear::dFdU( const Real& A, const Real& Q, const ID& ii,   const ID& jj, const UInt& i ) const
+OneDimensionalFluxNonLinear::dFdU( const Real& A, const Real& Q, const ID& ii,   const ID& jj, const UInt& i ) const
 {
     if ( ii == 1 && jj == 1 ) // dF1/dA
     {
@@ -103,7 +103,7 @@ OneDimensionalModel_Flux_NonLinear::dFdU( const Real& A, const Real& Q, const ID
 }
 
 //Real
-//OneDimensionalModel_Flux_NonLinear::diff2( const Real& A, const Real& Q,
+//OneDimensionalFluxNonLinear::diff2( const Real& A, const Real& Q,
 //                                           const ID& ii,   const ID& jj, const ID& kk,
 //                                           const UInt& i ) const
 //{
@@ -138,12 +138,12 @@ OneDimensionalModel_Flux_NonLinear::dFdU( const Real& A, const Real& Q, const ID
 //}
 
 void
-OneDimensionalModel_Flux_NonLinear::eigenValuesEigenVectors( const Real& A,
-                                                             const Real& Q,
-                                                             container2D_Type& eigenvalues,
-                                                             container2D_Type& leftEigenvector1,
-                                                             container2D_Type& leftEigenvector2,
-                                                             const UInt& i ) const
+OneDimensionalFluxNonLinear::eigenValuesEigenVectors( const Real& A,
+                                                      const Real& Q,
+                                                      container2D_Type& eigenvalues,
+                                                      container2D_Type& leftEigenvector1,
+                                                      container2D_Type& leftEigenvector2,
+                                                      const UInt& i ) const
 {
 #ifdef HAVE_LIFEV_DEBUG
     Debug(6312) << "[OneDimensionalModel_Flux_NonLinear]::jabocian_EigenValues_Vectors\n";
@@ -168,12 +168,12 @@ OneDimensionalModel_Flux_NonLinear::eigenValuesEigenVectors( const Real& A,
 }
 
 void
-OneDimensionalModel_Flux_NonLinear::deltaEigenValuesEigenVectors( const Real& A,
-                                                                  const Real& Q,
-                                                                  container2D_Type& deltaEigenvalues,
-                                                                  container2D_Type& deltaLeftEigenvector1,
-                                                                  container2D_Type& deltaLeftEigenvector2,
-                                                                  const UInt& i ) const
+OneDimensionalFluxNonLinear::deltaEigenValuesEigenVectors( const Real& A,
+                                                           const Real& Q,
+                                                           container2D_Type& deltaEigenvalues,
+                                                           container2D_Type& deltaLeftEigenvector1,
+                                                           container2D_Type& deltaLeftEigenvector2,
+                                                           const UInt& i ) const
 {
     Real deltaCelerity;
 

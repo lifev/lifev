@@ -47,7 +47,7 @@ namespace LifeV
 // Methods
 // ===================================================
 Real
-OneDimensionalModel_Source_Linear::source( const Real& U1, const Real& U2, const ID& ii, const UInt& indz ) const
+OneDimensionalSourceLinear::source( const Real& U1, const Real& U2, const ID& ii, const UInt& indz ) const
 {
     if ( ii == 1 ) // S1
     {
@@ -66,7 +66,7 @@ OneDimensionalModel_Source_Linear::source( const Real& U1, const Real& U2, const
 }
 
 Real
-OneDimensionalModel_Source_Linear::dSdU( const Real& /*_U1*/, const Real& /*_U2*/, const ID& ii, const ID& jj, const UInt& indz ) const
+OneDimensionalSourceLinear::dSdU( const Real& /*_U1*/, const Real& /*_U2*/, const ID& ii, const ID& jj, const UInt& indz ) const
 {
     if ( ii == 1 && jj == 1) // dS1/dU1 = 0
     {
@@ -89,7 +89,7 @@ OneDimensionalModel_Source_Linear::dSdU( const Real& /*_U1*/, const Real& /*_U2*
 }
 
 //Real
-//OneDimensionalModel_Source_Linear::diff2( const Real& /*_U1*/, const Real& /*_U2*/,
+//OneDimensionalSourceLinear::diff2( const Real& /*_U1*/, const Real& /*_U2*/,
 //                                          const ID& ii,        const ID& jj, const ID& kk,
 //                                          const UInt& /*indz*/ ) const
 //{
@@ -102,8 +102,8 @@ OneDimensionalModel_Source_Linear::dSdU( const Real& /*_U1*/, const Real& /*_U2*
 //}
 
 Real
-OneDimensionalModel_Source_Linear::interpolatedQuasiLinearSource( const Real& U1, const Real& U2,
-                                                                  const ID& ii,    const container2D_Type& bcNodes, const Real& /*cfl*/ ) const
+OneDimensionalSourceLinear::interpolatedQuasiLinearSource( const Real& U1, const Real& U2,
+                                                           const ID& ii,   const container2D_Type& bcNodes, const Real& /*cfl*/ ) const
 {
     //TODO Implement the interpolation as done for the non-linear case
     return this->source(U1, U2, ii, bcNodes[0]);

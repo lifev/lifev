@@ -83,7 +83,7 @@ public:
     typedef PhysicalSolverType                                                    physicalSolver_Type;
     typedef BCInterface1DData                                                     data_Type;
     typedef BCInterface1DFunction< physicalSolver_Type >                          function_Type;
-    typedef OneDimensionalModel_Solver::solutionPtr_Type                          solutionPtr_Type;
+    typedef OneDimensionalSolver::solutionPtr_Type                                solutionPtr_Type;
 
     //@}
 

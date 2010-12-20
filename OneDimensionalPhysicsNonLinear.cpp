@@ -48,7 +48,7 @@ namespace LifeV
 // Conversion methods
 // ===================================================
 void
-OneDimensionalModel_Physics_NonLinear::fromUToW( Real& W1, Real& W2, const Real& A,  const Real& Q, const UInt& indz ) const
+OneDimensionalPhysicsNonLinear::fromUToW( Real& W1, Real& W2, const Real& A,  const Real& Q, const UInt& indz ) const
 {
     Real celerity( celerity0(indz) * std::sqrt( std::pow( A / M_data -> area0(indz), M_data -> beta1(indz) ) ) );
 
@@ -61,7 +61,7 @@ OneDimensionalModel_Physics_NonLinear::fromUToW( Real& W1, Real& W2, const Real&
 }
 
 void
-OneDimensionalModel_Physics_NonLinear::fromWToU( Real& A, Real& Q, const Real& W1, const Real& W2, const UInt& indz ) const
+OneDimensionalPhysicsNonLinear::fromWToU( Real& A, Real& Q, const Real& W1, const Real& W2, const UInt& indz ) const
 {
     Real rhooverbeta0beta1 ( M_data -> densityRho() / ( M_data -> beta0(indz) * M_data -> beta1(indz) ) );
 
@@ -75,7 +75,7 @@ OneDimensionalModel_Physics_NonLinear::fromWToU( Real& A, Real& Q, const Real& W
 }
 
 Real
-OneDimensionalModel_Physics_NonLinear::fromWToP( const Real& W1, const Real& W2, const UInt& indz ) const
+OneDimensionalPhysicsNonLinear::fromWToP( const Real& W1, const Real& W2, const UInt& indz ) const
 {
     Real rhooverbeta0beta1 ( M_data -> densityRho() / ( M_data -> beta0(indz) * M_data -> beta1(indz) ) );
 
@@ -85,7 +85,7 @@ OneDimensionalModel_Physics_NonLinear::fromWToP( const Real& W1, const Real& W2,
 }
 
 Real
-OneDimensionalModel_Physics_NonLinear::fromPToW( const Real& P, const Real& W, const ID& i, const UInt& indz ) const
+OneDimensionalPhysicsNonLinear::fromPToW( const Real& P, const Real& W, const ID& i, const UInt& indz ) const
 {
     Real SQRTbeta0beta1overrho( M_data -> beta0(indz) * M_data -> beta1(indz) / M_data -> densityRho() );
     SQRTbeta0beta1overrho = std::sqrt( SQRTbeta0beta1overrho );
@@ -113,7 +113,7 @@ OneDimensionalModel_Physics_NonLinear::fromPToW( const Real& P, const Real& W, c
 }
 
 Real
-OneDimensionalModel_Physics_NonLinear::fromQToW( const Real& Q, const Real& W_n, const Real& W, const ID& i, const UInt& indz ) const
+OneDimensionalPhysicsNonLinear::fromQToW( const Real& Q, const Real& W_n, const Real& W, const ID& i, const UInt& indz ) const
 {
     Real K0( M_data -> beta1(indz) / ( std::sqrt(M_data -> robertsonCorrection()) * 4 ) );
 
@@ -157,7 +157,7 @@ OneDimensionalModel_Physics_NonLinear::fromQToW( const Real& Q, const Real& W_n,
 // Derivatives methods
 // ===================================================
 Real
-OneDimensionalModel_Physics_NonLinear::dPdW( const Real& W1, const Real& W2, const ID& i, const UInt& indz ) const
+OneDimensionalPhysicsNonLinear::dPdW( const Real& W1, const Real& W2, const ID& i, const UInt& indz ) const
 {
     Real rhoover2SQRTchi ( M_data -> densityRho() / ( std::sqrt(M_data -> robertsonCorrection()) * 2 ) );
 

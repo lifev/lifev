@@ -40,8 +40,8 @@
  *  @mantainer  Cristiano Malossi <cristiano.malossi@epfl.ch>
  */
 
-#ifndef ONEDIMENSIONALMODEL_PHYSICS_LINEAR_H
-#define ONEDIMENSIONALMODEL_PHYSICS_LINEAR_H
+#ifndef OneDimensionalPhysicsLinear_H
+#define OneDimensionalPhysicsLinear_H
 
 // LIFEV - MATHCARD
 #include <lifemc/lifesolver/OneDimensionalModel_Physics.hpp>
@@ -49,7 +49,7 @@
 namespace LifeV
 {
 
-//! OneDimensionalModel_Physics_Linear - Class providing linear physical operations for the 1D model data.
+//! OneDimensionalPhysicsLinear - Class providing linear physical operations for the 1D model data.
 /*!
  *  @author Vincent Martin, Cristiano Malossi
  *
@@ -73,14 +73,14 @@ namespace LifeV
  *  B = [ 0; k_R / A0];
  *  c_L = sqrt( beta0 * beta1 / rho );
  */
-class OneDimensionalModel_Physics_Linear : public OneDimensionalModel_Physics
+class OneDimensionalPhysicsLinear : public OneDimensionalPhysics
 {
 public:
 
     //! @name Type definitions and Enumerators
     //@{
 
-    typedef OneDimensionalModel_Physics           super;
+    typedef OneDimensionalPhysics           super;
 
     //@}
 
@@ -89,12 +89,12 @@ public:
     //@{
 
     //! Constructor
-    explicit OneDimensionalModel_Physics_Linear() : super() {}
+    explicit OneDimensionalPhysicsLinear() : super() {}
 
-    explicit OneDimensionalModel_Physics_Linear( const dataPtr_Type data ) : super( data ) {}
+    explicit OneDimensionalPhysicsLinear( const dataPtr_Type data ) : super( data ) {}
 
     //! Destructor
-    virtual ~OneDimensionalModel_Physics_Linear() {}
+    virtual ~OneDimensionalPhysicsLinear() {}
 
     //@}
 
@@ -156,17 +156,17 @@ private:
     //! @name Unimplemented Methods
     //@{
 
-    OneDimensionalModel_Physics_Linear& operator=( const dataPtr_Type data );
+    OneDimensionalPhysicsLinear& operator=( const dataPtr_Type data );
 
     //@}
 };
 
 //! Factory create function
-inline OneDimensionalModel_Physics* createOneDimensionalPhysicsLinear()
+inline OneDimensionalPhysics* createOneDimensionalPhysicsLinear()
 {
-    return new OneDimensionalModel_Physics_Linear();
+    return new OneDimensionalPhysicsLinear();
 }
 
 }
 
-#endif //ONEDIMENSIONALMODEL_PARAMETERS_LINEAR
+#endif //OneDimensionalPhysicsLinear_H
