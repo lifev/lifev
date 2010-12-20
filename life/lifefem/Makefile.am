@@ -30,7 +30,7 @@ lib_LTLIBRARIES		= liblifefem.la
 liblifefem_la_SOURCES	= bcCond.cpp bcFunction.cpp bcVector.cpp bcHandler.cpp \
           dataTime.cpp  \
           CurrentFE.cpp CurrentBoundaryFE.cpp defQuadRuleFE.cpp DOF.cpp \
-          DOFInterface3Dto2D.cpp DOFInterface3Dto3D.cpp dofInterfaceBase.cpp dofInterfaceHandler.cpp \
+          DOFInterface3Dto2D.cpp DOFInterface3Dto3D.cpp DOFInterface.cpp dofInterfaceHandler.cpp \
           elemOper.cpp  geoMap.cpp \
           localDofPattern.cpp quadRule.cpp refEle.cpp refFE.cpp refFEScalar.cpp refFEHdiv.cpp \
           refFEHybrid.cpp staticBdFE.cpp \

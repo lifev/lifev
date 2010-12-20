@@ -43,7 +43,7 @@
 #include <boost/shared_ptr.hpp>
 
 #include <life/lifecore/life.hpp>
-#include <life/lifefem/dofInterfaceBase.hpp>
+#include <life/lifefem/DOFInterface.hpp>
 #include <life/lifearray/EpetraVector.hpp>
 #include <life/lifecore/singleton.hpp>
 #include <life/lifecore/factory.hpp>

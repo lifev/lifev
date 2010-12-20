@@ -133,7 +133,7 @@ DefinitionFE                           defQuadRuleFE (splitting)               C
 DefinitionQuadratureRule               defQuadRuleFE (splitting)               CMCS2
 DefinitionReferenceToCurrentMap        defQuadRuleFE (splitting)               CMCS2
 DOF                                    dof                                     CMCS2     DONE
-DOFInterface                           dofInterfaceBase                        CMCS2
+DOFInterface                           dofInterfaceBase                        CMCS2     DONE
 DOFInterface3Dto2D                     dofInterface3Dto2D                      CMCS2     DONE
 DOFInterface3Dto3D                     dofInterface3Dto3D                      CMCS2     DONE
 DOFLocalPattern                        localDofPattern                         CMCS2

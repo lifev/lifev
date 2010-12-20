@@ -44,7 +44,7 @@
 #include <boost/shared_ptr.hpp>
 #include <boost/numeric/ublas/vector.hpp>
 
-#include <life/lifefem/dofInterfaceBase.hpp>
+#include <life/lifefem/DOFInterface.hpp>
 
 
 #include <life/lifefem/refFE.hpp>
