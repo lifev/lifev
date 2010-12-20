@@ -178,7 +178,7 @@ public:
   //! Returns the current FE object
   const CurrentFE&      getFe() const  {return M_fe;}
   //! Returns the current boundary FE object
-  CurrentBdFE&    getFeBd() {return M_feBd;}
+  CurrentBoundaryFE&    getFeBd() {return M_feBd;}
   //! Returns the Dof object
   const Dof&            getdDof() const {return M_dof;}
 
@@ -224,7 +224,7 @@ private:
   CurrentFE                              M_fe;
 
   //! Current boundary FE
-  CurrentBdFE                            M_feBd;
+  CurrentBoundaryFE                            M_feBd;
 
   //! The displacement
   PhysVectUnknown<Vector>                M_d;

@@ -230,14 +230,14 @@ void getVolumeFromFaces( RegionMesh3D const & mesh,
     vols[ 2 ] = 0.0;
     typedef typename RegionMesh3D::FaceShape GeoBShape;
     typedef typename RegionMesh3D::FaceType FaceType;
-    typedef boost::shared_ptr<CurrentBdFE> current_fe_type;
+    typedef boost::shared_ptr<CurrentBoundaryFE> current_fe_type;
 
     current_fe_type bdfe;
 
     switch ( GeoBShape::S_shape )
     {
     case TRIANGLE:
-        bdfe = current_fe_type( new CurrentBdFE( feTriaP1, geoLinearTria,
+        bdfe = current_fe_type( new CurrentBoundaryFE( feTriaP1, geoLinearTria,
                                                  quadRuleTria1pt ) );
         for ( ID i = 1; i <= mesh.numBFaces(); i++ )
         {
@@ -248,7 +248,7 @@ void getVolumeFromFaces( RegionMesh3D const & mesh,
         }
         break;
     case QUAD:
-        bdfe = current_fe_type( new CurrentBdFE( feQuadQ1, geoBilinearQuad,
+        bdfe = current_fe_type( new CurrentBoundaryFE( feQuadQ1, geoBilinearQuad,
                                                  quadRuleQuad1pt ) );
         for ( ID i = 1; i <= mesh.numBFaces(); i++ )
         {
@@ -274,7 +274,7 @@ Real testClosedDomain( RegionMesh3D const & mesh,
 {
     typedef typename RegionMesh3D::FaceType FaceType;
 
-    typedef boost::shared_ptr<CurrentBdFE> current_fe_type;
+    typedef boost::shared_ptr<CurrentBoundaryFE> current_fe_type;
     current_fe_type bdfe;
 
     MeshUtility::GetOnes ones;
@@ -283,7 +283,7 @@ Real testClosedDomain( RegionMesh3D const & mesh,
     switch ( RegionMesh3D::FaceShape::S_shape )
     {
     case TRIANGLE:
-        bdfe = current_fe_type( new CurrentBdFE( feTriaP1, geoLinearTria,
+        bdfe = current_fe_type( new CurrentBoundaryFE( feTriaP1, geoLinearTria,
                                                  quadRuleTria1pt ) );
         for ( ID i = 1; i <= mesh.numBFaces(); i++ )
         {
@@ -292,7 +292,7 @@ Real testClosedDomain( RegionMesh3D const & mesh,
         }
         break;
     case QUAD:
-        bdfe = current_fe_type( new CurrentBdFE( feQuadQ1, geoBilinearQuad,
+        bdfe = current_fe_type( new CurrentBoundaryFE( feQuadQ1, geoBilinearQuad,
                                                  quadRuleQuad1pt ) );
         for ( ID i = 1; i <= mesh.numBFaces(); i++ )
         {

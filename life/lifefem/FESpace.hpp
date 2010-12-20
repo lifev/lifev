@@ -385,7 +385,7 @@ public:
     CurrentFE& 			fe()		  { return *M_fe; }
 
     //! Returns the current boundary FE
-    CurrentBdFE&		feBd()		  { return *M_feBd; }
+    CurrentBoundaryFE&		feBd()		  { return *M_feBd; }
 
     //! Returns the res FE
     const RefFE&		refFE()	const { return *M_refFE; }
@@ -523,7 +523,7 @@ private:
 
     //! Current FE
     boost::shared_ptr<CurrentFE>		M_fe;
-    boost::shared_ptr<CurrentBdFE>		M_feBd;
+    boost::shared_ptr<CurrentBoundaryFE>		M_feBd;
 
     //! Map
     mapPtr_Type							M_map;
@@ -556,7 +556,7 @@ FESpace(	MeshPartitioner<MeshType>& 	mesh,
 {
     if (M_refFE->hasBoundaryFE())
     {
-        M_feBd.reset(new CurrentBdFE( M_refFE->boundaryFE(), getGeoMap( *M_mesh ).boundaryMap(), *M_bdQr ) );
+        M_feBd.reset(new CurrentBoundaryFE( M_refFE->boundaryFE(), getGeoMap( *M_mesh ).boundaryMap(), *M_bdQr ) );
     }
     MapType map( *M_refFE, *M_mesh, commptr );
     for ( UInt ii = 0; ii < M_fieldDim; ++ii )
@@ -594,7 +594,7 @@ FESpace(	MeshPartitioner<MeshType>&	mesh,
 
     if (M_refFE->hasBoundaryFE())
     {
-        M_feBd.reset( new CurrentBdFE( M_refFE->boundaryFE(), getGeoMap( *M_mesh ).boundaryMap(), *M_bdQr ) );
+        M_feBd.reset( new CurrentBoundaryFE( M_refFE->boundaryFE(), getGeoMap( *M_mesh ).boundaryMap(), *M_bdQr ) );
     }
 
     // Build Map
@@ -629,7 +629,7 @@ FESpace(	meshPtr_Type			mesh,
 
     if (M_refFE->hasBoundaryFE())
     {
-        M_feBd.reset(new CurrentBdFE( M_refFE->boundaryFE(), getGeoMap( *M_mesh ).boundaryMap(), *M_bdQr ) );
+        M_feBd.reset(new CurrentBoundaryFE( M_refFE->boundaryFE(), getGeoMap( *M_mesh ).boundaryMap(), *M_bdQr ) );
     }
 }
 
@@ -664,7 +664,7 @@ FESpace(	meshPtr_Type			mesh,
 
     if (M_refFE->hasBoundaryFE())
     {
-        M_feBd.reset( new CurrentBdFE( M_refFE->boundaryFE(), getGeoMap( *M_mesh ).boundaryMap(), *M_bdQr ) );
+        M_feBd.reset( new CurrentBoundaryFE( M_refFE->boundaryFE(), getGeoMap( *M_mesh ).boundaryMap(), *M_bdQr ) );
     };
 
     // Build Map

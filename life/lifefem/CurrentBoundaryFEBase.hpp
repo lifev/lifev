@@ -65,7 +65,7 @@ namespace LifeV
 
   This class has two purposes:
   \par
-  (1) it is a base class for standard boundary element (see CurrentBdFE.h)
+  (1) it is a base class for standard boundary element (see CurrentBoundaryFE.h)
   \par
   (2) it is used by refHybridFE as static boundary for a reference element
 

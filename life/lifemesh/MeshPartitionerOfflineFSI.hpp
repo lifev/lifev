@@ -512,7 +512,7 @@ void MeshPartitionerOfflineFSI<MeshType>::createSpaces()
 template<typename MeshType>
 void MeshPartitionerOfflineFSI<MeshType>::mapTheInterface()
 {
-    // Create the dofInterface3Dto3D objects for each fluid partition
+    // Create the DOFInterface3Dto3D objects for each fluid partition
     std::cout << std::endl;
     std::cout << "Creating the DOF interfaces..." << std::endl;
     std::cout << std::endl;

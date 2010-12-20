@@ -386,26 +386,26 @@ void source_stiff(const std::vector<Real>& constant, ElemVec& elvec, const Curre
 //! \f$ coef < \nabla p1, \nabla q2 >\f$
 void ipstab_grad( const Real coef, ElemMat& elmat,
                   const CurrentFE& fe1, const CurrentFE& fe2,
-                  const CurrentBdFE& bdfe, int iblock = 0, int jblock = 0 );
+                  const CurrentBoundaryFE& bdfe, int iblock = 0, int jblock = 0 );
 
 //! \f$ coef < \nabla u1, \nabla v2 >\f$
 void ipstab_grad( const Real coef, ElemMat& elmat,
                   const CurrentFE& fe1, const CurrentFE& fe2,
-                  const CurrentBdFE& bdfe, int iblock, int jblock, int nb );
+                  const CurrentBoundaryFE& bdfe, int iblock, int jblock, int nb );
 
 //! \f$ coef < \nabla\cdot  u1, \nabla\cdot  v2 >\f$
 void ipstab_div( const Real coef, ElemMat& elmat,
                  const CurrentFE& fe1, const CurrentFE& fe2,
-                 const CurrentBdFE& bdfe, int iblock = 0, int jblock = 0 );
+                 const CurrentBoundaryFE& bdfe, int iblock = 0, int jblock = 0 );
 //! \f$ coef < \beta1 . \nabla u1, \beta2 . \nabla v2 >\f$
 void ipstab_bgrad( const Real coef, ElemMat& elmat,
                    const CurrentFE& fe1, const CurrentFE& fe2,
-                   const ElemVec& beta, const CurrentBdFE& bdfe,
+                   const ElemVec& beta, const CurrentBoundaryFE& bdfe,
                    int iblock, int jblock, int nb );
 //! \f$ coef < |\beta . n|^2 / |\beta| \nabla p1, \nabla q2 >\f$
 void ipstab_bagrad( const Real coef, ElemMat& elmat,
                     const CurrentFE& fe1, const CurrentFE& fe2,
-                    const ElemVec& beta, const CurrentBdFE& bdfe,
+                    const ElemVec& beta, const CurrentBoundaryFE& bdfe,
                     int iblock = 0, int jblock = 0 );
 
 //!\f$ coef < |\beta\cdot n| \nabla p1, \nabla q2 >\f$
@@ -419,7 +419,7 @@ void ipstab_bagrad( const Real           coef,
                     const CurrentFE&     fe2,
                     const CurrentFE&     fe3,
                     const ElemVec&       beta,
-                    const CurrentBdFE&   bdfe,
+                    const CurrentBoundaryFE&   bdfe,
                     int iblock = 0, int jblock = 0 );
 
 //!@}

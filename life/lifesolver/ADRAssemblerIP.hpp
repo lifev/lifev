@@ -225,7 +225,7 @@ private:
     typedef CurrentFE                             currentFE_type;
     typedef boost::scoped_ptr<currentFE_type>            currentFE_ptrType;
 
-    typedef CurrentBdFE                           currentBdFE_type;
+    typedef CurrentBoundaryFE                           currentBdFE_type;
     typedef boost::scoped_ptr<currentBdFE_type>          currentBdFE_ptrType;
 
 
@@ -293,7 +293,7 @@ setup( const fespace_ptrType& fespace, const fespace_ptrType& betaFESpace )
     M_fespace = fespace;
     M_betaFESpace = betaFESpace;
 
-    M_IPFaceCFE.reset(new CurrentBdFE(M_fespace->feBd().refFE, M_fespace->feBd().geoMap, M_fespace->feBd().qr));
+    M_IPFaceCFE.reset(new CurrentBoundaryFE(M_fespace->feBd().refFE, M_fespace->feBd().geoMap, M_fespace->feBd().qr));
 
     // For the two next CurrentFEs, the quadrature plays no role
     M_IPQuad1CFE.reset(new CurrentFE(M_fespace->refFE(),M_fespace->fe().geoMap(), M_fespace->qr() ));

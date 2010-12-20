@@ -338,7 +338,7 @@ public:
       @param dof Container of the local to global map of DOF id
     */
     template <typename Mesh>
-    void bcUpdate( Mesh& mesh, CurrentBdFE& boundaryFE, const Dof& dof );
+    void bcUpdate( Mesh& mesh, CurrentBoundaryFE& boundaryFE, const Dof& dof );
 
 
     //! old bcUpdate version.. deprecated!!
@@ -517,7 +517,7 @@ private:
 // ===================================================
 template <typename Mesh>
 void
-BCHandler::bcUpdate( Mesh& mesh, CurrentBdFE& boundaryFE, const Dof& dof )
+BCHandler::bcUpdate( Mesh& mesh, CurrentBoundaryFE& boundaryFE, const Dof& dof )
 {
     typedef typename Mesh::ElementShape geoShape_Type;
 
@@ -836,7 +836,7 @@ BCHandler::bcUpdate( Mesh& mesh, CurrentBdFE& boundaryFE, const Dof& dof )
 // =============================================================
 template <typename Mesh>
 void  __attribute__ ((__deprecated__))
-BCHandler::bcUpdateOldVersion( Mesh& mesh, CurrentBdFE& boundaryFE, const Dof& dof )
+BCHandler::bcUpdateOldVersion( Mesh& mesh, CurrentBoundaryFE& boundaryFE, const Dof& dof )
 {
     typedef typename Mesh::ElementShape geoShape_Type;
 

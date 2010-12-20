@@ -910,7 +910,7 @@ void ipstab_grad( const Real         coef,
                   ElemMat&           elmat,
                   const CurrentFE&   fe1,
                   const CurrentFE&   fe2,
-                  const CurrentBdFE& bdfe,
+                  const CurrentBoundaryFE& bdfe,
                   int iblock, int jblock )
 {
     /*
@@ -1004,7 +1004,7 @@ void ipstab_grad( const Real         coef,
                   ElemMat&           elmat,
                   const CurrentFE&   fe1,
                   const CurrentFE&   fe2,
-                  const CurrentBdFE& bdfe,
+                  const CurrentBoundaryFE& bdfe,
                   int iblock, int jblock,
                   int nb )
 {
@@ -1105,7 +1105,7 @@ void ipstab_bgrad( const Real         coef,
                    const CurrentFE&   fe1,
                    const CurrentFE&   fe2,
                    const ElemVec&     beta,
-                   const CurrentBdFE& bdfe,
+                   const CurrentBoundaryFE& bdfe,
                    int iblock, int jblock,
                    int nb )
 {
@@ -1229,7 +1229,7 @@ void ipstab_bgrad( const Real         coef,
 
 
 void ipstab_div( const Real coef, ElemMat& elmat, const CurrentFE& fe1, const CurrentFE& fe2,
-                 const CurrentBdFE& bdfe, int iblock, int jblock )
+                 const CurrentBoundaryFE& bdfe, int iblock, int jblock )
 {
     /*
       Interior penalty stabilization: coef*\int_{face} div u . div v
@@ -1314,7 +1314,7 @@ void ipstab_div( const Real coef, ElemMat& elmat, const CurrentFE& fe1, const Cu
 
 void ipstab_bagrad( const Real coef, ElemMat& elmat,
                     const CurrentFE& fe1, const CurrentFE& fe2,
-                    const ElemVec& beta, const CurrentBdFE& bdfe,
+                    const ElemVec& beta, const CurrentBoundaryFE& bdfe,
                     int iblock, int jblock )
 {
 
@@ -1437,7 +1437,7 @@ void ipstab_bagrad( const Real         coef,
                     const CurrentFE&   fe2,
                     const CurrentFE&   fe3,
                     const ElemVec&     beta,
-                    const CurrentBdFE& bdfe,
+                    const CurrentBoundaryFE& bdfe,
                     int iblock, int    jblock )
 {
 

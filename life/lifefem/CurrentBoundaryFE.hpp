@@ -48,7 +48,7 @@
 namespace LifeV
 {
 /*!
-  \class CurrentBdFE
+  \class CurrentBoundaryFE
   \brief The class for a boundary finite element
   \author J.-F. Gerbeau
   \date 09/2002
@@ -62,7 +62,7 @@ namespace LifeV
   See the description of the base class StaticBdFE for further details.
 */
 
-class CurrentBdFE:
+class CurrentBoundaryFE:
         public StaticBdFE
 {
 public:
@@ -71,13 +71,13 @@ public:
     //@{
 
     //! Constructor with reference FE and geometric mapping
-    CurrentBdFE( const RefFE& refFE, const GeoMap& geoMap );
+    CurrentBoundaryFE( const RefFE& refFE, const GeoMap& geoMap );
 
     //! Constructor with reference FE, geometric mapping and quadrature rule
-    CurrentBdFE( const RefFE& refFE, const GeoMap& geoMap, const QuadRule& qr );
+    CurrentBoundaryFE( const RefFE& refFE, const GeoMap& geoMap, const QuadRule& qr );
 
     //! Destructor
-    virtual ~CurrentBdFE();
+    virtual ~CurrentBoundaryFE();
 
     //@}
 
@@ -128,7 +128,7 @@ public:
 
 template <typename GeometricType>
 void
-CurrentBdFE::
+CurrentBoundaryFE::
 update( const GeometricType& geometricEntity )
 {
 #ifdef TEST_PRE
@@ -152,7 +152,7 @@ update( const GeometricType& geometricEntity )
 
 template <typename GeometricType>
 void
-CurrentBdFE::
+CurrentBoundaryFE::
 updateMeas( const GeometricType& geometricEntity )
 {
 #ifdef TEST_PRE
@@ -180,7 +180,7 @@ updateMeas( const GeometricType& geometricEntity )
 
 template <typename GeometricType>
 void
-CurrentBdFE::
+CurrentBoundaryFE::
 updateMeasQuadPt( const GeometricType& geometricEntity )
 {
 #ifdef TEST_PRE
@@ -210,7 +210,7 @@ updateMeasQuadPt( const GeometricType& geometricEntity )
 
 template <typename GeometricType>
 void
-CurrentBdFE::
+CurrentBoundaryFE::
 updateMeasNormal( const GeometricType& geometricEntity )
 {
 #ifdef TEST_PRE
@@ -238,7 +238,7 @@ updateMeasNormal( const GeometricType& geometricEntity )
 
 template <typename GeometricType>
 void
-CurrentBdFE::
+CurrentBoundaryFE::
 updateMeasNormalQuadPt( const GeometricType& geometricEntity )
 {
 #ifdef TEST_PRE
