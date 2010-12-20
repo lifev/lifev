@@ -35,8 +35,8 @@ along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
   @maintainer Radu Popescu <radu.popescu@epfl.ch>
 */
 
-#ifndef PARTMESH_H
-#define PARTMESH_H 1
+#ifndef MESH_PARTITIONER_H
+#define MESH_PARTITIONER_H 1
 
 #include <fstream>
 #include <iostream>
@@ -1528,4 +1528,4 @@ void MeshPartitioner<MeshType>::execute()
 }
 
 }
-#endif // PARTMESH_H
+#endif // MESH_PARTITIONER_H
