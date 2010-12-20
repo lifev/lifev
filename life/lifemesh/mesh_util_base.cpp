@@ -31,10 +31,10 @@
     @contributor Tiziano Passerini <tiziano@mathcs.emory.edu>
     @maintainer Tiziano Passerini <tiziano@mathcs.emory.edu>
 
-    @sa mesh_util_base.hpp
+    @sa MeshUtility.hpp
  */
 
-#include <life/lifemesh/mesh_util_base.hpp>
+#include <life/lifemesh/MeshUtility.hpp>
 
 namespace LifeV
 {
