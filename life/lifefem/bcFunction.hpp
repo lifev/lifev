@@ -172,7 +172,7 @@ protected:
 };
 
 
-typedef LifeV::singleton< LifeV::factoryClone< BCFunctionBase > > FactoryCloneBCFunction;
+typedef LifeV::FactorySingleton< LifeV::FactoryClone< BCFunctionBase > > FactoryCloneBCFunction;
 
 
 
@@ -577,7 +577,7 @@ private:
     function_Type M_robinBoundaryMassCoeffFunction;
 };
 
-typedef LifeV::singleton< LifeV::factoryClone< BCFunctionUDepBase > > FactoryCloneBCFunctionUDep;
+typedef LifeV::FactorySingleton< LifeV::FactoryClone< BCFunctionUDepBase > > FactoryCloneBCFunctionUDep;
 
 /*!
 
