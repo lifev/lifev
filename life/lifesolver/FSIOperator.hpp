@@ -127,10 +127,10 @@ public:
     typedef HDF5Filter3DMesh<mesh_Type>                                             meshFilter_Type;
 #endif
     typedef OseenShapeDerivative   <mesh_Type>                                      fluid_Type;
-    typedef VenantKirchhofSolver   <mesh_Type>                                      solid_Type;
+    typedef VenantKirchhoffSolver  <mesh_Type>                                      solid_Type;
     typedef HarmonicExtensionSolver<mesh_Type>                                      meshMotion_Type;
     typedef OseenShapeDerivative   <mesh_Type>                                      fluidLin_Type;
-    typedef VenantKirchhofSolver   <mesh_Type>                                      solidLin_Type;
+    typedef VenantKirchhoffSolver  <mesh_Type>                                      solidLin_Type;
     typedef boost::shared_ptr<fluid_Type>                                           fluidPtr_Type;
     typedef boost::shared_ptr<solid_Type>                                           solidPtr_Type;
     typedef boost::shared_ptr<meshMotion_Type>                                      meshMotionPtr_Type;
@@ -337,7 +337,7 @@ public:
     //!@name Factory Methods
     //@{
     //! Factory method for the linear elasticity solver
-    static VenantKirchhofSolver< FSIOperator::mesh_Type, SolverTrilinos >*    createLinearStructure() { return new LinearVenantKirchhofSolver< FSIOperator::mesh_Type, SolverTrilinos >(); }
+    static VenantKirchhoffSolver< FSIOperator::mesh_Type, SolverTrilinos >*    createLinearStructure() { return new VenantKirchhoffSolverLinear< FSIOperator::mesh_Type, SolverTrilinos >(); }
     //@}
 
     //!@name Public Methods

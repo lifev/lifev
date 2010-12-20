@@ -52,8 +52,7 @@
 
 namespace LifeV
 {
-
-DataElasticStructure::DataElasticStructure() :
+VenantKirchhoffElasticData::VenantKirchhoffElasticData():
         M_time                             ( ),
         M_density                          ( ),
         M_thickness                        ( ),
@@ -65,35 +64,35 @@ DataElasticStructure::DataElasticStructure() :
 {
 }
 
-DataElasticStructure::DataElasticStructure( const DataElasticStructure& dataElasticStructure ):
-        DataTime                           ( dataElasticStructure ),
-        M_time                             ( dataElasticStructure.M_time ),
-        M_density                          ( dataElasticStructure.M_density ),
-        M_thickness                        ( dataElasticStructure.M_thickness ),
-        M_poisson                          ( dataElasticStructure.M_poisson ),
-        M_young                            ( dataElasticStructure.M_young ),
-        M_order                            ( dataElasticStructure.M_order ),
-        M_factor                           ( dataElasticStructure.M_factor ),
-        M_verbose                          ( dataElasticStructure.M_verbose )
+VenantKirchhoffElasticData::VenantKirchhoffElasticData( const VenantKirchhoffElasticData& VenantKirchhoffElasticData ):
+        DataTime                           ( VenantKirchhoffElasticData ),
+        M_time                             ( VenantKirchhoffElasticData.M_time ),
+        M_density                          ( VenantKirchhoffElasticData.M_density ),
+        M_thickness                        ( VenantKirchhoffElasticData.M_thickness ),
+        M_poisson                          ( VenantKirchhoffElasticData.M_poisson ),
+        M_young                            ( VenantKirchhoffElasticData.M_young ),
+        M_order                            ( VenantKirchhoffElasticData.M_order ),
+        M_factor                           ( VenantKirchhoffElasticData.M_factor ),
+        M_verbose                          ( VenantKirchhoffElasticData.M_verbose )
 {
 }
 
 // ===================================================
 // Operators
 // ===================================================
-DataElasticStructure&
-DataElasticStructure::operator=( const DataElasticStructure& dataElasticStructure )
+VenantKirchhoffElasticData&
+VenantKirchhoffElasticData::operator=( const VenantKirchhoffElasticData& VenantKirchhoffElasticData )
 {
-    if ( this != &dataElasticStructure )
+    if ( this != &VenantKirchhoffElasticData )
     {
-        M_time                             = dataElasticStructure.M_time;
-        M_density                          = dataElasticStructure.M_density;
-        M_thickness                        = dataElasticStructure.M_thickness;
-        M_poisson                          = dataElasticStructure.M_poisson;
-        M_young                            = dataElasticStructure.M_young;
-        M_order                            = dataElasticStructure.M_order;
-        M_factor                           = dataElasticStructure.M_factor;
-        M_verbose                          = dataElasticStructure.M_verbose;
+        M_time                             = VenantKirchhoffElasticData.M_time;
+        M_density                          = VenantKirchhoffElasticData.M_density;
+        M_thickness                        = VenantKirchhoffElasticData.M_thickness;
+        M_poisson                          = VenantKirchhoffElasticData.M_poisson;
+        M_young                            = VenantKirchhoffElasticData.M_young;
+        M_order                            = VenantKirchhoffElasticData.M_order;
+        M_factor                           = VenantKirchhoffElasticData.M_factor;
+        M_verbose                          = VenantKirchhoffElasticData.M_verbose;
     }
 
     return *this;
@@ -103,7 +102,7 @@ DataElasticStructure::operator=( const DataElasticStructure& dataElasticStructur
 // Methods
 // ===================================================
 void
-DataElasticStructure::setup( const GetPot& dataFile, const std::string& section )
+VenantKirchhoffElasticData::setup( const GetPot& dataFile, const std::string& section )
 {
     // If data time has not been set
     if ( !M_time.get() )
@@ -146,7 +145,7 @@ DataElasticStructure::setup( const GetPot& dataFile, const std::string& section 
 }
 
 void
-DataElasticStructure::showMe( std::ostream& output ) const
+VenantKirchhoffElasticData::showMe( std::ostream& output ) const
 {
     // physics
     output << "\n*** Values for data [solid/physics]\n\n";
@@ -178,31 +177,31 @@ DataElasticStructure::showMe( std::ostream& output ) const
 // Set Method
 // ===================================================
 void
-DataElasticStructure::setDataTime( const TimePtr_Type DataTime )
+VenantKirchhoffElasticData::setDataTime( const TimePtr_Type DataTime )
 {
     M_time = DataTime;
 }
 
 void
-DataElasticStructure::setDensity( const Real& density )
+VenantKirchhoffElasticData::setDensity( const Real& density )
 {
     M_density = density;
 }
 
 void
-DataElasticStructure::setThickness( const Real& thickness )
+VenantKirchhoffElasticData::setThickness( const Real& thickness )
 {
     M_thickness = thickness;
 }
 
 void
-DataElasticStructure::setPoisson( const Real& poisson, const UInt& material )
+VenantKirchhoffElasticData::setPoisson( const Real& poisson, const UInt& material )
 {
     M_poisson[material] = poisson;
 }
 
 void
-DataElasticStructure::setYoung( const Real& young, const UInt& material )
+VenantKirchhoffElasticData::setYoung( const Real& young, const UInt& material )
 {
     M_young[material] = young;
 }
@@ -210,26 +209,26 @@ DataElasticStructure::setYoung( const Real& young, const UInt& material )
 // ===================================================
 // Get Method
 // ===================================================
-const DataElasticStructure::TimePtr_Type
-DataElasticStructure::getDataTime() const
+const VenantKirchhoffElasticData::TimePtr_Type
+VenantKirchhoffElasticData::getDataTime() const
 {
     return M_time;
 }
 
 const Real&
-DataElasticStructure::getRho() const
+VenantKirchhoffElasticData::getRho() const
 {
     return M_density;
 }
 
 const Real&
-DataElasticStructure::getThickness() const
+VenantKirchhoffElasticData::getThickness() const
 {
     return M_thickness;
 }
 
 const Real&
-DataElasticStructure::getPoisson( const UInt& material ) const
+VenantKirchhoffElasticData::getPoisson( const UInt& material ) const
 {
     MaterialContainer_Type::const_iterator IT = M_poisson.find( material );
     if (IT != M_poisson.end())
@@ -242,7 +241,7 @@ DataElasticStructure::getPoisson( const UInt& material ) const
 }
 
 const Real&
-DataElasticStructure::getYoung( const UInt& material ) const
+VenantKirchhoffElasticData::getYoung( const UInt& material ) const
 {
     MaterialContainer_Type::const_iterator IT = M_young.find( material );
     if (IT != M_young.end())
@@ -255,44 +254,44 @@ DataElasticStructure::getYoung( const UInt& material ) const
 }
 
 Real
-DataElasticStructure::getLambda( const UInt& material ) const
+VenantKirchhoffElasticData::getLambda( const UInt& material ) const
 {
     return M_young.find( material )->second * M_poisson.find( material )->second /
            ( ( 1.0 + M_poisson.find( material )->second ) * ( 1.0 - 2.0 * M_poisson.find( material )->second ) );
 }
 
 Real
-DataElasticStructure::getMu( const UInt& material ) const
+VenantKirchhoffElasticData::getMu( const UInt& material ) const
 {
     return M_young.find( material )->second/( 2.0 * ( 1.0 + M_poisson.find( material )->second ) );
 }
 
 const std::string&
-DataElasticStructure::getOrder() const
+VenantKirchhoffElasticData::getOrder() const
 {
     return M_order;
 }
 
 const Real&
-DataElasticStructure::getFactor() const
+VenantKirchhoffElasticData::getFactor() const
 {
     return M_factor;
 }
 
 const UInt&
-DataElasticStructure::getVerbose() const
+VenantKirchhoffElasticData::getVerbose() const
 {
     return M_verbose;
 }
 
 const std::string&
-DataElasticStructure::getSolidType()
+VenantKirchhoffElasticData::getSolidType()
 {
     return M_solidType;
 }
 
 const bool&
-DataElasticStructure::getUseExactJacobian() const
+VenantKirchhoffElasticData::getUseExactJacobian() const
 {
     return M_useExactJacobian;
 }

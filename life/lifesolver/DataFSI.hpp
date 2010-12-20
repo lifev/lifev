@@ -80,7 +80,7 @@ public:
     typedef DataNavierStokes                        dataFluid_Type;
     typedef boost::shared_ptr< dataFluid_Type >     dataFluid_PtrType;
 
-    typedef DataElasticStructure                    dataSolid_Type;
+    typedef VenantKirchhoffElasticData                    dataSolid_Type;
     typedef boost::shared_ptr< dataSolid_Type >     dataSolid_PtrType;
 
     //@}

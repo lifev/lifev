@@ -78,7 +78,7 @@ namespace LifeV
 
 
 /*!
-  \class VenantKirchhofSolver
+  \class VenantKirchhoffSolver
   \brief
   This class solves the linear elastodynamics equations for a (only linear right now)
   St. Venant-Kirchoff material
@@ -87,7 +87,7 @@ namespace LifeV
 template <typename Mesh,
 	  typename SolverType = LifeV::SolverTrilinos >
 
-class VenantKirchhofSolver
+class VenantKirchhoffSolver
 {
 public:
 
@@ -109,9 +109,9 @@ public:
   typedef typename SolverType::prec_raw_type     precRaw_Type;
   typedef typename SolverType::prec_type         prec_Type;
 
-  typedef DataElasticStructure                   data_Type;
+  typedef VenantKirchhoffElasticData                   data_Type;
 
-  typedef singleton<factory<VenantKirchhofSolver,  std::string> >  StructureSolverFactory;
+  typedef singleton<factory<VenantKirchhoffSolver,  std::string> >  StructureSolverFactory;
 
   //@}
 
@@ -119,7 +119,7 @@ public:
   //! @name Constructor
   //@{
 
-  VenantKirchhofSolver();
+  VenantKirchhoffSolver();
 
   //@}
 
@@ -544,7 +544,7 @@ protected:
 //=====================================
 
 template <typename Mesh, typename SolverType>
-VenantKirchhofSolver<Mesh, SolverType>::VenantKirchhofSolver( ):
+VenantKirchhoffSolver<Mesh, SolverType>::VenantKirchhoffSolver( ):
   M_data                       ( ),
   M_FESpace                    ( ),
   M_Displayer                  ( ),
@@ -583,7 +583,7 @@ VenantKirchhofSolver<Mesh, SolverType>::VenantKirchhofSolver( ):
 
 template <typename Mesh, typename SolverType>
 void
-VenantKirchhofSolver<Mesh, SolverType>::setup(boost::shared_ptr<data_Type>          data,
+VenantKirchhoffSolver<Mesh, SolverType>::setup(boost::shared_ptr<data_Type>          data,
 					      const boost::shared_ptr< FESpace<Mesh, EpetraMap> >& dFESpace,
 					      bchandler_Type&                BCh,
 					      boost::shared_ptr<Epetra_Comm>&              comm)
@@ -594,7 +594,7 @@ VenantKirchhofSolver<Mesh, SolverType>::setup(boost::shared_ptr<data_Type>      
 
 template <typename Mesh, typename SolverType>
 void
-VenantKirchhofSolver<Mesh, SolverType>::setup(boost::shared_ptr<data_Type>        data,
+VenantKirchhoffSolver<Mesh, SolverType>::setup(boost::shared_ptr<data_Type>        data,
 					      const boost::shared_ptr< FESpace<Mesh, EpetraMap> >& dFESpace,
 					      boost::shared_ptr<Epetra_Comm>&     comm)
 {
@@ -614,7 +614,7 @@ VenantKirchhofSolver<Mesh, SolverType>::setup(boost::shared_ptr<data_Type>      
 
 template <typename Mesh, typename SolverType>
 void
-VenantKirchhofSolver<Mesh, SolverType>::setup(boost::shared_ptr<data_Type>        data,
+VenantKirchhoffSolver<Mesh, SolverType>::setup(boost::shared_ptr<data_Type>        data,
 					      const boost::shared_ptr< FESpace<Mesh, EpetraMap> >& dFESpace,
 					      boost::shared_ptr<Epetra_Comm>&     comm,
 					      const boost::shared_ptr<const EpetraMap>&  monolithicMap,
@@ -639,13 +639,13 @@ VenantKirchhofSolver<Mesh, SolverType>::setup(boost::shared_ptr<data_Type>      
 }
 
 template <typename Mesh, typename SolverType>
-void VenantKirchhofSolver<Mesh, SolverType>::updateSystem(  )
+void VenantKirchhoffSolver<Mesh, SolverType>::updateSystem(  )
 {
   updateSystem(M_stiff);
 }
 
 template <typename Mesh, typename SolverType>
-void VenantKirchhofSolver<Mesh, SolverType>::updateSystem( matrixPtr_Type& /*stiff*/ )
+void VenantKirchhoffSolver<Mesh, SolverType>::updateSystem( matrixPtr_Type& /*stiff*/ )
 {
   M_Displayer->leaderPrint("  S-  Updating mass term on right hand side... ");
 
@@ -685,7 +685,7 @@ void VenantKirchhofSolver<Mesh, SolverType>::updateSystem( matrixPtr_Type& /*sti
 
 template <typename Mesh, typename SolverType>
 void
-VenantKirchhofSolver<Mesh, SolverType>::buildSystem()
+VenantKirchhoffSolver<Mesh, SolverType>::buildSystem()
 {
   M_Displayer->leaderPrint("  S-  Computing constant matrices ...          ");
   Chrono chrono;
@@ -701,7 +701,7 @@ VenantKirchhofSolver<Mesh, SolverType>::buildSystem()
 
 template <typename Mesh, typename SolverType>
 void
-VenantKirchhofSolver<Mesh, SolverType>::buildSystem(matrixPtr_Type massStiff, const Real& factor)
+VenantKirchhoffSolver<Mesh, SolverType>::buildSystem(matrixPtr_Type massStiff, const Real& factor)
 {
   UInt totalDof = M_FESpace->dof().numTotalDof();
 
@@ -758,7 +758,7 @@ VenantKirchhofSolver<Mesh, SolverType>::buildSystem(matrixPtr_Type massStiff, co
 }
 
 template <typename Mesh, typename SolverType>
-void VenantKirchhofSolver<Mesh, SolverType>::iterate(vector_Type& solution)
+void VenantKirchhoffSolver<Mesh, SolverType>::iterate(vector_Type& solution)
 {
   Int status;
 
@@ -776,7 +776,7 @@ void VenantKirchhofSolver<Mesh, SolverType>::iterate(vector_Type& solution)
 
 template <typename Mesh, typename SolverType>
 void
-VenantKirchhofSolver<Mesh, SolverType>::iterate( bchandler_Type& bch )
+VenantKirchhoffSolver<Mesh, SolverType>::iterate( bchandler_Type& bch )
 {
   // matrix and vector assembling communication
   matrixPtr_Type matrFull( new matrix_Type( *M_localMap, M_massStiff->meanNumEntries()));
@@ -818,7 +818,7 @@ VenantKirchhofSolver<Mesh, SolverType>::iterate( bchandler_Type& bch )
 
 template <typename Mesh, typename SolverType>
 void
-VenantKirchhofSolver<Mesh, SolverType>::iterateLin( bchandler_Type& bch )
+VenantKirchhoffSolver<Mesh, SolverType>::iterateLin( bchandler_Type& bch )
 {
   matrixPtr_Type matrFull( new matrix_Type( *M_localMap, M_massStiff->meanNumEntries()));
 
@@ -855,7 +855,7 @@ VenantKirchhofSolver<Mesh, SolverType>::iterateLin( bchandler_Type& bch )
 
 template <typename Mesh, typename SolverType>
 void
-VenantKirchhofSolver<Mesh, SolverType>::showMe( std::ostream& c  ) const
+VenantKirchhoffSolver<Mesh, SolverType>::showMe( std::ostream& c  ) const
 {
   c << "\n*** VenantKirchhof::showMe method" << std::endl;
   c << "****** Data of the Material************" << std::endl;
@@ -868,7 +868,7 @@ VenantKirchhofSolver<Mesh, SolverType>::showMe( std::ostream& c  ) const
 
 template <typename Mesh, typename SolverType>
 void
-VenantKirchhofSolver<Mesh, SolverType>::evalResidual( vector_Type &residual, const vector_Type& solution, Int /*iter*/)
+VenantKirchhoffSolver<Mesh, SolverType>::evalResidual( vector_Type &residual, const vector_Type& solution, Int /*iter*/)
 {
   M_Displayer->leaderPrint("  S-  Computing residual ...                   ");
   Chrono chrono;
@@ -895,7 +895,7 @@ VenantKirchhofSolver<Mesh, SolverType>::evalResidual( vector_Type &residual, con
 
 template <typename Mesh, typename SolverType>
 void
-VenantKirchhofSolver<Mesh, SolverType>::evalConstraintTensor()
+VenantKirchhoffSolver<Mesh, SolverType>::evalConstraintTensor()
 {
   vector_Type count(*M_localMap);
 
@@ -1033,7 +1033,7 @@ VenantKirchhofSolver<Mesh, SolverType>::evalConstraintTensor()
 
 template <typename Mesh, typename SolverType>
 void
-VenantKirchhofSolver<Mesh, SolverType>::initialize( vectorPtr_Type disp, vectorPtr_Type vel, vectorPtr_Type /*acc*/)
+VenantKirchhoffSolver<Mesh, SolverType>::initialize( vectorPtr_Type disp, vectorPtr_Type vel, vectorPtr_Type /*acc*/)
 {
   *M_disp = *disp;
   if (vel.get())
@@ -1042,14 +1042,14 @@ VenantKirchhofSolver<Mesh, SolverType>::initialize( vectorPtr_Type disp, vectorP
 
 template <typename Mesh, typename SolverType>
 void
-VenantKirchhofSolver<Mesh, SolverType>::initializeVel( const vector_Type& vel)
+VenantKirchhoffSolver<Mesh, SolverType>::initializeVel( const vector_Type& vel)
 {
   *M_vel = vel;
 }
 
 template <typename Mesh, typename SolverType>
 void
-VenantKirchhofSolver<Mesh, SolverType>::initialize( const Function& d0, const Function& w0, const Function& /*a0*/ )
+VenantKirchhoffSolver<Mesh, SolverType>::initialize( const Function& d0, const Function& w0, const Function& /*a0*/ )
 {
   M_FESpace->interpolate(d0, *M_disp, 0.0);
   M_FESpace->interpolate(w0, *M_vel , 0.0);
@@ -1058,7 +1058,7 @@ VenantKirchhofSolver<Mesh, SolverType>::initialize( const Function& d0, const Fu
 
 template <typename Mesh, typename SolverType> // for monolithic
 void
-VenantKirchhofSolver<Mesh, SolverType>::updateVel()
+VenantKirchhoffSolver<Mesh, SolverType>::updateVel()
 {
   *M_vel  = ( 2.0 / M_data->getDataTime()->timeStep() ) * (*M_disp);
   *M_vel -= *M_rhsW;
@@ -1066,7 +1066,7 @@ VenantKirchhofSolver<Mesh, SolverType>::updateVel()
 
 template<typename Mesh, typename SolverType>
 void
-VenantKirchhofSolver<Mesh, SolverType>::reduceSolution( Vector& displacement, Vector& velocity )
+VenantKirchhoffSolver<Mesh, SolverType>::reduceSolution( Vector& displacement, Vector& velocity )
 {
   vector_Type disp(*M_disp, 0);
   vector_Type vel(*M_vel , 0);
@@ -1083,7 +1083,7 @@ VenantKirchhofSolver<Mesh, SolverType>::reduceSolution( Vector& displacement, Ve
 
 template <typename Mesh, typename SolverType>
 void
-VenantKirchhofSolver<Mesh, SolverType>::rescaleMatrices()
+VenantKirchhoffSolver<Mesh, SolverType>::rescaleMatrices()
 {
   *M_mass *=(M_data->getDataTime()->timeStep()*M_rescaleFactor);
   *M_linearStiff *= (M_data->getDataTime()->timeStep()*M_rescaleFactor);
@@ -1091,7 +1091,7 @@ VenantKirchhofSolver<Mesh, SolverType>::rescaleMatrices()
 
 template <typename Mesh, typename SolverType>
 void
-VenantKirchhofSolver<Mesh, SolverType>::setDataFromGetPot( const GetPot& dataFile )
+VenantKirchhoffSolver<Mesh, SolverType>::setDataFromGetPot( const GetPot& dataFile )
 {
   M_linearSolver->setDataFromGetPot( dataFile, "solid/solver" );
   M_linearSolver->setUpPrec(dataFile, "solid/prec");
@@ -1106,7 +1106,7 @@ VenantKirchhofSolver<Mesh, SolverType>::setDataFromGetPot( const GetPot& dataFil
 
 template<typename Mesh, typename SolverType>
 void
-VenantKirchhofSolver<Mesh, SolverType>::applyBoundaryConditions( matrix_Type&        matrix,
+VenantKirchhoffSolver<Mesh, SolverType>::applyBoundaryConditions( matrix_Type&        matrix,
 								 vector_Type&        rhs,
 								 bchandler_Type&     BCh,
 								 UInt                offset)
