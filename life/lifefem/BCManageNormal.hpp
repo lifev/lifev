@@ -367,7 +367,7 @@ void BCManageNormal<MatrixType>::init(const BCBase& boundaryCondition,const Real
     // Loop on BC identifiers
     for ( ID i = 1; i <= boundaryCondition.list_size(); ++i )
     {
-        const IdentifierEssential* pId = static_cast< const IdentifierEssential* >( boundaryCondition( i ) );
+        const BCIdentifierEssential* pId = static_cast< const BCIdentifierEssential* >( boundaryCondition( i ) );
 
         if (boundaryCondition.mode()==Directional)
         {

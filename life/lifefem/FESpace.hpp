@@ -766,9 +766,9 @@ FESpace<MeshType, MapType>::interpolateBC( BCHandler& BCh,
             for ( ID i = 1; i <= BCh[ibc].list_size(); ++i )
             {
                 // Coordinates of the node where we impose the value
-                Real x = static_cast< const IdentifierEssential* >( BCh[ibc]( i ) ) ->x();
-                Real y = static_cast< const IdentifierEssential* >( BCh[ibc]( i ) ) ->y();
-                Real z = static_cast< const IdentifierEssential* >( BCh[ibc]( i ) ) ->z();
+                Real x = static_cast< const BCIdentifierEssential* >( BCh[ibc]( i ) ) ->x();
+                Real y = static_cast< const BCIdentifierEssential* >( BCh[ibc]( i ) ) ->y();
+                Real z = static_cast< const BCIdentifierEssential* >( BCh[ibc]( i ) ) ->z();
 
                 for ( ID j = 1; j <= nComp; ++j )
                 {

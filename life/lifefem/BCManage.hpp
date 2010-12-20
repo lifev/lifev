@@ -947,9 +947,9 @@ bcEssentialManage( MatrixType& matrix,
         for ( ID i = 1; i <= boundaryCond.list_size(); ++i )
         {
             // Coordinates of the node where we impose the value
-            x = static_cast< const IdentifierEssential* >( boundaryCond( i ) ) ->x();
-            y = static_cast< const IdentifierEssential* >( boundaryCond( i ) ) ->y();
-            z = static_cast< const IdentifierEssential* >( boundaryCond( i ) ) ->z();
+            x = static_cast< const BCIdentifierEssential* >( boundaryCond( i ) ) ->x();
+            y = static_cast< const BCIdentifierEssential* >( boundaryCond( i ) ) ->y();
+            z = static_cast< const BCIdentifierEssential* >( boundaryCond( i ) ) ->z();
 
             // Loop on components involved in this boundary condition
             for ( ID j = 1; j <= nComp; ++j )
@@ -1012,9 +1012,9 @@ bcEssentialManageUDep( MatrixType& matrix,
         for ( ID i = 1; i <= boundaryCond.list_size(); ++i )
         {
             // Coordinates of the node where we impose the value
-            x = static_cast< const IdentifierEssential* >( boundaryCond( i ) ) ->x();
-            y = static_cast< const IdentifierEssential* >( boundaryCond( i ) ) ->y();
-            z = static_cast< const IdentifierEssential* >( boundaryCond( i ) ) ->z();
+            x = static_cast< const BCIdentifierEssential* >( boundaryCond( i ) ) ->x();
+            y = static_cast< const BCIdentifierEssential* >( boundaryCond( i ) ) ->y();
+            z = static_cast< const BCIdentifierEssential* >( boundaryCond( i ) ) ->z();
 
             // Loop on components involved in this boundary condition
             for ( ID j = 1; j <= nComp; ++j )
@@ -1125,9 +1125,9 @@ bcEssentialManageVector( VectorType&     rightHandSide,
         for ( ID i = 1; i <= boundaryCond.list_size(); ++i )
         {
             // Coordinates of the node where we impose the value
-            x = static_cast< const IdentifierEssential* >( boundaryCond( i ) ) ->x();
-            y = static_cast< const IdentifierEssential* >( boundaryCond( i ) ) ->y();
-            z = static_cast< const IdentifierEssential* >( boundaryCond( i ) ) ->z();
+            x = static_cast< const BCIdentifierEssential* >( boundaryCond( i ) ) ->x();
+            y = static_cast< const BCIdentifierEssential* >( boundaryCond( i ) ) ->y();
+            z = static_cast< const BCIdentifierEssential* >( boundaryCond( i ) ) ->z();
 
             // Loop on components involved in this boundary condition
             for ( ID j = 1; j <= nComp; ++j )
@@ -1170,7 +1170,7 @@ bcNaturalManage( VectorType& rightHandSide,
     // Number of components involved in this boundary condition
     UInt nComp = boundaryCond.numberOfComponents();
 
-    const IdentifierNatural* pId;
+    const BCIdentifierNatural* pId;
     ID ibF, idDof, icDof, gDof;
     Real sum;
 
@@ -1224,7 +1224,7 @@ bcNaturalManage( VectorType& rightHandSide,
             for ( ID i = 1; i <= boundaryCond.list_size(); ++i )
             {
                 // Pointer to the i-th itdentifier in the list
-                pId = static_cast< const IdentifierNatural* >( boundaryCond( i ) );
+                pId = static_cast< const BCIdentifierNatural* >( boundaryCond( i ) );
 
                 // Number of the current boundary face
                 ibF = pId->id();
@@ -1271,7 +1271,7 @@ bcNaturalManage( VectorType& rightHandSide,
             for ( ID i = 1; i <= boundaryCond.list_size(); ++i )
             {
                 // Pointer to the i-th itdentifier in the list
-                pId = static_cast< const IdentifierNatural* >( boundaryCond( i ) );
+                pId = static_cast< const BCIdentifierNatural* >( boundaryCond( i ) );
 
                 // Number of the current boundary face
                 ibF = pId->id();
@@ -1326,7 +1326,7 @@ bcNaturalManage( VectorType& rightHandSide,
         for ( ID i = 1; i <= boundaryCond.list_size(); ++i )
         {
             // Pointer to the i-th identifier in the list
-            pId = static_cast< const IdentifierNatural* >( boundaryCond( i ) );
+            pId = static_cast< const BCIdentifierNatural* >( boundaryCond( i ) );
             // Number of the current boundary face
             ibF = pId->id();
             // Updating face stuff
@@ -1396,7 +1396,7 @@ bcNaturalManageUDep( Real (*mu)(Real time,Real x, Real y, Real z, Real u),
     // Number of components involved in this boundary condition
     UInt nComp = boundaryCond.numberOfComponents();
 
-    const IdentifierNatural* pId;
+    const BCIdentifierNatural* pId;
     ID ibF, idDof ;
 
     if ( boundaryCond.isDataAVector() )
@@ -1418,7 +1418,7 @@ bcNaturalManageUDep( Real (*mu)(Real time,Real x, Real y, Real z, Real u),
         {
 
             // Pointer to the i-th itdentifier in the list
-            pId = static_cast< const IdentifierNatural* >( boundaryCond( i ) );
+            pId = static_cast< const BCIdentifierNatural* >( boundaryCond( i ) );
 
             // Number of the current boundary face
             ibF = pId->id();
@@ -1497,7 +1497,7 @@ bcRobinManage( MatrixType& matrix,
 
     DataType sum;
 
-    const IdentifierNatural* pId;
+    const BCIdentifierNatural* pId;
     ID ibF, idDof, jdDof, kdDof;
 
     if ( boundaryCond.isDataAVector() )
@@ -1511,7 +1511,7 @@ bcRobinManage( MatrixType& matrix,
         {
 
             // Pointer to the i-th identifier in the list
-            pId = static_cast< const IdentifierNatural* >( boundaryCond( i ) );
+            pId = static_cast< const BCIdentifierNatural* >( boundaryCond( i ) );
 
             // Number of the current boundary face
             ibF = pId->id();
@@ -1613,7 +1613,7 @@ bcRobinManage( MatrixType& matrix,
         {
 
             // Pointer to the i-th identifier in the list
-            pId = static_cast< const IdentifierNatural* >( boundaryCond( i ) );
+            pId = static_cast< const BCIdentifierNatural* >( boundaryCond( i ) );
 
             // Number of the current boundary face
             ibF = pId->id();
@@ -1711,7 +1711,7 @@ bcRobinManageMatrix( MatrixType& matrix,
 
     DataType sum;
 
-    const IdentifierNatural* pId;
+    const BCIdentifierNatural* pId;
     ID ibF, idDof, jdDof;
 
     if ( boundaryCond.isDataAVector() )
@@ -1725,7 +1725,7 @@ bcRobinManageMatrix( MatrixType& matrix,
         {
 
             // Pointer to the i-th identifier in the list
-            pId = static_cast< const IdentifierNatural* >( boundaryCond( i ) );
+            pId = static_cast< const BCIdentifierNatural* >( boundaryCond( i ) );
 
             // Number of the current boundary face
             ibF = pId->id();
@@ -1802,7 +1802,7 @@ bcRobinManageMatrix( MatrixType& matrix,
         {
 
             // Pointer to the i-th identifier in the list
-            pId = static_cast< const IdentifierNatural* >( boundaryCond( i ) );
+            pId = static_cast< const BCIdentifierNatural* >( boundaryCond( i ) );
 
             // Number of the current boundary face
             ibF = pId->id();
@@ -1895,7 +1895,7 @@ bcRobinManageVector( VectorType& rightHandSide,
     // Number of components involved in this boundary condition
     UInt nComp = boundaryCond.numberOfComponents();
 
-    const IdentifierNatural* pId;
+    const BCIdentifierNatural* pId;
     ID ibF, idDof;
 
     if ( boundaryCond.isDataAVector() )
@@ -1906,7 +1906,7 @@ bcRobinManageVector( VectorType& rightHandSide,
         {
 
             // Pointer to the i-th identifier in the list
-            pId = static_cast< const IdentifierNatural* >( boundaryCond( i ) );
+            pId = static_cast< const BCIdentifierNatural* >( boundaryCond( i ) );
 
             // Number of the current boundary face
             ibF = pId->id();
@@ -1945,7 +1945,7 @@ bcRobinManageVector( VectorType& rightHandSide,
         {
 
             // Pointer to the i-th identifier in the list
-            pId = static_cast< const IdentifierNatural* >( boundaryCond( i ) );
+            pId = static_cast< const BCIdentifierNatural* >( boundaryCond( i ) );
 
             // Number of the current boundary face
             ibF = pId->id();
@@ -2046,14 +2046,14 @@ bcFluxManageMatrix( MatrixType&     matrix,
 
     DataType sum;
 
-    const IdentifierNatural* pId;
+    const BCIdentifierNatural* pId;
     ID ibF, idDof, jdDof/*, kdDof*/;
 
     if ( !boundaryCond.isDataAVector() )
     {
         for ( ID i = 1; i <= boundaryCond.list_size(); ++i )
         {
-            pId = static_cast< const IdentifierNatural* >( boundaryCond( i ) );
+            pId = static_cast< const BCIdentifierNatural* >( boundaryCond( i ) );
 
             // Number of the current boundary face
             ibF = pId->id();
@@ -2108,7 +2108,7 @@ bcResistanceManage( MatrixType& matrix,
 
     std::set<ID> resistanceDofs;
 
-    const IdentifierNatural* pId;
+    const BCIdentifierNatural* pId;
     ID ibF, idDof, jdDof, kdDof;
 
     if ( boundaryCond.isDataAVector() )
@@ -2122,7 +2122,7 @@ bcResistanceManage( MatrixType& matrix,
         for ( ID i = 1; i <= boundaryCond.list_size(); ++i )
         {
             // Pointer to the i-th identifier in the list
-            pId = static_cast< const IdentifierNatural* >( boundaryCond( i ) );
+            pId = static_cast< const BCIdentifierNatural* >( boundaryCond( i ) );
 
             // Number of the current boundary face
             ibF = pId->id();

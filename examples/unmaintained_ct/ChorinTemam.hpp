@@ -1095,7 +1095,7 @@ void ChorinTemam<Mesh, SolverType>::computeRES_expl(Real resVal, EntityFlag resF
     for (UInt i=1; i <=  bcB.list_size(); i++)
     {
         // pointer to the ith identifier in the bc_base list
-        const IdentifierNatural* ptr_i = static_cast<const IdentifierNatural*> (bcB(i));
+        const BCIdentifierNatural* ptr_i = static_cast<const BCIdentifierNatural*> (bcB(i));
         // index of corresponding face
         UInt iFace = ptr_i->id();
 
@@ -1177,7 +1177,7 @@ void ChorinTemam<Mesh, SolverType>::computeRES_impl(Real resVal, EntityFlag resF
     for (UInt i=1; i <= bcB.list_size(); ++i)
     {
         // pointer to the ith identifier in the bc_base list
-        const IdentifierNatural* ptr_i = static_cast<const IdentifierNatural*> (bcB(i));
+        const BCIdentifierNatural* ptr_i = static_cast<const BCIdentifierNatural*> (bcB(i));
         // index of corresponding face
         UInt iFace = ptr_i->id();
 

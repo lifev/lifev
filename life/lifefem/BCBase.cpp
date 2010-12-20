@@ -509,9 +509,9 @@ const BCVectorBase* BCBase::pointerToBCVector() const
 }
 
 void
-BCBase::addIdentifier( IdentifierBase* identifierToAddPtr )
+BCBase::addBCIdentifier( BCIdentifierBase* identifierToAddPtr )
 {
-    M_idSet.insert( boost::shared_ptr<IdentifierBase>( identifierToAddPtr ) );
+    M_idSet.insert( boost::shared_ptr<BCIdentifierBase>( identifierToAddPtr ) );
 }
 
 
@@ -598,7 +598,7 @@ BCBase & BCBase::operator=( const BCBase& BCb )
     return *this;
 }
 
-const IdentifierBase*
+const BCIdentifierBase*
 BCBase::operator[] ( const ID& i ) const
 {
     ASSERT_PRE( M_finalized, "BC List should be finalized before being accessed" );
@@ -606,7 +606,7 @@ BCBase::operator[] ( const ID& i ) const
     return M_idVector[ i ].get();
 }
 
-const IdentifierBase*
+const BCIdentifierBase*
 BCBase::operator() ( const ID& i ) const
 {
     return this->operator[] ( i-1 );

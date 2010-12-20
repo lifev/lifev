@@ -48,9 +48,9 @@
 
 namespace LifeV {
 
-//! IdentifierBase - Base class holding Dof identifiers for implementing BC
+//! BCIdentifierBase - Base class holding Dof identifiers for implementing BC
 
-class IdentifierBase
+class BCIdentifierBase
 {
 public:
 
@@ -58,26 +58,26 @@ public:
     //@{
 
     //! Empty Constructor
-    IdentifierBase()
+    BCIdentifierBase()
     {
         // Nothing to be done here
     }
 
     //! Constructor given the ID
     /*!
-        Creates an Identifier with a given ID
+        Creates an BCIdentifier with a given ID
         @param i Usually the id of the Dof, or the id of a boundary face, etc...
     */
-    explicit IdentifierBase( ID const & i ) : M_id( i )
+    explicit BCIdentifierBase( ID const & i ) : M_id( i )
     {
         // Nothing to be done here
     }
 
     //! Copy constructor
-    IdentifierBase( IdentifierBase const & id );
+    BCIdentifierBase( BCIdentifierBase const & id );
 
     //! Destructor
-    virtual ~IdentifierBase()
+    virtual ~BCIdentifierBase()
     {
         // Nothing to be done here
     }
@@ -113,7 +113,7 @@ public:
     //! @name Get Methods
     //@{
 
-    //! Returns the ID of the Identifier
+    //! Returns the ID of the BCIdentifier
     const ID& id() const
     {
         return M_id;
@@ -126,31 +126,31 @@ protected:
     ID M_id;
 };
 
-//! IdentifierComp - Functor for ordering operations (required in set STL container)
+//! BCIdentifierComp - Functor for ordering operations (required in set STL container)
 
-class identifierComp
+class BCIdentifierComparison
 {
 public:
 
     //! @name Operators
     //@{
 
-    //! Comparison operator for Identifier objects
+    //! Comparison operator for BCIdentifier objects
     /*!
-        @return Boolean which is true if the ID of the first Identifier is smaller
-                than the ID of the second Identifier
+        @return Boolean which is true if the ID of the first BCIdentifier is smaller
+                than the ID of the second BCIdentifier
      */
-    bool operator() ( const IdentifierBase* i1, const IdentifierBase* i2 ) const
+    bool operator() ( const BCIdentifierBase* i1, const BCIdentifierBase* i2 ) const
     {
         return ( i1->id() < i2->id() );
     }
 
-    //! Comparison operator for shared pointers to Identifier objects
+    //! Comparison operator for shared pointers to BCIdentifier objects
     /*!
-        @return Boolean which is true if the ID of the first Identifier is smaller
-                than the ID of the second Identifier
+        @return Boolean which is true if the ID of the first BCIdentifier is smaller
+                than the ID of the second BCIdentifier
      */
-    bool operator() ( boost::shared_ptr<IdentifierBase> const & i1, boost::shared_ptr<IdentifierBase> const & i2 ) const
+    bool operator() ( boost::shared_ptr<BCIdentifierBase> const & i1, boost::shared_ptr<BCIdentifierBase> const & i2 ) const
     {
         return ( i1.get()->id() < i2.get()->id() );
     }
@@ -158,18 +158,18 @@ public:
     //@}
 };
 
-//! Overloading == operator for objects of type Identifier
+//! Overloading == operator for objects of type BCIdentifier
 /*!
-    @param first The first Identifier
-    @param second The second Identifier
-    @return A bool which is 1 if the ID of the two Identifier objects are the same
+    @param first The first BCIdentifier
+    @param second The second BCIdentifier
+    @return A bool which is 1 if the ID of the two BCIdentifier objects are the same
  */
-inline bool operator==( const IdentifierBase& first, const IdentifierBase& second )
+inline bool operator==( const BCIdentifierBase& first, const BCIdentifierBase& second )
 {
     return first.id() == second.id();
 }
 
-//! IdentifierEssential - Identifier for implementing Essential Boundary Conditions
+//! BCIdentifierEssential - BCIdentifier for implementing Essential Boundary Conditions
 /*!
 
     This class holds the Dof identifier and its coordinates for implementing Essential
@@ -177,7 +177,7 @@ inline bool operator==( const IdentifierBase& first, const IdentifierBase& secon
 
  */
 
-class IdentifierEssential: public IdentifierBase
+class BCIdentifierEssential: public BCIdentifierBase
 {
 public:
 
@@ -185,20 +185,20 @@ public:
     //@{
 
     //! Empty Constructor
-    IdentifierEssential() : IdentifierBase()
+    BCIdentifierEssential() : BCIdentifierBase()
     {
         // Nothing to be done here
     }
 
     //! Constructor given the ID and the coordinates
     /*!
-     *  Creates an Identifier with a given ID and given coordinates
+     *  Creates an BCIdentifier with a given ID and given coordinates
         @paramx x x-coordinate of the node where this BC applies
         @paramx y y-coordinate of the node where this BC applies
         @paramx z z-coordinate of the node where this BC applies
      */
-    IdentifierEssential( const ID& id, const Real& x, const Real& y, const Real& z ) :
-            IdentifierBase( id ),
+    BCIdentifierEssential( const ID& id, const Real& x, const Real& y, const Real& z ) :
+            BCIdentifierBase( id ),
             M_x( x ),
             M_y( y ),
             M_z( z )
@@ -207,7 +207,7 @@ public:
     }
 
     //! Copy Constructor
-    IdentifierEssential( IdentifierEssential const & id );
+    BCIdentifierEssential( BCIdentifierEssential const & id );
 
     //@}
 
@@ -257,7 +257,7 @@ private:
 };
 
 
-//! IdentifierNatural - Idenifier for Natural and Robin Boundary Condiions
+//! BCIdentifierNatural - Idenifier for Natural and Robin Boundary Condiions
 /*!
 
     This class holds the Dof identifier and the bdLocalToGlobal information for implementing
@@ -265,7 +265,7 @@ private:
 
  */
 
-class IdentifierNatural: public IdentifierBase
+class BCIdentifierNatural: public BCIdentifierBase
 {
 public:
 
@@ -273,30 +273,30 @@ public:
     //@{
 
     //! Empty Constructor
-    IdentifierNatural() : IdentifierBase()
+    BCIdentifierNatural() : BCIdentifierBase()
     {
         // Nothing to be done here
     }
 
     //! Constructor given ID and bdLocalToGlobal map
     /*!
-        Creates an Identifier with a given ID and a given local-to-global map
+        Creates an BCIdentifier with a given ID and a given local-to-global map
         @param i The number of the boundary face
         @param bdltg A SimpleVect holding the local-to-global map on this face
     */
-    IdentifierNatural( const ID& i, const SimpleVect<ID>& localToGlobal );
+    BCIdentifierNatural( const ID& i, const SimpleVect<ID>& localToGlobal );
 
     //! Constructor given the ID
     /*!
         @param id The ID of the dof
     */
-    explicit IdentifierNatural( const ID& id );
+    explicit BCIdentifierNatural( const ID& id );
 
     //! Copy Constructor
-    IdentifierNatural( IdentifierNatural const & id );
+    BCIdentifierNatural( BCIdentifierNatural const & id );
 
     //! Destructor
-    virtual ~IdentifierNatural()
+    virtual ~BCIdentifierNatural()
     {
         // Nothing to be done here
     }

@@ -64,7 +64,7 @@
 #ifndef BCBASE_H
 #define BCBASE_H
 
-#include <life/lifemesh/identifier.hpp>
+#include <life/lifemesh/BCIdentifier.hpp>
 #include <life/lifemesh/markers.hpp>
 #include <life/lifefem/DOF.hpp>
 #include <life/lifefem/CurrentFE.hpp>
@@ -389,9 +389,9 @@ public:
 
     //! Adds a new identifier to the list
     /*!
-       @param identifierToAddPtr pointer to the IdentifierBase object to be added
+       @param identifierToAddPtr pointer to the BCIdentifierBase object to be added
      */
-    void addIdentifier( IdentifierBase* identifierToAddPtr );
+    void addBCIdentifier( BCIdentifierBase* identifierToAddPtr );
 
     //! Returns the size of the identifiers list
     /*!
@@ -424,14 +424,14 @@ public:
        The list of identifiers has to be finalized before calling this operator.
        @param i index of the element in the list of identifier that we want to be returned (starting from 0)
      */
-    const IdentifierBase* operator[] ( const ID& i ) const;
+    const BCIdentifierBase* operator[] ( const ID& i ) const;
 
     //! Returns a pointer to the (i-1)-th element of the list of identifiers
     /*!
        The list of identifiers has to be finalized before calling this operator.
        @param i index of the element in the list of identifier that we want to be returned (starting from 1)
      */
-    const IdentifierBase* operator() ( const ID& i ) const;
+    const BCIdentifierBase* operator() ( const ID& i ) const;
 
 
     //! Overloading function operator by calling the BCFunctionBase user specified function
@@ -626,7 +626,7 @@ private:
 
     bool                                  M_isStored_BcFunctionVectorDependent; //!< True if the BCBase is based on a BCFunctionUDepBase function, False otherwise
 
-    std::set<boost::shared_ptr<IdentifierBase>, identifierComp> M_idSet; //!< set of pointers to identifiers allowing the user to get hold the DOF to which the BC applies
+    std::set<boost::shared_ptr<BCIdentifierBase>, BCIdentifierComparison> M_idSet; //!< set of pointers to identifiers allowing the user to get hold the DOF to which the BC applies
 
     std::vector<boost::shared_ptr<IdentifierBase> > M_idVector; //!< container for id's when the list is finalized
 

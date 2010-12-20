@@ -725,7 +725,7 @@ void steklovPoincare::computeStrongResidualFSI()
 //     // Number of components involved in this boundary condition
 //     UInt nComp = BCb.numberOfComponents();
 
-//     const IdentifierNatural* pId;
+//     const BCIdentifierNatural* pId;
 
 //     SimpleArray<UInt>  localToBoundary;
 //     SimpleArray<UInt>  boundaryToLocal;

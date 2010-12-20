@@ -646,11 +646,11 @@ BCHandler::bcUpdate( Mesh& mesh, CurrentBdFE& boundaryFE, const Dof& dof )
 
                     //providing Essential boundary conditions with needed data (global DOF id and their coordinates)
                     if ( bcBaseIterator->isDataAVector())
-                        bcBaseIterator->addIdentifier( new IdentifierBase( gDof) );
+                        bcBaseIterator->addBCIdentifier( new BCIdentifierBase( gDof) );
                     else
                     { // With user defined functions
                         boundaryFE.coorMap( x, y, z, boundaryFE.refFE.xi( lDof ), boundaryFE.refFE.eta( lDof ) );
-                        bcBaseIterator->addIdentifier( new IdentifierEssential( gDof, x, y, z ) );
+                        bcBaseIterator->addBCIdentifier( new BCIdentifierEssential( gDof, x, y, z ) );
                     }
                 }
                 break;
@@ -663,31 +663,31 @@ BCHandler::bcUpdate( Mesh& mesh, CurrentBdFE& boundaryFE, const Dof& dof )
                     if ( type == 0 )  // if the BC is a vector which values don't need to be integrated
                     {
                         for (ID lDof = 0; lDof< localToGlobalMapOnBElem.size(); lDof++)
-                            bcBaseIterator->addIdentifier( new IdentifierNatural( localToGlobalMapOnBElem(lDof+1) ) );
+                            bcBaseIterator->addBCIdentifier( new BCIdentifierNatural( localToGlobalMapOnBElem(lDof+1) ) );
                     }
                     else if ( type <= 3 )  // FE vector which needed to be integrated on the boundary
-                        bcBaseIterator->addIdentifier( new IdentifierNatural( iBoundaryElement, localToGlobalMapOnBElem ) );
+                        bcBaseIterator->addBCIdentifier( new BCIdentifierNatural( iBoundaryElement, localToGlobalMapOnBElem ) );
                     else
                         ERROR_MSG( "This BCVector type is not yet implemented" );
                 }
                 else
-                    bcBaseIterator->addIdentifier( new IdentifierNatural( iBoundaryElement, localToGlobalMapOnBElem) );
+                    bcBaseIterator->addBCIdentifier( new BCIdentifierNatural( iBoundaryElement, localToGlobalMapOnBElem) );
                 break;
 
             case Robin:
                 //providing Robin boundary conditions with global DOFs on element
-                bcBaseIterator->addIdentifier( new IdentifierNatural( iBoundaryElement, localToGlobalMapOnBElem ) );
+                bcBaseIterator->addBCIdentifier( new BCIdentifierNatural( iBoundaryElement, localToGlobalMapOnBElem ) );
                 break;
             case Resistance:
                 //providing Resistance boundary conditions with global DOFs on element
                 if ( bcBaseIterator->isDataAVector() )
                 {
-                    bcBaseIterator->addIdentifier( new IdentifierNatural( iBoundaryElement, localToGlobalMapOnBElem ) );
+                    bcBaseIterator->addBCIdentifier( new BCIdentifierNatural( iBoundaryElement, localToGlobalMapOnBElem ) );
                 }
                 break;
             case Flux:
                 //providing Flux boundary conditions with global DOFs on element
-                bcBaseIterator->addIdentifier( new IdentifierNatural( iBoundaryElement, localToGlobalMapOnBElem ) );
+                bcBaseIterator->addBCIdentifier( new BCIdentifierNatural( iBoundaryElement, localToGlobalMapOnBElem ) );
                 break;
             default:
                 ERROR_MSG("BC not yet implemented");
@@ -750,11 +750,11 @@ BCHandler::bcUpdate( Mesh& mesh, CurrentBdFE& boundaryFE, const Dof& dof )
 
                         //providing the boundary conditions with needed data
                         if ( bcBaseIterator->isDataAVector() )
-                            bcBaseIterator->addIdentifier( new IdentifierBase( gDof ) );
+                            bcBaseIterator->addBCIdentifier( new BCIdentifierBase( gDof ) );
                         else
                         { // With user defined functions
                             boundaryFE.coorMap( x, y, z, boundaryFE.refFE.xi( lDof ), boundaryFE.refFE.eta( lDof ) );
-                            bcBaseIterator->addIdentifier( new IdentifierEssential( gDof, x, y, z ) );
+                            bcBaseIterator->addBCIdentifier( new BCIdentifierEssential( gDof, x, y, z ) );
                         }
                     }
                     bcBaseIterator++;
@@ -784,11 +784,11 @@ BCHandler::bcUpdate( Mesh& mesh, CurrentBdFE& boundaryFE, const Dof& dof )
 
                         //providing the boundary conditions with needed data
                         if ( bcBaseIterator->isDataAVector() )
-                            bcBaseIterator->addIdentifier( new IdentifierBase( gDof ) );
+                            bcBaseIterator->addBCIdentifier( new BCIdentifierBase( gDof ) );
                         else
                         { // With user defined functions
                             boundaryFE.coorMap( x, y, z, boundaryFE.refFE.xi( lDof ), boundaryFE.refFE.eta( lDof ) );
-                            bcBaseIterator->addIdentifier( new IdentifierEssential( gDof, x, y, z ) );
+                            bcBaseIterator->addBCIdentifier( new BCIdentifierEssential( gDof, x, y, z ) );
                         }
                     }
                     bcBaseIterator++;
@@ -936,12 +936,12 @@ BCHandler::bcUpdateOldVersion( Mesh& mesh, CurrentBdFE& boundaryFE, const Dof& d
                             // Which kind of data ?
                             if ( where->isDataAVector() )
                             { // With data vector
-                                where->addIdentifier( new IdentifierBase( gDof ) ); // We only need the dof number
+                                where->addBCIdentifier( new BCIdentifierBase( gDof ) ); // We only need the dof number
                             }
                             else
                             { // With user defined functions
                                 boundaryFE.coorMap( x, y, z, boundaryFE.refFE.xi( lDof - 1 ), boundaryFE.refFE.eta( lDof - 1 ) );
-                                where->addIdentifier( new IdentifierEssential( gDof, x, y, z ) );
+                                where->addBCIdentifier( new BCIdentifierEssential( gDof, x, y, z ) );
                             }
                             break;
                         case Natural:
@@ -952,7 +952,7 @@ BCHandler::bcUpdateOldVersion( Mesh& mesh, CurrentBdFE& boundaryFE, const Dof& d
                                 case 0:
                                     // if the BC is a function or a vector which values
                                     // don't need to be integrated
-                                    where->addIdentifier( new IdentifierNatural( gDof ) );
+                                    where->addBCIdentifier( new BCIdentifierNatural( gDof ) );
                                     break;
                                 case 1:  // if the BC is a vector of values to be integrated
                                     break;
@@ -969,7 +969,7 @@ BCHandler::bcUpdateOldVersion( Mesh& mesh, CurrentBdFE& boundaryFE, const Dof& d
                             // Why kind of data ?
                             // vincent please check again for your Robin-FE it doesn't work for Q1
                             //       if ( where->isDataAVector()  ) { // With data vector
-                            //        where->addIdentifier( new IdentifierNatural(gDof) );
+                            //        where->addBCIdentifier( new BCIdentifierNatural(gDof) );
                             //       }
                             break;
                         case Flux:
@@ -980,10 +980,10 @@ BCHandler::bcUpdateOldVersion( Mesh& mesh, CurrentBdFE& boundaryFE, const Dof& d
                                 case 0:
                                     // if the BC is a function or a vector which values
                                     // don't need to be integrated
-                                    where->addIdentifier( new IdentifierNatural( gDof ) );
+                                    where->addBCIdentifier( new BCIdentifierNatural( gDof ) );
                                     break;
                                 case 1:  // if the BC is a vector of values to be integrated
-                                    where->addIdentifier( new IdentifierNatural( gDof ) );
+                                    where->addBCIdentifier( new BCIdentifierNatural( gDof ) );
                                     break;
                                 case 2:  // if the BC is a vector of values to be integrated
                                     break;
@@ -1049,12 +1049,12 @@ BCHandler::bcUpdateOldVersion( Mesh& mesh, CurrentBdFE& boundaryFE, const Dof& d
                             // Which kind of data ?
                             if ( where->isDataAVector() )
                             { // With data vector
-                                where->addIdentifier( new IdentifierBase( gDof ) );
+                                where->addBCIdentifier( new BCIdentifierBase( gDof ) );
                             }
                             else
                             { // With user defined functions
                                 boundaryFE.coorMap( x, y, z, boundaryFE.refFE.xi( lDof - 1 ), boundaryFE.refFE.eta( lDof - 1 ) );
-                                where->addIdentifier( new IdentifierEssential( gDof, x, y, z ) );
+                                where->addBCIdentifier( new BCIdentifierEssential( gDof, x, y, z ) );
                             }
                             break;
                         case Natural:
@@ -1066,7 +1066,7 @@ BCHandler::bcUpdateOldVersion( Mesh& mesh, CurrentBdFE& boundaryFE, const Dof& d
                                 case 0:
                                     // if the BC is a function or a vector which values
                                     // don't need to be integrated
-                                    where->addIdentifier( new IdentifierNatural( gDof ) );
+                                    where->addBCIdentifier( new BCIdentifierNatural( gDof ) );
                                     break;
                                 case 1:  // if the BC is a vector of values to be integrated
                                     break;
@@ -1081,7 +1081,7 @@ BCHandler::bcUpdateOldVersion( Mesh& mesh, CurrentBdFE& boundaryFE, const Dof& d
                             // Which kind of data ?
                             if ( where->isDataAVector() )
                             { // With data vector
-                                where->addIdentifier( new IdentifierNatural( gDof ) );
+                                where->addBCIdentifier( new BCIdentifierNatural( gDof ) );
                             }
                             break;
                         case Flux:
@@ -1131,12 +1131,12 @@ BCHandler::bcUpdateOldVersion( Mesh& mesh, CurrentBdFE& boundaryFE, const Dof& d
                     // Why kind of data ?
                     if ( where->isDataAVector() )
                     { // With data vector
-                        where->addIdentifier( new IdentifierBase( gDof ) );
+                        where->addBCIdentifier( new BCIdentifierBase( gDof ) );
                     }
                     else
                     { // With user defined functions
                         boundaryFE.coorMap( x, y, z, boundaryFE.refFE.xi( lDof - 1 ), boundaryFE.refFE.eta( lDof - 1 ) );
-                        where->addIdentifier( new IdentifierEssential( gDof, x, y, z ) );
+                        where->addBCIdentifier( new BCIdentifierEssential( gDof, x, y, z ) );
                     }
                 }
                 break;
@@ -1154,7 +1154,7 @@ BCHandler::bcUpdateOldVersion( Mesh& mesh, CurrentBdFE& boundaryFE, const Dof& d
                         {
                             lDof = nDofBElemEdges + nDofBElemVertices + l; // local Dof
                             gDof = dof.localToGlobal( iAdjacentElem, nDofElemEdges +  nDofElemVertices + ( iElemBElement - 1 ) * nDofPerFace + l ); // global Dof
-                            where->addIdentifier( new IdentifierNatural( gDof ) );
+                            where->addBCIdentifier( new BCIdentifierNatural( gDof ) );
                         }
                     }
                     else if ( (type == 1) || (type == 2) )
@@ -1166,7 +1166,7 @@ BCHandler::bcUpdateOldVersion( Mesh& mesh, CurrentBdFE& boundaryFE, const Dof& d
                             gDof = dof.localToGlobal( iAdjacentElem, nDofElemEdges +  nDofElemVertices + ( iElemBElement - 1 ) * nDofPerFace + l ); // global Dof
                             bdltg( lDof ) = gDof; // local to global on this face
                         }
-                        where->addIdentifier( new IdentifierNatural( iBoundaryElement, bdltg ) );
+                        where->addBCIdentifier( new BCIdentifierNatural( iBoundaryElement, bdltg ) );
                     }
 
                     else
@@ -1182,7 +1182,7 @@ BCHandler::bcUpdateOldVersion( Mesh& mesh, CurrentBdFE& boundaryFE, const Dof& d
                         gDof = dof.localToGlobal( iAdjacentElem, nDofElemEdges +  nDofElemVertices + ( iElemBElement - 1 ) * nDofPerFace + l ); // global Dof
                         bdltg( lDof ) = gDof; // local to global on this face
                     }
-                    where->addIdentifier( new IdentifierNatural( iBoundaryElement, bdltg ) );
+                    where->addBCIdentifier( new BCIdentifierNatural( iBoundaryElement, bdltg ) );
                 }
                 break;
             case Robin:
@@ -1192,17 +1192,17 @@ BCHandler::bcUpdateOldVersion( Mesh& mesh, CurrentBdFE& boundaryFE, const Dof& d
                     gDof = dof.localToGlobal( iAdjacentElem, nDofElemEdges +  nDofElemVertices + ( iElemBElement - 1 ) * nDofPerFace + l ); // global Dof
                     bdltg( lDof ) = gDof; // local to global on this face
                 }
-                where->addIdentifier( new IdentifierNatural( iBoundaryElement, bdltg ) );
+                where->addBCIdentifier( new BCIdentifierNatural( iBoundaryElement, bdltg ) );
                 // }
                 break;
             case Flux:
-                where->addIdentifier( new IdentifierNatural( iBoundaryElement, bdltg ) );
+                where->addBCIdentifier( new BCIdentifierNatural( iBoundaryElement, bdltg ) );
                 break;
 
             case Resistance:
                 if ( where->isDataAVector()  )
                 {
-                  where->addIdentifier( new IdentifierNatural( iBoundaryElement, bdltg ) );
+                  where->addBCIdentifier( new BCIdentifierNatural( iBoundaryElement, bdltg ) );
                 }
                 break;
             default:

@@ -26,27 +26,27 @@
 
 /*!
     @file
-    @brief Implementations for identifier.hpp
+    @brief Implementations for BCIdentifier.hpp
 
     @date 01-07-2002
     @author M. A. Fernandez
     @contributor Luca Bertagna <lbertag@emory.edu>
  */
 
-#include <life/lifemesh/identifier.hpp>
+#include <life/lifemesh/BCIdentifier.hpp>
 
 namespace LifeV
 {
 
 ////////////////////
-// IdentifierBase //
+// BCIdentifierBase //
 ////////////////////
 
 // ============================================= //
 //          Constructors & Destructor            //
 // ============================================= //
 
-IdentifierBase::IdentifierBase(const IdentifierBase & id): M_id( id.M_id )
+BCIdentifierBase::BCIdentifierBase(const BCIdentifierBase & id): M_id( id.M_id )
 {
     // Nothing to be done here
 }
@@ -55,20 +55,20 @@ IdentifierBase::IdentifierBase(const IdentifierBase & id): M_id( id.M_id )
 //            Methods            //
 // ============================= //
 
-void IdentifierBase::showMe( std::ostream& output) const
+void BCIdentifierBase::showMe( std::ostream& output) const
 {
 	output << "\n Node id: " << M_id << '\n';
 }
 
 /////////////////////////
-// IdentifierEssential //
+// BCIdentifierEssential //
 /////////////////////////
 
 // ============================================= //
 //          Constructors & Destructor            //
 // ============================================= //
 
-IdentifierEssential::IdentifierEssential( IdentifierEssential const & id ) : IdentifierBase ( id ),
+BCIdentifierEssential::BCIdentifierEssential( BCIdentifierEssential const & id ) : BCIdentifierBase ( id ),
                                                                              M_x( id.M_x ),
                                                                              M_y( id.M_y ),
                                                                              M_z( id.M_z )
@@ -80,7 +80,7 @@ IdentifierEssential::IdentifierEssential( IdentifierEssential const & id ) : Ide
 //            Methods            //
 // ============================= //
 
-void IdentifierEssential::showMe( std::ostream& output) const
+void BCIdentifierEssential::showMe( std::ostream& output) const
 {
 	output << "\nNode id:" << M_id << '\n';
 	output << "Node coordinates:\n";
@@ -90,25 +90,25 @@ void IdentifierEssential::showMe( std::ostream& output) const
 }
 
 ///////////////////////
-// IdentifierNatural //
+// BCIdentifierNatural //
 ///////////////////////
 
 // ============================================= //
 //          Constructors & Destructor            //
 // ============================================= //
 
-IdentifierNatural::IdentifierNatural( const ID& id, const SimpleVect<ID>& localToGlobal ) : IdentifierBase( id )
+BCIdentifierNatural::BCIdentifierNatural( const ID& id, const SimpleVect<ID>& localToGlobal ) : BCIdentifierBase( id )
 {
     M_localToGlobal.reserve( localToGlobal.size() );
     M_localToGlobal.insert( M_localToGlobal.end(), localToGlobal.begin(), localToGlobal.end() );
 }
 
-IdentifierNatural::IdentifierNatural( const ID& id ) : IdentifierBase( id )
+BCIdentifierNatural::BCIdentifierNatural( const ID& id ) : BCIdentifierBase( id )
 {
     // Nothing to be done here
 }
 
-IdentifierNatural::IdentifierNatural( IdentifierNatural const & id ) : IdentifierBase( id ),
+BCIdentifierNatural::BCIdentifierNatural( BCIdentifierNatural const & id ) : BCIdentifierBase( id ),
                                                                        M_localToGlobal( id.M_localToGlobal )
 {
     // Nothing to be done here
@@ -118,7 +118,7 @@ IdentifierNatural::IdentifierNatural( IdentifierNatural const & id ) : Identifie
 //            Methods            //
 // ============================= //
 
-void IdentifierNatural::showMe( std::ostream & output) const
+void BCIdentifierNatural::showMe( std::ostream & output) const
 {
 	output << "\nNode id:" << M_id << '\n';
 	output << "Local-to-global map:\n";
