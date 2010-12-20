@@ -33,8 +33,8 @@ along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
   @maintainer Radu Popescu <radu.popescu@epfl.ch>
 */
 
-#ifndef CHRONO_H
-#define CHRONO_H
+#ifndef LIFE_CHRONO_H
+#define LIFE_CHRONO_H
 
 #include <ctime>
 
@@ -43,17 +43,17 @@ along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
 namespace LifeV
 {
 
-//! @name Chrono - chronometer class
+//! @name LifeChrono - chronometer class
 /*!
   This class is used for timing sections of code
 */
-class Chrono
+class LifeChrono
 {
 public:
 
     //! @name Constructor
     //@{
-    Chrono():
+    LifeChrono():
         M_t1(0),
         M_t2(0),
         M_dt(0),
@@ -105,21 +105,6 @@ public:
 
         return ( 1. * M_dt / CLOCKS_PER_SEC );
     }
-
-    // DEPRECATED
-    //! Reset the timer
-    void __attribute__((__deprecated__)) Reset()
-    {
-        M_dt = 0;
-        M_running = false;
-    }
-    Real __attribute__((__deprecated__)) diff_cumul()
-    {
-        if (M_running)
-            return ( 1. * ( M_dt +  clock() - M_t1 ) ) / CLOCKS_PER_SEC;
-
-        return ( 1. * M_dt / CLOCKS_PER_SEC );
-    }
     //@}
 
 private:
@@ -130,17 +115,17 @@ private:
     //@}
 };
 
-//! @name ChronoFake - dummy chronometer class
+//! @name LifeChronoFake - dummy chronometer class
 /*!
   When the diff and diff_cumul methods are called, always
   returns -1.0
 */
-class ChronoFake
+class LifeChronoFake
 {
 public:
     //! @name Constructor
     //@{
-    ChronoFake()
+    LifeChronoFake()
     {
     }
     //@}
@@ -164,18 +149,9 @@ public:
     {
         return -1.;
     };
-
-    // // DEPRECATED
-    void __attribute__((__deprecated__)) Reset()
-    {
-    }
-    Real __attribute__((__deprecated__)) diff_cumul()
-    {
-        return -1.;
-    };
     //@}
 };
 
 }
-#endif // CHRONO_H
+#endif // LIFE_CHRONO_H
 
