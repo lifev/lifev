@@ -434,35 +434,6 @@ public:
 
   //@}
 
-  //Deprecated Interfaces
-
-  //! Get the density //Deprecated
-  const Real& __attribute__ ((__deprecated__)) rho() const
-  { return getRho(); }
-
-  //! Get the Poisson coefficient  //Deprecated
-  const Real& __attribute__ ((__deprecated__)) poisson() const
-  { return getPoisson(); }
-
-  //! Get the Young modulus //Deprecated
-  const Real& __attribute__ ((__deprecated__)) young() const
-  { return getYoung(); }
-
-  //! Get the thickness //Deprecated
-  const Real& __attribute__ ((__deprecated__)) thickness() const
-  { return getThickness(); }
-
-  /*! Get the offset parameter. It is taken into account when the boundary conditions
-    are applied and the matrices are assembled.
-  */ //Deprecated
-
-    const UInt& __attribute__ ((__deprecated__)) offset() const
-  { return getOffset(); }
-
-  //! Get the comunicator object //Deprecated
-  boost::shared_ptr<Epetra_Comm> const& __attribute__ ((__deprecated__)) comm() const
-  {return getComunicator();}
- 
 protected:
 
   //! Apply boundary condition

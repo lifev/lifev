@@ -92,30 +92,6 @@ public:
 
   //@}
 
-  /*const UInt __attribute__ ((__deprecated__)) maxiter()
-  {
-    return getMaxiter();
-  }
-
-  const UInt __attribute__ ((__deprecated__)) abstol()
-  {
-    return getAbstol();
-  }
-
-  const UInt __attribute__ ((__deprecated__)) reltol()
-  {
-    return getReltol();
-  }
-
-  const UInt __attribute__ ((__deprecated__)) etamax()
-  {
-    return getEtamax();
-  }
-
-  const UInt __attribute__ ((__deprecated__)) linesearch()
-  {
-    return getLinesearch();
-    }*/
 
 protected:
 
