@@ -98,7 +98,7 @@ public:
     // inside HDF5Filter3DMesh when doing output.
     typedef boost::shared_ptr<interfaceVector_Type> interfaceVectorPtr_Type;
 
-    typedef partitionMesh<uncutMesh_Type> meshCutter_Type;
+    typedef MeshPartitioner<uncutMesh_Type> meshCutter_Type;
     typedef boost::scoped_ptr<meshCutter_Type> meshCutterPtr_Type;
 
     typedef MarkerTraits_Base::EntityFlag entityFlag_Type;
@@ -231,9 +231,9 @@ private:
     //! @name Private Methods
     //@{
 
-    //! Create the partitionMesh objects for fluid and solid
+    //! Create the MeshPartitioner objects for fluid and solid
     /*!
-      Allocate the partitionMesh objects for the fluid and solid and
+      Allocate the MeshPartitioner objects for the fluid and solid and
       execute the partitioning of the two materials
     */
     void runTheCutters();
