@@ -376,9 +376,9 @@ public:
     const boost::shared_ptr<const MapType>			mapPtr() const  { return M_map; }
 
     //! Returns the velocity dof
-    const Dof&			dof()	const { return *M_dof; }
-    Dof&				dof() 		  { return *M_dof; }
-    const boost::shared_ptr<Dof> & dofPtr() const{ return M_dof; }
+    const DOF&			dof()	const { return *M_dof; }
+    DOF&				dof() 		  { return *M_dof; }
+    const boost::shared_ptr<DOF> & dofPtr() const{ return M_dof; }
 
     //! Returns the current FE
     const CurrentFE&	fe()	const { return *M_fe; }
@@ -515,8 +515,8 @@ private:
     //! dimension of the field variable ( scalar/vector field)
     UInt								M_fieldDim;
 
-    //! A shared pointer to the Dof object
-    boost::shared_ptr<Dof>				M_dof;
+    //! A shared pointer to the DOF object
+    boost::shared_ptr<DOF>				M_dof;
 
     //! The number of total dofs
     UInt								M_dim;
@@ -548,7 +548,7 @@ FESpace(	MeshPartitioner<MeshType>& 	mesh,
         M_Qr			( &Qr ),
         M_bdQr			( &bdQr ),
         M_fieldDim		( fDim ),
-        M_dof			( new Dof( *M_mesh, *M_refFE ) ),
+        M_dof			( new DOF( *M_mesh, *M_refFE ) ),
         M_dim			( M_dof->numTotalDof() ),
         M_fe			( new CurrentFE  ( *M_refFE,              getGeometricMap( *M_mesh ),               *M_Qr ) ),
         M_feBd			( ),
@@ -588,7 +588,7 @@ FESpace(	MeshPartitioner<MeshType>&	mesh,
     setSpace( space );
 
     // Set other quantities
-    M_dof.reset( new Dof( *M_mesh, *M_refFE ) );
+    M_dof.reset( new DOF( *M_mesh, *M_refFE ) );
     M_dim = M_dof->numTotalDof();
     M_fe.reset( new CurrentFE( *M_refFE, getGeometricMap( *M_mesh ), *M_Qr ) );
 
@@ -617,7 +617,7 @@ FESpace(	meshPtr_Type			mesh,
         M_Qr			( &Qr ),
         M_bdQr			( &bdQr ),
         M_fieldDim		( fDim ),
-        M_dof			( new Dof( *M_mesh, *M_refFE ) ),
+        M_dof			( new DOF( *M_mesh, *M_refFE ) ),
         M_dim			( M_dof->numTotalDof() ),
         M_fe			( new CurrentFE( *M_refFE, getGeometricMap( *M_mesh ), *M_Qr ) ),
         M_feBd			( ),
@@ -658,7 +658,7 @@ FESpace(	meshPtr_Type			mesh,
     setSpace( space );
 
     // Set other quantities
-    M_dof.reset( new Dof( *M_mesh, *M_refFE ) );
+    M_dof.reset( new DOF( *M_mesh, *M_refFE ) );
     M_dim = M_dof->numTotalDof();
     M_fe.reset( new CurrentFE( *M_refFE, getGeometricMap( *M_mesh ), *M_Qr ) );
 

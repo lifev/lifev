@@ -179,8 +179,8 @@ public:
   const CurrentFE&      getFe() const  {return M_fe;}
   //! Returns the current boundary FE object
   CurrentBoundaryFE&    getFeBd() {return M_feBd;}
-  //! Returns the Dof object
-  const Dof&            getdDof() const {return M_dof;}
+  //! Returns the DOF object
+  const DOF&            getdDof() const {return M_dof;}
 
   //! Returns the BCHandler object
   BCHandler & getBCh_solid() {return *M_BCh_solid;}
@@ -208,8 +208,8 @@ private:
   //! Reference FE
   const RefFE&                           M_refFE;
 
-  //! The Dof object
-  Dof                                    M_dof;
+  //! The DOF object
+  DOF                                    M_dof;
 
   //! The number of total displacement dofs
   UInt                                   M_dim;
@@ -401,18 +401,18 @@ VenantKirchhoffElasticHandler<Mesh>::initialize( const Function& d0, const Funct
 
   typedef typename Mesh::VolumeShape GeoShape; // Element shape
 
-  UInt nDofpV = M_refFE.nbDofPerVertex; // number of Dof per vertex
-  UInt nDofpE = M_refFE.nbDofPerEdge;   // number of Dof per edge
-  UInt nDofpF = M_refFE.nbDofPerFace;   // number of Dof per face
-  UInt nDofpEl = M_refFE.nbDofPerVolume; // number of Dof per Volume
+  UInt nDofpV = M_refFE.nbDofPerVertex; // number of DOF per vertex
+  UInt nDofpE = M_refFE.nbDofPerEdge;   // number of DOF per edge
+  UInt nDofpF = M_refFE.nbDofPerFace;   // number of DOF per face
+  UInt nDofpEl = M_refFE.nbDofPerVolume; // number of DOF per Volume
 
   UInt nElemV = GeoShape::S_numVertices; // Number of element's vertices
   UInt nElemE = GeoShape::S_numEdges;    // Number of element's edges
   UInt nElemF = GeoShape::S_numFaces;    // Number of element's faces
 
-  UInt nDofElemV = nElemV * nDofpV; // number of vertex's Dof on a Element
-  UInt nDofElemE = nElemE * nDofpE; // number of edge's Dof on a Element
-  UInt nDofElemF = nElemF * nDofpF; // number of face's Dof on a Element
+  UInt nDofElemV = nElemV * nDofpV; // number of vertex's DOF on a Element
+  UInt nDofElemE = nElemE * nDofpE; // number of edge's DOF on a Element
+  UInt nDofElemF = nElemF * nDofpF; // number of face's DOF on a Element
 
   ID nbComp = M_d.nbcomp(); // Number of components of the mesh velocity
 
@@ -434,7 +434,7 @@ VenantKirchhoffElasticHandler<Mesh>::initialize( const Function& d0, const Funct
             for ( ID iVe = 1; iVe <= nElemV; ++iVe )
 	      {
 
-                // Loop number of Dof per vertex
+                // Loop number of DOF per vertex
                 for ( ID l = 1; l <= nDofpV; ++l )
 		  {
                     lDof = ( iVe - 1 ) * nDofpV + l; // Local dof in this element
@@ -460,7 +460,7 @@ VenantKirchhoffElasticHandler<Mesh>::initialize( const Function& d0, const Funct
             for ( ID iEd = 1; iEd <= nElemE; ++iEd )
 	      {
 
-                // Loop number of Dof per edge
+                // Loop number of DOF per edge
                 for ( ID l = 1; l <= nDofpE; ++l )
 		  {
                     lDof = nDofElemV + ( iEd - 1 ) * nDofpE + l; // Local dof in the adjacent Element
@@ -486,7 +486,7 @@ VenantKirchhoffElasticHandler<Mesh>::initialize( const Function& d0, const Funct
             for ( ID iFa = 1; iFa <= nElemF; ++iFa )
 	      {
 
-                // Loop on number of Dof per face
+                // Loop on number of DOF per face
                 for ( ID l = 1; l <= nDofpF; ++l )
 		  {
 
@@ -505,7 +505,7 @@ VenantKirchhoffElasticHandler<Mesh>::initialize( const Function& d0, const Funct
 	      }
 	  }
         // Element based Dof
-        // Loop on number of Dof per Element
+        // Loop on number of DOF per Element
         for ( ID l = 1; l <= nDofpEl; ++l )
 	  {
             lDof = nDofElemF + nDofElemE + nDofElemV + l; // Local dof in the Element

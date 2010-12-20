@@ -179,9 +179,9 @@ EnsightToHdf5::run()
     UInt totalPressDof = pFESpace.map().map(Unique)->NumGlobalElements();
     UInt totalP0PresDof = p0FESpace.map().map(Unique)->NumGlobalElements();
 
-    if (verbose) std::cout << "Total Velocity Dof = " << totalVelDof << std::endl;
-    if (verbose) std::cout << "Total Pressure Dof = " << totalPressDof << std::endl;
-    if (verbose) std::cout << "Total P0Press  Dof = " << totalP0PresDof << std::endl;
+    if (verbose) std::cout << "Total Velocity DOF = " << totalVelDof << std::endl;
+    if (verbose) std::cout << "Total Pressure DOF = " << totalPressDof << std::endl;
+    if (verbose) std::cout << "Total P0Press  DOF = " << totalP0PresDof << std::endl;
 
     if (verbose) std::cout << "Calling the fluid constructor ... ";
 

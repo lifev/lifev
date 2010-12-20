@@ -202,8 +202,8 @@ main( int argc, char** argv )
     UInt totalPressDof = pFESpace.map().getMap(Unique)->NumGlobalElements();
 
 
-    if (verbose) std::cout << "Total Velocity Dof = " << totalVelDof << std::endl;
-    if (verbose) std::cout << "Total Pressure Dof = " << totalPressDof << std::endl;
+    if (verbose) std::cout << "Total Velocity DOF = " << totalVelDof << std::endl;
+    if (verbose) std::cout << "Total Pressure DOF = " << totalPressDof << std::endl;
 
 
     // now that the FE spaces are built, we proceed to the NS solver constrution

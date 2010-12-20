@@ -295,9 +295,9 @@ protected:
     bool                           M_stab;
     stab_type                      M_stabType;
     //! SD Stabilization
-    boost::shared_ptr< SDStabilization<Mesh, Dof> >     M_sdStab;
+    boost::shared_ptr< SDStabilization<Mesh, DOF> >     M_sdStab;
     //! IP Stabilization
-    boost::shared_ptr< StabilizationIP<Mesh, Dof> >     M_ipStab;
+    boost::shared_ptr< StabilizationIP<Mesh, DOF> >     M_ipStab;
     //! SD and/or IP stabilization parameters
     Real                           M_gammaBeta;
     Real                           M_gammaDiv;
@@ -507,7 +507,7 @@ void ChorinTemam<Mesh, SolverType>::setUp( const GetPot& dataFile )
 
     if (M_stabType == SD_STAB)
     {
-        M_sdStab.reset (new SDStabilization<Mesh, Dof>( M_uFESpace.mesh(),
+        M_sdStab.reset (new SDStabilization<Mesh, DOF>( M_uFESpace.mesh(),
                                                         M_uFESpace.dof(),
                                                         M_uFESpace.refFE(),
                                                         M_uFESpace.qr(),
@@ -521,7 +521,11 @@ void ChorinTemam<Mesh, SolverType>::setUp( const GetPot& dataFile )
     }
     if (M_stabType == IP_STAB_EXPL || M_stabType == IP_STAB_IMPL)
     {
+<<<<<<< HEAD:examples/unmaintained_ct/ChorinTemam.hpp
         M_ipStab.reset (new StabilizationIP<Mesh, Dof>( M_uFESpace.mesh(),
+=======
+        M_ipStab.reset (new IPStabilization<Mesh, DOF>( M_uFESpace.mesh(),
+>>>>>>> Go on with the class rename:examples/unmaintained_ct/ChorinTemam.hpp
                                                         M_uFESpace.dof(),
                                                         M_uFESpace.refFE(),
                                                         M_uFESpace.feBd(),

@@ -42,14 +42,14 @@
 
     Classes BareFace and BareEdge have been created to give an UNIQUE internal
 	representation for mesh faces and edges, allowing thus the construction of
-	Dof objects (which are naturally linked to mesh entities).
+	DOF objects (which are naturally linked to mesh entities).
 
 	\par Introduction
 
 	One of the paradigms chosen for the development of this	library is the fact
-	that degrees of freedom (Dof) are linked to geometrical	entities.  Now if
+	that degrees of freedom (DOF) are linked to geometrical	entities.  Now if
 	we have degrees of freedom associated, for instance, to	an Edge (like in
-	a P2 Tetra) in order to build the global numbering of the Dof and the
+	a P2 Tetra) in order to build the global numbering of the DOF and the
 	association between local (element-wise) and global numbering, we need to
 	identify edges and give them a unique ID. Yet, we may not want to
 	build a full Edge (MeshElementMarked2D) object: we only need

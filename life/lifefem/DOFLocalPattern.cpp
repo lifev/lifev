@@ -26,7 +26,7 @@
 
 /*!
     @file
-    @brief This file contains the definition of the LocalDofPattern class.
+    @brief This file contains the definition of the DOFLocalPattern class.
 
     @contributor Samuel Quinodoz <samuel.quinodoz@epfl.ch>
     @mantainer Samuel Quinodoz <samuel.quinodoz@epfl.ch>
@@ -42,7 +42,7 @@ namespace LifeV
 // ===================================================
 
 // This is the 3D constructor
-LocalDofPattern::LocalDofPattern( const UInt& nbLocalDof, const UInt& nbDofPerVertex,
+DOFLocalPattern::DOFLocalPattern( const UInt& nbLocalDof, const UInt& nbDofPerVertex,
                                   const UInt& nbDofPerEdge, const UInt& nbDofPerFace,
                                   const UInt& nbDofPerVolume, const DofPatternType& patternType ) :
         M_dim(3), M_nbLocalDof( nbLocalDof ), M_nbDofPerDimEntity(std::vector< UInt> (4)),
@@ -74,7 +74,7 @@ LocalDofPattern::LocalDofPattern( const UInt& nbLocalDof, const UInt& nbDofPerVe
 
 // This is the 2D constructor
 
-LocalDofPattern::LocalDofPattern( const UInt& nbLocalDof, const UInt& nbDofPerVertex,
+DOFLocalPattern::DOFLocalPattern( const UInt& nbLocalDof, const UInt& nbDofPerVertex,
                                   const UInt& nbDofPerEdge, const UInt& nbDofPerFace,
                                   const DofPatternType& patternType ) :
         M_dim(2), M_nbLocalDof( nbLocalDof ), M_nbDofPerDimEntity(std::vector< UInt> (3)),
@@ -110,7 +110,7 @@ LocalDofPattern::LocalDofPattern( const UInt& nbLocalDof, const UInt& nbDofPerVe
 
 // This is the 1D constructor
 
-LocalDofPattern::LocalDofPattern( const UInt& nbLocalDof, const UInt& nbDofPerVertex,
+DOFLocalPattern::DOFLocalPattern( const UInt& nbLocalDof, const UInt& nbDofPerVertex,
                                   const UInt& nbDofPerEdge, const DofPatternType& patternType ) :
         M_dim(1), M_nbLocalDof( nbLocalDof ), M_nbDofPerDimEntity(std::vector< UInt> (2)),
         M_patternType( patternType )
@@ -145,7 +145,7 @@ LocalDofPattern::LocalDofPattern( const UInt& nbLocalDof, const UInt& nbDofPerVe
 
 // The copy constructor
 
-LocalDofPattern::LocalDofPattern( const LocalDofPattern& localDofPattern) :
+DOFLocalPattern::DOFLocalPattern( const DOFLocalPattern& localDofPattern) :
         M_dim(localDofPattern.M_dim),
         M_nbLocalDof (localDofPattern.M_nbLocalDof ),
         M_nbDofPerDimEntity (localDofPattern.M_nbDofPerDimEntity),
@@ -160,7 +160,7 @@ LocalDofPattern::LocalDofPattern( const LocalDofPattern& localDofPattern) :
 // Methods
 // ===================================================
 
-void LocalDofPattern::showMe( std::ostream& output) const
+void DOFLocalPattern::showMe( std::ostream& output) const
 {
     output << " Size of the pattern : " << M_nbPattern << std::endl;
     output << " Diag: " << M_nbDiag << "  Upper: " << M_nbUpper << std::endl;
@@ -176,7 +176,7 @@ void LocalDofPattern::showMe( std::ostream& output) const
 // Private Methods
 // ===================================================
 
-void LocalDofPattern::setupStandardPattern()
+void DOFLocalPattern::setupStandardPattern()
 {
 
     // This is the standard pattern with all the
@@ -219,7 +219,7 @@ void LocalDofPattern::setupStandardPattern()
 };
 
 
-void LocalDofPattern::setupP1isoP2SegPattern()
+void DOFLocalPattern::setupP1isoP2SegPattern()
 {
     // Some check to ensure consistency
     ASSERT(M_nbDofPerDimEntity[0] == 1, " Inconsistent P1 iso P2 (Vertices)");
@@ -247,7 +247,7 @@ void LocalDofPattern::setupP1isoP2SegPattern()
 }
 
 
-void LocalDofPattern::setupP1isoP2TriaPattern()
+void DOFLocalPattern::setupP1isoP2TriaPattern()
 {
     // Some check to ensure consistency
     ASSERT(M_nbDofPerDimEntity[0] == 1, " Inconsistent P1 iso P2 (Vertices)");

@@ -45,29 +45,29 @@ namespace LifeV
 {
 
 template <class vector_type>
-void stiff(const Real sigma_l, const Real sigma_t, const vector_type& cos, ElemMat& elmat, const CurrentFE& fe, const Dof& dof, UInt iblock, UInt jblock);
+void stiff(const Real sigma_l, const Real sigma_t, const vector_type& cos, ElemMat& elmat, const CurrentFE& fe, const DOF& dof, UInt iblock, UInt jblock);
 
 template <class reduced_sigma, class vector_type>
-void stiff( const reduced_sigma& red_sigma, const Real sigma_l, const Real sigma_t, const vector_type& cos, ElemMat& elmat, const CurrentFE& fe, const Dof& dof, UInt iblock, UInt jblock, ID id=0);
+void stiff( const reduced_sigma& red_sigma, const Real sigma_l, const Real sigma_t, const vector_type& cos, ElemMat& elmat, const CurrentFE& fe, const DOF& dof, UInt iblock, UInt jblock, ID id=0);
 
 template <class reduced_sigma>
-void stiff( reduced_sigma red_sigma, const Real D, ElemMat& elmat, const CurrentFE& fe, const Dof& dof, UInt iblock, UInt jblock, ID id=0);
+void stiff( reduced_sigma red_sigma, const Real D, ElemMat& elmat, const CurrentFE& fe, const DOF& dof, UInt iblock, UInt jblock, ID id=0);
 
 template <class vector_type>
 void stiffNL(vector_type& U, Real coef, ElemMat& elmat, const CurrentFE& fe,
-             const Dof& dof, UInt iblock, UInt jblock, const Real beta);
+             const DOF& dof, UInt iblock, UInt jblock, const Real beta);
 
 //template <class vector_type>
 //void stiffNL(vector_type& U, Real coef, ElemMat& elmat, const CurrentFE& fe,
-//             const Dof& dof, UInt iblock, UInt jblock, UInt nb, const Real beta);
+//             const DOF& dof, UInt iblock, UInt jblock, UInt nb, const Real beta);
 
 template <class vector_type>
 void stiffNL(const vector_type& U, const Real sigma_l, const Real sigma_t,
                  const vector_type& cos, ElemMat& elmat, const CurrentFE& fe,
-             const Dof& dof, UInt iblock, UInt jblock, const Real beta);
+             const DOF& dof, UInt iblock, UInt jblock, const Real beta);
 
 template <class vector_type>
-void stiff( const Real sigma_l, const Real sigma_t, const vector_type& cos, ElemMat& elmat, const CurrentFE& fe, const Dof& dof, UInt iblock, UInt jblock)
+void stiff( const Real sigma_l, const Real sigma_t, const vector_type& cos, ElemMat& elmat, const CurrentFE& fe, const DOF& dof, UInt iblock, UInt jblock)
 {
 	//! Assembling the righthand side
     //ASSERT_PRE( fe.hasFirstDeriv(),
@@ -153,7 +153,7 @@ void stiff( const Real sigma_l, const Real sigma_t, const vector_type& cos, Elem
 
 
 template <class reduced_sigma, class vector_type>
-void stiff( const reduced_sigma& red_sigma, const Real sigma_l, const Real sigma_t, const vector_type& cos, ElemMat& elmat, const CurrentFE& fe, const Dof& dof, UInt iblock, UInt jblock, ID id)
+void stiff( const reduced_sigma& red_sigma, const Real sigma_l, const Real sigma_t, const vector_type& cos, ElemMat& elmat, const CurrentFE& fe, const DOF& dof, UInt iblock, UInt jblock, ID id)
 {
 //     ASSERT_PRE( fe.hasFirstDeriv(),
 //                 "Stiffness matrix needs at least the first derivatives" );
@@ -245,7 +245,7 @@ void stiff( const reduced_sigma& red_sigma, const Real sigma_l, const Real sigma
 
 
 template <class reduced_sigma>
-void stiff( reduced_sigma red_sigma, const Real D, ElemMat& elmat, const CurrentFE& fe, const Dof& /*dof*/, UInt iblock, UInt jblock, ID id)
+void stiff( reduced_sigma red_sigma, const Real D, ElemMat& elmat, const CurrentFE& fe, const DOF& /*dof*/, UInt iblock, UInt jblock, ID id)
 {
 
 //     ASSERT_PRE( fe.hasFirstDeriv(),
@@ -296,7 +296,7 @@ void stiff( reduced_sigma red_sigma, const Real D, ElemMat& elmat, const Current
 //Without fibers
 template <class vector_type>
 void stiffNL(vector_type& U, Real coef, ElemMat& elmat, const CurrentFE& fe,
-             const Dof& dof, UInt iblock, UInt jblock, const Real beta)
+             const DOF& dof, UInt iblock, UInt jblock, const Real beta)
 {
     ElemMat::matrix_view mat = elmat.block( iblock, jblock );
     Int iloc, jloc, i, icoor, jcoor, ig;
@@ -371,7 +371,7 @@ void stiffNL(vector_type& U, Real coef, ElemMat& elmat, const CurrentFE& fe,
 /* This one is for the vectorial case, only 'UInt nb' has been added to the argument
 template <class vector_type>
 void stiffNL(vector_type& U, Real coef, ElemMat& elmat, const CurrentFE& fe,
-             const Dof& dof, UInt iblock, UInt jblock, UInt nb, const Real beta)
+             const DOF& dof, UInt iblock, UInt jblock, UInt nb, const Real beta)
 {
     Tab2d mat_tmp( fe.nbFEDof(), fe.nbFEDof() );
     mat_tmp = ZeroMatrix( fe.nbFEDof(), fe.nbFEDof() );
@@ -469,7 +469,7 @@ void stiffNL(vector_type& U, Real coef, ElemMat& elmat, const CurrentFE& fe,
 template <class vector_type>
 void stiffNL(const vector_type& U, const Real sigma_l, const Real sigma_t,
              const vector_type& cos, ElemMat& elmat, const CurrentFE& fe,
-             const Dof& dof, UInt iblock, UInt jblock, const Real beta)
+             const DOF& dof, UInt iblock, UInt jblock, const Real beta)
 {
     ElemMat::matrix_view mat = elmat.block( iblock, jblock );
     Int iloc, jloc;

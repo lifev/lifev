@@ -81,12 +81,12 @@ public:
             M_dof1( 0 )
     {}
 
-    //! Constructor for interfacing Dof of the same type (LocalDofPattern)
+    //! Constructor for interfacing DOF of the same type (DOFLocalPattern)
     /*!
       \param refFe the part of the reference FE that contains the dof patterns (nbDofPerEdge...)
-      \param dof1 the Dof object of the mesh in which we want to make the computations
+      \param dof1 the DOF object of the mesh in which we want to make the computations
     */
-    DOFInterface3Dto2D( const LocalDofPattern& refFE, const Dof& dof1 );
+    DOFInterface3Dto2D( const DOFLocalPattern& refFE, const DOF& dof1 );
 
     //@}
 
@@ -94,9 +94,9 @@ public:
     //! @name Methods
     //@{
 
-    void setup(const LocalDofPattern& refFE1, const Dof& dof1);
+    void setup(const DOFLocalPattern& refFE1, const DOF& dof1);
 
-    //! This method builds the Dof connections at the interface
+    //! This method builds the DOF connections at the interface
     /*!
       \param mesh1 the mesh in which we want to make the computations
       \param flag1 the marker of the interface in the mesh1
@@ -180,10 +180,10 @@ private:
     template <typename MeshType>
     void updateVertices( const MeshType& mesh1 );
 
-    //! This method builds the connections between Dof at the interface (_locDof container)
+    //! This method builds the connections between DOF at the interface (_locDof container)
     /*!
       \param mesh1 the mesh in which we want to make the computations
-      \param dof1 the Dof object of the mesh in which we want to make the computations
+      \param dof1 the DOF object of the mesh in which we want to make the computations
     */
     template <typename MeshType>
     void updateDofConnections( const MeshType& mesh1 );
@@ -194,11 +194,11 @@ private:
     //! reference of the interface
     entityFlag_Type M_interfaceFlag;
 
-    //! LocalDofPattern object used in the mesh in which we want to make the computations
-    const LocalDofPattern * M_refFE1;
+    //! DOFLocalPattern object used in the mesh in which we want to make the computations
+    const DOFLocalPattern * M_refFE1;
 
-    //! Dof object of the mesh in which we want to make the computations
-    const Dof * M_dof1;
+    //! DOF object of the mesh in which we want to make the computations
+    const DOF * M_dof1;
 
     /*! STL list which holds the connections between faces at the interface
       -> first  : global (3D) face number
@@ -255,7 +255,7 @@ update( const MeshType& mesh1, const entityFlag_Type& flag1 )
 
     // _updateEdges( mesh1 );
 
-    // Update of the Dof connections without inperpolation
+    // Update of the DOF connections without inperpolation
     updateDofConnections( mesh1 );
 
     M_interfaceFlag = flag1;
@@ -401,15 +401,15 @@ updateDofConnections( const MeshType& mesh1 )
     UInt nbVertexPerFace = GeoBShape::S_numVertices; // Number of face's vertices
     UInt nbEdgePerFace = GeoBShape::S_numEdges;    // Number of face's edges
 
-    UInt nbDofPerVertex1 = M_refFE1->nbDofPerVertex; // number of Dof per vertices on mesh1
-    UInt nbDofPerEdge1 = M_refFE1->nbDofPerEdge;   // number of Dof per edges on mesh1
-    UInt nbDofPerFace1 = M_refFE1->nbDofPerFace;   // number of Dof per faces on mesh1
+    UInt nbDofPerVertex1 = M_refFE1->nbDofPerVertex; // number of DOF per vertices on mesh1
+    UInt nbDofPerEdge1 = M_refFE1->nbDofPerEdge;   // number of DOF per edges on mesh1
+    UInt nbDofPerFace1 = M_refFE1->nbDofPerFace;   // number of DOF per faces on mesh1
 
     UInt nbVertexPerElement = GeoShape::S_numVertices; // Number of element's vertices
     UInt nbEdgePerElement = GeoShape::S_numEdges;    // Number of element's edges
 
-    UInt nDofElemV1 = nbVertexPerElement * nbDofPerVertex1; // number of vertex's Dof on a Element on mesh1
-    UInt nDofElemE1 = nbEdgePerElement * nbDofPerEdge1; // number of edge's Dof on a Element on mesh1
+    UInt nDofElemV1 = nbVertexPerElement * nbDofPerVertex1; // number of vertex's DOF on a Element on mesh1
+    UInt nDofElemE1 = nbEdgePerElement * nbDofPerEdge1; // number of edge's DOF on a Element on mesh1
 
     ID iElAd1, iVeEl1, iFaEl1, iEdEl1, gDof1;
 
@@ -425,7 +425,7 @@ updateDofConnections( const MeshType& mesh1 )
 
         iFaEl1 = mesh1.boundaryFace( i->first ).firstAdjacentElementPosition(); // local id of the face in its adjacent element (mesh1)
 
-        // Vertex based Dof on mesh1
+        // Vertex based DOF on mesh1
         if ( nbDofPerVertex1 )
         {
 
@@ -435,21 +435,21 @@ updateDofConnections( const MeshType& mesh1 )
 
                 iVeEl1 = GeoShape::faceToPoint( iFaEl1, iVeFa1 ); // local vertex number (in element)
 
-                // Loop number of Dof per vertex (mesh1)
+                // Loop number of DOF per vertex (mesh1)
                 for ( ID l = 1; l <= nbDofPerVertex1; ++l )
                 {
 
-                    gDof1 = M_dof1->localToGlobal( iElAd1, ( iVeEl1 - 1 ) * nbDofPerVertex1 + l ); // Global Dof on mesh1
+                    gDof1 = M_dof1->localToGlobal( iElAd1, ( iVeEl1 - 1 ) * nbDofPerVertex1 + l ); // Global DOF on mesh1
 
                     std::pair<ID, ID> locDof( gDof1, locDofCounter1);   //! May be : invert the 2 ??
                     locDofMap.insert( locDof ); // Updating the list of dof connections
 
-                    locDofCounter1 ++;  //! local Dof (total dof on the interface)
+                    locDofCounter1 ++;  //! local DOF (total dof on the interface)
                 }
             }
         }
 
-        // Edge based Dof on mesh1
+        // Edge based DOF on mesh1
         if ( nbDofPerEdge1 )
         {
 
@@ -459,30 +459,30 @@ updateDofConnections( const MeshType& mesh1 )
 
                 iEdEl1 = GeoShape::faceToEdge( iFaEl1, iEdFa1 ).first; // local edge number (in element)
 
-                // Loop number of Dof per edge (mesh1)
+                // Loop number of DOF per edge (mesh1)
                 for ( ID l = 1; l <= nbDofPerEdge1; ++l )
                 {
 
-                    gDof1 = M_dof1->localToGlobal( iElAd1, nDofElemV1 + ( iEdEl1 - 1 ) * nbDofPerEdge1 + l ); // Global Dof on mesh1
+                    gDof1 = M_dof1->localToGlobal( iElAd1, nDofElemV1 + ( iEdEl1 - 1 ) * nbDofPerEdge1 + l ); // Global DOF on mesh1
 
                     std::pair<ID, ID> locDof( gDof1, locDofCounter1 );
                     locDofMap.insert( locDof ); // Updating the list of dof connections
 
-                    locDofCounter1 ++;  //! local Dof (total dof on the interface)
+                    locDofCounter1 ++;  //! local DOF (total dof on the interface)
                 }
             }
         }
 
-        // Face based Dof on mesh1
+        // Face based DOF on mesh1
         for ( ID l = 1; l <= nbDofPerFace1; ++l )
         {
 
-            gDof1 = M_dof1->localToGlobal( iElAd1, nDofElemE1 + nDofElemV1 + ( iFaEl1 - 1 ) * nbDofPerFace1 + l ); // Global Dof in mesh1
+            gDof1 = M_dof1->localToGlobal( iElAd1, nDofElemE1 + nDofElemV1 + ( iFaEl1 - 1 ) * nbDofPerFace1 + l ); // Global DOF in mesh1
 
             std::pair<ID, ID> locDof( gDof1, locDofCounter1 );
             locDofMap.insert( locDof ); // Updating the list of dof connections
 
-            locDofCounter1 ++;  //! local Dof (total dof on the interface)
+            locDofCounter1 ++;  //! local DOF (total dof on the interface)
         }
     }
 

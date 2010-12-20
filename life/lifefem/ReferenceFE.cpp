@@ -51,7 +51,7 @@ RefFE::RefFE( std::string name, FE_TYPE type, ReferenceShapes shape,
               DofPatternType patternType,
               const RefFE* bdRefFE ) :
         RefEle( name, shape, nbDof, nbCoor, FEDim, phi, dPhi, d2Phi, divPhi, refCoor ),
-        LocalDofPattern( nbDof, nbDofPerVertex, nbDofPerEdge, nbDofPerFace, nbDofPerVolume, patternType ),
+        DOFLocalPattern( nbDof, nbDofPerVertex, nbDofPerEdge, nbDofPerFace, nbDofPerVolume, patternType ),
         M_boundaryFE( bdRefFE ), M_type( type )
 {}
 

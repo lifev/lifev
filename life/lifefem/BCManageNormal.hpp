@@ -118,27 +118,27 @@ public:
     //! Build the rotation matrix
     /*!
      *  This method calculates the normal and tangential vectors and builds the rotation matrix
-        @param dof The Dof object
+        @param dof The DOF object
         @param currentBdFE the current boundary finite element
         @param systemMatrix The system matrix
         @param offset The boundary condition offset
         @param commPtr pointer to Epetra_Comm object
      */
-    void build(const Dof& dof, CurrentBoundaryFE& currentBdFE, matrix_Type& systemMatrix, UInt offset, EpetraMap::comm_ptrtype& commPtr);
+    void build(const DOF& dof, CurrentBoundaryFE& currentBdFE, matrix_Type& systemMatrix, UInt offset, EpetraMap::comm_ptrtype& commPtr);
 
 
     //! Build the rotation matrix
     /*!
      *  This method calculates the normal and tangential vectors and builds the rotation matrix
         @param mesh The mesh
-    	@param dof The Dof object
+    	@param dof The DOF object
     	@param currentBdFE the current boundary finite element
     	@param systemMatrix The system matrix
     	@param offset The boundary condition offset
     	@param commPtr pointer to Epetra_Comm object
      */
     template<typename MeshType>
-    void build(const MeshType& mesh, const Dof& dof, CurrentBoundaryFE& currentBdFE, matrix_Type& systemMatrix, UInt offset, EpetraMap::comm_ptrtype& commPtr);
+    void build(const MeshType& mesh, const DOF& dof, CurrentBoundaryFE& currentBdFE, matrix_Type& systemMatrix, UInt offset, EpetraMap::comm_ptrtype& commPtr);
 
 
     //! This function modify the system matrix to apply a change of basis from the Cartesian coordinate system to the local coordinate system given by tangents and normals to the boundary
@@ -169,13 +169,13 @@ public:
     //! This method computes the normals to the domain boundary
     /*!
     	@warning the computed normals can be not compatible with the incompressibility condition
-        @param dof The Dof object containing the local-to-global map
+        @param dof The DOF object containing the local-to-global map
         @param currentBdFE The current finite element on the boundary
         @param normals The output vector
         @param mesh The mesh
      */
     template <typename VectorType, typename MeshType>
-    void computeIntegratedNormals(const Dof& dof, CurrentBoundaryFE& currentBdFE, VectorType& normals,  const MeshType& mesh);
+    void computeIntegratedNormals(const DOF& dof, CurrentBoundaryFE& currentBdFE, VectorType& normals,  const MeshType& mesh);
 
 
 
@@ -224,7 +224,7 @@ private:
         @param currentBdFE the current boundary finite element
      */
     template<typename MeshType>
-    void M_calculateNormals(const MeshType& mesh, const Dof& dof,CurrentBoundaryFE& currentBdFE);
+    void M_calculateNormals(const MeshType& mesh, const DOF& dof,CurrentBoundaryFE& currentBdFE);
 
 
     //! Store in *M_normalPtr the versors given by the user
@@ -388,7 +388,7 @@ void BCManageNormal<MatrixType>::init(const BCBase& boundaryCondition,const Real
 
 template<typename MatrixType>
 template<typename MeshType>
-void BCManageNormal<MatrixType>::build(const MeshType& mesh, const Dof& dof,CurrentBoundaryFE& currentBdFE,MatrixType& systemMatrix, UInt offset,EpetraMap::comm_ptrtype& commPtr)
+void BCManageNormal<MatrixType>::build(const MeshType& mesh, const DOF& dof,CurrentBoundaryFE& currentBdFE,MatrixType& systemMatrix, UInt offset,EpetraMap::comm_ptrtype& commPtr)
 {
     if (M_dataBuilt)
     {
@@ -495,7 +495,7 @@ void BCManageNormal<MatrixType>::bcShiftToCartesianCoordSystem(matrix_Type& syst
 
 template<typename MatrixType>
 template<typename VectorType, typename MeshType>
-void BCManageNormal<MatrixType>::computeIntegratedNormals(const Dof& dof,CurrentBoundaryFE& currentBdFE, VectorType& normals,  const MeshType& mesh)
+void BCManageNormal<MatrixType>::computeIntegratedNormals(const DOF& dof,CurrentBoundaryFE& currentBdFE, VectorType& normals,  const MeshType& mesh)
 {
 
     //-----------------------------------------------------
@@ -751,7 +751,7 @@ void BCManageNormal<MatrixType>::M_addVersor(const ID& idof,const Real& vx,const
 
 template< typename MatrixType>
 template< typename MeshType>
-void BCManageNormal< MatrixType>::M_calculateNormals(const MeshType& mesh, const Dof& dof,CurrentBoundaryFE& currentBdFE)
+void BCManageNormal< MatrixType>::M_calculateNormals(const MeshType& mesh, const DOF& dof,CurrentBoundaryFE& currentBdFE)
 {
     //-----------------------------------------------------
     // STEP 1: Calculating the normals

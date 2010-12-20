@@ -61,7 +61,7 @@ ID DOFInterface::getInterfaceDof( const ID& i ) const
     if ( it == M_localDofMap.end() )
     {
         std::cout << i << " : " << std::flush;
-        ERROR_MSG( "DOFInterface::getInterfaceDof : Dof number not found" );
+        ERROR_MSG( "DOFInterface::getInterfaceDof : DOF number not found" );
     }
     return it->second;
 }
@@ -75,11 +75,11 @@ bool DOFInterface::isMyInterfaceDof( const ID& i ) const
 std::ostream& DOFInterface::showMe( bool verbose, std::ostream& out ) const
 {
     out << "------------------------------" << std::endl;
-    out << "\tNumber of Dof connections (M_localDofMap):" << M_localDofMap.size() << std::endl;
+    out << "\tNumber of DOF connections (M_localDofMap):" << M_localDofMap.size() << std::endl;
     if ( verbose )
     {
         UInt count( 0 ), lines( 10 );
-        out << "List of connections between Dof: (global, local)";
+        out << "List of connections between DOF: (global, local)";
         for ( std::map<ID, ID>::const_iterator it = M_localDofMap.begin(); it != M_localDofMap.end(); ++it )
         {
             if ( count++ % lines == 0 )

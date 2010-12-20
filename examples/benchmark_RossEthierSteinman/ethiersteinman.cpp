@@ -241,8 +241,8 @@ Ethiersteinman::check()
     UInt totalPressDof = pFESpace.map().map(Unique)->NumGlobalElements();
 
 
-    if (verbose) std::cout << "Total Velocity Dof = " << totalVelDof << std::endl;
-    if (verbose) std::cout << "Total Pressure Dof = " << totalPressDof << std::endl;
+    if (verbose) std::cout << "Total Velocity DOF = " << totalVelDof << std::endl;
+    if (verbose) std::cout << "Total Pressure DOF = " << totalPressDof << std::endl;
 
     if (verbose) std::cout << "Calling the fluid constructor ... ";
 
@@ -640,8 +640,8 @@ Ethiersteinman::run()
             // If we change the FE we have to update the BCHandler (internal data)
             bcH.bcUpdate( *meshPart.meshPartition(), uFESpace.feBd(), uFESpace.dof());
 
-            if (verbose) std::cout << "Total Velocity Dof = " << totalVelDof << std::endl;
-            if (verbose) std::cout << "Total Pressure Dof = " << totalPressDof << std::endl;
+            if (verbose) std::cout << "Total Velocity DOF = " << totalVelDof << std::endl;
+            if (verbose) std::cout << "Total Pressure DOF = " << totalPressDof << std::endl;
 
             if (verbose) std::cout << "Calling the fluid constructor ... ";
 

@@ -322,7 +322,7 @@ template <typename DOF, typename ElemVec>
 void
 extract_vec( EpetraVector& V,
              ElemVec& elvec,
-             const LocalDofPattern& fe,
+             const DOFLocalPattern& fe,
              const DOF& dof,
              const UInt feId,
              Int iblock )

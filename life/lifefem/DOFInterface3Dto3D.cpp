@@ -47,24 +47,24 @@ namespace LifeV
 // Constructors & Destructor
 // ===================================================
 
-DOFInterface3Dto3D::DOFInterface3Dto3D( const RefFE& refFE, const Dof& dof1,
-                                        const Dof& dof2 )
+DOFInterface3Dto3D::DOFInterface3Dto3D( const RefFE& refFE, const DOF& dof1,
+                                        const DOF& dof2 )
         :
         M_refFE1( &refFE ),
         M_dof1( &dof1 ),
         M_refFE2( &refFE ),
         M_dof2( &dof2 ),
-        M_dof( new Dof( refFE ) )
+        M_dof( new DOF( refFE ) )
 {}
 
-DOFInterface3Dto3D::DOFInterface3Dto3D( const RefFE& refFE1, const Dof& dof1, const RefFE& refFE2,
-                                        const Dof& dof2 )
+DOFInterface3Dto3D::DOFInterface3Dto3D( const RefFE& refFE1, const DOF& dof1, const RefFE& refFE2,
+                                        const DOF& dof2 )
         :
         M_refFE1( &refFE1 ),
         M_dof1( &dof1 ),
         M_refFE2( &refFE2 ),
         M_dof2( &dof2 ),
-        M_dof( new Dof( refFE1 ) )
+        M_dof( new DOF( refFE1 ) )
 {}
 
 // ===================================================
@@ -72,23 +72,23 @@ DOFInterface3Dto3D::DOFInterface3Dto3D( const RefFE& refFE1, const Dof& dof1, co
 // ===================================================
 
 void
-DOFInterface3Dto3D::setup( const RefFE& refFE, const Dof& dof1, const Dof& dof2 )
+DOFInterface3Dto3D::setup( const RefFE& refFE, const DOF& dof1, const DOF& dof2 )
 {
     M_refFE1 = &refFE;
     M_dof1 = &dof1;
     M_refFE2 = &refFE;
     M_dof2 = &dof2;
-    M_dof = boost::shared_ptr<Dof>( new Dof( refFE ) );
+    M_dof = boost::shared_ptr<DOF>( new DOF( refFE ) );
 }
 
 void
-DOFInterface3Dto3D::setup( const RefFE& refFE1, const Dof& dof1, const RefFE& refFE2, const Dof& dof2 )
+DOFInterface3Dto3D::setup( const RefFE& refFE1, const DOF& dof1, const RefFE& refFE2, const DOF& dof2 )
 {
     M_refFE1 = &refFE1;
     M_dof1 = &dof1;
     M_refFE2 = &refFE2;
     M_dof2 = &dof2;
-    M_dof = boost::shared_ptr<Dof>( new Dof( refFE1 ) );
+    M_dof = boost::shared_ptr<DOF>( new DOF( refFE1 ) );
 }
 
 // ===================================================

@@ -48,7 +48,7 @@
 
 namespace LifeV {
 
-//! BCIdentifierBase - Base class holding Dof identifiers for implementing BC
+//! BCIdentifierBase - Base class holding DOF identifiers for implementing BC
 
 class BCIdentifierBase
 {
@@ -66,7 +66,7 @@ public:
     //! Constructor given the ID
     /*!
         Creates an BCIdentifier with a given ID
-        @param i Usually the id of the Dof, or the id of a boundary face, etc...
+        @param i Usually the id of the DOF, or the id of a boundary face, etc...
     */
     explicit BCIdentifierBase( ID const & i ) : M_id( i )
     {
@@ -172,7 +172,7 @@ inline bool operator==( const BCIdentifierBase& first, const BCIdentifierBase& s
 //! BCIdentifierEssential - BCIdentifier for implementing Essential Boundary Conditions
 /*!
 
-    This class holds the Dof identifier and its coordinates for implementing Essential
+    This class holds the DOF identifier and its coordinates for implementing Essential
     Boundary Conditions
 
  */
@@ -260,7 +260,7 @@ private:
 //! BCIdentifierNatural - Idenifier for Natural and Robin Boundary Condiions
 /*!
 
-    This class holds the Dof identifier and the bdLocalToGlobal information for implementing
+    This class holds the DOF identifier and the bdLocalToGlobal information for implementing
     Natural and Robin boundary conditions
 
  */
@@ -314,9 +314,9 @@ public:
     //! @name Get Methods
     //@{
 
-    //! Return the global Dof corresponding tho the i-th local Dof in the face
+    //! Return the global DOF corresponding tho the i-th local DOF in the face
     /*!
-        @param i The local Dof in the face
+        @param i The local DOF in the face
     */
     ID localToGlobalMap( const ID& i ) const
     {

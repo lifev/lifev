@@ -120,7 +120,7 @@ public:
 
 protected:
 
-    //!  STL map container which holds the connections between Dof at the interface
+    //!  STL map container which holds the connections between DOF at the interface
     std::map<ID, ID> M_localDofMap;
 
 };

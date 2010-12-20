@@ -133,8 +133,8 @@ CT::run()
     UInt totalPressDof = pFESpace.map().getMap(Unique)->NumGlobalElements();
 
 
-    if (verbose) std::cout << "  t-  Total Velocity Dof = " << totalVelDof << std::endl;
-    if (verbose) std::cout << "  t-  Total Pressure Dof = " << totalPressDof << std::endl;
+    if (verbose) std::cout << "  t-  Total Velocity DOF = " << totalVelDof << std::endl;
+    if (verbose) std::cout << "  t-  Total Pressure DOF = " << totalPressDof << std::endl;
 
     if (verbose) std::cout << "  t-  Calling the fluid constructor ... ";
 

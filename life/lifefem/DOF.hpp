@@ -63,20 +63,20 @@ namespace LifeV
 /*! Local-to-global table
 
 This class provides the localtoglobal table that relates the local DOF of
-a finite element to its global numbering. It needs a LocalDofPattern in
+a finite element to its global numbering. It needs a DOFLocalPattern in
 order to obtain all the necessary information about the local pattern. In
 fact it stores a copy of it so to make the local pattern available, if
 needed.
 
 It is useless until is has not been set up on a specific RegionMesh. This is accomplished either by
-passing the mesh to the constructor, or calling the method Dof::update().
+passing the mesh to the constructor, or calling the method DOF::update().
 
 \note The methods bulds the table for ALL degrees of freedom, i.e. it does not handle any essential
 boundary condition.
 
 Now the class include also a local-to-global table with DOF grouped by (internal) face that was implemented in the old versions into the dofByFace.hpp and dofByFace.cpp files created by D. A. Di Pietro in 2004
 */
-class Dof
+class DOF
 {
 public:
 
@@ -90,24 +90,24 @@ public:
     //@{
 
     /*! The minimal constructor
-      \param fePattern is the LocalDofPattern on which the ref FE is built
-      \param Offset: the smallest Dof numbering. It might be used if we want the
+      \param fePattern is the DOFLocalPattern on which the ref FE is built
+      \param Offset: the smallest DOF numbering. It might be used if we want the
       degrees of freedom numbering start from a specific value.
     */
-    Dof( const LocalDofPattern& fePattern, UInt offset = 1 );
+    DOF( const DOFLocalPattern& fePattern, UInt offset = 1 );
 
     //! Copy constructor
-    Dof( const Dof & dof2 );
+    DOF( const DOF & dof2 );
 
     //! Constructor accepting a mesh as parameter
     /*!
       \param mesh a RegionMesh3D
-      \param _fe is the LocalDofPattern on which the ref FE is built
-      \param Offset: the smalest Dof numbering. It might be used if we want the
+      \param _fe is the DOFLocalPattern on which the ref FE is built
+      \param Offset: the smalest DOF numbering. It might be used if we want the
       degrees of freedom numbering start from a specific value.
     */
     template <typename MeshType>
-    Dof( MeshType& mesh, const LocalDofPattern& fePattern, UInt offset = 1 );
+    DOF( MeshType& mesh, const DOFLocalPattern& fePattern, UInt offset = 1 );
 
     //@}
 
@@ -159,7 +159,7 @@ public:
         return M_totalDof;
     }
 
-    //! The number of local Dof (nodes) in the finite element
+    //! The number of local DOF (nodes) in the finite element
     const UInt& numLocalDof() const
     {
         return M_elementDofPattern.nbLocalDof();
@@ -215,7 +215,7 @@ public:
     }
 
     //! Getter for the localDofPattern
-    const LocalDofPattern& localDofPattern() const
+    const DOFLocalPattern& localDofPattern() const
     {
         return M_elementDofPattern;
     }
@@ -232,7 +232,7 @@ private:
     typedef ID ( *faceToPointPtr_Type )( ID const& localFace, ID const& point );
 
     //! The pattern of the local degrees of freedom.
-    const LocalDofPattern& M_elementDofPattern;
+    const DOFLocalPattern& M_elementDofPattern;
 
     // Offset for the first degree of freedom numerated
     UInt M_offset;
@@ -277,7 +277,7 @@ private:
 
 //! Constructor that builds the localToglobal table
 template <typename MeshType>
-Dof::Dof( MeshType& mesh, const LocalDofPattern& fePattern, UInt offset ) :
+DOF::DOF( MeshType& mesh, const DOFLocalPattern& fePattern, UInt offset ) :
         M_elementDofPattern       ( fePattern ),
         M_offset  ( offset ),
         M_totalDof( 0 ),
@@ -334,7 +334,7 @@ Dof::Dof( MeshType& mesh, const LocalDofPattern& fePattern, UInt offset ) :
 
 //! Build the localToGlobal table
 template <typename MeshType>
-void Dof::update( MeshType& mesh )
+void DOF::update( MeshType& mesh )
 {
 
     typedef typename MeshType::ElementShape GeoShapeType;
@@ -462,7 +462,7 @@ void Dof::update( MeshType& mesh )
         }
     gcount += nbGlobalVolume * nbLocalDofPerVolume;
     M_dofPositionByEntity[ 4 ] = gcount;
-    ASSERT_POS( gcount - M_offset == M_totalDof , "Something wrong in Dof Setup " << gcount << " " << M_offset << " " << M_totalDof ) ;
+    ASSERT_POS( gcount - M_offset == M_totalDof , "Something wrong in DOF Setup " << gcount << " " << M_offset << " " << M_totalDof ) ;
 
     if ( update_edges )
         mesh.cleanElementEdges();

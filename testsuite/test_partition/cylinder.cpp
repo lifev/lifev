@@ -447,8 +447,8 @@ Cylinder::run()
 
 
 
-    if (verbose) std::cout << "Total Velocity Dof = " << totalVelDof << std::endl;
-    if (verbose) std::cout << "Total Pressure Dof = " << totalPressDof << std::endl;
+    if (verbose) std::cout << "Total Velocity DOF = " << totalVelDof << std::endl;
+    if (verbose) std::cout << "Total Pressure DOF = " << totalPressDof << std::endl;
 
     if (verbose) std::cout << "Calling the fluid constructor ... ";
 

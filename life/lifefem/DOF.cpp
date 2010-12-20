@@ -47,7 +47,7 @@ namespace LifeV
 // Constructors & Destructor
 // ===================================================
 
-Dof::Dof( const LocalDofPattern& fePattern, UInt offset ) : M_elementDofPattern( fePattern ), M_offset( offset ), M_totalDof( 0 ),
+DOF::DOF( const DOFLocalPattern& fePattern, UInt offset ) : M_elementDofPattern( fePattern ), M_offset( offset ), M_totalDof( 0 ),
         M_numElement( 0 ), M_nbLocalVertex( 0 ), M_nbLocalEdge( 0 ), M_nbLocalFace( 0 ), M_localToGlobal(),
         M_nbFace(0),M_localToGlobalByFace(),M_globalToLocalByFace()
 {
@@ -88,7 +88,7 @@ Dof::Dof( const LocalDofPattern& fePattern, UInt offset ) : M_elementDofPattern(
         M_dofPositionByEntity[ i ] = 0;
 }
 
-Dof::Dof( const Dof & dof2 ) : M_elementDofPattern( dof2.M_elementDofPattern ), M_offset( dof2.M_offset ),
+DOF::DOF( const DOF & dof2 ) : M_elementDofPattern( dof2.M_elementDofPattern ), M_offset( dof2.M_offset ),
         M_totalDof( dof2.M_totalDof ), M_numElement( dof2.M_numElement ),
         M_nbLocalVertex( dof2.M_nbLocalVertex ), M_nbLocalEdge( dof2.M_nbLocalEdge ), M_nbLocalFace( dof2.M_nbLocalFace ),
         M_localToGlobal( dof2.M_localToGlobal ),M_nbFace(dof2.M_nbFace),
@@ -106,7 +106,7 @@ Dof::Dof( const Dof & dof2 ) : M_elementDofPattern( dof2.M_elementDofPattern ), 
 // Methods
 // ===================================================
 
-ID Dof::localToGlobalByFace(const ID& faceId, const ID& localDof, bool& exist ) const
+ID DOF::localToGlobalByFace(const ID& faceId, const ID& localDof, bool& exist ) const
 {
     ASSERT_PRE( (M_numLocalDofByFace>0) , "This data are not available for this reference element");
     std::map<ID,ID>::const_iterator mapIt(M_globalToLocalByFace.find(faceId) );
@@ -123,15 +123,15 @@ ID Dof::localToGlobalByFace(const ID& faceId, const ID& localDof, bool& exist ) 
     }
 }
 
-void Dof::showMe( std::ostream & out, bool verbose ) const
+void DOF::showMe( std::ostream & out, bool verbose ) const
 {
-    out << " Degree of Freedom (Dof) Object" << std::endl;
-    out << " Total Dof Stored             " << M_totalDof << std::endl;
-    out << " With offset (min. Dof Id) =  " << M_offset << std::endl;
-    out << " Dof's on Vertices  from " << M_dofPositionByEntity[ 0 ] << " , to:" << M_dofPositionByEntity[ 1 ] - 1 << std::endl;
-    out << " Dof's on Edges     from " << M_dofPositionByEntity[ 1 ] << " , to:" << M_dofPositionByEntity[ 2 ] - 1 << std::endl;
-    out << " Dof's on Faces     from " << M_dofPositionByEntity[ 2 ] << " , to:" << M_dofPositionByEntity[ 3 ] - 1 << std::endl;
-    out << " Dof's on Volumes   from " << M_dofPositionByEntity[ 3 ] << " , to:" << M_dofPositionByEntity[ 4 ] - 1 << std::endl;
+    out << " Degree of Freedom (DOF) Object" << std::endl;
+    out << " Total DOF Stored             " << M_totalDof << std::endl;
+    out << " With offset (min. DOF Id) =  " << M_offset << std::endl;
+    out << " DOF's on Vertices  from " << M_dofPositionByEntity[ 0 ] << " , to:" << M_dofPositionByEntity[ 1 ] - 1 << std::endl;
+    out << " DOF's on Edges     from " << M_dofPositionByEntity[ 1 ] << " , to:" << M_dofPositionByEntity[ 2 ] - 1 << std::endl;
+    out << " DOF's on Faces     from " << M_dofPositionByEntity[ 2 ] << " , to:" << M_dofPositionByEntity[ 3 ] - 1 << std::endl;
+    out << " DOF's on Volumes   from " << M_dofPositionByEntity[ 3 ] << " , to:" << M_dofPositionByEntity[ 4 ] - 1 << std::endl;
     if ( verbose )
     {
         out << "************************************************************" << std::endl;
@@ -162,13 +162,13 @@ void Dof::showMe( std::ostream & out, bool verbose ) const
 
 }
 
-void Dof::showMeByFace(std::ostream& out, bool verbose) const
+void DOF::showMeByFace(std::ostream& out, bool verbose) const
 {
     out << "--------------------------------------------------------------------------------" << std::endl;
     out << " Degree of freedom by face object " << std::endl;
     out << "--------------------------------------------------------------------------------" << std::endl;
 
-    out << " Offset (min Dof Id) = " << M_offset << std::endl;
+    out << " Offset (min DOF Id) = " << M_offset << std::endl;
     out << " Number of local dof per face = " << M_numLocalDofByFace << std::endl;
 
     if (verbose)

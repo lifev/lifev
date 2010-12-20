@@ -390,7 +390,7 @@ public:
 
   vectorPtr_Type& getRhsWithoutBC() { return M_rhsNoBC; }
 
-  //const Dof& dDof() const { return M_FESpace.dof(); }
+  //const DOF& dDof() const { return M_FESpace.dof(); }
 
   //const Mesh& mesh() const { return M_FESpace.mesh(); }
 

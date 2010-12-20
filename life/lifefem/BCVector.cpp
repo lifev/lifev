@@ -227,8 +227,8 @@ BCVector::showMe( bool /* verbose */, std::ostream & out ) const
     ASSERT_PRE( this->isFinalized(), "BC Vector should be finalized before being accessed." );
     out << "+++++++++++++++++++++++++++++++" << std::endl;
     out << "BC Vector Interface: " << std::endl;
-    out << "number of interface vector Dof : " << this->nbTotalDOF() << std::endl;
-    out << "==>Interface Dof :\n";
+    out << "number of interface vector DOF : " << this->nbTotalDOF() << std::endl;
+    out << "==>Interface DOF :\n";
     out << "+++++++++++++++++++++++++++++++" << std::endl;
     return out;
 }
@@ -348,8 +348,8 @@ BCVectorInterface::showMe( bool verbose, std::ostream & out ) const
     ASSERT_PRE( this->isFinalized(), "BC Vector should be finalized before being accessed." );
     out << "+++++++++++++++++++++++++++++++" << std::endl;
     out << "BC Vector Interface: " << std::endl;
-    out << "number of interface vector Dof : " << M_numberOfTotalDof << std::endl;
-    out << "==>Interface Dof :\n";
+    out << "number of interface vector DOF : " << M_numberOfTotalDof << std::endl;
+    out << "==>Interface DOF :\n";
     M_interfaceDofPtr->showMe( verbose, out );  // no showMe(..) in Miguel's DofInterface
     out << "+++++++++++++++++++++++++++++++" << std::endl;
     return out;

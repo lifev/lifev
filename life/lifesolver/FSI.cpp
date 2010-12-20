@@ -363,8 +363,8 @@ FSI::setupDOF( void )
 {
     Displayer disp(M_epetraWorldComm);
     disp.leaderPrint("FSI: setting DOF ... " );
-    Dof uDof(*M_fluidMesh, M_uFESpace->refFE()); // velocity dof related to unpartitioned mesh
-    Dof dDof(*M_solidMesh, M_dFESpace->refFE()); // velocity dof related to unpartitioned mesh
+    DOF uDof(*M_fluidMesh, M_uFESpace->refFE()); // velocity dof related to unpartitioned mesh
+    DOF dDof(*M_solidMesh, M_dFESpace->refFE()); // velocity dof related to unpartitioned mesh
 
     M_dofFluidToStructure                .reset( new DOFInterface3Dto3D );
     M_dofStructureToFluid                .reset( new DOFInterface3Dto3D );
@@ -1355,10 +1355,10 @@ FSI::interpolateVelocity( const vector_Type& _vec1, vector_Type& _vec2 )
 
     typedef mesh_Type::VolumeShape GeoShape; // Element shape
 
-    UInt nDofpV = M_uFESpace->refFE().nbDofPerVertex(); // number of Dof per vertex
-    UInt nDofpE = M_uFESpace->refFE().nbDofPerEdge();   // number of Dof per edge
-    UInt nDofpF = M_uFESpace->refFE().nbDofPerFace();   // number of Dof per face
-    UInt nDofpEl = M_uFESpace->refFE().nbDofPerVolume(); // number of Dof per Volume
+    UInt nDofpV = M_uFESpace->refFE().nbDofPerVertex(); // number of DOF per vertex
+    UInt nDofpE = M_uFESpace->refFE().nbDofPerEdge();   // number of DOF per edge
+    UInt nDofpF = M_uFESpace->refFE().nbDofPerFace();   // number of DOF per face
+    UInt nDofpEl = M_uFESpace->refFE().nbDofPerVolume(); // number of DOF per Volume
 
     UInt nElemV = GeoShape::S_numVertices; // Number of element's vertices
     UInt nElemE = GeoShape::S_numEdges;    // Number of element's edges
@@ -1367,9 +1367,9 @@ FSI::interpolateVelocity( const vector_Type& _vec1, vector_Type& _vec2 )
     //    UInt nDofElem = M_uFESpace->refFE().nbDof; // Number of local dof per element of the M_uFESpace->mesh() (_mesh.getRefFE().nbDof)
     UInt nDofElemMesh = M_mmFESpace->refFE().nbDof();
 
-    UInt nDofElemV = nElemV * nDofpV; // number of vertex's Dof on a Element
-    UInt nDofElemE = nElemE * nDofpE; // number of edge's Dof on a Element
-    UInt nDofElemF = nElemF * nDofpF; // number of face's Dof on a Element
+    UInt nDofElemV = nElemV * nDofpV; // number of vertex's DOF on a Element
+    UInt nDofElemE = nElemE * nDofpE; // number of edge's DOF on a Element
+    UInt nDofElemF = nElemF * nDofpF; // number of face's DOF on a Element
 
     Real x, y, z;
     Vector wLoc( nDofElemMesh * nDimensions );
@@ -1398,7 +1398,7 @@ FSI::interpolateVelocity( const vector_Type& _vec1, vector_Type& _vec2 )
             for ( ID iVe = 1; iVe <= nElemV; ++iVe )
             {
 
-                // Loop number of Dof per vertex
+                // Loop number of DOF per vertex
                 for ( ID l = 1; l <= nDofpV; ++l )
                 {
                     lDof = ( iVe - 1 ) * nDofpV + l; // Local dof in this element
@@ -1414,7 +1414,7 @@ FSI::interpolateVelocity( const vector_Type& _vec1, vector_Type& _vec2 )
 
                         // Interpolating data at the nodal point
                         Real __sum = 0;
-                        for ( ID idof = 0; idof < nDofElemMesh; ++idof )  // Loop on local Dof on the element
+                        for ( ID idof = 0; idof < nDofElemMesh; ++idof )  // Loop on local DOF on the element
                             __sum += wLoc( icmp * nDofElemMesh + idof ) * M_mmFESpace->refFE().phi( idof, x, y, z );
 
                         // Updating interpolated mesh velocity
@@ -1434,7 +1434,7 @@ FSI::interpolateVelocity( const vector_Type& _vec1, vector_Type& _vec2 )
             for ( ID iEd = 1; iEd <= nElemE; ++iEd )
             {
 
-                // Loop number of Dof per edge
+                // Loop number of DOF per edge
                 for ( ID l = 1; l <= nDofpE; ++l )
                 {
                     lDof = nDofElemV + ( iEd - 1 ) * nDofpE + l; // Local dof in the adjacent Element
@@ -1450,7 +1450,7 @@ FSI::interpolateVelocity( const vector_Type& _vec1, vector_Type& _vec2 )
 
                         // Interpolating data at the nodal point
                         Real __sum = 0;
-                        for ( ID idof = 0; idof < nDofElemMesh; ++idof )   // Loop on local Dof on the adjacent element
+                        for ( ID idof = 0; idof < nDofElemMesh; ++idof )   // Loop on local DOF on the adjacent element
                             __sum += wLoc( icmp * nDofElemMesh + idof ) * M_mmFESpace->refFE().phi( idof, x, y, z ); // Problem here with P2
 
                         // Updating interpolating vector
@@ -1470,7 +1470,7 @@ FSI::interpolateVelocity( const vector_Type& _vec1, vector_Type& _vec2 )
             for ( ID iFa = 1; iFa <= nElemF; ++iFa )
             {
 
-                // Loop on number of Dof per face
+                // Loop on number of DOF per face
                 for ( ID l = 1; l <= nDofpF; ++l )
                 {
 
@@ -1487,7 +1487,7 @@ FSI::interpolateVelocity( const vector_Type& _vec1, vector_Type& _vec2 )
 
                         // Interpolating data at the nodal point
                         Real __sum = 0;
-                        for ( ID idof = 0; idof < nDofElemMesh; ++idof )  // Loop on local Dof on the adjacent element
+                        for ( ID idof = 0; idof < nDofElemMesh; ++idof )  // Loop on local DOF on the adjacent element
                             __sum += wLoc( icmp * nDofElemMesh + idof ) * M_mmFESpace->refFE().phi( idof, x, y, z ); // Problem here with P2
 
                         // Updating interpolating vector
@@ -1499,7 +1499,7 @@ FSI::interpolateVelocity( const vector_Type& _vec1, vector_Type& _vec2 )
         }
 
         // Element based Dof
-        // Loop on number of Dof per Element
+        // Loop on number of DOF per Element
         for ( ID l = 1; l <= nDofpEl; ++l )
         {
             lDof = nDofElemF + nDofElemE + nDofElemV + l; // Local dof in the Element
@@ -1515,7 +1515,7 @@ FSI::interpolateVelocity( const vector_Type& _vec1, vector_Type& _vec2 )
 
                 // Interpolating data at the nodal point
                 Real __sum = 0;
-                for ( ID idof = 0; idof < nDofElemMesh; ++idof )  // Loop on local Dof on the adjacent element
+                for ( ID idof = 0; idof < nDofElemMesh; ++idof )  // Loop on local DOF on the adjacent element
                     __sum += wLoc( icmp * nDofElemMesh + idof ) * M_mmFESpace->refFE().phi( idof, x, y, z );
 
                 // Updating interpolating vector
@@ -1547,15 +1547,15 @@ FSI::interpolateInterfaceDofs( const FESpace<mesh_Type, EpetraMap>& _fespace1,
     typedef mesh_Type::VolumeShape GeoShape; // Element shape
 
 
-    UInt nDofPerVert1  = _fespace1.refFE().nbDofPerVertex(); // number of Dof per vertex
-    UInt nDofPerEdge1  = _fespace1.refFE().nbDofPerEdge();   // number of Dof per edge
-    //UInt nDofPerFace1  = _fespace1.refFE().nbDofPerFace;   // number of Dof per face
-    //UInt nDofPerElem1  = _fespace1.refFE().nbDofPerVolume; // number of Dof per Volume
+    UInt nDofPerVert1  = _fespace1.refFE().nbDofPerVertex(); // number of DOF per vertex
+    UInt nDofPerEdge1  = _fespace1.refFE().nbDofPerEdge();   // number of DOF per edge
+    //UInt nDofPerFace1  = _fespace1.refFE().nbDofPerFace;   // number of DOF per face
+    //UInt nDofPerElem1  = _fespace1.refFE().nbDofPerVolume; // number of DOF per Volume
 
-    UInt nDofPerVert2  = _fespace2.refFE().nbDofPerVertex(); // number of Dof per vertex
-    UInt nDofPerEdge2  = _fespace2.refFE().nbDofPerEdge();   // number of Dof per edge
-    //UInt nDofPerFace2  = _fespace2.refFE().nbDofPerFace;   // number of Dof per face
-    //UInt nDofPerElem2  = _fespace2.refFE().nbDofPerVolume; // number of Dof per Volume
+    UInt nDofPerVert2  = _fespace2.refFE().nbDofPerVertex(); // number of DOF per vertex
+    UInt nDofPerEdge2  = _fespace2.refFE().nbDofPerEdge();   // number of DOF per edge
+    //UInt nDofPerFace2  = _fespace2.refFE().nbDofPerFace;   // number of DOF per face
+    //UInt nDofPerElem2  = _fespace2.refFE().nbDofPerVolume; // number of DOF per Volume
 
     //UInt nElemV        = GeoShape::S_numVertices; // Number of element's vertices
     //UInt nElemE        = GeoShape::S_numEdges;    // Number of element's edges
@@ -1572,13 +1572,13 @@ FSI::interpolateInterfaceDofs( const FESpace<mesh_Type, EpetraMap>& _fespace1,
     UInt numTotalDof1  = _fespace1.dof().numTotalDof();
     UInt numTotalDof2  = _fespace2.dof().numTotalDof();
 
-    //UInt nDofElemVert1 = nElemV * nDofPerVert1; // number of vertex's Dof on a Element
-    //UInt nDofElemEdge1 = nElemE * nDofPerEdge1; // number of edge's Dof on a Element
-    //UInt nDofElemFace1 = nElemF * nDofPerFace1; // number of face's Dof on a Element
+    //UInt nDofElemVert1 = nElemV * nDofPerVert1; // number of vertex's DOF on a Element
+    //UInt nDofElemEdge1 = nElemE * nDofPerEdge1; // number of edge's DOF on a Element
+    //UInt nDofElemFace1 = nElemF * nDofPerFace1; // number of face's DOF on a Element
 
-    //UInt nDofElemVert2 = nElemV * nDofPerVert2; // number of vertex's Dof on a Element
-    //UInt nDofElemEdge2 = nElemE * nDofPerEdge2; // number of edge's Dof on a Element
-    //UInt nDofElemFace2 = nElemF * nDofPerFace2; // number of face's Dof on a Element
+    //UInt nDofElemVert2 = nElemV * nDofPerVert2; // number of vertex's DOF on a Element
+    //UInt nDofElemEdge2 = nElemE * nDofPerEdge2; // number of edge's DOF on a Element
+    //UInt nDofElemFace2 = nElemF * nDofPerFace2; // number of face's DOF on a Element
 
     UInt numTotalVert1 = _fespace1.mesh()->numGlobalVertices();
     //UInt numTotalEdge1 = _fespace1.mesh()->numGlobalEdges();
@@ -1606,7 +1606,7 @@ FSI::interpolateInterfaceDofs( const FESpace<mesh_Type, EpetraMap>& _fespace1,
             if ((int)_fespace1.mesh()->pointList(iVert).marker() != M_data->fluidInterfaceFlag()) continue;
 
             ID nodeID = _fespace1.mesh()->pointList(iVert).id();
-            // Loop number of Dof per vertex
+            // Loop number of DOF per vertex
             for ( ID l = 1; l <= nDofPerVert1; ++l )
             {
                 // Loop on data vector components
@@ -1734,7 +1734,7 @@ FSI::interpolateInterfaceDofs( const FESpace<mesh_Type, EpetraMap>& _fespace1,
 //             for ( ID iFa = 1; iFa <= nElemF; ++iFa )
 //             {
 
-//                 // Loop on number of Dof per face
+//                 // Loop on number of DOF per face
 //                 for ( ID l = 1; l <= nDofpF; ++l )
 //                 {
 
@@ -1751,7 +1751,7 @@ FSI::interpolateInterfaceDofs( const FESpace<mesh_Type, EpetraMap>& _fespace1,
 
 //                         // Interpolating data at the nodal point
 //                         Real __sum = 0;
-//                         for ( ID idof = 0; idof < nDofElemMesh; ++idof )  // Loop on local Dof on the adjacent element
+//                         for ( ID idof = 0; idof < nDofElemMesh; ++idof )  // Loop on local DOF on the adjacent element
 //                             __sum += wLoc( icmp * nDofElemMesh + idof ) * M_mmFESpace->refFE().phi( idof, x, y, z ); // Problem here with P2
 
 //                         // Updating interpolating vector
@@ -1763,7 +1763,7 @@ FSI::interpolateInterfaceDofs( const FESpace<mesh_Type, EpetraMap>& _fespace1,
 //         }
 
 //         // Element based Dof
-//         // Loop on number of Dof per Element
+//         // Loop on number of DOF per Element
 //         for ( ID l = 1; l <= nDofpEl; ++l )
 //         {
 //             lDof = nDofElemF + nDofElemE + nDofElemV + l; // Local dof in the Element
@@ -1779,7 +1779,7 @@ FSI::interpolateInterfaceDofs( const FESpace<mesh_Type, EpetraMap>& _fespace1,
 
 //                 // Interpolating data at the nodal point
 //                 Real __sum = 0;
-//                 for ( ID idof = 0; idof < nDofElemMesh; ++idof )  // Loop on local Dof on the adjacent element
+//                 for ( ID idof = 0; idof < nDofElemMesh; ++idof )  // Loop on local DOF on the adjacent element
 //                     __sum += wLoc( icmp * nDofElemMesh + idof ) * M_mmFESpace->refFE().phi( idof, x, y, z );
 
 //                 // Updating interpolating vector

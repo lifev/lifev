@@ -137,7 +137,7 @@ typedef std::vector<ID> bcComponentsVec_Type;
   this boundary condition.
 </ol>
   Finally the list of pointers to identifiers will be updated in the
-  Dof class (\c BCHandler::bcUpdate method).
+  DOF class (\c BCHandler::bcUpdate method).
 
   \warning The idea is to not use inheritance from this class
 

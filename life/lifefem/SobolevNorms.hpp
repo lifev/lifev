@@ -63,7 +63,7 @@ typedef boost::numeric::ublas::zero_vector<Real> ZeroVector;
 //! version for vectorial problem
 template <typename VectorType>
 Real
-elementaryL2NormSquare( const VectorType & u, const CurrentFE& fe, const Dof& dof,
+elementaryL2NormSquare( const VectorType & u, const CurrentFE& fe, const DOF& dof,
                         const UInt nbComp )
 {
     Int dofID;
@@ -136,7 +136,7 @@ elementaryFctL2NormSquare( boost::function<Real( Real, Real, Real, Real, UInt )>
 //! returns the square of the H1 norm of u on the current element
 template <typename VectorType>
 Real
-elementaryH1NormSquare( const VectorType & u, const CurrentFE& fe, const Dof& dof, const int nbComp=1 )
+elementaryH1NormSquare( const VectorType & u, const CurrentFE& fe, const DOF& dof, const int nbComp=1 )
 {
     UInt eleID (fe.currentLocalId());
     Real sum (0.0);
@@ -237,7 +237,7 @@ template <typename VectorType>
 Real elementaryDifferenceL2NormSquare( VectorType & u,
                                        boost::function<Real( Real, Real, Real )> fct,
                                        const CurrentFE& fe,
-                                       const Dof& dof )
+                                       const DOF& dof )
 {
     UInt eleID (fe.currentLocalId());
     Real sum(0.0);
@@ -270,7 +270,7 @@ template <typename VectorType>
 Real elementaryDifferenceL2NormSquare( VectorType & u,
                                        boost::function<Real( Real, Real, Real, Real, UInt )> fct,
                                        const CurrentFE& fe,
-                                       const Dof& dof, const Real t, const UInt nbComp )
+                                       const DOF& dof, const Real t, const UInt nbComp )
 {
     // returns the square of the L2 norm of (u-fct) on the current element
 
@@ -305,7 +305,7 @@ Real elementaryDifferenceL2NormSquare( VectorType & u,
 //! returns the square of the H1 norm of (u-fct) on the current element
 template <typename VectorType, typename UsrFct>
 Real elementaryDifferenceH1NormSquare( const VectorType & u, const UsrFct& fct, const CurrentFE& fe,
-                                       const Dof& dof )
+                                       const DOF& dof )
 {
     UInt eleID (fe.currentLocalId());
     Real sum(0.0);
@@ -356,7 +356,7 @@ Real elementaryDifferenceH1NormSquare( const VectorType & u, const UsrFct& fct, 
 //! returns the square of the H1 norm of (u-fct) on the current element  (time-dependent case)
 template <typename VectorType, typename UsrFct>
 Real elementaryDifferenceH1NormSquare( const VectorType & u, const UsrFct& fct, const CurrentFE& fe,
-                                       const Dof& dof, const Real t, const UInt nbComp )
+                                       const DOF& dof, const Real t, const UInt nbComp )
 {
     UInt eleID = fe.currentLocalId();
     Real sum(0.0);
@@ -413,7 +413,7 @@ template <typename VectorType>
 Real elementaryDifferenceIntegral( VectorType & u,
                          boost::function<Real( Real, Real, Real, Real, UInt )> fct,
                          const CurrentFE& fe,
-                         const Dof& dof, const Real t, const UInt nbComp )
+                         const DOF& dof, const Real t, const UInt nbComp )
 {
     UInt eleID (fe.currentLocalId());
     Real sum(0.0);
@@ -444,7 +444,7 @@ Real elementaryDifferenceIntegral( VectorType & u,
 template <typename VectorType>
 Real elementaryIntegral( VectorType & u,
                          const CurrentFE& fe,
-                         const Dof& dof, const UInt component )
+                         const Dof& DOF, const UInt component )
 {
     UInt eleID (fe.currentLocalId());
     Real sum(0.0);

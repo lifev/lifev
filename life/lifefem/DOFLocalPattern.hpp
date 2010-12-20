@@ -26,7 +26,7 @@
 
 /*!
     @file
-    @brief This file contains the definition of the LocalDofPattern class.
+    @brief This file contains the definition of the DOFLocalPattern class.
 
     @contributor Samuel Quinodoz <samuel.quinodoz@epfl.ch>
     @mantainer Samuel Quinodoz <samuel.quinodoz@epfl.ch>
@@ -45,7 +45,7 @@ namespace LifeV
 //! Local pattern type
 /*!
   This enum allows to distinguish the normal standard local pattern, which is a full pattern involving all
-  degrees of freedom to special patterns. It is stored in LocalDofPattern for later use by Dof
+  degrees of freedom to special patterns. It is stored in DOFLocalPattern for later use by Dof
 */
 
 enum DofPatternType {STANDARD_PATTERN = 1,
@@ -53,7 +53,7 @@ enum DofPatternType {STANDARD_PATTERN = 1,
                      P1ISOP2_TRIA_PATTERN = 3
                     };
 
-//! LocalDofPattern - A class to store the "couplings" between the basis functions
+//! DOFLocalPattern - A class to store the "couplings" between the basis functions
 /*!
   The aim of this class is to store the way the basis functions couple one with each other. This might seem useless,
   however, some "advanced" finite elements require this structure.
@@ -103,7 +103,7 @@ enum DofPatternType {STANDARD_PATTERN = 1,
  */
 
 
-class LocalDofPattern
+class DOFLocalPattern
 {
 
 public:
@@ -112,22 +112,22 @@ public:
     //@{
 
     //! Full constructor for 3D elements
-    LocalDofPattern( const UInt& nbLocalDof, const UInt& nbDofPerVertex, const UInt& nbDofPerEdge,
+    DOFLocalPattern( const UInt& nbLocalDof, const UInt& nbDofPerVertex, const UInt& nbDofPerEdge,
                      const UInt& nbDofPerFace, const UInt& nbDofPerVolume, const DofPatternType& patternType );
 
     //! Full constructor for 2D elements
-    LocalDofPattern( const UInt& nbLocalDof, const UInt& nbDofPerVertex, const UInt& nbDofPerEdge,
+    DOFLocalPattern( const UInt& nbLocalDof, const UInt& nbDofPerVertex, const UInt& nbDofPerEdge,
                      const UInt& nbDofPerFace, const DofPatternType& patternType );
 
     //! Full constructor for 1D elements
-    LocalDofPattern( const UInt& nbLocalDof, const UInt& nbDofPerVertex, const UInt& nbDofPerEdge,
+    DOFLocalPattern( const UInt& nbLocalDof, const UInt& nbDofPerVertex, const UInt& nbDofPerEdge,
                      const DofPatternType& patternType );
 
     //! Simple copy constructor
-    LocalDofPattern( const LocalDofPattern& localDofPattern);
+    DOFLocalPattern( const DOFLocalPattern& localDofPattern);
 
     //! Empty destructor
-    virtual ~LocalDofPattern()
+    virtual ~DOFLocalPattern()
     {};
 
     //@}
@@ -245,7 +245,7 @@ private:
     //@{
 
     //! Default constructor disabled (because there is no setup/set method)
-    LocalDofPattern();
+    DOFLocalPattern();
 
     //! Method to setup the standard pattern, i.e. with all degrees of freedom coupled.
     void setupStandardPattern();

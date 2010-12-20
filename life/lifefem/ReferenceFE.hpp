@@ -109,7 +109,7 @@ enum FE_TYPE
 
 class RefFE:
         public RefEle,
-        public LocalDofPattern
+        public DOFLocalPattern
 {
 
 public:

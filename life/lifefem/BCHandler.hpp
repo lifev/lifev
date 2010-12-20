@@ -90,7 +90,7 @@ namespace LifeV
    bcHandler.bcUpdate(mesh, boundaryFe, dof);
    @endverbatim
 
-   This method will looks for the markers in the mesh and will fill the boundary conditions container BCBase, with the appropriate data structures (global Dof id.. coordinates.. ecc)
+   This method will looks for the markers in the mesh and will fill the boundary conditions container BCBase, with the appropriate data structures (global DOF id.. coordinates.. ecc)
 
    Now all is set to prescribe boundary conditions using one of the functions in bcManager.hpp
  */
@@ -338,7 +338,7 @@ public:
       @param dof Container of the local to global map of DOF id
     */
     template <typename Mesh>
-    void bcUpdate( Mesh& mesh, CurrentBoundaryFE& boundaryFE, const Dof& dof );
+    void bcUpdate( Mesh& mesh, CurrentBoundaryFE& boundaryFE, const DOF& dof );
 
 
     //! old bcUpdate version.. deprecated!!
@@ -517,14 +517,14 @@ private:
 // ===================================================
 template <typename Mesh>
 void
-BCHandler::bcUpdate( Mesh& mesh, CurrentBoundaryFE& boundaryFE, const Dof& dof )
+BCHandler::bcUpdate( Mesh& mesh, CurrentBoundaryFE& boundaryFE, const DOF& dof )
 {
     typedef typename Mesh::ElementShape geoShape_Type;
 
     // Some useful local variables
-    UInt nDofPerVert = dof.localDofPattern().nbDofPerVertex(); // number of Dof per vertices
-    UInt nDofPerEdge = dof.localDofPattern().nbDofPerEdge();   // number of Dof per edges
-    UInt nDofPerFace = dof.localDofPattern().nbDofPerFace();   // number of Dof per faces
+    UInt nDofPerVert = dof.localDofPattern().nbDofPerVertex(); // number of DOF per vertices
+    UInt nDofPerEdge = dof.localDofPattern().nbDofPerEdge();   // number of DOF per edges
+    UInt nDofPerFace = dof.localDofPattern().nbDofPerFace();   // number of DOF per faces
 
     UInt numBElements = mesh.numBElements();    // number of boundary elements
 
@@ -539,13 +539,13 @@ BCHandler::bcUpdate( Mesh& mesh, CurrentBoundaryFE& boundaryFE, const Dof& dof )
     UInt nElemVertices = geoShape_Type::S_numVertices; // Number of element's vertices
     UInt nElemEdges = geoShape_Type::S_numEdges;    // Number of element's edges
 
-    UInt nDofBElemVertices = nDofPerVert * nBElemVertices; // number of vertex's Dof on a boundary element
-    UInt nDofBElemEdges = nDofPerEdge * nBElemEdges; // number of edge's Dof on a boundary element
+    UInt nDofBElemVertices = nDofPerVert * nBElemVertices; // number of vertex's DOF on a boundary element
+    UInt nDofBElemEdges = nDofPerEdge * nBElemEdges; // number of edge's DOF on a boundary element
 
-    UInt nDofBElem = nDofBElemVertices + nDofBElemEdges + nDofPerFace; // number of total Dof on a boundary element
+    UInt nDofBElem = nDofBElemVertices + nDofBElemEdges + nDofPerFace; // number of total DOF on a boundary element
 
-    UInt  nDofElemVertices = nElemVertices * nDofPerVert; // number of vertex's Dof on a Element
-    UInt nDofElemEdges = nElemEdges * nDofPerEdge; // number of edge's Dof on a Element
+    UInt  nDofElemVertices = nElemVertices * nDofPerVert; // number of vertex's DOF on a Element
+    UInt nDofElemEdges = nElemEdges * nDofPerEdge; // number of edge's DOF on a Element
 
     //vector containing the local to global map on each elemenet
     VectorSimple<ID> localToGlobalMapOnBElem( nDofBElem );
@@ -590,7 +590,7 @@ BCHandler::bcUpdate( Mesh& mesh, CurrentBoundaryFE& boundaryFE, const Dof& dof )
     for ( ID iBoundaryElement = 1 ; iBoundaryElement <= numBElements; ++iBoundaryElement )
     {
         // ===================================================================================
-        // construction of localToGlobalMapOnBElem (this part should be moved in Dof.hpp)
+        // construction of localToGlobalMapOnBElem (this part should be moved in DOF.hpp)
         // ===================================================================================
 
         boundaryFE.updateMeas( mesh.bElement( iBoundaryElement ) );  // updating finite element information
@@ -598,7 +598,7 @@ BCHandler::bcUpdate( Mesh& mesh, CurrentBoundaryFE& boundaryFE, const Dof& dof )
         iAdjacentElem = mesh.bElement( iBoundaryElement ).firstAdjacentElementIdentity();  // id of the element adjacent to the face
         iElemBElement = mesh.bElement( iBoundaryElement ).firstAdjacentElementPosition(); // local id of the face in its adjacent element
 
-        UInt lDof = 1; //local Dof on boundary element
+        UInt lDof = 1; //local DOF on boundary element
 
         //loop on Dofs associated with vertices
         for ( ID iBElemVert = 1; iBElemVert <= nBElemVertices; ++iBElemVert )
@@ -836,14 +836,14 @@ BCHandler::bcUpdate( Mesh& mesh, CurrentBoundaryFE& boundaryFE, const Dof& dof )
 // =============================================================
 template <typename Mesh>
 void  __attribute__ ((__deprecated__))
-BCHandler::bcUpdateOldVersion( Mesh& mesh, CurrentBoundaryFE& boundaryFE, const Dof& dof )
+BCHandler::bcUpdateOldVersion( Mesh& mesh, CurrentBoundaryFE& boundaryFE, const DOF& dof )
 {
     typedef typename Mesh::ElementShape geoShape_Type;
 
     // Some useful local variables, to save some typing
-    UInt nDofPerVert = dof.localDofPattern().nbDofPerVertex(); // number of Dof per vertices
-    UInt nDofPerEdge = dof.localDofPattern().nbDofPerEdge();   // number of Dof per edges
-    UInt nDofPerFace = dof.localDofPattern().nbDofPerFace();   // number of Dof per faces
+    UInt nDofPerVert = dof.localDofPattern().nbDofPerVertex(); // number of DOF per vertices
+    UInt nDofPerEdge = dof.localDofPattern().nbDofPerEdge();   // number of DOF per edges
+    UInt nDofPerFace = dof.localDofPattern().nbDofPerFace();   // number of DOF per faces
 
     UInt numBElements = mesh.numBElements();    // number of boundary elements
 
@@ -858,13 +858,13 @@ BCHandler::bcUpdateOldVersion( Mesh& mesh, CurrentBoundaryFE& boundaryFE, const 
     UInt nElemVertices = geoShape_Type::S_numVertices; // Number of element's vertices
     UInt nElemEdges = geoShape_Type::S_numEdges;    // Number of element's edges
 
-    UInt nDofBElemVertices = nDofPerVert * nBElemVertices; // number of vertex's Dof on a boundary element
-    UInt nDofBElemEdges = nDofPerEdge * nBElemEdges; // number of edge's Dof on a boundary element
+    UInt nDofBElemVertices = nDofPerVert * nBElemVertices; // number of vertex's DOF on a boundary element
+    UInt nDofBElemEdges = nDofPerEdge * nBElemEdges; // number of edge's DOF on a boundary element
 
-    UInt nDofBElem = nDofBElemVertices + nDofBElemEdges + nDofPerFace; // number of total Dof on a boundary element
+    UInt nDofBElem = nDofBElemVertices + nDofBElemEdges + nDofPerFace; // number of total DOF on a boundary element
 
-    UInt  nDofElemVertices = nElemVertices * nDofPerVert; // number of vertex's Dof on a Element
-    UInt nDofElemEdges = nElemEdges * nDofPerEdge; // number of edge's Dof on a Element
+    UInt  nDofElemVertices = nElemVertices * nDofPerVert; // number of vertex's DOF on a Element
+    UInt nDofElemEdges = nElemEdges * nDofPerEdge; // number of edge's DOF on a Element
 
     VectorSimple<ID> bdltg( nDofBElem );
     typedef std::vector<BCBase>::iterator Iterator;
@@ -914,7 +914,7 @@ BCHandler::bcUpdateOldVersion( Mesh& mesh, CurrentBoundaryFE& boundaryFE, const 
                     notFoundMarkersCurrent.insert(marker);
                 }
 
-                // Loop number of Dof per vertex
+                // Loop number of DOF per vertex
                 for ( ID l = 1; l <= nDofPerVert; ++l )
                 {
 
@@ -1030,7 +1030,7 @@ BCHandler::bcUpdateOldVersion( Mesh& mesh, CurrentBoundaryFE& boundaryFE, const 
                     notFoundMarkersCurrent.insert(marker);
                 }
 
-                // Loop number of Dof per edge
+                // Loop number of DOF per edge
                 for ( ID l = 1; l <= nDofPerEdge; ++l )
                 {
 
@@ -1123,7 +1123,7 @@ BCHandler::bcUpdateOldVersion( Mesh& mesh, CurrentBoundaryFE& boundaryFE, const 
             switch ( where->type() )
             {
             case Essential:
-                // Loop on number of Dof per face
+                // Loop on number of DOF per face
                 for ( ID l = 1; l <= nDofPerFace; ++l )
                 {
                     lDof = nDofBElemEdges + nDofBElemVertices + l; // local Dof
@@ -1159,7 +1159,7 @@ BCHandler::bcUpdateOldVersion( Mesh& mesh, CurrentBoundaryFE& boundaryFE, const 
                     }
                     else if ( (type == 1) || (type == 2) )
                     {
-                        // Loop on number of Dof per face
+                        // Loop on number of DOF per face
                         for ( ID l = 1; l <= nDofPerFace; ++l )
                         {
                             lDof = nDofBElemEdges + nDofBElemVertices + l; // local Dof
@@ -1175,7 +1175,7 @@ BCHandler::bcUpdateOldVersion( Mesh& mesh, CurrentBoundaryFE& boundaryFE, const 
                 }
                 else
                 {
-                    // Loop on number of Dof per face
+                    // Loop on number of DOF per face
                     for ( ID l = 1; l <= nDofPerFace; ++l )
                     {
                         lDof = nDofBElemEdges + nDofBElemVertices + l; // local Dof

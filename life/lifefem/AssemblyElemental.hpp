@@ -117,7 +117,7 @@ template<typename localVector, typename globalVector>
 void interpolate(localVector& localValues,
                  const CurrentFE& interpCFE,
                  const UInt& spaceDim,
-                 const Dof& betaDof,
+                 const DOF& betaDof,
                  const UInt& elementID,
                  const globalVector& beta)
 {

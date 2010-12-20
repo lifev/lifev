@@ -687,7 +687,7 @@ void steklovPoincare::computeStrongResidualFSI()
 
     BCBase const &BCbEss = BCh[1];
 
-    // Number of local Dof (i.e. nodes) in this face
+    // Number of local DOF (i.e. nodes) in this face
     UInt nDofF = this->fluid().feBd_u().nbNode;
 
     // Number of total scalar Dof
@@ -716,7 +716,7 @@ void steklovPoincare::computeStrongResidualFSI()
 
 //     BCBase const &BCb = BCh[0];
 
-//     // Number of local Dof (i.e. nodes) in this face
+//     // Number of local DOF (i.e. nodes) in this face
 //     UInt nDofF = this->fluid().feBd_u().nbNode;
 
 //     // Number of total scalar Dof

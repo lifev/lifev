@@ -180,7 +180,7 @@ Heart::run()
         std::cout << "ok." << std::endl;
 
     UInt totalUDof  = uFESpace.map().map(Unique)->NumGlobalElements();
-    if (verbose) std::cout << "Total Potential Dof = " << totalUDof << std::endl;
+    if (verbose) std::cout << "Total Potential DOF = " << totalUDof << std::endl;
     if (verbose) std::cout << "Calling the electric model constructor ... ";
 
 #ifdef MONODOMAIN

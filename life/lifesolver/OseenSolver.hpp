@@ -692,7 +692,7 @@ protected:
     bool                           M_resetStabilization;
     Int                            M_iterReuseStabilization;
 
-    details::StabilizationIP<mesh_Type, Dof> M_ipStabilization;
+    details::StabilizationIP<mesh_Type, DOF> M_ipStabilization;
     Real                           M_gammaBeta;
     Real                           M_gammaDiv;
     Real                           M_gammaPress;

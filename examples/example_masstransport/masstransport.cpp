@@ -327,8 +327,8 @@ MassTransport::run()
     UInt totalPressDof = pFESpace.map().getMap(Unique)->NumGlobalElements();
 
 
-    if (verbose) std::cout << "Total Velocity Dof = " << totalVelDof << std::endl;
-    if (verbose) std::cout << "Total Pressure Dof = " << totalPressDof << std::endl;
+    if (verbose) std::cout << "Total Velocity DOF = " << totalVelDof << std::endl;
+    if (verbose) std::cout << "Total Pressure DOF = " << totalPressDof << std::endl;
 
     if (verbose) std::cout << "Calling the fluid solver constructor ... ";
 

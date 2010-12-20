@@ -82,7 +82,7 @@ void RemoveMultiple( const std::list<ID> & listToTreat, std::list< std::pair<ID,
 // Constructors & Destructor
 // ===================================================
 
-DOFInterface3Dto2D::DOFInterface3Dto2D( const LocalDofPattern& refFE, const Dof& dof1 ) :
+DOFInterface3Dto2D::DOFInterface3Dto2D( const DOFLocalPattern& refFE, const DOF& dof1 ) :
         M_interfaceFlag( 0 ), M_refFE1( &refFE ), M_dof1( &dof1 )
 {
     M_finalized = false;
@@ -93,7 +93,7 @@ DOFInterface3Dto2D::DOFInterface3Dto2D( const LocalDofPattern& refFE, const Dof&
 // ===================================================
 
 void
-DOFInterface3Dto2D::setup( const LocalDofPattern& refFE1, const Dof& dof1 )
+DOFInterface3Dto2D::setup( const DOFLocalPattern& refFE1, const DOF& dof1 )
 {
     M_refFE1    = &refFE1;
     M_dof1      = &dof1;
