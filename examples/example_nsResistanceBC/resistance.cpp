@@ -186,7 +186,7 @@ ResistanceProblem::run()
     LifeChrono chronoSet, chrono;
 
     chronoSet.start();
-    typedef Oseen< RegionMesh3D<LinearTetra> >::vector_Type  vector_Type;
+    typedef OseenSolver< RegionMesh3D<LinearTetra> >::vector_Type  vector_Type;
     typedef boost::shared_ptr<vector_Type> vectorPtr_Type;
     // typedef boost::shared_ptr<BCVectorInterface>   bc_vector_interface;
     // Reading from data file
@@ -301,7 +301,7 @@ ResistanceProblem::run()
 
     if (verbose) std::cout << "Calling the fluid constructor ... ";
 
-    Oseen< RegionMesh3D<LinearTetra> > fluid (dataNavierStokes,
+    OseenSolver< RegionMesh3D<LinearTetra> > fluid (dataNavierStokes,
                                               uFESpace,
                                               pFESpace,
                                               d->comm);

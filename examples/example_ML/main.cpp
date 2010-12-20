@@ -70,7 +70,7 @@ using namespace LifeV;
 
 typedef boost::function<Real ( Real const&, Real const&, Real const&, Real const&, ID const& )> fct_type;
 
-typedef Oseen< RegionMesh3D<LinearTetra> >::vector_type  vector_type;
+typedef OseenSolver< RegionMesh3D<LinearTetra> >::vector_type  vector_type;
 typedef boost::shared_ptr<vector_type>                   vector_ptrtype;
 
 Real zero_scalar( const Real& /* t */,

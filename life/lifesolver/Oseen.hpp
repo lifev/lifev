@@ -85,7 +85,7 @@ namespace LifeV
  */
 
 template< typename MeshType, typename SolverType = LifeV::SolverTrilinos >
-class Oseen
+class OseenSolver
 {
 
 public:
@@ -120,7 +120,7 @@ public:
     //@{
 
     //! Empty constructor
-    Oseen();
+    OseenSolver();
 
     //! Constructor
     /*!
@@ -130,7 +130,7 @@ public:
         @param communicator MPI communicator
         @param lagrangeMultiplier Lagrange multiplier
      */
-    Oseen( boost::shared_ptr<data_Type>    dataType,
+    OseenSolver( boost::shared_ptr<data_Type>    dataType,
            FESpace<mesh_Type, EpetraMap>&  velocityFESpace,
            FESpace<mesh_Type, EpetraMap>&  pressureFESpace,
            boost::shared_ptr<Epetra_Comm>& communicator,
@@ -145,7 +145,7 @@ public:
         @param monolithicMap EpetraMap class
         @param offset
      */
-    Oseen( boost::shared_ptr<data_Type>    dataType,
+    OseenSolver( boost::shared_ptr<data_Type>    dataType,
            FESpace<mesh_Type, EpetraMap>&  velocityFESpace,
            FESpace<mesh_Type, EpetraMap>&  pressureFESpace,
            boost::shared_ptr<Epetra_Comm>& communicator,
@@ -160,14 +160,14 @@ public:
         @param lagrangeMultipliers (lagrange multipliers for the flux problem with rufaec flag)
         @param communicator MPI communicator
      */
-    Oseen( boost::shared_ptr<data_Type>    dataType,
+    OseenSolver( boost::shared_ptr<data_Type>    dataType,
            FESpace<mesh_Type, EpetraMap>&  velocityFESpace,
            FESpace<mesh_Type, EpetraMap>&  pressureFESpace,
            const std::vector<Int>&         lagrangeMultipliers,
            boost::shared_ptr<Epetra_Comm>& communicator );
 
     //! virtual destructor
-    virtual ~Oseen();
+    virtual ~OseenSolver();
 
     //@}
 
@@ -588,7 +588,7 @@ protected:
     //@{
 
     //! Empty copy constructor
-    Oseen( const Oseen& oseen);
+    OseenSolver( const OseenSolver& oseen);
 
     //@}
 
@@ -724,7 +724,7 @@ protected:
     ElemVec                        M_uLoc;
     boost::shared_ptr<vector_Type> M_un;
 
-}; // class Oseen
+}; // class OseenSolver
 
 
 
@@ -733,8 +733,8 @@ protected:
 // ===================================================
 
 template<typename MeshType, typename SolverType>
-Oseen<MeshType, SolverType>::
-Oseen( boost::shared_ptr<data_Type>    dataType,
+OseenSolver<MeshType, SolverType>::
+OseenSolver( boost::shared_ptr<data_Type>    dataType,
        FESpace<mesh_Type, EpetraMap>&  velocityFESpace,
        FESpace<mesh_Type, EpetraMap>&  pressureFESpace,
        boost::shared_ptr<Epetra_Comm>& communicator,
@@ -797,8 +797,8 @@ Oseen( boost::shared_ptr<data_Type>    dataType,
 }
 
 template<typename MeshType, typename SolverType>
-Oseen<MeshType, SolverType>::
-Oseen( boost::shared_ptr<data_Type>    dataType,
+OseenSolver<MeshType, SolverType>::
+OseenSolver( boost::shared_ptr<data_Type>    dataType,
        FESpace<mesh_Type, EpetraMap>&  velocityFESpace,
        FESpace<mesh_Type, EpetraMap>&  pressureFESpace,
        boost::shared_ptr<Epetra_Comm>& communicator,
@@ -860,8 +860,8 @@ Oseen( boost::shared_ptr<data_Type>    dataType,
 }
 
 template<typename MeshType, typename SolverType>
-Oseen<MeshType, SolverType>::
-Oseen( boost::shared_ptr<data_Type>    dataType,
+OseenSolver<MeshType, SolverType>::
+OseenSolver( boost::shared_ptr<data_Type>    dataType,
        FESpace<mesh_Type, EpetraMap>&  velocityFESpace,
        FESpace<mesh_Type, EpetraMap>&  pressureFESpace,
        const std::vector<Int> &        lagrangeMultipliers,
@@ -922,8 +922,8 @@ Oseen( boost::shared_ptr<data_Type>    dataType,
 }
 
 template<typename MeshType, typename SolverType>
-Oseen<MeshType, SolverType>::
-~Oseen()
+OseenSolver<MeshType, SolverType>::
+~OseenSolver()
 {
 
 }
@@ -935,7 +935,7 @@ Oseen<MeshType, SolverType>::
 
 template<typename MeshType, typename SolverType>
 void
-Oseen<MeshType, SolverType>::setUp( const GetPot& dataFile )
+OseenSolver<MeshType, SolverType>::setUp( const GetPot& dataFile )
 {
 
     M_linearSolver.setUpPrec( dataFile, "fluid/prec" );
@@ -967,7 +967,7 @@ Oseen<MeshType, SolverType>::setUp( const GetPot& dataFile )
 
 template<typename MeshType, typename SolverType>
 void
-Oseen<MeshType, SolverType>::
+OseenSolver<MeshType, SolverType>::
 initialize( const function_Type& velocityFunction, const function_Type& pressureFunction )
 {
     vector_Type velocityInitialGuess( M_velocityFESpace.map() );
@@ -986,7 +986,7 @@ initialize( const function_Type& velocityFunction, const function_Type& pressure
 
 template<typename MeshType, typename SolverType>
 void
-Oseen<MeshType, SolverType>::
+OseenSolver<MeshType, SolverType>::
 initialize( const vector_Type& velocityInitialGuess, const vector_Type& pressureInitialGuess )
 {
 
@@ -999,7 +999,7 @@ initialize( const vector_Type& velocityInitialGuess, const vector_Type& pressure
 
 template<typename MeshType, typename SolverType>
 void
-Oseen<MeshType, SolverType>::
+OseenSolver<MeshType, SolverType>::
 initialize( const vector_Type& velocityAndPressure )
 {
 
@@ -1011,7 +1011,7 @@ initialize( const vector_Type& velocityAndPressure )
 
 template<typename MeshType, typename SolverType>
 void
-Oseen<MeshType, SolverType>::buildSystem()
+OseenSolver<MeshType, SolverType>::buildSystem()
 {
     M_matrixMass.reset  ( new matrix_Type( M_localMap ) );
     M_matrixStokes.reset( new matrix_Type( M_localMap ) );
@@ -1224,7 +1224,7 @@ Oseen<MeshType, SolverType>::buildSystem()
 
 template<typename MeshType, typename SolverType>
 void
-Oseen<MeshType, SolverType>::
+OseenSolver<MeshType, SolverType>::
 updateSystem( const Real         alpha,
               const vector_Type& betaVector,
               const vector_Type& sourceVector )
@@ -1242,7 +1242,7 @@ updateSystem( const Real         alpha,
 
 template<typename MeshType, typename SolverType>
 void
-Oseen<MeshType, SolverType>::
+OseenSolver<MeshType, SolverType>::
 updateSystem( const Real         alpha,
               const vector_Type& betaVector,
               const vector_Type& sourceVector,
@@ -1452,7 +1452,7 @@ updateSystem( const Real         alpha,
 
 template<typename MeshType, typename SolverType>
 void
-Oseen<MeshType, SolverType>::updateStabilization( matrix_Type& matrixFull )
+OseenSolver<MeshType, SolverType>::updateStabilization( matrix_Type& matrixFull )
 {
 
     if ( M_stabilization )
@@ -1464,7 +1464,7 @@ Oseen<MeshType, SolverType>::updateStabilization( matrix_Type& matrixFull )
 
 template<typename MeshType, typename SolverType>
 void
-Oseen<MeshType, SolverType>::iterate( bcHandler_Type& bcHandler )
+OseenSolver<MeshType, SolverType>::iterate( bcHandler_Type& bcHandler )
 {
 
     LifeChrono chrono;
@@ -1522,7 +1522,7 @@ Oseen<MeshType, SolverType>::iterate( bcHandler_Type& bcHandler )
 
 template<typename MeshType, typename SolverType>
 void
-Oseen<MeshType, SolverType>::reduceSolution( Vector& velocityVector, Vector& pressureVector )
+OseenSolver<MeshType, SolverType>::reduceSolution( Vector& velocityVector, Vector& pressureVector )
 {
     vector_Type solution( *M_solution, 0 );
 
@@ -1545,7 +1545,7 @@ Oseen<MeshType, SolverType>::reduceSolution( Vector& velocityVector, Vector& pre
 
 template<typename MeshType, typename SolverType>
 void
-Oseen<MeshType, SolverType>::reduceResidual( Vector& residualVector )
+OseenSolver<MeshType, SolverType>::reduceResidual( Vector& residualVector )
 {
     vector_Type residual( M_residual, 0 );
 
@@ -1562,7 +1562,7 @@ Oseen<MeshType, SolverType>::reduceResidual( Vector& residualVector )
 
 template<typename MeshType, typename SolverType>
 void
-Oseen<MeshType, SolverType>::setBlockPreconditioner( matrixPtr_Type blockPreconditioner )
+OseenSolver<MeshType, SolverType>::setBlockPreconditioner( matrixPtr_Type blockPreconditioner )
 {
     // blockPreconditioner.reset(new matrix_Type(M_monolithicMap, M_solid->getMatrixPtr()->getMeanNumEntries()));
     *blockPreconditioner += *M_blockPreconditioner;
@@ -1570,7 +1570,7 @@ Oseen<MeshType, SolverType>::setBlockPreconditioner( matrixPtr_Type blockPrecond
 
 template<typename MeshType, typename SolverType>
 void
-Oseen<MeshType, SolverType>::getFluidMatrix( matrix_Type& matrixFull )
+OseenSolver<MeshType, SolverType>::getFluidMatrix( matrix_Type& matrixFull )
 {
     M_matrixNoBC->globalAssemble();
     matrixFull += *M_matrixNoBC;
@@ -1578,35 +1578,35 @@ Oseen<MeshType, SolverType>::getFluidMatrix( matrix_Type& matrixFull )
 
 template<typename MeshType, typename SolverType>
 void
-Oseen<MeshType, SolverType>::postProcessingSetArea()
+OseenSolver<MeshType, SolverType>::postProcessingSetArea()
 {
     M_postProcessing->set_area();
 }
 
 template<typename MeshType, typename SolverType>
 void
-Oseen<MeshType, SolverType>::postProcessingSetNormal()
+OseenSolver<MeshType, SolverType>::postProcessingSetNormal()
 {
     M_postProcessing->set_normal();
 }
 
 template<typename MeshType, typename SolverType>
 void
-Oseen<MeshType, SolverType>::postProcessingSetPhi()
+OseenSolver<MeshType, SolverType>::postProcessingSetPhi()
 {
     M_postProcessing->set_phi();
 }
 
 template<typename MeshType, typename SolverType>
 Real
-Oseen<MeshType, SolverType>::flux( const entityFlag_Type& flag )
+OseenSolver<MeshType, SolverType>::flux( const entityFlag_Type& flag )
 {
     return flux( flag, *M_solution );
 }
 
 template<typename MeshType, typename SolverType>
 Real
-Oseen<MeshType, SolverType>::flux( const entityFlag_Type& flag,
+OseenSolver<MeshType, SolverType>::flux( const entityFlag_Type& flag,
                                    const vector_Type& solution )
 {
     vector_Type velocityAndPressure( solution, Repeated );
@@ -1618,21 +1618,21 @@ Oseen<MeshType, SolverType>::flux( const entityFlag_Type& flag,
 
 template<typename MeshType, typename SolverType>
 Real
-Oseen<MeshType, SolverType>::area( const entityFlag_Type& flag )
+OseenSolver<MeshType, SolverType>::area( const entityFlag_Type& flag )
 {
     return M_postProcessing->measure( flag );
 }
 
 template<typename MeshType, typename SolverType>
 Real
-Oseen<MeshType, SolverType>::pressure( const entityFlag_Type& flag )
+OseenSolver<MeshType, SolverType>::pressure( const entityFlag_Type& flag )
 {
     return pressure( flag, *M_solution );
 }
 
 template<typename MeshType, typename SolverType>
 Real
-Oseen<MeshType, SolverType>::pressure(const entityFlag_Type& flag,
+OseenSolver<MeshType, SolverType>::pressure(const entityFlag_Type& flag,
                                       const vector_Type& solution)
 {
     vector_Type velocityAndPressure( solution, Repeated );
@@ -1646,7 +1646,7 @@ Oseen<MeshType, SolverType>::pressure(const entityFlag_Type& flag,
 
 template<typename MeshType, typename SolverType>
 Real
-Oseen<MeshType, SolverType>::lagrangeMultiplier( const entityFlag_Type& flag,
+OseenSolver<MeshType, SolverType>::lagrangeMultiplier( const entityFlag_Type& flag,
                                                  bcHandler_Type& bcHandler )
 {
     return lagrangeMultiplier( flag, bcHandler, *M_solution );
@@ -1654,7 +1654,7 @@ Oseen<MeshType, SolverType>::lagrangeMultiplier( const entityFlag_Type& flag,
 
 template<typename MeshType, typename SolverType>
 Real
-Oseen<MeshType, SolverType>::lagrangeMultiplier( const entityFlag_Type&  flag,
+OseenSolver<MeshType, SolverType>::lagrangeMultiplier( const entityFlag_Type&  flag,
                                                  bcHandler_Type& bcHandler,
                                                  const vector_Type& solution )
 {
@@ -1678,7 +1678,7 @@ Oseen<MeshType, SolverType>::lagrangeMultiplier( const entityFlag_Type&  flag,
 
 template<typename MeshType, typename SolverType>
 Real
-Oseen<MeshType, SolverType>::removeMean( vector_Type& x )
+OseenSolver<MeshType, SolverType>::removeMean( vector_Type& x )
 {
 
     LifeChrono chrono;
@@ -1734,7 +1734,7 @@ Oseen<MeshType, SolverType>::removeMean( vector_Type& x )
 
 template<typename MeshType, typename SolverType>
 void
-Oseen<MeshType, SolverType>::applyBoundaryConditions( matrix_Type&       matrix,
+OseenSolver<MeshType, SolverType>::applyBoundaryConditions( matrix_Type&       matrix,
                                                       vector_Type&       rightHandSide,
                                                       bcHandler_Type& bcHandler )
 {
@@ -1779,7 +1779,7 @@ Oseen<MeshType, SolverType>::applyBoundaryConditions( matrix_Type&       matrix,
 
 template<typename MeshType, typename SolverType>
 void
-Oseen<MeshType, SolverType>::setupPostProc( const entityFlag_Type& flag, const mesh_Type meshPart )
+OseenSolver<MeshType, SolverType>::setupPostProc( const entityFlag_Type& flag, const mesh_Type meshPart )
 {
     M_postProcessing.reset( new PostProc<mesh_Type>( M_velocityFESpace.mesh(),
                                                      &M_velocityFESpace.feBd(),
@@ -1791,7 +1791,7 @@ Oseen<MeshType, SolverType>::setupPostProc( const entityFlag_Type& flag, const m
 
 template<typename MeshType, typename SolverType>
 void
-Oseen<MeshType, SolverType>::setTolMaxIteration( const Real& tolerance, const Int& maxIteration )
+OseenSolver<MeshType, SolverType>::setTolMaxIteration( const Real& tolerance, const Int& maxIteration )
 {
     M_linearSolver.setTolMaxIteration( tolerance, maxIteration );
 }

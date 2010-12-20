@@ -246,7 +246,7 @@ Ethiersteinman::check()
 
     if (verbose) std::cout << "Calling the fluid constructor ... ";
 
-    Oseen< RegionMesh3D<LinearTetra> > fluid (dataNavierStokes,
+    OseenSolver< RegionMesh3D<LinearTetra> > fluid (dataNavierStokes,
                                               uFESpace,
                                               pFESpace,
                                               d->comm);
@@ -645,7 +645,7 @@ Ethiersteinman::run()
 
             if (verbose) std::cout << "Calling the fluid constructor ... ";
 
-            Oseen< RegionMesh3D<LinearTetra> > fluid (dataNavierStokes,
+            OseenSolver< RegionMesh3D<LinearTetra> > fluid (dataNavierStokes,
                                                       uFESpace,
                                                       pFESpace,
                                                       d->comm);

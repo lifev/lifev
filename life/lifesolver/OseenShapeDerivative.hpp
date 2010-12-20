@@ -67,7 +67,7 @@ namespace LifeV
 
 template< typename MeshType, typename SolverType = LifeV::SolverTrilinos >
 class OseenShapeDerivative:
-        public Oseen< MeshType, SolverType >
+        public OseenSolver< MeshType, SolverType >
 {
 
 public:
@@ -77,7 +77,7 @@ public:
 
     typedef MeshType                                          mesh_Type;
     typedef SolverType                                        linearSolver_Type;
-    typedef Oseen< mesh_Type, linearSolver_Type >             oseenSolver_Type;
+    typedef OseenSolver< mesh_Type, linearSolver_Type >             oseenSolver_Type;
     typedef typename oseenSolver_Type::vector_Type            vector_Type;
     typedef typename oseenSolver_Type::matrix_Type            matrix_Type;
     typedef typename oseenSolver_Type::matrixPtr_Type         matrixPtr_Type;

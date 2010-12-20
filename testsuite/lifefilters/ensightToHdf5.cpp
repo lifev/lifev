@@ -60,7 +60,7 @@
 using namespace LifeV;
 
 
-typedef Oseen< RegionMesh3D<LinearTetra> >::vector_Type  vector_type;
+typedef OseenSolver< RegionMesh3D<LinearTetra> >::vector_Type  vector_type;
 typedef boost::shared_ptr<vector_type> vector_ptrtype;
 
 
@@ -185,7 +185,7 @@ EnsightToHdf5::run()
 
     if (verbose) std::cout << "Calling the fluid constructor ... ";
 
-    Oseen< RegionMesh3D<LinearTetra> > fluid (dataNavierStokes,
+    OseenSolver< RegionMesh3D<LinearTetra> > fluid (dataNavierStokes,
                                               uFESpace,
                                               pFESpace,
                                               d->comm);

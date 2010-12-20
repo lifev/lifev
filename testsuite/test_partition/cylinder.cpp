@@ -114,7 +114,7 @@ Real u2(const Real& t, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, 
 }
 
 void
-postProcessFluxesPressures( Oseen< RegionMesh3D<LinearTetra> >& nssolver,
+postProcessFluxesPressures( OseenSolver< RegionMesh3D<LinearTetra> >& nssolver,
                             BCHandler& bcHandler,
                             const LifeV::Real& t, bool _verbose )
 {
@@ -373,7 +373,7 @@ Cylinder::run()
 
 {
 
-    typedef Oseen< RegionMesh3D<LinearTetra> >::vector_Type  vector_type;
+    typedef OseenSolver< RegionMesh3D<LinearTetra> >::vector_Type  vector_type;
     typedef boost::shared_ptr<vector_type> vector_ptrtype;
     // Reading from data file
     //
@@ -454,7 +454,7 @@ Cylinder::run()
 
     bcH.setOffset("Inlet", totalVelDof + totalPressDof);
 
-    Oseen< RegionMesh3D<LinearTetra> > fluid (dataNavierStokes,
+    OseenSolver< RegionMesh3D<LinearTetra> > fluid (dataNavierStokes,
                                               uFESpace,
                                               pFESpace,
                                               d->comm, numLM);

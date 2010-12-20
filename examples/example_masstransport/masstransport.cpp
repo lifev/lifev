@@ -258,7 +258,7 @@ MassTransport::MassTransport( int argc,
 void
 MassTransport::run()
 {
-    typedef Oseen< RegionMesh3D<LinearTetra> >::vector_type  vector_type;
+    typedef OseenSolver< RegionMesh3D<LinearTetra> >::vector_type  vector_type;
     typedef boost::shared_ptr<vector_type>                   vector_ptrtype;
 
     // Reading from data file
@@ -332,7 +332,7 @@ MassTransport::run()
 
     if (verbose) std::cout << "Calling the fluid solver constructor ... ";
 
-    Oseen< RegionMesh3D<LinearTetra> > fluid (dataNavierStokes,
+    OseenSolver< RegionMesh3D<LinearTetra> > fluid (dataNavierStokes,
                                               uFESpace,
                                               pFESpace,
                                               *d->comm);

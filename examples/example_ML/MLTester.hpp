@@ -42,12 +42,12 @@ namespace LifeV
 
 template< typename Mesh,
 typename SolverType = LifeV::SolverTrilinos >
-class MLTester : public Oseen<Mesh, SolverType>
+class MLTester : public OseenSolver<Mesh, SolverType>
 {
 
 public :
 
-    typedef Oseen<Mesh, SolverType> super;
+    typedef OseenSolver<Mesh, SolverType> super;
 
     typedef DataNavierStokes<Mesh> data_type;
 

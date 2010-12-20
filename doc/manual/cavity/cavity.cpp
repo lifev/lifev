@@ -47,7 +47,7 @@
 
 // Object type definitions
 typedef LifeV::RegionMesh3D<LifeV::LinearTetra>       mesh_Type;
-typedef LifeV::Oseen< mesh_Type >                     fluid_Type;
+typedef LifeV::OseenSolver< mesh_Type >                     fluid_Type;
 typedef fluid_Type::vector_Type                       vector_Type;
 typedef boost::shared_ptr<vector_Type>                vectorPtr_Type;   //Pointer
 
@@ -215,7 +215,7 @@ int main(int argc, char** argv)
     if (verbose) std::cout << "Time discretization order " << dataNavierStokes->dataTime()->orderBDF() << std::endl;
 
     // The problem (matrix and rhs) is packed in an object called fluid
-    LifeV::Oseen< LifeV::RegionMesh3D<LifeV::LinearTetra> > fluid (dataNavierStokes,
+    LifeV::OseenSolver< LifeV::RegionMesh3D<LifeV::LinearTetra> > fluid (dataNavierStokes,
                                                                    uFESpace,
                                                                    pFESpace,
                                                                    comm,
