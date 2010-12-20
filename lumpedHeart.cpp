@@ -53,7 +53,7 @@
 namespace LifeV
 {
 
-void LumpedHeart::initParameters( FSIOperator&  /*oper*/, const std::string&    FileName )
+void LumpedHeart::initParameters( FSI&  /*oper*/, const std::string&    FileName )
 {
     M_ODEscheme.setInitialCondition(0.);
 
@@ -77,7 +77,7 @@ Real& LumpedHeart::outPressure         (const Real& /*t*/, const Real& /*x*/, co
     return LumpedHeart::M_pressure;
 }
 
-void LumpedHeart::renewParameters ( FSIOperator&  /*oper*/, const int& /*flag*/, const Real& time , const Real& flux)
+void LumpedHeart::renewParameters ( FSI&  /*oper*/, const int& /*flag*/, const Real& time , const Real& flux)
 {
     M_intFlux += flux*M_dt;
     //should have a different sign, but it is assigned as a Normal bc so we take the opposite

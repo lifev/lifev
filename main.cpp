@@ -95,7 +95,7 @@
 
 #include <life/lifesolver/FSISolver.hpp>
 #include <life/lifesolver/VenantKirchhoffSolverLinear.hpp>
-#include <lifemc/lifesolver/MonolithicGI.hpp>
+#include <lifemc/lifesolver/FSIMonolithicGI.hpp>
 
 #include <life/lifesolver/DataFSI.hpp>
 
@@ -106,7 +106,7 @@
 #endif
 
 // Mathcard includes
-#include <lifemc/lifesolver/MonolithicGI.hpp>
+#include <lifemc/lifesolver/FSIMonolithicGI.hpp>
 
 #include "ud_functions.hpp"
 #include "boundaryConditions.hpp"
@@ -119,21 +119,21 @@ public:
 
     typedef boost::shared_ptr<LifeV::FSISolver> fsi_solver_ptr;
 
-    typedef LifeV::FSIOperator::data_Type                          data_Type;
-    typedef LifeV::FSIOperator::dataPtr_Type                       dataPtr_Type;
+    typedef LifeV::FSI::data_Type                          data_Type;
+    typedef LifeV::FSI::dataPtr_Type                       dataPtr_Type;
 
-    typedef LifeV::FSIOperator::vector_Type        vector_Type;
-    typedef LifeV::FSIOperator::vectorPtr_Type     vectorPtr_Type;
+    typedef LifeV::FSI::vector_Type        vector_Type;
+    typedef LifeV::FSI::vectorPtr_Type     vectorPtr_Type;
 
     typedef boost::shared_ptr< LifeV::Exporter<LifeV::RegionMesh3D<LifeV::LinearTetra> > > filterPtr_Type;
 
-    typedef LifeV::Ensight<LifeV::FSIOperator::mesh_Type>  ensightFilter_Type;
+    typedef LifeV::Ensight<LifeV::FSI::mesh_Type>  ensightFilter_Type;
     typedef boost::shared_ptr<ensightFilter_Type>                 ensightFilterPtr_Type;
 #ifdef HAVE_HDF5
-    typedef LifeV::Hdf5exporter<LifeV::FSIOperator::mesh_Type>  hdf5Filter_Type;
+    typedef LifeV::Hdf5exporter<LifeV::FSI::mesh_Type>  hdf5Filter_Type;
     typedef boost::shared_ptr<hdf5Filter_Type>                  hdf5FilterPtr_Type;
 #endif
-    typedef LifeV::singleton<LifeV::factory<LifeV::FSIOperator,  std::string> > FSIFactory_Type;
+    typedef LifeV::singleton<LifeV::factory<LifeV::FSI,  std::string> > FSIFactory_Type;
     /*!
       This routine sets up the problem:
 
@@ -147,9 +147,9 @@ public:
     {
         using namespace LifeV;
 
-        VenantKirchhoffSolver< FSIOperator::mesh_Type, SolverTrilinos >::StructureSolverFactory::instance().registerProduct( "linearVenantKirchhof", &FSIOperator::createLinearStructure );
+        VenantKirchhoffSolver< FSI::mesh_Type, SolverTrilinos >::StructureSolverFactory::instance().registerProduct( "linearVenantKirchhof", &FSI::createLinearStructure );
 
-        //VenantKirchhofSolver< FSIOperator::mesh_Type, SolverTrilinos >::StructureSolverFactory::instance().registerProduct( "nonLinearVenantKirchhof", &FSIOperator::createNonLinearStructure );
+        //VenantKirchhofSolver< FSI::mesh_Type, SolverTrilinos >::StructureSolverFactory::instance().registerProduct( "nonLinearVenantKirchhof", &FSI::createNonLinearStructure );
 
         M_data = dataPtr_Type( new data_Type() );
         M_data->setup( data_file );
@@ -175,9 +175,9 @@ public:
         std::string  solidMeshPartitioned    =  data_file( "problem/solidMeshPartitioned", "none" );
         if ( fluidMeshPartitioned.compare( "none" ) )
         {
-            FSIOperator::meshFilter_Type fluidMeshFilter( data_file, fluidMeshPartitioned );
+            FSI::meshFilter_Type fluidMeshFilter( data_file, fluidMeshPartitioned );
             fluidMeshFilter.setComm( M_fsi->FSIOper()->worldComm() );
-            FSIOperator::meshFilter_Type solidMeshFilter( data_file, solidMeshPartitioned );
+            FSI::meshFilter_Type solidMeshFilter( data_file, solidMeshPartitioned );
             solidMeshFilter.setComm( M_fsi->FSIOper( )->worldComm( ) );
             M_fsi->FSIOper( )->partitionMeshes( fluidMeshFilter, solidMeshFilter );
             M_fsi->FSIOper( )->setupFEspace( );
@@ -293,7 +293,7 @@ public:
         boost::timer _overall_timer;
         M_Tstart=M_fsi->FSIOper()->dataFluid()->dataTime()->initialTime();
         int _i = 1;
-        LifeV::UInt offset=dynamic_cast<LifeV::Monolithic*>(M_fsi->FSIOper().get())->getOffset();
+        LifeV::UInt offset=dynamic_cast<LifeV::FSIMonolithic*>(M_fsi->FSIOper().get())->getOffset();
 
 #ifdef HAVE_HDF5
         if (M_exporterFluid->mapType() == LifeV::Unique)
@@ -584,7 +584,7 @@ void Problem::initialize(std::string& /*loadInitSol*/,  GetPot const& data_file)
     boost::shared_ptr<LifeV::EpetraVector> UniqueVFDOld;
 
 
-    UInt offset=dynamic_cast<LifeV::Monolithic*>(M_fsi->FSIOper().get())->getOffset();
+    UInt offset=dynamic_cast<LifeV::FSIMonolithic*>(M_fsi->FSIOper().get())->getOffset();
 
     Real dt= M_fsi->FSIOper()->dataFluid()->dataTime()->timeStep();//data_file("problem/Tstart"   ,0.);
     M_fsi->FSIOper()->displayer().leaderPrint( "Starting time = " ,M_Tstart);
@@ -593,7 +593,7 @@ void Problem::initialize(std::string& /*loadInitSol*/,  GetPot const& data_file)
     M_importerSolid->import(M_Tstart-dt, dt);
 
     UniqueVFDOld.reset(new vector_Type(*M_fluidDisp, Unique, Zero));
-    dynamic_cast<LifeV::Monolithic*>(M_fsi->FSIOper().get())->initializeMesh(UniqueVFDOld);
+    dynamic_cast<LifeV::FSIMonolithic*>(M_fsi->FSIOper().get())->initializeMesh(UniqueVFDOld);
 
     M_importerFluid->import(M_Tstart);
     M_importerSolid->import(M_Tstart);
@@ -618,7 +618,7 @@ void Problem::initialize(std::string& /*loadInitSol*/,  GetPot const& data_file)
     if (!M_data->method().compare("monolithicGI"))
     {
         UniqueVFD.reset(new vector_Type(*M_fsi->FSIOper()->couplingVariableMap(), Unique, Zero));
-        UniqueVFD->subset(*M_fluidDisp, M_fluidDisp->map(), (UInt)0, dynamic_cast<LifeV::MonolithicGI*>(M_fsi->FSIOper().get())->mapWithoutMesh().map(Unique)->NumGlobalElements());
+        UniqueVFD->subset(*M_fluidDisp, M_fluidDisp->map(), (UInt)0, dynamic_cast<LifeV::FSIMonolithicGI*>(M_fsi->FSIOper().get())->mapWithoutMesh().map(Unique)->NumGlobalElements());
         *initSol+=*UniqueVFD;
     }
 

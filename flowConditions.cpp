@@ -59,7 +59,7 @@ FlowConditions::FlowConditions():
 }
 
 
-void FlowConditions::initParameters( FSIOperator&  Oper,
+void FlowConditions::initParameters( FSI&  Oper,
                                      const int&    outflowFlag)
 {
 
@@ -109,7 +109,7 @@ void FlowConditions::renewParameters ( FSISolver&  oper_,
 
     Epetra_SerialDenseVector fluidQuantities(2); // Flux and Area
     //Epetra_SerialDenseVector solidQuantities(0); // M_beta and M_rhos
-    FSIOperator* Oper(oper_.FSIOper().get());
+    FSI* Oper(oper_.FSIOper().get());
 
     if (Oper->isFluid())
     {
