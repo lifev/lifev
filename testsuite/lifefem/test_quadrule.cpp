@@ -49,10 +49,10 @@ quadRuleTetra.plt ==> Show the Convergence Rate of all the quadrature rules on T
 #include <mpi.h>
 #endif
 
-#include <life/lifecore/GetPot.hpp>
 #include <life/lifefem/ReferenceFE.hpp>
 #include <life/lifefem/QuadRule.hpp>
 #include <life/lifefem/CurrentFE.hpp>
+#include <life/lifefilters/GetPot.hpp>
 #include <life/lifemesh/regionMesh3D.hpp>
 #include <life/lifemesh/structuredMesh3D.hpp>
 #include <life/lifefem/DOF.hpp>
