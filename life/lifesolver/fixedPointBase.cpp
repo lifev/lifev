@@ -92,7 +92,7 @@ fixedPoint::setupFEspace()
 void
 fixedPoint::setupFluidSolid()
 {
-    // call FSIOperator setup()
+    // call FSI setup()
 
     Debug( 6205 ) << "Setting up the FSI problem \n";
 
@@ -303,8 +303,8 @@ void fixedPoint::eval( const vector_Type& _disp,
 void fixedPoint::registerMyProducts( )
 {
     FSIFactory_Type::instance().registerProduct( "fixedPoint", &createFP );
-    solid_Type::StructureSolverFactory::instance().registerProduct( "LinearVenantKirchhof", &FSIOperator::createLinearStructure );
-    //solid_Type::StructureSolverFactory::instance().registerProduct( "NonLinearVenantKirchhof", &FSIOperator::createNonLinearStructure );
+    solid_Type::StructureSolverFactory::instance().registerProduct( "LinearVenantKirchhof", &FSI::createLinearStructure );
+    //solid_Type::StructureSolverFactory::instance().registerProduct( "NonLinearVenantKirchhof", &FSI::createNonLinearStructure );
 }
 
 }   // Namespace LifeV

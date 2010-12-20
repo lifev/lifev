@@ -26,7 +26,7 @@
 
 /*!
     @file
-    @brief Implementation of an  FSIOperator with Newton algorithm.
+    @brief Implementation of an  FSI with Newton algorithm.
 
     @author Miguel Fernandez
     @author Gilles Fourestey
@@ -42,12 +42,12 @@
 #define EXACTJACOBIANBASE_HPP
 
 #include <life/lifealg/NonLinearAitken.hpp>
-#include <life/lifesolver/FSIOperator.hpp>
+#include <life/lifesolver/FSI.hpp>
 
 namespace LifeV
 {
 
-//! exactJacobian - Implementation of an  FSIOperator with Newton algorithm.
+//! exactJacobian - Implementation of an  FSI with Newton algorithm.
 /*!
 \include ../../doc/api/bibliography/newton.dox
 
@@ -55,20 +55,20 @@ namespace LifeV
     @author Gilles Fourestey
     @author Paolo Crosetto <paolo.crosetto@epfl.ch>
     @see  \ref{FM05}
-    FSIOperator
+    FSI
 
-    This class implements an FSIOperator whose Jacobian is computed exacly, i.e., using
+    This class implements an FSI whose Jacobian is computed exacly, i.e., using
     shape dericatives.
 
 */
 
-class exactJacobian : public FSIOperator
+class exactJacobian : public FSI
 {
 public:
 
     //! @name Public Types
     //@{
-    typedef FSIOperator                     super;
+    typedef FSI                     super;
 
     typedef super::vector_Type              vector_Type;
     typedef super::vectorPtr_Type           vectorPtr_type;
@@ -264,11 +264,11 @@ private:
 }; // end class exactJacobian
 
 
-inline FSIOperator* createEJ() { return new exactJacobian(); }
+inline FSI* createEJ() { return new exactJacobian(); }
 
 namespace
 {
-static bool registerEJ = FSIOperator::FSIFactory_Type::instance().registerProduct( "exactJacobian", &createEJ );
+static bool registerEJ = FSI::FSIFactory_Type::instance().registerProduct( "exactJacobian", &createEJ );
 }
 
 }  // Namespace LifeV

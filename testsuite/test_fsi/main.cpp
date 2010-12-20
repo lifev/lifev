@@ -49,7 +49,7 @@
 #include <life/lifecore/chrono.hpp>
 
 #include <life/lifesolver/FSISolver.hpp>
-#include <life/lifesolver/FSIOperator.hpp>
+#include <life/lifesolver/FSI.hpp>
 //#include "life/lifesolver/exactJacobianBase.hpp"
 //#include "life/lifesolver/fixedPointBase.hpp"
 #include <life/lifesolver/DataFSI.hpp>
@@ -85,10 +85,10 @@ namespace LifeV
 {
 namespace
 {
-LifeV::VenantKirchhoffSolver< LifeV::FSIOperator::mesh_Type, LifeV::SolverTrilinos >*    createLinearStructure() { return new VenantKirchhoffSolverLinear< LifeV::FSIOperator::mesh_Type, LifeV::SolverTrilinos >(); }
+LifeV::VenantKirchhoffSolver< LifeV::FSI::mesh_Type, LifeV::SolverTrilinos >*    createLinearStructure() { return new VenantKirchhoffSolverLinear< LifeV::FSI::mesh_Type, LifeV::SolverTrilinos >(); }
 
 //NOTE: the nonlinear structure solver is still in development in the FSI framework
-//LifeV::VenantKirchhofSolver< LifeV::FSIOperator::mesh_Type, LifeV::SolverTrilinos >*    createNonLinearStructure(){ return new NonLinearVenantKirchhofSolver< LifeV::FSIOperator::mesh_Type, LifeV::SolverTrilinos >(); }
+//LifeV::VenantKirchhofSolver< LifeV::FSI::mesh_Type, LifeV::SolverTrilinos >*    createNonLinearStructure(){ return new NonLinearVenantKirchhofSolver< LifeV::FSI::mesh_Type, LifeV::SolverTrilinos >(); }
 }
 }
 
@@ -103,7 +103,7 @@ class bc_adaptor
 {
 public:
 
-    bc_adaptor( FSIOperator& Operator ):
+    bc_adaptor( FSI& Operator ):
             M_oper   ( Operator )
     {
         Real area0	= 0.7854;
@@ -159,7 +159,7 @@ public:
 
 private:
 
-    FSIOperator& M_oper;
+    FSI& M_oper;
     Real         M_outflow;
 };
 
@@ -172,13 +172,13 @@ class Problem
 public:
 
     typedef boost::shared_ptr<FSISolver>                    fsi_solver_ptr;
-    typedef FSIOperator::data_Type                          data_Type;
-    typedef FSIOperator::dataPtr_Type                       dataPtr_Type;
+    typedef FSI::data_Type                          data_Type;
+    typedef FSI::dataPtr_Type                       dataPtr_Type;
 
-    typedef FSIOperator::vector_Type                        vector_Type;
-    typedef FSIOperator::vectorPtr_Type                     vectorPtr_Type;
+    typedef FSI::vector_Type                        vector_Type;
+    typedef FSI::vectorPtr_Type                     vectorPtr_Type;
 
-    typedef Exporter<FSIOperator::mesh_Type>                filter_type;
+    typedef Exporter<FSI::mesh_Type>                filter_type;
     typedef boost::shared_ptr<filter_type>                  filter_ptrtype;
 
     /*!
@@ -192,7 +192,7 @@ public:
     Problem( const std::string& dataFileName, std::string method = "" )
     {
 
-        VenantKirchhoffSolver< FSIOperator::mesh_Type, SolverTrilinos >::StructureSolverFactory::instance().registerProduct( "linearVenantKirchhof", &createLinearStructure );
+        VenantKirchhoffSolver< FSI::mesh_Type, SolverTrilinos >::StructureSolverFactory::instance().registerProduct( "linearVenantKirchhof", &createLinearStructure );
         //        VenantKirchhofSolver< FSIOperator::mesh_Type, SolverTrilinos >::StructureSolverFactory::instance().registerProduct( "nonLinearVenantKirchhof", &createNonLinearStructure );
 
         Debug( 10000 ) << "Setting up data from GetPot \n";

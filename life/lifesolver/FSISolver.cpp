@@ -26,7 +26,7 @@
 
 /**
    @file
-   @brief File containing the solver for the instances of the FSIOperator class.
+   @brief File containing the solver for the instances of the FSI class.
    \author Christophe Prud'homme <christophe.prudhomme@epfl.ch>
    \date 2004-11-18
  */
@@ -192,7 +192,7 @@ FSISolver::setData( const dataPtr_Type& data )
     MPI_Barrier(MPI_COMM_WORLD);
     */
 
-    this->setFSIOperator( );
+    this->setFSI( );
 
     M_oper->setFluid( fluid );
     M_oper->setSolid( solid );
@@ -290,7 +290,7 @@ void
 FSISolver::iterate()
 {
     Debug( 6220 ) << "============================================================\n";
-    Debug( 6220 ) << "Solving FSI at time " << M_data->dataFluid()->dataTime()->time() << " with FSIOperator: " << M_data->method()  << "\n";
+    Debug( 6220 ) << "Solving FSI at time " << M_data->dataFluid()->dataTime()->time() << " with FSI: " << M_data->method()  << "\n";
     Debug( 6220 ) << "============================================================\n";
 
     // Update the system
@@ -351,10 +351,10 @@ FSISolver::setSourceTerms( const fluidSource_Type& fluidSource,
 }
 
 void
-FSISolver::setFSIOperator( )
+FSISolver::setFSI( )
 {
-    Debug( 6220 ) << "FSISolver::setFSIOperator with operator " << M_data->method() << "\n";
-    M_oper = FSIOperPtr_Type( FSIOperator::FSIFactory_Type::instance().createObject( M_data->method() ) );
+    Debug( 6220 ) << "FSISolver::setFSI with operator " << M_data->method() << "\n";
+    M_oper = FSIOperPtr_Type( FSI::FSIFactory_Type::instance().createObject( M_data->method() ) );
 }
 
 void

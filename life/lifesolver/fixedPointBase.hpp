@@ -26,7 +26,7 @@
 
 /*!
     @file
-    @brief Implementation of an  FSIOperator with fixed point iterations.
+    @brief Implementation of an  FSI with fixed point iterations.
 
     @author Miguel Fernandez
     @author Gilles Fourestey
@@ -41,12 +41,12 @@
 #define FIXEDPOINTBASE_HPP
 
 #include <life/lifealg/NonLinearAitken.hpp>
-#include <life/lifesolver/FSIOperator.hpp>
+#include <life/lifesolver/FSI.hpp>
 
 namespace LifeV
 {
 
-//! fixedPont - Implementation of an  FSIOperator with fixed point iterations.
+//! fixedPont - Implementation of an  FSI with fixed point iterations.
 /*!
 \include ../../doc/api/bibliography/fluidstructure
 
@@ -56,19 +56,19 @@ namespace LifeV
     @see
     \ref DDFQ06 (Dirichlet--Neumann )
     \ref BNV08 (Robin Neumann)
-    FSIOperator
+    FSI
 
-    This class implements an FSIOperator that will solve the FSI problem by a
+    This class implements an FSI that will solve the FSI problem by a
     relaxed fixed point method.
 */
 
-class fixedPoint : public FSIOperator
+class fixedPoint : public FSI
 {
 public:
 
     //! @name Public Types
     //@{
-    typedef FSIOperator                     super;
+    typedef FSI                     super;
 
     typedef super::vector_Type              vector_Type;
     typedef super::vectorPtr_Type           vectorPtr_type;
@@ -175,10 +175,10 @@ private:
 }; // end class fixedPointBase
 
 
-inline FSIOperator* createFP() { return new fixedPoint();}
+inline FSI* createFP() { return new fixedPoint();}
 namespace
 {
-static bool registerFP = FSIOperator::FSIFactory_Type::instance().registerProduct( "fixedPoint", &createFP );
+static bool registerFP = FSI::FSIFactory_Type::instance().registerProduct( "fixedPoint", &createFP );
 }
 
 }   // Namespace LifeV

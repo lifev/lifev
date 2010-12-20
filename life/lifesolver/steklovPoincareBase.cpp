@@ -73,7 +73,7 @@ void
 steklovPoincare::setup()
 {
 
-    // call FSIOperator setup()
+    // call FSI setup()
     setLinearFluid(true);
     setLinearSolid(true);
 
@@ -669,8 +669,8 @@ void steklovPoincare::computeStrongResidualFSI()
 
     std::cout << "        builing the mass matrix ... " << std::flush;
 
-    FSIOperator::dof_interface_type3D dofReducedFluidToMesh
-    (new FSIOperator::dof_interface_type3D::element_type);
+    FSI::dof_interface_type3D dofReducedFluidToMesh
+    (new FSI::dof_interface_type3D::element_type);
 
     //Real f(const Real& t, const Real& x, const Real& y, const Real& z, const ID& i);
 
@@ -972,8 +972,8 @@ void steklovPoincare::computeResidualFSI()
 
 namespace
 {
-FSIOperator* createSP() { return new steklovPoincare(); }
-static bool reg = FSIOperator::FSIFactory::instance().registerProduct( "steklovPoincare", &createSP );
+FSI* createSP() { return new steklovPoincare(); }
+static bool reg = FSI::FSIFactory::instance().registerProduct( "steklovPoincare", &createSP );
 }
 
 

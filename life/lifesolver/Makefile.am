@@ -26,7 +26,7 @@ AM_CPPFLAGS = -DNO_BLASLAPACK
 
 lib_LTLIBRARIES	= liblifesolver.la
 
-liblifesolver_la_SOURCES   = DataFSI.cpp dataADR.cpp VenantKirchhoffElasticData.cpp  dataNavierStokes.cpp FSIOperator.cpp fixedPointBase.cpp \
+liblifesolver_la_SOURCES   = DataFSI.cpp dataADR.cpp VenantKirchhoffElasticData.cpp  dataNavierStokes.cpp FSI.cpp fixedPointBase.cpp \
 			                 exactJacobianBase.cpp FSISolver.cpp HeartIonicData.cpp HeartBidomainData.cpp HeartMonodomainData.cpp HeartFunctors.cpp \
 					DataLevelSet.cpp dataSecondOrder.cpp
 

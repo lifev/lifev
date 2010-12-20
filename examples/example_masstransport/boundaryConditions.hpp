@@ -20,10 +20,10 @@
 namespace LifeV
 {
 
-typedef FSIOperator::fluid_raw_type fluid;
-typedef FSIOperator::solid_raw_type solid;
+typedef FSI::fluid_raw_type fluid;
+typedef FSI::solid_raw_type solid;
 
-FSIOperator::fluidBchandlerPtr_type BCh_harmonicExtension(FSIOperator &_oper)
+FSI::fluidBchandlerPtr_type BCh_harmonicExtension(FSI &_oper)
 {
 
 //     Debug(10000) << "SP harmonic extension\n";
@@ -32,7 +32,7 @@ FSIOperator::fluidBchandlerPtr_type BCh_harmonicExtension(FSIOperator &_oper)
 //     FPOper->setStructureDispToHarmonicExtension(_oper.lambdaFluid());
 
     if (! _oper.isFluid() )
-        return FSIOperator::fluidBchandlerPtr_type();
+        return FSI::fluidBchandlerPtr_type();
 
 //    FPOper->bcvStructureDispToHarmonicExtension()->showMe(true,std::cout);
 
@@ -41,7 +41,7 @@ FSIOperator::fluidBchandlerPtr_type BCh_harmonicExtension(FSIOperator &_oper)
 
     BCFunctionBase bcf(fZero);
 
-    FSISolver::fluidBchandlerPtr_type BCh_he(new FSIOperator::fluidBchandler_Type );
+    FSISolver::fluidBchandlerPtr_type BCh_he(new FSI::fluidBchandler_Type );
 
     BCh_he->addBC("Top",       3, Essential, Full, bcf,   3);
     BCh_he->addBC("Base",      2, Essential, Full, bcf,   3);
@@ -80,15 +80,15 @@ FSIOperator::fluidBchandlerPtr_type BCh_harmonicExtension(FSIOperator &_oper)
 }
 
 
-FSIOperator::fluidBchandlerPtr_type BCh_fluid(FSIOperator &_oper)
+FSI::fluidBchandlerPtr_type BCh_fluid(FSI &_oper)
 {
     // Boundary conditions for the fluid velocity
     Debug( 10000 ) << "Boundary condition for the fluid\n";
 
     if (! _oper.isFluid() )
-        return FSIOperator::fluidBchandlerPtr_type();
+        return FSI::fluidBchandlerPtr_type();
 
-    FSIOperator::fluidBchandlerPtr_type BCh_fluid( new FSIOperator::fluidBchandler_Type );
+    FSI::fluidBchandlerPtr_type BCh_fluid( new FSI::fluidBchandler_Type );
 
     BCFunctionBase bcf      (fZero);
     BCFunctionBase in_flow  (u2);
@@ -109,15 +109,15 @@ FSIOperator::fluidBchandlerPtr_type BCh_fluid(FSIOperator &_oper)
 }
 
 
-FSIOperator::fluidBchandlerPtr_type BCh_fluidInv(FSIOperator &_oper)
+FSI::fluidBchandlerPtr_type BCh_fluidInv(FSI &_oper)
 {
 
     if (! _oper.isFluid() )
-        return FSIOperator::fluidBchandlerPtr_type();
+        return FSI::fluidBchandlerPtr_type();
 
     // Boundary conditions for the fluid velocity
     Debug( 10000 ) << "Boundary condition for the inverse fluid\n";
-    FSIOperator::fluidBchandlerPtr_type BCh_fluidInv( new FSIOperator::fluidBchandler_Type );
+    FSI::fluidBchandlerPtr_type BCh_fluidInv( new FSI::fluidBchandler_Type );
 
     BCFunctionBase bcf(fZero);
     BCFunctionBase in_flow(u2);
@@ -131,14 +131,14 @@ FSIOperator::fluidBchandlerPtr_type BCh_fluidInv(FSIOperator &_oper)
 
 
 
-FSIOperator::fluidBchandlerPtr_type BCh_fluidLin(FSIOperator &_oper)
+FSI::fluidBchandlerPtr_type BCh_fluidLin(FSI &_oper)
 {
     if (! _oper.isFluid() )
-        return FSIOperator::fluidBchandlerPtr_type();
+        return FSI::fluidBchandlerPtr_type();
 
     // Boundary conditions for the fluid velocity
     Debug( 10000 ) << "Boundary condition for the linearized fluid\n";
-    FSIOperator::fluidBchandlerPtr_type BCh_fluidLin( new FSIOperator::fluidBchandler_Type );
+    FSI::fluidBchandlerPtr_type BCh_fluidLin( new FSI::fluidBchandler_Type );
 
     BCFunctionBase bcf(fZero);
     BCFunctionBase in_flow(u2);
@@ -171,15 +171,15 @@ FSIOperator::fluidBchandlerPtr_type BCh_fluidLin(FSIOperator &_oper)
 
 
 
-FSIOperator::solidBchandlerPtr_type BCh_solid(FSIOperator &_oper)
+FSI::solidBchandlerPtr_type BCh_solid(FSI &_oper)
 {
 
     if (! _oper.isSolid() )
-        return FSIOperator::solidBchandlerPtr_type();
+        return FSI::solidBchandlerPtr_type();
 
     // Boundary conditions for the solid displacement
     Debug( 10000 ) << "Boundary condition for the solid\n";
-    FSIOperator::solidBchandlerPtr_type BCh_solid( new FSIOperator::solidBchandler_Type );
+    FSI::solidBchandlerPtr_type BCh_solid( new FSI::solidBchandler_Type );
 
     BCFunctionBase bcf(fZero);
 
@@ -219,14 +219,14 @@ FSIOperator::solidBchandlerPtr_type BCh_solid(FSIOperator &_oper)
 }
 
 
-FSIOperator::solidBchandlerPtr_type BCh_solidLin(FSIOperator &_oper)
+FSI::solidBchandlerPtr_type BCh_solidLin(FSI &_oper)
 {
     if (! _oper.isSolid() )
-        return FSIOperator::solidBchandlerPtr_type();
+        return FSI::solidBchandlerPtr_type();
 
     // Boundary conditions for the solid displacement
     Debug( 10000 ) << "Boundary condition for the linear solid\n";
-    FSIOperator::solidBchandlerPtr_type BCh_solidLin( new FSIOperator::solidBchandler_Type );
+    FSI::solidBchandlerPtr_type BCh_solidLin( new FSI::solidBchandler_Type );
 
     BCFunctionBase bcf(fZero);
 
@@ -252,15 +252,15 @@ FSIOperator::solidBchandlerPtr_type BCh_solidLin(FSIOperator &_oper)
     return BCh_solidLin;
 }
 
-FSIOperator::solidBchandlerPtr_type BCh_solidInvLin(FSIOperator &_oper)
+FSI::solidBchandlerPtr_type BCh_solidInvLin(FSI &_oper)
 {
 
     if (! _oper.isSolid() )
-        return FSIOperator::solidBchandlerPtr_type();
+        return FSI::solidBchandlerPtr_type();
 
     // Boundary conditions for the solid displacement
     Debug( 10000 ) << "Boundary condition for the inverse linear solid\n";
-    FSIOperator::solidBchandlerPtr_type BCh_solidLinInv( new FSIOperator::solidBchandler_Type );
+    FSI::solidBchandlerPtr_type BCh_solidLinInv( new FSI::solidBchandler_Type );
 
     BCFunctionBase bcf(fZero);
 
@@ -289,14 +289,14 @@ FSIOperator::solidBchandlerPtr_type BCh_solidInvLin(FSIOperator &_oper)
 
 
 
-FSIOperator::fluidBchandlerPtr_type BCh_reducedFluid(FSIOperator &_oper)
+FSI::fluidBchandlerPtr_type BCh_reducedFluid(FSI &_oper)
 {
 
     if (! _oper.isFluid() )
-        return FSIOperator::solidBchandlerPtr_type();
+        return FSI::solidBchandlerPtr_type();
 
     Debug( 10000 ) << "Boundary condition for the reduced fluid\n";
-    FSISolver::fluidBchandlerPtr_type BCh_reducedFluid(new FSIOperator::fluidBchandler_Type );
+    FSISolver::fluidBchandlerPtr_type BCh_reducedFluid(new FSI::fluidBchandler_Type );
     BCFunctionBase bcf(fZero);
 
     BCh_reducedFluid->addBC("Wall_Edges", 20, Essential, Scalar, bcf);
@@ -313,12 +313,12 @@ FSIOperator::fluidBchandlerPtr_type BCh_reducedFluid(FSIOperator &_oper)
 }
 
 
-FSIOperator::fluidBchandlerPtr_type BCh_reducedFluidInv(FSIOperator &_oper)
+FSI::fluidBchandlerPtr_type BCh_reducedFluidInv(FSI &_oper)
 {
     if (! _oper.isFluid() )
-        return FSIOperator::solidBchandlerPtr_type();
+        return FSI::solidBchandlerPtr_type();
 
-    FSISolver::fluidBchandlerPtr_type BCh_reducedFluidInv( new FSIOperator::fluidBchandler_Type );
+    FSISolver::fluidBchandlerPtr_type BCh_reducedFluidInv( new FSI::fluidBchandler_Type );
     BCFunctionBase bcf(fZero);
     BCh_reducedFluidInv->addBC("Wall_Edges", 20, Essential, Scalar, bcf);
     BCh_reducedFluidInv->addBC("InFlow",      2, Essential, Scalar, bcf);
