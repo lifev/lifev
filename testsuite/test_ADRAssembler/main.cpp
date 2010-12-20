@@ -51,13 +51,13 @@
 
 #include <life/lifearray/EpetraMatrix.hpp>
 
-#include <life/lifefilters/ensight.hpp>
-//#include <life/lifefilters/hdf5exporter.hpp>
+#include <life/lifefilters/ExporterEnsight.hpp>
+//#include <life/lifefilters/ExporterHDF5.hpp>
 
 #include <life/lifefem/FESpace.hpp>
 #include <life/lifefem/bcManage.hpp>
 
-#include <life/lifemesh/partitionMesh.hpp>
+#include <life/lifemesh/MeshPartitioner.hpp>
 #include <life/lifemesh/structuredMesh3D.hpp>
 #include <life/lifemesh/regionMesh3D.hpp>
 
