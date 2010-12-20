@@ -124,9 +124,9 @@ int main(int argc, char** argv)
     }
 
     // Chronometer
-    LifeV::Chrono globalChrono;
-    LifeV::Chrono initChrono;
-    LifeV::Chrono iterChrono;
+    LifeV::LifeChrono globalChrono;
+    LifeV::LifeChrono initChrono;
+    LifeV::LifeChrono iterChrono;
     globalChrono.start();
     initChrono.start();
 
@@ -148,7 +148,7 @@ int main(int argc, char** argv)
     boost::shared_ptr< LifeV::RegionMesh3D<LifeV::LinearTetra> > fullMeshPtr(new LifeV::RegionMesh3D<LifeV::LinearTetra>);
     LifeV::readMesh(*fullMeshPtr, dataMesh);
     // Split the mesh between processors
-    LifeV::partitionMesh< LifeV::RegionMesh3D<LifeV::LinearTetra> >   meshPart(fullMeshPtr, comm);
+    LifeV::MeshPartitioner< LifeV::RegionMesh3D<LifeV::LinearTetra> >   meshPart(fullMeshPtr, comm);
 
     // +-----------------------------------------------+
     // |            Creating the FE spaces             |
@@ -275,13 +275,13 @@ int main(int argc, char** argv)
     // (A new one should be built for Navier-Stokes)
     fluid.resetPreconditioner();
 
-    boost::shared_ptr< LifeV::Hdf5exporter<LifeV::RegionMesh3D<LifeV::LinearTetra> > > exporter;
+    boost::shared_ptr< LifeV::ExporterHDF5<LifeV::RegionMesh3D<LifeV::LinearTetra> > > exporter;
 
     vectorPtr_Type velAndPressure;
 
     std::string const exporterType =  dataFile( "exporter/type", "ensight");
 
-    exporter.reset( new LifeV::Hdf5exporter<LifeV::RegionMesh3D<LifeV::LinearTetra> > ( dataFile, "cavity_example" ) );
+    exporter.reset( new LifeV::ExporterHDF5<LifeV::RegionMesh3D<LifeV::LinearTetra> > ( dataFile, "cavity_example" ) );
     exporter->setPostDir( "./" ); // This is a test to see if M_post_dir is working
     exporter->setMeshProcId( meshPart.meshPartition(), comm->MyPID() );
 
