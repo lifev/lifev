@@ -49,10 +49,10 @@
 #include <life/lifearray/EpetraMatrix.hpp>
 #include <life/lifearray/EpetraVector.hpp>
 #include <life/lifefem/bcHandler.hpp>
-#include <life/lifecore/chrono.hpp>
 #include <life/lifefem/SobolevNorms.hpp>
 #include <life/lifefem/GeometricMap.hpp>
 #include <life/lifesolver/HeartIonicData.hpp>
+#include <life/lifecore/LifeChrono.hpp>
 #include <boost/shared_ptr.hpp>
 #include <life/lifefem/FESpace.hpp>
 #include <life/lifefem/bdf_template.hpp>
