@@ -3333,7 +3333,7 @@ RegionMesh3D<GEOSHAPE, MC>::updateElementEdges( bool ce, bool verbose, UInt ee )
         edgeList.reserve( ee );
         edgeList.resize( 0 );
     }
-    BareItemsHandler<BareEdge> _be;
+    MeshElementBareHandler<BareEdge> _be;
     std::pair<UInt, bool> e;
     M_VToE.reshape( numLocalEdges(), numVolumes() ); // DIMENSION ARRAY
 
@@ -3490,7 +3490,7 @@ RegionMesh3D<GEOSHAPE, MC>::updateElementFaces( bool cf, const bool verbose, UIn
 
 
 
-    BareItemsHandler<BareFace> _be;
+    MeshElementBareHandler<BareFace> _be;
     std::pair<UInt, bool> e;
     M_VToF.reshape( numLocalFaces(), numVolumes() ); // DIMENSION ARRAY
 

@@ -43,7 +43,7 @@
 #include <life/lifemesh/markers.hpp>
 #include <life/lifefilters/ImporterMesh3D.hpp>
 #include <life/lifemesh/regionMesh3D.hpp>
-#include <life/lifemesh/bareItems.hpp>
+#include <life/lifemesh/MeshElementBare.hpp>
 
 
 int main()

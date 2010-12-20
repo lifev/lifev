@@ -604,7 +604,7 @@ readFreeFemFile( RegionMesh2D<GeoShape, MC> & mesh,
                  const std::string          & fileName,
                  entityFlag_Type              regionFlag, bool useless )
 {
-    BareItemsHandler<BareEdge> _be;
+    MeshElementBareHandler<BareEdge> _be;
     std::pair<BareEdge, bool> _edge;
 
     typename RegionMesh2D<GeoShape, MC>::point_Type * pp = 0;

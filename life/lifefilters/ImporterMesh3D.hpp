@@ -54,7 +54,7 @@
 
 #include <life/lifecore/StringUtility.hpp>
 
-#include <life/lifemesh/bareItems.hpp>
+#include <life/lifemesh/MeshElementBare.hpp>
 
 #include <life/lifefilters/mesh_util.hpp>
 #include <life/lifemesh/InternalEntitySelector.hpp>
@@ -1336,7 +1336,7 @@ readNetgenMesh(RegionMesh3D<GeoShape,MC> & mesh,
     std::vector<bool> boundaryPoint;
 
     // build a list of boundary edges, since netgen is not writing all of them
-    BareItemsHandler<BareEdge> bihBedges;
+    MeshElementBareHandler<BareEdge> bihBedges;
 
     // flags for boundary entities
     std::vector<entityFlag_Type> bcnsurf, bcnpoints;
@@ -1698,7 +1698,7 @@ readNetgenMesh(RegionMesh3D<GeoShape,MC> & mesh,
        in bihBedges
     */
 
-    BareItemsHandler<BareEdge>::const_iterator bedge = bihBedges.begin();
+    MeshElementBareHandler<BareEdge>::const_iterator bedge = bihBedges.begin();
 
     for ( UInt i=0; i < numberBoundaryEdges; i++ )
     {

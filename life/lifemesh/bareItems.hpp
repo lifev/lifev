@@ -212,9 +212,9 @@ struct BareFace
 };
 
 
-//! \defgroup BareItemsBuilder Global functions to build Bare Items.
+//! \defgroup MeshElementBareBuilder Global functions to build Bare Items.
 
-/*! \ingroup BareItemsBuilder
+/*! \ingroup MeshElementBareBuilder
   \brief It creates a BareEdge end returns the orientation of the created edge with respect
   to the given data.
   @param i is a Point ID
@@ -241,7 +241,7 @@ makeBareEdge( ID const i, ID const j )
     }
 }
 
-/*! \ingroup BareItemsBuilder
+/*! \ingroup MeshElementBareBuilder
   \brief It creates a BareEdge, ignoring orientation.
   @param i is a Point ID
   @param j is a Point ID
@@ -262,7 +262,7 @@ setBareEdge( ID const i, ID const j )
     return bareEdge;
 }
 
-/*! \ingroup BareItemsBuilder
+/*! \ingroup MeshElementBareBuilder
   \brief It creates a non-standard BareEdge.
   @param i is a Point ID
   @param j is a Point ID
@@ -284,7 +284,7 @@ setBareEdgeNo( ID const i, ID const j )
 }
 
 
-/*! \ingroup BareItemsBuilder
+/*! \ingroup MeshElementBareBuilder
  \brief It creates Bare Face objects from three Point ID's
   \param i is a Point ID
   \param j is a Point ID
@@ -297,7 +297,7 @@ setBareEdgeNo( ID const i, ID const j )
  */
 std::pair<BareFace, bool> makeBareFace( ID const i, ID const j, ID const k );
 
-/*! \ingroup BareItemsBuilder
+/*! \ingroup MeshElementBareBuilder
  \brief It creates Bare Face objects from four Point ID's. To be used with Quad faces.
   \param i is a Point ID
   \param j is a Point ID
@@ -313,7 +313,7 @@ std::pair<BareFace, bool> makeBareFace( ID const i, ID const j, ID const k );
 std::pair<BareFace, bool> makeBareFace( ID const i, ID const j, ID const k, ID const l );
 
 /*! \defgroup comparison Comparison Operators
-  Operators for comparing BareItems
+  Operators for comparing MeshElementBare
  */
 
 /*! \ingroup comparison
@@ -437,18 +437,18 @@ struct cmpBareItem<BareFace>
     }
 };
 
-//! BareItemsHandler class - Class to handle bare edges and faces construction
+//! MeshElementBareHandler class - Class to handle bare edges and faces construction
 /*!
     @author Luca Formaggia
     @see
 
 	This class handles mesh bare edges and faces construction. Used only in mesh builders
-	A BareItemsHandler is a specialisation of a STL map which holds the pair
+	A MeshElementBareHandler is a specialisation of a STL map which holds the pair
 	formed by a bareitem and its ID.
 	The ID  is automatically generated if one uses the method addIfNotThere
  */
 template <typename BareItemType>
-class BareItemsHandler: public std::map<BareItemType, ID, cmpBareItem<BareItemType> >
+class MeshElementBareHandler: public std::map<BareItemType, ID, cmpBareItem<BareItemType> >
 {
 public:
     //! @name Public Types
@@ -463,7 +463,7 @@ public:
     //! @name Constructors & Destructor
     //@{
     //! Empty Constructor
-    BareItemsHandler();
+    MeshElementBareHandler();
     //@}
 
     //! @name Methods
@@ -572,7 +572,7 @@ private:
 // Constructors & Destructor
 // ===================================================
 template <class BareItemType>
-BareItemsHandler<BareItemType>::BareItemsHandler() :
+MeshElementBareHandler<BareItemType>::MeshElementBareHandler() :
         M_idCount( 0 )
 { }
 
@@ -582,7 +582,7 @@ BareItemsHandler<BareItemType>::BareItemsHandler() :
 template <class BareItemType>
 inline
 bool
-BareItemsHandler<BareItemType>::isThere( const bareItem_Type & item ) const
+MeshElementBareHandler<BareItemType>::isThere( const bareItem_Type & item ) const
 {
     return find( item ) != container_Type::end();
 }
@@ -590,9 +590,9 @@ BareItemsHandler<BareItemType>::isThere( const bareItem_Type & item ) const
 template <class BareItemType>
 inline
 std::pair<ID, bool>
-BareItemsHandler<BareItemType>::addIfNotThere( const bareItem_Type & item )
+MeshElementBareHandler<BareItemType>::addIfNotThere( const bareItem_Type & item )
 {
-    std::pair<typename BareItemsHandler<BareItemType>::containerIterator_Type, bool> i( insert( std::make_pair( item, M_idCount + 1 ) ) );
+    std::pair<typename MeshElementBareHandler<BareItemType>::containerIterator_Type, bool> i( insert( std::make_pair( item, M_idCount + 1 ) ) );
     if ( i.second )
         ++M_idCount;
     return std::make_pair( ( i.first )->second, i.second );
@@ -601,22 +601,22 @@ BareItemsHandler<BareItemType>::addIfNotThere( const bareItem_Type & item )
 template <class BareItemType>
 inline
 std::pair<ID, bool>
-BareItemsHandler<BareItemType>::addIfNotThere( const bareItem_Type & item, const ID id )
+MeshElementBareHandler<BareItemType>::addIfNotThere( const bareItem_Type & item, const ID id )
 {
-    std::pair<typename BareItemsHandler<BareItemType>::containerIterator_Type, bool> i( insert( std::make_pair( item, id ) ) );
+    std::pair<typename MeshElementBareHandler<BareItemType>::containerIterator_Type, bool> i( insert( std::make_pair( item, id ) ) );
     ( i.first ) ->second = id; // Set new id in any case.
     return std::make_pair( id, i.second ); // for consistency with other version.
 }
 template <class BareItemType>
 bool
-BareItemsHandler<BareItemType>::deleteIfThere( bareItem_Type const & item )
+MeshElementBareHandler<BareItemType>::deleteIfThere( bareItem_Type const & item )
 {
     return erase( item ) != 0;
 }
 
 template <class BareItemType>
 bool  __attribute__ ((__deprecated__))
-BareItemsHandler<BareItemType>::isThereDel( bareItem_Type const & item )
+MeshElementBareHandler<BareItemType>::isThereDel( bareItem_Type const & item )
 {
     return erase( item ) != 0;
 }
@@ -624,16 +624,16 @@ BareItemsHandler<BareItemType>::isThereDel( bareItem_Type const & item )
 template <class BareItemType>
 inline
 UInt
-BareItemsHandler<BareItemType>::howMany() const
+MeshElementBareHandler<BareItemType>::howMany() const
 {
     return container_Type::size();
 }
 
 template <typename BareItemType>
 inline
-void BareItemsHandler<BareItemType>::showMe() const
+void MeshElementBareHandler<BareItemType>::showMe() const
 {
-    std::cout << "BareItemsHandler: " << std::endl;
+    std::cout << "MeshElementBareHandler: " << std::endl;
     std::cout << "Number of Items stored: " << this->size() << std::endl;
     std::cout << "Max Id stored         : " << this->maxId() << std::endl;
     std::cout << "End of Information";
@@ -642,7 +642,7 @@ void BareItemsHandler<BareItemType>::showMe() const
 template <class BareItemType>
 inline
 ID
-BareItemsHandler<BareItemType>::id( const bareItem_Type & item ) const
+MeshElementBareHandler<BareItemType>::id( const bareItem_Type & item ) const
 {
     containerConstIterator_Type i = this->find( item );
     if ( i != container_Type::end() )
@@ -657,7 +657,7 @@ BareItemsHandler<BareItemType>::id( const bareItem_Type & item ) const
 template <class BareItemType>
 inline
 bool  __attribute__ ((__deprecated__))
-BareItemsHandler<BareItemType>::setId( const bareItem_Type & item, const ID& id )
+MeshElementBareHandler<BareItemType>::setId( const bareItem_Type & item, const ID& id )
 {
     containerConstIterator_Type i = find( item );
     if ( i != container_Type::end() )
@@ -676,7 +676,7 @@ BareItemsHandler<BareItemType>::setId( const bareItem_Type & item, const ID& id 
 template <class BareItemType>
 inline
 bool
-BareItemsHandler<BareItemType>::setId( const bareItem_Type & item, ID const id )
+MeshElementBareHandler<BareItemType>::setId( const bareItem_Type & item, ID const id )
 {
     containerConstIterator_Type i = find( item );
     if ( i != container_Type::end() )

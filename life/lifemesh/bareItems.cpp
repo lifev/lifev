@@ -117,7 +117,7 @@
  */
 
 #include <life/lifecore/life.hpp>
-#include <life/lifemesh/bareItems.hpp>
+#include <life/lifemesh/MeshElementBare.hpp>
 
 namespace LifeV
 {

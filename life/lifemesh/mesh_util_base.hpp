@@ -1671,14 +1671,14 @@ bool buildFaces( MeshType & mesh,
 
     /*
       I may get rid of the boundaryFaces container. Unfortunately now I need a more
-      complex structure, a BareItemsHandler, in order to generate the internal
+      complex structure, a MeshElementBareHandler, in order to generate the internal
       faces id. An alternative would be to use the point data to identify
       boundary faces as the ones with all point on the boundary. Yet in this
       function we do not want to use a priori information, so that it might
       work even if the points boundary flag is not properly set.
     */
 
-    BareItemsHandler<BareFace> bareFaceHandler;
+    MeshElementBareHandler<BareFace> bareFaceHandler;
     std::pair<UInt, bool> faceIdToBoolPair;
     std::pair<BareFace, bool> _face;
 
@@ -1979,7 +1979,7 @@ p2MeshFromP1Data( MeshType & mesh, std::ostream & logStream = std::cout )
     typedef typename MeshType::Elements  elementContainer_Type;
     typedef typename MeshType::BElements facetContainer_Type;
 
-    BareItemsHandler<BareEdge>           bareEdgeHandler;
+    MeshElementBareHandler<BareEdge>           bareEdgeHandler;
     std::pair<UInt, bool>                edgeIdToBoolPair;
     UInt                                 point1Id, point2Id, edgeId;
     std::pair<BareEdge, bool>            bareEdgeToBoolPair;

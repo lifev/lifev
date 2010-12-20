@@ -1214,7 +1214,7 @@ protected:
      */
 #ifdef SAVEMEMORY
     //! Face-To-Edge Container.
-    BareItemsHandler<BareEdge> _FToE;
+    MeshElementBareHandler<BareEdge> _FToE;
 #else
     //! Face-To-Edge Container.
     SimpleArray<UInt> _FToE;

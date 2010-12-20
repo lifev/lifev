@@ -1205,7 +1205,7 @@ protected:
      */
 #ifdef SAVEMEMORY
     //! Face-To-Edge Container.
-    BareItemsHandler<BareEdge> _FToE;
+    MeshElementBareHandler<BareEdge> _FToE;
 #else
     //! Face-To-Edge Container.
     SimpleArray<UInt> _FToE;
@@ -2195,7 +2195,7 @@ RegionMesh2D<GEOSHAPE, MC>::updateElementEdges( bool ce, UInt ee )
     EdgeType edg;
 
 
-    BareItemsHandler<BareEdge> _be;
+    MeshElementBareHandler<BareEdge> _be;
     std::pair<UInt, bool> e;
     _FToE.reshape( numLocalEdges(), numFaces() ); // DIMENSION ARRAY
 
