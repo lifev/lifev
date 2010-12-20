@@ -93,9 +93,9 @@ public:
     typedef Exporter< mesh_Type >                                                          IOFile_Type;
     typedef boost::shared_ptr< IOFile_Type >                                               IOFilePtr_Type;
 
-    typedef Ensight< mesh_Type >                                                           ensightIOFile_Type;
+    typedef ExporterEnsight< mesh_Type >                                                           ensightIOFile_Type;
 #ifdef HAVE_HDF5
-    typedef Hdf5exporter< mesh_Type >                                                      hdf5IOFile_Type;
+    typedef ExporterHDF5< mesh_Type >                                                      hdf5IOFile_Type;
 #endif
 
     typedef BCHandler                                                                      bc_Type;
