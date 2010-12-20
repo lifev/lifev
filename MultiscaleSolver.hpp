@@ -128,7 +128,7 @@ private:
     boost::shared_ptr< Displayer >   M_displayer;
 
     // Chrono performances
-    Chrono                           M_chrono;
+    LifeChrono                           M_chrono;
 };
 
 } // Namespace multiscale
