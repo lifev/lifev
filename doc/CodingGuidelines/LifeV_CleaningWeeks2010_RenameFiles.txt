@@ -147,7 +147,7 @@ ReferenceElement                       refEle                                  C
 ReferenceFE                            refFE                                   CMCS2     DONE
 ReferenceFEHdiv                        refFEHdiv                               CMCS2     DONE
 ReferenceFEHybrid                      refFEHybrid                             CMCS2     DONE
-ReferenceFEScalar                      refFEScalar                             CMCS2
+ReferenceFEScalar                      refFEScalar                             CMCS2     DONE
 SobolevNorms                           sobolevNorms                            CMCS2
 TimeAdvance                            timeAdvance_template                    MOX
 TimeAdvanceBDF                         bdf_template                            MOX

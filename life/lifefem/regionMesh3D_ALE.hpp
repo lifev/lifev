@@ -44,7 +44,7 @@
 
 #include <life/lifemesh/regionMesh3D.hpp>
 
-#include <life/lifefem/refFEScalar.hpp>
+#include <life/lifefem/ReferenceFEScalar.hpp>
 #include <life/lifefem/GeometricMap.hpp>
 #include <life/lifefem/QuadRule.hpp>
 
