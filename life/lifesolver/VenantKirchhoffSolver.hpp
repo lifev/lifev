@@ -111,7 +111,7 @@ public:
 
   typedef VenantKirchhoffElasticData                   data_Type;
 
-  typedef singleton<factory<VenantKirchhoffSolver,  std::string> >  StructureSolverFactory;
+  typedef FactorySingleton<Factory<VenantKirchhoffSolver,  std::string> >  StructureSolverFactory;
 
   //@}
 
@@ -649,7 +649,7 @@ void VenantKirchhoffSolver<Mesh, SolverType>::updateSystem( matrixPtr_Type& /*st
 {
   M_Displayer->leaderPrint("  S-  Updating mass term on right hand side... ");
 
-  Chrono chrono;
+  LifeChrono chrono;
   chrono.start();
 
   //M_stiff = M_linearStiff;
@@ -688,7 +688,7 @@ void
 VenantKirchhoffSolver<Mesh, SolverType>::buildSystem()
 {
   M_Displayer->leaderPrint("  S-  Computing constant matrices ...          ");
-  Chrono chrono;
+  LifeChrono chrono;
   chrono.start();
 
   M_massStiff.reset(new matrix_Type(*M_localMap));
@@ -792,7 +792,7 @@ VenantKirchhoffSolver<Mesh, SolverType>::iterate( bchandler_Type& bch )
   //M_comm->Barrier();
 
   M_Displayer->leaderPrint("  S-  Applying boundary conditions ...         ");
-  Chrono chrono;
+  LifeChrono chrono;
   chrono.start();
 
   applyBoundaryConditions( *matrFull, rhsFull, bch);
@@ -830,7 +830,7 @@ VenantKirchhoffSolver<Mesh, SolverType>::iterateLin( bchandler_Type& bch )
   vector_Type rhsFull (M_rhsNoBC->map());
 
   M_Displayer->leaderPrint(" LS-  Applying boundary conditions ...         ");
-  Chrono chrono;
+  LifeChrono chrono;
   chrono.start();
 
   // boundary conditions update
@@ -871,7 +871,7 @@ void
 VenantKirchhoffSolver<Mesh, SolverType>::evalResidual( vector_Type &residual, const vector_Type& solution, Int /*iter*/)
 {
   M_Displayer->leaderPrint("  S-  Computing residual ...                   ");
-  Chrono chrono;
+  LifeChrono chrono;
   chrono.start();
 
   // Matrices initialization
