@@ -43,7 +43,7 @@ int MonolithicBlockComposedNN::solveSystem( const vector_Type& rhs, vector_Type&
     M_firstCompPrec .reset(new composed_prec(M_comm));
     M_secondCompPrec.reset(new composed_prec(M_comm));
 
-    Chrono chrono;
+    LifeChrono chrono;
     int overlapLevel     = M_list.get("overlap level", 2);
     std::string precType = M_list.get("prectype", "Amesos");
     Ifpack factory;
