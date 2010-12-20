@@ -83,7 +83,7 @@
 #include <life/lifefilters/ExporterHDF5Mesh3D.hpp>
 
 #include <life/lifesolver/DataFSI.hpp>
-#include <life/lifesolver/OseenShapeDerivative.hpp>
+#include <life/lifesolver/OseenSolverShapeDerivative.hpp>
 #include <life/lifesolver/VenantKirchhoffSolverLinear.hpp>
 #include <life/lifesolver/HarmonicExtensionSolver.hpp>
 
@@ -125,10 +125,10 @@ public:
 #ifdef HAVE_HDF5
     typedef ExporterHDF5Mesh3D<mesh_Type>                                           meshFilter_Type;
 #endif
-    typedef OseenShapeDerivative   <mesh_Type>                                      fluid_Type;
+    typedef OseenSolverShapeDerivative   <mesh_Type>                                      fluid_Type;
     typedef VenantKirchhoffSolver  <mesh_Type>                                      solid_Type;
     typedef HarmonicExtensionSolver<mesh_Type>                                      meshMotion_Type;
-    typedef OseenShapeDerivative   <mesh_Type>                                      fluidLin_Type;
+    typedef OseenSolverShapeDerivative   <mesh_Type>                                      fluidLin_Type;
     typedef VenantKirchhoffSolver  <mesh_Type>                                      solidLin_Type;
     typedef boost::shared_ptr<fluid_Type>                                           fluidPtr_Type;
     typedef boost::shared_ptr<solid_Type>                                           solidPtr_Type;

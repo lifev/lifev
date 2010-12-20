@@ -49,7 +49,7 @@
 namespace LifeV
 {
 
-//! @class OseenShapeDerivative
+//! @class OseenSolverShapeDerivative
 /*!
 
     @brief This class contains an Oseen equation solver class with shape derivative
@@ -66,7 +66,7 @@ namespace LifeV
  */
 
 template< typename MeshType, typename SolverType = LifeV::SolverTrilinos >
-class OseenShapeDerivative:
+class OseenSolverShapeDerivative:
         public OseenSolver< MeshType, SolverType >
 {
 
@@ -92,7 +92,7 @@ public:
     //@{
 
     //! Empty constructor
-    OseenShapeDerivative();
+    OseenSolverShapeDerivative();
 
     //! Constructor
     /*!
@@ -102,7 +102,7 @@ public:
         @param communicator MPI communicator
         @param lagrangeMultiplier Lagrange multiplier
      */
-    OseenShapeDerivative( boost::shared_ptr<data_Type>    dataType,
+    OseenSolverShapeDerivative( boost::shared_ptr<data_Type>    dataType,
                           FESpace<mesh_Type, EpetraMap>&  velocityFESpace,
                           FESpace<mesh_Type, EpetraMap>&  pressureFESpace,
                           boost::shared_ptr<Epetra_Comm>& communicator,
@@ -117,7 +117,7 @@ public:
         @param monolithicMap EpetraMap class
         @param offset
      */
-    OseenShapeDerivative( boost::shared_ptr<data_Type>    dataType,
+    OseenSolverShapeDerivative( boost::shared_ptr<data_Type>    dataType,
                           FESpace<mesh_Type, EpetraMap>&  velocityFESpace,
                           FESpace<mesh_Type, EpetraMap>&  pressureFESpace,
                           boost::shared_ptr<Epetra_Comm>& communicator,
@@ -134,7 +134,7 @@ public:
         @param monolithicMap EpetraMap class
         @param offset
      */
-    OseenShapeDerivative( boost::shared_ptr<data_Type>    dataType,
+    OseenSolverShapeDerivative( boost::shared_ptr<data_Type>    dataType,
                           FESpace<mesh_Type, EpetraMap>&  velocityFESpace,
                           FESpace<mesh_Type, EpetraMap>&  pressureFESpace,
                           FESpace<mesh_Type, EpetraMap>&  mmFESpace,
@@ -143,7 +143,7 @@ public:
                           const UInt                      offset = 0 );
 
     //! Virtual destructor
-    virtual ~OseenShapeDerivative();
+    virtual ~OseenSolverShapeDerivative();
 
     //@}
 
@@ -292,7 +292,7 @@ private:
     //@{
 
     //! Empty copy constructor
-    OseenShapeDerivative( const OseenShapeDerivative& oseenShapeDerivative );
+    OseenSolverShapeDerivative( const OseenSolverShapeDerivative& oseenShapeDerivative );
 
     //@}
 
@@ -328,8 +328,8 @@ private:
 // ===================================================
 
 template<typename MeshType, typename SolverType>
-OseenShapeDerivative<MeshType, SolverType>::
-OseenShapeDerivative( boost::shared_ptr<data_Type>    dataType,
+OseenSolverShapeDerivative<MeshType, SolverType>::
+OseenSolverShapeDerivative( boost::shared_ptr<data_Type>    dataType,
                       FESpace<mesh_Type, EpetraMap>&  velocityFESpace,
                       FESpace<mesh_Type, EpetraMap>&  pressureFESpace,
                       boost::shared_ptr<Epetra_Comm>& communicator,
@@ -360,8 +360,8 @@ OseenShapeDerivative( boost::shared_ptr<data_Type>    dataType,
 }
 
 template<typename MeshType, typename SolverType>
-OseenShapeDerivative<MeshType, SolverType>::
-OseenShapeDerivative( boost::shared_ptr<data_Type>    dataType,
+OseenSolverShapeDerivative<MeshType, SolverType>::
+OseenSolverShapeDerivative( boost::shared_ptr<data_Type>    dataType,
                       FESpace<mesh_Type, EpetraMap>&  velocityFESpace,
                       FESpace<mesh_Type, EpetraMap>&  pressureFESpace,
                       boost::shared_ptr<Epetra_Comm>& communicator,
@@ -394,8 +394,8 @@ OseenShapeDerivative( boost::shared_ptr<data_Type>    dataType,
 }
 
 template<typename MeshType, typename SolverType>
-OseenShapeDerivative<MeshType, SolverType>::
-OseenShapeDerivative( boost::shared_ptr<data_Type>    dataType,
+OseenSolverShapeDerivative<MeshType, SolverType>::
+OseenSolverShapeDerivative( boost::shared_ptr<data_Type>    dataType,
                       FESpace<mesh_Type, EpetraMap>&  velocityFESpace,
                       FESpace<mesh_Type, EpetraMap>&  pressureFESpace,
                       FESpace<mesh_Type, EpetraMap>&  mmFESpace,
@@ -430,8 +430,8 @@ OseenShapeDerivative( boost::shared_ptr<data_Type>    dataType,
 }
 
 template<typename MeshType, typename SolverType>
-OseenShapeDerivative<MeshType, SolverType>::
-~OseenShapeDerivative()
+OseenSolverShapeDerivative<MeshType, SolverType>::
+~OseenSolverShapeDerivative()
 {
 
 }
@@ -443,28 +443,28 @@ OseenShapeDerivative<MeshType, SolverType>::
 
 template<typename MeshType, typename SolverType>
 Real
-OseenShapeDerivative<MeshType, SolverType>::getLinearFlux( const entityFlag_Type& flag )
+OseenSolverShapeDerivative<MeshType, SolverType>::getLinearFlux( const entityFlag_Type& flag )
 {
     return flux( flag, M_linearSolution );
 }
 
 template<typename MeshType, typename SolverType>
 Real
-OseenShapeDerivative<MeshType, SolverType>::getLinearPressure( const entityFlag_Type& flag )
+OseenSolverShapeDerivative<MeshType, SolverType>::getLinearPressure( const entityFlag_Type& flag )
 {
     return pressure( flag, M_linearSolution );
 }
 
 template<typename MeshType, typename SolverType>
 Real
-OseenShapeDerivative<MeshType, SolverType>::getLinearLagrangeMultiplier( const entityFlag_Type& flag, bcHandler_Type& bcHandler )
+OseenSolverShapeDerivative<MeshType, SolverType>::getLinearLagrangeMultiplier( const entityFlag_Type& flag, bcHandler_Type& bcHandler )
 {
     return lagrangeMultiplier( flag, bcHandler, M_linearSolution );
 }
 
 
 template<typename MeshType, typename SolverType>
-void OseenShapeDerivative<MeshType, SolverType>::setUp( const GetPot& dataFile )
+void OseenSolverShapeDerivative<MeshType, SolverType>::setUp( const GetPot& dataFile )
 {
     // M_linearLinSolver.setDataFromGetPot( dataFile, "lin_fluid/solver" );
     // M_linearLinSolver.setAztecooPreconditioner( dataFile, "lin_fluid/solver" );
@@ -482,7 +482,7 @@ void OseenShapeDerivative<MeshType, SolverType>::setUp( const GetPot& dataFile )
 
 
 template<typename MeshType, typename SolverType>
-void OseenShapeDerivative<MeshType, SolverType>::solveLinearSystem( bcHandler_Type& bcHandler )
+void OseenSolverShapeDerivative<MeshType, SolverType>::solveLinearSystem( bcHandler_Type& bcHandler )
 {
     this->M_Displayer.leaderPrint( " LF-  Finalizing the matrix and vectors ...    " );
 
@@ -534,7 +534,7 @@ void OseenShapeDerivative<MeshType, SolverType>::solveLinearSystem( bcHandler_Ty
 
 template<typename MeshType, typename SolverType>
 void
-OseenShapeDerivative<MeshType, SolverType>::updateLinearSystem( const matrix_Type& /*matrixNoBC*/,
+OseenSolverShapeDerivative<MeshType, SolverType>::updateLinearSystem( const matrix_Type& /*matrixNoBC*/,
                                                                   Real&              /*alpha*/,
                                                                   const vector_Type& un,
                                                                   const vector_Type& uk,
@@ -733,7 +733,7 @@ OseenShapeDerivative<MeshType, SolverType>::updateLinearSystem( const matrix_Typ
 //#if UNDEF
 template<typename MeshType, typename SolverType>
 void
-OseenShapeDerivative<MeshType, SolverType>::
+OseenSolverShapeDerivative<MeshType, SolverType>::
 updateShapeDerivatives( matrix_Type&                   matrix,
                         Real&                          alpha,
                         const vector_Type&             un,
