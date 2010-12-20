@@ -41,7 +41,7 @@
 #include <life/lifearray/EpetraMatrix.hpp>
 #include <life/lifealg/EpetraMap.hpp>
 #include <life/lifemesh/dataMesh.hpp>
-#include <life/lifemesh/partitionMesh.hpp>
+#include <life/lifemesh/MeshPartitioner.hpp>
 
 #ifdef MONODOMAIN
 #include <life/lifesolver/HeartMonodomainSolver.hpp>
@@ -49,9 +49,9 @@
 #include <life/lifesolver/HeartBidomainSolver.hpp>
 #endif
 #include <life/lifesolver/HeartIonicSolver.hpp>
-#include <life/lifefilters/ensight.hpp>
-#include <life/lifefilters/hdf5exporter.hpp>
-#include <life/lifefilters/noexport.hpp>
+#include <life/lifefilters/ExporterEnsight.hpp>
+#include <life/lifefilters/ExporterHDF5.hpp>
+#include <life/lifefilters/ExporterEmpty.hpp>
 
 
 
