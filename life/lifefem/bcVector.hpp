@@ -559,6 +559,6 @@ protected:
     dofInterfacePtr_Type M_interfaceDofPtr;
 
 };
-typedef LifeV::singleton< LifeV::factoryClone< BCVectorBase > > FactoryCloneBCVector;
+typedef LifeV::FactorySingleton< LifeV::FactoryClone< BCVectorBase > > FactoryCloneBCVector;
 }
 #endif
