@@ -47,13 +47,13 @@
 namespace LifeV
 {
 /*!
-  @class DataDarcy
+  @class DarcyData
 
   This class contain the basic data for the Darcy solver. In particoular it stores...
   @todo class not finished!
  */
 template <typename Mesh>
-class DataDarcy
+class DarcyData
 {
 public:
 
@@ -77,20 +77,20 @@ public:
     //@{
 
     //! Empty Constructor
-    DataDarcy();
+    DarcyData();
 
     /*!
     Constructor using a data file.
       @param dataFile GetPot data file for setup the problem
       @param section the section for the Darcy data
     */
-    DataDarcy( const GetPot& dataFile, const std::string& section = "darcy" );
+    DarcyData( const GetPot& dataFile, const std::string& section = "darcy" );
 
     /*!
     Copy constructor.
-      @param dataDarcy object to take a copy
+      @param darcyData object to take a copy
     */
-    DataDarcy( const DataDarcy &dataDarcy );
+    DarcyData( const DarcyData &darcyData );
 
     //@}
 
@@ -99,9 +99,9 @@ public:
     //@{
 
     /*! Overloading of the operator =
-        @param dataDarcy The DataDarcy to be copied.
+        @param darcyData The DarcyData to be copied.
     */
-    DataDarcy& operator=( const DataDarcy& dataDarcy );
+    DarcyData& operator=( const DarcyData& darcyData );
 
     /*! External setup
         @param dataFile The data file with all the data.
@@ -190,7 +190,7 @@ private:
 // ===================================================
 
 template < typename Mesh >
-DataDarcy<Mesh>::DataDarcy( ):
+DarcyData<Mesh>::DarcyData( ):
         // Data containers
         M_data          ( ),
         M_time          ( ),
@@ -204,32 +204,32 @@ DataDarcy<Mesh>::DataDarcy( ):
 
 // Copy constructor
 template < typename Mesh >
-DataDarcy<Mesh>::DataDarcy( const DataDarcy &dataDarcy ):
+DarcyData<Mesh>::DarcyData( const DarcyData &darcyData ):
         // Data containers
-        M_data                ( dataDarcy.M_data ),
-        M_time                ( dataDarcy.M_time ),
-        M_mesh                ( dataDarcy.M_mesh ),
+        M_data                ( darcyData.M_data ),
+        M_time                ( darcyData.M_time ),
+        M_mesh                ( darcyData.M_mesh ),
         // Miscellaneous
-        M_verbose             ( dataDarcy.M_verbose ),
-        M_section             ( dataDarcy.M_section )
+        M_verbose             ( darcyData.M_verbose ),
+        M_section             ( darcyData.M_section )
 {
 
 }
 
 // Overloading of the operator =
 template < typename Mesh >
-DataDarcy<Mesh>&
-DataDarcy<Mesh>::operator=( const DataDarcy& dataDarcy )
+DarcyData<Mesh>&
+DarcyData<Mesh>::operator=( const DarcyData& darcyData )
 {
     // Avoid auto-copy
-    if ( this != &dataDarcy )
+    if ( this != &darcyData )
     {
         // Data containers
-        M_data           = dataDarcy.M_data;
-        M_time           = dataDarcy.M_time;
-        M_mesh           = dataDarcy.M_mesh;
+        M_data           = darcyData.M_data;
+        M_time           = darcyData.M_time;
+        M_mesh           = darcyData.M_mesh;
         // Mescellaneous
-        M_verbose       = dataDarcy.M_verbose;
+        M_verbose       = darcyData.M_verbose;
     }
 
     return *this;
@@ -239,7 +239,7 @@ DataDarcy<Mesh>::operator=( const DataDarcy& dataDarcy )
 
 // External set up method
 template < typename Mesh >
-void DataDarcy<Mesh>::setup( const Data_Type& dataFile, const std::string& section )
+void DarcyData<Mesh>::setup( const Data_Type& dataFile, const std::string& section )
 {
     M_section = section;
 

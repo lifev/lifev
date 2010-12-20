@@ -88,13 +88,13 @@ public:
     //! Constructor using a data file.
     /*!
       @param dataFile GetPot data file for setup the problem
-      @param section the section for the Darcy data
+      @param section the section for the Hyperbolic data
     */
     HyperbolicData( const GetPot& dataFile, const std::string& section = "hyperbolic" );
 
     //! Copy constructor.
     /*!
-      @param dataDarcy object to take a copy
+      @param hyperbolicData object to take a copy
     */
     HyperbolicData( const HyperbolicData &hyperbolicData );
 
@@ -108,7 +108,7 @@ public:
 
     //! Assign operator overloading
     /*!
-      @param dataDarcy The DataDarcy to be copied
+      @param hyperbolicData The hyperbolicData to be copied
     */
     HyperbolicData& operator=( const HyperbolicData& hyperbolicData );
 

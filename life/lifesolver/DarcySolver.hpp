@@ -255,7 +255,7 @@ public:
     typedef inversePermeability<Mesh, SolverType>  permeability_Type;
     typedef boost::shared_ptr<permeability_Type>   permeabilityPtr_Type;
 
-    typedef DataDarcy<Mesh>                        data_Type;
+    typedef DarcyData<Mesh>                        data_Type;
 
     typedef Mesh                                   mesh_Type;
 

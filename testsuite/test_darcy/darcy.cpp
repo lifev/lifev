@@ -326,10 +326,10 @@ darcy::run()
     chronoReadAndPartitionMesh.start();
 
     // Create the data file
-    DataDarcy<RegionMesh> dataDarcy;
+    DarcyData<RegionMesh> darcyData;
 
     // Set up the data
-    dataDarcy.setup( dataFile );
+    darcyData.setup( dataFile );
 
     // Create the mesh file handler
     DataMesh dataMesh;
@@ -536,7 +536,7 @@ darcy::run()
     {
     case DARCY_LINEAR:
 
-        darcySolver.reset( new darcyLinearSolver_type( dataDarcy, p_FESpace,
+        darcySolver.reset( new darcyLinearSolver_type( darcyData, p_FESpace,
                                                        u_FESpace, hybrid_FESpace,
                                                        VdotN_FESpace,
                                                        Members->comm ) );
@@ -545,7 +545,7 @@ darcy::run()
 
     case DARCY_NON_LINEAR:
 
-        darcySolver.reset( new darcyNonLinearSolver_type( dataDarcy, p_FESpace,
+        darcySolver.reset( new darcyNonLinearSolver_type( darcyData, p_FESpace,
                                                           u_FESpace, hybrid_FESpace,
                                                           VdotN_FESpace,
                                                           Members->comm ) );
@@ -554,7 +554,7 @@ darcy::run()
 
     case DARCY_TRANSIENT:
 
-        darcySolver.reset( new darcyTransientSolver_type( dataDarcy, p_FESpace,
+        darcySolver.reset( new darcyTransientSolver_type( darcyData, p_FESpace,
                                                           u_FESpace, hybrid_FESpace,
                                                           VdotN_FESpace,
                                                           Members->comm ) );
@@ -563,7 +563,7 @@ darcy::run()
 
     case DARCY_TRANSIENT_NON_LINEAR:
 
-        darcySolver.reset( new darcyTransientNonLinearSolver_type( dataDarcy, p_FESpace,
+        darcySolver.reset( new darcyTransientNonLinearSolver_type( darcyData, p_FESpace,
                                                                    u_FESpace, hybrid_FESpace,
                                                                    VdotN_FESpace,
                                                                    Members->comm ) );
@@ -764,19 +764,19 @@ darcy::run()
         *primalExporter = *( darcySolver->primalSolution() );
 
         // Save the initial primal solution into the exporter
-        exporter->postProcess( dataDarcy.dataTime()->initialTime() );
+        exporter->postProcess( darcyData.dataTime()->initialTime() );
 
         // A loop for the simulation, it starts from \Delta t and end in N \Delta t = T
-        while ( !dataDarcy.dataTime()->isLastTimeStep() )
+        while ( !darcyData.dataTime()->isLastTimeStep() )
         {
 
             // Advance the current time of \Delta t.
-            dataDarcy.dataTime()->updateTime();
+            darcyData.dataTime()->updateTime();
 
             // The leader process prints the temporal data.
             if ( darcySolver->getDisplayer().isLeader() )
             {
-                dataDarcy.dataTime()->showMe();
+                darcyData.dataTime()->showMe();
             }
 
             // Build the linear system and the right hand side
@@ -801,7 +801,7 @@ darcy::run()
             *dualExporter = *dualInterpolated;
 
             // Save the solution into the exporter
-            exporter->postProcess( dataDarcy.dataTime()->time() );
+            exporter->postProcess( darcyData.dataTime()->time() );
 
         }
 
@@ -817,21 +817,21 @@ darcy::run()
         *primalExporter = *( darcySolver->primalSolution() );
 
         // Save the initial primal solution into the exporter
-        exporter->postProcess( dataDarcy.dataTime()->initialTime() );
+        exporter->postProcess( darcyData.dataTime()->initialTime() );
 
         // A loop for the simulation, it starts from \Delta t and end in N \Delta t = T
-        while ( !dataDarcy.dataTime()->isLastTimeStep() )
+        while ( !darcyData.dataTime()->isLastTimeStep() )
         {
             // Update the primal old solution for the fixed point scheme
             ( dynamic_pointer_cast< darcyTransientNonLinearSolver_type >( darcySolver ) )->updatePrimalOldSolution();
 
             // Advance the current time of \Delta t.
-            dataDarcy.dataTime()->updateTime();
+            darcyData.dataTime()->updateTime();
 
             // The leader process prints the temporal data.
             if ( darcySolver->getDisplayer().isLeader() )
             {
-                dataDarcy.dataTime()->showMe();
+                darcyData.dataTime()->showMe();
             }
 
             // Start the fixed point simulation
@@ -850,7 +850,7 @@ darcy::run()
             *dualExporter = *dualInterpolated;
 
             // Save the solution into the exporter
-            exporter->postProcess( dataDarcy.dataTime()->time() );
+            exporter->postProcess( darcyData.dataTime()->time() );
 
         }
 
@@ -888,7 +888,7 @@ darcy::run()
 
     // Compute the L2 norm for the analytical primal
     exactPrimalL2Norm = p_FESpace.l2NormFunction( Members->getAnalyticalSolution(),
-                                                  dataDarcy.dataTime()->endTime() );
+                                                  darcyData.dataTime()->endTime() );
 
     // Display the L2 norm for the analytical primal
     darcySolver->getDisplayer().leaderPrint( " L2 norm of primal exact:              ",
@@ -898,7 +898,7 @@ darcy::run()
     primalL2Error = p_FESpace.l2ErrorWeighted( Members->getAnalyticalSolution(),
                                                *( darcySolver->primalSolution() ),
                                                Members->getUOne(),
-                                               dataDarcy.dataTime()->endTime() );
+                                               darcyData.dataTime()->endTime() );
 
     // Display the L2 error for the primal solution
     darcySolver->getDisplayer().leaderPrint( " L2 error of primal unknown:           ",
@@ -923,7 +923,7 @@ darcy::run()
 
     // Compute the L2 norm for the analytical dual
     exactDualL2Norm = uInterpolate_FESpace.l2NormFunction( Members->getAnalyticalFlux(),
-                                                           dataDarcy.dataTime()->endTime() );
+                                                           darcyData.dataTime()->endTime() );
 
     // Display the L2 norm for the analytical dual
     darcySolver->getDisplayer().leaderPrint( " L2 norm of dual exact:                ",
@@ -932,7 +932,7 @@ darcy::run()
     // Compute the L2 error for the dual solution
     dualL2Error = uInterpolate_FESpace.l2Error( Members->getAnalyticalFlux(),
                                                 *dualInterpolated,
-                                                dataDarcy.dataTime()->endTime(),
+                                                darcyData.dataTime()->endTime(),
                                                 NULL );
 
     // Display the L2 error for the dual solution

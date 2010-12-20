@@ -269,13 +269,13 @@ impes::run()
     chronoReadAndPartitionMesh.start();
 
     // Create the data file for the pressure equation.
-    DataDarcy<RegionMesh> dataPressure;
+    DarcyData<RegionMesh> dataPressure;
 
     // Create the data file for the hyperbolic solver in the saturation equation.
     HyperbolicData<RegionMesh> dataSaturationHyperbolic;
 
     // Create the data file for the non-linear and transient Darcy solver in the saturation equation.
-    DataDarcy<RegionMesh> dataSaturationDarcyNonLinear;
+    DarcyData<RegionMesh> dataSaturationDarcyNonLinear;
 
     // Set up the data for the pressure equation.
     dataPressure.setup( dataFile, Members->discretization_section_darcy );
