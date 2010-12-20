@@ -32,6 +32,9 @@
 #ifndef _HEARTNONLINEARMONODOMAINSOLVER_H_
 #define _HEARTNONLINEARMONODOMAINSOLVER_H_
 
+#include <fstream>
+#include <boost/shared_ptr.hpp>
+
 #include <life/lifearray/elemMat.hpp>
 #include <life/lifearray/elemVec.hpp>
 #include <life/lifefem/AssemblyElemental.hpp>
@@ -44,14 +47,13 @@
 #include <life/lifemesh/regionMesh3D.hpp>
 #include <life/lifefem/bcHandler.hpp>
 #include <life/lifecore/chrono.hpp>
-#include <life/lifefem/sobolevNorms.hpp>
+#include <life/lifefem/SobolevNorms.hpp>
 #include <life/lifefem/GeometricMap.hpp>
-#include <life/lifesolver/dataMonodomain.hpp>
-#include <boost/shared_ptr.hpp>
+#include <life/lifesolver/HeartMonodomainData.hpp>
 #include <life/lifefem/FESpace.hpp>
-#include <life/lifefem/stiffnessFibers.hpp>
+#include <life/lifesolver/HeartStiffnessFibers.hpp>
 #include <life/lifefem/bdf_template.hpp>
-#include <fstream>
+
 namespace LifeV
 {
 
@@ -67,7 +69,7 @@ public:
    //! @name Type definitions
     //@{
 
-    typedef DataMonodomain data_type;
+    typedef HeartMonodomainData data_type;
 
     typedef Real ( *Function ) ( const Real&, const Real&, const Real&,
                                  const Real&, const ID& );
