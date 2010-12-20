@@ -33,8 +33,8 @@ along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
   @maintainer Radu Popescu <radu.popescu@epfl.ch>
 */
 
-#ifndef FSIOFFLINEPARTITIONER_H
-#define FSIOFFLINEPARTITIONER_H 1
+#ifndef MESH_PARTITIONER_OFFLINE_FSI_H
+#define MESH_PARTITIONER_OFFLINE_FSI_H 1
 
 #pragma GCC diagnostic ignored "-Wunused-variable"
 #pragma GCC diagnostic ignored "-Wunused-parameter"
@@ -543,4 +543,4 @@ void MeshPartitionerOfflineFSI<MeshType>::mapTheInterface()
 
 } // Namespace LifeV
 
-#endif // FSIOFFLINEPARTITIONER_H
+#endif // MESH_PARTITIONER_OFFLINE_FSI_H
