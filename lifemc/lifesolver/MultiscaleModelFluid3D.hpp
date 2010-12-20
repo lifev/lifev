@@ -74,7 +74,7 @@ public:
     //@{
 
     typedef RegionMesh3D< LinearTetra >           mesh_Type;
-    typedef partitionMesh< mesh_Type >            partitionMesh_Type;
+    typedef MeshPartitioner< mesh_Type >          MeshPartitioner_Type;
 
     typedef OseenShapeDerivative< mesh_Type >     fluid_Type;
     typedef fluid_Type::vector_Type               fluidVector_Type;
@@ -83,9 +83,9 @@ public:
     typedef Exporter< mesh_Type >                 IOFile_Type;
     typedef boost::shared_ptr< IOFile_Type >      IOFilePtr_Type;
 
-    typedef Ensight< mesh_Type >                  ensightIOFile_Type;
+    typedef ExporterEnsight< mesh_Type >                  ensightIOFile_Type;
 #ifdef HAVE_HDF5
-    typedef Hdf5exporter< mesh_Type >             hdf5IOFile_Type;
+    typedef ExporterHDF5< mesh_Type >             hdf5IOFile_Type;
 #endif
 
     typedef BCHandler                             bc_Type;
@@ -365,7 +365,7 @@ private:
     boost::shared_ptr< bdf_Type >           M_bdf;
     boost::shared_ptr< data_Type >          M_data;
     boost::shared_ptr< DataMesh >           M_dataMesh;
-    boost::shared_ptr< partitionMesh_Type > M_mesh;
+    boost::shared_ptr< MeshPartitioner_Type > M_mesh;
     boost::shared_ptr< EpetraMap >          M_map;
     fluidVectorPtr_Type                     M_solution;
 
