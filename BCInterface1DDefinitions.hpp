@@ -61,7 +61,7 @@
 #include <life/lifecore/factory.hpp>
 #include <life/lifecore/singleton.hpp>
 
-#include <lifemc/lifefem/OneDimensionalModel_BCHandler.hpp>
+#include <lifemc/lifefem/OneDimensionalBCHandler.hpp>
 
 namespace LifeV
 {
