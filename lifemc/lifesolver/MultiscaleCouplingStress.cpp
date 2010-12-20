@@ -267,7 +267,7 @@ MultiscaleCouplingStress::showMe()
     {
         multiscaleCoupling_Type::showMe();
 
-        std::cout << "Stress Type         = " << Enum2String( M_stressType, multiscaleStressesMap ) << std::endl;
+        std::cout << "Stress Type         = " << enum2String( M_stressType, multiscaleStressesMap ) << std::endl;
         std::cout << "Coupling Stress     = " << ( *M_localCouplingVariables[0] )[0] << std::endl << std::endl;
         std::cout << std::endl << std::endl;
     }
