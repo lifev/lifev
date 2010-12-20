@@ -33,7 +33,7 @@
  */
 
 
-#include <life/lifefem/quadRule.hpp>
+#include <life/lifefem/QuadRule.hpp>
 #include <life/lifefem/refFEScalar.hpp>
 #include <life/lifefem/refFEHdiv.hpp>
 #include <life/lifefem/refFEHybrid.hpp>

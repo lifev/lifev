@@ -49,7 +49,7 @@
 #include <life/lifefem/refFEHdiv.hpp>
 #include <life/lifefem/refFEHybrid.hpp>
 
-#include <life/lifefem/quadRule.hpp>
+#include <life/lifefem/QuadRule.hpp>
 
 #include <boost/multi_array.hpp>
 

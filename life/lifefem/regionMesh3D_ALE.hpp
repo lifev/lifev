@@ -46,7 +46,7 @@
 
 #include <life/lifefem/refFEScalar.hpp>
 #include <life/lifefem/GeometricMap.hpp>
-#include <life/lifefem/quadRule.hpp>
+#include <life/lifefem/QuadRule.hpp>
 
 namespace LifeV
 {

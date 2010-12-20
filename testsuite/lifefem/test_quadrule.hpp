@@ -46,7 +46,7 @@ quadRuleTetra.plt ==> Show the Convergence Rate of all the quadrature rules on T
  */
 
 #include <life/lifecore/life.hpp>
-#include <life/lifefem/quadRule.hpp>
+#include <life/lifefem/QuadRule.hpp>
 #include <string>
 #include <fstream>
 

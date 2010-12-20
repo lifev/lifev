@@ -142,7 +142,7 @@ GeometricMap                           geoMap                                  C
 HyperbolicFluxNumerical                NumericalFluxes                         MOX
 PostProcessingBoundary                 postProc                                EMORY
 QuadraturePoint                        quadPoint                               CMCS2     DONE
-QuadratureRule                         quadRule                                CMCS2
+QuadratureRule                         quadRule                                CMCS2     DONE
 ReferenceElement                       refEle                                  CMCS2
 ReferenceFE                            refFE                                   CMCS2
 ReferenceFEHdiv                        refFEHdiv                               CMCS2
