@@ -62,8 +62,8 @@ public:
     //! @name Public typedefs
     //@{
     typedef SingletonType Singleton_Type;
-    typedef policyLifeTimeDefault<Singleton_Type> lifetimePolicy_Type;
-    typedef policyCreationUsingNew<Singleton_Type> creationPolicy_Type;
+    typedef FactoryPolicyLifeTimeDefault<Singleton_Type> lifetimeFactoryPolicy_Type;
+    typedef FactoryPolicyCreationUsingNew<Singleton_Type> creationFactoryPolicy_Type;
     //@}
 
     //! @name Public static methods
@@ -123,11 +123,11 @@ void FactorySingleton<SingletonType>::makeInstance()
     {
         if ( S_destroyed )
         {
-            lifetimePolicy_Type::onDeadReference();
+            lifetimeFactoryPolicy_Type::onDeadReference();
             S_destroyed = false;
         }
-        S_instance = creationPolicy_Type::create();
-        lifetimePolicy_Type::scheduleDestruction( S_instance, &destroyFactorySingleton );
+        S_instance = creationFactoryPolicy_Type::create();
+        lifetimeFactoryPolicy_Type::scheduleDestruction( S_instance, &destroyFactorySingleton );
     }
 }
 
@@ -135,7 +135,7 @@ template <class SingletonType>
 void FactorySingleton<SingletonType>::destroyFactorySingleton()
 {
     assert( !S_destroyed );
-    creationPolicy_Type::destroy( S_instance );
+    creationFactoryPolicy_Type::destroy( S_instance );
     S_instance = 0;
     S_destroyed = true;
 }
