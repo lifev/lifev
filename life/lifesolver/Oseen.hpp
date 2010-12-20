@@ -62,7 +62,7 @@
 #include <life/lifefem/AssemblyElemental.hpp>
 #include <life/lifefem/bcHandler.hpp>
 #include <life/lifefem/sobolevNorms.hpp>
-#include <life/lifefem/geoMap.hpp>
+#include <life/lifefem/GeometricMap.hpp>
 #include <life/lifefem/postProc.hpp>
 #include <life/lifefem/FESpace.hpp>
 

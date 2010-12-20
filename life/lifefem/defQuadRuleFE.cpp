@@ -37,7 +37,7 @@
 #include <life/lifefem/refFEScalar.hpp>
 #include <life/lifefem/refFEHdiv.hpp>
 #include <life/lifefem/refFEHybrid.hpp>
-#include <life/lifefem/geoMap.hpp>
+#include <life/lifefem/GeometricMap.hpp>
 
 namespace LifeV
 {

@@ -43,7 +43,7 @@
 
 #include <life/lifecore/life.hpp>
 
-#include <life/lifefem/geoMap.hpp>
+#include <life/lifefem/GeometricMap.hpp>
 
 #include <life/lifefem/refFEScalar.hpp>
 #include <life/lifefem/refFEHdiv.hpp>

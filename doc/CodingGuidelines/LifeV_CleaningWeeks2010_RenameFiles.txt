@@ -138,7 +138,7 @@ DOFInterface3Dto2D                     dofInterface3Dto2D                      C
 DOFInterface3Dto3D                     dofInterface3Dto3D                      CMCS2     DONE
 DOFLocalPattern                        localDofPattern                         CMCS2
 FESpace                                -                                       CMCS2     DONE
-GeometricMap                           geoMap                                  CMCS2
+GeometricMap                           geoMap                                  CMCS2     DONE
 HyperbolicFluxNumerical                NumericalFluxes                         MOX
 PostProcessingBoundary                 postProc                                EMORY
 QuadraturePoint                        quadPoint                               CMCS2

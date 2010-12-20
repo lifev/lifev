@@ -46,7 +46,7 @@
 #include <life/lifealg/clapack.hpp>
 #include <life/lifealg/cblas.hpp>
 //
-#include <life/lifefem/geoMap.hpp>
+#include <life/lifefem/GeometricMap.hpp>
 #include <life/lifesolver/dataDarcy.hpp>
 //
 #include <life/lifecore/displayer.hpp>

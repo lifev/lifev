@@ -45,7 +45,7 @@
 #include <life/lifemesh/regionMesh3D.hpp>
 
 #include <life/lifefem/refFEScalar.hpp>
-#include <life/lifefem/geoMap.hpp>
+#include <life/lifefem/GeometricMap.hpp>
 #include <life/lifefem/quadRule.hpp>
 
 namespace LifeV

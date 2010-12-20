@@ -39,7 +39,7 @@
  */
 
 
-#include <life/lifefem/geoMap.hpp>
+#include <life/lifefem/GeometricMap.hpp>
 
 namespace LifeV
 {

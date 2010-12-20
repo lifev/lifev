@@ -41,7 +41,7 @@
 
 #include <life/lifecore/life.hpp>
 
-#include <life/lifefem/geoMap.hpp>
+#include <life/lifefem/GeometricMap.hpp>
 #include <life/lifefem/refFE.hpp>
 #include <life/lifefem/staticBdFE.hpp>
 

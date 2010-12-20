@@ -50,9 +50,8 @@
 #pragma GCC diagnostic warning "-Wunused-parameter"
 
 #include <life/lifecore/life.hpp>
-#include <life/lifefem/geoMap.hpp>
+#include <life/lifefem/GeometricMap.hpp>
 #include <life/lifefem/refFE.hpp>
-#include <life/lifefem/geoMap.hpp>
 #include <life/lifearray/RNM.hpp>
 #include <life/lifefem/quadRule.hpp>
 
