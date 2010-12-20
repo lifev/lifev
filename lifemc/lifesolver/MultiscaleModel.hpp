@@ -272,7 +272,7 @@ protected:
 
     multiscaleCouplingsVector_Type       M_couplings;          // Container for the couplings
     std::string                          M_modelName;          // Name of the model
-    std::vector< bcFlag_Type >                M_flags;              // Free flags, available for the couplings
+    std::vector< bcFlag_Type >           M_flags;              // Free flags, available for the couplings
 
     multiscaleDataPtr_Type               M_globalData;         // GlobalDataContainer
 

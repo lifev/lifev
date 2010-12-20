@@ -388,7 +388,7 @@ private:
     // NS parameters
     UInt                                    M_subiterationsMaximumNumber;
     Real                                    M_tolerance;
-    generalizedAitken< fluidVector_Type >   M_generalizedAitken;
+    NonLinearAitken< fluidVector_Type >   M_generalizedAitken;
 
     // BC Functions for tangent problem
     BCFunctionBase                          M_bcBaseDeltaZero;
