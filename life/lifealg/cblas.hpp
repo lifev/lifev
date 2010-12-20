@@ -41,7 +41,7 @@
 #ifndef CBLAS_F77_H
 #define CBLAS_F77_H
 
-#include <life/lifecore/fortran_wrap.hpp>
+#include <life/lifecore/FortranWrapper.hpp>
 
 #ifdef __cplusplus
 #include <cstdio>
