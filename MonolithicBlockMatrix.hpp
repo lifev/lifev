@@ -66,7 +66,7 @@ public:
     typedef  super_Type::matrixPtr_Type          matrixPtr_Type;
     typedef  super_Type::epetraOperatorPtr_Type  epetraOperatorPtr_Type;
     typedef  super_Type::mapPtr_Type             mapPtr_Type;
-    typedef singleton<factory<MonolithicBlockMatrix,  std::string> >     Factory;
+    typedef  FactorySingleton<Factory<MonolithicBlockMatrix,  std::string> >     Factory_Type;
     //@}
 
 
