@@ -178,7 +178,7 @@ MultiscaleAlgorithmAitken::showMe()
     {
         multiscaleAlgorithm_Type::showMe();
 
-        std::cout << "Aitken Method       = " << Enum2String( M_method, M_methodMap ) << std::endl;
+        std::cout << "Aitken Method       = " << enum2String( M_method, M_methodMap ) << std::endl;
         std::cout << std::endl << std::endl;
     }
 }
