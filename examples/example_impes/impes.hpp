@@ -43,7 +43,7 @@
 #include <life/lifealg/EpetraMap.hpp>
 #include <life/lifemesh/partitionMesh.hpp>
 
-#include <life/lifesolver/darcySolverTransientNonLinear.hpp>
+#include <life/lifesolver/DarcySolverTransientNonLinear.hpp>
 #include <life/lifesolver/HyperbolicSolver.hpp>
 
 #ifdef HAVE_HDF5

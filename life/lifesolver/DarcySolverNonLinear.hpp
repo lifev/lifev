@@ -47,7 +47,7 @@
 #ifndef _DARCYSOLVERNONLINEAR_H_
 #define _DARCYSOLVERNONLINEAR_H_ 1
 
-#include <life/lifesolver/darcySolver.hpp>
+#include <life/lifesolver/DarcySolver.hpp>
 
 // Local namespace to store the default function for start up the fixed point scheme and the default non-linear permeability tensor.
 namespace

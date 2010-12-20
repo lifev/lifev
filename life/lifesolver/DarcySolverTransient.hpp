@@ -40,7 +40,7 @@
 #ifndef _DARCYSOLVERTRANSIENT_H_
 #define _DARCYSOLVERTRANSIENT_H_ 1
 
-#include <life/lifesolver/darcySolver.hpp>
+#include <life/lifesolver/DarcySolver.hpp>
 
 namespace
 {

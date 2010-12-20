@@ -40,8 +40,8 @@
 #ifndef _DARCYSOLVERTRANSIENTNONLINEAR_H_
 #define _DARCYSOLVERTRANSIENTNONLINEAR_H_ 1
 
-#include <life/lifesolver/darcySolverNonLinear.hpp>
-#include <life/lifesolver/darcySolverTransient.hpp>
+#include <life/lifesolver/DarcySolverNonLinear.hpp>
+#include <life/lifesolver/DarcySolverTransient.hpp>
 
 // LifeV namespace.
 namespace LifeV
