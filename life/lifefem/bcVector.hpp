@@ -45,8 +45,8 @@
 #include <life/lifecore/life.hpp>
 #include <life/lifefem/DOFInterface.hpp>
 #include <life/lifearray/EpetraVector.hpp>
-#include <life/lifecore/singleton.hpp>
-#include <life/lifecore/factory.hpp>
+#include <life/lifecore/FactorySingleton.hpp>
+#include <life/lifecore/Factory.hpp>
 
 
 
