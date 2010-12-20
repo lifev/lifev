@@ -36,7 +36,7 @@
 
  */
 
-#include <life/lifefem/currentBdFE.hpp>
+#include <life/lifefem/CurrentBoundaryFE.hpp>
 
 namespace LifeV
 {

@@ -55,7 +55,7 @@
 
 #include <life/lifefem/bcHandler.hpp>
 #include <life/lifefem/currentFE.hpp>
-#include <life/lifefem/currentBdFE.hpp>
+#include <life/lifefem/CurrentBoundaryFE.hpp>
 #include <life/lifefem/dof.hpp>
 #include <life/lifefem/sobolevNorms.hpp>
 

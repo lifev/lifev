@@ -52,7 +52,7 @@
 #include <iostream>
 #include <map>
 #include <life/lifemesh/markers.hpp>
-#include <life/lifefem/currentBdFE.hpp>
+#include <life/lifefem/CurrentBoundaryFE.hpp>
 #include <ext/slist>
 #include <cmath>
 
