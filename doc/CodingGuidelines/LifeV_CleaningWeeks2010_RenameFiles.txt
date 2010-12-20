@@ -30,7 +30,7 @@ GetPot:         from LIFECORE    to LIFEFILTERS                                C
 identifier      from LIFEMESH    to LIFEFEM                                    EMORY
 mesh_util       from LIFEFILTERS to LIFEMESH                                   CMCS3
 selectMarker    from LIFEFILTERS to LIFEMESH                                   MOX
-stiffnessFibers from LIFEFEM     to LIFESOLVER                                 CMCS1
+stiffnessFibers from LIFEFEM     to LIFESOLVER                                 CMCS1     DONE
 
 ============================
 LIFEV FILES TO BE RENAMED
@@ -172,14 +172,14 @@ FSIModelExactJacobian                  exactJacobianBase                       C
 FSIModelFixedPoint                     fixedPointBase                          CMCS3
 FSISolver                              -                                       CMCS3     DONE
 HarmonicExtensionSolver                -                                       CMCS3     DONE
-HeartBidomainSolver                    bidomainSolver                          CMCS1
-HeartBidomainData                      dataBidomain                            CMCS1
-HeartFunctors                          heartFunctors                           CMCS1
-HeartIonicData                         dataIonic                               CMCS1
-HeartIonicSolver                       ionicSolver                             CMCS1
-HeartMonodomainData                    dataMonodomain                          CMCS1
-HeartMonodomainSolver                  monodomainSolver                        CMCS1
-HeartStiffnessFibers                   stiffnessFibers                         CMCS1
+HeartBidomainSolver                    bidomainSolver                          CMCS1     DONE
+HeartBidomainData                      dataBidomain                            CMCS1     DONE
+HeartFunctors                          heartFunctors                           CMCS1     DONE
+HeartIonicData                         dataIonic                               CMCS1     DONE
+HeartIonicSolver                       ionicSolver                             CMCS1     DONE
+HeartMonodomainData                    dataMonodomain                          CMCS1     DONE
+HeartMonodomainSolver                  monodomainSolver                        CMCS1     DONE
+HeartStiffnessFibers                   stiffnessFibers                         CMCS1     DONE
 HyperbolicData                         dataHyperbolic                          MOX
 HyperbolicSolver                       hyperbolicSolver                        MOX
 LevelSetData                           dataLevelSet                            CMCS2
