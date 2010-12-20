@@ -66,10 +66,10 @@
 #include <life/lifearray/EpetraMatrix.hpp>
 #include <life/lifealg/EpetraPreconditioner.hpp>
 #include <life/lifealg/IfpackPreconditioner.hpp>
-#include <life/lifecore/debug.hpp>
-#include <life/lifecore/GetPot.hpp>
-#include <life/lifecore/chrono.hpp>
-#include <life/lifecore/displayer.hpp>
+#include <life/lifecore/LifeDebug.hpp>
+#include <life/lifefilters/GetPot.hpp>
+#include <life/lifecore/LifeChrono.hpp>
+#include <life/lifecore/Displayer.hpp>
 
 namespace LifeV
 {
