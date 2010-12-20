@@ -33,8 +33,8 @@ along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
   @maintainer Radu Popescu <radu.popescu@epfl.ch>
 */
 
-#ifndef SINGLETON_H
-#define SINGLETON_H 1
+#ifndef FACTORY_SINGLETON_H
+#define FACTORY_SINGLETON_H 1
 
 #include <algorithm>
 #include <cassert>
@@ -48,48 +48,48 @@ along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
 namespace LifeV
 {
 /**
-   \class singleton
-   \brief implement the Singleton pattern
+   \class FactorySingleton
+   \brief implement the FactorySingleton pattern
 
-   A Singleton pattern implementation using the ideas
+   A FactorySingleton pattern implementation using the ideas
    from Alexandrescu's book "modern C++ design"
    http://www.moderncppdesign.com/
 */
 template <typename SingletonType>
-class singleton
+class FactorySingleton
 {
 public:
     //! @name Public typedefs
     //@{
-    typedef SingletonType singleton_Type;
-    typedef policyLifeTimeDefault<singleton_Type> lifetimePolicy_Type;
-    typedef policyCreationUsingNew<singleton_Type> creationPolicy_Type;
+    typedef SingletonType Singleton_Type;
+    typedef policyLifeTimeDefault<Singleton_Type> lifetimePolicy_Type;
+    typedef policyCreationUsingNew<Singleton_Type> creationPolicy_Type;
     //@}
 
     //! @name Public static methods
     //@{
     /**
-       return the instance of the singleton
+       return the instance of the FactorySingleton
     */
-    static singleton_Type& instance();
+    static Singleton_Type& instance();
     //@}
 private:
     //! @name Private typedefs
     //@{
-    typedef singleton_Type* instance_Type;
+    typedef Singleton_Type* instance_Type;
     //@}
 
     // Disable the constructor
-    singleton();
+    FactorySingleton();
 
     //! @name Private static methods
     //@{
     static void makeInstance();
 
     /**
-       Singleton::makeInstance (helper for Instance)
+       FactorySingleton::makeInstance (helper for Instance)
     */
-    static void destroySingleton();
+    static void destroyFactorySingleton();
 
     //@}
     static instance_Type S_instance;
@@ -97,17 +97,17 @@ private:
 };
 
 // ===================================
-// Singleton Implementation
+// FactorySingleton Implementation
 // ===================================
 
 template <class SingletonType>
-typename singleton<SingletonType>::instance_Type singleton<SingletonType>::S_instance;
+typename FactorySingleton<SingletonType>::instance_Type FactorySingleton<SingletonType>::S_instance;
 
 template <class SingletonType>
-bool singleton<SingletonType>::S_destroyed;
+bool FactorySingleton<SingletonType>::S_destroyed;
 
 template <class SingletonType>
-inline SingletonType& singleton<SingletonType>::instance()
+inline SingletonType& FactorySingleton<SingletonType>::instance()
 {
     if ( !S_instance )
     {
@@ -117,7 +117,7 @@ inline SingletonType& singleton<SingletonType>::instance()
 }
 
 template <class SingletonType>
-void singleton<SingletonType>::makeInstance()
+void FactorySingleton<SingletonType>::makeInstance()
 {
     if ( !S_instance )
     {
@@ -127,12 +127,12 @@ void singleton<SingletonType>::makeInstance()
             S_destroyed = false;
         }
         S_instance = creationPolicy_Type::create();
-        lifetimePolicy_Type::scheduleDestruction( S_instance, &destroySingleton );
+        lifetimePolicy_Type::scheduleDestruction( S_instance, &destroyFactorySingleton );
     }
 }
 
 template <class SingletonType>
-void singleton<SingletonType>::destroySingleton()
+void FactorySingleton<SingletonType>::destroyFactorySingleton()
 {
     assert( !S_destroyed );
     creationPolicy_Type::destroy( S_instance );
@@ -142,4 +142,4 @@ void singleton<SingletonType>::destroySingleton()
 
 } // Namespace LifeV
 
-#endif // SINGLETON_H
+#endif // FACTORY_SINGLETON_H
