@@ -44,8 +44,7 @@
 
 // LifeV includes
 #include "life/lifecore/life.hpp"
-#include "life/lifefem/bcHandler.hpp"
-#include "life/lifefem/bcFunction.hpp"
+#include "life/lifefem/BCHandler.hpp"
 
 // Mathcard includes
 #include "lifemc/lifesolver/FSIMonolithicGE.hpp"

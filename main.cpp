@@ -87,7 +87,7 @@
 #pragma GCC diagnostic warning "-Wunused-parameter"
 
 // LifeV includes
-#include <life/lifefem/bcHandler.hpp>
+#include <life/lifefem/BCHandler.hpp>
 #include <life/lifecore/life.hpp>
 
 #include <life/lifealg/IfpackPreconditioner.hpp>
