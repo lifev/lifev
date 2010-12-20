@@ -52,7 +52,7 @@
 #include <life/lifecore/chrono.hpp>
 #include <life/lifefem/sobolevNorms.hpp>
 #include <life/lifefem/geoMap.hpp>
-#include <life/lifesolver/dataIonic.hpp>
+#include <life/lifesolver/HeartIonicData.hpp>
 #include <boost/shared_ptr.hpp>
 #include <life/lifefem/FESpace.hpp>
 #include <life/lifefem/bdf_template.hpp>
@@ -64,14 +64,14 @@ namespace LifeV
 
 template< typename Mesh,
           typename SolverType = LifeV::SolverTrilinos >
-class IonicSolver
+class HeartIonicSolver
 {
 
 public:
     //! @name Type definitions
     //@{
 
-    typedef DataIonic data_Type;
+    typedef HeartIonicData data_Type;
 
     typedef Real ( *function_Type ) ( const Real&,
                                  const Real&,
@@ -107,13 +107,13 @@ public:
      * @param recovery FE space
      * @param Epetra communicator
      */
-    IonicSolver( const data_Type& dataType,
+    HeartIonicSolver( const data_Type& dataType,
                  const Mesh& mesh,
                  FESpace<Mesh, EpetraMap>& uFEspace,
                  Epetra_Comm& comm );
 
     //! Destructor
-    virtual ~IonicSolver() {}
+    virtual ~HeartIonicSolver() {}
 
  //@}
 
@@ -181,8 +181,8 @@ protected:
 
 //! Constructor
 template<typename Mesh, typename SolverType>
-IonicSolver<Mesh, SolverType>::
-IonicSolver( const data_Type& dataType,
+HeartIonicSolver<Mesh, SolverType>::
+HeartIonicSolver( const data_Type& dataType,
              const Mesh& mesh,
              FESpace<Mesh, EpetraMap>& uFEspace,
              Epetra_Comm& comm ):
@@ -198,13 +198,13 @@ IonicSolver( const data_Type& dataType,
 
 template< typename Mesh,
 	  typename SolverType = LifeV::SolverTrilinos >
-class MitchellSchaeffer : public virtual IonicSolver<Mesh, SolverType>
+class MitchellSchaeffer : public virtual HeartIonicSolver<Mesh, SolverType>
 {
 public:
-	typedef typename IonicSolver<Mesh, SolverType>::data_Type	data_Type;
-	typedef typename IonicSolver<Mesh, SolverType>::vector_Type	vector_Type;
-	typedef typename IonicSolver<Mesh, SolverType>::function_Type 	function_Type;
-	typedef typename IonicSolver<Mesh, SolverType>::functorTauClose_Type  functorTauClose_Type;
+	typedef typename HeartIonicSolver<Mesh, SolverType>::data_Type	data_Type;
+	typedef typename HeartIonicSolver<Mesh, SolverType>::vector_Type	vector_Type;
+	typedef typename HeartIonicSolver<Mesh, SolverType>::function_Type 	function_Type;
+	typedef typename HeartIonicSolver<Mesh, SolverType>::functorTauClose_Type  functorTauClose_Type;
 
     MitchellSchaeffer( const data_Type& dataType,
                         const Mesh& mesh,
@@ -261,11 +261,11 @@ MitchellSchaeffer( const data_Type& dataType,
                    const Mesh& mesh,
                    FESpace<Mesh, EpetraMap>& uFEspace,
                    Epetra_Comm& comm ):
-    IonicSolver<Mesh, SolverType>( dataType, mesh, uFEspace, comm),
-    M_solutionGatingW ( IonicSolver<Mesh, SolverType>::M_localMap ),
+    HeartIonicSolver<Mesh, SolverType>( dataType, mesh, uFEspace, comm),
+    M_solutionGatingW ( HeartIonicSolver<Mesh, SolverType>::M_localMap ),
     M_solutionGatingWRepeated( M_solutionGatingW, Repeated ),
-    M_elvec ( IonicSolver<Mesh, SolverType>::M_uFESpace.fe().nbFEDof(), 1 ),
-    M_BDForder( IonicSolver<Mesh, SolverType>::M_data.MSBDForder() ),
+    M_elvec ( HeartIonicSolver<Mesh, SolverType>::M_uFESpace.fe().nbFEDof(), 1 ),
+    M_BDForder( HeartIonicSolver<Mesh, SolverType>::M_data.MSBDForder() ),
     M_BDFW( )
 {
   M_BDFW.setup( M_BDForder );
@@ -289,9 +289,9 @@ void MitchellSchaeffer<Mesh, SolverType>::updateElementSolution( UInt eleID )
 	M_elvec.zero();
 	UInt ig;
     //! Filling local elvec_w with recovery variable values in the nodes
-    for ( UInt iNode = 0 ; iNode < IonicSolver<Mesh, SolverType>::M_uFESpace.fe().nbFEDof() ; iNode++ )
+    for ( UInt iNode = 0 ; iNode < HeartIonicSolver<Mesh, SolverType>::M_uFESpace.fe().nbFEDof() ; iNode++ )
     {
-        ig = IonicSolver<Mesh, SolverType>::M_uFESpace.dof().localToGlobal( eleID, iNode + 1 );
+        ig = HeartIonicSolver<Mesh, SolverType>::M_uFESpace.dof().localToGlobal( eleID, iNode + 1 );
         M_elvec.vec()[ iNode ] = M_solutionGatingWRepeated[ig];
     }
 }
@@ -332,7 +332,7 @@ void MitchellSchaeffer<Mesh, SolverType>::solveIonicModel( const vector_Type& u,
 	M_BDFW.updateRHSContribution(timeStep);
 	vector_Type M_time_der=M_BDFW.rhsContributionFirstDerivative();
 
-	IonicSolver<Mesh, SolverType>::M_comm->Barrier();
+	HeartIonicSolver<Mesh, SolverType>::M_comm->Barrier();
 	UInt ID;
 	for ( Int i = 0 ; i < u.epetraVector().MyLength() ; ++i )
 	{
@@ -353,7 +353,7 @@ void MitchellSchaeffer<Mesh, SolverType>::solveIonicModel( const vector_Type& u,
 	}
 	M_BDFW.shiftRight(M_solutionGatingW);
 
-	IonicSolver<Mesh, SolverType>::M_comm->Barrier();
+	HeartIonicSolver<Mesh, SolverType>::M_comm->Barrier();
 }
 
 template<typename Mesh, typename SolverType>
@@ -391,12 +391,12 @@ initialize( )
 
 template< typename Mesh,
           typename SolverType = LifeV::SolverTrilinos >
-class RogersMcCulloch : public virtual IonicSolver<Mesh, SolverType>
+class RogersMcCulloch : public virtual HeartIonicSolver<Mesh, SolverType>
 {
 public:
-	typedef typename IonicSolver<Mesh, SolverType>::data_Type data_Type;
-	typedef typename IonicSolver<Mesh, SolverType>::vector_Type vector_Type;
-	typedef typename IonicSolver<Mesh, SolverType>::function_Type function_Type;
+	typedef typename HeartIonicSolver<Mesh, SolverType>::data_Type data_Type;
+	typedef typename HeartIonicSolver<Mesh, SolverType>::vector_Type vector_Type;
+	typedef typename HeartIonicSolver<Mesh, SolverType>::function_Type function_Type;
 
     RogersMcCulloch( const data_Type& dataType,
                       const Mesh& mesh,
@@ -440,10 +440,10 @@ RogersMcCulloch( const data_Type& dataType,
                   const Mesh& mesh,
                   FESpace<Mesh, EpetraMap>& uFEspace,
                   Epetra_Comm& comm ):
-    IonicSolver<Mesh, SolverType>( dataType, mesh, uFEspace, comm),
-    M_solutionGatingW ( IonicSolver<Mesh, SolverType>::M_localMap ),
+    HeartIonicSolver<Mesh, SolverType>( dataType, mesh, uFEspace, comm),
+    M_solutionGatingW ( HeartIonicSolver<Mesh, SolverType>::M_localMap ),
     M_solutionGatingWRepeated ( M_solutionGatingW, Repeated ),
-    M_elvec ( IonicSolver<Mesh, SolverType>::M_uFESpace.fe().nbFEDof(), 1 )
+    M_elvec ( HeartIonicSolver<Mesh, SolverType>::M_uFESpace.fe().nbFEDof(), 1 )
 {
 }
 
@@ -465,9 +465,9 @@ void RogersMcCulloch<Mesh, SolverType>::updateElementSolution( UInt eleID )
 	M_elvec.zero();
 	UInt ig;
     for ( UInt iNode = 0 ;
-          iNode < IonicSolver<Mesh, SolverType>::M_uFESpace.fe().nbFEDof() ; iNode++ )
+          iNode < HeartIonicSolver<Mesh, SolverType>::M_uFESpace.fe().nbFEDof() ; iNode++ )
     {
-        ig = IonicSolver<Mesh, SolverType>::M_uFESpace.dof().localToGlobal( eleID, iNode + 1 );
+        ig = HeartIonicSolver<Mesh, SolverType>::M_uFESpace.dof().localToGlobal( eleID, iNode + 1 );
         M_elvec.vec()[ iNode ] = M_solutionGatingWRepeated[ig];
     }
 }
@@ -480,7 +480,7 @@ void RogersMcCulloch<Mesh, SolverType>::solveIonicModel( const vector_Type& u, c
 
 	Real alpha = 1 / timeStep + G*this -> M_data.RMCPotentialAmplitude() * this -> M_data.RMCParameterD() ;
 
-	IonicSolver<Mesh, SolverType>::M_comm->Barrier();
+	HeartIonicSolver<Mesh, SolverType>::M_comm->Barrier();
 
 	M_solutionGatingW*=1/timeStep;
 	vector_Type temp(u);
@@ -489,7 +489,7 @@ void RogersMcCulloch<Mesh, SolverType>::solveIonicModel( const vector_Type& u, c
 	M_solutionGatingW-= temp;
 	M_solutionGatingW*=1/alpha;
 	M_solutionGatingW.globalAssemble();
-	IonicSolver<Mesh, SolverType>::M_comm->Barrier();
+	HeartIonicSolver<Mesh, SolverType>::M_comm->Barrier();
 
 }
 
@@ -534,12 +534,12 @@ initialize( )
 
 template< typename Mesh,
           typename SolverType = LifeV::SolverTrilinos >
-class LuoRudy : public virtual IonicSolver<Mesh, SolverType>
+class LuoRudy : public virtual HeartIonicSolver<Mesh, SolverType>
 {
 public:
-	typedef typename IonicSolver<Mesh, SolverType>::data_Type data_Type;
-	typedef typename IonicSolver<Mesh, SolverType>::vector_Type vector_Type;
-	typedef typename IonicSolver<Mesh, SolverType>::function_Type function_Type;
+	typedef typename HeartIonicSolver<Mesh, SolverType>::data_Type data_Type;
+	typedef typename HeartIonicSolver<Mesh, SolverType>::vector_Type vector_Type;
+	typedef typename HeartIonicSolver<Mesh, SolverType>::function_Type function_Type;
 
     LuoRudy( const data_Type&          dataType,
              const Mesh&          mesh,
@@ -651,7 +651,7 @@ LuoRudy( const data_Type& dataType,
 		const Mesh& mesh,
 		FESpace<Mesh, EpetraMap>& uFEspace,
 		Epetra_Comm& comm ):
-			IonicSolver<Mesh, SolverType>( dataType, mesh, uFEspace, comm),
+			HeartIonicSolver<Mesh, SolverType>( dataType, mesh, uFEspace, comm),
 			M_K0(5.4),
 			M_Ki(145.),
 			M_Na0(140.),
@@ -668,29 +668,29 @@ LuoRudy( const data_Type& dataType,
 			M_Gk1(0.6047 * sqrt(M_K0 / 5.4)),
 			M_Ek1(1000.* (M_R * M_temperature / M_F)* log(M_K0 / M_Ki)),
 			M_Ekp(M_Ek1),
-			M_vectorExponentialh(IonicSolver<Mesh, SolverType>::M_localMap),
-			M_vectorExponentialj(IonicSolver<Mesh, SolverType>::M_localMap),
-			M_vectorExponentialm(IonicSolver<Mesh, SolverType>::M_localMap),
-			M_vectorExponentiald(IonicSolver<Mesh, SolverType>::M_localMap),
-			M_vectorExponentialf(IonicSolver<Mesh, SolverType>::M_localMap),
-			M_vectorExponentialX(IonicSolver<Mesh, SolverType>::M_localMap),
-			M_vectorInfimumh(IonicSolver<Mesh, SolverType>::M_localMap),
-			M_vectorInfimumj(IonicSolver<Mesh, SolverType>::M_localMap),
-			M_vectorInfimumm(IonicSolver<Mesh, SolverType>::M_localMap),
-			M_vectorInfimumd(IonicSolver<Mesh, SolverType>::M_localMap),
-			M_vectorInfimumf(IonicSolver<Mesh, SolverType>::M_localMap),
-			M_vectorInfimumX(IonicSolver<Mesh, SolverType>::M_localMap),
-			M_vectorIonicChange(IonicSolver<Mesh, SolverType>::M_localMap),
-            M_solutionGatingH                  ( IonicSolver<Mesh, SolverType>::M_localMap ),
-            M_solutionGatingJ                  ( IonicSolver<Mesh, SolverType>::M_localMap ),
-            M_solutionGatingM                  ( IonicSolver<Mesh, SolverType>::M_localMap ),
-            M_solutionGatingD                  ( IonicSolver<Mesh, SolverType>::M_localMap ),
-            M_solutionGatingF                  ( IonicSolver<Mesh, SolverType>::M_localMap ),
-            M_solutionGatingX                  ( IonicSolver<Mesh, SolverType>::M_localMap ),
-            M_solutionGatingCa                  ( IonicSolver<Mesh, SolverType>::M_localMap ),
-            M_ionicCurrent( IonicSolver<Mesh, SolverType>::M_localMap ),
+			M_vectorExponentialh(HeartIonicSolver<Mesh, SolverType>::M_localMap),
+			M_vectorExponentialj(HeartIonicSolver<Mesh, SolverType>::M_localMap),
+			M_vectorExponentialm(HeartIonicSolver<Mesh, SolverType>::M_localMap),
+			M_vectorExponentiald(HeartIonicSolver<Mesh, SolverType>::M_localMap),
+			M_vectorExponentialf(HeartIonicSolver<Mesh, SolverType>::M_localMap),
+			M_vectorExponentialX(HeartIonicSolver<Mesh, SolverType>::M_localMap),
+			M_vectorInfimumh(HeartIonicSolver<Mesh, SolverType>::M_localMap),
+			M_vectorInfimumj(HeartIonicSolver<Mesh, SolverType>::M_localMap),
+			M_vectorInfimumm(HeartIonicSolver<Mesh, SolverType>::M_localMap),
+			M_vectorInfimumd(HeartIonicSolver<Mesh, SolverType>::M_localMap),
+			M_vectorInfimumf(HeartIonicSolver<Mesh, SolverType>::M_localMap),
+			M_vectorInfimumX(HeartIonicSolver<Mesh, SolverType>::M_localMap),
+			M_vectorIonicChange(HeartIonicSolver<Mesh, SolverType>::M_localMap),
+            M_solutionGatingH                  ( HeartIonicSolver<Mesh, SolverType>::M_localMap ),
+            M_solutionGatingJ                  ( HeartIonicSolver<Mesh, SolverType>::M_localMap ),
+            M_solutionGatingM                  ( HeartIonicSolver<Mesh, SolverType>::M_localMap ),
+            M_solutionGatingD                  ( HeartIonicSolver<Mesh, SolverType>::M_localMap ),
+            M_solutionGatingF                  ( HeartIonicSolver<Mesh, SolverType>::M_localMap ),
+            M_solutionGatingX                  ( HeartIonicSolver<Mesh, SolverType>::M_localMap ),
+            M_solutionGatingCa                  ( HeartIonicSolver<Mesh, SolverType>::M_localMap ),
+            M_ionicCurrent( HeartIonicSolver<Mesh, SolverType>::M_localMap ),
             M_ionicCurrentRepeated( M_ionicCurrent, Repeated ),
-            M_elemVecIonicCurrent ( IonicSolver<Mesh, SolverType>::M_uFESpace.fe().nbFEDof(), 1 )
+            M_elemVecIonicCurrent ( HeartIonicSolver<Mesh, SolverType>::M_uFESpace.fe().nbFEDof(), 1 )
 {
 }
 
@@ -707,9 +707,9 @@ void LuoRudy<Mesh, SolverType>::updateElementSolution( UInt eleID)
 	M_elemVecIonicCurrent.zero();
 	UInt ig;
 		//! Filling local elvec with recovery variable values in the nodes
-		for ( UInt iNode = 0 ; iNode < IonicSolver<Mesh, SolverType>::M_uFESpace.fe().nbFEDof() ; iNode++ )
+		for ( UInt iNode = 0 ; iNode < HeartIonicSolver<Mesh, SolverType>::M_uFESpace.fe().nbFEDof() ; iNode++ )
 		{
-			ig = IonicSolver<Mesh, SolverType>::M_uFESpace.dof().localToGlobal( eleID, iNode + 1 );
+			ig = HeartIonicSolver<Mesh, SolverType>::M_uFESpace.dof().localToGlobal( eleID, iNode + 1 );
 			M_elemVecIonicCurrent.vec()[ iNode ] = M_ionicCurrentRepeated[ig];
 		}
 
@@ -722,7 +722,7 @@ void LuoRudy<Mesh, SolverType>::solveIonicModel( const vector_Type& u, const Rea
 	//! Solving dw/dt=eta2 (u/vp -  eta3 w)
 	Chrono chronoionmodelsolve;
 	chronoionmodelsolve.start();
-	IonicSolver<Mesh, SolverType>::M_comm->Barrier();
+	HeartIonicSolver<Mesh, SolverType>::M_comm->Barrier();
 
 	for ( Int i = 0 ; i < u.epetraVector().MyLength() ; i++ )
 	{
@@ -854,10 +854,10 @@ void LuoRudy<Mesh, SolverType>::solveIonicModel( const vector_Type& u, const Rea
 	M_solutionGatingX.globalAssemble();
 	M_solutionGatingCa.globalAssemble();
 
-	IonicSolver<Mesh, SolverType>::M_comm->Barrier();
+	HeartIonicSolver<Mesh, SolverType>::M_comm->Barrier();
 
 	chronoionmodelsolve.stop();
-    if (IonicSolver<Mesh, SolverType>::M_comm->MyPID()==0)
+    if (HeartIonicSolver<Mesh, SolverType>::M_comm->MyPID()==0)
         std::cout << "Total ionmodelsolve time " << chronoionmodelsolve.diff() << " s." << std::endl;
 }
 

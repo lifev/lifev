@@ -40,7 +40,7 @@
 
 #include <life/lifemesh/dataMesh.hpp>
 #include <life/lifefem/dataTime.hpp>
-#include <life/lifesolver/heartFunctors.hpp>
+#include <life/lifesolver/HeartFunctors.hpp>
 
 
 namespace LifeV
@@ -51,7 +51,7 @@ namespace LifeV
   Base class which holds usual data for the Monodomain model solvers
 
 */
-class DataMonodomain:
+class HeartMonodomainData:
     public DataMesh,
     public DataTime
 {
@@ -76,19 +76,19 @@ public:
     //@{
 
     //! Constructors
-    DataMonodomain();
+    HeartMonodomainData();
 
-    DataMonodomain( boost::shared_ptr<HeartFunctors> heart);
+    HeartMonodomainData( boost::shared_ptr<HeartFunctors> heart);
 
-    DataMonodomain( const DataMonodomain& dataMonodomain );
+    HeartMonodomainData( const HeartMonodomainData& dataMonodomain );
 
-    virtual           ~DataMonodomain() {}
+    virtual           ~HeartMonodomainData() {}
     //@}
 
     //! @name Operators
     //@{
 
-    DataMonodomain&    operator=( const DataMonodomain& dataMonodomain );
+    HeartMonodomainData&    operator=( const HeartMonodomainData& dataMonodomain );
 
     //@}
 

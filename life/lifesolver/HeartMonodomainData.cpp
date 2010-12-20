@@ -35,7 +35,7 @@
     @mantainer Simone Rossi <simone.rossi@epfl.ch>
  */
 
-#include <life/lifesolver/dataMonodomain.hpp>
+#include <life/lifesolver/HeartMonodomainData.hpp>
 
 
 namespace LifeV
@@ -44,7 +44,7 @@ namespace LifeV
 // ===================================================
 // Constructors & Destructor
 // ===================================================
-DataMonodomain::DataMonodomain(   boost::shared_ptr<HeartFunctors> heart ) :
+HeartMonodomainData::HeartMonodomainData(   boost::shared_ptr<HeartFunctors> heart ) :
     DataMesh                        ( heart-> M_dataFile, "electric/space_discretization" ),
     DataTime                        ( heart-> M_dataFile, "electric/time_discretization" ),
     M_reducedConductivityBox        ( heart-> reducedConductivityBox() ),
@@ -56,7 +56,7 @@ DataMonodomain::DataMonodomain(   boost::shared_ptr<HeartFunctors> heart ) :
     setup                           ( heart-> M_dataFile);
 }
 
-DataMonodomain::DataMonodomain() :
+HeartMonodomainData::HeartMonodomainData() :
     DataMesh                        ( ),
     DataTime                        ( ),
     M_hasFibers                     ( ),
@@ -76,7 +76,7 @@ DataMonodomain::DataMonodomain() :
 {
 }
 
-DataMonodomain::DataMonodomain( const DataMonodomain& dataMonodomain ) :
+HeartMonodomainData::HeartMonodomainData( const HeartMonodomainData& dataMonodomain ) :
     DataMesh                        ( dataMonodomain ),
     DataTime                        ( dataMonodomain ),
     M_hasFibers                     ( dataMonodomain.M_hasFibers ),
@@ -100,8 +100,8 @@ DataMonodomain::DataMonodomain( const DataMonodomain& dataMonodomain ) :
 // ===================================================
 // Methods
 // ===================================================
-DataMonodomain&
-DataMonodomain::operator=( const DataMonodomain& dataMonodomain )
+HeartMonodomainData&
+HeartMonodomainData::operator=( const HeartMonodomainData& dataMonodomain )
 {
     if ( this != &dataMonodomain )
     {
@@ -126,7 +126,7 @@ DataMonodomain::operator=( const DataMonodomain& dataMonodomain )
 
 
 void
-DataMonodomain::setup(  const GetPot& dataFile )
+HeartMonodomainData::setup(  const GetPot& dataFile )
 {
     M_volumeSurfaceRatio           = dataFile("electric/physics/Chi", 1e3);   // [1e-3 1/cm]    ColliPavarinoTaccardi2005
     M_membraneCapacitance          = dataFile("electric/physics/Cm", 1e-3);	  // [1e-3 mF/cm2]  ColliPavarinoTaccardi2005
@@ -166,7 +166,7 @@ DataMonodomain::setup(  const GetPot& dataFile )
 
 
 void
-DataMonodomain::showMe( std::ostream& output )
+HeartMonodomainData::showMe( std::ostream& output )
 {
     output << "\n*** Values for data [fluid/time_discretization]\n\n";
     output << "endtime   = " << endTime() << std::endl;

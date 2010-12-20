@@ -36,7 +36,7 @@
     @mantainer Simone Rossi <simone.rossi@epfl.ch>
  */
 
-#include <life/lifesolver/dataIonic.hpp>
+#include <life/lifesolver/HeartIonicData.hpp>
 
 
 namespace LifeV
@@ -47,14 +47,14 @@ namespace LifeV
 // Constructors & Destructor
 // ===================================================
 //! Constructors
-DataIonic::DataIonic( const GetPot& dataFile ) :
+HeartIonicData::HeartIonicData( const GetPot& dataFile ) :
         DataMesh( dataFile, "electric/space_discretization" ),
         DataTime( dataFile, "electric/time_discretization" )
 {
     setup(dataFile);
 }
 
-DataIonic::DataIonic() :
+HeartIonicData::HeartIonicData() :
         DataMesh                        ( ),
         DataTime                        ( ),
         M_verbose                       ( ),
@@ -83,7 +83,7 @@ DataIonic::DataIonic() :
 {
 }
 
-DataIonic::DataIonic( const DataIonic& dataIonic ) :
+HeartIonicData::HeartIonicData( const HeartIonicData& dataIonic ) :
         DataMesh		                ( dataIonic ),
         DataTime                        ( dataIonic ),
         M_verbose                       ( dataIonic.M_verbose ),
@@ -116,8 +116,8 @@ DataIonic::DataIonic( const DataIonic& dataIonic ) :
 // ===================================================
 // Methods
 // ===================================================
-DataIonic&
-DataIonic::operator=( const DataIonic& dataIonic )
+HeartIonicData&
+HeartIonicData::operator=( const HeartIonicData& dataIonic )
 {
     if( this != &dataIonic )
     {
@@ -149,7 +149,7 @@ DataIonic::operator=( const DataIonic& dataIonic )
 }
 
 void
-DataIonic::setup(  const GetPot& dataFile )
+HeartIonicData::setup(  const GetPot& dataFile )
 {
     M_MSHasHeterogeneousTauClose = dataFile( "electric/physics/hasHeteroTauClose",1 );
     M_RMCParameterA   		               = dataFile( "electric/physics/a",0.13 );   // 0.13  adim  //RogersMcCulloch1994
@@ -177,7 +177,7 @@ DataIonic::setup(  const GetPot& dataFile )
 }
 
 // Output
-void DataIonic::showMe( std::ostream& output )
+void HeartIonicData::showMe( std::ostream& output )
 {
  output << " The output is still to be coded! \n" << std::endl;
 }

@@ -52,10 +52,10 @@
 #include <life/lifecore/chrono.hpp>
 #include <life/lifefem/sobolevNorms.hpp>
 #include <life/lifefem/geoMap.hpp>
-#include <life/lifesolver/dataMonodomain.hpp>
+#include <life/lifesolver/HeartMonodomainData.hpp>
 #include <boost/shared_ptr.hpp>
 #include <life/lifefem/FESpace.hpp>
-#include <life/lifefem/stiffnessFibers.hpp>
+#include <life/lifesolver/HeartStiffnessFibers.hpp>
 #include <life/lifefem/bdf_template.hpp>
 
 namespace LifeV
@@ -65,7 +65,7 @@ namespace LifeV
 
 template< typename Mesh,
           typename SolverType = LifeV::SolverTrilinos >
-class MonodomainSolver
+class HeartMonodomainSolver
 {
 
 public:
@@ -73,7 +73,7 @@ public:
     //! @name Type definitions
     //@{
 
-    typedef DataMonodomain data_type;
+    typedef HeartMonodomainData data_type;
     typedef Real ( *Function ) ( const Real& t,
                                  const Real& x,
                                  const Real& y,
@@ -109,13 +109,13 @@ public:
      * @param Epetra communicator
      */
 
-    MonodomainSolver( const data_type& dataType,
+    HeartMonodomainSolver( const data_type& dataType,
                       FESpace<Mesh, EpetraMap>& uFESpace,
                       BCHandler& bcHandler,
                       boost::shared_ptr<Epetra_Comm>& comm);
 
     //! Destructor
-    virtual ~MonodomainSolver() {}
+    virtual ~HeartMonodomainSolver() {}
 
     //@}
 
@@ -264,8 +264,8 @@ private:
 
 //! Constructors
 template<typename Mesh, typename SolverType>
-MonodomainSolver<Mesh, SolverType>::
-MonodomainSolver( const data_type&          dataType,
+HeartMonodomainSolver<Mesh, SolverType>::
+HeartMonodomainSolver( const data_type&          dataType,
                   FESpace<Mesh, EpetraMap>& uFESpace,
                   BCHandler&                BCh_u,
                   boost::shared_ptr<Epetra_Comm>&              comm ):
@@ -320,7 +320,7 @@ MonodomainSolver( const data_type&          dataType,
 
 
 template<typename Mesh, typename SolverType>
-void MonodomainSolver<Mesh, SolverType>::setup( const GetPot& dataFile )
+void HeartMonodomainSolver<Mesh, SolverType>::setup( const GetPot& dataFile )
 {
 
     M_diagonalize = dataFile( "electric/space_discretization/diagonalize",  1. );
@@ -343,7 +343,7 @@ void MonodomainSolver<Mesh, SolverType>::setup( const GetPot& dataFile )
 
 
 template<typename Mesh, typename SolverType>
-void MonodomainSolver<Mesh, SolverType>::buildSystem()
+void HeartMonodomainSolver<Mesh, SolverType>::buildSystem()
 {
     M_massMatrix.reset  ( new matrix_Type(M_localMap) );
     M_stiffnessMatrix.reset( new matrix_Type(M_localMap) );
@@ -545,7 +545,7 @@ void MonodomainSolver<Mesh, SolverType>::buildSystem()
 }
 
 template<typename Mesh, typename SolverType>
-void MonodomainSolver<Mesh, SolverType>::
+void HeartMonodomainSolver<Mesh, SolverType>::
 initialize( const source_Type& u0 )
 {
 
@@ -559,7 +559,7 @@ initialize( const source_Type& u0 )
 
 
 template<typename Mesh, typename SolverType>
-void MonodomainSolver<Mesh, SolverType>::
+void HeartMonodomainSolver<Mesh, SolverType>::
 initialize( const Function& u0 )
 {
 
@@ -571,7 +571,7 @@ initialize( const Function& u0 )
 
 
 template<typename Mesh, typename SolverType>
-void MonodomainSolver<Mesh, SolverType>::
+void HeartMonodomainSolver<Mesh, SolverType>::
 initialize( const vector_Type& u0 )
 {
 
@@ -581,7 +581,7 @@ initialize( const vector_Type& u0 )
 
 
 template<typename Mesh, typename SolverType>
-void MonodomainSolver<Mesh, SolverType>::
+void HeartMonodomainSolver<Mesh, SolverType>::
 updatePDESystem(Real         alpha,
                 vector_Type& sourceVec )
 {
@@ -632,7 +632,7 @@ updatePDESystem(Real         alpha,
 }
 
 template<typename Mesh, typename SolverType>
-void MonodomainSolver<Mesh, SolverType>::
+void HeartMonodomainSolver<Mesh, SolverType>::
 updatePDESystem(vector_Type& sourceVec )
 {
 
@@ -657,7 +657,7 @@ updatePDESystem(vector_Type& sourceVec )
 
 
 template<typename Mesh, typename SolverType>
-void MonodomainSolver<Mesh, SolverType>::PDEiterate( bcHandlerRaw_Type& bch )
+void HeartMonodomainSolver<Mesh, SolverType>::PDEiterate( bcHandlerRaw_Type& bch )
 {
 
     Chrono chrono;
@@ -698,7 +698,7 @@ void MonodomainSolver<Mesh, SolverType>::PDEiterate( bcHandlerRaw_Type& bch )
 
 
 template<typename Mesh, typename SolverType>
-void MonodomainSolver<Mesh, SolverType>::solveSystem( matrixPtr_Type  matrFull,
+void HeartMonodomainSolver<Mesh, SolverType>::solveSystem( matrixPtr_Type  matrFull,
                                                       vector_Type&    rhsFull )
 {
     Chrono chrono;
@@ -772,7 +772,7 @@ void MonodomainSolver<Mesh, SolverType>::solveSystem( matrixPtr_Type  matrFull,
 
 
 template<typename Mesh, typename SolverType>
-void MonodomainSolver<Mesh, SolverType>::applyBoundaryConditions( matrix_Type&        matrix,
+void HeartMonodomainSolver<Mesh, SolverType>::applyBoundaryConditions( matrix_Type&        matrix,
                                                                   vector_Type&        rhs,
                                                                   bcHandlerRaw_Type&  BCh )
 {

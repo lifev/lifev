@@ -35,7 +35,7 @@
     @mantainer Simone Rossi <simone.rossi@epfl.ch>
  */
 
-#include<life/lifesolver/dataBidomain.hpp>
+#include<life/lifesolver/HeartBidomainData.hpp>
 
 
 namespace LifeV
@@ -45,7 +45,7 @@ namespace LifeV
 // ===================================================
 // Constructors & Destructor
 // ===================================================
-DataBidomain::DataBidomain( boost::shared_ptr<HeartFunctors> heart ) :
+HeartBidomainData::HeartBidomainData( boost::shared_ptr<HeartFunctors> heart ) :
     DataMesh                            ( heart -> M_dataFile, "electric/space_discretization" ),
     DataTime                            ( heart -> M_dataFile, "electric/time_discretization" ),
     M_reducedConductivityBox            ( heart -> reducedConductivityBox() ),
@@ -57,7 +57,7 @@ DataBidomain::DataBidomain( boost::shared_ptr<HeartFunctors> heart ) :
     setup( heart -> M_dataFile);
 }
 
-DataBidomain::DataBidomain() :
+HeartBidomainData::HeartBidomainData() :
     DataMesh                            ( ),
     DataTime                            ( ),
     M_fibersFormat                      ( ),
@@ -83,7 +83,7 @@ DataBidomain::DataBidomain() :
 {
 }
 
-DataBidomain::DataBidomain( const DataBidomain& dataBidomain ) :
+HeartBidomainData::HeartBidomainData( const HeartBidomainData& dataBidomain ) :
     DataMesh                            ( dataBidomain ),
     DataTime                            ( dataBidomain ),
     M_fibersFormat                      ( dataBidomain.M_fibersFormat ),
@@ -113,8 +113,8 @@ DataBidomain::DataBidomain( const DataBidomain& dataBidomain ) :
 // ===================================================
 // Methods
 // ===================================================
-DataBidomain&
-DataBidomain::operator=( const DataBidomain& dataBidomain )
+HeartBidomainData&
+HeartBidomainData::operator=( const HeartBidomainData& dataBidomain )
 {
     if( this != &dataBidomain )
     {
@@ -145,7 +145,7 @@ DataBidomain::operator=( const DataBidomain& dataBidomain )
 
 
 void
-DataBidomain::setup(  const GetPot& dataFile )
+HeartBidomainData::setup(  const GetPot& dataFile )
 {
     M_volumeSurfaceRatio                   = dataFile("electric/physics/Chi",1e3); 	// [1e-3 1/cm]   ColliPavarinoTaccardi2005
     M_membraneCapacitance                  = dataFile("electric/physics/Cm",1e-3);  	// [1e-3 mF/cm2]   ColliPavarinoTaccardi2005
@@ -200,7 +200,7 @@ DataBidomain::setup(  const GetPot& dataFile )
 
 
 void
-DataBidomain::showMe( std::ostream& output )
+HeartBidomainData::showMe( std::ostream& output )
 {
     output << "\n*** Values for data [fluid/physics]\n\n";
     output << "endtime   = " << endTime() << std::endl;

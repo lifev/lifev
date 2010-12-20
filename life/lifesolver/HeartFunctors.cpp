@@ -38,7 +38,7 @@
 
 
 
-#include <life/lifesolver/heartFunctors.hpp>
+#include <life/lifesolver/HeartFunctors.hpp>
 
 using namespace LifeV;
 

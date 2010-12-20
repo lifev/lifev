@@ -40,7 +40,7 @@
 
 #include <life/lifemesh/dataMesh.hpp>
 #include <life/lifefem/dataTime.hpp>
-#include <life/lifesolver/heartFunctors.hpp>
+#include <life/lifesolver/HeartFunctors.hpp>
 
 
 namespace LifeV
@@ -52,7 +52,7 @@ namespace LifeV
 
 */
 
-class DataBidomain:
+class HeartBidomainData:
     public DataMesh,
     public DataTime
 {
@@ -81,20 +81,20 @@ public:
     //@{
 
     //! Constructors
-    DataBidomain();
+    HeartBidomainData();
 
-    DataBidomain( boost::shared_ptr<HeartFunctors> heart);
+    HeartBidomainData( boost::shared_ptr<HeartFunctors> heart);
 
-    DataBidomain( const DataBidomain& dataBidomain );
+    HeartBidomainData( const HeartBidomainData& dataBidomain );
 
-    virtual ~DataBidomain() {}
+    virtual ~HeartBidomainData() {}
     //@}
 
 
     //! @name Operators
     //@{
 
-    DataBidomain& operator=( const DataBidomain& dataBidomain );
+    HeartBidomainData& operator=( const HeartBidomainData& dataBidomain );
 
     //@}
 

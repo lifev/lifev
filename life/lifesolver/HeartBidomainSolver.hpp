@@ -52,10 +52,10 @@
 #include <life/lifecore/chrono.hpp>
 #include <life/lifefem/sobolevNorms.hpp>
 #include <life/lifefem/geoMap.hpp>
-#include <life/lifesolver/dataBidomain.hpp>
+#include <life/lifesolver/HeartBidomainData.hpp>
 #include <boost/shared_ptr.hpp>
 #include <life/lifefem/FESpace.hpp>
-#include <life/lifefem/stiffnessFibers.hpp>
+#include <life/lifesolver/HeartStiffnessFibers.hpp>
 #include <life/lifefem/bdf_template.hpp>
 namespace LifeV
 {
@@ -65,14 +65,14 @@ const UInt nbComp = 2;
 
 template< typename Mesh,
 typename SolverType = LifeV::SolverTrilinos >
-class BidomainSolver
+class HeartBidomainSolver
 {
 
 public:
     //! @name Type definitions
     //@{
 
-    typedef DataBidomain data_type;
+    typedef HeartBidomainData data_type;
 
     typedef Real ( *Function ) ( const Real&, const Real&, const Real&,
             const Real&, const ID& );
@@ -105,14 +105,14 @@ public:
      * @param bcHandler boundary conditions for potential
      * @param Epetra communicator
      */
-    BidomainSolver( const data_type&          dataType,
+    HeartBidomainSolver( const data_type&          dataType,
                     FESpace<Mesh, EpetraMap>& pFESpace,
                     FESpace<Mesh, EpetraMap>& uFESpace,
                     BCHandler&                bcHandler,
                     boost::shared_ptr<Epetra_Comm>& comm );
 
     //! Destructor
-    virtual ~BidomainSolver();
+    virtual ~HeartBidomainSolver();
 
     //@}
 
@@ -286,8 +286,8 @@ private:
 
 //! Constructors
 template<typename Mesh, typename SolverType>
-BidomainSolver<Mesh, SolverType>::
-BidomainSolver( const data_type&          dataType,
+HeartBidomainSolver<Mesh, SolverType>::
+HeartBidomainSolver( const data_type&          dataType,
                 FESpace<Mesh, EpetraMap>& pFESpace,
                 FESpace<Mesh, EpetraMap>& uFESpace,
                 BCHandler&                BCh_u,
@@ -354,13 +354,13 @@ BidomainSolver( const data_type&          dataType,
 };
 
 template<typename Mesh, typename SolverType>
-BidomainSolver<Mesh, SolverType>::
-~BidomainSolver()
+HeartBidomainSolver<Mesh, SolverType>::
+~HeartBidomainSolver()
 {
 }
 
 template<typename Mesh, typename SolverType>
-void BidomainSolver<Mesh, SolverType>::setup( const GetPot& dataFile )
+void HeartBidomainSolver<Mesh, SolverType>::setup( const GetPot& dataFile )
 {
     M_diagonalize = dataFile( "electric/space_discretization/diagonalize",  1. );
     M_reusePrec   = dataFile( "electric/prec/reuse", true);
@@ -374,7 +374,7 @@ void BidomainSolver<Mesh, SolverType>::setup( const GetPot& dataFile )
 }
 
 template<typename Mesh, typename SolverType>
-void BidomainSolver<Mesh, SolverType>::buildSystem()
+void HeartBidomainSolver<Mesh, SolverType>::buildSystem()
 {
     M_matrMass.reset( new matrix_Type(M_localMap) );
     M_matrStiff.reset( new matrix_Type(M_localMap) );
@@ -566,7 +566,7 @@ void BidomainSolver<Mesh, SolverType>::buildSystem()
                   << std::endl;
 }
 template<typename Mesh, typename SolverType>
-void BidomainSolver<Mesh, SolverType>::
+void HeartBidomainSolver<Mesh, SolverType>::
 initialize( const source_Type& ui0, const source_Type& ue0 )
 {
 
@@ -579,7 +579,7 @@ initialize( const source_Type& ui0, const source_Type& ue0 )
 }
 
 template<typename Mesh, typename SolverType>
-void BidomainSolver<Mesh, SolverType>::
+void HeartBidomainSolver<Mesh, SolverType>::
 initialize( const Function& ui0, const Function& ue0 )
 {
 
@@ -591,7 +591,7 @@ initialize( const Function& ui0, const Function& ue0 )
 }
 
 template<typename Mesh, typename SolverType>
-void BidomainSolver<Mesh, SolverType>::
+void HeartBidomainSolver<Mesh, SolverType>::
 initialize( const vector_Type& ui0, const vector_Type& ue0 )
 {
     M_solutionIntraExtraPotential = ui0;
@@ -612,7 +612,7 @@ initialize( const vector_Type& ui0, const vector_Type& ue0 )
 }
 
 template<typename Mesh, typename SolverType>
-void BidomainSolver<Mesh, SolverType>::
+void HeartBidomainSolver<Mesh, SolverType>::
 updatePDESystem(Real alpha, vector_Type& sourceVec)
 {
 
@@ -657,7 +657,7 @@ updatePDESystem(Real alpha, vector_Type& sourceVec)
 }
 
 template<typename Mesh, typename SolverType>
-void BidomainSolver<Mesh, SolverType>::
+void HeartBidomainSolver<Mesh, SolverType>::
 updatePDESystem(vector_Type& sourceVec )
 {
 
@@ -677,7 +677,7 @@ updatePDESystem(vector_Type& sourceVec )
 }
 
 template<typename Mesh, typename SolverType>
-void BidomainSolver<Mesh, SolverType>::PDEiterate( bchandlerRaw_Type& bch )
+void HeartBidomainSolver<Mesh, SolverType>::PDEiterate( bchandlerRaw_Type& bch )
 {
 
     Chrono chrono;
@@ -716,7 +716,7 @@ void BidomainSolver<Mesh, SolverType>::PDEiterate( bchandlerRaw_Type& bch )
 
 
 template<typename Mesh, typename SolverType>
-void BidomainSolver<Mesh, SolverType>::solveSystem( matrixPtr_Type  matrFull,
+void HeartBidomainSolver<Mesh, SolverType>::solveSystem( matrixPtr_Type  matrFull,
                                                     vector_Type&    rhsFull )
 {
     Chrono chrono;
@@ -806,7 +806,7 @@ void BidomainSolver<Mesh, SolverType>::solveSystem( matrixPtr_Type  matrFull,
 }
 
 template<typename Mesh, typename SolverType>
-void BidomainSolver<Mesh, SolverType>::applyBoundaryConditions(matrix_Type& matrix,
+void HeartBidomainSolver<Mesh, SolverType>::applyBoundaryConditions(matrix_Type& matrix,
                                                                vector_Type& rhs,
                                                                bchandlerRaw_Type& BCh )
 {
@@ -835,7 +835,7 @@ void BidomainSolver<Mesh, SolverType>::applyBoundaryConditions(matrix_Type& matr
 } // applyBoundaryCondition
 
 template<typename Mesh, typename SolverType>
-Real BidomainSolver<Mesh, SolverType>::computeMean( vector_Type& x )
+Real HeartBidomainSolver<Mesh, SolverType>::computeMean( vector_Type& x )
 {
     Real meanExtraPotential(0.);
     x.epetraVector().MeanValue(&meanExtraPotential);
@@ -843,7 +843,7 @@ Real BidomainSolver<Mesh, SolverType>::computeMean( vector_Type& x )
 } // computeMean()
 
 template<typename Mesh, typename SolverType>
-void BidomainSolver<Mesh, SolverType>::removeValue( vector_Type& x, Real& value )
+void HeartBidomainSolver<Mesh, SolverType>::removeValue( vector_Type& x, Real& value )
 {
     for ( Int i = 0 ; i < x.epetraVector().MyLength() ; i++ )
     {

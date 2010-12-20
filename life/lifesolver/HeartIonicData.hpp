@@ -49,7 +49,7 @@ namespace LifeV
   Base class which holds usual data for the ionic model solvers
 
 */
-class DataIonic:
+class HeartIonicData:
         public DataMesh,
         public DataTime
 {
@@ -59,14 +59,14 @@ public:
     //@{
 
     //! Constructors
-    DataIonic();
+    HeartIonicData();
 
 
-    DataIonic( const GetPot& dataFile );
+    HeartIonicData( const GetPot& dataFile );
 
-    DataIonic( const DataIonic& dataIonic );
+    HeartIonicData( const HeartIonicData& dataIonic );
 
-    virtual ~DataIonic() {}
+    virtual ~HeartIonicData() {}
     //@}
 
 
@@ -75,7 +75,7 @@ public:
 
 
 
-    DataIonic& operator=( const DataIonic& dataIonic );
+    HeartIonicData& operator=( const HeartIonicData& dataIonic );
 
     //@}
 
