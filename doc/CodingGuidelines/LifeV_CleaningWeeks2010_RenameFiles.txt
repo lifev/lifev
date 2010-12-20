@@ -145,7 +145,7 @@ QuadraturePoint                        quadPoint                               C
 QuadratureRule                         quadRule                                CMCS2     DONE
 ReferenceElement                       refEle                                  CMCS2     DONE
 ReferenceFE                            refFE                                   CMCS2
-ReferenceFEHdiv                        refFEHdiv                               CMCS2
+ReferenceFEHdiv                        refFEHdiv                               CMCS2     DONE
 ReferenceFEHybrid                      refFEHybrid                             CMCS2
 ReferenceFEScalar                      refFEScalar                             CMCS2
 SobolevNorms                           sobolevNorms                            CMCS2
