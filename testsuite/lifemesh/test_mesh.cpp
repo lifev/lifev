@@ -38,7 +38,7 @@
 
  */
 
-#include <life/lifecore/GetPot.hpp>
+#include <life/lifefilters/GetPot.hpp>
 
 #include <life/lifemesh/markers.hpp>
 #include <life/lifefilters/ImporterMesh3D.hpp>
