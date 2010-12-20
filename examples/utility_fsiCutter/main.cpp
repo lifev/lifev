@@ -44,10 +44,10 @@
 #include <mpi.h>
 
 #include <life/lifecore/life.hpp>
-#include <life/lifecore/GetPot.hpp>
+#include <life/lifefilters/GetPot.hpp>
 #include <life/lifemesh/dataMesh.hpp>
-#include <life/lifemesh/FSIOfflinePartitioner.hpp>
-#include <life/lifefilters/HDF5Filter3DMesh.hpp>
+#include <life/lifemesh/MeshPartitionerOfflineFSI.hpp>
+#include <life/lifefilters/ExporterHDF5Mesh3D.hpp>
 
 using namespace LifeV;
 
