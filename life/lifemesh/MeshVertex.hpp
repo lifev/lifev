@@ -41,7 +41,7 @@
 #define MESHVERTEX_H
 
 #include <boost/array.hpp>
-#include <life/lifemesh/meshEntity.hpp>
+#include <life/lifemesh/MeshEntity.hpp>
 #include <life/lifemesh/ElementShapes.hpp>
 
 namespace LifeV
