@@ -26,7 +26,7 @@
 
 /*!
  *  @file
- *  @brief This file contains solver for St. Venant-Kirchhof materials.
+ *  @brief This file contains solver for St. Venant-Kirchhoff materials.
  *
  *  @version 1.0
  *  @date 01-06-2003
@@ -83,20 +83,20 @@ namespace LifeV
 #define nonlinear
 
 /*!
-  \class NonLinearVenantKirchhofSolver
+  \class VenantKirchhoffSolverNonLinear
   \brief
   This class solves the linear elastodynamics equations for a  St. Venant-Kirchoff material.
 
 */
 template <typename Mesh, typename SolverType = LifeV::SolverTrilinos >
-class NonLinearVenantKirchhofSolver : public VenantKirchhofSolver<Mesh, SolverType>
+class VenantKirchhoffSolverNonLinear : public VenantKirchhoffSolver<Mesh, SolverType>
 {
 public:
 
     //! @name Type definition
     //@{
 
-    typedef VenantKirchhofSolver<Mesh, SolverType> super;
+    typedef VenantKirchhoffSolver<Mesh, SolverType> super;
     typedef Real ( *Function ) ( const Real&, const Real&, const Real&, const Real&, const ID& );
     typedef boost::function<Real ( Real const&, Real const&, Real const&, Real const&, ID const& )> source_Type;
 
@@ -113,7 +113,7 @@ public:
     typedef typename SolverType::prec_raw_type              precRaw_Type;
     typedef typename SolverType::prec_type                  prec_Type;
 
-    typedef DataElasticStructure                            data_Type;
+    typedef  VenantKirchhoffElasticData                     data_Type;
 
     //@}
 
@@ -121,7 +121,7 @@ public:
     //! @name Constructor
     //@{
 
-    NonLinearVenantKirchhofSolver();
+    VenantKirchhoffSolverNonLinear();
 
     //@}
 
@@ -323,8 +323,8 @@ private:
 //=============================================
 
 template <typename Mesh, typename SolverType>
-NonLinearVenantKirchhofSolver<Mesh, SolverType>::
-NonLinearVenantKirchhofSolver( ) :
+VenantKirchhoffSolverNonLinear<Mesh, SolverType>::
+VenantKirchhoffSolverNonLinear( ) :
         super                        ( ),
         M_zeta                       ( 0.75 ),
         M_theta                      ( 0.7 ),
@@ -340,7 +340,7 @@ NonLinearVenantKirchhofSolver( ) :
 
 
 template <typename Mesh, typename SolverType>
-void NonLinearVenantKirchhofSolver<Mesh, SolverType>::
+void VenantKirchhoffSolverNonLinear<Mesh, SolverType>::
 setup(
       boost::shared_ptr<data_Type>        data,
       const boost::shared_ptr< FESpace<Mesh, EpetraMap> >& dFESpace,
@@ -357,7 +357,7 @@ setup(
 }
 
 template <typename Mesh, typename SolverType>
-void NonLinearVenantKirchhofSolver<Mesh, SolverType>::
+void VenantKirchhoffSolverNonLinear<Mesh, SolverType>::
 setup(
       boost::shared_ptr<data_Type>        data,
       const boost::shared_ptr< FESpace<Mesh, EpetraMap> >& dFESpace,
@@ -369,7 +369,7 @@ setup(
 
 template <typename Mesh, typename SolverType>
 void
-NonLinearVenantKirchhofSolver<Mesh, SolverType>::
+VenantKirchhoffSolverNonLinear<Mesh, SolverType>::
 buildSystem(matrixPtr_Type massStiff, Real const & factor)
 {
     UInt totalDof = this->M_FESpace->dof().numTotalDof();
@@ -441,14 +441,14 @@ buildSystem(matrixPtr_Type massStiff, Real const & factor)
 }
 
 template <typename Mesh, typename SolverType>
-void NonLinearVenantKirchhofSolver<Mesh, SolverType>::
+void VenantKirchhoffSolverNonLinear<Mesh, SolverType>::
 buildSystem( )
 {
     super::buildSystem( );
 }
 
 template <typename Mesh, typename SolverType>
-void NonLinearVenantKirchhofSolver<Mesh, SolverType>::
+void VenantKirchhoffSolverNonLinear<Mesh, SolverType>::
 initialize( const Function& d0, const Function& w0, const Function& a0 )
 {
 
@@ -459,7 +459,7 @@ initialize( const Function& d0, const Function& w0, const Function& a0 )
 
 
 template <typename Mesh, typename SolverType>
-void NonLinearVenantKirchhofSolver<Mesh, SolverType>::updateSystem( matrixPtr_Type& stiff )
+void VenantKirchhoffSolverNonLinear<Mesh, SolverType>::updateSystem( matrixPtr_Type& stiff )
 {
     this->M_Displayer->leaderPrint(" NonLin S-  Updating mass term on right hand side... ");
 
@@ -522,7 +522,7 @@ void NonLinearVenantKirchhofSolver<Mesh, SolverType>::updateSystem( matrixPtr_Ty
 }
 
 template <typename Mesh, typename SolverType>
-void NonLinearVenantKirchhofSolver<Mesh, SolverType>::updateSystem(  )
+void VenantKirchhoffSolverNonLinear<Mesh, SolverType>::updateSystem(  )
 {
     updateSystem(this->M_stiff);
 }
@@ -530,7 +530,7 @@ void NonLinearVenantKirchhofSolver<Mesh, SolverType>::updateSystem(  )
 
 
 template <typename Mesh, typename SolverType>
-void NonLinearVenantKirchhofSolver<Mesh, SolverType>::updateSystem(  source_Type const& source, Real t )
+void VenantKirchhoffSolverNonLinear<Mesh, SolverType>::updateSystem(  source_Type const& source, Real t )
 {
 
     this->M_Displayer->leaderPrint(" NonLin S-  Updating mass term on right hand side... ");
@@ -626,7 +626,7 @@ void NonLinearVenantKirchhofSolver<Mesh, SolverType>::updateSystem(  source_Type
 
 
 template <typename Mesh, typename SolverType>
-void NonLinearVenantKirchhofSolver<Mesh, SolverType>::updateNonlinearMatrix( matrixPtr_Type& stiff )
+void VenantKirchhoffSolverNonLinear<Mesh, SolverType>::updateNonlinearMatrix( matrixPtr_Type& stiff )
 {
     UInt totalDof   = this->M_FESpace->dof().numTotalDof();
     ElemVec dk_loc( this->M_FESpace->fe().nbFEDof(), nDimensions );
@@ -695,7 +695,7 @@ void NonLinearVenantKirchhofSolver<Mesh, SolverType>::updateNonlinearMatrix( mat
 }
 
 template <typename Mesh, typename SolverType>
-void NonLinearVenantKirchhofSolver<Mesh, SolverType>::updateNonlinearTerms( matrixPtr_Type& stiff )
+void VenantKirchhoffSolverNonLinear<Mesh, SolverType>::updateNonlinearTerms( matrixPtr_Type& stiff )
 {
 
     UInt totalDof   = this->M_FESpace->dof().numTotalDof();
@@ -759,7 +759,7 @@ void NonLinearVenantKirchhofSolver<Mesh, SolverType>::updateNonlinearTerms( matr
 
 
 template <typename Mesh, typename SolverType>
-void NonLinearVenantKirchhofSolver<Mesh, SolverType>::
+void VenantKirchhoffSolverNonLinear<Mesh, SolverType>::
 iterate( bchandler_Type& bch )
 {
     Chrono chrono;
@@ -815,7 +815,7 @@ iterate( bchandler_Type& bch )
 
 
 template <typename Mesh, typename SolverType> // for monolithic
-void NonLinearVenantKirchhofSolver<Mesh, SolverType>::
+void VenantKirchhoffSolverNonLinear<Mesh, SolverType>::
 updateVel()
 {
     Real DeltaT = this->M_data->getDataTime()->timeStep();
@@ -826,7 +826,7 @@ updateVel()
 
 
 template <typename Mesh, typename SolverType>
-void NonLinearVenantKirchhofSolver<Mesh, SolverType>::computeMatrix( matrixPtr_Type& stiff, const vector_Type& sol,  Real const& factor)
+void VenantKirchhoffSolverNonLinear<Mesh, SolverType>::computeMatrix( matrixPtr_Type& stiff, const vector_Type& sol,  Real const& factor)
 {
     this->M_Displayer->leaderPrint( "    NonLin S- Computing residual ... \t\t\t");
 
@@ -868,13 +868,13 @@ void NonLinearVenantKirchhofSolver<Mesh, SolverType>::computeMatrix( matrixPtr_T
 
 
 template <typename Mesh, typename SolverType>
-void NonLinearVenantKirchhofSolver<Mesh, SolverType>::computeMatrix( const vector_Type& sol,  Real const& factor)
+void VenantKirchhoffSolverNonLinear<Mesh, SolverType>::computeMatrix( const vector_Type& sol,  Real const& factor)
 {
     computeMatrix(this->M_stiff, sol, factor);
 }
 
 template <typename Mesh, typename SolverType>
-void NonLinearVenantKirchhofSolver<Mesh, SolverType>::evalResidual( vector_Type &res, const vector_Type& sol, Int /*iter*/)
+void VenantKirchhoffSolverNonLinear<Mesh, SolverType>::evalResidual( vector_Type &res, const vector_Type& sol, Int /*iter*/)
 {
     //this->M_stiff.reset(new matrix_Type(this->M_localMap));
     computeMatrix(this->M_stiff, sol, 1.);
@@ -903,7 +903,7 @@ void NonLinearVenantKirchhofSolver<Mesh, SolverType>::evalResidual( vector_Type 
 
 
 template <typename Mesh, typename SolverType>
-void NonLinearVenantKirchhofSolver<Mesh, SolverType>::updateJacobian( vector_Type & sol, matrixPtr_Type& jacobian  )
+void VenantKirchhoffSolverNonLinear<Mesh, SolverType>::updateJacobian( vector_Type & sol, matrixPtr_Type& jacobian  )
 {
     this->M_Displayer->leaderPrint("  NonLin S-  Solid: Updating JACOBIAN... ");
 
@@ -1021,7 +1021,7 @@ void NonLinearVenantKirchhofSolver<Mesh, SolverType>::updateJacobian( vector_Typ
 
 //solveJac( const Vector& res, Real& linear_rel_tol, Vector &step)
 template <typename Mesh, typename SolverType>
-void NonLinearVenantKirchhofSolver<Mesh, SolverType>::
+void VenantKirchhoffSolverNonLinear<Mesh, SolverType>::
 solveJac( vector_Type &step, const vector_Type& res, Real& linear_rel_tol)
 {
     solveJacobian(step,  res, linear_rel_tol, this->M_BCh);
@@ -1030,7 +1030,7 @@ solveJac( vector_Type &step, const vector_Type& res, Real& linear_rel_tol)
 
 //solveJac( const Vector& res, Real& linear_rel_tol, Vector &step)
 template <typename Mesh, typename SolverType>
-void NonLinearVenantKirchhofSolver<Mesh, SolverType>::
+void VenantKirchhoffSolverNonLinear<Mesh, SolverType>::
 solveJacobian( vector_Type&           step,
                const vector_Type&     res,
                Real&                /*linear_rel_tol*/,
@@ -1079,7 +1079,7 @@ solveJacobian( vector_Type&           step,
 
 
 template<typename Mesh, typename SolverType>
-void NonLinearVenantKirchhofSolver<Mesh, SolverType>::
+void VenantKirchhoffSolverNonLinear<Mesh, SolverType>::
 applyBoundaryConditions(matrix_Type&        matrix,
                         vector_Type&        rhs,
                         bchandler_Type&     BCh,
@@ -1110,7 +1110,7 @@ applyBoundaryConditions(matrix_Type&        matrix,
 } // applyBoundaryCondition
 
 template<typename Mesh, typename SolverType>
-void NonLinearVenantKirchhofSolver<Mesh, SolverType>::
+void VenantKirchhoffSolverNonLinear<Mesh, SolverType>::
 getSolidMatrix( matrixPtr_Type& matrix)
 {
     //updateSystem(/*matrix*/);
