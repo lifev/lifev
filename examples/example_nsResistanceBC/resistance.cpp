@@ -183,7 +183,7 @@ void
 ResistanceProblem::run()
 
 {
-    Chrono chronoSet, chrono;
+    LifeChrono chronoSet, chrono;
 
     chronoSet.start();
     typedef Oseen< RegionMesh3D<LinearTetra> >::vector_Type  vector_Type;
@@ -221,7 +221,7 @@ ResistanceProblem::run()
     boost::shared_ptr<RegionMesh3D<LinearTetra> > fullMeshPtr (new RegionMesh3D<LinearTetra>);
     readMesh(*fullMeshPtr, dataMesh);
 
-    partitionMesh< RegionMesh3D<LinearTetra> >   meshPart(fullMeshPtr, d->comm);
+    MeshPartitioner< RegionMesh3D<LinearTetra> >   meshPart(fullMeshPtr, d->comm);
 
     std::string uOrder =  dataFile( "fluid/discretization/vel_order", "P1");
 
@@ -311,7 +311,7 @@ ResistanceProblem::run()
 
 
 #ifdef HAVE_HDF5
-    Hdf5exporter<RegionMesh3D<LinearTetra> > ensight( dataFile, meshPart.meshPartition(), "resistance", d->comm->MyPID());
+    ExporterHDF5<RegionMesh3D<LinearTetra> > ensight( dataFile, meshPart.meshPartition(), "resistance", d->comm->MyPID());
 #else
     Ensight<RegionMesh3D<LinearTetra> > ensight( dataFile, meshPart.meshPartition(), "resistance", d->comm->MyPID());
 #endif
