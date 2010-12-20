@@ -37,8 +37,8 @@ along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
 #include <stdexcept>
 #include <sstream>
 
-#include <life/lifecore/dataString.hpp>
-#include <life/lifecore/debug.hpp>
+#include <life/lifecore/StringData.hpp>
+#include <life/lifecore/LifeDebug.hpp>
 
 namespace LifeV
 {
