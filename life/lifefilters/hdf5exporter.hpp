@@ -296,7 +296,7 @@ void ExporterHDF5<MeshType>::postProcess(const Real& time)
     if ( this->M_postfix != "*****" )
     {
         if (!this->M_procId) std::cout << "  x-  HDF5 post-processing ...        " << std::flush;
-        Chrono chrono;
+        LifeChrono chrono;
         chrono.start();
         for (Iterator i=this->M_listData.begin(); i != this->M_listData.end(); ++i)
         {
@@ -371,7 +371,7 @@ UInt ExporterHDF5<MeshType>::importFromTime( const Real& Time )
     if ( !this->M_procId )
         std::cout << "  x-  HDF5 importing ...                       "<< std::flush;
 
-    Chrono chrono;
+    LifeChrono chrono;
     chrono.start();
     for ( std::list< ExporterData >::iterator i=this->M_listData.begin(); i != this->M_listData.end(); ++i )
         this->readVariable(*i);
@@ -456,7 +456,7 @@ Real ExporterHDF5<MeshType>::importFromIter( const UInt& iter )
                   << " at time " << SelectedTimeAndPostfix.first
                   << " ... " << std::flush;
 
-    Chrono chrono;
+    LifeChrono chrono;
     chrono.start();
     for ( std::list< ExporterData >::iterator i = this->M_listData.begin();
           i != this->M_listData.end(); ++i )
@@ -507,7 +507,7 @@ void ExporterHDF5<MeshType>::import(const Real& time)
 
     if (!this->M_procId) std::cout << "  x-  HDF5 importing ..."<< std::endl;
 
-    Chrono chrono;
+    LifeChrono chrono;
     chrono.start();
     for (std::list< ExporterData >::iterator i=this->M_listData.begin(); i != this->M_listData.end(); ++i)
     {
