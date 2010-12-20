@@ -46,7 +46,7 @@
 //#include <life/lifealg/IfpackPreconditioner.hpp>
 //#include <life/lifealg/MLPreconditioner.hpp>
 #include <life/lifecore/life.hpp>
-#include <life/lifecore/chrono.hpp>
+#include <life/lifecore/LifeChrono.hpp>
 
 #include <life/lifesolver/FSISolver.hpp>
 #include <life/lifesolver/FSI.hpp>
@@ -55,8 +55,8 @@
 #include <life/lifesolver/DataFSI.hpp>
 #include <life/lifesolver/VenantKirchhoffSolverLinear.hpp>
 
-#include <life/lifefilters/hdf5exporter.hpp>
-#include <life/lifefilters/ensight.hpp>
+#include <life/lifefilters/ExporterHDF5.hpp>
+#include <life/lifefilters/ExporterEnsight.hpp>
 
 #include <Epetra_ConfigDefs.h>
 #ifdef EPETRA_MPI
