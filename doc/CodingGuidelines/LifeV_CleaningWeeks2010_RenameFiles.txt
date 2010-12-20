@@ -12,7 +12,7 @@ LIFEALG:    dataNewton.*pp                                                     C
 LIFEARRAY:  tab.hpp                                                            CMCS3
 
 LIFEFEM:    assemb.cpp                                                         CMCS2     DONE
-            dofInterfaceHandler.*pp                                            CMCS2
+            dofInterfaceHandler.*pp                                            CMCS2     DONE
             regionMesh3D_ALE.hpp                                               MOX
 
 LIFESOLVER: fluidToMaster.hpp                                                  CMCS3
