@@ -200,7 +200,7 @@ private:
     // std::string  M_advectionFieldFEType;
 
     //! Discretization
-    DataStringList M_stabilization_list;
+    StringDataList M_stabilization_list;
     ADRStabilization M_stabilizationMethod;
     // stabilization coefficient for the advection field
     Real M_stabilizationCoefficient;
