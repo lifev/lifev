@@ -338,14 +338,14 @@ hyperbolic::run()
     typedef hyper::vector_Type                          vector_type;
     typedef boost::shared_ptr<vector_type>              vector_ptrtype;
 
-    Chrono chronoTotal;
-    Chrono chronoReadAndPartitionMesh;
-    Chrono chronoBoundaryCondition;
-    Chrono chronoFiniteElementSpace;
-    Chrono chronoProblem;
-    Chrono chronoProcess;
-    Chrono chronoTimeStep;
-    Chrono chronoError;
+    LifeChrono chronoTotal;
+    LifeChrono chronoReadAndPartitionMesh;
+    LifeChrono chronoBoundaryCondition;
+    LifeChrono chronoFiniteElementSpace;
+    LifeChrono chronoProblem;
+    LifeChrono chronoProcess;
+    LifeChrono chronoTimeStep;
+    LifeChrono chronoError;
 
     // Start chronoTotal for measure the total time for the computation
     chronoTotal.start();
@@ -385,7 +385,7 @@ hyperbolic::run()
     readMesh( *fullMeshPtr, dataMesh );
 
     // Partition the mesh using ParMetis
-    partitionMesh< RegionMesh >  meshPart( fullMeshPtr, Members->comm );
+    MeshPartitioner< RegionMesh >  meshPart( fullMeshPtr, Members->comm );
 
     // Stop chronoReadAndPartitionMesh
     chronoReadAndPartitionMesh.stop();
@@ -533,7 +533,7 @@ hyperbolic::run()
 #ifdef HAVE_HDF5
     if ( exporterType.compare("hdf5") == 0 )
     {
-        exporter.reset( new Hdf5exporter< RegionMesh > ( dataFile, dataFile( "exporter/file_name", "Concentration" ) ) );
+        exporter.reset( new ExporterHDF5< RegionMesh > ( dataFile, dataFile( "exporter/file_name", "Concentration" ) ) );
 
         // Set directory where to save the solution
         exporter->setPostDir( dataFile( "exporter/folder", "./" ) );
@@ -545,7 +545,7 @@ hyperbolic::run()
     {
         if ( exporterType.compare("none") == 0 )
         {
-            exporter.reset( new NoExport< RegionMesh > ( dataFile, dataFile( "exporter/file_name", "Concentration" ) ) );
+            exporter.reset( new ExporterEmpty< RegionMesh > ( dataFile, dataFile( "exporter/file_name", "Concentration" ) ) );
 
             // Set directory where to save the solution
             exporter->setPostDir( dataFile( "exporter/folder", "./" ) );
@@ -554,7 +554,7 @@ hyperbolic::run()
         }
         else
         {
-            exporter.reset( new Ensight< RegionMesh > ( dataFile, dataFile( "exporter/file_name", "Concentration" ) ) );
+            exporter.reset( new ExporterEnsight< RegionMesh > ( dataFile, dataFile( "exporter/file_name", "Concentration" ) ) );
 
             // Set directory where to save the solution
             exporter->setPostDir( dataFile( "exporter/folder", "./" ) );
