@@ -42,7 +42,7 @@
 #ifndef _NSIPTERMS_HPP
 #define _NSIPTERMS_HPP
 
-#include <life/lifecore/chrono.hpp>
+#include <life/lifecore/LifeChrono.hpp>
 #include <life/lifearray/elemMat.hpp>
 #include <life/lifearray/elemVec.hpp>
 #include <life/lifefem/AssemblyElemental.hpp>
