@@ -24,9 +24,7 @@ SUFFIXES	= .cpp .hpp .idl .c .h .f .F .o .moc
 
 lib_LTLIBRARIES	= liblifefilters.la
 
-liblifefilters_la_SOURCES	=  ImporterMesh3D.cpp\
-				  Importer.cpp exporter.cpp
-
+liblifefilters_la_SOURCES	=  ImporterMesh3D.cpp Importer.cpp Exporter.cpp
 liblifefilters_la_LIBADD	= ../lifefem/liblifefem.la
 
 include $(top_srcdir)/Doxyfile.am
