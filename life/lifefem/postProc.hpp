@@ -42,7 +42,7 @@
 //#include <string>
 //#include <iostream>
 //#include <sstream>
-#include <life/lifecore/GetPot.hpp>
+#include <life/lifefilters/GetPot.hpp>
 #include <life/lifecore/life.hpp>
 
 namespace LifeV
