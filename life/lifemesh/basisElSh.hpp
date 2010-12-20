@@ -122,8 +122,6 @@ enum ReferenceShapes
  */
 UInt shapeDimension(const ReferenceShapes& shape);
 
-UInt __attribute__ ((__deprecated__)) getReferenceDimension(const ReferenceShapes& shape);
-
 
 /*! @enum ReferenceGeometry
     Lists of the geometric items used to build the shapes.

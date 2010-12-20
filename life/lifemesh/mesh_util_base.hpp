@@ -64,14 +64,10 @@ namespace MeshUtility
 //! A locally used structure, not meant for general use
 typedef std::map<BareFace, std::pair<ID, ID >,
 cmpBareItem<BareFace> > temporaryFaceContainer_Type;
-// deprecated
-typedef temporaryFaceContainer_Type __attribute__ (( deprecated )) TempFaceContainer;
 
 //! A locally used structure, not meant for general use
 typedef std::map<BareEdge, std::pair<ID, ID>,
 cmpBareItem<BareEdge> > temporaryEdgeContainer_Type;
-// deprecated
-typedef temporaryEdgeContainer_Type __attribute__ (( deprecated )) TempEdgeContainer;
 
 /*
 *******************************************************************************
@@ -787,12 +783,6 @@ UInt findInternalEdges( const MeshType & mesh,
     @return the new flag for geoElement
 */
 template <typename GeoElementType>
-entityFlag_Type __attribute__ (( deprecated ))
-inheritStrongerMarker( GeoElementType & geoElement )
-{
-	return inheritPointsStrongerMarker( geoElement );
-}
-template <typename GeoElementType>
 entityFlag_Type inheritPointsStrongerMarker( GeoElementType & geoElement )
 {
     ASSERT_PRE( GeoElementType::S_nDimensions > 0,
@@ -820,12 +810,6 @@ entityFlag_Type inheritPointsStrongerMarker( GeoElementType & geoElement )
     @return the new flag for geoElement
 */
 template <typename GeoElementType>
-entityFlag_Type __attribute__ (( deprecated ))
-inheritWeakerMarker( GeoElementType & geoElement )
-{
-	return inheritPointsWeakerMarker( geoElement );
-}
-template <typename GeoElementType>
 entityFlag_Type inheritPointsWeakerMarker( GeoElementType & geoElement )
 {
     ASSERT_PRE( GeoElementType::S_nDimensions > 0,
@@ -850,12 +834,6 @@ entityFlag_Type inheritPointsWeakerMarker( GeoElementType & geoElement )
     @return It it returns 0 if the test has been passed. If not it returns the number of wrong boundary edges.
     @warning numBoundaryEdges is properly set only if the test has been passed.
 */
-template <typename MeshType>
-UInt __attribute__ (( deprecated ))
-testClosedDomain_Top( MeshType const & mesh, UInt & numBoundaryEdges )
-{
-	return testDomainTopology( mesh, numBoundaryEdges );
-}
 template <typename MeshType>
 UInt testDomainTopology( MeshType const & mesh, UInt & numBoundaryEdges )
 {
@@ -912,12 +890,6 @@ UInt testDomainTopology( MeshType const & mesh, UInt & numBoundaryEdges )
 
 //! Check whether all markers of a the geometry entities stored in a list are set
 template <typename MeshEntityListType>
-bool __attribute__ (( deprecated ))
-checkMarkerSet( const MeshEntityListType & meshEntityList )
-{
-	return checkIsMarkerSet( meshEntityList );
-}
-template <typename MeshEntityListType>
 bool checkIsMarkerSet( const MeshEntityListType & meshEntityList )
 {
     typedef typename MeshEntityListType::const_iterator MeshEntityListTypeConstIterator_Type;
@@ -945,14 +917,6 @@ bool checkIsMarkerSet( const MeshEntityListType & meshEntityList )
     wrapped into a class
     @todo errorStream is unused
 */
-template <typename MeshType>
-void __attribute__ (( deprecated ))
-setBEdgesMarker( MeshType & mesh, std::ostream & logStream = std::cout,
-                 std::ostream & errorStream = std::cerr, bool verbose = true )
-{
-	setBoundaryEdgesMarker( mesh, logStream, errorStream, verbose );
-
-}
 template <typename MeshType>
 void
 setBoundaryEdgesMarker( MeshType & mesh, std::ostream & logStream = std::cout,
@@ -1002,14 +966,6 @@ setBoundaryEdgesMarker( MeshType & mesh, std::ostream & logStream = std::cout,
     wrapped into a class
 */
 template <typename MeshType>
-void __attribute__ (( deprecated ))
-setBFacesMarker( MeshType & mesh, std::ostream & logStream = std::cout,
-                 std::ostream & errorStream = std::cerr, bool verbose = true )
-{
-	setBoundaryFacesMarker( mesh, logStream, errorStream, verbose );
-
-}
-template <typename MeshType>
 void
 setBoundaryFacesMarker( MeshType & mesh, std::ostream & logStream = std::cout,
                  std::ostream & /*errorStream*/ = std::cerr, bool verbose = true )
@@ -1057,14 +1013,6 @@ setBoundaryFacesMarker( MeshType & mesh, std::ostream & logStream = std::cout,
     @param verbose if false, no messages will be sent to the logStream
 
 */
-template <typename MeshType>
-void __attribute__ (( deprecated ))
-setBPointsMarker( MeshType & mesh, std::ostream & logStream = std::cout,
-                 std::ostream & errorStream = std::cerr, bool verbose = false )
-{
-	setBoundaryPointsMarker( mesh, logStream, errorStream, verbose );
-
-}
 template <typename MeshType>
 void
 setBoundaryPointsMarker( MeshType & mesh, std::ostream & logStream = std::cout,
@@ -1132,12 +1080,6 @@ setBoundaryPointsMarker( MeshType & mesh, std::ostream & logStream = std::cout,
    compliant container and its elements must have the method id().
 */
 template <typename MeshEntityListType>
-bool __attribute__ (( deprecated ))
-checkIdnumber( const MeshEntityListType & meshEntityList )
-{
-	return checkId( meshEntityList );
-}
-template <typename MeshEntityListType>
 bool checkId( const MeshEntityListType & meshEntityList )
 {
     typedef typename MeshEntityListType::const_iterator MeshEntityListTypeConstIterator_Type;
@@ -1158,12 +1100,6 @@ bool checkId( const MeshEntityListType & meshEntityList )
    compliant container and its elements must have the method UInt &id().
 */
 template <typename MeshEntityListType>
-void __attribute__ (( deprecated ))
-fixIdnumber( MeshEntityListType & meshEntityList )
-{
-	fixId( meshEntityList );
-}
-template <typename MeshEntityListType>
 void fixId( MeshEntityListType & meshEntityList )
 {
     UInt counter( 0 );
@@ -1181,13 +1117,6 @@ void fixId( MeshEntityListType & meshEntityList )
 
   @pre It assumes that the points have the boundary flag correctly set
 */
-
-template <typename MeshType>
-void __attribute__ (( deprecated ))
-setBPointsCounters( MeshType & mesh )
-{
-	setBoundaryPointsCounters( mesh );
-}
 template <typename MeshType>
 void
 setBoundaryPointsCounters( MeshType & mesh )
@@ -1243,13 +1172,6 @@ BOUNDARY INDICATOR FIXING
   @pre mesh point list must exists and boundary face list must have been set properly.
 */
 template <typename MeshType>
-void __attribute__ (( deprecated ))
-fixBPoints( MeshType & mesh, std::ostream & logStream = std::cout,
-            std::ostream & errorStream = std::cerr, bool verbose = true )
-{
-	fixBoundaryPoints( mesh, logStream, errorStream, verbose );
-}
-template <typename MeshType>
 void
 fixBoundaryPoints( MeshType & mesh, std::ostream & logStream = std::cout,
             std::ostream & /* errorStream */ = std::cerr, bool verbose = true )
@@ -1294,12 +1216,6 @@ fixBoundaryPoints( MeshType & mesh, std::ostream & logStream = std::cout,
     @pre It assumes that boundary points are properly stored in the mesh
 */
 template <typename MeshType>
-void __attribute__ (( deprecated ))
-setBoundaryEdgesFirst( MeshType & mesh )
-{
-	correctEdgesStoringOrder( mesh );
-}
-template <typename MeshType>
 void
 correctEdgesStoringOrder( MeshType & mesh )
 {
@@ -1319,12 +1235,6 @@ correctEdgesStoringOrder( MeshType & mesh )
     @pre It assumes that boundary points are properly stored in the mesh
 */
 template <typename MeshType>
-void __attribute__ (( deprecated ))
-setBoundaryFacesFirst( MeshType & mesh )
-{
-	correctFacesStoringOrder( mesh );
-}
-template <typename MeshType>
 void
 correctFacesStoringOrder( MeshType & mesh )
 {
@@ -1341,12 +1251,6 @@ correctFacesStoringOrder( MeshType & mesh )
 //! Tests if boundary faces are stored first
 /*! @return true if boundary faces are indeed stored first
   @pre It assumes that boundary points are set */
-template <typename MeshType>
-bool __attribute__ (( deprecated ))
-checkBoundaryFacesFirst( const MeshType & mesh )
-{
-	return checkFacesStoringOrder( mesh );
-}
 template <typename MeshType>
 bool checkFacesStoringOrder( const MeshType & mesh )
 {
@@ -1369,12 +1273,6 @@ bool checkFacesStoringOrder( const MeshType & mesh )
 //! Tests if boundary edges are stored first
 /*! @return true if boundary edges are indeed stored first
   @pre It assumes that boundary points are set */
-template <typename MeshType>
-bool __attribute__ (( deprecated ))
-checkBoundaryEdgesFirst( const MeshType & mesh )
-{
-	return checkEdgesStoringOrder( mesh );
-}
 template <typename MeshType>
 bool checkEdgesStoringOrder( const MeshType & mesh )
 {
@@ -2061,12 +1959,6 @@ bool buildEdges( MeshType & mesh,
     @param mesh[out] A mesh
 	@param logStream[out] Log stream for information on the newly created markers for boundary edges
 */
-template <typename MeshType>
-void __attribute__ (( deprecated ))
-p1top2( MeshType & mesh, std::ostream & logStream = std::cout )
-{
-	p2MeshFromP1Data( mesh, logStream );
-}
 template <typename MeshType>
 void
 p2MeshFromP1Data( MeshType & mesh, std::ostream & logStream = std::cout )
