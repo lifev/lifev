@@ -390,7 +390,7 @@ Cylinder::run()
     boost::shared_ptr<Mesh> fullMeshPtr(new Mesh);
     readMesh(*fullMeshPtr, dataMesh);
 
-    partitionMesh< Mesh >   meshPart(fullMeshPtr, d->comm);
+    MeshPartitioner< Mesh >   meshPart(fullMeshPtr, d->comm);
 
     if (verbose) std::cout << std::endl;
     if (verbose) std::cout << "Time discretization order " << dataNavierStokes->dataTime()->orderBDF() << std::endl;
@@ -458,7 +458,7 @@ Cylinder::run()
 
 
     std::string expFileName = dataFile( "exporter/filename", "fluid");
-    LifeV::Hdf5exporter<Mesh> exporter( dataFile, meshPart.meshPartition(), expFileName, d->comm->MyPID());
+    LifeV::ExporterHDF5<Mesh> exporter( dataFile, meshPart.meshPartition(), expFileName, d->comm->MyPID());
 
     vectorPtr_Type velAndPressure ( new vector_Type(*fluid.solution(), exporter.mapType() ) );
 
@@ -503,7 +503,7 @@ Cylinder::run()
         UInt        iStart   = atoi(start);
         std::string filename = dataFile("fluid/importer/filename", "cylinder");
 
-        LifeV::Hdf5exporter<Mesh> importer( dataFile, filename);
+        LifeV::ExporterHDF5<Mesh> importer( dataFile, filename);
         importer.setMeshProcId(uFESpace.mesh(), d->comm->MyPID());
 
         importer.addVariable( ExporterData::Vector,
@@ -570,7 +570,7 @@ Cylinder::run()
 
     // Temporal loop
 
-    Chrono chrono;
+    LifeChrono chrono;
     int iter = 1;
 
     for ( Real time = t0 + dt ; time <= tFinal + dt/2.; time += dt, iter++)
