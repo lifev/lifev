@@ -118,7 +118,7 @@ ImporterMesh3D                         readMesh3D                              M
 LIFEFEM
 ============================
 Assembly                               assemb                                  CMCS2     DONE
-AssemblyElemental                      elemOper                                CMCS2
+AssemblyElemental                      elemOper                                CMCS2     DONE
 BCBase                                 bcCond                                  EMORY
 BCFunction                             bcFunction                              EMORY
 BCHandler                              bcHandler                               EMORY

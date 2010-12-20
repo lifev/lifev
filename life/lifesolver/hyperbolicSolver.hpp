@@ -39,7 +39,7 @@
 #include <life/lifealg/SolverTrilinos.hpp>
 #include <life/lifealg/clapack.hpp>
 
-#include <life/lifefem/elemOper.hpp>
+#include <life/lifefem/AssemblyElemental.hpp>
 #include <life/lifefem/bcManage.hpp>
 #include <life/lifefem/NumericalFluxes.hpp>
 
@@ -685,7 +685,7 @@ CFL() const
 
                 // Compute the local CFL without the time step
                 localCFL = e / K * M_numericalFlux->getNormInfty ( leftValue[0], rightValue[0], normal, iElem,
-                                                                   M_data.dataTime()->time(), 
+                                                                   M_data.dataTime()->time(),
                                                                    quadPoint(0), quadPoint(1), quadPoint(2) );
 
                 // Select the maximum between the old CFL condition and the new CFL condition

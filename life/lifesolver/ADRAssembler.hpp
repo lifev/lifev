@@ -44,7 +44,7 @@
 
 #include <life/lifefem/Assembly.hpp>
 #include <life/lifefem/FESpace.hpp>
-#include <life/lifefem/elemOper.hpp>
+#include <life/lifefem/AssemblyElemental.hpp>
 
 #include <boost/shared_ptr.hpp>
 #include <boost/scoped_ptr.hpp>

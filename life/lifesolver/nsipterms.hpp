@@ -45,7 +45,7 @@
 #include <life/lifecore/chrono.hpp>
 #include <life/lifearray/elemMat.hpp>
 #include <life/lifearray/elemVec.hpp>
-#include <life/lifefem/elemOper.hpp>
+#include <life/lifefem/AssemblyElemental.hpp>
 #include <boost/shared_ptr.hpp>
 
 #define USE_OLD_PARAMETERS 0

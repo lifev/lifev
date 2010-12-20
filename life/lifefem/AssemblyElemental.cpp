@@ -35,7 +35,7 @@
 #ifndef ELEMOPER_CPP
 #define ELEMOPER_CPP 1
 
-#include <life/lifefem/elemOper.hpp>
+#include <life/lifefem/AssemblyElemental.hpp>
 
 namespace LifeV
 {

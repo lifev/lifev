@@ -60,7 +60,7 @@
 #include <life/lifearray/EpetraMatrix.hpp>
 #include <life/lifearray/EpetraVector.hpp>
 
-#include <life/lifefem/elemOper.hpp>
+#include <life/lifefem/AssemblyElemental.hpp>
 #include <life/lifefem/Assembly.hpp>
 #include <life/lifefem/bcManage.hpp>
 #include <life/lifefem/bcHandler.hpp>

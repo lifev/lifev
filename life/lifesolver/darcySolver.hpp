@@ -39,7 +39,7 @@
 #ifndef _DARCYSOLVER_H_
 #define _DARCYSOLVER_H_ 1
 
-#include <life/lifefem/elemOper.hpp>
+#include <life/lifefem/AssemblyElemental.hpp>
 #include <life/lifefem/bcManage.hpp>
 
 #include <life/lifealg/SolverTrilinos.hpp>
