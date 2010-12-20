@@ -46,10 +46,10 @@
 #include <string>
 #include <iostream>
 #include <map>
-#include <life/lifecore/GetPot.hpp>
+#include <life/lifefilters/GetPot.hpp>
 #include <boost/shared_ptr.hpp>
 #include <life/lifecore/life.hpp>
-#include <life/lifecore/util_string.hpp>
+#include <life/lifecore/StringUtility.hpp>
 #include <life/lifefem/dataTime.hpp>
 
 namespace LifeV
