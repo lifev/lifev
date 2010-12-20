@@ -176,7 +176,7 @@ public:
 
     typedef boost::shared_ptr<matrix_type>               matrix_ptrType;
 
-    typedef Chrono                                       chrono_type;
+    typedef LifeChrono                                       chrono_type;
 
     // Use the portable syntax of the boost function
     typedef boost::function5<Real, const Real&, const Real&, const Real&, const Real&, const ID&> function_type;
