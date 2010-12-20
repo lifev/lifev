@@ -54,7 +54,7 @@
 #include <life/lifefem/bdfNS_template.hpp>
 #include <life/lifefilters/ExporterEnsight.hpp>
 
-#include <life/lifesolver/Oseen.hpp>
+#include <life/lifesolver/OseenSolver.hpp>
 #include <life/lifealg/IfpackPreconditioner.hpp>
 #include <life/lifealg/MLPreconditioner.hpp>
 

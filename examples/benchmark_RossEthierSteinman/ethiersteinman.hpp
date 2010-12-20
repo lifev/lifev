@@ -33,7 +33,7 @@
 #ifndef __Ethiersteinman_H
 #define __Ethiersteinman_H 1
 
-#include <life/lifesolver/Oseen.hpp>
+#include <life/lifesolver/OseenSolver.hpp>
 #include <life/lifemesh/regionMesh3D.hpp>
 #include <life/lifemesh/basisElSh.hpp>
 

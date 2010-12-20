@@ -66,7 +66,7 @@
 #include <life/lifefilters/ExporterHDF5Mesh3D.hpp>
 #include <life/lifefilters/ExporterEnsight.hpp>
 
-#include <life/lifesolver/Oseen.hpp>
+#include <life/lifesolver/OseenSolver.hpp>
 
 #include "cylinder.hpp"
 #include <iostream>

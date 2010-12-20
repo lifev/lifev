@@ -48,7 +48,7 @@
 #endif
 #include <life/lifefilters/ExporterEnsight.hpp>
 
-#include <life/lifesolver/Oseen.hpp>
+#include <life/lifesolver/OseenSolver.hpp>
 
 #include "cylinder.hpp"
 #include <iostream>

@@ -58,7 +58,7 @@
 //#include <life/lifefilters/ExporterHDF5.hpp>
 
 #include <life/lifesolver/AdvectionDiffusionReactionSolver.hpp>
-#include <life/lifesolver/Oseen.hpp>
+#include <life/lifesolver/OseenSolver.hpp>
 
 #include <iostream>
 

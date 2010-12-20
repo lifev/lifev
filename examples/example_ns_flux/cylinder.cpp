@@ -47,7 +47,7 @@
 #include <boost/shared_ptr.hpp>
 #include <vector>
 
-#include <life/lifesolver/Oseen.hpp>
+#include <life/lifesolver/OseenSolver.hpp>
 
 #include "cylinder.hpp"
 #include <iostream>
