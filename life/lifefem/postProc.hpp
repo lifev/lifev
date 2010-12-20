@@ -744,7 +744,7 @@ Vector PostProc<MeshType>::average( const VectorType& field, const entityFlag_Ty
 
             // Quadrature formula
             // Loop on quadrature points
-            for (Int iq=0; iq< M_currentBdFEPtrVector[feSpace]->nbQuadPt(); ++iq)
+            for (UInt iq=0; iq< M_currentBdFEPtrVector[feSpace]->nbQuadPt(); ++iq)
             {
 
                 // Interpolation
