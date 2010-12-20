@@ -7,11 +7,11 @@
 #endif
 #include <life/lifearray/EpetraMatrix.hpp>
 #include <life/lifealg/EpetraMap.hpp>
-#include <life/lifemesh/partitionMesh.hpp>
+#include <life/lifemesh/MeshPartitioner.hpp>
 #include <life/lifesolver/dataNavierStokes.hpp>
 #include <life/lifefem/FESpace.hpp>
 #include <life/lifefem/bdf_template.hpp>
-#include <life/lifefilters/ensight.hpp>
+#include <life/lifefilters/ExporterEnsight.hpp>
 
 #include <ChorinTemam.hpp>
 
