@@ -42,7 +42,7 @@
 #define _DATATIME_H_ 1
 
 #include <ostream>
-#include <life/lifecore/GetPot.hpp>
+#include <life/lifefilters/GetPot.hpp>
 #include <life/lifecore/life.hpp>
 
 namespace LifeV
