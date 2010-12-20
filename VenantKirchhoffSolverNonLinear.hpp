@@ -72,8 +72,8 @@
 #include <life/lifealg/nonLinRichardson.hpp>
 #include <life/lifealg/SolverTrilinos.hpp>
 
-#include <life/lifesolver/dataElasticStructure.hpp>
-#include <life/lifesolver/VenantKirchhofSolver.hpp>
+#include <life/lifesolver/VenantKirchhoffElasticData.hpp>
+#include <life/lifesolver/VenantKirchhoffSolver.hpp>
 
 #include <life/lifecore/displayer.hpp>
 
