@@ -141,7 +141,7 @@ FESpace                                -                                       C
 GeometricMap                           geoMap                                  CMCS2     DONE
 HyperbolicFluxNumerical                NumericalFluxes                         MOX
 PostProcessingBoundary                 postProc                                EMORY
-QuadraturePoint                        quadPoint                               CMCS2
+QuadraturePoint                        quadPoint                               CMCS2     DONE
 QuadratureRule                         quadRule                                CMCS2
 ReferenceElement                       refEle                                  CMCS2
 ReferenceFE                            refFE                                   CMCS2

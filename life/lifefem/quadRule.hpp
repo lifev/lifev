@@ -44,7 +44,7 @@
 
 #include <life/lifemesh/basisElSh.hpp>
 
-#include <life/lifefem/quadPoint.hpp>
+#include <life/lifefem/QuadPoint.hpp>
 
 #include <iostream>
 #include <fstream>

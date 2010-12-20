@@ -34,7 +34,7 @@ liblifefem_la_SOURCES	= bcCond.cpp bcFunction.cpp bcVector.cpp bcHandler.cpp \
           AssemblyElemental.cpp  GeometricMap.cpp \
           DOFLocalPattern.cpp quadRule.cpp refEle.cpp refFE.cpp refFEScalar.cpp refFEHdiv.cpp \
           refFEHybrid.cpp staticBdFE.cpp \
-          bcManage.cpp quadPoint.cpp
+          bcManage.cpp QuadPoint.cpp
 
 liblifefem_la_LIBADD	= ../lifemesh/liblifemesh.la ../lifealg/liblifealg.la
 
