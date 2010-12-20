@@ -238,15 +238,15 @@ public:
         std::string const exporterType =  dataFile( "exporter/type", "hdf5");
         std::string const exporterName =  dataFile( "exporter/name", "fixedPt");
 
-        Debug( 10000 ) << "Setting up Ensight \n";
+        Debug( 10000 ) << "Setting up ExporterEnsight \n";
         if ( M_fsi->isFluid() )
         {
 #ifdef HAVE_HDF5
             if (exporterType.compare("hdf5") == 0)
-                M_exporterFluid.reset( new Hdf5exporter<RegionMesh3D<LinearTetra> > ( dataFile, exporterName+"Fluid" ) );
+                M_exporterFluid.reset( new ExporterHDF5<RegionMesh3D<LinearTetra> > ( dataFile, exporterName+"Fluid" ) );
             else
 #endif
-                M_exporterFluid.reset( new Ensight<RegionMesh3D<LinearTetra> > ( dataFile, exporterName+"Fluid" ) );
+                M_exporterFluid.reset( new ExporterEnsight<RegionMesh3D<LinearTetra> > ( dataFile, exporterName+"Fluid" ) );
 
 
             M_exporterFluid->setMeshProcId(M_fsi->FSIOper()->uFESpace().mesh(), M_fsi->FSIOper()->uFESpace().map().comm().MyPID());
@@ -268,10 +268,10 @@ public:
         {
 #ifdef HAVE_HDF5
             if (exporterType.compare("hdf5") == 0)
-                M_exporterSolid.reset( new Hdf5exporter<RegionMesh3D<LinearTetra> > ( dataFile, exporterName+"Solid" ) );
+                M_exporterSolid.reset( new ExporterHDF5<RegionMesh3D<LinearTetra> > ( dataFile, exporterName+"Solid" ) );
             else
 #endif
-                M_exporterSolid.reset( new Ensight<RegionMesh3D<LinearTetra> > ( dataFile, exporterName+"Solid" ) );
+                M_exporterSolid.reset( new ExporterEnsight<RegionMesh3D<LinearTetra> > ( dataFile, exporterName+"Solid" ) );
 
             M_exporterSolid->setMeshProcId(M_fsi->FSIOper()->dFESpace().mesh(), M_fsi->FSIOper()->dFESpace().map().comm().MyPID());
 
@@ -498,7 +498,7 @@ int main( int argc, char** argv )
     std::cout << "Serial Version" << std::endl;
 #endif
 
-    Chrono chrono;
+    LifeChrono chrono;
     chrono.start();
 
     GetPot command_line( argc, argv );
