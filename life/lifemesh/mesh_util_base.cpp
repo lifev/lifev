@@ -38,6 +38,8 @@
 
 namespace LifeV
 {
+namespace MeshUtility
+{
 // ===================================================
 // Constructors & Destructor
 // ===================================================
@@ -84,4 +86,6 @@ const
     ret[ 2 ] = 1.0;
 }
 
-}
+} // namespace MeshUtility
+
+} // namespace LifeV

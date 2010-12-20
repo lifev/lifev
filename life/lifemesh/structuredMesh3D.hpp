@@ -1005,7 +1005,7 @@ void regularMesh3D( RegionMesh3D<GeoShape,MC>& mesh,
     std::cout << "done" << std::endl;
 
     // Build a P2 mesh from a P1 geometry
-    if ( GeoShape::S_numPoints > 4 ) p2MeshFromP1Data( mesh );
+    if ( GeoShape::S_numPoints > 4 ) MeshUtility::p2MeshFromP1Data( mesh );
 
     // Test mesh
     Switch sw;

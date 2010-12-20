@@ -222,9 +222,9 @@ void getVolumeFromFaces( RegionMesh3D const & mesh,
                          Real vols[ 3 ],
                          std::ostream & err = std::cerr )
 {
-    GetCoordComponent getx( 0 );
-    GetCoordComponent gety( 1 );
-    GetCoordComponent getz( 2 );
+	MeshUtility::GetCoordComponent getx( 0 );
+	MeshUtility::GetCoordComponent gety( 1 );
+	MeshUtility::GetCoordComponent getz( 2 );
     vols[ 0 ] = 0.0;
     vols[ 1 ] = 0.0;
     vols[ 2 ] = 0.0;
@@ -277,7 +277,7 @@ Real testClosedDomain( RegionMesh3D const & mesh,
     typedef boost::shared_ptr<CurrentBdFE> current_fe_type;
     current_fe_type bdfe;
 
-    GetOnes ones;
+    MeshUtility::GetOnes ones;
     Real test( 0.0 );
 
     switch ( RegionMesh3D::FaceShape::S_shape )
@@ -355,7 +355,7 @@ bool checkMesh3D( RegionMesh3D & mesh,
         return false;
     }
 
-    if ( !checkIsMarkerSetInEntityList( mesh.pointList ) )
+    if ( !MeshUtility::checkIsMarkerSet( mesh.pointList ) )
     {
         if (verbose)
             err << "WARNING: Not all points have marker flag set" << std::endl;
@@ -377,7 +377,7 @@ bool checkMesh3D( RegionMesh3D & mesh,
         return false;
     }
 
-    if ( !checkIdInEntityList( mesh.volumeList ) )
+    if ( !MeshUtility::checkId( mesh.volumeList ) )
     {
         if (verbose)
         {
@@ -387,10 +387,10 @@ bool checkMesh3D( RegionMesh3D & mesh,
         if ( fix )
             sw.create( "FIXED_VOLUMES_ID", true );
         if ( fix )
-            fixIdInEntityList( mesh.volumeList );
+            MeshUtility::fixId( mesh.volumeList );
     }
 
-    if ( !checkIsMarkerSetInEntityList( mesh.volumeList ) )
+    if ( !MeshUtility::checkIsMarkerSet( mesh.volumeList ) )
     {
         if (verbose)
             err << "WARNING: Not all volumes have marker flag set" << std::endl;
@@ -472,14 +472,15 @@ bool checkMesh3D( RegionMesh3D & mesh,
     //                                    BOUNDARY FACES
     //-----------------------------------------------------
 
-    boost::shared_ptr<temporaryFaceContainer_Type> bfaces( new temporaryFaceContainer_Type );
+    boost::shared_ptr<MeshUtility::temporaryFaceContainer_Type> bfaces(
+    		new MeshUtility::temporaryFaceContainer_Type );
     UInt numInternalFaces, numFaces;
 
-    UInt bFacesFound = findBoundaryFaces( mesh, *bfaces, numInternalFaces );
+    UInt bFacesFound = MeshUtility::findBoundaryFaces( mesh, *bfaces, numInternalFaces );
 
     numFaces = bFacesFound + numInternalFaces;
 
-    EnquireBFace<RegionMesh3D> enquireBFace( mesh, *bfaces );
+    MeshUtility::EnquireBFace<RegionMesh3D> enquireBFace( mesh, *bfaces );
 
 
     if ( mesh.storedFaces() == 0 ||
@@ -491,7 +492,7 @@ bool checkMesh3D( RegionMesh3D & mesh,
         if ( fix )
             sw.create( "BUILD_BFACES", true );
         if ( fix )
-            buildFaces( mesh, clog, err, bFacesFound, numInternalFaces,
+            MeshUtility::buildFaces( mesh, clog, err, bFacesFound, numInternalFaces,
                         true, false, false, bfaces.get() );
     }
     else
@@ -516,26 +517,26 @@ bool checkMesh3D( RegionMesh3D & mesh,
                 std::stable_partition( mesh.faceList.begin(),
                                        mesh.faceList.end(), enquireBFace );
             if ( fix )
-                fixIdInEntityList( mesh.faceList );
+                MeshUtility::fixId( mesh.faceList );
             if ( fix )
                 sw.create( "FIXED_BFACES_FIRST" );
         }
 
 
-        if ( !checkIdInEntityList( mesh.faceList ) )
+        if ( !MeshUtility::checkId( mesh.faceList ) )
         {
             err << "ERROR: face ids where wrongly set" << std::endl;
             err << "FIXED" << std::endl;
             if ( fix )
                 sw.create( "FIXED_FACES_ID", true );
             if ( fix )
-                fixIdInEntityList( mesh.faceList );
+                MeshUtility::fixId( mesh.faceList );
         }
 
         // Check Consistency with the mesh. Beware that this method changes *bfaces!
 
         if ( fix )
-            fixBoundaryFaces( mesh, clog, err, sw, numFaces, bFacesFound,
+            MeshUtility::fixBoundaryFaces( mesh, clog, err, sw, numFaces, bFacesFound,
                               false, verbose, bfaces.get() );
 
         if ( mesh.storedFaces() == 0 )
@@ -558,13 +559,13 @@ bool checkMesh3D( RegionMesh3D & mesh,
         }
 
 
-        if ( !checkIsMarkerSetInEntityList( mesh.faceList ) )
+        if ( !MeshUtility::checkIsMarkerSet( mesh.faceList ) )
         {
             err << "WARNING: Not all faces have marker flag set" << std::endl;
             sw.create( "FACE_MARKER_UNSET", true );
             if ( fix )
-                setBoundaryFacesMarker( mesh, clog, err, verbose );
-            if ( fix && checkIsMarkerSetInEntityList( mesh.faceList ) )
+                MeshUtility::setBoundaryFacesMarker( mesh, clog, err, verbose );
+            if ( fix && MeshUtility::checkIsMarkerSet( mesh.faceList ) )
             {
                 sw.create( "FACE_MARKER_UNSET", false );
                 sw.create( "FACE_MARKER_FIXED", true );
@@ -603,14 +604,15 @@ bool checkMesh3D( RegionMesh3D & mesh,
     //                                    BOUNDARY EDGES
     //-----------------------------------------------------
 
-    boost::shared_ptr<temporaryEdgeContainer_Type> bedges( new temporaryEdgeContainer_Type );
+    boost::shared_ptr<MeshUtility::temporaryEdgeContainer_Type> bedges(
+    		new MeshUtility::temporaryEdgeContainer_Type );
 
-    UInt bEdgesFound = findBoundaryEdges( mesh, *bedges );
-    EnquireBEdge<RegionMesh3D> enquireBEdge( mesh, *bedges );
+    UInt bEdgesFound = MeshUtility::findBoundaryEdges( mesh, *bedges );
+    MeshUtility::EnquireBEdge<RegionMesh3D> enquireBEdge( mesh, *bedges );
 
     UInt intedge(0);
     UInt Ned(0);
-    temporaryEdgeContainer_Type iedges;
+    MeshUtility::temporaryEdgeContainer_Type iedges;
 
     if ( mesh.storedEdges() == 0 ||
             mesh.numBEdges() > mesh.storedEdges() ||
@@ -622,7 +624,7 @@ bool checkMesh3D( RegionMesh3D & mesh,
         }
         sw.create( "NOT_HAS_EDGES", true );
         if ( fix )
-            buildEdges( mesh, clog, err, bEdgesFound, intedge, true, false,
+            MeshUtility::buildEdges( mesh, clog, err, bEdgesFound, intedge, true, false,
                         false, bedges.get() );
         Ned = bEdgesFound + intedge;
         if ( fix )
@@ -648,26 +650,26 @@ bool checkMesh3D( RegionMesh3D & mesh,
             std::stable_partition( mesh.edgeList.begin(), mesh.edgeList.end(),
                                    enquireBEdge );
         if ( fix )
-            fixIdInEntityList( mesh.edgeList );
+            MeshUtility::fixId( mesh.edgeList );
         if ( fix )
             sw.create( "FIXED_BEDGES_FIRST" );
 
-        if ( !checkIdInEntityList( mesh.edgeList ) )
+        if ( !MeshUtility::checkId( mesh.edgeList ) )
         {
             err << "ERROR: edge ids where wrongly set" << std::endl;
             err << "FIXED" << std::endl;
             sw.create( "FIXED_EDGES_ID", true );
-            fixIdInEntityList( mesh.edgeList );
+            MeshUtility::fixId( mesh.edgeList );
         }
 
 
-        if ( !checkIsMarkerSetInEntityList( mesh.edgeList ) )
+        if ( !MeshUtility::checkIsMarkerSet( mesh.edgeList ) )
         {
             err << "WARNING: Not all edges have marker flag set" << std::endl;
             sw.create( "EDGE_MARKER_UNSET", true );
             if ( fix )
-                setBoundaryEdgesMarker( mesh, clog, err, verbose );
-            if ( fix && checkIsMarkerSetInEntityList( mesh.edgeList ) )
+                MeshUtility::setBoundaryEdgesMarker( mesh, clog, err, verbose );
+            if ( fix && MeshUtility::checkIsMarkerSet( mesh.edgeList ) )
             {
                 sw.unset( "EDGE_MARKER_UNSET" );
                 sw.create( "EDGE_MARKER_FIXED", true );
@@ -675,10 +677,10 @@ bool checkMesh3D( RegionMesh3D & mesh,
         }
         out << "Computing internal edges";
         if ( fix )
-            Ned = bEdgesFound + findInternalEdges( mesh, *bedges, iedges );
+            Ned = bEdgesFound + MeshUtility::findInternalEdges( mesh, *bedges, iedges );
     }
     iedges.clear();
-    temporaryEdgeContainer_Type tmp;
+    MeshUtility::temporaryEdgeContainer_Type tmp;
     iedges.swap(tmp);
 
     if ( mesh.numBEdges() != bEdgesFound )
@@ -711,7 +713,7 @@ bool checkMesh3D( RegionMesh3D & mesh,
         std::cerr << std::endl;
     }
     UInt nbed;
-    UInt counte = testClosedDomain( mesh, nbed );
+    UInt counte = MeshUtility::testDomainTopology( mesh, nbed );
     if ( counte == 0 )
     {
         out << "**DOMAIN SURFACE IS (TOPOLOGICALLY) CLOSED" << std::endl;
@@ -731,9 +733,9 @@ bool checkMesh3D( RegionMesh3D & mesh,
     // Now that boundary faces have been correctly set we may work out
     // boundaty points
 
-    if (fix) fixBoundaryPoints(mesh,clog,err,verbose);
+    if (fix) MeshUtility::fixBoundaryPoints(mesh,clog,err,verbose);
 
-    EnquireBPoint<RegionMesh3D> enquirebpoint( mesh );
+    MeshUtility::EnquireBPoint<RegionMesh3D> enquirebpoint( mesh );
 
     UInt foundBPoints = std::count_if( mesh.pointList.begin(),
                                        mesh.pointList.end(), enquirebpoint );
@@ -743,7 +745,7 @@ bool checkMesh3D( RegionMesh3D & mesh,
         err << "WARNING Bpoints indicator not correctly set" << std::endl;
         if ( fix )
             err << "FIXING by recomputing from boundary faces" << std::endl;
-        fixBoundaryPoints( mesh, clog, err, false );
+        MeshUtility::fixBoundaryPoints( mesh, clog, err, false );
         if ( fix )
             foundBPoints = std::count_if( mesh.pointList.begin(),
                                           mesh.pointList.end(),
@@ -752,15 +754,15 @@ bool checkMesh3D( RegionMesh3D & mesh,
             sw.create( "FIXED_BOUNDARY_POINTS", true );
     }
 
-    if ( ! checkIsMarkerSetInEntityList( mesh.pointList ) )
+    if ( ! MeshUtility::checkIsMarkerSet( mesh.pointList ) )
     {
         if (verbose)
             err << "WARNING B. Points MARKER incorrectly set" << std::endl;
 
         if ( fix )
         {
-            setBoundaryPointsMarker( mesh, clog, std::cerr, false );
-            if ( ! checkIsMarkerSetInEntityList( mesh.pointList ) )
+            MeshUtility::setBoundaryPointsMarker( mesh, clog, std::cerr, false );
+            if ( ! MeshUtility::checkIsMarkerSet( mesh.pointList ) )
             {
                 if (verbose)
                     err << "Cannot Fix Points MARKER" << std::endl;
@@ -780,7 +782,7 @@ bool checkMesh3D( RegionMesh3D & mesh,
     {
         err << "WARNING B. Points COUNTER incorrectly set" << std::endl;
         if ( fix )
-            setBoundaryPointsCounters( mesh ) ;
+            MeshUtility::setBoundaryPointsCounters( mesh ) ;
         if ( fix )
             err << " FIXED" << std::endl;
         if ( fix )

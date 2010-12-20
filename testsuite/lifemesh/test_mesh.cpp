@@ -49,6 +49,7 @@
 int main()
 {
     using namespace LifeV;
+    using namespace LifeV::MeshUtility;
     using namespace std;
 
     GetPot datafile( "data" );

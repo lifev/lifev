@@ -3389,7 +3389,7 @@ RegionMesh3D<GEOSHAPE, MC>::updateElementEdges( bool ce, bool verbose, UInt ee )
                         UInt inode = bele.edgeToPoint(j, k);
                         edg.setPoint( k, ifa->point( inode ) );
                     }
-                    inheritPointsWeakerMarker( edg );
+                    MeshUtility::inheritPointsWeakerMarker( edg );
                     addEdge( edg, true );
                 }
             }
@@ -3427,7 +3427,7 @@ RegionMesh3D<GEOSHAPE, MC>::updateElementEdges( bool ce, bool verbose, UInt ee )
                     UInt inode = ele.edgeToPoint(j, k);
                     edg.setPoint( k, iv->point( inode ) );
                 }
-                inheritPointsWeakerMarker( edg );
+                MeshUtility::inheritPointsWeakerMarker( edg );
                 addEdge( edg, false );
             }
         }
