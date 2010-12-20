@@ -26,7 +26,7 @@
 
 /*!
     @file
-    @brief This file contains the definition of the GeoMap class (and an helper function)
+    @brief This file contains the definition of the GeometricMap class (and an helper function)
 
     @author Jean-Frederic Gerbeau
     @date 00-04-2002
@@ -48,7 +48,7 @@
 namespace LifeV
 {
 
-//! GeoMap - Structure for the geometrical mapping
+//! GeometricMap - Structure for the geometrical mapping
 /*!
   @author J.-F. Gerbeau
   @date 04/2002
@@ -56,7 +56,7 @@ namespace LifeV
 
   Modified by S. Quinodoz (samuel.quinodoz@epfl.ch, 04.2010)
 */
-class GeoMap:
+class GeometricMap:
         public RefEle
 {
 public:
@@ -84,7 +84,7 @@ public:
       @param refCoor : the static array containing the coordinates of the nodes on the reference element (defined in refEle.h)
       @param  bdMap : a pointer on the natural associated mapping for the boundary of the element
      */
-    GeoMap( std::string          name,
+    GeometricMap( std::string          name,
             ReferenceShapes      shape,
             UInt                 nbDof,
             UInt                 nbCoor,
@@ -92,10 +92,10 @@ public:
             const function_Type* dPhi,
             const function_Type* d2Phi,
             const Real*          refCoor,
-            const GeoMap*        bdMap );
+            const GeometricMap*        bdMap );
 
     //! Destructor
-    ~GeoMap();
+    ~GeometricMap();
 
     //@}
 
@@ -104,7 +104,7 @@ public:
     //@{
 
     //! return the natural mapping for the boundary of the element
-    const GeoMap& boundaryMap() const
+    const GeometricMap& boundaryMap() const
     {
         ASSERT( M_boundaryMap!=0 , "No boundary map defined" );
         return *M_boundaryMap;
@@ -118,33 +118,33 @@ private:
     //@{
 
     //! No empty constructor
-    GeoMap();
+    GeometricMap();
 
     //! No copy constructor
-    GeoMap(const GeoMap&);
+    GeometricMap(const GeometricMap&);
 
     //@}
 
-    const GeoMap* M_boundaryMap;
+    const GeometricMap* M_boundaryMap;
 };
 
 
 
 //---- Predeclaration of the map (defined in defQuadRuleFE.cpp) ----
 
-extern const GeoMap geoLinearNode;
-extern const GeoMap geoLinearSeg;
-extern const GeoMap geoLinearTria;
-extern const GeoMap geoBilinearQuad;
-extern const GeoMap geoLinearTetra;
-extern const GeoMap geoBilinearHexa;
+extern const GeometricMap geoLinearNode;
+extern const GeometricMap geoLinearSeg;
+extern const GeometricMap geoLinearTria;
+extern const GeometricMap geoBilinearQuad;
+extern const GeometricMap geoLinearTetra;
+extern const GeometricMap geoBilinearHexa;
 
 
 // ----
 
 /*! Helper function that returns the geomap associated to a mesh */
 template <typename MeshType>
-const GeoMap& getGeoMap( MeshType & /*mesh*/ )
+const GeometricMap& getGeometricMap( MeshType & /*mesh*/ )
 {
 
     typedef typename MeshType::ElementShape ElementShape;

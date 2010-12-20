@@ -45,7 +45,7 @@ namespace LifeV
 // Constructors & Destructor
 // ===================================================
 
-StaticBdFE::StaticBdFE( const RefFE& refFE, const GeoMap& geoMap,
+StaticBdFE::StaticBdFE( const RefFE& refFE, const GeometricMap& geoMap,
                         const QuadRule& qr ) :
         M_nbGeoNode ( geoMap.nbDof() ),
         M_nbNode    ( refFE.nbDof() ),
@@ -106,7 +106,7 @@ StaticBdFE::StaticBdFE( const RefFE& refFE, const GeoMap& geoMap,
 
 }
 
-StaticBdFE::StaticBdFE( const RefFE& refFE, const GeoMap& geoMap ) :
+StaticBdFE::StaticBdFE( const RefFE& refFE, const GeometricMap& geoMap ) :
         M_nbGeoNode( geoMap.nbDof() ),
         M_nbNode( refFE.nbDof() ),
         M_nbCoor( refFE.nbCoor() ),
@@ -133,7 +133,7 @@ StaticBdFE::StaticBdFE( const RefFE& refFE, const GeoMap& geoMap ) :
 #endif
 }
 
-StaticBdFE::StaticBdFE( const RefFE& refFE, const GeoMap& geoMap,
+StaticBdFE::StaticBdFE( const RefFE& refFE, const GeometricMap& geoMap,
                         const QuadRule& qr, const Real* refcoor,
                         UInt currentid, Real invarea ) :
         M_nbGeoNode( geoMap.nbDof() ),

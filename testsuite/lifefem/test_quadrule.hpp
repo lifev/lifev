@@ -67,7 +67,7 @@ typedef container_Type::const_iterator constIterator_Type;
 
 // This function checks the DEGREE of Exactness (DoE) of the quadrature rules
 template<typename Mesh>
-bool quad_check_doe(const RefFE &refFE, const GeoMap & geoMap, const container_Type &allQuad, std::string output_file)
+bool quad_check_doe(const RefFE &refFE, const GeometricMap & geoMap, const container_Type &allQuad, std::string output_file)
 {
 
     Mesh aMesh;
@@ -131,7 +131,7 @@ bool quad_check_doe(const RefFE &refFE, const GeoMap & geoMap, const container_T
 
 // This function checks the convergence rate (CR) of the quadrature rules
 template<typename Mesh>
-bool quad_check_cr(	const RefFE &refFE, const GeoMap & geoMap, const container_Type &allQuad, std::string output_name)
+bool quad_check_cr(	const RefFE &refFE, const GeometricMap & geoMap, const container_Type &allQuad, std::string output_name)
 {
     SetofFun fct;
     int fun(fct.nfun());

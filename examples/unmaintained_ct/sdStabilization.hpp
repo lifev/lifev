@@ -119,7 +119,7 @@ SDStabilization<MESH, DOF>::SDStabilization(
     Real            viscosity):
         M_mesh( mesh ),
         M_dof( dof ),
-        M_fe( refFE, getGeoMap(*mesh), quadRule ),
+        M_fe( refFE, getGeometricMap(*mesh), quadRule ),
         M_viscosity( viscosity ),
         M_gammaBeta ( gammaBeta ),
         M_gammaDiv  ( gammaDiv ),

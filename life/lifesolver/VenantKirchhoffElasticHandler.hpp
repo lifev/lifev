@@ -284,8 +284,8 @@ setUp( VenantKirchhoffElasticData<Mesh>& data,
   M_dim                      = M_dof.numTotalDof();
   M_Qr                       = Qr;
   M_bdQr                     = bdQr;
-  M_fe                       ( M_refFE, getGeoMap( this->mesh() ), M_Qr )
-  M_feBd                     ( M_refFE.boundaryFE(), getGeoMap( this->mesh() ).boundaryMap(), M_bdQr );
+  M_fe                       ( M_refFE, getGeometricMap( this->mesh() ), M_Qr )
+  M_feBd                     ( M_refFE.boundaryFE(), getGeometricMap( this->mesh() ).boundaryMap(), M_bdQr );
   M_d                        = M_dim;
   M_dRhs                     = M_dim;
   M_w                        = M_dim;
@@ -307,8 +307,8 @@ setUp( const VenantKirchhoffElasticData<Mesh>& data,
   M_dim                      = M_dof.numTotalDof();
   M_Qr                       = Qr;
   M_bdQr                     = bdQr;
-  M_fe                       ( M_refFE, getGeoMap( this->mesh() ), M_Qr );
-  M_feBd                     ( M_refFE.boundaryFE(), getGeoMap( this->mesh() ).boundaryMap(), M_bdQr );
+  M_fe                       ( M_refFE, getGeometricMap( this->mesh() ), M_Qr );
+  M_feBd                     ( M_refFE.boundaryFE(), getGeometricMap( this->mesh() ).boundaryMap(), M_bdQr );
   M_d                        = M_dim;
   M_dRhs                   = M_dim;
   M_w                        = M_dim ;

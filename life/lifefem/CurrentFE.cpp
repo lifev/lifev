@@ -40,7 +40,7 @@
 
 namespace LifeV
 {
-CurrentFE::CurrentFE( const RefFE& refFE, const GeoMap& geoMap, const QuadRule& qr )
+CurrentFE::CurrentFE( const RefFE& refFE, const GeometricMap& geoMap, const QuadRule& qr )
         :
         M_nbNode( refFE.nbDof() ),
         M_nbCoor( refFE.nbCoor() ),
@@ -59,7 +59,7 @@ CurrentFE::CurrentFE( const RefFE& refFE, const GeoMap& geoMap, const QuadRule& 
         M_cellNodes(boost::extents[geoMap.nbDof()][M_nbCoor]),
         M_quadNodes(boost::extents[M_nbQuadPt][3]),
 
-        M_dphiGeoMap(boost::extents[M_nbGeoNode][M_nbCoor][M_nbQuadPt]),
+        M_dphiGeometricMap(boost::extents[M_nbGeoNode][M_nbCoor][M_nbQuadPt]),
         M_jacobian(boost::extents[M_nbCoor][M_nbCoor][M_nbQuadPt]),
         M_detJacobian(boost::extents[M_nbQuadPt]),
         M_wDetJacobian(boost::extents[M_nbQuadPt]),
@@ -77,7 +77,7 @@ CurrentFE::CurrentFE( const RefFE& refFE, const GeoMap& geoMap, const QuadRule& 
         M_cellNodesUpdated(false),
         M_quadNodesUpdated(false),
 
-        M_dphiGeoMapUpdated(false),
+        M_dphiGeometricMapUpdated(false),
         M_jacobianUpdated(false),
         M_detJacobianUpdated(false),
         M_wDetJacobianUpdated(false),
@@ -146,18 +146,18 @@ CurrentFE::CurrentFE( const RefFE& refFE, const GeoMap& geoMap, const QuadRule& 
         {
             for ( UInt icoor(0); icoor < M_nbCoor; ++icoor )
             {
-                M_dphiGeoMap[k][icoor][iterQuad] = M_geoMap->dPhi( k, icoor,
+                M_dphiGeometricMap[k][icoor][iterQuad] = M_geoMap->dPhi( k, icoor,
                                                                    M_quadRule->quadPointCoor(iterQuad));
             }
         }
     }
 
-    M_dphiGeoMapUpdated=true;
+    M_dphiGeometricMapUpdated=true;
 
 
 }
 
-CurrentFE::CurrentFE( const RefFE& refFE, const GeoMap& geoMap )
+CurrentFE::CurrentFE( const RefFE& refFE, const GeometricMap& geoMap )
         :
         M_nbNode( refFE.nbDof() ),
         M_nbCoor( refFE.nbCoor() ),
@@ -179,7 +179,7 @@ CurrentFE::CurrentFE( const RefFE& refFE, const GeoMap& geoMap )
         M_cellNodesUpdated(false),
         M_quadNodesUpdated(false),
 
-        M_dphiGeoMapUpdated(false),
+        M_dphiGeometricMapUpdated(false),
         M_jacobianUpdated(false),
         M_detJacobianUpdated(false),
         M_wDetJacobianUpdated(false),
@@ -730,7 +730,7 @@ void CurrentFE::setQuadRule(const QuadRule& newQuadRule)
     // Resize all the arrays that need it
     M_quadNodes.resize(boost::extents[M_nbQuadPt][3]);
 
-    M_dphiGeoMap.resize(boost::extents[M_nbGeoNode][M_nbCoor][M_nbQuadPt]);
+    M_dphiGeometricMap.resize(boost::extents[M_nbGeoNode][M_nbCoor][M_nbQuadPt]);
     M_jacobian.resize(boost::extents[M_nbCoor][M_nbCoor][M_nbQuadPt]);
     M_detJacobian.resize(boost::extents[M_nbQuadPt]);
     M_wDetJacobian.resize(boost::extents[M_nbQuadPt]);
@@ -749,7 +749,7 @@ void CurrentFE::setQuadRule(const QuadRule& newQuadRule)
     M_cellNodesUpdated=false;
     M_quadNodesUpdated=false;
 
-    M_dphiGeoMapUpdated=false;
+    M_dphiGeometricMapUpdated=false;
     M_jacobianUpdated=false;
     M_detJacobianUpdated=false;
     M_wDetJacobianUpdated=false;
@@ -816,13 +816,13 @@ void CurrentFE::setQuadRule(const QuadRule& newQuadRule)
         {
             for ( UInt icoor(0); icoor < M_nbCoor; ++icoor )
             {
-                M_dphiGeoMap[k][icoor][iterQuad] = M_geoMap->dPhi( k, icoor,
+                M_dphiGeometricMap[k][icoor][iterQuad] = M_geoMap->dPhi( k, icoor,
                                                                    M_quadRule->quadPointCoor(iterQuad));
             }
         }
     }
 
-    M_dphiGeoMapUpdated=true;
+    M_dphiGeometricMapUpdated=true;
 
 }
 
@@ -870,7 +870,7 @@ void CurrentFE::computePhi()
     }
 }
 
-void CurrentFE::computeDphiGeoMap()
+void CurrentFE::computeDphiGeometricMap()
 {
     for (UInt iterQuad(0); iterQuad< M_nbQuadPt ; ++iterQuad)
     {
@@ -878,18 +878,18 @@ void CurrentFE::computeDphiGeoMap()
         {
             for (UInt iterCoor(0); iterCoor < M_nbCoor; ++iterCoor)
             {
-                M_dphiGeoMap[iterNode][iterCoor][iterQuad] = M_geoMap->dPhi(iterNode,iterCoor,
+                M_dphiGeometricMap[iterNode][iterCoor][iterQuad] = M_geoMap->dPhi(iterNode,iterCoor,
                                                                             M_quadRule->quadPointCoor(iterQuad));
             }
         }
     }
-    M_dphiGeoMapUpdated=true;
+    M_dphiGeometricMapUpdated=true;
 }
 
 void CurrentFE::computeJacobian()
 {
     ASSERT(M_cellNodesUpdated,"Missing update: cellNodes");
-    ASSERT(M_dphiGeoMapUpdated,"Missing update: dphiGeoMap");
+    ASSERT(M_dphiGeometricMapUpdated,"Missing update: dphiGeometricMap");
 
     Real partialSum;
 
@@ -902,7 +902,7 @@ void CurrentFE::computeJacobian()
                 partialSum=0;
                 for (UInt iterNode(0); iterNode < M_nbGeoNode; ++iterNode)
                 {
-                    partialSum += M_cellNodes[iterNode][icoord] * M_dphiGeoMap[iterNode][jcoord][iterQuad];
+                    partialSum += M_cellNodes[iterNode][icoord] * M_dphiGeometricMap[iterNode][jcoord][iterQuad];
                 }
                 M_jacobian[icoord][jcoord][iterQuad] = partialSum;
             }

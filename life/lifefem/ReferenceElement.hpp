@@ -26,7 +26,7 @@
 
 /*!
     @file
-    @brief Base class for RefFE and GeoMap
+    @brief Base class for RefFE and GeometricMap
 
     @author Jean-Frederic Gerbeau
             Samuel Quinodoz <samuel.quinodoz@epfl.ch>
@@ -64,7 +64,7 @@ namespace LifeV
 
   Implemented orginially by J.-F. Gerbeau (04/2002) but totally modified by S.Quinodoz (samuel.quinodoz@epfl.ch , 04/2010)
 
-  This class contains all the basis functions, their derivatives and the reference coordinates. It is the basis class for the geometric map (LifeV::GeoMap) and the reference finite element (LifeV::RefFE).
+  This class contains all the basis functions, their derivatives and the reference coordinates. It is the basis class for the geometric map (LifeV::GeometricMap) and the reference finite element (LifeV::RefFE).
 
   \todo Add Volume
   \todo Add the minimal dimension and checks

@@ -569,41 +569,41 @@ static const QuadRule quad_rule_hexa[ NB_QUAD_RULE_HEXA ] =
 
 //----------------------------------------------------------------------
 //
-//                       GeoMaps
+//                       GeometricMaps
 //
 //----------------------------------------------------------------------
 
-const GeoMap geoLinearNode( "Mapping of a point", POINT,
+const GeometricMap geoLinearNode( "Mapping of a point", POINT,
                             1, 1,
                             fct_P0_0D, derfct_P0_0D, der2fct_P0_0D,
                             refcoor_P0_0D,
-                            ( GeoMap* ) NULL );
+                            ( GeometricMap* ) NULL );
 
-const GeoMap geoLinearSeg( "Linear mapping on a segment", LINE,
+const GeometricMap geoLinearSeg( "Linear mapping on a segment", LINE,
                            2, 1,
                            fct_P1_1D, derfct_P1_1D, der2fct_P1_1D,
                            refcoor_P1_1D,
                            &geoLinearNode );
 
-const GeoMap geoLinearTria( "Linear mapping on a triangle", TRIANGLE,
+const GeometricMap geoLinearTria( "Linear mapping on a triangle", TRIANGLE,
                             3, 2,
                             fct_P1_2D, derfct_P1_2D, der2fct_P1_2D,
                             refcoor_P1_2D,
                             &geoLinearSeg );
 
-const GeoMap geoBilinearQuad( "Bilinear mapping on a quadrangle", QUAD,
+const GeometricMap geoBilinearQuad( "Bilinear mapping on a quadrangle", QUAD,
                               4, 2,
                               fct_Q1_2D, derfct_Q1_2D, der2fct_Q1_2D,
                               refcoor_Q1_2D,
                               &geoLinearSeg );
 
-const GeoMap geoLinearTetra( "Linear mapping on a tetraedra", TETRA,
+const GeometricMap geoLinearTetra( "Linear mapping on a tetraedra", TETRA,
                              4, 3,
                              fct_P1_3D, derfct_P1_3D, der2fct_P1_3D,
                              refcoor_P1_3D,
                              &geoLinearTria );
 
-const GeoMap geoBilinearHexa( "Bilinear mapping on an hexaedra", HEXA,
+const GeometricMap geoBilinearHexa( "Bilinear mapping on an hexaedra", HEXA,
                               8, 3,
                               fct_Q1_3D, derfct_Q1_3D, der2fct_Q1_3D,
                               refcoor_Q1_3D,

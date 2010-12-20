@@ -550,13 +550,13 @@ FESpace(	MeshPartitioner<MeshType>& 	mesh,
         M_fieldDim		( fDim ),
         M_dof			( new Dof( *M_mesh, *M_refFE ) ),
         M_dim			( M_dof->numTotalDof() ),
-        M_fe			( new CurrentFE  ( *M_refFE,              getGeoMap( *M_mesh ),               *M_Qr ) ),
+        M_fe			( new CurrentFE  ( *M_refFE,              getGeometricMap( *M_mesh ),               *M_Qr ) ),
         M_feBd			( ),
         M_map			( new map_Type() )
 {
     if (M_refFE->hasBoundaryFE())
     {
-        M_feBd.reset(new CurrentBoundaryFE( M_refFE->boundaryFE(), getGeoMap( *M_mesh ).boundaryMap(), *M_bdQr ) );
+        M_feBd.reset(new CurrentBoundaryFE( M_refFE->boundaryFE(), getGeometricMap( *M_mesh ).boundaryMap(), *M_bdQr ) );
     }
     MapType map( *M_refFE, *M_mesh, commptr );
     for ( UInt ii = 0; ii < M_fieldDim; ++ii )
@@ -590,11 +590,11 @@ FESpace(	MeshPartitioner<MeshType>&	mesh,
     // Set other quantities
     M_dof.reset( new Dof( *M_mesh, *M_refFE ) );
     M_dim = M_dof->numTotalDof();
-    M_fe.reset( new CurrentFE( *M_refFE, getGeoMap( *M_mesh ), *M_Qr ) );
+    M_fe.reset( new CurrentFE( *M_refFE, getGeometricMap( *M_mesh ), *M_Qr ) );
 
     if (M_refFE->hasBoundaryFE())
     {
-        M_feBd.reset( new CurrentBoundaryFE( M_refFE->boundaryFE(), getGeoMap( *M_mesh ).boundaryMap(), *M_bdQr ) );
+        M_feBd.reset( new CurrentBoundaryFE( M_refFE->boundaryFE(), getGeometricMap( *M_mesh ).boundaryMap(), *M_bdQr ) );
     }
 
     // Build Map
@@ -619,7 +619,7 @@ FESpace(	meshPtr_Type			mesh,
         M_fieldDim		( fDim ),
         M_dof			( new Dof( *M_mesh, *M_refFE ) ),
         M_dim			( M_dof->numTotalDof() ),
-        M_fe			( new CurrentFE( *M_refFE, getGeoMap( *M_mesh ), *M_Qr ) ),
+        M_fe			( new CurrentFE( *M_refFE, getGeometricMap( *M_mesh ), *M_Qr ) ),
         M_feBd			( ),
         M_map			( new map_Type() )
 {
@@ -629,7 +629,7 @@ FESpace(	meshPtr_Type			mesh,
 
     if (M_refFE->hasBoundaryFE())
     {
-        M_feBd.reset(new CurrentBoundaryFE( M_refFE->boundaryFE(), getGeoMap( *M_mesh ).boundaryMap(), *M_bdQr ) );
+        M_feBd.reset(new CurrentBoundaryFE( M_refFE->boundaryFE(), getGeometricMap( *M_mesh ).boundaryMap(), *M_bdQr ) );
     }
 }
 
@@ -660,11 +660,11 @@ FESpace(	meshPtr_Type			mesh,
     // Set other quantities
     M_dof.reset( new Dof( *M_mesh, *M_refFE ) );
     M_dim = M_dof->numTotalDof();
-    M_fe.reset( new CurrentFE( *M_refFE, getGeoMap( *M_mesh ), *M_Qr ) );
+    M_fe.reset( new CurrentFE( *M_refFE, getGeometricMap( *M_mesh ), *M_Qr ) );
 
     if (M_refFE->hasBoundaryFE())
     {
-        M_feBd.reset( new CurrentBoundaryFE( M_refFE->boundaryFE(), getGeoMap( *M_mesh ).boundaryMap(), *M_bdQr ) );
+        M_feBd.reset( new CurrentBoundaryFE( M_refFE->boundaryFE(), getGeometricMap( *M_mesh ).boundaryMap(), *M_bdQr ) );
     };
 
     // Build Map
@@ -691,7 +691,7 @@ FESpace<MeshType, MapType>::interpolate( const function_Type& fct,
     interpQuad.setPoints(M_refFE->refCoor(),std::vector<Real>(M_refFE->nbDof(),0));
 
     // Then, we define a currentFE with nodes on the reference nodes
-    CurrentFE interpCFE(*M_refFE,getGeoMap(*M_mesh ),interpQuad);
+    CurrentFE interpCFE(*M_refFE,getGeometricMap(*M_mesh ),interpQuad);
 
     // Some constants
     UInt totalNumberElements(M_mesh->numElements());
@@ -1469,7 +1469,7 @@ gradientRecovery(const vector_type& solution, const UInt& dxi)
     UInt totalNumberElements(M_mesh->numElements());
     UInt numberLocalDof(M_dof->numLocalDof());
 
-    CurrentFE interpCFE(*M_refFE,getGeoMap(*M_mesh ),interpQuad);
+    CurrentFE interpCFE(*M_refFE,getGeometricMap(*M_mesh ),interpQuad);
 
     // Loop over the cells
     for (UInt iterVolume(1); iterVolume<= totalNumberElements; ++iterVolume)
@@ -1610,7 +1610,7 @@ FESpace<MeshType,MapType>::
 setQuadRule(const QuadRule& Qr)
 {
     M_Qr = &Qr;
-    M_fe.reset( new CurrentFE( *M_refFE, getGeoMap( *M_mesh ), *M_Qr ) );
+    M_fe.reset( new CurrentFE( *M_refFE, getGeometricMap( *M_mesh ), *M_Qr ) );
 };
 
 

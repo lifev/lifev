@@ -71,10 +71,10 @@ public:
     //@{
 
     //! Constructor with reference FE and geometric mapping
-    CurrentBoundaryFE( const RefFE& refFE, const GeoMap& geoMap );
+    CurrentBoundaryFE( const RefFE& refFE, const GeometricMap& geoMap );
 
     //! Constructor with reference FE, geometric mapping and quadrature rule
-    CurrentBoundaryFE( const RefFE& refFE, const GeoMap& geoMap, const QuadRule& qr );
+    CurrentBoundaryFE( const RefFE& refFE, const GeometricMap& geoMap, const QuadRule& qr );
 
     //! Destructor
     virtual ~CurrentBoundaryFE();

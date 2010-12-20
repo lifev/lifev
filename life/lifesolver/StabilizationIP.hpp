@@ -254,8 +254,8 @@ StabilizationIP<MeshType, DofType>::StabilizationIP( const meshPtr_Type & mesh,
                                                      Real            viscosity ) :
         M_mesh      ( mesh ),
         M_dof       ( new dof_Type(dof) ),
-        M_feOnSide1 ( new CurrentFE(refFE, getGeoMap(*mesh), quadRule) ),
-        M_feOnSide2 ( new CurrentFE(refFE, getGeoMap(*mesh), quadRule) ),
+        M_feOnSide1 ( new CurrentFE(refFE, getGeometricMap(*mesh), quadRule) ),
+        M_feOnSide2 ( new CurrentFE(refFE, getGeometricMap(*mesh), quadRule) ),
         M_feBd      ( &feBd ),
         M_gammaBeta ( gammaBeta ),
         M_gammaDiv  ( gammaDiv ),
@@ -633,8 +633,8 @@ template<typename MeshType, typename DofType>
 void StabilizationIP<MeshType, DofType>::setDiscretization(const dofPtr_Type& dof, const RefFE& refFE, CurrentBoundaryFE& feBd, const QuadRule& quadRule)
 {
     M_dof = dof;
-    M_feOnSide1.reset( new CurrentFE(refFE, getGeoMap(*M_mesh), quadRule) );
-    M_feOnSide2.reset( new CurrentFE(refFE, getGeoMap(*M_mesh), quadRule) );
+    M_feOnSide1.reset( new CurrentFE(refFE, getGeometricMap(*M_mesh), quadRule) );
+    M_feOnSide2.reset( new CurrentFE(refFE, getGeometricMap(*M_mesh), quadRule) );
     M_feBd = &feBd;
     switch ( M_feOnSide1->nbFEDof() )
     {

@@ -26,7 +26,7 @@
 
 /*!
     @file
-    @brief This file contains the implementation of the GeoMap class (and an helper function)
+    @brief This file contains the implementation of the GeometricMap class (and an helper function)
 
     @author Jean-Frederic Gerbeau
     @date 00-04-2002
@@ -48,15 +48,15 @@ namespace LifeV
 // Constructors & Destructor
 // ===================================================
 
-GeoMap::GeoMap( std::string name, ReferenceShapes shape,
+GeometricMap::GeometricMap( std::string name, ReferenceShapes shape,
                 UInt nbDof, UInt nbCoor,
                 const function_Type* phi, const function_Type* dPhi, const function_Type* d2Phi,
                 const Real* refCoor,
-                const GeoMap* bdMap ) :
+                const GeometricMap* bdMap ) :
         RefEle( name, shape, nbDof, nbCoor,1, phi, dPhi, d2Phi, static_cast<function_Type*>(NULL),  refCoor ),
         M_boundaryMap( bdMap )
 {}
-GeoMap::~GeoMap()
+GeometricMap::~GeometricMap()
 {}
 
 }

@@ -539,8 +539,8 @@ void DOFInterface3Dto3D::updateDofConnections( const Mesh& mesh1, const Dof& dof
 
     bool test = false;
 
-    CurrentBoundaryFE feBd1( M_refFE1->boundaryFE(), getGeoMap( mesh1 ).boundaryMap() );
-    CurrentBoundaryFE feBd2( M_refFE2->boundaryFE(), getGeoMap( mesh2 ).boundaryMap() );
+    CurrentBoundaryFE feBd1( M_refFE1->boundaryFE(), getGeometricMap( mesh1 ).boundaryMap() );
+    CurrentBoundaryFE feBd2( M_refFE2->boundaryFE(), getGeometricMap( mesh2 ).boundaryMap() );
 
     // Loop on faces at the interface (matching faces)
     for ( Iterator i = M_faceToFaceConnectionList.begin(); i != M_faceToFaceConnectionList.end(); ++i )

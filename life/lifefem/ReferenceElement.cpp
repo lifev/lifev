@@ -26,7 +26,7 @@
 
 /*!
     @file
-    @brief Base class for RefFE and GeoMap
+    @brief Base class for RefFE and GeometricMap
 
     @author Jean-Frederic Gerbeau
     @date 00-04-2002

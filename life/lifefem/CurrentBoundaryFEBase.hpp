@@ -84,12 +84,12 @@ public:
     //! @name Constructor & Destructor
     //@{
 
-    StaticBdFE( const RefFE& refFE, const GeoMap& geoMap );
+    StaticBdFE( const RefFE& refFE, const GeometricMap& geoMap );
 
-    StaticBdFE( const RefFE& refFE, const GeoMap& geoMap, const QuadRule& qr );
+    StaticBdFE( const RefFE& refFE, const GeometricMap& geoMap, const QuadRule& qr );
 
     //! new optionnal argument for hybrid hdiv fe invArea
-    StaticBdFE( const RefFE& refFE, const GeoMap& geoMap, const QuadRule& qr,
+    StaticBdFE( const RefFE& refFE, const GeometricMap& geoMap, const QuadRule& qr,
                 const Real* refcoor, UInt currentid, Real invarea = 1. );
 
     virtual ~StaticBdFE();
@@ -322,7 +322,7 @@ public:
     const RefFE& refFE;
 
     //! The geometical mapping
-    const GeoMap&   geoMap;
+    const GeometricMap&   geoMap;
 
     //! The quadrature rule
     const QuadRule& qr;

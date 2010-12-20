@@ -263,7 +263,7 @@ public:
       @param geoMap Geometric mapping used
       @param qr Quadrature rule for the computations
      */
-    CurrentFE( const RefFE& refFE, const GeoMap& geoMap, const QuadRule& qr );
+    CurrentFE( const RefFE& refFE, const GeometricMap& geoMap, const QuadRule& qr );
 
     //! Constructor without quadrature specification
     /*!
@@ -273,7 +273,7 @@ public:
       @param refFE Reference finite element used
       @param geoMap Geometric mapping used
      */
-    CurrentFE( const RefFE& refFE, const GeoMap& geoMap);
+    CurrentFE( const RefFE& refFE, const GeometricMap& geoMap);
 
     //! Destructor
     ~CurrentFE() { delete M_quadRule;}
@@ -385,8 +385,8 @@ public:
         return *M_refFE;
     };
 
-    //! Getter for the GeoMap reference
-    inline const GeoMap& geoMap() const
+    //! Getter for the GeometricMap reference
+    inline const GeometricMap& geoMap() const
     {
         return *M_geoMap;
     }
@@ -576,7 +576,7 @@ private:
     void computePhi();
 
     //! Compute the values of the derivatives of the mapping in the quadrature nodes
-    void computeDphiGeoMap();
+    void computeDphiGeometricMap();
 
     //! Compute the jacobian in the quadrature nodes
     void computeJacobian();
@@ -622,7 +622,7 @@ private:
     // Important structures
 
     const RefFE* M_refFE;
-    const GeoMap* M_geoMap;
+    const GeometricMap* M_geoMap;
     QuadRule* M_quadRule;
 
 
@@ -632,7 +632,7 @@ private:
     boost::multi_array<Real,2> M_cellNodes;
     boost::multi_array<Real,2> M_quadNodes;
 
-    boost::multi_array<Real,3> M_dphiGeoMap;
+    boost::multi_array<Real,3> M_dphiGeometricMap;
     boost::multi_array<Real,3> M_jacobian;
     boost::multi_array<Real,1> M_detJacobian;
     boost::multi_array<Real,1> M_wDetJacobian;
@@ -652,7 +652,7 @@ private:
     bool M_cellNodesUpdated;
     bool M_quadNodesUpdated;
 
-    bool M_dphiGeoMapUpdated;
+    bool M_dphiGeometricMapUpdated;
     bool M_jacobianUpdated;
     bool M_detJacobianUpdated;
     bool M_wDetJacobianUpdated;
@@ -847,7 +847,7 @@ void CurrentFE::updateJac( const MeshElementMarkedType& geoele )
     M_currentLocalId = geoele.localId();
     //! compute the jacobian and its determinant...
     computeCellNodes(geoele);
-    computeDphiGeoMap();
+    computeDphiGeometricMap();
     computeJacobian();
     computeDetJacobian();
     computeWDetJacobian();
@@ -865,7 +865,7 @@ void CurrentFE::updateJacQuadPt( const MeshElementMarkedType& geoele )
     M_currentLocalId = geoele.localId();
     // compute the jacobian and its determinant...
     computeCellNodes(geoele);
-    computeDphiGeoMap();
+    computeDphiGeometricMap();
     computeJacobian();
     computeDetJacobian();
     computeWDetJacobian();
@@ -885,7 +885,7 @@ void CurrentFE::updateFirstDeriv( const MeshElementMarkedType& geoele )
     M_currentLocalId = geoele.localId();
     //! compute the inverse jacobian...
     computeCellNodes(geoele);
-    computeDphiGeoMap();
+    computeDphiGeometricMap();
     computeJacobian();
     computeDetJacobian();
     computeWDetJacobian();
@@ -907,7 +907,7 @@ void CurrentFE::updateFirstDerivQuadPt( const MeshElementMarkedType& geoele )
     M_currentLocalId = geoele.localId();
     //! compute the inverse jacobian...
     computeCellNodes(geoele);
-    computeDphiGeoMap();
+    computeDphiGeometricMap();
     computeJacobian();
     computeDetJacobian();
     computeWDetJacobian();
@@ -932,7 +932,7 @@ void CurrentFE::updateSecondDeriv( const MeshElementMarkedType& geoele )
     M_currentLocalId = geoele.localId();
     //! compute the inverse jacobian...
     computeCellNodes(geoele);
-    computeDphiGeoMap();
+    computeDphiGeometricMap();
     computeJacobian();
     computeDetJacobian();
     computeWDetJacobian();
@@ -954,7 +954,7 @@ void CurrentFE::updateSecondDerivQuadPt( const MeshElementMarkedType& geoele )
     M_currentLocalId = geoele.localId();
     //! compute the inverse jacobian...
     computeCellNodes(geoele);
-    computeDphiGeoMap();
+    computeDphiGeometricMap();
     computeJacobian();
     computeDetJacobian();
     computeWDetJacobian();
@@ -977,7 +977,7 @@ void CurrentFE::updateFirstSecondDeriv( const MeshElementMarkedType& geoele )
     M_currentLocalId = geoele.localId();
     //! compute the inverse jacobian...
     computeCellNodes(geoele);
-    computeDphiGeoMap();
+    computeDphiGeometricMap();
     computeJacobian();
     computeDetJacobian();
     computeWDetJacobian();
@@ -1000,7 +1000,7 @@ void CurrentFE::updateFirstSecondDerivQuadPt( const MeshElementMarkedType& geoel
     M_currentLocalId = geoele.localId();
     //! compute the inverse jacobian...
     computeCellNodes(geoele);
-    computeDphiGeoMap();
+    computeDphiGeometricMap();
     computeJacobian();
     computeDetJacobian();
     computeWDetJacobian();
