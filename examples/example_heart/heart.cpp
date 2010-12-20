@@ -93,11 +93,11 @@ Heart::run()
     //! Construction of data classes
 
 #ifdef MONODOMAIN
-    DataMonodomain _data(M_heart_fct);
+    HeartMonodomainData _data(M_heart_fct);
 #else
-    DataBidomain _data(M_heart_fct);
+    HeartBidomainData _data(M_heart_fct);
 #endif
-    DataIonic _dataIonic(M_heart_fct->M_dataFile);
+    HeartIonicData _dataIonic(M_heart_fct->M_dataFile);
 
     DataMesh dataMesh;
     dataMesh.setup(M_heart_fct->M_dataFile, "electric/space_discretization");
@@ -184,9 +184,9 @@ Heart::run()
     if (verbose) std::cout << "Calling the electric model constructor ... ";
 
 #ifdef MONODOMAIN
-    MonodomainSolver< RegionMesh3D<LinearTetra> > electricModel (_data, uFESpace, bcH, M_heart_fct->M_comm);
+    HeartMonodomainSolver< RegionMesh3D<LinearTetra> > electricModel (_data, uFESpace, bcH, M_heart_fct->M_comm);
 #else
-    BidomainSolver< RegionMesh3D<LinearTetra> > electricModel (_data, _FESpace, uFESpace, bcH, M_heart_fct->M_comm);
+    HeartBidomainSolver< RegionMesh3D<LinearTetra> > electricModel (_data, _FESpace, uFESpace, bcH, M_heart_fct->M_comm);
 #endif
 
     if (verbose) std::cout << "ok." << std::endl;
@@ -196,7 +196,7 @@ Heart::run()
     std::cout<<"setup ok"<<std::endl;
 
     if (verbose) std::cout << "Calling the ionic model constructor ... ";
-    boost::shared_ptr< IonicSolver< RegionMesh3D<LinearTetra> > > ionicModel;
+    boost::shared_ptr< HeartIonicSolver< RegionMesh3D<LinearTetra> > > ionicModel;
     if (ion_model==1)
     {
         if (verbose) std::cout<<"Ion Model = Rogers-McCulloch"<<std::endl<<std::flush;
@@ -352,9 +352,9 @@ Heart::run()
 
 #ifdef MONODOMAIN
 void Heart::computeRhs( vector_Type& rhs,
-                        MonodomainSolver< RegionMesh3D<LinearTetra> >& electricModel,
-                        boost::shared_ptr< IonicSolver< RegionMesh3D<LinearTetra> > > ionicModel,
-                        DataMonodomain& data )
+                        HeartMonodomainSolver< RegionMesh3D<LinearTetra> >& electricModel,
+                        boost::shared_ptr< HeartIonicSolver< RegionMesh3D<LinearTetra> > > ionicModel,
+                        HeartMonodomainData& data )
 {
     bool verbose = (M_heart_fct->M_comm->MyPID() == 0);
     if (verbose) std::cout << "  f-  Computing Rhs ...        "<<"\n"<<std::flush;
@@ -420,9 +420,9 @@ void Heart::computeRhs( vector_Type& rhs,
 }
 #else
 void Heart::computeRhs( vector_Type& rhs,
-                        BidomainSolver< RegionMesh3D<LinearTetra> >& electricModel,
-                        boost::shared_ptr< IonicSolver< RegionMesh3D<LinearTetra> > > ionicModel,
-                        DataBidomain& data )
+                        HeartBidomainSolver< RegionMesh3D<LinearTetra> >& electricModel,
+                        boost::shared_ptr< HeartIonicSolver< RegionMesh3D<LinearTetra> > > ionicModel,
+                        HeartBidomainData& data )
 {
     bool verbose = (M_heart_fct->M_comm->MyPID() == 0);
     if (verbose) std::cout << "  f-  Computing Rhs ...        "<<"\n"<<std::flush;
