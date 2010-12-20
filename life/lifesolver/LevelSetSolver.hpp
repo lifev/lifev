@@ -347,7 +347,6 @@ LevelSetSolver( fespace_ptrType fespace, fespace_ptrType betaFESpace )
 {
     M_adrAssembler.setup(fespace,betaFESpace);
     M_ipAssembler.setup(fespace,betaFESpace);
-
     M_linearSolver.setCommunicator(fespace->map().commPtr());
 }
 
@@ -665,12 +664,12 @@ updateFacesNormalsRadius()
 
 
         // Find the edges that are crossed by the interface
-        for (int iter_dof_1(1); iter_dof_1 <= n_dof; ++iter_dof_1)
+        for (UInt iter_dof_1(1); iter_dof_1 <= n_dof; ++iter_dof_1)
         {
             ID id_dof_1( M_fespace->dof().localToGlobal(iter_el, iter_dof_1));
             Real val1 (rep_solution(id_dof_1));
 
-            for (int iter_dof_2(iter_dof_1+1); iter_dof_2 <= n_dof ; ++iter_dof_2)
+            for (UInt iter_dof_2(iter_dof_1+1); iter_dof_2 <= n_dof ; ++iter_dof_2)
             {
                 ID id_dof_2( M_fespace->dof().localToGlobal(iter_el, iter_dof_2));
                 Real val2 (rep_solution(id_dof_2));

@@ -941,7 +941,7 @@ Real
 FESpace<MeshType, MapType>::l2NormFunction( const function& f, const Real time)
 {
     //
-    ID nbComp = M_fieldDim; // Number of components of the mesh velocity
+    //ID nbComp = M_fieldDim; // Number of components of the mesh velocity
     //
     Real sumExact = 0.;
     //

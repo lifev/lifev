@@ -245,19 +245,19 @@ public:
     /*!
         @param i index of the coefficient
      */
-    const Real coefficientDerivative( UInt i ) const;
+    const Real& coefficientDerivative( UInt i ) const;
 
     //! Return the i-th coefficient of the time derivative alpha_i divided by dt
     /*!
         @param i index of the coefficient
      */
-    const Real coefficientDerivativeOverTimeStep( UInt i ) const;
+    Real coefficientDerivativeOverTimeStep( UInt i ) const;
 
     //! Return the i-th coefficient of the time extrapolation beta_i
     /*!
         @param i index of the coefficient
      */
-    const Real coefficientExtrapolation( UInt i ) const;
+    const Real& coefficientExtrapolation( UInt i ) const;
 
     //! Return the vector of the time steps, ordered starting from the most recent one.
     const container_Type& timeStepVector() const {return M_timeStep;}
@@ -597,7 +597,7 @@ void BdfVS<FEVectorType>::setTimeStep( Real timeStep )
 // Get Methods
 // ===================================================
 template<typename FEVectorType>
-const Real
+const Real&
 BdfVS<FEVectorType>::coefficientDerivative( UInt i ) const
 {
     // Pay attention: i is c-based indexed
@@ -608,7 +608,7 @@ BdfVS<FEVectorType>::coefficientDerivative( UInt i ) const
 
 
 template<typename FEVectorType>
-const Real
+Real
 BdfVS<FEVectorType>::coefficientDerivativeOverTimeStep( UInt i ) const
 {
     // Pay attention: i is c-based indexed
@@ -619,7 +619,7 @@ BdfVS<FEVectorType>::coefficientDerivativeOverTimeStep( UInt i ) const
 
 
 template<typename FEVectorType>
-const Real
+const Real&
 BdfVS<FEVectorType>::coefficientExtrapolation( UInt i ) const
 {
     // Pay attention: i is c-based indexed

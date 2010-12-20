@@ -558,7 +558,7 @@ addAdvection(matrix_ptrType matrix, const vector_type& beta, const UInt& offsetL
     const UInt nbQuadPt(M_advCFE->nbQuadPt());
 
     // Temporaries
-    Real localValue(0);
+    //Real localValue(0);
     std::vector< std::vector< Real > > localBetaValue(nbQuadPt, std::vector<Real>(3,0.0));
 
     // Loop over the elements

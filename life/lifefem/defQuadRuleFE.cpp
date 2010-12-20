@@ -997,12 +997,12 @@ Real fct1_Q0_2D( const GeoVector& )
 {
     return 1. ;
 }
-Real derfct1_Q0_2D( const GeoVector& /*v*/ )
+Real derfct1_Q0_2D( const GeoVector& )
 {
     return 0. ;
 }
 // The second derivative is equal to the first : both are equal to 0.
-Real der2fct1_Q0_2D( const GeoVector& /*v*/ )
+Real der2fct1_Q0_2D( const GeoVector& )
 {
     return 0. ;
 }

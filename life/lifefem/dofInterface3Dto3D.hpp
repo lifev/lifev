@@ -565,7 +565,7 @@ void DofInterface3Dto3D::updateDofConnections( const Mesh& mesh1, const Dof& dof
 
                 iVeEl1 = GeoShape::faceToPoint( iFaEl1, iVeFa1 ); // local vertex number (in element)
 
-                if ( flag1 != 0 && mesh1.boundaryFace(i->first).point(iVeFa1).marker() != *flag1) continue;
+                if ( flag1 != 0 && Int(mesh1.boundaryFace(i->first).point(iVeFa1).marker()) != *flag1) continue;
 
                 // Loop number of Dof per vertex (mesh1)
                 for ( ID l = 1; l <= nbDofPerVertex1; ++l )

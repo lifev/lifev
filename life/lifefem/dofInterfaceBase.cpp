@@ -107,18 +107,19 @@ void DofInterfaceBase::buildInverse( const DofInterfaceBase& dofBase)
 // Set Methods
 // ===================================================
 
-const size_t& DofInterfaceBase::nbInterfaceDof() const
+void DofInterfaceBase::set(const ID& key,const ID& value)
 {
-    return M_localDofMap.size();
+    M_localDofMap.find(key)->second = value;
 }
 
 // ===================================================
 // Get Methods
 // ===================================================
 
-void DofInterfaceBase::set(const ID& key, const ID& value )
+size_t DofInterfaceBase::nbInterfaceDof() const
 {
-    M_localDofMap.find(key)->second = value;
+    return M_localDofMap.size();
 }
+
 
 }

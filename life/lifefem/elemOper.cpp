@@ -290,7 +290,7 @@ void mass( const std::vector<Real>& coef, ElemMat& elmat, const CurrentFE& fe,
         mat_tmp( jloc, iloc ) += s;
     }
     // copy on the components
-    for ( int icomp = 0; icomp < nb; icomp++ )
+    for ( UInt icomp = 0; icomp < nb; icomp++ )
     {
         ElemMat::matrix_view mat_icomp = elmat.block( iblock + icomp, jblock + icomp );
         for ( i = 0; i < fe.nbDiag(); i++ )
@@ -923,7 +923,7 @@ void ipstab_grad( const Real         coef,
 
     Real sum, sum1, sum2;
     UInt icoor,jcoor,i,j;
-    int ig;
+    UInt ig;
     Real x[ 3 ], rx1[ 3 ], drp1[ 3 ], rx2[ 3 ], drp2[ 3 ];
     Real phid1[ fe1.nbFEDof() ][ fe1.nbCoor() ][ bdfe.nbQuadPt() ];
     Real phid2[ fe2.nbFEDof() ][ fe2.nbCoor() ][ bdfe.nbQuadPt() ];
@@ -932,7 +932,7 @@ void ipstab_grad( const Real         coef,
     fe1.coorMap( b1[ 0 ], b1[ 1 ], b1[ 2 ], 0, 0, 0 ); // translation fe1
     fe2.coorMap( b2[ 0 ], b2[ 1 ], b2[ 2 ], 0, 0, 0 ); // translation fe2
 
-    for ( int ig = 0; ig < bdfe.nbQuadPt(); ++ig )
+    for ( UInt ig = 0; ig < bdfe.nbQuadPt(); ++ig )
     {  // first derivatives on quadrature points
         bdfe.coorQuadPt( x[ 0 ], x[ 1 ], x[ 2 ], ig );       // quadrature points coordinates
 
@@ -1018,7 +1018,7 @@ void ipstab_grad( const Real         coef,
 
     Real sum, sum1, sum2;
     UInt icoor,jcoor,i,j;
-    int ig;
+    UInt ig;
     Real x[ 3 ], rx1[ 3 ], drp1[ 3 ], rx2[ 3 ], drp2[ 3 ];
     Real phid1[ fe1.nbFEDof() ][ fe1.nbCoor() ][ bdfe.nbQuadPt() ];
     Real phid2[ fe2.nbFEDof() ][ fe2.nbCoor() ][ bdfe.nbQuadPt() ];
@@ -1027,7 +1027,7 @@ void ipstab_grad( const Real         coef,
     fe1.coorMap( b1[ 0 ], b1[ 1 ], b1[ 2 ], 0, 0, 0 ); // translation fe1
     fe2.coorMap( b2[ 0 ], b2[ 1 ], b2[ 2 ], 0, 0, 0 ); // translation fe2
 
-    for ( int ig = 0; ig < bdfe.nbQuadPt(); ++ig )
+    for ( UInt ig = 0; ig < bdfe.nbQuadPt(); ++ig )
     {  // first derivatives on quadrature points
         bdfe.coorQuadPt( x[ 0 ], x[ 1 ], x[ 2 ], ig );       // quadrature points coordinates
 
@@ -1116,9 +1116,9 @@ void ipstab_bgrad( const Real         coef,
     ElemMat::matrix_type mat_tmp( fe1.nbFEDof(), fe2.nbFEDof() );
 
     Real sum, sum1, sum2;
-    int i,j;
+    UInt i,j;
     UInt icoor,jcoor;
-    int ig;
+    UInt ig;
 
     //
     // convection velocity \beta on the boundary quadrature points
@@ -1153,7 +1153,7 @@ void ipstab_bgrad( const Real         coef,
     fe1.coorMap( b1[ 0 ], b1[ 1 ], b1[ 2 ], 0, 0, 0 ); // translation fe1
     fe2.coorMap( b2[ 0 ], b2[ 1 ], b2[ 2 ], 0, 0, 0 ); // translation fe2
 
-    for ( int ig = 0; ig < bdfe.nbQuadPt(); ++ig )
+    for ( UInt ig = 0; ig < bdfe.nbQuadPt(); ++ig )
     {  // first derivatives on quadrature points
         bdfe.coorQuadPt( x[ 0 ], x[ 1 ], x[ 2 ], ig );       // quadrature points coordinates
 
@@ -1237,7 +1237,7 @@ void ipstab_div( const Real coef, ElemMat& elmat, const CurrentFE& fe1, const Cu
 
     Real sum, sum1, sum2;
     UInt i,j,icoor,jcoor;
-    int ig;
+    UInt ig;
     Real x[ 3 ], rx1[ 3 ], drp1[ 3 ], rx2[ 3 ], drp2[ 3 ];
     Real phid1[ fe1.nbFEDof() ][ fe1.nbCoor() ][ bdfe.nbQuadPt() ];
     Real phid2[ fe2.nbFEDof() ][ fe2.nbCoor() ][ bdfe.nbQuadPt() ];
@@ -1246,7 +1246,7 @@ void ipstab_div( const Real coef, ElemMat& elmat, const CurrentFE& fe1, const Cu
     fe1.coorMap( b1[ 0 ], b1[ 1 ], b1[ 2 ], 0, 0, 0 ); // translation fe1
     fe2.coorMap( b2[ 0 ], b2[ 1 ], b2[ 2 ], 0, 0, 0 ); // translation fe2
 
-    for ( int ig = 0; ig < bdfe.nbQuadPt(); ++ig )
+    for ( UInt ig = 0; ig < bdfe.nbQuadPt(); ++ig )
     {  // first derivatives on quadrature points
         bdfe.coorQuadPt( x[ 0 ], x[ 1 ], x[ 2 ], ig );       // quadrature points coordinates
 
@@ -1324,8 +1324,8 @@ void ipstab_bagrad( const Real coef, ElemMat& elmat,
     ElemMat::matrix_view mat = elmat.block( iblock, jblock );
 
     Real sum, sum1, sum2;
-    int icoor,jcoor;
-    int i, j, ig;
+    UInt icoor,jcoor;
+    UInt i, j, ig;
     Real phid1[ fe1.nbFEDof() ][ fe1.nbCoor() ][ bdfe.nbQuadPt() ];
     Real phid2[ fe2.nbFEDof() ][ fe2.nbCoor() ][ bdfe.nbQuadPt() ];
 
@@ -1358,7 +1358,7 @@ void ipstab_bagrad( const Real coef, ElemMat& elmat,
         ba2[ ig ] = sum2 == 0 ? 0 : sum1 * sum1 / pow( sum2, 0.5 );
     }
 
-    for ( int ig = 0; ig < bdfe.nbQuadPt(); ++ig )
+    for ( UInt ig = 0; ig < bdfe.nbQuadPt(); ++ig )
     {  // first derivatives on quadrature points
         bdfe.coorQuadPt( x[ 0 ], x[ 1 ], x[ 2 ], ig );       // quadrature points coordinates
 
@@ -1447,8 +1447,8 @@ void ipstab_bagrad( const Real         coef,
     ElemMat::matrix_view mat = elmat.block( iblock, jblock );
 
     Real sum, sum1, sum2;
-    int icoor,jcoor;
-    int i, j, ig;
+    UInt icoor,jcoor;
+    UInt i, j, ig;
     Real phid1[ fe1.nbFEDof() ][ fe1.nbCoor() ][ bdfe.nbQuadPt() ];
     Real phid2[ fe2.nbFEDof() ][ fe2.nbCoor() ][ bdfe.nbQuadPt() ];
 
@@ -1481,7 +1481,7 @@ void ipstab_bagrad( const Real         coef,
         bn[ ig ] = std::abs(sum1);
     }
 
-    for ( int ig = 0; ig < bdfe.nbQuadPt(); ++ig )
+    for ( UInt ig = 0; ig < bdfe.nbQuadPt(); ++ig )
     {  // first derivatives on quadrature points
         bdfe.coorQuadPt( x[ 0 ], x[ 1 ], x[ 2 ], ig );       // quadrature points coordinates
 

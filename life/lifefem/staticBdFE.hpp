@@ -228,15 +228,6 @@ public:
         return M_point(int(i),int(coor));
     }
 
-    //! The reference finite element
-    const RefFE& refFE;
-
-    //! The geometical mapping
-    const GeoMap&   geoMap;
-
-    //! The quadrature rule
-    const QuadRule& qr;
-
     //! Values of the basis functions on quadrature points
     const Real& phi(const UInt& i, const UInt& iQuadPt) const
     {
@@ -304,15 +295,12 @@ public:
         return M_quadPt(int(i),int(coor));
     }
 
-    //! Inverse of the area
-    const Real invArea;
 
 
 protected:
     void computeMeasure();
     void computeMeasureNormal();
     void computeQuadPointCoordinate();
-    UInt M_currentID;
 
 #ifdef TEST_PRE
     bool M_hasQR;
@@ -330,6 +318,16 @@ protected:
 
     KNM<Real>  M_point;
 
+public:
+    //! The reference finite element
+    const RefFE& refFE;
+
+    //! The geometical mapping
+    const GeoMap&   geoMap;
+
+    //! The quadrature rule
+    const QuadRule& qr;
+protected:
 
     KNM<Real>  M_phi;
     KNMK<Real> M_dPhiRef;
@@ -342,6 +340,14 @@ protected:
     KNMK<Real> M_tangent;
     KNMK<Real> M_metric;
     KNM<Real>  M_quadPt;
+
+public:
+    //! Inverse of the area
+    const Real invArea;
+
+protected:
+
+    UInt M_currentID;
 
 };
 
