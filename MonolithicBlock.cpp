@@ -27,7 +27,7 @@
 
 #include <life/lifecore/life.hpp>
 
-#include <BlockInterface.hpp>
+#include <MonolithicBlock.hpp>
 
 namespace LifeV
 {
@@ -37,7 +37,7 @@ namespace LifeV
 //! Public Methods
 // ===================================================
 
-void BlockInterface::couplingMatrix(matrixPtr_Type & bigMatrix,
+void MonolithicBlock::couplingMatrix(matrixPtr_Type & bigMatrix,
                                     Int flag,
                                     const std::vector<fespacePtr_Type>& problem,
                                     const std::vector<UInt>& offset,
@@ -109,7 +109,7 @@ void BlockInterface::couplingMatrix(matrixPtr_Type & bigMatrix,
     }
 }
 
-void BlockInterface::applyBoundaryConditions(const Real& time)
+void MonolithicBlock::applyBoundaryConditions(const Real& time)
 {
     ASSERT( M_bch.size() == M_blocks.size(), "The number of BChandlers must correspond to the number of blocks" )
     for (ID i=0; i<M_bch.size(); ++i)
@@ -119,7 +119,7 @@ void BlockInterface::applyBoundaryConditions(const Real& time)
 }
 
 
-void BlockInterface::applyBoundaryConditions(const Real& time, const UInt i)
+void MonolithicBlock::applyBoundaryConditions(const Real& time, const UInt i)
 {
     M_blocks[i]->openCrsMatrix();
     if ( !M_bch[i]->bcUpdateDone() )
@@ -131,19 +131,19 @@ void BlockInterface::applyBoundaryConditions(const Real& time, const UInt i)
     bcManageMatrix( *M_blocks[i] , *M_FESpace[i]->mesh(), M_FESpace[i]->dof(), *M_bch[i], M_FESpace[i]->feBd(), 1., time);
 }
 
-void BlockInterface::setConditions( std::vector<bchandlerPtr_Type>& vec )
+void MonolithicBlock::setConditions( std::vector<bchandlerPtr_Type>& vec )
 {
     M_bch = vec;
 }
 
 void
-BlockInterface::setSpaces(std::vector<fespacePtr_Type>& vec )
+MonolithicBlock::setSpaces(std::vector<fespacePtr_Type>& vec )
 {
     M_FESpace = vec;
 }
 
 void
-BlockInterface::setOffsets(UInt blocks, ...)
+MonolithicBlock::setOffsets(UInt blocks, ...)
 {
     using namespace std;
     va_list arguments;
@@ -157,16 +157,16 @@ BlockInterface::setOffsets(UInt blocks, ...)
 
 
 void
-BlockInterface::robinCoupling( matrixPtr_Type& matrix,
+MonolithicBlock::robinCoupling( matrixPtr_Type& matrix,
                                Real&  alphaf,
                                Real&  alphas,
                                UInt  coupling,
-                               const BlockInterface::fespacePtr_Type& FESpace1,
+                               const MonolithicBlock::fespacePtr_Type& FESpace1,
                                const UInt& /*offset1*/,
-                               const BlockInterface::fespacePtr_Type& FESpace2,
+                               const MonolithicBlock::fespacePtr_Type& FESpace2,
                                const UInt& offset2,
                                const std::map<ID, ID>& locDofMap,
-                               const BlockInterface::vectorPtr_Type& numerationInterface ) // not working with non-matching grids
+                               const MonolithicBlock::vectorPtr_Type& numerationInterface ) // not working with non-matching grids
 {//coupling: flag from 1 to 4 working as chmod
     UInt interface(numerationInterface->map().map(Unique)->NumGlobalElements());
     std::map<ID, ID>::const_iterator ITrow;
@@ -216,13 +216,13 @@ BlockInterface::robinCoupling( matrixPtr_Type& matrix,
     }
 }
 
-void BlockInterface::addToBlock( const matrixPtr_Type& Mat, UInt position)
+void MonolithicBlock::addToBlock( const matrixPtr_Type& Mat, UInt position)
 {
     *Mat += *M_blocks[position];
     M_blocks[position] = Mat;
 }
 
-void BlockInterface::push_back_oper( BlockInterface& Oper)
+void MonolithicBlock::push_back_oper( MonolithicBlock& Oper)
 {
 //     M_blocks.reserve(M_blocks.size()+Oper.blockVector().size());
 //     M_bch.reserve(M_bch.size()+Oper.BChVector().size());

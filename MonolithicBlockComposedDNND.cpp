@@ -27,7 +27,7 @@
 
 #include <life/lifecore/life.hpp>
 
-#include <ComposedDNND.hpp>
+#include <MonolithicBlockComposedDNND.hpp>
 
 namespace LifeV
 {
@@ -37,7 +37,7 @@ namespace LifeV
 //! Public Methods
 // ===================================================
 
-void ComposedDNND::coupler(mapPtr_Type& map,
+void MonolithicBlockComposedDNND::coupler(mapPtr_Type& map,
                            const std::map<ID, ID>& locDofMap,
                            const vectorPtr_Type& numerationInterface,
                            const Real& timeStep)

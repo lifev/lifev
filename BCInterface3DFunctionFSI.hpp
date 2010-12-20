@@ -43,8 +43,8 @@
 #include <life/lifesolver/exactJacobianBase.hpp>
 #include <life/lifesolver/fixedPointBase.hpp>
 //#include <life/lifesolver/steklovPoincareBase.hpp>
-#include <lifemc/lifesolver/MonolithicGE.hpp>
-#include <lifemc/lifesolver/MonolithicGI.hpp>
+#include <lifemc/lifesolver/FSIMonolithicGE.hpp>
+#include <lifemc/lifesolver/FSIMonolithicGI.hpp>
 
 namespace LifeV
 {
@@ -129,7 +129,7 @@ private:
  *  <b>DETAILS:</b>
  *
  *  The constructor of the class takes a string contains the ID of the interface condition to impose,
- *  and the FSIOperator. The list of available conditions is the FSIFunction variable. These are:
+ *  and the FSI. The list of available conditions is the FSIFunction variable. These are:
  *
  *	- DerFluidLoadToFluid,					(not implemented)
  *	- DerFluidLoadToStructure,
@@ -153,7 +153,7 @@ private:
  *	To get the base for the boundary condition call the getBase function.
  */
 template< >
-class BCInterface3DFunctionFSI< FSIOperator >
+class BCInterface3DFunctionFSI< FSI >
 {
 public:
 
@@ -195,9 +195,9 @@ public:
 
     //! Check method passing the operator
     /*!
-     * @param physicalSolver FSIOperator
+     * @param physicalSolver FSI
      */
-    void checkMethod( const boost::shared_ptr< FSIOperator >& physicalSolver );
+    void checkMethod( const boost::shared_ptr< FSI >& physicalSolver );
 
     //@}
 
@@ -241,7 +241,7 @@ private:
     //@{
 
     template< class method >
-    void checkFunction( const boost::shared_ptr< FSIOperator >& physicalSolver );
+    void checkFunction( const boost::shared_ptr< FSI >& physicalSolver );
 
     //@}
 
@@ -281,7 +281,7 @@ private:
 // Private functions
 // ===================================================
 template< class method >
-inline void BCInterface3DFunctionFSI< FSIOperator >::checkFunction( const boost::shared_ptr< FSIOperator >& physicalSolver )
+inline void BCInterface3DFunctionFSI< FSI >::checkFunction( const boost::shared_ptr< FSI >& physicalSolver )
 {
     method *operMethod = dynamic_cast< method * > ( &*physicalSolver );
 

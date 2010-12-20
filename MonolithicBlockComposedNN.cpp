@@ -29,7 +29,7 @@
 
 #include <life/lifefem/bcManage.hpp>
 
-#include <lifemc/lifesolver/ComposedNN.hpp>
+#include <lifemc/lifesolver/MonolithicBlockComposedNN.hpp>
 
 namespace LifeV
 {
@@ -38,7 +38,7 @@ namespace LifeV
 //! Public Methods
 // ===================================================
 
-int ComposedNN::solveSystem( const vector_Type& rhs, vector_Type& step, solverPtr_Type& linearSolver )
+int MonolithicBlockComposedNN::solveSystem( const vector_Type& rhs, vector_Type& step, solverPtr_Type& linearSolver )
 {
     M_firstCompPrec .reset(new composed_prec(M_comm));
     M_secondCompPrec.reset(new composed_prec(M_comm));
@@ -114,12 +114,12 @@ int ComposedNN::solveSystem( const vector_Type& rhs, vector_Type& step, solverPt
 
 
 
-void ComposedNN::setDataFromGetPot(const GetPot& data, const std::string& section)
+void MonolithicBlockComposedNN::setDataFromGetPot(const GetPot& data, const std::string& section)
 {
     IfpackPreconditioner::createIfpackList( M_list, data, section, "");
 }
 
-void ComposedNN::coupler(mapPtr_Type& map,
+void MonolithicBlockComposedNN::coupler(mapPtr_Type& map,
                          const std::map<ID, ID>& locDofMap,
                          const vectorPtr_Type& numerationInterface,
                          const Real& timeStep)
@@ -168,7 +168,7 @@ void ComposedNN::coupler(mapPtr_Type& map,
     M_prec.resize(M_blocks.size());
 }
 
-void ComposedNN::applyBoundaryConditions(const Real& time, const UInt i)
+void MonolithicBlockComposedNN::applyBoundaryConditions(const Real& time, const UInt i)
 {
     M_blocks[i]->openCrsMatrix();
     if ( !M_bch[i]->bcUpdateDone() )
@@ -180,7 +180,7 @@ void ComposedNN::applyBoundaryConditions(const Real& time, const UInt i)
 }
 
 
-void ComposedNN::push_back_matrix(const matrixPtr_Type& Mat, const  bool recompute)
+void MonolithicBlockComposedNN::push_back_matrix(const matrixPtr_Type& Mat, const  bool recompute)
 {
     Mat->globalAssemble();
     *Mat *= 2.;
@@ -189,7 +189,7 @@ void ComposedNN::push_back_matrix(const matrixPtr_Type& Mat, const  bool recompu
 
 
 
-void ComposedNN::replace_matrix( const matrixPtr_Type& oper, UInt position )
+void MonolithicBlockComposedNN::replace_matrix( const matrixPtr_Type& oper, UInt position )
 {
     oper->globalAssemble();
     *oper *= 2.;

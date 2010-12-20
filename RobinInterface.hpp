@@ -39,7 +39,7 @@
 #define ROBININTERFACE_H 1
 
 #include <life/lifecore/life.hpp>
-#include <lifemc/lifesolver/BlockInterface.hpp>
+#include <lifemc/lifesolver/MonolithicBlock.hpp>
 
 #include <life/lifearray/EpetraMatrix.hpp>
 
@@ -97,20 +97,20 @@ public:
       \param data: data file
       \param section: the section (usually /robin) in the GetPot file where the parameters are specified
      */
-    void setRobinMatrix( BlockInterface::matrixPtr_Type& robinMatrix ){M_robinPart=robinMatrix;}
+    void setRobinMatrix( MonolithicBlock::matrixPtr_Type& robinMatrix ){M_robinPart=robinMatrix;}
 
     //! method to initialize the pointer to the robin RHS
     /*!
       \param vec: the rhs vector
      */
-    void setRobinRhs( BlockInterface::vectorPtr_Type& vec ) { M_rhsVec = vec; }
+    void setRobinRhs( MonolithicBlock::vectorPtr_Type& vec ) { M_rhsVec = vec; }
 
     //! method to apply the robin coupling to the blocks.
     /*!
       Note that the coupling matrix M_robinCoupling must be set before calling this.
       \param blockVector: the vector of blocks to couple.
      */
-    void applyRobinCoupling( std::vector<BlockInterface::matrixPtr_Type> blockVector);
+    void applyRobinCoupling( std::vector<MonolithicBlock::matrixPtr_Type> blockVector);
 
     //@}
 
@@ -120,7 +120,7 @@ protected:
     //! @name Protected Methods
     //@{
 
-    void applyRobinCoupling( BlockInterface::matrixPtr_Type firstBlock );
+    void applyRobinCoupling( MonolithicBlock::matrixPtr_Type firstBlock );
 
     //@}
 
@@ -130,9 +130,9 @@ protected:
 
     Real                                 M_alphaf;
     Real                                 M_alphas;
-    BlockInterface::matrixPtr_Type       M_robinCoupling;
-    BlockInterface::matrixPtr_Type       M_robinPart;
-    BlockInterface::vectorPtr_Type       M_rhsVec;
+    MonolithicBlock::matrixPtr_Type       M_robinCoupling;
+    MonolithicBlock::matrixPtr_Type       M_robinPart;
+    MonolithicBlock::vectorPtr_Type       M_rhsVec;
     //@}
 
 };

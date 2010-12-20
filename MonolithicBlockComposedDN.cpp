@@ -27,7 +27,7 @@
 
 #include <life/lifecore/life.hpp>
 
-#include <ComposedDN.hpp>
+#include <MonolithicBlockComposedDN.hpp>
 
 namespace LifeV
 {
@@ -37,14 +37,14 @@ namespace LifeV
 //! Public Methods
 // ===================================================
 
-void ComposedDN::setDataFromGetPot( const GetPot& dataFile,
+void MonolithicBlockComposedDN::setDataFromGetPot( const GetPot& dataFile,
                                       const std::string& section )
 {
     M_blockPrecs->setDataFromGetPot( dataFile, section );
 }
 
 
-int ComposedDN::solveSystem( const vector_Type& rhs, vector_Type& step, solverPtr_Type& linearSolver )
+int MonolithicBlockComposedDN::solveSystem( const vector_Type& rhs, vector_Type& step, solverPtr_Type& linearSolver )
 {
     assert(M_blockPrecs.get());
 
@@ -70,7 +70,7 @@ int ComposedDN::solveSystem( const vector_Type& rhs, vector_Type& step, solverPt
 }
 
 
-void ComposedDN::coupler(mapPtr_Type& map,
+void MonolithicBlockComposedDN::coupler(mapPtr_Type& map,
                          const std::map<ID, ID>& locDofMap,
                          const vectorPtr_Type& numerationInterface,
                          const Real& timeStep)
@@ -92,7 +92,7 @@ void ComposedDN::coupler(mapPtr_Type& map,
 
 }
 
-void ComposedDN::push_back_precs( matrixPtr_Type& Mat )
+void MonolithicBlockComposedDN::push_back_precs( matrixPtr_Type& Mat )
 {
     M_blockPrecs->push_back(Mat);
 }
@@ -103,7 +103,7 @@ void ComposedDN::push_back_precs( matrixPtr_Type& Mat )
 // ===================================================
 
 
-void ComposedDN::replace_precs(  matrixPtr_Type& Mat, UInt position )
+void MonolithicBlockComposedDN::replace_precs(  matrixPtr_Type& Mat, UInt position )
 {
     M_blockPrecs->replace(Mat, position);
 }

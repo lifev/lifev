@@ -41,7 +41,7 @@
 #define COMPOSEDDNND_H 1
 
 #include <life/lifecore/life.hpp>
-#include <lifemc/lifesolver/ComposedNN.hpp>
+#include <lifemc/lifesolver/MonolithicBlockComposedNN.hpp>
 
 namespace LifeV
 {
@@ -113,21 +113,21 @@ I& 0 & 0 \\
 \right).
 \f$
  */
-class ComposedDNND : public ComposedNN
+class MonolithicBlockComposedDNND : public MonolithicBlockComposedNN
 {
 public:
 
-    typedef ComposedNN super_Type;
+    typedef MonolithicBlockComposedNN super_Type;
 
     //! @name Constructor and Destructor
     //@{
 
-    ComposedDNND( const std::vector<Int>& flag, const std::vector<Block>& order ):
+    MonolithicBlockComposedDNND( const std::vector<Int>& flag, const std::vector<Block>& order ):
             super_Type( flag, order )
     {
     }
 
-    ~ComposedDNND()
+    ~MonolithicBlockComposedDNND()
     {}
 
     //@}
@@ -166,13 +166,13 @@ public:
     //!@name Factory Method
     //@{
 
-    static BlockInterface* createComposedDNND()
+    static MonolithicBlock* createComposedDNND()
     {
         const Int couplingsDNND[] = { 8, 4, 2, 8, 1, 2 };
-        const ComposedBlockOper::Block order[] = { ComposedBlockOper::fluid, ComposedBlockOper::solid};
+        const MonolithicBlockComposed::Block order[] = { MonolithicBlockComposed::fluid, MonolithicBlockComposed::solid};
         const std::vector<Int> couplingVectorDNND(couplingsDNND, couplingsDNND+6);
-        const std::vector<ComposedBlockOper::Block> orderVector(order, order+6);
-        return new ComposedDNND(couplingVectorDNND, orderVector);
+        const std::vector<MonolithicBlockComposed::Block> orderVector(order, order+6);
+        return new MonolithicBlockComposedDNND(couplingVectorDNND, orderVector);
     }
 
     //@}

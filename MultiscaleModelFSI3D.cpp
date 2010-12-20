@@ -78,14 +78,14 @@ MultiscaleModelFSI3D::MultiscaleModelFSI3D() :
 
     M_type = FSI3D;
 
-    BlockPrecFactory::instance().registerProduct("ComposedDNND",      &ComposedDNND::createComposedDNND);
-    BlockPrecFactory::instance().registerProduct("AdditiveSchwarz",   &BlockMatrix::createAdditiveSchwarz) ;
-    BlockPrecFactory::instance().registerProduct("AdditiveSchwarzRN", &BlockMatrixRN::createAdditiveSchwarzRN ) ;
-    BlockPrecFactory::instance().registerProduct("ComposedDN",        &ComposedDN::createComposedDN ) ;
-    BlockPrecFactory::instance().registerProduct("ComposedDN2",       &ComposedDN::createComposedDN2 );
+    BlockPrecFactory::instance().registerProduct("ComposedDNND",      &MonolithicBlockComposedDNND::createComposedDNND);
+    BlockPrecFactory::instance().registerProduct("AdditiveSchwarz",   &MonolithicBlockMatrix::createAdditiveSchwarz) ;
+    BlockPrecFactory::instance().registerProduct("AdditiveSchwarzRN", &MonolithicBlockMatrixRN::createAdditiveSchwarzRN ) ;
+    BlockPrecFactory::instance().registerProduct("ComposedDN",        &MonolithicBlockComposedDN::createComposedDN ) ;
+    BlockPrecFactory::instance().registerProduct("ComposedDN2",       &MonolithicBlockComposedDN::createComposedDN2 );
 
-    BlockMatrix::Factory::instance().registerProduct("AdditiveSchwarz",   &BlockMatrix::createAdditiveSchwarz ) ;
-    BlockMatrix::Factory::instance().registerProduct("AdditiveSchwarzRN", &BlockMatrixRN::createAdditiveSchwarzRN ) ;
+    MonolithicBlockMatrix::Factory::instance().registerProduct("AdditiveSchwarz",   &MonolithicBlockMatrix::createAdditiveSchwarz ) ;
+    MonolithicBlockMatrix::Factory::instance().registerProduct("AdditiveSchwarzRN", &MonolithicBlockMatrixRN::createAdditiveSchwarzRN ) ;
 
     FSIOperator_Type::solid_Type::StructureSolverFactory::instance().registerProduct( "linearVenantKirchhof", &FSIOperator_Type::createLinearStructure );
 //    FSIOperator_Type::solid_Type::StructureSolverFactory::instance().registerProduct( "nonLinearVenantKirchhof", &FSIOperator_Type::createNonLinearStructure );
@@ -107,8 +107,8 @@ MultiscaleModelFSI3D::setupData( const std::string& fileName )
     if ( M_globalData.get() )
         setupGlobalData( fileName );
 
-    // Create FSIOperator
-    M_FSIoperator = FSIOperatorPtr_Type( FSIOperator::FSIFactory_Type::instance().createObject( M_data->method() ) );
+    // Create FSI
+    M_FSIoperator = FSIOperatorPtr_Type( FSI::FSIFactory_Type::instance().createObject( M_data->method() ) );
 
     // Setup Communicator
     setupCommunicator();
@@ -211,7 +211,7 @@ MultiscaleModelFSI3D::updateSystem()
 
     M_nonLinearRichardsonIteration = 0;
 
-    boost::dynamic_pointer_cast<Monolithic>(M_FSIoperator)->precPtrView()->setRecompute( 1, true );
+    boost::dynamic_pointer_cast<FSIMonolithic>(M_FSIoperator)->precPtrView()->setRecompute( 1, true );
 }
 
 void
@@ -222,7 +222,7 @@ MultiscaleModelFSI3D::solveSystem( )
 
     // Non-linear Richardson solver
     vectorPtr_Type solution( new vector_Type( *M_fluidVelocityPressure_tn ) ) ;
-    boost::dynamic_pointer_cast<LifeV::Monolithic>(M_FSIoperator)->initializeMesh(M_solidDisplacement_tn);
+    boost::dynamic_pointer_cast<LifeV::FSIMonolithic>(M_FSIoperator)->initializeMesh(M_solidDisplacement_tn);
     M_FSIoperator->fluid().initialize( *M_fluidVelocityPressure );//useless?
     vectorPtr_Type newDisp(new vector_Type(*M_solidDisplacement));
     M_FSIoperator->solid().initialize( newDisp, M_solidVelocity );
@@ -234,7 +234,7 @@ MultiscaleModelFSI3D::solveSystem( )
 
     if (M_nonLinearRichardsonIteration != 0)
     {
-        boost::dynamic_pointer_cast<Monolithic>(M_FSIoperator)->precPtrView()->setRecompute( 1, false );
+        boost::dynamic_pointer_cast<FSIMonolithic>(M_FSIoperator)->precPtrView()->setRecompute( 1, false );
         M_FSIoperator->updateRHS();
         M_FSIoperator->applyBoundaryConditions( );
     }
@@ -288,7 +288,7 @@ MultiscaleModelFSI3D::saveSolution()
         }
     */
 
-    // TODO Post-processing is not working with MonolithicGI + it is also not saving last time step for MonolithicGE
+    // TODO Post-processing is not working with FSIMonolithicGI + it is also not saving last time step for FSIMonolithicGE
     //      To solve this do HE after FluidAndSolid
 
     // Saving Fluid (displacement) for this post-processing
@@ -666,7 +666,7 @@ MultiscaleModelFSI3D::initializeSolution()
         // 1) TODO Remove nRestart flag from the file
         // 2) TODO This part should be rewritten better
         vectorPtr_Type UniqueVFDOld( new vector_Type( *M_fluidDisplacement, Unique, Zero ) );
-        dynamic_cast< Monolithic* >( M_FSIoperator.get())->initializeMesh( UniqueVFDOld );
+        dynamic_cast< FSIMonolithic* >( M_FSIoperator.get())->initializeMesh( UniqueVFDOld );
 
         vectorPtr_Type initSol( new EpetraVector( *M_FSIoperator->couplingVariableMap() ) );
         vectorPtr_Type UniqueV( new vector_Type( *M_fluidVelocityPressure, Unique, Zero ) );
@@ -674,7 +674,7 @@ MultiscaleModelFSI3D::initializeSolution()
         M_FSIoperator->fluid().initialize( *initSol );
 
         UniqueV.reset( new vector_Type( *M_FSIoperator->couplingVariableMap(), Unique, Zero ) );
-        UInt offset = dynamic_cast<Monolithic*>(M_FSIoperator.get())->getOffset();
+        UInt offset = dynamic_cast<FSIMonolithic*>(M_FSIoperator.get())->getOffset();
 
         UniqueV->subset( *M_solidDisplacement, M_solidDisplacement->map(), (UInt)0, offset );
         *UniqueV *= 1 / ( M_FSIoperator->solid().getRescaleFactor() * M_data->dataFluid()->dataTime()->timeStep() );
@@ -685,7 +685,7 @@ MultiscaleModelFSI3D::initializeSolution()
         if ( !M_data->method().compare("monolithicGI") )
         {
             vectorPtr_Type UniqueVFD ( new vector_Type( *M_FSIoperator->couplingVariableMap(), Unique, Zero ) );
-            UniqueVFD->subset( *M_fluidDisplacement, M_fluidDisplacement->map(), (UInt)0, dynamic_cast<MonolithicGI*>(M_FSIoperator.get())->mapWithoutMesh().map(Unique)->NumGlobalElements());
+            UniqueVFD->subset( *M_fluidDisplacement, M_fluidDisplacement->map(), (UInt)0, dynamic_cast<FSIMonolithicGI*>(M_FSIoperator.get())->mapWithoutMesh().map(Unique)->NumGlobalElements());
             *initSol += *UniqueVFD;
         }
 

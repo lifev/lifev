@@ -39,20 +39,20 @@
 #ifndef MONOLITHICGE_H
 #define MONOLITHICGE_H 1
 
-#include <lifemc/lifesolver/BlockMatrix.hpp>
-#include <lifemc/lifesolver/BlockMatrixRN.hpp>
-#include <lifemc/lifesolver/ComposedDN.hpp>
-#include <lifemc/lifesolver/ComposedNN.hpp>
-#include <lifemc/lifesolver/ComposedDNND.hpp>
+#include <lifemc/lifesolver/MonolithicBlockMatrix.hpp>
+#include <lifemc/lifesolver/MonolithicBlockMatrixRN.hpp>
+#include <lifemc/lifesolver/MonolithicBlockComposedDN.hpp>
+#include <lifemc/lifesolver/MonolithicBlockComposedNN.hpp>
+#include <lifemc/lifesolver/MonolithicBlockComposedDNND.hpp>
 
 #include <life/lifecore/life.hpp>
 
-#include <lifemc/lifesolver/Monolithic.hpp>
+#include <lifemc/lifesolver/FSIMonolithic.hpp>
 
 namespace LifeV
 {
 
-//! monolithicGE - Monolithic Geometry-Explicit solver
+//! FSIMonolithicGE - FSIMonolithic Geometry-Explicit solver
 /*!
   \include ../../testsuite/test_monolithic/fluidstructure.dox
   @author Paolo Crosetto
@@ -73,25 +73,25 @@ namespace LifeV
  ine for GE; if AdditiveSchwarzRN the coupling blocks are of Robin type instead of Dirichlet and Neumann. The parameters
  for the Robin coupling are alphaf and alphas in the data file. NOTE: this method has currently been tested only for
  alphas=0.
- - DDBlockPrec: specifies the possible preconditioners to use. Can be: AdditiveSchwarz, ComposedDN, ComposedDN2,
- ComposedNN, ComposedDNND.
+ - DDBlockPrec: specifies the possible preconditioners to use. Can be: AdditiveSchwarz, MonolithicBlockComposedDN, MonolithicBlockComposedDN2,
+ MonolithicBlockComposedNN, MonolithicBlockComposedDNND.
 
  */
-class MonolithicGE : public Monolithic
+class FSIMonolithicGE : public FSIMonolithic
 {
 public:
 
-    typedef Monolithic super_Type;
+    typedef FSIMonolithic super_Type;
     //! @name Constructor & Destructor
     //@{
 
     //! Empty Constructor
-    MonolithicGE():
+    FSIMonolithicGE():
         super_Type()
     {}
 
     //! Destructor
-    ~MonolithicGE()
+    ~FSIMonolithicGE()
     {}
 
     //@}
@@ -165,14 +165,14 @@ public:
     //@}
 
     //! Factory method
-    static FSIOperator* createM(){ return new MonolithicGE(); }
+    static FSI* createM(){ return new FSIMonolithicGE(); }
 
 private:
     //!@name Private Methods
     //@{
     void createOperator( std::string& operType )
     {
-        M_monolithicMatrix.reset(BlockMatrix::Factory::instance().createObject( operType ));
+        M_monolithicMatrix.reset(MonolithicBlockMatrix::Factory::instance().createObject( operType ));
     }
     //@}
 

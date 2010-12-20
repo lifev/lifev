@@ -38,7 +38,7 @@
 #ifndef _MONOLITHICGI_HPP
 #define _MONOLITHICGI_HPP
 
-#include <lifemc/lifesolver/Monolithic.hpp>
+#include <lifemc/lifesolver/FSIMonolithic.hpp>
 
 namespace LifeV
 {
@@ -47,7 +47,7 @@ class Epetra_FullMonolithic;
 #endif
 
 /**
-   Monolithic Geomitry-Implicit solver
+   FSIMonolithic Geomitry-Implicit solver
  * Class handling the nonlinear monolithic solver for FSI problems. The (exact or inexact)
  * Newton algorithm is used to solve the nonlinearity.
  * The block structure of the jacobian matrix is
@@ -77,24 +77,24 @@ class Epetra_FullMonolithic;
  ine for GE; if AdditiveSchwarzRN the coupling blocks are of Robin type instead of Dirichlet and Neumann. The parameters
  for the Robin coupling are alphaf and alphas in the data file. NOTE: this method has currently been tested only for
  alphas=0.
- - DDBlockPrec: specifies the possible preconditioners to use. Can be: AdditiveSchwarz, ComposedDN, ComposedDN2,
- ComposedNN, ComposedDNND.
+ - DDBlockPrec: specifies the possible preconditioners to use. Can be: AdditiveSchwarz, MonolithicBlockComposedDN, MonolithicBlockComposedDN2,
+ MonolithicBlockComposedNN, MonolithicBlockComposedDNND.
  */
 
-class MonolithicGI : public Monolithic
+class FSIMonolithicGI : public FSIMonolithic
 {
 public:
 
-    typedef Monolithic                                         super_Type;
+    typedef FSIMonolithic                                         super_Type;
     typedef EpetraPreconditioner                               prec_Type;
     typedef boost::shared_ptr<prec_Type>                   prec_type;
 
     //!@name Constructor and Destructor
     //@{
     //! Empty Constructor
-    MonolithicGI();
+    FSIMonolithicGI();
     //! Destructor
-    virtual ~MonolithicGI(){}
+    virtual ~FSIMonolithicGI(){}
     //@}
 
     //!@name Public Methods
@@ -146,11 +146,11 @@ public:
                                          const vector_Type &_res,
                                          const Real       _linearRelTol);
     //! initialize the system with functions
-    void                        initialize( FSIOperator::fluidPtr_Type::value_type::function_Type const& u0,
-                                            FSIOperator::solidPtr_Type::value_type::Function const& p0,
-                                            FSIOperator::solidPtr_Type::value_type::Function const& d0,
-                                            FSIOperator::solidPtr_Type::value_type::Function const& w0,
-                                            FSIOperator::solidPtr_Type::value_type::Function const& df0 );
+    void                        initialize( FSI::fluidPtr_Type::value_type::function_Type const& u0,
+                                            FSI::solidPtr_Type::value_type::Function const& p0,
+                                            FSI::solidPtr_Type::value_type::Function const& d0,
+                                            FSI::solidPtr_Type::value_type::Function const& w0,
+                                            FSI::solidPtr_Type::value_type::Function const& df0 );
 
     //@}
     //!@name Get Methods
@@ -203,7 +203,7 @@ private:
     //! Factory method for the system matrix, of type MonolithicBlockBase
     void createOperator( std::string& operType )
     {
-        M_monolithicMatrix.reset(BlockMatrix::Factory::instance().createObject( operType ));
+        M_monolithicMatrix.reset(MonolithicBlockMatrix::Factory::instance().createObject( operType ));
     }
 
     /**

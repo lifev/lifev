@@ -27,7 +27,7 @@
 
 #include <life/lifecore/life.hpp>
 
-#include <BlockMatrix.hpp>
+#include <MonolithicBlockMatrix.hpp>
 
 namespace LifeV
 {
@@ -39,18 +39,18 @@ namespace LifeV
 // ===================================================
 
 
-void BlockMatrix::setDataFromGetPot(const GetPot& data, const std::string& section)
+void MonolithicBlockMatrix::setDataFromGetPot(const GetPot& data, const std::string& section)
 {
 }
 
 
-void BlockMatrix::GlobalAssemble()
+void MonolithicBlockMatrix::GlobalAssemble()
 {
     M_globalMatrix->globalAssemble();
     //    M_globalMatrix->spy("Prec");
 }
 
-void BlockMatrix::coupler(mapPtr_Type& map,
+void MonolithicBlockMatrix::coupler(mapPtr_Type& map,
                           const std::map<ID, ID>& locDofMap,
                           const vectorPtr_Type& numerationInterface,
                           const Real& timeStep
@@ -61,7 +61,7 @@ void BlockMatrix::coupler(mapPtr_Type& map,
     super_Type::couplingMatrix( M_coupling,  M_couplingFlag, super_Type::M_FESpace, super_Type::M_offset, locDofMap, numerationInterface, timeStep);
 }
 
-void BlockMatrix::coupler(mapPtr_Type& map,
+void MonolithicBlockMatrix::coupler(mapPtr_Type& map,
                           const std::map<ID, ID>& locDofMap,
                           const vectorPtr_Type& numerationInterface,
                           const Real& timeStep,
@@ -72,30 +72,30 @@ void BlockMatrix::coupler(mapPtr_Type& map,
 }
 
 
-int BlockMatrix::solveSystem( const vector_Type& rhs, vector_Type& step, solverPtr_Type& linearSolver)
+int MonolithicBlockMatrix::solveSystem( const vector_Type& rhs, vector_Type& step, solverPtr_Type& linearSolver)
 {
     return linearSolver->solveSystem(rhs, step, M_globalMatrix);
 }
 
-void BlockMatrix::push_back_matrix( const matrixPtr_Type& Mat, bool /*recompute*/)
+void MonolithicBlockMatrix::push_back_matrix( const matrixPtr_Type& Mat, bool /*recompute*/)
 {
     super_Type::M_blocks.push_back(Mat);
 }
 
 
-void BlockMatrix::replace_matrix( const matrixPtr_Type& Mat, UInt index)
+void MonolithicBlockMatrix::replace_matrix( const matrixPtr_Type& Mat, UInt index)
 {
     super_Type::M_blocks[index] = Mat;
 }
 
 
-void BlockMatrix::replace_precs( const epetraOperatorPtr_Type& Mat, UInt index)
+void MonolithicBlockMatrix::replace_precs( const epetraOperatorPtr_Type& Mat, UInt index)
 {
     assert(false);
 }
 
 
-void BlockMatrix::blockAssembling()
+void MonolithicBlockMatrix::blockAssembling()
 {
     M_coupling->globalAssemble();
     M_globalMatrix.reset(new matrix_Type(M_coupling->map()));
@@ -109,14 +109,14 @@ void BlockMatrix::blockAssembling()
 
 
 
-void BlockMatrix::applyPreconditioner(const matrixPtr_Type matrix, vectorPtr_Type& rhsFull)
+void MonolithicBlockMatrix::applyPreconditioner(const matrixPtr_Type matrix, vectorPtr_Type& rhsFull)
 {
     this->applyPreconditioner(matrix, M_globalMatrix);
     *rhsFull = (*matrix)*(*rhsFull);
 }
 
 
-void BlockMatrix::applyPreconditioner( matrixPtr_Type robinCoupling, matrixPtr_Type prec, vectorPtr_Type& rhs)
+void MonolithicBlockMatrix::applyPreconditioner( matrixPtr_Type robinCoupling, matrixPtr_Type prec, vectorPtr_Type& rhs)
 {
     applyPreconditioner(robinCoupling, prec);
     applyPreconditioner(robinCoupling, M_globalMatrix);
@@ -124,7 +124,7 @@ void BlockMatrix::applyPreconditioner( matrixPtr_Type robinCoupling, matrixPtr_T
 }
 
 
-void BlockMatrix::applyPreconditioner( const matrixPtr_Type prec, matrixPtr_Type& oper )
+void MonolithicBlockMatrix::applyPreconditioner( const matrixPtr_Type prec, matrixPtr_Type& oper )
 {
     matrix_Type tmpMatrix(prec->map(), 1);
     EpetraExt::MatrixMatrix::Multiply( *prec->matrixPtr(),
@@ -136,7 +136,7 @@ void BlockMatrix::applyPreconditioner( const matrixPtr_Type prec, matrixPtr_Type
 }
 
 
-void BlockMatrix::createInterfaceMap( const EpetraMap& interfaceMap , const std::map<ID, ID>& locDofMap, const UInt subdomainMaxId,  const boost::shared_ptr<Epetra_Comm> epetraWorldComm )
+void MonolithicBlockMatrix::createInterfaceMap( const EpetraMap& interfaceMap , const std::map<ID, ID>& locDofMap, const UInt subdomainMaxId,  const boost::shared_ptr<Epetra_Comm> epetraWorldComm )
 {
     //std::map<ID, ID> const& locDofMap = M_dofStructureToHarmonicExtension->locDofMap();
     std::map<ID, ID>::const_iterator ITrow;
@@ -199,29 +199,29 @@ void BlockMatrix::createInterfaceMap( const EpetraMap& interfaceMap , const std:
     M_interfaceMap.reset(new EpetraMap(-1, static_cast< Int> ( couplingVector.size() ), &couplingVector[0], interfaceMap.map(Repeated)->IndexBase()/*1*/, epetraWorldComm));
 }
 
-void BlockMatrix::applyBoundaryConditions(const Real& time)
+void MonolithicBlockMatrix::applyBoundaryConditions(const Real& time)
 {
     for ( UInt i = 0; i < super_Type::M_blocks.size(); ++i )
         applyBoundaryConditions( time, i );
 }
 
-void BlockMatrix::applyBoundaryConditions(const Real& time, vectorPtr_Type& rhs)
+void MonolithicBlockMatrix::applyBoundaryConditions(const Real& time, vectorPtr_Type& rhs)
 {
     for ( UInt i = 0; i < super_Type::M_blocks.size(); ++i )
         applyBoundaryConditions( time, rhs, i );
 }
 
-void BlockMatrix::applyBoundaryConditions(const Real& time, vectorPtr_Type& rhs, const UInt block)
+void MonolithicBlockMatrix::applyBoundaryConditions(const Real& time, vectorPtr_Type& rhs, const UInt block)
 {
     bcManage( *M_globalMatrix , *rhs, *super_Type::M_FESpace[block]->mesh(), super_Type::M_FESpace[block]->dof(), *super_Type::M_bch[block], super_Type::M_FESpace[block]->feBd(), 1., time);
 }
 
-void BlockMatrix::applyBoundaryConditions(const Real& time, const UInt block)
+void MonolithicBlockMatrix::applyBoundaryConditions(const Real& time, const UInt block)
 {
     bcManageMatrix( *M_globalMatrix , *super_Type::M_FESpace[block]->mesh(), super_Type::M_FESpace[block]->dof(), *super_Type::M_bch[block], super_Type::M_FESpace[block]->feBd(), 1., time);
 }
 
-void BlockMatrix::addToCoupling( const matrixPtr_Type& Mat, UInt /*position*/)
+void MonolithicBlockMatrix::addToCoupling( const matrixPtr_Type& Mat, UInt /*position*/)
 {
     if (!M_coupling->matrixPtr()->Filled())
         *M_coupling += *Mat;

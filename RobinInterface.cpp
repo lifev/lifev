@@ -43,9 +43,9 @@ void RobinInterface::setRobinData(const GetPot& data, const std::string& section
 }
 
 
-void RobinInterface::applyRobinCoupling( std::vector<BlockInterface::matrixPtr_Type> blockVector)
+void RobinInterface::applyRobinCoupling( std::vector<MonolithicBlock::matrixPtr_Type> blockVector)
 {
-    M_robinPart.reset(new BlockInterface::matrix_Type(M_robinCoupling->map(), 0));
+    M_robinPart.reset(new MonolithicBlock::matrix_Type(M_robinCoupling->map(), 0));
 
     for( UInt ITBlock = 0; ITBlock < blockVector.size(); ++ITBlock )
         applyRobinCoupling( blockVector[ITBlock] );
@@ -56,9 +56,9 @@ void RobinInterface::applyRobinCoupling( std::vector<BlockInterface::matrixPtr_T
 //! Protected Methods
 // ===================================================
 
-void RobinInterface::applyRobinCoupling( BlockInterface::matrixPtr_Type block)
+void RobinInterface::applyRobinCoupling( MonolithicBlock::matrixPtr_Type block)
 {
-    BlockInterface::matrixPtr_Type tmpMatrix(new BlockInterface::matrix_Type(M_robinCoupling->map(), 0));
+    MonolithicBlock::matrixPtr_Type tmpMatrix(new MonolithicBlock::matrix_Type(M_robinCoupling->map(), 0));
     int err = EpetraExt::MatrixMatrix::
               Multiply( *M_robinCoupling->matrixPtr(),
                         false,

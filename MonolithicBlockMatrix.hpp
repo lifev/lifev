@@ -36,28 +36,28 @@
 #ifndef BLOCKMATRIX_H
 #define BLOCKMATRIX_H 1
 
-#include <lifemc/lifesolver/BlockInterface.hpp>
+#include <lifemc/lifesolver/MonolithicBlock.hpp>
 
 namespace LifeV
 {
 
-//! BlockMatrix - class which handles matrices with a block structure.
+//! MonolithicBlockMatrix - class which handles matrices with a block structure.
 /*!
     @author Paolo Crosetto
 
     This class handles a matrix with block structure. In particular a vector of shared_ptr
     points to the different blocks, while one matrix contains the coupling part. all the blocks and the coupling
-    are summed into the matrix M_globalMatrix for the solution of the linear system. If a BlockMatrix is used as
+    are summed into the matrix M_globalMatrix for the solution of the linear system. If a MonolithicBlockMatrix is used as
     a preconditioner by default an algebraic additive Schwarz preconditioner is built on the matrix M_globalMatrix.
  */
 
-class BlockMatrix            : public BlockInterface
+class MonolithicBlockMatrix            : public MonolithicBlock
 {
 public:
 
     //! @name Public Types
     //@{
-    typedef  BlockInterface                 super_Type;
+    typedef  MonolithicBlock                 super_Type;
     typedef  super_Type::fespacePtr_Type  fespacePtr_Type;
     typedef  super_Type::vector_Type             vector_Type;
     typedef  super_Type::vectorPtr_Type          vectorPtr_Type;
@@ -66,14 +66,14 @@ public:
     typedef  super_Type::matrixPtr_Type          matrixPtr_Type;
     typedef  super_Type::epetraOperatorPtr_Type  epetraOperatorPtr_Type;
     typedef  super_Type::mapPtr_Type             mapPtr_Type;
-    typedef singleton<factory<BlockMatrix,  std::string> >     Factory;
+    typedef singleton<factory<MonolithicBlockMatrix,  std::string> >     Factory;
     //@}
 
 
     //! @name Constructor & Destructor
     //@{
 
-    BlockMatrix(UInt coupling):
+    MonolithicBlockMatrix(UInt coupling):
             super_Type(),
             M_globalMatrix(),
             M_coupling(),
@@ -83,7 +83,7 @@ public:
             M_numerationInterface()
     {}
 
-    ~BlockMatrix() {}
+    ~MonolithicBlockMatrix() {}
     //@}
 
     //! @name Virtual methods
@@ -283,7 +283,7 @@ public:
 
     //! adds a block to the coupling matrix
     /*!
-      This method is specific for the BlockMatrix class, it is used e.g. to add the shape derivatives block in FSI
+      This method is specific for the MonolithicBlockMatrix class, it is used e.g. to add the shape derivatives block in FSI
       to the global matrix
       @param Mat: block matrix to be added.
      */
@@ -327,9 +327,9 @@ public:
 
     //!@name Factory Method
     //@{
-    static BlockMatrix*    createAdditiveSchwarz()
+    static MonolithicBlockMatrix*    createAdditiveSchwarz()
     {
-        return new BlockMatrix(15);
+        return new MonolithicBlockMatrix(15);
     }
     //@}
 

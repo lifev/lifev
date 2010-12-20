@@ -208,7 +208,7 @@ FSIMonolithic::setupFluidSolid( UInt const fluxes )
 
 
 void
-FSIMonolithic::FSIMonolithicToInterface(vector_Type& lambdaSolid, const vector_Type& disp)
+FSIMonolithic::monolithicToInterface(vector_Type& lambdaSolid, const vector_Type& disp)
 {
     if (disp.mapType() == Repeated)
     {
@@ -236,7 +236,7 @@ FSIMonolithic::FSIMonolithicToInterface(vector_Type& lambdaSolid, const vector_T
 
 
 void
-FSIMonolithic::FSIMonolithicToX(const vector_Type& disp, vector_Type& dispFluid, EpetraMap& map, UInt offset)
+FSIMonolithic::monolithicToX(const vector_Type& disp, vector_Type& dispFluid, EpetraMap& map, UInt offset)
 {
     if(disp.mapType()== Repeated)
     {

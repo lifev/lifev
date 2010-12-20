@@ -38,38 +38,38 @@
 #define COMPOSEDDND_H 1
 
 #include <life/lifecore/life.hpp>
-#include <lifemc/lifesolver/ComposedDN.hpp>
+#include <lifemc/lifesolver/MonolithicBlockComposedDN.hpp>
 
 namespace LifeV
 {
 
-//! ComposedDND - Modular preconditioner for (e.g.) geometry implicit monolithic FSI, three factors splitting
+//! MonolithicBlockComposedDND - Modular preconditioner for (e.g.) geometry implicit monolithic FSI, three factors splitting
 /*!
     @author Paolo Crosetto
 
 Class implementing a modular preconditioner for FSI with the fluid geometry implicit. The preconditioner si split into
 three factor, which can be recomputed every time or reused.
  */
-class ComposedDND : public ComposedDN
+class MonolithicBlockComposedDND : public MonolithicBlockComposedDN
 {
 public:
 
     //! @name Public Types
     //@{
 
-    typedef ComposedDN super_Type;
+    typedef MonolithicBlockComposedDN super_Type;
 
     //@}
     //! @name Constructors and destructor
     //@{
 
-    ComposedDND( const std::vector<Int>& flag, const std::vector<Block>& order ):
+    MonolithicBlockComposedDND( const std::vector<Int>& flag, const std::vector<Block>& order ):
             super_Type(flag, order),
             M_swapped(false)
     {
     }
 
-    ~ComposedDND() {}
+    ~MonolithicBlockComposedDND() {}
 
     //@}
     //!@name Public Methods

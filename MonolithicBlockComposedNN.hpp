@@ -38,12 +38,12 @@
 #ifndef COMPOSEDNN_H
 #define COMPOSEDNN_H 1
 
-#include <lifemc/lifesolver/ComposedBlockOper.hpp>
+#include <lifemc/lifesolver/MonolithicBlockComposed.hpp>
 
 namespace LifeV
 {
 
-//! ComposedNN - Short description of the class
+//! MonolithicBlockComposedNN - Short description of the class
 /*!
     @author Paolo Crosetto
 
@@ -54,11 +54,11 @@ namespace LifeV
 
     Notice that if \f$P^{-1}=(2A)^{-1}+(2A)^{-1}=A^{-1}\f$. Thus the factors that we push_back in the preconditioners should be as close as possible to \f$2A\f$
  */
-class ComposedNN: public ComposedBlockOper
+class MonolithicBlockComposedNN: public MonolithicBlockComposed
 {
 public:
 
-    typedef ComposedBlockOper          super_Type;
+    typedef MonolithicBlockComposed          super_Type;
     typedef  ComposedOperator<Ifpack_Preconditioner> composed_prec;
 
 
@@ -66,7 +66,7 @@ public:
     //@{
 
     //! Empty Constructor
-    ComposedNN(const std::vector<Int>& flag, const std::vector<Block>& order):
+    MonolithicBlockComposedNN(const std::vector<Int>& flag, const std::vector<Block>& order):
             super_Type( flag, order ),
             M_blockPrecs(),
             M_prec()
@@ -74,7 +74,7 @@ public:
 
 
     //! Destructor
-    ~ComposedNN() {}
+    ~MonolithicBlockComposedNN() {}
 
     //@}
 
@@ -149,13 +149,13 @@ public:
     //!@name Factory Method
     //@{
 
-    static BlockInterface* createComposedNN()
+    static MonolithicBlock* createComposedNN()
     {
-        const ComposedBlockOper::Block order[] = {  ComposedBlockOper::fluid, ComposedBlockOper::solid};
+        const MonolithicBlockComposed::Block order[] = {  MonolithicBlockComposed::fluid, MonolithicBlockComposed::solid};
         const Int couplingsNN[] = { 8, 4, 1, 2};
         const std::vector<Int> couplingVectorNN(couplingsNN, couplingsNN+4);
-        const std::vector<ComposedBlockOper::Block> orderVector(order, order+4);
-        return new ComposedNN( couplingVectorNN, orderVector );
+        const std::vector<MonolithicBlockComposed::Block> orderVector(order, order+4);
+        return new MonolithicBlockComposedNN( couplingVectorNN, orderVector );
     }
 
     //@}

@@ -37,7 +37,7 @@
 
 #include <life/lifecore/life.hpp>
 
-#include <MonolithicGE.hpp>
+#include <FSIMonolithicGE.hpp>
 
 namespace LifeV
 {
@@ -47,20 +47,20 @@ namespace LifeV
 // ===================================================
 
 
-void MonolithicGE::setupFluidSolid( UInt const fluxes )
+void FSIMonolithicGE::setupFluidSolid( UInt const fluxes )
 {
     super_Type::setupFluidSolid( fluxes );
-    M_meshMotion.reset(new FSIOperator::meshMotion_Type(*M_mmFESpace,
+    M_meshMotion.reset(new FSI::meshMotion_Type(*M_mmFESpace,
                                                         M_epetraComm));
 
-    M_fluid.reset(new FSIOperator::fluid_Type(M_data->dataFluid(),
+    M_fluid.reset(new FSI::fluid_Type(M_data->dataFluid(),
                                                   *M_uFESpace,
                                                   *M_pFESpace,
                                                   M_epetraComm,
                                                   *M_monolithicMap));
 
     //             if (isLinearFluid())// to be implemented
-    //                 M_fluidLin.reset(new FSIOperator::fluidlin_raw_type(dataFluid(),
+    //                 M_fluidLin.reset(new FSI::fluidlin_raw_type(dataFluid(),
     //                                                                    *M_uFESpace,
     //                                                                    *M_pFESpace,
     //                                                                    *M_epetraComm));
@@ -79,7 +79,7 @@ void MonolithicGE::setupFluidSolid( UInt const fluxes )
                   );
 
     //             if (isLinearSolid())// to be implemented with the offset
-    //                 M_solidLin.reset(new FSIOperator::solidlin_raw_type(dataSolid(),
+    //                 M_solidLin.reset(new FSI::solidlin_raw_type(dataSolid(),
     //                                                                    *M_dFESpace,
     //
     //                                                      *M_epetraComm));
@@ -88,21 +88,21 @@ void MonolithicGE::setupFluidSolid( UInt const fluxes )
 
 
 
-void MonolithicGE::setupDOF()
+void FSIMonolithicGE::setupDOF()
 {
     M_bcvStructureDispToHarmonicExtension.reset( new  BCVectorInterface );
     super_Type::setupDOF();
 }
 
 void
-MonolithicGE::setupSystem( )
+FSIMonolithicGE::setupSystem( )
 {
     super_Type::setupSystem();
     M_meshMotion->setUp( M_dataFile );
 }
 
 void
-MonolithicGE::updateSystem( )
+FSIMonolithicGE::updateSystem( )
 {
     super_Type::updateSystem();
 
@@ -112,7 +112,7 @@ MonolithicGE::updateSystem( )
 
 
 void
-MonolithicGE::evalResidual( vector_Type&       res,
+FSIMonolithicGE::evalResidual( vector_Type&       res,
                             const vector_Type& disp,
                             const UInt          iter )
 {
@@ -150,7 +150,7 @@ MonolithicGE::evalResidual( vector_Type&       res,
 }
 
 void
-MonolithicGE::iterateMesh(const vector_Type& disp)
+FSIMonolithicGE::iterateMesh(const vector_Type& disp)
 {
     vector_Type lambdaFluid(*M_interfaceMap, Unique);
 
@@ -164,7 +164,7 @@ MonolithicGE::iterateMesh(const vector_Type& disp)
 
 }
 
-void MonolithicGE::applyBoundaryConditions( )
+void FSIMonolithicGE::applyBoundaryConditions( )
 {
 
          if ( !M_BCh_u->bcUpdateDone() )
@@ -209,13 +209,13 @@ void MonolithicGE::applyBoundaryConditions( )
 //! Products registration
 // ===================================================
 
-bool MonolithicGE::reg = FSIFactory_Type::instance().registerProduct( "monolithicGE", &MonolithicGE::createM )  &&
-                         BlockPrecFactory::instance().registerProduct("ComposedDNND"  , &ComposedDNND::createComposedDNND) &&
-                         BlockPrecFactory::instance().registerProduct("AdditiveSchwarz"  , &BlockMatrix::createAdditiveSchwarz) &&
-                         BlockMatrix::Factory::instance().registerProduct("AdditiveSchwarz"  , &BlockMatrix::createAdditiveSchwarz ) &&
-                         BlockPrecFactory::instance().registerProduct("AdditiveSchwarzRN"  , &BlockMatrixRN::createAdditiveSchwarzRN ) &&
-                         BlockMatrix::Factory::instance().registerProduct("AdditiveSchwarzRN"  , &BlockMatrixRN::createAdditiveSchwarzRN ) &&
-                         BlockPrecFactory::instance().registerProduct("ComposedDN"  , &ComposedDN::createComposedDN ) &&
-                         BlockPrecFactory::instance().registerProduct("ComposedDN2"  , &ComposedDN::createComposedDN2 );
+bool FSIMonolithicGE::reg = FSIFactory_Type::instance().registerProduct( "FSIMonolithicGE", &FSIMonolithicGE::createM )  &&
+                         BlockPrecFactory::instance().registerProduct("ComposedDNND"  , &MonolithicBlockComposedDNND::createComposedDNND) &&
+                         BlockPrecFactory::instance().registerProduct("AdditiveSchwarz"  , &MonolithicBlockMatrix::createAdditiveSchwarz) &&
+                         MonolithicBlockMatrix::Factory::instance().registerProduct("AdditiveSchwarz"  , &MonolithicBlockMatrix::createAdditiveSchwarz ) &&
+                         BlockPrecFactory::instance().registerProduct("AdditiveSchwarzRN"  , &MonolithicBlockMatrixRN::createAdditiveSchwarzRN ) &&
+                         MonolithicBlockMatrix::Factory::instance().registerProduct("AdditiveSchwarzRN"  , &MonolithicBlockMatrixRN::createAdditiveSchwarzRN ) &&
+                         BlockPrecFactory::instance().registerProduct("MonolithicBlockComposedDN"  , &MonolithicBlockComposedDN::createComposedDN ) &&
+                         BlockPrecFactory::instance().registerProduct("MonolithicBlockComposedDN2"  , &MonolithicBlockComposedDN::createComposedDN2 );
 
 } // Namespace LifeV

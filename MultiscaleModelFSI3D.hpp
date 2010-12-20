@@ -39,7 +39,7 @@
 #define MS_MODEL_FSI3D_H 1
 
 // LifeV includes
-#include <life/lifesolver/FSIOperator.hpp>
+#include <life/lifesolver/FSI.hpp>
 #include <life/lifealg/nonLinRichardson.hpp>
 
 #include <life/lifefilters/ensight.hpp>
@@ -48,14 +48,14 @@
 #endif
 
 // Mathcard includes
-#include <lifemc/lifesolver/MonolithicGE.hpp>
-#include <lifemc/lifesolver/MonolithicGI.hpp>
+#include <lifemc/lifesolver/FSIMonolithicGE.hpp>
+#include <lifemc/lifesolver/FSIMonolithicGI.hpp>
 
-#include <lifemc/lifesolver/BlockMatrix.hpp>
-#include <lifemc/lifesolver/BlockMatrixRN.hpp>
-#include <lifemc/lifesolver/ComposedDN.hpp>
-#include <lifemc/lifesolver/ComposedNN.hpp>
-#include <lifemc/lifesolver/ComposedDNND.hpp>
+#include <lifemc/lifesolver/MonolithicBlockMatrix.hpp>
+#include <lifemc/lifesolver/MonolithicBlockMatrixRN.hpp>
+#include <lifemc/lifesolver/MonolithicBlockComposedDN.hpp>
+#include <lifemc/lifesolver/MonolithicBlockComposedNN.hpp>
+#include <lifemc/lifesolver/MonolithicBlockComposedDNND.hpp>
 
 #include <lifemc/lifesolver/BCInterface3D.hpp>
 #include <lifemc/lifesolver/MultiscaleModel.hpp>
@@ -76,19 +76,19 @@ public:
     //! @name Public Types
     //@{
 
-    typedef FSIOperator                                                                    FSIOperator_Type;
-    typedef boost::shared_ptr< FSIOperator_Type>                                           FSIOperatorPtr_Type;
+    typedef FSI                                                                    FSIOperator_Type;
+    typedef boost::shared_ptr< FSIOperator_Type>                                   FSIOperatorPtr_Type;
 
-    typedef FSIOperator::data_Type                                                         data_Type;
-    typedef FSIOperator::dataPtr_Type                                                      dataPtr_Type;
+    typedef FSI::data_Type                                                         data_Type;
+    typedef FSI::dataPtr_Type                                                      dataPtr_Type;
 
-    typedef FSIOperator::mesh_Type                                                         mesh_Type;
+    typedef FSI::mesh_Type                                                         mesh_Type;
 
-    typedef FSIOperator::fluid_Type                                                        fluid_Type;
-    typedef FSIOperator::solid_Type                                                        solid_Type;
+    typedef FSI::fluid_Type                                                        fluid_Type;
+    typedef FSI::solid_Type                                                        solid_Type;
 
-    typedef FSIOperator::vector_Type                                                       vector_Type;
-    typedef FSIOperator::vectorPtr_Type                                                    vectorPtr_Type;
+    typedef FSI::vector_Type                                                       vector_Type;
+    typedef FSI::vectorPtr_Type                                                    vectorPtr_Type;
 
     typedef Exporter< mesh_Type >                                                          IOFile_Type;
     typedef boost::shared_ptr< IOFile_Type >                                               IOFilePtr_Type;
@@ -100,7 +100,7 @@ public:
 
     typedef BCHandler                                                                      bc_Type;
     typedef boost::shared_ptr< bc_Type >                                                   bcPtr_Type;
-    typedef BCInterface3D< FSIOperator >                                                   bcInterface_Type;
+    typedef BCInterface3D< FSI >                                                   bcInterface_Type;
     typedef boost::shared_ptr< bcInterface_Type >                                          bcInterfacePtr_Type;
 
     //@}

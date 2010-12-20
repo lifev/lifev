@@ -27,12 +27,12 @@
 
 #include <life/lifecore/life.hpp>
 
-#include <ComposedDND.hpp>
+#include <MonolithicBlockComposedDND.hpp>
 
 namespace LifeV
 {
 
-void ComposedDND::blockAssembling( )
+void MonolithicBlockComposedDND::blockAssembling( )
 {
     if (!M_swapped)
     {

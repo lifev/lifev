@@ -41,14 +41,14 @@
 #define COMPOSEDBLOCKOPER_H 1
 
 #include <life/lifecore/life.hpp>
-#include <lifemc/lifesolver/BlockInterface.hpp>
+#include <lifemc/lifesolver/MonolithicBlock.hpp>
 
 #include <boost/scoped_ptr.hpp>
 
 namespace LifeV
 {
 
-//! ComposedBlockOper - Class handling block-structured preconditioners
+//! MonolithicBlockComposed - Class handling block-structured preconditioners
 /*!
     @author Paolo Crosetto
     see \ref CDFQ
@@ -58,12 +58,12 @@ namespace LifeV
     and for each coupling part.
 
     It can be used e.g. to build preconditioners for the FSI system which are composed of different factors.
-    It derives from the pure virtual class BlockInterface, it is still pure virtual and it is intended to be the base
+    It derives from the pure virtual class MonolithicBlock, it is still pure virtual and it is intended to be the base
     class for every preconditioner that can be split into factors. Notice that the vector of the preconditioned factors
     is missing, because it has to be implemented in the children. It could be for instance of type
     ComposedOperator<T> or ComposedPreconditioner.
  */
-class ComposedBlockOper            : public BlockInterface
+class MonolithicBlockComposed            : public MonolithicBlock
 {
 public:
 
@@ -71,7 +71,7 @@ public:
 
     //! @name Public Types
     //@{
-    typedef BlockInterface                           super_Type;
+    typedef MonolithicBlock                           super_Type;
     typedef super_Type::fespacePtr_Type            fespacePtr_Type;
     typedef ComposedOperator<Epetra_Operator>  operatorPtr_Type;
     //@}
@@ -85,7 +85,7 @@ public:
        \param flags: vector of flags specifying the type of coupling between the different blocks that we chose for this operator
        \param order: vector specifying the order of the blocks.
      */
-    ComposedBlockOper(const std::vector<Int>& flags, const std::vector<Block>& order):
+    MonolithicBlockComposed(const std::vector<Int>& flags, const std::vector<Block>& order):
             super_Type(),
             M_recompute(order.size()),
             M_coupling(),
@@ -94,7 +94,7 @@ public:
     {}
 
 
-    ~ComposedBlockOper() {}
+    ~MonolithicBlockComposed() {}
     //@}
 
     //! @name Pure virtual methods
@@ -167,7 +167,7 @@ public:
      */
     virtual void    push_back_matrix(const matrixPtr_Type& Mat, const bool recompute);
 
-    virtual void push_back_oper( ComposedBlockOper& Oper);
+    virtual void push_back_oper( MonolithicBlockComposed& Oper);
 
     virtual void push_back_coupling( matrixPtr_Type& coupling);
 

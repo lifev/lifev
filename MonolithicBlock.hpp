@@ -53,7 +53,7 @@
 
 namespace LifeV {
 
-//! BlockInterface - This is a pure virtual class for the linear operators with a block structure
+//! MonolithicBlock - This is a pure virtual class for the linear operators with a block structure
 /*!    (i.e. block matrices and preconditioners).
     @author Paolo Crosetto
 
@@ -63,7 +63,7 @@ namespace LifeV {
     to the corresponding problem. This class also handles the coupling through a vector of pointer to coupling matrices.
  */
 
-class BlockInterface
+class MonolithicBlock
 {
 public:
 
@@ -91,7 +91,7 @@ public:
     //! @name Constructor & Destructor
     //@{
     //! Empty Constructor
-    BlockInterface():
+    MonolithicBlock():
             M_bch(),
             M_blocks(),
             M_FESpace(),
@@ -100,7 +100,7 @@ public:
             M_comm()
     {}
 
-//     BlockInterface( Int flag ):
+//     MonolithicBlock( Int flag ):
 //         M_bch(),
 //         M_blocks(),
 //         M_FESpace(),
@@ -109,7 +109,7 @@ public:
 //     {}
 
     //! Destructor
-    ~BlockInterface()
+    ~MonolithicBlock()
     {
 //     free(M_offset);
 //     free(M_FESpace);
@@ -385,16 +385,16 @@ public:
       \param locDofMap: std::map with the correspondance between the numeration of the interface in the 2 FE spaces.
       \param numerationInterface:  vector containing the correspondence of the Lagrange multipliers with the interface dofs
      */
-    void robinCoupling( BlockInterface::matrixPtr_Type& matrix,
+    void robinCoupling( MonolithicBlock::matrixPtr_Type& matrix,
                         Real& alphaf,
                         Real& alphas,
                         UInt coupling,
-                        const BlockInterface::fespacePtr_Type& FESpace1,
+                        const MonolithicBlock::fespacePtr_Type& FESpace1,
                         const UInt& offset1,
-                        const BlockInterface::fespacePtr_Type& FESpace2,
+                        const MonolithicBlock::fespacePtr_Type& FESpace2,
                         const UInt& offset2,
                         const std::map<ID, ID>& locDofMap,
-                        const BlockInterface::vectorPtr_Type& numerationInterface );
+                        const MonolithicBlock::vectorPtr_Type& numerationInterface );
 
 
     //!
@@ -407,7 +407,7 @@ public:
 
     //! Pushes a new block
     /** Pushes a matrix, BCHandler, FESpace and offset in the correspondent vector*/
-    virtual void push_back_oper( BlockInterface& Oper);
+    virtual void push_back_oper( MonolithicBlock& Oper);
 
     //@}
 
@@ -478,17 +478,17 @@ private:
       If you need a copy you should implement it, so that it copies the shared pointer one by one, without copying
       the content.
      */
-    BlockInterface( const BlockInterface& T){}
+    MonolithicBlock( const MonolithicBlock& /*T*/){}
     //@}
 };
 
 
-typedef singleton<factory<BlockInterface,  std::string> >     BlockPrecFactory;
+typedef singleton<factory<MonolithicBlock,  std::string> >     BlockPrecFactory;
 
 
 template <typename Operator>
 void
-BlockInterface::swap(boost::shared_ptr<Operator>& operFrom, boost::shared_ptr<Operator>& operTo)
+MonolithicBlock::swap(boost::shared_ptr<Operator>& operFrom, boost::shared_ptr<Operator>& operTo)
 {
     boost::shared_ptr<Operator> tmp = operFrom;
     operFrom = operTo;
@@ -498,7 +498,7 @@ BlockInterface::swap(boost::shared_ptr<Operator>& operFrom, boost::shared_ptr<Op
 
 template <typename Operator>
 void
-BlockInterface::insert(std::vector<Operator>& vectorFrom, std::vector<Operator>& vectorTo)
+MonolithicBlock::insert(std::vector<Operator>& vectorFrom, std::vector<Operator>& vectorTo)
 {
     vectorTo.insert(vectorTo.end(), vectorFrom.begin(), vectorFrom.end());
 }

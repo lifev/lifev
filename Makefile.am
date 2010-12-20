@@ -29,18 +29,18 @@ lib_LTLIBRARIES	= liblifemcsolver.la
 liblifemcsolver_la_SOURCES   = BCInterface1DData.cpp \
                                BCInterface3DData.cpp \
                                BCInterface3DFunctionFSI.cpp \
-                               Monolithic.cpp \
-                               MonolithicGI.cpp \
-                               MonolithicGE.cpp \
+                               FSIMonolithic.cpp \
+                               FSIMonolithicGI.cpp \
+                               FSIMonolithicGE.cpp \
                                RobinInterface.cpp \
-                               BlockMatrix.cpp \
-                               BlockMatrixRN.cpp \
-                               BlockInterface.cpp \
-                               ComposedBlockOper.cpp \
-                               ComposedDN.cpp \
-                               ComposedDND.cpp \
-                               ComposedNN.cpp \
-                               ComposedDNND.cpp \
+                               MonolithicBlockMatrix.cpp \
+                               MonolithicBlockMatrixRN.cpp \
+                               MonolithicBlock.cpp \
+                               MonolithicBlockComposed.cpp \
+                               MonolithicBlockComposedDN.cpp \
+                               MonolithicBlockComposedDND.cpp \
+                               MonolithicBlockComposedNN.cpp \
+                               MonolithicBlockComposedDNND.cpp \
                                MultiscaleSolver.cpp \
                                MultiscaleAlgorithm.cpp \
                                MultiscaleAlgorithmAitken.cpp \

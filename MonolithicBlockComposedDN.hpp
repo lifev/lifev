@@ -62,7 +62,7 @@
     coupled to the solid block using the default coupling method ComposedBlockOper::coupler. In that case the
     preconditioner is decomposed in three factors, the fluid and structure ones being the same as for the GCE case.
     NOTE2: this class is also the base class for other types of preconditioners, like ComposedDN2, ComposedDND. In fact for
-    instance it is used as F-S block in the preconditioners for the GI matrix in MonolithicGI
+    instance it is used as F-S block in the preconditioners for the GI matrix in FSIFSIMonolithicGI
  */
 
 #ifndef COMPOSEDDN_H
@@ -72,23 +72,23 @@
 
 #include <lifemc/lifealg/ComposedPreconditioner.hpp>
 
-#include <lifemc/lifesolver/ComposedBlockOper.hpp>
+#include <lifemc/lifesolver/MonolithicBlockComposed.hpp>
 
 namespace LifeV {
 
-//! ComposedDN - Short description of the class
+//! MonolithicBlockComposedDN - Short description of the class
 /*!
     @author Paolo Crosetto
     @see \ref CDFQ
 
 
  */
-class ComposedDN : public ComposedBlockOper
+class MonolithicBlockComposedDN : public MonolithicBlockComposed
 {
 public:
-    typedef ComposedBlockOper super_Type;
+    typedef MonolithicBlockComposed super_Type;
 
-    ComposedDN( const std::vector<Int>& flag, const std::vector<Block>& order):
+    MonolithicBlockComposedDN( const std::vector<Int>& flag, const std::vector<Block>& order):
             super_Type( flag, order ),
             M_blockPrecs(),
             M_uMap(),
@@ -185,23 +185,23 @@ public:
     //!@name Factory Methods
     //@{
 
-    static BlockInterface* createComposedDN()
+    static MonolithicBlock* createComposedDN()
     {
-        const ComposedBlockOper::Block order[] = { ComposedBlockOper::solid, ComposedBlockOper::fluid};
+        const MonolithicBlockComposed::Block order[] = { MonolithicBlockComposed::solid, MonolithicBlockComposed::fluid};
         const Int couplingsDN[] = { 0, 7};
         const std::vector<Int> couplingVectorDN(couplingsDN, couplingsDN+2);
-        const std::vector<ComposedBlockOper::Block> orderVector(order, order+2);
-        return new ComposedDN(couplingVectorDN, orderVector);
+        const std::vector<MonolithicBlockComposed::Block> orderVector(order, order+2);
+        return new MonolithicBlockComposedDN(couplingVectorDN, orderVector);
     }
 
 
-    static BlockInterface* createComposedDN2()
+    static MonolithicBlock* createComposedDN2()
     {
-        const ComposedBlockOper::Block order[] = { ComposedBlockOper::fluid, ComposedBlockOper::solid};
+        const MonolithicBlockComposed::Block order[] = { MonolithicBlockComposed::fluid, MonolithicBlockComposed::solid};
         const Int couplingsDN2[] = { 8, 6};
         const std::vector<Int> couplingVectorDN2(couplingsDN2, couplingsDN2+2);
-        const std::vector<ComposedBlockOper::Block> orderVector(order, order+2);
-        return new ComposedDN(couplingVectorDN2, orderVector);
+        const std::vector<MonolithicBlockComposed::Block> orderVector(order, order+2);
+        return new MonolithicBlockComposedDN(couplingVectorDN2, orderVector);
     }
     //@}
 

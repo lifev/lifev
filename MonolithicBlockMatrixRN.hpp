@@ -41,17 +41,17 @@
 
 #include <life/lifecore/life.hpp>
 
-#include <lifemc/lifesolver/BlockMatrix.hpp>
+#include <lifemc/lifesolver/MonolithicBlockMatrix.hpp>
 #include <lifemc/lifesolver/RobinInterface.hpp>
 
 namespace LifeV
 {
 
-//! BlockMatrixRN - class for handling a 2-blocks matrix with Robin-Neumann coupling
+//! MonolithicBlockMatrixRN - class for handling a 2-blocks matrix with Robin-Neumann coupling
 /*!
     @author Paolo Crosetto
 
-    This class derives both from BlockInterface, which is the base class for the block operators, and from RobinInterface,
+    This class derives both from MonolithicBlock, which is the base class for the block operators, and from RobinInterface,
     which is a class holding some general methods and attributes for the robin coupling.
 
     NOTE: this class has been tested for both the GE and GI time discretizations
@@ -60,13 +60,13 @@ namespace LifeV
     choices available are in principle automatically adapted to the RN case. The preconditioners tested for this case
     are the modular composedDN and the algebraic additive Schwarz AdditiveSchwarz.
  */
-class BlockMatrixRN : public BlockMatrix, RobinInterface
+class MonolithicBlockMatrixRN : public MonolithicBlockMatrix, RobinInterface
 {
 public:
 
     //! @name Public Types
     //@{
-    typedef BlockMatrix super_Type;
+    typedef MonolithicBlockMatrix super_Type;
     typedef RobinInterface  superRobin;
     //@}
 
@@ -75,13 +75,13 @@ public:
     //@{
 
     //! Empty Constructor
-    BlockMatrixRN(UInt flag):
+    MonolithicBlockMatrixRN(UInt flag):
             super_Type(flag),
             superRobin()
     {}
 
     //! Destructor
-    ~BlockMatrixRN() {}
+    ~MonolithicBlockMatrixRN() {}
     //@}
 
     //! @name Public methods
@@ -91,7 +91,7 @@ public:
     //! sets the data relative to Robin (e.g. the coefficients \f$\alpha_f\f$ and \f$\alpha_s\f$).
     void setDataFromGetPot( const GetPot& data, const std::string& section );
 
-    //! Adds to the r.h.s. the part due to the Robin Coupling and runs BlockMatrix::GlobalAssemble()
+    //! Adds to the r.h.s. the part due to the Robin Coupling and runs MonolithicBlockMatrix::GlobalAssemble()
     void GlobalAssemble();
 
 
@@ -128,9 +128,9 @@ public:
 
     //!@name Factory Method
     //@{
-    static BlockMatrix*    createAdditiveSchwarzRN()
+    static MonolithicBlockMatrix*    createAdditiveSchwarzRN()
     {
-        return new BlockMatrixRN(15);
+        return new MonolithicBlockMatrixRN(15);
     }
     //@}
 

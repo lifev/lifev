@@ -27,7 +27,7 @@
 
 #include <life/lifecore/life.hpp>
 
-#include <ComposedBlockOper.hpp>
+#include <MonolithicBlockComposed.hpp>
 
 namespace LifeV
 {
@@ -37,7 +37,7 @@ namespace LifeV
 //! Public Methods
 // ===================================================
 
-void ComposedBlockOper::GlobalAssemble()
+void MonolithicBlockComposed::GlobalAssemble()
 {
     for (UInt k=0; k<M_blocks.size(); ++k)
     {
@@ -49,7 +49,7 @@ void ComposedBlockOper::GlobalAssemble()
 //        M_blocks[3]->spy("fourth");
 }
 
-void ComposedBlockOper::blockAssembling()
+void MonolithicBlockComposed::blockAssembling()
 {
     for(UInt k=0; k<M_blocks.size(); ++k)
     {
@@ -60,7 +60,7 @@ void ComposedBlockOper::blockAssembling()
 }
 
 
-void ComposedBlockOper::coupler( mapPtr_Type& map,
+void MonolithicBlockComposed::coupler( mapPtr_Type& map,
                                  const std::map<ID, ID>& locDofMap,
                                  const vectorPtr_Type& numerationInterface,
                                  const Real& timeStep,
@@ -81,35 +81,35 @@ void ComposedBlockOper::coupler( mapPtr_Type& map,
         M_coupling.push_back(coupling);
 }
 
-void ComposedBlockOper::push_back_matrix(const matrixPtr_Type& Mat, const  bool recompute)
+void MonolithicBlockComposed::push_back_matrix(const matrixPtr_Type& Mat, const  bool recompute)
 {
     M_blocks.push_back(Mat);
     M_recompute[M_blocks.size()-1] = recompute;
 }
 
-void ComposedBlockOper::push_back_oper( ComposedBlockOper& Oper)
+void MonolithicBlockComposed::push_back_oper( MonolithicBlockComposed& Oper)
 {
     super_Type::push_back_oper( Oper );
     M_coupling.insert(M_coupling.end(), Oper.couplingVector().begin(), Oper.couplingVector().end());
 }
 
 void
-ComposedBlockOper::push_back_coupling( matrixPtr_Type& coupling )
+MonolithicBlockComposed::push_back_coupling( matrixPtr_Type& coupling )
 {
     M_coupling.push_back(coupling);
 }
 
-void ComposedBlockOper::replace_matrix( const matrixPtr_Type& Mat, UInt position )
+void MonolithicBlockComposed::replace_matrix( const matrixPtr_Type& Mat, UInt position )
 {
     M_blocks[position]=Mat;
 }
 
-void ComposedBlockOper::replace_coupling( const matrixPtr_Type& Mat, UInt position )
+void MonolithicBlockComposed::replace_coupling( const matrixPtr_Type& Mat, UInt position )
 {
     M_coupling[position]=Mat;
 }
 
-void ComposedBlockOper::addToCoupling( const matrixPtr_Type& Mat, UInt position)
+void MonolithicBlockComposed::addToCoupling( const matrixPtr_Type& Mat, UInt position)
 {
      Mat->globalAssemble();
     *M_coupling[position] += *Mat;
@@ -122,7 +122,7 @@ void ComposedBlockOper::addToCoupling( const matrixPtr_Type& Mat, UInt position)
 // ===================================================
 
 
-void ComposedBlockOper::blockAssembling(const UInt k)
+void MonolithicBlockComposed::blockAssembling(const UInt k)
 {
     if(M_blocks[k]->matrixPtr()->Filled())
     {
@@ -134,7 +134,7 @@ void ComposedBlockOper::blockAssembling(const UInt k)
     *M_blocks[k] += *M_coupling[k];
 }
 
-void ComposedBlockOper::swap(const UInt i, const UInt j)
+void MonolithicBlockComposed::swap(const UInt i, const UInt j)
 {
     super_Type::swap(M_blocks[i], M_blocks[j]);
     super_Type::swap(M_bch[i], M_bch[j]);

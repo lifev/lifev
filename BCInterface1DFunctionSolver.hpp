@@ -49,7 +49,7 @@ namespace LifeV
  *  @author Cristiano Malossi
  *
  *  This class is an interface between BCInterface1D, the grammar parser and a general
- *  LifeV solver (such as Oseen or FSIOperator). It allows to construct LifeV
+ *  LifeV solver (such as Oseen or FSI). It allows to construct LifeV
  *  functions type for boundary conditions, using a functions string loaded from
  *  a GetPot file in which are present some "solver" parameters.
  *
@@ -252,7 +252,7 @@ BCInterface1DFunctionSolver< PhysicalSolverType >::updatePhysicalSolverVariables
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 5023 ) << "BCInterface1DFunctionSolver<FSIOperator>::UpdateOperatorVariables  " << "\n";
+    Debug( 5023 ) << "BCInterface1DFunctionSolver<FSI>::UpdateOperatorVariables  " << "\n";
 #endif
 
     // Create/Update variables for 1D problem
@@ -381,7 +381,7 @@ BCInterface1DFunctionSolver< PhysicalSolverType >::createAccessList( const data_
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 5023 ) << "BCInterface1DFunctionSolver<FSIOperator>::createAccessList" << "\n";
+    Debug( 5023 ) << "BCInterface1DFunctionSolver<FSI>::createAccessList" << "\n";
 #endif
 
     std::map< std::string, physicalSolverList > mapList;

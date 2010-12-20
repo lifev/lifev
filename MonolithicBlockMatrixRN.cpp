@@ -27,7 +27,7 @@
 
 #include <EpetraExt_MatrixMatrix.h>
 
-#include <BlockMatrixRN.hpp>
+#include <MonolithicBlockMatrixRN.hpp>
 ;
 namespace LifeV {
 
@@ -37,13 +37,13 @@ namespace LifeV {
 // ===================================================
 
 
-void BlockMatrixRN::setDataFromGetPot( const GetPot& data, const std::string& section )
+void MonolithicBlockMatrixRN::setDataFromGetPot( const GetPot& data, const std::string& section )
 {
     super_Type::setDataFromGetPot(data, section);
     setRobinData(data, section + "/robin");
 }
 
-void BlockMatrixRN::coupler(mapPtr_Type& map,
+void MonolithicBlockMatrixRN::coupler(mapPtr_Type& map,
                             const std::map<ID, ID>& locDofMap,
                             const vectorPtr_Type& numerationInterface,
                             const Real& timeStep)
@@ -55,14 +55,14 @@ void BlockMatrixRN::coupler(mapPtr_Type& map,
     //    M_robinCoupling->spy("RC");
 }
 
-void BlockMatrixRN::GlobalAssemble()
+void MonolithicBlockMatrixRN::GlobalAssemble()
 {
     super_Type::GlobalAssemble();
     vector_Type rhs((*M_robinCoupling)*(*M_rhsVec));
     *M_rhsVec += rhs;
 }
 
-void BlockMatrixRN::blockAssembling()
+void MonolithicBlockMatrixRN::blockAssembling()
 {
     M_coupling->globalAssemble();
     M_globalMatrix.reset(new matrix_Type(M_coupling->map()));
