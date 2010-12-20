@@ -37,7 +37,7 @@
  */
 
 
-#include <life/lifefem/quadRule.hpp>
+#include <life/lifefem/QuadRule.hpp>
 
 namespace LifeV
 {
