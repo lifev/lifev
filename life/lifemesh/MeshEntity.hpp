@@ -345,4 +345,5 @@ protected:
 
 
 } // End of namespace LifeV
-#endif
+
+#endif /* MESHENTITY_H */

@@ -62,8 +62,8 @@
 	      of dofs
 */
 
-#ifndef BASISELSH_H
-#define BASISELSH_H 1
+#ifndef ELEMENTSHAPES_H
+#define ELEMENTSHAPES_H 1
 
 #include <utility>
 #include <life/lifecore/life.hpp>
@@ -529,5 +529,5 @@ operate( ID const & point ) const
 }
 }
 
-#endif
+#endif  // ELEMENTSHAPES_H
 

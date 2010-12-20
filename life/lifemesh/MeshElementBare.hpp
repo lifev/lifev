@@ -116,8 +116,8 @@
 
  */
 
-#ifndef BAREITEMS_H
-#define BAREITEMS_H 1
+#ifndef MESHELEMENTBARE_H
+#define MESHELEMENTBARE_H 1
 
 #include<utility>
 #include<vector>
@@ -697,4 +697,4 @@ MeshElementBareHandler<BareItemType>::setId( const bareItem_Type & item, ID cons
 
 
 }
-#endif
+#endif /* MESHELEMENTBARE_H */

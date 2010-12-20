@@ -35,8 +35,8 @@
     operate on them
  */
 
-#ifndef MESHUTILITYBASE_H
-#define MESHUTILITYBASE_H 1
+#ifndef MESHUTILITY_H
+#define MESHUTILITY_H 1
 
 #include <algorithm>
 #include <iostream>
@@ -2139,4 +2139,5 @@ p2MeshFromP1Data( MeshType & mesh, std::ostream & logStream = std::cout )
 } // namespace MeshUtility
 
 } // namespace LifeV
-#endif
+
+#endif /* MESHUTILITY_H */

@@ -38,8 +38,8 @@
     imposing the BC.
  */
 
-#ifndef IDENTIFIER_H
-#define IDENTIFIER_H 1
+#ifndef BCIDENTIFIER_H
+#define BCIDENTIFIER_H 1
 
 #include <iostream>
 #include <boost/shared_ptr.hpp>
@@ -337,4 +337,4 @@ private:
 
 } // Namespace LifeV
 
-#endif /* IDENTIFIER_H */
+#endif /* BCIDENTIFIER_H */

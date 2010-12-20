@@ -39,8 +39,8 @@
 
  */
 
-#ifndef DATAMESH_H
-#define DATAMESH_H
+#ifndef MESHDATA_H
+#define MESHDATA_H
 
 #include <string>
 #include <ostream>
@@ -183,4 +183,4 @@ void readMesh( Mesh& mesh, const MeshData& data )
 
 } // namespace LifeV
 
-#endif
+#endif  /* MESHDATA_H */
