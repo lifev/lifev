@@ -42,26 +42,26 @@
 #ifndef MARKERS_H
 #define MARKERS_H 1
 
-#include <life/lifemesh/markers_base.hpp>
+#include <life/lifemesh/Marker.hpp>
 
 namespace LifeV
 {
 
 //! The simples MarkerCommon: uses all defaults
-typedef MarkerCommon<MarkerTraits_Base> defaultMarkerCommon_Type;
+typedef MarkerCommon<MarkerTraits> defaultMarkerCommon_Type;
 
 //!Expose entityFlag_Type
-typedef MarkerTraits_Base::entityFlag_Type entityFlag_Type;
+typedef MarkerTraits::entityFlag_Type entityFlag_Type;
 
 //!Expose NULLFLAG
-static const entityFlag_Type S_NULLFLAG = MarkerTraits_Base::S_NULLFLAG;
+static const entityFlag_Type S_NULLFLAG = MarkerTraits::S_NULLFLAG;
 
 // Old static variable to delete after the make check
-//static const entityFlag_Type NULLFLAG __attribute__ ((deprecated)) = MarkerTraits_Base::S_NULLFLAG;
+//static const entityFlag_Type NULLFLAG __attribute__ ((deprecated)) = MarkerTraits::S_NULLFLAG;
 
 // Old typedefs to delete
-typedef MarkerCommon<MarkerTraits_Base> DefMarkerCommon __attribute__ ((deprecated));
-typedef MarkerTraits_Base::EntityFlag EntityFlag __attribute__ ((deprecated));
+typedef MarkerCommon<MarkerTraits> DefMarkerCommon __attribute__ ((deprecated));
+typedef MarkerTraits::EntityFlag EntityFlag __attribute__ ((deprecated));
 
 } // Namespace LifeV
 

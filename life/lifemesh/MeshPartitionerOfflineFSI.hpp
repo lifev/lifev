@@ -47,7 +47,7 @@ along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <life/lifefem/FESpace.hpp>
 #include <life/lifefem/DOFInterface3Dto3D.hpp>
-#include <life/lifemesh/markers_base.hpp>
+#include <life/lifemesh/Marker.hpp>
 
 namespace LifeV
 {
@@ -101,7 +101,7 @@ public:
     typedef MeshPartitioner<uncutMesh_Type> meshCutter_Type;
     typedef boost::scoped_ptr<meshCutter_Type> meshCutterPtr_Type;
 
-    typedef MarkerTraits_Base::EntityFlag entityFlag_Type;
+    typedef MarkerTraits::EntityFlag entityFlag_Type;
     //@}
 
     //! @name Constructor & Destructor
@@ -129,8 +129,8 @@ public:
       @param solidPartitionNumber Int
       @param velocityOrder std::string
       @param displacementOrder std::string
-      @param fluidInterfaceFlag LifeV::MarkerTraits_Base::EntityFlag (Int)
-      @param solidInterfaceFlag LifeV::MarkerTraits_Base::EntityFlag (Int)
+      @param fluidInterfaceFlag LifeV::MarkerTraits::EntityFlag (Int)
+      @param solidInterfaceFlag LifeV::MarkerTraits::EntityFlag (Int)
       @param interfaceTolerance Real
       @param fluidInterfaceVertexFlag Int
       @param comm boost::shared_ptr to a Epetra_Comm object

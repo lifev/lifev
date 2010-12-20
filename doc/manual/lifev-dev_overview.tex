@@ -1204,11 +1204,11 @@ addressing the \texttt{BC} pointer. That is why the \texttt{MarkerUnset()} metho
 
 \begin{verbatim}
 #include "bccond.h"
-class Marker_Base
+class Marker
 {
 public:
-  Marker_Base():_marker(0);
-  Marker_Base(BC_Base * const _m ):_marker(_m);
+  Marker():_marker(0);
+  Marker(BC_Base * const _m ):_marker(_m);
   BC_Base * & marker_ptr();
   BC_Base * const & marker_ptr()const;
   bool markerUnset();
@@ -1240,32 +1240,32 @@ protected:
 
 Here the default marker classes.
 \begin{verbatim}
-class DefPointMarker: public Marker_Base
+class DefPointMarker: public Marker
 {
 public:
   DefPointMarker(){};
-  DefPointMarker(BC_Base * const _m ):Marker_Base(_m){};
+  DefPointMarker(BC_Base * const _m ):Marker(_m){};
 };
 
-class DefFaceMarker: public Marker_Base
+class DefFaceMarker: public Marker
 {
 public:
   DefFaceMarker(){};
-  DefFaceMarker(BC_Base * const _m ):Marker_Base(_m){};
+  DefFaceMarker(BC_Base * const _m ):Marker(_m){};
 };
 
-class DefEdgeMarker: public Marker_Base
+class DefEdgeMarker: public Marker
 {
 public:
   DefEdgeMarker(){};
-  DeEdgeMarker(BC_Base * const _m ):Marker_Base(_m){};
+  DeEdgeMarker(BC_Base * const _m ):Marker(_m){};
 };
 
-class DefVolumeMarker: public Marker_Base
+class DefVolumeMarker: public Marker
 {
 public:
    DefVolumeMarker(){};
-   DefVolumeMarker(BC_Base * const _m ):Marker_Base(_m){};
+   DefVolumeMarker(BC_Base * const _m ):Marker(_m){};
 };
 \end{verbatim}
 The \emph{default region marker} id derived also from
@@ -1274,11 +1274,11 @@ region which has the list of boundary conditions.}
 
 \begin{verbatim}
 class DefRegionMarker: 
-public Marker_Base, public MarkerHandler_Base 
+public Marker, public MarkerHandler_Base 
 {
 public:
    DefRegionMarker{};
-   DefRegionMarker(BC_Base * const _m ):Marker_Base(_m){};
+   DefRegionMarker(BC_Base * const _m ):Marker(_m){};
 };
 
 \end{verbatim}
@@ -1316,8 +1316,8 @@ helper function is provided to test equality of markers (provisional,
 may be changed).
 
 \begin{verbatim}
-const Marker_Base NULLMARKER=* new Marker_Base; 
-inline bool operator==(const Marker_Base & a, const Marker_Base & b);
+const Marker NULLMARKER=* new Marker; 
+inline bool operator==(const Marker & a, const Marker & b);
 \end{verbatim}
 
 
@@ -1327,7 +1327,7 @@ default \texttt{MarkerCommon}
 \begin{verbatim}
 #ifndef HH_MARKERS_HH_
 #define HH_MARKERS_HH_
-#include "markers_base.h"
+#include "Marker.h"
 typedef MarkerCommon<
 DefPointMarker,
 DefEdgeMarker,

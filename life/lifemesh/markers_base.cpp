@@ -26,7 +26,7 @@
 
 /*!
     @file
-    @brief Implementations for markers_base.hpp
+    @brief Implementations for Marker.hpp
 
     @contributor Luca Bertagna <lbertag@emory.edu>
     @date 00-00-0000
@@ -34,7 +34,7 @@
  */
 
 #include <climits>
-#include <life/lifemesh/markers_base.hpp>
+#include <life/lifemesh/Marker.hpp>
 
 namespace LifeV
 {
@@ -44,20 +44,20 @@ namespace LifeV
 //  ***********************************************************************************************************
 
 ///////////////////////
-// MarkerTraits_Base //
+// MarkerTraits //
 ///////////////////////
 
-const MarkerTraits_Base::entityFlag_Type MarkerTraits_Base::S_NULLFLAG = LONG_MIN;
+const MarkerTraits::entityFlag_Type MarkerTraits::S_NULLFLAG = LONG_MIN;
 
 //MM: if you modify these changes here recheck function readNetgenMesh
 //        because it uses this changes
 
-MarkerTraits_Base::entityFlag_Type MarkerTraits_Base::strongerFlag( entityFlag_Type const & flag1, entityFlag_Type const & flag2 )
+MarkerTraits::entityFlag_Type MarkerTraits::strongerFlag( entityFlag_Type const & flag1, entityFlag_Type const & flag2 )
 {
     return flag1 > flag2 ? flag1 : flag2 ;
 }
 
-MarkerTraits_Base::entityFlag_Type MarkerTraits_Base::weakerFlag( entityFlag_Type const & flag1, entityFlag_Type const & flag2 )
+MarkerTraits::entityFlag_Type MarkerTraits::weakerFlag( entityFlag_Type const & flag1, entityFlag_Type const & flag2 )
 {
     if ( flag1 == S_NULLFLAG )
         return flag2;
@@ -66,7 +66,7 @@ MarkerTraits_Base::entityFlag_Type MarkerTraits_Base::weakerFlag( entityFlag_Typ
     return flag1 < flag2 ? flag1 : flag2 ;
 }
 
-bool MarkerTraits_Base::EqualFlags(const entityFlag_Type& flag1, const entityFlag_Type& flag2)
+bool MarkerTraits::EqualFlags(const entityFlag_Type& flag1, const entityFlag_Type& flag2)
 {
     return flag1 == flag2;
 }

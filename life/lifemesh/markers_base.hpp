@@ -43,8 +43,8 @@
         <li> There is a mechanism, via the MarkerCommon class template, to
         extend the mesh entities definitions by adding user defined data
         and methods. It this case the user should create its own marker
-        class (maybe by inheriting from the Marker_Base class, which
-        provides the same interfaces of Marker_Base + the user defined
+        class (maybe by inheriting from the Marker class, which
+        provides the same interfaces of Marker + the user defined
         stuff.</li>
     </ul>
 
@@ -52,11 +52,11 @@
     is provided by traits. In particular,
 
     <ul>
-        <li> The MarkerTraits_Base define the basic (compulsory) interface of
+        <li> The MarkerTraits define the basic (compulsory) interface of
         any user defined Marker class.</li>
 
         <li> The Marker is a class template whose template argument is a
-        MarkerTrait, defaulted to MarkerTraits_Base.</li>
+        MarkerTrait, defaulted to MarkerTraits.</li>
 
         <li>A user may change some basic behavior of the Marker class by
         providing a special Traits.</li>
@@ -72,12 +72,12 @@
 namespace LifeV
 {
 
-//! MarkerTraits_Base - Class that defines the basic entities and functions.
+//! MarkerTraits - Class that defines the basic entities and functions.
 /*!
     @todo Change the name of the class in MarkerTraitsBase
  */
 
-class MarkerTraits_Base
+class MarkerTraits
 {
 public:
 
@@ -127,7 +127,7 @@ public:
 
 };
 
-//! Marker_Base - Base marker class.
+//! Marker - Base marker class.
 /*!
   It stores an integral type, aliased to entityFlag_Type, which may be used
   for marking a geometric entity. The typical use is to specify
@@ -136,13 +136,13 @@ public:
   class. During the creation of a field, the markers are post-processed
   to furnish the correct boundary conditions.
   The main interfaces are passed trough the MarkerTraits template argument,
-  which is defaulted to MarkerTraits_Base
+  which is defaulted to MarkerTraits
 
   @todo Change the name of the class in MarkerBase
  */
 
 template <typename MarkerTraits>
-class Marker_Base
+class Marker
 {
 public:
 
@@ -158,16 +158,16 @@ public:
     //@{
 
     //! Empty Constructor
-    Marker_Base();
+    Marker();
 
     //! Constructor given the flag
-    explicit Marker_Base( entityFlag_Type & p );
+    explicit Marker( entityFlag_Type & p );
 
     //! Copy Constructor
-    Marker_Base( Marker_Base<MarkerTraits> const & markerBase );
+    Marker( Marker<MarkerTraits> const & markerBase );
 
     //! Destructor
-    virtual ~Marker_Base()
+    virtual ~Marker()
     {
         // Nothing to be done
     }
@@ -266,19 +266,19 @@ public:
     //@{
 
     typedef MT markerTraits_Type;
-    typedef Marker_Base<MT> pointMarker_Type;
-    typedef Marker_Base<MT> edgeMarker_Type;
-    typedef Marker_Base<MT> faceMarker_Type;
-    typedef Marker_Base<MT> volumeMarker_Type;
-    typedef Marker_Base<MT> regionMarker_Type;
+    typedef Marker<MT> pointMarker_Type;
+    typedef Marker<MT> edgeMarker_Type;
+    typedef Marker<MT> faceMarker_Type;
+    typedef Marker<MT> volumeMarker_Type;
+    typedef Marker<MT> regionMarker_Type;
 
     // Old typedefs to delete
     typedef MT MarkerTraits;
-    typedef Marker_Base<MT> PointMarker;
-    typedef Marker_Base<MT> EdgeMarker;
-    typedef Marker_Base<MT> FaceMarker;
-    typedef Marker_Base<MT> VolumeMarker;
-    typedef Marker_Base<MT> RegionMarker;
+    typedef Marker<MT> PointMarker;
+    typedef Marker<MT> EdgeMarker;
+    typedef Marker<MT> FaceMarker;
+    typedef Marker<MT> VolumeMarker;
+    typedef Marker<MT> RegionMarker;
 
     //@}
 };
@@ -289,62 +289,62 @@ public:
 //  ***********************************************************************************************************
 
 template <typename MarkerTraits>
-Marker_Base<MarkerTraits>::Marker_Base() : M_flag( MarkerTraits_Base::S_NULLFLAG )
+Marker<MarkerTraits>::Marker() : M_flag( MarkerTraits::S_NULLFLAG )
 {
     // nothing to be done here
 }
 
 template <typename MarkerTraits>
-Marker_Base<MarkerTraits>::Marker_Base( entityFlag_Type & flag ) : M_flag( flag )
+Marker<MarkerTraits>::Marker( entityFlag_Type & flag ) : M_flag( flag )
 {
     // nothing to be done here
 }
 
 template <typename MarkerTraits>
-Marker_Base<MarkerTraits>::Marker_Base( Marker_Base<MarkerTraits> const & markerBase ) : M_flag( markerBase.marker() )
+Marker<MarkerTraits>::Marker( Marker<MarkerTraits> const & markerBase ) : M_flag( markerBase.marker() )
 {
     // nothing to be done here
 }
 
 template <typename MarkerTraits>
-typename MarkerTraits::entityFlag_Type Marker_Base<MarkerTraits>::marker() const
+typename MarkerTraits::entityFlag_Type Marker<MarkerTraits>::marker() const
 {
     return M_flag;
 }
 
 template <typename MarkerTraits>
-typename MarkerTraits::entityFlag_Type const & Marker_Base<MarkerTraits>::nullFlag() const
+typename MarkerTraits::entityFlag_Type const & Marker<MarkerTraits>::nullFlag() const
 {
-    return MarkerTraits_Base::S_NULLFLAG;
+    return MarkerTraits::S_NULLFLAG;
 }
 
 template <typename MarkerTraits>
-typename MarkerTraits::entityFlag_Type Marker_Base<MarkerTraits>::setMarker( entityFlag_Type const & flag )
+typename MarkerTraits::entityFlag_Type Marker<MarkerTraits>::setMarker( entityFlag_Type const & flag )
 {
     return M_flag = flag;
 }
 
 template <typename MarkerTraits>
-typename MarkerTraits::entityFlag_Type Marker_Base<MarkerTraits>::updateMarker( entityFlag_Type const & flag )
+typename MarkerTraits::entityFlag_Type Marker<MarkerTraits>::updateMarker( entityFlag_Type const & flag )
 {
     if ( M_flag == nullFlag() )
         return setMarker( flag );
 }
 
 template <typename MarkerTraits>
-typename MarkerTraits::entityFlag_Type Marker_Base<MarkerTraits>::setStrongerMarker( entityFlag_Type const & flag1, entityFlag_Type const & flag2 )
+typename MarkerTraits::entityFlag_Type Marker<MarkerTraits>::setStrongerMarker( entityFlag_Type const & flag1, entityFlag_Type const & flag2 )
 {
     return setMarker( MarkerTraits::strongerFlag( flag1, flag2 ) );
 }
 
 template <typename MarkerTraits>
-typename MarkerTraits::entityFlag_Type Marker_Base<MarkerTraits>::setWeakerMarker( entityFlag_Type const & flag1, entityFlag_Type const & flag2 )
+typename MarkerTraits::entityFlag_Type Marker<MarkerTraits>::setWeakerMarker( entityFlag_Type const & flag1, entityFlag_Type const & flag2 )
 {
     return setMarker( MarkerTraits::weakerFlag( flag1, flag2 ) );
 }
 
 template <typename MarkerTraits>
-typename MarkerTraits::entityFlag_Type Marker_Base<MarkerTraits>::setStrongerMarker( entityFlag_Type const & flag )
+typename MarkerTraits::entityFlag_Type Marker<MarkerTraits>::setStrongerMarker( entityFlag_Type const & flag )
 {
     if ( isMarkerUnset() )
         return M_flag = flag;
@@ -352,7 +352,7 @@ typename MarkerTraits::entityFlag_Type Marker_Base<MarkerTraits>::setStrongerMar
 }
 
 template <typename MarkerTraits>
-typename MarkerTraits::entityFlag_Type Marker_Base<MarkerTraits>::setWeakerMarker( entityFlag_Type const & flag )
+typename MarkerTraits::entityFlag_Type Marker<MarkerTraits>::setWeakerMarker( entityFlag_Type const & flag )
 {
     if ( isMarkerUnset() )
         return M_flag = flag;
@@ -360,38 +360,38 @@ typename MarkerTraits::entityFlag_Type Marker_Base<MarkerTraits>::setWeakerMarke
 }
 
 template <typename MarkerTraits>
-bool Marker_Base<MarkerTraits>::isMarkerSet() const
+bool Marker<MarkerTraits>::isMarkerSet() const
 {
     return M_flag != nullFlag();
 }
 
 template <typename MarkerTraits>
-bool Marker_Base<MarkerTraits>::isMarkerUnset() const
+bool Marker<MarkerTraits>::isMarkerUnset() const
 {
     return M_flag == nullFlag();
 }
 
 template <typename MarkerTraits>
-void Marker_Base<MarkerTraits>::unsetMarker()
+void Marker<MarkerTraits>::unsetMarker()
 {
     M_flag = nullFlag();
 }
 
 template <typename MarkerTraits>
-void Marker_Base<MarkerTraits>::markerUnset() const
+void Marker<MarkerTraits>::markerUnset() const
 {
     M_flag = nullFlag();
 }
 
 
 template <typename MarkerTraits>
-bool Marker_Base<MarkerTraits>::hasEqualEntityFlag(entityFlag_Type const & flag) const
+bool Marker<MarkerTraits>::hasEqualEntityFlag(entityFlag_Type const & flag) const
 {
     return MarkerTraits::EqualFlags(flag,M_flag);
 }
 
 template <typename MarkerTraits>
-std::ostream & Marker_Base<MarkerTraits>::printFlag( entityFlag_Type const f, std::ostream & output ) const
+std::ostream & Marker<MarkerTraits>::printFlag( entityFlag_Type const f, std::ostream & output ) const
 {
     if ( f == nullFlag() )
         output << "UNSET";
@@ -401,14 +401,14 @@ std::ostream & Marker_Base<MarkerTraits>::printFlag( entityFlag_Type const f, st
 }
 
 template <typename MarkerTraits>
-std::ostream & Marker_Base<MarkerTraits>::printFlag( std::ostream & output ) const
+std::ostream & Marker<MarkerTraits>::printFlag( std::ostream & output ) const
 {
     showMe( output );
     return output;
 }
 
 template <typename MarkerTraits>
-void Marker_Base<MarkerTraits>::showMe( std::ostream & output) const
+void Marker<MarkerTraits>::showMe( std::ostream & output) const
 {
 	if ( M_flag == nullFlag() )
 		output << "UNSET";
