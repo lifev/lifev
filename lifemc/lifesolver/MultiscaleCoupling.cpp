@@ -97,7 +97,7 @@ MultiscaleCoupling::showMe()
 {
     std::cout << "Coupling id         = " << M_ID << std::endl
               << "Coupling name       = " << M_couplingName << std::endl
-              << "Coupling type       = " << Enum2String( M_type, multiscaleCouplingsMap ) << std::endl << std::endl;
+              << "Coupling type       = " << enum2String( M_type, multiscaleCouplingsMap ) << std::endl << std::endl;
 
     std::cout << "Models number       = " << modelsNumber() << std::endl;
     std::cout << "Models ID(s)        = ";
@@ -106,7 +106,7 @@ MultiscaleCoupling::showMe()
     std::cout << std::endl;
     std::cout << "Models type(s)      = ";
     for ( UInt i( 0 ); i < modelsNumber(); ++i )
-        std::cout << Enum2String( M_models[i]->type(), multiscaleModelsMap ) << " ";
+        std::cout << enum2String( M_models[i]->type(), multiscaleModelsMap ) << " ";
     std::cout << std::endl;
     std::cout << "Flags list          = ";
     for ( UInt i( 0 ); i < modelsNumber(); ++i )
@@ -226,7 +226,7 @@ MultiscaleCoupling::saveSolution()
         if ( M_globalData->dataTime()->isFirstTimeStep() )
         {
             output.open( filename.c_str(), std::ios::trunc );
-            output << "% Coupling Type: " << Enum2String( M_type, multiscaleCouplingsMap ) << std::endl << std::endl;
+            output << "% Coupling Type: " << enum2String( M_type, multiscaleCouplingsMap ) << std::endl << std::endl;
             output << "% TIME                     ID   FLAG FLUX                     STRESS                    S. PRESSURE              D. PRESSURE" << std::endl;
         }
         else
@@ -337,8 +337,8 @@ MultiscaleCoupling::interpolateCouplingVariables( const timeContainer_Type& time
 void
 MultiscaleCoupling::switchErrorMessage( const multiscaleModelPtr_Type& model )
 {
-    multiscaleErrorCheck( ModelType, "Invalid model type ["  + Enum2String( model->type(), multiscaleModelsMap ) +
-                        "] for coupling type [" + Enum2String( M_type, multiscaleCouplingsMap ) +"]\n" );
+    multiscaleErrorCheck( ModelType, "Invalid model type ["  + enum2String( model->type(), multiscaleModelsMap ) +
+                        "] for coupling type [" + enum2String( M_type, multiscaleCouplingsMap ) +"]\n" );
 }
 
 } // Namespace Multiscale
