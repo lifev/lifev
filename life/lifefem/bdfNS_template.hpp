@@ -44,7 +44,7 @@
 #include <iostream>
 #include <algorithm>
 
-#include <life/lifecore/GetPot.hpp>
+#include <life/lifefilters/GetPot.hpp>
 #include <life/lifefem/bdf_template.hpp>
 
 
