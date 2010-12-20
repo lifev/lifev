@@ -163,7 +163,7 @@ Ethiersteinman::Ethiersteinman( int argc,
 void
 Ethiersteinman::check()
 {
-    Chrono chrono;
+    LifeChrono chrono;
 
     // Reading from data file
     //
@@ -209,7 +209,7 @@ Ethiersteinman::check()
     boost::shared_ptr<RegionMesh3D<LinearTetra> > fullMeshPtr(new RegionMesh3D<LinearTetra>);
     readMesh(*fullMeshPtr, dataMesh);
 
-    partitionMesh< RegionMesh3D<LinearTetra> >   meshPart(fullMeshPtr, d->comm);
+    MeshPartitioner< RegionMesh3D<LinearTetra> >   meshPart(fullMeshPtr, d->comm);
 
     std::string uOrder =  dataFile( "fluid/space_discretization/vel_order",   "P1");
     std::string pOrder =  dataFile( "fluid/space_discretization/press_order", "P1");
@@ -347,7 +347,7 @@ Ethiersteinman::check()
 #ifdef HAVE_HDF5
     if (exporterType.compare("hdf5") == 0)
     {
-        exporter.reset( new Hdf5exporter<RegionMesh3D<LinearTetra> > ( dataFile, "ethiersteinman" ) );
+        exporter.reset( new ExporterHDF5<RegionMesh3D<LinearTetra> > ( dataFile, "ethiersteinman" ) );
         exporter->setPostDir( "./" ); // This is a test to see if M_post_dir is working
         exporter->setMeshProcId( meshPart.meshPartition(), d->comm->MyPID() );
     }
@@ -356,11 +356,11 @@ Ethiersteinman::check()
     {
         if (exporterType.compare("none") == 0)
         {
-            exporter.reset( new NoExport<RegionMesh3D<LinearTetra> > ( dataFile, meshPart.meshPartition(), "ethiersteinman", d->comm->MyPID()) );
+            exporter.reset( new ExporterEmpty<RegionMesh3D<LinearTetra> > ( dataFile, meshPart.meshPartition(), "ethiersteinman", d->comm->MyPID()) );
         }
         else
         {
-            exporter.reset( new Ensight<RegionMesh3D<LinearTetra> > ( dataFile, meshPart.meshPartition(), "ethiersteinman", d->comm->MyPID()) );
+            exporter.reset( new ExporterEnsight<RegionMesh3D<LinearTetra> > ( dataFile, meshPart.meshPartition(), "ethiersteinman", d->comm->MyPID()) );
         }
     }
 
@@ -381,7 +381,7 @@ Ethiersteinman::check()
 
     int iter = 1;
 
-    Chrono chronoGlobal;
+    LifeChrono chronoGlobal;
     chronoGlobal.start();
 
     for ( ; time <= tFinal + dt/2.; time += dt, iter++)
@@ -471,7 +471,7 @@ Ethiersteinman::check()
 void
 Ethiersteinman::run()
 {
-    Chrono chrono;
+    LifeChrono chrono;
 
     // Reading from data file
     //
@@ -606,7 +606,7 @@ Ethiersteinman::run()
                            2.0,   2.0,   2.0,
                            -1.0,  -1.0,  -1.0);
 
-            partitionMesh< RegionMesh3D<LinearTetra> >   meshPart(fullMeshPtr, d->comm);
+            MeshPartitioner< RegionMesh3D<LinearTetra> >   meshPart(fullMeshPtr, d->comm);
 
             std::string uOrder =  uFE[iElem];
             std::string pOrder =  pFE[iElem];
@@ -776,7 +776,7 @@ Ethiersteinman::run()
 #ifdef HAVE_HDF5
             if (exporterType.compare("hdf5") == 0)
             {
-                exporter.reset( new Hdf5exporter<RegionMesh3D<LinearTetra> > ( dataFile, "ethiersteinman" ) );
+                exporter.reset( new ExporterHDF5<RegionMesh3D<LinearTetra> > ( dataFile, "ethiersteinman" ) );
                 exporter->setPostDir( "./" ); // This is a test to see if M_post_dir is working
                 exporter->setMeshProcId( meshPart.meshPartition(), d->comm->MyPID() );
             }
@@ -785,11 +785,11 @@ Ethiersteinman::run()
             {
                 if (exporterType.compare("none") == 0)
                 {
-                    exporter.reset( new NoExport<RegionMesh3D<LinearTetra> > ( dataFile, meshPart.meshPartition(), "ethiersteinman", d->comm->MyPID()) );
+                    exporter.reset( new ExporterEmpty<RegionMesh3D<LinearTetra> > ( dataFile, meshPart.meshPartition(), "ethiersteinman", d->comm->MyPID()) );
                 }
                 else
                 {
-                    exporter.reset( new Ensight<RegionMesh3D<LinearTetra> > ( dataFile, meshPart.meshPartition(), "ethiersteinman", d->comm->MyPID()) );
+                    exporter.reset( new ExporterEnsight<RegionMesh3D<LinearTetra> > ( dataFile, meshPart.meshPartition(), "ethiersteinman", d->comm->MyPID()) );
                 }
             }
 
@@ -819,7 +819,7 @@ Ethiersteinman::run()
             //
             int iter = 1;
 
-            Chrono chronoGlobal;
+            LifeChrono chronoGlobal;
             chronoGlobal.start();
 
             for ( ; time <= tFinal + dt/2.; time += dt, iter++)
