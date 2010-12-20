@@ -7,7 +7,7 @@
 
 #include<life/lifemesh/dataMesh.hpp>
 
-#include<life/lifecore/GetPot.hpp>
+#include<life/lifefilters/GetPot.hpp>
 #include <string>
 
 #include <life/lifefem/DOFInterface3Dto3D.hpp>
