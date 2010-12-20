@@ -47,11 +47,11 @@ namespace LifeV
 // Constructors
 // ===============
 
-DataString::DataString( std::string str, Int val, std::string help ) :
+StringData::StringData( std::string str, Int val, std::string help ) :
     M_string( str ), M_value( val ), M_help( help )
 {}
 
-DataStringList::DataStringList( std::string title ) :
+StringDataList::StringDataList( std::string title ) :
     M_title( title )
 {}
 
@@ -59,15 +59,15 @@ DataStringList::DataStringList( std::string title ) :
 // Public methods
 // ===============
 
-void DataStringList::add ( std::string str, Int val, std::string help )
+void StringDataList::add ( std::string str, Int val, std::string help )
 {
-    M_list.push_back( DataString( str, val, help ) );
+    M_list.push_back( StringData( str, val, help ) );
 }
 
-void DataStringList::showMe( std::ostream& c, bool val ) const
+void StringDataList::showMe( std::ostream& c, bool val ) const
 {
     c << M_title << " : " << std::endl;
-    for ( std::vector<DataString>::const_iterator ds = M_list.begin();
+    for ( std::vector<StringData>::const_iterator ds = M_list.begin();
           ds != M_list.end(); ds++ )
     {
         c << "   " << ds->string() << " : " << ds->help();
@@ -77,9 +77,9 @@ void DataStringList::showMe( std::ostream& c, bool val ) const
     }
 }
 
-Int DataStringList::value( const std::string& str ) const
+Int StringDataList::value( const std::string& str ) const
 {
-    std::vector<DataString>::const_iterator ds = M_list.begin();
+    std::vector<StringData>::const_iterator ds = M_list.begin();
     while ( ds != M_list.end() )
     {
         if ( ds->string() == str )

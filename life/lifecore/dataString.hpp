@@ -34,8 +34,8 @@ along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
   @maintainer Radu Popescu <radu.popescu@epfl.ch>
 */
 
-#ifndef DATA_STRING_H
-#define DATA_STRING_H
+#ifndef STRING_DATA_H
+#define STRING_DATA_H
 
 #include <iostream>
 #include <string>
@@ -47,21 +47,21 @@ namespace LifeV
 {
 
 /*!
-  @class DataString
+  @class StringData
 
   A data string contains a string (the name used
   in a data file), a integer value (the value used inside
   the code), a small help text
 */
-class DataString
+class StringData
 {
 public:
     //! @name Constructor
     //@{
-    DataString() {}
-    DataString( std::string str, Int val, std::string help );
+    StringData() {}
+    StringData( std::string str, Int val, std::string help );
 
-    virtual ~DataString() {}
+    virtual ~StringData() {}
     //@}
 
     //! @name Get methods
@@ -107,7 +107,7 @@ private:
 };
 
 /*!
-  @class DataStringList
+  @class StringDataList
 
   To build a list of data string.
 
@@ -118,7 +118,7 @@ private:
 
   You first create the list:
 
-  DataStringList solver_list("My solvers");
+  StringDataList solver_list("My solvers");
   solver_list.add("cg",1,"preconditioned conjugate gradient method");
   solver_list.add("gmres",2,"preconditioned gmres method");
   solver_list.add("cgs",2,"preconditioned cg squared method");
@@ -134,15 +134,15 @@ private:
   else, the list of possible choices (with help) is given and
   the code stop with an error.
 */
-class DataStringList
+class StringDataList
 {
 public:
     //! @name Constructor
     //@{
-    DataStringList() {}
-    DataStringList( std::string title );
+    StringDataList() {}
+    StringDataList( std::string title );
 
-    virtual ~DataStringList() {}
+    virtual ~StringDataList() {}
     //@}
 
     //! @name Public methods
@@ -159,8 +159,8 @@ private:
     //! @name Private data members
     //@{
     std::string M_title;
-    std::vector<DataString> M_list;
+    std::vector<StringData> M_list;
     //@}
 };
 }
-#endif // DATA_STRING_H
+#endif // STRING_DATA_H
