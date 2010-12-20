@@ -43,7 +43,7 @@
 
 #include <life/lifefem/GeometricMap.hpp>
 #include <life/lifefem/ReferenceFE.hpp>
-#include <life/lifefem/staticBdFE.hpp>
+#include <life/lifefem/CurrentBoundaryFEBase.hpp>
 
 namespace LifeV
 {

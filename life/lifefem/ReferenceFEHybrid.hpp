@@ -39,7 +39,7 @@
 #ifndef REFFEHYBRID_H
 #define REFFEHYBRID_H 1
 
-#include <life/lifefem/staticBdFE.hpp>
+#include <life/lifefem/ReferenceBoundaryFEBase.hpp>
 
 namespace LifeV
 {

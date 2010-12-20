@@ -126,7 +126,7 @@ BCIdentifier                           identifier                              E
 BCManage                               bcManage                                EMORY
 BCManageNormal                         BCNormalManager                         EMORY
 BCVector                               bcVector                                EMORY
-CurrentBoundaryFEBase                  staticBdFE                              CMCS2
+CurrentBoundaryFEBase                  staticBdFE                              CMCS2     DONE
 CurrentBoundaryFE                      currentBdFE                             CMCS2     DONE
 CurrentFE                              currentFE                               CMCS2     DONE
 DefinitionFE                           defQuadRuleFE (splitting)               CMCS2
