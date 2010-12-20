@@ -74,13 +74,13 @@ SUBROUTINE_F77 F77NAME( readmesh2d ) ( I_F77 & ne, I_F77 & np,
                                        R4_F77 & ymax, I_F77 * ib, I_F77 & nbd,
                                        I_F77 * ic, I_F77 * bc, I_F77 * ie,
                                        I_F77 * cpl, R4_F77 * xmed, I_F77 & isw,
-                                       I_F77 & ierr, CHARACTER filename );
+                                       I_F77 & ierr, FortranCharacterString filename );
 
 // Subroutine read_mesh2d_head(filename,ne,np,nptot,npe,nb,nx,npc,ierr)
 SUBROUTINE_F77 F77NAME( readmesh2dhead ) ( I_F77 & ne, I_F77 & np,
                                            I_F77 & nptot, I_F77 & npe, I_F77 & nb,
                                            I_F77 & nps, I_F77 & nx,
-                                           I_F77 & npc, I_F77 & ierr, CHARACTER filename );
+                                           I_F77 & npc, I_F77 & ierr, FortranCharacterString filename );
 
 //! importerMesh2D - reads a mesh in mesh2D(LF) format.
 /*!
@@ -118,7 +118,7 @@ importerMesh2D( RegionMesh2D      & mesh, //importerMesh2D
         std::abort();
     }
 
-    CHARACTER filename( const_cast<char *>( fileName.c_str() ), fileName.length() );
+    FortranCharacterString filename( const_cast<char *>( fileName.c_str() ), fileName.length() );
 
     I_F77 ne, np, nptot, npe, nb, nx, npc, ierr, nps, ndimn, npb;
 
@@ -149,14 +149,14 @@ importerMesh2D( RegionMesh2D      & mesh, //importerMesh2D
     I_F77 ndc( 3 );
     I_F77 isw( 0 );
 
-    FMATRIX<I_F77> iel( npe, ne );
-    FMATRIX<I_F77> ib( nps, nb );
-    FMATRIX<I_F77> ic( nb );
-    FMATRIX<I_F77> bc( nb );
-    FMATRIX<I_F77> ie( nb );
-    FMATRIX<I_F77> cpl( npc );
-    FMATRIX<R4_F77> coor( 3, nptot );
-    FMATRIX<R4_F77> xmed( 3, nb );
+    FortranMatrix<I_F77> iel( npe, ne );
+    FortranMatrix<I_F77> ib( nps, nb );
+    FortranMatrix<I_F77> ic( nb );
+    FortranMatrix<I_F77> bc( nb );
+    FortranMatrix<I_F77> ie( nb );
+    FortranMatrix<I_F77> cpl( npc );
+    FortranMatrix<R4_F77> coor( 3, nptot );
+    FortranMatrix<R4_F77> xmed( 3, nb );
     R4_F77 xmin, xmax, ymin, ymax;
 
     // Reading
