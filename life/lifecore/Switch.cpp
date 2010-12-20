@@ -34,7 +34,7 @@ along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 #include <life/lifecore/life.hpp>
-#include <life/lifecore/switch.hpp>
+#include <life/lifecore/Switch.hpp>
 
 namespace LifeV
 {
