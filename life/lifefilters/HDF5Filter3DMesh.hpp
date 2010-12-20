@@ -25,7 +25,7 @@ along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
 //@HEADER
 /*!
   @file
-  @brief Class derived from Hdf5exporter to provide I/O for the mesh partitions (RegionMesh3D only)
+  @brief Class derived from ExporterHDF5 to provide I/O for the mesh partitions (RegionMesh3D only)
 
   @date 9-07-2010
   @author Radu Popescu <radu.popescu@epfl.ch>
@@ -33,8 +33,8 @@ along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
   @maintainer Radu Popescu <radu.popescu@epfl.ch>
 */
 
-#ifndef HDF5FILTER3DMESH_H
-#define HDF5FILTER3DMESH_H 1
+#ifndef EXPORTER_HDF5_MESH_3D_H
+#define EXPORTER_HDF5_MESH_3D_H 1
 
 #include <life/lifefilters/hdf5exporter.hpp>
 #include <life/lifefem/DOFInterface3Dto3D.hpp>
@@ -42,7 +42,7 @@ along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
 namespace LifeV
 {
 
-//! Class derived from Hdf5exporter to provide I/O for the mesh partitions (RegionMesh3D only)
+//! Class derived from ExporterHDF5 to provide I/O for the mesh partitions (RegionMesh3D only)
 /*!
   @author Radu Popescu <radu.popescu@epfl.ch>
 
@@ -55,21 +55,21 @@ namespace LifeV
   Guidelines when operating with partition information:
   <ol>
   <li> Use different objects for import and export
-  <li> When exporting graph and partition(s) create a Hdf5exporter to be used for output.
+  <li> When exporting graph and partition(s) create a ExporterHDF5 to be used for output.
   Call methods: addPartitionGraph, addMeshPartitionAll, or addMyMeshPartition
   Call postProcess to write data
   Call CloseFile
-  <li> When importing graph and/or partition create a Hdf5exporter to be used for input,
+  <li> When importing graph and/or partition create a ExporterHDF5 to be used for input,
   Call loadGraph and partitionMesh::update, call loadMyPartition
   Call CloseFile
   </ol>
 */
 template <typename MeshType>
-class HDF5Filter3DMesh : public Hdf5exporter<MeshType>
+class ExporterHDF5Mesh3D : public ExporterHDF5<MeshType>
 {
 public:
     typedef MeshType mesh_Type;
-    typedef Hdf5exporter<MeshType> base;
+    typedef ExporterHDF5<MeshType> base;
     typedef typename base::meshPtr_Type meshPtr_Type;
     typedef typename base::vectorRaw_Type vector_Type;
     typedef typename base::vectorPtr_Type vectorPtr_Type;
@@ -91,10 +91,10 @@ public:
     //! @name Constructor & Destructor
     //@{
 
-    //! Empty Constructor for HDF5Filter3DMesh
-    HDF5Filter3DMesh() {}
+    //! Empty Constructor for ExporterHDF5Mesh3D
+    ExporterHDF5Mesh3D() {}
 
-    //! Constructor for HDF5Filter3DMesh
+    //! Constructor for ExporterHDF5Mesh3D
     /*!
       @param dataFile the GetPot data file where you must provide an [exporter] section with:
       "start"     (start index for sections in the hdf5 data structure 0 for 000, 1 for 001 etc.),
@@ -104,9 +104,9 @@ public:
       @param the prefix for the case file (ex. "test" for test.case)
       @param the procId determines de CPU id. if negative, it ussemes there is only one processor
     */
-    HDF5Filter3DMesh(const GetPot& dataFile, meshPtr_Type mesh, const std::string& prefix, const Int& procId);
+    ExporterHDF5Mesh3D(const GetPot& dataFile, meshPtr_Type mesh, const std::string& prefix, const Int& procId);
 
-    //! Constructor for HDF5Filter3DMesh without prefix and procID
+    //! Constructor for ExporterHDF5Mesh3D without prefix and procID
     /*!
       @param dataFile the GetPot data file where you must provide an [exporter] section with:
       "start"     (start index for sections in the hdf5 data structure 0 for 000, 1 for 001 etc.),
@@ -114,10 +114,10 @@ public:
       "multimesh" ( = true if the mesh has to be saved at each post-processing step)
       @param mesh the mesh
     */
-    HDF5Filter3DMesh(const GetPot& dataFile, const std::string& prefix);
+    ExporterHDF5Mesh3D(const GetPot& dataFile, const std::string& prefix);
 
-    //! Destructor for HDF5Filter3DMesh
-    virtual ~HDF5Filter3DMesh() {}
+    //! Destructor for ExporterHDF5Mesh3D
+    virtual ~ExporterHDF5Mesh3D() {}
 
     //@}
 
@@ -148,9 +148,9 @@ public:
     //! Add to HDF5 file the mesh partition that belongs to the current process (parallel operation)
     /*!
       After the mesh partition is loaded from the HDF5 file, the simulation is run and
-      HDF5Filter3DMesh::postProcess() is called, the original contents of the HDF5 will be lost.
+      ExporterHDF5Mesh3D::postProcess() is called, the original contents of the HDF5 will be lost.
       To keep mesh partition, call:
-      HDF5Filter3DMesh::addMyMeshPartition() before calling HDF5Filter3DMesh::postProcess();
+      ExporterHDF5Mesh3D::addMyMeshPartition() before calling ExporterHDF5Mesh3D::postProcess();
       \param meshPointer - shared_ptr<Mesh> - shared pointer to a mesh partition (as returned by
       partitionMesh::mesh() )
       \param comm - Epetra_Comm* - raw pointer to the Epetra communicator to be used
@@ -220,7 +220,7 @@ private:
 // ===================================================
 
 template<typename MeshType>
-HDF5Filter3DMesh<MeshType>::HDF5Filter3DMesh(const GetPot& dataFile, meshPtr_Type mesh,
+ExporterHDF5Mesh3D<MeshType>::ExporterHDF5Mesh3D(const GetPot& dataFile, meshPtr_Type mesh,
                                              const std::string& prefix,
                                              const Int& procId) :
     base                ( dataFile, mesh, prefix, procId )
@@ -228,7 +228,7 @@ HDF5Filter3DMesh<MeshType>::HDF5Filter3DMesh(const GetPot& dataFile, meshPtr_Typ
 }
 
 template<typename MeshType>
-HDF5Filter3DMesh<MeshType>::HDF5Filter3DMesh(const GetPot& dataFile, const std::string& prefix):
+ExporterHDF5Mesh3D<MeshType>::ExporterHDF5Mesh3D(const GetPot& dataFile, const std::string& prefix):
     base                ( dataFile, prefix )
 {
 }
@@ -238,7 +238,7 @@ HDF5Filter3DMesh<MeshType>::HDF5Filter3DMesh(const GetPot& dataFile, const std::
 // ===================================================
 
 template<typename MeshType>
-void HDF5Filter3DMesh<MeshType>::addDOFInterface(const interfaceVectorPtr_Type& interfaces,
+void ExporterHDF5Mesh3D<MeshType>::addDOFInterface(const interfaceVectorPtr_Type& interfaces,
                                                  const std::string& type,
                                                  const Int& firstInterfaceFlag,
                                                  const Int& secondInterfaceFlag,
@@ -253,7 +253,7 @@ void HDF5Filter3DMesh<MeshType>::addDOFInterface(const interfaceVectorPtr_Type& 
 }
 
 template<typename MeshType>
-void HDF5Filter3DMesh<MeshType>::postProcess(const Real& time)
+void ExporterHDF5Mesh3D<MeshType>::postProcess(const Real& time)
 {
     if ( this->M_HDF5.get() == 0)
     {
@@ -337,7 +337,7 @@ void HDF5Filter3DMesh<MeshType>::postProcess(const Real& time)
 }
 
 template <typename MeshType>
-int HDF5Filter3DMesh<MeshType>::queryStoredInterfaceNumber()
+int ExporterHDF5Mesh3D<MeshType>::queryStoredInterfaceNumber()
 {
     if (this->M_HDF5.get() == 0)
     {
@@ -355,7 +355,7 @@ int HDF5Filter3DMesh<MeshType>::queryStoredInterfaceNumber()
 }
 
 template <typename MeshType>
-std::vector<std::string>& HDF5Filter3DMesh<MeshType>::queryStoredInterfaceTypes()
+std::vector<std::string>& ExporterHDF5Mesh3D<MeshType>::queryStoredInterfaceTypes()
 {
     if (this->M_HDF5.get() == 0)
     {
@@ -381,7 +381,7 @@ std::vector<std::string>& HDF5Filter3DMesh<MeshType>::queryStoredInterfaceTypes(
 }
 
 template <typename MeshType>
-typename HDF5Filter3DMesh<MeshType>::graphPtr_Type HDF5Filter3DMesh<MeshType>::getGraph()
+typename ExporterHDF5Mesh3D<MeshType>::graphPtr_Type ExporterHDF5Mesh3D<MeshType>::getGraph()
 {
     graphPtr_Type tempGraph(new graphPtr_Type::element_type);
 
@@ -424,7 +424,7 @@ typename HDF5Filter3DMesh<MeshType>::graphPtr_Type HDF5Filter3DMesh<MeshType>::g
 }
 
 template <typename MeshType>
-typename HDF5Filter3DMesh<MeshType>::meshPtr_Type HDF5Filter3DMesh<MeshType>::getMeshPartition()
+typename ExporterHDF5Mesh3D<MeshType>::meshPtr_Type ExporterHDF5Mesh3D<MeshType>::getMeshPartition()
 {
     meshPtr_Type tempMesh(new MeshType);
 
@@ -692,7 +692,7 @@ typename HDF5Filter3DMesh<MeshType>::meshPtr_Type HDF5Filter3DMesh<MeshType>::ge
 }
 
 template <typename MeshType>
-boost::shared_ptr< std::map<UInt, UInt> >& HDF5Filter3DMesh<MeshType>::getStoredInterface(int k)
+boost::shared_ptr< std::map<UInt, UInt> >& ExporterHDF5Mesh3D<MeshType>::getStoredInterface(int k)
 {
     if (this->M_HDF5.get() == 0)
     {
@@ -734,7 +734,7 @@ boost::shared_ptr< std::map<UInt, UInt> >& HDF5Filter3DMesh<MeshType>::getStored
 // ========================
 
 template <typename MeshType>
-void HDF5Filter3DMesh<MeshType>::writeGraph()
+void ExporterHDF5Mesh3D<MeshType>::writeGraph()
 {
     std::vector<Int> partitionSizes;
     Int size, maxSize = 0;
@@ -773,7 +773,7 @@ void HDF5Filter3DMesh<MeshType>::writeGraph()
 }
 
 template <typename MeshType>
-void HDF5Filter3DMesh<MeshType>::writePartition(meshPtr_Type mesh, std::string& suffix)
+void ExporterHDF5Mesh3D<MeshType>::writePartition(meshPtr_Type mesh, std::string& suffix)
 {
     UInt elementNodes, faceNodes;
     switch (MeshType::ElementShape::S_shape)
@@ -970,7 +970,7 @@ void HDF5Filter3DMesh<MeshType>::writePartition(meshPtr_Type mesh, std::string& 
 }
 
 template <typename MeshType>
-void HDF5Filter3DMesh<MeshType>::writeSerialMesh()
+void ExporterHDF5Mesh3D<MeshType>::writeSerialMesh()
 {
     std::stringstream index;
     std::string suffix;
@@ -988,7 +988,7 @@ void HDF5Filter3DMesh<MeshType>::writeSerialMesh()
 }
 
 template <typename MeshType>
-void HDF5Filter3DMesh<MeshType>::writeParallelMesh()
+void ExporterHDF5Mesh3D<MeshType>::writeParallelMesh()
 {
     std::stringstream index;
     std::string suffix;
@@ -1000,7 +1000,7 @@ void HDF5Filter3DMesh<MeshType>::writeParallelMesh()
 }
 
 template <typename MeshType>
-void HDF5Filter3DMesh<MeshType>::writeInterfaces()
+void ExporterHDF5Mesh3D<MeshType>::writeInterfaces()
 {
     Int interfaceNumber = M_DOFInterfaces.size();
 
@@ -1061,4 +1061,4 @@ void HDF5Filter3DMesh<MeshType>::writeInterfaces()
 
 } // Namespace LifeV
 
-#endif // HDF5FILTER3DMESH_H
+#endif // EXPORTER_HDF5_MESH_3D_H
