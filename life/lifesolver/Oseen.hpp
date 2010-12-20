@@ -633,20 +633,6 @@ protected:
 
     //@}
 
-    //@{ deprecated methods
-
-    const UInt&  __attribute__ ((__deprecated__)) dim_u( ) const
-    {
-        return dimVelocity( );
-    }
-
-    const UInt&  __attribute__ ((__deprecated__)) dim_p( ) const
-    {
-        return dimPressure( );
-    }
-
-    //@}
-
     //private members
 
     //! data for Navier-Stokes solvers

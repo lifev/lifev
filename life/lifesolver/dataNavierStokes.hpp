@@ -170,10 +170,6 @@ public:
      * @param density
      * @param nfluid the fluid number
      */
-    inline void __attribute__ ((__deprecated__)) density ( const Real& density, const UInt nfluid=0 )
-    {
-        setDensity( density, nfluid );
-    }
     inline void setDensity ( const Real& density, const UInt nfluid=0 )
     {
         ASSERT(nfluid< M_fluidNumber,"Undeclared fluid");
@@ -185,10 +181,6 @@ public:
      * @param viscosity
      * @param nfluid the fluid number
      */
-    inline void __attribute__ ((__deprecated__)) viscosity ( const Real& viscosity, const UInt nfluid=0 )
-    {
-        setViscosity( viscosity, nfluid );
-    }
     inline void setViscosity ( const Real& viscosity, const UInt nfluid=0 )
     {
         ASSERT(nfluid< M_fluidNumber,"Undeclared fluid");
