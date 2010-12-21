@@ -504,12 +504,12 @@ OneDimensionalData::initLinearParam( const GetPot& /*dataFile*/ )  // CHECK THIS
     M_celerity2 = - M_celerity1;
 
     M_celerity1LeftEigenvector1 = M_celerity1;
-    M_celerity1LeftEigenvector2 = ScalarVector(M_mesh->numPoints(), 1.);
+    M_celerity1LeftEigenvector2 = scalarVector_Type(M_mesh->numPoints(), 1.);
     M_celerity2LeftEigenvector1 = M_celerity2;
-    M_celerity2LeftEigenvector2 = ScalarVector(M_mesh->numPoints(), 1.);
+    M_celerity2LeftEigenvector2 = scalarVector_Type(M_mesh->numPoints(), 1.);
 
     M_flux11 = ZeroVector(M_mesh->numPoints());
-    M_flux12 = ScalarVector(M_mesh->numPoints(), 1.);
+    M_flux12 = scalarVector_Type(M_mesh->numPoints(), 1.);
     M_flux22 = ZeroVector(M_mesh->numPoints());
 
     M_source10 = ZeroVector(M_mesh->numPoints());

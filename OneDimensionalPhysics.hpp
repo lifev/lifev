@@ -48,6 +48,7 @@
 
 namespace LifeV
 {
+    const Real Pi = 3.14159265358979323846264338328;
 
 //! OneDimensionalPhysics - Base class providing physical operations for the 1D model data.
 /*!
@@ -56,7 +57,6 @@ namespace LifeV
 class OneDimensionalPhysics
 {
 public :
-
     //! @name Type definitions and Enumerators
     //@{
 

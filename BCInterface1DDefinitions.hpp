@@ -56,7 +56,7 @@
 
 // LifeV classes
 #include <life/lifecore/life.hpp>
-#include <life/lifecore/GetPot.hpp>
+#include <life/lifefilters/GetPot.hpp>
 #include <life/lifecore/Displayer.hpp>
 #include <life/lifecore/Factory.hpp>
 #include <life/lifecore/FactorySingleton.hpp>

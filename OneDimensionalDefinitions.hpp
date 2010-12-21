@@ -62,7 +62,6 @@
 #include <life/lifecore/StringUtility.hpp>
 #include <life/lifecore/Factory.hpp>
 #include <life/lifecore/FactorySingleton.hpp>
-#include <life/lifearray/tab.hpp>
 #include <life/lifecore/LifeChrono.hpp>
 #include <life/lifefem/FESpace.hpp>
 #include <life/lifealg/SolverAmesos.hpp>
@@ -73,7 +72,7 @@ namespace LifeV
 {
 namespace OneDimensional
 {
-
+const Real Pi = 3.14159265358979323846264338328;
 /*! @enum Physics Types
  */
 enum physicsType_Type

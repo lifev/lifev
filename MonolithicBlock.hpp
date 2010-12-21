@@ -39,7 +39,7 @@
 #define BLOCKINTERFACE_H 1
 
 #include <cstdarg>
-#include <life/lifecore/GetPot.hpp>
+#include <life/lifefilters/GetPot.hpp>
 #include <life/lifecore/life.hpp>
 
 #include <life/lifealg/SolverTrilinos.hpp>

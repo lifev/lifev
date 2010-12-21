@@ -57,11 +57,10 @@
 // LifeV classes
 #include <life/lifecore/life.hpp>
 #include <life/lifecore/StringUtility.hpp>
-#include <life/lifecore/GetPot.hpp>
+#include <life/lifefilters/GetPot.hpp>
 #include <life/lifecore/Displayer.hpp>
 #include <life/lifecore/Factory.hpp>
 #include <life/lifecore/FactorySingleton.hpp>
-#include <life/lifearray/tab.hpp>
 #include <life/lifefem/dataTime.hpp>
 #include <life/lifemesh/markers.hpp>
 

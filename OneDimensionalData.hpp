@@ -44,7 +44,7 @@
 #define OneDimensionalData_H
 
 // LIFEV
-#include <life/lifecore/GetPot.hpp>
+#include <life/lifefilters/GetPot.hpp>
 #include <life/lifefem/dataTime.hpp>
 #include <life/lifemesh/regionMesh1D.hpp>
 
