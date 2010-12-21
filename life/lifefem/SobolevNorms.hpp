@@ -31,6 +31,7 @@
     @author
 
     @contributor Samuel Quinodoz <samuel.quinodoz@epfl.ch>
+    @contributor Mauro Perego <perego.mauro@gmail.com>
     @mantainer Samuel Quinodoz <samuel.quinodoz@epfl.ch>
 
  */
@@ -98,7 +99,9 @@ elementaryFctL2NormSquare( boost::function<Real( Real,Real,Real )> fct,
     Real z;
     for ( UInt iQuadPt = 0; iQuadPt < fe.nbQuadPt(); ++iQuadPt )
     {
-        fe.coorQuadPt( x, y, z, iQuadPt );
+    	x = fe.quadNode(iQuadPt,0);
+        y = fe.quadNode(iQuadPt,1);
+	    z = fe.quadNode(iQuadPt,2);
         f = fct( x, y, z );
         sum += f * f * fe.weightDet( iQuadPt );
     }
@@ -118,7 +121,9 @@ elementaryFctL2NormSquare( boost::function<Real( Real, Real, Real, Real, UInt )>
     Real z;
     for ( UInt iQuadPt = 0; iQuadPt < fe.nbQuadPt(); ++iQuadPt )
     {
-        fe.coorQuadPt( x, y, z, iQuadPt );
+        x = fe.quadNode(iQuadPt,0);
+        y = fe.quadNode(iQuadPt,1);
+	    z = fe.quadNode(iQuadPt,2);
         for ( UInt iComp(0); iComp < nbComp; ++iComp )
         {
             f = fct( t, x, y, z, iComp + 1 );
@@ -184,11 +189,14 @@ elementaryFctH1NormSquare( const FunctionType& fct, const CurrentFE& fe )
 
     for ( UInt iQuadPt (0); iQuadPt < fe.nbQuadPt(); ++iQuadPt )
     {
-        fe.coorQuadPt( x, y, z, iQuadPt );
-        sum2 = fct( x, y, z ) * fct( x, y, z );
+    	x = fe.quadNode(iQuadPt,0);
+		y = fe.quadNode(iQuadPt,1);
+		z = fe.quadNode(iQuadPt,2);
+
+        sum2 = pow(fct( x, y, z ),2);
         for (UInt iCoor (0); iCoor < fe.nbCoor(); ++iCoor)
         {
-            sum2 += fct.grad(iCoor+1, x,y,z) *  fct.grad(iCoor+1, x,y,z);
+            sum2 += pow(fct.grad(iCoor+1, x,y,z), 2);
         }
         sum += sum2 * fe.weightDet( iQuadPt );
     }
@@ -206,15 +214,17 @@ Real elementaryFctH1NormSquare( const FunctionType& fct, const CurrentFE& fe, co
     Real z;
     for ( UInt iQuadPt(0); iQuadPt < fe.nbQuadPt(); ++iQuadPt )
     {
-        fe.coorQuadPt( x, y, z, iQuadPt );
+    	x = fe.quadNode(iQuadPt,0);
+		y = fe.quadNode(iQuadPt,1);
+		z = fe.quadNode(iQuadPt,2);
 
         for ( UInt iComp = 0; iComp < nbComp; ++iComp )
         {
-            sum2 = fct(t, x, y, z, iComp+1 ) *  fct(t, x, y, z, iComp+1 );
+            sum2 = pow(fct(t, x, y, z, iComp+1 ),2);
 
             for (UInt iCoor = 0; iCoor < fe.nbCoor(); ++iCoor)
             {
-                sum2 += fct.grad(iCoor+1, t,x,y,z, iComp+1) * fct.grad(iCoor+1, t,x,y,z, iComp+1);
+                sum2 += pow(fct.grad(iCoor+1, t,x,y,z, iComp+1),2);
             }
             sum += sum2 * fe.weightDet( iQuadPt );
         }
@@ -240,12 +250,14 @@ Real elementaryDifferenceL2NormSquare( VectorType & u,
     for (UInt iQuadPt (0); iQuadPt < fe.nbQuadPt(); ++iQuadPt )
     {
         uQuadPt=0.0;
+    	x = fe.quadNode(iQuadPt,0);
+        y = fe.quadNode(iQuadPt,1);
+	    z = fe.quadNode(iQuadPt,2);
         for (UInt iDof(0); iDof < fe.nbFEDof(); ++iDof )
         {
             UInt dofID = dof.localToGlobal( eleID, iDof + 1 );
             uQuadPt += u( dofID ) * fe.phi( iDof, iQuadPt );
         }
-        fe.coorQuadPt( x, y, z, iQuadPt );
         diffQuadPt = uQuadPt - fct( x, y, z );
         sum += diffQuadPt * diffQuadPt * fe.weightDet( iQuadPt );
     }
@@ -272,6 +284,9 @@ Real elementaryDifferenceL2NormSquare( VectorType & u,
 
     for ( UInt iQuadPt(0); iQuadPt < fe.nbQuadPt(); ++iQuadPt )
     {
+    	x = fe.quadNode(iQuadPt,0);
+        y = fe.quadNode(iQuadPt,1);
+	    z = fe.quadNode(iQuadPt,2);
         for (UInt iComp = 0; iComp < nbComp; ++iComp )
         {
             uQuadPt=0.0;
@@ -280,7 +295,6 @@ Real elementaryDifferenceL2NormSquare( VectorType & u,
                 UInt dofID = dof.localToGlobal( eleID, iDof + 1 ) + iComp * dof.numTotalDof();
                 uQuadPt += u( dofID ) * fe.phi( iDof, iQuadPt );
             }
-            fe.coorQuadPt( x, y, z, iQuadPt );
             diffQuadPt = uQuadPt - fct( t, x, y, z, iComp + 1 );
             sum += diffQuadPt * diffQuadPt * fe.weightDet( iQuadPt );
         }
@@ -307,6 +321,10 @@ Real elementaryDifferenceH1NormSquare( const VectorType & u, const UsrFct& fct, 
         uQuadPt=0.0;
         Vector graduQuadPt = ZeroVector(fe.nbCoor());
 
+        x = fe.quadNode(iQuadPt,0);
+		y = fe.quadNode(iQuadPt,1);
+		z = fe.quadNode(iQuadPt,2);
+
 
         for (UInt iDof(0); iDof < fe.nbFEDof(); ++iDof )
         {
@@ -318,7 +336,6 @@ Real elementaryDifferenceH1NormSquare( const VectorType & u, const UsrFct& fct, 
             }
         }
 
-        fe.coorQuadPt( x, y, z, iQuadPt );
         diffQuadPt = uQuadPt - fct( x, y, z );
 
         Vector diffGradQuadPt = graduQuadPt;
@@ -352,6 +369,10 @@ Real elementaryDifferenceH1NormSquare( const VectorType & u, const UsrFct& fct, 
 
     for (UInt iQuadPt(0); iQuadPt < fe.nbQuadPt(); ++iQuadPt )
     {
+    	x = fe.quadNode(iQuadPt,0);
+		y = fe.quadNode(iQuadPt,1);
+		z = fe.quadNode(iQuadPt,2);
+
         for (UInt iComp(0); iComp < nbComp; ++iComp )
         {
             uQuadPt = 0.0;
@@ -366,8 +387,6 @@ Real elementaryDifferenceH1NormSquare( const VectorType & u, const UsrFct& fct, 
                     graduQuadPt(iCoor) += u( dofID ) * fe.dphi( iDof, iCoor, iQuadPt );
                 }
             }
-
-            fe.coorQuadPt( x, y, z, iQuadPt );
 
             diffQuadPt = uQuadPt - fct(t, x, y, z, iComp+1);
 
@@ -406,7 +425,9 @@ Real elementaryDifferenceIntegral( VectorType & u,
 
     for ( UInt iQuadPt(0); iQuadPt < fe.nbQuadPt(); ++iQuadPt )
     {
-        fe.coorQuadPt( x, y, z, iQuadPt );
+    	x = fe.quadNode(iQuadPt,0);
+        y = fe.quadNode(iQuadPt,1);
+	    z = fe.quadNode(iQuadPt,2);
         uQuadPt =0.0;
         for ( UInt iDof(0); iDof < fe.nbFEDof(); ++iDof )
         {
@@ -419,12 +440,11 @@ Real elementaryDifferenceIntegral( VectorType & u,
     return sum;
 }
 
-//! returns the integral of u on the current element
-//! for time dependent+vectorial
+//! returns the integral of the selected component of u the current element
 template <typename VectorType>
 Real elementaryIntegral( VectorType & u,
                          const CurrentFE& fe,
-                         const Dof& dof, const UInt nbComp )
+                         const Dof& dof, const UInt component )
 {
     UInt eleID (fe.currentLocalId());
     Real sum(0.0);
@@ -436,7 +456,7 @@ Real elementaryIntegral( VectorType & u,
 
         for ( UInt iDof(0); iDof < fe.nbFEDof(); ++iDof )
         {
-            UInt dofID = dof.localToGlobal( eleID, iDof + 1 ) + (nbComp-1) * dof.numTotalDof();
+            UInt dofID = dof.localToGlobal( eleID, iDof + 1 ) + (component-1) * dof.numTotalDof();
             uQuadPt += u( dofID ) * fe.phi( iDof, iQuadPt );
         }
         sum += uQuadPt * fe.weightDet( iQuadPt );
@@ -444,13 +464,11 @@ Real elementaryIntegral( VectorType & u,
     return sum;
 }
 
-//! returns the integral of fct on the current element
-//! for time dependent+vectorial
-//! WRONG if nbComp is not 1 !!
+//! returns the integral of the selected component of fct on the current element
 inline Real
 elementaryFctIntegral( boost::function<Real( Real, Real, Real,
                                              Real, UInt )> fct,
-                       const CurrentFE& fe, const Real t, const UInt nbComp )
+                       const CurrentFE& fe, const Real t, const UInt component )
 {
     Real sum(0.0);
     Real x;
@@ -459,8 +477,10 @@ elementaryFctIntegral( boost::function<Real( Real, Real, Real,
 
     for (UInt iQuadPt(0); iQuadPt < fe.nbQuadPt(); ++iQuadPt )
     {
-        fe.coorQuadPt( x, y, z, iQuadPt );
-        sum += fct( t, x, y, z, nbComp ) * fe.weightDet( iQuadPt );
+    	x = fe.quadNode(iQuadPt,0);
+		y = fe.quadNode(iQuadPt,1);
+		z = fe.quadNode(iQuadPt,2);
+        sum += fct( t, x, y, z,  component ) * fe.weightDet( iQuadPt );
     }
     return sum;
 }

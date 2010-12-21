@@ -797,26 +797,28 @@ FESpace<MeshType, MapType>::l2ScalarProduct( const function_Type& fct, vector_ty
 
     for ( UInt iVol = 1; iVol <= this->mesh()->numElements(); iVol++ )
     {
-        this->fe().updateFirstDeriv( this->mesh()->element( iVol ) );
+        this->fe().update( this->mesh()->element( iVol ), UPDATE_QUAD_NODES | UPDATE_PHI | UPDATE_WDET );
 
         Real f, x, y, z;
 
-        UInt i, inod, ig, ic;
+        UInt i, inod, iQuadPt, ic;
         UInt eleID = this->fe().currentLocalId();
         Real u_ig;
 
-        for ( ic = 0; ic < M_fieldDim; ic++ )
-        {
-            for ( ig = 0; ig < this->fe().nbQuadPt(); ig++ )
-            {
-                this->fe().coorQuadPt( x, y, z, ig );
+        for ( iQuadPt = 0; iQuadPt < this->fe().nbQuadPt(); iQuadPt++ )
+			{
+        	x = this->fe().quadNode(iQuadPt,0);
+			y = this->fe().quadNode(iQuadPt,1);
+			z = this->fe().quadNode(iQuadPt,2);
+        	for ( ic = 0; ic < M_fieldDim; ic++ )
+				{
                 f = fct( t, x, y, z, ic + 1 );
                 u_ig = 0.;
                 for ( i = 0; i < this->fe().nbFEDof(); i++ )
                 {
                     inod = this->dof().localToGlobal( eleID, i + 1 ) + ic * dim();
-                    u_ig = f*this->fe().phi( i, ig );
-                    vec.sumIntoGlobalValues(inod,u_ig*this->fe().weightDet( ig ));
+                    u_ig = f*this->fe().phi( i, iQuadPt );
+                    vec.sumIntoGlobalValues(inod,u_ig*this->fe().weightDet( iQuadPt ));
                 }
 
             }
@@ -844,7 +846,7 @@ FESpace<MeshType, MapType>::l20Error( const function_Type& fexact,
 
     for ( UInt iVol = 1; iVol <= this->mesh()->numElements(); iVol++ )
     {
-        this->fe().updateFirstDeriv( this->mesh()->element( iVol ) );
+        this->fe().update( this->mesh()->element( iVol ), UPDATE_QUAD_NODES | UPDATE_PHI | UPDATE_WDET );
 
         normU += elementaryDifferenceL2NormSquare( vec, fexact, this->fe(), this->dof(), time, M_fieldDim );
 
@@ -897,12 +899,12 @@ FESpace<MeshType, MapType>::l2Error( const function_Type&    fexact,
     {
         //this->fe().updateFirstDeriv( this->mesh()->element( iVol ) );
 
-        CurrentFE newFE(this->fe().refFE(),this->fe().geoMap(),quadRuleTetra64pt);
-        newFE.update(this->mesh()->element( iVol ),UPDATE_DPHI | UPDATE_WDET);
+       // CurrentFE newFE(this->fe().refFE(),this->fe().geoMap(),quadRuleTetra64pt);
+        this->fe().update(this->mesh()->element( iVol ),  UPDATE_QUAD_NODES | UPDATE_PHI | UPDATE_WDET);
 
         normU += elementaryDifferenceL2NormSquare( vec, fexact,
-                                                   //this->fe(),
-                                                   newFE,
+                                                   this->fe(),
+                                                   //newFE,
                                                    this->dof(),
                                                    time,
                                                    M_fieldDim );
@@ -944,7 +946,7 @@ FESpace<MeshType, MapType>::l2NormFunction( const function& f, const Real time)
     //
     for ( UInt ielem = 1; ielem <= this->mesh()->numElements(); ielem++ )
     {
-        this->fe().update( this->mesh()->element( ielem ), UPDATE_WDET  );
+        this->fe().update( this->mesh()->element( ielem ),  UPDATE_QUAD_NODES | UPDATE_PHI | UPDATE_WDET  );
 
         sumExact += elementaryFctL2NormSquare( f, this->fe(), time, M_fieldDim );
     }
@@ -1036,7 +1038,7 @@ FESpace<MeshType, MapType>::h1Error( const function&    fexact,
 
     for ( UInt iVol  = 1; iVol <= this->mesh()->numElements(); iVol++ )
     {
-        this->fe().updateFirstDeriv( this->mesh()->element( iVol ) );
+        this->fe().updateFirstDerivQuadPt( this->mesh()->element( iVol ) );
 
         normU += elementaryDifferenceH1NormSquare( vec, fexact,
                                                    this->fe(),
@@ -1091,7 +1093,7 @@ FESpace<MeshType, MapType>::l2Norm( const vector_type& vec)
     for ( UInt ielem = 1; ielem <= this->mesh()->numElements(); ielem++ )
     {
         //UInt elem = M_FESpace.mesh()->element( ielem ).id();
-        this->fe().updateJacQuadPt( this->mesh()->element( ielem ) );
+        this->fe().update( this->mesh()->element( ielem ), UPDATE_QUAD_NODES | UPDATE_PHI | UPDATE_WDET );
         //
         norm += elementaryL2NormSquare( vec, this->fe(), this->dof(), nbComp );
     }
@@ -1154,7 +1156,7 @@ feInterpolateValue(const ID& elementID, const vector_type& solutionVector, const
     };
 
     // Make sur everything is up to date
-    M_fe->updateFirstDeriv( M_mesh->element( elementID ));
+    M_fe->update( M_mesh->element( elementID ), UPDATE_PHI);
 
     // Map the point back to the ref FE
     Real hat_x(0);
@@ -1200,7 +1202,7 @@ FESpace<MeshType, MapType>::
 feInterpolateValueLocal(const ID& elementID, const vector_type& solutionVector, const point_type& pt ) const
 {
     // Make sur everything is up to date
-    M_fe->updateFirstDeriv( M_mesh->element( elementID ));
+    M_fe->update( M_mesh->element( elementID ), UPDATE_PHI);
 
     // Map the point back to the ref FE
     Real hat_x(0);
