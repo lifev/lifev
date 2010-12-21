@@ -888,8 +888,8 @@ MultiscaleModel1D::tangentProblem( const bcSide_Type& bcOutputSide, const bcType
                 break;
 
             // Compute the eigenvectors
-            Container2D_Type eigenvalues, leftEigenvector1, leftEigenvector2;
-            M_solver->BoundaryEigenValuesEigenVectors( bcSide, *M_solution_tn, eigenvalues, leftEigenvector1, leftEigenvector2 );
+            data_Type::container2D_Type eigenvalues, leftEigenvector1, leftEigenvector2;
+            M_solver->boundaryEigenValuesEigenVectors( bcSide, *M_solution_tn, eigenvalues, leftEigenvector1, leftEigenvector2 );
 
             switch ( bcSide )
             {
@@ -897,11 +897,11 @@ MultiscaleModel1D::tangentProblem( const bcSide_Type& bcOutputSide, const bcType
                 switch ( bcOutputType )
                 {
                 case OneDimensional::Q: // dQ_L/dP_L
-                    JacobianCoefficient = leftEigenvector2[0] / leftEigenvector2[1]
+                    jacobianCoefficient = leftEigenvector2[0] / leftEigenvector2[1]
                                           * M_physics->dAdP( M_solver->boundaryValue( *M_solution, OneDimensional::P, OneDimensional::left ), 0 );
                     break;
                 case OneDimensional::P: // dP_L/dQ_L
-                    JacobianCoefficient = leftEigenvector2[1] / leftEigenvector2[0]
+                    jacobianCoefficient = leftEigenvector2[1] / leftEigenvector2[0]
                                           * M_physics->dPdA( M_solver->boundaryValue( *M_solution, OneDimensional::A, OneDimensional::left ), 0 );
                     break;
                 default:
@@ -912,12 +912,12 @@ MultiscaleModel1D::tangentProblem( const bcSide_Type& bcOutputSide, const bcType
                 switch ( bcOutputType )
                 {
                 case OneDimensional::Q: // dQ_R/dP_R
-                    JacobianCoefficient = -leftEigenvector1[0] / leftEigenvector1[1]
-                                          * M_physics->dAdP( M_solver->boundaryValue( *M_solution, OneDimensional::P, OneDimensional::right ), M_data->NumberOfElements() );
+                    jacobianCoefficient = -leftEigenvector1[0] / leftEigenvector1[1]
+                                          * M_physics->dAdP( M_solver->boundaryValue( *M_solution, OneDimensional::P, OneDimensional::right ), M_data->numberOfElements() );
                     break;
                 case OneDimensional::P: // dP_R/dQ_R
-                    JacobianCoefficient = -leftEigenvector1[1] / leftEigenvector1[0]
-                                          * M_physics->dPdA( M_solver->boundaryValue( *M_solution, OneDimensional::A, OneDimensional::right ), M_data->NumberOfElements() );
+                    jacobianCoefficient = -leftEigenvector1[1] / leftEigenvector1[0]
+                                          * M_physics->dPdA( M_solver->boundaryValue( *M_solution, OneDimensional::A, OneDimensional::right ), M_data->numberOfElements() );
                     break;
                 default:
                     std::cout << "Warning: bcType \"" << bcOutputType << "\"not available!" << std::endl;
