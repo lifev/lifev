@@ -13,7 +13,7 @@
 ###################################################################################################
 
 [Problem] #########################################################################################
-ProblemType = MultiScale
+ProblemType = Multiscale
 ProblemFile = ./MultiScaleData/Models/MultiScale/SinusoidalWave_1D-3DFSI_2Cylinders_FluxStress.dat
 
 [Solver] ##########################################################################################

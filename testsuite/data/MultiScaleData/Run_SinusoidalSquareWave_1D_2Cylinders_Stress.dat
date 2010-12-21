@@ -13,7 +13,7 @@
 ###################################################################################################
 
 [Problem] #########################################################################################
-ProblemType = MultiScale
+ProblemType = Multiscale
 ProblemFile = ./MultiScaleData/Models/MultiScale/SinusoidalSquareWave_1D_2Cylinders_Stress.dat
 
 [Solver] ##########################################################################################
