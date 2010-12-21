@@ -127,7 +127,7 @@ public:
     const region_Type&      reducedConductivitySphere()      const { return M_reducedConductivitySphere; }
 
     //! verbose
-    const Real&             verbose()                        const { return M_verbose; }
+    const bool&             verbose()                        const { return M_verbose; }
 
     //! FE space order
     std::string             uOrder()                         const { return M_uOrder; }
@@ -176,7 +176,7 @@ private:
 
     // order of time discretization BDF order
     UInt        M_BDForder;
-    UInt        M_verbose;
+    bool        M_verbose;
 
     Int         M_heartDiffusionFactor;
 
