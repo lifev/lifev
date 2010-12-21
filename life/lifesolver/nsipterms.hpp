@@ -56,7 +56,7 @@ namespace LifeV
 
 namespace details
 {
-//! IPStabilization Class
+//! StabilizationIP Class
 /*!
  * @brief Interior Penality Stabilization
  * @author C. Winkelmann <christoph.winkelmann@epfl.ch>
@@ -88,7 +88,7 @@ namespace details
  */
 
 template<typename MeshType, typename DofType>
-class IPStabilization
+class StabilizationIP
 {
 public:
 
@@ -105,7 +105,7 @@ public:
     //@{
 
     //! Default Constructor
-    IPStabilization();
+    StabilizationIP();
 
     //! Constructor
     /*!
@@ -120,7 +120,7 @@ public:
      * @param gammaPress Real          the stabilization parameter @f$\gamma_p@f$ for @f$\Sigma_{f\in\mathcal{F}}\int_{f} [\nabla p] \cdot [\nabla q]@f$
      * @param viscosity  Real          the fluid viscosity @f$\nu@f$
      */
-    __attribute__((__deprecated__)) IPStabilization( const meshPtr_Type&     mesh,
+    __attribute__((__deprecated__)) StabilizationIP( const meshPtr_Type&     mesh,
                      const dof_Type&        dof,
                      const RefFE&           refFE,
                      CurrentBdFE&           feBd,
@@ -130,7 +130,7 @@ public:
                      Real                   gammaPress = 0,
                      Real                   viscosity = 1 );
 
-    virtual ~IPStabilization() {};
+    virtual ~StabilizationIP() {};
     //@}
 
     //! @name Methods
@@ -200,7 +200,7 @@ private:
     //! @name Private Constructor
     //@{
     //! Copy Constructor
-    IPStabilization(const IPStabilization<mesh_Type, dof_Type> & original);
+    StabilizationIP(const StabilizationIP<mesh_Type, dof_Type> & original);
     //@}
 
     //! @name Private Attributes
@@ -226,7 +226,7 @@ private:
     //! faceToPoint(i,j) = localId of jth point on ith local face
     FTOP         M_faceToPoint;
     //@}
-}; // class IPStabilization
+}; // class StabilizationIP
 
 
 //=============================================================================
@@ -234,7 +234,7 @@ private:
 //=============================================================================
 
 template<typename MeshType, typename DofType>
-IPStabilization<MeshType, DofType>::IPStabilization():
+StabilizationIP<MeshType, DofType>::StabilizationIP():
         M_gammaBeta ( 0.0 ),
         M_gammaDiv  ( 0.0 ),
         M_gammaPress( 0.0 ),
@@ -243,7 +243,7 @@ IPStabilization<MeshType, DofType>::IPStabilization():
 
 
 template<typename MeshType, typename DofType>
-IPStabilization<MeshType, DofType>::IPStabilization( const meshPtr_Type & mesh,
+StabilizationIP<MeshType, DofType>::StabilizationIP( const meshPtr_Type & mesh,
                                                      const dof_Type&      dof,
                                                      const RefFE&    refFE,
                                                      CurrentBdFE&    feBd,
@@ -291,7 +291,7 @@ IPStabilization<MeshType, DofType>::IPStabilization( const meshPtr_Type & mesh,
 
 template<typename MeshType, typename DofType>
 template<typename MatrixType, typename VectorType>
-void IPStabilization<MeshType, DofType>::apply( MatrixType& matrix,  const VectorType& state, const bool verbose )
+void StabilizationIP<MeshType, DofType>::apply( MatrixType& matrix,  const VectorType& state, const bool verbose )
 {
     if ( M_gammaBeta == 0. && M_gammaDiv == 0. && M_gammaPress == 0. )
     {
@@ -615,9 +615,9 @@ void IPStabilization<MeshType, DofType>::apply( MatrixType& matrix,  const Vecto
 } // apply(...)
 
 template<typename MeshType, typename DofType>
-void IPStabilization<MeshType, DofType>::showMe(std::ostream & output) const
+void StabilizationIP<MeshType, DofType>::showMe(std::ostream & output) const
 {
-    output << "IPStabilization::showMe() " <<std::endl;
+    output << "StabilizationIP::showMe() " <<std::endl;
     output << "Fluid Viscosity: " << M_viscosity << std::endl;
     output << "Stabilization coefficient velocity SD jumps:         " << M_gammaBeta  << std::endl;
     output << "Stabilization coefficient velocity divergence jumps: " << M_gammaDiv   << std::endl;
@@ -630,7 +630,7 @@ void IPStabilization<MeshType, DofType>::showMe(std::ostream & output) const
 // Setters method
 //=============================================================================
 template<typename MeshType, typename DofType>
-void IPStabilization<MeshType, DofType>::setDiscretization(const dofPtr_Type& dof, const RefFE& refFE, CurrentBdFE& feBd, const QuadRule& quadRule)
+void StabilizationIP<MeshType, DofType>::setDiscretization(const dofPtr_Type& dof, const RefFE& refFE, CurrentBdFE& feBd, const QuadRule& quadRule)
 {
     M_dof = dof;
     M_feOnSide1.reset( new CurrentFE(refFE, getGeoMap(*M_mesh), quadRule) );
@@ -661,7 +661,7 @@ void IPStabilization<MeshType, DofType>::setDiscretization(const dofPtr_Type& do
 
 template<typename MeshType, typename DofType>
 template<typename MapType>
-void IPStabilization<MeshType, DofType>::setFeSpaceVelocity(FESpace<mesh_Type, MapType> & feSpaceVelocity)
+void StabilizationIP<MeshType, DofType>::setFeSpaceVelocity(FESpace<mesh_Type, MapType> & feSpaceVelocity)
 {
 	setMesh(feSpaceVelocity.mesh());
 	setDiscretization(feSpaceVelocity.dofPtr(), feSpaceVelocity.refFE(),

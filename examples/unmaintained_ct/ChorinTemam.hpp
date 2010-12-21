@@ -297,7 +297,7 @@ protected:
     //! SD Stabilization
     boost::shared_ptr< SDStabilization<Mesh, Dof> >     M_sdStab;
     //! IP Stabilization
-    boost::shared_ptr< IPStabilization<Mesh, Dof> >     M_ipStab;
+    boost::shared_ptr< StabilizationIP<Mesh, Dof> >     M_ipStab;
     //! SD and/or IP stabilization parameters
     Real                           M_gammaBeta;
     Real                           M_gammaDiv;
@@ -521,7 +521,7 @@ void ChorinTemam<Mesh, SolverType>::setUp( const GetPot& dataFile )
     }
     if (M_stabType == IP_STAB_EXPL || M_stabType == IP_STAB_IMPL)
     {
-        M_ipStab.reset (new IPStabilization<Mesh, Dof>( M_uFESpace.mesh(),
+        M_ipStab.reset (new StabilizationIP<Mesh, Dof>( M_uFESpace.mesh(),
                                                         M_uFESpace.dof(),
                                                         M_uFESpace.refFE(),
                                                         M_uFESpace.feBd(),

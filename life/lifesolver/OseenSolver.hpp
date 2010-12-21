@@ -65,7 +65,7 @@
 #include <life/lifefem/PostProcessingBoundary.hpp>
 #include <life/lifefem/FESpace.hpp>
 
-#include <life/lifesolver/nsipterms.hpp>
+#include <life/lifesolver/StabilizationIP.hpp>
 #include <life/lifesolver/OseenData.hpp>
 
 #include <boost/shared_ptr.hpp>
@@ -692,7 +692,7 @@ protected:
     bool                           M_resetStabilization;
     Int                            M_iterReuseStabilization;
 
-    details::IPStabilization<mesh_Type, Dof> M_ipStabilization;
+    details::StabilizationIP<mesh_Type, Dof> M_ipStabilization;
     Real                           M_gammaBeta;
     Real                           M_gammaDiv;
     Real                           M_gammaPress;

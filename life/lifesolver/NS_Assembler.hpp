@@ -36,7 +36,7 @@ This library is free software; you can redistribute it and/or
 #include <life/lifefem/PostProcessingBoundary.hpp>
 #include <life/lifefem/FESpace.hpp>
 
-#include <life/lifesolver/nsipterms.hpp>
+#include <life/lifesolver/StabilizationIP.hpp>
 #include <life/lifesolver/OseenData.hpp>
 
 #include <life/lifearray/MatrixContainer.hpp>

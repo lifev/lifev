@@ -277,7 +277,7 @@ protected:
 
     //! IP Stabilization
     bool                           M_stab;
-    IPStabilization<Mesh, Dof>     M_ipStab;
+    StabilizationIP<Mesh, Dof>     M_ipStab;
     Real                           M_gammaBeta;
 
     // boolean indicating variational pressure term (velocity system RHS)

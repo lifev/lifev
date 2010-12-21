@@ -47,14 +47,14 @@ namespace LifeV
 //{
 
 template<typename MESH, typename DOF>
-class IPStabilization
+class StabilizationIP
 {
 public:
 
     typedef boost::shared_ptr<MESH> mesh_type;
 
     //! Constructor
-    IPStabilization( const mesh_type     mesh,
+    StabilizationIP( const mesh_type     mesh,
                      const DOF&      dof,
                      const RefFE&    refFE,
                      CurrentBdFE&    feBd,
@@ -103,10 +103,10 @@ private:
     ElemMat      M_elMatP;
     ElemVec      M_elvec_u;
     FTOP         M_fToP;
-}; // class IPStabilization
+}; // class StabilizationIP
 
 template<typename MESH, typename DOF>
-IPStabilization<MESH, DOF>::IPStabilization( const mesh_type mesh,
+StabilizationIP<MESH, DOF>::StabilizationIP( const mesh_type mesh,
                                              const DOF&      dof,
                                              const RefFE&    refFE,
                                              CurrentBdFE&    feBd,
@@ -155,7 +155,7 @@ IPStabilization<MESH, DOF>::IPStabilization( const mesh_type mesh,
 
 template<typename MESH, typename DOF>
 template<typename MATRIX, typename VECTOR>
-void IPStabilization<MESH, DOF>::apply( MATRIX& matrix,  const VECTOR& state, const bool verbose )
+void StabilizationIP<MESH, DOF>::apply( MATRIX& matrix,  const VECTOR& state, const bool verbose )
 {
     if ( M_gammaBeta == 0. && M_gammaDiv == 0. && M_gammaPress == 0. )
     {
@@ -472,7 +472,7 @@ void IPStabilization<MESH, DOF>::apply( MATRIX& matrix,  const VECTOR& state, co
 
 template<typename MESH, typename DOF>
 template<typename VECTOR>
-void IPStabilization<MESH, DOF>::apply_expl(VECTOR& vector, const VECTOR& state)
+void StabilizationIP<MESH, DOF>::apply_expl(VECTOR& vector, const VECTOR& state)
 {
 
     // __note__: we shall not use M_gammaDiv for the moment
