@@ -85,7 +85,7 @@ public:
     typedef Epetra_Comm comm_Type;
     typedef boost::shared_ptr<comm_Type> commPtr_Type;
 
-    typedef FESpace<uncutMesh_Type, EpetraMap> feSpace_Type;
+    typedef FESpace<uncutMesh_Type, MapEpetra> feSpace_Type;
     typedef boost::shared_ptr<feSpace_Type> feSpacePtr_Type;
     typedef std::vector<feSpacePtr_Type> feSpaceVector_Type;
     typedef boost::shared_ptr<feSpaceVector_Type> feSpaceVectorPtr_Type;

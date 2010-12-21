@@ -25,7 +25,7 @@ LIFESOLVER: fluidToMaster.hpp                                                  C
 LIFEV FILES TO BE MOVED
 ============================
 
-EpetraMap:      from LIFEALG     to LIFEARRAY                                  CMCS2
+EpetraMap:      from LIFEALG     to LIFEARRAY                                  CMCS2   DONE
 GetPot:         from LIFECORE    to LIFEFILTERS                                CMCS3 - DONE
 identifier      from LIFEMESH    to LIFEFEM                                    EMORY     DONE
 mesh_util       from LIFEFILTERS to LIFEMESH                                   CMCS3
@@ -70,7 +70,7 @@ SolverAztecOO                          SolverTrilinos                          C
 
 LIFEARRAY
 ============================
-MapEpetra                              EpetraMap                               CMCS2
+MapEpetra                              EpetraMap                               CMCS2     DONE
 MatrixContainer                        -                                       EMORY     DONE
 MatrixElemental                        elemMat                                 CMCS2
 MatrixEpetra                           EpetraMatrix                            CMCS2

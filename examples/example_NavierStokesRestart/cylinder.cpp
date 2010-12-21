@@ -37,7 +37,7 @@
 #endif
 
 #include <life/lifearray/EpetraMatrix.hpp>
-#include <life/lifealg/EpetraMap.hpp>
+#include <life/lifearray/MapEpetra.hpp>
 #include <life/lifemesh/MeshData.hpp>
 #include <life/lifemesh/MeshPartitioner.hpp>
 #include <life/lifesolver/OseenData.hpp>
@@ -401,7 +401,7 @@ Cylinder::run()
     if (verbose)
         std::cout << "Building the velocity FE space ... " << std::flush;
 
-    FESpace< Mesh, EpetraMap > uFESpace(meshPart,uOrder,3,d->comm);
+    FESpace< Mesh, MapEpetra > uFESpace(meshPart,uOrder,3,d->comm);
 
     if (verbose)
         std::cout << "ok." << std::endl;
@@ -412,7 +412,7 @@ Cylinder::run()
     if (verbose)
         std::cout << "Building the pressure FE space ... " << std::flush;
 
-    FESpace< Mesh, EpetraMap > pFESpace(meshPart, pOrder, 1, d->comm);
+    FESpace< Mesh, MapEpetra > pFESpace(meshPart, pOrder, 1, d->comm);
 
     if (verbose)
         std::cout << "ok." << std::endl;
@@ -432,7 +432,7 @@ Cylinder::run()
                                               uFESpace,
                                               pFESpace,
                                               d->comm, numLM);
-    EpetraMap fullMap(fluid.getMap());
+    MapEpetra fullMap(fluid.getMap());
 
     if (verbose) std::cout << "ok." << std::endl;
 

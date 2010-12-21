@@ -63,7 +63,7 @@ public:
     typedef std::map<ID, Vector > versorsMap_Type;
     typedef MatrixType matrix_Type;
     typedef boost::shared_ptr<matrix_Type> matrixPtr_Type;
-    typedef boost::shared_ptr<EpetraMap> epetraMapPtr_Type;
+    typedef boost::shared_ptr<MapEpetra> epetraMapPtr_Type;
     typedef boost::shared_ptr<EpetraVector> epetraVectorPtr_type;
 
     //@}
@@ -124,7 +124,7 @@ public:
         @param offset The boundary condition offset
         @param commPtr pointer to Epetra_Comm object
      */
-    void build(const DOF& dof, CurrentBoundaryFE& currentBdFE, matrix_Type& systemMatrix, UInt offset, EpetraMap::comm_ptrtype& commPtr);
+    void build(const DOF& dof, CurrentBoundaryFE& currentBdFE, matrix_Type& systemMatrix, UInt offset, MapEpetra::comm_ptrtype& commPtr);
 
 
     //! Build the rotation matrix
@@ -138,7 +138,7 @@ public:
     	@param commPtr pointer to Epetra_Comm object
      */
     template<typename MeshType>
-    void build(const MeshType& mesh, const DOF& dof, CurrentBoundaryFE& currentBdFE, matrix_Type& systemMatrix, UInt offset, EpetraMap::comm_ptrtype& commPtr);
+    void build(const MeshType& mesh, const DOF& dof, CurrentBoundaryFE& currentBdFE, matrix_Type& systemMatrix, UInt offset, MapEpetra::comm_ptrtype& commPtr);
 
 
     //! This function modify the system matrix to apply a change of basis from the Cartesian coordinate system to the local coordinate system given by tangents and normals to the boundary
@@ -254,7 +254,7 @@ private:
     matrixPtr_Type M_rotationMatrixPtr;
 
     //! Shared pointer to the local Map
-    epetraMapPtr_Type M_localEpetraMapPtr;
+    epetraMapPtr_Type M_localMapEpetraPtr;
 
     //! Shared pointer to the vector of the first tangents to the domain boundary
     epetraVectorPtr_type M_firstTangentPtr;
@@ -306,7 +306,7 @@ template<typename MatrixType>
 BCManageNormal<MatrixType>::BCManageNormal( const BCManageNormal & bcManageNormal ):
         M_dataBuilt(bcManageNormal.M_dataBuilt),
         M_rotationMatrixPtr(new matrix_Type(*bcManageNormal.M_rotationMatrixPtr) ),
-        M_localEpetraMapPtr(new EpetraMap(*bcManageNormal.M_localEpetraMapPtr) ),
+        M_localMapEpetraPtr(new MapEpetra(*bcManageNormal.M_localMapEpetraPtr) ),
         M_firstTangentPtr(new EpetraVector(*bcManageNormal.M_firstTangentPtr) ),
         M_secondTangentPtr(new EpetraVector(*bcManageNormal.M_secondTangentPtr) ),
         M_normalPtr(new EpetraVector(*bcManageNormal.M_normalPtr) ),
@@ -341,7 +341,7 @@ BCManageNormal<MatrixType>::operator= ( const BCManageNormal & bcManageNormal )
     {
         M_dataBuilt(bcManageNormal.M_dataBuilt);
         M_rotationMatrixPtr.reset(new matrix_Type(*bcManageNormal.M_rotationMatrixPtr) );
-        M_localEpetraMapPtr.reset(new EpetraMap(*bcManageNormal.M_localEpetraMapPtr) );
+        M_localMapEpetraPtr.reset(new MapEpetra(*bcManageNormal.M_localMapEpetraPtr) );
         M_firstTangentPtr.reset(new EpetraVector(*bcManageNormal.M_firstTangentPtr) );
         M_secondTangentPtr.reset(new EpetraVector(*bcManageNormal.M_secondTangentPtr) );
         M_normalPtr.reset(new EpetraVector(*bcManageNormal.M_normalPtr) );
@@ -388,7 +388,7 @@ void BCManageNormal<MatrixType>::init(const BCBase& boundaryCondition,const Real
 
 template<typename MatrixType>
 template<typename MeshType>
-void BCManageNormal<MatrixType>::build(const MeshType& mesh, const DOF& dof,CurrentBoundaryFE& currentBdFE,MatrixType& systemMatrix, UInt offset,EpetraMap::comm_ptrtype& commPtr)
+void BCManageNormal<MatrixType>::build(const MeshType& mesh, const DOF& dof,CurrentBoundaryFE& currentBdFE,MatrixType& systemMatrix, UInt offset,MapEpetra::comm_ptrtype& commPtr)
 {
     if (M_dataBuilt)
     {
@@ -424,7 +424,7 @@ void BCManageNormal<MatrixType>::build(const MeshType& mesh, const DOF& dof,Curr
             ++i;
         }
 
-        M_localEpetraMapPtr.reset( new EpetraMap(-1,3*nbPoints,idList,1,commPtr) );
+        M_localMapEpetraPtr.reset( new MapEpetra(-1,3*nbPoints,idList,1,commPtr) );
 
         //-----------------------------------------------------
         // STEP 2: Compute normals and tangents
@@ -592,7 +592,7 @@ void BCManageNormal<MatrixType>::exportToParaview(std::string fileName) const
     {
         fileName.append("_proc");
         std::ostringstream ossMyPid;
-        ossMyPid << M_localEpetraMapPtr->comm().MyPID();
+        ossMyPid << M_localMapEpetraPtr->comm().MyPID();
         fileName.append( ossMyPid.str() );
         fileName.append(".vtk");
         std::ofstream file(fileName.c_str());
@@ -605,9 +605,9 @@ void BCManageNormal<MatrixType>::exportToParaview(std::string fileName) const
         else
         {
             //We obtain the ID of the element
-            int NumMyElements = M_localEpetraMapPtr->map(Unique)->NumMyElements();
+            int NumMyElements = M_localMapEpetraPtr->map(Unique)->NumMyElements();
             int MyGlobalElements[NumMyElements];
-            M_localEpetraMapPtr->map(Unique)->MyGlobalElements(MyGlobalElements);
+            M_localMapEpetraPtr->map(Unique)->MyGlobalElements(MyGlobalElements);
             ID idof(0);
 
             //Writing the header
@@ -700,12 +700,12 @@ template< typename MatrixType>
 template< typename MeshType >
 void BCManageNormal<MatrixType>::M_calculateCoordinates(MeshType const& mesh)
 {
-    M_coordPtr.reset( new EpetraVector(*M_localEpetraMapPtr,Unique) );
+    M_coordPtr.reset( new EpetraVector(*M_localMapEpetraPtr,Unique) );
 
     //We obtain the ID of the element
-    int NumMyElements = M_localEpetraMapPtr->map(Unique)->NumMyElements();
+    int NumMyElements = M_localMapEpetraPtr->map(Unique)->NumMyElements();
     int MyGlobalElements[NumMyElements];
-    M_localEpetraMapPtr->map(Unique)->MyGlobalElements(MyGlobalElements);
+    M_localMapEpetraPtr->map(Unique)->MyGlobalElements(MyGlobalElements);
 
     UInt id;
     for ( int i(0); i<NumMyElements; ++i )
@@ -757,7 +757,7 @@ void BCManageNormal< MatrixType>::M_calculateNormals(const MeshType& mesh, const
     // STEP 1: Calculating the normals
     //-----------------------------------------------------
 
-    M_normalPtr.reset ( new EpetraVector(*M_localEpetraMapPtr,Repeated) );
+    M_normalPtr.reset ( new EpetraVector(*M_localMapEpetraPtr,Repeated) );
     //(*M_normalPtr)*=0;
     computeIntegratedNormals(dof, currentBdFE, *M_normalPtr, mesh);
 
@@ -778,9 +778,9 @@ void BCManageNormal<MatrixType>::M_storeGivenVersors()
     //-----------------------------------------------------
 
     //We obtain the ID of the element
-    int NumMyElements = M_localEpetraMapPtr->map(Unique)->NumMyElements();
+    int NumMyElements = M_localMapEpetraPtr->map(Unique)->NumMyElements();
     int MyGlobalElements[NumMyElements];
-    M_localEpetraMapPtr->map(Unique)->MyGlobalElements(MyGlobalElements);
+    M_localMapEpetraPtr->map(Unique)->MyGlobalElements(MyGlobalElements);
 
     //We normalize the normal
     Real norm;
@@ -818,14 +818,14 @@ void BCManageNormal<MatrixType>::M_calculateTangentVectors()
     //-----------------------------------------------------
 
     //We obtain the ID of the element
-    int NumMyElements = M_localEpetraMapPtr->map(Unique)->NumMyElements();
+    int NumMyElements = M_localMapEpetraPtr->map(Unique)->NumMyElements();
     int MyGlobalElements[NumMyElements];
-    M_localEpetraMapPtr->map(Unique)->MyGlobalElements(MyGlobalElements);
+    M_localMapEpetraPtr->map(Unique)->MyGlobalElements(MyGlobalElements);
 
     //Building the tangential vectors
-    M_firstTangentPtr.reset ( new EpetraVector(*M_localEpetraMapPtr,Unique) );
+    M_firstTangentPtr.reset ( new EpetraVector(*M_localMapEpetraPtr,Unique) );
     (*M_firstTangentPtr)*=0;
-    M_secondTangentPtr.reset ( new EpetraVector(*M_localEpetraMapPtr,Unique) );
+    M_secondTangentPtr.reset ( new EpetraVector(*M_localMapEpetraPtr,Unique) );
     (*M_secondTangentPtr)*=0;
 
     //We are going to use the loop to count the number
@@ -930,9 +930,9 @@ void BCManageNormal<MatrixType>::M_buildRotationMatrix(matrix_Type& systemMatrix
     std::vector<int> cols;
 
     //We obtain the ID of the element
-    int NumMyElements = M_localEpetraMapPtr->map(Unique)->NumMyElements();
+    int NumMyElements = M_localMapEpetraPtr->map(Unique)->NumMyElements();
     int MyGlobalElements[NumMyElements];
-    M_localEpetraMapPtr->map(Unique)->MyGlobalElements(MyGlobalElements);
+    M_localMapEpetraPtr->map(Unique)->MyGlobalElements(MyGlobalElements);
 
     UInt id;
     for ( int i(0); i<NumMyElements; ++i )

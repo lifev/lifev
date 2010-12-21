@@ -28,7 +28,7 @@
 #include <life/lifesolver/OseenSolver.hpp>
 #include <life/lifemesh/MeshData.hpp>
 #include <life/lifesolver/OseenData.hpp>
-#include <life/lifealg/EpetraMap.hpp>
+#include <life/lifearray/MapEpetra.hpp>
 #include <life/lifefem/FESpace.hpp>
 #include <life/lifefem/TimeAdvanceBDFNavierStokes.hpp>
 #include <life/lifemesh/MeshPartitioner.hpp>
@@ -160,12 +160,12 @@ int main(int argc, char** argv)
                                << "FE for the pressure: " << pOrder << std::endl;
 
     if (verbose) std::cout << "Building the velocity FE space... " << std::flush;
-    LifeV::FESpace< LifeV::RegionMesh3D<LifeV::LinearTetra>, LifeV::EpetraMap > uFESpace(meshPart, uOrder, 3, comm);
+    LifeV::FESpace< LifeV::RegionMesh3D<LifeV::LinearTetra>, LifeV::MapEpetra > uFESpace(meshPart, uOrder, 3, comm);
     if (verbose)
         std::cout << "ok." << std::endl;
 
     if (verbose) std::cout << "Building the pressure FE space... " << std::flush;
-    LifeV::FESpace< LifeV::RegionMesh3D<LifeV::LinearTetra>, LifeV::EpetraMap > pFESpace(meshPart,pOrder,1,comm);
+    LifeV::FESpace< LifeV::RegionMesh3D<LifeV::LinearTetra>, LifeV::MapEpetra > pFESpace(meshPart,pOrder,1,comm);
     if (verbose) std::cout << "ok." << std::endl;
 
     // Total degrees of freedom (elements of matrix)
@@ -227,7 +227,7 @@ int main(int argc, char** argv)
     fluid.buildSystem();
 
     // Communication map
-    LifeV::EpetraMap fullMap(fluid.getMap());
+    LifeV::MapEpetra fullMap(fluid.getMap());
 
     // Synchronization
     MPI_Barrier(MPI_COMM_WORLD);

@@ -168,7 +168,7 @@ public:
       @param comm Shared pointer of the Epetra communicator.
     */
     HyperbolicSolver ( const data_Type&          dataFile,
-                       FESpace<Mesh, EpetraMap>& fESpace,
+                       FESpace<Mesh, MapEpetra>& fESpace,
                        bchandler_Type&           bcHandler,
                        commPtr_Type&             comm );
 
@@ -179,7 +179,7 @@ public:
       @param comm Shared pointer of the Epetra communicator.
     */
     HyperbolicSolver ( const data_Type&          dataFile,
-                       FESpace<Mesh, EpetraMap>& fESpace,
+                       FESpace<Mesh, MapEpetra>& fESpace,
                        commPtr_Type&             comm );
 
     //! Virtual destructor.
@@ -299,9 +299,9 @@ public:
 
     //! Return the Epetra local map.
     /*!
-      @return Constant EpetraMap reference of the problem.
+      @return Constant MapEpetra reference of the problem.
     */
-    inline EpetraMap const& map () const
+    inline MapEpetra const& map () const
     {
         return M_localMap;
     }
@@ -347,7 +347,7 @@ protected:
     const UInt                M_me;
 
     //! Local map.
-    EpetraMap                 M_localMap;
+    MapEpetra                 M_localMap;
 
     //! Parallel displayer
     Displayer                 M_displayer;
@@ -374,7 +374,7 @@ protected:
     fluxPtr_Type              M_numericalFlux;
 
     //! Finite element space.
-    FESpace<Mesh, EpetraMap>& M_FESpace;
+    FESpace<Mesh, MapEpetra>& M_FESpace;
 
     //! Right hand side.
     vectorPtr_Type            M_rhs;
@@ -422,7 +422,7 @@ private:
 template< typename Mesh, typename SolverType >
 HyperbolicSolver< Mesh, SolverType >::
 HyperbolicSolver ( const data_Type&          dataFile,
-                   FESpace<Mesh, EpetraMap>& fESpace,
+                   FESpace<Mesh, MapEpetra>& fESpace,
                    bchandler_Type&           bcHandler,
                    commPtr_Type&             comm ):
         // Parallel stuff.
@@ -458,7 +458,7 @@ HyperbolicSolver ( const data_Type&          dataFile,
 template< typename Mesh, typename SolverType >
 HyperbolicSolver< Mesh, SolverType >::
 HyperbolicSolver ( const data_Type&          dataFile,
-                   FESpace<Mesh, EpetraMap>& fESpace,
+                   FESpace<Mesh, MapEpetra>& fESpace,
                    commPtr_Type&             comm ):
         // Parallel stuff.
         M_me              ( comm->MyPID() ),

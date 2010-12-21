@@ -72,15 +72,15 @@ public :
 
     // constructor
     MLTester( const data_type&          dataType,
-              FESpace<Mesh, EpetraMap>& uFESpace,
-              FESpace<Mesh, EpetraMap>& pFESpace,
+              FESpace<Mesh, MapEpetra>& uFESpace,
+              FESpace<Mesh, MapEpetra>& pFESpace,
               Epetra_Comm&              comm );
 
     MLTester( const data_type&          dataType,
-              FESpace<Mesh, EpetraMap>& uFESpace,
-              FESpace<Mesh, EpetraMap>& pFESpace,
+              FESpace<Mesh, MapEpetra>& uFESpace,
+              FESpace<Mesh, MapEpetra>& pFESpace,
               Epetra_Comm&              comm,
-              const EpetraMap           monolithicMap,
+              const MapEpetra           monolithicMap,
               const UInt                offset=0);
 
 
@@ -107,8 +107,8 @@ private :
 template< typename Mesh, typename SolverType >
 MLTester<Mesh, SolverType>::
 MLTester( const data_type&          dataType,
-          FESpace<Mesh, EpetraMap>& uFESpace,
-          FESpace<Mesh, EpetraMap>& pFESpace,
+          FESpace<Mesh, MapEpetra>& uFESpace,
+          FESpace<Mesh, MapEpetra>& pFESpace,
           Epetra_Comm&              comm ):
         super(dataType, uFESpace, pFESpace, comm)
 {};
@@ -118,10 +118,10 @@ MLTester( const data_type&          dataType,
 template< typename Mesh, typename SolverType >
 MLTester<Mesh, SolverType>::
 MLTester( const data_type&          dataType,
-          FESpace<Mesh, EpetraMap>& uFESpace,
-          FESpace<Mesh, EpetraMap>& pFESpace,
+          FESpace<Mesh, MapEpetra>& uFESpace,
+          FESpace<Mesh, MapEpetra>& pFESpace,
           Epetra_Comm&              comm,
-          const EpetraMap           monolithicMap,
+          const MapEpetra           monolithicMap,
           const UInt                offset):
         super(dataType, uFESpace, pFESpace, comm, monolithicMap, offset)
 {};

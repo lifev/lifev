@@ -87,8 +87,8 @@ namespace LifeV
   field \f$\beta\f$ is defined
 
   \code
-  boost::shared_ptr<FESpace< mesh_type, EpetraMap > > uFESpace( new FESpace< mesh_type, EpetraMap >( ... ));
-  boost::shared_ptr<FESpace< mesh_type, EpetraMap > > betaFESpace( new FESpace< mesh_type, EpetraMap >( ... ));
+  boost::shared_ptr<FESpace< mesh_type, MapEpetra > > uFESpace( new FESpace< mesh_type, MapEpetra >( ... ));
+  boost::shared_ptr<FESpace< mesh_type, MapEpetra > > betaFESpace( new FESpace< mesh_type, MapEpetra >( ... ));
 
   myAssembler.setup(uFESpace,betaFESpace);
   \endcode
@@ -169,7 +169,7 @@ public:
     //! @name Public Types
     //@{
 
-    typedef EpetraMap                                    map_type;
+    typedef MapEpetra                                    map_type;
 
     typedef FESpace<mesh_type, map_type> fespace_type;
     typedef boost::shared_ptr<fespace_type>              fespace_ptrType;

@@ -52,7 +52,7 @@
 #pragma GCC diagnostic warning "-Wunused-parameter"
 
 #include <life/lifecore/life.hpp>
-#include <life/lifealg/EpetraMap.hpp>
+#include <life/lifealg/MapEpetra.hpp>
 
 namespace LifeV
 {
@@ -86,7 +86,7 @@ public:
     /*!
       @param mapType Specify wether the map is Unique or Repeated
      */
-    EpetraVector( const EpetraMapType& mapType = Unique );
+    EpetraVector( const MapEpetraType& mapType = Unique );
 
     //! Constructor - Using Maps
     /*!
@@ -94,7 +94,7 @@ public:
       @param map Map to be used to split the vector between the processors
       @param mapType Specify wether the map is Unique or Repeated
      */
-    EpetraVector( const EpetraMap& map, const EpetraMapType& mapType = Unique );
+    EpetraVector( const MapEpetra& map, const MapEpetraType& mapType = Unique );
 
     //! Constructor - Using Maps
     /*!
@@ -102,8 +102,8 @@ public:
       @param mapPtr Pointer to the map which has to be used to split the vector between the processors
       @param mapType Specify wether the map is Unique or Repeated
      */
-    EpetraVector( const boost::shared_ptr< EpetraMap >& mapPtr,
-                  const EpetraMapType& mapType = Unique );
+    EpetraVector( const boost::shared_ptr< MapEpetra >& mapPtr,
+                  const MapEpetraType& mapType = Unique );
 
     //! Copy constructor
     /*!
@@ -116,7 +116,7 @@ public:
       @param vector Vector to be used to create the new vector
       @param mapType Specify wether the map is Unique or Repeated
      */
-    EpetraVector( const EpetraVector& vector, const EpetraMapType& mapType );
+    EpetraVector( const EpetraVector& vector, const MapEpetraType& mapType );
 
     //! Copy constructor
     /*!
@@ -125,7 +125,7 @@ public:
       @param combineMode Parameter used during the copy, and not in subsequent calls.
     */
     EpetraVector( const EpetraVector& vector,
-                  const EpetraMapType& mapType,
+                  const MapEpetraType& mapType,
                   const Epetra_CombineMode& combineMode );
 
     //! Copy constructor
@@ -136,8 +136,8 @@ public:
       @param mapType Specify wether the map is Unique or Repeated
      */
     EpetraVector( const Epetra_MultiVector& vector,
-                  const boost::shared_ptr< EpetraMap > map,
-                  const EpetraMapType& mapType );
+                  const boost::shared_ptr< MapEpetra > map,
+                  const MapEpetraType& mapType );
 
     //! Copy constructor
     /*!
@@ -483,7 +483,7 @@ public:
       @param offset2 offset to apply to this vector
      */
     EpetraVector& subset( const EpetraVector& vector,
-                          const EpetraMap& map,
+                          const MapEpetra& map,
                           const UInt offset1,
                           const UInt offset2 );
 
@@ -498,7 +498,7 @@ public:
       @param column  column of the multivector from which to extract the data
     */
     EpetraVector& subset(const Epetra_MultiVector& vector,
-                         const EpetraMap& map,
+                         const MapEpetra& map,
                          const UInt offset1,
                          const UInt offset2,
                          const UInt column = 0);
@@ -654,7 +654,7 @@ public:
       empty constructor.
       @param map the map of the vector
      */
-    void setMap( const EpetraMap& map );
+    void setMap( const MapEpetra& map );
 
     //@}
 
@@ -686,24 +686,24 @@ public:
     }
 
     //! Return the map type of the vector (Unique or Repeated)
-    EpetraMapType mapType() const
+    MapEpetraType mapType() const
     {
         return M_mapType;
     }
 
-    //! Return the EpetraMap of the vector
-    const EpetraMap& map() const
+    //! Return the MapEpetra of the vector
+    const MapEpetra& map() const
     {
         return *M_epetraMap;
     }
 
-    //! Return a shared pointer on the EpetraMap
-    const boost::shared_ptr< EpetraMap > mapPtr() const
+    //! Return a shared pointer on the MapEpetra
+    const boost::shared_ptr< MapEpetra > mapPtr() const
     {
         return M_epetraMap;
     }
 
-    //! Return the EpetraMap of the vector
+    //! Return the MapEpetra of the vector
     const Epetra_Map& epetraMap() const
     {
         return *( M_epetraMap->map( M_mapType ) );
@@ -761,8 +761,8 @@ private:
 
     //@}
 
-    boost::shared_ptr< EpetraMap > M_epetraMap;
-    EpetraMapType                  M_mapType;
+    boost::shared_ptr< MapEpetra > M_epetraMap;
+    MapEpetraType                  M_mapType;
     Vector_PtrType                 M_epetraVector;
     Epetra_CombineMode             M_combineMode;
 };

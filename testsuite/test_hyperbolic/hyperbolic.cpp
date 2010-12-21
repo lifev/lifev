@@ -448,7 +448,7 @@ hyperbolic::run()
     pressure_bdQr_dualInterpolate  = &quadRuleTria4pt;
 
     // Finite element space of the interpolation of dual variable.
-    FESpace< RegionMesh, EpetraMap > pressure_uInterpolate_FESpace( meshPart, *pressure_refFE_dualInterpolate, *pressure_qR_dualInterpolate,
+    FESpace< RegionMesh, MapEpetra > pressure_uInterpolate_FESpace( meshPart, *pressure_refFE_dualInterpolate, *pressure_qR_dualInterpolate,
                                                                     *pressure_bdQr_dualInterpolate, 3, Members->comm );
 
     // Vector for the interpolated dual solution.
@@ -457,7 +457,7 @@ hyperbolic::run()
     pressure_uInterpolate_FESpace.interpolate( dataProblem::dual, *pressure_dualInterpolated, 0 );
 
     // Finite element space
-    FESpace< RegionMesh, EpetraMap > fESpace( meshPart,
+    FESpace< RegionMesh, MapEpetra > fESpace( meshPart,
                                               *refFE,
                                               *qR,
                                               *bdQr,

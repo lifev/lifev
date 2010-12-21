@@ -48,7 +48,7 @@
 #endif
 //#include "life/lifesolver/NavierStokesSolver.hpp"
 #include <life/lifearray/EpetraMatrix.hpp>
-#include <life/lifealg/EpetraMap.hpp>
+#include <life/lifearray/MapEpetra.hpp>
 #include <life/lifemesh/MeshPartitioner.hpp>
 #include <life/lifesolver/OseenData.hpp>
 #include <life/lifesolver/ADRData.hpp>
@@ -309,7 +309,7 @@ MassTransport::run()
         std::cout << "Building the velocity FE space ... " << std::flush;
 
     std::string uOrder =  dataFile( "fluid/space_discretization/vel_order", "P1");
-    FESpace< RegionMesh3D<LinearTetra>, EpetraMap > uFESpace(meshPart,uOrder,3,*d->comm);
+    FESpace< RegionMesh3D<LinearTetra>, MapEpetra > uFESpace(meshPart,uOrder,3,*d->comm);
 
     if (verbose)
         std::cout << "ok." << std::endl;
@@ -318,7 +318,7 @@ MassTransport::run()
         std::cout << "Building the pressure FE space ... " << std::flush;
 
     std::string pOrder =  dataFile( "fluid/space_discretization/press_order", "P1");
-    FESpace< RegionMesh3D<LinearTetra>, EpetraMap > pFESpace(meshPart,pOrder,1,*d->comm);
+    FESpace< RegionMesh3D<LinearTetra>, MapEpetra > pFESpace(meshPart,pOrder,1,*d->comm);
 
     if (verbose)
         std::cout << "ok." << std::endl;
@@ -336,7 +336,7 @@ MassTransport::run()
                                               uFESpace,
                                               pFESpace,
                                               *d->comm);
-    EpetraMap fullFluidMap(fluid.getMap());
+    MapEpetra fullFluidMap(fluid.getMap());
 
     if (verbose) std::cout << "ok." << std::endl;
 
@@ -391,7 +391,7 @@ MassTransport::run()
     if (verbose) std::cout << std::endl;
     if (verbose) std::cout << "Time discretization order " << dataADR.orderBDF() << std::endl;
 
-    FESpace< RegionMesh3D<LinearTetra>, EpetraMap > adrFESpace(meshPart,
+    FESpace< RegionMesh3D<LinearTetra>, MapEpetra > adrFESpace(meshPart,
                                                                *refFE_adr,
                                                                *qR_adr,
                                                                *bdQr_adr,
@@ -485,7 +485,7 @@ MassTransport::run()
 
     betaFluid *= 0.;
 
-    EpetraMap fullAdrMap(adr.getMap());
+    MapEpetra fullAdrMap(adr.getMap());
     vector_type rhsADR ( fullAdrMap );
 
     rhsADR  *= 0.;

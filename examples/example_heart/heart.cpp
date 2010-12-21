@@ -157,7 +157,7 @@ Heart::run()
     if (verbose)
         std::cout << "Building the potential FE space ... " << std::flush;
 
-    FESpace< RegionMesh3D<LinearTetra>, EpetraMap > uFESpace(meshPart,
+    FESpace< RegionMesh3D<LinearTetra>, MapEpetra > uFESpace(meshPart,
                                                              *refFE_u,
                                                              *qR_u,
                                                              *bdQr_u,
@@ -165,7 +165,7 @@ Heart::run()
                                                              M_heart_fct->M_comm);
 
 #ifdef BIDOMAIN
-    FESpace< RegionMesh3D<LinearTetra>, EpetraMap > _FESpace(meshPart,
+    FESpace< RegionMesh3D<LinearTetra>, MapEpetra > _FESpace(meshPart,
                                                              *refFE_u,
                                                              *qR_u,
                                                              *bdQr_u,
@@ -190,7 +190,7 @@ Heart::run()
 #endif
 
     if (verbose) std::cout << "ok." << std::endl;
-    EpetraMap fullMap(electricModel.getMap());
+    MapEpetra fullMap(electricModel.getMap());
     vector_Type rhs ( fullMap);
     electricModel.setup( M_heart_fct->M_dataFile );
     std::cout<<"setup ok"<<std::endl;

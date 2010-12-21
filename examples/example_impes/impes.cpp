@@ -447,15 +447,15 @@ impes::run()
 
 
     // Finite element space of the primal variable.
-    FESpace< RegionMesh, EpetraMap > pressure_p_FESpace( meshPart, *pressure_refFE_primal, *pressure_qR_primal,
+    FESpace< RegionMesh, MapEpetra > pressure_p_FESpace( meshPart, *pressure_refFE_primal, *pressure_qR_primal,
                                                          *pressure_bdQr_primal, 1, Members->comm );
 
     // Finite element space of the dual variable.
-    FESpace< RegionMesh, EpetraMap > pressure_u_FESpace( meshPart, *pressure_refFE_dual, *pressure_qR_dual,
+    FESpace< RegionMesh, MapEpetra > pressure_u_FESpace( meshPart, *pressure_refFE_dual, *pressure_qR_dual,
                                                          *pressure_bdQr_dual, 1, Members->comm );
 
     // Finite element space of the interpolation of dual variable.
-    FESpace< RegionMesh, EpetraMap > pressure_uInterpolate_FESpace( meshPart, *pressure_refFE_dualInterpolate,
+    FESpace< RegionMesh, MapEpetra > pressure_uInterpolate_FESpace( meshPart, *pressure_refFE_dualInterpolate,
                                                                     *pressure_qR_dualInterpolate,
                                                                     *pressure_bdQr_dualInterpolate, 3, Members->comm );
 
@@ -463,11 +463,11 @@ impes::run()
     vector_ptrtype pressure_dualInterpolated( new vector_type ( pressure_uInterpolate_FESpace.map(), Repeated ) );
 
     // Finite element space of the hybrid variable.
-    FESpace< RegionMesh, EpetraMap > pressure_hybrid_FESpace( meshPart, *pressure_refFE_hybrid, *pressure_qR_hybrid,
+    FESpace< RegionMesh, MapEpetra > pressure_hybrid_FESpace( meshPart, *pressure_refFE_hybrid, *pressure_qR_hybrid,
                                                               *pressure_bdQr_hybrid, 1, Members->comm );
 
     // Finite element space of the  outward unit normal variable.
-    FESpace< RegionMesh, EpetraMap > pressure_VdotN_FESpace( meshPart, *pressure_refFE_VdotN, *pressure_qR_VdotN,
+    FESpace< RegionMesh, MapEpetra > pressure_VdotN_FESpace( meshPart, *pressure_refFE_VdotN, *pressure_qR_VdotN,
                                                              *pressure_bdQr_VdotN, 1, Members->comm );
 
     // Parameters for the saturation equation.
@@ -482,7 +482,7 @@ impes::run()
     saturation_hyperbolic_bdQr  = &quadRuleTria1pt;
 
     // Finite element space.
-    FESpace< RegionMesh, EpetraMap > saturation_hyperbolic_FESpace( meshPart, *saturation_hyperbolic_refFE,
+    FESpace< RegionMesh, MapEpetra > saturation_hyperbolic_FESpace( meshPart, *saturation_hyperbolic_refFE,
                                                                     *saturation_hyperbolic_qR,
                                                                     *saturation_hyperbolic_bdQr, 1, Members->comm );
 
@@ -527,22 +527,22 @@ impes::run()
 
 
     // Finite element space of the primal variable.
-    FESpace< RegionMesh, EpetraMap > saturation_darcy_p_FESpace( meshPart, *saturation_darcy_refFE_primal,
+    FESpace< RegionMesh, MapEpetra > saturation_darcy_p_FESpace( meshPart, *saturation_darcy_refFE_primal,
                                                                  *saturation_darcy_qR_primal,
                                                                  *saturation_darcy_bdQr_primal, 1, Members->comm );
 
     // Finite element space of the dual variable.
-    FESpace< RegionMesh, EpetraMap > saturation_darcy_u_FESpace( meshPart, *saturation_darcy_refFE_dual,
+    FESpace< RegionMesh, MapEpetra > saturation_darcy_u_FESpace( meshPart, *saturation_darcy_refFE_dual,
                                                                  *saturation_darcy_qR_dual,
                                                                  *saturation_darcy_bdQr_dual, 1, Members->comm );
 
     // Finite element space of the hybrid variable.
-    FESpace< RegionMesh, EpetraMap > saturation_darcy_hybrid_FESpace( meshPart, *saturation_darcy_refFE_hybrid,
+    FESpace< RegionMesh, MapEpetra > saturation_darcy_hybrid_FESpace( meshPart, *saturation_darcy_refFE_hybrid,
                                                                       *saturation_darcy_qR_hybrid,
                                                                       *saturation_darcy_bdQr_hybrid, 1, Members->comm );
 
     // Finite element space of the  outward unit normal variable.
-    FESpace< RegionMesh, EpetraMap > saturation_darcy_VdotN_FESpace( meshPart, *saturation_darcy_refFE_VdotN,
+    FESpace< RegionMesh, MapEpetra > saturation_darcy_VdotN_FESpace( meshPart, *saturation_darcy_refFE_VdotN,
                                                                      *saturation_darcy_qR_VdotN,
                                                                      *saturation_darcy_bdQr_VdotN, 1, Members->comm );
 

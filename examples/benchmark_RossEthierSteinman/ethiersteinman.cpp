@@ -51,7 +51,7 @@
 #endif
 //#include "life/lifesolver/NavierStokesSolver.hpp"
 #include <life/lifearray/EpetraMatrix.hpp>
-#include <life/lifealg/EpetraMap.hpp>
+#include <life/lifearray/MapEpetra.hpp>
 #include <life/lifemesh/MeshPartitioner.hpp>
 #include <life/lifemesh/MeshData.hpp>
 #include <life/lifesolver/OseenData.hpp>
@@ -222,7 +222,7 @@ Ethiersteinman::check()
     if (verbose)
         std::cout << "Building the velocity FE space ... " << std::flush;
 
-    FESpace< RegionMesh3D<LinearTetra>, EpetraMap > uFESpace(meshPart, uOrder, 3, d->comm);
+    FESpace< RegionMesh3D<LinearTetra>, MapEpetra > uFESpace(meshPart, uOrder, 3, d->comm);
 
     if (verbose)
         std::cout << "ok." << std::endl;
@@ -230,7 +230,7 @@ Ethiersteinman::check()
     if (verbose)
         std::cout << "Building the pressure FE space ... " << std::flush;
 
-    FESpace< RegionMesh3D<LinearTetra>, EpetraMap > pFESpace(meshPart,pOrder,1,d->comm);
+    FESpace< RegionMesh3D<LinearTetra>, MapEpetra > pFESpace(meshPart,pOrder,1,d->comm);
 
     if (verbose)
         std::cout << "ok." << std::endl;
@@ -250,7 +250,7 @@ Ethiersteinman::check()
                                               uFESpace,
                                               pFESpace,
                                               d->comm);
-    EpetraMap fullMap(fluid.getMap());
+    MapEpetra fullMap(fluid.getMap());
 
     if (verbose) std::cout << "ok." << std::endl;
 
@@ -619,7 +619,7 @@ Ethiersteinman::run()
             if (verbose)
                 std::cout << "Building the velocity FE space ... " << std::flush;
 
-            FESpace< RegionMesh3D<LinearTetra>, EpetraMap > uFESpace(meshPart, uOrder, 3, d->comm);
+            FESpace< RegionMesh3D<LinearTetra>, MapEpetra > uFESpace(meshPart, uOrder, 3, d->comm);
 
             if (verbose)
                 std::cout << "ok." << std::endl;
@@ -627,7 +627,7 @@ Ethiersteinman::run()
             if (verbose)
                 std::cout << "Building the pressure FE space ... " << std::flush;
 
-            FESpace< RegionMesh3D<LinearTetra>, EpetraMap > pFESpace(meshPart, pOrder, 1, d->comm);
+            FESpace< RegionMesh3D<LinearTetra>, MapEpetra > pFESpace(meshPart, pOrder, 1, d->comm);
 
             if (verbose)
                 std::cout << "ok." << std::endl;
@@ -649,7 +649,7 @@ Ethiersteinman::run()
                                                       uFESpace,
                                                       pFESpace,
                                                       d->comm);
-            EpetraMap fullMap(fluid.getMap());
+            MapEpetra fullMap(fluid.getMap());
 
             if (verbose) std::cout << "ok." << std::endl;
 

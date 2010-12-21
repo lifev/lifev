@@ -45,7 +45,7 @@
 #include <life/lifefem/AssemblyElemental.hpp>
 #include <life/lifefem/BCManage.hpp>
 #include <life/lifealg/SolverAztecOO.hpp>
-#include <life/lifealg/EpetraMap.hpp>
+#include <life/lifearray/MapEpetra.hpp>
 #include <life/lifearray/EpetraMatrix.hpp>
 #include <life/lifearray/EpetraVector.hpp>
 #include <life/lifefem/SobolevNorms.hpp>
@@ -108,7 +108,7 @@ public:
      */
     HeartIonicSolver( const data_Type& dataType,
                  const Mesh& mesh,
-                 FESpace<Mesh, EpetraMap>& uFEspace,
+                 FESpace<Mesh, MapEpetra>& uFEspace,
                  Epetra_Comm& comm );
 
     //! Destructor
@@ -121,12 +121,12 @@ public:
 
 
     //! Returns the recovery variable FE space
-    FESpace<Mesh, EpetraMap>& recoveryFESpace()   {return M_uFESpace;}
+    FESpace<Mesh, MapEpetra>& recoveryFESpace()   {return M_uFESpace;}
 
     //! Return maps
-    Epetra_Map const& getRepeatedEpetraMap() const { return *M_localMap.map(Repeated); }
+    Epetra_Map const& getRepeatedMapEpetra() const { return *M_localMap.map(Repeated); }
 
-    EpetraMap const& getMap() const { return M_localMap; }
+    MapEpetra const& getMap() const { return M_localMap; }
 
     virtual void updateRepeated( )=0;
 
@@ -142,7 +142,7 @@ public:
     virtual void computeIonicCurrent( Real Capacitance,
                               ElemVec& elvec,
                               ElemVec& elvec_u,
-                              FESpace<Mesh, EpetraMap>& uFESpace )=0;
+                              FESpace<Mesh, MapEpetra>& uFESpace )=0;
 
     //! Initialize
     virtual void initialize( )=0;
@@ -152,7 +152,7 @@ public:
     const Mesh&               M_mesh;
 
     // FE space
-    FESpace<Mesh, EpetraMap>&      M_uFESpace;
+    FESpace<Mesh, MapEpetra>&      M_uFESpace;
 
     //! MPI communicator
     Epetra_Comm*                   M_comm;
@@ -160,7 +160,7 @@ public:
     Int                            M_me;
 
     //! Map
-    EpetraMap                      M_localMap;
+    MapEpetra                      M_localMap;
 
     //! Boolean that indicates if output is sent to cout
     bool                           M_verbose;
@@ -183,7 +183,7 @@ template<typename Mesh, typename SolverType>
 HeartIonicSolver<Mesh, SolverType>::
 HeartIonicSolver( const data_Type& dataType,
              const Mesh& mesh,
-             FESpace<Mesh, EpetraMap>& uFEspace,
+             FESpace<Mesh, MapEpetra>& uFEspace,
              Epetra_Comm& comm ):
     M_data                   ( dataType ),
     M_mesh                   ( mesh ),
@@ -207,7 +207,7 @@ public:
 
     MitchellSchaeffer( const data_Type& dataType,
                         const Mesh& mesh,
-                        FESpace<Mesh, EpetraMap>& uFEspace,
+                        FESpace<Mesh, MapEpetra>& uFEspace,
                         Epetra_Comm& comm );
 
     virtual ~MitchellSchaeffer();
@@ -221,7 +221,7 @@ public:
     void computeIonicCurrent( Real Capacitance,
                       ElemVec& elvec,
                       ElemVec& elvec_u,
-                      FESpace<Mesh, EpetraMap>& uFESpace );
+                      FESpace<Mesh, MapEpetra>& uFESpace );
 
     const vector_Type& solutionGatingW() const {return M_solutionGatingW;}
 
@@ -258,7 +258,7 @@ template<typename Mesh, typename SolverType>
 MitchellSchaeffer<Mesh, SolverType>::
 MitchellSchaeffer( const data_Type& dataType,
                    const Mesh& mesh,
-                   FESpace<Mesh, EpetraMap>& uFEspace,
+                   FESpace<Mesh, MapEpetra>& uFEspace,
                    Epetra_Comm& comm ):
     HeartIonicSolver<Mesh, SolverType>( dataType, mesh, uFEspace, comm),
     M_solutionGatingW ( HeartIonicSolver<Mesh, SolverType>::M_localMap ),
@@ -359,7 +359,7 @@ template<typename Mesh, typename SolverType>
 void MitchellSchaeffer<Mesh, SolverType>::computeIonicCurrent(  Real,
                                                          ElemVec& elvec,
                                                          ElemVec& elvec_u,
-                                                         FESpace<Mesh, EpetraMap>& uFESpace )
+                                                         FESpace<Mesh, MapEpetra>& uFESpace )
 {
 	for ( UInt i = 0;i < uFESpace.fe().nbFEDof();i++ )
     {
@@ -399,7 +399,7 @@ public:
 
     RogersMcCulloch( const data_Type& dataType,
                       const Mesh& mesh,
-                      FESpace<Mesh, EpetraMap>& uFEspace,
+                      FESpace<Mesh, MapEpetra>& uFEspace,
                       Epetra_Comm& comm );
     virtual ~RogersMcCulloch();
 
@@ -412,7 +412,7 @@ public:
     void computeIonicCurrent( Real Capacitance,
                       ElemVec& elvec,
                       ElemVec& elvec_u,
-                      FESpace<Mesh, EpetraMap>& uFESpace );
+                      FESpace<Mesh, MapEpetra>& uFESpace );
 
     const vector_Type& solutionGatingW() const {return M_solutionGatingW;}
 
@@ -437,7 +437,7 @@ template<typename Mesh, typename SolverType>
 RogersMcCulloch<Mesh, SolverType>::
 RogersMcCulloch( const data_Type& dataType,
                   const Mesh& mesh,
-                  FESpace<Mesh, EpetraMap>& uFEspace,
+                  FESpace<Mesh, MapEpetra>& uFEspace,
                   Epetra_Comm& comm ):
     HeartIonicSolver<Mesh, SolverType>( dataType, mesh, uFEspace, comm),
     M_solutionGatingW ( HeartIonicSolver<Mesh, SolverType>::M_localMap ),
@@ -496,7 +496,7 @@ template<typename Mesh, typename SolverType>
 void RogersMcCulloch<Mesh, SolverType>::computeIonicCurrent(  Real Capacitance,
                                                               ElemVec& elvec,
                                                               ElemVec& elvec_u,
-                                                              FESpace<Mesh, EpetraMap>& uFESpace )
+                                                              FESpace<Mesh, MapEpetra>& uFESpace )
 {
 	Real u_ig, w_ig;
 
@@ -542,7 +542,7 @@ public:
 
     LuoRudy( const data_Type&          dataType,
              const Mesh&          mesh,
-             FESpace<Mesh, EpetraMap>& uFEspace,
+             FESpace<Mesh, MapEpetra>& uFEspace,
              Epetra_Comm&              comm );
 
     virtual ~LuoRudy() {}
@@ -558,7 +558,7 @@ public:
     void computeIonicCurrent( Real Capacitance,
                       ElemVec& elvec,
                       ElemVec& elvec_u,
-                      FESpace<Mesh, EpetraMap>& uFESpace );
+                      FESpace<Mesh, MapEpetra>& uFESpace );
 
     void initialize ( );
 
@@ -648,7 +648,7 @@ template<typename Mesh, typename SolverType>
 LuoRudy<Mesh, SolverType>::
 LuoRudy( const data_Type& dataType,
 		const Mesh& mesh,
-		FESpace<Mesh, EpetraMap>& uFEspace,
+		FESpace<Mesh, MapEpetra>& uFEspace,
 		Epetra_Comm& comm ):
 			HeartIonicSolver<Mesh, SolverType>( dataType, mesh, uFEspace, comm),
 			M_K0(5.4),
@@ -922,7 +922,7 @@ template<typename Mesh, typename SolverType>
 void LuoRudy<Mesh, SolverType>::computeIonicCurrent(  Real Capacitance,
                                               ElemVec& elvec,
                                               ElemVec& /*elvec_u*/,
-                                              FESpace<Mesh, EpetraMap>& uFESpace )
+                                              FESpace<Mesh, MapEpetra>& uFESpace )
 {
    	Real Iion_ig;
     for ( UInt ig = 0; ig < uFESpace.fe().nbQuadPt();ig++ )

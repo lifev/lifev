@@ -44,7 +44,7 @@
 #include <Epetra_SerialComm.h>
 #endif
 
-#include <life/lifealg/EpetraMap.hpp>
+#include <life/lifearray/MapEpetra.hpp>
 #include <life/lifemesh/MeshData.hpp>
 #include <life/lifemesh/MeshPartitioner.hpp>
 #include <life/lifealg/SolverAztecOO.hpp>
@@ -160,7 +160,7 @@ void test_bdf::run()
 
     //=============================================================================
     //finite element space of the solution
-    FESpace<RegionMesh, EpetraMap> FeSpace(meshPart,
+    FESpace<RegionMesh, MapEpetra> FeSpace(meshPart,
                                            dataFile(("bdf/"+discretization_section).c_str(), "P2"), 1, Members->comm);
 
     if (verbose)

@@ -138,7 +138,7 @@ public:
     @param comm communicator
     */
     void setup( boost::shared_ptr<data_type> data,
-                const boost::shared_ptr< FESpace<Mesh, EpetraMap> >&   feSpace,
+                const boost::shared_ptr< FESpace<Mesh, MapEpetra> >&   feSpace,
                 boost::shared_ptr<Epetra_Comm>&     comm
               );
 
@@ -150,7 +150,7 @@ public:
     @param comm communicator
     */
     void setup( boost::shared_ptr<data_type> data,
-                const boost::shared_ptr< FESpace<Mesh, EpetraMap> >&   feSpace,
+                const boost::shared_ptr< FESpace<Mesh, MapEpetra> >&   feSpace,
                 bchandler_type&       BCh,
                 boost::shared_ptr<Epetra_Comm>&     comm
               );
@@ -165,9 +165,9 @@ public:
     @param offset
     */
     virtual void setup( boost::shared_ptr<data_type> data,
-                const boost::shared_ptr< FESpace<Mesh, EpetraMap> >&   feSpace,
+                const boost::shared_ptr< FESpace<Mesh, MapEpetra> >&   feSpace,
                 boost::shared_ptr<Epetra_Comm>&     comm,
-                const boost::shared_ptr<const EpetraMap>&      epetraMap,
+                const boost::shared_ptr<const MapEpetra>&      epetraMap,
                 UInt       offset=0   );
 
 
@@ -281,7 +281,7 @@ public:
     /*!
      @returns epetraMap
      */
-    EpetraMap   const& map()       const { return M_localMap; }
+    MapEpetra   const& map()       const { return M_localMap; }
 
     //! Return the  map
     /*!
@@ -314,7 +314,7 @@ public:
     matrix_ptrtype const matrLinearStiff() const { return M_matrLinearStiffness; }
 
     //! Return FESpace
-    FESpace<Mesh, EpetraMap>& feSpace() {return M_FESpace;}
+    FESpace<Mesh, MapEpetra>& feSpace() {return M_FESpace;}
 
     //! BCHandler getter and setter
     /*!
@@ -399,7 +399,7 @@ protected :
     boost::shared_ptr<data_type>   M_data;
 
     //! feSpace
-    boost::shared_ptr<FESpace<Mesh, EpetraMap> >      M_FESpace;
+    boost::shared_ptr<FESpace<Mesh, MapEpetra> >      M_FESpace;
 
     //! displayer
     boost::scoped_ptr<Displayer>   M_displayer;
@@ -411,7 +411,7 @@ protected :
     bchandler_type   M_BCh;
 
     //! Epetra map need to define the EpetraVector;
-    boost::shared_ptr<const EpetraMap>       M_localMap;
+    boost::shared_ptr<const MapEpetra>       M_localMap;
 
     //! Matrix  mass
     matrix_ptrtype                          M_matrMass;
@@ -520,9 +520,9 @@ template <typename Mesh, typename SolverType>
 void
 VenantKirchhoffViscoelasticSolver<Mesh, SolverType>::setup(
     boost::shared_ptr<data_type>        data,
-    const boost::shared_ptr< FESpace<Mesh, EpetraMap> >& feSpace,
+    const boost::shared_ptr< FESpace<Mesh, MapEpetra> >& feSpace,
     boost::shared_ptr<Epetra_Comm>&     comm,
-    const boost::shared_ptr<const EpetraMap>&  epetraMap,
+    const boost::shared_ptr<const MapEpetra>&  epetraMap,
     UInt                                offset
 )
 {
@@ -548,7 +548,7 @@ template <typename Mesh, typename SolverType>
 void
 VenantKirchhoffViscoelasticSolver<Mesh, SolverType>::setup(
     boost::shared_ptr<data_type>        data,
-    const boost::shared_ptr< FESpace<Mesh, EpetraMap> >& feSpace,
+    const boost::shared_ptr< FESpace<Mesh, MapEpetra> >& feSpace,
     boost::shared_ptr<Epetra_Comm>&     comm
 )
 {
@@ -563,7 +563,7 @@ template <typename Mesh, typename SolverType>
 void
 VenantKirchhoffViscoelasticSolver<Mesh, SolverType>::setup(
     boost::shared_ptr<data_type>          data,
-    const boost::shared_ptr< FESpace<Mesh, EpetraMap> >& feSpace,
+    const boost::shared_ptr< FESpace<Mesh, MapEpetra> >& feSpace,
     bchandler_type&                BCh,
     boost::shared_ptr<Epetra_Comm>&              comm
 )

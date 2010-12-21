@@ -119,14 +119,14 @@ public:
     PostProcessingBoundary<MeshType>( meshPtr_Type mesh,
                     std::vector<currentBdFEPtr_Type > currentBdFEVector,
                     std::vector<dofPtr_Type > dofVector,
-                    const EpetraMap& epetraMap, UInt nFESpaces = 1 );
+                    const MapEpetra& epetraMap, UInt nFESpaces = 1 );
 
     /*!
      \brief Constructor for the case in which we have only one currentBdFE and dof
      */
     PostProcessingBoundary<MeshType>( meshPtr_Type mesh,
                     currentBdFEPtr_Type currentBdFE, dofPtr_Type dof,
-                    const EpetraMap& epetraMap );
+                    const MapEpetra& epetraMap );
 
     /*!
      \brief Constructor for the case in which we have two currentBdFE's and dof's
@@ -137,7 +137,7 @@ public:
     PostProcessingBoundary<MeshType>( meshPtr_Type mesh,
                     currentBdFEPtr_Type feBdu, dofPtr_Type dofu,
                     currentBdFEPtr_Type feBdp, dofPtr_Type dofp,
-                    const EpetraMap& epetraMap );
+                    const MapEpetra& epetraMap );
 
     //@}
 
@@ -298,7 +298,7 @@ private:
     // pointer to the mesh
     meshPtr_Type                                 M_meshPtr;
     // pointer to the processor mapping
-    boost::shared_ptr<EpetraMap>                 M_epetraMapPtr;
+    boost::shared_ptr<MapEpetra>                 M_epetraMapPtr;
 
 };
 
@@ -309,7 +309,7 @@ template <typename MeshType>
 PostProcessingBoundary<MeshType>::PostProcessingBoundary( meshPtr_Type meshPtr,
                           std::vector<currentBdFEPtr_Type > currentBdFEVector,
                           std::vector<dofPtr_Type > dofVector,
-                          const EpetraMap& epetraMap, UInt nvar ) :
+                          const MapEpetra& epetraMap, UInt nvar ) :
         M_numFESpaces(nvar),
         M_numBoundaryDofVector(M_numFESpaces),
         M_numDofPerVertexVector(M_numFESpaces), M_numDofPerEdgeVector(M_numFESpaces), M_numDofPerFaceVector(M_numFESpaces),
@@ -321,7 +321,7 @@ PostProcessingBoundary<MeshType>::PostProcessingBoundary( meshPtr_Type meshPtr,
         M_patchIntegratedPhiVector(M_numFESpaces),
         M_vectorNumberingPerFacetVector(M_numFESpaces), M_dofGlobalIdVector(M_numFESpaces),
         M_currentBdFEPtrVector(currentBdFEVector), M_dofPtrVector(dofVector),
-        M_meshPtr( meshPtr ), M_epetraMapPtr( new EpetraMap(epetraMap) )
+        M_meshPtr( meshPtr ), M_epetraMapPtr( new MapEpetra(epetraMap) )
 {
     for (UInt iFESpace=0; iFESpace<M_numFESpaces; ++iFESpace)
     {
@@ -348,7 +348,7 @@ PostProcessingBoundary<MeshType>::PostProcessingBoundary( meshPtr_Type meshPtr,
 template <typename MeshType>
 PostProcessingBoundary<MeshType>::PostProcessingBoundary( meshPtr_Type mesh,
                           currentBdFEPtr_Type currentBdFE, dofPtr_Type dof,
-                          const EpetraMap& epetraMap ) :
+                          const MapEpetra& epetraMap ) :
         M_numFESpaces(1),
         M_numBoundaryDofVector(M_numFESpaces),
         M_numDofPerVertexVector(M_numFESpaces), M_numDofPerEdgeVector(M_numFESpaces), M_numDofPerFaceVector(M_numFESpaces),
@@ -359,7 +359,7 @@ PostProcessingBoundary<MeshType>::PostProcessingBoundary( meshPtr_Type mesh,
         M_patchMeasureVector(M_numFESpaces), M_patchNormalVector(M_numFESpaces), M_patchIntegratedPhiVector(M_numFESpaces),
         M_vectorNumberingPerFacetVector(M_numFESpaces), M_dofGlobalIdVector(M_numFESpaces),
         M_currentBdFEPtrVector(M_numFESpaces), M_dofPtrVector(M_numFESpaces),
-        M_meshPtr( mesh ), M_epetraMapPtr( new EpetraMap(epetraMap) )
+        M_meshPtr( mesh ), M_epetraMapPtr( new MapEpetra(epetraMap) )
 {
     M_currentBdFEPtrVector[0]=currentBdFE;
     M_dofPtrVector[0]=dof;
@@ -385,7 +385,7 @@ template <typename MeshType>
 PostProcessingBoundary<MeshType>::PostProcessingBoundary( meshPtr_Type mesh,
                           currentBdFEPtr_Type feBdu, dofPtr_Type dofu,
                           currentBdFEPtr_Type feBdp, dofPtr_Type dofp,
-                          const EpetraMap& epetraMap ) :
+                          const MapEpetra& epetraMap ) :
         M_numFESpaces(2),
         M_numBoundaryDofVector(M_numFESpaces),
         M_numDofPerVertexVector(M_numFESpaces), M_numDofPerEdgeVector(M_numFESpaces), M_numDofPerFaceVector(M_numFESpaces),
@@ -396,7 +396,7 @@ PostProcessingBoundary<MeshType>::PostProcessingBoundary( meshPtr_Type mesh,
         M_patchMeasureVector(M_numFESpaces), M_patchNormalVector(M_numFESpaces), M_patchIntegratedPhiVector(M_numFESpaces),
         M_vectorNumberingPerFacetVector(M_numFESpaces), M_dofGlobalIdVector(M_numFESpaces),
         M_currentBdFEPtrVector(M_numFESpaces), M_dofPtrVector(M_numFESpaces),
-        M_meshPtr( mesh ), M_epetraMapPtr( new EpetraMap(epetraMap) )
+        M_meshPtr( mesh ), M_epetraMapPtr( new MapEpetra(epetraMap) )
 {
     M_currentBdFEPtrVector[0] = feBdu;
     M_dofPtrVector[0] = dofu;

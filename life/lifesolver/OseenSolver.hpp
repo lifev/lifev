@@ -48,7 +48,7 @@
 #include <life/lifealg/Preconditioner.hpp>
 #include <life/lifealg/PreconditionerIfpack.hpp>
 #include <life/lifealg/PreconditionerAztecOO.hpp>
-#include <life/lifealg/EpetraMap.hpp>
+#include <life/lifearray/MapEpetra.hpp>
 
 #include <life/lifearray/elemMat.hpp>
 #include <life/lifearray/elemVec.hpp>
@@ -130,11 +130,12 @@ public:
         @param communicator MPI communicator
         @param lagrangeMultiplier Lagrange multiplier
      */
+
     OseenSolver( boost::shared_ptr<data_Type>    dataType,
-           FESpace<mesh_Type, EpetraMap>&  velocityFESpace,
-           FESpace<mesh_Type, EpetraMap>&  pressureFESpace,
-           boost::shared_ptr<Epetra_Comm>& communicator,
-           const Int                       lagrangeMultiplier = 0 );
+                 FESpace<mesh_Type, MapEpetra>&  velocityFESpace,
+                 FESpace<mesh_Type, MapEpetra>&  pressureFESpace,
+                 boost::shared_ptr<Epetra_Comm>& communicator,
+                 const Int                       lagrangeMultiplier = 0 );
 
     //! Constructor
     /*!
@@ -142,15 +143,15 @@ public:
         @param velocityFESpace Velocity FE space
         @param pressureFESpace Pressure FE space
         @param communicator MPI communicator
-        @param monolithicMap EpetraMap class
+        @param monolithicMap MapEpetra class
         @param offset
      */
     OseenSolver( boost::shared_ptr<data_Type>    dataType,
-           FESpace<mesh_Type, EpetraMap>&  velocityFESpace,
-           FESpace<mesh_Type, EpetraMap>&  pressureFESpace,
-           boost::shared_ptr<Epetra_Comm>& communicator,
-           const EpetraMap                 monolithicMap,
-           const UInt                      offset = 0 );
+                 FESpace<mesh_Type, MapEpetra>&  velocityFESpace,
+                 FESpace<mesh_Type, MapEpetra>&  pressureFESpace,
+                 boost::shared_ptr<Epetra_Comm>& communicator,
+                 const MapEpetra                 monolithicMap,
+                 const UInt                      offset = 0 );
 
     //! Constructor
     /*!
@@ -161,10 +162,10 @@ public:
         @param communicator MPI communicator
      */
     OseenSolver( boost::shared_ptr<data_Type>    dataType,
-           FESpace<mesh_Type, EpetraMap>&  velocityFESpace,
-           FESpace<mesh_Type, EpetraMap>&  pressureFESpace,
-           const std::vector<Int>&         lagrangeMultipliers,
-           boost::shared_ptr<Epetra_Comm>& communicator );
+                 FESpace<mesh_Type, MapEpetra>&  velocityFESpace,
+                 FESpace<mesh_Type, MapEpetra>&  pressureFESpace,
+                 const std::vector<Int>&         lagrangeMultipliers,
+                 boost::shared_ptr<Epetra_Comm>& communicator );
 
     //! virtual destructor
     virtual ~OseenSolver();
@@ -444,12 +445,12 @@ public:
     /*!
         @return velocity FE space
      */
-    FESpace<mesh_Type, EpetraMap>& velocityFESpace()
+    FESpace<mesh_Type, MapEpetra>& velocityFESpace()
     {
         return M_velocityFESpace;
     }
 
-    const FESpace<mesh_Type, EpetraMap>& velocityFESpace() const
+    const FESpace<mesh_Type, MapEpetra>& velocityFESpace() const
     {
         return M_velocityFESpace;
     }
@@ -458,12 +459,12 @@ public:
     /*!
         @return pressure FE space
      */
-    FESpace<mesh_Type, EpetraMap>& pressureFESpace()
+    FESpace<mesh_Type, MapEpetra>& pressureFESpace()
     {
         return M_pressureFESpace;
     }
 
-    const FESpace<mesh_Type, EpetraMap>& pressureFESpace() const
+    const FESpace<mesh_Type, MapEpetra>& pressureFESpace() const
     {
         return M_pressureFESpace;
     }
@@ -491,11 +492,11 @@ public:
         return *M_postProcessing;
     }
 
-    //! Return EpetraMap.
+    //! Return MapEpetra.
     /*!
-        @return EpetraMap
+        @return MapEpetra
      */
-    const EpetraMap& getMap() const
+    const MapEpetra& getMap() const
     {
         return M_localMap;
     }
@@ -638,13 +639,13 @@ protected:
     boost::shared_ptr<data_Type>   M_oseenData;
 
     // FE spaces
-    FESpace<mesh_Type, EpetraMap>& M_velocityFESpace;
-    FESpace<mesh_Type, EpetraMap>& M_pressureFESpace;
+    FESpace<mesh_Type, MapEpetra>& M_velocityFESpace;
+    FESpace<mesh_Type, MapEpetra>& M_pressureFESpace;
 
     //! MPI communicator
     Displayer                      M_Displayer;
 
-    EpetraMap                      M_localMap;
+    MapEpetra                      M_localMap;
 
     //! mass matrix
     matrixPtr_Type                 M_matrixMass;
@@ -735,10 +736,10 @@ protected:
 template<typename MeshType, typename SolverType>
 OseenSolver<MeshType, SolverType>::
 OseenSolver( boost::shared_ptr<data_Type>    dataType,
-       FESpace<mesh_Type, EpetraMap>&  velocityFESpace,
-       FESpace<mesh_Type, EpetraMap>&  pressureFESpace,
-       boost::shared_ptr<Epetra_Comm>& communicator,
-       const Int                       lagrangeMultiplier ):
+             FESpace<mesh_Type, MapEpetra>&  velocityFESpace,
+             FESpace<mesh_Type, MapEpetra>&  pressureFESpace,
+             boost::shared_ptr<Epetra_Comm>& communicator,
+             const Int                       lagrangeMultiplier ):
         M_oseenData       ( dataType ),
         M_velocityFESpace        ( velocityFESpace ),
         M_pressureFESpace        ( pressureFESpace ),
@@ -799,10 +800,10 @@ OseenSolver( boost::shared_ptr<data_Type>    dataType,
 template<typename MeshType, typename SolverType>
 OseenSolver<MeshType, SolverType>::
 OseenSolver( boost::shared_ptr<data_Type>    dataType,
-       FESpace<mesh_Type, EpetraMap>&  velocityFESpace,
-       FESpace<mesh_Type, EpetraMap>&  pressureFESpace,
+       FESpace<mesh_Type, MapEpetra>&  velocityFESpace,
+       FESpace<mesh_Type, MapEpetra>&  pressureFESpace,
        boost::shared_ptr<Epetra_Comm>& communicator,
-       EpetraMap                       monolithicMap,
+       MapEpetra                       monolithicMap,
        UInt                            offset ):
         M_oseenData       ( dataType ),
         M_velocityFESpace        ( velocityFESpace ),
@@ -862,8 +863,8 @@ OseenSolver( boost::shared_ptr<data_Type>    dataType,
 template<typename MeshType, typename SolverType>
 OseenSolver<MeshType, SolverType>::
 OseenSolver( boost::shared_ptr<data_Type>    dataType,
-       FESpace<mesh_Type, EpetraMap>&  velocityFESpace,
-       FESpace<mesh_Type, EpetraMap>&  pressureFESpace,
+       FESpace<mesh_Type, MapEpetra>&  velocityFESpace,
+       FESpace<mesh_Type, MapEpetra>&  pressureFESpace,
        const std::vector<Int> &        lagrangeMultipliers,
        boost::shared_ptr<Epetra_Comm>& communicator ):
         M_oseenData       ( dataType ),

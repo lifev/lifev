@@ -476,7 +476,7 @@ darcy::run()
 
 
     // Finite element space of the primal variable
-    FESpace< RegionMesh, EpetraMap > p_FESpace( meshPart,
+    FESpace< RegionMesh, MapEpetra > p_FESpace( meshPart,
                                                 *refFE_primal,
                                                 *qR_primal,
                                                 *bdQr_primal,
@@ -484,7 +484,7 @@ darcy::run()
                                                 Members->comm );
 
     // Finite element space of the dual variable
-    FESpace< RegionMesh, EpetraMap > u_FESpace( meshPart,
+    FESpace< RegionMesh, MapEpetra > u_FESpace( meshPart,
                                                 *refFE_dual,
                                                 *qR_dual,
                                                 *bdQr_dual,
@@ -492,7 +492,7 @@ darcy::run()
                                                 Members->comm );
 
     // Finite element space of the interpolation of dual variable
-    FESpace< RegionMesh, EpetraMap > uInterpolate_FESpace( meshPart,
+    FESpace< RegionMesh, MapEpetra > uInterpolate_FESpace( meshPart,
                                                            *refFE_dualInterpolate,
                                                            *qR_dualInterpolate,
                                                            *bdQr_dualInterpolate,
@@ -503,7 +503,7 @@ darcy::run()
     vector_ptrtype dualInterpolated( new vector_type ( uInterpolate_FESpace.map(), Repeated ) );
 
     // Finite element space of the hybrid variable
-    FESpace< RegionMesh, EpetraMap > hybrid_FESpace( meshPart,
+    FESpace< RegionMesh, MapEpetra > hybrid_FESpace( meshPart,
                                                      *refFE_hybrid,
                                                      *qR_hybrid,
                                                      *bdQr_hybrid,
@@ -511,7 +511,7 @@ darcy::run()
                                                      Members->comm );
 
     // Finite element space of the  outward unit normal variable
-    FESpace< RegionMesh, EpetraMap > VdotN_FESpace( meshPart,
+    FESpace< RegionMesh, MapEpetra > VdotN_FESpace( meshPart,
                                                     *refFE_VdotN,
                                                     *qR_VdotN,
                                                     *bdQr_VdotN,

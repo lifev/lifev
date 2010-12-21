@@ -39,7 +39,7 @@
 #define MONODOMAIN
 
 #include <life/lifearray/EpetraMatrix.hpp>
-#include <life/lifealg/EpetraMap.hpp>
+#include <life/lifearray/MapEpetra.hpp>
 #include <life/lifemesh/MeshData.hpp>
 #include <life/lifemesh/MeshPartitioner.hpp>
 

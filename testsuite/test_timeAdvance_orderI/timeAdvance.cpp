@@ -64,7 +64,7 @@ nonlinear_function.hpp:
 #include "Epetra_SerialComm.h"
 #endif
 
-#include <life/lifealg/EpetraMap.hpp>
+#include <life/lifearray/MapEpetra.hpp>
 #include <life/lifemesh/MeshData.hpp>
 #include <life/lifemesh/MeshPartitioner.hpp>
 
@@ -167,7 +167,7 @@ problem::run()
 
     typedef boost::shared_ptr< TimeAdvance< vector_type > >                 TimeAdvance_type;
 
-    typedef FESpace< RegionMesh3D<LinearTetra>, EpetraMap > FESpace_type;
+    typedef FESpace< RegionMesh3D<LinearTetra>, MapEpetra > FESpace_type;
     typedef  boost::shared_ptr<FESpace_type> FESpace_ptrtype;
 
     bool verbose = (members->comm->MyPID() == 0);
@@ -301,7 +301,7 @@ problem::run()
     if (verbose ) std::cout << "ok." << std::endl;
 
     // building some vectors:
-    EpetraMap uMap = problem.solution()->map();
+    MapEpetra uMap = problem.solution()->map();
 
     // computing the rhs
     vector_type rhs ( uMap, Unique );

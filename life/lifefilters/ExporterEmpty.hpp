@@ -73,7 +73,7 @@ public:
 
     //! @name Get methods
     //@{
-    EpetraMapType mapType() const;
+    MapEpetraType mapType() const;
     //@}
 
 private:
@@ -118,7 +118,7 @@ ExporterEmpty<MeshType>::ExporterEmpty(const GetPot& dfile, const std::string& p
 // ====================
 
 template<typename MeshType>
-EpetraMapType ExporterEmpty<MeshType>::mapType() const
+MapEpetraType ExporterEmpty<MeshType>::mapType() const
 {
     return Unique;
 }

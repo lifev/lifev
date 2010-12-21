@@ -167,8 +167,8 @@ main( int argc, char** argv )
     if (verbose) std::cout << " -- Building FESpaces ... " << std::flush;
     std::string uOrder("P1");
     std::string bOrder("P1");
-    boost::shared_ptr<FESpace< mesh_type, EpetraMap > > uFESpace( new FESpace< mesh_type, EpetraMap >(meshPart,uOrder, 1, Comm));
-    boost::shared_ptr<FESpace< mesh_type, EpetraMap > > betaFESpace( new FESpace< mesh_type, EpetraMap >(meshPart,bOrder, 3, Comm));
+    boost::shared_ptr<FESpace< mesh_type, MapEpetra > > uFESpace( new FESpace< mesh_type, MapEpetra >(meshPart,uOrder, 1, Comm));
+    boost::shared_ptr<FESpace< mesh_type, MapEpetra > > betaFESpace( new FESpace< mesh_type, MapEpetra >(meshPart,bOrder, 3, Comm));
     if (verbose) std::cout << " done ! " << std::endl;
     if (verbose) std::cout << " ---> Dofs: " << uFESpace->dof().numTotalDof() << std::endl;
 

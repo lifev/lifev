@@ -25,7 +25,7 @@
 #include "mpi.h"
 
 #include <life/lifearray/EpetraMatrix.hpp>
-#include <life/lifealg/EpetraMap.hpp>
+#include <life/lifearray/MapEpetra.hpp>
 #include <life/lifemesh/MeshPartitioner.hpp>
 #include <life/lifesolver/OseenData.hpp>
 #include <life/lifefem/FESpace.hpp>
@@ -184,7 +184,7 @@ main( int argc, char** argv )
     if (verbose)
         std::cout << "Building the velocity FE space         ... " << std::flush;
 
-    FESpace< RegionMesh3D<LinearTetra>, EpetraMap > uFESpace(meshPart,
+    FESpace< RegionMesh3D<LinearTetra>, MapEpetra > uFESpace(meshPart,
                                                              *refFE_vel,
                                                              *qR_vel,
                                                              *bdQr_vel,
@@ -199,7 +199,7 @@ main( int argc, char** argv )
     if (verbose)
         std::cout << "Building the pressure FE space         ... " << std::flush;
 
-    FESpace< RegionMesh3D<LinearTetra>, EpetraMap > pFESpace(meshPart,
+    FESpace< RegionMesh3D<LinearTetra>, MapEpetra > pFESpace(meshPart,
                                                              *refFE_press,
                                                              *qR_press,
                                                              *bdQr_press,
@@ -232,7 +232,7 @@ main( int argc, char** argv )
     // this is the total map ( velocity + pressure ). it will be used to create
     // vectors to strore the solutions
 
-    EpetraMap fullMap(fluid.getMap());
+    MapEpetra fullMap(fluid.getMap());
 
     if (verbose) std::cout << "ok." << std::endl;
 

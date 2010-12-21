@@ -103,8 +103,8 @@ public:
         @param lagrangeMultiplier Lagrange multiplier
      */
     OseenSolverShapeDerivative( boost::shared_ptr<data_Type>    dataType,
-                          FESpace<mesh_Type, EpetraMap>&  velocityFESpace,
-                          FESpace<mesh_Type, EpetraMap>&  pressureFESpace,
+                          FESpace<mesh_Type, MapEpetra>&  velocityFESpace,
+                          FESpace<mesh_Type, MapEpetra>&  pressureFESpace,
                           boost::shared_ptr<Epetra_Comm>& communicator,
                           const Int                       lagrangeMultiplier = 0);
 
@@ -114,14 +114,14 @@ public:
         @param velocityFESpace Velocity FE space
         @param pressureFESpace Pressure FE space
         @param communicator MPI communicator
-        @param monolithicMap EpetraMap class
+        @param monolithicMap MapEpetra class
         @param offset
      */
     OseenSolverShapeDerivative( boost::shared_ptr<data_Type>    dataType,
-                          FESpace<mesh_Type, EpetraMap>&  velocityFESpace,
-                          FESpace<mesh_Type, EpetraMap>&  pressureFESpace,
+                          FESpace<mesh_Type, MapEpetra>&  velocityFESpace,
+                          FESpace<mesh_Type, MapEpetra>&  pressureFESpace,
                           boost::shared_ptr<Epetra_Comm>& communicator,
-                          const EpetraMap                 monolithicMap,
+                          const MapEpetra                 monolithicMap,
                           const UInt                      offset = 0 );
 
     //! Constructor
@@ -131,15 +131,15 @@ public:
         @param pressureFESpace Pressure FE space
         @param mmFESpace FE space
         @param communicator MPI communicator
-        @param monolithicMap EpetraMap class
+        @param monolithicMap MapEpetra class
         @param offset
      */
     OseenSolverShapeDerivative( boost::shared_ptr<data_Type>    dataType,
-                          FESpace<mesh_Type, EpetraMap>&  velocityFESpace,
-                          FESpace<mesh_Type, EpetraMap>&  pressureFESpace,
-                          FESpace<mesh_Type, EpetraMap>&  mmFESpace,
+                          FESpace<mesh_Type, MapEpetra>&  velocityFESpace,
+                          FESpace<mesh_Type, MapEpetra>&  pressureFESpace,
+                          FESpace<mesh_Type, MapEpetra>&  mmFESpace,
                           boost::shared_ptr<Epetra_Comm>& communicator,
-                          const EpetraMap                 monolithicMap,
+                          const MapEpetra                 monolithicMap,
                           const UInt                      offset = 0 );
 
     //! Virtual destructor
@@ -203,7 +203,7 @@ public:
                                  //const vector_Type&           disp,
                                  const vector_Type&             w,
                                  UInt                           offset,
-                                 FESpace<mesh_Type, EpetraMap>& dFESpace,
+                                 FESpace<mesh_Type, MapEpetra>& dFESpace,
                                  bool                           wImplicit = true,
                                  bool                           convectiveTermDerivative = false);
 
@@ -318,7 +318,7 @@ private:
     ElemVec                   M_elementVelocityRightHandSide;   // Elementary mesh velocity for right hand side
     ElemVec                   M_u_loc;
     bool                      M_reuseLinearPreconditioner;
-    FESpace<mesh_Type, EpetraMap>* M_mmFESpace;
+    FESpace<mesh_Type, MapEpetra>* M_mmFESpace;
 };
 
 
@@ -330,8 +330,8 @@ private:
 template<typename MeshType, typename SolverType>
 OseenSolverShapeDerivative<MeshType, SolverType>::
 OseenSolverShapeDerivative( boost::shared_ptr<data_Type>    dataType,
-                      FESpace<mesh_Type, EpetraMap>&  velocityFESpace,
-                      FESpace<mesh_Type, EpetraMap>&  pressureFESpace,
+                      FESpace<mesh_Type, MapEpetra>&  velocityFESpace,
+                      FESpace<mesh_Type, MapEpetra>&  pressureFESpace,
                       boost::shared_ptr<Epetra_Comm>& communicator,
                       const Int                       lagrangeMultiplier):
         oseenSolver_Type ( dataType,
@@ -362,10 +362,10 @@ OseenSolverShapeDerivative( boost::shared_ptr<data_Type>    dataType,
 template<typename MeshType, typename SolverType>
 OseenSolverShapeDerivative<MeshType, SolverType>::
 OseenSolverShapeDerivative( boost::shared_ptr<data_Type>    dataType,
-                      FESpace<mesh_Type, EpetraMap>&  velocityFESpace,
-                      FESpace<mesh_Type, EpetraMap>&  pressureFESpace,
+                      FESpace<mesh_Type, MapEpetra>&  velocityFESpace,
+                      FESpace<mesh_Type, MapEpetra>&  pressureFESpace,
                       boost::shared_ptr<Epetra_Comm>& communicator,
-                      const EpetraMap                 monolithicMap,
+                      const MapEpetra                 monolithicMap,
                       const UInt                      offset ):
         oseenSolver_Type ( dataType,
                            velocityFESpace,
@@ -396,11 +396,11 @@ OseenSolverShapeDerivative( boost::shared_ptr<data_Type>    dataType,
 template<typename MeshType, typename SolverType>
 OseenSolverShapeDerivative<MeshType, SolverType>::
 OseenSolverShapeDerivative( boost::shared_ptr<data_Type>    dataType,
-                      FESpace<mesh_Type, EpetraMap>&  velocityFESpace,
-                      FESpace<mesh_Type, EpetraMap>&  pressureFESpace,
-                      FESpace<mesh_Type, EpetraMap>&  mmFESpace,
+                      FESpace<mesh_Type, MapEpetra>&  velocityFESpace,
+                      FESpace<mesh_Type, MapEpetra>&  pressureFESpace,
+                      FESpace<mesh_Type, MapEpetra>&  mmFESpace,
                       boost::shared_ptr<Epetra_Comm>& communicator,
-                      const EpetraMap                 monolithicMap,
+                      const MapEpetra                 monolithicMap,
                       const UInt                      offset):
         oseenSolver_Type  (dataType,
                            velocityFESpace,
@@ -741,7 +741,7 @@ updateShapeDerivatives( matrix_Type&                   matrix,
                         //const vector_Type&           disp,
                         const vector_Type&             w,
                         UInt                           offset,
-                        FESpace<mesh_Type, EpetraMap>& mmFESpace,
+                        FESpace<mesh_Type, MapEpetra>& mmFESpace,
                         bool                           wImplicit,
                         bool                           convectiveTermDerivative )
 {

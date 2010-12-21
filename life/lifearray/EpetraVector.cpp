@@ -56,7 +56,7 @@ namespace LifeV
 // ===================================================
 // Constructors & Destructor
 // ===================================================
-EpetraVector::EpetraVector( const EpetraMapType& mapType ):
+EpetraVector::EpetraVector( const MapEpetraType& mapType ):
         M_epetraMap   (),
         M_mapType     ( mapType ),
         M_epetraVector(),
@@ -64,15 +64,15 @@ EpetraVector::EpetraVector( const EpetraMapType& mapType ):
 {
 }
 
-EpetraVector::EpetraVector( const EpetraMap& map, const EpetraMapType& mapType ):
-        M_epetraMap   ( new EpetraMap( map ) ),
+EpetraVector::EpetraVector( const MapEpetra& map, const MapEpetraType& mapType ):
+        M_epetraMap   ( new MapEpetra( map ) ),
         M_mapType     ( mapType ),
         M_epetraVector( new vector_type( *M_epetraMap->map(M_mapType) ) ),
         M_combineMode ( Add )
 {
 }
 
-EpetraVector::EpetraVector( const boost::shared_ptr<EpetraMap>& map, const EpetraMapType& mapType ):
+EpetraVector::EpetraVector( const boost::shared_ptr<MapEpetra>& map, const MapEpetraType& mapType ):
         M_epetraMap   ( map ),
         M_mapType     ( mapType ),
         M_epetraVector( new vector_type( *M_epetraMap->map(M_mapType) ) ),
@@ -88,7 +88,7 @@ EpetraVector::EpetraVector( const EpetraVector& vector):
 {
 }
 
-EpetraVector::EpetraVector( const EpetraVector& vector, const EpetraMapType& mapType):
+EpetraVector::EpetraVector( const EpetraVector& vector, const MapEpetraType& mapType):
         M_epetraMap   ( vector.M_epetraMap ),
         M_mapType     ( mapType ),
         M_epetraVector( new vector_type( *M_epetraMap->map( M_mapType ) ) ),
@@ -97,7 +97,7 @@ EpetraVector::EpetraVector( const EpetraVector& vector, const EpetraMapType& map
     operator = (vector);
 }
 
-EpetraVector::EpetraVector( const EpetraVector& vector, const EpetraMapType& mapType,
+EpetraVector::EpetraVector( const EpetraVector& vector, const MapEpetraType& mapType,
                             const Epetra_CombineMode& combineMode ):
         M_epetraMap   ( vector.M_epetraMap ),
         M_mapType     ( mapType ),
@@ -124,8 +124,8 @@ EpetraVector::EpetraVector( const EpetraVector& vector, const EpetraMapType& map
 }
 
 EpetraVector::EpetraVector( const Epetra_MultiVector&          vector,
-                            const boost::shared_ptr<EpetraMap> map,
-                            const EpetraMapType&               mapType ):
+                            const boost::shared_ptr<MapEpetra> map,
+                            const MapEpetraType&               mapType ):
         M_epetraMap   ( map ),
         M_mapType     ( mapType ),
         M_epetraVector( new vector_type( *map->map( mapType ) ) ),
@@ -207,7 +207,7 @@ EpetraVector::operator=( const EpetraVector& vector )
 
     *this *= 0.; // because of a buggy behaviour in case of multidefined indeces.
 
-    // vector have the same underlying EpetraMap, we then use the existing importer/exporter
+    // vector have the same underlying MapEpetra, we then use the existing importer/exporter
     if ( M_epetraMap.get()  && vector.M_epetraMap.get() &&
             M_epetraMap->mapsAreSimilar( *vector.M_epetraMap ) )
     {
@@ -679,7 +679,7 @@ EpetraVector::subset( const EpetraVector& vector,
 
 EpetraVector&
 EpetraVector::subset( const EpetraVector& vector,
-                      const EpetraMap&    map,
+                      const MapEpetra&    map,
                       const UInt          offset1,
                       const UInt          offset2 )
 {
@@ -692,7 +692,7 @@ EpetraVector::subset( const EpetraVector& vector,
 
 EpetraVector&
 EpetraVector::subset( const Epetra_MultiVector& vector,
-                      const EpetraMap&    map,
+                      const MapEpetra&    map,
                       const UInt          offset1,
                       const UInt          offset2,
                       const UInt          column )
@@ -923,9 +923,9 @@ EpetraVector::setDefaultCombineMode()
 }
 
 void
-EpetraVector::setMap( const EpetraMap& map )
+EpetraVector::setMap( const MapEpetra& map )
 {
-    M_epetraMap.reset( new EpetraMap( map ) );
+    M_epetraMap.reset( new MapEpetra( map ) );
     M_epetraVector.reset( new vector_type( *M_epetraMap->map(M_mapType) ) );
 }
 

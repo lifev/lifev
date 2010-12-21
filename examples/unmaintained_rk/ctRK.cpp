@@ -6,7 +6,7 @@
 #include <Epetra_SerialComm.h>
 #endif
 #include <life/lifearray/EpetraMatrix.hpp>
-#include <life/lifealg/EpetraMap.hpp>
+#include <life/lifearray/MapEpetra.hpp>
 #include <life/lifemesh/MeshPartitioner.hpp>
 #include <life/lifesolver/OseenData.hpp>
 #include <life/lifefem/FESpace.hpp>
@@ -137,7 +137,7 @@ CTRK::run()
     // building velocity and pressure FE spaces
     if (verbose)
         std::cout << "  t-  Building the velocity FE space ... " << std::flush;
-    FESpace< RegionMesh3D<LinearTetra>, EpetraMap > uFESpace(meshPart,
+    FESpace< RegionMesh3D<LinearTetra>, MapEpetra > uFESpace(meshPart,
                                                              *refFE_vel,
                                                              *qR_vel,
                                                              *bdQr_vel,
@@ -150,7 +150,7 @@ CTRK::run()
     if (verbose)
         std::cout << "  t-  Building the pressure FE space ... " << std::flush;
 
-    FESpace< RegionMesh3D<LinearTetra>, EpetraMap > pFESpace(meshPart,
+    FESpace< RegionMesh3D<LinearTetra>, MapEpetra > pFESpace(meshPart,
                                                              *refFE_press,
                                                              *qR_press,
                                                              *bdQr_press,
@@ -178,8 +178,8 @@ CTRK::run()
                                                       *bcHp,
                                                       *M_comm);
 
-    EpetraMap fullMap_u(fluid.getMap_u());
-    EpetraMap fullMap_p(fluid.getMap_p());
+    MapEpetra fullMap_u(fluid.getMap_u());
+    MapEpetra fullMap_p(fluid.getMap_p());
 
     if (verbose) std::cout << "ok." << std::endl;
 

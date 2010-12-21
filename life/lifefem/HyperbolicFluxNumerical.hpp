@@ -171,7 +171,7 @@ public:
     */
     AbstractNumericalFlux ( const vectorFunction_Type&       physicalFlux,
                             const vectorFunction_Type&       firstDerivativePhysicalFlux,
-                            const FESpace<Mesh, EpetraMap>&  fESpace,
+                            const FESpace<Mesh, MapEpetra>&  fESpace,
                             const dataFile_Type&             data,
                             const std::string&               section = "numerical_flux/");
 
@@ -383,7 +383,7 @@ protected:
     UInt                                 M_CFLBrentMaxIter;
 
     //! Finite element space of the hyperbolic solver.
-    const FESpace<Mesh, EpetraMap>&      M_fESpace;
+    const FESpace<Mesh, MapEpetra>&      M_fESpace;
 
     //! Vector of pointers for the dependences of the permeability to external vector fields.
     std::vector< const vectorPtr_Type* > M_fields;
@@ -399,7 +399,7 @@ template < typename Mesh, typename SolverType >
 AbstractNumericalFlux<Mesh, SolverType>::
 AbstractNumericalFlux ( const vectorFunction_Type&       physicalFlux,
                         const vectorFunction_Type&       firstDerivativePhysicalFlux,
-                        const FESpace<Mesh, EpetraMap>&  fESpace,
+                        const FESpace<Mesh, MapEpetra>&  fESpace,
                         const dataFile_Type&             data,
                         const std::string&               section ):
         M_physicalFlux                ( physicalFlux ),
@@ -553,7 +553,7 @@ public:
     */
     GodunovNumericalFlux ( const vectorFunction_Type&      physicalFlux,
                            const vectorFunction_Type&      firstDerivativePhysicalFlux,
-                           const FESpace<Mesh, EpetraMap>& fESpace,
+                           const FESpace<Mesh, MapEpetra>& fESpace,
                            const dataFile_Type&            data,
                            const std::string&              section = "numerical_flux/" );
 
@@ -613,7 +613,7 @@ template < typename Mesh, typename SolverType >
 GodunovNumericalFlux<Mesh, SolverType>::
 GodunovNumericalFlux ( const vectorFunction_Type&       physicalFlux,
                        const vectorFunction_Type&       firstDerivativePhysicalFlux,
-                       const FESpace<Mesh, EpetraMap>&  fESpace,
+                       const FESpace<Mesh, MapEpetra>&  fESpace,
                        const dataFile_Type&             data,
                        const std::string&               section ):
     AbstractNumericalFlux<Mesh, SolverType>::AbstractNumericalFlux  ( physicalFlux,

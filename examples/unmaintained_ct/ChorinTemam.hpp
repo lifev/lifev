@@ -37,7 +37,7 @@
 #include <life/lifefilters/medit_wrtrs.hpp>
 
 #include <life/lifealg/SolverAztecOO.hpp>
-#include <life/lifealg/EpetraMap.hpp>
+#include <life/lifearray/MapEpetra.hpp>
 #include <life/lifearray/EpetraMatrix.hpp>
 #include <life/lifearray/EpetraVector.hpp>
 
@@ -96,8 +96,8 @@ public:
       \param bcHp boundary conditions for the pressure
     */
     ChorinTemam( const data_type&          dataType,
-                 FESpace<Mesh, EpetraMap>& uFESpace,
-                 FESpace<Mesh, EpetraMap>& pFESpace,
+                 FESpace<Mesh, MapEpetra>& uFESpace,
+                 FESpace<Mesh, MapEpetra>& pFESpace,
                  int 			     uBdfOrder,
                  int			     pBdfOrder,
                  BCHandler&                bcHu,
@@ -130,8 +130,8 @@ public:
     const vector_type& residual_u() const {return M_residual_u;}
     const vector_type& residual_p() const {return M_residual_p;}
 
-    FESpace<Mesh, EpetraMap>& velFESpace()   {return M_uFESpace;}
-    FESpace<Mesh, EpetraMap>& pressFESpace() {return M_pFESpace;}
+    FESpace<Mesh, MapEpetra>& velFESpace()   {return M_uFESpace;}
+    FESpace<Mesh, MapEpetra>& pressFESpace() {return M_pFESpace;}
 
 
     //! Boundary Conditions
@@ -172,8 +172,8 @@ public:
     void resetPrec_u() {M_resetPrec_u = true;}
     void resetPrec_p() {M_resetPrec_p = true;}
 
-    EpetraMap const& getMap_u() const { return M_localMap_u; }
-    EpetraMap const& getMap_p() const { return M_localMap_p; }
+    MapEpetra const& getMap_u() const { return M_localMap_u; }
+    MapEpetra const& getMap_p() const { return M_localMap_p; }
 
     const Epetra_Comm& comm() const {return *M_comm;}
 
@@ -239,8 +239,8 @@ protected:
     const data_type&               M_data;
 
     // FE spaces
-    FESpace<Mesh, EpetraMap>&      M_uFESpace;
-    FESpace<Mesh, EpetraMap>&      M_pFESpace;
+    FESpace<Mesh, MapEpetra>&      M_uFESpace;
+    FESpace<Mesh, MapEpetra>&      M_pFESpace;
 
     //! MPI communicator
     Epetra_Comm*                   M_comm;
@@ -251,8 +251,8 @@ protected:
     BCHandler*			   M_BCh_fluid_p;
     bool                           M_setBC;
 
-    EpetraMap                      M_localMap_u;
-    EpetraMap			   M_localMap_p;
+    MapEpetra                      M_localMap_u;
+    MapEpetra			   M_localMap_p;
 
     //! mass matrix
     matrix_ptrtype                 M_matrMass;
@@ -378,8 +378,8 @@ private:
 template<typename Mesh, typename SolverType>
 ChorinTemam<Mesh, SolverType>::
 ChorinTemam( const data_type&          dataType,
-             FESpace<Mesh, EpetraMap>& uFESpace,
-             FESpace<Mesh, EpetraMap>& pFESpace,
+             FESpace<Mesh, MapEpetra>& uFESpace,
+             FESpace<Mesh, MapEpetra>& pFESpace,
              int uBdfOrder,
              int pBdfOrder,
              BCHandler&                BCh_u,
@@ -1090,7 +1090,7 @@ void ChorinTemam<Mesh, SolverType>::computeRES_expl(Real resVal, EntityFlag resF
     Real uLocalFlow = 0.0, uFlow = 0.0;
     UInt nNode = M_uFESpace.feBd().nbNode;
     // auxilliary map
-    EpetraMap fe_map (M_uFESpace.refFE(), *(M_uFESpace.mesh()), *M_comm);
+    MapEpetra fe_map (M_uFESpace.refFE(), *(M_uFESpace.mesh()), *M_comm);
     // auxilliary (repeated) vector
     vector_type uFlux(rhs, Repeated);
     uFlux *= 0.0;
@@ -1170,7 +1170,7 @@ void ChorinTemam<Mesh, SolverType>::computeRES_impl(Real resVal, EntityFlag resF
     BCBase& bcB = M_BCh_fluid_u->GetBCWithFlag(resFlag);
     UInt nNode = M_uFESpace.feBd().nbNode;
     // auxilliary map
-    EpetraMap fe_map (M_uFESpace.refFE(), *(M_uFESpace.mesh()), *M_comm);
+    MapEpetra fe_map (M_uFESpace.refFE(), *(M_uFESpace.mesh()), *M_comm);
     // FE flow vector
     vector_type _flow_u (M_localMap_u);
     _flow_u *= 0.0;

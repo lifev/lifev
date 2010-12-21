@@ -38,7 +38,7 @@
 
 //#include "NavierStokesSolverIP.hpp"
 
-#include <life/lifealg/EpetraMap.hpp>
+#include <life/lifearray/MapEpetra.hpp>
 #include <life/lifemesh/MeshData.hpp>
 
 #include <life/lifesolver/VenantKirchhoffElasticData.hpp>
@@ -197,14 +197,14 @@ Structure::run3d()
 
     std::string dOrder =  dataFile( "solid/space_discretization/order", "P1");
 
-    typedef FESpace< RegionMesh3D<LinearTetra>, EpetraMap > solidFESpace_type;
+    typedef FESpace< RegionMesh3D<LinearTetra>, MapEpetra > solidFESpace_type;
     typedef boost::shared_ptr<solidFESpace_type> solidFESpace_ptrtype;
     solidFESpace_ptrtype dFESpace( new solidFESpace_type(meshPart,dOrder,3,parameters->comm) );
     if (verbose) std::cout << std::endl;
 
-    EpetraMap structMap(dFESpace->refFE(), meshPart, parameters->comm);
+    MapEpetra structMap(dFESpace->refFE(), meshPart, parameters->comm);
 
-    EpetraMap fullMap;
+    MapEpetra fullMap;
 
     for (UInt ii = 0; ii < nDimensions; ++ii)
     {

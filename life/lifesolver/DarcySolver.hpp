@@ -291,10 +291,10 @@ public:
       @param comm Shared pointer of the Epetra communicator.
     */
     DarcySolver ( const data_Type&                dataFile,
-                        FESpace<Mesh, EpetraMap>& primal_FESpace,
-                        FESpace<Mesh, EpetraMap>& dual_FESpace,
-                        FESpace<Mesh, EpetraMap>& hybrid_FESpace,
-                        FESpace<Mesh, EpetraMap>& VdotN_FESpace,
+                        FESpace<Mesh, MapEpetra>& primal_FESpace,
+                        FESpace<Mesh, MapEpetra>& dual_FESpace,
+                        FESpace<Mesh, MapEpetra>& hybrid_FESpace,
+                        FESpace<Mesh, MapEpetra>& VdotN_FESpace,
                   const bchandler_raw_Type&       bcHandler,
                   const commPtr_Type&             comm );
 
@@ -309,10 +309,10 @@ public:
       @param comm Shared pointer of the Epetra communicator.
     */
     DarcySolver ( const data_Type&                dataFile,
-                        FESpace<Mesh, EpetraMap>& primal_FESpace,
-                        FESpace<Mesh, EpetraMap>& dual_FESpace,
-                        FESpace<Mesh, EpetraMap>& hybrid_FESpace,
-                        FESpace<Mesh, EpetraMap>& VdotN_FESpace,
+                        FESpace<Mesh, MapEpetra>& primal_FESpace,
+                        FESpace<Mesh, MapEpetra>& dual_FESpace,
+                        FESpace<Mesh, MapEpetra>& hybrid_FESpace,
+                        FESpace<Mesh, MapEpetra>& VdotN_FESpace,
                   const commPtr_Type&             comm );
 
     //! Virtual destructor.
@@ -484,14 +484,14 @@ public:
 
     //! Returns Epetra local map.
     /*!
-      @return Constant EpetraMap reference of the problem.
+      @return Constant MapEpetra reference of the problem.
     */
-    const EpetraMap& getMap () const
+    const MapEpetra& getMap () const
     {
         return M_localMap;
     }
 
-          EpetraMap& getMap ()
+          MapEpetra& getMap ()
     {
         return M_localMap;
     }
@@ -592,7 +592,7 @@ protected:
     UInt      M_me;
 
     //! Local map.
-    EpetraMap M_localMap;
+    MapEpetra M_localMap;
 
     //! Displayer.
     Displayer M_displayer;
@@ -625,16 +625,16 @@ protected:
     //@{
 
     //! Primal finite element space.
-    FESpace<Mesh, EpetraMap>&  M_primal_FESpace;
+    FESpace<Mesh, MapEpetra>&  M_primal_FESpace;
 
     //! Dual finite element space.
-    FESpace<Mesh, EpetraMap>&  M_dual_FESpace;
+    FESpace<Mesh, MapEpetra>&  M_dual_FESpace;
 
     //! Hybrid finite element space.
-    FESpace<Mesh, EpetraMap>&  M_hybrid_FESpace;
+    FESpace<Mesh, MapEpetra>&  M_hybrid_FESpace;
 
     //! Dual function dot outward unit vector finite element space.
-    FESpace<Mesh, EpetraMap>&  M_VdotN_FESpace;
+    FESpace<Mesh, MapEpetra>&  M_VdotN_FESpace;
 
     //@}
 
@@ -725,10 +725,10 @@ protected:
 template<typename Mesh, typename SolverType>
 DarcySolver<Mesh, SolverType>::
 DarcySolver ( const data_Type&                 dataFile,
-              FESpace<Mesh, EpetraMap>&  primal_FESpace,
-              FESpace<Mesh, EpetraMap>&  dual_FESpace,
-              FESpace<Mesh, EpetraMap>&  hybrid_FESpace,
-              FESpace<Mesh, EpetraMap>&  VdotN_FESpace,
+              FESpace<Mesh, MapEpetra>&  primal_FESpace,
+              FESpace<Mesh, MapEpetra>&  dual_FESpace,
+              FESpace<Mesh, MapEpetra>&  hybrid_FESpace,
+              FESpace<Mesh, MapEpetra>&  VdotN_FESpace,
               const bchandler_raw_Type&        bcHandler,
               const commPtr_Type&              comm ):
         // Parallel stuff.
@@ -773,10 +773,10 @@ DarcySolver ( const data_Type&                 dataFile,
 template<typename Mesh, typename SolverType>
 DarcySolver<Mesh, SolverType>::
 DarcySolver ( const data_Type&                 dataFile,
-              FESpace<Mesh, EpetraMap>&  primal_FESpace,
-              FESpace<Mesh, EpetraMap>&  dual_FESpace,
-              FESpace<Mesh, EpetraMap>&  hybrid_FESpace,
-              FESpace<Mesh, EpetraMap>&  VdotN_FESpace,
+              FESpace<Mesh, MapEpetra>&  primal_FESpace,
+              FESpace<Mesh, MapEpetra>&  dual_FESpace,
+              FESpace<Mesh, MapEpetra>&  hybrid_FESpace,
+              FESpace<Mesh, MapEpetra>&  VdotN_FESpace,
               const commPtr_Type&              comm ):
         // Parallel stuff.
         M_me                     ( comm->MyPID() ),

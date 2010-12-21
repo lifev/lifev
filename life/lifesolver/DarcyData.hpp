@@ -286,7 +286,7 @@ public:
     //@{
 
     // Copy constructor
-    inversePermeability ( const permeability_Type& invPerm, FESpace<Mesh, EpetraMap>& fESpace ):
+    inversePermeability ( const permeability_Type& invPerm, FESpace<Mesh, MapEpetra>& fESpace ):
 	M_fields              ( std::vector< const vectorPtr_Type* >(0) ),
 	M_inversePermeability ( invPerm ),
 	M_fESpace             ( fESpace )
@@ -326,7 +326,7 @@ private:
     permeability_Type             M_inversePermeability;
 
     // Finite element space
-    FESpace<Mesh, EpetraMap>&     M_fESpace;
+    FESpace<Mesh, MapEpetra>&     M_fESpace;
 
 };
 

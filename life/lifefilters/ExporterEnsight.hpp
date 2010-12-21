@@ -125,7 +125,7 @@ public:
     //@{
 
     //! returns the type of the map to use for the EpetraVector
-    EpetraMapType mapType() const;
+    MapEpetraType mapType() const;
 
     //@}
 
@@ -332,7 +332,7 @@ void ExporterEnsight<MeshType>::setMeshProcId( const meshPtr_Type mesh, const In
 // ===================
 
 template<typename MeshType>
-EpetraMapType ExporterEnsight<MeshType>::mapType() const
+MapEpetraType ExporterEnsight<MeshType>::mapType() const
 {
     return Repeated;
 }

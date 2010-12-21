@@ -249,8 +249,8 @@ private:
 
     dataPtr_Type                                M_data;
 
-    boost::shared_ptr<EpetraMap>				M_fluidInterfaceMap;
-    boost::shared_ptr<EpetraMap>				M_solidInterfaceMap;
+    boost::shared_ptr<MapEpetra>				M_fluidInterfaceMap;
+    boost::shared_ptr<MapEpetra>				M_solidInterfaceMap;
 
     boost::shared_ptr<Epetra_MpiComm>			M_epetraComm;
     boost::shared_ptr<Epetra_MpiComm>			M_epetraWorldComm;
@@ -272,10 +272,10 @@ private:
 //     fluidBchandlerPtr_Type       M_BCh_dz;
 
 
-//     FESpace<mesh_Type, EpetraMap>* M_uFESpace;
-//     FESpace<mesh_Type, EpetraMap>* M_pFESpace;
-//     FESpace<mesh_Type, EpetraMap>* M_dFESpace;
-//     FESpace<mesh_Type, EpetraMap>* M_mmFESpace;
+//     FESpace<mesh_Type, MapEpetra>* M_uFESpace;
+//     FESpace<mesh_Type, MapEpetra>* M_pFESpace;
+//     FESpace<mesh_Type, MapEpetra>* M_dFESpace;
+//     FESpace<mesh_Type, MapEpetra>* M_mmFESpace;
 
 //     partitionMesh< FSI::mesh_Type >*  M_fluidMeshPart;
 //     partitionMesh< FSI::mesh_Type >*  M_solidMeshPart;

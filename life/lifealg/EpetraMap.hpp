@@ -26,7 +26,7 @@
 
 /*!
     @file
-    @brief EpetraMap
+    @brief MapEpetra
 
     @author Gilles Fourestey <gilles.fourestey@epfl.ch>
     @author Simone Deparis <simone.deparis@epfl.ch>
@@ -64,20 +64,20 @@
 namespace LifeV
 {
 
-enum EpetraMapType {Unique = 0, Repeated};
+enum MapEpetraType {Unique = 0, Repeated};
 
 
-//! EpetraMap - Wrapper for Epetra_Map
+//! MapEpetra - Wrapper for Epetra_Map
 /*!
   @author Gilles Fourestey <gilles.fourestey@epfl.ch>
   @author Simone Deparis <simone.deparis@epfl.ch>
   @author Gwenol Grandperrin <gwenol.grandperrin@epfl.ch>
 
-  The EpetraMap class provides a general interface for the Epetra_Map class of Trilinos.
+  The MapEpetra class provides a general interface for the Epetra_Map class of Trilinos.
 
   Visit http://trilinos.sandia.gov for more informations about Epetra_Map.
  */
-class EpetraMap
+class MapEpetra
 {
 public:
 
@@ -97,7 +97,7 @@ public:
     //@{
 
     //! Empty Constructor
-    EpetraMap();
+    MapEpetra();
 
     //! Constructor
     /*!
@@ -108,7 +108,7 @@ public:
       @param indexBase Starting index base (typically 0 or 1)
       @param commPtr Pointer to the communicator
     */
-    EpetraMap( Int  numGlobalElements,
+    MapEpetra( Int  numGlobalElements,
                Int  numMyElements,
                Int* myGlobalElements,
                Int  indexBase,
@@ -123,7 +123,7 @@ public:
       @param indexBase Starting index base (typically 0 or 1)
       @param CommPtr A pointer to the Epetra communicator
      */
-    EpetraMap( const Int numGlobalElements,
+    MapEpetra( const Int numGlobalElements,
                const Int indexBase,
                const comm_ptrtype& commPtr );
 
@@ -132,7 +132,7 @@ public:
       @param size Size of the map
       @param commPtr Pointer to the communicator
      */
-    EpetraMap( const Int           size,
+    MapEpetra( const Int           size,
                const comm_ptrtype& commPtr );
 
     //! Constructor
@@ -143,7 +143,7 @@ public:
       @param commPtr Pointer to the communicator
      */
     template<typename Mesh>
-    EpetraMap( const ReferenceFE&         refFE,
+    MapEpetra( const ReferenceFE&         refFE,
                const MeshPartitioner<Mesh>& meshPart,
                const comm_ptrtype&        commPtr );
 
@@ -155,15 +155,15 @@ public:
       @param commPtr Pointer to the communicator
     */
     template<typename Mesh>
-    EpetraMap( const ReferenceFE&         refFE,
+    MapEpetra( const ReferenceFE&         refFE,
                const Mesh&          mesh,
                const comm_ptrtype&  commPtr );
 
     //! Copy constructor
     /*!
-      @param epetraMap An EpetraMap object
+      @param epetraMap An MapEpetra object
      */
-    EpetraMap( const EpetraMap&  epetraMap );
+    MapEpetra( const MapEpetra&  epetraMap );
 
     //! Constructor
     /*!
@@ -184,7 +184,7 @@ public:
       @param maxId Maximum Id
       @param indexBase Starting index base (typically 0 or 1)
     */
-    EpetraMap( const Epetra_BlockMap& blockMap,
+    MapEpetra( const Epetra_BlockMap& blockMap,
                const Int offset,
                const Int maxId,
                Int indexBase = -1 );
@@ -195,11 +195,11 @@ private:
       therefore it is private
       @param map: underlying Epetra_Map
      */
-    EpetraMap( const map_type map );
+    MapEpetra( const map_type map );
 
 public:
     //! Destructor
-    ~EpetraMap() {}
+    ~MapEpetra() {}
 
     //@}
 
@@ -210,30 +210,30 @@ public:
     //! Assignment operator
     /*!
       The assignment operator will copy the pointers of the maps, exporter and importer
-      @param epetraMap EpetraMap to be assigned to the current matrix
+      @param epetraMap MapEpetra to be assigned to the current matrix
      */
-    EpetraMap& operator  = ( const EpetraMap& epetraMap );
+    MapEpetra& operator  = ( const MapEpetra& epetraMap );
 
     //! Addition operator
     /*!
       The addition operator combines two map together
-      @param epetraMap EpetraMap to be combined with the current map
+      @param epetraMap MapEpetra to be combined with the current map
      */
-    EpetraMap& operator += ( const EpetraMap& epetraMap );
+    MapEpetra& operator += ( const MapEpetra& epetraMap );
 
     //! Addition operator
     /*!
       The addition operator combines two map together to create a new map
-      @param epetraMap EpetraMap to be combined with the current map
+      @param epetraMap MapEpetra to be combined with the current map
      */
-    EpetraMap operator +  ( const EpetraMap& epetraMap );
+    MapEpetra operator +  ( const MapEpetra& epetraMap );
 
     //! Addition operator
     /*!
       The addition operator create a map of size "size" and add it to the current map.
       @param size Size of the map to be added to the current map
      */
-    EpetraMap& operator += ( Int const size );
+    MapEpetra& operator += ( Int const size );
 
     //! Addition operator
     /*!
@@ -241,21 +241,21 @@ public:
       to create a new map
       @param size Size of the map to be added to the current map
      */
-    EpetraMap operator +  ( Int const size );
+    MapEpetra operator +  ( Int const size );
 
     //@}
 
     //! @name Methods
     //@{
 
-    //! This method creates a pointer to a EpetraMap that has points only on processor root
+    //! This method creates a pointer to a MapEpetra that has points only on processor root
     /*!
       @param root processor on which to export all the points
      */
-    boost::shared_ptr<EpetraMap> createRootMap( Int const root ) const;
+    boost::shared_ptr<MapEpetra> createRootMap( Int const root ) const;
 
     //! This method return true if both the unique map and the repeated map are identical
-    bool mapsAreSimilar( EpetraMap const& epetraMap ) const;
+    bool mapsAreSimilar( MapEpetra const& epetraMap ) const;
 
     //! Show informations about the map
     void showMe( std::ostream& output = std::cout ) const;
@@ -272,7 +272,7 @@ public:
     comm_ptrtype& commPtr() { return M_commPtr; }
 
     //! Return a shared pointer on the internal Epetra_Map
-    map_ptrtype const & map  ( EpetraMapType mapType ) const;
+    map_ptrtype const & map  ( MapEpetraType mapType ) const;
 
     //! Getter for the Epetra_Export
     Epetra_Export const& exporter();
@@ -281,35 +281,6 @@ public:
     Epetra_Import const& importer();
 
     //@}
-
-    bool __attribute__ ((__deprecated__)) MapsAreSimilart( EpetraMap const& epetraMap ) const
-    {
-        return mapsAreSimilar(epetraMap);
-    }
-    comm_type __attribute__ ((__deprecated__)) const& Commt() const
-    {
-        return comm();
-    }
-    comm_ptrtype& __attribute__ ((__deprecated__)) CommPtrt()
-    {
-        return commPtr();
-    }
-
-    map_ptrtype const & __attribute__ ((__deprecated__)) getMapt  ( EpetraMapType mapType ) const
-    {
-        return map(mapType);
-    }
-
-    Epetra_Export const& __attribute__ ((__deprecated__)) getExportert()
-    {
-        return exporter();
-    }
-
-    //! Getter for the Epetra_Import
-    Epetra_Import const& __attribute__ ((__deprecated__)) getImportert()
-    {
-        return importer();
-    }
 
 private:
 
@@ -332,10 +303,10 @@ private:
                     const comm_type& comm );
 
     //! Getter for the repeated map
-    map_ptrtype const & getRepeatedMap() const { return M_repeatedEpetraMap; }
+    map_ptrtype const & getRepeatedMap() const { return M_repeatedMapEpetra; }
 
     //! Getter for the unique map
-    map_ptrtype const & getUniqueMap()   const { return M_uniqueEpetraMap; }
+    map_ptrtype const & getUniqueMap()   const { return M_uniqueMapEpetra; }
 
     //! Reset the internal unique map and recompute it using the repeated map
     void  uniqueMap();
@@ -368,8 +339,8 @@ private:
 
     //@}
 
-    map_ptrtype        M_repeatedEpetraMap;
-    map_ptrtype        M_uniqueEpetraMap;
+    map_ptrtype        M_repeatedMapEpetra;
+    map_ptrtype        M_uniqueMapEpetra;
     exporter_ptrtype   M_exporter;
     importer_ptrtype   M_importer;
     comm_ptrtype       M_commPtr;
@@ -381,12 +352,12 @@ private:
 // Constructors & Destructor
 // ===================================================
 template<typename Mesh>
-EpetraMap::
-EpetraMap( const ReferenceFE&               refFE,
+MapEpetra::
+MapEpetra( const ReferenceFE&               refFE,
            const MeshPartitioner<Mesh>& meshPart,
            const comm_ptrtype&        commPtr ):
-        M_repeatedEpetraMap(),
-        M_uniqueEpetraMap(),
+        M_repeatedMapEpetra(),
+        M_uniqueMapEpetra(),
         M_exporter(),
         M_importer(),
         M_commPtr( commPtr )
@@ -405,12 +376,12 @@ EpetraMap( const ReferenceFE&               refFE,
 
 
 template<typename Mesh>
-EpetraMap::
-EpetraMap( const ReferenceFE&        refFE,
+MapEpetra::
+MapEpetra( const ReferenceFE&        refFE,
            const Mesh&         mesh,
            const comm_ptrtype& commPtr ):
-        M_repeatedEpetraMap(),
-        M_uniqueEpetraMap(),
+        M_repeatedMapEpetra(),
+        M_uniqueMapEpetra(),
         M_exporter(),
         M_importer(),
         M_commPtr( commPtr )

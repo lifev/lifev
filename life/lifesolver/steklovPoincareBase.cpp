@@ -127,7 +127,7 @@ void steklovPoincare::eval(const vector_Type& disp,
     {
         this->M_meshMotion->iterate();
 
-        vector_Type const meshDisplacement( M_meshMotion->displacement(), this->M_meshMotion->getRepeatedEpetraMap() );
+        vector_Type const meshDisplacement( M_meshMotion->displacement(), this->M_meshMotion->getRepeatedMapEpetra() );
         this->moveMesh(meshDisplacement);
 
         this->transferMeshMotionOnFluid(meshDisplacement,
@@ -143,7 +143,7 @@ void steklovPoincare::eval(const vector_Type& disp,
 
         *M_beta *= 0.;
 
-        vector_Type const meshDispDiff( M_meshMotion->dispDiff(), this->M_meshMotion->getRepeatedEpetraMap() );
+        vector_Type const meshDispDiff( M_meshMotion->dispDiff(), this->M_meshMotion->getRepeatedMapEpetra() );
 
         this->interpolateVelocity(meshDispDiff, *M_beta);
 

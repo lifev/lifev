@@ -66,7 +66,7 @@ along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
 #pragma GCC diagnostic warning "-Wunused-variable"
 #pragma GCC diagnostic warning "-Wunused-parameter"
 
-#include <life/lifealg/EpetraMap.hpp>
+#include <life/lifearray/MapEpetra.hpp>
 #include <life/lifecore/life.hpp>
 #include <life/lifecore/StringUtility.hpp>
 #include <life/lifefem/ReferenceFE.hpp>
@@ -185,7 +185,7 @@ public:
     //@{
 
     //! returns the type of the map to use for the EpetraVector
-    EpetraMapType mapType() const;
+    MapEpetraType mapType() const;
 
     //@}
 
@@ -532,7 +532,7 @@ void ExporterHDF5<MeshType>::readVariable(ExporterData& dvar)
 // Get Methods
 // ===================================================
 template<typename MeshType>
-EpetraMapType ExporterHDF5<MeshType>::mapType() const
+MapEpetraType ExporterHDF5<MeshType>::mapType() const
 {
     return Unique;
 }
@@ -877,7 +877,7 @@ void ExporterHDF5<MeshType>::writeScalar(const ExporterData& dvar)
     UInt size  = dvar.size();
     UInt start = dvar.start();
 
-    EpetraMap subMap(dvar.storedArray()->blockMap(), start, size);
+    MapEpetra subMap(dvar.storedArray()->blockMap(), start, size);
     vector_Type subVar(subMap);
     subVar.subset(*dvar.storedArray(),start);
 
@@ -911,14 +911,14 @@ void ExporterHDF5<MeshType>::writeVector(const ExporterData& dvar)
 
     for (UInt d ( 0 ); d < nDimensions; ++d)
     {
-        EpetraMap subMap(dvar.storedArray()->blockMap(), start+d*size, size);
+        MapEpetra subMap(dvar.storedArray()->blockMap(), start+d*size, size);
         ArrayOfVectors[d].reset(new  vector_Type(subMap));
         ArrayOfVectors[d]->subset(*dvar.storedArray(),start+d*size);
 
         ArrayOfVectors[d]->epetraVector().ExtractView(&ArrayOfPointers[d], &MyLDA);
     }
 
-    EpetraMap subMap(dvar.storedArray()->blockMap(), start, size);
+    MapEpetra subMap(dvar.storedArray()->blockMap(), start, size);
     Epetra_MultiVector multiVector(View, *subMap.map(Unique), ArrayOfPointers, nDimensions);
 
 
@@ -997,13 +997,13 @@ void ExporterHDF5<MeshType>::writeGeometry()
     // Build a map for linear elements, even though the origianl FE might be P0
     // This gives the right map for the coordinate arrays
 
-    EpetraMap subMap;
+    MapEpetra subMap;
     switch ( MeshType::ElementShape::S_shape )
     {
     case TETRA:
     {
         const ReferenceFE & refFEP1 = feTetraP1;
-        EpetraMap tmpMapP1(refFEP1, *this->M_mesh,
+        MapEpetra tmpMapP1(refFEP1, *this->M_mesh,
                            this->M_listData.begin()->storedArray()->mapPtr()->commPtr());
         subMap = tmpMapP1;
         break;
@@ -1011,7 +1011,7 @@ void ExporterHDF5<MeshType>::writeGeometry()
     case HEXA:
     {
         const ReferenceFE & refFEQ1 = feHexaQ1;
-        EpetraMap tmpMapQ1(refFEQ1, *this->M_mesh,
+        MapEpetra tmpMapQ1(refFEQ1, *this->M_mesh,
                            this->M_listData.begin()->storedArray()->mapPtr()->commPtr());
         subMap = tmpMapQ1;
         break;
@@ -1019,7 +1019,7 @@ void ExporterHDF5<MeshType>::writeGeometry()
     case LINE:
     {
         const ReferenceFE & refFEP11D = feSegP1;
-        EpetraMap tmpMapQ11D(refFEP11D, *this->M_mesh,
+        MapEpetra tmpMapQ11D(refFEP11D, *this->M_mesh,
                              this->M_listData.begin()->storedArray()->mapPtr()->commPtr());
         subMap = tmpMapQ11D;
         break;
@@ -1077,7 +1077,7 @@ void ExporterHDF5<MeshType>::readScalar(ExporterData& dvar)
     UInt size  = dvar.size();
     UInt start = dvar.start();
 
-    EpetraMap subMap(dvar.storedArray()->blockMap(), start, size);
+    MapEpetra subMap(dvar.storedArray()->blockMap(), start, size);
     Epetra_MultiVector* subVar(0);
 
     std::string varname (dvar.variableName()); // see also in writeAttributes
@@ -1105,7 +1105,7 @@ void ExporterHDF5<MeshType>::readVector( ExporterData& dvar)
     // solution array has first to be read has Multivector.
 
     // first read the multivector:
-    EpetraMap subMap(dvar.storedArray()->blockMap(), start, size);
+    MapEpetra subMap(dvar.storedArray()->blockMap(), start, size);
     Epetra_MultiVector* subVar(0);
 
     bool readTranspose (true);

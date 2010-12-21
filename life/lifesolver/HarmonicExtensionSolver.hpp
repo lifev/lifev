@@ -99,7 +99,7 @@ public:
       \param comm  the Epetra_Comm to be used for communication
     */
 
-    HarmonicExtensionSolver( FESpace<Mesh, EpetraMap>&       mmFESpace,
+    HarmonicExtensionSolver( FESpace<Mesh, MapEpetra>&       mmFESpace,
                              boost::shared_ptr<Epetra_Comm>  comm);
 
     //! Constructors for an harmonics extensions with offset
@@ -109,9 +109,9 @@ public:
       \param localMap use localMap instead of M_FESpace.map()
       \param offset use this offset to fill the matrix (both: row and column offset)
     */
-    HarmonicExtensionSolver( FESpace<Mesh, EpetraMap>&      mmFESpace,
+    HarmonicExtensionSolver( FESpace<Mesh, MapEpetra>&      mmFESpace,
                              boost::shared_ptr<Epetra_Comm> comm,
-                             EpetraMap&                     localMap,
+                             MapEpetra&                     localMap,
                              UInt                           offset =0
                            );
 
@@ -190,7 +190,7 @@ public:
     vector_Type const& dispDiff() const {return M_dispDiff;}
     vector_Type const& disp()     const {return M_disp;}
 
-    EpetraMap const& getMap() const { return M_localMap; }
+    MapEpetra const& getMap() const { return M_localMap; }
 
     const boost::shared_ptr<Epetra_Comm>& comm() const {return M_Displayer.comm();}
     //@}
@@ -199,10 +199,10 @@ private:
 
     //! Finite Element Space
 
-    FESpace<Mesh, EpetraMap>&      M_FESpace;
+    FESpace<Mesh, MapEpetra>&      M_FESpace;
 
     //! local map
-    EpetraMap                      M_localMap;
+    MapEpetra                      M_localMap;
 
     //! The matrix holding the values
     matrixPtr_Type                 M_matrHE;
@@ -238,7 +238,7 @@ private:
 
 template <typename Mesh, typename SolverType>
 HarmonicExtensionSolver<Mesh, SolverType>::
-HarmonicExtensionSolver( FESpace<Mesh, EpetraMap>& mmFESpace,
+HarmonicExtensionSolver( FESpace<Mesh, MapEpetra>& mmFESpace,
                          boost::shared_ptr<Epetra_Comm>    comm ):
         M_FESpace               ( mmFESpace ),
         M_localMap              ( M_FESpace.map() ),
@@ -259,9 +259,9 @@ HarmonicExtensionSolver( FESpace<Mesh, EpetraMap>& mmFESpace,
 
 template <typename Mesh, typename SolverType>
 HarmonicExtensionSolver<Mesh, SolverType>::
-HarmonicExtensionSolver( FESpace<Mesh, EpetraMap>& mmFESpace,
+HarmonicExtensionSolver( FESpace<Mesh, MapEpetra>& mmFESpace,
                          boost::shared_ptr<Epetra_Comm>              comm ,
-                         EpetraMap& localMap,
+                         MapEpetra& localMap,
                          UInt offset):
         M_FESpace               ( mmFESpace ),
         M_localMap              ( localMap),

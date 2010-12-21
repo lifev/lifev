@@ -142,7 +142,7 @@ public:
     //! @name Public Types
     //@{
 
-    typedef EpetraMap                             map_type;
+    typedef MapEpetra                             map_type;
 
     typedef FESpace<mesh_type, map_type> fespace_type;
     typedef boost::shared_ptr<fespace_type>              fespace_ptrType;

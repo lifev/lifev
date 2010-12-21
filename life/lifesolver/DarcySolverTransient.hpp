@@ -281,10 +281,10 @@ public:
       @param comm Shared pointer of the Epetra communicator.
     */
     DarcySolverTransient ( const data_Type&          dataFile,
-                           FESpace<Mesh, EpetraMap>& primal_FESpace,
-                           FESpace<Mesh, EpetraMap>& dual_FESpace,
-                           FESpace<Mesh, EpetraMap>& hybrid_FESpace,
-                           FESpace<Mesh, EpetraMap>& VdotN_FESpace,
+                           FESpace<Mesh, MapEpetra>& primal_FESpace,
+                           FESpace<Mesh, MapEpetra>& dual_FESpace,
+                           FESpace<Mesh, MapEpetra>& hybrid_FESpace,
+                           FESpace<Mesh, MapEpetra>& VdotN_FESpace,
                            bchandler_Type&           bcHandler,
                            const commPtr_Type&             comm );
     /*!
@@ -297,10 +297,10 @@ public:
       @param comm Shared pointer of the Epetra communicator.
     */
     DarcySolverTransient ( const data_Type&          dataFile,
-                           FESpace<Mesh, EpetraMap>& primal_FESpace,
-                           FESpace<Mesh, EpetraMap>& dual_FESpace,
-                           FESpace<Mesh, EpetraMap>& hybrid_FESpace,
-                           FESpace<Mesh, EpetraMap>& VdotN_FESpace,
+                           FESpace<Mesh, MapEpetra>& primal_FESpace,
+                           FESpace<Mesh, MapEpetra>& dual_FESpace,
+                           FESpace<Mesh, MapEpetra>& hybrid_FESpace,
+                           FESpace<Mesh, MapEpetra>& VdotN_FESpace,
                            const commPtr_Type&             comm );
 
     //! Virtual destructor.
@@ -437,10 +437,10 @@ private:
 template<typename Mesh, typename SolverType>
 DarcySolverTransient<Mesh, SolverType>::
 DarcySolverTransient ( const data_Type&           dataFile,
-                       FESpace<Mesh, EpetraMap>&  primal_FESpace,
-                       FESpace<Mesh, EpetraMap>&  dual_FESpace,
-                       FESpace<Mesh, EpetraMap>&  hybrid_FESpace,
-                       FESpace<Mesh, EpetraMap>&  VdotN_FESpace,
+                       FESpace<Mesh, MapEpetra>&  primal_FESpace,
+                       FESpace<Mesh, MapEpetra>&  dual_FESpace,
+                       FESpace<Mesh, MapEpetra>&  hybrid_FESpace,
+                       FESpace<Mesh, MapEpetra>&  VdotN_FESpace,
                        bchandler_Type&            bcHandler,
                        const commPtr_Type&              comm ):
         // Standard Darcy solver constructor.
@@ -464,10 +464,10 @@ DarcySolverTransient ( const data_Type&           dataFile,
 template<typename Mesh, typename SolverType>
 DarcySolverTransient<Mesh, SolverType>::
 DarcySolverTransient ( const data_Type&           dataFile,
-                       FESpace<Mesh, EpetraMap>&  primal_FESpace,
-                       FESpace<Mesh, EpetraMap>&  dual_FESpace,
-                       FESpace<Mesh, EpetraMap>&  hybrid_FESpace,
-                       FESpace<Mesh, EpetraMap>&  VdotN_FESpace,
+                       FESpace<Mesh, MapEpetra>&  primal_FESpace,
+                       FESpace<Mesh, MapEpetra>&  dual_FESpace,
+                       FESpace<Mesh, MapEpetra>&  hybrid_FESpace,
+                       FESpace<Mesh, MapEpetra>&  VdotN_FESpace,
                        const commPtr_Type&              comm ):
         // Standard Darcy solver constructor.
         DarcySolver<Mesh, SolverType>::DarcySolver( dataFile, primal_FESpace, dual_FESpace, hybrid_FESpace, VdotN_FESpace, comm),

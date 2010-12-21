@@ -160,10 +160,10 @@ bcManageVector( VectorType&      rightHandSide,
  * @param time The time
  * @parma diagonalizeCoef The coefficient used during the system diagonalization
  */
-template <typename VectorType, typename DataType, typename Mesh, typename EpetraMap>
+template <typename VectorType, typename DataType, typename Mesh, typename MapEpetra>
 void
 bcManageVector( VectorType&                     rightHandSide,
-                FESpace<Mesh, EpetraMap>&       feSpace,
+                FESpace<Mesh, MapEpetra>&       feSpace,
                 const BCHandler&                bcHandler,
                 const DataType&                 time,
                 const DataType&                 diagonalizeCoef );
@@ -835,10 +835,10 @@ bcManageVector( VectorType&      rightHandSide,
 }
 
 
-template <typename VectorType, typename DataType, typename Mesh, typename EpetraMap>
+template <typename VectorType, typename DataType, typename Mesh, typename MapEpetra>
 void
 bcManageVector( VectorType&                     rightHandSide,
-                FESpace<Mesh, EpetraMap>&       feSpace,
+                FESpace<Mesh, MapEpetra>&       feSpace,
                 const BCHandler&                bcHandler,
                 const DataType&                 time,
                 const DataType&                 diagonalizeCoef )

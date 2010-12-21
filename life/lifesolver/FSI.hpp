@@ -350,7 +350,7 @@ public:
     //! Creates the Epetra maps for the interface
     /**
        Given a std::map holding the numeration of the interface according to the fluid (first) and the solid (second),
-       builds the EpetraMaps for the interface dofs (e.g. M_fluidInterfaceMap). Note that when both the fluid and solid
+       builds the MapEpetras for the interface dofs (e.g. M_fluidInterfaceMap). Note that when both the fluid and solid
        meshes are partitioned (e.g. in the monolithic solver) the local dofs are those of the FLUID partition of the
        interface, even when the numeration refers to the solid.
      */
@@ -529,13 +529,13 @@ public:
     const MeshPartitioner< mesh_Type >& solidMeshPart()             const { return *M_solidMeshPart; }
 
     //!getter for the fluid velocity FESpace
-    const FESpace<mesh_Type, EpetraMap>& uFESpace()               const { return *M_uFESpace; }
+    const FESpace<mesh_Type, MapEpetra>& uFESpace()               const { return *M_uFESpace; }
     //!getter for the fluid pressure FESpace
-    const FESpace<mesh_Type, EpetraMap>& pFESpace()               const { return *M_pFESpace; }
+    const FESpace<mesh_Type, MapEpetra>& pFESpace()               const { return *M_pFESpace; }
     //!getter for the solid displacement FESpace
-    const FESpace<mesh_Type, EpetraMap>& dFESpace()               const { return *M_dFESpace; }
+    const FESpace<mesh_Type, MapEpetra>& dFESpace()               const { return *M_dFESpace; }
     //!getter for the harmonic extension solution FESpace
-    const FESpace<mesh_Type, EpetraMap>& mmFESpace()              const { return *M_mmFESpace; }
+    const FESpace<mesh_Type, MapEpetra>& mmFESpace()              const { return *M_mmFESpace; }
     //!getter for the harmonic extension solution
     virtual const vector_Type& meshDisp()                         const { return M_meshMotion->disp(); }
     //!getter for the harmonic extension solution of the previous time step
@@ -551,11 +551,11 @@ public:
     const dofInterface3DPtr_Type& dofStructureToHarmonicExtension() const { return M_dofStructureToHarmonicExtension; }
     const dofInterface3DPtr_Type& dofHarmonicExtensionToFluid()     const { return M_dofHarmonicExtensionToFluid; }
 
-    boost::shared_ptr<EpetraMap>& fluidInterfaceMap()                   { return M_fluidInterfaceMap; }
-    boost::shared_ptr<EpetraMap>& solidInterfaceMap()                   { return M_solidInterfaceMap; }
+    boost::shared_ptr<MapEpetra>& fluidInterfaceMap()                   { return M_fluidInterfaceMap; }
+    boost::shared_ptr<MapEpetra>& solidInterfaceMap()                   { return M_solidInterfaceMap; }
 
     //! Getter for the map of the variable used for the coupling
-    virtual boost::shared_ptr<EpetraMap>& couplingVariableMap()      { return M_solidInterfaceMap; }
+    virtual boost::shared_ptr<MapEpetra>& couplingVariableMap()      { return M_solidInterfaceMap; }
 
     //! Method to implement Robin boundary conditions on the external wall for the structure
     BCFunctionRobin& bcfRobinOuterWall()                                { return M_bcfRobinOuterWall; }
@@ -788,9 +788,9 @@ protected:
     /**
        The two vectors can have different numeration, for different discretizations this method is not tested.
     */
-    void interpolateInterfaceDofs(const FESpace<mesh_Type, EpetraMap>& _fespace1,
+    void interpolateInterfaceDofs(const FESpace<mesh_Type, MapEpetra>& _fespace1,
                                   const vector_Type&                   _vec1,
-                                  const FESpace<mesh_Type, EpetraMap>& _fespace2,
+                                  const FESpace<mesh_Type, MapEpetra>& _fespace2,
                                   vector_Type&                         _vec2,
                                   dofInterface3DPtr_Type&                _dofInterface);
     //@}
@@ -799,10 +799,10 @@ protected:
     //@{
     boost::shared_ptr<mesh_Type>                      M_mesh;
 
-    boost::shared_ptr<FESpace<mesh_Type, EpetraMap> > M_uFESpace;
-    boost::shared_ptr<FESpace<mesh_Type, EpetraMap> > M_pFESpace;
-    boost::shared_ptr<FESpace<mesh_Type, EpetraMap> > M_dFESpace;
-    boost::shared_ptr<FESpace<mesh_Type, EpetraMap> > M_mmFESpace;
+    boost::shared_ptr<FESpace<mesh_Type, MapEpetra> > M_uFESpace;
+    boost::shared_ptr<FESpace<mesh_Type, MapEpetra> > M_pFESpace;
+    boost::shared_ptr<FESpace<mesh_Type, MapEpetra> > M_dFESpace;
+    boost::shared_ptr<FESpace<mesh_Type, MapEpetra> > M_mmFESpace;
 
     boost::shared_ptr<mesh_Type>                      M_fluidMesh;
     boost::shared_ptr<mesh_Type>                      M_solidMesh;
@@ -840,13 +840,13 @@ protected:
 
     dataPtr_Type                                      M_data;
 
-    boost::shared_ptr<EpetraMap>                      M_fluidInterfaceMap;
-    boost::shared_ptr<EpetraMap>                      M_solidInterfaceMap;
+    boost::shared_ptr<MapEpetra>                      M_fluidInterfaceMap;
+    boost::shared_ptr<MapEpetra>                      M_solidInterfaceMap;
 
     //!\todo{kill this attribute}
-    boost::shared_ptr<EpetraMap>                      M_fluidInterfaceMapOnZero;
+    boost::shared_ptr<MapEpetra>                      M_fluidInterfaceMapOnZero;
     //!\todo{kill this attribute}
-    boost::shared_ptr<EpetraMap>                      M_solidInterfaceMapOnZero;
+    boost::shared_ptr<MapEpetra>                      M_solidInterfaceMapOnZero;
 
     dofInterface3DPtr_Type                              M_dofFluidToStructure; // Needed
 //     dofInterface3DPtr_Type                              M_dofSolidToFluid;

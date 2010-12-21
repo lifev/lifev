@@ -82,11 +82,11 @@ int main(int argc, char** argv)
 
         readMesh(*mesh2, mesh_data2);
 
-        boost::shared_ptr<FESpace<RegionMesh3D<LinearTetra>, EpetraMap> > firstFESpace;
-        firstFESpace.reset(new FESpace<RegionMesh3D<LinearTetra>, EpetraMap> (mesh,  "P1", 3, uselessComm));
+        boost::shared_ptr<FESpace<RegionMesh3D<LinearTetra>, MapEpetra> > firstFESpace;
+        firstFESpace.reset(new FESpace<RegionMesh3D<LinearTetra>, MapEpetra> (mesh,  "P1", 3, uselessComm));
 
-        boost::shared_ptr<FESpace<RegionMesh3D<LinearTetra>, EpetraMap> > secondFESpace;
-        secondFESpace.reset(new FESpace<RegionMesh3D<LinearTetra>, EpetraMap>(mesh2, "P1", 3, uselessComm));
+        boost::shared_ptr<FESpace<RegionMesh3D<LinearTetra>, MapEpetra> > secondFESpace;
+        secondFESpace.reset(new FESpace<RegionMesh3D<LinearTetra>, MapEpetra>(mesh2, "P1", 3, uselessComm));
 
 
         boost::shared_ptr<DOFInterface3Dto3D>  dofEdgeFluidToEdgeSolid( new DOFInterface3Dto3D );

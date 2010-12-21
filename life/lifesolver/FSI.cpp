@@ -257,7 +257,7 @@ FSI::setupFEspace()
     if (this->isFluid())
     {
 
-        M_mmFESpace.reset(new FESpace<mesh_Type, EpetraMap>(*M_fluidMeshPart,
+        M_mmFESpace.reset(new FESpace<mesh_Type, MapEpetra>(*M_fluidMeshPart,
                                                             //dOrder,
                                                             *refFE_struct,
                                                             *qR_struct,
@@ -265,7 +265,7 @@ FSI::setupFEspace()
                                                             3,
                                                             M_epetraComm));
 
-        M_uFESpace.reset( new FESpace<mesh_Type, EpetraMap>(*M_fluidMeshPart,
+        M_uFESpace.reset( new FESpace<mesh_Type, MapEpetra>(*M_fluidMeshPart,
                                                             //uOrder,
                                                             *refFE_vel,
                                                             *qR_vel,
@@ -273,7 +273,7 @@ FSI::setupFEspace()
                                                             3,
                                                             M_epetraComm));
 
-        M_pFESpace.reset( new FESpace<mesh_Type, EpetraMap>(*M_fluidMeshPart,
+        M_pFESpace.reset( new FESpace<mesh_Type, MapEpetra>(*M_fluidMeshPart,
                                                             //pOrder,
                                                             *refFE_press,
                                                             *qR_press,
@@ -283,7 +283,7 @@ FSI::setupFEspace()
     }
     else
     {
-        M_mmFESpace.reset(new FESpace<mesh_Type, EpetraMap>(M_fluidMesh,
+        M_mmFESpace.reset(new FESpace<mesh_Type, MapEpetra>(M_fluidMesh,
                                                             //dOrder,
                                                             *refFE_struct,
                                                             *qR_struct,
@@ -291,7 +291,7 @@ FSI::setupFEspace()
                                                             3,
                                                             M_epetraComm));
 
-        M_uFESpace.reset( new FESpace<mesh_Type, EpetraMap>(M_fluidMesh,
+        M_uFESpace.reset( new FESpace<mesh_Type, MapEpetra>(M_fluidMesh,
                                                             //uOrder,
                                                             *refFE_vel,
                                                             *qR_vel,
@@ -299,7 +299,7 @@ FSI::setupFEspace()
                                                             3,
                                                             M_epetraComm));
 
-        M_pFESpace.reset( new FESpace<mesh_Type, EpetraMap>(M_fluidMesh,
+        M_pFESpace.reset( new FESpace<mesh_Type, MapEpetra>(M_fluidMesh,
                                                             //pOrder,
                                                             *refFE_press,
                                                             *qR_press,
@@ -312,7 +312,7 @@ FSI::setupFEspace()
     disp.leaderPrint("FSI-  Building solid FESpace ...               \n");
     if (this->isSolid())
     {
-        M_dFESpace.reset( new FESpace<mesh_Type, EpetraMap>( *M_solidMeshPart,
+        M_dFESpace.reset( new FESpace<mesh_Type, MapEpetra>( *M_solidMeshPart,
                                                              dOrder,
                                                              //*refFE_struct,
                                                              //*qR_struct,
@@ -322,7 +322,7 @@ FSI::setupFEspace()
     }
     else
     {
-        M_dFESpace.reset(new FESpace<mesh_Type, EpetraMap>(M_solidMesh,
+        M_dFESpace.reset(new FESpace<mesh_Type, MapEpetra>(M_solidMesh,
                                                            //dOrder,
                                                            *refFE_struct,
                                                            *qR_struct,
@@ -630,7 +630,7 @@ void FSI::createInterfaceMaps( std::map<ID, ID> const& locDofMap )
     if (dofInterfaceFluid.size() > 0)
         pointerToDofs = &dofInterfaceFluid[0];
 
-    M_fluidInterfaceMap.reset( new EpetraMap( -1,
+    M_fluidInterfaceMap.reset( new MapEpetra( -1,
                                               static_cast<int>(dofInterfaceFluid.size()),
                                               pointerToDofs,
                                               1,
@@ -659,7 +659,7 @@ void FSI::createInterfaceMaps( std::map<ID, ID> const& locDofMap )
     if (dofInterfaceSolid.size() > 0)
         pointerToDofs = &dofInterfaceSolid[0];
 
-    M_solidInterfaceMap.reset( new EpetraMap( -1,
+    M_solidInterfaceMap.reset( new MapEpetra( -1,
                                               static_cast<int>(dofInterfaceSolid.size()),
                                               pointerToDofs,
                                               1,
@@ -798,7 +798,7 @@ void
 FSI::transferSolidOnInterface(const vector_Type &_vec1, vector_Type &_vec2)
 {
     /* e.g.:
-       vec1 (Unique)       vec2 (Repeated)  (On different EpetraMaps) (Changing now to Unique on both)
+       vec1 (Unique)       vec2 (Repeated)  (On different MapEpetras) (Changing now to Unique on both)
        M_solid->disp()     M_lambdaSolid
        M_solid->vel()      M_lambdaDotSolid
        M_solid->residual() M_sigmaSolid
@@ -1535,9 +1535,9 @@ FSI::interpolateVelocity( const vector_Type& _vec1, vector_Type& _vec2 )
 
 // this will interpolate dofs values from fespace1 to fespace2
 void
-FSI::interpolateInterfaceDofs( const FESpace<mesh_Type, EpetraMap>& _fespace1,
+FSI::interpolateInterfaceDofs( const FESpace<mesh_Type, MapEpetra>& _fespace1,
                                        const vector_Type&                   _vec1,
-                                       const FESpace<mesh_Type, EpetraMap>& _fespace2,
+                                       const FESpace<mesh_Type, MapEpetra>& _fespace2,
                                        vector_Type&                         _vec2,
                                        dofInterface3DPtr_Type&                _dofInterface)
 {

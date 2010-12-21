@@ -385,7 +385,7 @@ public:
     const UInt& startIndex() const { return M_startIndex; }
 
     //! returns the type of the map to use for the EpetraVector
-    virtual EpetraMapType mapType() const = 0;
+    virtual MapEpetraType mapType() const = 0;
     //@}
 
 protected:

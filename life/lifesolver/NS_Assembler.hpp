@@ -20,7 +20,7 @@ This library is free software; you can redistribute it and/or
 #ifndef _NS_ASSEMBLER_H_
 #define _NS_ASSEMBLER_H_
 
-#include <life/lifealg/EpetraMap.hpp>
+#include <life/lifealg/MapEpetra.hpp>
 
 #include <life/lifearray/elemMat.hpp>
 #include <life/lifearray/elemVec.hpp>
@@ -82,8 +82,8 @@ public:
       \param communicator
     */
     NS_Assembler( const data_ptr&          dataType,
-                  FESpace<Mesh, EpetraMap>& uFESpace,
-                  FESpace<Mesh, EpetraMap>& pFESpace,
+                  FESpace<Mesh, MapEpetra>& uFESpace,
+                  FESpace<Mesh, MapEpetra>& pFESpace,
                   boost::shared_ptr<Epetra_Comm>& comm
                 );
 
@@ -104,8 +104,8 @@ public:
 
 
     //! returns the FeSpaces
-    FESpace<Mesh, EpetraMap>& velFESpace()   {return M_uFESpace;}
-    FESpace<Mesh, EpetraMap>& pressFESpace() {return M_pFESpace;}
+    FESpace<Mesh, MapEpetra>& velFESpace()   {return M_uFESpace;}
+    FESpace<Mesh, MapEpetra>& pressFESpace() {return M_pFESpace;}
 
     // return the density and the viscosity of the fluid
     Real density()   const { return M_data->density(); }
@@ -138,8 +138,8 @@ protected:
     data_ptr                       M_data;
 
     // FE spaces
-    FESpace<Mesh, EpetraMap>&      M_uFESpace;
-    FESpace<Mesh, EpetraMap>&      M_pFESpace;
+    FESpace<Mesh, MapEpetra>&      M_uFESpace;
+    FESpace<Mesh, MapEpetra>&      M_pFESpace;
 
     //! MPI communicator
     Displayer                      M_Displayer;
@@ -172,8 +172,8 @@ protected:
 template<typename Mesh>
 NS_Assembler<Mesh>::
 NS_Assembler( const data_ptr&          dataType,
-              FESpace<Mesh, EpetraMap>& uFESpace,
-              FESpace<Mesh, EpetraMap>& pFESpace,
+              FESpace<Mesh, MapEpetra>& uFESpace,
+              FESpace<Mesh, MapEpetra>& pFESpace,
               boost::shared_ptr<Epetra_Comm>&              comm):
         M_data                   ( dataType ),
         M_uFESpace               ( uFESpace ),

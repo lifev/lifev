@@ -133,7 +133,7 @@ public:
     \param comm
   */
   void setup( boost::shared_ptr<data_Type> data,
-	      const boost::shared_ptr< FESpace<Mesh, EpetraMap> >&   FESpace,
+	      const boost::shared_ptr< FESpace<Mesh, MapEpetra> >&   FESpace,
 	      bchandler_Type&       BCh,
 	      boost::shared_ptr<Epetra_Comm>&     comm
 	      );
@@ -144,7 +144,7 @@ public:
     \param comm
   */
   void setup( boost::shared_ptr<data_Type> data,
-	      const boost::shared_ptr< FESpace<Mesh, EpetraMap> >&   FESpace,
+	      const boost::shared_ptr< FESpace<Mesh, MapEpetra> >&   FESpace,
 	      boost::shared_ptr<Epetra_Comm>&     comm
 	      );
 
@@ -152,15 +152,15 @@ public:
     \param data_file GetPot data file
     \param refFE reference FE for the displacement
     \param comm the comunicator parameter
-    \param monolithicMap the EpetraMap
+    \param monolithicMap the MapEpetra
     \param offset the offset parameter
   */
   virtual void setup( boost::shared_ptr<data_Type> data,
-		      const boost::shared_ptr< FESpace<Mesh, EpetraMap> >&   dFESpace,
+		      const boost::shared_ptr< FESpace<Mesh, MapEpetra> >&   dFESpace,
 		      boost::shared_ptr<Epetra_Comm>&     comm,
-		      const boost::shared_ptr<const EpetraMap>&       monolithicMap,
+		      const boost::shared_ptr<const MapEpetra>&       monolithicMap,
 		      UInt       offset=0
-		      //boost::shared_ptr<FESpace<Mesh, EpetraMap> >   uFESpace=0
+		      //boost::shared_ptr<FESpace<Mesh, MapEpetra> >   uFESpace=0
 		      );
 
 
@@ -351,7 +351,7 @@ public:
 
   //! Getters
   //! Get the Epetramap
-  EpetraMap   const& getMap()       const { return *M_localMap; }
+  MapEpetra   const& getMap()       const { return *M_localMap; }
 
   //! Get the Displayer object
   Displayer   const& getDisplayer() const { return *M_Displayer; }
@@ -369,7 +369,7 @@ public:
   //    LIFEV_DEPRECATED BCHandler const & BC_solid() const {return BCh_solid();}
 
   //! Get the FESpace object
-  FESpace<Mesh, EpetraMap>& getDFESpace() {return M_FESpace;}
+  FESpace<Mesh, MapEpetra>& getDFESpace() {return M_FESpace;}
 
   //! Get the bCHandler object
   bchandler_Type const & getBChandler() const {return M_BCh;}
@@ -394,7 +394,7 @@ public:
 
   //const Mesh& mesh() const { return M_FESpace.mesh(); }
 
-  //Epetra_Map const& getRepeatedEpetraMap() const { return *M_localMap.getRepeatedEpetra_Map(); }
+  //Epetra_Map const& getRepeatedMapEpetra() const { return *M_localMap.getRepeatedEpetra_Map(); }
 
   //! Get the comunicator object
   boost::shared_ptr<Epetra_Comm> const& getComunicator() const {return M_Displayer->comm();}
@@ -458,7 +458,7 @@ protected:
 
   boost::shared_ptr<data_Type>   M_data;
 
-  boost::shared_ptr<FESpace<Mesh, EpetraMap> >      M_FESpace;
+  boost::shared_ptr<FESpace<Mesh, MapEpetra> >      M_FESpace;
 
   boost::scoped_ptr<Displayer>   M_Displayer;
 
@@ -507,7 +507,7 @@ protected:
 
   bchandler_Type   M_BCh;
 
-  boost::shared_ptr<const EpetraMap>                      M_localMap;
+  boost::shared_ptr<const MapEpetra>                      M_localMap;
 
   //! Matrix M: mass
   matrixPtr_Type                    M_mass;
@@ -583,7 +583,7 @@ VenantKirchhoffSolver<Mesh, SolverType>::VenantKirchhoffSolver( ):
 template <typename Mesh, typename SolverType>
 void
 VenantKirchhoffSolver<Mesh, SolverType>::setup(boost::shared_ptr<data_Type>          data,
-					      const boost::shared_ptr< FESpace<Mesh, EpetraMap> >& dFESpace,
+					      const boost::shared_ptr< FESpace<Mesh, MapEpetra> >& dFESpace,
 					      bchandler_Type&                BCh,
 					      boost::shared_ptr<Epetra_Comm>&              comm)
 {
@@ -594,7 +594,7 @@ VenantKirchhoffSolver<Mesh, SolverType>::setup(boost::shared_ptr<data_Type>     
 template <typename Mesh, typename SolverType>
 void
 VenantKirchhoffSolver<Mesh, SolverType>::setup(boost::shared_ptr<data_Type>        data,
-					      const boost::shared_ptr< FESpace<Mesh, EpetraMap> >& dFESpace,
+					      const boost::shared_ptr< FESpace<Mesh, MapEpetra> >& dFESpace,
 					      boost::shared_ptr<Epetra_Comm>&     comm)
 {
   setup( data, dFESpace, comm, dFESpace->mapPtr(), (UInt)0 );
@@ -614,9 +614,9 @@ VenantKirchhoffSolver<Mesh, SolverType>::setup(boost::shared_ptr<data_Type>     
 template <typename Mesh, typename SolverType>
 void
 VenantKirchhoffSolver<Mesh, SolverType>::setup(boost::shared_ptr<data_Type>        data,
-					      const boost::shared_ptr< FESpace<Mesh, EpetraMap> >& dFESpace,
+					      const boost::shared_ptr< FESpace<Mesh, MapEpetra> >& dFESpace,
 					      boost::shared_ptr<Epetra_Comm>&     comm,
-					      const boost::shared_ptr<const EpetraMap>&  monolithicMap,
+					      const boost::shared_ptr<const MapEpetra>&  monolithicMap,
 					      UInt                                offset)
 {
   M_data                            = data;

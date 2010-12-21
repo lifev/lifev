@@ -98,7 +98,7 @@ public:
       @param numEntries The average number of entries for each row.
       @param indexBase The base index to address entries in the matrix (Usually 0 o 1)
      */
-    EpetraMatrix( const EpetraMap& map, Int numEntries = 50, Int indexBase = 1 );
+    EpetraMatrix( const MapEpetra& map, Int numEntries = 50, Int indexBase = 1 );
 
     //! Copy Constructor
     /*!
@@ -304,22 +304,22 @@ public:
      @param domainMap The domain map
      @param rangeMap The range map
      */
-    Int globalAssemble( const boost::shared_ptr<const EpetraMap> & domainMap,
-                        const boost::shared_ptr<const EpetraMap> & rangeMap );
+    Int globalAssemble( const boost::shared_ptr<const MapEpetra> & domainMap,
+                        const boost::shared_ptr<const MapEpetra> & rangeMap );
 
     //! insert the given value into the diagonal
     /*!
       Pay intention that this will add values to the diagonal,
       so for later added values with set_mat_inc, the one
       will be added.
-      Inserts Value on the local diagonal for diagonal elements specified by the input EpetraMap;
+      Inserts Value on the local diagonal for diagonal elements specified by the input MapEpetra;
       This methods works only if matrix is not closed.
 
       @param entry The entry that is inserted in the diagonal
-      @param Map The EpetraMap
+      @param Map The MapEpetra
       @param offset An offset for the insertion of the diagonal entries
     */
-    void insertValueDiagonal( const DataType entry, const EpetraMap& Map, const UInt offset = 0 );
+    void insertValueDiagonal( const DataType entry, const MapEpetra& Map, const UInt offset = 0 );
 
     //! insert the given value into the diagonal
     /*!
@@ -436,51 +436,51 @@ public:
     //! Return the Id of the processor
     Int processorId();
 
-    //! Return the row EpetraMap of the EpetraMatrix used in the assembling
+    //! Return the row MapEpetra of the EpetraMatrix used in the assembling
     /*!
-      Note: This method should be call when EpetraMap is still open.
+      Note: This method should be call when MapEpetra is still open.
      */
-    const EpetraMap& map() const;
+    const MapEpetra& map() const;
 
-    //! Return the domain EpetraMap of the EpetraMatrix
+    //! Return the domain MapEpetra of the EpetraMatrix
     /*!
       This function should be called only after EpetraMatrix<DataType>::GlobalAssemble(...) has been called.
       If this is an open matrix that M_domainMap is an invalid pointer
      */
-    const EpetraMap& domainMap() const;
+    const MapEpetra& domainMap() const;
 
-    //! Return the range EpetraMap of the EpetraMatrix
+    //! Return the range MapEpetra of the EpetraMatrix
     /*!
       This function should be called only after EpetraMatrix<DataType>::GlobalAssemble(...) has been called.
       If this is an open matrix that M_domainMap is an invalid pointer
      */
-    const EpetraMap& rangeMap() const;
+    const MapEpetra& rangeMap() const;
 
     //@}
 
 private:
 
 
-    // Shared pointer on the row EpetraMap used in the assembling
-    boost::shared_ptr< EpetraMap > M_map;
+    // Shared pointer on the row MapEpetra used in the assembling
+    boost::shared_ptr< MapEpetra > M_map;
 
-    // Shared pointer on the domain EpetraMap.
+    // Shared pointer on the domain MapEpetra.
     /*
       if y = this*x,
       then x.getMap() is the domain map.
       NOTE: Epetra assume the domain map to be 1-1 and onto (Unique)
       M_domainMap is a NULL pointer until EpetraMatrix<DataType> is called.
      */
-    boost::shared_ptr< const EpetraMap > M_domainMap;
+    boost::shared_ptr< const MapEpetra > M_domainMap;
 
-    //! Shared pointer on the range EpetraMap.
+    //! Shared pointer on the range MapEpetra.
     /*
       if y = this*x,
       then y.getMap() is the range map.
       NOTE: Epetra assume the domain map to be 1-1 and onto (Unique)
       M_rangeMap is a NULL pointer until EpetraMatrix<DataType> is called.
      */
-    boost::shared_ptr< const EpetraMap > M_rangeMap;
+    boost::shared_ptr< const MapEpetra > M_rangeMap;
 
     // Pointer on a Epetra_FECrsMatrix
     matrix_ptrtype  M_epetraCrs;
@@ -495,8 +495,8 @@ private:
 // Constructors & Destructor
 // ===================================================
 template <typename DataType>
-EpetraMatrix<DataType>::EpetraMatrix( const EpetraMap& map, Int numEntries, Int indexBase ) :
-    M_map       ( new EpetraMap( map ) ),
+EpetraMatrix<DataType>::EpetraMatrix( const MapEpetra& map, Int numEntries, Int indexBase ) :
+    M_map       ( new MapEpetra( map ) ),
     M_epetraCrs ( new matrix_type( Copy, *M_map->map( Unique ), numEntries, false) ),
     M_indexBase ( indexBase )
 {
@@ -1125,8 +1125,8 @@ Int EpetraMatrix<DataType>::globalAssemble()
 }
 
 template <typename DataType>
-Int EpetraMatrix<DataType>::globalAssemble( const boost::shared_ptr<const EpetraMap> & domainMap,
-                                            const boost::shared_ptr<const EpetraMap> & rangeMap )
+Int EpetraMatrix<DataType>::globalAssemble( const boost::shared_ptr<const MapEpetra> & domainMap,
+                                            const boost::shared_ptr<const MapEpetra> & rangeMap )
 {
     if ( M_epetraCrs->Filled() )
     {
@@ -1140,7 +1140,7 @@ Int EpetraMatrix<DataType>::globalAssemble( const boost::shared_ptr<const Epetra
 
 template <typename DataType>
 void
-EpetraMatrix<DataType>::insertValueDiagonal( const DataType entry, const EpetraMap& Map, const UInt offset )
+EpetraMatrix<DataType>::insertValueDiagonal( const DataType entry, const MapEpetra& Map, const UInt offset )
 {
     for ( UInt i=0 ; i<Map.map(Unique)->NumMyElements(); ++i )//num from 1
     {
@@ -1286,21 +1286,21 @@ Int EpetraMatrix<DataType>::processorId()
 }
 
 template <typename DataType>
-const EpetraMap& EpetraMatrix<DataType>::map() const
+const MapEpetra& EpetraMatrix<DataType>::map() const
 {
     ASSERT( M_map.get() != 0, "EpetraMatrix::getMap: Error: M_map pointer is null" );
     return *M_map;
 }
 
 template <typename DataType>
-const EpetraMap& EpetraMatrix<DataType>::domainMap() const
+const MapEpetra& EpetraMatrix<DataType>::domainMap() const
 {
     ASSERT( M_domainMap.get() != 0, "EpetraMatrix::getdomainMap: Error: M_domainMap pointer is null" );
     return *M_domainMap;
 }
 
 template <typename DataType>
-const EpetraMap& EpetraMatrix<DataType>::rangeMap() const
+const MapEpetra& EpetraMatrix<DataType>::rangeMap() const
 {
     ASSERT( M_rangeMap.get() != 0, "EpetraMatrix::getRangeMap: Error: M_rangeMap pointer is null" );
     return *M_rangeMap;
