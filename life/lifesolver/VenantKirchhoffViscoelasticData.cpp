@@ -253,7 +253,7 @@ VenantKirchhoffViscoelasticData::thickness() const
     return M_thickness;
 }
 
-const Real&
+Real
 VenantKirchhoffViscoelasticData::poisson( const UInt& material ) const
 {
     MaterialContainer_Type::const_iterator IT = M_poisson.find( material );
@@ -263,7 +263,7 @@ VenantKirchhoffViscoelasticData::poisson( const UInt& material ) const
       return 0;
 }
 
-const Real&
+Real
 VenantKirchhoffViscoelasticData::young( const UInt& material ) const
 {
     MaterialContainer_Type::const_iterator IT = M_young.find( material );

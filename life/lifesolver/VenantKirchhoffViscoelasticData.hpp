@@ -185,14 +185,14 @@ public:
      * @param material material ID (1 by default)
      * @return Solid poisson coefficient
      */
-    const Real& poisson( const UInt& material = 1 ) const;
+    Real poisson( const UInt& material = 1 ) const;
 
     //! Get solid young modulus
     /*!
      * @param material material ID (1 by default)
      * @return Solid young modulus
      */
-    const Real& young( const UInt& material = 1 ) const;
+    Real young( const UInt& material = 1 ) const;
 
     //! Get solid first lame coefficient
     /*!
