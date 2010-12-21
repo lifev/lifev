@@ -59,11 +59,11 @@
 
 // LIFEV
 #include <life/lifecore/life.hpp>
-#include <life/lifecore/util_string.hpp>
-#include <life/lifecore/factory.hpp>
-#include <life/lifecore/singleton.hpp>
+#include <life/lifecore/StringUtility.hpp>
+#include <life/lifecore/Factory.hpp>
+#include <life/lifecore/FactorySingleton.hpp>
 #include <life/lifearray/tab.hpp>
-#include <life/lifecore/chrono.hpp>
+#include <life/lifecore/LifeChrono.hpp>
 #include <life/lifefem/FESpace.hpp>
 #include <life/lifealg/SolverAmesos.hpp>
 
