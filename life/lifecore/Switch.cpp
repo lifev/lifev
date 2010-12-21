@@ -173,11 +173,15 @@ bool Switch::test( const char * a ) const
 
 std::ostream & Switch::showMe( bool verbose, std::ostream & out ) const
 {
-    out << std::endl << " Status of switches" << std::endl;
-    for ( iteratorConst_Type i = begin(); i != end(); ++i )
+    if ( verbose )
     {
-        out << "Switch named: " << i->first << " Value= " << i->second << std::endl;
+        out << std::endl << " Status of switches" << std::endl;
+        for ( iteratorConst_Type i = begin(); i != end(); ++i )
+        {
+            out << "Switch named: " << i->first << " Value= " << i->second << std::endl;
+        }
     }
+
     return out;
 }
 
