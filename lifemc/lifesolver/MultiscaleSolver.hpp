@@ -41,6 +41,7 @@
 
 #include <lifemc/lifesolver/MultiscaleAlgorithm.hpp>
 #include <lifemc/lifesolver/MultiscaleAlgorithmAitken.hpp>
+#include <lifemc/lifesolver/MultiscaleAlgorithmBroyden.hpp>
 #include <lifemc/lifesolver/MultiscaleAlgorithmExplicit.hpp>
 #include <lifemc/lifesolver/MultiscaleAlgorithmNewton.hpp>
 

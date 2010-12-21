@@ -54,7 +54,7 @@ MultiscaleModelMultiscale::MultiscaleModelMultiscale() :
     Debug( 8110 ) << "MultiscaleModelMultiscale::MultiscaleModelMultiscale() \n";
 #endif
 
-    M_type = MultiScale;
+    M_type = Multiscale;
 }
 
 MultiscaleModelMultiscale::~MultiscaleModelMultiscale()
@@ -88,10 +88,6 @@ MultiscaleModelMultiscale::setupData( const std::string& fileName )
     // Useful variables
     UInt id;
 
-    //!\todo pass a std::string to the factories
-    //std::string model;
-    //std::string coupling;
-
     models_Type model;
     couplings_Type coupling;
 
@@ -121,9 +117,6 @@ MultiscaleModelMultiscale::setupData( const std::string& fileName )
     {
         id    = dataFile( "Problem/models", 0, i * modelsColumnsNumber );
         modelsIDMap[id] = i;
-
-        //!\todo pass a std::string to the factories
-        //model = dataFile( "Problem/models", "undefined", i * modelsColumnsNumber + 1 );
         model = multiscaleModelsMap[dataFile( "Problem/models", "undefined", i * modelsColumnsNumber + 1 )];
 
         // Set Geometry
@@ -159,10 +152,6 @@ MultiscaleModelMultiscale::setupData( const std::string& fileName )
         M_modelsList[i]->setCommunicator( M_comm );
         M_modelsList[i]->setGeometry( geometryScale, geometryRotate, geometryTranslate );
         M_modelsList[i]->setGlobalData( M_globalData );
-
-//!\todo pass a std::string to the factories
-//         M_modelsList[i]->setupData( path + model + "/"
-//                                     + dataFile( "Problem/models", "undefined", i * modelsColumnsNumber + 2 ) + ".dat" );
         M_modelsList[i]->setupData( path + enum2String( model, multiscaleModelsMap ) + "/"
                                     + dataFile( "Problem/models", "undefined", i * modelsColumnsNumber + 2 ) + ".dat" );
 
@@ -172,16 +161,11 @@ MultiscaleModelMultiscale::setupData( const std::string& fileName )
     path = dataFile( "Problem/couplingsPath", "./" );
     for ( UInt i( 0 ); i < couplingsLinesNumber; ++i )
     {
-        //!\todo pass a std::string to the factories
-        //coupling = dataFile( "Problem/couplings", "undefined", i * couplingsColumnsNumber + 1 );
         coupling = multiscaleCouplingsMap[dataFile( "Problem/couplings", "undefined", i * couplingsColumnsNumber + 1 )];
 
         M_couplingsList[i] = multiscaleCouplingPtr_Type( multiscaleCouplingFactory_Type::instance().createObject( coupling ) );
         M_couplingsList[i]->setCommunicator( M_comm );
         M_couplingsList[i]->setGlobalData( M_globalData );
-        //!\todo pass a std::string to the factories
-//         M_couplingsList[i]->setupData( path + coupling + "/"
-//                                        + dataFile( "Problem/couplings", "undefined", i * couplingsColumnsNumber + 2 ) + ".dat" );
         M_couplingsList[i]->setupData( path + enum2String( coupling, multiscaleCouplingsMap ) + "/"
                                        + dataFile( "Problem/couplings", "undefined", i * couplingsColumnsNumber + 2 ) + ".dat" );
 
@@ -301,7 +285,7 @@ MultiscaleModelMultiscale::createCouplingMap( MapEpetra& couplingMap )
 #endif
 
     for ( multiscaleModelsVectorConstIterator_Type i = M_modelsList.begin(); i != M_modelsList.end(); ++i )
-        if ( ( *i )->type() == MultiScale )
+        if ( ( *i )->type() == Multiscale )
             ( multiscaleDynamicCast< MultiscaleModelMultiscale > ( *i ) )->createCouplingMap( couplingMap );
 
     for ( multiscaleCouplingsVectorConstIterator_Type i = M_couplingsList.begin(); i != M_couplingsList.end(); ++i )
@@ -317,7 +301,7 @@ MultiscaleModelMultiscale::initializeCouplingVariables()
 #endif
 
     for ( multiscaleModelsVectorConstIterator_Type i = M_modelsList.begin(); i != M_modelsList.end(); ++i )
-        if ( ( *i )->type() == MultiScale )
+        if ( ( *i )->type() == Multiscale )
             ( multiscaleDynamicCast< MultiscaleModelMultiscale > ( *i ) )->initializeCouplingVariables();
 
     for ( multiscaleCouplingsVectorConstIterator_Type i = M_couplingsList.begin(); i != M_couplingsList.end(); ++i )
@@ -333,7 +317,7 @@ MultiscaleModelMultiscale::extrapolateCouplingVariables()
 #endif
 
     for ( multiscaleModelsVectorConstIterator_Type i = M_modelsList.begin(); i != M_modelsList.end(); ++i )
-        if ( ( *i )->type() == MultiScale )
+        if ( ( *i )->type() == Multiscale )
             ( multiscaleDynamicCast< MultiscaleModelMultiscale > ( *i ) )->extrapolateCouplingVariables();
 
     for ( multiscaleCouplingsVectorConstIterator_Type i = M_couplingsList.begin(); i != M_couplingsList.end(); ++i )
@@ -349,7 +333,7 @@ MultiscaleModelMultiscale::importCouplingVariables( const multiscaleVector_Type&
 #endif
 
     for ( multiscaleModelsVectorConstIterator_Type i = M_modelsList.begin(); i != M_modelsList.end(); ++i )
-        if ( ( *i )->type() == MultiScale )
+        if ( ( *i )->type() == Multiscale )
             ( multiscaleDynamicCast< MultiscaleModelMultiscale > ( *i ) )->importCouplingVariables( couplingVariables );
 
     for ( multiscaleCouplingsVectorConstIterator_Type i = M_couplingsList.begin(); i != M_couplingsList.end(); ++i )
@@ -365,7 +349,7 @@ MultiscaleModelMultiscale::exportCouplingVariables( multiscaleVector_Type& coupl
 #endif
 
     for ( multiscaleModelsVectorConstIterator_Type i = M_modelsList.begin(); i != M_modelsList.end(); ++i )
-        if ( ( *i )->type() == MultiScale )
+        if ( ( *i )->type() == Multiscale )
             ( multiscaleDynamicCast< MultiscaleModelMultiscale > ( *i ) )->exportCouplingVariables( couplingVariables);
 
     for ( multiscaleCouplingsVectorConstIterator_Type i = M_couplingsList.begin(); i != M_couplingsList.end(); ++i )
@@ -381,7 +365,7 @@ MultiscaleModelMultiscale::exportCouplingResiduals( multiscaleVector_Type& coupl
 #endif
 
     for ( multiscaleModelsVectorConstIterator_Type i = M_modelsList.begin(); i != M_modelsList.end(); ++i )
-        if ( ( *i )->type() == MultiScale )
+        if ( ( *i )->type() == Multiscale )
             ( multiscaleDynamicCast< MultiscaleModelMultiscale > ( *i ) )->exportCouplingResiduals( couplingResiduals );
 
     for ( multiscaleCouplingsVectorConstIterator_Type i = M_couplingsList.begin(); i != M_couplingsList.end(); ++i )
@@ -397,7 +381,7 @@ MultiscaleModelMultiscale::exportJacobian( multiscaleMatrix_Type& jacobian )
 #endif
 
     for ( multiscaleModelsVectorConstIterator_Type i = M_modelsList.begin(); i != M_modelsList.end(); ++i )
-        if ( ( *i )->type() == MultiScale )
+        if ( ( *i )->type() == Multiscale )
             ( multiscaleDynamicCast< MultiscaleModelMultiscale > ( *i ) )->exportJacobian( jacobian );
 
     for ( multiscaleCouplingsVectorConstIterator_Type i = M_couplingsList.begin(); i != M_couplingsList.end(); ++i )
@@ -418,7 +402,7 @@ MultiscaleModelMultiscale::couplingVariablesNumber()
     UInt couplingVariablesNumber = 0;
 
     for ( multiscaleModelsVectorConstIterator_Type i = M_modelsList.begin(); i != M_modelsList.end(); ++i )
-        if ( ( *i )->type() == MultiScale )
+        if ( ( *i )->type() == Multiscale )
             couplingVariablesNumber += ( multiscaleDynamicCast< MultiscaleModelMultiscale > ( *i ) )->couplingVariablesNumber();
 
     for ( multiscaleCouplingsVectorConstIterator_Type i = M_couplingsList.begin(); i != M_couplingsList.end(); ++i )
