@@ -44,6 +44,7 @@ liblifemcsolver_la_SOURCES   = BCInterface1DData.cpp \
                                MultiscaleSolver.cpp \
                                MultiscaleAlgorithm.cpp \
                                MultiscaleAlgorithmAitken.cpp \
+                               MultiscaleAlgorithmBroyden.cpp \
                                MultiscaleAlgorithmExplicit.cpp \
                                MultiscaleAlgorithmNewton.cpp \
                                MultiscaleData.cpp \
