@@ -45,7 +45,7 @@ quadRuleTetra.plt ==> Show the Convergence Rate of all the quadrature rules on T
                                using gnuplot
  */
 
-#include <life/lifecore/life.hpp>
+#include <life/lifecore/Life.hpp>
 #include <life/lifefem/QuadratureRule.hpp>
 #include <string>
 #include <fstream>

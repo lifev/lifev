@@ -35,7 +35,7 @@
 
 #include <vector>
 
-#include <life/lifecore/life.hpp>
+#include <life/lifecore/Life.hpp>
 
 #pragma GCC diagnostic ignored "-Wunused-variable"
 #pragma GCC diagnostic ignored "-Wunused-parameter"

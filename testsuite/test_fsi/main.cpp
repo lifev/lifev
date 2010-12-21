@@ -45,7 +45,7 @@
 
 //#include <life/lifealg/PreconditionerIfpack.hpp>
 //#include <life/lifealg/PreconditionerML.hpp>
-#include <life/lifecore/life.hpp>
+#include <life/lifecore/Life.hpp>
 #include <life/lifecore/LifeChrono.hpp>
 
 #include <life/lifesolver/FSISolver.hpp>

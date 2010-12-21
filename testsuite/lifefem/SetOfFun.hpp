@@ -42,7 +42,7 @@ The last function is an exponential function to check the convergence rate
 */
 
 #ifndef SETOFFUN_HPP_
-#include <life/lifecore/life.hpp>
+#include <life/lifecore/Life.hpp>
 
 namespace LifeV
 {

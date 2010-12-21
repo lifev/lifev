@@ -35,7 +35,7 @@
 #ifndef BC_HPP
 #define BC_HPP
 
-#include "life/lifecore/life.hpp"
+#include "life/lifecore/Life.hpp"
 #include "ud_functions.hpp"
 #include "life/lifefem/BCHandler.hpp"
 #include "life/lifefem/BCFunction.hpp"

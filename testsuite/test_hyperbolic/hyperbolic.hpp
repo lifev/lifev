@@ -38,7 +38,7 @@
 //! Includes
 // ===================================================
 
-#include <life/lifecore/life.hpp>
+#include <life/lifecore/Life.hpp>
 
 #include <life/lifemesh/RegionMesh3DStructured.hpp>
 #include <life/lifearray/MapEpetra.hpp>
