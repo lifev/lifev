@@ -51,8 +51,8 @@
 
 #include <life/lifecore/life.hpp>
 #include <life/lifecore/GetPot.hpp>
-#include <life/lifecore/chrono.hpp>
-#include <life/lifecore/displayer.hpp>
+#include <life/lifecore/LifeChrono.hpp>
+#include <life/lifecore/Displayer.hpp>
 
 namespace LifeV
 {
