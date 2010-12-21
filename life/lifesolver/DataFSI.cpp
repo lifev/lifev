@@ -53,8 +53,6 @@ DataFSI::DataFSI( ) :
         M_relativeTolerance             (),
         M_errorTolerance                (),
         M_NonLinearLineSearch                    (),
-        M_preconditioner                (),
-        M_DDNpreconditioner             (),
         M_method                        (),
         M_algorithm                     (),
         M_defaultOmega                  (),
@@ -76,8 +74,6 @@ DataFSI::DataFSI( const DataFSI& DataFSI ) :
         M_relativeTolerance             ( DataFSI.M_relativeTolerance ),
         M_errorTolerance                ( DataFSI.M_errorTolerance ),
         M_NonLinearLineSearch                    ( DataFSI.M_NonLinearLineSearch ),
-        M_preconditioner                ( DataFSI.M_preconditioner ),
-        M_DDNpreconditioner             ( DataFSI.M_DDNpreconditioner ),
         M_method                        ( DataFSI.M_method ),
         M_algorithm                     ( DataFSI.M_algorithm ),
         M_defaultOmega                  ( DataFSI.M_defaultOmega ),
@@ -107,8 +103,6 @@ DataFSI::operator=( const DataFSI& DataFSI )
         M_relativeTolerance             = DataFSI.M_relativeTolerance;
         M_errorTolerance                = DataFSI.M_errorTolerance;
         M_NonLinearLineSearch                    = DataFSI.M_NonLinearLineSearch;
-        M_preconditioner                = DataFSI.M_preconditioner;
-        M_DDNpreconditioner             = DataFSI.M_DDNpreconditioner;
         M_method                        = DataFSI.M_method;
         M_algorithm                     = DataFSI.M_algorithm;
         M_defaultOmega                  = DataFSI.M_defaultOmega;
@@ -140,8 +134,6 @@ DataFSI::setup( const GetPot& dataFile, const std::string& section )
     M_NonLinearLineSearch = static_cast<Int> ( dataFile( ( section + "/NonLinearLineSearch" ).data(), 0 ) );
 
     // Problem - Preconditioner
-    M_preconditioner = static_cast<Preconditioner> ( dataFile( ( section + "/precond" ).data(), DIRICHLET_NEUMANN ) );
-    M_DDNpreconditioner = static_cast<DDNPreconditioner> ( dataFile( ( section + "/DDNprecond" ).data(), DDN_DIRICHLET_NEUMANN ) );
 
     // Problem - Methods
     M_method = dataFile( ( section + "/method" ).data(), "steklovPoincare" );
@@ -192,9 +184,6 @@ DataFSI::showMe( std::ostream& output )
     output << "Relative tolerance               = " << M_relativeTolerance << std::endl;
     output << "Max error tolerance              = " << M_errorTolerance << std::endl;
     output << "NonLinearLineSearch                       = " << M_NonLinearLineSearch << std::endl;
-
-    output << "Preconditioner                   = " << M_preconditioner << std::endl;
-    output << "DDNPreconditioner                = " << M_DDNpreconditioner << std::endl;
 
     output << "Method                           = " << M_method << std::endl;
     output << "Algorithm                        = " << M_algorithm << std::endl;

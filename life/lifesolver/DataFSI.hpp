@@ -48,23 +48,6 @@
 namespace LifeV
 {
 
-enum Preconditioner
-{
-    NO_PRECONDITIONER = -1, //!< No preconditioner
-    NEUMANN_DIRICHLET,      //!< Neuman Dirichlet
-    DIRICHLET_NEUMANN,      //!< Dirichlet Neumann
-    NEUMANN_NEUMANN,        //!< Neumann Neumann
-    NEWTON                  //!< Newton
-};
-
-enum DDNPreconditioner
-{
-    DDN_NO_PRECONDITIONER = -1, //!< No preconditioner
-    DDN_NEUMANN_DIRICHLET,      //!< Neuman Dirichlet
-    DDN_DIRICHLET_NEUMANN,      //!< Dirichlet Neumann
-    DDN_NEUMANN_NEUMANN         //!< Neumann Neumann
-};
-
 //! DataFSI - Data container for FSI problems
 /*!
  *  @author Cristiano Malossi
@@ -145,12 +128,6 @@ public:
      */
     inline void setDataSolid( const dataSolid_PtrType dataSolid ) { M_dataSolid = dataSolid; }
 
-    //! Set preconditioner type
-    /*!
-     * @param preconditioner preconditioner type
-     */
-    inline void setPreconditioner( const Preconditioner& preconditioner ) {M_preconditioner = preconditioner; }
-
     //@}
 
 
@@ -200,18 +177,6 @@ public:
      * @return NonLinearLineSearch
      */
     inline Int NonLinearLineSearch() const { return M_NonLinearLineSearch; }
-
-    //! Get preconditioner type
-    /*!
-     * @return preconditioner type
-     */
-    inline Preconditioner preconditioner() const { return M_preconditioner; }
-
-    //! Get DDNpreconditioner type
-    /*!
-     * @return DDNpreconditioner type
-     */
-    inline DDNPreconditioner DDNpreconditioner() const { return M_DDNpreconditioner; }
 
     //! Get method type
     /*!
@@ -292,8 +257,6 @@ private:
     Int                           M_NonLinearLineSearch;
 
     // Problem - Preconditioner
-    Preconditioner                M_preconditioner;
-    DDNPreconditioner             M_DDNpreconditioner;
     UInt                          M_DDBlockPreconditioner;
 
     // Problem - Methods
