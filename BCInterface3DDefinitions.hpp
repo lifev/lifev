@@ -76,7 +76,6 @@ enum baseList3D_Type
     BCI3DFunctionFSI
 };
 
-
 } // Namespace LifeV
 
 #endif /* BCInterface3DDefinitions_H */
