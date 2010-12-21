@@ -26,7 +26,7 @@
    \author Christophe Prud'homme <christophe.prudhomme@epfl.ch>
    \date 2005-02-19
  */
-#include <life/lifecore/life.hpp>
+#include <life/lifecore/Life.hpp>
 #include <life/lifecore/lifeversion.hpp>
 
 namespace LifeV
