@@ -45,7 +45,7 @@
 
 // LIFEV
 #include <life/lifefilters/GetPot.hpp>
-#include <life/lifefem/dataTime.hpp>
+#include <life/lifefem/TimeData.hpp>
 #include <life/lifemesh/regionMesh1D.hpp>
 
 // LIFEV - MATHCARD
@@ -117,7 +117,7 @@ public:
     //! @name Type definitions
     //@{
 
-    typedef DataTime                                                  time_Type;
+    typedef TimeData                                                  time_Type;
     typedef boost::shared_ptr< time_Type >                            timePtr_Type;
 
     typedef RegionMesh1D< LinearLine >                                mesh_Type;
@@ -187,9 +187,9 @@ public:
 
     //! Set data time container
     /*!
-     * @param DataTime shared_ptr to dataTime container
+     * @param TimeData shared_ptr to TimeData container
      */
-    void setDataTime( const timePtr_Type dataTime ) { M_time = dataTime; }
+    void setTimeData( const timePtr_Type TimeData ) { M_time = TimeData; }
 
     void setDensity( const Real& density ) { M_density = density; }
 
@@ -237,7 +237,7 @@ public:
 
     //! Get data time container
     /*!
-     * @return shared_ptr to dataTime container
+     * @return shared_ptr to TimeData container
      */
     timePtr_Type dataTime() const { return M_time; }
 
