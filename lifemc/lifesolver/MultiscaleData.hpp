@@ -63,7 +63,7 @@ public:
     //! @name Type definitions
     //@{
 
-    typedef DataTime                                     time_Type;
+    typedef TimeData                                     time_Type;
     typedef boost::shared_ptr< time_Type >               timePtr_Type;
 
     //@}
@@ -122,7 +122,7 @@ public:
     /*!
      * @return time container
      */
-    timePtr_Type dataTime() const { return M_dataTime; }
+    timePtr_Type dataTime() const { return M_TimeData; }
 
     //! Get the global fluid density.
     /*!
@@ -170,7 +170,7 @@ public:
 
 private:
 
-    timePtr_Type                        M_dataTime;
+    timePtr_Type                        M_TimeData;
 
     Real                                M_fluidDensity;
     Real                                M_fluidViscosity;
