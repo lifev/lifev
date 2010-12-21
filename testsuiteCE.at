@@ -11,7 +11,7 @@
 ### TESTSUITE: MONOLITHIC FSI #####################################################################
 ###################################################################################################
 
-AT_SETUP([test_monolithic])
+AT_SETUP([test_monolithic (GI)])
 AT_KEYWORDS([ns fluid solid fsi monolithic])
 AT_DATA([data],[[# -*- getpot -*- (GetPot mode activation for emacs)
 #-------------------------------------------------
