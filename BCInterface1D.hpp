@@ -449,8 +449,6 @@ inline void
 BCInterface1D< PhysicalSolverType >::addBase( std::vector< boost::shared_ptr< BCInterfaceBaseType > >& baseVector, const bcBaseList_Type& physicalSolver )
 {
     boost::shared_ptr< BCInterfaceBaseType > function( factoryFunction_Type::instance().createObject( physicalSolver ) );
-    //!\todo pass a std::string to the factories
-    //boost::shared_ptr< BCInterfaceBaseType > function( factoryFunction_Type::instance().createObject( "physicalSolver" ) );
 
     function->setData( M_data );
 
