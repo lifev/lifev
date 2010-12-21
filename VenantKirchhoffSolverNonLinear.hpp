@@ -298,7 +298,7 @@ private:
                                  UInt         offset=0);
 
     //! time scheme coefficients
-    // _theta and _zeta are the coefficient of the time discretization with Newmark scheme
+    // _theta and _zeta are the coefficient of the time discretization with TimeAdvanceNewmark scheme
     Real                            M_zeta;
     Real                            M_theta;
 
@@ -382,12 +382,12 @@ buildSystem(matrixPtr_Type massStiff, Real const & factor)
     UInt nc = nDimensions;
 
     //inverse of dt:
-    Real PTemp =  this->M_data->getDataTime()->timeStep();
+    Real PTemp =  this->M_data->getdataTime()->timeStep();
     Real dti2  = 2.0 / ( PTemp * PTemp );
 
     // Elementary computation and matrix assembling
     // Loop on elements
-    // These Matrices are assembled according to the Newmark Scheme!
+    // These Matrices are assembled according to the TimeAdvanceNewmark Scheme!
     for ( UInt i = 1; i <= this->M_FESpace->mesh()->numVolumes(); i++ )
     {
 
@@ -491,7 +491,7 @@ void VenantKirchhoffSolverNonLinear<Mesh, SolverType>::updateSystem( matrixPtr_T
     // end of the nonlinear part
     //Computation of the right hand sides
 
-    Real DeltaT    = this->M_data->getDataTime()->timeStep();
+    Real DeltaT    = this->M_data->getdataTime()->timeStep();
     vector_Type z = *this->M_disp;
 
      z            +=  DeltaT*(*this->M_vel);
@@ -585,7 +585,7 @@ void VenantKirchhoffSolverNonLinear<Mesh, SolverType>::updateSystem(  source_Typ
 
         for ( UInt ic = 0; ic < nc; ++ic )
         {
-            compute_vec( source, M_elvec, this->M_FESpace->fe(),  this->M_data->getDataTime()->getTime(), ic ); // compute local vector
+            compute_vec( source, M_elvec, this->M_FESpace->fe(),  this->M_data->getdataTime()->getTime(), ic ); // compute local vector
             assembleVector( *this->M_rhsNoBC, M_elvec, this->M_FESpace->fe(), this->M_FESpace->dof(), ic, ic*this->M_FESpace->dim() ); // assemble local vector into global one
         }
     }
@@ -594,7 +594,7 @@ void VenantKirchhoffSolverNonLinear<Mesh, SolverType>::updateSystem(  source_Typ
 
     //Computation of the right hand sides
 
-    Real DeltaT    = this->M_data->getDataTime()->getTimeStep();
+    Real DeltaT    = this->M_data->getdataTime()->getTimeStep();
     vector_Type z  = *this->M_disp;
 
     z             +=  DeltaT * (*this->M_vel);
@@ -772,13 +772,13 @@ iterate( bchandler_Type& bch )
     Real reltol  = 1.e-5;
     UInt   maxiter = 200;
     Real etamax  = 0;
-    Int linesearch = 0;
+    Int NonLinearLineSearch = 0;
 
     Real time = this->M_data->time();
 
     Int status = 0;
 
-    status = nonLinRichardson( *this->M_disp, *this, abstol, reltol, maxiter, etamax, linesearch, this->M_out_res, this->M_data->getDataTime()->time() );
+    status = nonLinRichardson( *this->M_disp, *this, abstol, reltol, maxiter, etamax, NonLinearLineSearch, this->M_out_res, this->M_data->getdataTime()->time() );
 
     if ( status == 1 )
     {
@@ -792,7 +792,7 @@ iterate( bchandler_Type& bch )
 
         std::cout <<" Number of inner iterations       : " << maxiter <<  std::endl;
 
-        std::cout <<" We are at the time step          : "  << this->M_data->getDataTime()->time() << std::endl;
+        std::cout <<" We are at the time step          : "  << this->M_data->getdataTime()->time() << std::endl;
 
         this->M_out_iter << time << " " << maxiter << std::endl;
     }
@@ -817,7 +817,7 @@ template <typename Mesh, typename SolverType> // for monolithic
 void VenantKirchhoffSolverNonLinear<Mesh, SolverType>::
 updateVel()
 {
-    Real DeltaT = this->M_data->getDataTime()->timeStep();
+    Real DeltaT = this->M_data->getdataTime()->timeStep();
 
     *M_acc = (2.0 /( M_zeta * pow(DeltaT,2) ))  * (*this->M_disp)  - *M_rhsA;
     *this->M_vel = *this->M_rhsW + M_theta * DeltaT * (*M_acc) ;
@@ -888,7 +888,7 @@ void VenantKirchhoffSolverNonLinear<Mesh, SolverType>::evalResidual( vector_Type
 
     vector_Type rhsFull(*this->M_rhsNoBC, Unique); // ignoring non-local entries, Otherwise they are summed up lately
 
-    bcManageVector( rhsFull, *this->M_FESpace->mesh(), this->M_FESpace->dof(), *this->M_BCh, this->M_FESpace->feBd(),  this->M_data->getDataTime()->time(), 1.0 );
+    bcManageVector( rhsFull, *this->M_FESpace->mesh(), this->M_FESpace->dof(), *this->M_BCh, this->M_FESpace->feBd(),  this->M_data->getdataTime()->time(), 1.0 );
 
     *this->M_rhs = rhsFull;
 
@@ -1117,7 +1117,7 @@ getSolidMatrix( matrixPtr_Type& matrix)
     //*this->M_stiff *= this->M_data->dataTime()->getTimeStep() * this->M_rescaleFactor;
     *matrix  += *this->M_stiff;
     matrix->GlobalAssemble();
-    matrix *= this->M_data->getDataTime()->getTimeStep() * this->M_rescaleFactor;
+    matrix *= this->M_data->getdataTime()->getTimeStep() * this->M_rescaleFactor;
 
 }
 

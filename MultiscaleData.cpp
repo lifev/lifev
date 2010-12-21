@@ -45,7 +45,7 @@ namespace Multiscale
 // Constructors & Destructor
 // ===================================================
 MultiscaleData::MultiscaleData() :
-        M_dataTime                      (),
+        M_TimeData                      (),
         M_fluidDensity                  (),
         M_fluidViscosity                (),
         M_fluidReferencePressure        (),
@@ -57,7 +57,7 @@ MultiscaleData::MultiscaleData() :
 }
 
 MultiscaleData::MultiscaleData( const MultiscaleData& data ) :
-        M_dataTime                      ( data.M_dataTime ),
+        M_TimeData                      ( data.M_TimeData ),
         M_fluidDensity                  ( data.M_fluidDensity ),
         M_fluidViscosity                ( data.M_fluidViscosity ),
         M_fluidReferencePressure        ( data.M_fluidReferencePressure ),
@@ -76,7 +76,7 @@ MultiscaleData::operator=( const MultiscaleData& data )
 {
     if ( this != &data )
     {
-        M_dataTime                      = data.M_dataTime;
+        M_TimeData                      = data.M_TimeData;
         M_fluidDensity                  = data.M_fluidDensity;
         M_fluidViscosity                = data.M_fluidViscosity;
         M_fluidReferencePressure        = data.M_fluidReferencePressure;
@@ -95,7 +95,7 @@ MultiscaleData::operator=( const MultiscaleData& data )
 void
 MultiscaleData::readData( const GetPot& dataFile )
 {
-    M_dataTime.reset( new time_Type( dataFile, "Solver/time_discretization" ) );
+    M_TimeData.reset( new time_Type( dataFile, "Solver/time_discretization" ) );
     M_fluidDensity                  = dataFile( "Physics/FluidDensity", 0. );
     M_fluidViscosity                = dataFile( "Physics/FluidViscosity", 0. );
     M_fluidReferencePressure        = dataFile( "Physics/FluidReferencePressure", 0. );
@@ -117,9 +117,9 @@ MultiscaleData::showMe()
               //<< "Structure Thickness           = " << M_structureThickness << std::endl
               << "Structure Young modulus       = " << M_structureYoungModulus << std::endl << std::endl;
 
-    std::cout << "Initial time                  = " << M_dataTime->initialTime() << std::endl
-              << "End time                      = " << M_dataTime->endTime() << std::endl
-              << "TimeStep                      = " << M_dataTime->timeStep() << std::endl << std::endl;
+    std::cout << "Initial time                  = " << M_TimeData->initialTime() << std::endl
+              << "End time                      = " << M_TimeData->endTime() << std::endl
+              << "TimeStep                      = " << M_TimeData->timeStep() << std::endl << std::endl;
 }
 
 } // Namespace Multiscale

@@ -87,7 +87,7 @@ FSIMonolithicGI::setupFluidSolid( UInt const fluxes )
     M_interface=M_monolithicMatrix->interface();
 
     vector_Type u0(*this->M_monolithicMap);
-    M_bdf.reset(new BdfT<vector_Type>());
+    M_bdf.reset(new TimeAdvanceBDF<vector_Type>());
     M_bdf->setup(M_data->dataFluid()->dataTime()->orderBDF());
     M_bdf->setInitialCondition(u0);
     this->M_rhs.reset(new vector_Type(*this->M_monolithicMap));
@@ -279,7 +279,7 @@ void FSIMonolithicGI::initialize( FSI::fluidPtr_Type::value_type::function_Type 
 {
     super_Type::initialize(u0, p0, d0, w0, df0);
     vector_Type df(M_mmFESpace->map());
-    M_mmFESpace->interpolate(df0, df, M_data->dataSolid()->getDataTime()->time());
+    M_mmFESpace->interpolate(df0, df, M_data->dataSolid()->getdataTime()->time());
 
     M_un->add(df, M_solidAndFluidDim+getDimInterface());
     M_meshMotion->setDisplacement(df);

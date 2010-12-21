@@ -582,7 +582,7 @@ MultiscaleModel1D::setupGlobalData( const std::string& fileName )
     GetPot dataFile( fileName );
 
     //Global data time
-    M_data->setDataTime( M_globalData->dataTime() );
+    M_data->setTimeData( M_globalData->dataTime() );
 
     //Global physical quantities
     if ( !dataFile.checkVariable( "1D_Model/PhysicalParameters/density" ) )

@@ -260,7 +260,7 @@ void
 FSIMonolithic::buildSystem()
 {
     M_solidBlock.reset(new matrix_Type(*M_monolithicMap, 1));//since it is constant, we keep this throughout the simulation
-    M_solid->buildSystem(M_solidBlock, M_data->dataSolid()->getDataTime()->timeStep()*M_solid->getRescaleFactor());//M_data->dataSolid()->rescaleFactor());
+    M_solid->buildSystem(M_solidBlock, M_data->dataSolid()->getdataTime()->timeStep()*M_solid->getRescaleFactor());//M_data->dataSolid()->rescaleFactor());
     M_solidBlock->globalAssemble();
     M_solid->rescaleMatrices();
 }
@@ -368,7 +368,7 @@ FSIMonolithic::initialize( FSI::fluidPtr_Type::value_type::function_Type const& 
     M_pFESpace->interpolate(p0, p, M_data->dataFluid()->dataTime()->time());
 
     vector_Type d(M_dFESpace->map());
-    M_dFESpace->interpolate(d0, d, M_data->dataSolid()->getDataTime()->time());
+    M_dFESpace->interpolate(d0, d, M_data->dataSolid()->getdataTime()->time());
 
     initialize(u, p, d);
 }
