@@ -52,7 +52,7 @@
 #pragma GCC diagnostic warning "-Wunused-parameter"
 
 // LifeV includes
-#include <life/lifealg/EpetraMap.hpp>
+#include <life/lifealg/MapEpetra.hpp>
 #include <life/lifearray/EpetraVector.hpp>
 
 // Mathcard includes
@@ -113,8 +113,8 @@ main( Int argc, char** argv )
     MyGlobalIElementsB[0] = 0;
     MyGlobalIElementsB[1] = 1;
 
-    EpetraMap mapA( 3, 3, &MyGlobalIElementsA[0], 0, comm);
-    EpetraMap mapB( 2, 2, &MyGlobalIElementsB[0], 0, comm);
+    MapEpetra mapA( 3, 3, &MyGlobalIElementsA[0], 0, comm);
+    MapEpetra mapB( 2, 2, &MyGlobalIElementsB[0], 0, comm);
 
     Vector_ptr A1, B1, A2, B2, A3, B3, A4, B4;
     A1.reset( new Vector( mapA, Unique ) );
