@@ -97,7 +97,7 @@ public:
     typedef TimeAdvanceBDFNavierStokes< fluidVector_Type >    bdf_Type;
     typedef OseenData		                                  data_Type;
 
-    typedef FESpace< mesh_Type, EpetraMap >                   FESpace_Type;
+    typedef FESpace< mesh_Type, MapEpetra >                   FESpace_Type;
     typedef boost::shared_ptr< FESpace_Type >                 FESpacePtr_Type;
 
     //@}
@@ -367,7 +367,7 @@ private:
     boost::shared_ptr< data_Type >          M_data;
     boost::shared_ptr< MeshData >           M_meshData;
     boost::shared_ptr< MeshPartitioner_Type > M_mesh;
-    boost::shared_ptr< EpetraMap >          M_map;
+    boost::shared_ptr< MapEpetra >          M_map;
     fluidVectorPtr_Type                     M_solution;
 
     // Linear Fluid problem

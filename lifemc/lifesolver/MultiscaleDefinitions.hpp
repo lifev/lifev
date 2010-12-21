@@ -64,7 +64,7 @@
 #include <life/lifefem/TimeData.hpp>
 #include <life/lifemesh/MarkerDefinitions.hpp>
 
-#include <life/lifealg/EpetraMap.hpp>
+#include <life/lifearray/MapEpetra.hpp>
 #include <life/lifearray/EpetraVector.hpp>
 #include <life/lifearray/EpetraMatrix.hpp>
 

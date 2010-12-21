@@ -118,7 +118,7 @@ MultiscaleCoupling::showMe()
 // Methods
 // ===================================================
 void
-MultiscaleCoupling::createCouplingMap( EpetraMap& couplingMap )
+MultiscaleCoupling::createCouplingMap( MapEpetra& couplingMap )
 {
 
 #ifdef HAVE_LIFEV_DEBUG
@@ -285,7 +285,7 @@ MultiscaleCoupling::createLocalVectors()
         myGlobalElements[i] = i;
 
     // Build a repeated map for the couplings
-    EpetraMap map( -1, static_cast< Int > ( myGlobalElements.size() ), &myGlobalElements[0], 0, M_comm );
+    MapEpetra map( -1, static_cast< Int > ( myGlobalElements.size() ), &myGlobalElements[0], 0, M_comm );
 
     // Create local repeated vectors
     M_localCouplingVariables.push_back( multiscaleVectorPtr_Type ( new EpetraVector( map, Repeated ) ) );

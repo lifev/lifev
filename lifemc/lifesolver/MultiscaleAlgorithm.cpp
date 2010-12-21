@@ -142,7 +142,7 @@ MultiscaleAlgorithm::setModel( const multiscaleModelPtr_Type model )
 
     // Build coupling variables and residuals vectors
     std::vector<Int> myGlobalElements(0);
-    EpetraMap couplingMap( -1, static_cast<Int> ( myGlobalElements.size() ), &myGlobalElements[0], 0, M_comm );
+    MapEpetra couplingMap( -1, static_cast<Int> ( myGlobalElements.size() ), &myGlobalElements[0], 0, M_comm );
     M_multiscale->createCouplingMap( couplingMap );
 
     M_couplingVariables.reset( new EpetraVector( couplingMap, Unique ) );

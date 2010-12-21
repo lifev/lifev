@@ -60,7 +60,7 @@
 #include <life/lifecore/life.hpp>
 #include <life/lifecore/LifeChrono.hpp>
 #include <life/lifefilters/GetPot.hpp>
-#include <life/lifealg/EpetraMap.hpp>
+#include <life/lifearray/MapEpetra.hpp>
 
 // Mathcard includes
 #include <lifemc/lifefem/OneDimensionalBCHandler.hpp>
