@@ -38,7 +38,7 @@
     scales.
  */
 
-#include <life/lifecore/life.hpp>
+#include <life/lifecore/Life.hpp>
 #include <life/lifemesh/RegionMesh3DStructured.hpp>
 
 namespace LifeV

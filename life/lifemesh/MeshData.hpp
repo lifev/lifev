@@ -45,7 +45,7 @@
 #include <string>
 #include <ostream>
 #include <life/lifefilters/GetPot.hpp>
-#include <life/lifecore/life.hpp>
+#include <life/lifecore/Life.hpp>
 
 #ifdef TWODIM
 #include <life/lifemesh/RegionMesh2D.hpp>

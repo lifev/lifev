@@ -39,7 +39,7 @@
 #ifndef MESHELEMENTMARKED_H
 #define MESHELEMENTMARKED_H
 
-#include <life/lifecore/life.hpp>
+#include <life/lifecore/Life.hpp>
 #include <life/lifemesh/MarkerDefinitions.hpp>
 #include <life/lifemesh/MeshElement.hpp>
 #include <life/lifemesh/MeshElementBare.hpp>

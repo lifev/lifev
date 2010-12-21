@@ -41,7 +41,7 @@
 #ifndef STRUCTUREDMESH3D_HPP
 #define STRUCTUREDMESH3D_HPP 1
 
-#include <life/lifecore/life.hpp>
+#include <life/lifecore/Life.hpp>
 #include <life/lifemesh/RegionMesh3D.hpp>
 #include <life/lifefilters/mesh_util.hpp>
 #include <fstream>
