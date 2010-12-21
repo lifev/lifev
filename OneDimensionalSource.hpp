@@ -58,7 +58,7 @@ public:
     //! @name Type definitions and Enumerators
     //@{
 
-    typedef singleton< factory< OneDimensionalSource, OneDimensional::sourceTerm_Type > > factorySource_Type;
+    typedef FactorySingleton< Factory< OneDimensionalSource, OneDimensional::sourceTerm_Type > > factorySource_Type;
 
     typedef OneDimensionalPhysics                       physics_Type;
     typedef boost::shared_ptr< physics_Type >           physicsPtr_Type;
