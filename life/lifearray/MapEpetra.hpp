@@ -57,7 +57,7 @@
 #pragma GCC diagnostic warning "-Wunused-parameter"
 
 #include <life/lifefem/ReferenceFE.hpp>
-#include <life/lifecore/life.hpp>
+#include <life/lifecore/Life.hpp>
 #include <life/lifemesh/MeshPartitioner.hpp>
 
 
