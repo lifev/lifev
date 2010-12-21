@@ -86,16 +86,6 @@ public:
 
     //@}
 
-protected:
-
-    //! @name Protected Methods
-    //@{
-
-    //@}
-
-    SolverAztecOO                            M_solver;
-    multiscaleMatrixPtr_Type                 M_jacobian;
-
 private:
 
     //! @name Unimplemented Methods
@@ -106,6 +96,17 @@ private:
     MultiscaleAlgorithmNewton& operator=( const MultiscaleAlgorithmNewton& algorithm );
 
     //@}
+
+
+    //! @name Private Methods
+    //@{
+
+    void assembleJacobianMatrix();
+
+    //@}
+
+    SolverAztecOO                            M_solver;
+    multiscaleMatrixPtr_Type                 M_jacobian;
 };
 
 //! Factory create function

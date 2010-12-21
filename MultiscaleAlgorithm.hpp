@@ -186,11 +186,12 @@ protected:
      */
     void save( const UInt& subiterationsNumber, const Real& residual );
 
-    //! Check if the tolerance has been satisfied
+    //! Update the residual and check if the tolerance has been satisfied
     /*!
+     * @param subIT subiteration number (for output purpose)
      * @return true if the tolerance is satisfied
      */
-    bool toleranceSatisfied();
+    bool checkResidual( const UInt& subIT = 0 );
 
     //@}
 
