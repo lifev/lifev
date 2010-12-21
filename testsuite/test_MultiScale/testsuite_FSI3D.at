@@ -12,7 +12,7 @@
 ###################################################################################################
 
 AT_SETUP([test_MultiScale (FSI3D)])
-AT_KEYWORDS([test_MS FSI])
+AT_KEYWORDS([test_MS FSI3D])
 AT_DATA([data],[[
 
 ]])

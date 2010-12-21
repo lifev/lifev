@@ -12,7 +12,7 @@
 ###################################################################################################
 
 AT_SETUP([test_MultiScale (Fluid3D)])
-AT_KEYWORDS([test_MS fluid])
+AT_KEYWORDS([test_MS Fluid3D])
 AT_DATA([data],[[
 
 ]])
