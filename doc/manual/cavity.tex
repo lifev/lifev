@@ -187,7 +187,7 @@ at the begining of each program.
 #include <life/lifearray/EpetraMatrix.hpp>
 #include <life/lifealg/EpetraMap.hpp>
 #include <life/lifemesh/partitionMesh.hpp>
-#include <life/lifesolver/dataNavierStokes.hpp>
+#include <life/lifesolver/OseenData.hpp>
 #include <life/lifefem/FESpace.hpp>
 #include <life/lifefem/bdfNS_template.hpp>
 #include <life/lifefilters/ensight.hpp>
@@ -356,7 +356,7 @@ are filled with a default value if not specified,
 but some entries are obligatory, like the mesh name for instance. 
 
 A data object will be used to store this information. In our case, since we want to
-solve a Navier-Stokes problem, we need to use the DataNavierStokes object.
+solve a Navier-Stokes problem, we need to use the OseenData object.
 Given the GetPot object we have just defined, it will parse the specified data file
 to retreive all the information necessary to run the simulation.
 
@@ -366,7 +366,7 @@ to retreive all the information necessary to run the simulation.
     boost::shared_ptr< DataTime > dataTime( new DataTime( dataFile ) );
     boost::shared_ptr< MeshData< RegionMesh3D<LinearTetra> > > meshData( new MeshData< RegionMesh3D<LinearTetra> >( dataFile ) );
 
-    DataNavierStokes<RegionMesh3D<LinearTetra> > dataNavierStokes( dataFile, dataTime, meshData );
+    OseenData<RegionMesh3D<LinearTetra> > oseenData( dataFile, dataTime, meshData );
 
 \end{verbatim}
 
@@ -396,7 +396,7 @@ order\_bdf & 1 & time discretization order \\
 
 
 \noindent After this line, everything we need to know about our problem is stored
-in dataNavierStokes.
+in oseenData.
 
 To build a FE solver for our cavity problem we need:
 \begin{itemize}
@@ -509,7 +509,7 @@ order to have the simulation running.
 \begin{verbatim}
     // partitioning the mesh
     partitionMesh< RegionMesh3D<LinearTetra> >
-             meshPart(*dataNavierStokes.meshData()->mesh(), comm);
+             meshPart(*oseenData.meshData()->mesh(), comm);
 \end{verbatim}
 
 In our case, after the call to the \verb!partitionMesh! constructor, \verb!meshPart! will store
@@ -651,7 +651,7 @@ velocity and pressure FE spaces
 
     if (verbose) std::cout << "Calling the fluid constructor ... ";
 
-    OseenSolver< RegionMesh3D<LinearTetra> > fluid (dataNavierStokes,
+    OseenSolver< RegionMesh3D<LinearTetra> > fluid (oseenData,
                                               uFESpace,
                                               pFESpace,
                                               comm);

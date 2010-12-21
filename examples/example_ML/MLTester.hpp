@@ -49,7 +49,7 @@ public :
 
     typedef OseenSolver<Mesh, SolverType> super;
 
-    typedef DataNavierStokes<Mesh> data_type;
+    typedef OseenData<Mesh> data_type;
 
     typedef Real ( *Function ) ( const Real&, const Real&, const Real&,
                                  const Real&, const ID& );

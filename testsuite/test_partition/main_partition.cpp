@@ -76,8 +76,8 @@ int main( int argc, char** argv )
     string data_file_name = command_line.follow("data", 2, "-f", "--file");
     GetPot dataFile( data_file_name );
 
-    DataNavierStokes dataNavierStokes;
-    dataNavierStokes.setup(dataFile);
+    OseenData oseenData;
+    oseenData.setup(dataFile);
 
     MeshData meshData;
     meshData.setup(dataFile, "fluid/space_discretization");

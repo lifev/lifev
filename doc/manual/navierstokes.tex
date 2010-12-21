@@ -103,7 +103,7 @@ to store a history of previous solutions in order to compute the time derivative
 This can be done by using the following object 
 \begin{verbatim}
     // bdf initialization with the stokes problem solution
-    BdfTNS<vector_type> bdf(dataNavierStokes.getBDF_order());
+    BdfTNS<vector_type> bdf(oseenData.getBDF_order());
 \end{verbatim}
 The backward differentiation formula, class \verb!BdfTNS! \ixn{Backward Differentiation Formula}, 
 stores the previous solution $u^n$, $u^{n-1}$ ... 
@@ -118,9 +118,9 @@ so that the stored vector will be resized correctly, and intialize it with our p
 We are now ready to enter the time loop 
 
 \begin{verbatim}
-    Real dt     = dataNavierStokes.getTimeStep();
-    Real t0     = dataNavierStokes.getInitialTime();
-    Real tFinal = dataNavierStokes.getEndTime ();
+    Real dt     = oseenData.getTimeStep();
+    Real t0     = oseenData.getInitialTime();
+    Real tFinal = oseenData.getEndTime ();
 
     int iter = 1;
 
@@ -128,12 +128,12 @@ We are now ready to enter the time loop
     {
         // inside the time loop, it's really like the initialization procedure,
         // exept that we now have an advection velocity, rhs and the mass matrix
-        dataNavierStokes.setTime(time);
+        oseenData.setTime(time);
 
         if (verbose)
         {
             std::cout << std::endl;
-            std::cout << "We are now at time " << dataNavierStokes.time()
+            std::cout << "We are now at time " << oseenData.time()
                       << " s. " << std::endl;
             std::cout << std::endl;
         }
@@ -141,13 +141,13 @@ We are now ready to enter the time loop
         chrono.start();
 
         // alpha coefficient for the mass matrix
-        double alpha = bdf.bdf_u().coeff_der( 0 ) / dataNavierStokes.timestep();
+        double alpha = bdf.bdf_u().coeff_der( 0 ) / oseenData.timestep();
 
         // extrapolation of the advection term
         beta = bdf.bdf_u().extrap();
 
         // rhs  part of the time-derivative
-        rhs  = fluid.matrMass()*bdf.bdf_u().time_der( dataNavierStokes.timestep() );
+        rhs  = fluid.matrMass()*bdf.bdf_u().time_der( oseenData.timestep() );
 
         // update the Oseen system
         fluid.updateSystem( alpha, beta, rhs );

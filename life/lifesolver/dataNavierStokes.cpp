@@ -26,7 +26,7 @@
 
 /*!
     @file
-    @brief File containing the implementation of the file DataNavierStokes.hpp
+    @brief File containing the implementation of the file OseenData.hpp
 
     @author Gilles Fourestey <gilles.fourestey@epfl.ch>
     @contributor Alexis Aposporidis <aapospo@emory.edu>
@@ -37,7 +37,7 @@
  */
 
 
-#include <life/lifesolver/dataNavierStokes.hpp>
+#include <life/lifesolver/OseenData.hpp>
 #include <life/lifecore/life.hpp>
 
 
@@ -49,7 +49,7 @@ namespace LifeV
 // Constructors
 // ===================================================
 
-DataNavierStokes::DataNavierStokes( ) :
+OseenData::OseenData( ) :
         M_time                             ( ),
         M_density                          ( ),
         M_viscosity                        ( ),
@@ -75,29 +75,29 @@ DataNavierStokes::DataNavierStokes( ) :
 }
 
 
-DataNavierStokes::DataNavierStokes( const DataNavierStokes& dataNavierStokes ) :
-        M_time                             ( dataNavierStokes.M_time ),
-        M_fluidNumber                      ( dataNavierStokes.M_fluidNumber ),
-        M_density                          ( dataNavierStokes.M_density ),
-        M_viscosity                        ( dataNavierStokes.M_viscosity ),
-        M_uOrder                           ( dataNavierStokes.M_uOrder ),
-        M_pOrder                           ( dataNavierStokes.M_pOrder ),
-        M_verbose                          ( dataNavierStokes.M_verbose ),
-        M_dumpInit                         ( dataNavierStokes.M_dumpInit ),
-        M_dumpPeriod                       ( dataNavierStokes.M_dumpPeriod ),
-        M_factor                           ( dataNavierStokes.M_factor ),
-        M_stokes                           ( dataNavierStokes.M_stokes ),
-        M_stabMethod                       ( dataNavierStokes.M_stabMethod ),
+OseenData::OseenData( const OseenData& oseenData ) :
+        M_time                             ( oseenData.M_time ),
+        M_fluidNumber                      ( oseenData.M_fluidNumber ),
+        M_density                          ( oseenData.M_density ),
+        M_viscosity                        ( oseenData.M_viscosity ),
+        M_uOrder                           ( oseenData.M_uOrder ),
+        M_pOrder                           ( oseenData.M_pOrder ),
+        M_verbose                          ( oseenData.M_verbose ),
+        M_dumpInit                         ( oseenData.M_dumpInit ),
+        M_dumpPeriod                       ( oseenData.M_dumpPeriod ),
+        M_factor                           ( oseenData.M_factor ),
+        M_stokes                           ( oseenData.M_stokes ),
+        M_stabMethod                       ( oseenData.M_stabMethod ),
         M_semiImplicit                     ( false ),
         M_shapeDerivatives                 ( false ),
-        M_computeMeanValuesPerSection      ( dataNavierStokes.M_computeMeanValuesPerSection ),
-        M_NbZSections                      ( dataNavierStokes.M_NbZSections ),
-        M_ToleranceSection                 ( dataNavierStokes.M_ToleranceSection ),
-        M_XSectionFrontier                 ( dataNavierStokes.M_XSectionFrontier ),
-        M_ZSectionInit                     ( dataNavierStokes.M_ZSectionInit ),
-        M_ZSectionFinal                    ( dataNavierStokes.M_ZSectionFinal ),
-        M_NbPolygonEdges                   ( dataNavierStokes.M_NbPolygonEdges ),
-        M_stabilizationList                ( dataNavierStokes.M_stabilizationList )
+        M_computeMeanValuesPerSection      ( oseenData.M_computeMeanValuesPerSection ),
+        M_NbZSections                      ( oseenData.M_NbZSections ),
+        M_ToleranceSection                 ( oseenData.M_ToleranceSection ),
+        M_XSectionFrontier                 ( oseenData.M_XSectionFrontier ),
+        M_ZSectionInit                     ( oseenData.M_ZSectionInit ),
+        M_ZSectionFinal                    ( oseenData.M_ZSectionFinal ),
+        M_NbPolygonEdges                   ( oseenData.M_NbPolygonEdges ),
+        M_stabilizationList                ( oseenData.M_stabilizationList )
 {
 }
 
@@ -110,33 +110,33 @@ DataNavierStokes::DataNavierStokes( const DataNavierStokes& dataNavierStokes ) :
 // Methods
 // ===================================================
 
-DataNavierStokes&
-DataNavierStokes::operator=( const DataNavierStokes& dataNavierStokes )
+OseenData&
+OseenData::operator=( const OseenData& oseenData )
 {
-    if ( this != &dataNavierStokes )
+    if ( this != &oseenData )
     {
-        M_time                             = dataNavierStokes.M_time;
-        M_fluidNumber                      = dataNavierStokes.M_fluidNumber;
-        M_density                          = dataNavierStokes.M_density;
-        M_viscosity                        = dataNavierStokes.M_viscosity;
-        M_uOrder                           = dataNavierStokes.M_uOrder;
-        M_pOrder                           = dataNavierStokes.M_pOrder;
-        M_verbose                          = dataNavierStokes.M_verbose;
-        M_dumpInit                         = dataNavierStokes.M_dumpInit;
-        M_dumpPeriod                       = dataNavierStokes.M_dumpPeriod;
-        M_factor                           = dataNavierStokes.M_factor;
-        M_stokes                           = dataNavierStokes.M_stokes;
-        M_stabMethod                       = dataNavierStokes.M_stabMethod;
-        M_semiImplicit                     = dataNavierStokes.M_semiImplicit;
-        M_shapeDerivatives                 = dataNavierStokes.M_shapeDerivatives;
-        M_computeMeanValuesPerSection      = dataNavierStokes.M_computeMeanValuesPerSection;
-        M_NbZSections                      = dataNavierStokes.M_NbZSections;
-        M_ToleranceSection                 = dataNavierStokes.M_ToleranceSection;
-        M_XSectionFrontier                 = dataNavierStokes.M_XSectionFrontier;
-        M_ZSectionInit                     = dataNavierStokes.M_ZSectionInit;
-        M_ZSectionFinal                    = dataNavierStokes.M_ZSectionFinal;
-        M_NbPolygonEdges                   = dataNavierStokes.M_NbPolygonEdges;
-        M_stabilizationList                = dataNavierStokes.M_stabilizationList;
+        M_time                             = oseenData.M_time;
+        M_fluidNumber                      = oseenData.M_fluidNumber;
+        M_density                          = oseenData.M_density;
+        M_viscosity                        = oseenData.M_viscosity;
+        M_uOrder                           = oseenData.M_uOrder;
+        M_pOrder                           = oseenData.M_pOrder;
+        M_verbose                          = oseenData.M_verbose;
+        M_dumpInit                         = oseenData.M_dumpInit;
+        M_dumpPeriod                       = oseenData.M_dumpPeriod;
+        M_factor                           = oseenData.M_factor;
+        M_stokes                           = oseenData.M_stokes;
+        M_stabMethod                       = oseenData.M_stabMethod;
+        M_semiImplicit                     = oseenData.M_semiImplicit;
+        M_shapeDerivatives                 = oseenData.M_shapeDerivatives;
+        M_computeMeanValuesPerSection      = oseenData.M_computeMeanValuesPerSection;
+        M_NbZSections                      = oseenData.M_NbZSections;
+        M_ToleranceSection                 = oseenData.M_ToleranceSection;
+        M_XSectionFrontier                 = oseenData.M_XSectionFrontier;
+        M_ZSectionInit                     = oseenData.M_ZSectionInit;
+        M_ZSectionFinal                    = oseenData.M_ZSectionFinal;
+        M_NbPolygonEdges                   = oseenData.M_NbPolygonEdges;
+        M_stabilizationList                = oseenData.M_stabilizationList;
     }
 
     return *this;
@@ -144,7 +144,7 @@ DataNavierStokes::operator=( const DataNavierStokes& dataNavierStokes )
 
 
 void
-DataNavierStokes::setup( const GetPot& dataFile, const std::string& section )
+OseenData::setup( const GetPot& dataFile, const std::string& section )
 {
     // If data time has not been set
     if ( !M_time.get() )
@@ -212,7 +212,7 @@ DataNavierStokes::setup( const GetPot& dataFile, const std::string& section )
 
 
 void
-DataNavierStokes::showMe( std::ostream& output ) const
+OseenData::showMe( std::ostream& output ) const
 {
     if (M_fluidNumber == 1)
     {

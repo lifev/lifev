@@ -127,8 +127,8 @@ main( int argc, char** argv )
     GetPot dataFile( data_file_name );
 
     // everything ( mesh included ) will be stored in a class
-    DataNavierStokes<RegionMesh3D<LinearTetra> > dataNavierStokes(dataFile, false, "fluid/discretization", "fluid/discretization");
-    dataNavierStokes.setup( dataFile );
+    OseenData<RegionMesh3D<LinearTetra> > oseenData(dataFile, false, "fluid/discretization", "fluid/discretization");
+    oseenData.setup( dataFile );
 
     // Now for the boundary conditions :
     // BCHandler is the class that stores the boundary conditions. Here we will
@@ -154,7 +154,7 @@ main( int argc, char** argv )
     bcH.addBC( "Slipwall", SLIPWALL, Essential, Component, uZero, zComp );
 
     // partitioning the mesh
-    partitionMesh< RegionMesh3D<LinearTetra> >   meshPart(*dataNavierStokes.mesh(), comm);
+    partitionMesh< RegionMesh3D<LinearTetra> >   meshPart(*oseenData.mesh(), comm);
 
     // Now we proceed with the FESpace definition
     // here we decided to use P2/P1 elements
@@ -223,7 +223,7 @@ main( int argc, char** argv )
 
     if (verbose) std::cout << "Calling the fluid constructor ... ";
 
-    OseenSolver< RegionMesh3D<LinearTetra> > fluid (dataNavierStokes,
+    OseenSolver< RegionMesh3D<LinearTetra> > fluid (oseenData,
                                               uFESpace,
                                               pFESpace,
                                               comm);
@@ -267,18 +267,18 @@ main( int argc, char** argv )
 
     // Initialization
 
-    Real dt     = dataNavierStokes.timeStep();
-    Real t0     = dataNavierStokes.initialTime();
-    Real tFinal = dataNavierStokes.endTime();
+    Real dt     = oseenData.timeStep();
+    Real t0     = oseenData.initialTime();
+    Real tFinal = oseenData.endTime();
 
     // bdf object to store the previous solutions
 
-    BdfTNS<vector_type> bdf(dataNavierStokes.orderBDF());
+    BdfTNS<vector_type> bdf(oseenData.orderBDF());
 
     if (verbose) std::cout << std::endl;
     if (verbose) std::cout << "Computing the stokes solution ... " << std::endl << std::endl;
 
-    dataNavierStokes.setTime(t0);
+    oseenData.setTime(t0);
 
     // advection speed (beta) and rhs definition using the full map
     // (velocity + pressure)

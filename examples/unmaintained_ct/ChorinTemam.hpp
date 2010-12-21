@@ -43,7 +43,7 @@
 
 #include <life/lifecore/LifeChrono.hpp>
 #include <life/lifefem/geoMap.hpp>
-#include <life/lifesolver/dataNavierStokes.hpp>
+#include <life/lifesolver/OseenData.hpp>
 
 #include <boost/shared_ptr.hpp>
 
@@ -65,7 +65,7 @@ class ChorinTemam
 
 public:
 
-    typedef DataNavierStokes<Mesh> data_type;
+    typedef OseenData<Mesh> data_type;
 
     typedef Real ( *Function ) ( const Real&, const Real&, const Real&,
                                  const Real&, const ID& );

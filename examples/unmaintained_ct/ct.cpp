@@ -84,10 +84,10 @@ CT::run()
     const QuadRule* qR_press;
     const QuadRule* bdQr_press;
 
-    DataNavierStokes<RegionMesh3D<LinearTetra> > dataNavierStokes;
-    dataNavierStokes.setup( dataFile );
+    OseenData<RegionMesh3D<LinearTetra> > oseenData;
+    oseenData.setup( dataFile );
 
-    partitionMesh< RegionMesh3D<LinearTetra> > meshPart(*dataNavierStokes.meshData()->mesh(), M_comm);
+    partitionMesh< RegionMesh3D<LinearTetra> > meshPart(*oseenData.meshData()->mesh(), M_comm);
 
     // fill in the space and time discretization orders
 
@@ -100,7 +100,7 @@ CT::run()
     if (verbose) std::cout << "  t-  Pressure time discretization order : "
                                << pBdfOrder << std::endl;
 
-    dataNavierStokes.meshData()->setMesh(meshPart.mesh());
+    oseenData.meshData()->setMesh(meshPart.mesh());
 
     std::string uOrder = dataFile( "fluid/space_discretization/vel_order", "P1");
     std::string pOrder =  dataFile( "fluid/space_discretization/press_order", "P1");
@@ -138,7 +138,7 @@ CT::run()
 
     if (verbose) std::cout << "  t-  Calling the fluid constructor ... ";
 
-    ChorinTemam< RegionMesh3D<LinearTetra> > fluid (dataNavierStokes,
+    ChorinTemam< RegionMesh3D<LinearTetra> > fluid (oseenData,
                                                     uFESpace,
                                                     pFESpace,
                                                     uBdfOrder,
@@ -160,9 +160,9 @@ CT::run()
     MPI_Barrier(MPI_COMM_WORLD);
 
     // Initialization
-    Real dt     = dataNavierStokes.dataTime()->timeStep();
-    Real t0     = dataNavierStokes.dataTime()->initialTime();
-    Real tFinal = dataNavierStokes.dataTime()->endTime();
+    Real dt     = oseenData.dataTime()->timeStep();
+    Real t0     = oseenData.dataTime()->initialTime();
+    Real tFinal = oseenData.dataTime()->endTime();
 
 
     // initialization with stokes solution
@@ -170,7 +170,7 @@ CT::run()
     if (verbose) std::cout << std::endl;
     if (verbose) std::cout << "  tt- Computing the stokes solution ... " << std::endl << std::endl;
 
-    dataNavierStokes.dataTime()->setTime(t0);
+    oseenData.dataTime()->setTime(t0);
 
     vector_type init_u ( fullMap_u );
     vector_type init_p ( fullMap_p );
@@ -203,12 +203,12 @@ CT::run()
     for ( Real time = t0 + dt ; time <= tFinal + dt/2.; time += dt, iter++)
     {
 
-        dataNavierStokes.dataTime()->setTime(time);
+        oseenData.dataTime()->setTime(time);
 
         if (verbose)
         {
             std::cout << std::endl;
-            std::cout << "l-  We are now at time "<< dataNavierStokes.dataTime()->time() << " s. " << std::endl;
+            std::cout << "l-  We are now at time "<< oseenData.dataTime()->time() << " s. " << std::endl;
             std::cout << std::endl;
         }
 

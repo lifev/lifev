@@ -62,8 +62,8 @@ enum NSStabilization
 };
 
 
-//! @class DataNavierStokes
-//! DataNavierStokes - LifeV Base class which holds usual data for the NavierStokes equations solvers
+//! @class OseenData
+//! OseenData - LifeV Base class which holds usual data for the NavierStokes equations solvers
 /*!
  *  @author M.A. Fernandez, Cristiano Malossi, Samuel Quinodoz
  *
@@ -94,7 +94,7 @@ enum NSStabilization
  *
  */
 
-class DataNavierStokes
+class OseenData
 {
 
 public:
@@ -113,16 +113,16 @@ public:
     //@{
 
     //! Empty Constructor
-    DataNavierStokes();
+    OseenData();
 
     //! Copy constructor
     /*!
-     * @param dataNavierStokes DataNavierStokes
+     * @param oseenData OseenData
      */
-    DataNavierStokes( const DataNavierStokes& dataNavierStokes );
+    OseenData( const OseenData& oseenData );
 
     //! Virtual destructor
-    virtual ~DataNavierStokes() {}
+    virtual ~OseenData() {}
 
     //@}
 
@@ -132,9 +132,9 @@ public:
 
     //! Operator=
     /*!
-     * @param dataNavierStokes DataNavierStokes
+     * @param oseenData OseenData
      */
-    DataNavierStokes& operator=( const DataNavierStokes& dataNavierStokes );
+    OseenData& operator=( const OseenData& oseenData );
 
     //@}
 
@@ -187,7 +187,7 @@ public:
         M_viscosity[nfluid] = viscosity;
     }
 
-    //! Set this instance of DataNavierStokes to either a Stokes or a Navier-Stokes problem
+    //! Set this instance of OseenData to either a Stokes or a Navier-Stokes problem
     /*!
      * @param Stokes a boolean that is "true" for a Stokes problem and "false" for a Navier-Stokes
      *                problem

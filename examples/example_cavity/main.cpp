@@ -147,8 +147,8 @@ main( int argc, char** argv )
     GetPot dataFile( data_file_name );
 
     // everything ( mesh included ) will be stored in a class
-    DataNavierStokes<RegionMesh3D<LinearTetra> > dataNavierStokes;
-    dataNavierStokes.setup( dataFile );
+    OseenData<RegionMesh3D<LinearTetra> > oseenData;
+    oseenData.setup( dataFile );
 
     // Now for the boundary conditions :
     // BCHandler is the class that stores the boundary conditions. Here we will
@@ -174,12 +174,12 @@ main( int argc, char** argv )
     bcH.addBC( "Slipwall", SLIPWALL, Essential, Component, uZero, zComp );
 
     // partitioning the mesh
-    partitionMesh< RegionMesh3D<LinearTetra> >   meshPart(*dataNavierStokes.meshData()->mesh(), comm);
+    partitionMesh< RegionMesh3D<LinearTetra> >   meshPart(*oseenData.meshData()->mesh(), comm);
 
     if (verbose) std::cout << std::endl;
-    if (verbose) std::cout << "Time discretization order " << dataNavierStokes.dataTime()->orderBDF() << std::endl;
+    if (verbose) std::cout << "Time discretization order " << oseenData.dataTime()->orderBDF() << std::endl;
 
-    dataNavierStokes.meshData()->setMesh(meshPart.meshPartition());
+    oseenData.meshData()->setMesh(meshPart.meshPartition());
 
 
     // Everything is ready to build the FE space
@@ -223,7 +223,7 @@ main( int argc, char** argv )
 
     if (verbose) std::cout << "Calling the fluid constructor ... ";
 
-    OseenSolver< RegionMesh3D<LinearTetra> > fluid (dataNavierStokes,
+    OseenSolver< RegionMesh3D<LinearTetra> > fluid (oseenData,
                                               uFESpace,
                                               pFESpace,
                                               comm);
@@ -264,8 +264,8 @@ main( int argc, char** argv )
     if (verbose) std::cout << std::endl;
     if (verbose) std::cout << "Computing the stokes solution ... " << std::endl << std::endl;
 
-    Real t0     = dataNavierStokes.dataTime()->initialTime();
-    dataNavierStokes.dataTime()->setTime(t0);
+    Real t0     = oseenData.dataTime()->initialTime();
+    oseenData.dataTime()->setTime(t0);
 
     // advection speed (beta) and rhs definition using the full map
     // (velocity + pressure)
@@ -289,7 +289,7 @@ main( int argc, char** argv )
     ensight.postProcess( 0 );
 
     // bdf object to store the previous solutions
-    BdfTNS<vector_type> bdf(dataNavierStokes.dataTime()->orderBDF());
+    BdfTNS<vector_type> bdf(oseenData.dataTime()->orderBDF());
     // bdf initialization with the stokes problem solution
     bdf.bdfVelocity().setInitialCondition( fluid.solution() );
 
@@ -303,8 +303,8 @@ main( int argc, char** argv )
 
     // Initialization of the time loop
 
-    Real dt     = dataNavierStokes.dataTime()->timeStep();
-    Real tFinal = dataNavierStokes.dataTime()->endTime();
+    Real dt     = oseenData.dataTime()->timeStep();
+    Real tFinal = oseenData.dataTime()->endTime();
 
 
     int iter = 1;
@@ -313,25 +313,25 @@ main( int argc, char** argv )
     {
         // inside the time loop, it's really like the initialization procedure,
         // exept that we now have an advection velocity, rhs and the mass matrix
-        dataNavierStokes.dataTime()->setTime(time);
+        oseenData.dataTime()->setTime(time);
 
         if (verbose)
         {
             std::cout << std::endl;
-            std::cout << "We are now at time "<< dataNavierStokes.dataTime()->time() << " s. " << std::endl;
+            std::cout << "We are now at time "<< oseenData.dataTime()->time() << " s. " << std::endl;
             std::cout << std::endl;
         }
 
         chrono.start();
 
         // alpha coefficient for the mass matrix
-        double alpha = bdf.bdfVelocity().coefficientFirstDerivative( 0 ) / dataNavierStokes.dataTime()->timeStep();
+        double alpha = bdf.bdfVelocity().coefficientFirstDerivative( 0 ) / oseenData.dataTime()->timeStep();
 
         // extrapolation of the advection term
         beta = bdf.bdfVelocity().extrapolation();
 
         // rhs  part of the time-derivative
-        rhs  = fluid.matrixMass()*bdf.bdfVelocity().time_der( dataNavierStokes.dataTime()->timeStep() );
+        rhs  = fluid.matrixMass()*bdf.bdfVelocity().time_der( oseenData.dataTime()->timeStep() );
 
         // the we update the Oseen system
         fluid.updateSystem( alpha, beta, rhs );

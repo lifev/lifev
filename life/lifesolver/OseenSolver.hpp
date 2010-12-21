@@ -66,7 +66,7 @@
 #include <life/lifefem/FESpace.hpp>
 
 #include <life/lifesolver/nsipterms.hpp>
-#include <life/lifesolver/dataNavierStokes.hpp>
+#include <life/lifesolver/OseenData.hpp>
 
 #include <boost/shared_ptr.hpp>
 
@@ -95,7 +95,7 @@ public:
 
     typedef MeshType                              mesh_Type;
     typedef SolverType                            linearSolver_Type;
-    typedef DataNavierStokes                      data_Type;
+    typedef OseenData                      data_Type;
 
     typedef boost::function<Real ( const Real& t, const Real& x, const Real& y,
                                    const Real& z, const ID& i )> function_Type;
@@ -124,7 +124,7 @@ public:
 
     //! Constructor
     /*!
-        @param dataType DataNavierStokes class
+        @param dataType OseenData class
         @param velocityFESpace Velocity FE space
         @param pressureFESpace Pressure FE space
         @param communicator MPI communicator
@@ -138,7 +138,7 @@ public:
 
     //! Constructor
     /*!
-        @param dataType DataNavierStokes class
+        @param dataType OseenData class
         @param velocityFESpace Velocity FE space
         @param pressureFESpace Pressure FE space
         @param communicator MPI communicator
@@ -154,7 +154,7 @@ public:
 
     //! Constructor
     /*!
-        @param dataType DataNavierStokes class
+        @param dataType OseenData class
         @param velocityFESpace Velocity FE space
         @param pressureFESpace Pressure FE space
         @param lagrangeMultipliers (lagrange multipliers for the flux problem with rufaec flag)
@@ -411,7 +411,7 @@ public:
      */
     const Real& density() const
     {
-        return M_dataNavierStokes->density();
+        return M_oseenData->density();
     }
     //! Return the viscosity of the fluid
     /*!
@@ -419,7 +419,7 @@ public:
      */
     const Real& viscosity() const
     {
-        return M_dataNavierStokes->viscosity();
+        return M_oseenData->viscosity();
     }
 
     //! Return the local solution vector
@@ -635,7 +635,7 @@ protected:
     //private members
 
     //! data for Navier-Stokes solvers
-    boost::shared_ptr<data_Type>   M_dataNavierStokes;
+    boost::shared_ptr<data_Type>   M_oseenData;
 
     // FE spaces
     FESpace<mesh_Type, EpetraMap>& M_velocityFESpace;
@@ -739,7 +739,7 @@ OseenSolver( boost::shared_ptr<data_Type>    dataType,
        FESpace<mesh_Type, EpetraMap>&  pressureFESpace,
        boost::shared_ptr<Epetra_Comm>& communicator,
        const Int                       lagrangeMultiplier ):
-        M_dataNavierStokes       ( dataType ),
+        M_oseenData       ( dataType ),
         M_velocityFESpace        ( velocityFESpace ),
         M_pressureFESpace        ( pressureFESpace ),
         M_Displayer              ( communicator ),
@@ -771,7 +771,7 @@ OseenSolver( boost::shared_ptr<data_Type>    dataType,
 //                                   M_velocityFESpace.feBd(),
 //                                   M_velocityFESpace.qr(),
 //                                   0., 0., 0.,
-//                                   M_dataNavierStokes->viscosity() ),
+//                                   M_oseenData->viscosity() ),
         M_betaFunction           ( 0 ),
         M_divBetaUv              ( false ),
         M_stiffStrain            ( false ),
@@ -793,7 +793,7 @@ OseenSolver( boost::shared_ptr<data_Type>    dataType,
 {
     M_stabilization = ( &M_velocityFESpace.refFE() == &M_pressureFESpace.refFE() );
     M_ipStabilization.setFeSpaceVelocity(M_velocityFESpace);
-    M_ipStabilization.setViscosity(M_dataNavierStokes->viscosity() );
+    M_ipStabilization.setViscosity(M_oseenData->viscosity() );
 }
 
 template<typename MeshType, typename SolverType>
@@ -804,7 +804,7 @@ OseenSolver( boost::shared_ptr<data_Type>    dataType,
        boost::shared_ptr<Epetra_Comm>& communicator,
        EpetraMap                       monolithicMap,
        UInt                            offset ):
-        M_dataNavierStokes       ( dataType ),
+        M_oseenData       ( dataType ),
         M_velocityFESpace        ( velocityFESpace ),
         M_pressureFESpace        ( pressureFESpace ),
         M_Displayer              ( communicator ),
@@ -834,7 +834,7 @@ OseenSolver( boost::shared_ptr<data_Type>    dataType,
 //                                   M_velocityFESpace.feBd(),
 //                                   M_velocityFESpace.qr(),
 //                                   0., 0., 0.,
-//                                   M_dataNavierStokes->viscosity() ),
+//                                   M_oseenData->viscosity() ),
         M_betaFunction           ( 0 ),
         M_divBetaUv              ( false ),
         M_stiffStrain            ( false ),
@@ -856,7 +856,7 @@ OseenSolver( boost::shared_ptr<data_Type>    dataType,
 {
     M_stabilization = ( &M_velocityFESpace.refFE() == &M_pressureFESpace.refFE() );
     M_ipStabilization.setFeSpaceVelocity(M_velocityFESpace);
-    M_ipStabilization.setViscosity(M_dataNavierStokes->viscosity() );
+    M_ipStabilization.setViscosity(M_oseenData->viscosity() );
 }
 
 template<typename MeshType, typename SolverType>
@@ -866,7 +866,7 @@ OseenSolver( boost::shared_ptr<data_Type>    dataType,
        FESpace<mesh_Type, EpetraMap>&  pressureFESpace,
        const std::vector<Int> &        lagrangeMultipliers,
        boost::shared_ptr<Epetra_Comm>& communicator ):
-        M_dataNavierStokes       ( dataType ),
+        M_oseenData       ( dataType ),
         M_velocityFESpace        ( velocityFESpace ),
         M_pressureFESpace        ( pressureFESpace ),
         M_Displayer              ( communicator ),
@@ -896,7 +896,7 @@ OseenSolver( boost::shared_ptr<data_Type>    dataType,
 //                                   M_velocityFESpace.feBd(),
 //                                   M_velocityFESpace.qr(),
 //                                   0., 0., 0.,
-//                                   M_dataNavierStokes->viscosity() ),
+//                                   M_oseenData->viscosity() ),
         M_betaFunction           ( 0 ),
         M_divBetaUv              ( false ),
         M_stiffStrain            ( false ),
@@ -918,7 +918,7 @@ OseenSolver( boost::shared_ptr<data_Type>    dataType,
 {
     M_stabilization = ( &M_velocityFESpace.refFE() == &M_pressureFESpace.refFE() );
     M_ipStabilization.setFeSpaceVelocity(M_velocityFESpace);
-    M_ipStabilization.setViscosity(M_dataNavierStokes->viscosity() );
+    M_ipStabilization.setViscosity(M_oseenData->viscosity() );
 }
 
 template<typename MeshType, typename SolverType>
@@ -973,12 +973,12 @@ initialize( const function_Type& velocityFunction, const function_Type& pressure
     vector_Type velocityInitialGuess( M_velocityFESpace.map() );
     M_velocityFESpace.interpolate( velocityFunction,
                                    velocityInitialGuess,
-                                   M_dataNavierStokes->dataTime()->time() );
+                                   M_oseenData->dataTime()->time() );
 
     vector_Type pressureInitialGuess( M_pressureFESpace.map() );
     M_pressureFESpace.interpolate( pressureFunction,
                                    pressureInitialGuess,
-                                   M_dataNavierStokes->dataTime()->time() );
+                                   M_oseenData->dataTime()->time() );
 
     initialize( velocityInitialGuess, pressureInitialGuess );
 }
@@ -1069,11 +1069,11 @@ OseenSolver<MeshType, SolverType>::buildSystem()
         // stiffness matrix
         chronoStiff.start();
         if ( M_stiffStrain )
-            stiff_strain( 2.0*M_dataNavierStokes->viscosity(),
+            stiff_strain( 2.0*M_oseenData->viscosity(),
                           M_elementMatrixStiff,
                           M_velocityFESpace.fe() );
         else
-            stiff( M_dataNavierStokes->viscosity(),
+            stiff( M_oseenData->viscosity(),
                    M_elementMatrixStiff,
                    M_velocityFESpace.fe(), 0, 0, nDimensions );
         //stiff_div( 0.5*M_velocityFESpace.fe().diameter(), M_elementMatrixStiff, M_velocityFESpace.fe() );
@@ -1083,7 +1083,7 @@ OseenSolver<MeshType, SolverType>::buildSystem()
         if ( !M_steady )
         {
             chronoMass.start();
-            mass( M_dataNavierStokes->density(),
+            mass( M_oseenData->density(),
                   M_elementMatrixMass,
                   M_velocityFESpace.fe(), 0, 0, nDimensions );
             chronoMass.stop();
@@ -1347,26 +1347,26 @@ updateSystem( const Real         alpha,
 
 
             // ALE term: - rho div w u v
-            mass_divw( - M_dataNavierStokes->density(),
+            mass_divw( - M_oseenData->density(),
                        M_wLoc,
                        M_elementMatrixStiff,
                        M_velocityFESpace.fe(), 0, 0, numVelocityComponent );
 
             // ALE stab implicit: 0.5 rho div u w v
-            mass_divw( 0.5*M_dataNavierStokes->density(),
+            mass_divw( 0.5*M_oseenData->density(),
                        M_uLoc,
                        M_elementMatrixStiff,
                        M_velocityFESpace.fe(), 0, 0, numVelocityComponent );
 
             // Stabilising term: div u^n u v
             if ( M_divBetaUv )
-                mass_divw( 0.5*M_dataNavierStokes->density(),
+                mass_divw( 0.5*M_oseenData->density(),
                            M_elementRightHandSide,
                            M_elementMatrixStiff,
                            M_velocityFESpace.fe(), 0, 0, numVelocityComponent );
 
             // compute local convective terms
-            advection( M_dataNavierStokes->density(),
+            advection( M_oseenData->density(),
                        M_elementRightHandSide,
                        M_elementMatrixStiff,
                        M_velocityFESpace.fe(), 0, 0, numVelocityComponent );
@@ -1759,7 +1759,7 @@ OseenSolver<MeshType, SolverType>::applyBoundaryConditions( matrix_Type&       m
               bcHandler,
               M_velocityFESpace.feBd(),
               1.,
-              M_dataNavierStokes->dataTime()->time() );
+              M_oseenData->dataTime()->time() );
 
     rightHandSide = rightHandSideFull;
 

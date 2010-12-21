@@ -37,7 +37,7 @@ This library is free software; you can redistribute it and/or
 #include <life/lifefem/FESpace.hpp>
 
 #include <life/lifesolver/nsipterms.hpp>
-#include <life/lifesolver/dataNavierStokes.hpp>
+#include <life/lifesolver/OseenData.hpp>
 
 #include <life/lifearray/MatrixContainer.hpp>
 
@@ -63,7 +63,7 @@ class NS_Assembler
 public:
 
     typedef Mesh                                  mesh_type;
-    typedef DataNavierStokes                      data_type;
+    typedef OseenData                      data_type;
     typedef boost::shared_ptr<data_type>          data_ptr;
 
     typedef BCHandler                             bchandler_raw_type;
@@ -200,7 +200,7 @@ NS_Assembler<Mesh>::
 template<typename Mesh>
 void NS_Assembler<Mesh>::setUp( const GetPot& dataFile )
 {
-    //FIXME: This variable should be in DataNavierStokes!!!
+    //FIXME: This variable should be in OseenData!!!
     M_stiffStrain = dataFile( "fluid/space_discretization/stiff_strain",false); // Enable grad( u )^T in stress tensor
 }
 

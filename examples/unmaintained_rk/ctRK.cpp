@@ -81,10 +81,10 @@ CTRK::run()
     const QuadRule* qR_press;
     const QuadRule* bdQr_press;
 
-    DataNavierStokes<RegionMesh3D<LinearTetra> > dataNavierStokes;
-    dataNavierStokes.setup( dataFile );
+    OseenData<RegionMesh3D<LinearTetra> > oseenData;
+    oseenData.setup( dataFile );
 
-    partitionMesh< RegionMesh3D<LinearTetra> > meshPart(*dataNavierStokes.meshData()->mesh(), *M_comm);
+    partitionMesh< RegionMesh3D<LinearTetra> > meshPart(*oseenData.meshData()->mesh(), *M_comm);
 
     // fill in the space and time discretization orders
     std::string uOrder = dataFile( "fluid/discretization/vel_order", "P1");
@@ -111,7 +111,7 @@ CTRK::run()
         bdQr_vel  = &quadRuleTria3pt;   // DoE 2
     }
 
-    Dof uDof(*dataNavierStokes.meshData()->mesh(), *refFE_vel);
+    Dof uDof(*oseenData.meshData()->mesh(), *refFE_vel);
 
     std::string pOrder =  dataFile( "fluid/discretization/press_order", "P1");
     if ( pOrder.compare("P2") == 0 )
@@ -132,7 +132,7 @@ CTRK::run()
         bdQr_press  = bdQr_vel;	 // test purpose
     }
 
-    dataNavierStokes.meshData()->setMesh(meshPart.mesh());
+    oseenData.meshData()->setMesh(meshPart.mesh());
 
     // building velocity and pressure FE spaces
     if (verbose)
@@ -171,7 +171,7 @@ CTRK::run()
 
     if (verbose) std::cout << "  t-  Calling the fluid constructor ... ";
 
-    ChorinTemamRK< RegionMesh3D<LinearTetra> > fluid (dataNavierStokes,
+    ChorinTemamRK< RegionMesh3D<LinearTetra> > fluid (oseenData,
                                                       uFESpace,
                                                       pFESpace,
                                                       *bcHu,
@@ -191,9 +191,9 @@ CTRK::run()
     MPI_Barrier(MPI_COMM_WORLD);
 
     // Initialization
-    Real dt     = dataNavierStokes.dataTime()->timeStep();
-    Real t0     = dataNavierStokes.dataTime()->initialTime();
-    Real tFinal = dataNavierStokes.dataTime()->endTime();
+    Real dt     = oseenData.dataTime()->timeStep();
+    Real t0     = oseenData.dataTime()->initialTime();
+    Real tFinal = oseenData.dataTime()->endTime();
 
 
     // initialization with stokes solution
@@ -201,7 +201,7 @@ CTRK::run()
     if (verbose) std::cout << std::endl;
     if (verbose) std::cout << "  tt- Computing the stokes solution ... " << std::endl << std::endl;
 
-    dataNavierStokes.dataTime()->setTime(t0);
+    oseenData.dataTime()->setTime(t0);
 
     vector_type init_u ( fullMap_u );
     vector_type init_p ( fullMap_p );
@@ -236,13 +236,13 @@ CTRK::run()
 
         if (verbose)
         {
-            std::cout << "\nl-  We are now at time "<< dataNavierStokes.dataTime()->time()
+            std::cout << "\nl-  We are now at time "<< oseenData.dataTime()->time()
                       << " s.\n" << std::endl;
         }
 
         chrono.start();
 
-        dataNavierStokes.dataTime()->setTime(time);
+        oseenData.dataTime()->setTime(time);
 
         if (verbose) std::cout << "\n  l-  Euler explicit step\n" << std::endl;
 

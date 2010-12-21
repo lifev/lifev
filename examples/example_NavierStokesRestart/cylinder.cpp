@@ -381,8 +381,8 @@ Cylinder::run()
 
     int numLM = 0;
 
-    boost::shared_ptr<DataNavierStokes> dataNavierStokes(new DataNavierStokes() );
-    dataNavierStokes->setup( dataFile );
+    boost::shared_ptr<OseenData> oseenData(new OseenData() );
+    oseenData->setup( dataFile );
 
     MeshData meshData;
     meshData.setup(dataFile, "fluid/space_discretization");
@@ -393,9 +393,9 @@ Cylinder::run()
     MeshPartitioner< Mesh >   meshPart(fullMeshPtr, d->comm);
 
     if (verbose) std::cout << std::endl;
-    if (verbose) std::cout << "Time discretization order " << dataNavierStokes->dataTime()->orderBDF() << std::endl;
+    if (verbose) std::cout << "Time discretization order " << oseenData->dataTime()->orderBDF() << std::endl;
 
-    //dataNavierStokes.meshData()->setMesh(meshPart.meshPartition());
+    //oseenData.meshData()->setMesh(meshPart.meshPartition());
 
     std::string uOrder =  dataFile( "fluid/space_discretization/vel_order", "P1");
     if (verbose)
@@ -428,7 +428,7 @@ Cylinder::run()
 
     bcH.setOffset("Inlet", totalVelDof + totalPressDof);
 
-    OseenSolver< RegionMesh3D<LinearTetra> > fluid (dataNavierStokes,
+    OseenSolver< RegionMesh3D<LinearTetra> > fluid (oseenData,
                                               uFESpace,
                                               pFESpace,
                                               d->comm, numLM);
@@ -443,15 +443,15 @@ Cylinder::run()
 
     // Initialization
 
-    Real dt     = dataNavierStokes->dataTime()->timeStep();
-    Real t0     = dataNavierStokes->dataTime()->initialTime();
-    Real tFinal = dataNavierStokes->dataTime()->endTime();
+    Real dt     = oseenData->dataTime()->timeStep();
+    Real t0     = oseenData->dataTime()->initialTime();
+    Real tFinal = oseenData->dataTime()->endTime();
 
 
     // bdf object to store the previous solutions
 
     BdfTNS<vector_Type> bdf;
-    bdf.setup(dataNavierStokes->dataTime()->orderBDF());
+    bdf.setup(oseenData->dataTime()->orderBDF());
 
     vector_Type beta( fullMap );
     vector_Type rhs ( fullMap );
@@ -478,7 +478,7 @@ Cylinder::run()
         if (verbose) std::cout << std::endl;
         if (verbose) std::cout << "Computing the stokes solution ... " << std::endl << std::endl;
 
-        dataNavierStokes->dataTime()->setTime(t0);
+        oseenData->dataTime()->setTime(t0);
 
         MPI_Barrier(MPI_COMM_WORLD);
 
@@ -576,21 +576,21 @@ Cylinder::run()
     for ( Real time = t0 + dt ; time <= tFinal + dt/2.; time += dt, iter++)
     {
 
-        dataNavierStokes->dataTime()->setTime(time);
+        oseenData->dataTime()->setTime(time);
 
         if (verbose)
         {
             std::cout << std::endl;
-            std::cout << "We are now at time "<< dataNavierStokes->dataTime()->time() << " s. " << std::endl;
+            std::cout << "We are now at time "<< oseenData->dataTime()->time() << " s. " << std::endl;
             std::cout << std::endl;
         }
 
         chrono.start();
 
-        double alpha = bdf.bdfVelocity().coefficientFirstDerivative( 0 ) / dataNavierStokes->dataTime()->timeStep();
+        double alpha = bdf.bdfVelocity().coefficientFirstDerivative( 0 ) / oseenData->dataTime()->timeStep();
 
         beta = bdf.bdfVelocity().extrapolation();
-        bdf.bdfVelocity().updateRHSContribution( dataNavierStokes->dataTime()->timeStep());
+        bdf.bdfVelocity().updateRHSContribution( oseenData->dataTime()->timeStep());
         rhs  = fluid.matrixMass()*bdf.bdfVelocity().rhsContributionFirstDerivative();
 
         fluid.updateSystem( alpha, beta, rhs );

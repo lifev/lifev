@@ -118,8 +118,8 @@ EnsightToHdf5::run()
     bool verbose = (d->comm->MyPID() == 0);
 
     // Fluid solver
-    boost::shared_ptr<DataNavierStokes> dataNavierStokes(new DataNavierStokes());
-    dataNavierStokes->setup( dataFile );
+    boost::shared_ptr<OseenData> oseenData(new OseenData());
+    oseenData->setup( dataFile );
 
     MeshData meshData;
     meshData.setup(dataFile, "fluid/space_discretization");
@@ -152,7 +152,7 @@ EnsightToHdf5::run()
     std::string uOrder =  dataFile( "fluid/space_discretization/vel_order", "P1");
     std::string pOrder =  dataFile( "fluid/space_discretization/press_order", "P1");
 
-    //dataNavierStokes->meshData()->setMesh(meshPart.mesh());
+    //oseenData->meshData()->setMesh(meshPart.mesh());
 
     if (verbose) std::cout << "Building the velocity FE space ... " << std::flush;
 
@@ -185,7 +185,7 @@ EnsightToHdf5::run()
 
     if (verbose) std::cout << "Calling the fluid constructor ... ";
 
-    OseenSolver< RegionMesh3D<LinearTetra> > fluid (dataNavierStokes,
+    OseenSolver< RegionMesh3D<LinearTetra> > fluid (oseenData,
                                               uFESpace,
                                               pFESpace,
                                               d->comm);
@@ -196,9 +196,9 @@ EnsightToHdf5::run()
     fluid.setUp(dataFile);
 
     // Initialization
-    Real dt     = dataNavierStokes->dataTime()->timeStep();
-    Real t0     = dataNavierStokes->dataTime()->initialTime();
-    Real tFinal = dataNavierStokes->dataTime()->endTime();
+    Real dt     = oseenData->dataTime()->timeStep();
+    Real t0     = oseenData->dataTime()->initialTime();
+    Real tFinal = oseenData->dataTime()->endTime();
 
     boost::shared_ptr< Exporter<RegionMesh3D<LinearTetra> > > exporter;
     boost::shared_ptr< Exporter<RegionMesh3D<LinearTetra> > > importer;

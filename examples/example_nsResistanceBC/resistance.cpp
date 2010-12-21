@@ -212,8 +212,8 @@ ResistanceProblem::run()
     const QuadRule* bdQr_press;
 
 
-    boost::shared_ptr<DataNavierStokes> dataNavierStokes(new DataNavierStokes());
-    dataNavierStokes->setup( dataFile );
+    boost::shared_ptr<OseenData> oseenData(new OseenData());
+    oseenData->setup( dataFile );
 
     MeshData meshData;
     meshData.setup(dataFile, "fluid/space_discretization");
@@ -264,7 +264,7 @@ ResistanceProblem::run()
     }
 
     if (verbose) std::cout << std::endl;
-    if (verbose) std::cout << "Time discretization order " << dataNavierStokes->dataTime()->orderBDF() << std::endl;
+    if (verbose) std::cout << "Time discretization order " << oseenData->dataTime()->orderBDF() << std::endl;
 
 
 
@@ -301,7 +301,7 @@ ResistanceProblem::run()
 
     if (verbose) std::cout << "Calling the fluid constructor ... ";
 
-    OseenSolver< RegionMesh3D<LinearTetra> > fluid (dataNavierStokes,
+    OseenSolver< RegionMesh3D<LinearTetra> > fluid (oseenData,
                                               uFESpace,
                                               pFESpace,
                                               d->comm);
@@ -327,19 +327,19 @@ ResistanceProblem::run()
 
     // Initialization
 
-    Real dt     = dataNavierStokes->dataTime()->timeStep();
-    Real t0     = dataNavierStokes->dataTime()->initialTime();
-    Real tFinal = dataNavierStokes->dataTime()->endTime();
+    Real dt     = oseenData->dataTime()->timeStep();
+    Real t0     = oseenData->dataTime()->initialTime();
+    Real tFinal = oseenData->dataTime()->endTime();
 
     // bdf object to store the previous solutions
 
     BdfTNS<vector_Type> bdf;
-    bdf.setup(dataNavierStokes->dataTime()->orderBDF());
+    bdf.setup(oseenData->dataTime()->orderBDF());
 
     // initialization with stokes solution
     if (verbose) std::cout << "Computing the stokes solution ... " << std::endl << std::endl;
 
-    dataNavierStokes->dataTime()->setTime(t0);
+    oseenData->dataTime()->setTime(t0);
 
     vector_Type beta( fullMap );
     vector_Type rhs ( fullMap );
@@ -395,15 +395,15 @@ ResistanceProblem::run()
 
     for ( Real time = t0 + dt ; time <= tFinal + dt/2.; time += dt, iter++)
     {
-        dataNavierStokes->dataTime()->setTime(time);
+        oseenData->dataTime()->setTime(time);
 
         chrono.start();
 
-        double alpha = bdf.bdfVelocity().coefficientFirstDerivative( 0 ) / dataNavierStokes->dataTime()->timeStep();
+        double alpha = bdf.bdfVelocity().coefficientFirstDerivative( 0 ) / oseenData->dataTime()->timeStep();
 
         beta = bdf.bdfVelocity().extrapolation();
 
-        bdf.bdfVelocity().updateRHSContribution( dataNavierStokes->dataTime()->timeStep());
+        bdf.bdfVelocity().updateRHSContribution( oseenData->dataTime()->timeStep());
         rhs  = fluid.matrixMass()*bdf.bdfVelocity().rhsContributionFirstDerivative();
 
         fluid.updateSystem( alpha, beta, rhs );
