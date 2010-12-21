@@ -47,7 +47,7 @@
 #include <life/lifecore/Switch.hpp>
 #include <life/lifemesh/MeshElementBare.hpp>
 #include <life/lifemesh/MarkerDefinitions.hpp>
-#include <life/lifemesh/meshEntity.hpp>
+#include <life/lifemesh/MeshEntity.hpp>
 
 namespace LifeV
 {

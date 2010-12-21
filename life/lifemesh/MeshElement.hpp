@@ -39,7 +39,7 @@
 #define MESHELEMENT_H
 
 #include <life/lifemesh/MeshVertex.hpp>
-#include <life/lifemesh/meshEntity.hpp>
+#include <life/lifemesh/MeshEntity.hpp>
 
 namespace LifeV
 {
