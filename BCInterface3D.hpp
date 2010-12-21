@@ -443,15 +443,15 @@ template< class PhysicalSolverType > template< class BCInterfaceBaseType >
 inline void
 BCInterface3D< PhysicalSolverType >::addBase( std::vector< boost::shared_ptr< BCInterfaceBaseType > >& baseVector )
 {
-    boost::shared_ptr< BCInterfaceBaseType > Function( new BCInterfaceBaseType( M_data ) );
-    baseVector.push_back( Function );
+    boost::shared_ptr< BCInterfaceBaseType > function( new BCInterfaceBaseType( M_data ) );
+    baseVector.push_back( function );
 }
 
 template< class PhysicalSolverType > template< class BCInterfaceBaseType >
 inline void
 BCInterface3D< PhysicalSolverType >::addBase( std::vector< boost::shared_ptr< BCInterfaceBaseType > >& baseVector, const bcBaseList_Type& physicalSolver )
 {
-    boost::shared_ptr< BCInterfaceBaseType > function( factoryFunction_Type::instance().createObject( physicalSolver ) );
+    boost::shared_ptr< BCInterfaceBaseType > function( factoryFunction_Type::instance().createObject( physicalSolver, M_data.mapBase() ) );
 
     function->setData( M_data );
 

@@ -168,6 +168,9 @@ public:
     //! Get the base type of the boundary condition
     const std::pair< std::string, bcBaseList_Type >& base() const { return M_base; }
 
+    //! Get the base type of the boundary condition
+    const std::map< std::string, bcBaseList_Type >& mapBase() const { return M_mapBase; }
+
     //! Get the resistance vector {R1, R2, R3 ...}
     const resistanceContainer_Type& resistance() const { return M_resistance; }
 
@@ -194,7 +197,7 @@ private:
 
     bcSide_Type                               M_side;
     bcLine_Type                               M_line;
-    bcType_Type                                   M_quantity;
+    bcType_Type                               M_quantity;
     std::string                               M_baseString;
     std::pair< std::string, bcBaseList_Type > M_base;
 
@@ -202,7 +205,7 @@ private:
 
     // Maps
     std::map< std::string, bcSide_Type >      M_mapSide;
-    std::map< std::string, bcType_Type >          M_mapQuantity;
+    std::map< std::string, bcType_Type >      M_mapQuantity;
     std::map< std::string, bcLine_Type >      M_mapLine;
     std::map< std::string, bcBaseList_Type >  M_mapBase;
 };
