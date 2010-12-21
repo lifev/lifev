@@ -176,7 +176,7 @@ public:
     typedef data_Type::container2D_Type             container2D_Type;
     typedef data_Type::scalarVector_Type            scalarVector_Type;
 
-    typedef FESpace< mesh_Type, EpetraMap >         feSpace_Type;
+    typedef FESpace< mesh_Type, MapEpetra >         feSpace_Type;
     typedef boost::shared_ptr< feSpace_Type >       feSpacePtr_Type;
 
     typedef Epetra_Comm                             comm_Type;
