@@ -67,7 +67,7 @@
 // LifeV includes
 #include <life/lifefem/FESpace.hpp>
 #ifdef HAVE_HDF5
-#include <life/lifefilters/hdf5exporter.hpp>
+#include <life/lifefilters/ExporterHDF5.hpp>
 #endif
 
 namespace LifeV
