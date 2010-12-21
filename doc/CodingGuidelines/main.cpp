@@ -57,7 +57,7 @@
 #pragma GCC diagnostic warning "-Wunused-parameter"
 
 #include <life/lifecore/application.hpp>
-#include <life/lifecore/life.hpp>
+#include <life/lifecore/Life.hpp>
 
 LifeV::AboutData
 makeAbout()
