@@ -48,7 +48,7 @@
 #pragma GCC diagnostic warning "-Wunused-parameter"
 
 
-#include <life/lifecore/life.hpp>
+#include <life/lifecore/Life.hpp>
 
 #include <life/lifemesh/ElementShapes.hpp>
 

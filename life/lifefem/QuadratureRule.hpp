@@ -40,7 +40,7 @@
 #ifndef QUADRULE_H
 #define QUADRULE_H
 
-#include <life/lifecore/life.hpp>
+#include <life/lifecore/Life.hpp>
 
 #include <life/lifemesh/ElementShapes.hpp>
 

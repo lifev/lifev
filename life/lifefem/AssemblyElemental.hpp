@@ -48,7 +48,7 @@
 #include <life/lifearray/MatrixElemental.hpp>
 #include <life/lifearray/VectorElemental.hpp>
 
-#include <life/lifecore/life.hpp>
+#include <life/lifecore/Life.hpp>
 
 #include <life/lifefem/CurrentBoundaryFE.hpp>
 #include <life/lifefem/CurrentFE.hpp>

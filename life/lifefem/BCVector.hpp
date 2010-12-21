@@ -42,7 +42,7 @@
 #include <boost/function.hpp>
 #include <boost/shared_ptr.hpp>
 
-#include <life/lifecore/life.hpp>
+#include <life/lifecore/Life.hpp>
 #include <life/lifefem/DOFInterface.hpp>
 #include <life/lifearray/VectorEpetra.hpp>
 #include <life/lifecore/FactorySingleton.hpp>

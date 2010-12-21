@@ -35,7 +35,7 @@
 #ifndef _LOCAL_DOF_PATTERN_HH
 #define _LOCAL_DOF_PATTERN_HH
 
-#include <life/lifecore/life.hpp>
+#include <life/lifecore/Life.hpp>
 
 #include <utility>
 
