@@ -580,9 +580,9 @@ MultiscaleModelFluid3D::setupFEspace()
 #endif
 
     //Velocity FE Space
-    const RefFE* u_refFE;
-    const QuadRule* u_qR;
-    const QuadRule* u_bdQr;
+    const ReferenceFE* u_refFE;
+    const QuadratureRule* u_qR;
+    const QuadratureRule* u_bdQr;
 
     if ( M_data->uOrder().compare( "P2" ) == 0 )
     {
@@ -610,9 +610,9 @@ MultiscaleModelFluid3D::setupFEspace()
     }
 
     //Pressure FE Space
-    const RefFE* p_refFE;
-    const QuadRule* p_qR;
-    const QuadRule* p_bdQr;
+    const ReferenceFE* p_refFE;
+    const QuadratureRule* p_qR;
+    const QuadratureRule* p_bdQr;
 
     if ( M_data->pOrder().compare( "P2" ) == 0 )
     {
