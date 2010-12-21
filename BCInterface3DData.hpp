@@ -235,6 +235,12 @@ public:
      */
     const std::pair< std::string, bcBaseList_Type >& base() const { return M_base; }
 
+    //! Get the base map of the boundary condition
+    /*!
+     * @return Boundary condition base map
+     */
+    const std::map< std::string, bcBaseList_Type >& mapBase() const { return M_mapBase; }
+
     //@}
 
 private:
@@ -262,15 +268,15 @@ private:
     bcFlag_Type                                    M_flag;
     bcType_Type                                    M_type;
     bcMode_Type                                    M_mode;
-    bcComponentsVec_Type                                    M_comV;
-    std::string                               M_direction;
-    std::string                               M_baseString;
-    std::pair< std::string, bcBaseList_Type > M_base;
+    bcComponentsVec_Type                           M_comV;
+    std::string                                    M_direction;
+    std::string                                    M_baseString;
+    std::pair< std::string, bcBaseList_Type >      M_base;
 
     // Maps
     std::map< std::string, bcType_Type >           M_mapType;
     std::map< std::string, bcMode_Type >           M_mapMode;
-    std::map< std::string, bcBaseList_Type >  M_mapBase;
+    std::map< std::string, bcBaseList_Type >       M_mapBase;
 };
 
 } // Namespace LifeV

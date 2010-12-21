@@ -126,15 +126,15 @@ MultiscaleModel1D::setupData( const std::string& fileName )
         setupGlobalData( fileName );
 
     //1D Model Physics
-    M_physics = physicsPtr_Type( physics_Type::factoryPhysics_Type::instance().createObject( M_data->physicsType() ) );
+    M_physics = physicsPtr_Type( physics_Type::factoryPhysics_Type::instance().createObject( M_data->physicsType(), OneDimensional::physicsMap ) );
     M_physics->setData( M_data );
 
     //1D Model Flux
-    M_flux = fluxPtr_Type( flux_Type::factoryFlux_Type::instance().createObject( M_data->fluxType() ) );
+    M_flux = fluxPtr_Type( flux_Type::factoryFlux_Type::instance().createObject( M_data->fluxType(), OneDimensional::fluxMap ) );
     M_flux->setPhysics( M_physics );
 
     //1D Model Source
-    M_source = sourcePtr_Type( source_Type::factorySource_Type::instance().createObject( M_data->sourceType() ) );
+    M_source = sourcePtr_Type( source_Type::factorySource_Type::instance().createObject( M_data->sourceType(), OneDimensional::sourceMap ) );
     M_source->setPhysics( M_physics );
 
     //Linear Solver

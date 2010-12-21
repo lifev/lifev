@@ -148,7 +148,7 @@ MultiscaleModelMultiscale::setupData( const std::string& fileName )
                 geometryTranslate[2] += dataFile( "Problem/offset", 0., j * geometryColumnsNumber + 9 );
             }
 
-        M_modelsList[i] = multiscaleModelPtr_Type( multiscaleModelFactory_Type::instance().createObject( model ) );
+        M_modelsList[i] = multiscaleModelPtr_Type( multiscaleModelFactory_Type::instance().createObject( model, multiscaleModelsMap ) );
         M_modelsList[i]->setCommunicator( M_comm );
         M_modelsList[i]->setGeometry( geometryScale, geometryRotate, geometryTranslate );
         M_modelsList[i]->setGlobalData( M_globalData );
@@ -163,7 +163,7 @@ MultiscaleModelMultiscale::setupData( const std::string& fileName )
     {
         coupling = multiscaleCouplingsMap[dataFile( "Problem/couplings", "undefined", i * couplingsColumnsNumber + 1 )];
 
-        M_couplingsList[i] = multiscaleCouplingPtr_Type( multiscaleCouplingFactory_Type::instance().createObject( coupling ) );
+        M_couplingsList[i] = multiscaleCouplingPtr_Type( multiscaleCouplingFactory_Type::instance().createObject( coupling, multiscaleCouplingsMap ) );
         M_couplingsList[i]->setCommunicator( M_comm );
         M_couplingsList[i]->setGlobalData( M_globalData );
         M_couplingsList[i]->setupData( path + enum2String( coupling, multiscaleCouplingsMap ) + "/"

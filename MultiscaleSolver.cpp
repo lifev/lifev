@@ -114,7 +114,7 @@ MultiscaleSolver::setupProblem( const std::string& fileName, const std::string& 
         multiscaleProblemStep = dataFile( "Solver/Restart/RestartFromStepNumber", 0 ) + 1;
 
     // Create the main model and set the communicator
-    M_model = multiscaleModelPtr_Type( multiscaleModelFactory_Type::instance().createObject( multiscaleModelsMap[ dataFile( "Problem/ProblemType", "MultiScale" ) ] ) );
+    M_model = multiscaleModelPtr_Type( multiscaleModelFactory_Type::instance().createObject( multiscaleModelsMap[ dataFile( "Problem/ProblemType", "MultiScale" ) ], multiscaleModelsMap ) );
 
     M_model->setCommunicator( M_comm );
 
@@ -129,7 +129,7 @@ MultiscaleSolver::setupProblem( const std::string& fileName, const std::string& 
     // Algorithm parameters
     if ( M_model->type() == Multiscale )
     {
-        M_algorithm = multiscaleAlgorithmPtr_Type( multiscaleAlgorithmFactory_Type::instance().createObject( multiscaleAlgorithmsMap[ dataFile( "Solver/Algorithm/AlgorithmType", "Newton" ) ] ) );
+        M_algorithm = multiscaleAlgorithmPtr_Type( multiscaleAlgorithmFactory_Type::instance().createObject( multiscaleAlgorithmsMap[ dataFile( "Solver/Algorithm/AlgorithmType", "Newton" ) ], multiscaleAlgorithmsMap ) );
 
         M_algorithm->setCommunicator( M_comm );
         M_algorithm->setModel( M_model );
