@@ -65,7 +65,7 @@ VenantKirchhoffElasticData::VenantKirchhoffElasticData():
 }
 
 VenantKirchhoffElasticData::VenantKirchhoffElasticData( const VenantKirchhoffElasticData& VenantKirchhoffElasticData ):
-        DataTime                           ( VenantKirchhoffElasticData ),
+        TimeData                           ( VenantKirchhoffElasticData ),
         M_time                             ( VenantKirchhoffElasticData.M_time ),
         M_density                          ( VenantKirchhoffElasticData.M_density ),
         M_thickness                        ( VenantKirchhoffElasticData.M_thickness ),
@@ -177,9 +177,9 @@ VenantKirchhoffElasticData::showMe( std::ostream& output ) const
 // Set Method
 // ===================================================
 void
-VenantKirchhoffElasticData::setDataTime( const TimePtr_Type DataTime )
+VenantKirchhoffElasticData::setTimeData( const TimePtr_Type TimeData )
 {
-    M_time = DataTime;
+    M_time = TimeData;
 }
 
 void
@@ -210,7 +210,7 @@ VenantKirchhoffElasticData::setYoung( const Real& young, const UInt& material )
 // Get Method
 // ===================================================
 const VenantKirchhoffElasticData::TimePtr_Type
-VenantKirchhoffElasticData::getDataTime() const
+VenantKirchhoffElasticData::getdataTime() const
 {
     return M_time;
 }

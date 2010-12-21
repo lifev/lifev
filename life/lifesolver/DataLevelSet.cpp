@@ -48,7 +48,7 @@ namespace LifeV
 
 DataLevelSet::
 DataLevelSet():
-        M_dataTime(),
+        M_TimeData(),
         M_stabilization(),
         M_IPTreatment(),
         M_IPCoef()
@@ -64,7 +64,7 @@ void
 DataLevelSet::
 setup( const GetPot& dataFile, const std::string& section)
 {
-    M_dataTime.reset( new dataTime_type(dataFile, section+"/time_discretization"));
+    M_TimeData.reset( new TimeData_type(dataFile, section+"/time_discretization"));
     std::string stabName = dataFile((section+"/stabilization").data(),"none");
     setStabilization(stabName);
     std::string ipName = dataFile((section+"/ip/treatment").data(),"implicit");
@@ -77,7 +77,7 @@ DataLevelSet::
 showMe(std::ostream& out) const
 {
     out << " Time data : " << std::endl;
-    M_dataTime->showMe(out);
+    M_TimeData->showMe(out);
     out << " Stabilization : ";
 
     if (M_stabilization == NONE) out << "none" << std::endl;

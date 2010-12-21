@@ -25,7 +25,7 @@
 //@HEADER
 
 /*!
-  @brief dataSecondOrder - Class to secondorder problem (S. Venant Kirchhoff Viscoelastic)
+  @brief VenantKirchhoffViscoelasticData - Class to secondorder problem (S. Venant Kirchhoff Viscoelastic)
 
   @author Matteo Pozzoli <matteo1.pozzoli@mail.polimi.it>
 
@@ -33,7 +33,7 @@
   @maintainer Matteo Pozzoli <matteo1.pozzoli@mail.polimi.it>
  */
 
-#include <life/lifesolver/dataSecondOrder.hpp>
+#include <life/lifesolver/VenantKirchhoffViscoelasticData.hpp>
 
 namespace LifeV
 {
@@ -42,7 +42,7 @@ namespace LifeV
 // Constructor
 //===================================================
 
-DataSecondOrder::DataSecondOrder() :
+VenantKirchhoffViscoelasticData::VenantKirchhoffViscoelasticData() :
         M_time                           ( ),
         M_density                        ( ),
         M_thickness                      ( ),
@@ -57,18 +57,18 @@ DataSecondOrder::DataSecondOrder() :
 {
 }
 
-DataSecondOrder::DataSecondOrder( const DataSecondOrder& DataSecondOrder):
-        DataTime               ( DataSecondOrder),
-        M_density              ( DataSecondOrder.M_density ),
-	M_thickness            ( DataSecondOrder.M_thickness ),
-        M_poisson              ( DataSecondOrder.M_poisson ),
-        M_young                ( DataSecondOrder.M_young ),
-        M_gamma                ( DataSecondOrder.M_gamma ),
-        M_beta                 ( DataSecondOrder.M_beta ),
-        M_factor               ( DataSecondOrder.M_factor ),
-        M_verbose              ( DataSecondOrder.M_verbose ),
-        M_order                ( DataSecondOrder.M_order ),
-	M_damping              ( DataSecondOrder.M_damping )
+VenantKirchhoffViscoelasticData::VenantKirchhoffViscoelasticData( const VenantKirchhoffViscoelasticData& VenantKirchhoffViscoelasticData):
+        TimeData               ( VenantKirchhoffViscoelasticData),
+        M_density              ( VenantKirchhoffViscoelasticData.M_density ),
+	M_thickness            ( VenantKirchhoffViscoelasticData.M_thickness ),
+        M_poisson              ( VenantKirchhoffViscoelasticData.M_poisson ),
+        M_young                ( VenantKirchhoffViscoelasticData.M_young ),
+        M_gamma                ( VenantKirchhoffViscoelasticData.M_gamma ),
+        M_beta                 ( VenantKirchhoffViscoelasticData.M_beta ),
+        M_factor               ( VenantKirchhoffViscoelasticData.M_factor ),
+        M_verbose              ( VenantKirchhoffViscoelasticData.M_verbose ),
+        M_order                ( VenantKirchhoffViscoelasticData.M_order ),
+	M_damping              ( VenantKirchhoffViscoelasticData.M_damping )
 {
 }
 
@@ -76,22 +76,22 @@ DataSecondOrder::DataSecondOrder( const DataSecondOrder& DataSecondOrder):
 // Operators
 //==================================================
 
-DataSecondOrder&
-DataSecondOrder::operator=( const DataSecondOrder& DataSecondOrder )
+VenantKirchhoffViscoelasticData&
+VenantKirchhoffViscoelasticData::operator=( const VenantKirchhoffViscoelasticData& VenantKirchhoffViscoelasticData )
 {
-    if ( this != &DataSecondOrder )
+    if ( this != &VenantKirchhoffViscoelasticData )
     {
-        M_time                    = DataSecondOrder.M_time;
-        M_density                 = DataSecondOrder.M_density;
-	M_thickness               = DataSecondOrder.M_thickness;
-	M_poisson                 = DataSecondOrder.M_poisson;
-        M_young                   = DataSecondOrder.M_young;
-        M_gamma                   = DataSecondOrder.M_gamma;
-        M_beta                    = DataSecondOrder.M_beta;
-        M_factor                  = DataSecondOrder.M_factor;
-        M_verbose                 = DataSecondOrder.M_verbose;
-	M_order                   = DataSecondOrder.M_order;
-	M_damping                 = DataSecondOrder.M_damping;
+        M_time                    = VenantKirchhoffViscoelasticData.M_time;
+        M_density                 = VenantKirchhoffViscoelasticData.M_density;
+	M_thickness               = VenantKirchhoffViscoelasticData.M_thickness;
+	M_poisson                 = VenantKirchhoffViscoelasticData.M_poisson;
+        M_young                   = VenantKirchhoffViscoelasticData.M_young;
+        M_gamma                   = VenantKirchhoffViscoelasticData.M_gamma;
+        M_beta                    = VenantKirchhoffViscoelasticData.M_beta;
+        M_factor                  = VenantKirchhoffViscoelasticData.M_factor;
+        M_verbose                 = VenantKirchhoffViscoelasticData.M_verbose;
+	M_order                   = VenantKirchhoffViscoelasticData.M_order;
+	M_damping                 = VenantKirchhoffViscoelasticData.M_damping;
     }
 
     return *this;
@@ -102,7 +102,7 @@ DataSecondOrder::operator=( const DataSecondOrder& DataSecondOrder )
 // ===================================================
 
 void
-DataSecondOrder::setup( const GetPot& dataFile, const std::string& section )
+VenantKirchhoffViscoelasticData::setup( const GetPot& dataFile, const std::string& section )
 {
     // If data time has not been set
     if ( !M_time.get() )
@@ -148,7 +148,7 @@ DataSecondOrder::setup( const GetPot& dataFile, const std::string& section )
 }
 
 void
-DataSecondOrder::showMe( std::ostream& output ) const
+VenantKirchhoffViscoelasticData::showMe( std::ostream& output ) const
 {
     // physics
     output << "\n*** Values for data [solid/physics]\n\n";
@@ -189,44 +189,44 @@ DataSecondOrder::showMe( std::ostream& output ) const
 // ===================================================
 
 void
-DataSecondOrder::setDataTime( const Time_ptrType DataTime )
+VenantKirchhoffViscoelasticData::setTimeData( const Time_ptrType TimeData )
 {
-    M_time = DataTime;
+    M_time = TimeData;
 }
 
 void
-DataSecondOrder::setDensity( const Real& density )
+VenantKirchhoffViscoelasticData::setDensity( const Real& density )
 {
     M_density = density;
 }
 
 void
-DataSecondOrder::setThickness( const Real& thickness )
+VenantKirchhoffViscoelasticData::setThickness( const Real& thickness )
 {
     M_thickness = thickness;
 }
 
 void
-DataSecondOrder::setPoisson( const Real& poisson, const UInt& material )
+VenantKirchhoffViscoelasticData::setPoisson( const Real& poisson, const UInt& material )
 {
     M_poisson[material] = poisson;
 }
 
 void
-DataSecondOrder::setYoung( const Real& young, const UInt& material )
+VenantKirchhoffViscoelasticData::setYoung( const Real& young, const UInt& material )
 {
     M_young[material] = young;
 }
 
 void
-DataSecondOrder::setGamma( const Real& gamma, const UInt& material )
+VenantKirchhoffViscoelasticData::setGamma( const Real& gamma, const UInt& material )
 {
     M_gamma[material] = gamma;
 }
 
 
 void
-DataSecondOrder::setBeta( const Real& beta, const UInt& material )
+VenantKirchhoffViscoelasticData::setBeta( const Real& beta, const UInt& material )
 {
     M_beta[material] = beta;
 }
@@ -235,26 +235,26 @@ DataSecondOrder::setBeta( const Real& beta, const UInt& material )
 // Get Method
 // ===================================================
 
-DataSecondOrder::Time_ptrType
-DataSecondOrder::dataTime() const
+VenantKirchhoffViscoelasticData::Time_ptrType
+VenantKirchhoffViscoelasticData::dataTime() const
 {
     return M_time;
 }
 
 const Real&
-DataSecondOrder::rho() const
+VenantKirchhoffViscoelasticData::rho() const
 {
     return M_density;
 }
 
 const Real&
-DataSecondOrder::thickness() const
+VenantKirchhoffViscoelasticData::thickness() const
 {
     return M_thickness;
 }
 
 const Real&
-DataSecondOrder::poisson( const UInt& material ) const
+VenantKirchhoffViscoelasticData::poisson( const UInt& material ) const
 {
     MaterialContainer_Type::const_iterator IT = M_poisson.find( material );
     if (IT != M_poisson.end())
@@ -264,7 +264,7 @@ DataSecondOrder::poisson( const UInt& material ) const
 }
 
 const Real&
-DataSecondOrder::young( const UInt& material ) const
+VenantKirchhoffViscoelasticData::young( const UInt& material ) const
 {
     MaterialContainer_Type::const_iterator IT = M_young.find( material );
     if (IT != M_young.end())
@@ -274,39 +274,39 @@ DataSecondOrder::young( const UInt& material ) const
 }
 
 Real
- DataSecondOrder::lambda( const UInt& material ) const
+ VenantKirchhoffViscoelasticData::lambda( const UInt& material ) const
 {
     return M_young.find( material )->second * M_poisson.find( material )->second /
            ( ( 1.0 + M_poisson.find( material )->second ) * ( 1.0 - 2.0 * M_poisson.find( material )->second ) );
 }
 
 Real 
-DataSecondOrder::mu( const UInt& material ) const
+VenantKirchhoffViscoelasticData::mu( const UInt& material ) const
 {
     return M_young.find( material )->second/( 2.0 * ( 1.0 + M_poisson.find( material )->second ) );
 }
 
 
 const Real&
-DataSecondOrder::gamma( const UInt& material ) const
+VenantKirchhoffViscoelasticData::gamma( const UInt& material ) const
 {
     return M_gamma.find( material )->second;
 }
 
 const Real&
-DataSecondOrder::beta( const UInt& material ) const
+VenantKirchhoffViscoelasticData::beta( const UInt& material ) const
 {
     return M_beta.find( material )->second;
 }
 
 const Real&
-DataSecondOrder::factor() const
+VenantKirchhoffViscoelasticData::factor() const
 {
     return M_factor;
 }
 
 const std::string&
-DataSecondOrder::order() const
+VenantKirchhoffViscoelasticData::order() const
 {
     return M_order;
 }

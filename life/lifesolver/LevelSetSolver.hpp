@@ -52,7 +52,7 @@
 
 #include <life/lifecore/life.hpp>
 
-#include <life/lifefem/bdf_template.hpp>
+#include <life/lifefem/TimeAdvanceBDF.hpp>
 
 #include <life/lifesolver/ADRAssembler.hpp>
 #include <life/lifesolver/ADRAssemblerIP.hpp>
@@ -179,7 +179,7 @@ public:
     typedef DataLevelSet data_type;
     typedef boost::shared_ptr<data_type> data_ptrType;
 
-    typedef BdfT<vector_type> bdf_type;
+    typedef TimeAdvanceBDF<vector_type> bdf_type;
     typedef boost::shared_ptr<bdf_type> bdf_ptrType;
 
     //@}

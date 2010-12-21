@@ -77,7 +77,7 @@
 #include <life/lifefem/DOFInterface3Dto2D.hpp>
 #include <life/lifefem/BCHandler.hpp>
 #include <life/lifefem/BCFunction.hpp>
-#include <life/lifefem/bdf_template.hpp>
+#include <life/lifefem/TimeAdvanceBDF.hpp>
 #include <life/lifefem/FESpace.hpp>
 
 #include <life/lifefilters/ExporterHDF5Mesh3D.hpp>
@@ -367,7 +367,7 @@ public:
     //! initializes the solid solver with vectors
     /**
        \param displacement: initial vector containing the structure displacement
-       \param velocity: initial vector containing the velocity, used for the initialization of the Newmark scheme
+       \param velocity: initial vector containing the velocity, used for the initialization of the TimeAdvanceNewmark scheme
      */
     void initializeSolid( vectorPtr_Type displacement,
                           vectorPtr_Type velocity );
@@ -831,7 +831,7 @@ protected:
 //     fluidLinPtr_Type                                     M_fluidLin;
 //     solidLinPtr_Type                                     M_solidLin;
 
-    boost::shared_ptr<BdfT<vector_Type> >             M_bdf;
+    boost::shared_ptr<TimeAdvanceBDF<vector_Type> >             M_bdf;
 
     GetPot                                            M_dataFile;
 

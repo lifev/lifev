@@ -42,8 +42,8 @@
 
     @see  Chapter 4 of R.P. Brent, "Algorithms for Minimization without Derivatives", Prentice-Hall, Englewood Cliffs, NJ. 1973
  */
-#ifndef _BRENTALGORITHM_H
-#define _BRENTALGORITHM_H 1
+#ifndef _NonLinearBrent_H
+#define _NonLinearBrent_H 1
 
 #include <limits>
 
@@ -69,7 +69,7 @@ namespace LifeV
 */
 
 template <class Function>
-Real BrentAlgorithm( const Function& f, const Real& leftExtremeBase, const Real& rightExtremeBase, const Real& toll, const UInt& maxIter )
+Real NonLinearBrent( const Function& f, const Real& leftExtremeBase, const Real& rightExtremeBase, const Real& toll, const UInt& maxIter )
 {
 
     // Current left and right extreme of the interval
@@ -246,4 +246,4 @@ Real BrentAlgorithm( const Function& f, const Real& leftExtremeBase, const Real&
 
 } // Namespace LifeV
 
-#endif /* _BRENTALGORITHM_ */
+#endif /* _NonLinearBrent_ */

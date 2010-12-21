@@ -34,8 +34,8 @@
     @maintainer Matteo Pozzoli <matteo1.pozzoli@mail.polimi.it>
 */
 
-#ifndef TIMEADVANCEBASE_H
-#define TIMEADVANCEBASE_H 1
+#ifndef TIMEADVANCE_H
+#define TIMEADVANCE_H 1
 
 // Tell the compiler to ignore specific kind of warnings:
 #pragma GCC diagnostic ignored "-Wunused-variable"
@@ -233,7 +233,7 @@ public:
 
      //! Initialize the parameters of time advance scheme
      /*
-     @param  coefficients define the Newmark's coefficients (\theta, \gamma);
+     @param  coefficients define the TimeAdvanceNewmark's coefficients (\theta, \gamma);
      @param  orderDerivate  define the order of derivate;
      */
      virtual void setup ( const std::vector<Real>&  coefficients, const  UInt& orderDerivate ) = 0;
@@ -269,7 +269,7 @@ public:
     //! initialize the StateVector
     /*!
     Initialize all the entries of the unknown vector to be derived with the vector x0.
-    this class is virtual because used in Newmark scheme;
+    this class is virtual because used in TimeAdvanceNewmark scheme;
     @param x0 is a vector of feVectorType containing the state vector;
     */
     virtual void setInitialCondition( const feVectorContainer_Type& x0) = 0;
@@ -413,13 +413,13 @@ protected:
     //! Size of the unknown vector
     UInt M_size;
 
-    //! Size for firstOrderDerivate loop (for bdf  equal M_order, for Newmark equal  M_size/2)
+    //! Size for firstOrderDerivate loop (for bdf  equal M_order, for TimeAdvanceNewmark equal  M_size/2)
     UInt M_firstOrderDerivateSize;
 
-    //! Size for setSecondOrderDerivate loop  (for bdf  equal M_order, for Newmark equal M_size/2)
+    //! Size for setSecondOrderDerivate loop  (for bdf  equal M_order, for TimeAdvanceNewmark equal M_size/2)
     UInt M_secondOrderDerivateSize;
 
-    //!Size of coefficients (for bdf equal M_order + M_orderDerivate, for theta-method is 3, and Newmark is 4)
+    //!Size of coefficients (for bdf equal M_order + M_orderDerivate, for theta-method is 3, and TimeAdvanceNewmark is 4)
     UInt M_coefficientsSize;
 
     //! Coefficients \f$ \alpha_i \f$ of the time advance discretization
@@ -610,4 +610,4 @@ TimeAdvance<feVectorType>::accelerate(const feVectorType& u)
 typedef FactorySingleton< Factory < TimeAdvance<>,  std::string> > TimeAdvanceFactory;
 
 }
-#endif  /* TIMEADVANCEBASE_H */
+#endif  /* TIMEADVANCE_H */

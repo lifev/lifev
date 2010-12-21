@@ -600,7 +600,7 @@ FSI::imposeFlux( void )
 
 void FSI::initializeBDF( const vector_Type& un )
 {
-  M_bdf.reset( new BdfT<vector_Type>( ));
+  M_bdf.reset( new TimeAdvanceBDF<vector_Type>( ));
   M_bdf->setup(M_data->dataFluid()->dataTime()->orderBDF() ) ;
  M_bdf->setInitialCondition( un );
 }

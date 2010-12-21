@@ -55,7 +55,7 @@
 #include <boost/shared_ptr.hpp>
 #include <life/lifefem/FESpace.hpp>
 #include <life/lifesolver/HeartStiffnessFibers.hpp>
-#include <life/lifefem/bdf_template.hpp>
+#include <life/lifefem/TimeAdvanceBDF.hpp>
 namespace LifeV
 {
 //! BidomainSolver - This class implements a bidomain solver.
@@ -175,7 +175,7 @@ public:
         return *M_matrMass;
     }
 
-    BdfT<vector_Type>& BDFIntraExtraPotential() {return M_BDFIntraExtraPotential;}
+    TimeAdvanceBDF<vector_Type>& BDFIntraExtraPotential() {return M_BDFIntraExtraPotential;}
 
     //@}
 
@@ -267,7 +267,7 @@ protected:
     //! Boolean that indicates if the matrix has to be recomputed
     bool                           M_recomputeMatrix;
 
-    BdfT<vector_Type>		       M_BDFIntraExtraPotential;
+    TimeAdvanceBDF<vector_Type>		       M_BDFIntraExtraPotential;
 private:
 
     //! Elementary matrices

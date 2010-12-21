@@ -1176,9 +1176,9 @@ public:
     //! Assign a new marker to edges.
     /**
      *  @param locDof Local degrees of freedom.
-     *  @param newMarker Id of new marker.
+     *  @param TimeAdvanceNewmarker Id of new marker.
      */
-    void edgeMarkers(std::map<UInt, UInt> const& locDof, UInt newMarker);
+    void edgeMarkers(std::map<UInt, UInt> const& locDof, UInt TimeAdvanceNewmarker);
 
     /** @} */ // End of group Edges Methods
 
@@ -3792,12 +3792,12 @@ orderMesh(MPI_Comm comm) // serial reordering:
 template <typename GEOSHAPE, typename MC>
 void
 RegionMesh3D<GEOSHAPE, MC>::
-edgeMarkers(std::map<UInt, UInt> const& locDof, UInt newMarker)
+edgeMarkers(std::map<UInt, UInt> const& locDof, UInt TimeAdvanceNewmarker)
 {
     std::map<UInt, UInt>::const_iterator IT;
     for (IT=locDof.begin(); IT!=locDof.end(); ++IT)
     {
-        pointList(IT->second).setMarker(newMarker);
+        pointList(IT->second).setMarker(TimeAdvanceNewmarker);
     }
 }
 

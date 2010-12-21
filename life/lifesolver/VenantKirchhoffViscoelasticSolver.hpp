@@ -26,7 +26,7 @@
 
 /*!
  *  @file
- *  @brief SecondOrderSolver - Class to solve second order problem as linear visco-elastic
+ *  @brief VenantKirchhoffViscoelasticSolver - Class to solve second order problem as linear visco-elastic
  *  problem and waves problem.
  *
  *  @author Matteo Pozzoli <matteo1.pozzoli@mail.polimi.it>
@@ -67,7 +67,7 @@
 
 #include <life/lifealg/SolverTrilinos.hpp>
 
-#include <life/lifesolver/dataSecondOrder.hpp>
+#include <life/lifesolver/VenantKirchhoffViscoelasticData.hpp>
 #include <life/lifecore/Displayer.hpp>
 
 
@@ -75,7 +75,7 @@ namespace LifeV
 {
 //! SecondOrderProblem this class solver second order problem,  waves equation and linear viscoelastic problem
 /*!
-  \class SecondOrderSolver
+  \class VenantKirchhoffViscoelasticSolver
   \brief
     This class solves the following waves equation:
 
@@ -90,7 +90,7 @@ where \f$M\f$ is mass matrix, \f$A\f$  stiffness matrix and \f$D\f$ is  damping 
 template <typename Mesh,
 typename SolverType = LifeV::SolverTrilinos >
 
-class SecondOrderSolver
+class VenantKirchhoffViscoelasticSolver
 {
 public:
 
@@ -113,7 +113,7 @@ public:
     typedef typename SolverType::prec_raw_type prec_raw_type;
     typedef typename SolverType::prec_type         prec_type;
 
-    typedef DataSecondOrder                                    data_type;
+    typedef VenantKirchhoffViscoelasticData                                    data_type;
 
     //@}
 
@@ -121,10 +121,10 @@ public:
     //@{
 
     //! Constructor
-    SecondOrderSolver( );
+    VenantKirchhoffViscoelasticSolver( );
 
     //! virtual Destructor
-    virtual ~SecondOrderSolver() {};
+    virtual ~VenantKirchhoffViscoelasticSolver() {};
 
     //@}
 
@@ -481,8 +481,8 @@ protected :
 //! Empty Constructor
 
 template <typename Mesh, typename SolverType>
-SecondOrderSolver<Mesh, SolverType>::
-SecondOrderSolver( ) :
+VenantKirchhoffViscoelasticSolver<Mesh, SolverType>::
+VenantKirchhoffViscoelasticSolver( ) :
         M_data                             (    ),
         M_FESpace                          (    ),
         M_displayer                        (    ),
@@ -518,7 +518,7 @@ SecondOrderSolver( ) :
 
 template <typename Mesh, typename SolverType>
 void
-SecondOrderSolver<Mesh, SolverType>::setup(
+VenantKirchhoffViscoelasticSolver<Mesh, SolverType>::setup(
     boost::shared_ptr<data_type>        data,
     const boost::shared_ptr< FESpace<Mesh, EpetraMap> >& feSpace,
     boost::shared_ptr<Epetra_Comm>&     comm,
@@ -546,7 +546,7 @@ SecondOrderSolver<Mesh, SolverType>::setup(
 
 template <typename Mesh, typename SolverType>
 void
-SecondOrderSolver<Mesh, SolverType>::setup(
+VenantKirchhoffViscoelasticSolver<Mesh, SolverType>::setup(
     boost::shared_ptr<data_type>        data,
     const boost::shared_ptr< FESpace<Mesh, EpetraMap> >& feSpace,
     boost::shared_ptr<Epetra_Comm>&     comm
@@ -561,7 +561,7 @@ SecondOrderSolver<Mesh, SolverType>::setup(
 
 template <typename Mesh, typename SolverType>
 void
-SecondOrderSolver<Mesh, SolverType>::setup(
+VenantKirchhoffViscoelasticSolver<Mesh, SolverType>::setup(
     boost::shared_ptr<data_type>          data,
     const boost::shared_ptr< FESpace<Mesh, EpetraMap> >& feSpace,
     bchandler_type&                BCh,
@@ -574,7 +574,7 @@ SecondOrderSolver<Mesh, SolverType>::setup(
 
 template <typename Mesh, typename SolverType>
 void
-SecondOrderSolver<Mesh, SolverType>::setDataFromGetPot( const GetPot& dataFile )
+VenantKirchhoffViscoelasticSolver<Mesh, SolverType>::setDataFromGetPot( const GetPot& dataFile )
 {
     M_linearSolver->setDataFromGetPot( dataFile, "problem/solver" );
     M_linearSolver->setUpPrec(dataFile, "problem/prec");
@@ -582,7 +582,7 @@ SecondOrderSolver<Mesh, SolverType>::setDataFromGetPot( const GetPot& dataFile )
 
 template <typename Mesh, typename SolverType>
 void
-SecondOrderSolver<Mesh, SolverType>::
+VenantKirchhoffViscoelasticSolver<Mesh, SolverType>::
 buildSystem(const Real& xi, const Real& alpha)
 {
  M_displayer->leaderPrint("  P-  Computing constant matrices ...          ");
@@ -605,18 +605,13 @@ buildSystem(const Real& xi, const Real& alpha)
 
 template <typename Mesh, typename SolverType>
 void
-SecondOrderSolver<Mesh, SolverType>::
+VenantKirchhoffViscoelasticSolver<Mesh, SolverType>::
 buildSystem(matrix_ptrtype matrSystem, const Real& xi)
 {
-    UInt totalDof = M_FESpace->dof().numTotalDof();
-
-    M_displayer->leaderPrint( "P-  Building the system             ... ");
+     M_displayer->leaderPrint( "P-  Building the system             ... ");
 
     LifeChrono chrono;
     chrono.start();
-
-    // Number of displacement components
-    UInt nc = nDimensions;
 
     // Elementary computation and matrix assembling
     // Loop on elements
@@ -679,16 +674,11 @@ buildSystem(matrix_ptrtype matrSystem, const Real& xi)
 }
 
 template <typename Mesh, typename SolverType>
-void SecondOrderSolver<Mesh, SolverType>::
+void VenantKirchhoffViscoelasticSolver<Mesh, SolverType>::
 buildDamping(matrix_ptrtype damping, const Real& alpha)
 {
-    UInt totalDof = this->M_FESpace->dof().numTotalDof();
-
     LifeChrono chrono;
     chrono.start();
-
-    // Number of displacement components
-    UInt nc = nDimensions;
 
     M_displayer->leaderPrint( "P-  Building the system   Damping matrix          ... ");
 
@@ -711,7 +701,7 @@ buildDamping(matrix_ptrtype damping, const Real& alpha)
       stiff_div   ( M_data->lambda(marker) * gamma, *this->M_elmatD, this->M_FESpace->fe() );
       mass( beta * M_data->rho(), *this->M_elmatD, this->M_FESpace->fe(), 0, 0);
 
-      assembleMatrix( *M_matrDamping,
+      assembleMatrix( *damping,
                       *this->M_elmatD,
                        this->M_FESpace->fe(),
                        this->M_FESpace->fe(),
@@ -720,14 +710,15 @@ buildDamping(matrix_ptrtype damping, const Real& alpha)
                        0, 0, 0, 0);
      }
 
-     *M_matrSystem += *M_matrDamping * alpha;
+     *M_matrSystem += *damping * alpha;
+     *M_matrDamping = *damping;
 
      M_matrDamping->globalAssemble();
      M_displayer->leaderPrintMax( " done in ", chrono.diff() );
 }
 
 template <typename Mesh, typename SolverType>
-void SecondOrderSolver<Mesh, SolverType>::
+void VenantKirchhoffViscoelasticSolver<Mesh, SolverType>::
 updateSystem(const vector_type& rhs,
              const Real&        xi,
              const Real&        alpha)
@@ -760,7 +751,7 @@ updateSystem(const vector_type& rhs,
 }
 
 template <typename Mesh, typename SolverType>
-void SecondOrderSolver<Mesh, SolverType>::
+void VenantKirchhoffViscoelasticSolver<Mesh, SolverType>::
 computeStartValue( vector_type& solution, const  bchandler_raw_type& bch, const vector_type& rhs )
 {
   vector_type rhsFull(rhs);
@@ -783,7 +774,7 @@ computeStartValue( vector_type& solution, const  bchandler_raw_type& bch, const 
 }
 
 template <typename Mesh, typename SolverType>
-void SecondOrderSolver<Mesh, SolverType>::
+void VenantKirchhoffViscoelasticSolver<Mesh, SolverType>::
 updateSourceTerm(const  vector_type&  source)
 {
   M_displayer->leaderPrint("P - updating the Source Term....      ");
@@ -822,7 +813,7 @@ updateSourceTerm(const  vector_type&  source)
 }
 
 template <typename Mesh, typename SolverType>
-void SecondOrderSolver<Mesh, SolverType>::
+void VenantKirchhoffViscoelasticSolver<Mesh, SolverType>::
 iterate( bchandler_raw_type& bch )
 {
     LifeChrono chrono;
@@ -873,7 +864,7 @@ iterate( bchandler_raw_type& bch )
 //=========================================================
 
 template<typename Mesh, typename SolverType>
-void SecondOrderSolver<Mesh, SolverType>::
+void VenantKirchhoffViscoelasticSolver<Mesh, SolverType>::
 applyBoundaryConditions(matrix_type&        matrix,
                         vector_type&        rhs,
                         bchandler_raw_type& BCh,

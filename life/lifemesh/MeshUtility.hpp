@@ -909,7 +909,7 @@ bool checkIsMarkerSet( const MeshEntityListType & meshEntityList )
     BC the edge will get the flag related to the Natural B.C.
 
     @param mesh A mesh
-    @param logStream stream to which a map edgeId -> NewMarker will be output
+    @param logStream stream to which a map edgeId -> TimeAdvanceNewmarker will be output
     @param errorStream stream to which error messages will be sent
     @param verbose if false, no messages will be sent to the logStream
 
@@ -958,7 +958,7 @@ setBoundaryEdgesMarker( MeshType & mesh, std::ostream & logStream = std::cout,
     will get the flag related to the Natural BC
 
     @param mesh A mesh
-    @param logStream stream to which a map faceId -> NewMarker will be output
+    @param logStream stream to which a map faceId -> TimeAdvanceNewmarker will be output
     @param errorStream stream to which error messages will be sent
     @param verbose if false, no messages will be sent to the logStream
 
@@ -1008,7 +1008,7 @@ setBoundaryFacesMarker( MeshType & mesh, std::ostream & logStream = std::cout,
     it is ignored.
 
     @param mesh A mesh
-    @param logStream stream to which a map edgeId -> NewMarker will be output
+    @param logStream stream to which a map edgeId -> TimeAdvanceNewmarker will be output
     @param errorStream stream to which error messages will be sent
     @param verbose if false, no messages will be sent to the logStream
 

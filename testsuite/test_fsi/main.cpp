@@ -199,7 +199,7 @@ public:
         GetPot dataFile( dataFileName );
         M_data = dataPtr_Type( new data_Type() );
         M_data->setup( dataFile );
-        M_data->dataSolid()->setDataTime( M_data->dataFluid()->dataTime() ); //Same dataTime for fluid & solid
+        M_data->dataSolid()->setTimeData( M_data->dataFluid()->dataTime() ); //Same TimeData for fluid & solid
         //M_data->showMe();
         MPI_Barrier( MPI_COMM_WORLD );
 
@@ -304,7 +304,7 @@ public:
             }
             if ( M_fsi->isSolid() )
             {
-               M_exporterSolid->import(M_Tstart, M_data->dataSolid()->getDataTime()->timeStep());
+               M_exporterSolid->import(M_Tstart, M_data->dataSolid()->getdataTime()->timeStep());
                M_fsi->FSIOper()->initializeSolid( M_solidDisp, M_solidVel );
             }
         }

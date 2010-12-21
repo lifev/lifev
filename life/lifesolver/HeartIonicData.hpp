@@ -39,7 +39,7 @@
 #define _DATAIONIC_H_
 
 #include <life/lifemesh/MeshData.hpp>
-#include <life/lifefem/dataTime.hpp>
+#include <life/lifefem/TimeData.hpp>
 
 namespace LifeV
 {
@@ -51,7 +51,7 @@ namespace LifeV
 */
 class HeartIonicData:
         public MeshData,
-        public DataTime
+        public TimeData
 {
 public:
 

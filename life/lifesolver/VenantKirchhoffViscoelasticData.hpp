@@ -26,7 +26,7 @@
 
 /*!
   @file
-  @brief dataSecondOrder - Class to secondorder problem (S. Venant Kirchhoff Viscoelastic)
+  @brief VenantKirchhoffViscoelasticData - Class to secondorder problem (S. Venant Kirchhoff Viscoelastic)
  
   @author Matteo Pozzoli <matteo1.pozzoli@mail.polimi.it>
   
@@ -53,22 +53,22 @@
 
 #include <life/lifefilters/GetPot.hpp>
 #include <life/lifecore/life.hpp>
-#include <life/lifefem/dataTime.hpp>
+#include <life/lifefem/TimeData.hpp>
 
 
 namespace LifeV
 {
 /*!
-  \class DataSecondOrder
+  \class VenantKirchhoffViscoelasticData
 */
-class DataSecondOrder:
-      public DataTime
+class VenantKirchhoffViscoelasticData:
+      public TimeData
 {
 public:
     //! @name Type definitions
     //@{
 
-    typedef DataTime                                 Time_Type;
+    typedef TimeData                                 Time_Type;
     typedef boost::shared_ptr< Time_Type >           Time_ptrType;
 
     typedef std::map<UInt, Real>                    MaterialContainer_Type;
@@ -77,17 +77,17 @@ public:
     //@}
 
     //! Constructor
-    DataSecondOrder();
-    DataSecondOrder( const DataSecondOrder& DataSecondOrder);
+    VenantKirchhoffViscoelasticData();
+    VenantKirchhoffViscoelasticData( const VenantKirchhoffViscoelasticData& VenantKirchhoffViscoelasticData);
 
     //! @name Operators
     //@{
 
     //! Operator=
     /*!
-     * @param DataSecondOrder - DataSecondOrder
+     * @param VenantKirchhoffViscoelasticData - VenantKirchhoffViscoelasticData
      */
-    DataSecondOrder& operator=( const DataSecondOrder& DataSecondOrder );
+    VenantKirchhoffViscoelasticData& operator=( const VenantKirchhoffViscoelasticData& VenantKirchhoffViscoelasticData );
 
     //@}
     //! @name Methods
@@ -110,9 +110,9 @@ public:
 
     //! Set data time container
     /*!
-     * @param DataTime shared_ptr to dataTime container
+     * @param TimeData shared_ptr to TimeData container
      */
-    void setDataTime( const Time_ptrType DataTime );
+    void setTimeData( const Time_ptrType TimeData );
 
     //! Set density
     /*!
@@ -164,7 +164,7 @@ public:
 
     //! Get data time container
     /*!
-     * @return shared_ptr to dataTime container
+     * @return shared_ptr to TimeData container
      */
     Time_ptrType dataTime() const;
 

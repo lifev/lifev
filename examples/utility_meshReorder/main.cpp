@@ -40,7 +40,7 @@ int main(int argc, char** argv)
     const std::string mesh_output = command_line.follow((data_file("space_discretization/output_mesh_file", "mesh").c_str()), 2, "-o", "--output");
     bool ordering = data_file("space_discretization/ordering", false);
     bool create_edge = data_file("interface/create_edge", true);
-    UInt newMarker = data_file("interface/edgeMarker", 20);
+    UInt TimeAdvanceNewmarker = data_file("interface/edgeMarker", 20);
 
     if (ordering)
     {
@@ -99,7 +99,7 @@ int main(int argc, char** argv)
             *mesh, FluidInterfaceFlag,
             *mesh, SolidInterfaceFlag,
             0., &edgeFlag);
-        mesh2->edgeMarkers(dofEdgeFluidToEdgeSolid->localDofMap(), newMarker);
+        mesh2->edgeMarkers(dofEdgeFluidToEdgeSolid->localDofMap(), TimeAdvanceNewmarker);
         /* We have removed mesh_wrt, but here it was called ...
             writeMesh( mesh_output , *mesh2);
         */

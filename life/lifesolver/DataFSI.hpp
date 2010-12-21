@@ -195,11 +195,11 @@ public:
      */
     inline Real errorTolerance() const { return M_errorTolerance; }
 
-    //! Get linesearch
+    //! Get NonLinearLineSearch
     /*!
-     * @return linesearch
+     * @return NonLinearLineSearch
      */
-    inline Int linesearch() const { return M_linesearch; }
+    inline Int NonLinearLineSearch() const { return M_NonLinearLineSearch; }
 
     //! Get preconditioner type
     /*!
@@ -289,7 +289,7 @@ private:
     Real                          M_absoluteTolerance;
     Real                          M_relativeTolerance;
     Real                          M_errorTolerance;
-    Int                           M_linesearch;
+    Int                           M_NonLinearLineSearch;
 
     // Problem - Preconditioner
     Preconditioner                M_preconditioner;

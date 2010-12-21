@@ -68,15 +68,15 @@ nonlinear_function.hpp:
 #include <life/lifemesh/MeshData.hpp>
 #include <life/lifemesh/MeshPartitioner.hpp>
 
-#include <life/lifesolver/SecondOrderSolver.hpp>
-#include <life/lifesolver/dataSecondOrder.hpp>
+#include <life/lifesolver/VenantKirchhoffViscoelasticSolver.hpp>
+#include <life/lifesolver/VenantKirchhoffViscoelasticData.hpp>
 
-#include <life/lifefem/dataTime.hpp>
+#include <life/lifefem/TimeData.hpp>
 #include <life/lifefem/FESpace.hpp>
 
-#include <life/lifefem/timeAdvance_template.hpp>
-#include <life/lifefem/newmark_template.hpp>
-#include <life/lifefem/bdf_template.hpp>
+#include <life/lifefem/TimeAdvance.hpp>
+#include <life/lifefem/TimeAdvanceNewmark.hpp>
+#include <life/lifefem/TimeAdvanceBDF.hpp>
 
 #include <life/lifefilters/ExporterEnsight.hpp>
 #include <life/lifefilters/ExporterHDF5.hpp>
@@ -161,7 +161,7 @@ problem::problem( int          argc,
 void
 problem::run()
 {
-    typedef SecondOrderSolver< RegionMesh3D<LinearTetra> >::vector_type    vector_type;
+    typedef VenantKirchhoffViscoelasticSolver< RegionMesh3D<LinearTetra> >::vector_type    vector_type;
     typedef boost::shared_ptr<vector_type>                                         vector_ptrtype;
 
     typedef boost::shared_ptr< TimeAdvance< vector_type > >                 TimeAdvance_type;
@@ -171,11 +171,11 @@ problem::run()
     bool verbose = (members->comm->MyPID() == 0);
 
     //
-    // dataSecondOrder
+    // VenantKirchhoffViscoelasticData
     //
 
     GetPot dataFile( members->data_file_name.c_str() );
-    boost::shared_ptr<DataSecondOrder> dataProblem(new DataSecondOrder( ));
+    boost::shared_ptr<VenantKirchhoffViscoelasticData> dataProblem(new VenantKirchhoffViscoelasticData( ));
      dataProblem->setup(dataFile, "problem");
 
     MeshData             meshData;
@@ -189,14 +189,6 @@ problem::run()
     //
     // The Problem Solver
     //
-
-    if (verbose) std::cout << "The Problem Solver" << std::flush;
-
-    const RefFE*    refFE_beta  (0);
-    const QuadRule* qR_beta     (0);
-    const QuadRule* bdQr_beta   (0);
-
-    refFE_beta = &feTetraP1;
 
     // Scalar Solution Space:
 
@@ -232,9 +224,9 @@ problem::run()
 
     FESpace_ptrtype feSpace( new FESpace_type(meshPart,dOrder,1,members->comm) );
 
-    // instantiation of the SecondOrderSolver class
+    // instantiation of the VenantKirchhoffViscoelasticSolver class
 
-    SecondOrderSolver< RegionMesh3D<LinearTetra> > problem;
+    VenantKirchhoffViscoelasticSolver< RegionMesh3D<LinearTetra> > problem;
 
     problem.setup(dataProblem,  feSpace,
                                   members->comm);
@@ -269,15 +261,15 @@ problem::run()
 
     LifeChrono chrono;
 
-    std::string TimeAdvanceMethod =  dataFile( "problem/time_discretization/method", "Newmark");
+    std::string TimeAdvanceMethod =  dataFile( "problem/time_discretization/method", "TimeAdvanceNewmark");
 
     TimeAdvance_type  timeAdvance( TimeAdvanceFactory::instance().createObject( TimeAdvanceMethod ) );
 
     UInt OrderDev = 2;
 
     //! initialization of parameters of time Advance method:
-    if (TimeAdvanceMethod =="Newmark")
-        timeAdvance->setup( dataProblem->dataTime()->coefficientsNewmark() , OrderDev);
+    if (TimeAdvanceMethod =="TimeAdvanceNewmark")
+        timeAdvance->setup( dataProblem->dataTime()->coefficientsTimeAdvanceNewmark() , OrderDev);
 
     if (TimeAdvanceMethod =="BDF")
         timeAdvance->setup(dataProblem->dataTime()->orderBDF() , OrderDev);
@@ -355,7 +347,7 @@ problem::run()
   Real dt = dataProblem->dataTime()->timeStep();
     Real T  = dataProblem->dataTime()->endTime();
 
-    if (TimeAdvanceMethod =="Newmark")
+    if (TimeAdvanceMethod =="TimeAdvanceNewmark")
     {
         uv0.push_back(*U);
         uv0.push_back(*V);
@@ -363,7 +355,7 @@ problem::run()
     }
     if (TimeAdvanceMethod =="BDF")
     {
-        for ( int previousPass=0; previousPass < dataProblem->orderBDF() ; previousPass++)
+        for ( UInt previousPass=0; previousPass < dataProblem->orderBDF() ; previousPass++)
         {
             Real previousTimeStep = -previousPass*dt;
             feSpace->interpolate(uexact, *U, previousTimeStep );
@@ -442,7 +434,7 @@ problem::run()
 
         AnalyticalSol uExact;
 
-        Real H1_Error,H1_Error1, H1_RelError, L2_Error1, L2_Error, L2_RelError, vL2_Error, vL2_RelError;
+        Real H1_Error,  H1_RelError, L2_Error, L2_RelError;
 
         L2_Error = feSpace->l2Error(uexact, u, time ,&L2_RelError);
         H1_Error = feSpace->h1Error(uExact, u, time ,&H1_RelError);

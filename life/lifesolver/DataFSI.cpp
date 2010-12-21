@@ -52,7 +52,7 @@ DataFSI::DataFSI( ) :
         M_absoluteTolerance             (),
         M_relativeTolerance             (),
         M_errorTolerance                (),
-        M_linesearch                    (),
+        M_NonLinearLineSearch                    (),
         M_preconditioner                (),
         M_DDNpreconditioner             (),
         M_method                        (),
@@ -75,7 +75,7 @@ DataFSI::DataFSI( const DataFSI& DataFSI ) :
         M_absoluteTolerance             ( DataFSI.M_absoluteTolerance ),
         M_relativeTolerance             ( DataFSI.M_relativeTolerance ),
         M_errorTolerance                ( DataFSI.M_errorTolerance ),
-        M_linesearch                    ( DataFSI.M_linesearch ),
+        M_NonLinearLineSearch                    ( DataFSI.M_NonLinearLineSearch ),
         M_preconditioner                ( DataFSI.M_preconditioner ),
         M_DDNpreconditioner             ( DataFSI.M_DDNpreconditioner ),
         M_method                        ( DataFSI.M_method ),
@@ -106,7 +106,7 @@ DataFSI::operator=( const DataFSI& DataFSI )
         M_absoluteTolerance             = DataFSI.M_absoluteTolerance;
         M_relativeTolerance             = DataFSI.M_relativeTolerance;
         M_errorTolerance                = DataFSI.M_errorTolerance;
-        M_linesearch                    = DataFSI.M_linesearch;
+        M_NonLinearLineSearch                    = DataFSI.M_NonLinearLineSearch;
         M_preconditioner                = DataFSI.M_preconditioner;
         M_DDNpreconditioner             = DataFSI.M_DDNpreconditioner;
         M_method                        = DataFSI.M_method;
@@ -137,7 +137,7 @@ DataFSI::setup( const GetPot& dataFile, const std::string& section )
     M_absoluteTolerance = dataFile( ( section + "/abstol" ).data(), 1.e-07 );
     M_relativeTolerance = dataFile( ( section + "/reltol" ).data(), 1.e-04 );
     M_errorTolerance = dataFile( ( section + "/etamax" ).data(), 1.e-03 );
-    M_linesearch = static_cast<Int> ( dataFile( ( section + "/linesearch" ).data(), 0 ) );
+    M_NonLinearLineSearch = static_cast<Int> ( dataFile( ( section + "/NonLinearLineSearch" ).data(), 0 ) );
 
     // Problem - Preconditioner
     M_preconditioner = static_cast<Preconditioner> ( dataFile( ( section + "/precond" ).data(), DIRICHLET_NEUMANN ) );
@@ -191,7 +191,7 @@ DataFSI::showMe( std::ostream& output )
     output << "Absolute tolerance               = " << M_absoluteTolerance << std::endl;
     output << "Relative tolerance               = " << M_relativeTolerance << std::endl;
     output << "Max error tolerance              = " << M_errorTolerance << std::endl;
-    output << "Linesearch                       = " << M_linesearch << std::endl;
+    output << "NonLinearLineSearch                       = " << M_NonLinearLineSearch << std::endl;
 
     output << "Preconditioner                   = " << M_preconditioner << std::endl;
     output << "DDNPreconditioner                = " << M_DDNpreconditioner << std::endl;

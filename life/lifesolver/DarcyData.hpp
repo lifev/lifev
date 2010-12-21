@@ -40,7 +40,7 @@
 #define _DATADARCY_H_ 1
 
 #include <life/lifemesh/MeshData.hpp>
-#include <life/lifefem/dataTime.hpp>
+#include <life/lifefem/TimeData.hpp>
 #include <life/lifefem/Assembly.hpp>
 
 // LifeV namespace
@@ -64,7 +64,7 @@ public:
     typedef GetPot                          Data_Type;
     typedef boost::shared_ptr< Data_Type >  Data_ptrType;
 
-    typedef DataTime                        Time_Type;
+    typedef TimeData                        Time_Type;
     typedef boost::shared_ptr< Time_Type >  Time_ptrType;
 
     typedef MeshData                        Mesh_Type;
@@ -116,11 +116,11 @@ public:
     //@{
 
     /*! Set data time container
-        @param DataTime Boost shared_ptr to dataTime container
+        @param TimeData Boost shared_ptr to TimeData container
     */
-    inline void setDataTime( const Time_ptrType DataTime )
+    inline void setTimeData( const Time_ptrType TimeData )
     {
-        M_time = DataTime;
+        M_time = TimeData;
     }
 
     /*! Set mesh container
@@ -154,7 +154,7 @@ public:
     }
 
     /*! Get data time container.
-        @return shared_ptr to dataTime container
+        @return shared_ptr to TimeData container
     */
     inline Time_ptrType dataTime( void ) const
     {

@@ -36,7 +36,7 @@
   
     @maintainer Matteo Pozzoli <matteo1.pozzoli@mail.polimi.it>
  */
-#include <life/lifefem/dataTime.hpp>
+#include <life/lifefem/TimeData.hpp>
 
 namespace LifeV
 {
@@ -44,7 +44,7 @@ namespace LifeV
 // ===================================================
 // Constructors & Destructor
 // ===================================================
-DataTime::DataTime( ) :
+TimeData::TimeData( ) :
         M_initialTime   ( 0. ),
         M_endTime       ( 1. ),
         M_periodTime    ( 1. ),
@@ -57,30 +57,30 @@ DataTime::DataTime( ) :
 {
 }
 
-DataTime::DataTime( const GetPot& dfile, const std::string& section ) :
+TimeData::TimeData( const GetPot& dfile, const std::string& section ) :
         M_timeStepNumber( 0 )
 {
     setup( dfile, section );
 }
 
-DataTime::DataTime( const DataTime& dataTime )
+TimeData::TimeData( const TimeData& TimeData )
 {
-    M_initialTime	= dataTime.M_initialTime;
-    M_endTime		= dataTime.M_endTime;
-    M_periodTime    = dataTime.M_periodTime;
-    M_time			= dataTime.M_time;
-    M_timeStep		= dataTime.M_timeStep;
-    M_timeStepNumber= dataTime.M_timeStepNumber;
-    M_orderBDF		= dataTime.M_orderBDF;
-    M_theta	        = dataTime.M_theta;
-    M_gamma         = dataTime.M_gamma;
+    M_initialTime	= TimeData.M_initialTime;
+    M_endTime		= TimeData.M_endTime;
+    M_periodTime    = TimeData.M_periodTime;
+    M_time			= TimeData.M_time;
+    M_timeStep		= TimeData.M_timeStep;
+    M_timeStepNumber= TimeData.M_timeStepNumber;
+    M_orderBDF		= TimeData.M_orderBDF;
+    M_theta	        = TimeData.M_theta;
+    M_gamma         = TimeData.M_gamma;
 }
 
 // ===================================================
 // Methods
 // ===================================================
 void
-DataTime::setup( const GetPot& dfile, const std::string& section )
+TimeData::setup( const GetPot& dfile, const std::string& section )
 {
     M_initialTime = dfile(( section + "/initialtime"  ).data(), 0.);
     M_endTime = dfile(( section + "/endtime"      ).data(), 1.);
@@ -93,9 +93,9 @@ DataTime::setup( const GetPot& dfile, const std::string& section )
 }
 
 void
-DataTime::showMe( std::ostream& output ) const
+TimeData::showMe( std::ostream& output ) const
 {
-    output << "\n*** DataTime: values for user-defined data\n";
+    output << "\n*** TimeData: values for user-defined data\n";
 
     output << "\n[/time_discretization]" << std::endl;
     output << "Initial time   = " << M_initialTime    << std::endl;
@@ -112,7 +112,7 @@ DataTime::showMe( std::ostream& output ) const
 // Methods
 // ===================================================
 std::vector<Real>
-DataTime::coefficientsNewmark()
+TimeData::coefficientsTimeAdvanceNewmark()
 {
     std::vector<Real> coefficients;
 
@@ -126,7 +126,7 @@ DataTime::coefficientsNewmark()
 // Private Methods
 // ===================================================
 Real
-DataTime::round( const Real n, const Int decimal ) const
+TimeData::round( const Real n, const Int decimal ) const
 {
     return std::floor( n * std::pow(10.0, decimal) + 0.5 )  / std::pow(10.0, decimal);
 }

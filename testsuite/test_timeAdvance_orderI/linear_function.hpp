@@ -75,29 +75,29 @@ Real source_in( const Real&  t ,
 }
 
 
-Real d0       ( const Real&  t ,
+Real d0       ( const Real& ,
                 const Real& x,
                 const Real& y,
                 const Real& z,
-                const ID&  icomp)
+                const ID&  )
 {
     return x+y+z;
 }
 
-Real v0( const Real&  t ,
+Real v0( const Real& t ,
          const Real& x,
          const Real& y,
          const Real& z,
-         const ID&  icomp)
+         const ID&)
 {
     return -Pi/2*cos(Pi/2*t)*exp(-sin(Pi/2*t))*(x+y+z);
 }
 
-Real a0( const Real&  t ,
-         const Real& x,
-         const Real& y,
-         const Real& z,
-         const ID&  icomp)
+Real a0( const Real&  ,
+         const Real& ,
+         const Real& ,
+         const Real& ,
+         const ID&  )
 {
     return 0;
 }

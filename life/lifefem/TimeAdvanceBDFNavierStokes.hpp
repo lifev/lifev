@@ -45,7 +45,7 @@
 #include <algorithm>
 
 #include <life/lifefilters/GetPot.hpp>
-#include <life/lifefem/bdf_template.hpp>
+#include <life/lifefem/TimeAdvanceBDF.hpp>
 
 
 namespace LifeV
@@ -113,23 +113,23 @@ public:
     /*!
         @return Reference to a new Bdf template which holds the velocity field
      */
-    BdfT<VectorType>& bdfVelocity() { return M_bdfVelocity; }
+    TimeAdvanceBDF<VectorType>& bdfVelocity() { return M_bdfVelocity; }
 
     //! The method returns the Bdf pressure
     /*!
         @return Reference to a new Bdf template which holds the pressure
      */
-    BdfT<VectorType>& bdfPressure() { return M_bdfPressure; }
+    TimeAdvanceBDF<VectorType>& bdfPressure() { return M_bdfPressure; }
 
     //@}
 
 private:
 
     //! Bdf velocity
-    BdfT<VectorType> M_bdfVelocity;
+    TimeAdvanceBDF<VectorType> M_bdfVelocity;
 
     //! Bdf pressure
-    BdfT<VectorType> M_bdfPressure;
+    TimeAdvanceBDF<VectorType> M_bdfPressure;
 };
 
 

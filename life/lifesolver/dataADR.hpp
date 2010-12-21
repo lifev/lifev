@@ -41,7 +41,7 @@
 
 #include <life/lifefilters/GetPot.hpp>
 #include <life/lifecore/life.hpp>
-#include <life/lifefem/dataTime.hpp>
+#include <life/lifefem/TimeData.hpp>
 #include <life/lifecore/StringData.hpp>
 
 #include <boost/shared_ptr.hpp>
@@ -78,8 +78,8 @@ public:
        The class DataADR "has a" time handler object, to manage time dependent
        problems.
      */
-    typedef DataTime                              dataTime_type;
-    typedef boost::shared_ptr<dataTime_type>      dataTime_ptr_type;
+    typedef TimeData                              TimeData_type;
+    typedef boost::shared_ptr<TimeData_type>      TimeData_ptr_type;
 
     //@}
 
@@ -143,9 +143,9 @@ public:
 
     //! Set data time container
     /*!
-     * @param DataTime shared_ptr to dataTime container
+     * @param TimeData shared_ptr to TimeData container
      */
-    inline void setDataTimePtr( const dataTime_ptr_type dataTimePtr ) { M_dataTimePtr = dataTimePtr; }
+    inline void setTimeDataPtr( const TimeData_ptr_type TimeDataPtr ) { M_TimeDataPtr = TimeDataPtr; }
 
     inline void setFieldDimension( const UInt& fieldDim ) { M_solutionFieldDimension = fieldDim; }
 
@@ -164,7 +164,7 @@ public:
     inline const Real& steady() const { return M_steady; }
 
     //! Get data time container
-    inline dataTime_ptr_type dataTimePtr( void ) const { return M_dataTimePtr; }
+    inline TimeData_ptr_type TimeDataPtr( void ) const { return M_TimeDataPtr; }
 
     inline const UInt& solutionFieldDimension() const { return M_solutionFieldDimension; }
 
@@ -189,7 +189,7 @@ private:
     UInt M_solutionFieldDimension;   // number of components of the unknown field
 
     //! Data container for time parameters
-    dataTime_ptr_type               M_dataTimePtr;
+    TimeData_ptr_type               M_TimeDataPtr;
 
     //! Miscellaneous parameters
     UInt M_verbose;                  // Class output verbose

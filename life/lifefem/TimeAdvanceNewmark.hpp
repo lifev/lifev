@@ -28,7 +28,7 @@
     @file
     @brief File containing a class to  deal the time advancing scheme.
     This class consider \f$\theta\f$-method for first order problems and
-    Newmark scheme for the second order problems.
+    TimeAdvanceNewmark scheme for the second order problems.
 
     @date
 
@@ -37,8 +37,8 @@
     @maintainer Matteo Pozzoli <matteo1.pozzoli@mail.polimi.it>
 */
 
-#ifndef TIMEADVANCENEWMARK_H
-#define TIMEADVANCENEWMARK_H 1
+#ifndef TimeAdvanceNewmark_H
+#define TimeAdvanceNewmark_H 1
 
 // Tell the compiler to ignore specific kind of warnings:
 #pragma GCC diagnostic ignored "-Wunused-variable"
@@ -54,17 +54,17 @@
 #pragma GCC diagnostic ignored "-Wunused-variable"
 #pragma GCC diagnostic ignored "-Wunused-parameter"
 
-#include <life/lifefem/timeAdvance_template.hpp>
+#include <life/lifefem/TimeAdvance.hpp>
 #include <life/lifearray/EpetraVector.hpp>
 
 namespace LifeV
 {
-//! Newmark  - Class to deal the \f$theta\f$-method and Newmark scheme
+//! TimeAdvanceNewmark  - Class to deal the \f$theta\f$-method and TimeAdvanceNewmark scheme
 /*!
   @author Matteo Pozzoli <matteo1.pozzoli@mail.polimi.it>
 
   This class can be used to approximate problems of the first order and the second order in time.
-  In the first case the temporal scheme is a theta-method, while in the second case is a Newmark scheme.
+  In the first case the temporal scheme is a theta-method, while in the second case is a TimeAdvanceNewmark scheme.
 
   This class defines the state vector \f$X^{n+1}\f$, a suitable  extrapolation of vector \f$X^*\f$ and   opportune coefficients used to determinate \f$X^{n+1}\f$ and \f$X^*\f$.
 <ol>
@@ -97,7 +97,7 @@ namespace LifeV
      the state vector is \f[X^{n+1} = (U^{n+1},V^{n+1}, W^{n+1}, U^{n}, V^{n}, W^{n}).\f]
      where U is an approximation of \f$u\f$ and \f$V\f$  of \f$\dot{u}\f$ and \f$W\f$ of \f$\ddot{u}\f$ .
 
-     We introduce the parameters (\f$\theta\f$, \f$\gamma\f$)  and we apply the following Newmark method:
+     We introduce the parameters (\f$\theta\f$, \f$\gamma\f$)  and we apply the following TimeAdvanceNewmark method:
 
      \f[ U^{n+1} = U^{n} + \Delta t  \theta V^{n+1} + (1 − \theta) V^n,  \f]
 
@@ -124,7 +124,7 @@ namespace LifeV
 */
 
 template<typename feVectorType = EpetraVector >
-class Newmark :
+class TimeAdvanceNewmark :
         public TimeAdvance < feVectorType >
 {
 public:
@@ -143,10 +143,10 @@ public:
     //@{
 
     //! Empty  Constructor
-    Newmark();
+    TimeAdvanceNewmark();
 
      //! Destructor
-    ~Newmark() {}
+    ~TimeAdvanceNewmark() {}
 
     //@}
 
@@ -183,8 +183,8 @@ public:
 
      //! Initialize the parameters of time advance scheme
      /*
-     Initialize parameters of time advance scheme used in Newmark scheme
-     @param  coefficients define the Newmark's coefficients
+     Initialize parameters of time advance scheme used in TimeAdvanceNewmark scheme
+     @param  coefficients define the TimeAdvanceNewmark's coefficients
      @param  orderDerivate  define the order of derivate;
      */
      void setup (const  std::vector<Real>&  coefficients, const  UInt& orderDerivate);
@@ -274,10 +274,10 @@ public:
 
 private:
 
-    //! Coefficient of Newmark: \f$theta\f$
+    //! Coefficient of TimeAdvanceNewmark: \f$theta\f$
     Real M_theta;
 
-    //! Coefficient of Newmark: \f$\gamma\f$
+    //! Coefficient of TimeAdvanceNewmark: \f$\gamma\f$
     Real M_gamma;
 
 };
@@ -286,7 +286,7 @@ private:
 // Constructors & Destructor
 // ==================================================
 template<typename feVectorType>
-Newmark <feVectorType> ::Newmark():super()
+TimeAdvanceNewmark <feVectorType> ::TimeAdvanceNewmark():super()
   {
   }
 
@@ -294,7 +294,7 @@ Newmark <feVectorType> ::Newmark():super()
 // Methods
 // ===================================================
 template<typename feVectorType>
-void Newmark <feVectorType>::shiftRight(const feVectorType& solution)
+void TimeAdvanceNewmark <feVectorType>::shiftRight(const feVectorType& solution)
 {
     ASSERT (  this->M_timeStep != 0 ,  "M_timeStep must be different to 0");
 
@@ -336,7 +336,7 @@ void Newmark <feVectorType>::shiftRight(const feVectorType& solution)
 
 template<typename feVectorType>
 feVectorType
-Newmark<feVectorType>::updateRHSFirstDerivative(const Real& timeStep )
+TimeAdvanceNewmark<feVectorType>::updateRHSFirstDerivative(const Real& timeStep )
 {
     feVectorContainerPtrIterate_Type it  =  this->M_rhsContribution.begin();
 
@@ -354,7 +354,7 @@ Newmark<feVectorType>::updateRHSFirstDerivative(const Real& timeStep )
 
 template<typename feVectorType>
 feVectorType
-Newmark<feVectorType>::updateRHSSecondDerivative(const Real& timeStep )
+TimeAdvanceNewmark<feVectorType>::updateRHSSecondDerivative(const Real& timeStep )
 {
     feVectorContainerPtrIterate_Type it  =  this->M_rhsContribution.end()-1;
 
@@ -373,9 +373,9 @@ Newmark<feVectorType>::updateRHSSecondDerivative(const Real& timeStep )
 
 template<typename feVectorType>
 void
-Newmark<feVectorType>::showMe() const
+TimeAdvanceNewmark<feVectorType>::showMe() const
 {
-    std::cout << "*** NewmarkTime discretization maximum order of derivate "
+    std::cout << "*** TimeAdvanceNewmarkTime discretization maximum order of derivate "
                     << this->M_orderDerivate<< " ***"<< std::endl;
     std::cout <<" Coefficients : "      <<  std::endl;
     std::cout <<" theta :        "      << M_theta<<"\n"
@@ -401,14 +401,14 @@ Newmark<feVectorType>::showMe() const
 
 template<typename feVectorType>
 void
-Newmark<feVectorType>::setup (const UInt& /*order*/, const  UInt& /*orderDerivate*/)
+TimeAdvanceNewmark<feVectorType>::setup (const UInt& /*order*/, const  UInt& /*orderDerivate*/)
 {
-    ERROR_MSG("use setup for BDF but the time advance scheme is Newmark or  theta-method");
+    ERROR_MSG("use setup for BDF but the time advance scheme is TimeAdvanceNewmark or  theta-method");
 }
 
 template<typename feVectorType>
 void
-Newmark<feVectorType>::setup(const std::vector<Real>& coefficients, const  UInt& orderDerivate)
+TimeAdvanceNewmark<feVectorType>::setup(const std::vector<Real>& coefficients, const  UInt& orderDerivate)
 {
     //initialize theta
     M_theta = coefficients[0];
@@ -422,7 +422,7 @@ Newmark<feVectorType>::setup(const std::vector<Real>& coefficients, const  UInt&
     // If theta equal 0, explicit meta method
     if (M_theta == 0)
     {
-        ASSERT (this->M_orderDerivate == 2,  "theta is 0 must be different from 0 in Newmark");
+        ASSERT (this->M_orderDerivate == 2,  "theta is 0 must be different from 0 in TimeAdvanceNewmark");
         this->M_size = 4;
         this->M_alpha[ 0 ] =  1;
         this->M_alpha[ 1 ] =  1;
@@ -450,7 +450,7 @@ Newmark<feVectorType>::setup(const std::vector<Real>& coefficients, const  UInt&
             this->M_xi[2]   = 0;
             this->M_coefficientsSize = 3;
         }
-        else     //NewmarkMethod
+        else     //TimeAdvanceNewmarkMethod
         {
             //unknown vector's dimension
             this->M_size = 6 ;
@@ -495,7 +495,7 @@ Newmark<feVectorType>::setup(const std::vector<Real>& coefficients, const  UInt&
 }
 
 template<typename feVectorType>
-void Newmark<feVectorType>::setInitialCondition( const feVectorType& x0)
+void TimeAdvanceNewmark<feVectorType>::setInitialCondition( const feVectorType& x0)
 {
     feVectorContainerPtrIterate_Type iter     = this->M_unknowns.begin();
     feVectorContainerPtrIterate_Type iter_end = this->M_unknowns.end();
@@ -523,7 +523,7 @@ void Newmark<feVectorType>::setInitialCondition( const feVectorType& x0)
 }
 
 template<typename feVectorType>
-void Newmark<feVectorType>::setInitialCondition( const feVectorType& x0, const feVectorType& v0)
+void TimeAdvanceNewmark<feVectorType>::setInitialCondition( const feVectorType& x0, const feVectorType& v0)
 {
     feVectorContainerPtrIterate_Type iter       = this->M_unknowns.begin();
     feVectorContainerPtrIterate_Type iter_end   = this->M_unknowns.end();
@@ -550,7 +550,7 @@ void Newmark<feVectorType>::setInitialCondition( const feVectorType& x0, const f
 }
 
 template<typename feVectorType>
-void Newmark<feVectorType>::setInitialCondition( const feVectorType& x0, const feVectorType& v0, const feVectorType& w0)
+void TimeAdvanceNewmark<feVectorType>::setInitialCondition( const feVectorType& x0, const feVectorType& v0, const feVectorType& w0)
 {
     feVectorContainerPtrIterate_Type iter       = this->M_unknowns.begin();
     feVectorContainerPtrIterate_Type iter_end   = this->M_unknowns.end();
@@ -578,7 +578,7 @@ void Newmark<feVectorType>::setInitialCondition( const feVectorType& x0, const f
 }
 
 template<typename feVectorType>
-void Newmark<feVectorType>::setInitialCondition( const feVectorContainer_Type& x0)
+void TimeAdvanceNewmark<feVectorType>::setInitialCondition( const feVectorContainer_Type& x0)
 {
     const UInt n0 = x0.size();
 
@@ -614,7 +614,7 @@ void Newmark<feVectorType>::setInitialCondition( const feVectorContainer_Type& x
 
 template<typename feVectorType>
 Real
-Newmark<feVectorType>::coefficientExtrapolation(const UInt& i) const
+TimeAdvanceNewmark<feVectorType>::coefficientExtrapolation(const UInt& i) const
 {
   ASSERT ( i <  3 ,  "coeff_der i must equal 0 or 1 because U^*= U^n + timeStep*V^n + timeStep^2 / 2 W^n");
   return  this->M_beta(i)*pow( this->M_timeStep, static_cast<Real>(i) );
@@ -622,14 +622,14 @@ Newmark<feVectorType>::coefficientExtrapolation(const UInt& i) const
 
 template<typename feVectorType>
 Real
-Newmark<feVectorType>::coefficientExtrapolationVelocity(const UInt& i ) const
+TimeAdvanceNewmark<feVectorType>::coefficientExtrapolationVelocity(const UInt& i ) const
 {
  return  this->M_betaVelocity(i)*pow( this->M_timeStep, static_cast<Real>(i));
 }
 
 template<typename feVectorType>
 feVectorType
-Newmark<feVectorType>::extrapolation()  const
+TimeAdvanceNewmark<feVectorType>::extrapolation()  const
 {
     feVectorType extrapolation(*this->M_unknowns[0]);
     extrapolation += this->M_timeStep * ( *this->M_unknowns[ 1 ]);
@@ -640,7 +640,7 @@ Newmark<feVectorType>::extrapolation()  const
 
 template<typename feVectorType>
 feVectorType
-Newmark<feVectorType>::extrapolationVelocity() const
+TimeAdvanceNewmark<feVectorType>::extrapolationVelocity() const
 {
     feVectorType extrapolation( *this->M_unknowns[1]);
     extrapolation += this->M_timeStep * ( *this->M_unknowns[ 2 ]);
@@ -650,7 +650,7 @@ Newmark<feVectorType>::extrapolationVelocity() const
 
 template<typename feVectorType>
 feVectorType
-Newmark<feVectorType>::velocity() const
+TimeAdvanceNewmark<feVectorType>::velocity() const
 {
     feVectorType velocity( *this->M_unknowns[1]);
     return velocity;
@@ -658,7 +658,7 @@ Newmark<feVectorType>::velocity() const
 
 template<typename feVectorType>
 feVectorType
-Newmark<feVectorType>::accelerate() const
+TimeAdvanceNewmark<feVectorType>::accelerate() const
 {
     feVectorType accelerate( *this->M_unknowns[2]);
     return accelerate;
@@ -668,14 +668,14 @@ Newmark<feVectorType>::accelerate() const
 // Macros
 // ===================================================
 
-//! define the Newmark factory
+//! define the TimeAdvanceNewmark factory
 inline
-TimeAdvance< EpetraVector >* createNewmark() { return new Newmark<EpetraVector>(); }
+TimeAdvance< EpetraVector >* createTimeAdvanceNewmark() { return new TimeAdvanceNewmark<EpetraVector>(); }
 
 namespace
 {
-static bool registerNewmark= TimeAdvanceFactory::instance().registerProduct( "Newmark",  &createNewmark);
+static bool registerTimeAdvanceNewmark= TimeAdvanceFactory::instance().registerProduct( "TimeAdvanceNewmark",  &createTimeAdvanceNewmark);
 }
 
 }
-#endif  /*TIMEADVANCENEWMARK*/
+#endif  /*TimeAdvanceNewmark*/

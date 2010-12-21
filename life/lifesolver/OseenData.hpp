@@ -46,7 +46,7 @@
 #include <life/lifecore/life.hpp>
 #include <life/lifecore/StringData.hpp>
 #include <life/lifecore/StringUtility.hpp>
-#include <life/lifefem/dataTime.hpp>
+#include <life/lifefem/TimeData.hpp>
 #include <boost/shared_ptr.hpp>
 #include <string>
 #include <iostream>
@@ -102,7 +102,7 @@ public:
     //! @name Public Types
     //@{
 
-    typedef DataTime							   time_Type;
+    typedef TimeData							   time_Type;
     typedef boost::shared_ptr<time_Type>	       timePtr_Type;
 
 
@@ -161,9 +161,9 @@ public:
 
     //! Set data time container
     /*!
-     * @param DataTime shared_ptr to dataTime container
+     * @param TimeData shared_ptr to TimeData container
      */
-    inline void setDataTime( const timePtr_Type DataTime ) { M_time = DataTime; }
+    inline void setTimeData( const timePtr_Type TimeData ) { M_time = TimeData; }
 
     //! Set the density for the specified fluid
     /*!
@@ -220,7 +220,7 @@ public:
 
     //! Get data time container
     /*!
-     * @return shared_ptr to dataTime container
+     * @return shared_ptr to TimeData container
      */
     inline timePtr_Type dataTime( void ) const { return M_time; }
 

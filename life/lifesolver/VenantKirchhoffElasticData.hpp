@@ -50,20 +50,20 @@
 #include <boost/shared_ptr.hpp>
 #include <life/lifecore/life.hpp>
 #include <life/lifecore/StringUtility.hpp>
-#include <life/lifefem/dataTime.hpp>
+#include <life/lifefem/TimeData.hpp>
 
 namespace LifeV
 {
 
 //! DataElasticStructure - Data container for solid problems with elastic structure
-class VenantKirchhoffElasticData: public DataTime
+class VenantKirchhoffElasticData: public TimeData
 {
 public:
 
     //! @name Type definitions
     //@{
 
-    typedef DataTime                                                  Time_Type;
+    typedef TimeData                                                  Time_Type;
     typedef boost::shared_ptr< Time_Type >                            TimePtr_Type;
 
     typedef std::map<UInt, Real>                                      MaterialContainer_Type;
@@ -120,9 +120,9 @@ public:
 
     //! Set data time container
     /*!
-     * @param DataTime shared_ptr to dataTime container
+     * @param TimeData shared_ptr to TimeData container
      */
-    void setDataTime( const TimePtr_Type DataTime );
+    void setTimeData( const TimePtr_Type TimeData );
 
     //! Set density
     /*!
@@ -158,9 +158,9 @@ public:
 
     //! Get data time container
     /*!
-     * @return shared_ptr to dataTime container
+     * @return shared_ptr to TimeData container
      */
-    const TimePtr_Type getDataTime() const;
+    const TimePtr_Type getdataTime() const;
 
     //! Get solid density
     /*!

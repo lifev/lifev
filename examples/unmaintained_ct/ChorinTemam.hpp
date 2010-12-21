@@ -48,7 +48,7 @@
 #include <boost/shared_ptr.hpp>
 
 #include <life/lifefem/FESpace.hpp>
-#include <life/lifefem/bdf_template.hpp>
+#include <life/lifefem/TimeAdvanceBDF.hpp>
 
 #include <sdStabilization.hpp>
 #include <ipStabilization.hpp>
@@ -358,9 +358,9 @@ private:
     bool			   M_firstTimeStep;
     int 			   M_uBdfOrder;	       // bdf order for velocity
     int 			   M_pBdfOrder;        // bdf order for pressure
-    BdfT<vector_type>		   M_bdf_u;	       // velocity bdf
-    BdfT<vector_type>		   M_bdf_p;            // pressure bdf
-    BdfT<vector_type>              M_bdf_p_phi;        // projector field bdf
+    TimeAdvanceBDF<vector_type>		   M_bdf_u;	       // velocity bdf
+    TimeAdvanceBDF<vector_type>		   M_bdf_p;            // pressure bdf
+    TimeAdvanceBDF<vector_type>              M_bdf_p_phi;        // projector field bdf
 
     //! Resistance related data
     std::vector<EntityFlag>	   M_resFlag;	       // resistance flags

@@ -230,8 +230,8 @@ Structure::run3d()
     // Temporal data and initial conditions
     //
 
-    Real dt = dataStructure->getDataTime()->timeStep();
-    Real T  = dataStructure->getDataTime()->endTime();
+    Real dt = dataStructure->getdataTime()->timeStep();
+    Real T  = dataStructure->getdataTime()->endTime();
 
     vectorPtr_Type disp(new vector_Type(solid.getDisplacement(), Unique));
     vectorPtr_Type vel(new vector_Type(solid.getVelocity(), Unique));
@@ -294,12 +294,12 @@ Structure::run3d()
     for (Real time = dt; time <= T; time += dt)
     {
 
-        dataStructure->getDataTime()->setTime(time);
+        dataStructure->getdataTime()->setTime(time);
 
         if (verbose)
         {
             std::cout << std::endl;
-            std::cout << "S- Now we are at time " << dataStructure->getDataTime()->time() << " s." << std::endl;
+            std::cout << "S- Now we are at time " << dataStructure->getdataTime()->time() << " s." << std::endl;
         }
 
         //solid.updateSystem(dZero);    // Computes the rigth hand side

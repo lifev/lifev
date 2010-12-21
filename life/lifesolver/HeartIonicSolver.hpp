@@ -54,7 +54,7 @@
 #include <life/lifecore/LifeChrono.hpp>
 #include <boost/shared_ptr.hpp>
 #include <life/lifefem/FESpace.hpp>
-#include <life/lifefem/bdf_template.hpp>
+#include <life/lifefem/TimeAdvanceBDF.hpp>
 
 namespace LifeV
 {
@@ -242,7 +242,7 @@ protected:
     vector_Type				M_solutionGatingWRepeated;
     ElemVec 				M_elvec;
     UInt				    M_BDForder;
-    BdfT<vector_Type> 		M_BDFW;
+    TimeAdvanceBDF<vector_Type> 		M_BDFW;
     functorTauClose_Type	M_tauClose;
 
 private:

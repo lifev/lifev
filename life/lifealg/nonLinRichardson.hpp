@@ -36,7 +36,7 @@
     have are evalRes and solveJac. If solveJac inverts the exact
     Jacobian of the functional, than this is equivalent to a Newton
     method. If convergence do not appens in the expected ratio,
-    a linesearch algorithm is called (uadratic or parabolic).
+    a NonLinearLineSearch algorithm is called (uadratic or parabolic).
 
     @contributor Simone Deparis <simone.deparis@epfl.ch>
     @maintainer Simone Deparis <simone.deparis@epfl.ch>
@@ -48,8 +48,7 @@
 #define _NONLINRICHARDSON_HPP
 
 #include <algorithm> // for min and max
-#include <life/lifealg/linesearch_parabolic.hpp>
-#include <life/lifealg/linesearch_cubic.hpp>
+#include <life/lifealg/NonLinearLineSearch.hpp>
 #include <life/lifearray/EpetraVector.hpp>
 
 namespace LifeV
@@ -70,7 +69,7 @@ namespace LifeV
        to the linear solver is therefore eta. eta is determined
        by the modified Eisenstat-Walker formula if etamax > 0.
 
-       @param linesearch     :  for now consider only the case linesearch=0
+       @param NonLinearLineSearch     :  for now consider only the case NonLinearLineSearch=0
          (coded but not theoretically analysed)
 
        @param omega          :  default relaxation parameter to be passed to Aitken.
@@ -86,7 +85,7 @@ Int nonLinRichardson( EpetraVector& sol,
                       Real        reltol,
                       UInt&       maxit,
                       Real        eta_max,
-                      Int         linesearch,
+                      Int         NonLinearLineSearch,
                       std::ofstream& out_res,
                       const Real& time,
                       UInt iter = UInt(0) )
@@ -195,21 +194,21 @@ Int nonLinRichardson( EpetraVector& sol,
         slope  = normRes * normRes * ( linres * linres - 1 );
 
         Int status(EXIT_SUCCESS);
-        switch ( linesearch )
+        switch ( NonLinearLineSearch )
         {
-        case 0: // no linesearch
+        case 0: // no NonLinearLineSearch
             sol += step;
             functional.evalResidual( residual, sol, iter);
 //                normRes = residual.NormInf();
             break;
         case 1:
-            status = LineSearchParabolic( functional, residual, sol, step, normRes, lambda, iter, verbose );
+            status = NonLinearLineSearchParabolic( functional, residual, sol, step, normRes, lambda, iter, verbose );
             break;
         case 2:  // recommended
-            status = LineSearchCubic( functional, residual, sol, step, normRes, lambda, slope, iter, verbose );
+            status = NonLinearLineSearchCubic( functional, residual, sol, step, normRes, lambda, slope, iter, verbose );
             break;
         default:
-            std::cout << "Unknown linesearch \n";
+            std::cout << "Unknown NonLinearLineSearch \n";
             status = EXIT_FAILURE;
         }
 

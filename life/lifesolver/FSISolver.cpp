@@ -308,7 +308,7 @@ FSISolver::iterate()
                                     M_data->relativeTolerance(),
                                     maxiter,
                                     M_data->errorTolerance(),
-                                    M_data->linesearch(),
+                                    M_data->NonLinearLineSearch(),
                                     M_out_res,
                                     M_data->dataFluid()->dataTime()->time() );
 

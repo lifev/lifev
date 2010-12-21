@@ -41,7 +41,7 @@
 
 #include <life/lifecore/life.hpp>
 
-#include <life/lifefem/dataTime.hpp>
+#include <life/lifefem/TimeData.hpp>
 
 #include <boost/shared_ptr.hpp>
 
@@ -65,7 +65,7 @@ namespace LifeV
 
       [./time_discretization]
 
-          #everything for the dataTime class
+          #everything for the TimeData class
 
       [../]
 
@@ -108,11 +108,11 @@ namespace LifeV
   data file for a problem that consists in coupling smaller
   problems. Here, the idea would be to initialize this data
   container with the dataFile (this will put default parameters
-  for the time discretization), create a DataTime (outside
-  DataLevelSet) and set this new DataTime in DataLevelSet. As
-  DataLevelSet will retain a pointer to the DataTime, any change
+  for the time discretization), create a TimeData (outside
+  DataLevelSet) and set this new TimeData in DataLevelSet. As
+  DataLevelSet will retain a pointer to the TimeData, any change
   to it will be repercuted in the DataLevelSet. Then, only one
-  DataTime needs to be managed.
+  TimeData needs to be managed.
 
   Beware that, when mixing the two solutions, any call to the
   setup will overwrite ALL the previous informations stored
@@ -127,8 +127,8 @@ public:
     //! @name Public Types
     //@{
 
-    typedef DataTime dataTime_type;
-    typedef boost::shared_ptr<dataTime_type> dataTime_ptrType;
+    typedef TimeData TimeData_type;
+    typedef boost::shared_ptr<TimeData_type> TimeData_ptrType;
 
     //! \enum Enumerated type for the stabilization
     enum stabilization_type
@@ -180,10 +180,10 @@ public:
 
     //! Set the data time
     /*!
-      This method sets the dataTime to the one given.
+      This method sets the TimeData to the one given.
       @Warning: this copies the pointer, not the data!
      */
-    inline void setDataTime(const dataTime_ptrType& t) { M_dataTime = t; };
+    inline void setTimeData(const TimeData_ptrType& t) { M_TimeData = t; };
 
     //! Set the stabilization type
     /*!
@@ -218,8 +218,8 @@ public:
     //! @name Get Methods
     //@{
 
-    //! Getter for the DataTime structure
-    inline dataTime_ptrType dataTime() const { return M_dataTime; };
+    //! Getter for the TimeData structure
+    inline TimeData_ptrType dataTime() const { return M_TimeData; };
 
     //! Getter for the stabilization type
     inline stabilization_type stabilization() const { return M_stabilization; };
@@ -238,7 +238,7 @@ private:
     DataLevelSet(const DataLevelSet&);
 
     // Data for the time
-    dataTime_ptrType M_dataTime;
+    TimeData_ptrType M_TimeData;
 
     // Stabilization type
     stabilization_type M_stabilization;

@@ -56,13 +56,13 @@
 #pragma GCC diagnostic ignored "-Wunused-parameter"
 
 #include <life/lifearray/EpetraVector.hpp>
-#include <life/lifefem/timeAdvance_template.hpp>
+#include <life/lifefem/TimeAdvance.hpp>
 
 namespace LifeV
 {
-const UInt BdfT_MAX_ORDER = 4;
+const UInt BDF_MAX_ORDER = 4;
 
-  //!class BdfT - Backward differencing formula time discretization for the first and the second order problem in time.
+  //!class TimeAdvanceBDF - Backward differencing formula time discretization for the first and the second order problem in time.
   /*!
    @author Simone Deparis  <simone.deparis@epfl.ch>
    @author Matteo Pozzoli <matteo1.pozzoli@mail.polimi.it>
@@ -147,7 +147,7 @@ const UInt BdfT_MAX_ORDER = 4;
 */
 
 template<typename feVectorType = EpetraVector >
-class BdfT:
+class TimeAdvanceBDF:
         public  TimeAdvance < feVectorType >
 {
 public:
@@ -167,21 +167,21 @@ public:
 
     //! Empty  Constructor
     
-    BdfT();
+    TimeAdvanceBDF();
      //! Constructor
      /*! 
      @param  order of the BDF
      */
-    //  BdfT( const UInt& order);
+    //  TimeAdvanceBDF( const UInt& order);
 
     /*! Constructor
      @param order: is accurancy's order of the BDF,
      @param orderDerivate: is the maximum order of derivate
      */
-    //BdfT( const UInt& order, const  UInt& orderDerivate );
+    //TimeAdvanceBDF( const UInt& order, const  UInt& orderDerivate );
 
      //! Destructor
-     ~BdfT() {}
+     ~TimeAdvanceBDF() {}
 
    //@}
 
@@ -225,7 +225,7 @@ public:
      */
     void setup ( const UInt& order, const UInt& orderDerivate = 1 );
 
-    //! Initialize the parameters of time advance scheme used in Newmark
+    //! Initialize the parameters of time advance scheme used in TimeAdvanceNewmark
 
     void setup ( const  std::vector<Real>&  coefficients, const  UInt& orderDerivate);
 
@@ -237,10 +237,10 @@ public:
      */
     void setInitialCondition( const feVectorType& x0);
 
-    //! Initialize the StateVector used in Newmark
+    //! Initialize the StateVector used in TimeAdvanceNewmark
     void setInitialCondition(const feVectorType& x0, const feVectorType& v0 );
 
-    //! Initialize the StateVector used in Newmark
+    //! Initialize the StateVector used in TimeAdvanceNewmark
     void setInitialCondition(const feVectorType& x0, const feVectorType& v0, const feVectorType&  w0 );
    
     //! Initialize all the entries of the unknown vector to be derived with a
@@ -296,7 +296,7 @@ public:
 // ===================================================
 
 template<typename feVectorType>
-BdfT <feVectorType> :: BdfT() :
+TimeAdvanceBDF <feVectorType> :: TimeAdvanceBDF() :
         super()
 {
 }
@@ -306,7 +306,7 @@ BdfT <feVectorType> :: BdfT() :
 // ===================================================
 template<typename feVectorType>
 void
-BdfT<feVectorType>::shiftRight(feVectorType const&  solution )
+TimeAdvanceBDF<feVectorType>::shiftRight(feVectorType const&  solution )
 {
     ASSERT ( this->M_unknowns.size() == this->M_size,
              "M_unknowns.size() and  M_size must be equal" );
@@ -329,7 +329,7 @@ BdfT<feVectorType>::shiftRight(feVectorType const&  solution )
 
 template<typename feVectorType>
 feVectorType
-BdfT<feVectorType>::updateRHSFirstDerivative(const Real& timeStep )
+TimeAdvanceBDF<feVectorType>::updateRHSFirstDerivative(const Real& timeStep )
 {
     feVectorContainerPtrIterate_Type it  = this->M_rhsContribution.begin();
 
@@ -348,7 +348,7 @@ BdfT<feVectorType>::updateRHSFirstDerivative(const Real& timeStep )
 
 template<typename feVectorType>
 feVectorType
-BdfT<feVectorType>::updateRHSSecondDerivative(const Real& timeStep )
+TimeAdvanceBDF<feVectorType>::updateRHSSecondDerivative(const Real& timeStep )
 {
     ASSERT ( this->M_orderDerivate== 2 ,
              " M_orderDerivatemust be equal two" );
@@ -369,7 +369,7 @@ BdfT<feVectorType>::updateRHSSecondDerivative(const Real& timeStep )
 
 template<typename feVectorType>
 void
-BdfT<feVectorType>::showMe() const
+TimeAdvanceBDF<feVectorType>::showMe() const
 {
     std::cout << "*** BDF Time discretization of order " << this->M_order << " maximum order of derivate "<< this->M_orderDerivate<< " ***"
               << std::endl;
@@ -399,14 +399,14 @@ BdfT<feVectorType>::showMe() const
 
 template<typename feVectorType>
 void
-BdfT<feVectorType>::setup( const UInt& order, const UInt& orderDerivate)
+TimeAdvanceBDF<feVectorType>::setup( const UInt& order, const UInt& orderDerivate)
 {
-    if ( order <= 0 || order > BdfT_MAX_ORDER )
+    if ( order <= 0 || order > BDF_MAX_ORDER )
     {
         std::ostringstream __ex;
         __ex << "Error: wrong BDF order\n"
         << " you want to use BDF order " << order << "\n"
-        << " we support BDF order from 1 to " << BdfT_MAX_ORDER << "\n";
+        << " we support BDF order from 1 to " << BDF_MAX_ORDER << "\n";
         throw std::invalid_argument( __ex.str() );
     }
 
@@ -484,13 +484,13 @@ BdfT<feVectorType>::setup( const UInt& order, const UInt& orderDerivate)
 
 template<typename feVectorType>
 void
-BdfT<feVectorType>::setup ( const  std::vector<Real>&  /*coefficients*/,  const  UInt& /*orderDerivate*/)
+TimeAdvanceBDF<feVectorType>::setup ( const  std::vector<Real>&  /*coefficients*/,  const  UInt& /*orderDerivate*/)
 {
-    ERROR_MSG("use setup for Newmark but the time advance scheme is BDF");
+    ERROR_MSG("use setup for TimeAdvanceNewmark but the time advance scheme is BDF");
 }
 
 template<typename feVectorType>
-void BdfT<feVectorType>::setInitialCondition( const feVectorType& x0)
+void TimeAdvanceBDF<feVectorType>::setInitialCondition( const feVectorType& x0)
 {
     feVectorContainerPtrIterate_Type iter     = this->M_unknowns.begin();
     feVectorContainerPtrIterate_Type iter_end = this->M_unknowns.end();
@@ -513,19 +513,19 @@ void BdfT<feVectorType>::setInitialCondition( const feVectorType& x0)
 }
 
 template<typename feVectorType>
-void  BdfT<feVectorType>::setInitialCondition( const feVectorType& /*x0*/, const feVectorType& /*v0*/)
+void  TimeAdvanceBDF<feVectorType>::setInitialCondition( const feVectorType& /*x0*/, const feVectorType& /*v0*/)
 {
     ERROR_MSG( "this method  is not yet implemented" );
 }
 
 template<typename feVectorType>
-void BdfT<feVectorType>::setInitialCondition( const feVectorType& /*x0*/, const feVectorType& /*v0*/, const feVectorType& /*w0*/)
+void TimeAdvanceBDF<feVectorType>::setInitialCondition( const feVectorType& /*x0*/, const feVectorType& /*v0*/, const feVectorType& /*w0*/)
 {
     ERROR_MSG( "this method  is not yet implemented" );
 }
 
 template<typename feVectorType>
-void BdfT<feVectorType>::setInitialCondition( const feVectorContainer_Type& x0)
+void TimeAdvanceBDF<feVectorType>::setInitialCondition( const feVectorContainer_Type& x0)
 {
     UInt n0 = x0.size();
 
@@ -574,7 +574,7 @@ void BdfT<feVectorType>::setInitialCondition( const feVectorContainer_Type& x0)
 
 template<typename feVectorType>
 Real
-BdfT<feVectorType>::coefficientExtrapolation(const UInt& i ) const
+TimeAdvanceBDF<feVectorType>::coefficientExtrapolation(const UInt& i ) const
 {
     // Pay attention: i is c-based indexed
     ASSERT( i < this->M_order,
@@ -584,7 +584,7 @@ BdfT<feVectorType>::coefficientExtrapolation(const UInt& i ) const
 
 template<typename feVectorType>
 double
-BdfT<feVectorType>::coefficientExtrapolationVelocity (const UInt& i ) const
+TimeAdvanceBDF<feVectorType>::coefficientExtrapolationVelocity (const UInt& i ) const
 {
       // Pay attention: i is c-based indexed
     ASSERT( i < this->M_order+1,
@@ -594,7 +594,7 @@ BdfT<feVectorType>::coefficientExtrapolationVelocity (const UInt& i ) const
 
 template<typename feVectorType>
 feVectorType
-BdfT<feVectorType>::extrapolation() const
+TimeAdvanceBDF<feVectorType>::extrapolation() const
 {
     feVectorType ue(*this->M_unknowns[ 0 ]);
     ue *= this->M_beta[ 0 ];
@@ -609,7 +609,7 @@ BdfT<feVectorType>::extrapolation() const
 
 template<typename feVectorType>
 feVectorType
-BdfT<feVectorType>::extrapolationVelocity() const
+TimeAdvanceBDF<feVectorType>::extrapolationVelocity() const
 {
     feVectorType velocity(*this->M_unknowns[ 0 ]);
     velocity *= this->M_betaVelocity[ 0 ];
@@ -622,7 +622,7 @@ BdfT<feVectorType>::extrapolationVelocity() const
 
 template<typename feVectorType>
 feVectorType
-BdfT<feVectorType>::velocity()  const
+TimeAdvanceBDF<feVectorType>::velocity()  const
 {
     feVectorType velocity(*this->M_unknowns[0]);
     velocity  *= this->M_alpha[ 0 ] / this->M_timeStep;
@@ -632,7 +632,7 @@ BdfT<feVectorType>::velocity()  const
 
 template<typename feVectorType>
 feVectorType
-BdfT<feVectorType>::accelerate() const
+TimeAdvanceBDF<feVectorType>::accelerate() const
 {
     feVectorType accelerate(*this->M_unknowns[0]);
     accelerate  *= this->M_xi[ 0 ]  /  (this->M_timeStep*this->M_timeStep);
@@ -646,7 +646,7 @@ BdfT<feVectorType>::accelerate() const
 
 //! define the BDF factory
 inline
-TimeAdvance<EpetraVector>* createBDF() { return new BdfT<EpetraVector>(); }
+TimeAdvance<EpetraVector>* createBDF() { return new TimeAdvanceBDF<EpetraVector>(); }
 
 namespace
 {

@@ -657,7 +657,7 @@ void VenantKirchhoffSolver<Mesh, SolverType>::updateSystem( matrixPtr_Type& /*st
   //    UInt nc = nDimensions;
 
   Real coef;
-  coef = (Real) M_data->getDataTime()->timeStep();
+  coef = (Real) M_data->getdataTime()->timeStep();
 
 
   vector_Type z = *M_disp;
@@ -673,7 +673,7 @@ void VenantKirchhoffSolver<Mesh, SolverType>::updateSystem( matrixPtr_Type& /*st
 
   std::cout<< "rhsNoBC in solid 2" << M_rhsNoBC->norm2()<<std::endl;
 
-  coef = 2.0/M_data->getDataTime()->timeStep();
+  coef = 2.0/M_data->getdataTime()->timeStep();
   *M_rhsW  = coef * (*M_disp);
   *M_rhsW += *M_vel;
 
@@ -708,7 +708,7 @@ VenantKirchhoffSolver<Mesh, SolverType>::buildSystem(matrixPtr_Type massStiff, c
   UInt nc = nDimensions;
 
   //inverse of dt square:
-  Real dti2 = 2.0 / ( M_data->getDataTime()->timeStep() * M_data->getDataTime()->timeStep() );
+  Real dti2 = 2.0 / ( M_data->getdataTime()->timeStep() * M_data->getdataTime()->timeStep() );
 
   // Elementary computation and matrix assembling
   // Loop on elements
@@ -763,7 +763,7 @@ void VenantKirchhoffSolver<Mesh, SolverType>::iterate(vector_Type& solution)
 
   vector_Type sol(*M_localMap);
 
-  *M_vel  = ( 2.0 / M_data->getDataTime()->timeStep() ) * (*M_disp);
+  *M_vel  = ( 2.0 / M_data->getdataTime()->timeStep() ) * (*M_disp);
   *M_vel -= *M_rhsW;
 
 
@@ -807,7 +807,7 @@ VenantKirchhoffSolver<Mesh, SolverType>::iterate( bchandler_Type& bch )
 
   // computing the velocity vector and the residual
 
-  *M_vel  = ( 2.0 / M_data->getDataTime()->timeStep() ) * (*M_disp);
+  *M_vel  = ( 2.0 / M_data->getdataTime()->timeStep() ) * (*M_disp);
   *M_vel -= *M_rhsW;
 
   *M_residual_d =  *M_massStiff * (*M_disp);
@@ -884,7 +884,7 @@ VenantKirchhoffSolver<Mesh, SolverType>::evalResidual( vector_Type &residual, co
 
   *M_rhs = *M_rhsNoBC;
 
-  bcManageVector( *M_rhs, *M_FESpace->mesh(), M_FESpace->dof(), *M_BCh, M_FESpace->feBd(), M_data->getDataTime()->time(), 1.0 );
+  bcManageVector( *M_rhs, *M_FESpace->mesh(), M_FESpace->dof(), *M_BCh, M_FESpace->feBd(), M_data->getdataTime()->time(), 1.0 );
   residual  = M_stiff * solution;
   //    res -= M_rhs;
 
@@ -1059,7 +1059,7 @@ template <typename Mesh, typename SolverType> // for monolithic
 void
 VenantKirchhoffSolver<Mesh, SolverType>::updateVel()
 {
-  *M_vel  = ( 2.0 / M_data->getDataTime()->timeStep() ) * (*M_disp);
+  *M_vel  = ( 2.0 / M_data->getdataTime()->timeStep() ) * (*M_disp);
   *M_vel -= *M_rhsW;
 }
 
@@ -1084,8 +1084,8 @@ template <typename Mesh, typename SolverType>
 void
 VenantKirchhoffSolver<Mesh, SolverType>::rescaleMatrices()
 {
-  *M_mass *=(M_data->getDataTime()->timeStep()*M_rescaleFactor);
-  *M_linearStiff *= (M_data->getDataTime()->timeStep()*M_rescaleFactor);
+  *M_mass *=(M_data->getdataTime()->timeStep()*M_rescaleFactor);
+  *M_linearStiff *= (M_data->getdataTime()->timeStep()*M_rescaleFactor);
 }
 
 template <typename Mesh, typename SolverType>
@@ -1120,7 +1120,7 @@ VenantKirchhoffSolver<Mesh, SolverType>::applyBoundaryConditions( matrix_Type&  
   vector_Type rhsFull(rhs, Unique);  // bcManages now manages the also repeated parts
 
   bcManage( matrix, rhsFull, *M_FESpace->mesh(), M_FESpace->dof(), *BCh, M_FESpace->feBd(), 1.,
-              M_data->getDataTime()->time() );
+              M_data->getdataTime()->time() );
 
   // matrix should be GlobalAssembled by  bcManage
 

@@ -38,8 +38,8 @@
     @maintainer Matteo Pozzoli <matteo1.pozzoli@mail.polimi.it>
  */
 
-#ifndef _DATATIME_H_
-#define _DATATIME_H_ 1
+#ifndef _TimeData_H_
+#define _TimeData_H_ 1
 
 #include <ostream>
 #include <life/lifefilters/GetPot.hpp>
@@ -49,13 +49,13 @@ namespace LifeV
 {
 
 
-//! DataTime - Class for handling temporal discretization.
+//! TimeData - Class for handling temporal discretization.
 /*!
  *  @author Cristiano Malossi
  *
  *  The class is a container for time information.
  */
-class DataTime
+class TimeData
 {
 public:
 
@@ -63,23 +63,23 @@ public:
     //@{
 
     //! Empty Constructor
-    DataTime();
+    TimeData();
 
     //! Constructor
     /*!
      * @param dataFile GetPot data file
      * @param section the section on the data file that contains the information on the time discretization
      */
-    DataTime( const GetPot& dataFile, const std::string& section = "time_discretization" );
+    TimeData( const GetPot& dataFile, const std::string& section = "time_discretization" );
 
     //! Copy constructor
     /*!
-     * @param dataTime - DataTime class
+     * @param TimeData - TimeData class
      */
-    DataTime( const DataTime& dataTime);
+    TimeData( const TimeData& TimeData);
 
     //! Virtual destructor
-    virtual ~DataTime() {}
+    virtual ~TimeData() {}
 
     //@}
 
@@ -157,15 +157,15 @@ public:
      */
     void setOrderBDF( const UInt& orderBDF ) { M_orderBDF = orderBDF; }
 
-    //! Set the theta of Newmark scheme
+    //! Set the theta of TimeAdvanceNewmark scheme
     /*!
-     * @param theta - coefficient of Newmark scheme
+     * @param theta - coefficient of TimeAdvanceNewmark scheme
      */
     void setTheta( const Real& theta ) { M_theta = theta; }
 
-    //! Set the theta of Newmark scheme
+    //! Set the theta of TimeAdvanceNewmark scheme
     /*!
-     * @param gamma- coefficient of Newmark scheme
+     * @param gamma- coefficient of TimeAdvanceNewmark scheme
      */
     void setGamma( const Real& gamma ) { M_gamma = gamma; }
 
@@ -251,21 +251,21 @@ public:
      */
     const UInt& orderBDF()		 const { return M_orderBDF; }
 
-    //! Return theta parameter of Newmark scheme
+    //! Return theta parameter of TimeAdvanceNewmark scheme
     /*!
      * @return theta value
      */
     const Real& theta()             const { return M_theta; }
 
-    //! Return gamma of Newmark scheme
+    //! Return gamma of TimeAdvanceNewmark scheme
     /*!
      * @return gamma value
      */
     const Real& gamma()              const { return M_gamma; }
 
-    //! Return Newmark parameters (\f$theta\f$, $\gamma$)
+    //! Return TimeAdvanceNewmark parameters (\f$theta\f$, $\gamma$)
 
-    std::vector<Real> coefficientsNewmark();
+    std::vector<Real> coefficientsTimeAdvanceNewmark();
 
     //@}
 
@@ -281,8 +281,8 @@ private:
     Real					M_timeStep; 	  // time step
     UInt                                     M_timeStepNumber; // iteration number
     UInt					M_orderBDF; 	  // order of the time discretization formula
-    Real                                    M_theta;          // Newmark parameter
-    Real                                    M_gamma;           // Newmark parameter
+    Real                                    M_theta;          // TimeAdvanceNewmark parameter
+    Real                                    M_gamma;           // TimeAdvanceNewmark parameter
 };
 
 } // namespace LifeV
