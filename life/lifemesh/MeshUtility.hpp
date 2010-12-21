@@ -43,7 +43,7 @@
 #include <set>
 #include <vector>
 
-#include <life/lifecore/life.hpp>
+#include <life/lifecore/Life.hpp>
 #include <life/lifecore/Switch.hpp>
 #include <life/lifemesh/MeshElementBare.hpp>
 #include <life/lifemesh/MarkerDefinitions.hpp>
