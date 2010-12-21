@@ -30,7 +30,7 @@
 #ifndef __ESSTEADY_HPP
 #define __ESSTEADY_HPP 1
 
-#include <life/lifecore/life.hpp>
+#include <life/lifecore/Life.hpp>
 #include <life/lifefilters/GetPot.hpp>
 
 namespace LifeV

@@ -49,8 +49,7 @@
 #pragma GCC diagnostic warning "-Wunused-variable"
 #pragma GCC diagnostic warning "-Wunused-parameter"
 
-
-#include <life/lifecore/life.hpp>
+#include <life/lifecore/Life.hpp>
 
 #include <life/lifearray/MatrixEpetra.hpp>
 #include <life/lifearray/MapEpetra.hpp>
