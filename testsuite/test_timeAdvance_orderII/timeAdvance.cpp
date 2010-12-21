@@ -65,7 +65,7 @@ nonlinear_function.hpp:
 #endif
 
 #include <life/lifealg/EpetraMap.hpp>
-#include <life/lifemesh/dataMesh.hpp>
+#include <life/lifemesh/MeshData.hpp>
 #include <life/lifemesh/MeshPartitioner.hpp>
 
 #include <life/lifesolver/SecondOrderSolver.hpp>

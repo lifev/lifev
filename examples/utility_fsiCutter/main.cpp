@@ -45,7 +45,7 @@
 
 #include <life/lifecore/life.hpp>
 #include <life/lifefilters/GetPot.hpp>
-#include <life/lifemesh/dataMesh.hpp>
+#include <life/lifemesh/MeshData.hpp>
 #include <life/lifemesh/MeshPartitionerOfflineFSI.hpp>
 #include <life/lifefilters/ExporterHDF5Mesh3D.hpp>
 

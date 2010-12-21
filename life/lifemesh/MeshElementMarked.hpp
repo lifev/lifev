@@ -40,9 +40,9 @@
 #define MESHELEMENTMARKED_H
 
 #include <life/lifecore/life.hpp>
-#include <life/lifemesh/markers.hpp>
+#include <life/lifemesh/MarkerDefinitions.hpp>
 #include <life/lifemesh/MeshElement.hpp>
-#include <life/lifemesh/bareItems.hpp>
+#include <life/lifemesh/MeshElementBare.hpp>
 
 namespace LifeV
 {

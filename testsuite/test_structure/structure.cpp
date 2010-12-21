@@ -39,7 +39,7 @@
 //#include "NavierStokesSolverIP.hpp"
 
 #include <life/lifealg/EpetraMap.hpp>
-#include <life/lifemesh/dataMesh.hpp>
+#include <life/lifemesh/MeshData.hpp>
 
 #include <life/lifesolver/VenantKirchhoffElasticData.hpp>
 #include <life/lifesolver/VenantKirchhoffSolverLinear.hpp>

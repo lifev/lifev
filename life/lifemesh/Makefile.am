@@ -21,8 +21,8 @@
 SUFFIXES	= .cpp .hpp .idl .c .h .f .F .o .moc .cc
 
 lib_LTLIBRARIES		= liblifemesh.la
-liblifemesh_la_SOURCES	= dataMesh.cpp bareItems.cpp basisElSh.cpp MeshVertex.cpp identifier.cpp \
-markers_base.cpp  mesh_util_base.cpp regionMesh3D.cpp structuredMesh3D.cpp InternalEntitySelector.cpp
+liblifemesh_la_SOURCES	= MeshData.cpp MeshElementBare.cpp ElementShapes.cpp MeshVertex.cpp \
+Marker.cpp  MeshUtility.cpp regionMesh3D.cpp structuredMesh3D.cpp InternalEntitySelector.cpp
 
 
 liblifemesh_la_LIBADD	= ../lifecore/liblifecore.la

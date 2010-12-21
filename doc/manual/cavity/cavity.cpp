@@ -25,9 +25,9 @@
 // LifeV definition files
 #include <life/lifecore/life.hpp>
 #include <life/lifecore/LifeChrono.hpp>
-#include <life/lifesolver/Oseen.hpp>
-#include <life/lifemesh/dataMesh.hpp>
-#include <life/lifesolver/dataNavierStokes.hpp>
+#include <life/lifesolver/OseenSolver.hpp>
+#include <life/lifemesh/MeshData.hpp>
+#include <life/lifesolver/OseenData.hpp>
 #include <life/lifealg/EpetraMap.hpp>
 #include <life/lifefem/FESpace.hpp>
 #include <life/lifefem/bdfNS_template.hpp>

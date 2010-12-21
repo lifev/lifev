@@ -45,7 +45,7 @@
 #endif
 
 #include <life/lifealg/EpetraMap.hpp>
-#include <life/lifemesh/dataMesh.hpp>
+#include <life/lifemesh/MeshData.hpp>
 #include <life/lifemesh/MeshPartitioner.hpp>
 #include <life/lifealg/SolverTrilinos.hpp>
 #include <life/lifefem/Assembly.hpp>
@@ -155,7 +155,7 @@ void test_bdf::run()
     Members->comm->Barrier();
     MeshData meshData(dataFile, ("bdf/" + discretization_section).c_str());
     boost::shared_ptr<RegionMesh> meshPtr( new RegionMesh() );
-    readMesh(*meshPtr,dataMesh);
+    readMesh(*meshPtr,meshData);
     MeshPartitioner<RegionMesh> meshPart(meshPtr, Members->comm);
 
     //=============================================================================

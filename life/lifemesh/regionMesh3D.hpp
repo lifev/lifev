@@ -44,7 +44,7 @@ along with LifeV. If not, see <http://www.gnu.org/licenses/>.
 #include <life/lifecore/LifeDebug.hpp>
 #include <life/lifemesh/MeshElementMarked.hpp>
 #include <life/lifecore/Switch.hpp>
-#include <life/lifemesh/bareItems.hpp>
+#include <life/lifemesh/MeshElementBare.hpp>
 
 #include <life/lifearray/SimpleVect.hpp>
 

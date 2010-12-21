@@ -45,8 +45,8 @@
 
 #include <life/lifecore/life.hpp>
 #include <life/lifecore/Switch.hpp>
-#include <life/lifemesh/bareItems.hpp>
-#include <life/lifemesh/markers.hpp>
+#include <life/lifemesh/MeshElementBare.hpp>
+#include <life/lifemesh/MarkerDefinitions.hpp>
 #include <life/lifemesh/meshEntity.hpp>
 
 namespace LifeV
@@ -774,7 +774,7 @@ UInt findInternalEdges( const MeshType & mesh,
     @ingroup marker_handlers
 
     It gets the stronger marker of the MeshElementMarked points. The marker
-    hierarchy is defined in the markers.hpp file. It returns the new
+    hierarchy is defined in the MarkerDefinitions.hpp file. It returns the new
     flag for the MeshElementMarked. If any of the vertices has an unset marker
     the result is an unset flag for the MeshElementMarked.
 
@@ -801,7 +801,7 @@ entityFlag_Type inheritPointsStrongerMarker( MeshElementMarkedType & geoElement 
 //! @brief Sets the marker flag of a MeshElementMarked of dimension greater one
 
     It gets the weaker marker of the MeshElementMarked points. The marker
-    hierarchy is defined in the markers.hpp file. It returns the new
+    hierarchy is defined in the MarkerDefinitions.hpp file. It returns the new
     flag for the MeshElementMarked. If any of the vertices has an unset marker
     the result is an unset flag for the MeshElementMarked.
 

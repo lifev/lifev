@@ -628,7 +628,7 @@ private:
 
     std::set<boost::shared_ptr<BCIdentifierBase>, BCIdentifierComparison> M_idSet; //!< set of pointers to identifiers allowing the user to get hold the DOF to which the BC applies
 
-    std::vector<boost::shared_ptr<IdentifierBase> > M_idVector; //!< container for id's when the list is finalized
+    std::vector<boost::shared_ptr<BCIdentifierBase> > M_idVector; //!< container for id's when the list is finalized
 
     int M_offset; //!< boundary condition offset
 
