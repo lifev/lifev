@@ -52,7 +52,7 @@
 #pragma GCC diagnostic warning "-Wunused-parameter"
 
 // LifeV includes
-#include <life/lifealg/MapEpetra.hpp>
+#include <life/lifearray/MapEpetra.hpp>
 #include <life/lifearray/EpetraVector.hpp>
 
 // Mathcard includes
