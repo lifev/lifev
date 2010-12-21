@@ -38,7 +38,7 @@
 #ifndef Parser_H
 #define Parser_H 1
 
-#include <life/lifecore/debug.hpp>
+#include <life/lifecore/LifeDebug.hpp>
 #include <lifemc/lifecore/ParserDefinitions.hpp>
 #include <lifemc/lifecore/ParserSpiritGrammar.hpp>
 
