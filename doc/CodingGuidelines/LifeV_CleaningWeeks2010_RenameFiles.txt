@@ -27,7 +27,7 @@ LIFEV FILES TO BE MOVED
 
 EpetraMap:      from LIFEALG     to LIFEARRAY                                  CMCS2
 GetPot:         from LIFECORE    to LIFEFILTERS                                CMCS3 - DONE
-identifier      from LIFEMESH    to LIFEFEM                                    EMORY
+identifier      from LIFEMESH    to LIFEFEM                                    EMORY     DONE
 mesh_util       from LIFEFILTERS to LIFEMESH                                   CMCS3
 selectMarker    from LIFEFILTERS to LIFEMESH                                   MOX
 stiffnessFibers from LIFEFEM     to LIFESOLVER                                 CMCS1     DONE
@@ -59,8 +59,8 @@ NonLinearAitken                        generalizedAitken                       C
 NonLinearBrent                         brent                                   MOX
 NonLinearLineSearch                    linesearch_* (merging 2 files)          MOX
 NonLinearRichardson                    nonLinRichardson                        CMCS3
-LinearEpetraOperator                   OP_LinearOperator                       EMORY
-LinearEpetraOperatorBlock              OP_BlockOperator                        EMORY
+LinearEpetraOperator                   OP_LinearOperator                       EMORY     DONE
+LinearEpetraOperatorBlock              OP_BlockOperator                        EMORY     DONE
 Preconditioner                         EpetraPreconditioner                    CMCS2
 PreconditionerAztecOO                  AztecOOPreconditioner                   CMCS2
 PreconditionerIfpack                   IfPackPreconditioner                    CMCS2
@@ -84,18 +84,18 @@ VectorSimple                           SimpleVect                              C
 
 LIFEMESH
 ============================
-ElementShapes                          basisElSh                               EMORY
+ElementShapes                          basisElSh                               EMORY     DONE
 InternalEntitySelector                 selectMarker                            MOX       DONE
-Markers                                markers_base                            EMORY
-MarkersDefinitions                     markers                                 EMORY
+Marker                                 markers_base                            EMORY     DONE
+MarkerDefinitions                      markers                                 EMORY     DONE
 MeshChecks                             mesh_util                               CMCS3
-MeshData                               dataMesh                                EMORY
-MeshElementBare                        bareItems                               EMORY
-MeshElement                            geoND                                   EMORY	Done
-MeshElementMarked                      geoElement                              EMORY	Done
-MeshEntity                             meshEntity                              EMORY
-MeshUtility                            mesh_util_base                          EMORY
-MeshVertex                             geo0D                                   EMORY	Done
+MeshData                               dataMesh                                EMORY     DONE
+MeshElementBare                        bareItems                               EMORY     DONE
+MeshElement                            geoND                                   EMORY     DONE
+MeshElementMarked                      geoElement                              EMORY     DONE
+MeshEntity                             meshEntity                              EMORY     DONE
+MeshUtility                            mesh_util_base                          EMORY     DONE
+MeshVertex                             geo0D                                   EMORY     DONE
 RegionMesh1D                           regionMesh1D                            MOX
 RegionMesh2D                           regionMesh2D                            MOX
 RegionMesh3D                           regionMesh3D                            MOX
@@ -140,7 +140,7 @@ DOFLocalPattern                        localDofPattern                         C
 FESpace                                -                                       CMCS2     DONE
 GeometricMap                           geoMap                                  CMCS2     DONE
 HyperbolicFluxNumerical                NumericalFluxes                         MOX
-PostProcessingBoundary                 postProc                                EMORY
+PostProcessingBoundary                 postProc                                EMORY     DONE
 QuadraturePoint                        quadPoint                               CMCS2     DONE
 QuadratureRule                         quadRule                                CMCS2     DONE
 ReferenceElement                       refEle                                  CMCS2     DONE
@@ -184,11 +184,11 @@ HyperbolicData                         dataHyperbolic                          M
 HyperbolicSolver                       hyperbolicSolver                        MOX
 LevelSetData                           dataLevelSet                            CMCS2
 LevelSetSolver                         -                                       CMCS2     DONE
-OseenData                              dataNavierStokes                        EMORY
-OseenSolver                            Oseen                                   EMORY
-OseenSolverShapeDerivative             OseenShapeDerivatives                   EMORY
-StabilizationIP                        nsipterms                               EMORY
-StabilizationSD                        sdStabilization                         EMORY
+OseenData                              dataNavierStokes                        EMORY     DONE
+OseenSolver                            Oseen                                   EMORY     DONE
+OseenSolverShapeDerivative             OseenShapeDerivatives                   EMORY     DONE
+StabilizationIP                        nsipterms                               EMORY     DONE
+StabilizationSD                        sdStabilization                         EMORY     DONE
 VenantKirchhoffElasticData             dataElasticStructure                    CMCS3
 VenantKirchhoffElasticHandler          ElasticStructureHandler                 CMCS3
 VenantKirchhoffSolver                  VenantKirchhofSolver                    CMCS3
