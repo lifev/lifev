@@ -50,7 +50,7 @@
 
 // LifeV includes
 #include <life/lifecore/life.hpp>
-#include <life/lifecore/GetPot.hpp>
+#include <life/lifefilters/GetPot.hpp>
 #include <life/lifesolver/FSISolver.hpp>
 #include <life/lifesolver/FSI.hpp>
 
