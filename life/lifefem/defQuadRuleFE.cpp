@@ -33,7 +33,7 @@
  */
 
 
-#include <life/lifefem/QuadRule.hpp>
+#include <life/lifefem/QuadratureRule.hpp>
 #include <life/lifefem/ReferenceFEScalar.hpp>
 #include <life/lifefem/ReferenceFEHdiv.hpp>
 #include <life/lifefem/ReferenceFEHybrid.hpp>
@@ -54,11 +54,11 @@ const size_t NB_QUAD_RULE_NODE = 3;
 const int QUAD_RULE_NODE_1PT = 1;
 
 
-static const QuadPoint pt_node_1pt[ 1 ] =
+static const QuadraturePoint pt_node_1pt[ 1 ] =
 {
-    QuadPoint( 0., 1. )
+    QuadraturePoint( 0., 1. )
 };
-const QuadRule quadRuleNode1pt( pt_node_1pt,
+const QuadratureRule quadRuleNode1pt( pt_node_1pt,
                                 QUAD_RULE_NODE_1PT,
                                 "Gauss Legendre 1 point on a node", POINT, 1, 1 );
 
@@ -76,45 +76,45 @@ const size_t QUAD_RULE_SEG_2PT = 2;
 const size_t QUAD_RULE_SEG_3PT = 3;
 //----------------------------------------------------------------------
 
-static const QuadPoint pt_seg_1pt[ 1 ] =
+static const QuadraturePoint pt_seg_1pt[ 1 ] =
 {
-    QuadPoint( 0.5, 1. )
+    QuadraturePoint( 0.5, 1. )
 };
-const QuadRule quadRuleSeg1pt( pt_seg_1pt,
+const QuadratureRule quadRuleSeg1pt( pt_seg_1pt,
                                QUAD_RULE_SEG_1PT,
                                "Gauss Legendre 1 point on a segment", LINE, 1, 1 );
 //
-const QuadRule quadRuleDummy( pt_seg_1pt, 1, "Dummy quadrature rule", LINE, 1, 1 );
+const QuadratureRule quadRuleDummy( pt_seg_1pt, 1, "Dummy quadrature rule", LINE, 1, 1 );
 //----------------------------------------------------------------------
 const Real q2ptx1 = ( 1 - sqrt( 1. / 3. ) ) / 2., q2ptx2 = ( 1 + sqrt( 1. / 3. ) ) / 2.;
 const Real q2ptw1 = 0.5, q2ptw2 = 0.5;
 
-static const QuadPoint pt_seg_2pt[ 2 ] =
+static const QuadraturePoint pt_seg_2pt[ 2 ] =
 {
-    QuadPoint( q2ptx1 , q2ptw1 ),
-    QuadPoint( q2ptx2 , q2ptw2 )
+    QuadraturePoint( q2ptx1 , q2ptw1 ),
+    QuadraturePoint( q2ptx2 , q2ptw2 )
 };
-const QuadRule quadRuleSeg2pt( pt_seg_2pt,
+const QuadratureRule quadRuleSeg2pt( pt_seg_2pt,
                                QUAD_RULE_SEG_2PT,
                                "Gauss Legendre 2 points on a segment", LINE, 2, 3 );
 //----------------------------------------------------------------------
 const Real q3ptx1 = 0.5, q3ptx2 = ( 1 - sqrt( 3. / 5. ) ) / 2., q3ptx3 = ( 1 + sqrt( 3. / 5. ) ) / 2.;
 const Real q3ptw1 = 8. / 18., q3ptw2 = 5. / 18., q3ptw3 = 5. / 18.;
 
-static const QuadPoint pt_seg_3pt[ 3 ] =
+static const QuadraturePoint pt_seg_3pt[ 3 ] =
 {
-    QuadPoint( q3ptx1, q3ptw1 ),
-    QuadPoint( q3ptx2, q3ptw2 ),
-    QuadPoint( q3ptx3, q3ptw3 )
+    QuadraturePoint( q3ptx1, q3ptw1 ),
+    QuadraturePoint( q3ptx2, q3ptw2 ),
+    QuadraturePoint( q3ptx3, q3ptw3 )
 };
 
-const QuadRule quadRuleSeg3pt( pt_seg_3pt,
+const QuadratureRule quadRuleSeg3pt( pt_seg_3pt,
                                QUAD_RULE_SEG_3PT,
                                "Gauss Legendre 3 points on a segment", LINE, 3, 5 );
 /*----------------------------------------------------------------------
   Set of all quadrature rules on segments
   ----------------------------------------------------------------------*/
-static const QuadRule quad_rule_seg[ NB_QUAD_RULE_SEG ] =
+static const QuadratureRule quad_rule_seg[ NB_QUAD_RULE_SEG ] =
 {
     quadRuleSeg1pt,
     quadRuleSeg2pt,
@@ -135,21 +135,21 @@ static const QuadRule quad_rule_seg[ NB_QUAD_RULE_SEG ] =
 #define QUAD_RULE_TRIA_7PT     5
 //----------------------------------------------------------------------
 
-static const QuadPoint pt_tria_1pt[ 1 ] =
+static const QuadraturePoint pt_tria_1pt[ 1 ] =
 {
-    QuadPoint( 1./3., 1./3., 1./2. )
+    QuadraturePoint( 1./3., 1./3., 1./2. )
 };
-const QuadRule quadRuleTria1pt( pt_tria_1pt,
+const QuadratureRule quadRuleTria1pt( pt_tria_1pt,
                                 QUAD_RULE_TRIA_1PT,
                                 "Quadrature rule 1 point on a triangle", TRIANGLE, 1, 1 );
 //----------------------------------------------------------------------
-static const QuadPoint pt_tria_3pt[ 3 ] =
+static const QuadraturePoint pt_tria_3pt[ 3 ] =
 {
-    QuadPoint( 0.5, 0. , 1. / 6. ),
-    QuadPoint( 0. , 0.5, 1. / 6. ),
-    QuadPoint( 0.5, 0.5, 1. / 6. )
+    QuadraturePoint( 0.5, 0. , 1. / 6. ),
+    QuadraturePoint( 0. , 0.5, 1. / 6. ),
+    QuadraturePoint( 0.5, 0.5, 1. / 6. )
 };
-const QuadRule quadRuleTria3pt( pt_tria_3pt,
+const QuadratureRule quadRuleTria3pt( pt_tria_3pt,
                                 QUAD_RULE_TRIA_3PT,
                                 "Quadrature rule 3 points on a triangle", TRIANGLE, 3, 2 );
 //----------------------------------------------------------------------
@@ -160,15 +160,15 @@ const Real t4pt_xb1 = 3. / 5.,
                                              t4pt_w2  = -9. / 32.,
                                                         t4pt_a   =  1. / 3.;
 
-static const QuadPoint pt_tria_4pt[ 4 ] =
+static const QuadraturePoint pt_tria_4pt[ 4 ] =
 {
-    QuadPoint( t4pt_xb1, t4pt_xb2, t4pt_w1 ),
-    QuadPoint( t4pt_xb2, t4pt_xb1, t4pt_w1 ),
-    QuadPoint( t4pt_xb2, t4pt_xb2, t4pt_w1 ),
-    QuadPoint( t4pt_a, t4pt_a, t4pt_w2 )
+    QuadraturePoint( t4pt_xb1, t4pt_xb2, t4pt_w1 ),
+    QuadraturePoint( t4pt_xb2, t4pt_xb1, t4pt_w1 ),
+    QuadraturePoint( t4pt_xb2, t4pt_xb2, t4pt_w1 ),
+    QuadraturePoint( t4pt_a, t4pt_a, t4pt_w2 )
 };
 
-const QuadRule quadRuleTria4pt( pt_tria_4pt,
+const QuadratureRule quadRuleTria4pt( pt_tria_4pt,
                                 QUAD_RULE_TRIA_4PT,
                                 "Quadrature rule 4 points on a triangle", TRIANGLE, 4, 3 );
 //----------------------------------------------------------------------
@@ -180,16 +180,16 @@ const Real t6pt_x2 = 0.44594849091596488;
 const Real t6pt_w1 = 0.054975871827660933;
 const Real t6pt_w2 = 0.11169079483900573;
 
-static const QuadPoint pt_tria_6pt[ 6 ] =
+static const QuadraturePoint pt_tria_6pt[ 6 ] =
 {
-    QuadPoint(     t6pt_x1,     t6pt_x1, t6pt_w1 ),
-    QuadPoint(     t6pt_x1, 1-2*t6pt_x1, t6pt_w1 ),
-    QuadPoint( 1-2*t6pt_x1,     t6pt_x1, t6pt_w1 ),
-    QuadPoint(     t6pt_x2,     t6pt_x2, t6pt_w2 ),
-    QuadPoint(     t6pt_x2, 1-2*t6pt_x2, t6pt_w2 ),
-    QuadPoint( 1-2*t6pt_x2,     t6pt_x2, t6pt_w2 ),
+    QuadraturePoint(     t6pt_x1,     t6pt_x1, t6pt_w1 ),
+    QuadraturePoint(     t6pt_x1, 1-2*t6pt_x1, t6pt_w1 ),
+    QuadraturePoint( 1-2*t6pt_x1,     t6pt_x1, t6pt_w1 ),
+    QuadraturePoint(     t6pt_x2,     t6pt_x2, t6pt_w2 ),
+    QuadraturePoint(     t6pt_x2, 1-2*t6pt_x2, t6pt_w2 ),
+    QuadraturePoint( 1-2*t6pt_x2,     t6pt_x2, t6pt_w2 ),
 };
-const QuadRule quadRuleTria6pt( pt_tria_6pt, QUAD_RULE_TRIA_6PT,
+const QuadratureRule quadRuleTria6pt( pt_tria_6pt, QUAD_RULE_TRIA_6PT,
                                 "Quadrature rule 6 points on a triangle",
                                 TRIANGLE, 6, 4 );
 //----------------------------------------------------------------------
@@ -201,23 +201,23 @@ const Real t7pt_w0 = 0.1125;
 const Real t7pt_w1 = 0.062969590272413576;
 const Real t7pt_w2 = 0.066197076394253090;
 
-static const QuadPoint pt_tria_7pt[ 7 ] =
+static const QuadraturePoint pt_tria_7pt[ 7 ] =
 {
-    QuadPoint(     t7pt_x0,     t7pt_x0, t7pt_w0 ),
-    QuadPoint(     t7pt_x1,     t7pt_x1, t7pt_w1 ),
-    QuadPoint(     t7pt_x1, 1-2*t7pt_x1, t7pt_w1 ),
-    QuadPoint( 1-2*t7pt_x1,     t7pt_x1, t7pt_w1 ),
-    QuadPoint(     t7pt_x2,     t7pt_x2, t7pt_w2 ),
-    QuadPoint(     t7pt_x2, 1-2*t7pt_x2, t7pt_w2 ),
-    QuadPoint( 1-2*t7pt_x2,     t7pt_x2, t7pt_w2 ),
+    QuadraturePoint(     t7pt_x0,     t7pt_x0, t7pt_w0 ),
+    QuadraturePoint(     t7pt_x1,     t7pt_x1, t7pt_w1 ),
+    QuadraturePoint(     t7pt_x1, 1-2*t7pt_x1, t7pt_w1 ),
+    QuadraturePoint( 1-2*t7pt_x1,     t7pt_x1, t7pt_w1 ),
+    QuadraturePoint(     t7pt_x2,     t7pt_x2, t7pt_w2 ),
+    QuadraturePoint(     t7pt_x2, 1-2*t7pt_x2, t7pt_w2 ),
+    QuadraturePoint( 1-2*t7pt_x2,     t7pt_x2, t7pt_w2 ),
 };
-const QuadRule quadRuleTria7pt( pt_tria_7pt, QUAD_RULE_TRIA_7PT,
+const QuadratureRule quadRuleTria7pt( pt_tria_7pt, QUAD_RULE_TRIA_7PT,
                                 "Quadrature rule 7 points on a triangle",
                                 TRIANGLE, 7, 5 );
 /*----------------------------------------------------------------------
   Set of all quadrature rules on triangle
   ----------------------------------------------------------------------*/
-static const QuadRule quad_rule_tria[ NB_QUAD_RULE_TRIA ] =
+static const QuadratureRule quad_rule_tria[ NB_QUAD_RULE_TRIA ] =
 {
     quadRuleTria1pt,
     quadRuleTria3pt,
@@ -239,47 +239,47 @@ static const QuadRule quad_rule_tria[ NB_QUAD_RULE_TRIA ] =
 #define QUAD_RULE_QUAD_9PT     3
 //----------------------------------------------------------------------
 
-static const QuadPoint pt_quad_1pt[ 1 ] =
+static const QuadraturePoint pt_quad_1pt[ 1 ] =
 {
-    QuadPoint( .5, .5, 1. )
+    QuadraturePoint( .5, .5, 1. )
 };
-const QuadRule quadRuleQuad1pt( pt_quad_1pt,
+const QuadratureRule quadRuleQuad1pt( pt_quad_1pt,
                                 QUAD_RULE_QUAD_1PT,
                                 "Quadrature rule 1 point on a quadrangle", QUAD, 1, 1 );
 //----------------------------------------------------------------------
-static const QuadPoint pt_quad_4pt[ 4 ] =
+static const QuadraturePoint pt_quad_4pt[ 4 ] =
 {
-    QuadPoint( q2ptx1, q2ptx1, q2ptw1 * q2ptw1 ),
-    QuadPoint( q2ptx1, q2ptx2, q2ptw1 * q2ptw2 ),
-    QuadPoint( q2ptx2, q2ptx1, q2ptw2 * q2ptw1 ),
-    QuadPoint( q2ptx2, q2ptx2, q2ptw2 * q2ptw2 )
+    QuadraturePoint( q2ptx1, q2ptx1, q2ptw1 * q2ptw1 ),
+    QuadraturePoint( q2ptx1, q2ptx2, q2ptw1 * q2ptw2 ),
+    QuadraturePoint( q2ptx2, q2ptx1, q2ptw2 * q2ptw1 ),
+    QuadraturePoint( q2ptx2, q2ptx2, q2ptw2 * q2ptw2 )
 };
-const QuadRule quadRuleQuad4pt( pt_quad_4pt,
+const QuadratureRule quadRuleQuad4pt( pt_quad_4pt,
                                 QUAD_RULE_QUAD_4PT,
                                 "Quadrature rule 4 points on a quadrangle", QUAD, 4, 3 );
 //----------------------------------------------------------------------
 // 4 points Integration rule for quadrangle
 
-static const QuadPoint pt_quad_9pt[ 9 ] =
+static const QuadraturePoint pt_quad_9pt[ 9 ] =
 {
-    QuadPoint( q3ptx1, q3ptx1, q3ptw1 * q3ptw1 ),
-    QuadPoint( q3ptx2, q3ptx1, q3ptw2 * q3ptw1 ),
-    QuadPoint( q3ptx3, q3ptx1, q3ptw3 * q3ptw1 ),
-    QuadPoint( q3ptx1, q3ptx2, q3ptw1 * q3ptw2 ),
-    QuadPoint( q3ptx2, q3ptx2, q3ptw2 * q3ptw2 ),
-    QuadPoint( q3ptx3, q3ptx2, q3ptw3 * q3ptw2 ),
-    QuadPoint( q3ptx1, q3ptx3, q3ptw1 * q3ptw3 ),
-    QuadPoint( q3ptx2, q3ptx3, q3ptw2 * q3ptw3 ),
-    QuadPoint( q3ptx3, q3ptx3, q3ptw3 * q3ptw3 )
+    QuadraturePoint( q3ptx1, q3ptx1, q3ptw1 * q3ptw1 ),
+    QuadraturePoint( q3ptx2, q3ptx1, q3ptw2 * q3ptw1 ),
+    QuadraturePoint( q3ptx3, q3ptx1, q3ptw3 * q3ptw1 ),
+    QuadraturePoint( q3ptx1, q3ptx2, q3ptw1 * q3ptw2 ),
+    QuadraturePoint( q3ptx2, q3ptx2, q3ptw2 * q3ptw2 ),
+    QuadraturePoint( q3ptx3, q3ptx2, q3ptw3 * q3ptw2 ),
+    QuadraturePoint( q3ptx1, q3ptx3, q3ptw1 * q3ptw3 ),
+    QuadraturePoint( q3ptx2, q3ptx3, q3ptw2 * q3ptw3 ),
+    QuadraturePoint( q3ptx3, q3ptx3, q3ptw3 * q3ptw3 )
 };
 
-const QuadRule quadRuleQuad9pt( pt_quad_9pt,
+const QuadratureRule quadRuleQuad9pt( pt_quad_9pt,
                                 QUAD_RULE_QUAD_9PT,
                                 "Quadrature rule 9 points on a quadrangle", QUAD, 9, 5 );
 /*----------------------------------------------------------------------
   Set of all quadrature rules on quadrangle
   ----------------------------------------------------------------------*/
-static const QuadRule quad_rule_quad[ NB_QUAD_RULE_QUAD ] =
+static const QuadratureRule quad_rule_quad[ NB_QUAD_RULE_QUAD ] =
 {
     quadRuleQuad1pt,
     quadRuleQuad4pt,
@@ -301,40 +301,40 @@ static const QuadRule quad_rule_quad[ NB_QUAD_RULE_QUAD ] =
 #define QUAD_RULE_TETRA_64PT    5
 //----------------------------------------------------------------------
 
-static const QuadPoint pt_tetra_1pt[ 1 ] =
+static const QuadraturePoint pt_tetra_1pt[ 1 ] =
 {
-    QuadPoint( 1. / 4., 1. / 4., 1. / 4., 1. / 6. )
+    QuadraturePoint( 1. / 4., 1. / 4., 1. / 4., 1. / 6. )
 };
-const QuadRule quadRuleTetra1pt( pt_tetra_1pt,
+const QuadratureRule quadRuleTetra1pt( pt_tetra_1pt,
                                  QUAD_RULE_TETRA_1PT,
                                  "Quadrature rule 1 point on a tetraedra", TETRA, 1, 1 );
 //----------------------------------------------------------------------
 const Real tet4ptx1 = ( 5. - sqrt( 5. ) ) / 20., tet4ptx2 = ( 5. + 3*sqrt( 5. ) ) / 20.;
 
-static const QuadPoint pt_tetra_4pt[ 4 ] =
+static const QuadraturePoint pt_tetra_4pt[ 4 ] =
 {
-    QuadPoint( tet4ptx1, tet4ptx1, tet4ptx1, 1. / 24. ),
-    QuadPoint( tet4ptx1, tet4ptx1, tet4ptx2, 1. / 24. ),
-    QuadPoint( tet4ptx1, tet4ptx2, tet4ptx1, 1. / 24. ),
-    QuadPoint( tet4ptx2, tet4ptx1, tet4ptx1, 1. / 24. )
+    QuadraturePoint( tet4ptx1, tet4ptx1, tet4ptx1, 1. / 24. ),
+    QuadraturePoint( tet4ptx1, tet4ptx1, tet4ptx2, 1. / 24. ),
+    QuadraturePoint( tet4ptx1, tet4ptx2, tet4ptx1, 1. / 24. ),
+    QuadraturePoint( tet4ptx2, tet4ptx1, tet4ptx1, 1. / 24. )
 };
-const QuadRule quadRuleTetra4pt( pt_tetra_4pt,
+const QuadratureRule quadRuleTetra4pt( pt_tetra_4pt,
                                  QUAD_RULE_TETRA_4PT,
                                  "Quadrature rule 4 points on a tetraedra", TETRA, 4, 2 );
 //----------------------------------------------------------------------
 // 5 points Integration rule for tetraedra (Ref. e.g. Comincioli pag. 236)
 const Real tet5ptx1 = 1. / 6. , tet5ptx2 = 1. / 2., tet5ptx3 = 1. / 4.;
 
-static const QuadPoint pt_tetra_5pt[ 5 ] =
+static const QuadraturePoint pt_tetra_5pt[ 5 ] =
 {
-    QuadPoint( tet5ptx1, tet5ptx1, tet5ptx1, 9. / 120. ),
-    QuadPoint( tet5ptx1, tet5ptx1, tet5ptx2, 9. / 120. ),
-    QuadPoint( tet5ptx1, tet5ptx2, tet5ptx1, 9. / 120. ),
-    QuadPoint( tet5ptx2, tet5ptx1, tet5ptx1, 9. / 120. ),
-    QuadPoint( tet5ptx3, tet5ptx3, tet5ptx3, -16. / 120. )
+    QuadraturePoint( tet5ptx1, tet5ptx1, tet5ptx1, 9. / 120. ),
+    QuadraturePoint( tet5ptx1, tet5ptx1, tet5ptx2, 9. / 120. ),
+    QuadraturePoint( tet5ptx1, tet5ptx2, tet5ptx1, 9. / 120. ),
+    QuadraturePoint( tet5ptx2, tet5ptx1, tet5ptx1, 9. / 120. ),
+    QuadraturePoint( tet5ptx3, tet5ptx3, tet5ptx3, -16. / 120. )
 };
 
-const QuadRule quadRuleTetra5pt( pt_tetra_5pt,
+const QuadratureRule quadRuleTetra5pt( pt_tetra_5pt,
                                  QUAD_RULE_TETRA_5PT,
                                  "Quadrature rule 5 points on a tetraedra", TETRA, 5, 3 );
 //
@@ -370,26 +370,26 @@ const Real B5[ 2 ] =
 // C
 const Real C5 = 0.008818342151675485; // 20/378*1/6
 //
-static const QuadPoint pt_tetra_15pt[ 15 ] =
+static const QuadraturePoint pt_tetra_15pt[ 15 ] =
 {
-    QuadPoint( r5, r5, r5, A5 ),
-    QuadPoint( s5[ 0 ], s5[ 0 ], s5[ 0 ], B5[ 0 ] ),
-    QuadPoint( t5[ 0 ], s5[ 0 ], s5[ 0 ], B5[ 0 ] ),
-    QuadPoint( s5[ 0 ], t5[ 0 ], s5[ 0 ], B5[ 0 ] ),
-    QuadPoint( s5[ 0 ], s5[ 0 ], t5[ 0 ], B5[ 0 ] ),
-    QuadPoint( s5[ 1 ], s5[ 1 ], s5[ 1 ], B5[ 1 ] ),
-    QuadPoint( t5[ 1 ], s5[ 1 ], s5[ 1 ], B5[ 1 ] ),
-    QuadPoint( s5[ 1 ], t5[ 1 ], s5[ 1 ], B5[ 1 ] ),
-    QuadPoint( s5[ 1 ], s5[ 1 ], t5[ 1 ], B5[ 1 ] ),
-    QuadPoint( u5, u5, v5, C5 ),
-    QuadPoint( u5, v5, u5, C5 ),
-    QuadPoint( v5, u5, u5, C5 ),
-    QuadPoint( v5, v5, u5, C5 ),
-    QuadPoint( v5, u5, v5, C5 ),
-    QuadPoint( u5, v5, v5, C5 )
+    QuadraturePoint( r5, r5, r5, A5 ),
+    QuadraturePoint( s5[ 0 ], s5[ 0 ], s5[ 0 ], B5[ 0 ] ),
+    QuadraturePoint( t5[ 0 ], s5[ 0 ], s5[ 0 ], B5[ 0 ] ),
+    QuadraturePoint( s5[ 0 ], t5[ 0 ], s5[ 0 ], B5[ 0 ] ),
+    QuadraturePoint( s5[ 0 ], s5[ 0 ], t5[ 0 ], B5[ 0 ] ),
+    QuadraturePoint( s5[ 1 ], s5[ 1 ], s5[ 1 ], B5[ 1 ] ),
+    QuadraturePoint( t5[ 1 ], s5[ 1 ], s5[ 1 ], B5[ 1 ] ),
+    QuadraturePoint( s5[ 1 ], t5[ 1 ], s5[ 1 ], B5[ 1 ] ),
+    QuadraturePoint( s5[ 1 ], s5[ 1 ], t5[ 1 ], B5[ 1 ] ),
+    QuadraturePoint( u5, u5, v5, C5 ),
+    QuadraturePoint( u5, v5, u5, C5 ),
+    QuadraturePoint( v5, u5, u5, C5 ),
+    QuadraturePoint( v5, v5, u5, C5 ),
+    QuadraturePoint( v5, u5, v5, C5 ),
+    QuadraturePoint( u5, v5, v5, C5 )
 };
 //
-const QuadRule quadRuleTetra15pt( pt_tetra_15pt,
+const QuadratureRule quadRuleTetra15pt( pt_tetra_15pt,
                                   QUAD_RULE_TETRA_15PT,
                                   "Quadrature rule 15 points on a tetraedra",
                                   TETRA, 15, 5 );
@@ -433,87 +433,87 @@ for (i=0;i<4;i++){
   for (j=0;j<4;j++){
     for (k=0;k<4;k++){
       pt_tetra_64pt[k+4*j+16*i]=
- QuadPoint(t[k], s[j]*(1-t[k]), r[i]*(1-s[j])*(1-t[k]), A[i]*B[j]*C[k]);
+ QuadraturePoint(t[k], s[j]*(1-t[k]), r[i]*(1-s[j])*(1-t[k]), A[i]*B[j]*C[k]);
     }
   }
 }
 */
-static const QuadPoint pt_tetra_64pt[ 64 ] =
+static const QuadraturePoint pt_tetra_64pt[ 64 ] =
 {
-    QuadPoint( t[ 0 ], s[ 0 ] * ( 1 - t[ 0 ] ), r[ 0 ] * ( 1 - s[ 0 ] ) * ( 1 - t[ 0 ] ), A[ 0 ] * B[ 0 ] * C[ 0 ] ),
-    QuadPoint( t[ 1 ], s[ 0 ] * ( 1 - t[ 1 ] ), r[ 0 ] * ( 1 - s[ 0 ] ) * ( 1 - t[ 1 ] ), A[ 0 ] * B[ 0 ] * C[ 1 ] ),
-    QuadPoint( t[ 2 ], s[ 0 ] * ( 1 - t[ 2 ] ), r[ 0 ] * ( 1 - s[ 0 ] ) * ( 1 - t[ 2 ] ), A[ 0 ] * B[ 0 ] * C[ 2 ] ),
-    QuadPoint( t[ 3 ], s[ 0 ] * ( 1 - t[ 3 ] ), r[ 0 ] * ( 1 - s[ 0 ] ) * ( 1 - t[ 3 ] ), A[ 0 ] * B[ 0 ] * C[ 3 ] ),
-    QuadPoint( t[ 0 ], s[ 1 ] * ( 1 - t[ 0 ] ), r[ 0 ] * ( 1 - s[ 1 ] ) * ( 1 - t[ 0 ] ), A[ 0 ] * B[ 1 ] * C[ 0 ] ),
-    QuadPoint( t[ 1 ], s[ 1 ] * ( 1 - t[ 1 ] ), r[ 0 ] * ( 1 - s[ 1 ] ) * ( 1 - t[ 1 ] ), A[ 0 ] * B[ 1 ] * C[ 1 ] ),
-    QuadPoint( t[ 2 ], s[ 1 ] * ( 1 - t[ 2 ] ), r[ 0 ] * ( 1 - s[ 1 ] ) * ( 1 - t[ 2 ] ), A[ 0 ] * B[ 1 ] * C[ 2 ] ),
-    QuadPoint( t[ 3 ], s[ 1 ] * ( 1 - t[ 3 ] ), r[ 0 ] * ( 1 - s[ 1 ] ) * ( 1 - t[ 3 ] ), A[ 0 ] * B[ 1 ] * C[ 3 ] ),
-    QuadPoint( t[ 0 ], s[ 2 ] * ( 1 - t[ 0 ] ), r[ 0 ] * ( 1 - s[ 2 ] ) * ( 1 - t[ 0 ] ), A[ 0 ] * B[ 2 ] * C[ 0 ] ),
-    QuadPoint( t[ 1 ], s[ 2 ] * ( 1 - t[ 1 ] ), r[ 0 ] * ( 1 - s[ 2 ] ) * ( 1 - t[ 1 ] ), A[ 0 ] * B[ 2 ] * C[ 1 ] ),
-    QuadPoint( t[ 2 ], s[ 2 ] * ( 1 - t[ 2 ] ), r[ 0 ] * ( 1 - s[ 2 ] ) * ( 1 - t[ 2 ] ), A[ 0 ] * B[ 2 ] * C[ 2 ] ),
-    QuadPoint( t[ 3 ], s[ 2 ] * ( 1 - t[ 3 ] ), r[ 0 ] * ( 1 - s[ 2 ] ) * ( 1 - t[ 3 ] ), A[ 0 ] * B[ 2 ] * C[ 3 ] ),
-    QuadPoint( t[ 0 ], s[ 3 ] * ( 1 - t[ 0 ] ), r[ 0 ] * ( 1 - s[ 3 ] ) * ( 1 - t[ 0 ] ), A[ 0 ] * B[ 3 ] * C[ 0 ] ),
-    QuadPoint( t[ 1 ], s[ 3 ] * ( 1 - t[ 1 ] ), r[ 0 ] * ( 1 - s[ 3 ] ) * ( 1 - t[ 1 ] ), A[ 0 ] * B[ 3 ] * C[ 1 ] ),
-    QuadPoint( t[ 2 ], s[ 3 ] * ( 1 - t[ 2 ] ), r[ 0 ] * ( 1 - s[ 3 ] ) * ( 1 - t[ 2 ] ), A[ 0 ] * B[ 3 ] * C[ 2 ] ),
-    QuadPoint( t[ 3 ], s[ 3 ] * ( 1 - t[ 3 ] ), r[ 0 ] * ( 1 - s[ 3 ] ) * ( 1 - t[ 3 ] ), A[ 0 ] * B[ 3 ] * C[ 3 ] ),
-    QuadPoint( t[ 0 ], s[ 0 ] * ( 1 - t[ 0 ] ), r[ 1 ] * ( 1 - s[ 0 ] ) * ( 1 - t[ 0 ] ), A[ 1 ] * B[ 0 ] * C[ 0 ] ),
-    QuadPoint( t[ 1 ], s[ 0 ] * ( 1 - t[ 1 ] ), r[ 1 ] * ( 1 - s[ 0 ] ) * ( 1 - t[ 1 ] ), A[ 1 ] * B[ 0 ] * C[ 1 ] ),
-    QuadPoint( t[ 2 ], s[ 0 ] * ( 1 - t[ 2 ] ), r[ 1 ] * ( 1 - s[ 0 ] ) * ( 1 - t[ 2 ] ), A[ 1 ] * B[ 0 ] * C[ 2 ] ),
-    QuadPoint( t[ 3 ], s[ 0 ] * ( 1 - t[ 3 ] ), r[ 1 ] * ( 1 - s[ 0 ] ) * ( 1 - t[ 3 ] ), A[ 1 ] * B[ 0 ] * C[ 3 ] ),
-    QuadPoint( t[ 0 ], s[ 1 ] * ( 1 - t[ 0 ] ), r[ 1 ] * ( 1 - s[ 1 ] ) * ( 1 - t[ 0 ] ), A[ 1 ] * B[ 1 ] * C[ 0 ] ),
-    QuadPoint( t[ 1 ], s[ 1 ] * ( 1 - t[ 1 ] ), r[ 1 ] * ( 1 - s[ 1 ] ) * ( 1 - t[ 1 ] ), A[ 1 ] * B[ 1 ] * C[ 1 ] ),
-    QuadPoint( t[ 2 ], s[ 1 ] * ( 1 - t[ 2 ] ), r[ 1 ] * ( 1 - s[ 1 ] ) * ( 1 - t[ 2 ] ), A[ 1 ] * B[ 1 ] * C[ 2 ] ),
-    QuadPoint( t[ 3 ], s[ 1 ] * ( 1 - t[ 3 ] ), r[ 1 ] * ( 1 - s[ 1 ] ) * ( 1 - t[ 3 ] ), A[ 1 ] * B[ 1 ] * C[ 3 ] ),
-    QuadPoint( t[ 0 ], s[ 2 ] * ( 1 - t[ 0 ] ), r[ 1 ] * ( 1 - s[ 2 ] ) * ( 1 - t[ 0 ] ), A[ 1 ] * B[ 2 ] * C[ 0 ] ),
-    QuadPoint( t[ 1 ], s[ 2 ] * ( 1 - t[ 1 ] ), r[ 1 ] * ( 1 - s[ 2 ] ) * ( 1 - t[ 1 ] ), A[ 1 ] * B[ 2 ] * C[ 1 ] ),
-    QuadPoint( t[ 2 ], s[ 2 ] * ( 1 - t[ 2 ] ), r[ 1 ] * ( 1 - s[ 2 ] ) * ( 1 - t[ 2 ] ), A[ 1 ] * B[ 2 ] * C[ 2 ] ),
-    QuadPoint( t[ 3 ], s[ 2 ] * ( 1 - t[ 3 ] ), r[ 1 ] * ( 1 - s[ 2 ] ) * ( 1 - t[ 3 ] ), A[ 1 ] * B[ 2 ] * C[ 3 ] ),
-    QuadPoint( t[ 0 ], s[ 3 ] * ( 1 - t[ 0 ] ), r[ 1 ] * ( 1 - s[ 3 ] ) * ( 1 - t[ 0 ] ), A[ 1 ] * B[ 3 ] * C[ 0 ] ),
-    QuadPoint( t[ 1 ], s[ 3 ] * ( 1 - t[ 1 ] ), r[ 1 ] * ( 1 - s[ 3 ] ) * ( 1 - t[ 1 ] ), A[ 1 ] * B[ 3 ] * C[ 1 ] ),
-    QuadPoint( t[ 2 ], s[ 3 ] * ( 1 - t[ 2 ] ), r[ 1 ] * ( 1 - s[ 3 ] ) * ( 1 - t[ 2 ] ), A[ 1 ] * B[ 3 ] * C[ 2 ] ),
-    QuadPoint( t[ 3 ], s[ 3 ] * ( 1 - t[ 3 ] ), r[ 1 ] * ( 1 - s[ 3 ] ) * ( 1 - t[ 3 ] ), A[ 1 ] * B[ 3 ] * C[ 3 ] ),
-    QuadPoint( t[ 0 ], s[ 0 ] * ( 1 - t[ 0 ] ), r[ 2 ] * ( 1 - s[ 0 ] ) * ( 1 - t[ 0 ] ), A[ 2 ] * B[ 0 ] * C[ 0 ] ),
-    QuadPoint( t[ 1 ], s[ 0 ] * ( 1 - t[ 1 ] ), r[ 2 ] * ( 1 - s[ 0 ] ) * ( 1 - t[ 1 ] ), A[ 2 ] * B[ 0 ] * C[ 1 ] ),
-    QuadPoint( t[ 2 ], s[ 0 ] * ( 1 - t[ 2 ] ), r[ 2 ] * ( 1 - s[ 0 ] ) * ( 1 - t[ 2 ] ), A[ 2 ] * B[ 0 ] * C[ 2 ] ),
-    QuadPoint( t[ 3 ], s[ 0 ] * ( 1 - t[ 3 ] ), r[ 2 ] * ( 1 - s[ 0 ] ) * ( 1 - t[ 3 ] ), A[ 2 ] * B[ 0 ] * C[ 3 ] ),
-    QuadPoint( t[ 0 ], s[ 1 ] * ( 1 - t[ 0 ] ), r[ 2 ] * ( 1 - s[ 1 ] ) * ( 1 - t[ 0 ] ), A[ 2 ] * B[ 1 ] * C[ 0 ] ),
-    QuadPoint( t[ 1 ], s[ 1 ] * ( 1 - t[ 1 ] ), r[ 2 ] * ( 1 - s[ 1 ] ) * ( 1 - t[ 1 ] ), A[ 2 ] * B[ 1 ] * C[ 1 ] ),
-    QuadPoint( t[ 2 ], s[ 1 ] * ( 1 - t[ 2 ] ), r[ 2 ] * ( 1 - s[ 1 ] ) * ( 1 - t[ 2 ] ), A[ 2 ] * B[ 1 ] * C[ 2 ] ),
-    QuadPoint( t[ 3 ], s[ 1 ] * ( 1 - t[ 3 ] ), r[ 2 ] * ( 1 - s[ 1 ] ) * ( 1 - t[ 3 ] ), A[ 2 ] * B[ 1 ] * C[ 3 ] ),
-    QuadPoint( t[ 0 ], s[ 2 ] * ( 1 - t[ 0 ] ), r[ 2 ] * ( 1 - s[ 2 ] ) * ( 1 - t[ 0 ] ), A[ 2 ] * B[ 2 ] * C[ 0 ] ),
-    QuadPoint( t[ 1 ], s[ 2 ] * ( 1 - t[ 1 ] ), r[ 2 ] * ( 1 - s[ 2 ] ) * ( 1 - t[ 1 ] ), A[ 2 ] * B[ 2 ] * C[ 1 ] ),
-    QuadPoint( t[ 2 ], s[ 2 ] * ( 1 - t[ 2 ] ), r[ 2 ] * ( 1 - s[ 2 ] ) * ( 1 - t[ 2 ] ), A[ 2 ] * B[ 2 ] * C[ 2 ] ),
-    QuadPoint( t[ 3 ], s[ 2 ] * ( 1 - t[ 3 ] ), r[ 2 ] * ( 1 - s[ 2 ] ) * ( 1 - t[ 3 ] ), A[ 2 ] * B[ 2 ] * C[ 3 ] ),
-    QuadPoint( t[ 0 ], s[ 3 ] * ( 1 - t[ 0 ] ), r[ 2 ] * ( 1 - s[ 3 ] ) * ( 1 - t[ 0 ] ), A[ 2 ] * B[ 3 ] * C[ 0 ] ),
-    QuadPoint( t[ 1 ], s[ 3 ] * ( 1 - t[ 1 ] ), r[ 2 ] * ( 1 - s[ 3 ] ) * ( 1 - t[ 1 ] ), A[ 2 ] * B[ 3 ] * C[ 1 ] ),
-    QuadPoint( t[ 2 ], s[ 3 ] * ( 1 - t[ 2 ] ), r[ 2 ] * ( 1 - s[ 3 ] ) * ( 1 - t[ 2 ] ), A[ 2 ] * B[ 3 ] * C[ 2 ] ),
-    QuadPoint( t[ 3 ], s[ 3 ] * ( 1 - t[ 3 ] ), r[ 2 ] * ( 1 - s[ 3 ] ) * ( 1 - t[ 3 ] ), A[ 2 ] * B[ 3 ] * C[ 3 ] ),
-    QuadPoint( t[ 0 ], s[ 0 ] * ( 1 - t[ 0 ] ), r[ 3 ] * ( 1 - s[ 0 ] ) * ( 1 - t[ 0 ] ), A[ 3 ] * B[ 0 ] * C[ 0 ] ),
-    QuadPoint( t[ 1 ], s[ 0 ] * ( 1 - t[ 1 ] ), r[ 3 ] * ( 1 - s[ 0 ] ) * ( 1 - t[ 1 ] ), A[ 3 ] * B[ 0 ] * C[ 1 ] ),
-    QuadPoint( t[ 2 ], s[ 0 ] * ( 1 - t[ 2 ] ), r[ 3 ] * ( 1 - s[ 0 ] ) * ( 1 - t[ 2 ] ), A[ 3 ] * B[ 0 ] * C[ 2 ] ),
-    QuadPoint( t[ 3 ], s[ 0 ] * ( 1 - t[ 3 ] ), r[ 3 ] * ( 1 - s[ 0 ] ) * ( 1 - t[ 3 ] ), A[ 3 ] * B[ 0 ] * C[ 3 ] ),
-    QuadPoint( t[ 0 ], s[ 1 ] * ( 1 - t[ 0 ] ), r[ 3 ] * ( 1 - s[ 1 ] ) * ( 1 - t[ 0 ] ), A[ 3 ] * B[ 1 ] * C[ 0 ] ),
-    QuadPoint( t[ 1 ], s[ 1 ] * ( 1 - t[ 1 ] ), r[ 3 ] * ( 1 - s[ 1 ] ) * ( 1 - t[ 1 ] ), A[ 3 ] * B[ 1 ] * C[ 1 ] ),
-    QuadPoint( t[ 2 ], s[ 1 ] * ( 1 - t[ 2 ] ), r[ 3 ] * ( 1 - s[ 1 ] ) * ( 1 - t[ 2 ] ), A[ 3 ] * B[ 1 ] * C[ 2 ] ),
-    QuadPoint( t[ 3 ], s[ 1 ] * ( 1 - t[ 3 ] ), r[ 3 ] * ( 1 - s[ 1 ] ) * ( 1 - t[ 3 ] ), A[ 3 ] * B[ 1 ] * C[ 3 ] ),
-    QuadPoint( t[ 0 ], s[ 2 ] * ( 1 - t[ 0 ] ), r[ 3 ] * ( 1 - s[ 2 ] ) * ( 1 - t[ 0 ] ), A[ 3 ] * B[ 2 ] * C[ 0 ] ),
-    QuadPoint( t[ 1 ], s[ 2 ] * ( 1 - t[ 1 ] ), r[ 3 ] * ( 1 - s[ 2 ] ) * ( 1 - t[ 1 ] ), A[ 3 ] * B[ 2 ] * C[ 1 ] ),
-    QuadPoint( t[ 2 ], s[ 2 ] * ( 1 - t[ 2 ] ), r[ 3 ] * ( 1 - s[ 2 ] ) * ( 1 - t[ 2 ] ), A[ 3 ] * B[ 2 ] * C[ 2 ] ),
-    QuadPoint( t[ 3 ], s[ 2 ] * ( 1 - t[ 3 ] ), r[ 3 ] * ( 1 - s[ 2 ] ) * ( 1 - t[ 3 ] ), A[ 3 ] * B[ 2 ] * C[ 3 ] ),
-    QuadPoint( t[ 0 ], s[ 3 ] * ( 1 - t[ 0 ] ), r[ 3 ] * ( 1 - s[ 3 ] ) * ( 1 - t[ 0 ] ), A[ 3 ] * B[ 3 ] * C[ 0 ] ),
-    QuadPoint( t[ 1 ], s[ 3 ] * ( 1 - t[ 1 ] ), r[ 3 ] * ( 1 - s[ 3 ] ) * ( 1 - t[ 1 ] ), A[ 3 ] * B[ 3 ] * C[ 1 ] ),
-    QuadPoint( t[ 2 ], s[ 3 ] * ( 1 - t[ 2 ] ), r[ 3 ] * ( 1 - s[ 3 ] ) * ( 1 - t[ 2 ] ), A[ 3 ] * B[ 3 ] * C[ 2 ] ),
-    QuadPoint( t[ 3 ], s[ 3 ] * ( 1 - t[ 3 ] ), r[ 3 ] * ( 1 - s[ 3 ] ) * ( 1 - t[ 3 ] ), A[ 3 ] * B[ 3 ] * C[ 3 ] )
+    QuadraturePoint( t[ 0 ], s[ 0 ] * ( 1 - t[ 0 ] ), r[ 0 ] * ( 1 - s[ 0 ] ) * ( 1 - t[ 0 ] ), A[ 0 ] * B[ 0 ] * C[ 0 ] ),
+    QuadraturePoint( t[ 1 ], s[ 0 ] * ( 1 - t[ 1 ] ), r[ 0 ] * ( 1 - s[ 0 ] ) * ( 1 - t[ 1 ] ), A[ 0 ] * B[ 0 ] * C[ 1 ] ),
+    QuadraturePoint( t[ 2 ], s[ 0 ] * ( 1 - t[ 2 ] ), r[ 0 ] * ( 1 - s[ 0 ] ) * ( 1 - t[ 2 ] ), A[ 0 ] * B[ 0 ] * C[ 2 ] ),
+    QuadraturePoint( t[ 3 ], s[ 0 ] * ( 1 - t[ 3 ] ), r[ 0 ] * ( 1 - s[ 0 ] ) * ( 1 - t[ 3 ] ), A[ 0 ] * B[ 0 ] * C[ 3 ] ),
+    QuadraturePoint( t[ 0 ], s[ 1 ] * ( 1 - t[ 0 ] ), r[ 0 ] * ( 1 - s[ 1 ] ) * ( 1 - t[ 0 ] ), A[ 0 ] * B[ 1 ] * C[ 0 ] ),
+    QuadraturePoint( t[ 1 ], s[ 1 ] * ( 1 - t[ 1 ] ), r[ 0 ] * ( 1 - s[ 1 ] ) * ( 1 - t[ 1 ] ), A[ 0 ] * B[ 1 ] * C[ 1 ] ),
+    QuadraturePoint( t[ 2 ], s[ 1 ] * ( 1 - t[ 2 ] ), r[ 0 ] * ( 1 - s[ 1 ] ) * ( 1 - t[ 2 ] ), A[ 0 ] * B[ 1 ] * C[ 2 ] ),
+    QuadraturePoint( t[ 3 ], s[ 1 ] * ( 1 - t[ 3 ] ), r[ 0 ] * ( 1 - s[ 1 ] ) * ( 1 - t[ 3 ] ), A[ 0 ] * B[ 1 ] * C[ 3 ] ),
+    QuadraturePoint( t[ 0 ], s[ 2 ] * ( 1 - t[ 0 ] ), r[ 0 ] * ( 1 - s[ 2 ] ) * ( 1 - t[ 0 ] ), A[ 0 ] * B[ 2 ] * C[ 0 ] ),
+    QuadraturePoint( t[ 1 ], s[ 2 ] * ( 1 - t[ 1 ] ), r[ 0 ] * ( 1 - s[ 2 ] ) * ( 1 - t[ 1 ] ), A[ 0 ] * B[ 2 ] * C[ 1 ] ),
+    QuadraturePoint( t[ 2 ], s[ 2 ] * ( 1 - t[ 2 ] ), r[ 0 ] * ( 1 - s[ 2 ] ) * ( 1 - t[ 2 ] ), A[ 0 ] * B[ 2 ] * C[ 2 ] ),
+    QuadraturePoint( t[ 3 ], s[ 2 ] * ( 1 - t[ 3 ] ), r[ 0 ] * ( 1 - s[ 2 ] ) * ( 1 - t[ 3 ] ), A[ 0 ] * B[ 2 ] * C[ 3 ] ),
+    QuadraturePoint( t[ 0 ], s[ 3 ] * ( 1 - t[ 0 ] ), r[ 0 ] * ( 1 - s[ 3 ] ) * ( 1 - t[ 0 ] ), A[ 0 ] * B[ 3 ] * C[ 0 ] ),
+    QuadraturePoint( t[ 1 ], s[ 3 ] * ( 1 - t[ 1 ] ), r[ 0 ] * ( 1 - s[ 3 ] ) * ( 1 - t[ 1 ] ), A[ 0 ] * B[ 3 ] * C[ 1 ] ),
+    QuadraturePoint( t[ 2 ], s[ 3 ] * ( 1 - t[ 2 ] ), r[ 0 ] * ( 1 - s[ 3 ] ) * ( 1 - t[ 2 ] ), A[ 0 ] * B[ 3 ] * C[ 2 ] ),
+    QuadraturePoint( t[ 3 ], s[ 3 ] * ( 1 - t[ 3 ] ), r[ 0 ] * ( 1 - s[ 3 ] ) * ( 1 - t[ 3 ] ), A[ 0 ] * B[ 3 ] * C[ 3 ] ),
+    QuadraturePoint( t[ 0 ], s[ 0 ] * ( 1 - t[ 0 ] ), r[ 1 ] * ( 1 - s[ 0 ] ) * ( 1 - t[ 0 ] ), A[ 1 ] * B[ 0 ] * C[ 0 ] ),
+    QuadraturePoint( t[ 1 ], s[ 0 ] * ( 1 - t[ 1 ] ), r[ 1 ] * ( 1 - s[ 0 ] ) * ( 1 - t[ 1 ] ), A[ 1 ] * B[ 0 ] * C[ 1 ] ),
+    QuadraturePoint( t[ 2 ], s[ 0 ] * ( 1 - t[ 2 ] ), r[ 1 ] * ( 1 - s[ 0 ] ) * ( 1 - t[ 2 ] ), A[ 1 ] * B[ 0 ] * C[ 2 ] ),
+    QuadraturePoint( t[ 3 ], s[ 0 ] * ( 1 - t[ 3 ] ), r[ 1 ] * ( 1 - s[ 0 ] ) * ( 1 - t[ 3 ] ), A[ 1 ] * B[ 0 ] * C[ 3 ] ),
+    QuadraturePoint( t[ 0 ], s[ 1 ] * ( 1 - t[ 0 ] ), r[ 1 ] * ( 1 - s[ 1 ] ) * ( 1 - t[ 0 ] ), A[ 1 ] * B[ 1 ] * C[ 0 ] ),
+    QuadraturePoint( t[ 1 ], s[ 1 ] * ( 1 - t[ 1 ] ), r[ 1 ] * ( 1 - s[ 1 ] ) * ( 1 - t[ 1 ] ), A[ 1 ] * B[ 1 ] * C[ 1 ] ),
+    QuadraturePoint( t[ 2 ], s[ 1 ] * ( 1 - t[ 2 ] ), r[ 1 ] * ( 1 - s[ 1 ] ) * ( 1 - t[ 2 ] ), A[ 1 ] * B[ 1 ] * C[ 2 ] ),
+    QuadraturePoint( t[ 3 ], s[ 1 ] * ( 1 - t[ 3 ] ), r[ 1 ] * ( 1 - s[ 1 ] ) * ( 1 - t[ 3 ] ), A[ 1 ] * B[ 1 ] * C[ 3 ] ),
+    QuadraturePoint( t[ 0 ], s[ 2 ] * ( 1 - t[ 0 ] ), r[ 1 ] * ( 1 - s[ 2 ] ) * ( 1 - t[ 0 ] ), A[ 1 ] * B[ 2 ] * C[ 0 ] ),
+    QuadraturePoint( t[ 1 ], s[ 2 ] * ( 1 - t[ 1 ] ), r[ 1 ] * ( 1 - s[ 2 ] ) * ( 1 - t[ 1 ] ), A[ 1 ] * B[ 2 ] * C[ 1 ] ),
+    QuadraturePoint( t[ 2 ], s[ 2 ] * ( 1 - t[ 2 ] ), r[ 1 ] * ( 1 - s[ 2 ] ) * ( 1 - t[ 2 ] ), A[ 1 ] * B[ 2 ] * C[ 2 ] ),
+    QuadraturePoint( t[ 3 ], s[ 2 ] * ( 1 - t[ 3 ] ), r[ 1 ] * ( 1 - s[ 2 ] ) * ( 1 - t[ 3 ] ), A[ 1 ] * B[ 2 ] * C[ 3 ] ),
+    QuadraturePoint( t[ 0 ], s[ 3 ] * ( 1 - t[ 0 ] ), r[ 1 ] * ( 1 - s[ 3 ] ) * ( 1 - t[ 0 ] ), A[ 1 ] * B[ 3 ] * C[ 0 ] ),
+    QuadraturePoint( t[ 1 ], s[ 3 ] * ( 1 - t[ 1 ] ), r[ 1 ] * ( 1 - s[ 3 ] ) * ( 1 - t[ 1 ] ), A[ 1 ] * B[ 3 ] * C[ 1 ] ),
+    QuadraturePoint( t[ 2 ], s[ 3 ] * ( 1 - t[ 2 ] ), r[ 1 ] * ( 1 - s[ 3 ] ) * ( 1 - t[ 2 ] ), A[ 1 ] * B[ 3 ] * C[ 2 ] ),
+    QuadraturePoint( t[ 3 ], s[ 3 ] * ( 1 - t[ 3 ] ), r[ 1 ] * ( 1 - s[ 3 ] ) * ( 1 - t[ 3 ] ), A[ 1 ] * B[ 3 ] * C[ 3 ] ),
+    QuadraturePoint( t[ 0 ], s[ 0 ] * ( 1 - t[ 0 ] ), r[ 2 ] * ( 1 - s[ 0 ] ) * ( 1 - t[ 0 ] ), A[ 2 ] * B[ 0 ] * C[ 0 ] ),
+    QuadraturePoint( t[ 1 ], s[ 0 ] * ( 1 - t[ 1 ] ), r[ 2 ] * ( 1 - s[ 0 ] ) * ( 1 - t[ 1 ] ), A[ 2 ] * B[ 0 ] * C[ 1 ] ),
+    QuadraturePoint( t[ 2 ], s[ 0 ] * ( 1 - t[ 2 ] ), r[ 2 ] * ( 1 - s[ 0 ] ) * ( 1 - t[ 2 ] ), A[ 2 ] * B[ 0 ] * C[ 2 ] ),
+    QuadraturePoint( t[ 3 ], s[ 0 ] * ( 1 - t[ 3 ] ), r[ 2 ] * ( 1 - s[ 0 ] ) * ( 1 - t[ 3 ] ), A[ 2 ] * B[ 0 ] * C[ 3 ] ),
+    QuadraturePoint( t[ 0 ], s[ 1 ] * ( 1 - t[ 0 ] ), r[ 2 ] * ( 1 - s[ 1 ] ) * ( 1 - t[ 0 ] ), A[ 2 ] * B[ 1 ] * C[ 0 ] ),
+    QuadraturePoint( t[ 1 ], s[ 1 ] * ( 1 - t[ 1 ] ), r[ 2 ] * ( 1 - s[ 1 ] ) * ( 1 - t[ 1 ] ), A[ 2 ] * B[ 1 ] * C[ 1 ] ),
+    QuadraturePoint( t[ 2 ], s[ 1 ] * ( 1 - t[ 2 ] ), r[ 2 ] * ( 1 - s[ 1 ] ) * ( 1 - t[ 2 ] ), A[ 2 ] * B[ 1 ] * C[ 2 ] ),
+    QuadraturePoint( t[ 3 ], s[ 1 ] * ( 1 - t[ 3 ] ), r[ 2 ] * ( 1 - s[ 1 ] ) * ( 1 - t[ 3 ] ), A[ 2 ] * B[ 1 ] * C[ 3 ] ),
+    QuadraturePoint( t[ 0 ], s[ 2 ] * ( 1 - t[ 0 ] ), r[ 2 ] * ( 1 - s[ 2 ] ) * ( 1 - t[ 0 ] ), A[ 2 ] * B[ 2 ] * C[ 0 ] ),
+    QuadraturePoint( t[ 1 ], s[ 2 ] * ( 1 - t[ 1 ] ), r[ 2 ] * ( 1 - s[ 2 ] ) * ( 1 - t[ 1 ] ), A[ 2 ] * B[ 2 ] * C[ 1 ] ),
+    QuadraturePoint( t[ 2 ], s[ 2 ] * ( 1 - t[ 2 ] ), r[ 2 ] * ( 1 - s[ 2 ] ) * ( 1 - t[ 2 ] ), A[ 2 ] * B[ 2 ] * C[ 2 ] ),
+    QuadraturePoint( t[ 3 ], s[ 2 ] * ( 1 - t[ 3 ] ), r[ 2 ] * ( 1 - s[ 2 ] ) * ( 1 - t[ 3 ] ), A[ 2 ] * B[ 2 ] * C[ 3 ] ),
+    QuadraturePoint( t[ 0 ], s[ 3 ] * ( 1 - t[ 0 ] ), r[ 2 ] * ( 1 - s[ 3 ] ) * ( 1 - t[ 0 ] ), A[ 2 ] * B[ 3 ] * C[ 0 ] ),
+    QuadraturePoint( t[ 1 ], s[ 3 ] * ( 1 - t[ 1 ] ), r[ 2 ] * ( 1 - s[ 3 ] ) * ( 1 - t[ 1 ] ), A[ 2 ] * B[ 3 ] * C[ 1 ] ),
+    QuadraturePoint( t[ 2 ], s[ 3 ] * ( 1 - t[ 2 ] ), r[ 2 ] * ( 1 - s[ 3 ] ) * ( 1 - t[ 2 ] ), A[ 2 ] * B[ 3 ] * C[ 2 ] ),
+    QuadraturePoint( t[ 3 ], s[ 3 ] * ( 1 - t[ 3 ] ), r[ 2 ] * ( 1 - s[ 3 ] ) * ( 1 - t[ 3 ] ), A[ 2 ] * B[ 3 ] * C[ 3 ] ),
+    QuadraturePoint( t[ 0 ], s[ 0 ] * ( 1 - t[ 0 ] ), r[ 3 ] * ( 1 - s[ 0 ] ) * ( 1 - t[ 0 ] ), A[ 3 ] * B[ 0 ] * C[ 0 ] ),
+    QuadraturePoint( t[ 1 ], s[ 0 ] * ( 1 - t[ 1 ] ), r[ 3 ] * ( 1 - s[ 0 ] ) * ( 1 - t[ 1 ] ), A[ 3 ] * B[ 0 ] * C[ 1 ] ),
+    QuadraturePoint( t[ 2 ], s[ 0 ] * ( 1 - t[ 2 ] ), r[ 3 ] * ( 1 - s[ 0 ] ) * ( 1 - t[ 2 ] ), A[ 3 ] * B[ 0 ] * C[ 2 ] ),
+    QuadraturePoint( t[ 3 ], s[ 0 ] * ( 1 - t[ 3 ] ), r[ 3 ] * ( 1 - s[ 0 ] ) * ( 1 - t[ 3 ] ), A[ 3 ] * B[ 0 ] * C[ 3 ] ),
+    QuadraturePoint( t[ 0 ], s[ 1 ] * ( 1 - t[ 0 ] ), r[ 3 ] * ( 1 - s[ 1 ] ) * ( 1 - t[ 0 ] ), A[ 3 ] * B[ 1 ] * C[ 0 ] ),
+    QuadraturePoint( t[ 1 ], s[ 1 ] * ( 1 - t[ 1 ] ), r[ 3 ] * ( 1 - s[ 1 ] ) * ( 1 - t[ 1 ] ), A[ 3 ] * B[ 1 ] * C[ 1 ] ),
+    QuadraturePoint( t[ 2 ], s[ 1 ] * ( 1 - t[ 2 ] ), r[ 3 ] * ( 1 - s[ 1 ] ) * ( 1 - t[ 2 ] ), A[ 3 ] * B[ 1 ] * C[ 2 ] ),
+    QuadraturePoint( t[ 3 ], s[ 1 ] * ( 1 - t[ 3 ] ), r[ 3 ] * ( 1 - s[ 1 ] ) * ( 1 - t[ 3 ] ), A[ 3 ] * B[ 1 ] * C[ 3 ] ),
+    QuadraturePoint( t[ 0 ], s[ 2 ] * ( 1 - t[ 0 ] ), r[ 3 ] * ( 1 - s[ 2 ] ) * ( 1 - t[ 0 ] ), A[ 3 ] * B[ 2 ] * C[ 0 ] ),
+    QuadraturePoint( t[ 1 ], s[ 2 ] * ( 1 - t[ 1 ] ), r[ 3 ] * ( 1 - s[ 2 ] ) * ( 1 - t[ 1 ] ), A[ 3 ] * B[ 2 ] * C[ 1 ] ),
+    QuadraturePoint( t[ 2 ], s[ 2 ] * ( 1 - t[ 2 ] ), r[ 3 ] * ( 1 - s[ 2 ] ) * ( 1 - t[ 2 ] ), A[ 3 ] * B[ 2 ] * C[ 2 ] ),
+    QuadraturePoint( t[ 3 ], s[ 2 ] * ( 1 - t[ 3 ] ), r[ 3 ] * ( 1 - s[ 2 ] ) * ( 1 - t[ 3 ] ), A[ 3 ] * B[ 2 ] * C[ 3 ] ),
+    QuadraturePoint( t[ 0 ], s[ 3 ] * ( 1 - t[ 0 ] ), r[ 3 ] * ( 1 - s[ 3 ] ) * ( 1 - t[ 0 ] ), A[ 3 ] * B[ 3 ] * C[ 0 ] ),
+    QuadraturePoint( t[ 1 ], s[ 3 ] * ( 1 - t[ 1 ] ), r[ 3 ] * ( 1 - s[ 3 ] ) * ( 1 - t[ 1 ] ), A[ 3 ] * B[ 3 ] * C[ 1 ] ),
+    QuadraturePoint( t[ 2 ], s[ 3 ] * ( 1 - t[ 2 ] ), r[ 3 ] * ( 1 - s[ 3 ] ) * ( 1 - t[ 2 ] ), A[ 3 ] * B[ 3 ] * C[ 2 ] ),
+    QuadraturePoint( t[ 3 ], s[ 3 ] * ( 1 - t[ 3 ] ), r[ 3 ] * ( 1 - s[ 3 ] ) * ( 1 - t[ 3 ] ), A[ 3 ] * B[ 3 ] * C[ 3 ] )
 };
 //
-const QuadRule quadRuleTetra64pt( pt_tetra_64pt,
+const QuadratureRule quadRuleTetra64pt( pt_tetra_64pt,
                                   QUAD_RULE_TETRA_64PT,
                                   "Quadrature rule 64 points on a tetraedra",
                                   TETRA, 64, 7 );
 /*----------------------------------------------------------------------
   Set of all quadrature rules on tetraedra
   ----------------------------------------------------------------------*/
-static const QuadRule quad_rule_tetra[ NB_QUAD_RULE_TETRA ] =
+static const QuadratureRule quad_rule_tetra[ NB_QUAD_RULE_TETRA ] =
 {
     quadRuleTetra1pt,
     quadRuleTetra4pt,
@@ -534,32 +534,32 @@ static const QuadRule quad_rule_tetra[ NB_QUAD_RULE_TETRA ] =
 #define QUAD_RULE_HEXA_8PT     2
 //----------------------------------------------------------------------
 
-static const QuadPoint pt_hexa_1pt[ 1 ] =
+static const QuadraturePoint pt_hexa_1pt[ 1 ] =
 {
-    QuadPoint( .5, .5, .5, 1. )
+    QuadraturePoint( .5, .5, .5, 1. )
 };
-const QuadRule quadRuleHexa1pt( pt_hexa_1pt,
+const QuadratureRule quadRuleHexa1pt( pt_hexa_1pt,
                                 QUAD_RULE_HEXA_1PT,
                                 "Quadrature rule 1 point on a hexa", HEXA, 1, 1 );
 //----------------------------------------------------------------------
-static const QuadPoint pt_hexa_8pt[ 8 ] =
+static const QuadraturePoint pt_hexa_8pt[ 8 ] =
 {
-    QuadPoint( q2ptx1, q2ptx1, q2ptx1, q2ptw1 * q2ptw1 * q2ptw1 ),
-    QuadPoint( q2ptx1, q2ptx2, q2ptx1, q2ptw1 * q2ptw2 * q2ptw1 ),
-    QuadPoint( q2ptx2, q2ptx1, q2ptx1, q2ptw2 * q2ptw1 * q2ptw1 ),
-    QuadPoint( q2ptx2, q2ptx2, q2ptx1, q2ptw2 * q2ptw2 * q2ptw1 ),
-    QuadPoint( q2ptx1, q2ptx1, q2ptx2, q2ptw1 * q2ptw1 * q2ptw2 ),
-    QuadPoint( q2ptx1, q2ptx2, q2ptx2, q2ptw1 * q2ptw2 * q2ptw2 ),
-    QuadPoint( q2ptx2, q2ptx1, q2ptx2, q2ptw2 * q2ptw1 * q2ptw2 ),
-    QuadPoint( q2ptx2, q2ptx2, q2ptx2, q2ptw2 * q2ptw2 * q2ptw2 )
+    QuadraturePoint( q2ptx1, q2ptx1, q2ptx1, q2ptw1 * q2ptw1 * q2ptw1 ),
+    QuadraturePoint( q2ptx1, q2ptx2, q2ptx1, q2ptw1 * q2ptw2 * q2ptw1 ),
+    QuadraturePoint( q2ptx2, q2ptx1, q2ptx1, q2ptw2 * q2ptw1 * q2ptw1 ),
+    QuadraturePoint( q2ptx2, q2ptx2, q2ptx1, q2ptw2 * q2ptw2 * q2ptw1 ),
+    QuadraturePoint( q2ptx1, q2ptx1, q2ptx2, q2ptw1 * q2ptw1 * q2ptw2 ),
+    QuadraturePoint( q2ptx1, q2ptx2, q2ptx2, q2ptw1 * q2ptw2 * q2ptw2 ),
+    QuadraturePoint( q2ptx2, q2ptx1, q2ptx2, q2ptw2 * q2ptw1 * q2ptw2 ),
+    QuadraturePoint( q2ptx2, q2ptx2, q2ptx2, q2ptw2 * q2ptw2 * q2ptw2 )
 };
-const QuadRule quadRuleHexa8pt( pt_hexa_8pt,
+const QuadratureRule quadRuleHexa8pt( pt_hexa_8pt,
                                 QUAD_RULE_HEXA_8PT,
                                 "Quadrature rule 8 points on a hexa", HEXA, 8, 3 );
 /*----------------------------------------------------------------------
   Set of all quadrature rules on hexa
   ----------------------------------------------------------------------*/
-static const QuadRule quad_rule_hexa[ NB_QUAD_RULE_HEXA ] =
+static const QuadratureRule quad_rule_hexa[ NB_QUAD_RULE_HEXA ] =
 {
     quadRuleHexa1pt,
     quadRuleHexa8pt
@@ -3499,7 +3499,7 @@ std::vector<Real> P1Bubble3DTransform(const std::vector<Real>& nodalValues)
                            1
 */
 
-const RefFEScalar fePointP0( "Lagrange P0 on a point",
+const ReferenceFEScalar fePointP0( "Lagrange P0 on a point",
                              FE_P0_0D,
                              POINT,
                              1,                           // nb dof per vertex
@@ -3513,7 +3513,7 @@ const RefFEScalar fePointP0( "Lagrange P0 on a point",
                              der2fct_P0_0D,
                              refcoor_P0_0D,
                              STANDARD_PATTERN,
-                             ( RefFE* ) NULL,
+                             ( ReferenceFE* ) NULL,
                              &lagrangianTransform );
 
 //======================================================================
@@ -3525,7 +3525,7 @@ const RefFEScalar fePointP0( "Lagrange P0 on a point",
                            1-----2
 */
 
-const RefFEScalar feSegP1( "Lagrange P1 on a segment", FE_P1_1D, LINE, 1, 0, 0, 0, 2, 1,
+const ReferenceFEScalar feSegP1( "Lagrange P1 on a segment", FE_P1_1D, LINE, 1, 0, 0, 0, 2, 1,
                            fct_P1_1D, derfct_P1_1D, der2fct_P1_1D, refcoor_P1_1D,
                            STANDARD_PATTERN, &fePointP0,&lagrangianTransform );
 
@@ -3538,7 +3538,7 @@ const RefFEScalar feSegP1( "Lagrange P1 on a segment", FE_P1_1D, LINE, 1, 0, 0, 
                            1--3--2
 */
 
-const RefFEScalar feSegP2( "Lagrange P2 on a segment", FE_P2_1D, LINE, 1, 1, 0, 0, 3, 1,
+const ReferenceFEScalar feSegP2( "Lagrange P2 on a segment", FE_P2_1D, LINE, 1, 1, 0, 0, 3, 1,
                            fct_P2_1D, derfct_P2_1D, der2fct_P2_1D, refcoor_P2_1D,
                            STANDARD_PATTERN, &fePointP0,&lagrangianTransform );
 
@@ -3555,9 +3555,9 @@ const RefFEScalar feSegP2( "Lagrange P2 on a segment", FE_P2_1D, LINE, 1, 1, 0, 
                             ---
 */
 
-const RefFEScalar feTriaP0( "Lagrange P0 on a triangle", FE_P0_2D, TRIANGLE, 0, 0, 0, 1, 1, 2,
+const ReferenceFEScalar feTriaP0( "Lagrange P0 on a triangle", FE_P0_2D, TRIANGLE, 0, 0, 0, 1, 1, 2,
                             fct_P0_2D, derfct_P0_2D, der2fct_P0_2D, refcoor_P0_2D,
-                            STANDARD_PATTERN, ( RefFE* ) NULL,&lagrangianTransform );
+                            STANDARD_PATTERN, ( ReferenceFE* ) NULL,&lagrangianTransform );
 
 //======================================================================
 //
@@ -3572,7 +3572,7 @@ const RefFEScalar feTriaP0( "Lagrange P0 on a triangle", FE_P0_2D, TRIANGLE, 0, 
                            1---2
 */
 
-const RefFEScalar feTriaP1( "Lagrange P1 on a triangle", FE_P1_2D, TRIANGLE, 1, 0, 0, 0, 3, 2,
+const ReferenceFEScalar feTriaP1( "Lagrange P1 on a triangle", FE_P1_2D, TRIANGLE, 1, 0, 0, 0, 3, 2,
                             fct_P1_2D, derfct_P1_2D, der2fct_P1_2D, refcoor_P1_2D,
                             STANDARD_PATTERN, &feSegP1,&lagrangianTransform );
 
@@ -3589,7 +3589,7 @@ const RefFEScalar feTriaP1( "Lagrange P1 on a triangle", FE_P1_2D, TRIANGLE, 1, 
                            1-4-2
 */
 
-const RefFEScalar feTriaP2( "Lagrange P2 on a triangle", FE_P2_2D, TRIANGLE, 1, 1, 0, 0, 6, 2,
+const ReferenceFEScalar feTriaP2( "Lagrange P2 on a triangle", FE_P2_2D, TRIANGLE, 1, 1, 0, 0, 6, 2,
                             fct_P2_2D, derfct_P2_2D, der2fct_P2_2D, refcoor_P2_2D,
                             STANDARD_PATTERN, &feSegP2,&lagrangianTransform );
 
@@ -3606,9 +3606,9 @@ const RefFEScalar feTriaP2( "Lagrange P2 on a triangle", FE_P2_2D, TRIANGLE, 1, 
                             -------
 */
 
-const RefFEScalar feQuadQ0( "Lagrange Q0 on a quadrangle", FE_Q0_2D, QUAD, 0, 0, 1, 0, 1, 2,
+const ReferenceFEScalar feQuadQ0( "Lagrange Q0 on a quadrangle", FE_Q0_2D, QUAD, 0, 0, 1, 0, 1, 2,
                             fct_Q0_2D, derfct_Q0_2D, der2fct_Q0_2D, refcoor_Q0_2D,
-                            STANDARD_PATTERN, ( RefFE* ) NULL,&lagrangianTransform );
+                            STANDARD_PATTERN, ( ReferenceFE* ) NULL,&lagrangianTransform );
 
 //======================================================================
 //
@@ -3623,7 +3623,7 @@ const RefFEScalar feQuadQ0( "Lagrange Q0 on a quadrangle", FE_Q0_2D, QUAD, 0, 0,
                            1-------2
 */
 
-const RefFEScalar feQuadQ1( "Lagrange Q1 on a quadrangle", FE_Q1_2D, QUAD, 1, 0, 0, 0, 4, 2,
+const ReferenceFEScalar feQuadQ1( "Lagrange Q1 on a quadrangle", FE_Q1_2D, QUAD, 1, 0, 0, 0, 4, 2,
                             fct_Q1_2D, derfct_Q1_2D, der2fct_Q1_2D, refcoor_Q1_2D,
                             STANDARD_PATTERN, &feSegP1,&lagrangianTransform );
 
@@ -3641,7 +3641,7 @@ const RefFEScalar feQuadQ1( "Lagrange Q1 on a quadrangle", FE_Q1_2D, QUAD, 1, 0,
                            1---5---2
 */
 
-const RefFEScalar feQuadQ2( "Lagrange Q2 on a quadrangle", FE_Q2_2D, QUAD, 1, 1, 1, 0, 9, 2,
+const ReferenceFEScalar feQuadQ2( "Lagrange Q2 on a quadrangle", FE_Q2_2D, QUAD, 1, 1, 1, 0, 9, 2,
                             fct_Q2_2D, derfct_Q2_2D, der2fct_Q2_2D, refcoor_Q2_2D,
                             STANDARD_PATTERN, &feSegP2,&lagrangianTransform );
 
@@ -3659,7 +3659,7 @@ const RefFEScalar feQuadQ2( "Lagrange Q2 on a quadrangle", FE_Q2_2D, QUAD, 1, 1,
            /.       \!
            ----------
 */
-const RefFEScalar feTetraP0( "Lagrange P0 on a tetraedra", FE_P0_3D, TETRA, 0, 0, 0, 1, 1, 3,
+const ReferenceFEScalar feTetraP0( "Lagrange P0 on a tetraedra", FE_P0_3D, TETRA, 0, 0, 0, 1, 1, 3,
                              fct_P0_3D, derfct_P0_3D, der2fct_P0_3D, refcoor_P0_3D,
                              STANDARD_PATTERN, &feTriaP0,&lagrangianTransform );
 
@@ -3677,7 +3677,7 @@ const RefFEScalar feTetraP0( "Lagrange P0 on a tetraedra", FE_P0_3D, TETRA, 0, 0
            /.       \!
          1 ----------2
 */
-const RefFEScalar feTetraP1( "Lagrange P1 on a tetraedra", FE_P1_3D, TETRA, 1, 0, 0, 0, 4, 3,
+const ReferenceFEScalar feTetraP1( "Lagrange P1 on a tetraedra", FE_P1_3D, TETRA, 1, 0, 0, 0, 4, 3,
                              fct_P1_3D, derfct_P1_3D, der2fct_P1_3D, refcoor_P1_3D,
                              STANDARD_PATTERN, &feTriaP1,&lagrangianTransform );
 
@@ -3695,7 +3695,7 @@ const RefFEScalar feTetraP1( "Lagrange P1 on a tetraedra", FE_P1_3D, TETRA, 1, 0
            /.       \!
          1 ----------2
 */
-const RefFEScalar feTetraP1bubble( "Lagrange P1bubble on a tetraedra", FE_P1bubble_3D, TETRA, 1, 0, 0, 1, 5, 3,
+const ReferenceFEScalar feTetraP1bubble( "Lagrange P1bubble on a tetraedra", FE_P1bubble_3D, TETRA, 1, 0, 0, 1, 5, 3,
                                    fct_P1bubble_3D, derfct_P1bubble_3D, der2fct_P1bubble_3D, refcoor_P1bubble_3D,
                                    STANDARD_PATTERN, &feTriaP1, &P1Bubble3DTransform );
 
@@ -3714,7 +3714,7 @@ const RefFEScalar feTetraP1bubble( "Lagrange P1bubble on a tetraedra", FE_P1bubb
            /.       \!
          1 -----5----2
 */
-const RefFEScalar feTetraP2( "Lagrange P2 on a tetraedra", FE_P2_3D, TETRA, 1, 1, 0, 0, 10, 3,
+const ReferenceFEScalar feTetraP2( "Lagrange P2 on a tetraedra", FE_P2_3D, TETRA, 1, 1, 0, 0, 10, 3,
                              fct_P2_3D, derfct_P2_3D, der2fct_P2_3D, refcoor_P2_3D,
                              STANDARD_PATTERN, &feTriaP2,&lagrangianTransform );
 //======================================================================
@@ -3731,7 +3731,7 @@ const RefFEScalar feTetraP2( "Lagrange P2 on a tetraedra", FE_P2_3D, TETRA, 1, 1
            /.       \!
          1 -----5----2
 */
-const RefFEScalar feTetraP2tilde( "Lagrange P2tilde on a tetraedra", FE_P2tilde_3D,
+const ReferenceFEScalar feTetraP2tilde( "Lagrange P2tilde on a tetraedra", FE_P2tilde_3D,
                                   TETRA, 1, 1, 0, 1, 11, 3, fct_P2tilde_3D,
                                   derfct_P2tilde_3D,
                                   der2fct_P2tilde_3D,
@@ -3754,7 +3754,7 @@ const RefFEScalar feTetraP2tilde( "Lagrange P2tilde on a tetraedra", FE_P2tilde_
      |.      |/
      |_______|
 */
-const RefFEScalar feHexaQ0( "Lagrange Q0 on a hexaedra", FE_Q0_3D, HEXA, 0, 0, 0, 1, 1, 3,
+const ReferenceFEScalar feHexaQ0( "Lagrange Q0 on a hexaedra", FE_Q0_3D, HEXA, 0, 0, 0, 1, 1, 3,
                             fct_Q0_3D, derfct_Q0_3D, der2fct_Q0_3D, refcoor_Q0_3D,
                             STANDARD_PATTERN, &feQuadQ0,&lagrangianTransform );
 
@@ -3774,7 +3774,7 @@ const RefFEScalar feHexaQ0( "Lagrange Q0 on a hexaedra", FE_Q0_3D, HEXA, 0, 0, 0
      |.      |/
      1_______2
 */
-const RefFEScalar feHexaQ1( "Lagrange Q1 on a hexaedra", FE_Q1_3D, HEXA, 1, 0, 0, 0, 8, 3,
+const ReferenceFEScalar feHexaQ1( "Lagrange Q1 on a hexaedra", FE_Q1_3D, HEXA, 1, 0, 0, 0, 8, 3,
                             fct_Q1_3D, derfct_Q1_3D, der2fct_Q1_3D, refcoor_Q1_3D,
                             STANDARD_PATTERN, &feQuadQ1,&lagrangianTransform );
 
@@ -3803,7 +3803,7 @@ const RefFEScalar feHexaQ1( "Lagrange Q1 on a hexaedra", FE_Q1_3D, HEXA, 1, 0, 0
    face 6: 5,6,7,8
 
 */
-const RefFEHdiv feHexaRT0( "Lagrange RT0 on a hexaedra", FE_RT0_HEXA_3D, HEXA, 0, 0, 1, 0, 6, 3,
+const ReferenceFEHdiv feHexaRT0( "Lagrange RT0 on a hexaedra", FE_RT0_HEXA_3D, HEXA, 0, 0, 1, 0, 6, 3,
                            fct_RT0_HEXA_3D, fct_DIV_RT0_HEXA_3D, refcoor_RT0_HEXA_3D,
                            STANDARD_PATTERN, &feQuadQ0);
 
@@ -3827,7 +3827,7 @@ const RefFEHdiv feHexaRT0( "Lagrange RT0 on a hexaedra", FE_RT0_HEXA_3D, HEXA, 0
    face 3: 2, 3, 4
    face 4: 1, 4, 3
 */
-const RefFEHdiv feTetraRT0( "Lagrange RT0 on a tetraedra", FE_RT0_TETRA_3D, TETRA, 0, 0, 1, 0, 4, 3,
+const ReferenceFEHdiv feTetraRT0( "Lagrange RT0 on a tetraedra", FE_RT0_TETRA_3D, TETRA, 0, 0, 1, 0, 4, 3,
                             fct_RT0_TETRA_3D, fct_DIV_RT0_TETRA_3D, refcoor_RT0_TETRA_3D,
                             STANDARD_PATTERN, &feTriaP0 );
 
@@ -3872,20 +3872,20 @@ const RefFEHdiv feTetraRT0( "Lagrange RT0 on a tetraedra", FE_RT0_TETRA_3D, TETR
 
 //! Total number of Boundary elements for the hybrid MFE for HEXA (= Number of faces, common for RT0,RT1...)
 #define NB_BDFE_HYB_HEXA 6
-static const StaticBdFE BdFE_RT0_HYB_HEXA_1( feQuadQ0, geoBilinearQuad, quadRuleQuad4pt,
+static const CurrentBoundaryFEBase BdFE_RT0_HYB_HEXA_1( feQuadQ0, geoBilinearQuad, quadRuleQuad4pt,
                                              refcoor_HYB_HEXA_FACE_1, 0 );
-static const StaticBdFE BdFE_RT0_HYB_HEXA_2( feQuadQ0, geoBilinearQuad, quadRuleQuad4pt,
+static const CurrentBoundaryFEBase BdFE_RT0_HYB_HEXA_2( feQuadQ0, geoBilinearQuad, quadRuleQuad4pt,
                                              refcoor_HYB_HEXA_FACE_2, 1 );
-static const StaticBdFE BdFE_RT0_HYB_HEXA_3( feQuadQ0, geoBilinearQuad, quadRuleQuad4pt,
+static const CurrentBoundaryFEBase BdFE_RT0_HYB_HEXA_3( feQuadQ0, geoBilinearQuad, quadRuleQuad4pt,
                                              refcoor_HYB_HEXA_FACE_3, 2 );
-static const StaticBdFE BdFE_RT0_HYB_HEXA_4( feQuadQ0, geoBilinearQuad, quadRuleQuad4pt,
+static const CurrentBoundaryFEBase BdFE_RT0_HYB_HEXA_4( feQuadQ0, geoBilinearQuad, quadRuleQuad4pt,
                                              refcoor_HYB_HEXA_FACE_4, 3 );
-static const StaticBdFE BdFE_RT0_HYB_HEXA_5( feQuadQ0, geoBilinearQuad, quadRuleQuad4pt,
+static const CurrentBoundaryFEBase BdFE_RT0_HYB_HEXA_5( feQuadQ0, geoBilinearQuad, quadRuleQuad4pt,
                                              refcoor_HYB_HEXA_FACE_5, 4 );
-static const StaticBdFE BdFE_RT0_HYB_HEXA_6( feQuadQ0, geoBilinearQuad, quadRuleQuad4pt,
+static const CurrentBoundaryFEBase BdFE_RT0_HYB_HEXA_6( feQuadQ0, geoBilinearQuad, quadRuleQuad4pt,
                                              refcoor_HYB_HEXA_FACE_6, 5 );
 
-static const StaticBdFE HybRT0HexaList[ NB_BDFE_HYB_HEXA ] =
+static const CurrentBoundaryFEBase HybRT0HexaList[ NB_BDFE_HYB_HEXA ] =
 {
     BdFE_RT0_HYB_HEXA_1, BdFE_RT0_HYB_HEXA_2,
     BdFE_RT0_HYB_HEXA_3, BdFE_RT0_HYB_HEXA_4,
@@ -3895,31 +3895,31 @@ static const StaticBdFE HybRT0HexaList[ NB_BDFE_HYB_HEXA ] =
 //const RefHybridFE feHexaRT0Hyb(NB_BDFE_HYB_HEXA,HybRT0HexaList,"Hybrid RT0 elements on a hexaedra",
 //         FE_RT0_HYB_HEXA_3D, HEXA, 0,0,1,0,6,3,
 //         refcoor_RT0HYB_HEXA,STANDARD_PATTERN);
-static const StaticBdFE BdFE_RT0_HYB_HEXA_VdotN_1( feQuadQ0, geoBilinearQuad, quadRuleQuad4pt,
+static const CurrentBoundaryFEBase BdFE_RT0_HYB_HEXA_VdotN_1( feQuadQ0, geoBilinearQuad, quadRuleQuad4pt,
                                                    refcoor_HYB_HEXA_FACE_1, 0, 1. );
-static const StaticBdFE BdFE_RT0_HYB_HEXA_VdotN_2( feQuadQ0, geoBilinearQuad, quadRuleQuad4pt,
+static const CurrentBoundaryFEBase BdFE_RT0_HYB_HEXA_VdotN_2( feQuadQ0, geoBilinearQuad, quadRuleQuad4pt,
                                                    refcoor_HYB_HEXA_FACE_2, 1, 1. );
-static const StaticBdFE BdFE_RT0_HYB_HEXA_VdotN_3( feQuadQ0, geoBilinearQuad, quadRuleQuad4pt,
+static const CurrentBoundaryFEBase BdFE_RT0_HYB_HEXA_VdotN_3( feQuadQ0, geoBilinearQuad, quadRuleQuad4pt,
                                                    refcoor_HYB_HEXA_FACE_3, 2, 1. );
-static const StaticBdFE BdFE_RT0_HYB_HEXA_VdotN_4( feQuadQ0, geoBilinearQuad, quadRuleQuad4pt,
+static const CurrentBoundaryFEBase BdFE_RT0_HYB_HEXA_VdotN_4( feQuadQ0, geoBilinearQuad, quadRuleQuad4pt,
                                                    refcoor_HYB_HEXA_FACE_4, 3, 1. );
-static const StaticBdFE BdFE_RT0_HYB_HEXA_VdotN_5( feQuadQ0, geoBilinearQuad, quadRuleQuad4pt,
+static const CurrentBoundaryFEBase BdFE_RT0_HYB_HEXA_VdotN_5( feQuadQ0, geoBilinearQuad, quadRuleQuad4pt,
                                                    refcoor_HYB_HEXA_FACE_5, 4, 1. );
-static const StaticBdFE BdFE_RT0_HYB_HEXA_VdotN_6( feQuadQ0, geoBilinearQuad, quadRuleQuad4pt,
+static const CurrentBoundaryFEBase BdFE_RT0_HYB_HEXA_VdotN_6( feQuadQ0, geoBilinearQuad, quadRuleQuad4pt,
                                                    refcoor_HYB_HEXA_FACE_6, 5, 1. );
 
-static const StaticBdFE HybRT0HexaVdotNList[ NB_BDFE_HYB_HEXA ] =
+static const CurrentBoundaryFEBase HybRT0HexaVdotNList[ NB_BDFE_HYB_HEXA ] =
 {
     BdFE_RT0_HYB_HEXA_VdotN_1, BdFE_RT0_HYB_HEXA_VdotN_2,
     BdFE_RT0_HYB_HEXA_VdotN_3, BdFE_RT0_HYB_HEXA_VdotN_4,
     BdFE_RT0_HYB_HEXA_VdotN_5, BdFE_RT0_HYB_HEXA_VdotN_6
 };
 
-const RefFEHybrid feHexaRT0Hyb( "Hybrid RT0 elements on a hexaedra", FE_RT0_HYB_HEXA_3D, HEXA,
+const ReferenceFEHybrid feHexaRT0Hyb( "Hybrid RT0 elements on a hexaedra", FE_RT0_HYB_HEXA_3D, HEXA,
                                 0, 0, 1, 0, 6, 3, NB_BDFE_HYB_HEXA, HybRT0HexaList,
                                 refcoor_RT0HYB_HEXA, STANDARD_PATTERN );
 
-const RefFEHybrid feHexaRT0VdotNHyb( "Hybrid RT0 elements on a hexaedra", FE_RT0_HYB_HEXA_3D, HEXA,
+const ReferenceFEHybrid feHexaRT0VdotNHyb( "Hybrid RT0 elements on a hexaedra", FE_RT0_HYB_HEXA_3D, HEXA,
                                      0, 0, 1, 0, 6, 3, NB_BDFE_HYB_HEXA, HybRT0HexaVdotNList,
                                      refcoor_RT0HYB_HEXA, STANDARD_PATTERN );
 
@@ -3959,16 +3959,16 @@ SEE ElementShapes.cc   for the ORIENTATION CONVENTIONS
 
 //! Total number of Boundary elements for the hybrid MFE for TETRA (= Number of faces. common for RT0,RT1...)
 #define NB_BDFE_RT0_HYB_TETRA 4
-static const StaticBdFE BdFE_RT0_HYB_TETRA_1( feTriaP0, geoLinearTria, quadRuleTria4pt,
+static const CurrentBoundaryFEBase BdFE_RT0_HYB_TETRA_1( feTriaP0, geoLinearTria, quadRuleTria4pt,
                                               refcoor_HYB_TETRA_FACE_1, 0 );
-static const StaticBdFE BdFE_RT0_HYB_TETRA_2( feTriaP0, geoLinearTria, quadRuleTria4pt,
+static const CurrentBoundaryFEBase BdFE_RT0_HYB_TETRA_2( feTriaP0, geoLinearTria, quadRuleTria4pt,
                                               refcoor_HYB_TETRA_FACE_2, 1 );
-static const StaticBdFE BdFE_RT0_HYB_TETRA_3( feTriaP0, geoLinearTria, quadRuleTria4pt,
+static const CurrentBoundaryFEBase BdFE_RT0_HYB_TETRA_3( feTriaP0, geoLinearTria, quadRuleTria4pt,
                                               refcoor_HYB_TETRA_FACE_3, 2 );
-static const StaticBdFE BdFE_RT0_HYB_TETRA_4( feTriaP0, geoLinearTria, quadRuleTria4pt,
+static const CurrentBoundaryFEBase BdFE_RT0_HYB_TETRA_4( feTriaP0, geoLinearTria, quadRuleTria4pt,
                                               refcoor_HYB_TETRA_FACE_4, 3 );
 
-static const StaticBdFE HybRT0TetraList[ NB_BDFE_RT0_HYB_TETRA ] =
+static const CurrentBoundaryFEBase HybRT0TetraList[ NB_BDFE_RT0_HYB_TETRA ] =
 {
     BdFE_RT0_HYB_TETRA_1, BdFE_RT0_HYB_TETRA_2,
     BdFE_RT0_HYB_TETRA_3, BdFE_RT0_HYB_TETRA_4
@@ -3979,26 +3979,26 @@ static const StaticBdFE HybRT0TetraList[ NB_BDFE_RT0_HYB_TETRA ] =
     refcoor_RT0HYB_TETRA,STANDARD_PATTERN);*/
 
 
-static const StaticBdFE BdFE_RT0_HYB_TETRA_VdotN_1( feTriaP0, geoLinearTria, quadRuleTria4pt,
+static const CurrentBoundaryFEBase BdFE_RT0_HYB_TETRA_VdotN_1( feTriaP0, geoLinearTria, quadRuleTria4pt,
                                                     refcoor_HYB_TETRA_FACE_1, 0, 2. );
-static const StaticBdFE BdFE_RT0_HYB_TETRA_VdotN_2( feTriaP0, geoLinearTria, quadRuleTria4pt,
+static const CurrentBoundaryFEBase BdFE_RT0_HYB_TETRA_VdotN_2( feTriaP0, geoLinearTria, quadRuleTria4pt,
                                                     refcoor_HYB_TETRA_FACE_2, 1, 2. );
-static const StaticBdFE BdFE_RT0_HYB_TETRA_VdotN_3( feTriaP0, geoLinearTria, quadRuleTria4pt,
+static const CurrentBoundaryFEBase BdFE_RT0_HYB_TETRA_VdotN_3( feTriaP0, geoLinearTria, quadRuleTria4pt,
                                                     refcoor_HYB_TETRA_FACE_3, 2, 2. / sqrt( 3. ) );
-static const StaticBdFE BdFE_RT0_HYB_TETRA_VdotN_4( feTriaP0, geoLinearTria, quadRuleTria4pt,
+static const CurrentBoundaryFEBase BdFE_RT0_HYB_TETRA_VdotN_4( feTriaP0, geoLinearTria, quadRuleTria4pt,
                                                     refcoor_HYB_TETRA_FACE_4, 3, 2. );
 
-static const StaticBdFE HybRT0TetraVdotNList[ NB_BDFE_RT0_HYB_TETRA ] =
+static const CurrentBoundaryFEBase HybRT0TetraVdotNList[ NB_BDFE_RT0_HYB_TETRA ] =
 {
     BdFE_RT0_HYB_TETRA_VdotN_1, BdFE_RT0_HYB_TETRA_VdotN_2,
     BdFE_RT0_HYB_TETRA_VdotN_3, BdFE_RT0_HYB_TETRA_VdotN_4
 };
 
-const RefFEHybrid feTetraRT0Hyb ( "Hybrid RT0 elements on a tetrahedron", FE_RT0_HYB_TETRA_3D, TETRA,
+const ReferenceFEHybrid feTetraRT0Hyb ( "Hybrid RT0 elements on a tetrahedron", FE_RT0_HYB_TETRA_3D, TETRA,
                                   0, 0, 1, 0, 4, 3, NB_BDFE_RT0_HYB_TETRA, HybRT0TetraList,
                                   refcoor_RT0HYB_TETRA, STANDARD_PATTERN );
 
-const RefFEHybrid feTetraRT0VdotNHyb ( "Hybrid RT0 elements on a tetrahedron", FE_RT0_HYB_TETRA_3D, TETRA,
+const ReferenceFEHybrid feTetraRT0VdotNHyb ( "Hybrid RT0 elements on a tetrahedron", FE_RT0_HYB_TETRA_3D, TETRA,
                                        0, 0, 1, 0, 4, 3, NB_BDFE_RT0_HYB_TETRA, HybRT0TetraVdotNList,
                                        refcoor_RT0HYB_TETRA, STANDARD_PATTERN );
 

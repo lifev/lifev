@@ -49,7 +49,7 @@
 #include <life/lifefem/ReferenceFEHdiv.hpp>
 #include <life/lifefem/ReferenceFEHybrid.hpp>
 
-#include <life/lifefem/QuadRule.hpp>
+#include <life/lifefem/QuadratureRule.hpp>
 
 #include <boost/multi_array.hpp>
 
@@ -263,7 +263,7 @@ public:
       @param geoMap Geometric mapping used
       @param qr Quadrature rule for the computations
      */
-    CurrentFE( const RefFE& refFE, const GeometricMap& geoMap, const QuadRule& qr );
+    CurrentFE( const ReferenceFE& refFE, const GeometricMap& geoMap, const QuadratureRule& qr );
 
     //! Constructor without quadrature specification
     /*!
@@ -273,7 +273,7 @@ public:
       @param refFE Reference finite element used
       @param geoMap Geometric mapping used
      */
-    CurrentFE( const RefFE& refFE, const GeometricMap& geoMap);
+    CurrentFE( const ReferenceFE& refFE, const GeometricMap& geoMap);
 
     //! Destructor
     ~CurrentFE() { delete M_quadRule;}
@@ -347,7 +347,7 @@ public:
       expensive method. Use it only when it is really needed.
       @param newQuadRule The new quadrature rule
      */
-    void setQuadRule(const QuadRule& newQuadRule);
+    void setQuadRule(const QuadratureRule& newQuadRule);
 
     //@}
 
@@ -380,7 +380,7 @@ public:
     }
 
     //! Getter for the reference FE
-    inline const RefFE& refFE() const
+    inline const ReferenceFE& refFE() const
     {
         return *M_refFE;
     };
@@ -392,7 +392,7 @@ public:
     }
 
     //! Getter for the quadrature rule
-    inline const QuadRule& quadRule() const
+    inline const QuadratureRule& quadRule() const
     {
         return *M_quadRule;
     };
@@ -621,9 +621,9 @@ private:
 
     // Important structures
 
-    const RefFE* M_refFE;
+    const ReferenceFE* M_refFE;
     const GeometricMap* M_geoMap;
-    QuadRule* M_quadRule;
+    QuadratureRule* M_quadRule;
 
 
     // Internal storage for the data

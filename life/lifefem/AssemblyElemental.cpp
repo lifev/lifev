@@ -4490,7 +4490,7 @@ void grad_Hdiv( Real coef, ElemMat& elmat, const CurrentFE& dualFE, const Curren
 {
     ElemMat::matrix_view mat = elmat.block( iblock, jblock );
     Real sumdivphi(0.);
-    const QuadRule& dualQuadRule( dualFE.quadRule() );
+    const QuadratureRule& dualQuadRule( dualFE.quadRule() );
 
     // Loop over all the degrees of freedom of the dual variable.
     for ( UInt i(0); i < dualFE.nbFEDof(); ++i )
@@ -4516,7 +4516,7 @@ void div_Hdiv( Real coef, ElemMat& elmat, const CurrentFE& dualFE, const Current
 {
     ElemMat::matrix_view mat = elmat.block( iblock, jblock );
     Real sumdivphi(0.);
-    const QuadRule& dualQuadRule( dualFE.quadRule() );
+    const QuadratureRule& dualQuadRule( dualFE.quadRule() );
 
     // Loop over all the degrees of freedom of the dual variable.
     for ( UInt i(0); i < dualFE.nbFEDof(); ++i )
@@ -4538,8 +4538,8 @@ void div_Hdiv( Real coef, ElemMat& elmat, const CurrentFE& dualFE, const Current
 
 //----------------------------------------------------------------------
 // Compute a Hdiv function dot product with the outwart unit normal times a hybrid function.
-void TP_VdotN_Hdiv( Real coef, ElemMat& elmat, const RefFEHybrid& hybridFE,
-                    const RefFEHybrid& dualDotNFE, int iblock, int jblock )
+void TP_VdotN_Hdiv( Real coef, ElemMat& elmat, const ReferenceFEHybrid& hybridFE,
+                    const ReferenceFEHybrid& dualDotNFE, int iblock, int jblock )
 {
     ElemMat::matrix_view mat = elmat.block( iblock, jblock );
     UInt nbnode;
@@ -4549,9 +4549,9 @@ void TP_VdotN_Hdiv( Real coef, ElemMat& elmat, const RefFEHybrid& hybridFE,
     for ( UInt nf(0); nf < hybridFE.numberBoundaryFE(); ++nf )
     {
         // Take the staticBdFE of the hybrid finite element.
-        const StaticBdFE & boundaryElementHybridFE( hybridFE[ nf ] );
+        const CurrentBoundaryFEBase & boundaryElementHybridFE( hybridFE[ nf ] );
         // Take the staticBdFE of the Hdiv function dot product outward unit normal.
-        const StaticBdFE & boundaryElementDualDotNFE( dualDotNFE[ nf ] );
+        const CurrentBoundaryFEBase & boundaryElementDualDotNFE( dualDotNFE[ nf ] );
         nbnode = boundaryElementHybridFE.nbNode();
 
         // Loop over all the the degrees of freedom of the dual dot normal variable.
@@ -4577,7 +4577,7 @@ void TP_VdotN_Hdiv( Real coef, ElemMat& elmat, const RefFEHybrid& hybridFE,
 
 //----------------------------------------------------------------------
 // Compute the mass matrix for hybrid variable.
-void TP_TP_Hdiv( Real coef, ElemMat& elmat, const RefFEHybrid& hybridFE, int iblock, int jblock )
+void TP_TP_Hdiv( Real coef, ElemMat& elmat, const ReferenceFEHybrid& hybridFE, int iblock, int jblock )
 {
     ElemMat::matrix_view mat = elmat.block( iblock, jblock );
     UInt nbnode;
@@ -4587,7 +4587,7 @@ void TP_TP_Hdiv( Real coef, ElemMat& elmat, const RefFEHybrid& hybridFE, int ibl
     for ( UInt nf(0); nf < hybridFE.numberBoundaryFE(); ++nf )
     {
         // Take the staticBdFE of the hybrid finite element.
-        const StaticBdFE & boundaryElementHybridFE( hybridFE[ nf ] );
+        const CurrentBoundaryFEBase & boundaryElementHybridFE( hybridFE[ nf ] );
         nbnode = boundaryElementHybridFE.nbNode();
 
         // Loop over all the degrees of freedom of the first hybrid variable.

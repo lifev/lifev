@@ -425,7 +425,7 @@ EpetraMap::bubbleSort(Epetra_IntSerialDenseVector& elements)
 }
 
 void
-EpetraMap::setUp( const RefFE&        refFE,
+EpetraMap::setUp( const ReferenceFE&        refFE,
                   const comm_ptrtype& commPtr,
                   std::vector<Int>& repeatedNodeVector,
                   std::vector<Int>& repeatedEdgeVector,

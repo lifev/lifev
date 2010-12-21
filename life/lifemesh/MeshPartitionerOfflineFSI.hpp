@@ -428,13 +428,13 @@ template<typename MeshType>
 void MeshPartitionerOfflineFSI<MeshType>::createSpaces()
 {
     // Set the appropriate reference elements and quad rules
-    const RefFE*    refFE_vel(0);
-    const QuadRule* qR_vel(0);
-    const QuadRule* bdQr_vel(0);
+    const ReferenceFE*    refFE_vel(0);
+    const QuadratureRule* qR_vel(0);
+    const QuadratureRule* bdQr_vel(0);
 
-    const RefFE*    refFE_disp(0);
-    const QuadRule* qR_disp(0);
-    const QuadRule* bdQr_disp(0);
+    const ReferenceFE*    refFE_disp(0);
+    const QuadratureRule* qR_disp(0);
+    const QuadratureRule* bdQr_disp(0);
 
     if ( M_velocityOrder.compare("P2") == 0 )
     {

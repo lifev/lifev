@@ -74,14 +74,14 @@ public:
      * @param mesh     mesh_Type    mesh
      * @param dof      dof_Type     velocity field degree of freedom
      * @param refFE    refFE        velocity field reference finite element
-     * @param quadRule QuadRule     quadrature rule for the integration of the stabilization variational forms
+     * @param quadRule QuadratureRule     quadrature rule for the integration of the stabilization variational forms
      * @param viscosity viscosity   fluid viscosity  @f$\nu@f$
      */
     StabilizationSD( const GetPot&   dataFile,
                      const mesh_Type&     mesh,
                      const dof_Type&      dof,
-                     const RefFE&    refFE,
-                     const QuadRule& quadRule,
+                     const ReferenceFE&    refFE,
+                     const QuadratureRule& quadRule,
                      Real      viscosity);
     //! ~Destructor
     virtual ~StabilizationSD() {};
@@ -230,8 +230,8 @@ template<typename MeshType, typename DofType>
 StabilizationSD<MeshType, DofType>::StabilizationSD( const GetPot& dataFile,
                                                      const mesh_Type&     mesh,
                                                      const dof_Type&      dof,
-                                                     const RefFE&    refFE,
-                                                     const QuadRule& quadRule,
+                                                     const ReferenceFE&    refFE,
+                                                     const QuadratureRule& quadRule,
                                                      Real            viscosity):
         M_mesh( mesh ),
         M_dof( dof ),

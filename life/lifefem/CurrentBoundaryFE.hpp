@@ -54,16 +54,16 @@ namespace LifeV
   \date 09/2002
 
   This class is used for a current boundary elements, i.e. the boundary of
-  a CurrentFE. As for the CurrentFE (and contrarily to StaticBdFE) on must
+  a CurrentFE. As for the CurrentFE (and contrarily to CurrentBoundaryFEBase) on must
   update this element with a geometrical element before using it. If only
   the measure is needed - to perform for example surface integrations -
   call updateMeas(...), which by the way compute also the tangent.  If, the
   normal at the integration point is needed, call updateMeasNormal(...).
-  See the description of the base class StaticBdFE for further details.
+  See the description of the base class CurrentBoundaryFEBase for further details.
 */
 
 class CurrentBoundaryFE:
-        public StaticBdFE
+        public CurrentBoundaryFEBase
 {
 public:
 
@@ -71,10 +71,10 @@ public:
     //@{
 
     //! Constructor with reference FE and geometric mapping
-    CurrentBoundaryFE( const RefFE& refFE, const GeometricMap& geoMap );
+    CurrentBoundaryFE( const ReferenceFE& refFE, const GeometricMap& geoMap );
 
     //! Constructor with reference FE, geometric mapping and quadrature rule
-    CurrentBoundaryFE( const RefFE& refFE, const GeometricMap& geoMap, const QuadRule& qr );
+    CurrentBoundaryFE( const ReferenceFE& refFE, const GeometricMap& geoMap, const QuadratureRule& qr );
 
     //! Destructor
     virtual ~CurrentBoundaryFE();

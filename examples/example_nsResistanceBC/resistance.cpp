@@ -203,13 +203,13 @@ ResistanceProblem::run()
 
     // fluid solver
 
-    const RefFE*    refFE_vel;
-    const QuadRule* qR_vel;
-    const QuadRule* bdQr_vel;
+    const ReferenceFE*    refFE_vel;
+    const QuadratureRule* qR_vel;
+    const QuadratureRule* bdQr_vel;
 
-    const RefFE*    refFE_press;
-    const QuadRule* qR_press;
-    const QuadRule* bdQr_press;
+    const ReferenceFE*    refFE_press;
+    const QuadratureRule* qR_press;
+    const QuadratureRule* bdQr_press;
 
 
     boost::shared_ptr<OseenData> oseenData(new OseenData());

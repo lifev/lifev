@@ -45,7 +45,7 @@
 namespace LifeV
 {
 /*!
-  \class RefFE
+  \class ReferenceFE
   \brief The class for a reference Lagrangian finite element
   \author J.-F. Gerbeau
   \date 04/2002
@@ -62,16 +62,16 @@ namespace LifeV
   \par
   (3) in refFE.h, you declare your finite element:
   \code
-  extern const RefFE fePipo;
+  extern const ReferenceFE fePipo;
   \endcode
 
   \par
   (4) in defQuadRuleFE.cc: you define your new element with a command like:
   \code
-  const RefFE feTriaPipo("Pipo element on a triangle",TRIANGLE,1,0,0,0,3,2,
+  const ReferenceFE feTriaPipo("Pipo element on a triangle",TRIANGLE,1,0,0,0,3,2,
   fct_Pipo_2D,derfct_Pipo_2D,der2fct_Pipo_2D,refcoor_Pipo_2D,allQuadRuleTria,STANDARD_PATTERN,&feSegP1);
   \endcode
-  See documentation of RefFE::RefFE(...) for a precise description of all arguments
+  See documentation of ReferenceFE::ReferenceFE(...) for a precise description of all arguments
 
 */
 /* Unique FE identifier*/
@@ -107,8 +107,8 @@ enum FE_TYPE
 };
 
 
-class RefFE:
-        public RefEle,
+class ReferenceFE:
+        public ReferenceElement,
         public DOFLocalPattern
 {
 
@@ -117,7 +117,7 @@ public:
     //! @name Public Types
     //@{
 
-    typedef RefEle::function_Type function_Type;
+    typedef ReferenceElement::function_Type function_Type;
 
     //@}
 
@@ -154,7 +154,7 @@ public:
       code it in refFE.cc following the example of P1ISOP2_TRIA_PATTERN)
       @param bdRefFE  a pointer on the associated reference finite element on the boundary
     */
-    RefFE( std::string          name,
+    ReferenceFE( std::string          name,
            FE_TYPE              type,
            ReferenceShapes      shape,
            Int                  nbDofPerVertex,
@@ -170,10 +170,10 @@ public:
            const function_Type* divPhi,
            const Real*          refCoor,
            DofPatternType       patternType,
-           const RefFE*         bdRefFE );
+           const ReferenceFE*         bdRefFE );
 
     //! Destructor
-    virtual ~RefFE();
+    virtual ~ReferenceFE();
 
     //@}
 
@@ -188,7 +188,7 @@ public:
     /*
       The boundary of a finite element has to be understood in the sense of the trace. For example, the boundary finite element of the P0 finite element on a triangle is a P0 finite element on a segment, even if there is no degree of freedom located on the edges of the triangle for P0 finite element.
      */
-    const RefFE& boundaryFE() const
+    const ReferenceFE& boundaryFE() const
     {
         ASSERT( M_boundaryFE , "No boundary FE defined" );
         return *M_boundaryFE;
@@ -208,16 +208,16 @@ private:
     //@{
 
     //! No empty constructor
-    RefFE();
+    ReferenceFE();
 
     //! No copy constructor
-    RefFE(const RefFE&);
+    ReferenceFE(const ReferenceFE&);
 
     //@}
 
 
     //! Reference to the boundary finite element
-    const RefFE* M_boundaryFE;
+    const ReferenceFE* M_boundaryFE;
 
     //! Type of finite element (FE_P1_2D, ..., see the #define at the beginning of refFE.h
     const FE_TYPE M_type;

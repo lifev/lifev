@@ -32,9 +32,9 @@ liblifefem_la_SOURCES	= BCBase.cpp BCFunction.cpp BCVector.cpp BCHandler.cpp \
           CurrentFE.cpp CurrentBoundaryFE.cpp defQuadRuleFE.cpp DOF.cpp \
           DOFInterface3Dto2D.cpp DOFInterface3Dto3D.cpp DOFInterface.cpp \
           AssemblyElemental.cpp  GeometricMap.cpp \
-          DOFLocalPattern.cpp QuadRule.cpp ReferenceElement.cpp ReferenceFE.cpp ReferenceFEScalar.cpp ReferenceFEHdiv.cpp \
+          DOFLocalPattern.cpp QuadratureRule.cpp ReferenceElement.cpp ReferenceFE.cpp ReferenceFEScalar.cpp ReferenceFEHdiv.cpp \
           ReferenceFEHybrid.cpp CurrentBoundaryFEBase.cpp \
-          BCManage.cpp QuadPoint.cpp
+          BCManage.cpp QuadraturePoint.cpp
 
 liblifefem_la_LIBADD	= ../lifemesh/liblifemesh.la ../lifealg/liblifealg.la
 

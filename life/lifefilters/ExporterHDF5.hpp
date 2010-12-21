@@ -1002,7 +1002,7 @@ void ExporterHDF5<MeshType>::writeGeometry()
     {
     case TETRA:
     {
-        const RefFE & refFEP1 = feTetraP1;
+        const ReferenceFE & refFEP1 = feTetraP1;
         EpetraMap tmpMapP1(refFEP1, *this->M_mesh,
                            this->M_listData.begin()->storedArray()->mapPtr()->commPtr());
         subMap = tmpMapP1;
@@ -1010,7 +1010,7 @@ void ExporterHDF5<MeshType>::writeGeometry()
     }
     case HEXA:
     {
-        const RefFE & refFEQ1 = feHexaQ1;
+        const ReferenceFE & refFEQ1 = feHexaQ1;
         EpetraMap tmpMapQ1(refFEQ1, *this->M_mesh,
                            this->M_listData.begin()->storedArray()->mapPtr()->commPtr());
         subMap = tmpMapQ1;
@@ -1018,7 +1018,7 @@ void ExporterHDF5<MeshType>::writeGeometry()
     }
     case LINE:
     {
-        const RefFE & refFEP11D = feSegP1;
+        const ReferenceFE & refFEP11D = feSegP1;
         EpetraMap tmpMapQ11D(refFEP11D, *this->M_mesh,
                              this->M_listData.begin()->storedArray()->mapPtr()->commPtr());
         subMap = tmpMapQ11D;

@@ -26,7 +26,7 @@
 
 /*!
     @file
-    @brief File for the definition of the QuadRule class.
+    @brief File for the definition of the QuadratureRule class.
 
     @author Jean-Frederic Gerbeau
             Samuel Quinodoz <samuel.quinodoz@epfl.ch>
@@ -44,7 +44,7 @@
 
 #include <life/lifemesh/ElementShapes.hpp>
 
-#include <life/lifefem/QuadPoint.hpp>
+#include <life/lifefem/QuadraturePoint.hpp>
 
 #include <iostream>
 #include <fstream>
@@ -54,7 +54,7 @@ namespace LifeV
 {
 
 
-//! QuadRule - The basis class for storing and accessing quadrature rules.
+//! QuadratureRule - The basis class for storing and accessing quadrature rules.
 /*!
 
   <b> Definition of a quadrature rule </b>
@@ -63,7 +63,7 @@ namespace LifeV
 
 For example, if we want to define a Simpson rule in 1D, we can write:
  \code
-  QuadRule simpson1D ("Simpson 1D",LINE,1,3,3,  // name,shape,dimension,exactness,number of points
+  QuadratureRule simpson1D ("Simpson 1D",LINE,1,3,3,  // name,shape,dimension,exactness,number of points
                       0.0, 1.0/6.0,             // first point: x=0 with weight 1/6
                       0.5, 2.0/3.0,             // second point: x=0.5, weight 2/3
                       1.0, 1.0/6.0);            // third point: x=1, weight 1/6
@@ -72,7 +72,7 @@ For example, if we want to define a Simpson rule in 1D, we can write:
 If we want to see this quadrature as a 1D quadrature in a 2D space, the code would have been:
 
 \code
-  QuadRule simpson2D ("Simpson 2D",LINE,2,3,3,  // name,shape,dimension,exactness,number of points
+  QuadratureRule simpson2D ("Simpson 2D",LINE,2,3,3,  // name,shape,dimension,exactness,number of points
                       0.0,0.0, 1.0/6.0,         // first point: (0,0) with weight 1/6
                       0.5,0.0, 2.0/3.0,         // second point: (0.5,0) weight 2/3
                       1.0,0.0, 1.0/6.0);        // third point: (1,0) weight 1/6
@@ -81,7 +81,7 @@ If we want to see this quadrature as a 1D quadrature in a 2D space, the code wou
 The following code would have produced the same quadrature:
 
 \code
-  QuadRule simpson2D (simpson1D,2);
+  QuadratureRule simpson2D (simpson1D,2);
   \endcode
 
   <b> Basic Use </b>
@@ -92,11 +92,11 @@ The following code would have produced the same quadrature:
 
   The quadrature rules store the degree of exactness that they are supposed to achieve. It can be specified when building the quadrature rule. No test is performed automatically to check the order and when the quadrature rule is modified (with the addPoint method for example), the order of exactness is kept unchanged.
 
-  However, the QuadRule class provides a test for the degree of exactness. When called, this test returns the degree of exactness that has been found by trying to perform several integrals, but it does not change the stored degree of exactness.
+  However, the QuadratureRule class provides a test for the degree of exactness. When called, this test returns the degree of exactness that has been found by trying to perform several integrals, but it does not change the stored degree of exactness.
 
   <b> Dimension and Shape </b>
 
-  For some problems, it makes sens to use quadrature rules outside their "original" space, e.g. one could need a quadrature rule for the triangles in a 3D space (when integrating on a surface). The QuadRule class provides the possibility of changing the dimension in which a quadrature rule in defined (i.e. how many coordinates are used for the coordinates of the quadrature points).
+  For some problems, it makes sens to use quadrature rules outside their "original" space, e.g. one could need a quadrature rule for the triangles in a 3D space (when integrating on a surface). The QuadratureRule class provides the possibility of changing the dimension in which a quadrature rule in defined (i.e. how many coordinates are used for the coordinates of the quadrature points).
 
   When using a quadrature rule in a space with higher dimension, 0 coordinates are added to fill the missing coordinates. The shape of the quadrature (i.e. the geometric shape where it is defined) remains the same.
 
@@ -108,7 +108,7 @@ The following code would have produced the same quadrature:
   @note The previous version was due to J.-F. Gerbeau (04/2002). Many ideas were taken from that version.
 
 */
-class QuadRule
+class QuadratureRule
 {
 public:
 
@@ -116,7 +116,7 @@ public:
     //@{
 
     //! Empty constructor
-    QuadRule();
+    QuadratureRule();
 
     //! Full constructor using pointers
     /*!
@@ -129,7 +129,7 @@ public:
       @param nbQuadPt The number of quadrature points defined
       @param degOfExact The degree of exactness of the quadrature rule
      */
-    QuadRule( const QuadPoint* pt, int id, std::string name, ReferenceShapes shape,
+    QuadratureRule( const QuadraturePoint* pt, int id, std::string name, ReferenceShapes shape,
               UInt nbQuadPt, UInt degOfExact );
 
     //! Full constructor
@@ -147,14 +147,14 @@ public:
       @param degreeOfExactness The degree of exactness of the quadrature
       @param nbQuadPt The number of quadrature points
      */
-    QuadRule(std::string name, ReferenceShapes shape, UInt dimension, UInt degreeOfExactness, UInt nbQuadPt, ... );
+    QuadratureRule(std::string name, ReferenceShapes shape, UInt dimension, UInt degreeOfExactness, UInt nbQuadPt, ... );
 
 
     //! Copy constructor
     /*!
       @param qr The quadrature rule that we want to copy.
      */
-    QuadRule( const QuadRule& qr);
+    QuadratureRule( const QuadratureRule& qr);
 
     //! Copy constructor using a different dimension
     /*!
@@ -164,11 +164,11 @@ public:
       @param qr The quadrature rule to export
       @param dim The new dimension to be used with the quadrature rule.
      */
-    QuadRule( const QuadRule& qr, const UInt dim);
+    QuadratureRule( const QuadratureRule& qr, const UInt dim);
 
 
     //! Destructor
-    virtual ~QuadRule();
+    virtual ~QuadratureRule();
 
     //@}
 
@@ -177,7 +177,7 @@ public:
     //@{
 
     //! Output operator
-    friend std::ostream& operator << ( std::ostream& c, const QuadRule& qr );
+    friend std::ostream& operator << ( std::ostream& c, const QuadratureRule& qr );
 
     //@}
 
@@ -195,9 +195,9 @@ public:
 
       @param qp The quadrature point to add.
      */
-    void addPoint(const QuadPoint& qp)
+    void addPoint(const QuadraturePoint& qp)
     {
-        M_pt.push_back(QuadPoint(qp,M_dimension));
+        M_pt.push_back(QuadraturePoint(qp,M_dimension));
         M_nbQuadPt+=1;
     };
 
@@ -235,9 +235,9 @@ public:
     //! Change the quadrature points for the ones given here.
     /*!
       Beware to have set the dimension (default: 0!) before calling
-      this method (use the QuadRule::setDimensionShape method for example).
+      this method (use the QuadratureRule::setDimensionShape method for example).
      */
-    void setPoints(const std::vector<QuadPoint> & pts);
+    void setPoints(const std::vector<QuadraturePoint> & pts);
 
     //! Change the quadrature points for the one given here
     /*!
@@ -246,7 +246,7 @@ public:
       points are then given by (coorindates[i],weights[i]).
 
       Beware to have set the dimension (default: 0!) before calling
-      this method (use the QuadRule::setDimensionShape method for example).
+      this method (use the QuadratureRule::setDimensionShape method for example).
 
      @param coordinates An array containing the coordinates of the points
      @param weights An array containing the weights of the points
@@ -270,7 +270,7 @@ public:
     //@{
 
     //! quadPoint(ig) is the ig-th quadrature point
-    const QuadPoint& quadPoint( const UInt& ig ) const
+    const QuadraturePoint& quadPoint( const UInt& ig ) const
     {
         ASSERT_BD( ig < M_nbQuadPt );
         return M_pt[ ig ];
@@ -338,7 +338,7 @@ private:
     static Real S_exactnessTol;
 
     // Storage for the quadrature nodes
-    std::vector<QuadPoint> M_pt;
+    std::vector<QuadraturePoint> M_pt;
 
     //! geometrical shape of the domain on which the quadrature rule can be used
     ReferenceShapes M_shape;
@@ -360,32 +360,32 @@ private:
 
 
 //======================================================================
-extern const QuadRule quadRuleDummy;
+extern const QuadratureRule quadRuleDummy;
 
-extern const QuadRule quadRuleNode1pt;
+extern const QuadratureRule quadRuleNode1pt;
 
-extern const QuadRule quadRuleSeg1pt;
-extern const QuadRule quadRuleSeg2pt;
-extern const QuadRule quadRuleSeg3pt;
+extern const QuadratureRule quadRuleSeg1pt;
+extern const QuadratureRule quadRuleSeg2pt;
+extern const QuadratureRule quadRuleSeg3pt;
 
-extern const QuadRule quadRuleTria1pt;
-extern const QuadRule quadRuleTria3pt;
-extern const QuadRule quadRuleTria4pt;
-extern const QuadRule quadRuleTria6pt;
-extern const QuadRule quadRuleTria7pt;
+extern const QuadratureRule quadRuleTria1pt;
+extern const QuadratureRule quadRuleTria3pt;
+extern const QuadratureRule quadRuleTria4pt;
+extern const QuadratureRule quadRuleTria6pt;
+extern const QuadratureRule quadRuleTria7pt;
 
-extern const QuadRule quadRuleQuad1pt;
-extern const QuadRule quadRuleQuad4pt;
-extern const QuadRule quadRuleQuad9pt;
+extern const QuadratureRule quadRuleQuad1pt;
+extern const QuadratureRule quadRuleQuad4pt;
+extern const QuadratureRule quadRuleQuad9pt;
 
-extern const QuadRule quadRuleTetra1pt;
-extern const QuadRule quadRuleTetra4pt;
-extern const QuadRule quadRuleTetra5pt;
-extern const QuadRule quadRuleTetra15pt;
-extern const QuadRule quadRuleTetra64pt;
+extern const QuadratureRule quadRuleTetra1pt;
+extern const QuadratureRule quadRuleTetra4pt;
+extern const QuadratureRule quadRuleTetra5pt;
+extern const QuadratureRule quadRuleTetra15pt;
+extern const QuadratureRule quadRuleTetra64pt;
 
-extern const QuadRule quadRuleHexa1pt;
-extern const QuadRule quadRuleHexa8pt;
+extern const QuadratureRule quadRuleHexa1pt;
+extern const QuadratureRule quadRuleHexa8pt;
 
 
 }

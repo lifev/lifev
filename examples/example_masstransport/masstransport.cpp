@@ -367,9 +367,9 @@ MassTransport::run()
 
     std::string adrOrder =  dataFile( "adr/space_discretization/order", "P1");
 
-    const RefFE*    refFE_adr(0);
-    const QuadRule* qR_adr(0);
-    const QuadRule* bdQr_adr(0);
+    const ReferenceFE*    refFE_adr(0);
+    const QuadratureRule* qR_adr(0);
+    const QuadratureRule* bdQr_adr(0);
 
     if ( adrOrder.compare("P1") == 0 )
     {

@@ -46,7 +46,7 @@ quadRuleTetra.plt ==> Show the Convergence Rate of all the quadrature rules on T
  */
 
 #include <life/lifecore/life.hpp>
-#include <life/lifefem/QuadRule.hpp>
+#include <life/lifefem/QuadratureRule.hpp>
 #include <string>
 #include <fstream>
 
@@ -62,12 +62,12 @@ quadRuleTetra.plt ==> Show the Convergence Rate of all the quadrature rules on T
 namespace LifeV
 {
 typedef boost::numeric::ublas::vector<Real> Vector;
-typedef std::vector<QuadRule const *> container_Type;
+typedef std::vector<QuadratureRule const *> container_Type;
 typedef container_Type::const_iterator constIterator_Type;
 
 // This function checks the DEGREE of Exactness (DoE) of the quadrature rules
 template<typename Mesh>
-bool quad_check_doe(const RefFE &refFE, const GeometricMap & geoMap, const container_Type &allQuad, std::string output_file)
+bool quad_check_doe(const ReferenceFE &refFE, const GeometricMap & geoMap, const container_Type &allQuad, std::string output_file)
 {
 
     Mesh aMesh;
@@ -131,7 +131,7 @@ bool quad_check_doe(const RefFE &refFE, const GeometricMap & geoMap, const conta
 
 // This function checks the convergence rate (CR) of the quadrature rules
 template<typename Mesh>
-bool quad_check_cr(	const RefFE &refFE, const GeometricMap & geoMap, const container_Type &allQuad, std::string output_name)
+bool quad_check_cr(	const ReferenceFE &refFE, const GeometricMap & geoMap, const container_Type &allQuad, std::string output_name)
 {
     SetofFun fct;
     int fun(fct.nfun());

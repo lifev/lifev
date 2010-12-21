@@ -53,7 +53,7 @@ namespace LifeV
 typedef boost::numeric::ublas::vector<Real> GeoVector;
 //@}
 
-//! QuadPoint - Simple container for a point of a quadrature rule.
+//! QuadraturePoint - Simple container for a point of a quadrature rule.
 /*!
     @author Samuel Quinodoz
     @date 05/2010
@@ -62,41 +62,41 @@ typedef boost::numeric::ublas::vector<Real> GeoVector;
 
     <b> Definition </b>
 
-    The QuadPoint class consists basically in a real number (the weight of the point) and a vector of real numbers (the coordinates of the point). To enable fast computations if needed, blas vectors (look in the file /lifearray/tab.hpp to know precisely the type) are used internally.
+    The QuadraturePoint class consists basically in a real number (the weight of the point) and a vector of real numbers (the coordinates of the point). To enable fast computations if needed, blas vectors (look in the file /lifearray/tab.hpp to know precisely the type) are used internally.
 
-    <b> Create a QuadPoint </b>
+    <b> Create a QuadraturePoint </b>
 
-    A QuadPoint can be defined using directly 1,2 or 3 coordinates and the weight.
-
-    \code
-    QuadPoint myPoint(1,0,1,0.5); // Point(1,0,1) with weight 0.5
-    \endcode
-
-    However, this use should be avoided if possible, because it assumes (for backward compatibility purpose) that the dimension of the QuadPoint is 3, even if only 1 or 2 coordinates are passed!
+    A QuadraturePoint can be defined using directly 1,2 or 3 coordinates and the weight.
 
     \code
-    QuadPoint myPoint(1,0.3); // Point(1,0,0) with weight 0.3
+    QuadraturePoint myPoint(1,0,1,0.5); // Point(1,0,1) with weight 0.5
     \endcode
 
-    To create properly a QuadPoint, one should use the native vector (GeoVector):
+    However, this use should be avoided if possible, because it assumes (for backward compatibility purpose) that the dimension of the QuadraturePoint is 3, even if only 1 or 2 coordinates are passed!
+
+    \code
+    QuadraturePoint myPoint(1,0.3); // Point(1,0,0) with weight 0.3
+    \endcode
+
+    To create properly a QuadraturePoint, one should use the native vector (GeoVector):
 
     \code
     GeoVector myCoordinates(1); // Create a vector with 1 component
     myCoordinates[0]=1;         // Put 1 in the first component
-    QuadPoint myPoint(myCoordinates,0.3);   // Point(1) with weight 0.3
+    QuadraturePoint myPoint(myCoordinates,0.3);   // Point(1) with weight 0.3
     \endcode
 
     This makes the code "surprise-free" and also easier to generalize to any dimension.
 
-    <b> Dimension of the QuadPoint </b>
+    <b> Dimension of the QuadraturePoint </b>
 
-    The QuadPoint has naturally a dimension, the number of coordinates of the point. To change the dimension of the QuadPoint, use the copy constructor where you can specify the new dimension.
+    The QuadraturePoint has naturally a dimension, the number of coordinates of the point. To change the dimension of the QuadraturePoint, use the copy constructor where you can specify the new dimension.
 
     If you intend to use your code for different dimensions, take care of the methods that you call: avoid using x(),y(),z() and replace them by the coor() method.
 
 
  */
-class QuadPoint
+class QuadraturePoint
 {
 public:
 
@@ -105,11 +105,11 @@ public:
 
     //! Empty constructor (all zero data).
     /*!
-      This constructor builds a QuadPoint with
+      This constructor builds a QuadraturePoint with
       3 components (for the location) and a weight
       that are all set to zero
      */
-    QuadPoint();
+    QuadraturePoint();
 
     //! Full constructor for 3D
     /*!
@@ -119,7 +119,7 @@ public:
       @param z Third coordinate of the point
       @param weight Weight of the point
      */
-    QuadPoint( Real x, Real y, Real z, Real weight );
+    QuadraturePoint( Real x, Real y, Real z, Real weight );
 
     //! Full constructor for 2D
     /*!
@@ -127,40 +127,40 @@ public:
       @param y Second coordinate of the point
       @param weight Weight of the point
      */
-    QuadPoint( Real x, Real y, Real weight );
+    QuadraturePoint( Real x, Real y, Real weight );
 
     //! Full constructor for 1D
     /*!
       @param x First coordinate of the point
       @param weight Weight of the point
      */
-    QuadPoint( Real x, Real weight );
+    QuadraturePoint( Real x, Real weight );
 
     //! Full multidimension constructor
     /*!
       @param coor Coordinates of the point
       @param weight Weight of the point
      */
-    QuadPoint(const GeoVector& coor, const Real& weight);
+    QuadraturePoint(const GeoVector& coor, const Real& weight);
 
     //! Multidimension constructor with specified dimension
     /*!
       With this constructor, one can specify the dimension
-      of the QuadPoint (that can therefore be different from
+      of the QuadraturePoint (that can therefore be different from
       coor.size()).
 
       @param coor Coordinates of the point
       @param weight Weight of the point
       @param spaceDim The new dimension of the point
      */
-    QuadPoint(const GeoVector& coor, const Real& weight, const UInt& spaceDim);
+    QuadraturePoint(const GeoVector& coor, const Real& weight, const UInt& spaceDim);
 
 
     //! Simple copy constructor
     /*!
       @param qp The quadrature point to copy
      */
-    QuadPoint(const QuadPoint& qp);
+    QuadraturePoint(const QuadraturePoint& qp);
 
     //! Import from another dimension
     /*!
@@ -170,10 +170,10 @@ public:
       @param qp The quadrature point to import
       @param spaceDim The dimension of the space where the quadrature point is defined
      */
-    QuadPoint(const QuadPoint& qp, const UInt spaceDim);
+    QuadraturePoint(const QuadraturePoint& qp, const UInt spaceDim);
 
     //! Destructor
-    virtual ~QuadPoint() {};
+    virtual ~QuadraturePoint() {};
 
     //@}
 
@@ -194,7 +194,7 @@ public:
     //@{
 
     //! Output operator
-    friend std::ostream & operator << ( std::ostream& out, const QuadPoint& qp )
+    friend std::ostream & operator << ( std::ostream& out, const QuadraturePoint& qp )
     {
         out << " Coordinates = ";
         for (UInt i(0); i<qp.M_coor.size(); ++i)

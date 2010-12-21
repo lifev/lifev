@@ -386,7 +386,7 @@ addIPStabilizationStencil(const matrix_ptrType& matrixGalerkin,
 
         M_IPQuad1CFE->update( M_fespace->mesh()->element(adjacentElement1),UPDATE_ONLY_CELL_NODES );
 
-        QuadRule faceQR1("custom quad 1",TETRA,3,0,0);
+        QuadratureRule faceQR1("custom quad 1",TETRA,3,0,0);
         for (UInt iQuad(0); iQuad< nbQuadPt; ++iQuad) // Here we do not use UInt because of KNM, but we should
         {
             Real x(0.0),y(0.0),z(0.0);
@@ -394,12 +394,12 @@ addIPStabilizationStencil(const matrix_ptrType& matrixGalerkin,
                                        M_IPFaceCFE->quadPt(iQuad,1),
                                        M_IPFaceCFE->quadPt(iQuad,2),
                                        x,y,z);
-            QuadPoint newPoint(x,y,z,M_fespace->bdQr().weight(iQuad));
+            QuadraturePoint newPoint(x,y,z,M_fespace->bdQr().weight(iQuad));
             faceQR1.addPoint(newPoint);
         }
 
         M_IPQuad2CFE->update( M_fespace->mesh()->element(adjacentElement2),UPDATE_ONLY_CELL_NODES );
-        QuadRule faceQR2("custom quad 2",TETRA,3,0,0);
+        QuadratureRule faceQR2("custom quad 2",TETRA,3,0,0);
         for (UInt iQuad(0); iQuad< nbQuadPt; ++iQuad) // Idem here
         {
             Real x(0.0),y(0.0),z(0.0);
@@ -407,7 +407,7 @@ addIPStabilizationStencil(const matrix_ptrType& matrixGalerkin,
                                        M_IPFaceCFE->quadPt(iQuad,1),
                                        M_IPFaceCFE->quadPt(iQuad,2),
                                        x,y,z);
-            QuadPoint newPoint(x,y,z,M_fespace->bdQr().weight(iQuad));
+            QuadraturePoint newPoint(x,y,z,M_fespace->bdQr().weight(iQuad));
             faceQR2.addPoint(newPoint);
         }
 
@@ -611,7 +611,7 @@ addIPStabilizationStencil(const matrix_ptrType& matrixGalerkin,
 
         M_IPQuad1CFE->update( M_fespace->mesh()->element(adjacentElement1),UPDATE_ONLY_CELL_NODES );
 
-        QuadRule faceQR1("custom quad 1",TETRA,3,0,0);
+        QuadratureRule faceQR1("custom quad 1",TETRA,3,0,0);
         for (int iQuad(0); iQuad< nbQuadPt; ++iQuad) // Here we do not use UInt because of KNM, but we should
         {
             Real x(0.0),y(0.0),z(0.0);
@@ -619,12 +619,12 @@ addIPStabilizationStencil(const matrix_ptrType& matrixGalerkin,
                                        M_IPFaceCFE->quadPt(iQuad,1),
                                        M_IPFaceCFE->quadPt(iQuad,2),
                                        x,y,z);
-            QuadPoint newPoint(x,y,z,M_fespace->bdQr().weight(iQuad));
+            QuadraturePoint newPoint(x,y,z,M_fespace->bdQr().weight(iQuad));
             faceQR1.addPoint(newPoint);
         }
 
         M_IPQuad2CFE->update( M_fespace->mesh()->element(adjacentElement2),UPDATE_ONLY_CELL_NODES );
-        QuadRule faceQR2("custom quad 2",TETRA,3,0,0);
+        QuadratureRule faceQR2("custom quad 2",TETRA,3,0,0);
         for (int iQuad(0); iQuad< nbQuadPt; ++iQuad) // Idem here
         {
             Real x(0.0),y(0.0),z(0.0);
@@ -632,7 +632,7 @@ addIPStabilizationStencil(const matrix_ptrType& matrixGalerkin,
                                        M_IPFaceCFE->quadPt(iQuad,1),
                                        M_IPFaceCFE->quadPt(iQuad,2),
                                        x,y,z);
-            QuadPoint newPoint(x,y,z,M_fespace->bdQr().weight(iQuad));
+            QuadraturePoint newPoint(x,y,z,M_fespace->bdQr().weight(iQuad));
             faceQR2.addPoint(newPoint);
         }
 

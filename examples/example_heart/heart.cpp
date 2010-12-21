@@ -112,13 +112,13 @@ Heart::run()
     bcH.addBC( "Epi",   	EPICARDIUM, 	Natural,   	Full,   uZero, 	1 );
     bcH.addBC( "Trunc",    	TRUNC_SEC,  	Natural, 	Full,   uZero, 	1 );
 
-    const RefFE*    refFE_w;
-    const QuadRule* qR_w;
-    const QuadRule* bdQr_w;
+    const ReferenceFE*    refFE_w;
+    const QuadratureRule* qR_w;
+    const QuadratureRule* bdQr_w;
 
-    const RefFE*    refFE_u;
-    const QuadRule* qR_u;
-    const QuadRule* bdQr_u;
+    const ReferenceFE*    refFE_u;
+    const QuadratureRule* qR_u;
+    const QuadratureRule* bdQr_u;
 
 
     //! Construction of the partitioned mesh

@@ -889,7 +889,7 @@ buildSystem ()
 
         /* Assemble the global hybrid matrix.
            M_primal_FESpace is used instead of M_hybrid_FESpace for currentLocalId,
-           because currentFE cannot store a RefFEHybrid. */
+           because currentFE cannot store a ReferenceFEHybrid. */
         assembleMatrix( *M_matrHybrid,
                         M_primal_FESpace.fe().currentLocalId(),
                         M_elmatHyb,
@@ -899,7 +899,7 @@ buildSystem ()
 
         /* Assemble the global hybrid right hand side.
            M_primal_FESpace is used instead of M_hybrid_FESpace for currentLocalId,
-           because currentFE cannot store a RefFEHybrid. */
+           because currentFE cannot store a ReferenceFEHybrid. */
         assembleVector( *M_rhs,
                         M_primal_FESpace.fe().currentLocalId(),
                         M_elvecHyb,
@@ -1094,14 +1094,14 @@ computeConstantMatrices ()
 
     /* Update the boundary matrix, it is independant of the current element
        thanks to the Piola transform.
-       Here we use the fact that a RefHybridFE "IS A" RefFE and the method refFE of
-       a FESpace object. In fact the method refFE return a const RefFE&, but the function
-       TP_VdotN_Hdiv takes two const RefHybridFE& so we must cast a const RefFE&
+       Here we use the fact that a RefHybridFE "IS A" ReferenceFE and the method refFE of
+       a FESpace object. In fact the method refFE return a const ReferenceFE&, but the function
+       TP_VdotN_Hdiv takes two const RefHybridFE& so we must cast a const ReferenceFE&
        to a const RefHybridFE&. The cast of type is static and uses pointers. */
     TP_VdotN_Hdiv( static_cast<Real>(1.),
                    M_elmatMix,
-                   *static_cast<const RefFEHybrid*>(&M_hybrid_FESpace.refFE()),
-                   *static_cast<const RefFEHybrid*>(&M_VdotN_FESpace.refFE()),
+                   *static_cast<const ReferenceFEHybrid*>(&M_hybrid_FESpace.refFE()),
+                   *static_cast<const ReferenceFEHybrid*>(&M_VdotN_FESpace.refFE()),
                    0, 2 );
 
 } // computeConstantMatrices

@@ -110,9 +110,9 @@ public:
     */
 
     FESpace(	MeshPartitioner<MeshType>&	mesh,
-             const RefFE&			refFE,
-             const QuadRule&			Qr,
-             const QuadRule&			bdQr,
+             const ReferenceFE&			refFE,
+             const QuadratureRule&			Qr,
+             const QuadratureRule&			bdQr,
              const Int				fDim,
              commPtr_Type&			commptr
            );
@@ -124,9 +124,9 @@ public:
            );
 
     FESpace(	meshPtr_Type			mesh,
-             const RefFE&			refFE,
-             const QuadRule&			Qr,
-             const QuadRule&			bdQr,
+             const ReferenceFE&			refFE,
+             const QuadratureRule&			Qr,
+             const QuadratureRule&			bdQr,
              const Int				fDim,
              commPtr_Type&			commptr
            );
@@ -355,7 +355,7 @@ public:
     /*!
       @param Qr The new quadrule to be used in the FESpace
      */
-    void setQuadRule(const QuadRule& Qr);
+    void setQuadRule(const QuadratureRule& Qr);
 
     //@}
 
@@ -388,13 +388,13 @@ public:
     CurrentBoundaryFE&		feBd()		  { return *M_feBd; }
 
     //! Returns the res FE
-    const RefFE&		refFE()	const { return *M_refFE; }
+    const ReferenceFE&		refFE()	const { return *M_refFE; }
 
     //! Returns the volumic quadratic rule
-    const QuadRule&		qr() 	const { return *M_Qr; }
+    const QuadratureRule&		qr() 	const { return *M_Qr; }
 
     //! Returns the surfasic quadratic rule
-    const QuadRule&		bdQr()	const { return *M_bdQr; }
+    const QuadratureRule&		bdQr()	const { return *M_bdQr; }
 
     //! Returns FE space dimension
     const UInt&         dim()      const { return M_dim; }
@@ -504,13 +504,13 @@ private:
     meshPtr_Type						M_mesh;
 
     //! Reference FE for the velocity
-    const RefFE*    					M_refFE;
+    const ReferenceFE*    					M_refFE;
 
     //! Quadrature rule for volumic elementary computations
-    const QuadRule* 					M_Qr;
+    const QuadratureRule* 					M_Qr;
 
     //! Quadrature rule for surface elementary computations
-    const QuadRule* 					M_bdQr;
+    const QuadratureRule* 					M_bdQr;
 
     //! dimension of the field variable ( scalar/vector field)
     UInt								M_fieldDim;
@@ -537,9 +537,9 @@ private:
 template <typename MeshType, typename MapType>
 FESpace<MeshType, MapType>::
 FESpace(	MeshPartitioner<MeshType>& 	mesh,
-         const RefFE&         	refFE,
-         const QuadRule&      	Qr,
-         const QuadRule&      	bdQr,
+         const ReferenceFE&         	refFE,
+         const QuadratureRule&      	Qr,
+         const QuadratureRule&      	bdQr,
          const Int            	fDim,
          commPtr_Type&         	commptr
        ) :
@@ -606,9 +606,9 @@ FESpace(	MeshPartitioner<MeshType>&	mesh,
 template <typename MeshType, typename MapType>
 FESpace<MeshType, MapType>::
 FESpace(	meshPtr_Type			mesh,
-         const RefFE&			refFE,
-         const QuadRule&			Qr,
-         const QuadRule&			bdQr,
+         const ReferenceFE&			refFE,
+         const QuadratureRule&			Qr,
+         const QuadratureRule&			bdQr,
          const Int				fDim,
          commPtr_Type&			commptr
        ) :
@@ -686,7 +686,7 @@ FESpace<MeshType, MapType>::interpolate( const function_Type& fct,
                                  const Real      time)
 {
     // First, we build a "quadrature" that consists in the nodes (0 weight)
-    QuadRule interpQuad;
+    QuadratureRule interpQuad;
     interpQuad.setDimensionShape(3,M_refFE->shape());
     interpQuad.setPoints(M_refFE->refCoor(),std::vector<Real>(M_refFE->nbDof(),0));
 
@@ -1449,13 +1449,13 @@ gradientRecovery(const vector_type& solution, const UInt& dxi)
     };
 
     // Define a special quadrature rule for the interpolation
-    QuadRule interpQuad;
+    QuadratureRule interpQuad;
     interpQuad.setDimensionShape(3,M_refFE->shape());
     Real wQuad(1.0/(M_refFE->nbDof() * 6.0));       //Here use area=1/6 ==> only for tetra
 
     for (UInt i(0); i<M_refFE->nbDof(); ++i) //nbRefCoor
     {
-        interpQuad.addPoint(QuadPoint(M_refFE->xi(i),M_refFE->eta(i),M_refFE->zeta(i),wQuad));
+        interpQuad.addPoint(QuadraturePoint(M_refFE->xi(i),M_refFE->eta(i),M_refFE->zeta(i),wQuad));
     };
 
     // Initialization of the vectors
@@ -1607,7 +1607,7 @@ FESpace<MeshType, MapType>::setSpace( const std::string& space )
 template<typename MeshType, typename MapType>
 void
 FESpace<MeshType,MapType>::
-setQuadRule(const QuadRule& Qr)
+setQuadRule(const QuadratureRule& Qr)
 {
     M_Qr = &Qr;
     M_fe.reset( new CurrentFE( *M_refFE, getGeometricMap( *M_mesh ), *M_Qr ) );

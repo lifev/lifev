@@ -195,18 +195,18 @@ problem::run()
 
     if (verbose) std::cout << "The Problem Solver" << std::flush;
 
-    const RefFE*    refFE_beta  (0);
-    const QuadRule* qR_beta     (0);
-    const QuadRule* bdQr_beta   (0);
+    const ReferenceFE*    refFE_beta  (0);
+    const QuadratureRule* qR_beta     (0);
+    const QuadratureRule* bdQr_beta   (0);
 
     refFE_beta = &feTetraP1;
 
     // Scalar Solution Space:
 
     std::string Order =  dataFile( "problem/space_discretization/order", "P1");
-    const RefFE*    refFE(0);
-    const QuadRule* qR(0);
-    const QuadRule* bdQr(0);
+    const ReferenceFE*    refFE(0);
+    const QuadratureRule* qR(0);
+    const QuadratureRule* bdQr(0);
 
     if ( Order.compare("P1") == 0 )
     {

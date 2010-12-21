@@ -51,7 +51,7 @@
 #include <life/lifefilters/ExporterHDF5.hpp>
 #include <life/lifesolver/OseenSolver.hpp>
 #include <life/lifefem/ReferenceFE.hpp>
-#include <life/lifefem/QuadRule.hpp>
+#include <life/lifefem/QuadratureRule.hpp>
 
 #include <iostream>
 

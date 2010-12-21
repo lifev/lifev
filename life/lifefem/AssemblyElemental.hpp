@@ -708,8 +708,8 @@ REFERENCE HEXA  -> 6 REFERENCE QUAD.
 TP_TP_Hdiv(coef, elmat, hybridFE, iblock, jblock);
 \endcode
 */
-void TP_VdotN_Hdiv( Real coef, ElemMat& elmat, const RefFEHybrid& hybridFE,
-                    const RefFEHybrid& dualDotNFE, int iblock = 0, int jblock = 0 );
+void TP_VdotN_Hdiv( Real coef, ElemMat& elmat, const ReferenceFEHybrid& hybridFE,
+                    const ReferenceFEHybrid& dualDotNFE, int iblock = 0, int jblock = 0 );
 
 // Mass matrix for the hybrid variable.
 /*!
@@ -740,7 +740,7 @@ REFERENCE HEXA  -> 6 REFERENCE QUAD.
 @param jblock Subarray index where to store the integral just computed.
 @note This is an obsolete function, call TP_VdotN_Hdiv instead.
 */
-void TP_TP_Hdiv( Real coef, ElemMat& elmat, const RefFEHybrid& hybridFE, int iblock = 0, int jblock = 0);
+void TP_TP_Hdiv( Real coef, ElemMat& elmat, const ReferenceFEHybrid& hybridFE, int iblock = 0, int jblock = 0);
 
 // Mass matrix for dual variable with constant real permeability.
 /*!

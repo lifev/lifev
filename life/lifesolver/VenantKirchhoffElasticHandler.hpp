@@ -85,9 +85,9 @@ public:
     \param BCh boundary conditions for the displacement
   */
   setUp( const VenantKirchhoffElasticData<Mesh>& data,
-	 const RefFE&                      refFE,
-	 const QuadRule&                   Qr,
-	 const QuadRule&                   bdQr,
+	 const RefernceFE&                      refFE,
+	 const QuadratureRule&                   Qr,
+	 const QuadratureRule&                   bdQr,
 	 BCHandler&                        BCh );
 
   /*!
@@ -97,10 +97,9 @@ public:
     \param bdQr surface quadrature
   */
   setUp( const VenantKirchhoffElasticData<Mesh>& data,
-	 const RefFE&                      refFE,
-	 const QuadRule&                   Qr,
-	 const QuadRule&                   bdQr);
-
+	 const ReferenceFE&                      refFE,
+	 const QuadratureRule&                   Qr,
+	 const QuadratureRule&                   bdQr);
 
   //! Destructor
   virtual ~VenantKirchhoffElasticHandler()
@@ -171,7 +170,7 @@ public:
   const UInt getDimension() const {return M_dim;}
 
   //! Returns the reference FE object
-  const RefFE&          getRefFE() const {return M_refFE;}
+  const ReferenceFE&          getRefFE() const {return M_refFE;}
 
   //! Returns the current FE object
   CurrentFE&            getFe() {return M_fe;}
@@ -206,7 +205,7 @@ private:
 		    PhysVectUnknown<Vector> &unknown);
 
   //! Reference FE
-  const RefFE&                           M_refFE;
+  const ReferenceFE&                           M_refFE;
 
   //! The DOF object
   DOF                                    M_dof;
@@ -215,10 +214,10 @@ private:
   UInt                                   M_dim;
 
   //! Quadrature rule for volumic elementary computations
-  const QuadRule&                        M_Qr;
+  const QuadratureRule&                        M_Qr;
 
   //! Quadrature rule for elementary computations
-  const QuadRule&                        M_bdQr;
+  const QuadratureRule&                        M_bdQr;
 
   //! Current FE
   CurrentFE                              M_fe;
@@ -273,9 +272,9 @@ VenantKirchhoffElasticHandler( ):
 template <typename Mesh>
 VenantKirchhoffElasticHandler<Mesh>::
 setUp( VenantKirchhoffElasticData<Mesh>& data,
-       const RefFE&                      refFE,
-       const QuadRule&                   Qr,
-       const QuadRule&                   bdQr,
+       const ReferenceFE&                      refFE,
+       const QuadratureRule&                   Qr,
+       const QuadratureRule&                   bdQr,
        BCHandler&                        BCh )
 {
   VenantKirchhoffElasticData<Mesh> = data;
@@ -297,9 +296,9 @@ setUp( VenantKirchhoffElasticData<Mesh>& data,
 template <typename Mesh>
 VenantKirchhoffElasticHandler<Mesh>::
 setUp( const VenantKirchhoffElasticData<Mesh>& data,
-       const RefFE&                      refFE,
-       const QuadRule&                   Qr,
-       const QuadRule&                   bdQr)
+       const ReferenceFE&                      refFE,
+       const QuadratureRule&                   Qr,
+       const QuadratureRule&                   bdQr)
 {
   VenantKirchhoffElasticData<Mesh> = data;
   M_refFE                    = refFE;

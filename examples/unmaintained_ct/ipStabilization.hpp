@@ -56,9 +56,9 @@ public:
     //! Constructor
     StabilizationIP( const mesh_type     mesh,
                      const DOF&      dof,
-                     const RefFE&    refFE,
+                     const ReferenceFE&    refFE,
                      CurrentBdFE&    feBd,
-                     const QuadRule& quadRule,
+                     const QuadratureRule& quadRule,
                      Real            gammaBeta = 0,
                      Real            gammaDiv = 0,
                      Real            gammaPress = 0,
@@ -108,9 +108,9 @@ private:
 template<typename MESH, typename DOF>
 StabilizationIP<MESH, DOF>::StabilizationIP( const mesh_type mesh,
                                              const DOF&      dof,
-                                             const RefFE&    refFE,
+                                             const ReferenceFE&    refFE,
                                              CurrentBdFE&    feBd,
-                                             const QuadRule& quadRule,
+                                             const QuadratureRule& quadRule,
                                              Real            gammaBeta,
                                              Real            gammaDiv,
                                              Real            gammaPress,

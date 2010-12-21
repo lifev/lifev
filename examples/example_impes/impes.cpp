@@ -400,27 +400,27 @@ impes::run()
     // We impose directly the compatibily condition on the FE spaces.
 
     // Parameters for the pressure equation.
-    const RefFE*    pressure_refFE_primal ( static_cast<RefFE*>(NULL) );
-    const QuadRule* pressure_qR_primal    ( static_cast<QuadRule*>(NULL) );
-    const QuadRule* pressure_bdQr_primal  ( static_cast<QuadRule*>(NULL) );
+    const ReferenceFE*    pressure_refFE_primal ( static_cast<ReferenceFE*>(NULL) );
+    const QuadratureRule* pressure_qR_primal    ( static_cast<QuadratureRule*>(NULL) );
+    const QuadratureRule* pressure_bdQr_primal  ( static_cast<QuadratureRule*>(NULL) );
 
     pressure_refFE_primal = &feTetraP0;
     pressure_qR_primal    = &quadRuleTetra15pt;
     pressure_bdQr_primal  = &quadRuleTria4pt;
 
     // Dual solution parameters.
-    const RefFE*    pressure_refFE_dual ( static_cast<RefFE*>(NULL) );
-    const QuadRule* pressure_qR_dual    ( static_cast<QuadRule*>(NULL) );
-    const QuadRule* pressure_bdQr_dual  ( static_cast<QuadRule*>(NULL) );
+    const ReferenceFE*    pressure_refFE_dual ( static_cast<ReferenceFE*>(NULL) );
+    const QuadratureRule* pressure_qR_dual    ( static_cast<QuadratureRule*>(NULL) );
+    const QuadratureRule* pressure_bdQr_dual  ( static_cast<QuadratureRule*>(NULL) );
 
     pressure_refFE_dual = &feTetraRT0;
     pressure_qR_dual    = &quadRuleTetra15pt;
     pressure_bdQr_dual  = &quadRuleTria4pt;
 
     // Interpolate of dual solution parameters.
-    const RefFE*    pressure_refFE_dualInterpolate ( static_cast<RefFE*>(NULL) );
-    const QuadRule* pressure_qR_dualInterpolate    ( static_cast<QuadRule*>(NULL) );
-    const QuadRule* pressure_bdQr_dualInterpolate  ( static_cast<QuadRule*>(NULL) );
+    const ReferenceFE*    pressure_refFE_dualInterpolate ( static_cast<ReferenceFE*>(NULL) );
+    const QuadratureRule* pressure_qR_dualInterpolate    ( static_cast<QuadratureRule*>(NULL) );
+    const QuadratureRule* pressure_bdQr_dualInterpolate  ( static_cast<QuadratureRule*>(NULL) );
 
     pressure_refFE_dualInterpolate = &feTetraP0;
     pressure_qR_dualInterpolate    = &quadRuleTetra15pt;
@@ -428,18 +428,18 @@ impes::run()
 
     // Hybrid solution parameters.
     // hybrid.
-    const RefFE*    pressure_refFE_hybrid ( static_cast<RefFE*>(NULL) );
-    const QuadRule* pressure_qR_hybrid    ( static_cast<QuadRule*>(NULL) );
-    const QuadRule* pressure_bdQr_hybrid  ( static_cast<QuadRule*>(NULL) );
+    const ReferenceFE*    pressure_refFE_hybrid ( static_cast<ReferenceFE*>(NULL) );
+    const QuadratureRule* pressure_qR_hybrid    ( static_cast<QuadratureRule*>(NULL) );
+    const QuadratureRule* pressure_bdQr_hybrid  ( static_cast<QuadratureRule*>(NULL) );
 
     pressure_refFE_hybrid = &feTetraRT0Hyb;
     pressure_qR_hybrid    = &quadRuleTetra15pt;
     pressure_bdQr_hybrid  = &quadRuleTria4pt;
 
     // dual dot outward unit normal.
-    const RefFE*    pressure_refFE_VdotN ( static_cast<RefFE*>(NULL) );
-    const QuadRule* pressure_qR_VdotN    ( static_cast<QuadRule*>(NULL) );
-    const QuadRule* pressure_bdQr_VdotN  ( static_cast<QuadRule*>(NULL) );
+    const ReferenceFE*    pressure_refFE_VdotN ( static_cast<ReferenceFE*>(NULL) );
+    const QuadratureRule* pressure_qR_VdotN    ( static_cast<QuadratureRule*>(NULL) );
+    const QuadratureRule* pressure_bdQr_VdotN  ( static_cast<QuadratureRule*>(NULL) );
 
     pressure_refFE_VdotN = &feTetraRT0VdotNHyb;
     pressure_qR_VdotN    = &quadRuleTetra15pt;
@@ -473,9 +473,9 @@ impes::run()
     // Parameters for the saturation equation.
 
     // Hyperbolic parameters.
-    const RefFE*    saturation_hyperbolic_refFE ( static_cast<RefFE*>(NULL) );
-    const QuadRule* saturation_hyperbolic_qR    ( static_cast<QuadRule*>(NULL) );
-    const QuadRule* saturation_hyperbolic_bdQr  ( static_cast<QuadRule*>(NULL) );
+    const ReferenceFE*    saturation_hyperbolic_refFE ( static_cast<ReferenceFE*>(NULL) );
+    const QuadratureRule* saturation_hyperbolic_qR    ( static_cast<QuadratureRule*>(NULL) );
+    const QuadratureRule* saturation_hyperbolic_bdQr  ( static_cast<QuadratureRule*>(NULL) );
 
     saturation_hyperbolic_refFE = pressure_refFE_primal;
     saturation_hyperbolic_qR    = pressure_qR_primal;
@@ -489,18 +489,18 @@ impes::run()
     // Non-linear and transient Darcy parameters.
 
     // Primal solution parameters.
-    const RefFE*    saturation_darcy_refFE_primal ( static_cast<RefFE*>(NULL) );
-    const QuadRule* saturation_darcy_qR_primal    ( static_cast<QuadRule*>(NULL) );
-    const QuadRule* saturation_darcy_bdQr_primal  ( static_cast<QuadRule*>(NULL) );
+    const ReferenceFE*    saturation_darcy_refFE_primal ( static_cast<ReferenceFE*>(NULL) );
+    const QuadratureRule* saturation_darcy_qR_primal    ( static_cast<QuadratureRule*>(NULL) );
+    const QuadratureRule* saturation_darcy_bdQr_primal  ( static_cast<QuadratureRule*>(NULL) );
 
     saturation_darcy_refFE_primal = pressure_refFE_primal;
     saturation_darcy_qR_primal    = pressure_qR_primal;
     saturation_darcy_bdQr_primal  = pressure_bdQr_dual;
 
     // Dual solution parameters.
-    const RefFE*    saturation_darcy_refFE_dual ( static_cast<RefFE*>(NULL) );
-    const QuadRule* saturation_darcy_qR_dual    ( static_cast<QuadRule*>(NULL) );
-    const QuadRule* saturation_darcy_bdQr_dual  ( static_cast<QuadRule*>(NULL) );
+    const ReferenceFE*    saturation_darcy_refFE_dual ( static_cast<ReferenceFE*>(NULL) );
+    const QuadratureRule* saturation_darcy_qR_dual    ( static_cast<QuadratureRule*>(NULL) );
+    const QuadratureRule* saturation_darcy_bdQr_dual  ( static_cast<QuadratureRule*>(NULL) );
 
     saturation_darcy_refFE_dual = pressure_refFE_dual;
     saturation_darcy_qR_dual    = pressure_qR_dual;
@@ -508,18 +508,18 @@ impes::run()
 
     // Hybrid solution parameters.
     // hybrid.
-    const RefFE*    saturation_darcy_refFE_hybrid ( static_cast<RefFE*>(NULL) );
-    const QuadRule* saturation_darcy_qR_hybrid    ( static_cast<QuadRule*>(NULL) );
-    const QuadRule* saturation_darcy_bdQr_hybrid  ( static_cast<QuadRule*>(NULL) );
+    const ReferenceFE*    saturation_darcy_refFE_hybrid ( static_cast<ReferenceFE*>(NULL) );
+    const QuadratureRule* saturation_darcy_qR_hybrid    ( static_cast<QuadratureRule*>(NULL) );
+    const QuadratureRule* saturation_darcy_bdQr_hybrid  ( static_cast<QuadratureRule*>(NULL) );
 
     saturation_darcy_refFE_hybrid = pressure_refFE_hybrid;
     saturation_darcy_qR_hybrid    = pressure_qR_hybrid;
     saturation_darcy_bdQr_hybrid  = pressure_bdQr_hybrid;
 
     // dual dot outward unit normal.
-    const RefFE*    saturation_darcy_refFE_VdotN ( static_cast<RefFE*>(NULL) );
-    const QuadRule* saturation_darcy_qR_VdotN    ( static_cast<QuadRule*>(NULL) );
-    const QuadRule* saturation_darcy_bdQr_VdotN  ( static_cast<QuadRule*>(NULL) );
+    const ReferenceFE*    saturation_darcy_refFE_VdotN ( static_cast<ReferenceFE*>(NULL) );
+    const QuadratureRule* saturation_darcy_qR_VdotN    ( static_cast<QuadratureRule*>(NULL) );
+    const QuadratureRule* saturation_darcy_bdQr_VdotN  ( static_cast<QuadratureRule*>(NULL) );
 
     saturation_darcy_refFE_VdotN = pressure_refFE_VdotN;
     saturation_darcy_qR_VdotN    = pressure_qR_VdotN;

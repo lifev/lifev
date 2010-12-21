@@ -50,7 +50,7 @@ namespace LifeV
   @author V. Martin
   @date 08/2002
 
-  This is an enrichment of RefFE in order to implement mixed hybrid finite elements,
+  This is an enrichment of ReferenceFE in order to implement mixed hybrid finite elements,
   which are based on a (RT0 - Q0) like discretization of \f$ H(div, \Omega) - L^2(\Omega) \f$.
 
   This class contains a list of boundary elements; thanks to the Piola transform, the computations
@@ -83,17 +83,17 @@ FE_PIPO = a_new_number
 extern const RefHybridFE fePipo;
   \endcode
 
-  @li In defQuadRuleFE.cc: you define a list of StaticBdFE with a command like:
+  @li In defQuadRuleFE.cc: you define a list of CurrentBoundaryFEBase with a command like:
   \code
   #define NB_BDFE_PIPO
-static const StaticBdFE BdFE_PIPO_1( feTriaP0, geoLinearTria, quadRuleTria4pt, refcoor_PIPO_1, 0 );
+static const CurrentBoundaryFEBase BdFE_PIPO_1( feTriaP0, geoLinearTria, quadRuleTria4pt, refcoor_PIPO_1, 0 );
 ...
   \endcode
 
-  @li In defQuadRuleFE.cc: you define a static array containing all the StaticBdFE
+  @li In defQuadRuleFE.cc: you define a static array containing all the CurrentBoundaryFEBase
   with a command like
   \code
-static const StaticBdFE HybPIPOList[ NB_BDFE_PIPO ] =
+static const CurrentBoundaryFEBase HybPIPOList[ NB_BDFE_PIPO ] =
 {
      BdFE_PIPO_1, BdFE_PIPO_2,
      ...
@@ -102,17 +102,17 @@ static const StaticBdFE HybPIPOList[ NB_BDFE_PIPO ] =
 
   @li In defQuadRuleFE.cc: you define your new element with a command like:
   \code
-const RefFEHybrid feTriaPipo("Pipo elements on a tetrahedron", FE_PIPO, TETRA,
+const ReferenceFEHybrid feTriaPipo("Pipo elements on a tetrahedron", FE_PIPO, TETRA,
 							 0, 0, 1, 0, 4, 3, NB_BDFE_PIPO, HybPIPOList, refcoor_PIPO, STANDARD_PATTERN );
   \endcode
-  See documentation of RefFEHybrid::RefFEHybrid(...) for a precise description of all arguments.
+  See documentation of ReferenceFEHybrid::ReferenceFEHybrid(...) for a precise description of all arguments.
 */
-class RefFEHybrid:
-        public RefFE
+class ReferenceFEHybrid:
+        public ReferenceFE
 {
 public:
 
-    typedef RefFE::function_Type function_Type;
+    typedef ReferenceFE::function_Type function_Type;
 
     //! @name Constructor & Destructor
     //@{
@@ -137,7 +137,7 @@ public:
       like P1isoP2 (to define a new pattern, add a new #define in refFE.h and
       code it in refFE.cc following the example of P1ISOP2_TRIA_PATTERN)
     */
-    RefFEHybrid( std::string        name,
+    ReferenceFEHybrid( std::string        name,
                  FE_TYPE            type,
                  ReferenceShapes    shape,
                  UInt               nbDofPerVertex,
@@ -147,12 +147,12 @@ public:
                  UInt               nbDof,
                  UInt               nbCoor,
                  const UInt&        numberBoundaryFE,
-                 const StaticBdFE*  boundaryFEList,
+                 const CurrentBoundaryFEBase*  boundaryFEList,
                  const Real*        refCoor,
                  DofPatternType     patternType = STANDARD_PATTERN );
 
     //! Destructor.
-    ~RefFEHybrid();
+    ~ReferenceFEHybrid();
 
     //@}
 
@@ -160,8 +160,8 @@ public:
     //! @name Operators
     //@{
 
-    //! Extracting a StaticBdFE from the faces list.
-    const StaticBdFE& operator[] ( const ID& i ) const
+    //! Extracting a CurrentBoundaryFEBase from the faces list.
+    const CurrentBoundaryFEBase& operator[] ( const ID& i ) const
     {
         ASSERT_BD( i < static_cast<ID>( M_numberBoundaryFE ) );
         return M_boundaryFEList[ i ];
@@ -185,10 +185,10 @@ public:
 private:
 
     //! No empty constructor.
-    RefFEHybrid();
+    ReferenceFEHybrid();
 
     //! No copy constructor.
-    RefFEHybrid( const RefFEHybrid& );
+    ReferenceFEHybrid( const ReferenceFEHybrid& );
 
     //! Number of boundary elements to be stored.
     const UInt M_numberBoundaryFE;
@@ -196,8 +196,8 @@ private:
     /*! List holding the stored boundary elements that live on the boundary faces (3D),
         or edges (2D), of the RefHybridFE element. The boundary elements of a reference
         element are not in general reference elements themselves, that is why
-        we use here the StaticBdFE rather that RefFE. */
-    const StaticBdFE* M_boundaryFEList;
+        we use here the CurrentBoundaryFEBase rather that ReferenceFE. */
+    const CurrentBoundaryFEBase* M_boundaryFEList;
 };
 
 
@@ -205,11 +205,11 @@ private:
 //======================================================================
 //     DECLARATION OF FINITE ELEMENTS (defined in defQuadRule.cc)
 
-extern const RefFEHybrid feHexaRT0Hyb;
-extern const RefFEHybrid feHexaRT0VdotNHyb;
+extern const ReferenceFEHybrid feHexaRT0Hyb;
+extern const ReferenceFEHybrid feHexaRT0VdotNHyb;
 
-extern const RefFEHybrid feTetraRT0Hyb;
-extern const RefFEHybrid feTetraRT0VdotNHyb;
+extern const ReferenceFEHybrid feTetraRT0Hyb;
+extern const ReferenceFEHybrid feTetraRT0VdotNHyb;
 
 //======================================================================
 //

@@ -49,15 +49,15 @@ namespace LifeV
 /*!
 
  */
-class RefFEScalar
-        : public RefFE
+class ReferenceFEScalar
+        : public ReferenceFE
 {
 public:
 
     //! @name Public Types
     //@{
 
-    typedef RefFE::function_Type function_Type;
+    typedef ReferenceFE::function_Type function_Type;
     typedef std::vector<Real> (*ValuesToValuesFunction_Type) (const std::vector<Real>&);
 
     //@}
@@ -94,7 +94,7 @@ public:
       code it in refFE.cc following the example of P1ISOP2_TRIA_PATTERN)
       @param bdRefFE  a pointer on the associated reference finite element on the boundary
     */
-    RefFEScalar( std::string          name,
+    ReferenceFEScalar( std::string          name,
                  FE_TYPE              type,
                  ReferenceShapes      shape,
                  Int                  nbDofPerVertex,
@@ -108,10 +108,10 @@ public:
                  const function_Type*           d2Phi,
                  const Real*          refCoor,
                  DofPatternType       patternType,
-                 const RefFE*         bdRefFE,
+                 const ReferenceFE*         bdRefFE,
                  const ValuesToValuesFunction_Type nodalToFE);
 
-    ~RefFEScalar(){};
+    ~ReferenceFEScalar(){};
 
     //@}
 
@@ -135,25 +135,25 @@ private:
 
 //--------------------------------------------------
 
-extern const RefFEScalar feSegP1;
-extern const RefFEScalar feSegP2;
+extern const ReferenceFEScalar feSegP1;
+extern const ReferenceFEScalar feSegP2;
 
-extern const RefFEScalar feTriaP0;
-extern const RefFEScalar feTriaP1;
-extern const RefFEScalar feTriaP2;
+extern const ReferenceFEScalar feTriaP0;
+extern const ReferenceFEScalar feTriaP1;
+extern const ReferenceFEScalar feTriaP2;
 
-extern const RefFEScalar feQuadQ0;
-extern const RefFEScalar feQuadQ1;
-extern const RefFEScalar feQuadQ2;
+extern const ReferenceFEScalar feQuadQ0;
+extern const ReferenceFEScalar feQuadQ1;
+extern const ReferenceFEScalar feQuadQ2;
 
-extern const RefFEScalar feTetraP0;
-extern const RefFEScalar feTetraP1;
-extern const RefFEScalar feTetraP1bubble;
-extern const RefFEScalar feTetraP2;
-extern const RefFEScalar feTetraP2tilde;
+extern const ReferenceFEScalar feTetraP0;
+extern const ReferenceFEScalar feTetraP1;
+extern const ReferenceFEScalar feTetraP1bubble;
+extern const ReferenceFEScalar feTetraP2;
+extern const ReferenceFEScalar feTetraP2tilde;
 
-extern const RefFEScalar feHexaQ0;
-extern const RefFEScalar feHexaQ1;
+extern const ReferenceFEScalar feHexaQ0;
+extern const ReferenceFEScalar feHexaQ1;
 
 } // Namespace LifeV
 

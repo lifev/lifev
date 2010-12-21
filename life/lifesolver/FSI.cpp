@@ -176,23 +176,23 @@ void
 FSI::setupFEspace()
 {
     Displayer disp(M_epetraComm);
-    disp.leaderPrint("FSI-  Setting RefFE and QuadRule ...           ");
+    disp.leaderPrint("FSI-  Setting ReferenceFE and QuadratureRule ...           ");
 
     std::string uOrder = M_data->dataFluid()->uOrder();
     std::string pOrder = M_data->dataFluid()->pOrder();
     std::string dOrder = M_data->dataSolid()->getOrder();
 
-    const RefFE*    refFE_vel(0);
-    const QuadRule* qR_vel(0);
-    const QuadRule* bdQr_vel(0);
+    const ReferenceFE*    refFE_vel(0);
+    const QuadratureRule* qR_vel(0);
+    const QuadratureRule* bdQr_vel(0);
 
-    const RefFE*    refFE_press(0);
-    const QuadRule* qR_press(0);
-    const QuadRule* bdQr_press(0);
+    const ReferenceFE*    refFE_press(0);
+    const QuadratureRule* qR_press(0);
+    const QuadratureRule* bdQr_press(0);
 
-    const RefFE*    refFE_struct(0);
-    const QuadRule* qR_struct(0);
-    const QuadRule* bdQr_struct(0);
+    const ReferenceFE*    refFE_struct(0);
+    const QuadratureRule* qR_struct(0);
+    const QuadratureRule* bdQr_struct(0);
 
     if ( uOrder.compare("P2") == 0 )
     {
@@ -1288,7 +1288,7 @@ void FSI::setRobinOuterWall(function_Type const& dload, function_Type const& E)
 
 void
 FSI::variablesInit( const std::string& /*dOrder*/ )
-//FSI::variablesInit(const RefFE* refFE_struct,const LifeV::QuadRule*  bdQr_struct, const LifeV::QuadRule* qR_struct)
+//FSI::variablesInit(const ReferenceFE* refFE_struct,const LifeV::QuadratureRule*  bdQr_struct, const LifeV::QuadratureRule* qR_struct)
 {
     M_lambdaFluid.reset        ( new vector_Type(*M_fluidInterfaceMap, Unique) );
     M_lambda.reset             ( new vector_Type(*M_solidInterfaceMap, Unique) );

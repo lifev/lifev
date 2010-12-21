@@ -143,7 +143,7 @@ public:
       @param commPtr Pointer to the communicator
      */
     template<typename Mesh>
-    EpetraMap( const RefFE&               refFE,
+    EpetraMap( const ReferenceFE&         refFE,
                const MeshPartitioner<Mesh>& meshPart,
                const comm_ptrtype&        commPtr );
 
@@ -155,7 +155,7 @@ public:
       @param commPtr Pointer to the communicator
     */
     template<typename Mesh>
-    EpetraMap( const RefFE&         refFE,
+    EpetraMap( const ReferenceFE&         refFE,
                const Mesh&          mesh,
                const comm_ptrtype&  commPtr );
 
@@ -359,7 +359,7 @@ private:
       @param repeatedFaceVector Vector containing the face ids
       @param repeatedVolumeVector Vector containing the volume ids
      */
-    void setUp( const RefFE&        refFE,
+    void setUp( const ReferenceFE&        refFE,
                 const comm_ptrtype& commPtr,
                 std::vector<Int>& repeatedNodeVector,
                 std::vector<Int>& repeatedEdgeVector,
@@ -382,7 +382,7 @@ private:
 // ===================================================
 template<typename Mesh>
 EpetraMap::
-EpetraMap( const RefFE&               refFE,
+EpetraMap( const ReferenceFE&               refFE,
            const MeshPartitioner<Mesh>& meshPart,
            const comm_ptrtype&        commPtr ):
         M_repeatedEpetraMap(),
@@ -406,7 +406,7 @@ EpetraMap( const RefFE&               refFE,
 
 template<typename Mesh>
 EpetraMap::
-EpetraMap( const RefFE&        refFE,
+EpetraMap( const ReferenceFE&        refFE,
            const Mesh&         mesh,
            const comm_ptrtype& commPtr ):
         M_repeatedEpetraMap(),

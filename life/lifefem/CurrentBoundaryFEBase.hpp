@@ -53,12 +53,12 @@
 #include <life/lifefem/GeometricMap.hpp>
 #include <life/lifefem/ReferenceFE.hpp>
 #include <life/lifearray/RNM.hpp>
-#include <life/lifefem/QuadRule.hpp>
+#include <life/lifefem/QuadratureRule.hpp>
 
 namespace LifeV
 {
 /*!
-  \class StaticBdFE
+  \class CurrentBoundaryFEBase
   \brief A class for static boundary finite element
   \author J.-F. Gerbeau & V. Martin
   \date 09/2002
@@ -71,7 +71,7 @@ namespace LifeV
 
 */
 
-class StaticBdFE
+class CurrentBoundaryFEBase
 {
 
 public:
@@ -84,15 +84,15 @@ public:
     //! @name Constructor & Destructor
     //@{
 
-    StaticBdFE( const RefFE& refFE, const GeometricMap& geoMap );
+    CurrentBoundaryFEBase( const ReferenceFE& refFE, const GeometricMap& geoMap );
 
-    StaticBdFE( const RefFE& refFE, const GeometricMap& geoMap, const QuadRule& qr );
+    CurrentBoundaryFEBase( const ReferenceFE& refFE, const GeometricMap& geoMap, const QuadratureRule& qr );
 
     //! new optionnal argument for hybrid hdiv fe invArea
-    StaticBdFE( const RefFE& refFE, const GeometricMap& geoMap, const QuadRule& qr,
+    CurrentBoundaryFEBase( const ReferenceFE& refFE, const GeometricMap& geoMap, const QuadratureRule& qr,
                 const Real* refcoor, UInt currentid, Real invarea = 1. );
 
-    virtual ~StaticBdFE();
+    virtual ~CurrentBoundaryFEBase();
 
     //@}
 
@@ -319,13 +319,13 @@ protected:
 
 public:
     //! The reference finite element
-    const RefFE& refFE;
+    const ReferenceFE& refFE;
 
     //! The geometical mapping
     const GeometricMap&   geoMap;
 
     //! The quadrature rule
-    const QuadRule& qr;
+    const QuadratureRule& qr;
 protected:
 
     KNM<Real>  M_phi;
@@ -353,7 +353,7 @@ protected:
 
 template <typename FunctorType>
 Real
-StaticBdFE::
+CurrentBoundaryFEBase::
 integral( const FunctorType & f ) const
 {
     ASSERT_PRE( M_hasMeasure, "integral needs measure. Call an update function" );
@@ -369,7 +369,7 @@ integral( const FunctorType & f ) const
 
 template <typename FunctorType>
 Real
-StaticBdFE::
+CurrentBoundaryFEBase::
 integral_n( const FunctorType & f ) const
 {
     ASSERT_PRE( M_hasNormal, "integral_n needs measure and normal. Call the appropriate update function" );

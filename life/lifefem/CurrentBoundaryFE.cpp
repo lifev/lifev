@@ -45,12 +45,12 @@ namespace LifeV
 // Constructors & Destructor
 // ===================================================
 
-CurrentBoundaryFE::CurrentBoundaryFE( const RefFE& refFE, const GeometricMap& geoMap, const QuadRule& qr ) :
-        StaticBdFE( refFE, geoMap, qr )
+CurrentBoundaryFE::CurrentBoundaryFE( const ReferenceFE& refFE, const GeometricMap& geoMap, const QuadratureRule& qr ) :
+        CurrentBoundaryFEBase( refFE, geoMap, qr )
 {}
 
-CurrentBoundaryFE::CurrentBoundaryFE( const RefFE& refFE, const GeometricMap& geoMap ) :
-        StaticBdFE( refFE, geoMap )
+CurrentBoundaryFE::CurrentBoundaryFE( const ReferenceFE& refFE, const GeometricMap& geoMap ) :
+        CurrentBoundaryFEBase( refFE, geoMap )
 {}
 
 CurrentBoundaryFE::~CurrentBoundaryFE()

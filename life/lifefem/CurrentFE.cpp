@@ -40,7 +40,7 @@
 
 namespace LifeV
 {
-CurrentFE::CurrentFE( const RefFE& refFE, const GeometricMap& geoMap, const QuadRule& qr )
+CurrentFE::CurrentFE( const ReferenceFE& refFE, const GeometricMap& geoMap, const QuadratureRule& qr )
         :
         M_nbNode( refFE.nbDof() ),
         M_nbCoor( refFE.nbCoor() ),
@@ -53,7 +53,7 @@ CurrentFE::CurrentFE( const RefFE& refFE, const GeometricMap& geoMap, const Quad
 
         M_refFE( &refFE ),
         M_geoMap( &geoMap),
-        M_quadRule(new QuadRule(qr)),
+        M_quadRule(new QuadratureRule(qr)),
 
 
         M_cellNodes(boost::extents[geoMap.nbDof()][M_nbCoor]),
@@ -157,7 +157,7 @@ CurrentFE::CurrentFE( const RefFE& refFE, const GeometricMap& geoMap, const Quad
 
 }
 
-CurrentFE::CurrentFE( const RefFE& refFE, const GeometricMap& geoMap )
+CurrentFE::CurrentFE( const ReferenceFE& refFE, const GeometricMap& geoMap )
         :
         M_nbNode( refFE.nbDof() ),
         M_nbCoor( refFE.nbCoor() ),
@@ -715,14 +715,14 @@ void CurrentFE::quadRuleVTKexport( const std::string& filename) const
 }
 
 
-void CurrentFE::setQuadRule(const QuadRule& newQuadRule)
+void CurrentFE::setQuadRule(const QuadratureRule& newQuadRule)
 {
     // Set the quadrature
     if (M_quadRule != 0)
     {
         delete M_quadRule;
     };
-    M_quadRule = new QuadRule(newQuadRule);
+    M_quadRule = new QuadratureRule(newQuadRule);
 
     // Adjust the constants related to the quadrature
     M_nbQuadPt =  UInt( newQuadRule.nbQuadPt() );

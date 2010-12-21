@@ -429,27 +429,27 @@ darcy::run()
     chronoFiniteElementSpace.start();
 
     // Primal solution parameters
-    const RefFE*    refFE_primal ( static_cast<RefFE*>(NULL) );
-    const QuadRule* qR_primal    ( static_cast<QuadRule*>(NULL) );
-    const QuadRule* bdQr_primal  ( static_cast<QuadRule*>(NULL) );
+    const ReferenceFE*    refFE_primal ( static_cast<ReferenceFE*>(NULL) );
+    const QuadratureRule* qR_primal    ( static_cast<QuadratureRule*>(NULL) );
+    const QuadratureRule* bdQr_primal  ( static_cast<QuadratureRule*>(NULL) );
 
     refFE_primal = &feTetraP0;
     qR_primal    = &quadRuleTetra15pt;
     bdQr_primal  = &quadRuleTria4pt;
 
     // Dual solution parameters
-    const RefFE*    refFE_dual ( static_cast<RefFE*>(NULL) );
-    const QuadRule* qR_dual    ( static_cast<QuadRule*>(NULL) );
-    const QuadRule* bdQr_dual  ( static_cast<QuadRule*>(NULL) );
+    const ReferenceFE*    refFE_dual ( static_cast<ReferenceFE*>(NULL) );
+    const QuadratureRule* qR_dual    ( static_cast<QuadratureRule*>(NULL) );
+    const QuadratureRule* bdQr_dual  ( static_cast<QuadratureRule*>(NULL) );
 
     refFE_dual = &feTetraRT0;
     qR_dual    = &quadRuleTetra15pt;
     bdQr_dual  = &quadRuleTria4pt;
 
     // Interpolate of dual solution parameters
-    const RefFE*    refFE_dualInterpolate ( static_cast<RefFE*>(NULL) );
-    const QuadRule* qR_dualInterpolate    ( static_cast<QuadRule*>(NULL) );
-    const QuadRule* bdQr_dualInterpolate  ( static_cast<QuadRule*>(NULL) );
+    const ReferenceFE*    refFE_dualInterpolate ( static_cast<ReferenceFE*>(NULL) );
+    const QuadratureRule* qR_dualInterpolate    ( static_cast<QuadratureRule*>(NULL) );
+    const QuadratureRule* bdQr_dualInterpolate  ( static_cast<QuadratureRule*>(NULL) );
 
     refFE_dualInterpolate = &feTetraP0;
     qR_dualInterpolate    = &quadRuleTetra15pt;
@@ -457,18 +457,18 @@ darcy::run()
 
     // Hybrid solution parameters
     // hybrid
-    const RefFE*    refFE_hybrid ( static_cast<RefFE*>(NULL) );
-    const QuadRule* qR_hybrid    ( static_cast<QuadRule*>(NULL) );
-    const QuadRule* bdQr_hybrid  ( static_cast<QuadRule*>(NULL) );
+    const ReferenceFE*    refFE_hybrid ( static_cast<ReferenceFE*>(NULL) );
+    const QuadratureRule* qR_hybrid    ( static_cast<QuadratureRule*>(NULL) );
+    const QuadratureRule* bdQr_hybrid  ( static_cast<QuadratureRule*>(NULL) );
 
     refFE_hybrid = &feTetraRT0Hyb;
     qR_hybrid    = &quadRuleTetra15pt;
     bdQr_hybrid  = &quadRuleTria4pt;
 
     // dual dot outward unit normal
-    const RefFE*    refFE_VdotN ( static_cast<RefFE*>(NULL) );
-    const QuadRule* qR_VdotN    ( static_cast<QuadRule*>(NULL) );
-    const QuadRule* bdQr_VdotN  ( static_cast<QuadRule*>(NULL) );
+    const ReferenceFE*    refFE_VdotN ( static_cast<ReferenceFE*>(NULL) );
+    const QuadratureRule* qR_VdotN    ( static_cast<QuadratureRule*>(NULL) );
+    const QuadratureRule* bdQr_VdotN  ( static_cast<QuadratureRule*>(NULL) );
 
     refFE_VdotN = &feTetraRT0VdotNHyb;
     qR_VdotN    = &quadRuleTetra15pt;

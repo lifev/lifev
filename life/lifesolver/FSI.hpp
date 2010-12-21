@@ -757,7 +757,7 @@ public:
 
 protected:
 
-    //virtual void variablesInit(const RefFE* refFE_struct,const LifeV::QuadRule*  bdQr_struct, const LifeV::QuadRule* qR_struct);
+    //virtual void variablesInit(const ReferenceFE* refFE_struct,const LifeV::QuadratureRule*  bdQr_struct, const LifeV::QuadratureRule* qR_struct);
     //!@name Protected Methods
     //@{
     //!initailize the variables

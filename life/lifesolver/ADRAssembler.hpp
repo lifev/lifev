@@ -309,7 +309,7 @@ public:
       Beware that calling this function might be quite heavy, so avoid using
       it when it is not necessary.
      */
-    inline void setQuadRuleForMassMatrix(const QuadRule& qr)
+    inline void setQuadRuleForMassMatrix(const QuadratureRule& qr)
     {
         ASSERT(M_massCFE != 0,"No mass currentFE for setting the quadrature rule!");
         M_massCFE->setQuadRule(qr);
@@ -320,7 +320,7 @@ public:
       Beware that calling this function might be quite heavy, so avoid using
       it when it is not necessary.
      */
-    inline void setQuadRuleForDiffusionMatrix(const QuadRule& qr)
+    inline void setQuadRuleForDiffusionMatrix(const QuadratureRule& qr)
     {
         ASSERT(M_diffCFE != 0,"No diffusion currentFE for setting the quadrature rule!");
         M_diffCFE->setQuadRule(qr);
@@ -331,7 +331,7 @@ public:
       Beware that calling this function might be quite heavy, so avoid using
       it when it is not necessary.
      */
-    inline void setQuadRuleForAdvectionMatrix(const QuadRule& qr)
+    inline void setQuadRuleForAdvectionMatrix(const QuadratureRule& qr)
     {
         ASSERT(M_advCFE != 0,"No advection (u) currentFE for setting the quadrature rule!");
         ASSERT(M_advBetaCFE != 0,"No advection (beta) currentFE for setting the quadrature rule!");
@@ -344,7 +344,7 @@ public:
       Beware that calling this function might be quite heavy, so avoid using
       it when it is not necessary.
     */
-    inline void setQuadRuleForMassRhs(const QuadRule& qr)
+    inline void setQuadRuleForMassRhs(const QuadratureRule& qr)
     {
         ASSERT(M_massRhsCFE != 0,"No Rhs currentFE for setting the quadrature rule!");
         M_massRhsCFE->setQuadRule(qr);

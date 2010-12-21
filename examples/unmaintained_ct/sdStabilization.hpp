@@ -50,8 +50,8 @@ public:
     SDStabilization(
         const mesh_type     mesh,
         const DOF&      dof,
-        const RefFE&    refFE,
-        const QuadRule& quadRule,
+        const ReferenceFE&    refFE,
+        const QuadratureRule& quadRule,
         Real	     gammaBeta = 0.,
         Real      gammaDiv = 0.,
         Real      viscosity = 1.);
@@ -112,8 +112,8 @@ template<typename MESH, typename DOF>
 SDStabilization<MESH, DOF>::SDStabilization(
     const mesh_type     mesh,
     const DOF&      dof,
-    const RefFE&    refFE,
-    const QuadRule& quadRule,
+    const ReferenceFE&    refFE,
+    const QuadratureRule& quadRule,
     Real 	       gammaBeta,
     Real            gammaDiv,
     Real            viscosity):

@@ -111,10 +111,10 @@ public:
     /*!
      * @param mesh       meshPtr_Type  a pointer to the mesh
      * @param dof        dof_Type      the velocity/pressure dof (same order discretization)
-     * @param refFE      RefFE         the velocity/pressure field reference finite
+     * @param refFE      ReferenceFE         the velocity/pressure field reference finite
      * @param feBd       CurrentBoundaryFE   the facet current fe to be used to compute the jumps
      * 								   on the interface within elements.
-     * @param quadRule   QuadRule      the element quadrature rule used for the facet projection
+     * @param quadRule   QuadratureRule      the element quadrature rule used for the facet projection
      * @param gammaBeta  Real 		   the stabilization parameter @f$\gamma_\beta@f$ for @f$\Sigma_{f\in\mathcal{F}}\int_{f} [\beta \cdot \nabla \mathbf{u}] [\beta \cdot \nabla \mathbf{v}]@f$
      * @param gammaDiv   Real          the stabilization parameter @f$\gamma_d@f$ for @f$\Sigma_{f\in\mathcal{F}}\int_{f} [div \mathbf{u}] [div \mathbf{v}]@f$
      * @param gammaPress Real          the stabilization parameter @f$\gamma_p@f$ for @f$\Sigma_{f\in\mathcal{F}}\int_{f} [\nabla p] \cdot [\nabla q]@f$
@@ -122,9 +122,9 @@ public:
      */
     __attribute__((__deprecated__)) StabilizationIP( const meshPtr_Type&     mesh,
                      const dof_Type&        dof,
-                     const RefFE&           refFE,
+                     const ReferenceFE&           refFE,
                      CurrentBoundaryFE&           feBd,
-                     const QuadRule&        quadRule,
+                     const QuadratureRule&        quadRule,
                      Real                   gammaBeta = 0,
                      Real                   gammaDiv = 0,
                      Real                   gammaPress = 0,
@@ -184,7 +184,7 @@ public:
     //! Set the mesh file
     void setMesh(const meshPtr_Type mesh) { M_mesh = mesh; }
     //! Set Discretization
-    void setDiscretization(const dofPtr_Type& dof, const RefFE& refFE, CurrentBoundaryFE& feBd, const QuadRule& quadRule);
+    void setDiscretization(const dofPtr_Type& dof, const ReferenceFE& refFE, CurrentBoundaryFE& feBd, const QuadratureRule& quadRule);
     //! Set the fespace
     template<typename MapType>
     void setFeSpaceVelocity(FESpace<mesh_Type, MapType> & feSpaceVelocity);
@@ -245,9 +245,9 @@ StabilizationIP<MeshType, DofType>::StabilizationIP():
 template<typename MeshType, typename DofType>
 StabilizationIP<MeshType, DofType>::StabilizationIP( const meshPtr_Type & mesh,
                                                      const dof_Type&      dof,
-                                                     const RefFE&    refFE,
+                                                     const ReferenceFE&    refFE,
                                                      CurrentBoundaryFE&    feBd,
-                                                     const QuadRule& quadRule,
+                                                     const QuadratureRule& quadRule,
                                                      Real            gammaBeta,
                                                      Real            gammaDiv,
                                                      Real            gammaPress,
@@ -630,7 +630,7 @@ void StabilizationIP<MeshType, DofType>::showMe(std::ostream & output) const
 // Setters method
 //=============================================================================
 template<typename MeshType, typename DofType>
-void StabilizationIP<MeshType, DofType>::setDiscretization(const dofPtr_Type& dof, const RefFE& refFE, CurrentBoundaryFE& feBd, const QuadRule& quadRule)
+void StabilizationIP<MeshType, DofType>::setDiscretization(const dofPtr_Type& dof, const ReferenceFE& refFE, CurrentBoundaryFE& feBd, const QuadratureRule& quadRule)
 {
     M_dof = dof;
     M_feOnSide1.reset( new CurrentFE(refFE, getGeometricMap(*M_mesh), quadRule) );

@@ -36,7 +36,7 @@
     @mantainer Samuel Quinodoz <samuel.quinodoz@epfl.ch>
  */
 
-#include <QuadPoint.hpp>
+#include <QuadraturePoint.hpp>
 
 namespace LifeV
 {
@@ -45,7 +45,7 @@ namespace LifeV
 // Constructors & Destructor
 // ===================================================
 
-QuadPoint::QuadPoint()
+QuadraturePoint::QuadraturePoint()
         : M_weight( 0 ),
         M_coor( 3 )
 {
@@ -54,7 +54,7 @@ QuadPoint::QuadPoint()
     M_coor[ 2 ] = 0;
 }
 
-QuadPoint::QuadPoint( Real x, Real y, Real z, Real weight )
+QuadraturePoint::QuadraturePoint( Real x, Real y, Real z, Real weight )
         : M_weight( weight ),
         M_coor( 3 )
 {
@@ -63,7 +63,7 @@ QuadPoint::QuadPoint( Real x, Real y, Real z, Real weight )
     M_coor[ 2 ] = z;
 }
 
-QuadPoint::QuadPoint( Real x, Real y, Real weight )
+QuadraturePoint::QuadraturePoint( Real x, Real y, Real weight )
         : M_weight( weight ),
         M_coor( 3 )
 {
@@ -72,7 +72,7 @@ QuadPoint::QuadPoint( Real x, Real y, Real weight )
     M_coor[ 2 ] = 0.;
 }
 
-QuadPoint::QuadPoint( Real x, Real weight )
+QuadraturePoint::QuadraturePoint( Real x, Real weight )
         : M_weight( weight ),
         M_coor( 3 )
 {
@@ -81,12 +81,12 @@ QuadPoint::QuadPoint( Real x, Real weight )
     M_coor[ 2 ] = 0.;
 }
 
-QuadPoint::QuadPoint(const GeoVector& coor, const Real& weight)
+QuadraturePoint::QuadraturePoint(const GeoVector& coor, const Real& weight)
         : M_weight(weight),
         M_coor(coor)
 {}
 
-QuadPoint::QuadPoint(const GeoVector& coor, const Real& weight, const UInt& spaceDim)
+QuadraturePoint::QuadraturePoint(const GeoVector& coor, const Real& weight, const UInt& spaceDim)
         : M_weight(weight),
         M_coor(spaceDim)
 {
@@ -102,14 +102,14 @@ QuadPoint::QuadPoint(const GeoVector& coor, const Real& weight, const UInt& spac
     }
 }
 
-QuadPoint::QuadPoint(const QuadPoint& qp)
+QuadraturePoint::QuadraturePoint(const QuadraturePoint& qp)
         : M_weight(qp.M_weight),
         M_coor(qp.M_coor.size())
 {
     M_coor = qp.M_coor;
 }
 
-QuadPoint::QuadPoint(const QuadPoint& qp, const UInt spaceDim)
+QuadraturePoint::QuadraturePoint(const QuadraturePoint& qp, const UInt spaceDim)
         : M_weight(qp.M_weight),
         M_coor(spaceDim)
 {

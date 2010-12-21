@@ -57,14 +57,14 @@ namespace LifeV
   Modified by S. Quinodoz (samuel.quinodoz@epfl.ch, 04.2010)
 */
 class GeometricMap:
-        public RefEle
+        public ReferenceElement
 {
 public:
 
     //! @name Public Types
     //@{
 
-    typedef RefEle::function_Type function_Type;
+    typedef ReferenceElement::function_Type function_Type;
 
     //@}
 

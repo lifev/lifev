@@ -26,7 +26,7 @@
 
 /*!
     @file
-    @brief File for the implementation of the QuadRule class.
+    @brief File for the implementation of the QuadratureRule class.
 
     @author Jean-Frederic Gerbeau
             Samuel Quinodoz <samuel.quinodoz@epfl.ch>
@@ -37,22 +37,22 @@
  */
 
 
-#include <life/lifefem/QuadRule.hpp>
+#include <life/lifefem/QuadratureRule.hpp>
 
 namespace LifeV
 {
 
-Real QuadRule::S_exactnessTol=1e-8;
+Real QuadratureRule::S_exactnessTol=1e-8;
 
 // ===================================================
 // Constructors & Destructor
 // ===================================================
 
-QuadRule::QuadRule()
+QuadratureRule::QuadratureRule()
         :    M_pt(0), M_shape(NONE), M_name(""), M_nbQuadPt(0), M_degOfExact(0), M_dimension(0)
 {}
 
-QuadRule::QuadRule( const QuadPoint* pt, int /*id*/, std::string name,
+QuadratureRule::QuadratureRule( const QuadraturePoint* pt, int /*id*/, std::string name,
                     ReferenceShapes shape, UInt nbQuadPt, UInt degOfExact ) :
         M_pt( nbQuadPt),
         M_shape( shape ), M_name( name ),
@@ -65,13 +65,13 @@ QuadRule::QuadRule( const QuadPoint* pt, int /*id*/, std::string name,
     }
 }
 
-QuadRule::QuadRule( const QuadRule& qr ) :
+QuadratureRule::QuadratureRule( const QuadratureRule& qr ) :
         M_pt( qr.M_pt ), M_shape( qr.M_shape ), M_name( qr.M_name ),
         M_nbQuadPt( qr.M_nbQuadPt ), M_degOfExact( qr.M_degOfExact ), M_dimension(qr.M_dimension)
 {
 }
 
-QuadRule::QuadRule( const QuadRule& qr, const UInt dim) :
+QuadratureRule::QuadratureRule( const QuadratureRule& qr, const UInt dim) :
         M_pt( qr.M_nbQuadPt ), M_shape( qr.M_shape ), M_name( qr.M_name ),
         M_nbQuadPt( qr.M_nbQuadPt ), M_degOfExact( qr.M_degOfExact ), M_dimension(dim)
 {
@@ -79,12 +79,12 @@ QuadRule::QuadRule( const QuadRule& qr, const UInt dim) :
 
     for (UInt i(0); i<M_nbQuadPt; ++i)
     {
-        M_pt[i] = QuadPoint(qr.M_pt[i],dim);
+        M_pt[i] = QuadraturePoint(qr.M_pt[i],dim);
     }
 
 }
 
-QuadRule::QuadRule(std::string name, ReferenceShapes shape, UInt dimension, UInt degreeOfExactness, UInt nbQuadPt, ... ) :
+QuadratureRule::QuadratureRule(std::string name, ReferenceShapes shape, UInt dimension, UInt degreeOfExactness, UInt nbQuadPt, ... ) :
         M_pt( nbQuadPt),
         M_shape( shape),
         M_name( name),
@@ -103,12 +103,12 @@ QuadRule::QuadRule(std::string name, ReferenceShapes shape, UInt dimension, UInt
         {
             nextPoint[i] = va_arg(quadList,Real);
         };
-        M_pt[iterArg] = QuadPoint(nextPoint,va_arg(quadList,double));
+        M_pt[iterArg] = QuadraturePoint(nextPoint,va_arg(quadList,double));
     }
     va_end(quadList);
 }
 
-QuadRule::~QuadRule()
+QuadratureRule::~QuadratureRule()
 {
 }
 
@@ -117,7 +117,7 @@ QuadRule::~QuadRule()
 // ===================================================
 
 
-std::ostream& operator << ( std::ostream& c, const QuadRule& qr )
+std::ostream& operator << ( std::ostream& c, const QuadratureRule& qr )
 {
     c << " name: " << qr.M_name << std::endl;
     c << " shape:" << ( int ) qr.M_shape << std::endl;
@@ -133,7 +133,7 @@ std::ostream& operator << ( std::ostream& c, const QuadRule& qr )
 // ===================================================
 
 
-void QuadRule::showMe( std::ostream& output) const
+void QuadratureRule::showMe( std::ostream& output) const
 {
     output << " Name  : " << M_name << std::endl;
     output << " Shape : " << M_shape << std::endl;
@@ -145,7 +145,7 @@ void QuadRule::showMe( std::ostream& output) const
     }
 }
 
-UInt QuadRule::checkExactness() const
+UInt QuadratureRule::checkExactness() const
 {
     switch (M_shape)
     {
@@ -167,7 +167,7 @@ UInt QuadRule::checkExactness() const
     }
 }
 
-void QuadRule::vtkExport( const std::string& filename) const
+void QuadratureRule::vtkExport( const std::string& filename) const
 {
     std::ofstream output(filename.c_str());
     ASSERT(!output.fail(), " Unable to open the file for the export of the quadrature ");
@@ -198,19 +198,19 @@ void QuadRule::vtkExport( const std::string& filename) const
 // Set Methods
 // ===================================================
 
-void QuadRule::setPoints(const std::vector<QuadPoint>& pts)
+void QuadratureRule::setPoints(const std::vector<QuadraturePoint>& pts)
 {
     M_pt.clear();
     M_pt.resize(pts.size());
     for (UInt i(0); i<pts.size(); ++i)
     {
-        M_pt[i]=QuadPoint(pts[i],M_dimension);
+        M_pt[i]=QuadraturePoint(pts[i],M_dimension);
     }
 
     M_nbQuadPt=pts.size();
 }
 
-void QuadRule::setPoints(const std::vector<GeoVector>& coordinates, const std::vector<Real>& weights)
+void QuadratureRule::setPoints(const std::vector<GeoVector>& coordinates, const std::vector<Real>& weights)
 {
     ASSERT(coordinates.size()==weights.size(),"Non matching length of the arguments");
 
@@ -218,23 +218,23 @@ void QuadRule::setPoints(const std::vector<GeoVector>& coordinates, const std::v
     M_pt.resize(coordinates.size());
     for (UInt i(0); i<M_pt.size(); ++i)
     {
-        M_pt[i]=QuadPoint(coordinates[i],weights[i],M_dimension);
+        M_pt[i]=QuadraturePoint(coordinates[i],weights[i],M_dimension);
     }
 
     M_nbQuadPt=M_pt.size();
 }
 
-void QuadRule::setName(const std::string& newName)
+void QuadratureRule::setName(const std::string& newName)
 {
     M_name = newName;
 }
 
-void QuadRule::setExactness(const UInt& exactness)
+void QuadratureRule::setExactness(const UInt& exactness)
 {
     M_degOfExact = exactness;
 }
 
-void QuadRule::setDimensionShape(const UInt& newDim, const ReferenceShapes& newShape)
+void QuadratureRule::setDimensionShape(const UInt& newDim, const ReferenceShapes& newShape)
 {
     ASSERT(newDim >= shapeDimension(newShape)," Impossible shape-dimension combinaison ");
     M_dimension = newDim;
@@ -243,7 +243,7 @@ void QuadRule::setDimensionShape(const UInt& newDim, const ReferenceShapes& newS
     // Change also the dimension of the points if they are already set!
     for (UInt i(0); i<M_pt.size(); ++i)
     {
-        M_pt[i] = QuadPoint(M_pt[i],newDim);
+        M_pt[i] = QuadraturePoint(M_pt[i],newDim);
     }
 }
 
@@ -251,7 +251,7 @@ void QuadRule::setDimensionShape(const UInt& newDim, const ReferenceShapes& newS
 // Private Methods
 // ===================================================
 
-UInt QuadRule::checkExactnessTetra() const
+UInt QuadratureRule::checkExactnessTetra() const
 {
     // Degre 0: f=1 => exact value : 1/6
     Real partialSum(0.0);
@@ -328,7 +328,7 @@ UInt QuadRule::checkExactnessTetra() const
 
 }
 
-UInt QuadRule::checkExactnessTriangle() const
+UInt QuadratureRule::checkExactnessTriangle() const
 {
 
     // Degre 0: f=1 => exact value : 1/2
@@ -424,7 +424,7 @@ UInt QuadRule::checkExactnessTriangle() const
     return 5;
 }
 
-UInt QuadRule::checkExactnessSegment() const
+UInt QuadratureRule::checkExactnessSegment() const
 {
     // Degre 0: f=1 => exact value : 1
     Real partialSum(0.0);

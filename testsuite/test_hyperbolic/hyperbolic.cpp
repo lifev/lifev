@@ -430,18 +430,18 @@ hyperbolic::run()
     chronoFiniteElementSpace.start();
 
     // Primal solution parameters
-    const RefFE*    refFE ( static_cast<RefFE*>(NULL) );
-    const QuadRule* qR    ( static_cast<QuadRule*>(NULL) );
-    const QuadRule* bdQr  ( static_cast<QuadRule*>(NULL) );
+    const ReferenceFE*    refFE ( static_cast<ReferenceFE*>(NULL) );
+    const QuadratureRule* qR    ( static_cast<QuadratureRule*>(NULL) );
+    const QuadratureRule* bdQr  ( static_cast<QuadratureRule*>(NULL) );
 
     refFE = &feTetraP0;
     qR    = &quadRuleTetra15pt;
     bdQr  = &quadRuleTria1pt;
 
     // Interpolate of dual solution parameters.
-    const RefFE*    pressure_refFE_dualInterpolate ( static_cast<RefFE*>(NULL) );
-    const QuadRule* pressure_qR_dualInterpolate    ( static_cast<QuadRule*>(NULL) );
-    const QuadRule* pressure_bdQr_dualInterpolate  ( static_cast<QuadRule*>(NULL) );
+    const ReferenceFE*    pressure_refFE_dualInterpolate ( static_cast<ReferenceFE*>(NULL) );
+    const QuadratureRule* pressure_qR_dualInterpolate    ( static_cast<QuadratureRule*>(NULL) );
+    const QuadratureRule* pressure_bdQr_dualInterpolate  ( static_cast<QuadratureRule*>(NULL) );
 
     pressure_refFE_dualInterpolate = &feTetraP0;
     pressure_qR_dualInterpolate    = &quadRuleTetra15pt;

@@ -50,7 +50,7 @@ quadRuleTetra.plt ==> Show the Convergence Rate of all the quadrature rules on T
 #endif
 
 #include <life/lifefem/ReferenceFE.hpp>
-#include <life/lifefem/QuadRule.hpp>
+#include <life/lifefem/QuadratureRule.hpp>
 #include <life/lifefem/CurrentFE.hpp>
 #include <life/lifefilters/GetPot.hpp>
 #include <life/lifemesh/regionMesh3D.hpp>

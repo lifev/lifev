@@ -45,8 +45,8 @@ namespace LifeV
 // Constructors & Destructor
 // ===================================================
 
-StaticBdFE::StaticBdFE( const RefFE& refFE, const GeometricMap& geoMap,
-                        const QuadRule& qr ) :
+CurrentBoundaryFEBase::CurrentBoundaryFEBase( const ReferenceFE& refFE, const GeometricMap& geoMap,
+                        const QuadratureRule& qr ) :
         M_nbGeoNode ( geoMap.nbDof() ),
         M_nbNode    ( refFE.nbDof() ),
         M_nbCoor    ( refFE.nbCoor() ),
@@ -106,7 +106,7 @@ StaticBdFE::StaticBdFE( const RefFE& refFE, const GeometricMap& geoMap,
 
 }
 
-StaticBdFE::StaticBdFE( const RefFE& refFE, const GeometricMap& geoMap ) :
+CurrentBoundaryFEBase::CurrentBoundaryFEBase( const ReferenceFE& refFE, const GeometricMap& geoMap ) :
         M_nbGeoNode( geoMap.nbDof() ),
         M_nbNode( refFE.nbDof() ),
         M_nbCoor( refFE.nbCoor() ),
@@ -133,8 +133,8 @@ StaticBdFE::StaticBdFE( const RefFE& refFE, const GeometricMap& geoMap ) :
 #endif
 }
 
-StaticBdFE::StaticBdFE( const RefFE& refFE, const GeometricMap& geoMap,
-                        const QuadRule& qr, const Real* refcoor,
+CurrentBoundaryFEBase::CurrentBoundaryFEBase( const ReferenceFE& refFE, const GeometricMap& geoMap,
+                        const QuadratureRule& qr, const Real* refcoor,
                         UInt currentid, Real invarea ) :
         M_nbGeoNode( geoMap.nbDof() ),
         M_nbNode( refFE.nbDof() ),
@@ -215,14 +215,14 @@ StaticBdFE::StaticBdFE( const RefFE& refFE, const GeometricMap& geoMap,
 #endif
 }
 
-StaticBdFE::~StaticBdFE()
+CurrentBoundaryFEBase::~CurrentBoundaryFEBase()
 {}
 
 // ===================================================
 // Methods
 // ===================================================
 
-void StaticBdFE::coorMap( Real& x, Real& y, Real& z,
+void CurrentBoundaryFEBase::coorMap( Real& x, Real& y, Real& z,
                           const Real & xi, const Real & eta ) const
 {
     Vector coor = ZeroVector(3);
@@ -235,7 +235,7 @@ void StaticBdFE::coorMap( Real& x, Real& y, Real& z,
 }
 
 
-Real StaticBdFE::measure() const
+Real CurrentBoundaryFEBase::measure() const
 {
     ASSERT_PRE( M_hasMeasure, "Needs measure. Call an update function" );
 
@@ -245,7 +245,7 @@ Real StaticBdFE::measure() const
     return meas;
 }
 
-void StaticBdFE::computeQuadPointCoordinate()
+void CurrentBoundaryFEBase::computeQuadPointCoordinate()
 {
     ASSERT_PRE( M_hasQR, "Needs a quadrature rule" );
 
@@ -256,7 +256,7 @@ void StaticBdFE::computeQuadPointCoordinate()
     }
 }
 
-void StaticBdFE::computeMeasure()
+void CurrentBoundaryFEBase::computeMeasure()
 {
     ASSERT_PRE( M_hasQR, "Needs a quadrature rule" )
     Real s, fctDer;
@@ -319,7 +319,7 @@ void StaticBdFE::computeMeasure()
 }
 
 
-void StaticBdFE::computeMeasureNormal()
+void CurrentBoundaryFEBase::computeMeasureNormal()
 {
     ASSERT_PRE( M_hasQR, "Needs a quadrature rule" )
 

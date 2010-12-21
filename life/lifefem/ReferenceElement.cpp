@@ -26,7 +26,7 @@
 
 /*!
     @file
-    @brief Base class for RefFE and GeometricMap
+    @brief Base class for ReferenceFE and GeometricMap
 
     @author Jean-Frederic Gerbeau
     @date 00-04-2002
@@ -44,7 +44,7 @@ namespace LifeV
 // Constructors & Destructor
 // ===================================================
 
-RefEle::RefEle( std::string name, ReferenceShapes shape, UInt nbDof, UInt nbCoor, UInt feDim,
+ReferenceElement::ReferenceElement( std::string name, ReferenceShapes shape, UInt nbDof, UInt nbCoor, UInt feDim,
                 const function_Type* phi, const function_Type* dPhi, const function_Type* d2Phi,
                 const function_Type* divPhi, const Real* refCoor ) :
         M_phi( phi ),
@@ -61,7 +61,7 @@ RefEle::RefEle( std::string name, ReferenceShapes shape, UInt nbDof, UInt nbCoor
 {
 }
 
-RefEle::~RefEle()
+ReferenceElement::~ReferenceElement()
 {
 }
 
@@ -70,7 +70,7 @@ RefEle::~RefEle()
 // ===================================================
 
 std::vector<GeoVector>
-RefEle::refCoor() const
+ReferenceElement::refCoor() const
 {
     std::vector<GeoVector> coordinates(M_nbDof, GeoVector(3));
     for (UInt i(0); i<M_nbDof; ++i)

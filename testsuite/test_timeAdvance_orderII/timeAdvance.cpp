@@ -193,9 +193,9 @@ problem::run()
     // Scalar Solution Space:
 
     std::string Order =  dataFile( "problem/space_discretization/order", "P1");
-    const RefFE*    refFE(0);
-    const QuadRule* qR(0);
-    const QuadRule* bdQr(0);
+    const ReferenceFE*    refFE(0);
+    const QuadratureRule* qR(0);
+    const QuadratureRule* bdQr(0);
 
     if ( Order.compare("P1") == 0 )
     {

@@ -46,18 +46,18 @@ namespace LifeV
 // ===================================================
 
 // Costructor.
-RefFEHybrid::RefFEHybrid( std::string name, FE_TYPE type, ReferenceShapes shape, UInt nbDofPerVertex, UInt nbDofPerEdge,
+ReferenceFEHybrid::ReferenceFEHybrid( std::string name, FE_TYPE type, ReferenceShapes shape, UInt nbDofPerVertex, UInt nbDofPerEdge,
                           UInt nbDofPerFace, UInt nbDofPerVolume, UInt nbDof, UInt nbCoor, const UInt& numberBoundaryFE,
-                          const StaticBdFE* boundaryFEList, const Real* refCoor, DofPatternType patternType ) :
-        RefFE( name, type, shape, nbDofPerVertex, nbDofPerEdge, nbDofPerFace, nbDofPerVolume,
+                          const CurrentBoundaryFEBase* boundaryFEList, const Real* refCoor, DofPatternType patternType ) :
+        ReferenceFE( name, type, shape, nbDofPerVertex, nbDofPerEdge, nbDofPerFace, nbDofPerVolume,
                nbDof, nbCoor,1,static_cast<function_Type*>(NULL),  static_cast<function_Type*>(NULL),
                static_cast<function_Type*>(NULL),  static_cast<function_Type*>(NULL),refCoor,
-               patternType, static_cast<RefFE*>(NULL)),
+               patternType, static_cast<ReferenceFE*>(NULL)),
         M_numberBoundaryFE( numberBoundaryFE ), M_boundaryFEList( boundaryFEList )
 {}
 
 // Destructor.
-RefFEHybrid::~RefFEHybrid()
+ReferenceFEHybrid::~ReferenceFEHybrid()
 {}
 
 

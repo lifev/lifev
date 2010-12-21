@@ -44,17 +44,17 @@
 namespace LifeV
 {
 
-//! RefFEHdiv - Short description of the class
+//! ReferenceFEHdiv - Short description of the class
 
-class RefFEHdiv
-        : public RefFE
+class ReferenceFEHdiv
+        : public ReferenceFE
 {
 public:
 
     //! @name Public Types
     //@{
 
-    typedef RefFE::function_Type function_Type;
+    typedef ReferenceFE::function_Type function_Type;
 
     //@}
 
@@ -90,7 +90,7 @@ public:
       code it in refFE.cc following the example of P1ISOP2_TRIA_PATTERN)
       @param bdRefFE  a pointer on the associated reference finite element on the boundary
     */
-    RefFEHdiv( std::string          name,
+    ReferenceFEHdiv( std::string          name,
                FE_TYPE              type,
                ReferenceShapes      shape,
                Int                  nbDofPerVertex,
@@ -103,16 +103,16 @@ public:
                const function_Type*           divPhi,
                const Real*          refCoor,
                DofPatternType       patternType,
-               const RefFE*         bdRefFE );
+               const ReferenceFE*         bdRefFE );
 
-    ~RefFEHdiv(){};
+    ~ReferenceFEHdiv(){};
 
     //@}
 };
 
 // Vector finite elements
-extern const RefFEHdiv feHexaRT0;
-extern const RefFEHdiv feTetraRT0;
+extern const ReferenceFEHdiv feHexaRT0;
+extern const ReferenceFEHdiv feTetraRT0;
 
 } // Namespace LifeV
 

@@ -64,7 +64,7 @@ namespace LifeV
   Base class which holds the connections of the dof in two matching meshes
 
   In order to hold the interface connections the user must give the
-  RefFE elements and DOF used in both meshes.  The connections may be
+  ReferenceFE elements and DOF used in both meshes.  The connections may be
   built by calling the update method. An interpolate method has been
   provided in order to interpolate data at the interface. Finally
   method getInterfaceDof gives the connections.
@@ -91,22 +91,22 @@ public:
             M_dof2( 0 )
     {}
 
-    //! Constructor for interfacing DOF of the same type (RefFE)
+    //! Constructor for interfacing DOF of the same type (ReferenceFE)
     /*!
      \param refFe the reference FE used in both meshes
      \param dof1 the DOF object of the mesh in which we want to make the computations
      \param dof2 the DOF object of the mesh which provides the data at the interface
     */
-    DOFInterface3Dto3D( const RefFE& refFE, const DOF& dof1, const DOF& dof2 );
+    DOFInterface3Dto3D( const ReferenceFE& refFE, const DOF& dof1, const DOF& dof2 );
 
-    //! Constructor for interfacing DOF of different type (RefFE)
+    //! Constructor for interfacing DOF of different type (ReferenceFE)
     /*!
       \param refFe1 the reference FE used in the mesh in which we want to make the computations
       \param dof1 the DOF object of the mesh in which we want to make the computations
       \param refFe2 the reference FE used in the mesh which provides the data at the interface
       \param dof2 the DOF object of the mesh which provides the data at the interface
      */
-    DOFInterface3Dto3D( const RefFE& refFE1, const DOF& dof1, const RefFE& refFE2, const DOF& dof2 );
+    DOFInterface3Dto3D( const ReferenceFE& refFE1, const DOF& dof1, const ReferenceFE& refFE2, const DOF& dof2 );
 
     //@}
 
@@ -115,10 +115,10 @@ public:
     //@{
 
     //! Setup method for common finite element
-    void setup(const RefFE& refFE, const DOF& dof1, const DOF& dof2 );
+    void setup(const ReferenceFE& refFE, const DOF& dof1, const DOF& dof2 );
 
     //! Setup method for possibly different finite element
-    void setup(const RefFE& refFE1, const DOF& dof1, const RefFE& refFE2, const DOF& dof2 );
+    void setup(const ReferenceFE& refFE1, const DOF& dof1, const ReferenceFE& refFE2, const DOF& dof2 );
 
     //! This method builds the DOF connections at the interface
     /*!
@@ -200,14 +200,14 @@ private:
     //@}
 
 
-    //! RefFE object used in the mesh in which we want to make the computations
-    const RefFE* M_refFE1;
+    //! ReferenceFE object used in the mesh in which we want to make the computations
+    const ReferenceFE* M_refFE1;
 
     //! DOF object of the mesh in which we want to make the computations
     const DOF* M_dof1;
 
-    //! RefFE object used in the mesh which provides de data at the interface
-    const RefFE* M_refFE2;
+    //! ReferenceFE object used in the mesh which provides de data at the interface
+    const ReferenceFE* M_refFE2;
 
     //! DOF object of the mesh which provides the data at the interface
     const DOF* M_dof2;
