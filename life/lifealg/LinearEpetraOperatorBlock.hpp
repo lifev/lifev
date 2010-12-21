@@ -37,10 +37,10 @@
     LifeV::Operators::LinearOperator.
  */
 
-#ifndef BLOCKOPERATOR_HPP_
-#define BLOCKOPERATOR_HPP_
+#ifndef LINEAREPETRAOPERATORBLOCK_H
+#define LINEAREPETRAOPERATORBLOCK_H 1
 
-#include <life/lifealg/OP_LinearOperator.hpp>
+#include <life/lifealg/LinearEpetraOperator.hpp>
 #include <Epetra_Import.h>
 
 namespace LifeV
@@ -248,4 +248,4 @@ private:
 
 } /*end namespace Operators*/
 } /*end namespace */
-#endif /* BLOCKOPERATOR_HPP_ */
+#endif /* LINEAREPETRAOPERATORBLOCK_H */

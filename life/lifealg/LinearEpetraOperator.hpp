@@ -39,8 +39,8 @@
     IdentityOperator and NullOperator are defined in this file and both inherit from LinearOperator.
  */
 
-#ifndef LINEAROPERATOR_HPP_
-#define LINEAROPERATOR_HPP_
+#ifndef LINEAREPETRAOPERATOR_H
+#define LINEAREPETRAOPERATOR_H 1
 
 
 #include <life/lifecore/life.hpp>
@@ -251,4 +251,4 @@ private:
 
 } /*end namespace Operators*/
 } /*end namespace */
-#endif /* LINEAROPERATOR_HPP_ */
+#endif /* LINEAREPETRAOPERATOR_H */

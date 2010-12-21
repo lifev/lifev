@@ -37,7 +37,7 @@
     LifeV::Operators::LinearOperator.
  */
 
-#include <life/lifealg/OP_BlockOperator.hpp>
+#include <life/lifealg/LinearEpetraOperatorBlock.hpp>
 
 namespace LifeV
 {
