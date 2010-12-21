@@ -61,7 +61,7 @@ US: http://dx.doi.org/10.1002/fld.1650190502
 #ifndef __ROSS_ETHIER_STEINMAN_DEC_HPP
 #define __ROSS_ETHIER_STEINMAN_DEC_HPP 1
 
-#include <life/lifecore/life.hpp>
+#include <life/lifecore/Life.hpp>
 #include <life/lifefilters/GetPot.hpp>
 
 namespace LifeV
