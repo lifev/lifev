@@ -26,15 +26,15 @@
 
 /*!
  *  @file
- *  @brief File containing the MultiScale Aitken Algorithm
+ *  @brief File containing the MultiScale Broyden Algorithm
  *
- *  @date 23-10-2009
+ *  @date 26-10-2009
  *  @author Cristiano Malossi <cristiano.malossi@epfl.ch>
  *
  *  @maintainer Cristiano Malossi <cristiano.malossi@epfl.ch>
  */
 
-#include <lifemc/lifesolver/MultiscaleAlgorithmAitken.hpp>
+#include <lifemc/lifesolver/MultiscaleAlgorithmBroyden.hpp>
 
 namespace LifeV
 {
@@ -44,54 +44,45 @@ namespace Multiscale
 // ===================================================
 // Constructors & Destructor
 // ===================================================
-MultiscaleAlgorithmAitken::MultiscaleAlgorithmAitken() :
+MultiscaleAlgorithmBroyden::MultiscaleAlgorithmBroyden() :
         multiscaleAlgorithm_Type   (),
-        M_methodMap                (),
-        M_method                   (),
-        M_generalizedAitken        ()
+        M_solver                   (),
+        M_jacobian                 ()
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 8011 ) << "MultiscaleAlgorithmAitken::MultiscaleAlgorithmAitken() \n";
+    Debug( 8014 ) << "MultiscaleAlgorithmBroyden::MultiscaleAlgorithmBroyden() \n";
 #endif
 
-    M_type = Aitken;
-
-    //Set Map
-    M_methodMap["Scalar"]  = Scalar;
-    M_methodMap["Vectorial"] = Vectorial;
-    //M_methodMap["VectorialBlock"] = VectorialBlock;
+    M_type = Broyden;
 }
 
 // ===================================================
 // MultiScale Algorithm Virtual Methods
 // ===================================================
 void
-MultiscaleAlgorithmAitken::setupData( const std::string& fileName )
+MultiscaleAlgorithmBroyden::setupData( const std::string& fileName )
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 8011 ) << "MultiscaleAlgorithmAitken::setupData( fileName ) \n";
+    Debug( 8014 ) << "MultiscaleAlgorithmBroyden::setupData( fileName ) \n";
 #endif
 
     multiscaleAlgorithm_Type::setupData( fileName );
 
     GetPot dataFile( fileName );
 
-    M_generalizedAitken.setDefaultOmega( dataFile( "Solver/Algorithm/Aitken_method/Omega", 1.e-3 ) );
-    M_generalizedAitken.useDefaultOmega( dataFile( "Solver/Algorithm/Aitken_method/fixedOmega",   false ) );
-    M_generalizedAitken.setOmegaMin( dataFile( "Solver/Algorithm/Aitken_method/range", M_generalizedAitken.defaultOmegaFluid()/1024, 0 ) );
-    M_generalizedAitken.setOmegaMax( dataFile( "Solver/Algorithm/Aitken_method/range", M_generalizedAitken.defaultOmegaFluid()*1024, 1 ) );
-    M_generalizedAitken.setMinimizationType( dataFile( "Solver/Algorithm/Aitken_method/inverseOmega", true ) );
-    M_method = M_methodMap[ dataFile( "Solver/Algorithm/Aitken_method/method", "Vectorial" ) ];
+    M_solver.setCommunicator( M_comm );
+    M_solver.setDataFromGetPot( dataFile, "Solver/Algorithm/Broyden_method/AztecOO" );
+    //M_solver.setUpPrec( DataFile, "Solver/Algorithm/Broyden_method/Preconditioner" );
 }
 
 void
-MultiscaleAlgorithmAitken::subIterate()
+MultiscaleAlgorithmBroyden::subIterate()
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 8011 ) << "MultiscaleAlgorithmAitken::subIterate() \n";
+    Debug( 8014 ) << "MultiscaleAlgorithmBroyden::subIterate() \n";
 #endif
 
     multiscaleAlgorithm_Type::subIterate();
@@ -102,44 +93,34 @@ MultiscaleAlgorithmAitken::subIterate()
 
     M_multiscale->exportCouplingVariables( *M_couplingVariables );
 
-    M_generalizedAitken.restart();
-
-    // Temporary Computation of a Block Vector - Testing purpose
-    //VectorType blocksVector( M_couplingVariables ); blocksVector = 0.0;
-    //for ( UInt i = 1 ; i < blocksVector.size() ; i = i+2)
-    //    blocksVector[i] = 1.0;
-    //std::cout << "blocksVector: " << std::endl;
-    //blocksVector.showMe();
+    multiscaleVector_Type delta( *M_couplingResiduals );
+    delta = 0.0;
+    multiscaleVector_Type minusCouplingResidual( *M_couplingResiduals );
+    minusCouplingResidual = 0.0;
 
     for ( UInt subIT = 1; subIT <= M_subiterationsMaximumNumber; ++subIT )
     {
+        // Compute the Jacobian (we completery delete the previous matrix)
+        if ( subIT == 1 )
+            assembleJacobianMatrix();
+        else
+            broydenJacobianUpdate( delta, minusCouplingResidual );
+
         // To be moved in a post-processing class
         //std::cout << " MS-  CouplingVariables:\n" << std::endl;
         //M_couplingVariables->showMe();
         //std::cout << " MS-  CouplingResiduals:\n" << std::endl;
         //M_couplingResiduals->showMe();
 
-        // Update Coupling Variables
-        switch ( M_method )
-        {
-        case Scalar:
+        //Compute delta using -R
+        minusCouplingResidual = -( *M_couplingResiduals );
 
-            *M_couplingVariables += M_generalizedAitken.computeDeltaLambdaScalar( *M_couplingVariables, *M_couplingResiduals );
+        M_solver.setMatrix( *M_jacobian );
+        M_solver.solve( delta, minusCouplingResidual );
+        //M_solver.solveSystem( minusCouplingResidual, delta, M_jacobian, false );
 
-            break;
-
-        case Vectorial:
-
-            *M_couplingVariables += M_generalizedAitken.computeDeltaLambdaVector( *M_couplingVariables, *M_couplingResiduals, true );
-
-            break;
-
-        case VectorialBlock:
-
-            //*M_couplingVariables += M_generalizedAitken.computeDeltaLambdaVectorBlock( *M_couplingVariables, *M_couplingResiduals, blocksVector, 2 );
-
-            break;
-        }
+        // Update Coupling Variables using the Broyden Method
+        *M_couplingVariables += delta;
 
         //std::cout << " MS-  New CouplingVariables:\n" << std::endl;
         //M_couplingVariables->showMe();
@@ -157,20 +138,37 @@ MultiscaleAlgorithmAitken::subIterate()
 
     save( M_subiterationsMaximumNumber, M_couplingResiduals->norm2() );
 
-    multiscaleErrorCheck( Tolerance, "Aitken algorithm residual: " + number2string( M_couplingResiduals->norm2() ) +
+    multiscaleErrorCheck( Tolerance, "Broyden algorithm residual: " + number2string( M_couplingResiduals->norm2() ) +
                         " (required: " + number2string( M_tolerance ) + ")\n" );
 }
 
+// ===================================================
+// Private Methods
+// ===================================================
 void
-MultiscaleAlgorithmAitken::showMe()
+MultiscaleAlgorithmBroyden::assembleJacobianMatrix()
 {
-    if ( M_displayer->isLeader() )
-    {
-        multiscaleAlgorithm_Type::showMe();
+    // Compute the Jacobian matrix
+    M_jacobian.reset( new multiscaleMatrix_Type( M_couplingVariables->map(), 50, 0 ) );
+    M_multiscale->exportJacobian( *M_jacobian );
+    M_jacobian->globalAssemble();
 
-        std::cout << "Aitken Method       = " << enum2String( M_method, M_methodMap ) << std::endl;
-        std::cout << std::endl << std::endl;
-    }
+    //M_jacobian->spy( "Jacobian" )
+}
+
+void
+MultiscaleAlgorithmBroyden::broydenJacobianUpdate( const multiscaleVector_Type& delta, const multiscaleVector_Type& minusCouplingResidual )
+{
+    // Compute the Broyden update
+    multiscaleMatrix_Type broydenMatrixUpdate( M_couplingVariables->map(), 50, 0 );
+    multiscaleVector_Type columnVector( ( *M_couplingResiduals + minusCouplingResidual - *M_jacobian * delta ) / ( delta.dot( delta ) ) );
+
+    // Update the Jacobian Matrix
+    M_jacobian->openCrsMatrix();
+    *M_jacobian += broydenMatrixUpdate;
+    M_jacobian->globalAssemble();
+
+    //M_jacobian->spy( "Jacobian" )
 }
 
 } // Namespace Multiscale

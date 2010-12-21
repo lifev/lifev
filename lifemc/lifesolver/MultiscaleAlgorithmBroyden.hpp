@@ -26,7 +26,7 @@
 
 /*!
  *  @file
- *  @brief File containing the MultiScale Explicit Algorithm
+ *  @brief File containing the MultiScale Broyden Algorithm
  *
  *  @date 26-10-2009
  *  @author Cristiano Malossi <cristiano.malossi@epfl.ch>
@@ -34,8 +34,13 @@
  *  @maintainer Cristiano Malossi <cristiano.malossi@epfl.ch>
  */
 
-#ifndef MultiscaleAlgorithmExplicit_H
-#define MultiscaleAlgorithmExplicit_H 1
+#ifndef MultiscaleAlgorithmBroyden_H
+#define MultiscaleAlgorithmBroyden_H 1
+
+#include <life/lifealg/SolverTrilinos.hpp>
+
+#include <life/lifealg/EpetraPreconditioner.hpp>
+#include <life/lifealg/IfpackPreconditioner.hpp>
 
 #include <lifemc/lifesolver/MultiscaleAlgorithm.hpp>
 
@@ -44,14 +49,14 @@ namespace LifeV
 namespace Multiscale
 {
 
-//! MultiscaleAlgorithmExplicit - The MultiScale Algorithm implementation of Explicit
+//! MultiscaleAlgorithmBroyden - The MultiScale Algorithm implementation of Broyden
 /*!
  *  @author Cristiano Malossi
  *
- *  The MultiscaleAlgorithmExplicit is an implementation of multiscaleAlgorithm_Type
- *  which implements the Explicit method.
+ *  The MultiscaleAlgorithmBroyden is an implementation of multiscaleAlgorithm_Type
+ *  which implements the Broyden method.
  */
-class MultiscaleAlgorithmExplicit : public virtual multiscaleAlgorithm_Type
+class MultiscaleAlgorithmBroyden : public virtual multiscaleAlgorithm_Type
 {
 public:
 
@@ -59,10 +64,10 @@ public:
     //@{
 
     //! Constructor
-    explicit MultiscaleAlgorithmExplicit();
+    explicit MultiscaleAlgorithmBroyden();
 
     //! Destructor
-    virtual ~MultiscaleAlgorithmExplicit() {}
+    virtual ~MultiscaleAlgorithmBroyden() {}
 
     //@}
 
@@ -70,11 +75,14 @@ public:
     //! @name MultiScale Algorithm Virtual Methods
     //@{
 
-    //! Perform sub-iteration on the coupling variables
-    void subIterate() { checkResidual(); }
+    //! Setup the data of the algorithm using a data file
+    /*!
+     * @param FileName Name of the data file.
+     */
+    void setupData( const std::string& fileName );
 
-    //! Update coupling variables for the next time step.
-    void updateCouplingVariables() { M_multiscale->initializeCouplingVariables(); }
+    //! Perform sub-iteration on the coupling variables
+    void subIterate();
 
     //@}
 
@@ -83,21 +91,33 @@ private:
     //! @name Unimplemented Methods
     //@{
 
-    MultiscaleAlgorithmExplicit( const MultiscaleAlgorithmExplicit& algorithm );
+    MultiscaleAlgorithmBroyden( const MultiscaleAlgorithmBroyden& algorithm );
 
-    MultiscaleAlgorithmExplicit& operator=( const MultiscaleAlgorithmExplicit& algorithm );
+    MultiscaleAlgorithmBroyden& operator=( const MultiscaleAlgorithmBroyden& algorithm );
 
     //@}
 
+
+    //! @name Private Methods
+    //@{
+
+    void assembleJacobianMatrix();
+
+    void broydenJacobianUpdate( const multiscaleVector_Type& delta, const multiscaleVector_Type& minusCouplingResidual );
+
+    //@}
+
+    SolverTrilinos                           M_solver;
+    multiscaleMatrixPtr_Type                 M_jacobian;
 };
 
 //! Factory create function
-inline multiscaleAlgorithm_Type* createMultiscaleAlgorithmExplicit()
+inline multiscaleAlgorithm_Type* createMultiscaleAlgorithmBroyden()
 {
-    return new MultiscaleAlgorithmExplicit();
+    return new MultiscaleAlgorithmBroyden();
 }
 
 } // Namespace Multiscale
 } // Namespace LifeV
 
-#endif /* MultiscaleAlgorithmExplicit_H */
+#endif /* MultiscaleAlgorithmBroyden_H */

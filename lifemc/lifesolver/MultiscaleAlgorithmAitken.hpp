@@ -86,22 +86,6 @@ public:
 
     //@}
 
-protected:
-
-    //! @name Protected Methods
-    //@{
-
-    //@}
-
-    enum methodType
-    {
-        Scalar, Vectorial, VectorialBlock
-    };
-
-    std::map< std::string, methodType >            M_methodMap;
-    methodType                                     M_method;
-    NonLinearAitken< multiscaleVector_Type >     M_generalizedAitken;
-
 private:
 
     //! @name Unimplemented Methods
@@ -112,6 +96,16 @@ private:
     MultiscaleAlgorithmAitken& operator=( const MultiscaleAlgorithmAitken& algorithm );
 
     //@}
+
+    enum methodType
+    {
+        Scalar, Vectorial, VectorialBlock
+    };
+
+    std::map< std::string, methodType >            M_methodMap;
+    methodType                                     M_method;
+    NonLinearAitken< multiscaleVector_Type >       M_generalizedAitken;
+
 };
 
 //! Factory create function

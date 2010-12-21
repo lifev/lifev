@@ -71,7 +71,7 @@ MultiscaleAlgorithm::setupData( const std::string& fileName )
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 8010 ) << "MultiscaleAlgorithm::SetupData( fileName ) \n";
+    Debug( 8010 ) << "MultiscaleAlgorithm::setupData( fileName ) \n";
 #endif
 
     GetPot dataFile( fileName );
@@ -85,7 +85,7 @@ MultiscaleAlgorithm::subIterate()
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 8010 ) << "MultiscaleAlgorithm::SubIterate() \n";
+    Debug( 8010 ) << "MultiscaleAlgorithm::subIterate() \n";
 #endif
 
     // Algorithm Type
@@ -123,7 +123,7 @@ MultiscaleAlgorithm::setCommunicator( const multiscaleCommPtr_Type& comm )
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 8100 ) << "MultiscaleAlgorithm::SetCommunicator( comm ) \n";
+    Debug( 8100 ) << "MultiscaleAlgorithm::setCommunicator( comm ) \n";
 #endif
 
     M_comm = comm;
@@ -135,7 +135,7 @@ MultiscaleAlgorithm::setModel( const multiscaleModelPtr_Type model )
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 8010 ) << "MultiscaleAlgorithm::SetMultiScaleProblem( multiscale ) \n";
+    Debug( 8010 ) << "MultiscaleAlgorithm::setMultiScaleProblem( multiscale ) \n";
 #endif
 
     M_multiscale = boost::dynamic_pointer_cast< MultiscaleModelMultiscale >( model );
@@ -181,18 +181,24 @@ MultiscaleAlgorithm::save( const UInt& subiterationsNumber, const Real& residual
 }
 
 bool
-MultiscaleAlgorithm::toleranceSatisfied()
+MultiscaleAlgorithm::checkResidual( const UInt& subIT )
 {
     // Compute computeResidual
     Real residual ( computeResidual() );
 
-    // Display computeResidual value
+    // Display subIT and residual values
     if ( M_displayer->isLeader() )
+    {
+        if ( subIT > 0 )
+            std::cout << " MS-  Sub-iteration n.:                        " << subIT << std::endl;
         std::cout << " MS-  Residual:                                " << residual << std::endl;
-
+    }
     // Is the tolerance satisfied?
     if ( residual <= M_tolerance )
+    {
+        save( subIT, M_couplingResiduals->norm2() );
         return true;
+    }
     else
         return false;
 }

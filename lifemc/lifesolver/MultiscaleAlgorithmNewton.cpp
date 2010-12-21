@@ -65,7 +65,7 @@ MultiscaleAlgorithmNewton::setupData( const std::string& fileName )
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 8013 ) << "MultiscaleAlgorithmNewton::SetupData( fileName ) \n";
+    Debug( 8013 ) << "MultiscaleAlgorithmNewton::setupData( fileName ) \n";
 #endif
 
     multiscaleAlgorithm_Type::setupData( fileName );
@@ -82,17 +82,14 @@ MultiscaleAlgorithmNewton::subIterate()
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 8013 ) << "MultiscaleAlgorithmNewton::SubIterate() \n";
+    Debug( 8013 ) << "MultiscaleAlgorithmNewton::subIterate() \n";
 #endif
 
     multiscaleAlgorithm_Type::subIterate();
 
     // Verify tolerance
-    if ( toleranceSatisfied() )
-    {
-        save( 0, M_couplingResiduals->norm2() );
+    if ( checkResidual( 0 ) )
         return;
-    }
 
     M_multiscale->exportCouplingVariables( *M_couplingVariables );
 
@@ -104,12 +101,7 @@ MultiscaleAlgorithmNewton::subIterate()
     for ( UInt subIT = 1; subIT <= M_subiterationsMaximumNumber; ++subIT )
     {
         // Compute the Jacobian (we completery delete the previous matrix)
-        M_jacobian.reset( new multiscaleMatrix_Type( M_couplingVariables->map(), 50, 0 ) );
-        M_multiscale->exportJacobian( *M_jacobian );
-        M_jacobian->globalAssemble();
-        M_solver.setMatrix( *M_jacobian );
-
-        //M_jacobian->spy( "Jacobian" );
+        assembleJacobianMatrix();
 
         // To be moved in a post-processing class
         //std::cout << " MS-  CouplingVariables:\n" << std::endl;
@@ -120,6 +112,7 @@ MultiscaleAlgorithmNewton::subIterate()
         //Compute delta using -R
         minusCouplingResidual = -( *M_couplingResiduals );
 
+        M_solver.setMatrix( *M_jacobian );
         M_solver.solve( delta, minusCouplingResidual );
         //M_solver.solveSystem( minusCouplingResidual, delta, M_jacobian, false );
 
@@ -135,22 +128,29 @@ MultiscaleAlgorithmNewton::subIterate()
         // solveSystem
         M_multiscale->solveSystem();
 
-        // Display subiteration information
-        if ( M_displayer->isLeader() )
-            std::cout << " MS-  Sub-iteration n.:                        " << subIT << std::endl;
-
         // Verify tolerance
-        if ( toleranceSatisfied() )
-        {
-            save( subIT, M_couplingResiduals->norm2() );
+        if ( checkResidual( subIT ) )
             return;
-        }
     }
 
     save( M_subiterationsMaximumNumber, M_couplingResiduals->norm2() );
 
     multiscaleErrorCheck( Tolerance, "Newton algorithm residual: " + number2string( M_couplingResiduals->norm2() ) +
                         " (required: " + number2string( M_tolerance ) + ")\n" );
+}
+
+// ===================================================
+// Private Methods
+// ===================================================
+void
+MultiscaleAlgorithmNewton::assembleJacobianMatrix()
+{
+    // Compute the Jacobian matrix
+    M_jacobian.reset( new multiscaleMatrix_Type( M_couplingVariables->map(), 50, 0 ) );
+    M_multiscale->exportJacobian( *M_jacobian );
+    M_jacobian->globalAssemble();
+
+    //M_jacobian->spy( "Jacobian" )
 }
 
 } // Namespace Multiscale
