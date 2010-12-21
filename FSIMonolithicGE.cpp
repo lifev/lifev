@@ -209,13 +209,13 @@ void FSIMonolithicGE::applyBoundaryConditions( )
 //! Products registration
 // ===================================================
 
-bool FSIMonolithicGE::reg = FSIFactory_Type::instance().registerProduct( "FSIMonolithicGE", &FSIMonolithicGE::createM )  &&
+bool FSIMonolithicGE::reg = FSIFactory_Type::instance().registerProduct( "monolithicGE", &FSIMonolithicGE::createM )  &&
     BlockPrecFactory::instance().registerProduct("ComposedDNND"  , &MonolithicBlockComposedDNND::createComposedDNND) &&
     BlockPrecFactory::instance().registerProduct("AdditiveSchwarz"  , &MonolithicBlockMatrix::createAdditiveSchwarz) &&
     MonolithicBlockMatrix::Factory_Type::instance().registerProduct("AdditiveSchwarz"  , &MonolithicBlockMatrix::createAdditiveSchwarz ) &&
     BlockPrecFactory::instance().registerProduct("AdditiveSchwarzRN"  , &MonolithicBlockMatrixRN::createAdditiveSchwarzRN ) &&
     MonolithicBlockMatrix::Factory_Type::instance().registerProduct("AdditiveSchwarzRN"  , &MonolithicBlockMatrixRN::createAdditiveSchwarzRN ) &&
-    BlockPrecFactory::instance().registerProduct("MonolithicBlockComposedDN"  , &MonolithicBlockComposedDN::createComposedDN ) &&
-    BlockPrecFactory::instance().registerProduct("MonolithicBlockComposedDN2"  , &MonolithicBlockComposedDN::createComposedDN2 );
+    BlockPrecFactory::instance().registerProduct("ComposedDN"  , &MonolithicBlockComposedDN::createComposedDN ) &&
+    BlockPrecFactory::instance().registerProduct("ComposedDN2"  , &MonolithicBlockComposedDN::createComposedDN2 );
 
 } // Namespace LifeV
