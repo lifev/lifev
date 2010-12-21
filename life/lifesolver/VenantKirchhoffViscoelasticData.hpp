@@ -27,9 +27,9 @@
 /*!
   @file
   @brief VenantKirchhoffViscoelasticData - Class to secondorder problem (S. Venant Kirchhoff Viscoelastic)
- 
+
   @author Matteo Pozzoli <matteo1.pozzoli@mail.polimi.it>
-  
+
   @contributor Matteo Pozzoli <matteo1.pozzoli@mail.polimi.it>
   @maintainer Matteo Pozzoli <matteo1.pozzoli@mail.polimi.it>
  */
@@ -52,7 +52,7 @@
 #pragma GCC diagnostic ignored "-Wunused-parameter"
 
 #include <life/lifefilters/GetPot.hpp>
-#include <life/lifecore/life.hpp>
+#include <life/lifecore/Life.hpp>
 #include <life/lifefem/TimeData.hpp>
 
 
@@ -252,15 +252,15 @@ private:
     //! Data containers for time and mesh
     Time_ptrType           M_time;
 
-    //@name Physics 
+    //@name Physics
     //@{
     //! density
     Real                   M_density;
 
-    //!thickness 
+    //!thickness
     Real                   M_thickness;
 
-    //!poisson 
+    //!poisson
     MaterialContainer_Type M_poisson;
 
     //!young
@@ -268,11 +268,11 @@ private:
 
     //!damping coefficient (Stiffness)
     MaterialContainer_Type M_gamma;
-  
+
     //! damping coefficint (mass)
     MaterialContainer_Type  M_beta;
     //@}
-    
+
     //! Miscellaneous
     Real                   M_factor; // amplification factor for deformed mesh
     //!verbose
@@ -281,8 +281,8 @@ private:
     std::string            M_order;
 
     //!damping true when there is damping term
-    bool                   M_damping;  
+    bool                   M_damping;
 };
 
-}  //namespace 
+}  //namespace
 #endif /* VENANTKIRCHHOFFVISCOELASTICDATA_H*/

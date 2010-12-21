@@ -48,7 +48,7 @@
 #include <map>
 #include <life/lifefilters/GetPot.hpp>
 #include <boost/shared_ptr.hpp>
-#include <life/lifecore/life.hpp>
+#include <life/lifecore/Life.hpp>
 #include <life/lifecore/StringUtility.hpp>
 #include <life/lifefem/TimeData.hpp>
 

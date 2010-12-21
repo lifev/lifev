@@ -58,7 +58,7 @@
 #include <Epetra_SerialComm.h>
 #endif
 
-#include <life/lifecore/life.hpp>
+#include <life/lifecore/Life.hpp>
 
 //#include <life/lifealg/newton.hpp>
 

@@ -43,7 +43,7 @@
  *  @maintainer  Paolo Tricerri <paolo.tricerri@epfl.ch>
  */
 
-#include <life/lifecore/life.hpp>
+#include <life/lifecore/Life.hpp>
 #include <life/lifesolver/VenantKirchhoffElasticData.hpp>
 
 //=====================================================

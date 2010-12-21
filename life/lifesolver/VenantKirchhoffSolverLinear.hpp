@@ -38,8 +38,9 @@
 #ifndef LINEARVENANTKIRCHHOFSOLVER_H
 #define LINEARVENANTKIRCHHOFSOLVER_H 1
 
-#include <life/lifecore/life.hpp>
+#include <life/lifecore/Life.hpp>
 #include <life/lifesolver/VenantKirchhoffSolver.hpp>
+
 
 namespace LifeV
 {

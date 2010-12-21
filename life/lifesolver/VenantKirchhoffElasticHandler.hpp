@@ -46,7 +46,7 @@
 #include <life/lifesolver/dataElasticStructure.hpp>
 #include <life/lifefem/ReferenceFE.hpp>
 #include <life/lifefem/DOF.hpp>
-#include <life/lifecore/life.hpp>
+#include <life/lifecore/Life.hpp>
 #include <life/lifefilters/medit_wrtrs.hpp>
 #include <life/lifefem/BCHandler.hpp>
 

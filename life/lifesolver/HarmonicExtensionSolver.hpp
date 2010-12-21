@@ -40,7 +40,7 @@
 #ifndef HARMONICEXTENSIONSOLVER_H_
 #define HARMONICEXTENSIONSOLVER_H_
 
-#include <life/lifecore/life.hpp>
+#include <life/lifecore/Life.hpp>
 #include <life/lifefem/DOF.hpp>
 #include <life/lifearray/MatrixElemental.hpp>
 #include <life/lifefem/AssemblyElemental.hpp>

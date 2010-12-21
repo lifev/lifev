@@ -38,7 +38,7 @@
 
 
 #include <life/lifesolver/OseenData.hpp>
-#include <life/lifecore/life.hpp>
+#include <life/lifecore/Life.hpp>
 
 
 namespace LifeV
