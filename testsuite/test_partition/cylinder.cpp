@@ -476,7 +476,7 @@ Cylinder::run()
 
     // bdf object to store the previous solutions
 
-    BdfTNS<vector_type> bdf;
+    TimeAdvanceBDFNavierStokes<vector_type> bdf;
     bdf.setup(oseenData->dataTime()->orderBDF());
 
     vector_type beta( fullMap );

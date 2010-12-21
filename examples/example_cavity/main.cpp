@@ -289,7 +289,8 @@ main( int argc, char** argv )
     ensight.postProcess( 0 );
 
     // bdf object to store the previous solutions
-    BdfTNS<vector_type> bdf(oseenData.dataTime()->orderBDF());
+    TimeAdvanceBDFNavierStokes<vector_type> bdf(oseenData.dataTime()->orderBDF());
+
     // bdf initialization with the stokes problem solution
     bdf.bdfVelocity().setInitialCondition( fluid.solution() );
 

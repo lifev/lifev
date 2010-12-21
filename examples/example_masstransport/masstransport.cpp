@@ -422,7 +422,7 @@ MassTransport::run()
 
     // bdf object to store the previous solutions
 
-    BdfTNS<vector_type> bdf(oseenData.dataTime()->orderBDF());
+    TimeAdvanceBDFNavierStokes<vector_type> bdf(oseenData.dataTime()->orderBDF());
 
     // initialization with stokes solution
 

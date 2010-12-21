@@ -51,7 +51,7 @@
 namespace LifeV
 {
 
-//! \class BdfTNS
+//! \class TimeAdvanceBDFNavierStokes
 /*!
     @author Alessandro Veneziani
     @see Van Kan, Prohl, Guermond
@@ -68,7 +68,7 @@ namespace LifeV
  */
 
 template<typename VectorType = EpetraVector >
-class BdfTNS
+class TimeAdvanceBDFNavierStokes
 {
 public:
 
@@ -85,10 +85,10 @@ public:
     //@{
 
     //! Constructor
-    BdfTNS();
+    TimeAdvanceBDFNavierStokes();
 
     //! Destructor
-    ~BdfTNS() { }
+    ~TimeAdvanceBDFNavierStokes() { }
 
     //@}
 
@@ -137,7 +137,7 @@ private:
 // Constructors
 // ===================================================
 template<typename VectorType>
-BdfTNS<VectorType>::BdfTNS()
+TimeAdvanceBDFNavierStokes<VectorType>::TimeAdvanceBDFNavierStokes()
         :
         M_bdfVelocity( ),
         M_bdfPressure( )
@@ -146,7 +146,7 @@ BdfTNS<VectorType>::BdfTNS()
 
 template<typename VectorType>
 void
-BdfTNS<VectorType>::setup( const UInt order )
+TimeAdvanceBDFNavierStokes<VectorType>::setup( const UInt order )
 {
     M_bdfVelocity.setup( order, 1 );
     M_bdfPressure.setup( std::max( UInt( 1 ), order - 1 ), 1 );
@@ -157,7 +157,7 @@ BdfTNS<VectorType>::setup( const UInt order )
 // ===================================================
 template<typename VectorType>
 void
-BdfTNS<VectorType>::showMe() const
+TimeAdvanceBDFNavierStokes<VectorType>::showMe() const
 {
     std::cout << " *** Bdf velocity: " << std::endl;
     M_bdfVelocity.showMe();

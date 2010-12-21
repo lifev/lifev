@@ -264,7 +264,7 @@ main( int argc, char** argv )
 
     // bdf object to store the previous solutions
 
-    BdfTNS<vector_type> bdf(oseenData.dataTime()->orderBDF());
+    TimeAdvanceBDFNavierStokes<vector_type> bdf(oseenData.dataTime()->orderBDF());
 
     if (verbose) std::cout << std::endl;
     if (verbose) std::cout << "Computing the stokes solution ... " << std::endl << std::endl;

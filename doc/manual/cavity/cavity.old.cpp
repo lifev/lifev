@@ -244,7 +244,7 @@ int main(int argc, char** argv)
     LifeV::Real tFinal = oseenData->dataTime()->endTime();
 
     // bdf object to store the previous solutions
-    LifeV::BdfTNS<vector_type> bdf(oseenData->dataTime()->orderBDF());
+    LifeV::TimeAdvanceBDFNavierStokes<vector_type> bdf(oseenData->dataTime()->orderBDF());
 
     // Initialization with exact solution: either interpolation or "L2-NS"-projection
     t0 -= dt * bdf.bdfVelocity().order();
