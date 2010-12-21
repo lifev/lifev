@@ -153,7 +153,7 @@ public:
 
         M_data = dataPtr_Type( new data_Type() );
         M_data->setup( data_file );
-        M_data->dataSolid()->setDataTime( M_data->dataFluid()->dataTime() ); //Same dataTime for fluid & solid
+        M_data->dataSolid()->setTimeData( M_data->dataFluid()->dataTime() ); //Same TimeData for fluid & solid
         //M_data->showMe();
 
 #ifdef DEBUG
@@ -624,7 +624,7 @@ void Problem::initialize(std::string& /*loadInitSol*/,  GetPot const& data_file)
 
     initSolSVel.reset(new vector_Type(*M_fsi->FSIOper()->couplingVariableMap(), Unique, Zero));
     initSolSVel->subset(*M_solidVel,M_solidVel->map(), (UInt)0, offset);
-    *initSolSVel*=1/(M_fsi->FSIOper()->solid().getRescaleFactor()*M_data->dataSolid()->getDataTime()->timeStep());
+    *initSolSVel*=1/(M_fsi->FSIOper()->solid().getRescaleFactor()*M_data->dataSolid()->getdataTime()->timeStep());
 
     M_fsi->FSIOper()->solid().initializeVel(*initSolSVel);
     M_fsi->initialize(initSol);
