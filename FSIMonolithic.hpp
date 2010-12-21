@@ -113,7 +113,7 @@ public:
 
     typedef MonolithicBlockMatrix                              blockMatrix_Type;
     typedef boost::shared_ptr<blockMatrix_Type>                blockMatrixPtr_Type;
-    typedef SolverTrilinos                                     solver_Type;
+    typedef SolverAztecOO                                      solver_Type;
     //@}
 
     //! OBSOLETE typedefs
