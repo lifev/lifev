@@ -56,7 +56,7 @@ public:
     //! @name Type definitions and Enumerators
     //@{
 
-    typedef singleton< factory< OneDimensionalFlux, OneDimensional::fluxTerm_Type > > factoryFlux_Type;
+    typedef FactorySingleton< Factory< OneDimensionalFlux, OneDimensional::fluxTerm_Type > > factoryFlux_Type;
 
     typedef OneDimensionalPhysics                       physics_Type;
     typedef boost::shared_ptr< physics_Type >           physicsPtr_Type;

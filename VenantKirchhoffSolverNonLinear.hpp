@@ -376,7 +376,7 @@ buildSystem(matrixPtr_Type massStiff, Real const & factor)
 
     this->M_Displayer->leaderPrint( "NonLin S-  Building the system             ... ");
 
-    Chrono chrono;
+    LifeChrono chrono;
     chrono.start();
 
     // Number of displacement components
@@ -463,7 +463,7 @@ void VenantKirchhoffSolverNonLinear<Mesh, SolverType>::updateSystem( matrixPtr_T
 {
     this->M_Displayer->leaderPrint(" NonLin S-  Updating mass term on right hand side... ");
 
-    Chrono chrono;
+    LifeChrono chrono;
     chrono.start();
 
     // Number of displacement components
@@ -535,7 +535,7 @@ void VenantKirchhoffSolverNonLinear<Mesh, SolverType>::updateSystem(  source_Typ
 
     this->M_Displayer->leaderPrint(" NonLin S-  Updating mass term on right hand side... ");
 
-    Chrono chrono;
+    LifeChrono chrono;
     chrono.start();
 
     // Number of displacement components
@@ -762,7 +762,7 @@ template <typename Mesh, typename SolverType>
 void VenantKirchhoffSolverNonLinear<Mesh, SolverType>::
 iterate( bchandler_Type& bch )
 {
-    Chrono chrono;
+    LifeChrono chrono;
 
     // matrix and vector assembling communication
     this->M_Displayer->leaderPrint("  NonLin S-  Solving the system ... \n");
@@ -830,7 +830,7 @@ void VenantKirchhoffSolverNonLinear<Mesh, SolverType>::computeMatrix( matrixPtr_
 {
     this->M_Displayer->leaderPrint( "    NonLin S- Computing residual ... \t\t\t");
 
-    Chrono chrono;
+    LifeChrono chrono;
     chrono.start();
 
     // Matrices initialization
@@ -880,7 +880,7 @@ void VenantKirchhoffSolverNonLinear<Mesh, SolverType>::evalResidual( vector_Type
     computeMatrix(this->M_stiff, sol, 1.);
 
     this->M_Displayer->leaderPrint("    NonLin S- Updating the boundary conditions ... \t");
-    Chrono chrono;
+    LifeChrono chrono;
     chrono.start();
     if ( !this->M_BCh->bcUpdateDone() )
         this->M_BCh->bcUpdate( *this->M_FESpace->mesh(), this->M_FESpace->feBd(), this->M_FESpace->dof() );
@@ -907,7 +907,7 @@ void VenantKirchhoffSolverNonLinear<Mesh, SolverType>::updateJacobian( vector_Ty
 {
     this->M_Displayer->leaderPrint("  NonLin S-  Solid: Updating JACOBIAN... ");
 
-    Chrono chrono;
+    LifeChrono chrono;
     chrono.start();
 
 
@@ -1036,7 +1036,7 @@ solveJacobian( vector_Type&           step,
                Real&                /*linear_rel_tol*/,
                bchandler_Type&        BCh)
 {
-    Chrono chrono;
+    LifeChrono chrono;
 
     updateJacobian( *this->M_disp, this->M_jacobian );
 
