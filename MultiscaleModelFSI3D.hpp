@@ -42,9 +42,9 @@
 #include <life/lifesolver/FSI.hpp>
 #include <life/lifealg/nonLinRichardson.hpp>
 
-#include <life/lifefilters/ensight.hpp>
+#include <life/lifefilters/ExporterEnsight.hpp>
 #ifdef HAVE_HDF5
-#include <life/lifefilters/hdf5exporter.hpp>
+#include <life/lifefilters/ExporterHDF5.hpp>
 #endif
 
 // Mathcard includes
