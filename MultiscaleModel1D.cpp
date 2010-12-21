@@ -87,16 +87,6 @@ MultiscaleModel1D::MultiscaleModel1D() :
     OneDimensional::mapsDefinition();
 
     //Register the objects
-//!\todo pass a std::string to the factories
-//     factoryOneDimensionalPhysics_Type::instance().registerProduct( "OneD_LinearPhysics",    &createOneDimensionalPhysicsLinear );
-//     factoryOneDimensionalPhysics_Type::instance().registerProduct( "OneD_NonLinearPhysics", &createOneDimensionalPhysicsNonLinear );
-
-//     factoryOneDimensionalFlux_Type::instance().registerProduct(    "OneD_LinearFlux",       &createOneDimensionalFluxLinear );
-//     factoryOneDimensionalFlux_Type::instance().registerProduct(    "OneD_NonLinearFlux",    &createOneDimensionalFluxNonLinear );
-
-//     factoryOneDimensionalSource_Type::instance().registerProduct(  "OneD_LinearSource",     &createOneDimensionalSourceLinear );
-//     factoryOneDimensionalSource_Type::instance().registerProduct(  "OneD_NonLinearSource",  &createOneDimensionalSourceNonLinear );
-
     physics_Type::factoryPhysics_Type::instance().registerProduct( OneDimensional::LinearPhysics,    &createOneDimensionalPhysicsLinear );
     physics_Type::factoryPhysics_Type::instance().registerProduct( OneDimensional::NonLinearPhysics, &createOneDimensionalPhysicsNonLinear );
 
@@ -136,20 +126,14 @@ MultiscaleModel1D::setupData( const std::string& fileName )
         setupGlobalData( fileName );
 
     //1D Model Physics
-    //!\todo pass a std::string to the factories
-    //M_physics = physicsPtr_Type( factoryOneDimensionalPhysics_Type::instance().createObject( "M_data->physicsType()" ) );
     M_physics = physicsPtr_Type( physics_Type::factoryPhysics_Type::instance().createObject( M_data->physicsType() ) );
     M_physics->setData( M_data );
 
     //1D Model Flux
-    //!\todo pass a std::string to the factories
-    //M_flux = fluxPtr_Type( factoryOneDimensionalFlux_Type::instance().createObject( "M_data->fluxType()" ) );
     M_flux = fluxPtr_Type( flux_Type::factoryFlux_Type::instance().createObject( M_data->fluxType() ) );
     M_flux->setPhysics( M_physics );
 
     //1D Model Source
-    //!\todo pass a std::string to the factories
-    //M_source = sourcePtr_Type( factoryOneDimensionalSource_Type::instance().createObject( "M_data->sourceType()" ) );
     M_source = sourcePtr_Type( source_Type::factorySource_Type::instance().createObject( M_data->sourceType() ) );
     M_source->setPhysics( M_physics );
 

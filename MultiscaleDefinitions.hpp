@@ -57,12 +57,11 @@
 // LifeV classes
 #include <life/lifecore/life.hpp>
 #include <life/lifecore/StringUtility.hpp>
-#include <life/lifefilters/GetPot.hpp>
 #include <life/lifecore/Displayer.hpp>
 #include <life/lifecore/Factory.hpp>
 #include <life/lifecore/FactorySingleton.hpp>
-#include <life/lifefem/TimeData.hpp>
 #include <life/lifemesh/MarkerDefinitions.hpp>
+#include <life/lifefem/TimeData.hpp>
 
 #include <life/lifearray/MapEpetra.hpp>
 #include <life/lifearray/EpetraVector.hpp>
@@ -78,37 +77,38 @@ namespace Multiscale
  */
 enum algorithms_Type
 {
-    Aitken,   /*!< Aitken method */
-    Explicit, /*!< Explicit method */
-    Newton    /*!< Newton method (with exact Jacobian Matrix) */
+    Aitken,                 /*!< Aitken method */
+    Broyden,                /*!< Broyden method (start from exact Jacobian Matrix) */
+    Explicit,               /*!< Explicit method */
+    Newton                  /*!< Newton method (with exact Jacobian Matrix) */
 };
 
 /*! @enum modelsTypes
  */
 enum models_Type
 {
-    Fluid3D,                   /*!< Fluid (Oseen) 3D model */
-    FSI3D,                     /*!< FSI 3D model */
-    MultiScale,                /*!< MultiScale model */
-    OneDimensional             /*!< 1D model */
+    Fluid3D,                /*!< Fluid (Oseen) 3D model */
+    FSI3D,                  /*!< FSI 3D model */
+    Multiscale,             /*!< MultiScale model */
+    OneDimensional          /*!< 1D model */
 };
 
 /*! @enum couplingsTypes
  */
 enum couplings_Type
 {
-    BoundaryCondition,         /*!< Boundary condition */
-    FlowRateStress,            /*!< Flow Rate/stress coupling condition */
-    Stress                     /*!< All stress coupling condition */
+    BoundaryCondition,      /*!< Boundary condition */
+    FlowRateStress,         /*!< Flow Rate/stress coupling condition */
+    Stress                  /*!< All stress coupling condition */
 };
 
 /*! @enum stressTypes
  */
 enum stress_Type
 {
-    StaticPressure,             /*!< Use static pressure */
-    TotalPressure,              /*!< Use total pressure (static + dynamic) */
-    LagrangeMultiplier          /*!< Use the Lagrange multiplier */
+    StaticPressure,          /*!< Use static pressure */
+    TotalPressure,           /*!< Use total pressure (static + dynamic) */
+    LagrangeMultiplier       /*!< Use the Lagrange multiplier */
 };
 
 enum errors_Type
@@ -142,44 +142,38 @@ class MultiscaleCoupling;
 class MultiscaleData;
 
 // Type definitions
-typedef entityFlag_Type                                                   bcFlag_Type;
+typedef entityFlag_Type                                                          bcFlag_Type;
 
-typedef Displayer::commPtr_Type                                           multiscaleCommPtr_Type;
+typedef Displayer::commPtr_Type                                                  multiscaleCommPtr_Type;
 
-typedef EpetraVector                                                      multiscaleVector_Type;
-typedef boost::shared_ptr< multiscaleVector_Type >                        multiscaleVectorPtr_Type;
+typedef EpetraVector                                                             multiscaleVector_Type;
+typedef boost::shared_ptr< multiscaleVector_Type >                               multiscaleVectorPtr_Type;
 
-typedef EpetraMatrix< Real >                                              multiscaleMatrix_Type;
-typedef boost::shared_ptr< multiscaleMatrix_Type >                        multiscaleMatrixPtr_Type;
+typedef EpetraMatrix< Real >                                                     multiscaleMatrix_Type;
+typedef boost::shared_ptr< multiscaleMatrix_Type >                               multiscaleMatrixPtr_Type;
 
-typedef MultiscaleAlgorithm                                               multiscaleAlgorithm_Type;
-typedef boost::shared_ptr< multiscaleAlgorithm_Type >                     multiscaleAlgorithmPtr_Type;
-//!\todo pass a std::string to the factories
-//typedef singleton< factory< multiscaleAlgorithm_Type, std::string > > multiscaleAlgorithmFactory_Type;
+typedef MultiscaleAlgorithm                                                      multiscaleAlgorithm_Type;
+typedef boost::shared_ptr< multiscaleAlgorithm_Type >                            multiscaleAlgorithmPtr_Type;
 typedef FactorySingleton< Factory< multiscaleAlgorithm_Type, algorithms_Type > > multiscaleAlgorithmFactory_Type;
 
-typedef MultiscaleModel                                                   multiscaleModel_Type;
-typedef boost::shared_ptr< multiscaleModel_Type >                         multiscaleModelPtr_Type;
-//!\todo pass a std::string to the factories
-//typedef singleton< factory< multiscaleModel_Type, std::string > >         multiscaleModelFactory_Type;
+typedef MultiscaleModel                                                          multiscaleModel_Type;
+typedef boost::shared_ptr< multiscaleModel_Type >                                multiscaleModelPtr_Type;
 typedef FactorySingleton< Factory< multiscaleModel_Type, models_Type > >         multiscaleModelFactory_Type;
 
-typedef MultiscaleCoupling                                                multiscaleCoupling_Type;
-//!\todo pass a std::string to the factories
-//typedef singleton< factory< multiscaleCoupling_Type, std::string > >   multiscaleCouplingFactory_Type;
-typedef boost::shared_ptr< multiscaleCoupling_Type >                      multiscaleCouplingPtr_Type;
+typedef MultiscaleCoupling                                                       multiscaleCoupling_Type;
+typedef boost::shared_ptr< multiscaleCoupling_Type >                             multiscaleCouplingPtr_Type;
 typedef FactorySingleton< Factory< multiscaleCoupling_Type, couplings_Type > >   multiscaleCouplingFactory_Type;
 
-typedef std::vector< multiscaleModelPtr_Type >                            multiscaleModelsVector_Type;
-typedef multiscaleModelsVector_Type::iterator                             multiscaleModelsVectorIterator_Type;
-typedef multiscaleModelsVector_Type::const_iterator                       multiscaleModelsVectorConstIterator_Type;
+typedef std::vector< multiscaleModelPtr_Type >                                   multiscaleModelsVector_Type;
+typedef multiscaleModelsVector_Type::iterator                                    multiscaleModelsVectorIterator_Type;
+typedef multiscaleModelsVector_Type::const_iterator                              multiscaleModelsVectorConstIterator_Type;
 
-typedef std::vector< multiscaleCouplingPtr_Type >                         multiscaleCouplingsVector_Type;
-typedef multiscaleCouplingsVector_Type::iterator                          multiscaleCouplingsVectorIterator_Type;
-typedef multiscaleCouplingsVector_Type::const_iterator                    multiscaleCouplingsVectorConstIterator_Type;
+typedef std::vector< multiscaleCouplingPtr_Type >                                multiscaleCouplingsVector_Type;
+typedef multiscaleCouplingsVector_Type::iterator                                 multiscaleCouplingsVectorIterator_Type;
+typedef multiscaleCouplingsVector_Type::const_iterator                           multiscaleCouplingsVectorConstIterator_Type;
 
-typedef MultiscaleData                                                    multiscaleData_Type;
-typedef boost::shared_ptr< multiscaleData_Type >                          multiscaleDataPtr_Type;
+typedef MultiscaleData                                                           multiscaleData_Type;
+typedef boost::shared_ptr< multiscaleData_Type >                                 multiscaleDataPtr_Type;
 
 // ===================================================
 // MS Utility Methods
@@ -191,7 +185,7 @@ multiscaleMapsDefinition()
 {
     multiscaleModelsMap["Fluid3D"]              = Fluid3D;
     multiscaleModelsMap["FSI3D"]                = FSI3D;
-    multiscaleModelsMap["MultiScale"]           = MultiScale;
+    multiscaleModelsMap["Multiscale"]           = Multiscale;
     multiscaleModelsMap["OneDimensional"]       = OneDimensional;
 
     multiscaleCouplingsMap["BoundaryCondition"] = BoundaryCondition;
@@ -199,12 +193,13 @@ multiscaleMapsDefinition()
     multiscaleCouplingsMap["Stress"]            = Stress;
 
     multiscaleAlgorithmsMap["Aitken"]           = Aitken;
+    multiscaleAlgorithmsMap["Broyden"]          = Broyden;
     multiscaleAlgorithmsMap["Explicit"]         = Explicit;
     multiscaleAlgorithmsMap["Newton"]           = Newton;
 
+    multiscaleStressesMap["LagrangeMultiplier"] = LagrangeMultiplier;
     multiscaleStressesMap["StaticPressure"]     = StaticPressure;
     multiscaleStressesMap["TotalPressure"]      = TotalPressure;
-    multiscaleStressesMap["LagrangeMultiplier"] = LagrangeMultiplier;
 }
 
 //! Perform a dynamic cast from a base class to a derived class
@@ -284,8 +279,7 @@ multiscaleErrorCheck( const errors_Type& error, const std::string& message = "" 
     multiscaleExitFlag = EXIT_FAILURE;
 }
 
-} // Namespace multiscale
-
+} // Namespace Multiscale
 } // Namespace LifeV
 
 #endif /* MS_Definitions_H */

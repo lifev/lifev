@@ -65,21 +65,7 @@ MultiscaleSolver::MultiscaleSolver() :
     multiscaleMapsDefinition();
 
     //Register the objects
-    //!\todo pass a std::string to the factories
-//     multiscaleModelFactory_Type::instance().registerProduct   (  "MultiScale",          &createMultiscaleModelMultiscale );
-//     multiscaleModelFactory_Type::instance().registerProduct   (  "Fluid3D",             &createMultiscaleModelFluid3D );
-//     multiscaleModelFactory_Type::instance().registerProduct   (  "OneDimensional",      &createMultiscaleModelOneDimensional );
-//     multiscaleModelFactory_Type::instance().registerProduct   (  "FSI3D",               &createMultiscaleModelFSI3D );
-
-//     multiscaleCouplingFactory_Type::instance().registerProduct(  "Stress",              &createMultiscaleCouplingStress );
-//     multiscaleCouplingFactory_Type::instance().registerProduct(  "FlowRateStress",      &createMultiscaleCouplingFlowRateStress );
-//     multiscaleCouplingFactory_Type::instance().registerProduct(  "BoundaryCondition",   &createMultiscaleCouplingBoundaryCondition );
-
-//     multiscaleAlgorithmFactory_Type::instance().registerProduct( "Aitken",              &createMultiscaleAlgorithmAitken );
-//     multiscaleAlgorithmFactory_Type::instance().registerProduct( "Explicit",            &createMultiscaleAlgorithmExplicit );
-//     multiscaleAlgorithmFactory_Type::instance().registerProduct( "Newton",              &createMultiscaleAlgorithmNewton );
-
-    multiscaleModelFactory_Type::instance().registerProduct   (  MultiScale,          &createMultiscaleModelMultiscale );
+    multiscaleModelFactory_Type::instance().registerProduct   (  Multiscale,          &createMultiscaleModelMultiscale );
     multiscaleModelFactory_Type::instance().registerProduct   (  Fluid3D,             &createMultiscaleModelFluid3D );
     multiscaleModelFactory_Type::instance().registerProduct   (  OneDimensional,      &createMultiscaleModelOneDimensional );
     multiscaleModelFactory_Type::instance().registerProduct   (  FSI3D,               &createMultiscaleModelFSI3D );
@@ -89,6 +75,7 @@ MultiscaleSolver::MultiscaleSolver() :
     multiscaleCouplingFactory_Type::instance().registerProduct(  BoundaryCondition,   &createMultiscaleCouplingBoundaryCondition );
 
     multiscaleAlgorithmFactory_Type::instance().registerProduct( Aitken,              &createMultiscaleAlgorithmAitken );
+    multiscaleAlgorithmFactory_Type::instance().registerProduct( Broyden,             &createMultiscaleAlgorithmBroyden );
     multiscaleAlgorithmFactory_Type::instance().registerProduct( Explicit,            &createMultiscaleAlgorithmExplicit );
     multiscaleAlgorithmFactory_Type::instance().registerProduct( Newton,              &createMultiscaleAlgorithmNewton );
 }
@@ -127,9 +114,6 @@ MultiscaleSolver::setupProblem( const std::string& fileName, const std::string& 
         multiscaleProblemStep = dataFile( "Solver/Restart/RestartFromStepNumber", 0 ) + 1;
 
     // Create the main model and set the communicator
-    //!\todo pass a std::string to the factories
-//     M_model = multiscaleModelPtr_Type( multiscaleModelFactory_Type::instance().createObject(  dataFile( "Problem/ProblemType", "MultiScale" ) ) );
-
     M_model = multiscaleModelPtr_Type( multiscaleModelFactory_Type::instance().createObject( multiscaleModelsMap[ dataFile( "Problem/ProblemType", "MultiScale" ) ] ) );
 
     M_model->setCommunicator( M_comm );
@@ -143,10 +127,8 @@ MultiscaleSolver::setupProblem( const std::string& fileName, const std::string& 
     M_model->setupModel();
 
     // Algorithm parameters
-    if ( M_model->type() == MultiScale )
+    if ( M_model->type() == Multiscale )
     {
-        //!\todo pass a std::string to the factories
-        //        M_algorithm = multiscaleAlgorithmPtr_Type( multiscaleAlgorithmFactory_Type::instance().createObject( dataFile( "Solver/Algorithm/AlgorithmType", "Newton" ) ) );
         M_algorithm = multiscaleAlgorithmPtr_Type( multiscaleAlgorithmFactory_Type::instance().createObject( multiscaleAlgorithmsMap[ dataFile( "Solver/Algorithm/AlgorithmType", "Newton" ) ] ) );
 
         M_algorithm->setCommunicator( M_comm );
@@ -191,7 +173,7 @@ MultiscaleSolver::solveProblem( const Real& externalResidual )
             M_model->buildSystem();
         else
         {
-            if ( M_model->type() == MultiScale )
+            if ( M_model->type() == Multiscale )
                 M_algorithm->updateCouplingVariables();
             M_model->updateSystem();
         }
@@ -200,7 +182,7 @@ MultiscaleSolver::solveProblem( const Real& externalResidual )
         M_model->solveSystem();
 
         // If it is a MultiScale model, call algorithms for subiterations
-        if ( M_model->type() == MultiScale )
+        if ( M_model->type() == Multiscale )
             M_algorithm->subIterate();
 
         // saveSolution
@@ -238,7 +220,7 @@ MultiscaleSolver::showMe()
     }
 
     M_model->showMe();
-    if ( M_model->type() == MultiScale )
+    if ( M_model->type() == Multiscale )
         M_algorithm->showMe();
 
     if ( M_displayer->isLeader() )
