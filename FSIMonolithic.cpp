@@ -97,7 +97,7 @@ void
 FSIMonolithic::setupDOF( void )
 {
 
-    M_dofStructureToHarmonicExtension    .reset( new DofInterface3Dto3D );
+    M_dofStructureToHarmonicExtension    .reset( new DOFInterface3Dto3D );
 
     M_dofStructureToHarmonicExtension->setup(   M_uFESpace->refFE(), M_uFESpace->dof(),
                                                 M_dFESpace->refFE(), M_dFESpace->dof() );

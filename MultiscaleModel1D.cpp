@@ -631,9 +631,9 @@ MultiscaleModel1D::setupFESpace()
 #endif
 
     //Setup FESpace
-    const RefFE*    refFE = &feSegP1;
-    const QuadRule* qR    = &quadRuleSeg3pt;
-    const QuadRule* bdQr  = &quadRuleSeg1pt;
+    const ReferenceFE*    refFE = &feSegP1;
+    const QuadratureRule* qR    = &quadRuleSeg3pt;
+    const QuadratureRule* bdQr  = &quadRuleSeg1pt;
 
 //    const RefFE*    refFE = &feSegP2;
 //    const QuadRule* qR    = &quadRuleSeg3pt;
