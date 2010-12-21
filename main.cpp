@@ -99,10 +99,10 @@
 
 #include <life/lifesolver/DataFSI.hpp>
 
-#include <life/lifefilters/ensight.hpp>
-#include <life/lifefilters/noexport.hpp>
+#include <life/lifefilters/ExporterEnsight.hpp>
+#include <life/lifefilters/ExporterEmpty.hpp>
 #ifdef HAVE_HDF5
-#include <life/lifefilters/hdf5exporter.hpp>
+#include <life/lifefilters/ExporterHDF5.hpp>
 #endif
 
 // Mathcard includes
