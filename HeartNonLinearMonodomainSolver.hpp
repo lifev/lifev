@@ -46,7 +46,7 @@
 #include <life/lifearray/EpetraVector.hpp>
 #include <life/lifemesh/regionMesh3D.hpp>
 #include <life/lifefem/bcHandler.hpp>
-#include <life/lifecore/chrono.hpp>
+#include <life/lifecore/LifeChrono.hpp>
 #include <life/lifefem/SobolevNorms.hpp>
 #include <life/lifefem/GeometricMap.hpp>
 #include <life/lifesolver/HeartMonodomainData.hpp>
