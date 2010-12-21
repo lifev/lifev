@@ -444,7 +444,7 @@ Real elementaryDifferenceIntegral( VectorType & u,
 template <typename VectorType>
 Real elementaryIntegral( VectorType & u,
                          const CurrentFE& fe,
-                         const Dof& DOF, const UInt component )
+                         const DOF& dof, const UInt component )
 {
     UInt eleID (fe.currentLocalId());
     Real sum(0.0);

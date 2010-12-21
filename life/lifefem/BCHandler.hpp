@@ -343,7 +343,7 @@ public:
 
     //! old bcUpdate version.. deprecated!!
     template <typename Mesh>
-    void  __attribute__ ((__deprecated__)) bcUpdateOldVersion( Mesh& mesh, CurrentBdFE& boundaryFE, const Dof& dof );
+    void  __attribute__ ((__deprecated__)) bcUpdateOldVersion( Mesh& mesh, CurrentBoundaryFE& boundaryFE, const DOF& dof );
 
     //! Merges the boundary condition bcHandler (with its offset) with the stored one
     /*!

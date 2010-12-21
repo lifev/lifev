@@ -716,13 +716,8 @@ Vector PostProcessingBoundary<MeshType>::average( const VectorType& field, const
     // The total measure of the considered faces
     Real measureScatter(0.), measure;
 
-<<<<<<< HEAD:life/lifefem/PostProcessingBoundary.hpp
     // I need the global Dof ID to query the Oseen solution vector
-    // dofVectorIndex is the id of the dof in the data structure of PostProcessingBoundary class
-=======
-    // I need the global DOF ID to query the Oseen solution vector
-    // dofVectorIndex is the id of the dof in the data structure of PostProc class
->>>>>>> Go on with the class rename:life/lifefem/postProc.hpp
+    // dofVectorIndex is the id of the DOF in the data structure of PostProcessingBoundary class
     // dofGlobalId is the corresponding ID in the GLOBAL mesh (prior to partitioning)
     UInt dofVectorIndex, dofGlobalId;
 
