@@ -60,7 +60,7 @@ along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
 #include <life/lifearray/VectorEpetra.hpp>
 #include <life/lifefilters/GetPot.hpp>
 #include <life/lifecore/LifeChrono.hpp>
-#include <life/lifecore/life.hpp>
+#include <life/lifecore/Life.hpp>
 #include <life/lifefem/ReferenceFE.hpp>
 #include <life/lifemesh/MarkerDefinitions.hpp>
 
