@@ -238,7 +238,7 @@ namespace LifeV
   @bug If the save flag for the exporter is setted to 0 the program fails.
 */
 
-template< typename Mesh, typename SolverType = LifeV::AztecOOTrilinos >
+template< typename Mesh, typename SolverType = LifeV::SolverAztecOO >
 class DarcySolver
 {
 
