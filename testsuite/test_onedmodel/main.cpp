@@ -59,7 +59,7 @@
 // LifeV includes
 #include <life/lifecore/life.hpp>
 #include <life/lifecore/LifeChrono.hpp>
-#include <life/lifecore/GetPot.hpp>
+#include <life/lifefilters/GetPot.hpp>
 #include <life/lifealg/EpetraMap.hpp>
 
 // Mathcard includes
