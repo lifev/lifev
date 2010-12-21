@@ -40,7 +40,7 @@
 
 // LifeV includes
 #include <life/lifemesh/MeshPartitioner.hpp>
-#include <life/lifesolver/dataNavierStokes.hpp>
+#include <life/lifesolver/OseenData.hpp>
 #include <life/lifemesh/MeshData.hpp>
 #include <life/lifefem/FESpace.hpp>
 #include <life/lifefem/bdfNS_template.hpp>
@@ -364,7 +364,7 @@ private:
     bcInterfacePtr_Type                     M_bc;
     boost::shared_ptr< bdf_Type >           M_bdf;
     boost::shared_ptr< data_Type >          M_data;
-    boost::shared_ptr< DataMesh >           M_dataMesh;
+    boost::shared_ptr< MeshData >           M_meshData;
     boost::shared_ptr< MeshPartitioner_Type > M_mesh;
     boost::shared_ptr< EpetraMap >          M_map;
     fluidVectorPtr_Type                     M_solution;
