@@ -43,7 +43,7 @@
 #include <life/lifecore/life.hpp>
 
 #include <life/lifealg/SolverAztecOO.hpp>
-#include <life/lifealg/IfpackPreconditioner.hpp>
+#include <life/lifealg/PreconditionerIfpack.hpp>
 
 #include <life/lifefem/FESpace.hpp>
 #include <life/lifefem/BCManage.hpp>
@@ -74,15 +74,15 @@ public:
     typedef EpetraMatrix< Real >                                       matrix_Type;
     typedef boost::shared_ptr< matrix_Type >                           matrixPtr_Type;
     typedef boost::shared_ptr< Epetra_Operator >                       epetraOperatorPtr_Type;
-    typedef boost::shared_ptr< EpetraPreconditioner >                  epetra_preconditioner_ptrtype;
+    typedef boost::shared_ptr< Preconditioner >                        epetra_preconditioner_ptrtype;
     typedef matrix_Type::matrix_type/*matrix_Type*/                    epetraMatrix_Type;
     typedef SolverAztecOO                                              solver_Type;
     typedef boost::shared_ptr< SolverAztecOO >                         solverPtr_Type;
-    typedef boost::shared_ptr< FESpace<RegionMesh3D<LinearTetra>, EpetraMap> >  fespacePtr_Type;
+    typedef boost::shared_ptr< FESpace<RegionMesh3D<LinearTetra>, MapEpetra> >  fespacePtr_Type;
     //typedef fespacePtr_Type                                     fespacePtr_Type;
-    //    typedef FESpace<RegionMesh3D<LinearTetra>, EpetraMap>*                 fespacePtr_Type;
-    //typedef EpetraMap*                                                 mapPtr_Type;
-    typedef boost::shared_ptr< EpetraMap >                             mapPtr_Type;
+    //    typedef FESpace<RegionMesh3D<LinearTetra>, MapEpetra>*                 fespacePtr_Type;
+    //typedef MapEpetra*                                                 mapPtr_Type;
+    typedef boost::shared_ptr< MapEpetra >                             mapPtr_Type;
     //typedef BCHandler*                                                 bchandlerPtr_Type;
     typedef boost::shared_ptr< BCHandler >                             bchandlerPtr_Type;
     //@}

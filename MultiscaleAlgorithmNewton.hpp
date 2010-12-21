@@ -39,8 +39,8 @@
 
 #include <life/lifealg/SolverAztecOO.hpp>
 
-#include <life/lifealg/EpetraPreconditioner.hpp>
-#include <life/lifealg/IfpackPreconditioner.hpp>
+#include <life/lifealg/Preconditioner.hpp>
+#include <life/lifealg/PreconditionerIfpack.hpp>
 
 #include <lifemc/lifesolver/MultiscaleAlgorithm.hpp>
 

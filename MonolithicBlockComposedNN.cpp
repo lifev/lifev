@@ -116,7 +116,7 @@ int MonolithicBlockComposedNN::solveSystem( const vector_Type& rhs, vector_Type&
 
 void MonolithicBlockComposedNN::setDataFromGetPot(const GetPot& data, const std::string& section)
 {
-    IfpackPreconditioner::createIfpackList( M_list, data, section, "");
+    PreconditionerIfpack::createIfpackList( M_list, data, section, "");
 }
 
 void MonolithicBlockComposedNN::coupler(mapPtr_Type& map,

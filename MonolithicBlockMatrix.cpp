@@ -136,7 +136,7 @@ void MonolithicBlockMatrix::applyPreconditioner( const matrixPtr_Type prec, matr
 }
 
 
-void MonolithicBlockMatrix::createInterfaceMap( const EpetraMap& interfaceMap , const std::map<ID, ID>& locDofMap, const UInt subdomainMaxId,  const boost::shared_ptr<Epetra_Comm> epetraWorldComm )
+void MonolithicBlockMatrix::createInterfaceMap( const MapEpetra& interfaceMap , const std::map<ID, ID>& locDofMap, const UInt subdomainMaxId,  const boost::shared_ptr<Epetra_Comm> epetraWorldComm )
 {
     //std::map<ID, ID> const& locDofMap = M_dofStructureToHarmonicExtension->locDofMap();
     std::map<ID, ID>::const_iterator ITrow;
@@ -147,7 +147,7 @@ void MonolithicBlockMatrix::createInterfaceMap( const EpetraMap& interfaceMap , 
     int pid=epetraWorldComm->MyPID();
     int numMyElements = interfaceMap.map(Unique)->NumMyElements();
     numInterfaceDof[pid]=numMyElements;
-    EpetraMap subMap(*interfaceMap.map(Unique), (UInt)0, subdomainMaxId);
+    MapEpetra subMap(*interfaceMap.map(Unique), (UInt)0, subdomainMaxId);
 
     M_numerationInterface.reset(new vector_Type(subMap,Unique));
     //should be an int vector instead of double
@@ -196,7 +196,7 @@ void MonolithicBlockMatrix::createInterfaceMap( const EpetraMap& interfaceMap , 
         }
     }// so the map for the coupling part of the matrix is just Unique
 
-    M_interfaceMap.reset(new EpetraMap(-1, static_cast< Int> ( couplingVector.size() ), &couplingVector[0], interfaceMap.map(Repeated)->IndexBase()/*1*/, epetraWorldComm));
+    M_interfaceMap.reset(new MapEpetra(-1, static_cast< Int> ( couplingVector.size() ), &couplingVector[0], interfaceMap.map(Repeated)->IndexBase()/*1*/, epetraWorldComm));
 }
 
 void MonolithicBlockMatrix::applyBoundaryConditions(const Real& time)

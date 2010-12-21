@@ -202,7 +202,7 @@ public:
        \param _dispFluid: vector on the fluid domain
        \param _disp: monolithic vector
     */
-    void monolithicToX(const vector_Type& _disp, vector_Type& _dispFluid, EpetraMap& map, UInt offset=(UInt)0);
+    void monolithicToX(const vector_Type& _disp, vector_Type& _dispFluid, MapEpetra& map, UInt offset=(UInt)0);
 
     /**
        sets the vector M_solid->dispSolid() to the monolithic solution M_solid->disp() in the solid nodes, to 0 in the fluid nodes
@@ -374,7 +374,7 @@ public:
     /** get the shape derivatives vector*/
     vector_Type getRhsShapeDerivatives(){return *M_rhsShapeDerivatives;}
 #endif
-    //    const boost::shared_ptr<EpetraMap>& monolithicMap() {return M_monolithicMap;}
+    //    const boost::shared_ptr<MapEpetra>& monolithicMap() {return M_monolithicMap;}
 
     //!get the total dimension of the FS interface
     UInt getDimInterface() const {return nDimensions*M_monolithicMatrix->interface();}
@@ -424,7 +424,7 @@ public:
 
 
     //! Returns the monolithic map
-    virtual    boost::shared_ptr<EpetraMap>& couplingVariableMap(){return M_monolithicMap;}
+    virtual    boost::shared_ptr<MapEpetra>& couplingVariableMap(){return M_monolithicMap;}
 
     //! get the solution vector
     virtual const vector_Type& solution() const = 0;
@@ -528,8 +528,8 @@ protected:
 
     //!@name Protected attributes
     //@{
-    boost::shared_ptr<EpetraMap>                      M_monolithicMap;
-    boost::shared_ptr< EpetraMap >                    M_interfaceMap;///the solid interface map
+    boost::shared_ptr<MapEpetra>                      M_monolithicMap;
+    boost::shared_ptr< MapEpetra >                    M_interfaceMap;///the solid interface map
     boost::shared_ptr<vector_Type>                    M_beta;
     boost::shared_ptr<MonolithicBlockMatrix >                   M_monolithicMatrix;
     //matrixPtr_Type                                    M_precMatrPtr;
@@ -551,7 +551,7 @@ protected:
     boost::shared_ptr<solver_Type>                    M_linearSolver;
     boost::shared_ptr<vector_Type>                    M_numerationInterface;
     std::vector<fluidBchandlerPtr_Type>                 M_BChs;
-    std::vector<boost::shared_ptr<FESpace<mesh_Type, EpetraMap> > >          M_FESpaces;
+    std::vector<boost::shared_ptr<FESpace<mesh_Type, MapEpetra> > >          M_FESpaces;
     bool                                              M_diagonalScale;
     bool                                              M_reusePrec;//!\todo to move to private
     bool                                              M_resetPrec;//!\todo to move to private

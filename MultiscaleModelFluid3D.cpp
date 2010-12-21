@@ -143,7 +143,7 @@ MultiscaleModelFluid3D::setupModel()
     M_fluid->setUp( dataFile ); //Remove Preconditioner and Solver if possible!
 
     //Fluid MAP
-    M_map.reset( new EpetraMap( M_fluid->getMap() ) );
+    M_map.reset( new MapEpetra( M_fluid->getMap() ) );
 
     //BDF
     M_bdf.reset( new bdf_Type);

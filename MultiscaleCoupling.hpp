@@ -112,7 +112,7 @@ public:
     /*!
      * @param couplingMap Global coupling map
      */
-    void createCouplingMap( EpetraMap& couplingMap );
+    void createCouplingMap( MapEpetra& couplingMap );
 
     //! Import the values of the coupling variables
     /*!

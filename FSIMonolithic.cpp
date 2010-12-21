@@ -87,7 +87,7 @@ FSIMonolithic::setupFEspace()
     super_Type::setupFEspace();
 
     // Monolitic: In the beginning I need a non-partitioned mesh. later we will do the partitioning
-    M_dFESpace.reset( new FESpace<mesh_Type, EpetraMap>( M_solidMesh,
+    M_dFESpace.reset( new FESpace<mesh_Type, MapEpetra>( M_solidMesh,
                                                          M_data->dataSolid()->getOrder(),
                                                          nDimensions,
                                                          M_epetraComm));
@@ -180,7 +180,7 @@ FSIMonolithic::setupFluidSolid( UInt const fluxes )
     //std::map<ID, ID> const& localDofMap = M_dofStructureToHarmonicExtension->localDofMap();
     std::map<ID, ID>::const_iterator ITrow;
 
-    M_monolithicMap.reset(new EpetraMap(M_uFESpace->map()));
+    M_monolithicMap.reset(new MapEpetra(M_uFESpace->map()));
 
     std::string opertype = M_dataFile("problem/blockOper", "AdditiveSchwarz");
 
@@ -228,7 +228,7 @@ FSIMonolithic::monolithicToInterface(vector_Type& lambdaSolid, const vector_Type
        subDisp.mySubset(disp, MyOffset);
        lambdaSolid=subDisp;*/
 
-    EpetraMap subMap(*disp.map().map(Unique), M_offset,disp.map().map(Unique)->NumGlobalElements() );
+    MapEpetra subMap(*disp.map().map(Unique), M_offset,disp.map().map(Unique)->NumGlobalElements() );
     vector_Type subDisp(subMap, Unique);
     subDisp.subset(disp, M_offset);
     lambdaSolid=subDisp;
@@ -236,7 +236,7 @@ FSIMonolithic::monolithicToInterface(vector_Type& lambdaSolid, const vector_Type
 
 
 void
-FSIMonolithic::monolithicToX(const vector_Type& disp, vector_Type& dispFluid, EpetraMap& map, UInt offset)
+FSIMonolithic::monolithicToX(const vector_Type& disp, vector_Type& dispFluid, MapEpetra& map, UInt offset)
 {
     if(disp.mapType()== Repeated)
     {
@@ -487,7 +487,7 @@ diagonalScale(vector_Type& rhs, matrixPtr_Type matrFull)
 void
 FSIMonolithic::solidInit(std::string const& dOrder)
 {   // Monolitic: In the beginning I need a non-partitioned mesh. later we will do the partitioning
-    M_dFESpace.reset(new FESpace<mesh_Type, EpetraMap>(M_solidMesh,
+    M_dFESpace.reset(new FESpace<mesh_Type, MapEpetra>(M_solidMesh,
                                                        dOrder,
                                                        nDimensions,
                                                        M_epetraComm));
@@ -496,7 +496,7 @@ FSIMonolithic::solidInit(std::string const& dOrder)
 void
 FSIMonolithic::variablesInit(const std::string& dOrder)
 {
-    M_dFESpace.reset(new FESpace<mesh_Type, EpetraMap>(*M_solidMeshPart,
+    M_dFESpace.reset(new FESpace<mesh_Type, MapEpetra>(*M_solidMeshPart,
                                                        dOrder,
                                                        3,
                                                        M_epetraComm));

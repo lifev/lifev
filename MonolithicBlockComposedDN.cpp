@@ -66,7 +66,7 @@ int MonolithicBlockComposedDN::solveSystem( const vector_Type& rhs, vector_Type&
                 linearSolver->displayer()->leaderPrint("  M-  Reusing preconditioner factor:           ", k, "\n");
         }
     }
-    return linearSolver->solveSystem(rhs, step, boost::static_pointer_cast<EpetraPreconditioner>(M_blockPrecs));
+    return linearSolver->solveSystem(rhs, step, boost::static_pointer_cast<Preconditioner>(M_blockPrecs));
 }
 
 

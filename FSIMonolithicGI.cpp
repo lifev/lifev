@@ -74,7 +74,7 @@ FSIMonolithicGI::setupFluidSolid( UInt const fluxes )
 {
     super_Type::setupFluidSolid( fluxes );
     UInt offset = M_monolithicMap->map(Unique)->NumGlobalElements();
-    M_mapWithoutMesh.reset(new EpetraMap(*M_monolithicMap));
+    M_mapWithoutMesh.reset(new MapEpetra(*M_monolithicMap));
 
     *this->M_monolithicMap += this->M_mmFESpace->map();
     /* OBSOLETE

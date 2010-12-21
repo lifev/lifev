@@ -131,13 +131,13 @@ public:
       \param data_file GetPot data file
       \param refFE reference FE for the displacement
       \param comm the comunicator parameter
-      \param monolithicMap the EpetraMap
+      \param monolithicMap the MapEpetra
       \param offset the offset parameter
     */
     void setup( boost::shared_ptr<data_Type> data,
-                const boost::shared_ptr< FESpace<Mesh, EpetraMap> >& dFESpace,
+                const boost::shared_ptr< FESpace<Mesh, MapEpetra> >& dFESpace,
                 boost::shared_ptr<Epetra_Comm>&     comm,
-                const boost::shared_ptr<const EpetraMap>&   monolithicMap,
+                const boost::shared_ptr<const MapEpetra>&   monolithicMap,
                 UInt       offset=0
 		);
     /*!
@@ -146,7 +146,7 @@ public:
       \param comm
     */
     void setup(boost::shared_ptr<data_Type>        data,
-	       const boost::shared_ptr< FESpace<Mesh, EpetraMap> >& dFESpace,
+	       const boost::shared_ptr< FESpace<Mesh, MapEpetra> >& dFESpace,
 	       boost::shared_ptr<Epetra_Comm>&     comm
 	       );
 
@@ -342,9 +342,9 @@ template <typename Mesh, typename SolverType>
 void VenantKirchhoffSolverNonLinear<Mesh, SolverType>::
 setup(
       boost::shared_ptr<data_Type>        data,
-      const boost::shared_ptr< FESpace<Mesh, EpetraMap> >& dFESpace,
+      const boost::shared_ptr< FESpace<Mesh, MapEpetra> >& dFESpace,
       boost::shared_ptr<Epetra_Comm>&     comm,
-      const boost::shared_ptr<const EpetraMap>&  monolithicMap,
+      const boost::shared_ptr<const MapEpetra>&  monolithicMap,
       UInt                                offset
       )
 {
@@ -359,7 +359,7 @@ template <typename Mesh, typename SolverType>
 void VenantKirchhoffSolverNonLinear<Mesh, SolverType>::
 setup(
       boost::shared_ptr<data_Type>        data,
-      const boost::shared_ptr< FESpace<Mesh, EpetraMap> >& dFESpace,
+      const boost::shared_ptr< FESpace<Mesh, MapEpetra> >& dFESpace,
       boost::shared_ptr<Epetra_Comm>&     comm
       )
 {

@@ -41,7 +41,7 @@
 #include <life/lifefem/Assembly.hpp>
 #include <life/lifefem/BCManage.hpp>
 #include <life/lifealg/SolverAztecOO.hpp>
-#include <life/lifealg/EpetraMap.hpp>
+#include <life/lifealg/MapEpetra.hpp>
 #include <life/lifearray/EpetraMatrix.hpp>
 #include <life/lifearray/EpetraVector.hpp>
 #include <life/lifemesh/regionMesh3D.hpp>
@@ -103,7 +103,7 @@ public:
      */
 
     HeartNonLinearMonodomainSolver( const data_type&          dataType,
-                         FESpace<Mesh, EpetraMap>& uFESpace,
+                         FESpace<Mesh, MapEpetra>& uFESpace,
                          BCHandler&                bcHandler,
                          boost::shared_ptr<Epetra_Comm> comm );
 
@@ -155,7 +155,7 @@ public:
 
 
     //! Returns u FE space
-    FESpace<Mesh, EpetraMap>& potentialFESpace() {return M_uFESpace;}
+    FESpace<Mesh, MapEpetra>& potentialFESpace() {return M_uFESpace;}
 
     //! Boundary Conditions
     const bool BCset() const {return M_setBC;}
@@ -172,11 +172,11 @@ public:
     void resetPrec() {M_resetPrec = true;}
 
     //! Return maps
-    Epetra_Map const& getRepeatedEpetraMap() const { return *M_localMap.getMap(Repeated); }
+    Epetra_Map const& getRepeatedMapEpetra() const { return *M_localMap.getMap(Repeated); }
 
-    Epetra_Map const& getRepeatedEpetraMapVec() const { return *M_localMapVec.getMap(Repeated); }
+    Epetra_Map const& getRepeatedMapEpetraVec() const { return *M_localMapVec.getMap(Repeated); }
 
-    EpetraMap const& getMap() const { return M_localMap; }
+    MapEpetra const& getMap() const { return M_localMap; }
 
     void recomputeMatrix(bool const recomp){M_recomputeMatrix = recomp;}
 
@@ -201,7 +201,7 @@ protected:
     const data_type&               M_data;
 
     //! u FE space
-    FESpace<Mesh, EpetraMap>&      M_uFESpace;
+    FESpace<Mesh, MapEpetra>&      M_uFESpace;
 
     //! MPI communicator
     boost::shared_ptr<Epetra_Comm> M_comm;
@@ -212,8 +212,8 @@ protected:
     bool                           M_setBC;
 
     //! Map
-    EpetraMap                      M_localMap;
-    EpetraMap                      M_localMapVec;
+    MapEpetra                      M_localMap;
+    MapEpetra                      M_localMapVec;
 
     //! mass matrix
     matrixPtr_Type                 M_matrMass;
@@ -283,7 +283,7 @@ private:
 template<typename Mesh, typename SolverType>
 HeartNonLinearMonodomainSolver<Mesh, SolverType>::
 HeartNonLinearMonodomainSolver( const data_type&          dataType,
-                     FESpace<Mesh, EpetraMap>& uFESpace,
+                     FESpace<Mesh, MapEpetra>& uFESpace,
                      BCHandler&                BCh_u,
                      boost::shared_ptr<Epetra_Comm> comm):
     M_data                   ( dataType ),

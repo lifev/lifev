@@ -293,7 +293,7 @@ MultiscaleModelMultiscale::showMe()
 // Methods
 // ===================================================
 void
-MultiscaleModelMultiscale::createCouplingMap( EpetraMap& couplingMap )
+MultiscaleModelMultiscale::createCouplingMap( MapEpetra& couplingMap )
 {
 
 #ifdef HAVE_LIFEV_DEBUG

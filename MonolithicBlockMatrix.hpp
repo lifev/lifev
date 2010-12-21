@@ -256,7 +256,7 @@ public:
       interfaceNodes)
       \param epetraWorldComm: The communicator
      */
-    void createInterfaceMap( const EpetraMap& interfaceMap,
+    void createInterfaceMap( const MapEpetra& interfaceMap,
                              const std::map<ID, ID>& locDofMap,
                              const UInt subdomainMaxId,
                              const boost::shared_ptr<Epetra_Comm> epetraWorldComm );

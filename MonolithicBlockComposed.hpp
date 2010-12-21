@@ -145,7 +145,7 @@ public:
       The default coupling matrix it is an identity matrix with zeros on the diagonal corresponding to the specified block.
       The couplings are specified through the vector M_couplingFlags, as usual. If the coupling block is not the last one
       in the M_coupling vector then it is inserted at the specified position.
-      @param map: global EpetraMap of the problem
+      @param map: global MapEpetra of the problem
       @param locDofMap: std::map holding the connections between the coupling interface dofs
       @param numerationInterface: the numeration of the interface dofs
       @param timeStep: time step

@@ -85,8 +85,8 @@ class FSIMonolithicGI : public FSIMonolithic
 {
 public:
 
-    typedef FSIMonolithic                                         super_Type;
-    typedef EpetraPreconditioner                               prec_Type;
+    typedef FSIMonolithic                                  super_Type;
+    typedef Preconditioner                                 prec_Type;
     typedef boost::shared_ptr<prec_Type>                   prec_type;
 
     //!@name Constructor and Destructor
@@ -157,7 +157,7 @@ public:
     //@{
 
     //! getter for the map of fluid-structure-interface (without the mesh motion)
-    const EpetraMap&            mapWithoutMesh() const {return *M_mapWithoutMesh;}
+    const MapEpetra&            mapWithoutMesh() const {return *M_mapWithoutMesh;}
 
     //! getter for the global matrix of the system
     const matrixPtr_Type        matrixPtr() const {return this->M_monolithicMatrix->matrix();}
@@ -226,7 +226,7 @@ private:
     //!@name Private Members
     //@{
 
-    boost::shared_ptr<EpetraMap>         M_mapWithoutMesh;
+    boost::shared_ptr<MapEpetra>         M_mapWithoutMesh;
     vectorPtr_Type                       M_uk;
     bool                                 M_domainVelImplicit;
     bool                                 M_convectiveTermDer;
