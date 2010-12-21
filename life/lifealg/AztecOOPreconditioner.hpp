@@ -39,25 +39,25 @@
 #define AZTECOOPRECONDITIONER_HPP 1
 
 #include <life/lifealg/SolverAztecOO.hpp>
-#include <life/lifealg/EpetraPreconditioner.hpp>
+#include <life/lifealg/Preconditioner.hpp>
 
 namespace LifeV
 {
 
-//! AztecOOPreconditioner - The implementation of EpetraPreconditioner for AztecOO preconditioners
+//! PreconditionerAztecOO - The implementation of Preconditioner for AztecOO preconditioners
 /*!
   @author Cristiano Malossi <cristinao.malossi@epfl.ch>
 
   This class provides the interface for using AztecOO preconditioners with SolverAztecOO.
  */
-class AztecOOPreconditioner : public EpetraPreconditioner
+class PreconditionerAztecOO : public Preconditioner
 {
 public:
 
     //! @name Public Types
     //@{
 
-    typedef EpetraPreconditioner     super;
+    typedef Preconditioner     super;
 
     typedef super::operator_raw_type operator_raw_type;
     typedef super::operator_type     operator_type;
@@ -71,10 +71,10 @@ public:
     //@{
 
     //! Constructor
-    AztecOOPreconditioner();
+    PreconditionerAztecOO();
 
     //! Destructor
-    ~AztecOOPreconditioner() {}
+    ~PreconditionerAztecOO() {}
 
     //@}
 
@@ -162,14 +162,14 @@ private:
     Solver_Type*           M_solver;
 };
 
-inline EpetraPreconditioner* createAztecOOPreconditioner()
+inline Preconditioner* createPreconditionerAztecOO()
 {
-    return new AztecOOPreconditioner();
+    return new PreconditionerAztecOO();
 }
 
 namespace
 {
-static bool registerAztecOO = PRECFactory::instance().registerProduct( "AztecOO", &createAztecOOPreconditioner );
+static bool registerAztecOO = PRECFactory::instance().registerProduct( "AztecOO", &createPreconditionerAztecOO );
 }
 
 } // namespace LifeV

@@ -35,7 +35,7 @@
     @date 17-11-2009
  */
 
-#include "AztecOOPreconditioner.hpp"
+#include "PreconditionerAztecOO.hpp"
 #include <life/lifecore/life.hpp>
 
 namespace LifeV
@@ -44,13 +44,13 @@ namespace LifeV
 // ===================================================
 // Constructors & Destructor
 // ===================================================
-AztecOOPreconditioner::AztecOOPreconditioner() :
+PreconditionerAztecOO::PreconditionerAztecOO() :
     super   (),
     M_solver()
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 7100 ) << "AztecOOPreconditioner::AztecOOPreconditioner() \n";
+    Debug( 7100 ) << "PreconditionerAztecOO::PreconditionerAztecOO() \n";
 #endif
 
 }
@@ -60,11 +60,11 @@ AztecOOPreconditioner::AztecOOPreconditioner() :
 // Methods
 // ===================================================
 Int
-AztecOOPreconditioner::buildPreconditioner( operator_type& matrix )
+PreconditionerAztecOO::buildPreconditioner( operator_type& matrix )
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 7100 ) << "AztecOOPreconditioner::buildPreconditioner( Operator ) \n";
+    Debug( 7100 ) << "PreconditionerAztecOO::buildPreconditioner( Operator ) \n";
 #endif
 
     if ( this->M_preconditionerCreated )
@@ -84,11 +84,11 @@ AztecOOPreconditioner::buildPreconditioner( operator_type& matrix )
 }
 
 void
-AztecOOPreconditioner::precReset()
+PreconditionerAztecOO::precReset()
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 7100 ) << "AztecOOPreconditioner::precReset() \n";
+    Debug( 7100 ) << "PreconditionerAztecOO::precReset() \n";
 #endif
 
     M_solver->getSolver().SetAztecOption( AZ_keep_info, 0 );
@@ -104,7 +104,7 @@ AztecOOPreconditioner::precReset()
 }
 
 void
-AztecOOPreconditioner::createList( list_Type& /*list*/, const GetPot& dataFile, const std::string& section, const std::string& subSection )
+PreconditionerAztecOO::createList( list_Type& /*list*/, const GetPot& dataFile, const std::string& section, const std::string& subSection )
 {
     // Preconditioner
     M_solver->getParameterList().set( "precond", dataFile( ( section + "/" + subSection + "/precond" ).data(), "dom_decomp" ) );
@@ -163,17 +163,17 @@ AztecOOPreconditioner::createList( list_Type& /*list*/, const GetPot& dataFile, 
 }
 
 void
-AztecOOPreconditioner::showMe( std::ostream& output ) const
+PreconditionerAztecOO::showMe( std::ostream& output ) const
 {
-    output << "showMe must be implemented for the AztecOOPreconditioner class" << std::endl;
+    output << "showMe must be implemented for the PreconditionerAztecOO class" << std::endl;
 }
 
 Real
-AztecOOPreconditioner::Condest()
+PreconditionerAztecOO::Condest()
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 7100 ) << "AztecOOPreconditioner::Condest() \n";
+    Debug( 7100 ) << "PreconditionerAztecOO::Condest() \n";
 #endif
 
     return M_solver->getSolver().Condest();
@@ -183,12 +183,12 @@ AztecOOPreconditioner::Condest()
 // Set Methods
 // ===================================================
 void
-AztecOOPreconditioner::setDataFromGetPot( const GetPot&      dataFile,
+PreconditionerAztecOO::setDataFromGetPot( const GetPot&      dataFile,
                                           const std::string& section )
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 7100 ) << "AztecOOPreconditioner::setDataFromGetPot(dataFile, section) \n";
+    Debug( 7100 ) << "PreconditionerAztecOO::setDataFromGetPot(dataFile, section) \n";
 #endif
 
     createList( M_list, dataFile, section, "AztecOO" );
@@ -198,12 +198,12 @@ AztecOOPreconditioner::setDataFromGetPot( const GetPot&      dataFile,
 // ===================================================
 // Get Methods
 // ===================================================
-EpetraPreconditioner::prec_raw_type*
-AztecOOPreconditioner::getPrec()
+Preconditioner::prec_raw_type*
+PreconditionerAztecOO::getPrec()
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 7100 ) << "AztecOOPreconditioner::getPrec() \n";
+    Debug( 7100 ) << "PreconditionerAztecOO::getPrec() \n";
 #endif
 
     if ( this->M_preconditionerCreated )
@@ -212,12 +212,12 @@ AztecOOPreconditioner::getPrec()
     return 0;
 }
 
-EpetraPreconditioner::prec_type
-AztecOOPreconditioner::getPrecPtr()
+Preconditioner::prec_type
+PreconditionerAztecOO::getPrecPtr()
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 7100 ) << "AztecOOPreconditioner::getPrec() \n";
+    Debug( 7100 ) << "PreconditionerAztecOO::getPrec() \n";
 #endif
 
     boost::shared_ptr<Epetra_RowMatrix> prec;
@@ -226,7 +226,7 @@ AztecOOPreconditioner::getPrecPtr()
         prec.reset(M_solver->getSolver().GetPrecMatrix());
         return  prec;
     }
-    return EpetraPreconditioner::prec_type();
+    return Preconditioner::prec_type();
 }
 
 } // namespace LifeV

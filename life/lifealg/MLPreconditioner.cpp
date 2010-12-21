@@ -35,7 +35,7 @@
     @date 09-11-2006
  */
 
-#include <MLPreconditioner.hpp>
+#include <PreconditionerML.hpp>
 
 #include <life/lifecore/life.hpp>
 
@@ -45,7 +45,7 @@ namespace LifeV
 // ===================================================
 // Constructors & Destructor
 // ===================================================
-MLPreconditioner::MLPreconditioner():
+PreconditionerML::PreconditionerML():
         super(),
         M_operator(),
         M_preconditioner(),
@@ -54,7 +54,7 @@ MLPreconditioner::MLPreconditioner():
 
 }
 
-MLPreconditioner::~MLPreconditioner()
+PreconditionerML::~PreconditionerML()
 {
 
 }
@@ -64,7 +64,7 @@ MLPreconditioner::~MLPreconditioner()
 // Methods
 // ===================================================
 Int
-MLPreconditioner::buildPreconditioner( operator_type& matrix )
+PreconditionerML::buildPreconditioner( operator_type& matrix )
 {
 
     //the Trilinos::MultiLevelPreconditioner unsafely access to the area of memory co-owned by M_operator.
@@ -96,7 +96,7 @@ MLPreconditioner::buildPreconditioner( operator_type& matrix )
 }
 
 void
-MLPreconditioner::precReset()
+PreconditionerML::precReset()
 {
     //the Trilinos::MultiLevelPreconditioner unsafely access to the area of memory co-owned by M_operator.
     //to avoid the risk of dandling pointers always deallocate M_preconditioner first and then M_operator
@@ -108,7 +108,7 @@ MLPreconditioner::precReset()
 }
 
 void
-MLPreconditioner::createMLList( list_Type& list,
+PreconditionerML::createMLList( list_Type& list,
                                 const GetPot&       dataFile,
                                 const std::string&  section,
                                 const std::string&  subSection )
@@ -297,16 +297,16 @@ MLPreconditioner::createMLList( list_Type& list,
     }
 }
 
-void MLPreconditioner::showMe( std::ostream& output ) const
+void PreconditionerML::showMe( std::ostream& output ) const
 {
-    output << "showMe must be implemented for the MLPreconditioner class" << std::endl;
+    output << "showMe must be implemented for the PreconditionerML class" << std::endl;
 }
 
 // ===================================================
 // Set Methods
 // ===================================================
 void
-MLPreconditioner::setDataFromGetPot( const GetPot&      dataFile,
+PreconditionerML::setDataFromGetPot( const GetPot&      dataFile,
                                      const std::string& section )
 {
     M_analyze = dataFile( (section + "/" + "ML" + "/analyze_smoother" ).data(), false); // To be moved in createMLList
@@ -316,7 +316,7 @@ MLPreconditioner::setDataFromGetPot( const GetPot&      dataFile,
 
     // IfPack list
     list_Type& SmootherIFSubList = M_list.sublist( "smoother: ifpack list" );
-    IfpackPreconditioner::createIfpackList( SmootherIFSubList, dataFile, section, "ML" );
+    PreconditionerIfpack::createIfpackList( SmootherIFSubList, dataFile, section, "ML" );
 }
 
 
@@ -324,13 +324,13 @@ MLPreconditioner::setDataFromGetPot( const GetPot&      dataFile,
 // Get Methods
 // ===================================================
 Real
-MLPreconditioner::Condest()
+PreconditionerML::Condest()
 {
     return 0.;
 }
 
-EpetraPreconditioner::prec_raw_type*
-MLPreconditioner::getPrec()
+Preconditioner::prec_raw_type*
+PreconditionerML::getPrec()
 {
     return M_preconditioner.get();
 }

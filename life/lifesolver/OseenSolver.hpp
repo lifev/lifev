@@ -45,9 +45,9 @@
 #define OSEENSOLVER_H 1
 
 #include <life/lifealg/SolverAztecOO.hpp>
-#include <life/lifealg/EpetraPreconditioner.hpp>
-#include <life/lifealg/IfpackPreconditioner.hpp>
-#include <life/lifealg/AztecOOPreconditioner.hpp>
+#include <life/lifealg/Preconditioner.hpp>
+#include <life/lifealg/PreconditionerIfpack.hpp>
+#include <life/lifealg/PreconditionerAztecOO.hpp>
 #include <life/lifealg/EpetraMap.hpp>
 
 #include <life/lifearray/elemMat.hpp>

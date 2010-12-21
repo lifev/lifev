@@ -664,7 +664,7 @@ protected:
     solver_Type                             M_linearSolver;
 
     //! Epetra preconditioner for the linear system.
-    boost::shared_ptr<EpetraPreconditioner> M_prec;
+    boost::shared_ptr<Preconditioner> M_prec;
 
     //@}
 

@@ -36,7 +36,7 @@
  */
 
 #include <life/lifecore/life.hpp>
-#include "EpetraPreconditioner.hpp"
+#include "Preconditioner.hpp"
 
 namespace LifeV
 {
@@ -44,8 +44,8 @@ namespace LifeV
 // ===================================================
 // Constructors & Destructor
 // ===================================================
-EpetraPreconditioner::EpetraPreconditioner( const commPtr_Type& comm ):
-        M_precType              ( "EpetraPreconditioner" ),
+Preconditioner::Preconditioner( const commPtr_Type& comm ):
+        M_precType              ( "Preconditioner" ),
         M_displayer             ( comm ),
         M_list                  (),
         M_preconditionerCreated ( false )
@@ -53,7 +53,7 @@ EpetraPreconditioner::EpetraPreconditioner( const commPtr_Type& comm ):
 
 }
 
-EpetraPreconditioner::EpetraPreconditioner( const EpetraPreconditioner& preconditioner, const commPtr_Type& comm ):
+Preconditioner::Preconditioner( const Preconditioner& preconditioner, const commPtr_Type& comm ):
         M_precType              ( preconditioner.M_precType ),
         M_displayer             ( comm ),
         M_list                  ( preconditioner.getList() ),
@@ -62,7 +62,7 @@ EpetraPreconditioner::EpetraPreconditioner( const EpetraPreconditioner& precondi
 
 }
 
-EpetraPreconditioner::~EpetraPreconditioner()
+Preconditioner::~Preconditioner()
 {
 
 }
@@ -76,28 +76,28 @@ EpetraPreconditioner::~EpetraPreconditioner()
 // Epetra Operator Interface Methods
 // ===================================================
 Int
-EpetraPreconditioner::SetUseTranspose( const bool /*useTranspose=false*/ )
+Preconditioner::SetUseTranspose( const bool /*useTranspose=false*/ )
 {
     assert( false );
     return 0;
 }
 
 Int
-EpetraPreconditioner::Apply( const Epetra_MultiVector& /*vector1*/, Epetra_MultiVector& /*vector2*/ ) const
+Preconditioner::Apply( const Epetra_MultiVector& /*vector1*/, Epetra_MultiVector& /*vector2*/ ) const
 {
     assert( false );
     return 0;
 }
 
 Int
-EpetraPreconditioner::ApplyInverse( const Epetra_MultiVector& /*vector1*/, Epetra_MultiVector& /*vector2*/ ) const
+Preconditioner::ApplyInverse( const Epetra_MultiVector& /*vector1*/, Epetra_MultiVector& /*vector2*/ ) const
 {
     assert( false );
     return 0;
 }
 
 void
-EpetraPreconditioner::showMe( std::ostream& /*output*/ ) const
+Preconditioner::showMe( std::ostream& /*output*/ ) const
 {
     assert( false );
 }
@@ -106,13 +106,13 @@ EpetraPreconditioner::showMe( std::ostream& /*output*/ ) const
 // Set Methods
 // ===================================================
 void
-EpetraPreconditioner::setList( const list_Type& list )
+Preconditioner::setList( const list_Type& list )
 {
     M_list = list;
 }
 
 void
-EpetraPreconditioner::setSolver( SolverAztecOO& /*solver*/ )
+Preconditioner::setSolver( SolverAztecOO& /*solver*/ )
 {
     //assert( false );
 }
@@ -121,32 +121,32 @@ EpetraPreconditioner::setSolver( SolverAztecOO& /*solver*/ )
 // Get Methods
 // ===================================================
 const bool&
-EpetraPreconditioner::preconditionerCreated()
+Preconditioner::preconditionerCreated()
 {
     return M_preconditionerCreated;
 }
 
-const EpetraPreconditioner::list_Type&
-EpetraPreconditioner::getList() const
+const Preconditioner::list_Type&
+Preconditioner::getList() const
 {
     return M_list;
 }
 
-EpetraPreconditioner::list_Type&
-EpetraPreconditioner::list()
+Preconditioner::list_Type&
+Preconditioner::list()
 {
     return M_list;
 }
 
 bool
-EpetraPreconditioner::UseTranspose()
+Preconditioner::UseTranspose()
 {
     assert( false );
     return false;
 }
 
 const Epetra_Map&
-EpetraPreconditioner::OperatorRangeMap() const
+Preconditioner::OperatorRangeMap() const
 {
     assert( false );
     Epetra_Map *emptyMapPtr( NULL );
@@ -154,7 +154,7 @@ EpetraPreconditioner::OperatorRangeMap() const
 }
 
 const Epetra_Map&
-EpetraPreconditioner::OperatorDomainMap() const
+Preconditioner::OperatorDomainMap() const
 {
     assert( false );
     Epetra_Map *emptyMapPtr( NULL );

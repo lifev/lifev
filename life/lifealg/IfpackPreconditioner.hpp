@@ -57,24 +57,24 @@
 
 #include <life/lifefilters/GetPot.hpp>
 #include <life/lifearray/EpetraMatrix.hpp>
-#include <life/lifealg/EpetraPreconditioner.hpp>
+#include <life/lifealg/Preconditioner.hpp>
 
 namespace LifeV
 {
 
-//! IfpackPreconditioner - Class implementing overlapping Schwarz preconditioner
+//! PreconditionerIfpack - Class implementing overlapping Schwarz preconditioner
 /*!
   @author Simone Deparis   <simone.deparis@epfl.ch>
 */
-class IfpackPreconditioner:
-        public EpetraPreconditioner
+class PreconditionerIfpack:
+        public Preconditioner
 {
 public:
 
     //! @name Public Types
     //@{
 
-    typedef EpetraPreconditioner             super;
+    typedef Preconditioner             super;
 
     typedef Ifpack_Preconditioner            prec_raw_type;
     typedef boost::shared_ptr<prec_raw_type> prec_type;
@@ -89,10 +89,10 @@ public:
     //@{
 
     //! Empty constructor.
-    IfpackPreconditioner();
+    PreconditionerIfpack();
 
     //! Destructor
-    ~IfpackPreconditioner();
+    ~PreconditionerIfpack();
 
     //@}
 
@@ -217,7 +217,7 @@ private:
 };
 
 
-inline EpetraPreconditioner* createIfpack() { return new IfpackPreconditioner(); }
+inline Preconditioner* createIfpack() { return new PreconditionerIfpack(); }
 namespace
 {
 static bool registerIF = PRECFactory::instance().registerProduct( "Ifpack", &createIfpack );

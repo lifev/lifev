@@ -62,11 +62,11 @@ namespace LifeV
 // Forward declaration
 class SolverAztecOO;
 
-//! EpetraPreconditioner - Abstract preconditioner class
+//! Preconditioner - Abstract preconditioner class
 /*!
   @author Simone Deparis   <simone.deparis@epfl.ch>
 */
-class EpetraPreconditioner
+class Preconditioner
 {
 public:
 
@@ -94,17 +94,17 @@ public:
     /*!
       @param comm Comminicator
      */
-    EpetraPreconditioner( const commPtr_Type& comm = commPtr_Type() );
+    Preconditioner( const commPtr_Type& comm = commPtr_Type() );
 
     //! Copy constructor
     /*!
-      @param preconditioner EpetraPreconditioner
+      @param preconditioner Preconditioner
       @param comm Comminicator
      */
-    EpetraPreconditioner( const EpetraPreconditioner& preconditioner, const commPtr_Type& comm = commPtr_Type() );
+    Preconditioner( const Preconditioner& preconditioner, const commPtr_Type& comm = commPtr_Type() );
 
     //! Destructor
-    virtual ~EpetraPreconditioner();
+    virtual ~Preconditioner();
 
     //@}
 
@@ -238,7 +238,7 @@ protected:
 
 };
 
-typedef FactorySingleton<Factory<EpetraPreconditioner, std::string> > PRECFactory;
+typedef FactorySingleton<Factory<Preconditioner, std::string> > PRECFactory;
 
 } // namespace LifeV
 

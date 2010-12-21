@@ -42,8 +42,8 @@
 #include <boost/program_options.hpp>
 
 #include <life/lifecore/life.hpp>
-#include <life/lifealg/IfpackPreconditioner.hpp>
-#include <life/lifealg/MLPreconditioner.hpp>
+#include <life/lifealg/PreconditionerIfpack.hpp>
+#include <life/lifealg/PreconditionerML.hpp>
 
 #include "cylinder.hpp"
 #include <mpi.h>

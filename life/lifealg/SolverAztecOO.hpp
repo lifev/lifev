@@ -64,8 +64,8 @@
 
 #include <life/lifearray/EpetraVector.hpp>
 #include <life/lifearray/EpetraMatrix.hpp>
-#include <life/lifealg/EpetraPreconditioner.hpp>
-#include <life/lifealg/IfpackPreconditioner.hpp>
+#include <life/lifealg/Preconditioner.hpp>
+#include <life/lifealg/PreconditionerIfpack.hpp>
 #include <life/lifecore/LifeDebug.hpp>
 #include <life/lifefilters/GetPot.hpp>
 #include <life/lifecore/LifeChrono.hpp>
@@ -95,7 +95,7 @@ public:
     typedef EpetraMatrix<Real>                 matrix_type;
     typedef EpetraVector                       vector_type;
 
-    typedef EpetraPreconditioner               prec_raw_type;
+    typedef Preconditioner                     prec_raw_type;
     typedef boost::shared_ptr<prec_raw_type>   prec_type;
     typedef boost::shared_ptr<Epetra_Operator> comp_prec_type;
     typedef boost::shared_ptr<matrix_type>     matrix_ptrtype;
@@ -163,7 +163,7 @@ public:
       @param  rhsFull Right hand side
       @param  solution Vector to store the solution
       @param  preconditionerPtr Pointer on a preconditioner to use (templated parameter, can derive from
-                                EpetraPreconditioner class or from Epetra_Operator)
+                                Preconditioner class or from Epetra_Operator)
     */
     template <typename PrecPtrOperator>
     Int solveSystem(  const vector_type& rhsFull,
@@ -217,9 +217,9 @@ public:
      */
     void setOperator( Epetra_Operator& oper );
 
-    //! Method to set an EpetraPreconditioner preconditioner
+    //! Method to set an Preconditioner preconditioner
     /*!
-      @param preconditioner EpetraPreconditioner to be used to solve the system
+      @param preconditioner Preconditioner to be used to solve the system
      */
     void setPreconditioner( prec_type& preconditioner );
 
@@ -272,7 +272,7 @@ public:
     //! Return the true residual
     Real TrueResidual();
 
-    //! Method to get a shared pointer to the preconditioner (of type derived from EpetraPreconditioner)*/
+    //! Method to get a shared pointer to the preconditioner (of type derived from Preconditioner)*/
     prec_type& getPrec();
 
     //! Return the AztecStatus

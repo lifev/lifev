@@ -58,8 +58,8 @@ Solve the problem
 
 #include <life/lifecore/life.hpp>
 
-#include <life/lifealg/IfpackPreconditioner.hpp>
-#include <life/lifealg/MLPreconditioner.hpp>
+#include <life/lifealg/PreconditionerIfpack.hpp>
+#include <life/lifealg/PreconditionerML.hpp>
 
 #include "darcy.hpp"
 

@@ -52,25 +52,25 @@
 
 #include <life/lifefilters/GetPot.hpp>
 #include <life/lifearray/EpetraMatrix.hpp>
-#include <life/lifealg/EpetraPreconditioner.hpp>
-#include <life/lifealg/IfpackPreconditioner.hpp>
+#include <life/lifealg/Preconditioner.hpp>
+#include <life/lifealg/PreconditionerIfpack.hpp>
 
 namespace LifeV
 {
 
-//! MLPreconditioner - Class of multilevels preconditioner
+//! PreconditionerML - Class of multilevels preconditioner
 /*!
   @author Simone Deparis   <simone.deparis@epfl.ch>
 */
-class MLPreconditioner:
-        public EpetraPreconditioner
+class PreconditionerML:
+        public Preconditioner
 {
 public:
 
     //! @name Public Types
     //@{
 
-    typedef EpetraPreconditioner                 super;
+    typedef Preconditioner                       super;
 
     typedef ML_Epetra::MultiLevelPreconditioner  prec_raw_type;
     typedef boost::shared_ptr<prec_raw_type>     prec_type;
@@ -84,16 +84,16 @@ public:
     //! @name Constructors & Destructor
     //@{
     //! Empty constructor.
-    MLPreconditioner();
+    PreconditionerML();
 
     //! destructor.
-    ~MLPreconditioner();
+    ~PreconditionerML();
 
     //! Constructor from a matrix
     /*!
       @param matrix Matrix upon which construct the preconditioner
     */
-    MLPreconditioner( operator_type& matrix );
+    PreconditionerML( operator_type& matrix );
 
     //@}
 
@@ -228,7 +228,7 @@ private:
 };
 
 
-inline EpetraPreconditioner* createML() {return new MLPreconditioner(); }
+inline Preconditioner* createML() {return new PreconditionerML(); }
 namespace
 {
 static bool registerML = PRECFactory::instance().registerProduct( "ML", &createML );

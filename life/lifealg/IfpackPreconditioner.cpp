@@ -36,7 +36,7 @@
  */
 
 #include <life/lifecore/life.hpp>
-#include "IfpackPreconditioner.hpp"
+#include "PreconditionerIfpack.hpp"
 
 namespace LifeV
 {
@@ -44,7 +44,7 @@ namespace LifeV
 // ===================================================
 // Constructors & Destructor
 // ===================================================
-IfpackPreconditioner::IfpackPreconditioner():
+PreconditionerIfpack::PreconditionerIfpack():
         super (),
         M_preconditioner(),
         M_overlapLevel(0),
@@ -53,7 +53,7 @@ IfpackPreconditioner::IfpackPreconditioner():
 
 }
 
-IfpackPreconditioner::~IfpackPreconditioner()
+PreconditionerIfpack::~PreconditionerIfpack()
 {
 
 }
@@ -63,7 +63,7 @@ IfpackPreconditioner::~IfpackPreconditioner()
 // Methods
 // ===================================================
 Int
-IfpackPreconditioner::buildPreconditioner( operator_type& matrix )
+PreconditionerIfpack::buildPreconditioner( operator_type& matrix )
 {
     M_operator     = matrix->matrixPtr();
 
@@ -92,7 +92,7 @@ IfpackPreconditioner::buildPreconditioner( operator_type& matrix )
 }
 
 void
-IfpackPreconditioner::precReset()
+PreconditionerIfpack::precReset()
 {
     M_operator.reset();
     M_preconditioner.reset();
@@ -101,7 +101,7 @@ IfpackPreconditioner::precReset()
 }
 
 void
-IfpackPreconditioner::createList( list_Type&         list,
+PreconditionerIfpack::createList( list_Type&         list,
                                   const GetPot&      dataFile,
                                   const std::string& section,
                                   const std::string& subSection )
@@ -110,7 +110,7 @@ IfpackPreconditioner::createList( list_Type&         list,
 }
 
 void
-IfpackPreconditioner::createIfpackList( list_Type&         list,
+PreconditionerIfpack::createIfpackList( list_Type&         list,
                                         const GetPot&      dataFile,
                                         const std::string& section,
                                         const std::string& subSection )
@@ -206,35 +206,35 @@ IfpackPreconditioner::createIfpackList( list_Type&         list,
 }
 
 Int
-IfpackPreconditioner::ApplyInverse( const Epetra_MultiVector& vector1, Epetra_MultiVector& vector2 ) const
+PreconditionerIfpack::ApplyInverse( const Epetra_MultiVector& vector1, Epetra_MultiVector& vector2 ) const
 {
     return M_preconditioner->ApplyInverse( vector1, vector2 );
 }
 
 Int
-IfpackPreconditioner::Apply( const Epetra_MultiVector& vector1, Epetra_MultiVector& vector2 ) const
+PreconditionerIfpack::Apply( const Epetra_MultiVector& vector1, Epetra_MultiVector& vector2 ) const
 {
     return M_preconditioner->Apply( vector1, vector2 );
 }
 
 void
-IfpackPreconditioner::showMe( std::ostream& output ) const
+PreconditionerIfpack::showMe( std::ostream& output ) const
 {
-    output << "showMe must be implemented for the IfpackPreconditioner class" << std::endl;
+    output << "showMe must be implemented for the PreconditionerIfpack class" << std::endl;
 }
 
 // ===================================================
 // Set Methods
 // ===================================================
 void
-IfpackPreconditioner::setDataFromGetPot( const GetPot&      dataFile,
+PreconditionerIfpack::setDataFromGetPot( const GetPot&      dataFile,
                                          const std::string& section )
 {
     createIfpackList( this->M_list, dataFile, section, "ifpack" );
 }
 
 Int
-IfpackPreconditioner::SetUseTranspose( bool useTranspose )
+PreconditionerIfpack::SetUseTranspose( bool useTranspose )
 {
     return M_preconditioner->SetUseTranspose( useTranspose );
 }
@@ -243,55 +243,55 @@ IfpackPreconditioner::SetUseTranspose( bool useTranspose )
 // Get Methods
 // ===================================================
 bool
-IfpackPreconditioner::set() const
+PreconditionerIfpack::set() const
 {
     return M_preconditioner;
 }
 
 Real
-IfpackPreconditioner::Condest()
+PreconditionerIfpack::Condest()
 {
     return M_preconditioner->Condest();
 }
 
-EpetraPreconditioner::prec_raw_type*
-IfpackPreconditioner::getPrec()
+Preconditioner::prec_raw_type*
+PreconditionerIfpack::getPrec()
 {
     return M_preconditioner.get();
 }
 
-IfpackPreconditioner::super::prec_type
-IfpackPreconditioner::getPrecPtr()
+PreconditionerIfpack::super::prec_type
+PreconditionerIfpack::getPrecPtr()
 {
     return M_preconditioner;
 }
 
 std::string
-IfpackPreconditioner::precType()
+PreconditionerIfpack::precType()
 {
     return M_precType;
 }
 
 const Int&
-IfpackPreconditioner::getOverlapLevel() const
+PreconditionerIfpack::getOverlapLevel() const
 {
     return M_overlapLevel;
 }
 
 bool
-IfpackPreconditioner::UseTranspose()
+PreconditionerIfpack::UseTranspose()
 {
     return M_preconditioner->UseTranspose();
 }
 
 const Epetra_Map &
-IfpackPreconditioner::OperatorRangeMap() const
+PreconditionerIfpack::OperatorRangeMap() const
 {
     return M_preconditioner->OperatorRangeMap();
 }
 
 const Epetra_Map &
-IfpackPreconditioner::OperatorDomainMap() const
+PreconditionerIfpack::OperatorDomainMap() const
 {
     return M_preconditioner->OperatorDomainMap();
 }

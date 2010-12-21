@@ -270,8 +270,8 @@ protected:
     SolverType                     M_linearSolver_u;
     SolverType			   M_linearSolver_p;
 
-    boost::shared_ptr<EpetraPreconditioner>             M_prec_u;
-    boost::shared_ptr<EpetraPreconditioner>		M_prec_p;
+    boost::shared_ptr<Preconditioner>             M_prec_u;
+    boost::shared_ptr<Preconditioner>		M_prec_p;
 
     bool                           M_steady;
 

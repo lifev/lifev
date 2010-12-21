@@ -61,12 +61,12 @@ NonLinearLineSearch                    linesearch_* (merging 2 files)          M
 NonLinearRichardson                    nonLinRichardson                        CMCS3
 LinearEpetraOperator                   OP_LinearOperator                       EMORY     DONE
 LinearEpetraOperatorBlock              OP_BlockOperator                        EMORY     DONE
-Preconditioner                         EpetraPreconditioner                    CMCS2
-PreconditionerAztecOO                  AztecOOPreconditioner                   CMCS2
-PreconditionerIfpack                   IfPackPreconditioner                    CMCS2
-PreconditionerML                       MLPreconditioner                        CMCS2
+Preconditioner                         EpetraPreconditioner                    CMCS2     DONE
+PreconditionerAztecOO                  AztecOOPreconditioner                   CMCS2     DONE
+PreconditionerIfpack                   IfpackPreconditioner                    CMCS2     DONE
+PreconditionerML                       MLPreconditioner                        CMCS2     DONE
 SolverAmesos                           -                                       CMCS2     DONE
-SolverAztecOO                          SolverTrilinos                          CMCS2
+SolverAztecOO                          SolverTrilinos                          CMCS2     DONE
 
 LIFEARRAY
 ============================
@@ -99,7 +99,7 @@ MeshVertex                             geo0D                                   E
 RegionMesh1D                           regionMesh1D                            MOX
 RegionMesh2D                           regionMesh2D                            MOX
 RegionMesh3D                           regionMesh3D                            MOX
-RegionMesh3DStructured                 structuredMesh3D                        CMCS2
+RegionMesh3DStructured                 structuredMesh3D                        CMCS2   DONE
 MeshPartitionerOfflineFSI              FSIOfflinePartitioner                   CMCS3 - DONE
 MeshPartitioner                        partitionMesh                           CMCS3 - DONE
 
