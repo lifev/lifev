@@ -26,11 +26,11 @@ AM_CPPFLAGS                 = -I$(top_srcdir)
 
 lib_LTLIBRARIES		= liblifecore.la
 
-liblifecore_la_SOURCES	=  life.cpp lifeversion.cpp\
+liblifecore_la_SOURCES	=  Life.cpp lifeversion.cpp\
 StringData.cpp LifeDebug.cpp \
 Switch.cpp StringUtility.cpp FactoryTypeInfo.cpp\
 LifeAssertSmart.cpp Displayer.cpp
-liblifecore_la_LIBADD	= $(aztec_libs)
+BADD	= $(aztec_libs)
 
 if HAVE_BOOST_PROGRAM_OPTIONS
 liblifecore_la_LIBADD += $(boost_program_options_lib)
