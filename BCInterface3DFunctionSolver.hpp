@@ -38,7 +38,7 @@
 #define BCInterface3DFunctionSolver_H 1
 
 #include <life/lifesolver/FSI.hpp>
-#include <life/lifesolver/OseenShapeDerivative.hpp>
+#include <life/lifesolver/OseenSolverShapeDerivative.hpp>
 
 #include <lifemc/lifesolver/BCInterface3DFunction.hpp>
 
