@@ -52,8 +52,8 @@
 #define OneDimensionalSolver_H
 
 // LIFEV
-#include <life/lifearray/elemMat.hpp>
-#include <life/lifearray/elemVec.hpp>
+#include <life/lifearray/MatrixElemental.hpp>
+#include <life/lifearray/VectorElemental.hpp>
 #include <life/lifefem/AssemblyElemental.hpp>
 #include <life/lifefem/Assembly.hpp>
 
