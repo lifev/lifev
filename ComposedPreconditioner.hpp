@@ -53,7 +53,7 @@
 
 #include <life/lifearray/EpetraMatrix.hpp>
 
-#include <life/lifealg/EpetraPreconditioner.hpp>
+#include <life/lifealg/Preconditioner.hpp>
 
 #include <lifemc/lifealg/ComposedOperator.hpp>
 
@@ -61,7 +61,7 @@ namespace LifeV
 {
 
 class ComposedPreconditioner:
-        public EpetraPreconditioner
+        public Preconditioner
 {
 public:
 
@@ -69,15 +69,15 @@ public:
      */
     //@{
 
-    typedef EpetraPreconditioner                                       super_Type;
-    typedef ComposedOperator<EpetraPreconditioner>                     prec_Type;
+    typedef Preconditioner                                             super_Type;
+    typedef ComposedOperator<Preconditioner>                     prec_Type;
     typedef boost::shared_ptr<prec_Type>                               precPtr_Type;
-    typedef boost::shared_ptr<EpetraPreconditioner>                    epetraPrecPtr_Type;
+    typedef boost::shared_ptr<Preconditioner>                    epetraPrecPtr_Type;
     typedef boost::shared_ptr<ML_Epetra::MultiLevelPreconditioner>     mlPrecPtr_Type;
     typedef super_Type::operator_raw_type                              operator_Type;
     typedef boost::shared_ptr<operator_Type>                           operatorPtr_Type;
     typedef super_Type::list_Type                                      list_Type;
-    typedef boost::shared_ptr<EpetraPreconditioner>                    epetraPrec_Type;
+    typedef boost::shared_ptr<Preconditioner>                    epetraPrec_Type;
 
 
     /** @name Constructors, destructor
@@ -181,7 +181,7 @@ public:
     //@{
 
     //! Factory method
-    static EpetraPreconditioner* createComposedPreconditioner()
+    static Preconditioner* createComposedPreconditioner()
     {
         return new ComposedPreconditioner();
     }
@@ -193,7 +193,7 @@ private:
     //@{
 
     Int createPrec (operatorPtr_Type& oper,
-                    boost::shared_ptr<EpetraPreconditioner>& prec);
+                    boost::shared_ptr<Preconditioner>& prec);
     //@}
 
 

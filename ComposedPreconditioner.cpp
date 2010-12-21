@@ -28,8 +28,8 @@
  */
 
 #include <lifemc/lifealg/ComposedPreconditioner.hpp>
-#include <life/lifealg/IfpackPreconditioner.hpp>
-#include <life/lifealg/MLPreconditioner.hpp>
+#include <life/lifealg/PreconditionerIfpack.hpp>
+#include <life/lifealg/PreconditionerML.hpp>
 
 
 
@@ -98,7 +98,7 @@ ComposedPreconditioner::Condest()
     return M_prec->Condest();
 }
 
-EpetraPreconditioner::prec_raw_type*
+Preconditioner::prec_raw_type*
 ComposedPreconditioner::getPrec()
 {
     return M_prec.get();
@@ -181,7 +181,7 @@ ComposedPreconditioner::precReset()
 
 Int
 ComposedPreconditioner::createPrec(operator_type& oper,
-                                   boost::shared_ptr<EpetraPreconditioner> & prec )
+                                   boost::shared_ptr<Preconditioner> & prec )
 {
     return prec->buildPreconditioner( oper );
 }
