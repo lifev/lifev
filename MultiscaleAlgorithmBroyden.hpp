@@ -37,10 +37,10 @@
 #ifndef MultiscaleAlgorithmBroyden_H
 #define MultiscaleAlgorithmBroyden_H 1
 
-#include <life/lifealg/SolverTrilinos.hpp>
+#include <life/lifealg/SolverAztecOO.hpp>
 
-#include <life/lifealg/EpetraPreconditioner.hpp>
-#include <life/lifealg/IfpackPreconditioner.hpp>
+#include <life/lifealg/Preconditioner.hpp>
+#include <life/lifealg/PreconditionerIfpack.hpp>
 
 #include <lifemc/lifesolver/MultiscaleAlgorithm.hpp>
 
@@ -107,7 +107,7 @@ private:
 
     //@}
 
-    SolverTrilinos                           M_solver;
+    SolverAztecOO                            M_solver;
     multiscaleMatrixPtr_Type                 M_jacobian;
 };
 
