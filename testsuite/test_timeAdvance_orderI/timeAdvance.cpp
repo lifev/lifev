@@ -271,7 +271,7 @@ problem::run()
 
     LifeChrono chrono;
 
-    std::string TimeAdvanceMethod =  dataFile( "problem/time_discretization/method", "TimeAdvanceNewmark");
+    std::string TimeAdvanceMethod =  dataFile( "problem/time_discretization/method", "Newmark");
 
     TimeAdvance_type  timeAdvance( TimeAdvanceFactory::instance().createObject( TimeAdvanceMethod ) );
 
@@ -279,7 +279,7 @@ problem::run()
 
     //! initialization of parameters of time Advance method:
 
-    if (TimeAdvanceMethod =="TimeAdvanceNewmark")
+    if (TimeAdvanceMethod =="Newmark")
         timeAdvance->setup( dataProblem->dataTime()->coefficientsTimeAdvanceNewmark() , OrderDev);
 
     if (TimeAdvanceMethod =="BDF")
@@ -355,7 +355,7 @@ problem::run()
 
     std::vector<vector_type> uv0;
 
-    if (TimeAdvanceMethod =="TimeAdvanceNewmark")
+    if (TimeAdvanceMethod =="Newmark")
     {
         uv0.push_back(*U);
         uv0.push_back(*V);

@@ -165,7 +165,7 @@ public:
     @param timeStep defined the  time step need to compute the
     */
     feVectorType updateRHSFirstDerivative(const Real& timeStep = 1 );
-  
+
     //! Update the right hand side \f$ f_W \f$ of the time derivative formula
     /*
     Set and Return the right hand side \f$ f_W \f$ of the time derivative formula
@@ -204,7 +204,7 @@ public:
      @param x0 is the initial solution;
      */
      void setInitialCondition( const feVectorType& x0);
-     
+
      //! initialize the state vector
      /*!
      Initialize all the entries of the unknown vector to be derived with the vector x0, v0 (duplicated).
@@ -223,14 +223,14 @@ public:
      @param w0 is the initial accelerate
      */
      void setInitialCondition(const feVectorType& x0, const feVectorType& v0, const feVectorType& w0 );
-    
+
     //! Initialize the state vector
     /*! Initialize all the entries of the unknown vector to be derived with a
      set of vectors x0
      note: this is taken as a copy (not a reference), since x0 is resized inside the method.
      */
     void setInitialCondition( const feVectorContainer_Type& x0);
-    
+
    //@}
 
   //!@name Get Methods
@@ -266,7 +266,7 @@ public:
 
     //! Return the current velocity
     feVectorType velocity()  const;
- 
+
     //!Return the current accelerate
     feVectorType accelerate() const ;
 
@@ -674,7 +674,7 @@ TimeAdvance< EpetraVector >* createTimeAdvanceNewmark() { return new TimeAdvance
 
 namespace
 {
-static bool registerTimeAdvanceNewmark= TimeAdvanceFactory::instance().registerProduct( "TimeAdvanceNewmark",  &createTimeAdvanceNewmark);
+static bool registerTimeAdvanceNewmark= TimeAdvanceFactory::instance().registerProduct( "Newmark",  &createTimeAdvanceNewmark);
 }
 
 }
