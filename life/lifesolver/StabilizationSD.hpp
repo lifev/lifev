@@ -46,7 +46,7 @@
 namespace LifeV
 {
 
-//! SDStabilization Class
+//! StabilizationSD Class
 /*!
  * @brief Streamline diffusion and SUPG for Navier-Stokes
  * @author M.A. Fernandez
@@ -56,7 +56,7 @@ namespace LifeV
  */
 
 template<typename MeshType, typename DofType>
-class SDStabilization
+class StabilizationSD
 {
 public:
 
@@ -77,14 +77,14 @@ public:
      * @param quadRule QuadRule     quadrature rule for the integration of the stabilization variational forms
      * @param viscosity viscosity   fluid viscosity  @f$\nu@f$
      */
-    SDStabilization( const GetPot&   dataFile,
+    StabilizationSD( const GetPot&   dataFile,
                      const mesh_Type&     mesh,
                      const dof_Type&      dof,
                      const RefFE&    refFE,
                      const QuadRule& quadRule,
                      Real      viscosity);
     //! ~Destructor
-    virtual ~SDStabilization() {};
+    virtual ~StabilizationSD() {};
     //@}
 
     //! @name Methods
@@ -162,9 +162,9 @@ private:
     //! @name Private Constructor
     //@{
     //! Default Constructor
-    SDStabilization();
+    StabilizationSD();
     //! Copy Constructor
-    SDStabilization(const SDStabilization<mesh_Type, dof_Type> & original);
+    StabilizationSD(const StabilizationSD<mesh_Type, dof_Type> & original);
     //@}
 
     //! @name Private Methods
@@ -220,14 +220,14 @@ private:
     //! Elementary Vector for assembling the stabilization terms
     ElemVec      M_elVec;
     //@}
-}; // class SDStabilization
+}; // class StabilizationSD
 
 //=============================================================================
 // Constructor
 //=============================================================================
 
 template<typename MeshType, typename DofType>
-SDStabilization<MeshType, DofType>::SDStabilization( const GetPot& dataFile,
+StabilizationSD<MeshType, DofType>::StabilizationSD( const GetPot& dataFile,
                                                      const mesh_Type&     mesh,
                                                      const dof_Type&      dof,
                                                      const RefFE&    refFE,
@@ -248,7 +248,7 @@ SDStabilization<MeshType, DofType>::SDStabilization( const GetPot& dataFile,
 
 template<typename MeshType, typename DofType>
 template <typename MatrixType, typename VectorType>
-void SDStabilization<MeshType, DofType>::applySUPG(const Real dt, MatrixType& matrix, const VectorType& state )
+void StabilizationSD<MeshType, DofType>::applySUPG(const Real dt, MatrixType& matrix, const VectorType& state )
 {
     if ( M_gammaBeta == 0 && M_gammaDiv == 0)
         return;
@@ -333,7 +333,7 @@ void SDStabilization<MeshType, DofType>::applySUPG(const Real dt, MatrixType& ma
 
 template<typename MeshType, typename DofType>
 template <typename MatrixType, typename VectorType>
-void SDStabilization<MeshType, DofType>::applySD(const Real dt, MatrixType& matrix, const VectorType& state )
+void StabilizationSD<MeshType, DofType>::applySD(const Real dt, MatrixType& matrix, const VectorType& state )
 {
     if ( M_gammaBeta == 0 && M_gammaDiv == 0)
         return;
@@ -402,7 +402,7 @@ void SDStabilization<MeshType, DofType>::applySD(const Real dt, MatrixType& matr
 
 template<typename MeshType, typename DofType>
 template <typename VectorType, typename SourceType >
-void SDStabilization<MeshType, DofType>::applyRHS(const Real dt, VectorType& vector, const VectorType& state,
+void StabilizationSD<MeshType, DofType>::applyRHS(const Real dt, VectorType& vector, const VectorType& state,
                                                   const SourceType& source, const Real& time)
 {
     if ( M_gammaBeta == 0 )
@@ -468,9 +468,9 @@ void SDStabilization<MeshType, DofType>::applyRHS(const Real dt, VectorType& vec
 } // applyRHS(...)
 
 template<typename MeshType, typename DofType>
-void SDStabilization<MeshType, DofType>::showMe(std::ostream & output) const
+void StabilizationSD<MeshType, DofType>::showMe(std::ostream & output) const
 {
-    output << "SDStabilization::showMe() " <<std::endl;
+    output << "StabilizationSD::showMe() " <<std::endl;
     output << "Fluid Viscosity: " << M_viscosity << std::endl;
     output << "Stabilization coefficient SUPG/SD:  " << M_gammaBeta << std::endl;
     output << "Stabilization coefficient div grad: "<< M_gammaDiv   << std::endl;
@@ -483,7 +483,7 @@ void SDStabilization<MeshType, DofType>::showMe(std::ostream & output) const
 //=============================================================================
 template<typename MeshType, typename DofType>
 template<typename VectorType>
-void SDStabilization<MeshType, DofType>::computeParameters(const Real dt, const UInt iVol, const VectorType& state,
+void StabilizationSD<MeshType, DofType>::computeParameters(const Real dt, const UInt iVol, const VectorType& state,
                                                            ElemVec& beta, Real& coeffBeta, Real& coeffDiv) const
 {
 
@@ -524,7 +524,7 @@ void SDStabilization<MeshType, DofType>::computeParameters(const Real dt, const 
 
 
 template<typename MeshType, typename DofType>
-void SDStabilization<MeshType, DofType>::gradp_bgradv(const Real& coef, ElemVec& vel,
+void StabilizationSD<MeshType, DofType>::gradp_bgradv(const Real& coef, ElemVec& vel,
                                                       ElemMat& elmat,const CurrentFE& fe)  const
 {
     ASSERT_PRE(fe.hasFirstDeriv(),
@@ -569,7 +569,7 @@ void SDStabilization<MeshType, DofType>::gradp_bgradv(const Real& coef, ElemVec&
 
 
 template<typename MeshType, typename DofType>
-void SDStabilization<MeshType, DofType>::bgradu_bgradv(const Real& coef, ElemVec& vel, ElemMat& elmat, const CurrentFE& fe,
+void StabilizationSD<MeshType, DofType>::bgradu_bgradv(const Real& coef, ElemVec& vel, ElemMat& elmat, const CurrentFE& fe,
                                                        UInt iblock, UInt jblock, UInt nb)  const
 {
     ASSERT_PRE(fe.hasFirstDeriv(),
@@ -624,7 +624,7 @@ void SDStabilization<MeshType, DofType>::bgradu_bgradv(const Real& coef, ElemVec
 
 
 template<typename MeshType, typename DofType>
-void SDStabilization<MeshType, DofType>::lapu_bgradv(const Real& coef, ElemVec& vel, ElemMat& elmat, const CurrentFE& fe,
+void StabilizationSD<MeshType, DofType>::lapu_bgradv(const Real& coef, ElemVec& vel, ElemMat& elmat, const CurrentFE& fe,
                                                      UInt iblock, UInt jblock, UInt nb)  const
 {
 
@@ -683,7 +683,7 @@ void SDStabilization<MeshType, DofType>::lapu_bgradv(const Real& coef, ElemVec& 
 
 
 template<typename MeshType, typename DofType>
-void SDStabilization<MeshType, DofType>::lapu_gradq(const Real& coef, ElemMat& elmat,const CurrentFE& fe)  const
+void StabilizationSD<MeshType, DofType>::lapu_gradq(const Real& coef, ElemMat& elmat,const CurrentFE& fe)  const
 {
 
     ASSERT_PRE(fe.hasFirstDeriv(),
@@ -715,7 +715,7 @@ void SDStabilization<MeshType, DofType>::lapu_gradq(const Real& coef, ElemMat& e
 
 template<typename MeshType, typename DofType>
 template<typename SourceType>
-void SDStabilization<MeshType, DofType>::f_bgradv(const Real& coef, SourceType& source, ElemVec& vel,
+void StabilizationSD<MeshType, DofType>::f_bgradv(const Real& coef, SourceType& source, ElemVec& vel,
                                                   ElemVec& elvec, const CurrentFE& fe, UInt iblock, const Real& time)  const
 {
 
@@ -758,7 +758,7 @@ void SDStabilization<MeshType, DofType>::f_bgradv(const Real& coef, SourceType& 
 
 template<typename MeshType, typename DofType>
 template<typename SourceType>
-void SDStabilization<MeshType, DofType>::f_gradq(const Real& coef, SourceType& source, ElemVec& elvec, const CurrentFE& fe, UInt iblock, const Real& time) const
+void StabilizationSD<MeshType, DofType>::f_gradq(const Real& coef, SourceType& source, ElemVec& elvec, const CurrentFE& fe, UInt iblock, const Real& time) const
 {
 
     ASSERT_PRE(fe.hasFirstDeriv(),
