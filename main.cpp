@@ -435,8 +435,7 @@ public:
 struct FSIChecker
 {
     FSIChecker( GetPot const& _data_file ):
-            data_file( _data_file ),
-            prec     ( ( LifeV::Preconditioner )_data_file( "problem/precond", LifeV::NEUMANN_NEUMANN ) )
+            data_file( _data_file )
     {}
 
     void operator()()
@@ -446,8 +445,6 @@ struct FSIChecker
         try
         {
             fsip = boost::shared_ptr<Problem>( new Problem( data_file ) );
-
-            fsip->fsiData()->setPreconditioner( prec );
 
             fsip->run();
         }
@@ -460,7 +457,6 @@ struct FSIChecker
     }
 
     GetPot                data_file;
-    LifeV::Preconditioner prec;
     LifeV::Vector         disp;
 };
 
