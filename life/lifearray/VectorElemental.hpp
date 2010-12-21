@@ -38,7 +38,7 @@
 
 #include <vector>
 
-#include <life/lifecore/life.hpp>
+#include <life/lifecore/Life.hpp>
 #include <iomanip>
 #include <life/lifearray/RNM.hpp>
 
