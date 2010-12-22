@@ -408,7 +408,7 @@ typename ExporterHDF5Mesh3D<MeshType>::graphPtr_Type ExporterHDF5Mesh3D<MeshType
     std::vector<Int> partBuffer;
     std::stringstream index;
 
-    for (UInt i = 0; i < nPartitions; ++i)
+    for (Int i = 0; i < nPartitions; ++i)
     {
         partBuffer.resize(partitionSizes[i]);
         index << i;
@@ -527,7 +527,7 @@ typename ExporterHDF5Mesh3D<MeshType>::meshPtr_Type ExporterHDF5Mesh3D<MeshType>
 
     typename MeshType::point_Type *pp = 0;
 
-    for (UInt j = 0; j < numPoints; ++j)
+    for (Int j = 0; j < numPoints; ++j)
     {
         pp = &(tempMesh->addPoint(bool(pointBoundaryFlags[j])));
         pp->setMarker(pointMarkers[j]);
@@ -565,7 +565,7 @@ typename ExporterHDF5Mesh3D<MeshType>::meshPtr_Type ExporterHDF5Mesh3D<MeshType>
 
     typename MeshType::EdgeType *pe;
 
-    for (UInt j = 0; j < numEdges; ++j)
+    for (Int j = 0; j < numEdges; ++j)
     {
         pe = &(tempMesh->addEdge(edgeBoundaryFlags[j]));
         pe->setLocalId(j + 1);
@@ -619,7 +619,7 @@ typename ExporterHDF5Mesh3D<MeshType>::meshPtr_Type ExporterHDF5Mesh3D<MeshType>
 
     tempMesh->faceList.reserve(numFaces);
 
-    for (UInt j = 0; j < numFaces; ++j)
+    for (Int j = 0; j < numFaces; ++j)
     {
         pf = &(tempMesh->addFace(faceBoundaryFlags[j]));
         pf->setLocalId(j + 1);
@@ -669,7 +669,7 @@ typename ExporterHDF5Mesh3D<MeshType>::meshPtr_Type ExporterHDF5Mesh3D<MeshType>
 
     typename MeshType::VolumeType *pv = 0;
 
-    for (UInt j = 0; j < numVolumes; ++j)
+    for (Int j = 0; j < numVolumes; ++j)
     {
         pv = &(tempMesh->addVolume());
         pv->setId(volumeGlobalId[j]);
