@@ -18,6 +18,7 @@ LIFEARRAY:  tab.hpp                                                            C
 LIFESOLVER: fluidToMaster.hpp                                                  CMCS3     DONE
             reducedLinFluid.*pp                                                CMCS3     DONE
             ipStabilization                                                    EMORY     DONE
+            NS_Assembler                                                       EMORY
             steklovPoincareBase.*pp                                            CMCS3
             VenantKirchhofSolver.cpp                                           CMCS3     DONE
 
@@ -26,12 +27,12 @@ LIFEV FILES TO BE MOVED
 ============================
 
 EpetraMap:      from LIFEALG     to LIFEARRAY                                  CMCS2     DONE
-cblas           from LIFEALG     to LIFECORE                                   MOX
-clapack         from LIFEALG     to LIFECORE                                   MOX
+cblas           from LIFEALG     to LIFECORE                                   MOX       DONE
+clapack         from LIFEALG     to LIFECORE                                   MOX       DONE
 GetPot:         from LIFECORE    to LIFEFILTERS                                CMCS3     DONE
 identifier      from LIFEMESH    to LIFEFEM                                    EMORY     DONE
 mesh_util       from LIFEFILTERS to LIFEMESH                                   CMCS3
-selectMarker    from LIFEFILTERS to LIFEMESH                                   MOX
+selectMarker    from LIFEFILTERS to LIFEMESH                                   MOX       DONE
 stiffnessFibers from LIFEFEM     to LIFESOLVER                                 CMCS1     DONE
 
 ============================
@@ -40,8 +41,8 @@ LIFEV FILES TO BE RENAMED
 
 LIFECORE
 ============================
-CBlas                                  cblas                                   MOX       
-CLapack                                clapack                                 MOX 
+CBlas                                  cblas                                   MOX       DONE
+CLapack                                clapack                                 MOX       DONE
 Displayer                              -                                       CMCS3     DONE
 Factory                                factory                                 CMCS3     DONE
 FactoryPolicy                          policy                                  CMCS3     DONE
@@ -85,7 +86,7 @@ RNMOperatorConstant                    RNM_opc                                 C
 RNMTemplate                            RNM_tpl                                 CMCS2
 VectorElemental                        elemVec                                 CMCS2
 VectorEpetra                           EpetraVector                            CMCS2
-VectorSimple                           SimpleVect                              CMCS2
+VectorSimple                           SimpleVect                              CMCS2     DONE
 
 LIFEMESH
 ============================
@@ -103,9 +104,9 @@ MeshPartitioner                        partitionMesh                           C
 MeshPartitionerOfflineFSI              FSIOfflinePartitioner                   CMCS3     DONE
 MeshUtility                            mesh_util_base                          EMORY     DONE
 MeshVertex                             geo0D                                   EMORY     DONE
-RegionMesh1D                           regionMesh1D                            MOX
-RegionMesh2D                           regionMesh2D                            MOX
-RegionMesh3D                           regionMesh3D                            MOX
+RegionMesh1D                           regionMesh1D                            MOX       DONE
+RegionMesh2D                           regionMesh2D                            MOX       DONE
+RegionMesh3D                           regionMesh3D                            MOX       DONE
 RegionMesh3DStructured                 structuredMesh3D                        CMCS2     DONE
 
 LIFEFILTERS
@@ -116,7 +117,7 @@ ExporterEnsight                        ensight                                 C
 ExporterHDF5                           hdf5exporter                            CMCS3     DONE
 ExporterHDF5Mesh3D                     HDF5Filter3DMesh                        CMCS3     DONE
 GetPot                                 -                                       CMCS3     DONE
-Importer                               importer                                MOX
+Importer                               importer                                MOX       DONE
 ImporterMesh2D                         readMesh2D                              MOX       DONE
 ImporterMesh3D                         readMesh3D                              MOX       DONE
 
@@ -172,7 +173,7 @@ DarcySolverNonLinear                   darcySolverNonLinear                    M
 DarcySolverTransient                   darcySolverTransient                    MOX       DONE
 DarcySolverTransientNonLinear          darcySolverTransientNonLinear           MOX       DONE
 FSIData                                DataFSI                                 CMCS3
-FSIOperator                            FSIOperator                             CMCS3     DONE
+FSIOperator                            FSIOperator                             CMCS3    
 FSIExactJacobian                       exactJacobianBase                       CMCS3
 FSIFixedPoint                          fixedPointBase                          CMCS3
 FSISolver                              -                                       CMCS3     DONE
@@ -189,7 +190,6 @@ HyperbolicData                         dataHyperbolic                          M
 HyperbolicSolver                       hyperbolicSolver                        MOX       DONE
 LevelSetData                           dataLevelSet                            CMCS2     DONE
 LevelSetSolver                         -                                       CMCS2     DONE
-NavierStokesAssembler                  NS_Assembler                            EMORY
 OseenData                              dataNavierStokes                        EMORY     DONE
 OseenSolver                            Oseen                                   EMORY     DONE
 OseenSolverShapeDerivative             OseenShapeDerivatives                   EMORY     DONE
