@@ -46,7 +46,7 @@
 // LIFEV
 #include <life/lifefilters/GetPot.hpp>
 #include <life/lifefem/TimeData.hpp>
-#include <life/lifemesh/regionMesh1D.hpp>
+#include <life/lifemesh/RegionMesh1D.hpp>
 
 // LIFEV - MATHCARD
 #include <lifemc/lifesolver/OneDimensionalDefinitions.hpp>
