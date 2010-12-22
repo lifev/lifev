@@ -2992,7 +2992,7 @@ RegionMesh3D<GEOSHAPE, MC>::check( int level, bool const fix, bool const verb, s
     {
         out << "Num Boundary points " << count << " not equal to internal counter value "
         << M_numBPoints << std::endl;
-        if ( count != 0 & fix )
+        if ( ( count != 0 ) & fix )
         {
             M_numBPoints = count;
             out << "Fixed Counter";
