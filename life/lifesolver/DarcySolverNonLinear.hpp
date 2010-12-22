@@ -385,7 +385,7 @@ public:
     /*!
       @return M_fixedPointTolerance
      */
-    Real fixedPointTolerance () const
+    const Real& fixedPointTolerance () const
     {
         return M_fixedPointTolerance;
     }
@@ -403,7 +403,7 @@ public:
     /*!
       @return max possible number of fixed point iterations
     */
-    UInt fixedPointMaxIteration () const
+    const UInt& fixedPointMaxIteration () const
     {
         return M_fixedPointMaxIteration;
     }

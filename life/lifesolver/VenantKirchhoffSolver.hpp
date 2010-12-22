@@ -423,10 +423,10 @@ public:
   //  const Real& density()   const { return M_data->rho(); }
 
   //! Get the Young modulus
-  const Real& getYoung()     const { return M_data->getYoung(); }
+  Real getYoung()            const { return M_data->getYoung(); }
 
   //! Get the Poisson coefficient
-  const Real& getPoisson()   const { return M_data->getPoisson(); }
+  Real getPoisson()          const { return M_data->getPoisson(); }
 
   //! Get the density
   const Real& getRho()       const { return M_data->getRho(); }
