@@ -1142,7 +1142,7 @@ template <typename DataType>
 void
 EpetraMatrix<DataType>::insertValueDiagonal( const DataType entry, const MapEpetra& Map, const UInt offset )
 {
-    for ( UInt i=0 ; i<Map.map(Unique)->NumMyElements(); ++i )//num from 1
+    for ( Int i=0 ; i<Map.map(Unique)->NumMyElements(); ++i )//num from 1
     {
         addToCoefficient( offset + Map.map(Unique)->GID(i)-1 , offset + Map.map(Unique)->GID(i)-1, entry );
     }
