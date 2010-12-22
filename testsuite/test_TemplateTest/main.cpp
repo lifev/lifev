@@ -43,6 +43,10 @@
     night execution of the test inside the testsuite.
  */
 
+// Tell the compiler to ignore specific kind of warnings:
+#pragma GCC diagnostic ignored "-Wunused-variable"
+#pragma GCC diagnostic ignored "-Wunused-parameter"
+
 #include <Epetra_ConfigDefs.h>
 #ifdef EPETRA_MPI
 #include <mpi.h>
@@ -50,6 +54,10 @@
 #else
 #include <Epetra_SerialComm.h>
 #endif
+
+//Tell the compiler to restore the warning previously silented
+#pragma GCC diagnostic warning "-Wunused-variable"
+#pragma GCC diagnostic warning "-Wunused-parameter"
 
 #include <life/lifecore/life.hpp>
 #include <boost/shared_ptr.hpp>

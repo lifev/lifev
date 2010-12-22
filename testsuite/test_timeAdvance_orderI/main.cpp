@@ -1,29 +1,28 @@
-/* -*- mode: c++ -*-
+//@HEADER
+/*
+*******************************************************************************
 
-  This file is part of the LifeV Applications.
+    Copyright (C) 2004, 2005, 2007 EPFL, Politecnico di Milano, INRIA
+    Copyright (C) 2010 EPFL, Politecnico di Milano, Emory University
 
-  Author(s):  F. Nobile     <fabio.nobile@polimi.it>
-              M. Pozzoli    <matteo1.pozzoli@mail.polimi.it>
-              C. Vergara    <christian.vergara@polimi.it>
-       Date: 2010-02-15
+    This file is part of LifeV.
 
-  Copyright (C) 2009 EPFL
+    LifeV is free software; you can redistribute it and/or modify
+    it under the terms of the GNU Lesser General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
 
-  This program is free software; you can redistribute it and/or modify
-  it under the terms of the GNU General Public License as published by
-  the Free Software Foundation; either version 2.1 of the License, or
-  (at your option) any later version.
+    LifeV is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+    Lesser General Public License for more details.
 
-  This program is distributed in the hope that it will be useful, but
-  WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-  General Public License for more details.
+    You should have received a copy of the GNU Lesser General Public License
+    along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
 
-  You should have received a copy of the GNU General Public License
-  along with this program; if not, write to the Free Software
-  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
-  USA
+*******************************************************************************
 */
+//@HEADER
 /* ========================================================
 
 Solve the problem
@@ -43,6 +42,11 @@ nonlinear_function.hpp:
    uexact = exp(-sin(Pi/2*t))*cos(x *Pi)*cos(y*Pi)*cos(z*Pi);
 
    f = Pi2/4*( sin(Pi/2*t)+cos(Pi/2*t)*cos(Pi/2*t) )*exp(-sin(Pi/2*t))*cos(x *Pi)*cos(y*Pi)*cos(z*Pi);
+
+  Author(s):  F. Nobile     <fabio.nobile@polimi.it>
+              M. Pozzoli    <matteo1.pozzoli@mail.polimi.it>
+              C. Vergara    <christian.vergara@polimi.it>
+       Date: 2010-02-15
 */
 /**
   \file timeAdvance.hpp
@@ -54,13 +58,21 @@ nonlinear_function.hpp:
 // ===================================================
 //! Includes
 // ===================================================
-#include "Epetra_config.h"
-#ifdef HAVE_MPI
-#include "mpi.h"
-#include "Epetra_MpiComm.h"
+// Tell the compiler to ignore specific kind of warnings:
+#pragma GCC diagnostic ignored "-Wunused-variable"
+#pragma GCC diagnostic ignored "-Wunused-parameter"
+
+#include <Epetra_ConfigDefs.h>
+#ifdef EPETRA_MPI
+#include <mpi.h>
+#include <Epetra_MpiComm.h>
 #else
-#include "Epetra_SerialComm.h"
+#include <Epetra_SerialComm.h>
 #endif
+
+//Tell the compiler to restore the warning previously silented
+#pragma GCC diagnostic warning "-Wunused-variable"
+#pragma GCC diagnostic warning "-Wunused-parameter"
 
 #include <life/lifecore/life.hpp>
 

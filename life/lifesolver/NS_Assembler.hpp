@@ -20,7 +20,7 @@ This library is free software; you can redistribute it and/or
 #ifndef _NS_ASSEMBLER_H_
 #define _NS_ASSEMBLER_H_
 
-#include <life/lifealg/MapEpetra.hpp>
+#include <life/lifearray/MapEpetra.hpp>
 
 #include <life/lifearray/elemMat.hpp>
 #include <life/lifearray/elemVec.hpp>

@@ -33,12 +33,15 @@
 
  */
 
-
 #include "EqualSolutions.hpp"
 #include <Epetra_SerialComm.h>
+#pragma GCC diagnostic ignored "-Wunused-variable"
+#pragma GCC diagnostic ignored "-Wunused-parameter"
 #include <Epetra_Map.h>
 #include <Epetra_MultiVector.h>
 #include <EpetraExt_HDF5.h>
+#pragma GCC diagnostic warning "-Wunused-variable"
+#pragma GCC diagnostic warning "-Wunused-parameter"
 #include <iostream>
 #include <sstream>
 #include <string>

@@ -30,25 +30,23 @@
    \date 2010-05-18
  */
 
-// #include <life/lifecore/life.hpp>
-
-// #include <life/lifecore/life.hpp>
-// #include <life/lifefilters/GetPot.hpp>
-// #include <life/lifecore/LifeDebug.hpp>
-
-// #include <life/lifefilters/importer.hpp>
-
-//#include "NavierStokesSolverBlockIP.hpp"
-
-//#include "Epetra_SerialComm.h"
+// Tell the compiler to ignore specific kind of warnings:
+#pragma GCC diagnostic ignored "-Wunused-variable"
+#pragma GCC diagnostic ignored "-Wunused-parameter"
 
 #include <Epetra_ConfigDefs.h>
 #ifdef EPETRA_MPI
-#include <Epetra_MpiComm.h>
 #include <mpi.h>
+#include <Epetra_MpiComm.h>
 #else
 #include <Epetra_SerialComm.h>
 #endif
+
+//Tell the compiler to restore the warning previously silented
+#pragma GCC diagnostic warning "-Wunused-variable"
+#pragma GCC diagnostic warning "-Wunused-parameter"
+
+
 //#include "life/lifesolver/NavierStokesSolver.hpp"
 #include <life/lifearray/EpetraMatrix.hpp>
 #include <life/lifearray/MapEpetra.hpp>

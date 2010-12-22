@@ -3,7 +3,21 @@
 #endif
 
 
-#include <Epetra_config.h>
+// Tell the compiler to ignore specific kind of warnings:
+#pragma GCC diagnostic ignored "-Wunused-variable"
+#pragma GCC diagnostic ignored "-Wunused-parameter"
+
+#include <Epetra_ConfigDefs.h>
+#ifdef EPETRA_MPI
+#include <mpi.h>
+#include <Epetra_MpiComm.h>
+#else
+#include <Epetra_SerialComm.h>
+#endif
+
+//Tell the compiler to restore the warning previously silented
+#pragma GCC diagnostic warning "-Wunused-variable"
+#pragma GCC diagnostic warning "-Wunused-parameter"
 
 #include<life/lifemesh/MeshData.hpp>
 
@@ -13,9 +27,6 @@
 #include <life/lifefem/DOFInterface3Dto3D.hpp>
 #include <life/lifefem/FESpace.hpp>
 
-#ifdef HAVE_MPI
-#include <mpi.h>
-#endif
 
 int main(int argc, char** argv)
 {
