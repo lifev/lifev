@@ -385,27 +385,36 @@ public:
     /*!
       @return M_fixedPointTolerance
      */
-    const Real fixedPointTolerance () const
+    Real fixedPointTolerance () const
     {
-	return M_fixedPointTolerance;
+        return M_fixedPointTolerance;
     }
-          Real fixedPointTolerance ()
+
+    //! Returns fixed point tolerance
+    /*!
+      @return M_fixedPointTolerance
+    */
+    Real& fixedPointTolerance ()
     {
-	return M_fixedPointTolerance;
+        return M_fixedPointTolerance;
     }
 
     //! Returns maximum number of fixed point iterations allowed
     /*!
       @return max possible number of fixed point iterations
     */
-    const UInt fixedPointMaxIteration () const
+    UInt fixedPointMaxIteration () const
     {
-	return M_fixedPointMaxIteration;
+        return M_fixedPointMaxIteration;
     }
 
-          UInt fixedPointMaxIteration ()
+    //! Returns maximum number of fixed point iterations allowed
+    /*!
+      @return max possible number of fixed point iterations
+    */
+    UInt& fixedPointMaxIteration ()
     {
-	return M_fixedPointMaxIteration;
+        return M_fixedPointMaxIteration;
     }
 
     //!  Returns the pointer of the primal solution vector at previous step.
@@ -449,7 +458,7 @@ protected:
     */
     void setFixedPointTolerance ( const Real& tol)
     {
-	M_fixedPointTolerance = tol;
+        M_fixedPointTolerance = tol;
     }
 
     /*!
@@ -458,7 +467,7 @@ protected:
      */
     void setFixedPointMaxIteration ( const UInt& maxit)
     {
-	M_fixedPointMaxIteration = maxit;
+        M_fixedPointMaxIteration = maxit;
     }
 
     //@}
@@ -517,11 +526,11 @@ DarcySolverNonLinear ( const data_Type&           dataFile,
         // Standard Darcy solver constructor.
         DarcySolver<Mesh, SolverType>::DarcySolver( dataFile, primal_FESpace, dual_FESpace, hybrid_FESpace, VdotN_FESpace, bcHandler, comm),
         // Non-linear stuff.
+        M_primalPreviousIteration       ( new vector_Type ( this->M_primal_FESpace.map() ) ),
         M_fixedPointMaxIteration        ( static_cast<UInt>(10) ),
         M_fixedPointNumIteration        ( static_cast<UInt>(0) ),
         M_fixedPointTolerance           ( static_cast<Real>(1.e-8) ),
         M_fixedPointResidual            ( M_fixedPointTolerance + static_cast<Real>(1) ),
-        M_primalPreviousIteration       ( new vector_Type ( this->M_primal_FESpace.map() ) ),
         M_primalZeroIteration           ( DarcyDefaultStartUpFunction() )
 
 {
@@ -545,11 +554,11 @@ DarcySolverNonLinear ( const data_Type&           dataFile,
         // Standard Darcy solver constructor.
         DarcySolver<Mesh, SolverType>::DarcySolver( dataFile, primal_FESpace, dual_FESpace, hybrid_FESpace, VdotN_FESpace, comm),
         // Non-linear stuff.
+        M_primalPreviousIteration       ( new vector_Type ( this->M_primal_FESpace.map() ) ),
         M_fixedPointMaxIteration        ( static_cast<UInt>(10) ),
         M_fixedPointNumIteration        ( static_cast<UInt>(0) ),
         M_fixedPointTolerance           ( static_cast<Real>(1.e-8) ),
         M_fixedPointResidual            ( M_fixedPointTolerance + static_cast<Real>(1) ),
-        M_primalPreviousIteration       ( new vector_Type ( this->M_primal_FESpace.map() ) ),
         M_primalZeroIteration           ( DarcyDefaultStartUpFunction() )
 {
 

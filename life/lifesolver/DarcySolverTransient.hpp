@@ -445,11 +445,11 @@ DarcySolverTransient ( const data_Type&           dataFile,
                        const commPtr_Type&              comm ):
         // Standard Darcy solver constructor.
         DarcySolver<Mesh, SolverType>::DarcySolver( dataFile, primal_FESpace, dual_FESpace, hybrid_FESpace, VdotN_FESpace, bcHandler, comm),
+        M_primalOld              ( new vector_Type ( this->M_primal_FESpace.map() ) ),
         // Data of the problem
         M_primalInitial          ( NULL ),
         M_mass                   ( _One_ ),
         // Linear solver.
-        M_primalOld              ( new vector_Type ( this->M_primal_FESpace.map() ) ),
         M_reusePrec              ( false ),
         M_updated                ( false ),
         M_maxIterSolver          ( static_cast<UInt>(0) ),
@@ -471,11 +471,11 @@ DarcySolverTransient ( const data_Type&           dataFile,
                        const commPtr_Type&              comm ):
         // Standard Darcy solver constructor.
         DarcySolver<Mesh, SolverType>::DarcySolver( dataFile, primal_FESpace, dual_FESpace, hybrid_FESpace, VdotN_FESpace, comm),
+        M_primalOld              ( new vector_Type ( this->M_primal_FESpace.map() ) ),
         // Data of the problem
         M_primalInitial          ( NULL ),
         M_mass                   ( _One_ ),
         // Linear solver.
-        M_primalOld              ( new vector_Type ( this->M_primal_FESpace.map() ) ),
         M_reusePrec              ( false ),
         M_updated                ( false ),
         M_maxIterSolver          ( static_cast<UInt>(0) ),
