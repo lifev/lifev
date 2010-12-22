@@ -59,7 +59,7 @@ quadRuleTetra.plt ==> Show the Convergence Rate of all the quadrature rules on T
 
 #include "test_quadrule.hpp"
 
-int main(int argc, char** argv)
+int main(int /*argc*/, char** /*argv*/)
 {
     using namespace LifeV;
 

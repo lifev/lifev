@@ -64,25 +64,6 @@
 
 using namespace LifeV;
 
-std::set<UInt> parseList( const std::string& list )
-{
-    std::string stringList = list;
-    std::set<UInt> setList;
-    if ( list == "" )
-    {
-        return setList;
-    }
-    UInt commaPos = 0;
-    while ( commaPos != std::string::npos )
-    {
-        commaPos = stringList.find( "," );
-        setList.insert( atoi( stringList.substr( 0, commaPos ).c_str() ) );
-        stringList = stringList.substr( commaPos+1 );
-    }
-    setList.insert( atoi( stringList.c_str() ) );
-    return setList;
-}
-
 namespace LifeV
 {
 namespace

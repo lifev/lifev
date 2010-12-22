@@ -32,5 +32,6 @@
     @date 20-07-2010
 
  */
+#include <string>
 
-bool equalSolutions(char* fileA, char* fileB, int timesteps, double tolerance);
+bool equalSolutions(const std::string& fileA, const std::string& fileB, int timesteps, double tolerance);

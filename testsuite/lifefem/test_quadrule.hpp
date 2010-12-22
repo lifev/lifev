@@ -81,7 +81,7 @@ bool quad_check_doe(const ReferenceFE &refFE, const GeometricMap & geoMap, const
     std::ofstream ofile(output_file.c_str());
 
 
-    for (UInt nqr(0); nqr<nquadrule; ++nqr)
+    for (Int nqr(0); nqr<nquadrule; ++nqr)
     {
 
         CurrentFE fe(refFE,geoMap, *allQuad[nqr]);

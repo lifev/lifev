@@ -109,6 +109,8 @@ Real d0(const Real& /*t*/, const Real& /*x*/, const Real& /*y*/, const Real& /*z
         ERROR_MSG("This entrie is not allowed: ud_functions.hpp");
         break;
     }
+
+    return 0.;
 }
 
 Real w0(const Real& /*t*/, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& i)
@@ -129,11 +131,13 @@ Real w0(const Real& /*t*/, const Real& /*x*/, const Real& /*y*/, const Real& /*z
         ERROR_MSG("This entrie is not allowed: ud_functions.hpp");
         break;
     }
+
+    return 0.;
 }
 
-Real PhysFlux(const Real&  t, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& i)
+Real PhysFlux(const Real&  t, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& /*i*/)
 {
-    double coef = 0.001;
+    //double coef = 0.001;
     double plusmoins = -1.;
 
     if (t < 0.01) return -1000.*t;
@@ -254,7 +258,7 @@ Real PhysFlux(const Real&  t, const Real& /*x*/, const Real& /*y*/, const Real& 
     double a = (flux[ipos + 1] - flux[ipos])/timescale;
     double b = flux[ipos + 1] - a*t2;
 
-    double slope = ipos -  t;
+    //double slope = ipos -  t;
 
     std::cout << "t = " << t << " f = " << t*a + b << " " << ipos << " " << a << " " << b << std::endl;
 

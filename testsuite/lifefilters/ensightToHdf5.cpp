@@ -78,7 +78,7 @@ computeP0pressure(FESpace< Mesh, Map >& pFESpace,
                   FESpace< Mesh, Map >& p0FESpace,
                   const FESpace<Mesh, Map >& uFESpace,
                   const vector_type& velAndPressureExport,
-                  vector_type& P0pres, Real /*time*/);
+                  vector_type& P0pres, Real /*time*/ );
 
 struct EnsightToHdf5::Private
 {
@@ -301,7 +301,7 @@ computeP0pressure(FESpace< Mesh, Map >& pFESpace,
                   FESpace< Mesh, Map >& p0FESpace,
                   const FESpace< Mesh, Map >& uFESpace,
                   const vector_type& velAndPressure,
-                  vector_type& P0pres, Real time)
+                  vector_type& P0pres, Real /*time*/)
 {
 
     int MyPID;

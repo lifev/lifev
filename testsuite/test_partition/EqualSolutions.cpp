@@ -44,9 +44,8 @@
 #pragma GCC diagnostic warning "-Wunused-parameter"
 #include <iostream>
 #include <sstream>
-#include <string>
 
-bool equalSolutions(char* fileA, char* fileB, int timesteps, double tolerance)
+bool equalSolutions(const std::string& fileA, const std::string& fileB, int timesteps, double tolerance)
 {
     Epetra_SerialComm comm;
     EpetraExt::HDF5 HDF5input(comm);

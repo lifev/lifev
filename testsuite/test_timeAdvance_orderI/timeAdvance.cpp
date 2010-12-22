@@ -208,8 +208,6 @@ problem::run()
     if (verbose) std::cout << "The Problem Solver" << std::flush;
 
     const ReferenceFE*    refFE_beta  (0);
-    const QuadratureRule* qR_beta     (0);
-    const QuadratureRule* bdQr_beta   (0);
 
     refFE_beta = &feTetraP1;
 

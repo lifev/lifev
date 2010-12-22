@@ -44,7 +44,7 @@ public:
     {
         return exp(-sin(Pi/2*t))*(x+y+z);
     }
-    inline Real grad(UInt icoor, Real t, Real x,Real y,Real z, UInt /*ic*/=0) const
+    inline Real grad(UInt icoor, Real t, Real /*x*/,Real /*y*/,Real /*z*/, UInt /*ic*/=0) const
     {
         switch (icoor)
         {
@@ -65,7 +65,7 @@ Real uexact( const Real&  t ,
              const Real& x,
              const Real& y,
              const Real& z,
-             const ID&  icomp)
+             const ID&  /*icomp*/)
 {
     return exp(-sin(Pi/2*t))*(x+y+z);
 }
@@ -75,7 +75,7 @@ Real source_in( const Real&  t ,
                 const Real& x,
                 const Real& y,
                 const Real& z,
-                const ID&  icomp)
+                const ID&  /*icomp*/)
 {
     return  -Pi/2*cos(Pi/2*t)*exp(-sin(Pi/2*t))*(x+y+z) ;
 //  return (3*Pi*Pi-alpha)*exp(-alpha*t)*sin(Pi*x+Pi/2)*sin(Pi*y+Pi/2)*sin(Pi*z+Pi/2);
