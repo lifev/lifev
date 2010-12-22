@@ -458,7 +458,7 @@ NonLinearAitken< VectorType >::computeDeltaLambdaVector( const vector_Type& solu
     omega /= -norm;
 
     //Check omega limits
-    for ( UInt i(0) ; i < omega.size() ; ++i )
+    for ( UInt i(0) ; i < static_cast<UInt> ( omega.size() ) ; ++i )
         checkRange(omega[i]);
 
 #ifdef HAVE_LIFEV_DEBUG
