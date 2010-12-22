@@ -192,7 +192,7 @@ protected:
     //!@name Protected Methods
     //@{
     //!sets the block preconditioner
-    int                        setupBlockPrec( );
+    void                        setupBlockPrec( );
     //@}
 
 private:

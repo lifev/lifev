@@ -39,7 +39,7 @@ namespace LifeV
 // ===================================================
 
 
-void MonolithicBlockMatrix::setDataFromGetPot(const GetPot& data, const std::string& section)
+void MonolithicBlockMatrix::setDataFromGetPot(const GetPot& /*data*/, const std::string& /*section*/)
 {
 }
 
@@ -61,7 +61,7 @@ void MonolithicBlockMatrix::coupler(mapPtr_Type& map,
     super_Type::couplingMatrix( M_coupling,  M_couplingFlag, super_Type::M_FESpace, super_Type::M_offset, locDofMap, numerationInterface, timeStep);
 }
 
-void MonolithicBlockMatrix::coupler(mapPtr_Type& map,
+void MonolithicBlockMatrix::coupler(mapPtr_Type& /*map*/,
                           const std::map<ID, ID>& locDofMap,
                           const vectorPtr_Type& numerationInterface,
                           const Real& timeStep,
@@ -89,7 +89,7 @@ void MonolithicBlockMatrix::replace_matrix( const matrixPtr_Type& Mat, UInt inde
 }
 
 
-void MonolithicBlockMatrix::replace_precs( const epetraOperatorPtr_Type& Mat, UInt index)
+void MonolithicBlockMatrix::replace_precs( const epetraOperatorPtr_Type& /*Mat*/, UInt /*index*/)
 {
     assert(false);
 }
@@ -164,7 +164,6 @@ void MonolithicBlockMatrix::createInterfaceMap( const MapEpetra& interfaceMap , 
     for (int j=1; j<numtasks ; ++j)
         numInterfaceDof[j] += numInterfaceDof[j-1];
 
-    UInt k=1;
     UInt l=0;
 
     M_interface = (UInt) interfaceMap.map(Unique)->NumGlobalElements()/nDimensions;
@@ -184,7 +183,7 @@ void MonolithicBlockMatrix::createInterfaceMap( const MapEpetra& interfaceMap , 
     std::vector<int> couplingVector;
     couplingVector.reserve((int)(interfaceMap.map(Unique)->NumMyElements()));
 
-    for (int dim=0; dim<nDimensions; ++dim)
+    for (UInt dim=0; dim<nDimensions; ++dim)
     {
         for ( ITrow=locDofMap.begin(); ITrow!=locDofMap.end() ; ++ITrow)
         {

@@ -506,7 +506,7 @@ FSIMonolithic::variablesInit(const std::string& dOrder)
     M_lambdaFluidRepeated.reset(new vector_Type(*M_fluidInterfaceMap, Repeated) );
 }
 
-int FSIMonolithic::setupBlockPrec( )
+void FSIMonolithic::setupBlockPrec( )
 {
      if(!(M_precPtr->set()))
      {
@@ -522,7 +522,6 @@ int FSIMonolithic::setupBlockPrec( )
          M_precPtr->replace_matrix(M_fluidBlock, 1);
          M_precPtr->replace_matrix(M_solidBlockPrec, 0);
      }
-     return EXIT_SUCCESS;
 }
 
 void

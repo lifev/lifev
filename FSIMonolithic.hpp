@@ -498,7 +498,7 @@ protected:
     void variablesInit(std::string const& dOrder);
 
     //!
-    int  setupBlockPrec( );
+    void setupBlockPrec( );
 
 #ifdef OBSOLETE
     void setOperator(Epetra_Operator& epetraOperator) {M_linearSolver->setOperator(epetraOperator);}
@@ -555,7 +555,7 @@ protected:
     bool                                              M_diagonalScale;
     bool                                              M_reusePrec;//!\todo to move to private
     bool                                              M_resetPrec;//!\todo to move to private
-    UInt                                              M_maxIterSolver;//!\todo to move to private
+    Int                                               M_maxIterSolver;//!\todo to move to private
     bool                                              M_restarts;
     //@}
 

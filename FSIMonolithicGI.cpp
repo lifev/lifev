@@ -286,7 +286,7 @@ void FSIMonolithicGI::initialize( FSI::fluidPtr_Type::value_type::function_Type 
 }
 
 
-int FSIMonolithicGI::setupBlockPrec( )
+void FSIMonolithicGI::setupBlockPrec( )
 {
     super_Type::setupBlockPrec( );
 
@@ -401,7 +401,7 @@ void
 FSIMonolithicGI::assembleMeshBlock(UInt /*iter*/)
 {
     M_meshBlock.reset(new matrix_Type(*M_monolithicMap));
-    M_meshMotion->setMatrix(M_meshBlock);
+    M_meshMotion->addSystemMatrixTo(M_meshBlock);
     M_meshBlock->globalAssemble();
     UInt offset(M_solidAndFluidDim+nDimensions*M_interface);
     std::map<ID, ID>::const_iterator ITrow;

@@ -498,7 +498,7 @@ protected:
     void variablesInit(std::string const& dOrder);
 
     //!
-    int  setupBlockPrec( );
+    void  setupBlockPrec( );
 
 #ifdef OBSOLETE
     void setOperator(Epetra_Operator& epetraOperator) {M_linearSolver->setOperator(epetraOperator);}

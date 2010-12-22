@@ -369,7 +369,7 @@ setup(
 template <typename Mesh, typename SolverType>
 void
 VenantKirchhoffSolverNonLinear<Mesh, SolverType>::
-buildSystem(matrixPtr_Type massStiff, Real const & factor)
+buildSystem(matrixPtr_Type massStiff, Real const & /*factor*/)
 {
     UInt totalDof = this->M_FESpace->dof().numTotalDof();
 
@@ -586,7 +586,7 @@ void VenantKirchhoffSolverNonLinear<Mesh, SolverType>::updateSystem(  source_Typ
         for ( UInt ic = 0; ic < nc; ++ic )
         {
             compute_vec( source, M_elvec, this->M_FESpace->fe(),  this->M_data->getdataTime()->getTime(), ic ); // compute local vector
-            assembleVector( *this->M_rhsNoBC, M_elvec, this->M_FESpace->fe(), this->M_FESpace->dof(), ic, ic*this->M_FESpace->dim() ); // assemble local vector into global one
+            assembleVector( *this->M_rhsNoBC, M_elvec, this->M_FESpace->fe(), this->M_FESpace->dof(), ic, ic*this->M_FESpace->getDim() ); // assemble local vector into global one
         }
     }
 
@@ -627,7 +627,7 @@ void VenantKirchhoffSolverNonLinear<Mesh, SolverType>::updateSystem(  source_Typ
 template <typename Mesh, typename SolverType>
 void VenantKirchhoffSolverNonLinear<Mesh, SolverType>::updateNonlinearMatrix( matrixPtr_Type& stiff )
 {
-    UInt totalDof   = this->M_FESpace->dof().numTotalDof();
+    //UInt totalDof   = this->M_FESpace->dof().numTotalDof();
     ElemVec dk_loc( this->M_FESpace->fe().nbFEDof(), nDimensions );
 
     vector_Type disp(*this->M_disp);
@@ -646,7 +646,7 @@ void VenantKirchhoffSolverNonLinear<Mesh, SolverType>::updateNonlinearMatrix( ma
             UInt  iloc = this->M_FESpace->fe().patternFirst( iNode );
             for ( UInt iComp = 0; iComp < nDimensions; ++iComp )
             {
-                UInt ig = this->M_FESpace->dof().localToGlobal( eleID, iloc + 1 ) + iComp*this->dim();
+                UInt ig = this->M_FESpace->dof().localToGlobal( eleID, iloc + 1 ) + iComp*this->getDim();
                 dk_loc[ iloc + iComp*this->M_FESpace->fe().nbFEDof() ] = dRep[ig]; // BASEINDEX + 1
             }
         }
@@ -716,7 +716,7 @@ void VenantKirchhoffSolverNonLinear<Mesh, SolverType>::updateNonlinearTerms( mat
             UInt  iloc = this->M_FESpace->fe().patternFirst( iNode );
             for ( UInt iComp = 0; iComp < nDimensions; ++iComp )
             {
-                UInt ig = this->M_FESpace->dof().localToGlobal( eleID, iloc + 1 ) + iComp*this->dim() + this->M_offset;
+                UInt ig = this->M_FESpace->dof().localToGlobal( eleID, iloc + 1 ) + iComp*this->getDim() + this->M_offset;
                 dk_loc[ iloc + iComp*this->M_FESpace->fe().nbFEDof() ] = dRep[ig]; // BASEINDEX + 1
             }
         }
@@ -921,9 +921,6 @@ void VenantKirchhoffSolverNonLinear<Mesh, SolverType>::updateJacobian( vector_Ty
     coef = this->M_zeta;
     *jacobian *= coef;
 
-
-    UInt ig;
-
     ElemVec dk_loc( this->M_FESpace->fe().nbFEDof(), nDimensions );
 
     vector_Type dRep(sol, Repeated);
@@ -946,7 +943,7 @@ void VenantKirchhoffSolverNonLinear<Mesh, SolverType>::updateJacobian( vector_Ty
             UInt  iloc = this->M_FESpace->fe().patternFirst( iNode );
             for ( UInt iComp = 0; iComp < nDimensions; ++iComp )
             {
-                UInt ig = this->M_FESpace->dof().localToGlobal( eleID, iloc + 1 ) + iComp*this->dim() + this->M_offset;
+                UInt ig = this->M_FESpace->dof().localToGlobal( eleID, iloc + 1 ) + iComp*this->getDim() + this->M_offset;
                 dk_loc[iloc + iComp*this->M_FESpace->fe().nbFEDof()] = dRep[ig]; // BASEINDEX + 1
             }
         }
@@ -1044,7 +1041,6 @@ solveJacobian( vector_Type&           step,
     //*this->M_f = res;
 
     // for BC treatment (done at each time-step)
-    Real tgv = 1.0;
 
     this->M_Displayer->leaderPrint("\tS'-  Applying boundary conditions      ... ");
 
@@ -1065,7 +1061,7 @@ solveJacobian( vector_Type&           step,
 
     this->M_linearSolver->setMatrix(*this->M_jacobian);
 
-    Int numIter = this->M_linearSolver->solveSystem( rhsFull, step, this->M_jacobian );
+    this->M_linearSolver->solveSystem( rhsFull, step, this->M_jacobian );
 
     chrono.stop();
 
@@ -1080,7 +1076,7 @@ solveJacobian( vector_Type&           step,
 template<typename Mesh, typename SolverType>
 void VenantKirchhoffSolverNonLinear<Mesh, SolverType>::
 applyBoundaryConditions(matrix_Type&        matrix,
-                        vector_Type&        rhs,
+                        vector_Type&        /*rhs*/,
                         bchandler_Type&     BCh,
                         UInt                offset)
 {

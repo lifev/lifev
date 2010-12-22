@@ -139,7 +139,6 @@ void MonolithicBlockComposedNN::coupler(mapPtr_Type& map,
     }
 
     matrixPtr_Type coupling(new matrix_Type(*map));
-    UInt one(1.);
 
     coupling.reset(new matrix_Type(*map, 0));
     coupling->insertValueDiagonal(1., M_offset[fluid]+1, M_offset[solid]+1 );
