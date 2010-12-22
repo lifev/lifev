@@ -43,38 +43,35 @@
 
 #ifdef  HAVE_TRILINOS_ANASAZI
 
-
 #ifndef EIGENSOLVER_HPP
 #define EIGENSOLVER_HPP
-
 
 #pragma GCC diagnostic ignored "-Wunused-variable"
 #pragma GCC diagnostic ignored "-Wunused-parameter"
 
-#include "Epetra_MultiVector.h"
-#include "Epetra_SerialDenseVector.h"
-#include "Epetra_Operator.h"
-#include "Epetra_CrsMatrix.h"
+#include <cstdlib>
+#include <boost/shared_ptr.hpp>
 
-#include "Teuchos_RefCountPtrDecl.hpp"
+#include <Epetra_MultiVector.h>
+#include <Epetra_SerialDenseVector.h>
+#include <Epetra_Operator.h>
+#include <Epetra_CrsMatrix.h>
 
-#include "AnasaziBlockDavidson.hpp"
-#include "AnasaziLOBPCG.hpp"
-#include "AnasaziBasicOutputManager.hpp"
-#include "AnasaziBasicSort.hpp"
-#include "AnasaziConfigDefs.hpp"
-#include "AnasaziBasicEigenproblem.hpp"
-#include "AnasaziBlockKrylovSchurSolMgr.hpp"
-#include "AnasaziLOBPCGSolMgr.hpp"
-#include "AnasaziEpetraAdapter.hpp"
+#include <Teuchos_RefCountPtrDecl.hpp>
+
+#include <AnasaziBlockDavidson.hpp>
+#include <AnasaziLOBPCG.hpp>
+#include <AnasaziBasicOutputManager.hpp>
+#include <AnasaziBasicSort.hpp>
+#include <AnasaziConfigDefs.hpp>
+#include <AnasaziBasicEigenproblem.hpp>
+#include <AnasaziBlockKrylovSchurSolMgr.hpp>
+#include <AnasaziLOBPCGSolMgr.hpp>
+#include <AnasaziEpetraAdapter.hpp>
 
 #pragma GCC diagnostic warning "-Wunused-variable"
 #pragma GCC diagnostic warning "-Wunused-parameter"
 
-#include <cstdlib>
-#include <boost/shared_ptr.hpp>
-
-#include <life/lifecore/life.hpp>
 #include <life/lifefilters/GetPot.hpp>
 
 namespace LifeV

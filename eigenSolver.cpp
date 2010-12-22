@@ -34,8 +34,8 @@
 
 #include <string>
 
-#include "Teuchos_RefCountPtrDecl.hpp"
-#include "Teuchos_RCPBoostSharedPtrConversions.hpp"
+#include <Teuchos_RefCountPtrDecl.hpp>
+#include <Teuchos_RCPBoostSharedPtrConversions.hpp>
 
 #pragma GCC diagnostic warning "-Wunused-variable"
 #pragma GCC diagnostic warning "-Wunused-parameter"
