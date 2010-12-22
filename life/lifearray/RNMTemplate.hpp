@@ -184,17 +184,17 @@ KN_<R>& KN_<R>::map( R ( *f ) ( R ) )
 }
 ///////////////// definition des operateurs d'affectation /////////////////////////
 #define oper =
-#include <life/lifearray/RNM_op.hpp>
-#include <life/lifearray/RNM_opc.hpp>
+#include <life/lifearray/RNMOperator.hpp>
+#include <life/lifearray/RNMOperatorConstant.hpp>
 #define oper +=
-#include <life/lifearray/RNM_op.hpp>
-#include <life/lifearray/RNM_opc.hpp>
+#include <life/lifearray/RNMOperator.hpp>
+#include <life/lifearray/RNMOperatorConstant.hpp>
 #define oper -=
-#include <life/lifearray/RNM_op.hpp>
-#include <life/lifearray/RNM_opc.hpp>
+#include <life/lifearray/RNMOperator.hpp>
+#include <life/lifearray/RNMOperatorConstant.hpp>
 #define oper *=
-#include <life/lifearray/RNM_opc.hpp>
+#include <life/lifearray/RNMOperatorConstant.hpp>
 #define oper /=
-#include <life/lifearray/RNM_opc.hpp>
+#include <life/lifearray/RNMOperatorConstant.hpp>
 
 #endif
