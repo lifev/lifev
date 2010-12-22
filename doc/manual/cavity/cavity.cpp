@@ -61,7 +61,7 @@ const int RIGHT  = 4;
 const int BOTTOM = 5;
 const int TOP    = 6;
 
-LifeV::Real lidBC(const LifeV::Real& t, const LifeV::Real& /*x*/, const LifeV::Real& /*y*/, const LifeV::Real& /*z*/, const LifeV::ID& i)
+LifeV::Real lidBC(const LifeV::Real& /*t*/, const LifeV::Real& /*x*/, const LifeV::Real& /*y*/, const LifeV::Real& /*z*/, const LifeV::ID& i)
 {
     switch (i)
     {
