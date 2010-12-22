@@ -68,7 +68,7 @@ namespace LifeV
  *
  *  In a region elements are all of the same type.
  */
-template <typename GEOSHAPE, typename MC = DefMarkerCommon >
+template <typename GEOSHAPE, typename MC = defaultMarkerCommon_Type >
 class RegionMesh1D : public MeshEntity,
         public MC::RegionMarker
 {
@@ -1047,7 +1047,7 @@ public:
      *  @param locE Position of the surrounding edges.
      *  @return Edge Id.
      */
-    UInt localEdgeId( const FaceType& iface, const UInt locE ) const { return 0; }
+    UInt localEdgeId( const FaceType& /*iface*/, const UInt /*locE*/ ) const { return 0; }
 
     //! Edge Id of a certain edge number around a Face.
     /**
@@ -1057,7 +1057,7 @@ public:
      *  @param locE Position of the surrounding edges.
      *  @return Edge Id.
      */
-    UInt localEdgeId( const UInt facId, const UInt locE ) const { return 0; }
+    UInt localEdgeId( const UInt /*facId*/, const UInt /*locE*/ ) const { return 0; }
 
     //! Builds Edge-To-Face lookup table.
     /**
@@ -1722,7 +1722,7 @@ template <typename GEOSHAPE, typename MC>
 Real
 RegionMesh1D<GEOSHAPE, MC>::edgeLength( const UInt& i ) const
 {
-    ASSERT_BD( i >= 0 && i < edgeList.size() );
+    ASSERT_BD( i < edgeList.size() );
 
     Real deltaX, deltaY, deltaZ;
 
