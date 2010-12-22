@@ -59,7 +59,7 @@ int main()
     ofstream ofile(outfile.c_str());
     if (ofile.fail()) {cerr<<" Error: Cannot creat output file"<<endl; abort();}
 
-    RegionMesh3D<QuadraticTetra> aMesh;
+    RegionMesh3D<LinearTetra> aMesh;
 
     //    aMesh.test3DBuilder();
     //    aMesh.readMppFile(mystream, id, m);
