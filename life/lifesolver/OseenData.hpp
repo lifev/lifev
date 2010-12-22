@@ -228,14 +228,14 @@ public:
     /*!
      * @return M_fluidNumber the number of the current fluid
      */
-    inline UInt fluidNumber() const { return M_fluidNumber; };
+    const UInt& fluidNumber() const { return M_fluidNumber; };
 
     //! Get the density of the fluid
     /*!
      * @param n the fluid number
      * @return M_density the density of fluid n
      */
-    inline Real density(const UInt& n=0) const
+    const Real& density(const UInt& n=0) const
     {
         ASSERT(n<M_fluidNumber,"Undeclared fluid");
         return M_density[n];
@@ -246,7 +246,7 @@ public:
      * @param n the fluid number
      * @return M_viscosity the viscosity of the fluid n
      */
-    inline Real viscosity(const UInt& n=0) const
+    const Real& viscosity(const UInt& n=0) const
     {
         ASSERT(n<M_fluidNumber,"Undeclared fluid");
         return M_viscosity[n];

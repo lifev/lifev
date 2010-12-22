@@ -304,7 +304,7 @@ public:
     \param sol the current solution
     \param factor the rescaleFactor
   */
-  void computeMatrix( matrixPtr_Type& stiff, const vector_Type& sol, Real const& factor )
+  void computeMatrix( matrixPtr_Type& /*stiff*/, const vector_Type& /*sol*/, Real const& /*factor*/ )
   {
   }
   //! Update (in the case of nonlinear material) the solid matrix
@@ -312,7 +312,7 @@ public:
     \param sol the current solution
     \param factor the rescaleFactor
   */
-  void computeMatrix( const vector_Type& sol, Real const& factor )
+  void computeMatrix( const vector_Type& /*sol*/, Real const& /*factor*/ )
   {
   }
 
@@ -411,7 +411,7 @@ public:
      Do nothing in the linear case: the matrix remains constant. Otherwise substitute the matrix with an updated one
   */
   //! Get the Solid Matrix
-  void getSolidMatrix( matrixPtr_Type& matrix)
+  void getSolidMatrix( matrixPtr_Type& /*matrix*/ )
   {
   }
 

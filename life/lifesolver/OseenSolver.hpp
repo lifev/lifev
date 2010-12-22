@@ -804,8 +804,8 @@ OseenSolver( boost::shared_ptr<data_Type>    dataType,
        FESpace<mesh_Type, MapEpetra>&  pressureFESpace,
        boost::shared_ptr<Epetra_Comm>& communicator,
        MapEpetra                       monolithicMap,
-       UInt                            offset ):
-        M_oseenData       ( dataType ),
+       UInt                            /*offset*/ ):
+        M_oseenData              ( dataType ),
         M_velocityFESpace        ( velocityFESpace ),
         M_pressureFESpace        ( pressureFESpace ),
         M_Displayer              ( communicator ),

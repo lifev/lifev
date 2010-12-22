@@ -907,7 +907,7 @@ private:
     //!@name Private Methods
     //@{
     //!Private Copy Constructor
-    FSI( const FSI& copy){}
+    FSI( const FSI& /*copy*/){}
     //@}
 
     //! @name Private Attributes
