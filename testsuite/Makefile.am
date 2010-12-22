@@ -1,29 +1,21 @@
-# -*- makefile; indent-tabs-mode: t -*-
+# -*- makefile -*-
+###################################################################################################
 #
+#                       This file is part of the LifeV Applications                        
+#                Copyright (C) 2004, 2005, 2007 EPFL, Politecnico di Milano, INRIA
+#                Copyright (C) 2010 EPFL, Politecnico di Milano, Emory University      
 #
+#      Author(s): Name Surname <name.surname@epfl.ch>
+#           Date: 00-00-0000
+#  License Terms: GNU LGPL
 #
-# Copyright (C) 2004 Christophe Prud'homme (christophe.prudhomme@epfl.ch)
-#
-#  Distributed under the GPL(GNU Public License):
-#  This program is free software; you can redistribute it and/or modify
-#  it under the terms of the GNU General Public License as published by
-#  the Free Software Foundation; either version 2 of the License, or
-#  (at your option) any later version.
-#
-#  This program is distributed in the hope that it will be useful,
-#  but WITHOUT ANY WARRANTY; without even the implied warranty of
-#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#  GNU General Public License for more details.
-#
-#  You should have received a copy of the GNU General Public License
-#  along with this program; if not, write to the Free Software
-#  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-#
+###################################################################################################
 
 SUFFIXES	= .cpp .hpp .idl .c .h .f .F .o .moc
 
 DO_NOT_COMPILE=
 
+# add newly created folders to SUBDIRS to allow 'make' to enter those folders recursively 
 SUBDIRS		= data  \
 			  lifealg \
 			  lifearray \
@@ -44,17 +36,25 @@ SUBDIRS		= data  \
               test_timeAdvance_orderII
 
 
-
-TESTSUITES=$(srcdir)/test_TemplateTest/testsuite.at \
-           $(srcdir)/test_structure/testsuite.at \
-           $(srcdir)/test_fsi/testsuite.at \
-           $(srcdir)/lifefilters/testsuite.at \
+# add newly created testsuite.at scripts to TESTSUITES to allow the automatic generation of the
+# 'testsuite' script upon modification of one of them 
+TESTSUITES=$(srcdir)/lifealg/testsuite.at \
+           $(srcdir)/lifearray/testsuite.at \
+           $(srcdir)/lifecore/testsuite.at \
            $(srcdir)/lifefem/testsuite.at \
-           $(srcdir)/test_partition/testsuite.at \
-           $(srcdir)/test_darcy/testsuite.at \
+           $(srcdir)/lifefilters/testsuite.at \
+           $(srcdir)/lifemesh/testsuite.at \
 		   $(srcdir)/test_ADRAssembler/testsuite.at \
-	   	   $(srcdir)/test_LevelSetSolver/testsuite.at
-
+		   $(srcdir)/test_bdf/testsuite.at \
+           $(srcdir)/test_darcy/testsuite.at \
+           $(srcdir)/test_fsi/testsuite.at \
+           $(srcdir)/test_hyperbolic/testsuite.at \
+	   	   $(srcdir)/test_LevelSetSolver/testsuite.at \
+           $(srcdir)/test_partition/testsuite.at \
+           $(srcdir)/test_structure/testsuite.at \
+           $(srcdir)/test_TemplateTest/testsuite.at \
+           $(srcdir)/test_timeAdvance_orderI/testsuite.at \
+           $(srcdir)/test_timeAdvance_orderII/testsuite.at
 
 
 $(srcdir)/package.m4: $(top_srcdir)/configure.in.in
@@ -71,7 +71,8 @@ $(srcdir)/package.m4: $(top_srcdir)/configure.in.in
 EXTRA_DIST = testsuite.at testsuite package.m4
 
 TESTSUITE = $(srcdir)/testsuite
-check-local: atconfig atlocal  $(TESTSUITE) $(LN_TESTSUITE)
+
+check-local: atconfig atlocal $(TESTSUITE) $(LN_TESTSUITE)
 	$(SHELL) $(TESTSUITE)
 
 AUTOM4TE    = autom4te
@@ -79,13 +80,6 @@ AUTOTEST = $(AUTOM4TE) --language=autotest
 $(TESTSUITE): $(srcdir)/testsuite.at $(srcdir)/package.m4 $(TESTSUITES)
 	$(AUTOTEST) -I $(srcdir) $@.at -o $@.tmp
 	mv $@.tmp $@
-	@if test $(top_srcdir) != $(top_builddir); then\
-     ln -sf $(TESTSUITE);\
-    fi
-
-testsuite: $(srcdir)/testsuite.at $(srcdir)/package.m4 $(TESTSUITES)
-	$(AUTOTEST) -I $(srcdir) $(srcdir)/$@.at -o $(srcdir)/$@.tmp
-	mv $(srcdir)/$@.tmp $(srcdir)/$@
 	@if test $(top_srcdir) != $(top_builddir); then\
      ln -sf $(TESTSUITE);\
     fi

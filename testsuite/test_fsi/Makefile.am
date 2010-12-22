@@ -5,7 +5,7 @@
 #                Copyright (C) 2004, 2005, 2007 EPFL, Politecnico di Milano, INRIA
 #                Copyright (C) 2010 EPFL, Politecnico di Milano, Emory University      
 #
-#      Author(s): Christophe Prud'homme <christophe.prudhomme@epfl.ch>
+#      Author(s): Name Surname <name.surname@epfl.ch>
 #           Date: 00-00-0000
 #  License Terms: GNU LGPL
 #

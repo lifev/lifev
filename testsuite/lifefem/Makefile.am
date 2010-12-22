@@ -4,8 +4,9 @@
 #                       This file is part of the LifeV Applications                        
 #                Copyright (C) 2001-2010 EPFL, Politecnico di Milano, INRIA          
 #
-#      Author(s): Name Surname <name.surname@epfl.ch>
-#           Date: 00-00-0000
+#      Author(s): Samuel Quinodoz <samuel.quinodoz@epfl.ch>
+#                 Umberto Villa <uvilla@emory.edu>
+#           Date: 06-04-2010
 #  License Terms: GNU GPL
 #
 ###################################################################################################
