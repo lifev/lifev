@@ -182,7 +182,7 @@ public:
     meshPtr_Type  getMeshPartition();
 
     //! Return a pointer to the k-th interface stored inside the file
-    boost::shared_ptr< std::map<UInt, UInt> >& getStoredInterface(Int k) ;
+    boost::shared_ptr< std::map<UInt, UInt> > getStoredInterface(Int k) ;
 
     // When reading back partitions and interfaces, the comm member must be set explicitly.
     // This is intended for use with getMeshPartition and getStoredInterface
@@ -692,7 +692,7 @@ typename ExporterHDF5Mesh3D<MeshType>::meshPtr_Type ExporterHDF5Mesh3D<MeshType>
 }
 
 template <typename MeshType>
-boost::shared_ptr< std::map<UInt, UInt> >& ExporterHDF5Mesh3D<MeshType>::getStoredInterface(int k)
+boost::shared_ptr< std::map<UInt, UInt> > ExporterHDF5Mesh3D<MeshType>::getStoredInterface(int k)
 {
     if (this->M_HDF5.get() == 0)
     {
@@ -721,7 +721,7 @@ boost::shared_ptr< std::map<UInt, UInt> >& ExporterHDF5Mesh3D<MeshType>::getStor
     this->M_HDF5->Read("Interfaces", "Value." + idx.str(), H5T_NATIVE_INT, size,
                        &valueVector[0]);
 
-    for (UInt i = 0; i < size; ++i)
+    for (Int i = 0; i < size; ++i)
     {
         interface->insert(std::make_pair(keyVector[i], valueVector[i]));
     }
