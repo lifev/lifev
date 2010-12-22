@@ -39,12 +39,14 @@
 #ifndef _DARCYSOLVER_H_
 #define _DARCYSOLVER_H_ 1
 
+#include <life/lifecore/CBlas.hpp>
+#include <life/lifecore/CLapack.hpp>
+
 #include <life/lifefem/AssemblyElemental.hpp>
 #include <life/lifefem/BCManage.hpp>
 
 #include <life/lifealg/SolverAztecOO.hpp>
-#include <life/lifealg/clapack.hpp>
-#include <life/lifealg/cblas.hpp>
+
 //
 #include <life/lifefem/GeometricMap.hpp>
 #include <life/lifesolver/DarcyData.hpp>

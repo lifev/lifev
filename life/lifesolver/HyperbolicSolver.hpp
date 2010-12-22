@@ -36,8 +36,9 @@
 #ifndef _HYPERBOLICSOLVER_H_
 #define _HYPERBOLICSOLVER_H_ 1
 
+#include <life/lifecore/CLapack.hpp>
+
 #include <life/lifealg/SolverAztecOO.hpp>
-#include <life/lifealg/clapack.hpp>
 
 #include <life/lifefem/AssemblyElemental.hpp>
 #include <life/lifefem/BCManage.hpp>
