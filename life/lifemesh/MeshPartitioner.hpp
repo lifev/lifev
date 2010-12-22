@@ -57,7 +57,7 @@ along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <life/lifecore/life.hpp>
 #include <life/lifefem/DOF.hpp>
-#include <life/lifemesh/regionMesh3D.hpp>
+#include <life/lifemesh/RegionMesh3D.hpp>
 
 namespace LifeV
 {

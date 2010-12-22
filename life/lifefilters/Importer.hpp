@@ -36,8 +36,8 @@
 #ifndef _IMPORTER_H
 #define _IMPORTER_H 1
 
-#include <life/lifemesh/regionMesh3D.hpp>
-#include <life/lifemesh/regionMesh2D.hpp>
+#include <life/lifemesh/RegionMesh3D.hpp>
+#include <life/lifemesh/RegionMesh2D.hpp>
 
 namespace LifeV
 {

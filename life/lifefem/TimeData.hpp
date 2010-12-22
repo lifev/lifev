@@ -265,7 +265,7 @@ public:
 
     //! Return TimeAdvanceNewmark parameters (\f$theta\f$, $\gamma$)
 
-    std::vector<Real> coefficientsTimeAdvanceNewmark();
+    std::vector<Real> coefficientsNewmark();
 
     //@}
 

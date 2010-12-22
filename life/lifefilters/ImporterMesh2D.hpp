@@ -53,7 +53,7 @@
 #include <life/lifecore/FortranWrapper.hpp>
 #include <life/lifecore/StringUtility.hpp>
 
-#include <life/lifemesh/regionMesh2D.hpp>
+#include <life/lifemesh/RegionMesh2D.hpp>
 
 #include <life/lifefilters/mesh_util.hpp>
 

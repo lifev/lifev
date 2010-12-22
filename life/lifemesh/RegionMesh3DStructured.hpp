@@ -42,7 +42,7 @@
 #define STRUCTUREDMESH3D_HPP 1
 
 #include <life/lifecore/life.hpp>
-#include <life/lifemesh/regionMesh3D.hpp>
+#include <life/lifemesh/RegionMesh3D.hpp>
 #include <life/lifefilters/mesh_util.hpp>
 #include <fstream>
 

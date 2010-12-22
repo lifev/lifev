@@ -280,7 +280,7 @@ problem::run()
 
     //! initialization of parameters of time Advance method:
     if (TimeAdvanceMethod =="Newmark")
-        timeAdvance->setup( dataProblem->dataTime()->coefficientsTimeAdvanceNewmark() , OrderDev);
+        timeAdvance->setup( dataProblem->dataTime()->coefficientsNewmark() , OrderDev);
 
     if (TimeAdvanceMethod =="BDF")
         timeAdvance->setup(dataProblem->dataTime()->orderBDF() , OrderDev);

@@ -42,7 +42,7 @@
 
 #include <life/lifemesh/MarkerDefinitions.hpp>
 #include <life/lifefilters/ImporterMesh3D.hpp>
-#include <life/lifemesh/regionMesh3D.hpp>
+#include <life/lifemesh/RegionMesh3D.hpp>
 #include <life/lifemesh/MeshElementBare.hpp>
 
 

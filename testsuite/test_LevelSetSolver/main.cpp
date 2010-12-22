@@ -61,7 +61,7 @@
 
 #include <life/lifemesh/MeshPartitioner.hpp>
 #include <life/lifemesh/RegionMesh3DStructured.hpp>
-#include <life/lifemesh/regionMesh3D.hpp>
+#include <life/lifemesh/RegionMesh3D.hpp>
 
 #include <life/lifesolver/LevelSetSolver.hpp>
 #include <life/lifemesh/MeshData.hpp>

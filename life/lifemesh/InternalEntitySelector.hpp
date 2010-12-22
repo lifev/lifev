@@ -40,7 +40,7 @@
 #ifndef _SELECTMARKER_HH_
 #define _SELECTMARKER_HH_ 1
 
-#include <life/lifemesh/regionMesh3D.hpp>
+#include <life/lifemesh/RegionMesh3D.hpp>
 
 namespace LifeV
 {

@@ -48,10 +48,10 @@
 #include <life/lifecore/life.hpp>
 
 #ifdef TWODIM
-#include <life/lifemesh/regionMesh2D.hpp>
+#include <life/lifemesh/RegionMesh2D.hpp>
 #include <life/lifefilters/ImporterMesh2D.hpp>
 #else // THREEDIM
-#include <life/lifemesh/regionMesh3D.hpp>
+#include <life/lifemesh/RegionMesh3D.hpp>
 #include <life/lifefilters/ImporterMesh3D.hpp>
 #include <life/lifemesh/RegionMesh3DStructured.hpp>
 #endif

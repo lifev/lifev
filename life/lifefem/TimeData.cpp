@@ -112,7 +112,7 @@ TimeData::showMe( std::ostream& output ) const
 // Methods
 // ===================================================
 std::vector<Real>
-TimeData::coefficientsTimeAdvanceNewmark()
+TimeData::coefficientsNewmark()
 {
     std::vector<Real> coefficients;
 

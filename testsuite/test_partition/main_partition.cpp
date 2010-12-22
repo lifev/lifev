@@ -56,7 +56,7 @@
 #include <life/lifemesh/MeshPartitioner.hpp>
 #include <life/lifesolver/OseenData.hpp>
 #include <life/lifemesh/MeshData.hpp>
-#include <life/lifemesh/regionMesh3D.hpp>
+#include <life/lifemesh/RegionMesh3D.hpp>
 #include <life/lifefilters/ExporterHDF5Mesh3D.hpp>
 
 #include <iostream>

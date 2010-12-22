@@ -40,7 +40,7 @@
 #define EXPORTMESH3D_H 1
 
 #include <life/lifecore/life.hpp>
-#include <life/lifemesh/regionMesh3D.hpp>
+#include <life/lifemesh/RegionMesh3D.hpp>
 #include <fstream>
 #include <string>
 
