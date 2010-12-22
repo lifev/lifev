@@ -148,10 +148,10 @@ struct Cylinder::Private
     *
     * Define the velocity profile at the inlet for the 3D cylinder
     */
-    Real poiseuille( const Real& t,
+    Real poiseuille( const Real& /*t*/,
                      const Real& x,
                      const Real& y,
-                     const Real& z,
+                     const Real& /*z*/,
                      const ID&   id ) const
     {
         double r = std::sqrt(x*x + y*y);
@@ -192,11 +192,11 @@ struct Cylinder::Private
      *
      * Define the velocity profile at the inlet for the 3D cylinder
      */
-    Real lambda3d( const Real& t,
+    Real lambda3d( const Real& /*t*/,
                    const Real& /* x */,
                    const Real& /* y */,
                    const Real& /* z */,
-                   const ID&   id ) const
+                   const ID&   /*id*/ ) const
     {
         return ( 1.33333 );
         //            return ( (*lambda)[0] );
@@ -233,7 +233,7 @@ Cylinder::Cylinder( int argc,
 
     d->comm.reset( new Epetra_MpiComm( MPI_COMM_WORLD ) );
     int ntasks;
-    int err = MPI_Comm_size(MPI_COMM_WORLD, &ntasks);
+    MPI_Comm_size(MPI_COMM_WORLD, &ntasks);
 #else
     d->comm.reset( new Epetra_SerialComm() );
 #endif

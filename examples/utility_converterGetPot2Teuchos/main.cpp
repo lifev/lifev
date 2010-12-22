@@ -38,14 +38,11 @@
 
  */
 
-#include <life/lifecore/life.hpp>
-#include <life/lifefilters/GetPot.hpp>
-
-#include "converter.hpp"
-
 // Tell the compiler to ignore specific kind of warnings:
 #pragma GCC diagnostic ignored "-Wunused-variable"
 #pragma GCC diagnostic ignored "-Wunused-parameter"
+
+#include<boost/shared_ptr.hpp>
 
 #include <Teuchos_ParameterList.hpp>
 #include <Teuchos_XMLParameterListHelpers.hpp>
@@ -62,7 +59,10 @@
 #pragma GCC diagnostic warning "-Wunused-variable"
 #pragma GCC diagnostic warning "-Wunused-parameter"
 
-#include<boost/shared_ptr.hpp>
+#include <life/lifecore/life.hpp>
+#include <life/lifefilters/GetPot.hpp>
+
+#include "converter.hpp"
 
 // Do not edit
 int main(int argc, char **argv)
@@ -78,7 +78,6 @@ int main(int argc, char **argv)
 #else
     boost::shared_ptr<Epetra_Comm> comm(new Epetra_SerialComm());
 #endif
-    bool verbose = comm->MyPID()==0;
 
     std::string dataFileName;
     GetPot command_line(argc, argv);

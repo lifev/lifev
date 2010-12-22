@@ -77,20 +77,20 @@ const int OUTLET  =3;
 const int INEDGES = 4;
 const int OUTEDGES   = 5;
 
-Real zero_scalar(const Real& t, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& /*i*/)
+Real zero_scalar(const Real& /*t*/, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& /*i*/)
 {
     return 0.0;
 }
 
 
-Real p0(const Real& t, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& /*i*/)
+Real p0(const Real& /*t*/, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& /*i*/)
 {
     return 10;
 }
 
 
 
-Real velocity(const Real& t, const Real& x, const Real& y, const Real& z, const ID& i)
+Real velocity(const Real& /*t*/, const Real& x, const Real& y, const Real& /*z*/, const ID& i)
 {
     switch (i)
     {
@@ -157,7 +157,7 @@ ResistanceProblem::ResistanceProblem( int argc,
     d->comm.reset( new Epetra_MpiComm( MPI_COMM_WORLD ) );
 
     int ntasks;
-    int err = MPI_Comm_size(MPI_COMM_WORLD, &ntasks);
+    MPI_Comm_size(MPI_COMM_WORLD, &ntasks);
 #else
     d->comm = new Epetra_SerialComm();
 #endif
@@ -189,8 +189,6 @@ ResistanceProblem::run()
     // Reading from data file
 
     GetPot dataFile( d->data_file_name.c_str() );
-
-    int save = dataFile("fluid/miscellaneous/save", 1);
 
     bool verbose = (d->comm->MyPID() == 0);
 
@@ -386,7 +384,7 @@ ResistanceProblem::run()
 
     // Temporal loop
 
-    int iter = 1, ii = 0;
+    int iter = 1;
 
     chronoSet.stop();
 

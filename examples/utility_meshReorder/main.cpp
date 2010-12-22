@@ -59,13 +59,12 @@ int main(int argc, char** argv)
         int me;
         MPI_Comm_rank(MPI_COMM_WORLD, &me);
         MPI_Comm_size(MPI_COMM_WORLD, &numtasks);
-        MPI_Comm MPIcomm;
         MPI_Group  originGroup, newGroup;
         MPI_Comm_group(MPI_COMM_WORLD, &originGroup);
         int members[numtasks];
-        for (ID i=0; i<numtasks; ++i)
+        for (Int i=0; i<numtasks; ++i)
             members[i]=0;
-        int ierr = MPI_Group_incl(originGroup, 1, members, &newGroup);
+        MPI_Group_incl(originGroup, 1, members, &newGroup);
 
         /* We have removed mesh_wrt, but here it was called ...
         MPI_Comm_create(MPI_COMM_WORLD, newGroup, &MPIcomm);

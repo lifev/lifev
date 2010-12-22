@@ -44,15 +44,19 @@
 #ifndef FILTER_HPP_
 #define FILTER_HPP_
 
+// Tell the compiler to ignore specific kind of warnings:
+#pragma GCC diagnostic ignored "-Wunused-variable"
+#pragma GCC diagnostic ignored "-Wunused-parameter"
+
 #include<iosfwd>
 #include<Teuchos_ParameterList.hpp>
 
+//Tell the compiler to restore the warning previously silented
+#pragma GCC diagnostic warning "-Wunused-variable"
+#pragma GCC diagnostic warning "-Wunused-parameter"
+
 #include <life/lifecore/life.hpp>
 #include <life/lifefilters/GetPot.hpp>
-
-/*
- *  *
- */
 
 namespace LifeV
 {

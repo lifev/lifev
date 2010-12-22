@@ -233,9 +233,9 @@ struct Cylinder::Private
      * Define the velocity profile at the inlet for the 2D cylinder
      */
     Real u2d( const Real& t,
-              const Real& x,
-              const Real& y,
-              const Real& z,
+              const Real& /*x*/,
+              const Real& /*y*/,
+              const Real& /*z*/,
               const ID&   id ) const
     {
 
@@ -272,10 +272,10 @@ struct Cylinder::Private
      *
      * Define the velocity profile at the inlet for the 2D cylinder
      */
-    Real poiseuille( const Real& t,
+    Real poiseuille( const Real& /*t*/,
                      const Real& x,
                      const Real& y,
-                     const Real& z,
+                     const Real& /*z*/,
                      const ID&   id ) const
     {
         double r = std::sqrt(x*x + y*y);
@@ -298,7 +298,7 @@ struct Cylinder::Private
                const Real& /*x*/,
                const Real& /*y*/,
                const Real& /*z*/,
-               const ID&   id ) const
+               const ID&   /*id*/ ) const
     {
         //            if (id == 3)
         return 10.;

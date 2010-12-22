@@ -36,12 +36,20 @@
 
 	Implementation.
  */
+
+// Tell the compiler to ignore specific kind of warnings:
+#pragma GCC diagnostic ignored "-Wunused-variable"
+#pragma GCC diagnostic ignored "-Wunused-parameter"
+
+#include<ctype.h>
 #include<boost/algorithm/string/split.hpp>
 #include<boost/algorithm/string/classification.hpp>
-#include<ctype.h>
+
+//Tell the compiler to restore the warning previously silented
+#pragma GCC diagnostic warning "-Wunused-variable"
+#pragma GCC diagnostic warning "-Wunused-parameter"
 
 #include"converter.hpp"
-
 
 namespace LifeV
 {
