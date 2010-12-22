@@ -42,7 +42,7 @@
   \sigma \cdot n + h p = g_R         & \mathrm{on} & \Gamma_R\,, \vspace{0.2cm} \\
   \sigma \cdot n = g_n               & \mathrm{on} & \Gamma_N\,.
   \end{array}
-  \right\.
+  \right.
   \f]
 where \f$ \Omega \f$ is the unit cube with
   \f[
@@ -61,15 +61,15 @@ and the data are
   h(x,y,z) = 1\,, \vspace{0.2cm} \\
   g_R(x,y,z) = -2yx^2 - 2xy^2 - 6 + x^2y^2 + 6x + 5z\,, \vspace{0.2cm} \\
   g_N(x,y,z) = \pm (4xy^2 + 2x^2y + 12)\,, \vspace{0.2cm} \\
-  K(x,y,z) = \left\[
+  K(x,y,z) = \left[
   \begin{array}{c c c}
   2 & 1 & 0 \\
   1 & 1 & 0 \\
   0 & 0 & 1
   \end{array}
-  \right\]
+  \right]
   \end{array}
-  \right\.
+  \right.
   \f]
 The analytical solutions are
   \f[
