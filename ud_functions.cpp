@@ -365,6 +365,7 @@ Real d0(const Real& /*t*/, const Real& /*x*/, const Real& /*y*/, const Real& /*z
         break;
     default:
         ERROR_MSG("This entry is not allowed: ud_functions.hpp");
+        return 0.;
         break;
     }
 }
@@ -385,6 +386,7 @@ Real w0(const Real& /*t*/, const Real& /*x*/, const Real& /*y*/, const Real& /*z
         break;
     default:
         ERROR_MSG("This entrie is not allowed: ud_functions.hpp");
+        return 0.;
         break;
     }
 }
