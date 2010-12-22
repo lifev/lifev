@@ -27,8 +27,8 @@
 #ifndef _CHORIN_TEMAM_RK_H_
 #define _CHORIN_TEMAM_RK_H_
 
-#include <life/lifearray/elemMat.hpp>
-#include <life/lifearray/elemVec.hpp>
+#include <life/lifearray/MatrixElemental.hpp>
+#include <life/lifearray/VectorElemental.hpp>
 #include <life/lifefem/elemOper.hpp>
 #include <life/lifefem/assemb.hpp>
 #include <life/lifefem/BCManage.hpp>

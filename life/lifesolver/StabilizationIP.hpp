@@ -43,8 +43,8 @@
 #define _NSIPTERMS_HPP
 
 #include <life/lifecore/LifeChrono.hpp>
-#include <life/lifearray/elemMat.hpp>
-#include <life/lifearray/elemVec.hpp>
+#include <life/lifearray/MatrixElemental.hpp>
+#include <life/lifearray/VectorElemental.hpp>
 #include <life/lifefem/AssemblyElemental.hpp>
 #include <boost/shared_ptr.hpp>
 

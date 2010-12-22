@@ -42,7 +42,7 @@
 
 #include <life/lifecore/life.hpp>
 #include <life/lifefem/DOF.hpp>
-#include <life/lifearray/elemMat.hpp>
+#include <life/lifearray/MatrixElemental.hpp>
 #include <life/lifefem/AssemblyElemental.hpp>
 #include <life/lifefem/Assembly.hpp>
 #include <life/lifefem/BCManage.hpp>

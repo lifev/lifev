@@ -4,7 +4,7 @@
 
 LIFECORE_HDRS=life/lifecore/Displayer.hpp life/lifecore/Factory.hpp life/lifecore/FactoryPolicy.hpp life/lifecore/FactorySingleton.hpp life/lifecore/FactoryTypeInfo.hpp life/lifecore/FortranWrapper.hpp life/lifecore/LifeAssert.hpp life/lifecore/LifeAssertSmart.hpp life/lifecore/LifeChrono.hpp life/lifecore/LifeDebug.hpp life/lifecore/StringData.hpp life/lifecore/StringUtility.hpp life/lifecore/Switch.hpp life/lifecore/life.hpp life/lifecore/lifeversion.hpp life/lifecore/CBlas.hpp life/lifecore/CLapack.hpp
 
-LIFEARRAY_HDRS=life/lifearray/EpetraMatrix.hpp life/lifearray/EpetraVector.hpp life/lifearray/MatrixContainer.hpp life/lifearray/RNM.hpp life/lifearray/RNMOperator.hpp life/lifearray/RNMOperatorConstant.hpp life/lifearray/RNMTemplate.hpp life/lifearray/VectorSimple.hpp life/lifearray/elemMat.hpp life/lifearray/elemVec.hpp life/lifearray/MapEpetra.hpp
+LIFEARRAY_HDRS=life/lifearray/EpetraMatrix.hpp life/lifearray/EpetraVector.hpp life/lifearray/MatrixContainer.hpp life/lifearray/RNM.hpp life/lifearray/RNMOperator.hpp life/lifearray/RNMOperatorConstant.hpp life/lifearray/RNMTemplate.hpp life/lifearray/VectorSimple.hpp life/lifearray/MatrixElemental.hpp life/lifearray/VectorElemental.hpp life/lifearray/MapEpetra.hpp
 
 LIFEALG_HDRS=life/lifealg/Preconditioner.hpp life/lifealg/PreconditionerAztecOO.hpp life/lifealg/PreconditionerIfpack.hpp life/lifealg/LinearEpetraOperator.hpp life/lifealg/LinearEpetraOperatorBlock.hpp life/lifealg/PreconditionerML.hpp life/lifealg/NonLinearAitken.hpp life/lifealg/SolverAmesos.hpp life/lifealg/SolverAztecOO.hpp life/lifealg/NonLinearLineSearch.hpp life/lifealg/nonLinRichardson.hpp life/lifealg/NonLinearBrent.hpp
 

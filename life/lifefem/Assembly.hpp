@@ -51,8 +51,8 @@
 #ifndef _ASSEMBLY
 #define _ASSEMBLY
 
-#include <life/lifearray/elemMat.hpp>
-#include <life/lifearray/elemVec.hpp>
+#include <life/lifearray/MatrixElemental.hpp>
+#include <life/lifearray/VectorElemental.hpp>
 #include <life/lifearray/EpetraMatrix.hpp>
 #include <life/lifearray/EpetraVector.hpp>
 

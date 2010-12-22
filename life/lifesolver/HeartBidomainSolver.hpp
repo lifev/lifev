@@ -39,8 +39,8 @@
 #ifndef _BIDOMAINSOLVER_H_
 #define _BIODOMAINSOLVER_H_
 
-#include <life/lifearray/elemMat.hpp>
-#include <life/lifearray/elemVec.hpp>
+#include <life/lifearray/MatrixElemental.hpp>
+#include <life/lifearray/VectorElemental.hpp>
 #include <life/lifefem/AssemblyElemental.hpp>
 #include <life/lifefem/Assembly.hpp>
 #include <life/lifefem/BCManage.hpp>

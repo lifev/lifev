@@ -27,8 +27,8 @@
 #ifndef _CHORIN_TEMAM_H_
 #define _CHORIN_TEMAM_H_
 
-#include <life/lifearray/elemMat.hpp>
-#include <life/lifearray/elemVec.hpp>
+#include <life/lifearray/MatrixElemental.hpp>
+#include <life/lifearray/VectorElemental.hpp>
 #include <life/lifefem/elemOper.hpp>
 //#include <life/lifefem/values.hpp>
 //#include <life/lifearray/pattern.hpp>

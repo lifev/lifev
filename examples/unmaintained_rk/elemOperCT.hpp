@@ -7,8 +7,8 @@
 #define __ELEMOPER_CT_HH
 
 #include <life/lifecore/life.hpp>
-#include <life/lifearray/elemMat.hpp>
-#include <life/lifearray/elemVec.hpp>
+#include <life/lifearray/MatrixElemental.hpp>
+#include <life/lifearray/VectorElemental.hpp>
 #include <life/lifefem/currentFE.hpp>
 
 namespace LifeV
