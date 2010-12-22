@@ -780,15 +780,6 @@ readFreeFemFile( RegionMesh2D<GeoShape, MC> & mesh,
     return true;
 } // Function readFreeFemFile
 
-template <typename RegionMesh2D>
-bool __attribute__ ((__deprecated__))
-readMesh2d( RegionMesh2D      & mesh,
-            const std::string & fileName,
-            entityFlag_Type     regionFlag )
-{
-return importerMesh2D( mesh, fileName, regionFlag );
-}
-
 } // Namespace LifeV
 
 #endif /* IMPORTERMESH2D_H */
