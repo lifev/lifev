@@ -101,7 +101,7 @@ public:
     typedef MeshPartitioner<uncutMesh_Type> meshCutter_Type;
     typedef boost::scoped_ptr<meshCutter_Type> meshCutterPtr_Type;
 
-    typedef MarkerTraits::EntityFlag entityFlag_Type;
+    typedef MarkerTraits::entityFlag_Type entityFlag_Type;
     //@}
 
     //! @name Constructor & Destructor
