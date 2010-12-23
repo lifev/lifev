@@ -87,7 +87,7 @@ FSI::fluidBchandlerPtr_Type BCh_harmonicExtension(FSI &_oper)
     else if (_oper.data().method() == "exactJacobian")
     {
         Debug(10000) << "EJ harmonic extension\n";
-        exactJacobian *EJOper = dynamic_cast<exactJacobian *>(&_oper);
+        FSIModelExactJacobian *EJOper = dynamic_cast<FSIModelExactJacobian *>(&_oper);
         EJOper->setStructureDispToHarmonicExtension(_oper.lambdaFluidRepeated());
         BCh_he->addBC("Interface", 1, Essential, Full,
                       *EJOper->bcvStructureDispToHarmonicExtension(), 3);
@@ -95,7 +95,7 @@ FSI::fluidBchandlerPtr_Type BCh_harmonicExtension(FSI &_oper)
     else if (_oper.data().method() == "fixedPoint")
     {
         Debug(10000) << "FP harmonic extension\n";
-        fixedPoint *FPOper = dynamic_cast<fixedPoint *>(&_oper);
+        FSIModelFixedPoint *FPOper = dynamic_cast<FSIModelFixedPoint *>(&_oper);
 
         FPOper->setStructureDispToHarmonicExtension(_oper.lambdaFluidRepeated());
         BCh_he->addBC("Interface", 1, Essential, Full,
@@ -217,7 +217,7 @@ FSI::fluidBchandlerPtr_Type BCh_fluidLin(FSI &_oper)
     }
     if (_oper.data().method() == "exactJacobian")
     {
-        exactJacobian* EJOper = dynamic_cast<exactJacobian *>(&_oper);
+        FSIModelExactJacobian* EJOper = dynamic_cast<FSIModelExactJacobian *>(&_oper);
         EJOper->setDerHarmonicExtensionVelToFluid(_oper.derVeloFluidMesh());
         BCh_fluidLin->addBC("Interface", 1, Essential  , Full,
                             *_oper.bcvDerHarmonicExtensionVelToFluid(), 3);
@@ -259,7 +259,7 @@ FSI::solidBchandlerPtr_Type BCh_solid(FSI &_oper)
     }
     else if (_oper.data().method() == "exactJacobian")
     {
-        exactJacobian  *EJOper = dynamic_cast<exactJacobian *>(&_oper);
+        FSIModelExactJacobian  *EJOper = dynamic_cast<FSIModelExactJacobian *>(&_oper);
         EJOper->setFluidLoadToStructure(_oper.sigmaSolidRepeated());
 
         BCh_solid->addBC("Interface", 1, Natural,   Full,
@@ -267,7 +267,7 @@ FSI::solidBchandlerPtr_Type BCh_solid(FSI &_oper)
     }
     else if (_oper.data().method() == "fixedPoint")
     {
-        fixedPoint *FPOper = dynamic_cast<fixedPoint *>(&_oper);
+        FSIModelFixedPoint *FPOper = dynamic_cast<FSIModelFixedPoint *>(&_oper);
 
         FPOper->setFluidLoadToStructure(_oper.sigmaSolidRepeated());
 
@@ -306,7 +306,7 @@ FSI::solidBchandlerPtr_Type BCh_solidLin(FSI &_oper)
     }
     else if (_oper.data().method() == "exactJacobian")
     {
-        exactJacobian  *EJOper = dynamic_cast<exactJacobian *>(&_oper);
+        FSIModelExactJacobian  *EJOper = dynamic_cast<FSIModelExactJacobian *>(&_oper);
         EJOper->setDerFluidLoadToStructure(_oper.sigmaSolidRepeated());
         BCh_solidLin->addBC("Interface", 1, Natural,   Full,
                             *EJOper->bcvDerFluidLoadToStructure(), 3);

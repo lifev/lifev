@@ -26,7 +26,7 @@
 
 /*!
     @file
-    @brief Implementation of an  FSIOperator with Newton algorithm.
+    @brief Implementation of an  FSI (Operator) with Newton algorithm.
 
     @author Miguel Fernandez
     @author Gilles Fourestey
@@ -41,12 +41,12 @@
 #ifndef EXACTJACOBIANBASE_HPP
 #define EXACTJACOBIANBASE_HPP
 
-#include <life/lifesolver/FSIOperator.hpp>
+#include <life/lifesolver/FSI.hpp>
 
 namespace LifeV
 {
 
-//! exactJacobian - Implementation of an  FSIOperator with Newton algorithm.
+//! FSIModelExactJacobian - Implementation of an  FSI (Operator) with Newton algorithm.
 /*!
 \include ../../doc/api/bibliography/newton.dox
 
@@ -61,13 +61,13 @@ namespace LifeV
 
 */
 
-class exactJacobian : public FSIOperator
+class FSIModelExactJacobian : public FSI
 {
 public:
 
     //! @name Public Types
     //@{
-    typedef FSIOperator                     super;
+    typedef FSI                             super;
 
     typedef super::vector_Type              vector_Type;
     typedef super::vectorPtr_Type           vectorPtr_type;
@@ -78,18 +78,6 @@ public:
     //typedef super::fluid_Type               fluid_Type;
     typedef super::solid_Type               solid_Type;
 
-    //! OBSOLETE typedefs
-//     //typedef super::fluidBchandler_Type      fluidBchandler_Type;
-
-//     typedef super::fluid_Type               fluid_type;
-//     typedef super::solid_Type               solid_type;
-//     typedef super::vector_Type              vector_Type;
-
-//     typedef super::fluidBchandler_Type      bchandler_type;
-
-//     typedef fluid_Type::matrix_Type         matrix_types;
-//     typedef fluid_Type::matrixPtr_Type      matrix_ptrtype;
-
     //@}
 
 
@@ -97,10 +85,10 @@ public:
     //@{
 
     //! Empty Constructor
-    exactJacobian();
+    FSIModelExactJacobian();
 
     //! Destructor
-    ~exactJacobian();
+    ~FSIModelExactJacobian();
     //@}
 
     //! @name Methods
@@ -193,7 +181,7 @@ private:
 
     public:
 
-        typedef exactJacobian::vector_Type  vector_Type;
+        typedef FSIModelExactJacobian::vector_Type  vector_Type;
         typedef Epetra_Map                  map_Type;
         typedef boost::shared_ptr<map_Type> mapPtr_Type;
 
@@ -213,7 +201,7 @@ private:
         //@{
 
         //! sets the exactJacobian pointer and some contents thereof
-        void setOperator(exactJacobian* ej);
+        void setOperator(FSIModelExactJacobian* ej);
 
         //! apply the jacobian to X and returns the result in Y
         int 	Apply           (const Epetra_MultiVector &X, Epetra_MultiVector &Y) const;
@@ -238,7 +226,7 @@ private:
 
     private:
 
-        exactJacobian*                  M_ej;
+        FSIModelExactJacobian*                  M_ej;
 
         mapPtr_Type                     M_operatorDomainMap;
         mapPtr_Type                     M_operatorRangeMap;
@@ -263,7 +251,7 @@ private:
 }; // end class exactJacobian
 
 
-inline FSIOperator* createEJ() { return new exactJacobian(); }
+inline FSIOperator* createEJ() { return new FSIModelExactJacobian(); }
 
 namespace
 {

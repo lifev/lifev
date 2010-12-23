@@ -26,7 +26,7 @@ namespace LifeV
 // Constructors & Destructor
 // ===================================================
 
-fixedPoint::fixedPoint():
+FSIModelFixedPoint::FSIModelFixedPoint():
         super(),
         M_nonLinearAitken(),
         M_rhsNew(),
@@ -35,7 +35,7 @@ fixedPoint::fixedPoint():
 }
 
 
-fixedPoint::~fixedPoint()
+FSIModelFixedPoint::~FSIModelFixedPoint()
 {}
 
 
@@ -43,7 +43,7 @@ fixedPoint::~fixedPoint()
 // Methods
 // ===================================================
 
-void  fixedPoint::solveJac(vector_Type        &muk,
+void  FSIModelFixedPoint::solveJac(vector_Type        &muk,
                            const vector_Type  &res,
                            const Real   /*_linearRelTol*/)
 {
@@ -59,7 +59,7 @@ void  fixedPoint::solveJac(vector_Type        &muk,
     }
 }
 
-void fixedPoint::evalResidual(vector_Type &res, const vector_Type& disp, UInt iter)
+void FSIModelFixedPoint::evalResidual(vector_Type &res, const vector_Type& disp, UInt iter)
 {
 
     if (this->isSolid())
@@ -79,7 +79,7 @@ void fixedPoint::evalResidual(vector_Type &res, const vector_Type& disp, UInt it
 
 
 void
-fixedPoint::setupFEspace()
+FSIModelFixedPoint::setupFEspace()
 {
     super::setLinearFluid(false);
     super::setLinearSolid(false);
@@ -90,7 +90,7 @@ fixedPoint::setupFEspace()
 
 
 void
-fixedPoint::setupFluidSolid()
+FSIModelFixedPoint::setupFluidSolid()
 {
     // call FSI setup()
 
@@ -110,7 +110,7 @@ fixedPoint::setupFluidSolid()
 }
 
 void
-fixedPoint::setDataFile( GetPot const& dataFile )
+FSIModelFixedPoint::setDataFile( GetPot const& dataFile )
 {
     super::setDataFile( dataFile );
 
@@ -126,7 +126,7 @@ fixedPoint::setDataFile( GetPot const& dataFile )
 // Private Methods
 // ===================================================
 
-void fixedPoint::eval( const vector_Type& _disp,
+void FSIModelFixedPoint::eval( const vector_Type& _disp,
                        UInt                iter)
 {
     // If M_data->updateEvery() == 1, normal fixedPoint algorithm
@@ -300,7 +300,7 @@ void fixedPoint::eval( const vector_Type& _disp,
 
 
 
-void fixedPoint::registerMyProducts( )
+void FSIModelFixedPoint::registerMyProducts( )
 {
     FSIFactory_Type::instance().registerProduct( "fixedPoint", &createFP );
     solid_Type::StructureSolverFactory::instance().registerProduct( "LinearVenantKirchhof", &FSI::createLinearStructure );

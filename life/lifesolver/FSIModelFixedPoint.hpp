@@ -46,7 +46,7 @@
 namespace LifeV
 {
 
-//! fixedPont - Implementation of an  FSI with fixed point iterations.
+//! FSIModelFixedPont - Implementation of an  FSI with fixed point iterations.
 /*!
 \include ../../doc/api/bibliography/fluidstructure
 
@@ -62,7 +62,7 @@ namespace LifeV
     relaxed fixed point method.
 */
 
-class fixedPoint : public FSI
+class FSIModelFixedPoint : public FSI
 {
 public:
 
@@ -98,10 +98,10 @@ public:
     //@{
 
     //! Empty Constructor
-    fixedPoint();
+    FSIModelFixedPoint();
 
     //! Destructor
-    ~fixedPoint();
+    ~FSIModelFixedPoint();
 
     //! @name Methods
     //@{
@@ -175,7 +175,7 @@ private:
 }; // end class fixedPointBase
 
 
-inline FSI* createFP() { return new fixedPoint();}
+inline FSI* createFP() { return new FSIModelFixedPoint();}
 namespace
 {
 static bool registerFP = FSI::FSIFactory_Type::instance().registerProduct( "fixedPoint", &createFP );
