@@ -38,7 +38,7 @@
 #define Parser_Definitions_H 1
 
 // LifeV classes
-#include <life/lifecore/life.hpp>
+#include <life/lifecore/LifeV.hpp>
 
 // Tell the compiler to ignore specific kind of warnings:
 #pragma GCC diagnostic ignored "-Wunused-variable"
