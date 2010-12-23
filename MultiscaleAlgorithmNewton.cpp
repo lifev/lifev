@@ -74,7 +74,7 @@ MultiscaleAlgorithmNewton::setupData( const std::string& fileName )
 
     M_solver.setCommunicator( M_comm );
     M_solver.setDataFromGetPot( dataFile, "Solver/Algorithm/Newton_method/AztecOO" );
-    //M_solver.setUpPrec( DataFile, "Solver/Algorithm/Newton_method/Preconditioner" );
+    //M_solver.setupPreconditioner( DataFile, "Solver/Algorithm/Newton_method/Preconditioner" );
 }
 
 void

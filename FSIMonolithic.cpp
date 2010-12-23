@@ -130,7 +130,7 @@ FSIMonolithic::setUp( const GetPot& dataFile )
     M_linearSolver.reset(new solver_Type(M_epetraComm));
 
     M_linearSolver->setDataFromGetPot( dataFile, "linear_system/solver" );
-    M_linearSolver->setUpPrec(dataFile, "linear_system/prec");//to avoid if we have already a prec.
+    M_linearSolver->setupPreconditioner(dataFile, "linear_system/prec");//to avoid if we have already a prec.
     std::string prectype = dataFile("problem/DDBlockPrec", "NULL");
     std::string opertype = dataFile("problem/blockOper", "NULL");
 
@@ -274,7 +274,7 @@ FSIMonolithic::computeMaxSingularValue( )
 
     M_preconditionedSymmetrizedMatrix.reset(new ComposedOperator<Epetra_Operator>(M_epetraComm));
 
-    boost::shared_ptr<operatorPtr_Type>  ComposedPrecPtr(M_linearSolver->getPrec()->getPrec());
+    boost::shared_ptr<operatorPtr_Type>  ComposedPrecPtr(M_linearSolver->preconditioner()->preconditioner());
 
     //M_monolithicMatrix->getMatrixPtr()->OptimizeStorage();
     boost::shared_ptr<Epetra_FECrsMatrix> matrCrsPtr(new Epetra_FECrsMatrix(*M_monolithicMatrix->matrix()->matrixPtr()));

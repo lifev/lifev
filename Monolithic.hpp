@@ -368,7 +368,7 @@ public:
     //     }
 
     //! returns a boost shared pointer to the preconditioner
-    //prec_raw_type & getPrec(){return M_prec.getPrec();}
+    //prec_raw_type & preconditioner(){return M_prec.preconditioner();}
 
 #ifdef OBSOLETE
     /** get the shape derivatives vector*/
