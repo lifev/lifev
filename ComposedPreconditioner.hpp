@@ -51,7 +51,7 @@
 
 #include <life/lifefilters/GetPot.hpp>
 
-#include <life/lifearray/EpetraMatrix.hpp>
+#include <life/lifearray/MatrixEpetra.hpp>
 
 #include <life/lifealg/Preconditioner.hpp>
 
@@ -93,7 +93,7 @@ public:
     ComposedPreconditioner( ComposedPreconditioner& P );
 
     //! constructor from matrix A.
-    //! @param A EpetraMatrix<double> matrix upon which construct the preconditioner
+    //! @param A MatrixEpetra<double> matrix upon which construct the preconditioner
     //    ComposedPreconditioner(operatorPtr_Type& A);
 
     //! default destructor
