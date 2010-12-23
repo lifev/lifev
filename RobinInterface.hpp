@@ -41,7 +41,7 @@
 #include <life/lifecore/life.hpp>
 #include <lifemc/lifesolver/MonolithicBlock.hpp>
 
-#include <life/lifearray/EpetraMatrix.hpp>
+#include <life/lifearray/MatrixEpetra.hpp>
 
 namespace LifeV
 {
