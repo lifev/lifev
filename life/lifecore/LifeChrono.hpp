@@ -38,7 +38,7 @@ along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <ctime>
 
-#include <life/lifecore/Life.hpp>
+#include <life/lifecore/LifeV.hpp>
 
 namespace LifeV
 {

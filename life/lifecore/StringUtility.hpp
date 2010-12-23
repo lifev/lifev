@@ -55,7 +55,7 @@ along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
 #pragma GCC diagnostic warning "-Wunused-variable"
 #pragma GCC diagnostic warning "-Wunused-parameter"
 
-#include <life/lifecore/Life.hpp>
+#include <life/lifecore/LifeV.hpp>
 
 namespace LifeV
 {

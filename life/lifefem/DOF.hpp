@@ -49,7 +49,7 @@
 
 #include <life/lifearray/VectorSimple.hpp>
 
-#include <life/lifecore/Life.hpp>
+#include <life/lifecore/LifeV.hpp>
 
 #include <life/lifefem/DOFLocalPattern.hpp>
 

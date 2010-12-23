@@ -40,7 +40,7 @@
 #define _DATAADR_H_
 
 #include <life/lifefilters/GetPot.hpp>
-#include <life/lifecore/Life.hpp>
+#include <life/lifecore/LifeV.hpp>
 #include <life/lifefem/TimeData.hpp>
 #include <life/lifecore/StringData.hpp>
 

@@ -39,7 +39,7 @@
 #ifndef _CURRENTBDFE_H
 #define _CURRENTBDFE_H
 
-#include <life/lifecore/Life.hpp>
+#include <life/lifecore/LifeV.hpp>
 
 #include <life/lifefem/GeometricMap.hpp>
 #include <life/lifefem/ReferenceFE.hpp>

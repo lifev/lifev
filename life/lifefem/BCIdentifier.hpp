@@ -43,7 +43,7 @@
 
 #include <iostream>
 #include <boost/shared_ptr.hpp>
-#include <life/lifecore/Life.hpp>
+#include <life/lifecore/LifeV.hpp>
 #include <life/lifearray/VectorSimple.hpp>
 
 namespace LifeV {

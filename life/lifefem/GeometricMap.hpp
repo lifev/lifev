@@ -41,7 +41,7 @@
 #ifndef GEOMAP_H
 #define GEOMAP_H 1
 
-#include <life/lifecore/Life.hpp>
+#include <life/lifecore/LifeV.hpp>
 
 #include <life/lifefem/ReferenceElement.hpp>
 

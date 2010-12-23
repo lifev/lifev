@@ -27,7 +27,7 @@
 #ifndef NLF_HPP
 #define NLF_HPP
 
-#include <life/lifecore/Life.hpp>
+#include <life/lifecore/LifeV.hpp>
 
 // ===================================================
 //! User functions

@@ -23,7 +23,7 @@
  */
 
 // LifeV definition files
-#include <life/lifecore/Life.hpp>
+#include <life/lifecore/LifeV.hpp>
 #include <life/lifecore/LifeChrono.hpp>
 #include <life/lifesolver/OseenSolver.hpp>
 #include <life/lifemesh/MeshData.hpp>

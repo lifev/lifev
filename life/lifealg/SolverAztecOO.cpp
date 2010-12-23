@@ -36,7 +36,7 @@
     @date 08-11-2006
  */
 
-#include <life/lifecore/Life.hpp>
+#include <life/lifecore/LifeV.hpp>
 #include <life/lifealg/SolverAztecOO.hpp>
 
 namespace LifeV

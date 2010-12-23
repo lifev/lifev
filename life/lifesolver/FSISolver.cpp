@@ -33,7 +33,7 @@
 
 #ifndef TWODIM
 
-#include <life/lifecore/Life.hpp>
+#include <life/lifecore/LifeV.hpp>
 #include <life/lifesolver/FSISolver.hpp>
 //!\todo remove this header
 #include <life/lifealg/nonLinRichardson.hpp>

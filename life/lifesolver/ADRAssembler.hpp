@@ -40,7 +40,7 @@
 #define ADRASSEMBLER_H 1
 
 #include <life/lifecore/LifeChrono.hpp>
-#include <life/lifecore/Life.hpp>
+#include <life/lifecore/LifeV.hpp>
 
 #include <life/lifefem/Assembly.hpp>
 #include <life/lifefem/FESpace.hpp>

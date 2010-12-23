@@ -66,7 +66,7 @@
 #define ELEMENTSHAPES_H 1
 
 #include <utility>
-#include <life/lifecore/Life.hpp>
+#include <life/lifecore/LifeV.hpp>
 
 namespace LifeV
 {

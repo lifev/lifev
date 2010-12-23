@@ -65,7 +65,7 @@ Solve the problem
 #pragma GCC diagnostic warning "-Wunused-variable"
 #pragma GCC diagnostic warning "-Wunused-parameter"
 
-#include <life/li#include <life/lifecore/Life.hpp>
+#include <life/li#include <life/lifecore/LifeV.hpp>
 
 #include "hyperbolic.hpp"
 

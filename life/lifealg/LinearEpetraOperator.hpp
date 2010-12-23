@@ -43,7 +43,7 @@
 #define LINEAREPETRAOPERATOR_H 1
 
 
-#include <life/lifecore/Life.hpp>
+#include <life/lifecore/LifeV.hpp>
 
 #include <Epetra_Comm.h>
 #include <Epetra_Map.h>

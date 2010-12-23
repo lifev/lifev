@@ -41,7 +41,7 @@
 #define CURRENTFE_H 1
 
 
-#include <life/lifecore/Life.hpp>
+#include <life/lifecore/LifeV.hpp>
 
 #include <life/lifefem/GeometricMap.hpp>
 

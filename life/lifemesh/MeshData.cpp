@@ -39,7 +39,7 @@
 
  */
 
-#include <life/lifecore/Life.hpp>
+#include <life/lifecore/LifeV.hpp>
 #include <life/lifemesh/MeshData.hpp>
 
 namespace LifeV

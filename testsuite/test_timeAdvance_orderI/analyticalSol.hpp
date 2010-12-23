@@ -27,7 +27,7 @@
 #ifndef ANALYTICALSOL_H_
 #define ANALYTICALSOL_H_
 
-#include <life/lifecore/Life.hpp>
+#include <life/lifecore/LifeV.hpp>
 
 namespace LifeV
 {

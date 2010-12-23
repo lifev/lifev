@@ -51,7 +51,7 @@
 
 #include <boost/shared_ptr.hpp>
 
-#include <life/lifecore/Life.hpp>
+#include <life/lifecore/LifeV.hpp>
 #include <life/lifefilters/GetPot.hpp>
 #include <life/lifemesh/MeshData.hpp>
 #include <life/lifemesh/MeshPartitionerOfflineFSI.hpp>

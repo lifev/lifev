@@ -38,7 +38,7 @@
 #ifndef MESHENTITY_H
 #define MESHENTITY_H 1
 
-#include <life/lifecore/Life.hpp>
+#include <life/lifecore/LifeV.hpp>
 
 namespace LifeV
 {

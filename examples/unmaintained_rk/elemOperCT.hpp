@@ -6,7 +6,7 @@
 #ifndef __ELEMOPER_CT_HH
 #define __ELEMOPER_CT_HH
 
-#include <life/lifecore/Life.hpp>
+#include <life/lifecore/LifeV.hpp>
 #include <life/lifearray/MatrixElemental.hpp>
 #include <life/lifearray/VectorElemental.hpp>
 #include <life/lifefem/currentFE.hpp>

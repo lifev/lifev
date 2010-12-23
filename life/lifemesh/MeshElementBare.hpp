@@ -125,7 +125,7 @@
 #include<algorithm>
 #include<iostream>
 
-#include <life/lifecore/Life.hpp>
+#include <life/lifecore/LifeV.hpp>
 
 namespace LifeV
 {

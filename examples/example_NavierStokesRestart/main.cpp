@@ -50,7 +50,7 @@
 
 #include <boost/program_options.hpp>
 
-#include <life/lifecore/Life.hpp>
+#include <life/lifecore/LifeV.hpp>
 #include <life/lifealg/PreconditionerIfpack.hpp>
 #include <life/lifealg/PreconditionerML.hpp>
 

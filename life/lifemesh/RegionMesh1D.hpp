@@ -39,7 +39,7 @@ along with LifeV. If not, see <http://www.gnu.org/licenses/>.
 #ifndef REGIONMESH1D_H
 #define REGIONMESH1D_H
 
-#include <life/lifecore/Life.hpp>
+#include <life/lifecore/LifeV.hpp>
 #include <life/lifecore/LifeDebug.hpp>
 #include <life/lifecore/Switch.hpp>
 

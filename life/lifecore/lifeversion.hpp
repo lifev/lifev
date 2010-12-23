@@ -37,7 +37,7 @@
 #ifndef _LIFEV_VERSION_H_
 #define _LIFEV_VERSION_H_
 
-//#include <life/lifecore/Life.hpp>
+//#include <life/lifecore/LifeV.hpp>
 
 #define LIFEV_MAKE_VERSION( a,b,c ) (((a) << 16) | ((b) << 8) | (c))
 

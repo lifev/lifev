@@ -40,7 +40,7 @@ along with LifeV. If not, see <http://www.gnu.org/licenses/>.
 #include <fstream>
 #include <cstdlib>
 
-#include <life/lifecore/Life.hpp>
+#include <life/lifecore/LifeV.hpp>
 #include <life/lifecore/Switch.hpp>
 
 #include <life/lifemesh/MeshElementMarked.hpp>

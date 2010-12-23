@@ -57,7 +57,7 @@
 
 #include <complex>
 
-#include <life/lifecore/Life.hpp>
+#include <life/lifecore/LifeV.hpp>
 #include <life/lifefilters/GetPot.hpp>
 
 

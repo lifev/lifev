@@ -29,7 +29,7 @@
    \date 2005-04-19
  */
 
-// #include <life/lifecore/Life.hpp>
+// #include <life/lifecore/LifeV.hpp>
 // #include <life/lifefilters/GetPot.hpp>
 // #include <life/lifecore/LifeDebug.hpp>
 

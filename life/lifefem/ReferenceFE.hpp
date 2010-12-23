@@ -38,7 +38,7 @@
 #ifndef _REFFE_H
 #define _REFFE_H
 
-#include <life/lifecore/Life.hpp>
+#include <life/lifecore/LifeV.hpp>
 #include <life/lifefem/ReferenceElement.hpp>
 #include <life/lifefem/DOFLocalPattern.hpp>
 

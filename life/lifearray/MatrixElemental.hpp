@@ -37,7 +37,7 @@
 #define _ELEMMAT_H_INCLUDED
 #include <vector>
 
-#include <life/lifecore/Life.hpp>
+#include <life/lifecore/LifeV.hpp>
 #include <life/lifearray/RNM.hpp>
 
 namespace LifeV
