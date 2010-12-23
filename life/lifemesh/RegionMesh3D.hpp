@@ -647,7 +647,7 @@ public:
      *  to a proper value helps in reducing time and memory.
      *
      *  @pre The routine assumes that the boundary faces are properly set, if not use the
-     *  methods in mesh_util.hpp
+     *  methods in #include MeshChecks.hpp
      *
      */
     void updateElementFaces( bool createFaces = false, const bool verbose = false, UInt estimateFaceNumber = 0 );
@@ -679,7 +679,7 @@ public:
 
     //! Build localEdgeId table and optionally fills the list of Edges
     /** @param createEdges is set true if we want also to create the actual list
-     *  of edges. There is another utility (mesh_util.hpp), which
+     *  of edges. There is another utility (MeshChecks.hpp), which
      *  might be used for the same purpose if we want just to create the faces
      *  and not also the LocalEdgeID table.
      *  @param verbose If true, output is verbose.

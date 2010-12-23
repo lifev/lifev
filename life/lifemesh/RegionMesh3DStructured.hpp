@@ -43,7 +43,7 @@
 
 #include <life/lifecore/LifeV.hpp>
 #include <life/lifemesh/RegionMesh3D.hpp>
-#include <life/lifefilters/mesh_util.hpp>
+#include <life/lifemesh/MeshChecks.hpp>
 #include <fstream>
 
 namespace LifeV

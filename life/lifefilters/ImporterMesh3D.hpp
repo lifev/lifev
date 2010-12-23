@@ -56,7 +56,7 @@
 
 #include <life/lifemesh/MeshElementBare.hpp>
 
-#include <life/lifefilters/mesh_util.hpp>
+#include <life/lifemesh/MeshChecks.hpp>
 #include <life/lifemesh/InternalEntitySelector.hpp>
 
 namespace LifeV

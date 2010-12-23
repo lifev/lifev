@@ -55,7 +55,7 @@
 
 #include <life/lifemesh/RegionMesh2D.hpp>
 
-#include <life/lifefilters/mesh_util.hpp>
+#include <life/lifemesh/MeshChecks.hpp>
 
 namespace LifeV
 {
