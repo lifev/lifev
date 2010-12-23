@@ -54,7 +54,7 @@
 #pragma GCC diagnostic warning "-Wunused-parameter"
 
 // LifeV includes
-#include <life/lifecore/life.hpp>
+#include <life/lifecore/LifeV.hpp>
 #include <life/lifecore/StringUtility.hpp>
 #include <life/lifecore/LifeChrono.hpp>
 
