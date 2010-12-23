@@ -53,7 +53,7 @@
 
 // LifeV includes
 #include <life/lifearray/MapEpetra.hpp>
-#include <life/lifearray/EpetraVector.hpp>
+#include <life/lifearray/VectorEpetra.hpp>
 
 // Mathcard includes
 #include "TestFunction.hpp"
@@ -103,7 +103,7 @@ main( Int argc, char** argv )
     std::cout << std::setprecision(15) << std::endl;
 
     //BASE VECTORS
-    typedef EpetraVector                        Vector;
+    typedef VectorEpetra                        Vector;
     typedef boost::shared_ptr<Vector>           Vector_ptr;
 
     Int MyGlobalIElementsA[3],MyGlobalIElementsB[2];
