@@ -55,7 +55,7 @@
 #pragma GCC diagnostic ignored "-Wunused-parameter"
 
 #include <life/lifefem/TimeAdvance.hpp>
-#include <life/lifearray/EpetraVector.hpp>
+#include <life/lifearray/VectorEpetra.hpp>
 
 namespace LifeV
 {
@@ -123,7 +123,7 @@ namespace LifeV
       </ol>
 */
 
-template<typename feVectorType = EpetraVector >
+template<typename feVectorType = VectorEpetra >
 class TimeAdvanceNewmark :
         public TimeAdvance < feVectorType >
 {
@@ -670,7 +670,7 @@ TimeAdvanceNewmark<feVectorType>::accelerate() const
 
 //! define the TimeAdvanceNewmark factory
 inline
-TimeAdvance< EpetraVector >* createTimeAdvanceNewmark() { return new TimeAdvanceNewmark<EpetraVector>(); }
+TimeAdvance< VectorEpetra >* createTimeAdvanceNewmark() { return new TimeAdvanceNewmark<VectorEpetra>(); }
 
 namespace
 {

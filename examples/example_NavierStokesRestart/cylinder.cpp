@@ -44,7 +44,7 @@
 #pragma GCC diagnostic warning "-Wunused-variable"
 #pragma GCC diagnostic warning "-Wunused-parameter"
 
-#include <life/lifearray/EpetraMatrix.hpp>
+#include <life/lifearray/MatrixEpetra.hpp>
 #include <life/lifearray/MapEpetra.hpp>
 #include <life/lifemesh/MeshData.hpp>
 #include <life/lifemesh/MeshPartitioner.hpp>
@@ -530,8 +530,8 @@ Cylinder::run()
 
         //
 #if 0
-        vectorPtr_Type vel      (new LifeV::EpetraVector(uFESpace.map(), importer.mapType()));
-        vectorPtr_Type pressure (new LifeV::EpetraVector(pFESpace.map(), importer.mapType()));
+        vectorPtr_Type vel      (new LifeV::VectorEpetra(uFESpace.map(), importer.mapType()));
+        vectorPtr_Type pressure (new LifeV::VectorEpetra(pFESpace.map(), importer.mapType()));
 
         LifeV::ExporterData initSolVel(LifeV::ExporterData::Vector,
                                        std::string("velocity." + start),

@@ -26,7 +26,7 @@
 
 /*!
     @file
-    @brief EpetraVector
+    @brief VectorEpetra
 
     @author Gilles Fourestey <gilles.fourestey@epfl.ch>
     @author Simone Deparis <simone.deparis@epfl.ch>
@@ -57,15 +57,15 @@
 namespace LifeV
 {
 
-//! EpetraVector - The Epetra Vector format Wrapper
+//! VectorEpetra - The Epetra Vector format Wrapper
 /*!
     @author Gilles Fourestey, Simone Deparis, Cristiano Malossi
 
-    The EpetraVector class provides a general interface for the Epetra_Vector of Trilinos.
+    The VectorEpetra class provides a general interface for the Epetra_Vector of Trilinos.
 
     Visit http://trilinos.sandia.gov for more informations about Epetra_Vector.
  */
-class EpetraVector
+class VectorEpetra
 {
 public:
 
@@ -86,7 +86,7 @@ public:
     /*!
       @param mapType Specify wether the map is Unique or Repeated
      */
-    EpetraVector( const MapEpetraType& mapType = Unique );
+    VectorEpetra( const MapEpetraType& mapType = Unique );
 
     //! Constructor - Using Maps
     /*!
@@ -94,7 +94,7 @@ public:
       @param map Map to be used to split the vector between the processors
       @param mapType Specify wether the map is Unique or Repeated
      */
-    EpetraVector( const MapEpetra& map, const MapEpetraType& mapType = Unique );
+    VectorEpetra( const MapEpetra& map, const MapEpetraType& mapType = Unique );
 
     //! Constructor - Using Maps
     /*!
@@ -102,21 +102,21 @@ public:
       @param mapPtr Pointer to the map which has to be used to split the vector between the processors
       @param mapType Specify wether the map is Unique or Repeated
      */
-    EpetraVector( const boost::shared_ptr< MapEpetra >& mapPtr,
+    VectorEpetra( const boost::shared_ptr< MapEpetra >& mapPtr,
                   const MapEpetraType& mapType = Unique );
 
     //! Copy constructor
     /*!
       @param vector Vector to be used to create the new vector
      */
-    EpetraVector( const EpetraVector& vector );
+    VectorEpetra( const VectorEpetra& vector );
 
     //! Copy constructor
     /*!
       @param vector Vector to be used to create the new vector
       @param mapType Specify wether the map is Unique or Repeated
      */
-    EpetraVector( const EpetraVector& vector, const MapEpetraType& mapType );
+    VectorEpetra( const VectorEpetra& vector, const MapEpetraType& mapType );
 
     //! Copy constructor
     /*!
@@ -124,7 +124,7 @@ public:
       @param mapType Specify wether the map is Unique or Repeated
       @param combineMode Parameter used during the copy, and not in subsequent calls.
     */
-    EpetraVector( const EpetraVector& vector,
+    VectorEpetra( const VectorEpetra& vector,
                   const MapEpetraType& mapType,
                   const Epetra_CombineMode& combineMode );
 
@@ -135,7 +135,7 @@ public:
       @param map Map to be used to split the vector between the processors
       @param mapType Specify wether the map is Unique or Repeated
      */
-    EpetraVector( const Epetra_MultiVector& vector,
+    VectorEpetra( const Epetra_MultiVector& vector,
                   const boost::shared_ptr< MapEpetra > map,
                   const MapEpetraType& mapType );
 
@@ -146,10 +146,10 @@ public:
       @param map Map to be used to split the vector between the processors
       @param mapType Specify wether the map is Unique or Repeated
      */
-    EpetraVector( const EpetraVector& vector, const Int& reduceToProc );
+    VectorEpetra( const VectorEpetra& vector, const Int& reduceToProc );
 
     //! Destructor
-    ~EpetraVector() {}
+    ~VectorEpetra() {}
 
     //@}
 
@@ -188,7 +188,7 @@ public:
       Calls Import with Add.
       @param vector Vector to be affected to the current vector
      */
-    EpetraVector& operator=( const EpetraVector& vector );
+    VectorEpetra& operator=( const VectorEpetra& vector );
 
     //! Affectation operator
     /*!
@@ -197,70 +197,70 @@ public:
       Calls Import with Add.
       @param vector Vector to be affected to the current vector
      */
-    EpetraVector& operator=( const Epetra_MultiVector& vector );
+    VectorEpetra& operator=( const Epetra_MultiVector& vector );
 
     //! Affectation operator
     /*!
       Put the given scalar in each component of the vector
       @param scalar Scalar to be used to fill the current vector
      */
-    EpetraVector& operator=( data_type scalar );
+    VectorEpetra& operator=( data_type scalar );
 
     //! Addition operator
     /*!
       Element by Element addition (if the map is not the same, try to import values)
       @param vector Vector to be added to the current vector
      */
-    EpetraVector& operator+=( const EpetraVector& vector );
+    VectorEpetra& operator+=( const VectorEpetra& vector );
 
     //! Subtraction operator
     /*!
       Element by Element subtraction (if the map is not the same, try to import values)
       @param vector Vector to be subtracted to the current vector
      */
-    EpetraVector& operator-=( const EpetraVector& vector );
+    VectorEpetra& operator-=( const VectorEpetra& vector );
 
     //! Multiplication operator
     /*!
       Element by Element multiplication (if the map is not the same, try to import values)
       @param vector Vector to be perform the multiplication
      */
-    EpetraVector& operator*=( const EpetraVector& vector );
+    VectorEpetra& operator*=( const VectorEpetra& vector );
 
     //! Division operator
     /*!
       Element by Element division (if the map is not the same, try to import values)
       @param vector Vector to be perform the division
      */
-    EpetraVector& operator/=( const EpetraVector& vector );
+    VectorEpetra& operator/=( const VectorEpetra& vector );
 
     //! Addition operator
     /*!
       Element by Element addition (do not modify the vector of the class)
       @param vector Vector to be added to the current vector
      */
-    const EpetraVector operator+( const EpetraVector& vector ) const;
+    const VectorEpetra operator+( const VectorEpetra& vector ) const;
 
     //! Subtraction operator
     /*!
       Element by Element subtraction (do not modify the vector of the class)
       @param vector Vector to be subtracted to the current vector
      */
-    const EpetraVector operator-( const EpetraVector& vector ) const;
+    const VectorEpetra operator-( const VectorEpetra& vector ) const;
 
     //! Multiplication operator
     /*!
       Element by Element multiplication (do not modify the vector of the class)
       @param vector Vector to be perform the multiplication
      */
-    const EpetraVector operator*( const EpetraVector& vector ) const;
+    const VectorEpetra operator*( const VectorEpetra& vector ) const;
 
     //! Division operator
     /*!
       Element by Element division (do not modify the vector of the class)
       @param vector Vector to be perform the division
      */
-    const EpetraVector operator/( const EpetraVector& vector ) const;
+    const VectorEpetra operator/( const VectorEpetra& vector ) const;
 
     //! Addition operator
     /*!
@@ -268,7 +268,7 @@ public:
       (modify the vector of the class)
       @param scalar Value to be added
      */
-    EpetraVector& operator+=( const data_type& scalar );
+    VectorEpetra& operator+=( const data_type& scalar );
 
     //! Subtraction operator
     /*!
@@ -276,7 +276,7 @@ public:
       (modify the vector of the class)
       @param scalar Value to be subtracted
      */
-    EpetraVector& operator-=( const data_type& scalar );
+    VectorEpetra& operator-=( const data_type& scalar );
 
     //! Multiplication operator
     /*!
@@ -284,7 +284,7 @@ public:
       (modify the vector of the class)
       @param scalar Value for the multiplication
      */
-    EpetraVector& operator*=( const data_type& scalar );
+    VectorEpetra& operator*=( const data_type& scalar );
 
     //! Division operator
     /*!
@@ -292,7 +292,7 @@ public:
       (modify the vector of the class)
       @param scalar Value for the division
      */
-    EpetraVector& operator/=( const data_type& scalar );
+    VectorEpetra& operator/=( const data_type& scalar );
 
     //! Operations with scalar values (do not modify the vector of the class)
 
@@ -302,7 +302,7 @@ public:
       (do not modify the vector of the class)
       @param scalar Value to be added
      */
-    const EpetraVector operator+( const data_type& scalar ) const;
+    const VectorEpetra operator+( const data_type& scalar ) const;
 
     //! Subtraction operator
     /*!
@@ -310,7 +310,7 @@ public:
       (do not modify the vector of the class)
       @param scalar Value to be subtracted
      */
-    const EpetraVector operator-( const data_type& scalar ) const;
+    const VectorEpetra operator-( const data_type& scalar ) const;
 
     //! Multiplication operator
     /*!
@@ -318,7 +318,7 @@ public:
       (do not modify the vector of the class)
       @param scalar Value for the multiplication
      */
-    const EpetraVector operator*( const data_type& scalar ) const;
+    const VectorEpetra operator*( const data_type& scalar ) const;
 
     //! Division operator
     /*!
@@ -326,69 +326,69 @@ public:
       (do not modify the vector of the class)
       @param scalar Value for the division
      */
-    const EpetraVector operator/( const data_type& scalar ) const;
+    const VectorEpetra operator/( const data_type& scalar ) const;
 
     //! Equality operator
     /*!
       Return a vector containing 1 where vector elements are == scalar
       @param scalar Value for the comparison.
      */
-    EpetraVector operator==( const Real& scalar );
+    VectorEpetra operator==( const Real& scalar );
 
     //! Inequality operator
     /*!
       Return a vector containing 1 where vector elements are != scalar
       @param scalar Value for the comparison.
      */
-    EpetraVector operator!=( const Real& scalar );
+    VectorEpetra operator!=( const Real& scalar );
 
     //! Less than operator
     /*!
       Return a vector containing 1 where vector elements are < scalar
       @param scalar Value for the comparison.
      */
-    EpetraVector operator<( const Real& scalar );
+    VectorEpetra operator<( const Real& scalar );
 
     //! Greater than operator
     /*!
       Return a vector containing 1 where vector elements are > scalar
       @param scalar Value for the comparison.
      */
-    EpetraVector operator>( const Real& scalar );
+    VectorEpetra operator>( const Real& scalar );
 
     //! Less than or equal to operator
     /*!
       Return a vector containing 1 where vector elements are <= scalar
       @param scalar Value for the comparison.
      */
-    EpetraVector operator<=( const Real& scalar );
+    VectorEpetra operator<=( const Real& scalar );
 
     //! Greater than or equal to operator
     /*!
       Return a vector containing 1 where vector elements are >= scalar
       @param scalar Value for the comparison.
      */
-    EpetraVector operator>=( const Real& scalar );
+    VectorEpetra operator>=( const Real& scalar );
 
     //! Logical AND operator
     /*!
       Return a vector containing one where both elements are != zero
       @param vector Vector for the logical comparison.
      */
-    EpetraVector operator&&( const EpetraVector& vector );
+    VectorEpetra operator&&( const VectorEpetra& vector );
 
     //! Logical OR operator
     /*!
       Return a vector containing one where one of the elements is != zero
       @param vector Vector for the logical comparison.
      */
-    EpetraVector operator||( const EpetraVector& vector );
+    VectorEpetra operator||( const VectorEpetra& vector );
 
     //! Logical NOT operator
     /*!
       Return a vector containing one where the vector is equal to zero
      */
-    EpetraVector operator!( void );
+    VectorEpetra operator!( void );
 
     //@}
 
@@ -459,7 +459,7 @@ public:
       @param vector Vector to be added
       @param offset Offset to shift the value
      */
-    EpetraVector& add( const EpetraVector& vector, const Int offset = 0 );
+    VectorEpetra& add( const VectorEpetra& vector, const Int offset = 0 );
 
     //! Set the current vector to a subset of the given vector with an offset
     /*!
@@ -471,33 +471,33 @@ public:
       @param vector Vector of value to set the current vector
       @param offset Offset to shift the value
      */
-    EpetraVector& subset( const EpetraVector& vector, const UInt offset = 0 );
+    VectorEpetra& subset( const VectorEpetra& vector, const UInt offset = 0 );
 
     //! Set the current vector to a subset of  vector with an offset.
     /*!
-      similar to subset( const EpetraVector& , const Int ), but with
+      similar to subset( const VectorEpetra& , const Int ), but with
       additional parameters:
       @param vector  vector from which to copy data
       @param map     map from which to select indeces to copy
       @param offset1 offset to apply to input vector
       @param offset2 offset to apply to this vector
      */
-    EpetraVector& subset( const EpetraVector& vector,
+    VectorEpetra& subset( const VectorEpetra& vector,
                           const MapEpetra& map,
                           const UInt offset1,
                           const UInt offset2 );
 
     //! Set the current vector to a subset of  vector with an offset.
     /*!
-      similar to subset( const EpetraVector& , const Int ), but with
+      similar to subset( const VectorEpetra& , const Int ), but with
       additional parameters:
-      @param vector  Epetra_MultiVector, instead of EpetraVector, from which to copy data
+      @param vector  Epetra_MultiVector, instead of VectorEpetra, from which to copy data
       @param map     map from which to select indeces to copy
       @param offset1 offset to apply to input vector
       @param offset2 offset to apply to this vector
       @param column  column of the multivector from which to extract the data
     */
-    EpetraVector& subset(const Epetra_MultiVector& vector,
+    VectorEpetra& subset(const Epetra_MultiVector& vector,
                          const MapEpetra& map,
                          const UInt offset1,
                          const UInt offset2,
@@ -591,20 +591,20 @@ public:
     /*!
       @param vector Output vector to store the absolute value of the vector
      */
-    void abs( EpetraVector& vector );
+    void abs( VectorEpetra& vector );
 
     //! Compute the scalar product of two vectors
     /*!
       @param vector Second vector for the scalar product
      */
-    data_type dot( const EpetraVector& vector ) const;
+    data_type dot( const VectorEpetra& vector ) const;
 
     //! Compute the scalar product of two vectors and store the result in a given variable
     /*!
       @param vector Second vector for the scalar product
       @param scalarProduct Variable to store the result
      */
-    void dot( const EpetraVector& vector, data_type& scalarProduct );
+    void dot( const VectorEpetra& vector, data_type& scalarProduct );
 
     //! Save the values of the matrix into a file
     /*!
@@ -650,7 +650,7 @@ public:
 
     //! Sets the map to use for the epetra vector
     /*!
-      This method can be used when building the EpetraVector using
+      This method can be used when building the VectorEpetra using
       empty constructor.
       @param map the map of the vector
      */
@@ -667,13 +667,13 @@ public:
         return blockMap().Comm();
     }
 
-    //! Return the EpetraVector in the wrapper
+    //! Return the VectorEpetra in the wrapper
     vector_type& epetraVector()
     {
         return *M_epetraVector;
     }
 
-    //! Return the EpetraVector in the wrapper
+    //! Return the VectorEpetra in the wrapper
     const vector_type& epetraVector() const
     {
         return *M_epetraVector;
@@ -739,7 +739,7 @@ private:
       @param vector Vector to be imported
       @param combineMode Mode to be used to combine the vector
      */
-    EpetraVector& Import( const Epetra_FEVector& vector, Epetra_CombineMode combineMode );
+    VectorEpetra& Import( const Epetra_FEVector& vector, Epetra_CombineMode combineMode );
 
     //! Export the value of a vector
     /*!
@@ -757,7 +757,7 @@ private:
       @param vector Vector where to store the exportation
       @param combineMode Mode to be used to combine the vector
      */
-    EpetraVector& Export( const Epetra_FEVector& vector, Epetra_CombineMode combineMode );
+    VectorEpetra& Export( const Epetra_FEVector& vector, Epetra_CombineMode combineMode );
 
     //@}
 
@@ -767,10 +767,10 @@ private:
     Epetra_CombineMode             M_combineMode;
 };
 
-EpetraVector operator-( const EpetraVector& vector );
-EpetraVector operator+( const EpetraVector::data_type& scalar, const EpetraVector& vector );
-EpetraVector operator-( const EpetraVector::data_type& scalar, const EpetraVector& vector );
-EpetraVector operator*( const EpetraVector::data_type& scalar, const EpetraVector& vector );
+VectorEpetra operator-( const VectorEpetra& vector );
+VectorEpetra operator+( const VectorEpetra::data_type& scalar, const VectorEpetra& vector );
+VectorEpetra operator-( const VectorEpetra::data_type& scalar, const VectorEpetra& vector );
+VectorEpetra operator*( const VectorEpetra::data_type& scalar, const VectorEpetra& vector );
 
 } // end namespace LifeV
 

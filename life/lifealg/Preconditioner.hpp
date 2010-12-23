@@ -54,7 +54,7 @@
 #include <life/lifecore/FactorySingleton.hpp>
 #include <life/lifefilters/GetPot.hpp>
 #include <life/lifecore/Displayer.hpp>
-#include <life/lifearray/EpetraMatrix.hpp>
+#include <life/lifearray/MatrixEpetra.hpp>
 
 namespace LifeV
 {
@@ -76,7 +76,7 @@ public:
     typedef Epetra_Operator                      prec_raw_type;
     typedef boost::shared_ptr<prec_raw_type>     prec_type;
 
-    typedef EpetraMatrix<Real>                   operator_raw_type;
+    typedef MatrixEpetra<Real>                   operator_raw_type;
     typedef boost::shared_ptr<operator_raw_type> operator_type;
 
     typedef Displayer::comm_Type                 comm_Type;

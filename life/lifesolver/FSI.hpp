@@ -384,7 +384,7 @@ public:
 //     void solveLinearFluid();
 //     void solveLinearSolid();
 
-    //!Method to import an EpetraVector defined on the fluid map (i.e. with the fluid numeration of the dofs) to the interface
+    //!Method to import an VectorEpetra defined on the fluid map (i.e. with the fluid numeration of the dofs) to the interface
     /**
        Note that the output vector will have the solid numeration on the interface! By default in fact the vectors on the
        FSI interface in LifeV are numerated according to the solid.
@@ -394,14 +394,14 @@ public:
     //works in serial but no yet in parallel
     void transferSolidOnFluid    ( const vector_Type& _vec1, vector_Type& _vec2 );
 
-    //!Method to import an EpetraVector defined on the solid map (i.e. with the solid numeration of the dofs) to the interface
+    //!Method to import an VectorEpetra defined on the solid map (i.e. with the solid numeration of the dofs) to the interface
     /**
        The output vector has the solid numeration of the dofs and is partitioned according to the solid partition. This method is not used in the monolithic solvers.
      */
     void transferSolidOnInterface( const vector_Type& _vec1, vector_Type& _vec2 );
 //     void transferInterfaceOnFluid( const vector_Type& _vec1, vector_Type& _vec2 );
 
-    //!Method to import an EpetraVector defined on the solid map (i.e. with the solid numeration of the dofs) to the interface
+    //!Method to import an VectorEpetra defined on the solid map (i.e. with the solid numeration of the dofs) to the interface
     /**
        the output vector have the numeration of the solid, as in transferSolidOnInterface, but is partitioned according to the fluid! This method is not used in the monolithic solvers.
      */

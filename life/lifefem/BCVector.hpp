@@ -44,7 +44,7 @@
 
 #include <life/lifecore/life.hpp>
 #include <life/lifefem/DOFInterface.hpp>
-#include <life/lifearray/EpetraVector.hpp>
+#include <life/lifearray/VectorEpetra.hpp>
 #include <life/lifecore/FactorySingleton.hpp>
 #include <life/lifecore/Factory.hpp>
 
@@ -85,7 +85,7 @@ public:
     //! @name Public Types
     //@{
 
-    typedef EpetraVector vector_Type;
+    typedef VectorEpetra vector_Type;
     typedef vector_Type const* vectorConstPtr_Type;
 
     //@}
@@ -321,13 +321,13 @@ protected:
 
   This class holds data structure also for Robin, Resistance and Flux boundary conditions.
 
-  Since the FE vector v is used in the right hand side of the equation, the associate code variable is @c M_rightHandSideVector  (EpetraVector)
+  Since the FE vector v is used in the right hand side of the equation, the associate code variable is @c M_rightHandSideVector  (VectorEpetra)
 
   In Robin boundary conditions we add to the matrix the term: <br>
   @c (coeff u, phi)_bd   <br>
   and to the right hand side of the equation the term: <br>
   @ ( v, phi)_bd     <br>
-  The code variables associated with coeff are M_boundaryMassCoeff and M_boundaryMassCoeffVector, the former being a scalar (Real), the latter an FE Vector (EpetraVector)
+  The code variables associated with coeff are M_boundaryMassCoeff and M_boundaryMassCoeffVector, the former being a scalar (Real), the latter an FE Vector (VectorEpetra)
 
    This is the base class for other BCVectorInterface class.
   Inheritance is used to hold specific boundary condition data.
@@ -418,13 +418,13 @@ public:
 
   This class holds data structure also for Robin, Resistance and Flux boundary conditions.
 
-  Since the FE vector v is used in the right hand side of the equation, the associate code variable is @c M_rightHandSideVector  (EpetraVector)
+  Since the FE vector v is used in the right hand side of the equation, the associate code variable is @c M_rightHandSideVector  (VectorEpetra)
 
   In Robin boundary conditions we add to the matrix the term: <br>
   @c (coeff u, phi)_bd   <br>
   and to the right hand side of the equation the term: <br>
   @ ( v, phi)_bd     <br>
-  The code variables associated with coeff are M_boundaryMassCoeff and M_boundaryMassCoeffVector, the former being a scalar (Real), the latter an FE Vector (EpetraVector)
+  The code variables associated with coeff are M_boundaryMassCoeff and M_boundaryMassCoeffVector, the former being a scalar (Real), the latter an FE Vector (VectorEpetra)
 
   This is the base class for other BCVectorInterface class.
   Inheritance is used to hold specific boundary condition data.

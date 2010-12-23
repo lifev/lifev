@@ -55,7 +55,7 @@
 #pragma GCC diagnostic ignored "-Wunused-variable"
 #pragma GCC diagnostic ignored "-Wunused-parameter"
 
-#include <life/lifearray/EpetraVector.hpp>
+#include <life/lifearray/VectorEpetra.hpp>
 #include <life/lifefem/TimeAdvance.hpp>
 
 namespace LifeV
@@ -146,7 +146,7 @@ const UInt BDF_MAX_ORDER = 4;
   </ol>
 */
 
-template<typename feVectorType = EpetraVector >
+template<typename feVectorType = VectorEpetra >
 class TimeAdvanceBDF:
         public  TimeAdvance < feVectorType >
 {
@@ -646,7 +646,7 @@ TimeAdvanceBDF<feVectorType>::accelerate() const
 
 //! define the BDF factory
 inline
-TimeAdvance<EpetraVector>* createBDF() { return new TimeAdvanceBDF<EpetraVector>(); }
+TimeAdvance<VectorEpetra>* createBDF() { return new TimeAdvanceBDF<VectorEpetra>(); }
 
 namespace
 {

@@ -26,7 +26,7 @@
 
 /*!
     @file
-    @brief EpetraMatrix
+    @brief MatrixEpetra
 
     @author Gilles Fourestey <gilles.fourestey@epfl.ch>
     @author Simone Deparis <simone.deparis@epfl.ch>
@@ -54,7 +54,7 @@
 
 #include <life/lifecore/life.hpp>
 #include <life/lifecore/life.hpp>
-#include <life/lifearray/EpetraVector.hpp>
+#include <life/lifearray/VectorEpetra.hpp>
 
 #include <vector>
 
@@ -64,18 +64,18 @@
 namespace LifeV
 {
 
-//! EpetraMatrix - The Epetra Matrix format Wrapper
+//! MatrixEpetra - The Epetra Matrix format Wrapper
 /*!
   @author Gilles Fourestey <gilles.fourestey@epfl.ch>
   @author Simone Deparis <simone.deparis@epfl.ch>
   @author Gwenol Grandperrin <gwenol.grandperrin@epfl.ch>
 
-  The EpetraMatrix class provides a general interface for the Epetra_FECrsMatrix of Trilinos.
+  The MatrixEpetra class provides a general interface for the Epetra_FECrsMatrix of Trilinos.
 
   Visit http://trilinos.sandia.gov for more informations about Epetra_FECrsMatrix.
  */
 template <typename DataType>
-class EpetraMatrix
+class MatrixEpetra
 {
 public:
 
@@ -84,7 +84,7 @@ public:
 
     typedef Epetra_FECrsMatrix             matrix_type;
     typedef boost::shared_ptr<matrix_type> matrix_ptrtype;
-    typedef EpetraVector                   vector_type;
+    typedef VectorEpetra                   vector_type;
 
     //@}
 
@@ -94,35 +94,35 @@ public:
 
     //! Constructor for square and rectangular matrices
     /*!
-      @param map Row map. The column map will be defined in EpetraMatrix<DataType>::GlobalAssemble(...,...)
+      @param map Row map. The column map will be defined in MatrixEpetra<DataType>::GlobalAssemble(...,...)
       @param numEntries The average number of entries for each row.
       @param indexBase The base index to address entries in the matrix (Usually 0 o 1)
      */
-    EpetraMatrix( const MapEpetra& map, Int numEntries = 50, Int indexBase = 1 );
+    MatrixEpetra( const MapEpetra& map, Int numEntries = 50, Int indexBase = 1 );
 
     //! Copy Constructor
     /*!
       @param matrix Matrix used to create the new occurence
      */
-    EpetraMatrix( const EpetraMatrix& matrix);
+    MatrixEpetra( const MatrixEpetra& matrix);
 
     //! Copies the matrix to a matrix which resides only on the processor
     /*!
       @param matrix Matrix where the content of the matrix should be stored
       @param reduceToProc Processor where the matrix should be stored
      */
-    EpetraMatrix( const EpetraMatrix& matrix, const UInt reduceToProc );
+    MatrixEpetra( const MatrixEpetra& matrix, const UInt reduceToProc );
 
-    //! Constructs an EpetraMatrix view of an Epetra_FECrsMatrix.
+    //! Constructs an MatrixEpetra view of an Epetra_FECrsMatrix.
     /*!
       This constructor can be used when we need to modify an Epetra_FECrsMatrix
-      using a method of the class EpetraMatrix
+      using a method of the class MatrixEpetra
       @param crsMatrixPtr Pointer on a Epetra_FECrsMatrix of Trilinos
      */
-    EpetraMatrix( matrix_ptrtype crsMatrixPtr );
+    MatrixEpetra( matrix_ptrtype crsMatrixPtr );
 
     //! Destructor
-    ~EpetraMatrix() {};
+    ~MatrixEpetra() {};
 
     //@}
 
@@ -134,13 +134,13 @@ public:
     /*!
       @param matrix matrix to be added to the current matrix
      */
-    EpetraMatrix& operator += ( const EpetraMatrix& matrix );
+    MatrixEpetra& operator += ( const MatrixEpetra& matrix );
 
     //! Assignment operator
     /*!
       @param matrix matrix to be assigned to the current matrix
      */
-    EpetraMatrix& operator= ( const EpetraMatrix& matrix );
+    MatrixEpetra& operator= ( const MatrixEpetra& matrix );
 
     //! Matrix-Vector multiplication
     /*!
@@ -154,7 +154,7 @@ public:
       (modify the matrix of the class)
       @param scalar Value for the multiplication
      */
-    EpetraMatrix& operator *= ( const DataType scalar );
+    MatrixEpetra& operator *= ( const DataType scalar );
 
     //! Multiplication operator
     /*!
@@ -162,7 +162,7 @@ public:
       (do not modify the matrix of the class)
       @param scalar Value for the multiplication
      */
-    EpetraMatrix  operator *  ( const DataType scalar ) const;
+    MatrixEpetra  operator *  ( const DataType scalar ) const;
 
     //@}
 
@@ -189,26 +189,26 @@ public:
     /*!
       @param matrix matrix which is swapped
      */
-    void swapCrsMatrix( EpetraMatrix<DataType>& matrix );
+    void swapCrsMatrix( MatrixEpetra<DataType>& matrix );
 
-    //! Multiply the EpetraMatrix by the first given matrix and put the result in the second given matrix
+    //! Multiply the MatrixEpetra by the first given matrix and put the result in the second given matrix
     /*!
-      @param transposeCurrent If true, it transposes the EpetraMatrix
-      @param matrix Matrix that multiply the EpetraMatrix
+      @param transposeCurrent If true, it transposes the MatrixEpetra
+      @param matrix Matrix that multiply the MatrixEpetra
       @param transposeMatrix if true, it transposes the matrix "matrix"
       @param result Matrix to store the result
       @param callFillCompleteOnResult If true, the matrix "result" will be filled (i.e. closed) after the multiplication
      */
     Int multiply( bool transposeCurrent,
-                  const EpetraMatrix<DataType> &matrix,
+                  const MatrixEpetra<DataType> &matrix,
                   bool transposeMatrix,
-                  EpetraMatrix<DataType> &result,
+                  MatrixEpetra<DataType> &result,
                   bool callFillCompleteOnResult=true ) const;
 
-    //! Multiply the first EpetraVector given as a parameter by the EpetraMatrix and put the result into the second given EpetraVector
+    //! Multiply the first VectorEpetra given as a parameter by the MatrixEpetra and put the result into the second given VectorEpetra
     /*!
-      @param transposeCurrent If true, it transposes the EpetraMatrix
-      @param vector1 Vector that will be multiply by the EpetraMatrix
+      @param transposeCurrent If true, it transposes the MatrixEpetra
+      @param vector1 Vector that will be multiply by the MatrixEpetra
       @param vector2 Vector that will store the result
      */
     Int multiply( bool transposeCurrent, const vector_type& vector1, vector_type &vector2 ) const;
@@ -218,7 +218,7 @@ public:
       @param scalar Scalar which multiplies the matrix
       @param matrix Matrix to be added
      */
-    void add( const DataType scalar, const EpetraMatrix& matrix );
+    void add( const DataType scalar, const MatrixEpetra& matrix );
 
     //! Set entries (rVec(i),rVec(i)) to coefficient and the rest of the row entries to zero
     /*!
@@ -436,22 +436,22 @@ public:
     //! Return the Id of the processor
     Int processorId();
 
-    //! Return the row MapEpetra of the EpetraMatrix used in the assembling
+    //! Return the row MapEpetra of the MatrixEpetra used in the assembling
     /*!
       Note: This method should be call when MapEpetra is still open.
      */
     const MapEpetra& map() const;
 
-    //! Return the domain MapEpetra of the EpetraMatrix
+    //! Return the domain MapEpetra of the MatrixEpetra
     /*!
-      This function should be called only after EpetraMatrix<DataType>::GlobalAssemble(...) has been called.
+      This function should be called only after MatrixEpetra<DataType>::GlobalAssemble(...) has been called.
       If this is an open matrix that M_domainMap is an invalid pointer
      */
     const MapEpetra& domainMap() const;
 
-    //! Return the range MapEpetra of the EpetraMatrix
+    //! Return the range MapEpetra of the MatrixEpetra
     /*!
-      This function should be called only after EpetraMatrix<DataType>::GlobalAssemble(...) has been called.
+      This function should be called only after MatrixEpetra<DataType>::GlobalAssemble(...) has been called.
       If this is an open matrix that M_domainMap is an invalid pointer
      */
     const MapEpetra& rangeMap() const;
@@ -469,7 +469,7 @@ private:
       if y = this*x,
       then x.getMap() is the domain map.
       NOTE: Epetra assume the domain map to be 1-1 and onto (Unique)
-      M_domainMap is a NULL pointer until EpetraMatrix<DataType> is called.
+      M_domainMap is a NULL pointer until MatrixEpetra<DataType> is called.
      */
     boost::shared_ptr< const MapEpetra > M_domainMap;
 
@@ -478,7 +478,7 @@ private:
       if y = this*x,
       then y.getMap() is the range map.
       NOTE: Epetra assume the domain map to be 1-1 and onto (Unique)
-      M_rangeMap is a NULL pointer until EpetraMatrix<DataType> is called.
+      M_rangeMap is a NULL pointer until MatrixEpetra<DataType> is called.
      */
     boost::shared_ptr< const MapEpetra > M_rangeMap;
 
@@ -495,7 +495,7 @@ private:
 // Constructors & Destructor
 // ===================================================
 template <typename DataType>
-EpetraMatrix<DataType>::EpetraMatrix( const MapEpetra& map, Int numEntries, Int indexBase ) :
+MatrixEpetra<DataType>::MatrixEpetra( const MapEpetra& map, Int numEntries, Int indexBase ) :
     M_map       ( new MapEpetra( map ) ),
     M_epetraCrs ( new matrix_type( Copy, *M_map->map( Unique ), numEntries, false) ),
     M_indexBase ( indexBase )
@@ -504,7 +504,7 @@ EpetraMatrix<DataType>::EpetraMatrix( const MapEpetra& map, Int numEntries, Int 
 }
 
 template <typename DataType>
-EpetraMatrix<DataType>::EpetraMatrix( const EpetraMatrix& matrix ) :
+MatrixEpetra<DataType>::MatrixEpetra( const MatrixEpetra& matrix ) :
         M_map      ( matrix.M_map ),
         M_domainMap( matrix.M_domainMap ),
         M_rangeMap ( matrix.M_rangeMap ),
@@ -515,7 +515,7 @@ EpetraMatrix<DataType>::EpetraMatrix( const EpetraMatrix& matrix ) :
 }
 
 template <typename DataType>
-EpetraMatrix<DataType>::EpetraMatrix( const EpetraMatrix& matrix, const UInt reduceToProc ) :
+MatrixEpetra<DataType>::MatrixEpetra( const MatrixEpetra& matrix, const UInt reduceToProc ) :
     M_map      ( matrix.getMap().createRootMap( reduceToProc ) ),
     M_epetraCrs( new matrix_type( Copy, *M_map->map( Unique ),
                                   numEntries( matrix.M_epetraCrs->Map().Comm().MyPID() == reduceToProc ) * 20,
@@ -542,7 +542,7 @@ EpetraMatrix<DataType>::EpetraMatrix( const EpetraMatrix& matrix, const UInt red
 }
 
 template <typename DataType>
-EpetraMatrix<DataType>::EpetraMatrix( matrix_ptrtype CRSMatrixPtr ):
+MatrixEpetra<DataType>::MatrixEpetra( matrix_ptrtype CRSMatrixPtr ):
     M_map(),
     M_domainMap(),
     M_rangeMap(),
@@ -556,8 +556,8 @@ EpetraMatrix<DataType>::EpetraMatrix( matrix_ptrtype CRSMatrixPtr ):
 // Operators
 // ===================================================
 template <typename DataType>
-EpetraMatrix<DataType>&
-EpetraMatrix<DataType>::operator += ( const EpetraMatrix& matrix )
+MatrixEpetra<DataType>&
+MatrixEpetra<DataType>::operator += ( const MatrixEpetra& matrix )
 {
 #ifdef HAVE_TRILINOS_EPETRAEXT_31 // trilinos6
     EpetraExt::MatrixMatrix::Add( *matrix.matrixPtr(), false, 1., *this->matrixPtr(), 1., false );
@@ -571,7 +571,7 @@ EpetraMatrix<DataType>::operator += ( const EpetraMatrix& matrix )
 }
 
 template<typename DataType>
-EpetraMatrix<DataType>&  EpetraMatrix<DataType>::operator=( const EpetraMatrix& matrix )
+MatrixEpetra<DataType>&  MatrixEpetra<DataType>::operator=( const MatrixEpetra& matrix )
 {
     M_map        = matrix.M_map;
     M_domainMap  = matrix.M_domainMap;
@@ -583,13 +583,13 @@ EpetraMatrix<DataType>&  EpetraMatrix<DataType>::operator=( const EpetraMatrix& 
 }
 
 template<typename DataType>
-typename EpetraMatrix<DataType>::vector_type
-EpetraMatrix<DataType>::operator * ( const vector_type& vector ) const
+typename MatrixEpetra<DataType>::vector_type
+MatrixEpetra<DataType>::operator * ( const vector_type& vector ) const
 {
     ASSERT_PRE( M_epetraCrs->Filled(),
-                "EpetraMatrix::Operator*: globalAssemble(...) should be called first" );
+                "MatrixEpetra::Operator*: globalAssemble(...) should be called first" );
     ASSERT_PRE( vector.map().mapsAreSimilar(*M_domainMap),
-                "EpetraMatrix::Operator*: the map of vec is not the same of domainMap" );
+                "MatrixEpetra::Operator*: the map of vec is not the same of domainMap" );
     vector_type result(vector);
 
     M_epetraCrs->Apply( vector.epetraVector(), result.epetraVector() );
@@ -599,18 +599,18 @@ EpetraMatrix<DataType>::operator * ( const vector_type& vector ) const
 
 
 template<typename DataType>
-EpetraMatrix<DataType>&
-EpetraMatrix<DataType>::operator *= ( const DataType value )
+MatrixEpetra<DataType>&
+MatrixEpetra<DataType>::operator *= ( const DataType value )
 {
     M_epetraCrs->Scale( value );
     return *this;
 }
 
 template<typename DataType>
-EpetraMatrix<DataType>
-EpetraMatrix<DataType>::operator * ( const DataType scalar ) const
+MatrixEpetra<DataType>
+MatrixEpetra<DataType>::operator * ( const DataType scalar ) const
 {
-    EpetraMatrix<DataType> matrix( *this );
+    MatrixEpetra<DataType> matrix( *this );
     return matrix *= scalar;
 }
 
@@ -618,7 +618,7 @@ EpetraMatrix<DataType>::operator * ( const DataType scalar ) const
 // Methods
 // ===================================================
 template <typename DataType>
-void EpetraMatrix<DataType>::openCrsMatrix()
+void MatrixEpetra<DataType>::openCrsMatrix()
 {
     if ( M_epetraCrs->Filled() )
     {
@@ -640,7 +640,7 @@ void EpetraMatrix<DataType>::openCrsMatrix()
 }
 
 template <typename DataType>
-void EpetraMatrix<DataType>::removeZeros()
+void MatrixEpetra<DataType>::removeZeros()
 {
     if ( M_epetraCrs->Filled() )
     {
@@ -680,22 +680,22 @@ void EpetraMatrix<DataType>::removeZeros()
 }
 
 template <typename DataType>
-void EpetraMatrix<DataType>::swapCrsMatrix( matrix_ptrtype& matrixPtr )
+void MatrixEpetra<DataType>::swapCrsMatrix( matrix_ptrtype& matrixPtr )
 {
     M_epetraCrs.swap( matrixPtr );
 }
 
 
 template <typename DataType>
-void EpetraMatrix<DataType>::swapCrsMatrix( EpetraMatrix<DataType>& matrix )
+void MatrixEpetra<DataType>::swapCrsMatrix( MatrixEpetra<DataType>& matrix )
 {
     M_epetraCrs.swap( matrix.M_epetraCrs );
 }
 
 template <typename DataType>
-Int EpetraMatrix<DataType>::multiply( bool transposeCurrent,
-                                      const EpetraMatrix<DataType> &matrix, bool transposeMatrix,
-                                      EpetraMatrix<DataType> &result, bool callFillCompleteOnResult ) const
+Int MatrixEpetra<DataType>::multiply( bool transposeCurrent,
+                                      const MatrixEpetra<DataType> &matrix, bool transposeMatrix,
+                                      MatrixEpetra<DataType> &result, bool callFillCompleteOnResult ) const
 {
     Int errCode = EpetraExt::MatrixMatrix::Multiply( *M_epetraCrs, transposeCurrent,
                                                      *matrix.matrixPtr(), transposeMatrix,
@@ -707,21 +707,21 @@ Int EpetraMatrix<DataType>::multiply( bool transposeCurrent,
 }
 
 template <typename DataType>
-Int EpetraMatrix<DataType>::multiply( bool transposeCurrent, const vector_type& vector1, vector_type &vector2 ) const
+Int MatrixEpetra<DataType>::multiply( bool transposeCurrent, const vector_type& vector1, vector_type &vector2 ) const
 {
     ASSERT_PRE( M_epetraCrs->Filled(),
-                "EpetraMatrix<DataType>::Multiply: GlobalAssemble(...) must be called first" );
+                "MatrixEpetra<DataType>::Multiply: GlobalAssemble(...) must be called first" );
     ASSERT_PRE( vector1.map().mapsAreSimilar(*M_domainMap),
-                "EpetraMatrix<DataType>::Multiply: x map is different from M_domainMap" );
+                "MatrixEpetra<DataType>::Multiply: x map is different from M_domainMap" );
     ASSERT_PRE( vector2.map().mapsAreSimilar(*M_rangeMap),
-                "EpetraMatrix<DataType>::Multiply: y map is different from M_rangeMap" );
+                "MatrixEpetra<DataType>::Multiply: y map is different from M_rangeMap" );
 
 
     return M_epetraCrs->Multiply( transposeCurrent, vector1.epetraVector(), vector2.epetraVector() );
 }
 
 template <typename DataType>
-void EpetraMatrix<DataType>::add ( const DataType scalar, const EpetraMatrix& matrix )
+void MatrixEpetra<DataType>::add ( const DataType scalar, const MatrixEpetra& matrix )
 {
 #if defined HAVE_TRILINOS_EPETRAEXT // trilinos8
     EpetraExt::MatrixMatrix::Add( *matrix.getMatrixPtr(), false, scalar, *this->getMatrixPtr(), 1. );
@@ -731,7 +731,7 @@ void EpetraMatrix<DataType>::add ( const DataType scalar, const EpetraMatrix& ma
 }
 
 template <typename DataType>
-void EpetraMatrix<DataType>::diagonalize ( std::vector<UInt> rVec,
+void MatrixEpetra<DataType>::diagonalize ( std::vector<UInt> rVec,
                                            DataType const coefficient,
                                            UInt offset )
 {
@@ -782,7 +782,7 @@ void EpetraMatrix<DataType>::diagonalize ( std::vector<UInt> rVec,
 }
 
 template <typename DataType>
-void EpetraMatrix<DataType>::diagonalize( UInt const row,
+void MatrixEpetra<DataType>::diagonalize( UInt const row,
                                           DataType const coefficient,
                                           UInt offset )
 {
@@ -821,7 +821,7 @@ void EpetraMatrix<DataType>::diagonalize( UInt const row,
 }
 
 template <typename DataType>
-void EpetraMatrix<DataType>::diagonalize( std::vector<UInt> rVec,
+void MatrixEpetra<DataType>::diagonalize( std::vector<UInt> rVec,
                                           DataType const coefficient,
                                           vector_type &rhs,
                                           std::vector<DataType> datumVec,
@@ -1017,7 +1017,7 @@ void EpetraMatrix<DataType>::diagonalize( std::vector<UInt> rVec,
 }
 
 template <typename DataType>
-void EpetraMatrix<DataType>::diagonalize( UInt const row,
+void MatrixEpetra<DataType>::diagonalize( UInt const row,
                                           DataType const coefficient,
                                           vector_type &rhs,
                                           DataType datum,
@@ -1073,7 +1073,7 @@ void EpetraMatrix<DataType>::diagonalize( UInt const row,
 }
 
 template <typename DataType>
-void EpetraMatrix<DataType>::matrixMarket( std::string const &fileName, const bool headers )
+void MatrixEpetra<DataType>::matrixMarket( std::string const &fileName, const bool headers )
 {
     // Purpose: Matlab dumping and spy
     std::string name = fileName;
@@ -1090,7 +1090,7 @@ void EpetraMatrix<DataType>::matrixMarket( std::string const &fileName, const bo
 }
 
 template <typename DataType>
-void EpetraMatrix<DataType>::spy( std::string const &fileName )
+void MatrixEpetra<DataType>::spy( std::string const &fileName )
 {
     // Purpose: Matlab dumping and spy
     std::string name = fileName, uti = " , ";
@@ -1105,13 +1105,13 @@ void EpetraMatrix<DataType>::spy( std::string const &fileName )
 }
 
 template <typename DataType>
-void EpetraMatrix<DataType>::showMe( std::ostream& output ) const
+void MatrixEpetra<DataType>::showMe( std::ostream& output ) const
 {
-    output << "showMe must be implemented for the EpetraMatrix class" << std::endl;
+    output << "showMe must be implemented for the MatrixEpetra class" << std::endl;
 }
 
 template <typename DataType>
-Int EpetraMatrix<DataType>::globalAssemble()
+Int MatrixEpetra<DataType>::globalAssemble()
 {
     if ( M_epetraCrs->Filled() )
     {
@@ -1125,7 +1125,7 @@ Int EpetraMatrix<DataType>::globalAssemble()
 }
 
 template <typename DataType>
-Int EpetraMatrix<DataType>::globalAssemble( const boost::shared_ptr<const MapEpetra> & domainMap,
+Int MatrixEpetra<DataType>::globalAssemble( const boost::shared_ptr<const MapEpetra> & domainMap,
                                             const boost::shared_ptr<const MapEpetra> & rangeMap )
 {
     if ( M_epetraCrs->Filled() )
@@ -1140,7 +1140,7 @@ Int EpetraMatrix<DataType>::globalAssemble( const boost::shared_ptr<const MapEpe
 
 template <typename DataType>
 void
-EpetraMatrix<DataType>::insertValueDiagonal( const DataType entry, const MapEpetra& Map, const UInt offset )
+MatrixEpetra<DataType>::insertValueDiagonal( const DataType entry, const MapEpetra& Map, const UInt offset )
 {
     for ( Int i=0 ; i<Map.map(Unique)->NumMyElements(); ++i )//num from 1
     {
@@ -1149,7 +1149,7 @@ EpetraMatrix<DataType>::insertValueDiagonal( const DataType entry, const MapEpet
 }
 
 template <typename DataType>
-void EpetraMatrix<DataType>::insertValueDiagonal( const DataType& value, Int from, Int to )
+void MatrixEpetra<DataType>::insertValueDiagonal( const DataType& value, Int from, Int to )
 {
     if ( M_epetraCrs->Filled() )
     {
@@ -1180,25 +1180,25 @@ void EpetraMatrix<DataType>::insertValueDiagonal( const DataType& value, Int fro
 }
 
 template <typename DataType>
-void EpetraMatrix<DataType>::insertOneDiagonal( Int from, Int to )
+void MatrixEpetra<DataType>::insertOneDiagonal( Int from, Int to )
 {
     insertValueDiagonal( 1.0, from, to );
 }
 
 template <typename DataType>
-void EpetraMatrix<DataType>::insertZeroDiagonal( Int from, Int to )
+void MatrixEpetra<DataType>::insertZeroDiagonal( Int from, Int to )
 {
     insertValueDiagonal( 0.0, from, to );
 }
 
 template <typename DataType>
-Real EpetraMatrix<DataType>::norm1() const
+Real MatrixEpetra<DataType>::norm1() const
 {
     return M_epetraCrs->NormOne();
 }
 
 template <typename DataType>
-Real EpetraMatrix<DataType>::normInf() const
+Real MatrixEpetra<DataType>::normInf() const
 {
     return M_epetraCrs->NormInf();
 }
@@ -1208,7 +1208,7 @@ Real EpetraMatrix<DataType>::normInf() const
 // Set Methods
 // ===================================================
 template <typename DataType>
-void EpetraMatrix<DataType>::
+void MatrixEpetra<DataType>::
 setCoefficient( UInt row, UInt column, DataType localValue )
 {
     // incrementing row and cols by indexBase;
@@ -1222,7 +1222,7 @@ setCoefficient( UInt row, UInt column, DataType localValue )
 }
 
 template <typename DataType>
-void EpetraMatrix<DataType>::
+void MatrixEpetra<DataType>::
 addToCoefficient( UInt row, UInt column, DataType localValue )
 {
 
@@ -1236,7 +1236,7 @@ addToCoefficient( UInt row, UInt column, DataType localValue )
 }
 
 template <typename DataType>
-void EpetraMatrix<DataType>::
+void MatrixEpetra<DataType>::
 addToCoefficients( Int const numRows, Int const numColumns,
                    std::vector<Int> const rowIndices, std::vector<Int> const columnIndices,
                    DataType* const* const localValues,
@@ -1267,7 +1267,7 @@ addToCoefficients( Int const numRows, Int const numColumns,
 // Get Methods
 // ===================================================
 template <typename DataType>
-Int EpetraMatrix<DataType>::meanNumEntries() const
+Int MatrixEpetra<DataType>::meanNumEntries() const
 {
     const Int minEntries = M_epetraCrs->MaxNumEntries ()/2;
     if ( M_epetraCrs->NumMyRows() )
@@ -1280,29 +1280,29 @@ Int EpetraMatrix<DataType>::meanNumEntries() const
 }
 
 template <typename DataType>
-Int EpetraMatrix<DataType>::processorId()
+Int MatrixEpetra<DataType>::processorId()
 {
     return  M_epetraCrs->Comm().MyPID();
 }
 
 template <typename DataType>
-const MapEpetra& EpetraMatrix<DataType>::map() const
+const MapEpetra& MatrixEpetra<DataType>::map() const
 {
-    ASSERT( M_map.get() != 0, "EpetraMatrix::getMap: Error: M_map pointer is null" );
+    ASSERT( M_map.get() != 0, "MatrixEpetra::getMap: Error: M_map pointer is null" );
     return *M_map;
 }
 
 template <typename DataType>
-const MapEpetra& EpetraMatrix<DataType>::domainMap() const
+const MapEpetra& MatrixEpetra<DataType>::domainMap() const
 {
-    ASSERT( M_domainMap.get() != 0, "EpetraMatrix::getdomainMap: Error: M_domainMap pointer is null" );
+    ASSERT( M_domainMap.get() != 0, "MatrixEpetra::getdomainMap: Error: M_domainMap pointer is null" );
     return *M_domainMap;
 }
 
 template <typename DataType>
-const MapEpetra& EpetraMatrix<DataType>::rangeMap() const
+const MapEpetra& MatrixEpetra<DataType>::rangeMap() const
 {
-    ASSERT( M_rangeMap.get() != 0, "EpetraMatrix::getRangeMap: Error: M_rangeMap pointer is null" );
+    ASSERT( M_rangeMap.get() != 0, "MatrixEpetra::getRangeMap: Error: M_rangeMap pointer is null" );
     return *M_rangeMap;
 }
 

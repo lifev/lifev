@@ -973,7 +973,7 @@ FESpace<MeshType,MapType>:: l2ErrorWeighted(const function_Type&    exactSolutio
     // Check that the vector is repeated (needed!)
     if (solution.mapType() == Unique)
     {
-        return l2ErrorWeighted(exactSolution, EpetraVector(solution,Repeated), weight,time);
+        return l2ErrorWeighted(exactSolution, VectorEpetra(solution,Repeated), weight,time);
     }
 
     Real sumOfSquare(0.0);

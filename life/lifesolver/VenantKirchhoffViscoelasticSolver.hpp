@@ -55,8 +55,8 @@
 
 #include <life/lifearray/MatrixElemental.hpp>
 #include <life/lifearray/VectorElemental.hpp>
-#include <life/lifearray/EpetraMatrix.hpp>
-#include <life/lifearray/EpetraVector.hpp>
+#include <life/lifearray/MatrixEpetra.hpp>
+#include <life/lifearray/VectorEpetra.hpp>
 
 #include <life/lifefem/AssemblyElemental.hpp>
 #include <life/lifefem/Assembly.hpp>
@@ -410,7 +410,7 @@ protected :
     //! boundary condition
     bchandler_type   M_BCh;
 
-    //! Epetra map need to define the EpetraVector;
+    //! Epetra map need to define the VectorEpetra;
     boost::shared_ptr<const MapEpetra>       M_localMap;
 
     //! Matrix  mass

@@ -45,7 +45,7 @@
 #pragma GCC diagnostic warning "-Wunused-parameter"
 
 //#include "life/lifesolver/NavierStokesSolver.hpp"
-#include <life/lifearray/EpetraMatrix.hpp>
+#include <life/lifearray/MatrixEpetra.hpp>
 #include <life/lifearray/MapEpetra.hpp>
 #include <life/lifemesh/MeshPartitioner.hpp>
 #include <life/lifesolver/OseenData.hpp>

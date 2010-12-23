@@ -57,7 +57,7 @@ along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
 #pragma GCC diagnostic warning "-Wunused-variable"
 #pragma GCC diagnostic warning "-Wunused-parameter"
 
-#include <life/lifearray/EpetraVector.hpp>
+#include <life/lifearray/VectorEpetra.hpp>
 #include <life/lifefilters/GetPot.hpp>
 #include <life/lifecore/LifeChrono.hpp>
 #include <life/lifecore/life.hpp>
@@ -83,7 +83,7 @@ public:
     //! @name Public Types
     //@{
 
-    typedef EpetraVector                      vectorRaw_Type;
+    typedef VectorEpetra                      vectorRaw_Type;
     typedef boost::shared_ptr<vectorRaw_Type> vectorPtr_Type;
 
     //! Type of data stored.
@@ -384,7 +384,7 @@ public:
 
     const UInt& startIndex() const { return M_startIndex; }
 
-    //! returns the type of the map to use for the EpetraVector
+    //! returns the type of the map to use for the VectorEpetra
     virtual MapEpetraType mapType() const = 0;
     //@}
 

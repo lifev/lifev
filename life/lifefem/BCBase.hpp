@@ -72,7 +72,7 @@
 
 #include <life/lifefem/BCVector.hpp>
 #include <life/lifefem/BCFunction.hpp>
-#include <life/lifearray/EpetraVector.hpp>
+#include <life/lifearray/VectorEpetra.hpp>
 
 
 namespace LifeV
@@ -339,15 +339,15 @@ public:
      */
     ID component( const ID i ) const;
 
-    //! Returns true if robin coefficient (in BC Vector ) is a EpetraVector, false if it is scalar (default alphaCoef=1)
+    //! Returns true if robin coefficient (in BC Vector ) is a VectorEpetra, false if it is scalar (default alphaCoef=1)
     /*!
-       @return true if robin coefficient (in BC Vector ) is a EpetraVector, false if it is scalar
+       @return true if robin coefficient (in BC Vector ) is a VectorEpetra, false if it is scalar
      */
     bool isRobinCoeffAVector() const;
 
-    //! Returns true if beta coefficient (in BC Vector ) is a EpetraVector (betaVec) (default betaCoef=1)
+    //! Returns true if beta coefficient (in BC Vector ) is a VectorEpetra (betaVec) (default betaCoef=1)
     /*!
-       @return true if beta coefficient (in BC Vector ) is a EpetraVector (betaVec)
+       @return true if beta coefficient (in BC Vector ) is a VectorEpetra (betaVec)
      */
     bool isBetaCoeffAVector() const;
 

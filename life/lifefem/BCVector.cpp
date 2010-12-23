@@ -256,7 +256,7 @@ const bool __bcvec = FactoryCloneBCVector::instance().registerProduct( typeid(BC
 //====================================
 
 
-BCVectorInterface::BCVectorInterface( const EpetraVector& rightHandSideVector, UInt numberOfTotalDof,
+BCVectorInterface::BCVectorInterface( const VectorEpetra& rightHandSideVector, UInt numberOfTotalDof,
                                       const dofInterfacePtr_Type& interfaceDofPtr, UInt type )
         :
         BCVectorBase( rightHandSideVector, numberOfTotalDof, type ),

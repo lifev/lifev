@@ -56,7 +56,7 @@
 #pragma GCC diagnostic warning "-Wunused-parameter"
 
 #include <life/lifefilters/GetPot.hpp>
-#include <life/lifearray/EpetraMatrix.hpp>
+#include <life/lifearray/MatrixEpetra.hpp>
 #include <life/lifealg/Preconditioner.hpp>
 
 namespace LifeV

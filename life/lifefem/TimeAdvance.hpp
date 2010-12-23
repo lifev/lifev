@@ -51,7 +51,7 @@
 #pragma GCC diagnostic warning "-Wunused-parameter"
 
 #include <life/lifecore/Factory.hpp>
-#include <life/lifearray/EpetraVector.hpp>
+#include <life/lifearray/VectorEpetra.hpp>
 
 namespace LifeV
 {
@@ -128,7 +128,7 @@ namespace LifeV
      </ol>
 */
 
-template<typename feVectorType = EpetraVector >
+template<typename feVectorType = VectorEpetra >
 
 class TimeAdvance
 {

@@ -50,8 +50,8 @@
 #pragma GCC diagnostic warning "-Wunused-variable"
 #pragma GCC diagnostic warning "-Wunused-parameter"
 
-#include <life/lifearray/EpetraVector.hpp>
-#include <life/lifearray/EpetraMatrix.hpp>
+#include <life/lifearray/VectorEpetra.hpp>
+#include <life/lifearray/MatrixEpetra.hpp>
 #include <life/lifecore/Displayer.hpp>
 
 class GetPot;
@@ -77,13 +77,13 @@ public:
 
     typedef SolverAmesos                     solver_type;
 
-    typedef EpetraMatrix<Real>               matrix_type;
-    typedef EpetraVector                     vector_type;
+    typedef MatrixEpetra<Real>               matrix_type;
+    typedef VectorEpetra                     vector_type;
 
     typedef void                             prec_raw_type;
     typedef boost::shared_ptr<prec_raw_type> prec_type;
     typedef boost::shared_ptr<matrix_type>   matrix_ptrtype;
-    typedef boost::shared_ptr<EpetraVector>  vector_ptrtype;
+    typedef boost::shared_ptr<VectorEpetra>  vector_ptrtype;
 
     //@}
 
@@ -163,7 +163,7 @@ public:
     //! @name  Set Methods
     //@{
 
-    //! Set matrix from EpetraMatrix
+    //! Set matrix from MatrixEpetra
     /*!
       @param matrix Matrix of the system
      */

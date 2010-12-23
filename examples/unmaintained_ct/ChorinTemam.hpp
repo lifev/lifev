@@ -38,8 +38,8 @@
 
 #include <life/lifealg/SolverAztecOO.hpp>
 #include <life/lifearray/MapEpetra.hpp>
-#include <life/lifearray/EpetraMatrix.hpp>
-#include <life/lifearray/EpetraVector.hpp>
+#include <life/lifearray/MatrixEpetra.hpp>
+#include <life/lifearray/VectorEpetra.hpp>
 
 #include <life/lifecore/LifeChrono.hpp>
 #include <life/lifefem/geoMap.hpp>

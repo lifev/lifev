@@ -124,7 +124,7 @@ public:
     //! @name Get methods
     //@{
 
-    //! returns the type of the map to use for the EpetraVector
+    //! returns the type of the map to use for the VectorEpetra
     MapEpetraType mapType() const;
 
     //@}

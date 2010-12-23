@@ -64,7 +64,7 @@ public:
     typedef MatrixType matrix_Type;
     typedef boost::shared_ptr<matrix_Type> matrixPtr_Type;
     typedef boost::shared_ptr<MapEpetra> epetraMapPtr_Type;
-    typedef boost::shared_ptr<EpetraVector> epetraVectorPtr_type;
+    typedef boost::shared_ptr<VectorEpetra> epetraVectorPtr_type;
 
     //@}
 
@@ -307,10 +307,10 @@ BCManageNormal<MatrixType>::BCManageNormal( const BCManageNormal & bcManageNorma
         M_dataBuilt(bcManageNormal.M_dataBuilt),
         M_rotationMatrixPtr(new matrix_Type(*bcManageNormal.M_rotationMatrixPtr) ),
         M_localMapEpetraPtr(new MapEpetra(*bcManageNormal.M_localMapEpetraPtr) ),
-        M_firstTangentPtr(new EpetraVector(*bcManageNormal.M_firstTangentPtr) ),
-        M_secondTangentPtr(new EpetraVector(*bcManageNormal.M_secondTangentPtr) ),
-        M_normalPtr(new EpetraVector(*bcManageNormal.M_normalPtr) ),
-        M_coordPtr(new EpetraVector(*bcManageNormal.M_coordPtr) ),
+        M_firstTangentPtr(new VectorEpetra(*bcManageNormal.M_firstTangentPtr) ),
+        M_secondTangentPtr(new VectorEpetra(*bcManageNormal.M_secondTangentPtr) ),
+        M_normalPtr(new VectorEpetra(*bcManageNormal.M_normalPtr) ),
+        M_coordPtr(new VectorEpetra(*bcManageNormal.M_coordPtr) ),
         M_numDof(bcManageNormal.M_numDof),
         M_numInvoledDof(bcManageNormal.M_numInvoledDof),
         M_flags(bcManageNormal.M_flags),
@@ -342,10 +342,10 @@ BCManageNormal<MatrixType>::operator= ( const BCManageNormal & bcManageNormal )
         M_dataBuilt(bcManageNormal.M_dataBuilt);
         M_rotationMatrixPtr.reset(new matrix_Type(*bcManageNormal.M_rotationMatrixPtr) );
         M_localMapEpetraPtr.reset(new MapEpetra(*bcManageNormal.M_localMapEpetraPtr) );
-        M_firstTangentPtr.reset(new EpetraVector(*bcManageNormal.M_firstTangentPtr) );
-        M_secondTangentPtr.reset(new EpetraVector(*bcManageNormal.M_secondTangentPtr) );
-        M_normalPtr.reset(new EpetraVector(*bcManageNormal.M_normalPtr) );
-        M_coordPtr.reset(new EpetraVector(*bcManageNormal.M_coordPtr) );
+        M_firstTangentPtr.reset(new VectorEpetra(*bcManageNormal.M_firstTangentPtr) );
+        M_secondTangentPtr.reset(new VectorEpetra(*bcManageNormal.M_secondTangentPtr) );
+        M_normalPtr.reset(new VectorEpetra(*bcManageNormal.M_normalPtr) );
+        M_coordPtr.reset(new VectorEpetra(*bcManageNormal.M_coordPtr) );
         M_numDof = bcManageNormal.M_numDof;
         M_numInvoledDof = bcManageNormal.M_numInvoledDof;
         M_flags = bcManageNormal.M_flags;
@@ -700,7 +700,7 @@ template< typename MatrixType>
 template< typename MeshType >
 void BCManageNormal<MatrixType>::M_calculateCoordinates(MeshType const& mesh)
 {
-    M_coordPtr.reset( new EpetraVector(*M_localMapEpetraPtr,Unique) );
+    M_coordPtr.reset( new VectorEpetra(*M_localMapEpetraPtr,Unique) );
 
     //We obtain the ID of the element
     int NumMyElements = M_localMapEpetraPtr->map(Unique)->NumMyElements();
@@ -757,7 +757,7 @@ void BCManageNormal< MatrixType>::M_calculateNormals(const MeshType& mesh, const
     // STEP 1: Calculating the normals
     //-----------------------------------------------------
 
-    M_normalPtr.reset ( new EpetraVector(*M_localMapEpetraPtr,Repeated) );
+    M_normalPtr.reset ( new VectorEpetra(*M_localMapEpetraPtr,Repeated) );
     //(*M_normalPtr)*=0;
     computeIntegratedNormals(dof, currentBdFE, *M_normalPtr, mesh);
 
@@ -823,13 +823,13 @@ void BCManageNormal<MatrixType>::M_calculateTangentVectors()
     M_localMapEpetraPtr->map(Unique)->MyGlobalElements(MyGlobalElements);
 
     //Building the tangential vectors
-    M_firstTangentPtr.reset ( new EpetraVector(*M_localMapEpetraPtr,Unique) );
+    M_firstTangentPtr.reset ( new VectorEpetra(*M_localMapEpetraPtr,Unique) );
     (*M_firstTangentPtr)*=0;
-    M_secondTangentPtr.reset ( new EpetraVector(*M_localMapEpetraPtr,Unique) );
+    M_secondTangentPtr.reset ( new VectorEpetra(*M_localMapEpetraPtr,Unique) );
     (*M_secondTangentPtr)*=0;
 
     //We are going to use the loop to count the number
-    //of imposed DOF because since the EpetraVector is
+    //of imposed DOF because since the VectorEpetra is
     //unique now it is possible that we have less DOF
     M_numInvoledDof = 0;
 

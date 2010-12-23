@@ -133,7 +133,7 @@ void test_bdf::run()
 
     //Useful typedef
     typedef SolverAztecOO solver_type;
-    typedef EpetraVector vector_type;
+    typedef VectorEpetra vector_type;
     typedef boost::shared_ptr<vector_type> vector_ptrtype;
 
     // Reading from data file
@@ -181,11 +181,11 @@ void test_bdf::run()
     //=============================================================================
     //Fe Matrices and vectors
     ElemMat elmat(FeSpace.fe().nbFEDof(), 1, 1); //local matrix
-    EpetraMatrix<double> matM(FeSpace.map()); //mass matrix
-    boost::shared_ptr<EpetraMatrix<double> > matA_ptr(
-        new EpetraMatrix<double> (FeSpace.map())); //stiff matrix
-    EpetraVector u(FeSpace.map(), Unique); // solution vector
-    EpetraVector f(FeSpace.map(), Unique); // forcing term vector
+    MatrixEpetra<double> matM(FeSpace.map()); //mass matrix
+    boost::shared_ptr<MatrixEpetra<double> > matA_ptr(
+        new MatrixEpetra<double> (FeSpace.map())); //stiff matrix
+    VectorEpetra u(FeSpace.map(), Unique); // solution vector
+    VectorEpetra f(FeSpace.map(), Unique); // forcing term vector
 
     LifeChrono chrono;
     //Assembling Matrix M
@@ -213,7 +213,7 @@ void test_bdf::run()
     Real delta_t = dataFile("bdf/timestep", 0.5);
     Real t0 = 1.;
     UInt ord_bdf = dataFile("bdf/order", 3);
-    TimeAdvanceBDFVariableStep<EpetraVector> bdf;
+    TimeAdvanceBDFVariableStep<VectorEpetra> bdf;
     bdf.setup(ord_bdf);
 
     //Initialization
@@ -247,7 +247,7 @@ void test_bdf::run()
     exporter->setPostDir( "./" );
     exporter->setMeshProcId( meshPart.meshPartition(), Members->comm->MyPID() );
 
-    boost::shared_ptr<EpetraVector> u_display_ptr(new EpetraVector(
+    boost::shared_ptr<VectorEpetra> u_display_ptr(new VectorEpetra(
                                                       FeSpace.map(), exporter->mapType()));
     exporter->addVariable(ExporterData::Scalar, "u", u_display_ptr,
                           UInt(0),
@@ -271,7 +271,7 @@ void test_bdf::run()
         if (verbose)
             cout << "Now we are at time " << t << endl;
 
-        matA_ptr.reset(new EpetraMatrix<double> (FeSpace.map()));
+        matA_ptr.reset(new MatrixEpetra<double> (FeSpace.map()));
 
         chrono.start();
         //Assemble A

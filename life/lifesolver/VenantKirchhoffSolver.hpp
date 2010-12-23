@@ -57,8 +57,8 @@
 
 #include <life/lifearray/MatrixElemental.hpp>
 #include <life/lifearray/VectorElemental.hpp>
-#include <life/lifearray/EpetraMatrix.hpp>
-#include <life/lifearray/EpetraVector.hpp>
+#include <life/lifearray/MatrixEpetra.hpp>
+#include <life/lifearray/VectorEpetra.hpp>
 
 #include <life/lifefem/AssemblyElemental.hpp>
 #include <life/lifefem/Assembly.hpp>

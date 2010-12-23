@@ -11,7 +11,7 @@
 #include <boost/shared_ptr.hpp>
 #include <map>
 
-#include <life/lifearray/EpetraMatrix.hpp>
+#include <life/lifearray/MatrixEpetra.hpp>
 #include <Teuchos_ParameterList.hpp>
 
 namespace LifeV
@@ -31,7 +31,7 @@ public:
 
     typedef KEYTYPE KeyType;
 
-    typedef boost::shared_ptr<EpetraMatrix<double> > MatrixType_ptr;
+    typedef boost::shared_ptr<MatrixEpetra<double> > MatrixType_ptr;
     typedef boost::shared_ptr<Epetra_CrsMatrix> MatrixRawType_ptr;
     typedef typename std::map<KeyType, MatrixType_ptr > Container;
     typedef typename Container::iterator Iterator;
@@ -72,7 +72,7 @@ void MatrixContainer<KEYTYPE>::set(const KeyType & _name, const MatrixType_ptr &
 }
 
 template<typename KEYTYPE>
-boost::shared_ptr<EpetraMatrix<double> > MatrixContainer<KEYTYPE>::getMatrix(const KeyType & _name) const
+boost::shared_ptr<MatrixEpetra<double> > MatrixContainer<KEYTYPE>::getMatrix(const KeyType & _name) const
 {
     CIterator it(M_container.find(_name));
     ASSERT_POS(it != M_container.end(), "Matrix not found");

@@ -62,8 +62,8 @@
 #pragma GCC diagnostic warning "-Wunused-variable"
 #pragma GCC diagnostic warning "-Wunused-parameter"
 
-#include <life/lifearray/EpetraVector.hpp>
-#include <life/lifearray/EpetraMatrix.hpp>
+#include <life/lifearray/VectorEpetra.hpp>
+#include <life/lifearray/MatrixEpetra.hpp>
 #include <life/lifealg/Preconditioner.hpp>
 #include <life/lifealg/PreconditionerIfpack.hpp>
 #include <life/lifecore/LifeDebug.hpp>
@@ -92,14 +92,14 @@ public:
 
     typedef SolverAztecOO                      solver_type;
 
-    typedef EpetraMatrix<Real>                 matrix_type;
-    typedef EpetraVector                       vector_type;
+    typedef MatrixEpetra<Real>                 matrix_type;
+    typedef VectorEpetra                       vector_type;
 
     typedef Preconditioner                     prec_raw_type;
     typedef boost::shared_ptr<prec_raw_type>   prec_type;
     typedef boost::shared_ptr<Epetra_Operator> comp_prec_type;
     typedef boost::shared_ptr<matrix_type>     matrix_ptrtype;
-    typedef boost::shared_ptr<EpetraVector>    vector_ptrtype;
+    typedef boost::shared_ptr<VectorEpetra>    vector_ptrtype;
 
     //@}
 
@@ -205,7 +205,7 @@ public:
      */
     void setCommunicator( const boost::shared_ptr<Epetra_Comm>& comm );
 
-    //! Method to set matrix from EpetraMatrix
+    //! Method to set matrix from MatrixEpetra
     /*!
       @param matrix Matrix of the system
      */

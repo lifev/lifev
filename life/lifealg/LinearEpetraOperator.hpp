@@ -34,7 +34,7 @@
 
     In this file we define a Lifev::Operators:LinearOperator which inherit from Epetra_Operator.
     LinearOperator adds to the interface of Epetra_Operator a method "Apply" and "ApplyInverse"
-    which work with LifeV::EpetraVector instead of Epetra_MultiVector.
+    which work with LifeV::VectorEpetra instead of Epetra_MultiVector.
     LinearOperator is an abstract class with virtual public interface.
     IdentityOperator and NullOperator are defined in this file and both inherit from LinearOperator.
  */
@@ -50,7 +50,7 @@
 #include <Epetra_Operator.h>
 #include <Epetra_MultiVector.h>
 
-#include <life/lifearray/EpetraVector.hpp>
+#include <life/lifearray/VectorEpetra.hpp>
 
 namespace LifeV
 {
@@ -63,14 +63,14 @@ namespace Operators
  * LinearOperator should be the base class for all the LifeV class which implements a linear operator.
  *
  * LinearOperator ensures perfect compatibility with all the Trilinos solvers,
- * plus it supports directly the LifeV::EpetraVector data.
+ * plus it supports directly the LifeV::VectorEpetra data.
  *
  * Two concrete methods are implemented in LinearOperator
- * int apply(const EpetraVector &X, EpetraVector & Y) const ;
- * int applyInverse(const EpetraVector &X, EpetraVector &Y) const.
+ * int apply(const VectorEpetra &X, VectorEpetra & Y) const ;
+ * int applyInverse(const VectorEpetra &X, VectorEpetra &Y) const.
  *
  *
- * Such methods extract a raw Epetra_MultiVector from the EpetraVector and then call the virtual methods
+ * Such methods extract a raw Epetra_MultiVector from the VectorEpetra and then call the virtual methods
  * Int Apply(const Epetra_MultiVector & X, Epetra_MultiVector & Y) const
  * or
  * Int ApplyInverse(const Epetra_MultiVector & X, Epetra_MultiVector & Y) const
@@ -118,16 +118,16 @@ public:
     */
     virtual int Apply(const Epetra_MultiVector& X, Epetra_MultiVector& Y) const = 0;
 
-    //! Returns the result of a LinearOperator applied to a EpetraVector X in Y.
+    //! Returns the result of a LinearOperator applied to a VectorEpetra X in Y.
     /*!
     \param In
-       X - A EpetraVector to multiply with matrix.
+       X - A VectorEpetra to multiply with matrix.
     \param Out
-       Y -A EpetraVector containing result.
+       Y -A VectorEpetra containing result.
 
     \return Integer error code, set to 0 if successful.
     */
-    inline int apply(const EpetraVector & X, EpetraVector & Y) const
+    inline int apply(const VectorEpetra & X, VectorEpetra & Y) const
     {
         return Apply(X.epetraVector(), Y.epetraVector());
     }
@@ -146,12 +146,12 @@ public:
     */
     virtual int ApplyInverse(const Epetra_MultiVector& X, Epetra_MultiVector& Y) const = 0;
 
-    //! Returns the result of a LinearOperator inverse applied to an EpetraVector X in Y.
+    //! Returns the result of a LinearOperator inverse applied to an VectorEpetra X in Y.
     /*!
     \param In
-       X - A EpetraVector to solve for.
+       X - A VectorEpetra to solve for.
     \param Out
-       Y -A EpetraVector containing result.
+       Y -A VectorEpetra containing result.
 
     \return Integer error code, set to 0 if successful.
 
@@ -159,7 +159,7 @@ public:
               support the case where X and Y are the same object.
     */
 
-    inline int applyInverse(const EpetraVector & X, EpetraVector Y)
+    inline int applyInverse(const VectorEpetra & X, VectorEpetra Y)
     {
         return ApplyInverse(X.epetraVector(), Y.epetraVector());
     }

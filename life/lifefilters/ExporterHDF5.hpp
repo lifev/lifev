@@ -184,7 +184,7 @@ public:
     //! @name Get Methods
     //@{
 
-    //! returns the type of the map to use for the EpetraVector
+    //! returns the type of the map to use for the VectorEpetra
     MapEpetraType mapType() const;
 
     //@}
@@ -1029,9 +1029,9 @@ void ExporterHDF5<MeshType>::writeGeometry()
 
     }
 
-    EpetraVector pointsX(subMap);
-    EpetraVector pointsY(subMap);
-    EpetraVector pointsZ(subMap);
+    VectorEpetra pointsX(subMap);
+    VectorEpetra pointsY(subMap);
+    VectorEpetra pointsZ(subMap);
 
     Int gid;
     for (ID i=1; i <= this->M_mesh->numVertices(); ++i)
@@ -1119,7 +1119,7 @@ void ExporterHDF5<MeshType>::readVector( ExporterData& dvar)
     M_HDF5->Read(varname, *subMap.map(this->mapType()), subVar, readTranspose);
 
 
-    // then put back value in our EpetraVector
+    // then put back value in our VectorEpetra
 
     for (UInt d ( 0 ); d < nDimensions; ++d)
     {

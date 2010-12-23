@@ -50,7 +50,7 @@
 
 
 #include <life/lifefilters/GetPot.hpp>
-#include <life/lifearray/EpetraMatrix.hpp>
+#include <life/lifearray/MatrixEpetra.hpp>
 
 #include <life/lifefem/FESpace.hpp>
 

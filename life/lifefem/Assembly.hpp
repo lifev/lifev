@@ -53,8 +53,8 @@
 
 #include <life/lifearray/MatrixElemental.hpp>
 #include <life/lifearray/VectorElemental.hpp>
-#include <life/lifearray/EpetraMatrix.hpp>
-#include <life/lifearray/EpetraVector.hpp>
+#include <life/lifearray/MatrixEpetra.hpp>
+#include <life/lifearray/VectorEpetra.hpp>
 
 #include <life/lifefem/CurrentFE.hpp>
 #include <life/lifefem/DOFLocalPattern.hpp>
@@ -73,7 +73,7 @@ namespace LifeV
  */
 template <typename DofType>
 void
-assembleVector( EpetraVector&    globalVector,
+assembleVector( VectorEpetra&    globalVector,
                 ElemVec&         localVector,
                 const CurrentFE& currentFE,
                 const DofType    dof,
@@ -92,7 +92,7 @@ assembleVector( EpetraVector&    globalVector,
  */
 template <typename DofType>
 void
-assembleVector( EpetraVector&    globalVector,
+assembleVector( VectorEpetra&    globalVector,
                 const UInt&      elementID,
                 ElemVec&         localVector,
                 const UInt&      feNbDof,
@@ -119,7 +119,7 @@ assembleVector( EpetraVector&    globalVector,
  */
 template <typename DofType>
 void
-assembleMatrix( EpetraMatrix<Real>&   globalMatrix,
+assembleMatrix( MatrixEpetra<Real>&   globalMatrix,
                 const UInt&      	  elementID,
                 ElemMat&          	  localMatrix,
                 const UInt&           feNbDof,
@@ -150,7 +150,7 @@ assembleMatrix( EpetraMatrix<Real>&   globalMatrix,
  */
 template <typename DofType>
 void
-assembleMatrix( EpetraMatrix<Real>& globalMatrix,
+assembleMatrix( MatrixEpetra<Real>& globalMatrix,
                 ElemMat&            localMatrix,
                 const CurrentFE&    currentFE,
                 const DofType&      dof,
@@ -171,7 +171,7 @@ assembleMatrix( EpetraMatrix<Real>& globalMatrix,
  */
 template <typename DofType1, typename DofType2, typename LocalMatrixType>
 void
-assembleMatrix( EpetraMatrix<Real>& globalMatrix,
+assembleMatrix( MatrixEpetra<Real>& globalMatrix,
                 UInt const&         elementID1,
                 UInt const&         elementID2,
                 LocalMatrixType&    localMatrix,
@@ -195,7 +195,7 @@ assembleMatrix( EpetraMatrix<Real>& globalMatrix,
  */
 template <typename DofType1, typename DofType2, typename LocalMatrixType>
 void
-assembleMatrix( EpetraMatrix<Real>&   globalMatrix,
+assembleMatrix( MatrixEpetra<Real>&   globalMatrix,
                 UInt const&           elementID1,
                 UInt const&           elementID2,
                 LocalMatrixType&      localMatrix,
@@ -238,7 +238,7 @@ assembleMatrix( EpetraMatrix<Real>&   globalMatrix,
  */
 template <typename DofType1, typename DofType2>
 void
-assembleMatrix( EpetraMatrix<Real>& globalMatrix,
+assembleMatrix( MatrixEpetra<Real>& globalMatrix,
                 ElemMat&            localMatrix,
                 const CurrentFE&    currentFE1,
                 const CurrentFE&    currentFE2,
@@ -271,7 +271,7 @@ assembleMatrix( EpetraMatrix<Real>& globalMatrix,
  */
 template <typename DofType1, typename DofType2>
 void
-assembleTransposeMatrix( EpetraMatrix<Real>&   globalMatrix,
+assembleTransposeMatrix( MatrixEpetra<Real>&   globalMatrix,
                          Real                  coefficient,
                          ElemMat&              localMatrix,
                          const CurrentFE&      currentFE1,
@@ -320,7 +320,7 @@ assembleTransposeMatrix( EpetraMatrix<Real>&   globalMatrix,
 
 template <typename DOF, typename ElemVec>
 void
-extract_vec( EpetraVector& V,
+extract_vec( VectorEpetra& V,
              ElemVec& elvec,
              const DOFLocalPattern& fe,
              const DOF& dof,

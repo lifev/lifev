@@ -67,7 +67,7 @@ namespace LifeV
 
  */
 
-template<typename VectorType = EpetraVector >
+template<typename VectorType = VectorEpetra >
 class TimeAdvanceBDFNavierStokes
 {
 public:

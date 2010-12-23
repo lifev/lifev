@@ -49,7 +49,7 @@
 
 #include <algorithm> // for min and max
 #include <life/lifealg/NonLinearLineSearch.hpp>
-#include <life/lifearray/EpetraVector.hpp>
+#include <life/lifearray/VectorEpetra.hpp>
 
 namespace LifeV
 {
@@ -79,7 +79,7 @@ namespace LifeV
     */
 
 template < class Fct >
-Int nonLinRichardson( EpetraVector& sol,
+Int nonLinRichardson( VectorEpetra& sol,
                       Fct&        functional,
                       Real        abstol,
                       Real        reltol,
@@ -112,8 +112,8 @@ Int nonLinRichardson( EpetraVector& sol,
 
     //UInt iter = 0;
 
-    EpetraVector residual ( sol.map() );
-    EpetraVector step     ( sol.map() );
+    VectorEpetra residual ( sol.map() );
+    VectorEpetra step     ( sol.map() );
 
     step *= 0.;
 

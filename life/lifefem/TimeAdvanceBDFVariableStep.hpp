@@ -47,7 +47,7 @@
 #include <numeric>
 #include <boost/numeric/ublas/vector.hpp>
 
-#include <life/lifearray/EpetraVector.hpp>
+#include <life/lifearray/VectorEpetra.hpp>
 
 
 namespace LifeV
@@ -97,7 +97,7 @@ typedef boost::numeric::ublas::vector<Real> ScalarVector;
     Other methods that could be helpful while adapting in time are:
     set_deltat, store_unk and restore_unk
 */
-template< typename FEVectorType = EpetraVector >
+template< typename FEVectorType = VectorEpetra >
 class TimeAdvanceBDFVariableStep
 {
 public:
@@ -180,7 +180,7 @@ public:
     //! Returns the right hand side \f$ \bar{p} \f$ of the time derivative
     //! formula divided by dt
     /*!
-	    @return a feVector_Type, by default feVector_Type = EpetraVector
+	    @return a feVector_Type, by default feVector_Type = VectorEpetra
      */
 
     feVector_Type rhsContribution() const;
@@ -189,7 +189,7 @@ public:
     //! formula divided by timeStep (backward compatibility version, will be discontinued)
     /*!
         @param timeStep time step, 1 by default
-	    @return a feVector_Type, by default feVector_Type = EpetraVector
+	    @return a feVector_Type, by default feVector_Type = VectorEpetra
      */
     feVector_Type rhsContributionTimeStep( Real timeStep = 1 ) const;
 

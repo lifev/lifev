@@ -55,7 +55,7 @@
 
 #include <life/lifealg/SolverAztecOO.hpp>
 
-#include <life/lifearray/EpetraMatrix.hpp>
+#include <life/lifearray/MatrixEpetra.hpp>
 
 #include <life/lifefilters/ExporterEnsight.hpp>
 //#include <life/lifefilters/ExporterHDF5.hpp>
@@ -126,8 +126,8 @@ Real fRhs( const Real& /* t */, const Real& x, const Real& y, const Real& /* z *
 
 
 typedef RegionMesh3D<LinearTetra> mesh_type;
-typedef EpetraMatrix<Real> matrix_type;
-typedef EpetraVector vector_type;
+typedef MatrixEpetra<Real> matrix_type;
+typedef VectorEpetra vector_type;
 
 int
 main( int argc, char** argv )

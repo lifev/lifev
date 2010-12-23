@@ -24,8 +24,8 @@ This library is free software; you can redistribute it and/or
 
 #include <life/lifearray/MatrixElemental.hpp>
 #include <life/lifearray/VectorElemental.hpp>
-#include <life/lifearray/EpetraMatrix.hpp>
-#include <life/lifearray/EpetraVector.hpp>
+#include <life/lifearray/MatrixEpetra.hpp>
+#include <life/lifearray/VectorEpetra.hpp>
 //
 #include <life/lifecore/LifeChrono.hpp>
 
@@ -69,9 +69,9 @@ public:
     typedef BCHandler                             bchandler_raw_type;
     typedef boost::shared_ptr<bchandler_raw_type> bchandler_type;
 
-    typedef EpetraMatrix<double>      matrix_type;
+    typedef MatrixEpetra<double>      matrix_type;
     typedef boost::shared_ptr<matrix_type>        matrix_ptrtype;
-    typedef EpetraVector      vector_type;
+    typedef VectorEpetra      vector_type;
     typedef boost::shared_ptr<vector_type>        vector_ptrtype;
 
     //! Constructor
@@ -458,7 +458,7 @@ linearConvectiveTerm(const vector_type& betaVec, matrix_ptrtype A)
 
     if (normInf != 0.)
     {
-        EpetraMatrix<double> N(M_uFESpace.map());
+        MatrixEpetra<double> N(M_uFESpace.map());
         M_Displayer.leaderPrint("  F-  Sharing convective term ...              ");
         chrono.start();
 

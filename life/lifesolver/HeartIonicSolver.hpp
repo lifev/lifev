@@ -46,8 +46,8 @@
 #include <life/lifefem/BCManage.hpp>
 #include <life/lifealg/SolverAztecOO.hpp>
 #include <life/lifearray/MapEpetra.hpp>
-#include <life/lifearray/EpetraMatrix.hpp>
-#include <life/lifearray/EpetraVector.hpp>
+#include <life/lifearray/MatrixEpetra.hpp>
+#include <life/lifearray/VectorEpetra.hpp>
 #include <life/lifefem/SobolevNorms.hpp>
 #include <life/lifefem/GeometricMap.hpp>
 #include <life/lifesolver/HeartIonicData.hpp>
