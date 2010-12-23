@@ -2,7 +2,7 @@
 # DO NOT EDIT : generated automatically by update-headers
 #
 
-LIFECORE_HDRS=life/lifecore/FactorySingleton.hpp life/lifecore/CLapack.hpp life/lifecore/LifeV.hpp life/lifecore/FortranWrapper.hpp life/lifecore/LifeDebug.hpp life/lifecore/Displayer.hpp life/lifecore/lifeversion.hpp life/lifecore/CBlas.hpp life/lifecore/StringUtility.hpp life/lifecore/LifeAssert.hpp life/lifecore/FactoryTypeInfo.hpp life/lifecore/LifeChrono.hpp life/lifecore/StringData.hpp life/lifecore/LifeAssertSmart.hpp life/lifecore/Factory.hpp life/lifecore/Switch.hpp life/lifecore/FactoryPolicy.hpp
+LIFECORE_HDRS=life/lifecore/Displayer.hpp life/lifecore/Factory.hpp life/lifecore/FactoryPolicy.hpp life/lifecore/FactorySingleton.hpp life/lifecore/FactoryTypeInfo.hpp life/lifecore/FortranWrapper.hpp life/lifecore/LifeAssert.hpp life/lifecore/LifeAssertSmart.hpp life/lifecore/LifeChrono.hpp life/lifecore/LifeDebug.hpp life/lifecore/StringData.hpp life/lifecore/StringUtility.hpp life/lifecore/Switch.hpp life/lifecore/LifeV.hpp life/lifecore/LifeVersion.hpp life/lifecore/CBlas.hpp life/lifecore/CLapack.hpp
 
 LIFEARRAY_HDRS=life/lifearray/VectorEpetra.hpp life/lifearray/RNMTemplate.hpp life/lifearray/MapEpetra.hpp life/lifearray/RNMOperator.hpp life/lifearray/RNM.hpp life/lifearray/RNMOperatorConstant.hpp life/lifearray/MatrixEpetra.hpp life/lifearray/VectorElemental.hpp life/lifearray/VectorSimple.hpp life/lifearray/MatrixContainer.hpp life/lifearray/MatrixElemental.hpp
 

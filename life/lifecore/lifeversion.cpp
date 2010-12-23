@@ -22,12 +22,12 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
 /**
-   \file lifeversion.cpp
+   \file LifeVersion.cpp
    \author Christophe Prud'homme <christophe.prudhomme@epfl.ch>
    \date 2005-02-19
  */
 #include <life/lifecore/LifeV.hpp>
-#include <life/lifecore/lifeversion.hpp>
+#include <life/lifecore/LifeVersion.hpp>
 
 namespace LifeV
 {
