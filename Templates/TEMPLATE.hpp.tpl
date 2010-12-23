@@ -37,7 +37,7 @@
 #ifndef (>>>FILE_UPCASE<<<)_H
 #define (>>>FILE_UPCASE<<<)_H 1
 
-#include <life/lifecore/life.hpp>
+#include <life/lifecore/Life.hpp>
 
 namespace LifeV {
 
