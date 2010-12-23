@@ -26,7 +26,7 @@
 
 /*!
     @file
-    @brief DataFSI - File containing a data container for FSI problems
+    @brief FSIData - File containing a data container for FSI problems
 
     @author Cristiano Malossi <cristiano.malossi@epfl.ch>
     @author Gilles fourestey <gilles.fourestey@epfl.ch>
@@ -60,10 +60,10 @@ public:
     //! @name Type definitions
     //@{
 
-    typedef OseenData                        dataFluid_Type;
+    typedef OseenData                               dataFluid_Type;
     typedef boost::shared_ptr< dataFluid_Type >     dataFluid_PtrType;
 
-    typedef VenantKirchhoffElasticData                    dataSolid_Type;
+    typedef VenantKirchhoffElasticData              dataSolid_Type;
     typedef boost::shared_ptr< dataSolid_Type >     dataSolid_PtrType;
 
     //@}
