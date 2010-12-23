@@ -22,7 +22,7 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
 /**
-   \file LSCPreconditioner.cpp
+   \file PreconditionerLSC.cpp
    \author Gwenol Grandperrin <gwenol.grandperrin@epfl.ch>
    \date 2010-10-08
  */
@@ -31,27 +31,27 @@
 
 namespace LifeV {
 
-LSCPreconditioner::LSCPreconditioner():
-        TekoPreconditioner (),
+PreconditionerLSC::PreconditionerLSC():
+        PreconditionerTeko (),
         M_precType(""),
         M_velocityBlockSize(-1),
         M_pressureBlockSize(-1)
 {}
 
-LSCPreconditioner::~LSCPreconditioner()
+PreconditionerLSC::~PreconditionerLSC()
 {}
 
-void LSCPreconditioner::setDataFromGetPot( const GetPot& dataFile,
+void PreconditionerLSC::setDataFromGetPot( const GetPot& dataFile,
                                            const std::string& section )
 {
-    createLSCList(M_List, dataFile, section, "LSC");
+    createLSCList(M_list, dataFile, section, "LSC");
 
-    M_velocityBlockSize = this->M_List.get("blocks: velocity block size", -1);
-    M_pressureBlockSize = this->M_List.get("blocks: pressure block size", -1);
-    M_precType          = this->M_List.get("prectype", "LSC");
+    M_velocityBlockSize = this->M_list.get("blocks: velocity block size", -1);
+    M_pressureBlockSize = this->M_list.get("blocks: pressure block size", -1);
+    M_precType          = this->M_list.get("prectype", "LSC");
 }
 
-int LSCPreconditioner::buildPreconditioner(operator_type& oper)
+int PreconditionerLSC::buildPreconditioner(operator_type& oper)
 {
     // Creating the InverseLibrary from Stratimikos
     RCP<Teko::InverseLibrary> invLib = Teko::InverseLibrary::buildFromStratimikos();
@@ -68,19 +68,19 @@ int LSCPreconditioner::buildPreconditioner(operator_type& oper)
         = rcp(new Teko::NS::LSCPreconditionerFactory(strategy));
 
     // Building Block sizes
-    M_velocityBlockSize = this->M_List.get("blocks: velocity block size", -1);
-    M_pressureBlockSize = this->M_List.get("blocks: pressure block size", -1);
+    M_velocityBlockSize = this->M_list.get("blocks: velocity block size", -1);
+    M_pressureBlockSize = this->M_list.get("blocks: pressure block size", -1);
     std::vector<int> blockSizes;
     blockSizes.push_back(M_velocityBlockSize);
     blockSizes.push_back(M_pressureBlockSize);
 
     // Building the LSC preconditioner
-    buildTekoPreconditioner(precFact,oper,blockSizes);
+    buildPreconditionerTeko(precFact,oper,blockSizes);
 
     return ( EXIT_SUCCESS );
 }
 
-void LSCPreconditioner::createList( list_type&         list,
+void PreconditionerLSC::createList( list_type&         list,
                                     const GetPot&      dataFile,
                                     const std::string& section,
                                     const std::string& subSection )
@@ -88,7 +88,7 @@ void LSCPreconditioner::createList( list_type&         list,
     createLSCList( list, dataFile, section, subSection );
 }
 
-void LSCPreconditioner::createLSCList( list_type&         list,
+void PreconditionerLSC::createLSCList( list_type&         list,
                                        const GetPot&      dataFile,
                                        const std::string& section,
                                        const std::string& subsection )
@@ -118,17 +118,17 @@ void LSCPreconditioner::createLSCList( list_type&         list,
     if (displayList) list.print(std::cout);
 }
 
-Real LSCPreconditioner::Condest()
+Real PreconditionerLSC::Condest()
 {
     return 0.0;
 }
 
-int LSCPreconditioner::numBlocksRows() const
+int PreconditionerLSC::numBlocksRows() const
 {
     return 2;
 }
 
-int LSCPreconditioner::numBlocksCols() const
+int PreconditionerLSC::numBlocksCols() const
 {
     return 2;
 }

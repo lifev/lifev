@@ -84,7 +84,7 @@ MatrixBlockView::setup( const UInt& firstRow,
     M_lastRowIndex     = firstRow+numRows-1;
     M_firstColumnIndex = firstColumn;
     M_lastColumnIndex  = firstColumn+numColumns-1;
-    M_matrix           = A.getMatrixPtr();
+    M_matrix           = A.matrixPtr();
 }
 
 // ===================================================

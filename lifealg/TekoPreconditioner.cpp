@@ -22,37 +22,37 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
 /**
-   \file TekoPreconditioner.cpp
+   \file PreconditionerTeko.cpp
    \author Gwenol Grandperrin <gwenol.grandperrin@epfl.ch>
    \date 2010-10-14
  */
 
-#include "TekoPreconditioner.hpp"
+#include "PreconditionerTeko.hpp"
 
 namespace LifeV {
 
-TekoPreconditioner::TekoPreconditioner(const boost::shared_ptr<Epetra_Comm>& comm):
+PreconditionerTeko::PreconditionerTeko(const boost::shared_ptr<Epetra_Comm>& comm):
     BlockPreconditioner(comm),M_Prec()
 {}
 
-TekoPreconditioner::TekoPreconditioner(  TekoPreconditioner& P, const boost::shared_ptr<Epetra_Comm>& comm):
+PreconditionerTeko::PreconditionerTeko(  PreconditionerTeko& P, const boost::shared_ptr<Epetra_Comm>& comm):
     BlockPreconditioner(P,comm)
 {}
 
-TekoPreconditioner::~TekoPreconditioner()
+PreconditionerTeko::~PreconditionerTeko()
 {}
 
-TekoPreconditioner::super::prec_type TekoPreconditioner::getPrecPtr()
+PreconditionerTeko::super::prec_type PreconditionerTeko::getPrecPtr()
 {
     return M_Prec;
 }
 
-EpetraPreconditioner::prec_raw_type* TekoPreconditioner::getPrec()
+Preconditioner::prec_raw_type* PreconditionerTeko::getPrec()
 {
     return M_Prec.get();
 }
 
-void TekoPreconditioner::precReset()
+void PreconditionerTeko::precReset()
 {
     M_Oper.reset();
     M_Prec.reset();
@@ -60,45 +60,49 @@ void TekoPreconditioner::precReset()
     this->M_preconditionerCreated = false;
 }
 
-bool TekoPreconditioner::set() const
+bool PreconditionerTeko::set() const
 {
     return M_Prec;
 }
 
-int TekoPreconditioner::SetUseTranspose( const bool useTranspose)
+int PreconditionerTeko::SetUseTranspose( const bool useTranspose)
 {
     return M_Prec->SetUseTranspose(useTranspose);
 }
 
-bool TekoPreconditioner::UseTranspose()
+bool PreconditionerTeko::UseTranspose()
 {
     return M_Prec->UseTranspose();
 }
-int TekoPreconditioner::ApplyInverse(const Epetra_MultiVector& X, Epetra_MultiVector& Y) const
+int PreconditionerTeko::ApplyInverse(const Epetra_MultiVector& X, Epetra_MultiVector& Y) const
 {
     return M_Prec->ApplyInverse(X, Y);
 }
 
-int TekoPreconditioner::Apply(const Epetra_MultiVector& X, Epetra_MultiVector& Y) const
+int PreconditionerTeko::Apply(const Epetra_MultiVector& X, Epetra_MultiVector& Y) const
 {
     return M_Prec->Apply(X, Y);
 }
 
-const Epetra_Map & TekoPreconditioner::OperatorRangeMap() const
+const Epetra_Map & PreconditionerTeko::OperatorRangeMap() const
 {
     return M_Prec->OperatorRangeMap();
 }
 
-const Epetra_Map & TekoPreconditioner::OperatorDomainMap() const
+const Epetra_Map & PreconditionerTeko::OperatorDomainMap() const
 {
     return M_Prec->OperatorRangeMap();
 }
 
-void TekoPreconditioner::buildBlockGIDs(std::vector<std::vector<int> > & gids,
+void PreconditionerTeko::buildBlockGIDs(std::vector<std::vector<int> > & gids,
+<<<<<<< Updated upstream
+                                        const MapEpetra & map,
+=======
                                         const EpetraMap & map,
+>>>>>>> Stashed changes
                                         const std::vector<int>& blockSizes)
 {
-    int numLocal = map.getMap(Unique)->NumMyElements();
+    int numLocal = map.map(Unique)->NumMyElements();
     int numBlocks = blockSizes.size();
 
     gids.clear();
@@ -109,7 +113,7 @@ void TekoPreconditioner::buildBlockGIDs(std::vector<std::vector<int> > & gids,
 
     for(int i(0);i<numLocal;++i)
     {
-        gid = map.getMap(Unique)->GID(i);
+        gid = map.map(Unique)->GID(i);
         cumulBlocksSizes = 0;
         for(int j(0);j<numBlocks;++j){
 	        cumulBlocksSizes += blockSizes[j];
@@ -122,17 +126,21 @@ void TekoPreconditioner::buildBlockGIDs(std::vector<std::vector<int> > & gids,
     }
 }
 
-void TekoPreconditioner::buildTekoPreconditioner(RCP<Teko::BlockPreconditionerFactory> precFact,
+<<<<<<< Updated upstream
+void PreconditionerTeko::buildTekoPreconditioner(RCP<Teko::BlockPreconditionerFactory> precFact,
+=======
+void PreconditionerTeko::buildPreconditionerTeko(RCP<Teko::BlockPreconditionerFactory> precFact,
+>>>>>>> Stashed changes
                                                  operator_type& oper,
                                                  const std::vector<int>& blockSizes)
 {
     // Building the preconditioner
     Teko::Epetra::EpetraBlockPreconditioner* prec = new Teko::Epetra::EpetraBlockPreconditioner(precFact);
 
-    M_Oper = oper->getMatrixPtr();
+    M_Oper = oper->matrixPtr();
 
     std::vector<std::vector<int> > vec;
-    buildBlockGIDs(vec,oper->getRangeMap(),blockSizes);
+    buildBlockGIDs(vec,oper->rangeMap(),blockSizes);
 
     // Building the block operator from the matrix
     Teuchos::RCP<Teko::Epetra::BlockedEpetraOperator> sA

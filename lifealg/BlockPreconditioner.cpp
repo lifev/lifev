@@ -32,12 +32,12 @@
 namespace LifeV {
 
 BlockPreconditioner::BlockPreconditioner(const boost::shared_ptr<Epetra_Comm>& comm):
-  EpetraPreconditioner(comm)
+  Preconditioner(comm)
 {
 }
 
 BlockPreconditioner::BlockPreconditioner(  BlockPreconditioner& P, const boost::shared_ptr<Epetra_Comm>& comm):
-  EpetraPreconditioner(P,comm)
+  Preconditioner(P,comm)
 {
 }
 

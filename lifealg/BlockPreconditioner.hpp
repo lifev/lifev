@@ -33,8 +33,8 @@
 
 #include <vector>
 #include <boost/shared_ptr.hpp>
-#include <life/lifealg/EpetraPreconditioner.hpp>
-#include <life/lifealg/EpetraMap.hpp>
+#include <life/lifealg/Preconditioner.hpp>
+#include <life/lifearray/MapEpetra.hpp>
 
 namespace LifeV {
 
@@ -46,14 +46,14 @@ namespace LifeV {
  *  defines the interfaces for a typical block preconditioner
  */
 class BlockPreconditioner:
-        public EpetraPreconditioner
+        public Preconditioner
 {
 public:
 
     /** @name Typedefs
      */
     //@{
-    typedef EpetraPreconditioner                 super;
+    typedef Preconditioner                       super;
 
     typedef Epetra_Operator                      prec_raw_type;
     typedef boost::shared_ptr<prec_raw_type>     prec_type;
@@ -87,7 +87,7 @@ protected:
 
 };
 
-void buildBlockGIDs(std::vector<std::vector<int> > & gids,const EpetraMap & map,const std::vector<int>& blockSizes);
+void buildBlockGIDs(std::vector<std::vector<int> > & gids,const MapEpetra & map,const std::vector<int>& blockSizes);
 
 } // namespace LifeV
 

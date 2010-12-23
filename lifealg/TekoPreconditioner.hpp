@@ -22,18 +22,18 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
 /**
-   \file TekoPreconditioner.hpp
+   \file PreconditionerTeko.hpp
    \author Gwenol Grandperrin <gwenol.grandperrin@epfl.ch>
    \date 2010-10-14
  */
 
 
-#ifndef _TEKOPRECONDITIONER_HPP_
-#define _TEKOPRECONDITIONER_HPP_
+#ifndef _PRECONDITIONERTEKO_HPP_
+#define _PRECONDITIONERTEKO_HPP_
 
 #include <vector>
 #include <boost/shared_ptr.hpp>
-#include <life/lifealg/EpetraMap.hpp>
+#include <life/lifearray/MapEpetra.hpp>
 #include <lifemc/lifealg/BlockPreconditioner.hpp>
 
 // Teuchos includes
@@ -54,14 +54,14 @@ using Teuchos::rcp;
 
 namespace LifeV {
 
-//! TekoPreconditioner
+//! PreconditionerTeko
 /*!
  *  @author Gwenol Grandperrin
  *
- *  The TekoPreconditioner class provides a wrapper for Trilinos
+ *  The PreconditionerTeko class provides a wrapper for Trilinos
  *  block preconditioners implimented with the Teko package
  */
-class TekoPreconditioner:
+class PreconditionerTeko:
         public BlockPreconditioner
 {
 public:
@@ -69,7 +69,7 @@ public:
     /** @name Typedefs
      */
     //@{
-    typedef EpetraPreconditioner                    super;
+    typedef Preconditioner                          super;
 
     typedef Teko::Epetra::EpetraBlockPreconditioner prec_raw_type;
     typedef boost::shared_ptr<prec_raw_type>        prec_type;
@@ -83,13 +83,13 @@ public:
      */
     //@{
     //! default constructor.
-    TekoPreconditioner(const boost::shared_ptr<Epetra_Comm>& comm = boost::shared_ptr<Epetra_Comm>());
+    PreconditionerTeko(const boost::shared_ptr<Epetra_Comm>& comm = boost::shared_ptr<Epetra_Comm>());
 
     /** Copy constructor*/
-    TekoPreconditioner(TekoPreconditioner& P, const boost::shared_ptr<Epetra_Comm>& comm = boost::shared_ptr<Epetra_Comm>() );
+    PreconditionerTeko(PreconditionerTeko& P, const boost::shared_ptr<Epetra_Comm>& comm = boost::shared_ptr<Epetra_Comm>() );
 
     //! default virtual destructor
-    virtual ~TekoPreconditioner();
+    virtual ~PreconditionerTeko();
 
     //@}
 
@@ -121,9 +121,9 @@ protected:
     prec_type             M_Prec;
 
     void buildBlockGIDs(std::vector<std::vector<int> > & gids,
-                        const EpetraMap & map,
+                        const MapEpetra & map,
                         const std::vector<int>& blockSizes);
-    void buildTekoPreconditioner(RCP<Teko::BlockPreconditionerFactory> precFact,
+    void buildPreconditionerTeko(RCP<Teko::BlockPreconditionerFactory> precFact,
                                  operator_type& oper,
                                  const std::vector<int>& blockSizes);
 

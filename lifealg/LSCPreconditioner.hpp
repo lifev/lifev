@@ -22,20 +22,20 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
 /**
-   \file LSCPreconditioner.hpp
+   \file PreconditionerLSC.hpp
    \author Gwenol Grandperrin <gwenol.grandperrin@epfl.ch>
    \date 2010-10-08
  */
 
 
-#ifndef _LSCPRECONDITIONER_HPP_
-#define _LSCPRECONDITIONER_HPP_
+#ifndef _PRECONDITIONERLSC_HPP_
+#define _PRECONDITIONERLSC_HPP_
 
 #include <boost/shared_ptr.hpp>
 
-#include <life/lifecore/GetPot.hpp>
+#include <life/lifefilters/GetPot.hpp>
 #include <life/lifearray/EpetraMatrix.hpp>
-#include <lifemc/lifealg/TekoPreconditioner.hpp>
+#include <lifemc/lifealg/PreconditionerTeko.hpp>
 
 // Teuchos includes
 #include "Teuchos_RCP.hpp"
@@ -54,22 +54,22 @@ using Teuchos::rcp;
 
 namespace LifeV {
 
-//! LSCPreconditioner
+//! PreconditionerLSC
 /*!
  *  @author Gwenol Grandperrin
  *
- *  The LSCPreconditioner class provides the LSC block preconditioner
+ *  The PreconditionerLSC class provides the LSC block preconditioner
  *  available in the Teko package of Trilinos
  */
-class LSCPreconditioner:
-        public TekoPreconditioner
+class PreconditionerLSC:
+        public PreconditionerTeko
 {
 public:
 
     /** @name Public Types
      */
     //@{
-    typedef EpetraPreconditioner                    super;
+    typedef Preconditioner                          super;
 
     typedef Teko::Epetra::EpetraBlockPreconditioner prec_raw_type;
     typedef boost::shared_ptr<prec_raw_type>        prec_type;
@@ -85,14 +85,14 @@ public:
      */
     //@{
     //! default constructor.
-    LSCPreconditioner();
+    PreconditionerLSC();
 
     //! constructor from matrix A.
     //! @param A EpetraMatrix<double> matrix upon which construct the preconditioner
     //    IfpackPreconditioner(operator_type& A);
 
     //! default destructor
-    ~LSCPreconditioner();
+    ~PreconditionerLSC();
 
     //@}
 
@@ -138,7 +138,7 @@ protected:
 
 };
 
-inline EpetraPreconditioner* createLSC(){ return new LSCPreconditioner(); }
+inline Preconditioner* createLSC(){ return new PreconditionerLSC(); }
 namespace
 {
 	static bool registerLSC = PRECFactory::instance().registerProduct( "LSC", &createLSC );
