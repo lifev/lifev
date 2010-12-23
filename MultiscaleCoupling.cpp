@@ -153,7 +153,7 @@ MultiscaleCoupling::extrapolateCouplingVariables()
     if ( couplingVariablesSize <= M_timeInterpolationOrder )
     {
         ++couplingVariablesSize;
-        M_localCouplingVariables.push_back( multiscaleVectorPtr_Type ( new EpetraVector( *M_localCouplingVariables[0] ) ) );
+        M_localCouplingVariables.push_back( multiscaleVectorPtr_Type ( new VectorEpetra( *M_localCouplingVariables[0] ) ) );
     }
 
     // Updating database
@@ -288,8 +288,8 @@ MultiscaleCoupling::createLocalVectors()
     MapEpetra map( -1, static_cast< Int > ( myGlobalElements.size() ), &myGlobalElements[0], 0, M_comm );
 
     // Create local repeated vectors
-    M_localCouplingVariables.push_back( multiscaleVectorPtr_Type ( new EpetraVector( map, Repeated ) ) );
-    M_localCouplingResiduals.reset( new EpetraVector( map, Repeated ) );
+    M_localCouplingVariables.push_back( multiscaleVectorPtr_Type ( new VectorEpetra( map, Repeated ) ) );
+    M_localCouplingResiduals.reset( new VectorEpetra( map, Repeated ) );
 }
 
 void

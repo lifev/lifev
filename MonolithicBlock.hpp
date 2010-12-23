@@ -69,9 +69,9 @@ public:
 
     //! @name Public Types
     //@{
-    typedef EpetraVector                                               vector_Type;
+    typedef VectorEpetra                                               vector_Type;
     typedef boost::shared_ptr< vector_Type >                           vectorPtr_Type;
-    typedef EpetraMatrix< Real >                                       matrix_Type;
+    typedef MatrixEpetra< Real >                                       matrix_Type;
     typedef boost::shared_ptr< matrix_Type >                           matrixPtr_Type;
     typedef boost::shared_ptr< Epetra_Operator >                       epetraOperatorPtr_Type;
     typedef boost::shared_ptr< Preconditioner >                        epetra_preconditioner_ptrtype;

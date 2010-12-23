@@ -64,8 +64,8 @@
 #include <life/lifefem/TimeData.hpp>
 
 #include <life/lifearray/MapEpetra.hpp>
-#include <life/lifearray/EpetraVector.hpp>
-#include <life/lifearray/EpetraMatrix.hpp>
+#include <life/lifearray/VectorEpetra.hpp>
+#include <life/lifearray/MatrixEpetra.hpp>
 
 namespace LifeV
 {
@@ -146,10 +146,10 @@ typedef entityFlag_Type                                                         
 
 typedef Displayer::commPtr_Type                                                  multiscaleCommPtr_Type;
 
-typedef EpetraVector                                                             multiscaleVector_Type;
+typedef VectorEpetra                                                             multiscaleVector_Type;
 typedef boost::shared_ptr< multiscaleVector_Type >                               multiscaleVectorPtr_Type;
 
-typedef EpetraMatrix< Real >                                                     multiscaleMatrix_Type;
+typedef MatrixEpetra< Real >                                                     multiscaleMatrix_Type;
 typedef boost::shared_ptr< multiscaleMatrix_Type >                               multiscaleMatrixPtr_Type;
 
 typedef MultiscaleAlgorithm                                                      multiscaleAlgorithm_Type;
