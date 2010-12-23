@@ -34,8 +34,8 @@
 #include <boost/shared_ptr.hpp>
 
 #include <life/lifecore/GetPot.hpp>
-#include <life/lifearray/EpetraMatrix.hpp>
-#include <life/lifearray/EpetraVector.hpp>
+#include <life/lifearray/MatrixEpetra.hpp>
+#include <life/lifearray/VectorEpetra.hpp>
 #include <lifemc/lifealg/ComposedPreconditioner.hpp>
 #include <lifemc/lifearray/MatrixBlock.hpp>
 #include <life/lifesolver/ADRAssembler.hpp>

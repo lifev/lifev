@@ -27,7 +27,7 @@
    \date 2010-10-08
  */
 
-#include "LSCPreconditioner.hpp"
+#include "PreconditionerLSC.hpp"
 
 namespace LifeV {
 

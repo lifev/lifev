@@ -34,7 +34,7 @@
 #include <vector>
 #include <boost/shared_ptr.hpp>
 #include <life/lifearray/MapEpetra.hpp>
-#include <lifemc/lifealg/BlockPreconditioner.hpp>
+#include <lifemc/lifealg/PreconditionerBlock.hpp>
 
 // Teuchos includes
 #include "Teuchos_RCP.hpp"
@@ -62,7 +62,7 @@ namespace LifeV {
  *  block preconditioners implimented with the Teko package
  */
 class PreconditionerTeko:
-        public BlockPreconditioner
+        public PreconditionerBlock
 {
 public:
 

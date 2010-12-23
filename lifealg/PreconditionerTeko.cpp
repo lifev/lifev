@@ -32,11 +32,11 @@
 namespace LifeV {
 
 PreconditionerTeko::PreconditionerTeko(const boost::shared_ptr<Epetra_Comm>& comm):
-    BlockPreconditioner(comm),M_Prec()
+    PreconditionerBlock(comm),M_Prec()
 {}
 
 PreconditionerTeko::PreconditionerTeko(  PreconditionerTeko& P, const boost::shared_ptr<Epetra_Comm>& comm):
-    BlockPreconditioner(P,comm)
+    PreconditionerBlock(P,comm)
 {}
 
 PreconditionerTeko::~PreconditionerTeko()
@@ -95,11 +95,7 @@ const Epetra_Map & PreconditionerTeko::OperatorDomainMap() const
 }
 
 void PreconditionerTeko::buildBlockGIDs(std::vector<std::vector<int> > & gids,
-<<<<<<< Updated upstream
                                         const MapEpetra & map,
-=======
-                                        const EpetraMap & map,
->>>>>>> Stashed changes
                                         const std::vector<int>& blockSizes)
 {
     int numLocal = map.map(Unique)->NumMyElements();

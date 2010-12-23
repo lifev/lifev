@@ -61,8 +61,8 @@ public:
     //! @name Public Types
     //@{
 
-    typedef Preconditioner                   super;
-    typedef ComposedOperator<Preconditioner> prec_raw_type;
+    typedef Preconditioner                         super;
+    typedef ComposedOperator<Preconditioner>       prec_raw_type;
     typedef boost::shared_ptr<prec_raw_type>       prec_type;
     typedef super::operator_raw_type               operator_raw_type;
     typedef boost::shared_ptr<operator_raw_type>   operator_type;
