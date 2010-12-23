@@ -478,9 +478,9 @@ double ComposedOperator<operator_Type>::Condest()  const
 
     for (UInt q(0); q<M_set ; q++) {
         if (M_inverse[q])
-            cond = cond /  M_operator[q]->Condest();
+            cond = cond /  M_operator[q]->condest();
         else
-            cond *= M_operator[q]->Condest();
+            cond *= M_operator[q]->condest();
     }
     return(cond);
 }

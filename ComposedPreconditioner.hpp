@@ -108,8 +108,8 @@ public:
     void                   setDataFromGetPot ( const GetPot&      dataFile,
                                                const std::string& section);
 
-    void                   createList( list_Type& /*list*/, const GetPot& dataFile, const std::string& section, const std::string& subSection );
-    double                 Condest ();
+    void                   createParametersList( list_Type& /*list*/, const GetPot& dataFile, const std::string& section, const std::string& subSection );
+    double                 condest ();
 
     int                    buildPreconditioner(operatorPtr_Type& A);
     int                    buildPreconditioner(operatorPtr_Type& A,
@@ -127,16 +127,16 @@ public:
                                                const bool useInverse=false,
                                                const bool useTranspose=false);
 
-    void                   precReset();
+    void                   resetPreconditioner();
 
     //! returns true if prec exists
     /*const*/
-    bool                   set() const {return M_prec;}
+    bool                   isPreconditionerSet() const {return M_prec;}
     //@}
 
     //!@name Implementation of Methods from Epetra_Operator
     //@{
-    const Epetra_Comm& Comm(){return getPrec()->Comm(); }
+    const Epetra_Comm& Comm(){return preconditioner()->Comm(); }
 
     const Epetra_Map& OperatorDomainMap() { return  M_prec->OperatorDomainMap(); }
     const Epetra_Map& OperatorRangeMap() { return  M_prec->OperatorRangeMap(); }
@@ -168,13 +168,13 @@ public:
 
     //!@name Get Methods
     //@{
-    super_Type::prec_raw_type*  getPrec ();
+    super_Type::prec_raw_type*  preconditioner ();
 
     UInt number() const {return M_prec->number();}
 
-    super_Type::prec_type              getPrecPtr(){return M_prec;}
+    super_Type::prec_type              preconditionerPtr(){return M_prec;}
 
-    std::string            precType() {return "composedPreconditioner";}
+    std::string            preconditionerType() {return "composedPreconditioner";}
     //@}
 
     //!@name Static Methods

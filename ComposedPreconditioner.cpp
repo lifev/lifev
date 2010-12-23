@@ -50,12 +50,12 @@ ComposedPreconditioner::ComposedPreconditioner( boost::shared_ptr<Epetra_Comm> c
 }
 
 ComposedPreconditioner::ComposedPreconditioner(ComposedPreconditioner& P):
-    super_Type(P, boost::dynamic_pointer_cast<ComposedOperator<Ifpack_Preconditioner> >(P.getPrecPtr())->commPtr()),
-    M_prec(new prec_Type(*boost::dynamic_pointer_cast<prec_Type>(P.getPrecPtr()))),
+    super_Type(P, boost::dynamic_pointer_cast<ComposedOperator<Ifpack_Preconditioner> >(P.preconditionerPtr())->commPtr()),
+    M_prec(new prec_Type(*boost::dynamic_pointer_cast<prec_Type>(P.preconditionerPtr()))),
     M_operVector(P.getOperVector())
-    //M_precType(P.precType())
+    //M_precType(P.preconditionerType())
 {
-    //    *M_prec=*P.getPrec();
+    //    *M_prec=*P.preconditioner();
 }
 ComposedPreconditioner::~ComposedPreconditioner()
 {}
@@ -71,11 +71,11 @@ ComposedPreconditioner::setDataFromGetPot( const GetPot&      dataFile,
                                            const std::string& section )
 {
 	list_Type uselessList __attribute__ ((deprecated));
-    createList( uselessList, dataFile, section, "Composed" );
+    createParametersList( uselessList, dataFile, section, "Composed" );
 }
 
 void
-ComposedPreconditioner::createList(       list_Type& /*list*/,
+ComposedPreconditioner::createParametersList(       list_Type& /*list*/,
                                           const GetPot&      dataFile,
                                           const std::string& section,
                                           const std::string& subSection )
@@ -88,18 +88,18 @@ ComposedPreconditioner::createList(       list_Type& /*list*/,
     {
         epetraPrec_Type tmp( PRECFactory::instance().createObject( dataFile( ( section + "/" + subSection + "/list" ).data(), "ML", i ) ) );
         M_prec->push_back(tmp);
-        M_prec->Operator()[i]->createList(M_prec->Operator()[i]->list(), dataFile, section, dataFile( ( section + "/" + subSection + "/sections" ).data(), "ML", i ));
+        M_prec->Operator()[i]->createParametersList(M_prec->Operator()[i]->parametersList(), dataFile, section, dataFile( ( section + "/" + subSection + "/sections" ).data(), "ML", i ));
     }
 }
 
 double
-ComposedPreconditioner::Condest()
+ComposedPreconditioner::condest()
 {
     return M_prec->Condest();
 }
 
 Preconditioner::prec_raw_type*
-ComposedPreconditioner::getPrec()
+ComposedPreconditioner::preconditioner()
 {
     return M_prec.get();
 }
@@ -132,7 +132,7 @@ ComposedPreconditioner::push_back(operatorPtr_Type& oper,
     LifeChrono chrono;
     epetraPrecPtr_Type prec;
 
-    this->M_displayer.leaderPrint(std::string("ICP-  Computing prec. factorization, type:") + M_prec->Operator()[M_operVector.size()-1]->precType() + " ...        ");
+    this->M_displayer.leaderPrint(std::string("ICP-  Computing prec. factorization, type:") + M_prec->Operator()[M_operVector.size()-1]->preconditionerType() + " ...        ");
     chrono.start();
     createPrec(oper, M_prec->Operator()[M_operVector.size()-1]);
     chrono.stop();
@@ -154,7 +154,7 @@ ComposedPreconditioner::replace(operatorPtr_Type& oper,
     M_operVector[index] = oper;
     LifeChrono chrono;
     //ifpack_prec_type prec;
-    this->M_displayer.leaderPrint(std::string("ICP-  Computing prec. factorization, type:") + (M_prec->Operator()[index]->precType()) + " ...        ");
+    this->M_displayer.leaderPrint(std::string("ICP-  Computing prec. factorization, type:") + (M_prec->Operator()[index]->preconditionerType()) + " ...        ");
     chrono.start();
     createPrec(oper, M_prec->Operator()[index]);
     chrono.stop();
@@ -166,7 +166,7 @@ ComposedPreconditioner::replace(operatorPtr_Type& oper,
 }
 
 void
-ComposedPreconditioner::precReset()
+ComposedPreconditioner::resetPreconditioner()
 {
     //M_operVector.reset();
     M_prec.reset();
