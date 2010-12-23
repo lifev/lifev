@@ -289,7 +289,7 @@ template <typename Mesh, typename SolverType>
 void HarmonicExtensionSolver<Mesh, SolverType>::setUp( const GetPot& dataFile )
 {
     M_linearSolver.setDataFromGetPot( dataFile, "mesh_motion/solver" );
-    M_linearSolver.setUpPrec(dataFile, "mesh_motion/prec");
+    M_linearSolver.setupPreconditioner(dataFile, "mesh_motion/prec");
 
     M_diffusion = dataFile("mesh_motion/diffusion",1.0);
 

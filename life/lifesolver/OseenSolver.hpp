@@ -344,7 +344,7 @@ public:
     void resetPreconditioner( bool reset = true )
     {
         if ( reset )
-            M_linearSolver.precReset();
+            M_linearSolver.resetPreconditioner();
     }
 
     //! Reset stabilization matrix at the same time as the preconditioner
@@ -939,7 +939,7 @@ void
 OseenSolver<MeshType, SolverType>::setUp( const GetPot& dataFile )
 {
 
-    M_linearSolver.setUpPrec( dataFile, "fluid/prec" );
+    M_linearSolver.setupPreconditioner( dataFile, "fluid/prec" );
     M_linearSolver.setDataFromGetPot( dataFile, "fluid/solver" );
 
     M_steady        = dataFile( "fluid/miscellaneous/steady", 0 );
@@ -949,7 +949,7 @@ OseenSolver<MeshType, SolverType>::setUp( const GetPot& dataFile )
     M_gammaPress    = dataFile( "fluid/ipstab/gammaPress", 0. );
     M_reuseStabilization     = dataFile( "fluid/ipstab/reuse", false );
     M_iterReuseStabilization = dataFile( "fluid/ipstab/max_iter_reuse",
-                                         static_cast<Int> ( M_linearSolver.MaxIter() * 8./10. ) );
+                                         static_cast<Int> ( M_linearSolver.maxNumIterations() * 8./10. ) );
 
     // Energetic stabilization term
     M_divBetaUv   = dataFile( "fluid/space_discretization/div_beta_u_v",false);

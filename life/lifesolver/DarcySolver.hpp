@@ -954,7 +954,7 @@ setup ()
 
     // Set up data for the linear solver and the preconditioner.
     M_linearSolver.setDataFromGetPot( dataFile, "darcy/solver" );
-    M_linearSolver.setUpPrec( dataFile, "darcy/prec" );
+    M_linearSolver.setupPreconditioner( dataFile, "darcy/prec" );
     M_linearSolver.setCommunicator( M_displayer.comm() );
 
     // Choose the preconditioner type.

@@ -78,7 +78,7 @@ PreconditionerML::buildPreconditioner( operator_type& matrix )
     // <one-level-postsmoothing> / <two-level-additive>
     // <two-level-hybrid> / <two-level-hybrid2>
 
-    M_preconditioner.reset( new prec_raw_type( *M_operator, this->getList(), true ) );
+    M_preconditioner.reset( new prec_raw_type( *M_operator, this->parametersList(), true ) );
 
     if ( M_analyze )
     {
@@ -96,7 +96,7 @@ PreconditionerML::buildPreconditioner( operator_type& matrix )
 }
 
 void
-PreconditionerML::precReset()
+PreconditionerML::resetPreconditioner()
 {
     //the Trilinos::MultiLevelPreconditioner unsafely access to the area of memory co-owned by M_operator.
     //to avoid the risk of dandling pointers always deallocate M_preconditioner first and then M_operator
@@ -324,13 +324,13 @@ PreconditionerML::setDataFromGetPot( const GetPot&      dataFile,
 // Get Methods
 // ===================================================
 Real
-PreconditionerML::Condest()
+PreconditionerML::condest()
 {
     return 0.;
 }
 
 Preconditioner::prec_raw_type*
-PreconditionerML::getPrec()
+PreconditionerML::preconditioner()
 {
     return M_preconditioner.get();
 }

@@ -56,7 +56,7 @@ Preconditioner::Preconditioner( const commPtr_Type& comm ):
 Preconditioner::Preconditioner( const Preconditioner& preconditioner, const commPtr_Type& comm ):
         M_precType              ( preconditioner.M_precType ),
         M_displayer             ( comm ),
-        M_list                  ( preconditioner.getList() ),
+        M_list                  ( preconditioner.parametersList() ),
         M_preconditionerCreated ( preconditioner.M_preconditionerCreated )
 {
 
@@ -106,7 +106,7 @@ Preconditioner::showMe( std::ostream& /*output*/ ) const
 // Set Methods
 // ===================================================
 void
-Preconditioner::setList( const list_Type& list )
+Preconditioner::setParametersList( const list_Type& list )
 {
     M_list = list;
 }
@@ -127,13 +127,13 @@ Preconditioner::preconditionerCreated()
 }
 
 const Preconditioner::list_Type&
-Preconditioner::getList() const
+Preconditioner::parametersList() const
 {
     return M_list;
 }
 
 Preconditioner::list_Type&
-Preconditioner::list()
+Preconditioner::parametersList()
 {
     return M_list;
 }

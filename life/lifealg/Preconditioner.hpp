@@ -119,7 +119,7 @@ public:
       @param section The section in "dataFile" where to find data about the preconditioner
       @param subSection The subsection in "dataFile" where to find data about the preconditioner
      */
-    virtual void createList( list_Type& list,
+    virtual void createParametersList( list_Type& list,
                              const GetPot& dataFile,
                              const std::string& section,
                              const std::string& subSection ) = 0;
@@ -131,10 +131,10 @@ public:
     virtual Int buildPreconditioner( operator_type& matrix ) = 0;
 
     //! Reset the preconditioner
-    virtual void precReset() = 0;
+    virtual void resetPreconditioner() = 0;
 
     //! Return An estimation of the condition number of the preconditioner
-    virtual Real Condest() = 0;
+    virtual Real condest() = 0;
 
     //! Show informations about the preconditioner
     virtual void showMe( std::ostream& output = std::cout ) const;
@@ -151,6 +151,9 @@ public:
      */
     virtual Int SetUseTranspose( const bool useTranspose = false );
 
+    //! Return true if the preconditioner is transposed
+    virtual bool UseTranspose();
+
     //! Apply the inverse of the preconditioner on vector1 and store the result in vector2
     /*!
       @param vector1 Vector to which we apply the preconditioner
@@ -165,6 +168,12 @@ public:
      */
     virtual Int ApplyInverse( const Epetra_MultiVector& vector1, Epetra_MultiVector& vector2 ) const;
 
+
+    //! Return the Range map of the operator
+    virtual const Epetra_Map& OperatorRangeMap() const;
+
+    //! Return the Domain map of the operator
+    virtual const Epetra_Map& OperatorDomainMap() const;
     //@}
 
 
@@ -175,7 +184,7 @@ public:
     /*!
       @param list List to be set into the preconditioner
      */
-    void setList( const list_Type& list );
+    void setParametersList( const list_Type& list );
 
     //! Set the data of the preconditioner using a GetPot object
     /*!
@@ -201,31 +210,22 @@ public:
     const bool& preconditionerCreated();
 
     //! Return true if the preconditioner is set
-    virtual bool set() const = 0;
+    virtual bool isPreconditionerSet() const = 0;
 
     //! Return a raw pointer on the preconditioner
-    virtual prec_raw_type* getPrec() = 0;
+    virtual prec_raw_type* preconditioner() = 0;
 
     //! Return a shared pointer on the preconditioner
-    virtual prec_type getPrecPtr() = 0;
+    virtual prec_type preconditionerPtr() = 0;
 
     //! Return the type of preconditioner
-    virtual std::string precType() = 0;
+    virtual std::string preconditionerType() = 0;
 
     //! Return the parameters list
-    const list_Type& getList() const;
+    const list_Type& parametersList() const;
 
     //! Return the parameters list
-    list_Type& list();
-
-    //! Return true if the preconditioner is transposed
-    virtual bool UseTranspose();
-
-    //! Return the Range map of the operator
-    virtual const Epetra_Map& OperatorRangeMap() const;
-
-    //! Return the Domain map of the operator
-    virtual const Epetra_Map& OperatorDomainMap() const;
+    list_Type& parametersList();
 
     //@}
 

@@ -260,7 +260,7 @@ void test_bdf::run()
     //Definition of the linear solver
     SolverAztecOO az_A(Members->comm);
     az_A.setDataFromGetPot(dataFile, "bdf/solver");
-    az_A.setUpPrec(dataFile, "bdf/prec");
+    az_A.setupPreconditioner(dataFile, "bdf/prec");
 
     //===================================================
     // TIME LOOP

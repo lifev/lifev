@@ -460,7 +460,7 @@ LevelSetSolver<mesh_type,solver_type>::
 setupLinearSolver(const GetPot& dataFile, const string& section)
 {
     M_linearSolver.setDataFromGetPot( dataFile, (section+"/solver").data() );
-    M_linearSolver.setUpPrec( dataFile, (section+"/prec").data() );
+    M_linearSolver.setupPreconditioner( dataFile, (section+"/prec").data() );
 }
 
 template< typename mesh_type, typename solver_type>

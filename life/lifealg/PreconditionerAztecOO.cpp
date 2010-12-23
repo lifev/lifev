@@ -68,15 +68,15 @@ PreconditionerAztecOO::buildPreconditioner( operator_type& matrix )
 #endif
 
     if ( this->M_preconditionerCreated )
-        precReset();
+        resetPreconditioner();
 
-    M_solver->getSolver().SetPrecMatrix( matrix->matrixPtr().get() );
+    M_solver->solver().SetPrecMatrix( matrix->matrixPtr().get() );
 
-    M_solver->getSolver().SetAztecOption( AZ_pre_calc, AZ_calc );
-    M_solver->getSolver().SetAztecOption( AZ_keep_info, 1 );
+    M_solver->solver().SetAztecOption( AZ_pre_calc, AZ_calc );
+    M_solver->solver().SetAztecOption( AZ_keep_info, 1 );
 
     Real estimateConditionNumber;
-    M_solver->getSolver().ConstructPreconditioner( estimateConditionNumber );
+    M_solver->solver().ConstructPreconditioner( estimateConditionNumber );
 
     this->M_preconditionerCreated = true;
 
@@ -84,82 +84,82 @@ PreconditionerAztecOO::buildPreconditioner( operator_type& matrix )
 }
 
 void
-PreconditionerAztecOO::precReset()
+PreconditionerAztecOO::resetPreconditioner()
 {
 
 #ifdef HAVE_LIFEV_DEBUG
     Debug( 7100 ) << "PreconditionerAztecOO::precReset() \n";
 #endif
 
-    M_solver->getSolver().SetAztecOption( AZ_keep_info, 0 );
-    M_solver->getSolver().SetAztecOption( AZ_pre_calc, AZ_calc );
+    M_solver->solver().SetAztecOption( AZ_keep_info, 0 );
+    M_solver->solver().SetAztecOption( AZ_pre_calc, AZ_calc );
 
     // Perform one "fake" iteration to delete the preconditioner
-    Int AZoutputOption = M_solver->getSolver().GetAztecOption( AZ_output );
-    M_solver->getSolver().SetAztecOption( AZ_output, AZ_none );
-    M_solver->getSolver().Iterate( 0, 1.e14 );
-    M_solver->getSolver().SetAztecOption( AZ_output, AZoutputOption );
+    Int AZoutputOption = M_solver->solver().GetAztecOption( AZ_output );
+    M_solver->solver().SetAztecOption( AZ_output, AZ_none );
+    M_solver->solver().Iterate( 0, 1.e14 );
+    M_solver->solver().SetAztecOption( AZ_output, AZoutputOption );
 
     this->M_preconditionerCreated = false;
 }
 
 void
-PreconditionerAztecOO::createList( list_Type& /*list*/, const GetPot& dataFile, const std::string& section, const std::string& subSection )
+PreconditionerAztecOO::createParametersList( list_Type& /*list*/, const GetPot& dataFile, const std::string& section, const std::string& subSection )
 {
     // Preconditioner
-    M_solver->getParameterList().set( "precond", dataFile( ( section + "/" + subSection + "/precond" ).data(), "dom_decomp" ) );
+    M_solver->getParametersList().set( "precond", dataFile( ( section + "/" + subSection + "/precond" ).data(), "dom_decomp" ) );
 
     // Compute the preconditioner
-    M_solver->getParameterList().set( "pre_calc", dataFile( ( section + "/" + subSection + "/pre_calc" ).data(), "calc" ) );
+    M_solver->getParametersList().set( "pre_calc", dataFile( ( section + "/" + subSection + "/pre_calc" ).data(), "calc" ) );
 
     // Reordering
-    M_solver->getParameterList().set( "reorder", dataFile( ( section + "/" + subSection + "/reorder" ).data(), 1 ) );
+    M_solver->getParametersList().set( "reorder", dataFile( ( section + "/" + subSection + "/reorder" ).data(), 1 ) );
 
     // Keep the information
-    M_solver->getParameterList().set( "keep_info", dataFile( ( section + "/" + subSection + "/keep_info" ).data(), 1 ) );
+    M_solver->getParametersList().set( "keep_info", dataFile( ( section + "/" + subSection + "/keep_info" ).data(), 1 ) );
 
     // Polynomial order when using Jacobi and GS preconditioners
-    //M_solver->getParameterList().set( "poly_ord", dataFile( ( section + "/" + subSection + "/poly_ord" ).data(), 3 ) );
+    //M_solver->getParametersList().set( "poly_ord", dataFile( ( section + "/" + subSection + "/poly_ord" ).data(), 3 ) );
 
     // Overlap level
-    M_solver->getParameterList().set( "overlap", dataFile( ( section + "/" + subSection + "/overlap" ).data(), AZ_none ) );
+    M_solver->getParametersList().set( "overlap", dataFile( ( section + "/" + subSection + "/overlap" ).data(), AZ_none ) );
 
     // Overlap type
-    M_solver->getParameterList().set( "type_overlap", dataFile( ( section + "/" + subSection + "/type_overlap" ).data(), AZ_standard ) );
+    M_solver->getParametersList().set( "type_overlap", dataFile( ( section + "/" + subSection + "/type_overlap" ).data(), AZ_standard ) );
 
 
     // SUBDOMAIN SOLVER
 
-    M_solver->getParameterList().set( "subdomain_solve", dataFile( ( section + "/" + subSection + "/subdomain_solve" ).data(), "ILUT" ) );
+    M_solver->getParametersList().set( "subdomain_solve", dataFile( ( section + "/" + subSection + "/subdomain_solve" ).data(), "ILUT" ) );
 
-    M_solver->getParameterList().set( "drop", dataFile( ( section + "/" + subSection + "/drop" ).data(), 1.e-5 ) );
+    M_solver->getParametersList().set( "drop", dataFile( ( section + "/" + subSection + "/drop" ).data(), 1.e-5 ) );
 
-    //M_solver->getParameterList().set( "graph_fill", dataFile( ( section + "/" + subSection + "/graph_fill" ).data(), 6. ) );
+    //M_solver->getParametersList().set( "graph_fill", dataFile( ( section + "/" + subSection + "/graph_fill" ).data(), 6. ) );
 
-    M_solver->getParameterList().set( "ilut_fill", dataFile( ( section + "/" + subSection + "/ilut_fill" ).data(), 4. ) );
+    M_solver->getParametersList().set( "ilut_fill", dataFile( ( section + "/" + subSection + "/ilut_fill" ).data(), 4. ) );
 
-    //M_solver->getParameterList().set( "init_guess", dataFile( ( section + "/" + subSection + "/init_guess" ).data(), AZ_NOT_ZERO ) );
+    //M_solver->getParametersList().set( "init_guess", dataFile( ( section + "/" + subSection + "/init_guess" ).data(), AZ_NOT_ZERO ) );
 
-    //M_solver->getParameterList().set( "keep_kvecs", dataFile( ( section + "/" + subSection + "/keep_kvecs" ).data(), 0 ) );
+    //M_solver->getParametersList().set( "keep_kvecs", dataFile( ( section + "/" + subSection + "/keep_kvecs" ).data(), 0 ) );
 
-    //M_solver->getParameterList().set( "apply_kvecs", dataFile( ( section + "/" + subSection + "/apply_kvecs" ).data(), AZ_FALSE ) );
+    //M_solver->getParametersList().set( "apply_kvecs", dataFile( ( section + "/" + subSection + "/apply_kvecs" ).data(), AZ_FALSE ) );
 
-    //M_solver->getParameterList().set( "orth_kvecs", dataFile( ( section + "/" + subSection + "/orth_kvecs" ).data(), AZ_FALSE ) );
+    //M_solver->getParametersList().set( "orth_kvecs", dataFile( ( section + "/" + subSection + "/orth_kvecs" ).data(), AZ_FALSE ) );
 
-    //M_solver->getParameterList().set( "ignore_scaling", dataFile( ( section + "/" + subSection + "/ignore_scaling" ).data(), AZ_FALSE ) );
+    //M_solver->getParametersList().set( "ignore_scaling", dataFile( ( section + "/" + subSection + "/ignore_scaling" ).data(), AZ_FALSE ) );
 
-    //M_solver->getParameterList().set( "check_update_size", dataFile( ( section + "/" + subSection + "/check_update_size" ).data(), AZ_FALSE ) );
+    //M_solver->getParametersList().set( "check_update_size", dataFile( ( section + "/" + subSection + "/check_update_size" ).data(), AZ_FALSE ) );
 
-    //M_solver->getParameterList().set( "omega", dataFile( ( section + "/" + subSection + "/omega" ).data(), 1. ) );
+    //M_solver->getParametersList().set( "omega", dataFile( ( section + "/" + subSection + "/omega" ).data(), 1. ) );
 
-    //M_solver->getParameterList().set( "update_reduction", dataFile( ( section + "/" + subSection + "/update_reduction" ).data(), 10e10 ) );
+    //M_solver->getParametersList().set( "update_reduction", dataFile( ( section + "/" + subSection + "/update_reduction" ).data(), 10e10 ) );
 
     // SET PARAMETERS
     M_solver->setParameters( true );
 
     // DISPLAY LIST
     if ( dataFile( (section + "/displayList").data(), false ) )
-        M_solver->getParameterList().print( std::cout );
+        M_solver->getParametersList().print( std::cout );
 }
 
 void
@@ -169,14 +169,14 @@ PreconditionerAztecOO::showMe( std::ostream& output ) const
 }
 
 Real
-PreconditionerAztecOO::Condest()
+PreconditionerAztecOO::condest()
 {
 
 #ifdef HAVE_LIFEV_DEBUG
     Debug( 7100 ) << "PreconditionerAztecOO::Condest() \n";
 #endif
 
-    return M_solver->getSolver().Condest();
+    return M_solver->solver().Condest();
 }
 
 // ===================================================
@@ -191,7 +191,7 @@ PreconditionerAztecOO::setDataFromGetPot( const GetPot&      dataFile,
     Debug( 7100 ) << "PreconditionerAztecOO::setDataFromGetPot(dataFile, section) \n";
 #endif
 
-    createList( M_list, dataFile, section, "AztecOO" );
+    createParametersList( M_list, dataFile, section, "AztecOO" );
 }
 
 
@@ -199,7 +199,7 @@ PreconditionerAztecOO::setDataFromGetPot( const GetPot&      dataFile,
 // Get Methods
 // ===================================================
 Preconditioner::prec_raw_type*
-PreconditionerAztecOO::getPrec()
+PreconditionerAztecOO::preconditioner()
 {
 
 #ifdef HAVE_LIFEV_DEBUG
@@ -207,13 +207,13 @@ PreconditionerAztecOO::getPrec()
 #endif
 
     if ( this->M_preconditionerCreated )
-        return M_solver->getSolver().GetPrecMatrix();
+        return M_solver->solver().GetPrecMatrix();
 
     return 0;
 }
 
 Preconditioner::prec_type
-PreconditionerAztecOO::getPrecPtr()
+PreconditionerAztecOO::preconditionerPtr()
 {
 
 #ifdef HAVE_LIFEV_DEBUG
@@ -223,7 +223,7 @@ PreconditionerAztecOO::getPrecPtr()
     boost::shared_ptr<Epetra_RowMatrix> prec;
     if ( this->M_preconditionerCreated )
     {
-        prec.reset(M_solver->getSolver().GetPrecMatrix());
+        prec.reset(M_solver->solver().GetPrecMatrix());
         return  prec;
     }
     return Preconditioner::prec_type();

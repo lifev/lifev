@@ -577,7 +577,7 @@ void
 VenantKirchhoffViscoelasticSolver<Mesh, SolverType>::setDataFromGetPot( const GetPot& dataFile )
 {
     M_linearSolver->setDataFromGetPot( dataFile, "problem/solver" );
-    M_linearSolver->setUpPrec(dataFile, "problem/prec");
+    M_linearSolver->setupPreconditioner(dataFile, "problem/prec");
 }
 
 template <typename Mesh, typename SolverType>
@@ -840,7 +840,7 @@ iterate( bchandler_raw_type& bch )
 
     M_displayer->leaderPrintMax("done in " , chrono.diff());
 
-    M_linearSolver->precReset();
+    M_linearSolver->resetPreconditioner();
     M_resetPrec = false;
 
     // solving the system

@@ -175,7 +175,7 @@ public:
       @param dataFile GetPot object which contains the data about the preconditioner
       @param section Section the GetPot structure where to find the informations about the preconditioner
      */
-    void setUpPrec( const GetPot& dataFile, const std::string& section );
+    void setupPreconditioner( const GetPot& dataFile, const std::string& section );
 
     //! Builds the preconditioner starting from the matrix "baseMatrixForPreconditioner"
     /*!
@@ -186,10 +186,10 @@ public:
     void buildPreconditioner( matrix_ptrtype& baseMatrixForPreconditioner );
 
     //! Delete the stored preconditioner
-    void precReset();
+    void resetPreconditioner();
 
     //! Return true if preconditioner has been setted
-    bool isPrecSet() const;
+    bool isPreconditionerSet() const;
 
     //! Print informations about the solver
     void showMe( std::ostream& output = std::cout ) const;
@@ -242,12 +242,17 @@ public:
      */
     void setParameters( bool cerrWarningIfUnused = false );
 
-    //! Set the tolerance and the maximum number of iteration
+    //! Set the tolerance of the solver
     /*!
       @param tolerance Tolerance for the solver
-      @param maxIter Maximum number of iteration
-     */
-    void setTolMaxIteration( const Real tolerance, const Int maxIter = -1 );
+    */
+    void setTolerance( const Real tolerance );
+
+    //! Set the tolerance and the maximum number of iterations
+    /*!
+    @param maxIter Maximum number of iteration
+    */
+    void setMaxNumIterations( const Int maxIter = -1 );
 
     //! Specify if the preconditioner should be reuse or not
     /*!
@@ -264,25 +269,25 @@ public:
     //@{
 
     //! Return the total number of iterations
-    Int NumIters() const;
+    Int numIterations() const;
 
     //! Return the maximum total number of iterations
-    Int MaxIter() const;
+    Int maxNumIterations() const;
 
     //! Return the true residual
-    Real TrueResidual();
+    Real trueResidual();
 
     //! Method to get a shared pointer to the preconditioner (of type derived from Preconditioner)*/
-    prec_type& getPrec();
+    prec_type& preconditioner();
 
     //! Return the AztecStatus
-    void getAztecStatus( Real status[AZ_STATUS_SIZE] );
+    void aztecStatus( Real status[AZ_STATUS_SIZE] );
 
     //! Return a Teuchos parameters list
-    Teuchos::ParameterList& getParameterList();
+    Teuchos::ParameterList& getParametersList();
 
     //! Return a reference on the AztecOO solver
-    AztecOO& getSolver();
+    AztecOO& solver();
 
     //@}
 

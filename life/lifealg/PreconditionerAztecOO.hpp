@@ -89,10 +89,10 @@ public:
     Int buildPreconditioner( operator_type& matrix );
 
     //! Reset the preconditioner
-    void precReset();
+    void resetPreconditioner();
 
     //! Return true if the AztecOO preconditioner is set
-    bool set() const { return M_preconditionerCreated; }
+    bool isPreconditionerSet() const { return M_preconditionerCreated; }
 
     //! Create the list of parameters of the preconditioner
     /*!
@@ -101,7 +101,7 @@ public:
       @param section The section in "dataFile" where to find data about the preconditioner
       @param subSection The subsection in "dataFile" where to find data about the preconditioner
      */
-    void createList( list_Type& list, const GetPot& dataFile, const std::string& section, const std::string& subSection );
+    void createParametersList( list_Type& list, const GetPot& dataFile, const std::string& section, const std::string& subSection );
 
     //! Show informations about the preconditioner
     virtual void showMe( std::ostream& output = std::cout ) const;
@@ -110,7 +110,7 @@ public:
     /*!
       @return Condition number of the preconditioner
      */
-    Real Condest();
+    Real condest();
 
     //@}
 
@@ -141,19 +141,19 @@ public:
     /*!
       @return always zero because no external precondtioner is used here!
      */
-    super::prec_raw_type* getPrec();
+    super::prec_raw_type* preconditioner();
 
     //! Return the shared pointer to the preconditioner
     /*!
       @Deprecated
      */
-    super::prec_type  getPrecPtr();
+    super::prec_type  preconditionerPtr();
 
     //! Return the name of the preconditioner
     /*!
       @return "AztecOO"
      */
-    std::string precType() { return "AztecOO"; }
+    std::string preconditionerType() { return "AztecOO"; }
 
     //@}
 

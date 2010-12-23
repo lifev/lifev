@@ -85,8 +85,8 @@ SolverAztecOO::solve( vector_type& solution, const vector_type& rhs )
     Real mytol  (M_tolerance);
     Int status;
 
-    if ( isPrecSet() && M_preconditioner->precType().compare("AztecOO") )
-        M_solver.SetPrecOperator(M_preconditioner->getPrec());
+    if ( isPreconditionerSet() && M_preconditioner->preconditionerType().compare("AztecOO") )
+        M_solver.SetPrecOperator(M_preconditioner->preconditioner());
 
     status = M_solver.Iterate(maxiter, mytol);
 
@@ -146,7 +146,7 @@ SolverAztecOO::printStatus()
     std::string str;
 
     Real status[AZ_STATUS_SIZE];
-    getAztecStatus( status );
+    aztecStatus( status );
 
     if ( status[AZ_why] == AZ_normal         ) stat << "Normal Convergence    ";
     else if ( status[AZ_why] == AZ_maxits    ) stat << "Maximum iters reached ";
@@ -177,7 +177,7 @@ Int SolverAztecOO::solveSystem( const vector_type& rhsFull,
     if ( baseMatrixForPreconditioner.get() == 0 )
         M_displayer->leaderPrint( "      Warning: baseMatrixForPreconditioner is empty     \n" );
 
-    if ( !isPrecSet() || !M_reusePreconditioner  )
+    if ( !isPreconditionerSet() || !M_reusePreconditioner  )
     {
         buildPreconditioner( baseMatrixForPreconditioner );
         // do not retry if I am recomputing the preconditioner
@@ -212,12 +212,12 @@ Int SolverAztecOO::solveSystem( const vector_type& rhsFull,
     }
 
     if ( abs(numIter) > M_maxIterForReuse )
-        precReset();
+        resetPreconditioner();
 
     return numIter;
 }
 
-void SolverAztecOO::setUpPrec( const GetPot& dataFile,  const std::string& section )
+void SolverAztecOO::setupPreconditioner( const GetPot& dataFile,  const std::string& section )
 {
     std::string precType = dataFile( (section + "/prectype").data(), "Ifpack" );
     M_preconditioner.reset( PRECFactory::instance().createObject( precType ) );
@@ -238,20 +238,20 @@ void SolverAztecOO::buildPreconditioner( matrix_ptrtype& preconditioner )
 
     M_preconditioner->buildPreconditioner( preconditioner );
 
-    condest = M_preconditioner->Condest();
+    condest = M_preconditioner->condest();
     chrono.stop();
 
     M_displayer->leaderPrintMax( "done in " , chrono.diff() );
     M_displayer->leaderPrint( "      Estimated condition number               " , condest, "\n" );
 }
 
-void SolverAztecOO::precReset()
+void SolverAztecOO::resetPreconditioner()
 {
-    M_preconditioner->precReset();
+    M_preconditioner->resetPreconditioner();
 }
 
 bool
-SolverAztecOO::isPrecSet() const
+SolverAztecOO::isPreconditionerSet() const
 {
     return ( M_preconditioner.get() !=0 && M_preconditioner->preconditionerCreated() );
 }
@@ -346,14 +346,18 @@ SolverAztecOO::setParameters( bool cerrWarningIfUnused )
 }
 
 void
-SolverAztecOO::setTolMaxIteration( const Real tolerance, const Int maxIter )
+SolverAztecOO::setTolerance( const Real tolerance )
 {
     if ( tolerance > 0 )
     {
         M_tolerance = tolerance;
         M_TrilinosParameterList.set( "tol", M_tolerance );
     }
+}
 
+void
+SolverAztecOO::setMaxNumIterations( const Int maxIter )
+{
     if ( maxIter >= 0 )
     {
         M_maxIter = maxIter;
@@ -377,44 +381,44 @@ SolverAztecOO::displayer()
 // Get Methods
 // ===================================================
 Int
-SolverAztecOO::NumIters() const
+SolverAztecOO::numIterations() const
 {
     return M_solver.NumIters();
 }
 
 Int
-SolverAztecOO::MaxIter() const
+SolverAztecOO::maxNumIterations() const
 {
     return M_maxIter;
 }
 
 
 Real
-SolverAztecOO::TrueResidual()
+SolverAztecOO::trueResidual()
 {
     return M_solver.TrueResidual();
 }
 
 SolverAztecOO::prec_type&
-SolverAztecOO::getPrec()
+SolverAztecOO::preconditioner()
 {
     return M_preconditioner;
 }
 
 void
-SolverAztecOO::getAztecStatus( Real status[AZ_STATUS_SIZE] )
+SolverAztecOO::aztecStatus( Real status[AZ_STATUS_SIZE] )
 {
     M_solver.GetAllAztecStatus( status );
 }
 
 Teuchos::ParameterList&
-SolverAztecOO::getParameterList()
+SolverAztecOO::getParametersList()
 {
     return M_TrilinosParameterList;
 }
 
 AztecOO&
-SolverAztecOO::getSolver()
+SolverAztecOO::solver()
 {
     return M_solver;
 }

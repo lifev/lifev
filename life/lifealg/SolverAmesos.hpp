@@ -131,13 +131,13 @@ public:
     /*!
       Note: This method always return true!
     */
-    bool isPrecSet() const;
+    bool isPreconditionerSet() const;
 
     //! Delete the stored preconditioner
     /*!
       Note: This method is empty
      */
-    void precReset();
+    void resetPreconditioner();
 
     //! Setup the preconditioner
     /*!
@@ -145,7 +145,7 @@ public:
       @param dataFile GetPot object which contains the data about the preconditioner
       @param section Section the GetPot structure where to find the informations about the preconditioner
      */
-    void setUpPrec( const GetPot& dataFile,  const std::string& section );
+    void setupPreconditioner( const GetPot& dataFile,  const std::string& section );
 
     //! Specify if the preconditioner should be reuse or not
     /*!
@@ -188,12 +188,17 @@ public:
      */
     void setParameters();
 
-    //! Set the tolerance and the maximum number of iteration
+    //! Set the tolerance of the solver
     /*!
       @param tolerance Tolerance for the solver
+    */
+    void setTolerance( const Real tolerance );
+
+    //! Set the tolerance and the maximum number of iterations
+    /*!
       @param maxIter Maximum number of iteration
-     */
-    void setTolMaxIteration( const Real tolerance, const Int maxIter = -1 );
+    */
+    void setMaxNumIterations( const Int maxIter = -1 );
 
     //@}
 
@@ -202,10 +207,10 @@ public:
     //@{
 
     //! Return the total number of iterations
-    Int NumIters();
+    Int numIterations();
 
     //! Return the true residual
-    Real TrueResidual();
+    Real trueResidual();
 
     //@}
 

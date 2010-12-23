@@ -1489,7 +1489,7 @@ void ChorinTemam<Mesh, SolverType>::solveSystem_u( matrix_ptrtype  matrFull,
 
         M_prec_u->buildPreconditioner(matrFull);
 
-        double condest = M_prec_u->Condest();
+        double condest = M_prec_u->condest();
 
         M_linearSolver_u.setPreconditioner(M_prec_u);
 
@@ -1525,7 +1525,7 @@ void ChorinTemam<Mesh, SolverType>::solveSystem_u( matrix_ptrtype  matrFull,
 
         M_prec_u->buildPreconditioner(matrFull);
 
-        double condest = M_prec_u->Condest();
+        double condest = M_prec_u->condest();
 
         M_linearSolver_u.setPreconditioner(M_prec_u);
 
@@ -1593,7 +1593,7 @@ void ChorinTemam<Mesh, SolverType>::solveSystem_p( matrix_ptrtype  matrFull,
 
         M_prec_p->buildPreconditioner(matrFull);
 
-        double condest = M_prec_p->Condest();
+        double condest = M_prec_p->condest();
 
         M_linearSolver_p.setPreconditioner(M_prec_p);
 
@@ -1631,7 +1631,7 @@ void ChorinTemam<Mesh, SolverType>::solveSystem_p( matrix_ptrtype  matrFull,
 
         M_prec_p->buildPreconditioner(matrFull);
 
-        double condest = M_prec_p->Condest();
+        double condest = M_prec_p->condest();
 
         M_linearSolver_p.setPreconditioner(M_prec_p);
 

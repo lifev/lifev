@@ -137,17 +137,17 @@ SolverAmesos::printStatus()
         M_solver->PrintStatus();
 }
 
-bool SolverAmesos::isPrecSet() const
+bool SolverAmesos::isPreconditionerSet() const
 {
     return true;
 }
 
-void SolverAmesos::precReset()
+void SolverAmesos::resetPreconditioner()
 {
 
 }
 
-void SolverAmesos::setUpPrec( const GetPot& /*dataFile*/, const std::string& /*section*/ )
+void SolverAmesos::setupPreconditioner( const GetPot& /*dataFile*/, const std::string& /*section*/ )
 {
 
 }
@@ -213,13 +213,13 @@ void SolverAmesos::setParameters()
 // Get Methods
 // ===================================================
 Int
-SolverAmesos::NumIters()
+SolverAmesos::numIterations()
 {
     return 1;
 }
 
 Real
-SolverAmesos::TrueResidual()
+SolverAmesos::trueResidual()
 {
     return 0.;
 }

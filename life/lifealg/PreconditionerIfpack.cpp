@@ -92,7 +92,7 @@ PreconditionerIfpack::buildPreconditioner( operator_type& matrix )
 }
 
 void
-PreconditionerIfpack::precReset()
+PreconditionerIfpack::resetPreconditioner()
 {
     M_operator.reset();
     M_preconditioner.reset();
@@ -101,7 +101,7 @@ PreconditionerIfpack::precReset()
 }
 
 void
-PreconditionerIfpack::createList( list_Type&         list,
+PreconditionerIfpack::createParametersList( list_Type&         list,
                                   const GetPot&      dataFile,
                                   const std::string& section,
                                   const std::string& subSection )
@@ -243,31 +243,31 @@ PreconditionerIfpack::SetUseTranspose( bool useTranspose )
 // Get Methods
 // ===================================================
 bool
-PreconditionerIfpack::set() const
+PreconditionerIfpack::isPreconditionerSet() const
 {
     return M_preconditioner;
 }
 
 Real
-PreconditionerIfpack::Condest()
+PreconditionerIfpack::condest()
 {
     return M_preconditioner->Condest();
 }
 
 Preconditioner::prec_raw_type*
-PreconditionerIfpack::getPrec()
+PreconditionerIfpack::preconditioner()
 {
     return M_preconditioner.get();
 }
 
 PreconditionerIfpack::super::prec_type
-PreconditionerIfpack::getPrecPtr()
+PreconditionerIfpack::preconditionerPtr()
 {
     return M_preconditioner;
 }
 
 std::string
-PreconditionerIfpack::precType()
+PreconditionerIfpack::preconditionerType()
 {
     return M_precType;
 }

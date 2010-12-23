@@ -107,13 +107,13 @@ public:
     Int buildPreconditioner( operator_type& matrix );
 
     //! Reset the preconditioner
-    void precReset();
+    void resetPreconditioner();
 
     //! ?
     void testSmoothers( operator_type& matrix );
 
     //! Returns true if the preconditioner is set
-    bool  set() const {return M_preconditioner;}
+    bool  isPreconditionerSet() const {return M_preconditioner;}
 
     //! Create the list of parameters of the preconditioner
     /*!
@@ -122,7 +122,7 @@ public:
       @param section The section in "dataFile" where to find data about the preconditioner
       @param subSection The subsection in "dataFile" where to find data about the preconditioner
      */
-    virtual void createList( list_Type& list,
+    virtual void createParametersList( list_Type& list,
                              const GetPot& dataFile,
                              const std::string& section,
                              const std::string& subSection ) { createMLList( list, dataFile, section, subSection ); }
@@ -189,16 +189,16 @@ public:
     //@{
 
     //! Return An estimation of the condition number of the preconditioner
-    Real Condest ();
+    Real condest ();
 
     //! Return a raw pointer on the preconditioner
-    super::prec_raw_type* getPrec();
+    super::prec_raw_type* preconditioner();
 
     //! Return a shared pointer on the preconditioner
-    super::prec_type getPrecPtr() { return M_preconditioner; }
+    super::prec_type preconditionerPtr() { return M_preconditioner; }
 
     //! Return the type of preconditioner
-    std::string precType() { return M_precType; }
+    std::string preconditionerType() { return M_precType; }
 
     //! Return true if the preconditioner is transposed
     bool UseTranspose() { return M_preconditioner->UseTranspose(); }

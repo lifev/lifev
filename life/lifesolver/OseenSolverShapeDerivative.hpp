@@ -473,9 +473,9 @@ void OseenSolverShapeDerivative<MeshType, SolverType>::setUp( const GetPot& data
 
     M_reuseLinearPreconditioner = dataFile( "lin_fluid/prec/reuse", true );
 
-    // std::string precType = dataFile( "lin_fluid/prec/prectype", "Ifpack" );
+    // std::string preconditionerType = dataFile( "lin_fluid/prec/prectype", "Ifpack" );
 
-    // M_linearPreconditioner = prec_type( PRECFactory::instance().createObject( precType ) ); //linPrec is not used
+    // M_linearPreconditioner = prec_type( PRECFactory::instance().createObject( preconditionerType ) ); //linPrec is not used
     // M_linearPreconditioner->setDataFromGetPot( dataFile, "lin_fluid/prec" );
 
 }

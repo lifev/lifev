@@ -279,7 +279,7 @@ main( int argc, char** argv )
 
     if (verbose) std::cout << " -- Setting up the solver ... " << std::flush;
     linearSolver.setDataFromGetPot(dataFile,"solver");
-    linearSolver.setUpPrec(dataFile,"prec");
+    linearSolver.setupPreconditioner(dataFile,"prec");
     if (verbose) std::cout << " done ! " << std::endl;
 
     if (verbose) std::cout << " -- Setting matrix in the solver ... " << std::flush;
