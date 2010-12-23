@@ -139,7 +139,7 @@ MultiscaleModel1D::setupData( const std::string& fileName )
 
     //Linear Solver
     M_linearSolver.reset( new linearSolver_Type( M_comm ) );
-    M_linearSolver->setUpPrec        ( dataFile, "1D_Model/prec" );
+    M_linearSolver->setupPreconditioner        ( dataFile, "1D_Model/prec" );
     M_linearSolver->setDataFromGetPot( dataFile, "1D_Model/solver" );
     M_linearSolver->setParameters();
 
