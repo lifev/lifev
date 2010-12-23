@@ -32,10 +32,4 @@ Switch.cpp StringUtility.cpp FactoryTypeInfo.cpp\
 LifeAssertSmart.cpp Displayer.cpp
 BADD	= $(aztec_libs)
 
-if HAVE_BOOST_PROGRAM_OPTIONS
-liblifecore_la_LIBADD += $(boost_program_options_lib)
-endif
-
-
-
 include $(top_srcdir)/Doxyfile.am
