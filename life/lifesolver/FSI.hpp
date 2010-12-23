@@ -82,7 +82,7 @@
 
 #include <life/lifefilters/ExporterHDF5Mesh3D.hpp>
 
-#include <life/lifesolver/DataFSI.hpp>
+#include <life/lifesolver/FSIData.hpp>
 #include <life/lifesolver/OseenSolverShapeDerivative.hpp>
 #include <life/lifesolver/VenantKirchhoffSolverLinear.hpp>
 #include <life/lifesolver/HarmonicExtensionSolver.hpp>
@@ -150,10 +150,10 @@ public:
     typedef fluid_Type::bcHandler_Type/*fluidPtr_Type::bchandler_Type*/             fluidBchandler_Type;
     typedef BCHandler                                                               solidBchandler_Type;
     typedef boost::shared_ptr<solidBchandler_Type>                                  solidBchandlerPtr_Type;
-    typedef DataFSI                                                                 data_Type;
+    typedef FSIData                                                                 data_Type;
     typedef boost::shared_ptr<data_Type>                                            dataPtr_Type;
     typedef std::map<ID, ID>::const_iterator                                        iterator_Type;
-    typedef FactorySingleton<Factory<FSI, std::string> >                    FSIFactory_Type;
+    typedef FactorySingleton<Factory<FSI, std::string> >                            FSIFactory_Type;
     typedef Displayer::commPtr_Type/*Displayer::commPtr_Type*/                      commPtr_Type;
 
      //@}

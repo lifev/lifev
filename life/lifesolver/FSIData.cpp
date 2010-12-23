@@ -37,7 +37,7 @@
  */
 
 
-#include <life/lifesolver/DataFSI.hpp>
+#include <life/lifesolver/FSIData.hpp>
 
 namespace LifeV
 {
@@ -45,7 +45,7 @@ namespace LifeV
 // ===================================================
 // Constructors
 // ===================================================
-DataFSI::DataFSI( ) :
+FSIData::FSIData( ) :
         M_dataFluid                     ( new dataFluid_Type() ),
         M_dataSolid                     ( new dataSolid_Type() ),
         M_maxSubIterationNumber         (),
@@ -66,24 +66,24 @@ DataFSI::DataFSI( ) :
 {
 }
 
-DataFSI::DataFSI( const DataFSI& DataFSI ) :
-        M_dataFluid                     ( DataFSI.M_dataFluid ),
-        M_dataSolid                     ( DataFSI.M_dataSolid ),
-        M_maxSubIterationNumber         ( DataFSI.M_maxSubIterationNumber ),
-        M_absoluteTolerance             ( DataFSI.M_absoluteTolerance ),
-        M_relativeTolerance             ( DataFSI.M_relativeTolerance ),
-        M_errorTolerance                ( DataFSI.M_errorTolerance ),
-        M_NonLinearLineSearch                    ( DataFSI.M_NonLinearLineSearch ),
-        M_method                        ( DataFSI.M_method ),
-        M_algorithm                     ( DataFSI.M_algorithm ),
-        M_defaultOmega                  ( DataFSI.M_defaultOmega ),
-        M_rangeOmega                    ( DataFSI.M_rangeOmega ),
-        M_updateEvery                   ( DataFSI.M_updateEvery ),
-        M_fluidInterfaceFlag            ( DataFSI.M_fluidInterfaceFlag ),
-        M_structureInterfaceFlag        ( DataFSI.M_structureInterfaceFlag ),
-        M_fluidInterfaceVertexFlag      ( new int const ( *DataFSI.M_fluidInterfaceVertexFlag ) ),
-        M_structureInterfaceVertexFlag  ( new int const ( *DataFSI.M_structureInterfaceVertexFlag ) ),
-        M_interfaceTolerance            ( DataFSI.M_interfaceTolerance )
+FSIData::FSIData( const FSIData& FSIData ) :
+        M_dataFluid                     ( FSIData.M_dataFluid ),
+        M_dataSolid                     ( FSIData.M_dataSolid ),
+        M_maxSubIterationNumber         ( FSIData.M_maxSubIterationNumber ),
+        M_absoluteTolerance             ( FSIData.M_absoluteTolerance ),
+        M_relativeTolerance             ( FSIData.M_relativeTolerance ),
+        M_errorTolerance                ( FSIData.M_errorTolerance ),
+        M_NonLinearLineSearch                    ( FSIData.M_NonLinearLineSearch ),
+        M_method                        ( FSIData.M_method ),
+        M_algorithm                     ( FSIData.M_algorithm ),
+        M_defaultOmega                  ( FSIData.M_defaultOmega ),
+        M_rangeOmega                    ( FSIData.M_rangeOmega ),
+        M_updateEvery                   ( FSIData.M_updateEvery ),
+        M_fluidInterfaceFlag            ( FSIData.M_fluidInterfaceFlag ),
+        M_structureInterfaceFlag        ( FSIData.M_structureInterfaceFlag ),
+        M_fluidInterfaceVertexFlag      ( new int const ( *FSIData.M_fluidInterfaceVertexFlag ) ),
+        M_structureInterfaceVertexFlag  ( new int const ( *FSIData.M_structureInterfaceVertexFlag ) ),
+        M_interfaceTolerance            ( FSIData.M_interfaceTolerance )
 {
 }
 
@@ -91,37 +91,37 @@ DataFSI::DataFSI( const DataFSI& DataFSI ) :
 // ===================================================
 // Methods
 // ===================================================
-DataFSI&
-DataFSI::operator=( const DataFSI& DataFSI )
+FSIData&
+FSIData::operator=( const FSIData& FSIData )
 {
-    if ( this != &DataFSI )
+    if ( this != &FSIData )
     {
-        M_dataFluid                     = DataFSI.M_dataFluid;
-        M_dataSolid                     = DataFSI.M_dataSolid;
-        M_maxSubIterationNumber         = DataFSI.M_maxSubIterationNumber;
-        M_absoluteTolerance             = DataFSI.M_absoluteTolerance;
-        M_relativeTolerance             = DataFSI.M_relativeTolerance;
-        M_errorTolerance                = DataFSI.M_errorTolerance;
-        M_NonLinearLineSearch                    = DataFSI.M_NonLinearLineSearch;
-        M_method                        = DataFSI.M_method;
-        M_algorithm                     = DataFSI.M_algorithm;
-        M_defaultOmega                  = DataFSI.M_defaultOmega;
-        M_rangeOmega                    = DataFSI.M_rangeOmega;
-        M_updateEvery                   = DataFSI.M_updateEvery;
-        M_fluidInterfaceFlag            = DataFSI.M_fluidInterfaceFlag;
-        M_structureInterfaceFlag        = DataFSI.M_structureInterfaceFlag;
+        M_dataFluid                     = FSIData.M_dataFluid;
+        M_dataSolid                     = FSIData.M_dataSolid;
+        M_maxSubIterationNumber         = FSIData.M_maxSubIterationNumber;
+        M_absoluteTolerance             = FSIData.M_absoluteTolerance;
+        M_relativeTolerance             = FSIData.M_relativeTolerance;
+        M_errorTolerance                = FSIData.M_errorTolerance;
+        M_NonLinearLineSearch                    = FSIData.M_NonLinearLineSearch;
+        M_method                        = FSIData.M_method;
+        M_algorithm                     = FSIData.M_algorithm;
+        M_defaultOmega                  = FSIData.M_defaultOmega;
+        M_rangeOmega                    = FSIData.M_rangeOmega;
+        M_updateEvery                   = FSIData.M_updateEvery;
+        M_fluidInterfaceFlag            = FSIData.M_fluidInterfaceFlag;
+        M_structureInterfaceFlag        = FSIData.M_structureInterfaceFlag;
 
-        M_fluidInterfaceVertexFlag.reset    ( new int const ( *DataFSI.M_fluidInterfaceVertexFlag ) );
-        M_structureInterfaceVertexFlag.reset( new int const ( *DataFSI.M_structureInterfaceVertexFlag ) );
+        M_fluidInterfaceVertexFlag.reset    ( new int const ( *FSIData.M_fluidInterfaceVertexFlag ) );
+        M_structureInterfaceVertexFlag.reset( new int const ( *FSIData.M_structureInterfaceVertexFlag ) );
 
-        M_interfaceTolerance            = DataFSI.M_interfaceTolerance;
+        M_interfaceTolerance            = FSIData.M_interfaceTolerance;
     }
 
     return *this;
 }
 
 void
-DataFSI::setup( const GetPot& dataFile, const std::string& section )
+FSIData::setup( const GetPot& dataFile, const std::string& section )
 {
     M_dataFluid->setup( dataFile );
     M_dataSolid->setup( dataFile );
@@ -164,13 +164,13 @@ DataFSI::setup( const GetPot& dataFile, const std::string& section )
 }
 
 bool
-DataFSI::isMonolithic()
+FSIData::isMonolithic()
 {
     return !( M_method.compare( "monolithicGE" ) && M_method.compare( "monolithicGI" ) );
 }
 
 void
-DataFSI::showMe( std::ostream& output )
+FSIData::showMe( std::ostream& output )
 {
     output << "\n*** Values for data fluid\n\n";
     M_dataFluid->showMe();

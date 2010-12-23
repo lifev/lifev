@@ -48,12 +48,12 @@
 namespace LifeV
 {
 
-//! DataFSI - Data container for FSI problems
+//! FSIData - Data container for FSI problems
 /*!
  *  @author Cristiano Malossi
  */
 
-class DataFSI
+class FSIData
 {
 public:
 
@@ -73,13 +73,13 @@ public:
     //@{
 
     //! Empty Constructor
-    DataFSI();
+    FSIData();
 
     //! Copy constructor
     /*!
-     * @param DataFSI - DataFSI
+     * @param FSIData - FSIData
      */
-    DataFSI( const DataFSI& DataFSI );
+    FSIData( const FSIData& FSIData );
 
     //@}
 
@@ -89,9 +89,9 @@ public:
 
     //! Operator=
     /*!
-     * @param DataFSI - DataFSI
+     * @param FSIData - FSIData
      */
-    DataFSI& operator=( const DataFSI& DataFSI );
+    FSIData& operator=( const FSIData& FSIData );
 
     //@}
 
