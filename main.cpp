@@ -88,7 +88,7 @@
 
 // LifeV includes
 #include <life/lifefem/BCHandler.hpp>
-#include <life/lifecore/life.hpp>
+#include <life/lifecore/LifeV.hpp>
 
 #include <life/lifealg/PreconditionerIfpack.hpp>
 #include <life/lifealg/PreconditionerML.hpp>

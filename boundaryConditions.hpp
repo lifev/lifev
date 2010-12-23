@@ -43,7 +43,7 @@
 #define BC_HPP
 
 // LifeV includes
-#include "life/lifecore/life.hpp"
+#include "life/lifecore/LifeV.hpp"
 #include "life/lifefem/BCHandler.hpp"
 
 // Mathcard includes

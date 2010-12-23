@@ -43,7 +43,7 @@
 #define UDF_HPP
 
 // LifeV includes
-#include <life/lifecore/life.hpp>
+#include <life/lifecore/LifeV.hpp>
 
 namespace LifeV
 {
