@@ -668,7 +668,7 @@ MultiscaleModelFSI3D::initializeSolution()
         vectorPtr_Type UniqueVFDOld( new vector_Type( *M_fluidDisplacement, Unique, Zero ) );
         dynamic_cast< FSIMonolithic* >( M_FSIoperator.get())->initializeMesh( UniqueVFDOld );
 
-        vectorPtr_Type initSol( new EpetraVector( *M_FSIoperator->couplingVariableMap() ) );
+        vectorPtr_Type initSol( new VectorEpetra( *M_FSIoperator->couplingVariableMap() ) );
         vectorPtr_Type UniqueV( new vector_Type( *M_fluidVelocityPressure, Unique, Zero ) );
         *initSol = *UniqueV;
         M_FSIoperator->fluid().initialize( *initSol );
