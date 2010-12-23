@@ -60,7 +60,7 @@ StringUtility                          util_string                             C
 Switch                                 switch                                  CMCS3     DONE
 
 LIFEALG
-============================      
+============================
 NonLinearAitken                        generalizedAitken                       CMCS1     DONE
 NonLinearBrent                         brent                                   MOX       DONE
 NonLinearLineSearch                    linesearch_* (merging 2 files)          MOX       DONE
@@ -78,14 +78,14 @@ LIFEARRAY
 ============================
 MapEpetra                              EpetraMap                               CMCS2     DONE
 MatrixContainer                        -                                       EMORY     DONE
-MatrixElemental                        elemMat                                 CMCS2
-MatrixEpetra                           EpetraMatrix                            CMCS2
+MatrixElemental                        elemMat                                 CMCS2     DONE
+MatrixEpetra                           EpetraMatrix                            CMCS2     DONE
 RNM                                    -                                       CMCS2     DONE
-RNMOperator                            RNM_op                                  CMCS2
-RNMOperatorConstant                    RNM_opc                                 CMCS2
-RNMTemplate                            RNM_tpl                                 CMCS2
-VectorElemental                        elemVec                                 CMCS2
-VectorEpetra                           EpetraVector                            CMCS2
+RNMOperator                            RNM_op                                  CMCS2     DONE
+RNMOperatorConstant                    RNM_opc                                 CMCS2     DONE
+RNMTemplate                            RNM_tpl                                 CMCS2     DONE
+VectorElemental                        elemVec                                 CMCS2     DONE
+VectorEpetra                           EpetraVector                            CMCS2     DONE
 VectorSimple                           SimpleVect                              CMCS2     DONE
 
 LIFEMESH
@@ -135,9 +135,9 @@ BCVector                               bcVector                                E
 CurrentBoundaryFEBase                  staticBdFE                              CMCS2     DONE
 CurrentBoundaryFE                      currentBdFE                             CMCS2     DONE
 CurrentFE                              currentFE                               CMCS2     DONE
-DefinitionFE                           defQuadRuleFE (splitting)               CMCS2
-DefinitionQuadratureRule               defQuadRuleFE (splitting)               CMCS2
-DefinitionReferenceToCurrentMap        defQuadRuleFE (splitting)               CMCS2
+DefinitionFE                           defQuadRuleFE (splitting)               CMCS2     ABORT
+DefinitionQuadratureRule               defQuadRuleFE (splitting)               CMCS2     ABORT
+DefinitionReferenceToCurrentMap        defQuadRuleFE (splitting)               CMCS2     ABORT
 DOF                                    dof                                     CMCS2     DONE
 DOFInterface                           dofInterfaceBase                        CMCS2     DONE
 DOFInterface3Dto2D                     dofInterface3Dto2D                      CMCS2     DONE
@@ -173,7 +173,7 @@ DarcySolverNonLinear                   darcySolverNonLinear                    M
 DarcySolverTransient                   darcySolverTransient                    MOX       DONE
 DarcySolverTransientNonLinear          darcySolverTransientNonLinear           MOX       DONE
 FSIData                                DataFSI                                 CMCS3
-FSIOperator                            FSIOperator                             CMCS3    
+FSIOperator                            FSIOperator                             CMCS3
 FSIExactJacobian                       exactJacobianBase                       CMCS3
 FSIFixedPoint                          fixedPointBase                          CMCS3
 FSISolver                              -                                       CMCS3     DONE
