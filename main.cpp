@@ -568,16 +568,16 @@ void Problem::initialize(std::string& /*loadInitSol*/,  GetPot const& data_file)
 
 
     using namespace LifeV;
-    typedef EpetraVector vector_Type;
+    typedef VectorEpetra vector_Type;
 
     std::string loadInitSolPrev(data_file("problem/initSolPrev","-1"));
 
 
-    boost::shared_ptr<LifeV::EpetraVector> initSol(new LifeV::EpetraVector(*M_fsi->FSIOper()->couplingVariableMap()));
-    boost::shared_ptr<LifeV::EpetraVector> initSolSVel(new LifeV::EpetraVector(*M_fsi->FSIOper()->couplingVariableMap()));
-    boost::shared_ptr<LifeV::EpetraVector> UniqueV(new LifeV::EpetraVector(*M_fsi->FSIOper()->couplingVariableMap(), Unique));
-    boost::shared_ptr<LifeV::EpetraVector> UniqueVFD;
-    boost::shared_ptr<LifeV::EpetraVector> UniqueVFDOld;
+    boost::shared_ptr<LifeV::VectorEpetra> initSol(new LifeV::VectorEpetra(*M_fsi->FSIOper()->couplingVariableMap()));
+    boost::shared_ptr<LifeV::VectorEpetra> initSolSVel(new LifeV::VectorEpetra(*M_fsi->FSIOper()->couplingVariableMap()));
+    boost::shared_ptr<LifeV::VectorEpetra> UniqueV(new LifeV::VectorEpetra(*M_fsi->FSIOper()->couplingVariableMap(), Unique));
+    boost::shared_ptr<LifeV::VectorEpetra> UniqueVFD;
+    boost::shared_ptr<LifeV::VectorEpetra> UniqueVFDOld;
 
 
     UInt offset=dynamic_cast<LifeV::FSIMonolithic*>(M_fsi->FSIOper().get())->getOffset();
