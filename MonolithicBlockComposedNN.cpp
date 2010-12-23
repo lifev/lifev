@@ -25,7 +25,7 @@
 */
 //@HEADER
 
-#include <life/lifecore/life.hpp>
+#include <life/lifecore/LifeV.hpp>
 
 #include <life/lifefem/BCManage.hpp>
 

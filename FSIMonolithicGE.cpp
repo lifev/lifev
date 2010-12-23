@@ -35,7 +35,7 @@
     A more detailed description of the file (if necessary)
  */
 
-#include <life/lifecore/life.hpp>
+#include <life/lifecore/LifeV.hpp>
 
 #include <FSIMonolithicGE.hpp>
 

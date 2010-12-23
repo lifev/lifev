@@ -40,7 +40,7 @@
 
 #include <cstdarg>
 #include <life/lifefilters/GetPot.hpp>
-#include <life/lifecore/life.hpp>
+#include <life/lifecore/LifeV.hpp>
 
 #include <life/lifealg/SolverAztecOO.hpp>
 #include <life/lifealg/PreconditionerIfpack.hpp>

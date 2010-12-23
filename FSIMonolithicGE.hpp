@@ -45,7 +45,7 @@
 #include <lifemc/lifesolver/MonolithicBlockComposedNN.hpp>
 #include <lifemc/lifesolver/MonolithicBlockComposedDNND.hpp>
 
-#include <life/lifecore/life.hpp>
+#include <life/lifecore/LifeV.hpp>
 
 #include <lifemc/lifesolver/FSIMonolithic.hpp>
 

@@ -40,7 +40,7 @@
 #ifndef COMPOSEDBLOCKOPER_H
 #define COMPOSEDBLOCKOPER_H 1
 
-#include <life/lifecore/life.hpp>
+#include <life/lifecore/LifeV.hpp>
 #include <lifemc/lifesolver/MonolithicBlock.hpp>
 
 #include <boost/scoped_ptr.hpp>
