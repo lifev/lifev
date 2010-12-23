@@ -39,7 +39,7 @@
 
 // #endif
 
-#include <life/lifecore/life.hpp>
+#include <life/lifecore/LifeV.hpp>
 
 #ifdef  HAVE_TRILINOS_ANASAZI
 

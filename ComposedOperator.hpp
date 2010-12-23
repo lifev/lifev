@@ -49,7 +49,7 @@
 #pragma GCC diagnostic warning "-Wunused-variable"
 #pragma GCC diagnostic warning "-Wunused-parameter"
 
-#include <life/lifecore/life.hpp>
+#include <life/lifecore/LifeV.hpp>
 #include <life/lifefilters/GetPot.hpp>
 #include <life/lifecore/LifeChrono.hpp>
 #include <life/lifecore/Displayer.hpp>
