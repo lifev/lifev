@@ -52,7 +52,7 @@
 #include <life/lifecore/LifeV.hpp>
 #include <life/lifefem/GeometricMap.hpp>
 #include <life/lifefem/ReferenceFE.hpp>
-fearray/RNM.hpp>
+#include <life/lifearray/RNM.hpp>
 #include <life/lifefem/QuadratureRule.hpp>
 
 namespace LifeV
