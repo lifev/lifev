@@ -34,7 +34,7 @@
 #include <boost/shared_ptr.hpp>
 
 #include <life/lifefilters/GetPot.hpp>
-#include <life/lifearray/EpetraMatrix.hpp>
+#include <life/lifearray/MatrixEpetra.hpp>
 #include <lifemc/lifealg/PreconditionerTeko.hpp>
 
 // Teuchos includes
@@ -69,13 +69,12 @@ public:
     /** @name Public Types
      */
     //@{
-    typedef Preconditioner                          super;
+    typedef Preconditioner                          super_Type;
 
     typedef Teko::Epetra::EpetraBlockPreconditioner prec_raw_type;
     typedef boost::shared_ptr<prec_raw_type>        prec_type;
-
-    typedef super::operator_raw_type                operator_raw_type;
-    typedef super::operator_type                    operator_type;
+    typedef super_Type::operator_raw_type           operator_raw_type;
+    typedef super_Type::operator_type               operator_type;
 
     typedef Teuchos::ParameterList                  list_type;
     //@}

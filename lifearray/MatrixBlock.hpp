@@ -36,7 +36,8 @@
 #define _MATRIXBLOCK_HPP_
 
 #include <boost/shared_ptr.hpp>
-#include <life/lifearray/EpetraMatrix.hpp>
+#include <life/lifearray/MapEpetra.hpp>
+#include <life/lifearray/MatrixEpetra.hpp>
 #include <lifemc/lifearray/MatrixBlockView.hpp>
 
 namespace LifeV {
@@ -51,7 +52,7 @@ namespace LifeV {
  *  been set.
  */
 template <typename DataType>
-class MatrixBlock : public EpetraMatrix<DataType>
+class MatrixBlock : public MatrixEpetra<DataType>
 {
 public:
 
@@ -59,10 +60,10 @@ public:
      */
     //@{
     //! default constructor.
-    MatrixBlock( const EpetraMap& map, int numEntries = 50, int indexBase = 1 );
+    MatrixBlock( const MapEpetra& map, int numEntries = 50, int indexBase = 1 );
 
     //! Casting constructor
-    MatrixBlock( const EpetraMatrix<DataType>& matrix );
+    MatrixBlock( const MatrixEpetra<DataType>& matrix );
 
     //! Copy constructor
     MatrixBlock( const MatrixBlock& matrix );
@@ -124,22 +125,22 @@ private:
 // Constructors & Destructor
 // ===================================================
 template <typename DataType>
-MatrixBlock<DataType>::MatrixBlock(const EpetraMap& map, int numEntries, int indexBase) :
-    EpetraMatrix<DataType>(map,numEntries,indexBase)
+MatrixBlock<DataType>::MatrixBlock(const MapEpetra& map, int numEntries, int indexBase) :
+    MatrixEpetra<DataType>(map,numEntries,indexBase)
 {
 
 }
 
 template <typename DataType>
-MatrixBlock<DataType>::MatrixBlock( const EpetraMatrix<DataType>& matrix ) :
-    EpetraMatrix<DataType>(matrix)
+MatrixBlock<DataType>::MatrixBlock( const MatrixEpetra<DataType>& matrix ) :
+    MatrixEpetra<DataType>(matrix)
 {
 
 }
 
 template <typename DataType>
 MatrixBlock<DataType>::MatrixBlock( const MatrixBlock& matrix ) :
-    EpetraMatrix<DataType>(matrix),
+    MatrixEpetra<DataType>(matrix),
     M_blockNumRows(matrix.M_blockNumRows),
     M_blockNumColumns(matrix.M_blockNumColumns)
 {

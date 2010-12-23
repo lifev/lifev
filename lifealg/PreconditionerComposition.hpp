@@ -41,7 +41,7 @@
 #include <vector>
 #include <boost/shared_ptr.hpp>
 #include <Teuchos_ParameterList.hpp>
-#include <life/lifecore/Life.hpp>
+#include <life/lifecore/life.hpp>
 #include <life/lifealg/Preconditioner.hpp>
 #include "ComposedOperator.hpp"
 
@@ -64,7 +64,7 @@ public:
     typedef Preconditioner                         super;
     typedef ComposedOperator<Preconditioner>       prec_raw_type;
     typedef boost::shared_ptr<prec_raw_type>       prec_type;
-    typedef super::operator_raw_type               operator_raw_type;
+    typedef super::prec_raw_type                   operator_raw_type;
     typedef boost::shared_ptr<operator_raw_type>   operator_type;
     typedef Teuchos::ParameterList                 list_type;
 
@@ -139,9 +139,9 @@ public:
 
     bool UseTranspose();
 
-    Epetra_Map& OperatorRangeMap() const;
+    const Epetra_Map& OperatorRangeMap() const;
 
-    Epetra_Map& OperatorDomainMap() const;
+    const Epetra_Map& OperatorDomainMap() const;
 
     //@}
 
@@ -177,7 +177,7 @@ public:
 
     /** get a boost::shared_ptr to the preconditioner. The only requirement on the preconditioner is that
      it must derive from the Epetra_Operator object*/
-    prec_type getPrecPtr();
+    operator_type getPrecPtr();
 
     //! Return the type name of the preconditioner.
     /*!

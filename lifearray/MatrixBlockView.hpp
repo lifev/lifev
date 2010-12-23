@@ -37,7 +37,7 @@
 
 #include <boost/shared_ptr.hpp>
 #include <Epetra_FECrsMatrix.h>
-#include <life/lifearray/EpetraMatrix.hpp>
+#include <life/lifearray/MatrixEpetra.hpp>
 
 namespace LifeV {
 
@@ -56,7 +56,7 @@ public:
     /** @name Typedefs
      */
     //@{
-    typedef EpetraMatrix<double> matrix_type;
+    typedef MatrixEpetra<double> matrix_type;
     typedef boost::shared_ptr<Epetra_FECrsMatrix>  matrix_ptrtype;
     //@}
 

@@ -33,7 +33,7 @@
 
 #include <boost/shared_ptr.hpp>
 
-#include <life/lifecore/GetPot.hpp>
+#include <life/lifefilters/GetPot.hpp>
 #include <life/lifearray/MatrixEpetra.hpp>
 #include <life/lifearray/VectorEpetra.hpp>
 #include <lifemc/lifealg/ComposedPreconditioner.hpp>
@@ -59,16 +59,16 @@ public:
      */
     //@{
     typedef RegionMesh3D<LinearTetra>               mesh_type;
-    typedef EpetraMap                               map_type;
+    typedef MapEpetra                               map_type;
     typedef MatrixBlock<Real>                       matrix_type;
-    typedef EpetraMatrix<Real>                      parent_matrix_type;
+    typedef MatrixEpetra<Real>                      parent_matrix_type;
     typedef Epetra_FECrsMatrix                      src_matrix_type;
-    typedef EpetraVector                            vector_type;
+    typedef VectorEpetra                            vector_type;
     typedef boost::shared_ptr<vector_type>          vector_ptr;
 
-    typedef EpetraPreconditioner                    super;
+    typedef Preconditioner                          super;
 
-    typedef ComposedOperator<EpetraPreconditioner>  prec_raw_type;
+    typedef ComposedOperator<Preconditioner>        prec_raw_type;
     typedef boost::shared_ptr<prec_raw_type>        prec_type;
 
     typedef super::operator_raw_type                operator_raw_type;
@@ -192,7 +192,7 @@ protected:
 
 };
 
-inline EpetraPreconditioner* createPCD(){ return new PreconditionerPCD(); }
+inline Preconditioner* createPCD(){ return new PreconditionerPCD(); }
 namespace
 {
 	static bool registerPCD = PRECFactory::instance().registerProduct( "PCD", &createPCD );

@@ -32,7 +32,7 @@
 namespace LifeV {
 
 PreconditionerTeko::PreconditionerTeko(const boost::shared_ptr<Epetra_Comm>& comm):
-    PreconditionerBlock(comm),M_Prec()
+    PreconditionerBlock(comm),M_prec()
 {}
 
 PreconditionerTeko::PreconditionerTeko(  PreconditionerTeko& P, const boost::shared_ptr<Epetra_Comm>& comm):
@@ -44,54 +44,54 @@ PreconditionerTeko::~PreconditionerTeko()
 
 PreconditionerTeko::super::prec_type PreconditionerTeko::getPrecPtr()
 {
-    return M_Prec;
+    return M_prec;
 }
 
 Preconditioner::prec_raw_type* PreconditionerTeko::getPrec()
 {
-    return M_Prec.get();
+    return M_prec.get();
 }
 
 void PreconditionerTeko::precReset()
 {
-    M_Oper.reset();
-    M_Prec.reset();
+    M_oper.reset();
+    M_prec.reset();
 
     this->M_preconditionerCreated = false;
 }
 
 bool PreconditionerTeko::set() const
 {
-    return M_Prec;
+    return M_prec;
 }
 
 int PreconditionerTeko::SetUseTranspose( const bool useTranspose)
 {
-    return M_Prec->SetUseTranspose(useTranspose);
+    return M_prec->SetUseTranspose(useTranspose);
 }
 
 bool PreconditionerTeko::UseTranspose()
 {
-    return M_Prec->UseTranspose();
+    return M_prec->UseTranspose();
 }
 int PreconditionerTeko::ApplyInverse(const Epetra_MultiVector& X, Epetra_MultiVector& Y) const
 {
-    return M_Prec->ApplyInverse(X, Y);
+    return M_prec->ApplyInverse(X, Y);
 }
 
 int PreconditionerTeko::Apply(const Epetra_MultiVector& X, Epetra_MultiVector& Y) const
 {
-    return M_Prec->Apply(X, Y);
+    return M_prec->Apply(X, Y);
 }
 
 const Epetra_Map & PreconditionerTeko::OperatorRangeMap() const
 {
-    return M_Prec->OperatorRangeMap();
+    return M_prec->OperatorRangeMap();
 }
 
 const Epetra_Map & PreconditionerTeko::OperatorDomainMap() const
 {
-    return M_Prec->OperatorRangeMap();
+    return M_prec->OperatorRangeMap();
 }
 
 void PreconditionerTeko::buildBlockGIDs(std::vector<std::vector<int> > & gids,
@@ -122,32 +122,28 @@ void PreconditionerTeko::buildBlockGIDs(std::vector<std::vector<int> > & gids,
     }
 }
 
-<<<<<<< Updated upstream
-void PreconditionerTeko::buildTekoPreconditioner(RCP<Teko::BlockPreconditionerFactory> precFact,
-=======
 void PreconditionerTeko::buildPreconditionerTeko(RCP<Teko::BlockPreconditionerFactory> precFact,
->>>>>>> Stashed changes
                                                  operator_type& oper,
                                                  const std::vector<int>& blockSizes)
 {
     // Building the preconditioner
     Teko::Epetra::EpetraBlockPreconditioner* prec = new Teko::Epetra::EpetraBlockPreconditioner(precFact);
 
-    M_Oper = oper->matrixPtr();
+    M_oper = oper->matrixPtr();
 
     std::vector<std::vector<int> > vec;
     buildBlockGIDs(vec,oper->rangeMap(),blockSizes);
 
     // Building the block operator from the matrix
     Teuchos::RCP<Teko::Epetra::BlockedEpetraOperator> sA
-        = Teuchos::rcp(new Teko::Epetra::BlockedEpetraOperator(vec,Teuchos::rcp(M_Oper)));
+        = Teuchos::rcp(new Teko::Epetra::BlockedEpetraOperator(vec,Teuchos::rcp(M_oper)));
 
-    M_Prec.reset(prec);
+    M_prec.reset(prec);
 
     //Building explicitly the preconditioner
-    M_Prec->buildPreconditioner(sA);
+    M_prec->buildPreconditioner(sA);
 
-    if ( !M_Prec.get() )
+    if ( !M_prec.get() )
     { //! if not filled, I do not know how to diagonalize.
         ERROR_MSG( "Preconditioner not set, something went wrong in its computation\n" );
     }

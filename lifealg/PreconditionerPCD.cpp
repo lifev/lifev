@@ -115,7 +115,7 @@ int PreconditionerPCD::buildPreconditioner(operator_type& oper)
     //bool transposed(true);
     bool notTransposed(false);
 
-    map_type map(oper->getMap());
+    map_type map(oper->map());
 
     // Getting the block structure of A
     // / F Bt \
@@ -153,7 +153,7 @@ int PreconditionerPCD::buildPreconditioner(operator_type& oper)
     P1a->getMatrixBlockView(1,1,B22);
     MatrixBlockUtils::createIdentityBlock(B11);
     M_adrPressureAssembler.addDiffusion(P1a,-1.0,B22.firstRowIndex(),B22.firstColumnIndex());
-    P1a->GlobalAssemble();
+    P1a->globalAssemble();
     P1a->spy("p1a");
     boost::shared_ptr<parent_matrix_type> p1a = P1a;
     //push_back(p1a,notInversed,notTransposed);
@@ -168,7 +168,7 @@ int PreconditionerPCD::buildPreconditioner(operator_type& oper)
     M_adrPressureAssembler.addDiffusion(P1b,-M_viscosity/M_density,B22.firstRowIndex(),B22.firstColumnIndex());
 	M_adrPressureAssembler.addAdvection(P1b,*M_beta,B22.firstRowIndex(),B22.firstColumnIndex());
 	M_adrPressureAssembler.addMass(P1b,1.0/M_timestep,B22.firstRowIndex(),B22.firstColumnIndex());
-    P1b->GlobalAssemble();
+    P1b->globalAssemble();
     P1b->spy("p1b");
     boost::shared_ptr<parent_matrix_type> p1b = P1b;
     //boost::shared_ptr<src_matrix_type> p1b(P1b->getMatrixPtr());
@@ -181,7 +181,7 @@ int PreconditionerPCD::buildPreconditioner(operator_type& oper)
     P1c->getMatrixBlockView(0,0,B11);
     MatrixBlockUtils::createIdentityBlock(B11);
 	M_adrPressureAssembler.addMass(P1c,1.0,B22.firstRowIndex(),B22.firstColumnIndex());
-	P1c->GlobalAssemble();
+	P1c->globalAssemble();
     P1c->spy("p1c");
     boost::shared_ptr<parent_matrix_type> p1c = P1c;
     //push_back(p1c,notInversed,notTransposed);
@@ -196,7 +196,7 @@ int PreconditionerPCD::buildPreconditioner(operator_type& oper)
     P2->getMatrixBlockView(1,1,B22);
     MatrixBlockUtils::copyBlock(F,B11);
     MatrixBlockUtils::createIdentityBlock(B22);
-    P2->GlobalAssemble();
+    P2->globalAssemble();
     P2->spy("p2");
     boost::shared_ptr<parent_matrix_type> p2 = P2;
     //push_back(p2,notInversed,notTransposed);
@@ -213,7 +213,7 @@ int PreconditionerPCD::buildPreconditioner(operator_type& oper)
     MatrixBlockUtils::createIdentityBlock(B11);
     MatrixBlockUtils::copyBlock(Bt,B12);
     MatrixBlockUtils::createIdentityBlock(B22);
-    P3->GlobalAssemble();
+    P3->globalAssemble();
     P3->spy("p3");
     boost::shared_ptr<parent_matrix_type> p3 = P3;
     //push_back(p3,notInversed,notTransposed);
@@ -236,11 +236,11 @@ int PreconditionerPCD::numBlocksCols() const
 void PreconditionerPCD::setDataFromGetPot( const GetPot& dataFile,
                                            const std::string& section )
 {
-    createPCDList(M_List, dataFile, section, "PCD");
+    createPCDList(M_list, dataFile, section, "PCD");
 
-    M_velocityBlockSize = this->M_List.get("blocks: velocity block size", -1);
-    M_pressureBlockSize = this->M_List.get("blocks: pressure block size", -1);
-    M_precType          = this->M_List.get("prectype", "PCD");
+    M_velocityBlockSize = this->M_list.get("blocks: velocity block size", -1);
+    M_pressureBlockSize = this->M_list.get("blocks: pressure block size", -1);
+    M_precType          = this->M_list.get("prectype", "PCD");
 }
 
 void PreconditionerPCD::setFESpace(FESpace_ptr uFESpace,FESpace_ptr pFESpace){

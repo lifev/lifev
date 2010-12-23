@@ -53,16 +53,14 @@ namespace LifeV {
 // Constructors & Destructor
 // ===================================================
 
-PreconditionerComposition::PreconditionerComposition( boost::shared_ptr<Epetra_Comm> comm = boost::shared_ptr<Epetra_Comm>() ):
+PreconditionerComposition::PreconditionerComposition( boost::shared_ptr<Epetra_Comm> comm ):
     super (comm ),
     M_prec(new prec_raw_type(comm))
 {
 
 }
 
-PreconditionerComposition::PreconditionerComposition( const PreconditionerComposition& precComp ):
-    super(precComp, boost::dynamic_pointer_cast<ComposedOperator<Ifpack_Preconditioner> >(precComp.getPrecPtr())->getCommPtr()),
-    M_prec(new prec_raw_type(*boost::dynamic_pointer_cast<prec_raw_type>(precComp.getPrecPtr())))
+PreconditionerComposition::PreconditionerComposition( const PreconditionerComposition& precComp )
 {
 
 }
@@ -102,8 +100,8 @@ double PreconditionerComposition::Condest()
 }
 
 int PreconditionerComposition::push_back( operator_type& A,
-                                          const bool useInverse=false,
-                                          const bool useTranspose=false )
+                                          const bool useInverse,
+                                          const bool useTranspose )
 {
     M_operators.push_back(A);
 
@@ -112,12 +110,12 @@ int PreconditionerComposition::push_back( operator_type& A,
 
 int PreconditionerComposition::replace( operator_type& A,
                                         const UInt index,
-                                        const bool useInverse=false,
-                                        const bool useTranspose=false )
+                                        const bool useInverse,
+                                        const bool useTranspose )
 {
     ASSERT(index <= M_operators.size(), "ComposedPreconditioner::replace: index too large");
     M_operators[index] = A;
-    M_prec->replace(index,useInverse,useTranspose);
+    //M_prec->replace(index,useInverse,useTranspose);
 
     return EXIT_SUCCESS;
 }
@@ -125,7 +123,7 @@ int PreconditionerComposition::replace( operator_type& A,
 // ===================================================
 // Epetra Operator Interface Methods
 // ===================================================
-int PreconditionerComposition::SetUseTranspose( const bool useTranspose = false )
+int PreconditionerComposition::SetUseTranspose( const bool useTranspose )
 {
     return M_prec->SetUseTranspose(useTranspose);
 }
@@ -145,12 +143,12 @@ bool PreconditionerComposition::UseTranspose()
     return M_prec->UseTranspose();
 }
 
-Epetra_Map& PreconditionerComposition::OperatorRangeMap() const
+const Epetra_Map& PreconditionerComposition::OperatorRangeMap() const
 {
     return M_prec->OperatorRangeMap();
 }
 
-Epetra_Map& PreconditionerComposition::OperatorDomainMap() const
+const Epetra_Map& PreconditionerComposition::OperatorDomainMap() const
 {
     return M_prec->OperatorDomainMap();
 }
@@ -191,7 +189,7 @@ std::string PreconditionerComposition::precType()
 
 UInt PreconditionerComposition::numOperators() const
 {
-    return M_prec->getNumber();
+    return M_prec->number();
 }
 
 // ===================================================

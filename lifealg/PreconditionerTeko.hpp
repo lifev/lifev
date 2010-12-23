@@ -34,6 +34,7 @@
 #include <vector>
 #include <boost/shared_ptr.hpp>
 #include <life/lifearray/MapEpetra.hpp>
+#include <life/lifealg/Preconditioner.hpp>
 #include <lifemc/lifealg/PreconditionerBlock.hpp>
 
 // Teuchos includes
@@ -118,7 +119,7 @@ public:
     virtual const Epetra_Map & OperatorDomainMap() const;
 
 protected:
-    prec_type             M_Prec;
+    prec_type             M_prec;
 
     void buildBlockGIDs(std::vector<std::vector<int> > & gids,
                         const MapEpetra & map,
@@ -128,7 +129,7 @@ protected:
                                  const std::vector<int>& blockSizes);
 
 private:
-    operator_raw_type::matrix_ptrtype M_Oper;
+    operator_raw_type::matrix_ptrtype M_oper;
 
 };
 
