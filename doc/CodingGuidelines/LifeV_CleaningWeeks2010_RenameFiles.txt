@@ -19,7 +19,7 @@ LIFESOLVER: fluidToMaster.hpp                                                  C
             reducedLinFluid.*pp                                                CMCS3     DONE
             ipStabilization                                                    EMORY     DONE
             NS_Assembler                                                       EMORY
-            steklovPoincareBase.*pp                                            CMCS3
+            steklovPoincareBase.*pp                                            CMCS3     DONE
             VenantKirchhofSolver.cpp                                           CMCS3     DONE
 
 ============================
@@ -49,7 +49,7 @@ FactoryPolicy                          policy                                  C
 FactorySingleton                       singleton                               CMCS3     DONE
 FactoryTypeInfo                        typeInfo                                CMCS3     DONE
 FortranWrapper                         fortran_wrap                            CMCS3     DONE
-Life                                   life                                    CMCS3
+LifeV                                  life                                    CMCS3     DONE
 LifeAssert                             lifeassert                              CMCS3     DONE
 LifeAssertSmart                        SmartAssert                             CMCS3     DONE
 LifeChrono                             chrono                                  CMCS3     DONE
@@ -172,10 +172,10 @@ DarcySolver                            darcySolver                             M
 DarcySolverNonLinear                   darcySolverNonLinear                    MOX       DONE
 DarcySolverTransient                   darcySolverTransient                    MOX       DONE
 DarcySolverTransientNonLinear          darcySolverTransientNonLinear           MOX       DONE
-FSIData                                DataFSI                                 CMCS3
-FSIOperator                            FSIOperator                             CMCS3
-FSIExactJacobian                       exactJacobianBase                       CMCS3
-FSIFixedPoint                          fixedPointBase                          CMCS3
+FSIData                                DataFSI                                 CMCS3     DONE
+FSIOperator                            FSIOperator                             CMCS3     DONE
+FSIExactJacobian                       exactJacobianBase                       CMCS3     DONE
+FSIFixedPoint                          fixedPointBase                          CMCS3     DONE
 FSISolver                              -                                       CMCS3     DONE
 HarmonicExtensionSolver                -                                       CMCS3     DONE
 HeartBidomainSolver                    bidomainSolver                          CMCS1     DONE
