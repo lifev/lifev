@@ -80,10 +80,10 @@ int PreconditionerLSC::buildPreconditioner(operator_type& oper)
     return ( EXIT_SUCCESS );
 }
 
-void PreconditionerLSC::createList( list_type&         list,
-                                    const GetPot&      dataFile,
-                                    const std::string& section,
-                                    const std::string& subSection )
+void PreconditionerLSC::createParametersList( list_type&         list,
+                                              const GetPot&      dataFile,
+                                              const std::string& section,
+                                              const std::string& subSection )
 {
     createLSCList( list, dataFile, section, subSection );
 }
@@ -118,7 +118,7 @@ void PreconditionerLSC::createLSCList( list_type&         list,
     if (displayList) list.print(std::cout);
 }
 
-Real PreconditionerLSC::Condest()
+Real PreconditionerLSC::condest()
 {
     return 0.0;
 }

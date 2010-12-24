@@ -99,17 +99,17 @@ public:
      */
 
     //! Return a pointer on the preconditioner
-    super::prec_raw_type* getPrec();
+    super::prec_raw_type* preconditioner();
 
     //! Return a pointer on the preconditioner
-    super::prec_type      getPrecPtr();
+    super::prec_type      preconditionerPtr();
 
     //! Reset the preconditioner
-    void                  precReset();
+    void                  resetPreconditioner();
 
     //! returns true if prec exists
     /*const*/
-    bool                  set() const;
+    bool                  isPreconditionerSet() const;
 
     virtual int           SetUseTranspose( const bool useTranspose=false );
     virtual bool          UseTranspose();

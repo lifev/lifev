@@ -42,17 +42,17 @@ PreconditionerTeko::PreconditionerTeko(  PreconditionerTeko& P, const boost::sha
 PreconditionerTeko::~PreconditionerTeko()
 {}
 
-PreconditionerTeko::super::prec_type PreconditionerTeko::getPrecPtr()
+PreconditionerTeko::super::prec_type PreconditionerTeko::preconditionerPtr()
 {
     return M_prec;
 }
 
-Preconditioner::prec_raw_type* PreconditionerTeko::getPrec()
+Preconditioner::prec_raw_type* PreconditionerTeko::preconditioner()
 {
     return M_prec.get();
 }
 
-void PreconditionerTeko::precReset()
+void PreconditionerTeko::resetPreconditioner()
 {
     M_oper.reset();
     M_prec.reset();
@@ -60,7 +60,7 @@ void PreconditionerTeko::precReset()
     this->M_preconditionerCreated = false;
 }
 
-bool PreconditionerTeko::set() const
+bool PreconditionerTeko::isPreconditionerSet() const
 {
     return M_prec;
 }

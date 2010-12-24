@@ -108,10 +108,10 @@ public:
     void setDataFromGetPot ( const GetPot&      dataFile,
                             const std::string& section );
 
-    void createList( list_type&         list,
-                     const GetPot&      dataFile,
-                     const std::string& section,
-                     const std::string& subSection );
+    void createParametersList( list_type&         list,
+                               const GetPot&      dataFile,
+                               const std::string& section,
+                               const std::string& subSection );
 
     static void createLSCList( list_type&         list,
                                const GetPot&      dataFile,
@@ -119,10 +119,10 @@ public:
                                const std::string& subSection = "LSC" );
 
     //! Return an estimation of the conditionement number of the preconditioner
-    double      Condest ();
+    double      condest ();
 
     //! Return the name of the preconditioner to be used in the factory
-    std::string precType(){return M_precType;}
+    std::string preconditionerType(){return M_precType;}
 
     //! Build the preconditioner
     int         buildPreconditioner(operator_type& A);

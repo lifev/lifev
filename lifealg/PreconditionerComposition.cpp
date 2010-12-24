@@ -177,12 +177,12 @@ PreconditionerComposition::prec_raw_type* PreconditionerComposition::getPrec()
     return M_prec.get();
 }
 
-PreconditionerComposition::prec_type PreconditionerComposition::getPrecPtr()
+PreconditionerComposition::operator_type PreconditionerComposition::preconditionerPtr()
 {
     return M_prec;
 }
 
-std::string PreconditionerComposition::precType()
+std::string PreconditionerComposition::preconditionerType()
 {
     return "PreconditionerComposition";
 }

@@ -96,7 +96,7 @@ public:
     //! @name Methods
     //@{
 
-    void createList( list_type& list,
+    void createParametersList( list_type& list,
                      const GetPot& dataFile,
                      const std::string& section,
                      const std::string& subSection ) = 0;
@@ -105,7 +105,7 @@ public:
     /*!
       @param A the base matrix for computing the preconditioner
     */
-    int buildPreconditioner(operator_type& A) = 0;
+    virtual int buildPreconditioner(operator_type& A) = 0;
 
     //! Reset the preconditioner
     void precReset();
@@ -177,13 +177,13 @@ public:
 
     /** get a boost::shared_ptr to the preconditioner. The only requirement on the preconditioner is that
      it must derive from the Epetra_Operator object*/
-    operator_type getPrecPtr();
+    operator_type preconditionerPtr();
 
     //! Return the type name of the preconditioner.
     /*!
      *  @return type of the preconditioner
      */
-    std::string precType();
+    std::string preconditionerType();
 
     //! Return the number of operators in the composition
     UInt numOperators() const;
