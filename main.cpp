@@ -97,8 +97,6 @@
 #include <life/lifesolver/VenantKirchhoffSolverLinear.hpp>
 #include <lifemc/lifesolver/FSIMonolithicGI.hpp>
 
-#include <life/lifesolver/DataFSI.hpp>
-
 #include <life/lifefilters/ExporterEnsight.hpp>
 #include <life/lifefilters/ExporterEmpty.hpp>
 #ifdef HAVE_HDF5
