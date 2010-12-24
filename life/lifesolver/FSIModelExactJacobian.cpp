@@ -58,7 +58,8 @@ void  FSIModelExactJacobian::solveJac(vector_Type         &_muk,
     this->displayer().leaderPrint( "solveJac: NormInf res " , _res.normInf(), "\n" );
     _muk *= 0.;
 
-    M_linearSolver.setTolMaxIteration(_linearRelTol, 100);
+    M_linearSolver.setTolerance( _linearRelTol );
+    M_linearSolver.setMaxNumIterations( 100 );
 
     vector_Type res(_res);
 
