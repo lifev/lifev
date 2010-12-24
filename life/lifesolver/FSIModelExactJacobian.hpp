@@ -239,9 +239,9 @@ private:
     vectorPtr_Type       M_rhsNew;
     vectorPtr_Type       M_beta;
 
-    generalizedAitken<vector_Type> M_aitkFS;
+    NonLinearAitken<vector_Type> M_aitkFS;
 
-    LifeV::SolverTrilinos  M_linearSolver;
+    SolverAztecOO  M_linearSolver;
     Epetra_ExactJacobian   M_epetraOper;
 
     matrixPtr_Type M_matrShapeDer;
@@ -251,11 +251,11 @@ private:
 }; // end class exactJacobian
 
 
-inline FSIOperator* createEJ() { return new FSIModelExactJacobian(); }
+inline FSI* createEJ() { return new FSIModelExactJacobian(); }
 
 namespace
 {
-static bool registerEJ = FSIOperator::FSIFactory_Type::instance().registerProduct( "exactJacobian", &createEJ );
+static bool registerEJ = FSI::FSIFactory_Type::instance().registerProduct( "exactJacobian", &createEJ );
 }
 
 }  // Namespace LifeV
