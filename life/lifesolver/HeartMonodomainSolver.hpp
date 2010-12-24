@@ -722,7 +722,7 @@ void HeartMonodomainSolver<Mesh, SolverType>::solveSystem( matrixPtr_Type  matrF
 
         M_preconditioner->buildPreconditioner(matrFull);
 
-        Real condest = M_preconditioner->Condest();
+        Real condest = M_preconditioner->condest();
 
         M_linearSolver.setPreconditioner(M_preconditioner);
 
