@@ -1433,6 +1433,8 @@ feToFEInterpolate(const FESpace<mesh_Type,map_Type>& OriginalSpace,
         ERROR_MSG(" The interpolation with this space has not been yet implemented. Please, add it!");
     };
 
+    // avoid warnings at compile time. If we arrive here, the program already issued an error message.
+    return OriginalVector;
 
 };
 
