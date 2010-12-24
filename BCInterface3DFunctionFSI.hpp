@@ -40,8 +40,8 @@
 #include <lifemc/lifesolver/BCInterface3DDefinitions.hpp>
 #include <lifemc/lifesolver/BCInterface3DData.hpp>
 
-#include <life/lifesolver/exactJacobianBase.hpp>
-#include <life/lifesolver/fixedPointBase.hpp>
+#include <life/lifesolver/FSIModelExactJacobian.hpp>
+#include <life/lifesolver/FSIModelFixedPoint.hpp>
 //#include <life/lifesolver/steklovPoincareBase.hpp>
 #include <lifemc/lifesolver/FSIMonolithicGE.hpp>
 #include <lifemc/lifesolver/FSIMonolithicGI.hpp>
