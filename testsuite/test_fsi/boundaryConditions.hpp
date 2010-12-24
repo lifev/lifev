@@ -40,8 +40,8 @@
 #include "life/lifefem/BCHandler.hpp"
 #include "life/lifefem/BCFunction.hpp"
 
-#include "life/lifesolver/exactJacobianBase.hpp"
-#include "life/lifesolver/fixedPointBase.hpp"
+#include "life/lifesolver/FSIModelExactJacobian.hpp"
+#include "life/lifesolver/FSIModelFixedPoint.hpp"
 
 
 //#define FLUX

@@ -52,7 +52,7 @@
 #include <life/lifesolver/FSI.hpp>
 //#include "life/lifesolver/exactJacobianBase.hpp"
 //#include "life/lifesolver/fixedPointBase.hpp"
-#include <life/lifesolver/DataFSI.hpp>
+#include <life/lifesolver/FSIData.hpp>
 #include <life/lifesolver/VenantKirchhoffSolverLinear.hpp>
 
 #include <life/lifefilters/ExporterHDF5.hpp>
