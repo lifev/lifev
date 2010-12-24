@@ -113,7 +113,7 @@ BCInterface3DFunctionFSI< FSI >::checkMethod( const boost::shared_ptr< FSI >& ph
         Debug( 5025 ) << "BCInterface3DFunctionFSI::checkMethod                            exactJacobian" << "\n";
 #endif
 
-        checkFunction< exactJacobian > ( physicalSolver );
+        checkFunction< FSIModelExactJacobian > ( physicalSolver );
 
         break;
 
@@ -123,7 +123,7 @@ BCInterface3DFunctionFSI< FSI >::checkMethod( const boost::shared_ptr< FSI >& ph
         Debug( 5025 ) << "BCInterface3DFunctionFSI::checkMethod                            fixedPoint" << "\n";
 #endif
 
-        checkFunction< fixedPoint > ( physicalSolver );
+        checkFunction< FSIModelFixedPoint > ( physicalSolver );
 
         break;
 
