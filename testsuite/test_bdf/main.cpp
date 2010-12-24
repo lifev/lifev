@@ -64,8 +64,6 @@
 #pragma GCC diagnostic warning "-Wunused-variable"
 #pragma GCC diagnostic warning "-Wunused-parameter"
 
-#include <boost/program_options.hpp>
-
 #include <life/lifecore/LifeV.hpp>
 
 #include <life/lifealg/PreconditionerIfpack.hpp>
