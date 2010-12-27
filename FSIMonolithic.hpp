@@ -62,7 +62,7 @@
 #include <lifemc/lifealg/ComposedPreconditioner.hpp>
 #include <lifemc/lifealg/ComposedOperator.hpp>
 #ifdef HAVE_TRILINOS_ANASAZI
-#include <lifemc/lifealg/eigenSolver.hpp>
+#include <lifemc/lifealg/EigenSolver.hpp>
 #endif
 
 #include <lifemc/lifesolver/MonolithicBlockMatrix.hpp>
