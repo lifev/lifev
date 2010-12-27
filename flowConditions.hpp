@@ -52,7 +52,7 @@
 #include <life/lifecore/LifeV.hpp>
 #include <life/lifefilters/GetPot.hpp>
 #include <life/lifesolver/FSISolver.hpp>
-#include <life/lifesolver/FSI.hpp>
+#include <life/lifesolver/FSIOperator.hpp>
 
 namespace LifeV
 {
@@ -63,7 +63,7 @@ public:
 
     FlowConditions();
 
-    void initParameters      ( FSI&  oper,
+    void initParameters      ( FSIOperator&  oper,
                                const int&    outflowFlag);
 
     void renewParameters     ( FSISolver&  oper,

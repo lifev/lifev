@@ -42,7 +42,7 @@
 #include <life/lifecore/LifeV.hpp>
 #include <life/lifefilters/GetPot.hpp>
 #include <life/lifesolver/FSISolver.hpp>
-#include <life/lifesolver/FSI.hpp>
+#include <life/lifesolver/FSIOperator.hpp>
 
 // Mathcard includes
 #include <lifemc/lifesolver/BCInterface3D.hpp>
@@ -53,9 +53,9 @@ namespace LifeV
 class LumpedHeart
 {
 public:
-    typedef BCInterface3D< FSI >                                                   bc_type;
-    typedef FSI::vector_Type                                                       vector_Type;
-    typedef FSI::vectorPtr_Type                                                    vectorPtr_Type;
+    typedef BCInterface3D< FSIOperator >                                                   bc_type;
+    typedef FSIOperator::vector_Type                                                       vector_Type;
+    typedef FSIOperator::vectorPtr_Type                                                    vectorPtr_Type;
 
     LumpedHeart()
             :
@@ -77,12 +77,12 @@ public:
       M_ODEscheme.setup(1);
     }
 
-    void initParameters      ( FSI&  Oper,
+    void initParameters      ( FSIOperator&  Oper,
                                const std::string&    FileName);
 
     static Real& outPressure         (const Real& t, const Real& x, const Real& y, const Real& z, const ID& i);
 
-    void renewParameters     ( FSI&  Oper , const int& flag, const Real& time, const Real& flux);
+    void renewParameters     ( FSIOperator&  Oper , const int& flag, const Real& time, const Real& flux);
 
     Real fZero               (const Real& t, const Real& x, const Real& y, const Real& z, const ID& i);
 
