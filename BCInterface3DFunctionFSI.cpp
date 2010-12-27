@@ -42,7 +42,7 @@ namespace LifeV
 // ===================================================
 // Constructors
 // ===================================================
-BCInterface3DFunctionFSI< FSI >::BCInterface3DFunctionFSI() :
+BCInterface3DFunctionFSI< FSIOperator >::BCInterface3DFunctionFSI() :
         M_FSIFunction   (),
         M_name          (),
         M_flag          (),
@@ -58,7 +58,7 @@ BCInterface3DFunctionFSI< FSI >::BCInterface3DFunctionFSI() :
 
 }
 
-BCInterface3DFunctionFSI< FSI >::BCInterface3DFunctionFSI( const data_Type& data ) :
+BCInterface3DFunctionFSI< FSIOperator >::BCInterface3DFunctionFSI( const data_Type& data ) :
         M_FSIFunction   (),
         M_name          (),
         M_flag          (),
@@ -79,7 +79,7 @@ BCInterface3DFunctionFSI< FSI >::BCInterface3DFunctionFSI( const data_Type& data
 // Methods
 // ===================================================
 void
-BCInterface3DFunctionFSI< FSI >::exportData( data_Type& data )
+BCInterface3DFunctionFSI< FSIOperator >::exportData( data_Type& data )
 {
 
 #ifdef HAVE_LIFEV_DEBUG
@@ -94,7 +94,7 @@ BCInterface3DFunctionFSI< FSI >::exportData( data_Type& data )
 }
 
 void
-BCInterface3DFunctionFSI< FSI >::checkMethod( const boost::shared_ptr< FSI >& physicalSolver )
+BCInterface3DFunctionFSI< FSIOperator >::checkMethod( const boost::shared_ptr< FSIOperator >& physicalSolver )
 {
     //Set mapMethod
     std::map< std::string, FSIMethod > mapMethod;
@@ -113,7 +113,7 @@ BCInterface3DFunctionFSI< FSI >::checkMethod( const boost::shared_ptr< FSI >& ph
         Debug( 5025 ) << "BCInterface3DFunctionFSI::checkMethod                            exactJacobian" << "\n";
 #endif
 
-        checkFunction< FSIModelExactJacobian > ( physicalSolver );
+        checkFunction< FSIExactJacobian > ( physicalSolver );
 
         break;
 
@@ -123,7 +123,7 @@ BCInterface3DFunctionFSI< FSI >::checkMethod( const boost::shared_ptr< FSI >& ph
         Debug( 5025 ) << "BCInterface3DFunctionFSI::checkMethod                            fixedPoint" << "\n";
 #endif
 
-        checkFunction< FSIModelFixedPoint > ( physicalSolver );
+        checkFunction< FSIFixedPoint > ( physicalSolver );
 
         break;
 
@@ -163,7 +163,7 @@ BCInterface3DFunctionFSI< FSI >::checkMethod( const boost::shared_ptr< FSI >& ph
 // Set Methods
 // ===================================================
 void
-BCInterface3DFunctionFSI< FSI >::setData( const data_Type& data )
+BCInterface3DFunctionFSI< FSIOperator >::setData( const data_Type& data )
 {
 
 #ifdef HAVE_LIFEV_DEBUG
