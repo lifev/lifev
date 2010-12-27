@@ -42,7 +42,7 @@
 #include <life/lifecore/LifeV.hpp>
 
 #include <lifemc/lifesolver/MonolithicBlockMatrix.hpp>
-#include <lifemc/lifesolver/RobinInterface.hpp>
+#include <lifemc/lifesolver/MonolithicRobinInterface.hpp>
 
 namespace LifeV
 {
@@ -51,7 +51,7 @@ namespace LifeV
 /*!
     @author Paolo Crosetto
 
-    This class derives both from MonolithicBlock, which is the base class for the block operators, and from RobinInterface,
+    This class derives both from MonolithicBlock, which is the base class for the block operators, and from MonolithicRobinInterface,
     which is a class holding some general methods and attributes for the robin coupling.
 
     NOTE: this class has been tested for both the GE and GI time discretizations
@@ -60,14 +60,14 @@ namespace LifeV
     choices available are in principle automatically adapted to the RN case. The preconditioners tested for this case
     are the modular composedDN and the algebraic additive Schwarz AdditiveSchwarz.
  */
-class MonolithicBlockMatrixRN : public MonolithicBlockMatrix, RobinInterface
+class MonolithicBlockMatrixRN : public MonolithicBlockMatrix, MonolithicRobinInterface
 {
 public:
 
     //! @name Public Types
     //@{
     typedef MonolithicBlockMatrix super_Type;
-    typedef RobinInterface  superRobin;
+    typedef MonolithicRobinInterface  superRobin;
     //@}
 
 

@@ -27,7 +27,7 @@
 
 #include <life/lifecore/LifeV.hpp>
 
-#include <lifemc/lifesolver/RobinInterface.hpp>
+#include <lifemc/lifesolver/MonolithicRobinInterface.hpp>
 
 namespace LifeV
 {
@@ -36,14 +36,14 @@ namespace LifeV
 //! Public Methods
 // ===================================================
 
-void RobinInterface::setRobinData(const GetPot& data, const std::string& section)
+void MonolithicRobinInterface::setRobinData(const GetPot& data, const std::string& section)
 {
     M_alphas=data((section + "/alphas").data(), 0.);
     M_alphaf=data((section + "/alphaf").data(), 0.);
 }
 
 
-void RobinInterface::applyRobinCoupling( std::vector<MonolithicBlock::matrixPtr_Type> blockVector)
+void MonolithicRobinInterface::applyRobinCoupling( std::vector<MonolithicBlock::matrixPtr_Type> blockVector)
 {
     M_robinPart.reset(new MonolithicBlock::matrix_Type(M_robinCoupling->map(), 0));
 
@@ -56,7 +56,7 @@ void RobinInterface::applyRobinCoupling( std::vector<MonolithicBlock::matrixPtr_
 //! Protected Methods
 // ===================================================
 
-void RobinInterface::applyRobinCoupling( MonolithicBlock::matrixPtr_Type block)
+void MonolithicRobinInterface::applyRobinCoupling( MonolithicBlock::matrixPtr_Type block)
 {
     MonolithicBlock::matrixPtr_Type tmpMatrix(new MonolithicBlock::matrix_Type(M_robinCoupling->map(), 0));
     int err = EpetraExt::MatrixMatrix::

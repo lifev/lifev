@@ -32,7 +32,7 @@ liblifemcsolver_la_SOURCES   = BCInterface1DData.cpp \
                                FSIMonolithic.cpp \
                                FSIMonolithicGI.cpp \
                                FSIMonolithicGE.cpp \
-                               RobinInterface.cpp \
+                               MonolithicRobinInterface.cpp \
                                MonolithicBlockMatrix.cpp \
                                MonolithicBlockMatrixRN.cpp \
                                MonolithicBlock.cpp \

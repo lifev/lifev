@@ -61,7 +61,7 @@ namespace LifeV
 
     \todo Remove this class and try to implement the same coupling otherwise.
  */
-class RobinInterface
+class MonolithicRobinInterface
 {
 public:
 
@@ -69,7 +69,7 @@ public:
     //! @name Constructor & Destructor
     //@{
 
-    RobinInterface():
+    MonolithicRobinInterface():
             M_alphaf(),
             M_alphas(),
             M_robinCoupling(),
@@ -77,7 +77,7 @@ public:
             M_rhsVec()
     {}
 
-    ~RobinInterface() {}
+    ~MonolithicRobinInterface() {}
 
     //@}
 
