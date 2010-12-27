@@ -36,7 +36,7 @@
 #include <life/lifecore/LifeV.hpp>
 #include <life/lifesolver/FSISolver.hpp>
 //!\todo remove this header
-#include <life/lifealg/nonLinRichardson.hpp>
+#include <life/lifealg/NonLinearRichardson.hpp>
 
 namespace LifeV
 {
@@ -302,7 +302,7 @@ FSISolver::iterate()
 
     // the newton solver
     UInt maxiter = M_data->maxSubIterationNumber();
-    UInt status = nonLinRichardson( *lambda,
+    UInt status = NonLinearRichardson( *lambda,
                                     *M_oper,
                                     M_data->absoluteTolerance(),
                                     M_data->relativeTolerance(),

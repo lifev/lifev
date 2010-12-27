@@ -79,7 +79,7 @@ namespace LifeV
     */
 
 template < class Fct >
-Int nonLinRichardson( VectorEpetra& sol,
+Int NonLinearRichardson( VectorEpetra& sol,
                       Fct&        functional,
                       Real        abstol,
                       Real        reltol,
