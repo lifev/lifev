@@ -108,7 +108,7 @@ MultiscaleModelFSI3D::setupData( const std::string& fileName )
         setupGlobalData( fileName );
 
     // Create FSI
-    M_FSIoperator = FSIOperatorPtr_Type( FSI::FSIFactory_Type::instance().createObject( M_data->method() ) );
+    M_FSIoperator = FSIOperatorPtr_Type( FSIOperator::FSIFactory_Type::instance().createObject( M_data->method() ) );
 
     // Setup Communicator
     setupCommunicator();
