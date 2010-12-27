@@ -37,7 +37,7 @@
 #ifndef BCInterface3DFunctionSolver_H
 #define BCInterface3DFunctionSolver_H 1
 
-#include <life/lifesolver/FSI.hpp>
+#include <life/lifesolver/FSIOperator.hpp>
 #include <life/lifesolver/OseenSolverShapeDerivative.hpp>
 
 #include <lifemc/lifesolver/BCInterface3DFunction.hpp>
@@ -238,11 +238,11 @@ BCInterface3DFunctionSolver< PhysicalSolverType >::BCInterface3DFunctionSolver( 
 // ===================================================
 template< >
 inline void
-BCInterface3DFunctionSolver< FSI >::updatePhysicalSolverVariables()
+BCInterface3DFunctionSolver< FSIOperator >::updatePhysicalSolverVariables()
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 5023 ) << "BCInterface3DFunctionSolver<FSI>::UpdateOperatorVariables  " << "\n";
+    Debug( 5023 ) << "BCInterface3DFunctionSolver<FSIOperator>::UpdateOperatorVariables  " << "\n";
 #endif
 
     // Create/Update variables for FSI problem
@@ -339,7 +339,7 @@ BCInterface3DFunctionSolver< FSI >::updatePhysicalSolverVariables()
             break;
 
         default:
-            switchErrorMessage( "FSI" );
+            switchErrorMessage( "FSIOperator" );
         }
 }
 
@@ -501,11 +501,11 @@ BCInterface3DFunctionSolver< PhysicalSolverType >::setData( const data_Type& dat
 // ===================================================
 template< >
 inline void
-BCInterface3DFunctionSolver< FSI >::createAccessList( const data_Type& data )
+BCInterface3DFunctionSolver< FSIOperator >::createAccessList( const data_Type& data )
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 5023 ) << "BCInterface3DFunctionSolver<FSI>::createAccessList" << "\n";
+    Debug( 5023 ) << "BCInterface3DFunctionSolver<FSIOperator>::createAccessList" << "\n";
 #endif
 
     std::map< std::string, physicalSolverList > mapList;
