@@ -44,8 +44,8 @@
 
  */
 
-#ifndef _NONLINRICHARDSON_HPP
-#define _NONLINRICHARDSON_HPP
+#ifndef _NONLINEARRICHARDSON_HPP
+#define _NONLINEARRICHARDSON_HPP
 
 #include <algorithm> // for min and max
 #include <life/lifealg/NonLinearLineSearch.hpp>
