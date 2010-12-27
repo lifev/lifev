@@ -57,7 +57,7 @@
 
 #include <life/lifefem/FESpace.hpp>
 
-#include <life/lifesolver/FSI.hpp>
+#include <life/lifesolver/FSIOperator.hpp>
 
 #include <lifemc/lifealg/ComposedPreconditioner.hpp>
 #include <lifemc/lifealg/ComposedOperator.hpp>
@@ -99,14 +99,14 @@ class WRONG_PREC_EXCEPTION;
  * Exact Newton method and full implicit time discretization are implemented in the FSIMonolithicGI class.
  */
 
-class FSIMonolithic : public FSI
+class FSIMonolithic : public FSIOperator
 {
 public:
 
     //!@name Typedefs
     //@{
-    typedef FSI                                        super_Type;
-    typedef FSI::fluidPtr_Type::value_type::matrix_Type/*matrix_Type*/   matrix_Type;
+    typedef FSIOperator                                        super_Type;
+    typedef FSIOperator::fluidPtr_Type::value_type::matrix_Type/*matrix_Type*/   matrix_Type;
     typedef boost::shared_ptr<matrix_Type>                     matrixPtr_Type;
     typedef MonolithicBlock                                     prec_Type;
     typedef boost::shared_ptr<prec_Type>                       precPtr_Type;
@@ -305,11 +305,11 @@ public:
     /**
        \small initialize with functions
     */
-    virtual void initialize( FSI::fluidPtr_Type::value_type::function_Type const& u0,
-                             FSI::solidPtr_Type::value_type::Function const& p0,
-                             FSI::solidPtr_Type::value_type::Function const& d0,
-                             FSI::solidPtr_Type::value_type::Function const& w0,
-                             FSI::solidPtr_Type::value_type::Function const& df0);
+    virtual void initialize( FSIOperator::fluidPtr_Type::value_type::function_Type const& u0,
+                             FSIOperator::solidPtr_Type::value_type::Function const& p0,
+                             FSIOperator::solidPtr_Type::value_type::Function const& d0,
+                             FSIOperator::solidPtr_Type::value_type::Function const& w0,
+                             FSIOperator::solidPtr_Type::value_type::Function const& df0);
 
     /**
        \small initialize the mesh displacement
@@ -474,10 +474,10 @@ protected:
        \param matrFull: the output matrix*/
     void    diagonalScale(vector_Type& rhs, matrixPtr_Type matrFull);
 
-    //!Empty method kept for compatibility with FSI.
+    //!Empty method kept for compatibility with FSIOperator.
     void shiftSolution(){}
 
-    //!Empty method kept for compatibility with FSI.
+    //!Empty method kept for compatibility with FSIOperator.
     void couplingVariableExtrap(vectorPtr_Type& /*lambda*/, vectorPtr_Type& /*lambdaDot*/, bool& /*firstIter*/)
     { }
 

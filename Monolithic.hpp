@@ -57,7 +57,7 @@
 
 #include <life/lifefem/FESpace.hpp>
 
-#include <life/lifesolver/FSI.hpp>
+#include <life/lifesolver/FSIOperator.hpp>
 
 #include <lifemc/lifealg/ComposedPreconditioner.hpp>
 #include <lifemc/lifealg/ComposedOperator.hpp>

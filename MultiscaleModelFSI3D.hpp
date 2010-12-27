@@ -39,7 +39,7 @@
 #define MS_MODEL_FSI3D_H 1
 
 // LifeV includes
-#include <life/lifesolver/FSI.hpp>
+#include <life/lifesolver/FSIOperator.hpp>
 #include <life/lifealg/nonLinRichardson.hpp>
 
 #include <life/lifefilters/ExporterEnsight.hpp>
@@ -76,32 +76,32 @@ public:
     //! @name Public Types
     //@{
 
-    typedef FSI                                                                    FSIOperator_Type;
-    typedef boost::shared_ptr< FSIOperator_Type>                                   FSIOperatorPtr_Type;
+    typedef FSIOperator                               FSIOperator_Type;
+    typedef boost::shared_ptr< FSIOperator_Type>      FSIOperatorPtr_Type;
 
-    typedef FSI::data_Type                                                         data_Type;
-    typedef FSI::dataPtr_Type                                                      dataPtr_Type;
+    typedef FSIOperator::data_Type                    data_Type;
+    typedef FSIOperator::dataPtr_Type                 dataPtr_Type;
 
-    typedef FSI::mesh_Type                                                         mesh_Type;
+    typedef FSIOperator::mesh_Type                    mesh_Type;
 
-    typedef FSI::fluid_Type                                                        fluid_Type;
-    typedef FSI::solid_Type                                                        solid_Type;
+    typedef FSIOperator::fluid_Type                   fluid_Type;
+    typedef FSIOperator::solid_Type                   solid_Type;
 
-    typedef FSI::vector_Type                                                       vector_Type;
-    typedef FSI::vectorPtr_Type                                                    vectorPtr_Type;
+    typedef FSIOperator::vector_Type                  vector_Type;
+    typedef FSIOperator::vectorPtr_Type               vectorPtr_Type;
 
-    typedef Exporter< mesh_Type >                                                          IOFile_Type;
-    typedef boost::shared_ptr< IOFile_Type >                                               IOFilePtr_Type;
+    typedef Exporter< mesh_Type >                     IOFile_Type;
+    typedef boost::shared_ptr< IOFile_Type >          IOFilePtr_Type;
 
-    typedef ExporterEnsight< mesh_Type >                                                           ensightIOFile_Type;
+    typedef ExporterEnsight< mesh_Type >              ensightIOFile_Type;
 #ifdef HAVE_HDF5
-    typedef ExporterHDF5< mesh_Type >                                                      hdf5IOFile_Type;
+    typedef ExporterHDF5< mesh_Type >                 hdf5IOFile_Type;
 #endif
 
-    typedef BCHandler                                                                      bc_Type;
-    typedef boost::shared_ptr< bc_Type >                                                   bcPtr_Type;
-    typedef BCInterface3D< FSI >                                                   bcInterface_Type;
-    typedef boost::shared_ptr< bcInterface_Type >                                          bcInterfacePtr_Type;
+    typedef BCHandler                                 bc_Type;
+    typedef boost::shared_ptr< bc_Type >              bcPtr_Type;
+    typedef BCInterface3D< FSIOperator >              bcInterface_Type;
+    typedef boost::shared_ptr< bcInterface_Type >     bcInterfacePtr_Type;
 
     //@}
 
