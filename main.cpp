@@ -117,21 +117,21 @@ public:
 
     typedef boost::shared_ptr<LifeV::FSISolver> fsi_solver_ptr;
 
-    typedef LifeV::FSI::data_Type                          data_Type;
-    typedef LifeV::FSI::dataPtr_Type                       dataPtr_Type;
+    typedef LifeV::FSIOperator::data_Type                          data_Type;
+    typedef LifeV::FSIOperator::dataPtr_Type                       dataPtr_Type;
 
-    typedef LifeV::FSI::vector_Type        vector_Type;
-    typedef LifeV::FSI::vectorPtr_Type     vectorPtr_Type;
+    typedef LifeV::FSIOperator::vector_Type        vector_Type;
+    typedef LifeV::FSIOperator::vectorPtr_Type     vectorPtr_Type;
 
     typedef boost::shared_ptr< LifeV::Exporter<LifeV::RegionMesh3D<LifeV::LinearTetra> > > filterPtr_Type;
 
-    typedef LifeV::ExporterEnsight<LifeV::FSI::mesh_Type>  ensightFilter_Type;
+    typedef LifeV::ExporterEnsight<LifeV::FSIOperator::mesh_Type>  ensightFilter_Type;
     typedef boost::shared_ptr<ensightFilter_Type>                 ensightFilterPtr_Type;
 #ifdef HAVE_HDF5
-    typedef LifeV::ExporterHDF5<LifeV::FSI::mesh_Type>  hdf5Filter_Type;
+    typedef LifeV::ExporterHDF5<LifeV::FSIOperator::mesh_Type>  hdf5Filter_Type;
     typedef boost::shared_ptr<hdf5Filter_Type>                  hdf5FilterPtr_Type;
 #endif
-    typedef LifeV::FactorySingleton<LifeV::Factory<LifeV::FSI,  std::string> > FSIFactory_Type;
+    typedef LifeV::FactorySingleton<LifeV::Factory<LifeV::FSIOperator,  std::string> > FSIFactory_Type;
     /*!
       This routine sets up the problem:
 
@@ -145,9 +145,9 @@ public:
     {
         using namespace LifeV;
 
-        VenantKirchhoffSolver< FSI::mesh_Type, SolverAztecOO >::StructureSolverFactory::instance().registerProduct( "linearVenantKirchhof", &FSI::createLinearStructure );
+        VenantKirchhoffSolver< FSIOperator::mesh_Type, SolverAztecOO >::StructureSolverFactory::instance().registerProduct( "linearVenantKirchhof", &FSIOperator::createLinearStructure );
 
-        //VenantKirchhofSolver< FSI::mesh_Type, SolverAztecOO >::StructureSolverFactory::instance().registerProduct( "nonLinearVenantKirchhof", &FSI::createNonLinearStructure );
+        //VenantKirchhofSolver< FSIOperator::mesh_Type, SolverAztecOO >::StructureSolverFactory::instance().registerProduct( "nonLinearVenantKirchhof", &FSIOperator::createNonLinearStructure );
 
         M_data = dataPtr_Type( new data_Type() );
         M_data->setup( data_file );
@@ -173,9 +173,9 @@ public:
         std::string  solidMeshPartitioned    =  data_file( "problem/solidMeshPartitioned", "none" );
         if ( fluidMeshPartitioned.compare( "none" ) )
         {
-            FSI::meshFilter_Type fluidMeshFilter( data_file, fluidMeshPartitioned );
+            FSIOperator::meshFilter_Type fluidMeshFilter( data_file, fluidMeshPartitioned );
             fluidMeshFilter.setComm( M_fsi->FSIOper()->worldComm() );
-            FSI::meshFilter_Type solidMeshFilter( data_file, solidMeshPartitioned );
+            FSIOperator::meshFilter_Type solidMeshFilter( data_file, solidMeshPartitioned );
             solidMeshFilter.setComm( M_fsi->FSIOper( )->worldComm( ) );
             M_fsi->FSIOper( )->partitionMeshes( fluidMeshFilter, solidMeshFilter );
             M_fsi->FSIOper( )->setupFEspace( );
