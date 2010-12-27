@@ -38,10 +38,10 @@
  */
 
 
-#ifndef EXACTJACOBIANBASE_HPP
-#define EXACTJACOBIANBASE_HPP
+#ifndef FSIEXACTJACOBIAN_HPP
+#define FSIEXACTJACOBIAN_HPP
 
-#include <life/lifesolver/FSI.hpp>
+#include <life/lifesolver/FSIOperator.hpp>
 
 namespace LifeV
 {
@@ -61,13 +61,13 @@ namespace LifeV
 
 */
 
-class FSIModelExactJacobian : public FSI
+class FSIExactJacobian : public FSIOperator
 {
 public:
 
     //! @name Public Types
     //@{
-    typedef FSI                             super;
+    typedef FSIOperator                             super;
 
     typedef super::vector_Type              vector_Type;
     typedef super::vectorPtr_Type           vectorPtr_type;
@@ -85,10 +85,10 @@ public:
     //@{
 
     //! Empty Constructor
-    FSIModelExactJacobian();
+    FSIExactJacobian();
 
     //! Destructor
-    ~FSIModelExactJacobian();
+    ~FSIExactJacobian();
     //@}
 
     //! @name Methods
@@ -181,7 +181,7 @@ private:
 
     public:
 
-        typedef FSIModelExactJacobian::vector_Type  vector_Type;
+        typedef FSIExactJacobian::vector_Type  vector_Type;
         typedef Epetra_Map                  map_Type;
         typedef boost::shared_ptr<map_Type> mapPtr_Type;
 
@@ -201,7 +201,7 @@ private:
         //@{
 
         //! sets the exactJacobian pointer and some contents thereof
-        void setOperator(FSIModelExactJacobian* ej);
+        void setOperator(FSIExactJacobian* ej);
 
         //! apply the jacobian to X and returns the result in Y
         int 	Apply           (const Epetra_MultiVector &X, Epetra_MultiVector &Y) const;
@@ -226,7 +226,7 @@ private:
 
     private:
 
-        FSIModelExactJacobian*                  M_ej;
+        FSIExactJacobian*                  M_ej;
 
         mapPtr_Type                     M_operatorDomainMap;
         mapPtr_Type                     M_operatorRangeMap;
@@ -251,11 +251,11 @@ private:
 }; // end class exactJacobian
 
 
-inline FSI* createEJ() { return new FSIModelExactJacobian(); }
+inline FSIOperator* createEJ() { return new FSIExactJacobian(); }
 
 namespace
 {
-static bool registerEJ = FSI::FSIFactory_Type::instance().registerProduct( "exactJacobian", &createEJ );
+static bool registerEJ = FSIOperator::FSIFactory_Type::instance().registerProduct( "exactJacobian", &createEJ );
 }
 
 }  // Namespace LifeV

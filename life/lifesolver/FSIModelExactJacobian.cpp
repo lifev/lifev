@@ -18,7 +18,7 @@
 */
 
 
-#include <life/lifesolver/FSIModelExactJacobian.hpp>
+#include <life/lifesolver/FSIExactJacobian.hpp>
 
 namespace LifeV
 {
@@ -26,7 +26,7 @@ namespace LifeV
 // ===================================================
 // Constructors & Destructor
 // ===================================================
-FSIModelExactJacobian::FSIModelExactJacobian():
+FSIExactJacobian::FSIExactJacobian():
         super(),
         M_rhsNew(),
         M_beta(),
@@ -41,14 +41,14 @@ FSIModelExactJacobian::FSIModelExactJacobian():
 
 
 
-FSIModelExactJacobian::~FSIModelExactJacobian()
+FSIExactJacobian::~FSIExactJacobian()
 {}
 
 // ===================================================
 // Methods
 // ===================================================
 
-void  FSIModelExactJacobian::solveJac(vector_Type         &_muk,
+void  FSIExactJacobian::solveJac(vector_Type         &_muk,
                               const vector_Type   &_res,
                               const Real         _linearRelTol)
 {
@@ -73,7 +73,7 @@ void  FSIModelExactJacobian::solveJac(vector_Type         &_muk,
     this->displayer().leaderPrint( "Solving the Jacobian system done.\n" );
 }
 
-void FSIModelExactJacobian::evalResidual(vector_Type&       res,
+void FSIExactJacobian::evalResidual(vector_Type&       res,
                                  const vector_Type& disp,
                                  const UInt          iter)
 {
@@ -97,7 +97,7 @@ void FSIModelExactJacobian::evalResidual(vector_Type&       res,
 }
 
 
-void  FSIModelExactJacobian::solveLinearFluid()
+void  FSIExactJacobian::solveLinearFluid()
 {
     //vector_Type dispFluidDomainRep( M_fluid->matrixNoBC().getMap(), Repeated);
     vector_Type dispFluidDomain( M_fluid->matrixNoBC().map(), Unique, Zero);
@@ -177,13 +177,13 @@ void  FSIModelExactJacobian::solveLinearFluid()
 }
 
 
-void  FSIModelExactJacobian::solveLinearSolid()
+void  FSIExactJacobian::solveLinearSolid()
 {
     this->M_solid->iterateLin( M_BCh_dz );
 }
 
 void
-FSIModelExactJacobian::setupFEspace()
+FSIExactJacobian::setupFEspace()
 {
     setLinearFluid(true);
     setLinearSolid(true);
@@ -192,7 +192,7 @@ FSIModelExactJacobian::setupFEspace()
 }
 
 void
-FSIModelExactJacobian::setupFluidSolid()
+FSIExactJacobian::setupFluidSolid()
 {
     super::setupFluidSolid();
 
@@ -207,7 +207,7 @@ FSIModelExactJacobian::setupFluidSolid()
 }
 
 void
-FSIModelExactJacobian::setDataFile( const GetPot& dataFile )
+FSIExactJacobian::setDataFile( const GetPot& dataFile )
 {
     super::setDataFile( dataFile );
 
@@ -220,7 +220,7 @@ FSIModelExactJacobian::setDataFile( const GetPot& dataFile )
 }
 
 
-void FSIModelExactJacobian::registerMyProducts( )
+void FSIExactJacobian::registerMyProducts( )
 {
     FSIFactory_Type::instance().registerProduct( "exactJacobian", &createEJ );
     solid_Type::StructureSolverFactory::instance().registerProduct( "LinearVenantKirchhof", &createLinearStructure );
@@ -233,7 +233,7 @@ void FSIModelExactJacobian::registerMyProducts( )
 
 
 UInt
-FSIModelExactJacobian::imposeFlux( void )
+FSIExactJacobian::imposeFlux( void )
 {
     if ( this->isFluid() )
     {
@@ -261,7 +261,7 @@ FSIModelExactJacobian::imposeFlux( void )
 // Residual computation
 //
 
-void FSIModelExactJacobian::eval(const vector_Type& _disp,
+void FSIExactJacobian::eval(const vector_Type& _disp,
                          const UInt          iter)
 {
     LifeChrono chronoFluid, chronoSolid, chronoInterface;
@@ -429,7 +429,7 @@ void FSIModelExactJacobian::eval(const vector_Type& _disp,
 // Constructors & Destructor
 // ===================================================
 
-FSIModelExactJacobian::Epetra_ExactJacobian::Epetra_ExactJacobian() :
+FSIExactJacobian::Epetra_ExactJacobian::Epetra_ExactJacobian() :
     M_ej(),
     M_operatorDomainMap(),
     M_operatorRangeMap(),
@@ -441,7 +441,7 @@ FSIModelExactJacobian::Epetra_ExactJacobian::Epetra_ExactJacobian() :
 // Methods
 // ===================================================
 
-void FSIModelExactJacobian::Epetra_ExactJacobian::setOperator(FSIModelExactJacobian* ej)
+void FSIExactJacobian::Epetra_ExactJacobian::setOperator(FSIExactJacobian* ej)
 {
     ASSERT(ej != 0, "passing NULL pointer to se operator");
     M_ej                = ej;
@@ -450,7 +450,7 @@ void FSIModelExactJacobian::Epetra_ExactJacobian::setOperator(FSIModelExactJacob
     M_comm              = M_ej->worldComm();
 }
 
-int FSIModelExactJacobian::Epetra_ExactJacobian::Apply(const Epetra_MultiVector &X, Epetra_MultiVector &Y) const
+int FSIExactJacobian::Epetra_ExactJacobian::Apply(const Epetra_MultiVector &X, Epetra_MultiVector &Y) const
 {
 
     LifeChrono chronoFluid, chronoSolid, chronoInterface;

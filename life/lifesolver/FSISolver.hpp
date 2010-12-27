@@ -62,7 +62,7 @@
 
 //#include <life/lifealg/newton.hpp>
 
-#include <life/lifesolver/FSI.hpp>
+#include <life/lifesolver/FSIOperator.hpp>
 
 #pragma GCC diagnostic warning "-Wunused-variable"
 #pragma GCC diagnostic warning "-Wunused-parameter"
@@ -101,13 +101,13 @@ public:
      */
     //@{
 
-    typedef FSI                                             FSIOper_Type;
+    typedef FSIOperator                                             FSIOper_Type;
     typedef boost::shared_ptr<FSIOper_Type>                         FSIOperPtr_Type;
 
-    typedef FSI::mesh_Type									mesh_Type;
+    typedef FSIOperator::mesh_Type									mesh_Type;
 
-    typedef FSI::fluidPtr_Type::value_type					fluid_Type;
-    typedef FSI::solidPtr_Type::value_type					solid_Type;
+    typedef FSIOperator::fluidPtr_Type::value_type					fluid_Type;
+    typedef FSIOperator::solidPtr_Type::value_type					solid_Type;
 
     typedef fluid_Type::function_Type    						    fluidFunction_Type;
     typedef solid_Type::Function								    solidFunction_Type;
@@ -115,19 +115,19 @@ public:
     typedef fluid_Type::source_Type    							    fluidSource_Type;
     typedef solid_Type::source_Type							        solidSource_Type;
 
-    typedef FSI::fluidBchandlerPtr_Type						fluidBchandlerPtr_Type;
-    typedef FSI::solidBchandlerPtr_Type						solidBchandlerPtr_Type;
+    typedef FSIOperator::fluidBchandlerPtr_Type						fluidBchandlerPtr_Type;
+    typedef FSIOperator::solidBchandlerPtr_Type						solidBchandlerPtr_Type;
 
-    typedef FSI::fluidBchandler_Type					    fluidBchandler_Type;
-    typedef FSI::solidBchandler_Type					    solidBchandler_Type;
+    typedef FSIOperator::fluidBchandler_Type					    fluidBchandler_Type;
+    typedef FSIOperator::solidBchandler_Type					    solidBchandler_Type;
 
     typedef fluid_Type::data_Type								    fluidData_Type;
     typedef solid_Type::data_Type								    solidData_Type;
 
-    typedef FSI::dataPtr_Type                               dataPtr_Type;
+    typedef FSIOperator::dataPtr_Type                               dataPtr_Type;
 
-    typedef FSI::vector_Type								vector_Type;
-    typedef FSI::vectorPtr_Type								vectorPtr_Type;
+    typedef FSIOperator::vector_Type								vector_Type;
+    typedef FSIOperator::vectorPtr_Type								vectorPtr_Type;
 
     //@}
 

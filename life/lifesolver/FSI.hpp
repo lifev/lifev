@@ -99,7 +99,7 @@ namespace LifeV
 
   \include ../../doc/api/bibliography/fluidstructure.dox
   \include ../../doc/api/bibliography/newton.dox
-  @class FSI
+  @class FSIOperator
   @brief Fluid-Structure Interface operator class
 
   This is the base class for the FSI solvers in LifeV. It contains the methods to evaluate the residual and compute the
@@ -112,7 +112,7 @@ namespace LifeV
   FSIFixedPoint
   FSIMonolithic
 */
-class FSI
+class FSIOperator
 {
 
 public:
@@ -153,7 +153,7 @@ public:
     typedef FSIData                                                                 data_Type;
     typedef boost::shared_ptr<data_Type>                                            dataPtr_Type;
     typedef std::map<ID, ID>::const_iterator                                        iterator_Type;
-    typedef FactorySingleton<Factory<FSI, std::string> >                            FSIFactory_Type;
+    typedef FactorySingleton<Factory<FSIOperator, std::string> >                            FSIFactory_Type;
     typedef Displayer::commPtr_Type/*Displayer::commPtr_Type*/                      commPtr_Type;
 
      //@}
@@ -164,9 +164,9 @@ public:
      */
     //@{
 
-    FSI();
+    FSIOperator();
 
-    virtual ~FSI();
+    virtual ~FSIOperator();
 
     //@}
 
@@ -290,11 +290,11 @@ public:
        \param d0: initial solid displacement
        \param w0: initial mesh velocity
      */
-    virtual void initialize( FSI::fluidPtr_Type::value_type::function_Type const& u0,
-                             FSI::fluidPtr_Type::value_type::function_Type const& p0,
-                             FSI::solidPtr_Type::value_type::Function const& d0,
-                             FSI::solidPtr_Type::value_type::Function const& w0,
-                             FSI::fluidPtr_Type::value_type::function_Type const& /*df0=FSI::solidPtr_Type::value_type::Function()*/)
+    virtual void initialize( FSIOperator::fluidPtr_Type::value_type::function_Type const& u0,
+                             FSIOperator::fluidPtr_Type::value_type::function_Type const& p0,
+                             FSIOperator::solidPtr_Type::value_type::Function const& d0,
+                             FSIOperator::solidPtr_Type::value_type::Function const& w0,
+                             FSIOperator::fluidPtr_Type::value_type::function_Type const& /*df0=FSI::solidPtr_Type::value_type::Function()*/)
     {
         Debug( 6220 ) << "FSI:: solid init \n";
         if (this->isSolid())
@@ -336,7 +336,7 @@ public:
     //!@name Factory Methods
     //@{
     //! Factory method for the linear elasticity solver
-    static VenantKirchhoffSolver< FSI::mesh_Type, SolverAztecOO >*    createLinearStructure() { return new VenantKirchhoffSolverLinear< FSI::mesh_Type, SolverAztecOO >(); }
+    static VenantKirchhoffSolver< FSIOperator::mesh_Type, SolverAztecOO >*    createLinearStructure() { return new VenantKirchhoffSolverLinear< FSIOperator::mesh_Type, SolverAztecOO >(); }
     //@}
 
     //!@name Public Methods
@@ -907,7 +907,7 @@ private:
     //!@name Private Methods
     //@{
     //!Private Copy Constructor
-    FSI( const FSI& /*copy*/){}
+    FSIOperator( const FSIOperator& /*copy*/){}
     //@}
 
     //! @name Private Attributes

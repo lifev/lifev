@@ -37,16 +37,16 @@
  */
 
 
-#ifndef FIXEDPOINTBASE_HPP
-#define FIXEDPOINTBASE_HPP
+#ifndef FSIFIXEDPOINT_HPP
+#define FSIFIXEDPOINT_HPP
 
 #include <life/lifealg/NonLinearAitken.hpp>
-#include <life/lifesolver/FSI.hpp>
+#include <life/lifesolver/FSIOperator.hpp>
 
 namespace LifeV
 {
 
-//! FSIModelFixedPont - Implementation of an  FSI with fixed point iterations.
+//! FSIFixedPont - Implementation of an  FSI with fixed point iterations.
 /*!
 \include ../../doc/api/bibliography/fluidstructure
 
@@ -62,13 +62,13 @@ namespace LifeV
     relaxed fixed point method.
 */
 
-class FSIModelFixedPoint : public FSI
+class FSIFixedPoint : public FSIOperator
 {
 public:
 
     //! @name Public Types
     //@{
-    typedef FSI                     super;
+    typedef FSIOperator                     super;
 
     typedef super::vector_Type              vector_Type;
     typedef super::vectorPtr_Type           vectorPtr_type;
@@ -98,10 +98,10 @@ public:
     //@{
 
     //! Empty Constructor
-    FSIModelFixedPoint();
+    FSIFixedPoint();
 
     //! Destructor
-    ~FSIModelFixedPoint();
+    ~FSIFixedPoint();
 
     //! @name Methods
     //@{
@@ -175,10 +175,10 @@ private:
 }; // end class fixedPointBase
 
 
-inline FSI* createFP() { return new FSIModelFixedPoint();}
+inline FSIOperator* createFP() { return new FSIFixedPoint();}
 namespace
 {
-static bool registerFP = FSI::FSIFactory_Type::instance().registerProduct( "fixedPoint", &createFP );
+static bool registerFP = FSIOperator::FSIFactory_Type::instance().registerProduct( "fixedPoint", &createFP );
 }
 
 }   // Namespace LifeV

@@ -20,10 +20,10 @@
 namespace LifeV
 {
 
-typedef FSI::fluid_raw_type fluid;
-typedef FSI::solid_raw_type solid;
+typedef FSIOperator::fluid_raw_type fluid;
+typedef FSIOperator::solid_raw_type solid;
 
-FSI::fluidBchandlerPtr_type BCh_harmonicExtension(FSI &_oper)
+FSIOperator::fluidBchandlerPtr_type BCh_harmonicExtension(FSIOperator &_oper)
 {
 
 //     Debug(10000) << "SP harmonic extension\n";
@@ -32,7 +32,7 @@ FSI::fluidBchandlerPtr_type BCh_harmonicExtension(FSI &_oper)
 //     FPOper->setStructureDispToHarmonicExtension(_oper.lambdaFluid());
 
     if (! _oper.isFluid() )
-        return FSI::fluidBchandlerPtr_type();
+        return FSIOperator::fluidBchandlerPtr_type();
 
 //    FPOper->bcvStructureDispToHarmonicExtension()->showMe(true,std::cout);
 
@@ -41,7 +41,7 @@ FSI::fluidBchandlerPtr_type BCh_harmonicExtension(FSI &_oper)
 
     BCFunctionBase bcf(fZero);
 
-    FSISolver::fluidBchandlerPtr_type BCh_he(new FSI::fluidBchandler_Type );
+    FSISolver::fluidBchandlerPtr_type BCh_he(new FSIOperator::fluidBchandler_Type );
 
     BCh_he->addBC("Top",       3, Essential, Full, bcf,   3);
     BCh_he->addBC("Base",      2, Essential, Full, bcf,   3);
@@ -59,7 +59,7 @@ FSI::fluidBchandlerPtr_type BCh_harmonicExtension(FSI &_oper)
     else if (_oper.method() == "exactJacobian")
     {
         Debug(10000) << "EJ harmonic extension\n";
-        FSIModelExactJacobian *EJOper = dynamic_cast<FSIModelExactJacobian *>(&_oper);
+        FSIExactJacobian *EJOper = dynamic_cast<FSIExactJacobian *>(&_oper);
         EJOper->setStructureDispToHarmonicExtension(_oper.lambdaFluidRepeated());
         BCh_he->addBC("Interface", 1, Essential, Full,
                       *EJOper->bcvStructureDispToHarmonicExtension(), 3);
@@ -67,7 +67,7 @@ FSI::fluidBchandlerPtr_type BCh_harmonicExtension(FSI &_oper)
     else if (_oper.method() == "fixedPoint")
     {
         Debug(10000) << "FP harmonic extension\n";
-        FSIModelFixedPoint *FPOper = dynamic_cast<FSIModelFixedPoint *>(&_oper);
+        FSIFixedPoint *FPOper = dynamic_cast<FSIFixedPoint *>(&_oper);
 
         FPOper->setStructureDispToHarmonicExtension(_oper.lambdaFluidRepeated());
         BCh_he->addBC("Interface", 1, Essential, Full,
@@ -80,15 +80,15 @@ FSI::fluidBchandlerPtr_type BCh_harmonicExtension(FSI &_oper)
 }
 
 
-FSI::fluidBchandlerPtr_type BCh_fluid(FSI &_oper)
+FSIOperator::fluidBchandlerPtr_type BCh_fluid(FSIOperator &_oper)
 {
     // Boundary conditions for the fluid velocity
     Debug( 10000 ) << "Boundary condition for the fluid\n";
 
     if (! _oper.isFluid() )
-        return FSI::fluidBchandlerPtr_type();
+        return FSIOperator::fluidBchandlerPtr_type();
 
-    FSI::fluidBchandlerPtr_type BCh_fluid( new FSI::fluidBchandler_Type );
+    FSIOperator::fluidBchandlerPtr_type BCh_fluid( new FSIOperator::fluidBchandler_Type );
 
     BCFunctionBase bcf      (fZero);
     BCFunctionBase in_flow  (u2);
@@ -109,15 +109,15 @@ FSI::fluidBchandlerPtr_type BCh_fluid(FSI &_oper)
 }
 
 
-FSI::fluidBchandlerPtr_type BCh_fluidInv(FSI &_oper)
+FSIOperator::fluidBchandlerPtr_type BCh_fluidInv(FSIOperator &_oper)
 {
 
     if (! _oper.isFluid() )
-        return FSI::fluidBchandlerPtr_type();
+        return FSIOperator::fluidBchandlerPtr_type();
 
     // Boundary conditions for the fluid velocity
     Debug( 10000 ) << "Boundary condition for the inverse fluid\n";
-    FSI::fluidBchandlerPtr_type BCh_fluidInv( new FSI::fluidBchandler_Type );
+    FSIOperator::fluidBchandlerPtr_type BCh_fluidInv( new FSIOperator::fluidBchandler_Type );
 
     BCFunctionBase bcf(fZero);
     BCFunctionBase in_flow(u2);
@@ -131,14 +131,14 @@ FSI::fluidBchandlerPtr_type BCh_fluidInv(FSI &_oper)
 
 
 
-FSI::fluidBchandlerPtr_type BCh_fluidLin(FSI &_oper)
+FSIOperator::fluidBchandlerPtr_type BCh_fluidLin(FSIOperator &_oper)
 {
     if (! _oper.isFluid() )
-        return FSI::fluidBchandlerPtr_type();
+        return FSIOperator::fluidBchandlerPtr_type();
 
     // Boundary conditions for the fluid velocity
     Debug( 10000 ) << "Boundary condition for the linearized fluid\n";
-    FSI::fluidBchandlerPtr_type BCh_fluidLin( new FSI::fluidBchandler_Type );
+    FSIOperator::fluidBchandlerPtr_type BCh_fluidLin( new FSIOperator::fluidBchandler_Type );
 
     BCFunctionBase bcf(fZero);
     BCFunctionBase in_flow(u2);
@@ -160,7 +160,7 @@ FSI::fluidBchandlerPtr_type BCh_fluidLin(FSI &_oper)
     }
     if (_oper.method() == "exactJacobian")
     {
-        FSIModelExactJacobian* EJOper = dynamic_cast<FSIModelExactJacobian *>(&_oper);
+        FSIExactJacobian* EJOper = dynamic_cast<FSIExactJacobian *>(&_oper);
         EJOper->setDerHarmonicExtensionVelToFluid(_oper.derVeloFluidMesh());
         BCh_fluidLin->addBC("Interface", 1, Essential  , Full,
                             *_oper.bcvDerHarmonicExtensionVelToFluid(), 3);
@@ -171,15 +171,15 @@ FSI::fluidBchandlerPtr_type BCh_fluidLin(FSI &_oper)
 
 
 
-FSI::solidBchandlerPtr_type BCh_solid(FSI &_oper)
+FSIOperator::solidBchandlerPtr_type BCh_solid(FSIOperator &_oper)
 {
 
     if (! _oper.isSolid() )
-        return FSI::solidBchandlerPtr_type();
+        return FSIOperator::solidBchandlerPtr_type();
 
     // Boundary conditions for the solid displacement
     Debug( 10000 ) << "Boundary condition for the solid\n";
-    FSI::solidBchandlerPtr_type BCh_solid( new FSI::solidBchandler_Type );
+    FSIOperator::solidBchandlerPtr_type BCh_solid( new FSIOperator::solidBchandler_Type );
 
     BCFunctionBase bcf(fZero);
 
@@ -199,7 +199,7 @@ FSI::solidBchandlerPtr_type BCh_solid(FSI &_oper)
     }
     else if (_oper.method() == "exactJacobian")
     {
-        FSIModelExactJacobian  *EJOper = dynamic_cast<FSIModelExactJacobian *>(&_oper);
+        FSIExactJacobian  *EJOper = dynamic_cast<FSIExactJacobian *>(&_oper);
         EJOper->setFluidLoadToStructure(_oper.sigmaSolidRepeated());
 
         BCh_solid->addBC("Interface", 1, Natural,   Full,
@@ -207,7 +207,7 @@ FSI::solidBchandlerPtr_type BCh_solid(FSI &_oper)
     }
     else if (_oper.method() == "fixedPoint")
     {
-        FSIModelFixedPoint *FPOper = dynamic_cast<FSIModelFixedPoint *>(&_oper);
+        FSIFixedPoint *FPOper = dynamic_cast<FSIFixedPoint *>(&_oper);
 
         FPOper->setFluidLoadToStructure(_oper.sigmaSolidRepeated());
 
@@ -219,14 +219,14 @@ FSI::solidBchandlerPtr_type BCh_solid(FSI &_oper)
 }
 
 
-FSI::solidBchandlerPtr_type BCh_solidLin(FSI &_oper)
+FSIOperator::solidBchandlerPtr_type BCh_solidLin(FSIOperator &_oper)
 {
     if (! _oper.isSolid() )
-        return FSI::solidBchandlerPtr_type();
+        return FSIOperator::solidBchandlerPtr_type();
 
     // Boundary conditions for the solid displacement
     Debug( 10000 ) << "Boundary condition for the linear solid\n";
-    FSI::solidBchandlerPtr_type BCh_solidLin( new FSI::solidBchandler_Type );
+    FSIOperator::solidBchandlerPtr_type BCh_solidLin( new FSIOperator::solidBchandler_Type );
 
     BCFunctionBase bcf(fZero);
 
@@ -243,7 +243,7 @@ FSI::solidBchandlerPtr_type BCh_solidLin(FSI &_oper)
     }
     else if (_oper.method() == "exactJacobian")
     {
-        FSIModelExactJacobian  *EJOper = dynamic_cast<FSIModelExactJacobian *>(&_oper);
+        FSIExactJacobian  *EJOper = dynamic_cast<FSIExactJacobian *>(&_oper);
         EJOper->setDerFluidLoadToStructure(_oper.sigmaSolidRepeated());
         BCh_solidLin->addBC("Interface", 1, Natural,   Full,
                             *EJOper->bcvDerFluidLoadToStructure(), 3);
@@ -252,15 +252,15 @@ FSI::solidBchandlerPtr_type BCh_solidLin(FSI &_oper)
     return BCh_solidLin;
 }
 
-FSI::solidBchandlerPtr_type BCh_solidInvLin(FSI &_oper)
+FSIOperator::solidBchandlerPtr_type BCh_solidInvLin(FSIOperator &_oper)
 {
 
     if (! _oper.isSolid() )
-        return FSI::solidBchandlerPtr_type();
+        return FSIOperator::solidBchandlerPtr_type();
 
     // Boundary conditions for the solid displacement
     Debug( 10000 ) << "Boundary condition for the inverse linear solid\n";
-    FSI::solidBchandlerPtr_type BCh_solidLinInv( new FSI::solidBchandler_Type );
+    FSIOperator::solidBchandlerPtr_type BCh_solidLinInv( new FSIOperator::solidBchandler_Type );
 
     BCFunctionBase bcf(fZero);
 
@@ -289,14 +289,14 @@ FSI::solidBchandlerPtr_type BCh_solidInvLin(FSI &_oper)
 
 
 
-FSI::fluidBchandlerPtr_type BCh_reducedFluid(FSI &_oper)
+FSIOperator::fluidBchandlerPtr_type BCh_reducedFluid(FSIOperator &_oper)
 {
 
     if (! _oper.isFluid() )
-        return FSI::solidBchandlerPtr_type();
+        return FSIOperator::solidBchandlerPtr_type();
 
     Debug( 10000 ) << "Boundary condition for the reduced fluid\n";
-    FSISolver::fluidBchandlerPtr_type BCh_reducedFluid(new FSI::fluidBchandler_Type );
+    FSISolver::fluidBchandlerPtr_type BCh_reducedFluid(new FSIOperator::fluidBchandler_Type );
     BCFunctionBase bcf(fZero);
 
     BCh_reducedFluid->addBC("Wall_Edges", 20, Essential, Scalar, bcf);
@@ -313,12 +313,12 @@ FSI::fluidBchandlerPtr_type BCh_reducedFluid(FSI &_oper)
 }
 
 
-FSI::fluidBchandlerPtr_type BCh_reducedFluidInv(FSI &_oper)
+FSIOperator::fluidBchandlerPtr_type BCh_reducedFluidInv(FSIOperator &_oper)
 {
     if (! _oper.isFluid() )
-        return FSI::solidBchandlerPtr_type();
+        return FSIOperator::solidBchandlerPtr_type();
 
-    FSISolver::fluidBchandlerPtr_type BCh_reducedFluidInv( new FSI::fluidBchandler_Type );
+    FSISolver::fluidBchandlerPtr_type BCh_reducedFluidInv( new FSIOperator::fluidBchandler_Type );
     BCFunctionBase bcf(fZero);
     BCh_reducedFluidInv->addBC("Wall_Edges", 20, Essential, Scalar, bcf);
     BCh_reducedFluidInv->addBC("InFlow",      2, Essential, Scalar, bcf);

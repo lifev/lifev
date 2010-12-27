@@ -17,7 +17,7 @@
    Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 
-#include <life/lifesolver/FSIModelFixedPoint.hpp>
+#include <life/lifesolver/FSIFixedPoint.hpp>
 
 namespace LifeV
 {
@@ -26,7 +26,7 @@ namespace LifeV
 // Constructors & Destructor
 // ===================================================
 
-FSIModelFixedPoint::FSIModelFixedPoint():
+FSIFixedPoint::FSIFixedPoint():
         super(),
         M_nonLinearAitken(),
         M_rhsNew(),
@@ -35,7 +35,7 @@ FSIModelFixedPoint::FSIModelFixedPoint():
 }
 
 
-FSIModelFixedPoint::~FSIModelFixedPoint()
+FSIFixedPoint::~FSIFixedPoint()
 {}
 
 
@@ -43,7 +43,7 @@ FSIModelFixedPoint::~FSIModelFixedPoint()
 // Methods
 // ===================================================
 
-void  FSIModelFixedPoint::solveJac(vector_Type        &muk,
+void  FSIFixedPoint::solveJac(vector_Type        &muk,
                            const vector_Type  &res,
                            const Real   /*_linearRelTol*/)
 {
@@ -59,7 +59,7 @@ void  FSIModelFixedPoint::solveJac(vector_Type        &muk,
     }
 }
 
-void FSIModelFixedPoint::evalResidual(vector_Type &res, const vector_Type& disp, UInt iter)
+void FSIFixedPoint::evalResidual(vector_Type &res, const vector_Type& disp, UInt iter)
 {
 
     if (this->isSolid())
@@ -79,7 +79,7 @@ void FSIModelFixedPoint::evalResidual(vector_Type &res, const vector_Type& disp,
 
 
 void
-FSIModelFixedPoint::setupFEspace()
+FSIFixedPoint::setupFEspace()
 {
     super::setLinearFluid(false);
     super::setLinearSolid(false);
@@ -90,7 +90,7 @@ FSIModelFixedPoint::setupFEspace()
 
 
 void
-FSIModelFixedPoint::setupFluidSolid()
+FSIFixedPoint::setupFluidSolid()
 {
     // call FSI setup()
 
@@ -110,7 +110,7 @@ FSIModelFixedPoint::setupFluidSolid()
 }
 
 void
-FSIModelFixedPoint::setDataFile( GetPot const& dataFile )
+FSIFixedPoint::setDataFile( GetPot const& dataFile )
 {
     super::setDataFile( dataFile );
 
@@ -126,7 +126,7 @@ FSIModelFixedPoint::setDataFile( GetPot const& dataFile )
 // Private Methods
 // ===================================================
 
-void FSIModelFixedPoint::eval( const vector_Type& _disp,
+void FSIFixedPoint::eval( const vector_Type& _disp,
                        UInt                iter)
 {
     // If M_data->updateEvery() == 1, normal fixedPoint algorithm
@@ -300,10 +300,10 @@ void FSIModelFixedPoint::eval( const vector_Type& _disp,
 
 
 
-void FSIModelFixedPoint::registerMyProducts( )
+void FSIFixedPoint::registerMyProducts( )
 {
     FSIFactory_Type::instance().registerProduct( "fixedPoint", &createFP );
-    solid_Type::StructureSolverFactory::instance().registerProduct( "LinearVenantKirchhof", &FSI::createLinearStructure );
+    solid_Type::StructureSolverFactory::instance().registerProduct( "LinearVenantKirchhof", &FSIOperator::createLinearStructure );
     //solid_Type::StructureSolverFactory::instance().registerProduct( "NonLinearVenantKirchhof", &FSI::createNonLinearStructure );
 }
 

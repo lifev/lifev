@@ -354,7 +354,7 @@ void
 FSISolver::setFSI( )
 {
     Debug( 6220 ) << "FSISolver::setFSI with operator " << M_data->method() << "\n";
-    M_oper = FSIOperPtr_Type( FSI::FSIFactory_Type::instance().createObject( M_data->method() ) );
+    M_oper = FSIOperPtr_Type( FSIOperator::FSIFactory_Type::instance().createObject( M_data->method() ) );
 }
 
 void

@@ -48,7 +48,7 @@
  */
 
 #include <life/lifecore/LifeV.hpp>
-#include <life/lifesolver/FSI.hpp>
+#include <life/lifesolver/FSIOperator.hpp>
 
 namespace LifeV
 {
@@ -56,7 +56,7 @@ namespace LifeV
 // ===================================================
 //! Constructors & Destructors
 // ===================================================
-FSI::FSI():
+FSIOperator::FSIOperator():
     M_mesh                               ( ),
     M_uFESpace                           ( ),
     M_pFESpace                           ( ),
@@ -148,7 +148,7 @@ FSI::FSI():
 {
 }
 
-FSI::~FSI()
+FSIOperator::~FSIOperator()
 {
 }
 
@@ -158,7 +158,7 @@ FSI::~FSI()
 // ===================================================
 
 void
-FSI::setDataFile( const GetPot& dataFile )
+FSIOperator::setDataFile( const GetPot& dataFile )
 {
 
     M_fluidMesh.reset(new mesh_Type());
@@ -173,7 +173,7 @@ FSI::setDataFile( const GetPot& dataFile )
 }
 
 void
-FSI::setupFEspace()
+FSIOperator::setupFEspace()
 {
     Displayer disp(M_epetraComm);
     disp.leaderPrint("FSI-  Setting ReferenceFE and QuadratureRule ...           ");
@@ -335,7 +335,7 @@ FSI::setupFEspace()
 
 
 void
-FSI::partitionMeshes()
+FSIOperator::partitionMeshes()
 {
     if (this->isFluid())
     {
@@ -350,7 +350,7 @@ FSI::partitionMeshes()
 
 #ifdef HAVE_HDF5
 void
-FSI::partitionMeshes( meshFilter_Type& fluidMeshFilter, meshFilter_Type& solidMeshFilter )
+FSIOperator::partitionMeshes( meshFilter_Type& fluidMeshFilter, meshFilter_Type& solidMeshFilter )
 {
     M_fluidMesh = fluidMeshFilter.getMeshPartition();
     M_solidMesh = solidMeshFilter.getMeshPartition();
@@ -359,7 +359,7 @@ FSI::partitionMeshes( meshFilter_Type& fluidMeshFilter, meshFilter_Type& solidMe
 
 
 void
-FSI::setupDOF( void )
+FSIOperator::setupDOF( void )
 {
     Displayer disp(M_epetraWorldComm);
     disp.leaderPrint("FSI: setting DOF ... " );
@@ -431,13 +431,13 @@ FSI::setupDOF( void )
 }
 
 void
-FSI::setupFluidSolid( void )
+FSIOperator::setupFluidSolid( void )
 {
     setupFluidSolid(imposeFlux());
 }
 
 void
-FSI::setupFluidSolid( UInt const fluxes )
+FSIOperator::setupFluidSolid( UInt const fluxes )
 {
     if ( this->isFluid() )
     {
@@ -476,7 +476,7 @@ FSI::setupFluidSolid( UInt const fluxes )
 }
 
 void
-FSI::setupSystem( void )
+FSIOperator::setupSystem( void )
 {
     if ( this->isFluid() )
     {
@@ -499,7 +499,7 @@ FSI::setupSystem( void )
 
 
 void
-FSI::buildSystem()
+FSIOperator::buildSystem()
 {
     if ( this->isFluid() )
     {
@@ -521,7 +521,7 @@ FSI::buildSystem()
 
 
 void
-FSI::updateSystem( )
+FSIOperator::updateSystem( )
 {
     shiftSolution();
 
@@ -546,7 +546,7 @@ FSI::updateSystem( )
 
 
 
-void FSI::couplingVariableExtrap( )
+void FSIOperator::couplingVariableExtrap( )
 {
     *M_lambda      = lambdaSolid();
     if (!M_lambdaDot.get())
@@ -566,7 +566,7 @@ void FSI::couplingVariableExtrap( )
 }
 
 void
-FSI::shiftSolution()
+FSIOperator::shiftSolution()
 {
     if ( this->isFluid() )
     {
@@ -575,7 +575,7 @@ FSI::shiftSolution()
 }
 
 UInt
-FSI::imposeFlux( void )
+FSIOperator::imposeFlux( void )
 {
     if ( this->isFluid() )
     {
@@ -598,14 +598,14 @@ FSI::imposeFlux( void )
 // ===================================================
 
 
-void FSI::initializeBDF( const vector_Type& un )
+void FSIOperator::initializeBDF( const vector_Type& un )
 {
   M_bdf.reset( new TimeAdvanceBDF<vector_Type>( ));
   M_bdf->setup(M_data->dataFluid()->dataTime()->orderBDF() ) ;
  M_bdf->setInitialCondition( un );
 }
 
-void FSI::createInterfaceMaps( std::map<ID, ID> const& locDofMap )
+void FSIOperator::createInterfaceMaps( std::map<ID, ID> const& locDofMap )
 {
     Displayer disp(M_epetraWorldComm);
     disp.leaderPrint("FSI-  Building fluid variables ...             ");
@@ -679,7 +679,7 @@ void FSI::createInterfaceMaps( std::map<ID, ID> const& locDofMap )
 
 
 void
-FSI::initializeFluid( const vector_Type& velAndPressure,
+FSIOperator::initializeFluid( const vector_Type& velAndPressure,
                               const vector_Type& displacement )
 {
     this->fluid().initialize( velAndPressure );
@@ -690,7 +690,7 @@ FSI::initializeFluid( const vector_Type& velAndPressure,
 
 
 void
-FSI::initializeSolid( vectorPtr_Type displacement,
+FSIOperator::initializeSolid( vectorPtr_Type displacement,
                               vectorPtr_Type velocity )
 {
     this->solid().initialize( displacement, velocity);
@@ -699,7 +699,7 @@ FSI::initializeSolid( vectorPtr_Type displacement,
 
 
 void
-FSI::moveMesh( const vector_Type& dep )
+FSIOperator::moveMesh( const vector_Type& dep )
 {
     displayer().leaderPrint("FSI-  Moving the mesh ...                      ");
     M_fluidMeshPart->meshPartition()->moveMesh(dep,  this->M_mmFESpace->dof().numTotalDof());
@@ -710,7 +710,7 @@ FSI::moveMesh( const vector_Type& dep )
 
 
 void
-FSI::transferFluidOnInterface(const vector_Type &_vec1, vector_Type &_vec2)
+FSIOperator::transferFluidOnInterface(const vector_Type &_vec1, vector_Type &_vec2)
 {
     // e.g.: vec1=M_fluid->residual(), vec2=M_sigmaFluid
 //     _vec2 = ZeroVector(_vec2.size());
@@ -754,7 +754,7 @@ FSI::transferFluidOnInterface(const vector_Type &_vec1, vector_Type &_vec2)
 
 //works in serial but no yet in parallel
 void
-FSI::transferSolidOnFluid(const vector_Type &_vec1, vector_Type &_vec2)
+FSIOperator::transferSolidOnFluid(const vector_Type &_vec1, vector_Type &_vec2)
 {
     //    e.g.: vec2=M_fluid->residual(), vec1=M_sigmaFluid
     //     _vec2 = ZeroVector(_vec2.size());
@@ -795,7 +795,7 @@ FSI::transferSolidOnFluid(const vector_Type &_vec1, vector_Type &_vec2)
 
 
 void
-FSI::transferSolidOnInterface(const vector_Type &_vec1, vector_Type &_vec2)
+FSIOperator::transferSolidOnInterface(const vector_Type &_vec1, vector_Type &_vec2)
 {
     /* e.g.:
        vec1 (Unique)       vec2 (Repeated)  (On different MapEpetras) (Changing now to Unique on both)
@@ -836,7 +836,7 @@ FSI::transferSolidOnInterface(const vector_Type &_vec1, vector_Type &_vec2)
 }
 
 void
-FSI::transferInterfaceOnSolid(const vector_Type& _vec1, vector_Type& _vec2)
+FSIOperator::transferInterfaceOnSolid(const vector_Type& _vec1, vector_Type& _vec2)
 {
     /* e.g.:
        vec2                vec1
@@ -876,7 +876,7 @@ FSI::transferInterfaceOnSolid(const vector_Type& _vec1, vector_Type& _vec2)
 }
 
 void
-FSI::bcManageVectorRHS( const fluidBchandlerPtr_Type& bch, vector_Type& rhs )
+FSIOperator::bcManageVectorRHS( const fluidBchandlerPtr_Type& bch, vector_Type& rhs )
 {
     if ( !bch->bcUpdateDone() || M_fluid->recomputeMatrix() )
         bch->bcUpdate( *M_uFESpace->mesh(), M_uFESpace->feBd(), M_uFESpace->dof() );
@@ -885,7 +885,7 @@ FSI::bcManageVectorRHS( const fluidBchandlerPtr_Type& bch, vector_Type& rhs )
 }
 
 void
-FSI::setAlphafCoef( )
+FSIOperator::setAlphafCoef( )
 {
     Real h=0.1, R=0.5;
     M_AlphafCoef  = 2*(this->dataSolid()->getRho()*h)/this->dataFluid()->dataTime()->timeStep();
@@ -894,7 +894,7 @@ FSI::setAlphafCoef( )
 }
 
 void
-FSI::setStructureToFluidParametres()
+FSIOperator::setStructureToFluidParametres()
 {
     this->setAlphafCoef();
     this->setAlphaf();
@@ -916,7 +916,7 @@ FSI::setStructureToFluidParametres()
 //! Display Methods
 // ===================================================
 bool
-FSI::isLeader() const
+FSIOperator::isLeader() const
 {
     if ( isFluid() )
     {
@@ -935,7 +935,7 @@ FSI::isLeader() const
 
 
 Displayer const&
-FSI::displayer()
+FSIOperator::displayer()
 {
     if ( isFluid() &&  M_fluid.get())
         return M_fluid->getDisplayer();
@@ -989,7 +989,7 @@ FSI::displacementOnInterface()
 //! Set Functions
 // ===================================================
 void
-FSI::setComm( const commPtr_Type& comm,
+FSIOperator::setComm( const commPtr_Type& comm,
                       const commPtr_Type& worldComm )
 {
     M_epetraComm       = comm;
@@ -998,7 +998,7 @@ FSI::setComm( const commPtr_Type& comm,
 
 
 void
-FSI::setFluid( const fluidPtr_Type& fluid, const meshMotionPtr_Type& meshmotion )
+FSIOperator::setFluid( const fluidPtr_Type& fluid, const meshMotionPtr_Type& meshmotion )
 {
     M_fluid = fluid;
     M_meshMotion = meshmotion;
@@ -1008,7 +1008,7 @@ FSI::setFluid( const fluidPtr_Type& fluid, const meshMotionPtr_Type& meshmotion 
 
 
 void
-FSI::setSolid( const solidPtr_Type& solid )
+FSIOperator::setSolid( const solidPtr_Type& solid )
 {
     M_solid = solid;
     M_isSolid = true;
@@ -1017,7 +1017,7 @@ FSI::setSolid( const solidPtr_Type& solid )
 
 
 void
-FSI::setFluidBC( const fluidBchandlerPtr_Type& bc_fluid )
+FSIOperator::setFluidBC( const fluidBchandlerPtr_Type& bc_fluid )
 {
     if ( isFluid() )
     {
@@ -1028,7 +1028,7 @@ FSI::setFluidBC( const fluidBchandlerPtr_Type& bc_fluid )
 
 
 void
-FSI::setHarmonicExtensionBC( const fluidBchandlerPtr_Type& bc_he )
+FSIOperator::setHarmonicExtensionBC( const fluidBchandlerPtr_Type& bc_he )
 {
     if ( isFluid() )
     {
@@ -1040,7 +1040,7 @@ FSI::setHarmonicExtensionBC( const fluidBchandlerPtr_Type& bc_he )
 
 
 void
-FSI::setSolidBC( const solidBchandlerPtr_Type& bc_solid )
+FSIOperator::setSolidBC( const solidBchandlerPtr_Type& bc_solid )
 {
     if ( isSolid() )
     {
@@ -1051,7 +1051,7 @@ FSI::setSolidBC( const solidBchandlerPtr_Type& bc_solid )
 
 
 void
-FSI::setLambdaFluid( const vector_Type& lambda )
+FSIOperator::setLambdaFluid( const vector_Type& lambda )
 {
     if ( lambda.mapType() == Unique )
         *M_lambdaFluid = lambda;
@@ -1064,7 +1064,7 @@ FSI::setLambdaFluid( const vector_Type& lambda )
 
 
 void
-FSI::setLambdaSolid( const vector_Type& lambda )
+FSIOperator::setLambdaSolid( const vector_Type& lambda )
 {
     if ( lambda.mapType() == Unique )
         *M_lambdaSolid = lambda;
@@ -1077,7 +1077,7 @@ FSI::setLambdaSolid( const vector_Type& lambda )
 
 
 void
-FSI::setLambdaSolidOld( const vector_Type& lambda )
+FSIOperator::setLambdaSolidOld( const vector_Type& lambda )
 {
     if ( lambda.mapType() == Unique )
         *M_lambdaSolidOld = lambda;
@@ -1088,7 +1088,7 @@ FSI::setLambdaSolidOld( const vector_Type& lambda )
 
 
 void
-FSI::setLambdaDotSolid( const vector_Type& lambda )
+FSIOperator::setLambdaDotSolid( const vector_Type& lambda )
 {
     if ( lambda.mapType() == Unique )
         *M_lambdaDotSolid = lambda;
@@ -1101,7 +1101,7 @@ FSI::setLambdaDotSolid( const vector_Type& lambda )
 
 
 void
-FSI::setSigmaSolid( const vector_Type& sigma )
+FSIOperator::setSigmaSolid( const vector_Type& sigma )
 {
     if ( sigma.mapType() == Unique )
         *M_sigmaSolid = sigma;
@@ -1113,7 +1113,7 @@ FSI::setSigmaSolid( const vector_Type& sigma )
 
 
 void
-FSI::setSigmaFluid( const vector_Type& sigma )
+FSIOperator::setSigmaFluid( const vector_Type& sigma )
 {
     if ( sigma.mapType() == Unique )
         *M_sigmaFluid = sigma;
@@ -1127,7 +1127,7 @@ FSI::setSigmaFluid( const vector_Type& sigma )
 
 
 void
-FSI::setMinusSigmaFluid( const vector_Type& sigma )
+FSIOperator::setMinusSigmaFluid( const vector_Type& sigma )
 {
     if ( sigma.mapType() == Unique )
     {
@@ -1144,7 +1144,7 @@ FSI::setMinusSigmaFluid( const vector_Type& sigma )
 
 
 void
-FSI::setAlphafbcf( const bcFunction_Type& alphafbcf )
+FSIOperator::setAlphafbcf( const bcFunction_Type& alphafbcf )
 {
     vector_Type vec( M_fluid->velocityFESpace().map());
     M_fluid->velocityFESpace().interpolate(alphafbcf, vec, 0.0);
@@ -1154,7 +1154,7 @@ FSI::setAlphafbcf( const bcFunction_Type& alphafbcf )
 
 
 void
-FSI::setStructureDispToHarmonicExtension( const vector_Type& disp, UInt type )
+FSIOperator::setStructureDispToHarmonicExtension( const vector_Type& disp, UInt type )
 {
     M_bcvStructureDispToHarmonicExtension->setup( disp,
                                                   M_dFESpace->dof().numTotalDof(),
@@ -1165,7 +1165,7 @@ FSI::setStructureDispToHarmonicExtension( const vector_Type& disp, UInt type )
 
 
 void
-FSI::setStructureToFluid( const vector_Type& velo,  UInt type )
+FSIOperator::setStructureToFluid( const vector_Type& velo,  UInt type )
 {
     M_bcvStructureToFluid->setup( velo,
                                   M_uFESpace->dof().numTotalDof(),
@@ -1176,7 +1176,7 @@ FSI::setStructureToFluid( const vector_Type& velo,  UInt type )
 
 
 void
-FSI::setStructureDispToFluid( const vector_Type& disp,  UInt type )
+FSIOperator::setStructureDispToFluid( const vector_Type& disp,  UInt type )
 {
     M_bcvStructureDispToFluid->setup( disp,
                                       M_uFESpace->dof().numTotalDof(),
@@ -1187,7 +1187,7 @@ FSI::setStructureDispToFluid( const vector_Type& disp,  UInt type )
 
 
 void
-FSI::setStructureDispToSolid( const vector_Type& disp, UInt type )
+FSIOperator::setStructureDispToSolid( const vector_Type& disp, UInt type )
 {
     M_bcvStructureDispToSolid->setup( disp,
                                       M_dFESpace->dof().numTotalDof(),
@@ -1198,7 +1198,7 @@ FSI::setStructureDispToSolid( const vector_Type& disp, UInt type )
 
 
 void
-FSI::setDerStructureDispToSolid( const vector_Type& ddisp, UInt type )
+FSIOperator::setDerStructureDispToSolid( const vector_Type& ddisp, UInt type )
 {
     M_bcvDerStructureDispToSolid->setup( ddisp,
                                          M_dFESpace->dof().numTotalDof(),
@@ -1209,7 +1209,7 @@ FSI::setDerStructureDispToSolid( const vector_Type& ddisp, UInt type )
 
 
 void
-FSI::setSolidLoadToStructure( const vector_Type& load, UInt type )
+FSIOperator::setSolidLoadToStructure( const vector_Type& load, UInt type )
 {
     M_bcvSolidLoadToStructure->setup( load,
                                       M_dFESpace->dof().numTotalDof(),
@@ -1220,7 +1220,7 @@ FSI::setSolidLoadToStructure( const vector_Type& load, UInt type )
 
 
 void
-FSI::setHarmonicExtensionVelToFluid( const vector_Type& vel, UInt type )
+FSIOperator::setHarmonicExtensionVelToFluid( const vector_Type& vel, UInt type )
 {
     M_bcvHarmonicExtensionVelToFluid->setup( vel,
                                              M_uFESpace->dof().numTotalDof(),
@@ -1231,7 +1231,7 @@ FSI::setHarmonicExtensionVelToFluid( const vector_Type& vel, UInt type )
 
 
 void
-FSI::setDerHarmonicExtensionVelToFluid( const vector_Type& dvel, UInt type )
+FSIOperator::setDerHarmonicExtensionVelToFluid( const vector_Type& dvel, UInt type )
 {
     M_bcvDerHarmonicExtensionVelToFluid->setup( dvel,
                                                 M_uFESpace->dof().numTotalDof(),
@@ -1243,7 +1243,7 @@ FSI::setDerHarmonicExtensionVelToFluid( const vector_Type& dvel, UInt type )
 
 
 void
-FSI::setFluidLoadToStructure( const vector_Type& load, UInt type )
+FSIOperator::setFluidLoadToStructure( const vector_Type& load, UInt type )
 {
     M_bcvFluidLoadToStructure->setup( load,
                                       M_dFESpace->dof().numTotalDof(),
@@ -1254,7 +1254,7 @@ FSI::setFluidLoadToStructure( const vector_Type& load, UInt type )
 
 
 void
-FSI::setDerFluidLoadToStructure( const vector_Type& dload, UInt type )
+FSIOperator::setDerFluidLoadToStructure( const vector_Type& dload, UInt type )
 {
     M_bcvDerFluidLoadToStructure->setup( dload,
                                          M_dFESpace->dof().numTotalDof(),
@@ -1265,7 +1265,7 @@ FSI::setDerFluidLoadToStructure( const vector_Type& dload, UInt type )
 
 
 void
-FSI::setDerFluidLoadToFluid( const vector_Type& dload, UInt type )
+FSIOperator::setDerFluidLoadToFluid( const vector_Type& dload, UInt type )
 {
     M_bcvDerFluidLoadToFluid->setup( dload,
                                      M_uFESpace->dof().numTotalDof(),
@@ -1273,7 +1273,7 @@ FSI::setDerFluidLoadToFluid( const vector_Type& dload, UInt type )
                                      type );
 }
 
-void FSI::setRobinOuterWall(function_Type const& dload, function_Type const& E)
+void FSIOperator::setRobinOuterWall(function_Type const& dload, function_Type const& E)
 {
     M_bcfRobinOuterWall.setFunctions_Robin(dload,
                                            E);
@@ -1287,7 +1287,7 @@ void FSI::setRobinOuterWall(function_Type const& dload, function_Type const& E)
 
 
 void
-FSI::variablesInit( const std::string& /*dOrder*/ )
+FSIOperator::variablesInit( const std::string& /*dOrder*/ )
 //FSI::variablesInit(const ReferenceFE* refFE_struct,const LifeV::QuadratureRule*  bdQr_struct, const LifeV::QuadratureRule* qR_struct)
 {
     M_lambdaFluid.reset        ( new vector_Type(*M_fluidInterfaceMap, Unique) );
@@ -1322,7 +1322,7 @@ FSI::variablesInit( const std::string& /*dOrder*/ )
 
 
 void
-FSI::transferMeshMotionOnFluid( const vector_Type& _vec1, vector_Type& _vec2 )
+FSIOperator::transferMeshMotionOnFluid( const vector_Type& _vec1, vector_Type& _vec2 )
 {
     //transferMeshMotionOnFluid should handle the repetition of the interface nodes.
     if (_vec1.mapType() == Unique)
@@ -1348,7 +1348,7 @@ FSI::transferMeshMotionOnFluid( const vector_Type& _vec1, vector_Type& _vec2 )
 }
 
 void
-FSI::interpolateVelocity( const vector_Type& _vec1, vector_Type& _vec2 )
+FSIOperator::interpolateVelocity( const vector_Type& _vec1, vector_Type& _vec2 )
 {
     assert(_vec1.mapType() == Repeated);
     assert(_vec2.mapType() == Unique);
@@ -1535,7 +1535,7 @@ FSI::interpolateVelocity( const vector_Type& _vec1, vector_Type& _vec2 )
 
 // this will interpolate dofs values from fespace1 to fespace2
 void
-FSI::interpolateInterfaceDofs( const FESpace<mesh_Type, MapEpetra>& _fespace1,
+FSIOperator::interpolateInterfaceDofs( const FESpace<mesh_Type, MapEpetra>& _fespace1,
                                        const vector_Type&                   _vec1,
                                        const FESpace<mesh_Type, MapEpetra>& _fespace2,
                                        vector_Type&                         _vec2,
