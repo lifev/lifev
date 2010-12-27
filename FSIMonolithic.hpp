@@ -261,7 +261,7 @@ public:
        This class is pure virtual, it depends on which type of monolithic solver is used
        \param res: output
        \param _sol: monolithic solution
-       \param iter: current nonLinRichardson (Newton) iteration
+       \param iter: current NonLinearRichardson (Newton) iteration
     */
     virtual void   evalResidual(vector_Type&        res,
                                 const vector_Type& _sol,

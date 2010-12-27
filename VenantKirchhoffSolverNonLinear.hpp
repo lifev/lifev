@@ -68,7 +68,7 @@
 
 #include <life/lifecore/LifeChrono.hpp>
 
-#include <life/lifealg/nonLinRichardson.hpp>
+#include <life/lifealg/NonLinearRichardson.hpp>
 #include <life/lifealg/SolverAztecOO.hpp>
 
 #include <life/lifesolver/VenantKirchhoffElasticData.hpp>
@@ -778,7 +778,7 @@ iterate( bchandler_Type& bch )
 
     Int status = 0;
 
-    status = nonLinRichardson( *this->M_disp, *this, abstol, reltol, maxiter, etamax, NonLinearLineSearch, this->M_out_res, this->M_data->getdataTime()->time() );
+    status = NonLinearRichardson( *this->M_disp, *this, abstol, reltol, maxiter, etamax, NonLinearLineSearch, this->M_out_res, this->M_data->getdataTime()->time() );
 
     if ( status == 1 )
     {

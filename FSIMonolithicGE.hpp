@@ -129,7 +129,7 @@ public:
        evaluates the residual b-Ax
        \param res: output
        \param _sol: monolithic solution
-       \param iter: current nonLinRichardson (Newton) iteration
+       \param iter: current NonLinearRichardson (Newton) iteration
     */
     void   evalResidual(vector_Type&        res,
                         const vector_Type& _sol,

@@ -125,7 +125,7 @@ public:
        evaluates the residual b-Ax
        \param res: output
        \param _sol: fluid domain displacement solution
-       \param iter: current nonLinRichardson (block Gauss Seidel for the tangent system) iteration
+       \param iter: current NonLinearRichardson (block Gauss Seidel for the tangent system) iteration
     */
     void                      evalResidual(vector_Type&        res,
                                            const vector_Type& _sol,

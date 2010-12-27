@@ -40,7 +40,7 @@
 
 // LifeV includes
 #include <life/lifesolver/FSIOperator.hpp>
-#include <life/lifealg/nonLinRichardson.hpp>
+#include <life/lifealg/NonLinearRichardson.hpp>
 
 #include <life/lifefilters/ExporterEnsight.hpp>
 #ifdef HAVE_HDF5
