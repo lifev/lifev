@@ -153,7 +153,7 @@ private:
  *	To get the base for the boundary condition call the getBase function.
  */
 template< >
-class BCInterface3DFunctionFSI< FSI >
+class BCInterface3DFunctionFSI< FSIOperator >
 {
 public:
 
@@ -197,7 +197,7 @@ public:
     /*!
      * @param physicalSolver FSI
      */
-    void checkMethod( const boost::shared_ptr< FSI >& physicalSolver );
+    void checkMethod( const boost::shared_ptr< FSIOperator >& physicalSolver );
 
     //@}
 
@@ -241,7 +241,7 @@ private:
     //@{
 
     template< class method >
-    void checkFunction( const boost::shared_ptr< FSI >& physicalSolver );
+    void checkFunction( const boost::shared_ptr< FSIOperator >& physicalSolver );
 
     //@}
 
@@ -281,7 +281,7 @@ private:
 // Private functions
 // ===================================================
 template< class method >
-inline void BCInterface3DFunctionFSI< FSI >::checkFunction( const boost::shared_ptr< FSI >& physicalSolver )
+inline void BCInterface3DFunctionFSI< FSIOperator >::checkFunction( const boost::shared_ptr< FSIOperator >& physicalSolver )
 {
     method *operMethod = dynamic_cast< method * > ( &*physicalSolver );
 

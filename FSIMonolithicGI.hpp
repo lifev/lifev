@@ -146,11 +146,11 @@ public:
                                          const vector_Type &_res,
                                          const Real       _linearRelTol);
     //! initialize the system with functions
-    void                        initialize( FSI::fluidPtr_Type::value_type::function_Type const& u0,
-                                            FSI::solidPtr_Type::value_type::Function const& p0,
-                                            FSI::solidPtr_Type::value_type::Function const& d0,
-                                            FSI::solidPtr_Type::value_type::Function const& w0,
-                                            FSI::solidPtr_Type::value_type::Function const& df0 );
+    void                        initialize( FSIOperator::fluidPtr_Type::value_type::function_Type const& u0,
+                                            FSIOperator::solidPtr_Type::value_type::Function const& p0,
+                                            FSIOperator::solidPtr_Type::value_type::Function const& d0,
+                                            FSIOperator::solidPtr_Type::value_type::Function const& w0,
+                                            FSIOperator::solidPtr_Type::value_type::Function const& df0 );
 
     //@}
     //!@name Get Methods

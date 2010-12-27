@@ -355,11 +355,11 @@ FSIMonolithic::updateSystem()
 }
 
 void
-FSIMonolithic::initialize( FSI::fluidPtr_Type::value_type::function_Type const& u0,
-                        FSI::solidPtr_Type::value_type::Function const& p0,
-                        FSI::solidPtr_Type::value_type::Function const& d0,
-                        FSI::solidPtr_Type::value_type::Function const& /*w0*/,
-                        FSI::solidPtr_Type::value_type::Function const& /*w0*/ )
+FSIMonolithic::initialize( FSIOperator::fluidPtr_Type::value_type::function_Type const& u0,
+                        FSIOperator::solidPtr_Type::value_type::Function const& p0,
+                        FSIOperator::solidPtr_Type::value_type::Function const& d0,
+                        FSIOperator::solidPtr_Type::value_type::Function const& /*w0*/,
+                        FSIOperator::solidPtr_Type::value_type::Function const& /*w0*/ )
 {
     vector_Type u(M_uFESpace->map());
     M_uFESpace->interpolate(u0, u, M_data->dataFluid()->dataTime()->time());

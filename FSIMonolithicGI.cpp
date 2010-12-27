@@ -271,11 +271,11 @@ void FSIMonolithicGI::solveJac(vector_Type       &_step,
     M_solid->getDisplayer().leaderPrint("  M-  Jacobian NormInf res:                    ", _step.normInf(), "\n");
 }
 
-void FSIMonolithicGI::initialize( FSI::fluidPtr_Type::value_type::function_Type const& u0,
-                               FSI::solidPtr_Type::value_type::Function const& p0,
-                               FSI::solidPtr_Type::value_type::Function const& d0,
-                               FSI::solidPtr_Type::value_type::Function const& w0,
-                               FSI::solidPtr_Type::value_type::Function const& df0 )
+void FSIMonolithicGI::initialize( FSIOperator::fluidPtr_Type::value_type::function_Type const& u0,
+                               FSIOperator::solidPtr_Type::value_type::Function const& p0,
+                               FSIOperator::solidPtr_Type::value_type::Function const& d0,
+                               FSIOperator::solidPtr_Type::value_type::Function const& w0,
+                               FSIOperator::solidPtr_Type::value_type::Function const& df0 )
 {
     super_Type::initialize(u0, p0, d0, w0, df0);
     vector_Type df(M_mmFESpace->map());
@@ -483,7 +483,7 @@ MonolithicBlock*    createComposedDND2GI()
     const std::vector<MonolithicBlockComposed::Block> orderVector(order, order+3);
     return new MonolithicBlockComposedDND( couplingVectorDN2GI2, orderVector );
 }
-FSI*    createFM() { return new FSIMonolithicGI(); }
+FSIOperator*    createFM() { return new FSIMonolithicGI(); }
 }
 
 // ===================================================

@@ -165,7 +165,7 @@ public:
     //@}
 
     //! Factory method
-    static FSI* createM(){ return new FSIMonolithicGE(); }
+    static FSIOperator* createM(){ return new FSIMonolithicGE(); }
 
 private:
     //!@name Private Methods
