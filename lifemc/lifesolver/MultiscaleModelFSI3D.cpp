@@ -239,7 +239,7 @@ MultiscaleModelFSI3D::solveSystem( )
         M_FSIoperator->applyBoundaryConditions( );
     }
 
-    UInt status = nonLinRichardson( *solution, *M_FSIoperator,
+    UInt status = NonLinearRichardson( *solution, *M_FSIoperator,
                                     M_data->absoluteTolerance(),
                                     M_data->relativeTolerance(),
                                     maxSubIterationNumber,
