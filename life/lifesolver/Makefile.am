@@ -26,8 +26,8 @@ AM_CPPFLAGS = -DNO_BLASLAPACK
 
 lib_LTLIBRARIES	= liblifesolver.la
 
-liblifesolver_la_SOURCES   = FSIData.cpp ADRData.cpp VenantKirchhoffElasticData.cpp  OseenData.cpp FSI.cpp FSIModelFixedPoint.cpp \
-			                 FSIModelExactJacobian.cpp FSISolver.cpp HeartIonicData.cpp HeartBidomainData.cpp HeartMonodomainData.cpp HeartFunctors.cpp \
+liblifesolver_la_SOURCES   = FSIData.cpp ADRData.cpp VenantKirchhoffElasticData.cpp  OseenData.cpp FSIOperator.cpp FSIFixedPoint.cpp \
+			                 FSIExactJacobian.cpp FSISolver.cpp HeartIonicData.cpp HeartBidomainData.cpp HeartMonodomainData.cpp HeartFunctors.cpp \
 					LevelSetData.cpp VenantKirchhoffViscoelasticData.cpp
 
 liblifesolver_la_LIBADD    = ../lifefilters/liblifefilters.la ../lifearray/liblifearray.la ../lifecore/liblifecore.la $(petsc_libs) $(aztec_libs) $(boost_libs)
