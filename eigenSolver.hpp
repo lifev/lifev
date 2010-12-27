@@ -26,7 +26,7 @@
 //@HEADER
 
 /**
-   \file eigenSolver.cpp
+   \file
    \author Paolo Crosetto <paolo.crosetto@epfl.ch>
    \date 2009-03-25
    \brief Class handling an eigensolver
