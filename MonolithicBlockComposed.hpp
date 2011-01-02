@@ -61,7 +61,7 @@ namespace LifeV
     It derives from the pure virtual class MonolithicBlock, it is still pure virtual and it is intended to be the base
     class for every preconditioner that can be split into factors. Notice that the vector of the preconditioned factors
     is missing, because it has to be implemented in the children. It could be for instance of type
-    ComposedOperator<T> or ComposedPreconditioner.
+    ComposedOperator<T> or PreconditionerComposed.
  */
 class MonolithicBlockComposed            : public MonolithicBlock
 {

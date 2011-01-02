@@ -70,7 +70,7 @@
 
 #include <life/lifecore/LifeV.hpp>
 
-#include <lifemc/lifealg/ComposedPreconditioner.hpp>
+#include <lifemc/lifealg/PreconditionerComposed.hpp>
 
 #include <lifemc/lifesolver/MonolithicBlockComposed.hpp>
 
@@ -160,7 +160,7 @@ public:
 
     //!pushes back the preconditioner for a block
     /*!
-      In this case M_blockPrecs is of type ComposedPreconditioner, thus this method calls ComposedPreconditioner::push_back(...)
+      In this case M_blockPrecs is of type PreconditionerComposed, thus this method calls PreconditionerComposed::push_back(...)
       which computes the AAS preconditioner for the input matrix
       \param Mat: input matrix
      */
@@ -178,7 +178,7 @@ public:
     void setComm( boost::shared_ptr<Epetra_Comm> comm )
     {
         M_comm = comm;
-        M_blockPrecs.reset( new ComposedPreconditioner(M_comm));
+        M_blockPrecs.reset( new PreconditionerComposed(M_comm));
     }
 
     //@}
@@ -220,9 +220,9 @@ protected:
     //@{
 
     /*!
-      Pointer to an ComposedPreconditioner object containing the preconditioners for each block
+      Pointer to an PreconditionerComposed object containing the preconditioners for each block
     */
-    boost::shared_ptr<ComposedPreconditioner>            M_blockPrecs;
+    boost::shared_ptr<PreconditionerComposed>            M_blockPrecs;
     mapPtr_Type                                      M_uMap;
     mapPtr_Type                                      M_pMap;
     mapPtr_Type                                      M_dMap;

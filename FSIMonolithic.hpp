@@ -59,7 +59,7 @@
 
 #include <life/lifesolver/FSIOperator.hpp>
 
-#include <lifemc/lifealg/ComposedPreconditioner.hpp>
+#include <lifemc/lifealg/PreconditionerComposed.hpp>
 #include <lifemc/lifealg/ComposedOperator.hpp>
 #ifdef HAVE_TRILINOS_ANASAZI
 #include <lifemc/lifealg/EigenSolver.hpp>
