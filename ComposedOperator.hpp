@@ -56,7 +56,7 @@
 
 namespace LifeV
 {
-//! ComposedPreconditioner -
+//! PreconditionerComposed -
 /*!
   @author Simone Deparis, Paolo Crosetto
   @mantainer Paolo Crosetto

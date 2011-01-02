@@ -60,7 +60,7 @@
 namespace LifeV
 {
 
-class ComposedPreconditioner:
+class PreconditionerComposed:
         public Preconditioner
 {
 public:
@@ -84,21 +84,21 @@ public:
      */
     //@{
     //! default constructor.
-    ComposedPreconditioner( boost::shared_ptr<Epetra_Comm> comm = boost::shared_ptr<Epetra_Comm>() );
+    PreconditionerComposed( boost::shared_ptr<Epetra_Comm> comm = boost::shared_ptr<Epetra_Comm>() );
 
     //!Copy Constructor
     /**
        This copy constructor does not copy the matrices, but just the shared_ptrs. It calls the copy constructor of ComposedOperator.
      */
-    ComposedPreconditioner( ComposedPreconditioner& P );
+    PreconditionerComposed( PreconditionerComposed& P );
 
     //! constructor from matrix A.
     //! @param A MatrixEpetra<double> matrix upon which construct the preconditioner
-    //    ComposedPreconditioner(operatorPtr_Type& A);
+    //    PreconditionerComposed(operatorPtr_Type& A);
 
     //! default destructor
 
-    ~ComposedPreconditioner();
+    ~PreconditionerComposed();
 
     //@}
 
@@ -183,7 +183,7 @@ public:
     //! Factory method
     static Preconditioner* createComposedPreconditioner()
     {
-        return new ComposedPreconditioner();
+        return new PreconditionerComposed();
     }
     //@}
 

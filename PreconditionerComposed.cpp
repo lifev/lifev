@@ -27,7 +27,7 @@
    \date 2009-05-07
  */
 
-#include <lifemc/lifealg/ComposedPreconditioner.hpp>
+#include <lifemc/lifealg/PreconditionerComposed.hpp>
 #include <life/lifealg/PreconditionerIfpack.hpp>
 #include <life/lifealg/PreconditionerML.hpp>
 
@@ -41,7 +41,7 @@ namespace LifeV
 //! Constructurs and Destructor
 // ===================================================
 
-ComposedPreconditioner::ComposedPreconditioner( boost::shared_ptr<Epetra_Comm> comm):
+PreconditionerComposed::PreconditionerComposed( boost::shared_ptr<Epetra_Comm> comm):
     super_Type (comm ),
     M_prec(new prec_Type(comm)),
     M_operVector(0)
@@ -49,7 +49,7 @@ ComposedPreconditioner::ComposedPreconditioner( boost::shared_ptr<Epetra_Comm> c
 {
 }
 
-ComposedPreconditioner::ComposedPreconditioner(ComposedPreconditioner& P):
+PreconditionerComposed::PreconditionerComposed(PreconditionerComposed& P):
     super_Type(P, boost::dynamic_pointer_cast<ComposedOperator<Ifpack_Preconditioner> >(P.preconditionerPtr())->commPtr()),
     M_prec(new prec_Type(*boost::dynamic_pointer_cast<prec_Type>(P.preconditionerPtr()))),
     M_operVector(P.getOperVector())
@@ -57,7 +57,7 @@ ComposedPreconditioner::ComposedPreconditioner(ComposedPreconditioner& P):
 {
     //    *M_prec=*P.preconditioner();
 }
-ComposedPreconditioner::~ComposedPreconditioner()
+PreconditionerComposed::~PreconditionerComposed()
 {}
 
 
@@ -67,7 +67,7 @@ ComposedPreconditioner::~ComposedPreconditioner()
 
 
 void
-ComposedPreconditioner::setDataFromGetPot( const GetPot&      dataFile,
+PreconditionerComposed::setDataFromGetPot( const GetPot&      dataFile,
                                            const std::string& section )
 {
 	list_Type uselessList __attribute__ ((deprecated));
@@ -75,7 +75,7 @@ ComposedPreconditioner::setDataFromGetPot( const GetPot&      dataFile,
 }
 
 void
-ComposedPreconditioner::createParametersList(       list_Type& /*list*/,
+PreconditionerComposed::createParametersList(       list_Type& /*list*/,
                                           const GetPot&      dataFile,
                                           const std::string& section,
                                           const std::string& subSection )
@@ -93,26 +93,26 @@ ComposedPreconditioner::createParametersList(       list_Type& /*list*/,
 }
 
 double
-ComposedPreconditioner::condest()
+PreconditionerComposed::condest()
 {
     return M_prec->Condest();
 }
 
 Preconditioner::prec_raw_type*
-ComposedPreconditioner::preconditioner()
+PreconditionerComposed::preconditioner()
 {
     return M_prec.get();
 }
 
 int
-ComposedPreconditioner::buildPreconditioner(operatorPtr_Type& oper)
+PreconditionerComposed::buildPreconditioner(operatorPtr_Type& oper)
 {
     //M_prec.reset(new prec_raw_type(M_displayer.comm()));
     return push_back(oper);
 }
 
 int
-ComposedPreconditioner::buildPreconditioner(operatorPtr_Type& oper,
+PreconditionerComposed::buildPreconditioner(operatorPtr_Type& oper,
                                         const bool useInverse,
                                         const bool useTranspose)
 {
@@ -121,7 +121,7 @@ ComposedPreconditioner::buildPreconditioner(operatorPtr_Type& oper,
 }
 
 int
-ComposedPreconditioner::push_back(operatorPtr_Type& oper,
+PreconditionerComposed::push_back(operatorPtr_Type& oper,
                               const bool useInverse,
                               const bool useTranspose
                               )
@@ -144,12 +144,12 @@ ComposedPreconditioner::push_back(operatorPtr_Type& oper,
 }
 
 int
-ComposedPreconditioner::replace(operatorPtr_Type& oper,
+PreconditionerComposed::replace(operatorPtr_Type& oper,
                             const UInt index,
                             const bool useInverse,
                             const bool useTranspose)
 {
-    ASSERT(index <= M_operVector.size(), "ComposedPreconditioner::replace: index too large");
+    ASSERT(index <= M_operVector.size(), "PreconditionerComposed::replace: index too large");
 
     M_operVector[index] = oper;
     LifeChrono chrono;
@@ -166,7 +166,7 @@ ComposedPreconditioner::replace(operatorPtr_Type& oper,
 }
 
 void
-ComposedPreconditioner::resetPreconditioner()
+PreconditionerComposed::resetPreconditioner()
 {
     //M_operVector.reset();
     M_prec.reset();
@@ -180,7 +180,7 @@ ComposedPreconditioner::resetPreconditioner()
 // ===================================================
 
 Int
-ComposedPreconditioner::createPrec(operator_type& oper,
+PreconditionerComposed::createPrec(operator_type& oper,
                                    boost::shared_ptr<Preconditioner> & prec )
 {
     return prec->buildPreconditioner( oper );
@@ -188,6 +188,6 @@ ComposedPreconditioner::createPrec(operator_type& oper,
 
 
 
-bool ComposedPreconditioner::registerComposed = PRECFactory::instance().registerProduct( "Composed", &ComposedPreconditioner::createComposedPreconditioner );
+bool PreconditionerComposed::registerComposed = PRECFactory::instance().registerProduct( "Composed", &PreconditionerComposed::createComposedPreconditioner );
 
 } // namespace LifeV

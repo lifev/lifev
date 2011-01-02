@@ -26,7 +26,7 @@ AM_CPPFLAGS = -DNO_BLASLAPACK
 
 lib_LTLIBRARIES	= liblifemcalg.la
 
-liblifemcalg_la_SOURCES	= ComposedPreconditioner.cpp EigenSolver.cpp
+liblifemcalg_la_SOURCES	= PreconditionerComposed.cpp EigenSolver.cpp
 
 liblifemcalg_la_LIBADD	= -llifealg
 
