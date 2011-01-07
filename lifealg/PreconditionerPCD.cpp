@@ -29,6 +29,7 @@
 
 #include <vector>
 #include "PreconditionerPCD.hpp"
+#include <life/lifealg/PreconditionerIfpack.hpp>
 #include <lifemc/lifearray/MatrixBlock.hpp>
 #include <lifemc/lifearray/MatrixBlockView.hpp>
 #include <lifemc/lifearray/MatrixBlockUtils.hpp>
@@ -36,8 +37,7 @@
 namespace LifeV {
 
 PreconditionerPCD::PreconditionerPCD():
-    ComposedPreconditioner(),
-    M_precType(""),
+    PreconditionerComposition(),
     M_velocityBlockSize(-1),
     M_pressureBlockSize(-1),
     M_timestep(1.0),
@@ -52,15 +52,15 @@ PreconditionerPCD::PreconditionerPCD():
 PreconditionerPCD::~PreconditionerPCD()
 {}
 
-void PreconditionerPCD::createList( list_type&         list,
-                                    const GetPot&      dataFile,
-                                    const std::string& section,
-                                    const std::string& subSection )
+void PreconditionerPCD::createParametersList( list_Type&         list,
+                                              const GetPot&      dataFile,
+                                              const std::string& section,
+                                              const std::string& subSection )
 {
     createPCDList( list, dataFile, section, subSection );
 }
 
-void PreconditionerPCD::createPCDList( list_type&         list,
+void PreconditionerPCD::createPCDList( list_Type&         list,
                                        const GetPot&      dataFile,
                                        const std::string& section,
                                        const std::string& subsection )
@@ -87,7 +87,7 @@ void PreconditionerPCD::createPCDList( list_type&         list,
     if (displayList) list.print(std::cout);
 }
 
-Real PreconditionerPCD::Condest()
+Real PreconditionerPCD::condest()
 {
     return 0.0;
 }
@@ -156,7 +156,7 @@ int PreconditionerPCD::buildPreconditioner(operator_type& oper)
     P1a->globalAssemble();
     P1a->spy("p1a");
     boost::shared_ptr<parent_matrix_type> p1a = P1a;
-    //push_back(p1a,notInversed,notTransposed);
+    pushBack(p1a,notInversed,notTransposed);
 
     std::cout << "P1b" << std::endl;
     boost::shared_ptr<matrix_type> P1b(new matrix_type( map ));
@@ -172,7 +172,10 @@ int PreconditionerPCD::buildPreconditioner(operator_type& oper)
     P1b->spy("p1b");
     boost::shared_ptr<parent_matrix_type> p1b = P1b;
     //boost::shared_ptr<src_matrix_type> p1b(P1b->getMatrixPtr());
+    boost::shared_ptr<PreconditionerIfpack> prec;
+    prec.reset(new PreconditionerIfpack());
     //push_back(p1b,inversed,notTransposed);
+    //pushBack(p1b,prec);
 
     std::cout << "P1c" << std::endl;
     boost::shared_ptr<matrix_type> P1c(new matrix_type( map ));
@@ -184,7 +187,7 @@ int PreconditionerPCD::buildPreconditioner(operator_type& oper)
 	P1c->globalAssemble();
     P1c->spy("p1c");
     boost::shared_ptr<parent_matrix_type> p1c = P1c;
-    //push_back(p1c,notInversed,notTransposed);
+    pushBack(p1c,notInversed,notTransposed);
 
     // Building the block
     // / F 0 \
@@ -199,7 +202,7 @@ int PreconditionerPCD::buildPreconditioner(operator_type& oper)
     P2->globalAssemble();
     P2->spy("p2");
     boost::shared_ptr<parent_matrix_type> p2 = P2;
-    //push_back(p2,notInversed,notTransposed);
+    pushBack(p2,notInversed,notTransposed);
 
     // Building the block
     // / I Bt \
@@ -216,7 +219,11 @@ int PreconditionerPCD::buildPreconditioner(operator_type& oper)
     P3->globalAssemble();
     P3->spy("p3");
     boost::shared_ptr<parent_matrix_type> p3 = P3;
-    //push_back(p3,notInversed,notTransposed);
+    pushBack(p3,notInversed,notTransposed);
+
+    this->M_preconditionerCreated = true;
+
+    std::cout << "[DEBUG] number of operators: " << numOperators() << std::endl;
 
     std::cout << "All the blocks are built" << std::endl;
 
@@ -228,7 +235,7 @@ int PreconditionerPCD::numBlocksRows() const
     return 2;
 }
 
-int PreconditionerPCD::numBlocksCols() const
+int PreconditionerPCD::numBlocksColumns() const
 {
     return 2;
 }

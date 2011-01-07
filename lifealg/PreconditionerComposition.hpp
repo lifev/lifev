@@ -60,14 +60,17 @@ public:
 
     //! @name Public Types
     //@{
+    typedef Preconditioner                         super_Type;
+    typedef boost::shared_ptr<super_Type>          super_PtrType;
+    typedef super_Type::prec_raw_type              operator_Type;
+    typedef boost::shared_ptr<operator_Type>       operator_PtrType;
+    typedef ComposedOperator<operator_Type>        prec_Type;
+    typedef boost::shared_ptr<prec_Type>           prec_PtrType;
 
-    typedef Preconditioner                         super;
-    typedef ComposedOperator<Preconditioner>       prec_raw_type;
-    typedef boost::shared_ptr<prec_raw_type>       prec_type;
-    typedef super::prec_raw_type                   operator_raw_type;
-    typedef boost::shared_ptr<operator_raw_type>   operator_type;
-    typedef Teuchos::ParameterList                 list_type;
+    typedef Teuchos::ParameterList                 list_Type;
 
+    typedef MatrixEpetra<Real>                     matrix_Type;
+    typedef boost::shared_ptr<matrix_Type>         matrix_PtrType;
     //@}
 
 
@@ -96,33 +99,22 @@ public:
     //! @name Methods
     //@{
 
-    void createParametersList( list_type& list,
-                     const GetPot& dataFile,
-                     const std::string& section,
-                     const std::string& subSection ) = 0;
+    virtual void createParametersList( list_Type& list,
+                                       const GetPot& dataFile,
+                                       const std::string& section,
+                                       const std::string& subSection ) = 0;
 
     //! Build the preconditioner
     /*!
       @param A the base matrix for computing the preconditioner
     */
-    virtual int buildPreconditioner(operator_type& A) = 0;
+    virtual int buildPreconditioner(matrix_PtrType& A) = 0;
 
     //! Reset the preconditioner
-    void precReset();
+    void resetPreconditioner();
 
     //! Return an estimation of the conditionement number of the preconditioner
-    double Condest();
-
-    //! Add A to the right of the composition
-    int push_back( operator_type& A,
-                   const bool useInverse=false,
-                   const bool useTranspose=false );
-
-    //! Replace the operators at position i by A
-    int replace( operator_type& A,
-                 const UInt index,
-                 const bool useInverse=false,
-                 const bool useTranspose=false );
+    Real condest();
 
     //@}
 
@@ -156,8 +148,8 @@ public:
         @param dataFile is a GetPot dataFile
         @param section is the section containing the data
      */
-    void setDataFromGetPot ( const GetPot& dataFile,
-                             const std::string& section ) = 0;
+    virtual void setDataFromGetPot ( const GetPot& dataFile,
+                                     const std::string& section ) = 0;
 
     //@}
 
@@ -169,43 +161,60 @@ public:
     /*!
      *  @return true
      */
-    bool set() const;
+    bool isPreconditionerSet() const;
 
     /** Get a standard pointer to the preconditioner. In most of the cases is more safe to use getPrecPtr(), which
      returns a boost::shared_ptr*/
-    prec_raw_type* getPrec();
+    operator_Type* preconditioner();
 
     /** get a boost::shared_ptr to the preconditioner. The only requirement on the preconditioner is that
      it must derive from the Epetra_Operator object*/
-    operator_type preconditionerPtr();
+    operator_PtrType preconditionerPtr();
 
     //! Return the type name of the preconditioner.
     /*!
      *  @return type of the preconditioner
      */
-    std::string preconditionerType();
+    virtual std::string preconditionerType();
 
     //! Return the number of operators in the composition
     UInt numOperators() const;
 
     //@}
 
-private:
+protected:
 
     //! @name Private Methods
     //@{
 
-    //! Short description of this method
-    /*!
-        Add more details about the method.
-        NOTE: short description is automatically added before this part.
-     */
-    //void privateMethodOne();
+    //! Add A to the right of the composition
+    int pushBack( matrix_PtrType& A,
+                  const bool useInverse=false,
+                  const bool useTranspose=false );
+
+    //! Use a preconditioner to build the inverse of A and add it to the right of the composition
+    int pushBack( matrix_PtrType& A,
+                  super_PtrType& preconditioner,
+                  const bool useInverse=false,
+                  const bool useTranspose=false );
+
+    //! Use a preconditioner to build the inverse of A and add it to the right of the composition
+    int pushBack( operator_Type& A,
+                  const bool useInverse=false,
+                  const bool useTranspose=false );
+
+    //! Replace the operators at position i by A
+    int replace( operator_Type& A,
+                 const UInt index,
+                 const bool useInverse=false,
+                 const bool useTranspose=false );
 
     //@}
 
-    prec_type                  M_prec;
-    std::vector<operator_type> M_operators;
+private:
+
+    prec_PtrType                  M_prec;
+    //std::vector<operator_type> M_operators;
 };
 
 } // Namespace LifeV

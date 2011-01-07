@@ -52,10 +52,11 @@ namespace LifeV {
 // ===================================================
 // Constructors & Destructor
 // ===================================================
+// Todo: look into FSIMonolithic.hpp
 
 PreconditionerComposition::PreconditionerComposition( boost::shared_ptr<Epetra_Comm> comm ):
-    super (comm ),
-    M_prec(new prec_raw_type(comm))
+    super_Type (comm),
+    M_prec(new prec_Type(comm))
 {
 
 }
@@ -73,51 +74,17 @@ PreconditionerComposition::~PreconditionerComposition()
 // ===================================================
 // Methods
 // ===================================================
-/*
-void PreconditionerComposition::createList( list_type& list,
-                     const GetPot& dataFile,
-                     const std::string& section,
-                     const std::string& subSection )
-{
 
-}
-
-int PreconditionerComposition::buildPreconditioner(operator_type& A)
-{
-
-}
-*/
-
-void PreconditionerComposition::precReset()
+void PreconditionerComposition::resetPreconditioner()
 {
     M_prec.reset();
     this->M_preconditionerCreated = false;
 }
 
-double PreconditionerComposition::Condest()
+Real PreconditionerComposition::condest()
 {
-    return M_prec->Condest();
-}
-
-int PreconditionerComposition::push_back( operator_type& A,
-                                          const bool useInverse,
-                                          const bool useTranspose )
-{
-    M_operators.push_back(A);
-
-    return EXIT_SUCCESS;
-}
-
-int PreconditionerComposition::replace( operator_type& A,
-                                        const UInt index,
-                                        const bool useInverse,
-                                        const bool useTranspose )
-{
-    ASSERT(index <= M_operators.size(), "ComposedPreconditioner::replace: index too large");
-    M_operators[index] = A;
-    //M_prec->replace(index,useInverse,useTranspose);
-
-    return EXIT_SUCCESS;
+    //return M_prec->Condest();
+    return 0.0;
 }
 
 // ===================================================
@@ -130,11 +97,13 @@ int PreconditionerComposition::SetUseTranspose( const bool useTranspose )
 
 int PreconditionerComposition::Apply( const Epetra_MultiVector& X, Epetra_MultiVector& Y ) const
 {
+    std::cout << "[Debug] precomp.cpp: Applying prec" << std::endl;
     return M_prec->Apply(X,Y);
 }
 
 int PreconditionerComposition::ApplyInverse( const Epetra_MultiVector& X, Epetra_MultiVector& Y ) const
 {
+    std::cout << "[Debug] precomp.cpp: Applying inverse" << std::endl;
     return M_prec->ApplyInverse(X,Y);
 }
 
@@ -154,37 +123,26 @@ const Epetra_Map& PreconditionerComposition::OperatorDomainMap() const
 }
 
 // ===================================================
-// Set Methods
-// ===================================================
-/*
-void PreconditionerComposition::setDataFromGetPot ( const GetPot& dataFile,
-                                                    const std::string& section )
-{
-
-}
-*/
-
-// ===================================================
 // Get Methods
 // ===================================================
-bool PreconditionerComposition::set() const
+bool PreconditionerComposition::isPreconditionerSet() const
 {
     return M_prec;
 }
 
-PreconditionerComposition::prec_raw_type* PreconditionerComposition::getPrec()
+PreconditionerComposition::operator_Type* PreconditionerComposition::preconditioner()
 {
     return M_prec.get();
 }
 
-PreconditionerComposition::operator_type PreconditionerComposition::preconditionerPtr()
+PreconditionerComposition::operator_PtrType PreconditionerComposition::preconditionerPtr()
 {
     return M_prec;
 }
 
 std::string PreconditionerComposition::preconditionerType()
 {
-    return "PreconditionerComposition";
+    return M_precType;
 }
 
 UInt PreconditionerComposition::numOperators() const
@@ -193,8 +151,47 @@ UInt PreconditionerComposition::numOperators() const
 }
 
 // ===================================================
-// Private Methods
+// Protected Methods
 // ===================================================
+int PreconditionerComposition::pushBack( matrix_PtrType& A,
+                                         const bool useInverse,
+                                         const bool useTranspose )
+{
+    M_prec->push_back(boost::dynamic_pointer_cast<operator_Type>(A->matrixPtr()),useInverse,useTranspose);
 
+    return EXIT_SUCCESS;
+}
+
+int PreconditionerComposition::pushBack( matrix_PtrType& A,
+                                         super_PtrType& preconditionerPtr,
+                                         const bool useInverse,
+                                         const bool useTranspose )
+{
+    preconditionerPtr->buildPreconditioner(A);
+    M_prec->push_back(boost::dynamic_pointer_cast<operator_Type>(preconditionerPtr),useInverse,useTranspose);
+
+    return EXIT_SUCCESS;
+}
+
+int PreconditionerComposition::pushBack( operator_Type& A,
+                                         const bool useInverse,
+                                         const bool useTranspose )
+{
+    //M_operators.push_back(A);
+
+    return EXIT_SUCCESS;
+}
+
+int PreconditionerComposition::replace( operator_Type& A,
+                                        const UInt index,
+                                        const bool useInverse,
+                                        const bool useTranspose )
+{
+    ASSERT(index <= M_operators.size(), "ComposedPreconditioner::replace: index too large");
+    //M_operators[index] = A;
+    //M_prec->replace(index,useInverse,useTranspose);
+
+    return EXIT_SUCCESS;
+}
 
 } // Namespace LifeV

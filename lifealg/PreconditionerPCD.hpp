@@ -36,7 +36,7 @@
 #include <life/lifefilters/GetPot.hpp>
 #include <life/lifearray/MatrixEpetra.hpp>
 #include <life/lifearray/VectorEpetra.hpp>
-#include <lifemc/lifealg/ComposedPreconditioner.hpp>
+#include <lifemc/lifealg/PreconditionerComposition.hpp>
 #include <lifemc/lifearray/MatrixBlock.hpp>
 #include <life/lifesolver/ADRAssembler.hpp>
 #include <life/lifefem/FESpace.hpp>
@@ -51,7 +51,7 @@ namespace LifeV {
  *  The PreconditionerPCD class provides the PCD block preconditioner
  */
 class PreconditionerPCD:
-        public ComposedPreconditioner
+        public PreconditionerComposition
 {
 public:
 
@@ -76,7 +76,7 @@ public:
 
     typedef boost::shared_ptr<FESpace<mesh_type,map_type> >  FESpace_ptr;
 
-    typedef Teuchos::ParameterList                  list_type;
+    typedef Teuchos::ParameterList                  list_Type;
     //@}
 
 
@@ -96,18 +96,18 @@ public:
 
     //! @name  Methods
     //@{
-    void createList( list_type&         list,
-                     const GetPot&      dataFile,
-                     const std::string& section,
-                     const std::string& subSection );
+    void createParametersList( list_Type&         list,
+                               const GetPot&      dataFile,
+                               const std::string& section,
+                               const std::string& subSection );
 
-    static void createPCDList( list_type&         list,
+    static void createPCDList( list_Type&         list,
                                const GetPot&      dataFile,
                                const std::string& section,
                                const std::string& subSection = "PCD" );
 
     //! Return an estimation of the conditionement number of the preconditioner
-    double      Condest ();
+    double      condest ();
 
     //! Update the vector beta of the convective term in Fp
     /*!
@@ -124,10 +124,7 @@ public:
     //! @name  Get Methods
     //@{
     int         numBlocksRows() const;
-    int         numBlocksCols() const;
-
-    //! Return the name of the preconditioner to be used in the factory
-    std::string precType(){return M_precType;}
+    int         numBlocksColumns() const;
     //@}
 
     //! @name  Set Methods
@@ -176,7 +173,6 @@ public:
 
 protected:
 
-    std::string M_precType;
     int         M_velocityBlockSize;
     int         M_pressureBlockSize;
     FESpace_ptr M_uFESpace;
