@@ -18,4 +18,5 @@
 7000 -- LifeV::alg
 7010 -- LifeV::SolverPETSC
 7020 -- LifeV::generalizedAitken
+8000 -- LifeV::filters
 10000 -- testsuite

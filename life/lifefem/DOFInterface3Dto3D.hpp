@@ -41,20 +41,20 @@
 #ifndef _DOFINTERFACE3DTO3D_HH
 #define _DOFINTERFACE3DTO3D_HH
 
+#include <list>
+#include <cmath>
+#include <map>
+#include <iostream>
+
 #include <boost/shared_ptr.hpp>
 #include <boost/numeric/ublas/vector.hpp>
 
+#include <life/lifemesh/MarkerDefinitions.hpp>
+
 #include <life/lifefem/DOFInterface.hpp>
-
-
 #include <life/lifefem/ReferenceFE.hpp>
 #include <life/lifefem/DOF.hpp>
-#include <iostream>
-#include <map>
-#include <life/lifemesh/MarkerDefinitions.hpp>
 #include <life/lifefem/CurrentBoundaryFE.hpp>
-#include <ext/slist>
-#include <cmath>
 
 namespace LifeV
 {
@@ -167,7 +167,7 @@ public:
 private:
 
     //!  STL iterator type for the lists
-    typedef __gnu_cxx::slist< std::pair<ID, ID> >::iterator Iterator;
+    typedef std::list< std::pair<ID, ID> >::iterator Iterator;
 
 
     //! @name Private Methods
@@ -217,11 +217,11 @@ private:
     boost::shared_ptr<DOF> M_dof;
 
     //! STL list which holds the connections between faces at the interface
-    __gnu_cxx::slist< std::pair<ID, ID> > M_faceToFaceConnectionList;
+    std::list< std::pair<ID, ID> > M_faceToFaceConnectionList;
 
     //!  Auxiliary STL list which holds the connections between DOF at the interface
     //! Empty after calling update
-    __gnu_cxx::slist< std::pair<ID, ID> > M_dofToDofConnectionList;
+    std::list< std::pair<ID, ID> > M_dofToDofConnectionList;
 
 };
 

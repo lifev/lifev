@@ -385,14 +385,14 @@ readGmshFile( RegionMesh2D<GeoShape, MC> & mesh,
     __is >> buffer;
 
 #ifdef DEBUG
-    std::debug( 3000 ) << "buffer: "<< buffer << "\n";
+    Debug ( 8000 ) << "buffer: "<< buffer << "\n";
 #endif
 
     UInt __n;
     __is >> __n;
 
 #ifdef DEBUG
-    std::debug( 3000 ) << "number of nodes: " << __n;
+    Debug ( 8000 ) << "number of nodes: " << __n;
 #endif
 
     // Add Marker to list of Markers
@@ -403,7 +403,7 @@ readGmshFile( RegionMesh2D<GeoShape, MC> & mesh,
     std::vector<UInt> __whichboundary( __n );
 
 #ifdef DEBUG
-    std::debug( 3000 ) << "reading "<< __n << " nodes\n";
+    Debug ( 8000 ) << "reading "<< __n << " nodes\n";
 #endif
 
     std::map<int,int> itoii;
@@ -421,13 +421,13 @@ readGmshFile( RegionMesh2D<GeoShape, MC> & mesh,
     __is >> buffer;
 
 #ifdef DEBUG
-    std::debug( 3000 ) << "buffer: "<< buffer << "\n";
+    Debug ( 8000 ) << "buffer: "<< buffer << "\n";
 #endif
 
     __is >> buffer;
 
 #ifdef DEBUG
-    std::debug( 3000 ) << "buffer: "<< buffer << "\n";
+    Debug ( 8000 ) << "buffer: "<< buffer << "\n";
 #endif
 
     UInt __nele;
@@ -437,7 +437,7 @@ readGmshFile( RegionMesh2D<GeoShape, MC> & mesh,
     typename RegionMesh2D<GeoShape, MC>::FaceType * pf = 0;
 
 #ifdef DEBUG
-    std::debug( 3000 ) << "number of elements: " << __nele << "\n";
+    Debug ( 8000 ) << "number of elements: " << __nele << "\n";
 #endif
 
     std::vector<std::vector<int> > __e( __nele );
@@ -489,7 +489,7 @@ readGmshFile( RegionMesh2D<GeoShape, MC> & mesh,
     mesh.setNumBEdges( __gt[ 1 ] );
 
 #ifdef DEBUG
-    std::debug( 3000 ) << "number of edges= " << __gt[ 1 ] << "\n";
+    Debug ( 8000 ) << "number of edges= " << __gt[ 1 ] << "\n";
 #endif
 
     // Only Boundary Faces
@@ -499,7 +499,7 @@ readGmshFile( RegionMesh2D<GeoShape, MC> & mesh,
     mesh.numFaces() = n_elements;
 
 #ifdef DEBUG
-    std::debug( 3000 ) << "number of faces= " << n_elements << "\n";
+    Debug ( 8000 ) << "number of faces= " << n_elements << "\n";
 #endif
 
     __isonboundary.assign ( __n, false );
@@ -531,10 +531,10 @@ readGmshFile( RegionMesh2D<GeoShape, MC> & mesh,
     mesh.setNumBPoints  ( mesh.numBVertices() );
 
 #ifdef DEBUG
-    std::debug( 3000 ) << "number of points : " << mesh.numPoints() << "\n";
-    std::debug( 3000 ) << "number of boundary points : " << mesh.numBPoints() << "\n";
-    std::debug( 3000 ) << "number of vertices : " << mesh.numVertices() << "\n";
-    std::debug( 3000 ) << "number of boundary vertices : " << mesh.numBVertices() << "\n";
+    Debug ( 8000 ) << "number of points : " << mesh.numPoints() << "\n";
+    Debug ( 8000 ) << "number of boundary points : " << mesh.numBPoints() << "\n";
+    Debug ( 8000 ) << "number of vertices : " << mesh.numVertices() << "\n";
+    Debug ( 8000 ) << "number of boundary vertices : " << mesh.numBVertices() << "\n";
 #endif
 
     for ( UInt __i = 0; __i < __n; ++__i )
@@ -618,9 +618,9 @@ readFreeFemFile( RegionMesh2D<GeoShape, MC> & mesh,
     __is >> __nv >> __nt >> __ne;
 
 #ifdef DEBUG
-    std::debug( 3000 ) << "number of vertices: "<< __nv << "\n";
-    std::debug( 3000 ) << "number of triangles: "<< __nt << "\n";
-    std::debug( 3000 ) << "number of edges: "<< __ne << "\n";
+    Debug ( 8000 ) << "number of vertices: "<< __nv << "\n";
+    Debug ( 8000 ) << "number of triangles: "<< __nt << "\n";
+    Debug ( 8000 ) << "number of edges: "<< __ne << "\n";
 #endif
 
     // first section: read the list of vertices
@@ -630,7 +630,7 @@ readFreeFemFile( RegionMesh2D<GeoShape, MC> & mesh,
     std::vector<UInt> __whichboundary(__nv);
 
 #ifdef DEBUG
-    std::debug( 3000 ) << "reading "<< __nv << " nodes\n";
+    Debug ( 8000 ) << "reading "<< __nv << " nodes\n";
 #endif
 
     // count the number of nodes on the boundary
@@ -650,7 +650,7 @@ readFreeFemFile( RegionMesh2D<GeoShape, MC> & mesh,
     std::vector<int> __triangle_label( __nt );
 
 #ifdef DEBUG
-    std::debug( 3000 ) << "reading "<< __nt << " triangles\n";
+    Debug ( 8000 ) << "reading "<< __nt << " triangles\n";
 #endif
 
     std::map<UInt,UInt> edge_to_firstAdjacentElementIdentity, edge_to_firstAdjacentElementPosition;
@@ -733,10 +733,10 @@ readFreeFemFile( RegionMesh2D<GeoShape, MC> & mesh,
     mesh.setNumBPoints( mesh.numBVertices() );
 
 #ifdef DEBUG
-    std::debug( 3000 ) << "number of points : " << mesh.numPoints() << "\n";
-    std::debug( 3000 ) << "number of boundary points : " << mesh.numBPoints() << "\n";
-    std::debug( 3000 ) << "number of vertices : " << mesh.numVertices() << "\n";
-    std::debug( 3000 ) << "number of boundary vertices : " << mesh.numBVertices() << "\n";
+    Debug ( 8000 ) << "number of points : " << mesh.numPoints() << "\n";
+    Debug ( 8000 ) << "number of boundary points : " << mesh.numBPoints() << "\n";
+    Debug ( 8000 ) << "number of vertices : " << mesh.numVertices() << "\n";
+    Debug ( 8000 ) << "number of boundary vertices : " << mesh.numBVertices() << "\n";
 #endif
 
     for ( UInt __i = 0; __i < __nv; ++__i )
