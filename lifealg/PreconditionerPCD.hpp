@@ -67,6 +67,7 @@ public:
     typedef boost::shared_ptr<vector_type>          vector_ptr;
 
     typedef Preconditioner                          super;
+    typedef boost::shared_ptr<super>                super_PtrType;
 
     typedef ComposedOperator<Preconditioner>        prec_raw_type;
     typedef boost::shared_ptr<prec_raw_type>        prec_type;
@@ -83,7 +84,7 @@ public:
     //! @name Constructors, destructor
     //@{
     //! default constructor.
-    PreconditionerPCD();
+    PreconditionerPCD(const  boost::shared_ptr<Epetra_Comm>& comm= boost::shared_ptr<Epetra_Comm>());
 
     //! constructor from matrix A.
     //! @param A EpetraMatrix<double> matrix upon which construct the preconditioner
@@ -118,7 +119,11 @@ public:
 
 
     //! Build the preconditioner
-    int         buildPreconditioner(operator_type& A);
+    int buildPreconditioner(operator_type& A);
+
+    //! Reset the preconditioner
+    void resetPreconditioner();
+
     //@}
 
     //! @name  Get Methods
@@ -185,6 +190,13 @@ protected:
 
     ADRAssembler<mesh_type,matrix_type,vector_type> M_adrPressureAssembler;
     ADRAssembler<mesh_type,matrix_type,vector_type> M_adrVelocityAssembler;
+
+    // todo: Remove the member dataFile (bad programmation)
+    GetPot      M_dataFile;
+    string      M_section;
+    super_PtrType M_precForBlock1;
+    super_PtrType M_precForBlock2;
+    super_PtrType M_precForBlock3;
 
 };
 

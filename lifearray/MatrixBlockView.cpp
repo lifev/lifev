@@ -71,6 +71,21 @@ MatrixBlockView::~MatrixBlockView()
 // ===================================================
 // Set Methods
 // ===================================================
+
+void
+MatrixBlockView::showMe( std::ostream& output ) const
+{
+    output << "MatrixBlockView informations:" << std::endl
+           << "Size = " << M_numRows << " x " << M_numColumns << std::endl
+           << "firstRow = " << M_firstRowIndex << std::endl
+           << "lastRow = " << M_lastRowIndex << std::endl
+           << "firstColumn = " << M_firstColumnIndex << std::endl
+           << "lastColumn = " << M_lastColumnIndex << std::endl;
+}
+
+// ===================================================
+// Set Methods
+// ===================================================
 void
 MatrixBlockView::setup( const UInt& firstRow,
                         const UInt& firstColumn,

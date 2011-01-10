@@ -52,16 +52,19 @@ namespace LifeV {
 // ===================================================
 // Constructors & Destructor
 // ===================================================
-// Todo: look into FSIMonolithic.hpp
 
 PreconditionerComposition::PreconditionerComposition( boost::shared_ptr<Epetra_Comm> comm ):
     super_Type (comm),
+    M_comm(comm),
     M_prec(new prec_Type(comm))
 {
 
 }
 
-PreconditionerComposition::PreconditionerComposition( const PreconditionerComposition& precComp )
+PreconditionerComposition::PreconditionerComposition( const PreconditionerComposition& precComp ):
+    super_Type(precComp, precComp.M_comm),
+    M_comm(precComp.M_comm),
+    M_prec(new prec_Type(*(precComp.M_prec.get())))
 {
 
 }
@@ -123,6 +126,15 @@ const Epetra_Map& PreconditionerComposition::OperatorDomainMap() const
 }
 
 // ===================================================
+// Set Methods
+// ===================================================
+void PreconditionerComposition::setComm( boost::shared_ptr<Epetra_Comm> comm )
+{
+    M_comm = comm;
+    M_prec->setComm(comm);
+}
+
+// ===================================================
 // Get Methods
 // ===================================================
 bool PreconditionerComposition::isPreconditionerSet() const
@@ -168,7 +180,8 @@ int PreconditionerComposition::pushBack( matrix_PtrType& A,
                                          const bool useTranspose )
 {
     preconditionerPtr->buildPreconditioner(A);
-    M_prec->push_back(boost::dynamic_pointer_cast<operator_Type>(preconditionerPtr),useInverse,useTranspose);
+    operator_PtrType oper(preconditionerPtr->preconditionerPtr());
+    M_prec->push_back(oper,useInverse,useTranspose);
 
     return EXIT_SUCCESS;
 }
@@ -187,11 +200,21 @@ int PreconditionerComposition::replace( operator_Type& A,
                                         const bool useInverse,
                                         const bool useTranspose )
 {
-    ASSERT(index <= M_operators.size(), "ComposedPreconditioner::replace: index too large");
+    //ASSERT(index <= M_operators.size(), "ComposedPreconditioner::replace: index too large");
     //M_operators[index] = A;
     //M_prec->replace(index,useInverse,useTranspose);
 
     return EXIT_SUCCESS;
 }
+
+int PreconditionerComposition::initializeOperator()
+{
+    if(!isPreconditionerSet())
+    {
+        M_prec.reset(new prec_Type(M_comm));
+    }
+    return EXIT_SUCCESS;
+}
+
 
 } // Namespace LifeV

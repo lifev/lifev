@@ -36,6 +36,7 @@
 #define _MATRIXBLOCKVIEW_HPP_
 
 #include <boost/shared_ptr.hpp>
+#include <iostream>
 #include <Epetra_FECrsMatrix.h>
 #include <life/lifearray/MatrixEpetra.hpp>
 
@@ -72,6 +73,14 @@ public:
 
     //! default virtual destructor
     ~MatrixBlockView();
+
+    //@}
+
+    //! @name Methods
+    //@{
+
+    //! Print the informations about the MatrixBlockView
+    void showMe(std::ostream& output = std::cout) const;
 
     //@}
 

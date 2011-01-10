@@ -111,7 +111,7 @@ public:
     virtual int buildPreconditioner(matrix_PtrType& A) = 0;
 
     //! Reset the preconditioner
-    void resetPreconditioner();
+    virtual void resetPreconditioner();
 
     //! Return an estimation of the conditionement number of the preconditioner
     Real condest();
@@ -150,6 +150,11 @@ public:
      */
     virtual void setDataFromGetPot ( const GetPot& dataFile,
                                      const std::string& section ) = 0;
+
+    /*!
+        copies the shared_ptr to the communicator in the member M_comm and builds a new instance
+    */
+    void setComm( boost::shared_ptr<Epetra_Comm> comm );
 
     //@}
 
@@ -209,11 +214,15 @@ protected:
                  const bool useInverse=false,
                  const bool useTranspose=false );
 
+    //! If no operator exists (null pointer), build a new one
+    int initializeOperator();
+
     //@}
 
 private:
 
-    prec_PtrType                  M_prec;
+    boost::shared_ptr<Epetra_Comm> M_comm;
+    prec_PtrType                   M_prec;
     //std::vector<operator_type> M_operators;
 };
 
