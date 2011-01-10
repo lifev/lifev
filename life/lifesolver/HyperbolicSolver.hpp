@@ -36,7 +36,7 @@
 #ifndef _HYPERBOLICSOLVER_H_
 #define _HYPERBOLICSOLVER_H_ 1
 
-#include <Epetra_LAPACK.h>
+#include <life/lifecore/CLapack.hpp>
 
 #include <life/lifealg/SolverAztecOO.hpp>
 
@@ -507,15 +507,13 @@ void
 HyperbolicSolver<Mesh, SolverType>::
 setup ()
 {
-    // LAPACK wrapper of Epetra
-    Epetra_LAPACK lapack;
 
     // Flags for LAPACK routines.
     Int INFO[1]  = {0};
-    Int NB = M_FESpace.refFE().nbDof();
+    Int NB[1] = { M_FESpace.refFE().nbDof() };
 
     // Parameter that indicate the Lower storage of matrices.
-    char param_L = 'L';
+    char param_L[1] = { 'L' };
 
     // Total number of elements.
     UInt meshNumberOfElements = M_FESpace.mesh()->numElements();
@@ -551,7 +549,7 @@ setup ()
 
         /* Put in M the matrix L and L^T, where L and L^T is the Cholesky factorization of M.
            For more details see http://www.netlib.org/lapack/double/dpotrf.f */
-        lapack.POTRF( param_L, NB, matElem.mat(), NB, INFO );
+        dpotrf_( param_L, NB, matElem.mat(), NB, INFO );
         ASSERT_PRE( !INFO[0], "Lapack factorization of M is not achieved." );
 
         // Save the local mass matrix in the global vector of mass matrices
@@ -772,22 +770,19 @@ HyperbolicSolver< Mesh, SolverType >::
 localEvolve ( const UInt& iElem )
 {
 
-    // LAPACK wrapper of Epetra
-    Epetra_LAPACK lapack;
-
     // Flags for LAPACK routines.
     Int INFO[1]  = { 0 };
-    Int NB = M_FESpace.refFE().nbDof();
+    Int NB[1] = { M_FESpace.refFE().nbDof() };
 
     // Parameter that indicate the Lower storage of matrices.
-    char param_L = 'L';
-    char param_N = 'N';
+    char param_L[1] = { 'L' };
+    char param_N[1] = { 'N' };
 
     // Paramater that indicate the Transpose of matrices.
-    char param_T = 'T';
+    char param_T[1] = { 'T' };
 
     // Numbers of columns of the right hand side := 1.
-    Int NBRHS = 1;
+    Int NBRHS[1] = { 1 };
 
     // Clean the local flux
     M_localFlux.zero();
@@ -953,12 +948,12 @@ localEvolve ( const UInt& iElem )
 
         /* Put in localFlux the vector L^{-1} * localFlux
            For more details see http://www.netlib.org/lapack/lapack-3.1.1/SRC/dtrtrs.f */
-        lapack.TRTRS( param_L, param_N, param_N, NB, NBRHS, M_elmatMass[ iElem - 1 ].mat(), NB, localFaceFluxWeight, NB, INFO);
+        dtrtrs_( param_L, param_N, param_N, NB, NBRHS, M_elmatMass[ iElem - 1 ].mat(), NB, localFaceFluxWeight, NB, INFO);
         ASSERT_PRE( !INFO[0], "Lapack Computation M_elvecSource = LB^{-1} rhs is not achieved." );
 
         /* Put in localFlux the vector L^{-T} * localFlux
            For more details see http://www.netlib.org/lapack/lapack-3.1.1/SRC/dtrtrs.f */
-        lapack.TRTRS( param_L, param_T, param_N, NB, NBRHS, M_elmatMass[ iElem - 1 ].mat(), NB, localFaceFluxWeight, NB, INFO);
+        dtrtrs_( param_L, param_T, param_N, NB, NBRHS, M_elmatMass[ iElem - 1 ].mat(), NB, localFaceFluxWeight, NB, INFO);
         ASSERT_PRE( !INFO[0], "Lapack Computation M_elvecSource = LB^{-1} rhs is not achieved." );
 
         // Add to the local flux the local flux of the current face
