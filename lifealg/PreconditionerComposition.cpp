@@ -209,10 +209,10 @@ int PreconditionerComposition::replace( operator_Type& A,
 
 int PreconditionerComposition::initializeOperator()
 {
-    if(!isPreconditionerSet())
-    {
+    //if(!isPreconditionerSet())
+    //{
         M_prec.reset(new prec_Type(M_comm));
-    }
+    //}
     return EXIT_SUCCESS;
 }
 

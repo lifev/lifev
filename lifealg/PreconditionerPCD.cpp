@@ -158,7 +158,7 @@ int PreconditionerPCD::buildPreconditioner(operator_type& oper)
     P1->globalAssemble();
     P1->spy("p1");
     boost::shared_ptr<parent_matrix_type> p1 = P1;
-    M_precForBlock1.reset(new PreconditionerIfpack());
+    M_precForBlock1.reset(new PreconditionerML());
     M_precForBlock1->setDataFromGetPot(M_dataFile,M_section);
     pushBack(p1,M_precForBlock1,inversed,notTransposed);
 
