@@ -1,4 +1,3 @@
-/* -*- mode: c++ -*-*/
 //@HEADER
 /*
 *******************************************************************************
@@ -24,37 +23,24 @@
 *******************************************************************************
 */
 //@HEADER
-/**
-   \file ComposedPreconditioner.hpp
-   \author Simone Deparis <simone.deparis@epfl.ch>
-   \contributor Paolo Crosetto
-   \mantainer Paolo Crosetto
-   \date 2009-05-07
+
+/*!
+ *  @file
+ *  @brief File containing the Composed Preconditioner Class
+ *
+ *  @date 07-05-2009
+ *  @author Simone Deparis <simone.deparis@epfl.ch>
+ *
+ *  @contributor Paolo Crosetto <paolo.crosetto@epfl.ch>
+ *  @maintainer Paolo Crosetto <paolo.crosetto@epfl.ch>
  */
 
-
-#ifndef _IFPACKCOMPOSEDPREC_HPP_
-#define _IFPACKCOMPOSEDPREC_HPP_
-
-#pragma GCC diagnostic ignored "-Wunused-variable"
-#pragma GCC diagnostic ignored "-Wunused-parameter"
-#include <Ifpack_ConfigDefs.h>
-#include <Ifpack.h>
-#include <Ifpack_Preconditioner.h>
-#include <ml_MultiLevelPreconditioner.h>
-#include <Ifpack_AdditiveSchwarz.h>
-#include <Ifpack_Amesos.h>
-#include <Ifpack_ILU.h>
-#pragma GCC diagnostic warning "-Wunused-variable"
-#pragma GCC diagnostic warning "-Wunused-parameter"
-
+#ifndef PreconditionerComposed_HPP
+#define PreconditionerComposed_HPP
 
 #include <life/lifefilters/GetPot.hpp>
-
 #include <life/lifearray/MatrixEpetra.hpp>
-
 #include <life/lifealg/Preconditioner.hpp>
-
 #include <lifemc/lifealg/ComposedOperator.hpp>
 
 namespace LifeV
@@ -70,14 +56,13 @@ public:
     //@{
 
     typedef Preconditioner                                             super_Type;
-    typedef ComposedOperator<Preconditioner>                     prec_Type;
+    typedef ComposedOperator<Preconditioner>                           prec_Type;
     typedef boost::shared_ptr<prec_Type>                               precPtr_Type;
-    typedef boost::shared_ptr<Preconditioner>                    epetraPrecPtr_Type;
-    typedef boost::shared_ptr<ML_Epetra::MultiLevelPreconditioner>     mlPrecPtr_Type;
+    typedef boost::shared_ptr<Preconditioner>                          epetraPrecPtr_Type;
     typedef super_Type::operator_raw_type                              operator_Type;
     typedef boost::shared_ptr<operator_Type>                           operatorPtr_Type;
     typedef super_Type::list_Type                                      list_Type;
-    typedef boost::shared_ptr<Preconditioner>                    epetraPrec_Type;
+    typedef boost::shared_ptr<Preconditioner>                          epetraPrec_Type;
 
 
     /** @name Constructors, destructor
@@ -207,4 +192,4 @@ private:
 
 } // namespace LifeV
 
-#endif
+#endif // PreconditionerComposed_HPP
