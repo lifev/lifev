@@ -145,7 +145,7 @@ public:
     void setDataFile( GetPot const& data );
 
     //! should call bcManage for a vector, but the implementation is empty
-    void bcManageVec   ( super::fluidBchandler_Type& bch, vector_Type& rhs ) {};
+    void bcManageVec   ( super::fluidBchandler_Type& /*bch*/, vector_Type& /*rhs*/ ) {};
 
     //! register the product for the factory
     void registerMyProducts( );
