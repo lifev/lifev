@@ -433,7 +433,7 @@ TimeAdvanceNewmark<feVectorType>::setup(const std::vector<Real>& coefficients, c
     {
         if (this->M_orderDerivate == 1 )  // Theta method
         {
-            this->M_theta = 1;
+            this->M_gamma = 1;
             //  unknown vector's  dimension;
             this->M_size = 4;
             this->M_alpha.resize(3);

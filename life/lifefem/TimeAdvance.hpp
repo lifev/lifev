@@ -45,6 +45,7 @@
 #include <iostream>
 #include <stdexcept>
 #include <sstream>
+#include <boost/numeric/ublas/vector.hpp>
 
 // Tell the compiler to restore the warning previously silented
 #pragma GCC diagnostic warning "-Wunused-variable"
@@ -55,6 +56,8 @@
 
 namespace LifeV
 {
+typedef boost::numeric::ublas::vector<Real> ScalarVector;
+
 //! timeAdvance_template - File containing a class to deal the time advancing scheme
 /*!
   @author Matteo Pozzoli <matteo1.pozzoli@mail.polimi.it>
@@ -136,7 +139,7 @@ public:
 
     //! @name Public Types
     //@{
-
+    typedef ScalarVector                             container_Type;
     typedef std::vector<feVectorType>                feVectorContainer_Type;
     typedef std::vector<feVectorType*>               feVectorContainerPtr_Type;
     typedef typename feVectorContainerPtr_Type::iterator  feVectorContainerPtrIterate_Type;
@@ -423,16 +426,16 @@ protected:
     UInt M_coefficientsSize;
 
     //! Coefficients \f$ \alpha_i \f$ of the time advance discretization
-    Vector M_xi;
+    container_Type M_xi;
 
     //! Coefficients \f$ \alpha_i \f$ of the time advance discretization
-    Vector M_alpha;
+    container_Type M_alpha;
 
     //! Coefficients \f$ \beta_i \f$ of the extrapolation
-    Vector M_beta;
+    container_Type M_beta;
 
     //! Coefficients \f$ \beta^V_i \f$ of the velocity's extrapolation
-    Vector M_betaVelocity;
+    container_Type M_betaVelocity;
 
     //! Last n state vectors
     feVectorContainerPtr_Type M_unknowns;
