@@ -122,7 +122,7 @@ public:
     /*!
      * @return time container
      */
-    timePtr_Type dataTime() const { return M_TimeData; }
+    timePtr_Type dataTime() const { return M_timeData; }
 
     //! Get the global fluid density.
     /*!
@@ -170,7 +170,7 @@ public:
 
 private:
 
-    timePtr_Type                        M_TimeData;
+    timePtr_Type                        M_timeData;
 
     Real                                M_fluidDensity;
     Real                                M_fluidViscosity;
