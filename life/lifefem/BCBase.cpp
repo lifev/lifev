@@ -83,7 +83,7 @@ BCBase::BCBase( const bcName_Type& name, const bcFlag_Type& flag,
         M_type( type ),
         M_mode( mode ),
         M_components( components ),
-        M_bcFunction( FactoryCloneBCFunction::instance().createObject( &bcFunction ) ),
+        M_bcFunction( bcFunction.clone() ),
         M_bcFunctionFEVectorDependent(),
         M_bcVector(),
         M_isStored_BcVector( false ),
@@ -107,7 +107,7 @@ BCBase::BCBase( const bcName_Type& name,
         M_type( type ),
         M_mode( mode ),
         M_components(),
-        M_bcFunction( FactoryCloneBCFunction::instance().createObject( &bcFunction ) ),
+        M_bcFunction( bcFunction.clone() ),
         M_bcFunctionFEVectorDependent(),
         M_bcVector(),
         M_isStored_BcVector( false ),
@@ -167,7 +167,7 @@ BCBase::BCBase( const bcName_Type& name,
         M_type( type ),
         M_mode( mode ),
         M_components(),
-        M_bcFunction( FactoryCloneBCFunction::instance().createObject( &bcFunction ) ),
+        M_bcFunction( bcFunction.clone() ),
         M_bcFunctionFEVectorDependent(),
         M_bcVector(),
         M_isStored_BcVector( false ),
@@ -654,7 +654,7 @@ BCBase::setBCVector( const BCVectorBase& bcVector )
 void
 BCBase::setBCFunction( const BCFunctionBase& bcFunction )
 {
-    M_bcFunction = boost::shared_ptr<BCFunctionBase>( FactoryCloneBCFunction::instance().createObject( &bcFunction ) );
+    M_bcFunction = bcFunction.clone();
     M_isStored_BcVector = false;
     M_isStored_BcFunctionVectorDependent=false;
 }

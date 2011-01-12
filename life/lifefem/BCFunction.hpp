@@ -40,6 +40,7 @@
 #define BCFUNCTION_H 1
 
 #include <boost/function.hpp>
+#include <boost/shared_ptr.hpp>
 
 #include <life/lifecore/FactorySingleton.hpp>
 #include <life/lifecore/Factory.hpp>
@@ -85,6 +86,7 @@ public:
     //@{
 
     typedef boost::function<Real ( const Real&, const Real&, const Real&, const Real&, const ID& )> function_Type;
+    typedef boost::shared_ptr<BCFunctionBase> BCFunctionBasePtr_Type;
 
     //@}
 
@@ -161,6 +163,21 @@ public:
       @return Reference to M_userDefinedFunction
     */
     inline const function_Type& Function() const {return M_userDefinedFunction;}
+
+    //@}
+
+    //! @name Methods
+    //@{
+
+    //! Clone the current object
+    /*!
+      @return Pointer to the cloned object
+    */
+   BCFunctionBasePtr_Type clone() const
+   {
+       BCFunctionBasePtr_Type copy ( new BCFunctionBase( M_userDefinedFunction ) );
+       return copy;
+   }
 
     //@}
 
