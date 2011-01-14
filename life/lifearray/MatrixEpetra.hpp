@@ -30,7 +30,7 @@
 
     @author Gilles Fourestey <gilles.fourestey@epfl.ch>
     @author Simone Deparis <simone.deparis@epfl.ch>
-    @contributor Gwenol Grandperrin <gwenol.grandperrin@epfl.ch>
+    @contributor Gwenol Grandperrin <gwenol.grandperrin@epfl.ch> Cristiano Malossi <cristiano.malossi@epfl.ch>
     @maintainer Gwenol Grandperrin <gwenol.grandperrin@epfl.ch>
 
     @date 03-11-2009
@@ -84,6 +84,7 @@ public:
     typedef Epetra_FECrsMatrix             matrix_type;
     typedef boost::shared_ptr<matrix_type> matrix_ptrtype;
     typedef VectorEpetra                   vector_type;
+    typedef boost::shared_ptr<vector_type> vectorPtr_Type;
 
     //@}
 
@@ -210,7 +211,15 @@ public:
       @param vector1 Vector that will be multiply by the MatrixEpetra
       @param vector2 Vector that will store the result
      */
-    Int multiply( bool transposeCurrent, const vector_type& vector1, vector_type &vector2 ) const;
+    Int multiply( bool transposeCurrent, const vector_type& vector1, vector_type& vector2 ) const;
+
+    //! Add to the matrix a dyadic product: \f[ C += A \otimes B + \f], where \f[ C \f] is the matrix.
+    /*!
+     *  NOTE: This method has been tested only for square matrices.
+      @param vector1 Vector A
+      @param vector2 Vector B
+     */
+    void addDyadicProduct( const vector_type& vector1, const vector_type& vector2 );
 
     //! Add a multiple of a given matrix:  *this += scalar*matrix
     /*!
@@ -416,6 +425,12 @@ public:
       @param localValue Value to be added to the coefficient
      */
     void addToCoefficient( UInt row, UInt column, DataType localValue );
+
+    //! If set true, transpose of this operator will be applied.
+    /*!
+      @param transpose flag to identify whether to transpose or not
+     */
+    void setUseTranspose( const bool& transpose = false ) { M_epetraCrs->SetUseTranspose( transpose ); }
 
     //@}
 
@@ -720,6 +735,29 @@ Int MatrixEpetra<DataType>::multiply( bool transposeCurrent, const vector_type& 
 }
 
 template <typename DataType>
+void MatrixEpetra<DataType>::addDyadicProduct( const vector_type& vector1, const vector_type& vector2 )
+{
+    // Check if the matrix is open
+    if ( M_epetraCrs->Filled() )
+    {
+        if ( M_epetraCrs->Comm().MyPID() == 0 )
+            std::cout << "ERROR: Matrix already filled: cannot add dyadic product!" << std::endl;
+        return;
+    }
+
+    // Creating a fully repeated copy of vector2
+    VectorEpetra repeatedVector2( vector2, Repeated );
+    //Epetra_Map repeatedMap( Epetra_Util::Create_OneToOne_Map ( vector2.epetraMap(), -1 ) );
+    //boost::VectorEpetra repeatedVector2( repeatedMap, Repeated );
+    //repeatedVector2 = vector2;
+
+    // Add the new coefficients to the matrix
+    for( Int row(0); row < M_epetraCrs->NumMyRows(); ++row )
+        for( Int column(0); column < M_epetraCrs->NumGlobalCols(); ++column )
+            addToCoefficient( M_epetraCrs->GRID(row), column, vector1[row]*repeatedVector2[column] );
+}
+
+template <typename DataType>
 void MatrixEpetra<DataType>::add ( const DataType scalar, const MatrixEpetra& matrix )
 {
 #if defined HAVE_TRILINOS_EPETRAEXT // trilinos8
@@ -730,9 +768,7 @@ void MatrixEpetra<DataType>::add ( const DataType scalar, const MatrixEpetra& ma
 }
 
 template <typename DataType>
-void MatrixEpetra<DataType>::diagonalize ( std::vector<UInt> rVec,
-                                           DataType const coefficient,
-                                           UInt offset )
+void MatrixEpetra<DataType>::diagonalize( std::vector<UInt> rVec, DataType const coefficient, UInt offset )
 {
 
     const Epetra_Comm&  Comm( M_epetraCrs->Comm() );
