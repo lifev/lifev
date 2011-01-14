@@ -173,7 +173,7 @@ public:
     /*!
       @return Pointer to the cloned object
     */
-   BCFunctionBasePtr_Type clone() const
+   virtual BCFunctionBasePtr_Type clone() const
    {
        BCFunctionBasePtr_Type copy ( new BCFunctionBase( M_userDefinedFunction ) );
        return copy;
@@ -282,6 +282,16 @@ public:
 
     //! @name Methods
     //@{
+
+    //! Clone the current object
+    /*!
+      @return Pointer to the cloned object
+    */
+    BCFunctionBase::BCFunctionBasePtr_Type clone() const
+    {
+        BCFunctionBase::BCFunctionBasePtr_Type copy ( new BCFunctionRobin( M_userDefinedFunction, M_robinBoundaryMassCoeffFunction ) );
+        return copy;
+    }
 
     //! evaluate the user defined function M_robinBoundaryMassCoeffFunction
     /*!
