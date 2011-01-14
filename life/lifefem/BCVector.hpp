@@ -45,8 +45,6 @@
 #include <life/lifecore/LifeV.hpp>
 #include <life/lifefem/DOFInterface.hpp>
 #include <life/lifearray/VectorEpetra.hpp>
-#include <life/lifecore/FactorySingleton.hpp>
-#include <life/lifecore/Factory.hpp>
 
 
 
@@ -174,9 +172,10 @@ public:
      * @param verbose The verbosity
      * @param out The output stream (default: cout)
      */
-    virtual std::ostream & showMe( bool /*verbose = false*/, std::ostream & /*out = std::cout*/ ) const
+    virtual std::ostream & showMe( bool /*verbose = false*/, std::ostream & out = std::cout ) const
     {
-        std::cerr << "not implemented in parent class, use derived class implementation!" << std::endl;
+        out << "not implemented in parent class, use derived class implementation!" << std::endl;
+        return out;
     }
 
 
@@ -583,6 +582,5 @@ protected:
     dofInterfacePtr_Type M_interfaceDofPtr;
 
 };
-typedef LifeV::FactorySingleton< LifeV::FactoryClone< BCVectorBase > > FactoryCloneBCVector;
 }
 #endif

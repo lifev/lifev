@@ -42,8 +42,6 @@
 #include <boost/function.hpp>
 #include <boost/shared_ptr.hpp>
 
-#include <life/lifecore/FactorySingleton.hpp>
-#include <life/lifecore/Factory.hpp>
 
 namespace LifeV
 {
@@ -189,7 +187,6 @@ protected:
 };
 
 
-typedef LifeV::FactorySingleton< LifeV::FactoryClone< BCFunctionBase > > FactoryCloneBCFunction;
 
 
 
@@ -628,7 +625,6 @@ private:
     function_Type M_robinBoundaryMassCoeffFunction;
 };
 
-typedef LifeV::FactorySingleton< LifeV::FactoryClone< BCFunctionUDepBase > > FactoryCloneBCFunctionUDep;
 
 /*!
 
