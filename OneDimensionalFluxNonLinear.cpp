@@ -70,7 +70,7 @@ OneDimensionalFluxNonLinear::flux( const Real& A, const Real& Q, const ID& ii,  
 }
 
 Real
-OneDimensionalFluxNonLinear::dFdU( const Real& A, const Real& Q, const ID& ii,   const ID& jj, const UInt& i ) const
+OneDimensionalFluxNonLinear::dFdU( const Real& A, const Real& Q, const ID& ii, const ID& jj, const UInt& i ) const
 {
     if ( ii == 1 && jj == 1 ) // dF1/dA
     {
