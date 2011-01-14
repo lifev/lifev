@@ -377,6 +377,7 @@ public:
     //@{
 
     typedef boost::function<Real ( const Real&, const Real&, const Real&, const Real&, const ID&, const Real& )> function_Type;
+    typedef boost::shared_ptr<BCFunctionUDepBase> BCFunctionUDepBasePtr_Type;
 
     //@}
 
@@ -431,6 +432,20 @@ public:
 
     //@}
 
+    //! @name Methods
+    //@{
+
+    //! Clone the current object
+    /*!
+      @return Pointer to the cloned object
+    */
+    virtual BCFunctionUDepBasePtr_Type clone() const
+    {
+        BCFunctionUDepBasePtr_Type copy ( new BCFunctionUDepBase( M_userDefinedFunction ) );
+        return copy;
+    }
+
+    //@}
 
     //! @name Set Methods
     //@{
@@ -554,6 +569,15 @@ public:
     //! @name Methods
     //@{
 
+    //! Clone the current object
+    /*!
+      @return Pointer to the cloned object
+    */
+    BCFunctionUDepBase::BCFunctionUDepBasePtr_Type clone() const
+    {
+        BCFunctionUDepBase::BCFunctionUDepBasePtr_Type copy ( new BCFunctionUDepRobin( M_userDefinedFunction, M_robinBoundaryMassCoeffFunction ) );
+        return copy;
+    }
 
     //! evaluate the user defined function M_robinBoundaryMassCoeffFunction
     /*!
