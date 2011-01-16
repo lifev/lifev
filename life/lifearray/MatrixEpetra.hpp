@@ -892,8 +892,7 @@ void MatrixEpetra<DataType>::diagonalize( std::vector<UInt> rVec,
                          LIDList );
 
     std::vector< std::vector<Int> > procToID  ( Comm.NumProc() );
-    std::vector< std::vector<Int> > procToData( Comm.NumProc() );
-
+    std::vector< std::vector<Real> > procToData( Comm.NumProc() );
 
     for ( Int ii = 0; ii < numIDs; ++ii )
     {
@@ -918,7 +917,7 @@ void MatrixEpetra<DataType>::diagonalize( std::vector<UInt> rVec,
             if ( length > 0 )
             {
                 MPI_Send( &procToID[ii][0], length, MPI_INT, ii, 667, comm->Comm() );
-                MPI_Send( &procToData[ii][0], length, MPI_INT, ii, 668, comm->Comm() );
+                MPI_Send( &procToData[ii][0], length, MPI_DOUBLE, ii, 668, comm->Comm() );
             }
         }
 
@@ -945,7 +944,7 @@ void MatrixEpetra<DataType>::diagonalize( std::vector<UInt> rVec,
                 Real* bufferData = new Real[length];
                 Real* ptrData(0);
 
-                MPI_Recv( bufferData, length, MPI_INT, ii, 668, comm->Comm(), &status );
+                MPI_Recv( bufferData, length, MPI_DOUBLE, ii, 668, comm->Comm(), &status );
                 ptrData = bufferData;
 
                 for ( Int ii = 0; ii < length; ++ii, ++ptrID, ++ptrData )
