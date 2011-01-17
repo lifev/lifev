@@ -5,7 +5,7 @@
 #                                 Copyright (C) 2010 EPFL
 #
 #      Author(s): Cristiano Malossi <cristiano.malossi@epfl.ch>
-#           Date: 2009-09-01
+#           Date: 2010-09-08
 #  License Terms: GNU GPL
 #
 ###################################################################################################
@@ -14,19 +14,25 @@
 
 [Problem] #########################################################################################
 ProblemType = Multiscale
-ProblemFile = ./MultiscaleDatabase/Models/Multiscale/Womersley_3DFluid_5Cylinders_Stress_tube80
+ProblemFile = ./MultiscaleDatabase/Models/Multiscale/ReymondStergiopulos2009_1D_AortaArmsLegs_Absorbing_Stress
+#ProblemFile = ./MultiscaleDatabase/Models/Multiscale/ReymondStergiopulos2009_1D_AortaArmsLegs_Resistance_Stress
 
 [Solver] ##########################################################################################
 ###################################################################################################
 
     [./Restart]
-    Restart                    = true
+    Restart                    = false
     RestartFromStepNumber      = 0
-
+    
     [../time_discretization]
-    initialtime                = 0.0                # [s]
-    endtime                    = 29.6088132032681   # [s]
-    timestep                   = 0.115659426575266  # [s]
+    initialtime                = .00      # [s]
+    endtime                    = 0.8      # [s] 1-HB
+    #initialtime                = 0.8      # [s] 2-HB start
+    #endtime                    = 1.6      # [s] 2-HB end
+    #initialtime                = 1.6      # [s] 2-HB start
+    #endtime                    = 2.4      # [s] 2-HB end
+    #endtime                    = 0.35     # [s] Absorbing
+    timestep                   = 1e-3     # [s]
 
     [../Algorithm]
     type                       = Newton            # Aitken, Explicit, Newton, Broyden
@@ -40,9 +46,10 @@ ProblemFile = ./MultiscaleDatabase/Models/Multiscale/Womersley_3DFluid_5Cylinder
 
 [Physics] #########################################################################################
 ###################################################################################################
-FluidDensity                = 2.79658816105093      # density        [g/cm^3]
-FluidViscosity              = 0.00593454445511297   # viscosity      [g/cm/s]
-StructureDensity            = 0                     # density        [g/cm^3]
-StructurePoissonCoefficient = 0                     # Poisson coeff. []
-StructureYoungModulus       = 0                     # Young modulus  [g/cm/s^2 - dyne/cm^2]
+FluidDensity                = 1.0           # density        [g/cm^3]
+FluidViscosity              = 0.035         # viscosity      [g/cm/s]
+FluidReferencePressure      = 1E+05         # ref. pressure  [g/cm/s^2 - dyne/cm^2]
+StructureDensity            = 0.0           # density        [g/cm^3]
+StructurePoissonCoefficient = 0.0           # Poisson coeff. []
+StructureYoungModulus       = 4.0E6         # Young modulus  [g/cm/s^2 - dyne/cm^2]
 ###################################################################################################

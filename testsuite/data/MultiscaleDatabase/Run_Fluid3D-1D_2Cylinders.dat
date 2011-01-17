@@ -14,7 +14,8 @@
 
 [Problem] #########################################################################################
 ProblemType = Multiscale
-ProblemFile = ./MultiscaleDatabase/Models/Multiscale/TestStress_3DFSI_2Cylinders_Stress_tube20
+ProblemFile = ./MultiscaleDatabase/Models/Multiscale/SinusoidalWave_3DFluid-1D_2Cylinders_FluxStress
+#ProblemFile = ./MultiscaleDatabase/Models/Multiscale/SinusoidalWave_3DFluid-1D_2Cylinders_Stress
 
 [Solver] ##########################################################################################
 ###################################################################################################
@@ -22,11 +23,11 @@ ProblemFile = ./MultiscaleDatabase/Models/Multiscale/TestStress_3DFSI_2Cylinders
     [./Restart]
     Restart                    = false
     RestartFromStepNumber      = 0
-
+    
     [../time_discretization]
-    initialtime                = 0.000   # [s]
-    endtime                    = 0.020   # [s]
-    timestep                   = 0.001   # [s]
+    initialtime                = .00000   # [s]
+    endtime                    = .04999   # [s]
+    timestep                   = 5e-5     # [s]
 
     [../Algorithm]
     type                       = Newton            # Aitken, Explicit, Newton, Broyden
@@ -42,6 +43,7 @@ ProblemFile = ./MultiscaleDatabase/Models/Multiscale/TestStress_3DFSI_2Cylinders
 ###################################################################################################
 FluidDensity                = 1.0           # density        [g/cm^3]
 FluidViscosity              = 0.035         # viscosity      [g/cm/s]
+FluidReferencePressure      = 0             # ref. pressure  [g/cm/s^2 - dyne/cm^2]
 StructureDensity            = 1.2           # density        [g/cm^3]
 StructurePoissonCoefficient = 0.48          # Poisson coeff. []
 StructureYoungModulus       = 4.0E6         # Young modulus  [g/cm/s^2 - dyne/cm^2]

@@ -16,48 +16,24 @@ SUBDIRS		= 	Algorithms\
                 Couplings\
 				Models
 
-dist_pkgdata_DATA = Run_CarotidBifurcation_1D-3DFluid_FluxStress.dat \
-					Run_CarotidBifurcation_1D-3DFSI_FluxStress.dat \
-					Run_CarotidBifurcation_3DFluid.dat \
-					Run_CarotidBifurcation_3DFluid_FluxStress.dat \
-					Run_CarotidBifurcation_3DFluid_Stress.dat \
-					Run_CarotidBifurcation_3DFluid_Synthetic_FluxStress.dat \
-					Run_CarotidBifurcation_3DFluid_Synthetic_Stress.dat \
-					Run_ReymondStergiopulos2009_1D_Aorta.dat \
-					Run_ReymondStergiopulos2009_1D_AortaArmsLegs.dat \
-					Run_ReymondStergiopulos2009_1D_ArterialTree.dat \
-					Run_Stationary_3DFluid_1Cylinder.dat \
-					Run_Stationary_3DFluid_CarotidBifurcation_FluxStress.dat \
-					Run_Stationary_3DFluid_Hexagon_FluxStress.dat \
-					Run_Stationary_3DFluid_Hexagon_Stress.dat \
-					Run_SinusoidalSquareWave_1D_2Cylinders_Stress.dat \
-					Run_SinusoidalWave_1D_1Cylinder.dat \
-					Run_SinusoidalWave_1D_2Cylinders_Stress.dat \
-					Run_SinusoidalWave_1D_2Cylinders_FluxStress.dat \
-					Run_SinusoidalWave_1D_3Cylinders_Stress.dat \
-					Run_SinusoidalWave_1D_3Cylinders_FluxStress.dat \
-					Run_SinusoidalWave_1D_Hexagon_Stress.dat \
-					Run_SinusoidalWave_1D_Hexagon_FluxStress.dat \
-					Run_SinusoidalWave_1D-3DFluid_2Cylinders_FluxStress.dat \
-					Run_SinusoidalWave_1D-3DFluid_2Cylinders_Stress.dat \
-					Run_SinusoidalWave_3DFluid-1D_2Cylinders_FluxStress.dat \
-					Run_SinusoidalWave_3DFluid-1D_2Cylinders_Stress.dat \
-					Run_SinusoidalWave_1D-3DFSI_2Cylinders_FluxStress.dat \
-					Run_SinusoidalSquareWave_3DFSI_1Cylinder.dat \
-					Run_SinusoidalSquareWave_3DFSI_2Cylinders_FluxStress.dat \
-					Run_SinusoidalSquareWave_3DFSI_2Cylinders_Stress.dat \
-					Run_TestStress_3DFSI_1Cylinder.dat \
-                    Run_TestStress_3DFSI_2Cylinders_FluxStress.dat \
-                    Run_TestStress_3DFSI_2Cylinders_Stress.dat \
-					Run_Womersley_3DFluid_1Cylinder.dat \
-					Run_Womersley_3DFluid_5Cylinders_FluxStress_tube20.dat \
-					Run_Womersley_3DFluid_5Cylinders_FluxStress_tube40.dat \
-					Run_Womersley_3DFluid_5Cylinders_FluxStress_tube60.dat \
-					Run_Womersley_3DFluid_5Cylinders_FluxStress_tube80.dat \
-					Run_Womersley_3DFluid_5Cylinders_Stress_tube20.dat \
-					Run_Womersley_3DFluid_5Cylinders_Stress_tube40.dat \
-					Run_Womersley_3DFluid_5Cylinders_Stress_tube60.dat \
-					Run_Womersley_3DFluid_5Cylinders_Stress_tube80.dat \
+dist_pkgdata_DATA = Run_1D_1Cylinder.dat \
+					Run_1D_2Cylinders.dat \
+					Run_1D_ReymondStergiopulos2009_Aorta.dat \
+					Run_1D_ReymondStergiopulos2009_AortaArmsLegs.dat \
+					Run_1D_ReymondStergiopulos2009_ArterialTree.dat \
+					Run_1D_Rhombus.dat \
+					Run_1D-Fluid3D_2Cylinders.dat \
+					Run_Fluid3D_1Cylinder.dat \
+					Run_Fluid3D_5Cylinders.dat \
+					Run_Fluid3D_CarotidBifurcation.dat \
+					Run_Fluid3D_CarotidBifurcationSynthetic.dat \
+					Run_Fluid3D_Rhombus.dat \
+					Run_Fluid3D-1D_2Cylinders.dat \
+					Run_Fluid3D-1D_CarotidBifurcation.dat \
+					Run_FSI3D_1Cylinder.dat \
+					Run_FSI3D_2Cylinders.dat \
+					Run_FSI3D-1D_2Cylinders.dat \
+					Run_FSI3D-1D_CarotidBifurcation.dat \
 					Test_Fluid3D.dat \
 					Test_1D.dat \
 					Test_FSI3D.dat
