@@ -12,7 +12,7 @@
 
 SUFFIXES	= .cpp .hpp .idl .c .h .f .F .o .moc
 
-SUBDIRS		= 	Algorithm\
+SUBDIRS		= 	Algorithms\
                 Couplings\
 				Models
 
