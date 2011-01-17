@@ -548,7 +548,7 @@ void VenantKirchhoffSolverNonLinear<Mesh, SolverType>::updateSystem(  source_Typ
     // start of the non linear part
 
 #ifdef nonlinear
-    ElemVec dk_loc( this->M_FESpace->fe().nbFEDof(), nDimensions );
+    VectorElemental dk_loc( this->M_FESpace->fe().nbFEDof(), nDimensions );
 
     vector_Type disp(*this->M_disp);
 
@@ -572,7 +572,7 @@ void VenantKirchhoffSolverNonLinear<Mesh, SolverType>::updateSystem(  source_Typ
 #endif
     // End of the nonlinear part
 
-    ElemVec M_elvec(this->M_FESpace->fe().nbFEDof(), nDimensions);
+    VectorElemental M_elvec(this->M_FESpace->fe().nbFEDof(), nDimensions);
     UInt nc = nDimensions;
 
 // loop on volumes: assembling source term
@@ -628,7 +628,7 @@ template <typename Mesh, typename SolverType>
 void VenantKirchhoffSolverNonLinear<Mesh, SolverType>::updateNonlinearMatrix( matrixPtr_Type& stiff )
 {
     //UInt totalDof   = this->M_FESpace->dof().numTotalDof();
-    ElemVec dk_loc( this->M_FESpace->fe().nbFEDof(), nDimensions );
+    VectorElemental dk_loc( this->M_FESpace->fe().nbFEDof(), nDimensions );
 
     vector_Type disp(*this->M_disp);
 
@@ -698,7 +698,7 @@ void VenantKirchhoffSolverNonLinear<Mesh, SolverType>::updateNonlinearTerms( mat
 {
 
     UInt totalDof   = this->M_FESpace->dof().numTotalDof();
-    ElemVec dk_loc( this->M_FESpace->fe().nbFEDof(), nDimensions );
+    VectorElemental dk_loc( this->M_FESpace->fe().nbFEDof(), nDimensions );
     vector_Type disp(*this->M_disp);
 
     vector_Type dRep(disp, Repeated);
@@ -842,7 +842,7 @@ void VenantKirchhoffSolverNonLinear<Mesh, SolverType>::computeMatrix( matrixPtr_
     *stiff *= coef;
 
 
-    ElemVec dk_loc( this->M_FESpace->fe().nbFEDof(), nDimensions );
+    VectorElemental dk_loc( this->M_FESpace->fe().nbFEDof(), nDimensions );
 
     vector_Type dRep(sol, Repeated);
 
@@ -921,7 +921,7 @@ void VenantKirchhoffSolverNonLinear<Mesh, SolverType>::updateJacobian( vector_Ty
     coef = this->M_zeta;
     *jacobian *= coef;
 
-    ElemVec dk_loc( this->M_FESpace->fe().nbFEDof(), nDimensions );
+    VectorElemental dk_loc( this->M_FESpace->fe().nbFEDof(), nDimensions );
 
     vector_Type dRep(sol, Repeated);
 
