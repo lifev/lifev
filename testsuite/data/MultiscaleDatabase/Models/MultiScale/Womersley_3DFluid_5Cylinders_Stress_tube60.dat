@@ -20,8 +20,8 @@ couplingFlags    = ' '
 
 [Problem] #########################################################################################
 ###################################################################################################
-modelsPath         = './MultiscaleData/Models/'
-couplingsPath    = './MultiscaleData/Couplings/'
+modelsPath         = './MultiscaleDatabase/Models/'
+couplingsPath    = './MultiscaleDatabase/Couplings/'
 
 # List of models ##################################################################################
 ########### ID #### Type ############## File (without .dat) #######################################
