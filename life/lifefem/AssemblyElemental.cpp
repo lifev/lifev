@@ -42,7 +42,7 @@ namespace LifeV
 
 namespace AssemblyElemental
 {
-void mass(ElemMat& localMass,
+void mass(MatrixElemental& localMass,
           const CurrentFE& massCFE,
           const Real& coefficient,
           const UInt& fieldDim)
@@ -55,7 +55,7 @@ void mass(ElemMat& localMass,
     for (UInt iterFDim(0); iterFDim<fieldDim; ++iterFDim)
     {
         // Extract the view of the matrix
-        ElemMat::matrix_view localView = localMass.block(iterFDim,iterFDim);
+        MatrixElemental::matrix_view localView = localMass.block(iterFDim,iterFDim);
 
         // Loop over the basis functions
         for (UInt iDof(0); iDof < nbFEDof ; ++iDof)
@@ -89,7 +89,7 @@ void mass(ElemMat& localMass,
 }
 
 
-void stiffness(ElemMat& localStiff,
+void stiffness(MatrixElemental& localStiff,
                const CurrentFE& stiffCFE,
                const Real& coefficient,
                const UInt& fieldDim)
@@ -102,7 +102,7 @@ void stiffness(ElemMat& localStiff,
     for (UInt iterFDim(0); iterFDim<fieldDim; ++iterFDim)
     {
         // Extract the view of the matrix
-        ElemMat::matrix_view localView = localStiff.block(iterFDim,iterFDim);
+        MatrixElemental::matrix_view localView = localStiff.block(iterFDim,iterFDim);
 
         // Loop over the basis functions
         for (UInt iDof(0); iDof < nbFEDof ; ++iDof)
@@ -151,13 +151,13 @@ void stiffness(ElemMat& localStiff,
 //
 // coeff*Mass
 //
-void mass( Real coef, ElemMat& elmat, const CurrentFE& fe,
+void mass( Real coef, MatrixElemental& elmat, const CurrentFE& fe,
            int iblock, int jblock )
 /*
   Mass matrix: \int v_i v_j
 */
 {
-    ElemMat::matrix_view mat = elmat.block( iblock, jblock );
+    MatrixElemental::matrix_view mat = elmat.block( iblock, jblock );
     UInt i, ig;
     int iloc, jloc;
     Real s, coef_s;
@@ -192,7 +192,7 @@ void mass( Real coef, ElemMat& elmat, const CurrentFE& fe,
 //
 // coeff*Mass
 //
-void mass( Real coef, ElemMat& elmat, const CurrentFE& fe,
+void mass( Real coef, MatrixElemental& elmat, const CurrentFE& fe,
            int iblock, int jblock, UInt nb )
 /*
   Mass matrix: \int v_i v_j (nb blocks on the diagonal, nb>1)
@@ -233,7 +233,7 @@ void mass( Real coef, ElemMat& elmat, const CurrentFE& fe,
     // copy on the components
     for ( UInt icomp = 0; icomp < nb; icomp++ )
     {
-        ElemMat::matrix_view mat_icomp = elmat.block( iblock + icomp, jblock + icomp );
+        MatrixElemental::matrix_view mat_icomp = elmat.block( iblock + icomp, jblock + icomp );
         for ( i = 0; i < fe.nbDiag(); i++ )
         {
             iloc = fe.patternFirst( i );
@@ -252,7 +252,7 @@ void mass( Real coef, ElemMat& elmat, const CurrentFE& fe,
 //
 // coeff[q]*Mass
 //
-void mass( const std::vector<Real>& coef, ElemMat& elmat, const CurrentFE& fe,
+void mass( const std::vector<Real>& coef, MatrixElemental& elmat, const CurrentFE& fe,
            int iblock, int jblock, UInt nb )
 /*
   Mass matrix: \int v_i v_j (nb blocks on the diagonal, nb>1)
@@ -292,7 +292,7 @@ void mass( const std::vector<Real>& coef, ElemMat& elmat, const CurrentFE& fe,
     // copy on the components
     for ( UInt icomp = 0; icomp < nb; icomp++ )
     {
-        ElemMat::matrix_view mat_icomp = elmat.block( iblock + icomp, jblock + icomp );
+        MatrixElemental::matrix_view mat_icomp = elmat.block( iblock + icomp, jblock + icomp );
         for ( i = 0; i < fe.nbDiag(); i++ )
         {
             iloc = fe.patternFirst( i );
@@ -313,7 +313,7 @@ void mass( const std::vector<Real>& coef, ElemMat& elmat, const CurrentFE& fe,
 
 
 
-void stiff_divgrad( Real coef, const ElemVec& uk_loc, ElemMat& elmat, const CurrentFE& fe )
+void stiff_divgrad( Real coef, const VectorElemental& uk_loc, MatrixElemental& elmat, const CurrentFE& fe )
 {
 
     double s;
@@ -336,7 +336,7 @@ void stiff_divgrad( Real coef, const ElemVec& uk_loc, ElemMat& elmat, const Curr
         duk[ ig ] = s;
     }// chiude il ciclo su ig
 
-    ElemMat::matrix_type mat_tmp( fe.nbFEDof(), fe.nbFEDof() );
+    MatrixElemental::matrix_type mat_tmp( fe.nbFEDof(), fe.nbFEDof() );
 
     for ( UInt i = 0; i < fe.nbFEDof(); ++i )
     {
@@ -354,14 +354,14 @@ void stiff_divgrad( Real coef, const ElemVec& uk_loc, ElemMat& elmat, const Curr
 
     for ( UInt icoor = 0; icoor < fe.nbCoor(); ++icoor )
     {
-        ElemMat::matrix_view mat = elmat.block( icoor, icoor );
+        MatrixElemental::matrix_view mat = elmat.block( icoor, icoor );
         mat += mat_tmp;
     }
 
 }
 
 // Stiffness matrix: coef * ( (\div u) \grad u_k : \grad v  ) controllato!!!
-void stiff_divgrad_2( Real coef, const ElemVec& uk_loc, ElemMat& elmat, const CurrentFE& fe )
+void stiff_divgrad_2( Real coef, const VectorElemental& uk_loc, MatrixElemental& elmat, const CurrentFE& fe )
 {
 
     double s;
@@ -392,7 +392,7 @@ void stiff_divgrad_2( Real coef, const ElemVec& uk_loc, ElemMat& elmat, const Cu
     {
         for ( UInt jcoor = 0; jcoor < fe.nbCoor(); ++jcoor )
         {
-            ElemMat::matrix_view mat = elmat.block( icoor, jcoor );
+            MatrixElemental::matrix_view mat = elmat.block( icoor, jcoor );
 
             for ( UInt i = 0; i < fe.nbFEDof(); ++i )
             {
@@ -410,7 +410,7 @@ void stiff_divgrad_2( Real coef, const ElemVec& uk_loc, ElemMat& elmat, const Cu
 }
 
 // Stiffness matrix: coef * ( \grad u_k : \grad u_k) *( \grad u : \grad v  ) controllato!!!
-void stiff_gradgrad( Real coef, const ElemVec& uk_loc, ElemMat& elmat, const CurrentFE& fe )
+void stiff_gradgrad( Real coef, const VectorElemental& uk_loc, MatrixElemental& elmat, const CurrentFE& fe )
 {
 
     double s,s1;
@@ -434,7 +434,7 @@ void stiff_gradgrad( Real coef, const ElemVec& uk_loc, ElemMat& elmat, const Cur
         gguk[ ig ] = s;
     }// chiude il ciclo su ig
 
-    ElemMat::matrix_type mat_tmp( fe.nbFEDof(), fe.nbFEDof() );
+    MatrixElemental::matrix_type mat_tmp( fe.nbFEDof(), fe.nbFEDof() );
 
     for ( UInt i = 0; i < fe.nbFEDof(); ++i )
     {
@@ -452,13 +452,13 @@ void stiff_gradgrad( Real coef, const ElemVec& uk_loc, ElemMat& elmat, const Cur
 
     for ( UInt icoor = 0; icoor < fe.nbCoor(); ++icoor )
     {
-        ElemMat::matrix_view mat = elmat.block( icoor, icoor );
+        MatrixElemental::matrix_view mat = elmat.block( icoor, icoor );
         mat += mat_tmp;
     }
 }
 
 // Stiffness matrix: coef * ( \grad u_k : \grad u) *( \grad u_k : \grad v  ) controllato!!!
-void stiff_gradgrad_2( Real coef, const ElemVec& uk_loc, ElemMat& elmat, const CurrentFE& fe )
+void stiff_gradgrad_2( Real coef, const VectorElemental& uk_loc, MatrixElemental& elmat, const CurrentFE& fe )
 {
 
     double s;
@@ -485,7 +485,7 @@ void stiff_gradgrad_2( Real coef, const ElemVec& uk_loc, ElemMat& elmat, const C
     {
         for ( UInt jcoor = 0; jcoor < fe.nbCoor(); ++jcoor )
         {
-            ElemMat::matrix_view mat = elmat.block( icoor, jcoor );
+            MatrixElemental::matrix_view mat = elmat.block( icoor, jcoor );
 
             for ( UInt i = 0; i < fe.nbFEDof(); ++i )
             {
@@ -508,7 +508,7 @@ void stiff_gradgrad_2( Real coef, const ElemVec& uk_loc, ElemMat& elmat, const C
 }
 
 // Stiffness matrix: coef * ( \grad d^k \grad d : \grad v  )controllato!!!
-void stiff_dergrad_gradbis( Real coef, const ElemVec& uk_loc, ElemMat& elmat, const CurrentFE& fe )
+void stiff_dergrad_gradbis( Real coef, const VectorElemental& uk_loc, MatrixElemental& elmat, const CurrentFE& fe )
 {
 
     double s;
@@ -542,7 +542,7 @@ void stiff_dergrad_gradbis( Real coef, const ElemVec& uk_loc, ElemMat& elmat, co
         for ( UInt jcoor = 0; jcoor < fe.nbCoor(); ++jcoor )
         {
 
-            ElemMat::matrix_view mat = elmat.block( icoor, jcoor );
+            MatrixElemental::matrix_view mat = elmat.block( icoor, jcoor );
 
             for ( UInt i = 0; i < fe.nbFEDof(); ++i )
             {
@@ -562,7 +562,7 @@ void stiff_dergrad_gradbis( Real coef, const ElemVec& uk_loc, ElemMat& elmat, co
 }
 
 // Stiffness matrix: coef * ( \grad u^k [\grad d]^T : \grad v  ) controllato!!!
-void stiff_dergrad_gradbis_Tr( Real coef, const ElemVec& uk_loc, ElemMat& elmat, const CurrentFE& fe )
+void stiff_dergrad_gradbis_Tr( Real coef, const VectorElemental& uk_loc, MatrixElemental& elmat, const CurrentFE& fe )
 {
 
     double s;
@@ -596,7 +596,7 @@ void stiff_dergrad_gradbis_Tr( Real coef, const ElemVec& uk_loc, ElemMat& elmat,
         for ( UInt jcoor = 0; jcoor < fe.nbCoor(); ++jcoor )
         {
 
-            ElemMat::matrix_view mat = elmat.block( icoor, jcoor );
+            MatrixElemental::matrix_view mat = elmat.block( icoor, jcoor );
 
             for ( UInt i = 0; i < fe.nbFEDof(); ++i )
             {
@@ -616,7 +616,7 @@ void stiff_dergrad_gradbis_Tr( Real coef, const ElemVec& uk_loc, ElemMat& elmat,
 }
 
 // Stiffness matrix: coef * ( \grad \delta d \grad d^k : \grad v  ) controllato!!!
-void stiff_dergrad_gradbis_2( Real coef, const ElemVec& uk_loc, ElemMat& elmat, const CurrentFE& fe )
+void stiff_dergrad_gradbis_2( Real coef, const VectorElemental& uk_loc, MatrixElemental& elmat, const CurrentFE& fe )
 {
 
     double s;
@@ -644,7 +644,7 @@ void stiff_dergrad_gradbis_2( Real coef, const ElemVec& uk_loc, ElemMat& elmat, 
     //
     // blocks (icoor,jcoor) of elmat
     //
-    ElemMat::matrix_type mat_tmp( fe.nbFEDof(), fe.nbFEDof() );
+    MatrixElemental::matrix_type mat_tmp( fe.nbFEDof(), fe.nbFEDof() );
 
     for ( UInt i = 0; i < fe.nbFEDof(); ++i )
     {
@@ -665,13 +665,13 @@ void stiff_dergrad_gradbis_2( Real coef, const ElemVec& uk_loc, ElemMat& elmat, 
 
     for ( UInt icoor = 0; icoor < fe.nbCoor(); ++icoor )
     {
-        ElemMat::matrix_view mat = elmat.block( icoor, icoor );
+        MatrixElemental::matrix_view mat = elmat.block( icoor, icoor );
         mat += mat_tmp;
     }
 }
 
 // Stiffness matrix: coef * ( \grad \delta d [\grad d^k]^T : \grad v  )
-void stiff_dergrad_gradbis_Tr_2( Real coef, const ElemVec& uk_loc, ElemMat& elmat, const CurrentFE& fe )
+void stiff_dergrad_gradbis_Tr_2( Real coef, const VectorElemental& uk_loc, MatrixElemental& elmat, const CurrentFE& fe )
 {
 
     double s;
@@ -699,7 +699,7 @@ void stiff_dergrad_gradbis_Tr_2( Real coef, const ElemVec& uk_loc, ElemMat& elma
     //
     // blocks (icoor,jcoor) of elmat
     //
-    ElemMat::matrix_type mat_tmp( fe.nbFEDof(), fe.nbFEDof() );
+    MatrixElemental::matrix_type mat_tmp( fe.nbFEDof(), fe.nbFEDof() );
 
     for ( UInt i = 0; i < fe.nbFEDof(); ++i )
     {
@@ -720,13 +720,13 @@ void stiff_dergrad_gradbis_Tr_2( Real coef, const ElemVec& uk_loc, ElemMat& elma
 
     for ( UInt icoor = 0; icoor < fe.nbCoor(); ++icoor ) // copia del blocco sulla diagonale
     {
-        ElemMat::matrix_view mat = elmat.block( icoor, icoor );
+        MatrixElemental::matrix_view mat = elmat.block( icoor, icoor );
         mat += mat_tmp;
     }
 }
 
 //  Stiffness matrix: coef * (  \grad u^k [\grad u^k]^T \grad u : \grad v  ) controllato!!!
-void stiff_gradgradTr_gradbis( Real coef, const ElemVec& uk_loc, ElemMat& elmat, const CurrentFE& fe )
+void stiff_gradgradTr_gradbis( Real coef, const VectorElemental& uk_loc, MatrixElemental& elmat, const CurrentFE& fe )
 {
 
     double s;
@@ -765,7 +765,7 @@ void stiff_gradgradTr_gradbis( Real coef, const ElemVec& uk_loc, ElemMat& elmat,
         for ( UInt jcoor = 0; jcoor < fe.nbCoor(); ++jcoor )
         {
 
-            ElemMat::matrix_view mat = elmat.block( icoor, jcoor ); // estrae il blocco (icoor, jcoor)
+            MatrixElemental::matrix_view mat = elmat.block( icoor, jcoor ); // estrae il blocco (icoor, jcoor)
 
             for ( UInt i = 0; i < fe.nbFEDof(); ++i )
             {
@@ -783,7 +783,7 @@ void stiff_gradgradTr_gradbis( Real coef, const ElemVec& uk_loc, ElemMat& elmat,
 }
 
 //  Stiffness matrix: coef * (  \grad u^k [\grad u]^T \grad u^k : \grad v  )controllato!!!
-void stiff_gradgradTr_gradbis_2( Real coef, const ElemVec& uk_loc, ElemMat& elmat, const CurrentFE& fe )
+void stiff_gradgradTr_gradbis_2( Real coef, const VectorElemental& uk_loc, MatrixElemental& elmat, const CurrentFE& fe )
 {
 
     double s;
@@ -817,7 +817,7 @@ void stiff_gradgradTr_gradbis_2( Real coef, const ElemVec& uk_loc, ElemMat& elma
         for ( UInt jcoor = 0; jcoor < fe.nbCoor(); ++jcoor )
         {
 
-            ElemMat::matrix_view mat = elmat.block( icoor, jcoor ); // estrae il blocco (icoor, jcoor)
+            MatrixElemental::matrix_view mat = elmat.block( icoor, jcoor ); // estrae il blocco (icoor, jcoor)
 
             for ( UInt i = 0; i < fe.nbFEDof(); ++i )
             {
@@ -840,7 +840,7 @@ void stiff_gradgradTr_gradbis_2( Real coef, const ElemVec& uk_loc, ElemMat& elma
 }
 
 //  Stiffness matrix: coef * (  \grad u [\grad u^k]^T \grad u^k : \grad v  )controllato!!!
-void stiff_gradgradTr_gradbis_3( Real coef, const ElemVec& uk_loc, ElemMat& elmat, const CurrentFE& fe )
+void stiff_gradgradTr_gradbis_3( Real coef, const VectorElemental& uk_loc, MatrixElemental& elmat, const CurrentFE& fe )
 {
 
     double s;
@@ -874,7 +874,7 @@ void stiff_gradgradTr_gradbis_3( Real coef, const ElemVec& uk_loc, ElemMat& elma
     //
     // blocks (icoor,jcoor) of elmat
     //
-    ElemMat::matrix_type mat_tmp( fe.nbFEDof(), fe.nbFEDof() );
+    MatrixElemental::matrix_type mat_tmp( fe.nbFEDof(), fe.nbFEDof() );
 
     for ( UInt i = 0; i < fe.nbFEDof(); ++i )
     {
@@ -895,7 +895,7 @@ void stiff_gradgradTr_gradbis_3( Real coef, const ElemVec& uk_loc, ElemMat& elma
 
     for ( UInt icoor = 0; icoor < fe.nbCoor(); ++icoor ) // copia del blocco sulla diagonale
     {
-        ElemMat::matrix_view mat = elmat.block( icoor, icoor );
+        MatrixElemental::matrix_view mat = elmat.block( icoor, icoor );
         mat += mat_tmp;
     }
 }
@@ -907,7 +907,7 @@ void stiff_gradgradTr_gradbis_3( Real coef, const ElemVec& uk_loc, ElemMat& elma
 
 
 void ipstab_grad( const Real         coef,
-                  ElemMat&           elmat,
+                  MatrixElemental&           elmat,
                   const CurrentFE&   fe1,
                   const CurrentFE&   fe2,
                   const CurrentBoundaryFE& bdfe,
@@ -917,7 +917,7 @@ void ipstab_grad( const Real         coef,
       Interior penalty stabilization: coef*\int_{face} grad u1_i . grad v1_j
     */
 
-    ElemMat::matrix_view mat = elmat.block( iblock, jblock );
+    MatrixElemental::matrix_view mat = elmat.block( iblock, jblock );
 
 
 
@@ -1001,7 +1001,7 @@ void ipstab_grad( const Real         coef,
 
 
 void ipstab_grad( const Real         coef,
-                  ElemMat&           elmat,
+                  MatrixElemental&           elmat,
                   const CurrentFE&   fe1,
                   const CurrentFE&   fe2,
                   const CurrentBoundaryFE& bdfe,
@@ -1013,7 +1013,7 @@ void ipstab_grad( const Real         coef,
     */
 
 
-    ElemMat::matrix_type mat_tmp( fe1.nbFEDof(), fe2.nbFEDof() );
+    MatrixElemental::matrix_type mat_tmp( fe1.nbFEDof(), fe2.nbFEDof() );
 
 
     Real sum, sum1, sum2;
@@ -1091,7 +1091,7 @@ void ipstab_grad( const Real         coef,
     // copy on the components
     for ( int icomp = 0; icomp < nb; icomp++ )
     {
-        ElemMat::matrix_view mat_icomp = elmat.block( iblock + icomp, jblock + icomp );
+        MatrixElemental::matrix_view mat_icomp = elmat.block( iblock + icomp, jblock + icomp );
         mat_icomp += mat_tmp;
     }
 }
@@ -1101,10 +1101,10 @@ void ipstab_grad( const Real         coef,
 
 
 void ipstab_bgrad( const Real         coef,
-                   ElemMat&           elmat,
+                   MatrixElemental&           elmat,
                    const CurrentFE&   fe1,
                    const CurrentFE&   fe2,
-                   const ElemVec&     beta,
+                   const VectorElemental&     beta,
                    const CurrentBoundaryFE& bdfe,
                    int iblock, int jblock,
                    int nb )
@@ -1113,7 +1113,7 @@ void ipstab_bgrad( const Real         coef,
       Interior penalty stabilization: coef*\int_{face} (\beta1 . grad u1_i) . (\beta2 . grad v2_j)
     */
 
-    ElemMat::matrix_type mat_tmp( fe1.nbFEDof(), fe2.nbFEDof() );
+    MatrixElemental::matrix_type mat_tmp( fe1.nbFEDof(), fe2.nbFEDof() );
 
     Real sum, sum1, sum2;
     UInt i,j;
@@ -1218,7 +1218,7 @@ void ipstab_bgrad( const Real         coef,
     // copy on the components
     for ( int icomp = 0; icomp < nb; icomp++ )
     {
-        ElemMat::matrix_view mat_icomp = elmat.block( iblock + icomp, jblock + icomp );
+        MatrixElemental::matrix_view mat_icomp = elmat.block( iblock + icomp, jblock + icomp );
         mat_icomp += mat_tmp;
     }
 
@@ -1228,7 +1228,7 @@ void ipstab_bgrad( const Real         coef,
 
 
 
-void ipstab_div( const Real coef, ElemMat& elmat, const CurrentFE& fe1, const CurrentFE& fe2,
+void ipstab_div( const Real coef, MatrixElemental& elmat, const CurrentFE& fe1, const CurrentFE& fe2,
                  const CurrentBoundaryFE& bdfe, int iblock, int jblock )
 {
     /*
@@ -1294,7 +1294,7 @@ void ipstab_div( const Real coef, ElemMat& elmat, const CurrentFE& fe1, const Cu
     {
         for ( jcoor = 0; jcoor < fe1.nbCoor(); ++jcoor )
         {
-            ElemMat::matrix_view mat_icomp = elmat.block( iblock + icoor, jblock + jcoor );
+            MatrixElemental::matrix_view mat_icomp = elmat.block( iblock + icoor, jblock + jcoor );
             // Loop on rows
             for ( i = 0; i < fe1.nbFEDof(); ++i )
             {
@@ -1312,16 +1312,16 @@ void ipstab_div( const Real coef, ElemMat& elmat, const CurrentFE& fe1, const Cu
 
 }
 
-void ipstab_bagrad( const Real coef, ElemMat& elmat,
+void ipstab_bagrad( const Real coef, MatrixElemental& elmat,
                     const CurrentFE& fe1, const CurrentFE& fe2,
-                    const ElemVec& beta, const CurrentBoundaryFE& bdfe,
+                    const VectorElemental& beta, const CurrentBoundaryFE& bdfe,
                     int iblock, int jblock )
 {
 
     // Interior penalty stabilization:
     // coef < |\beta . n|^2 / |\beta| \grad p1, \grad q2 >
 
-    ElemMat::matrix_view mat = elmat.block( iblock, jblock );
+    MatrixElemental::matrix_view mat = elmat.block( iblock, jblock );
 
     Real sum, sum1, sum2;
     UInt icoor,jcoor;
@@ -1432,11 +1432,11 @@ void ipstab_bagrad( const Real coef, ElemMat& elmat,
 
 
 void ipstab_bagrad( const Real         coef,
-                    ElemMat&           elmat,
+                    MatrixElemental&           elmat,
                     const CurrentFE&   fe1,
                     const CurrentFE&   fe2,
                     const CurrentFE&   fe3,
-                    const ElemVec&     beta,
+                    const VectorElemental&     beta,
                     const CurrentBoundaryFE& bdfe,
                     int iblock, int    jblock )
 {
@@ -1444,7 +1444,7 @@ void ipstab_bagrad( const Real         coef,
     // Interior penalty stabilization:
     // coef < |\beta.n| \grad p1, \grad q2 >
 
-    ElemMat::matrix_view mat = elmat.block( iblock, jblock );
+    MatrixElemental::matrix_view mat = elmat.block( iblock, jblock );
 
     Real sum, sum1, sum2;
     UInt icoor,jcoor;
@@ -1548,13 +1548,13 @@ void ipstab_bagrad( const Real         coef,
 }
 
 
-void stiff( Real coef, ElemMat& elmat, const CurrentFE& fe,
+void stiff( Real coef, MatrixElemental& elmat, const CurrentFE& fe,
             int iblock, int jblock )
 /*
   Stiffness matrix: coef*\int grad v_i . grad v_j
 */
 {
-    ElemMat::matrix_view mat = elmat.block( iblock, jblock );
+    MatrixElemental::matrix_view mat = elmat.block( iblock, jblock );
     UInt iloc, jloc;
     UInt i, icoor, ig;
     double s, coef_s;
@@ -1594,13 +1594,13 @@ void stiff( Real coef, ElemMat& elmat, const CurrentFE& fe,
 }
 
 
-void stiff( Real coef, Real ( *fct ) ( Real, Real, Real ), ElemMat& elmat,
+void stiff( Real coef, Real ( *fct ) ( Real, Real, Real ), MatrixElemental& elmat,
             const CurrentFE& fe, int iblock, int jblock )
 /*
   Stiffness matrix: coef*\int grad v_i . grad v_j
 */
 {
-    ElemMat::matrix_view mat = elmat.block( iblock, jblock );
+    MatrixElemental::matrix_view mat = elmat.block( iblock, jblock );
     UInt iloc, jloc;
     UInt i, icoor, ig;
     double s, coef_s, coef_f;
@@ -1642,7 +1642,7 @@ void stiff( Real coef, Real ( *fct ) ( Real, Real, Real ), ElemMat& elmat,
 }
 //
 
-void stiff( Real coef, ElemMat& elmat, const CurrentFE& fe,
+void stiff( Real coef, MatrixElemental& elmat, const CurrentFE& fe,
             int iblock, int jblock, int nb )
 /*
   Stiffness matrix: coef*\int grad v_i . grad v_j (nb blocks on the diagonal, nb>1)
@@ -1692,7 +1692,7 @@ void stiff( Real coef, ElemMat& elmat, const CurrentFE& fe,
     // copy on the components
     for ( int icomp = 0; icomp < nb; icomp++ )
     {
-        ElemMat::matrix_view mat_icomp = elmat.block( iblock + icomp, jblock + icomp );
+        MatrixElemental::matrix_view mat_icomp = elmat.block( iblock + icomp, jblock + icomp );
         for ( i = 0; i < fe.nbDiag(); i++ )
         {
             iloc = fe.patternFirst( i );
@@ -1709,7 +1709,7 @@ void stiff( Real coef, ElemMat& elmat, const CurrentFE& fe,
 }
 
 
-void stiff( const std::vector<Real>& coef, ElemMat& elmat, const CurrentFE& fe,
+void stiff( const std::vector<Real>& coef, MatrixElemental& elmat, const CurrentFE& fe,
             int iblock, int jblock, int nb )
 /*
   Stiffness matrix: coef*\int grad v_i . grad v_j (nb blocks on the diagonal, nb>1)
@@ -1758,7 +1758,7 @@ void stiff( const std::vector<Real>& coef, ElemMat& elmat, const CurrentFE& fe,
     // copy on the components
     for ( int icomp = 0; icomp < nb; icomp++ )
     {
-        ElemMat::matrix_view mat_icomp = elmat.block( iblock + icomp, jblock + icomp );
+        MatrixElemental::matrix_view mat_icomp = elmat.block( iblock + icomp, jblock + icomp );
         for ( i = 0; i < fe.nbDiag(); i++ )
         {
             iloc = fe.patternFirst( i );
@@ -1777,7 +1777,7 @@ void stiff( const std::vector<Real>& coef, ElemMat& elmat, const CurrentFE& fe,
 
 // VC - December 2004
 //
-void stiff_curl( Real coef, ElemMat& elmat, const CurrentFE& fe,
+void stiff_curl( Real coef, MatrixElemental& elmat, const CurrentFE& fe,
                  int iblock, int jblock, int /*nb*/ )
 
 
@@ -2072,7 +2072,7 @@ void stiff_curl( Real coef, ElemMat& elmat, const CurrentFE& fe,
         mat_tmp33( jloc, iloc ) += coef_s;
     }
 
-    ElemMat::matrix_view mat_icomp = elmat.block( iblock + 0, jblock + 0 );
+    MatrixElemental::matrix_view mat_icomp = elmat.block( iblock + 0, jblock + 0 );
     for ( i = 0; i < fe.nbDiag(); i++ )
     {
         iloc = fe.patternFirst( i );
@@ -2203,7 +2203,7 @@ void stiff_curl( Real coef, ElemMat& elmat, const CurrentFE& fe,
 /*
   Stiffness matrix: coef * ( div u , div v )
 */
-void stiff_div( Real coef, ElemMat& elmat, const CurrentFE& fe )
+void stiff_div( Real coef, MatrixElemental& elmat, const CurrentFE& fe )
 {
 
     double s;
@@ -2216,7 +2216,7 @@ void stiff_div( Real coef, ElemMat& elmat, const CurrentFE& fe )
         for ( UInt jcoor = 0; jcoor < fe.nbCoor(); ++jcoor )
         {
 
-            ElemMat::matrix_view mat = elmat.block( icoor, jcoor );
+            MatrixElemental::matrix_view mat = elmat.block( icoor, jcoor );
 
             for ( UInt i = 0; i < fe.nbFEDof(); ++i )
             {
@@ -2237,7 +2237,7 @@ void stiff_div( Real coef, ElemMat& elmat, const CurrentFE& fe )
 /*
   Stiffness matrix: coef * ( [\grad u^k]^T \grad d : \grad v  )
 */
-void stiff_dergradbis( Real coef, const ElemVec& uk_loc, ElemMat& elmat, const CurrentFE& fe )
+void stiff_dergradbis( Real coef, const VectorElemental& uk_loc, MatrixElemental& elmat, const CurrentFE& fe )
 {
 
     double s;
@@ -2271,7 +2271,7 @@ void stiff_dergradbis( Real coef, const ElemVec& uk_loc, ElemMat& elmat, const C
         for ( UInt jcoor = 0; jcoor < fe.nbCoor(); ++jcoor )
         {
 
-            ElemMat::matrix_view mat = elmat.block( icoor, jcoor );
+            MatrixElemental::matrix_view mat = elmat.block( icoor, jcoor );
 
             for ( UInt i = 0; i < fe.nbFEDof(); ++i )
             {
@@ -2294,7 +2294,7 @@ void stiff_dergradbis( Real coef, const ElemVec& uk_loc, ElemMat& elmat, const C
 /*
   Stiffness matrix: coef * ( [\grad u]^T \grad u^k [\grad u^k]^T \grad u : \grad v  ) for Newton on St-Venant
 */
-void stiff_dergrad( Real coef, const ElemVec& uk_loc, ElemMat& elmat, const CurrentFE& fe )
+void stiff_dergrad( Real coef, const VectorElemental& uk_loc, MatrixElemental& elmat, const CurrentFE& fe )
 {
 
     double s;
@@ -2328,7 +2328,7 @@ void stiff_dergrad( Real coef, const ElemVec& uk_loc, ElemMat& elmat, const Curr
         for ( UInt jcoor = 0; jcoor < fe.nbCoor(); ++jcoor )
         {
 
-            ElemMat::matrix_view mat = elmat.block( icoor, jcoor );
+            MatrixElemental::matrix_view mat = elmat.block( icoor, jcoor );
 
             for ( UInt i = 0; i < fe.nbFEDof(); ++i )
             {
@@ -2356,7 +2356,7 @@ void stiff_dergrad( Real coef, const ElemVec& uk_loc, ElemMat& elmat, const Curr
 // coef * ( \tr { [\grad u^k]^T \grad u }, \div v  ) for Newton on St-Venant
 //
 //
-void stiff_derdiv( Real coef, const ElemVec& uk_loc, ElemMat& elmat, const CurrentFE& fe )
+void stiff_derdiv( Real coef, const VectorElemental& uk_loc, MatrixElemental& elmat, const CurrentFE& fe )
 {
 
     Real guk[ fe.nbCoor() ][ fe.nbCoor() ][ fe.nbQuadPt() ];      // \grad u^k at each quadrature point
@@ -2388,7 +2388,7 @@ void stiff_derdiv( Real coef, const ElemVec& uk_loc, ElemMat& elmat, const Curre
         for ( UInt jcoor = 0; jcoor < fe.nbCoor(); ++jcoor )
         {
 
-            ElemMat::matrix_view mat = elmat.block( icoor, jcoor );
+            MatrixElemental::matrix_view mat = elmat.block( icoor, jcoor );
 
             for ( UInt i = 0; i < fe.nbFEDof(); ++i )
             {
@@ -2408,7 +2408,7 @@ void stiff_derdiv( Real coef, const ElemVec& uk_loc, ElemMat& elmat, const Curre
 
 
 
-void stiff_strain( Real coef, ElemMat& elmat, const CurrentFE& fe )
+void stiff_strain( Real coef, MatrixElemental& elmat, const CurrentFE& fe )
 /*
   Stiffness matrix: coef * ( e(u) , e(v) )
 */
@@ -2416,7 +2416,7 @@ void stiff_strain( Real coef, ElemMat& elmat, const CurrentFE& fe )
     double s;
     double tmp = coef * 0.5;
 
-    ElemMat::matrix_type mat_tmp( fe.nbFEDof(), fe.nbFEDof() );
+    MatrixElemental::matrix_type mat_tmp( fe.nbFEDof(), fe.nbFEDof() );
 
     for ( UInt i = 0; i < fe.nbFEDof(); ++i )
     {
@@ -2431,7 +2431,7 @@ void stiff_strain( Real coef, ElemMat& elmat, const CurrentFE& fe )
     }
     for ( UInt icoor = 0; icoor < fe.nbCoor(); ++icoor )
     {
-        ElemMat::matrix_view mat = elmat.block( icoor, icoor );
+        MatrixElemental::matrix_view mat = elmat.block( icoor, icoor );
         mat += mat_tmp;
     }
 
@@ -2439,7 +2439,7 @@ void stiff_strain( Real coef, ElemMat& elmat, const CurrentFE& fe )
     {
         for ( UInt jcoor = 0; jcoor < fe.nbCoor(); ++jcoor )
         {
-            ElemMat::matrix_view mat = elmat.block( icoor, jcoor );
+            MatrixElemental::matrix_view mat = elmat.block( icoor, jcoor );
             for ( UInt i = 0; i < fe.nbFEDof(); ++i )
             {
                 for ( UInt j = 0; j < fe.nbFEDof(); ++j )
@@ -2456,7 +2456,7 @@ void stiff_strain( Real coef, ElemMat& elmat, const CurrentFE& fe )
 
 
 
-void mass_divw( Real coef, const ElemVec& w_loc, ElemMat& elmat, const CurrentFE& fe,
+void mass_divw( Real coef, const VectorElemental& w_loc, MatrixElemental& elmat, const CurrentFE& fe,
                 int iblock, int jblock, UInt nb )
 /*
   modified mass matrix: ( div w u,v )
@@ -2508,7 +2508,7 @@ void mass_divw( Real coef, const ElemVec& w_loc, ElemMat& elmat, const CurrentFE
     // copy on the components
     for ( icomp = 0; icomp < nb; icomp++ )
     {
-        ElemMat::matrix_view mat_icomp = elmat.block( iblock + icomp, jblock + icomp );
+        MatrixElemental::matrix_view mat_icomp = elmat.block( iblock + icomp, jblock + icomp );
         for ( i = 0; i < fe.nbDiag(); i++ )
         {
             iloc = fe.patternFirst( i );
@@ -2525,7 +2525,7 @@ void mass_divw( Real coef, const ElemVec& w_loc, ElemMat& elmat, const CurrentFE
 }
 
 
-void mass_divw(const std::vector<Real>& coef, const ElemVec& w_loc, ElemMat& elmat, const CurrentFE& fe,
+void mass_divw(const std::vector<Real>& coef, const VectorElemental& w_loc, MatrixElemental& elmat, const CurrentFE& fe,
                int iblock, int jblock, UInt nb )
 /*
   modified mass matrix: ( div w u,v )
@@ -2576,7 +2576,7 @@ void mass_divw(const std::vector<Real>& coef, const ElemVec& w_loc, ElemMat& elm
     // copy on the components
     for ( icomp = 0; icomp < nb; icomp++ )
     {
-        ElemMat::matrix_view mat_icomp = elmat.block( iblock + icomp, jblock + icomp );
+        MatrixElemental::matrix_view mat_icomp = elmat.block( iblock + icomp, jblock + icomp );
         for ( i = 0; i < fe.nbDiag(); i++ )
         {
             iloc = fe.patternFirst( i );
@@ -2595,7 +2595,7 @@ void mass_divw(const std::vector<Real>& coef, const ElemVec& w_loc, ElemMat& elm
 
 
 
-void mass_gradu( Real coef, const ElemVec& u0_loc, ElemMat& elmat, const CurrentFE& fe )
+void mass_gradu( Real coef, const VectorElemental& u0_loc, MatrixElemental& elmat, const CurrentFE& fe )
 /*
   modified mass matrix: ( grad u0 u,v )
 */
@@ -2627,7 +2627,7 @@ void mass_gradu( Real coef, const ElemVec& u0_loc, ElemMat& elmat, const Current
         for ( jcoor = 0; jcoor < fe.nbCoor(); ++jcoor )
         {
 
-            ElemMat::matrix_view mat = elmat.block( icoor, jcoor );
+            MatrixElemental::matrix_view mat = elmat.block( icoor, jcoor );
 
             for ( i = 0; i < fe.nbFEDof(); ++i )
             {
@@ -2649,13 +2649,13 @@ void mass_gradu( Real coef, const ElemVec& u0_loc, ElemMat& elmat, const Current
 // \! Streamline diffusion
 //
 //
-void stiff_sd( Real coef, const ElemVec& vec_loc, ElemMat& elmat, const CurrentFE& fe, const CurrentFE& fe2,
+void stiff_sd( Real coef, const VectorElemental& vec_loc, MatrixElemental& elmat, const CurrentFE& fe, const CurrentFE& fe2,
                int iblock, int jblock, int nb )
 /*
   Stiffness matrix for SD Stabilization
 */
 {
-    ElemMat::matrix_view mat = elmat.block( iblock, jblock );
+    MatrixElemental::matrix_view mat = elmat.block( iblock, jblock );
     UInt iloc, jloc;
     UInt i, icoor, ig, jcoor;
     double s, coef_s, coef_v[ nDimensions ];
@@ -2726,7 +2726,7 @@ void stiff_sd( Real coef, const ElemVec& vec_loc, ElemMat& elmat, const CurrentF
     // copy on the other components (if necessary, i.e. if nb>1)
     for ( int icomp = 1; icomp < nb; icomp++ )
     {
-        ElemMat::matrix_view mat_icomp = elmat.block( iblock + icomp, jblock + icomp );
+        MatrixElemental::matrix_view mat_icomp = elmat.block( iblock + icomp, jblock + icomp );
         for ( i = 0; i < fe.nbDiag(); i++ )
         {
             iloc = fe.patternFirst( i );
@@ -2744,14 +2744,14 @@ void stiff_sd( Real coef, const ElemVec& vec_loc, ElemMat& elmat, const CurrentF
 
 
 //
-void grad( const int icoor, Real coef, ElemMat& elmat,
+void grad( const int icoor, Real coef, MatrixElemental& elmat,
            const CurrentFE& fe_u, const CurrentFE& fe_p,
            int iblock, int jblock )
 /*
   \int q_j \frac{\partial v_i}{\partial x_icoor}
 */
 {
-    ElemMat::matrix_view mat = elmat.block( iblock, jblock );
+    MatrixElemental::matrix_view mat = elmat.block( iblock, jblock );
     UInt ig;
     UInt i, j;
     double s;
@@ -2773,14 +2773,14 @@ void grad( const int icoor, Real coef, ElemMat& elmat,
     }
 }
 
-void div( const int icoor, Real coef, ElemMat& elmat,
+void div( const int icoor, Real coef, MatrixElemental& elmat,
           const CurrentFE& fe_u, const CurrentFE& fe_p,
           int iblock, int jblock )
 /*
   \int q_i \frac{\partial v_j}{\partial x_icoor}
 */
 {
-    ElemMat::matrix_view mat = elmat.block( iblock, jblock );
+    MatrixElemental::matrix_view mat = elmat.block( iblock, jblock );
     UInt ig;
     UInt i, j;
     double s;
@@ -2796,7 +2796,7 @@ void div( const int icoor, Real coef, ElemMat& elmat,
     }
 }
 
-void grad_div( Real coef_grad, Real coef_div, ElemMat& elmat,
+void grad_div( Real coef_grad, Real coef_div, MatrixElemental& elmat,
                const CurrentFE& fe_u, const CurrentFE& fe_p,
                int block_pres )
 /*
@@ -2807,8 +2807,8 @@ void grad_div( Real coef_grad, Real coef_div, ElemMat& elmat,
     int iblock = block_pres - nDimensions;
     for ( UInt icoor = 0; icoor < 3; icoor++ )
     {
-        ElemMat::matrix_view mat_grad = elmat.block( iblock + icoor, block_pres );
-        ElemMat::matrix_view mat_div = elmat.block( block_pres , iblock + icoor );
+        MatrixElemental::matrix_view mat_grad = elmat.block( iblock + icoor, block_pres );
+        MatrixElemental::matrix_view mat_div = elmat.block( block_pres , iblock + icoor );
         for ( UInt i = 0; i < fe_u.nbFEDof(); i++ )
         {
             for ( UInt j = 0; j < fe_p.nbFEDof(); j++ )
@@ -2823,10 +2823,10 @@ void grad_div( Real coef_grad, Real coef_div, ElemMat& elmat,
     }
 }
 //
-void stab_stokes( Real visc, Real coef_stab, ElemMat& elmat,
+void stab_stokes( Real visc, Real coef_stab, MatrixElemental& elmat,
                   const CurrentFE& fe, int block_pres )
 {
-    ElemMat::matrix_view mat = elmat.block( block_pres, block_pres );
+    MatrixElemental::matrix_view mat = elmat.block( block_pres, block_pres );
     Real s, h = fe.diameter();
     Real fh2 = coef_stab * h * h / ( 2 * visc );
     for ( UInt i = 0; i < fe.nbFEDof(); i++ )
@@ -2849,8 +2849,8 @@ void stab_stokes( Real visc, Real coef_stab, ElemMat& elmat,
 /*
  * Fixed by Umberto Villa,  Jan 2010
  */
-void advection( Real coef, ElemVec& vel,
-                ElemMat& elmat, const CurrentFE& fe, int iblock, int jblock, int nb )
+void advection( Real coef, VectorElemental& vel,
+                MatrixElemental& elmat, const CurrentFE& fe, int iblock, int jblock, int nb )
 {
     Matrix mat_tmp( fe.nbFEDof(), fe.nbFEDof() );
     Real v_grad, s;
@@ -2859,7 +2859,7 @@ void advection( Real coef, ElemVec& vel,
     //Evaluate the advective field at the quadrature nodes
     for ( UInt icoor = 0; icoor < nDimensions; icoor++ )
     {
-        ElemVec::vector_view velicoor = vel.block( icoor );
+        VectorElemental::vector_view velicoor = vel.block( icoor );
         for ( UInt iq = 0; iq < fe.nbQuadPt(); iq++ )
         {
             s = 0.;
@@ -2890,7 +2890,7 @@ void advection( Real coef, ElemVec& vel,
     // copy on the components
     for ( int icomp = 0; icomp < nb; icomp++ )
     {
-        ElemMat::matrix_view mat_icomp = elmat.block( iblock + icomp, jblock + icomp );
+        MatrixElemental::matrix_view mat_icomp = elmat.block( iblock + icomp, jblock + icomp );
         for ( UInt i = 0; i < fe.nbDiag(); i++ )
         {
             for ( UInt j = 0; j < fe.nbDiag(); j++ )
@@ -2902,7 +2902,7 @@ void advection( Real coef, ElemVec& vel,
 }
 
 
-void grad( const int icoor, const ElemVec& vec_loc, ElemMat& elmat,
+void grad( const int icoor, const VectorElemental& vec_loc, MatrixElemental& elmat,
            const CurrentFE& fe1, const CurrentFE& fe2,
            int iblock, int jblock )
 /*
@@ -2910,7 +2910,7 @@ void grad( const int icoor, const ElemVec& vec_loc, ElemMat& elmat,
 */
 {
     //
-    ElemMat::matrix_view mat = elmat.block( iblock, jblock );
+    MatrixElemental::matrix_view mat = elmat.block( iblock, jblock );
 
     if ( iblock == jblock )
     {
@@ -2943,7 +2943,7 @@ void grad( const int icoor, const ElemVec& vec_loc, ElemMat& elmat,
 // \! Gradient operator in the skew-symmetric form for NS Problems
 //  A. Veneziani - December 2002
 // \!
-void grad_ss( const int icoor, const ElemVec& vec_loc, ElemMat& elmat,
+void grad_ss( const int icoor, const VectorElemental& vec_loc, MatrixElemental& elmat,
               const CurrentFE& fe1, const CurrentFE& fe2,
               int iblock, int jblock )
 /*
@@ -2951,7 +2951,7 @@ void grad_ss( const int icoor, const ElemVec& vec_loc, ElemMat& elmat,
 */
 {
     //
-    ElemMat::matrix_view mat = elmat.block( iblock, jblock );
+    MatrixElemental::matrix_view mat = elmat.block( iblock, jblock );
 
     if ( iblock == jblock )
     {
@@ -2991,8 +2991,8 @@ void grad_ss( const int icoor, const ElemVec& vec_loc, ElemMat& elmat,
 // It is useful for advection diffusion problems driven by a NS problem
 // !/
 void grad( const int icoor,
-           const ElemVec& vec_loc,
-           ElemMat& elmat,
+           const VectorElemental& vec_loc,
+           MatrixElemental& elmat,
            const CurrentFE& fe1,
            const CurrentFE& fe2,
            const CurrentFE& fe3,
@@ -3002,7 +3002,7 @@ void grad( const int icoor,
 */
 {
     //
-    ElemMat::matrix_view mat = elmat.block( iblock, jblock );
+    MatrixElemental::matrix_view mat = elmat.block( iblock, jblock );
 
     if ( iblock == jblock )
     {
@@ -3038,13 +3038,13 @@ void grad( const int icoor,
 // Convective term with the velocity given in the quadrature nodes
 void grad( const int& icoor,
            const std::vector<Real>& localVector,
-           ElemMat& elmat,
+           MatrixElemental& elmat,
            const CurrentFE& currentFE1,
            const CurrentFE& currentFE2,
            const int& iblock,
            const int& jblock)
 {
-    ElemMat::matrix_view mat = elmat.block( iblock, jblock );
+    MatrixElemental::matrix_view mat = elmat.block( iblock, jblock );
 
     // This term concerns only the diagonal blocks (same components)
     if ( iblock == jblock )
@@ -3085,10 +3085,10 @@ void grad( const int& icoor,
 //    and
 // Vector F(V) = \Sum V_k \Sum V_j \Int \phi_k \phi_i \phi_j
 //-------------------
-void quad(std::vector<Real> coef, ElemMat& elmat, ElemVec& elvec,
+void quad(std::vector<Real> coef, MatrixElemental& elmat, VectorElemental& elvec,
 const CurrentFE& fe,int iblock=0,int jblock=0)
 {
-ElemMat::matrix_view mat = elmat.block(iblock,jblock);
+MatrixElemental::matrix_view mat = elmat.block(iblock,jblock);
 int i,ig,iq,siz;
 int iloc,jloc,qloc;
 Real s,coef_s;
@@ -3131,10 +3131,10 @@ mat(jloc,iloc) += 2*s;
 //----------------------------------------------------------------------
 //                      Element vector operator
 //----------------------------------------------------------------------
-void source( Real constant, ElemVec& elvec, const CurrentFE& fe, int iblock )
+void source( Real constant, VectorElemental& elvec, const CurrentFE& fe, int iblock )
 {
     UInt i, ig;
-    ElemVec::vector_view vec = elvec.block( iblock );
+    VectorElemental::vector_view vec = elvec.block( iblock );
     Real s;
     for ( i = 0; i < fe.nbFEDof(); i++ )
     {
@@ -3145,7 +3145,7 @@ void source( Real constant, ElemVec& elvec, const CurrentFE& fe, int iblock )
     }
 }
 
-void source( Real coef, ElemVec& f, ElemVec& elvec, const CurrentFE& fe,
+void source( Real coef, VectorElemental& f, VectorElemental& elvec, const CurrentFE& fe,
              int fblock, int eblock )
 /*
   compute \int f \phi_i
@@ -3155,8 +3155,8 @@ void source( Real coef, ElemVec& f, ElemVec& elvec, const CurrentFE& fe,
 */
 {
     UInt i, ig;
-    ElemVec::vector_view vec = elvec.block( eblock );
-    ElemVec::vector_view vecf = f.block( fblock );
+    VectorElemental::vector_view vec = elvec.block( eblock );
+    VectorElemental::vector_view vecf = f.block( fblock );
     Real f_ig;
 
     for ( ig = 0; ig < fe.nbQuadPt(); ig++ )
@@ -3172,9 +3172,9 @@ void source( Real coef, ElemVec& f, ElemVec& elvec, const CurrentFE& fe,
 }
 
 
-void source_mass(const std::vector<Real>& constant, ElemVec& elvec, const CurrentFE& currentFe, const int& iblock)
+void source_mass(const std::vector<Real>& constant, VectorElemental& elvec, const CurrentFE& currentFe, const int& iblock)
 {
-    ElemVec::vector_view vec = elvec.block( iblock );
+    VectorElemental::vector_view vec = elvec.block( iblock );
     for (UInt iterNode(0); iterNode < currentFe.nbFEDof(); ++iterNode )
     {
         for ( UInt iterQuadNode(0); iterQuadNode < currentFe.nbQuadPt(); iterQuadNode++ )
@@ -3186,9 +3186,9 @@ void source_mass(const std::vector<Real>& constant, ElemVec& elvec, const Curren
     };
 };
 
-void source_stiff(const std::vector<Real>& constant, ElemVec& elvec, const CurrentFE& currentFe, const int& iblock)
+void source_stiff(const std::vector<Real>& constant, VectorElemental& elvec, const CurrentFE& currentFe, const int& iblock)
 {
-    ElemVec::vector_view vec = elvec.block( iblock );
+    VectorElemental::vector_view vec = elvec.block( iblock );
     const UInt nbQuadPt(currentFe.nbQuadPt());
     for (UInt iterNode(0); iterNode < currentFe.nbFEDof(); ++iterNode )
     {
@@ -3206,10 +3206,10 @@ void source_stiff(const std::vector<Real>& constant, ElemVec& elvec, const Curre
 
 
 
-void source_divuq(Real alpha, ElemVec& uLoc,  ElemVec& elvec, const CurrentFE& fe_u, const CurrentFE& fe_p, int iblock  )
+void source_divuq(Real alpha, VectorElemental& uLoc,  VectorElemental& elvec, const CurrentFE& fe_u, const CurrentFE& fe_p, int iblock  )
 {
     UInt i, j, ic, iq;
-    ElemVec::vector_view vec = elvec.block( iblock );
+    VectorElemental::vector_view vec = elvec.block( iblock );
     Real s;
 
     for (i = 0; i < fe_p.nbFEDof(); i++)
@@ -3225,10 +3225,10 @@ void source_divuq(Real alpha, ElemVec& uLoc,  ElemVec& elvec, const CurrentFE& f
 }
 
 
-void source_gradpv(Real alpha, ElemVec& pLoc,  ElemVec& elvec, const CurrentFE& fe_p, const CurrentFE& fe_u, int iblock )
+void source_gradpv(Real alpha, VectorElemental& pLoc,  VectorElemental& elvec, const CurrentFE& fe_p, const CurrentFE& fe_u, int iblock )
 {
     UInt i, j, iq;
-    ElemVec::vector_view vec = elvec.block( iblock );
+    VectorElemental::vector_view vec = elvec.block( iblock );
     Real s;
 
     for ( i = 0; i < fe_u.nbFEDof(); i++ )
@@ -3244,7 +3244,7 @@ void source_gradpv(Real alpha, ElemVec& pLoc,  ElemVec& elvec, const CurrentFE& 
 
 
 
-void source_fhn( Real coef_f, Real coef_a, ElemVec& u, ElemVec& elvec, const CurrentFE& fe,
+void source_fhn( Real coef_f, Real coef_a, VectorElemental& u, VectorElemental& elvec, const CurrentFE& fe,
                  int fblock, int eblock )
 /*
   compute \int coef_f u(1-u)(u-coef_a) \phi_i
@@ -3255,8 +3255,8 @@ void source_fhn( Real coef_f, Real coef_a, ElemVec& u, ElemVec& elvec, const Cur
 */
 {
     UInt i, ig;
-    ElemVec::vector_view vec = elvec.block( eblock );
-    ElemVec::vector_view vecu = u.block( fblock );
+    VectorElemental::vector_view vec = elvec.block( eblock );
+    VectorElemental::vector_view vecu = u.block( fblock );
     Real f_ig;
 
     for ( ig = 0; ig < fe.nbQuadPt(); ig++ )
@@ -3276,8 +3276,8 @@ void source_fhn( Real coef_f, Real coef_a, ElemVec& u, ElemVec& elvec, const Cur
 //
 // Remark: convect = u^n-w^k relative vel.
 //
-void source_mass1( Real coef, const ElemVec& uk_loc, const ElemVec& wk_loc, const ElemVec& convect_loc,
-                   const ElemVec& d_loc, ElemVec& elvec, const CurrentFE& fe )
+void source_mass1( Real coef, const VectorElemental& uk_loc, const VectorElemental& wk_loc, const VectorElemental& convect_loc,
+                   const VectorElemental& d_loc, VectorElemental& elvec, const CurrentFE& fe )
 {
     Real B[ fe.nbCoor() ][ fe.nbCoor() ];                 // \grad (convect) at a quadrature point
     Real A[ fe.nbCoor() ][ fe.nbCoor() ];                 // I\div d - (\grad d)^T at a quadrature point
@@ -3375,7 +3375,7 @@ void source_mass1( Real coef, const ElemVec& uk_loc, const ElemVec& wk_loc, cons
     {
 
         // the block iccor of the elementary vector
-        ElemVec::vector_view vec = elvec.block( icoor );
+        VectorElemental::vector_view vec = elvec.block( icoor );
 
         // loop on nodes, i.e. loop on components of this block
         for ( i = 0; i < fe.nbFEDof(); i++ )
@@ -3404,8 +3404,8 @@ void source_mass1( Real coef, const ElemVec& uk_loc, const ElemVec& wk_loc, cons
 // coef * ( \grad u^k dw, v  ) for Newton FSI
 //
 //
-void source_mass2( Real coef, const ElemVec& uk_loc, const ElemVec& dw_loc,
-                   ElemVec& elvec, const CurrentFE& fe )
+void source_mass2( Real coef, const VectorElemental& uk_loc, const VectorElemental& dw_loc,
+                   VectorElemental& elvec, const CurrentFE& fe )
 {
 
     Real guk[ fe.nbCoor() ][ fe.nbCoor() ];      // \grad u^k at a quadrature point
@@ -3457,7 +3457,7 @@ void source_mass2( Real coef, const ElemVec& uk_loc, const ElemVec& dw_loc,
     for ( icoor = 0; icoor < fe.nbCoor(); icoor++ )
     {
 
-        ElemVec::vector_view vec = elvec.block( icoor );
+        VectorElemental::vector_view vec = elvec.block( icoor );
 
         // loop on nodes, i.e. loop on components of this block
         for ( i = 0; i < fe.nbFEDof(); i++ )
@@ -3478,8 +3478,8 @@ void source_mass2( Real coef, const ElemVec& uk_loc, const ElemVec& dw_loc,
 // coef * ( \grad u^n :[2 I \div d - (\grad d)^T]  u^k , v  ) for Newton FSI
 //
 //
-void source_mass3( Real coef, const ElemVec& un_loc, const ElemVec& uk_loc, const ElemVec& d_loc,
-                   ElemVec& elvec, const CurrentFE& fe )
+void source_mass3( Real coef, const VectorElemental& un_loc, const VectorElemental& uk_loc, const VectorElemental& d_loc,
+                   VectorElemental& elvec, const CurrentFE& fe )
 {
     Real B[ fe.nbCoor() ][ fe.nbCoor() ];                 // \grad u^n at a quadrature point
     Real A[ fe.nbCoor() ][ fe.nbCoor() ];                 // I\div d - (\grad d)^T at a quadrature point
@@ -3548,7 +3548,7 @@ void source_mass3( Real coef, const ElemVec& un_loc, const ElemVec& uk_loc, cons
     {
 
         // the block iccor of the elementary vector
-        ElemVec::vector_view vec = elvec.block( icoor );
+        VectorElemental::vector_view vec = elvec.block( icoor );
 
         // loop on nodes, i.e. loop on components of this block
         for ( i = 0; i < fe.nbFEDof(); i++ )
@@ -3571,8 +3571,8 @@ void source_mass3( Real coef, const ElemVec& un_loc, const ElemVec& uk_loc, cons
 //
 // coef * ( [-p^k I + 2*mu e(u^k)] [I\div d - (\grad d)^T] , \grad v  ) for Newton FSI
 //
-void source_stress( Real coef, Real mu, const ElemVec& uk_loc, const ElemVec& pk_loc,
-                    const ElemVec& d_loc, ElemVec& elvec, const CurrentFE& fe_u,
+void source_stress( Real coef, Real mu, const VectorElemental& uk_loc, const VectorElemental& pk_loc,
+                    const VectorElemental& d_loc, VectorElemental& elvec, const CurrentFE& fe_u,
                     const CurrentFE& fe_p )
 {
 
@@ -3665,7 +3665,7 @@ void source_stress( Real coef, Real mu, const ElemVec& uk_loc, const ElemVec& pk
     for ( icoor = 0; icoor < fe_u.nbCoor(); icoor++ )
     {
 
-        ElemVec::vector_view vec = elvec.block( icoor );
+        VectorElemental::vector_view vec = elvec.block( icoor );
 
         // loop on nodes, i.e. loop on components of this block
         for ( i = 0; i < fe_u.nbFEDof(); i++ )
@@ -3687,7 +3687,7 @@ void source_stress( Real coef, Real mu, const ElemVec& uk_loc, const ElemVec& pk
 //
 // + \mu ( \grad u^k \grad d + [\grad d]^T[\grad u^k]^T : \grad v )
 //
-void source_stress2( Real coef, const ElemVec& uk_loc, const ElemVec& d_loc, ElemVec& elvec, const CurrentFE& fe_u )
+void source_stress2( Real coef, const VectorElemental& uk_loc, const VectorElemental& d_loc, VectorElemental& elvec, const CurrentFE& fe_u )
 {
 
     Real guk[ fe_u.nbCoor() ][ fe_u.nbCoor() ];               // \grad u^k at a quadrature point
@@ -3751,7 +3751,7 @@ void source_stress2( Real coef, const ElemVec& uk_loc, const ElemVec& d_loc, Ele
     for ( icoor = 0; icoor < fe_u.nbCoor(); icoor++ )
     {
 
-        ElemVec::vector_view vec = elvec.block( icoor );
+        VectorElemental::vector_view vec = elvec.block( icoor );
 
         // loop on nodes, i.e. loop on components of this block
         for ( i = 0; i < fe_u.nbFEDof(); i++ )
@@ -3775,14 +3775,14 @@ void source_stress2( Real coef, const ElemVec& uk_loc, const ElemVec& d_loc, Ele
 //
 // coef * (  (\grad u^k):[I\div d - (\grad d)^T] , q  ) for Newton FSI
 //
-void source_press( Real coef, const ElemVec& uk_loc, const ElemVec& d_loc, ElemVec& elvec,
+void source_press( Real coef, const VectorElemental& uk_loc, const VectorElemental& d_loc, VectorElemental& elvec,
                    const CurrentFE& fe_u, const CurrentFE& fe_p, int iblock )
 {
 
     Real A[ fe_u.nbCoor() ][ fe_u.nbCoor() ];     //  I\div d - (\grad d)^T at a quadrature point
     Real guk[ fe_u.nbCoor() ][ fe_u.nbCoor() ];   // \grad u^k at a quadrature point
     Real aux[ fe_u.nbQuadPt() ];              // grad u^k:[I\div d - (\grad d)^T] at each quadrature point
-    ElemVec::vector_view vec = elvec.block( iblock );
+    VectorElemental::vector_view vec = elvec.block( iblock );
 
     Real s, sA, sG;
     UInt icoor, jcoor, ig, i;
@@ -3848,7 +3848,7 @@ void source_press( Real coef, const ElemVec& uk_loc, const ElemVec& d_loc, ElemV
 //
 // coef * ( [I\div d - (\grad d)^T - \grad d] \grap p, \grad q  ) for Newton FSI
 //
-void source_press2( Real coef, const ElemVec& p_loc, const ElemVec& d_loc, ElemVec& elvec,
+void source_press2( Real coef, const VectorElemental& p_loc, const VectorElemental& d_loc, VectorElemental& elvec,
                     const CurrentFE& fe, int iblock )
 {
 
@@ -3857,7 +3857,7 @@ void source_press2( Real coef, const ElemVec& p_loc, const ElemVec& d_loc, ElemV
     Real gpk[ fe.nbCoor() ];   // \grad p^k at a quadrature point
     Real aux[ fe.nbQuadPt() ][fe.nbCoor()];              // [I\div d - (\grad d)^T - \grad d ]\grad p^k at each quadrature point
 
-    ElemVec::vector_view vec = elvec.block( iblock );
+    VectorElemental::vector_view vec = elvec.block( iblock );
 
     Real s, sA, sG;
     UInt icoor, jcoor, ig, i;
@@ -3977,7 +3977,7 @@ void cholsl( KNM<Real> &a, KN<Real> &p, KN<Real> &b, KN<Real> &x )
 //
 // coef * (  (\grad u^k):[I\div d - (\grad d)^T] , q  ) for Newton FSI
 //
-void source_press( Real coef, const ElemVec& uk_loc, ElemMat& elmat,
+void source_press( Real coef, const VectorElemental& uk_loc, MatrixElemental& elmat,
                    const CurrentFE& fe_u, const CurrentFE& fe_p, ID mmDim , int iblock )
 {
 
@@ -4116,7 +4116,7 @@ void source_press( Real coef, const ElemVec& uk_loc, ElemMat& elmat,
         //for ( jcoor = 0;jcoor < fe_u.nbCoor();jcoor++ )
         double l = 0.;
 
-        ElemMat::matrix_view mat = elmat.block( iblock, kcoor );
+        MatrixElemental::matrix_view mat = elmat.block( iblock, kcoor );
         for ( UInt j = 0; j < mmDim; j++ )
             for ( UInt i = 0; i < fe_p.nbFEDof(); i++ )
                 mat(i,j)=0.;
@@ -4164,23 +4164,23 @@ void source_press( Real coef, const ElemVec& uk_loc, ElemMat& elmat,
 // rho * ( \grad u^k du, v  )
 //
 void shape_terms(
-    //const ElemVec& d_loc,
+    //const VectorElemental& d_loc,
     Real rho,
     Real mu,
-    const ElemVec& un_loc,
-    const ElemVec& uk_loc,
-    const ElemVec& wk_loc,
-    const ElemVec& convect_loc,
-    const ElemVec& pk_loc,
-    ElemMat& elmat,
+    const VectorElemental& un_loc,
+    const VectorElemental& uk_loc,
+    const VectorElemental& wk_loc,
+    const VectorElemental& convect_loc,
+    const VectorElemental& pk_loc,
+    MatrixElemental& elmat,
     const CurrentFE& fe,
     const CurrentFE& fe_p,
     ID /*mmDim*/,
-    ElemMat& /*elmatP*/,
+    MatrixElemental& /*elmatP*/,
     int /*iblock*/,
     bool wImplicit,
     Real alpha,
-    boost::shared_ptr<ElemMat> elmat_convect
+    boost::shared_ptr<MatrixElemental> elmat_convect
 )
 {
     //Real BGrConv[ fe.nbCoor() ][ fe.nbCoor() ]/*[fe.nbFEDof()]*/;                 // \grad (convect) at a quadrature point
@@ -4429,12 +4429,12 @@ void shape_terms(
         {
 
             // the block iccor of the elementary vector
-            ElemMat::matrix_view mat = elmat.block( icoor, kcoor );
-            boost::shared_ptr<ElemMat::matrix_view> mat_convect;
+            MatrixElemental::matrix_view mat = elmat.block( icoor, kcoor );
+            boost::shared_ptr<MatrixElemental::matrix_view> mat_convect;
 
             if (elmat_convect.get())
             {
-                mat_convect.reset(new ElemMat::matrix_view(elmat_convect->block( icoor, kcoor )));
+                mat_convect.reset(new MatrixElemental::matrix_view(elmat_convect->block( icoor, kcoor )));
             }
             // loop on nodes, i.e. loop on components of this block
             for ( i = 0; i < fe.nbFEDof(); i++ )
@@ -4486,9 +4486,9 @@ void shape_terms(
 
 //----------------------------------------------------------------------
 // Compute the gradient in the Hdiv space, i.e. the opposite and transpose of the divergence matrix.
-void grad_Hdiv( Real coef, ElemMat& elmat, const CurrentFE& dualFE, const CurrentFE& primalFE, int iblock, int jblock )
+void grad_Hdiv( Real coef, MatrixElemental& elmat, const CurrentFE& dualFE, const CurrentFE& primalFE, int iblock, int jblock )
 {
-    ElemMat::matrix_view mat = elmat.block( iblock, jblock );
+    MatrixElemental::matrix_view mat = elmat.block( iblock, jblock );
     Real sumdivphi(0.);
     const QuadratureRule& dualQuadRule( dualFE.quadRule() );
 
@@ -4512,9 +4512,9 @@ void grad_Hdiv( Real coef, ElemMat& elmat, const CurrentFE& dualFE, const Curren
 
 //----------------------------------------------------------------------
 // Compute the divergence in the Hdiv space.
-void div_Hdiv( Real coef, ElemMat& elmat, const CurrentFE& dualFE, const CurrentFE& primalFE, int iblock, int jblock )
+void div_Hdiv( Real coef, MatrixElemental& elmat, const CurrentFE& dualFE, const CurrentFE& primalFE, int iblock, int jblock )
 {
-    ElemMat::matrix_view mat = elmat.block( iblock, jblock );
+    MatrixElemental::matrix_view mat = elmat.block( iblock, jblock );
     Real sumdivphi(0.);
     const QuadratureRule& dualQuadRule( dualFE.quadRule() );
 
@@ -4538,10 +4538,10 @@ void div_Hdiv( Real coef, ElemMat& elmat, const CurrentFE& dualFE, const Current
 
 //----------------------------------------------------------------------
 // Compute a Hdiv function dot product with the outwart unit normal times a hybrid function.
-void TP_VdotN_Hdiv( Real coef, ElemMat& elmat, const ReferenceFEHybrid& hybridFE,
+void TP_VdotN_Hdiv( Real coef, MatrixElemental& elmat, const ReferenceFEHybrid& hybridFE,
                     const ReferenceFEHybrid& dualDotNFE, int iblock, int jblock )
 {
-    ElemMat::matrix_view mat = elmat.block( iblock, jblock );
+    MatrixElemental::matrix_view mat = elmat.block( iblock, jblock );
     UInt nbnode;
     Real sum(0.);
 
@@ -4577,9 +4577,9 @@ void TP_VdotN_Hdiv( Real coef, ElemMat& elmat, const ReferenceFEHybrid& hybridFE
 
 //----------------------------------------------------------------------
 // Compute the mass matrix for hybrid variable.
-void TP_TP_Hdiv( Real coef, ElemMat& elmat, const ReferenceFEHybrid& hybridFE, int iblock, int jblock )
+void TP_TP_Hdiv( Real coef, MatrixElemental& elmat, const ReferenceFEHybrid& hybridFE, int iblock, int jblock )
 {
-    ElemMat::matrix_view mat = elmat.block( iblock, jblock );
+    MatrixElemental::matrix_view mat = elmat.block( iblock, jblock );
     UInt nbnode;
     Real sum(0.);
 
@@ -4614,9 +4614,9 @@ void TP_TP_Hdiv( Real coef, ElemMat& elmat, const ReferenceFEHybrid& hybridFE, i
 
 //----------------------------------------------------------------------
 // Compute the mass matrix in Hdiv with a real scalar coefficient.
-void mass_Hdiv( Real coef, ElemMat& elmat, const CurrentFE& dualFE, int iblock, int jblock )
+void mass_Hdiv( Real coef, MatrixElemental& elmat, const CurrentFE& dualFE, int iblock, int jblock )
 {
-    ElemMat::matrix_view mat = elmat.block( iblock, jblock );
+    MatrixElemental::matrix_view mat = elmat.block( iblock, jblock );
     Real sum(0.);
 
     // Loop over all the degrees of freedom of the first dual variable.
@@ -4643,9 +4643,9 @@ void mass_Hdiv( Real coef, ElemMat& elmat, const CurrentFE& dualFE, int iblock, 
 
 //----------------------------------------------------------------------
 // Compute the mass matrix in Hdiv with a real matrix coefficient.
-void mass_Hdiv( Matrix const&  Invperm, ElemMat& elmat, const CurrentFE& dualFE, int iblock, int jblock )
+void mass_Hdiv( Matrix const&  Invperm, MatrixElemental& elmat, const CurrentFE& dualFE, int iblock, int jblock )
 {
-    ElemMat::matrix_view mat = elmat.block( iblock, jblock );
+    MatrixElemental::matrix_view mat = elmat.block( iblock, jblock );
     Real partialSum(0.), sum(0.);
 
     // Loop over all the degrees of freedom of the first dual variable.
@@ -4684,9 +4684,9 @@ void mass_Hdiv( Matrix const&  Invperm, ElemMat& elmat, const CurrentFE& dualFE,
 //----------------------------------------------------------------------
 // Compute the mass matrix in Hdiv with a real function coefficient.
 void mass_Hdiv( Real ( *InvpermFun ) ( const Real&, const Real&, const Real& ),
-                ElemMat& elmat, const CurrentFE& dualFE, int iblock, int jblock )
+                MatrixElemental& elmat, const CurrentFE& dualFE, int iblock, int jblock )
 {
-    ElemMat::matrix_view mat = elmat.block( iblock, jblock );
+    MatrixElemental::matrix_view mat = elmat.block( iblock, jblock );
     Real sum(0.), x(0.), y(0.), z(0.);
 
     // Loop over all the degrees of freedom of the first dual variable.

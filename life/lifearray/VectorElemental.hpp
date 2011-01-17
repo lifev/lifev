@@ -44,7 +44,7 @@
 
 namespace LifeV
 {
-class ElemVec
+class VectorElemental
         :
         public KN<Real>
         //public Tab1d
@@ -55,14 +55,14 @@ public:
     typedef KN_<Real> vector_view;
 
 
-    ElemVec( int nNode1, int nbr1 );
-    ElemVec( int nNode1, int nbr1,
+    VectorElemental( int nNode1, int nbr1 );
+    VectorElemental( int nNode1, int nbr1,
              int nNode2, int nbr2 );
-    ElemVec( int nNode1, int nbr1,
+    VectorElemental( int nNode1, int nbr1,
              int nNode2, int nbr2,
              int nNode3, int nbr3 );
 
-    ElemVec& operator=( super const& __v )
+    VectorElemental& operator=( super const& __v )
     {
         if ( this == &__v )
             return * this;

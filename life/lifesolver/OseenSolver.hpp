@@ -714,15 +714,15 @@ protected:
     bool                           M_isDiagonalBlockPreconditioner;
 
     //! Elementary matrices and vectors
-    ElemMat                        M_elementMatrixStiff;      // velocity Stokes
-    ElemMat                        M_elementMatrixMass;       // velocity mass
-    ElemMat                        M_elementMatrixPreconditioner;          // (p,q) bloc for preconditioners
-    ElemMat                        M_elementMatrixDivergence;
-    ElemMat                        M_elementMatrixGradient;
-    ElemVec                        M_elementRightHandSide;           // Elementary right hand side
+    MatrixElemental                        M_elementMatrixStiff;      // velocity Stokes
+    MatrixElemental                        M_elementMatrixMass;       // velocity mass
+    MatrixElemental                        M_elementMatrixPreconditioner;          // (p,q) bloc for preconditioners
+    MatrixElemental                        M_elementMatrixDivergence;
+    MatrixElemental                        M_elementMatrixGradient;
+    VectorElemental                        M_elementRightHandSide;           // Elementary right hand side
     matrixPtr_Type                 M_blockPreconditioner;
-    ElemVec                        M_wLoc;
-    ElemVec                        M_uLoc;
+    VectorElemental                        M_wLoc;
+    VectorElemental                        M_uLoc;
     boost::shared_ptr<vector_Type> M_un;
 
 }; // class OseenSolver

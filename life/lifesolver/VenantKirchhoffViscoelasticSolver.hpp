@@ -428,15 +428,15 @@ protected :
     //!@name Elementary matrices and vectors:
     //@{
     //! linear stiffness
-    boost::shared_ptr<ElemMat>                       M_elmatK;
+    boost::shared_ptr<MatrixElemental>                       M_elmatK;
 
     //! mass
-    boost::shared_ptr<ElemMat>                       M_elmatM;
+    boost::shared_ptr<MatrixElemental>                       M_elmatM;
     //!mass+ linear stiffness
-    boost::shared_ptr<ElemMat>                       M_elmatC;
+    boost::shared_ptr<MatrixElemental>                       M_elmatC;
 
     //!damping
-    boost::shared_ptr<ElemMat>                       M_elmatD;
+    boost::shared_ptr<MatrixElemental>                       M_elmatD;
     //@}
 
     //! unknowns vector
@@ -530,10 +530,10 @@ VenantKirchhoffViscoelasticSolver<Mesh, SolverType>::setup(
     M_FESpace                                 = feSpace;
     M_displayer.reset                      (new Displayer(comm));
     M_me                                           = comm->MyPID();
-    M_elmatK.reset                           ( new ElemMat( M_FESpace->fe().nbFEDof(), nDimensions, nDimensions ) );
-    M_elmatM.reset                           ( new ElemMat( M_FESpace->fe().nbFEDof(), nDimensions, nDimensions ) );
-    M_elmatC.reset                           ( new ElemMat( M_FESpace->fe().nbFEDof(), nDimensions, nDimensions ) );
-    M_elmatD.reset                           ( new ElemMat( M_FESpace->fe().nbFEDof(), nDimensions, nDimensions ) );
+    M_elmatK.reset                           ( new MatrixElemental( M_FESpace->fe().nbFEDof(), nDimensions, nDimensions ) );
+    M_elmatM.reset                           ( new MatrixElemental( M_FESpace->fe().nbFEDof(), nDimensions, nDimensions ) );
+    M_elmatC.reset                           ( new MatrixElemental( M_FESpace->fe().nbFEDof(), nDimensions, nDimensions ) );
+    M_elmatD.reset                           ( new MatrixElemental( M_FESpace->fe().nbFEDof(), nDimensions, nDimensions ) );
     M_localMap                                   = epetraMap;
     M_solution.reset                          (new vector_type(*M_localMap));
     M_rhsNoBC.reset                         ( new vector_type(*M_localMap));

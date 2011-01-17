@@ -219,7 +219,7 @@ public:
 
 private:
 
-    typedef ElemMat                               localMatrix_type;
+    typedef MatrixElemental                               localMatrix_type;
     typedef boost::scoped_ptr<localMatrix_type>          localMatrix_ptrType;
 
     typedef CurrentFE                             currentFE_type;

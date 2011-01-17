@@ -390,10 +390,10 @@ protected:
     vectorPtr_Type            M_globalFlux;
 
     //! Auxiliary vector for local fluxes.
-    ElemVec                   M_localFlux;
+    VectorElemental                   M_localFlux;
 
     //! Vector of all local mass matrices, possibly with mass function.
-    std::vector<ElemMat>      M_elmatMass;
+    std::vector<MatrixElemental>      M_elmatMass;
 
 private:
 
@@ -541,7 +541,7 @@ setup ()
                                UPDATE_QUAD_NODES | UPDATE_WDET );
 
         // Local mass matrix
-        ElemMat matElem(M_FESpace.refFE().nbDof(), 1, 1);
+        MatrixElemental matElem(M_FESpace.refFE().nbDof(), 1, 1);
         matElem.zero();
 
         // Compute the mass matrix for the current element
@@ -648,10 +648,10 @@ CFL() const
             const UInt rightElement( M_FESpace.mesh()->faceElement( iGlobalFace, 2 ) );
 
             // Solution in the left element
-            ElemVec leftValue  ( M_FESpace.refFE().nbDof(), 1 );
+            VectorElemental leftValue  ( M_FESpace.refFE().nbDof(), 1 );
 
             // Solution in the right element
-            ElemVec rightValue ( M_FESpace.refFE().nbDof(), 1 );
+            VectorElemental rightValue ( M_FESpace.refFE().nbDof(), 1 );
 
             // Extract the solution in the current element, now is the leftElement
             extract_vec( *M_uOld,
@@ -803,13 +803,13 @@ localEvolve ( const UInt& iElem )
         M_FESpace.feBd().updateMeasNormalQuadPt( M_FESpace.mesh()->bElement( iGlobalFace ) );
 
         // Local flux of a face times the integration weight
-        ElemVec localFaceFluxWeight ( M_FESpace.refFE().nbDof(), 1 );
+        VectorElemental localFaceFluxWeight ( M_FESpace.refFE().nbDof(), 1 );
 
         // Solution in the left element
-        ElemVec leftValue  ( M_FESpace.refFE().nbDof(), 1 );
+        VectorElemental leftValue  ( M_FESpace.refFE().nbDof(), 1 );
 
         // Solution in the right element
-        ElemVec rightValue ( M_FESpace.refFE().nbDof(), 1 );
+        VectorElemental rightValue ( M_FESpace.refFE().nbDof(), 1 );
 
         // Extract the solution in the current element, now is the leftElement
         extract_vec( *M_uOld,

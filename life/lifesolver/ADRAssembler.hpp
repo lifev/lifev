@@ -379,10 +379,10 @@ private:
     typedef CurrentFE                                    currentFE_type;
     typedef boost::scoped_ptr<currentFE_type>            currentFE_ptrType;
 
-    typedef ElemMat                                      localMatrix_type;
+    typedef MatrixElemental                                      localMatrix_type;
     typedef boost::scoped_ptr<localMatrix_type>          localMatrix_ptrType;
 
-    typedef ElemVec                                      localVector_type;
+    typedef VectorElemental                                      localVector_type;
     typedef boost::scoped_ptr<localVector_type>          localVector_ptrType;
 
     //! @name Private Methods

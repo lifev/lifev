@@ -248,8 +248,8 @@ protected:
 private:
 
     //! Elementary matrices
-    ElemMat                        M_stiffnessElementaryMatrix;
-    ElemMat                        M_massElementaryMatrix;
+    MatrixElemental                        M_stiffnessElementaryMatrix;
+    MatrixElemental                        M_massElementaryMatrix;
     Real 						   massCoefficient;
     UInt dim_u() const           { return M_uFESpace.dim(); }
 

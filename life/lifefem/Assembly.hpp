@@ -74,7 +74,7 @@ namespace LifeV
 template <typename DofType>
 void
 assembleVector( VectorEpetra&    globalVector,
-                ElemVec&         localVector,
+                VectorElemental&         localVector,
                 const CurrentFE& currentFE,
                 const DofType    dof,
                 Int              block,
@@ -94,14 +94,14 @@ template <typename DofType>
 void
 assembleVector( VectorEpetra&    globalVector,
                 const UInt&      elementID,
-                ElemVec&         localVector,
+                VectorElemental&         localVector,
                 const UInt&      feNbDof,
                 const DofType&   dof,
                 Int              block,
                 Int              offset = 0)
 
 {
-    ElemVec::vector_view localView = localVector.block( block );
+    VectorElemental::vector_view localView = localVector.block( block );
 
     UInt iGlobalID;
 
@@ -121,7 +121,7 @@ template <typename DofType>
 void
 assembleMatrix( MatrixEpetra<Real>&   globalMatrix,
                 const UInt&      	  elementID,
-                ElemMat&          	  localMatrix,
+                MatrixElemental&          	  localMatrix,
                 const UInt&           feNbDof,
                 const DofType&    	  dof,
                 Int                   iblock,
@@ -131,7 +131,7 @@ assembleMatrix( MatrixEpetra<Real>&   globalMatrix,
 
 {
 
-    ElemMat::matrix_view localView = localMatrix.block( iblock, jblock );
+    MatrixElemental::matrix_view localView = localMatrix.block( iblock, jblock );
 
     assembleMatrix( globalMatrix,
                     elementID,
@@ -151,7 +151,7 @@ assembleMatrix( MatrixEpetra<Real>&   globalMatrix,
 template <typename DofType>
 void
 assembleMatrix( MatrixEpetra<Real>& globalMatrix,
-                ElemMat&            localMatrix,
+                MatrixElemental&            localMatrix,
                 const CurrentFE&    currentFE,
                 const DofType&      dof,
                 Int                 iblock,
@@ -239,7 +239,7 @@ assembleMatrix( MatrixEpetra<Real>&   globalMatrix,
 template <typename DofType1, typename DofType2>
 void
 assembleMatrix( MatrixEpetra<Real>& globalMatrix,
-                ElemMat&            localMatrix,
+                MatrixElemental&            localMatrix,
                 const CurrentFE&    currentFE1,
                 const CurrentFE&    currentFE2,
                 const DofType1&     dof1,
@@ -250,7 +250,7 @@ assembleMatrix( MatrixEpetra<Real>& globalMatrix,
                 Int                 jOffset )
 
 {
-    ElemMat::matrix_view localView = localMatrix.block( iblock, jblock );
+    MatrixElemental::matrix_view localView = localMatrix.block( iblock, jblock );
 
     UInt elementID1 = currentFE1.currentLocalId();
     UInt elementID2 = currentFE2.currentLocalId();
@@ -273,7 +273,7 @@ template <typename DofType1, typename DofType2>
 void
 assembleTransposeMatrix( MatrixEpetra<Real>&   globalMatrix,
                          Real                  coefficient,
-                         ElemMat&              localMatrix,
+                         MatrixElemental&              localMatrix,
                          const CurrentFE&      currentFE1,
                          const CurrentFE&      currentFE2,
                          const DofType1&       dof1,
@@ -284,7 +284,7 @@ assembleTransposeMatrix( MatrixEpetra<Real>&   globalMatrix,
                          Int                   jOffset )
 
 {
-    ElemMat::matrix_type localView(localMatrix.block( jblock, iblock ));
+    MatrixElemental::matrix_type localView(localMatrix.block( jblock, iblock ));
     localView *= coefficient;
 
     Int i, j;
@@ -318,17 +318,17 @@ assembleTransposeMatrix( MatrixEpetra<Real>&   globalMatrix,
 
 }
 
-template <typename DOF, typename ElemVec>
+template <typename DOF, typename VectorElemental>
 void
 extract_vec( VectorEpetra& V,
-             ElemVec& elvec,
+             VectorElemental& elvec,
              const DOFLocalPattern& fe,
              const DOF& dof,
              const UInt feId,
              Int iblock )
 {
     UInt totdof (dof.numTotalDof());
-    typename ElemVec::vector_view vec = elvec.block( iblock );
+    typename VectorElemental::vector_view vec = elvec.block( iblock );
     UInt ig;
     for ( UInt i (0) ; i < fe.nbLocalDof() ; ++i )
     {

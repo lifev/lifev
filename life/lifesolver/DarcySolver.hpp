@@ -675,13 +675,13 @@ protected:
     //@{
 
     //! Element vector for the right hand side, lives in RTkHyb(fe).
-    ElemVec M_elvecHyb;
+    VectorElemental M_elvecHyb;
 
     //! Element vector for the source term of the problem, lives in Qk(fe).
-    ElemVec M_elvecSource;
+    VectorElemental M_elvecSource;
 
     //! Element vector for the dual variabl, lives in RTk(fe).
-    ElemVec M_elvecFlux;
+    VectorElemental M_elvecFlux;
 
     /*! Mixed hybrid matrix, maps
       \f[
@@ -695,10 +695,10 @@ protected:
       \right]
       \f]
     */
-    ElemMat M_elmatMix;
+    MatrixElemental M_elmatMix;
 
     //! Element hybrid matrix.
-    ElemMat M_elmatHyb;
+    MatrixElemental M_elmatHyb;
 
     //! Temporary array of size the square of the number of degrees of freedom of the primal variable.
     KNM<Real> M_BtB;
@@ -1177,9 +1177,9 @@ staticCondensation ()
     char NODIAG[1] = {'N'};
 
     // Create and assign the local matrices A, B and C.
-    ElemMat::matrix_type A = M_elmatMix.block( 0, 0 );
-    ElemMat::matrix_type B = M_elmatMix.block( 0, 1 );
-    ElemMat::matrix_type C = M_elmatMix.block( 0, 2 );
+    MatrixElemental::matrix_type A = M_elmatMix.block( 0, 0 );
+    MatrixElemental::matrix_type B = M_elmatMix.block( 0, 1 );
+    MatrixElemental::matrix_type C = M_elmatMix.block( 0, 2 );
 
     //.................................
     //        MATRIX OPERATIONS
@@ -1316,9 +1316,9 @@ localComputePrimalAndDual ()
     char NODIAG[1] = {'N'};
 
     // No need for CtC in this part, and last dsyrk, the only differences.
-    ElemMat::matrix_type A = M_elmatMix.block( 0, 0 );
-    ElemMat::matrix_type B = M_elmatMix.block( 0, 1 );
-    ElemMat::matrix_type C = M_elmatMix.block( 0, 2 );
+    MatrixElemental::matrix_type A = M_elmatMix.block( 0, 0 );
+    MatrixElemental::matrix_type B = M_elmatMix.block( 0, 1 );
+    MatrixElemental::matrix_type C = M_elmatMix.block( 0, 2 );
 
     //........................
     //    MATRIX OPERATIONS

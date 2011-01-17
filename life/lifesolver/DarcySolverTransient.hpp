@@ -423,7 +423,7 @@ private:
 
     /*! Temporary array of size the square of the number of degrees of freedom of the
         primal variable. */
-    ElemMat         M_elmatMassPrimal;
+    MatrixElemental         M_elmatMassPrimal;
 
     //@}
 
@@ -605,9 +605,9 @@ staticCondensation ()
     char NODIAG[1] = {'N'};
 
     // Create and assign the local matrices A, B and C.
-    ElemMat::matrix_type A = this->M_elmatMix.block( 0, 0 );
-    ElemMat::matrix_type B = this->M_elmatMix.block( 0, 1 );
-    ElemMat::matrix_type C = this->M_elmatMix.block( 0, 2 );
+    MatrixElemental::matrix_type A = this->M_elmatMix.block( 0, 0 );
+    MatrixElemental::matrix_type B = this->M_elmatMix.block( 0, 1 );
+    MatrixElemental::matrix_type C = this->M_elmatMix.block( 0, 2 );
 
     //.................................
     //        MATRIX OPERATIONS
@@ -692,7 +692,7 @@ staticCondensation ()
             this->M_data.dataTime()->time(), 0 );
 
     // Take the pressure at the previews time step in the local element.
-    ElemVec elvecPrimalOldLocal( this->M_primal_FESpace.refFE().nbDof(), 1 );
+    VectorElemental elvecPrimalOldLocal( this->M_primal_FESpace.refFE().nbDof(), 1 );
 
     // Extract the old primal variable for the current finite element and put it into elvecPrimalOldLocal.
     extract_vec( *M_primalOld,
@@ -765,9 +765,9 @@ localComputePrimalAndDual ()
     char NODIAG[1] = {'N'};
 
     // No need for CtC in this part, and last dsyrk, the only differences.
-    ElemMat::matrix_type A = this->M_elmatMix.block( 0, 0 );
-    ElemMat::matrix_type B = this->M_elmatMix.block( 0, 1 );
-    ElemMat::matrix_type C = this->M_elmatMix.block( 0, 2 );
+    MatrixElemental::matrix_type A = this->M_elmatMix.block( 0, 0 );
+    MatrixElemental::matrix_type B = this->M_elmatMix.block( 0, 1 );
+    MatrixElemental::matrix_type C = this->M_elmatMix.block( 0, 2 );
 
     //........................
     //    MATRIX OPERATIONS
@@ -844,7 +844,7 @@ localComputePrimalAndDual ()
             this->M_data.dataTime()->time(), 0 );
 
     // Take the pressure at the previews time step in the local element.
-    ElemVec elvecPrimalOldLocal( this->M_primal_FESpace.refFE().nbDof(), 1 );
+    VectorElemental elvecPrimalOldLocal( this->M_primal_FESpace.refFE().nbDof(), 1 );
 
     // Extract the old primal variable for the current finite element and put it into elvecPrimalOldLocal.
     extract_vec( *M_primalOld,

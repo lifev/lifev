@@ -37,11 +37,11 @@
 
 namespace LifeV
 {
-ElemMat::~ElemMat()
+MatrixElemental::~MatrixElemental()
 {
 }
 
-ElemMat::ElemMat( UInt nNode1, UInt nbr1, UInt nbc1 ) :
+MatrixElemental::MatrixElemental( UInt nNode1, UInt nbr1, UInt nbc1 ) :
         _mat( nNode1*nbr1, nNode1*nbc1 )
 {
     //
@@ -70,7 +70,7 @@ ElemMat::ElemMat( UInt nNode1, UInt nbr1, UInt nbc1 ) :
     }
 }
 
-ElemMat::ElemMat( UInt nNode1, UInt nbr1, UInt nbc1,
+MatrixElemental::MatrixElemental( UInt nNode1, UInt nbr1, UInt nbc1,
                   UInt nNode2, UInt nbr2, UInt nbc2 ) :
         _mat( nNode1*nbr1 + nNode2*nbr2, nNode1*nbc1 + nNode2*nbc2 )
 {
@@ -113,7 +113,7 @@ ElemMat::ElemMat( UInt nNode1, UInt nbr1, UInt nbc1,
 }
 
 
-ElemMat::ElemMat( UInt nNode1, UInt nbr1, UInt nbc1,
+MatrixElemental::MatrixElemental( UInt nNode1, UInt nbr1, UInt nbc1,
                   UInt nNode2, UInt nbr2, UInt nbc2,
                   UInt nNode3, UInt nbr3, UInt nbc3 ) :
         _mat( nNode1*nbr1 + nNode2*nbr2 + nNode3*nbr3,
@@ -169,7 +169,7 @@ ElemMat::ElemMat( UInt nNode1, UInt nbr1, UInt nbc1,
     }
 }
 
-void ElemMat::showMe( std::ostream& c )
+void MatrixElemental::showMe( std::ostream& c )
 {
     UInt i, j;
     for ( i = 0; i < _nBlockRow; i++ )

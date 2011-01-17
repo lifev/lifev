@@ -38,7 +38,7 @@
 namespace LifeV
 {
 
-ElemVec::ElemVec( int nNode1, int nbr1 ) :
+VectorElemental::VectorElemental( int nNode1, int nbr1 ) :
         super( nNode1*nbr1 )
 {
     _nBlockRow = nbr1;
@@ -53,7 +53,7 @@ ElemVec::ElemVec( int nNode1, int nbr1 ) :
     }
 }
 
-ElemVec::ElemVec( int nNode1, int nbr1,
+VectorElemental::VectorElemental( int nNode1, int nbr1,
                   int nNode2, int nbr2 ) :
         super( nNode1*nbr1 + nNode2*nbr2 )
 {
@@ -75,7 +75,7 @@ ElemVec::ElemVec( int nNode1, int nbr1,
     }
 }
 
-ElemVec::ElemVec( int nNode1, int nbr1,
+VectorElemental::VectorElemental( int nNode1, int nbr1,
                   int nNode2, int nbr2,
                   int nNode3, int nbr3 ) :
         super( nNode1*nbr1 + nNode2*nbr2 + nNode3*nbr3 )
@@ -105,7 +105,7 @@ ElemVec::ElemVec( int nNode1, int nbr1,
 }
 
 
-void ElemVec::showMe( std::ostream& c )
+void VectorElemental::showMe( std::ostream& c )
 {
     for ( int i = 0; i < _nBlockRow; i++ )
         c << "Block (" << i << "), " << block( i ) << std::endl;
