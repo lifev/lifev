@@ -414,7 +414,7 @@ private:
      *  that are computed with _updateMatrixCoefficients.
      *
      *  call of  _updateMatrixCoefficients,
-     *  _updateElemMatrices and _assemble_matrices.
+     *  _updateMatrixElementalrices and _assemble_matrices.
      */
     void updateMatrices();
 
@@ -422,7 +422,7 @@ private:
     void updateMatrixCoefficients( const UInt& ii, const UInt& jj, const UInt& iedge);
 
     //! Update the element matrices with the current element
-    void updateElemMatrices();
+    void updateMatrixElementalrices();
 
     //! Assemble the matrices
     void matrixAssemble( const UInt& ii, const UInt& jj );
@@ -500,10 +500,10 @@ private:
     Real                               M_coeffGrad;
     Real                               M_coeffDiv;
 
-    boost::shared_ptr< ElemMat >       M_elmatMass;  //!< element mass matrix
-    boost::shared_ptr< ElemMat >       M_elmatStiff; //!< element stiffness matrix
-    boost::shared_ptr< ElemMat >       M_elmatGrad;  //!< element gradient matrix
-    boost::shared_ptr< ElemMat >       M_elmatDiv;   //!< element divergence matrix
+    boost::shared_ptr< MatrixElemental >       M_elmatMass;  //!< element mass matrix
+    boost::shared_ptr< MatrixElemental >       M_elmatStiff; //!< element stiffness matrix
+    boost::shared_ptr< MatrixElemental >       M_elmatGrad;  //!< element gradient matrix
+    boost::shared_ptr< MatrixElemental >       M_elmatDiv;   //!< element divergence matrix
 
     //! Unknowns at previous time step (see savesol() )
     solution_Type                      M_UPreviousTime;

@@ -436,10 +436,10 @@ OneDimensionalSolver::setFESpace( const feSpacePtr_Type FESpace )
     M_rightInternalNodeId = M_rightNodeId - 1;
 
     //Elementary Matrices
-    M_elmatMass.reset ( new ElemMat ( M_FESpace -> fe().nbFEDof(), 1, 1 ) );
-    M_elmatStiff.reset( new ElemMat ( M_FESpace -> fe().nbFEDof(), 1, 1 ) );
-    M_elmatGrad.reset ( new ElemMat ( M_FESpace -> fe().nbFEDof(), 1, 1 ) );
-    M_elmatDiv.reset  ( new ElemMat ( M_FESpace -> fe().nbFEDof(), 1, 1 ) );
+    M_elmatMass.reset ( new MatrixElemental ( M_FESpace -> fe().nbFEDof(), 1, 1 ) );
+    M_elmatStiff.reset( new MatrixElemental ( M_FESpace -> fe().nbFEDof(), 1, 1 ) );
+    M_elmatGrad.reset ( new MatrixElemental ( M_FESpace -> fe().nbFEDof(), 1, 1 ) );
+    M_elmatDiv.reset  ( new MatrixElemental ( M_FESpace -> fe().nbFEDof(), 1, 1 ) );
 
     //Vectors
     M_rhs.resize(          2, vector_Type( M_FESpace -> map() ) );
@@ -721,7 +721,7 @@ OneDimensionalSolver::updateMatrices()
                 updateMatrixCoefficients( ii , jj, iedge);
 
                 // update the M_elmat*
-                updateElemMatrices();
+                updateMatrixElementalrices();
 
                 // assemble the global matrices
                 matrixAssemble( ii, jj );
@@ -747,7 +747,7 @@ OneDimensionalSolver::updateMatrixCoefficients( const UInt& ii, const UInt& jj ,
 }
 
 void
-OneDimensionalSolver::updateElemMatrices()
+OneDimensionalSolver::updateMatrixElementalrices()
 {
     // set the elementary matrices to 0.
     M_elmatMass -> zero();
@@ -853,9 +853,9 @@ OneDimensionalSolver::inertialFluxCorrection( const vector_Type& flux )
     matrix_Type matrixLHS(M_FESpace -> map());
     matrix_Type stiffRHS (M_FESpace -> map());
 
-    ElemMat elmatMassLHS  (M_FESpace -> fe().nbFEDof(), 1, 1);
-    ElemMat elmatStiffLHS (M_FESpace -> fe().nbFEDof(), 1, 1);
-    ElemMat elmatStiffRHS (M_FESpace -> fe().nbFEDof(), 1, 1);
+    MatrixElemental elmatMassLHS  (M_FESpace -> fe().nbFEDof(), 1, 1);
+    MatrixElemental elmatStiffLHS (M_FESpace -> fe().nbFEDof(), 1, 1);
+    MatrixElemental elmatStiffRHS (M_FESpace -> fe().nbFEDof(), 1, 1);
 
     vector_Type rhs(M_FESpace -> map());
 
@@ -949,9 +949,9 @@ OneDimensionalSolver::viscoelasticFluxCorrection( const vector_Type& flux, const
 
     //TriDiagCholesky< Real, matrix_Type, Vector > _tridiagsolver(M_FESpace -> dim());
 
-    ElemMat elmatMassLHS  (M_FESpace -> fe().nbFEDof(),1,1);
-    ElemMat elmatStiffLHS (M_FESpace -> fe().nbFEDof(),1,1);
-    ElemMat elmatStiffRHS (M_FESpace -> fe().nbFEDof(),1,1);
+    MatrixElemental elmatMassLHS  (M_FESpace -> fe().nbFEDof(),1,1);
+    MatrixElemental elmatStiffLHS (M_FESpace -> fe().nbFEDof(),1,1);
+    MatrixElemental elmatStiffRHS (M_FESpace -> fe().nbFEDof(),1,1);
 
     vector_Type rhs(M_FESpace -> map());
 
@@ -1055,8 +1055,8 @@ OneDimensionalSolver::longitudinalFluxCorrection()
 
     //TriDiagCholesky< Real, matrix_Type, Vector > _tridiagsolver(M_FESpace -> dim());
 
-    ElemMat elmatMassLHS (M_FESpace -> fe().nbFEDof(),1,1);
-    ElemMat elmatMassRHS (M_FESpace -> fe().nbFEDof(),1,1);
+    MatrixElemental elmatMassLHS (M_FESpace -> fe().nbFEDof(),1,1);
+    MatrixElemental elmatMassRHS (M_FESpace -> fe().nbFEDof(),1,1);
 
     vector_Type rhs(M_FESpace -> map());
     // let g = sqrt(A) - sqrt(A0)
@@ -1191,8 +1191,8 @@ OneDimensionalSolver::_compute_d2Q_dx2( const ScalVec& flux )
 
     TriDiagCholesky< Real, matrix_Type, Vector > _tridiagsolver(M_FESpace -> dim());
 
-    ElemMat _elmatMassLHS (M_FESpace -> fe().nbFEDof(),1,1);
-    ElemMat _elmatStiffRHS (M_FESpace -> fe().nbFEDof(),1,1);
+    MatrixElemental _elmatMassLHS (M_FESpace -> fe().nbFEDof(),1,1);
+    MatrixElemental _elmatStiffRHS (M_FESpace -> fe().nbFEDof(),1,1);
 
     ScalVec _rhs(M_FESpace -> dim());
 
