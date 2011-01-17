@@ -26,7 +26,7 @@
 
 /*!
  *  @file
- *  @brief File containing the MultiScale Physical Coupling
+ *  @brief File containing the Multiscale Physical Coupling
  *
  *  @date 02-09-2009
  *  @author Cristiano Malossi <cristiano.malossi@epfl.ch>
@@ -46,7 +46,7 @@ namespace LifeV
 namespace Multiscale
 {
 
-//! MultiscaleCoupling - The MultiScale Physical Coupling
+//! MultiscaleCoupling - The Multiscale Physical Coupling
 /*!
  *  @author Cristiano Malossi
  *
@@ -78,7 +78,7 @@ public:
     //@}
 
 
-    //! @name MultiScale PhysicalCoupling Virtual Methods
+    //! @name Multiscale PhysicalCoupling Virtual Methods
     //@{
 
     //! Setup the data of the coupling.
@@ -281,7 +281,7 @@ public:
 
 protected:
 
-    //! @name Protected MultiScale PhysicalCoupling Virtual Methods
+    //! @name Protected Multiscale PhysicalCoupling Virtual Methods
     //@{
 
     //! Build the list of models affected by the perturbation of a local coupling variable
@@ -360,7 +360,7 @@ protected:
 
     multiscaleModelsVector_Type          M_models;
     std::string                          M_couplingName;
-    std::vector< bcFlag_Type >                M_flags;
+    std::vector< bcFlag_Type >           M_flags;
 
     multiscaleDataPtr_Type               M_globalData;
 

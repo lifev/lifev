@@ -26,7 +26,7 @@
 
 /*!
  *  @file
- *  @brief File containing the MultiScale Physical Model
+ *  @brief File containing the Multiscale Physical Model
  *
  *  @date 12-03-2009
  *  @author Cristiano Malossi <cristiano.malossi@epfl.ch>
@@ -78,7 +78,7 @@ MultiscaleModel::MultiscaleModel() :
 }
 
 // ===================================================
-// MultiScale PhysicalModel Virtual Methods
+// Multiscale PhysicalModel Virtual Methods
 // ===================================================
 void
 MultiscaleModel::setupData( const std::string& fileName )
@@ -91,13 +91,13 @@ MultiscaleModel::setupData( const std::string& fileName )
     GetPot dataFile( fileName );
 
     // Read modelName
-    M_modelName = dataFile( "MultiScale/modelName", "modelName" );
+    M_modelName = dataFile( "Multiscale/modelName", "modelName" );
 
     // Read flags
-    UInt componentSize = dataFile.vector_variable_size( "MultiScale/couplingFlags" );
+    UInt componentSize = dataFile.vector_variable_size( "Multiscale/couplingFlags" );
     M_flags.reserve( componentSize );
     for ( UInt j( 0 ); j < componentSize; ++j )
-        M_flags.push_back( dataFile( "MultiScale/couplingFlags", 0, j ) );
+        M_flags.push_back( dataFile( "Multiscale/couplingFlags", 0, j ) );
 }
 
 void

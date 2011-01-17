@@ -26,7 +26,7 @@
 
 /*!
  *  @file
- *  @brief File containing the MultiScale Definitions
+ *  @brief File containing the Multiscale Definitions
  *
  *  @date 03-11-2009
  *  @author Cristiano Malossi <cristiano.malossi@epfl.ch>
@@ -89,7 +89,7 @@ enum models_Type
 {
     Fluid3D,                /*!< Fluid (Oseen) 3D model */
     FSI3D,                  /*!< FSI 3D model */
-    Multiscale,             /*!< MultiScale model */
+    Multiscale,             /*!< Multiscale model */
     OneDimensional          /*!< 1D model */
 };
 

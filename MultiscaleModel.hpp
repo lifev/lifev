@@ -26,7 +26,7 @@
 
 /*!
  *  @file
- *  @brief File containing the MultiScale Physical Model
+ *  @brief File containing the Multiscale Physical Model
  *
  *  @date 12-03-2009
  *  @author Cristiano Malossi <cristiano.malossi@epfl.ch>
@@ -47,7 +47,7 @@ namespace LifeV
 namespace Multiscale
 {
 
-//! MultiscaleModel - The MultiScale Physical Model
+//! MultiscaleModel - The Multiscale Physical Model
 /*!
  *  @author Cristiano Malossi
  *
@@ -76,7 +76,7 @@ public:
     //@}
 
 
-    //! @name MultiScale PhysicalModel Virtual Methods
+    //! @name Multiscale PhysicalModel Virtual Methods
     //@{
 
     //! Setup the data of the model.

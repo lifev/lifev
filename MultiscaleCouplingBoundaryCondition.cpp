@@ -26,7 +26,7 @@
 
 /*!
  *  @file
- *  @brief File containing the MultiScale Coupling BoundaryCondition
+ *  @brief File containing the Multiscale Coupling BoundaryCondition
  *
  *  @date 02-09-2009
  *  @author Cristiano Malossi <cristiano.malossi@epfl.ch>
@@ -59,7 +59,7 @@ MultiscaleCouplingBoundaryCondition::MultiscaleCouplingBoundaryCondition() :
 }
 
 // ===================================================
-// MultiScale PhysicalCoupling Implementation
+// Multiscale PhysicalCoupling Implementation
 // ===================================================
 void
 MultiscaleCouplingBoundaryCondition::setupData( const std::string& fileName )
@@ -140,7 +140,7 @@ MultiscaleCouplingBoundaryCondition::showMe()
 }
 
 // ===================================================
-// Private MultiScale PhysicalCoupling Implementation
+// Private Multiscale PhysicalCoupling Implementation
 // ===================================================
 multiscaleModelsVector_Type
 MultiscaleCouplingBoundaryCondition::listOfPerturbedModels( const UInt& /*localCouplingVariableID*/ )

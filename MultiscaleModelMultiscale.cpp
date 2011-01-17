@@ -26,7 +26,7 @@
 
 /*!
  *  @file
- *  @brief File containing the MultiScale Model MultiScale
+ *  @brief File containing the Multiscale Model Multiscale
  *
  *  @date 12-03-2009
  *  @author Cristiano Malossi <cristiano.malossi@epfl.ch>
@@ -73,7 +73,7 @@ MultiscaleModelMultiscale::~MultiscaleModelMultiscale()
 }
 
 // ===================================================
-// MultiScale Physical Model
+// Multiscale Physical Model
 // ===================================================
 void
 MultiscaleModelMultiscale::setupData( const std::string& fileName )

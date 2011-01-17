@@ -26,7 +26,7 @@
 
 /*!
  *  @file
- *  @brief File containing the MultiScale Newton Algorithm
+ *  @brief File containing the Multiscale Newton Algorithm
  *
  *  @date 26-10-2009
  *  @author Cristiano Malossi <cristiano.malossi@epfl.ch>
@@ -49,7 +49,7 @@ namespace LifeV
 namespace Multiscale
 {
 
-//! MultiscaleAlgorithmNewton - The MultiScale Algorithm implementation of Newton
+//! MultiscaleAlgorithmNewton - The Multiscale Algorithm implementation of Newton
 /*!
  *  @author Cristiano Malossi
  *
@@ -72,7 +72,7 @@ public:
     //@}
 
 
-    //! @name MultiScale Algorithm Virtual Methods
+    //! @name Multiscale Algorithm Virtual Methods
     //@{
 
     //! Setup the data of the algorithm using a data file

@@ -26,7 +26,7 @@
 
 /*!
  *  @file
- *  @brief File containing the MultiScale Aitken Algorithm
+ *  @brief File containing the Multiscale Aitken Algorithm
  *
  *  @date 23-10-2009
  *  @author Cristiano Malossi <cristiano.malossi@epfl.ch>
@@ -46,7 +46,7 @@ namespace LifeV
 namespace Multiscale
 {
 
-//! MultiscaleAlgorithmAitken - The MultiScale Algorithm implementation of Aitken
+//! MultiscaleAlgorithmAitken - The Multiscale Algorithm implementation of Aitken
 /*!
  *  @author Cristiano Malossi
  *
@@ -69,7 +69,7 @@ public:
     //@}
 
 
-    //! @name MultiScale Algorithm Virtual Methods
+    //! @name Multiscale Algorithm Virtual Methods
     //@{
 
     //! Setup the data of the algorithm using a data file

@@ -26,7 +26,7 @@
 
 /*!
  *  @file
- *  @brief File containing the MultiScale Newton Algorithm
+ *  @brief File containing the Multiscale Newton Algorithm
  *
  *  @date 26-10-2009
  *  @author Cristiano Malossi <cristiano.malossi@epfl.ch>
@@ -58,7 +58,7 @@ MultiscaleAlgorithmNewton::MultiscaleAlgorithmNewton() :
 }
 
 // ===================================================
-// MultiScale Algorithm Virtual Methods
+// Multiscale Algorithm Virtual Methods
 // ===================================================
 void
 MultiscaleAlgorithmNewton::setupData( const std::string& fileName )
@@ -73,8 +73,8 @@ MultiscaleAlgorithmNewton::setupData( const std::string& fileName )
     GetPot dataFile( fileName );
 
     M_solver.setCommunicator( M_comm );
-    M_solver.setDataFromGetPot( dataFile, "Solver/Algorithm/Newton_method/AztecOO" );
-    //M_solver.setupPreconditioner( DataFile, "Solver/Algorithm/Newton_method/Preconditioner" );
+    M_solver.setDataFromGetPot( dataFile, "Solver/AztecOO" );
+    //M_solver.setupPreconditioner( DataFile, "Solver/Preconditioner" );
 }
 
 void

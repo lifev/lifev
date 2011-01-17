@@ -26,7 +26,7 @@
 
 /*!
  *  @file
- *  @brief File containing the MultiScale Model 1D
+ *  @brief File containing the Multiscale Model 1D
  *
  *  @version 1.1
  *  @date 26-02-2010
@@ -98,7 +98,7 @@ MultiscaleModel1D::MultiscaleModel1D() :
 }
 
 // ===================================================
-// MultiScale PhysicalModel Virtual Methods
+// Multiscale PhysicalModel Virtual Methods
 // ===================================================
 void
 MultiscaleModel1D::setupData( const std::string& fileName )

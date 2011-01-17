@@ -26,7 +26,7 @@
 
 /*!
  *  @file
- *  @brief File containing the MultiScale Model FSI3D
+ *  @brief File containing the Multiscale Model FSI3D
  *
  *  @date 19-04-2010
  *  @author Paolo Crosetto <paolo.crosetto@epfl.ch>
@@ -92,7 +92,7 @@ MultiscaleModelFSI3D::MultiscaleModelFSI3D() :
 }
 
 // ===================================================
-// MultiScale PhysicalModel Virtual Methods
+// Multiscale PhysicalModel Virtual Methods
 // ===================================================
 void
 MultiscaleModelFSI3D::setupData( const std::string& fileName )

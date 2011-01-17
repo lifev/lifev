@@ -26,7 +26,7 @@
 
 /*!
  *  @file
- *  @brief File containing the MultiScale Model Fluid3D
+ *  @brief File containing the Multiscale Model Fluid3D
  *
  *  @date 12-03-2009
  *  @author Cristiano Malossi <cristiano.malossi@epfl.ch>
@@ -78,7 +78,7 @@ MultiscaleModelFluid3D::MultiscaleModelFluid3D() :
 }
 
 // ===================================================
-// MultiScale PhysicalModel Virtual Methods
+// Multiscale PhysicalModel Virtual Methods
 // ===================================================
 void
 MultiscaleModelFluid3D::setupData( const std::string& fileName )

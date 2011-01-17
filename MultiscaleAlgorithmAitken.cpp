@@ -26,7 +26,7 @@
 
 /*!
  *  @file
- *  @brief File containing the MultiScale Aitken Algorithm
+ *  @brief File containing the Multiscale Aitken Algorithm
  *
  *  @date 23-10-2009
  *  @author Cristiano Malossi <cristiano.malossi@epfl.ch>
@@ -64,7 +64,7 @@ MultiscaleAlgorithmAitken::MultiscaleAlgorithmAitken() :
 }
 
 // ===================================================
-// MultiScale Algorithm Virtual Methods
+// Multiscale Algorithm Virtual Methods
 // ===================================================
 void
 MultiscaleAlgorithmAitken::setupData( const std::string& fileName )
@@ -78,12 +78,12 @@ MultiscaleAlgorithmAitken::setupData( const std::string& fileName )
 
     GetPot dataFile( fileName );
 
-    M_generalizedAitken.setDefaultOmega( dataFile( "Solver/Algorithm/Aitken_method/Omega", 1.e-3 ) );
-    M_generalizedAitken.useDefaultOmega( dataFile( "Solver/Algorithm/Aitken_method/fixedOmega",   false ) );
-    M_generalizedAitken.setOmegaMin( dataFile( "Solver/Algorithm/Aitken_method/range", M_generalizedAitken.defaultOmegaFluid()/1024, 0 ) );
-    M_generalizedAitken.setOmegaMax( dataFile( "Solver/Algorithm/Aitken_method/range", M_generalizedAitken.defaultOmegaFluid()*1024, 1 ) );
-    M_generalizedAitken.setMinimizationType( dataFile( "Solver/Algorithm/Aitken_method/inverseOmega", true ) );
-    M_method = M_methodMap[ dataFile( "Solver/Algorithm/Aitken_method/method", "Vectorial" ) ];
+    M_generalizedAitken.setDefaultOmega( dataFile( "Solver/Omega", 1.e-3 ) );
+    M_generalizedAitken.useDefaultOmega( dataFile( "Solver/fixedOmega",   false ) );
+    M_generalizedAitken.setOmegaMin( dataFile( "Solver/range", M_generalizedAitken.defaultOmegaFluid()/1024, 0 ) );
+    M_generalizedAitken.setOmegaMax( dataFile( "Solver/range", M_generalizedAitken.defaultOmegaFluid()*1024, 1 ) );
+    M_generalizedAitken.setMinimizationType( dataFile( "Solver/inverseOmega", true ) );
+    M_method = M_methodMap[ dataFile( "Solver/method", "Vectorial" ) ];
 }
 
 void
