@@ -26,7 +26,7 @@
 
 /*!
  *  @file
- *  @brief File containing the MultiScale Physical Coupling
+ *  @brief File containing the Multiscale Physical Coupling
  *
  *  @date 02-09-2009
  *  @author Cristiano Malossi <cristiano.malossi@epfl.ch>
@@ -72,7 +72,7 @@ MultiscaleCoupling::MultiscaleCoupling() :
 }
 
 // ===================================================
-// MultiScale PhysicalCoupling Virtual Methods
+// Multiscale PhysicalCoupling Virtual Methods
 // ===================================================
 void
 MultiscaleCoupling::setupData( const std::string& fileName )
@@ -85,8 +85,8 @@ MultiscaleCoupling::setupData( const std::string& fileName )
     GetPot dataFile( fileName );
 
     // Read Multiscale parameters
-    M_couplingName = dataFile( "MultiScale/couplingName", "couplingName" );
-    M_timeInterpolationOrder = dataFile( "MultiScale/timeInterpolationOrder", 0 );
+    M_couplingName = dataFile( "Multiscale/couplingName", "couplingName" );
+    M_timeInterpolationOrder = dataFile( "Multiscale/timeInterpolationOrder", 0 );
 
     // Set the size of the local coupling variables
     M_localCouplingVariables.reserve( M_timeInterpolationOrder + 1 );

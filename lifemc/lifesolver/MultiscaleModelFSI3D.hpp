@@ -26,7 +26,7 @@
 
 /*!
  *  @file
- *  @brief File containing the MultiScale Model FSI3D
+ *  @brief File containing the Multiscale Model FSI3D
  *
  *  @date 19-04-2010
  *  @author Paolo Crosetto <paolo.crosetto@epfl.ch>
@@ -65,7 +65,7 @@ namespace LifeV
 namespace Multiscale
 {
 
-//! MultiscaleModelFSI3D - MultiScale model for 3D FSI simulations
+//! MultiscaleModelFSI3D - Multiscale model for 3D FSI simulations
 /*!
  *  @author Paolo Crosetto
  */
@@ -118,7 +118,7 @@ public:
     //@}
 
 
-    //! @name MultiScale PhysicalModel Virtual Methods
+    //! @name Multiscale PhysicalModel Virtual Methods
     //@{
 
     //! Setup the data of the model.

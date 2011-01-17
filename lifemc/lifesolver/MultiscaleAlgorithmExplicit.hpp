@@ -26,7 +26,7 @@
 
 /*!
  *  @file
- *  @brief File containing the MultiScale Explicit Algorithm
+ *  @brief File containing the Multiscale Explicit Algorithm
  *
  *  @date 26-10-2009
  *  @author Cristiano Malossi <cristiano.malossi@epfl.ch>
@@ -44,7 +44,7 @@ namespace LifeV
 namespace Multiscale
 {
 
-//! MultiscaleAlgorithmExplicit - The MultiScale Algorithm implementation of Explicit
+//! MultiscaleAlgorithmExplicit - The Multiscale Algorithm implementation of Explicit
 /*!
  *  @author Cristiano Malossi
  *
@@ -67,7 +67,7 @@ public:
     //@}
 
 
-    //! @name MultiScale Algorithm Virtual Methods
+    //! @name Multiscale Algorithm Virtual Methods
     //@{
 
     //! Perform sub-iteration on the coupling variables

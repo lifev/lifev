@@ -26,7 +26,7 @@
 
 /*!
  *  @file
- *  @brief File containing the MultiScale Broyden Algorithm
+ *  @brief File containing the Multiscale Broyden Algorithm
  *
  *  @date 26-10-2009
  *  @author Cristiano Malossi <cristiano.malossi@epfl.ch>
@@ -58,7 +58,7 @@ MultiscaleAlgorithmBroyden::MultiscaleAlgorithmBroyden() :
 }
 
 // ===================================================
-// MultiScale Algorithm Virtual Methods
+// Multiscale Algorithm Virtual Methods
 // ===================================================
 void
 MultiscaleAlgorithmBroyden::setupData( const std::string& fileName )
@@ -73,8 +73,8 @@ MultiscaleAlgorithmBroyden::setupData( const std::string& fileName )
     GetPot dataFile( fileName );
 
     M_solver.setCommunicator( M_comm );
-    M_solver.setDataFromGetPot( dataFile, "Solver/Algorithm/Broyden_method/AztecOO" );
-    //M_solver.setupPreconditioner( DataFile, "Solver/Algorithm/Broyden_method/Preconditioner" );
+    M_solver.setDataFromGetPot( dataFile, "Solver/AztecOO" );
+    //M_solver.setupPreconditioner( DataFile, "Solver/Preconditioner" );
 }
 
 void
@@ -102,7 +102,10 @@ MultiscaleAlgorithmBroyden::subIterate()
     {
         // Compute the Jacobian (we completery delete the previous matrix)
         if ( subIT == 1 )
-            assembleJacobianMatrix();
+        {
+            if ( M_multiscale->globalData()->dataTime()->isFirstTimeStep() )
+                assembleJacobianMatrix();
+        }
         else
             broydenJacobianUpdate( delta, minusCouplingResidual );
 
@@ -159,13 +162,12 @@ MultiscaleAlgorithmBroyden::assembleJacobianMatrix()
 void
 MultiscaleAlgorithmBroyden::broydenJacobianUpdate( const multiscaleVector_Type& delta, const multiscaleVector_Type& minusCouplingResidual )
 {
-    // Compute the Broyden update
-    multiscaleMatrix_Type broydenMatrixUpdate( M_couplingVariables->map(), 50, 0 );
+    // Compute the Broyden update (before opening the matrix)
     multiscaleVector_Type columnVector( ( *M_couplingResiduals + minusCouplingResidual - *M_jacobian * delta ) / ( delta.dot( delta ) ) );
 
     // Update the Jacobian Matrix
     M_jacobian->openCrsMatrix();
-    *M_jacobian += broydenMatrixUpdate; // TO BE FINISHED!
+    M_jacobian->addDyadicProduct( columnVector, delta ); // TO BE TESTED IN PARALLEL
     M_jacobian->globalAssemble();
 
     //M_jacobian->spy( "Jacobian" )

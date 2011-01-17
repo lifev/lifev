@@ -26,7 +26,7 @@
 
 /*!
  *  @file
- *  @brief File containing the MultiScale Coupling BoundaryCondition
+ *  @brief File containing the Multiscale Coupling BoundaryCondition
  *
  *  @date 02-09-2009
  *  @author Cristiano Malossi <cristiano.malossi@epfl.ch>
@@ -73,7 +73,7 @@ public:
     //@}
 
 
-    //! @name MultiScale PhysicalCoupling Implementation
+    //! @name Multiscale PhysicalCoupling Implementation
     //@{
 
     //! Setup the data of the coupling
@@ -111,7 +111,7 @@ private:
     //@}
 
 
-    //! @name Private MultiScale PhysicalCoupling Implementation
+    //! @name Private Multiscale PhysicalCoupling Implementation
     //@{
 
     //! Build the list of models affected by the perturbation of a local coupling variable

@@ -26,7 +26,7 @@
 
 /*!
  *  @file
- *  @brief File containing the MultiScale Physical Data
+ *  @brief File containing the Multiscale Physical Data
  *
  *  @date 09-09-2009
  *  @author Cristiano Malossi <cristiano.malossi@epfl.ch>

@@ -26,7 +26,7 @@
 
 /*!
  *  @file
- *  @brief File containing the MultiScale Model Fluid3D
+ *  @brief File containing the Multiscale Model Fluid3D
  *
  *  @date 12-03-2009
  *  @author Cristiano Malossi <cristiano.malossi@epfl.ch>
@@ -59,7 +59,7 @@ namespace LifeV
 namespace Multiscale
 {
 
-//! MultiscaleModelFluid3D - MultiScale model for 3D Fluid simulations
+//! MultiscaleModelFluid3D - Multiscale model for 3D Fluid simulations
 /*!
  *  @author Cristiano Malossi
  *
@@ -115,7 +115,7 @@ public:
     //@}
 
 
-    //! @name MultiScale PhysicalModel Virtual Methods
+    //! @name Multiscale PhysicalModel Virtual Methods
     //@{
 
     //! Setup the data of the model.

@@ -26,7 +26,7 @@
 
 /*!
  *  @file
- *  @brief File containing the MultiScale Coupling Stress
+ *  @brief File containing the Multiscale Coupling Stress
  *
  *  @date 20-10-2009
  *  @author Cristiano Malossi <cristiano.malossi@epfl.ch>
@@ -61,7 +61,7 @@ MultiscaleCouplingStress::MultiscaleCouplingStress() :
 }
 
 // ===================================================
-// MultiScale PhysicalCoupling Implementation
+// Multiscale PhysicalCoupling Implementation
 // ===================================================
 void
 MultiscaleCouplingStress::setupData( const std::string& fileName )
@@ -76,7 +76,7 @@ MultiscaleCouplingStress::setupData( const std::string& fileName )
     GetPot DataFile( fileName );
 
     //Set type of stress coupling
-    M_stressType = multiscaleStressesMap[DataFile( "MultiScale/stressType", "StaticPressure" )];
+    M_stressType = multiscaleStressesMap[DataFile( "Multiscale/stressType", "StaticPressure" )];
 }
 
 void
@@ -274,7 +274,7 @@ MultiscaleCouplingStress::showMe()
 }
 
 // ===================================================
-// Private MultiScale PhysicalCoupling Implementation
+// Private Multiscale PhysicalCoupling Implementation
 // ===================================================
 multiscaleModelsVector_Type
 MultiscaleCouplingStress::listOfPerturbedModels( const UInt& localCouplingVariableID )

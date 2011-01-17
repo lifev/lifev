@@ -26,7 +26,7 @@
 
 /*!
  *  @file
- *  @brief File containing the MultiScale Algorithm
+ *  @brief File containing the Multiscale Algorithm
  *
  *  @date 23-10-2009
  *  @author Cristiano Malossi <cristiano.malossi@epfl.ch>
@@ -45,7 +45,7 @@ namespace LifeV
 namespace Multiscale
 {
 
-//! MultiscaleAlgorithm - The MultiScale Algorithm Interface
+//! MultiscaleAlgorithm - The Multiscale Algorithm Interface
 /*!
  *  @author Cristiano Malossi
  *
@@ -77,7 +77,7 @@ public:
     //@}
 
 
-    //! @name MultiScale Algorithm Virtual Methods
+    //! @name Multiscale Algorithm Virtual Methods
     //@{
 
     //! Setup the data of the algorithm using a data file
@@ -118,11 +118,23 @@ public:
      */
     void setCommunicator( const multiscaleCommPtr_Type& comm );
 
-    //! Set the main MultiScale model
+    //! Set the main Multiscale model
     /*!
-     * @param model MultiScale model
+     * @param model Multiscale model
      */
     void setModel( const multiscaleModelPtr_Type model );
+
+    //! Set the maximum number of subiterations
+    /*!
+     * @param subiterationsMaximumNumber maximum number of subiterations
+     */
+    void setSubiterationsMaximumNumber( const UInt& subiterationsMaximumNumber ) { M_subiterationsMaximumNumber = subiterationsMaximumNumber; }
+
+    //! Set the tolerance
+    /*!
+     * @param tolerance coupling tolerance
+     */
+    void setTolerance( const Real& tolerance ) { M_tolerance = tolerance; }
 
     //@}
 
@@ -138,7 +150,7 @@ public:
 
     //! Get the Multiscale problem
     /*!
-     * @return shared_ptr to the MultiScale problem
+     * @return shared_ptr to the Multiscale problem
      */
     const multiscaleModelMultiscalePtr_Type multiScaleProblem() const { return M_multiscale; }
 
@@ -196,6 +208,7 @@ protected:
     //@}
 
     algorithms_Type                          M_type;
+    std::string                              M_name;
 
     multiscaleModelMultiscalePtr_Type        M_multiscale;
 

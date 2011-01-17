@@ -26,7 +26,7 @@
 
 /*!
  *  @file
- *  @brief File containing the MultiScale Model 1D
+ *  @brief File containing the Multiscale Model 1D
  *
  *  @version 1.1
  *  @date 26-02-2010
@@ -75,7 +75,7 @@ namespace LifeV
 namespace Multiscale
 {
 
-//! MultiscaleModel1D - MultiScale model for 1D Fluid simulations
+//! MultiscaleModel1D - Multiscale model for 1D Fluid simulations
 /*!
  *  @author Gilles Fourestey, Cristiano Malossi
  *
@@ -137,7 +137,7 @@ public:
     //@}
 
 
-    //! @name MultiScale PhysicalModel Virtual Methods
+    //! @name Multiscale PhysicalModel Virtual Methods
     //@{
 
     //! Setup the data of the model.

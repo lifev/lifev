@@ -26,7 +26,7 @@
 
 /*!
  *  @file
- *  @brief File containing the MultiScale Solver
+ *  @brief File containing the Multiscale Solver
  *
  *  @date 28-09-2009
  *  @author Cristiano Malossi <cristiano.malossi@epfl.ch>
@@ -114,14 +114,14 @@ MultiscaleSolver::setupProblem( const std::string& fileName, const std::string& 
         multiscaleProblemStep = dataFile( "Solver/Restart/RestartFromStepNumber", 0 ) + 1;
 
     // Create the main model and set the communicator
-    M_model = multiscaleModelPtr_Type( multiscaleModelFactory_Type::instance().createObject( multiscaleModelsMap[ dataFile( "Problem/ProblemType", "MultiScale" ) ], multiscaleModelsMap ) );
+    M_model = multiscaleModelPtr_Type( multiscaleModelFactory_Type::instance().createObject( multiscaleModelsMap[ dataFile( "Problem/ProblemType", "Multiscale" ) ], multiscaleModelsMap ) );
 
     M_model->setCommunicator( M_comm );
 
     // Setup data
     M_globalData->readData( dataFile );
     M_model->setGlobalData( M_globalData );
-    M_model->setupData( dataFile( "Problem/ProblemFile", "./MultiScaleData/Models/Model.dat" ) );
+    M_model->setupData( dataFile( "Problem/ProblemFile", "./MultiscaleData/Models/NoModel.dat" ) + ".dat" );
 
     // Setup Models
     M_model->setupModel();
@@ -129,11 +129,14 @@ MultiscaleSolver::setupProblem( const std::string& fileName, const std::string& 
     // Algorithm parameters
     if ( M_model->type() == Multiscale )
     {
-        M_algorithm = multiscaleAlgorithmPtr_Type( multiscaleAlgorithmFactory_Type::instance().createObject( multiscaleAlgorithmsMap[ dataFile( "Solver/Algorithm/AlgorithmType", "Newton" ) ], multiscaleAlgorithmsMap ) );
+        M_algorithm = multiscaleAlgorithmPtr_Type( multiscaleAlgorithmFactory_Type::instance().createObject( multiscaleAlgorithmsMap[ dataFile( "Solver/Algorithm/type", "Newton" ) ], multiscaleAlgorithmsMap ) );
 
         M_algorithm->setCommunicator( M_comm );
         M_algorithm->setModel( M_model );
-        M_algorithm->setupData( fileName );
+        M_algorithm->setSubiterationsMaximumNumber( dataFile( "Solver/Algorithm/subiterationsMaximumNumber", 100 ) );
+        M_algorithm->setTolerance( dataFile( "Solver/Algorithm/tolerance", 1e-2 ) );
+        std::string path = "./MultiscaleDatabase/Algorithms/"; // TODO Add this to files
+        M_algorithm->setupData( path + enum2String( M_algorithm->type(), multiscaleAlgorithmsMap ) + "/" + dataFile( "Solver/Algorithm/file", "undefined" ) + ".dat" );
         M_algorithm->initializeCouplingVariables();
     }
 }
@@ -181,7 +184,7 @@ MultiscaleSolver::solveProblem( const Real& externalResidual )
         // solveSystem
         M_model->solveSystem();
 
-        // If it is a MultiScale model, call algorithms for subiterations
+        // If it is a Multiscale model, call algorithms for subiterations
         if ( M_model->type() == Multiscale )
             M_algorithm->subIterate();
 
@@ -209,7 +212,7 @@ MultiscaleSolver::showMe()
     if ( M_displayer->isLeader() )
     {
         std::cout << std::endl << std::endl
-                  << "=============== MultiScale Solver Information ===============" << std::endl << std::endl;
+                  << "=============== Multiscale Solver Information ===============" << std::endl << std::endl;
 
         std::cout << "Problem folder                = " << multiscaleProblemFolder << std::endl
                   << "Problem step                  = " << multiscaleProblemStep << std::endl << std::endl;

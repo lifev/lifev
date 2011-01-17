@@ -26,7 +26,7 @@
 
 /*!
  *  @file
- *  @brief File containing the MultiScale Solver
+ *  @brief File containing the Multiscale Solver
  *
  *  @date 28-09-2009
  *  @author Cristiano Malossi <cristiano.malossi@epfl.ch>
@@ -52,12 +52,12 @@ namespace LifeV
 namespace Multiscale
 {
 
-//! MultiscaleSolver - The MultiScale problem solver
+//! MultiscaleSolver - The Multiscale problem solver
 /*!
  *  @author Cristiano Malossi
  *
  *  The MultiscaleSolver class provides a series of functions to create and
- *  solve a general MultiScale problem.
+ *  solve a general Multiscale problem.
  */
 class MultiscaleSolver
 {
@@ -78,7 +78,7 @@ public:
     //! @name Methods
     //@{
 
-    //! Set the epetra communicator for the MultiScale problem
+    //! Set the epetra communicator for the Multiscale problem
     /*!
      * @param comm Epetra communicator
      */
@@ -91,13 +91,13 @@ public:
      */
     void setupProblem( const std::string& fileName, const std::string& problemName );
 
-    //! Run the time-loop to solve the MultiScale problem
+    //! Run the time-loop to solve the Multiscale problem
     /*!
      * @return 0: EXIT_SUCCESS, 1: EXIT_FAILURE
      */
     bool solveProblem( const Real& externalResidual = -1 );
 
-    //! Display some information about the MultiScale problem (to be called after SetupProblem)
+    //! Display some information about the Multiscale problem (to be called after SetupProblem)
     void showMe();
 
     //@}
@@ -113,7 +113,7 @@ private:
 
     //@}
 
-    // The main model (can be a specific model or a MultiScale model)
+    // The main model (can be a specific model or a Multiscale model)
     multiscaleModelPtr_Type          M_model;
 
     // Algorithm for subiterations

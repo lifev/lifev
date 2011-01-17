@@ -26,7 +26,7 @@
 
 /*!
  *  @file
- *  @brief File containing the MultiScale Algorithm
+ *  @brief File containing the Multiscale Algorithm
  *
  *  @date 23-10-2009
  *  @author Cristiano Malossi <cristiano.malossi@epfl.ch>
@@ -48,6 +48,7 @@ std::map< std::string, algorithms_Type > multiscaleAlgorithmsMap;
 // ===================================================
 MultiscaleAlgorithm::MultiscaleAlgorithm() :
         M_type                       (),
+        M_name                       (),
         M_multiscale                 (),
         M_couplingVariables          (),
         M_couplingResiduals          (),
@@ -64,7 +65,7 @@ MultiscaleAlgorithm::MultiscaleAlgorithm() :
 }
 
 // ===================================================
-// MultiScale Algorithm Virtual Methods
+// Multiscale Algorithm Virtual Methods
 // ===================================================
 void
 MultiscaleAlgorithm::setupData( const std::string& fileName )
@@ -75,9 +76,8 @@ MultiscaleAlgorithm::setupData( const std::string& fileName )
 #endif
 
     GetPot dataFile( fileName );
-
-    M_subiterationsMaximumNumber = dataFile( "Solver/Algorithm/subITMax", 100 );
-    M_tolerance                  = dataFile( "Solver/Algorithm/tolerance", 1.e-10 );
+std::cout << "ciao: "<< fileName << std::endl;
+    M_name = dataFile( "Multiscale/algorithmName", "algorithmName" );
 }
 
 void
@@ -99,6 +99,7 @@ MultiscaleAlgorithm::showMe()
     std::cout << "=================== Algorithm Information ===================" << std::endl << std::endl;
 
     std::cout << "Algorithm type      = " << enum2String( M_type, multiscaleAlgorithmsMap ) << std::endl
+              << "Algorithm name      = " << M_name << std::endl
               << "Max Sub-iterations  = " << M_subiterationsMaximumNumber << std::endl
               << "Tolerance           = " << M_tolerance << std::endl << std::endl;
     std::cout << std::endl << std::endl;
@@ -135,7 +136,7 @@ MultiscaleAlgorithm::setModel( const multiscaleModelPtr_Type model )
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 8010 ) << "MultiscaleAlgorithm::setMultiScaleProblem( multiscale ) \n";
+    Debug( 8010 ) << "MultiscaleAlgorithm::setMultiscaleProblem( multiscale ) \n";
 #endif
 
     M_multiscale = boost::dynamic_pointer_cast< MultiscaleModelMultiscale >( model );
