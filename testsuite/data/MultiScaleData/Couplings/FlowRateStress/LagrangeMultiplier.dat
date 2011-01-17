@@ -12,7 +12,7 @@
 ### COUPLING: FlowRateStress - Lagrange Multiplier ################################################
 ###################################################################################################
 
-[MultiScale]
+[Multiscale]
 couplingName           = FlowRateStess_LagrangeMultiplier
 stressType             = LagrangeMultiplier
 timeInterpolationOrder = 1

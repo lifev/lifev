@@ -12,7 +12,7 @@
 ### COUPLING: FlowRateStress - Total Pressure #####################################################
 ###################################################################################################
 
-[MultiScale]
+[Multiscale]
 couplingName           = FlowRateStess_TotalPressure
 stressType             = TotalPressure
 timeInterpolationOrder = 1

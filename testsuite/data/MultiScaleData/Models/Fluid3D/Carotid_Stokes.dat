@@ -12,7 +12,7 @@
 ### MODEL: Fluid3D - Carotid Bifurcation ##########################################################
 ###################################################################################################
 
-[MultiScale]
+[Multiscale]
 modelName        = Fluid3D_CarotidBifurcation_Stokes
 modelType        = Fluid3D
 couplingFlags    = '2 3 4'

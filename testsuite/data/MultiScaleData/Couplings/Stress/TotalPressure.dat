@@ -12,7 +12,7 @@
 ### COUPLING: Stress - Total Pressure #############################################################
 ###################################################################################################
 
-[MultiScale]
+[Multiscale]
 couplingName           = Stess_TotalPressure
 stressType             = TotalPressure
 timeInterpolationOrder = 1

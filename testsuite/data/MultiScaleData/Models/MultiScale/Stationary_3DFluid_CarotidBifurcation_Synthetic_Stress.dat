@@ -9,10 +9,10 @@
 #  License Terms: GNU GPL
 #
 ###################################################################################################
-### MODEL: MultiScale - TEST: Six 3DFluid cylinders representing the Carotid Bifurcation ##########
+### MODEL: Multiscale - TEST: Six 3DFluid cylinders representing the Carotid Bifurcation ##########
 ###################################################################################################
 
-[MultiScale] ######################################################################################
+[Multiscale] ######################################################################################
 ###################################################################################################
 modelName        = 'Synthetic Carotid Bifurcation (tube40, Fluid3D), Stress'
 modelType        = Multiscale
@@ -20,8 +20,8 @@ couplingFlags    = ' '
 
 [Problem] #########################################################################################
 ###################################################################################################
-modelsPath       = './MultiScaleData/Models/'
-couplingsPath    = './MultiScaleData/Couplings/'
+modelsPath       = './MultiscaleData/Models/'
+couplingsPath    = './MultiscaleData/Couplings/'
 
 # List of models ##################################################################################
 ########### ID #### Type ############## File (without .dat) #######################################

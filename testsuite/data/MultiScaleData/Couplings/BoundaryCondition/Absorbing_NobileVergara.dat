@@ -12,7 +12,7 @@
 ### COUPLING: BoundaryCondition - Absorbing (Nobile-Vergara) ######################################
 ###################################################################################################
 
-[MultiScale]
+[Multiscale]
 couplingName	= BoundaryCondition_Absorbing_NobileVergara
 
 [boundary_conditions]

@@ -12,7 +12,7 @@
 ### COUPLING: BoundaryCondition - No Flux #########################################################
 ###################################################################################################
 
-[MultiScale]
+[Multiscale]
 couplingName	= BoundaryCondition_NoFlux
 
 [boundary_conditions]

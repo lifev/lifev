@@ -12,7 +12,7 @@
 ### COUPLING: BoundaryCondition - Pressure ########################################################
 ###################################################################################################
 
-[MultiScale]
+[Multiscale]
 couplingName	= BoundaryCondition_Pressure
 
 [boundary_conditions]

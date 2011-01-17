@@ -1,0 +1,16 @@
+###################################################################################################
+#
+#                       This file is part of the LifeV Applications                        
+#                                 Copyright (C) 2009 EPFL          
+#
+#      Author(s): Cristiano Malossi <cristiano.malossi@epfl.ch>
+#           Date: 2011-01-14
+#  License Terms: GNU GPL
+#
+###################################################################################################
+### ALGORITHM: Explicit - Default parameters ######################################################
+###################################################################################################
+
+[Multiscale]
+algorithmName        = ExplicitDefault
+algorithmType        = Explicit

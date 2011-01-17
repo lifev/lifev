@@ -12,7 +12,7 @@
 ### COUPLING: FlowRateStress - Static Pressure ####################################################
 ###################################################################################################
 
-[MultiScale]
+[Multiscale]
 couplingName           = FlowRateStess_StaticPressure
 stressType             = StaticPressure
 timeInterpolationOrder = 1

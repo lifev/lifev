@@ -12,7 +12,7 @@
 ### COUPLING: BoundaryCondition - NoStress ########################################################
 ###################################################################################################
 
-[MultiScale]
+[Multiscale]
 couplingName	= BoundaryCondition_NoStress
 
 [boundary_conditions]

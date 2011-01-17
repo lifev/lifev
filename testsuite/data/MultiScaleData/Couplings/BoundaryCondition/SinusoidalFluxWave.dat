@@ -12,7 +12,7 @@
 ### COUPLING: BoundaryCondition - Sinusoidal Flux (single Wave) ###################################
 ###################################################################################################
 
-[MultiScale]
+[Multiscale]
 couplingName	= BoundaryCondition_SinusoidalFluxWave
 
 [boundary_conditions]

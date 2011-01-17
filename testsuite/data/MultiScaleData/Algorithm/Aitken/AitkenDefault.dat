@@ -1,0 +1,24 @@
+###################################################################################################
+#
+#                       This file is part of the LifeV Applications                        
+#                                 Copyright (C) 2009 EPFL          
+#
+#      Author(s): Cristiano Malossi <cristiano.malossi@epfl.ch>
+#           Date: 2011-01-14
+#  License Terms: GNU GPL
+#
+###################################################################################################
+### ALGORITHM: Aitken - Default parameters ########################################################
+###################################################################################################
+
+[Multiscale]
+algorithmName        = AitkenDefault
+algorithmType        = Aitken
+
+[Solver]
+    Omega                      = 0.5           # omega starting value
+    fixedOmega                 = true          # use fixed omega (if omega = 1 -> fixed point)
+    method                     = Vectorial     # Scalar, Vectorial
+    #range                      = '0.1 1.5'     # Range coefficient: OmegaMin < Omega < OmegaMax
+    inverseOmega               = true          # direct: minimize on omega; inverse: minimize on omega^-1
+[../]

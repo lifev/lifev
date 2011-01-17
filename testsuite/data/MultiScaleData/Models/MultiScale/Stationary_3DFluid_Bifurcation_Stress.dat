@@ -9,10 +9,10 @@
 #  License Terms: GNU GPL
 #
 ###################################################################################################
-### MODEL: MultiScale - TEST: Bifurcation with three 3DFluid cylinders - Stress - Stationary ######
+### MODEL: Multiscale - TEST: Bifurcation with three 3DFluid cylinders - Stress - Stationary ######
 ###################################################################################################
 
-[MultiScale] ######################################################################################
+[Multiscale] ######################################################################################
 ###################################################################################################
 modelName        = 'Bifurcation (tube20, Fluid3D), Stress'
 modelType        = Multiscale
@@ -20,8 +20,8 @@ couplingFlags    = ' '
 
 [Problem] #########################################################################################
 ###################################################################################################
-modelsPath       = './MultiScaleData/Models/'
-couplingsPath    = './MultiScaleData/Couplings/'
+modelsPath       = './MultiscaleData/Models/'
+couplingsPath    = './MultiscaleData/Couplings/'
 
 # List of models ##################################################################################
 ########### ID #### Type ############## File (without .dat) #######################################

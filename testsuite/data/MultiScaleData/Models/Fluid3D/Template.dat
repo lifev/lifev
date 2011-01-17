@@ -12,7 +12,7 @@
 ### MODEL: Fluid3D - Template #####################################################################
 ###################################################################################################
 
-[MultiScale]
+[Multiscale]
 modelName        = Fluid3D_Template
 modelType        = Fluid3D
 couplingFlags    = ''

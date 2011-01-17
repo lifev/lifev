@@ -12,7 +12,7 @@
 ### COUPLING: BoundaryCondition - Sinusoidal Pressure #############################################
 ###################################################################################################
 
-[MultiScale]
+[Multiscale]
 couplingName	= BoundaryCondition_WomersleySinusoidalPressure
 
 [boundary_conditions]

@@ -12,7 +12,7 @@
 ### COUPLING: BoundaryCondition - Poiseuille Flux Dynamic #########################################
 ###################################################################################################
 
-[MultiScale]
+[Multiscale]
 couplingName	= BoundaryCondition_PoiseuilleFluxDynamic
 
 [boundary_conditions]

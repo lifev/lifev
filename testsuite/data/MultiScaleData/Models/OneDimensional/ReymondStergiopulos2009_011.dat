@@ -12,7 +12,7 @@
 ### MODEL: Reymond Stergiopulos 1D Arterial Tree ##################################################
 ###################################################################################################
 
-[MultiScale]
+[Multiscale]
 modelName            = '1D ReymondStergiopulos 11 (ulnar B right)'
 modelType            = OneDimensional
 couplingFlags        = '0 1'

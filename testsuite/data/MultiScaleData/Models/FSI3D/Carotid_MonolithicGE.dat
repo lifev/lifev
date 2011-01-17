@@ -13,7 +13,7 @@
 ### MODEL: FSI3D - Carotid ########################################################################
 ###################################################################################################
 
-[MultiScale]
+[Multiscale]
 modelName        = FSI3D_CarotidBifurcationGE
 modelType        = FSI3D
 couplingFlags    = '2 3 4'

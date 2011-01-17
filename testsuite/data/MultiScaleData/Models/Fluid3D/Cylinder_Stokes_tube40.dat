@@ -12,7 +12,7 @@
 ### MODEL: Fluid3D - Cylinder #####################################################################
 ###################################################################################################
 
-[MultiScale]
+[Multiscale]
 modelName        = Fluid3D_Cylinder_Stokes_tube40
 modelType        = Fluid3D
 couplingFlags    = '2 3'

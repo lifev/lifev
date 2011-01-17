@@ -1,119 +1,47 @@
-# -*- getpot -*- GetPot mode activation for emacs
 ###################################################################################################
 #
-#                       This file is part of the LifeV Applications
-#                                 Copyright (C) 2010 EPFL
+#                       Th[Multiscale]s f[Multiscale][Multiscale][Multiscale] [Multiscale]s p[Multiscale]r[Multiscale] of [Multiscale]h[Multiscale] L[Multiscale]f[Multiscale]V App[Multiscale][Multiscale][Multiscale][Multiscale][Multiscale][Multiscale]ons
+#                                 Copyr[Multiscale]gh[Multiscale] (C) 2010 EPFL
 #
-#      Author(s): Cristiano Malossi <cristiano.malossi@epfl.ch>
-#           Date: 2009-09-01
-#  License Terms: GNU GPL
+#      A[Multiscale][Multiscale]hor(s): Cr[Multiscale]s[Multiscale][Multiscale][Multiscale]no [Multiscale][Multiscale][Multiscale]oss[Multiscale] <[Multiscale]r[Multiscale]s[Multiscale][Multiscale][Multiscale]no.m[Multiscale][Multiscale]oss[Multiscale]@[Multiscale]pf[Multiscale].[Multiscale]h>
+#           D[Multiscale][Multiscale][Multiscale]: 2009-09-01
+#  L[Multiscale][Multiscale][Multiscale]ns[Multiscale] T[Multiscale]rms: GNU GPL
 #
 ###################################################################################################
-### MULTISCALE: Main data file ####################################################################
+### [Multiscale]ULTI[Multiscale]CALE: [Multiscale][Multiscale][Multiscale]n d[Multiscale][Multiscale][Multiscale] f[Multiscale][Multiscale][Multiscale] ####################################################################
 ###################################################################################################
 
-[Problem] #########################################################################################
-ProblemType = Multiscale
-ProblemFile = ./MultiScaleData/Models/MultiScale/Stationary_3DFluid_Hexagon_Stress.dat
+[Prob[Multiscale][Multiscale]m] #########################################################################################
+Prob[Multiscale][Multiscale]mTyp[Multiscale] = [Multiscale][Multiscale][Multiscale][Multiscale][Multiscale]s[Multiscale][Multiscale][Multiscale][Multiscale]
+Prob[Multiscale][Multiscale]mF[Multiscale][Multiscale][Multiscale] = ./[Multiscale][Multiscale][Multiscale][Multiscale][Multiscale][Multiscale][Multiscale][Multiscale][Multiscale][Multiscale]D[Multiscale][Multiscale][Multiscale]/[Multiscale]od[Multiscale][Multiscale]s/[Multiscale][Multiscale][Multiscale][Multiscale][Multiscale][Multiscale][Multiscale][Multiscale][Multiscale][Multiscale]/[Multiscale][Multiscale][Multiscale][Multiscale][Multiscale]on[Multiscale]ry_3DF[Multiscale][Multiscale][Multiscale]d_H[Multiscale]x[Multiscale]gon_[Multiscale][Multiscale]r[Multiscale]ss
 
-[Solver] ##########################################################################################
+[[Multiscale]o[Multiscale]v[Multiscale]r] ##########################################################################################
 ###################################################################################################
 
-    [./Restart]
-    Restart                    = false
-    RestartFromStepNumber      = 0
+    [./R[Multiscale]s[Multiscale][Multiscale]r[Multiscale]]
+    R[Multiscale]s[Multiscale][Multiscale]r[Multiscale]                    = f[Multiscale][Multiscale]s[Multiscale]
+    R[Multiscale]s[Multiscale][Multiscale]r[Multiscale]From[Multiscale][Multiscale][Multiscale]pN[Multiscale]mb[Multiscale]r      = 0
     
-    [../time_discretization]
-    initialtime                = 0.0   # [s]
-    endtime                    = 1.0   # [s]
-    timestep                   = 1.0   # [s]
+    [../[Multiscale][Multiscale]m[Multiscale]_d[Multiscale]s[Multiscale]r[Multiscale][Multiscale][Multiscale]z[Multiscale][Multiscale][Multiscale]on]
+    [Multiscale]n[Multiscale][Multiscale][Multiscale][Multiscale][Multiscale][Multiscale][Multiscale]m[Multiscale]                = 0.0   # [s]
+    [Multiscale]nd[Multiscale][Multiscale]m[Multiscale]                    = 1.0   # [s]
+    [Multiscale][Multiscale]m[Multiscale]s[Multiscale][Multiscale]p                   = 1.0   # [s]
 
-    [../Algorithm]
-    AlgorithmType              = Newton            # Aitken, Explicit, Newton
-    subITMax                   = 1                 # Maximum number for coupling subiterations
-    tolerance                  = 1.e-6             # Tolerance on the coupling values
-    
-        [./Aitken_method]
-        Omega                      = 0.5           # omega starting value
-        fixedOmega                 = false         # use fixed omega (if omega = 1 -> fixed point)
-        method                     = Vectorial     # Scalar, Vectorial
-        #range                      = '0.1 1.5'     # Range coefficient: OmegaMin < Omega < OmegaMax
-        inverseOmega               = true          # direct: minimize on omega; inverse: minimize on omega^-1
-        
-        [../Newton_method]
-        
-            [./AztecOO]
-            solver                     = gmres
-            scaling                    = none
-            output                     = all           # none
-            conv                       = AZ_noscaled   # r0, noscaled
-            max_iter                   = 100
-            reuse                      = false
-            max_iter_reuse             = 100
-            kspace                     = 100
-            tol                        = 1.e-14
-            
-            [../Preconditioner]
-            prectype                   = Ifpack #Ifpack
-            displayList                = false
-    
-                [./AztecOO]
-                precond                    = 'dom_decomp'
-                prec_calc                  = calc
-                reorder                    = 1
-                keep_info                  = 0
-                overlap                    = 0
-                subdomain_solve            = ILUT
-                ilut_fill                  = 4
-                drop                       = 1.e-5
-                
-                [../ifpack]
-                overlap                    = 3 #ok
-                prectype                   = Amesos # Amesos (does a local LU factorization), ILUT (not ILU)
+    [../A[Multiscale]gor[Multiscale][Multiscale]hm]
+    [Multiscale]yp[Multiscale]                       = N[Multiscale]w[Multiscale]on            # A[Multiscale][Multiscale]k[Multiscale]n, Exp[Multiscale][Multiscale][Multiscale][Multiscale][Multiscale], N[Multiscale]w[Multiscale]on, Broyd[Multiscale]n
+    f[Multiscale][Multiscale][Multiscale]                       = N[Multiscale]w[Multiscale]onD[Multiscale]f[Multiscale][Multiscale][Multiscale][Multiscale]     # D[Multiscale][Multiscale][Multiscale] f[Multiscale][Multiscale][Multiscale] [Multiscale]n [Multiscale]h[Multiscale] A[Multiscale]gor[Multiscale][Multiscale]hm fo[Multiscale]d[Multiscale]r (w[Multiscale][Multiscale]ho[Multiscale][Multiscale] .d[Multiscale][Multiscale] [Multiscale]x[Multiscale][Multiscale]ns[Multiscale]on)
+    s[Multiscale]b[Multiscale][Multiscale][Multiscale]r[Multiscale][Multiscale][Multiscale]ons[Multiscale][Multiscale]x[Multiscale]m[Multiscale]mN[Multiscale]mb[Multiscale]r = 1                 # [Multiscale][Multiscale]x[Multiscale]m[Multiscale]m n[Multiscale]mb[Multiscale]r for [Multiscale]o[Multiscale]p[Multiscale][Multiscale]ng s[Multiscale]b[Multiscale][Multiscale][Multiscale]r[Multiscale][Multiscale][Multiscale]ons
+    [Multiscale]o[Multiscale][Multiscale]r[Multiscale]n[Multiscale][Multiscale]                  = 1.[Multiscale]-6             # To[Multiscale][Multiscale]r[Multiscale]n[Multiscale][Multiscale] on [Multiscale]h[Multiscale] [Multiscale]o[Multiscale]p[Multiscale][Multiscale]ng v[Multiscale][Multiscale][Multiscale][Multiscale]s
 
-                    [./relaxation]
-                    type                   = Jacobi
-                    sweeps                 = 1
-                    damping_factor         = 1.
-                    min_diagonal_value     = 0
-                    zero_starting_solution = true
-            
-                    [../partitioner]
-                    type                   = metis
-                    overlap                = 2
-                    local_parts            = 1
-                    root_node              = 0
-                    use_symmetric_graph    = true
-
-                    [../amesos]
-                    solvertype = Amesos_Umfpack # Amesos_KLU or Amesos_Umfpack
-                           
-                    [../fact]
-                    level-of-fill          = 4
-                    ilut_level-of-fill     = 4
-                    absolute_threshold     = 0
-                    relative_threshold     = 1
-                    relax_value            = 0
-                    drop_tolerance         = 1.e-5
-
-                    [../schwarz]
-                    combine_mode           = 0 # 0=Add, 1=Zero, 2=Insert, 3=Average, 4=AbsMax
-                    compute_condest        = true
-                    reordering_type        = none       #none, metis, rcm
-                    filter_singletons      = true
-    
-                    [../]
-                [../]
-            [../]
-        [../]
     [../]
+
 ###################################################################################################
 
-[Physics] #########################################################################################
+[Phys[Multiscale][Multiscale]s] #########################################################################################
 ###################################################################################################
-FluidDensity                = 1.0           # density        [g/cm^3]
-FluidViscosity              = 1.005309649148734e-06 # viscosity      [g/cm/s]
-StructureDensity            = 1.2           # density        [g/cm^3]
-StructurePoissonCoefficient = 0.48          # Poisson coeff. []
-StructureYoungModulus       = 4.0E6         # Young modulus  [g/cm/s^2 - dyne/cm^2]
+F[Multiscale][Multiscale][Multiscale]dD[Multiscale]ns[Multiscale][Multiscale]y                = 1.0           # d[Multiscale]ns[Multiscale][Multiscale]y        [g/[Multiscale]m^3]
+F[Multiscale][Multiscale][Multiscale]dV[Multiscale]s[Multiscale]os[Multiscale][Multiscale]y              = 1.005309649148734[Multiscale]-06 # v[Multiscale]s[Multiscale]os[Multiscale][Multiscale]y      [g/[Multiscale]m/s]
+[Multiscale][Multiscale]r[Multiscale][Multiscale][Multiscale][Multiscale]r[Multiscale]D[Multiscale]ns[Multiscale][Multiscale]y            = 1.2           # d[Multiscale]ns[Multiscale][Multiscale]y        [g/[Multiscale]m^3]
+[Multiscale][Multiscale]r[Multiscale][Multiscale][Multiscale][Multiscale]r[Multiscale]Po[Multiscale]ssonCo[Multiscale]ff[Multiscale][Multiscale][Multiscale][Multiscale]n[Multiscale] = 0.48          # Po[Multiscale]sson [Multiscale]o[Multiscale]ff. []
+[Multiscale][Multiscale]r[Multiscale][Multiscale][Multiscale][Multiscale]r[Multiscale]Yo[Multiscale]ng[Multiscale]od[Multiscale][Multiscale][Multiscale]s       = 4.0E6         # Yo[Multiscale]ng mod[Multiscale][Multiscale][Multiscale]s  [g/[Multiscale]m/s^2 - dyn[Multiscale]/[Multiscale]m^2]
 ###################################################################################################

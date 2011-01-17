@@ -12,7 +12,7 @@
 ### COUPLING: BoundaryCondition - Carotid bifurcation Flux ########################################
 ###################################################################################################
 
-[MultiScale]
+[Multiscale]
 couplingName	= BoundaryCondition_CarotidBifurcationFlux
 
 [boundary_conditions]

@@ -12,7 +12,7 @@
 ### COUPLING: BoundaryCondition - Test Stress #####################################################
 ###################################################################################################
 
-[MultiScale]
+[Multiscale]
 couplingName	= BoundaryCondition_TestStress
 
 [boundary_conditions]

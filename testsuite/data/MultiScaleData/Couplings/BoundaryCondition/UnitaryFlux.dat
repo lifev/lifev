@@ -12,7 +12,7 @@
 ### COUPLING: BoundaryCondition - Cylinder Poiseuille Flux ########################################
 ###################################################################################################
 
-[MultiScale]
+[Multiscale]
 couplingName	= BoundaryCondition_UnitaryFlux
 
 [boundary_conditions]

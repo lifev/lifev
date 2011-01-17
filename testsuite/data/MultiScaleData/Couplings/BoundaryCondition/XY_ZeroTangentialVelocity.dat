@@ -12,7 +12,7 @@
 ### COUPLING: BoundaryCondition - XY plane zero tangential velocity ###############################
 ###################################################################################################
 
-[MultiScale]
+[Multiscale]
 couplingName	= XY_ZeroTangentialVelocity
 
 [boundary_conditions]

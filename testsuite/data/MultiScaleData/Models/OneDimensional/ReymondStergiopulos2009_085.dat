@@ -12,7 +12,7 @@
 ### MODEL: Reymond Stergiopulos 1D Arterial Tree ##################################################
 ###################################################################################################
 
-[MultiScale]
+[Multiscale]
 modelName            = '1D ReymondStergiopulos 85 (external carotid 2 left)'
 modelType            = OneDimensional
 couplingFlags        = '0 1'

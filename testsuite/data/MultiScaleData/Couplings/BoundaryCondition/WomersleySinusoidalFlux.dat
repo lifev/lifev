@@ -12,7 +12,7 @@
 ### COUPLING: BoundaryCondition - Sinusoidal Flux #################################################
 ###################################################################################################
 
-[MultiScale]
+[Multiscale]
 couplingName	= BoundaryCondition_WomersleySinusoidalFlux
 
 [boundary_conditions]

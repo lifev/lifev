@@ -12,7 +12,7 @@
 ### MODEL: Reymond Stergiopulos 1D Arterial Tree ##################################################
 ###################################################################################################
 
-[MultiScale]
+[Multiscale]
 modelName            = '1D ReymondStergiopulos 78 (ant. cerebral A2 left)'
 modelType            = OneDimensional
 couplingFlags        = '0 1'

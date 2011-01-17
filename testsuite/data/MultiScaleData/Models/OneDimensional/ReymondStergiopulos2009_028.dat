@@ -12,7 +12,7 @@
 ### MODEL: Reymond Stergiopulos 1D Arterial Tree ##################################################
 ###################################################################################################
 
-[MultiScale]
+[Multiscale]
 modelName            = '1D ReymondStergiopulo 28 (abdominal aorta A)'
 modelType            = OneDimensional
 couplingFlags        = '0 1'

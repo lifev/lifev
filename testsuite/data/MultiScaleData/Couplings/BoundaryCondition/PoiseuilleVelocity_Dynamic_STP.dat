@@ -12,7 +12,7 @@
 ### COUPLING: BoundaryCondition - Poiseuille Velocity Dynamic #####################################
 ###################################################################################################
 
-[MultiScale]
+[Multiscale]
 couplingName	= BoundaryCondition_PoiseuilleVelocityDynamic
 
 [boundary_conditions]

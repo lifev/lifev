@@ -12,7 +12,7 @@
 ### COUPLING: Reymond Stergiopulos 1D Arterial Tree ###############################################
 ###################################################################################################
 
-[MultiScale]
+[Multiscale]
 couplingName	= '1D ReymondStergiopulos 36 (terminal resistance)'
 
 [boundary_conditions]

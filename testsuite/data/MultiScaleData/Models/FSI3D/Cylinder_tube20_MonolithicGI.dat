@@ -13,7 +13,7 @@
 ### MODEL: FSI3D - Cylinder #######################################################################
 ###################################################################################################
 
-[MultiScale]
+[Multiscale]
 modelName        = FSI3D_Cylinder_tube20_MonolithicGI
 modelType        = FSI3D
 couplingFlags    = '2 3'

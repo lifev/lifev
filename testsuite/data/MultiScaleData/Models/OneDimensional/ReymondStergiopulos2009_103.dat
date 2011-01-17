@@ -12,7 +12,7 @@
 ### MODEL: Reymond Stergiopulos 1D Arterial Tree ##################################################
 ###################################################################################################
 
-[MultiScale]
+[Multiscale]
 modelName            = '1D ReymondStergiopulos 103 (ICA distal cnt. chor.-M1 seg. left)'
 modelType            = OneDimensional
 couplingFlags        = '0 1'

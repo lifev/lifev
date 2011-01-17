@@ -12,7 +12,7 @@
 ### COUPLING: Stress - Static Pressure ############################################################
 ###################################################################################################
 
-[MultiScale]
+[Multiscale]
 couplingName           = Stess_StaticPressure
 stressType             = StaticPressure
 timeInterpolationOrder = 1
