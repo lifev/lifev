@@ -12,7 +12,7 @@
 ###################################################################################################
 
 [Multiscale]
-algorithmName        = AitkenDefault
+algorithmName        = Default
 algorithmType        = Aitken
 
 [Solver]

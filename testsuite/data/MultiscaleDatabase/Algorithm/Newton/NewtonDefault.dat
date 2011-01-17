@@ -12,7 +12,7 @@
 ###################################################################################################
 
 [Multiscale]
-algorithmName        = NewtonDefault
+algorithmName        = Default
 algorithmType        = Newton
 
 [Solver]

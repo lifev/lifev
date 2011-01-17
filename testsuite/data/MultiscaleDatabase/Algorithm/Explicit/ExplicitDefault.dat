@@ -12,5 +12,5 @@
 ###################################################################################################
 
 [Multiscale]
-algorithmName        = ExplicitDefault
+algorithmName        = Default
 algorithmType        = Explicit
