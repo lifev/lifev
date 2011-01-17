@@ -14,7 +14,7 @@ SUFFIXES	= .cpp .hpp .idl .c .h .f .F .o .moc
 
 SUBDIRS		= 	Fluid3D\
 				FSI3D\
-				MultiScale\
+				Multiscale\
 				OneDimensional
 				
 dist_pkgdata_DATA = 
