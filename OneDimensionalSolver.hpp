@@ -83,7 +83,7 @@ namespace LifeV
  *  with U = [U1,U2]^T in R^2.
  *
  *  The non linear flux function F(U) and source function S(U)
- *  are quite independant of this solver : they are taken into
+ *  are quite independent of this solver : they are taken into
  *  account only via two classes that define a vectorial function
  *  and its derivatives.
  *
@@ -175,6 +175,7 @@ public:
 
     typedef data_Type::container2D_Type             container2D_Type;
     typedef data_Type::scalarVector_Type            scalarVector_Type;
+    typedef boost::array< scalarVector_Type, 4 >    scalarVectorContainer_Type;
 
     typedef FESpace< mesh_Type, MapEpetra >         feSpace_Type;
     typedef boost::shared_ptr< feSpace_Type >       feSpacePtr_Type;
@@ -184,11 +185,14 @@ public:
 
     typedef SolverAmesos                            linearSolver_Type;
     typedef boost::shared_ptr< linearSolver_Type >  linearSolverPtr_Type;
+
     typedef linearSolver_Type::vector_type          vector_Type;
     typedef boost::shared_ptr< vector_Type >        vectorPtr_Type;
+    typedef boost::array< vectorPtr_Type, 2 >       vectorPtrContainer_Type;
 
     typedef linearSolver_Type::matrix_type          matrix_Type;
     typedef boost::shared_ptr<matrix_Type>          matrixPtr_Type;
+    typedef boost::array<matrixPtr_Type, 4 >        matrixPtrContainer_Type;
 
     typedef std::map< std::string, vectorPtr_Type > solution_Type;
     typedef boost::shared_ptr< solution_Type >      solutionPtr_Type;
@@ -292,18 +296,18 @@ public:
     //@{
 
     //! Set problem elements
-    void setProblem( const physicsPtr_Type physics,
-                     const fluxPtr_Type    flux,
-                     const sourcePtr_Type  source );
+    void setProblem( const physicsPtr_Type& physics,
+                     const fluxPtr_Type&    flux,
+                     const sourcePtr_Type&  source );
 
     //! Set the communicator
-    void setCommunicator( const commPtr_Type comm );
+    void setCommunicator( const commPtr_Type& comm );
 
     //! Set the FEspace
-    void setFESpace( const feSpacePtr_Type FESpace );
+    void setFESpace( const feSpacePtr_Type& FESpace );
 
     //! Set the linear solver
-    void setLinearSolver( const linearSolverPtr_Type linearSolver );
+    void setLinearSolver( const linearSolverPtr_Type& linearSolver );
 
     //! Set the Dirichlet boundary conditions (left)
     void setBCValuesLeft( const Real& bcL1, const Real& bcL2 );
@@ -390,7 +394,7 @@ private:
      *  (mean value of the two extremal values of dF/dU)
      *  BEWARE: works only for P1Seg elements
      */
-    void updateFluxDer( const solution_Type& solution );
+    void updatedFdU( const solution_Type& solution );
 
     //! Update the P1 source vector from U: M_sourcei = S_h(Un) i=1,2 (works only for P1Seg elements)
     void updateSource( const solution_Type& solution );
@@ -403,7 +407,7 @@ private:
      *  (mean value of the two extremal values of dS/dU)
      *  BEWARE: works only for P1Seg elements
      */
-    void updateSourceDer( const solution_Type& solution );
+    void updatedSdU( const solution_Type& solution );
 
     //! Update the matrices
     /*!
@@ -418,11 +422,8 @@ private:
      */
     void updateMatrices();
 
-    //! Update the coefficients (from the flux, source functions and their derivatives)
-    void updateMatrixCoefficients( const UInt& ii, const UInt& jj, const UInt& iedge);
-
     //! Update the element matrices with the current element
-    void updateMatrixElementalrices();
+    void updateElementalMatrices( const Real& dFdU, const Real& dSdU );
 
     //! Assemble the matrices
     void matrixAssemble( const UInt& ii, const UInt& jj );
@@ -485,7 +486,7 @@ private:
     physicsPtr_Type                    M_physics;
     fluxPtr_Type                       M_flux;
     sourcePtr_Type                     M_source;
-    feSpacePtr_Type                    M_FESpace;
+    feSpacePtr_Type                    M_feSpace;
     commPtr_Type                       M_comm;
     Displayer                          M_displayer;
 
@@ -494,56 +495,50 @@ private:
     UInt                               M_rightNodeId;
     UInt                               M_rightInternalNodeId;
 
-    //! coefficient in front of the corresponding M_elmat*
-    Real                               M_coeffMass;
-    Real                               M_coeffStiff;
-    Real                               M_coeffGrad;
-    Real                               M_coeffDiv;
-
-    boost::shared_ptr< MatrixElemental >       M_elmatMass;  //!< element mass matrix
-    boost::shared_ptr< MatrixElemental >       M_elmatStiff; //!< element stiffness matrix
-    boost::shared_ptr< MatrixElemental >       M_elmatGrad;  //!< element gradient matrix
-    boost::shared_ptr< MatrixElemental >       M_elmatDiv;   //!< element divergence matrix
+    boost::shared_ptr< MatrixElemental > M_elementalMassMatrix;       //!< element mass matrix
+    boost::shared_ptr< MatrixElemental > M_elementalStiffnessMatrix;  //!< element stiffness matrix
+    boost::shared_ptr< MatrixElemental > M_elementalGradientMatrix;   //!< element gradient matrix
+    boost::shared_ptr< MatrixElemental > M_elementalDivergenceMatrix; //!< element divergence matrix
 
     //! Unknowns at previous time step (see savesol() )
     solution_Type                      M_UPreviousTime;
     solution_Type                      M_U2PreviousTime;
 
     //! Right hand sides of the linear system i: "mass * M_Ui = M_rhsi"
-    std::vector<vector_Type>           M_rhs;
+    vectorPtrContainer_Type            M_rhs;
 
     //! Flux F(U) (in P1)
-    std::vector<vector_Type>           M_fluxVector;
-
-    //! diffFlux = dF(U)/dU (in P0)
-    std::vector< scalarVector_Type >   M_diffFlux;
+    vectorPtrContainer_Type            M_fluxVector;
 
     //! Source term S (in P1)
-    std::vector<vector_Type>           M_sourceVector;
+    vectorPtrContainer_Type            M_sourceVector;
+
+    //! diffFlux = dF(U)/dU (in P0)
+    scalarVectorContainer_Type         M_dFdUVector;
 
     //! diffSrc = dSource(U)/dU (in P0)
-    std::vector< scalarVector_Type >   M_diffSrc;
+    scalarVectorContainer_Type         M_dSdUVector;
 
     //! tridiagonal mass matrix
-    matrixPtr_Type                     M_massMatrix;
-
-    //! tridiagonal mass matrices multiplied by diffSrcij
-    std::vector<matrixPtr_Type >       M_massMatrixDiffSrc;
-
-    //! tridiagonal stiffness matrices multiplied by diffFluxij
-    std::vector<matrixPtr_Type >       M_stiffMatrixDiffFlux;
+    matrixPtr_Type                     M_homogeneousMassMatrix;
 
     //! tridiagonal gradient matrix
-    matrixPtr_Type                     M_gradMatrix;
+    matrixPtr_Type                     M_homogeneousGradientMatrix;
+
+    //! tridiagonal mass matrices multiplied by diffSrcij
+    matrixPtrContainer_Type            M_dSdUMassMatrix;
+
+    //! tridiagonal stiffness matrices multiplied by diffFluxij
+    matrixPtrContainer_Type            M_dFdUStiffnessMatrix;
 
     //! tridiagonal gradient matrices multiplied by diffFluxij
-    std::vector<matrixPtr_Type >       M_gradMatrixDiffFlux;
+    matrixPtrContainer_Type            M_dFdUGradientMatrix;
 
     //! tridiagonal divergence matrices multiplied by diffSrcij
-    std::vector<matrixPtr_Type >       M_divMatrixDiffSrc;
+    matrixPtrContainer_Type            M_dSdUDivergenceMatrix;
 
     //! The linear solver
-    boost::shared_ptr<linearSolver_Type> M_linearSolver;
+    linearSolverPtr_Type               M_linearSolver;
 
     container2D_Type                   M_bcDirLeft;  //! first -> U1, second ->U2
     container2D_Type                   M_bcDirRight; //
