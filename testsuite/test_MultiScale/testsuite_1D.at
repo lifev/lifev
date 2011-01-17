@@ -11,14 +11,14 @@
 ### TESTSUITE: MULTISCALE (1D) ####################################################################
 ###################################################################################################
 
-AT_SETUP([test_MultiScale (1D)])
+AT_SETUP([test_Multiscale (1D)])
 AT_KEYWORDS([test_MS 1D])
 AT_DATA([data],[[
 
 ]])
 AT_CHECK([ln -sf $abs_top_builddir/testsuite/data/mesh/inria/ Mesh &&
           ln -sf $abs_top_builddir/testsuite/data/physicalFunctions/ physicalFunctions &&
-		  ln -sf $abs_top_builddir/testsuite/data/MultiScaleData/ MultiScaleData &&
-		  mpirun -n 1 $abs_top_builddir/testsuite/test_MultiScale/test_MS -s 1 -f MultiScaleData/Test_1D.dat -c 2.722449289527601e-09],[0],[ignore],[ignore])
+		  ln -sf $abs_top_builddir/testsuite/data/MultiscaleDatabase/ MultiscaleDatabase &&
+		  mpirun -n 1 $abs_top_builddir/testsuite/test_Multiscale/test_MS -s 1 -f MultiscaleDatabase/Test_1D.dat -c 2.722449289527601e-09],[0],[ignore],[ignore])
 AT_CLEANUP
 

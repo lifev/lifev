@@ -26,7 +26,7 @@
 
 /*!
  *  @file
- *  @brief File containing the MultiScale Test
+ *  @brief File containing the Multiscale Test
  *
  *  @date 12-03-2009
  *  @author Cristiano Malossi <cristiano.malossi@epfl.ch>
@@ -34,14 +34,14 @@
  *  @maintainer Cristiano Malossi <cristiano.malossi@epfl.ch>
  *
  *
- *  This is a very general main file to run a MultiScale simulation.
+ *  This is a very general main file to run a Multiscale simulation.
  *
  *  Models available:
  *  <ol>
  *      <li> Fluid3D (Oseen)
  *      <li> FSI3D
  *      <li> 1D
- *      <li> MultiScale
+ *      <li> Multiscale
  *  </ol>
  *
  *  Couplings available:
@@ -117,7 +117,7 @@ main( Int argc, char** argv )
     comm.reset( new Epetra_SerialComm() );
 #endif
 
-    // Setup MultiScale problem
+    // Setup Multiscale problem
     bool exitFlag = EXIT_SUCCESS;
     MultiscaleSolver multiscale;
 
@@ -126,9 +126,9 @@ main( Int argc, char** argv )
 
     // Command line parameters
     GetPot commandLine( argc, argv );
-    std::string dataFile      = commandLine.follow( "./MultiScale.dat", 2, "-f", "--file" );
+    std::string dataFile      = commandLine.follow( "./Multiscale.dat", 2, "-f", "--file" );
     bool verbose              = commandLine.follow( false, 2, "-s", "--showme" );
-    std::string problemFolder = commandLine.follow( "MultiScale", 2, "-n", "--name" );
+    std::string problemFolder = commandLine.follow( "Output", 2, "-n", "--name" );
     Real externalResidual     = commandLine.follow( -1., 2, "-c", "--check" );
 
     // Create the problem folder

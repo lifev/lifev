@@ -11,14 +11,14 @@
 ### TESTSUITE: MULTISCALE (FSI 3D) ################################################################
 ###################################################################################################
 
-AT_SETUP([test_MultiScale (FSI3D)])
+AT_SETUP([test_Multiscale (FSI3D)])
 AT_KEYWORDS([test_MS FSI3D])
 AT_DATA([data],[[
 
 ]])
 AT_CHECK([ln -sf $abs_top_builddir/testsuite/data/mesh/inria/ Mesh &&
           ln -sf $abs_top_builddir/testsuite/data/physicalFunctions/ physicalFunctions &&
-		  ln -sf $abs_top_builddir/testsuite/data/MultiScaleData/ MultiScaleData &&
-		  mpirun -n 4 $abs_top_builddir/testsuite/test_MultiScale/test_MS -s 1 -f MultiScaleData/Test_FSI3D.dat -c 2.24265e-12],[0],[ignore],[ignore])
+		  ln -sf $abs_top_builddir/testsuite/data/MultiscaleDatabase/ MultiscaleDatabase &&
+		  mpirun -n 4 $abs_top_builddir/testsuite/test_Multiscale/test_MS -s 1 -f MultiscaleDatabase/Test_FSI3D.dat -c 2.24265e-12],[0],[ignore],[ignore])
 AT_CLEANUP
 
