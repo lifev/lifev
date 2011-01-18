@@ -149,9 +149,9 @@ int main(int argc, char** argv)
     geometryScale[1] = dataFile( "1D_Model/space_discretization/transform", 1., 1);
     geometryScale[2] = dataFile( "1D_Model/space_discretization/transform", 1., 2);
 
-    geometryRotate[0] = dataFile( "1D_Model/space_discretization/transform", 0., 3) * Pi / 180;
-    geometryRotate[1] = dataFile( "1D_Model/space_discretization/transform", 0., 4) * Pi / 180;
-    geometryRotate[2] = dataFile( "1D_Model/space_discretization/transform", 0., 5) * Pi / 180;
+    geometryRotate[0] = dataFile( "1D_Model/space_discretization/transform", 0., 3) * M_PI / 180;
+    geometryRotate[1] = dataFile( "1D_Model/space_discretization/transform", 0., 4) * M_PI / 180;
+    geometryRotate[2] = dataFile( "1D_Model/space_discretization/transform", 0., 5) * M_PI / 180;
 
     geometryTranslate[0] = dataFile( "1D_Model/space_discretization/transform", 0., 6);
     geometryTranslate[1] = dataFile( "1D_Model/space_discretization/transform", 0., 7);
