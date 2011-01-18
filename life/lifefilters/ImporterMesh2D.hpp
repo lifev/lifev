@@ -295,12 +295,12 @@ importerMesh2D( RegionMesh2D      & mesh, //importerMesh2D
 
         // Boundary condition marker
         pe->setMarker( ibc );
-        pe->setPoint( 1, mesh.point( p1 ) ); // set edge conn.
-        pe->setPoint( 2, mesh.point( p2 ) ); // set edge conn.
+        pe->setPoint( 0, mesh.point( p1 ) ); // set edge conn.
+        pe->setPoint( 1, mesh.point( p2 ) ); // set edge conn.
 
         if ( p2meshwanted )
         {
-        pe->setPoint( 2, mesh.point( ID( ib( 2, i ) ) ) );
+        pe->setPoint( 1, mesh.point( ID( ib( 2, i ) ) ) );
         }
 
         // fix bedge adjacency information
@@ -342,18 +342,18 @@ importerMesh2D( RegionMesh2D      & mesh, //importerMesh2D
         pf = &( mesh.addFace() ); // Only boundary faces
 
         pf->setMarker( entityFlag_Type( ibc ) );
-        pf->setPoint( 1, mesh.point( p1 ) ); // set face conn.
-        pf->setPoint( 2, mesh.point( p2 ) ); // set face conn.
-        pf->setPoint( 3, mesh.point( p3 ) ); // set face conn.
+        pf->setPoint( 0, mesh.point( p1 ) ); // set face conn.
+        pf->setPoint( 1, mesh.point( p2 ) ); // set face conn.
+        pf->setPoint( 2, mesh.point( p3 ) ); // set face conn.
 
         if ( p2meshwanted )
         {
             p1 = ID( iel( 3, i ) );
             p2 = ID( iel( 4, i ) );
             p3 = ID( iel( 5, i ) );
-            pf->setPoint( 4, mesh.point( p1 ) ); // set face conn.
-            pf->setPoint( 5, mesh.point( p2 ) ); // set face conn.
-            pf->setPoint( 6, mesh.point( p3 ) ); // set face conn.
+            pf->setPoint( 3, mesh.point( p1 ) ); // set face conn.
+            pf->setPoint( 4, mesh.point( p2 ) ); // set face conn.
+            pf->setPoint( 5, mesh.point( p3 ) ); // set face conn.
         }
     }
     std::cout << "Triangular Faces Created " << std::endl;
@@ -469,7 +469,6 @@ readGmshFile( RegionMesh2D<GeoShape, MC> & mesh,
         {
             __is >> __e[ __i ][ __p ];
             __e[ __i ][ __p ]  = itoii[ __e[ __i ][ __p ] - 1 ];
-            __e[ __i ][ __p ] += 1;
 
             ++__p;
         }
@@ -512,13 +511,13 @@ readGmshFile( RegionMesh2D<GeoShape, MC> & mesh,
         // triangular faces (linear)
         case 2:
         {
-            __isonboundary[ __e[ __i ][ 0 ] - 1 ] = true;
-            __isonboundary[ __e[ __i ][ 1 ] - 1 ] = true;
-            __isonboundary[ __e[ __i ][ 2 ] - 1 ] = true;
+            __isonboundary[ __e[ __i ][ 0 ] ] = true;
+            __isonboundary[ __e[ __i ][ 1 ] ] = true;
+            __isonboundary[ __e[ __i ][ 2 ] ] = true;
 
-            __whichboundary[ __e[ __i ][ 0 ] - 1 ] = __et[ __i ];
-            __whichboundary[ __e[ __i ][ 1 ] - 1 ] = __et[ __i ];
-            __whichboundary[ __e[ __i ][ 2 ] - 1 ] = __et[ __i ];
+            __whichboundary[ __e[ __i ][ 0 ] ] = __et[ __i ];
+            __whichboundary[ __e[ __i ][ 1 ] ] = __et[ __i ];
+            __whichboundary[ __e[ __i ][ 2 ] ] = __et[ __i ];
         }
         }
     }
@@ -555,8 +554,8 @@ readGmshFile( RegionMesh2D<GeoShape, MC> & mesh,
         {
             pe = &( mesh.addEdge( true ) );
             pe->setMarker( entityFlag_Type( __et[ __i ] ) );
-            pe->setPoint( 1, mesh.point( __e[ __i ][ 0 ] ) );
-            pe->setPoint( 2, mesh.point( __e[ __i ][ 1 ] ) );
+            pe->setPoint( 0, mesh.point( __e[ __i ][ 0 ] ) );
+            pe->setPoint( 1, mesh.point( __e[ __i ][ 1 ] ) );
         }
         break;
 
@@ -565,9 +564,9 @@ readGmshFile( RegionMesh2D<GeoShape, MC> & mesh,
         {
             pf = &( mesh.addFace() );
             pf->setMarker( entityFlag_Type( __et[ __i ] ) );
-            pf->setPoint( 1, mesh.point( __e[ __i ][ 0 ] ) );
-            pf->setPoint( 2, mesh.point( __e[ __i ][ 1 ] ) );
-            pf->setPoint( 3, mesh.point( __e[ __i ][ 2 ] ) );
+            pf->setPoint( 0, mesh.point( __e[ __i ][ 0 ] ) );
+            pf->setPoint( 1, mesh.point( __e[ __i ][ 1 ] ) );
+            pf->setPoint( 2, mesh.point( __e[ __i ][ 2 ] ) );
         }
         break;
 
@@ -576,10 +575,10 @@ readGmshFile( RegionMesh2D<GeoShape, MC> & mesh,
         {
             pf = &( mesh.addFace() );
             pf->setMarker( entityFlag_Type( __et[ __i ] ) );
-            pf->setPoint( 1, mesh.point( __e[ __i ][ 0 ] ) );
-            pf->setPoint( 2, mesh.point( __e[ __i ][ 1 ] ) );
-            pf->setPoint( 3, mesh.point( __e[ __i ][ 2 ] ) );
-            pf->setPoint( 4, mesh.point( __e[ __i ][ 3 ] ) );
+            pf->setPoint( 0, mesh.point( __e[ __i ][ 0 ] ) );
+            pf->setPoint( 1, mesh.point( __e[ __i ][ 1 ] ) );
+            pf->setPoint( 2, mesh.point( __e[ __i ][ 2 ] ) );
+            pf->setPoint( 3, mesh.point( __e[ __i ][ 3 ] ) );
         }
         break;
         }
@@ -675,18 +674,18 @@ readFreeFemFile( RegionMesh2D<GeoShape, MC> & mesh,
 
         _edge                             = makeBareEdge( i1, i2 );
         _check                            = _be.addIfNotThere( _edge.first );
-        edge_to_firstAdjacentElementIdentity[ _check.first ]  = __i + 1;
-        edge_to_firstAdjacentElementPosition[ _check.first ] = 1;
+        edge_to_firstAdjacentElementIdentity[ _check.first ]  = __i;
+        edge_to_firstAdjacentElementPosition[ _check.first ] = 0;
 
         _edge                             = makeBareEdge( i2, i3 );
         _check                            = _be.addIfNotThere( _edge.first );
-        edge_to_firstAdjacentElementIdentity[ _check.first ]  = __i + 1;
-        edge_to_firstAdjacentElementPosition[ _check.first ] = 2;
+        edge_to_firstAdjacentElementIdentity[ _check.first ]  = __i;
+        edge_to_firstAdjacentElementPosition[ _check.first ] = 1;
 
         _edge                             = makeBareEdge( i3, i1 );
         _check                            = _be.addIfNotThere( _edge.first );
-        edge_to_firstAdjacentElementIdentity[ _check.first ]  = __i + 1;
-        edge_to_firstAdjacentElementPosition[ _check.first ] = 3;
+        edge_to_firstAdjacentElementIdentity[ _check.first ]  = __i;
+        edge_to_firstAdjacentElementPosition[ _check.first ] = 2;
     }
 
     //    ( __triangle[ 3 * i + 2] > __triangle[ 3 * i + 1 ] )
@@ -745,11 +744,11 @@ readFreeFemFile( RegionMesh2D<GeoShape, MC> & mesh,
         pp->setMarker( __whichboundary[ __i ] );
         pp->x() = __x[ 2 * __i ];
         pp->y() = __x[ 2 * __i + 1 ];
-        pp->setId( __i + 1 );
-        pp->setLocalId( __i + 1 );
+        pp->setId( __i );
+        pp->setLocalId( __i );
 
-        mesh.localToGlobalNode().insert(std::make_pair( __i + 1 , __i + 1 ) );
-        mesh.globalToLocalNode().insert(std::make_pair( __i + 1 , __i + 1 ) );
+        mesh.localToGlobalNode().insert(std::make_pair( __i, __i ) );
+        mesh.globalToLocalNode().insert(std::make_pair( __i, __i ) );
     }
 
     // add the edges to the mesh
@@ -757,8 +756,8 @@ readFreeFemFile( RegionMesh2D<GeoShape, MC> & mesh,
     {
         pe = &( mesh.addEdge( true ) );
         pe->setMarker( entityFlag_Type( __edge_label[ __i ] ) );
-        pe->setPoint( 1, mesh.point( __edge_nodes[ 2 * __i ] ) );
-        pe->setPoint( 2, mesh.point( __edge_nodes[ 2 * __i + 1 ] ) );
+        pe->setPoint( 0, mesh.point( __edge_nodes[ 2 * __i ] ) );
+        pe->setPoint( 1, mesh.point( __edge_nodes[ 2 * __i + 1 ] ) );
         _edge = makeBareEdge( __edge_nodes[ 2 * __i ], __edge_nodes[ 2 * __i + 1 ] );
         UInt map_it( _be.id( _edge.first ) );
         pe->firstAdjacentElementIdentity() = edge_to_firstAdjacentElementIdentity[ map_it ];
@@ -769,12 +768,12 @@ readFreeFemFile( RegionMesh2D<GeoShape, MC> & mesh,
     for ( UInt __i = 0; __i < __nt; ++__i )
     {
         pf = &( mesh.addFace() );
-        pf->setId     ( __i + 1 );
-        pf->setLocalId( __i + 1);
+        pf->setId     ( __i );
+        pf->setLocalId( __i );
         pf->setMarker( entityFlag_Type( __triangle_label[ __i ] ) );
-        pf->setPoint( 1, mesh.point( __triangle_nodes[ 3 * __i ] ) );
-        pf->setPoint( 2, mesh.point( __triangle_nodes[ 3 * __i + 1 ] ) );
-        pf->setPoint( 3, mesh.point( __triangle_nodes[ 3 * __i + 2 ] ) );
+        pf->setPoint( 0, mesh.point( __triangle_nodes[ 3 * __i ] ) );
+        pf->setPoint( 1, mesh.point( __triangle_nodes[ 3 * __i + 1 ] ) );
+        pf->setPoint( 2, mesh.point( __triangle_nodes[ 3 * __i + 2 ] ) );
     }
 
     return true;
