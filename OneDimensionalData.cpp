@@ -206,14 +206,14 @@ OneDimensionalData::setup( const GetPot& dataFile, const std::string& section )
 
     // Select a law for the coefficients
     std::map< string, OneD_distributionLaw > distributionLawMap;
-    distributionLawMap["none"]      = none;
+    distributionLawMap["uniform"]   = uniform;
     distributionLawMap["linear"]    = linear;
     distributionLawMap["pointwise"] = pointwise;
 
-    OneD_distributionLaw distributionLaw = distributionLawMap[ dataFile( ( section + "/PhysicalParameters/DistributionLaw" ).data(), "none" ) ];
+    OneD_distributionLaw distributionLaw = distributionLawMap[ dataFile( ( section + "/PhysicalParameters/DistributionLaw" ).data(), "uniform" ) ];
     switch ( distributionLaw )
     {
-    case none:
+    case uniform:
 
         for ( UInt i = 0; i < M_mesh->numPoints() ; ++i )
         {
@@ -336,17 +336,17 @@ OneDimensionalData::oldStyleSetup( const GetPot& dataFile, const std::string& se
     //std::cout << " 1D- Mesh elements:                            " << M_mesh->numElements() << std::endl;
 
     // Miscellaneous
-    M_postprocessingDirectory= dataFile( ( section + "/miscellaneous/post_dir"                       ).data(), "./" );
-    M_postprocessingFile     = dataFile( ( section + "/miscellaneous/post_file"                      ).data(), "sol" );
-    M_verbose                = dataFile( ( section + "/miscellaneous/verbose"                        ).data(), 1 );
-    M_inertialWall          = dataFile( ( section + "/miscellaneous/inertial_wall"                  ).data(), false );
-    M_viscoelasticWall      = dataFile( ( section + "/miscellaneous/viscoelastic_wall"              ).data(), false );
-    M_linearizeStringModel = dataFile( ( section + "/miscellaneous/linearize_string_model"         ).data(), true );
-    M_linearizeEquations    = dataFile( ( section + "/miscellaneous/linearize_equations"            ).data(), false );
-    M_longitudinalWall      = dataFile( ( section + "/miscellaneous/longitudinal_wall"              ).data(), false );
-    M_fluxSecondDer        = dataFile( ( section + "/miscellaneous/compute_flux_second_derivative" ).data(), false );
-    M_dP_dt_steps            = dataFile( ( section + "/miscellaneous/pressure_derivative_steps"      ).data(), 1 );
-    M_CFLmax                 = dataFile( ( section + "/miscellaneous/CFLmax"                         ).data(), std::sqrt(3)/3. );
+    M_postprocessingDirectory = dataFile( ( section + "/miscellaneous/post_dir"                       ).data(), "./" );
+    M_postprocessingFile      = dataFile( ( section + "/miscellaneous/post_file"                      ).data(), "sol" );
+    M_verbose                 = dataFile( ( section + "/miscellaneous/verbose"                        ).data(), 1 );
+    M_inertialWall            = dataFile( ( section + "/miscellaneous/inertial_wall"                  ).data(), false );
+    M_viscoelasticWall        = dataFile( ( section + "/miscellaneous/viscoelastic_wall"              ).data(), false );
+    M_linearizeStringModel    = dataFile( ( section + "/miscellaneous/linearize_string_model"         ).data(), true );
+    M_linearizeEquations      = dataFile( ( section + "/miscellaneous/linearize_equations"            ).data(), false );
+    M_longitudinalWall        = dataFile( ( section + "/miscellaneous/longitudinal_wall"              ).data(), false );
+    M_fluxSecondDer           = dataFile( ( section + "/miscellaneous/compute_flux_second_derivative" ).data(), false );
+    M_dP_dt_steps             = dataFile( ( section + "/miscellaneous/pressure_derivative_steps"      ).data(), 1 );
+    M_CFLmax                  = dataFile( ( section + "/miscellaneous/CFLmax"                         ).data(), std::sqrt(3)/3. );
 
     if ( M_CFLmax > std::sqrt(3)/3. )
         std::cout << "!!! WARNING: CFLmax greater than the theoretical value (see MOX21, eq. 1.47) - CONVERGENCE NOT GUARANTEED  !!!" << std::endl;
