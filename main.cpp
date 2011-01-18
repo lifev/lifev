@@ -113,8 +113,8 @@ main( Int argc, char** argv )
     MyGlobalIElementsB[0] = 0;
     MyGlobalIElementsB[1] = 1;
 
-    MapEpetra mapA( 3, 3, &MyGlobalIElementsA[0], 0, comm);
-    MapEpetra mapB( 2, 2, &MyGlobalIElementsB[0], 0, comm);
+    MapEpetra mapA( 3, 3, &MyGlobalIElementsA[0], comm);
+    MapEpetra mapB( 2, 2, &MyGlobalIElementsB[0], comm);
 
     Vector_ptr A1, B1, A2, B2, A3, B3, A4, B4;
     A1.reset( new Vector( mapA, Unique ) );
