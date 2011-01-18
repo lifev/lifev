@@ -121,8 +121,6 @@ public:
     /** @name Geometric Element Container Types
      *  @ingroup public_types
      *  Typedefs for STL compliant containers of mesh geometric entities.
-     *
-     *  I Use VectorSimple container for addressing from 1.
      *  @{
      */
 
@@ -1067,7 +1065,7 @@ public:
      *  the normal of the edge appears INWARD with respect to that element.
      *
      *  @param edgeId Id of a given edge.
-     *  @param Pos Position equal to 1 or 2 indicates first or second adjacent Element.
+     *  @param Pos Position equal to 0 or 1 indicates first or second adjacent Element.
      *  @return Edge ID given.
      */
     UInt edgeElement( UInt const edgeId, UInt const Pos ) const;
@@ -1083,7 +1081,7 @@ public:
      *  the normal of the edge appears INWARD with respect to that element.
      *
      *  @param f Reference of a given edge.
-     *  @param Pos Position equal to 1 or 2 indicates first or second adjacent Element.
+     *  @param Pos Position equal to 0 or 1 indicates first or second adjacent Element.
      *  @return Edge ID given.
      */
     UInt edgeElement( EdgeType const & f, UInt const Pos ) const;
@@ -1538,7 +1536,7 @@ inline
 typename RegionMesh2D<GEOSHAPE, MC>::FaceType &
 RegionMesh2D<GEOSHAPE, MC>::setFace( FaceType const & v, UInt const pos )
 {
-    ASSERT_PRE( pos <= faceList.capacity() , "position requested exceed capacity" <<
+    ASSERT_PRE( pos < faceList.capacity() , "position requested exceed capacity" <<
                 pos << " " << faceList.capacity() ) ;
     faceList( pos ) = v;
     faceList( pos ).setId(pos);
@@ -1567,7 +1565,7 @@ inline
 typename RegionMesh2D<GEOSHAPE, MC>::FaceType const &
 RegionMesh2D<GEOSHAPE, MC>::face( UInt const i ) const
 {
-    ASSERT_BD( i > 0 && i <= faceList.size() ) ;
+    ASSERT_BD( i < faceList.size() ) ;
     return faceList( i );
 }
 
@@ -1576,7 +1574,7 @@ inline
 typename RegionMesh2D<GEOSHAPE, MC>::FaceType &
 RegionMesh2D<GEOSHAPE, MC>::face( UInt const i )
 {
-    ASSERT_BD( i > 0 && i <= faceList.size() ) ;
+    ASSERT_BD( i < faceList.size() ) ;
     return faceList( i );
 }
 
@@ -1668,7 +1666,7 @@ inline
 typename RegionMesh2D<GEOSHAPE, MC>::EdgeType &
 RegionMesh2D<GEOSHAPE, MC>::setEdge( EdgeType const & f, UInt position, bool const boundary )
 {
-    ASSERT_PRE( position <= edgeList.capacity(), "Edge list size exceeded" <<
+    ASSERT_PRE( position < edgeList.capacity(), "Edge list size exceeded" <<
                 position << " " << edgeList.capacity() ) ;
     edgeList( position ) = f;
     edgeList( position ).setId( position );
@@ -1676,7 +1674,7 @@ RegionMesh2D<GEOSHAPE, MC>::setEdge( EdgeType const & f, UInt position, bool con
 
     if ( boundary )
     {
-        ASSERT_PRE( position <= _bEdges.capacity(), "Boundary Edge list size exceeded" <<
+        ASSERT_PRE( position < _bEdges.capacity(), "Boundary Edge list size exceeded" <<
                     _bEdges.size() << " " << bEdges.capacity() ) ;
         _bEdges.push_back( &( edgeList( position ) ) );
     }
@@ -1698,7 +1696,7 @@ inline
 typename RegionMesh2D<GEOSHAPE, MC>::EdgeType const &
 RegionMesh2D<GEOSHAPE, MC>::edge( UInt const i ) const
 {
-    ASSERT_BD( i > 0 && i <= edgeList.size() ) ;
+    ASSERT_BD( i < edgeList.size() ) ;
     return edgeList( i );
 }
 
@@ -1707,8 +1705,8 @@ inline
 typename RegionMesh2D<GEOSHAPE, MC>::EdgeType &
 RegionMesh2D<GEOSHAPE, MC>::edge( UInt const i )
 {
-    if ( i <= 0 || i > edgeList.size() ) std::cout<< "i: " << i << "edgeList.size(): " <<edgeList.size()<<std::endl;
-    ASSERT_BD( i > 0 && i <= edgeList.size() ) ;
+    if ( i >= edgeList.size() ) std::cout<< "i: " << i << "edgeList.size(): " <<edgeList.size()<<std::endl;
+    ASSERT_BD( i < edgeList.size() ) ;
     return edgeList( i );
 }
 
@@ -1720,12 +1718,12 @@ RegionMesh2D<GEOSHAPE, MC>::boundaryEdge( UInt const i ) const
 {
 #ifdef NOT_BDATA_FIRST
     ASSERT_PRE( _bEdges.size() != 0 " Boundary Edges not Stored" ) ;
-    ASSERT_BD( i > 0 && i <= _bEdges.size() ) ;
+    ASSERT_BD( i < _bEdges.size() ) ;
     return *( _bEdges( i ) );
 #else
 
     ASSERT_PRE( edgeList.size() != 0, "Boundary Edges not stored" ) ;
-    ASSERT_BD( i > 0 && i <= edgeList.size() ) ;
+    ASSERT_BD( i < edgeList.size() ) ;
     return edgeList( i );
 #endif
 }
@@ -1737,12 +1735,12 @@ RegionMesh2D<GEOSHAPE, MC>::boundaryEdge( UInt const i )
 {
 #ifdef NOT_BDATA_FIRST
     ASSERT_PRE( _bEdges.size() != 0 " Boundary Edges not Stored" ) ;
-    ASSERT_BD( i > 0 && i <= _bEdges.size() ) ;
+    ASSERT_BD( i < _bEdges.size() ) ;
     return *( _bEdges( i ) );
 #else
 
     ASSERT_PRE( edgeList.size() != 0, "Boundary Edges not stored" ) ;
-    ASSERT_BD( i > 0 && i <= edgeList.size() ) ;
+    ASSERT_BD( i < edgeList.size() ) ;
     return edgeList( i );
 #endif
 }
@@ -1792,14 +1790,14 @@ RegionMesh2D<GEOSHAPE, MC>::isBoundaryEdge( EdgeType const & e ) const
 #ifdef NOT_BDATA_FIRST
     //ASSERT(false,"In this version Boundary edges must be stored first");
     bool isboundary = true;
-    for ( UInt k = 1; k <= EdgeType::S_numVertices; ++k )
+    for ( UInt k = 0; k < EdgeType::S_numVertices; ++k )
     {
         isboundary = isboundary & e.point( k ).boundary();
     }
     return isboundary;
 #else
 
-    return e.id() <= M_numBEdges;
+    return e.id() < M_numBEdges;
 #endif
 }
 
@@ -1824,7 +1822,7 @@ inline
 UInt
 RegionMesh2D<GEOSHAPE, MC>::edgeElement( UInt const i, UInt const Pos ) const
 {
-    ASSERT_PRE( i <= edgeList.size(), "Not enough faces stored" ) ;
+    ASSERT_PRE( i < edgeList.size(), "Not enough faces stored" ) ;
     ASSERT_BD( i > 0 ) ;
     return edgeElement( edge( i ), Pos );
 };
@@ -1835,8 +1833,8 @@ UInt
 RegionMesh2D<GEOSHAPE, MC>::edgeElement( EdgeType const & f, UInt const Pos ) const
 {
     ASSERT_BD( ! edgeList.empty() ) ;
-    ASSERT_PRE( Pos == 1 || Pos == 2 , "Wrong position (1 or 2)" ) ;
-    if ( Pos == 1 )
+    ASSERT_PRE( Pos <= 1 , "Wrong position (0 or 1)" ) ;
+    if ( Pos == 0 )
     {
         return f.firstAdjacentElementIdentity();
     }
@@ -1934,7 +1932,7 @@ typename RegionMesh2D<GEOSHAPE, MC>::point_Type &
 RegionMesh2D<GEOSHAPE, MC>::setPoint
 ( point_Type const & p, UInt position, bool const boundary, bool const vertex )
 {
-    ASSERT_PRE( position <= pointList.capacity(), "Position  exceed lpoint list capacity" <<
+    ASSERT_PRE( position < pointList.capacity(), "Position  exceed lpoint list capacity" <<
                 position << " " << pointList.capacity() ) ;
     bool found( false );
     pointList( position ) = p;
@@ -1975,7 +1973,7 @@ inline
 typename RegionMesh2D<GEOSHAPE, MC>::point_Type const &
 RegionMesh2D<GEOSHAPE, MC>::point( UInt const i ) const
 {
-    ASSERT_BD( i > 0 && i <= pointList.size() ) ;
+    ASSERT_BD( i < pointList.size() ) ;
     return pointList( i );
 }
 
@@ -1984,7 +1982,7 @@ inline
 typename RegionMesh2D<GEOSHAPE, MC>::point_Type &
 RegionMesh2D<GEOSHAPE, MC>::point( UInt const i )
 {
-    ASSERT_BD( i > 0 && i <= pointList.size() ) ;
+    ASSERT_BD( i < pointList.size() ) ;
     return pointList( i );
 }
 
@@ -1995,7 +1993,7 @@ typename RegionMesh2D<GEOSHAPE, MC>::point_Type const &
 RegionMesh2D<GEOSHAPE, MC>::boundaryPoint( UInt const i ) const
 {
     ASSERT_PRE( _bPoints.size() != 0, " Boundary Points not Stored" ) ;
-    ASSERT_BD( i > 0 && i <= _bPoints.size() ) ;
+    ASSERT_BD( i < _bPoints.size() ) ;
     return *( _bPoints( i ) );
 }
 
@@ -2005,7 +2003,7 @@ typename RegionMesh2D<GEOSHAPE, MC>::point_Type &
 RegionMesh2D<GEOSHAPE, MC>::boundaryPoint( UInt const i )
 {
     ASSERT_PRE( _bPoints.size() != 0, " Boundary Points not Stored" ) ;
-    ASSERT_BD( i > 0 && i <= _bPoints.size() ) ;
+    ASSERT_BD( i < _bPoints.size() ) ;
     return *( _bPoints( i ) );
 }
 
@@ -2077,7 +2075,7 @@ inline
 bool
 RegionMesh2D<GEOSHAPE, MC>::isVertex( point_Type const & p ) const
 {
-    return p.id() <= M_numVertices;
+    return p.id() < M_numVertices;
 }
 
 template <typename GEOSHAPE, typename MC>
@@ -2085,7 +2083,7 @@ inline
 bool
 RegionMesh2D<GEOSHAPE, MC>::isVertex( UInt const & id ) const
 {
-    return id <= M_numVertices;
+    return id < M_numVertices;
 }
 
 
@@ -2127,11 +2125,11 @@ UInt
 RegionMesh2D<GEOSHAPE, MC>::localEdgeId( const FaceType & ifac, UInt const locE ) const
 {
     ASSERT_PRE( !_FToE.empty(), "Face to Edges array not  set" );
-    ASSERT_BD( locE > 0 && locE <= FaceType::S_numLocalEdges );
+    ASSERT_BD( locE < FaceType::S_numLocalEdges );
     std::pair<BareEdge, bool> it;
     UInt i1, i2;
-    i1 = GEOSHAPE::edgeToPoint( locE, 1 );
-    i2 = GEOSHAPE::edgeToPoint( locE, 2 );
+    i1 = GEOSHAPE::edgeToPoint( locE, 0 );
+    i2 = GEOSHAPE::edgeToPoint( locE, 1 );
     i1 = ( ifac.point( i1 ) ).id();
     i2 = ( ifac.point( i2 ) ).id();
     it = makeBareEdge( i1, i2 );
@@ -2143,7 +2141,7 @@ inline
 UInt
 RegionMesh2D<GEOSHAPE, MC>::localEdgeId( UInt const facId, UInt const locE ) const
 {
-    ASSERT_BD( facId > 0 && facId <= M_numFaces );
+    ASSERT_BD( facId < M_numFaces );
     return localEdgeId( face( facId ), locE );
 }
 
@@ -2165,8 +2163,8 @@ RegionMesh2D<GEOSHAPE, MC>::localEdgeId( UInt const facId, UInt const locE )
 const
 {
     ASSERT_PRE( !_FToE.empty(), "Face to Edges array not  set" );
-    ASSERT_BD( facId > 0 && facId <= M_numFaces );
-    ASSERT_BD( locE > 0 && locE <= FaceType::S_numLocalEdges );
+    ASSERT_BD( facId < M_numFaces );
+    ASSERT_BD( locE < FaceType::S_numLocalEdges );
     return _FToE( locE, facId );
 }
 
@@ -2176,7 +2174,6 @@ template <typename GEOSHAPE, typename MC>
 void
 RegionMesh2D<GEOSHAPE, MC>::updateElementEdges( bool ce, UInt ee )
 {
-//  std::cout<< "locEdge: " << localEdgeId( 1, 3 )<< std::endl;
     std::cout << "     Updating element edges ... " << std::flush;
 
     ASSERT0( ! ce || M_numBEdges > 0, std::stringstream( std::string("Boundary Edges Must have been set") +
@@ -2235,8 +2232,8 @@ RegionMesh2D<GEOSHAPE, MC>::updateElementEdges( bool ce, UInt ee )
         std::pair<UInt, bool> _check;
         for ( UInt j = 0; j < edgeList.size(); ++j )
         {
-            i1 = ( edgeList[ j ].point( 1 ) ).localId();
-            i2 = ( edgeList[ j ].point( 2 ) ).localId();
+            i1 = ( edgeList[ j ].point( 0 ) ).localId();
+            i2 = ( edgeList[ j ].point( 1 ) ).localId();
             _edge = makeBareEdge( i1, i2);
             _check = _be.addIfNotThere( _edge.first );
         }
@@ -2246,10 +2243,10 @@ RegionMesh2D<GEOSHAPE, MC>::updateElementEdges( bool ce, UInt ee )
             iface != faceList.end(); ++iface )
     {
         fid = iface->localId();
-        for ( UInt j = 1; j <= numLocalEdges(); j++ )
+        for ( UInt j = 0; j < numLocalEdges(); j++ )
         {
-            i1 = ele.edgeToPoint( j, 1 );
-            i2 = ele.edgeToPoint( j, 2 );
+            i1 = ele.edgeToPoint( j, 0 );
+            i2 = ele.edgeToPoint( j, 1 );
             i1 = ( iface->point( i1 ) ).localId();
             i2 = ( iface->point( i2 ) ).localId();
             _edge = makeBareEdge( i1, i2);
@@ -2260,8 +2257,7 @@ RegionMesh2D<GEOSHAPE, MC>::updateElementEdges( bool ce, UInt ee )
                 if ( e.second )
                 {
                     // a new face It must be internal.
-                    for ( UInt k = 1; k <= EdgeType::S_numPoints; ++k )//
-                        //iface->point( ele.edgeToPoint( j, k ) );
+                    for ( UInt k = 0; k < EdgeType::S_numPoints; ++k )
                         edg.setPoint( k, iface->point( ele.edgeToPoint( j, k ) ) );
                     edg.firstAdjacentElementIdentity()  = fid;
                     edg.firstAdjacentElementPosition() = j;
@@ -2407,8 +2403,7 @@ RegionMesh2D<GEOSHAPE, MC>::check( int /*level*/, bool const fix, bool const ver
         }
     }
     UInt badid = 0;
-    for ( UInt i = 1; i <= storedPoints(); ++i )
-        //for (UInt i=1; i<= _numVertices; ++i)// PERICOLOSISSIMO DOMANDARE ALEX
+    for ( UInt i = 0; i < storedPoints(); ++i )
         if ( point( i ).id() != i )
             ++badid;
     if ( badid != 0 )
@@ -2418,7 +2413,7 @@ RegionMesh2D<GEOSHAPE, MC>::check( int /*level*/, bool const fix, bool const ver
     }
 
     badid = 0;
-    for ( UInt i = 1; i <= storedEdges(); ++i )
+    for ( UInt i = 0; i < storedEdges(); ++i )
         if ( edge( i ).id() != i )
             ++badid;
     if ( badid != 0 )
@@ -2428,7 +2423,7 @@ RegionMesh2D<GEOSHAPE, MC>::check( int /*level*/, bool const fix, bool const ver
     }
 
     badid = 0;
-    for ( UInt i = 1; i <= storedFaces(); ++i )
+    for ( UInt i = 0; i < storedFaces(); ++i )
         if ( face( i ).id() != i )
             ++badid;
     if ( badid != 0 )

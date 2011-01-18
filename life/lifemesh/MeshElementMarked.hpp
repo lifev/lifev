@@ -410,39 +410,19 @@ MeshElementMarked0D<MC>::operator = ( MeshElementMarked0D<MC> const & Element )
 // ==========================================
 // Constructor & Destructor
 // ==========================================
-#ifdef TWODIM
-template <typename GeoShape, typename MC>
-MeshElementMarked1D<GeoShape, MC>::MeshElementMarked1D( ID Identity ) :
-        MeshElement<GeoShape, MeshElementMarked0D<MC> >( Identity ),
-        MC::EdgeMarker (),
-        M_firstAdjacentElementIdentity    ( 0 ),
-        M_secondAdjacentElementIdentity   ( 0 ),
-        M_firstAdjacentElementPosition    ( 0 ),
-        M_secondAdjacentElementPosition   ( 0 )
-#else
+
 template <typename GeoShape, typename MC>
 MeshElementMarked1D<GeoShape, MC>::MeshElementMarked1D( ID identity ) :
         MeshElement<GeoShape, MeshElementMarked0D<MC> >( identity )
-#endif
 {
     ASSERT_PRE( GeoShape::S_nDimensions == 1 , "geoElement2D with incorrect GeoShape" ) ;
 }
 
-#ifdef TWODIM
-template <typename GeoShape, typename MC>
-MeshElementMarked1D<GeoShape, MC>::MeshElementMarked1D( const MeshElementMarked1D<GeoShape, MC>& Element ) :
-        MeshElement<GeoShape, MeshElementMarked0D<MC> >( Element ),
-        MC::EdgeMarker                    ( Element ),
-        M_firstAdjacentElementIdentity    ( Element.M_firstAdjacentElementIdentity),
-        M_secondAdjacentElementIdentity   ( Element.M_secondAdjacentElementIdentity),
-        M_firstAdjacentElementPosition    ( Element.M_firstAdjacentElementPosition ),
-        M_secondAdjacentElementPosition   ( Element.M_secondAdjacentElementPosition )
-#else
+
 template <typename GeoShape, typename MC>
 MeshElementMarked1D<GeoShape, MC>::MeshElementMarked1D( const MeshElementMarked1D<GeoShape, MC>& Element ) :
         MeshElement<GeoShape, MeshElementMarked0D<MC> >( Element ),
         MC::EdgeMarker                    ( Element )
-#endif
 {
     ASSERT_PRE( GeoShape::S_nDimensions == 1 , "geoElement2D with incorrect GeoShape" ) ;
 }
@@ -458,29 +438,17 @@ MeshElementMarked1D<GeoShape, MC>::MeshElementMarked1D( const MeshElementMarked1
 template <typename GeoShape, typename MC>
 const UInt MeshElementMarked2D<GeoShape, MC>::S_numLocalEdges;
 
-#ifdef TWODIM
-template <typename GeoShape, typename MC>
-MeshElementMarked2D<GeoShape, MC>::MeshElementMarked2D( ID identity ) :
-        MeshElement<GeoShape, MeshElementMarked0D<MC> >( identity )
-#else
 template <typename GeoShape, typename MC>
 MeshElementMarked2D<GeoShape, MC>::MeshElementMarked2D( ID identity ) :
         MeshElement<GeoShape, MeshElementMarked0D<MC> >( identity ),
-        M_firstAdjacentElementIdentity   ( 0 ),
-        M_secondAdjacentElementIdentity  ( 0 ),
-        M_firstAdjacentElementPosition   ( 0 ),
-        M_secondAdjacentElementPosition  ( 0 )
-#endif
+        M_firstAdjacentElementIdentity   ( NotAnId ),
+        M_secondAdjacentElementIdentity  ( NotAnId ),
+        M_firstAdjacentElementPosition   ( NotAnId ),
+        M_secondAdjacentElementPosition  ( NotAnId )
 {
     ASSERT_PRE( GeoShape::S_nDimensions == 2 , "geoElement2D with incorrect GeoShape" ) ;
 }
 
-#ifdef TWODIM
-template <typename GeoShape, typename MC>
-MeshElementMarked2D<GeoShape, MC>::MeshElementMarked2D( const MeshElementMarked2D<GeoShape, MC>& Element ) :
-        MeshElement<GeoShape, MeshElementMarked0D<MC> >( Element ),
-        MC::FaceMarker                    ( Element )
-#else
 template <typename GeoShape, typename MC>
 MeshElementMarked2D<GeoShape, MC>::MeshElementMarked2D( const MeshElementMarked2D<GeoShape, MC>& Element ) :
         MeshElement<GeoShape, MeshElementMarked0D<MC> >( Element ),
@@ -489,7 +457,6 @@ MeshElementMarked2D<GeoShape, MC>::MeshElementMarked2D( const MeshElementMarked2
         M_secondAdjacentElementIdentity   ( Element.M_secondAdjacentElementIdentity),
         M_firstAdjacentElementPosition    ( Element.M_firstAdjacentElementPosition ),
         M_secondAdjacentElementPosition   ( Element.M_secondAdjacentElementPosition )
-#endif
 {
     ASSERT_PRE( GeoShape::S_nDimensions == 2 , "geoElement2D with incorrect GeoShape" ) ;
 }

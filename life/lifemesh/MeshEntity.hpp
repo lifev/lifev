@@ -68,11 +68,11 @@ public:
 
     //! Empty Constructor
     /*!
-       Using this constructor, both identifiers are set to 0.
+       Using this constructor, both identifiers are set to NotAnId.
      */
     MeshEntity():
-            M_id( 0 ),
-            M_localId( 0 )
+            M_id( NotAnId ),
+            M_localId( NotAnId )
     {};
 
     //! Copy Constructor

@@ -86,9 +86,9 @@ LinearTriangle::edgeToPoint( ID const& iEdge, ID const& jPoint )
     {
         1, 2, 2, 3, 3, 1
     };
-    ASSERT_BD( jPoint > 0 && jPoint < 3 ) ;
-    ASSERT_BD( iEdge > 0 && iEdge <= S_numEdges ) ;
-    return _edgeToPoint[ 2 * iEdge + jPoint - 3 ];
+    ASSERT_BD( jPoint < 2 ) ;
+    ASSERT_BD( iEdge < S_numEdges ) ;
+    return _edgeToPoint[ 2 * iEdge + jPoint ] - 1;
 }
 
 
@@ -110,9 +110,9 @@ QuadraticTriangle::edgeToPoint( ID const& iEdge, ID const& jPoint )
     {
         1, 2, 4, 2, 3, 5, 3, 1, 6
     };
-    ASSERT_BD( jPoint > 0 && jPoint < 4 ) ;
-    ASSERT_BD( iEdge > 0 && iEdge <= S_numEdges ) ;
-    return _edgeToPoint[ 3 * iEdge + jPoint - 4 ];
+    ASSERT_BD( jPoint < 3 ) ;
+    ASSERT_BD( iEdge < S_numEdges ) ;
+    return _edgeToPoint[ 3 * iEdge + jPoint ] - 1;
 }
 
 
@@ -134,9 +134,9 @@ LinearQuad::edgeToPoint( ID const& iEdge, ID const& jPoint )
     {
         1, 2, 2, 3, 3, 4, 4, 1
     };
-    ASSERT_BD( jPoint > 0 && jPoint < 3 ) ;
-    ASSERT_BD( iEdge > 0 && iEdge <= S_numEdges ) ;
-    return _edgeToPoint[ 2 * iEdge + jPoint - 3 ];
+    ASSERT_BD( jPoint < 2 ) ;
+    ASSERT_BD( iEdge < S_numEdges ) ;
+    return _edgeToPoint[ 2 * iEdge + jPoint] - 1;
 }
 
 
@@ -158,9 +158,9 @@ QuadraticQuad::edgeToPoint( ID const& iEdge, ID const& jPoint )
     {
         1, 2, 5, 2, 3, 6, 3, 4, 7, 4, 1, 8
     };
-    ASSERT_BD( jPoint > 0 && jPoint < 4 ) ;
-    ASSERT_BD( iEdge > 0 && iEdge <= S_numEdges ) ;
-    return _edgeToPoint[ 3 * iEdge + jPoint - 4 ];
+    ASSERT_BD( jPoint < 3 ) ;
+    ASSERT_BD( iEdge < S_numEdges ) ;
+    return _edgeToPoint[ 3 * iEdge + jPoint ] - 1;
 }
 
 
@@ -185,9 +185,9 @@ LinearTetra::edgeToPoint( ID const& iEdge, ID const& jPoint )
     {
         1, 2, 2, 3, 3, 1, 1, 4, 2, 4, 3, 4
     };
-    ASSERT_BD( jPoint > 0 && jPoint < 3 ) ;
-    ASSERT_BD( iEdge > 0 && iEdge <= S_numEdges ) ;
-    return _edgeToPoint[ 2 * iEdge + jPoint - 3 ];
+    ASSERT_BD( jPoint < 2 ) ;
+    ASSERT_BD( iEdge < S_numEdges ) ;
+    return _edgeToPoint[ 2 * iEdge + jPoint ] - 1;
 }
 
 ID
@@ -197,12 +197,10 @@ LinearTetra::faceToPoint( ID const& iFace, ID const& jPoint )
     static const ID _faceToPoint[ 3 * S_numFaces ] =
     {
         1, 3, 2, 1, 2, 4, 2, 3, 4, 1, 4, 3
-    }
-    ; // AV - November 2000: fixed a little bug
-    //  {1,3,2, 1,2,4, 2,3,4, 3,1,4};
-    ASSERT_BD( jPoint > 0 && jPoint < 4 ) ;
-    ASSERT_BD( iFace > 0 && iFace <= S_numFaces ) ;
-    return _faceToPoint[ 3 * iFace + jPoint - 4 ];
+    };
+    ASSERT_BD( jPoint < 3 ) ;
+    ASSERT_BD( iFace < S_numFaces ) ;
+    return _faceToPoint[ 3 * iFace + jPoint ] -1 ;
 }
 
 std::pair<ID, bool>
@@ -213,15 +211,16 @@ LinearTetra::faceToEdge( ID const& iFace, ID const& jEdge )
     {
         3, 2, 1, 1, 5, 4, 2, 6, 5, 4, 6, 3
     };
+
     static const bool _orient[ 3 * S_numFaces ] =
     {
         0, 0, 0, 1, 1, 0, 1, 1, 0, 1, 0, 1
     };
 
-    ASSERT_BD( jEdge > 0 && jEdge < 4 ) ;
-    ASSERT_BD( iFace > 0 && iFace <= S_numFaces ) ;
+    ASSERT_BD( jEdge < 3 ) ;
+    ASSERT_BD( iFace < S_numFaces ) ;
 
-    return std::make_pair( _faceToEdge[ 3 * iFace + jEdge - 4 ], _orient[ 3 * iFace + jEdge - 4 ] );
+    return std::make_pair( _faceToEdge[ 3 * iFace + jEdge ] - 1, _orient[ 3 * iFace + jEdge ] );
 }
 
 
@@ -248,9 +247,9 @@ LinearTetraBubble::edgeToPoint( ID const& iEdge, ID const& jPoint )
     {
         1, 2, 2, 3, 3, 1, 1, 4, 2, 4, 3, 4
     };
-    ASSERT_BD( jPoint > 0 && jPoint < 3 ) ;
-    ASSERT_BD( iEdge > 0 && iEdge <= S_numEdges ) ;
-    return _edgeToPoint[ 2 * iEdge + jPoint - 3 ];
+    ASSERT_BD( jPoint < 2 ) ;
+    ASSERT_BD( iEdge < S_numEdges ) ;
+    return _edgeToPoint[ 2 * iEdge + jPoint ] - 1;
 }
 
 ID
@@ -263,9 +262,9 @@ LinearTetraBubble::faceToPoint( ID const& iFace, ID const& jPoint )
     }
     ; // AV - November 2000: fixed a little bug
     //  {1,3,2, 1,2,4, 2,3,4, 3,1,4};
-    ASSERT_BD( jPoint > 0 && jPoint < 4 ) ;
-    ASSERT_BD( iFace > 0 && iFace <= S_numFaces ) ;
-    return _faceToPoint[ 3 * iFace + jPoint - 4 ];
+    ASSERT_BD( jPoint < 3 ) ;
+    ASSERT_BD( iFace < S_numFaces ) ;
+    return _faceToPoint[ 3 * iFace + jPoint ] - 1;
 }
 
 std::pair<ID, bool>
@@ -281,10 +280,10 @@ LinearTetraBubble::faceToEdge( ID const& iFace, ID const& jEdge )
         0, 0, 0, 1, 1, 0, 1, 1, 0, 1, 0, 1
     };
 
-    ASSERT_BD( jEdge > 0 && jEdge < 4 ) ;
-    ASSERT_BD( iFace > 0 && iFace <= S_numFaces ) ;
+    ASSERT_BD( jEdge < 3 ) ;
+    ASSERT_BD( iFace < S_numFaces ) ;
 
-    return std::make_pair( _faceToEdge[ 3 * iFace + jEdge - 4 ], _orient[ 3 * iFace + jEdge - 4 ] );
+    return std::make_pair( _faceToEdge[ 3 * iFace + jEdge ] - 1, _orient[ 3 * iFace + jEdge ] );
 }
 
 
@@ -310,9 +309,9 @@ QuadraticTetra::edgeToPoint( ID const& iEdge, ID const& jPoint )
     {
         1, 2, 5, 2, 3, 6, 3, 1, 7, 1, 4, 8, 2, 4, 9, 3, 4, 10
     };
-    ASSERT_BD( jPoint > 0 && jPoint < 4 ) ;
-    ASSERT_BD( iEdge > 0 && iEdge <= S_numEdges ) ;
-    return _edgeToPoint[ 3 * iEdge + jPoint - 4 ];
+    ASSERT_BD( jPoint < 3 ) ;
+    ASSERT_BD( iEdge < S_numEdges ) ;
+    return _edgeToPoint[ 3 * iEdge + jPoint ] - 1;
 }
 
 ID
@@ -326,9 +325,9 @@ QuadraticTetra::faceToPoint( ID const& iFace, ID const& jPoint )
         2, 3, 4, 6, 10, 9,
         1, 4, 3, 8, 10, 7
     };
-    ASSERT_BD( jPoint > 0 && jPoint < 7 ) ;
-    ASSERT_BD( iFace > 0 && iFace <= S_numFaces ) ;
-    return _faceToPoint[ 6 * iFace + jPoint - 7 ];
+    ASSERT_BD( jPoint < 6 ) ;
+    ASSERT_BD( iFace < S_numFaces ) ;
+    return _faceToPoint[ 6 * iFace + jPoint ] - 1;
 }
 
 std::pair<ID, bool>
@@ -363,9 +362,9 @@ LinearHexa::edgeToPoint( ID const& iEdge, ID const& jPoint )
         1, 5, 2, 6, 3, 7, 4, 8,
         5, 6, 6, 7, 7, 8, 8, 5
     };
-    ASSERT_BD( jPoint > 0 && jPoint < 3 ) ;
-    ASSERT_BD( iEdge > 0 && iEdge <= S_numEdges ) ;
-    return _edgeToPoint[ 2 * iEdge + jPoint - 3 ];
+    ASSERT_BD( jPoint < 2 ) ;
+    ASSERT_BD( iEdge < S_numEdges ) ;
+    return _edgeToPoint[ 2 * iEdge + jPoint ] - 1;
 }
 
 ID
@@ -381,9 +380,9 @@ LinearHexa::faceToPoint( ID const& iFace, ID const& jPoint )
         3, 4, 8, 7,
         5, 6, 7, 8
     };
-    ASSERT_BD( jPoint > 0 && jPoint < 5 ) ;
-    ASSERT_BD( iFace > 0 && iFace <= S_numFaces ) ;
-    return _faceToPoint[ 4 * iFace + jPoint - 5 ];
+    ASSERT_BD( jPoint < 4 ) ;
+    ASSERT_BD( iFace < S_numFaces ) ;
+    return _faceToPoint[ 4 * iFace + jPoint ] - 1;
 }
 
 std::pair<ID, bool>
@@ -403,11 +402,11 @@ LinearHexa::faceToEdge( ID const& iFace, ID const& jEdge )
     };
 
 
-    ASSERT_BD( jEdge > 0 && jEdge < 5 ) ;
-    ASSERT_BD( iFace > 0 && iFace <= S_numFaces ) ;
+    ASSERT_BD( jEdge < 4 ) ;
+    ASSERT_BD( iFace < S_numFaces ) ;
 
     return
-        std::make_pair( _faceToEdge[ 4 * iFace + jEdge - 5 ], _orient[ 4 * iFace + jEdge - 5 ] );
+        std::make_pair( _faceToEdge[ 4 * iFace + jEdge ] -1 , _orient[ 4 * iFace + jEdge ] );
 }
 
 
@@ -424,9 +423,9 @@ QuadraticHexa::edgeToPoint( ID const& iEdge, ID const& jPoint )
         1, 5, 13, 2, 6, 14, 3, 7, 15, 4, 8, 16,
         5, 6, 17, 6, 7, 18, 7, 8, 19, 8, 5, 20
     };
-    ASSERT_BD( ( jPoint > 0 && jPoint < 4 ) ) ;
-    ASSERT_BD( iEdge > 0 && iEdge <= S_numEdges ) ;
-    return _edgeToPoint[ 3 * iEdge + jPoint - 4 ];
+    ASSERT_BD( ( jPoint < 3 ) ) ;
+    ASSERT_BD( iEdge < S_numEdges ) ;
+    return _edgeToPoint[ 3 * iEdge + jPoint ] - 1;
 }
 
 ID
@@ -442,9 +441,9 @@ QuadraticHexa::faceToPoint( ID const& iFace, ID const& jPoint )
         3, 4, 8, 7, 11, 16, 19, 15, 25,
         5, 6, 7, 8, 17, 18, 19, 20, 26
     };
-    ASSERT_BD( jPoint > 0 && jPoint < 10 ) ;
-    ASSERT_BD( iFace > 0 && iFace <= S_numFaces ) ;
-    return _faceToPoint[ 9 * iFace + jPoint - 10 ];
+    ASSERT_BD( jPoint < 9 ) ;
+    ASSERT_BD( iFace < S_numFaces ) ;
+    return _faceToPoint[ 9 * iFace + jPoint ] - 1;
 }
 
 std::pair<ID, bool>
