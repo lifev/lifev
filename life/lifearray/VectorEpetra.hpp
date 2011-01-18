@@ -114,7 +114,7 @@ public:
     //! Copy constructor
     /*!
       @param vector Vector to be used to create the new vector
-      @param mapType Specify wether the map is Unique or Repeated
+      @param mapType Specify whether the map is Unique or Repeated
      */
     VectorEpetra( const VectorEpetra& vector, const MapEpetraType& mapType );
 

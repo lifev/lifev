@@ -105,27 +105,24 @@ public:
       @param numGlobalElements Number of global elements
       @param numMyElements Number of local elements
       @param myGlobalElements Array of Id of the local element
-      @param indexBase Starting index base (typically 0 or 1)
       @param commPtr Pointer to the communicator
     */
     MapEpetra( Int  numGlobalElements,
                Int  numMyElements,
                Int* myGlobalElements,
-               Int  indexBase,
                const comm_ptrtype& commPtr );
 
     //! Constructor
-    /*!
+    /*
       Build a nearly equally distributed map.
 
       The map is equally distributed if NumGlobalElements % Rank = 0
       @param NumGlobalElements Total number of elements inside the map
-      @param indexBase Starting index base (typically 0 or 1)
       @param CommPtr A pointer to the Epetra communicator
      */
-    MapEpetra( const Int numGlobalElements,
-               const Int indexBase,
-               const comm_ptrtype& commPtr );
+     MapEpetra( const Int numGlobalElements,
+                const Int notUsed,
+                const comm_ptrtype& commPtr );
 
     //! Constructor
     /*!
@@ -178,16 +175,13 @@ public:
       <li> this = [ 0 3 5 6 ]
       </ol>
 
-      if needed, indexBase may be changed (default values < 0 means "same as original map")
       @param blockMap Epetra_BlockMap
       @param offset Offset to be used to build the map
       @param maxId Maximum Id
-      @param indexBase Starting index base (typically 0 or 1)
     */
     MapEpetra( const Epetra_BlockMap& blockMap,
                const Int offset,
-               const Int maxId,
-               Int indexBase = -1 );
+               const Int maxId);
 private:
     //! Constructor from raw Epetra_Map
     /*!
@@ -293,13 +287,11 @@ private:
       @param numGlobalElements Number of global elements of the map
       @param numMyElements number of local element
       @param myGlobalElements Array of Id of the global elements of the map
-      @param indexBase Starting index base (typically 0 or 1)
       @param comm Communicator
     */
     void createMap( Int   numGlobalElements,
                     Int   numMyElements,
                     Int*  myGlobalElements,
-                    Int   indexBase,
                     const comm_type& comm );
 
     //! Getter for the repeated map
@@ -394,7 +386,7 @@ MapEpetra( const ReferenceFE&        refFE,
     if ( refFE.nbDofPerVertex() )
     {
         repeatedNodeVector.reserve(mesh.numPoints());
-        for ( UInt ii = 1; ii <= mesh.numPoints(); ii++ )
+        for ( UInt ii = 0; ii < mesh.numPoints(); ii++ )
             repeatedNodeVector.push_back( mesh.pointList(ii).id() );
     }
 
@@ -402,7 +394,7 @@ MapEpetra( const ReferenceFE&        refFE,
     {
         repeatedEdgeVector.reserve( mesh.numEdges() );
 
-        for ( UInt ii = 1; ii <= mesh.numEdges(); ii++ )
+        for ( UInt ii = 0; ii < mesh.numEdges(); ii++ )
             repeatedEdgeVector.push_back( mesh.edgeList(ii).id() );
     }
 
@@ -410,7 +402,7 @@ MapEpetra( const ReferenceFE&        refFE,
     {
         repeatedFaceVector.reserve( mesh.numFaces() );
 
-        for ( UInt ii = 1; ii <= mesh.numFaces(); ii++ )
+        for ( UInt ii = 0; ii < mesh.numFaces(); ii++ )
             repeatedFaceVector.push_back( mesh.faceList(ii).id() );
     }
 
@@ -418,7 +410,7 @@ MapEpetra( const ReferenceFE&        refFE,
     {
         repeatedVolumeVector.reserve( mesh.numVolumes() );
 
-        for ( UInt ii = 1; ii <= mesh.numVolumes(); ii++ )
+        for ( UInt ii = 0; ii < mesh.numVolumes(); ii++ )
             repeatedVolumeVector.push_back( mesh.volumeList(ii).id() );
     }
 
