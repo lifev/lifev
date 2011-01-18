@@ -172,9 +172,9 @@ void MonolithicBlockMatrix::createInterfaceMap( const MapEpetra& interfaceMap , 
     {
         if (interfaceMap.map(Unique)->LID(ITrow->second /*+ dim*solidDim*/)>=0)
         {
-            (*M_numerationInterface)[ITrow->second /*+ dim*solidDim*/ ]=l+1+ (int)(numInterfaceDof[pid]/nDimensions)/*+ dim*localInterface*/      ;
+            (*M_numerationInterface)[ITrow->second /*+ dim*solidDim*/ ]=l+ (int)(numInterfaceDof[pid]/nDimensions)/*+ dim*localInterface*/      ;
             //                                    (*M_numerationInterfaceInt)[ITrow->second /*+ dim*solidDim*/ ]=l+1+ (int)(M_numInterfaceDof[pid]/nDimensions)/*+ dim*localInterface*/      ;
-            if ((int)(*M_numerationInterface)(ITrow->second )!=floor(l+1+ numInterfaceDof[pid]/nDimensions+0.2 /*+ dim*localInterface*/) )
+            if ((int)(*M_numerationInterface)(ITrow->second )!=floor(l+ numInterfaceDof[pid]/nDimensions+0.2 /*+ dim*localInterface*/) )
                 std::cout<<"ERROR! the numeration of the coupling map is not correct"<<std::endl;
             ++l;
         }
@@ -195,7 +195,7 @@ void MonolithicBlockMatrix::createInterfaceMap( const MapEpetra& interfaceMap , 
         }
     }// so the map for the coupling part of the matrix is just Unique
 
-    M_interfaceMap.reset(new MapEpetra(-1, static_cast< Int> ( couplingVector.size() ), &couplingVector[0], interfaceMap.map(Repeated)->IndexBase()/*1*/, epetraWorldComm));
+    M_interfaceMap.reset(new MapEpetra(-1, static_cast< Int> ( couplingVector.size() ), &couplingVector[0], epetraWorldComm));
 }
 
 void MonolithicBlockMatrix::applyBoundaryConditions(const Real& time)

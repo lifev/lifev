@@ -70,7 +70,7 @@ void MonolithicBlock::couplingMatrix(matrixPtr_Type & bigMatrix,
             {
                 if ( numerationInterface->map().map(Unique)->LID(ITrow->second /*+ dim*solidDim*/) >= 0 )//to avoid repeated stuff
                 {
-                    bigMatrix->addToCoefficient(solidFluidInterface + ITrow->first + dim*problem[2]->dof().numTotalDof() - 1, offset[0] + ITrow->second-1 + dim* problem[0]->dof().numTotalDof(), (-value)*timeStep/**1.e-2*//*scaling of the solid matrix*/ );
+                    bigMatrix->addToCoefficient(solidFluidInterface + ITrow->first + dim*problem[2]->dof().numTotalDof(), offset[0] + ITrow->second + dim* problem[0]->dof().numTotalDof(), (-value)*timeStep/**1.e-2*//*scaling of the solid matrix*/ );
                 }
             }
         }
@@ -87,23 +87,23 @@ void MonolithicBlock::couplingMatrix(matrixPtr_Type & bigMatrix,
             {
                 if (newFlag-8>=0)//right low
                 {
-                    bigMatrix->addToCoefficient( offset[0] + ITrow->second-1 + dim* problem[0]->dof().numTotalDof(),(int)(*numerationInterface)[ITrow->second/*+ dim*solidDim*/ ] - 1 + dim*interface + totalSize, value );//right low
+                    bigMatrix->addToCoefficient( offset[0] + ITrow->second + dim* problem[0]->dof().numTotalDof(),(int)(*numerationInterface)[ITrow->second/*+ dim*solidDim*/ ] + dim*interface + totalSize, value );//right low
                     newFlag -= 8;
                 }
                 if (newFlag-4>=0)// right up
                 {
-                    bigMatrix->addToCoefficient( offset[1] + ITrow->first-1 + dim* problem[1]->dof().numTotalDof(), (int)(*numerationInterface)[ITrow->second/*+ dim*solidDim*/ ] - 1 + dim*interface + totalSize, -value );//right up
+                    bigMatrix->addToCoefficient( offset[1] + ITrow->first + dim* problem[1]->dof().numTotalDof(), (int)(*numerationInterface)[ITrow->second/*+ dim*solidDim*/ ] + dim*interface + totalSize, -value );//right up
                     newFlag -= 4;
                 }
                 if (newFlag-2>=0)//low left
                 {
-                    bigMatrix->addToCoefficient( (int)(*numerationInterface)[ITrow->second/*+ dim*solidDim*/ ] - 1 + dim*interface + totalSize, (ITrow->first)-1 + dim* problem[1]->dof().numTotalDof(), value);//low left
+                    bigMatrix->addToCoefficient( (int)(*numerationInterface)[ITrow->second/*+ dim*solidDim*/ ] + dim*interface + totalSize, (ITrow->first) + dim* problem[1]->dof().numTotalDof(), value);//low left
                     newFlag -= 2;
                 }
                 if (newFlag-1>=0)//low right
-                    bigMatrix->addToCoefficient( (int)(*numerationInterface)[ITrow->second/*+ dim*solidDim*/ ] - 1 + dim*interface + totalSize, (offset[0] + ITrow->second)-1 + dim* problem[0]->dof().numTotalDof(), -value);//low right
+                    bigMatrix->addToCoefficient( (int)(*numerationInterface)[ITrow->second/*+ dim*solidDim*/ ] + dim*interface + totalSize, (offset[0] + ITrow->second) + dim* problem[0]->dof().numTotalDof(), -value);//low right
 
-                bigMatrix->addToCoefficient( (int)(*numerationInterface)[ITrow->second/*+ dim*solidDim*/ ] - 1 + dim*interface + totalSize , (int)(*numerationInterface)[ITrow->second /*+ dim*solidDim*/ ] - 1 + dim*interface + totalSize, 0.0);
+                bigMatrix->addToCoefficient( (int)(*numerationInterface)[ITrow->second/*+ dim*solidDim*/ ] + dim*interface + totalSize , (int)(*numerationInterface)[ITrow->second /*+ dim*solidDim*/ ] + dim*interface + totalSize, 0.0);
             }
         }
     }
@@ -181,7 +181,7 @@ MonolithicBlock::robinCoupling( matrixPtr_Type& matrix,
             {
                 for (UInt dim = 0; dim < nDimensions; ++dim)
                 {
-                    matrix->addToCoefficient( (int)(*numerationInterface)[ITrow->second ] - 1 + dim*interface + totalSize, (offset2 + ITrow->second)-1 + dim* FESpace2->dof().numTotalDof(), alphas);//low right
+                    matrix->addToCoefficient( (int)(*numerationInterface)[ITrow->second ] + dim*interface + totalSize, (offset2 + ITrow->second) + dim* FESpace2->dof().numTotalDof(), alphas);//low right
                 }
             }
         }
@@ -195,7 +195,7 @@ MonolithicBlock::robinCoupling( matrixPtr_Type& matrix,
             {
                 for (UInt dim = 0; dim < nDimensions; ++dim)
                 {
-                    matrix->addToCoefficient( ITrow->first-1 + dim* FESpace1->dof().numTotalDof(), (int)(*numerationInterface)[ITrow->second ] - 1 + dim*interface + totalSize, alphaf );//right up
+                    matrix->addToCoefficient( ITrow->first + dim* FESpace1->dof().numTotalDof(), (int)(*numerationInterface)[ITrow->second ] + dim*interface + totalSize, alphaf );//right up
                 }
             }
         }
@@ -209,7 +209,7 @@ MonolithicBlock::robinCoupling( matrixPtr_Type& matrix,
             {
                 for (UInt dim = 0; dim < nDimensions; ++dim)
                 {
-                    matrix->addToCoefficient( (int)(*numerationInterface)[ITrow->second ] - 1 + dim*interface + totalSize, (ITrow->first)-1 + dim* FESpace1->dof().numTotalDof(), alphas);//low left
+                    matrix->addToCoefficient( (int)(*numerationInterface)[ITrow->second ] + dim*interface + totalSize, (ITrow->first) + dim* FESpace1->dof().numTotalDof(), alphas);//low left
                 }
             }
         }

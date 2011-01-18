@@ -507,8 +507,8 @@ OneDimensionalSolver::boundaryEigenValuesEigenVectors( const bcSide_Type& bcSide
 {
     UInt boundaryDof( boundaryDOF( bcSide ) );
 
-    M_flux->eigenValuesEigenVectors( (*solution.find("A")->second)( boundaryDof + 1 ),
-                                     (*solution.find("Q")->second)( boundaryDof + 1 ),
+    M_flux->eigenValuesEigenVectors( (*solution.find("A")->second)( boundaryDof ),
+                                     (*solution.find("Q")->second)( boundaryDof ),
                                      eigenvalues, leftEigenvector1, leftEigenvector2,
                                      boundaryDof );
 }
@@ -523,11 +523,11 @@ OneDimensionalSolver::updateFlux( const solution_Type& solution )
 
     for ( UInt iNode(0); iNode < M_physics->data()->numberOfNodes() ; ++iNode )
     {
-        Ai = (*solution.find("A")->second)( iNode + 1 );
-        Qi = (*solution.find("Q")->second)( iNode + 1 );
+        Ai = (*solution.find("A")->second)( iNode );
+        Qi = (*solution.find("Q")->second)( iNode );
 
-        (*M_fluxVector[0])( iNode + 1 ) = M_flux->flux( Ai, Qi, 1, iNode );
-        (*M_fluxVector[1])( iNode + 1 ) = M_flux->flux( Ai, Qi, 2, iNode );
+        (*M_fluxVector[0])( iNode ) = M_flux->flux( Ai, Qi, 1, iNode );
+        (*M_fluxVector[1])( iNode ) = M_flux->flux( Ai, Qi, 2, iNode );
     }
 }
 
@@ -545,11 +545,11 @@ OneDimensionalSolver::updatedFdU( const solution_Type& solution )
     for ( UInt iElement(0); iElement < M_physics->data()->numberOfElements(); ++iElement )
     {
         // for P1Seg and appropriate mesh only!
-        Aii   = (*solution.find("A")->second)( iElement + 1 );
-        Qii   = (*solution.find("Q")->second)( iElement + 1 );
+        Aii   = (*solution.find("A")->second)( iElement );
+        Qii   = (*solution.find("Q")->second)( iElement );
 
-        Aiip1 = (*solution.find("A")->second)( iElement + 2 );
-        Qiip1 = (*solution.find("Q")->second)( iElement + 2 );
+        Aiip1 = (*solution.find("A")->second)( iElement + 1 );
+        Qiip1 = (*solution.find("Q")->second)( iElement + 1 );
 
         for ( UInt ii=1; ii<3; ++ii )
         {
@@ -571,11 +571,11 @@ OneDimensionalSolver::updateSource( const solution_Type& solution )
 
     for ( UInt iNode(0); iNode < M_physics->data()->numberOfNodes() ; ++iNode )
     {
-        Ai = (*solution.find("A")->second)( iNode + 1 );
-        Qi = (*solution.find("Q")->second)( iNode + 1 );
+        Ai = (*solution.find("A")->second)( iNode );
+        Qi = (*solution.find("Q")->second)( iNode );
 
-        (*M_sourceVector[0])( iNode + 1 ) = M_source->source( Ai, Qi, 1, iNode );
-        (*M_sourceVector[1])( iNode + 1 ) = M_source->source( Ai, Qi, 2, iNode );
+        (*M_sourceVector[0])( iNode ) = M_source->source( Ai, Qi, 0, iNode );
+        (*M_sourceVector[1])( iNode ) = M_source->source( Ai, Qi, 1, iNode );
     }
 }
 
@@ -593,19 +593,19 @@ OneDimensionalSolver::updatedSdU( const solution_Type& solution )
     for ( UInt iElement(0); iElement < M_physics->data()->numberOfElements() ; ++iElement )
     {
         // for P1Seg and appropriate mesh only!
-        Aii   = (*solution.find("A")->second)( iElement + 1);
-        Qii   = (*solution.find("Q")->second)( iElement + 1);
-        Aiip1 = (*solution.find("A")->second)( iElement + 2 );
-        Qiip1 = (*solution.find("Q")->second)( iElement + 2 );
+        Aii   = (*solution.find("A")->second)( iElement);
+        Qii   = (*solution.find("Q")->second)( iElement);
+        Aiip1 = (*solution.find("A")->second)( iElement + 1 );
+        Qiip1 = (*solution.find("Q")->second)( iElement + 1 );
 
-        for ( UInt ii=1; ii<3; ++ii )
+        for ( UInt ii=0; ii<2; ++ii )
         {
-            for ( UInt jj=1; jj<3; ++jj )
+            for ( UInt jj=0; jj<2; ++jj )
             {
                 tmp =  M_source->dSdU(   Aii,   Qii, ii, jj, iElement );     // left node of current element
                 tmp += M_source->dSdU( Aiip1, Qiip1, ii, jj, iElement + 1 ); // right node of current element
 
-                M_dSdUVector[ 2*(ii - 1) + jj - 1 ]( iElement ) = 0.5 * tmp;
+                M_dSdUVector[ 2*ii + jj ]( iElement ) = 0.5 * tmp;
             }
         }
     }
@@ -629,9 +629,9 @@ OneDimensionalSolver::updateMatrices()
         // Update the current element
         M_feSpace->fe().update( M_feSpace->mesh()->edgeList( iElement + 1 ), UPDATE_DPHI | UPDATE_WDET );
 
-        for ( UInt ii(1); ii <= 2; ++ii )
+        for ( UInt ii(0); ii < 2; ++ii )
         {
-            for ( UInt jj(1); jj <= 2; ++jj )
+            for ( UInt jj(0); jj < 2; ++jj )
             {
                 // Update the elemental matrices
                 updateElementalMatrices( M_dFdUVector[ 2*(ii-1) + jj-1 ]( iElement ), M_dSdUVector[ 2*(ii-1) + jj-1 ]( iElement ) );
@@ -698,16 +698,16 @@ void
 OneDimensionalSolver::matrixAssemble( const UInt& ii, const UInt& jj )
 {
     // Assemble the mass matrix
-    assembleMatrix( *M_dSdUMassMatrix[ 2*(ii-1) + jj-1 ], *M_elementalMassMatrix, M_feSpace->fe(), M_feSpace->dof(), 0, 0, 0, 0 );
+    assembleMatrix( *M_dSdUMassMatrix[ 2*ii + jj ], *M_elementalMassMatrix, M_feSpace->fe(), M_feSpace->dof(), 0, 0, 0, 0 );
 
     // Assemble the stiffness matrix
-    assembleMatrix( *M_dFdUStiffnessMatrix[ 2*(ii-1) + jj-1 ], *M_elementalStiffnessMatrix, M_feSpace->fe(), M_feSpace->dof(), 0, 0, 0, 0 );
+    assembleMatrix( *M_dFdUStiffnessMatrix[ 2*ii + jj ], *M_elementalStiffnessMatrix, M_feSpace->fe(), M_feSpace->dof(), 0, 0, 0, 0 );
 
     // Assemble the gradient matrix
-    assembleMatrix( *M_dFdUGradientMatrix[ 2*(ii-1) + jj-1 ], *M_elementalGradientMatrix, M_feSpace->fe(), M_feSpace->dof(), 0, 0, 0, 0 );
+    assembleMatrix( *M_dFdUGradientMatrix[ 2*ii + jj ], *M_elementalGradientMatrix, M_feSpace->fe(), M_feSpace->dof(), 0, 0, 0, 0 );
 
     // Assemble the divergence matrix
-    assembleMatrix( *M_dSdUDivergenceMatrix[ 2*(ii-1) + jj-1 ], *M_elementalDivergenceMatrix, M_feSpace->fe(), M_feSpace->dof(), 0, 0, 0, 0 );
+    assembleMatrix( *M_dSdUDivergenceMatrix[ 2*ii + jj ], *M_elementalDivergenceMatrix, M_feSpace->fe(), M_feSpace->dof(), 0, 0, 0, 0 );
 }
 
 void
@@ -854,8 +854,8 @@ OneDimensionalSolver::inertialFluxCorrection( const vector_Type& flux )
 
     rhs = stiffRHS*flux;
 
-    UInt firstDof = 1;
-    UInt lastDof  = rhs.size();
+    UInt firstDof = 0;
+    UInt lastDof  = rhs.size()-1;
 
     // symmetric treatment (cholesky can be used)
     // first row modified (Dirichlet)
@@ -1051,8 +1051,8 @@ OneDimensionalSolver::longitudinalFluxCorrection()
     //    _massLHS.Axpy( 1., (*solution["P"]) , 0., _rhs );
     rhs = massRHS*f;
 
-    UInt firstDof = 1;
-    UInt lastDof  = rhs.size();
+    UInt firstDof = 0;
+    UInt lastDof  = rhs.size() - 1;
 
     // symmetric treatment (cholesky can be used)
     // first row modified (Dirichlet)

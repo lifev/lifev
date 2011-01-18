@@ -388,7 +388,7 @@ buildSystem(matrixPtr_Type massStiff, Real const & /*factor*/)
     // Elementary computation and matrix assembling
     // Loop on elements
     // These Matrices are assembled according to the TimeAdvanceNewmark Scheme!
-    for ( UInt i = 1; i <= this->M_FESpace->mesh()->numVolumes(); i++ )
+    for ( UInt i = 0; i < this->M_FESpace->mesh()->numVolumes(); i++ )
     {
 
         this->M_FESpace->fe().updateFirstDerivQuadPt( this->M_FESpace->mesh()->volumeList( i ) );
@@ -576,7 +576,7 @@ void VenantKirchhoffSolverNonLinear<Mesh, SolverType>::updateSystem(  source_Typ
     UInt nc = nDimensions;
 
 // loop on volumes: assembling source term
-    for ( UInt i = 1; i <= this->M_FESpace->mesh()->numVolumes(); ++i )
+    for ( UInt i = 0; i < this->M_FESpace->mesh()->numVolumes(); ++i )
     {
 
         this->M_FESpace->fe().updateFirstDerivQuadPt( this->M_FESpace->mesh()->volumeList( i ) );
@@ -634,7 +634,7 @@ void VenantKirchhoffSolverNonLinear<Mesh, SolverType>::updateNonlinearMatrix( ma
 
     vector_Type dRep(disp, Repeated);
 
-    for ( UInt i = 1; i <= this->M_FESpace->mesh()->numVolumes(); i++ )
+    for ( UInt i = 0; i < this->M_FESpace->mesh()->numVolumes(); i++ )
     {
 
         this->M_FESpace->fe().updateFirstDerivQuadPt( this->M_FESpace->mesh()->volumeList( i ) );
@@ -646,8 +646,8 @@ void VenantKirchhoffSolverNonLinear<Mesh, SolverType>::updateNonlinearMatrix( ma
             UInt  iloc = this->M_FESpace->fe().patternFirst( iNode );
             for ( UInt iComp = 0; iComp < nDimensions; ++iComp )
             {
-                UInt ig = this->M_FESpace->dof().localToGlobal( eleID, iloc + 1 ) + iComp*this->getDim();
-                dk_loc[ iloc + iComp*this->M_FESpace->fe().nbFEDof() ] = dRep[ig]; // BASEINDEX + 1
+                UInt ig = this->M_FESpace->dof().localToGlobalMap( eleID, iloc ) + iComp*this->getDim();
+                dk_loc[ iloc + iComp*this->M_FESpace->fe().nbFEDof() ] = dRep[ig];
             }
         }
 
@@ -703,7 +703,7 @@ void VenantKirchhoffSolverNonLinear<Mesh, SolverType>::updateNonlinearTerms( mat
 
     vector_Type dRep(disp, Repeated);
 
-    for ( UInt i = 1; i <= this->M_FESpace->mesh()->numVolumes(); i++ )
+    for ( UInt i = 0; i < this->M_FESpace->mesh()->numVolumes(); i++ )
     {
 
         this->M_FESpace->fe().updateFirstDerivQuadPt( this->M_FESpace->mesh()->volumeList( i ) );
@@ -716,8 +716,8 @@ void VenantKirchhoffSolverNonLinear<Mesh, SolverType>::updateNonlinearTerms( mat
             UInt  iloc = this->M_FESpace->fe().patternFirst( iNode );
             for ( UInt iComp = 0; iComp < nDimensions; ++iComp )
             {
-                UInt ig = this->M_FESpace->dof().localToGlobal( eleID, iloc + 1 ) + iComp*this->getDim() + this->M_offset;
-                dk_loc[ iloc + iComp*this->M_FESpace->fe().nbFEDof() ] = dRep[ig]; // BASEINDEX + 1
+                UInt ig = this->M_FESpace->dof().localToGlobalMap( eleID, iloc ) + iComp*this->getDim() + this->M_offset;
+                dk_loc[ iloc + iComp*this->M_FESpace->fe().nbFEDof() ] = dRep[ig];
             }
         }
 
@@ -930,7 +930,7 @@ void VenantKirchhoffSolverNonLinear<Mesh, SolverType>::updateJacobian( vector_Ty
 
 #ifdef nonlinear
     // loop on volumes: assembling source term
-    for ( UInt i = 1; i <= this->M_FESpace->mesh()->numVolumes(); ++i )
+    for ( UInt i = 0; i < this->M_FESpace->mesh()->numVolumes(); ++i )
     {
         this->M_FESpace->fe().updateFirstDerivQuadPt( this->M_FESpace->mesh()->volumeList( i ) );
 
@@ -943,8 +943,8 @@ void VenantKirchhoffSolverNonLinear<Mesh, SolverType>::updateJacobian( vector_Ty
             UInt  iloc = this->M_FESpace->fe().patternFirst( iNode );
             for ( UInt iComp = 0; iComp < nDimensions; ++iComp )
             {
-                UInt ig = this->M_FESpace->dof().localToGlobal( eleID, iloc + 1 ) + iComp*this->getDim() + this->M_offset;
-                dk_loc[iloc + iComp*this->M_FESpace->fe().nbFEDof()] = dRep[ig]; // BASEINDEX + 1
+                UInt ig = this->M_FESpace->dof().localToGlobalMap( eleID, iloc ) + iComp*this->getDim() + this->M_offset;
+                dk_loc[iloc + iComp*this->M_FESpace->fe().nbFEDof()] = dRep[ig];
             }
         }
 
@@ -1091,7 +1091,7 @@ applyBoundaryConditions(matrix_Type&        matrix,
     //    vector_Type rhsFull(rhs, Unique);  // bcManages now manages the also repeated parts
 
 
-    //In the original versione it was not commented, modified by Paolo Tricerri
+    //In the original version it was not commented, modified by Paolo Tricerri
 //  bcManage( matrix, rhsFull, *this->M_FESpace->mesh(), this->M_FESpace->dof(), BCh, this->M_FESpace->feBd(), 1., this->M_data->time() );
 
 

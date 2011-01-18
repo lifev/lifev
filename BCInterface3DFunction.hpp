@@ -265,8 +265,8 @@ BCInterface3DFunction< PhysicalSolverType >::setData( const data_Type& data )
                 M_mapID[data.comV()[i]] = i + 1;
         else
             // if ( data.comV().front() == arguments )  Full
-            for ( ID i( 1 ); i <= data.comV().front(); ++i )
-                M_mapID[i] = i;
+            for ( ID i( 0 ); i < data.comV().front(); ++i )
+                M_mapID[i+1] = i+1;
 
         M_base.setFunction( boost::bind( &BCInterface3DFunction::functionID, this, _1, _2, _3, _4, _5 ) );
     }

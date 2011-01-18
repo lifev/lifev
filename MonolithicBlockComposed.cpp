@@ -70,8 +70,8 @@ void MonolithicBlockComposed::coupler( mapPtr_Type& map,
     couplingMatrix( coupling,  (*M_couplingFlags)[couplingBlock], M_FESpace, M_offset, locDofMap, numerationInterface, timeStep);
     UInt totalDofs( map->map(Unique)->NumGlobalElements() );
 
-    coupling->insertValueDiagonal( 1., 1 , M_offset[couplingBlock]+1 );
-    coupling->insertValueDiagonal( 1., M_offset[couplingBlock]+M_FESpace[couplingBlock]->map().map(Unique)->NumGlobalElements()+1, totalDofs+1 );
+    coupling->insertValueDiagonal( 1., 0 , M_offset[couplingBlock] );
+    coupling->insertValueDiagonal( 1., M_offset[couplingBlock]+M_FESpace[couplingBlock]->map().map(Unique)->NumGlobalElements(), totalDofs );
 
     if(couplingBlock != M_coupling.size()+1)
     {

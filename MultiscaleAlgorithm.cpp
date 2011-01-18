@@ -76,7 +76,6 @@ MultiscaleAlgorithm::setupData( const std::string& fileName )
 #endif
 
     GetPot dataFile( fileName );
-std::cout << "ciao: "<< fileName << std::endl;
     M_name = dataFile( "Multiscale/algorithmName", "algorithmName" );
 }
 
@@ -143,7 +142,7 @@ MultiscaleAlgorithm::setModel( const multiscaleModelPtr_Type model )
 
     // Build coupling variables and residuals vectors
     std::vector<Int> myGlobalElements(0);
-    MapEpetra couplingMap( -1, static_cast<Int> ( myGlobalElements.size() ), &myGlobalElements[0], 0, M_comm );
+    MapEpetra couplingMap( -1, static_cast<Int> ( myGlobalElements.size() ), &myGlobalElements[0],  M_comm );
     M_multiscale->createCouplingMap( couplingMap );
 
     M_couplingVariables.reset( new VectorEpetra( couplingMap, Unique ) );
