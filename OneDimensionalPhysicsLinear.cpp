@@ -75,8 +75,8 @@ Real
 OneDimensionalPhysicsLinear::fromWToP( const Real& W1, const Real& W2, const UInt& indz ) const
 {
     return ( M_data -> beta0(indz)
-             * ( std::pow( 1 / M_data->area0(indz), M_data -> beta1(indz) )
-                 * std::pow( (W1 - W2 ) / ( 2 * celerity0(indz) ) + M_data -> area0(indz), M_data -> beta1(indz) )
+             * (   OneDimensional::pow05( 1 / M_data->area0(indz), M_data -> beta1(indz) )
+                 * OneDimensional::pow05( (W1 - W2 ) / ( 2 * celerity0(indz) ) + M_data -> area0(indz), M_data -> beta1(indz) )
                  - 1 )
            );
 }
@@ -84,13 +84,13 @@ OneDimensionalPhysicsLinear::fromWToP( const Real& W1, const Real& W2, const UIn
 Real
 OneDimensionalPhysicsLinear::fromPToW( const Real& P, const Real& W, const ID& i, const UInt& indz ) const
 {
-    Real add( 2 * celerity0(indz) * M_data -> area0(indz) * ( pow( ( P / M_data -> beta0(indz) + 1 ), 1 / M_data -> beta1(indz) ) - 1 ) );
+    Real add( 2 * celerity0(indz) * M_data -> area0(indz) * ( OneDimensional::pow20( P / M_data -> beta0(indz) + 1, 1 / M_data -> beta1(indz) ) - 1 ) );
 
 #ifdef HAVE_LIFEV_DEBUG
     Debug(6320) << "[fromPToW] "
     << "2 * celerity0(indz) * area0(indz) = " << 2 * celerity0(indz) * M_data -> area0(indz)
     << ", pow( ( P / beta0(indz) + 1 ), 1 / beta1(indz) ) = "
-    << pow( ( P / M_data -> beta0(indz) + 1 ), 1 / M_data -> beta1(indz) ) << "\n";
+    << OneDimensional::pow20( P / M_data -> beta0(indz) + 1 , 1 / M_data -> beta1(indz) ) << "\n";
     Debug(6320) << "[fromPToW] add term = " << add << "\n";
 #endif
 
@@ -124,7 +124,7 @@ OneDimensionalPhysicsLinear::fromQToW( const Real& Q, const Real& /*W_n*/, const
 Real
 OneDimensionalPhysicsLinear::dPdW( const Real& W1, const Real& W2, const ID& i, const UInt& indz ) const
 {
-    Real beta0beta1overA0beta1 ( M_data->beta0(indz) * M_data -> beta1(indz) / std::pow( M_data -> area0(indz), M_data -> beta1(indz) ) );
+    Real beta0beta1overA0beta1 ( M_data->beta0(indz) * M_data -> beta1(indz) / OneDimensional::pow05( M_data -> area0(indz), M_data -> beta1(indz) ) );
 
     Real oneover2celerity( 1 / ( 2 * celerity0(indz) ) );
 

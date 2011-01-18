@@ -64,6 +64,7 @@ OneDimensionalSolver::OneDimensionalSolver():
     M_source                    (),
     M_feSpace                   (),
     M_comm                      (),
+    M_displayer                 (),
     M_leftNodeId                (),
     M_leftInternalNodeId        (),
     M_rightNodeId               (),
@@ -237,9 +238,9 @@ OneDimensionalSolver::computeArea( solution_Type& solution )
 void
 OneDimensionalSolver::updateRHS( const solution_Type& solution, const Real& timeStep )
 {
-    updatedFdU( solution );   // Update the vector containing the values of the flux at the nodes and its jacobian
+    updatedFdU( solution ); // Update the vector containing the values of the flux at the nodes and its jacobian
     updatedSdU( solution ); // Update the vector containing the values of the source term at the nodes and its jacobian
-    updateMatrices();            // Update the matrices for the non-linear terms
+    updateMatrices();       // Update the matrices for the non-linear terms
 
     // Taylor-Galerkin scheme: (explicit, U = [U1,U2]^T, with U1=A, U2=Q )
     // (Un+1, phi) =          (               Un,     phi     )-> massFactor^{-1} * Un+1 = mass * U
@@ -1103,7 +1104,7 @@ OneDimensionalSolver::longitudinalFluxCorrection()
 #endif
         }
 
-        f(inode) *= 1 / ( 2 * std::pow(h,3) );
+        f(inode) *= 1 / ( 2 * OneDimensional::pow30(h, 3) );
 
         // Update the current element
         M_feSpace->fe().update( M_feSpace->mesh()->edgeList(iEdge), UPDATE_DPHI | UPDATE_WDET );

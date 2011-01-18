@@ -58,7 +58,7 @@ OneDimensionalSourceNonLinear::source( const Real& A, const Real& Q, const ID& i
         Real beta1plus1( M_physics->data()->beta1(i) + 1 );
         Real AoverA0( A / M_physics->data()->area0(i) );
         Real C0( 1 / ( M_physics->data()->densityRho() * beta1plus1 ) );
-        Real C ( 1 / ( M_physics->data()->densityRho() * beta1plus1 ) * std::pow(  AoverA0, beta1plus1 ) );
+        Real C ( 1 / ( M_physics->data()->densityRho() * beta1plus1 ) * OneDimensional::pow15( AoverA0, beta1plus1 ) );
 
         return ( M_physics->data()->friction() * Q / A
                  + Q * Q / A * M_physics->data()->dAlphadz(i)
@@ -94,7 +94,7 @@ OneDimensionalSourceNonLinear::dSdU( const Real& A, const Real& Q, const ID& ii,
         if ( jj == 1 ) // dB2/dA
         {
             Real AoverA0( A / M_physics->data()->area0(i) );
-            Real C ( std::pow(  AoverA0, M_physics->data()->beta1(i) ) / M_physics->data()->densityRho() );
+            Real C ( OneDimensional::pow05( AoverA0, M_physics->data()->beta1(i) ) / M_physics->data()->densityRho() );
 
             return ( -M_physics->data()->friction() * Q / A / A
                      - Q * Q / ( A * A ) * M_physics->data()->dAlphadz(i)
@@ -211,7 +211,7 @@ OneDimensionalSourceNonLinear::interpolatedQuasiLinearSource( const Real& A, con
         Real dAlphadz   = ( 1 - cfl ) * M_physics->data()->dAlphadz(bcNodes[0]) + cfl * M_physics->data()->dAlphadz(bcNodes[1]);
 
         Real AoverA0( A / area0 );
-        Real C( A / M_physics->data()->densityRho() * std::pow(  AoverA0, beta1 ) );
+        Real C( A / M_physics->data()->densityRho() * OneDimensional::pow05( AoverA0, beta1 ) );
 
         return ( M_physics->data()->friction() * Q / A
                  + Q * Q / A * dAlphadz

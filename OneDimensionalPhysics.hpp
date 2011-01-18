@@ -289,7 +289,7 @@ OneDimensionalPhysics::celerity0( const UInt& i ) const
 inline Real
 OneDimensionalPhysics::elasticPressure( const Real& A, const UInt& i ) const
 {
-    return ( M_data->beta0(i) * ( std::pow( A/M_data->area0(i), M_data->beta1(i) ) - 1 ) ) + M_data->externalPressure();
+    return ( M_data->beta0(i) * ( OneDimensional::pow05( A/M_data->area0(i), M_data->beta1(i) ) - 1 ) ) + M_data->externalPressure();
 }
 
 inline Real

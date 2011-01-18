@@ -95,21 +95,21 @@ OneDimensionalPhysics::stiffenVesselLeft( const Real& xl,        const Real& xr,
             ratio=( ( ( alpha + delta / 2 ) - x_current ) / delta);
 
             M_data -> setdBeta0dz( M_data -> beta0(alpha_iz + iz) *
-                                 ( factor * (- n / delta) * ( pow(2,(n-1)) * pow(ratio, (n-1)) ) ), alpha_iz + iz );
+                                 ( factor * (- n / delta) * ( std::pow(2,(n-1)) * std::pow(ratio, (n-1)) ) ), alpha_iz + iz );
             M_data -> setdBeta0dz( M_data -> dBeta0dz(alpha_iz + iz), alpha_iz - iz );
 
-            M_data -> setBeta0( M_data -> beta0(alpha_iz + iz) * ( 1 + factor * ( pow(2,(n-1)) * pow(ratio,n) ) ), alpha_iz + iz );
-            M_data -> setBeta0( M_data -> beta0(alpha_iz + iz) / ( 1 + factor * ( pow(2,(n-1)) * pow(ratio,n) ) )
-                              * ( 1 + factor * ( 1 - ( pow(2,(n-1)) * pow(ratio,n) ) ) ), alpha_iz - iz );
+            M_data -> setBeta0( M_data -> beta0(alpha_iz + iz) * ( 1 + factor * ( std::pow(2,(n-1)) * std::pow(ratio,n) ) ), alpha_iz + iz );
+            M_data -> setBeta0( M_data -> beta0(alpha_iz + iz) / ( 1 + factor * ( std::pow(2,(n-1)) * std::pow(ratio,n) ) )
+                              * ( 1 + factor * ( 1 - ( std::pow(2,(n-1)) * std::pow(ratio,n) ) ) ), alpha_iz - iz );
 
             // first order
             //        M_dPressbeta0dz[iz] = M_Pressbeta0[iz] * ( -factor * (n / delta) *
-            //                       ( pow(2,(n-1)) * pow(ratio,(n-1)) ) );
+            //                       ( std::pow(2,(n-1)) * std::pow(ratio,(n-1)) ) );
             //M_Pressbeta0[iz] = M_Pressbeta0[iz] * ( 1 + factor * ratio );
 
 
-            deltax_adaptive = ( -1 / n_elem_delta ) * ( 1 / ( ( -n / delta) * pow(2,(n-1) ) *
-                                                            pow( ratio , (n-1) ) ) );
+            deltax_adaptive = ( -1 / n_elem_delta ) * ( 1 / ( ( -n / delta) * std::pow(2,(n-1) ) *
+                                                            std::pow( ratio , (n-1) ) ) );
 
             deltax_uniform = ( ( alpha + delta / 2) - x_current ) / ( n_elem_r - iz );
 
@@ -161,9 +161,9 @@ OneDimensionalPhysics::stiffenVesselLeft( const Real& xl,        const Real& xr,
         {
             ratio=(( x_current - (alpha-delta/2) ) / delta);
 
-            M_data -> setdBeta0dz( M_data -> beta0(iz) * ( factor * (- n / delta ) * ( pow(2,(n-1)) * pow(ratio,(n-1) ) ) ), iz );
+            M_data -> setdBeta0dz( M_data -> beta0(iz) * ( factor * (- n / delta ) * ( std::pow(2,(n-1)) * std::pow(ratio,(n-1) ) ) ), iz );
 
-            M_data -> setBeta0( M_data -> beta0(iz) * ( 1 + factor * ( 1 - pow(2,(n-1)) * pow(ratio,n) ) ), iz );
+            M_data -> setBeta0( M_data -> beta0(iz) * ( 1 + factor * ( 1 - std::pow(2,(n-1)) * std::pow(ratio,n) ) ), iz );
             iz++;
             x_current+=deltax;
         }
@@ -172,9 +172,9 @@ OneDimensionalPhysics::stiffenVesselLeft( const Real& xl,        const Real& xr,
         {
             ratio=( ( ( alpha + delta / 2 ) - x_current ) / delta );
 
-            M_data -> setdBeta0dz( M_data -> beta0(iz) * ( factor * ( -n / delta) * ( pow(2,(n-1)) * pow(ratio,(n-1) ) ) ), iz );
+            M_data -> setdBeta0dz( M_data -> beta0(iz) * ( factor * ( -n / delta) * ( std::pow(2,(n-1)) * std::pow(ratio,(n-1) ) ) ), iz );
 
-            M_data -> setBeta0( M_data -> beta0(iz) * ( 1 + factor * ( pow(2,(n-1)) * pow(ratio,n) ) ), iz );
+            M_data -> setBeta0( M_data -> beta0(iz) * ( 1 + factor * ( std::pow(2,(n-1)) * std::pow(ratio,n) ) ), iz );
             iz++;
             x_current += deltax;
         }
@@ -231,25 +231,25 @@ OneDimensionalPhysics::stiffenVesselRight( const Real& xl,        const Real& xr
             ratio=( ( ( alpha + delta / 2 ) - x_current ) / delta );
 
             M_data -> setdBeta0dz( M_data -> beta0( alpha_iz + iz ) * ( factor * ( n / delta) *
-                                                                  ( pow(2,(n-1)) * pow(ratio,(n-1)) ) ), alpha_iz + iz );
+                                                                  ( std::pow(2,(n-1)) * std::pow(ratio,(n-1)) ) ), alpha_iz + iz );
 
             M_data -> setdBeta0dz( M_data -> dBeta0dz(alpha_iz + iz), alpha_iz - iz );
 
             M_data -> setBeta0( M_data -> beta0(alpha_iz + iz) *
-                              ( 1 + factor * ( 1 - ( pow(2,(n-1)) * pow(ratio,n) ) ) ), (alpha_iz + iz) );
+                              ( 1 + factor * ( 1 - ( std::pow(2,(n-1)) * std::pow(ratio,n) ) ) ), (alpha_iz + iz) );
 
             M_data -> setBeta0( M_data -> beta0(alpha_iz + iz) /
-                              ( 1 + factor * ( 1 - ( pow(2,(n-1)) * pow(ratio,n) ) ) )
-                              * ( 1 + factor * ( pow(2,(n-1)) * pow(ratio,n) ) ), alpha_iz - iz );
+                              ( 1 + factor * ( 1 - ( std::pow(2,(n-1)) * std::pow(ratio,n) ) ) )
+                              * ( 1 + factor * ( std::pow(2,(n-1)) * std::pow(ratio,n) ) ), alpha_iz - iz );
 
             // first order
             //        M_data -> dBeta0dz(iz) = M_data -> Beta0(iz) * ( -factor * (n / delta) *
-            //                       ( pow(2,(n-1)) * pow(ratio,(n-1)) ) );
+            //                       ( std::pow(2,(n-1)) * std::pow(ratio,(n-1)) ) );
             //M_data -> Beta0(iz) = M_data -> Beta0(iz) * ( 1 + factor * ratio );
 
             deltax_adaptive = ( -1 / n_elem_delta ) *
-                              ( 1 / ( (-n / delta ) * pow(2,(n-1)) *
-                                      pow( ratio , (n-1) )
+                              ( 1 / ( (-n / delta ) * std::pow(2,(n-1)) *
+                                      std::pow( ratio , (n-1) )
                                     )
                               );
 
@@ -303,9 +303,9 @@ OneDimensionalPhysics::stiffenVesselRight( const Real& xl,        const Real& xr
         {
             ratio=( ( ( alpha + delta / 2 ) - x_current ) / delta );
 
-            M_data -> setdBeta0dz( M_data -> beta0(iz) * ( factor * ( n / delta) *  ( pow(2,(n-1)) * pow(ratio,(n-1)) ) ), iz );
+            M_data -> setdBeta0dz( M_data -> beta0(iz) * ( factor * ( n / delta) *  ( std::pow(2,(n-1)) * std::pow(ratio,(n-1)) ) ), iz );
 
-            M_data -> setBeta0( M_data -> beta0(iz) * ( 1 + factor * ( 1 - pow(2,(n-1)) * pow(ratio,n) ) ), iz );
+            M_data -> setBeta0( M_data -> beta0(iz) * ( 1 + factor * ( 1 - std::pow(2,(n-1)) * std::pow(ratio,n) ) ), iz );
             iz--;
             x_current -= deltax;
         }
@@ -314,9 +314,9 @@ OneDimensionalPhysics::stiffenVesselRight( const Real& xl,        const Real& xr
         {
             ratio = ( ( x_current - ( alpha - delta / 2 ) ) / delta );
 
-            M_data -> setdBeta0dz( M_data -> beta0(iz) * ( factor * ( n / delta) * ( pow(2,(n-1)) * pow(ratio,(n-1)) ) ), iz );
+            M_data -> setdBeta0dz( M_data -> beta0(iz) * ( factor * ( n / delta) * ( std::pow(2,(n-1)) * std::pow(ratio,(n-1)) ) ), iz );
 
-            M_data -> setBeta0( M_data -> beta0(iz) * ( 1 + factor * ( pow(2,(n-1)) * pow(ratio,n) ) ), iz );
+            M_data -> setBeta0( M_data -> beta0(iz) * ( 1 + factor * ( std::pow(2,(n-1)) * std::pow(ratio,n) ) ), iz );
             iz--;
             x_current -= deltax;
         }

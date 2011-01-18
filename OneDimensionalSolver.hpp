@@ -548,9 +548,9 @@ private:
     //! @name Unimplemented Methods
     //@{
 
-    OneDimensionalSolver( const physicsPtr_Type physics );
+    OneDimensionalSolver( const OneDimensionalSolver& solver );
 
-    OneDimensionalSolver& operator=( const physicsPtr_Type physics);
+    OneDimensionalSolver& operator=( const OneDimensionalSolver& solver );
 
     //@}
 };

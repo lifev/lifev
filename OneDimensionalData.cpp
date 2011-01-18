@@ -411,7 +411,7 @@ OneDimensionalData::oldStyleSetup( const GetPot& dataFile, const std::string& se
     {
         // Physical Parameters
         if ( M_computeCoefficients )
-            M_area0[i]                 = std::pow( dataFile( ( section + "/1d_physics/radius"        ).data(), 0.5 ), 2 ) * M_PI;
+            M_area0[i]                 = OneDimensional::pow20( dataFile( ( section + "/1d_physics/radius"        ).data(), 0.5 ), 2 ) * M_PI;
         else
             M_area0[i]                 = dataFile( ( section + "/parameters/Area0"                   ).data(), M_PI );
         M_beta0[i]                     = dataFile( ( section + "/parameters/beta0"                   ).data(), 1.e6 );
@@ -450,10 +450,11 @@ OneDimensionalData::updateCoefficients()
         // PowerlawProfile: s(r) = (1+2/gamma)*(1-r^gamma)
         Real radius (1.); //std::sqrt( M_Area0[i] / M_PI );
 
-        Real profileIntegral =   std::pow(1+2./M_powerLawCoefficient, 2) *
-                                 (   std::pow(radius,2) / 2 +
-                                     std::pow(radius,2*M_powerLawCoefficient+2) / (2*M_powerLawCoefficient+2) -
-                                     2*std::pow(radius,  M_powerLawCoefficient+2) / (  M_powerLawCoefficient+2) );
+        Real profileIntegral =   ( 1+2./M_powerLawCoefficient ) * ( 1+2./M_powerLawCoefficient ) *
+                                 (     radius * radius / 2 +
+                                       std::pow(radius, 2*M_powerLawCoefficient+2) / (2*M_powerLawCoefficient+2 ) -
+                                     2*std::pow(radius,   M_powerLawCoefficient+2) / (  M_powerLawCoefficient+2 )
+                                 );
 
         // Compute Friction Coefficient: Kr = -2*pi*mu/rho*s'(R)
         M_friction = 2 * M_PI * M_viscosity / M_density * ( M_powerLawCoefficient + 2 ) * std::pow( radius, M_powerLawCoefficient - 1 );
@@ -461,7 +462,7 @@ OneDimensionalData::updateCoefficients()
         for ( UInt i = 0; i < M_mesh->numPoints(); ++i )
         {
             // Compute Coriolis Coefficient: Alpha = 2*pi/Area0*Int(s(r)^2)
-            M_alpha[i] = 2 / std::pow(radius,2) * profileIntegral;
+            M_alpha[i] = 2 / ( radius * radius ) * profileIntegral;
 
             // Compute Beta0
             if ( M_thickVessel ) // see Amadori, Ferrari, Formaggia (MOX report 86)
@@ -497,7 +498,7 @@ OneDimensionalData::initLinearParam( const GetPot& /*dataFile*/ )  // CHECK THIS
     for ( UInt indz=0; indz < M_mesh->numPoints(); ++indz )
     {
         M_celerity1[indz] = std::sqrt( M_beta0[indz] * M_beta1[indz] / M_density );
-        M_flux21[indz]    = std::pow( M_celerity1[indz], 2 );
+        M_flux21[indz]    =  M_celerity1[indz] *  M_celerity1[indz];
         M_source22[indz]  = M_friction / M_area0(indz);
     }
 
