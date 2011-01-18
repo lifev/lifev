@@ -91,6 +91,8 @@ BCBase::BCBase( const bcName_Type& name, const bcFlag_Type& flag,
         M_offset( -1 ),
         M_finalized( false )
 {
+	for(UInt i=0; i<M_components.size(); i++)
+		M_components[i]--;
     if ( M_mode != Component )
     {
         ERROR_MSG( "BCBase::BCBase: You should use a more specific constructor for this mode" );
@@ -121,12 +123,12 @@ BCBase::BCBase( const bcName_Type& name,
     case Scalar:
         numberOfComponents = 1;
         M_components.reserve( numberOfComponents );
-        M_components.push_back( 1 );
+        M_components.push_back( 0 );
         break;
     case Tangential:
         numberOfComponents = nDimensions;
         M_components.reserve( numberOfComponents );
-        for ( ID i = 1; i <= numberOfComponents; ++i )
+        for ( ID i = 0; i < numberOfComponents; ++i )
             M_components.push_back( i );
         break;
     case Normal:
@@ -135,20 +137,20 @@ BCBase::BCBase( const bcName_Type& name,
         {
             numberOfComponents = 1;
             M_components.reserve( numberOfComponents );
-            M_components.push_back( nDimensions );
+            M_components.push_back( nDimensions-1 );
         }
         else
         {
             numberOfComponents = nDimensions;
             M_components.reserve( numberOfComponents );
-            for ( ID i = 1; i <= numberOfComponents; ++i )
+            for ( ID i = 0; i < numberOfComponents; ++i )
                 M_components.push_back( i );
         }
         break;
     case Directional:
         numberOfComponents = 1;
         M_components.reserve( numberOfComponents );
-        M_components.push_back( nDimensions );
+        M_components.push_back( nDimensions - 1 );
         break;
     default:
         ERROR_MSG( "BCBase::BCBase: You should use a more specific constructor for this mode" );
@@ -180,7 +182,7 @@ BCBase::BCBase( const bcName_Type& name,
         ERROR_MSG( "BCBase::BCBase: You should use a more specific constructor for this mode" );
     }
     M_components.reserve( numberOfComponents );
-    for ( ID i = 1; i <= numberOfComponents; ++i )
+    for ( ID i = 0; i < numberOfComponents; ++i )
         M_components.push_back( i );
 
 }
@@ -206,6 +208,8 @@ BCBase::BCBase( const bcName_Type& name,
         M_offset( -1 ),
         M_finalized( false )
 {
+	for(UInt i=0; i<M_components.size(); i++)
+		M_components[i]--;
     if ( mode != Component )
     {
         ERROR_MSG( "BCBase::BCBase: You should use a more specific constructor for this mode" );
@@ -236,26 +240,26 @@ BCBase::BCBase( const bcName_Type& name,
     case Scalar:
         numberOfComponents = 1;
         M_components.reserve( numberOfComponents );
-        M_components.push_back( 1 );
+        M_components.push_back( 0 );
 
         break;
     case Tangential:
         numberOfComponents = nDimensions - 1;
         M_components.reserve( numberOfComponents );
-        for ( ID i = 1; i <= numberOfComponents; ++i )
+        for ( ID i = 0; i < numberOfComponents; ++i )
             M_components.push_back( i );
 
         break;
     case Normal:
         numberOfComponents = 1;
         M_components.reserve( numberOfComponents );
-        M_components.push_back( nDimensions );
+        M_components.push_back( nDimensions - 1 );
 
         break;
     case Directional:
         numberOfComponents = 1;
         M_components.reserve( numberOfComponents );
-        M_components.push_back( nDimensions );
+        M_components.push_back( nDimensions - 1 );
         break;
     default:
         ERROR_MSG( "BCBase::BCBase: You should use a more specific constructor for this mode" );
@@ -289,7 +293,7 @@ BCBase::BCBase( const bcName_Type& name,
     }
 
     M_components.reserve( numberOfComponents );
-    for ( ID i = 1; i <= numberOfComponents; ++i )
+    for ( ID i = 0; i < numberOfComponents; ++i )
         M_components.push_back( i );
 
 }
@@ -312,6 +316,8 @@ BCBase::BCBase( const bcName_Type&     name,
         M_isStored_BcFunctionVectorDependent(true),
         M_finalized( false )
 {
+	for(UInt i=0; i<M_components.size(); i++)
+		M_components[i]--;
     if ( M_mode != Component )
     {
         ERROR_MSG( "BCBase::BCBase: You should use a more specific constructor for this mode" );
@@ -343,23 +349,23 @@ BCBase::BCBase( const bcName_Type&  name,
     case Scalar:
         numberOfComponents = 1;
         M_components.reserve( numberOfComponents );
-        M_components.push_back( 1 );
+        M_components.push_back( 0 );
         break;
     case Tangential:
         numberOfComponents = nDimensions - 1;
         M_components.reserve( numberOfComponents );
-        for ( ID i = 1; i <= numberOfComponents; ++i )
+        for ( ID i = 0; i < numberOfComponents; ++i )
             M_components.push_back( i );
         break;
     case Normal:
         numberOfComponents = 1;
         M_components.reserve( numberOfComponents );
-        M_components.push_back( nDimensions );
+        M_components.push_back( nDimensions -1 );
         break;
     case Directional:
         numberOfComponents = 1;
         M_components.reserve( numberOfComponents );
-        M_components.push_back( nDimensions );
+        M_components.push_back( nDimensions - 1);
         break;
     default:
         ERROR_MSG( "BCBase::BCBase: You should use a more specific constructor for this mode" );
@@ -393,7 +399,7 @@ BCBase::BCBase( const bcName_Type&  name,
     }
 
     M_components.reserve( numberOfComponents );
-    for ( ID i = 1; i <= numberOfComponents; ++i )
+    for ( ID i = 0; i < numberOfComponents; ++i )
         M_components.push_back( i );
 
 }
@@ -437,8 +443,8 @@ BCBase::~BCBase()
 
 ID BCBase::component( const ID i ) const
 {
-    ASSERT_BD( i >= 1 && i <= M_components.size() );
-    return M_components[ i -1 ];
+    ASSERT_BD( i < M_components.size() );
+    return M_components[ i ];
 }
 
 bool  BCBase::isRobinCoeffAVector()  const
@@ -604,12 +610,6 @@ BCBase::operator[] ( const ID& i ) const
     ASSERT_PRE( M_finalized, "BC List should be finalized before being accessed" );
     ASSERT_BD( i < M_idVector.size() );
     return M_idVector[ i ].get();
-}
-
-const BCIdentifierBase*
-BCBase::operator() ( const ID& i ) const
-{
-    return this->operator[] ( i-1 );
 }
 
 Real BCBase::operator() ( const Real& t, const Real& x, const Real& y,

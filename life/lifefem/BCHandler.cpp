@@ -356,7 +356,7 @@ BCHandler::hasOnlyEssential() const
 {
     std::map<bcFlag_Type, std::set<ID> > nonEssentialConditions;
     std::set<ID> nonEssentialComponents;
-    for (UInt i=1; i<=nDimensions; i++)
+    for (UInt i=0; i< nDimensions; i++)
         nonEssentialComponents.insert(i);
 
     for ( bcBaseConstIterator_Type it = M_bcList.begin(); it != M_bcList.end(); ++it )
@@ -373,10 +373,10 @@ BCHandler::hasOnlyEssential() const
                 nonEssentialConditions.erase(it->flag());
                 break;
             case Scalar:
-                nonEssentialConditions.find(it->flag())->second.erase(1);
+                nonEssentialConditions.find(it->flag())->second.erase(0);
                 break;
             case Component:
-                for ( UInt iComp = 1; iComp <= it->numberOfComponents(); ++iComp )
+                for ( UInt iComp = 0; iComp < it->numberOfComponents(); ++iComp )
                     nonEssentialConditions.find(it->flag())->second.erase( it->component(iComp) );
                 if ( nonEssentialConditions.find(it->flag())->second.empty() )
                     nonEssentialConditions.erase(it->flag());

@@ -426,14 +426,6 @@ public:
      */
     const BCIdentifierBase* operator[] ( const ID& i ) const;
 
-    //! Returns a pointer to the (i-1)-th element of the list of identifiers
-    /*!
-       The list of identifiers has to be finalized before calling this operator.
-       @param i index of the element in the list of identifier that we want to be returned (starting from 1)
-     */
-    const BCIdentifierBase* operator() ( const ID& i ) const;
-
-
     //! Overloading function operator by calling the BCFunctionBase user specified function
     /*!
        @param t time
