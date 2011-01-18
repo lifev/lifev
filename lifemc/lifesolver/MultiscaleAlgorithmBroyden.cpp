@@ -152,7 +152,7 @@ void
 MultiscaleAlgorithmBroyden::assembleJacobianMatrix()
 {
     // Compute the Jacobian matrix
-    M_jacobian.reset( new multiscaleMatrix_Type( M_couplingVariables->map(), 50, 0 ) );
+    M_jacobian.reset( new multiscaleMatrix_Type( M_couplingVariables->map(), 50 ) );
     M_multiscale->exportJacobian( *M_jacobian );
     M_jacobian->globalAssemble();
 
