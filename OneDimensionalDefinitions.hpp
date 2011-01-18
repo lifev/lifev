@@ -72,7 +72,7 @@ namespace LifeV
 {
 namespace OneDimensional
 {
-const Real Pi = 3.14159265358979323846264338328;
+
 /*! @enum Physics Types
  */
 enum physicsType_Type
@@ -145,6 +145,56 @@ mapsDefinition()
 
     sourceMap["OneD_LinearSource"]      = LinearSource;
     sourceMap["OneD_NonLinearSource"]   = NonLinearSource;
+}
+
+//! Fast pow for the case of exponent 0.5
+inline Real
+pow05( const Real& base, const Real& exponent )
+{
+    if ( exponent == 0.5 )
+        return std::sqrt( base );
+    else
+        return std::pow( base, exponent );
+}
+
+//! Fast pow for the case of exponent 1.5
+inline Real
+pow15( const Real& base, const Real& exponent )
+{
+    if ( exponent == 1.5 )
+        return std::sqrt( base ) * base;
+    else
+        return std::pow( base, exponent );
+}
+
+//! Fast pow for the case of exponent 2.0
+inline Real
+pow20( const Real& base, const Real& exponent )
+{
+    if ( exponent == 2.0 )
+        return base * base;
+    else
+        return std::pow( base, exponent );
+}
+
+//! Fast pow for the case of exponent 3.0
+inline Real
+pow30( const Real& base, const Real& exponent )
+{
+    if ( exponent == 3.0 )
+        return base * base * base;
+    else
+        return std::pow( base, exponent );
+}
+
+//! Fast pow for the case of exponent 4.0
+inline Real
+pow40( const Real& base, const Real& exponent )
+{
+    if ( exponent == 4.0 )
+        return base * base * base * base;
+    else
+        return std::pow( base, exponent );
 }
 
 } // OneDimensional namespace

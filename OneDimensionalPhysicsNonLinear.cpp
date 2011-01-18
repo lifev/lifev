@@ -50,7 +50,7 @@ namespace LifeV
 void
 OneDimensionalPhysicsNonLinear::fromUToW( Real& W1, Real& W2, const Real& A,  const Real& Q, const UInt& indz ) const
 {
-    Real celerity( celerity0(indz) * std::sqrt( std::pow( A / M_data -> area0(indz), M_data -> beta1(indz) ) ) );
+    Real celerity( celerity0(indz) * std::sqrt( OneDimensional::pow05( A / M_data -> area0(indz), M_data -> beta1(indz) ) ) );
 
     Real add( std::sqrt( M_data -> robertsonCorrection() ) * ( celerity - celerity0(indz) ) * 2 / M_data -> beta1(indz) );
 
@@ -68,8 +68,8 @@ OneDimensionalPhysicsNonLinear::fromWToU( Real& A, Real& Q, const Real& W1, cons
     Real beta1over4SQRTchi( M_data -> beta1(indz) / ( std::sqrt(M_data -> robertsonCorrection() ) * 4 ) );
 
     A = M_data -> area0(indz)
-        * std::pow( rhooverbeta0beta1, (1/M_data -> beta1(indz)) )
-        * std::pow( beta1over4SQRTchi * (W1 - W2) + celerity0(indz), (2/M_data -> beta1(indz)) );
+        * OneDimensional::pow20( rhooverbeta0beta1, 1 / M_data -> beta1(indz) )
+        * OneDimensional::pow40( beta1over4SQRTchi * (W1 - W2) + celerity0(indz), 2 / M_data -> beta1(indz) );
 
     Q = A * ( W1 + W2 ) / 2;
 }
@@ -81,7 +81,7 @@ OneDimensionalPhysicsNonLinear::fromWToP( const Real& W1, const Real& W2, const 
 
     Real beta1over4SQRTchi( M_data -> beta1(indz) / ( std::sqrt(M_data -> robertsonCorrection()) * 4 ) );
 
-    return M_data -> beta0(indz) * ( rhooverbeta0beta1 * std::pow( beta1over4SQRTchi * (W1 - W2) + celerity0(indz), 2 ) - 1 );
+    return M_data -> beta0(indz) * ( rhooverbeta0beta1 * ( beta1over4SQRTchi * (W1 - W2) + celerity0(indz) ) * ( beta1over4SQRTchi * (W1 - W2) + celerity0(indz) ) - 1 );
 }
 
 Real
@@ -93,13 +93,13 @@ OneDimensionalPhysicsNonLinear::fromPToW( const Real& P, const Real& W, const ID
     Real SQRTchi4overbeta1( std::sqrt(M_data -> robertsonCorrection()) * 4 / M_data -> beta1(indz) );
 
     Real add( SQRTchi4overbeta1 * SQRTbeta0beta1overrho
-              * ( pow( ( P / M_data -> beta0(indz) + 1 ), 0.5 ) - 1 ) );
+              * ( std::sqrt( P / M_data -> beta0(indz) + 1 ) - 1 ) );
 
 #ifdef HAVE_LIFEV_DEBUG
     Debug(6320) << "[OneDimensionalModel_Physics_NonLinear::W_fromP] "
     << "SQRTchi4overbeta1 = " << SQRTchi4overbeta1
     << ", beta0beta1overrho = " << SQRTbeta0beta1overrho
-    << ", pow( ( P / M_data -> beta0(indz) + 1 ), 0.5 ) = " << pow( ( P / M_data -> beta0(indz) + 1 ), 0.5 ) << "\n";
+    << ", pow( ( P / M_data -> beta0(indz) + 1 ), 0.5 ) = " << std::sqrt( ( P / M_data -> beta0(indz) + 1 ) ) << "\n";
     Debug(6320) << "[OneDimensionalModel_Physics_NonLinear::W_fromP] add term = " << add << "\n";
 #endif
 
@@ -118,23 +118,23 @@ OneDimensionalPhysicsNonLinear::fromQToW( const Real& Q, const Real& W_n, const 
     Real K0( M_data -> beta1(indz) / ( std::sqrt(M_data -> robertsonCorrection()) * 4 ) );
 
     Real K1( (M_data -> area0(indz) / 2) );
-    K1 *= pow( M_data -> densityRho() / (M_data -> beta0(indz) * M_data -> beta1(indz)), 1/M_data -> beta1(indz) );
-    K1 *= pow( K0, 2/M_data -> beta1(indz) );
+    K1 *= OneDimensional::pow20( M_data -> densityRho() / (M_data -> beta0(indz) * M_data -> beta1(indz)), 1 / M_data -> beta1(indz) );
+    K1 *= OneDimensional::pow40( K0, 2/M_data -> beta1(indz) );
 
     Real w_k = W_n;
     Real f_k, df_k, tau_k(0);
 
     if ( i == 1 ) // W1 given
     {
-        f_k = pow( W - w_k + celerity0(indz) / K0, 2/M_data -> beta1(indz) );
-        tau_k = pow( W - w_k + celerity0(indz) / K0, 2/M_data -> beta1(indz) );
-        df_k = (-2 / M_data -> beta1(indz)) * pow( W - w_k + celerity0(indz) / K0, 2/M_data -> beta1(indz) - 1 );
+        f_k = OneDimensional::pow40( W - w_k + celerity0(indz) / K0, 2/M_data -> beta1(indz) );
+        tau_k = OneDimensional::pow40( W - w_k + celerity0(indz) / K0, 2/M_data -> beta1(indz) );
+        df_k = (-2 / M_data -> beta1(indz)) * OneDimensional::pow30( W - w_k + celerity0(indz) / K0, 2/M_data -> beta1(indz) - 1 );
     }
     if ( i == 2 ) // W2 given
     {
-        f_k = pow( w_k - W + celerity0(indz) / K0, 2/M_data -> beta1(indz) );
-        tau_k = pow( w_k - W + celerity0(indz) / K0, 2/M_data -> beta1(indz) );
-        df_k = (-2 / M_data -> beta1(indz)) * pow( w_k - W + celerity0(indz) / K0, 2/M_data -> beta1(indz) - 1 );
+        f_k = OneDimensional::pow40( w_k - W + celerity0(indz) / K0, 2/M_data -> beta1(indz) );
+        tau_k = OneDimensional::pow40( w_k - W + celerity0(indz) / K0, 2/M_data -> beta1(indz) );
+        df_k = (-2 / M_data -> beta1(indz)) * OneDimensional::pow30( w_k - W + celerity0(indz) / K0, 2/M_data -> beta1(indz) - 1 );
     }
     f_k *= (W + w_k);
     f_k += - Q / K1;
