@@ -129,7 +129,7 @@ public:
 
     enum OneD_distributionLaw
     {
-        none,
+        uniform,
         linear,
         pointwise
     };
