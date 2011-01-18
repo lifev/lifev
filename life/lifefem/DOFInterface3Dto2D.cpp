@@ -55,7 +55,7 @@ namespace LifeV
 
 void RemoveMultiple( const std::list<ID> & listToTreat, std::list< std::pair<ID, ID> > & finalList )
 {
-    ID counter = 1;
+    ID counter = 0;
     std::list<ID> temporaryList( listToTreat );
 
     //! Sort the list
