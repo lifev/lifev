@@ -365,9 +365,9 @@ template<typename MatrixType>
 void BCManageNormal<MatrixType>::init(const BCBase& boundaryCondition,const Real& time)
 {
     // Loop on BC identifiers
-    for ( ID i = 1; i <= boundaryCondition.list_size(); ++i )
+    for ( ID i = 0; i < boundaryCondition.list_size(); ++i )
     {
-        const BCIdentifierEssential* pId = static_cast< const BCIdentifierEssential* >( boundaryCondition( i ) );
+        const BCIdentifierEssential* pId = static_cast< const BCIdentifierEssential* >( boundaryCondition[ i ] );
 
         if (boundaryCondition.mode()==Directional)
         {
@@ -376,11 +376,11 @@ void BCManageNormal<MatrixType>::init(const BCBase& boundaryCondition,const Real
             Real ny(pBcF->vectFct(time,pId->x(),pId->y(),pId->z(),2));
             Real nz(pBcF->vectFct(time,pId->x(),pId->y(),pId->z(),3));
 
-            M_addVersor(boundaryCondition(i)->id(),nx,ny,nz);
+            M_addVersor(boundaryCondition[i]->id(),nx,ny,nz);
         }
         else
         {
-            M_addBoundaryPoint(boundaryCondition(i)->id(),boundaryCondition.flag());
+            M_addBoundaryPoint(boundaryCondition[i]->id(),boundaryCondition.flag());
         }
     }
     M_dataBuilt = true; //Since vectors has been given we must apply the basis change.
@@ -424,7 +424,7 @@ void BCManageNormal<MatrixType>::build(const MeshType& mesh, const DOF& dof,Curr
             ++i;
         }
 
-        M_localMapEpetraPtr.reset( new MapEpetra(-1,3*nbPoints,idList,1,commPtr) );
+        M_localMapEpetraPtr.reset( new MapEpetra(-1,3*nbPoints,idList,commPtr) );
 
         //-----------------------------------------------------
         // STEP 2: Compute normals and tangents

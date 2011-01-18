@@ -123,7 +123,7 @@ void BCIdentifierNatural::showMe( std::ostream & output) const
 	output << "\nNode id:" << M_id << '\n';
 	output << "Local-to-global map:\n";
 
-	int i(1);
+	int i(0);
 	for( VectorSimple<ID>::const_iterator it = M_localToGlobal.begin(); it != M_localToGlobal.end(); ++it, ++i )
 		output << "Local id: " << i << "  -->  Global id: " << *it << '\n';
 }
