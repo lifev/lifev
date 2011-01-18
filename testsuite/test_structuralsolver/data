@@ -17,10 +17,9 @@
 
 
 [exporter]
-type       = hdf5 # ensight # hdf5 (if library compiled with hdf5 support) or ensight
+type       = ensight # ensight # hdf5 (if library compiled with hdf5 support) or ensight
 multimesh  = false
 start      = 0
-
 save       = 1
 
 [solid]
@@ -29,6 +28,7 @@ save       = 1
   density   = 1.2               # density
   young     = 8.0E6
   poisson   = 0.4
+  solidType = linearVenantKirchhoff
 
   [../time_discretization]
   initialtime = 0.
@@ -38,7 +38,8 @@ save       = 1
 
   [../space_discretization]
   mesh_dir  = Mesh/     # the directory where the mesh file is
-  mesh_file = vessel20.mesh # mesh file  #mesh_file = hexa2x2.mesh # mesh file
+  mesh_file = vessel20.mesh
+  #mesh_file = hexa2x2.mesh # mesh file
   order     = P1
 
 
