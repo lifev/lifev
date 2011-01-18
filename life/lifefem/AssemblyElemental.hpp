@@ -136,7 +136,7 @@ void interpolate(localVector& localValues,
             for (UInt iDof(0); iDof < nbFEDof ; ++iDof)
             {
                 localValues[iQuadPt][iterDim] +=
-                    beta[ betaDof.localToGlobal(elementID,iDof+1) + iterDim*totalDof]
+                    beta[ betaDof.localToGlobalMap(elementID,iDof) + iterDim*totalDof]
                     * interpCFE.phi(iDof,iQuadPt);
             }
         }

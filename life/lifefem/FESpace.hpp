@@ -553,7 +553,7 @@ FESpace(	MeshPartitioner<MeshType>& 	mesh,
         M_feBd			( ),
         M_map			( new map_Type() )
 {
-    if (M_refFE->hasBoundaryFE())
+	if (M_refFE->hasBoundaryFE())
     {
         M_feBd.reset(new CurrentBoundaryFE( M_refFE->boundaryFE(), getGeometricMap( *M_mesh ).boundaryMap(), *M_bdQr ) );
     }
@@ -701,7 +701,7 @@ FESpace<MeshType, MapType>::interpolate( const function_Type& fct,
     std::vector<Real> FEValues(numberLocalDof,0);
 
     // Do the loop over the cells
-    for (UInt iterVolume(1); iterVolume<= totalNumberElements; ++iterVolume)
+    for (UInt iterVolume(0); iterVolume < totalNumberElements; ++iterVolume)
     {
         // We update the CurrentFE so that we get the coordinates of the nodes
         interpCFE.update(M_mesh->element(iterVolume), UPDATE_QUAD_NODES);
@@ -724,7 +724,7 @@ FESpace<MeshType, MapType>::interpolate( const function_Type& fct,
             for (UInt iterDof(0); iterDof < numberLocalDof; ++iterDof)
             {
                 // Find the ID of the considered DOF
-                ID globalDofID(M_dof->localToGlobal(iterVolume,iterDof+1) + iDim*M_dim);
+                ID globalDofID(M_dof->localToGlobalMap(iterVolume,iterDof) + iDim*M_dim);
 
                 // Compute the value of the function and set it
                 vect.setCoefficient(globalDofID,FEValues[iterDof]);
@@ -762,17 +762,17 @@ FESpace<MeshType, MapType>::interpolateBC( BCHandler& BCh,
             // Number of components involved in this boundary condition
             UInt nComp = BCh[ibc].numberOfComponents();
 
-            for ( ID i = 1; i <= BCh[ibc].list_size(); ++i )
+            for ( ID i = 0; i < BCh[ibc].list_size(); ++i )
             {
                 // Coordinates of the node where we impose the value
-                Real x = static_cast< const BCIdentifierEssential* >( BCh[ibc]( i ) ) ->x();
-                Real y = static_cast< const BCIdentifierEssential* >( BCh[ibc]( i ) ) ->y();
-                Real z = static_cast< const BCIdentifierEssential* >( BCh[ibc]( i ) ) ->z();
+                Real x = static_cast< const BCIdentifierEssential* >( BCh[ibc][ i ] ) ->x();
+                Real y = static_cast< const BCIdentifierEssential* >( BCh[ibc][ i ] ) ->y();
+                Real z = static_cast< const BCIdentifierEssential* >( BCh[ibc][ i ] ) ->z();
 
-                for ( ID j = 1; j <= nComp; ++j )
+                for ( ID j = 0; j < nComp; ++j )
                 {
                     // Global Dof
-                    idDof = BCh[ibc]( i ) ->id() + ( BCh[ibc].component( j ) - 1 ) * totalDof;
+                    idDof = BCh[ibc][ i ] ->id() + BCh[ibc].component( j ) * totalDof;
                     Real val = BCh[ibc]( time, x, y, z, BCh[ibc].component( j ) );
 
                     vect.setCoefficient(idDof,val);
@@ -794,7 +794,7 @@ void
 FESpace<MeshType, MapType>::l2ScalarProduct( const function_Type& fct, vector_type& vec, const Real t)
 {
 
-    for ( UInt iVol = 1; iVol <= this->mesh()->numElements(); iVol++ )
+    for ( UInt iVol = 0; iVol < this->mesh()->numElements(); iVol++ )
     {
         this->fe().update( this->mesh()->element( iVol ), UPDATE_QUAD_NODES | UPDATE_PHI | UPDATE_WDET );
 
@@ -815,7 +815,7 @@ FESpace<MeshType, MapType>::l2ScalarProduct( const function_Type& fct, vector_ty
                 u_ig = 0.;
                 for ( i = 0; i < this->fe().nbFEDof(); i++ )
                 {
-                    inod = this->dof().localToGlobal( eleID, i + 1 ) + ic * dim();
+                    inod = this->dof().localToGlobalMap( eleID, i ) + ic * dim();
                     u_ig = f*this->fe().phi( i, iQuadPt );
                     vec.sumIntoGlobalValues(inod,u_ig*this->fe().weightDet( iQuadPt ));
                 }
@@ -843,7 +843,7 @@ FESpace<MeshType, MapType>::l20Error( const function_Type& fexact,
     Real sumExact2 = 0.;
     Real sumExact1 = 0.;
 
-    for ( UInt iVol = 1; iVol <= this->mesh()->numElements(); iVol++ )
+    for ( UInt iVol = 0; iVol < this->mesh()->numElements(); iVol++ )
     {
         this->fe().update( this->mesh()->element( iVol ), UPDATE_QUAD_NODES | UPDATE_PHI | UPDATE_WDET );
 
@@ -894,7 +894,7 @@ FESpace<MeshType, MapType>::l2Error( const function_Type&    fexact,
     Real normU       = 0.;
     Real sumExact    = 0.;
 
-    for ( UInt iVol  = 1; iVol <= this->mesh()->numElements(); iVol++ )
+    for ( UInt iVol  = 0; iVol < this->mesh()->numElements(); iVol++ )
     {
         //this->fe().updateFirstDeriv( this->mesh()->element( iVol ) );
 
@@ -943,7 +943,7 @@ FESpace<MeshType, MapType>::l2NormFunction( const function& f, const Real time)
     //
     Real sumExact = 0.;
     //
-    for ( UInt ielem = 1; ielem <= this->mesh()->numElements(); ielem++ )
+    for ( UInt ielem = 0; ielem < this->mesh()->numElements(); ielem++ )
     {
         this->fe().update( this->mesh()->element( ielem ),  UPDATE_QUAD_NODES | UPDATE_PHI | UPDATE_WDET  );
 
@@ -979,7 +979,7 @@ FESpace<MeshType,MapType>:: l2ErrorWeighted(const function_Type&    exactSolutio
 
     // Compute the integral on this processor
 
-    for (UInt iVol(1); iVol <= this->mesh()->numElements(); ++iVol)
+    for (UInt iVol(0); iVol < this->mesh()->numElements(); ++iVol)
     {
         this->fe().update(this->mesh()->element(iVol), UPDATE_QUAD_NODES | UPDATE_PHI | UPDATE_WDET);
 
@@ -991,7 +991,7 @@ FESpace<MeshType,MapType>:: l2ErrorWeighted(const function_Type&    exactSolutio
             {
                 for (UInt iDof(0); iDof< this->fe().nbFEDof(); ++iDof)
                 {
-                    UInt dofID(this->dof().localToGlobal(iVol,iDof+1) + iDim*this->dof().numTotalDof());
+                    UInt dofID(this->dof().localToGlobalMap(iVol,iDof) + iDim*this->dof().numTotalDof());
                     solutionInQuadNode += this->fe().phi(iDof,iQuad) * solution[dofID];
                 }
 
@@ -1035,7 +1035,7 @@ FESpace<MeshType, MapType>::h1Error( const function&    fexact,
     Real normU       = 0.;
     Real sumExact    = 0.;
 
-    for ( UInt iVol  = 1; iVol <= this->mesh()->numElements(); iVol++ )
+    for ( UInt iVol  = 0; iVol < this->mesh()->numElements(); iVol++ )
     {
         this->fe().updateFirstDerivQuadPt( this->mesh()->element( iVol ) );
 
@@ -1089,7 +1089,7 @@ FESpace<MeshType, MapType>::l2Norm( const vector_type& vec)
     //
     Real norm = 0.;
     //
-    for ( UInt ielem = 1; ielem <= this->mesh()->numElements(); ielem++ )
+    for ( UInt ielem = 0; ielem < this->mesh()->numElements(); ielem++ )
     {
         //UInt elem = M_FESpace.mesh()->element( ielem ).id();
         this->fe().update( this->mesh()->element( ielem ), UPDATE_QUAD_NODES | UPDATE_PHI | UPDATE_WDET );
@@ -1119,7 +1119,7 @@ FESpace<MeshType, MapType>::h1Norm(const vector_type& vec)
     //
     Real norm = 0.;
     //
-    for ( UInt ielem = 1; ielem <= this->mesh()->numElements(); ielem++ )
+    for ( UInt ielem = 0; ielem < this->mesh()->numElements(); ielem++ )
     {
         //UInt elem = M_FESpace.mesh()->element( ielem ).id();
         this->fe().updateFirstDerivQuadPt( this->mesh()->element( ielem ) );
@@ -1184,7 +1184,7 @@ feInterpolateValue(const ID& elementID, const vector_type& solutionVector, const
         // The global ID of the selected dof
         // This should be changed in case of a VECTORIAL FE
 
-        ID globalDofID(component*totalDof + dof().localToGlobal(elementID, iter_dof +1) ); // iter_dof -> dofID
+        ID globalDofID(component*totalDof + dof().localToGlobalMap(elementID, iter_dof) ); // iter_dof -> dofID
 
         // Make the accumulation
         value += solutionVector[globalDofID] * M_refFE->phi(iter_dof, hat_x, hat_y, hat_z);
@@ -1283,7 +1283,7 @@ feInterpolateGradient(const ID& elementID, const vector_type& solutionVector, co
     for (UInt iter_dof(0); iter_dof<nDof ; ++iter_dof)
     {
         // The global ID of the selected dof
-        ID globalDofID(totalDof * component + dof().localToGlobal(elementID, iter_dof+1) );
+        ID globalDofID(totalDof * component + dof().localToGlobalMap(elementID, iter_dof) );
 
         for (UInt iter_dim(0); iter_dim<3; ++iter_dim)
         {
@@ -1473,7 +1473,7 @@ gradientRecovery(const vector_type& solution, const UInt& dxi)
     CurrentFE interpCFE(*M_refFE,getGeometricMap(*M_mesh ),interpQuad);
 
     // Loop over the cells
-    for (UInt iterVolume(1); iterVolume<= totalNumberElements; ++iterVolume)
+    for (UInt iterVolume(0); iterVolume< totalNumberElements; ++iterVolume)
     {
         interpCFE.update(mesh()->element(iterVolume), UPDATE_DPHI | UPDATE_WDET );
 
@@ -1481,12 +1481,12 @@ gradientRecovery(const vector_type& solution, const UInt& dxi)
         {
             for (UInt iDim(0); iDim < M_fieldDim; ++iDim)
             {
-                ID globalDofID(dof().localToGlobal(iterVolume,iterDof+1) + iDim*dof().numTotalDof());
+                ID globalDofID(dof().localToGlobalMap(iterVolume,iterDof) + iDim*dof().numTotalDof());
 
                 patchArea[globalDofID] += interpCFE.measure();
                 for (UInt iterDofGrad(0); iterDofGrad < numberLocalDof; ++iterDofGrad)
                 {
-                    ID globalDofIDGrad(dof().localToGlobal(iterVolume,iterDofGrad+1));
+                    ID globalDofIDGrad(dof().localToGlobalMap(iterVolume,iterDofGrad));
                     gradientSum[globalDofID] += interpCFE.measure()*solution[globalDofIDGrad]*interpCFE.dphi(iterDofGrad,dxi,iterDof);
                 }
             }
@@ -1640,7 +1640,7 @@ P2ToP1Interpolate(const FESpace<mesh_Type,map_Type>& OriginalSpace,
     UInt totalDofsPresent(dof().numTotalDof());
 
     // Loop over the elements to get the values
-    for ( ID iElem = 1; iElem <= numVolumes ; ++iElem )
+    for ( ID iElem = 0; iElem < numVolumes ; ++iElem )
     {
         UInt elemId (mesh()->volume(iElem).localId());
 
@@ -1652,8 +1652,8 @@ P2ToP1Interpolate(const FESpace<mesh_Type,map_Type>& OriginalSpace,
         {
             for (UInt iP1dof(0); iP1dof<4; ++iP1dof)
             {
-                ID globalDofID_original(iComponent*totalDofsOriginal + OriginalSpace.dof().localToGlobal(elemId, iP1dof +1));
-                ID globalDofID_present(iComponent*totalDofsPresent + dof().localToGlobal(elemId, iP1dof +1) );
+                ID globalDofID_original(iComponent*totalDofsOriginal + OriginalSpace.dof().localToGlobalMap(elemId, iP1dof));
+                ID globalDofID_present(iComponent*totalDofsPresent + dof().localToGlobalMap(elemId, iP1dof) );
 
                 Real value =  OriginalVector[globalDofID_original];
                 Interpolated[globalDofID_present]= value;
@@ -1691,7 +1691,7 @@ P1bToP1Interpolate(const FESpace<mesh_Type,map_Type>& OriginalSpace,
     UInt totalDofsPresent(dof().numTotalDof());
 
     // Loop over the elements to get the values
-    for ( ID iElem = 1; iElem <= numVolumes ; ++iElem )
+    for ( ID iElem = 0; iElem < numVolumes ; ++iElem )
     {
         UInt elemId (mesh()->volume(iElem).localId());
 
@@ -1703,8 +1703,8 @@ P1bToP1Interpolate(const FESpace<mesh_Type,map_Type>& OriginalSpace,
         {
             for (UInt iP1dof(0); iP1dof<4; ++iP1dof)
             {
-                ID globalDofID_original(iComponent*totalDofsOriginal + OriginalSpace.dof().localToGlobal(elemId, iP1dof +1));
-                ID globalDofID_present(iComponent*totalDofsPresent + dof().localToGlobal(elemId, iP1dof +1) );
+                ID globalDofID_original(iComponent*totalDofsOriginal + OriginalSpace.dof().localToGlobalMap(elemId, iP1dof));
+                ID globalDofID_present(iComponent*totalDofsPresent + dof().localToGlobalMap(elemId, iP1dof) );
 
                 Real value =  OriginalVector[globalDofID_original];
                 Interpolated[globalDofID_present]= value;
@@ -1745,7 +1745,7 @@ P1ToP2Interpolate(const FESpace<mesh_Type,map_Type>& OriginalSpace,
     std::vector<Real> DofValues(10,0.0);
 
     // Loop over the elements to get the values
-    for ( ID iElem = 1; iElem <= numVolumes ; ++iElem )
+    for ( ID iElem = 0; iElem < numVolumes ; ++iElem )
     {
         UInt elemId (mesh()->volume(iElem).localId());
 
@@ -1758,12 +1758,12 @@ P1ToP2Interpolate(const FESpace<mesh_Type,map_Type>& OriginalSpace,
             // Get the values in the vertices
             for (UInt iP1dof(0); iP1dof<4; ++iP1dof)
             {
-                ID globalDofID_original(iComponent*totalDofsOriginal+OriginalSpace.dof().localToGlobal(elemId,iP1dof +1));
+                ID globalDofID_original(iComponent*totalDofsOriginal+OriginalSpace.dof().localToGlobalMap(elemId,iP1dof));
 
                 DofValues[iP1dof]  =  OriginalVector[globalDofID_original];
             };
 
-            // Compute the values in the faces (!this vector starts from 0, not from 1 as the dofs numeration)
+            // Compute the values in the faces
             DofValues[4] = 0.5*(DofValues[0]+DofValues[1]);
             DofValues[5] = 0.5*(DofValues[1]+DofValues[2]);
             DofValues[6] = 0.5*(DofValues[0]+DofValues[2]);
@@ -1774,7 +1774,7 @@ P1ToP2Interpolate(const FESpace<mesh_Type,map_Type>& OriginalSpace,
             // Now set them
             for (UInt iP2dof(0); iP2dof<10; ++iP2dof)
             {
-                ID globalDofID_present(iComponent*totalDofsPresent+dof().localToGlobal(elemId,iP2dof +1));
+                ID globalDofID_present(iComponent*totalDofsPresent+dof().localToGlobalMap(elemId,iP2dof));
 
                 Interpolated[globalDofID_present] = DofValues[iP2dof];
             };
@@ -1814,7 +1814,7 @@ P1ToP1bInterpolate(const FESpace<mesh_Type,map_Type>& OriginalSpace,
     std::vector<Real> DofValues(5,0.0);
 
     // Loop over the elements to get the values
-    for ( ID iElem = 1; iElem <= numVolumes ; ++iElem )
+    for ( ID iElem = 0; iElem < numVolumes ; ++iElem )
     {
         UInt elemId (mesh()->volume(iElem).localId());
 
@@ -1827,7 +1827,7 @@ P1ToP1bInterpolate(const FESpace<mesh_Type,map_Type>& OriginalSpace,
             // Get the values in the vertices
             for (UInt iP1dof(0); iP1dof<4; ++iP1dof)
             {
-                ID globalDofID_original(iComponent*totalDofsOriginal+OriginalSpace.dof().localToGlobal(elemId,iP1dof +1));
+                ID globalDofID_original(iComponent*totalDofsOriginal+OriginalSpace.dof().localToGlobalMap(elemId,iP1dof));
 
                 DofValues[iP1dof]  =  OriginalVector[globalDofID_original];
             };
@@ -1838,7 +1838,7 @@ P1ToP1bInterpolate(const FESpace<mesh_Type,map_Type>& OriginalSpace,
             // Now set them
             for (UInt iP1bdof(0); iP1bdof<5; ++iP1bdof)
             {
-                ID globalDofID_present(iComponent*totalDofsPresent+dof().localToGlobal(elemId,iP1bdof +1));
+                ID globalDofID_present(iComponent*totalDofsPresent+dof().localToGlobalMap(elemId,iP1bdof));
 
                 Interpolated[globalDofID_present] = DofValues[iP1bdof];
             };
@@ -1878,7 +1878,7 @@ P1bToP2Interpolate(const FESpace<mesh_Type,map_Type>& OriginalSpace,
     std::vector<Real> DofValues(10,0.0);
 
     // Loop over the elements to get the values
-    for ( ID iElem = 1; iElem <= numVolumes ; ++iElem )
+    for ( ID iElem = 0; iElem < numVolumes ; ++iElem )
     {
         UInt elemId (mesh()->volume(iElem).localId());
 
@@ -1892,12 +1892,12 @@ P1bToP2Interpolate(const FESpace<mesh_Type,map_Type>& OriginalSpace,
             // Get the values in the vertices
             for (UInt iP1dof(0); iP1dof<4; ++iP1dof)
             {
-                ID globalDofID_original(iComponent*totalDofsOriginal+OriginalSpace.dof().localToGlobal(elemId,iP1dof +1));
+                ID globalDofID_original(iComponent*totalDofsOriginal+OriginalSpace.dof().localToGlobalMap(elemId,iP1dof));
 
                 DofValues[iP1dof]  =  OriginalVector[globalDofID_original];
             };
 
-            // Compute the values in the faces (!this vector starts from 0, not from 1 as the dofs numeration)
+            // Compute the values in the faces
             DofValues[4] = 0.5*(DofValues[0]+DofValues[1]);
             DofValues[5] = 0.5*(DofValues[1]+DofValues[2]);
             DofValues[6] = 0.5*(DofValues[0]+DofValues[2]);
@@ -1908,7 +1908,7 @@ P1bToP2Interpolate(const FESpace<mesh_Type,map_Type>& OriginalSpace,
             // Now set them
             for (UInt iP2dof(0); iP2dof<10; ++iP2dof)
             {
-                ID globalDofID_present(iComponent*totalDofsPresent+dof().localToGlobal(elemId,iP2dof +1));
+                ID globalDofID_present(iComponent*totalDofsPresent+dof().localToGlobalMap(elemId,iP2dof));
 
                 Interpolated[globalDofID_present] = DofValues[iP2dof];
             };
@@ -1949,7 +1949,7 @@ P2ToP1bInterpolate(const FESpace<mesh_Type,map_Type>& OriginalSpace,
     std::vector<Real> DofValues(5,0.0);
 
     // Loop over the elements to get the values
-    for ( ID iElem = 1; iElem <= numVolumes ; ++iElem )
+    for ( ID iElem = 0; iElem < numVolumes ; ++iElem )
     {
         UInt elemId (mesh()->volume(iElem).localId());
 
@@ -1964,7 +1964,7 @@ P2ToP1bInterpolate(const FESpace<mesh_Type,map_Type>& OriginalSpace,
             // Get the values in the vertices
             for (UInt iP1dof(0); iP1dof<4; ++iP1dof)
             {
-                ID globalDofID_original(iComponent*totalDofsOriginal+OriginalSpace.dof().localToGlobal(elemId,iP1dof +1));
+                ID globalDofID_original(iComponent*totalDofsOriginal+OriginalSpace.dof().localToGlobalMap(elemId,iP1dof));
 
                 DofValues[iP1dof]  =  OriginalVector[globalDofID_original];
             };
@@ -1974,9 +1974,9 @@ P2ToP1bInterpolate(const FESpace<mesh_Type,map_Type>& OriginalSpace,
             std::vector<Real> gravityCenter(3,0);
             for (UInt iterVertices(0); iterVertices<4; ++iterVertices)
             {
-                gravityCenter[0] += mesh()->volume(iElem).point(iterVertices+1).coordinate(0+1)/4.0;
-                gravityCenter[1] += mesh()->volume(iElem).point(iterVertices+1).coordinate(1+1)/4.0;
-                gravityCenter[2] += mesh()->volume(iElem).point(iterVertices+1).coordinate(2+1)/4.0;
+                gravityCenter[0] += mesh()->volume(iElem).point(iterVertices).coordinate(0)/4.0;
+                gravityCenter[1] += mesh()->volume(iElem).point(iterVertices).coordinate(1)/4.0;
+                gravityCenter[2] += mesh()->volume(iElem).point(iterVertices).coordinate(2)/4.0;
             };
 
             Real gravityCenterValue(0);
@@ -1988,7 +1988,7 @@ P2ToP1bInterpolate(const FESpace<mesh_Type,map_Type>& OriginalSpace,
             // Now set them
             for (UInt iP1bdof(0); iP1bdof<5; ++iP1bdof)
             {
-                ID globalDofID_present(iComponent*totalDofsPresent+dof().localToGlobal(elemId,iP1bdof +1));
+                ID globalDofID_present(iComponent*totalDofsPresent+dof().localToGlobalMap(elemId,iP1bdof));
 
                 Interpolated[globalDofID_present] = DofValues[iP1bdof];
             };
@@ -2025,7 +2025,7 @@ RT0ToP0Interpolate(const FESpace<mesh_Type,map_Type>& OriginalSpace,
     UInt totalDofsPresent(dof().numTotalDof());
 
     // Loop over the elements to get the values. To compute the value we use the Piola transformation.
-    for ( ID iElem(1); iElem <= numVolumes ; ++iElem )
+    for ( ID iElem(0); iElem < numVolumes ; ++iElem )
     {
 
         // Map between local and global mesh.
@@ -2063,19 +2063,19 @@ RT0ToP0Interpolate(const FESpace<mesh_Type,map_Type>& OriginalSpace,
             Jac[1]= M_fe->pointJacobian(barRefFE[0], barRefFE[1], barRefFE[2], iComponent, 1);
             Jac[2]= M_fe->pointJacobian(barRefFE[0], barRefFE[1], barRefFE[2], iComponent, 2);
 
-            UInt iGlobalFacePresent( iComponent*totalDofsPresent + dof().localToGlobal(elemId, 1) );
+            UInt iGlobalFacePresent( iComponent*totalDofsPresent + dof().localToGlobalMap(elemId, 0) );
 
             // At each face loop on all the d.o.f.
             for (UInt iter_dof(0); iter_dof<nDof ; ++iter_dof)
             {
                 // Map between local d.o.f. and global d.o.f.
-                ID globalDofID( OriginalSpace.dof().localToGlobal( elemId, iter_dof + 1) );
+                ID globalDofID( OriginalSpace.dof().localToGlobalMap( elemId, iter_dof) );
 
                 // Find the correct position in the final vector.
-                UInt iGlobalFace( mesh()->localFaceId( elemId, iter_dof + 1 ) );
+                UInt iGlobalFace( mesh()->localFaceId( elemId, iter_dof ) );
 
                 // Select if the current face is coherent or not with the orientation. If yes use +, if not use -.
-                if ( mesh()->faceElement( iGlobalFace, 1 ) != iElem )
+                if ( mesh()->faceElement( iGlobalFace, 0 ) != iElem )
                 {
                     // Loop on each component of the selected finite element.
                     for (UInt jComponent(0); jComponent < FieldDim; ++jComponent)

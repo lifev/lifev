@@ -107,7 +107,7 @@ assembleVector( VectorEpetra&    globalVector,
 
     for ( UInt i(0) ; i < feNbDof ; ++i )
     {
-        iGlobalID = dof.localToGlobal( elementID, i + 1 ) + offset;
+        iGlobalID = dof.localToGlobalMap( elementID, i ) + offset;
         globalVector.sumIntoGlobalValues( iGlobalID, localView( i ) );
     }
 }
@@ -217,12 +217,12 @@ assembleMatrix( MatrixEpetra<Real>&   globalMatrix,
 
     for ( UInt k1 (0) ; k1 < fe1NbDof ; k1++ )
     {
-        iList[k1] = dof1.localToGlobal( elementID1, k1 + 1 ) - 1 + iOffset ;
+        iList[k1] = dof1.localToGlobalMap( elementID1, k1 ) + iOffset ;
     }
 
     for ( UInt k2 (0) ; k2 < fe2NbDof ; k2++ )
     {
-        jList[k2]  = dof2.localToGlobal( elementID2, k2 + 1 ) - 1 + jOffset ;
+        jList[k2]  = dof2.localToGlobalMap( elementID2, k2 ) + jOffset ;
         matPtr[k2] = &(localMatrix(static_cast<UInt>(0),k2));
     }
 
@@ -301,14 +301,14 @@ assembleTransposeMatrix( MatrixEpetra<Real>&   globalMatrix,
     for ( k1 = 0 ; k1 < currentFE1.nbFEDof() ; k1++ )
     {
         i =  k1;
-        ilist[k1] = dof1.localToGlobal( elementID1, i + 1 ) - 1 + iOffset ;
+        ilist[k1] = dof1.localToGlobalMap( elementID1, i ) + iOffset ;
         matPtr[k1] = &(localView(0,i));
     }
 
     for ( k2 = 0 ; k2 < currentFE2.nbFEDof() ; k2++ )
     {
         j = k2;
-        jlist[k2]  = dof2.localToGlobal( elementID2, j + 1 ) - 1 + jOffset ;
+        jlist[k2]  = dof2.localToGlobalMap( elementID2, j ) + jOffset ;
     }
 
     assert(localView.indexij( Int (1), Int(0) ) == 1);
@@ -332,7 +332,7 @@ extract_vec( VectorEpetra& V,
     UInt ig;
     for ( UInt i (0) ; i < fe.nbLocalDof() ; ++i )
     {
-        ig = dof.localToGlobal( feId, i + 1 ) + iblock * totdof;
+        ig = dof.localToGlobalMap( feId, i ) + iblock * totdof;
         vec( i ) = V[ ig ];
     }
 }

@@ -78,7 +78,7 @@ elementaryL2NormSquare( const VectorType & u, const CurrentFE& fe, const DOF& do
             uQuadPt = 0.;
             for ( UInt iDof(0); iDof < fe.nbFEDof(); ++iDof )
             {
-                dofID = dof.localToGlobal( eleID, iDof + 1 ) + iComp * dof.numTotalDof();
+                dofID = dof.localToGlobalMap( eleID, iDof ) + iComp * dof.numTotalDof();
                 uQuadPt += u( dofID ) * fe.phi( iDof, iQuadPt );
             }
             sum += uQuadPt * uQuadPt * fe.weightDet( iQuadPt );
@@ -157,7 +157,7 @@ elementaryH1NormSquare( const VectorType & u, const CurrentFE& fe, const DOF& do
 
             for ( UInt iDof(0); iDof < fe.nbFEDof(); ++iDof )
             {
-                UInt dofID = dof.localToGlobal( eleID, iDof + 1 ) + iComp * dof.numTotalDof();
+                UInt dofID = dof.localToGlobalMap( eleID, iDof ) + iComp * dof.numTotalDof();
                 uQuadPt += u( dofID ) * fe.phi( iDof, iQuadPt );
                 for (UInt iCoor (0); iCoor < fe.nbCoor(); ++iCoor)
                 {
@@ -255,7 +255,7 @@ Real elementaryDifferenceL2NormSquare( VectorType & u,
 	    z = fe.quadNode(iQuadPt,2);
         for (UInt iDof(0); iDof < fe.nbFEDof(); ++iDof )
         {
-            UInt dofID = dof.localToGlobal( eleID, iDof + 1 );
+            UInt dofID = dof.localToGlobalMap( eleID, iDof );
             uQuadPt += u( dofID ) * fe.phi( iDof, iQuadPt );
         }
         diffQuadPt = uQuadPt - fct( x, y, z );
@@ -292,7 +292,7 @@ Real elementaryDifferenceL2NormSquare( VectorType & u,
             uQuadPt=0.0;
             for (UInt iDof(0); iDof < fe.nbFEDof(); ++iDof )
             {
-                UInt dofID = dof.localToGlobal( eleID, iDof + 1 ) + iComp * dof.numTotalDof();
+                UInt dofID = dof.localToGlobalMap( eleID, iDof ) + iComp * dof.numTotalDof();
                 uQuadPt += u( dofID ) * fe.phi( iDof, iQuadPt );
             }
             diffQuadPt = uQuadPt - fct( t, x, y, z, iComp + 1 );
@@ -328,7 +328,7 @@ Real elementaryDifferenceH1NormSquare( const VectorType & u, const UsrFct& fct, 
 
         for (UInt iDof(0); iDof < fe.nbFEDof(); ++iDof )
         {
-            UInt dofID = dof.localToGlobal( eleID, iDof + 1 );
+            UInt dofID = dof.localToGlobalMap( eleID, iDof );
             uQuadPt += u( dofID ) * fe.phi( iDof, iQuadPt );
             for (UInt iCoor (0); iCoor < fe.nbCoor(); ++iCoor)
             {
@@ -380,7 +380,7 @@ Real elementaryDifferenceH1NormSquare( const VectorType & u, const UsrFct& fct, 
 
             for (UInt iDof(0); iDof < fe.nbFEDof(); ++iDof )
             {
-                UInt dofID = dof.localToGlobal( eleID, iDof + 1 ) + iComp * dof.numTotalDof();
+                UInt dofID = dof.localToGlobalMap( eleID, iDof ) + iComp * dof.numTotalDof();
                 uQuadPt += u( dofID ) * fe.phi( iDof, iQuadPt );
                 for (UInt iCoor(0); iCoor < fe.nbCoor(); ++iCoor)
                 {
@@ -431,7 +431,7 @@ Real elementaryDifferenceIntegral( VectorType & u,
         uQuadPt =0.0;
         for ( UInt iDof(0); iDof < fe.nbFEDof(); ++iDof )
         {
-            UInt dofID = dof.localToGlobal( eleID, iDof + 1 )+ (nbComp-1) * dof.numTotalDof();
+            UInt dofID = dof.localToGlobalMap( eleID, iDof )+ (nbComp-1) * dof.numTotalDof();
             uQuadPt += u( dofID ) * fe.phi( iDof, iQuadPt );
         }
         diffQuadPt = uQuadPt - fct( t, x, y, z, nbComp );
@@ -456,7 +456,7 @@ Real elementaryIntegral( VectorType & u,
 
         for ( UInt iDof(0); iDof < fe.nbFEDof(); ++iDof )
         {
-            UInt dofID = dof.localToGlobal( eleID, iDof + 1 ) + (component-1) * dof.numTotalDof();
+            UInt dofID = dof.localToGlobalMap( eleID, iDof ) + (component-1) * dof.numTotalDof();
             uQuadPt += u( dofID ) * fe.phi( iDof, iQuadPt );
         }
         sum += uQuadPt * fe.weightDet( iQuadPt );
