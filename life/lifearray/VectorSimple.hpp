@@ -60,7 +60,7 @@ namespace LifeV
 
  */
 
-template <typename DataType, int offsetVector = 1>
+template <typename DataType, int offsetVector = 0>
 class VectorSimple : public std::vector<DataType>
 {
 public:
@@ -248,7 +248,7 @@ VectorSimple<DataType, offsetVector>::returnElementAfterCheck( vectorSize_Type i
    
  */
 
-template <typename DataType, int offsetVector = 1>
+template <typename DataType, int offsetVector = 0>
 class ArraySimple : public std::vector<DataType>
 {
 public:
@@ -272,7 +272,7 @@ public:
 
     //! Empty Constructor
     /*!
-       Construct a ArraySimple vector of size (0,1)
+       Construct a ArraySimple vector of size (0,0)
      */
     explicit ArraySimple();
 
@@ -427,7 +427,7 @@ ArraySimple<DataType, offsetVector>::ArraySimple()
         :
         std::vector<DataType>(),
         M_numberOfRows( 0 ),
-        M_numberOfColumns( 1 )
+        M_numberOfColumns( 0 )
 {}
 
 template <typename DataType, int offsetVector>
