@@ -48,38 +48,38 @@ namespace LifeV
 // Methods
 // ===================================================
 Real
-OneDimensionalFluxLinear::flux( const Real& U1, const Real& U2, const ID& ii, const UInt& i ) const
+OneDimensionalFluxLinear::flux( const Real& U1, const Real& U2, const ID& ii, const UInt& iNode ) const
 {
     if ( ii == 1 ) // F1
     {
-        return M_physics->data()->flux11( i ) * U1 + M_physics->data()->flux12( i ) * U2;
+        return M_physics->data()->flux11( iNode ) * U1 + M_physics->data()->flux12( iNode ) * U2;
     }
     if ( ii == 2 ) // F2
     {
-        return M_physics->data()->flux21( i ) * U1 + M_physics->data()->flux22( i ) * U2;
+        return M_physics->data()->flux21( iNode ) * U1 + M_physics->data()->flux22( iNode ) * U2;
     }
     ERROR_MSG("The flux function has only 2 components.");
     return -1.;
 }
 
 Real
-OneDimensionalFluxLinear::dFdU( const Real& /*U1*/, const Real& /*U2*/, const ID& ii, const ID& jj, const UInt& i) const
+OneDimensionalFluxLinear::dFdU( const Real& /*U1*/, const Real& /*U2*/, const ID& ii, const ID& jj, const UInt& iNode) const
 {
     if ( ii == 1 && jj == 1 ) // dF1/dU1
     {
-        return M_physics->data()->flux11( i );
+        return M_physics->data()->flux11( iNode );
     }
     if ( ii == 1 && jj == 2 ) // dF1/dU2
     {
-        return M_physics->data()->flux12( i );
+        return M_physics->data()->flux12( iNode );
     }
     if ( ii == 2 && jj == 1 ) // dF2/dU1
     {
-        return M_physics->data()->flux21( i );
+        return M_physics->data()->flux21( iNode );
     }
     if ( ii == 2 && jj == 2 ) // dF2/dU2
     {
-        return M_physics->data()->flux22( i );
+        return M_physics->data()->flux22( iNode );
     }
 
     ERROR_MSG("Flux's differential function has only 4 components.");
@@ -89,7 +89,7 @@ OneDimensionalFluxLinear::dFdU( const Real& /*U1*/, const Real& /*U2*/, const ID
 //Real
 //OneDimensionalFluxLinear::diff2( const Real& /*U1*/, const Real& /*U2*/,
 //                                        const ID& ii, const ID& jj, const ID& kk,
-//                                        const UInt& /*i*/ ) const
+//                                        const UInt& /*iNode*/ ) const
 //{
 //    if( (0 < ii && ii < 3) && (0 < jj && jj < 3) && (0 < kk && kk < 3) )
 //    {
@@ -104,15 +104,15 @@ OneDimensionalFluxLinear::eigenValuesEigenVectors( const Real& /*U1*/, const Rea
                                                    container2D_Type& eigenvalues,
                                                    container2D_Type& leftEigenvector1,
                                                    container2D_Type& leftEigenvector2,
-                                                   const UInt& i ) const
+                                                   const UInt& iNode ) const
 {
-    eigenvalues[0] = M_physics->data()->celerity1( i );
-    eigenvalues[1] = M_physics->data()->celerity2( i );
+    eigenvalues[0] = M_physics->data()->celerity1( iNode );
+    eigenvalues[1] = M_physics->data()->celerity2( iNode );
 
-    leftEigenvector1[0] = M_physics->data()->leftEigenVector11( i );
-    leftEigenvector1[1] = M_physics->data()->leftEigenVector12( i );
-    leftEigenvector2[0] = M_physics->data()->leftEigenVector21( i );
-    leftEigenvector2[1] = M_physics->data()->leftEigenVector22( i );
+    leftEigenvector1[0] = M_physics->data()->leftEigenVector11( iNode );
+    leftEigenvector1[1] = M_physics->data()->leftEigenVector12( iNode );
+    leftEigenvector2[0] = M_physics->data()->leftEigenVector21( iNode );
+    leftEigenvector2[1] = M_physics->data()->leftEigenVector22( iNode );
 }
 
 void
@@ -120,7 +120,7 @@ OneDimensionalFluxLinear::deltaEigenValuesEigenVectors( const Real& /*U1*/, cons
                                                         container2D_Type& deltaEigenvalues,
                                                         container2D_Type& deltaLeftEigenvector1,
                                                         container2D_Type& deltaLeftEigenvector2,
-                                                        const UInt& /*i*/ ) const
+                                                        const UInt& /*iNode*/ ) const
 {
     deltaEigenvalues[0] = 0;
     deltaEigenvalues[1] = 0;

@@ -38,6 +38,8 @@
 #ifndef OneDimensionalDefinitions_H
 #define OneDimensionalDefinitions_H
 
+//#define GHOSTNODE 1
+
 #pragma GCC diagnostic ignored "-Wunused-variable"
 #pragma GCC diagnostic ignored "-Wunused-parameter"
 
@@ -153,6 +155,16 @@ pow05( const Real& base, const Real& exponent )
 {
     if ( exponent == 0.5 )
         return std::sqrt( base );
+    else
+        return std::pow( base, exponent );
+}
+
+//! Fast pow for the case of exponent 1.0
+inline Real
+pow10( const Real& base, const Real& exponent )
+{
+    if ( exponent == 1.0 )
+        return base;
     else
         return std::pow( base, exponent );
 }

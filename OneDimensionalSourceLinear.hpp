@@ -91,17 +91,17 @@ public:
      * S1 = S10 + S11 U1 + S12 U2
      * S2 = S20 + S21 U1 + S22 U2
      *
-     * \param indz : is the index position for the parameter
+     * \param iNode : is the index position for the parameter
      */
-    Real source( const Real& U1, const Real& U2, const ID& ii, const UInt& indz = 0 ) const ;
+    Real source( const Real& U1, const Real& U2, const ID& ii, const UInt& iNode ) const ;
 
     //! Jacobian matrix dSi/dxj
-    Real dSdU( const Real& U1, const Real& U2, const ID& ii, const ID& jj, const UInt& indz = 0 ) const;
+    Real dSdU( const Real& U1, const Real& U2, const ID& ii, const ID& jj, const UInt& iNode ) const;
 
     //! Second derivative tensor d2Si/(dxj dxk)
 //    Real diff2( const Real& _U1, const Real& _U2,
 //                const ID& ii,    const ID& jj, const ID& kk,
-//                const UInt& indz = 0 ) const;
+//                const UInt& iNode = 0 ) const;
 
     //! Sql = [Sql1, Sql2]^T
     /*!
@@ -111,8 +111,6 @@ public:
      *
      *  Here H is constant w.r. to U. And Sql = S(U), because there is no variation of
      *  the coefficients.
-     *
-     *  \param indz : is the index position for the parameter
      */
     Real interpolatedQuasiLinearSource( const Real& U1, const Real& U2,
                                         const ID& ii,   const container2D_Type& bcNodes, const Real& cfl ) const ;

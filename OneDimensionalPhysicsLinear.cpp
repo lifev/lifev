@@ -48,49 +48,49 @@ namespace LifeV
 // Conversion Methods
 // ===================================================
 void
-OneDimensionalPhysicsLinear::fromUToW( Real& W1, Real& W2, const Real& U1, const Real& U2, const UInt& indz ) const
+OneDimensionalPhysicsLinear::fromUToW( Real& W1, Real& W2, const Real& U1, const Real& U2, const UInt& iNode ) const
 {
-    W1 = U2 + celerity0(indz) * ( U1 - M_data->area0(indz) );
+    W1 = U2 + celerity0( iNode ) * ( U1 - M_data->area0( iNode ) );
 
-    W2 = U2 - celerity0(indz) * ( U1 - M_data->area0(indz) );
+    W2 = U2 - celerity0( iNode ) * ( U1 - M_data->area0( iNode ) );
 
 #ifdef HAVE_LIFEV_DEBUG
     Debug( 6320 ) << "[OneDimensionalModel_Physics_Linear::fromUToW] Q " << U2 << "\n";
     Debug( 6320 ) << "[OneDimensionalModel_Physics_Linear::fromUToW] W1 " << W1 << "\n";
     Debug( 6320 ) << "[OneDimensionalModel_Physics_Linear::fromUToW] W2 " << W2 << "\n";
-    Debug( 6320 ) << "[OneDimensionalModel_Physics_Linear::fromUToW] celerity " << celerity0(indz) << "\n";
-    Debug( 6320 ) << "[OneDimensionalModel_Physics_Linear::fromUToW] ( _U1 - area0(indz) ) " << ( U1 - M_data->area0(indz) ) << "\n";
+    Debug( 6320 ) << "[OneDimensionalModel_Physics_Linear::fromUToW] celerity " << celerity0( iNode ) << "\n";
+    Debug( 6320 ) << "[OneDimensionalModel_Physics_Linear::fromUToW] ( _U1 - area0( iNode ) ) " << ( U1 - M_data->area0( iNode ) ) << "\n";
 #endif
 }
 
 void
-OneDimensionalPhysicsLinear::fromWToU( Real& U1, Real& U2, const Real& W1, const Real& W2, const UInt& indz ) const
+OneDimensionalPhysicsLinear::fromWToU( Real& U1, Real& U2, const Real& W1, const Real& W2, const UInt& iNode ) const
 {
-    U1 = M_data -> area0(indz) + ( W1 - W2) / ( 2 * celerity0(indz) );
+    U1 = M_data -> area0( iNode ) + ( W1 - W2) / ( 2 * celerity0( iNode ) );
 
     U2 = ( W1 + W2 ) / 2;
 }
 
 Real
-OneDimensionalPhysicsLinear::fromWToP( const Real& W1, const Real& W2, const UInt& indz ) const
+OneDimensionalPhysicsLinear::fromWToP( const Real& W1, const Real& W2, const UInt& iNode ) const
 {
-    return ( M_data -> beta0(indz)
-             * (   OneDimensional::pow05( 1 / M_data->area0(indz), M_data -> beta1(indz) )
-                 * OneDimensional::pow05( (W1 - W2 ) / ( 2 * celerity0(indz) ) + M_data -> area0(indz), M_data -> beta1(indz) )
+    return ( M_data -> beta0( iNode )
+             * (   OneDimensional::pow05( 1 / M_data->area0( iNode ), M_data -> beta1( iNode ) )
+                 * OneDimensional::pow05( (W1 - W2 ) / ( 2 * celerity0( iNode ) ) + M_data -> area0( iNode ), M_data -> beta1( iNode ) )
                  - 1 )
            );
 }
 
 Real
-OneDimensionalPhysicsLinear::fromPToW( const Real& P, const Real& W, const ID& i, const UInt& indz ) const
+OneDimensionalPhysicsLinear::fromPToW( const Real& P, const Real& W, const ID& i, const UInt& iNode ) const
 {
-    Real add( 2 * celerity0(indz) * M_data -> area0(indz) * ( OneDimensional::pow20( P / M_data -> beta0(indz) + 1, 1 / M_data -> beta1(indz) ) - 1 ) );
+    Real add( 2 * celerity0( iNode ) * M_data -> area0( iNode ) * ( OneDimensional::pow20( P / M_data -> beta0( iNode ) + 1, 1 / M_data -> beta1( iNode ) ) - 1 ) );
 
 #ifdef HAVE_LIFEV_DEBUG
     Debug(6320) << "[fromPToW] "
-    << "2 * celerity0(indz) * area0(indz) = " << 2 * celerity0(indz) * M_data -> area0(indz)
-    << ", pow( ( P / beta0(indz) + 1 ), 1 / beta1(indz) ) = "
-    << OneDimensional::pow20( P / M_data -> beta0(indz) + 1 , 1 / M_data -> beta1(indz) ) << "\n";
+    << "2 * celerity0( iNode ) * area0( iNode ) = " << 2 * celerity0( iNode ) * M_data -> area0( iNode )
+    << ", pow( ( P / beta0( iNode ) + 1 ), 1 / beta1( iNode ) ) = "
+    << OneDimensional::pow20( P / M_data -> beta0( iNode ) + 1 , 1 / M_data -> beta1( iNode ) ) << "\n";
     Debug(6320) << "[fromPToW] add term = " << add << "\n";
 #endif
 
@@ -104,7 +104,7 @@ OneDimensionalPhysicsLinear::fromPToW( const Real& P, const Real& W, const ID& i
 }
 
 Real
-OneDimensionalPhysicsLinear::fromQToW( const Real& Q, const Real& /*W_n*/, const Real& W, const ID& i, const UInt& /*indz*/ ) const
+OneDimensionalPhysicsLinear::fromQToW( const Real& Q, const Real& /*W_n*/, const Real& W, const ID& i, const UInt& /*iNode*/ ) const
 {
     Real add( 2 * Q );
 
@@ -122,14 +122,14 @@ OneDimensionalPhysicsLinear::fromQToW( const Real& Q, const Real& /*W_n*/, const
 // Derivatives Methods
 // ===================================================
 Real
-OneDimensionalPhysicsLinear::dPdW( const Real& W1, const Real& W2, const ID& i, const UInt& indz ) const
+OneDimensionalPhysicsLinear::dPdW( const Real& W1, const Real& W2, const ID& i, const UInt& iNode ) const
 {
-    Real beta0beta1overA0beta1 ( M_data->beta0(indz) * M_data -> beta1(indz) / OneDimensional::pow05( M_data -> area0(indz), M_data -> beta1(indz) ) );
+    Real beta0beta1overA0beta1 ( M_data->beta0( iNode ) * M_data -> beta1( iNode ) / OneDimensional::pow05( M_data -> area0( iNode ), M_data -> beta1( iNode ) ) );
 
-    Real oneover2celerity( 1 / ( 2 * celerity0(indz) ) );
+    Real oneover2celerity( 1 / ( 2 * celerity0( iNode ) ) );
 
     Real result( beta0beta1overA0beta1 * oneover2celerity );
-    result *= ( ( W1 - W2 ) * oneover2celerity + M_data -> area0(indz) );
+    result *= ( ( W1 - W2 ) * oneover2celerity + M_data -> area0( iNode ) );
 
     if ( i == 1 ) //! dP/dW1
         return result;

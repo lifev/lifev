@@ -94,34 +94,34 @@ public :
 
     //! Compute W from U
     /*!
-     *  Riemann Invariants corresponding to data (Q, A) at node indz
+     *  Riemann Invariants corresponding to data (Q, A) at node iNode
      *  W1,2 = (Q / A) +- (2 / beta1) * sqrt(chi) * (celerity - celerity0)
      *  being chi the correction coefficient proposed by A. Robertson and H. Zakaria
      */
-    void fromUToW( Real& W1, Real& W2, const Real& U1, const Real& U2, const UInt& indz ) const;
+    void fromUToW( Real& W1, Real& W2, const Real& U1, const Real& U2, const UInt& iNode ) const;
 
     //! Compute U from W
     /*!
-     *  Physical variables corresponding to (W1, W2) at node indz
+     *  Physical variables corresponding to (W1, W2) at node iNode
      *  A = A0 * ( rho / (beta0 * beta1) )^(1/beta1)
      *    * ( beta1 / (4 * sqrt(chi) ) * (W1 - W2) + celerity0 )^(2/beta1)
      *
      *  Q = A (W1 + W2) / 2
      */
-    void fromWToU( Real& U1, Real& U2, const Real& W1, const Real& W2, const UInt& indz ) const;
+    void fromWToU( Real& U1, Real& U2, const Real& W1, const Real& W2, const UInt& iNode ) const;
 
     //! Compute the pressure as a fuction of W1, W2
     /*!
      *  P = beta0 * ( rho / (beta0 * beta1) * ( beta1 / (4 * sqrt(chi)) * (W1 - W2) + celerity0 )^2 - 1 )
      */
-    Real fromWToP( const Real& W1, const Real& W2, const UInt& indz = 0 ) const;
+    Real fromWToP( const Real& W1, const Real& W2, const UInt& iNode ) const;
 
     //! Compute W1 or W2 given the pressure:
     /*!
      *  W1 - W2 = (4 * sqrt(chi) / beta1) * sqrt( beta0 * beta1 / rho ) ) * ( sqrt( P / beta0 + 1 ) - 1 )
      *  W1 - W2 = 4 * sqrt( beta0 / (beta1 * rho ) ) * ( sqrt( P / beta0 + 1 ) - 1 )
      */
-    Real fromPToW( const Real& P, const Real& W, const ID& i, const UInt& indz ) const;
+    Real fromPToW( const Real& P, const Real& W, const ID& i, const UInt& iNode ) const;
 
     //! Compute W1 or W2 given the flux: fixed point problem
     /*!
@@ -132,7 +132,7 @@ public :
      *  K0 = beta1 / ( 4 * sqrt(chi) )
      *  K1 = A0 / 2 * ( rho / (beta0*beta1) )^(1/beta1) * K0^(2/beta1)
      */
-    Real fromQToW( const Real& Q, const Real& W_n, const Real& W, const ID& i, const UInt& indz ) const;
+    Real fromQToW( const Real& Q, const Real& W_n, const Real& W, const ID& i, const UInt& iNode ) const;
 
     //@}
 
@@ -146,7 +146,7 @@ public :
      *  dP(W1,W2)/dW_1 = rho / (2 * sqrt(chi)) * ( beta1 / (4 * sqrt(chi)) * (W1 - W2) + celerity0 )
      *  dP(W1,W2)/dW_2 = - rho / (2 * sqrt(chi)) * ( beta1 / (4 * sqrt(chi)) * (W1 - W2) + celerity0 )
      */
-    Real dPdW( const Real& W1, const Real& W2, const ID& i, const UInt& indz = 0) const;
+    Real dPdW( const Real& W1, const Real& W2, const ID& i, const UInt& iNode ) const;
 
     //@}
 
