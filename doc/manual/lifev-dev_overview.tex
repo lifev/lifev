@@ -728,18 +728,18 @@ which export to RegionMesh space the types used for the internal data.
   typedef  MeshElementMarked0D<PointMarker>           point_Type; 
 
   // Typedefs for STL compliant containers of mesh geometric entities
-  // I Use SimpleVect for addressing from 1.
+  // I Use VectorSimple for addressing from 1.
 
-  typedef SimpleVect<point_Type>    Points;  // Point List
-  typedef SimpleVect<VolumeType >  Volumes; // 3DElements list
-  typedef SimpleVect<FaceType> Faces;       /* Face list:Boundary Faces compulsory,
+  typedef VectorSimple<point_Type>    Points;  // Point List
+  typedef VectorSimple<VolumeType >  Volumes; // 3DElements list
+  typedef VectorSimple<FaceType> Faces;       /* Face list:Boundary Faces compulsory,
                                                if needed all faces. */
-  typedef SimpleVect<EdgeType> Edges;       /* Edges list:
+  typedef VectorSimple<EdgeType> Edges;       /* Edges list:
                                                Filled only if needed, may be empty */
 \end{verbatim}  
-We use the \texttt{SimpleVect<T>} template class which is a simple
+We use the \texttt{VectorSimple<T>} template class which is a simple
 wrap-around to the STL \texttt{vector<T>} template class (see header file
-\texttt{SimpleVector.h}) to store the list of the various 
+\texttt{VectorSimpleor.h}) to store the list of the various 
 Geometrical entities which form the Region Mesh. We follow the following Paradigm
 \begin{description}
 \item A region mesh stores all the MeshElementMarkeds (Volumes in 3D

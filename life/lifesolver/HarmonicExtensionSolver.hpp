@@ -366,7 +366,7 @@ void HarmonicExtensionSolver<Mesh, SolverType>::computeMatrix( )
 
     UInt totalDof   = M_FESpace.dof().numTotalDof();
     // Loop on elements
-    for ( UInt i = 1; i <= M_FESpace.mesh()->numVolumes(); ++i )
+    for ( UInt i = 0; i < M_FESpace.mesh()->numVolumes(); ++i )
     {
         // Updating derivatives
         M_FESpace.fe().updateFirstDerivQuadPt( M_FESpace.mesh()->volumeList( i ) );

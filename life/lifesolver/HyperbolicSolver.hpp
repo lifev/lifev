@@ -535,11 +535,11 @@ setup ()
     }
 
     // For each element it creates the mass matrix and factorize it using Cholesky.
-    for ( UInt iElem(1); iElem <= meshNumberOfElements; ++iElem )
+    for ( UInt iElem(0); iElem < meshNumberOfElements; ++iElem )
     {
 
         // Update the element.
-        M_FESpace.fe().update( M_FESpace.mesh()->element( iElem ),
+        M_FESpace.fe().update( M_FESpace.mesh()->element( iElem),
                                UPDATE_QUAD_NODES | UPDATE_WDET );
 
         // Local mass matrix
@@ -572,7 +572,7 @@ solveOneTimeStep ()
     const UInt meshNumberOfElements( M_FESpace.mesh()->numElements() );
 
     // Loop on all the elements to perform the fluxes
-    for ( UInt iElem(1); iElem <= meshNumberOfElements; ++iElem )
+    for ( UInt iElem(0); iElem < meshNumberOfElements; ++iElem )
     {
 
         // Update the property of the current element
@@ -625,7 +625,7 @@ CFL() const
     Real localCFL(0.), localCFLOld( - 1. );
 
     // Loop on all the elements to perform the fluxes
-    for ( UInt iElem(1); iElem <= meshNumberOfElements; ++iElem )
+    for ( UInt iElem(0); iElem < meshNumberOfElements; ++iElem )
     {
         // Update the property of the current element
         M_FESpace.fe().update( M_FESpace.mesh()->element( iElem ),
@@ -635,7 +635,7 @@ CFL() const
         const Real K( M_FESpace.fe().measure() );
 
         // Loop on the faces of the element iElem and compute the local contribution
-        for ( UInt iFace(1); iFace <= M_FESpace.mesh()->numLocalFaces(); ++iFace )
+        for ( UInt iFace(0); iFace < M_FESpace.mesh()->numLocalFaces(); ++iFace )
         {
 
             const UInt iGlobalFace( M_FESpace.mesh()->localFaceId( iElem, iFace ) );
@@ -644,10 +644,10 @@ CFL() const
             M_FESpace.feBd().updateMeasNormalQuadPt( M_FESpace.mesh()->bElement( iGlobalFace ) );
 
             // Take the left element to the face, see regionMesh for the meaning of left element
-            const UInt leftElement( M_FESpace.mesh()->faceElement( iGlobalFace, 1 ) );
+            const UInt leftElement( M_FESpace.mesh()->faceElement( iGlobalFace, 0 ) );
 
             // Take the right element to the face, see regionMesh for the meaning of right element
-            const UInt rightElement( M_FESpace.mesh()->faceElement( iGlobalFace, 2 ) );
+            const UInt rightElement( M_FESpace.mesh()->faceElement( iGlobalFace, 1 ) );
 
             // Solution in the left element
             VectorElemental leftValue  ( M_FESpace.refFE().nbDof(), 1 );
@@ -662,9 +662,8 @@ CFL() const
                          M_FESpace.dof(),
                          leftElement , 0 );
 
-            if ( rightElement )
+            if ( rightElement  != NotAnId)
             {
-
                 // Extract the solution in the current element, now is the leftElement
                 extract_vec( *M_uOld,
                              rightValue,
@@ -793,16 +792,16 @@ localEvolve ( const UInt& iElem )
     M_localFlux.zero();
 
     // Loop on the faces of the element iElem and compute the local contribution
-    for ( UInt iFace(1); iFace <= M_FESpace.mesh()->numLocalFaces(); ++iFace )
+    for ( UInt iFace(0); iFace < M_FESpace.mesh()->numLocalFaces(); ++iFace )
     {
         // Id mapping
         const UInt iGlobalFace( M_FESpace.mesh()->localFaceId( iElem, iFace ) );
 
         // Take the left element to the face, see regionMesh for the meaning of left element
-        const UInt leftElement( M_FESpace.mesh()->faceElement( iGlobalFace, 1 ) );
+        const UInt leftElement( M_FESpace.mesh()->faceElement( iGlobalFace, 0 ) );
 
         // Take the right element to the face, see regionMesh for the meaning of right element
-        const UInt rightElement( M_FESpace.mesh()->faceElement( iGlobalFace, 2 ) );
+        const UInt rightElement( M_FESpace.mesh()->faceElement( iGlobalFace, 1 ) );
 
         // Update the normal vector of the current face in each quadrature point
         M_FESpace.feBd().updateMeasNormalQuadPt( M_FESpace.mesh()->bElement( iGlobalFace ) );
@@ -823,8 +822,8 @@ localEvolve ( const UInt& iElem )
                      M_FESpace.dof(),
                      leftElement , 0 );
 
-        // Check if the current face is a boundary face, that is rightElement == 0
-        if ( !rightElement )
+        // Check if the current face is a boundary face, that is rightElement == NotAnId
+        if ( rightElement == NotAnId)
         {
 
             // Clean the value of the right element

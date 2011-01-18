@@ -420,7 +420,7 @@ VenantKirchhoffElasticHandler<Mesh>::initialize( const Function& d0, const Funct
   ID lDof;
 
   // Loop on elements of the mesh
-  for ( ID iElem = 1; iElem <= this->mesh().numVolumes(); ++iElem )
+  for ( ID iElem = 0; iElem < this->mesh().numVolumes(); ++iElem )
       {
 
         M_fe.updateJac( this->mesh().volume( iElem ) );
@@ -430,22 +430,22 @@ VenantKirchhoffElasticHandler<Mesh>::initialize( const Function& d0, const Funct
 	  {
 
             // loop on element vertices
-            for ( ID iVe = 1; iVe <= nElemV; ++iVe )
+            for ( ID iVe = 0; iVe < nElemV; ++iVe )
 	      {
 
                 // Loop number of DOF per vertex
-                for ( ID l = 1; l <= nDofpV; ++l )
+                for ( ID l = 0; l < nDofpV; ++l )
 		  {
-                    lDof = ( iVe - 1 ) * nDofpV + l; // Local dof in this element
+                    lDof = iVe * nDofpV + l; // Local dof in this element
 
                     // Nodal coordinates
-                    M_fe.coorMap( x, y, z, M_fe.refFE.xi( lDof - 1 ), M_fe.refFE.eta( lDof - 1 ), M_fe.refFE.zeta( lDof - 1 ) );
+                    M_fe.coorMap( x, y, z, M_fe.refFE.xi( lDof  ), M_fe.refFE.eta( lDof ), M_fe.refFE.zeta( lDof  ) );
 
                     // Loop on data vector components
                     for ( UInt icmp = 0; icmp < nbComp; ++icmp )
 		      {
-                        M_d( icmp * M_dim + M_dof.localToGlobal( iElem, lDof ) - 1 ) = d0( 0.0, x, y, z, icmp + 1 );
-                        M_w( icmp * M_dim + M_dof.localToGlobal( iElem, lDof ) - 1 ) = w0( 0.0, x, y, z, icmp + 1 );
+                        M_d( icmp * M_dim + M_dof.localToGlobalMap( iElem, lDof ) ) = d0( 0.0, x, y, z, icmp + 1 );
+                        M_w( icmp * M_dim + M_dof.localToGlobalMap( iElem, lDof ) ) = w0( 0.0, x, y, z, icmp + 1 );
 		      }
 		  }
 	      }
@@ -456,22 +456,22 @@ VenantKirchhoffElasticHandler<Mesh>::initialize( const Function& d0, const Funct
 	  {
 
             // loop on element edges
-            for ( ID iEd = 1; iEd <= nElemE; ++iEd )
+            for ( ID iEd = 0; iEd < nElemE; ++iEd )
 	      {
 
                 // Loop number of DOF per edge
-                for ( ID l = 1; l <= nDofpE; ++l )
+                for ( ID l = 0; l < nDofpE; ++l )
 		  {
-                    lDof = nDofElemV + ( iEd - 1 ) * nDofpE + l; // Local dof in the adjacent Element
+                    lDof = nDofElemV + iEd * nDofpE + l; // Local dof in the adjacent Element
 
                     // Nodal coordinates
-                    M_fe.coorMap( x, y, z, M_fe.refFE.xi( lDof - 1 ), M_fe.refFE.eta( lDof - 1 ), M_fe.refFE.zeta( lDof - 1 ) );
+                    M_fe.coorMap( x, y, z, M_fe.refFE.xi( lDof ), M_fe.refFE.eta( lDof ), M_fe.refFE.zeta( lDof ) );
 
                     // Loop on data vector components
                     for ( UInt icmp = 0; icmp < nbComp; ++icmp )
 		      {
-                        M_d( icmp * M_dim + M_dof.localToGlobal( iElem, lDof ) - 1 ) = d0( 0.0, x, y, z, icmp + 1 );
-                        M_w( icmp * M_dim + M_dof.localToGlobal( iElem, lDof ) - 1 ) = w0( 0.0, x, y, z, icmp + 1 );
+                        M_d( icmp * M_dim + M_dof.localToGlobalMap( iElem, lDof ) ) = d0( 0.0, x, y, z, icmp + 1 );
+                        M_w( icmp * M_dim + M_dof.localToGlobalMap( iElem, lDof )  ) = w0( 0.0, x, y, z, icmp + 1 );
 		      }
 		  }
 	      }
@@ -482,41 +482,41 @@ VenantKirchhoffElasticHandler<Mesh>::initialize( const Function& d0, const Funct
 	  {
 
             // loop on element faces
-            for ( ID iFa = 1; iFa <= nElemF; ++iFa )
+            for ( ID iFa = 0; iFa < nElemF; ++iFa )
 	      {
 
                 // Loop on number of DOF per face
-                for ( ID l = 1; l <= nDofpF; ++l )
+                for ( ID l = 0; l < nDofpF; ++l )
 		  {
 
-                    lDof = nDofElemE + nDofElemV + ( iFa - 1 ) * nDofpF + l; // Local dof in the adjacent Element
+                    lDof = nDofElemE + nDofElemV + iFa * nDofpF + l; // Local dof in the adjacent Element
 
                     // Nodal coordinates
-                    M_fe.coorMap( x, y, z, M_fe.refFE.xi( lDof - 1 ), M_fe.refFE.eta( lDof - 1 ), M_fe.refFE.zeta( lDof - 1 ) );
+                    M_fe.coorMap( x, y, z, M_fe.refFE.xi( lDof ), M_fe.refFE.eta( lDof ), M_fe.refFE.zeta( lDof ) );
 
                     // Loop on data vector components
                     for ( UInt icmp = 0; icmp < nbComp; ++icmp )
 		      {
-                        M_d( icmp * M_dim + M_dof.localToGlobal( iElem, lDof ) - 1 ) = d0( 0.0, x, y, z, icmp + 1 );
-                        M_w( icmp * M_dim + M_dof.localToGlobal( iElem, lDof ) - 1 ) = w0( 0.0, x, y, z, icmp + 1 );
+                        M_d( icmp * M_dim + M_dof.localToGlobalMap( iElem, lDof ) ) = d0( 0.0, x, y, z, icmp + 1 );
+                        M_w( icmp * M_dim + M_dof.localToGlobalMap( iElem, lDof ) ) = w0( 0.0, x, y, z, icmp + 1 );
 		      }
 		  }
 	      }
 	  }
         // Element based Dof
         // Loop on number of DOF per Element
-        for ( ID l = 1; l <= nDofpEl; ++l )
+        for ( ID l = 0; l < nDofpEl; ++l )
 	  {
             lDof = nDofElemF + nDofElemE + nDofElemV + l; // Local dof in the Element
 
             // Nodal coordinates
-            M_fe.coorMap( x, y, z, M_fe.refFE.xi( lDof - 1 ), M_fe.refFE.eta( lDof - 1 ), M_fe.refFE.zeta( lDof - 1 ) );
+            M_fe.coorMap( x, y, z, M_fe.refFE.xi( lDof ), M_fe.refFE.eta( lDof ), M_fe.refFE.zeta( lDof ) );
 
             // Loop on data vector components
             for ( UInt icmp = 0; icmp < nbComp; ++icmp )
 	      {
-                M_d( icmp * M_dim + M_dof.localToGlobal( iElem, lDof ) - 1 ) = d0( 0.0, x, y, z, icmp + 1 );
-                M_w( icmp * M_dim + M_dof.localToGlobal( iElem, lDof ) - 1 ) = w0( 0.0, x, y, z, icmp + 1 );
+                M_d( icmp * M_dim + M_dof.localToGlobalMap( iElem, lDof ) ) = d0( 0.0, x, y, z, icmp + 1 );
+                M_w( icmp * M_dim + M_dof.localToGlobalMap( iElem, lDof ) ) = w0( 0.0, x, y, z, icmp + 1 );
 	      }
 	  }
       }
@@ -535,7 +535,7 @@ VenantKirchhoffElasticHandler<Mesh>::initialize( const std::string& depName,
   M_count = (Int) (startT/this->timestep() - 0.5);
 
   // Loop on elements of the mesh
-  for ( ID iElem = 1; iElem <= this->mesh().numVolumes(); ++iElem )
+  for ( ID iElem = 0; iElem < this->mesh().numVolumes(); ++iElem )
     {
       M_fe.updateJac( this->mesh().volume( iElem ) );
     }

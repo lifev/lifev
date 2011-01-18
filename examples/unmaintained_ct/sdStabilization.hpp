@@ -371,8 +371,8 @@ void SDStabilization<MESH, DOF>::M_computeParameters(const Real dt, const ID iVo
     {
         for ( int iCoor = 0; iCoor < M_fe.nbCoor(); ++iCoor )
         {
-            //UInt ig = M_dof.localToGlobal( iVol, iNode+1 )-1+iCoor*nDof;
-            UInt ig = M_dof.localToGlobal( iVol, iNode+1) + iCoor*nDof;
+            //UInt ig = M_dof.localToGlobalMap( iVol, iNode )+iCoor*nDof;
+            UInt ig = M_dof.localToGlobalMap( iVol, iNode) + iCoor*nDof;
             beta.vec()[ iCoor*M_fe.nbNode + iNode ] = state[ig];
         }
     }

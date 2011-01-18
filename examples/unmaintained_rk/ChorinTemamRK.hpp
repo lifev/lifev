@@ -704,7 +704,7 @@ void ChorinTemamRK<Mesh, SolverType>::updateSYS_u(vector_type& betaVec,
                 UInt  iloc = M_uFESpace.fe().patternFirst( iNode );
                 for ( UInt iComp = 0; iComp < nbCompU; ++iComp )
                 {
-                    UInt ig = M_uFESpace.dof().localToGlobal( eleID, iloc + 1 ) + iComp*dim_u();
+                    UInt ig = M_uFESpace.dof().localToGlobalMap( eleID, iloc ) + iComp*dim_u();
                     M_elvec_u_aux.vec()[ iloc + iComp*M_uFESpace.fe().nbNode ] = betaVecRep[ig]; // BASEINDEX + 1
                     M_elvec_u.vec()[iloc + iComp * M_uFESpace.fe().nbNode] = velVecRep[ig];
                 }
@@ -793,7 +793,7 @@ computeCTRHS_u(vector_type& p_vec, vector_type& u_rhs)
         for ( UInt iNode = 0; iNode < ( UInt ) M_pFESpace.fe().nbNode; iNode++ )
         {
             UInt iloc = M_pFESpace.fe().patternFirst( iNode );
-            UInt ig = M_pFESpace.dof().localToGlobal( eleID_p, iloc+1 );
+            UInt ig = M_pFESpace.dof().localToGlobalMap( eleID_p, iloc );
             M_elvec_p.vec()[ iloc ] = press_sol( ig );
         }
 
@@ -873,7 +873,7 @@ void ChorinTemamRK<Mesh, SolverType>::computeCTRHS_p(vector_type& u_vec,
 
             for ( UInt iComp = 0; iComp < nDimensions; ++iComp)
             {
-                UInt ig = M_uFESpace.dof().localToGlobal( eleID_u, iloc+1 ) +
+                UInt ig = M_uFESpace.dof().localToGlobalMap( eleID_u, iloc ) +
                           iComp*dim_u();
                 M_elvec_u.vec()[ iloc+iComp*M_uFESpace.fe().nbNode  ] = vel_sol( ig );
             }

@@ -258,6 +258,7 @@ EnsightToHdf5::run()
 
     vector_ptrtype P0pres ( new vector_type(p0FESpace.map()) );
     MPI_Barrier(MPI_COMM_WORLD);
+
     computeP0pressure(pFESpace, p0FESpace, uFESpace, *velAndPressureImport, *P0pres, t0);
 
     exporter->addVariable( ExporterData::Vector, "velocity", velAndPressureExport,
@@ -279,7 +280,6 @@ EnsightToHdf5::run()
 
     for ( Real time = t0 + dt ; time <= tFinal + dt/2.; time += dt, iter++)
     {
-        std::cout << "Doing " << time << std::endl;
         chrono.stop();
         importer->import( time );
 
@@ -304,7 +304,7 @@ computeP0pressure(FESpace< Mesh, Map >& pFESpace,
                   vector_type& P0pres, Real /*time*/)
 {
 
-    int MyPID;
+	int MyPID;
     MPI_Comm_rank(MPI_COMM_WORLD, &MyPID);
     UInt offset = 3*uFESpace.dof().numTotalDof();
 
@@ -313,9 +313,8 @@ computeP0pressure(FESpace< Mesh, Map >& pFESpace,
     std::vector<Real> val0Vec(0);
     val0Vec.reserve(p0FESpace.mesh()->numVolumes());
 
-    for (UInt ivol=1; ivol<= pFESpace.mesh()->numVolumes(); ++ivol)
+    for (UInt ivol=0; ivol < pFESpace.mesh()->numVolumes(); ++ivol)
     {
-
         pFESpace.fe().update( pFESpace.mesh()->volumeList( ivol ), UPDATE_DPHI );
         p0FESpace.fe().update( p0FESpace.mesh()->volumeList( ivol ) );
 
@@ -324,13 +323,12 @@ computeP0pressure(FESpace< Mesh, Map >& pFESpace,
         double tmpsum=0.;
         for (UInt iNode=0; iNode < (UInt) pFESpace.fe().nbFEDof(); iNode++)
         {
-            int ig = pFESpace.dof().localToGlobal( eleID, iNode + 1 );
+            int ig = pFESpace.dof().localToGlobalMap( eleID, iNode );
             tmpsum += velAndPressure(ig+offset);
             gid0Vec.push_back( p0FESpace.fe().currentId() );
             val0Vec.push_back( tmpsum / (double) pFESpace.fe().nbFEDof() );
         }
     }
-
     P0pres.setCoefficients(gid0Vec, val0Vec);
     P0pres.globalAssemble();
     MPI_Barrier(MPI_COMM_WORLD);

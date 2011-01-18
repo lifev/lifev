@@ -345,7 +345,7 @@ HeartBidomainSolver( const data_type&          dataType,
         UInt numMyElements = M_localMapVec.map(Repeated)->NumMyElements();
         for(UInt j=0; j< numMyElements; ++j){
             UInt ig= M_localMapVec.map(Repeated)->MyGlobalElements()[j];
-            M_fiberVector[ig]= fiberGlobalVector[ig-1];
+            M_fiberVector[ig]= fiberGlobalVector[ig];
         }
         std::cout << std::endl;
         fiberGlobalVector.clear();
@@ -394,7 +394,7 @@ void HeartBidomainSolver<Mesh, SolverType>::buildSystem()
     //! Elementary computation and matrix assembling
     //! Loop on elements
 
-    for ( UInt iVol = 1; iVol <= M_pFESpace.mesh()->numVolumes(); iVol++ )
+    for ( UInt iVol = 0; iVol < M_pFESpace.mesh()->numVolumes(); iVol++ )
     {
         chronoZero.start();
         M_elmatStiff.zero();
@@ -600,9 +600,9 @@ initialize( const vector_Type& ui0, const vector_Type& ue0 )
     {
         Int ig = M_solutionTransmembranePotential.blockMap().MyGlobalElements()[i];
         M_solutionTransmembranePotential[ig] = M_solutionIntraExtraPotential[ig] -
-            M_solutionIntraExtraPotential[ig+potentialFESpaceDimension()]; // BASEINDEX + 1
+            M_solutionIntraExtraPotential[ig+potentialFESpaceDimension()];
         M_solutionExtraPotential[ig] = M_solutionIntraExtraPotential[ig +
-                                                                     potentialFESpaceDimension()]; // BASEINDEX + 1
+                                                                     potentialFESpaceDimension()];
     }
     M_solutionIntraExtraPotentialExtrapolated = M_solutionIntraExtraPotential;
     M_solutionTransmembranePotentialExtrapolated = M_solutionTransmembranePotential;
@@ -782,7 +782,7 @@ void HeartBidomainSolver<Mesh, SolverType>::solveSystem( matrixPtr_Type  matrFul
     for ( Int i = 0 ; i < M_solutionTransmembranePotential.epetraVector().MyLength() ; i++ )
     {
         UInt ig=M_solutionTransmembranePotential.blockMap().MyGlobalElements()[i];
-        M_solutionExtraPotential[ig] = M_solutionIntraExtraPotential[ig+potentialFESpaceDimension()]; // BASEINDEX + 1
+        M_solutionExtraPotential[ig] = M_solutionIntraExtraPotential[ig+potentialFESpaceDimension()];
     }
     Real meanExtraPotential=computeMean(M_solutionExtraPotential);
     removeValue(M_solutionIntraExtraPotential, meanExtraPotential);
@@ -790,8 +790,8 @@ void HeartBidomainSolver<Mesh, SolverType>::solveSystem( matrixPtr_Type  matrFul
     for ( Int i = 0 ; i < M_solutionTransmembranePotential.epetraVector().MyLength() ; i++ )
     {
         UInt ig=M_solutionTransmembranePotential.blockMap().MyGlobalElements()[i];
-        M_solutionTransmembranePotential[ig] = M_solutionIntraExtraPotential[ig] - M_solutionIntraExtraPotential[ig+potentialFESpaceDimension()]; // BASEINDEX + 1
-        M_solutionExtraPotential[ig] = M_solutionIntraExtraPotential[ig+potentialFESpaceDimension()]; // BASEINDEX + 1
+        M_solutionTransmembranePotential[ig] = M_solutionIntraExtraPotential[ig] - M_solutionIntraExtraPotential[ig+potentialFESpaceDimension()];
+        M_solutionExtraPotential[ig] = M_solutionIntraExtraPotential[ig+potentialFESpaceDimension()];
     }
 
     M_BDFIntraExtraPotential.shiftRight(M_solutionIntraExtraPotential);
@@ -800,7 +800,7 @@ void HeartBidomainSolver<Mesh, SolverType>::solveSystem( matrixPtr_Type  matrFul
     for ( Int i = 0 ; i < M_solutionTransmembranePotential.epetraVector().MyLength() ; i++ )
     {
         UInt ig=M_solutionTransmembranePotential.blockMap().MyGlobalElements()[i];
-        M_solutionTransmembranePotentialExtrapolated[ig] = M_solutionIntraExtraPotentialExtrapolated[ig] - M_solutionIntraExtraPotentialExtrapolated[ig+potentialFESpaceDimension()]; // BASEINDEX + 1
+        M_solutionTransmembranePotentialExtrapolated[ig] = M_solutionIntraExtraPotentialExtrapolated[ig] - M_solutionIntraExtraPotentialExtrapolated[ig+potentialFESpaceDimension()];
     }
 }
 
@@ -847,7 +847,7 @@ void HeartBidomainSolver<Mesh, SolverType>::removeValue( vector_Type& x, Real& v
     for ( Int i = 0 ; i < x.epetraVector().MyLength() ; i++ )
     {
         Int ig=x.blockMap().MyGlobalElements()[i];
-        x[ig] -= value; // BASEINDEX + 1
+        x[ig] -= value;
     }
 
 } // removeMean()

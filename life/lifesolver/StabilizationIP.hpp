@@ -328,13 +328,13 @@ void StabilizationIP<MeshType, DofType>::apply( MatrixType& matrix,  const Vecto
 
     chronoAssembly.start();
     // loop on interior faces
-    for ( UInt iFace( M_mesh->numBFaces() + 1 ); iFace<= M_mesh->numFaces();
+    for ( UInt iFace( M_mesh->numBFaces() ); iFace< M_mesh->numFaces();
             ++iFace )
     {
         const UInt iElAd1 ( M_mesh->face( iFace ).firstAdjacentElementIdentity()  );
         const UInt iElAd2 ( M_mesh->face( iFace ).secondAdjacentElementIdentity() );
 
-        if ( iElAd1 == iElAd2 || iElAd1 == 0 || iElAd2 == 0)
+        if ( iElAd1 == iElAd2 || iElAd1 == NotAnId || iElAd2 == NotAnId)
         {
             //std::cout << "iElAd1 = " << iElAd1 << "; iElAd2 = " << iElAd2 << std::endl;
             continue;
@@ -367,13 +367,13 @@ void StabilizationIP<MeshType, DofType>::apply( MatrixType& matrix,  const Vecto
             UInt iFaEl ( M_mesh->face( iFace ).firstAdjacentElementPosition() );
             for ( UInt iNode ( 0 ); iNode < M_feBd->nbNode(); ++iNode )
             {
-                UInt iloc ( M_faceToPoint( iFaEl, iNode+1 ) );
+                UInt iloc ( M_faceToPoint( iFaEl, iNode ) );
                 for ( UInt iCoor ( 0 ); iCoor < M_feOnSide1->nbCoor(); ++iCoor )
                 {
-                    UInt ig ( M_dof->localToGlobal( iElAd1, iloc + 1 ) - 1 +iCoor*nDof );
+                    UInt ig ( M_dof->localToGlobalMap( iElAd1, iloc ) +iCoor*nDof );
 
-                    if (state.blockMap().LID(ig + 1) >= 0)
-                        beta.vec()[ iCoor*M_feBd->nbNode() + iNode ] = state( ig + 1); // BASEINDEX + 1
+                    if (state.blockMap().LID(ig) >= 0)
+                        beta.vec()[ iCoor*M_feBd->nbNode() + iNode ] = state( ig);
                 }
             }
 
@@ -475,10 +475,10 @@ void StabilizationIP<MeshType, DofType>::apply( MatrixType& matrix,  const Vecto
                     bn += normal(iNode, iCoor) *
                           beta.vec()[ iCoor*M_feBd->nbNode + iNode ];
                     bcmax = std::max<Real>
-                            (bcmax, normal(iNode, (iCoor+1)%3) *
-                             beta.vec()[ (iCoor+2)%3*M_feBd->nbNode + iNode ] -
-                             normal(iNode, (iCoor+2)%3) *
-                             beta.vec()[ (iCoor+1)%3*M_feBd->nbNode + iNode ]);
+                            (bcmax, normal(iNode, (iCoor)%3) *
+                             beta.vec()[ (iCoor+1)%3*M_feBd->nbNode + iNode ] -
+                             normal(iNode, (iCoor+1)%3) *
+                             beta.vec()[ (iCoor)%3*M_feBd->nbNode + iNode ]);
                 }
                 bnmax = std::max<Real> (bnmax, bn);
             }

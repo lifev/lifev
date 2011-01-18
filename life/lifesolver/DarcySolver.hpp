@@ -882,7 +882,7 @@ buildSystem ()
     //    LOOP ON ALL THE VOLUME ELEMENTS
     //---------------------------------------
 
-    for ( UInt iElem(1); iElem <= meshNumberOfElements; ++iElem )
+    for ( UInt iElem(0); iElem < meshNumberOfElements; ++iElem )
     {
         // Compute the Hdiv mass matrix as a local matrix depending on the current element.
         localElementComputation( iElem );
@@ -924,6 +924,8 @@ buildSystem ()
     chronoGlobalAssembleMatrix.start();
 
     // Assemble the global hybrid matrix.
+    M_matrHybrid->spy("Hybrid");
+
     M_matrHybrid->globalAssemble();
 
     chronoGlobalAssembleMatrix.stop();
@@ -1015,7 +1017,7 @@ computePrimalAndDual ()
     //    LOOP ON ALL THE VOLUME ELEMENTS
     //---------------------------------------
 
-    for ( UInt iElem(1); iElem <= meshNumberOfElements; ++iElem )
+    for ( UInt iElem(0); iElem < meshNumberOfElements; ++iElem )
     {
         // Clear the hybrid right hand side, it will store the extranctions from the global vecotor.
         M_elvecHyb.zero();
@@ -1042,12 +1044,12 @@ computePrimalAndDual ()
                         M_primal_FESpace.dof(), 0 );
 
 
-        for ( UInt iLocalFace(1); iLocalFace <=  M_dual_FESpace.mesh()->element( iElem ).S_numLocalFaces; ++iLocalFace )
+        for ( UInt iLocalFace(0); iLocalFace <  M_dual_FESpace.mesh()->element( iElem ).S_numLocalFaces; ++iLocalFace )
         {
             UInt iGlobalFace( M_dual_FESpace.mesh()->localFaceId( iElem, iLocalFace ) );
-            if ( M_dual_FESpace.mesh()->faceElement( iGlobalFace, 1 ) != iElem )
+            if ( M_dual_FESpace.mesh()->faceElement( iGlobalFace, 0 ) != iElem )
             {
-                M_elvecFlux[ iLocalFace - 1 ] = 0;
+                M_elvecFlux[ iLocalFace ] = 0;
             }
         }
 
@@ -1087,14 +1089,14 @@ DarcySolver<Mesh, SolverType>::
 computeConstantMatrices ()
 {
 
-    /* Update the divergence matrix, it is independant of the current element
+    /* Update the divergence matrix, it is independent of the current element
        thanks to the Piola transform. */
     grad_Hdiv( static_cast<Real>(1.),
                M_elmatMix,
                M_dual_FESpace.fe(),
                M_primal_FESpace.fe(), 0, 1 );
 
-    /* Update the boundary matrix, it is independant of the current element
+    /* Update the boundary matrix, it is independent of the current element
        thanks to the Piola transform.
        Here we use the fact that a RefHybridFE "IS A" ReferenceFE and the method refFE of
        a FESpace object. In fact the method refFE return a const ReferenceFE&, but the function
@@ -1135,7 +1137,7 @@ localElementComputation ( const UInt & iElem )
     M_primal_FESpace.fe().barycenter( xg, yg, zg );
 
     /* Compute the Hdiv mass matrix. We pass the time at the inverse of the permeability
-       because the DarcySolverTransient needs the pemeability time dependent. In this case
+       because the DarcySolverTransient needs the permeability time dependent. In this case
        we do not have a time evolution. */
     mass_Hdiv( (*M_inversePermeability)( M_data.dataTime()->time(), xg, yg, zg, iElem ),
                M_elmatMix,
