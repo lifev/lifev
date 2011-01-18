@@ -295,8 +295,8 @@ OneDimensionalBCFunctionCompatibility::evaluateRHS( const Real& eigenvalue, cons
     bcNodes[0] = M_bcNode;
     bcNodes[1] = M_bcInternalNode;
 
-    U[0] = U_interpolated[0] - timeStep * M_source->interpolatedQuasiLinearSource( U_interpolated[0], U_interpolated[1], 1, bcNodes, cfl );
-    U[1] = U_interpolated[1] - timeStep * M_source->interpolatedQuasiLinearSource( U_interpolated[0], U_interpolated[1], 2, bcNodes, cfl );
+    U[0] = U_interpolated[0] - timeStep * M_source->interpolatedQuasiLinearSource( U_interpolated[0], U_interpolated[1], 0, bcNodes, cfl );
+    U[1] = U_interpolated[1] - timeStep * M_source->interpolatedQuasiLinearSource( U_interpolated[0], U_interpolated[1], 1, bcNodes, cfl );
 
     return scalarProduct( eigenvector, U ) + timeStep * eigenvalue * scalarProduct( deltaEigenvector, U_interpolated );
 #endif
