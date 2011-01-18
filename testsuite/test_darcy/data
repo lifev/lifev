@@ -51,6 +51,7 @@ problem_type = 1
     verbose       = 0                        # verbose during mesh-reading
     #0 -> tetra, 1 -> hexa
     element_shape = 0
+
     # For structured mesh
     nx = 8
     ny = 8
