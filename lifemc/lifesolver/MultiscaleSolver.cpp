@@ -157,6 +157,7 @@ MultiscaleSolver::solveProblem( const Real& externalResidual )
     M_globalData->dataTime()->updateTime();
     M_globalData->dataTime()->setInitialTime( M_globalData->dataTime()->time() );
 
+    Real totalSimulationTime(0);
     for ( ; M_globalData->dataTime()->canAdvance(); M_globalData->dataTime()->updateTime() )
     {
         M_chrono.start();
@@ -191,11 +192,18 @@ MultiscaleSolver::solveProblem( const Real& externalResidual )
         // saveSolution
         M_model->saveSolution();
 
+        // Chrono stop
         M_chrono.stop();
+
+        // Updating total simulation time
+        totalSimulationTime += M_chrono.diff();
 
         if ( M_displayer->isLeader() )
             std::cout << " MS-  Total iteration time:                    " << M_chrono.diff() << " s" << std::endl;
     }
+
+    if ( M_displayer->isLeader() )
+        std::cout << " MS-  Total simulation time:                   " << totalSimulationTime << " s" << std::endl;
 
     // Redisual check
     Real algorithmResidual( M_algorithm->computeResidual() );
