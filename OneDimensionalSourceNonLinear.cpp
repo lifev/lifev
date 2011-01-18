@@ -49,11 +49,11 @@ namespace LifeV
 Real
 OneDimensionalSourceNonLinear::source( const Real& A, const Real& Q, const ID& ii, const UInt& iNode ) const
 {
-    if ( ii == 1 ) // B1
+    if ( ii == 0 ) // B1
     {
         return 0.;
     }
-    if ( ii == 2 ) // B2
+    if ( ii == 1 ) // B2
     {
         Real beta1plus1( M_physics->data()->beta1( iNode ) + 1 );
         Real AoverA0( A / M_physics->data()->area0( iNode ) );
@@ -82,16 +82,16 @@ OneDimensionalSourceNonLinear::source( const Real& A, const Real& Q, const ID& i
 Real
 OneDimensionalSourceNonLinear::dSdU( const Real& A, const Real& Q, const ID& ii, const ID& jj, const UInt& iNode) const
 {
-    if ( ii == 1 ) // B1
+    if ( ii == 0 ) // B1
     {
-        if ( jj == 1 || jj == 2 ) // dB2/dUj = 0
+        if ( jj == 0 || jj == 1 ) // dB2/dUj = 0
         {
             return 0.;
         }
     }
-    if ( ii == 2 ) // B2
+    if ( ii == 1 ) // B2
     {
-        if ( jj == 1 ) // dB2/dA
+        if ( jj == 0 ) // dB2/dA
         {
             Real AoverA0( A / M_physics->data()->area0( iNode ) );
             Real C ( OneDimensional::pow05( AoverA0, M_physics->data()->beta1( iNode ) ) / M_physics->data()->densityRho() );
@@ -105,7 +105,7 @@ OneDimensionalSourceNonLinear::dSdU( const Real& A, const Real& Q, const ID& ii,
                      - 1. / M_physics->data()->densityRho() * M_physics->data()->dBeta0dz( iNode )
                    ) * M_physics->data()->robertsonCorrection();
         }
-        if ( jj == 2 ) // dB2/dQ
+        if ( jj == 1 ) // dB2/dQ
         {
             return M_physics->data()->robertsonCorrection() * ( M_physics->data()->friction() / A + 2 * Q / A * M_physics->data()->dAlphadz( iNode ) );
         }
@@ -195,11 +195,11 @@ Real
 OneDimensionalSourceNonLinear::interpolatedQuasiLinearSource( const Real& A, const Real& Q,
                                                               const ID& ii, const container2D_Type& bcNodes, const Real& cfl ) const
 {
-    if ( ii == 1 ) // QLS1
+    if ( ii == 0 ) // QLS1
     {
         return 0.;
     }
-    if ( ii == 2 ) // QLS2
+    if ( ii == 1 ) // QLS2
     {
         // Interpolate quantities
         Real area0      = ( 1 - cfl ) * M_physics->data()->area0(bcNodes[0])    + cfl * M_physics->data()->area0(bcNodes[1]);

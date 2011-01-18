@@ -242,7 +242,7 @@ public:
     timePtr_Type dataTime() const { return M_time; }
 
     meshPtr_Type mesh() const { return M_mesh; }
-    Real length() const { return M_mesh->pointList( M_mesh->numVertices() ).x() - M_mesh->pointList( 1 ).x(); }
+    Real length() const { return M_mesh->pointList( M_mesh->numVertices() - 1).x() - M_mesh->pointList( 0 ).x(); }
     UInt numberOfElements() const { return M_mesh->numElements(); }
     UInt numberOfNodes() const { return M_mesh->numPoints(); }
 
