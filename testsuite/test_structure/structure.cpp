@@ -63,7 +63,7 @@ Real d0(const Real& t, const Real& x, const Real& y, const Real& z, const ID& i)
         switch (i)
         {
         case 0:
-            return 0.0;
+            return 0.0
             break;
         case 1:
             return 0.0;
