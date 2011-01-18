@@ -644,7 +644,7 @@ void VenantKirchhoffSolver<Mesh, SolverType>::updateSystem(  )
 }
 
 template <typename Mesh, typename SolverType>
-void VenantKirchhoffSolver<Mesh, SolverType>::updateSystem( matrixPtr_Type& /*stiff*/ )
+void VenantKirchhoffSolver<Mesh, SolverType>::updateSystem( matrixPtr_Type& stiff )
 {
   M_Displayer->leaderPrint("  S-  Updating mass term on right hand side... ");
 

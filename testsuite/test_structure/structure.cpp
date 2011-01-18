@@ -54,7 +54,7 @@
 
 using namespace LifeV;
 
-
+/*Starting of ud_functions*/
 
 Real d0(const Real& t, const Real& x, const Real& y, const Real& z, const ID& i)
 {
@@ -63,10 +63,10 @@ Real d0(const Real& t, const Real& x, const Real& y, const Real& z, const ID& i)
         switch (i)
         {
         case 0:
-            return -z*(z - 5.)*x/50.;
+            return 0.0;
             break;
         case 1:
-            return -z*(z - 5.)*y/50.;
+            return 0.0;
             break;
         case 2:
             return 0.0;
@@ -111,6 +111,97 @@ Real zero_scalar( const Real& /* t */,
 {
     return 0.;
 }
+
+Real InternalPressure(const Real& /*t*/, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& /*i*/)
+{
+    return -1e+5;
+    //return -260000*sin(80*3.141592*t);
+}
+
+Real g1(const Real& /*t*/, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& i)
+{
+    switch (i)
+    {
+    case 1:
+        return 0.;
+        break;
+    case 2:
+        return 0.;
+        break;
+    case 3:
+        return 0.;
+        break;
+    default:
+        ERROR_MSG("This entrie is not allowed: ud_functions.hpp");
+        return 0.;
+        break;
+    }
+}
+
+Real g2(const Real& /*t*/, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& i)
+{
+    switch (i)
+    {
+    case 1:
+        return 0.;
+        break;
+    case 2:
+        return 0.;
+        break;
+    case 3:
+        return 1.e+5;
+        break;
+    default:
+        ERROR_MSG("This entrie is not allowed: ud_functions.hpp");
+        return 0.;
+        break;
+    }
+}
+
+Real g3(const Real& /*t*/, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& i)
+{
+    switch (i)
+    {
+    case 1:
+        return 0.;
+        break;
+    case 2:
+        return 0.;
+        break;
+    case 3:
+        return 0.;
+        break;
+    default:
+        ERROR_MSG("This entrie is not allowed: ud_functions.hpp");
+        return 0.;
+        break;
+    }
+}
+
+Real f(const Real& /*t*/, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& i)
+{
+    switch (i)
+    {
+    case 1:
+        return 0.0;
+        break;
+    case 2:
+        return 0.0;
+        break;
+    case 3:
+        return 0.0;
+        break;
+    default:
+        ERROR_MSG("This entrie is not allowed: ud_functions.hpp");
+        return 0.;
+        break;
+    }
+}
+
+
+
+/*End of ud_functions*/
+
 
 struct Structure::Private
 {
@@ -221,9 +312,43 @@ Structure::run3d()
     // Boundary conditions for the displacement
     //
     BCFunctionBase fixed(dZero);
+    //BCFunctions
+    BCFunctionBase fixed1(g1);  // homogeneous boundary values
+    BCFunctionBase fixed2(g2);  // pressure
+    BCFunctionBase Homogen(zero_scalar);
+    BCFunctionBase Intern(InternalPressure);
 
-    BCh->addBC("Base2 ", 2 , Essential, Full, fixed, 3);
-    BCh->addBC("Base3 ", 3 , Essential, Full, fixed, 3);
+    /*
+    // BC for cyl1x02_1796_edge.mesh
+    vector <ID> compx(1), compy(1), compz(1);
+    compx[0]=1; compy[0]=2, compz[0]=3;
+
+    // lower base
+    BCh->addBC("Base10 ", 2 , Essential, Component, fixed1, compz);
+    BCh->addBC("Base10 ", 20 , Essential, Component, fixed1, compz);
+
+    // upper base
+    BCh->addBC("Base2 ", 3, Natural, Full, fixed1, 3); // traction
+    BCh->addBC("Base2 ", 30, Natural, Full, fixed1, 3); // traction
+
+    BCh->addBC("Base3", 1 , Natural, Normal,Intern); // free stress surface
+    */
+// BC for vessel2x4x20_10cm.mesh
+    vector <ID> compx(1), compy(1), compz(1);
+    compx[0]=1; compy[0]=2, compz[0]=3;
+
+    // lower base
+    BCh->addBC("BaseSx ", 2 , Essential, Component, fixed1, compz);
+    BCh->addBC("BaseDx ", 3 , Essential, Component, fixed1, compz);
+
+    // upper base
+    BCh->addBC("BaseEx", 1, Natural, Normal,Intern); // internal pressure
+    ////////////vessel20.mesh////////////////////////////////////////////
+    BCh->addBC("BaseEx", 20, Natural, Normal,Intern); // internal pressure
+
+    BCh->addBC("BaseIn", 10, Natural, Normal,  Homogen); // external pressure
+    //BCh->addBC("BaseEx", 10, Natural, Full, fixed1, 3); // external pressure
+
 
     //
     // Temporal data and initial conditions
