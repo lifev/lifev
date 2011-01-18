@@ -37,7 +37,7 @@ SourceType           = OneD_NonLinearSource
 ComputeCoefficients  = true
 PowerlawCoefficient  = 9            # 2: Parabolic; 9: Typical value
 
-DistributionLaw      = linear              # Coefficients distribution law: none, linear, pointwise
+DistributionLaw      = linear              # Coefficients distribution law: uniform, linear, pointwise
 Area0                = '1.0386890711 0.6361725124' # Area of tube
 #Area0                = '0.8251589454 0.8251589454' # Area of tube - averaged
 
