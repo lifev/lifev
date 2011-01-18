@@ -47,7 +47,7 @@ namespace LifeV
 // Methods
 // ===================================================
 Real
-OneDimensionalSourceNonLinear::source( const Real& A, const Real& Q, const ID& ii, const UInt& i ) const
+OneDimensionalSourceNonLinear::source( const Real& A, const Real& Q, const ID& ii, const UInt& iNode ) const
 {
     if ( ii == 1 ) // B1
     {
@@ -55,22 +55,22 @@ OneDimensionalSourceNonLinear::source( const Real& A, const Real& Q, const ID& i
     }
     if ( ii == 2 ) // B2
     {
-        Real beta1plus1( M_physics->data()->beta1(i) + 1 );
-        Real AoverA0( A / M_physics->data()->area0(i) );
+        Real beta1plus1( M_physics->data()->beta1( iNode ) + 1 );
+        Real AoverA0( A / M_physics->data()->area0( iNode ) );
         Real C0( 1 / ( M_physics->data()->densityRho() * beta1plus1 ) );
         Real C ( 1 / ( M_physics->data()->densityRho() * beta1plus1 ) * OneDimensional::pow15( AoverA0, beta1plus1 ) );
 
         return ( M_physics->data()->friction() * Q / A
-                 + Q * Q / A * M_physics->data()->dAlphadz(i)
-                 + C  * ( M_physics->data()->area0(i) * M_physics->data()->dBeta0dz(i)
-                          - M_physics->data()->beta0(i) * M_physics->data()->beta1(i) * M_physics->data()->dArea0dz(i)
-                          + M_physics->data()->area0(i) * M_physics->data()->beta0(i) * ( std::log( AoverA0 ) - 1. / beta1plus1 ) * M_physics->data()->dBeta1dz(i)
+                 + Q * Q / A * M_physics->data()->dAlphadz( iNode )
+                 + C  * ( M_physics->data()->area0( iNode ) * M_physics->data()->dBeta0dz( iNode )
+                          - M_physics->data()->beta0( iNode ) * M_physics->data()->beta1( iNode ) * M_physics->data()->dArea0dz( iNode )
+                          + M_physics->data()->area0( iNode ) * M_physics->data()->beta0( iNode ) * ( std::log( AoverA0 ) - 1. / beta1plus1 ) * M_physics->data()->dBeta1dz( iNode )
                         )
-                 - C0 * ( M_physics->data()->area0(i) * M_physics->data()->dBeta0dz(i)
-                          - M_physics->data()->beta0(i) * M_physics->data()->beta1(i) * M_physics->data()->dArea0dz(i)
-                          - M_physics->data()->area0(i) * M_physics->data()->beta0(i) / beta1plus1 * M_physics->data()->dBeta1dz(i)
+                 - C0 * ( M_physics->data()->area0( iNode ) * M_physics->data()->dBeta0dz( iNode )
+                          - M_physics->data()->beta0( iNode ) * M_physics->data()->beta1( iNode ) * M_physics->data()->dArea0dz( iNode )
+                          - M_physics->data()->area0( iNode ) * M_physics->data()->beta0( iNode ) / beta1plus1 * M_physics->data()->dBeta1dz( iNode )
                         )
-                 + ( M_physics->data()->area0(i) - A ) / M_physics->data()->densityRho() * M_physics->data()->dBeta0dz(i)
+                 + ( M_physics->data()->area0( iNode ) - A ) / M_physics->data()->densityRho() * M_physics->data()->dBeta0dz( iNode )
                ) * M_physics->data()->robertsonCorrection();
     }
 
@@ -80,7 +80,7 @@ OneDimensionalSourceNonLinear::source( const Real& A, const Real& Q, const ID& i
 }
 
 Real
-OneDimensionalSourceNonLinear::dSdU( const Real& A, const Real& Q, const ID& ii, const ID& jj, const UInt& i) const
+OneDimensionalSourceNonLinear::dSdU( const Real& A, const Real& Q, const ID& ii, const ID& jj, const UInt& iNode) const
 {
     if ( ii == 1 ) // B1
     {
@@ -93,21 +93,21 @@ OneDimensionalSourceNonLinear::dSdU( const Real& A, const Real& Q, const ID& ii,
     {
         if ( jj == 1 ) // dB2/dA
         {
-            Real AoverA0( A / M_physics->data()->area0(i) );
-            Real C ( OneDimensional::pow05( AoverA0, M_physics->data()->beta1(i) ) / M_physics->data()->densityRho() );
+            Real AoverA0( A / M_physics->data()->area0( iNode ) );
+            Real C ( OneDimensional::pow05( AoverA0, M_physics->data()->beta1( iNode ) ) / M_physics->data()->densityRho() );
 
             return ( -M_physics->data()->friction() * Q / A / A
-                     - Q * Q / ( A * A ) * M_physics->data()->dAlphadz(i)
-                     + C  * ( M_physics->data()->dBeta0dz(i)
-                              - M_physics->data()->beta0(i) * M_physics->data()->beta1(i) / M_physics->data()->area0(i) * M_physics->data()->dArea0dz(i)
-                              + M_physics->data()->beta0(i) * std::log( AoverA0 ) * M_physics->data()->dBeta1dz(i)
+                     - Q * Q / ( A * A ) * M_physics->data()->dAlphadz( iNode )
+                     + C  * ( M_physics->data()->dBeta0dz( iNode )
+                              - M_physics->data()->beta0( iNode ) * M_physics->data()->beta1( iNode ) / M_physics->data()->area0( iNode ) * M_physics->data()->dArea0dz( iNode )
+                              + M_physics->data()->beta0( iNode ) * std::log( AoverA0 ) * M_physics->data()->dBeta1dz( iNode )
                             )
-                     - 1. / M_physics->data()->densityRho() * M_physics->data()->dBeta0dz(i)
+                     - 1. / M_physics->data()->densityRho() * M_physics->data()->dBeta0dz( iNode )
                    ) * M_physics->data()->robertsonCorrection();
         }
         if ( jj == 2 ) // dB2/dQ
         {
-            return M_physics->data()->robertsonCorrection() * ( M_physics->data()->friction() / A + 2 * Q / A * M_physics->data()->dAlphadz(i) );
+            return M_physics->data()->robertsonCorrection() * ( M_physics->data()->friction() / A + 2 * Q / A * M_physics->data()->dAlphadz( iNode ) );
         }
     }
 
@@ -120,7 +120,7 @@ OneDimensionalSourceNonLinear::dSdU( const Real& A, const Real& Q, const ID& ii,
 //Real
 //OneDimensionalSourceNonLinear::diff2( const Real& A, const Real& Q,
 //                                             const ID& ii,   const ID& jj, const ID& kk,
-//                                             const UInt& i ) const
+//                                             const UInt& iNode ) const
 //{
 //    Real d2B2dA2;
 //    Real Area0, beta0, beta1, rho, Kr;
@@ -146,12 +146,12 @@ OneDimensionalSourceNonLinear::dSdU( const Real& A, const Real& Q, const ID& ii,
 //            // this term is not strictly necessary as it is always multiplied by 0.
 //            // but for the sake of generality...
 //
-//            Area0 = M_physics->data()->Area0(i);
-//            beta0 = M_physics->data()->Beta0(i);
-//            beta1 = M_physics->data()->Beta1(i);
-//            dArea0dz = M_physics->data()->dArea0dz(i);
-//            dbeta0dz = M_physics->data()->dBeta0dz(i);
-//            dbeta1dz = M_physics->data()->dBeta1dz(i);
+//            Area0 = M_physics->data()->Area0( iNode );
+//            beta0 = M_physics->data()->Beta0( iNode );
+//            beta1 = M_physics->data()->Beta1( iNode );
+//            dArea0dz = M_physics->data()->dArea0dz( iNode );
+//            dbeta0dz = M_physics->data()->dBeta0dz( iNode );
+//            dbeta1dz = M_physics->data()->dBeta1dz( iNode );
 //            Kr    = M_physics->data()->Friction();
 //            rho   = M_physics->data()->densityRho();
 //

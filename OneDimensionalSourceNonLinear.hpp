@@ -100,25 +100,23 @@ public:
      *     + A0    * beta0/( rho*(beta1+1) ) * (A/A0)^(beta1+1)
      *     * [ log(A/A0) - 1/(beta1+1) ]                         * dbeta1/dz
      *
-     *  \param indz : is the index position for the parameter
+     *  \param iNode : is the index position for the parameter
      */
-    Real source( const Real& A, const Real& Q, const ID& ii, const UInt& indz = 0 ) const ;
+    Real source( const Real& A, const Real& Q, const ID& ii, const UInt& iNode ) const ;
 
     //! Jacobian matrix dBi/dxj
-    Real dSdU( const Real& A, const Real& Q, const ID& ii, const ID& jj, const UInt& indz = 0 ) const;
+    Real dSdU( const Real& A, const Real& Q, const ID& ii, const ID& jj, const UInt& iNode ) const;
 
     //! Second derivative tensor d2Bi/(dxj dxk)
 //    Real diff2(const Real& _A, const Real& _Q,
 //               const ID& ii, const ID& jj, const ID& kk,
-//               const UInt& indz = 0) const;
+//               const UInt& iNode = 0) const;
 
     //! Sql = [Sql1, Sql2]^T
     /*!
      *  Sql source term of the equation under its quasi-linear formulation:
      *
      *  dU/dt + H(U) dU/dz + Sql(U) = 0
-     *
-     *  \param indz : is the index position for the parameter
      */
     Real interpolatedQuasiLinearSource( const Real& U1, const Real& U2,
                                         const ID& ii,    const container2D_Type& bcNodes, const Real& cfl ) const ;

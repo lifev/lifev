@@ -48,7 +48,6 @@
 
 namespace LifeV
 {
-    const Real Pi = 3.14159265358979323846264338328;
 
 //! OneDimensionalPhysics - Base class providing physical operations for the 1D model data.
 /*!
@@ -86,26 +85,26 @@ public :
     //@{
 
     //! Compute U from W
-    virtual void fromWToU( Real& U1, Real& U2, const Real& W1, const Real& W2, const UInt& indz ) const = 0;
+    virtual void fromWToU( Real& U1, Real& U2, const Real& W1, const Real& W2, const UInt& iNode ) const = 0;
 
     //! Compute W from U
-    virtual void fromUToW( Real& W1, Real& W2, const Real& U1, const Real& U2, const UInt& indz ) const = 0;
+    virtual void fromUToW( Real& W1, Real& W2, const Real& U1, const Real& U2, const UInt& iNode ) const = 0;
 
     //! Compute the pressure as a function of W1, W2:
-    virtual Real fromWToP( const Real& W1, const Real& W2, const UInt& indz = 0 ) const = 0;
+    virtual Real fromWToP( const Real& W1, const Real& W2, const UInt& iNode ) const = 0;
 
     //! Compute W1 or W2 given the pressure:
-    virtual Real fromPToW( const Real& P, const Real& W, const ID& i, const UInt& indz ) const = 0;
+    virtual Real fromPToW( const Real& P, const Real& W, const ID& i, const UInt& iNode ) const = 0;
 
     //! Compute W1 or W2 given the flux
-    virtual Real fromQToW( const Real& Q, const Real& W_n, const Real& W, const ID& i, const UInt& indz ) const = 0;
+    virtual Real fromQToW( const Real& Q, const Real& W_n, const Real& W, const ID& i, const UInt& iNode ) const = 0;
 
     //! Compute area given the elastic pressure.
     /*!
      *  To be used in initialization, when time derivative of A is supposed null
      *  @return A = A0 * ( (P - Pext) / beta0 + 1 )^(1/beta1)
      */
-    Real fromPToA( const Real& P, const UInt& i=0 ) const;
+    Real fromPToA( const Real& P, const UInt& iNode ) const;
 
     //@}
 
@@ -120,25 +119,25 @@ public :
     Real dAdt( const Real& Anp1, const Real& An, const Real& Anm1, const Real& timeStep ) const;
 
     //! Compute the derivative of pressure with respect to W1 and W2
-    virtual Real dPdW( const Real& W1, const Real& W2, const ID& i, const UInt& indz = 0 ) const = 0;
+    virtual Real dPdW( const Real& W1, const Real& W2, const ID& i, const UInt& iNode ) const = 0;
 
     //! Compute the derivative of the elastic pressure with respect to A
     /*!
      * @return dP(A)/dA = beta1 * beta0 * ( A / Area0 )^beta1 / A
      */
-    Real dPdA( const Real& A, const UInt& i = 0 ) const;
+    Real dPdA( const Real& A, const UInt& iNode ) const;
 
     //! Compute the derivative of the elastic pressure with respect to A
     /*!
      * @return dA(A)/dP = A0 / ( beta0 * beta1 ) * ( 1 + ( P - Pext )/ beta0 )^(1/beta1 - 1)
      */
-    Real dAdP( const Real& P, const UInt& i = 0 ) const;
+    Real dAdP( const Real& P, const UInt& iNode ) const;
 
     //! Compute the derivative of total pressure (P is the elastic pressure) with respect to A and Q.
     /*!
      * @return dPt/dU_ii = dP/dU_ii + rho/2 * d(Q/A)^2/dU_ii
      */
-    Real dPTdU( const Real& A, const Real& Q, const ID& id,  const UInt& i = 0 ) const;
+    Real dPTdU( const Real& A, const Real& Q, const ID& id,  const UInt& iNode ) const;
 
     //@}
 
@@ -146,26 +145,26 @@ public :
     //! @name Methods
     //@{
 
-    Real celerity0( const UInt& i ) const;
+    Real celerity0( const UInt& iNode ) const;
 
     //! Compute the elastic pressure.
     /*!
      * It includes the contribution of the external pressure.
      * @return P = beta0 * ( ( A / Area0 )^beta1 - 1 ) + Pext
      */
-    Real elasticPressure( const Real& A, const UInt& indz = 0 ) const;
+    Real elasticPressure( const Real& A, const UInt& iNode ) const;
 
     //! Compute the viscoelastic pressure.
     /*!
      * @return P = gamma * 1/(2*sqrt(pi*A)) * dA / dt
      */
-    Real viscoelasticPressure( const Real& Anp1, const Real& An, const Real& Anm1, const Real& timeStep, const UInt& i ) const;
+    Real viscoelasticPressure( const Real& Anp1, const Real& An, const Real& Anm1, const Real& timeStep, const UInt& iNode ) const;
 
     //! Compute the total pressure (P is the elastic pressure)
     /*!
      * @return Pt = P + rho/2 * (Q/A)^2
      */
-    Real totalPressure( const Real& A, const Real& Q, const UInt& i = 0 ) const;
+    Real totalPressure( const Real& A, const Real& Q, const UInt& iNode ) const;
 
     //! Make the vessel stiffer on the left side of interval [xl, xr]
     /*!
@@ -231,10 +230,9 @@ private:
 // Inline conversion methods
 // ===================================================
 inline Real
-OneDimensionalPhysics::fromPToA( const Real& P, const UInt& i ) const
+OneDimensionalPhysics::fromPToA( const Real& P, const UInt& iNode ) const
 {
-    return ( M_data->area0(i) * std::pow( ( P - M_data->externalPressure() )
-                                          / M_data->beta0(i) + 1, 1/M_data->beta1(i) )  );
+    return ( M_data->area0( iNode ) * OneDimensional::pow20( ( P - M_data->externalPressure() ) / M_data->beta0( iNode ) + 1, 1 / M_data->beta1( iNode ) )  );
 }
 
 // ===================================================
@@ -250,25 +248,24 @@ OneDimensionalPhysics::dAdt( const Real& Anp1, const Real& An, const Real& Anm1,
 }
 
 inline Real
-OneDimensionalPhysics::dPdA( const Real& A, const UInt& i ) const
+OneDimensionalPhysics::dPdA( const Real& A, const UInt& iNode ) const
 {
-    return M_data->beta0(i) * M_data->beta1(i)
-                              * std::pow( A / M_data->area0(i), M_data->beta1(i) ) / A;
+    return M_data->beta0( iNode ) * M_data->beta1( iNode ) * OneDimensional::pow05( A / M_data->area0( iNode ), M_data->beta1( iNode ) ) / A;
 }
 
 inline Real
-OneDimensionalPhysics::dAdP( const Real& P, const UInt& i ) const
+OneDimensionalPhysics::dAdP( const Real& P, const UInt& iNode ) const
 {
-    return M_data->area0(i) / ( M_data->beta0(i) * M_data->beta1(i) )
-                            * std::pow( 1 + ( P - M_data->externalPressure() )
-                            / M_data->beta0(i), 1 / M_data->beta1(i) - 1 );
+    return M_data->area0( iNode ) / ( M_data->beta0( iNode ) * M_data->beta1( iNode ) )
+                                * OneDimensional::pow10( 1 + ( P - M_data->externalPressure() )
+                                / M_data->beta0( iNode ), 1 / M_data->beta1( iNode ) - 1 );
 }
 
 inline Real
-OneDimensionalPhysics::dPTdU( const Real& A, const Real& Q, const ID& id, const UInt& i) const
+OneDimensionalPhysics::dPTdU( const Real& A, const Real& Q, const ID& id, const UInt& iNode ) const
 {
     if ( id == 1 ) // dPt/dA
-        return dPdA( A, i ) - M_data->densityRho() * Q * Q / ( A * A * A );
+        return dPdA( A, iNode ) - M_data->densityRho() * Q * Q / ( A * A * A );
 
     if ( id == 2 ) // dPt/dQ
         return M_data->densityRho() * Q / ( A * A);
@@ -281,31 +278,31 @@ OneDimensionalPhysics::dPTdU( const Real& A, const Real& Q, const ID& id, const 
 // Inline methods
 // ===================================================
 inline Real
-OneDimensionalPhysics::celerity0( const UInt& i ) const
+OneDimensionalPhysics::celerity0( const UInt& iNode ) const
 {
-    return std::sqrt( M_data->beta0(i) * M_data->beta1(i) / M_data->densityRho() );
+    return std::sqrt( M_data->beta0( iNode ) * M_data->beta1( iNode ) / M_data->densityRho() );
 }
 
 inline Real
-OneDimensionalPhysics::elasticPressure( const Real& A, const UInt& i ) const
+OneDimensionalPhysics::elasticPressure( const Real& A, const UInt& iNode ) const
 {
-    return ( M_data->beta0(i) * ( OneDimensional::pow05( A/M_data->area0(i), M_data->beta1(i) ) - 1 ) ) + M_data->externalPressure();
+    return ( M_data->beta0( iNode ) * ( OneDimensional::pow05( A/M_data->area0( iNode ), M_data->beta1( iNode ) ) - 1 ) ) + M_data->externalPressure();
 }
 
 inline Real
-OneDimensionalPhysics::viscoelasticPressure( const Real& Anp1, const Real& An, const Real& Anm1, const Real& timeStep, const UInt& i ) const
+OneDimensionalPhysics::viscoelasticPressure( const Real& Anp1, const Real& An, const Real& Anm1, const Real& timeStep, const UInt& iNode ) const
 {
     Real area(Anp1);
     if ( M_data->linearizeStringModel() )
-        area = M_data->area0(i);
+        area = M_data->area0( iNode );
 
-    return M_data->viscoelasticModulus() / ( 2*sqrt( Pi*area ) ) * dAdt(Anp1, An, Anm1, timeStep);
+    return M_data->viscoelasticModulus() / ( 2*std::sqrt( M_PI * area ) ) * dAdt(Anp1, An, Anm1, timeStep);
 }
 
 inline Real
-OneDimensionalPhysics::totalPressure( const Real& A, const Real& Q, const UInt& i ) const
+OneDimensionalPhysics::totalPressure( const Real& A, const Real& Q, const UInt& iNode ) const
 {
-    return elasticPressure( A, i ) + M_data->densityRho() / 2 * Q * Q / ( A * A );
+    return elasticPressure( A, iNode ) + M_data->densityRho() / 2 * Q * Q / ( A * A );
 }
 
 }

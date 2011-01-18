@@ -47,7 +47,7 @@ namespace LifeV
 // Methods
 // ===================================================
 Real
-OneDimensionalFluxNonLinear::flux( const Real& A, const Real& Q, const ID& ii,  const UInt& i ) const
+OneDimensionalFluxNonLinear::flux( const Real& A, const Real& Q, const ID& ii,  const UInt& iNode ) const
 {
     if ( ii == 1 ) // F1
     {
@@ -56,10 +56,10 @@ OneDimensionalFluxNonLinear::flux( const Real& A, const Real& Q, const ID& ii,  
 
     if ( ii == 2 ) // F2
     {
-        return ( M_physics->data()->alpha(i) * Q * Q / A +
-                 M_physics->data()->beta0(i) * M_physics->data()->beta1(i) *
-                 M_physics->data()->area0(i) / ( ( M_physics->data()->beta1(i) + 1 ) *
-                 M_physics->data()->densityRho() ) * ( OneDimensional::pow15( A / M_physics->data()->area0(i), M_physics->data()->beta1(i) + 1 ) - 1 ) ) *
+        return ( M_physics->data()->alpha( iNode ) * Q * Q / A +
+                 M_physics->data()->beta0( iNode ) * M_physics->data()->beta1( iNode ) *
+                 M_physics->data()->area0( iNode ) / ( ( M_physics->data()->beta1( iNode ) + 1 ) *
+                 M_physics->data()->densityRho() ) * ( OneDimensional::pow15( A / M_physics->data()->area0( iNode ), M_physics->data()->beta1( iNode ) + 1 ) - 1 ) ) *
                  M_physics->data()->robertsonCorrection();
     }
 
@@ -69,7 +69,7 @@ OneDimensionalFluxNonLinear::flux( const Real& A, const Real& Q, const ID& ii,  
 }
 
 Real
-OneDimensionalFluxNonLinear::dFdU( const Real& A, const Real& Q, const ID& ii, const ID& jj, const UInt& i ) const
+OneDimensionalFluxNonLinear::dFdU( const Real& A, const Real& Q, const ID& ii, const ID& jj, const UInt& iNode ) const
 {
     if ( ii == 1 && jj == 1 ) // dF1/dA
     {
@@ -83,15 +83,15 @@ OneDimensionalFluxNonLinear::dFdU( const Real& A, const Real& Q, const ID& ii, c
 
     if ( ii == 2 && jj == 1 ) // dF2/dA
     {
-        return ( M_physics->data()->beta0(i) *
-                 M_physics->data()->beta1(i) /
-                 M_physics->data()->densityRho() * OneDimensional::pow05( A / M_physics->data()->area0(i), M_physics->data()->beta1(i) ) -
-                 M_physics->data()->alpha(i) * Q * Q / A / A ) *
+        return ( M_physics->data()->beta0( iNode ) *
+                 M_physics->data()->beta1( iNode ) /
+                 M_physics->data()->densityRho() * OneDimensional::pow05( A / M_physics->data()->area0( iNode ), M_physics->data()->beta1( iNode ) ) -
+                 M_physics->data()->alpha( iNode ) * Q * Q / A / A ) *
                  M_physics->data()->robertsonCorrection();
     }
     if ( ii == 2 && jj == 2 ) // dF2/dQ
     {
-        return M_physics->data()->robertsonCorrection() * 2 * M_physics->data()->alpha(i) * Q / A;
+        return M_physics->data()->robertsonCorrection() * 2 * M_physics->data()->alpha( iNode ) * Q / A;
     }
 
     ERROR_MSG("Flux's differential function has only 4 components.");
@@ -102,7 +102,7 @@ OneDimensionalFluxNonLinear::dFdU( const Real& A, const Real& Q, const ID& ii, c
 //Real
 //OneDimensionalFluxNonLinear::diff2( const Real& A, const Real& Q,
 //                                           const ID& ii,   const ID& jj, const ID& kk,
-//                                           const UInt& i ) const
+//                                           const UInt& iNode ) const
 //{
 //    // diff second of F1 is always 0.
 //    if( ii == 1 ) // d2F1/dUjdUk = 0.
@@ -115,18 +115,18 @@ OneDimensionalFluxNonLinear::dFdU( const Real& A, const Real& Q, const ID& ii, c
 //        if( jj == 1 && kk == 1 )  // d2F2/dA2
 //        {
 //            return M_physics->data()->robertsonCorrection()
-//                       * M_physics->data()->beta0(i) * M_physics->data()->beta1(i) * M_physics->data()->beta1(i)
-//                       / ( M_physics->data()->densityRho() * M_physics->data()->area0(i) )
-//                       * std::pow( A / M_physics->data()->area0(i), M_physics->data()->beta1(i) - 1 );
+//                       * M_physics->data()->beta0( iNode ) * M_physics->data()->beta1( iNode ) * M_physics->data()->beta1( iNode )
+//                       / ( M_physics->data()->densityRho() * M_physics->data()->area0( iNode ) )
+//                       * std::pow( A / M_physics->data()->area0( iNode ), M_physics->data()->beta1( iNode ) - 1 );
 //        }
 //        // cross terms (equal)
 //        if( (jj == 1 && kk == 2) || (jj == 2 && kk == 1) ) // d2F2/dAdQ=d2F2/dQdA
 //        {
-//            return -M_physics->data()->robertsonCorrection() * M_physics->data()->alpha(i) * Q / ( A * A );
+//            return -M_physics->data()->robertsonCorrection() * M_physics->data()->alpha( iNode ) * Q / ( A * A );
 //        }
 //        if( jj == 2 && kk == 2 ) // d2F2/dQ2
 //        {
-//            return M_physics->data()->robertsonCorrection() * 2 * M_physics->data()->alpha(i) / A;
+//            return M_physics->data()->robertsonCorrection() * 2 * M_physics->data()->alpha( iNode ) / A;
 //        }
 //    }
 //    ERROR_MSG("Flux's second differential function has only 8 components.");
@@ -140,21 +140,21 @@ OneDimensionalFluxNonLinear::eigenValuesEigenVectors( const Real& A,
                                                       container2D_Type& eigenvalues,
                                                       container2D_Type& leftEigenvector1,
                                                       container2D_Type& leftEigenvector2,
-                                                      const UInt& i ) const
+                                                      const UInt& iNode ) const
 {
 #ifdef HAVE_LIFEV_DEBUG
     Debug(6312) << "[OneDimensionalModel_Flux_NonLinear]::jabocian_EigenValues_Vectors\n";
 #endif
 
     Real celerity;
-    celerity       = std::sqrt( M_physics->data()->alpha(i) * (
-                                M_physics->data()->alpha(i) - 1) * Q * Q / ( A * A ) +
-                                M_physics->data()->beta0(i) *
-                                M_physics->data()->beta1(i) /
-                                M_physics->data()->densityRho() * OneDimensional::pow05( A / M_physics->data()->area0(i), M_physics->data()->beta1(i) ) );
+    celerity       = std::sqrt( M_physics->data()->alpha( iNode ) * (
+                                M_physics->data()->alpha( iNode ) - 1) * Q * Q / ( A * A ) +
+                                M_physics->data()->beta0( iNode ) *
+                                M_physics->data()->beta1( iNode ) /
+                                M_physics->data()->densityRho() * OneDimensional::pow05( A / M_physics->data()->area0( iNode ), M_physics->data()->beta1( iNode ) ) );
 
-    eigenvalues[0] = M_physics->data()->alpha(i) * Q / A + celerity;
-    eigenvalues[1] = M_physics->data()->alpha(i) * Q / A - celerity;
+    eigenvalues[0] = M_physics->data()->alpha( iNode ) * Q / A + celerity;
+    eigenvalues[1] = M_physics->data()->alpha( iNode ) * Q / A - celerity;
 
     leftEigenvector1[0] = - eigenvalues[1] / A;
     leftEigenvector1[1] = 1. / A;
@@ -168,32 +168,32 @@ OneDimensionalFluxNonLinear::deltaEigenValuesEigenVectors( const Real& A,
                                                            container2D_Type& deltaEigenvalues,
                                                            container2D_Type& deltaLeftEigenvector1,
                                                            container2D_Type& deltaLeftEigenvector2,
-                                                           const UInt& i ) const
+                                                           const UInt& iNode ) const
 {
     Real deltaCelerity;
 
-    Real AoverA0( A / M_physics->data()->area0(i) );
-    Real C ( OneDimensional::pow05(  AoverA0, M_physics->data()->beta1(i) ) / M_physics->data()->densityRho() );
+    Real AoverA0( A / M_physics->data()->area0( iNode ) );
+    Real C ( OneDimensional::pow05(  AoverA0, M_physics->data()->beta1( iNode ) ) / M_physics->data()->densityRho() );
 
-    deltaCelerity  = 0.5 / std::sqrt( M_physics->data()->alpha(i) * (
-                     M_physics->data()->alpha(i) - 1) * Q * Q / ( A * A ) +
-                     M_physics->data()->beta0(i) *
-                     M_physics->data()->beta1(i) * C ) * ( C * (
-                     M_physics->data()->beta1(i) *
-                     M_physics->data()->dBeta0dz(i) -
-                     M_physics->data()->beta0(i) *
-                     M_physics->data()->beta1(i) *
-                     M_physics->data()->beta1(i) /
-                     M_physics->data()->area0(i) *
-                     M_physics->data()->dArea0dz(i) +
-                     M_physics->data()->beta0(i) * ( 1 +
-                     M_physics->data()->beta0(i) * std::log( AoverA0 ) ) *
-                     M_physics->data()->dBeta1dz(i) ) + ( 2 *
-                     M_physics->data()->alpha(i) - 1 ) * Q * Q / ( A * A ) *
-                     M_physics->data()->dAlphadz(i) );
+    deltaCelerity  = 0.5 / std::sqrt( M_physics->data()->alpha( iNode ) * (
+                     M_physics->data()->alpha( iNode ) - 1) * Q * Q / ( A * A ) +
+                     M_physics->data()->beta0( iNode ) *
+                     M_physics->data()->beta1( iNode ) * C ) * ( C * (
+                     M_physics->data()->beta1( iNode ) *
+                     M_physics->data()->dBeta0dz( iNode ) -
+                     M_physics->data()->beta0( iNode ) *
+                     M_physics->data()->beta1( iNode ) *
+                     M_physics->data()->beta1( iNode ) /
+                     M_physics->data()->area0( iNode ) *
+                     M_physics->data()->dArea0dz( iNode ) +
+                     M_physics->data()->beta0( iNode ) * ( 1 +
+                     M_physics->data()->beta0( iNode ) * std::log( AoverA0 ) ) *
+                     M_physics->data()->dBeta1dz( iNode ) ) + ( 2 *
+                     M_physics->data()->alpha( iNode ) - 1 ) * Q * Q / ( A * A ) *
+                     M_physics->data()->dAlphadz( iNode ) );
 
-    deltaEigenvalues[0] = M_physics->data()->dAlphadz(i) * Q / A + deltaCelerity;
-    deltaEigenvalues[1] = M_physics->data()->dAlphadz(i) * Q / A - deltaCelerity;
+    deltaEigenvalues[0] = M_physics->data()->dAlphadz( iNode ) * Q / A + deltaCelerity;
+    deltaEigenvalues[1] = M_physics->data()->dAlphadz( iNode ) * Q / A - deltaCelerity;
 
     deltaLeftEigenvector1[0] = - deltaEigenvalues[1] / A;
     deltaLeftEigenvector1[1] = 0;

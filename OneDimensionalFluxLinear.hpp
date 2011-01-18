@@ -90,11 +90,11 @@ public:
     //! operator()
     /*!
      *  F = F(U) = [F11 U1 + F12 U2 , F21 U1 + F22 U2]^T
-     *  \param indz : is the index position for the parameters
+     *  \param iNode : is the index position for the parameters
      *  when they are space dependent.
      *  This is NOT pretty. I should try to remove this dependency. VM 09/04
      */
-    Real flux( const Real& U1, const Real& U2, const ID& ii, const UInt& indz = 0) const ;
+    Real flux( const Real& U1, const Real& U2, const ID& ii, const UInt& iNode ) const ;
 
     //! Jacobian matrix
     /*!
@@ -103,7 +103,7 @@ public:
      *  diff(1,1) = dF1/dx1    diff(1,2) = dF1/dx2
      *  diff(2,1) = dF2/dx1    diff(2,2) = dF2/dx2
      */
-    Real dFdU( const Real& U1, const Real& U2, const ID& ii, const ID& jj, const UInt& indz = 0) const;
+    Real dFdU( const Real& U1, const Real& U2, const ID& ii, const ID& jj, const UInt& iNode ) const;
 
     //! Second derivative tensor d2Fi/(dxj dxk)
     /*!
@@ -116,7 +116,7 @@ public:
      */
 //    Real diff2( const Real& U1, const Real& U2,
 //                const ID& ii,    const ID& jj, const ID& kk,
-//                const UInt& indz = 0 ) const;
+//                const UInt& iNode = 0 ) const;
 
     //! Eigenvalues and eigenvectors of the Jacobian matrix dFi/dxj
     /*!
@@ -127,14 +127,14 @@ public:
                                   container2D_Type& eigenvalues,
                                   container2D_Type& leftEigenvector1,
                                   container2D_Type& leftEigenvector2,
-                                  const UInt& indz = 0 ) const;
+                                  const UInt& iNode ) const;
 
     //! Compute the derivative of the eigenvalues and of the eigenvectors of the Jacobian matrix
     void deltaEigenValuesEigenVectors( const Real& A, const Real& Q,
                                        container2D_Type& deltaEigenvalues,
                                        container2D_Type& deltaLeftEigenvector1,
                                        container2D_Type& deltaLeftEigenvector2,
-                                       const UInt& indz = 0 ) const;
+                                       const UInt& iNode ) const;
 
     //@}
 
