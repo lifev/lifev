@@ -761,7 +761,7 @@ template <typename DataType>
 void MatrixEpetra<DataType>::add ( const DataType scalar, const MatrixEpetra& matrix )
 {
 #if defined HAVE_TRILINOS_EPETRAEXT // trilinos8
-    EpetraExt::MatrixMatrix::Add( *matrix.getMatrixPtr(), false, scalar, *this->getMatrixPtr(), 1. );
+    EpetraExt::MatrixMatrix::Add( *matrix.matrixPtr(), false, scalar, *this->matrixPtr(), 1. );
 #else
 #error error: do not have nor EpetraExt  8+
 #endif
