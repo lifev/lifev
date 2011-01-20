@@ -155,7 +155,7 @@ PreconditionerIfpack::createIfpackList( list_Type&         list,
 
     list.set( "amesos: solver type", amesosSolverType );
 
-    Real   levelOfFill     = dataFile( (section + "/" + subSection + "/fact/level-of-fill").data(),      4. );
+    Int    levelOfFill     = dataFile( (section + "/" + subSection + "/fact/level-of-fill").data(),      4. );
     Real   ILUTlevelOfFill = dataFile( (section + "/" + subSection + "/fact/ilut_level-of-fill").data(), 4. );
     Real   athr            = dataFile( (section + "/" + subSection + "/fact/absolute_threshold").data(), 0. );
     Real   rthr            = dataFile( (section + "/" + subSection + "/fact/relative_threshold").data(), 1. );
