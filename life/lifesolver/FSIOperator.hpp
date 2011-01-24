@@ -530,12 +530,16 @@ public:
 
     //!getter for the fluid velocity FESpace
     const FESpace<mesh_Type, MapEpetra>& uFESpace()               const { return *M_uFESpace; }
+    boost::shared_ptr<FESpace<mesh_Type, MapEpetra> > uFESpacePtr() const { return M_uFESpace; }
     //!getter for the fluid pressure FESpace
     const FESpace<mesh_Type, MapEpetra>& pFESpace()               const { return *M_pFESpace; }
+    boost::shared_ptr<FESpace<mesh_Type, MapEpetra> > pFESpacePtr() const { return M_pFESpace; }
     //!getter for the solid displacement FESpace
     const FESpace<mesh_Type, MapEpetra>& dFESpace()               const { return *M_dFESpace; }
+    boost::shared_ptr<FESpace<mesh_Type, MapEpetra> > dFESpacePtr() const { return M_dFESpace; }
     //!getter for the harmonic extension solution FESpace
     const FESpace<mesh_Type, MapEpetra>& mmFESpace()              const { return *M_mmFESpace; }
+    boost::shared_ptr<FESpace<mesh_Type, MapEpetra> > mmFESpacePtr() const { return M_mmFESpace; }
     //!getter for the harmonic extension solution
     virtual const vector_Type& meshDisp()                         const { return M_meshMotion->disp(); }
     //!getter for the harmonic extension solution of the previous time step
