@@ -336,7 +336,7 @@ inversePermeability < Mesh, SolverType >::
 operator() ( const Real& t, const Real& x, const Real& y, const Real& z, const UInt& iElem )
 {
     std::vector<Real> values ( M_fields.size(), 0 );
-    ElemVec value ( M_fESpace.refFE().nbDof(), 1 );
+    VectorElemental value ( M_fESpace.refFE().nbDof(), 1 );
 
     // Update the value of the current element
     M_fESpace.fe().update( M_fESpace.mesh()->element( iElem ),

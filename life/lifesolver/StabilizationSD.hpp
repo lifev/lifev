@@ -174,30 +174,30 @@ private:
     //! Compute the stabilization coefficients for each element
     template <typename VectorType>
     void computeParameters(const Real dt, const UInt iVol, const VectorType& state,
-                           ElemVec& beta,  Real& coeffBeta, Real& coeffDiv) const;
+                           VectorElemental& beta,  Real& coeffBeta, Real& coeffDiv) const;
 
     //!Evaluate the varf @f$(\beta \nabla \mathbf{u}, \beta \nabla \mathbf{v})@f$
-    void bgradu_bgradv(const Real& coef, ElemVec& vel, ElemMat& elmat,const CurrentFE& fe,
+    void bgradu_bgradv(const Real& coef, VectorElemental& vel, ElemMat& elmat,const CurrentFE& fe,
                        UInt iblock, UInt jblock, UInt nb) const;
 
     //! Evaluate the varf @f$(\Delta \mathbf{u}, \beta \nabla \mathbf{v})@f$
-    void lapu_bgradv(const Real& coef, ElemVec& vel, ElemMat& elmat, const CurrentFE& fe,
+    void lapu_bgradv(const Real& coef, VectorElemental& vel, MatrixElemental& elmat, const CurrentFE& fe,
                      UInt iblock, UInt jblock, UInt nb) const;
 
     //! Evaluate the varf @f$(\nabla p, \beta \nabla \mathbf{v})@f$
-    void gradp_bgradv(const Real& coef, ElemVec& vel, ElemMat& elmat, const CurrentFE& fe) const;
+    void gradp_bgradv(const Real& coef, VectorElemental& vel, MatrixElemental& elmat, const CurrentFE& fe) const;
 
     //! Evaluate the varf @f$(\Delta \mathbf{u}, \nabla q)@f$
-    void lapu_gradq(const Real& coef, ElemMat& elmat, const CurrentFE& fe) const;
+    void lapu_gradq(const Real& coef, MatrixElemental& elmat, const CurrentFE& fe) const;
 
     //! Evaluate the varf @f$(f, \beta \nabla \mathbf{v})@f$
     template <typename SourceType>
-    void f_bgradv(const Real& coef, SourceType& source, ElemVec& vel,
-                  ElemVec& elvec, const CurrentFE& fe, UInt iblock, const Real& time) const;
+    void f_bgradv(const Real& coef, SourceType& source, VectorElemental& vel,
+                  VectorElemental& elvec, const CurrentFE& fe, UInt iblock, const Real& time) const;
 
     //! Evaluate the varf @f$(f, \nabla q)@f$
     template<typename SourceType>
-    void f_gradq(const Real& coef, SourceType& source, ElemVec& elvec,
+    void f_gradq(const Real& coef, SourceType& source, VectorElemental& elvec,
                  const CurrentFE& fe, UInt iblock, const Real& time) const;
     //@}
 
@@ -216,9 +216,9 @@ private:
     //! Stabilization coefficient of @f$(c(h,dt) div \mathbf{u} , div \nabla \mathbf{v})@f$
     Real         M_gammaDiv;
     //! Elementary Matrix for assembling the stabilization terms
-    ElemMat      M_elMat;
+    MatrixElemental      M_elMat;
     //! Elementary Vector for assembling the stabilization terms
-    ElemVec      M_elVec;
+    VectorElemental      M_elVec;
     //@}
 }; // class StabilizationSD
 
@@ -262,7 +262,7 @@ void StabilizationSD<MeshType, DofType>::applySUPG(const Real dt, MatrixType& ma
     Real coeffBeta, coeffDiv;
 
     // local velocity
-    ElemVec beta( M_fe.nbNode, nDimensions );
+    VectorElemental beta( M_fe.nbNode, nDimensions );
 
     // loop on elements
     for ( UInt iVol = 1; iVol <= M_mesh.numVolumes(); iVol++ )
@@ -347,7 +347,7 @@ void StabilizationSD<MeshType, DofType>::applySD(const Real dt, MatrixType& matr
     Real coeffBeta/*, coeffDiv*/;
 
     // local velocity
-    ElemVec beta( M_fe.nbNode, nDimensions );
+    VectorElemental beta( M_fe.nbNode, nDimensions );
 
     // loop on elements
     for ( UInt iVol = 1; iVol <= M_mesh.numVolumes(); iVol++ )
@@ -418,7 +418,7 @@ void StabilizationSD<MeshType, DofType>::applyRHS(const Real dt, VectorType& vec
     Real coeffBeta, coeffDiv;
 
     // local velocity
-    ElemVec beta( M_fe.nbNode, nDimensions );
+    VectorElemental beta( M_fe.nbNode, nDimensions );
 
     // loop on elements
     for ( UInt iVol = 1; iVol <= M_mesh.numVolumes(); iVol++ )
@@ -484,7 +484,7 @@ void StabilizationSD<MeshType, DofType>::showMe(std::ostream & output) const
 template<typename MeshType, typename DofType>
 template<typename VectorType>
 void StabilizationSD<MeshType, DofType>::computeParameters(const Real dt, const UInt iVol, const VectorType& state,
-                                                           ElemVec& beta, Real& coeffBeta, Real& coeffDiv) const
+                                                           VectorElemental& beta, Real& coeffBeta, Real& coeffDiv) const
 {
 
     const UInt nDof = M_dof.numTotalDof();
@@ -524,13 +524,13 @@ void StabilizationSD<MeshType, DofType>::computeParameters(const Real dt, const 
 
 
 template<typename MeshType, typename DofType>
-void StabilizationSD<MeshType, DofType>::gradp_bgradv(const Real& coef, ElemVec& vel,
-                                                      ElemMat& elmat,const CurrentFE& fe)  const
+void StabilizationSD<MeshType, DofType>::gradp_bgradv(const Real& coef, VectorElemental& vel,
+                                                      MatrixElemental& elmat,const CurrentFE& fe)  const
 {
     ASSERT_PRE(fe.hasFirstDeriv(),
                "advection_grad  matrix needs at least the first derivatives");
 
-    ElemMat::matrix_type v(fe.nbCoor(),fe.nbQuadPt());
+    MatrixElemental::matrix_type v(fe.nbCoor(),fe.nbQuadPt());
     Real s;
 
 
@@ -539,7 +539,7 @@ void StabilizationSD<MeshType, DofType>::gradp_bgradv(const Real& coef, ElemVec&
     {
         for (UInt icoor(0); icoor<fe.nbCoor(); ++icoor)
         {
-            ElemVec::vector_view velicoor=vel.block(icoor);
+            VectorElemental::vector_view velicoor=vel.block(icoor);
             v(icoor,ig)=0.;
             for (UInt k(0); k<fe.nbNode; ++k)
             {
@@ -550,8 +550,8 @@ void StabilizationSD<MeshType, DofType>::gradp_bgradv(const Real& coef, ElemVec&
 
     for (UInt ic(0); ic < fe.nbCoor(); ++ic)
     {
-        ElemMat::matrix_view mat_ic3 = elmat.block(ic,fe.nbCoor());
-        ElemMat::matrix_view mat_3ic = elmat.block(fe.nbCoor(),ic);
+        MatrixElemental::matrix_view mat_ic3 = elmat.block(ic,fe.nbCoor());
+        MatrixElemental::matrix_view mat_3ic = elmat.block(fe.nbCoor(),ic);
         for (UInt i=0; i<fe.nbNode; ++i)
         {
             for (UInt j=0; j<fe.nbNode; ++j)
@@ -569,15 +569,15 @@ void StabilizationSD<MeshType, DofType>::gradp_bgradv(const Real& coef, ElemVec&
 
 
 template<typename MeshType, typename DofType>
-void StabilizationSD<MeshType, DofType>::bgradu_bgradv(const Real& coef, ElemVec& vel, ElemMat& elmat, const CurrentFE& fe,
+void StabilizationSD<MeshType, DofType>::bgradu_bgradv(const Real& coef, VectorElemental& vel, MatrixElemental& elmat, const CurrentFE& fe,
                                                        UInt iblock, UInt jblock, UInt nb)  const
 {
     ASSERT_PRE(fe.hasFirstDeriv(),
                "advection (vect) matrix needs at least the first derivatives");
 
 
-    ElemMat::matrix_type mat_tmp(fe.nbNode,fe.nbNode);
-    ElemMat::matrix_type v( fe.nbCoor(),fe.nbQuadPt() );
+    MatrixElemental::matrix_type mat_tmp(fe.nbNode,fe.nbNode);
+    MatrixElemental::matrix_type v( fe.nbCoor(),fe.nbQuadPt() );
     Real s;
 
 
@@ -586,7 +586,7 @@ void StabilizationSD<MeshType, DofType>::bgradu_bgradv(const Real& coef, ElemVec
     {
         for (UInt icoor(0); icoor<fe.nbCoor(); ++icoor)
         {
-            ElemVec::vector_view velicoor=vel.block(icoor);
+            VectorElemental::vector_view velicoor=vel.block(icoor);
             v(icoor,ig)=0.;
             for (UInt k(0); k<fe.nbNode; k++)
                 v(icoor,ig) += velicoor(k)*fe.phi(k,ig); // velocity on the intgt point
@@ -610,7 +610,7 @@ void StabilizationSD<MeshType, DofType>::bgradu_bgradv(const Real& coef, ElemVec
     // copy on the components
     for (UInt icomp(0); icomp<nb; icomp++)
     {
-        ElemMat::matrix_view mat_icomp = elmat.block(iblock+icomp,jblock+icomp);
+        MatrixElemental::matrix_view mat_icomp = elmat.block(iblock+icomp,jblock+icomp);
         for (UInt i(0); i<fe.nbDiag(); ++i)
         {
             for (UInt j(0); j<fe.nbDiag(); ++j)
@@ -624,7 +624,7 @@ void StabilizationSD<MeshType, DofType>::bgradu_bgradv(const Real& coef, ElemVec
 
 
 template<typename MeshType, typename DofType>
-void StabilizationSD<MeshType, DofType>::lapu_bgradv(const Real& coef, ElemVec& vel, ElemMat& elmat, const CurrentFE& fe,
+void StabilizationSD<MeshType, DofType>::lapu_bgradv(const Real& coef, VectorElemental& vel, MatrixElemental& elmat, const CurrentFE& fe,
                                                      UInt iblock, UInt jblock, UInt nb)  const
 {
 
@@ -635,8 +635,8 @@ void StabilizationSD<MeshType, DofType>::lapu_bgradv(const Real& coef, ElemVec& 
     ASSERT_PRE(fe.hasSecondDeriv(),
                "lapu_bgradv matrix needs second derivatives");
 
-    ElemMat::matrix_type mat_tmp(fe.nbNode,fe.nbNode);
-    ElemMat::matrix_type v( fe.nbCoor(),fe.nbQuadPt() );
+    MatrixElemental::matrix_type mat_tmp(fe.nbNode,fe.nbNode);
+    MatrixElemental::matrix_type v( fe.nbCoor(),fe.nbQuadPt() );
     Real s;
 
 
@@ -645,7 +645,7 @@ void StabilizationSD<MeshType, DofType>::lapu_bgradv(const Real& coef, ElemVec& 
     {
         for (UInt icoor(0); icoor<fe.nbCoor(); ++icoor)
         {
-            ElemVec::vector_view velicoor=vel.block(icoor);
+            VectorElemental::vector_view velicoor=vel.block(icoor);
             v(icoor,ig)=0.;
             for (UInt k(0); k<fe.nbNode; ++k)
                 v(icoor,ig) += velicoor(k)*fe.phi(k,ig); // velocity on the intgt point
@@ -670,7 +670,7 @@ void StabilizationSD<MeshType, DofType>::lapu_bgradv(const Real& coef, ElemVec& 
     // copy on the components
     for (UInt icomp(0); icomp<nb; ++icomp)
     {
-        ElemMat::matrix_view mat_icomp = elmat.block(iblock+icomp,jblock+icomp);
+        MatrixElemental::matrix_view mat_icomp = elmat.block(iblock+icomp,jblock+icomp);
         for (UInt i(0); i<fe.nbDiag(); ++i)
         {
             for (UInt j(0); j<fe.nbDiag(); ++j)
@@ -683,7 +683,7 @@ void StabilizationSD<MeshType, DofType>::lapu_bgradv(const Real& coef, ElemVec& 
 
 
 template<typename MeshType, typename DofType>
-void StabilizationSD<MeshType, DofType>::lapu_gradq(const Real& coef, ElemMat& elmat,const CurrentFE& fe)  const
+void StabilizationSD<MeshType, DofType>::lapu_gradq(const Real& coef, MatrixElemental& elmat,const CurrentFE& fe)  const
 {
 
     ASSERT_PRE(fe.hasFirstDeriv(),
@@ -696,7 +696,7 @@ void StabilizationSD<MeshType, DofType>::lapu_gradq(const Real& coef, ElemMat& e
 
     for (UInt jc(0); jc < fe.nbCoor(); ++jc) // loop on column blocks
     {
-        ElemMat::matrix_view mat_view = elmat.block(fe.nbCoor(),jc);
+        MatrixElemental::matrix_view mat_view = elmat.block(fe.nbCoor(),jc);
         for (UInt i(0); i<fe.nbNode; ++i) // local rows
         {
             for (UInt j(0); j<fe.nbNode; ++j) // local columns
@@ -715,14 +715,14 @@ void StabilizationSD<MeshType, DofType>::lapu_gradq(const Real& coef, ElemMat& e
 
 template<typename MeshType, typename DofType>
 template<typename SourceType>
-void StabilizationSD<MeshType, DofType>::f_bgradv(const Real& coef, SourceType& source, ElemVec& vel,
-                                                  ElemVec& elvec, const CurrentFE& fe, UInt iblock, const Real& time)  const
+void StabilizationSD<MeshType, DofType>::f_bgradv(const Real& coef, SourceType& source, VectorElemental& vel,
+                                                  VectorElemental& elvec, const CurrentFE& fe, UInt iblock, const Real& time)  const
 {
 
     ASSERT_PRE(fe.hasFirstDeriv(),
                "f_bgradv  vector needs at least the first derivatives");
 
-    ElemMat::matrix_type v(fe.nbCoor(),fe.nbQuadPt());
+    MatrixElemental::matrix_type v(fe.nbCoor(),fe.nbQuadPt());
     Real s;
 
 
@@ -731,7 +731,7 @@ void StabilizationSD<MeshType, DofType>::f_bgradv(const Real& coef, SourceType& 
     {
         for (UInt icoor(0); icoor<fe.nbCoor(); ++icoor)
         {
-            ElemVec::vector_view velicoor=vel.block(icoor);
+            VectorElemental::vector_view velicoor=vel.block(icoor);
             v(icoor,ig)=0.;
             for (UInt k(0); k<fe.nbNode; ++k)
                 v(icoor,ig) += velicoor(k)*fe.phi(k,ig); // velocity on the intgt point
@@ -741,7 +741,7 @@ void StabilizationSD<MeshType, DofType>::f_bgradv(const Real& coef, SourceType& 
     // local vector per block
     for (UInt ic(0); ic < fe.nbCoor(); ++ic)
     {
-        ElemVec::vector_view vec_ic = elvec.block(ic+iblock);
+        VectorElemental::vector_view vec_ic = elvec.block(ic+iblock);
         for (UInt i(0); i<fe.nbNode; ++i)
         {
             s = 0.0;
@@ -758,7 +758,7 @@ void StabilizationSD<MeshType, DofType>::f_bgradv(const Real& coef, SourceType& 
 
 template<typename MeshType, typename DofType>
 template<typename SourceType>
-void StabilizationSD<MeshType, DofType>::f_gradq(const Real& coef, SourceType& source, ElemVec& elvec, const CurrentFE& fe, UInt iblock, const Real& time) const
+void StabilizationSD<MeshType, DofType>::f_gradq(const Real& coef, SourceType& source, VectorElemental& elvec, const CurrentFE& fe, UInt iblock, const Real& time) const
 {
 
     ASSERT_PRE(fe.hasFirstDeriv(),
@@ -766,7 +766,7 @@ void StabilizationSD<MeshType, DofType>::f_gradq(const Real& coef, SourceType& s
 
     Real s;
 
-    ElemVec::vector_view vec_ic = elvec.block(iblock);
+    VectorElemental::vector_view vec_ic = elvec.block(iblock);
     for (UInt i(0); i<fe.nbNode; ++i)
     {
         s = 0.0;

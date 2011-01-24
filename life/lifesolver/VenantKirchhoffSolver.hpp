@@ -468,11 +468,11 @@ protected:
   boost::shared_ptr<solver_Type>                    M_linearSolver;
 
   //! Elementary matrices and vectors
-  boost::shared_ptr<ElemMat>                        M_elmatK; // stiffnes
-  boost::shared_ptr<ElemMat>                        M_elmatM; // mass
-  boost::shared_ptr<ElemMat>                        M_elmatC; // mass + stiffness
-  //    ElemVec                        M_elvec;  // Elementary right hand side
-  //    ElemVec                        M_dk_loc; // Local displacement
+  boost::shared_ptr<MatrixElemental>                        M_elmatK; // stiffnes
+  boost::shared_ptr<MatrixElemental>                        M_elmatM; // mass
+  boost::shared_ptr<MatrixElemental>                        M_elmatC; // mass + stiffness
+  //    VectorElemental                        M_elvec;  // Elementary right hand side
+  //    VectorElemental                        M_dk_loc; // Local displacement
 
   //! linearized velocity
 
@@ -623,9 +623,9 @@ VenantKirchhoffSolver<Mesh, SolverType>::setup(boost::shared_ptr<data_Type>     
   M_FESpace                         = dFESpace;
   M_Displayer.reset                 (new Displayer(comm));
   M_me                              = comm->MyPID();
-  M_elmatK.reset                    ( new ElemMat( M_FESpace->fe().nbFEDof(), nDimensions, nDimensions ) );
-  M_elmatM.reset                    ( new ElemMat( M_FESpace->fe().nbFEDof(), nDimensions, nDimensions ) );
-  M_elmatC.reset                    ( new ElemMat( M_FESpace->fe().nbFEDof(), nDimensions, nDimensions ) );
+  M_elmatK.reset                    ( new MatrixElemental( M_FESpace->fe().nbFEDof(), nDimensions, nDimensions ) );
+  M_elmatM.reset                    ( new MatrixElemental( M_FESpace->fe().nbFEDof(), nDimensions, nDimensions ) );
+  M_elmatC.reset                    ( new MatrixElemental( M_FESpace->fe().nbFEDof(), nDimensions, nDimensions ) );
   M_localMap                        = monolithicMap;
 
   M_disp.reset                      (new vector_Type(*M_localMap));

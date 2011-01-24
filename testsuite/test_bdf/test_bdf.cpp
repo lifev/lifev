@@ -181,8 +181,8 @@ void test_bdf::run()
 
     //=============================================================================
     //Fe Matrices and vectors
-    ElemMat elmat(feSpacePtr->fe().nbFEDof(), 1, 1); //local matrix
-    MatrixEpetra<double> matM(feSpacePtr->map()); //mass matrix
+    MatrixElemental elmat(FeSpace.fe().nbFEDof(), 1, 1); //local matrix
+    MatrixEpetra<double> matM(FeSpace.map()); //mass matrix
     boost::shared_ptr<MatrixEpetra<double> > matA_ptr(
         new MatrixEpetra<double> (feSpacePtr->map())); //stiff matrix
     VectorEpetra u(feSpacePtr->map(), Unique); // solution vector

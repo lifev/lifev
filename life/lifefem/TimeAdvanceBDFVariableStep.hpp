@@ -430,6 +430,9 @@ void TimeAdvanceBDFVariableStep<FEVectorType>::setInitialCondition( const Functi
         M_timeStep[ i ] = timeStep;
     }
     u0Vector = *M_unknowns[ 0 ];
+
+    computeCoefficient();
+
     return ;
 }
 

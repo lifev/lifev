@@ -212,7 +212,7 @@ private:
     bool                           M_verbose;
 
     //! Elementary matrix : 3 blocks
-    ElemMat                        M_elmat;
+    MatrixElemental                        M_elmat;
 
     //! The actual extension of the displacement
     vector_Type                    M_disp;

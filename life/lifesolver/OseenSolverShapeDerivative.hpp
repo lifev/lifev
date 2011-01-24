@@ -305,18 +305,18 @@ private:
     preconditionerPtr_type    M_linearPreconditioner;
 
 
-    ElemVec                   M_elementVectorVelocity; // Elementary right hand side for the linearized velocity
-    ElemVec                   M_elementVectorPressure; // Elementary right hand side for the linearized pressure
-    //    boost::shared_ptr<ElemMat>                   M_elementMatrixVelocity;
-    //    boost::shared_ptr<ElemMat>                   M_elementMatrixConvective;
-    //    boost::shared_ptr<ElemMat>                   M_elementMatrixPressure;    // Elementary displacement for right hand side
-    ElemVec                   M_elementMeshVelocity;    // Elementary mesh velocity
-    ElemVec                   M_elementVelocity;   // Elementary velocity
-    ElemVec                   M_elementPressure;   // Elementary pressure
-    ElemVec                   M_elementConvectionVelocity;    // Elementary convection velocity
-    ElemVec                   M_elementDisplacement;    // Elementary displacement for right hand side
-    ElemVec                   M_elementVelocityRightHandSide;   // Elementary mesh velocity for right hand side
-    ElemVec                   M_u_loc;
+    VectorElemental                   M_elementVectorVelocity; // Elementary right hand side for the linearized velocity
+    VectorElemental                   M_elementVectorPressure; // Elementary right hand side for the linearized pressure
+    //    boost::shared_ptr<MatrixElemental>                   M_elementMatrixVelocity;
+    //    boost::shared_ptr<MatrixElemental>                   M_elementMatrixConvective;
+    //    boost::shared_ptr<MatrixElemental>                   M_elementMatrixPressure;    // Elementary displacement for right hand side
+    VectorElemental                   M_elementMeshVelocity;    // Elementary mesh velocity
+    VectorElemental                   M_elementVelocity;   // Elementary velocity
+    VectorElemental                   M_elementPressure;   // Elementary pressure
+    VectorElemental                   M_elementConvectionVelocity;    // Elementary convection velocity
+    VectorElemental                   M_elementDisplacement;    // Elementary displacement for right hand side
+    VectorElemental                   M_elementVelocityRightHandSide;   // Elementary mesh velocity for right hand side
+    VectorElemental                   M_u_loc;
     bool                      M_reuseLinearPreconditioner;
     FESpace<mesh_Type, MapEpetra>* M_mmFESpace;
 };
@@ -788,23 +788,23 @@ updateShapeDerivatives( matrix_Type&                   matrix,
             mmFESpace.fe().updateFirstDerivQuadPt( mmFESpace.mesh()->volumeList( i ) );
 
             // initialization of elementary vectors
-            boost::shared_ptr<ElemMat> elementMatrixPressure ( new ElemMat( this->M_pressureFESpace.fe().nbFEDof(),
+            boost::shared_ptr<MatrixElemental> elementMatrixPressure ( new MatrixElemental( this->M_pressureFESpace.fe().nbFEDof(),
                                                                             1,
                                                                             0,
                                                                             mmFESpace.fe().nbFEDof(),
                                                                             0,
                                                                             nDimensions ) );
-            boost::shared_ptr<ElemMat> elementMatrixVelocity ( new ElemMat( this->M_velocityFESpace.fe().nbFEDof(),
+            boost::shared_ptr<MatrixElemental> elementMatrixVelocity ( new MatrixElemental( this->M_velocityFESpace.fe().nbFEDof(),
                                                                             nDimensions,
                                                                             0,
                                                                             this->M_velocityFESpace.fe().nbFEDof(),
                                                                             0,
                                                                             nDimensions ) );
-            boost::shared_ptr<ElemMat> elementMatrixConvective;
+            boost::shared_ptr<MatrixElemental> elementMatrixConvective;
 
             if ( convectiveTermDerivative )
             {
-                elementMatrixConvective.reset( new ElemMat( this->M_velocityFESpace.fe().nbFEDof(),
+                elementMatrixConvective.reset( new MatrixElemental( this->M_velocityFESpace.fe().nbFEDof(),
                                                             nDimensions,
                                                             0,
                                                             mmFESpace.fe().nbFEDof(),

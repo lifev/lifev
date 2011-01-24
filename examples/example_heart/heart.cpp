@@ -382,9 +382,9 @@ void Heart::computeRhs( vector_Type& rhs,
     //! u, w with repeated map
     vector_Type uVecRep(electricModel.solutionTransmembranePotential(), Repeated);
     ionicModel->updateRepeated();
-    ElemVec elvec_Iapp( electricModel.potentialFESpace().fe().nbFEDof(), 2 ),
-                    elvec_u( electricModel.potentialFESpace().fe().nbFEDof(), 1 ),
-                    elvec_Iion( electricModel.potentialFESpace().fe().nbFEDof(), 1 );
+    VectorElemental elvec_Iapp( electricModel.potentialFESpace().fe().nbFEDof(), 2 ),
+    elvec_u( electricModel.potentialFESpace().fe().nbFEDof(), 1 ),
+    elvec_Iion( electricModel.potentialFESpace().fe().nbFEDof(), 1 );
 
     for (UInt iVol=1; iVol<=electricModel.potentialFESpace().mesh()->numVolumes(); ++iVol)
     {
@@ -451,9 +451,9 @@ void Heart::computeRhs( vector_Type& rhs,
     vector_Type uVecRep(electricModel.solutionTransmembranePotential(), Repeated);
     ionicModel->updateRepeated();
 
-    ElemVec elvec_Iapp( electricModel.potentialFESpace().fe().nbFEDof(), 2 ),
-                    elvec_u( electricModel.potentialFESpace().fe().nbFEDof(), 1 ),
-                    elvec_Iion( electricModel.potentialFESpace().fe().nbFEDof(), 1 );
+    VectorElemental elvec_Iapp( electricModel.potentialFESpace().fe().nbFEDof(), 2 ),
+    elvec_u( electricModel.potentialFESpace().fe().nbFEDof(), 1 ),
+    elvec_Iion( electricModel.potentialFESpace().fe().nbFEDof(), 1 );
     for (UInt iVol=1; iVol<=electricModel.potentialFESpace().mesh()->numVolumes(); ++iVol)
     {
         electricModel.potentialFESpace().fe().updateJacQuadPt( electricModel.potentialFESpace().mesh()->volumeList( iVol ) );

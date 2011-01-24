@@ -130,7 +130,7 @@ private:
 
 
 
-//---- Predeclaration of the map (defined in defQuadRuleFE.cpp) ----
+//---- Predeclaration of the map (defined in FEDefinitions.cpp) ----
 
 extern const GeometricMap geoLinearNode;
 extern const GeometricMap geoLinearSeg;

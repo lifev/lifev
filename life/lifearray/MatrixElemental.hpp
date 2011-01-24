@@ -42,7 +42,7 @@
 
 namespace LifeV
 {
-class ElemMat
+class MatrixElemental
 {
 
 public:
@@ -50,8 +50,8 @@ public:
     typedef KNM_<Real> matrix_view;
     //typedef Tab2d matrix_type;
 
-    ~ElemMat();
-    ElemMat( UInt nNode1, UInt nbr1, UInt nbc1 ); // constructor for 1 finite element
+    ~MatrixElemental();
+    MatrixElemental( UInt nNode1, UInt nbr1, UInt nbc1 ); // constructor for 1 finite element
 
     //! This is the constructor for the local matrix involving 2 finite elements
     /*!
@@ -68,9 +68,9 @@ public:
       and nbc1 are 3 (components for the velocity), nbr2 and nbc2 are 1 (pressure
       is scalar)).
      */
-    ElemMat( UInt nNode1, UInt nbr1, UInt nbc1,
+    MatrixElemental( UInt nNode1, UInt nbr1, UInt nbc1,
              UInt nNode2, UInt nbr2, UInt nbc2 );
-    ElemMat( UInt nNode1, UInt nbr1, UInt nbc1,
+    MatrixElemental( UInt nNode1, UInt nbr1, UInt nbc1,
              UInt nNode2, UInt nbr2, UInt nbc2,
              UInt nNode3, UInt nbr3, UInt nbc3 ); // constructor for 3 finite elements
     matrix_type& mat()

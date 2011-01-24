@@ -140,8 +140,8 @@ public:
     //! Computes the term -1/ \Cm u^n (G (1-u^n/vp) (1-u^n/v_th) + eta_1 v^{n+1})
     //! for the PDE righthand side
     virtual void computeIonicCurrent( Real Capacitance,
-                              ElemVec& elvec,
-                              ElemVec& elvec_u,
+                              VectorElemental& elvec,
+                              VectorElemental& elvec_u,
                               FESpace<Mesh, MapEpetra>& uFESpace )=0;
 
     //! Initialize
@@ -219,8 +219,8 @@ public:
     void solveIonicModel( const vector_Type& u, const Real timeStep );
 
     void computeIonicCurrent( Real Capacitance,
-                      ElemVec& elvec,
-                      ElemVec& elvec_u,
+                      VectorElemental& elvec,
+                      VectorElemental& elvec_u,
                       FESpace<Mesh, MapEpetra>& uFESpace );
 
     const vector_Type& solutionGatingW() const {return M_solutionGatingW;}
@@ -240,7 +240,7 @@ protected:
     //! Global solution _w
     vector_Type             M_solutionGatingW;
     vector_Type				M_solutionGatingWRepeated;
-    ElemVec 				M_elvec;
+    VectorElemental 				M_elvec;
     UInt				    M_BDForder;
     TimeAdvanceBDF<vector_Type> 		M_BDFW;
     functorTauClose_Type	M_tauClose;
@@ -357,8 +357,8 @@ void MitchellSchaeffer<Mesh, SolverType>::solveIonicModel( const vector_Type& u,
 
 template<typename Mesh, typename SolverType>
 void MitchellSchaeffer<Mesh, SolverType>::computeIonicCurrent(  Real,
-                                                         ElemVec& elvec,
-                                                         ElemVec& elvec_u,
+                                                         VectorElemental& elvec,
+                                                         VectorElemental& elvec_u,
                                                          FESpace<Mesh, MapEpetra>& uFESpace )
 {
 	for ( UInt i = 0;i < uFESpace.fe().nbFEDof();i++ )
@@ -410,8 +410,8 @@ public:
     void solveIonicModel( const vector_Type& u, const Real timeStep );
 
     void computeIonicCurrent( Real Capacitance,
-                      ElemVec& elvec,
-                      ElemVec& elvec_u,
+                      VectorElemental& elvec,
+                      VectorElemental& elvec_u,
                       FESpace<Mesh, MapEpetra>& uFESpace );
 
     const vector_Type& solutionGatingW() const {return M_solutionGatingW;}
@@ -423,7 +423,7 @@ protected:
     //! Global solution _w
     vector_Type                    	M_solutionGatingW;
     vector_Type						M_solutionGatingWRepeated;
-    ElemVec 						M_elvec;
+    VectorElemental 						M_elvec;
 private:
 };
 
@@ -494,8 +494,8 @@ void RogersMcCulloch<Mesh, SolverType>::solveIonicModel( const vector_Type& u, c
 
 template<typename Mesh, typename SolverType>
 void RogersMcCulloch<Mesh, SolverType>::computeIonicCurrent(  Real Capacitance,
-                                                              ElemVec& elvec,
-                                                              ElemVec& elvec_u,
+                                                              VectorElemental& elvec,
+                                                              VectorElemental& elvec_u,
                                                               FESpace<Mesh, MapEpetra>& uFESpace )
 {
 	Real u_ig, w_ig;
@@ -556,8 +556,8 @@ public:
     void solveIonicModel( const vector_Type& u, const Real timeStep );
 
     void computeIonicCurrent( Real Capacitance,
-                      ElemVec& elvec,
-                      ElemVec& elvec_u,
+                      VectorElemental& elvec,
+                      VectorElemental& elvec_u,
                       FESpace<Mesh, MapEpetra>& uFESpace );
 
     void initialize ( );
@@ -632,7 +632,7 @@ protected:
 
     vector_Type						M_ionicCurrentRepeated;
 
-    ElemVec 						M_elemVecIonicCurrent;
+    VectorElemental 						M_elemVecIonicCurrent;
 
 private:
 };
@@ -920,8 +920,8 @@ void LuoRudy<Mesh, SolverType>::computeODECoefficients( const Real& u_ig )
 
 template<typename Mesh, typename SolverType>
 void LuoRudy<Mesh, SolverType>::computeIonicCurrent(  Real Capacitance,
-                                              ElemVec& elvec,
-                                              ElemVec& /*elvec_u*/,
+                                              VectorElemental& elvec,
+                                              VectorElemental& /*elvec_u*/,
                                               FESpace<Mesh, MapEpetra>& uFESpace )
 {
    	Real Iion_ig;

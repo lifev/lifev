@@ -312,8 +312,8 @@ void StabilizationIP<MeshType, DofType>::apply( MatrixType& matrix,  const Vecto
     LifeChronoFake chronoAssembly9;
     LifeChrono chronoAssembly;
 
-    ElemMat elMatU( M_feOnSide1->nbFEDof(), nDimensions    , nDimensions   );
-    ElemMat elMatP( M_feOnSide1->nbFEDof(), nDimensions + 1, nDimensions+1 );
+    MatrixElemental elMatU( M_feOnSide1->nbFEDof(), nDimensions    , nDimensions   );
+    MatrixElemental elMatP( M_feOnSide1->nbFEDof(), nDimensions + 1, nDimensions+1 );
 
 
     const UInt nDof = M_dof->numTotalDof();
@@ -322,7 +322,7 @@ void StabilizationIP<MeshType, DofType>::apply( MatrixType& matrix,  const Vecto
     state.normInf(&normInf);
 
     // local trace of the velocity
-    ElemVec beta( M_feBd->nbNode(), nDimensions );
+    VectorElemental beta( M_feBd->nbNode(), nDimensions );
 
     UInt myFaces(0);
 
