@@ -44,7 +44,7 @@ problem_type = 1
     [../]
 
     [./space_discretization]
-    mesh_dir      = ./Mesh/old/ # the directory where the mesh file is
+    mesh_dir      = ./Mesh/ # the directory where the mesh file is
     mesh_file     = cartesian_cube8.mesh #mesh48603.mesh #cartesian_cube8.mesh
     mesh_type     = .mesh #structured #.mesh
     mesh_faces    = all
