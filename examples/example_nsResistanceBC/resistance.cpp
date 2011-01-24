@@ -183,8 +183,11 @@ ResistanceProblem::run()
     LifeChrono chronoSet, chrono;
 
     chronoSet.start();
-    typedef OseenSolver< RegionMesh3D<LinearTetra> >::vector_Type  vector_Type;
+    typedef RegionMesh3D<LinearTetra> mesh_Type;
+    typedef OseenSolver< mesh_Type >::vector_Type  vector_Type;
     typedef boost::shared_ptr<vector_Type> vectorPtr_Type;
+    typedef FESpace< mesh_Type, MapEpetra > feSpace_Type;
+    typedef boost::shared_ptr<feSpace_Type> feSpacePtr_Type;
     // typedef boost::shared_ptr<BCVectorInterface>   bc_vector_interface;
     // Reading from data file
 
@@ -213,10 +216,10 @@ ResistanceProblem::run()
     MeshData meshData;
     meshData.setup(dataFile, "fluid/space_discretization");
 
-    boost::shared_ptr<RegionMesh3D<LinearTetra> > fullMeshPtr (new RegionMesh3D<LinearTetra>);
+    boost::shared_ptr<mesh_Type > fullMeshPtr (new mesh_Type);
     readMesh(*fullMeshPtr, meshData);
 
-    MeshPartitioner< RegionMesh3D<LinearTetra> >   meshPart(fullMeshPtr, d->comm);
+    MeshPartitioner< mesh_Type >   meshPart(fullMeshPtr, d->comm);
 
     std::string uOrder =  dataFile( "fluid/discretization/vel_order", "P1");
 
@@ -265,12 +268,12 @@ ResistanceProblem::run()
 
     if (verbose)
         std::cout << "Building the velocity FE space ... " << std::flush;
-    FESpace< RegionMesh3D<LinearTetra>, MapEpetra > uFESpace(meshPart,
-                                                             *refFE_vel,
-                                                             *qR_vel,
-                                                             *bdQr_vel,
-                                                             3,
-                                                             d->comm);
+    feSpacePtr_Type uFESpacePtr( new feSpace_Type( meshPart,
+                                                   *refFE_vel,
+                                                   *qR_vel,
+                                                   *bdQr_vel,
+                                                   3,
+                                                   d->comm) );
 
     if (verbose)
         std::cout << "ok." << std::endl;
@@ -278,47 +281,46 @@ ResistanceProblem::run()
     if (verbose)
         std::cout << "Building the pressure FE space ... " << std::flush;
 
-    FESpace< RegionMesh3D<LinearTetra>, MapEpetra > pFESpace(meshPart,
-                                                             *refFE_press,
-                                                             *qR_press,
-                                                             *bdQr_press,
-                                                             1,
-                                                             d->comm);
+    feSpacePtr_Type pFESpacePtr( new feSpace_Type( meshPart,
+                                                   *refFE_press,
+                                                   *qR_press,
+                                                   *bdQr_press,
+                                                   1,
+                                                   d->comm) );
 
     if (verbose)
         std::cout << "ok." << std::endl;
 
-    UInt totalVelDof   = uFESpace.map().map(Unique)->NumGlobalElements();
-    UInt totalPressDof = pFESpace.map().map(Unique)->NumGlobalElements();
+    UInt totalVelDof   = uFESpacePtr->map().map(Unique)->NumGlobalElements();
+    UInt totalPressDof = pFESpacePtr->map().map(Unique)->NumGlobalElements();
 
     if (verbose) std::cout << "Total Velocity DOF = " << totalVelDof << std::endl;
     if (verbose) std::cout << "Total Pressure DOF = " << totalPressDof << std::endl;
 
     if (verbose) std::cout << "Calling the fluid constructor ... ";
 
-    OseenSolver< RegionMesh3D<LinearTetra> > fluid (oseenData,
-                                              uFESpace,
-                                              pFESpace,
-                                              d->comm);
+    OseenSolver< mesh_Type > fluid (oseenData,
+                                    *uFESpacePtr,
+                                    *pFESpacePtr,
+                                    d->comm);
     MapEpetra fullMap(fluid.getMap());
 
     if (verbose) std::cout << "ok." << std::endl;
 
 
 #ifdef HAVE_HDF5
-    ExporterHDF5<RegionMesh3D<LinearTetra> > ensight( dataFile, meshPart.meshPartition(), "resistance", d->comm->MyPID());
+    ExporterHDF5<mesh_Type > ensight( dataFile, meshPart.meshPartition(), "resistance", d->comm->MyPID());
 #else
-    Ensight<RegionMesh3D<LinearTetra> > ensight( dataFile, meshPart.meshPartition(), "resistance", d->comm->MyPID());
+    Ensight<mesh_Type > ensight( dataFile, meshPart.meshPartition(), "resistance", d->comm->MyPID());
 #endif
 
     vectorPtr_Type velAndPressure ( new vector_Type(*fluid.solution(), ensight.mapType() ) );
 
-    ensight.addVariable( ExporterData::Vector, "velocity", velAndPressure,
-                         UInt(0), uFESpace.dof().numTotalDof() );
+    ensight.addVariable( ExporterData<mesh_Type>::VectorField, "velocity",
+                         uFESpacePtr, velAndPressure, UInt(0) );
 
-    ensight.addVariable( ExporterData::Scalar, "pressure", velAndPressure,
-                         UInt(3*uFESpace.dof().numTotalDof() ),
-                         UInt(  pFESpace.dof().numTotalDof() ) );
+    ensight.addVariable( ExporterData<mesh_Type>::ScalarField, "pressure", pFESpacePtr,
+                         velAndPressure, UInt(3*uFESpacePtr->dof().numTotalDof() ) );
 
     // Initialization
 
@@ -352,7 +354,7 @@ ResistanceProblem::run()
 
     bcvector.epetraVector().PutScalar(0.0);
 
-    BCVector bcResistance(bcvector,uFESpace.dof().numTotalDof(),1);
+    BCVector bcResistance(bcvector,uFESpacePtr->dof().numTotalDof(),1);
 
     bcResistance.setResistanceCoeff(d->resistance);
 

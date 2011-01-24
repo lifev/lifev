@@ -253,8 +253,12 @@ Cylinder::run()
 
 {
 
-    typedef OseenSolver< RegionMesh3D<LinearTetra> >::vector_Type  vector_Type;
+    typedef RegionMesh3D<LinearTetra> mesh_Type;
+    typedef OseenSolver< mesh_Type >::vector_Type  vector_Type;
     typedef boost::shared_ptr<vector_Type> vectorPtr_Type;
+    typedef FESpace< mesh_Type, MapEpetra > feSpace_Type;
+    typedef boost::shared_ptr<feSpace_Type> feSpacePtr_Type;
+
     // Reading from data file
     //
     GetPot dataFile( d->data_file_name.c_str() );
@@ -302,10 +306,10 @@ Cylinder::run()
     MeshData meshData;
     meshData.setup(dataFile, "fluid/space_discretization");
 
-    boost::shared_ptr<RegionMesh3D<LinearTetra> > fullMeshPtr(new RegionMesh3D<LinearTetra>);
+    boost::shared_ptr<mesh_Type > fullMeshPtr(new mesh_Type);
     readMesh(*fullMeshPtr, meshData);
 
-    MeshPartitioner< RegionMesh3D<LinearTetra> >   meshPart(fullMeshPtr, d->comm);
+    MeshPartitioner< mesh_Type >   meshPart(fullMeshPtr, d->comm);
 
     if (verbose) std::cout << std::endl;
     if (verbose) std::cout << "    Time discretization order " << oseenData->dataTime()->orderBDF() << std::endl;
@@ -315,7 +319,7 @@ Cylinder::run()
     if (verbose)
         std::cout << "Building the velocity FE space ... " << std::flush;
     std::string uOrder =  dataFile( "fluid/space_discretization/vel_order", "P1");
-    FESpace< RegionMesh3D<LinearTetra>, MapEpetra > uFESpace(meshPart,uOrder,3,d->comm);
+    feSpacePtr_Type uFESpacePtr( new feSpace_Type(meshPart,uOrder,3,d->comm) );
 
     if (verbose)
         std::cout << "ok." << std::endl;
@@ -323,15 +327,15 @@ Cylinder::run()
     if (verbose)
         std::cout << "Building the pressure FE space ... " << std::flush;
     std::string pOrder =  dataFile( "fluid/space_discretization/press_order", "P1");
-    FESpace< RegionMesh3D<LinearTetra>, MapEpetra > pFESpace(meshPart,pOrder,1,d->comm);
+    feSpacePtr_Type pFESpacePtr( new feSpace_Type(meshPart,pOrder,1,d->comm) );
 
     if (verbose)
         std::cout << "ok." << std::endl;
 
 
 
-    UInt totalVelDofs   = uFESpace.map().map(Unique)->NumGlobalElements();
-    UInt totalPressDofs = pFESpace.map().map(Unique)->NumGlobalElements();
+    UInt totalVelDofs   = uFESpacePtr->map().map(Unique)->NumGlobalElements();
+    UInt totalPressDofs = pFESpacePtr->map().map(Unique)->NumGlobalElements();
     UInt totalDofs      = totalVelDofs + totalPressDofs;
 
 
@@ -358,8 +362,8 @@ Cylinder::run()
     if (verbose) std::cout << "Total Pressure Dofs = " << totalPressDofs << std::endl;
     if (verbose) std::cout << "Total Dofs          = " << totalDofs << std::endl;
 
-    UInt myTotalVelDofs   = uFESpace.map().map(Unique)->NumMyElements();
-    UInt myTotalPressDofs = pFESpace.map().map(Unique)->NumMyElements();
+    UInt myTotalVelDofs   = uFESpacePtr->map().map(Unique)->NumMyElements();
+    UInt myTotalPressDofs = pFESpacePtr->map().map(Unique)->NumMyElements();
     UInt myTotalDofs      = myTotalVelDofs + myTotalPressDofs;
 
 
@@ -370,16 +374,16 @@ Cylinder::run()
     if (verbose) std::cout << "Calling the fluid constructor  ... " << std::flush;
 
 #if LM
-    OseenSolver< RegionMesh3D<LinearTetra> > fluid (oseenData,
-                                              uFESpace,
-                                              pFESpace,
-                                              d->comm,
-                                              lagrangeMultipliers.size());
+    OseenSolver< mesh_Type > fluid (oseenData,
+                                    *uFESpacePtr,
+                                    *pFESpacePtr,
+                                    d->comm,
+                                    lagrangeMultipliers.size());
 #else
-    OseenSolver< RegionMesh3D<LinearTetra> > fluid (oseenData,
-                                              uFESpace,
-                                              pFESpace,
-                                              d->comm);
+    OseenSolver< mesh_Type > fluid (oseenData,
+                                    *uFESpacePtr,
+                                    *pFESpacePtr,
+                                    d->comm);
 #endif
 
     if (verbose) std::cout << "ok." << std::endl;
@@ -447,16 +451,15 @@ Cylinder::run()
 
     fluid.resetPreconditioner();
 
-    ExporterEnsight<RegionMesh3D<LinearTetra> > ensight( dataFile, meshPart.meshPartition(), "cylinder", d->comm->MyPID());
+    ExporterEnsight<mesh_Type > ensight( dataFile, meshPart.meshPartition(), "cylinder", d->comm->MyPID());
 
     vectorPtr_Type velAndPressure ( new vector_Type(*fluid.solution(), Repeated ) );
 
-    ensight.addVariable( ExporterData::Vector, "velocity", velAndPressure,
-                         UInt(0), uFESpace.dof().numTotalDof() );
+    ensight.addVariable( ExporterData<mesh_Type>::VectorField, "velocity", uFESpacePtr,
+                         velAndPressure, UInt(0) );
 
-    ensight.addVariable( ExporterData::Scalar, "pressure", velAndPressure,
-                         UInt(3*uFESpace.dof().numTotalDof() ),
-                         UInt(  pFESpace.dof().numTotalDof() ) );
+    ensight.addVariable( ExporterData<mesh_Type>::ScalarField, "pressure", pFESpacePtr,
+                         velAndPressure, UInt(3*uFESpacePtr->dof().numTotalDof() ) );
     ensight.postProcess( 0 );
 
     // Temporal loop
