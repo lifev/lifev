@@ -31,6 +31,7 @@ along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
   @author Simone Deparis <simone.deparis.epfl.ch>
 
   @maintainer Radu Popescu <radu.popescu@epfl.ch>
+  @contributor Tiziano Passerini <tiziano@mathcs.emory.edu>
 
     Usage: two steps
     <ol>
@@ -61,7 +62,7 @@ along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
 #include <life/lifefilters/GetPot.hpp>
 #include <life/lifecore/LifeChrono.hpp>
 #include <life/lifecore/LifeV.hpp>
-#include <life/lifefem/ReferenceFE.hpp>
+#include <life/lifefem/FESpace.hpp>
 #include <life/lifemesh/MarkerDefinitions.hpp>
 
 namespace LifeV
@@ -76,6 +77,7 @@ namespace LifeV
     to help the importer/exporter
     like:   variable name, shared pointer to data, size, and few others.
  */
+template< typename MeshType >
 class ExporterData
 {
 public:
@@ -83,21 +85,32 @@ public:
     //! @name Public Types
     //@{
 
-    typedef VectorEpetra                      vectorRaw_Type;
-    typedef boost::shared_ptr<vectorRaw_Type> vectorPtr_Type;
+    typedef MeshType                          mesh_Type;
+    typedef VectorEpetra                      vector_Type;
+    typedef boost::shared_ptr<vector_Type>    vectorPtr_Type;
+    typedef FESpace< mesh_Type, MapEpetra >   feSpace_Type;
+    typedef boost::shared_ptr<feSpace_Type>   feSpacePtr_Type;
 
-    //! Type of data stored.
-    enum Type
+    //! FieldTypeEnum of data stored.
+    enum FieldTypeEnum
     {
-        Scalar, /*!< Scalar stands for scalarfield */
-        Vector  /*!< Vector stands for vectorfield */
+        ScalarField, /*!< ScalarField stands for scalar field */
+        VectorField, /*!< VectorField stands for vector field */
     };
 
-    //! Where is data centered /
-    enum Where
+    //! Where is data centered? /
+    enum WhereEnum
     {
         Node, /*!< Node centered */
         Cell  /*!< Cell centered */
+    };
+
+    //! Time regime of the field /
+    enum FieldRegimeEnum
+    {
+        UnsteadyRegime = 0, /*!< The field is in unsteady regime */
+        SteadyRegime = 1, /*!< The field is in steady regime */
+        NullRegime = 2 /*!< DEPRECATED */
     };
 
     //@}
@@ -108,22 +121,22 @@ public:
     //! Constructor with all the data to be stored
     /*!
         Constructor with all the data to be stored
-        @param type         - scalar or vector field
+        @param fieldType    - scalar or vector field
         @param variableName - name assigned to this variable in output file
-        @param vec          - shared pointer to array
+        @param feSpacePtr   - shared pointer to variable FESpace
+        @param vectorPtr    - shared pointer to variable array
         @param start        - address of first datum in the array to be stored.
                               Useful in case you want to define a subrange of the vector *vec
-        @param size         - size of the array to store (not yet multiplied by the dimension of the vector)
-        @param steady       - if  file name for postprocessing has to include time dependency
+        @param regime       - if UnsteadyRegime, then the file name for postprocessing has to include time dependency
         @param where        - where is variable located (Node or Cell)
     */
-    ExporterData(const Type&           type,
-                 const std::string&    variableName,
-                 const vectorPtr_Type& vec,
-                 const UInt&           start,
-                 const UInt&           size,
-                 const UInt&           steady,
-                 const Where&          where = ExporterData::Node);
+    ExporterData(const FieldTypeEnum&   fieldType,
+                 const std::string&     variableName,
+                 const feSpacePtr_Type& feSpacePtr,
+                 const vectorPtr_Type&  vectorPtr,
+                 const UInt&            start,
+                 const FieldRegimeEnum& regime,
+                 const WhereEnum&       where = Node);
 
     //@}
 
@@ -148,7 +161,7 @@ public:
     //@{
 
     //! file name for postprocessing has to include time dependency
-    void setSteady(UInt i) {M_steady = i;}
+    void setRegime(FieldRegimeEnum regime) {M_regime = regime;}
 
     //@}
 
@@ -157,34 +170,42 @@ public:
     //@{
 
     //! name assigned to this variable in output file
-    const std::string&  variableName() const
+    const std::string& variableName() const
     {
         return M_variableName;
     }
 
-    //! size of the stored array
-    const UInt& size() const
+    //! number of (scalar) DOFs of the variable
+    const UInt& __attribute__ (( deprecated )) size() const
     {
-        return M_size;
+        return numDOF();
+    }
+    const UInt& numDOF() const
+    {
+        return M_numDOF;
     }
 
     //! address of first datum in the array
     const UInt& start() const { return M_start; }
 
     //! scalar or vector field
-    const Type& type() const
+    const FieldTypeEnum& __attribute__ (( deprecated )) type() const
     {
-        return M_type;
+        return fieldType();
+    }
+    const FieldTypeEnum& fieldType() const
+    {
+        return M_fieldType;
     }
 
     //! shared pointer to array
-    const vectorPtr_Type storedArray() const
+    const vectorPtr_Type storedArrayPtr() const
     {
-        return M_vr;
+        return M_storedArrayPtr;
     }
 
-    //! returns 0 if file name for postprocessing has to include time dependency
-    UInt steady() const {return M_steady; }
+    //! returns UnsteadyRegime (=0) if file name for postprocessing has to include time dependency
+    FieldRegimeEnum regime() const {return M_regime; }
 
     //! returns Scalar or Vector strings
     std::string typeName() const;
@@ -193,7 +214,7 @@ public:
     UInt typeDim() const;
 
     //! Node or Cell centered ?
-    const Where& where() const
+    const WhereEnum& where() const
     {
         return M_where;
     }
@@ -208,23 +229,26 @@ private:
     //! name assigned to this variable in output file
     std::string M_variableName;
 
-    //! pointer to storedArray
-    const vectorPtr_Type M_vr;
+    //! pointer to the FESpace of the variable
+    const feSpacePtr_Type M_feSpacePtr;
 
-    //! address of first datum in the array
-    UInt M_size;
+    //! pointer to storedArray
+    const vectorPtr_Type M_storedArrayPtr;
+
+    //! number of (scalar) DOFs of the variable
+    UInt M_numDOF;
 
     //! address of first datum in the array
     UInt M_start;
 
     //! scalar or vector field
-    Type M_type;
+    FieldTypeEnum M_fieldType;
 
-    //! equal to 0 if file name for postprocessing has to include time dependency
-    UInt M_steady;
+    //! equal to UnsteadyRegime if file name for postprocessing has to include time dependency
+    FieldRegimeEnum M_regime;
 
     //! Node or Cell centered
-    Where M_where;
+    WhereEnum M_where;
     //@}
 };
 
@@ -244,10 +268,17 @@ class Exporter
 public:
     //! @name Public typedefs
     //@{
-    typedef MeshType mesh_Type;
-    typedef boost::shared_ptr<MeshType>    meshPtr_Type;
-    typedef ExporterData::vectorRaw_Type vectorRaw_Type;
-    typedef ExporterData::vectorPtr_Type vectorPtr_Type;
+    typedef MeshType                                    mesh_Type;
+    typedef boost::shared_ptr<MeshType>                 meshPtr_Type;
+    typedef ExporterData<mesh_Type>                     exporterData_Type;
+    typedef typename exporterData_Type::vector_Type     vector_Type;
+    typedef typename exporterData_Type::vectorPtr_Type  vectorPtr_Type;
+    typedef typename exporterData_Type::feSpacePtr_Type feSpacePtr_Type;
+    typedef typename exporterData_Type::WhereEnum       WhereEnum;
+    typedef typename exporterData_Type::FieldTypeEnum   FieldTypeEnum;
+    typedef typename exporterData_Type::FieldRegimeEnum FieldRegimeEnum;
+    typedef typename std::multimap<WhereEnum, exporterData_Type >::iterator
+    		                                            iterator_Type;
     //@}
 
     //! @name Constructor & Destructor
@@ -277,18 +308,21 @@ public:
 
     //! Adds a new variable to be post-processed
     /*!
-        @param type the type fo the variable Ensight::Scalar or Ensight::Vector
-        @param prefix the prefix of the files storing the variable (ex: "velocity" for velocity.***)
-        @param vr an ublas::vector_range type given a view of the varialbe (ex: subrange(fluid.u(),0,3*dimU) )
-        @param size size of the stored array
+        @param type the type of the variable exporterData_Type::FieldTypeEnum
+        @param variableName the name of the variable (to be used in file prefix)
+        @param feSpacePtr a pointer to the FESpace of the variable
+        @param vectorPtr a pointer to the vector containing the values of the variable
+        @param start location in the vector where the storing of the variable starts
+        @param regime if UnsteadyRegime the filename should change at each time step
+        @param where choose whether the variable is defined on Nodes of Elements
     */
-    void addVariable(const ExporterData::Type& type,
+    void addVariable(const FieldTypeEnum& type,
                      const std::string& variableName,
-                     const vectorPtr_Type& vector,
+                     const feSpacePtr_Type& feSpacePtr,
+                     const vectorPtr_Type& vectorPtr,
                      const UInt& start,
-                     const UInt& size,
-                     const UInt& steady = 0,
-                     const ExporterData::Where& where = ExporterData::Node );
+                     const FieldRegimeEnum& regime = exporterData_Type::UnsteadyRegime,
+                     const WhereEnum& where = exporterData_Type::Node );
 
     //! Post-process the variables added to the list
     /*!
@@ -312,7 +346,7 @@ public:
     //! Read  only last timestep
     virtual void import(const Real& startTime) = 0;
 
-    virtual void readVariable(ExporterData& dvar);
+    virtual void readVariable(exporterData_Type& dvar);
     //@}
 
     //! @name Set Methods
@@ -347,9 +381,9 @@ public:
     /*!
      * @param Directory output folder
      */
-    void setStartIndex( const UInt& StartIndex )
+    void setTimeIndexStart( const UInt& StartIndex )
     {
-        M_startIndex = StartIndex;
+        M_timeIndexStart = StartIndex;
     }
 
     //! Set how many time step between two saves.
@@ -382,7 +416,8 @@ public:
     //! @name Get Methods
     //@{
 
-    const UInt& startIndex() const { return M_startIndex; }
+    const UInt& timeIndexStart() const { return M_timeIndexStart; }
+    const UInt& timeIndex() const { return M_timeIndex; }
 
     //! returns the type of the map to use for the VectorEpetra
     virtual MapEpetraType mapType() const = 0;
@@ -395,8 +430,8 @@ protected:
     //! compute postfix
     void computePostfix();
 
-    virtual void readScalar( ExporterData& dvar ) = 0;
-    virtual void readVector( ExporterData& dvar ) = 0;
+    virtual void readScalar( exporterData_Type& dvar ) = 0;
+    virtual void readVector( exporterData_Type& dvar ) = 0;
 
     //@}
 
@@ -404,20 +439,106 @@ protected:
     //@{
     std::string                 M_prefix;
     std::string                 M_postDir;
-    UInt                        M_startIndex;
+    UInt                        M_timeIndexStart;
+    UInt                        M_timeIndex;
     UInt                        M_save;
     bool                        M_multimesh;
+    UInt                        M_timeIndexWidth;
     meshPtr_Type                M_mesh;
     int                         M_procId;
     std::string                 M_postfix;
 
-    std::list<ExporterData>     M_listData;
+    std::multimap<WhereEnum, exporterData_Type > M_whereToDataMap;
     std::list<Real>             M_timeSteps;
     //@}
 };
 
 // ==================================================
-// IMPLEMENTATION
+// EXPORTERDATA: IMPLEMENTATION
+// ==================================================
+
+// =================
+// Constructor
+// =================
+
+template< typename MeshType >
+ExporterData<MeshType>::ExporterData( const FieldTypeEnum&   type,
+                                      const std::string&     variableName,
+                                      const feSpacePtr_Type& feSpacePtr,
+                                      const vectorPtr_Type&  vectorPtr,
+                                      const UInt&            start,
+                                      const FieldRegimeEnum& regime,
+                                      const WhereEnum&       where ):
+        M_variableName      ( variableName ),
+        M_feSpacePtr        ( feSpacePtr ),
+        M_storedArrayPtr    ( vectorPtr ),
+        M_numDOF            ( feSpacePtr->dim() ),
+        M_start             ( start ),
+        M_fieldType         ( type ),
+        M_regime            ( regime ),
+        M_where             ( where )
+{}
+
+// ==============
+// Operators
+// ==============
+
+template< typename MeshType >
+Real ExporterData<MeshType>::operator()( const UInt i ) const
+{
+    return (*M_storedArrayPtr)[i];
+}
+
+template< typename MeshType >
+Real& ExporterData<MeshType>::operator()( const UInt i )
+{
+    return (*M_storedArrayPtr)[i];
+}
+
+template< typename MeshType >
+std::string ExporterData<MeshType>::typeName() const
+{
+    switch (M_fieldType)
+    {
+    case ScalarField:
+        return "Scalar";
+    case VectorField:
+        return "Vector";
+    }
+
+    return "ERROR string";
+}
+
+template< typename MeshType >
+UInt ExporterData<MeshType>::typeDim() const
+{
+    /*switch ( M_fieldType )
+    {
+    case ScalarField:
+        return 1;
+    case VectorField:
+        return 3;
+    }*/
+
+    return M_feSpacePtr->fieldDim();
+}
+
+template< typename MeshType >
+std::string ExporterData<MeshType>::whereName() const
+{
+    switch (M_where)
+    {
+    case Node:
+        return "Node";
+    case Cell:
+        return "Cell";
+    }
+
+    return "ERROR string";
+}
+
+// ==================================================
+// EXPORTER: IMPLEMENTATION
 // ==================================================
 
 // ===================================================
@@ -426,45 +547,51 @@ protected:
 template<typename MeshType>
 Exporter<MeshType>::Exporter():
         M_prefix        ( "output"),
-        M_postDir      ( "./" ),
-        M_startIndex         ( 0 ),
+        M_postDir       ( "./" ),
+        M_timeIndexStart( 0 ),
+        M_timeIndex     ( M_timeIndexStart ),
         M_save          ( 1 ),
-        M_multimesh     ( true )
+        M_multimesh     ( true ),
+        M_timeIndexWidth( 5 )
 {}
 
 template<typename MeshType>
 Exporter<MeshType>::Exporter( const GetPot& dfile, const std::string& prefix ):
         M_prefix        ( prefix ),
-        M_postDir      ( dfile("exporter/post_dir", "./") ),
-        M_startIndex         ( dfile("exporter/start",0) ),
+        M_postDir       ( dfile("exporter/post_dir", "./") ),
+        M_timeIndexStart( dfile("exporter/start",0) ),
+        M_timeIndex     ( M_timeIndexStart ),
         M_save          ( dfile("exporter/save",1) ),
-        M_multimesh     ( dfile("exporter/multimesh",true) )
+        M_multimesh     ( dfile("exporter/multimesh",true) ),
+        M_timeIndexWidth( dfile("exporter/time_id_width",5) )
 {}
 
 // ===================================================
 // Methods
 // ===================================================
 template<typename MeshType>
-void Exporter<MeshType>::addVariable(const ExporterData::Type&  type,
-                                 const std::string&         variableName,
-                                 const vectorPtr_Type&      vr,
-                                 const UInt&                start,
-                                 const UInt&                size,
-                                 const UInt&                steady,
-                                 const ExporterData::Where& where)
+void Exporter<MeshType>::addVariable(const FieldTypeEnum& type,
+                                     const std::string& variableName,
+                                     const feSpacePtr_Type& feSpacePtr,
+                                     const vectorPtr_Type& vectorPtr,
+                                     const UInt& start,
+                                     const FieldRegimeEnum& regime,
+                                     const WhereEnum& where )
 {
-    M_listData.push_back( ExporterData(type,variableName, vr, start, size, steady, where) );
+    // M_whereToDataMap.push_back( ExporterData(type,variableName, vr, start, size, regime, where) );
+    M_whereToDataMap.insert( std::pair<WhereEnum,exporterData_Type >(
+                                 where, exporterData_Type(type, variableName, feSpacePtr, vectorPtr, start, regime, where) ) );
 }
 
 template <typename MeshType>
-void Exporter<MeshType>::readVariable(ExporterData& dvar)
+void Exporter<MeshType>::readVariable(exporterData_Type& dvar)
 {
     switch ( dvar.type() )
     {
-    case ExporterData::Scalar:
+    case exporterData_Type::ScalarField:
         readScalar(dvar);
         break;
-    case ExporterData::Vector:
+    case exporterData_Type::VectorField:
         readVector(dvar);
         break;
     }
@@ -476,16 +603,21 @@ void Exporter<MeshType>::computePostfix()
     std::ostringstream index;
     index.fill( '0' );
 
-    if (M_startIndex % M_save == 0)
+    if (M_timeIndex % M_save == 0)
     {
-        index << std::setw(5) << ( M_startIndex / M_save );
+        index << std::setw(M_timeIndexWidth) << ( M_timeIndex / M_save );
 
         M_postfix = "." + index.str();
     }
     else
-        M_postfix = "*****";
+    {
+        // M_postfix = "*****";
+        std::string stars("");
+        for (UInt cc(0); cc<M_timeIndexWidth; ++cc) stars+="*";
+        M_postfix = stars;
+    }
 
-    ++M_startIndex;
+    ++M_timeIndex;
 }
 
 // ===================================================
@@ -494,10 +626,12 @@ void Exporter<MeshType>::computePostfix()
 template<typename MeshType>
 void Exporter<MeshType>::setDataFromGetPot( const GetPot& dataFile, const std::string& section )
 {
-    M_postDir      = dataFile( ( section + "/post_dir"  ).data(), "./" );
-    M_startIndex   = dataFile( ( section + "/start"     ).data(), 0 );
-    M_save          = dataFile( ( section + "/save"      ).data(), 1 );
-    M_multimesh     = dataFile( ( section + "/multimesh" ).data(), true );
+    M_postDir        = dataFile( ( section + "/post_dir"  ).data(), "./" );
+    M_timeIndexStart = dataFile( ( section + "/start"     ).data(), 0 );
+    M_timeIndex      = M_timeIndexStart;
+    M_save           = dataFile( ( section + "/save"      ).data(), 1 );
+    M_multimesh      = dataFile( ( section + "/multimesh" ).data(), true );
+    M_timeIndexWidth = dataFile( ( section + "/time_id_width" ).data(), 5);
 }
 
 template<typename MeshType>
