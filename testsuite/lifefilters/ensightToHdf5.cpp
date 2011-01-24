@@ -67,18 +67,19 @@
 
 using namespace LifeV;
 
+typedef RegionMesh3D<LinearTetra>                mesh_Type;
+typedef OseenSolver< mesh_Type >::vector_Type    vector_Type;
+typedef OseenSolver< mesh_Type >::vectorPtr_Type vectorPtr_Type;
+typedef FESpace< mesh_Type, MapEpetra >          feSpace_Type;
+typedef boost::shared_ptr< feSpace_Type >        feSpacePtr_Type;
 
-typedef OseenSolver< RegionMesh3D<LinearTetra> >::vector_Type  vector_type;
-typedef boost::shared_ptr<vector_type> vector_ptrtype;
 
-
-template <class Mesh, class Map>
 void
-computeP0pressure(FESpace< Mesh, Map >& pFESpace,
-                  FESpace< Mesh, Map >& p0FESpace,
-                  const FESpace<Mesh, Map >& uFESpace,
-                  const vector_type& velAndPressureExport,
-                  vector_type& P0pres, Real /*time*/ );
+computeP0pressure(const feSpacePtr_Type& pFESpacePtr,
+                  const feSpacePtr_Type& p0FESpacePtr,
+                  const feSpacePtr_Type& uFESpacePtr,
+                  const vector_Type& velAndPressureExport,
+                  vector_Type& P0pres, Real /*time*/ );
 
 struct EnsightToHdf5::Private
 {
@@ -132,7 +133,7 @@ EnsightToHdf5::run()
     MeshData meshData;
     meshData.setup(dataFile, "fluid/space_discretization");
 
-    boost::shared_ptr<RegionMesh3D<LinearTetra> > fullMeshPtr(new RegionMesh3D<LinearTetra>);
+    boost::shared_ptr<mesh_Type > fullMeshPtr(new mesh_Type);
     readMesh(*fullMeshPtr, meshData);
 
     // writeMesh("test.mesh", *fullMeshPtr);
@@ -155,7 +156,7 @@ EnsightToHdf5::run()
 
     fullMeshPtr->transformMesh( geometryScale, geometryRotate, geometryTranslate );
 
-    MeshPartitioner< RegionMesh3D<LinearTetra> >   meshPart(fullMeshPtr, d->comm);
+    MeshPartitioner< mesh_Type >   meshPart(fullMeshPtr, d->comm);
 
     std::string uOrder =  dataFile( "fluid/space_discretization/vel_order", "P1");
     std::string pOrder =  dataFile( "fluid/space_discretization/press_order", "P1");
@@ -164,28 +165,28 @@ EnsightToHdf5::run()
 
     if (verbose) std::cout << "Building the velocity FE space ... " << std::flush;
 
-    FESpace< RegionMesh3D<LinearTetra>, MapEpetra > uFESpace(meshPart,uOrder,3,d->comm);
+    feSpacePtr_Type uFESpacePtr( new feSpace_Type(meshPart,uOrder,3,d->comm) );
 
     if (verbose) std::cout << "ok." << std::endl;
 
     if (verbose) std::cout << "Building the pressure FE space ... " << std::flush;
 
-    FESpace< RegionMesh3D<LinearTetra>, MapEpetra > pFESpace(meshPart,pOrder,1,d->comm);
+    feSpacePtr_Type pFESpacePtr( new feSpace_Type( meshPart,pOrder,1,d->comm ) );
 
     if (verbose) std::cout << "ok." << std::endl;
 
     if (verbose) std::cout << "Building the P0 pressure FE space ... " << std::flush;
 
-    FESpace< RegionMesh3D<LinearTetra>, MapEpetra > p0FESpace(meshPart, feTetraP0, quadRuleTetra1pt,
-                                                              quadRuleTria1pt, 1,d->comm);
+    feSpacePtr_Type p0FESpacePtr( new feSpace_Type( meshPart, feTetraP0, quadRuleTetra1pt,
+                                                    quadRuleTria1pt, 1,d->comm ) );
 
     if (verbose) std::cout << "ok." << std::endl;
 
 
 
-    UInt totalVelDof   = uFESpace.map().map(Unique)->NumGlobalElements();
-    UInt totalPressDof = pFESpace.map().map(Unique)->NumGlobalElements();
-    UInt totalP0PresDof = p0FESpace.map().map(Unique)->NumGlobalElements();
+    UInt totalVelDof   = uFESpacePtr->map().map(Unique)->NumGlobalElements();
+    UInt totalPressDof = pFESpacePtr->map().map(Unique)->NumGlobalElements();
+    UInt totalP0PresDof = p0FESpacePtr->map().map(Unique)->NumGlobalElements();
 
     if (verbose) std::cout << "Total Velocity DOF = " << totalVelDof << std::endl;
     if (verbose) std::cout << "Total Pressure DOF = " << totalPressDof << std::endl;
@@ -193,10 +194,10 @@ EnsightToHdf5::run()
 
     if (verbose) std::cout << "Calling the fluid constructor ... ";
 
-    OseenSolver< RegionMesh3D<LinearTetra> > fluid (oseenData,
-                                              uFESpace,
-                                              pFESpace,
-                                              d->comm);
+    OseenSolver< mesh_Type > fluid (oseenData,
+                                    *uFESpacePtr,
+                                    *pFESpacePtr,
+                                    d->comm);
     MapEpetra fullMap(fluid.getMap());
 
     if (verbose) std::cout << "ok." << std::endl;
@@ -208,8 +209,8 @@ EnsightToHdf5::run()
     Real t0     = oseenData->dataTime()->initialTime();
     Real tFinal = oseenData->dataTime()->endTime();
 
-    boost::shared_ptr< Exporter<RegionMesh3D<LinearTetra> > > exporter;
-    boost::shared_ptr< Exporter<RegionMesh3D<LinearTetra> > > importer;
+    boost::shared_ptr< Exporter<mesh_Type > > exporter;
+    boost::shared_ptr< Exporter<mesh_Type > > importer;
 
     std::string const exporterType =  dataFile( "exporter/type", "hdf5");
     std::string const exporterName =  dataFile( "exporter/filename", "ethiersteinman");
@@ -221,56 +222,53 @@ EnsightToHdf5::run()
 
 #ifdef HAVE_HDF5
     if (exporterType.compare("hdf5") == 0)
-        exporter.reset( new ExporterHDF5<RegionMesh3D<LinearTetra> > ( dataFile, exporterName ) );
+        exporter.reset( new ExporterHDF5<mesh_Type > ( dataFile, exporterName ) );
     else
 #endif
-        exporter.reset( new ExporterEnsight<RegionMesh3D<LinearTetra> > ( dataFile, exporterName ) );
+        exporter.reset( new ExporterEnsight<mesh_Type > ( dataFile, exporterName ) );
 
     exporter->setPostDir( exportDir ); // This is a test to see if M_post_dir is working
     exporter->setMeshProcId( meshPart.meshPartition(), d->comm->MyPID() );
 
 #ifdef HAVE_HDF5
     if (importerType.compare("hdf5") == 0)
-        importer.reset( new ExporterHDF5<RegionMesh3D<LinearTetra> > ( dataFile, importerName ) );
+        importer.reset( new ExporterHDF5<mesh_Type > ( dataFile, importerName ) );
     else
 #endif
-        importer.reset( new ExporterEnsight<RegionMesh3D<LinearTetra> > ( dataFile, importerName ) );
+        importer.reset( new ExporterEnsight<mesh_Type > ( dataFile, importerName ) );
 
     // todo this will not work with the ExporterEnsight filter (it uses M_importDir, a private variable)
     importer->setPostDir( importDir ); // This is a test to see if M_post_dir is working
     importer->setMeshProcId( meshPart.meshPartition(), d->comm->MyPID() );
 
-    vector_ptrtype velAndPressureExport ( new vector_type(*fluid.solution(), exporter->mapType() ) );
-    vector_ptrtype velAndPressureImport ( new vector_type(*fluid.solution(), importer->mapType() ) );
+    vectorPtr_Type velAndPressureExport ( new vector_Type(*fluid.solution(), exporter->mapType() ) );
+    vectorPtr_Type velAndPressureImport ( new vector_Type(*fluid.solution(), importer->mapType() ) );
 
     if ( exporter->mapType() == Unique )
         velAndPressureExport->setCombineMode(Zero);
 
-    importer->addVariable( ExporterData::Vector, "velocity", velAndPressureImport,
-                           UInt(0), uFESpace.dof().numTotalDof() );
-    importer->addVariable( ExporterData::Scalar, "pressure", velAndPressureImport,
-                           UInt(3*uFESpace.dof().numTotalDof() ),
-                           UInt(  pFESpace.dof().numTotalDof() ) );
+    importer->addVariable( ExporterData<mesh_Type>::VectorField, "velocity", uFESpacePtr,
+                           velAndPressureImport, UInt(0) );
+    importer->addVariable( ExporterData<mesh_Type>::ScalarField, "pressure", pFESpacePtr,
+                           velAndPressureImport, UInt(3*uFESpacePtr->dof().numTotalDof() ) );
     importer->import( t0 );
 
     *velAndPressureExport = *velAndPressureImport;
 
 
-    vector_ptrtype P0pres ( new vector_type(p0FESpace.map()) );
+    vectorPtr_Type P0pres ( new vector_Type(p0FESpacePtr->map()) );
     MPI_Barrier(MPI_COMM_WORLD);
-    computeP0pressure(pFESpace, p0FESpace, uFESpace, *velAndPressureImport, *P0pres, t0);
+    computeP0pressure(pFESpacePtr, p0FESpacePtr, uFESpacePtr, *velAndPressureImport, *P0pres, t0);
 
-    exporter->addVariable( ExporterData::Vector, "velocity", velAndPressureExport,
-                           UInt(0), uFESpace.dof().numTotalDof() );
+    exporter->addVariable( ExporterData<mesh_Type>::VectorField, "velocity", uFESpacePtr,
+                           velAndPressureExport, UInt(0) );
 
-    exporter->addVariable( ExporterData::Scalar, "pressure", velAndPressureExport,
-                           UInt(3*uFESpace.dof().numTotalDof() ),
-                           UInt(  pFESpace.dof().numTotalDof() ) );
+    exporter->addVariable( ExporterData<mesh_Type>::ScalarField, "pressure", pFESpacePtr,
+                           velAndPressureExport, UInt(3*uFESpacePtr->dof().numTotalDof() ) );
 
-    exporter->addVariable(ExporterData::Scalar, "P0pressure", P0pres,
-                          UInt(0),
-                          UInt(p0FESpace.dof().numTotalDof()),
-                          UInt(0), ExporterData::Cell );
+    exporter->addVariable(ExporterData<mesh_Type>::ScalarField, "P0pressure", p0FESpacePtr,
+                          P0pres, UInt(0),
+                          ExporterData<mesh_Type>::SteadyRegime, ExporterData<mesh_Type>::Cell );
     exporter->postProcess( t0 );
 
     // Temporal loop
@@ -285,7 +283,7 @@ EnsightToHdf5::run()
 
         *velAndPressureExport = *velAndPressureImport;
         MPI_Barrier(MPI_COMM_WORLD);
-        computeP0pressure(pFESpace, p0FESpace, uFESpace, *velAndPressureImport, *P0pres, time);
+        computeP0pressure(pFESpacePtr, p0FESpacePtr, uFESpacePtr, *velAndPressureImport, *P0pres, time);
 
         exporter->postProcess( time );
 
@@ -295,39 +293,39 @@ EnsightToHdf5::run()
 }
 
 
-template<class Mesh, class Map>
 void
-computeP0pressure(FESpace< Mesh, Map >& pFESpace,
-                  FESpace< Mesh, Map >& p0FESpace,
-                  const FESpace< Mesh, Map >& uFESpace,
-                  const vector_type& velAndPressure,
-                  vector_type& P0pres, Real /*time*/)
+computeP0pressure(const feSpacePtr_Type& pFESpacePtr,
+                  const feSpacePtr_Type& p0FESpacePtr,
+                  const feSpacePtr_Type& uFESpacePtr,
+                  const vector_Type&     velAndPressure,
+                  vector_Type&           P0pres,
+                  Real /*time*/)
 {
 
     int MyPID;
     MPI_Comm_rank(MPI_COMM_WORLD, &MyPID);
-    UInt offset = 3*uFESpace.dof().numTotalDof();
+    UInt offset = 3*uFESpacePtr->dof().numTotalDof();
 
     std::vector<int> gid0Vec(0);
-    gid0Vec.reserve(p0FESpace.mesh()->numVolumes());
+    gid0Vec.reserve(p0FESpacePtr->mesh()->numVolumes());
     std::vector<Real> val0Vec(0);
-    val0Vec.reserve(p0FESpace.mesh()->numVolumes());
+    val0Vec.reserve(p0FESpacePtr->mesh()->numVolumes());
 
-    for (UInt ivol=1; ivol<= pFESpace.mesh()->numVolumes(); ++ivol)
+    for (UInt ivol=1; ivol<= pFESpacePtr->mesh()->numVolumes(); ++ivol)
     {
 
-        pFESpace.fe().update( pFESpace.mesh()->volumeList( ivol ), UPDATE_DPHI );
-        p0FESpace.fe().update( p0FESpace.mesh()->volumeList( ivol ) );
+        pFESpacePtr->fe().update( pFESpacePtr->mesh()->volumeList( ivol ), UPDATE_DPHI );
+        p0FESpacePtr->fe().update( p0FESpacePtr->mesh()->volumeList( ivol ) );
 
-        UInt eleID = pFESpace.fe().currentLocalId();
+        UInt eleID = pFESpacePtr->fe().currentLocalId();
 
         double tmpsum=0.;
-        for (UInt iNode=0; iNode < (UInt) pFESpace.fe().nbFEDof(); iNode++)
+        for (UInt iNode=0; iNode < (UInt) pFESpacePtr->fe().nbFEDof(); iNode++)
         {
-            int ig = pFESpace.dof().localToGlobal( eleID, iNode + 1 );
+            int ig = pFESpacePtr->dof().localToGlobal( eleID, iNode + 1 );
             tmpsum += velAndPressure(ig+offset);
-            gid0Vec.push_back( p0FESpace.fe().currentId() );
-            val0Vec.push_back( tmpsum / (double) pFESpace.fe().nbFEDof() );
+            gid0Vec.push_back( p0FESpacePtr->fe().currentId() );
+            val0Vec.push_back( tmpsum / (double) pFESpacePtr->fe().nbFEDof() );
         }
     }
 
