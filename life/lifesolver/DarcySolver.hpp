@@ -39,8 +39,8 @@
 #ifndef _DARCYSOLVER_H_
 #define _DARCYSOLVER_H_ 1
 
-#include <life/lifecore/CBlas.hpp>
-#include <life/lifecore/CLapack.hpp>
+#include <Epetra_LAPACK.h>
+#include <Epetra_BLAS.h>
 
 #include <life/lifefem/AssemblyElemental.hpp>
 #include <life/lifefem/BCManage.hpp>
@@ -583,7 +583,7 @@ protected:
       @param A The matrix to be reordered.
     */
     template<typename matrix>
-    void symmetrizeMatrix ( char* UPLO, int* N, matrix& A  );
+    void symmetrizeMatrix ( char UPLO, Int N, matrix& A  );
 
     //@}
 
@@ -1150,31 +1150,37 @@ DarcySolver<Mesh, SolverType>::
 staticCondensation ()
 {
 
+    // LAPACK wrapper of Epetra
+    Epetra_LAPACK lapack;
+
+    // BLAS wrapper of Epetra
+    Epetra_BLAS blas;
+
     // Flags for the BLAS and LAPACK routine.
+    Int INFO[1]   = {0};
 
-    int INFO[1]         = {0};
     // Number of columns of the right hand side := 1.
-    int NBRHS[1]        = {1};
+    Int NBRHS     = 1;
     // Primal variable degrees of freedom.
-    int NBP[1]          = { M_primal_FESpace.refFE().nbDof() };
+    Int NBP       = M_primal_FESpace.refFE().nbDof();
     // Dual variable degrees of freedom.
-    int NBU[1]          = { M_dual_FESpace.refFE().nbDof() };
+    Int NBU       = M_dual_FESpace.refFE().nbDof();
     // Hybrid variable degree of freedom.
-    int NBL[1]          = { M_hybrid_FESpace.refFE().nbDof() };
+    Int NBL       = M_hybrid_FESpace.refFE().nbDof();
 
-    double ONE[1]      = {1.0};
-    double MINUSONE[1] = {-1.0};
-    double ZERO[1]     = {0.0};
+    Real ONE      = 1.0;
+    Real MINUSONE = -1.0;
+    Real ZERO     = 0.0;
 
     // Parameter that indicate the Lower storage of matrices.
-    char UPLO[1]     = {'L'};
+    char UPLO     = 'L';
 
     // Paramater that indicate the Transpose of matrices.
-    char   TRANS[1]    = {'T'};
-    char NOTRANS[1]    = {'N'};
+    char   TRANS  = 'T';
+    char NOTRANS  = 'N';
 
     // Parameter that indicates whether the matrix has diagonal unit ('N' means no)
-    char NODIAG[1] = {'N'};
+    char NODIAG   = 'N';
 
     // Create and assign the local matrices A, B and C.
     MatrixElemental::matrix_type A = M_elmatMix.block( 0, 0 );
@@ -1187,50 +1193,50 @@ staticCondensation ()
 
     /* Put in A the matrix L and L^T, where L and L^T is the Cholesky factorization of A.
        For more details see http://www.netlib.org/lapack/double/dpotrf.f */
-    dpotrf_ (UPLO, NBU, A, NBU, INFO);
+    lapack.POTRF ( UPLO, NBU, A, NBU, INFO );
     ASSERT_PRE( !INFO[0], "Lapack factorization of A is not achieved." );
 
     /* Put in B the matrix L^{-1} * B, solving a triangular system.
        For more details see http://www.netlib.org/lapack/lapack-3.1.1/SRC/dtrtrs.f */
-    dtrtrs_ (UPLO, NOTRANS, NODIAG, NBU, NBP, A, NBU, B, NBU, INFO);
+    lapack.TRTRS ( UPLO, NOTRANS, NODIAG, NBU, NBP, A, NBU, B, NBU, INFO );
     ASSERT_PRE( !INFO[0], "Lapack Computation B = L^{-1} B  is not achieved." );
 
     /* Put in C the matrix L^{-1} * C, solving a triangular system.
        For more details see http://www.netlib.org/lapack/lapack-3.1.1/SRC/dtrtrs.f */
-    dtrtrs_ (UPLO, NOTRANS, NODIAG, NBU, NBL, A, NBU, C, NBL, INFO);
+    lapack.TRTRS ( UPLO, NOTRANS, NODIAG, NBU, NBL, A, NBU, C, NBL, INFO );
     ASSERT_PRE( !INFO[0], "Lapack Computation C = L^{-1} C  is not achieved." );
 
     /* Put in M_BtB the matrix  B^T * L^{-T} * L^{-1} * B = B^T * A^{-1} * B
        M_BtB stored only on lower part.
        For more details see http://www.netlib.org/lapack/lapack-3.1.1/BLAS/SRC/dsyrk.f */
-    dsyrk_ (UPLO, TRANS, NBP, NBU, ONE, B, NBU, ZERO, M_BtB, NBP);
+    blas.SYRK ( UPLO, TRANS, NBP, NBU, ONE, B, NBU, ZERO, M_BtB, NBP );
 
     /* Put in M_CtC the matrix C^T * L^{-T} * L^{-1} * C = C^T * A^{-1} * C
        M_CtC stored only on lower part.
        For more details see http://www.netlib.org/slatec/lin/dsyrk.f  */
-    dsyrk_ (UPLO, TRANS, NBL, NBU, ONE, C, NBU, ZERO, M_CtC, NBL);
+    blas.SYRK ( UPLO, TRANS, NBL, NBU, ONE, C, NBU, ZERO, M_CtC, NBL );
 
     /* Put in M_BtC the matrix B^T * L^{-T} * L^{-1} * C = B^T * A^{-1} * C
        M_BtC fully stored.
        For more details see http://www.netlib.org/blas/dgemm.f */
-    dgemm_ (TRANS, NOTRANS, NBP, NBL, NBU, ONE, B, NBU, C, NBU, ZERO, M_BtC, NBP);
+    blas.GEMM ( TRANS, NOTRANS, NBP, NBL, NBU, ONE, B, NBU, C, NBU, ZERO, M_BtC, NBP );
 
     /* Put in M_BtB the matrix LB and LB^T where LB and LB^T is the cholesky
        factorization of B^T * A^{-1} * B.
        For more details see http://www.netlib.org/lapack/double/dpotrf.f  */
-    dpotrf_ (UPLO, NBP, M_BtB, NBP, INFO);
+    lapack.POTRF ( UPLO, NBP, M_BtB, NBP, INFO );
     ASSERT_PRE( !INFO[0],"Lapack factorization of BtB is not achieved." );
 
     /* Put in M_BtC the matrix LB^{-1} * M_BtC = LB^{-1} * B^T * A^{-1} * C.
        For more details see http://www.netlib.org/lapack/lapack-3.1.1/SRC/dtrtrs.f */
-    dtrtrs_ (UPLO, NOTRANS, NODIAG, NBP, NBL, M_BtB, NBP, M_BtC, NBP, INFO);
+    lapack.TRTRS ( UPLO, NOTRANS, NODIAG, NBP, NBL, M_BtB, NBP, M_BtC, NBP, INFO );
     ASSERT_PRE( !INFO[0], "Lapack Computation BtC = LB^{-1} BtC is not achieved." );
 
     /* Put in M_CtC the matrix -M_CtC + M_BtC^T * M_BtC
        Result stored only on lower part, the matrix M_CtC stores
        M_CtC = -C^T * A^{-1} * C + C^T * A^{-t} * B * ( B^T * A^{-1} * B)^{-1} * B^T * A^{-1} * C.
        For more details see http://www.netlib.org/slatec/lin/dsyrk.f  */
-    dsyrk_ (UPLO, TRANS, NBL, NBP, ONE, M_BtC, NBP, MINUSONE, M_CtC, NBL);
+    blas.SYRK ( UPLO, TRANS, NBL, NBP, ONE, M_BtC, NBP, MINUSONE, M_CtC, NBL );
 
     //...................................
     //      END OF MATRIX OPERATIONS
@@ -1260,13 +1266,13 @@ staticCondensation ()
 
     /* Put in M_elvecSource the vector LB^{-1} * M_elvecSource = LB^{-1} F
        For more details see http://www.netlib.org/lapack/lapack-3.1.1/SRC/dtrtrs.f */
-    dtrtrs_ (UPLO, NOTRANS, NODIAG, NBP, NBRHS, M_BtB, NBP, M_elvecSource, NBP, INFO);
+    lapack.TRTRS ( UPLO, NOTRANS, NODIAG, NBP, NBRHS, M_BtB, NBP, M_elvecSource, NBP, INFO );
     ASSERT_PRE( !INFO[0], "Lapack Computation M_elvecSource = LB^{-1} rhs is not achieved." );
 
     /* Put in M_elvecHyb the vector M_BtC^T * M_elvecSource = C^T * A^{-1} * B^T * (B^T * A^{-1} * B)^{-1} * F
        M_elvecHyb is fully stored.
        For more details see http://www.netlib.org/blas/dgemm.f */
-    dgemm_ (TRANS, NOTRANS, NBL, NBRHS, NBP, ONE, M_BtC, NBP, M_elvecSource, NBP, ZERO, M_elvecHyb, NBL);
+    blas.GEMM ( TRANS, NOTRANS, NBL, NBRHS, NBP, ONE, M_BtC, NBP, M_elvecSource, NBP, ZERO, M_elvecHyb, NBL );
 
     //........................
     // END OF VECTOR OPERATIONS.
@@ -1289,31 +1295,35 @@ DarcySolver<Mesh, SolverType>::
 localComputePrimalAndDual ()
 {
 
+    // LAPACK wrapper of Epetra
+    Epetra_LAPACK lapack;
+
+    // BLAS wrapper of Epetra
+    Epetra_BLAS blas;
+
     // Flags for the BLAS and LAPACK routine.
 
-    int INFO[1]         = {0};
+    Int INFO[1]   = {0};
     // Number of columns of the right hand side := 1.
-    int NBRHS[1]        = {1};
+    Int NBRHS     = 1;
     // Primal variable degrees of freedom.
-    int NBP[1]          = { M_primal_FESpace.refFE().nbDof() };
+    Int NBP       = M_primal_FESpace.refFE().nbDof();
     // Dual variable degrees of freedom.
-    int NBU[1]          = { M_dual_FESpace.refFE().nbDof() };
+    Int NBU       = M_dual_FESpace.refFE().nbDof();
     // Hybrid variable degree of freedom.
-    int NBL[1]          = { M_hybrid_FESpace.refFE().nbDof() };
-    // Increment := 1.
-    int INC[1]         = {1};
+    Int NBL       = M_hybrid_FESpace.refFE().nbDof();
 
-    double ONE[1]      = {1.0};
-    double MINUSONE[1] = {-1.0};
-    double ZERO[1]     = {0.0};
+    Real ONE      = 1.0;
+    Real MINUSONE = -1.0;
+    Real ZERO     = 0.0;
 
     // Parameter that indicate the Lower storage of matrices.
-    char UPLO[1]     = {'L'};
+    char UPLO     = 'L';
     // Parameter that indicate the Transpose of matrices.
-    char   TRANS[1]    = {'T'};
-    char NOTRANS[1]    = {'N'};
+    char   TRANS  = 'T';
+    char NOTRANS  = 'N';
     // Parameter that indicates whether the matrix has diagonal unit ('N' means no)
-    char NODIAG[1] = {'N'};
+    char NODIAG   = 'N';
 
     // No need for CtC in this part, and last dsyrk, the only differences.
     MatrixElemental::matrix_type A = M_elmatMix.block( 0, 0 );
@@ -1326,38 +1336,38 @@ localComputePrimalAndDual ()
 
     /* Put in A the matrix L and L^T, where L and L^T is the Cholesky factorization of A.
        For more details see http://www.netlib.org/lapack/double/dpotrf.f */
-    dpotrf_ (UPLO, NBU, A, NBU, INFO);
+    lapack.POTRF ( UPLO, NBU, A, NBU, INFO );
     ASSERT_PRE( !INFO[0], "Lapack factorization of A is not achieved." );
 
     /* Put in B the matrix L^{-1} * B, solving a triangular system.
        For more details see http://www.netlib.org/lapack/lapack-3.1.1/SRC/dtrtrs.f */
-    dtrtrs_ (UPLO, NOTRANS, NODIAG, NBU, NBP, A, NBU, B, NBU, INFO);
+    lapack.TRTRS ( UPLO, NOTRANS, NODIAG, NBU, NBP, A, NBU, B, NBU, INFO );
     ASSERT_PRE( !INFO[0], "Lapack Computation B = L^{-1} B  is not achieved." );
 
     /* Put in C the matrix L^{-1} * C, solving a triangular system.
        For more details see http://www.netlib.org/lapack/lapack-3.1.1/SRC/dtrtrs.f */
-    dtrtrs_ (UPLO, NOTRANS, NODIAG, NBU, NBL, A, NBU, C, NBU, INFO);
+    lapack.TRTRS ( UPLO, NOTRANS, NODIAG, NBU, NBL, A, NBU, C, NBU, INFO );
     ASSERT_PRE( !INFO[0], "Lapack Computation C = L^{-1} C  is not achieved." );
 
     /* Put in M_BtB the matrix  B^T * L^{-T} * L^{-1} * B = B^T * A^{-1} * B
        M_BtB stored only on lower part.
        For more details see http://www.netlib.org/slatec/lin/dsyrk.f */
-    dsyrk_ (UPLO, TRANS, NBP, NBU, ONE, B, NBU, ZERO, M_BtB, NBP);
+    blas.SYRK ( UPLO, TRANS, NBP, NBU, ONE, B, NBU, ZERO, M_BtB, NBP );
 
     /* Put in M_BtC the matrix B^T * L^{-T} * L^{-1} * C = B^T * A^{-1} * C
        M_BtC fully stored.
        For more details see http://www.netlib.org/blas/dgemm.f */
-    dgemm_ (TRANS, NOTRANS, NBP, NBL, NBU, ONE, B, NBU, C, NBU, ZERO, M_BtC, NBP);
+    blas.GEMM ( TRANS, NOTRANS, NBP, NBL, NBU, ONE, B, NBU, C, NBU, ZERO, M_BtC, NBP );
 
     /* Put in M_BtB the matrix LB and LB^T where LB and LB^T is the cholesky
        factorization of B^T * A^{-1} * B.
        For more details see http://www.netlib.org/lapack/double/dpotrf.f */
-    dpotrf_ (UPLO, NBP, M_BtB, NBP, INFO);
+    lapack.POTRF ( UPLO, NBP, M_BtB, NBP, INFO );
     ASSERT_PRE( !INFO[0], "Lapack factorization of BtB is not achieved." );
 
     /* Put in M_BtC the matrix LB^{-1} * M_BtC = LB^{-1} * B^T * A^{-1} * C.
        For more details see http://www.netlib.org/lapack/lapack-3.1.1/SRC/dtrtrs.f */
-    dtrtrs_ (UPLO, NOTRANS, NODIAG, NBP, NBL, M_BtB, NBP, M_BtC, NBP, INFO);
+    lapack.TRTRS ( UPLO, NOTRANS, NODIAG, NBP, NBL, M_BtB, NBP, M_BtC, NBP, INFO );
     ASSERT_PRE( !INFO[0], "Lapack Computation BtC = LB^{-1} BtC is not achieved." );
 
     //..............................
@@ -1391,18 +1401,18 @@ localComputePrimalAndDual ()
 
     /* Put in M_elvecSource the vector LB^{-1} * M_elvecSource = LB^{-1} * F
        For more details see http://www.netlib.org/lapack/lapack-3.1.1/SRC/dtrtrs.f */
-    dtrtrs_ (UPLO, NOTRANS, NODIAG, NBP, NBRHS, M_BtB, NBP, M_elvecSource, NBP, INFO);
+    lapack.TRTRS ( UPLO, NOTRANS, NODIAG, NBP, NBRHS, M_BtB, NBP, M_elvecSource, NBP, INFO );
     ASSERT_PRE( !INFO[0], "Lapack Computation M_elvecSource = LB^{-1} M_elvecSource is not achieved." );
 
     /* Put in M_elvecSource the vector
        M_BtC * M_elvecHyb + M_elvecSource = LB^{-1} * B^T * A^{-1} * C * lambda_K + LB^{-1} * F
        For more details see http://www.netlib.org/blas/dgemm.f */
-    dgemm_ (NOTRANS, NOTRANS, NBP, NBRHS, NBL, MINUSONE, M_BtC, NBP, M_elvecHyb, NBL, MINUSONE, M_elvecSource, NBP);
+    blas.GEMM ( NOTRANS, NOTRANS, NBP, NBRHS, NBL, MINUSONE, M_BtC, NBP, M_elvecHyb, NBL, MINUSONE, M_elvecSource, NBP );
 
     /* Put in M_elvecSource the vector LB^{-T} * M_elvecSource, where
        M_elvecSource stores - (B^T * A^{-1} * B)^{-1} * B^T * A^{-1} * C * lambda_K - (B^T * A^{-1} * B)^{-1} * F
        For more details see http://www.netlib.org/lapack/lapack-3.1.1/SRC/dtrtrs.f */
-    dtrtrs_ (UPLO, TRANS, NODIAG, NBP, NBRHS, M_BtB, NBP, M_elvecSource, NBP, INFO);
+    lapack.TRTRS ( UPLO, TRANS, NODIAG, NBP, NBRHS, M_BtB, NBP, M_elvecSource, NBP, INFO );
     ASSERT_PRE( !INFO[0], "Lapack Computation M_elvecSource = LB^{-T} M_elvecSource is not achieved." );
 
     // Now rhs contains the primal variable for the current element, we must put it in the global vector.
@@ -1416,16 +1426,17 @@ localComputePrimalAndDual ()
 
     /* Put in M_elvecFlux the vector B * M_elvecSource = L^{-1} * B * primal_K
        For more details see http://www.netlib.org/slatec/lin/dgemv.f */
-    dgemv_ (NOTRANS, NBU, NBP, ONE, B, NBU, M_elvecSource, INC, ZERO, M_elvecFlux, INC);
+    blas.GEMV ( NOTRANS, NBU, NBP, ONE, B, NBU, M_elvecSource, ZERO, M_elvecFlux );
+
     /* Put in M_elvecFlux the vector
        - C * M_elvecHyb - M_elvecFlux = - L^{-1} * C * lambda_K - L^{-1} * B * primal_K
        For more details see http://www.netlib.org/slatec/lin/dgemv.f */
-    dgemv_ (NOTRANS, NBU, NBL, MINUSONE, C, NBL, M_elvecHyb, INC, MINUSONE, M_elvecFlux, INC);
+    blas.GEMV ( NOTRANS, NBU, NBL, MINUSONE, C, NBL, M_elvecHyb, MINUSONE, M_elvecFlux );
 
     /* Put in flux the vector
        L^{-T} * M_elvecFlux = - A^{-1} * C^T * lambda_K - A^{-1} * B^T * primal_K
        For more details see http://www.netlib.org/lapack/lapack-3.1.1/SRC/dtrtrs.f */
-    dtrtrs_ (UPLO, TRANS, NODIAG, NBU, NBRHS, A, NBU, M_elvecFlux, NBU, INFO);
+    lapack.TRTRS ( UPLO, TRANS, NODIAG, NBU, NBRHS, A, NBU, M_elvecFlux, NBU, INFO );
     ASSERT_PRE(!INFO[0], "Lapack Computation M_elvecFlux = L^{-T} M_elvecFlux is not achieved.");
 
 } // localComputePrimalAndDual
@@ -1511,15 +1522,15 @@ template<typename Mesh, typename SolverType>
 template<typename matrix>
 void
 DarcySolver<Mesh, SolverType>::
-symmetrizeMatrix ( char* UPLO, int* N, matrix& A  )
+symmetrizeMatrix ( char UPLO, Int N, matrix& A  )
 {
 
     // If the matrix is stored in the lower part
-    if ( UPLO[0] == 'L')
+    if ( UPLO == 'L')
     {
-        for (UInt i(0); i < static_cast<UInt>(N[0]); ++i)
+        for (UInt i(0); i < static_cast<UInt>(N); ++i)
         {
-            for (UInt j(i + 1); j < static_cast<UInt>(N[0]); ++j)
+            for (UInt j(i + 1); j < static_cast<UInt>(N); ++j)
             {
                 A(i, j) = A(j, i);
             }
@@ -1528,9 +1539,9 @@ symmetrizeMatrix ( char* UPLO, int* N, matrix& A  )
     // If the matrix is stored in the upper part
     else
     {
-        for (UInt i(0); i < static_cast<UInt>(N[0]); ++i)
+        for (UInt i(0); i < static_cast<UInt>(N); ++i)
         {
-            for (UInt j(i + 1); j < static_cast<UInt>(N[0]); ++j)
+            for (UInt j(i + 1); j < static_cast<UInt>(N); ++j)
             {
                 A(j, i) = A(i, j);
             }
