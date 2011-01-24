@@ -292,6 +292,9 @@ darcy::run()
     typedef darcyLinearSolver_type::vector_Type                       vector_type;
     typedef boost::shared_ptr< vector_type >                          vector_ptrtype;
 
+    typedef FESpace< RegionMesh, MapEpetra >                          feSpace_Type;
+    typedef boost::shared_ptr< feSpace_Type >                         feSpacePtr_Type;
+
     LifeChrono chronoTotal;
     LifeChrono chronoReadAndPartitionMesh;
     LifeChrono chronoBoundaryCondition;
@@ -477,31 +480,31 @@ darcy::run()
 
 
     // Finite element space of the primal variable
-    FESpace< RegionMesh, MapEpetra > p_FESpace( meshPart,
-                                                *refFE_primal,
-                                                *qR_primal,
-                                                *bdQr_primal,
-                                                1,
-                                                Members->comm );
+    feSpacePtr_Type p_FESpacePtr( new feSpace_Type( meshPart,
+                                                    *refFE_primal,
+                                                    *qR_primal,
+                                                    *bdQr_primal,
+                                                    1,
+                                                    Members->comm ) );
 
     // Finite element space of the dual variable
-    FESpace< RegionMesh, MapEpetra > u_FESpace( meshPart,
-                                                *refFE_dual,
-                                                *qR_dual,
-                                                *bdQr_dual,
-                                                1,
-                                                Members->comm );
+    feSpacePtr_Type u_FESpacePtr( new feSpace_Type( meshPart,
+                                                    *refFE_dual,
+                                                    *qR_dual,
+                                                    *bdQr_dual,
+                                                    1,
+                                                    Members->comm ) );
 
     // Finite element space of the interpolation of dual variable
-    FESpace< RegionMesh, MapEpetra > uInterpolate_FESpace( meshPart,
-                                                           *refFE_dualInterpolate,
-                                                           *qR_dualInterpolate,
-                                                           *bdQr_dualInterpolate,
-                                                           3,
-                                                           Members->comm );
+    feSpacePtr_Type uInterpolate_FESpacePtr( new feSpace_Type( meshPart,
+                                                               *refFE_dualInterpolate,
+                                                               *qR_dualInterpolate,
+                                                               *bdQr_dualInterpolate,
+                                                               3,
+                                                               Members->comm ) );
 
     // Vector for the interpolated dual solution
-    vector_ptrtype dualInterpolated( new vector_type ( uInterpolate_FESpace.map(), Repeated ) );
+    vector_ptrtype dualInterpolated( new vector_type ( uInterpolate_FESpacePtr->map(), Repeated ) );
 
     // Finite element space of the hybrid variable
     FESpace< RegionMesh, MapEpetra > hybrid_FESpace( meshPart,
@@ -537,8 +540,8 @@ darcy::run()
     {
     case DARCY_LINEAR:
 
-        darcySolver.reset( new darcyLinearSolver_type( darcyData, p_FESpace,
-                                                       u_FESpace, hybrid_FESpace,
+        darcySolver.reset( new darcyLinearSolver_type( darcyData, *p_FESpacePtr,
+                                                       *u_FESpacePtr, hybrid_FESpace,
                                                        VdotN_FESpace,
                                                        Members->comm ) );
 
@@ -546,8 +549,8 @@ darcy::run()
 
     case DARCY_NON_LINEAR:
 
-        darcySolver.reset( new darcyNonLinearSolver_type( darcyData, p_FESpace,
-                                                          u_FESpace, hybrid_FESpace,
+        darcySolver.reset( new darcyNonLinearSolver_type( darcyData, *p_FESpacePtr,
+                                                          *u_FESpacePtr, hybrid_FESpace,
                                                           VdotN_FESpace,
                                                           Members->comm ) );
 
@@ -555,8 +558,8 @@ darcy::run()
 
     case DARCY_TRANSIENT:
 
-        darcySolver.reset( new darcyTransientSolver_type( darcyData, p_FESpace,
-                                                          u_FESpace, hybrid_FESpace,
+        darcySolver.reset( new darcyTransientSolver_type( darcyData, *p_FESpacePtr,
+                                                          *u_FESpacePtr, hybrid_FESpace,
                                                           VdotN_FESpace,
                                                           Members->comm ) );
 
@@ -564,8 +567,8 @@ darcy::run()
 
     case DARCY_TRANSIENT_NON_LINEAR:
 
-        darcySolver.reset( new darcyTransientNonLinearSolver_type( darcyData, p_FESpace,
-                                                                   u_FESpace, hybrid_FESpace,
+        darcySolver.reset( new darcyTransientNonLinearSolver_type( darcyData, *p_FESpacePtr,
+                                                                   *u_FESpacePtr, hybrid_FESpace,
                                                                    VdotN_FESpace,
                                                                    Members->comm ) );
 
@@ -593,7 +596,7 @@ darcy::run()
 
     // Create the inverse permeability
     inversePermeability < RegionMesh > invPerm ( Members->getInversePermeability(),
-                                                 p_FESpace );
+                                                 *p_FESpacePtr );
 
     // Set the inverse of the permeability
     darcySolver->setInversePermeability( invPerm );
@@ -675,25 +678,25 @@ darcy::run()
                                             exporter->mapType() ) );
 
     // Add the primal variable to the exporter
-    exporter->addVariable( ExporterData::Scalar,
+    exporter->addVariable( ExporterData< RegionMesh >::ScalarField,
                            dataFile( "exporter/name_primal", "Pressure" ),
+                           p_FESpacePtr,
                            primalExporter,
                            static_cast<UInt>( 0 ),
-                           static_cast<UInt>( p_FESpace.dof().numTotalDof() ),
-                           static_cast<UInt>( 0 ),
-                           ExporterData::Cell );
+                           ExporterData< RegionMesh >::UnsteadyRegime,
+                           ExporterData< RegionMesh >::Cell );
 
     // Set the exporter dual pointer
     dualExporter.reset( new vector_type ( *dualInterpolated, exporter->mapType() ) );
 
     // Add the variable to the exporter
-    exporter->addVariable( ExporterData::Vector,
+    exporter->addVariable( ExporterData< RegionMesh >::VectorField,
                            dataFile( "exporter/name_dual", "Velocity" ),
+                           u_FESpacePtr,
                            dualExporter,
                            static_cast<UInt>( 0 ),
-                           static_cast<UInt>( uInterpolate_FESpace.dof().numTotalDof() ),
-                           static_cast<UInt>( 0 ),
-                           ExporterData::Cell );
+                           ExporterData< RegionMesh >::UnsteadyRegime,
+                           ExporterData< RegionMesh >::Cell );
 
     // Display the total number of unknowns
     darcySolver->getDisplayer().leaderPrint( "Number of unknowns : ",
@@ -720,8 +723,8 @@ darcy::run()
         *primalExporter = *( darcySolver->primalSolution() );
 
         // Interpolate the dual vector field spammed as Raviart-Thomas into a P0 vector field
-        *dualInterpolated = uInterpolate_FESpace.feToFEInterpolate( u_FESpace,
-                                                                    *( darcySolver->dualSolution() ) );
+        *dualInterpolated = uInterpolate_FESpacePtr->feToFEInterpolate( *u_FESpacePtr,
+                                                                        *( darcySolver->dualSolution() ) );
 
         // Copy the dual interpolated solution to the exporter
         *dualExporter = *dualInterpolated;
@@ -744,8 +747,8 @@ darcy::run()
         *primalExporter = *( darcySolver->primalSolution() );
 
         // Interpolate the dual vector field spammed as Raviart-Thomas into a P0 vector field
-        *dualInterpolated = uInterpolate_FESpace.feToFEInterpolate( u_FESpace,
-                                                                    *( darcySolver->dualSolution() ) );
+        *dualInterpolated = uInterpolate_FESpacePtr->feToFEInterpolate( *u_FESpacePtr,
+                                                                        *( darcySolver->dualSolution() ) );
 
         // Copy the dual interpolated solution to the exporter
         *dualExporter = *dualInterpolated;
@@ -795,8 +798,8 @@ darcy::run()
             *primalExporter = *( darcySolver->primalSolution() );
 
             // Interpolate the dual vector field spammed as Raviart-Thomas into a P0 vector field
-            *dualInterpolated = uInterpolate_FESpace.feToFEInterpolate( u_FESpace,
-                                                                        *( darcySolver->dualSolution() ) );
+            *dualInterpolated = uInterpolate_FESpacePtr->feToFEInterpolate( *u_FESpacePtr,
+                                                                            *( darcySolver->dualSolution() ) );
 
             // Copy the dual interpolated solution to the exporter
             *dualExporter = *dualInterpolated;
@@ -844,8 +847,8 @@ darcy::run()
             *primalExporter = *( darcySolver->primalSolution() );
 
             // Interpolate the dual vector field spammed as Raviart-Thomas into a P0 vector field
-            *dualInterpolated = uInterpolate_FESpace.feToFEInterpolate( u_FESpace,
-                                                                        *( darcySolver->dualSolution() ) );
+            *dualInterpolated = uInterpolate_FESpacePtr->feToFEInterpolate( *u_FESpacePtr,
+                                                                            *( darcySolver->dualSolution() ) );
 
             // Copy the dual interpolated solution to the exporter
             *dualExporter = *dualInterpolated;
@@ -881,25 +884,25 @@ darcy::run()
     darcySolver->getDisplayer().leaderPrint( "\nPRESSURE ERROR\n" );
 
     // Compute the L2 norm for the primal solution
-    primalL2Norm = p_FESpace.l2Norm( *( darcySolver->primalSolution() ) );
+    primalL2Norm = p_FESpacePtr->l2Norm( *( darcySolver->primalSolution() ) );
 
     // Display the L2 norm for the primal solution
     darcySolver->getDisplayer().leaderPrint( " L2 norm of primal unknown:            ",
                                              primalL2Norm, "\n" );
 
     // Compute the L2 norm for the analytical primal
-    exactPrimalL2Norm = p_FESpace.l2NormFunction( Members->getAnalyticalSolution(),
-                                                  darcyData.dataTime()->endTime() );
+    exactPrimalL2Norm = p_FESpacePtr->l2NormFunction( Members->getAnalyticalSolution(),
+                                                      darcyData.dataTime()->endTime() );
 
     // Display the L2 norm for the analytical primal
     darcySolver->getDisplayer().leaderPrint( " L2 norm of primal exact:              ",
                                              exactPrimalL2Norm, "\n" );
 
     // Compute the L2 error for the primal solution
-    primalL2Error = p_FESpace.l2ErrorWeighted( Members->getAnalyticalSolution(),
-                                               *( darcySolver->primalSolution() ),
-                                               Members->getUOne(),
-                                               darcyData.dataTime()->endTime() );
+    primalL2Error = p_FESpacePtr->l2ErrorWeighted( Members->getAnalyticalSolution(),
+                                                   *( darcySolver->primalSolution() ),
+                                                   Members->getUOne(),
+                                                   darcyData.dataTime()->endTime() );
 
     // Display the L2 error for the primal solution
     darcySolver->getDisplayer().leaderPrint( " L2 error of primal unknown:           ",
@@ -916,25 +919,25 @@ darcy::run()
     darcySolver->getDisplayer().leaderPrint( "\n\nINTERPOLATED DARCY VELOCITY ERROR\n" );
 
     // Compute the L2 norm for the interpolated dual solution
-    dualL2Norm = uInterpolate_FESpace.l2Norm( *dualInterpolated );
+    dualL2Norm = uInterpolate_FESpacePtr->l2Norm( *dualInterpolated );
 
     // Display the L2 norm for the interpolated dual solution
     darcySolver->getDisplayer().leaderPrint( " L2 norm of dual unknown:              ",
                                              dualL2Norm, "\n" );
 
     // Compute the L2 norm for the analytical dual
-    exactDualL2Norm = uInterpolate_FESpace.l2NormFunction( Members->getAnalyticalFlux(),
-                                                           darcyData.dataTime()->endTime() );
+    exactDualL2Norm = uInterpolate_FESpacePtr->l2NormFunction( Members->getAnalyticalFlux(),
+                                                               darcyData.dataTime()->endTime() );
 
     // Display the L2 norm for the analytical dual
     darcySolver->getDisplayer().leaderPrint( " L2 norm of dual exact:                ",
                                              exactDualL2Norm, "\n" );
 
     // Compute the L2 error for the dual solution
-    dualL2Error = uInterpolate_FESpace.l2Error( Members->getAnalyticalFlux(),
-                                                *dualInterpolated,
-                                                darcyData.dataTime()->endTime(),
-                                                NULL );
+    dualL2Error = uInterpolate_FESpacePtr->l2Error( Members->getAnalyticalFlux(),
+                                                    *dualInterpolated,
+                                                    darcyData.dataTime()->endTime(),
+                                                    NULL );
 
     // Display the L2 error for the dual solution
     darcySolver->getDisplayer().leaderPrint( " L2 error of dual unknown:             ",

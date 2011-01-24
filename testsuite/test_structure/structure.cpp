@@ -161,8 +161,8 @@ Structure::run2d()
 void
 Structure::run3d()
 {
-
-    typedef VenantKirchhoffSolver< RegionMesh3D<LinearTetra> >::vector_Type  vector_Type;
+    typedef RegionMesh3D<LinearTetra> mesh_Type;
+    typedef VenantKirchhoffSolver< mesh_Type >::vector_Type  vector_Type;
     typedef boost::shared_ptr<vector_Type> vectorPtr_Type;
 
     bool verbose = (parameters->comm->MyPID() == 0);
@@ -182,11 +182,11 @@ Structure::run3d()
     MeshData             meshData;
     meshData.setup(dataFile, "solid/space_discretization");
 
-    boost::shared_ptr<RegionMesh3D<LinearTetra> > fullMeshPtr(new RegionMesh3D<LinearTetra>);
+    boost::shared_ptr<mesh_Type > fullMeshPtr(new mesh_Type);
     readMesh(*fullMeshPtr, meshData);
 
 
-    MeshPartitioner< RegionMesh3D<LinearTetra> > meshPart( fullMeshPtr, parameters->comm );
+    MeshPartitioner< mesh_Type > meshPart( fullMeshPtr, parameters->comm );
 
 //    meshPart.rebuildMesh();
 
@@ -196,7 +196,7 @@ Structure::run3d()
 
     std::string dOrder =  dataFile( "solid/space_discretization/order", "P1");
 
-    typedef FESpace< RegionMesh3D<LinearTetra>, MapEpetra > solidFESpace_type;
+    typedef FESpace< mesh_Type, MapEpetra > solidFESpace_type;
     typedef boost::shared_ptr<solidFESpace_type> solidFESpace_ptrtype;
     solidFESpace_ptrtype dFESpace( new solidFESpace_type(meshPart,dOrder,3,parameters->comm) );
     if (verbose) std::cout << std::endl;
@@ -210,7 +210,7 @@ Structure::run3d()
         fullMap += structMap;
     }
 
-    VenantKirchhoffSolverLinear< RegionMesh3D<LinearTetra> > solid;
+    VenantKirchhoffSolverLinear< mesh_Type > solid;
     solid.setup(dataStructure,
                 dFESpace,
                 parameters->comm);
@@ -249,25 +249,25 @@ Structure::run3d()
     //if (parameters->comm->NumProc() == 1 )  solid.postProcess();
 
 
-    boost::shared_ptr< Exporter<RegionMesh3D<LinearTetra> > > exporter;
+    boost::shared_ptr< Exporter<mesh_Type > > exporter;
 
     std::string const exporterType =  dataFile( "exporter/type", "ensight");
 
 #ifdef HAVE_HDF5
     if (exporterType.compare("hdf5") == 0)
     {
-        exporter.reset( new ExporterHDF5<RegionMesh3D<LinearTetra> > ( dataFile, "structure" ) );
+        exporter.reset( new ExporterHDF5<mesh_Type > ( dataFile, "structure" ) );
     }
     else
 #endif
     {
         if (exporterType.compare("none") == 0)
         {
-            exporter.reset( new ExporterEmpty<RegionMesh3D<LinearTetra> > ( dataFile, meshPart.meshPartition(), "structure", parameters->comm->MyPID()) );
+            exporter.reset( new ExporterEmpty<mesh_Type > ( dataFile, meshPart.meshPartition(), "structure", parameters->comm->MyPID()) );
         }
         else
         {
-            exporter.reset( new ExporterEnsight<RegionMesh3D<LinearTetra> > ( dataFile, meshPart.meshPartition(), "structure", parameters->comm->MyPID()) );
+            exporter.reset( new ExporterEnsight<mesh_Type > ( dataFile, meshPart.meshPartition(), "structure", parameters->comm->MyPID()) );
         }
     }
 
@@ -277,11 +277,11 @@ Structure::run3d()
     vectorPtr_Type solidDisp ( new vector_Type(solid.getDisplacement(), exporter->mapType() ) );
     vectorPtr_Type solidVel  ( new vector_Type(solid.getVelocity(),  exporter->mapType() ) );
 
-    exporter->addVariable( ExporterData::Vector, "displacement", solidDisp,
-                           UInt(0), dFESpace->dof().numTotalDof() );
+    exporter->addVariable( ExporterData<mesh_Type>::VectorField, "displacement",
+                           dFESpace, solidDisp, UInt(0) );
 
-    exporter->addVariable( ExporterData::Vector, "velocity", solidVel,
-                           UInt(0), dFESpace->dof().numTotalDof() );
+    exporter->addVariable( ExporterData<mesh_Type>::VectorField, "velocity",
+                           dFESpace, solidVel, UInt(0) );
 
     exporter->postProcess( 0 );
 
@@ -308,7 +308,7 @@ Structure::run3d()
 
         *solidDisp = solid.getDisplacement();
         *solidVel  = solid.getVelocity();
-            CheckResults(solid.getDisplacement().norm2(),time);
+        CheckResults(solid.getDisplacement().norm2(),time);
 
         exporter->postProcess( time );
 
@@ -331,11 +331,11 @@ void Structure::CheckResults(const LifeV::Real& dispNorm,const LifeV::Real& time
 }
 
 LifeV::UInt Structure::RESULT_CHANGED_EXCEPTION(const LifeV::Real time)
-  {
-      LifeV::UInt value = EXIT_SUCCESS;
-      std::cout << "Some modifications led to changes in the l2 norm of the solution at time" << time << std::endl;
-      return value = EXIT_FAILURE;
-  }
+{
+    LifeV::UInt value = EXIT_SUCCESS;
+    std::cout << "Some modifications led to changes in the l2 norm of the solution at time" << time << std::endl;
+    return value = EXIT_FAILURE;
+}
 
 
 //////////////////////
