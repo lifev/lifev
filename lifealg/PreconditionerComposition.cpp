@@ -81,6 +81,7 @@ PreconditionerComposition::~PreconditionerComposition()
 void PreconditionerComposition::resetPreconditioner()
 {
     M_prec.reset();
+    M_precBaseOperators.clear();
     this->M_preconditionerCreated = false;
 }
 
@@ -100,13 +101,11 @@ int PreconditionerComposition::SetUseTranspose( const bool useTranspose )
 
 int PreconditionerComposition::Apply( const Epetra_MultiVector& X, Epetra_MultiVector& Y ) const
 {
-    std::cout << "[Debug] precomp.cpp: Applying prec" << std::endl;
     return M_prec->Apply(X,Y);
 }
 
 int PreconditionerComposition::ApplyInverse( const Epetra_MultiVector& X, Epetra_MultiVector& Y ) const
 {
-    std::cout << "[Debug] precomp.cpp: Applying inverse" << std::endl;
     return M_prec->ApplyInverse(X,Y);
 }
 
@@ -169,6 +168,7 @@ int PreconditionerComposition::pushBack( matrix_PtrType& A,
                                          const bool useInverse,
                                          const bool useTranspose )
 {
+    //std::cout << "[DEBUG] pushBack() matrix version" << std::endl;
     M_prec->push_back(boost::dynamic_pointer_cast<operator_Type>(A->matrixPtr()),useInverse,useTranspose);
 
     return EXIT_SUCCESS;
@@ -179,8 +179,11 @@ int PreconditionerComposition::pushBack( matrix_PtrType& A,
                                          const bool useInverse,
                                          const bool useTranspose )
 {
+    //std::cout << "[DEBUG] pushBack() preconditioner version" << std::endl;
+    M_precBaseOperators.push_back(A);
     preconditionerPtr->buildPreconditioner(A);
     operator_PtrType oper(preconditionerPtr->preconditionerPtr());
+    //std::cout << "[DEBUG] Number of pointers which share the operator: " << oper.use_count() << std::endl;
     M_prec->push_back(oper,useInverse,useTranspose);
 
     return EXIT_SUCCESS;
@@ -190,6 +193,7 @@ int PreconditionerComposition::pushBack( operator_Type& A,
                                          const bool useInverse,
                                          const bool useTranspose )
 {
+    std::cout << "[DEBUG] pushBack() operator version" << std::endl;
     //M_operators.push_back(A);
 
     return EXIT_SUCCESS;
@@ -211,7 +215,9 @@ int PreconditionerComposition::initializeOperator()
 {
     //if(!isPreconditionerSet())
     //{
+        //std::cout << "[DEBUG] PreconditionerComposition::initializeOperator() called" << std::endl;
         M_prec.reset(new prec_Type(M_comm));
+        M_precBaseOperators.clear();
     //}
     return EXIT_SUCCESS;
 }

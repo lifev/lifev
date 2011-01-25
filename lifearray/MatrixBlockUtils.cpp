@@ -45,6 +45,8 @@ void copyBlock ( const MatrixBlockView& srcBlock,
     // BLOCK COMPATIBILITY TEST
     // BLOCK PTR TEST
 
+    int indexBase(1.0);
+
     // Processor informations
     int  numSrcElements    = srcBlock.getMatrixPtr()->RowMap().NumMyElements();
     int* srcGlobalElements = srcBlock.getMatrixPtr()->RowMap().MyGlobalElements();
@@ -67,7 +69,7 @@ void copyBlock ( const MatrixBlockView& srcBlock,
         srcRowElement = srcGlobalElements[i];
 
         // Test if the rows are in the source block
-        if((srcRowElement>=srcBlock.firstRowIndex()) && (srcRowElement<=srcBlock.lastRowIndex()))
+        if((srcRowElement>=srcBlock.firstRowIndex()+indexBase) && (srcRowElement<=srcBlock.lastRowIndex()+indexBase))
         {
             // Get the data of the row
             srcRow = srcBlock.getMatrixPtr()->LRID(srcRowElement);
@@ -82,8 +84,8 @@ void copyBlock ( const MatrixBlockView& srcBlock,
                 srcGlobalIndex = srcBlock.getMatrixPtr()->GCID(srcIndices[j]);
 
                 // Test if the coefficient is in the block
-                if((srcGlobalIndex>=srcBlock.firstColumnIndex()) &&
-                   (srcGlobalIndex<=srcBlock.lastColumnIndex()))
+                if((srcGlobalIndex>=srcBlock.firstColumnIndex()+indexBase) &&
+                   (srcGlobalIndex<=srcBlock.lastColumnIndex()+indexBase))
                 {
                     destIndices[numDestEntries] = srcGlobalIndex+columnsOffset;
                     destValues[numDestEntries] = srcValues[j];
@@ -112,9 +114,11 @@ void createIdentityBlock ( MatrixBlockView& destBlock )
     int destIndex(0);
     double one(1.0);
 
-    int firstRowIndex(destBlock.firstRowIndex());
-    int lastRowIndex(destBlock.lastRowIndex());
-    int firstColumnIndex(destBlock.firstColumnIndex());
+    int indexBase(1.0);
+
+    int firstRowIndex(destBlock.firstRowIndex()+indexBase);
+    int lastRowIndex(destBlock.lastRowIndex()+indexBase);
+    int firstColumnIndex(destBlock.firstColumnIndex()+indexBase);
 
     // Processor informations
     int  numDestElements    = destBlock.getMatrixPtr()->RowMap().NumMyElements();
@@ -446,6 +450,8 @@ void createInvLumpedBlock ( const MatrixBlockView& srcBlock,
     // BLOCK PTR TEST
     // ZERO ON DIAGONAL TEST
 
+    int indexBase(1.0);
+
     // Processor informations
     int  numSrcElements    = srcBlock.getMatrixPtr()->RowMap().NumMyElements();
     int* srcGlobalElements = srcBlock.getMatrixPtr()->RowMap().MyGlobalElements();
@@ -468,7 +474,7 @@ void createInvLumpedBlock ( const MatrixBlockView& srcBlock,
         srcRowElement = srcGlobalElements[i];
 
         // Test if the rows are in the source block
-        if((srcRowElement>=srcBlock.firstRowIndex()) && (srcRowElement<=srcBlock.lastRowIndex()))
+        if((srcRowElement>=srcBlock.firstRowIndex()+indexBase) && (srcRowElement<=srcBlock.lastRowIndex()+indexBase))
         {
             // Get the data of the row
             srcRow = srcBlock.getMatrixPtr()->LRID(srcRowElement);
@@ -483,8 +489,8 @@ void createInvLumpedBlock ( const MatrixBlockView& srcBlock,
                 srcGlobalIndex = srcBlock.getMatrixPtr()->GCID(srcIndices[j]);
 
                 // Test if the coefficient is in the block
-                if((srcGlobalIndex>=srcBlock.firstColumnIndex()) &&
-                   (srcGlobalIndex<=srcBlock.lastColumnIndex()))
+                if((srcGlobalIndex>=srcBlock.firstColumnIndex()+indexBase) &&
+                   (srcGlobalIndex<=srcBlock.lastColumnIndex()+indexBase))
                 {
                     srcBlockRowSum += abs(srcValues[j]);
                 }

@@ -87,8 +87,9 @@ public:
     /*!
         @param precComp PreconditionerComposition
      */
+private:
     PreconditionerComposition( const PreconditionerComposition& precComp );
-
+public:
     //! Destructor
     ~PreconditionerComposition();
 
@@ -111,7 +112,7 @@ public:
     virtual int buildPreconditioner(matrix_PtrType& A) = 0;
 
     //! Reset the preconditioner
-    virtual void resetPreconditioner();
+    void resetPreconditioner();
 
     //! Return an estimation of the conditionement number of the preconditioner
     Real condest();
@@ -123,11 +124,11 @@ public:
     //! @name Epetra Operator Interface Methods
     //@{
 
-    int SetUseTranspose( const bool useTranspose = false );
+    Int SetUseTranspose( const bool useTranspose = false );
 
-    int Apply( const Epetra_MultiVector& X, Epetra_MultiVector& Y ) const;
+    Int Apply( const Epetra_MultiVector& X, Epetra_MultiVector& Y ) const;
 
-    int ApplyInverse( const Epetra_MultiVector& X, Epetra_MultiVector& Y ) const;
+    Int ApplyInverse( const Epetra_MultiVector& X, Epetra_MultiVector& Y ) const;
 
     bool UseTranspose();
 
@@ -219,11 +220,11 @@ protected:
 
     //@}
 
-private:
-
     boost::shared_ptr<Epetra_Comm> M_comm;
+
+private:
     prec_PtrType                   M_prec;
-    //std::vector<operator_type> M_operators;
+    std::vector<operator_type>     M_precBaseOperators;
 };
 
 } // Namespace LifeV

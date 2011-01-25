@@ -121,9 +121,6 @@ public:
     //! Build the preconditioner
     int buildPreconditioner(operator_type& A);
 
-    //! Reset the preconditioner
-    void resetPreconditioner();
-
     //@}
 
     //! @name  Get Methods
@@ -194,9 +191,10 @@ protected:
     // todo: Remove the member dataFile (bad programmation)
     GetPot      M_dataFile;
     string      M_section;
-    super_PtrType M_precForBlock1;
-    super_PtrType M_precForBlock2;
-    super_PtrType M_precForBlock3;
+
+private:
+    PreconditionerPCD(const PreconditionerPCD& P){}
+    PreconditionerPCD(const boost::shared_ptr<PreconditionerPCD>& P){}
 
 };
 
