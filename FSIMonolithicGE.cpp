@@ -50,14 +50,16 @@ namespace LifeV
 void FSIMonolithicGE::setupFluidSolid( UInt const fluxes )
 {
     super_Type::setupFluidSolid( fluxes );
+
     M_meshMotion.reset(new FSIOperator::meshMotion_Type(*M_mmFESpace,
                                                         M_epetraComm));
 
     M_fluid.reset(new FSIOperator::fluid_Type(M_data->dataFluid(),
-                                                  *M_uFESpace,
-                                                  *M_pFESpace,
-                                                  M_epetraComm,
-                                                  *M_monolithicMap));
+                                              *M_uFESpace,
+                                              *M_pFESpace,
+                                              M_epetraComm,
+                                              *M_monolithicMap,
+                                              fluxes));
 
     //             if (isLinearFluid())// to be implemented
     //                 M_fluidLin.reset(new FSIOperator::fluidlin_raw_type(dataFluid(),

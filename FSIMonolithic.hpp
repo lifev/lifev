@@ -223,6 +223,7 @@ public:
     {
         M_un=u0;
 
+        //mergeBCHandlers();
         //         M_BCh_u->merge(*M_BCh_flux);
         //         M_BCh_flux.reset();
         //         M_BCh_d->merge(*M_BCh_Robin);

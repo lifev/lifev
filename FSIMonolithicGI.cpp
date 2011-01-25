@@ -98,15 +98,17 @@ FSIMonolithicGI::setupFluidSolid( UInt const fluxes )
     M_un.reset (new vector_Type(*this->M_monolithicMap));
 
     M_meshMotion.reset(new meshMotion_Type(*M_mmFESpace,
-                                               M_epetraComm,
-                                               *M_monolithicMap,
-                                               offset));
+                                           M_epetraComm,
+                                           *M_monolithicMap,
+                                           offset));
+
     M_fluid.reset     (new fluid_Type(M_data->dataFluid(),
-                                          *M_uFESpace,
-                                          *M_pFESpace,
-                                          *M_mmFESpace,
-                                          M_epetraComm,
-                                          *M_monolithicMap));
+                                      *M_uFESpace,
+                                      *M_pFESpace,
+                                      *M_mmFESpace,
+                                      M_epetraComm,
+                                      *M_monolithicMap,
+                                      fluxes));
     M_solid.reset(solid_Type::StructureSolverFactory::instance().createObject( M_data->dataSolid()->getSolidType( ) ));
 
     M_solid->setup(M_data->dataSolid(),

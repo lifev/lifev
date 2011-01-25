@@ -170,8 +170,6 @@ void
 FSIMonolithic::setupFluidSolid( UInt const fluxes )
 {
 
-    super_Type::setupFluidSolid(fluxes);
-
     // Note: up to now it works only with matching grids (and poly order) on the interface
     assert(M_fluidInterfaceMap->map(Unique)->NumGlobalElements() == M_solidInterfaceMap->map(Unique)->NumGlobalElements());
 
@@ -184,7 +182,7 @@ FSIMonolithic::setupFluidSolid( UInt const fluxes )
 
     std::string opertype = M_dataFile("problem/blockOper", "AdditiveSchwarz");
 
-    createOperator( opertype);
+    createOperator( opertype );
 
     *M_monolithicMap+= M_pFESpace->map();
     *M_monolithicMap+= M_fluxes;
