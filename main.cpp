@@ -270,7 +270,7 @@ public:
         {
             M_fsi->initialize();
         }
-        //M_fsi->FSIOper()->mergeBCHandlers();
+        dynamic_cast<LifeV::FSIMonolithic*>(M_fsi->FSIOper().get())->mergeBCHandlers();
 
         FC0.initParameters( *M_fsi->FSIOper(), 3);
         LH.initParameters( *M_fsi->FSIOper(), "dataHM");
