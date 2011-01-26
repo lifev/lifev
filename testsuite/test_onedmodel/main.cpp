@@ -72,7 +72,7 @@
 using namespace LifeV;
 using namespace Multiscale;
 
-bool checkValue(const double val, const double test, const double tol = 1.e-5, const bool verbose = true)
+bool checkValue(const Real val, const Real test, const Real tol = 1.e-5, const bool verbose = true)
 {
     Real norm = abs(val - test);
 
@@ -82,7 +82,7 @@ bool checkValue(const double val, const double test, const double tol = 1.e-5, c
     return (norm < tol);
 }
 
-int main(int argc, char** argv)
+Int main(Int argc, char** argv)
 {
     //Setup main communicator
     boost::shared_ptr<Epetra_Comm>  comm;
@@ -94,8 +94,8 @@ int main(int argc, char** argv)
 
     //MPI Preprocessing
 #ifdef EPETRA_MPI
-    int nprocs;
-    int rank;
+    Int nprocs;
+    Int rank;
 
     MPI_Comm_size( MPI_COMM_WORLD, &nprocs );
     MPI_Comm_rank( MPI_COMM_WORLD, &rank );
@@ -174,14 +174,11 @@ int main(int argc, char** argv)
 
     // Absorbing
     bc_Type::bcFunctionDefaultPtr_Type absorbing ( new OneDimensionalBCFunctionAbsorbing( OneDimensional::right, OneDimensional::W2 ) );
-    absorbing->setSolution( oneDModel.solution() );
-    absorbing->setFluxSource( oneDModel.flux(), oneDModel.source() );
-
     bcFunction_Type absorbingFunction ( boost::bind( &OneDimensionalBCFunctionAbsorbing::operator(),
                                                      dynamic_cast<OneDimensionalBCFunctionAbsorbing *> ( &( *absorbing ) ), _1, _2 ) );
 
     // BC to test A_from_P conversion
-    //Constant constantArea( 1.05 );
+    //Constant constantArea( 1.00 );
     //bcFunction_Type constantAreaFunction( boost::bind( &Constant::operator(), &constantArea, _1 ) );
 
     //Constant constantPressure( 24695.0765959599 );
@@ -190,21 +187,26 @@ int main(int argc, char** argv)
     oneDModel.bc().setBC( OneDimensional::left,  OneDimensional::first, OneDimensional::Q,  sinusoidalFunction  );
     oneDModel.bc().setBC( OneDimensional::right, OneDimensional::first, OneDimensional::W2, absorbingFunction );
 
-    //oneDModel.GetBC().setBC( OneDimensional::right, OneDimensional::first, OneDimensional::A,   constantAreaFunction );
-    //oneDModel.GetBC().setBC( OneDimensional::right, OneDimensional::first, OneDimensional::P,   constantPressureFunction );
+    //oneDModel.bc().setBC( OneDimensional::right, OneDimensional::first, OneDimensional::A, constantAreaFunction );
+    //oneDModel.bc().setBC( OneDimensional::right, OneDimensional::first, OneDimensional::P,   constantPressureFunction );
 
     oneDModel.setupModel();
 
+    absorbing->setSolution( oneDModel.solution() );
+    absorbing->setFluxSource( oneDModel.flux(), oneDModel.source() );
+#ifdef GHOSTNODE
+    absorbing->setSystemResidual( oneDModel.solver()->residual() );
+#endif
     // *********************************
     // Tempolar loop
     // *********************************
-    printf("\nTemporal loop:\n");
+    std::cout << "\nTemporal loop:" << std::endl;
 
     LifeChrono chronoTotal;
     LifeChrono chronoSystem;
     LifeChrono chronoIteration;
 
-    int count = 0;
+    Int count = 0;
     chronoTotal.start();
     for ( ; oneDModel.data().dataTime()->canAdvance() ; oneDModel.data().dataTime()->updateTime(), ++count )
     {
@@ -243,17 +245,17 @@ int main(int argc, char** argv)
     if ( check )
     {
         bool ok = true;
-        int rightNodeID = oneDModel.solver()->rightNodeId();
+        Int rightNodeID = oneDModel.solver()->boundaryDOF( OneDimensional::right );
 
-        ok = ok && checkValue( 0.999998  , (*oneDModel.solution("A"))[rightNodeID - 0]);
-        ok = ok && checkValue(-0.00138076, (*oneDModel.solution("Q"))[rightNodeID - 0]);
-        ok = ok && checkValue(-0.00276153, (*oneDModel.solution("W1"))[rightNodeID - 0]);
-        ok = ok && checkValue( 0.00000000, (*oneDModel.solution("W2"))[rightNodeID - 0]);
+        ok = ok && checkValue( 0.999998  , (*oneDModel.solution("A"))[rightNodeID + 1]);
+        ok = ok && checkValue(-0.00138076, (*oneDModel.solution("Q"))[rightNodeID + 1]);
+        ok = ok && checkValue(-0.00276153, (*oneDModel.solution("W1"))[rightNodeID + 1]);
+        ok = ok && checkValue( 0.00000000, (*oneDModel.solution("W2"))[rightNodeID + 1]);
 
-        ok = ok && checkValue( 0.999999  , (*oneDModel.solution("A"))[rightNodeID - 1]);
-        ok = ok && checkValue(-0.00040393, (*oneDModel.solution("Q"))[rightNodeID - 1]);
-        ok = ok && checkValue(-0.00080833, (*oneDModel.solution("W1"))[rightNodeID - 1]);
-        ok = ok && checkValue( 0.00000045, (*oneDModel.solution("W2"))[rightNodeID - 1]);
+        ok = ok && checkValue( 0.999999  , (*oneDModel.solution("A"))[rightNodeID]);
+        ok = ok && checkValue(-0.00040393, (*oneDModel.solution("Q"))[rightNodeID]);
+        ok = ok && checkValue(-0.00080833, (*oneDModel.solution("W1"))[rightNodeID]);
+        ok = ok && checkValue( 0.00000045, (*oneDModel.solution("W2"))[rightNodeID]);
 
         if (ok)
         {
