@@ -17,6 +17,11 @@ PhysicsType          = OneD_NonLinearPhysics
 FluxType             = OneD_NonLinearFlux
 SourceType           = OneD_NonLinearSource
 
+[../PhysicalWall]
+ViscoelasticWall     = false       # Enable/Disable viscoelastic effects
+ViscoelasticAngle    = 10          # Viscoelastic wall angle (degree) 
+ViscoelasticPeriod   = 0.24        # Viscoelastic systolic period
+
 [../PhysicalParameters]
 ComputeCoefficients  = false
 PowerlawCoefficient  = 9 # 2: Parabolic; 9: Typical value
@@ -29,7 +34,7 @@ viscosity            = 0.035
 thickVessel          = false
 thickness            = 0.056
 young                = 4.0E6 # g/cm/s^2 (dyne/cm^2)
-poisson              = 0.48
+poisson              = 0
 
 # Use Fixed Coefficients
 AlphaCoriolis        = 1            # Coriolis Coefficients
@@ -55,7 +60,7 @@ transform            = '1.0 1.0 1.0
 post_dir             = ./           # the directory for postprocessing files
 post_file            = sol          # the file name
 verbose              = 1
-CFLmax               = 0.5773       # Maximum admissible value of the CFL 
+CFLmax               = 0.5          # Maximum admissible value of the CFL 
 
 [../solver]
 
