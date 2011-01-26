@@ -33,6 +33,11 @@ PhysicsType          = OneD_NonLinearPhysics
 FluxType             = OneD_NonLinearFlux
 SourceType           = OneD_NonLinearSource
 
+[../PhysicalWall]
+ViscoelasticWall     = false       # Enable/Disable viscoelastic effects
+ViscoelasticAngle    = 10          # Viscoelastic wall angle (degree) 
+ViscoelasticPeriod   = 0.24        # Viscoelastic systolic period
+
 [../PhysicalParameters]
 ComputeCoefficients  = true
 PowerlawCoefficient  = 9 # 2: Parabolic; 9: Typical value
