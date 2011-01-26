@@ -540,7 +540,7 @@ addAdvection(matrix_ptrType matrix, const vector_type& beta, const UInt& offsetL
     // Beta has to be repeated!
     if (beta.mapType() == Unique)
     {
-        addAdvection(matrix,vector_type(beta,Repeated));
+        addAdvection(matrix,vector_type(beta,Repeated), offsetLeft, offsetUp);
         return;
     }
 
