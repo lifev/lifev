@@ -36,6 +36,12 @@
 #include <lifemc/lifearray/MatrixBlockView.hpp>
 #include <lifemc/lifearray/MatrixBlockUtils.hpp>
 
+#define shuttleworth
+
+#ifdef shuttleworth
+#include <EpetraExt_MatrixMatrix.h>
+#endif
+
 namespace LifeV {
 
 PreconditionerPCD::PreconditionerPCD(const  boost::shared_ptr<Epetra_Comm>& comm):
@@ -157,83 +163,88 @@ int PreconditionerPCD::buildPreconditioner(operator_type& oper)
     // Building the block
     // / I  0 \   / I  0       \   / I  0  \ / I 0     \ / I 0  \
     // \ 0 -S / = \ 0 -ApFp^-1 / = \ 0 -Ap / \ 0 Fp^-1 / \ 0 Mp /
-    /*
+    if(verbose) std::cout << " Building Fp" << std::endl;
+    timer.start();
+    boost::shared_ptr<matrix_type> PFp(new matrix_type( map ));
+    *PFp *= 0.0;
+    PFp->setBlockStructure(blockNumRows,blockNumColumns);
+    PFp->getMatrixBlockView(1,1,B22);
+    M_adrPressureAssembler.addDiffusion(PFp,-M_viscosity/M_density,B22.firstRowIndex(),B22.firstColumnIndex());
+    M_adrPressureAssembler.addAdvection(PFp,*M_beta,B22.firstRowIndex(),B22.firstColumnIndex());
+    M_adrPressureAssembler.addMass(PFp,1.0/M_timestep,B22.firstRowIndex(),B22.firstColumnIndex());
+    PFp->globalAssemble();
+    PFp->spy("pFp");
+    boost::shared_ptr<parent_matrix_type> pFp = PFp;
+    if(verbose) std::cout << " done in " << timer.diff() << " s." << std::endl;
+
+    if(verbose) std::cout << " Building Ap" << std::endl;
+    timer.start();
+    boost::shared_ptr<matrix_type> PAp(new matrix_type( map ));
+    *PAp *= 0.0;
+    PAp->setBlockStructure(blockNumRows,blockNumColumns);
+    PAp->getMatrixBlockView(0,0,B11);
+    PAp->getMatrixBlockView(1,1,B22);
+#ifdef shuttleworth
+
+    Epetra_CrsMatrix* tmpCrsMatrix(NULL);
+    tmpCrsMatrix = PAp->matrixPtr().get();
+    EpetraExt::MatrixMatrix::Add(*(pFp->matrixPtr()), false, 0.5*M_density/M_viscosity,
+                                 *(pFp->matrixPtr()), true,  0.5*M_density/M_viscosity,
+                                 tmpCrsMatrix);
+
+    MatrixBlockUtils::createScalarBlock(B11,1);
+#else
+    M_adrPressureAssembler.addDiffusion(PAp,-1.0,B22.firstRowIndex(),B22.firstColumnIndex());
+    MatrixBlockUtils::createIdentityBlock(B11);
+#endif
+    PAp->globalAssemble();
+    boost::shared_ptr<parent_matrix_type> pAp = PAp;
+    if(verbose) std::cout << " done in " << timer.diff() << " s." << std::endl;
+
+    if(verbose) std::cout << " Building Mp" << std::endl;
+    timer.start();
+    boost::shared_ptr<matrix_type> PMp(new matrix_type( map ));
+    *PMp *= 0.0;
+    PMp->setBlockStructure(blockNumRows,blockNumColumns);
+    PMp->getMatrixBlockView(0,0,B11);
+    PMp->getMatrixBlockView(1,1,B22);
+    MatrixBlockUtils::createIdentityBlock(B11);
+    M_adrPressureAssembler.addMass(PMp,1.0,B22.firstRowIndex(),B22.firstColumnIndex());
+    PMp->globalAssemble();
+    boost::shared_ptr<parent_matrix_type> pMp = PMp;
+    if(verbose) std::cout << " done in " << timer.diff() << " s." << std::endl;
+
     if(verbose) std::cout << " P1a" << std::endl;
     timer.start();
-    boost::shared_ptr<matrix_type> P1a(new matrix_type( map ));
-    *P1a *= 0.0;
-    P1a->setBlockStructure(blockNumRows,blockNumColumns);
-    P1a->getMatrixBlockView(0,0,B11);
-    P1a->getMatrixBlockView(1,1,B22);
-    M_adrPressureAssembler.addDiffusion(P1a,-1.0,B22.firstRowIndex(),B22.firstColumnIndex());
-    MatrixBlockUtils::createIdentityBlock(B11);
-    P1a->globalAssemble();
-    //P1a->spy("p1a");
-    boost::shared_ptr<parent_matrix_type> p1a = P1a;
+    //pAp->spy("p1a");
     super_PtrType precForBlock1;
     precForBlock1.reset(new PreconditionerIfpack());
     precForBlock1->setDataFromGetPot(M_dataFile,M_section);
-    this->pushBack(p1a,precForBlock1,notInversed,notTransposed);
-    if(verbose) std::cout << " done in " << timer.diff() << " s." << std::endl;
-    */
-    if(verbose) std::cout << " P1a" << std::endl;
-    timer.start();
-    boost::shared_ptr<matrix_type> P1base(new matrix_type( map ));
-    *P1base *= 0.0;
-    P1base->setBlockStructure(blockNumRows,blockNumColumns);
-    P1base->getMatrixBlockView(1,1,B22base);
-    M_adrPressureAssembler.addDiffusion(P1base,-1.0,B22base.firstRowIndex(),B22base.firstColumnIndex());
-    P1base->globalAssemble();
-    boost::shared_ptr<matrix_type> P1a(new matrix_type( map ));
-    *P1a *= 0.0;
-    P1a->setBlockStructure(blockNumRows,blockNumColumns);
-    P1a->getMatrixBlockView(0,0,B11);
-    P1a->getMatrixBlockView(1,1,B22);
-    MatrixBlockUtils::createInvLumpedBlock(B22base,B22);
-    P1base.reset();
-    MatrixBlockUtils::createIdentityBlock(B11);
-    P1a->globalAssemble();
-    P1a->spy("p1a");
-    boost::shared_ptr<parent_matrix_type> p1a = P1a;
-    this->pushBack(p1a,inversed,notTransposed);
+    this->pushBack(pAp,precForBlock1,notInversed,notTransposed);
     if(verbose) std::cout << " done in " << timer.diff() << " s." << std::endl;
 
     if(verbose) std::cout << " P1b" << std::endl;
     timer.start();
     boost::shared_ptr<matrix_type> P1b(new matrix_type( map ));
-    *P1b *= 0.0;
     P1b->setBlockStructure(blockNumRows,blockNumColumns);
+    *P1b += *PFp;
     P1b->getMatrixBlockView(0,0,B11);
-    P1b->getMatrixBlockView(1,1,B22);
-    M_adrPressureAssembler.addDiffusion(P1b,-M_viscosity/M_density,B22.firstRowIndex(),B22.firstColumnIndex());
-    M_adrPressureAssembler.addAdvection(P1b,*M_beta,B22.firstRowIndex(),B22.firstColumnIndex());
-    M_adrPressureAssembler.addMass(P1b,1.0/M_timestep,B22.firstRowIndex(),B22.firstColumnIndex());
     MatrixBlockUtils::createIdentityBlock(B11);
-    //P1b->spy("p1b");
+    P1b->globalAssemble();
     boost::shared_ptr<parent_matrix_type> p1b = P1b;
+    //p1b->spy("p1b");
     this->pushBack(p1b,inversed,notTransposed);
     if(verbose) std::cout << " done in " << timer.diff() << " s." << std::endl;
 
-    /*
     if(verbose) std::cout << " P1c" << std::endl;
     timer.start();
-    boost::shared_ptr<matrix_type> P1c(new matrix_type( map ));
-    *P1c *= 0.0;
-    P1c->setBlockStructure(blockNumRows,blockNumColumns);
-    P1c->getMatrixBlockView(0,0,B11);
-    P1c->getMatrixBlockView(1,1,B22);
-    MatrixBlockUtils::createIdentityBlock(B11);
-    M_adrPressureAssembler.addMass(P1c,1.0,B22.firstRowIndex(),B22.firstColumnIndex());
-    P1c->globalAssemble();
-    P1c->spy("p1c");
-    boost::shared_ptr<parent_matrix_type> p1c = P1c;
+    //pMp->spy("p1c");
     super_PtrType precForBlock2;
     precForBlock2.reset(new PreconditionerML());
     //prec->createParametersList(prec->parametersList(), M_dataFile, M_section, "Ifpack");
     precForBlock2->setDataFromGetPot(M_dataFile,M_section);
-    this->pushBack(p1c,precForBlock2,notInversed,notTransposed);
+    this->pushBack(pMp,precForBlock2,notInversed,notTransposed);
     if(verbose) std::cout << " done in " << timer.diff() << " s." << std::endl;
-    */
 
     // Building the block (the block is inversed)
     // / I -Bt \
@@ -250,7 +261,7 @@ int PreconditionerPCD::buildPreconditioner(operator_type& oper)
     MatrixBlockUtils::createIdentityBlock(B11);
     MatrixBlockUtils::createIdentityBlock(B22);
     P2->globalAssemble();
-    P2->spy("p2");
+    //P2->spy("p2");
     boost::shared_ptr<parent_matrix_type> p2 = P2;
     this->pushBack(p2,inversed,notTransposed);
     if(verbose) std::cout << " done in " << timer.diff() << " s." << std::endl;
@@ -267,7 +278,7 @@ int PreconditionerPCD::buildPreconditioner(operator_type& oper)
     MatrixBlockUtils::copyBlock(F,B11);
     MatrixBlockUtils::createIdentityBlock(B22);
     P3->globalAssemble();
-    P3->spy("p3");
+    //P3->spy("p3");
     boost::shared_ptr<parent_matrix_type> p3 = P3;
     super_PtrType precForBlock3;
     precForBlock3.reset(new PreconditionerIfpack());

@@ -55,6 +55,13 @@ void copyBlock ( const MatrixBlockView& srcBlock,
 */
 void createZeroBlock ( MatrixBlockView& destBlock );
 
+//! Create a block with an identical value on the diagonal
+/*!
+  @param destBlock Block where the data will be stored
+  @param diagonalValue Value to be inserted in the diagonal
+*/
+void createScalarBlock ( MatrixBlockView& destBlock, const Real& diagonalValue );
+
 //! Create a block with ones on the diagonal
 /*!
   @param destBlock Block where the data will be stored

@@ -106,13 +106,12 @@ void createZeroBlock ( MatrixBlockView& destBlock )
     // by the method setBlockToZero
 }
 
-void createIdentityBlock ( MatrixBlockView& destBlock )
+void createScalarBlock ( MatrixBlockView& destBlock, const Real& diagonalValue )
 {
     // SQUARE TEST
     // BLOCK PTR TEST
 
     int destIndex(0);
-    double one(1.0);
 
     int indexBase(1.0);
 
@@ -133,9 +132,14 @@ void createIdentityBlock ( MatrixBlockView& destBlock )
         if((destRowElement>=firstRowIndex) && (destRowElement<=lastRowIndex))
         {
             destIndex = firstColumnIndex+destRowElement-firstRowIndex;
-            destBlock.getMatrixPtr()->InsertGlobalValues(destRowElement,1,&one,&destIndex);
+            destBlock.getMatrixPtr()->InsertGlobalValues(destRowElement,1,&diagonalValue,&destIndex);
         }
     }
+}
+
+void createIdentityBlock ( MatrixBlockView& destBlock )
+{
+    createScalarBlock(destBlock,1.0);
 }
 
 void createDiagBlock ( const MatrixBlockView& srcBlock,
