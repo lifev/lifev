@@ -582,6 +582,8 @@ public:
 
     //@}
 
+    //! Return a shared pointer to the preconditioner (of type derived from EpetraPreconditioner)
+    preconditionerPtr_Type& preconditioner(){return M_linearSolver.preconditioner();}
 
 protected:
 
@@ -1794,7 +1796,8 @@ template<typename MeshType, typename SolverType>
 void
 OseenSolver<MeshType, SolverType>::setTolMaxIteration( const Real& tolerance, const Int& maxIteration )
 {
-    M_linearSolver.setTolMaxIteration( tolerance, maxIteration );
+    M_linearSolver.setTolerance( tolerance );
+    M_linearSolver.setMaxNumIterations( maxIteration );
 }
 
 
