@@ -169,7 +169,7 @@ Int main(Int argc, char** argv)
     //oneDModel.GetBCInterface().FillHandler( fileName, "1D_Model" );
 
     // Set BC using standard approach
-    Sin sinus;
+    Sin sinus( 0, 10, .01, 0.);
     bcFunction_Type sinusoidalFunction( boost::bind( &Sin::operator(), &sinus, _1 ) );
 
     // Absorbing
