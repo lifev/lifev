@@ -14,8 +14,8 @@
 
 [Problem] #########################################################################################
 ProblemType = Multiscale
-ProblemFile = ./MultiscaleDatabase/Models/Multiscale/ReymondStergiopulos2009_1D_Aorta_Absorbing_Stress
-#ProblemFile = ./MultiscaleDatabase/Models/Multiscale/ReymondStergiopulos2009_1D_Aorta_Resistance_Stress
+#ProblemFile = ./MultiscaleDatabase/Models/Multiscale/ReymondStergiopulos2009_1D_Aorta_Absorbing_Stress
+ProblemFile = ./MultiscaleDatabase/Models/Multiscale/ReymondStergiopulos2009_1D_Aorta_Resistance_Stress
 
 [Solver] ##########################################################################################
 ###################################################################################################
