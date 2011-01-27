@@ -47,6 +47,7 @@ along with LifeV. If not, see <http://www.gnu.org/licenses/>.
 #include <life/lifemesh/MeshElementBare.hpp>
 #include <life/lifemesh/ElementShapes.hpp>
 #include <life/lifearray/VectorSimple.hpp>
+#include <life/lifearray/ArraySimple.hpp>
 
 namespace LifeV
 {

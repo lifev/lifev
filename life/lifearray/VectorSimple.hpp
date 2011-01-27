@@ -49,18 +49,19 @@ namespace LifeV
 /*!
     @author Luca Formaggia
 
-    The class is a wrap up of Standard Library vector class to allow indexing from one.
+    The class is a wrap up of Standard Library vector class.
+    This class is deprecated and it should be removed when the discussion is over.
     It implements one dimensional vector
 
     Example:
 
-    VectorSimple<float> a(10);
+    VectorSimple<float> a(11);
 
-    a(10)=90; // a[9] will contain 90.0
+    a(10)=90; // a[10] will contain 90.0
 
  */
 
-template <typename DataType, int offsetVector = 0>
+template <typename DataType>
 class VectorSimple : public std::vector<DataType>
 {
 public:
@@ -92,7 +93,7 @@ public:
     /*!
         @param vector VectorSimple vector to copy
      */
-    VectorSimple( const VectorSimple<DataType, offsetVector> & vector );
+    VectorSimple( const VectorSimple<DataType> & vector );
 
     //! Constructor
     /*!
@@ -117,28 +118,28 @@ public:
         @return Reference to a new VectorSimple vector with the same
                 content of VectorSimple vector
      */
-    VectorSimple<DataType, offsetVector> & operator=( const VectorSimple<DataType, offsetVector> & vector );
+    VectorSimple<DataType> & operator=( const VectorSimple<DataType> & vector );
 
     //! Access operator
     /*!
-        Example: a(10)=90; // a[9] will contain 90.0
+        Example: a(10)=90; // a[10] will contain 90.0
         @param i index of the element of the VectorSimple vector
         @return a vector reference 
      */
     vectorReference_Type operator() ( vectorSize_Type const i )
     {
-        return ( this->operator[] ( i - offsetVector ) );
+        return ( this->operator[] ( i ) );
     }
 
     //! Const access operator
     /*!
-        Example: a(10)=90; // a[9] will contain 90.0
+        Example: a(10)=90; // a[10] will contain 90.0
         @param i index of the element of the VectorSimple vector
         @return a vector const reference  
      */
     vectorConstReference_Type operator() ( vectorSize_Type const i ) const
     {
-        return ( this->operator[] ( i - offsetVector ) );
+        return ( this->operator[] ( i ) );
     }
 
     //@}
@@ -157,7 +158,7 @@ public:
      */
     bool checkIndex( vectorSize_Type const i ) const
     {
-        return i >= offsetVector && i < this->size() + offsetVector ;
+        return i >= 0 && i < this->size() ;
     }  
 
     //! Return a reference to the element of type data_Type stored in the i-th position.
@@ -183,8 +184,8 @@ public:
 //============================================================================
 // Constructors
 //============================================================================
-template <typename DataType, int offsetVector>
-VectorSimple<DataType, offsetVector>::VectorSimple( const VectorSimple<DataType, offsetVector> & vector ) 
+template <typename DataType>
+VectorSimple<DataType>::VectorSimple( const VectorSimple<DataType> & vector ) 
         :
         vector_Type( vector )
 {}
@@ -193,9 +194,9 @@ VectorSimple<DataType, offsetVector>::VectorSimple( const VectorSimple<DataType,
 //============================================================================
 // Operators
 //============================================================================
-template <typename DataType, int offsetVector>
-VectorSimple<DataType, offsetVector> &
-VectorSimple<DataType, offsetVector>::operator=( const VectorSimple<DataType, offsetVector> & vector )
+template <typename DataType>
+VectorSimple<DataType> &
+VectorSimple<DataType>::operator=( const VectorSimple<DataType> & vector )
 {
     vector_Type::operator=( vector );
     return *this;
@@ -205,287 +206,31 @@ VectorSimple<DataType, offsetVector>::operator=( const VectorSimple<DataType, of
 //============================================================================
 // Methods
 //============================================================================
-template <typename DataType, int offsetVector> 
+template <typename DataType> 
 void
-VectorSimple<DataType, offsetVector>::clearVector()
+VectorSimple<DataType>::clearVector()
 {
     vector_Type tmp;
     this->clear();
     this->swap( tmp );
 }
 
-template <typename DataType, int offsetVector>
-typename VectorSimple<DataType, offsetVector>::data_Type& 
-VectorSimple<DataType, offsetVector>::returnElementAfterCheck( vectorSize_Type i )
+template <typename DataType>
+typename VectorSimple<DataType>::data_Type& 
+VectorSimple<DataType>::returnElementAfterCheck( vectorSize_Type i )
 {
     if ( ! checkIndex( i ) )
         abort();
-    return *( this->begin() + ( i - offsetVector ) );
+    return *( this->begin() + ( i ) );
 }
 
-template <typename DataType, int offsetVector>
-const typename VectorSimple<DataType, offsetVector>::data_Type&  
-VectorSimple<DataType, offsetVector>::returnElementAfterCheck( vectorSize_Type i ) const
+template <typename DataType>
+const typename VectorSimple<DataType>::data_Type&  
+VectorSimple<DataType>::returnElementAfterCheck( vectorSize_Type i ) const
 {
     if ( ! checkIndex( i ) )
         abort();
-    return *( this->begin() + ( i - offsetVector ) );
-}
-
-
-//! ArraySimple
-/*!
-    @author Luca Formaggia
-
-    The class is a wrap up of Standard Library vector class to allow indexing from one.
-    It defines vectors of n x m size.
-
-    Example:
-
-    ArraySimple<int> b(3,5) is an array with 3 rows and 5 columns
-
-    b(3,2)=5 puts the number 5 in the third row, in the second column.
-   
- */
-
-template <typename DataType, int offsetVector = 0>
-class ArraySimple : public std::vector<DataType>
-{
-public:
-
-    //! @name Public Types
-    //@{
-
-    typedef DataType                                data_Type;
-    typedef std::vector<DataType>                   vector_Type;
-    typedef typename vector_Type::size_type         vectorSize_Type;
-    typedef typename vector_Type::reference         vectorReference_Type;
-    typedef typename vector_Type::const_reference   vectorConstReference_Type;
-    typedef typename vector_Type::iterator          vectorIterator_Type;
-    typedef typename vector_Type::const_iterator    vectorConstIterator_Type;
-
-    //@}
-
-
-    //! @name Constructor & Destructor
-    //@{
-
-    //! Empty Constructor
-    /*!
-       Construct a ArraySimple vector of size (0,0)
-     */
-    explicit ArraySimple();
-
-    //! Constructor
-    /*!
-        Construct a ArraySimple vector of size (size,1)
-        @param vectorSize size of the ArraySimple vector
-     */
-    explicit ArraySimple( vectorSize_Type vectorSize );
-
-    //! Constructor
-    /*!
-        Construct a ArraySimple object of size (numberOfRows,numberOfColumns)
-        @param numberOfRows number of rows
-        @param numberOfColumns number of columns
-     */
-    explicit ArraySimple( vectorSize_Type numberOfRows, vectorSize_Type numberOfColumns );
-
-    //! Destructor
-    ~ArraySimple() {}
-
-    //@}
-
-
-    //! @name Operators
-    //@{
-
-    //! Access operator
-    /*!
-        ArraySimple is seen as vector (index from one)
-        @param i index of the element of the ArraySimple vector
-        @return a vector reference 
-     */
-    vectorReference_Type operator() ( vectorSize_Type const i )
-    {
-        return *( this->begin() + ( i - offsetVector ) );
-    }
-
-    //! Const access operator
-    /*!
-        ArraySimple is seen as vector (index from one)
-        @param i index of the element of the ArraySimple vector
-        @return a vector const reference 
-     */
-    vectorConstReference_Type operator() ( vectorSize_Type const i ) const
-    {
-        return *( this->begin() + ( i - offsetVector ) );
-    } 
-
-    //! Access operator
-    /*!
-        Indices start from one
-        @param i row index
-        @param j column index 
-        @return a vector reference 
-     */
-    vectorReference_Type operator() ( vectorSize_Type const i, vectorSize_Type const j )
-    {
-        return *( this->begin() + ( j - offsetVector ) * M_numberOfRows + ( i - offsetVector ) );
-    } 
-
-    //! Const access operator
-    /*!
-        Indices start from one
-        @param i row index
-        @param j column index 
-        @return a vector const reference 
-     */
-    vectorConstReference_Type operator() ( vectorSize_Type const i, vectorSize_Type const j ) const
-    {
-        return *( this->begin() + ( j - offsetVector ) * M_numberOfRows + ( i - offsetVector ) );
-    }
-
-    //@}
-
-
-    //! @name Methods
-    //@{
-
-    //!Return the iterator of the column passed by argument
-    /*!
-        @param column column index 
-        @return ArraySimple iterator
-     */
-    inline typename ArraySimple<DataType, offsetVector>::iterator columnIterator( vectorSize_Type const column );
-
-    //!Resize the ArraySimple vector
-    /*!
-        @param numberOfRows number of rows
-        @param numberOfColumns number of columns 
-     */
-    void reshape( vectorSize_Type const numberOfRows, vectorSize_Type const numberOfColumns );
-
-    //! Completely clear out the container, returning memory to the system
-    inline void clearArray();
-
-    //! Check if the VectorSimple vector contains an element with row index i and column index j
-    /*!
-        @param i row index
-        @param j column index
-        @return boolean
-     */
-    bool checkIndex( vectorSize_Type const i, vectorSize_Type const j ) const
-    {
-        return i >= offsetVector && i - offsetVector + ( j - offsetVector ) * M_numberOfRows < this->size();
-    }
-
-    //! Show the contents of the ArraySimple vector
-    void showMe() const;
-
-    //@}
-
-
-    //! @name Get Methods
-    //@{
-
-    //!Return the number of rows
-    /*!
-        @return a vector size type variable holding the number of rows
-     */
-    vectorSize_Type const numberOfRows() const
-    {
-        return M_numberOfRows;
-    }
-
-    //!Return the number of columns
-    /*!
-        @return a vector size type variable holding the number of columns
-     */
-    vectorSize_Type const numberOfColumns() const
-    {
-        return M_numberOfColumns;
-    }
-
-    //@}
-
-private:
-
-    //! Number of rows
-    vectorSize_Type M_numberOfRows;
-    
-    //! Number of columns
-    vectorSize_Type M_numberOfColumns;
-};
-
-
-//============================================================================
-// Constructors
-//============================================================================
-template <typename DataType, int offsetVector>
-ArraySimple<DataType, offsetVector>::ArraySimple()
-        :
-        std::vector<DataType>(),
-        M_numberOfRows( 0 ),
-        M_numberOfColumns( 0 )
-{}
-
-template <typename DataType, int offsetVector>
-ArraySimple<DataType, offsetVector>::ArraySimple( vectorSize_Type vectorSize )
-        :
-        std::vector<DataType>( vectorSize ),
-        M_numberOfRows( vectorSize ),
-        M_numberOfColumns( 1 )
-{}
-
-template <typename DataType, int offsetVector>
-ArraySimple<DataType, offsetVector>::ArraySimple( vectorSize_Type numberOfRows, vectorSize_Type numberOfColumns )
-        :
-        std::vector<DataType>( numberOfRows * numberOfColumns ),
-        M_numberOfRows( numberOfRows ),
-        M_numberOfColumns( numberOfColumns )
-{}
-
-//============================================================================
-// Methods
-//============================================================================
-template <typename DataType, int offsetVector>
-typename ArraySimple<DataType, offsetVector>::iterator 
-ArraySimple<DataType, offsetVector>::columnIterator( vectorSize_Type const column )
-{
-    if ( column > M_numberOfColumns )
-        return typename ArraySimple<DataType, offsetVector>::iterator();
-    else
-        return this->begin() + ( column - offsetVector ) * M_numberOfRows;
-}
-
-
-template <typename DataType, int offsetVector>
-void
-ArraySimple<DataType, offsetVector>::reshape( vectorSize_Type numberOfRows, vectorSize_Type numberOfColumns )
-{
-    vector_Type::resize( numberOfRows * numberOfColumns ); // Standard Library vector method
-    M_numberOfRows = numberOfRows;
-    M_numberOfColumns = numberOfColumns;
-}
-
-template <typename DataType, int offsetVector>
-void 
-ArraySimple<DataType, offsetVector>::clearArray()
-{
-    vector_Type tmp;
-    this->clear();
-    this->swap( tmp );
-    M_numberOfRows = 0;
-    M_numberOfColumns = 0;
-}
-
-template <typename DataType, int offsetVector>
-void 
-ArraySimple<DataType, offsetVector>::showMe() const
-{
-    std::cout << " Number of rows: " << M_numberOfRows << std::endl;
-    std::cout << " Number of columns: " << M_numberOfColumns << std::endl;
+    return *( this->begin() + ( i ) );
 }
 
 }// Namespace LifeV
