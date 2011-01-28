@@ -49,22 +49,22 @@ Real EthierSteinmanUnsteady::xexact( const Real& t,
 
     switch (i)
     {
-    case 1:
+    case 0:
         return -a * exp(-d*d*tau) *
                ( exp(a*x) * sin(a*y+d*z) +
                  exp(a*z) * cos(a*x+d*y) );
         break;
-    case 2:
+    case 1:
         return -a * exp(-d*d*tau) *
                ( exp(a*y) * sin(a*z+d*x) +
                  exp(a*x) * cos(a*y+d*z) );
         break;
-    case 3:
+    case 2:
         return -a * exp(-d*d*tau) *
                ( exp(a*z) * sin(a*x+d*y) +
                  exp(a*y) * cos(a*z+d*x) );
         break;
-    case 4:
+    case 3:
         return -a*a / 2 * exp(-2*d*d*tau) *
                ( exp(2*a*x) + exp(2*a*y) + exp(2*a*z) +
                  2 * sin(a*x+d*y) * cos(a*z+d*x) * exp(a*(y+z)) +
@@ -82,7 +82,7 @@ Real EthierSteinmanUnsteady::uexact( const Real& t,
                                      const Real& z,
                                      const ID& i)
 {
-    if (i < 4)
+    if (i < 3)
         return xexact(t, x, y, z, i);
     else
         return 0.;
@@ -94,7 +94,7 @@ Real EthierSteinmanUnsteady::pexact( const Real& t,
                                      const Real& z,
                                      const ID& /* i */ )
 {
-    return xexact(t, x, y, z, 4);
+    return xexact(t, x, y, z, 3);
 }
 
 // Initial velocity
@@ -112,7 +112,7 @@ Real EthierSteinmanUnsteady::uderexact( const Real& t,
                                         const ID& i)
 {
 
-    if (i < 4)
+    if (i < 3)
         return - nu*d*d*xexact(t, x, y, z, i);
     else
         return 0.;
@@ -131,17 +131,17 @@ Real EthierSteinmanUnsteady::ux( const Real& t, const Real& x, const Real& y,
 
     switch (i)
     {
-    case 1:
+    case 0:
         return -a * exp(-d*d*tau) *
                ( a * exp(a*x) * sin(a*y+d*z) -
                  a * exp(a*z) * sin(a*x+d*y) );
         break;
-    case 2:
+    case 1:
         return -a * exp(-d*d*tau) *
                ( d * exp(a*y) * cos(a*z+d*x) +
                  a * exp(a*x) * cos(a*y+d*z) );
         break;
-    case 3:
+    case 2:
         return -a * exp(-d*d*tau) *
                ( a * exp(a*z) * cos(a*x+d*y) -
                  d * exp(a*y) * sin(a*z+d*x) );
@@ -158,17 +158,17 @@ Real EthierSteinmanUnsteady::uy( const Real& t, const Real& x, const Real& y,
 
     switch (i)
     {
-    case 1:
+    case 0:
         return -a * exp(-d*d*tau) *
                ( a * exp(a*x) * cos(a*y+d*z) -
                  d * exp(a*z) * sin(a*x+d*y) );
         break;
-    case 2:
+    case 1:
         return -a * exp(-d*d*tau) *
                ( a * exp(a*y) * sin(a*z+d*x) -
                  a * exp(a*x) * sin(a*y+d*z) );
         break;
-    case 3:
+    case 2:
         return -a * exp(-d*d*tau) *
                ( d * exp(a*z) * cos(a*x+d*y) +
                  a * exp(a*y) * cos(a*z+d*x) );
@@ -185,17 +185,17 @@ Real EthierSteinmanUnsteady::uz( const Real& t, const Real& x, const Real& y,
 
     switch (i)
     {
-    case 1:
+    case 0:
         return -a * exp(-d*d*tau) *
                ( d * exp(a*x) * cos(a*y+d*z) +
                  a * exp(a*z) * cos(a*x+d*y) );
         break;
-    case 2:
+    case 1:
         return -a * exp(-d*d*tau) *
                ( a * exp(a*y) * cos(a*z+d*x) -
                  d * exp(a*x) * sin(a*y+d*z) );
         break;
-    case 3:
+    case 2:
         return -a * exp(-d*d*tau) *
                ( a * exp(a*z) * sin(a*x+d*y) -
                  a * exp(a*y) * sin(a*z+d*x) );
@@ -246,21 +246,21 @@ Real EthierSteinmanUnsteady::fNeumann( const Real& t,
 
     switch (i)
     {
-    case 1:
+    case 0:
         return - pexact(t, x, y, z, 1) * nx
                + mu * ( ux(t, x, y, z, 1) * nx * 2 +
                         ux(t, x, y, z, 2) * ny +
                         ux(t, x, y, z, 3) * nz +
                         uy(t, x, y, z, 1) * ny +
                         uz(t, x, y, z, 1) * nz );
-    case 2:
+    case 1:
         return - pexact(t, x, y, z, 1) * ny
                + mu * ( uy(t, x, y, z, 1) * nx +
                         uy(t, x, y, z, 2) * ny * 2 +
                         uy(t, x, y, z, 3) * nz +
                         ux(t, x, y, z, 2) * nx +
                         uz(t, x, y, z, 2) * nz );
-    case 3:
+    case 2:
         return - pexact(t, x, y, z, 1) * nz
                + mu * ( uz(t, x, y, z, 1) * nx +
                         uz(t, x, y, z, 2) * ny +

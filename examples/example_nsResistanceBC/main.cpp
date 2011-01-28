@@ -51,15 +51,6 @@
 
 using namespace LifeV;
 
-namespace LifeV
-{
-namespace
-{
-static bool regIF = (PRECFactory::instance().registerProduct( "Ifpack", &createIfpack ));
-static bool regML = (PRECFactory::instance().registerProduct( "ML", &createML ));
-}
-}
-
 int
 main( int argc, char** argv )
 {

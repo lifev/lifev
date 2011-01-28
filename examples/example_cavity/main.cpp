@@ -91,10 +91,10 @@ Real uLid(const Real& t, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/
 {
     switch (i)
     {
-    case 1:
+    case 0:
         return 1.0;
         break;
-    case 3:
+    case 1:
         return 0.0;
         break;
     case 2:
@@ -104,15 +104,6 @@ Real uLid(const Real& t, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/
     return 0;
 }
 
-
-namespace LifeV
-{
-namespace
-{
-static bool regIF = (PRECFactory::instance().registerProduct( "Ifpack", &createIfpack ));
-static bool regML = (PRECFactory::instance().registerProduct( "ML", &createML ));
-}
-}
 
 int
 main( int argc, char** argv )
