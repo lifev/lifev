@@ -372,9 +372,9 @@ void BCManageNormal<MatrixType>::init(const BCBase& boundaryCondition,const Real
         if (boundaryCondition.mode()==Directional)
         {
             const BCFunctionDirectional* pBcF = static_cast<const BCFunctionDirectional*>( boundaryCondition.pointerToFunctor() );
-            Real nx(pBcF->vectFct(time,pId->x(),pId->y(),pId->z(),1));
-            Real ny(pBcF->vectFct(time,pId->x(),pId->y(),pId->z(),2));
-            Real nz(pBcF->vectFct(time,pId->x(),pId->y(),pId->z(),3));
+            Real nx(pBcF->vectFct(time,pId->x(),pId->y(),pId->z(),0));
+            Real ny(pBcF->vectFct(time,pId->x(),pId->y(),pId->z(),1));
+            Real nz(pBcF->vectFct(time,pId->x(),pId->y(),pId->z(),2));
 
             M_addVersor(boundaryCondition[i]->id(),nx,ny,nz);
         }
@@ -505,7 +505,7 @@ void BCManageNormal<MatrixType>::computeIntegratedNormals(const DOF& dof,Current
 
     VectorType repNormals(normals.map(), Repeated);
     //Loop on the Faces
-    for ( UInt iFace = 1; iFace<= mesh.numBElements(); ++iFace )
+    for ( UInt iFace = 0; iFace< mesh.numBElements(); ++iFace )
     {
         //Update the currentBdFE with the face data
         currentBdFE.updateMeasNormalQuadPt( mesh.bElement( iFace ) );
@@ -513,7 +513,7 @@ void BCManageNormal<MatrixType>::computeIntegratedNormals(const DOF& dof,Current
         UInt nDofF = currentBdFE.nbNode();
 
         //For each node on the face
-        for (UInt icheck = 1; icheck<= nDofF; ++icheck)
+        for (UInt icheck = 0; icheck< nDofF; ++icheck)
         {
             bool idFaceExist(false); //Is the face in the array?
             ID idf = dof.localToGlobalByFace(idFace,icheck,idFaceExist);
@@ -940,15 +940,15 @@ void BCManageNormal<MatrixType>::M_buildRotationMatrix(matrix_Type& systemMatrix
         id = MyGlobalElements[i];
 
         //The id must be smaller than M_numDof
-        if (id<=M_numDof)
+        if (id<M_numDof)
         {
             //...Except for the nodes where we make the rotation
             //Global Dof
-            //idDof = boundaryCondition( i ) ->id() + ( boundaryCondition.component( j ) - 1 ) * totalDof;
-            //i,j and k take values in [1,totalDof]
-            Indices[0] = id + offset - 1;
-            Indices[1] = id + M_numDof + offset - 1;
-            Indices[2] = id + 2 * M_numDof + offset - 1;
+            //idDof = boundaryCondition( i ) ->id() + boundaryCondition.component( j ) * totalDof;
+            //i,j and k take values in [0,totalDof)
+            Indices[0] = id + offset;
+            Indices[1] = id + M_numDof + offset;
+            Indices[2] = id + 2 * M_numDof + offset;
 
             cols.clear();
             cols.push_back(Indices[0]);

@@ -714,7 +714,7 @@ FESpace<MeshType, MapType>::interpolate( const function_Type& fct,
             {
                 // Store the nodal value
                 nodalValues[iterDof] =  fct(time,interpCFE.quadNode(iterDof,0),interpCFE.quadNode(iterDof,1)
-                                            ,interpCFE.quadNode(iterDof,2),iDim+1);
+                                            ,interpCFE.quadNode(iterDof,2),iDim);
             }
 
             // Transform the nodal values in FE values
@@ -811,7 +811,7 @@ FESpace<MeshType, MapType>::l2ScalarProduct( const function_Type& fct, vector_ty
 			z = this->fe().quadNode(iQuadPt,2);
         	for ( ic = 0; ic < M_fieldDim; ic++ )
 				{
-                f = fct( t, x, y, z, ic + 1 );
+                f = fct( t, x, y, z, ic );
                 u_ig = 0.;
                 for ( i = 0; i < this->fe().nbFEDof(); i++ )
                 {

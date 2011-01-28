@@ -137,7 +137,7 @@ public:
     */
     inline Real operator() ( const Real& t, const Real& x, const Real& y,
                              const Real& z, const ID& component ) const
-    { return M_userDefinedFunction( t, x, y, z, component + 1 ); }
+    { return M_userDefinedFunction( t, x, y, z, component ); }
 
     //@}
 
@@ -277,7 +277,7 @@ public:
     */
     Real coef( const Real& t, const Real& x, const Real& y,
                const Real& z, const ID& component ) const
-    { return M_robinBoundaryMassCoeffFunction(t, x, y, z, component + 1); }
+    { return M_robinBoundaryMassCoeffFunction(t, x, y, z, component); }
 
     //@}
 
@@ -400,7 +400,7 @@ public:
     */
     inline Real operator()(const Real& t, const Real& x, const Real& y,
                            const Real& z, const ID& component, const Real& feVectorEvaluatedInThisPoint ) const
-    { return M_userDefinedFunction( t, x, y, z, component + 1, feVectorEvaluatedInThisPoint ); }
+    { return M_userDefinedFunction( t, x, y, z, component, feVectorEvaluatedInThisPoint ); }
 
     //@}
 
@@ -540,7 +540,7 @@ public:
     */
     Real coef( const Real& t, const Real& x, const Real& y,
                const Real& z, const ID& component, const Real& feVectorEvaluatedInThisPoint ) const
-    { return M_robinBoundaryMassCoeffFunction(t, x, y, z, component + 1, feVectorEvaluatedInThisPoint); }
+    { return M_robinBoundaryMassCoeffFunction(t, x, y, z, component, feVectorEvaluatedInThisPoint); }
 
 
     ///@}
@@ -679,7 +679,7 @@ public:
     */
     inline Real vectFct( const Real& t, const Real& x, const Real& y,
                          const Real& z, const ID& component ) const
-    { return M_userDefinedVersorsFunction(t, x, y, z, component + 1); }
+    { return M_userDefinedVersorsFunction(t, x, y, z, component); }
 
     //@}
 

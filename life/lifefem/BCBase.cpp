@@ -91,9 +91,7 @@ BCBase::BCBase( const bcName_Type& name, const bcFlag_Type& flag,
         M_offset( -1 ),
         M_finalized( false )
 {
-	for(UInt i=0; i<M_components.size(); i++)
-		M_components[i]--;
-    if ( M_mode != Component )
+	if ( M_mode != Component )
     {
         ERROR_MSG( "BCBase::BCBase: You should use a more specific constructor for this mode" );
     }
@@ -208,9 +206,7 @@ BCBase::BCBase( const bcName_Type& name,
         M_offset( -1 ),
         M_finalized( false )
 {
-	for(UInt i=0; i<M_components.size(); i++)
-		M_components[i]--;
-    if ( mode != Component )
+	if ( mode != Component )
     {
         ERROR_MSG( "BCBase::BCBase: You should use a more specific constructor for this mode" );
     }
@@ -316,9 +312,7 @@ BCBase::BCBase( const bcName_Type&     name,
         M_isStored_BcFunctionVectorDependent(true),
         M_finalized( false )
 {
-	for(UInt i=0; i<M_components.size(); i++)
-		M_components[i]--;
-    if ( M_mode != Component )
+	if ( M_mode != Component )
     {
         ERROR_MSG( "BCBase::BCBase: You should use a more specific constructor for this mode" );
     }

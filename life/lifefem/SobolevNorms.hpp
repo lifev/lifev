@@ -126,7 +126,7 @@ elementaryFctL2NormSquare( boost::function<Real( Real, Real, Real, Real, UInt )>
 	    z = fe.quadNode(iQuadPt,2);
         for ( UInt iComp(0); iComp < nbComp; ++iComp )
         {
-            f = fct( t, x, y, z, iComp + 1 );
+            f = fct( t, x, y, z, iComp );
             sum += f * f * fe.weightDet( iQuadPt );
         }
     }
@@ -196,7 +196,7 @@ elementaryFctH1NormSquare( const FunctionType& fct, const CurrentFE& fe )
         sum2 = pow(fct( x, y, z ),2);
         for (UInt iCoor (0); iCoor < fe.nbCoor(); ++iCoor)
         {
-            sum2 += pow(fct.grad(iCoor+1, x,y,z), 2);
+            sum2 += pow(fct.grad(iCoor, x,y,z), 2);
         }
         sum += sum2 * fe.weightDet( iQuadPt );
     }
@@ -220,11 +220,11 @@ Real elementaryFctH1NormSquare( const FunctionType& fct, const CurrentFE& fe, co
 
         for ( UInt iComp = 0; iComp < nbComp; ++iComp )
         {
-            sum2 = pow(fct(t, x, y, z, iComp+1 ),2);
+            sum2 = pow(fct(t, x, y, z, iComp ),2);
 
             for (UInt iCoor = 0; iCoor < fe.nbCoor(); ++iCoor)
             {
-                sum2 += pow(fct.grad(iCoor+1, t,x,y,z, iComp+1),2);
+                sum2 += pow(fct.grad(iCoor, t,x,y,z, iComp),2);
             }
             sum += sum2 * fe.weightDet( iQuadPt );
         }
@@ -295,7 +295,7 @@ Real elementaryDifferenceL2NormSquare( VectorType & u,
                 UInt dofID = dof.localToGlobalMap( eleID, iDof ) + iComp * dof.numTotalDof();
                 uQuadPt += u( dofID ) * fe.phi( iDof, iQuadPt );
             }
-            diffQuadPt = uQuadPt - fct( t, x, y, z, iComp + 1 );
+            diffQuadPt = uQuadPt - fct( t, x, y, z, iComp );
             sum += diffQuadPt * diffQuadPt * fe.weightDet( iQuadPt );
         }
     }
@@ -388,12 +388,12 @@ Real elementaryDifferenceH1NormSquare( const VectorType & u, const UsrFct& fct, 
                 }
             }
 
-            diffQuadPt = uQuadPt - fct(t, x, y, z, iComp+1);
+            diffQuadPt = uQuadPt - fct(t, x, y, z, iComp);
 
             Vector diffGradQuadPt = graduQuadPt;
             for (UInt iCoor(0); iCoor < fe.nbCoor(); ++iCoor)
             {
-                diffGradQuadPt(iCoor) -= fct.grad(iCoor+1, t, x, y, z, iComp+1);
+                diffGradQuadPt(iCoor) -= fct.grad(iCoor, t, x, y, z, iComp);
             }
 
             sum2 = diffQuadPt*diffQuadPt;
@@ -431,7 +431,7 @@ Real elementaryDifferenceIntegral( VectorType & u,
         uQuadPt =0.0;
         for ( UInt iDof(0); iDof < fe.nbFEDof(); ++iDof )
         {
-            UInt dofID = dof.localToGlobalMap( eleID, iDof )+ (nbComp-1) * dof.numTotalDof();
+            UInt dofID = dof.localToGlobalMap( eleID, iDof )+ nbComp * dof.numTotalDof();
             uQuadPt += u( dofID ) * fe.phi( iDof, iQuadPt );
         }
         diffQuadPt = uQuadPt - fct( t, x, y, z, nbComp );
@@ -456,7 +456,7 @@ Real elementaryIntegral( VectorType & u,
 
         for ( UInt iDof(0); iDof < fe.nbFEDof(); ++iDof )
         {
-            UInt dofID = dof.localToGlobalMap( eleID, iDof ) + (component-1) * dof.numTotalDof();
+            UInt dofID = dof.localToGlobalMap( eleID, iDof ) + component * dof.numTotalDof();
             uQuadPt += u( dofID ) * fe.phi( iDof, iQuadPt );
         }
         sum += uQuadPt * fe.weightDet( iQuadPt );

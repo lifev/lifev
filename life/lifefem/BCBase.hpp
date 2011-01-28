@@ -331,10 +331,10 @@ public:
     //@{
     //! Returns the index of the component of the solution associated to the iComponent-th component prescribed in the boundary condition at hand
     /*!
-    	Example: the solution has 3 components and we prescribe a boundary condition on component 1 and 3.
-    	Then, component(2) returns 3, since 3 is the index of the 2nd BC prescribed.
+    	Example: the solution has 4 components and we prescribe a boundary condition on component 0 and 3.
+    	Then, component(1) returns 3, since 3 is the index of the 2nd BC prescribed.
 
-       @param iComponent the "local" component (from 1 to numberOfComponents)
+       @param iComponent the "local" component
        @return the index of the component of the solution associated to the iComponent-th component prescribed in the boundary condition at hand
      */
     ID component( const ID i ) const;
