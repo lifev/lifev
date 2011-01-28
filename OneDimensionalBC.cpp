@@ -52,22 +52,14 @@ namespace LifeV
 OneDimensionalBC::OneDimensionalBC( const bcSide_Type& bcSide ) :
         M_bcType                    (),
         M_bcSide                    ( bcSide ),
-        M_bcFunction                (),
-        M_isInternal                ( false ),
-        M_bcMatrix                  (),
-        M_bcRHS                     ()
+        M_bcFunction                ()
 {
-    M_bcMatrix[ OneDimensional::first ]  = container2D_Type();
-    M_bcMatrix[ OneDimensional::second ] = container2D_Type();
 }
 
 OneDimensionalBC::OneDimensionalBC( const OneDimensionalBC& bc ) :
         M_bcType                    ( bc.M_bcType ),
         M_bcSide                    ( bc.M_bcSide ),
-        M_bcFunction                ( bc.M_bcFunction ),
-        M_isInternal                ( bc.M_isInternal ),
-        M_bcMatrix                  ( bc.M_bcMatrix ),
-        M_bcRHS                     ( bc.M_bcRHS )
+        M_bcFunction                ( bc.M_bcFunction )
 {}
 
 // ===================================================
@@ -75,42 +67,64 @@ OneDimensionalBC::OneDimensionalBC( const OneDimensionalBC& bc ) :
 // ===================================================
 void
 OneDimensionalBC::applyBC( const Real& time, const Real& timeStep, const solution_Type& solution,
-                           const fluxPtr_Type& flux, container2D_Type& bc )
+                           const fluxPtr_Type& flux, vectorPtrContainer_Type& rhs )
 {
+    UInt iNode;
 
-#ifdef HAVE_LIFEV_DEBUG
-    ASSERT_PRE( bc.size() == 2, "applyBC works only for 2D vectors");
-
-    if ( M_isInternal )
-        Debug(6311) << "[OneDimensionalModel_BC::compute_resBC] found internal boundary\n";
-    else
+#ifdef GHOSTNODE
+    ( M_bcSide == OneDimensional::left ) ? iNode = 1 : iNode = flux->physics()->data()->numberOfNodes() - 2;
+#else
+    ( M_bcSide == OneDimensional::left ) ? iNode = 0 : iNode = flux->physics()->data()->numberOfNodes() - 1;
 #endif
+
+    container2D_Type boundaryU;
+    boundaryU[0] = (*solution.find("A")->second)(iNode + 1);
+    boundaryU[1] = (*solution.find("Q")->second)(iNode + 1);
+
+    // Eigenvalues and eigenvectors of the jacobian diffFlux (= dF/dU = H)
+    container2D_Type eigenvalues;
+    container2D_Type leftEigenvector1, leftEigenvector2;
+
+    flux->eigenValuesEigenVectors( boundaryU[0], boundaryU[1],
+                                   eigenvalues, leftEigenvector1, leftEigenvector2, iNode );
+
+    std::map<bcLine_Type, container2D_Type> bcMatrix;
+    bcMatrix[ OneDimensional::first ]  = container2D_Type();
+    bcMatrix[ OneDimensional::second ] = container2D_Type();
+
+    container2D_Type bcRHS;
+
+    // First line of Matrix and RHS
+    computeMatrixAndRHS( time, timeStep, flux, OneDimensional::first,
+                         leftEigenvector1, leftEigenvector2, iNode, bcMatrix, bcRHS[0] );
+
+    // Second line of Matrix and RHS
+    computeMatrixAndRHS( time, timeStep, flux, OneDimensional::second,
+                         leftEigenvector1, leftEigenvector2, iNode, bcMatrix, bcRHS[1] );
+
+
+    container2D_Type bc = solveLinearSystem( bcMatrix[OneDimensional::first], bcMatrix[OneDimensional::second], bcRHS );
+
+    // Set the BC in the RHS
+    (*rhs[0])( iNode + 1 ) = bc[0];
+    (*rhs[1])( iNode + 1 ) = bc[1];
+
+#ifdef GHOSTNODE
+    // BC for the ghost nodes
+    if ( M_bcSide == OneDimensional::left )
     {
-        UInt dof;
-        ( M_bcSide == OneDimensional::left ) ? dof = 0 : dof = flux->physics()->data()->numberOfNodes() - 1;
-
-        container2D_Type boundaryU;
-        boundaryU[0] = (*solution.find("A")->second)(dof + 1);
-        boundaryU[1] = (*solution.find("Q")->second)(dof + 1);
-
-        // Eigenvalues and eigenvectors of the jacobian diffFlux (= dF/dU = H)
-        container2D_Type eigenvalues;
-        container2D_Type leftEigenvector1, leftEigenvector2;
-
-        flux->eigenValuesEigenVectors( boundaryU[0], boundaryU[1],
-                                       eigenvalues, leftEigenvector1, leftEigenvector2, dof );
-
-        computeMatrixAndRHS( time, timeStep, flux, OneDimensional::first,
-                             leftEigenvector1, leftEigenvector2, dof, M_bcRHS[0]);
-
-        computeMatrixAndRHS( time, timeStep, flux, OneDimensional::second,
-                             leftEigenvector1, leftEigenvector2, dof, M_bcRHS[1]);
-
-        bc = solveLinearSystem( M_bcMatrix[OneDimensional::first], M_bcMatrix[OneDimensional::second], M_bcRHS );
+        (*rhs[0])( iNode ) = 0;
+        (*rhs[1])( iNode ) = 0;
     }
+    else
+    {
+        (*rhs[0])( iNode + 2) = 0;
+        (*rhs[1])( iNode + 2) = 0;
+    }
+#endif
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug(6311) << "[OneDimensionalModel_BC::applyBC] on bcSide " << M_bcSide << " imposing [ A, Q ] = [ " << bc[0] << ", " << bc[1] << " ]\n";
+    Debug(6311) << "[OneDimensionalBC::applyBC] on bcSide " << M_bcSide << " imposing [ A, Q ] = [ " << bc[0] << ", " << bc[1] << " ]\n";
 #endif
 }
 
@@ -120,7 +134,7 @@ OneDimensionalBC::applyBC( const Real& time, const Real& timeStep, const solutio
 void
 OneDimensionalBC::computeMatrixAndRHS( const Real& time, const Real& timeStep, const fluxPtr_Type& flux, const bcLine_Type& line,
                                        const container2D_Type& leftEigenvector1, const container2D_Type& leftEigenvector2,
-                                       const UInt& dof, Real& rhs )
+                                       const UInt& iNode, std::map<bcLine_Type, container2D_Type>& bcMatrix, Real& bcRHS )
 {
     // This is not general (typical situation):
     //     on first line,  left boundary,  I impose W1
@@ -130,41 +144,38 @@ OneDimensionalBC::computeMatrixAndRHS( const Real& time, const Real& timeStep, c
     // The code does not check for coherence (you cannot impose the same variable on both lines!)
 
     // Compute Matrix & RHS
-    rhs = M_bcFunction[ line ](time, timeStep);
+    bcRHS = M_bcFunction[ line ](time, timeStep);
     switch ( M_bcType[line] )
     {
     case OneDimensional::W1:
-        M_bcMatrix[line] = leftEigenvector1;
+        bcMatrix[line] = leftEigenvector1;
         break;
     case OneDimensional::W2:
-        M_bcMatrix[line] = leftEigenvector2;
+        bcMatrix[line] = leftEigenvector2;
         break;
     case OneDimensional::A:
-        M_bcMatrix[line][0] = 1.;
-        M_bcMatrix[line][1] = 0.;
+        bcMatrix[line][0] = 1.;
+        bcMatrix[line][1] = 0.;
         break;
     case OneDimensional::P:
-        rhs = flux->physics()->fromPToA( rhs, dof );
-        M_bcMatrix[line][0] = 1.;
-        M_bcMatrix[line][1] = 0.;
+        bcRHS = flux->physics()->fromPToA( bcRHS, timeStep, iNode );
+        bcMatrix[line][0] = 1.;
+        bcMatrix[line][1] = 0.;
         break;
     case OneDimensional::Q:
         // Flow rate is positive with respect to the outgoing normal
         if ( M_bcSide == OneDimensional::left )
-            rhs *= -1;
-        M_bcMatrix[line][0] = 0.;
-        M_bcMatrix[line][1] = 1.;
+            bcRHS *= -1;
+        bcMatrix[line][0] = 0.;
+        bcMatrix[line][1] = 1.;
         break;
     default:
-        std::cout << "\n[OneDimensionalModel_BC::compute_resBC] Wrong boundary variable as " << line
-                  << " condition on bcSide " << M_bcSide;
+        std::cout << "\n[OneDimensionalBC::computeMatrixAndRHS] Wrong boundary variable as " << line << " condition on bcSide " << M_bcSide;
     }
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug(6311) << "[OneDimensionalModel_BC::compute_MatrixAndRHS] to impose variable "
-    << M_bcType[line] << ", " << line << " line = "
-    << M_bcMatrix[line][0] << ", "
-    << M_bcMatrix[line][1] << "\n";
+    Debug(6311) << "[OneDimensionalBC::computeMatrixAndRHS] to impose variable "
+    << M_bcType[line] << ", " << line << " line = " << bcMatrix[line][0] << ", " << bcMatrix[line][1] << "\n";
 #endif
 }
 
@@ -175,7 +186,7 @@ OneDimensionalBC::solveLinearSystem( const container2D_Type& line1,
 {
 #ifdef HAVE_LIFEV_DEBUG
     ASSERT_PRE( line1.size() == 2 && line2.size() == 2 && rhs.size() == 2,
-                "_solveLinearSyst2x2 works only for 2D vectors");
+                "OneDimensionalBC::solveLinearSystem works only for 2D vectors");
 #endif
 
     Real determinant = line1[0] * line2[1] - line1[1] * line2[0];

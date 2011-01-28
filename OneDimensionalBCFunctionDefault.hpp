@@ -80,6 +80,7 @@ public:
     typedef SolverAmesos                            linearSolver_Type;
     typedef linearSolver_Type::vector_type          vector_Type;
     typedef boost::shared_ptr< vector_Type >        vectorPtr_Type;
+    typedef boost::array< vectorPtr_Type, 2 >       vectorPtrContainer_Type;
 
     typedef std::map< std::string, vectorPtr_Type > solution_Type;
     typedef boost::shared_ptr< solution_Type >      solutionPtr_Type;
@@ -120,9 +121,17 @@ public:
     //! @name Set Methods
     //@{
 
+    void setFluxSource( const fluxPtr_Type& flux, const sourcePtr_Type& source );
+
     void setSolution( const solutionPtr_Type& solution ) { M_solution = solution; }
 
-    void setFluxSource( const fluxPtr_Type& flux, const sourcePtr_Type& source );
+#ifdef GHOSTNODE
+    // Set the system residual that is required by the ghost node implementation
+    /*
+     * @param rhs system residual
+     */
+    void setSystemResidual( const vectorPtrContainer_Type& systemResidual );
+#endif
 
     //@}
 
@@ -138,7 +147,10 @@ protected:
     fluxPtr_Type                             M_flux;
     sourcePtr_Type                           M_source;
     solutionPtr_Type                         M_solution;
-
+#ifdef GHOSTNODE
+    vectorPtrContainer_Type                  M_systemResidual;
+#endif
+    
     UInt                                     M_bcNode;
     bcSide_Type                              M_bcSide;
     bcType_Type                              M_bcType;

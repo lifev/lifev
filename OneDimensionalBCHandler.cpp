@@ -93,24 +93,10 @@ OneDimensionalBCHandler::OneDimensionalBCHandler( const OneDimensionalBCHandler&
 // Methods
 // ===================================================
 void
-OneDimensionalBCHandler::applyBC( const Real& time, const Real& timeStep, const solution_Type& solution, const fluxPtr_Type& flux,
-                                        container2D_Type& leftBC, container2D_Type& rightBC )
+OneDimensionalBCHandler::applyBC( const Real& time, const Real& timeStep, const solution_Type& solution, const fluxPtr_Type& flux, vectorPtrContainer_Type& rhs )
 {
-#ifdef HAVE_LIFEV_DEBUG
-    ASSERT_PRE( leftBC.size() == 2 && rightBC.size() == 2, "applyBC works only for 2D vectors" );
-#endif
-
-    M_boundary[ OneDimensional::left  ]->applyBC( time, timeStep, solution, flux, leftBC  );
-    M_boundary[ OneDimensional::right ]->applyBC( time, timeStep, solution, flux, rightBC );
-
-#ifdef HAVE_LIFEV_DEBUG
-    Debug(6311) << "[OneDimensionalModel_BCHandler::applyBC] at left "
-    << " imposing [ A, Q ] = [ " << leftBC[0]
-    << ", " << leftBC[1] << " ]\n";
-    Debug(6311) << "[OneDimensionalModel_BCHandler::applyBC] at right "
-    << " imposing [ A, Q ] = [ " << rightBC[0]
-    << ", " << rightBC[1] << " ]\n";
-#endif
+    M_boundary[ OneDimensional::left  ]->applyBC( time, timeStep, solution, flux, rhs );
+    M_boundary[ OneDimensional::right ]->applyBC( time, timeStep, solution, flux, rhs );
 }
 
 // ===================================================
@@ -118,11 +104,11 @@ OneDimensionalBCHandler::applyBC( const Real& time, const Real& timeStep, const 
 // ===================================================
 void
 OneDimensionalBCHandler::setBC( const bcSide_Type& bcSide, const bcLine_Type& bcLine,
-                                const bcType_Type& bcType, const bcFunction_Type& BCfunction )
+                                const bcType_Type& bcType, const bcFunction_Type& bcFunction )
 {
     M_boundarySet[bcSide][bcLine] = true;
     M_boundary[bcSide]->setType( bcLine, bcType );
-    M_boundary[bcSide]->setBCFunction( bcLine, BCfunction );
+    M_boundary[bcSide]->setBCFunction( bcLine, bcFunction );
 
 #ifdef HAVE_LIFEV_DEBUG
     Debug( 6311 ) << "[OneDimensionalModel_BCHandler::setBC] imposing function at "
@@ -207,17 +193,26 @@ OneDimensionalBCHandler::setDefaultBC()
 }
 
 void
+OneDimensionalBCHandler::setFluxSource( const fluxPtr_Type& flux, const sourcePtr_Type& source )
+{
+    for ( std::vector < bcFunctionDefaultPtr_Type >::const_iterator i = M_defaultFunctions.begin() ; i < M_defaultFunctions.end() ; ++i )
+        ( *i )->setFluxSource( flux, source );
+}
+
+void
 OneDimensionalBCHandler::setSolution( const solutionPtr_Type& solution )
 {
     for ( std::vector < bcFunctionDefaultPtr_Type >::const_iterator i = M_defaultFunctions.begin() ; i < M_defaultFunctions.end() ; ++i )
         ( *i )->setSolution( solution );
 }
 
+#ifdef GHOSTNODE
 void
-OneDimensionalBCHandler::setFluxSource( const fluxPtr_Type& flux, const sourcePtr_Type& source )
+OneDimensionalBCHandler::setSystemResidual( const vectorPtrContainer_Type& systemResidual )
 {
     for ( std::vector < bcFunctionDefaultPtr_Type >::const_iterator i = M_defaultFunctions.begin() ; i < M_defaultFunctions.end() ; ++i )
-        ( *i )->setFluxSource( flux, source );
+        ( *i )->setSystemResidual( systemResidual );
 }
+#endif
 
 }

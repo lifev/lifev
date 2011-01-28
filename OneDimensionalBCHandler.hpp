@@ -74,7 +74,7 @@ public:
     typedef bc_Type::solution_Type              solution_Type;
     typedef bc_Type::solutionPtr_Type           solutionPtr_Type;
 
-    typedef bc_Type::container2D_Type           container2D_Type;
+    typedef bc_Type::vectorPtrContainer_Type    vectorPtrContainer_Type;
 
     typedef bc_Type::bcLine_Type                bcLine_Type;
     typedef bc_Type::bcSide_Type                bcSide_Type;
@@ -93,7 +93,7 @@ public:
     /*!
      * @param BCH OneDimensionalBCHandler
      */
-    explicit OneDimensionalBCHandler( const OneDimensionalBCHandler& BCH );
+    explicit OneDimensionalBCHandler( const OneDimensionalBCHandler& bcHandler );
 
     //! Destructor
     virtual ~OneDimensionalBCHandler() {}
@@ -105,7 +105,7 @@ public:
     //@{
 
     //! Apply boundary conditions
-    void applyBC( const Real& time, const Real& timeStep, const solution_Type& solution, const fluxPtr_Type& flux, container2D_Type& leftBC, container2D_Type& rightBC );
+    void applyBC( const Real& time, const Real& timeStep, const solution_Type& solution, const fluxPtr_Type& flux, vectorPtrContainer_Type& rhs );
 
     //@}
 
@@ -113,15 +113,21 @@ public:
     //! @name Set Methods
     //@{
 
-    void setBC( const bcSide_Type& bcSide, const bcLine_Type& line, const bcType_Type& bcType, const bcFunction_Type& BCfunction );
+    void setBC( const bcSide_Type& bcSide, const bcLine_Type& line, const bcType_Type& bcType, const bcFunction_Type& bcFunction );
 
     void setDefaultBC();
 
-    void setSolution( const solutionPtr_Type& solution );
-
     void setFluxSource( const fluxPtr_Type& flux, const sourcePtr_Type& source );
 
-    void setInternalNode( const bcSide_Type& bcSide ) { M_boundary[bcSide]->setInternalFlag( true ); }
+    void setSolution( const solutionPtr_Type& solution );
+
+#ifdef GHOSTNODE
+    // Set the system residual that is required by the ghost node implementation
+    /*
+     * @param rhs system residual
+     */
+    void setSystemResidual( const vectorPtrContainer_Type& systemResidual );
+#endif
 
     //@}
 

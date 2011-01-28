@@ -74,6 +74,7 @@ public:
     typedef bcFunctionDefault_Type::solutionPtr_Type     solutionPtr_Type;
 
     typedef bcFunctionDefault_Type::container2D_Type     container2D_Type;
+    typedef bcFunctionDefault_Type::vectorPtrContainer_Type vectorPtrContainer_Type;
 
     typedef bcFunctionDefault_Type::bcLine_Type          bcLine_Type;
     typedef bcFunctionDefault_Type::bcSide_Type          bcSide_Type;
@@ -104,7 +105,7 @@ public:
     //@{
 
     //! Apply boundary conditions
-    void applyBC( const Real& time, const Real& timeStep, const solution_Type& solution, const fluxPtr_Type& flux, container2D_Type& BC );
+    void applyBC( const Real& time, const Real& timeStep, const solution_Type& solution, const fluxPtr_Type& flux, vectorPtrContainer_Type& rhs );
 
     //@}
 
@@ -116,8 +117,6 @@ public:
 
     void setBCFunction( const bcLine_Type& bcLine, const bcFunction_Type& rhs ) { M_bcFunction[bcLine] = rhs; }
 
-    void setInternalFlag( const bool& bcFlag ) { M_isInternal = bcFlag; }
-
     //@}
 
 
@@ -127,8 +126,6 @@ public:
     const bcType_Type& type( const bcLine_Type& bcLine ) { return M_bcType[bcLine]; }
 
     bcFunction_Type& bcFunction( const bcLine_Type& bcLine ) { return M_bcFunction[bcLine]; }
-
-    const bool& isInternal() { return M_isInternal; }
 
     //@}
 
@@ -148,7 +145,7 @@ private:
     //! Compute the matrix and the RHS for the BC 2x2 linear system
     void computeMatrixAndRHS( const Real& time, const Real& timeStep, const fluxPtr_Type& flux, const bcLine_Type& bcLine,
                               const container2D_Type& leftEigenvector1, const container2D_Type& leftEigenvector2,
-                              const UInt& dof, Real& rhs );
+                              const UInt& dof, std::map<bcLine_Type, container2D_Type>& bcMatrix, Real& bcRHS );
 
     //! Solve a 2x2 linear system by the Cramer method (for the boundary systems)
     /*!
@@ -166,12 +163,6 @@ private:
     bcSide_Type                                   M_bcSide;
 
     std::map<bcLine_Type, bcFunction_Type>        M_bcFunction;
-
-    bool                                          M_isInternal;
-
-    std::map<bcLine_Type, container2D_Type>       M_bcMatrix;
-
-    container2D_Type                              M_bcRHS;
 };
 
 }
