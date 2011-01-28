@@ -76,8 +76,6 @@ along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
 namespace LifeV
 {
 
-const int hdf5Offset = 0;
-
 //! Hdf5 data exporter, implementation of Exporter
 /*!
   @author Simone Deparis <simone.deparis@epfl.ch>
@@ -698,7 +696,7 @@ void ExporterHDF5<MeshType>::writeTopology  ( std::ofstream& xdmf )
          << this->M_mesh->numGlobalElements()
          << "\"\n"
          << "         BaseOffset=\""
-         << hdf5Offset
+         << 0
          << "\">\n"
          << "         <DataStructure Format=\"HDF\"\n"
          << "                        Dimensions=\""
@@ -987,7 +985,7 @@ void ExporterHDF5<MeshType>::writeGeometry()
         UInt lid=i*numberOfPoints;
         for (ID j=0; j< numberOfPoints; ++j, ++lid)
         {
-            connections[lid] = element.point(j).id()+hdf5Offset;
+            connections[lid] = element.point(j).id();
         }
     }
 
