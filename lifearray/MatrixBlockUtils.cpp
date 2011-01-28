@@ -150,6 +150,8 @@ void createDiagBlock ( const MatrixBlockView& srcBlock,
     // BLOCK PTR TEST
     // ZERO ON DIAGONAL TEST
 
+    int indexBase(1.0);
+
     // Processor informations
     int  numSrcElements    = srcBlock.getMatrixPtr()->RowMap().NumMyElements();
     int* srcGlobalElements = srcBlock.getMatrixPtr()->RowMap().MyGlobalElements();
@@ -172,7 +174,7 @@ void createDiagBlock ( const MatrixBlockView& srcBlock,
         srcRowElement = srcGlobalElements[i];
 
         // Test if the rows are in the source block
-        if((srcRowElement>=srcBlock.firstRowIndex()) && (srcRowElement<=srcBlock.lastRowIndex()))
+        if((srcRowElement>=srcBlock.firstRowIndex()+indexBase) && (srcRowElement<=srcBlock.lastRowIndex()+indexBase))
         {
             // Get the data of the row
             srcRow = srcBlock.getMatrixPtr()->LRID(srcRowElement);
@@ -210,6 +212,8 @@ void createInvDiagBlock ( const MatrixBlockView& srcBlock,
     // BLOCK PTR TEST
     // ZERO ON DIAGONAL TEST
 
+    int indexBase(1.0);
+
     // Processor informations
     int  numSrcElements    = srcBlock.getMatrixPtr()->RowMap().NumMyElements();
     int* srcGlobalElements = srcBlock.getMatrixPtr()->RowMap().MyGlobalElements();
@@ -232,7 +236,7 @@ void createInvDiagBlock ( const MatrixBlockView& srcBlock,
         srcRowElement = srcGlobalElements[i];
 
         // Test if the rows are in the source block
-        if((srcRowElement>=srcBlock.firstRowIndex()) && (srcRowElement<=srcBlock.lastRowIndex()))
+        if((srcRowElement>=srcBlock.firstRowIndex()+indexBase) && (srcRowElement<=srcBlock.lastRowIndex()+indexBase))
         {
             // Get the data of the row
             srcRow = srcBlock.getMatrixPtr()->LRID(srcRowElement);
@@ -395,6 +399,8 @@ void createLumpedBlock ( const MatrixBlockView& srcBlock,
     // BLOCK COMPATIBILITY TEST
     // BLOCK PTR TEST
 
+    int indexBase(1.0);
+
     // Processor informations
     int  numSrcElements    = srcBlock.getMatrixPtr()->RowMap().NumMyElements();
     int* srcGlobalElements = srcBlock.getMatrixPtr()->RowMap().MyGlobalElements();
@@ -417,7 +423,7 @@ void createLumpedBlock ( const MatrixBlockView& srcBlock,
         srcRowElement = srcGlobalElements[i];
 
         // Test if the rows are in the source block
-        if((srcRowElement>=srcBlock.firstRowIndex()) && (srcRowElement<=srcBlock.lastRowIndex()))
+        if((srcRowElement>=srcBlock.firstRowIndex()+indexBase) && (srcRowElement<=srcBlock.lastRowIndex()+indexBase))
         {
             // Get the data of the row
             srcRow = srcBlock.getMatrixPtr()->LRID(srcRowElement);
@@ -432,8 +438,8 @@ void createLumpedBlock ( const MatrixBlockView& srcBlock,
                 srcGlobalIndex = srcBlock.getMatrixPtr()->GCID(srcIndices[j]);
 
                 // Test if the coefficient is in the block
-                if((srcGlobalIndex>=srcBlock.firstColumnIndex()) &&
-                   (srcGlobalIndex<=srcBlock.lastColumnIndex()))
+                if((srcGlobalIndex>=srcBlock.firstColumnIndex()+indexBase) &&
+                   (srcGlobalIndex<=srcBlock.lastColumnIndex()+indexBase))
                 {
                     srcBlockRowSum += abs(srcValues[j]);
                 }
