@@ -43,7 +43,7 @@
 #define MultiscaleModel1D_H 1
 
 // Jacobian coefficient approximation
-//#define JACOBIAN_WITH_FINITEDIFFERENCE
+#define JACOBIAN_WITH_FINITEDIFFERENCE
 #ifdef JACOBIAN_WITH_FINITEDIFFERENCE
 //#define JACOBIAN_WITH_FINITEDIFFERENCE_AREA
 #endif
