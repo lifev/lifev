@@ -64,6 +64,9 @@ public :
     typedef OneDimensionalData                    data_Type;
     typedef boost::shared_ptr< data_Type >        dataPtr_Type;
 
+    typedef VectorEpetra                          vector_Type;
+    typedef boost::shared_ptr< vector_Type >      vectorPtr_Type;
+
     //@}
 
 
@@ -71,9 +74,9 @@ public :
     //@{
 
     //! Constructor
-    explicit OneDimensionalPhysics() : M_data () {}
+    explicit OneDimensionalPhysics() : M_data(), M_area_tn() {}
 
-    explicit OneDimensionalPhysics( const dataPtr_Type data ) : M_data ( data ) {}
+    explicit OneDimensionalPhysics( const dataPtr_Type data ) : M_data ( data ), M_area_tn() {}
 
     //! Destructor
     virtual ~OneDimensionalPhysics() {}
@@ -104,7 +107,7 @@ public :
      *  To be used in initialization, when time derivative of A is supposed null
      *  @return A = A0 * ( (P - Pext) / beta0 + 1 )^(1/beta1)
      */
-    Real fromPToA( const Real& P, const UInt& iNode ) const;
+    Real fromPToA( const Real& P, const Real& timeStep, const UInt& iNode ) const;
 
     //@}
 
@@ -116,28 +119,40 @@ public :
     /*!
      * @return dA(t)/dt
      */
-    Real dAdt( const Real& Anp1, const Real& An, const Real& Anm1, const Real& timeStep ) const;
+    Real dAdt( const Real& Anp1, const Real& timeStep, const UInt& iNode ) const;
 
     //! Compute the derivative of pressure with respect to W1 and W2
     virtual Real dPdW( const Real& W1, const Real& W2, const ID& i, const UInt& iNode ) const = 0;
+
+    //! Compute the derivative of the pressure with respect to A
+    /*!
+     * @return dP(A)/dA = dPelastic(A)/dA + dPviscoelastic(A)/dA
+     */
+    Real dPdA( const Real& A, const Real& timeStep, const UInt& iNode ) const;
 
     //! Compute the derivative of the elastic pressure with respect to A
     /*!
      * @return dP(A)/dA = beta1 * beta0 * ( A / Area0 )^beta1 / A
      */
-    Real dPdA( const Real& A, const UInt& iNode ) const;
+    Real dPdAelastic( const Real& A, const UInt& iNode ) const;
+
+    //! Compute the derivative of the viscoelastic pressure with respect to A
+    /*!
+     * @return dP(A)/dA = gamma / ( A^(3/2) ) * ( 1 / deltaT - 3 * dA/dT / ( 2 * A ) )
+     */
+    Real dPdAviscoelastic( const Real& A, const Real& timeStep, const UInt& iNode ) const;
 
     //! Compute the derivative of the elastic pressure with respect to A
     /*!
      * @return dA(A)/dP = A0 / ( beta0 * beta1 ) * ( 1 + ( P - Pext )/ beta0 )^(1/beta1 - 1)
      */
-    Real dAdP( const Real& P, const UInt& iNode ) const;
+    Real dAdP( const Real& P, const Real& timeStep, const UInt& iNode ) const;
 
     //! Compute the derivative of total pressure (P is the elastic pressure) with respect to A and Q.
     /*!
      * @return dPt/dU_ii = dP/dU_ii + rho/2 * d(Q/A)^2/dU_ii
      */
-    Real dPTdU( const Real& A, const Real& Q, const ID& id,  const UInt& iNode ) const;
+    Real dPTdU( const Real& A, const Real& Q, const Real& timeStep, const ID& id, const UInt& iNode ) const;
 
     //@}
 
@@ -146,6 +161,13 @@ public :
     //@{
 
     Real celerity0( const UInt& iNode ) const;
+
+    //! Compute the pressure.
+    /*!
+     * Includes the contribution of the external, elastic and viscoelastic pressure.
+     * @return P = beta0 * ( ( A / Area0 )^beta1 - 1 ) + Pext
+     */
+    Real pressure( const Real& A, const Real& timeStep, const UInt& iNode ) const;
 
     //! Compute the elastic pressure.
     /*!
@@ -158,7 +180,7 @@ public :
     /*!
      * @return P = gamma * 1/(2*sqrt(pi*A)) * dA / dt
      */
-    Real viscoelasticPressure( const Real& Anp1, const Real& An, const Real& Anm1, const Real& timeStep, const UInt& iNode ) const;
+    Real viscoelasticPressure( const Real& A, const Real& timeStep, const UInt& iNode ) const;
 
     //! Compute the total pressure (P is the elastic pressure)
     /*!
@@ -202,6 +224,8 @@ public :
 
     void setData( const dataPtr_Type& data ) { M_data = data; }
 
+    void setArea_tn( const vector_Type& area_tn ) { M_area_tn.reset( new vector_Type ( area_tn ) ); }
+
     //@}
 
     //! @name Get Methods
@@ -215,7 +239,6 @@ protected:
 
     dataPtr_Type                      M_data;
 
-
 private:
 
     //! @name Unimplemented Methods
@@ -224,51 +247,88 @@ private:
     OneDimensionalPhysics& operator=( const dataPtr_Type data );
 
     //@}
+
+    vectorPtr_Type                    M_area_tn;
 };
 
 // ===================================================
 // Inline conversion methods
 // ===================================================
 inline Real
-OneDimensionalPhysics::fromPToA( const Real& P, const UInt& iNode ) const
+OneDimensionalPhysics::fromPToA( const Real& P, const Real& timeStep, const UInt& iNode ) const
 {
-    return ( M_data->area0( iNode ) * OneDimensional::pow20( ( P - M_data->externalPressure() ) / M_data->beta0( iNode ) + 1, 1 / M_data->beta1( iNode ) )  );
+    if ( M_data->viscoelasticWall() )
+    {
+        // Newton method to solve the non linear equation
+        Real tolerance(1e-8);
+        Real maxIT(100);
+        UInt i(0);
+
+        Real A( M_data->area0( iNode ) );
+        for ( ; i < maxIT ; ++i )
+        {
+            if ( std::abs( pressure( A, timeStep, iNode ) - P ) < tolerance )
+                break;
+            A -= ( pressure( A, timeStep, iNode ) - P ) / dPdA( A, timeStep, iNode );
+        }
+        if ( i == maxIT )
+            std::cout << "!!! Warning: conversion fromPToA below tolerance !!! " << std::endl;
+
+        return A;
+    }
+    else
+        return ( M_data->area0( iNode ) * OneDimensional::pow20( ( P - M_data->externalPressure() ) / M_data->beta0( iNode ) + 1, 1 / M_data->beta1( iNode ) )  );
 }
 
 // ===================================================
 // Inline derivatives methods
 // ===================================================
 inline Real
-OneDimensionalPhysics::dAdt( const Real& Anp1, const Real& An, const Real& Anm1, const Real& timeStep ) const
+OneDimensionalPhysics::dAdt( const Real& Anp1, const Real& timeStep, const UInt& iNode ) const
 {
-    if ( M_data->dPdtSteps() == 0 )
-        return ( Anp1 - An ) / timeStep;
-    else
-        return ( 3 / 2 * Anp1 - 2 * An + 1 / 2 * Anm1 ) / timeStep;
+    return ( Anp1 - (*M_area_tn)[iNode+1] ) / timeStep;
 }
 
 inline Real
-OneDimensionalPhysics::dPdA( const Real& A, const UInt& iNode ) const
+OneDimensionalPhysics::dPdA( const Real& A, const Real& timeStep, const UInt& iNode ) const
+{
+    return dPdAelastic( A, iNode ) + dPdAviscoelastic( A, timeStep, iNode );
+}
+
+inline Real
+OneDimensionalPhysics::dPdAelastic( const Real& A, const UInt& iNode ) const
 {
     return M_data->beta0( iNode ) * M_data->beta1( iNode ) * OneDimensional::pow05( A / M_data->area0( iNode ), M_data->beta1( iNode ) ) / A;
 }
 
 inline Real
-OneDimensionalPhysics::dAdP( const Real& P, const UInt& iNode ) const
+OneDimensionalPhysics::dPdAviscoelastic( const Real& A, const Real& timeStep, const UInt& iNode ) const
 {
-    return M_data->area0( iNode ) / ( M_data->beta0( iNode ) * M_data->beta1( iNode ) )
-                                * OneDimensional::pow10( 1 + ( P - M_data->externalPressure() )
-                                / M_data->beta0( iNode ), 1 / M_data->beta1( iNode ) - 1 );
+    return M_data->viscoelasticCoefficient( iNode ) / ( A * std::sqrt( A ) ) * ( 1 / timeStep - 3 * dAdt( A, timeStep, iNode ) / ( 2 * A ) );
 }
 
 inline Real
-OneDimensionalPhysics::dPTdU( const Real& A, const Real& Q, const ID& id, const UInt& iNode ) const
+OneDimensionalPhysics::dAdP( const Real& P, const Real& timeStep, const UInt& iNode ) const
+{
+    if ( M_data->viscoelasticWall() )
+    {
+        // Finite difference approach
+        return ( fromPToA( P + M_data->jacobianPerturbationPressure(), timeStep, iNode ) - fromPToA( P, timeStep, iNode ) ) / M_data->jacobianPerturbationPressure();
+    }
+    else
+        return M_data->area0( iNode ) / ( M_data->beta0( iNode ) * M_data->beta1( iNode ) )
+                                      * OneDimensional::pow10( 1 + ( P - M_data->externalPressure() )
+                                      / M_data->beta0( iNode ), 1 / M_data->beta1( iNode ) - 1 );
+}
+
+inline Real
+OneDimensionalPhysics::dPTdU( const Real& A, const Real& Q, const Real& timeStep, const ID& id, const UInt& iNode ) const
 {
     if ( id == 1 ) // dPt/dA
-        return dPdA( A, iNode ) - M_data->densityRho() * Q * Q / ( A * A * A );
+        return dPdA( A, timeStep, iNode ) - M_data->densityRho() * Q * Q / ( A * A * A );
 
     if ( id == 2 ) // dPt/dQ
-        return M_data->densityRho() * Q / ( A * A);
+        return M_data->densityRho() * Q / ( A * A );
 
     ERROR_MSG("Total pressure's differential function has only 2 components.");
     return -1.;
@@ -284,19 +344,24 @@ OneDimensionalPhysics::celerity0( const UInt& iNode ) const
 }
 
 inline Real
+OneDimensionalPhysics::pressure( const Real& A, const Real& timeStep, const UInt& iNode ) const
+{
+    return elasticPressure( A, iNode ) + viscoelasticPressure( A, timeStep, iNode );
+}
+
+inline Real
 OneDimensionalPhysics::elasticPressure( const Real& A, const UInt& iNode ) const
 {
     return ( M_data->beta0( iNode ) * ( OneDimensional::pow05( A/M_data->area0( iNode ), M_data->beta1( iNode ) ) - 1 ) ) + M_data->externalPressure();
 }
 
 inline Real
-OneDimensionalPhysics::viscoelasticPressure( const Real& Anp1, const Real& An, const Real& Anm1, const Real& timeStep, const UInt& iNode ) const
+OneDimensionalPhysics::viscoelasticPressure( const Real& A, const Real& timeStep, const UInt& iNode ) const
 {
-    Real area(Anp1);
-    if ( M_data->linearizeStringModel() )
-        area = M_data->area0( iNode );
-
-    return M_data->viscoelasticModulus() / ( 2*std::sqrt( M_PI * area ) ) * dAdt(Anp1, An, Anm1, timeStep);
+    if ( M_data->viscoelasticWall() )
+        return M_data->viscoelasticCoefficient( iNode ) / ( A * std::sqrt( A ) ) * dAdt( A, timeStep, iNode );
+    else
+        return 0.;
 }
 
 inline Real
