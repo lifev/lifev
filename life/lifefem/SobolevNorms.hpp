@@ -407,13 +407,13 @@ Real elementaryDifferenceH1NormSquare( const VectorType & u, const UsrFct& fct, 
     return sum;
 }
 
-//! returns the integral of (u-fct) on the current element
+//! returns the integral of (u-fct) of u on the current element
 //! for time dependent+vectorial
 template <typename VectorType>
 Real elementaryDifferenceIntegral( VectorType & u,
                          boost::function<Real( Real, Real, Real, Real, UInt )> fct,
                          const CurrentFE& fe,
-                         const DOF& dof, const Real t, const UInt nbComp )
+                         const DOF& dof, const Real t, const UInt nbComp = 1)
 {
     UInt eleID (fe.currentLocalId());
     Real sum(0.0);
@@ -429,22 +429,25 @@ Real elementaryDifferenceIntegral( VectorType & u,
         y = fe.quadNode(iQuadPt,1);
 	    z = fe.quadNode(iQuadPt,2);
         uQuadPt =0.0;
-        for ( UInt iDof(0); iDof < fe.nbFEDof(); ++iDof )
+        for(ID component = 0; component < nbComp; component++)
         {
-            UInt dofID = dof.localToGlobalMap( eleID, iDof )+ nbComp * dof.numTotalDof();
-            uQuadPt += u( dofID ) * fe.phi( iDof, iQuadPt );
+			for ( UInt iDof(0); iDof < fe.nbFEDof(); ++iDof )
+			{
+				UInt dofID = dof.localToGlobalMap( eleID, iDof )+ component * dof.numTotalDof();
+				uQuadPt += u( dofID ) * fe.phi( iDof, iQuadPt );
+			}
+			diffQuadPt = uQuadPt - fct( t, x, y, z, component );
         }
-        diffQuadPt = uQuadPt - fct( t, x, y, z, nbComp );
         sum += diffQuadPt * fe.weightDet( iQuadPt );
     }
     return sum;
 }
 
-//! returns the integral of the selected component of u the current element
+//! returns the integral of u on the current element
 template <typename VectorType>
 Real elementaryIntegral( VectorType & u,
                          const CurrentFE& fe,
-                         const DOF& dof, const UInt component )
+                         const DOF& dof, const UInt nbComp = 1)
 {
     UInt eleID (fe.currentLocalId());
     Real sum(0.0);
@@ -453,22 +456,24 @@ Real elementaryIntegral( VectorType & u,
     for ( UInt iQuadPt(0); iQuadPt < fe.nbQuadPt(); ++iQuadPt )
     {
         uQuadPt = 0.0;
-
-        for ( UInt iDof(0); iDof < fe.nbFEDof(); ++iDof )
+        for(ID component = 0; component < nbComp; component++)
         {
-            UInt dofID = dof.localToGlobalMap( eleID, iDof ) + component * dof.numTotalDof();
-            uQuadPt += u( dofID ) * fe.phi( iDof, iQuadPt );
+        	for ( UInt iDof(0); iDof < fe.nbFEDof(); ++iDof )
+			{
+				UInt dofID = dof.localToGlobalMap( eleID, iDof ) + component * dof.numTotalDof();
+				uQuadPt += u( dofID ) * fe.phi( iDof, iQuadPt );
+			}
         }
         sum += uQuadPt * fe.weightDet( iQuadPt );
     }
     return sum;
 }
 
-//! returns the integral of the selected component of fct on the current element
+//! returns the integral of fct on the current element
 inline Real
 elementaryFctIntegral( boost::function<Real( Real, Real, Real,
                                              Real, UInt )> fct,
-                       const CurrentFE& fe, const Real t, const UInt component )
+                       const CurrentFE& fe, const Real t, const UInt nbComp = 1)
 {
     Real sum(0.0);
     Real x;
@@ -480,7 +485,9 @@ elementaryFctIntegral( boost::function<Real( Real, Real, Real,
     	x = fe.quadNode(iQuadPt,0);
 		y = fe.quadNode(iQuadPt,1);
 		z = fe.quadNode(iQuadPt,2);
-        sum += fct( t, x, y, z,  component ) * fe.weightDet( iQuadPt );
+
+		for(ID component = 0; component < nbComp; component++)
+			sum += fct( t, x, y, z,  component ) * fe.weightDet( iQuadPt );
     }
     return sum;
 }

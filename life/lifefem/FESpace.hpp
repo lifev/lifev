@@ -853,8 +853,8 @@ FESpace<MeshType, MapType>::l20Error( const function_Type& fexact,
         mass += this->fe().measure();
         if (relError)
         {
-            sumExact2 += elementaryFctL2NormSquare( fexact, this->fe(), time, 1 );
-            sumExact1 += elementaryFctIntegral( fexact, this->fe(), time, 1 );
+            sumExact2 += elementaryFctL2NormSquare( fexact, this->fe(), time, M_fieldDim );
+            sumExact1 += elementaryFctIntegral( fexact, this->fe(), time, M_fieldDim );
         }
     }
 
