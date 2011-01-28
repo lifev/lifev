@@ -89,7 +89,10 @@ SolverAmesos::solveSystem( vector_type&    rhsFull,
                            vector_type&    solution,
                            matrix_ptrtype& /*basePrecMatrix*/ )
 {
-    M_displayer.leaderPrint( "      Amesos solving system ...                " );
+    bool verbose = M_trilinosParameterList.get( "Verbose", true );
+    if ( verbose )
+        M_displayer.leaderPrint( "      Amesos solving system ...                " );
+
     LifeChrono chrono;
     chrono.start();
 
@@ -99,7 +102,9 @@ SolverAmesos::solveSystem( vector_type&    rhsFull,
     M_solver->Solve();
 
     chrono.stop();
-    M_displayer.leaderPrintMax( "done in " , chrono.diff() );
+
+    if ( verbose )
+        M_displayer.leaderPrintMax( "done in " , chrono.diff() );
 
     return 0;
 }
@@ -159,7 +164,7 @@ void SolverAmesos::setReusePreconditioner( const bool& /*reusePreconditioner*/ )
 
 void SolverAmesos::showMe( std::ostream& output ) const
 {
-    output << "showMe must be implemented for the SolverAmesos class" << std::endl;
+    M_trilinosParameterList.print( output );
 }
 
 // ===================================================
@@ -200,12 +205,17 @@ void SolverAmesos::setDataFromGetPot( const GetPot& dataFile, const std::string&
     // Type of the matrix: symmetric, SDP, general
     M_trilinosParameterList.set( "MatrixProperty", dataFile( ( section + "/amesos/matrixproperty").data(), "general" ) );
 
-    // Create the solver
-    createSolver( dataFile( ( section + "/amesos/solvertype"  ).data(), "Klu" ) );
+    // Type of the solver
+    M_trilinosParameterList.set( "SolverType", dataFile( ( section + "/amesos/solvertype"  ).data(), "Klu" ) );
 }
 
 void SolverAmesos::setParameters()
 {
+    // Create the solver
+    if ( M_solver == NULL )
+        createSolver( M_trilinosParameterList.get( "SolverType", "Klu" ) );
+
+    // Set the parameters
     M_solver->SetParameters( M_trilinosParameterList );
 }
 
