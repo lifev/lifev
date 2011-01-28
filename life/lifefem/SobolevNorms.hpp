@@ -341,7 +341,7 @@ Real elementaryDifferenceH1NormSquare( const VectorType & u, const UsrFct& fct, 
         Vector diffGradQuadPt = graduQuadPt;
         for (UInt iCoor(0); iCoor < fe.nbCoor(); ++iCoor)
         {
-            diffGradQuadPt(iCoor) -= fct.grad(iCoor+1, x, y, z);
+            diffGradQuadPt(iCoor) -= fct.grad(iCoor, x, y, z);
         }
         Real sum2 = diffQuadPt*diffQuadPt;
         for (UInt iCoor(0); iCoor < fe.nbCoor(); ++iCoor)
