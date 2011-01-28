@@ -959,8 +959,8 @@ FSI::displacementOnInterface()
 //     vector_Type dispOnInterface();
 // //@     dispOnInterface = ZeroVector(dispOnInterface.size());
 
-//  //    FOR_EACH_INTERFACE_DOF( dispOnInterface[IDsolid - 1 + jDim*totalDofSolid] =
-// //                             M_solid->disp()[IDsolid - 1 + jDim*totalDofSolid]);
+//  //    FOR_EACH_INTERFACE_DOF( dispOnInterface[IDsolid + jDim*totalDofSolid] =
+// //                             M_solid->disp()[IDsolid + jDim*totalDofSolid]);
 
 //     Real norminf;
 //     Real norm2;
@@ -1730,14 +1730,14 @@ FSIOperator::interpolateInterfaceDofs( const FESpace<mesh_Type, MapEpetra>& _fes
 //         {
 
 //             // loop on element faces
-//             for ( ID iFa = 1; iFa <= nElemF; ++iFa )
+//             for ( ID iFa = 0; iFa < nElemF; ++iFa )
 //             {
 
 //                 // Loop on number of DOF per face
 //                 for ( ID l = 0; l < nDofpF; ++l )
 //                 {
 
-//                     lDof = nDofElemE + nDofElemV + ( iFa - 1 ) * nDofpF + l; // Local dof in the adjacent Element
+//                     lDof = nDofElemE + nDofElemV + iFa * nDofpF + l; // Local dof in the adjacent Element
 
 //                     // Nodal coordinates
 //                     x = _fespace1.refFE().xi( lDof );
