@@ -43,7 +43,7 @@
 #define MultiscaleModel1D_H 1
 
 // Jacobian coefficient approximation
-#define JACOBIAN_WITH_FINITEDIFFERENCE
+//#define JACOBIAN_WITH_FINITEDIFFERENCE
 #ifdef JACOBIAN_WITH_FINITEDIFFERENCE
 //#define JACOBIAN_WITH_FINITEDIFFERENCE_AREA
 #endif
@@ -318,7 +318,7 @@ public:
     /*!
      * @return 1D model FESpace
      */
-    feSpacePtr_Type FESpace() const { return M_FESpace; }
+    feSpacePtr_Type feSpace() const { return M_feSpace; }
 
     //! Get the Solver of the 1D model.
     /*!
@@ -371,12 +371,14 @@ private:
     //! Initialize the solution.
     void initializeSolution();
 
-    //! Update the solution (solution2 = solution1)
+    //! Copy the solution (solution2 = solution1)
     /*!
+     * NOTE: if the size of the two vector is different due to the presence of ghost nodes
+     * the method automatically add/remove them from the resulting vector.
      * @param solution1 solution to be copied.
      * @param solution2 copy of solution1.
      */
-    void updateSolution( const solution_Type& solution1, solution_Type& solution2 );
+    void copySolution( const solution_Type& solution1, solution_Type& solution2 );
 
     //! Solve the 1D hyperbolic problem
     /*!
@@ -423,6 +425,7 @@ private:
     boost::shared_ptr< IOFile_Type >       M_importer;
 
     boost::shared_ptr< mesh_Type >         M_exporterMesh;
+    solutionPtr_Type                       M_exporterSolution;
 #endif
 
 #ifdef JACOBIAN_WITH_FINITEDIFFERENCE
@@ -454,7 +457,7 @@ private:
     boost::shared_ptr< linearSolver_Type > M_linearSolver;
 
     // FE spaces
-    boost::shared_ptr< feSpace_Type >      M_FESpace;
+    boost::shared_ptr< feSpace_Type >      M_feSpace;
 
     solutionPtr_Type                       M_solution_tn;    // Solution at time t_n
     solutionPtr_Type                       M_solution;       // Solution at time t_n+1
