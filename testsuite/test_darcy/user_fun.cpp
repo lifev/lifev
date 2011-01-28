@@ -177,13 +177,13 @@ Real neumann1( const Real& /* t */,
 {
     switch (icomp)
     {
-    case 1:   //! Dx
+    case 0:   //! Dx
         return  -1.*(4.*x*y*y + 2.*x*x*y + 12.);
         break;
-    case 2:   //! Dy
+    case 1:   //! Dy
         return 0.;
         break;
-    case 3:   //! Dz
+    case 2:   //! Dz
         return 0.;
         break;
     }
@@ -198,13 +198,13 @@ Real neumann2( const Real& /* t */,
 {
     switch (icomp)
     {
-    case 1:   //! Dx
+    case 0:   //! Dx
         return  4.*x*y*y + 2.*x*x*y + 12.;
         break;
-    case 2:   //! Dy
+    case 1:   //! Dy
         return 0.;
         break;
-    case 3:   //! Dz
+    case 2:   //! Dz
         return 0.;
         break;
     }
@@ -247,13 +247,13 @@ Real analyticalFlux( const Real& /*t*/,
 
     switch ( icomp )
     {
-    case 1:
+    case 0:
         return -1. * (4.*x*y*y + 12. + 2.*x*x*y);
 
-    case 2:
+    case 1:
         return -1. * (2.*y*x*x + 2.*x*y*y + 6.);
 
-    case 3:
+    case 2:
         return -5.;
 
     default:
