@@ -150,7 +150,7 @@ public:
     /*!
         @param identity Element identity
      */
-    explicit MeshElementMarked1D( ID identity = 0 );
+    explicit MeshElementMarked1D( ID identity = NotAnId );
 
     //! Copy constructor
     /*!
@@ -201,7 +201,7 @@ public:
     /*!
         @param identity Element identity
      */
-    explicit MeshElementMarked2D( ID identity = 0 );
+    explicit MeshElementMarked2D( ID identity = NotAnId );
 
     //! Copy constructor
     /*!
@@ -343,7 +343,7 @@ public:
     /*!
         @param identity Element identity
      */
-    explicit MeshElementMarked3D( ID identity = 0 );
+    explicit MeshElementMarked3D( ID identity = NotAnId );
 
     //! Copy constructor
     /*!
