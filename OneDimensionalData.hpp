@@ -246,39 +246,32 @@ public:
     UInt numberOfElements() const { return M_mesh->numElements(); }
     UInt numberOfNodes() const { return M_mesh->numPoints(); }
 
+    const bool& viscoelasticWall() const { return M_viscoelasticWall; }
+    const Real& viscoelasticCoefficient( const UInt& i ) const { return M_viscoelasticCoefficient[i]; }
+    const bool& inertialWall() const { return M_inertialWall; }
+    const Real& densityWall() const { return M_densityWall; }
+    const Real& inertialModulus() const { return M_inertialModulus; }
+    const bool& longitudinalWall() const { return M_longitudinalWall; }
+
     const std::string& postprocessingDirectory() const { return M_postprocessingDirectory; }
     const std::string& postprocessingFile() const { return M_postprocessingFile; }
 
-    const Int& verbose() const { return M_verbose; }
-
-    const bool& inertialWall() const { return M_inertialWall; }
-    const bool& viscoelasticWall() const { return M_viscoelasticWall; }
-    const bool& linearizeStringModel() const { return M_linearizeStringModel; }
-    const bool& linearizeEquations() const { return M_linearizeEquations; }
-    const bool& longitudinalWall() const { return M_longitudinalWall; }
-
-    const bool& fluxSecondDer() const { return M_fluxSecondDer; }
-
-    const Int& dPdtSteps() const { return M_dP_dt_steps; }
     const Real& CFLmax() const { return M_CFLmax; }
 
-//    const OneD_Initialize& initialVariable() const;
-//    const Real&        initialValue() const;
-//    const Real&        restValue() const;
-//    const Real&        multiplier() const;
+    // Jacobian perturbation parameters
+    const Real& jacobianPerturbationArea() const { return M_jacobianPerturbationArea; }
+    const Real& jacobianPerturbationFlowRate() const { return M_jacobianPerturbationFlowRate; }
+    const Real& jacobianPerturbationPressure() const { return M_jacobianPerturbationPressure; }
 
     // Physical Parameters
     const Real& densityRho() const { return M_density; }
     const Real& viscosity() const { return M_viscosity; }
 
-    const Real& densityWall() const { return M_densityWall; }
     const Real& young() const { return M_young; }
     const Real& poisson() const { return M_poisson; }
 
     const Real& externalPressure() const { return M_externalPressure; }
 
-    const Real& viscoelasticModulus() const { return M_viscoelasticModulus; }
-    const Real& inertialModulus() const { return M_inertialModulus; }
     const Real& robertsonCorrection() const;
 
     const Real& thickness( const UInt& i ) const {  return M_thickness[i]; }
@@ -293,11 +286,6 @@ public:
     const Real& dAlphadz( const UInt& i ) const { return M_dAlphadz[i]; }
     const Real& dBeta0dz( const UInt& i ) const { return M_dBeta0dz[i]; }
     const Real& dBeta1dz( const UInt& i ) const { return M_dBeta1dz[i]; }
-
-    // Jacobian perturbation parameters
-    const Real& jacobianPerturbationArea() const { return M_jacobianPerturbationArea; }
-    const Real& jacobianPerturbationFlowRate() const { return M_jacobianPerturbationFlowRate; }
-    const Real& jacobianPerturbationPressure() const { return M_jacobianPerturbationPressure; }
 
     // Linear Parameters
     const Real& flux11( const UInt& i ) const { return M_flux11[i]; }
@@ -343,6 +331,9 @@ private:
      */
     void computeDerivatives();
 
+    //! Reset all the containers.
+    void resetContainers();
+
     //@}
 
     //! Model
@@ -354,20 +345,20 @@ private:
     timePtr_Type M_time;
     meshPtr_Type M_mesh;
 
+    //! Physical Wall Model
+    bool M_viscoelasticWall;
+    Real M_viscoelasticAngle;
+    Real M_viscoelasticPeriod;
+    scalarVector_Type M_viscoelasticCoefficient;
+
+    bool M_inertialWall;
+    Real M_densityWall;
+    Real M_inertialModulus;
+    bool M_longitudinalWall;
+
     //! Miscellaneous
     std::string M_postprocessingDirectory; //! full directory name (including path)
     std::string M_postprocessingFile;      //! output file name
-    Int         M_verbose;
-    //! boolean: activate inertial/ viscoelastic/ longitudinal term in pressure-area relationship?
-    bool        M_inertialWall;
-    bool        M_viscoelasticWall;
-    bool        M_linearizeStringModel;
-    bool        M_linearizeEquations;
-    bool        M_longitudinalWall;
-    //! boolean: compute second spatial derivative of flux?
-    bool        M_fluxSecondDer;
-    //! approximation of pressure temporal derivative: how many time steps?
-    Int         M_dP_dt_steps;
     Real        M_CFLmax;
 
     //! Jacobian perturbation
@@ -382,15 +373,11 @@ private:
     Real M_density;     // Density rho (always taken constant along the vessel)
     Real M_viscosity;
 
-    Real M_densityWall;
     bool M_thickVessel;
     Real M_young;
     Real M_poisson;
 
     Real M_externalPressure;
-
-    Real M_viscoelasticModulus;
-    Real M_inertialModulus;
     Real M_robertsonCorrection;
 
     scalarVector_Type M_thickness;

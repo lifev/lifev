@@ -135,6 +135,8 @@ public:
     typedef bcHandler_Type::fluxPtr_Type                                                              fluxPtr_Type;
     typedef bcHandler_Type::sourcePtr_Type                                                            sourcePtr_Type;
 
+    typedef bcHandler_Type::vectorPtrContainer_Type                                                   vectorPtrContainer_Type;
+
     typedef std::vector< boost::shared_ptr< BCInterface1DFunction< physicalSolver_Type > > >          vectorFunction_Type;
     typedef std::vector< boost::shared_ptr< BCInterface1DFunctionDefault< physicalSolver_Type > > >   vectorDefaultFunction_Type;
 
@@ -216,16 +218,24 @@ public:
 
     //! Set the solution for the members that need it
     /*!
-     * @param solution solution
-     */
-    void setSolution( const solutionPtr_Type solution );
-
-    //! Set the solution for the members that need it
-    /*!
      * @param flux flux
      * @param source source
      */
     void setFluxSource( const fluxPtr_Type& flux, const sourcePtr_Type& source );
+
+    //! Set the solution for the members that need it
+    /*!
+     * @param solution solution
+     */
+    void setSolution( const solutionPtr_Type& solution );
+
+#ifdef GHOSTNODE
+    // Set the system residual for the members that need it
+    /*
+     * @param rhs system residual
+     */
+    void setSystemResidual( const vectorPtrContainer_Type& systemResidual );
+#endif
 
     //@}
 
@@ -373,7 +383,17 @@ BCInterface1D< PhysicalSolverType >::setPhysicalSolver( const boost::shared_ptr<
 
 template< class PhysicalSolverType >
 void
-BCInterface1D< PhysicalSolverType >::setSolution( const solutionPtr_Type solution )
+BCInterface1D< PhysicalSolverType >::setFluxSource( const fluxPtr_Type& flux, const sourcePtr_Type& source )
+{
+    for ( typename vectorDefaultFunction_Type::const_iterator i = M_vectorDefaultFunction1D.begin() ; i < M_vectorDefaultFunction1D.end() ; ++i )
+        ( *i )->setFluxSource( flux, source );
+
+    M_handler->setFluxSource( flux, source );
+}
+
+template< class PhysicalSolverType >
+void
+BCInterface1D< PhysicalSolverType >::setSolution( const solutionPtr_Type& solution )
 {
     //for ( typename vectorFunction_Type::const_iterator i = M_vectorFunction.begin() ; i < M_vectorFunction.end() ; ++i )
     for ( UInt i( 0 ); i < M_vectorFunction.size(); ++i )
@@ -391,15 +411,17 @@ BCInterface1D< PhysicalSolverType >::setSolution( const solutionPtr_Type solutio
     M_handler->setSolution( solution );
 }
 
+#ifdef GHOSTNODE
 template< class PhysicalSolverType >
 void
-BCInterface1D< PhysicalSolverType >::setFluxSource( const fluxPtr_Type& flux, const sourcePtr_Type& source )
+BCInterface1D< PhysicalSolverType >::setSystemResidual( const vectorPtrContainer_Type& systemResidual )
 {
     for ( typename vectorDefaultFunction_Type::const_iterator i = M_vectorDefaultFunction1D.begin() ; i < M_vectorDefaultFunction1D.end() ; ++i )
-        ( *i )->setFluxSource( flux, source );
+        ( *i )->setSystemResidual( systemResidual );
 
-    M_handler->setFluxSource( flux, source );
+    M_handler->setSystemResidual( systemResidual );
 }
+#endif
 
 // ===================================================
 // Private Methods

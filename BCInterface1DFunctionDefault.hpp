@@ -80,6 +80,8 @@ public:
     typedef bc_Type::bcFunctionPtr_Type                                           bcFunction_PtrType;
     typedef bc_Type::bcFunctionDefaultPtr_Type                                    bcFunction_Default_PtrType;
 
+    typedef bc_Type::vectorPtrContainer_Type                                      vectorPtrContainer_Type;
+
     typedef bc_Type::fluxPtr_Type                                                 fluxPtr_Type;
     typedef bc_Type::sourcePtr_Type                                               sourcePtr_Type;
     typedef bc_Type::solutionPtr_Type                                             solutionPtr_Type;
@@ -114,18 +116,26 @@ public:
      */
     void setData( const data_Type& data );
 
-    //! Set solution
-    /*!
-     * @param solution solution container of the 1D model
-     */
-    void setSolution( const solutionPtr_Type solution ) { M_defaultFunction->setSolution( solution ); }
-
     //! Set flux and source
     /*!
      * @param flux flux object of the 1D model
      * @param source source object of the 1D model
      */
     void setFluxSource( const fluxPtr_Type& flux, const sourcePtr_Type& source ) { M_defaultFunction->setFluxSource( flux, source ); }
+
+    //! Set solution
+    /*!
+     * @param solution solution container of the 1D model
+     */
+    void setSolution( const solutionPtr_Type& solution ) { M_defaultFunction->setSolution( solution ); }
+
+#ifdef GHOSTNODE
+    // Set the system residual that is required by the ghost node implementation
+    /*
+     * @param systemResidual system residual
+     */
+    void setSystemResidual( const vectorPtrContainer_Type& systemResidual ) { M_defaultFunction->setSystemResidual( systemResidual ); }
+#endif
 
     //@}
 

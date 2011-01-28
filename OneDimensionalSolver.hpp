@@ -226,8 +226,18 @@ public:
     //! Build constant matrices (mass and grad)
     void buildConstantMatrices();
 
-    //! setup
-    void setupSolution( solution_Type& solution );
+    //! Setup the solution using the default FESpace map.
+    /*!
+     * @param solution solution container
+     */
+    void setupSolution( solution_Type& solution ) { setupSolution( solution, M_feSpace->map() ); }
+
+    //! Setup the solution using user defined FESpace map.
+    /*!
+     * @param solution solution container
+     * @param map map for initializing the solution vectors
+     */
+    void setupSolution( solution_Type& solution, const MapEpetra& map );
 
     //! Initialize all the variables of the solution to a reference condition with Q=0, A=A0, and P=P_ext
     /*!
@@ -309,12 +319,6 @@ public:
     //! Set the linear solver
     void setLinearSolver( const linearSolverPtr_Type& linearSolver );
 
-    //! Set the Dirichlet boundary conditions (left)
-    void setBCValuesLeft( const Real& bcL1, const Real& bcL2 );
-
-    //! Set the Dirichlet boundary conditions (right)
-    void setBCValuesRight( const Real& bcR1, const Real& bcR2 );
-
     //@}
 
 
@@ -330,29 +334,12 @@ public:
     //! Get the source function
     const sourcePtr_Type& source() const { return M_source; }
 
-    //! Get the left node identifier
-    const UInt& leftNodeId() const { return M_leftNodeId; }
-
-    //! Get the left internal node (neighboring node)
-    const UInt& leftInternalNodeId() const { return M_leftInternalNodeId; }
-
-    //! Get the right node identifier
-    const UInt& rightNodeId() const { return M_rightNodeId; }
-
-    //! Get the right internal node (neighboring node)
-    const UInt& rightInternalNodeId() const { return M_rightInternalNodeId; }
-
-    //! Get the Dirichlet boundary conditions (left)
-    container2D_Type bcValuesLeft( const solution_Type& solution ) const;
-
-    //! Get the value at neighboring node (left)
-    container2D_Type bcValuesInternalLeft( const solution_Type& solution ) const;
-
-    //! Get the Dirichlet boundary conditions (right)
-    container2D_Type bcValuesRight( const solution_Type& solution ) const;
-
-    //! Get the value at neighboring node (right)
-    container2D_Type bcValuesInternalRight( const solution_Type& solution ) const;
+    //! Return the ID of the boundary node given a side.
+    /*!
+     *  @param bcSide Side of the boundary.
+     *  @return ID of the boundary node.
+     */
+    UInt boundaryDOF( const bcSide_Type& bcSide ) const;
 
     //! Return the value of a quantity (P, A, Q, W1, W2) on a specified boundary.
     /*!
@@ -375,6 +362,12 @@ public:
                                           container2D_Type& eigenvalues,
                                           container2D_Type& leftEigenvector1,
                                           container2D_Type& leftEigenvector2 );
+
+    //! Get the residual container
+    /*!
+     * @return System residual container
+     */
+    const vectorPtrContainer_Type& residual() const { return M_residual; }
 
     //@}
 
@@ -428,21 +421,13 @@ private:
     //! Assemble the matrices
     void matrixAssemble( const UInt& ii, const UInt& jj );
 
-    //! Update the vectors to take into account Dirichlet BC.
-    /*!
-     *  Modify the vectors to take into account
-     *  the Dirichlet boundary conditions
-     *  (works for P1Seg and canonic numbering!)
-     */
-    void updateBCDirichletVector();
-
     //! Update the matrices to take into account Dirichlet BC.
     /*!
      *  Modify the matrix to take into account
      *  the Dirichlet boundary conditions
      *  (works for P1Seg and canonic numbering!)
      */
-    void updateBCDirichletMatrix( matrix_Type& mat );
+    void applyDirichletBCToMatrix( matrix_Type& mat );
 
     //! Apply the inertial Flux correction:
     /*!
@@ -466,7 +451,7 @@ private:
      *
      *  gamma = gamma_tilde / ( 2 sqrt(pi) )
      */
-    vector_Type viscoelasticFluxCorrection( const vector_Type&, const Real& timeStep );
+    vector_Type viscoelasticFluxCorrection( const vector_Type& area, const vector_Type& flowRate, const Real& timeStep );
 
     //! Apply the longitudinal Flux correction:
     /*!
@@ -490,11 +475,6 @@ private:
     commPtr_Type                       M_comm;
     Displayer                          M_displayer;
 
-    UInt                               M_leftNodeId;
-    UInt                               M_leftInternalNodeId;
-    UInt                               M_rightNodeId;
-    UInt                               M_rightInternalNodeId;
-
     boost::shared_ptr< MatrixElemental > M_elementalMassMatrix;       //!< element mass matrix
     boost::shared_ptr< MatrixElemental > M_elementalStiffnessMatrix;  //!< element stiffness matrix
     boost::shared_ptr< MatrixElemental > M_elementalGradientMatrix;   //!< element gradient matrix
@@ -506,6 +486,9 @@ private:
 
     //! Right hand sides of the linear system i: "mass * M_Ui = M_rhsi"
     vectorPtrContainer_Type            M_rhs;
+
+    //! Residual of the linear system
+    vectorPtrContainer_Type            M_residual;
 
     //! Flux F(U) (in P1)
     vectorPtrContainer_Type            M_fluxVector;
@@ -539,9 +522,6 @@ private:
 
     //! The linear solver
     linearSolverPtr_Type               M_linearSolver;
-
-    container2D_Type                   M_bcDirLeft;  //! first -> U1, second ->U2
-    container2D_Type                   M_bcDirRight; //
 
 private:
 

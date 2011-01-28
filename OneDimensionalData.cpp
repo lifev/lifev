@@ -54,16 +54,16 @@ OneDimensionalData::OneDimensionalData():
     M_sourceType                (),
     M_time                      (),
     M_mesh                      ( new mesh_Type() ),
+    M_viscoelasticWall          (),
+    M_viscoelasticAngle         (),
+    M_viscoelasticPeriod        (),
+    M_viscoelasticCoefficient   (),
+    M_inertialWall              (),
+    M_densityWall               (),
+    M_inertialModulus           (),
+    M_longitudinalWall          (),
     M_postprocessingDirectory   (),
     M_postprocessingFile        (),
-    M_verbose                   (),
-    M_inertialWall              (),
-    M_viscoelasticWall          (),
-    M_linearizeStringModel      (),
-    M_linearizeEquations        (),
-    M_longitudinalWall          (),
-    M_fluxSecondDer             (),
-    M_dP_dt_steps               (),
     M_CFLmax                    (),
     M_jacobianPerturbationArea  (),
     M_jacobianPerturbationFlowRate(),
@@ -72,13 +72,10 @@ OneDimensionalData::OneDimensionalData():
     M_powerLawCoefficient       (),
     M_density                   (),
     M_viscosity                 (),
-    M_densityWall               (),
     M_thickVessel               (),
     M_young                     (),
     M_poisson                   (),
     M_externalPressure          (),
-    M_viscoelasticModulus       (),
-    M_inertialModulus           (),
     M_robertsonCorrection       (),
     M_thickness                 (),
     M_friction                  (),
@@ -125,23 +122,31 @@ OneDimensionalData::setup( const GetPot& dataFile, const std::string& section )
         M_time.reset( new time_Type( dataFile, (section + "/time_discretization" ).data() ) );
 
     // Mesh setup - Space Discretization
-    M_mesh->setup( dataFile( ( section + "/space_discretization/Length"           ).data(), 1. ),
-                   dataFile( ( section + "/space_discretization/NumberOfElements" ).data(), 10 ) );
+    Real length = dataFile( ( section + "/space_discretization/Length"           ).data(), 1. );
+    Real numberOfElements = dataFile( ( section + "/space_discretization/NumberOfElements" ).data(), 10 );
+#ifdef GHOSTNODE
+    M_mesh->setup( length * ( numberOfElements + 2 ) / numberOfElements, numberOfElements + 2 );
+#else
+    M_mesh->setup( length, numberOfElements );
+#endif
 
     //std::cout << " 1D- Mesh nodes:                               " << M_mesh->numPoints() << std::endl;
     //std::cout << " 1D- Mesh elements:                            " << M_mesh->numElements() << std::endl;
 
+    // Physical Wall
+    M_viscoelasticWall        = dataFile( ( section + "/PhysicalWall/ViscoelasticWall"                ).data(), false );
+    M_viscoelasticAngle       = dataFile( ( section + "/PhysicalWall/ViscoelasticAngle"               ).data(), 5 ) * M_PI / 180.;
+    M_viscoelasticPeriod      = dataFile( ( section + "/PhysicalWall/ViscoelasticPeriod"              ).data(), 0.3 * 0.8 );
+
+    M_inertialWall            = dataFile( ( section + "/PhysicalWall/InertialWall"                    ).data(), false );
+    M_densityWall             = dataFile( ( section + "/PhysicalWall/DensityWall"                     ).data(), 1. );
+    M_inertialModulus         = dataFile( ( section + "/PhysicalWall/coeffA"                          ).data(), 0. );
+
+    M_longitudinalWall        = dataFile( ( section + "/PhysicalWall/LongitudinalWall"                ).data(), false );
+
     // Miscellaneous
     M_postprocessingDirectory = dataFile( ( section + "/miscellaneous/post_dir"                       ).data(), "./" );
     M_postprocessingFile      = dataFile( ( section + "/miscellaneous/post_file"                      ).data(), "sol" );
-    M_verbose                 = dataFile( ( section + "/miscellaneous/verbose"                        ).data(), 1 );
-    M_inertialWall            = dataFile( ( section + "/miscellaneous/inertial_wall"                  ).data(), false );
-    M_viscoelasticWall        = dataFile( ( section + "/miscellaneous/viscoelastic_wall"              ).data(), false );
-    M_linearizeStringModel    = dataFile( ( section + "/miscellaneous/linearize_string_model"         ).data(), true );
-    M_linearizeEquations      = dataFile( ( section + "/miscellaneous/linearize_equations"            ).data(), false );
-    M_longitudinalWall        = dataFile( ( section + "/miscellaneous/longitudinal_wall"              ).data(), false );
-    M_fluxSecondDer           = dataFile( ( section + "/miscellaneous/compute_flux_second_derivative" ).data(), false );
-    M_dP_dt_steps             = dataFile( ( section + "/miscellaneous/pressure_derivative_steps"      ).data(), 1 );
     M_CFLmax                  = dataFile( ( section + "/miscellaneous/CFLmax"                         ).data(), std::sqrt(3)/3. );
 
     if ( M_CFLmax > std::sqrt(3)/3. )
@@ -159,7 +164,6 @@ OneDimensionalData::setup( const GetPot& dataFile, const std::string& section )
     M_density                = dataFile( ( section + "/PhysicalParameters/density"                   ).data(), 1. );
     M_viscosity              = dataFile( ( section + "/PhysicalParameters/viscosity"                 ).data(), 0.035 );
 
-    M_densityWall            = dataFile( ( section + "/PhysicalParameters/densityWall"               ).data(), 1. );
     M_thickVessel            = dataFile( ( section + "/PhysicalParameters/thickVessel"               ).data(), false );
     M_young                  = dataFile( ( section + "/PhysicalParameters/young"                     ).data(), 4.0E6 );
     M_poisson                = dataFile( ( section + "/PhysicalParameters/poisson"                   ).data(), 0.5 );
@@ -167,42 +171,12 @@ OneDimensionalData::setup( const GetPot& dataFile, const std::string& section )
     M_externalPressure       = dataFile( ( section + "/PhysicalParameters/externalPressure"          ).data(), 0 );
     M_friction               = dataFile( ( section + "/PhysicalParameters/Kr"                        ).data(), 1. );
 
-    M_viscoelasticModulus    = dataFile( ( section + "/PhysicalParameters/gamma"                     ).data(), 0. );
-    M_inertialModulus        = dataFile( ( section + "/PhysicalParameters/coeffA"                    ).data(), 0. );
     M_robertsonCorrection    = dataFile( ( section + "/PhysicalParameters/RobertsonCorrection"       ).data(), 1. );
 
     M_computeCoefficients    = dataFile( ( section + "/PhysicalParameters/ComputeCoefficients"       ).data(), false );
 
-    // Physical Parameters defined along the 1D model
-    M_thickness.resize( M_mesh->numPoints() );
-
-    M_area0.resize( M_mesh->numPoints() );
-    M_beta0.resize( M_mesh->numPoints() );
-    M_beta1.resize( M_mesh->numPoints() );
-    M_alpha.resize( M_mesh->numPoints() );
-
-    M_dArea0dz.resize( M_mesh->numPoints() );
-    M_dBeta0dz.resize( M_mesh->numPoints() );
-    M_dBeta1dz.resize( M_mesh->numPoints() );
-    M_dAlphadz.resize( M_mesh->numPoints() );
-
-    // Linear Parameters defined along the 1D model
-    M_flux11.resize( M_mesh->numPoints() );
-    M_flux12.resize( M_mesh->numPoints() );
-    M_flux21.resize( M_mesh->numPoints() );
-    M_flux22.resize( M_mesh->numPoints() );
-    M_celerity1.resize( M_mesh->numPoints() );
-    M_celerity2.resize( M_mesh->numPoints() );
-    M_celerity1LeftEigenvector1.resize( M_mesh->numPoints() );
-    M_celerity1LeftEigenvector2.resize( M_mesh->numPoints() );
-    M_celerity2LeftEigenvector1.resize( M_mesh->numPoints() );
-    M_celerity2LeftEigenvector2.resize( M_mesh->numPoints() );
-    M_source10.resize( M_mesh->numPoints() );
-    M_source20.resize( M_mesh->numPoints() );
-    M_source11.resize( M_mesh->numPoints() );
-    M_source12.resize( M_mesh->numPoints() );
-    M_source21.resize( M_mesh->numPoints() );
-    M_source22.resize( M_mesh->numPoints() );
+    // Reset all the containers
+    resetContainers();
 
     // Select a law for the coefficients
     std::map< string, OneD_distributionLaw > distributionLawMap;
@@ -219,6 +193,7 @@ OneDimensionalData::setup( const GetPot& dataFile, const std::string& section )
         {
             // Physical Parameters
             M_thickness[i]                 = dataFile( ( section + "/PhysicalParameters/thickness"       ).data(), 0. );
+            M_viscoelasticCoefficient[i]   = dataFile( ( section + "/PhysicalWall/ViscoelasticCoefficient" ).data(), 0. );
 
             M_area0[i]                     = dataFile( ( section + "/PhysicalParameters/Area0"           ).data(), M_PI );
             M_alpha[i]                     = dataFile( ( section + "/PhysicalParameters/AlphaCoriolis"   ).data(), 1. / M_robertsonCorrection );
@@ -249,6 +224,7 @@ OneDimensionalData::setup( const GetPot& dataFile, const std::string& section )
     case linear:
 
         linearInterpolation( M_thickness, dataFile, section + "/PhysicalParameters/thickness", 0. );
+        linearInterpolation( M_viscoelasticCoefficient, dataFile, section + "/PhysicalWall/ViscoelasticCoefficient", 0. );
 
         linearInterpolation( M_area0, dataFile, section + "/PhysicalParameters/Area0", M_PI );
         linearInterpolation( M_alpha, dataFile, section + "/PhysicalParameters/AlphaCoriolis", 1. / M_robertsonCorrection, true );
@@ -280,6 +256,7 @@ OneDimensionalData::setup( const GetPot& dataFile, const std::string& section )
         {
             // Physical Parameters
             M_thickness[i]                 = dataFile( ( section + "/PhysicalParameters/thickness"       ).data(), 0., i );
+            M_viscoelasticCoefficient[i]   = dataFile( ( section + "/PhysicalWall/ViscoelasticCoefficient" ).data(), 0., i );
 
             M_area0[i]                     = dataFile( ( section + "/PhysicalParameters/Area0"           ).data(), M_PI, i );
             M_alpha[i]                     = dataFile( ( section + "/PhysicalParameters/AlphaCoriolis"   ).data(), 1. / M_robertsonCorrection, i );
@@ -308,7 +285,7 @@ OneDimensionalData::setup( const GetPot& dataFile, const std::string& section )
         break;
 
     default:
-        std::cout << "Warning: taperLaw \"" << distributionLaw << "\"not available!" << std::endl;
+        std::cout << "Warning: distributionLaw \"" << distributionLaw << "\"not available!" << std::endl;
     }
 
     updateCoefficients();
@@ -335,17 +312,16 @@ OneDimensionalData::oldStyleSetup( const GetPot& dataFile, const std::string& se
     //std::cout << " 1D- Mesh nodes:                               " << M_mesh->numPoints() << std::endl;
     //std::cout << " 1D- Mesh elements:                            " << M_mesh->numElements() << std::endl;
 
+    // Physical Wall Model
+    M_inertialWall            = dataFile( ( section + "/miscellaneous/inertial_wall"                  ).data(), false );
+    M_viscoelasticWall        = dataFile( ( section + "/miscellaneous/viscoelastic_wall"              ).data(), false );
+    M_longitudinalWall        = dataFile( ( section + "/miscellaneous/longitudinal_wall"              ).data(), false );
+
     // Miscellaneous
     M_postprocessingDirectory = dataFile( ( section + "/miscellaneous/post_dir"                       ).data(), "./" );
     M_postprocessingFile      = dataFile( ( section + "/miscellaneous/post_file"                      ).data(), "sol" );
-    M_verbose                 = dataFile( ( section + "/miscellaneous/verbose"                        ).data(), 1 );
     M_inertialWall            = dataFile( ( section + "/miscellaneous/inertial_wall"                  ).data(), false );
     M_viscoelasticWall        = dataFile( ( section + "/miscellaneous/viscoelastic_wall"              ).data(), false );
-    M_linearizeStringModel    = dataFile( ( section + "/miscellaneous/linearize_string_model"         ).data(), true );
-    M_linearizeEquations      = dataFile( ( section + "/miscellaneous/linearize_equations"            ).data(), false );
-    M_longitudinalWall        = dataFile( ( section + "/miscellaneous/longitudinal_wall"              ).data(), false );
-    M_fluxSecondDer           = dataFile( ( section + "/miscellaneous/compute_flux_second_derivative" ).data(), false );
-    M_dP_dt_steps             = dataFile( ( section + "/miscellaneous/pressure_derivative_steps"      ).data(), 1 );
     M_CFLmax                  = dataFile( ( section + "/miscellaneous/CFLmax"                         ).data(), std::sqrt(3)/3. );
 
     if ( M_CFLmax > std::sqrt(3)/3. )
@@ -370,45 +346,20 @@ OneDimensionalData::oldStyleSetup( const GetPot& dataFile, const std::string& se
 
     M_externalPressure       = dataFile( ( section + "/PhysicalParameters/externalPressure"          ).data(), 0 );
 
-    M_viscoelasticModulus    = dataFile( ( section + "/PhysicalParameters/gamma"                     ).data(), 0. );
     M_inertialModulus        = dataFile( ( section + "/PhysicalParameters/coeffA"                    ).data(), 0. );
     M_robertsonCorrection    = dataFile( ( section + "/PhysicalParameters/RobertsonCorrection"       ).data(), 1. );
 
     M_friction               = dataFile( ( section + "/parameters/Kr"                                ).data(), 1. );
     M_computeCoefficients    = dataFile( ( section + "/parameters/use_physical_values"               ).data(), false );
 
-    M_thickness.resize( M_mesh->numPoints() );
-
-    M_area0.resize( M_mesh->numPoints() );
-    M_beta0.resize( M_mesh->numPoints() );
-    M_beta1.resize( M_mesh->numPoints() );
-    M_alpha.resize( M_mesh->numPoints() );
-
-    M_dArea0dz.resize( M_mesh->numPoints() );
-    M_dBeta0dz.resize( M_mesh->numPoints() );
-    M_dBeta1dz.resize( M_mesh->numPoints() );
-    M_dAlphadz.resize( M_mesh->numPoints() );
-
-    M_flux11.resize( M_mesh->numPoints() );
-    M_flux12.resize( M_mesh->numPoints() );
-    M_flux21.resize( M_mesh->numPoints() );
-    M_flux22.resize( M_mesh->numPoints() );
-    M_celerity1.resize( M_mesh->numPoints() );
-    M_celerity2.resize( M_mesh->numPoints() );
-    M_celerity1LeftEigenvector1.resize( M_mesh->numPoints() );
-    M_celerity1LeftEigenvector2.resize( M_mesh->numPoints() );
-    M_celerity2LeftEigenvector1.resize( M_mesh->numPoints() );
-    M_celerity2LeftEigenvector2.resize( M_mesh->numPoints() );
-    M_source10.resize( M_mesh->numPoints() );
-    M_source20.resize( M_mesh->numPoints() );
-    M_source11.resize( M_mesh->numPoints() );
-    M_source12.resize( M_mesh->numPoints() );
-    M_source21.resize( M_mesh->numPoints() );
-    M_source22.resize( M_mesh->numPoints() );
+    // Reset all the containers
+    resetContainers();
 
     // Linear Parameters
     for ( UInt i = 0; i < M_mesh->numPoints() ; ++i )
     {
+        M_viscoelasticCoefficient[i]   = dataFile( ( section + "/PhysicalParameters/gamma" ).data(), 0. );
+
         // Physical Parameters
         if ( M_computeCoefficients )
             M_area0[i]                 = OneDimensional::pow20( dataFile( ( section + "/1d_physics/radius"        ).data(), 0.5 ), 2 ) * M_PI;
@@ -476,6 +427,9 @@ OneDimensionalData::updateCoefficients()
                 M_beta0[i] = M_thickness[i] * std::sqrt( M_PI / M_area0[i] ) *  M_young / (1 - M_poisson * M_poisson);
                 M_beta1[i] = 0.5;
             }
+
+            // Compute Viscoelastic Coefficient: gamma = h * E * T * tan(phi) / ( 4 * \sqrt(pi))
+            M_viscoelasticCoefficient[i] = M_thickness[i] * M_young * M_viscoelasticPeriod * std::tan( M_viscoelasticAngle ) / ( 4 * std::sqrt(M_PI) );
         }
     }
 
@@ -524,34 +478,38 @@ OneDimensionalData::initLinearParam( const GetPot& /*dataFile*/ )  // CHECK THIS
 void
 OneDimensionalData::showMe( std::ostream& output ) const
 {
-    // Model
     //output << std::scientific << std::setprecision(15);
-    output << "\n*** Values for data [Model]\n\n";
+
+    // Model
+    output << "\n*** Values for data [Model]" << std::endl << std::endl;
     output << "Physics Type           = " << enum2String( M_physicsType, OneDimensional::physicsMap ) << std::endl;
     output << "Flux Type              = " << enum2String( M_fluxType,    OneDimensional::fluxMap    ) << std::endl;
     output << "Source Type            = " << enum2String( M_sourceType,  OneDimensional::sourceMap  ) << std::endl;
 
     // Time
-    output << "\n*** Values for data [time_discretization]\n\n";
+    output << "\n*** Values for data [time_discretization]" << std::endl << std::endl;
     M_time->showMe( output );
 
     // Space Discretization
-    output << "\n*** Values for data [space_discretization]\n\n";
+    output << "\n*** Values for data [space_discretization]" << std::endl << std::endl;
     output << "Length                 = " << length() << std::endl;
     output << "NumberOfElements       = " << M_mesh->numElements() << std::endl;
 
+    // Physical Wall Model
+    output << "\n*** Values for data [PhysicalWallModel]" << std::endl << std::endl;
+    output << "Viscoelastic wall      = " << M_viscoelasticWall << std::endl;
+    output << "Viscoelastic angle     = " << M_viscoelasticAngle << std::endl;
+    output << "Viscoelastic period    = " << M_viscoelasticPeriod << std::endl;
+    output << "Viscoelastic coeff.    = " << M_viscoelasticCoefficient << std::endl;
+    output << "Inertial wall          = " << M_inertialWall << std::endl;
+    output << "Wall density           = " << M_densityWall << std::endl;
+    output << "Inertial modulus       = " << M_inertialModulus << std::endl;
+    output << "Longitudinal wall      = " << M_longitudinalWall << std::endl;
+
     // Miscellaneous
-    output << "\n*** Values for data [miscellaneous]\n\n";
+    output << "\n*** Values for data [miscellaneous]" << std::endl << std::endl;
     output << "Postprocessing Dir.    = " << M_postprocessingDirectory << std::endl;
     output << "Postprocessing File    = " << M_postprocessingFile << std::endl;
-    output << "verbose                = " << M_verbose << std::endl;
-    output << "Use Inertial Wall      = " << M_inertialWall << std::endl;
-    output << "Use Viscoelastic Wall  = " << M_viscoelasticWall << std::endl;
-    output << "Linearize Model        = " << M_linearizeStringModel << std::endl;
-    output << "Linearize Equations    = " << M_linearizeEquations << std::endl;
-    output << "Longitudinal Wall      = " << M_longitudinalWall << std::endl;
-    output << "Flux Second Derivative = " << M_fluxSecondDer << std::endl;
-    output << "Pressure Derivative    = " << M_dP_dt_steps << std::endl;
     output << "Maximum admissible CFL = " << M_CFLmax << std::endl;
 
     // Jacobian perturbation
@@ -560,51 +518,48 @@ OneDimensionalData::showMe( std::ostream& output ) const
     output << "Jacobian perturbation Pressure  = " << M_jacobianPerturbationPressure << std::endl;
 
     // Physical Parameters
-    output << "\n*** Values for data [PhysicalParameters]\n\n";
-    output << "Compute Coefficients   = " << M_computeCoefficients << "\n";
-    output << "Powerlaw Coefficient   = " << M_powerLawCoefficient << "\n";
-    output << "Fluid density          = " << M_density << "\n";
-    output << "Fluid dyn. viscosity   = " << M_viscosity << "\n";
-    output << "Wall density           = " << M_densityWall << "\n";
-    output << "Thick vessel           = " << M_thickVessel << "\n";
-    output << "Young modulus          = " << M_young << "\n";
-    output << "Poisson                = " << M_poisson << "\n";
-    output << "External pressure      = " << M_externalPressure << "\n";
-    output << "Viscoelastic modulus   = " << M_viscoelasticModulus << "\n";
-    output << "Inertial modulus       = " << M_inertialModulus << "\n";
-    output << "Robertson correction   = " << M_robertsonCorrection << "\n";
+    output << "\n*** Values for data [PhysicalParameters]" << std::endl << std::endl;
+    output << "Compute Coefficients   = " << M_computeCoefficients << std::endl;
+    output << "Powerlaw Coefficient   = " << M_powerLawCoefficient << std::endl;
+    output << "Fluid density          = " << M_density << std::endl;
+    output << "Fluid dyn. viscosity   = " << M_viscosity << std::endl;
+    output << "Thick vessel           = " << M_thickVessel << std::endl;
+    output << "Young modulus          = " << M_young << std::endl;
+    output << "Poisson                = " << M_poisson << std::endl;
+    output << "External pressure      = " << M_externalPressure << std::endl;
+    output << "Robertson correction   = " << M_robertsonCorrection << std::endl;
 
-    output << "Area0                  = " << M_area0 << "\n";
-    output << "dArea0dz               = " << M_dArea0dz << "\n";
-    output << "Beta0                  = " << M_beta0 << "\n";
-    output << "dBeta0dz               = " << M_dBeta0dz << "\n";
-    output << "Beta1                  = " << M_beta1 << "\n";
-    output << "dBeta1dz               = " << M_dBeta1dz << "\n";
+    output << "Area0                  = " << M_area0 << std::endl;
+    output << "dArea0dz               = " << M_dArea0dz << std::endl;
+    output << "Beta0                  = " << M_beta0 << std::endl;
+    output << "dBeta0dz               = " << M_dBeta0dz << std::endl;
+    output << "Beta1                  = " << M_beta1 << std::endl;
+    output << "dBeta1dz               = " << M_dBeta1dz << std::endl;
 
-    output << "Alpha (Coriolis)       = " << M_alpha << "\n";
-    output << "dAlpha (Coriolis)      = " << M_dAlphadz << "\n";
+    output << "Alpha (Coriolis)       = " << M_alpha << std::endl;
+    output << "dAlpha (Coriolis)      = " << M_dAlphadz << std::endl;
 
-    output << "Thickness              = " << M_thickness << "\n";
-    output << "Friction               = " << M_friction << "\n";
+    output << "Thickness              = " << M_thickness << std::endl;
+    output << "Friction               = " << M_friction << std::endl;
 
     // Linear Parameters
-    output << "\n*** Values for data [LinearParameters]\n\n";
-    output << "Flux11                 = " << M_flux11 << "\n";
-    output << "Flux12                 = " << M_flux12 << "\n";
-    output << "Flux21                 = " << M_flux21 << "\n";
-    output << "Flux22                 = " << M_flux22 << "\n";
-    output << "Celerity1              = " << M_celerity1 << "\n";
-    output << "Celerity2              = " << M_celerity2 << "\n";
-    output << "Eigenvector11          = " << M_celerity1LeftEigenvector1 << "\n";
-    output << "Eigenvector12          = " << M_celerity1LeftEigenvector2 << "\n";
-    output << "Eigenvector21          = " << M_celerity2LeftEigenvector1 << "\n";
-    output << "Eigenvector22          = " << M_celerity2LeftEigenvector2 << "\n";
-    output << "Source10               = " << M_source10 << "\n";
-    output << "Source20               = " << M_source20 << "\n";
-    output << "Source11               = " << M_source11 << "\n";
-    output << "Source12               = " << M_source12 << "\n";
-    output << "Source21               = " << M_source21 << "\n";
-    output << "Source22               = " << M_source22 << "\n";
+    output << "\n*** Values for data [LinearParameters]" << std::endl << std::endl;
+    output << "Flux11                 = " << M_flux11 << std::endl;
+    output << "Flux12                 = " << M_flux12 << std::endl;
+    output << "Flux21                 = " << M_flux21 << std::endl;
+    output << "Flux22                 = " << M_flux22 << std::endl;
+    output << "Celerity1              = " << M_celerity1 << std::endl;
+    output << "Celerity2              = " << M_celerity2 << std::endl;
+    output << "Eigenvector11          = " << M_celerity1LeftEigenvector1 << std::endl;
+    output << "Eigenvector12          = " << M_celerity1LeftEigenvector2 << std::endl;
+    output << "Eigenvector21          = " << M_celerity2LeftEigenvector1 << std::endl;
+    output << "Eigenvector22          = " << M_celerity2LeftEigenvector2 << std::endl;
+    output << "Source10               = " << M_source10 << std::endl;
+    output << "Source20               = " << M_source20 << std::endl;
+    output << "Source11               = " << M_source11 << std::endl;
+    output << "Source12               = " << M_source12 << std::endl;
+    output << "Source21               = " << M_source21 << std::endl;
+    output << "Source22               = " << M_source22 << std::endl;
 }
 
 // ===================================================
@@ -615,6 +570,7 @@ OneDimensionalData::robertsonCorrection() const
 {
     if ( M_robertsonCorrection != 1. )
         std::cout << "!!! WARNING: Robertson corretion has not been checked in this version of the code !!!" << std::endl;
+
     return M_robertsonCorrection;
 }
 // ===================================================
@@ -622,20 +578,38 @@ OneDimensionalData::robertsonCorrection() const
 // ===================================================
 void
 OneDimensionalData::linearInterpolation( scalarVector_Type& vector,
-                                               const GetPot& dataFile,
-                                               const std::string& quantity,
-                                               const Real& defaultValue,
-                                               const bool& isArea )
+                                         const GetPot& dataFile,
+                                         const std::string& quantity,
+                                         const Real& defaultValue,
+                                         const bool& isArea )
 {
     Real a  = dataFile( quantity.data(), defaultValue, 0 );
     Real b  = dataFile( quantity.data(), a, 1 );
 
+//#ifdef GHOSTNODE
+//    Real xa = M_mesh->point( 2 ).x();
+//    Real xb = M_mesh->point( M_mesh->numPoints() - 1 ).x();
+//#else
+//    Real xa = M_mesh->firstPoint().x();
+//    Real xb = M_mesh->lastPoint().x();
+//#endif
+//
+//    // Note: due to offset numeration starts from 1
+//    for ( UInt i(0) ; i < M_mesh->numPoints() ; ++i )
+//        if ( isArea )
+//        {
+//            vector[i] = std::sqrt(a / M_PI) + ( std::sqrt(b / M_PI) - std::sqrt(a / M_PI) ) / ( xb - xa ) * ( M_mesh->point( i+1 ).x() - xa );
+//            vector[i] *= vector[i] * M_PI;
+//        }
+//        else
+//            vector[i] = a + (b - a) / ( xb - xa ) * ( M_mesh->point( i+1 ).x() - xa );
+
     // linearInterpolation disabled as tapering is not working!
-    for ( UInt i(1); i <= M_mesh->numPoints() ; ++i )
+    for ( UInt i(0); i < M_mesh->numPoints() ; ++i )
         if ( isArea )
-            vector[i-1] = (a + b + 2 * std::sqrt(a*b)) / 4;
+            vector[i] = (a + b + 2 * std::sqrt(a*b)) / 4;
         else
-            vector[i-1] = (a + b) / 2;
+            vector[i] = (a + b) / 2;
 }
 
 void
@@ -652,11 +626,13 @@ OneDimensionalData::computeDerivatives()
         M_dAlphadz[i] = ( M_alpha[i+1] - M_alpha[i-1] ) / 2;
     }
 
+    // First node
     M_dArea0dz[0] = ( -M_area0[2] + 4*M_area0[1] - 3*M_area0[0] ) / 2;
     M_dBeta0dz[0] = ( -M_beta0[2] + 4*M_beta0[1] - 3*M_beta0[0] ) / 2;
     M_dBeta1dz[0] = ( -M_beta1[2] + 4*M_beta1[1] - 3*M_beta1[0] ) / 2;
     M_dAlphadz[0] = ( -M_alpha[2] + 4*M_alpha[1] - 3*M_alpha[0] ) / 2;
 
+    // Last node
     M_dArea0dz[nodes-1] = ( 3*M_area0[nodes-1] - 4*M_area0[nodes-2] + M_area0[nodes-3] ) / 2;
     M_dBeta0dz[nodes-1] = ( 3*M_beta0[nodes-1] - 4*M_beta0[nodes-2] + M_beta0[nodes-3] ) / 2;
     M_dBeta1dz[nodes-1] = ( 3*M_beta1[nodes-1] - 4*M_beta1[nodes-2] + M_beta1[nodes-3] ) / 2;
@@ -666,6 +642,41 @@ OneDimensionalData::computeDerivatives()
     M_dBeta0dz /= M_mesh->meanH();
     M_dBeta1dz /= M_mesh->meanH();
     M_dAlphadz /= M_mesh->meanH();
+}
+
+void
+OneDimensionalData::resetContainers()
+{
+    M_viscoelasticCoefficient.resize( M_mesh->numPoints() );
+    M_thickness.resize( M_mesh->numPoints() );
+
+    M_area0.resize( M_mesh->numPoints() );
+    M_beta0.resize( M_mesh->numPoints() );
+    M_beta1.resize( M_mesh->numPoints() );
+    M_alpha.resize( M_mesh->numPoints() );
+
+    M_dArea0dz.resize( M_mesh->numPoints() );
+    M_dBeta0dz.resize( M_mesh->numPoints() );
+    M_dBeta1dz.resize( M_mesh->numPoints() );
+    M_dAlphadz.resize( M_mesh->numPoints() );
+
+    // Linear Parameters defined along the 1D model
+    M_flux11.resize( M_mesh->numPoints() );
+    M_flux12.resize( M_mesh->numPoints() );
+    M_flux21.resize( M_mesh->numPoints() );
+    M_flux22.resize( M_mesh->numPoints() );
+    M_celerity1.resize( M_mesh->numPoints() );
+    M_celerity2.resize( M_mesh->numPoints() );
+    M_celerity1LeftEigenvector1.resize( M_mesh->numPoints() );
+    M_celerity1LeftEigenvector2.resize( M_mesh->numPoints() );
+    M_celerity2LeftEigenvector1.resize( M_mesh->numPoints() );
+    M_celerity2LeftEigenvector2.resize( M_mesh->numPoints() );
+    M_source10.resize( M_mesh->numPoints() );
+    M_source20.resize( M_mesh->numPoints() );
+    M_source11.resize( M_mesh->numPoints() );
+    M_source12.resize( M_mesh->numPoints() );
+    M_source21.resize( M_mesh->numPoints() );
+    M_source22.resize( M_mesh->numPoints() );
 }
 
 } // LifeV namespace
