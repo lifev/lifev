@@ -108,12 +108,12 @@ Parser::evaluate( const ID& id )
         M_results.clear();
         stringIterator_Type start, end;
 
-        for ( UInt i = 0; i < M_strings.size(); ++i )
+        for ( UInt i(0); i < M_strings.size(); ++i )
         {
             start = M_strings[i].begin();
             end   = M_strings[i].end();
 #ifdef HAVE_BOOST_SPIRIT_QI
-            qi::phrase_parse( start, end, M_calculator, ascii::space, M_results);
+            qi::phrase_parse( start, end, M_calculator, ascii::space, M_results );
 #else
             std::cout << "!!! ERROR: Boost version < 1.41 !!!" << std::endl;
             // This generate an error ---------
@@ -130,10 +130,10 @@ Parser::evaluate( const ID& id )
     }
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 5030 ) << "Parser::evaluate          results[ "<< (id - 1) << "]: " << M_results[id - 1] << "\n";
+    Debug( 5030 ) << "Parser::evaluate          results[ "<< id << "]: " << M_results[id] << "\n";
 #endif
 
-    return M_results[id - 1];
+    return M_results[id];
 }
 
 UInt

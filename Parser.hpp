@@ -107,10 +107,10 @@ public:
     //@{
 
     /*! Evaluate the expression
-     * @param id expression index (starting from 1)
+     * @param id expression index (starting from 0)
      * @return computed value
      */
-    const Real& evaluate( const ID& id = 1 );
+    const Real& evaluate( const ID& id = 0 );
 
     /*! Count how many times a substring is present in the string (utility for BCInterfaceFunction)
      *
