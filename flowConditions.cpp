@@ -210,15 +210,15 @@ Real FlowConditions::outPressure6(const Real&/*t*/, const Real& /*x*/, const Rea
 
 Real FlowConditions::inDeltaRadius (const Real& /*t*/, const Real& x, const Real& y, const Real& /*z*/, const ID& i)
 {
-    if (i == 3) return 0;
+    if (i == 2) return 0;
 
     Real r ( sqrt(x*x + y*y) );
 
     switch (i)
     {
-    case 1:
+    case 0:
         return M_inDeltaRadius * x/r;
-    case 2:
+    case 1:
         return M_inDeltaRadius * y/r;
     default:
         ERROR_MSG("This entry is not allowed: flowConditions.hpp");
@@ -228,15 +228,15 @@ Real FlowConditions::inDeltaRadius (const Real& /*t*/, const Real& x, const Real
 
 Real FlowConditions::outDeltaRadius(const Real& /*t*/, const Real& x, const Real& y, const Real& /*z*/, const ID& i)
 {
-    if (i == 3) return 0;
+    if (i == 2) return 0;
 
     Real r ( sqrt(x*x + y*y) );
 
     switch (i)
     {
-    case 1:
+    case 0:
         return M_outDeltaRadius * x/r;
-    case 2:
+    case 1:
         return M_outDeltaRadius * y/r;
     default:
         ERROR_MSG("This entry is not allowed: flowConditions.hpp");

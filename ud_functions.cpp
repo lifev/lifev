@@ -79,7 +79,7 @@ Real uInterpolated(const Real& time, const Real& /*x*/, const Real& /*y*/, const
     Real presecond =  0.3 *Tfin;
     Real second    =  0.51*Tfin;
     Real a,b1,b2,a22,a12,a11,a21,det,dt,coeff22,coeff23,coeff32,coeff33;
-    Real flux;
+    Real flux(0);
     Real Tcorr;
     Real Taux      =  Tfin;
 
@@ -320,16 +320,16 @@ Real u2(const Real& t, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, 
 {
     switch (i)
     {
-    case 1:
+    case 0:
         return 0.0;
         break;
-    case 3:
+    case 2:
         if ( t <= 0.003 )
             return 1.3332e5;
         //      return 0.01;
         return 0.0;
         break;
-    case 2:
+    case 1:
         return 0.0;
         //      return 1.3332e4;
         //    else
@@ -354,13 +354,13 @@ Real d0(const Real& /*t*/, const Real& /*x*/, const Real& /*y*/, const Real& /*z
 {
     switch (i)
     {
+    case 0:
+        return 0.;
+        break;
     case 1:
         return 0.;
         break;
     case 2:
-        return 0.;
-        break;
-    case 3:
         return 0.;
         break;
     default:
@@ -375,13 +375,13 @@ Real w0(const Real& /*t*/, const Real& /*x*/, const Real& /*y*/, const Real& /*z
 
     switch (i)
     {
+    case 0:
+        return 0.0;
+        break;
     case 1:
         return 0.0;
         break;
     case 2:
-        return 0.0;
-        break;
-    case 3:
         return 0.0;
         break;
     default:
