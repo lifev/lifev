@@ -952,12 +952,12 @@ localEvolve ( const UInt& iElem )
 
         /* Put in localFlux the vector L^{-1} * localFlux
            For more details see http://www.netlib.org/lapack/lapack-3.1.1/SRC/dtrtrs.f */
-        lapack.TRTRS( param_L, param_N, param_N, NB, NBRHS, M_elmatMass[ iElem - 1 ].mat(), NB, localFaceFluxWeight, NB, INFO);
+        lapack.TRTRS( param_L, param_N, param_N, NB, NBRHS, M_elmatMass[ iElem ].mat(), NB, localFaceFluxWeight, NB, INFO);
         ASSERT_PRE( !INFO[0], "Lapack Computation M_elvecSource = LB^{-1} rhs is not achieved." );
 
         /* Put in localFlux the vector L^{-T} * localFlux
            For more details see http://www.netlib.org/lapack/lapack-3.1.1/SRC/dtrtrs.f */
-        lapack.TRTRS( param_L, param_T, param_N, NB, NBRHS, M_elmatMass[ iElem - 1 ].mat(), NB, localFaceFluxWeight, NB, INFO);
+        lapack.TRTRS( param_L, param_T, param_N, NB, NBRHS, M_elmatMass[ iElem ].mat(), NB, localFaceFluxWeight, NB, INFO);
         ASSERT_PRE( !INFO[0], "Lapack Computation M_elvecSource = LB^{-1} rhs is not achieved." );
 
         // Add to the local flux the local flux of the current face
