@@ -164,25 +164,25 @@ main( Int argc, char** argv )
     // TEST 9:
     expression = "c=2; [0., c, c*c, c*c*c]"; // (0, 2, 4, 8)
     parser.setString(expression);
-    std::cout << "TEST  9:  " << check( std::abs( parser.evaluate(1) - 0 ) > tolerance || std::abs( parser.evaluate(2) - 2 ) > tolerance || std::abs( parser.evaluate(3) - 4 ) > tolerance || std::abs( parser.evaluate(4) - 8 ) > tolerance )
-              << expression << " = [" << parser.evaluate(1) << ", " << parser.evaluate(2) << ", " << parser.evaluate(3) << ", " << parser.evaluate(4) << "]" << std::endl;
+    std::cout << "TEST  9:  " << check( std::abs( parser.evaluate(0) - 0 ) > tolerance || std::abs( parser.evaluate(1) - 2 ) > tolerance || std::abs( parser.evaluate(2) - 4 ) > tolerance || std::abs( parser.evaluate(3) - 8 ) > tolerance )
+              << expression << " = [" << parser.evaluate(0) << ", " << parser.evaluate(1) << ", " << parser.evaluate(2) << ", " << parser.evaluate(3) << "]" << std::endl;
 
     // TEST 10:
     expression = "[0, 0, -(x^2)+y^2]";
     parser.setString(expression);
     parser.setVariable("x", 1);
     parser.setVariable("y", 2); // (0, 0, -5)
-    std::cout << "TEST 10a: " << check( std::abs( parser.evaluate(1) - 0 ) > tolerance || std::abs( parser.evaluate(2) - 0 ) > tolerance || std::abs( parser.evaluate(3) - 3 ) > tolerance )
+    std::cout << "TEST 10a: " << check( std::abs( parser.evaluate(0) - 0 ) > tolerance || std::abs( parser.evaluate(1) - 0 ) > tolerance || std::abs( parser.evaluate(2) - 3 ) > tolerance )
               << "x = " << 1 << ", y = " << 2 << " ==> "
-              << expression << " = [" << parser.evaluate(1) << ", " << parser.evaluate(2) << ", " << parser.evaluate(3) << "]" << std::endl;
+              << expression << " = [" << parser.evaluate(0) << ", " << parser.evaluate(1) << ", " << parser.evaluate(2) << "]" << std::endl;
 
 
     parser.setString(expression);
     parser.setVariable("x", 4);
     parser.setVariable("y", 5); // (0, 0, -41)
-    std::cout << "TEST 10b: " << check( std::abs( parser.evaluate(1) - 0 ) > tolerance || std::abs( parser.evaluate(2) - 0 ) > tolerance || std::abs( parser.evaluate(3) - 9 ) > tolerance )
+    std::cout << "TEST 10b: " << check( std::abs( parser.evaluate(0) - 0 ) > tolerance || std::abs( parser.evaluate(1) - 0 ) > tolerance || std::abs( parser.evaluate(2) - 9 ) > tolerance )
               << "x = " << 4 << ", y = " << 5 << " ==> "
-              << expression << " = [" << parser.evaluate(1) << ", " << parser.evaluate(2) << ", " << parser.evaluate(3) << "]" << std::endl;
+              << expression << " = [" << parser.evaluate(0) << ", " << parser.evaluate(1) << ", " << parser.evaluate(2) << "]" << std::endl;
 
     std::cout << std::endl << "TEST ENDS SUCCESFULLY" << std::endl;
 
