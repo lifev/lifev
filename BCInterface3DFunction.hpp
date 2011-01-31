@@ -277,11 +277,7 @@ BCInterface3DFunction< PhysicalSolverType >::setData( const data_Type& data )
 // ===================================================
 template< typename PhysicalSolverType >
 Real
-BCInterface3DFunction< PhysicalSolverType >::function( const Real& t,
-                                            const Real& x,
-                                            const Real& y,
-                                            const Real& z,
-                                            const ID& /*id*/)
+BCInterface3DFunction< PhysicalSolverType >::function( const Real& t, const Real& x, const Real& y, const Real& z, const ID& /*id*/)
 {
 
 #ifdef HAVE_LIFEV_DEBUG
@@ -300,19 +296,15 @@ BCInterface3DFunction< PhysicalSolverType >::function( const Real& t,
     this->dataInterpolation();
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 5021 ) << "                                                evaluate(" << 1 << ") : " << M_parser->evaluate( 1 ) << "\n";
+    Debug( 5021 ) << "                                                evaluate( 0 ) : " << M_parser->evaluate( 0 ) << "\n";
 #endif
 
-    return M_parser->evaluate( 1 );
+    return M_parser->evaluate( 0 );
 }
 
 template< typename PhysicalSolverType >
 Real
-BCInterface3DFunction< PhysicalSolverType >::functionID( const Real& t,
-                                              const Real& x,
-                                              const Real& y,
-                                              const Real& z,
-                                              const ID& id )
+BCInterface3DFunction< PhysicalSolverType >::functionID( const Real& t, const Real& x, const Real& y, const Real& z, const ID& id )
 {
 
 #ifdef HAVE_LIFEV_DEBUG

@@ -242,10 +242,10 @@ BCInterface1DFunction< PhysicalSolverType >::function( const Real& t )
     this->dataInterpolation();
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 5021 ) << "                                                evaluate(" << 1 << ") : " << M_parser->evaluate( 1 ) << "\n";
+    Debug( 5021 ) << "                                                evaluate( 0 ) : " << M_parser->evaluate( 0 ) << "\n";
 #endif
 
-    return M_parser->evaluate( 1 );
+    return M_parser->evaluate( 0 );
 }
 
 } // Namespace LifeV
