@@ -284,7 +284,7 @@ void regularMesh3D( RegionMesh3D<GeoShape,MC>& mesh,
                 }
 
                 // We set the point properties
-                nodeID = k * N_z + j * N_y + i + 1;
+                nodeID = k * N_z + j * N_y + i;
                 pointPtr->setId( nodeID );
                 pointPtr->setLocalId( nodeID );
 
@@ -888,116 +888,116 @@ void regularMesh3D( RegionMesh3D<GeoShape,MC>& mesh,
                 {
                     // Zone 0,7
                     nodeID = k * N_z + j * N_y + i;
-                    P4 = nodeID + 1;
-                    P6 = nodeID + N_x + 1;
-                    P5 = nodeID + N_y + 1;
-                    P7 = nodeID + N_x + N_y + 1;
-                    P0 = nodeID + N_z + 1;
-                    P2 = nodeID + N_x + N_z + 1;
-                    P1 = nodeID + N_y + N_z + 1;
-                    P3 = nodeID + N_x + N_y + N_z + 1;
+                    P4 = nodeID;
+                    P6 = nodeID + N_x;
+                    P5 = nodeID + N_y;
+                    P7 = nodeID + N_x + N_y;
+                    P0 = nodeID + N_z;
+                    P2 = nodeID + N_x + N_z;
+                    P1 = nodeID + N_y + N_z;
+                    P3 = nodeID + N_x + N_y + N_z;
                 }
                 else if ( ( i + 1 > mid_x && j + 1 <= mid_y && k + 1 <= mid_z ) ||
                           ( i + 1 <= mid_x && j + 1 > mid_y && k + 1 > mid_z ) )
                 {
                     // Zone 1,6
                     nodeID = k * N_z + j * N_y + i;
-                    P1 = nodeID + 1;
-                    P3 = nodeID + N_x + 1;
-                    P0 = nodeID + N_y + 1;
-                    P2 = nodeID + N_x + N_y + 1;
-                    P5 = nodeID + N_z + 1;
-                    P7 = nodeID + N_x + N_z + 1;
-                    P4 = nodeID + N_y + N_z + 1;
-                    P6 = nodeID + N_x + N_y + N_z + 1;
+                    P1 = nodeID;
+                    P3 = nodeID + N_x;
+                    P0 = nodeID + N_y;
+                    P2 = nodeID + N_x + N_y;
+                    P5 = nodeID + N_z;
+                    P7 = nodeID + N_x + N_z;
+                    P4 = nodeID + N_y + N_z;
+                    P6 = nodeID + N_x + N_y + N_z;
                 }
                 else if ( ( i + 1 <= mid_x && j + 1 > mid_y && k + 1 <= mid_z ) ||
                           ( i + 1 > mid_x && j + 1 <= mid_y && k + 1 > mid_z ) )
                 {
                     // Zone 2,5
                     nodeID = k * N_z + j * N_y + i;
-                    P2 = nodeID + 1;
-                    P0 = nodeID + N_x + 1;
-                    P3 = nodeID + N_y + 1;
-                    P1 = nodeID + N_x + N_y + 1;
-                    P6 = nodeID + N_z + 1;
-                    P4 = nodeID + N_x + N_z + 1;
-                    P7 = nodeID + N_y + N_z + 1;
-                    P5 = nodeID + N_x + N_y + N_z + 1;
+                    P2 = nodeID;
+                    P0 = nodeID + N_x;
+                    P3 = nodeID + N_y;
+                    P1 = nodeID + N_x + N_y;
+                    P6 = nodeID + N_z;
+                    P4 = nodeID + N_x + N_z;
+                    P7 = nodeID + N_y + N_z;
+                    P5 = nodeID + N_x + N_y + N_z;
                 }
                 else if ( ( i + 1 <= mid_x && j + 1 <= mid_y && k + 1 > mid_z ) ||
                           ( i + 1 > mid_x && j + 1 > mid_y && k + 1 <= mid_z ) )
                 {
                     // Zone 3,4
                     nodeID = k * N_z + j * N_y + i;
-                    P0 = nodeID + 1;
-                    P1 = nodeID + N_x + 1;
-                    P2 = nodeID + N_y + 1;
-                    P3 = nodeID + N_x + N_y + 1;
-                    P4 = nodeID + N_z + 1;
-                    P5 = nodeID + N_x + N_z + 1;
-                    P6 = nodeID + N_y + N_z + 1;
-                    P7 = nodeID + N_x + N_y + N_z + 1;
+                    P0 = nodeID;
+                    P1 = nodeID + N_x;
+                    P2 = nodeID + N_y;
+                    P3 = nodeID + N_x + N_y;
+                    P4 = nodeID + N_z;
+                    P5 = nodeID + N_x + N_z;
+                    P6 = nodeID + N_y + N_z;
+                    P7 = nodeID + N_x + N_y + N_z;
                 }
 
                 // Tetra 1
                 volumePtr = &mesh.addVolume();
-                volumePtr->setId( volumeID + 1 );
-                volumePtr->setLocalId( volumeID + 1 );
-                volumePtr->setPoint( 1, mesh.point(P0) );
-                volumePtr->setPoint( 2, mesh.point(P1) );
-                volumePtr->setPoint( 3, mesh.point(P3) );
-                volumePtr->setPoint( 4, mesh.point(P4) );
+                volumePtr->setId( volumeID );
+                volumePtr->setLocalId( volumeID );
+                volumePtr->setPoint( 0, mesh.point(P0) );
+                volumePtr->setPoint( 1, mesh.point(P1) );
+                volumePtr->setPoint( 2, mesh.point(P3) );
+                volumePtr->setPoint( 3, mesh.point(P4) );
                 volumePtr->setMarker( regionFlag );
 
                 // Tetra 2
                 volumePtr = &mesh.addVolume();
-                volumePtr->setId( volumeID + 2 );
-                volumePtr->setLocalId( volumeID + 2 );
-                volumePtr->setPoint( 1, mesh.point(P1) );
-                volumePtr->setPoint( 2, mesh.point(P3) );
-                volumePtr->setPoint( 3, mesh.point(P4) );
-                volumePtr->setPoint( 4, mesh.point(P5) );
+                volumePtr->setId( volumeID + 1 );
+                volumePtr->setLocalId( volumeID + 1 );
+                volumePtr->setPoint( 0, mesh.point(P1) );
+                volumePtr->setPoint( 1, mesh.point(P3) );
+                volumePtr->setPoint( 2, mesh.point(P4) );
+                volumePtr->setPoint( 3, mesh.point(P5) );
                 volumePtr->setMarker( regionFlag );
 
                 // Tetra 3
                 volumePtr = &mesh.addVolume();
-                volumePtr->setId( volumeID + 3 );
-                volumePtr->setLocalId( volumeID + 3 );
-                volumePtr->setPoint( 1, mesh.point(P4) );
-                volumePtr->setPoint( 2, mesh.point(P5) );
-                volumePtr->setPoint( 3, mesh.point(P3) );
-                volumePtr->setPoint( 4, mesh.point(P7) );
+                volumePtr->setId( volumeID + 2 );
+                volumePtr->setLocalId( volumeID + 2 );
+                volumePtr->setPoint( 0, mesh.point(P4) );
+                volumePtr->setPoint( 1, mesh.point(P5) );
+                volumePtr->setPoint( 2, mesh.point(P3) );
+                volumePtr->setPoint( 3, mesh.point(P7) );
                 volumePtr->setMarker( regionFlag );
 
                 // Tetra 4
                 volumePtr = &mesh.addVolume();
-                volumePtr->setId( volumeID + 4 );
-                volumePtr->setLocalId( volumeID + 4 );
-                volumePtr->setPoint( 1, mesh.point(P0) );
-                volumePtr->setPoint( 2, mesh.point(P3) );
-                volumePtr->setPoint( 3, mesh.point(P2) );
-                volumePtr->setPoint( 4, mesh.point(P4) );
+                volumePtr->setId( volumeID + 3 );
+                volumePtr->setLocalId( volumeID + 3 );
+                volumePtr->setPoint( 0, mesh.point(P0) );
+                volumePtr->setPoint( 1, mesh.point(P3) );
+                volumePtr->setPoint( 2, mesh.point(P2) );
+                volumePtr->setPoint( 3, mesh.point(P4) );
                 volumePtr->setMarker( regionFlag );
 
                 // Tetra 5
                 volumePtr = &mesh.addVolume();
-                volumePtr->setId( volumeID + 5 );
-                volumePtr->setLocalId( volumeID + 5 );
-                volumePtr->setPoint( 1, mesh.point(P6) );
-                volumePtr->setPoint( 2, mesh.point(P3) );
-                volumePtr->setPoint( 3, mesh.point(P4) );
-                volumePtr->setPoint( 4, mesh.point(P2) );
+                volumePtr->setId( volumeID + 4 );
+                volumePtr->setLocalId( volumeID + 4 );
+                volumePtr->setPoint( 0, mesh.point(P6) );
+                volumePtr->setPoint( 1, mesh.point(P3) );
+                volumePtr->setPoint( 2, mesh.point(P4) );
+                volumePtr->setPoint( 3, mesh.point(P2) );
                 volumePtr->setMarker( regionFlag );
 
                 // Tetra 6
                 volumePtr = &mesh.addVolume();
-                volumePtr->setId(volumeID+6);
-                volumePtr->setLocalId(volumeID+6);
-                volumePtr->setPoint(1, mesh.point(P7));
-                volumePtr->setPoint(2, mesh.point(P6));
-                volumePtr->setPoint(3, mesh.point(P3));
-                volumePtr->setPoint(4, mesh.point(P4));
+                volumePtr->setId(volumeID+5);
+                volumePtr->setLocalId(volumeID+5);
+                volumePtr->setPoint(0, mesh.point(P7));
+                volumePtr->setPoint(1, mesh.point(P6));
+                volumePtr->setPoint(2, mesh.point(P3));
+                volumePtr->setPoint(3, mesh.point(P4));
                 volumePtr->setMarker(regionFlag);
             }
         }

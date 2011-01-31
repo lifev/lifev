@@ -935,16 +935,16 @@ Ethiersteinman::run()
             // Everything is OK a priori
             status = "OK";
 
-            for (UInt jDiscretization(1); jDiscretization<discretizationNumber; ++jDiscretization)
+            for (UInt jDiscretization(0); jDiscretization<discretizationNumber-1; ++jDiscretization)
             {
-                h1 = 1.0/meshDiscretization[jDiscretization-1];
-                h2 = 1.0/meshDiscretization[jDiscretization];
+                h1 = 1.0/meshDiscretization[jDiscretization];
+                h2 = 1.0/meshDiscretization[jDiscretization+1];
 
                 uBound = convTol*pow(h1/h2,int(uConvergenceOrder[iElem]));
                 pBound = convTol*pow(h1/h2,int(pConvergenceOrder[iElem]));
 
-                uErrRatio = uL2Error[iElem][jDiscretization-1]/uL2Error[iElem][jDiscretization]; // E1/E2
-                pErrRatio = pL2Error[iElem][jDiscretization-1]/pL2Error[iElem][jDiscretization];
+                uErrRatio = uL2Error[iElem][jDiscretization]/uL2Error[iElem][jDiscretization+1]; // E1/E2
+                pErrRatio = pL2Error[iElem][jDiscretization]/pL2Error[iElem][jDiscretization+1];
 
                 if (uErrRatio < uBound)
                 {

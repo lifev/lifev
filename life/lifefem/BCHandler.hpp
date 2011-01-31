@@ -587,7 +587,7 @@ BCHandler::bcUpdate( Mesh& mesh, CurrentBoundaryFE& boundaryFE, const DOF& dof )
     // ===================================================
     // Loop on boundary faces
     // ===================================================
-    for ( ID iBoundaryElement = 1 ; iBoundaryElement <= numBElements; ++iBoundaryElement )
+    for ( ID iBoundaryElement = 0 ; iBoundaryElement < numBElements; ++iBoundaryElement )
     {
         // ===================================================================================
         // construction of localToGlobalMapOnBElem (this part should be moved in DOF.hpp)
@@ -598,27 +598,27 @@ BCHandler::bcUpdate( Mesh& mesh, CurrentBoundaryFE& boundaryFE, const DOF& dof )
         iAdjacentElem = mesh.bElement( iBoundaryElement ).firstAdjacentElementIdentity();  // id of the element adjacent to the face
         iElemBElement = mesh.bElement( iBoundaryElement ).firstAdjacentElementPosition(); // local id of the face in its adjacent element
 
-        UInt lDof = 1; //local DOF on boundary element
+        UInt lDof = 0; //local DOF on boundary element
 
         //loop on Dofs associated with vertices
-        for ( ID iBElemVert = 1; iBElemVert <= nBElemVertices; ++iBElemVert )
+        for ( ID iBElemVert = 0; iBElemVert < nBElemVertices; ++iBElemVert )
         {
             iElemVertex = geoShape_Type::faceToPoint( iElemBElement, iBElemVert ); // local vertex number (in element)
-            for ( ID l = 1; l <= nDofPerVert; ++l )
-                localToGlobalMapOnBElem( lDof++) = dof.localToGlobal( iAdjacentElem, ( iElemVertex - 1 ) * nDofPerVert + l );
+            for ( ID l = 0; l < nDofPerVert; ++l )
+                localToGlobalMapOnBElem( lDof++) = dof.localToGlobalMap( iAdjacentElem, iElemVertex * nDofPerVert + l );
         }
 
         //loop on Dofs associated with Edges
-        for ( ID iBElemEdge = 1; iBElemEdge <= nBElemEdges; ++iBElemEdge )
+        for ( ID iBElemEdge = 0; iBElemEdge < nBElemEdges; ++iBElemEdge )
         {
             iElemEdge = geoShape_Type::faceToEdge( iElemBElement, iBElemEdge ).first; // local edge number (in element)
-            for ( ID l = 1; l <= nDofPerEdge; ++l )
-                localToGlobalMapOnBElem( lDof++) = dof.localToGlobal( iAdjacentElem,  nDofElemVertices + ( iElemEdge - 1 ) * nDofPerEdge + l ); // global Dof
+            for ( ID l = 0; l < nDofPerEdge; ++l )
+                localToGlobalMapOnBElem( lDof++) = dof.localToGlobalMap( iAdjacentElem,  nDofElemVertices + iElemEdge * nDofPerEdge + l ); // global Dof
         }
 
         //loop on Dofs associated with faces
-        for ( ID l = 1; l <= nDofPerFace; ++l )
-            localToGlobalMapOnBElem( lDof++) = dof.localToGlobal( iAdjacentElem, nDofElemEdges +  nDofElemVertices + ( iElemBElement - 1 ) * nDofPerFace + l ); // global Dof
+        for ( ID l = 0; l < nDofPerFace; ++l )
+            localToGlobalMapOnBElem( lDof++) = dof.localToGlobalMap( iAdjacentElem, nDofElemEdges +  nDofElemVertices + iElemBElement * nDofPerFace + l ); // global Dof
 
 
         // =============================================================
@@ -642,7 +642,7 @@ BCHandler::bcUpdate( Mesh& mesh, CurrentBoundaryFE& boundaryFE, const DOF& dof )
             case Essential:
                 for (ID lDof = 0; lDof< localToGlobalMapOnBElem.size(); lDof++)
                 {
-                    ID gDof = localToGlobalMapOnBElem( lDof+1); // global DOF
+                    ID gDof = localToGlobalMapOnBElem( lDof); // global DOF
 
                     //providing Essential boundary conditions with needed data (global DOF id and their coordinates)
                     if ( bcBaseIterator->isDataAVector())
@@ -663,7 +663,7 @@ BCHandler::bcUpdate( Mesh& mesh, CurrentBoundaryFE& boundaryFE, const DOF& dof )
                     if ( type == 0 )  // if the BC is a vector which values don't need to be integrated
                     {
                         for (ID lDof = 0; lDof< localToGlobalMapOnBElem.size(); lDof++)
-                            bcBaseIterator->addBCIdentifier( new BCIdentifierNatural( localToGlobalMapOnBElem(lDof+1) ) );
+                            bcBaseIterator->addBCIdentifier( new BCIdentifierNatural( localToGlobalMapOnBElem(lDof) ) );
                     }
                     else if ( type <= 3 )  // FE vector which needed to be integrated on the boundary
                         bcBaseIterator->addBCIdentifier( new BCIdentifierNatural( iBoundaryElement, localToGlobalMapOnBElem ) );
@@ -709,7 +709,7 @@ BCHandler::bcUpdate( Mesh& mesh, CurrentBoundaryFE& boundaryFE, const DOF& dof )
         if ((beginEssEdges != beginEssVertices)&&(nDofPerVert||nDofPerEdge))
         {
             //loop on boundary element edges
-            for ( ID iBElemEdge = 1; iBElemEdge <= nBElemEdges; ++iBElemEdge )
+            for ( ID iBElemEdge = 0; iBElemEdge < nBElemEdges; ++iBElemEdge )
             {
                 //index of edge in element
                 iElemEdge = geoShape_Type::faceToEdge( iElemBElement, iBElemEdge ).first;
@@ -718,8 +718,8 @@ BCHandler::bcUpdate( Mesh& mesh, CurrentBoundaryFE& boundaryFE, const DOF& dof )
                 marker = mesh.boundaryEdge( mesh.localEdgeId( iAdjacentElem, iElemEdge ) ).marker(); // edge marker
 
                 //indices of edge's vertices
-                UInt iEdgeFirstVert =  geoBShape_Type::edgeToPoint( iBElemEdge, 1)-1;
-                UInt iEdgeSecondVert = geoBShape_Type::edgeToPoint( iBElemEdge, 2)-1;
+                UInt iEdgeFirstVert =  geoBShape_Type::edgeToPoint( iBElemEdge, 0);
+                UInt iEdgeSecondVert = geoBShape_Type::edgeToPoint( iBElemEdge, 1);
 
                 // Finding this marker on the BC list
                 bcBaseIterator = beginEssEdges;
@@ -739,14 +739,14 @@ BCHandler::bcUpdate( Mesh& mesh, CurrentBoundaryFE& boundaryFE, const DOF& dof )
 
                     //loop on Edge DOFs
                     for ( ID iEdgeDof = 0; iEdgeDof < nDofPerEdge; ++iEdgeDof )
-                        vecEdgeDofs[iTotalEdgeDof++] = nDofPerVert * nBElemVertices + ( iBElemEdge - 1 ) * nDofPerEdge + iEdgeDof ; // local Dof
+                        vecEdgeDofs[iTotalEdgeDof++] = nDofPerVert * nBElemVertices + iBElemEdge * nDofPerEdge + iEdgeDof ; // local Dof
 
 
                     //loop on total DOFs of current edge
                     for (iTotalEdgeDof =0; iTotalEdgeDof<vecEdgeDofs.size(); iTotalEdgeDof++)
                     {
                         UInt lDof = vecEdgeDofs[iTotalEdgeDof]; //local DOF on boundary element
-                        UInt gDof = localToGlobalMapOnBElem( lDof+1 ); // global DOF
+                        UInt gDof = localToGlobalMapOnBElem( lDof ); // global DOF
 
                         //providing the boundary conditions with needed data
                         if ( bcBaseIterator->isDataAVector() )
@@ -771,7 +771,7 @@ BCHandler::bcUpdate( Mesh& mesh, CurrentBoundaryFE& boundaryFE, const DOF& dof )
             //loop on boundary element vertices
             for ( ID iBElemVert = 0; iBElemVert < nBElemVertices; ++iBElemVert )
             {
-                marker = mesh.bElement( iBoundaryElement ).point( iBElemVert+1 ).marker(); // vertex marker
+                marker = mesh.bElement( iBoundaryElement ).point( iBElemVert ).marker(); // vertex marker
 
                 // Finding this marker on the BC list
                 bcBaseIterator = beginEssVertices;
@@ -780,7 +780,7 @@ BCHandler::bcUpdate( Mesh& mesh, CurrentBoundaryFE& boundaryFE, const DOF& dof )
                     for ( ID iVertexDof = 0; iVertexDof < nDofPerVert; ++iVertexDof )
                     {
                         UInt lDof = iBElemVert * nDofPerVert + iVertexDof ; // local Dof
-                        UInt gDof = localToGlobalMapOnBElem(lDof+1); // global Dof
+                        UInt gDof = localToGlobalMapOnBElem(lDof); // global Dof
 
                         //providing the boundary conditions with needed data
                         if ( bcBaseIterator->isDataAVector() )
@@ -880,7 +880,7 @@ BCHandler::bcUpdateOldVersion( Mesh& mesh, CurrentBoundaryFE& boundaryFE, const 
     // ===================================================
     // Loop on boundary faces
     // ===================================================
-    for ( ID iBoundaryElement = 1 ; iBoundaryElement <= numBElements; ++iBoundaryElement )
+    for ( ID iBoundaryElement = 0 ; iBoundaryElement < numBElements; ++iBoundaryElement )
     {
         iAdjacentElem = mesh.bElement( iBoundaryElement ).firstAdjacentElementIdentity();  // id of the element adjacent to the face
         iElemBElement = mesh.bElement( iBoundaryElement ).firstAdjacentElementPosition(); // local id of the face in its adjacent element
@@ -895,7 +895,7 @@ BCHandler::bcUpdateOldVersion( Mesh& mesh, CurrentBoundaryFE& boundaryFE, const 
         {
 
             // loop on boundary elements vertices
-            for ( ID iBElemVert = 1; iBElemVert <= nBElemVertices; ++iBElemVert )
+            for ( ID iBElemVert = 0; iBElemVert < nBElemVertices; ++iBElemVert )
             {
 
                 marker = mesh.bElement( iBoundaryElement ).point( iBElemVert ).marker(); // vertex marker
@@ -915,13 +915,13 @@ BCHandler::bcUpdateOldVersion( Mesh& mesh, CurrentBoundaryFE& boundaryFE, const 
                 }
 
                 // Loop number of DOF per vertex
-                for ( ID l = 1; l <= nDofPerVert; ++l )
+                for ( ID l = 0; l < nDofPerVert; ++l )
                 {
 
-                    lDof = ( iBElemVert - 1 ) * nDofPerVert + l ; // local Dof
+                    lDof = iBElemVert * nDofPerVert + l ; // local Dof
 
                     // global Dof
-                    gDof = dof.localToGlobal( iAdjacentElem, ( iElemVertex - 1 ) * nDofPerVert + l );
+                    gDof = dof.localToGlobalMap( iAdjacentElem, ( iElemVertex ) * nDofPerVert + l );
                     bdltg( lDof ) = gDof; // local to global on this face
 
                     // Adding identifier
@@ -940,7 +940,7 @@ BCHandler::bcUpdateOldVersion( Mesh& mesh, CurrentBoundaryFE& boundaryFE, const 
                             }
                             else
                             { // With user defined functions
-                                boundaryFE.coorMap( x, y, z, boundaryFE.refFE.xi( lDof - 1 ), boundaryFE.refFE.eta( lDof - 1 ) );
+                                boundaryFE.coorMap( x, y, z, boundaryFE.refFE.xi( lDof ), boundaryFE.refFE.eta( lDof ) );
                                 where->addBCIdentifier( new BCIdentifierEssential( gDof, x, y, z ) );
                             }
                             break;
@@ -1012,7 +1012,7 @@ BCHandler::bcUpdateOldVersion( Mesh& mesh, CurrentBoundaryFE& boundaryFE, const 
         if ( nDofPerEdge )
         {
             // loop on boundary element's edges
-            for ( ID iBElemEdge = 1; iBElemEdge <= nBElemEdges; ++iBElemEdge )
+            for ( ID iBElemEdge = 0; iBElemEdge < nBElemEdges; ++iBElemEdge )
             {
                 iElemEdge = geoShape_Type::faceToEdge( iElemBElement, iBElemEdge ).first; // local edge number (in element)
                 marker = mesh.boundaryEdge( mesh.localEdgeId( iAdjacentElem, iElemEdge ) ).marker(); // edge marker
@@ -1031,11 +1031,11 @@ BCHandler::bcUpdateOldVersion( Mesh& mesh, CurrentBoundaryFE& boundaryFE, const 
                 }
 
                 // Loop number of DOF per edge
-                for ( ID l = 1; l <= nDofPerEdge; ++l )
+                for ( ID l = 0; l < nDofPerEdge; ++l )
                 {
 
-                    lDof = nDofBElemVertices + ( iBElemEdge - 1 ) * nDofPerEdge + l ; // local Dof
-                    gDof = dof.localToGlobal( iAdjacentElem,  nDofElemVertices + ( iElemEdge - 1 ) * nDofPerEdge + l ); // global Dof
+                    lDof = nDofBElemVertices + iBElemEdge * nDofPerEdge + l ; // local Dof
+                    gDof = dof.localToGlobalMap( iAdjacentElem,  nDofElemVertices + iElemEdge * nDofPerEdge + l ); // global Dof
                     bdltg( lDof ) = gDof; // local to global on this face
 
                     // Adding identifier
@@ -1053,7 +1053,7 @@ BCHandler::bcUpdateOldVersion( Mesh& mesh, CurrentBoundaryFE& boundaryFE, const 
                             }
                             else
                             { // With user defined functions
-                                boundaryFE.coorMap( x, y, z, boundaryFE.refFE.xi( lDof - 1 ), boundaryFE.refFE.eta( lDof - 1 ) );
+                                boundaryFE.coorMap( x, y, z, boundaryFE.refFE.xi( lDof ), boundaryFE.refFE.eta( lDof ) );
                                 where->addBCIdentifier( new BCIdentifierEssential( gDof, x, y, z ) );
                             }
                             break;
@@ -1124,10 +1124,10 @@ BCHandler::bcUpdateOldVersion( Mesh& mesh, CurrentBoundaryFE& boundaryFE, const 
             {
             case Essential:
                 // Loop on number of DOF per face
-                for ( ID l = 1; l <= nDofPerFace; ++l )
+                for ( ID l = 0; l < nDofPerFace; ++l )
                 {
                     lDof = nDofBElemEdges + nDofBElemVertices + l; // local Dof
-                    gDof = dof.localToGlobal( iAdjacentElem, nDofElemEdges +  nDofElemVertices + ( iElemBElement - 1 ) * nDofPerFace + l ); // global Dof
+                    gDof = dof.localToGlobalMap( iAdjacentElem, nDofElemEdges +  nDofElemVertices + iElemBElement * nDofPerFace + l ); // global Dof
                     // Why kind of data ?
                     if ( where->isDataAVector() )
                     { // With data vector
@@ -1135,7 +1135,7 @@ BCHandler::bcUpdateOldVersion( Mesh& mesh, CurrentBoundaryFE& boundaryFE, const 
                     }
                     else
                     { // With user defined functions
-                        boundaryFE.coorMap( x, y, z, boundaryFE.refFE.xi( lDof - 1 ), boundaryFE.refFE.eta( lDof - 1 ) );
+                        boundaryFE.coorMap( x, y, z, boundaryFE.refFE.xi( lDof ), boundaryFE.refFE.eta( lDof ) );
                         where->addBCIdentifier( new BCIdentifierEssential( gDof, x, y, z ) );
                     }
                 }
@@ -1150,20 +1150,20 @@ BCHandler::bcUpdateOldVersion( Mesh& mesh, CurrentBoundaryFE& boundaryFE, const 
                     if ( type == 0 )
                     {
                         // if the BC is a vector which values don't need to be integrated
-                        for ( ID l = 1; l <= nDofPerFace; ++l )
+                        for ( ID l = 0; l < nDofPerFace; ++l )
                         {
                             lDof = nDofBElemEdges + nDofBElemVertices + l; // local Dof
-                            gDof = dof.localToGlobal( iAdjacentElem, nDofElemEdges +  nDofElemVertices + ( iElemBElement - 1 ) * nDofPerFace + l ); // global Dof
+                            gDof = dof.localToGlobalMap( iAdjacentElem, nDofElemEdges +  nDofElemVertices + iElemBElement * nDofPerFace + l ); // global Dof
                             where->addBCIdentifier( new BCIdentifierNatural( gDof ) );
                         }
                     }
                     else if ( (type == 1) || (type == 2) )
                     {
                         // Loop on number of DOF per face
-                        for ( ID l = 1; l <= nDofPerFace; ++l )
+                        for ( ID l = 0; l < nDofPerFace; ++l )
                         {
                             lDof = nDofBElemEdges + nDofBElemVertices + l; // local Dof
-                            gDof = dof.localToGlobal( iAdjacentElem, nDofElemEdges +  nDofElemVertices + ( iElemBElement - 1 ) * nDofPerFace + l ); // global Dof
+                            gDof = dof.localToGlobalMap( iAdjacentElem, nDofElemEdges +  nDofElemVertices + iElemBElement * nDofPerFace + l ); // global Dof
                             bdltg( lDof ) = gDof; // local to global on this face
                         }
                         where->addBCIdentifier( new BCIdentifierNatural( iBoundaryElement, bdltg ) );
@@ -1176,20 +1176,20 @@ BCHandler::bcUpdateOldVersion( Mesh& mesh, CurrentBoundaryFE& boundaryFE, const 
                 else
                 {
                     // Loop on number of DOF per face
-                    for ( ID l = 1; l <= nDofPerFace; ++l )
+                    for ( ID l = 0; l < nDofPerFace; ++l )
                     {
                         lDof = nDofBElemEdges + nDofBElemVertices + l; // local Dof
-                        gDof = dof.localToGlobal( iAdjacentElem, nDofElemEdges +  nDofElemVertices + ( iElemBElement - 1 ) * nDofPerFace + l ); // global Dof
+                        gDof = dof.localToGlobalMap( iAdjacentElem, nDofElemEdges +  nDofElemVertices + iElemBElement * nDofPerFace + l ); // global Dof
                         bdltg( lDof ) = gDof; // local to global on this face
                     }
                     where->addBCIdentifier( new BCIdentifierNatural( iBoundaryElement, bdltg ) );
                 }
                 break;
             case Robin:
-                 for ( ID l = 1; l <= nDofPerFace; ++l )
+                 for ( ID l = 0; l < nDofPerFace; ++l )
                 {
                     lDof = nDofBElemEdges + nDofBElemVertices + l; // local Dof
-                    gDof = dof.localToGlobal( iAdjacentElem, nDofElemEdges +  nDofElemVertices + ( iElemBElement - 1 ) * nDofPerFace + l ); // global Dof
+                    gDof = dof.localToGlobalMap( iAdjacentElem, nDofElemEdges +  nDofElemVertices + iElemBElement * nDofPerFace + l ); // global Dof
                     bdltg( lDof ) = gDof; // local to global on this face
                 }
                 where->addBCIdentifier( new BCIdentifierNatural( iBoundaryElement, bdltg ) );

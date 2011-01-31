@@ -213,8 +213,8 @@ public:
      */
     Real coordinate ( ID const coordinate ) const
     {
-        ASSERT_BD( coordinate > 0 && coordinate <= NDIM ) ;
-        return M_coordinates[ coordinate -1 ]; // indexing from 1
+        ASSERT_BD( coordinate < NDIM ) ;
+        return M_coordinates[ coordinate ];
     }
     //! Returns the reference to the coordinate specified in the argument
     /*!
@@ -224,8 +224,8 @@ public:
      */
     Real & coordinate ( ID const coordinate )
     {
-        ASSERT_BD( coordinate > 0 && coordinate <= NDIM ) ;
-        return M_coordinates[ coordinate -1 ];
+        ASSERT_BD( coordinate < NDIM ) ;
+        return M_coordinates[ coordinate ];
     }
 
     //@}

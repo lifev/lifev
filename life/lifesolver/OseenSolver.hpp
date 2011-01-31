@@ -1050,7 +1050,7 @@ OseenSolver<MeshType, SolverType>::buildSystem()
     }
     chrono.start();
 
-    for ( UInt iVolume = 1; iVolume <= M_velocityFESpace.mesh()->numVolumes(); iVolume++ )
+    for ( UInt iVolume = 0; iVolume < M_velocityFESpace.mesh()->numVolumes(); iVolume++ )
     {
         chronoDer.start();
         // just to provide the id number in the assem_mat_mixed
@@ -1319,7 +1319,7 @@ updateSystem( const Real         alpha,
         M_Displayer.leaderPrint( "  F-  Updating the convective terms ...        " );
         chrono.start();
 
-        for ( UInt iVolume = 1; iVolume <= M_velocityFESpace.mesh()->numVolumes(); ++iVolume )
+        for ( UInt iVolume = 0; iVolume < M_velocityFESpace.mesh()->numVolumes(); ++iVolume )
         {
             // just to provide the id number in the assem_mat_mixed
             M_pressureFESpace.fe().updateFirstDeriv( M_velocityFESpace.mesh()->volumeList( iVolume ) );
@@ -1336,10 +1336,10 @@ updateSystem( const Real         alpha,
                 UInt iLocal = M_velocityFESpace.fe().patternFirst( iNode );
                 for ( UInt iComponent = 0; iComponent < numVelocityComponent; ++iComponent )
                 {
-                    UInt iGlobal = M_velocityFESpace.dof().localToGlobal( elementID, iLocal + 1 )
+                    UInt iGlobal = M_velocityFESpace.dof().localToGlobalMap( elementID, iLocal )
                                    + iComponent * dimVelocity();
                     M_elementRightHandSide.vec() [ iLocal + iComponent * M_velocityFESpace.fe().nbFEDof() ]
-                    = betaVectorRepeated[iGlobal]; // BASEINDEX + 1
+                    = betaVectorRepeated[iGlobal];
 
                     M_uLoc.vec() [ iLocal + iComponent * M_velocityFESpace.fe().nbFEDof() ]
                     = unRepeated(iGlobal);
@@ -1504,7 +1504,6 @@ OseenSolver<MeshType, SolverType>::iterate( bcHandler_Type& bcHandler )
 
     M_Displayer.leaderPrintMax( "done in " , chrono.diff() );
 
-    //matrixFull->spy( "matrixFull" );
     // solving the system
     M_linearSolver.setMatrix( *matrixFull );
 
@@ -1533,14 +1532,12 @@ OseenSolver<MeshType, SolverType>::reduceSolution( Vector& velocityVector, Vecto
     {
         for ( UInt iDof = 0; iDof < nDimensions * dimVelocity(); ++iDof )
         {
-            // BASEINDEX + 1
-            velocityVector[ iDof ] = solution[ iDof + 1 ];
+            velocityVector[ iDof ] = solution[ iDof ];
         }
 
         for ( UInt iDof = 0; iDof < dimPressure(); ++iDof )
         {
-            // BASEINDEX + 1
-            pressureVector[ iDof ] = solution[ iDof + nDimensions * dimVelocity() + 1 ];
+            pressureVector[ iDof ] = solution[ iDof + nDimensions * dimVelocity() ];
         }
     }
 
@@ -1556,8 +1553,7 @@ OseenSolver<MeshType, SolverType>::reduceResidual( Vector& residualVector )
     {
         for ( UInt iDof = 0; iDof < nDimensions * dimVelocity(); ++iDof )
         {
-            // BASEINDEX + 1
-            residualVector[ iDof ] = residual[ iDof + 1 ];
+            residualVector[ iDof ] = residual[ iDof ];
         }
 
     }
@@ -1672,7 +1668,7 @@ OseenSolver<MeshType, SolverType>::lagrangeMultiplier( const entityFlag_Type&  f
     for ( UInt lmIndex = 0; lmIndex < static_cast <UInt> ( fluxBCVector.size() ); ++lmIndex )
         if ( fluxbcName_Type.compare( fluxBCVector[ lmIndex ] ) == 0 )
             return velocityPressureLambda[3 * M_velocityFESpace.dof().numTotalDof()
-                                          + M_pressureFESpace.dof().numTotalDof() + 1 + lmIndex];
+                                          + M_pressureFESpace.dof().numTotalDof() + lmIndex];
 
     // If lmIndex has not been found a warning message is printed
     std::cout << "!!! Warning - Lagrange multiplier for Flux BC not found!" << std::endl;
@@ -1694,7 +1690,7 @@ OseenSolver<MeshType, SolverType>::removeMean( vector_Type& x )
     if ( M_matrixMassPtr.get() == 0 )
         M_matrixMassPtr.reset( new matrix_Type( M_localMap ) );
 
-    for ( UInt iVolume = 1; iVolume <= M_velocityFESpace.mesh()->numVolumes(); iVolume++ )
+    for ( UInt iVolume = 0; iVolume < M_velocityFESpace.mesh()->numVolumes(); iVolume++ )
     {
         chrono.start();
         // just to provide the id number in the assem_mat_mixed

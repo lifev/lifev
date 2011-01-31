@@ -68,7 +68,7 @@ CurrentBoundaryFEBase::CurrentBoundaryFEBase( const ReferenceFE& refFE, const Ge
         M_quadPt    ( ( int ) M_nbQuadPt, 3 ),
         invArea   ( 1. )
 {
-    for ( UInt iQuadPt(0); iQuadPt < M_nbQuadPt; iQuadPt++ )
+	for ( UInt iQuadPt(0); iQuadPt < M_nbQuadPt; iQuadPt++ )
     {
         for ( UInt iNode(0); iNode < M_nbNode; iNode++ )
         {

@@ -237,13 +237,13 @@ Real pressureNeumann( const Real& /* t */,
 
     switch (icomp)
     {
-    case 1:   //! Dx
+    case 0:   //! Dx
         return  -1.*(4.*x*y*y + 2.*x*x*y + 12.);
         break;
-    case 2:   //! Dy
+    case 1:   //! Dy
         return 0.;
         break;
-    case 3:   //! Dz
+    case 2:   //! Dz
         return 0.;
         break;
     }
@@ -487,13 +487,13 @@ Real saturationNeumann( const Real& /* t */,
 
     switch (icomp)
     {
-    case 1:   //! Dx
+    case 0:   //! Dx
         return 0.;
         break;
-    case 2:   //! Dy
+    case 1:   //! Dy
         return 0.;
         break;
-    case 3:   //! Dz
+    case 2:   //! Dz
         return 0.;
         break;
     }

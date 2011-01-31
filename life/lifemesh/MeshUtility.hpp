@@ -136,7 +136,7 @@ public:
     bool operator() ( const face_Type & face ) const
     {
         bool isBoundary = true;
-        for ( UInt kPointId = 1; kPointId <= face_Type::S_numVertices; ++kPointId )
+        for ( UInt kPointId = 0; kPointId < face_Type::S_numVertices; ++kPointId )
         {
             isBoundary = isBoundary & face.point( kPointId ).boundary();
         }
@@ -151,7 +151,7 @@ public:
     bool operator() ( const edge_Type & edge ) const
     {
         bool isBoundary = true;
-        for ( UInt kPointId = 1; kPointId <= edge_Type::S_numVertices; ++kPointId )
+        for ( UInt kPointId = 0; kPointId < edge_Type::S_numVertices; ++kPointId )
         {
             isBoundary = isBoundary & edge.point( kPointId ).boundary();
         }
@@ -248,12 +248,12 @@ public:
         ID point1Id, point2Id, point3Id, point4Id;
         BareFace bareFace;
 
-        point1Id = face.point( 1 ).id();
-        point2Id = face.point( 2 ).id();
-        point3Id = face.point( 3 ).id();
+        point1Id = face.point( 0 ).id();
+        point2Id = face.point( 1 ).id();
+        point3Id = face.point( 2 ).id();
         if ( faceShape_Type::S_numVertices == 4 )
         {
-            point4Id = face.point( 4 ).id();
+            point4Id = face.point( 3 ).id();
             bareFace = ( makeBareFace( point1Id, point2Id, point3Id, point4Id ) ).first;
         }
         else
@@ -343,8 +343,8 @@ public:
         ID point1Id, point2Id;
         BareEdge bareEdge;
 
-        point1Id = edge.point( 1 ).id();
-        point2Id = edge.point( 2 ).id();
+        point1Id = edge.point( 0 ).id();
+        point2Id = edge.point( 1 ).id();
         bareEdge = ( makeBareEdge( point1Id, point2Id ) ).first;
         return boundaryEdgeContainerPtr->find( bareEdge ) != boundaryEdgeContainerPtr->end();
     }
@@ -583,18 +583,18 @@ UInt findFaces( const MeshType & mesh, temporaryFaceContainer_Type & boundaryFac
     for ( typename volumeContainer_Type::const_iterator volumeContainerIterator = mesh.volumeList.begin();
             volumeContainerIterator != mesh.volumeList.end(); ++volumeContainerIterator )
     {
-        for ( ID jFaceLocalId = 1; jFaceLocalId <= mesh.numLocalFaces(); ++jFaceLocalId )
+        for ( ID jFaceLocalId = 0; jFaceLocalId < mesh.numLocalFaces(); ++jFaceLocalId )
         {
-            point1Id = volumeShape.faceToPoint( jFaceLocalId, 1 );
-            point2Id = volumeShape.faceToPoint( jFaceLocalId, 2 );
-            point3Id = volumeShape.faceToPoint( jFaceLocalId, 3 );
+            point1Id = volumeShape.faceToPoint( jFaceLocalId, 0 );
+            point2Id = volumeShape.faceToPoint( jFaceLocalId, 1 );
+            point3Id = volumeShape.faceToPoint( jFaceLocalId, 2 );
             // go to global
             point1Id = ( volumeContainerIterator->point( point1Id ) ).id();
             point2Id = ( volumeContainerIterator->point( point2Id ) ).id();
             point3Id = ( volumeContainerIterator->point( point3Id ) ).id();
             if ( MeshType::FaceShape::S_numVertices == 4 )
             {
-                point4Id = volumeShape.faceToPoint( jFaceLocalId, 4 );
+                point4Id = volumeShape.faceToPoint( jFaceLocalId, 3 );
                 point4Id = ( volumeContainerIterator->point( point4Id ) ).id();
                 bareFace = ( makeBareFace( point1Id, point2Id, point3Id, point4Id ) ).first;
             }
@@ -689,10 +689,10 @@ UInt findBoundaryEdges( const MeshType & mesh, temporaryEdgeContainer_Type & bou
     for ( typename faceContainer_Type::const_iterator faceContainerIterator = mesh.faceList.begin();
             faceContainerIterator != mesh.faceList.begin() + mesh.numBFaces(); ++faceContainerIterator )
     {
-        for ( ID jEdgeLocalId = 1; jEdgeLocalId <= mesh.numLocalEdgesOfFace(); ++jEdgeLocalId )
+        for ( ID jEdgeLocalId = 0; jEdgeLocalId < mesh.numLocalEdgesOfFace(); ++jEdgeLocalId )
         {
-            point1Id = faceShape_Type::edgeToPoint( jEdgeLocalId, 1 );
-            point2Id = faceShape_Type::edgeToPoint( jEdgeLocalId, 2 );
+            point1Id = faceShape_Type::edgeToPoint( jEdgeLocalId, 0 );
+            point2Id = faceShape_Type::edgeToPoint( jEdgeLocalId, 1 );
             // go to global
             point1Id = ( faceContainerIterator->point( point1Id ) ).id();
             point2Id = ( faceContainerIterator->point( point2Id ) ).id();
@@ -745,10 +745,10 @@ UInt findInternalEdges( const MeshType & mesh,
     for ( typename volumeContainer_Type::const_iterator volumeContainerIterator = mesh.volumeList.begin();
             volumeContainerIterator != mesh.volumeList.end(); ++volumeContainerIterator )
     {
-        for ( ID jEdgeLocalId = 1; jEdgeLocalId <= mesh.numLocalEdges(); ++jEdgeLocalId )
+        for ( ID jEdgeLocalId = 0; jEdgeLocalId < mesh.numLocalEdges(); ++jEdgeLocalId )
         {
-            point1Id = volumeShape_Type::edgeToPoint( jEdgeLocalId, 1 );
-            point2Id = volumeShape_Type::edgeToPoint( jEdgeLocalId, 2 );
+            point1Id = volumeShape_Type::edgeToPoint( jEdgeLocalId, 0 );
+            point2Id = volumeShape_Type::edgeToPoint( jEdgeLocalId, 1 );
             // go to global
             point1Id = ( volumeContainerIterator->point( point1Id ) ).id();
             point2Id = ( volumeContainerIterator->point( point2Id ) ).id();
@@ -786,10 +786,10 @@ template <typename MeshElementMarkedType>
 entityFlag_Type inheritPointsStrongerMarker( MeshElementMarkedType & geoElement )
 {
     ASSERT_PRE( MeshElementMarkedType::S_nDimensions > 0,
-                "A MeshElementMarked with ndim<1 cannot inherit marker flags" );
+                "A MeshElementMarked with ndim == 0 cannot inherit marker flags" );
 
-    geoElement.setMarker( geoElement.point( 1 ).marker() );
-    for ( ID jPointId = 2; jPointId <= MeshElementMarkedType::S_numVertices; ++jPointId )
+    geoElement.setMarker( geoElement.point( 0 ).marker() );
+    for ( ID jPointId = 1; jPointId < MeshElementMarkedType::S_numVertices; ++jPointId )
         geoElement.setStrongerMarker( geoElement.point( jPointId ).marker() );
     return geoElement.marker();
 
@@ -813,10 +813,10 @@ template <typename MeshElementMarkedType>
 entityFlag_Type inheritPointsWeakerMarker( MeshElementMarkedType & geoElement )
 {
     ASSERT_PRE( MeshElementMarkedType::S_nDimensions > 0,
-                "A MeshElementMarked with ndim<1 cannot inherit marker flags" );
+                "A MeshElementMarked with ndim == 0 cannot inherit marker flags" );
 
-    geoElement.setMarker( geoElement.point( 1 ).marker() );
-    for ( ID jPointId = 2; jPointId <= MeshElementMarkedType::S_numVertices; ++jPointId )
+    geoElement.setMarker( geoElement.point( 0 ).marker() );
+    for ( ID jPointId = 1; jPointId < MeshElementMarkedType::S_numVertices; ++jPointId )
         geoElement.setWeakerMarker( geoElement.point( jPointId ).marker() );
     return geoElement.marker();
 
@@ -856,10 +856,10 @@ UInt testDomainTopology( MeshType const & mesh, UInt & numBoundaryEdges )
         << kFaceId << " " << mesh.numBFaces();
         ASSERT( faceContainerIterator != mesh.faceList.end(), errorStream.str().c_str() );
 
-        for ( ID jEdgeLocalId = 1; jEdgeLocalId <= face_Type::S_numEdges; ++jEdgeLocalId )
+        for ( ID jEdgeLocalId = 0; jEdgeLocalId < face_Type::S_numEdges; ++jEdgeLocalId )
         {
-            point1Id = facetShape.edgeToPoint( jEdgeLocalId, 1 );
-            point2Id = facetShape.edgeToPoint( jEdgeLocalId, 2 );
+            point1Id = facetShape.edgeToPoint( jEdgeLocalId, 0 );
+            point2Id = facetShape.edgeToPoint( jEdgeLocalId, 1 );
             // go to global
             point1Id = ( faceContainerIterator->point( point1Id ) ).id();
             point2Id = ( faceContainerIterator->point( point2Id ) ).id();
@@ -929,7 +929,7 @@ setBoundaryEdgesMarker( MeshType & mesh, std::ostream & logStream = std::cout,
         logStream << "NEW EDGE MARKER MAP" << std::endl
         << " ID->New Marker" << std::endl;
 
-    for ( ID kEdgeId = 1; kEdgeId <= mesh.numBEdges(); ++kEdgeId )
+    for ( ID kEdgeId = 0; kEdgeId < mesh.numBEdges(); ++kEdgeId )
     {
         edgePtr = &( mesh.edge( kEdgeId ) );
         if ( edgePtr->isMarkerUnset() )
@@ -979,7 +979,7 @@ setBoundaryFacesMarker( MeshType & mesh, std::ostream & logStream = std::cout,
         logStream << " Face ID -> New Marker\tFace ID -> New Marker\tFace ID -> New Marker" << std::endl;
     }
 
-    for ( UInt kFaceId = 1; kFaceId <= mesh.numBFaces(); ++kFaceId )
+    for ( UInt kFaceId = 0; kFaceId < mesh.numBFaces(); ++kFaceId )
     {
         facePtr = &( mesh.face( kFaceId ) );
         if ( facePtr->isMarkerUnset() )
@@ -1031,14 +1031,14 @@ setBoundaryPointsMarker( MeshType & mesh, std::ostream & logStream = std::cout,
         *( isDefinedPointMarkerIterator++ ) = pointContainerIterator->isMarkerSet();
 
     typename MeshType::BElementType * facetPtr = 0;
-    for ( UInt kFacetId = 1; kFacetId <= mesh.numBElements(); ++kFacetId )
+    for ( UInt kFacetId = 0; kFacetId < mesh.numBElements(); ++kFacetId )
     {
         facetPtr = &( mesh.bElement( kFacetId ) );
         if ( facetPtr->isMarkerSet() )
         {
-            for ( UInt jPointId = 1; jPointId <= facetShape_Type::S_numPoints; ++jPointId )
+            for ( UInt jPointId = 0; jPointId < facetShape_Type::S_numPoints; ++jPointId )
             {
-                if ( !isDefinedPointMarker[ ( facetPtr->point( jPointId ).id() ) - 1 ] )
+                if ( !isDefinedPointMarker[ facetPtr->point( jPointId ).id() ] )
                     facetPtr->setStrongerMarkerAtPoint( jPointId, facetPtr->marker() );
             }
         }
@@ -1074,7 +1074,7 @@ setBoundaryPointsMarker( MeshType & mesh, std::ostream & logStream = std::cout,
 */
 //! @brief Verifies if a list of mesh entities have the ID properly set.
 /* More precisely, the id() must correspond to the position of the entity
-   in the list (starting from 1, since id=0 is reserved for unset entities.
+   in the list.
 
    @pre The template argument MeshEntityListType must be a stl
    compliant container and its elements must have the method id().
@@ -1084,17 +1084,17 @@ bool checkId( const MeshEntityListType & meshEntityList )
 {
     typedef typename MeshEntityListType::const_iterator MeshEntityListTypeConstIterator_Type;
     bool ok( true );
-    UInt counter( 1 );
+    UInt counter( 0 );
     for ( MeshEntityListTypeConstIterator_Type meshEntityListIterator = meshEntityList.begin();
     		meshEntityListIterator != meshEntityList.end() && ok; ++meshEntityListIterator, ++counter )
-        ok = ( meshEntityListIterator->id() == counter );
+    	ok = ok && ( meshEntityListIterator->id() == counter );
     return ok;
 }
 
 
 //! @brief Fixes a a list of mesh entities so that the ID is properly set.
 /* @post  The id will correspond to the position of the entity
-   in the list (starting from 1, since id=0 is reserved for unset entities.
+   in the list.
 
    @pre The template argument MeshEntityListType must be a stl
    compliant container and its elements must have the method UInt &id().
@@ -1106,7 +1106,7 @@ void fixId( MeshEntityListType & meshEntityList )
     typedef typename MeshEntityListType::iterator Iter;
     for ( Iter meshEntityListIterator = meshEntityList.begin();
     		meshEntityListIterator != meshEntityList.end(); ++meshEntityListIterator )
-        meshEntityListIterator->setId( ++counter );
+        meshEntityListIterator->setId( counter++ );
 }
 
 
@@ -1127,7 +1127,7 @@ setBoundaryPointsCounters( MeshType & mesh )
 
     mesh._bPoints.clear();
 
-    for ( UInt kPointId = 1; kPointId <= mesh.numVertices(); ++kPointId )
+    for ( UInt kPointId = 0; kPointId < mesh.numVertices(); ++kPointId )
     {
         if ( mesh.isBoundaryPoint( kPointId ) )
         {
@@ -1136,7 +1136,7 @@ setBoundaryPointsCounters( MeshType & mesh )
         }
     }
 
-    for ( UInt kPointId = mesh.numVertices() + 1; kPointId <= mesh.storedPoints(); ++kPointId )
+    for ( UInt kPointId = mesh.numVertices(); kPointId < mesh.storedPoints(); ++kPointId )
     {
         if ( mesh.isBoundaryPoint( kPointId ) )
         {
@@ -1149,7 +1149,7 @@ setBoundaryPointsCounters( MeshType & mesh )
     mesh._bPoints.clear();
     mesh._bPoints.reserve( boundaryPointCounter );
 
-    for ( UInt kPointId = 1; kPointId <= mesh.storedPoints(); ++kPointId )
+    for ( UInt kPointId = 0; kPointId < mesh.storedPoints(); ++kPointId )
     {
         if ( mesh.isBoundaryPoint( kPointId ) )
             mesh._bPoints.push_back( &mesh.point( kPointId ) );
@@ -1197,11 +1197,11 @@ fixBoundaryPoints( MeshType & mesh, std::ostream & logStream = std::cout,
         numitems=facetShape_Type::S_numPoints;
     }
 
-    for ( UInt kFacetId = 1; kFacetId <= mesh.numBElements(); ++kFacetId )
-        for ( UInt jPointId = 1; jPointId <= numitems; ++jPointId )
-            boundaryPoints[mesh.bElement(kFacetId).point(jPointId).id()-1]=true;
-    for (ID  kPointId = 1; kPointId <= mesh.storedPoints() ; ++kPointId )
-        mesh.point(kPointId).setBoundary(boundaryPoints[kPointId-1]);
+    for ( UInt kFacetId = 0; kFacetId < mesh.numBElements(); ++kFacetId )
+        for ( UInt jPointId = 0; jPointId < numitems; ++jPointId )
+            boundaryPoints[mesh.bElement(kFacetId).point(jPointId).id()]=true;
+    for (ID  kPointId = 0; kPointId < mesh.storedPoints() ; ++kPointId )
+        mesh.point(kPointId).setBoundary(boundaryPoints[kPointId]);
     boundaryPoints.clear();
     std::vector<bool> temp;
     boundaryPoints.swap(temp);
@@ -1261,9 +1261,9 @@ bool checkFacesStoringOrder( const MeshType & mesh )
     EnquireBEntity<MeshType> enquireBoundaryFace( mesh );
     bool ok( true );
 
-    for ( UInt kFacetId = 1; kFacetId <= mesh.numFacets(); ++kFacetId )
+    for ( UInt kFacetId = 0; kFacetId < mesh.numFacets(); ++kFacetId )
         ok = ok && enquireBoundaryFace( mesh.boundaryFace( kFacetId ) );
-    for ( UInt kFacetId = mesh.numBElements() + 1; kFacetId <= mesh.storedFaces(); ++kFacetId )
+    for ( UInt kFacetId = mesh.numBElements(); kFacetId < mesh.storedFaces(); ++kFacetId )
         ok = ok && ! enquireBoundaryFace( mesh.face( kFacetId ) );
 
     return ok;
@@ -1283,9 +1283,9 @@ bool checkEdgesStoringOrder( const MeshType & mesh )
     EnquireBEntity<MeshType> enquireBoundaryEdge( mesh );
     bool ok( true );
 
-    for ( UInt kBEdgeId = 1; kBEdgeId <= mesh.numBEdges(); ++kBEdgeId )
+    for ( UInt kBEdgeId = 0; kBEdgeId < mesh.numBEdges(); ++kBEdgeId )
         ok = ok && enquireBoundaryEdge( mesh.bareEdge( kBEdgeId ) );
-    for ( UInt kBEdgeId = mesh.numBEdges() + 1; kBEdgeId <= mesh.storedEdges(); ++kBEdgeId )
+    for ( UInt kBEdgeId = mesh.numBEdges(); kBEdgeId < mesh.storedEdges(); ++kBEdgeId )
         ok = ok && ! enquireBoundaryEdge( mesh.edge( kBEdgeId ) );
     return ok;
 }
@@ -1427,12 +1427,12 @@ bool fixBoundaryFaces( MeshType & mesh,
     faceContainerIterator = mesh.faceList.begin();
     for ( UInt facid = 0; facid < mesh.numBElements(); ++facid )
     {
-        point1Id = ( faceContainerIterator->point( 1 ) ).id();
-        point2Id = ( faceContainerIterator->point( 2 ) ).id();
-        point3Id = ( faceContainerIterator->point( 3 ) ).id();
+        point1Id = ( faceContainerIterator->point( 0 ) ).id();
+        point2Id = ( faceContainerIterator->point( 1 ) ).id();
+        point3Id = ( faceContainerIterator->point( 2 ) ).id();
         if ( MeshType::FaceShape::S_numVertices == 4 )
         {
-            point4Id = ( faceContainerIterator->point( 4 ) ).id();
+            point4Id = ( faceContainerIterator->point( 3 ) ).id();
             bareFace = ( makeBareFace( point1Id, point2Id, point3Id, point4Id ) ).first;
         }
         else
@@ -1463,7 +1463,7 @@ bool fixBoundaryFaces( MeshType & mesh,
             volumePtr = &mesh.volume( volumeId ); // Element
             jFaceLocalId = volumeIdToLocalFaceIdPair.second;       // The local ID of face on element
             // Reset face point definition to be consistent with face.
-            for ( UInt kPointId = 1; kPointId <= face_Type::S_numPoints; ++kPointId )
+            for ( UInt kPointId = 0; kPointId < face_Type::S_numPoints; ++kPointId )
             {
                 faceContainerIterator->setPoint( kPointId, volumePtr->point( volumeShape.faceToPoint( jFaceLocalId, kPointId ) ) );
             }
@@ -1624,7 +1624,7 @@ bool buildFaces( MeshType & mesh,
             volumePtr = &mesh.volume( volumeId ); // Element
             jFaceLocalId = volumeIdToLocalFaceIdPair.second;       // The local ID of face on element
 
-            for ( UInt kPointId = 1; kPointId <= face_Type::S_numPoints; ++kPointId )
+            for ( UInt kPointId = 0; kPointId < face_Type::S_numPoints; ++kPointId )
                 face.setPoint( kPointId, volumePtr->point( volumeShape.faceToPoint( jFaceLocalId, kPointId ) ) );
             // Add extra info
             face.firstAdjacentElementIdentity() = volumeId;
@@ -1684,12 +1684,12 @@ bool buildFaces( MeshType & mesh,
 
     for ( UInt jFaceId = 0; jFaceId < mesh.faceList.size(); ++jFaceId )
     {
-        point1Id = ( mesh.faceList[ jFaceId ].point( 1 ) ).id();
-        point2Id = ( mesh.faceList[ jFaceId ].point( 2 ) ).id();
-        point3Id = ( mesh.faceList[ jFaceId ].point( 3 ) ).id();
+        point1Id = ( mesh.faceList[ jFaceId ].point( 0 ) ).id();
+        point2Id = ( mesh.faceList[ jFaceId ].point( 1 ) ).id();
+        point3Id = ( mesh.faceList[ jFaceId ].point( 2 ) ).id();
         if ( MeshType::FaceShape::S_numVertices == 4 )
         {
-            point4Id = ( mesh.faceList[ jFaceId ].point( 4 ) ).id();
+            point4Id = ( mesh.faceList[ jFaceId ].point( 3 ) ).id();
             _face = makeBareFace( point1Id, point2Id, point3Id, point4Id );
         }
         else
@@ -1706,19 +1706,18 @@ bool buildFaces( MeshType & mesh,
             volumeContainerIterator != mesh.volumeList.end(); ++volumeContainerIterator )
     {
         volumeId = volumeContainerIterator->id();
-        // REMEMBER: numbering from 1
-        for ( UInt jFaceLocalId = 1; jFaceLocalId <= mesh.numLocalFaces(); jFaceLocalId++ )
+        for ( UInt jFaceLocalId = 0; jFaceLocalId < mesh.numLocalFaces(); jFaceLocalId++ )
         {
-            point1Id = volumeShape.faceToPoint( jFaceLocalId, 1 );
-            point2Id = volumeShape.faceToPoint( jFaceLocalId, 2 );
-            point3Id = volumeShape.faceToPoint( jFaceLocalId, 3 );
+            point1Id = volumeShape.faceToPoint( jFaceLocalId, 0 );
+            point2Id = volumeShape.faceToPoint( jFaceLocalId, 1 );
+            point3Id = volumeShape.faceToPoint( jFaceLocalId, 2 );
             // go to global
             point1Id = ( volumeContainerIterator->point( point1Id ) ).id();
             point2Id = ( volumeContainerIterator->point( point2Id ) ).id();
             point3Id = ( volumeContainerIterator->point( point3Id ) ).id();
             if ( MeshType::FaceShape::S_numVertices == 4 )
             {
-                point4Id = volumeShape.faceToPoint( jFaceLocalId, 4 );
+                point4Id = volumeShape.faceToPoint( jFaceLocalId, 3 );
                 point4Id = ( volumeContainerIterator->point( point4Id ) ).id();
                 _face = makeBareFace( point1Id, point2Id, point3Id, point4Id );
             }
@@ -1730,7 +1729,7 @@ bool buildFaces( MeshType & mesh,
             if ( faceIdToBoolPair.second )
             {
                 // a new face It must be internal.
-                for ( UInt kPointId = 1; kPointId <= face_Type::S_numPoints; ++kPointId )
+                for ( UInt kPointId = 0; kPointId < face_Type::S_numPoints; ++kPointId )
                     face.setPoint( kPointId, volumeContainerIterator->point( volumeShape.faceToPoint( jFaceLocalId, kPointId ) ) );
                 face.firstAdjacentElementIdentity() = volumeId;
                 face.firstAdjacentElementPosition() = jFaceLocalId;
@@ -1885,7 +1884,7 @@ bool buildEdges( MeshType & mesh,
             faceId = faceIdToLocalEdgeIdPair.first; // Face ID
             facePtr = &mesh.face( faceId ); // Face
             jEdgeLocalId = faceIdToLocalEdgeIdPair.second;       // The local ID of edge on face
-            for ( UInt kPointId = 1; kPointId <= edge_Type::S_numPoints; ++kPointId )
+            for ( UInt kPointId = 0; kPointId < edge_Type::S_numPoints; ++kPointId )
             {
                 edge.setPoint( kPointId, facePtr->point( faceShape_Type::edgeToPoint( jEdgeLocalId, kPointId ) ) );
             }
@@ -1932,7 +1931,7 @@ bool buildEdges( MeshType & mesh,
         faceId = faceIdToLocalEdgeIdPair.first; // Volume ID
         volumePtr = &mesh.volume( faceId ); // Volume that generated the edge
         jEdgeLocalId = faceIdToLocalEdgeIdPair.second;       // The local ID of edge on volume
-        for ( UInt kPointId = 1; kPointId <= edge_Type::S_numPoints; ++kPointId )
+        for ( UInt kPointId = 0; kPointId < edge_Type::S_numPoints; ++kPointId )
             edge.setPoint( kPointId, volumePtr->point( volumeShape_Type::edgeToPoint( jEdgeLocalId, kPointId ) ) );
         edge.setMarker( mesh.marker() ); // Get marker value: that of the mesh
         mesh.addEdge( edge, false );
@@ -1987,18 +1986,18 @@ p2MeshFromP1Data( MeshType & mesh, std::ostream & logStream = std::cout )
 
     logStream << "Processing " << mesh.storedEdges() << " P1 Edges" << std::endl;
     UInt numBoundaryEdges = mesh.numBEdges();
-    for ( UInt jEdgeId = 1; jEdgeId <= mesh.storedEdges(); ++jEdgeId )
+    for ( UInt jEdgeId = 0; jEdgeId < mesh.storedEdges(); ++jEdgeId )
     {
         edgePtr = & mesh.edge( jEdgeId );
-        point1Id = ( edgePtr->point( 1 ) ).id();
-        point2Id = ( edgePtr->point( 2 ) ).id();
-        pointPtr = & mesh.addPoint( jEdgeId <= numBoundaryEdges ); // true for boundary points
-        pointPtr->x() = ( ( edgePtr->point( 1 ) ).x() +
-                    ( edgePtr->point( 2 ) ).x() ) * .5;
-        pointPtr->y() = ( ( edgePtr->point( 1 ) ).y() +
-                    ( edgePtr->point( 2 ) ).y() ) * .5;
-        pointPtr->z() = ( ( edgePtr->point( 1 ) ).z() +
-                    ( edgePtr->point( 2 ) ).z() ) * .5;
+        point1Id = ( edgePtr->point( 0 ) ).id();
+        point2Id = ( edgePtr->point( 1 ) ).id();
+        pointPtr = & mesh.addPoint( jEdgeId < numBoundaryEdges ); // true for boundary points
+        pointPtr->x() = ( ( edgePtr->point( 0 ) ).x() +
+                    ( edgePtr->point( 1 ) ).x() ) * .5;
+        pointPtr->y() = ( ( edgePtr->point( 0 ) ).y() +
+                    ( edgePtr->point( 1 ) ).y() ) * .5;
+        pointPtr->z() = ( ( edgePtr->point( 0 ) ).z() +
+                    ( edgePtr->point( 1 ) ).z() ) * .5;
 
         /*
           If we have set a marker for the boundary edge, that marker is
@@ -2021,13 +2020,13 @@ p2MeshFromP1Data( MeshType & mesh, std::ostream & logStream = std::cout )
 
         logStream << "Processing " << mesh.storedFaces() << " Face Edges"
         << std::endl;
-        for ( UInt kFaceId = 1; kFaceId <= mesh.storedFaces(); ++kFaceId )
+        for ( UInt kFaceId = 0; kFaceId < mesh.storedFaces(); ++kFaceId )
         {
             facetPtr = &mesh.face( kFaceId );
-            for ( UInt jEdgeLocalId = 1; jEdgeLocalId <= mesh.numLocalEdgesOfFace(); jEdgeLocalId++ )
+            for ( UInt jEdgeLocalId = 0; jEdgeLocalId < mesh.numLocalEdgesOfFace(); jEdgeLocalId++ )
             {
-                point1Id = GeoBShape::edgeToPoint( jEdgeLocalId, 1 );
-                point2Id = GeoBShape::edgeToPoint( jEdgeLocalId, 2 );
+                point1Id = GeoBShape::edgeToPoint( jEdgeLocalId, 0 );
+                point2Id = GeoBShape::edgeToPoint( jEdgeLocalId, 1 );
                 point1Id = ( facetPtr->point( point1Id ) ).id();
                 point2Id = ( facetPtr->point( point2Id ) ).id();
                 bareEdgeToBoolPair = makeBareEdge( point1Id, point2Id );
@@ -2039,7 +2038,7 @@ p2MeshFromP1Data( MeshType & mesh, std::ostream & logStream = std::cout )
                 else
                 {
                     // new edge -> new Point
-                    pointPtr = &mesh.addPoint( kFaceId <= numBoundaryFaces );// true for boundary points
+                    pointPtr = &mesh.addPoint( kFaceId < numBoundaryFaces );// true for boundary points
                     edgeIdToBoolPair = bareEdgeHandler.addIfNotThere( bareEdgeToBoolPair.first, pointPtr->id() );
                     pointPtr->x() = ( mesh.point( point1Id ).x() +
                                 mesh.point( point2Id ).x() ) * .5;
@@ -2059,13 +2058,13 @@ p2MeshFromP1Data( MeshType & mesh, std::ostream & logStream = std::cout )
     logStream << "Processing " << mesh.numElements() << " Mesh Elements"
     << std::endl;
     UInt nev = GeoShape::S_numVertices;
-    for ( UInt kElementId = 1; kElementId <= mesh.numElements(); ++kElementId )
+    for ( UInt kElementId = 0; kElementId < mesh.numElements(); ++kElementId )
     {
         elementPtr = &mesh.element( kElementId );
-        for ( UInt jEdgeLocalId = 1; jEdgeLocalId <= mesh.numLocalEdges(); jEdgeLocalId++ )
+        for ( UInt jEdgeLocalId = 0; jEdgeLocalId < mesh.numLocalEdges(); jEdgeLocalId++ )
         {
-            point1Id = elementShape.edgeToPoint( jEdgeLocalId, 1 );
-            point2Id = elementShape.edgeToPoint( jEdgeLocalId, 2 );
+            point1Id = elementShape.edgeToPoint( jEdgeLocalId, 0 );
+            point2Id = elementShape.edgeToPoint( jEdgeLocalId, 1 );
             point1Id = ( elementPtr->point( point1Id ) ).id();
             point2Id = ( elementPtr->point( point2Id ) ).id();
             bareEdgeToBoolPair = makeBareEdge( point1Id, point2Id );
@@ -2129,7 +2128,7 @@ p2MeshFromP1Data( MeshType & mesh, std::ostream & logStream = std::cout )
 //     mesh.unsetLinkSwitch("HAS_BOUNDAY_EDGES");
 //   }
 //   if (mesh.storedFaces()>0){
-//     if(mesh.face(1).firstAdjacentElementIdentity(
+//     if(mesh.face(0).firstAdjacentElementIdentity(
 //     mesh.setLinkSwitch("HAS_BOUNDARY_EDGES");
 //   }  else{
 //     mesh.unsetLinkSwitch("HAS_BOUNDAY_EDGES");

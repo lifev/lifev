@@ -89,16 +89,16 @@ Real u2(const Real& t, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, 
 {
     switch (i)
     {
-    case 1:
+    case 0:
         return 0.0;
         break;
-    case 3:
+    case 2:
         if ( t <= 0.003 )
             return 1.3332e4;
 //      return 0.01;
         return 0.0;
         break;
-    case 2:
+    case 1:
         return 0.0;
 //      return 1.3332e4;
 //    else
@@ -204,7 +204,7 @@ struct Cylinder::Private
               const Real& z,
               const ID&   id ) const
     {
-        if ( id == 1 )
+        if ( id == 0 )
         {
             if ( centered )
             {
@@ -242,16 +242,16 @@ struct Cylinder::Private
 
         switch (id)
         {
-        case 1: // x component
+        case 0: // x component
             return 0.0;
             break;
-        case 3: // z component
+        case 2: // z component
             if ( t <= 0.003 )
                 return 1.3332e4;
             //      return 0.01;
             return 0.0;
             break;
-        case 2: // y component
+        case 1: // y component
             return 0.0;
             //      return 1.3332e4;
             //    else
@@ -282,7 +282,7 @@ struct Cylinder::Private
         double result(0.);
         double dist2 = D*D/4. - (x*x + y*y);
 
-        if (id == 3)
+        if (id == 2)
         {
             // make sure it is exactely 0 on the cylinder surface.
             result = (fabs(dist2)<1e-5) ? 0. : Um_2d()*2*dist2;
@@ -382,7 +382,7 @@ Cylinder::run()
     BCHandler bcH;
     BCFunctionBase uZero( zero_scalar );
     std::vector<ID> zComp(1);
-    zComp[0] = 3;
+    zComp[0] = 2;
 
     BCFunctionBase uIn  (  d->getU_2d() );
     BCFunctionBase uOne (  d->getU_one() );

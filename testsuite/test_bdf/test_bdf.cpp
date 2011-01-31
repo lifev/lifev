@@ -191,7 +191,7 @@ void test_bdf::run()
     //Assembling Matrix M
     Members->comm->Barrier();
     chrono.start();
-    for (UInt iVol = 1; iVol <= FeSpace.mesh()->numElements(); iVol++)
+    for (UInt iVol = 0; iVol < FeSpace.mesh()->numElements(); iVol++)
     {
         FeSpace.fe().updateJac(FeSpace.mesh()->element(iVol));
         elmat.zero();
@@ -278,7 +278,7 @@ void test_bdf::run()
         Real coeff = bdf.coefficientDerivative(0) / delta_t;
         Real visc = nu(t);
         Real s = sigma(t);
-        for (UInt i = 1; i <= FeSpace.mesh()->numElements(); i++)
+        for (UInt i = 0; i < FeSpace.mesh()->numElements(); i++)
         {
             FeSpace.fe().updateFirstDerivQuadPt(FeSpace.mesh()->element(i));
             elmat.zero();

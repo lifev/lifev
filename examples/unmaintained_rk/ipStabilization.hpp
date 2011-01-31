@@ -194,7 +194,7 @@ void StabilizationIP<MESH, DOF>::apply( MATRIX& matrix,  const VECTOR& state, co
         const UInt iElAd1 = M_mesh->face( iFace ).firstAdjacentElementIdentity();
         const UInt iElAd2 = M_mesh->face( iFace ).secondAdjacentElementIdentity();
 
-        if ( iElAd1 == iElAd2 || iElAd1 == 0 || iElAd2 == 0)
+        if ( iElAd1 == iElAd2 || iElAd1 == NotAnId || iElAd2 == NotAnId)
         {
             //std::cout << "iElAd1 = " << iElAd1 << "; iElAd2 = " << iElAd2 << std::endl;
             continue;
@@ -228,16 +228,16 @@ void StabilizationIP<MESH, DOF>::apply( MATRIX& matrix,  const VECTOR& state, co
             for ( int iNode = 0; iNode < M_feBd.nbNode; ++iNode )
             {
                 UInt iloc = M_fToP( iFaEl, iNode+1 );
-                for ( int iCoor = 0; iCoor < M_fe1.nbCoor; ++iCoor )
+                for ( int iCoor = 0; iCoor < M_fe1.nbCoor(); ++iCoor )
                 {
-                    UInt ig = M_dof.localToGlobal( iElAd1, iloc + 1 ) - 1 +iCoor*nDof;
-                    if (state.BlockMap().LID(ig + 1) >= 0)
-                        beta.vec()[ iCoor*M_feBd.nbNode + iNode ] = state( ig + 1); // BASEINDEX + 1
+                    UInt ig = M_dof.localToGlobalMap( iElAd1, iloc ) +iCoor*nDof;
+                    if (state.BlockMap().LID(ig) >= 0)
+                        beta.vec()[ iCoor*M_feBd.nbNode + iNode ] = state( ig); // BASEINDEX + 1
                 }
             }
 
             // second, calculate its max norm
-            for ( int l = 0; l < int( M_fe1.nbCoor*M_feBd.nbNode ); ++l )
+            for ( int l = 0; l < int( M_fe1.nbCoor()*M_feBd.nbNode ); ++l )
             {
                 if ( bmax < fabs( beta.vec()[ l ] ) )
                     bmax = fabs( beta.vec()[ l ] );
@@ -330,7 +330,7 @@ void StabilizationIP<MESH, DOF>::apply( MATRIX& matrix,  const VECTOR& state, co
             for ( int iNode=0; iNode<M_feBd.nbNode; ++iNode )
             {
                 Real bn = 0;
-                for ( int iCoor=0; iCoor<M_fe1.nbCoor; ++iCoor )
+                for ( int iCoor=0; iCoor<M_fe1.nbCoor(); ++iCoor )
                 {
                     bn += normal(iNode, iCoor) *
                           beta.vec()[ iCoor*M_feBd.nbNode + iNode ];
@@ -509,7 +509,7 @@ void StabilizationIP<MESH, DOF>::apply_expl(VECTOR& vector, const VECTOR& state)
         const UInt iElAd1 = M_mesh->face( iFace ).firstAdjacentElementIdentity();
         const UInt iElAd2 = M_mesh->face( iFace ).secondAdjacentElementIdentity();
 
-        if ( iElAd1 == iElAd2 || iElAd1 == 0 || iElAd2 == 0)
+        if ( iElAd1 == iElAd2 || iElAd1 == NotAnId || iElAd2 == NotAnId)
         {
             continue;
         }
@@ -539,16 +539,16 @@ void StabilizationIP<MESH, DOF>::apply_expl(VECTOR& vector, const VECTOR& state)
             for ( int iNode = 0; iNode < M_feBd.nbNode; ++iNode )
             {
                 UInt iloc = M_fToP( iFaEl, iNode+1 );
-                for ( int iCoor = 0; iCoor < M_fe1.nbCoor; ++iCoor )
+                for ( int iCoor = 0; iCoor < M_fe1.nbCoor(); ++iCoor )
                 {
-                    UInt ig = M_dof.localToGlobal( iElAd1, iloc + 1 ) - 1 +iCoor*nDof;
-                    if (state.BlockMap().LID(ig + 1) >= 0)
-                        beta.vec()[ iCoor*M_feBd.nbNode + iNode ] = state( ig + 1); // BASEINDEX + 1
+                    UInt ig = M_dof.localToGlobalMap( iElAd1, iloc ) +iCoor*nDof;
+                    if (state.BlockMap().LID(ig) >= 0)
+                        beta.vec()[ iCoor*M_feBd.nbNode + iNode ] = state( ig); // BASEINDEX + 1
                 }
             }
 
             // second, calculate its max norm
-            for ( int l = 0; l < int( M_fe1.nbCoor*M_feBd.nbNode ); ++l )
+            for ( int l = 0; l < int( M_fe1.nbCoor()*M_feBd.nbNode ); ++l )
             {
                 if ( bmax < fabs( beta.vec()[ l ] ) )
                     bmax = fabs( beta.vec()[ l ] );
@@ -565,8 +565,8 @@ void StabilizationIP<MESH, DOF>::apply_expl(VECTOR& vector, const VECTOR& state)
             {
                 UInt eleID1 = M_fe1.currentLocalId();
                 UInt eleID2 = M_fe2.currentLocalId();
-                UInt ig1 = M_dof.localToGlobal( iElAd1, iNode+1) + iCoor * nDof;
-                UInt ig2 = M_dof.localToGlobal( iElAd2, iNode+1) + iCoor * nDof;
+                UInt ig1 = M_dof.localToGlobalMap( iElAd1, iNode) + iCoor * nDof;
+                UInt ig2 = M_dof.localToGlobalMap( iElAd2, iNode) + iCoor * nDof;
                 uLoc1.vec()[ iNode + iCoor * M_fe1.nbNode ] = state(ig1);
                 uLoc2.vec()[ iNode + iCoor * M_fe2.nbNode ] = state(ig2);
             }
@@ -583,7 +583,7 @@ void StabilizationIP<MESH, DOF>::apply_expl(VECTOR& vector, const VECTOR& state)
             for ( int iNode=0; iNode<M_feBd.nbNode; ++iNode )
             {
                 Real bn = 0;
-                for ( int iCoor=0; iCoor<M_fe1.nbCoor; ++iCoor )
+                for ( int iCoor=0; iCoor<M_fe1.nbCoor(); ++iCoor )
                 {
                     bn += normal(iNode, iCoor) *
                           beta.vec()[ iCoor*M_feBd.nbNode + iNode ];

@@ -95,7 +95,7 @@ bool quad_check_doe(const ReferenceFE &refFE, const GeometricMap & geoMap, const
         for (UInt fun(0); fun<fct.nfun(); ++fun)
         {
             Real integral = 0.;
-            for (UInt i=1; i<=aMesh.numElements(); ++i)
+            for (UInt i=0; i<aMesh.numElements(); ++i)
             {
                 fe.updateJacQuadPt(aMesh.element(i));
                 Real s = 0., x, y, z;
@@ -163,7 +163,7 @@ bool quad_check_cr(	const ReferenceFE &refFE, const GeometricMap & geoMap, const
 
             CurrentFE fe(refFE,geoMap, *allQuad[iqr]);
             Real integral = 0.;
-            for (UInt i=1; i<=aMesh.numElements(); ++i)
+            for (UInt i=0; i<aMesh.numElements(); ++i)
             {
                 fe.updateJacQuadPt(aMesh.element(i));
                 Real s = 0., x, y, z;

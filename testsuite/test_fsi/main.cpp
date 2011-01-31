@@ -145,15 +145,15 @@ public:
     {
         switch ( id )
         {
+        case 0:
+            return 0.;
+            break;
+
         case 1:
             return 0.;
             break;
 
         case 2:
-            return 0.;
-            break;
-
-        case 3:
             //return 0.;
             return -M_outflow;
             break;

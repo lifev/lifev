@@ -310,7 +310,7 @@ HeartMonodomainSolver( const data_type&          dataType,
 	    	for(UInt j=0; j< NumMyElements; ++j)
 	    	{
 	    		UInt ig= M_localMapVector.map(Repeated)->MyGlobalElements()[j];
-	    		M_fiberVector[ig]= fiber_global_vector[ig-1];
+	    		M_fiberVector[ig]= fiber_global_vector[ig];
 	    		}
 	    	std::cout << std::endl;
 	    	fiber_global_vector.clear();
@@ -367,7 +367,7 @@ void HeartMonodomainSolver<Mesh, SolverType>::buildSystem()
     //! Elementary computation and matrix assembling
     //! Loop on elements
 
-    for ( UInt iVol = 1; iVol <= M_uFESpace.mesh()->numVolumes(); iVol++ )
+    for ( UInt iVol = 0; iVol < M_uFESpace.mesh()->numVolumes(); iVol++ )
     {
         chronoZero.start();
 

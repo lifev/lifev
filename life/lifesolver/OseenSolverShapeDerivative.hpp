@@ -567,7 +567,7 @@ OseenSolverShapeDerivative<MeshType, SolverType>::updateLinearSystem( const matr
 
         vector_Type linearRightHandSideNoBC( M_linearRightHandSideNoBC.map(), Repeated );
 
-        for ( UInt i = 1; i <= this->M_velocityFESpace.mesh()->numVolumes(); i++ )
+        for ( UInt i = 0; i < this->M_velocityFESpace.mesh()->numVolumes(); i++ )
         {
 
             this->M_pressureFESpace.fe().update( this->M_pressureFESpace.mesh()->volumeList( i ) );
@@ -583,7 +583,7 @@ OseenSolverShapeDerivative<MeshType, SolverType>::updateLinearSystem( const matr
 
                 for ( Int iComponent = 0; iComponent < numVelocityComponent; ++iComponent )
                 {
-                    UInt iGlobal = this->M_velocityFESpace.dof().localToGlobal( i, iLocal + 1 ) + iComponent * this->dimVelocity();
+                    UInt iGlobal = this->M_velocityFESpace.dof().localToGlobalMap( i, iLocal ) + iComponent * this->dimVelocity();
 
                     // u^n - w^iNode local
                     M_elementConvectionVelocity.vec( )  [ iLocal + iComponent*this->M_velocityFESpace.fe().nbFEDof() ] = unRepeated(iGlobal)
@@ -611,7 +611,7 @@ OseenSolverShapeDerivative<MeshType, SolverType>::updateLinearSystem( const matr
             for ( UInt iNode = 0 ; iNode < this->M_pressureFESpace.fe().nbFEDof() ; iNode++ )
             {
                 UInt iLocal = this->M_pressureFESpace.fe().patternFirst( iNode ); // iLocal = iNode
-                UInt iGlobal   = this->M_pressureFESpace.dof().localToGlobal( i, iLocal + 1 ) + numVelocityComponent*this->dimVelocity();
+                UInt iGlobal   = this->M_pressureFESpace.dof().localToGlobalMap( i, iLocal ) + numVelocityComponent*this->dimVelocity();
                 M_elementPressure[ iLocal ] = ukRepeated[ iGlobal ];  // p^iNode local
 
             }
@@ -774,7 +774,7 @@ updateShapeDerivatives( matrix_Type&                   matrix,
 
 //            vector_Type rhsLinNoBC( M_linearRightHandSideNoBC.map(), Repeated);
 
-        for ( UInt i = 1; i <= this->M_velocityFESpace.mesh()->numVolumes(); i++ )
+        for ( UInt i = 0; i < this->M_velocityFESpace.mesh()->numVolumes(); i++ )
         {
 
             this->M_pressureFESpace.fe().update( this->M_pressureFESpace.mesh()->volumeList( i ) );
@@ -822,7 +822,7 @@ updateShapeDerivatives( matrix_Type&                   matrix,
 
                 for ( UInt iComponent = 0; iComponent < numVelocityComponent; ++iComponent )
                 {
-                    UInt iGlobal = this->M_velocityFESpace.dof().localToGlobal( i, iLocal + 1 ) + iComponent * this->dimVelocity();
+                    UInt iGlobal = this->M_velocityFESpace.dof().localToGlobalMap( i, iLocal ) + iComponent * this->dimVelocity();
 
                     // if(!wImplicit)
                     // u^n - w^iNode local
@@ -856,7 +856,7 @@ updateShapeDerivatives( matrix_Type&                   matrix,
             {
                 // iLocal = iNode
                 UInt iLocal = this->M_pressureFESpace.fe().patternFirst( iNode );
-                UInt iGlobal = this->M_pressureFESpace.dof().localToGlobal( i, iLocal + 1 ) + numVelocityComponent*this->dimVelocity();
+                UInt iGlobal = this->M_pressureFESpace.dof().localToGlobalMap( i, iLocal ) + numVelocityComponent*this->dimVelocity();
                 // p^iNode local
                 M_elementPressure[ iLocal ] = ukRepeated[ iGlobal ];
             }
@@ -958,8 +958,8 @@ updateShapeDerivatives( matrix_Type&                   matrix,
                                 offset + iComponent * velocityTotalDof );
             }
         }
-
     }
+
     chrono.stop();
     this->M_Displayer.leaderPrintMax("done in ", chrono.diff() );
 }

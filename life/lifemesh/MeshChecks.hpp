@@ -124,7 +124,7 @@ Real checkVolumes( RegionMesh3D const & mesh,
     case TETRA:
     {
         CurrentFE fe( feTetraP1, geoLinearTetra, quadRuleTetra1pt );
-        for ( ID i = 1; i <= mesh.numVolumes(); i++ )
+        for ( ID i = 0; i < mesh.numVolumes(); i++ )
         {
             fe.updateJac( mesh.volume( i ) );
             lmeas = fe.measure();
@@ -136,7 +136,7 @@ Real checkVolumes( RegionMesh3D const & mesh,
     case HEXA:
     {
         CurrentFE fe( feHexaQ1, geoBilinearHexa, quadRuleHexa1pt );
-        for ( ID i = 1; i <= mesh.numVolumes(); i++ )
+        for ( ID i = 0; i < mesh.numVolumes(); i++ )
         {
             fe.updateJac( mesh.volume( i ) );
             lmeas = fe.measure();
@@ -179,14 +179,14 @@ void fixVolumes( RegionMesh3D & mesh,
 
     static const ID otn_Tetra[ 10 ] =
     {
-        2, 1, 3, 4, 5, 7, 6, 9, 8, 10
+        1, 0, 2, 3, 4, 6, 5, 8, 7, 9
     };
     static const ID otn_Hexa[ 20 ] =
     {
-        1, 4, 3, 2, 5, 8, 7, 6, 12, 11,
-        10, 9, 13, 16, 15, 14, 20, 19, 18, 17
+        0, 3, 2, 1, 4, 7, 6, 5, 11, 10,
+        9, 8, 12, 15, 14, 13, 19, 18, 17, 16
     };
-    for ( ID i = 1; i <= mesh.numVolumes(); i++ )
+    for ( ID i = 0; i < mesh.numVolumes(); i++ )
     {
 
         if ( ! elSign( i ) )
@@ -208,7 +208,7 @@ void fixVolumes( RegionMesh3D & mesh,
 }
 //!\brief Computes volume enclosed by boundary faces
 /*!
-  It computes, for $i=1,2,3$, the integral \f$\int_{\partial \Omega} x_i n_i
+  It computes, for $i=0,1,2$, the integral \f$\int_{\partial \Omega} x_i n_i
   d\gamma \f$, \f$n_i\f$ being the i-th component of the boundary normal. If
   the domain boundary is properly disretised they should all return (within
   discretisation and truncation errors) the quantity \f$\vert\Omega\vert\f$.
@@ -239,7 +239,7 @@ void getVolumeFromFaces( RegionMesh3D const & mesh,
     case TRIANGLE:
         bdfe = current_fe_type( new CurrentBoundaryFE( feTriaP1, geoLinearTria,
                                                  quadRuleTria1pt ) );
-        for ( ID i = 1; i <= mesh.numBFaces(); i++ )
+        for ( ID i = 0; i < mesh.numBFaces(); i++ )
         {
             bdfe->updateMeasNormal( mesh.face( i ) );
             vols[ 0 ] += bdfe->integral_n( getx );
@@ -250,7 +250,7 @@ void getVolumeFromFaces( RegionMesh3D const & mesh,
     case QUAD:
         bdfe = current_fe_type( new CurrentBoundaryFE( feQuadQ1, geoBilinearQuad,
                                                  quadRuleQuad1pt ) );
-        for ( ID i = 1; i <= mesh.numBFaces(); i++ )
+        for ( ID i = 0; i < mesh.numBFaces(); i++ )
         {
             bdfe->updateMeasNormal( mesh.face( i ) );
             vols[ 0 ] += bdfe->integral_n( getx );
@@ -265,7 +265,7 @@ void getVolumeFromFaces( RegionMesh3D const & mesh,
 }
 
 //! Tests if the surface of the mesh is closed by computing surface integrals.
-/*! It computes \f$\sum_{i=1}^3\int_{\partial \Omega} n_i d\gamma\f$.
+/*! It computes \f$\sum_{i=0}^2\int_{\partial \Omega} n_i d\gamma\f$.
   The value returned  should be very proximal to zero
  */
 template <typename RegionMesh3D>
@@ -285,7 +285,7 @@ Real testClosedDomain( RegionMesh3D const & mesh,
     case TRIANGLE:
         bdfe = current_fe_type( new CurrentBoundaryFE( feTriaP1, geoLinearTria,
                                                  quadRuleTria1pt ) );
-        for ( ID i = 1; i <= mesh.numBFaces(); i++ )
+        for ( ID i = 0; i < mesh.numBFaces(); i++ )
         {
             bdfe->updateMeasNormal( mesh.face( i ) );
             test += bdfe->integral_n( ones );
@@ -294,7 +294,7 @@ Real testClosedDomain( RegionMesh3D const & mesh,
     case QUAD:
         bdfe = current_fe_type( new CurrentBoundaryFE( feQuadQ1, geoBilinearQuad,
                                                  quadRuleQuad1pt ) );
-        for ( ID i = 1; i <= mesh.numBFaces(); i++ )
+        for ( ID i = 0; i < mesh.numBFaces(); i++ )
         {
             bdfe->updateMeasNormal( mesh.face( i ) );
             test += bdfe->integral_n( ones );
@@ -379,7 +379,7 @@ bool checkMesh3D( RegionMesh3D & mesh,
     {
         if (verbose)
         {
-            err << "ERROR: volume ids where wrongly set" << std::endl;
+            err << "ERROR: volume ids were wrongly set" << std::endl;
             err << "FIXED" << std::endl;
         }
         if ( fix )
@@ -523,7 +523,7 @@ bool checkMesh3D( RegionMesh3D & mesh,
 
         if ( !MeshUtility::checkId( mesh.faceList ) )
         {
-            err << "ERROR: face ids where wrongly set" << std::endl;
+            err << "ERROR: face ids were wrongly set" << std::endl;
             err << "FIXED" << std::endl;
             if ( fix )
                 sw.create( "FIXED_FACES_ID", true );
@@ -654,7 +654,7 @@ bool checkMesh3D( RegionMesh3D & mesh,
 
         if ( !MeshUtility::checkId( mesh.edgeList ) )
         {
-            err << "ERROR: edge ids where wrongly set" << std::endl;
+            err << "ERROR: edge ids were wrongly set" << std::endl;
             err << "FIXED" << std::endl;
             sw.create( "FIXED_EDGES_ID", true );
             MeshUtility::fixId( mesh.edgeList );

@@ -44,6 +44,8 @@
 namespace LifeV
 {
 
+const int ensightOffset = 1; //the offset of the IDs in ensight files
+
 /**
  * @class ExporterEnsight
  * @brief ExporterEnsight data exporter
@@ -369,11 +371,11 @@ void ExporterEnsight<MeshType>::writeAsciiGeometry(const std::string gFile)
     geoFile.setf(std::ios::right | std::ios_base::scientific);
     geoFile.precision(5);
     geoFile << setw(8) <<  vertexNumber << "\n";
-    for (ID i=1; i <= vertexNumber; ++i)
+    for (ID i=0; i < vertexNumber; ++i)
     {
-        geoFile << setw(8) << i ;
+        geoFile << setw(8) << i + ensightOffset;
         for (UInt icoor=0; icoor<nDimensions; icoor++)
-            geoFile << setw(12) << float(this->M_mesh->pointList(i).coordinatesArray()[icoor]);
+            geoFile << setw(12) << float(this->M_mesh->pointList(i).coordinatesArray()[icoor]+ensightOffset);
         geoFile << "\n";
     }
 
@@ -385,12 +387,12 @@ void ExporterEnsight<MeshType>::writeAsciiGeometry(const std::string gFile)
     // elements
     geoFile << M_FEstr << "\n";
     geoFile << setw(8) << elementNumber << "\n";
-    for (ID i=1; i <= elementNumber; ++i)
+    for (ID i=0; i < elementNumber; ++i)
     {
-        geoFile << setw(8) << i ;
-        for (ID j=1; j<= M_nbLocalDof; ++j)
+        geoFile << setw(8) << i + ensightOffset;
+        for (ID j=0; j< M_nbLocalDof; ++j)
         {
-            geoFile << setw(8) << this->M_mesh->element(i).point(j).localId();
+            geoFile << setw(8) << this->M_mesh->element(i).point(j).localId() + ensightOffset;
         }
         geoFile << "\n";
 
@@ -655,8 +657,7 @@ void ExporterEnsight<MeshType>::initNodesMap()
     M_ltGNodesMap.resize(vertexNumber);
     for (UInt i=0; i<vertexNumber; ++i)
     {
-        Int id = this->M_mesh->pointList( i + 1 ).id();
-        M_ltGNodesMap[i] = id;
+        M_ltGNodesMap[i] = this->M_mesh->pointList( i ).id();
     }
 }
 

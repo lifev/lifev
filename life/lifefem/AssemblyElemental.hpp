@@ -136,7 +136,7 @@ void interpolate(localVector& localValues,
             for (UInt iDof(0); iDof < nbFEDof ; ++iDof)
             {
                 localValues[iQuadPt][iterDim] +=
-                    beta[ betaDof.localToGlobal(elementID,iDof+1) + iterDim*totalDof]
+                    beta[ betaDof.localToGlobalMap(elementID,iDof) + iterDim*totalDof]
                     * interpCFE.phi(iDof,iQuadPt);
             }
         }
@@ -305,7 +305,7 @@ void advection( Real coef, const UsrFct & beta,
         fe.coorQuadPt(x,y,z,iq);
         for ( UInt icoor = 0; icoor < nDimensions; icoor++ )
         {
-            v = beta(t,x,y,z,icoor+1);
+            v = beta(t,x,y,z,icoor);
             for ( UInt j = 0; j<fe.nbFEDof(); ++j)
                 v_grad(j, iq) += v*fe.phiDer(j, icoor, iq );
         }
@@ -472,7 +472,7 @@ void source( const UsrFct& fct, VectorElemental& elvec, const CurrentFE& fe, int
         for ( ig = 0; ig < fe.nbQuadPt(); ig++ )
         {
             s += fe.phi( i, ig ) * fct( fe.quadPt( ig, 0 ), fe.quadPt( ig, 1 ), fe.quadPt( ig, 2 ),
-                                        iblock +1) * fe.weightDet( ig );
+                                        iblock) * fe.weightDet( ig );
         }
         vec( i ) += s;
     }
@@ -494,7 +494,7 @@ void source( const UsrFct& fct, VectorElemental& elvec, const CurrentFE& fe, Rea
         for ( ig = 0; ig < fe.nbQuadPt(); ig++ )
         {
             s += fe.phi( i, ig ) * fct(t, fe.quadPt( ig, 0 ), fe.quadPt( ig, 1 ), fe.quadPt( ig, 2 ),
-                                       iblock+1 ) * fe.weightDet( ig );
+                                       iblock ) * fe.weightDet( ig );
         }
         vec( i ) += s;
     }

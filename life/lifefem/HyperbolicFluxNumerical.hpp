@@ -443,7 +443,7 @@ normInfinity ( const Real& leftState, const Real& rightState, const normal_Type&
         // Select if the external field is a scalar or vector field
         for ( UInt iComponent(0); iComponent < fieldDim; ++iComponent )
         {
-            values[ i*fieldDim + iComponent ] = (*( *(M_fields)[i] ))[ iComponent*totalDofsPresent + M_fESpace.dof().localToGlobal( iElem, 1)  ];
+            values[ i*fieldDim + iComponent ] = (*( *(M_fields)[i] ))[ iComponent*totalDofsPresent + M_fESpace.dof().localToGlobalMap( iElem, 0)  ];
         }
 
     }
@@ -481,7 +481,7 @@ computeFunctionDotNormal ( const vectorFunction_Type& function, const normal_Typ
         // Select if the external field is a scalar or vector field
         for ( UInt iComponent(0); iComponent < fieldDim; ++iComponent )
         {
-            values[ i*fieldDim + iComponent ] = (*( *(M_fields)[i] ))[ iComponent*totalDofsPresent + M_fESpace.dof().localToGlobal( iElem, 1)  ];
+            values[ i*fieldDim + iComponent ] = (*( *(M_fields)[i] ))[ iComponent*totalDofsPresent + M_fESpace.dof().localToGlobalMap( iElem, 0)  ];
         }
 
     }

@@ -265,7 +265,7 @@ void StabilizationSD<MeshType, DofType>::applySUPG(const Real dt, MatrixType& ma
     VectorElemental beta( M_fe.nbNode, nDimensions );
 
     // loop on elements
-    for ( UInt iVol = 1; iVol <= M_mesh.numVolumes(); iVol++ )
+    for ( UInt iVol = 0; iVol < M_mesh.numVolumes(); iVol++ )
     {
         chronoUpdate.start();
         // update current finite elements
@@ -350,7 +350,7 @@ void StabilizationSD<MeshType, DofType>::applySD(const Real dt, MatrixType& matr
     VectorElemental beta( M_fe.nbNode, nDimensions );
 
     // loop on elements
-    for ( UInt iVol = 1; iVol <= M_mesh.numVolumes(); iVol++ )
+    for ( UInt iVol = 0; iVol < M_mesh.numVolumes(); iVol++ )
     {
         chronoUpdate.start();
         // update current finite elements
@@ -421,7 +421,7 @@ void StabilizationSD<MeshType, DofType>::applyRHS(const Real dt, VectorType& vec
     VectorElemental beta( M_fe.nbNode, nDimensions );
 
     // loop on elements
-    for ( UInt iVol = 1; iVol <= M_mesh.numVolumes(); iVol++ )
+    for ( UInt iVol = 0; iVol < M_mesh.numVolumes(); iVol++ )
     {
         chronoUpdate.start();
         // update current finite elements
@@ -502,7 +502,7 @@ void StabilizationSD<MeshType, DofType>::computeParameters(const Real dt, const 
     {
         for ( UInt iCoor = 0; iCoor < M_fe.nbCoor(); ++iCoor )
         {
-            UInt ig = M_dof.localToGlobal( iVol, iNode+1 )-1+iCoor*nDof;
+            UInt ig = M_dof.localToGlobalMap( iVol, iNode )+iCoor*nDof;
             beta.vec()[ iCoor*M_fe.nbNode + iNode ] = state[ig];
         }
     }

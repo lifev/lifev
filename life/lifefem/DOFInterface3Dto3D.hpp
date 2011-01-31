@@ -302,27 +302,27 @@ void DOFInterface3Dto3D::interpolate( MeshType& mesh2, const UInt nbComp, const 
         // Updating the local dof of the data vector in the adjacent element
         for ( UInt icmp = 0; icmp < nbComp; ++icmp )
             for ( ID idof = 0; idof < nbDofPerElement; ++idof )
-                vLoc( icmp * nbDofPerElement + idof ) = v ( icmp * M_dof2->numTotalDof() + M_dof2->localToGlobal( iElAd, idof + 1 ) - 1 );
+                vLoc( icmp * nbDofPerElement + idof ) = v ( icmp * M_dof2->numTotalDof() + M_dof2->localToGlobalMap( iElAd, idof ) );
 
         // Vertex based Dof
         if ( nbDofPerVertex )
         {
 
             // loop on face vertices
-            for ( ID iVeFa = 1; iVeFa <= nbVertexPerFace; ++iVeFa )
+            for ( ID iVeFa = 0; iVeFa < nbVertexPerFace; ++iVeFa )
             {
 
                 iVeEl = GeoShape::faceToPoint( iFaEl, iVeFa ); // local vertex number (in element)
 
                 // Loop number of DOF per vertex
-                for ( ID l = 1; l <= nbDofPerVertex; ++l )
+                for ( ID l = 0; l < nbDofPerVertex; ++l )
                 {
-                    lDof = ( iVeEl - 1 ) * nbDofPerVertex + l; // Local dof in the adjacent Element
+                    lDof = iVeEl * nbDofPerVertex + l; // Local dof in the adjacent Element
 
                     // Nodal coordinates
-                    x = M_refFE1->xi( lDof - 1 );
-                    y = M_refFE1->eta( lDof - 1 );
-                    z = M_refFE1->zeta( lDof - 1 );
+                    x = M_refFE1->xi( lDof );
+                    y = M_refFE1->eta( lDof );
+                    z = M_refFE1->zeta( lDof );
 
                     // Loop on data vector components
                     for ( UInt icmp = 0; icmp < nbComp; ++icmp )
@@ -334,7 +334,7 @@ void DOFInterface3Dto3D::interpolate( MeshType& mesh2, const UInt nbComp, const 
                             sum += vLoc( icmp * nbDofPerElement + idof ) * M_refFE2->phi( idof, x, y, z );
 
                         // Updating interpolating vector
-                        vI ( icmp * M_dof->numTotalDof() + M_dof->localToGlobal( iElAd, lDof ) - 1 ) = sum;
+                        vI ( icmp * M_dof->numTotalDof() + M_dof->localToGlobalMap( iElAd, lDof ) ) = sum;
                     }
                 }
             }
@@ -345,20 +345,20 @@ void DOFInterface3Dto3D::interpolate( MeshType& mesh2, const UInt nbComp, const 
         {
 
             // loop on face edges
-            for ( ID iEdFa = 1; iEdFa <= nbEdgePerFace; ++iEdFa )
+            for ( ID iEdFa = 0; iEdFa < nbEdgePerFace; ++iEdFa )
             {
 
                 iEdEl = GeoShape::faceToEdge( iFaEl, iEdFa ).first; // local edge number (in element)
 
                 // Loop number of DOF per edge
-                for ( ID l = 1; l <= nbDofPerEdge; ++l )
+                for ( ID l = 0; l < nbDofPerEdge; ++l )
                 {
-                    lDof = nbVertexDofPerElement + ( iEdEl - 1 ) * nbDofPerEdge + l; // Local dof in the adjacent Element
+                    lDof = nbVertexDofPerElement + iEdEl * nbDofPerEdge + l; // Local dof in the adjacent Element
 
                     // Nodal coordinates
-                    x = M_refFE1->xi( lDof - 1 );
-                    y = M_refFE1->eta( lDof - 1 );
-                    z = M_refFE1->zeta( lDof - 1 );
+                    x = M_refFE1->xi( lDof );
+                    y = M_refFE1->eta( lDof );
+                    z = M_refFE1->zeta( lDof );
 
                     // Loop on data vector components
                     for ( UInt icmp = 0; icmp < nbComp; ++icmp )
@@ -370,21 +370,21 @@ void DOFInterface3Dto3D::interpolate( MeshType& mesh2, const UInt nbComp, const 
                             sum += vLoc( icmp * nbDofPerElement + idof ) * M_refFE2->phi( idof, x, y, z );
 
                         // Updating interpolating vector
-                        vI ( icmp * M_dof->numTotalDof() + M_dof->localToGlobal( iElAd, lDof ) - 1 ) = sum;
+                        vI ( icmp * M_dof->numTotalDof() + M_dof->localToGlobalMap( iElAd, lDof ) ) = sum;
                     }
                 }
             }
         }
 
         // Loop on number of DOF per face
-        for ( ID l = 1; l <= nbDofPerFace; ++l )
+        for ( ID l = 0; l < nbDofPerFace; ++l )
         {
-            lDof = nbEdgeDofPerElement + nbVertexDofPerElement + ( iFaEl - 1 ) * nbDofPerFace + l; // Local dof in the adjacent Element
+            lDof = nbEdgeDofPerElement + nbVertexDofPerElement + iFaEl * nbDofPerFace + l; // Local dof in the adjacent Element
 
             // Nodal coordinates
-            x = M_refFE1->xi( lDof - 1 );
-            y = M_refFE1->eta( lDof - 1 );
-            z = M_refFE1->zeta( lDof - 1 );
+            x = M_refFE1->xi( lDof );
+            y = M_refFE1->eta( lDof );
+            z = M_refFE1->zeta( lDof );
 
             // Loop on data vector components
             for ( UInt icmp = 0; icmp < nbComp; ++icmp )
@@ -396,7 +396,7 @@ void DOFInterface3Dto3D::interpolate( MeshType& mesh2, const UInt nbComp, const 
                     sum += vLoc( icmp * nbDofPerElement + idof ) * M_refFE2->phi( idof, x, y, z );
 
                 // Updating interpolating vector
-                vI ( icmp * M_dof->numTotalDof() + M_dof->localToGlobal( iElAd, lDof ) - 1 ) = sum;
+                vI ( icmp * M_dof->numTotalDof() + M_dof->localToGlobalMap( iElAd, lDof ) ) = sum;
             }
         }
     }
@@ -423,7 +423,7 @@ void DOFInterface3Dto3D::updateFaceConnections( const MeshType& mesh1, const ent
     KN<Real> v1( nbVertexPerFace * nDimensions ), v2( nDimensions );
 
     // Loop on boundary faces on mesh1
-    for ( ID ibF1 = 1; ibF1 <= bdnF1; ++ibF1 )
+    for ( ID ibF1 = 0; ibF1 < bdnF1; ++ibF1 )
     {
 
         // The face marker
@@ -434,16 +434,16 @@ void DOFInterface3Dto3D::updateFaceConnections( const MeshType& mesh1, const ent
         {
 
             // Loop on face vertices
-            for ( ID iVeFa = 1; iVeFa <= nbVertexPerFace; ++iVeFa )
+            for ( ID iVeFa = 0; iVeFa < nbVertexPerFace; ++iVeFa )
             {
 
                 // Loop on vertex coordinates
-                for ( ID j = 1; j <= nDimensions; ++j )
-                    v1[ j - 1 + ( iVeFa - 1 ) * nDimensions ] = mesh1.boundaryFace( ibF1 ).point( iVeFa ).coordinate( j );
+                for ( ID j = 0; j < nDimensions; ++j )
+                    v1[ j + iVeFa * nDimensions ] = mesh1.boundaryFace( ibF1 ).point( iVeFa ).coordinate( j );
             }
 
             // Loop on boundary faces on mesh2
-            for ( ID ibF2 = 1; ibF2 <= bdnF2; ++ibF2 )
+            for ( ID ibF2 = 0; ibF2 < bdnF2; ++ibF2 )
             {
 
                 // The face marker
@@ -456,18 +456,18 @@ void DOFInterface3Dto3D::updateFaceConnections( const MeshType& mesh1, const ent
                     UInt vertexOk = 0; // Number of matched vertices
 
                     // Loop on face vertices
-                    for ( ID iVeFa = 1; iVeFa <= nbVertexPerFace; ++iVeFa )
+                    for ( ID iVeFa = 0; iVeFa < nbVertexPerFace; ++iVeFa )
                     {
 
                         // Loop on vertex coordinates
-                        for ( ID j = 1; j <= nDimensions; ++j )
-                            v2[ j - 1 ] = mesh2.boundaryFace( ibF2 ).point( iVeFa ).coordinate( j );
+                        for ( ID j = 0; j < nDimensions; ++j )
+                            v2[ j ] = mesh2.boundaryFace( ibF2 ).point( iVeFa ).coordinate( j );
 
                         // Loop on face vertices on mesh1
-                        for ( ID ivefa = 1; ivefa <= nbVertexPerFace; ++ivefa )
+                        for ( ID ivefa = 0; ivefa < nbVertexPerFace; ++ivefa )
                         {
                             // Do the vertices match?
-                            if ( coincide( v1( SubArray( nDimensions, ( ivefa - 1 ) * nDimensions ) ), v2, tol ) )
+                            if ( coincide( v1( SubArray( nDimensions, ivefa * nDimensions ) ), v2, tol ) )
                             {
                                 ++vertexOk;
                                 break; // Stop loop on face vertices
@@ -560,7 +560,7 @@ void DOFInterface3Dto3D::updateDofConnections( const Mesh& mesh1, const DOF& dof
         {
 
             // loop on face vertices (mesh1)
-            for ( ID iVeFa1 = 1; iVeFa1 <= nbVertexPerFace; ++iVeFa1 )
+            for ( ID iVeFa1 = 0; iVeFa1 < nbVertexPerFace; ++iVeFa1 )
             {
 
                 iVeEl1 = GeoShape::faceToPoint( iFaEl1, iVeFa1 ); // local vertex number (in element)
@@ -568,28 +568,28 @@ void DOFInterface3Dto3D::updateDofConnections( const Mesh& mesh1, const DOF& dof
                 if ( flag1 != 0 && Int(mesh1.boundaryFace(i->first).point(iVeFa1).marker()) != *flag1) continue;
 
                 // Loop number of DOF per vertex (mesh1)
-                for ( ID l = 1; l <= nbDofPerVertex1; ++l )
+                for ( ID l = 0; l < nbDofPerVertex1; ++l )
                 {
-                    lDof1 = ( iVeFa1 - 1 ) * nbDofPerVertex1 + l ; // local Dof
-                    feBd1.coorMap( x1, y1, z1, feBd1.refFE.xi( lDof1 - 1 ), feBd1.refFE.eta( lDof1 - 1 ) ); // Nodal coordinates on the current face (mesh1)
+                    lDof1 = iVeFa1 * nbDofPerVertex1 + l ; // local Dof
+                    feBd1.coorMap( x1, y1, z1, feBd1.refFE.xi( lDof1 ), feBd1.refFE.eta( lDof1 ) ); // Nodal coordinates on the current face (mesh1)
 
                     // loop on face vertices (mesh2)
-                    for ( ID iVeFa2 = 1; iVeFa2 <= nbVertexPerFace; ++iVeFa2 )
+                    for ( ID iVeFa2 = 0; iVeFa2 < nbVertexPerFace; ++iVeFa2 )
                     {
 
                         iVeEl2 = GeoShape::faceToPoint( iFaEl2, iVeFa2 ); // local vertex number (in element)
 
                         // Loop on number of DOF per vertex (mesh2)
-                        for ( ID k = 1; k <= nbDofPerVertex2; ++k )
+                        for ( ID k = 0; k < nbDofPerVertex2; ++k )
                         {
-                            lDof2 = ( iVeFa2 - 1 ) * nbDofPerVertex2 + k ; // local Dof
-                            feBd2.coorMap( x2, y2, z2, feBd2.refFE.xi( lDof2 - 1 ), feBd2.refFE.eta( lDof2 - 1 ) ); // Nodal coordinates on the current face (mesh2)
+                            lDof2 = iVeFa2 * nbDofPerVertex2 + k ; // local Dof
+                            feBd2.coorMap( x2, y2, z2, feBd2.refFE.xi( lDof2 ), feBd2.refFE.eta( lDof2 ) ); // Nodal coordinates on the current face (mesh2)
 
                             // Do the nodal points match?
                             if ( (test = coincide( x1, y1, z1, x2, y2, z2, tol )) )
                             {
-                                gDof1 = dof1.localToGlobal( iElAd1, ( iVeEl1 - 1 ) * nbDofPerVertex1 + l ); // Global DOF on mesh1
-                                gDof2 = dof2.localToGlobal( iElAd2, ( iVeEl2 - 1 ) * nbDofPerVertex2 + k ); // Global DOF on mesh2
+                                gDof1 = dof1.localToGlobalMap( iElAd1, iVeEl1 * nbDofPerVertex1 + l ); // Global DOF on mesh1
+                                gDof2 = dof2.localToGlobalMap( iElAd2, iVeEl2 * nbDofPerVertex2 + k ); // Global DOF on mesh2
                                 std::pair<ID, ID> locDof( gDof1, gDof2 );
                                 M_dofToDofConnectionList.push_front( locDof ); // Updating the list of dof connections
                                 break;
@@ -611,36 +611,36 @@ void DOFInterface3Dto3D::updateDofConnections( const Mesh& mesh1, const DOF& dof
         {
 
             // loop on face edges (mesh1)
-            for ( ID iEdFa1 = 1; iEdFa1 <= nbEdgePerFace; ++iEdFa1 )
+            for ( ID iEdFa1 = 0; iEdFa1 < nbEdgePerFace; ++iEdFa1 )
             {
 
                 iEdEl1 = GeoShape::faceToEdge( iFaEl1, iEdFa1 ).first; // local edge number (in element)
 
                 // Loop number of DOF per edge (mesh1)
-                for ( ID l = 1; l <= nbDofPerEdge1; ++l )
+                for ( ID l = 0; l < nbDofPerEdge1; ++l )
                 {
 
-                    lDof1 = nbVertexDofPerFace1 + ( iEdFa1 - 1 ) * nbDofPerEdge1 + l ; // local Dof
-                    feBd1.coorMap( x1, y1, z1, feBd1.refFE.xi( lDof1 - 1 ), feBd1.refFE.eta( lDof1 - 1 ) ); // Nodal coordinates on the current face (mesh1)
+                    lDof1 = nbVertexDofPerFace1 + iEdFa1 * nbDofPerEdge1 + l ; // local Dof
+                    feBd1.coorMap( x1, y1, z1, feBd1.refFE.xi( lDof1 ), feBd1.refFE.eta( lDof1 ) ); // Nodal coordinates on the current face (mesh1)
 
                     // loop on face edges (mesh2)
-                    for ( ID iEdFa2 = 1; iEdFa2 <= nbVertexPerFace; ++iEdFa2 )
+                    for ( ID iEdFa2 = 0; iEdFa2 < nbVertexPerFace; ++iEdFa2 )
                     {
 
                         iEdEl2 = GeoShape::faceToEdge( iFaEl2, iEdFa2 ).first; // local edge number (in element)
 
                         // Loop number of DOF per edge (mesh1)
-                        for ( ID k = 1; k <= nbDofPerEdge2; ++k )
+                        for ( ID k = 0; k < nbDofPerEdge2; ++k )
                         {
 
-                            lDof2 = nbVertexDofPerFace2 + ( iEdFa2 - 1 ) * nbDofPerEdge2 + k; // local Dof
-                            feBd2.coorMap( x2, y2, z2, feBd2.refFE.xi( lDof2 - 1 ), feBd2.refFE.eta( lDof2 - 1 ) ); // Nodal coordinates on the current face (mesh2)
+                            lDof2 = nbVertexDofPerFace2 + iEdFa2 * nbDofPerEdge2 + k; // local Dof
+                            feBd2.coorMap( x2, y2, z2, feBd2.refFE.xi( lDof2 ), feBd2.refFE.eta( lDof2 ) ); // Nodal coordinates on the current face (mesh2)
 
                             // Do the nodal points match?
                             if ( (test = coincide( x1, y1, z1, x2, y2, z2, tol )) )
                             {
-                                gDof1 = dof1.localToGlobal( iElAd1, nbVertexDofPerElement1 + ( iEdEl1 - 1 ) * nbDofPerEdge1 + l ); // Global DOF on mesh1
-                                gDof2 = dof2.localToGlobal( iElAd2, nbVertexDofPerElement2 + ( iEdEl2 - 1 ) * nbDofPerEdge2 + k ); // Global DOF on mesh2
+                                gDof1 = dof1.localToGlobalMap( iElAd1, nbVertexDofPerElement1 + iEdEl1 * nbDofPerEdge1 + l ); // Global Dof on mesh1
+                                gDof2 = dof2.localToGlobalMap( iElAd2, nbVertexDofPerElement2 + iEdEl2 * nbDofPerEdge2 + k ); // Global Dof on mesh2
                                 std::pair<ID, ID> locDof( gDof1, gDof2 );
                                 M_dofToDofConnectionList.push_front( locDof ); // Updating the list of dof connections
                                 break;
@@ -658,21 +658,21 @@ void DOFInterface3Dto3D::updateDofConnections( const Mesh& mesh1, const DOF& dof
         }
 
         // Face based DOF on mesh1
-        for ( ID l = 1; l <= nbDofPerFace1; ++l )
+        for ( ID l = 0; l < nbDofPerFace1; ++l )
         {
             lDof1 = nbEdgeDofPerFace1 + nbVertexDofPerFace1 + l; // local Dof
-            feBd1.coorMap( x1, y1, z1, feBd1.refFE.xi( lDof1 - 1 ), feBd1.refFE.eta( lDof1 - 1 ) ); // Nodal coordinates on the current face (mesh1)
+            feBd1.coorMap( x1, y1, z1, feBd1.refFE.xi( lDof1 ), feBd1.refFE.eta( lDof1 ) ); // Nodal coordinates on the current face (mesh1)
 
-            for ( ID k = 1; k <= nbDofPerFace2; ++k )
+            for ( ID k = 0; k < nbDofPerFace2; ++k )
             {
                 lDof2 = nbEdgeDofPerFace2 + nbVertexDofPerFace2 + k; // local Dof
-                feBd2.coorMap( x2, y2, z2, feBd2.refFE.xi( lDof2 - 1 ), feBd2.refFE.eta( lDof2 - 1 ) ); // Nodal coordinates on the current face (mesh2)
+                feBd2.coorMap( x2, y2, z2, feBd2.refFE.xi( lDof2), feBd2.refFE.eta( lDof2 ) ); // Nodal coordinates on the current face (mesh2)
 
                 // Do the nodal points match?
                 if ( coincide( x1, y1, z1, x2, y2, z2, tol ) )
                 {
-                    gDof1 = dof1.localToGlobal( iElAd1, nbEdgeDofPerElement1 + nbVertexDofPerElement1 + ( iFaEl1 - 1 ) * nbDofPerFace1 + l ); // Global DOF in mesh1
-                    gDof2 = dof2.localToGlobal( iElAd2, nbEdgeDofPerElement2 + nbVertexDofPerElement2 + ( iFaEl2 - 1 ) * nbDofPerFace2 + k ); // Global DOF in mesh2
+                    gDof1 = dof1.localToGlobalMap( iElAd1, nbEdgeDofPerElement1 + nbVertexDofPerElement1 + iFaEl1 * nbDofPerFace1 + l ); // Global Dof in mesh1
+                    gDof2 = dof2.localToGlobalMap( iElAd2, nbEdgeDofPerElement2 + nbVertexDofPerElement2 + iFaEl2 * nbDofPerFace2 + k ); // Global Dof in mesh2
                     std::pair<ID, ID> locDof( gDof1, gDof2 );
                     M_dofToDofConnectionList.push_front( locDof ); // Updating the list of dof connections
                     break;

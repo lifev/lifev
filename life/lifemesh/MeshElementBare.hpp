@@ -131,7 +131,7 @@ namespace LifeV
 {
 #ifndef _LIFEV_HH_
 /*! \typedef typedef unsigned int ID
-\brief type used for Identifiers (Integral type in the range [1, MAX_INT]).
+\brief type used for Identifiers (Integral type in the range [0, MAX_INT]).
 All principal items handled by the library have an identified, which is an
 unsigned integer <em>greater or equal to one</em>
  */
@@ -157,7 +157,7 @@ struct BareEdge
     //! @name Constructor & Destructor
     //@{
     //! Empty Constructor
-    BareEdge() : first( 0 ), second( 0 )
+    BareEdge() : first( NotAnId ), second( NotAnId )
     {}
     ;
     //! Constructor that takes the ID's as parameter
@@ -184,7 +184,7 @@ struct BareFace
     //! @name Constructor & Destructor
     //@{
     //! Empty Constructor
-    BareFace() : first( 0 ), second( 0 ), third( 0 )
+    BareFace() : first( NotAnId ), second( NotAnId ), third( NotAnId )
     {}
     ;
     //! Constructor that takes the ID's as parameter
@@ -225,7 +225,7 @@ struct BareFace
   <tt>j</tt>. The orientation is i->j if the returned parameter is a
   true.
 
-  \pre i and j >0, i!=j */
+  \pre i and j >=0, i!=j */
 inline
 std::pair<BareEdge, bool>
 makeBareEdge( ID const i, ID const j )
@@ -592,7 +592,7 @@ inline
 std::pair<ID, bool>
 MeshElementBareHandler<BareItemType>::addIfNotThere( const bareItem_Type & item )
 {
-    std::pair<typename MeshElementBareHandler<BareItemType>::containerIterator_Type, bool> i( insert( std::make_pair( item, M_idCount + 1 ) ) );
+    std::pair<typename MeshElementBareHandler<BareItemType>::containerIterator_Type, bool> i( insert( std::make_pair( item, M_idCount ) ) );
     if ( i.second )
         ++M_idCount;
     return std::make_pair( ( i.first )->second, i.second );

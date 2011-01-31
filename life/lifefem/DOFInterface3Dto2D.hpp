@@ -317,7 +317,7 @@ generate2DMesh( std::string fname, const MeshType& mesh1 ) const
     {
         idface3D = i2D->first;
 
-        for ( ID vertex = 1 ; vertex <= numVertexPerFace ; ++ vertex )
+        for ( ID vertex = 0 ; vertex < numVertexPerFace ; ++ vertex )
         {
             idpoint3D = mesh1.boundaryFace( idface3D ).point( vertex ).id();
             idpoint2D = vertex3Dto2D( idpoint3D ); //Simple algorithm (of Search in the list...)
@@ -342,10 +342,10 @@ updateFaceConnections( const MeshType& mesh1, const entityFlag_Type& flag1 )
 
     typedef typename MeshType::FaceShape GeoBShape; // Shape of the faces
 
-    ID fcounter = 1;  //! Face on the interface counter
+    ID fcounter = 0;  //! Face on the interface counter
 
     //! Loop on boundary faces on mesh1
-    for ( ID iBoundaryFace1 = 1; iBoundaryFace1 <= numBoundaryFace1; ++iBoundaryFace1 )
+    for ( ID iBoundaryFace1 = 0; iBoundaryFace1 < numBoundaryFace1; ++iBoundaryFace1 )
     {
 
         //! The face marker
@@ -378,7 +378,7 @@ updateVertices( const MeshType& mesh1 )
     // Loop on faces at the interface (matching faces)
     for ( std::vector< std::pair<ID, ID> >::iterator i = M_faceList.begin(); i != M_faceList.end(); ++i )
     {
-        for ( ID jVertex = 1 ; jVertex <= numVertexPerFace ; ++ jVertex )
+        for ( ID jVertex = 0 ; jVertex < numVertexPerFace ; ++ jVertex )
         {
             M_vertexPerFaceList.push_back( mesh1.boundaryFace( i->first ).point( jVertex ).id() );
         }
@@ -413,7 +413,7 @@ updateDofConnections( const MeshType& mesh1 )
 
     ID iElAd1, iVeEl1, iFaEl1, iEdEl1, gDof1;
 
-    ID locDofCounter1 = 1;
+    ID locDofCounter1 = 0;
 
     std::map<ID, ID> locDofMap;
 
@@ -430,16 +430,16 @@ updateDofConnections( const MeshType& mesh1 )
         {
 
             // loop on face vertices (mesh1)
-            for ( ID iVeFa1 = 1; iVeFa1 <= nbVertexPerFace; ++iVeFa1 )
+            for ( ID iVeFa1 = 0; iVeFa1 < nbVertexPerFace; ++iVeFa1 )
             {
 
                 iVeEl1 = GeoShape::faceToPoint( iFaEl1, iVeFa1 ); // local vertex number (in element)
 
                 // Loop number of DOF per vertex (mesh1)
-                for ( ID l = 1; l <= nbDofPerVertex1; ++l )
+                for ( ID l = 0; l < nbDofPerVertex1; ++l )
                 {
 
-                    gDof1 = M_dof1->localToGlobal( iElAd1, ( iVeEl1 - 1 ) * nbDofPerVertex1 + l ); // Global DOF on mesh1
+                    gDof1 = M_dof1->localToGlobalMap( iElAd1, iVeEl1 * nbDofPerVertex1 + l ); // Global Dof on mesh1
 
                     std::pair<ID, ID> locDof( gDof1, locDofCounter1);   //! May be : invert the 2 ??
                     locDofMap.insert( locDof ); // Updating the list of dof connections
@@ -454,16 +454,16 @@ updateDofConnections( const MeshType& mesh1 )
         {
 
             // loop on face edges (mesh1)
-            for ( ID iEdFa1 = 1; iEdFa1 <= nbEdgePerFace; ++iEdFa1 )
+            for ( ID iEdFa1 = 0; iEdFa1 < nbEdgePerFace; ++iEdFa1 )
             {
 
                 iEdEl1 = GeoShape::faceToEdge( iFaEl1, iEdFa1 ).first; // local edge number (in element)
 
                 // Loop number of DOF per edge (mesh1)
-                for ( ID l = 1; l <= nbDofPerEdge1; ++l )
+                for ( ID l = 0; l < nbDofPerEdge1; ++l )
                 {
 
-                    gDof1 = M_dof1->localToGlobal( iElAd1, nDofElemV1 + ( iEdEl1 - 1 ) * nbDofPerEdge1 + l ); // Global DOF on mesh1
+                    gDof1 = M_dof1->localToGlobalMap( iElAd1, nDofElemV1 + iEdEl1 * nbDofPerEdge1 + l ); // Global Dof on mesh1
 
                     std::pair<ID, ID> locDof( gDof1, locDofCounter1 );
                     locDofMap.insert( locDof ); // Updating the list of dof connections
@@ -473,11 +473,11 @@ updateDofConnections( const MeshType& mesh1 )
             }
         }
 
-        // Face based DOF on mesh1
-        for ( ID l = 1; l <= nbDofPerFace1; ++l )
+        // Face based Dof on mesh1
+        for ( ID l = 0; l < nbDofPerFace1; ++l )
         {
 
-            gDof1 = M_dof1->localToGlobal( iElAd1, nDofElemE1 + nDofElemV1 + ( iFaEl1 - 1 ) * nbDofPerFace1 + l ); // Global DOF in mesh1
+            gDof1 = M_dof1->localToGlobalMap( iElAd1, nDofElemE1 + nDofElemV1 + iFaEl1 * nbDofPerFace1 + l ); // Global Dof in mesh1
 
             std::pair<ID, ID> locDof( gDof1, locDofCounter1 );
             locDofMap.insert( locDof ); // Updating the list of dof connections
@@ -487,7 +487,7 @@ updateDofConnections( const MeshType& mesh1 )
     }
 
 //    RemoveMultiple(locDofMap);
-    UInt ii = 1;
+    UInt ii = 0;
     for ( std::map<ID, ID>::const_iterator it = locDofMap.begin(); it != locDofMap.end(); ++it, ++ii )
     {
 //        std::cout << it->first << " " << it->second << ". ";

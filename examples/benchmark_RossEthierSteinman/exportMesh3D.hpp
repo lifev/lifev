@@ -63,6 +63,7 @@ namespace LifeV
 template <typename GeoShape, typename MC>
 void exportMesh3D( RegionMesh3D<GeoShape,MC>& mesh, const std::string& fileName, const UInt& format=MESH_FORMAT )
 {
+	const ID offset = 1;
     std::string outName(fileName);
     if ((format&MATLAB_FORMAT)!=0)
     {
@@ -75,7 +76,7 @@ void exportMesh3D( RegionMesh3D<GeoShape,MC>& mesh, const std::string& fileName,
 
             // Writing the points
             ofile << "mesh.p=[\n";
-            for (UInt i(1); i<=mesh.storedPoints(); ++i)
+            for (UInt i(0); i< mesh.storedPoints(); ++i)
             {
                 ofile << mesh.point(i).x() << ",";
                 ofile << mesh.point(i).y() << ",";
@@ -84,7 +85,7 @@ void exportMesh3D( RegionMesh3D<GeoShape,MC>& mesh, const std::string& fileName,
             ofile << "];\n";
 
             ofile << "mesh.pflag=[\n";
-            for (UInt i(1); i<=mesh.storedPoints(); ++i)
+            for (UInt i(0); i<mesh.storedPoints(); ++i)
             {
                 ofile << mesh.point(i).marker() << ";\n";
             }
@@ -92,15 +93,15 @@ void exportMesh3D( RegionMesh3D<GeoShape,MC>& mesh, const std::string& fileName,
 
             // Writing the edges
             ofile << "mesh.e=[\n";
-            for (UInt i(1); i<=mesh.storedEdges(); ++i)
+            for (UInt i(0); i< mesh.storedEdges(); ++i)
             {
-                ofile << mesh.edge(i).point(1).id() << ",";
-                ofile << mesh.edge(i).point(2).id() << ";\n";
+                ofile << mesh.edge(i).point(0).id() + offset << ",";
+                ofile << mesh.edge(i).point(1).id() + offset << ";\n";
             }
             ofile << "];\n";
 
             ofile << "mesh.eflag=[\n";
-            for (UInt i(1); i<=mesh.storedEdges(); ++i)
+            for (UInt i(0); i< mesh.storedEdges(); ++i)
             {
                 ofile << mesh.edge(i).marker() << ";\n";
             }
@@ -108,16 +109,16 @@ void exportMesh3D( RegionMesh3D<GeoShape,MC>& mesh, const std::string& fileName,
 
             // Writing the faces
             ofile << "mesh.f=[\n";
-            for (UInt i(1); i<=mesh.storedFaces(); ++i)
+            for (UInt i(0); i< mesh.storedFaces(); ++i)
             {
-                ofile << mesh.face(i).point(1).id() << ",";
-                ofile << mesh.face(i).point(2).id() << ",";
-                ofile << mesh.face(i).point(3).id() << ";\n";
+                ofile << mesh.face(i).point(0).id() + offset << ",";
+                ofile << mesh.face(i).point(1).id() + offset << ",";
+                ofile << mesh.face(i).point(2).id() + offset << ";\n";
             }
             ofile << "];\n";
 
             ofile << "mesh.fflag=[\n";
-            for (UInt i(1); i<=mesh.storedFaces(); ++i)
+            for (UInt i(0); i< mesh.storedFaces(); ++i)
             {
                 ofile << mesh.face(i).marker() << ";\n";
             }
@@ -125,17 +126,17 @@ void exportMesh3D( RegionMesh3D<GeoShape,MC>& mesh, const std::string& fileName,
 
             // Writing the volumes
             ofile << "mesh.v=[\n";
-            for (UInt i(1); i<=mesh.storedVolumes(); ++i)
+            for (UInt i(0); i< mesh.storedVolumes(); ++i)
             {
-                ofile << mesh.volume(i).point(1).id() << ",";
-                ofile << mesh.volume(i).point(2).id() << ",";
-                ofile << mesh.volume(i).point(3).id() << ",";
-                ofile << mesh.volume(i).point(4).id() << ";\n";
+                ofile << mesh.volume(i).point(0).id() + offset << ",";
+                ofile << mesh.volume(i).point(1).id() + offset << ",";
+                ofile << mesh.volume(i).point(2).id() + offset << ",";
+                ofile << mesh.volume(i).point(3).id() + offset << ";\n";
             }
             ofile << "];\n";
 
             ofile << "mesh.vflag=[\n";
-            for (UInt i(1); i<=mesh.storedVolumes(); ++i)
+            for (UInt i(0); i< mesh.storedVolumes(); ++i)
             {
                 ofile << mesh.volume(i).marker() << ";\n";
             }
@@ -157,7 +158,7 @@ void exportMesh3D( RegionMesh3D<GeoShape,MC>& mesh, const std::string& fileName,
             // Writing the points
             ofile<< "Vertices\n";
             ofile<< mesh.storedPoints() << std::endl;
-            for (UInt i(1); i<=mesh.storedPoints(); ++i)
+            for (UInt i(0); i< mesh.storedPoints(); ++i)
             {
                 ofile << mesh.point(i).x() << " ";
                 ofile << mesh.point(i).y() << " ";
@@ -168,11 +169,11 @@ void exportMesh3D( RegionMesh3D<GeoShape,MC>& mesh, const std::string& fileName,
             // Writing the triangles
             ofile<< "\nTriangles\n";
             ofile<< mesh.storedFaces() << std::endl;
-            for (UInt i(1); i<=mesh.storedFaces(); ++i)
+            for (UInt i(0); i< mesh.storedFaces(); ++i)
             {
-                ofile << mesh.face(i).point(1).id() << " ";
-                ofile << mesh.face(i).point(2).id() << " ";
-                ofile << mesh.face(i).point(3).id() << " ";
+                ofile << mesh.face(i).point(0).id() + offset << " ";
+                ofile << mesh.face(i).point(1).id() + offset << " ";
+                ofile << mesh.face(i).point(2).id() + offset << " ";
                 ofile << mesh.face(i).marker() << std::endl;
             }
 
@@ -190,12 +191,12 @@ void exportMesh3D( RegionMesh3D<GeoShape,MC>& mesh, const std::string& fileName,
             // Writing the volumes
             ofile<< "\nTetrahedra\n";
             ofile<< mesh.storedVolumes() << std::endl;
-            for (UInt i(1); i<=mesh.storedVolumes(); ++i)
+            for (UInt i(0); i< mesh.storedVolumes(); ++i)
             {
-                ofile << mesh.volume(i).point(1).id() << " ";
-                ofile << mesh.volume(i).point(2).id() << " ";
-                ofile << mesh.volume(i).point(3).id() << " ";
-                ofile << mesh.volume(i).point(4).id() << " ";
+                ofile << mesh.volume(i).point(0).id() + offset << " ";
+                ofile << mesh.volume(i).point(1).id() + offset << " ";
+                ofile << mesh.volume(i).point(2).id() + offset << " ";
+                ofile << mesh.volume(i).point(3).id() + offset << " ";
                 ofile << mesh.volume(i).marker() << std::endl;
             }
             ofile.close();

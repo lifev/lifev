@@ -68,7 +68,6 @@ MapEpetra::MapEpetra():
 MapEpetra::MapEpetra( Int  numGlobalElements,
                       Int  numMyElements,
                       Int* myGlobalElements,
-                      Int  indexBase,
                       const comm_ptrtype& commPtr ):
     M_repeatedMapEpetra(),
     M_uniqueMapEpetra(),
@@ -83,12 +82,12 @@ MapEpetra::MapEpetra( Int  numGlobalElements,
     createMap( numGlobalElements,
                numMyElements,
                myGlobalElements,
-               indexBase,
                *commPtr );
 }
 
+
 MapEpetra::MapEpetra( const Int numGlobalElements,
-                      const Int indexBase,
+                      const Int /*notUsed*/,
                       const comm_ptrtype& commPtr ) :
     M_repeatedMapEpetra(),
     M_uniqueMapEpetra(),
@@ -99,10 +98,10 @@ MapEpetra::MapEpetra( const Int numGlobalElements,
     std::vector<Int> myGlobalElements( numGlobalElements );
 
     for ( Int i = 0; i < numGlobalElements; ++i )
-        myGlobalElements[i] = i + indexBase;
+        myGlobalElements[i] = i;
 
-    M_repeatedMapEpetra.reset( new Epetra_Map( -1, numGlobalElements, &myGlobalElements[0], indexBase, *commPtr ) );
-    M_uniqueMapEpetra.reset( new Epetra_Map( numGlobalElements, indexBase, *commPtr ) );
+    M_repeatedMapEpetra.reset( new Epetra_Map( -1, numGlobalElements, &myGlobalElements[0], 0, *commPtr ) );
+    M_uniqueMapEpetra.reset( new Epetra_Map( numGlobalElements, 0, *commPtr ) );
 }
 
 MapEpetra::MapEpetra( const Int           size,
@@ -116,15 +115,13 @@ MapEpetra::MapEpetra( const Int           size,
     Int numGlobalElements( size );
     Int numMyElements    ( numGlobalElements );
     std::vector<Int>  myGlobalElements( size );
-    Int indexBase = 1;
 
     for ( Int i(0); i < numGlobalElements; ++i )
-        myGlobalElements[i] = i + 1;
-
+        myGlobalElements[i] = i;
     M_repeatedMapEpetra.reset( new Epetra_Map( numGlobalElements,
                                                numMyElements,
                                                &myGlobalElements[0],
-                                               indexBase,
+                                               0,
                                                *commPtr ) );
 
     if ( commPtr->MyPID() != 0 ) numMyElements = 0;
@@ -132,7 +129,7 @@ MapEpetra::MapEpetra( const Int           size,
     M_uniqueMapEpetra.reset( new Epetra_Map( numGlobalElements,
                                              numMyElements,
                                              &myGlobalElements[0],
-                                             indexBase,
+                                             0,
                                              *commPtr ) );
 }
 
@@ -146,20 +143,16 @@ MapEpetra::MapEpetra( const map_type map ):
     uniqueMap();
 }
 
-MapEpetra::MapEpetra( const Epetra_BlockMap& blockMap, const Int offset, const Int maxId,
-                      Int indexBase ) :
+MapEpetra::MapEpetra( const Epetra_BlockMap& blockMap, const Int offset, const Int maxId) :
     M_repeatedMapEpetra(),
     M_uniqueMapEpetra(),
     M_exporter(),
     M_importer(),
     M_commPtr()
 {
-
-    if ( indexBase < 0 ) indexBase = blockMap.IndexBase();
-
     std::vector<Int> myGlobalElements;
     Int* sourceGlobalElements( blockMap.MyGlobalElements() );
-    Int const startIdOrig( offset + indexBase );
+    Int const startIdOrig( offset );
     Int const endIdOrig  ( startIdOrig + maxId );
     const Int maxMyElements = std::min( maxId, blockMap.NumMyElements() );
     myGlobalElements.reserve( maxMyElements );
@@ -175,7 +168,6 @@ MapEpetra::MapEpetra( const Epetra_BlockMap& blockMap, const Int offset, const I
     createMap( -1,
                myGlobalElements.size(),
                &myGlobalElements.front(),
-               indexBase,
                blockMap.Comm() );
 }
 
@@ -220,8 +212,7 @@ MapEpetra::operator += ( const MapEpetra& epetraMap )
         map.push_back( *pointer );
     }
 
-    Int numGlobalElements = getUniqueMap()->NumGlobalElements()
-                            + getUniqueMap()->IndexBase() - epetraMap.getUniqueMap()->IndexBase();
+    Int numGlobalElements = getUniqueMap()->NumGlobalElements();
 
     pointer = epetraMap.getRepeatedMap()->MyGlobalElements();
     for (Int ii = 0; ii < epetraMap.getRepeatedMap()->NumMyElements(); ++ii, ++pointer)
@@ -229,9 +220,7 @@ MapEpetra::operator += ( const MapEpetra& epetraMap )
         map.push_back( *pointer + numGlobalElements );
     }
 
-    Int IndexBase = getRepeatedMap()->IndexBase();
-
-    M_repeatedMapEpetra.reset( new Epetra_Map(-1, map.size(), &map[0], IndexBase, epetraMap.getRepeatedMap()->Comm() ) );
+    M_repeatedMapEpetra.reset( new Epetra_Map(-1, map.size(), &map[0], 0, epetraMap.getRepeatedMap()->Comm() ) );
 
     map.resize(0);
     pointer = getUniqueMap()->MyGlobalElements();
@@ -247,7 +236,7 @@ MapEpetra::operator += ( const MapEpetra& epetraMap )
         map.push_back( *pointer + numGlobalElements );
     }
 
-    M_uniqueMapEpetra.reset( new Epetra_Map( -1, map.size(), &map[0], IndexBase, epetraMap.getRepeatedMap()->Comm() ) );
+    M_uniqueMapEpetra.reset( new Epetra_Map( -1, map.size(), &map[0], 0, epetraMap.getRepeatedMap()->Comm() ) );
 
     M_exporter.reset();
     M_importer.reset();
@@ -359,20 +348,19 @@ void
 MapEpetra::createMap( Int  numGlobalElements,
                       Int  numMyElements,
                       Int* myGlobalElements,
-                      Int  indexBase,
                       const comm_type& comm )
 {
 
     if ( numMyElements != 0 && myGlobalElements == 0 ) // linearMap
         M_repeatedMapEpetra.reset( new Epetra_Map( numGlobalElements,
                                                    numMyElements,
-                                                   indexBase,
+                                                   0,
                                                    comm ) );
     else // classic LifeV map
         M_repeatedMapEpetra.reset( new Epetra_Map( numGlobalElements,
                                                    numMyElements,
                                                    myGlobalElements,
-                                                   indexBase,
+                                                   0,
                                                    comm ) );
 
     uniqueMap();
@@ -432,33 +420,31 @@ MapEpetra::setUp( const ReferenceFE&        refFE,
                   std::vector<Int>& repeatedFaceVector,
                   std::vector<Int>& repeatedVolumeVector )
 {
-    Int indexBase = 1;
-
     if ( refFE.nbDofPerVertex() )
     {
         Int numNode = repeatedNodeVector.size();
-        MapEpetra repeatedNodeMap( -1, numNode, &repeatedNodeVector[0], indexBase, commPtr );
+        MapEpetra repeatedNodeMap( -1, numNode, &repeatedNodeVector[0], commPtr );
         operator+=(repeatedNodeMap);
     }
 
     if ( refFE.nbDofPerEdge() )
     {
         Int numEdge = repeatedEdgeVector.size();
-        MapEpetra repeatedEdgeMap( -1, numEdge, &repeatedEdgeVector[0], indexBase, commPtr );
+        MapEpetra repeatedEdgeMap( -1, numEdge, &repeatedEdgeVector[0], commPtr );
         operator+=(repeatedEdgeMap);
     }
 
     if ( refFE.nbDofPerFace() )
     {
         Int numFace = repeatedFaceVector.size();
-        MapEpetra repeatedFaceMap(-1, numFace, &repeatedFaceVector[0], indexBase, commPtr);
+        MapEpetra repeatedFaceMap(-1, numFace, &repeatedFaceVector[0], commPtr);
         operator+=( repeatedFaceMap );
     }
 
     if ( refFE.nbDofPerVolume() )
     {
         Int numElem = repeatedVolumeVector.size();
-        MapEpetra repeatedElemMap( -1, numElem, &repeatedVolumeVector[0], indexBase, commPtr );
+        MapEpetra repeatedElemMap( -1, numElem, &repeatedVolumeVector[0], commPtr );
         operator+=( repeatedElemMap );
     }
 

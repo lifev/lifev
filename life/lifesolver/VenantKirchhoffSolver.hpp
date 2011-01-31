@@ -712,7 +712,7 @@ VenantKirchhoffSolver<Mesh, SolverType>::buildSystem(matrixPtr_Type massStiff, c
 
   // Elementary computation and matrix assembling
   // Loop on elements
-  for ( UInt i = 1; i <= M_FESpace->mesh()->numVolumes(); i++ )
+  for ( UInt i = 0; i < M_FESpace->mesh()->numVolumes(); i++ )
     {
 
       M_FESpace->fe().updateFirstDerivQuadPt( M_FESpace->mesh()->volumeList( i ) );
@@ -902,7 +902,7 @@ VenantKirchhoffSolver<Mesh, SolverType>::evalConstraintTensor()
   *M_syy *= 0.;
   *M_szz *= 0.;
 
-  for ( UInt ielem = 1; ielem <= M_FESpace->mesh()->numVolumes(); ielem++ )
+  for ( UInt ielem = 0; ielem < M_FESpace->mesh()->numVolumes(); ielem++ )
     {
       //UInt elem = M_FESpace->mesh()->volumeList( ielem ).id();
       M_FESpace->fe().updateFirstDerivQuadPt( M_FESpace->mesh()->volumeList( ielem ) );
@@ -916,7 +916,7 @@ VenantKirchhoffSolver<Mesh, SolverType>::evalConstraintTensor()
         for ( Int k = 0; k < M_FESpace->fe().nbFEDof(); ++k )
 	    {
 	      Int i    = M_FESpace->fe().patternFirst(k);
-	      Int idof = M_FESpace->dof().localToGlobal(M_FESpace->fe().currentLocalId(), i + 1);
+	      Int idof = M_FESpace->dof().localToGlobalMap(M_FESpace->fe().currentLocalId(), i);
 
 	      s+= (2*M_data->getMu() + M_data->getLambda())*
 		M_FESpace->fe().weightDet( ig )*
@@ -940,7 +940,7 @@ VenantKirchhoffSolver<Mesh, SolverType>::evalConstraintTensor()
       for ( Int k = 0; k < M_FESpace->fe().nbFEDof(); ++k )
 	{
 	  Int i    = M_FESpace->fe().patternFirst(k);
-	  Int idof = M_FESpace->dof().localToGlobal(M_FESpace->fe().currentLocalId(), i + 1);
+	  Int idof = M_FESpace->dof().localToGlobalMap(M_FESpace->fe().currentLocalId(), i);
 
 	  (*M_sxx)[idof] += s/M_FESpace->fe().detJac(0);
 	}
@@ -952,7 +952,7 @@ VenantKirchhoffSolver<Mesh, SolverType>::evalConstraintTensor()
         for ( Int k = 0; k < M_FESpace->fe().nbFEDof(); ++k )
 	    {
 	      Int i    = M_FESpace->fe().patternFirst(k);
-	      Int idof = M_FESpace->dof().localToGlobal(M_FESpace->fe().currentLocalId(), i + 1);
+	      Int idof = M_FESpace->dof().localToGlobalMap(M_FESpace->fe().currentLocalId(), i);
 
 	      s += M_data->getLambda()*
 		M_FESpace->fe().weightDet( ig )*
@@ -977,7 +977,7 @@ VenantKirchhoffSolver<Mesh, SolverType>::evalConstraintTensor()
       for ( Int k = 0; k < M_FESpace->fe().nbFEDof(); ++k )
 	{
 	  Int i    = M_FESpace->fe().patternFirst(k);
-	  Int idof = M_FESpace->dof().localToGlobal(M_FESpace->fe().currentLocalId(), i + 1);
+	  Int idof = M_FESpace->dof().localToGlobalMap(M_FESpace->fe().currentLocalId(), i);
 
 	  (*M_syy)[idof] += s/volume;
 	}
@@ -990,7 +990,7 @@ VenantKirchhoffSolver<Mesh, SolverType>::evalConstraintTensor()
         for ( Int k = 0; k < M_FESpace->fe().nbFEDof(); ++k )
 	    {
 	      Int i    = M_FESpace->fe().patternFirst(k);
-	      Int idof = M_FESpace->dof().localToGlobal(M_FESpace->fe().currentLocalId(), i + 1);
+	      Int idof = M_FESpace->dof().localToGlobalMap(M_FESpace->fe().currentLocalId(), i);
 
 	      s += M_data->getLambda()*
 		M_FESpace->fe().weightDet( ig )*
@@ -1014,14 +1014,14 @@ VenantKirchhoffSolver<Mesh, SolverType>::evalConstraintTensor()
       for ( Int k = 0; k < M_FESpace->fe().nbFEDof(); ++k )
 	{
 	  Int i    = M_FESpace->fe().patternFirst(k);
-	  Int idof = M_FESpace->dof().localToGlobal(M_FESpace->fe().currentLocalId(), i + 1);
+	  Int idof = M_FESpace->dof().localToGlobalMap(M_FESpace->fe().currentLocalId(), i);
 
 	  (*M_szz)[idof] += s/M_FESpace->fe().detJac(0);
 	}
 
     }
 
-  for (UInt ii = 1; ii <= M_FESpace->dim(); ++ii)
+  for (UInt ii = 0; ii < M_FESpace->dim(); ++ii)
     {
       (*M_sxx)[ii] /= count[ii];
       (*M_syy)[ii] /= count[ii];
@@ -1074,8 +1074,8 @@ VenantKirchhoffSolver<Mesh, SolverType>::reduceSolution( Vector& displacement, V
     {
       for ( UInt iDof = 0; iDof < nDimensions*dim(); ++iDof )
 	{
-	  disp[ iDof ] = displacement[ iDof + 1 ];
-	  vel [ iDof ] = velocity    [ iDof + 1 ];
+	  disp[ iDof ] = displacement[ iDof ];
+	  vel [ iDof ] = velocity    [ iDof ];
 	}
     }
 }
@@ -1095,7 +1095,7 @@ VenantKirchhoffSolver<Mesh, SolverType>::setDataFromGetPot( const GetPot& dataFi
   M_linearSolver->setDataFromGetPot( dataFile, "solid/solver" );
   M_linearSolver->setupPreconditioner(dataFile, "solid/prec");
 
-  UInt marker = M_FESpace->mesh()->volumeList( 1 ).marker();
+  UInt marker = M_FESpace->mesh()->volumeList( 0 ).marker();
   if (!M_data->getYoung(marker))
     M_data->setYoung(dataFile( "solid/physics/young", 0. ), marker);
   if (!M_data->getPoisson(marker))

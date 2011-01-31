@@ -82,9 +82,9 @@ public:
 	/*!
 	    <ol>
 	    <li> If the point Id is smaller than GeoShapeType::S_numVertices, return<br>
-    		GeoShapeType::S_numVertices - pointId + 1
+    		GeoShapeType::S_numVertices - pointId
 	    <li> If the point Id is bigger than GeoShapeType::S_numVertices, return<br>
-            GeoShapeType::S_numPoints - point + GeoShapeType::S_numVertices + 1;
+            GeoShapeType::S_numPoints - point + GeoShapeType::S_numVertices;
 	    </ol>
 
         @note this numbering follows the convention that VERTICES are always numbered first.
@@ -523,9 +523,9 @@ inline
 ID reversePoint<GeoShapeType>::
 operate( ID const & point ) const
 {
-    return point <= GeoShapeType::S_numVertices ?
-    		GeoShapeType::S_numVertices - point + 1 :
-            GeoShapeType::S_numPoints - point + GeoShapeType::S_numVertices + 1;
+    return point < GeoShapeType::S_numVertices ?
+    		GeoShapeType::S_numVertices - point :
+            GeoShapeType::S_numPoints - point + GeoShapeType::S_numVertices;
 }
 }
 

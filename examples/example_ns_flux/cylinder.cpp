@@ -98,15 +98,15 @@ Real flux(const Real& t, const ID& i)
 
     switch (i)
     {
-    case 1:
+    case 0:
         return 0.0;
         break;
-    case 3:
+    case 2:
         if ( t <= 1 )
             return sin(pi*t);
         return 0.0;
         break;
-    case 2:
+    case 1:
         return 0.0;
         break;
     }
@@ -156,7 +156,7 @@ struct Cylinder::Private
     {
         double r = std::sqrt(x*x + y*y);
 
-        if (id == 3)
+        if (id == 2)
             return Um_2d()*2*((D/2.)*(D/2.) - r*r);
 
         return 0.;

@@ -87,9 +87,9 @@ void stiff( const Real sigma_l, const Real sigma_t, const vector_type& cos, Matr
     for ( ig = 0;ig < fe.nbQuadPt();ig++ ){
         u_x[ig] = u_y[ig] = u_z[ig] = 0;
         for (i=0;i<fe.nbFEDof();i++){
-           u_x[ig]+=cos[dof.localToGlobal(eleId,i+1)]*fe.phi(i,ig);    //(one component)
-           u_y[ig]+=cos[dof.localToGlobal(eleId,i+1)+dim]*fe.phi(i,ig);
-           u_z[ig]+=cos[dof.localToGlobal(eleId,i+1)+2*dim]*fe.phi(i,ig);
+           u_x[ig]+=cos[dof.localToGlobalMap(eleId,i)]*fe.phi(i,ig);    //(one component)
+           u_y[ig]+=cos[dof.localToGlobalMap(eleId,i)+dim]*fe.phi(i,ig);
+           u_z[ig]+=cos[dof.localToGlobalMap(eleId,i)+2*dim]*fe.phi(i,ig);
         }
     }
     //
@@ -176,9 +176,9 @@ void stiff( const reduced_sigma& red_sigma, const Real sigma_l, const Real sigma
         u_x[ig] = u_y[ig] = u_z[ig] = 0;
         for (i=0;i<fe.nbFEDof();i++)
 	{
-           u_x[ig]+=cos[dof.localToGlobal(eleId,i+1)]*fe.phi(i,ig);    //(one component)
-           u_y[ig]+=cos[dim+dof.localToGlobal(eleId,i+1)]*fe.phi(i,ig);
-           u_z[ig]+=cos[2*dim+dof.localToGlobal(eleId,i+1)]*fe.phi(i,ig);
+           u_x[ig]+=cos[dof.localToGlobalMap(eleId,i)]*fe.phi(i,ig);    //(one component)
+           u_y[ig]+=cos[dim+dof.localToGlobalMap(eleId,i)]*fe.phi(i,ig);
+           u_z[ig]+=cos[2*dim+dof.localToGlobalMap(eleId,i)]*fe.phi(i,ig);
         }
     }
 
@@ -309,7 +309,7 @@ void stiffNL(vector_type& U, Real coef, MatrixElemental& elmat, const CurrentFE&
     Real bPt;
 
     for (i=0;i<fe.nbFEDof();i++){
-        locU[i]=U[dof.localToGlobal(eleId,i+1)];    //(one component)
+        locU[i]=U[dof.localToGlobalMap(eleId,i)];    //(one component)
     }
 
     //
@@ -387,7 +387,7 @@ void stiffNL(vector_type& U, Real coef, MatrixElemental& elmat, const CurrentFE&
     Real bPt;
 
     for (i=0;i<fe.nbFEDof();i++){
-        locU[i]=U[dof.localToGlobal(eleId,i+1)];    //(one component)
+        locU[i]=U[dof.localToGlobalMap(eleId,i)];    //(one component)
     }
 
     //
@@ -489,10 +489,10 @@ void stiffNL(const vector_type& U, const Real sigma_l, const Real sigma_t,
     for ( ig = 0;ig < fe.nbQuadPt();ig++ ){
         u_x[ig] = u_y[ig] = u_z[ig] = 0;
         for (i=0;i<fe.nbFEDof();i++){
-            locU[i]=U[dof.localToGlobal(eleId,i+1)]; // ojo!!! quizas es -1
-            u_x[ig]+=cos[dof.localToGlobal(eleId,i+1)]*fe.phi(i,ig);    //(one component)
-            u_y[ig]+=cos[dof.localToGlobal(eleId,i+1)+dim]*fe.phi(i,ig);
-            u_z[ig]+=cos[dof.localToGlobal(eleId,i+1)+2*dim]*fe.phi(i,ig);
+            locU[i]=U[dof.localToGlobalMap(eleId,i)]; // ojo!!! quizas es -1
+            u_x[ig]+=cos[dof.localToGlobalMap(eleId,i)]*fe.phi(i,ig);    //(one component)
+            u_y[ig]+=cos[dof.localToGlobalMap(eleId,i)+dim]*fe.phi(i,ig);
+            u_z[ig]+=cos[dof.localToGlobalMap(eleId,i)+2*dim]*fe.phi(i,ig);
         }
     }
     //

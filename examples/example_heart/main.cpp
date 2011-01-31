@@ -57,17 +57,6 @@
 #include <life/lifealg/PreconditionerML.hpp>
 #include <heart.hpp>
 
-
-namespace LifeV
-{
-namespace
-{
-static bool regIF = PRECFactory::instance().registerProduct( "Ifpack", &createIfpack );
-static bool regML = PRECFactory::instance().registerProduct( "ML", &createML );
-}
-}
-
-
 using namespace LifeV;
 
 Int main( Int argc, char** argv )

@@ -71,20 +71,20 @@ Real u2(const Real& t, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, 
 {
     switch (i)
     {
+    case 0:
+        return 0.0;
+        break;
     case 1:
-        return 0.0;
-        break;
-    case 3:
-        if ( t <= 0.003 )
-            return 1.3332e4;
-        //      return 0.01;
-        return 0.0;
-        break;
-    case 2:
         return 0.0;
         //      return 1.3332e4;
         //    else
         //      return 0.0;
+        break;
+    case 2:
+        if ( t <= 0.003 )
+            return 1.3332e4;
+        //      return 0.01;
+        return 0.0;
         break;
     }
     return 0;
@@ -96,13 +96,13 @@ Real d0(const Real& /*t*/, const Real& /*x*/, const Real& /*y*/, const Real& /*z
 {
     switch (i)
     {
+    case 0:
+        return 0.;
+        break;
     case 1:
         return 0.;
         break;
     case 2:
-        return 0.;
-        break;
-    case 3:
         return 0.;
         break;
     default:
@@ -118,13 +118,13 @@ Real w0(const Real& /*t*/, const Real& /*x*/, const Real& /*y*/, const Real& /*z
 
     switch (i)
     {
+    case 0:
+        return 0.0;
+        break;
     case 1:
         return 0.0;
         break;
     case 2:
-        return 0.0;
-        break;
-    case 3:
         return 0.0;
         break;
     default:
@@ -271,10 +271,13 @@ Real aortaPhysPress(const Real&  t, const Real& /*x*/, const Real& /*y*/, const 
     double coef = .1;
     switch (i)
     {
+    case 0:
+        return 0.0;
+        break;
     case 1:
         return 0.0;
         break;
-    case 3:
+    case 2:
         if (t<=0.00) return 110170*coef;
         if (t<=0.01) return 109540*coef;
         if (t<=0.02) return 108930*coef;
@@ -355,9 +358,6 @@ Real aortaPhysPress(const Real&  t, const Real& /*x*/, const Real& /*y*/, const 
         if (t<=0.77) return 111200*coef;
         if (t<=0.78) return 110620*coef;
         if (t<=0.79) return 110060*coef;
-        break;
-    case 2:
-        return 0.0;
         break;
     }
 

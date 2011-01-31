@@ -920,22 +920,22 @@ bcEssentialManage( MatrixType& matrix,
         assert( pId != 0);
 
         // Loop on BC identifiers
-        for ( ID i = 1; i <= boundaryCond.list_size(); ++i )
+        for ( ID i = 0; i < boundaryCond.list_size(); ++i )
         {
 
-            if ( !pId->dofInterface().isMyInterfaceDof(boundaryCond( i ) ->id()))
+            if ( !pId->dofInterface().isMyInterfaceDof(boundaryCond[ i ] ->id()))
             {
                 continue;
             }
 
             // Loop on components involved in this boundary condition
-            for ( ID j = 1; j <= nComp; ++j )
+            for ( ID j = 0; j < nComp; ++j )
             {
                 // Global Dof
-                idDof = boundaryCond( i )->id() + ( boundaryCond.component( j ) - 1 ) * totalDof + offset;
+                idDof = boundaryCond[ i ]->id() + boundaryCond.component( j ) * totalDof + offset;
 
-                datumVec.push_back(boundaryCond( boundaryCond( i ) ->id(), boundaryCond.component( j ) ));
-                idDofVec.push_back(idDof - 1);
+                datumVec.push_back(boundaryCond( boundaryCond[ i ] ->id(), boundaryCond.component( j ) ));
+                idDofVec.push_back(idDof);
             }
         }
     }
@@ -944,21 +944,21 @@ bcEssentialManage( MatrixType& matrix,
 
         DataType x, y, z;
         // Loop on BC identifiers
-        for ( ID i = 1; i <= boundaryCond.list_size(); ++i )
+        for ( ID i = 0; i < boundaryCond.list_size(); ++i )
         {
             // Coordinates of the node where we impose the value
-            x = static_cast< const BCIdentifierEssential* >( boundaryCond( i ) ) ->x();
-            y = static_cast< const BCIdentifierEssential* >( boundaryCond( i ) ) ->y();
-            z = static_cast< const BCIdentifierEssential* >( boundaryCond( i ) ) ->z();
+            x = static_cast< const BCIdentifierEssential* >( boundaryCond[ i ] ) ->x();
+            y = static_cast< const BCIdentifierEssential* >( boundaryCond[ i ] ) ->y();
+            z = static_cast< const BCIdentifierEssential* >( boundaryCond[ i ] ) ->z();
 
             // Loop on components involved in this boundary condition
-            for ( ID j = 1; j <= nComp; ++j )
+            for ( ID j = 0; j < nComp; ++j )
             {
                 // Global Dof
-                idDof = boundaryCond( i ) ->id() + ( boundaryCond.component( j ) - 1 ) * totalDof + offset;
+                idDof = boundaryCond[ i ] ->id() + boundaryCond.component( j ) * totalDof + offset;
 
                 datumVec.push_back(boundaryCond( time, x, y, z, boundaryCond.component( j ) ));
-                idDofVec.push_back(idDof - 1);
+                idDofVec.push_back(idDof);
 
             }
         }
@@ -1009,23 +1009,23 @@ bcEssentialManageUDep( MatrixType& matrix,
 
         DataType x, y, z;
         // Loop on BC identifiers
-        for ( ID i = 1; i <= boundaryCond.list_size(); ++i )
+        for ( ID i = 0; i < boundaryCond.list_size(); ++i )
         {
             // Coordinates of the node where we impose the value
-            x = static_cast< const BCIdentifierEssential* >( boundaryCond( i ) ) ->x();
-            y = static_cast< const BCIdentifierEssential* >( boundaryCond( i ) ) ->y();
-            z = static_cast< const BCIdentifierEssential* >( boundaryCond( i ) ) ->z();
+            x = static_cast< const BCIdentifierEssential* >( boundaryCond[ i ] ) ->x();
+            y = static_cast< const BCIdentifierEssential* >( boundaryCond[ i ] ) ->y();
+            z = static_cast< const BCIdentifierEssential* >( boundaryCond[ i ] ) ->z();
 
             // Loop on components involved in this boundary condition
-            for ( ID j = 1; j <= nComp; ++j )
+            for ( ID j = 0; j < nComp; ++j )
             {
                 // Global Dof
-                idDof = boundaryCond( i ) ->id() + ( boundaryCond.component( j ) - 1 ) * totalDof + offset;
+                idDof = boundaryCond[ i ] ->id() + boundaryCond.component( j ) * totalDof + offset;
 
-                Real datum = boundaryCond( time, x, y, z, boundaryCond.component( j ) ,feVec[idDof-1]);
+                Real datum = boundaryCond( time, x, y, z, boundaryCond.component( j ) ,feVec[idDof]);
 
                 datumVec.push_back(datum);
-                idDofVec.push_back(idDof-1);
+                idDofVec.push_back(idDof);
 
             }
         }
@@ -1058,16 +1058,14 @@ bcEssentialManageMatrix( MatrixType& matrix,
     idDofVec.reserve(boundaryCond.list_size()*nComp);
 
     // Loop on BC identifiers
-    for ( ID i = 1; i <= boundaryCond.list_size(); ++i )
+    for ( ID i = 0; i < boundaryCond.list_size(); ++i )
     {
         // Loop on components involved in this boundary condition
-        for ( ID j = 1; j <= nComp; ++j )
+        for ( ID j = 0; j < nComp; ++j )
         {
             // Global Dof
-            idDof = boundaryCond( i ) ->id() + ( boundaryCond.component( j ) - 1 ) * totalDof;
-            idDofVec.push_back(idDof-1);
-            // Modifying ONLY matrix
-            //matrix.diagonalize( idDof - 1, diagonalizeCoef );
+            idDof = boundaryCond[ i ] ->id() + boundaryCond.component( j ) * totalDof;
+            idDofVec.push_back(idDof);
         }
     }
     // Modifying ONLY matrix
@@ -1103,17 +1101,17 @@ bcEssentialManageVector( VectorType&     rightHandSide,
     {  //! If BC is given under a vectorial form
 
         // Loop on BC identifiers
-        for ( ID i = 1; i <= boundaryCond.list_size(); ++i )
+        for ( ID i = 0; i < boundaryCond.list_size(); ++i )
         {
             // Loop on components involved in this boundary condition
-            for ( ID j = 1; j <= nComp; ++j )
+            for ( ID j = 0; j < nComp; ++j )
             {
 
                 // Global Dof
-                idDof = boundaryCond( i ) ->id() + ( boundaryCond.component( j ) - 1 ) * totalDof + offset;
+                idDof = boundaryCond[ i ] ->id() + boundaryCond.component( j ) * totalDof + offset;
 
                 idDofVec.push_back( idDof );
-                datumVec.push_back( diagonalizeCoef * boundaryCond( boundaryCond( i ) ->id(), boundaryCond.component( j ) ) );
+                datumVec.push_back( diagonalizeCoef * boundaryCond( boundaryCond[ i ] ->id(), boundaryCond.component( j ) ) );
             }
         }
     }
@@ -1122,19 +1120,19 @@ bcEssentialManageVector( VectorType&     rightHandSide,
 
         DataType x, y, z;
         // Loop on BC identifiers
-        for ( ID i = 1; i <= boundaryCond.list_size(); ++i )
+        for ( ID i = 0; i < boundaryCond.list_size(); ++i )
         {
             // Coordinates of the node where we impose the value
-            x = static_cast< const BCIdentifierEssential* >( boundaryCond( i ) ) ->x();
-            y = static_cast< const BCIdentifierEssential* >( boundaryCond( i ) ) ->y();
-            z = static_cast< const BCIdentifierEssential* >( boundaryCond( i ) ) ->z();
+            x = static_cast< const BCIdentifierEssential* >( boundaryCond[ i ] ) ->x();
+            y = static_cast< const BCIdentifierEssential* >( boundaryCond[ i ] ) ->y();
+            z = static_cast< const BCIdentifierEssential* >( boundaryCond[ i ] ) ->z();
 
             // Loop on components involved in this boundary condition
-            for ( ID j = 1; j <= nComp; ++j )
+            for ( ID j = 0; j < nComp; ++j )
             {
                 // Global Dof
 
-                idDof = boundaryCond( i ) ->id() + ( boundaryCond.component( j ) - 1 ) * totalDof + offset;
+                idDof = boundaryCond[ i ] ->id() + boundaryCond.component( j ) * totalDof + offset;
                 // Modifying right hand side
                 idDofVec.push_back(idDof);
                 datumVec.push_back( diagonalizeCoef * boundaryCond( time, x, y, z, boundaryCond.component( j ) ) );
@@ -1190,15 +1188,15 @@ bcNaturalManage( VectorType& rightHandSide,
             // double datum;
 
             // Loop on BC identifiers
-            for ( ID i = 1; i <= boundaryCond.list_size(); ++i )
+            for ( ID i = 0; i < boundaryCond.list_size(); ++i )
             {
                 // Loop on components involved in this boundary condition
-                for ( ID j = 1; j <= nComp; ++j )
+                for ( ID j = 0; j < nComp; ++j )
                 {
-                    ID id = boundaryCond(i)->id();
+                    ID id = boundaryCond[i]->id();
 
                     // Global Dof
-                    idDof = id + ( boundaryCond.component( j ) - 1 ) * totalDof + offset;
+                    idDof = id + boundaryCond.component( j ) * totalDof + offset;
 
                     idDofVec.push_back( idDof);
 
@@ -1221,10 +1219,10 @@ bcNaturalManage( VectorType& rightHandSide,
             VectorType rhsRepeated(rightHandSide.map(),Repeated);
 
             // Loop on BC identifiers
-            for ( ID i = 1; i <= boundaryCond.list_size(); ++i )
+            for ( ID i = 0; i < boundaryCond.list_size(); ++i )
             {
                 // Pointer to the i-th itdentifier in the list
-                pId = static_cast< const BCIdentifierNatural* >( boundaryCond( i ) );
+                pId = static_cast< const BCIdentifierNatural* >( boundaryCond[ i ] );
 
                 // Number of the current boundary face
                 ibF = pId->id();
@@ -1233,10 +1231,10 @@ bcNaturalManage( VectorType& rightHandSide,
                 currentBdFE.updateMeasNormalQuadPt( mesh.bElement( ibF ) );
 
                 // Loop on total DOF per Face
-                for ( ID l = 1; l <= nDofF; ++l )
+                for ( ID l = 0; l < nDofF; ++l )
                 {
 
-                    gDof = pId->localToGlobalMap( l );
+                    gDof = pId->boundaryLocalToGlobalMap( l );
 
                     // Loop on components involved in this boundary condition
                     for ( UInt ic = 0; ic < nComp; ++ic )
@@ -1248,10 +1246,10 @@ bcNaturalManage( VectorType& rightHandSide,
                         {
                             sum=0.0;
                             // data on quadrature point
-                            for ( ID m = 1; m <= nDofF; ++m )
-                                sum +=  boundaryCond( pId->localToGlobalMap( m ) , 1 ) * currentBdFE.phi( int( m - 1 ), iq );
+                            for ( ID m = 0; m < nDofF; ++m )
+                                sum +=  boundaryCond( pId->boundaryLocalToGlobalMap( m ) , 0 ) * currentBdFE.phi( int( m ), iq );
                             // Adding right hand side contribution
-                            rhsRepeated[ icDof ] += sum * currentBdFE.phi( int( l - 1 ), iq ) * currentBdFE.normal( int( ic ), iq )
+                            rhsRepeated[ icDof ] += sum * currentBdFE.phi( int( l ), iq ) * currentBdFE.normal( int( ic ), iq )
                                                     * currentBdFE.weightMeas( iq );
                         }
                     }
@@ -1268,10 +1266,10 @@ bcNaturalManage( VectorType& rightHandSide,
             VectorType rhsRepeated(rightHandSide.map(),Repeated);
 
             // Loop on BC identifiers
-            for ( ID i = 1; i <= boundaryCond.list_size(); ++i )
+            for ( ID i = 0; i < boundaryCond.list_size(); ++i )
             {
                 // Pointer to the i-th itdentifier in the list
-                pId = static_cast< const BCIdentifierNatural* >( boundaryCond( i ) );
+                pId = static_cast< const BCIdentifierNatural* >( boundaryCond[ i ] );
 
                 // Number of the current boundary face
                 ibF = pId->id();
@@ -1280,27 +1278,27 @@ bcNaturalManage( VectorType& rightHandSide,
                 currentBdFE.updateMeasNormalQuadPt( mesh.bElement( ibF ) );
 
                 // Loop on total DOF per Face
-                for ( ID idofF = 1; idofF <= nDofF; ++idofF )
+                for ( ID idofF = 0; idofF < nDofF; ++idofF )
                 {
 
-                    gDof = pId->localToGlobalMap( idofF );
+                    gDof = pId->boundaryLocalToGlobalMap( idofF );
 
                     // Loop on space dimensions
-                    for ( ID ic = 1; ic <= nComp; ++ic )
+                    for ( ID ic = 0; ic < nComp; ++ic )
                         //  for ( UInt ic = 0; ic < nDimensions; ++ic )
                     {
-                        icDof = gDof + ( boundaryCond.component( ic ) - 1 ) * totalDof+ offset;   //Components passed separately
+                        icDof = gDof +  boundaryCond.component( ic ) * totalDof+ offset;   //Components passed separately
 
                         // Loop on quadrature points
                         for ( int iq = 0; iq < (int)currentBdFE.nbQuadPt(); ++iq )
                         {
                             sum = 0;
                             // data on quadrature point
-                            for ( ID m = 1; m <= nDofF; ++m )
-                                sum +=  boundaryCond( pId->localToGlobalMap( m ) , boundaryCond.component( ic ) ) * currentBdFE.phi( int( m - 1 ), iq );  //Components passed separatedly
+                            for ( ID m = 0; m < nDofF; ++m )
+                                sum +=  boundaryCond( pId->boundaryLocalToGlobalMap( m ) , boundaryCond.component( ic ) ) * currentBdFE.phi( int( m ), iq );  //Components passed separatedly
 
                             // Adding right hand side contribution
-                            rhsRepeated[ icDof ] += sum *  currentBdFE.phi( int( idofF - 1 ), iq ) *
+                            rhsRepeated[ icDof ] += sum *  currentBdFE.phi( int( idofF ), iq ) *
                                                     currentBdFE.weightMeas( iq );
                         }
                     }
@@ -1323,21 +1321,21 @@ bcNaturalManage( VectorType& rightHandSide,
         VectorType rhsRepeated(rightHandSide.map(),Repeated);
 
         // Loop on BC identifiers
-        for ( ID i = 1; i <= boundaryCond.list_size(); ++i )
+        for ( ID i = 0; i < boundaryCond.list_size(); ++i )
         {
             // Pointer to the i-th identifier in the list
-            pId = static_cast< const BCIdentifierNatural* >( boundaryCond( i ) );
+            pId = static_cast< const BCIdentifierNatural* >( boundaryCond[ i ] );
             // Number of the current boundary face
             ibF = pId->id();
             // Updating face stuff
             currentBdFE.updateMeasNormalQuadPt( mesh.bElement( ibF ) );
             // Loop on total DOF per Face
-            for ( ID idofF = 1; idofF <= nDofF; ++idofF )
+            for ( ID idofF = 0; idofF < nDofF; ++idofF )
             {
-                for ( ID j = 1; j <= nComp; ++j )
+                for ( ID j = 0; j < nComp; ++j )
                 {
                     //global Dof
-                    idDof = pId->localToGlobalMap( idofF ) + ( boundaryCond.component( j ) - 1 ) * totalDof + offset;
+                    idDof = pId->boundaryLocalToGlobalMap( idofF ) + boundaryCond.component( j ) * totalDof + offset;
                     // Loop on quadrature points
                     for ( int iq = 0; iq < (int)currentBdFE.nbQuadPt(); ++iq )
                     {
@@ -1345,17 +1343,17 @@ bcNaturalManage( VectorType& rightHandSide,
                         switch (boundaryCond.mode())
                         {
                         case Full:
-                            rhsRepeated[ idDof ] += currentBdFE.phi( int( idofF - 1 ), iq ) * boundaryCond( time, x, y, z, boundaryCond.component( j ) ) *
-                                                    currentBdFE.weightMeas( iq ); // BASEINDEX + 1
+                            rhsRepeated[ idDof ] += currentBdFE.phi( int( idofF ), iq ) * boundaryCond( time, x, y, z, boundaryCond.component( j ) ) *
+                                                    currentBdFE.weightMeas( iq );
                             break;
                         case Component:
-                            rhsRepeated[ idDof ] += currentBdFE.phi( int( idofF - 1 ), iq ) * boundaryCond( time, x, y, z, boundaryCond.component( j ) ) *
-                                                    currentBdFE.weightMeas( iq ); // BASEINDEX + 1
+                            rhsRepeated[ idDof ] += currentBdFE.phi( int( idofF ), iq ) * boundaryCond( time, x, y, z, boundaryCond.component( j ) ) *
+                                                    currentBdFE.weightMeas( iq );
                             break;
                         case Normal:
                             rhsRepeated[ idDof ] += boundaryCond( time, x, y, z, boundaryCond.component( j ) )*
-                                                    currentBdFE.phi( int( idofF - 1 ), iq )*
-                                                    currentBdFE.weightMeas( iq )*currentBdFE.normal( int(j - 1), iq );
+                                                    currentBdFE.phi( int( idofF ), iq )*
+                                                    currentBdFE.weightMeas( iq )*currentBdFE.normal( int(j), iq );
                             break;
                         default:
                             ERROR_MSG( "This BC mode is not (yet) implemented" );
@@ -1408,17 +1406,17 @@ bcNaturalManageUDep( Real (*mu)(Real time,Real x, Real y, Real z, Real u),
 
         DataType x, y, z;
 
-        if (nComp!=1)
+        if (nComp!=0)
         {
             ERROR_MSG("For now bcNaturalManageUDep cannot handle non scalar solutions\n");
         }
 
         // Loop on BC identifiers
-        for ( ID i = 1; i <= boundaryCond.list_size(); ++i )
+        for ( ID i = 0; i < boundaryCond.list_size(); ++i )
         {
 
             // Pointer to the i-th itdentifier in the list
-            pId = static_cast< const BCIdentifierNatural* >( boundaryCond( i ) );
+            pId = static_cast< const BCIdentifierNatural* >( boundaryCond[ i ] );
 
             // Number of the current boundary face
             ibF = pId->id();
@@ -1426,24 +1424,24 @@ bcNaturalManageUDep( Real (*mu)(Real time,Real x, Real y, Real z, Real u),
             // Updating face stuff
             currentBdFE.updateMeas( mesh.boundaryFace( ibF ) );
 
-            std::vector<Real> locU(nDofF+1);    //assumes feVec is a vec of reals, TODO: deal with more comp
+            std::vector<Real> locU(nDofF);    //assumes feVec is a vec of reals, TODO: deal with more comp
             Real uPt;            //value in the point
             for (ID idofLocU=0; idofLocU<nDofF; idofLocU++)
             {
-                ID idGDofU=pId->bdLocalToGlobal(idofLocU+1)+( boundaryCond.component( 1 ) - 1 ) * totalDof + offset;
-                locU[idofLocU]=feVec[idGDofU-1];
+                ID idGDofU=pId->bdLocalToGlobal(idofLocU)+ boundaryCond.component( 0 ) * totalDof + offset;
+                locU[idofLocU]=feVec[idGDofU];
             }
 
 
-            // Loop on total DOF per Face
-            for ( ID idofF = 1; idofF <= nDofF; ++idofF )
+            // Loop on total Dof per Face
+            for ( ID idofF = 0; idofF < nDofF; ++idofF )
             {
                 // Loop on components involved in this boundary condition
-                for ( ID j = 1; j <= nComp; ++j )
+                for ( ID j = 0; j < nComp; ++j )
                 {
 
                     //global Dof
-                    idDof = pId->bdLocalToGlobal( idofF ) + ( boundaryCond.component( j ) - 1 ) * totalDof + offset;
+                    idDof = pId->bdLocalToGlobal( idofF ) + boundaryCond.component( j ) * totalDof + offset;
 
                     // Loop on quadrature points
                     for ( int l = 0; l < (int)currentBdFE.nbQuadPt; ++l )
@@ -1457,8 +1455,8 @@ bcNaturalManageUDep( Real (*mu)(Real time,Real x, Real y, Real z, Real u),
                         }
 
                         // Adding right hand side contribution
-                        rightHandSide[ idDof ] += currentBdFE.phi( int( idofF - 1 ), l ) * boundaryCond( time, x, y, z, boundaryCond.component( j ),uPt ) *
-                                                  mu(time,x,y,z,uPt)*currentBdFE.weightMeas( l ); // BASEINDEX + 1
+                        rightHandSide[ idDof ] += currentBdFE.phi( int( idofF ), l ) * boundaryCond( time, x, y, z, boundaryCond.component( j ),uPt ) *
+                                                  mu(time,x,y,z,uPt)*currentBdFE.weightMeas( l );
                     }
                 }
             }
@@ -1487,7 +1485,7 @@ bcRobinManage( MatrixType& matrix,
 {
 
     // Number of local DOF in this face
-    UInt nDofF = currentBdFE.nbNode();
+    ID nDofF = currentBdFE.nbNode();
 
     // Number of total scalar Dof
     UInt totalDof = dof.numTotalDof();
@@ -1507,11 +1505,11 @@ bcRobinManage( MatrixType& matrix,
         DataType mcoef, mbcb;
 
         // Loop on BC identifiers
-        for ( ID i = 1; i <= boundaryCond.list_size(); ++i )
+        for ( ID i = 0; i < boundaryCond.list_size(); ++i )
         {
 
             // Pointer to the i-th identifier in the list
-            pId = static_cast< const BCIdentifierNatural* >( boundaryCond( i ) );
+            pId = static_cast< const BCIdentifierNatural* >( boundaryCond[ i ] );
 
             // Number of the current boundary face
             ibF = pId->id();
@@ -1520,81 +1518,80 @@ bcRobinManage( MatrixType& matrix,
             currentBdFE.updateMeas( mesh.bElement( ibF ) );
 
             // Loop on total DOF per Face
-            for ( ID idofF = 1; idofF <= nDofF; ++idofF )
+            for ( int idofF = 0; idofF < (int)nDofF; ++idofF )
             {
                 // Loop on components involved in this boundary condition
-                for ( ID j = 1; j <= nComp; ++j )
+                for ( ID j = 0; j < nComp; ++j )
                 {
 
                     sum = 0;
 
-                    idDof = pId->localToGlobalMap( idofF ) + ( boundaryCond.component( j ) - 1 ) * totalDof + offset;
+                    idDof = pId->boundaryLocalToGlobalMap( idofF ) + boundaryCond.component( j ) * totalDof + offset;
 
                     // Loop on quadrature points
                     for ( int l = 0; l < (int)currentBdFE.nbQuadPt(); ++l )
                     {
                         mcoef = 0.0;
                         mbcb = 0.0;
-                        for ( ID n = 1; n <= nDofF; ++n)
+                        for ( int n = 0; n < (int)nDofF; ++n)
                         {
-                            kdDof=pId->localToGlobalMap( n ); // + ( boundaryCond.component( j ) - 1 ) * totalDof;
+                            kdDof=pId->boundaryLocalToGlobalMap( n );
                             if (boundaryCond.isRobinCoeffAVector())
-                                mcoef += boundaryCond.robinCoeffVector( kdDof, boundaryCond.component( j ) ) * currentBdFE.phi( int( n - 1 ), l );
-                            else  mcoef += boundaryCond.robinCoeff() * currentBdFE.phi( int( n - 1 ), l );
+                                mcoef += boundaryCond.robinCoeffVector( kdDof, boundaryCond.component( j ) ) * currentBdFE.phi( n, l );
+                            else  mcoef += boundaryCond.robinCoeff() * currentBdFE.phi( n, l );
 
                             if (boundaryCond.isBetaCoeffAVector())
                                 mbcb += boundaryCond.betaCoeffVector( kdDof, boundaryCond.component( j ) )
-                                        * boundaryCond( kdDof, boundaryCond.component( j )) * currentBdFE.phi( int( n - 1 ), l );
-                            else  mbcb += boundaryCond.betaCoeff() * boundaryCond( kdDof, boundaryCond.component( j )) * currentBdFE.phi( int( n - 1 ), l );
+                                        * boundaryCond( kdDof, boundaryCond.component( j )) * currentBdFE.phi( n, l );
+                            else  mbcb += boundaryCond.betaCoeff() * boundaryCond( kdDof, boundaryCond.component( j )) * currentBdFE.phi( n, l );
                         }
 
-                        sum += mcoef* currentBdFE.phi( int( idofF - 1 ), l ) *
-                               currentBdFE.phi( int( idofF - 1 ), l ) *currentBdFE.weightMeas( l );
+                        sum += mcoef* currentBdFE.phi( idofF, l ) *
+                               currentBdFE.phi( idofF, l ) *currentBdFE.weightMeas( l );
 
-                        rightHandSide[ idDof ] += currentBdFE.phi( int( idofF - 1 ), l ) * mbcb * // BASEINDEX + 1
-                                                  currentBdFE.weightMeas( l );
+                        rightHandSide[ idDof ] += currentBdFE.phi( idofF, l ) * mbcb * currentBdFE.weightMeas( l );
 
                     }
 
                     // Assembling diagonal entry
-                    matrix.addToCoefficient( idDof - 1, idDof - 1, sum );
+                    matrix.addToCoefficient( idDof, idDof, sum );
                 }
 
                 // Upper diagonal columns of the elementary boundary mass matrix
-                for ( ID k = idofF + 1 ; k <= nDofF ; ++k )
+                for ( int k = idofF +1 ; k <  (int)nDofF ; ++k )
                 {
 
                     // Loop on components invoved in this boundary condition
-                    for ( ID j = 1; j <= nComp; ++j )
+                    for ( ID j = 0; j < nComp; ++j )
                     {
 
                         sum = 0;
 
-                        idDof = pId->localToGlobalMap( idofF ) + ( boundaryCond.component( j ) - 1 ) * totalDof + offset;
-                        jdDof = pId->localToGlobalMap( k ) + ( boundaryCond.component( j ) - 1 ) * totalDof + offset;
+                        idDof = pId->boundaryLocalToGlobalMap( idofF ) + boundaryCond.component( j ) * totalDof + offset;
+                        jdDof = pId->boundaryLocalToGlobalMap( k ) + boundaryCond.component( j ) * totalDof + offset;
 
                         // Loop on quadrature points
                         for ( int l = 0; l < (int)currentBdFE.nbQuadPt(); ++l )
                         {
                             mcoef = 0.0;
-                            for ( ID n = 1; n <= nDofF; ++n)
+                            for ( int n = 0; n < (int)nDofF; ++n)
                             {
-                                kdDof=pId->localToGlobalMap( n ); // + ( boundaryCond.component( j ) - 1 ) * totalDof;
+                                kdDof=pId->boundaryLocalToGlobalMap( n );
                                 if (boundaryCond.isRobinCoeffAVector())
-                                    mcoef += boundaryCond.robinCoeffVector( kdDof, boundaryCond.component( j ) ) * currentBdFE.phi( int( n - 1 ), l );
+                                    mcoef += boundaryCond.robinCoeffVector( kdDof, boundaryCond.component( j ) ) * currentBdFE.phi( n, l );
 
-                                else mcoef += boundaryCond.robinCoeff() * currentBdFE.phi( int( n - 1 ), l );
+                                else mcoef += boundaryCond.robinCoeff() * currentBdFE.phi( n, l );
                             }
 
                             currentBdFE.weightMeas( l );
-                            sum += mcoef*currentBdFE.phi( int( idofF - 1 ), l ) *
-                                   currentBdFE.phi( int( k - 1 ), l ) * currentBdFE.weightMeas( l );
+                            sum += mcoef*currentBdFE.phi( idofF, l ) *
+                                   currentBdFE.phi( k, l ) * currentBdFE.weightMeas( l );
 
                         }
 
                         // Assembling upper entry.  The boundary mass matrix is symetric
-                        matrix.addToCoefficient( idDof - 1, jdDof - 1, sum );
-                        matrix.addToCoefficient( jdDof - 1, idDof - 1, sum );
+                        matrix.addToCoefficient( idDof, jdDof, sum );
+                        matrix.addToCoefficient( jdDof, idDof, sum );
                     }
                 }
             }
@@ -1609,11 +1606,11 @@ bcRobinManage( MatrixType& matrix,
         const BCFunctionRobin* pBcF = static_cast<const BCFunctionRobin*>( boundaryCond.pointerToFunctor() );
 
         // Loop on BC identifiers
-        for ( ID i = 1; i <= boundaryCond.list_size(); ++i )
+        for ( ID i = 0; i < boundaryCond.list_size(); ++i )
         {
 
             // Pointer to the i-th identifier in the list
-            pId = static_cast< const BCIdentifierNatural* >( boundaryCond( i ) );
+            pId = static_cast< const BCIdentifierNatural* >( boundaryCond[ i ] );
 
             // Number of the current boundary face
             ibF = pId->id();
@@ -1622,16 +1619,16 @@ bcRobinManage( MatrixType& matrix,
             currentBdFE.updateMeas( mesh.bElement( ibF ) );
 
             // Loop on total DOF per Face
-            for ( ID idofF = 1; idofF <= nDofF; ++idofF )
+            for ( ID idofF = 0; idofF < nDofF; ++idofF )
             {
                 // Loop on components invoved in this boundary condition
-                for ( ID j = 1; j <= nComp; ++j )
+                for ( ID j = 0; j < nComp; ++j )
                 {
 
                     sum = 0;
 
                     // Global DOF (outside the quad point loop. V. Martin)
-                    idDof = pId->localToGlobalMap( idofF ) + ( boundaryCond.component( j ) - 1 ) * totalDof + offset;
+                    idDof = pId->boundaryLocalToGlobalMap( idofF ) + boundaryCond.component( j ) * totalDof + offset;
 
                     // Loop on quadrature points
                     for ( int l = 0; l < (int)currentBdFE.nbQuadPt(); ++l )
@@ -1640,24 +1637,24 @@ bcRobinManage( MatrixType& matrix,
                         currentBdFE.coorQuadPt( x, y, z, l ); // quadrature point coordinates
 
                         // Contribution to the diagonal entry of the elementary boundary mass matrix
-                        sum += pBcF->coef( time, x, y, z, boundaryCond.component( j ) ) * currentBdFE.phi( int( idofF - 1 ), l ) * currentBdFE.phi( int( idofF - 1 ), l ) *
+                        sum += pBcF->coef( time, x, y, z, boundaryCond.component( j ) ) * currentBdFE.phi( int( idofF ), l ) * currentBdFE.phi( int( idofF ), l ) *
                                currentBdFE.weightMeas( l );
 
                         // Adding right hand side contribution
-                        rightHandSide[ idDof ] += currentBdFE.phi( int( idofF - 1 ), l ) * boundaryCond( time, x, y, z, boundaryCond.component( j ) ) * // BASEINDEX + 1
+                        rightHandSide[ idDof ] += currentBdFE.phi( int( idofF), l ) * boundaryCond( time, x, y, z, boundaryCond.component( j ) ) *
                                                   currentBdFE.weightMeas( l );
                     }
 
                     // Assembling diagonal entry
-                    matrix.addToCoefficient( idDof - 1, idDof - 1, sum );
+                    matrix.addToCoefficient( idDof, idDof, sum );
                 }
 
                 // Upper diagonal columns of the elementary boundary mass matrix
-                for ( ID k = idofF + 1 ; k <= nDofF ; ++k )
+                for ( ID k = idofF + 1 ; k < nDofF ; ++k )
                 {
 
                     // Loop on components invoved in this boundary condition
-                    for ( ID j = 1; j <= nComp; ++j )
+                    for ( ID j = 0; j < nComp; ++j )
                     {
 
                         sum = 0;
@@ -1669,17 +1666,17 @@ bcRobinManage( MatrixType& matrix,
                             currentBdFE.coorQuadPt( x, y, z, l ); // quadrature point coordinates
 
                             // Upper diagonal entry of the elementary boundary mass matrix
-                            sum += pBcF->coef( time,  x, y, z, boundaryCond.component( j )   ) * currentBdFE.phi( int( idofF - 1 ), l ) * currentBdFE.phi( int( k - 1 ), l ) *
+                            sum += pBcF->coef( time,  x, y, z, boundaryCond.component( j )   ) * currentBdFE.phi( idofF , l ) * currentBdFE.phi( k, l ) *
                                    currentBdFE.weightMeas( l );
                         }
 
                         // Globals DOF: row and columns
-                        idDof = pId->localToGlobalMap( idofF ) + ( boundaryCond.component( j ) - 1 ) * totalDof + offset;
-                        jdDof = pId->localToGlobalMap( k ) + ( boundaryCond.component( j ) - 1 ) * totalDof + offset;
+                        idDof = pId->boundaryLocalToGlobalMap( idofF ) + boundaryCond.component( j ) * totalDof + offset;
+                        jdDof = pId->boundaryLocalToGlobalMap( k ) + boundaryCond.component( j ) * totalDof + offset;
 
                         // Assembling upper entry.  The boundary mass matrix is symetric
-                        matrix.addToCoefficient( idDof - 1, jdDof - 1, sum );
-                        matrix.addToCoefficient( jdDof - 1, idDof - 1, sum );
+                        matrix.addToCoefficient( idDof, jdDof, sum );
+                        matrix.addToCoefficient( jdDof, idDof, sum );
                     }
                 }
             }
@@ -1721,11 +1718,11 @@ bcRobinManageMatrix( MatrixType& matrix,
         DataType mcoef = boundaryCond.robinCoeff();   //!< the robin coefficient
 
         // Loop on BC identifiers
-        for ( ID i = 1; i <= boundaryCond.list_size(); ++i )
+        for ( ID i = 0; i < boundaryCond.list_size(); ++i )
         {
 
             // Pointer to the i-th identifier in the list
-            pId = static_cast< const BCIdentifierNatural* >( boundaryCond( i ) );
+            pId = static_cast< const BCIdentifierNatural* >( boundaryCond[ i ] );
 
             // Number of the current boundary face
             ibF = pId->id();
@@ -1734,36 +1731,36 @@ bcRobinManageMatrix( MatrixType& matrix,
             currentBdFE.updateMeas( mesh.bElement( ibF ) );
 
             // Loop on total DOF per Face
-            for ( ID idofF = 1; idofF <= nDofF; ++idofF )
+            for ( ID idofF = 0; idofF < nDofF; ++idofF )
             {
                 // Loop on components invoved in this boundary condition
-                for ( ID j = 1; j <= nComp; ++j )
+                for ( ID j = 0; j < nComp; ++j )
                 {
 
                     sum = 0;
 
                     // Global Dof
-                    idDof = boundaryCond( i ) ->id() + ( boundaryCond.component( j ) - 1 ) * totalDof + offset;
+                    idDof = boundaryCond[ i ] ->id() + boundaryCond.component( j ) * totalDof + offset;
 
                     // Loop on quadrature points
                     for ( int l = 0; l < (int)currentBdFE.nbQuadPt(); ++l )
                     {
 
                         // Contribution to the diagonal entry of the elementary boundary mass matrix
-                        sum += mcoef * currentBdFE.phi( int( idofF - 1 ), l ) * currentBdFE.phi( int( idofF - 1 ), l ) *
+                        sum += mcoef * currentBdFE.phi( int( idofF ), l ) * currentBdFE.phi( int( idofF ), l ) *
                                currentBdFE.weightMeas( l );
                     }
 
                     // Assembling diagonal entry
-                    matrix.addToCoefficient( idDof - 1, idDof - 1, sum );
+                    matrix.addToCoefficient( idDof, idDof, sum );
                 }
 
                 // Upper diagonal columns of the elementary boundary mass matrix
-                for ( ID k = idofF + 1 ; k <= nDofF ; ++k )
+                for ( ID k = idofF + 1 ; k <nDofF ; ++k )
                 {
 
                     // Loop on components invoved in this boundary condition
-                    for ( ID j = 1; j <= nComp; ++j )
+                    for ( ID j = 0; j < nComp; ++j )
                     {
 
                         sum = 0;
@@ -1773,17 +1770,17 @@ bcRobinManageMatrix( MatrixType& matrix,
                         {
 
                             // Upper diagonal entry of the elementary boundary mass matrix
-                            sum += mcoef * currentBdFE.phi( int( idofF - 1 ), l ) * currentBdFE.phi( int( k - 1 ), l ) *
+                            sum += mcoef * currentBdFE.phi( int( idofF ), l ) * currentBdFE.phi( int( k ), l ) *
                                    currentBdFE.weightMeas( l );
                         }
 
                         // Globals DOF: row and columns
-                        idDof = boundaryCond( i ) ->id() + ( boundaryCond.component( j ) - 1 ) * totalDof + offset;
-                        jdDof = boundaryCond( k ) ->id() + ( boundaryCond.component( j ) - 1 ) * totalDof + offset;
+                        idDof = boundaryCond[ i ] ->id() + boundaryCond.component( j ) * totalDof + offset;
+                        jdDof = boundaryCond[ k ] ->id() + boundaryCond.component( j ) * totalDof + offset;
 
                         // Assembling upper entry.  The boundary mass matrix is symetric
-                        matrix.addToCoefficient( idDof - 1, jdDof - 1, sum );
-                        matrix.addToCoefficient( jdDof - 1, idDof - 1, sum );
+                        matrix.addToCoefficient( idDof, jdDof, sum );
+                        matrix.addToCoefficient( jdDof, idDof, sum );
                     }
                 }
             }
@@ -1798,11 +1795,11 @@ bcRobinManageMatrix( MatrixType& matrix,
         const BCFunctionRobin* pBcF = static_cast<const BCFunctionRobin*>( boundaryCond.pointerToFunctor() );
 
         // Loop on BC identifiers
-        for ( ID i = 1; i <= boundaryCond.list_size(); ++i )
+        for ( ID i = 0; i < boundaryCond.list_size(); ++i )
         {
 
             // Pointer to the i-th identifier in the list
-            pId = static_cast< const BCIdentifierNatural* >( boundaryCond( i ) );
+            pId = static_cast< const BCIdentifierNatural* >( boundaryCond[ i ] );
 
             // Number of the current boundary face
             ibF = pId->id();
@@ -1811,16 +1808,16 @@ bcRobinManageMatrix( MatrixType& matrix,
             currentBdFE.updateMeas( mesh.bElement( ibF ) );
 
             // Loop on total DOF per Face
-            for ( ID idofF = 1; idofF <= nDofF; ++idofF )
+            for ( ID idofF = 0; idofF < nDofF; ++idofF )
             {
                 // Loop on components invoved in this boundary condition
-                for ( ID j = 1; j <= nComp; ++j )
+                for ( ID j = 0; j < nComp; ++j )
                 {
 
                     sum = 0;
 
                     // Global DOF (outside the quad point loop. V. Martin)
-                    idDof = pId->localToGlobalMap( idofF ) + ( boundaryCond.component( j ) - 1 ) * totalDof + offset;
+                    idDof = pId->boundaryLocalToGlobalMap( idofF ) + boundaryCond.component( j ) * totalDof + offset;
 
                     // Loop on quadrature points
                     for ( int l = 0; l < (int)currentBdFE.nbQuadPt(); ++l )
@@ -1829,21 +1826,21 @@ bcRobinManageMatrix( MatrixType& matrix,
                         currentBdFE.coorQuadPt( x, y, z, l ); // quadrature point coordinates
 
                         // Contribution to the diagonal entry of the elementary boundary mass matrix
-                        sum += pBcF->coef( time, x, y, z, boundaryCond.component(j) ) * currentBdFE.phi( int( idofF - 1 ), l ) * currentBdFE.phi( int( idofF - 1 ), l ) *
+                        sum += pBcF->coef( time, x, y, z, boundaryCond.component(j) ) * currentBdFE.phi( int( idofF ), l ) * currentBdFE.phi( int( idofF ), l ) *
                                currentBdFE.weightMeas( l );
                     }
 
 
                     // Assembling diagonal entry
-                    matrix.addToCoefficient( idDof - 1, idDof - 1, sum );
+                    matrix.addToCoefficient( idDof, idDof, sum );
                 }
 
                 // Upper diagonal columns of the elementary boundary mass matrix
-                for ( ID k = idofF + 1 ; k <= nDofF ; ++k )
+                for ( ID k = idofF + 1 ; k < nDofF ; ++k )
                 {
 
                     // Loop on components invoved in this boundary condition
-                    for ( ID j = 1; j <= nComp; ++j )
+                    for ( ID j = 0; j < nComp; ++j )
                     {
 
                         sum = 0;
@@ -1855,17 +1852,17 @@ bcRobinManageMatrix( MatrixType& matrix,
                             currentBdFE.coorQuadPt( x, y, z, l ); // quadrature point coordinates
 
                             // Upper diagonal entry of the elementary boundary mass matrix
-                            sum += pBcF->coef( time, x, y, z, boundaryCond.component( j )  ) * currentBdFE.phi( int( idofF - 1 ), l ) * currentBdFE.phi( int( k - 1 ), l ) *
+                            sum += pBcF->coef( time, x, y, z, boundaryCond.component( j )  ) * currentBdFE.phi( int( idofF  ), l ) * currentBdFE.phi( int( k ), l ) *
                                    currentBdFE.weightMeas( l );
                         }
 
                         // Globals DOF: row and columns
-                        idDof = pId->localToGlobalMap( idofF ) + ( boundaryCond.component( j ) - 1 ) * totalDof + offset;
-                        jdDof = pId->localToGlobalMap( k ) + ( boundaryCond.component( j ) - 1 ) * totalDof + offset;
+                        idDof = pId->boundaryLocalToGlobalMap( idofF ) + boundaryCond.component( j ) * totalDof + offset;
+                        jdDof = pId->boundaryLocalToGlobalMap( k ) + boundaryCond.component( j ) * totalDof + offset;
 
                         // Assembling upper entry.  The boundary mas matrix is symetric
-                        matrix.addToCoefficient( idDof - 1, jdDof - 1, sum );
-                        matrix.addToCoefficient( jdDof - 1, idDof - 1, sum );
+                        matrix.addToCoefficient( idDof, jdDof, sum );
+                        matrix.addToCoefficient( jdDof, idDof, sum );
                     }
                 }
             }
@@ -1902,11 +1899,11 @@ bcRobinManageVector( VectorType& rightHandSide,
     {   //! If BC is given under a vectorial form
 
         // Loop on BC identifiers
-        for ( ID i = 1; i <= boundaryCond.list_size(); ++i )
+        for ( ID i = 0; i < boundaryCond.list_size(); ++i )
         {
 
             // Pointer to the i-th identifier in the list
-            pId = static_cast< const BCIdentifierNatural* >( boundaryCond( i ) );
+            pId = static_cast< const BCIdentifierNatural* >( boundaryCond[ i ] );
 
             // Number of the current boundary face
             ibF = pId->id();
@@ -1915,19 +1912,19 @@ bcRobinManageVector( VectorType& rightHandSide,
             currentBdFE.updateMeas( mesh.bElement( ibF ) );
 
             // Loop on total DOF per Face
-            for ( ID idofF = 1; idofF <= nDofF; ++idofF )
+            for ( ID idofF = 0; idofF < nDofF; ++idofF )
             {
                 // Loop on components invoved in this boundary condition
-                for ( ID j = 1; j <= nComp; ++j )
+                for ( ID j = 0; j < nComp; ++j )
                 {
                     // Global Dof
-                    idDof = boundaryCond( i ) ->id() + ( boundaryCond.component( j ) - 1 ) * totalDof + offset;
+                    idDof = boundaryCond[ i ] ->id() + boundaryCond.component( j ) * totalDof + offset;
 
                     // Loop on quadrature points
                     for ( int l = 0; l < (int)currentBdFE.nbQuadPt(); ++l )
                     {
                         // Adding right hand side contribution
-                        rightHandSide[ idDof ] += currentBdFE.phi( int( idofF - 1 ), l ) * boundaryCond( boundaryCond( i ) ->id(), boundaryCond.component( j ) ) * // BASEINDEX + 1
+                        rightHandSide[ idDof ] += currentBdFE.phi( int( idofF ), l ) * boundaryCond( boundaryCond[ i ] ->id(), boundaryCond.component( j ) ) *
                                                   currentBdFE.weightMeas( l );
                     }
                 }
@@ -1941,11 +1938,11 @@ bcRobinManageVector( VectorType& rightHandSide,
         DataType x, y, z;
 
         // Loop on BC identifiers
-        for ( ID i = 1; i <= boundaryCond.list_size(); ++i )
+        for ( ID i = 0; i < boundaryCond.list_size(); ++i )
         {
 
             // Pointer to the i-th identifier in the list
-            pId = static_cast< const BCIdentifierNatural* >( boundaryCond( i ) );
+            pId = static_cast< const BCIdentifierNatural* >( boundaryCond[ i ] );
 
             // Number of the current boundary face
             ibF = pId->id();
@@ -1954,14 +1951,14 @@ bcRobinManageVector( VectorType& rightHandSide,
             currentBdFE.updateMeas( mesh.bElement( ibF ) );
 
             // Loop on total DOF per Face
-            for ( ID idofF = 1; idofF <= nDofF; ++idofF )
+            for ( ID idofF = 0; idofF < nDofF; ++idofF )
             {
                 // Loop on components invoved in this boundary condition
-                for ( ID j = 1; j <= nComp; ++j )
+                for ( ID j = 0; j < nComp; ++j )
                 {
 
                     // Global DOF (outside the quad point loop. V. Martin)
-                    idDof = pId->localToGlobalMap( idofF ) + ( boundaryCond.component( j ) - 1 ) * totalDof + offset;
+                    idDof = pId->boundaryLocalToGlobalMap( idofF ) + boundaryCond.component( j ) * totalDof + offset;
 
                     // Loop on quadrature points
                     for ( int l = 0; l < (int)currentBdFE.nbQuadPt(); ++l )
@@ -1970,7 +1967,7 @@ bcRobinManageVector( VectorType& rightHandSide,
                         currentBdFE.coorQuadPt( x, y, z, l ); // quadrature point coordinates
 
                         // Adding right hand side contribution
-                        rightHandSide[ idDof ] += currentBdFE.phi( int( idofF - 1 ), l ) * boundaryCond( time, x, y, z, boundaryCond.component( j ) ) *// BASEINDEX + 1
+                        rightHandSide[ idDof ] += currentBdFE.phi( int( idofF ), l ) * boundaryCond( time, x, y, z, boundaryCond.component( j ) ) *
                                                   currentBdFE.weightMeas( l );
                     }
                 }
@@ -2016,7 +2013,7 @@ bcFluxManageVector(
     UInt            offset)
 
 {
-    rightHandSide.setCoefficient(offset + 1,boundaryCond(time, 0., 0., 0., 1));
+    rightHandSide.setCoefficient(offset, boundaryCond(time, 0., 0., 0., 0));
 }  //bcFluxManageVector
 
 
@@ -2051,33 +2048,33 @@ bcFluxManageMatrix( MatrixType&     matrix,
 
     if ( !boundaryCond.isDataAVector() )
     {
-        for ( ID i = 1; i <= boundaryCond.list_size(); ++i )
+        for ( ID i = 0; i < boundaryCond.list_size(); ++i )
         {
-            pId = static_cast< const BCIdentifierNatural* >( boundaryCond( i ) );
+            pId = static_cast< const BCIdentifierNatural* >( boundaryCond[ i ] );
 
             // Number of the current boundary face
             ibF = pId->id();
             // Updating face stuff
             currentBdFE.updateMeasNormalQuadPt( mesh.bElement( ibF ) );
 
-            for ( ID idofF = 1; idofF <= nDofF; ++idofF )
+            for ( ID idofF = 0; idofF < nDofF; ++idofF )
             {
-                for ( int ic = 1; ic <= (int)nComp; ++ic)
+                for ( int ic = 0; ic < (int)nComp; ++ic)
                 {
-                    idDof = pId->localToGlobalMap( idofF ) + (ic - 1)*totalDof;
+                    idDof = pId->boundaryLocalToGlobalMap( idofF ) + ic * totalDof;
 
                     sum = 0.;
                     for ( int iq = 0; iq < (int)currentBdFE.nbQuadPt(); ++iq )
                     {
-                        sum += currentBdFE.phi( int( idofF - 1 ), iq )*
-                               currentBdFE.normal(int(ic - 1), iq)*
+                        sum += currentBdFE.phi( int( idofF ), iq )*
+                               currentBdFE.normal(ic , iq)*
                                currentBdFE.weightMeas(iq);
                     }
 
                     jdDof = offset;
 
-                    matrix.addToCoefficient( idDof - 1, jdDof    , sum );
-                    matrix.addToCoefficient( jdDof    , idDof - 1, sum );
+                    matrix.addToCoefficient( idDof    , jdDof    , sum );
+                    matrix.addToCoefficient( jdDof    , idDof    , sum );
                 }
             }
         }
@@ -2119,10 +2116,10 @@ bcResistanceManage( MatrixType& matrix,
         DataType  mbcb;
 
         // Loop on BC identifiers
-        for ( ID i = 1; i <= boundaryCond.list_size(); ++i )
+        for ( ID i = 0; i < boundaryCond.list_size(); ++i )
         {
             // Pointer to the i-th identifier in the list
-            pId = static_cast< const BCIdentifierNatural* >( boundaryCond( i ) );
+            pId = static_cast< const BCIdentifierNatural* >( boundaryCond[ i ] );
 
             // Number of the current boundary face
             ibF = pId->id();
@@ -2130,30 +2127,30 @@ bcResistanceManage( MatrixType& matrix,
             currentBdFE.updateMeasNormalQuadPt( mesh.boundaryFace( ibF ) );
 
             // Loop on total DOF per Face
-            for ( ID idofF = 1; idofF <= nDofF; ++idofF )
+            for ( ID idofF = 0; idofF < nDofF; ++idofF )
             {
-                resistanceDofs.insert( pId->localToGlobalMap( idofF ) );
+                resistanceDofs.insert( pId->boundaryLocalToGlobalMap( idofF ) );
 
                 // Loop on components involved in this boundary condition
-                for ( ID j = 1; j <= nComp; ++j )
+                for ( ID j = 0; j < nComp; ++j )
                 {
-                    idDof = pId->localToGlobalMap( idofF ) + ( boundaryCond.component( j ) - 1 ) * totalDof + offset;
+                    idDof = pId->boundaryLocalToGlobalMap( idofF ) + boundaryCond.component( j ) * totalDof + offset;
 
                     // Loop on quadrature points
                     for ( int l = 0; l < (int)currentBdFE.nbQuadPt(); ++l )
                     {
-                        vv[idDof] += currentBdFE.phi( int( idofF-1 ), l ) *  currentBdFE.normal( int( j-1 ), l ) * currentBdFE.weightMeas( l );
+                        vv[idDof] += currentBdFE.phi( int( idofF), l ) *  currentBdFE.normal( int( j ), l ) * currentBdFE.weightMeas( l );
 
                         mbcb=0;
 
                         // data on quadrature point
-                        for ( ID n = 1; n <= nDofF; ++n)
+                        for ( ID n = 0; n < nDofF; ++n)
                         {
-                            kdDof=pId->localToGlobalMap( n );
-                            mbcb += boundaryCond( kdDof, boundaryCond.component( j ) )* currentBdFE.phi( int( n - 1 ), l ) ;
+                            kdDof=pId->boundaryLocalToGlobalMap( n );
+                            mbcb += boundaryCond( kdDof, boundaryCond.component( j ) )* currentBdFE.phi( int( n ), l ) ;
                         }
 
-                        rightHandSide[ idDof ] +=  mbcb* currentBdFE.phi( int( idofF - 1 ), l ) *  currentBdFE.normal( int( j-1 ), l ) * // BASEINDEX + 1
+                        rightHandSide[ idDof ] +=  mbcb* currentBdFE.phi( int( idofF ), l ) *  currentBdFE.normal( int( j ), l ) *
                                                    currentBdFE.weightMeas( l );
 
                     }
@@ -2165,17 +2162,17 @@ bcResistanceManage( MatrixType& matrix,
         for ( std::set<ID>::iterator iDofIt = resistanceDofs.begin();
                 iDofIt != resistanceDofs.end(); ++iDofIt )
         {
-            for ( UInt iComp = 1; iComp <= nComp; ++iComp )
+            for ( UInt iComp = 0; iComp < nComp; ++iComp )
             {
-                idDof = *iDofIt + ( boundaryCond.component( iComp ) - 1 ) * totalDof + offset;
+                idDof = *iDofIt + boundaryCond.component( iComp ) * totalDof + offset;
                 for ( std::set<ID>::iterator jDofIt = resistanceDofs.begin();
                         jDofIt != resistanceDofs.end(); ++jDofIt )
                 {
-                    for ( UInt jComp = 1; jComp <= nComp; ++jComp )
+                    for ( UInt jComp = 0; jComp < nComp; ++jComp )
                     {
-                        jdDof = *jDofIt + ( boundaryCond.component( jComp ) - 1 ) * totalDof + offset;
+                        jdDof = *jDofIt + boundaryCond.component( jComp ) * totalDof + offset;
 
-                        matrix.addToCoefficient( idDof-1,  jdDof-1, boundaryCond.resistanceCoeff() * vv[idDof] * vv[jdDof] );
+                        matrix.addToCoefficient( idDof,  jdDof, boundaryCond.resistanceCoeff() * vv[idDof] * vv[jdDof] );
                     }
                 }
             }

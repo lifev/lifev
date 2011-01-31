@@ -28,7 +28,7 @@
 	#mesh_file = cube32x32.mesh      # mesh file
 
 	[../prec]
-	prectype                = ML # ML or Ifpack
+	prectype                = Ifpack # ML or Ifpack
 	reuse                   = true
 	displayList             = false
 

@@ -290,7 +290,7 @@ void MitchellSchaeffer<Mesh, SolverType>::updateElementSolution( UInt eleID )
     //! Filling local elvec_w with recovery variable values in the nodes
     for ( UInt iNode = 0 ; iNode < HeartIonicSolver<Mesh, SolverType>::M_uFESpace.fe().nbFEDof() ; iNode++ )
     {
-        ig = HeartIonicSolver<Mesh, SolverType>::M_uFESpace.dof().localToGlobal( eleID, iNode + 1 );
+        ig = HeartIonicSolver<Mesh, SolverType>::M_uFESpace.dof().localToGlobalMap( eleID, iNode );
         M_elvec.vec()[ iNode ] = M_solutionGatingWRepeated[ig];
     }
 }
@@ -466,7 +466,7 @@ void RogersMcCulloch<Mesh, SolverType>::updateElementSolution( UInt eleID )
     for ( UInt iNode = 0 ;
           iNode < HeartIonicSolver<Mesh, SolverType>::M_uFESpace.fe().nbFEDof() ; iNode++ )
     {
-        ig = HeartIonicSolver<Mesh, SolverType>::M_uFESpace.dof().localToGlobal( eleID, iNode + 1 );
+        ig = HeartIonicSolver<Mesh, SolverType>::M_uFESpace.dof().localToGlobalMap( eleID, iNode );
         M_elvec.vec()[ iNode ] = M_solutionGatingWRepeated[ig];
     }
 }
@@ -708,7 +708,7 @@ void LuoRudy<Mesh, SolverType>::updateElementSolution( UInt eleID)
 		//! Filling local elvec with recovery variable values in the nodes
 		for ( UInt iNode = 0 ; iNode < HeartIonicSolver<Mesh, SolverType>::M_uFESpace.fe().nbFEDof() ; iNode++ )
 		{
-			ig = HeartIonicSolver<Mesh, SolverType>::M_uFESpace.dof().localToGlobal( eleID, iNode + 1 );
+			ig = HeartIonicSolver<Mesh, SolverType>::M_uFESpace.dof().localToGlobalMap( eleID, iNode );
 			M_elemVecIonicCurrent.vec()[ iNode ] = M_ionicCurrentRepeated[ig];
 		}
 
