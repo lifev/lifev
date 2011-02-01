@@ -1,4 +1,3 @@
-/* -*- mode: c++ -*- */
 //@HEADER
 /*
 *******************************************************************************
@@ -33,15 +32,13 @@ namespace LifeV
 {
 
 // ===================================================
-//! Public Methods
+// Public Methods
 // ===================================================
-
 void MonolithicRobinInterface::setRobinData(const GetPot& data, const std::string& section)
 {
     M_alphas=data((section + "/alphas").data(), 0.);
     M_alphaf=data((section + "/alphaf").data(), 0.);
 }
-
 
 void MonolithicRobinInterface::applyRobinCoupling( std::vector<MonolithicBlock::matrixPtr_Type> blockVector)
 {
@@ -52,22 +49,19 @@ void MonolithicRobinInterface::applyRobinCoupling( std::vector<MonolithicBlock::
 }
 
 
-// ===================================================
-//! Protected Methods
-// ===================================================
 
+// ===================================================
+// Protected Methods
+// ===================================================
 void MonolithicRobinInterface::applyRobinCoupling( MonolithicBlock::matrixPtr_Type block)
 {
     MonolithicBlock::matrixPtr_Type tmpMatrix(new MonolithicBlock::matrix_Type(M_robinCoupling->map(), 0));
-    int err = EpetraExt::MatrixMatrix::
-              Multiply( *M_robinCoupling->matrixPtr(),
-                        false,
-                        *block->matrixPtr(),
-                        false,
-                        *tmpMatrix->matrixPtr()
-                      );
-    tmpMatrix->globalAssemble();
+#ifdef HAVE_LIFEV_DEBUG
+    Int err =
+#endif
+    EpetraExt::MatrixMatrix::Multiply( *M_robinCoupling->matrixPtr(), false, *block->matrixPtr(), false, *tmpMatrix->matrixPtr() );
     ASSERT(!err, "Error in multiplication");
+    tmpMatrix->globalAssemble();
     *M_robinPart += *tmpMatrix;
 }
 
