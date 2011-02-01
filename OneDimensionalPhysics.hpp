@@ -324,10 +324,10 @@ OneDimensionalPhysics::dAdP( const Real& P, const Real& timeStep, const UInt& iN
 inline Real
 OneDimensionalPhysics::dPTdU( const Real& A, const Real& Q, const Real& timeStep, const ID& id, const UInt& iNode ) const
 {
-    if ( id == 1 ) // dPt/dA
+    if ( id == 0 ) // dPt/dA
         return dPdA( A, timeStep, iNode ) - M_data->densityRho() * Q * Q / ( A * A * A );
 
-    if ( id == 2 ) // dPt/dQ
+    if ( id == 1 ) // dPt/dQ
         return M_data->densityRho() * Q / ( A * A );
 
     ERROR_MSG("Total pressure's differential function has only 2 components.");

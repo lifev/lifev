@@ -49,12 +49,12 @@ namespace LifeV
 Real
 OneDimensionalFluxNonLinear::flux( const Real& A, const Real& Q, const ID& ii,  const UInt& iNode ) const
 {
-    if ( ii == 1 ) // F1
+    if ( ii == 0 ) // F1
     {
         return Q;
     }
 
-    if ( ii == 2 ) // F2
+    if ( ii == 1 ) // F2
     {
         return ( M_physics->data()->alpha( iNode ) * Q * Q / A +
                  M_physics->data()->beta0( iNode ) * M_physics->data()->beta1( iNode ) *
@@ -71,17 +71,17 @@ OneDimensionalFluxNonLinear::flux( const Real& A, const Real& Q, const ID& ii,  
 Real
 OneDimensionalFluxNonLinear::dFdU( const Real& A, const Real& Q, const ID& ii, const ID& jj, const UInt& iNode ) const
 {
-    if ( ii == 1 && jj == 1 ) // dF1/dA
+    if ( ii == 0 && jj == 0 ) // dF1/dA
     {
         return 0.;
     }
 
-    if ( ii == 1 && jj == 2 ) // dF1/dQ
+    if ( ii == 0 && jj == 1 ) // dF1/dQ
     {
         return 1.;
     }
 
-    if ( ii == 2 && jj == 1 ) // dF2/dA
+    if ( ii == 1 && jj == 0 ) // dF2/dA
     {
         return ( M_physics->data()->beta0( iNode ) *
                  M_physics->data()->beta1( iNode ) /
@@ -89,7 +89,7 @@ OneDimensionalFluxNonLinear::dFdU( const Real& A, const Real& Q, const ID& ii, c
                  M_physics->data()->alpha( iNode ) * Q * Q / A / A ) *
                  M_physics->data()->robertsonCorrection();
     }
-    if ( ii == 2 && jj == 2 ) // dF2/dQ
+    if ( ii == 1 && jj == 1 ) // dF2/dQ
     {
         return M_physics->data()->robertsonCorrection() * 2 * M_physics->data()->alpha( iNode ) * Q / A;
     }
