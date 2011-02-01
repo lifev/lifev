@@ -692,15 +692,15 @@ MultiscaleModel1D::copySolution( const solution_Type& solution1, solution_Type& 
 
         if ( sizeVector1 - 2 == sizeVector2 )      // True copy of the solution removing the ghost nodes.
             for ( UInt iNode(0) ; iNode < sizeVector2 ; ++iNode )
-                (*solution2[i->first])[iNode + 1] = (*i->second)[iNode + 2];
+                (*solution2[i->first])[iNode] = (*i->second)[iNode + 1];
         else if ( sizeVector1 + 2 == sizeVector2 ) // True copy of the solution adding ghost nodes (linear extrapolation).
         {
             for ( UInt iNode(0) ; iNode < sizeVector1 ; ++iNode )
-                (*solution2[i->first])[iNode + 2] = (*i->second)[iNode + 1];
+                (*solution2[i->first])[iNode + 1] = (*i->second)[iNode];
 
                 // Linear extrapolation for the ghost nodes
-                (*solution2[i->first])[1]           = 2 * (*solution2[i->first])[2] - (*solution2[i->first])[3];
-                (*solution2[i->first])[sizeVector2] = 2 * (*solution2[i->first])[sizeVector2-1] - (*solution2[i->first])[sizeVector2-2];
+                (*solution2[i->first])[0]           = 2 * (*solution2[i->first])[1] - (*solution2[i->first])[2];
+                (*solution2[i->first])[sizeVector2-1] = 2 * (*solution2[i->first])[sizeVector2-2] - (*solution2[i->first])[sizeVector2-3];
         }
         else // True copy of the solution
 #endif
