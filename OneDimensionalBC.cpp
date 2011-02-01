@@ -78,8 +78,8 @@ OneDimensionalBC::applyBC( const Real& time, const Real& timeStep, const solutio
 #endif
 
     container2D_Type boundaryU;
-    boundaryU[0] = (*solution.find("A")->second)(iNode + 1);
-    boundaryU[1] = (*solution.find("Q")->second)(iNode + 1);
+    boundaryU[0] = (*solution.find("A")->second)(iNode);
+    boundaryU[1] = (*solution.find("Q")->second)(iNode);
 
     // Eigenvalues and eigenvectors of the jacobian diffFlux (= dF/dU = H)
     container2D_Type eigenvalues;
@@ -106,20 +106,20 @@ OneDimensionalBC::applyBC( const Real& time, const Real& timeStep, const solutio
     container2D_Type bc = solveLinearSystem( bcMatrix[OneDimensional::first], bcMatrix[OneDimensional::second], bcRHS );
 
     // Set the BC in the RHS
-    (*rhs[0])( iNode + 1 ) = bc[0];
-    (*rhs[1])( iNode + 1 ) = bc[1];
+    (*rhs[0])( iNode ) = bc[0];
+    (*rhs[1])( iNode ) = bc[1];
 
 #ifdef GHOSTNODE
     // BC for the ghost nodes
     if ( M_bcSide == OneDimensional::left )
     {
-        (*rhs[0])( iNode ) = 0;
-        (*rhs[1])( iNode ) = 0;
+        (*rhs[0])( iNode - 1) = 0;
+        (*rhs[1])( iNode - 1) = 0;
     }
     else
     {
-        (*rhs[0])( iNode + 2) = 0;
-        (*rhs[1])( iNode + 2) = 0;
+        (*rhs[0])( iNode + 1) = 0;
+        (*rhs[1])( iNode + 1) = 0;
     }
 #endif
 

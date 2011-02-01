@@ -154,10 +154,10 @@ OneDimensionalBCFunctionRiemann::operator()( const Real& /*time*/, const Real& /
 void
 OneDimensionalBCFunctionRiemann::updateBCVariables()
 {
-    M_bcU[0] = (*(*M_solution)["A"])(M_bcNode + 1);
-    M_bcU[1] = (*(*M_solution)["Q"])(M_bcNode + 1);
-    M_bcW[0] = (*(*M_solution)["W1"])(M_bcNode + 1);
-    M_bcW[1] = (*(*M_solution)["W2"])(M_bcNode + 1);
+    M_bcU[0] = (*(*M_solution)["A"])(M_bcNode);
+    M_bcU[1] = (*(*M_solution)["Q"])(M_bcNode);
+    M_bcW[0] = (*(*M_solution)["W1"])(M_bcNode);
+    M_bcW[1] = (*(*M_solution)["W2"])(M_bcNode);
 }
 
 
@@ -206,24 +206,24 @@ OneDimensionalBCFunctionCompatibility::setupNode()
     {
     case OneDimensional::left:
         M_bcInternalNode      = M_bcNode + 1;
-        boundaryEdge          = M_flux->physics()->data()->mesh()->edgeList(M_bcNode + 1);
-        M_boundaryPoint[0]    = boundaryEdge.point(1).x();
-        M_boundaryPoint[1]    = boundaryEdge.point(1).y();
-        M_boundaryPoint[2]    = boundaryEdge.point(1).z();
-        M_internalBdPoint[0]  = boundaryEdge.point(2).x();
-        M_internalBdPoint[1]  = boundaryEdge.point(2).y();
-        M_internalBdPoint[2]  = boundaryEdge.point(2).z();
+        boundaryEdge          = M_flux->physics()->data()->mesh()->edgeList(M_bcNode);
+        M_boundaryPoint[0]    = boundaryEdge.point(0).x();
+        M_boundaryPoint[1]    = boundaryEdge.point(0).y();
+        M_boundaryPoint[2]    = boundaryEdge.point(0).z();
+        M_internalBdPoint[0]  = boundaryEdge.point(1).x();
+        M_internalBdPoint[1]  = boundaryEdge.point(1).y();
+        M_internalBdPoint[2]  = boundaryEdge.point(1).z();
         break;
 
     case OneDimensional::right:
         M_bcInternalNode      = M_bcNode - 1;
-        boundaryEdge          = M_flux->physics()->data()->mesh()->edgeList( M_bcNode );
-        M_boundaryPoint[0]    = boundaryEdge.point(2).x();
-        M_boundaryPoint[1]    = boundaryEdge.point(2).y();
-        M_boundaryPoint[2]    = boundaryEdge.point(2).z();
-        M_internalBdPoint[0]  = boundaryEdge.point(1).x();
-        M_internalBdPoint[1]  = boundaryEdge.point(1).y();
-        M_internalBdPoint[2]  = boundaryEdge.point(1).z();
+        boundaryEdge          = M_flux->physics()->data()->mesh()->edgeList(M_bcNode - 2);
+        M_boundaryPoint[0]    = boundaryEdge.point(1).x();
+        M_boundaryPoint[1]    = boundaryEdge.point(1).y();
+        M_boundaryPoint[2]    = boundaryEdge.point(1).z();
+        M_internalBdPoint[0]  = boundaryEdge.point(0).x();
+        M_internalBdPoint[1]  = boundaryEdge.point(0).y();
+        M_internalBdPoint[2]  = boundaryEdge.point(0).z();
         break;
 
     default:
@@ -286,8 +286,8 @@ OneDimensionalBCFunctionCompatibility::evaluateRHS( const Real& eigenvalue, cons
     Real cfl = computeCFL( eigenvalue, timeStep );
 
     container2D_Type U_interpolated;
-    U_interpolated[0] = ( 1 - cfl ) * M_bcU[0]  + cfl * (*(*M_solution)["A"])( M_bcInternalNode + 1 );
-    U_interpolated[1] = ( 1 - cfl ) * M_bcU[1]  + cfl * (*(*M_solution)["Q"])( M_bcInternalNode + 1 );
+    U_interpolated[0] = ( 1 - cfl ) * M_bcU[0]  + cfl * (*(*M_solution)["A"])( M_bcInternalNode );
+    U_interpolated[1] = ( 1 - cfl ) * M_bcU[1]  + cfl * (*(*M_solution)["Q"])( M_bcInternalNode );
 
     container2D_Type U;
 
@@ -313,7 +313,7 @@ OneDimensionalBCFunctionCompatibility::computeCFL( const Real& eigenvalue, const
         break;
 
     case OneDimensional::right:
-        deltaX = M_flux->physics()->data()->mesh()->edgeLength( M_bcNode - 1 );
+        deltaX = M_flux->physics()->data()->mesh()->edgeLength( M_bcNode - 2 );
         break;
 
     default:
@@ -470,7 +470,7 @@ OneDimensionalBCFunctionWindkessel3::operator()( const Real& time, const Real& t
 
     if ( M_absorbing1 )
     {
-        Real b1( M_flux->physics()->dPdW( A, Q, 1, M_bcNode + 1) );  // dP / dW1
+        Real b1( M_flux->physics()->dPdW( A, Q, 1, M_bcNode) );  // dP / dW1
         Real b2( A / 2 ); // dQ / dW1
         M_resistance1 = b1 / b2;
     }
@@ -504,7 +504,7 @@ OneDimensionalBCFunctionWindkessel3::operator()( const Real& time, const Real& t
     M_Q_tn        = Q;
 
     // Remove this call to fromPToW it is not compatible with viscoelasticity!
-    return  M_flux->physics()->fromPToW( P, W_out, W_outID, M_bcNode + 1); // W_in
+    return  M_flux->physics()->fromPToW( P, W_out, W_outID, M_bcNode ); // W_in
 }
 
 }
