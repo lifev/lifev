@@ -110,7 +110,7 @@ OneDimensionalSolver::buildConstantMatrices()
         M_elementalGradientMatrix->zero();
 
         // update the current element
-        M_feSpace->fe().update( M_feSpace->mesh()->edgeList( iElement + 1 ), UPDATE_DPHI | UPDATE_WDET );
+        M_feSpace->fe().update( M_feSpace->mesh()->edgeList( iElement ), UPDATE_DPHI | UPDATE_WDET );
 
         // update the mass and grad matrices
         mass( 1, *M_elementalMassMatrix, M_feSpace->fe(), 0, 0 );
@@ -168,8 +168,8 @@ OneDimensionalSolver::initialize( solution_Type& solution )
 {
     for ( UInt iNode(0); iNode < M_physics->data()->numberOfNodes() ; ++iNode )
     {
-        (*solution["A"])[iNode + 1] = M_physics->data()->area0( iNode );
-        (*solution["Q"])[iNode + 1] = 0;
+        (*solution["A"])[iNode] = M_physics->data()->area0( iNode );
+        (*solution["Q"])[iNode] = 0;
     }
 
     // Compute W1 and W2 from A and Q
@@ -188,8 +188,8 @@ OneDimensionalSolver::computeW1W2( solution_Type& solution )
 {
     for ( UInt iNode(0); iNode < M_physics->data()->numberOfNodes() ; ++iNode )
     {
-        M_physics->fromUToW( ( *solution["W1"]) [iNode + 1], (*solution["W2"]) [iNode + 1],
-                             ( *solution["A"] ) [iNode + 1], (*solution["Q"] ) [iNode + 1], iNode );
+        M_physics->fromUToW( ( *solution["W1"]) [iNode], (*solution["W2"]) [iNode],
+                             ( *solution["A"] ) [iNode], (*solution["Q"] ) [iNode], iNode );
     }
 }
 
@@ -198,12 +198,12 @@ OneDimensionalSolver::computePressure( solution_Type& solution, const Real& time
 {
     for ( UInt iNode(0); iNode < M_physics->data()->numberOfNodes() ; ++iNode )
     {
-        ( *solution["P"] ) [iNode+1] = M_physics->elasticPressure( ( *solution["A"] ) [iNode+1], iNode );
+        ( *solution["P"] ) [iNode] = M_physics->elasticPressure( ( *solution["A"] ) [iNode], iNode );
 
         if ( M_physics->data()->viscoelasticWall() )
         {
-            ( *solution["P_visc"] ) [iNode+1] = M_physics->viscoelasticPressure( ( *solution["A"]) [iNode+1], timeStep, iNode );
-            ( *solution["P"] )      [iNode+1] += ( *solution["P_visc"] ) [iNode+1];
+            ( *solution["P_visc"] ) [iNode] = M_physics->viscoelasticPressure( ( *solution["A"]) [iNode], timeStep, iNode );
+            ( *solution["P"] )      [iNode] += ( *solution["P_visc"] ) [iNode];
         }
     }
 }
@@ -212,14 +212,14 @@ void
 OneDimensionalSolver::computeAreaRatio( solution_Type& solution )
 {
     for ( UInt iNode(0); iNode < M_physics->data()->numberOfNodes() ; ++iNode )
-        ( *solution["A/A0-1"] ) [iNode + 1] = ( *solution["A"] ) [iNode + 1] / M_physics->data()->area0( iNode ) - 1;
+        ( *solution["A/A0-1"] ) [iNode] = ( *solution["A"] ) [iNode] / M_physics->data()->area0( iNode ) - 1;
 }
 
 void
 OneDimensionalSolver::computeArea( solution_Type& solution )
 {
     for ( UInt iNode(0); iNode < M_physics->data()->numberOfNodes() ; ++iNode )
-        ( *solution["A"] ) [iNode + 1] = ( (*solution["A/A0-1"] ) [iNode + 1] + 1 ) * M_physics->data()->area0( iNode );
+        ( *solution["A"] ) [iNode] = ( (*solution["A/A0-1"] ) [iNode] + 1 ) * M_physics->data()->area0( iNode );
 }
 
 void
@@ -336,8 +336,8 @@ OneDimensionalSolver::computeCFL( const solution_Type& solution, const Real& tim
     for ( UInt iNode(0); iNode < M_physics->data()->numberOfNodes() ; ++iNode )
     {
         // compute the eigenvalues at node
-        M_flux->eigenValuesEigenVectors( ( *solution.find("A")->second ) ( iNode + 1 ),
-                                         ( *solution.find("Q")->second ) ( iNode + 1 ),
+        M_flux->eigenValuesEigenVectors( ( *solution.find("A")->second ) ( iNode ),
+                                         ( *solution.find("Q")->second ) ( iNode ),
                                            eigenvalues, leftEigenvector1, leftEigenvector2, iNode );
 
         lambdaMax = std::max<Real>( std::max<Real>( std::fabs(eigenvalues[0]), std::fabs(eigenvalues[1]) ), lambdaMax );
@@ -368,7 +368,7 @@ OneDimensionalSolver::postProcess( const solution_Type& solution )
         outfile.open( file.c_str(), std::ios::app );
 
         for ( UInt iNode(0); iNode < static_cast< UInt > ( (*i->second).size() ); ++iNode )
-            outfile << (*i->second)(iNode + 1) << " ";
+            outfile << (*i->second)(iNode) << " ";
 
         outfile << std::endl;
         outfile.close();
@@ -471,24 +471,24 @@ OneDimensionalSolver::boundaryValue( const solution_Type& solution, const bcType
     {
     case OneDimensional::A:
 
-        return (*solution.find("A")->second)( boundaryDof + 1 );
+        return (*solution.find("A")->second)( boundaryDof );
 
     case OneDimensional::Q:
 
         // Flow rate is positive with respect to the outgoing normal
-        return (*solution.find("Q")->second)( boundaryDof + 1 ) * ( ( bcSide == OneDimensional::left ) ? -1. : 1. );
+        return (*solution.find("Q")->second)( boundaryDof ) * ( ( bcSide == OneDimensional::left ) ? -1. : 1. );
 
     case OneDimensional::W1:
 
-        return (*solution.find("W1")->second)( boundaryDof + 1 );
+        return (*solution.find("W1")->second)( boundaryDof );
 
     case OneDimensional::W2:
 
-        return (*solution.find("W2")->second)( boundaryDof + 1 );
+        return (*solution.find("W2")->second)( boundaryDof );
 
     case OneDimensional::P:
 
-        return (*solution.find("P")->second)( boundaryDof + 1 );
+        return (*solution.find("P")->second)( boundaryDof );
 
     default:
 
@@ -542,7 +542,7 @@ OneDimensionalSolver::updatedFdU( const solution_Type& solution )
     Real Aii, Qii;
     Real Aiip1, Qiip1;
 
-    for ( UInt iElement(0); iElement < M_physics->data()->numberOfElements(); ++iElement )
+    for ( UInt iElement(0); iElement < M_physics->data()->numberOfElements() - 1; ++iElement )
     {
         // for P1Seg and appropriate mesh only!
         Aii   = (*solution.find("A")->second)( iElement );
@@ -551,14 +551,14 @@ OneDimensionalSolver::updatedFdU( const solution_Type& solution )
         Aiip1 = (*solution.find("A")->second)( iElement + 1 );
         Qiip1 = (*solution.find("Q")->second)( iElement + 1 );
 
-        for ( UInt ii=1; ii<3; ++ii )
+        for ( UInt ii=0; ii<2; ++ii )
         {
-            for ( UInt jj=1; jj<3; ++jj )
+            for ( UInt jj=0; jj<2; ++jj )
             {
-                tmp  = M_flux->dFdU(   Aii,   Qii, ii, jj, iElement );     // left node of current element
-                tmp += M_flux->dFdU( Aiip1, Qiip1, ii, jj, iElement + 1 ); // right node of current element
+                tmp  = M_flux->dFdU(   Aii,   Qii, ii+1, jj+1, iElement );     // left node of current element
+                tmp += M_flux->dFdU( Aiip1, Qiip1, ii+1, jj+1, iElement + 1 ); // right node of current element
 
-                M_dFdUVector[ 2*(ii - 1) + jj - 1 ]( iElement ) = 0.5 * tmp;
+                M_dFdUVector[ 2*ii + jj ]( iElement ) = 0.5 * tmp;
             }
         }
     }
@@ -590,7 +590,7 @@ OneDimensionalSolver::updatedSdU( const solution_Type& solution )
     Real Aii, Qii;
     Real Aiip1, Qiip1;
 
-    for ( UInt iElement(0); iElement < M_physics->data()->numberOfElements() ; ++iElement )
+    for ( UInt iElement(0); iElement < M_physics->data()->numberOfElements() - 1 ; ++iElement )
     {
         // for P1Seg and appropriate mesh only!
         Aii   = (*solution.find("A")->second)( iElement);
@@ -624,17 +624,17 @@ OneDimensionalSolver::updateMatrices()
     }
 
     // Elementary computation and matrix assembling
-    for ( UInt iElement(0); iElement < M_physics->data()->numberOfElements() ; ++iElement )
+    for ( UInt iElement(0); iElement < M_physics->data()->numberOfElements(); ++iElement )
     {
         // Update the current element
-        M_feSpace->fe().update( M_feSpace->mesh()->edgeList( iElement + 1 ), UPDATE_DPHI | UPDATE_WDET );
+        M_feSpace->fe().update( M_feSpace->mesh()->edgeList( iElement), UPDATE_DPHI | UPDATE_WDET );
 
         for ( UInt ii(0); ii < 2; ++ii )
         {
             for ( UInt jj(0); jj < 2; ++jj )
             {
                 // Update the elemental matrices
-                updateElementalMatrices( M_dFdUVector[ 2*(ii-1) + jj-1 ]( iElement ), M_dSdUVector[ 2*(ii-1) + jj-1 ]( iElement ) );
+                updateElementalMatrices( M_dFdUVector[ 2*ii + jj ]( iElement ), M_dSdUVector[ 2*ii + jj ]( iElement ) );
 
                 // Assemble the global matrices
                 matrixAssemble( ii, jj );
@@ -813,7 +813,7 @@ OneDimensionalSolver::inertialFluxCorrection( const vector_Type& flux )
     stiffRHS  *= 0.;
 
     // Elementary computation and matrix assembling
-    for ( UInt iElement(0); iElement < M_physics->data()->numberOfElements() ; ++iElement )
+    for ( UInt iElement(0); iElement < M_physics->data()->numberOfElements(); ++iElement )
     {
         // set the elementary matrices to 0.
         elmatMassLHS. zero();
@@ -833,7 +833,7 @@ OneDimensionalSolver::inertialFluxCorrection( const vector_Type& flux )
         coeffStiff = m/M_physics->data()->densityRho();
 
         // Update the current element
-        M_feSpace->fe().update( M_feSpace->mesh()->edgeList(iElement + 1), UPDATE_DPHI | UPDATE_WDET );
+        M_feSpace->fe().update( M_feSpace->mesh()->edgeList(iElement), UPDATE_DPHI | UPDATE_WDET );
 
         mass (   coeffMass,  elmatMassLHS,  M_feSpace->fe(), 0, 0 );
         stiff(   coeffStiff, elmatStiffLHS, M_feSpace->fe(), 0, 0 );
@@ -898,11 +898,11 @@ OneDimensionalSolver::viscoelasticFluxCorrection( const vector_Type& area, const
     for ( UInt iElement(0); iElement < M_physics->data()->numberOfElements() ; ++iElement )
     {
         // Update the current element
-        M_feSpace->fe().update( M_feSpace->mesh()->edgeList(iElement + 1), UPDATE_DPHI | UPDATE_WDET );
+        M_feSpace->fe().update( M_feSpace->mesh()->edgeList(iElement), UPDATE_DPHI | UPDATE_WDET );
 
         // Compute stiffness coefficient
         stiffnessCoefficient  = timeStep * 0.5* ( M_physics->data()->viscoelasticCoefficient( iElement ) + M_physics->data()->viscoelasticCoefficient( iElement + 1 ) );
-        stiffnessCoefficient /= M_physics->data()->densityRho() * std::sqrt( 0.5* ( area[ iElement + 1 ] + area[ iElement + 2 ] ) );
+        stiffnessCoefficient /= M_physics->data()->densityRho() * std::sqrt( 0.5* ( area[ iElement ] + area[ iElement + 1 ] ) );
 
         // Set the elementary matrices to 0.
         M_elementalStiffnessMatrix->zero();
@@ -924,11 +924,11 @@ OneDimensionalSolver::viscoelasticFluxCorrection( const vector_Type& area, const
     // Apply BC
     applyDirichletBCToMatrix( systemMatrix );
 #ifdef GHOSTNODE
-    rhs( 2 ) = 0;
-    rhs( M_feSpace->dim() - 1 ) = 0;
-#endif
     rhs( 1 ) = 0;
-    rhs( M_feSpace->dim() ) = 0;
+    rhs( M_feSpace->dim() - 2 ) = 0;
+#endif
+    rhs( 0 ) = 0;
+    rhs( M_feSpace->dim() -1 ) = 0;
 
     // Compute flow rate correction at t^n+1
     vector_Type flowRateCorrection( rhs );
@@ -1030,7 +1030,7 @@ OneDimensionalSolver::longitudinalFluxCorrection()
         f(iNode) *= 1 / ( 2 * OneDimensional::pow30(h, 3) );
 
         // Update the current element
-        M_feSpace->fe().update( M_feSpace->mesh()->edgeList(iElement + 1), UPDATE_DPHI | UPDATE_WDET );
+        M_feSpace->fe().update( M_feSpace->mesh()->edgeList(iElement), UPDATE_DPHI | UPDATE_WDET );
 
         mass( coeffMassLHS, elmatMassLHS, M_feSpace->fe(),0, 0 );
         mass( coeffMassRHS, elmatMassRHS, M_feSpace->fe(),0, 0 );
