@@ -280,12 +280,9 @@ OneDimensionalSolver::updateRHS( const solution_Type& solution, const Real& time
 void
 OneDimensionalSolver::iterate( OneDimensionalBCHandler& bcHandler, solution_Type& solution, const Real& time, const Real& timeStep )
 {
-    M_rhs[0]->spy("rhs0");
-    M_rhs[1]->spy("rhs1");
     // Apply BC to RHS
     bcHandler.applyBC( time, timeStep, solution, M_flux, M_rhs );
-    M_rhs[0]->spy("rhs0bc");
-    M_rhs[1]->spy("rhs1bc");
+
     // Compute A^n+1
     vector_Type area( *M_rhs[0] );
     M_linearSolver->solveSystem( *M_rhs[0], area, M_homogeneousMassMatrix );
@@ -545,7 +542,7 @@ OneDimensionalSolver::updatedFdU( const solution_Type& solution )
     Real Aii, Qii;
     Real Aiip1, Qiip1;
 
-    for ( UInt iElement(0); iElement < M_physics->data()->numberOfElements() - 1; ++iElement )
+    for ( UInt iElement(0); iElement < M_physics->data()->numberOfElements(); ++iElement )
     {
         // for P1Seg and appropriate mesh only!
         Aii   = (*solution.find("A")->second)( iElement );
@@ -593,7 +590,7 @@ OneDimensionalSolver::updatedSdU( const solution_Type& solution )
     Real Aii, Qii;
     Real Aiip1, Qiip1;
 
-    for ( UInt iElement(0); iElement < M_physics->data()->numberOfElements() - 1 ; ++iElement )
+    for ( UInt iElement(0); iElement < M_physics->data()->numberOfElements(); ++iElement )
     {
         // for P1Seg and appropriate mesh only!
         Aii   = (*solution.find("A")->second)( iElement);
