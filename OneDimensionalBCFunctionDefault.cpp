@@ -217,7 +217,7 @@ OneDimensionalBCFunctionCompatibility::setupNode()
 
     case OneDimensional::right:
         M_bcInternalNode      = M_bcNode - 1;
-        boundaryEdge          = M_flux->physics()->data()->mesh()->edgeList(M_bcNode - 2);
+        boundaryEdge          = M_flux->physics()->data()->mesh()->edgeList(M_bcNode - 1);
         M_boundaryPoint[0]    = boundaryEdge.point(1).x();
         M_boundaryPoint[1]    = boundaryEdge.point(1).y();
         M_boundaryPoint[2]    = boundaryEdge.point(1).z();
@@ -313,7 +313,7 @@ OneDimensionalBCFunctionCompatibility::computeCFL( const Real& eigenvalue, const
         break;
 
     case OneDimensional::right:
-        deltaX = M_flux->physics()->data()->mesh()->edgeLength( M_bcNode - 2 );
+        deltaX = M_flux->physics()->data()->mesh()->edgeLength( M_bcNode - 1 );
         break;
 
     default:
@@ -368,10 +368,10 @@ OneDimensionalBCFunctionAbsorbing::operator()( const Real& /*time*/, const Real&
     a1 = M_flux->physics()->pressure( M_bcU[0], timeStep, M_bcNode ) - M_flux->physics()->data()->externalPressure(); // pressure at previous time step
     a2 = M_bcU[1]; // flux at previous time step
 
-    b1 = M_flux->physics()->dPdW( M_bcW[0], M_bcW[1], 1, M_bcNode );  // dP / dW1
+    b1 = M_flux->physics()->dPdW( M_bcW[0], M_bcW[1], 0, M_bcNode );  // dP / dW1
     b2 = M_bcU[0] / 2; // dQ / dW1
 
-    c1 = M_flux->physics()->dPdW( M_bcW[0], M_bcW[1], 2, M_bcNode );  // dP / dW2
+    c1 = M_flux->physics()->dPdW( M_bcW[0], M_bcW[1], 1, M_bcNode );  // dP / dW2
     c2 = b2; // dQ / dW2
 
     a11 = a1 - b1*M_bcW[0] - c1*M_bcW[1];
@@ -454,11 +454,11 @@ OneDimensionalBCFunctionWindkessel3::operator()( const Real& time, const Real& t
     switch ( M_bcType )
     {
     case OneDimensional::W1:
-        W_outID = 2;
+        W_outID = 1;
         W_out = computeRHS( timeStep );
         break;
     case OneDimensional::W2:
-        W_outID = 1;
+        W_outID = 0;
         W_out = computeRHS( timeStep );
         break;
     default:
@@ -470,7 +470,7 @@ OneDimensionalBCFunctionWindkessel3::operator()( const Real& time, const Real& t
 
     if ( M_absorbing1 )
     {
-        Real b1( M_flux->physics()->dPdW( A, Q, 1, M_bcNode) );  // dP / dW1
+        Real b1( M_flux->physics()->dPdW( A, Q, 0, M_bcNode ) );  // dP / dW1 - Missing W_outID ???
         Real b2( A / 2 ); // dQ / dW1
         M_resistance1 = b1 / b2;
     }
