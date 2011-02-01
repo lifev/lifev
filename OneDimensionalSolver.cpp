@@ -280,9 +280,12 @@ OneDimensionalSolver::updateRHS( const solution_Type& solution, const Real& time
 void
 OneDimensionalSolver::iterate( OneDimensionalBCHandler& bcHandler, solution_Type& solution, const Real& time, const Real& timeStep )
 {
+    M_rhs[0]->spy("rhs0");
+    M_rhs[1]->spy("rhs1");
     // Apply BC to RHS
     bcHandler.applyBC( time, timeStep, solution, M_flux, M_rhs );
-
+    M_rhs[0]->spy("rhs0bc");
+    M_rhs[1]->spy("rhs1bc");
     // Compute A^n+1
     vector_Type area( *M_rhs[0] );
     M_linearSolver->solveSystem( *M_rhs[0], area, M_homogeneousMassMatrix );
@@ -526,8 +529,8 @@ OneDimensionalSolver::updateFlux( const solution_Type& solution )
         Ai = (*solution.find("A")->second)( iNode );
         Qi = (*solution.find("Q")->second)( iNode );
 
-        (*M_fluxVector[0])( iNode ) = M_flux->flux( Ai, Qi, 1, iNode );
-        (*M_fluxVector[1])( iNode ) = M_flux->flux( Ai, Qi, 2, iNode );
+        (*M_fluxVector[0])( iNode ) = M_flux->flux( Ai, Qi, 0, iNode );
+        (*M_fluxVector[1])( iNode ) = M_flux->flux( Ai, Qi, 1, iNode );
     }
 }
 
@@ -555,8 +558,8 @@ OneDimensionalSolver::updatedFdU( const solution_Type& solution )
         {
             for ( UInt jj=0; jj<2; ++jj )
             {
-                tmp  = M_flux->dFdU(   Aii,   Qii, ii+1, jj+1, iElement );     // left node of current element
-                tmp += M_flux->dFdU( Aiip1, Qiip1, ii+1, jj+1, iElement + 1 ); // right node of current element
+                tmp  = M_flux->dFdU(   Aii,   Qii, ii, jj, iElement );     // left node of current element
+                tmp += M_flux->dFdU( Aiip1, Qiip1, ii, jj, iElement + 1 ); // right node of current element
 
                 M_dFdUVector[ 2*ii + jj ]( iElement ) = 0.5 * tmp;
             }

@@ -49,13 +49,13 @@ namespace LifeV
 Real
 OneDimensionalSourceLinear::source( const Real& U1, const Real& U2, const ID& ii, const UInt& iNode ) const
 {
-    if ( ii == 1 ) // S1
+    if ( ii == 0 ) // S1
     {
         return M_physics->data()->source10( iNode ) +
                M_physics->data()->source11( iNode ) * U1 +
                M_physics->data()->source12( iNode ) * U2;
     }
-    if ( ii == 2 ) // S2
+    if ( ii == 1 ) // S2
     {
         return M_physics->data()->source20( iNode ) +
                M_physics->data()->source21( iNode ) * U1 +
@@ -68,19 +68,19 @@ OneDimensionalSourceLinear::source( const Real& U1, const Real& U2, const ID& ii
 Real
 OneDimensionalSourceLinear::dSdU( const Real& /*_U1*/, const Real& /*_U2*/, const ID& ii, const ID& jj, const UInt& iNode ) const
 {
-    if ( ii == 1 && jj == 1) // dS1/dU1 = 0
+    if ( ii == 0 && jj == 0) // dS1/dU1 = 0
     {
         return M_physics->data()->source11( iNode );
     }
-    if ( ii == 1 && jj == 2) // dS1/dU2 = 0
+    if ( ii == 0 && jj == 1) // dS1/dU2 = 0
     {
         return M_physics->data()->source12( iNode );
     }
-    if ( ii == 2 && jj == 1 ) // dS2/dU1
+    if ( ii == 1 && jj == 0 ) // dS2/dU1
     {
         return M_physics->data()->source21( iNode );
     }
-    if ( ii == 2 && jj == 2 ) // dS2/dU2
+    if ( ii == 1 && jj == 1 ) // dS2/dU2
     {
         return M_physics->data()->source22( iNode );
     }

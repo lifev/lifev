@@ -103,9 +103,9 @@ OneDimensionalPhysicsNonLinear::fromPToW( const Real& P, const Real& W, const ID
     Debug(6320) << "[OneDimensionalModel_Physics_NonLinear::W_fromP] add term = " << add << "\n";
 #endif
 
-    if ( i == 1 )
+    if ( i == 0 )
         return W - add;
-    if ( i == 2 )
+    if ( i == 1 )
         return W + add;
 
     ERROR_MSG("You can only find W1 or W2 as function of P");
@@ -124,13 +124,13 @@ OneDimensionalPhysicsNonLinear::fromQToW( const Real& Q, const Real& W_n, const 
     Real w_k = W_n;
     Real f_k, df_k, tau_k(0);
 
-    if ( i == 1 ) // W1 given
+    if ( i == 0 ) // W1 given
     {
         f_k = OneDimensional::pow40( W - w_k + celerity0( iNode ) / K0, 2/M_data -> beta1( iNode ) );
         tau_k = OneDimensional::pow40( W - w_k + celerity0( iNode ) / K0, 2/M_data -> beta1( iNode ) );
         df_k = (-2 / M_data -> beta1( iNode )) * OneDimensional::pow30( W - w_k + celerity0( iNode ) / K0, 2/M_data -> beta1( iNode ) - 1 );
     }
-    if ( i == 2 ) // W2 given
+    if ( i == 1 ) // W2 given
     {
         f_k = OneDimensional::pow40( w_k - W + celerity0( iNode ) / K0, 2/M_data -> beta1( iNode ) );
         tau_k = OneDimensional::pow40( w_k - W + celerity0( iNode ) / K0, 2/M_data -> beta1( iNode ) );
@@ -167,12 +167,12 @@ OneDimensionalPhysicsNonLinear::dPdW( const Real& W1, const Real& W2, const ID& 
     result += celerity0( iNode );
     result *= rhoover2SQRTchi;
 
-    if ( i == 1 ) //! dP/dW1
+    if ( i == 0 ) //! dP/dW1
     {
         return result;
     }
 
-    if ( i == 2 ) //! dP/dW2
+    if ( i == 1 ) //! dP/dW2
     {
         return -result;
     }

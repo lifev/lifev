@@ -44,6 +44,7 @@
 
 namespace LifeV
 {
+
 // ===================================================
 // Conversion Methods
 // ===================================================
@@ -94,9 +95,9 @@ OneDimensionalPhysicsLinear::fromPToW( const Real& P, const Real& W, const ID& i
     Debug(6320) << "[fromPToW] add term = " << add << "\n";
 #endif
 
-    if ( i == 1 )
+    if ( i == 0 )
         return W - add;
-    if ( i == 2 )
+    if ( i == 1 )
         return W + add;
 
     ERROR_MSG("You can only find W1 or W2 as function of P");
@@ -108,10 +109,10 @@ OneDimensionalPhysicsLinear::fromQToW( const Real& Q, const Real& /*W_n*/, const
 {
     Real add( 2 * Q );
 
-    if ( i == 1 ) // W1 given
+    if ( i == 0 ) // W1 given
         return add - W;
 
-    if ( i == 2 ) // W2 given
+    if ( i == 1 ) // W2 given
         return add - W;
 
     ERROR_MSG("You can only find W1 or W2 as function of Q");
@@ -131,10 +132,10 @@ OneDimensionalPhysicsLinear::dPdW( const Real& W1, const Real& W2, const ID& i, 
     Real result( beta0beta1overA0beta1 * oneover2celerity );
     result *= ( ( W1 - W2 ) * oneover2celerity + M_data -> area0( iNode ) );
 
-    if ( i == 1 ) //! dP/dW1
+    if ( i == 0 ) //! dP/dW1
         return result;
 
-    if ( i == 2 ) //! dP/dW2
+    if ( i == 1 ) //! dP/dW2
         return -result;
 
     ERROR_MSG("P(W1,W2)'s differential function has only 2 components.");

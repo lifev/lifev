@@ -50,11 +50,11 @@ namespace LifeV
 Real
 OneDimensionalFluxLinear::flux( const Real& U1, const Real& U2, const ID& ii, const UInt& iNode ) const
 {
-    if ( ii == 1 ) // F1
+    if ( ii == 0 ) // F1
     {
         return M_physics->data()->flux11( iNode ) * U1 + M_physics->data()->flux12( iNode ) * U2;
     }
-    if ( ii == 2 ) // F2
+    if ( ii == 1 ) // F2
     {
         return M_physics->data()->flux21( iNode ) * U1 + M_physics->data()->flux22( iNode ) * U2;
     }
@@ -65,19 +65,19 @@ OneDimensionalFluxLinear::flux( const Real& U1, const Real& U2, const ID& ii, co
 Real
 OneDimensionalFluxLinear::dFdU( const Real& /*U1*/, const Real& /*U2*/, const ID& ii, const ID& jj, const UInt& iNode) const
 {
-    if ( ii == 1 && jj == 1 ) // dF1/dU1
+    if ( ii == 0 && jj == 0 ) // dF1/dU1
     {
         return M_physics->data()->flux11( iNode );
     }
-    if ( ii == 1 && jj == 2 ) // dF1/dU2
+    if ( ii == 0 && jj == 1 ) // dF1/dU2
     {
         return M_physics->data()->flux12( iNode );
     }
-    if ( ii == 2 && jj == 1 ) // dF2/dU1
+    if ( ii == 1 && jj == 0 ) // dF2/dU1
     {
         return M_physics->data()->flux21( iNode );
     }
-    if ( ii == 2 && jj == 2 ) // dF2/dU2
+    if ( ii == 1 && jj == 1 ) // dF2/dU2
     {
         return M_physics->data()->flux22( iNode );
     }
