@@ -286,7 +286,7 @@ OneDimensionalPhysics::fromPToA( const Real& P, const Real& timeStep, const UInt
 inline Real
 OneDimensionalPhysics::dAdt( const Real& Anp1, const Real& timeStep, const UInt& iNode ) const
 {
-    return ( Anp1 - (*M_area_tn)[iNode+1] ) / timeStep;
+    return ( Anp1 - (*M_area_tn)[iNode] ) / timeStep;
 }
 
 inline Real
