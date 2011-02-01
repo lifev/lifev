@@ -247,15 +247,15 @@ Int main(Int argc, char** argv)
         bool ok = true;
         Int rightNodeID = oneDModel.solver()->boundaryDOF( OneDimensional::right );
 
-        ok = ok && checkValue( 0.999998  , (*oneDModel.solution("A"))[rightNodeID + 1]);
-        ok = ok && checkValue(-0.00138076, (*oneDModel.solution("Q"))[rightNodeID + 1]);
-        ok = ok && checkValue(-0.00276153, (*oneDModel.solution("W1"))[rightNodeID + 1]);
-        ok = ok && checkValue( 0.00000000, (*oneDModel.solution("W2"))[rightNodeID + 1]);
+        ok = ok && checkValue( 0.999998  , (*oneDModel.solution("A"))[rightNodeID]);
+        ok = ok && checkValue(-0.00138076, (*oneDModel.solution("Q"))[rightNodeID]);
+        ok = ok && checkValue(-0.00276153, (*oneDModel.solution("W1"))[rightNodeID]);
+        ok = ok && checkValue( 0.00000000, (*oneDModel.solution("W2"))[rightNodeID]);
 
-        ok = ok && checkValue( 0.999999  , (*oneDModel.solution("A"))[rightNodeID]);
-        ok = ok && checkValue(-0.00040393, (*oneDModel.solution("Q"))[rightNodeID]);
-        ok = ok && checkValue(-0.00080833, (*oneDModel.solution("W1"))[rightNodeID]);
-        ok = ok && checkValue( 0.00000045, (*oneDModel.solution("W2"))[rightNodeID]);
+        ok = ok && checkValue( 0.999999  , (*oneDModel.solution("A"))[rightNodeID - 1]);
+        ok = ok && checkValue(-0.00040393, (*oneDModel.solution("Q"))[rightNodeID - 1]);
+        ok = ok && checkValue(-0.00080833, (*oneDModel.solution("W1"))[rightNodeID - 1]);
+        ok = ok && checkValue( 0.00000045, (*oneDModel.solution("W2"))[rightNodeID - 1]);
 
         if (ok)
         {

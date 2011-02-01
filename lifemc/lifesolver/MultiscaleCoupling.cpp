@@ -285,7 +285,7 @@ MultiscaleCoupling::createLocalVectors()
         myGlobalElements[i] = i;
 
     // Build a repeated map for the couplings
-    MapEpetra map( -1, static_cast< Int > ( myGlobalElements.size() ), &myGlobalElements[0], 0, M_comm );
+    MapEpetra map( -1, static_cast< Int > ( myGlobalElements.size() ), &myGlobalElements[0], M_comm );
 
     // Create local repeated vectors
     M_localCouplingVariables.push_back( multiscaleVectorPtr_Type ( new VectorEpetra( map, Repeated ) ) );
