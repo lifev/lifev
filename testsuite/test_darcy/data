@@ -56,6 +56,9 @@ problem_type = 1
     nx = 8
     ny = 8
     nz = 8
+    lx = 1.
+    ly = 1.
+    lz = 1.
     [../]
 
     [./miscellaneous]

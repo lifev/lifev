@@ -99,13 +99,7 @@ using namespace LifeV;
 
 enum BCNAME
 {
-    /*
-      FLUX0            = 0,
-      INLETPRESSURE1   = 1,
-      INLETPRESSURE2   = 2,
-      OUTLETPRESSURE   = 3,
-      FLUX1            = 4*/
-
+    // Flags for cartesian_cube* meshes
     BACK   = 1,
     FRONT  = 2,
     LEFT   = 3,
@@ -114,12 +108,16 @@ enum BCNAME
     TOP    = 6
 
 
-    /*        LEFT   = 4,
+/*
+    // Falgs for structured meshes
+    LEFT   = 4,
     RIGHT  = 2,
     FRONT  = 1,
     BACK   = 3,
     TOP    = 6,
-    BOTTOM = 5*/
+    BOTTOM = 5
+*/
+
 };
 
 enum DARCY_SOLVER_TYPE
@@ -353,7 +351,11 @@ darcy::run()
         regularMesh3D( *fullMeshPtr, 0,
                        dataFile( ( Members->discretization_section + "/space_discretization/nx" ).data(), 4 ),
                        dataFile( ( Members->discretization_section + "/space_discretization/ny" ).data(), 4 ),
-                       dataFile( ( Members->discretization_section + "/space_discretization/nz" ).data(), 4 ) );
+                       dataFile( ( Members->discretization_section + "/space_discretization/nz" ).data(), 4 ),
+                       dataFile( ( Members->discretization_section + "/space_discretization/verbose" ).data(), false ),
+                       dataFile( ( Members->discretization_section + "/space_discretization/lx" ).data(), 1. ),
+                       dataFile( ( Members->discretization_section + "/space_discretization/ly" ).data(), 1. ),
+                       dataFile( ( Members->discretization_section + "/space_discretization/lz" ).data(), 1. ) );
     }
 
     // Partition the mesh using ParMetis
@@ -371,24 +373,6 @@ darcy::run()
 
     // Start chronoBoundaryCondition for measure the total time for create the boundary conditions
     chronoBoundaryCondition.start();
-
-    /*
-    BCFunctionBase dirichletBDfun1, dirichletBDfun2, dirichletBDfun3, neumannBDfun1;
-    BCFunctionRobin robinBDfun;
-
-    dirichletBDfun1.setFunction( dataProblem::dirichlet1 );
-    dirichletBDfun2.setFunction( dataProblem::dirichlet2 );
-    dirichletBDfun3.setFunction( dataProblem::dirichlet3 );
-    neumannBDfun1.setFunction( dataProblem::neumann3 );
-
-
-    BCHandler bcDarcy( 5 );
-    bcDarcy.addBC( "Top",            FLUX0,          Natural,   Full,    neumannBDfun1, 0 );
-    bcDarcy.addBC( "Top2",           FLUX1,          Natural,   Full,    neumannBDfun1, 0 );
-    bcDarcy.addBC( "InletPressure",  INLETPRESSURE1, Essential, Scalar,  dirichletBDfun1  );
-    bcDarcy.addBC( "InletPressure1", INLETPRESSURE2, Essential, Scalar,  dirichletBDfun3  );
-    bcDarcy.addBC( "OutletPressure", OUTLETPRESSURE, Essential, Scalar,  dirichletBDfun2  );
-    */
 
     BCFunctionBase dirichletBDfun, neumannBDfun1, neumannBDfun2;
     BCFunctionRobin robinBDfun;

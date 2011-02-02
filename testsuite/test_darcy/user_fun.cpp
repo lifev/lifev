@@ -25,7 +25,7 @@
 //@HEADER
 
 /**
-   @file user_fun.cpp
+   @file
    @author A. Fumagalli <alessio.fumagalli@mail.polimi.it>
    @date 2010-07-29
 */
@@ -50,41 +50,7 @@ Matrix inversePermeability( const Real& /*t*/,
                             const Real& /*y*/,
                             const Real& /*z*/, const std::vector<Real>& )
 {
-    Matrix inversePermeabilityMatrix( static_cast<UInt>(3), static_cast<UInt>(3) );
-
-    /* Real Entry00, Entry01, Entry02, Entry11, Entry12, Entry22;
-
-    if ( ((x > 1000) && (x < 1250) && (y > 0) &&  (y < 1250) )
-         || ((x > 2250) && (x < 2500) && (y > 1000) &&  (y < 3000))
-         || ((x > 3500) && (x < 3750) && (y > 500) &&  (y < 3000)) )
-    {
-        // First row
-        Entry00 = 100.;
-        Entry01 = 0.;
-        Entry02 = 0.;
-
-        // Second row
-        Entry11 = 100.;
-        Entry12 = 0.;
-
-        // Third row
-        Entry22 =  100.;
-
-    }
-    else
-    { // First row
-        Entry00 = 1.;
-        Entry01 = 0.;
-        Entry02 = 0.;
-
-        // Second row
-        Entry11 = 1.;
-        Entry12 = 0.;
-
-        // Third row
-        Entry22 = 1.;
-        }*/
-
+    Matrix invK( static_cast<UInt>(3), static_cast<UInt>(3) );
 
     // First row
     Real Entry00 = 1.;
@@ -99,17 +65,17 @@ Matrix inversePermeability( const Real& /*t*/,
     Real Entry22 = 1.;
 
     // Fill in of the inversePermeabilityMatrix
-    inversePermeabilityMatrix( static_cast<UInt>(0), static_cast<UInt>(0) ) = Entry00;
-    inversePermeabilityMatrix( static_cast<UInt>(0), static_cast<UInt>(1) ) = Entry01;
-    inversePermeabilityMatrix( static_cast<UInt>(0), static_cast<UInt>(2) ) = Entry02;
-    inversePermeabilityMatrix( static_cast<UInt>(1), static_cast<UInt>(0) ) = Entry01;
-    inversePermeabilityMatrix( static_cast<UInt>(1), static_cast<UInt>(1) ) = Entry11;
-    inversePermeabilityMatrix( static_cast<UInt>(1), static_cast<UInt>(2) ) = Entry12;
-    inversePermeabilityMatrix( static_cast<UInt>(2), static_cast<UInt>(0) ) = Entry02;
-    inversePermeabilityMatrix( static_cast<UInt>(2), static_cast<UInt>(1) ) = Entry12;
-    inversePermeabilityMatrix( static_cast<UInt>(2), static_cast<UInt>(2) ) = Entry22;
+    invK ( static_cast<UInt>(0), static_cast<UInt>(0) ) = Entry00;
+    invK ( static_cast<UInt>(0), static_cast<UInt>(1) ) = Entry01;
+    invK ( static_cast<UInt>(0), static_cast<UInt>(2) ) = Entry02;
+    invK ( static_cast<UInt>(1), static_cast<UInt>(0) ) = Entry01;
+    invK ( static_cast<UInt>(1), static_cast<UInt>(1) ) = Entry11;
+    invK ( static_cast<UInt>(1), static_cast<UInt>(2) ) = Entry12;
+    invK ( static_cast<UInt>(2), static_cast<UInt>(0) ) = Entry02;
+    invK ( static_cast<UInt>(2), static_cast<UInt>(1) ) = Entry12;
+    invK ( static_cast<UInt>(2), static_cast<UInt>(2) ) = Entry22;
 
-    return inversePermeabilityMatrix;
+    return invK;
 
 }
 
@@ -262,4 +228,4 @@ Real analyticalFlux( const Real& /*t*/,
 
 }
 
-}
+} // Namespace DataProblem
