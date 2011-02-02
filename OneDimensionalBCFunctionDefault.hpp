@@ -411,25 +411,25 @@ protected:
 
 //! Windkessel (3 elements)
 /*!
- *  Q1D -> ---R1------R2---
+ *   Q -> ---R1-------R2---
  *         ^      |       ^
- *        P1D     C       Pv
+ *         P      C       Pv
  *         ^      |       ^
  *
  *  The holding equation is:
  *
- *  P1D + C R2 dP1D/dt = (R1 + R2 ) * Q1D + R1 R2 C dQ1D/dt + Pv
+ *  P + C R2 dP/dt = (R1 + R2 ) * Q + R1 R2 C dQ/dt + Pv
  *
  *  where the "venous" pressure Pv is taken constant and equal to 5mmHg (6666 dyn/cm^2).
  *
  *  You can solve this ODE in analytical fashion and obtain:
  *
- *  P1D(t) = P1D(0) + [ \int_0^t ( pv + (R1+R2) Q1D(s) + R1*R2*C dQ1D(s)/ds ) exp( s / (R2*C) ) ds ] * exp( - t / (R2*C) )
+ *  P(t) = P(0) + [ \int_0^t ( pv + (R1+R2) Q(s) + R1*R2*C dQ(s)/ds ) exp( s / (R2*C) ) ds ] * exp( - t / (R2*C) )
  *
  *  then you just need to exploit numerical integration rules.
  *  Here a simple trapezoidal rule is used, with a first order approximation of derivative
  *
- *  dQ1D(s)/ds = Q1D(t(n+1)) - Q1D(t(n)) * (1/dt)
+ *  dQ(s)/ds = Q(t(n+1)) - Q(t(n)) * (1/dt)
  *
  *  @author Lucia Mirabella
  */
