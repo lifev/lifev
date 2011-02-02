@@ -48,10 +48,8 @@
 #include <life/lifealg/SolverAztecOO.hpp>
 
 //
-#include <life/lifefem/GeometricMap.hpp>
 #include <life/lifesolver/DarcyData.hpp>
 //
-#include <life/lifecore/Displayer.hpp>
 
 
 // Local namespace to store the default source term and the default permeability tensor.
