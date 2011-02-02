@@ -40,9 +40,8 @@
 #define BCFUNCTION_H 1
 
 #include <boost/function.hpp>
+#include <boost/shared_ptr.hpp>
 
-#include <life/lifecore/FactorySingleton.hpp>
-#include <life/lifecore/Factory.hpp>
 
 namespace LifeV
 {
@@ -85,6 +84,7 @@ public:
     //@{
 
     typedef boost::function<Real ( const Real&, const Real&, const Real&, const Real&, const ID& )> function_Type;
+    typedef boost::shared_ptr<BCFunctionBase> BCFunctionBasePtr_Type;
 
     //@}
 
@@ -164,6 +164,21 @@ public:
 
     //@}
 
+    //! @name Methods
+    //@{
+
+    //! Clone the current object
+    /*!
+      @return Pointer to the cloned object
+    */
+   virtual BCFunctionBasePtr_Type clone() const
+   {
+       BCFunctionBasePtr_Type copy ( new BCFunctionBase( M_userDefinedFunction ) );
+       return copy;
+   }
+
+    //@}
+
 
 
 protected:
@@ -172,7 +187,6 @@ protected:
 };
 
 
-typedef LifeV::FactorySingleton< LifeV::FactoryClone< BCFunctionBase > > FactoryCloneBCFunction;
 
 
 
@@ -266,6 +280,16 @@ public:
     //! @name Methods
     //@{
 
+    //! Clone the current object
+    /*!
+      @return Pointer to the cloned object
+    */
+    BCFunctionBase::BCFunctionBasePtr_Type clone() const
+    {
+        BCFunctionBase::BCFunctionBasePtr_Type copy ( new BCFunctionRobin( M_userDefinedFunction, M_robinBoundaryMassCoeffFunction ) );
+        return copy;
+    }
+
     //! evaluate the user defined function M_robinBoundaryMassCoeffFunction
     /*!
       @param t Time
@@ -350,6 +374,7 @@ public:
     //@{
 
     typedef boost::function<Real ( const Real&, const Real&, const Real&, const Real&, const ID&, const Real& )> function_Type;
+    typedef boost::shared_ptr<BCFunctionUDepBase> BCFunctionUDepBasePtr_Type;
 
     //@}
 
@@ -404,6 +429,20 @@ public:
 
     //@}
 
+    //! @name Methods
+    //@{
+
+    //! Clone the current object
+    /*!
+      @return Pointer to the cloned object
+    */
+    virtual BCFunctionUDepBasePtr_Type clone() const
+    {
+        BCFunctionUDepBasePtr_Type copy ( new BCFunctionUDepBase( M_userDefinedFunction ) );
+        return copy;
+    }
+
+    //@}
 
     //! @name Set Methods
     //@{
@@ -527,6 +566,15 @@ public:
     //! @name Methods
     //@{
 
+    //! Clone the current object
+    /*!
+      @return Pointer to the cloned object
+    */
+    BCFunctionUDepBase::BCFunctionUDepBasePtr_Type clone() const
+    {
+        BCFunctionUDepBase::BCFunctionUDepBasePtr_Type copy ( new BCFunctionUDepRobin( M_userDefinedFunction, M_robinBoundaryMassCoeffFunction ) );
+        return copy;
+    }
 
     //! evaluate the user defined function M_robinBoundaryMassCoeffFunction
     /*!
@@ -577,7 +625,6 @@ private:
     function_Type M_robinBoundaryMassCoeffFunction;
 };
 
-typedef LifeV::FactorySingleton< LifeV::FactoryClone< BCFunctionUDepBase > > FactoryCloneBCFunctionUDep;
 
 /*!
 

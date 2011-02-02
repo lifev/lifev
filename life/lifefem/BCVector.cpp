@@ -242,8 +242,6 @@ createBCVector( BCVectorBase const* __bc )
 {
     return new BCVector( ( BCVector const& )*__bc );
 }
-// register BCFunctionBase in factory for cloning
-const bool __bcvec = FactoryCloneBCVector::instance().registerProduct( typeid(BCVector), &createBCVector );
 
 
 // ====================================
@@ -361,7 +359,5 @@ createBCVectorInterface( BCVectorBase const* bcVectorBase )
     return new BCVectorInterface( ( BCVectorInterface const& )* bcVectorBase );
 }
 
-// register BCFunctionBase in factory for cloning
-const bool bcVectorBase = FactoryCloneBCVector::instance().registerProduct( typeid(BCVectorInterface), &createBCVectorInterface );
 
 }

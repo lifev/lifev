@@ -87,8 +87,6 @@ createBCFunctionBase( BCFunctionBase const* bcFunctionBase )
 {
     return new BCFunctionBase( ( BCFunctionBase const& )* bcFunctionBase );
 }
-// register BCFunctionBase in factory for cloning
-const bool bcBaseFactory = FactoryCloneBCFunction::instance().registerProduct( typeid(BCFunctionBase), &createBCFunctionBase );
 
 
 
@@ -152,8 +150,6 @@ createBCFunctionRobin( BCFunctionBase const* __bc )
 {
     return new BCFunctionRobin( ( BCFunctionRobin const& )*__bc );
 }
-// register BCFunctionRobin in factory for cloning
-const bool __bcRobin = FactoryCloneBCFunction::instance().registerProduct( typeid(BCFunctionRobin), &createBCFunctionRobin );
 
 
 //==================================================
@@ -196,8 +192,6 @@ createBCFunctionUDep( BCFunctionUDepBase const* bcFunctionUDepBase )
 {
     return new BCFunctionUDepBase( ( BCFunctionUDepBase const& )* bcFunctionUDepBase );
 }
-const bool bcFunctionUDepBase = FactoryCloneBCFunctionUDep::instance().registerProduct(
-                                    typeid(BCFunctionUDepBase), &createBCFunctionUDep );
 
 
 //==================================================
@@ -258,8 +252,6 @@ createBCFunctionUDepRobin( BCFunctionUDepBase const* bcFunctionUDepRobin )
 {
     return new BCFunctionUDepRobin( ( BCFunctionUDepRobin const& )* bcFunctionUDepRobin );
 }
-const bool bcFunctionUDepRobin = FactoryCloneBCFunctionUDep::instance().registerProduct(
-                                     typeid(BCFunctionUDepRobin), &createBCFunctionUDepRobin );
 
 
 //==================================================
@@ -316,7 +308,5 @@ createBCFunctionDirectional( BCFunctionBase const* bcFunctionDirectional )
 {
     return new BCFunctionDirectional( ( BCFunctionDirectional const& )* bcFunctionDirectional);
 }
-// register BCFunctionRobin in factory for cloning
-const bool bcFunctionDirectional = FactoryCloneBCFunction::instance().registerProduct( typeid(BCFunctionDirectional), &createBCFunctionDirectional );
 
 } //End of namespace LifeV
