@@ -141,7 +141,6 @@ public:
 
     /** @} */ // End of group Geometric Element Types
 
-\
     /** @name Geometric Element Container Types
      *  @ingroup public_types
      *  Typedefs for STL compliant containers of mesh geometric entities.
@@ -371,6 +370,19 @@ public:
      */
     template <typename VECTOR>
     void transformMesh( const VECTOR& scale, const VECTOR& rotate, const VECTOR& translate );
+
+
+
+    //! Transform the mesh according to a given mapping
+	/** Transform the mesh according to a given meshMapping(Real& x, Real& y, Real& z).
+	 *  @date   12/2010
+	 *  @author Mauro Perego
+	 *  @param meshMapping   function void meshMmapping(Real& x, Real& y, Real& z) which receive
+	 *  				 x, y, z, and transform them according to a certain mapping
+	 */
+     template <typename function>
+     void transformMesh( const function& meshMapping);
+
 
     //! Get the maximum H over all the edges of the mesh.
     /**
@@ -1851,6 +1863,17 @@ void RegionMesh3D<GEOSHAPE, MC>::transformMesh( const VECTOR& scale, const VECTO
         pointList[ i ].coordinate( 1 ) = P( 1 );
         pointList[ i ].coordinate( 2 ) = P( 2 );
     }
+}
+
+template <typename GEOSHAPE, typename MC>
+template <typename function>
+void RegionMesh3D<GEOSHAPE, MC>::transformMesh( const function& meshMapping)
+{
+	for ( unsigned int i = 0; i < pointList.size();++i )
+	{
+		point_Type& p = pointList[ i ];
+		meshMapping(p.coordinate(0),p.coordinate(1),p.coordinate(2));
+	}
 }
 
 template <typename GEOSHAPE, typename MC>
