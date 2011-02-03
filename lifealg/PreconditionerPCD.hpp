@@ -193,8 +193,8 @@ protected:
     string      M_section;
 
 private:
-    PreconditionerPCD(const PreconditionerPCD& P){}
-    PreconditionerPCD(const boost::shared_ptr<PreconditionerPCD>& P){}
+    PreconditionerPCD(const PreconditionerPCD& /*P*/){}
+    PreconditionerPCD(const boost::shared_ptr<PreconditionerPCD>& /*P*/){}
 
 };
 

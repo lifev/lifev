@@ -203,8 +203,8 @@ protected:
     string      M_section;
 
 private:
-    PreconditionerSIMPLE(const PreconditionerSIMPLE& P){}
-    PreconditionerSIMPLE(const boost::shared_ptr<PreconditionerSIMPLE>& P){}
+    PreconditionerSIMPLE(const PreconditionerSIMPLE& /*P*/){}
+    PreconditionerSIMPLE(const boost::shared_ptr<PreconditionerSIMPLE>& /*P*/){}
 
 };
 

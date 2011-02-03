@@ -216,7 +216,7 @@ int PreconditionerPCD::buildPreconditioner(operator_type& oper)
 
     if(verbose) std::cout << " P1a" << std::endl;
     timer.start();
-    //pAp->spy("p1a");
+    pAp->spy("p1a");
     super_PtrType precForBlock1;
     precForBlock1.reset(new PreconditionerIfpack());
     precForBlock1->setDataFromGetPot(M_dataFile,M_section);
