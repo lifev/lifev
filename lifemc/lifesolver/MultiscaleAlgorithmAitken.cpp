@@ -78,12 +78,12 @@ MultiscaleAlgorithmAitken::setupData( const std::string& fileName )
 
     GetPot dataFile( fileName );
 
-    M_generalizedAitken.setDefaultOmega( dataFile( "Solver/Omega", 1.e-3 ) );
-    M_generalizedAitken.useDefaultOmega( dataFile( "Solver/fixedOmega",   false ) );
-    M_generalizedAitken.setOmegaMin( dataFile( "Solver/range", M_generalizedAitken.defaultOmegaFluid()/1024, 0 ) );
-    M_generalizedAitken.setOmegaMax( dataFile( "Solver/range", M_generalizedAitken.defaultOmegaFluid()*1024, 1 ) );
-    M_generalizedAitken.setMinimizationType( dataFile( "Solver/inverseOmega", true ) );
-    M_method = M_methodMap[ dataFile( "Solver/method", "Vectorial" ) ];
+    M_generalizedAitken.setDefaultOmega( dataFile( "Parameters/omega", 1.e-3 ) );
+    M_generalizedAitken.useDefaultOmega( dataFile( "Parameters/fixedOmega",   false ) );
+    M_generalizedAitken.setOmegaMin( dataFile( "Parameters/range", M_generalizedAitken.defaultOmegaFluid()/1024, 0 ) );
+    M_generalizedAitken.setOmegaMax( dataFile( "Parameters/range", M_generalizedAitken.defaultOmegaFluid()*1024, 1 ) );
+    M_generalizedAitken.setMinimizationType( dataFile( "Parameters/inverseOmega", true ) );
+    M_method = M_methodMap[ dataFile( "Parameters/method", "Vectorial" ) ];
 }
 
 void
@@ -168,7 +168,7 @@ MultiscaleAlgorithmAitken::showMe()
     {
         multiscaleAlgorithm_Type::showMe();
 
-        std::cout << "Aitken Method       = " << enum2String( M_method, M_methodMap ) << std::endl;
+        std::cout << "Aitken Method                        = " << enum2String( M_method, M_methodMap ) << std::endl;
         std::cout << std::endl << std::endl;
     }
 }

@@ -84,9 +84,21 @@ public:
     //! Perform sub-iteration on the coupling variables
     void subIterate();
 
+    //! Display some information about the algorithm
+    void showMe();
+
     //@}
 
 private:
+
+    //! @name Private Types
+    //@{
+
+    typedef std::list< multiscaleVector_Type >                    container_Type;
+    typedef container_Type::const_iterator                        containerIterator_Type;
+
+    //@}
+
 
     //! @name Unimplemented Methods
     //@{
@@ -103,12 +115,20 @@ private:
 
     void assembleJacobianMatrix();
 
-    void broydenJacobianUpdate( const multiscaleVector_Type& delta, const multiscaleVector_Type& minusCouplingResidual );
+    void broydenJacobianUpdate( const multiscaleVector_Type& delta );
+
+    void orthogonalizationUpdate( const multiscaleVector_Type& delta );
 
     //@}
 
     SolverAztecOO                            M_solver;
     multiscaleMatrixPtr_Type                 M_jacobian;
+
+    bool                                     M_initializeAsIdentityMatrix;
+    bool                                     M_resetAtEachTimeStep;
+    bool                                     M_orthogonalization;
+    Real                                     M_orthogonalizationSize;
+    container_Type                           M_orthogonalizationContainer;
 };
 
 //! Factory create function

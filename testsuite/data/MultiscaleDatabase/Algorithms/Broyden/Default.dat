@@ -15,6 +15,13 @@
 algorithmName        = Default
 algorithmType        = Broyden
 
+[Parameters]
+initializeAsIdentityMatrix     = false
+resetAtEachTimeStep            = true
+
+orthogonalization              = false
+orthogonalizationSize          = 1
+
 [Solver]
 	[./AztecOO]
 	    solver                     = gmres
