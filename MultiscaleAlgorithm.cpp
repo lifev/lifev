@@ -97,10 +97,10 @@ MultiscaleAlgorithm::showMe()
 {
     std::cout << "=================== Algorithm Information ===================" << std::endl << std::endl;
 
-    std::cout << "Algorithm type      = " << enum2String( M_type, multiscaleAlgorithmsMap ) << std::endl
-              << "Algorithm name      = " << M_name << std::endl
-              << "Max Sub-iterations  = " << M_subiterationsMaximumNumber << std::endl
-              << "Tolerance           = " << M_tolerance << std::endl << std::endl;
+    std::cout << "Algorithm type                       = " << enum2String( M_type, multiscaleAlgorithmsMap ) << std::endl
+              << "Algorithm name                       = " << M_name << std::endl
+              << "Max Sub-iterations                   = " << M_subiterationsMaximumNumber << std::endl
+              << "Tolerance                            = " << M_tolerance << std::endl << std::endl;
     std::cout << std::endl << std::endl;
 }
 

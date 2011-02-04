@@ -45,9 +45,14 @@ namespace Multiscale
 // Constructors & Destructor
 // ===================================================
 MultiscaleAlgorithmBroyden::MultiscaleAlgorithmBroyden() :
-        multiscaleAlgorithm_Type   (),
-        M_solver                   (),
-        M_jacobian                 ()
+        multiscaleAlgorithm_Type     (),
+        M_solver                     (),
+        M_jacobian                   (),
+        M_initializeAsIdentityMatrix ( false ),
+        M_resetAtEachTimeStep        ( false ),
+        M_orthogonalization          ( false ),
+        M_orthogonalizationSize      ( 1 ),
+        M_orthogonalizationContainer ()
 {
 
 #ifdef HAVE_LIFEV_DEBUG
@@ -71,6 +76,12 @@ MultiscaleAlgorithmBroyden::setupData( const std::string& fileName )
     multiscaleAlgorithm_Type::setupData( fileName );
 
     GetPot dataFile( fileName );
+
+    M_initializeAsIdentityMatrix = dataFile( "Parameters/initializeAsIdentityMatrix", false );
+    M_resetAtEachTimeStep = dataFile( "Parameters/resetAtEachTimeStep", true );
+
+    M_orthogonalization = dataFile( "Parameters/orthogonalization", false );
+    M_orthogonalizationSize = dataFile( "Parameters/orthogonalizationSize", 1 );
 
     M_solver.setCommunicator( M_comm );
     M_solver.setDataFromGetPot( dataFile, "Solver/AztecOO" );
@@ -103,11 +114,11 @@ MultiscaleAlgorithmBroyden::subIterate()
         // Compute the Jacobian (we completery delete the previous matrix)
         if ( subIT == 1 )
         {
-            if ( M_multiscale->globalData()->dataTime()->isFirstTimeStep() )
+            if ( M_jacobian.get() == 0 || M_resetAtEachTimeStep )
                 assembleJacobianMatrix();
         }
         else
-            broydenJacobianUpdate( delta, minusCouplingResidual );
+            broydenJacobianUpdate( delta );
 
         // To be moved in a post-processing class
         //std::cout << " MS-  CouplingVariables:\n" << std::endl;
@@ -145,6 +156,21 @@ MultiscaleAlgorithmBroyden::subIterate()
                         " (required: " + number2string( M_tolerance ) + ")\n" );
 }
 
+void
+MultiscaleAlgorithmBroyden::showMe()
+{
+    if ( M_displayer->isLeader() )
+    {
+        multiscaleAlgorithm_Type::showMe();
+
+        std::cout << "Initialize as identity matrix        = " << M_initializeAsIdentityMatrix << std::endl;
+        std::cout << "Reset matrix at each time step       = " << M_resetAtEachTimeStep << std::endl;
+        std::cout << "Enable orthogonalization             = " << M_orthogonalization << std::endl;
+        std::cout << "Orthogonalization memory size        = " << M_orthogonalizationSize << std::endl;
+        std::cout << std::endl << std::endl;
+    }
+}
+
 // ===================================================
 // Private Methods
 // ===================================================
@@ -153,24 +179,62 @@ MultiscaleAlgorithmBroyden::assembleJacobianMatrix()
 {
     // Compute the Jacobian matrix
     M_jacobian.reset( new multiscaleMatrix_Type( M_couplingVariables->map(), 50 ) );
-    M_multiscale->exportJacobian( *M_jacobian );
+
+    if ( M_initializeAsIdentityMatrix )
+        M_jacobian->insertValueDiagonal( 1 );
+    else
+        M_multiscale->exportJacobian( *M_jacobian );
+
+    M_jacobian->globalAssemble();
+
+    //M_jacobian->spy( "Jacobian" );
+
+    // Reset orthogonalization
+    M_orthogonalizationContainer.clear();
+}
+
+void
+MultiscaleAlgorithmBroyden::broydenJacobianUpdate( const multiscaleVector_Type& delta )
+{
+    M_jacobian->openCrsMatrix();
+
+    // Compute the Broyden update
+    if ( M_orthogonalization )
+    {
+        // Orthogonalize the vector
+        multiscaleVector_Type orthogonalization ( delta );
+        for ( containerIterator_Type i = M_orthogonalizationContainer.begin(); i != M_orthogonalizationContainer.end() ; ++i )
+            orthogonalization -= orthogonalization.dot( *i ) * *i;
+        orthogonalization /= orthogonalization.norm2();
+
+        // Update orthogonalization
+        orthogonalizationUpdate( delta );
+
+        // Update the Jacobian
+        M_jacobian->addDyadicProduct( ( *M_couplingResiduals ) / orthogonalization.dot( delta ), orthogonalization );
+    }
+    else
+    {
+        // Update the Jacobian
+        //M_jacobian->addDyadicProduct( ( *M_couplingResiduals + minusCouplingResidual - *M_jacobian * delta ) / delta.dot( delta ), delta );
+        M_jacobian->addDyadicProduct( ( *M_couplingResiduals ) / delta.dot( delta ), delta );
+    }
+
     M_jacobian->globalAssemble();
 
     //M_jacobian->spy( "Jacobian" )
 }
 
 void
-MultiscaleAlgorithmBroyden::broydenJacobianUpdate( const multiscaleVector_Type& delta, const multiscaleVector_Type& minusCouplingResidual )
+MultiscaleAlgorithmBroyden::orthogonalizationUpdate( const multiscaleVector_Type& delta )
 {
-    // Compute the Broyden update (before opening the matrix)
-    multiscaleVector_Type columnVector( ( *M_couplingResiduals + minusCouplingResidual - *M_jacobian * delta ) / ( delta.dot( delta ) ) );
-
-    // Update the Jacobian Matrix
-    M_jacobian->openCrsMatrix();
-    M_jacobian->addDyadicProduct( columnVector, delta ); // TO BE TESTED IN PARALLEL
-    M_jacobian->globalAssemble();
-
-    //M_jacobian->spy( "Jacobian" )
+    if ( M_orthogonalizationContainer.size() < M_orthogonalizationSize )
+        M_orthogonalizationContainer.push_back( delta );
+    else
+    {
+        M_orthogonalizationContainer.pop_front();
+        M_orthogonalizationContainer.push_back( delta );
+    }
 }
 
 } // Namespace Multiscale
