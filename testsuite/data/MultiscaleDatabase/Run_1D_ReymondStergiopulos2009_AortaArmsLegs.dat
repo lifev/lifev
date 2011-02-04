@@ -26,16 +26,16 @@ ProblemFile = ./MultiscaleDatabase/Models/Multiscale/ReymondStergiopulos2009_1D_
     
     [../time_discretization]
     initialtime                = .00      # [s]
-    endtime                    = 0.8      # [s] 1-HB
+    #endtime                    = 0.8      # [s] 1-HB
     #initialtime                = 0.8      # [s] 2-HB start
     #endtime                    = 1.6      # [s] 2-HB end
-    #initialtime                = 1.6      # [s] 2-HB start
-    #endtime                    = 2.4      # [s] 2-HB end
+    #initialtime                = 1.6      # [s] 3-HB start
+    endtime                    = 2.4      # [s] 3-HB end
     #endtime                    = 0.35     # [s] Absorbing
     timestep                   = 1e-3     # [s]
 
     [../Algorithm]
-    type                       = Newton            # Aitken, Explicit, Newton, Broyden
+    type                       = Broyden           # Aitken, Explicit, Newton, Broyden
     file                       = Default           # File name (without .dat extension)
     subiterationsMaximumNumber = 100               # Maximum number for coupling subiterations
     tolerance                  = 1.e-6             # Tolerance on the coupling values

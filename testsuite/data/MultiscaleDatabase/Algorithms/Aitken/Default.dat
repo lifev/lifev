@@ -15,8 +15,8 @@
 algorithmName        = Default
 algorithmType        = Aitken
 
-[Solver]
-    Omega                      = 0.5           # omega starting value
+[Parameters]
+    omega                      = 0.5           # omega starting value
     fixedOmega                 = true          # use fixed omega (if omega = 1 -> fixed point)
     method                     = Vectorial     # Scalar, Vectorial
     #range                      = '0.1 1.5'     # Range coefficient: OmegaMin < Omega < OmegaMax
