@@ -39,13 +39,13 @@ problem_type = 1
     # used for transient and transientNonLinear
     [./time_discretization]
     initialtime   = 0.
-    endtime       = 1.
+    endtime       = 1.1
     timestep      = 0.0625
     [../]
 
     [./space_discretization]
     mesh_dir      = ./Mesh/ # the directory where the mesh file is
-    mesh_file     = cartesian_cube8.mesh #mesh48603.mesh #cartesian_cube8.mesh
+    mesh_file     = cartesian_cube8.mesh #cartesian_cube8.mesh #mesh48603.mesh #cartesian_cube8.mesh
     mesh_type     = .mesh #structured #.mesh
     mesh_faces    = all
     verbose       = 0                        # verbose during mesh-reading
@@ -53,9 +53,9 @@ problem_type = 1
     element_shape = 0
 
     # For structured mesh
-    nx = 8
-    ny = 8
-    nz = 8
+    nx = 32
+    ny = 32
+    nz = 32
     lx = 1.
     ly = 1.
     lz = 1.

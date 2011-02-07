@@ -62,7 +62,10 @@ typedef boost::numeric::ublas::matrix<Real> Matrix;
 Matrix inversePermeability ( const Real&, const Real&, const Real&, const Real&, const std::vector<Real>& );
 
 // Source term
-Real source_in ( const Real&, const Real&, const Real&, const Real&, const ID& );
+Real source ( const Real&, const Real&, const Real&, const Real&, const ID& );
+
+// Vector source term
+Vector vectorSource ( const Real&, const Real&, const Real&, const Real&, const ID& );
 
 // Initial time primal variable for transient and non-linear transient solvers
 Real initialPrimal ( const Real&, const Real&, const Real&, const Real&, const ID& );

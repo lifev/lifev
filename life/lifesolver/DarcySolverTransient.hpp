@@ -249,7 +249,7 @@ public:
 
     typedef DarcySolver<Mesh, SolverType> DarcySolverPolicies;
 
-    typedef typename DarcySolverPolicies::Function           Function;
+    typedef typename DarcySolverPolicies::function_Type      function_Type;
 
     typedef typename DarcySolverPolicies::data_Type          data_Type;
 
@@ -327,7 +327,7 @@ public:
       variable at step zero.
       @param primalInitial The primal initial function.
     */
-    void setInitialPrimal ( const Function& primalInitial );
+    void setInitialPrimal ( const function_Type& primalInitial );
 
     //! Set mass matrix
     /*!
@@ -336,7 +336,7 @@ public:
       @param mass Mass term for the problem.
     */
 
-    void setMass ( const Function& mass )
+    void setMass ( const function_Type& mass )
     {
         M_mass = mass;
     }
@@ -392,10 +392,10 @@ private:
     //@{
 
     //! Initial time primal variable.
-    Function    M_primalInitial;
+    function_Type   M_primalInitial;
 
     //! Mass function, it does not depend on time.
-    Function    M_mass;
+    function_Type   M_mass;
 
     //@}
 
@@ -527,7 +527,7 @@ template<typename Mesh, typename SolverType>
 inline
 void
 DarcySolverTransient<Mesh, SolverType>::
-setInitialPrimal ( const Function& primalInitial )
+setInitialPrimal ( const function_Type& primalInitial )
 {
     // Set the initial value function.
     M_primalInitial = primalInitial;
@@ -687,15 +687,8 @@ staticCondensation ()
     //     VECTOR OPERATIONS
     //..........................
 
-    // Clear some vectors.
-    this->M_elvecSource.zero();
+    // Clear vector.
     this->M_elvecHyb.zero();
-
-    // Compute the right hand side.
-    source( this->M_source,
-            this->M_elvecSource,
-            this->M_primal_FESpace.fe(),
-            this->M_data.dataTime()->time(), 0 );
 
     // Take the pressure at the previews time step in the local element.
     VectorElemental elvecPrimalOldLocal( this->M_primal_FESpace.refFE().nbDof(), 1 );
@@ -709,7 +702,7 @@ staticCondensation ()
 
     /* Put in M_elvecSource the vector M_elmatMassPrimal / \Delta t * elvecPrimalOldLocal + M_elvecSource
        For more details see http://www.netlib.org/slatec/lin/dgemv.f */
-    blas.GEMV ( NOTRANS, NBP, NBP, ONE, M_elmatMassPrimal.mat(), NBP, elvecPrimalOldLocal, ZERO, this->M_elvecSource );
+    blas.GEMV ( NOTRANS, NBP, NBP, ONE, M_elmatMassPrimal.mat(), NBP, elvecPrimalOldLocal, ONE, this->M_elvecSource );
 
     /* Put in M_elvecSource the vector LB^{-1} * M_elvecSource = LB^{-1} *( M_elmatMassPrimal / \Delta t + F)
        For more details see http://www.netlib.org/lapack/lapack-3.1.1/SRC/dtrtrs.f */
@@ -722,6 +715,32 @@ staticCondensation ()
        M_elvecHyb is fully stored.
        For more details see http://www.netlib.org/blas/dgemm.f */
     blas.GEMM ( TRANS, NOTRANS, NBL, NBRHS, NBP, ONE, this->M_BtC, NBP, this->M_elvecSource, NBP, ZERO, this->M_elvecHyb, NBL );
+
+   /* Put in M_elvecSourceVector the vector L^{-1} * M_elvecSourceVector, solving a triangular system.
+       For more details see http://www.netlib.org/lapack/lapack-3.1.1/SRC/dtrtrs.f */
+    lapack.TRTRS ( UPLO, NOTRANS, NODIAG, NBU, NBRHS, A, NBU, this->M_elvecSourceVector, NBU, INFO );
+    ASSERT_PRE( !INFO[0], "Lapack Computation M_elvecSourceVector = L^{-1} M_elvecSourceVector is not achieved." );
+
+    /* Add to M_elvecHyb the vector - C^T * M_elvecSourceVector = M_elvecHyb - C^T * A^{-1} * M_elvecSourceVector
+       M_elvecHyb is fully stored.
+       For more details see http://www.netlib.org/blas/dgemm.f */
+    blas.GEMM ( TRANS, NOTRANS, NBL, NBRHS, NBL, MINUSONE, C, NBL, this->M_elvecSourceVector, NBU, ONE, this->M_elvecHyb, NBL );
+
+    /* Put in M_elvecSource the vector B^T * L^{-T} * M_elvecSourceVector =  B^T * A^{-1} * M_elvecSourceVector
+       M_elvecSource fully stored.
+       For more details see http://www.netlib.org/blas/dgemm.f */
+    blas.GEMM ( TRANS, TRANS, NBP, NBRHS, NBU, ONE, B, NBU, this->M_elvecSourceVector, NBRHS, ZERO, this->M_elvecSource, NBRHS );
+
+    /* Put in M_elvecSource the vector LB^{-1} * M_elvecSource = LB^{-1} * B^T * A^{-1} * M_elvecSource
+       For more details see http://www.netlib.org/lapack/lapack-3.1.1/SRC/dtrtrs.f */
+    lapack.TRTRS ( UPLO, NOTRANS, NODIAG, NBP, NBRHS, this->M_BtB, NBP, this->M_elvecSource, NBRHS, INFO );
+    ASSERT_PRE( !INFO[0], "Lapack Computation M_elvecSourceVector = LB^{-1} rhs is not achieved." );
+
+    /* Add in M_elvecHyb the vector M_BtC^T * M_elvecSource = 
+       C^T * A^{-1} * B^T * (B^T * A^{-1} * B)^{-1} * B^T * A^{-1} * M_elvecSource
+       M_elvecHyb is fully stored.
+       For more details see http://www.netlib.org/blas/dgemm.f */
+    blas.GEMM ( TRANS, NOTRANS, NBL, NBRHS, NBP, ONE, this->M_BtC, NBP, this->M_elvecSource, NBRHS, ONE, this->M_elvecHyb, NBL );
 
     //........................
     // END OF VECTOR OPERATIONS.
@@ -844,14 +863,18 @@ localComputePrimalAndDual ()
     //  1) Computation of the PRESSURE
     //...................................
 
-    // Clear the source vector.
-    this->M_elvecSource.zero();
+    // Save in M_elvecFlux the values in M_elvecSourceVector useful for the dual variable
+    this->M_elvecFlux = this->M_elvecSourceVector;
 
-    // The source term is computed with a test function in the primal variable space.
-    source( this->M_source,
-            this->M_elvecSource,
-            this->M_primal_FESpace.fe(),
-            this->M_data.dataTime()->time(), 0 );
+    /* Put in M_elvecSourceVector the vector L^{-1} * M_elvecSourceVector, solving a triangular system.
+       For more details see http://www.netlib.org/lapack/lapack-3.1.1/SRC/dtrtrs.f */
+    lapack.TRTRS ( UPLO, NOTRANS, NODIAG, NBU, NBRHS, A, NBU, this->M_elvecSourceVector, NBU, INFO );
+    ASSERT_PRE( !INFO[0], "Lapack Computation M_elvecSourceVector = L^{-1} M_elvecSourceVector is not achieved." );
+
+    /* Put in M_elvecSourceVector the vector B^T * L^{-T} * M_elvecSourceVector =  B^T * A^{-1} * M_elvecSourceVector
+       M_elvecSourceVector fully stored.
+       For more details see http://www.netlib.org/blas/dgemm.f */
+    blas.GEMM ( TRANS, TRANS, NBP, NBRHS, NBU, ONE, B, NBU, this->M_elvecSourceVector, NBRHS, ONE, this->M_elvecSource, NBRHS );
 
     // Take the pressure at the previews time step in the local element.
     VectorElemental elvecPrimalOldLocal( this->M_primal_FESpace.refFE().nbDof(), 1 );
@@ -890,20 +913,23 @@ localComputePrimalAndDual ()
     //  2) Computation of the VELOCITIES
     //.....................................
 
-    // Clear the element dual vector.
-    this->M_elvecFlux.zero();
+    /* Put in M_elvecFlux the vector L^{-1} * M_elvecFlux, solving a triangular system.
+       For more details see http://www.netlib.org/lapack/lapack-3.1.1/SRC/dtrtrs.f */
+    lapack.TRTRS ( UPLO, NOTRANS, NODIAG, NBU, NBRHS, A, NBU, this->M_elvecFlux, NBU, INFO );
+    ASSERT_PRE( !INFO[0], "Lapack Computation M_elvecFlux = L^{-1} M_elvecFlux is not achieved." );
 
-    /* Put in M_elvecFlux the vector B * M_elvecSource = L^{-1} * B * primal_K
+    /* Put in M_elvecFlux the vector B * M_elvecSource - M_elvecFlux = 
+       = L^{-1} * B * primal_K - M_elvecVectorSource
        For more details see http://www.netlib.org/slatec/lin/dgemv.f */
-    blas.GEMV ( NOTRANS, NBU, NBP, ONE, B, NBU, this->M_elvecSource, ZERO, this->M_elvecFlux );
+    blas.GEMV ( NOTRANS, NBU, NBP, ONE, B, NBU, this->M_elvecSource, MINUSONE, this->M_elvecFlux );
 
-    /* Put in M_elvecFlux the vector
-       - C * M_elvecHyb - M_elvecFlux = - L^{-1} * C * lambda_K - L^{-1} * B * primal_K
+    /* Put in M_elvecFlux the vector - C * M_elvecHyb - M_elvecFlux = 
+       = - L^{-1} * C * lambda_K - L^{-1} * B * primal_K + L^{-1} * M_elvecVectorSource
        For more details see http://www.netlib.org/slatec/lin/dgemv.f */
     blas.GEMV ( NOTRANS, NBU, NBL, MINUSONE, C, NBL, this->M_elvecHyb, MINUSONE, this->M_elvecFlux );
 
-    /* Put in flux the vector
-       L^{-T} * M_elvecFlux = - A^{-1} * C^T * lambda_K - A^{-1} * B^T * primal_K
+    /* Put in flux the vector L^{-T} * M_elvecFlux = 
+       = - A^{-1} * C^T * lambda_K - A^{-1} * B^T * primal_K + A^{-1} * M_elvecVectorSource
        For more details see http://www.netlib.org/lapack/lapack-3.1.1/SRC/dtrtrs.f */
     lapack.TRTRS ( UPLO, TRANS, NODIAG, NBU, NBRHS, A, NBU, this->M_elvecFlux, NBU, INFO );
     ASSERT_PRE(!INFO[0], "Lapack Computation M_elvecFlux = L^{-T} M_elvecFlux is not achieved.");
