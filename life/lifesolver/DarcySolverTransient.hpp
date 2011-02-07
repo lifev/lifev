@@ -52,7 +52,7 @@ Real _One_ ( const Real&, const Real&, const Real&, const Real&, const ID& )
     return static_cast<Real>( 1. );
 }
 
-}
+} // anonimus namespace
 
 // LifeV namespace.
 namespace LifeV

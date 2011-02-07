@@ -101,6 +101,6 @@ Real analyticalSolution ( const Real&, const Real&, const Real&, const Real&, co
 // Gradient of the analytical solution
 Real analyticalFlux ( const Real&, const Real&, const Real&, const Real&, const ID& );
 
-}
+} // namespace LifeV
 
 #endif /* __user_fun_H */

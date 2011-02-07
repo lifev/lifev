@@ -39,7 +39,7 @@ problem_type = 1
     # used for transient and transientNonLinear
     [./time_discretization]
     initialtime   = 0.
-    endtime       = 1.1
+    endtime       = 1.
     timestep      = 0.0625
     [../]
 

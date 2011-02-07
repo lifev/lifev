@@ -978,4 +978,4 @@ darcy::run()
     // Return the error, needed for the succes/failure of the test
     return primalL2Error;
 
-}
+} // run

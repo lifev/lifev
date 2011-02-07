@@ -204,7 +204,7 @@ Real robin ( const Real& /* t */,
              const Real& z,
              const ID&   /*icomp*/ )
 {
-    return -2. * y * x * x - 2 * x * y * y - 6. + 2. * y + x * x * x + x * x * y * y + 6. * x + 5. * z;
+    return -2. * y * x * x - 2. * x * y * y - 6. + 2. * y + x * x * x + x * x * y * y + 6. * x + 5. * z;
 }
 
 // ===================================================

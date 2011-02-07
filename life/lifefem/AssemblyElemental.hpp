@@ -69,6 +69,7 @@ namespace LifeV
 //! @name Public typedefs
 //@{
 typedef boost::numeric::ublas::matrix<Real> Matrix;
+typedef boost::numeric::ublas::vector<Real> Vector;
 typedef boost::numeric::ublas::zero_matrix<Real> ZeroMatrix;
 //@}
 
@@ -807,7 +808,23 @@ permeability that is provided directly \f$ \mathrm{InvpermFun} = K^{-1} \f$.
 void mass_Hdiv( Real ( *InvpermFun ) ( const Real&, const Real&, const Real& ),
                 MatrixElemental& elmat, const CurrentFE& dualFE, int iblock = 0, int jblock = 0 );
 
+// Source vector for dual variable with constant vector source.
+/*!
+Compute the source vector in \f$ H(div, K ) \f$ with constant vector permeability, with \f$ K \f$ the
+current element. In formula
+\f[
+< g, w > \,,
+\f]
+for \f$ w \in H(div, K) \f$ and \f$ g \f$ a constant vector.
+<BR>
+@param source constant vector as the source.
+@param elvect element vector.
+@param dualFE Current dual finite element in \f$ H(div, K) \f$.
+@param iblock Subarray index where to store the integral just computed.
+*/
+void source_Hdiv( const Vector& source , VectorElemental& elvec, const CurrentFE& dualFE, int iblock = 0 );
+
 //!@}
 
-}
+} // namespace LifeV
 #endif
