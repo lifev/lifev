@@ -72,7 +72,7 @@ all-local:
 upload-api:
 	-cd doc/ && rsync -avz api/ `whoami`@cmcsforge.epfl.ch:/var/lib/gforge/chroot/home/groups/lifev/htdocs/api-$(LIFEV_MAJOR_VERSION).$(LIFEV_MINOR_VERSION).$(LIFEV_MICRO_VERSION)
 
-MOSTLYCLEANFILES	= ChangeLog
+MOSTLYCLEANFILES	= ChangeLog life.pc.in life-uninstalled.sh life.pc life-uninstalled.pc
 
 $(top_srcdir)/acinclude.m4:
 	@echo 'm4_include([admin/libtool.m4])' > acinclude.m4
