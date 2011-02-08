@@ -26,10 +26,11 @@ include $(top_srcdir)/testsuite/Makefile.testsuite
 
 check_HEADERS = ud_functions.hpp boundaryConditions.hpp masstransport.hpp
 
-check_PROGRAMS = test_mt
+# To compile test_mt uncomment the following line and make check
+##check_PROGRAMS = test_mt
 test_mt_SOURCES = main.cpp masstransport.cpp
 
-EXTRA_DIST = data testsuite.at
+EXTRA_DIST = data
 
 link:
 	test -a data || ln -s $(srcdir)/data
