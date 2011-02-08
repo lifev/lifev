@@ -221,6 +221,8 @@ public:
 
     //! returns Node or Cell centered string
     std::string whereName() const;
+
+    const feSpacePtr_Type& feSpacePtr() const {return M_feSpacePtr;};
     //@}
 
 private:
@@ -230,10 +232,10 @@ private:
     std::string M_variableName;
 
     //! pointer to the FESpace of the variable
-    const feSpacePtr_Type M_feSpacePtr;
+    feSpacePtr_Type M_feSpacePtr;
 
     //! pointer to storedArray
-    const vectorPtr_Type M_storedArrayPtr;
+    vectorPtr_Type M_storedArrayPtr;
 
     //! number of (scalar) DOFs of the variable
     UInt M_numDOF;
@@ -277,8 +279,10 @@ public:
     typedef typename exporterData_Type::WhereEnum       WhereEnum;
     typedef typename exporterData_Type::FieldTypeEnum   FieldTypeEnum;
     typedef typename exporterData_Type::FieldRegimeEnum FieldRegimeEnum;
-    typedef typename std::multimap<WhereEnum, exporterData_Type >::iterator
-    		                                            iterator_Type;
+    typedef typename std::vector<exporterData_Type >    dataVector_Type;
+    typedef typename dataVector_Type::iterator          dataVectorIterator_Type;
+    typedef typename std::multimap<WhereEnum, UInt >    whereToDataIdMap_Type;
+    typedef typename std::multimap<FE_TYPE, UInt >      feTypeToDataIdMap_Type;
     //@}
 
     //! @name Constructor & Destructor
@@ -448,7 +452,9 @@ protected:
     int                         M_procId;
     std::string                 M_postfix;
 
-    std::multimap<WhereEnum, exporterData_Type > M_whereToDataMap;
+    whereToDataIdMap_Type       M_whereToDataIdMap;
+    feTypeToDataIdMap_Type      M_feTypeToDataIdMap;
+    dataVector_Type             M_dataVector;
     std::list<Real>             M_timeSteps;
     //@}
 };
@@ -578,9 +584,9 @@ void Exporter<MeshType>::addVariable(const FieldTypeEnum& type,
                                      const FieldRegimeEnum& regime,
                                      const WhereEnum& where )
 {
-    // M_whereToDataMap.push_back( ExporterData(type,variableName, vr, start, size, regime, where) );
-    M_whereToDataMap.insert( std::pair<WhereEnum,exporterData_Type >(
-                                 where, exporterData_Type(type, variableName, feSpacePtr, vectorPtr, start, regime, where) ) );
+    M_dataVector.push_back( exporterData_Type(type, variableName, feSpacePtr, vectorPtr, start, regime, where) );
+    M_whereToDataIdMap.insert( std::pair<WhereEnum,UInt >(where, M_dataVector.size()-1 ) );
+    M_feTypeToDataIdMap.insert( std::pair<FE_TYPE,UInt >(feSpacePtr->fe().refFE().type(), M_dataVector.size()-1 ) );
 }
 
 template <typename MeshType>

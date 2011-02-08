@@ -258,9 +258,9 @@ void ExporterHDF5Mesh3D<MeshType>::postProcess(const Real& time)
 {
     if ( this->M_HDF5.get() == 0)
     {
-        if (this->M_whereToDataMap.size() != 0)
+        if (this->M_dataVector.size() != 0)
         {
-            this->M_HDF5.reset(new hdf5_Type(this->M_whereToDataMap.begin()->second.storedArrayPtr()->comm()));
+            this->M_HDF5.reset(new hdf5_Type(this->M_dataVector.begin()->storedArrayPtr()->comm()));
         }
         else
         {
@@ -274,7 +274,7 @@ void ExporterHDF5Mesh3D<MeshType>::postProcess(const Real& time)
 
         if (!this->M_multimesh)
         {
-            if (this->M_whereToDataMap.size() != 0)
+            if (this->M_dataVector.size() != 0)
             {
                 this->writeGeometry(); // see also writeGeometrymetry
             }
@@ -314,9 +314,9 @@ void ExporterHDF5Mesh3D<MeshType>::postProcess(const Real& time)
         if (!this->M_procId) std::cout << "  x-  HDF5 post-processing ...        " << std::flush;
         LifeChrono chrono;
         chrono.start();
-        for (typename base::iterator_Type i=this->M_whereToDataMap.begin(); i != this->M_whereToDataMap.end(); ++i)
+        for (typename base::dataVectorIterator_Type i=this->M_dataVector.begin(); i != this->M_dataVector.end(); ++i)
         {
-            this->writeVariable(i->second);
+            this->writeVariable(*i);
         }
         // pushing time
         this->M_timeSteps.push_back(time);
@@ -574,6 +574,8 @@ typename ExporterHDF5Mesh3D<MeshType>::meshPtr_Type ExporterHDF5Mesh3D<MeshType>
         pe->setPoint(1, tempMesh->point(edgePoints[0][j]));
         pe->setPoint(2, tempMesh->point(edgePoints[1][j]));
         pe->setMarker(edgeMarkers[j]);
+
+        tempMesh->globalToLocalEdge().insert(std::make_pair(edgeGlobalId[j], j + 1));
     }
 
     edgePoints.clear();
@@ -636,6 +638,9 @@ typename ExporterHDF5Mesh3D<MeshType>::meshPtr_Type ExporterHDF5Mesh3D<MeshType>
         {
             pf->setPoint(k + 1, tempMesh->point(facePoints[k][j]));
         }
+
+        tempMesh->globalToLocalFace().insert(std::make_pair(faceGlobalId[j], j + 1));
+
     }
 
     tempMesh->setLinkSwitch("HAS_ALL_FACES");
@@ -680,6 +685,9 @@ typename ExporterHDF5Mesh3D<MeshType>::meshPtr_Type ExporterHDF5Mesh3D<MeshType>
             pv->setPoint(k + 1, tempMesh->point(volumePoints[k][j]));
         }
         pv->setMarker(volumeMarkers[j]);
+
+        tempMesh->globalToLocalVolume().insert(std::make_pair(volumeGlobalId[j], j + 1));
+
     }
 
     volumePoints.clear();

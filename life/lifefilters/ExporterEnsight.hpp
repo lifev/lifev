@@ -226,12 +226,12 @@ void ExporterEnsight<MeshType>::postProcess(const Real& time)
         if (!this->M_procId) std::cout << "  x-  ExporterEnsight post-processing ...        " << std::flush;
         LifeChrono chrono;
         chrono.start();
-        for (typename super::iterator_Type i=this->M_whereToDataMap.begin(); i != this->M_whereToDataMap.end(); ++i)
+        for (typename super::dataVectorIterator_Type i=this->M_dataVector.begin(); i != this->M_dataVector.end(); ++i)
         {
-            if ( i->second.regime() != exporterData_Type::NullRegime )
-                writeAscii(i->second);
-            if (i->second.regime() == exporterData_Type::SteadyRegime)
-                i->second.setRegime( exporterData_Type::NullRegime );
+            if ( i->regime() != exporterData_Type::NullRegime )
+                writeAscii(*i);
+            if (i->regime() == exporterData_Type::SteadyRegime)
+                i->setRegime( exporterData_Type::NullRegime );
         }
         writeCase(time);
 
@@ -278,9 +278,9 @@ void ExporterEnsight<MeshType>::import(const Real& time)
 
     LifeChrono chrono;
     chrono.start();
-    for (typename super::iterator_Type i=this->M_whereToDataMap.begin(); i != this->M_whereToDataMap.end(); ++i)
+    for (typename super::dataVectorIterator_Type i=this->M_dataVector.begin(); i != this->M_dataVector.end(); ++i)
     {
-        this->readVariable(i->second);
+        this->readVariable(*i);
     }
     chrono.stop();
     if (!this->M_procId) std::cout << "      done in " << chrono.diff() << " s." << std::endl;
@@ -506,17 +506,17 @@ void ExporterEnsight<MeshType>::caseMeshSection(std::ofstream& casef)
 template <typename MeshType>
 void ExporterEnsight<MeshType>::caseVariableSection(std::ofstream& casef)
 {
-    typedef typename std::list< exporterData_Type >::const_iterator Iterator;
+    // typedef typename std::list< exporterData_Type >::const_iterator Iterator;
     casef << "VARIABLE\n";
     std::string aux, str;
-    for (typename super::iterator_Type i=this->M_whereToDataMap.begin(); i != this->M_whereToDataMap.end(); ++i)
+    for (typename super::dataVectorIterator_Type i=this->M_dataVector.begin(); i != this->M_dataVector.end(); ++i)
     {
-        if ( i->second.regime() == exporterData_Type::SteadyRegime )
+        if ( i->regime() == exporterData_Type::SteadyRegime )
             str = "";
         else
             str = ".*****";
-        aux = i->second.variableName() + " " + super::M_prefix + "_" + i->second.variableName();
-        switch ( i->second.type() )
+        aux = i->variableName() + " " + super::M_prefix + "_" + i->variableName();
+        switch ( i->type() )
         {
         case exporterData_Type::ScalarField:
             casef << "scalar per node: 1 " +  aux + str << this->M_me << ".scl\n";

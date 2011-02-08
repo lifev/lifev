@@ -26,11 +26,11 @@ along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
 
 /*!
   @file
-  @brief This file provides an interface for post-processing with Paraview
+  @brief This file provides an interface for post-processing with VTK/Paraview
      by writing files in VTK XML format
   @date 11-2010
 
-  ExporterVTK is now inherited from Exporter.
+  ExporterVTK is inherited from Exporter.
 
   Usage: two steps
   - first: add the variables using addVariable
@@ -38,17 +38,20 @@ along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
 
   @author Tiziano Passerini <tiziano@mathcs.emory.edu>
   @maintainer Tiziano Passerini <tiziano@mathcs.emory.edu>
-*/
+ */
 
-#ifndef EXPORTER_VTK_H
-#define EXPORTER_VTK_H 1
+#ifndef EXPORTERVTK_H
+#define EXPORTERVTK_H 1
 
 #include <life/lifefilters/Exporter.hpp>
-#include <life/lifefem/FESpace.hpp>
 
 namespace LifeV
 {
 
+/**
+ * @class ExporterVTK
+ * @brief ExporterVTK data exporter
+ */
 template<typename MeshType>
 class ExporterVTK : public Exporter<MeshType> {
 
@@ -86,19 +89,22 @@ public:
 
     };
 
-    typedef MeshType                       mesh_Type;
-    typedef Exporter<MeshType>             super;
-    typedef typename super::meshPtr_Type   meshPtr_Type;
-    typedef boost::shared_ptr<FESpace>     feSpacePtr_Type;
+    typedef MeshType                          mesh_Type;
+    typedef Exporter<MeshType>                super;
+    typedef typename super::meshPtr_Type      meshPtr_Type;
+    typedef typename super::feSpacePtr_Type   feSpacePtr_Type;
+    typedef typename super::exporterData_Type exporterData_Type;
+    typedef typename super::feTypeToDataIdMap_Type::iterator
+                                              feTypeToDataIdMap_Type_Type;
     //@}
 
     //! @name Constructors & Destructor
     //@{
 
-    //! Empty constructor
+    //! Default constructor
     ExporterVTK();
 
-    /* *
+    /*!
        Constructor for ExporterVTK
 
        \param data_file the GetPot data file where you must provide an [exporter] section with:
@@ -108,20 +114,21 @@ public:
 
        \param the prefix for the output file (ex. "test" for test.vtu)
      */
-//    ExporterVTK(const GetPot& data_file, meshPtr_Type meshPtr, dofPtr_Type dofPtr, fePtr_Type M_fePtr,
-//            const std::string prefix);
     ExporterVTK(const GetPot& data_file, const std::string prefix);
 
+private:
     //! Copy constructor
-    // ExporterVTK( const ExporterVTK& example );
+    ExporterVTK( const ExporterVTK& example ) {}
 
+public:
     //! Destructor
     ~ExporterVTK() {}
 
     //@}
 
-    //! @name Methods
+    //! @name Public Methods
     //@{
+
     /* *
        Post-process the variables added to the list
 
@@ -139,7 +146,7 @@ public:
     /*!
        @param time the solver time
        @param dt time step used to rebuild the history up to now
-    */
+     */
     virtual void import(const Real& /*Tstart*/, const Real& /*dt*/) {}
 
     //! Read  only last timestep
@@ -149,108 +156,156 @@ public:
 
     //! @name Get methods
     //@{
-
     //! returns the type of the map to use for the VectorEpetra
-    MapEpetraType mapType() const;
-
+    virtual MapEpetraType mapType() const;
     //@}
 
 private:
 
-    UInt whichCellType();
+    //! @name Private methods
+    //@{
+    /*!
+       \param _feSpacePtr a point to the FE space descriptor
+       \return the identifier of the VTK elementary cell
+     */
+    UInt whichCellType( const feSpacePtr_Type & _feSpacePtr );
 
-    void M_wr_ascii();
-    void composeHeader();
-    void composeFooter();
-    void composeTypeDataHeader(const ExporterData::Where& where,
-                               std::stringstream& typeDataHeaderStringStream);
-    void composeTypeDataFooter(const ExporterData::Where& where,
-                               std::stringstream& typeDataFooterStringStream);
-    void composeDataArrays(const ExporterData::Where& where,
+    /*!
+       This method fills a buffer for the *.pvtu file. We will have a PVTU file for each
+       ExporterData object, basically listing the names of the VTU files containing the
+       "partitioned" data.
+
+       \param dvar the ExporterData object
+       \param[out] pVTUStringStream the stringstream object (a file buffer)
+     */
+    void composePVTUStream( const exporterData_Type& dvar, std::stringstream& pVTUStringStream );
+
+    /*!
+       This method creates the data structures needed by each processor to retrieve the
+       point global IDs and coordinates.
+
+       \param _feSpacePtr a pointer to the FE Space descriptor
+       \param[out] globalToLocalPointsMap the key of this map is the global ID of the point,
+              the value is the position in the local data structure
+       \param[out] localToGlobalPointsMap the key of this map is the position in the local data structure,
+              the value is the global ID of the point
+       \param[out] coordinatesOfPoints a nDimensionsxnumPoints matrix, storing the nDimensions coordinates
+              of the numPoints points
+     */
+    void createMaps( const feSpacePtr_Type & _feSpacePtr,
+                     std::map<UInt, UInt>& globalToLocalPointsMap,
+                     std::map<UInt, UInt>& localToGlobalPointsMap,
+                     std::vector<Vector>& coordinatesOfPoints );
+
+    /*!
+       This method fills a buffer for the header part of a *.vtu file.
+
+       \param numPoints we need to specify the dimension of the data set written in the VTU file
+       \param[out] vtuHeaderStringStream the stringstream object (a file buffer)
+     */
+    void composeVTUHeaderStream( UInt numPoints,
+                                 std::stringstream& vtuHeaderStringStream );
+
+    /*!
+       This method fills a buffer for the footer part of a *.vtu file.
+
+       \param[out] vtuHeaderStringStream the stringstream object (a file buffer)
+     */
+    void composeVTUFooterStream( std::stringstream& vtuFooterStringStream );
+
+    /*!
+       This method writes in a buffer (according to the VTK XML format)
+       1- the list of points' coordinates
+       2- the connectivity of the cells
+       3- the offsets of the connectivity list
+       4- the type of each cell
+
+       \param _feSpacePtr a pointer to the FE Space descriptor
+       \param globalToLocalPointsMap the key of this map is the global ID of the point,
+              the value is the position in the local data structure
+       \param coordinatesOfPoints a nDimensionsxnumPoints matrix, storing the nDimensions coordinates
+              of the numPoints points
+     */
+    void composeVTUGeoStream( const feSpacePtr_Type & _feSpacePtr,
+                              const std::map<UInt, UInt>& globalToLocalPointsMap,
+                              const std::vector<Vector>& coordinatesOfPoints,
+                              std::stringstream& vtuGeoStringStream );
+
+    /*!
+       This method writes in a buffer (according to the VTK XML format) the header
+       of the Data section of the file. This section may be named PointData or
+       CellData, and to allow for several DataArrays to be grouped inside a single
+       PointData or CellData environment, we need a separate method taking care
+       of the header (footer)
+
+       \param where Node or Cell
+       \param typeDataHeaderStringStream  the stringstream object (a file buffer)
+     */
+    void composeTypeDataHeaderStream(const typename exporterData_Type::WhereEnum& where,
+                                     std::stringstream& typeDataHeaderStringStream);
+
+    /*!
+       \sa composeTypeDataHeaderStream
+
+       \param where Node or Cell
+       \param typeDataHeaderStringStream  the stringstream object (a file buffer)
+     */
+    void composeTypeDataFooterStream(const typename exporterData_Type::WhereEnum& where,
+                                     std::stringstream& typeDataFooterStringStream);
+    /*!
+       This method writes in a buffer (according to the VTK XML format) the content
+       of the Data section of the file.
+
+       \param dvar the ExporterData object
+       \param localToGlobalPointsMap a map to query the dvar object for global IDs
+       \param dataArraysStringStream the stringstream object (a file buffer)
+     */
+    void composeDataArrayStream(const exporterData_Type& dvar,
+                                const std::map<UInt,UInt>& localToGlobalPointsMap,
+                                std::stringstream& dataArraysStringStream);
+
+    // to be checked - do not use for now
+    void composeDataArrayStream(const typename exporterData_Type::WhereEnum& where,
                            std::stringstream& dataArraysStringStream);
 
-    virtual void readScalar( ExporterData& /*dvar*/ ) {}
-    virtual void readVector( ExporterData& /*dvar*/ ) {}
+    virtual void readScalar( ExporterData<mesh_Type>& /*dvar*/ ) {}
+    virtual void readVector( ExporterData<mesh_Type>& /*dvar*/ ) {}
+    //@}
 
-    meshPtr_Type    M_meshPtr;
-    // dofPtr_Type     M_dofPtr;
-    feSpacePtr_Type M_feSpacePtr;
+    //! @name Private members
+    //@{
+    //@}
 
-    std::stringstream M_headerStringStream, M_footerStringStream,
-    M_pointDataHeaderStringStream, M_cellDataHeaderStringStream,
-    M_pointDataFooterStringStream, M_cellDataFooterStringStream;
 };
 
 
-//
+// ==============
 // Implementation
-//
+// ==============
+
+// ==============
+// Constructors
+// ==============
 
 template<typename Mesh>
 ExporterVTK<Mesh>::ExporterVTK():
-        super()
+super()
 {
 }
 
 
 template<typename Mesh> ExporterVTK<Mesh >::ExporterVTK(
-    const GetPot& data_file,
-    // meshPtr_Type meshPtr, dofPtr_Type dofPtr, fePtr_Type M_fePtr,
-    const std::string prefix)
-        :
-        super(data_file, prefix)
-//    M_meshPtr(meshPtr), // pointer to mesh
-//    M_dofPtr(dofPtr),
-//    M_fePtr(M_fePtr)
+                const GetPot& data_file,
+                const std::string prefix)
+                :
+                super(data_file, prefix)
 {
-    // composeHeader();
-    // composeFooter();
 }
 
 
-template <typename Mesh>
-UInt ExporterVTK<Mesh>::whichCellType()
-{
-    ASSERT( M_feSpacePtr.get(), "\nA pointer to a valid FE object is required!");
-
-    UInt vtkCellType;
-
-    switch ( M_feSpacePtr->fe().refFE().type() )
-    {
-    case FE_P1_2D:
-        // case FE_P1bubble_2D:
-        vtkCellType = VTK_TRIANGLE;
-        break;
-    case FE_P2_2D:
-        vtkCellType = VTK_QUADRATIC_TRIANGLE;
-        break;
-    case FE_P1_3D:
-        vtkCellType = VTK_TETRA;
-        break;
-    case FE_P2_3D:
-    case FE_P2tilde_3D:
-        vtkCellType = VTK_QUADRATIC_TETRA; // maybe to be modified (P2 on linear tetra...) see also the geomap...
-        break;
-    case FE_Q1_2D:
-        vtkCellType = VTK_QUAD;
-        break;
-    case FE_Q2_2D:
-        vtkCellType = VTK_QUADRATIC_QUAD;
-        break;
-    case FE_Q0_3D:
-    case FE_Q1_3D:
-        vtkCellType = VTK_HEXAHEDRON;
-        break;
-    case FE_Q2_3D:
-        vtkCellType = VTK_QUADRATIC_HEXAHEDRON;
-        break;
-    default:
-        std::cout << "WARNING: the element is not yet implemented in vtk_wrtrs.h\n";
-    }
-
-    return vtkCellType;
-}
-
+// =====================
+// Public methods
+// =====================
 
 template<typename Mesh>
 void ExporterVTK<Mesh>::postProcess(const Real& /*time*/)
@@ -262,57 +317,215 @@ void ExporterVTK<Mesh>::postProcess(const Real& /*time*/)
     std::size_t found( this->M_postfix.find( "*" ) );
     if ( found == string::npos )
     {
-        std::cout << "  x-  VTK post-processing ...        " << std::flush;
-
-        // redundant. should be done just the first time
-        composeTypeDataHeader(ExporterData::Node, M_pointDataHeaderStringStream);
-        composeTypeDataFooter(ExporterData::Node, M_pointDataFooterStringStream);
-        composeTypeDataHeader(ExporterData::Cell, M_cellDataHeaderStringStream);
-        composeTypeDataFooter(ExporterData::Cell, M_cellDataFooterStringStream);
-
-        std::ofstream vtkFile( ( this->M_postDir+this->M_prefix+this->M_postfix+".vtu").c_str() );
-        std::stringstream buffer("");
+        if (!this->M_procId) std::cout << "\t[VTK post-processing] ...        " << std::endl;
 
         LifeChrono chrono;
         chrono.start();
+        for (typename super::dataVectorIterator_Type i=this->M_dataVector.begin(); i != this->M_dataVector.end(); ++i)
+        {
+            std::ofstream vtkFile;
+            std::stringstream buffer("");
 
-        vtkFile << M_headerStringStream.str();
+            // a unique PVTU file is produced by the leader process
+            if(this->M_procId==0)
+            {
+                composePVTUStream(*i, buffer);
+
+                std::ofstream vtkPFile;
+                vtkPFile.open( ( this->M_postDir+this->M_prefix+"_" + i->variableName()+this->M_postfix+".pvtu").c_str() );
+                vtkPFile << buffer.str();
+                vtkPFile.close();
+
+                buffer.str("");
+            }
+
+
+            // redundant. should be done just the first time
+            std::map<UInt,UInt> ltgPointsMap, gtlPointsMap;
+            std::vector<Vector> pointsCoords;
+            createMaps( i->feSpacePtr(), gtlPointsMap, ltgPointsMap, pointsCoords );
+
+            composeVTUHeaderStream( gtlPointsMap.size(), buffer );
+            composeVTUGeoStream( i->feSpacePtr(), gtlPointsMap, pointsCoords, buffer );
+
+            composeTypeDataHeaderStream(i->where(), buffer);
+            composeDataArrayStream(*i, ltgPointsMap, buffer);
+            composeTypeDataFooterStream(i->where(), buffer);
+
+            composeVTUFooterStream( buffer );
+
+            // each process writes its own file
+            vtkFile.open( ( this->M_postDir+this->M_prefix+"_" + i->variableName()+this->M_postfix+"."+this->M_procId+".vtu").c_str() );
+            vtkFile << buffer.str();
+            vtkFile.close();
+
+            buffer.str("");
+
+            /*
+        composeTypeDataHeaderStream(exporterData_Type::Node, M_pointDataHeaderStringStream);
+        composeTypeDataFooterStream(exporterData_Type::Node, M_pointDataFooterStringStream);
+        composeTypeDataHeaderStream(exporterData_Type::Cell, M_cellDataHeaderStringStream);
+        composeTypeDataFooterStream(exporterData_Type::Cell, M_cellDataFooterStringStream);
 
         vtkFile << M_pointDataHeaderStringStream.str();
-        composeDataArrays(ExporterData::Node, buffer);
+        composeDataArrayStream(exporterData_Type::Node, buffer);
         vtkFile << buffer.str();
         vtkFile << M_pointDataFooterStringStream.str();
 
         buffer.str("");
 
         vtkFile << M_cellDataHeaderStringStream.str();
-        composeDataArrays(ExporterData::Cell, buffer);
+        composeDataArrayStream(exporterData_Type::Cell, buffer);
         vtkFile << buffer.str();
         vtkFile << M_cellDataFooterStringStream.str();
 
-        vtkFile << M_footerStringStream.str();
-
-        vtkFile.close();
-
-        chrono.stop();
+            M_headerStringStream.str("");
+            M_dataHeaderStringStream.str("");
+            M_dataFooterStringStream.str("");
+            M_footerStringStream.str("");
 
         M_pointDataHeaderStringStream.str("");
         M_pointDataFooterStringStream.str("");
         M_cellDataHeaderStringStream.str("");
         M_cellDataFooterStringStream.str("");
+             */
+        }
+        chrono.stop();
         std::cout << "      done in " << chrono.diff() << " s." << std::endl;
     }
 }
 
 
+// ===================
+// Get methods
+// ===================
+
+template<typename MeshType>
+MapEpetraType ExporterVTK<MeshType>::mapType() const
+{
+    return Repeated;
+}
+
+
+// ===================
+// Private methods
+// ===================
+
+template <typename Mesh>
+UInt ExporterVTK<Mesh>::whichCellType( const feSpacePtr_Type & _feSpacePtr )
+{
+    ASSERT( _feSpacePtr.get(), "\nA pointer to a valid FE object is required!");
+
+    UInt vtkCellType;
+
+    switch ( _feSpacePtr->fe().refFE().type() )
+    {
+        case FE_P1_2D:
+            // case FE_P1bubble_2D:
+            vtkCellType = VTK_TRIANGLE;
+            break;
+        case FE_P2_2D:
+            vtkCellType = VTK_QUADRATIC_TRIANGLE;
+            break;
+        case FE_P1_3D:
+            vtkCellType = VTK_TETRA;
+            break;
+        case FE_P2_3D:
+        case FE_P2tilde_3D:
+            vtkCellType = VTK_QUADRATIC_TETRA; // maybe to be modified (P2 on linear tetra...) see also the geomap...
+            break;
+        case FE_Q1_2D:
+            vtkCellType = VTK_QUAD;
+            break;
+        case FE_Q2_2D:
+            vtkCellType = VTK_QUADRATIC_QUAD;
+            break;
+        case FE_Q0_3D:
+        case FE_Q1_3D:
+            vtkCellType = VTK_HEXAHEDRON;
+            break;
+        case FE_Q2_3D:
+            vtkCellType = VTK_QUADRATIC_HEXAHEDRON;
+            break;
+        default:
+            std::cout << "WARNING: the element is not yet implemented in vtk_wrtrs.h\n";
+    }
+
+    return vtkCellType;
+}
+
+
 template <typename Mesh>
 void
-ExporterVTK<Mesh>::composeDataArrays(const ExporterData::Where& where,
+ExporterVTK<Mesh>::composeDataArrayStream(const exporterData_Type& dvar,
+                                          const std::map<UInt,UInt>& localToGlobalPointsMap,
+                                          std::stringstream& dataArraysStringStream)
+{
+    dataArraysStringStream.setf(std::ios_base::fixed);
+    dataArraysStringStream.precision(5);
+    dataArraysStringStream.width(12);
+
+    UInt start   = dvar.start();
+    UInt numDOF  = dvar.numDOF();
+    UInt numPoints( localToGlobalPointsMap.size() );
+
+    switch ( dvar.fieldType() )
+    {
+        case exporterData_Type::ScalarField:
+
+            dataArraysStringStream << "\t\t\t\t<DataArray type=\"Float32\" Name=\""
+            << dvar.variableName() << "\" NumberOfComponents=\"1\" format=\"ascii\">\n";
+
+            for (UInt i=0; i<numPoints; ++i) {
+                Int id = localToGlobalPointsMap.find(i)->second;
+                dataArraysStringStream << dvar( start + id ) << " ";
+            }
+            break;
+        case exporterData_Type::VectorField:
+
+            dataArraysStringStream << "\t\t\t\t<DataArray type=\"Float32\" Name=\""
+            << dvar.variableName() << "\" NumberOfComponents=\""
+            << nDimensions << "\" format=\"ascii\">\n";
+
+            for (UInt i=0; i<numPoints; ++i) {
+                for (UInt icoor=0; icoor< dvar.typeDim(); ++icoor) {
+                    Int id = localToGlobalPointsMap.find(i)->second;
+                    dataArraysStringStream << dvar( start + id + icoor * numDOF ) << " ";
+                }
+            }
+            break;
+            /*case typename exporterData_Type::TensorField:
+
+                    dataArraysStringStream << "\t\t\t\t<DataArray type=\"Float32\" Name=\""
+                            << dvar.variableName() << "\" NumberOfComponents=\""
+                            << nDimensions*nDimensions << "\" format=\"ascii\">\n";
+
+                    for (UInt i=0; i<dvar.size(); ++i){
+                        for (UInt icoor=0; icoor< nDimensions;++icoor){
+                            for (UInt jcoor=0; jcoor< nDimensions;++jcoor){
+                                dataArraysStringStream << it->second( i * nDimensions * nDimensions + icoor * nDimensions + jcoor ) << " ";
+                            }
+                        }
+                    }
+                    break;*/
+    }
+    dataArraysStringStream << "\n\t\t\t\t</DataArray>\n";
+    // return dataArraysStringStream;
+}
+
+
+/*
+    preliminary attempt at managing simultaneously all data associated to Nodes
+    as opposed to data associated to Cells.
+
+    Untested for now.
+ */
+template <typename Mesh>
+void
+ExporterVTK<Mesh>::composeDataArrayStream(const typename exporterData_Type::WhereEnum& where,
                                      std::stringstream& dataArraysStringStream)
 {
-    Debug(8000) << "\n[ExporterVTK::composeDataArrays] where = " << where << "\n";
-    // Debug(8000) << "\n[ExporterVTK::composeDataArrays] dataArraysStringStream = " << dataArraysStringStream;
-    // std::stringstream dataArraysStringStream;
+
 
     typename super::iterator_Type it;
     std::pair<typename super::iterator_Type, typename super::iterator_Type> rangeFound;
@@ -321,7 +534,7 @@ ExporterVTK<Mesh>::composeDataArrays(const ExporterData::Where& where,
 
     if ( rangeFound.first != rangeFound.second )
     {
-        Debug(8000) << "\n[ExporterVTK::composeDataArrays] found data\n";
+        Debug(8000) << "\n[ExporterVTK::composeDataArrayStream] found data\n";
 
         dataArraysStringStream.setf(std::ios_base::fixed);
         dataArraysStringStream.precision(5);
@@ -331,28 +544,28 @@ ExporterVTK<Mesh>::composeDataArrays(const ExporterData::Where& where,
         {
             switch ( it->second.type() )
             {
-            case ExporterData::ScalarField:
+                case exporterData_Type::ScalarField:
 
-                dataArraysStringStream << "\t\t\t\t<DataArray type=\"Float32\" Name=\""
-                        << it->second.variableName() << "\" NumberOfComponents=\"1\" format=\"ascii\">\n";
+                    dataArraysStringStream << "\t\t\t\t<DataArray type=\"Float32\" Name=\""
+                    << it->second.variableName() << "\" NumberOfComponents=\"1\" format=\"ascii\">\n";
 
-                for (UInt i=0; i<it->second.size(); ++i) {
-                    dataArraysStringStream << it->second( i ) << " ";
-                }
-                break;
-            case ExporterData::VectorField:
-
-                dataArraysStringStream << "\t\t\t\t<DataArray type=\"Float32\" Name=\""
-                        << it->second.variableName() << "\" NumberOfComponents=\""
-                        << nDimensions << "\" format=\"ascii\">\n";
-
-                for (UInt i=0; i<it->second.size(); ++i) {
-                    for (UInt icoor=0; icoor< nDimensions; ++icoor) {
-                        dataArraysStringStream << it->second( i + icoor * it->second.size() ) << " ";
+                    for (UInt i=1; i<=it->second.size(); ++i) {
+                        dataArraysStringStream << it->second( i ) << " ";
                     }
-                }
-                break;
-                /*case ExporterData::TensorField:
+                    break;
+                case exporterData_Type::VectorField:
+
+                    dataArraysStringStream << "\t\t\t\t<DataArray type=\"Float32\" Name=\""
+                    << it->second.variableName() << "\" NumberOfComponents=\""
+                    << nDimensions << "\" format=\"ascii\">\n";
+
+                    for (UInt i=1; i<=it->second.size(); ++i) {
+                        for (UInt icoor=0; icoor< nDimensions; ++icoor) {
+                            dataArraysStringStream << it->second( i + icoor * it->second.size() ) << " ";
+                        }
+                    }
+                    break;
+                    /*case typename exporterData_Type::TensorField:
 
                     dataArraysStringStream << "\t\t\t\t<DataArray type=\"Float32\" Name=\""
                             << it->second.variableName() << "\" NumberOfComponents=\""
@@ -371,138 +584,285 @@ ExporterVTK<Mesh>::composeDataArrays(const ExporterData::Where& where,
         }
         // return dataArraysStringStream;
     }
+                                     }
+
+
+template <typename Mesh>
+void ExporterVTK<Mesh>::composePVTUStream(const exporterData_Type& dvar,
+                                          std::stringstream& pVTUStringStream)
+{
+    // ASSERT( vtkFile, "Error: Output file cannot be open" );
+
+    //header part of the file
+    pVTUStringStream << "<?xml version=\"1.0\"?>\n";
+    pVTUStringStream << "<VTKFile type=\"PUnstructuredGrid\" version=\"0.1\" byte_order=\"LittleEndian\">\n";
+    pVTUStringStream << "\t<PUnstructuredGrid GhostLevel=\"0\">\n";
+
+    pVTUStringStream << "\t\t<PPoints>\n";
+    pVTUStringStream << "\t\t\t<PDataArray type=\"Float32\" NumberOfComponents=\"" << nDimensions
+                    << "\" format=\"ascii\"/>\n";
+    pVTUStringStream << "\t\t</PPoints>\n";
+
+    // connectivity
+    // cells_size = nldof*(nV+1);
+    pVTUStringStream << "\t\t<PCells>\n";
+    pVTUStringStream << "\t\t\t<PDataArray type=\"Int32\" Name=\"connectivity\" format=\"ascii\"/>\n";
+
+    pVTUStringStream << "\t\t\t<PDataArray type=\"Int32\" Name=\"offsets\" format=\"ascii\"/>\n";
+
+    pVTUStringStream << "\t\t\t<PDataArray type=\"Int32\" Name=\"types\" format=\"ascii\"/>\n";
+
+    pVTUStringStream << "\t\t</PCells>\n";
+
+    std::string whereString;
+    switch ( dvar.where() )
+    {
+        case exporterData_Type::Node:
+            whereString = "PPointData";
+            break;
+        case exporterData_Type::Cell:
+            whereString = "PCellData";
+            break;
+    }
+    pVTUStringStream << "\t\t<" << whereString << " ";
+
+    pVTUStringStream << ">\n";
+
+    switch ( dvar.fieldType() )
+    {
+        case exporterData_Type::ScalarField:
+
+            pVTUStringStream << "\t\t\t<PDataArray type=\"Float32\" Name=\""
+            << dvar.variableName() << "\" NumberOfComponents=\"1\" format=\"ascii\">\n";
+
+            break;
+        case exporterData_Type::VectorField:
+
+            pVTUStringStream << "\t\t\t<PDataArray type=\"Float32\" Name=\""
+            << dvar.variableName() << "\" NumberOfComponents=\""
+            << nDimensions << "\" format=\"ascii\">\n";
+
+            break;
+    }
+    pVTUStringStream << "\t\t\t</PDataArray>\n";
+
+    switch ( dvar.where() )
+    {
+        case exporterData_Type::Node:
+            whereString = "PPointData";
+            break;
+        case exporterData_Type::Cell:
+            whereString = "PCellData";
+            break;
+    }
+    pVTUStringStream << "\t\t</" << whereString << ">\n";
+
+    for( int iProc = 0; iProc < dvar.feSpacePtr()->map().comm().NumProc(); ++iProc )
+    {
+        std::stringstream fileName( ( this->M_postDir+this->M_prefix+"_" + dvar.variableName()+this->M_postfix+"."+iProc+".vtu").c_str() );
+
+        //footer part of the file
+        pVTUStringStream << "\t\t<Piece Source=\"" << fileName.str() << "\"/>\n";
+    }
+
+    pVTUStringStream << "\t</PUnstructuredGrid>\n";
+    pVTUStringStream << "</VTKFile>\n";
+
 }
 
 
 template <typename Mesh>
-void ExporterVTK<Mesh>::composeHeader()
+void ExporterVTK<Mesh>::createMaps( const feSpacePtr_Type & _feSpacePtr,
+                                    std::map<UInt, UInt>& globalToLocalPointsMap,
+                                    std::map<UInt, UInt>& localToGlobalPointsMap,
+                                    std::vector<Vector>& coordinatesOfPoints )
 {
-    ASSERT( M_meshPtr.get(), "\nA pointer to a valid mesh object is required!");
-    ASSERT( M_feSpacePtr.get(), "\nA pointer to a valid FESpace object is required!");
+    ASSERT( this->M_mesh.get(), "\nA pointer to a valid mesh object is required!");
+    ASSERT( _feSpacePtr.get(), "\nA pointer to a valid FESpace object is required!");
 
-    Debug(8000) << "\n[ExporterVTK::composeHeader]\n";
+    ID numVertices = this->M_mesh->numVertices();
+    ID numElements = this->M_mesh->numElements();
 
-    ID numVertices = M_meshPtr->numVertices();
-    ID numElements = M_meshPtr->numElements();
-    UInt numLocalDof = M_feSpacePtr->dof().numLocalDof();
+    // careful: the vertex map in the mesh is repeated. to know how many non vertex dofs I have
+    // in the partitioned mesh I need to look at repeated maps
+    UInt numPoints = _feSpacePtr->map().map(Repeated)->NumMyElements() / _feSpacePtr->fieldDim();
 
-    UInt numPoints = M_feSpacePtr->dof().numTotalDof();
-    UInt numNonVertexPoints = M_feSpacePtr->dof().numTotalDof() - numVertices;
-
-    std::vector<Vector> coordinatesOfNonVertexPoints( nDimensions, ZeroVector(numPoints) );
+    coordinatesOfPoints.resize( nDimensions, ZeroVector(numPoints) );
 
     Real x, y, z;
 
-    // ASSERT( vtkFile, "Error: Output file cannot be open" );
+    // The global ID of the considered DOF
+    UInt globalPointId(0);
+    // The local ID of the considered DOF
+    UInt positionInPartitionedMesh(0);
+    // Helper iterator
+    std::pair< std::map<UInt,UInt>::iterator, bool > returnType;
 
-    //header part of the file
-    M_headerStringStream << "<?xml version=\"1.0\"?>\n";
-    M_headerStringStream << "<VTKFile type=\"UnstructuredGrid\" version=\"0.1\" byte_order=\"LittleEndian\">\n";
-    M_headerStringStream << "\t<UnstructuredGrid>\n";
-
-    M_headerStringStream << "\t\t<Piece NumberOfPoints=\"" << numPoints << "\""
-            << " NumberOfCells=\"" << numElements << "\">\n";
-
-
-    M_headerStringStream << "\t\t\t<Points>\n";
-    M_headerStringStream << "\t\t\t\t<DataArray type=\"Float32\" NumberOfComponents=\"" << nDimensions
-            << "\" format=\"ascii\">\n";
     // Vertex based Dof: the coordinates are available from the Point List
     for (ID iVertex=1; iVertex <= numVertices; ++iVertex)
     {
-        for (ID jCoor=1; jCoor <= nDimensions; ++jCoor)
+        globalPointId = this->M_mesh->point(iVertex).id();
+        localToGlobalPointsMap.insert( std::pair<UInt,UInt>( positionInPartitionedMesh, globalPointId ) );
+        globalToLocalPointsMap.insert( std::pair<UInt,UInt>( globalPointId, positionInPartitionedMesh ) );
+
+        for (ID jCoor=0; jCoor < nDimensions; ++jCoor)
         {
-            M_headerStringStream << M_meshPtr->point(iVertex).coordinate(jCoor) << " ";
+            coordinatesOfPoints[jCoor][positionInPartitionedMesh] =
+                            this->M_mesh->point(iVertex).coordinate(jCoor+1);
         }
+        ++positionInPartitionedMesh;
     }
+    ASSERT( positionInPartitionedMesh == numVertices, "didn't store all vertices in the maps");
+    ASSERT( localToGlobalPointsMap.size() == globalToLocalPointsMap.size(),
+            "problem in storing the local to global and global to local maps" );
 
     // Now I store the coordinates of the supplementary nodes in a temporary vector
     for ( UInt iElement = 1; iElement <= numElements; ++iElement )
     {
-        M_feSpacePtr->fe().updateJac( M_meshPtr->element( iElement ) );
-        for ( UInt iPoint = M_feSpacePtr->dof().numLocalVertices()+1; iPoint <= M_feSpacePtr->dof().numLocalDof(); ++iPoint )
+        _feSpacePtr->fe().updateJac( this->M_mesh->element( iElement ) );
+        for ( UInt iPoint = _feSpacePtr->dof().numLocalVertices(); iPoint < _feSpacePtr->dof().numLocalDof(); ++iPoint )
         {
-            M_feSpacePtr->fe().coorMap( x, y, z,
-                                        M_feSpacePtr->fe().refFE().xi( iPoint ), M_feSpacePtr->fe().refFE().eta( iPoint ), M_feSpacePtr->fe().refFE().zeta( iPoint ) );
-            UInt index = M_feSpacePtr->dof().localToGlobal( iElement, iPoint ) - numVertices;
-            coordinatesOfNonVertexPoints[0][index] = x;
-            coordinatesOfNonVertexPoints[1][index] = y;
-            coordinatesOfNonVertexPoints[2][index] = z;
+            _feSpacePtr->fe().coorMap( x, y, z,
+                                       _feSpacePtr->fe().refFE().xi( iPoint ),
+                                       _feSpacePtr->fe().refFE().eta( iPoint ),
+                                       _feSpacePtr->fe().refFE().zeta( iPoint ) );
+
+            globalPointId = _feSpacePtr->dof().localToGlobal( iElement, iPoint+1 );
+
+            returnType = globalToLocalPointsMap.insert( std::pair<UInt,UInt>( globalPointId,
+                                                                             positionInPartitionedMesh ) );
+
+            // by looping over mesh elements I get repetition in the list of points
+            // update the maps only when finding a new point
+            if( returnType.second )
+            {
+                localToGlobalPointsMap.insert( std::pair<UInt,UInt>( positionInPartitionedMesh, globalPointId ) );
+                coordinatesOfPoints[0][positionInPartitionedMesh] = x;
+                coordinatesOfPoints[1][positionInPartitionedMesh] = y;
+                coordinatesOfPoints[2][positionInPartitionedMesh] = z;
+                ++positionInPartitionedMesh;
+            }
+
         }
     }
-    for ( UInt iPoint = 0; iPoint < numNonVertexPoints; ++iPoint )
+    ASSERT( positionInPartitionedMesh == numPoints, "didn't store all points in the maps" );
+    ASSERT( localToGlobalPointsMap.size() == globalToLocalPointsMap.size(),
+            "problem in storing the local to global and global to local maps" );
+    ASSERT( localToGlobalPointsMap.size() == numPoints,
+            "problem in storing the local to global and global to local maps" );
+
+}
+
+
+template <typename Mesh>
+void ExporterVTK<Mesh>::composeVTUGeoStream( const feSpacePtr_Type & _feSpacePtr,
+                                             const std::map<UInt, UInt>& globalToLocalPointsMap,
+                                             const std::vector<Vector>& coordinatesOfPoints,
+                                             std::stringstream& vtuGeoStringStream )
+{
+    ASSERT( this->M_mesh.get(), "\nA pointer to a valid mesh object is required!");
+    ASSERT( _feSpacePtr.get(), "\nA pointer to a valid FESpace object is required!");
+
+    Debug(8000) << "\n[ExporterVTK::composeVTUHeaderStream]\n";
+
+    UInt numPoints = globalToLocalPointsMap.size();
+    UInt numElements = this->M_mesh->numElements();
+    UInt numLocalDof = _feSpacePtr->dof().numLocalDof();
+
+    vtuGeoStringStream << "\t\t\t<Points>\n";
+    vtuGeoStringStream << "\t\t\t\t<DataArray type=\"Float32\" NumberOfComponents=\"" << nDimensions
+                    << "\" format=\"ascii\">\n";
+
+    for ( UInt iPoint = 0; iPoint < numPoints; ++iPoint )
     {
         for ( UInt iCoor = 0; iCoor < nDimensions; ++iCoor )
-            M_headerStringStream << coordinatesOfNonVertexPoints[iCoor][ iPoint ] << " ";
+            vtuGeoStringStream << coordinatesOfPoints[iCoor][ iPoint ] << " ";
     }
-    M_headerStringStream << "\n\t\t\t\t</DataArray>\n";
-    M_headerStringStream << "\t\t\t</Points>\n";
+    vtuGeoStringStream << "\n\t\t\t\t</DataArray>\n";
+    vtuGeoStringStream << "\t\t\t</Points>\n";
 
     // connectivity
     // cells_size = nldof*(nV+1);
-    M_headerStringStream << "\t\t\t<Cells>\n";
-    M_headerStringStream << "\t\t\t\t<DataArray type=\"Int32\" Name=\"connectivity\" format=\"ascii\">\n";
+    vtuGeoStringStream << "\t\t\t<Cells>\n";
+    vtuGeoStringStream << "\t\t\t\t<DataArray type=\"Int32\" Name=\"connectivity\" format=\"ascii\">\n";
 
     for (UInt iElement=1; iElement <= numElements; ++iElement)
     {
         for ( UInt jPoint=1; jPoint <= numLocalDof; ++jPoint)
         {
             // vtkFile.width(8);
-            M_headerStringStream << M_feSpacePtr->dof().localToGlobal( iElement, jPoint ) << " ";
+            // UInt globalElementId( this->M_mesh->element(iElement).id() );
+            UInt globalPointId( _feSpacePtr->dof().localToGlobal( iElement, jPoint ) );
+            ASSERT( globalToLocalPointsMap.find( globalPointId )!=globalToLocalPointsMap.end(),
+                    "didn't find a local ID for global point" );
+            UInt localId( globalToLocalPointsMap.find( globalPointId )->second );
+            vtuGeoStringStream << localId << " ";
         }
     }
-    M_headerStringStream << "\n\t\t\t\t</DataArray>\n";
+    vtuGeoStringStream << "\n\t\t\t\t</DataArray>\n";
 
-    M_headerStringStream << "\t\t\t\t<DataArray type=\"Int32\" Name=\"offsets\" format=\"ascii\">\n";
+    vtuGeoStringStream << "\t\t\t\t<DataArray type=\"Int32\" Name=\"offsets\" format=\"ascii\">\n";
 
     for (UInt iElement=1; iElement <= numElements; ++iElement)
     {
-        M_headerStringStream << iElement * numLocalDof << " ";
+        vtuGeoStringStream << iElement * numLocalDof << " ";
     }
 
-    M_headerStringStream << "\n\t\t\t\t</DataArray>\n";
+    vtuGeoStringStream << "\n\t\t\t\t</DataArray>\n";
 
-    M_headerStringStream << "\t\t\t\t<DataArray type=\"Int32\" Name=\"types\" format=\"ascii\">\n";
+    vtuGeoStringStream << "\t\t\t\t<DataArray type=\"Int32\" Name=\"types\" format=\"ascii\">\n";
 
     // definition of cells types
-    UInt vtkCellType = whichCellType();
+    UInt vtkCellType = whichCellType(_feSpacePtr);
     for (UInt iElement=1; iElement <= numElements; ++iElement)
     {
-        M_headerStringStream << vtkCellType << " ";
+        vtuGeoStringStream << vtkCellType << " ";
     }
 
-    M_headerStringStream << "\n\t\t\t\t</DataArray>\n";
-    M_headerStringStream << "\t\t\t</Cells>\n";
+    vtuGeoStringStream << "\n\t\t\t\t</DataArray>\n";
+    vtuGeoStringStream << "\t\t\t</Cells>\n";
 
-//    vtkFile << "\t\t</Piece>\n";
-//    vtkFile << "\t</UnstructuredGrid>\n";
-//    vtkFile << "</VTKFile>\n";
-
-//    vtkFile.close();
 }
 
 
 template <typename Mesh>
-void ExporterVTK<Mesh>::composeFooter()
+void ExporterVTK<Mesh>::composeVTUHeaderStream( UInt numPoints,
+                                                std::stringstream& vtuHeaderStringStream )
+{
+
+    //header part of the file
+    vtuHeaderStringStream << "<?xml version=\"1.0\"?>\n";
+    vtuHeaderStringStream << "<VTKFile type=\"UnstructuredGrid\" version=\"0.1\" byte_order=\"LittleEndian\">\n";
+    vtuHeaderStringStream << "\t<UnstructuredGrid>\n";
+    vtuHeaderStringStream << "\t\t<Piece NumberOfPoints=\"" << numPoints << "\""
+                          << " NumberOfCells=\"" << this->M_mesh->numElements() << "\">\n";
+
+
+}
+
+
+template <typename Mesh>
+void ExporterVTK<Mesh>::composeVTUFooterStream( std::stringstream& vtuFooterStringStream )
 {
     Debug(8000) << "\n[ExporterVTK::composeFooter]\n";
 
     //footer part of the file
-    M_footerStringStream << "\t\t</Piece>\n";
-    M_footerStringStream << "\t</UnstructuredGrid>\n";
-    M_footerStringStream << "</VTKFile>\n";
+    vtuFooterStringStream << "\t\t</Piece>\n";
+    vtuFooterStringStream << "\t</UnstructuredGrid>\n";
+    vtuFooterStringStream << "</VTKFile>\n";
+
 
 }
 
 
 template <typename Mesh>
 void
-ExporterVTK<Mesh>::composeTypeDataHeader(const ExporterData::Where& where,
+ExporterVTK<Mesh>::composeTypeDataHeaderStream(const typename exporterData_Type::WhereEnum& where,
                                          std::stringstream& dataHeaderStringStream)
-{
-    Debug(8000) << "\n[ExporterVTK::composeTypeDataHeader] where = " << where << "\n";
+                                         {
+    Debug(8000) << "\n[ExporterVTK::composeTypeDataHeaderStream] where = " << where << "\n";
     // std::stringstream M_dataHeaderStringStream;
-
+    /*
     typename super::iterator_Type it;
     std::pair<typename super::iterator_Type, typename super::iterator_Type> rangeFound;
 
@@ -512,50 +872,50 @@ ExporterVTK<Mesh>::composeTypeDataHeader(const ExporterData::Where& where,
 
     if ( rangeFound.first != rangeFound.second )
     {
-        Debug(8000) << "\n[ExporterVTK::composeTypeDataHeader] found data\n";
-
-        std::string whereString;
-        switch ( where )
-        {
-        case ExporterData::Node:
+        Debug(8000) << "\n[ExporterVTK::composeTypeDataHeaderStream] found data\n";
+     */
+    std::string whereString;
+    switch ( where )
+    {
+        case exporterData_Type::Node:
             whereString = "PointData";
             break;
-        case ExporterData::Cell:
+        case exporterData_Type::Cell:
             whereString = "CellData";
             break;
-        }
-        dataHeaderStringStream << "\t\t\t<" << whereString << " ";
-        /*
+    }
+    dataHeaderStringStream << "\t\t\t<" << whereString << " ";
+    /*
                 for (it = rangeFound.first; it != rangeFound.second; ++it)
                 {
                     switch( it->second.type() )
                     {
-                    case ExporterData::ScalarField:
+                    case typename exporterData_Type::ScalarField:
                         dataHeaderStringStream << "Scalars=\"" << it->second.variableName() << "\" ";
                         break;
-                    case ExporterData::VectorField:
+                    case typename exporterData_Type::VectorField:
                         dataHeaderStringStream << "Vectors=\"" << it->second.variableName() << "\" ";
                         break;
-                    case ExporterData::TensorField:
+                    case typename exporterData_Type::TensorField:
                         M_pointDataHeaderStringStream << "Tensors=\"" << it->second.variableName() << "\" ";
                         break;
                     }
                 }
-        */
-        dataHeaderStringStream << ">\n";
-    }
+     */
+    dataHeaderStringStream << ">\n";
+    // }
 
     // return M_dataHeaderStringStream;
-}
+                                         }
 
 
 template <typename Mesh>
 void
-ExporterVTK<Mesh>::composeTypeDataFooter(const ExporterData::Where& where,
+ExporterVTK<Mesh>::composeTypeDataFooterStream(const typename exporterData_Type::WhereEnum& where,
                                          std::stringstream& dataFooterStringStream)
-{
+                                         {
     // std::stringstream dataFooterStringStream;
-
+    /*
     typename super::iterator_Type it;
     std::pair<typename super::iterator_Type, typename super::iterator_Type> rangeFound;
 
@@ -565,23 +925,23 @@ ExporterVTK<Mesh>::composeTypeDataFooter(const ExporterData::Where& where,
 
     if ( rangeFound.first != rangeFound.second )
     {
-        Debug(8000) << "\n[ExporterVTK::composeTypeDataFooter] where = " << where << "\n";
-
-        std::string whereString;
-        switch ( where )
-        {
-        case ExporterData::Node:
+        Debug(8000) << "\n[ExporterVTK::composeTypeDataFooterStream] where = " << where << "\n";
+     */
+    std::string whereString;
+    switch ( where )
+    {
+        case exporterData_Type::Node:
             whereString = "PointData";
             break;
-        case ExporterData::Cell:
+        case exporterData_Type::Cell:
             whereString = "CellData";
             break;
-        }
-        dataFooterStringStream << "\t\t\t</" << whereString << ">\n";
-
     }
+    dataFooterStringStream << "\t\t\t</" << whereString << ">\n";
+
+    //    }
     // return dataFooterStringStream;
 }
 
 }
-#endif
+#endif // define EXPORTERVTK_H
