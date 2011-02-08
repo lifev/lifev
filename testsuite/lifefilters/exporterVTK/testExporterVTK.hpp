@@ -39,7 +39,6 @@
 #include <life/lifecore/LifeChrono.hpp>
 #include <life/lifecore/LifeV.hpp>
 #include <life/lifefem/TimeData.hpp>
-#include <life/lifefem/FESpace.hpp>
 #include <life/lifefilters/ExporterVTK.hpp>
 #include <life/lifemesh/MeshData.hpp>
 #include <life/lifemesh/MeshPartitioner.hpp>
@@ -64,8 +63,9 @@
 
 // Object type definitions
 typedef LifeV::RegionMesh3D<LifeV::LinearTetra>       mesh_Type;
-//typedef LifeV::VectorEpetra                           vector_Type;
-typedef LifeV::RossEthierSteinmanUnsteadyInc          Problem;
+typedef LifeV::RossEthierSteinmanUnsteadyInc          problem_Type;
+typedef LifeV::FESpace< mesh_Type, LifeV::MapEpetra > feSpace_Type;
+typedef boost::shared_ptr<feSpace_Type>               feSpacePtr_Type;
 
 template<typename ProblemType>
 bool testExporterVTK(/*const*/ boost::shared_ptr<Epetra_Comm> & comm, GetPot & commandLine)
@@ -85,10 +85,12 @@ bool testExporterVTK(/*const*/ boost::shared_ptr<Epetra_Comm> & comm, GetPot & c
     // |               Loading the data                |
     // +-----------------------------------------------+
     displayer.leaderPrint( "[Loading the data]\n" );
-    const std::string problemName = commandLine.follow("RossEthierSteinmanUnsteadyInc", 2, "-p", "--problem");
+    const std::string problemName = commandLine.follow("", 2, "-p", "--problem");
     const std::string defaultDataFileName("data"+problemName);
     const std::string dataFileName = commandLine.follow(defaultDataFileName.c_str(), 2, "-f","--file");
     GetPot dataFile(dataFileName);
+
+    problem_Type::setParamsFromGetPot(dataFile);
 
     // +-----------------------------------------------+
     // |              Building the mesh                |
@@ -96,7 +98,7 @@ bool testExporterVTK(/*const*/ boost::shared_ptr<Epetra_Comm> & comm, GetPot & c
     displayer.leaderPrint( "[Building the mesh]\n" );
 
     boost::shared_ptr< mesh_Type > fullMeshPtr(new mesh_Type);
-    UInt nEl(dataFile("space_discretization/dimension", 2));
+    UInt nEl(dataFile("space_discretization/dimension", 1));
     regularMesh3D(*fullMeshPtr, 0, nEl, nEl, nEl);
     //  The following is when reading from file
     /*
@@ -108,6 +110,7 @@ bool testExporterVTK(/*const*/ boost::shared_ptr<Epetra_Comm> & comm, GetPot & c
     // Split the mesh between processors
     MeshPartitioner< mesh_Type > meshPart( fullMeshPtr, comm );
     // Release the original mesh from the MeshPartitioner object and delete the RegionMesh3D object
+    meshPart.releaseUnpartitionedMesh();
     fullMeshPtr.reset();
 
     // +-----------------------------------------------+
@@ -120,7 +123,7 @@ bool testExporterVTK(/*const*/ boost::shared_ptr<Epetra_Comm> & comm, GetPot & c
 
     displayer.leaderPrint( "\tBuilding the velocity FE space... " );
 
-    FESpace< mesh_Type, MapEpetra > velFESpace(meshPart, velFE, nDimensions, comm);
+    feSpacePtr_Type velFESpacePtr( new feSpace_Type(meshPart, velFE, nDimensions, comm) );
 
     displayer.leaderPrint( "\tok." );
 
@@ -129,13 +132,13 @@ bool testExporterVTK(/*const*/ boost::shared_ptr<Epetra_Comm> & comm, GetPot & c
 
     displayer.leaderPrint( "\tBuilding the pressure FE space... " );
 
-    FESpace< mesh_Type, MapEpetra > pressFESpace(meshPart, pressFE, nDimensions, comm);
+    feSpacePtr_Type pressFESpacePtr( new feSpace_Type(meshPart, pressFE, nDimensions, comm) );
 
     displayer.leaderPrint( "\tok." );
 
     // Total degrees of freedom (elements of matrix)
-    UInt velTotalDof   = velFESpace.map().map(Unique)->NumGlobalElements();
-    UInt pressTotalDof = pressFESpace.map().map(Unique)->NumGlobalElements();
+    UInt velTotalDof   = velFESpacePtr->map().map(Unique)->NumGlobalElements();
+    UInt pressTotalDof = pressFESpacePtr->map().map(Unique)->NumGlobalElements();
 
     displayer.leaderPrint( "\tTotal Dof for the velocity: ", velTotalDof );
     displayer.leaderPrint( "\tTotal Dof for the pressure: ", pressTotalDof );
@@ -144,20 +147,20 @@ bool testExporterVTK(/*const*/ boost::shared_ptr<Epetra_Comm> & comm, GetPot & c
     // |            Creating the exporter              |
     // +-----------------------------------------------+
     Exporter<mesh_Type >::vectorPtr_Type velInterpolantPtr(
-        new Exporter<mesh_Type >::vector_Type   ( velFESpace.map() ) );
+        new Exporter<mesh_Type >::vector_Type   ( velFESpacePtr->map(), Repeated ) );
     Exporter<mesh_Type >::vectorPtr_Type pressInterpolantPtr(
-        new Exporter<mesh_Type >::vector_Type   ( pressFESpace.map() ) );
+        new Exporter<mesh_Type >::vector_Type   ( pressFESpacePtr->map(), Repeated ) );
 
     boost::shared_ptr< ExporterVTK<mesh_Type > > exporter;
     exporter.reset( new ExporterVTK<mesh_Type > ( dataFile, "testExporterVTK" ) );
     exporter->setPostDir( "./" );
     exporter->setMeshProcId( meshPart.meshPartition(), comm->MyPID() );
 
-    exporter->addVariable( ExporterData::VectorField, "velocity", velInterpolantPtr,
-                           UInt(0), velFESpace.dof().numTotalDof() );
+    exporter->addVariable( ExporterData<mesh_Type>::VectorField, "velocity",
+                           velFESpacePtr, velInterpolantPtr, UInt(0) );
 
-    exporter->addVariable( ExporterData::ScalarField, "pressure", pressInterpolantPtr,
-                           UInt(0), UInt(pressFESpace.dof().numTotalDof()) );
+    exporter->addVariable( ExporterData<mesh_Type>::ScalarField, "pressure",
+                           pressFESpacePtr, pressInterpolantPtr, UInt(0) );
     exporter->postProcess( 0 );
 
     initChrono.stop();
@@ -177,8 +180,8 @@ bool testExporterVTK(/*const*/ boost::shared_ptr<Epetra_Comm> & comm, GetPot & c
         displayer.leaderPrint( "\t[t = ", timeData.time(), " s.]\n" );
 
         // Computation of the interpolation
-        velFESpace.interpolate( Problem::uexact, *velInterpolantPtr, timeData.time() );
-        pressFESpace.interpolate( Problem::pexact, *pressInterpolantPtr, timeData.time() );
+        velFESpacePtr->interpolate( problem_Type::uexact, *velInterpolantPtr, timeData.time() );
+        pressFESpacePtr->interpolate( problem_Type::pexact, *pressInterpolantPtr, timeData.time() );
 
         // Exporting the solution
         exporter->postProcess( timeData.time() );
@@ -191,10 +194,6 @@ bool testExporterVTK(/*const*/ boost::shared_ptr<Epetra_Comm> & comm, GetPot & c
     displayer.leaderPrint( "Total simulation time:  ", globalChrono.diff(), " s.\n" );
 
     exporter->closeFile();
-
-#ifdef HAVE_MPI
-    MPI_Finalize();
-#endif
 
     return 0;
 }

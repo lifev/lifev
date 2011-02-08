@@ -15,12 +15,15 @@ include $(top_srcdir)/testsuite/Makefile.testsuite
 
 SUFFIXES                   = .cpp .hpp .idl .c .h .f .F .o .moc
 
+EXTRA_DIST = data testsuite.at
+
+MOSTLYCLEANFILES = *.vct *.scl *.case *.geo *.vtu *.pvtu
+
 check_HEADERS              = testExporterVTK.hpp # List of all the hpp files
 
 check_PROGRAMS             = test_ExporterVTK
-test_ExporterVTK_SOURCES  = main.cpp # List of all the cpp files
 
-EXTRA_DIST = data.txt testsuite.at
+test_ExporterVTK_SOURCES  = main.cpp # List of all the cpp files
 
 link:
 	test -a data || ln -s $(srcdir)/data.txt
@@ -32,4 +35,6 @@ clean_PROGRAMS:
 	-rm $(check_PROGRAMS)
 
 clean-results:
-	-rm *.vct *.scl *.case *.geo
+	for dustfile in $(MOSTLYCLEANFILES); do \
+	!( \test -e $$dustfile ) || \rm $$dustfile; \
+	done
