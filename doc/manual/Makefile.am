@@ -58,5 +58,7 @@ EXTRA_DIST = $(lifev_dev_TEX) $(lifev_manual_TEX) $(IMAGES_SRC) ltxcompile
 
 MOSTLYCLEANFILES	= lifev-dev.log lifev-dev.glo lifev-dev.idx lifev-dev.ind lifev-dev.ilg lifev-dev.aux lifev-dev.out \
                           lifev-dev.pdf lifev-dev.toc lifev-dev.lof lifev-dev.lot lifev-dev.blg lifev-dev.bbl \
-			  lifev-dev_generalities.aux lifev-dev_conventions.aux lifev-dev_overview.aux lifev-dev_howto.aux ltxcompile.log
-
+			  lifev-dev_generalities.aux lifev-dev_conventions.aux lifev-dev_overview.aux lifev-dev_howto.aux ltxcompile.log \
+              lifev-install.aux lifev-manual.idx lifev-manual.aux lifev-manual.lot lifev-manual.ilg lifev-examples.aux \
+              lifev-manual.out lifev-manual.bbl lifev-manual.blg lifev-manual.pdf lifev-manual.glo lifev-manual.toc \
+              lifev-manual.log lifev-manual.ind

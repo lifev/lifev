@@ -33,4 +33,4 @@ IMAGES_SRC	=
 
 EXTRA_DIST = $(LifeV_SOTA_TEX) $(IMAGES_SRC) ltxcompile
 
-MOSTLYCLEANFILES = LifeV_SOTA.log LifeV_SOTA.aux
+MOSTLYCLEANFILES = LifeV_SOTA.log LifeV_SOTA.aux ltxcompile.log
