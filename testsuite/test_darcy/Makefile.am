@@ -1,9 +1,9 @@
 # -*- makefile -*-
 ###################################################################################################
 #
-#                       This file is part of the LifeV Applications                        
+#                       This file is part of the LifeV Applications
 #                Copyright (C) 2004, 2005, 2007 EPFL, Politecnico di Milano, INRIA
-#                Copyright (C) 2010 EPFL, Politecnico di Milano, Emory University      
+#                Copyright (C) 2010 EPFL, Politecnico di Milano, Emory University
 #
 #      Author(s): Alessio Fumagalli <alessio.fumagalli@mail.polimi.it>
 #           Date: 00-00-0000
@@ -20,7 +20,7 @@ check_PROGRAMS = test_darcy
 
 test_darcy_SOURCES = main.cpp darcy.cpp user_fun.cpp
 
-EXTRA_DIST = data
+EXTRA_DIST = data testsuite.at
 
 link:
 	test -a data || ln -s $(srcdir)/data

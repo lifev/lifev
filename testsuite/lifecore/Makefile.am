@@ -1,7 +1,7 @@
 # -*- makefile -*-
 ###################################################################################################
 #
-#                       This file is part of the LifeV Library                       
+#                       This file is part of the LifeV Library
 #                Copyright (C) 2004, 2005, 2007 EPFL, Politecnico di Milano, INRIA
 #                Copyright (C) 2010 EPFL, Politecnico di Milano, Emory University
 #
@@ -13,7 +13,7 @@
 
 include $(top_srcdir)/testsuite/Makefile.testsuite
 
-SUFFIXES		= .cpp .hpp .idl .c .h .f .F .o .moc 
+SUFFIXES		= .cpp .hpp .idl .c .h .f .F .o .moc
 
 check_HEADERS              = # List of all the hpp files
 
@@ -21,7 +21,7 @@ check_PROGRAMS 	    = test_getPot
 
 test_getPot_SOURCES = main_getPot.cpp
 
-EXTRA_DIST = data_getPot
+EXTRA_DIST = data_getPot testsuite.at
 
 link:
 	test -a data_getPot || ln -s $(srcdir)/data_getPot
