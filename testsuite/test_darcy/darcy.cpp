@@ -692,7 +692,7 @@ darcy::run()
     // Add the variable to the exporter
     exporter->addVariable( ExporterData< RegionMesh >::VectorField,
                            dataFile( "exporter/name_dual", "Velocity" ),
-                           u_FESpacePtr,
+                           uInterpolate_FESpacePtr,
                            dualExporter,
                            static_cast<UInt>( 0 ),
                            ExporterData< RegionMesh >::UnsteadyRegime,
