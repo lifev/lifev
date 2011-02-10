@@ -165,14 +165,19 @@ public :
     //! Compute the pressure.
     /*!
      * Includes the contribution of the external, elastic and viscoelastic pressure.
-     * @return P = beta0 * ( ( A / Area0 )^beta1 - 1 ) + Pext
+     * @return P = P_elastic + P_viscoelastic + P_external
      */
     Real pressure( const Real& A, const Real& timeStep, const UInt& iNode ) const;
 
+    //! Return the external pressure.
+    /*!
+     * @return P_external
+     */
+    const Real& externalPressure() const { return M_data->externalPressure(); }
+
     //! Compute the elastic pressure.
     /*!
-     * It includes the contribution of the external pressure.
-     * @return P = beta0 * ( ( A / Area0 )^beta1 - 1 ) + Pext
+     * @return P = beta0 * ( ( A / Area0 )^beta1 - 1 )
      */
     Real elasticPressure( const Real& A, const UInt& iNode ) const;
 
@@ -265,19 +270,37 @@ OneDimensionalPhysics::fromPToA( const Real& P, const Real& timeStep, const UInt
         UInt i(0);
 
         Real A( M_data->area0( iNode ) );
+        Real newtonUpdate(0);
         for ( ; i < maxIT ; ++i )
         {
-            if ( std::abs( pressure( A, timeStep, iNode ) - P ) < tolerance )
-                break;
-            A -= ( pressure( A, timeStep, iNode ) - P ) / dPdA( A, timeStep, iNode );
+            if ( P < tolerance )
+            {
+                if ( std::abs( pressure( A, timeStep, iNode ) - P ) < tolerance )
+                	break;
+
+            }
+            else
+            {
+                if ( std::abs( pressure( A, timeStep, iNode ) / P - 1 ) < tolerance )
+                    break;
+            }
+
+            newtonUpdate = ( pressure( A, timeStep, iNode ) - P ) / dPdA( A, timeStep, iNode );
+            if ( A - newtonUpdate <= 0 )
+                A /= 2; // Bisection
+            else
+                A -= newtonUpdate; // Newton
         }
         if ( i == maxIT )
+        {
             std::cout << "!!! Warning: conversion fromPToA below tolerance !!! " << std::endl;
+            std::cout << "Tolerance: " << tolerance << "; Residual: " << std::abs( pressure( A, timeStep, iNode ) - P ) << std::endl;
+        }
 
         return A;
     }
     else
-        return ( M_data->area0( iNode ) * OneDimensional::pow20( ( P - M_data->externalPressure() ) / M_data->beta0( iNode ) + 1, 1 / M_data->beta1( iNode ) )  );
+        return ( M_data->area0( iNode ) * OneDimensional::pow20( ( P - externalPressure() ) / M_data->beta0( iNode ) + 1, 1 / M_data->beta1( iNode ) )  );
 }
 
 // ===================================================
@@ -317,7 +340,7 @@ OneDimensionalPhysics::dAdP( const Real& P, const Real& timeStep, const UInt& iN
     }
     else
         return M_data->area0( iNode ) / ( M_data->beta0( iNode ) * M_data->beta1( iNode ) )
-                                      * OneDimensional::pow10( 1 + ( P - M_data->externalPressure() )
+                                      * OneDimensional::pow10( 1 + ( P - externalPressure() )
                                       / M_data->beta0( iNode ), 1 / M_data->beta1( iNode ) - 1 );
 }
 
@@ -346,13 +369,13 @@ OneDimensionalPhysics::celerity0( const UInt& iNode ) const
 inline Real
 OneDimensionalPhysics::pressure( const Real& A, const Real& timeStep, const UInt& iNode ) const
 {
-    return elasticPressure( A, iNode ) + viscoelasticPressure( A, timeStep, iNode );
+    return elasticPressure( A, iNode ) + viscoelasticPressure( A, timeStep, iNode ) + externalPressure();
 }
 
 inline Real
 OneDimensionalPhysics::elasticPressure( const Real& A, const UInt& iNode ) const
 {
-    return ( M_data->beta0( iNode ) * ( OneDimensional::pow05( A/M_data->area0( iNode ), M_data->beta1( iNode ) ) - 1 ) ) + M_data->externalPressure();
+    return ( M_data->beta0( iNode ) * ( OneDimensional::pow05( A/M_data->area0( iNode ), M_data->beta1( iNode ) ) - 1 ) );
 }
 
 inline Real

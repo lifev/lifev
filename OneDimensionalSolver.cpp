@@ -198,7 +198,8 @@ OneDimensionalSolver::computePressure( solution_Type& solution, const Real& time
 {
     for ( UInt iNode(0); iNode < M_physics->data()->numberOfNodes() ; ++iNode )
     {
-        ( *solution["P"] ) [iNode] = M_physics->elasticPressure( ( *solution["A"] ) [iNode], iNode );
+        ( *solution["P"] ) [iNode] = M_physics->elasticPressure( ( *solution["A"] ) [iNode], iNode )
+                                   + M_physics->externalPressure();
 
         if ( M_physics->data()->viscoelasticWall() )
         {
