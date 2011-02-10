@@ -13,7 +13,7 @@
 ###################################################################################################
 
 [Multiscale]
-modelName            = '1D ReymondStergiopulos 34 (superior mesenteric)'
+modelName            = '1D Reymond-Stergiopulos 34 (superior mesenteric)'
 modelType            = OneDimensional
 couplingFlags        = '0 1'
 
@@ -35,7 +35,7 @@ SourceType           = OneD_NonLinearSource
 
 [../PhysicalWall]
 ViscoelasticWall     = true        # Enable/Disable viscoelastic effects
-ViscoelasticAngle    = 10          # Viscoelastic wall angle (degree) 
+ViscoelasticAngle    = 5           # Viscoelastic wall angle (degree) 
 ViscoelasticPeriod   = 0.24        # Viscoelastic systolic period
 
 [../PhysicalParameters]

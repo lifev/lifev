@@ -13,7 +13,7 @@
 ###################################################################################################
 
 [Multiscale]
-modelName            = '1D ReymondStergiopulos 75 (MCA M2 inf. br. dist. sylvian bif. left)'
+modelName            = '1D Reymond-Stergiopulos 75 (MCA M2 inf. br. dist. sylvian bif. left)'
 modelType            = OneDimensional
 couplingFlags        = '0 1'
 
@@ -35,7 +35,7 @@ SourceType           = OneD_NonLinearSource
 
 [../PhysicalWall]
 ViscoelasticWall     = true        # Enable/Disable viscoelastic effects
-ViscoelasticAngle    = 10          # Viscoelastic wall angle (degree) 
+ViscoelasticAngle    = 5           # Viscoelastic wall angle (degree) 
 ViscoelasticPeriod   = 0.24        # Viscoelastic systolic period
 
 [../PhysicalParameters]
