@@ -217,6 +217,8 @@ MultiscaleModelFSI3D::updateSystem()
 void
 MultiscaleModelFSI3D::solveSystem( )
 {
+    displayModelstatus( "Solve" );
+
     UInt maxSubIterationNumber = M_data->maxSubIterationNumber();
     std::ofstream outRes; // Unuseful variable
 
@@ -402,6 +404,7 @@ MultiscaleModelFSI3D::solveLinearModel( bool& solveLinearSystem )
     updateLinearModel();
 
     //Solve the linear problem
+    displayModelstatus( "Solve linear" );
     M_FSIoperator->solveJac( *M_linearSolution, *M_linearRHS, 0. );
 
     resetPerturbation();

@@ -244,6 +244,7 @@ MultiscaleModelFluid3D::solveSystem()
 #endif
 
     //Solve the problem
+    displayModelstatus( "Solve" );
     M_fluid->iterate( *M_bc->handler() );
 
     if ( M_subiterationsMaximumNumber > 0 )
@@ -392,6 +393,7 @@ MultiscaleModelFluid3D::solveLinearModel( bool& solveLinearSystem )
         updateLinearModel();
 
     //Solve the linear problem
+    displayModelstatus( "Solve linear" );
     M_fluid->solveLinearSystem( *M_linearBC );
 
     resetPerturbation();

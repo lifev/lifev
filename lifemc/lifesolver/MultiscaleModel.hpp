@@ -265,6 +265,12 @@ public:
 
 protected:
 
+    //! Display model ID and name with a user provided tag.
+    /*!
+     * @param tag user provided tag.
+     */
+    void displayModelstatus( const std::string& tag ) const;
+
     static UInt                          M_modelsNumber;       // Total number of models
 
     UInt                                 M_ID;                 // Global ID of the model
@@ -294,6 +300,16 @@ private:
 
     //@}
 };
+
+// ===================================================
+// Protected Inline Methods
+// ===================================================
+inline void
+MultiscaleModel::displayModelstatus( const std::string& tag ) const
+{
+    if ( M_displayer->isLeader() )
+        std::cout << " MS-  " << tag << " model " << M_ID << " - " << M_modelName << std::endl;
+}
 
 } // Namespace multiscale
 } // Namespace LifeV

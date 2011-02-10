@@ -280,6 +280,7 @@ MultiscaleModel1D::solveSystem()
     Debug( 8130 ) << "MultiscaleModel1D::solveSystem() \n";
 #endif
 
+    displayModelstatus( "Solve" );
     solve( *M_bc->handler(), *M_solution );
 
 #ifdef JACOBIAN_WITH_FINITEDIFFERENCE
@@ -396,6 +397,7 @@ MultiscaleModel1D::solveLinearModel( bool& solveLinearSystem )
 
     imposePerturbation();
 
+    displayModelstatus( "Solve linear" );
     solve( *M_linearBC, *M_linearSolution, "L1D-" );
 
     resetPerturbation();
@@ -720,26 +722,24 @@ MultiscaleModel1D::solve( bc_Type& bc, solution_Type& solution, const std::strin
     copySolution( *M_solution_tn, solution );
 
     // Subiterate to respect CFL
-    UInt SubiterationNumber(1);
+    UInt subiterationNumber(1);
     Real timeStep = M_data->dataTime()->timeStep();
 
     Real CFL = M_solver->computeCFL( solution, M_data->dataTime()->timeStep() );
     if ( CFL > M_data->CFLmax() )
     {
-        SubiterationNumber = std::ceil( CFL / M_data->CFLmax() );
-        timeStep /= SubiterationNumber;
+        subiterationNumber = std::ceil( CFL / M_data->CFLmax() );
+        timeStep /= subiterationNumber;
     }
 
     if ( M_displayer->isLeader() )
-    {
-        std::cout << solverType << "  CFL                                      " << CFL*timeStep/M_data->dataTime()->timeStep() << std::endl;
-        std::cout << solverType << "  Number of subiterations                  " << SubiterationNumber << std::endl;
-    }
+        std::cout << solverType << "  Number of subiterations                  " << subiterationNumber
+                                << " ( CFL = " << CFL*timeStep/M_data->dataTime()->timeStep() << " )" << std::endl;
 
 //    if ( M_displayer->isLeader() )
 //        std::cout << solverType << "  CFL                                      " << CFL*timeStep/M_data->dataTime()->timeStep() << std::endl;
 
-    for ( UInt i(1) ; i <= SubiterationNumber ; ++i )
+    for ( UInt i(1) ; i <= subiterationNumber ; ++i )
     {
 //        if ( M_displayer->isLeader() )
 //        {
