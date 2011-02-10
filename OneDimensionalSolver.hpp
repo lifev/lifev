@@ -480,10 +480,6 @@ private:
     boost::shared_ptr< MatrixElemental > M_elementalGradientMatrix;   //!< element gradient matrix
     boost::shared_ptr< MatrixElemental > M_elementalDivergenceMatrix; //!< element divergence matrix
 
-    //! Unknowns at previous time step (see savesol() )
-    solution_Type                      M_UPreviousTime;
-    solution_Type                      M_U2PreviousTime;
-
     //! Right hand sides of the linear system i: "mass * M_Ui = M_rhsi"
     vectorPtrContainer_Type            M_rhs;
 
