@@ -29,8 +29,8 @@ ProblemFile = ./MultiscaleDatabase/Models/Multiscale/ReymondStergiopulos2009_1D_
     #initialtime                = 0.8      # [s] 2-HB start
     #endtime                    = 1.6      # [s] 2-HB end
     #initialtime                = 1.6      # [s] 2-HB start
-    endtime                    = 2.4      # [s] 2-HB end
-    #endtime                    = 0.35     # [s] Absorbing
+    #endtime                    = 2.4      # [s] 2-HB end
+    endtime                    = 0.8      # [s] Absorbing
     timestep                   = 1e-3     # [s]
 
     [../Algorithm]
