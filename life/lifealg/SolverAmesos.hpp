@@ -98,7 +98,7 @@ public:
     SolverAmesos( const commPtr_Type& comm );
 
     //! Destructor
-    ~SolverAmesos() {}
+    ~SolverAmesos() { delete M_solver; }
 
     //@}
 
