@@ -57,7 +57,7 @@ AC_MSG_CHECKING(for size_t == uint)
 AC_TRY_RUN(AC_LANG_PROGRAM([
 #include <cstdlib>
 ],[
-return !(sizeof(size_t)==sizeof(uint));
+return !(sizeof(size_t)==sizeof(unsigned int));
 ]),
 [
    AC_MSG_RESULT(yes)
@@ -126,10 +126,6 @@ dnl AM_CONDITIONAL(HAVE_BOOST_PROGRAM_OPTIONS, test "x$boost_program_options_err
 
 dnl extra ldflags, useful for clusters (eg. cscs)
 AC_CHECK_EXTRA_LDFLAGS
-
-dnl pvm
-dnl AC_CHECK_PVM
-dnl AM_CONDITIONAL(HAVE_PVM, test "x$pvm_libs" != "x" )
 
 CPPFLAGS="-I\${top_srcdir} ${CPPFLAGS}"
 
