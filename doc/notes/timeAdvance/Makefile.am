@@ -45,7 +45,7 @@ IMAGES_SRC	= ./figures/tempo.eps ./figures/P11_order1.eps ./figures/P11_order2.e
 ./figures/P21_order2.eps ./figures/P21_order3.eps
 
 
-EXTRA_DIST = $(timeAdvance.tex) ltxcompile
+EXTRA_DIST = $(timeAdvance_TEX) ltxcompile
 
-MOSTLYCLEANFILES	=  timeAdvance.dvi timeAdvance.ps timeAdvance.pdf timeAdvance.aux timeAdvance.out
-
+MOSTLYCLEANFILES	=  timeAdvance.dvi timeAdvance.ps timeAdvance.pdf timeAdvance.aux timeAdvance.out \
+                        ltxcompile.log timeAdvance.blg timeAdvance.toc timeAdvance.log timeAdvance.bbl

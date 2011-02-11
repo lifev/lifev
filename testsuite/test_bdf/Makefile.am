@@ -1,9 +1,9 @@
 # -*- makefile -*-
 ###################################################################################################
 #
-#                       This file is part of the LifeV Applications                        
+#                       This file is part of the LifeV Applications
 #                Copyright (C) 2004, 2005, 2007 EPFL, Politecnico di Milano, INRIA
-#                Copyright (C) 2010 EPFL, Politecnico di Milano, Emory University      
+#                Copyright (C) 2010 EPFL, Politecnico di Milano, Emory University
 #
 #      Author(s): Umberto Villa <uvilla@emory.edu>
 #           Date: 00-00-0000
@@ -12,13 +12,13 @@
 ###################################################################################################
 
 
-SUFFIXES	= .cpp .hpp .idl .c .h .f .F .o .moc 
+SUFFIXES	= .cpp .hpp .idl .c .h .f .F .o .moc
 
 include $(top_srcdir)/testsuite/Makefile.testsuite
 
-check_HEADERS = test_bdf.hpp
+check_HEADERS = test_bdf.hpp ud_functions.hpp
 
-check_PROGRAMS = test_bdf 
+check_PROGRAMS = test_bdf
 test_bdf_SOURCES = main.cpp  test_bdf.cpp
 
 link:
@@ -28,5 +28,5 @@ link:
 clean-results:
 	-rm *.vct *.scl *.case *.geo
 
-EXTRA_DIST = data testsuite.at
+EXTRA_DIST = data testsuite.at ud_functions.hpp
 MOSTLYCLEANFILES	= *.scl *.case *.geo

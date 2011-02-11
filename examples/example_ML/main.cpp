@@ -55,6 +55,7 @@
 
 #include <life/lifearray/MatrixEpetra.hpp>
 #include <life/lifearray/MapEpetra.hpp>
+#include <life/lifemesh/MeshData.hpp>
 #include <life/lifemesh/MeshPartitioner.hpp>
 #include <life/lifesolver/OseenData.hpp>
 #include <life/lifefem/FESpace.hpp>
@@ -75,10 +76,10 @@ const int SLIPWALL = 20;
 
 using namespace LifeV;
 
-typedef boost::function<Real ( Real const&, Real const&, Real const&, Real const&, ID const& )> fct_type;
+typedef boost::function<Real ( Real const&, Real const&, Real const&, Real const&, ID const& )> fct_Type;
 
-typedef OseenSolver< RegionMesh3D<LinearTetra> >::vector_type  vector_type;
-typedef boost::shared_ptr<vector_type>                   vector_ptrtype;
+typedef OseenSolver< RegionMesh3D<LinearTetra> >::vector_Type  vector_Type;
+typedef boost::shared_ptr<vector_Type>                   vector_ptrtype;
 
 Real zero_scalar( const Real& /* t */,
                   const Real& /* x */,
@@ -89,7 +90,7 @@ Real zero_scalar( const Real& /* t */,
     return 0.;
 }
 
-Real uLid(const Real& t, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& i)
+Real uLid(const Real& /*t*/, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& i)
 {
     switch (i)
     {
@@ -117,24 +118,24 @@ main( int argc, char** argv )
     // This is standard and can be "copy/pasted"
     //
 
-
+    boost::shared_ptr<Epetra_Comm> comm;
 #ifdef HAVE_MPI
     MPI_Init(&argc, &argv);
-    Epetra_MpiComm comm(MPI_COMM_WORLD);
-    if ( comm.MyPID() == 0 )
+    comm.reset(new Epetra_MpiComm(MPI_COMM_WORLD));
+    if ( comm->MyPID() == 0 )
     {
         cout << "% using MPI" << endl;
-        int ntasks;
-        int err = MPI_Comm_size(MPI_COMM_WORLD, &ntasks);
-        std::cout << "My PID = " << comm.MyPID() << " out of " << ntasks << " running." << std::endl;
+        int ntasks = 0;
+//        int err = MPI_Comm_size(MPI_COMM_WORLD, &ntasks);
+        std::cout << "My PID = " << comm->MyPID() << " out of " << ntasks << " running." << std::endl;
     }
 #else
-    Epetra_SerialComm comm;
+    comm.reset(new Epetra_SerialComm);
     cout << "% using serial Version" << endl;
 #endif
 
     // a flag to see who's the leader for output purposes
-    bool verbose = comm.MyPID() == 0;
+    bool verbose = comm->MyPID() == 0;
 
     // We now proceed to the data file. Its name can be given using the
     // -f or --file argument after the name of launch program.
@@ -144,9 +145,8 @@ main( int argc, char** argv )
     string data_file_name = command_line.follow("data", 2, "-f", "--file");
     GetPot dataFile( data_file_name );
 
-    // everything ( mesh included ) will be stored in a class
-    OseenData<RegionMesh3D<LinearTetra> > oseenData;
-    oseenData.setup( dataFile );
+    boost::shared_ptr<OseenData> oseenData;
+    oseenData->setup( dataFile );
 
     // Now for the boundary conditions :
     // BCHandler is the class that stores the boundary conditions. Here we will
@@ -155,7 +155,7 @@ main( int argc, char** argv )
     // left, right, down : (ux, uy, uz) = (0., 0., 0.) essential BC
     // front and rear    : uz = 0 essential BC
 
-    BCHandler bcH(3);
+    BCHandler bcH;
 
     std::vector<ID> zComp(1);
     zComp[0] = 3;
@@ -171,8 +171,15 @@ main( int argc, char** argv )
     // Here it's the thirs, ie z, in order to have u.n = 0
     bcH.addBC( "Slipwall", SLIPWALL, Essential, Component, uZero, zComp );
 
-    // partitioning the mesh
-    partitionMesh< RegionMesh3D<LinearTetra> >   meshPart(*oseenData.meshData()->mesh(), comm);
+    // Read the mesh
+    MeshData meshData;
+    meshData.setup(dataFile, "fluid/space_discretization");
+
+    boost::shared_ptr<RegionMesh3D<LinearTetra> > fullMeshPtr (new RegionMesh3D<LinearTetra>);
+    readMesh(*fullMeshPtr, meshData);
+
+    // Partition the mesh
+    MeshPartitioner< RegionMesh3D<LinearTetra> >   meshPart(fullMeshPtr, comm);
 
     // Now we proceed with the FESpace definition
     // here we decided to use P2/P1 elements
@@ -195,8 +202,8 @@ main( int argc, char** argv )
     if (verbose)
         std::cout << "ok." << std::endl;
 
-    UInt totalVelDof   = uFESpace.map().getMap(Unique)->NumGlobalElements();
-    UInt totalPressDof = pFESpace.map().getMap(Unique)->NumGlobalElements();
+    UInt totalVelDof   = uFESpace.map().map(Unique)->NumGlobalElements();
+    UInt totalPressDof = pFESpace.map().map(Unique)->NumGlobalElements();
 
 
     if (verbose) std::cout << "Total Velocity DOF = " << totalVelDof << std::endl;
@@ -232,10 +239,10 @@ main( int argc, char** argv )
     // finally, let's create an exporter in order to view the results
     // here, we use the ensight exporter
 
-    Ensight<RegionMesh3D<LinearTetra> > ensight( dataFile, meshPart.meshPartition(), "cavity", comm.MyPID());
+    ExporterEnsight<RegionMesh3D<LinearTetra> > ensight( dataFile, meshPart.meshPartition(), "cavity", comm->MyPID());
 
     // we have to define a variable that will store the solution
-    vector_ptrtype velAndPressure ( new vector_type(fluid.solution(), Repeated ) );
+    vector_ptrtype velAndPressure ( new vector_Type(*fluid.solution(), Repeated ) );
 
     // and we add the variables to be saved
     // the velocity
@@ -255,23 +262,25 @@ main( int argc, char** argv )
     // Initialization
 
 
-    Real dt     = oseenData.dataTime()->timeStep();
-    Real t0     = oseenData.dataTime()->initialTime();
-    Real tFinal = oseenData.dataTime()->endTime();
+//    Real dt     = oseenData->dataTime()->timeStep();
+    Real t0     = oseenData->dataTime()->initialTime();
+//    Real tFinal = oseenData->dataTime()->endTime();
 
     // bdf object to store the previous solutions
 
-    TimeAdvanceBDFNavierStokes<vector_type> bdf(oseenData.dataTime()->orderBDF());
+    TimeAdvanceBDFNavierStokes<vector_Type> bdf;
+    bdf.setup(oseenData->dataTime()->orderBDF());
+
 
     if (verbose) std::cout << std::endl;
     if (verbose) std::cout << "Computing the stokes solution ... " << std::endl << std::endl;
 
-    oseenData.dataTime()->setTime(t0);
+    oseenData->dataTime()->setTime(t0);
 
     // advection speed (beta) and rhs definition using the full map
     // (velocity + pressure)
-    vector_type beta( fullMap );
-    vector_type rhs ( fullMap );
+    vector_Type beta( fullMap );
+    vector_Type rhs ( fullMap );
 
     MPI_Barrier(MPI_COMM_WORLD);
 

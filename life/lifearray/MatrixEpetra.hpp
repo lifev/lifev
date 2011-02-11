@@ -413,7 +413,7 @@ public:
       @param format Format of the matrix (Epetra_FECrsMatrix::COLUMN_MAJOR or Epetra_FECrsMatrix::ROW_MAJOR)
      */
     void addToCoefficients( Int const numRows, Int const numColumns,
-                            std::vector<Int> const rowIndices, std::vector<Int> const columnIndices,
+                            std::vector<Int> const& rowIndices, std::vector<Int> const& columnIndices,
                             DataType* const* const localValues,
                             Int format = Epetra_FECrsMatrix::COLUMN_MAJOR );
 
@@ -1251,26 +1251,12 @@ addToCoefficient( UInt row, UInt column, DataType localValue )
 template <typename DataType>
 void MatrixEpetra<DataType>::
 addToCoefficients( Int const numRows, Int const numColumns,
-                   std::vector<Int> const rowIndices, std::vector<Int> const columnIndices,
+                   std::vector<Int> const& rowIndices, std::vector<Int> const& columnIndices,
                    DataType* const* const localValues,
                    Int format )
 {
-
-    std::vector<Int> irow( numRows );
-    std::vector<Int> icol( numColumns );
-
-    std::vector<Int>::const_iterator pt;
-
-    pt = rowIndices.begin();
-    for ( std::vector<Int>::iterator i( irow.begin() ); i !=  irow.end() && pt != rowIndices.end(); ++i, ++pt )
-        *i = *pt;
-
-    pt = columnIndices.begin();
-    for ( std::vector<Int>::iterator i( icol.begin() ); i !=  icol.end() && pt != columnIndices.end(); ++i, ++pt )
-        *i = *pt;
-
-
-    Int ierr = M_epetraCrs->InsertGlobalValues( numRows, &irow[0], numColumns, &icol[0], localValues, format );
+    Int ierr = M_epetraCrs->InsertGlobalValues( numRows, &rowIndices[0], numColumns,
+                                                &columnIndices[0], localValues, format );
 
     if ( ierr < 0 ) std::cout << " error in matrix insertion " << ierr << std::endl;
 }

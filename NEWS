@@ -1,5 +1,24 @@
 # -*- readme-debian -*-
 
+LifeV  2.0.0:
+=============
+
+* Major release, the source code has been refactored in order to follow the naming and coding guidelines. Please consult the updated doxygen documentation for the new class and method names.
+
+* This version of LifeV includes zero based numbering for all entities (user defined functions, boundary conditions, mesh entities etc.)
+
+The following is some advice for porting applications to the new numbering scheme:
+
+    In most cases, only a few things need to be changed when moving an application from one-based to zero-based numbering:
+    1. user defined functions: now the component index (ic) starts from zero.
+    2. adding boundary conditions: if you use "Component" mode, make sure that the component vector starts from zero.
+    3. Loops, in particular the loop over mesh elements (volumes) start from zero.
+    4. localToGlobal(...) function must be replaced with localToGlobalMap(..), which has zero-based entities both in input and output.
+
+    If, after these changes, there are +1 or -1 here and there in the code, it is likely (but there are many exceptions) that there is something wrong.
+
+
+
 LifeV  1.2.3:
 =============
 
