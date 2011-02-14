@@ -41,7 +41,7 @@
 #include <vector>
 #include <boost/shared_ptr.hpp>
 #include <Teuchos_ParameterList.hpp>
-#include <life/lifecore/life.hpp>
+#include <life/lifecore/LifeV.hpp>
 #include <life/lifealg/Preconditioner.hpp>
 #include "ComposedOperator.hpp"
 

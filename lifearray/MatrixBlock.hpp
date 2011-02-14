@@ -60,7 +60,7 @@ public:
      */
     //@{
     //! default constructor.
-    MatrixBlock( const MapEpetra& map, int numEntries = 50, int indexBase = 1 );
+    MatrixBlock( const MapEpetra& map, int numEntries = 50);
 
     //! Casting constructor
     MatrixBlock( const MatrixEpetra<DataType>& matrix );
@@ -125,8 +125,8 @@ private:
 // Constructors & Destructor
 // ===================================================
 template <typename DataType>
-MatrixBlock<DataType>::MatrixBlock(const MapEpetra& map, int numEntries, int indexBase) :
-    MatrixEpetra<DataType>(map,numEntries,indexBase)
+MatrixBlock<DataType>::MatrixBlock(const MapEpetra& map, int numEntries) :
+    MatrixEpetra<DataType>(map,numEntries)
 {
 
 }

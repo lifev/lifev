@@ -190,7 +190,12 @@ protected:
 
     // todo: Remove the member dataFile (bad programmation)
     GetPot      M_dataFile;
-    string      M_section;
+    string      M_fluidPrec;
+    string      M_fluidPrecDataSection;
+    string      M_pressureLaplacianPrec;
+    string      M_pressureLaplacianPrecDataSection;
+    string      M_pressureMassPrec;
+    string      M_pressureMassPrecDataSection;
 
 private:
     PreconditionerPCD(const PreconditionerPCD& /*P*/){}

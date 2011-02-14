@@ -166,7 +166,7 @@ int PreconditionerSIMPLE::buildPreconditioner(operator_type& oper)
     MatrixBlockUtils::copyBlock(F,B11);
     MatrixBlockUtils::createIdentityBlock(B22);
     P1a->globalAssemble();
-    //P1a->spy("p1a");
+    P1a->spy("p1a");
     boost::shared_ptr<parent_matrix_type> p1a = P1a;
     super_PtrType precForBlock1;
     precForBlock1.reset(new PreconditionerIfpack());
@@ -188,7 +188,7 @@ int PreconditionerSIMPLE::buildPreconditioner(operator_type& oper)
     MatrixBlockUtils::createIdentityBlock(B11);
     MatrixBlockUtils::createIdentityBlock(B22);
     P1b->globalAssemble();
-    //P1b->spy("p1b");
+    P1b->spy("p1b");
     boost::shared_ptr<parent_matrix_type> p1b = P1b;
     this->pushBack(p1b,inversed,notTransposed);
     if(verbose) std::cout << " done in " << timer.diff() << " s." << std::endl;
@@ -239,7 +239,7 @@ int PreconditionerSIMPLE::buildPreconditioner(operator_type& oper)
     P1c->getMatrixBlockView(0,0,B11);
     MatrixBlockUtils::createIdentityBlock(B11);
     P1c->globalAssemble();
-    //P1c->spy("p1c");
+    P1c->spy("p1c");
     boost::shared_ptr<parent_matrix_type> p1c = P1c;
     super_PtrType precForBlock2;
     precForBlock2.reset(new PreconditionerIfpack());
@@ -270,7 +270,7 @@ int PreconditionerSIMPLE::buildPreconditioner(operator_type& oper)
     }
     MatrixBlockUtils::createScalarBlock(B22,1/M_dampingFactor);
     P2a->globalAssemble();
-    //P2a->spy("p2a");
+    P2a->spy("p2a");
     boost::shared_ptr<parent_matrix_type> p2a = P2a;
     this->pushBack(p2a,inversed,notTransposed);
     if(verbose) std::cout << " done in " << timer.diff() << " s." << std::endl;
@@ -289,7 +289,7 @@ int PreconditionerSIMPLE::buildPreconditioner(operator_type& oper)
     MatrixBlockUtils::createIdentityBlock(B11);
     MatrixBlockUtils::createIdentityBlock(B22);
     P2b->globalAssemble();
-    //P2b->spy("p2b");
+    P2b->spy("p2b");
     boost::shared_ptr<parent_matrix_type> p2b = P2b;
     this->pushBack(p2b,inversed,notTransposed);
     if(verbose) std::cout << " done in " << timer.diff() << " s." << std::endl;
@@ -313,7 +313,7 @@ int PreconditionerSIMPLE::buildPreconditioner(operator_type& oper)
     }
     MatrixBlockUtils::createIdentityBlock(B22);
     P2c->globalAssemble();
-    //P2c->spy("p2c");
+    P2c->spy("p2c");
     boost::shared_ptr<parent_matrix_type> p2c = P2c;
     this->pushBack(p2c,inversed,notTransposed);
     if(verbose) std::cout << " done in " << timer.diff() << " s." << std::endl;

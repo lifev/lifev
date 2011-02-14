@@ -45,7 +45,7 @@ void copyBlock ( const MatrixBlockView& srcBlock,
     // BLOCK COMPATIBILITY TEST
     // BLOCK PTR TEST
 
-    int indexBase(1.0);
+    int indexBase(0);
 
     // Processor informations
     int  numSrcElements    = srcBlock.getMatrixPtr()->RowMap().NumMyElements();
@@ -113,7 +113,7 @@ void createScalarBlock ( MatrixBlockView& destBlock, const Real& diagonalValue )
 
     int destIndex(0);
 
-    int indexBase(1.0);
+    int indexBase(0);
 
     int firstRowIndex(destBlock.firstRowIndex()+indexBase);
     int lastRowIndex(destBlock.lastRowIndex()+indexBase);
@@ -150,7 +150,7 @@ void createDiagBlock ( const MatrixBlockView& srcBlock,
     // BLOCK PTR TEST
     // ZERO ON DIAGONAL TEST
 
-    int indexBase(1.0);
+    int indexBase(0);
 
     // Processor informations
     int  numSrcElements    = srcBlock.getMatrixPtr()->RowMap().NumMyElements();
@@ -212,7 +212,7 @@ void createInvDiagBlock ( const MatrixBlockView& srcBlock,
     // BLOCK PTR TEST
     // ZERO ON DIAGONAL TEST
 
-    int indexBase(1.0);
+    int indexBase(0);
 
     // Processor informations
     int  numSrcElements    = srcBlock.getMatrixPtr()->RowMap().NumMyElements();
@@ -399,7 +399,7 @@ void createLumpedBlock ( const MatrixBlockView& srcBlock,
     // BLOCK COMPATIBILITY TEST
     // BLOCK PTR TEST
 
-    int indexBase(1.0);
+    int indexBase(0);
 
     // Processor informations
     int  numSrcElements    = srcBlock.getMatrixPtr()->RowMap().NumMyElements();
@@ -460,7 +460,7 @@ void createInvLumpedBlock ( const MatrixBlockView& srcBlock,
     // BLOCK PTR TEST
     // ZERO ON DIAGONAL TEST
 
-    int indexBase(1.0);
+    int indexBase(0);
 
     // Processor informations
     int  numSrcElements    = srcBlock.getMatrixPtr()->RowMap().NumMyElements();

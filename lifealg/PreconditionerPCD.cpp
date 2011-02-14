@@ -84,6 +84,21 @@ void PreconditionerPCD::createPCDList( list_Type&         list,
     list.set("blocks: velocity block size", velocityBlockSize);
     list.set("blocks: pressure block size", pressureBlockSize);
 
+    std::string fluidPrec = dataFile((section + "/" + subsection + "/subprecs/fluid_prec").data(),"ML");
+    list.set("subprecs: fluid prec", fluidPrec);
+    std::string fluidPrecDataSection = dataFile((section + "/" + subsection + "/subprecs/fluid_prec_data_section").data(), "");
+    list.set("subprecs: fluid prec data section", (section + "/" + subsection+"/subprecs/"+fluidPrecDataSection).data());
+
+    std::string pressureLaplacianPrec = dataFile((section + "/" + subsection + "/subprecs/pressure_laplacian_prec").data(),"ML");
+    list.set("subprecs: pressure laplacian prec", pressureLaplacianPrec);
+    std::string pressureLaplacianPrecDataSection = dataFile((section + "/" + subsection + "/subprecs/pressure_laplacian_prec_data_section").data(), "");
+    list.set("subprecs: pressure laplacian prec data section", (section + "/" + subsection+"/subprecs/"+pressureLaplacianPrecDataSection).data());
+
+    std::string pressureMassPrec = dataFile((section + "/" + subsection + "/subprecs/pressure_mass_prec").data(),"ML");
+    list.set("subprecs: pressure mass prec", pressureMassPrec);
+    std::string pressureMassPrecDataSection = dataFile((section + "/" + subsection + "/subprecs/pressure_mass_prec_data_section").data(), "");
+    list.set("subprecs: pressure mass prec data section", (section + "/" + subsection+"/subprecs/"+pressureMassPrecDataSection).data());
+
     if (displayList) list.print(std::cout);
 }
 
@@ -122,13 +137,15 @@ int PreconditionerPCD::buildPreconditioner(operator_type& oper)
     bool notTransposed(false);
 
     map_type map(oper->map());
-    oper->spy("A");
+    //oper->spy("A");
 
     LifeChrono timer;
 
-    // Getting the block structure of A
-    // / F Bt \
-    // \ B C  /
+    /*
+      Getting the block structure of A
+      / F Bt \
+      \ B C  /
+     */
     if(verbose) std::cout << std::endl << "      >Getting the structure of A... ";
     timer.start();
     MatrixBlockView F,Bt,B,C;
@@ -149,20 +166,24 @@ int PreconditionerPCD::buildPreconditioner(operator_type& oper)
     //C.showMe();
     if(verbose) std::cout << "done in " << timer.diff() << " s." << std::endl;
 
-    // PCD:
-    // / F Bt \   / I  0 \ / I Bt \ / F 0 \
-    // \ 0 -S / = \ 0 -S / \ 0 I  / \ 0 I /
+    /*
+     PCD:
+     / F Bt \   / I  0 \ / I Bt \ / F 0 \
+     \ 0 -S / = \ 0 -S / \ 0 I  / \ 0 I /
 
-    // PCD^-1:
-    // / F  Bt \^-1   / F^-1 0 \ / I -Bt \ / I  0    \
-    // \ 0 -S  /    = \ 0    I / \ 0  I  / \ 0 -S^-1 /
+     PCD^-1:
+     / F  Bt \^-1   / F^-1 0 \ / I -Bt \ / I  0    \
+     \ 0 -S  /    = \ 0    I / \ 0  I  / \ 0 -S^-1 /
+     */
 
     // Getting the block structure of B
     MatrixBlockView B11,B12,B21,B22,B22base;
 
-    // Building the block
-    // / I  0 \   / I  0       \   / I  0  \ / I 0     \ / I 0  \
-    // \ 0 -S / = \ 0 -ApFp^-1 / = \ 0 -Ap / \ 0 Fp^-1 / \ 0 Mp /
+    /*
+     Building the block
+     / I  0 \   / I  0       \   / I  0  \ / I 0     \ / I 0  \
+     \ 0 -S / = \ 0 -ApFp^-1 / = \ 0 -Ap / \ 0 Fp^-1 / \ 0 Mp /
+     */
     if(verbose) std::cout << " Building Fp" << std::endl;
     timer.start();
     boost::shared_ptr<matrix_type> PFp(new matrix_type( map ));
@@ -173,7 +194,7 @@ int PreconditionerPCD::buildPreconditioner(operator_type& oper)
     M_adrPressureAssembler.addAdvection(PFp,*M_beta,B22.firstRowIndex(),B22.firstColumnIndex());
     M_adrPressureAssembler.addMass(PFp,1.0/M_timestep,B22.firstRowIndex(),B22.firstColumnIndex());
     PFp->globalAssemble();
-    PFp->spy("pFp");
+    //PFp->spy("pFp");
     boost::shared_ptr<parent_matrix_type> pFp = PFp;
     if(verbose) std::cout << " done in " << timer.diff() << " s." << std::endl;
 
@@ -216,10 +237,9 @@ int PreconditionerPCD::buildPreconditioner(operator_type& oper)
 
     if(verbose) std::cout << " P1a" << std::endl;
     timer.start();
-    pAp->spy("p1a");
-    super_PtrType precForBlock1;
-    precForBlock1.reset(new PreconditionerIfpack());
-    precForBlock1->setDataFromGetPot(M_dataFile,M_section);
+    //pAp->spy("p1a");
+    super_PtrType precForBlock1(PRECFactory::instance().createObject(M_pressureLaplacianPrec));
+    precForBlock1->setDataFromGetPot(M_dataFile,M_pressureLaplacianPrecDataSection);
     this->pushBack(pAp,precForBlock1,notInversed,notTransposed);
     if(verbose) std::cout << " done in " << timer.diff() << " s." << std::endl;
 
@@ -239,16 +259,16 @@ int PreconditionerPCD::buildPreconditioner(operator_type& oper)
     if(verbose) std::cout << " P1c" << std::endl;
     timer.start();
     //pMp->spy("p1c");
-    super_PtrType precForBlock2;
-    precForBlock2.reset(new PreconditionerML());
-    //prec->createParametersList(prec->parametersList(), M_dataFile, M_section, "Ifpack");
-    precForBlock2->setDataFromGetPot(M_dataFile,M_section);
+    super_PtrType precForBlock2(PRECFactory::instance().createObject(M_pressureMassPrec));
+    precForBlock2->setDataFromGetPot(M_dataFile,M_pressureMassPrecDataSection);
     this->pushBack(pMp,precForBlock2,notInversed,notTransposed);
     if(verbose) std::cout << " done in " << timer.diff() << " s." << std::endl;
 
-    // Building the block (the block is inversed)
-    // / I -Bt \
-    // \ 0  I  /
+    /*
+     Building the block (the block is inversed)
+     / I -Bt \
+     \ 0  I  /
+     */
     if(verbose) std::cout << " P2" << std::endl;
     timer.start();
     boost::shared_ptr<matrix_type> P2(new matrix_type(map));
@@ -266,9 +286,11 @@ int PreconditionerPCD::buildPreconditioner(operator_type& oper)
     this->pushBack(p2,inversed,notTransposed);
     if(verbose) std::cout << " done in " << timer.diff() << " s." << std::endl;
 
-    // Building the block
-    // / F 0 \
-    // \ 0 I /
+    /*
+     Building the block
+     / F 0 \
+     \ 0 I /
+     */
     if(verbose) std::cout << " P3" << std::endl;
     timer.start();
     boost::shared_ptr<matrix_type> P3(new matrix_type(map));
@@ -280,9 +302,8 @@ int PreconditionerPCD::buildPreconditioner(operator_type& oper)
     P3->globalAssemble();
     //P3->spy("p3");
     boost::shared_ptr<parent_matrix_type> p3 = P3;
-    super_PtrType precForBlock3;
-    precForBlock3.reset(new PreconditionerIfpack());
-    precForBlock3->setDataFromGetPot(M_dataFile,M_section);
+    super_PtrType precForBlock3(PRECFactory::instance().createObject(M_fluidPrec));
+    precForBlock3->setDataFromGetPot(M_dataFile,M_fluidPrecDataSection);
     this->pushBack(p3,precForBlock3,notInversed,notTransposed);
     if(verbose) std::cout << " done in " << timer.diff() << " s." << std::endl;
 
@@ -309,12 +330,21 @@ void PreconditionerPCD::setDataFromGetPot( const GetPot& dataFile,
                                            const std::string& section )
 {
     M_dataFile   = dataFile;
-    M_section    = section;
     createPCDList(M_list, dataFile, section, "PCD");
 
     M_velocityBlockSize = this->M_list.get("blocks: velocity block size", -1);
     M_pressureBlockSize = this->M_list.get("blocks: pressure block size", -1);
     M_precType          = this->M_list.get("prectype", "PCD");
+
+    M_fluidPrec                   = this->M_list.get("subprecs: fluid prec","ML");
+    M_fluidPrecDataSection        = this->M_list.get("subprecs: fluid prec data section", "");
+
+    M_pressureLaplacianPrec       = this->M_list.get("subprecs: pressure laplacian prec","ML");
+    M_pressureLaplacianPrecDataSection = this->M_list.get("subprecs: pressure laplacian prec data section", "");
+
+    M_pressureMassPrec            = this->M_list.get("subprecs: pressure mass prec","ML");
+    M_pressureMassPrecDataSection = this->M_list.get("subprecs: pressure mass prec data section", "");
+
 }
 
 void PreconditionerPCD::setFESpace(FESpace_ptr uFESpace,FESpace_ptr pFESpace){
