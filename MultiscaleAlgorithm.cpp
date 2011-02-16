@@ -168,7 +168,7 @@ MultiscaleAlgorithm::save( const UInt& subiterationsNumber, const Real& residual
             output << "% Algorithm Type: " << enum2String( M_type, multiscaleAlgorithmsMap ) << std::endl;
             output << "% Subiteration maximum number: " << M_subiterationsMaximumNumber << std::endl;
             output << "% Tolerance: " << M_tolerance << std::endl << std::endl;
-            output << "% TIME                     Subiterations      Residual" << std::endl;
+            output << "% Time                     Subiterations      Residual" << std::endl;
         }
         else
             output.open( filename.c_str(), std::ios::app );
