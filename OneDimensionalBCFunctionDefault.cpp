@@ -167,9 +167,8 @@ OneDimensionalBCFunctionRiemann::updateBCVariables()
 // ===================================================
 OneDimensionalBCFunctionCompatibility::OneDimensionalBCFunctionCompatibility( const bcSide_Type& bcSide, const bcType_Type& bcType ):
         super                           ( bcSide, bcType ),
+        M_bcElement                     (),
         M_bcInternalNode                (),
-        M_boundaryPoint                 (),
-        M_internalBdPoint               (),
         M_eigenvalues                   (),
         M_deltaEigenvalues              (),
         M_leftEigenvector1              (),
@@ -181,9 +180,8 @@ OneDimensionalBCFunctionCompatibility::OneDimensionalBCFunctionCompatibility( co
 
 OneDimensionalBCFunctionCompatibility::OneDimensionalBCFunctionCompatibility( const OneDimensionalBCFunctionCompatibility& bcFunctionCompatibility ) :
         super                           ( bcFunctionCompatibility ),
+        M_bcElement                     ( bcFunctionCompatibility.M_bcElement ),
         M_bcInternalNode                ( bcFunctionCompatibility.M_bcInternalNode ),
-        M_boundaryPoint                 ( bcFunctionCompatibility.M_boundaryPoint ),
-        M_internalBdPoint               ( bcFunctionCompatibility.M_internalBdPoint ),
         M_eigenvalues                   ( bcFunctionCompatibility.M_eigenvalues ),
         M_deltaEigenvalues              ( bcFunctionCompatibility.M_deltaEigenvalues ),
         M_leftEigenvector1              ( bcFunctionCompatibility.M_leftEigenvector1 ),
@@ -205,25 +203,13 @@ OneDimensionalBCFunctionCompatibility::setupNode()
     switch ( M_bcSide )
     {
     case OneDimensional::left:
-        M_bcInternalNode      = M_bcNode + 1;
-        boundaryEdge          = M_flux->physics()->data()->mesh()->edgeList(M_bcNode);
-        M_boundaryPoint[0]    = boundaryEdge.point(0).x();
-        M_boundaryPoint[1]    = boundaryEdge.point(0).y();
-        M_boundaryPoint[2]    = boundaryEdge.point(0).z();
-        M_internalBdPoint[0]  = boundaryEdge.point(1).x();
-        M_internalBdPoint[1]  = boundaryEdge.point(1).y();
-        M_internalBdPoint[2]  = boundaryEdge.point(1).z();
+        M_bcElement          = 0;
+        M_bcInternalNode  = M_bcNode + 1;
         break;
 
     case OneDimensional::right:
-        M_bcInternalNode      = M_bcNode - 1;
-        boundaryEdge          = M_flux->physics()->data()->mesh()->edgeList(M_bcNode - 1);
-        M_boundaryPoint[0]    = boundaryEdge.point(1).x();
-        M_boundaryPoint[1]    = boundaryEdge.point(1).y();
-        M_boundaryPoint[2]    = boundaryEdge.point(1).z();
-        M_internalBdPoint[0]  = boundaryEdge.point(0).x();
-        M_internalBdPoint[1]  = boundaryEdge.point(0).y();
-        M_internalBdPoint[2]  = boundaryEdge.point(0).z();
+        M_bcElement          = M_bcNode - 1;
+        M_bcInternalNode  = M_bcNode - 1;
         break;
 
     default:
@@ -305,22 +291,7 @@ OneDimensionalBCFunctionCompatibility::evaluateRHS( const Real& eigenvalue, cons
 Real
 OneDimensionalBCFunctionCompatibility::computeCFL( const Real& eigenvalue, const Real& timeStep ) const
 {
-    Real deltaX(0);
-    switch ( M_bcSide )
-    {
-    case OneDimensional::left:
-        deltaX = M_flux->physics()->data()->mesh()->edgeLength( M_bcNode );
-        break;
-
-    case OneDimensional::right:
-        deltaX = M_flux->physics()->data()->mesh()->edgeLength( M_bcNode - 1 );
-        break;
-
-    default:
-        std::cout << "Warning: bcSide \"" << M_bcSide << "\" not available!" << std::endl;
-    }
-
-    Real cfl = eigenvalue * timeStep / deltaX;
+    Real cfl = eigenvalue * timeStep / M_flux->physics()->data()->mesh()->edgeLength( M_bcElement );
 
 #ifdef HAVE_LIFEV_DEBUG
     if ( M_bcInternalNode == 1 ) // the edge is on the left of the domain

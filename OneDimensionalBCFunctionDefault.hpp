@@ -286,12 +286,10 @@ protected:
 
     //@}
 
+    //! ID of the boundary edge
+    UInt                                               M_bcElement;
     //! Dof of the internal node adjacent to the boundary
     UInt                                               M_bcInternalNode;
-
-    //! Boundary point and internal boundary point
-    boost::array< Real, NDIM >                         M_boundaryPoint;
-    boost::array< Real, NDIM >                         M_internalBdPoint;
 
     //! Eigen values of the jacobian diffFlux (= dF/dU = H)
     container2D_Type                                   M_eigenvalues;
