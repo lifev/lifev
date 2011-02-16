@@ -587,22 +587,21 @@ OneDimensionalData::linearInterpolation( scalarVector_Type& vector,
     Real b  = dataFile( quantity.data(), a, 1 );
 
 //#ifdef GHOSTNODE
-//    Real xa = M_mesh->point( 2 ).x();
-//    Real xb = M_mesh->point( M_mesh->numPoints() - 1 ).x();
+//    Real xa = M_mesh->point( 1 ).x();
+//    Real xb = M_mesh->point( M_mesh->numPoints() - 2 ).x();
 //#else
 //    Real xa = M_mesh->firstPoint().x();
 //    Real xb = M_mesh->lastPoint().x();
 //#endif
 //
-//    // Note: due to offset numeration starts from 1
 //    for ( UInt i(0) ; i < M_mesh->numPoints() ; ++i )
 //        if ( isArea )
 //        {
-//            vector[i] = std::sqrt(a / M_PI) + ( std::sqrt(b / M_PI) - std::sqrt(a / M_PI) ) / ( xb - xa ) * ( M_mesh->point( i+1 ).x() - xa );
+//            vector[i] = std::sqrt(a / M_PI) + ( std::sqrt(b / M_PI) - std::sqrt(a / M_PI) ) / ( xb - xa ) * ( M_mesh->point( i ).x() - xa );
 //            vector[i] *= vector[i] * M_PI;
 //        }
 //        else
-//            vector[i] = a + (b - a) / ( xb - xa ) * ( M_mesh->point( i+1 ).x() - xa );
+//            vector[i] = a + (b - a) / ( xb - xa ) * ( M_mesh->point( i ).x() - xa );
 
     // linearInterpolation disabled as tapering is not working!
     for ( UInt i(0); i < M_mesh->numPoints() ; ++i )
