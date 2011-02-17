@@ -94,13 +94,13 @@ Real velocity(const Real& /*t*/, const Real& x, const Real& y, const Real& /*z*/
 {
     switch (i)
     {
-    case 1:
+    case 0:
         return 0;
         break;
-    case 3:
+    case 2:
         return   20*( 1-(x*x+y*y)/(0.5*0.5) );
         break;
-    case 2:
+    case 1:
         return 0;
         break;
     }

@@ -1,9 +1,9 @@
 # -*- makefile -*-
 ###################################################################################################
 #
-#                       This file is part of the LifeV Applications                        
+#                       This file is part of the LifeV Applications
 #                Copyright (C) 2004, 2005, 2007 EPFL, Politecnico di Milano, INRIA
-#                Copyright (C) 2010 EPFL, Politecnico di Milano, Emory University      
+#                Copyright (C) 2010 EPFL, Politecnico di Milano, Emory University
 #
 #      Author(s): Radu Popescu <radu.popescu@epfl.ch>
 #           Date: 02-07-2010
@@ -15,14 +15,14 @@ include $(top_srcdir)/testsuite/Makefile.testsuite
 
 SUFFIXES                   = .cpp .hpp .idl .c .h .f .F .o .moc
 
-check_HEADERS              = cylinder.hpp
+check_HEADERS              = cylinder.hpp EqualSolutions.hpp
 
 check_PROGRAMS             = test_partition test_cylinder
 
 test_partition_SOURCES = main_partition.cpp
 test_cylinder_SOURCES = main_cylinder.cpp cylinder.cpp EqualSolutions.cpp
 
-EXTRA_DIST = data_partition data_cylinder cylinder_ref.h5
+EXTRA_DIST = data_partition data_cylinder cylinder_ref.h5 EqualSolutions.cpp EqualSolutions.hpp run_test.sh testsuite.at
 
 link:
 	test -a data_partition || ln -s $(srcdir)/data_partition

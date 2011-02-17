@@ -175,6 +175,8 @@ readINRIAMeshFileHead( std::ifstream          & myStream,
                        ReferenceShapes        & shape,
                        InternalEntitySelector   iSelect )
 {
+	const int idOffset = 1; //IDs in INRIA files start from 1
+
     std::string line;
 
     Real x, y, z;
@@ -236,11 +238,11 @@ readINRIAMeshFileHead( std::ifstream          & myStream,
             for ( UInt k = 0; k < numReadFaces; k++ )
             {
                 myStream >> p1 >> p2 >> p3 >> ibc;
-                if ( isboundary[ p1 - 1 ] && isboundary [ p2 - 1 ] && isboundary[ p3 - 1 ])
+                if ( isboundary[ p1 - idOffset ] && isboundary [ p2 - idOffset ] && isboundary[ p3 - idOffset ])
                 {
                     if ( iSelect( EntityFlag( ibc ) ) )
                     {
-                        std::cerr << "ATTENTION: Face "
+                        std::cerr << "ATTENTION: Face (1-based numbering) "
                                   << p1 << " "
                                   << p2 << " "
                                   << p3 << " has all vertices on the boundary yet is marked as interior: "
@@ -252,7 +254,7 @@ readINRIAMeshFileHead( std::ifstream          & myStream,
                 {
                     if ( !iSelect( EntityFlag( ibc ) ) )
                     {
-                        std::cerr << "ATTENTION: Face "
+                        std::cerr << "ATTENTION: Face (1-based numbering) "
                                   << p1 << " "
                                   << p2 << " "
                                   << p3
@@ -276,12 +278,12 @@ readINRIAMeshFileHead( std::ifstream          & myStream,
             for ( UInt k = 0; k < numReadFaces; k++ )
             {
                myStream >> p1 >> p2 >> p3 >> p4 >> ibc;
-               if ( isboundary[ p1 - 1 ] && isboundary[ p2 - 1 ]
-                    && isboundary[ p3 - 1 ] && isboundary[ p4 - 1 ] )
+               if ( isboundary[ p1 - idOffset ] && isboundary[ p2 - idOffset ]
+                    && isboundary[ p3 - idOffset ] && isboundary[ p4 - idOffset ] )
                 {
                     if ( iSelect( EntityFlag( ibc ) ) )
                     {
-                        std::cerr << "ATTENTION: Face "
+                        std::cerr << "ATTENTION: Face (1-based numbering) "
                                   << p1 << " "
                                   << p2 << " "
                                   << p3 << " "

@@ -55,11 +55,11 @@ Real RossEthierSteinmanUnsteadyInc::uexact( const Real& t,
 	Real e = exp(2.*(S_a*S_a + S_d*S_d + S_a*S_d)*S_nu * t);
 	switch(i)
 	{
-	case 1:
+	case 0:
 		return e * ( S_d*exp(S_a*(x-z)+S_d*(y-z)) - S_a*exp(S_a*(z-y)+S_d*(x-y)) );
-	case 2:
+	case 1:
 	    return e * ( S_d*exp(S_a*(y-x)+S_d*(z-x)) - S_a*exp(S_a*(x-z)+S_d*(y-z)) );
-	case 3:
+	case 2:
 	    return e * ( S_d*exp(S_a*(z-y)+S_d*(x-y)) - S_a*exp(S_a*(y-x)+S_d*(z-x)) );
 	default:
 	exit(1);
@@ -82,33 +82,33 @@ Real RossEthierSteinmanUnsteadyInc::grad_u( const UInt& icoor, const Real& t, co
 	switch(icoor) {
 			case 1:    // u_x
 			switch(i) {
-				case 1:
+				case 0:
 					return S_a*S_d*e * ( exp(S_a*(x-z)+S_d*(y-z)) - exp(S_a*(z-y)+S_d*(x-y)) );
-				case 2:
+				case 1:
 					return e * ( -(S_a+S_d)*S_d*exp(S_a*(y-x)+S_d*(z-x)) - S_a*S_a*exp(S_a*(x-z)+S_d*(y-z)) );
-				case 3:
+				case 2:
 					return e * ( S_d*S_d*exp(S_a*(z-y)+S_d*(x-y)) + S_a*(S_a+S_d)*exp(S_a*(y-x)+S_d*(z-x)) );
 				default:
 					exit(1);
 			 }
 			case 2:   // u_y
 			switch(i) {
-				case 1:
+				case 0:
 					return e * ( S_d*S_d*exp(S_a*(x-z)+S_d*(y-z)) + S_a*(S_a+S_d)*exp(S_a*(z-y)+S_d*(x-y)) );
-				case 2:
+				case 1:
 					return e * ( S_a*S_d*exp(S_a*(y-x)+S_d*(z-x)) - S_a*S_d*exp(S_a*(x-z)+S_d*(y-z)) );
-				case 3:
+				case 2:
 					return e * ( -S_d*(S_a+S_d)*exp(S_a*(z-y)+S_d*(x-y)) - S_a*S_a*exp(S_a*(y-x)+S_d*(z-x)) );
 				default:
 					exit(1);
 			}
 			case 3:
 			switch(i) {
-			    case 1:
+			    case 0:
 			        return e * ( -S_d*(S_a+S_d)*exp(S_a*(x-z)+S_d*(y-z)) - S_a*S_a*exp(S_a*(z-y)+S_d*(x-y)) );
-			    case 2:
+			    case 1:
 			        return e * ( S_d*S_d*exp(S_a*(y-x)+S_d*(z-x)) + S_a*(S_a+S_d)*exp(S_a*(x-z)+S_d*(y-z)) );
-			    case 3:
+			    case 2:
 			        return e * ( S_a*S_d*exp(S_a*(z-y)+S_d*(x-y)) - S_a*S_d*exp(S_a*(y-x)+S_d*(z-x)) );
 			    default:
 			    exit(1);
@@ -131,11 +131,11 @@ Real RossEthierSteinmanUnsteadyInc::xexact( const Real& t,
                                      const ID& i )
 {
     switch(i) {
+        case 0:
         case 1:
         case 2:
-        case 3:
             return uexact(t, x, y, z, i);
-        case 4:
+        case 3:
             return pexact(t, x, y, z, 1);
         default:
             exit(1);
@@ -179,13 +179,13 @@ Real RossEthierSteinmanUnsteadyInc::fNeumann( const Real& t,
 	}
 
 	for (UInt k =0; k< 3; k++)  //mu grad_u n
-		out += S_mu* grad_u(k+1, t, x, y, z, i)*n[k];
+		out += S_mu* grad_u(k, t, x, y, z, i)*n[k];
 
 	if(S_flagStrain)
 		for (UInt k =0; k< 3; k++)  //mu grad_u^T n
-			out += S_mu* grad_u(i, t, x, y, z, k+1)*n[k];
+			out += S_mu* grad_u(i, t, x, y, z, k)*n[k];
 
-	out -= pexact(t, x, y, z, i) * n[i-1]; //grad_p n
+	out -= pexact(t, x, y, z, i) * n[i]; //grad_p n
 	return out;
 }
 

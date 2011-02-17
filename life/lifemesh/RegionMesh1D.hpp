@@ -47,6 +47,7 @@ along with LifeV. If not, see <http://www.gnu.org/licenses/>.
 #include <life/lifemesh/MeshElementBare.hpp>
 #include <life/lifemesh/ElementShapes.hpp>
 #include <life/lifearray/VectorSimple.hpp>
+#include <life/lifearray/ArraySimple.hpp>
 
 #include <iomanip>
 #include <fstream>
@@ -130,7 +131,7 @@ public:
      *  @ingroup public_types
      *  Typedefs for STL compliant containers of mesh geometric entities.
      *
-     *  I Use VectorSimple container for addressing from 1.
+     *  I Use VectorSimple container
      *  @{
      */
 
@@ -458,10 +459,10 @@ public:
      *  @param i Volume id
      *  @return Reference to the Volume
      */
-    const VolumeType& volume( const UInt i ) const { ASSERT_BD( i > 0 && i <= edgeList.size() ); return edgeList( i ); }
+    const VolumeType& volume( const UInt i ) const { ASSERT_BD( i < edgeList.size() ); return edgeList( i ); }
     //! Returns Volume for a given Id
     /** @copydoc volume */
-    VolumeType& volume( const UInt i )             { ASSERT_BD( i > 0 && i <= edgeList.size() ); return edgeList( i ); }
+    VolumeType& volume( const UInt i )             { ASSERT_BD( i < edgeList.size() ); return edgeList( i ); }
 
     /** @} */ // End of group Volume Methods
 
@@ -1097,7 +1098,7 @@ public:
      *  the normal of the edge appears INWARD with respect to that element.
      *
      *  @param edgeId Id of a given edge.
-     *  @param Pos Position equal to 1 or 2 indicates first or second adjacent Element.
+     *  @param Pos Position equal to 0 or 1 indicates first or second adjacent Element.
      *  @return Edge ID given.
      */
     UInt edgeElement( UInt const edgeId, UInt const Pos ) const;
@@ -1113,7 +1114,7 @@ public:
      *  the normal of the edge appears INWARD with respect to that element.
      *
      *  @param f Reference of a given edge.
-     *  @param Pos Position equal to 1 or 2 indicates first or second adjacent Element.
+     *  @param Pos Position equal to 0 or 1 indicates first or second adjacent Element.
      *  @return Edge ID given.
      */
     UInt edgeElement( EdgeType const & f, UInt const Pos ) const;
@@ -1324,8 +1325,8 @@ RegionMesh1D<GEOSHAPE, MC>::setup( const Real& Length, const UInt& NumberOfEleme
         // insert a new Point1D in point list
         pp = &addPoint( (it == NumberOfElements) || ( it == 0) );
         pp->x() = x_current;
-        pp->setId(it + 1);
-        pp->setLocalId(it + 1);
+        pp->setId(it);
+        pp->setLocalId(it);
         // move to the next point location
         x_current += deltax;
         //std::cout << "point " << pointList.back().id() << " " << pointList.back().x() << std::endl;
@@ -1344,10 +1345,10 @@ RegionMesh1D<GEOSHAPE, MC>::setup( const Real& Length, const UInt& NumberOfEleme
     for (UInt it = 0; it < NumberOfElements; it++)
     {
         pe = &addEdge( false );
+        pe->setPoint(0, pointList(it));
         pe->setPoint(1, pointList(it + 1));
-        pe->setPoint(2, pointList(it + 2));
-        pe->setId(it + 1);
-        pe->setLocalId(it + 1);
+        pe->setId(it);
+        pe->setLocalId(it);
     }
 
     setEdgeCounter();
@@ -1418,15 +1419,15 @@ void RegionMesh1D<GEOSHAPE, MC>::transformMesh( const VECTOR& scale, const VECTO
     {
         //P = pointList[ i ].coordinate(); // Try to avoid double copy if possible
 
-        P( 0 ) = pointList[ i ].coordinate( 1 );
-        P( 1 ) = pointList[ i ].coordinate( 2 );
-        P( 2 ) = pointList[ i ].coordinate( 3 );
+        P( 0 ) = pointList[ i ].coordinate( 0 );
+        P( 1 ) = pointList[ i ].coordinate( 1 );
+        P( 2 ) = pointList[ i ].coordinate( 2 );
 
         P = T + prod( R, P );
 
-        pointList[ i ].coordinate( 1 ) = P( 0 );
-        pointList[ i ].coordinate( 2 ) = P( 1 );
-        pointList[ i ].coordinate( 3 ) = P( 2 );
+        pointList[ i ].coordinate( 0 ) = P( 0 );
+        pointList[ i ].coordinate( 1 ) = P( 1 );
+        pointList[ i ].coordinate( 2 ) = P( 2 );
     }
 }
 
@@ -1438,9 +1439,9 @@ Real RegionMesh1D<GEOSHAPE, MC>::maxH() const
 
     for ( UInt i(0); i < static_cast<UInt> ( edgeList.size() ); ++i )
     {
-        deltaX = ( edgeList( i+1 ).point( 2 ) ).x() - ( edgeList( i+1 ).point( 1 ) ).x();
-        deltaY = ( edgeList( i+1 ).point( 2 ) ).y() - ( edgeList( i+1 ).point( 1 ) ).y();
-        deltaZ = ( edgeList( i+1 ).point( 2 ) ).z() - ( edgeList( i+1 ).point( 1 ) ).z();
+        deltaX = ( edgeList( i ).point( 1 ) ).x() - ( edgeList( i ).point( 0 ) ).x();
+        deltaY = ( edgeList( i ).point( 1 ) ).y() - ( edgeList( i ).point( 0 ) ).y();
+        deltaZ = ( edgeList( i ).point( 1 ) ).z() - ( edgeList( i ).point( 0 ) ).z();
 
         deltaX *= deltaX;
         deltaY *= deltaY;
@@ -1460,9 +1461,9 @@ Real RegionMesh1D<GEOSHAPE, MC>::minH() const
 
     for ( UInt i(0); i < static_cast<UInt> ( edgeList.size() ); ++i )
     {
-        deltaX = ( edgeList( i+1 ).point( 2 ) ).x() - ( edgeList( i+1 ).point( 1 ) ).x();
-        deltaY = ( edgeList( i+1 ).point( 2 ) ).y() - ( edgeList( i+1 ).point( 1 ) ).y();
-        deltaZ = ( edgeList( i+1 ).point( 2 ) ).z() - ( edgeList( i+1 ).point( 1 ) ).z();
+        deltaX = ( edgeList( i ).point( 1 ) ).x() - ( edgeList( i ).point( 0 ) ).x();
+        deltaY = ( edgeList( i ).point( 1 ) ).y() - ( edgeList( i ).point( 0 ) ).y();
+        deltaZ = ( edgeList( i ).point( 1 ) ).z() - ( edgeList( i ).point( 0 ) ).z();
 
         deltaX *= deltaX;
         deltaY *= deltaY;
@@ -1482,9 +1483,9 @@ Real RegionMesh1D<GEOSHAPE, MC>::meanH() const
 
     for ( UInt i(0); i < static_cast<UInt> ( edgeList.size() ); ++i )
     {
-        deltaX = ( edgeList( i+1 ).point( 2 ) ).x() - ( edgeList( i+1 ).point( 1 ) ).x();
-        deltaY = ( edgeList( i+1 ).point( 2 ) ).y() - ( edgeList( i+1 ).point( 1 ) ).y();
-        deltaZ = ( edgeList( i+1 ).point( 2 ) ).z() - ( edgeList( i+1 ).point( 1 ) ).z();
+        deltaX = ( edgeList( i ).point( 1 ) ).x() - ( edgeList( i ).point( 0 ) ).x();
+        deltaY = ( edgeList( i ).point( 1 ) ).y() - ( edgeList( i ).point( 0 ) ).y();
+        deltaZ = ( edgeList( i ).point( 1 ) ).z() - ( edgeList( i ).point( 0 ) ).z();
 
         deltaX *= deltaX;
         deltaY *= deltaY;
@@ -1685,7 +1686,7 @@ inline
 typename RegionMesh1D<GEOSHAPE, MC>::EdgeType &
 RegionMesh1D<GEOSHAPE, MC>::setEdge( EdgeType const & v, UInt const pos )
 {
-    ASSERT_PRE( pos <= edgeList.capacity() , "position requested exceed capacity" <<
+    ASSERT_PRE( pos < edgeList.capacity() , "position requested exceed capacity" <<
                 pos << " " << edgeList.capacity() ) ;
     edgeList( pos ) = v;
     edgeList( pos ).id() = pos;
@@ -1705,7 +1706,7 @@ inline
 typename RegionMesh1D<GEOSHAPE, MC>::EdgeType const &
 RegionMesh1D<GEOSHAPE, MC>::edge( UInt const i ) const
 {
-    ASSERT_BD( i > 0 && i <= edgeList.size() ) ;
+    ASSERT_BD( i < edgeList.size() ) ;
     return edgeList( i );
 }
 
@@ -1714,7 +1715,7 @@ inline
 typename RegionMesh1D<GEOSHAPE, MC>::EdgeType &
 RegionMesh1D<GEOSHAPE, MC>::edge( UInt const i )
 {
-    ASSERT_BD( i > 0 && i <= edgeList.size() ) ;
+    ASSERT_BD( i < edgeList.size() ) ;
     return edgeList( i );
 }
 
@@ -1726,9 +1727,9 @@ RegionMesh1D<GEOSHAPE, MC>::edgeLength( const UInt& i ) const
 
     Real deltaX, deltaY, deltaZ;
 
-    deltaX = ( edgeList( i+1 ).point( 2 ) ).x() - ( edgeList( i+1 ).point( 1 ) ).x();
-    deltaY = ( edgeList( i+1 ).point( 2 ) ).y() - ( edgeList( i+1 ).point( 1 ) ).y();
-    deltaZ = ( edgeList( i+1 ).point( 2 ) ).z() - ( edgeList( i+1 ).point( 1 ) ).z();
+    deltaX = ( edgeList( i ).point( 1 ) ).x() - ( edgeList( i ).point( 0 ) ).x();
+    deltaY = ( edgeList( i ).point( 1 ) ).y() - ( edgeList( i ).point( 0 ) ).y();
+    deltaZ = ( edgeList( i ).point( 1 ) ).z() - ( edgeList( i ).point( 0 ) ).z();
 
     deltaX *= deltaX;
     deltaY *= deltaY;
@@ -1821,7 +1822,7 @@ inline
 typename RegionMesh1D<GEOSHAPE, MC>::EdgeType &
 RegionMesh1D<GEOSHAPE, MC>::setEdge( EdgeType const & f, UInt position, bool const boundary )
 {
-    ASSERT_PRE( position <= edgeList.capacity(), "Edge list size exceeded" <<
+    ASSERT_PRE( position < edgeList.capacity(), "Edge list size exceeded" <<
                 position << " " << edgeList.capacity() ) ;
     edgeList( position ) = f;
     edgeList( position ).id() = position;
@@ -1829,7 +1830,7 @@ RegionMesh1D<GEOSHAPE, MC>::setEdge( EdgeType const & f, UInt position, bool con
 
     if ( boundary )
     {
-        ASSERT_PRE( position <= _bEdges.capacity(), "Boundary Edge list size exceeded" <<
+        ASSERT_PRE( position < _bEdges.capacity(), "Boundary Edge list size exceeded" <<
                     _bEdges.size() << " " << bEdges.capacity() ) ;
         _bEdges.push_back( &( edgeList( position ) ) );
     }
@@ -1855,12 +1856,12 @@ RegionMesh1D<GEOSHAPE, MC>::boundaryEdge( UInt const i ) const
 {
 #ifdef NOT_BDATA_FIRST
     ASSERT_PRE( _bEdges.size() != 0 " Boundary Edges not Stored" ) ;
-    ASSERT_BD( i > 0 && i <= _bEdges.size() ) ;
+    ASSERT_BD( i < _bEdges.size() ) ;
     return *( _bEdges( i ) );
 #else
 
     ASSERT_PRE( edgeList.size() != 0, "Boundary Edges not stored" ) ;
-    ASSERT_BD( i > 0 && i <= edgeList.size() ) ;
+    ASSERT_BD( i < edgeList.size() ) ;
     return edgeList( i );
 #endif
 }
@@ -1872,12 +1873,12 @@ RegionMesh1D<GEOSHAPE, MC>::boundaryEdge( UInt const i )
 {
 #ifdef NOT_BDATA_FIRST
     ASSERT_PRE( _bEdges.size() != 0 " Boundary Edges not Stored" ) ;
-    ASSERT_BD( i > 0 && i <= _bEdges.size() ) ;
+    ASSERT_BD( i < _bEdges.size() ) ;
     return *( _bEdges( i ) );
 #else
 
     ASSERT_PRE( edgeList.size() != 0, "Boundary Edges not stored" ) ;
-    ASSERT_BD( i > 0 && i <= edgeList.size() ) ;
+    ASSERT_BD( i  < edgeList.size() ) ;
     return edgeList( i );
 #endif
 }
@@ -1927,14 +1928,14 @@ RegionMesh1D<GEOSHAPE, MC>::isBoundaryEdge( EdgeType const & e ) const
 #ifdef NOT_BDATA_FIRST
     //ASSERT(false,"In this version Boundary edges must be stored first");
     bool isboundary = true;
-    for ( UInt k = 1; k <= EdgeType::S_numVertices; ++k )
+    for ( UInt k = 0; k < EdgeType::S_numVertices; ++k )
     {
         isboundary = isboundary & e.point( k ).boundary();
     }
     return isboundary;
 #else
 
-    return e.id() <= _numBEdges;
+    return e.id() < _numBEdges;
 #endif
 }
 
@@ -1959,8 +1960,7 @@ inline
 UInt
 RegionMesh1D<GEOSHAPE, MC>::edgeElement( UInt const i, UInt const Pos ) const
 {
-    ASSERT_PRE( i <= edgeList.size(), "Not enough edges stored" ) ;
-    ASSERT_BD( i > 0 ) ;
+    ASSERT_PRE( i < edgeList.size(), "Not enough edges stored" );
     return edgeElement( edge( i ), Pos );
 };
 
@@ -1970,8 +1970,8 @@ UInt
 RegionMesh1D<GEOSHAPE, MC>::edgeElement( EdgeType const & f, UInt const Pos ) const
 {
     ASSERT_BD( ! edgeList.empty() ) ;
-    ASSERT_PRE( Pos == 1 || Pos == 2 , "Wrong position (1 or 2)" ) ;
-    if ( Pos == 1 )
+    ASSERT_PRE( Pos <= 1 , "Wrong position (0 or 1)" ) ;
+    if ( Pos == 0 )
     {
         return f.firstAdjacentElementIdentity();
     }
@@ -2061,7 +2061,7 @@ typename RegionMesh1D<GEOSHAPE, MC>::point_Type &
 RegionMesh1D<GEOSHAPE, MC>::setPoint
 ( point_Type const & p, UInt position, bool const boundary, bool const vertex )
 {
-    ASSERT_PRE( position <= pointList.capacity(), "Position  exceed lpoint list capacity" <<
+    ASSERT_PRE( position < pointList.capacity(), "Position  exceed lpoint list capacity" <<
                 position << " " << pointList.capacity() ) ;
     bool found( false );
     pointList( position ) = p;
@@ -2110,7 +2110,7 @@ inline
 typename RegionMesh1D<GEOSHAPE, MC>::point_Type const &
 RegionMesh1D<GEOSHAPE, MC>::point( UInt const i ) const
 {
-    ASSERT_BD( i > 0 && i <= pointList.size() ) ;
+    ASSERT_BD( i < pointList.size() ) ;
     return pointList( i );
 }
 
@@ -2119,7 +2119,7 @@ inline
 typename RegionMesh1D<GEOSHAPE, MC>::point_Type &
 RegionMesh1D<GEOSHAPE, MC>::point( UInt const i )
 {
-    ASSERT_BD( i > 0 && i <= pointList.size() ) ;
+    ASSERT_BD( i < pointList.size() ) ;
     return pointList( i );
 }
 
@@ -2130,7 +2130,7 @@ typename RegionMesh1D<GEOSHAPE, MC>::point_Type const &
 RegionMesh1D<GEOSHAPE, MC>::boundaryPoint( UInt const i ) const
 {
     ASSERT_PRE( _bPoints.size() != 0, " Boundary Points not Stored" ) ;
-    ASSERT_BD( i > 0 && i <= _bPoints.size() ) ;
+    ASSERT_BD( i < _bPoints.size() ) ;
     return *( _bPoints( i ) );
 }
 
@@ -2140,7 +2140,7 @@ typename RegionMesh1D<GEOSHAPE, MC>::point_Type &
 RegionMesh1D<GEOSHAPE, MC>::boundaryPoint( UInt const i )
 {
     ASSERT_PRE( _bPoints.size() != 0, " Boundary Points not Stored" ) ;
-    ASSERT_BD( i > 0 && i <= _bPoints.size() ) ;
+    ASSERT_BD( i < _bPoints.size() ) ;
     return *( _bPoints( i ) );
 }
 
@@ -2200,7 +2200,7 @@ inline
 bool
 RegionMesh1D<GEOSHAPE, MC>::isVertex( point_Type const & p ) const
 {
-    return p.id() <= _numVertices;
+    return p.id() < _numVertices;
 }
 
 template <typename GEOSHAPE, typename MC>
@@ -2208,7 +2208,7 @@ inline
 bool
 RegionMesh1D<GEOSHAPE, MC>::isVertex( UInt const & id ) const
 {
-    return id <= _numVertices;
+    return id < _numVertices;
 }
 
 
@@ -2329,22 +2329,21 @@ RegionMesh1D<GEOSHAPE, MC>::check( int level, bool const fix, bool const verb, s
         }
     }
     UInt badid = 0;
-    for ( UInt i = 1; i <= storedPoints(); ++i )
-        //for (UInt i=1; i<= _numVertices; ++i)// PERICOLOSISSIMO DOMANDARE ALEX
+    for ( UInt i = 0; i < storedPoints(); ++i )
         if ( point( i ).id() != i )
             ++badid;
     if ( badid != 0 )
         out << " SEVERITY ERROR:" << badid << "Points ids are wrong";
 
     badid = 0;
-    for ( UInt i = 1; i <= storedEdges(); ++i )
+    for ( UInt i = 0; i < storedEdges(); ++i )
         if ( edge( i ).id() != i )
             ++badid;
     if ( badid != 0 )
         out << " SEVERITY ERROR:" << badid << "Edges ids are wrong";
 
     badid = 0;
-    for ( UInt i = 1; i <= storedEdges(); ++i )
+    for ( UInt i = 0; i < storedEdges(); ++i )
         if ( edge( i ).id() != i )
             ++badid;
     if ( badid != 0 )

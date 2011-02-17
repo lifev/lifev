@@ -32,7 +32,7 @@ BDF_order		= 1
 
 [../space_discretization]
 mesh_dir        = ./Mesh/
-mesh_file       = tube40.mesh          # "big file"
+mesh_file       = tube20.mesh          # "big file"
 #mesh_file       = tube-test.mesh          # "big file"
 #mesh_file       = tube-r5.mesh          # "big file"
 #mesh_file       = cyl3D-1.mesh          # "big file"

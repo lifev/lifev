@@ -45,16 +45,20 @@ problem_type = 1
 
     [./space_discretization]
     mesh_dir      = ./Mesh/ # the directory where the mesh file is
-    mesh_file     = cartesian_cube8.mesh #mesh48603.mesh #cartesian_cube8.mesh
+    mesh_file     = cartesian_cube8.mesh #cartesian_cube8.mesh #mesh48603.mesh #cartesian_cube8.mesh
     mesh_type     = .mesh #structured #.mesh
     mesh_faces    = all
     verbose       = 0                        # verbose during mesh-reading
     #0 -> tetra, 1 -> hexa
     element_shape = 0
+
     # For structured mesh
-    nx = 8
-    ny = 8
-    nz = 8
+    nx = 32
+    ny = 32
+    nz = 32
+    lx = 1.
+    ly = 1.
+    lz = 1.
     [../]
 
     [./miscellaneous]

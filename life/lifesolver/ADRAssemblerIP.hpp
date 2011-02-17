@@ -356,7 +356,7 @@ addIPStabilizationStencil(const matrix_ptrType& matrixGalerkin,
     Real hFace2(0.0);
 
     // Here instead of looping over the elements, we loop on the faces.
-    for (UInt iFace(nbBoundaryFaces+1); iFace<= nbFaces; ++iFace)
+    for (UInt iFace(nbBoundaryFaces); iFace< nbFaces; ++iFace)
     {
         // Get the adjacent elements ID
         const UInt adjacentElement1(M_fespace->mesh()->face(iFace).firstAdjacentElementIdentity());
@@ -368,7 +368,7 @@ addIPStabilizationStencil(const matrix_ptrType& matrixGalerkin,
         // across the different partitions of the mesh (if they exist).
         // These cases are the excluded.
 
-        if ((adjacentElement1 == 0) || (adjacentElement2 == 0) || (adjacentElement1 == adjacentElement2))
+        if ((adjacentElement1 == NotAnId) || (adjacentElement2 == NotAnId) || (adjacentElement1 == adjacentElement2))
         {
             continue;
         };
@@ -434,7 +434,7 @@ addIPStabilizationStencil(const matrix_ptrType& matrixGalerkin,
             {
                 for (UInt iDim(0); iDim<3; ++iDim)
                 {
-                    betaN[iQuadPt] += beta[M_betaFESpace->dof().localToGlobal(adjacentElement1,iDof+1)
+                    betaN[iQuadPt] += beta[M_betaFESpace->dof().localToGlobalMap(adjacentElement1,iDof)
                                            + betaTotalDof*iDim]
                                       * M_IPBetaCFE->phi(iDof,iQuadPt)
                                       * M_IPFaceCFE->normal(iDim,iQuadPt);
@@ -581,7 +581,7 @@ addIPStabilizationStencil(const matrix_ptrType& matrixGalerkin,
     Real hFace2(0.0);
 
     // Here instead of looping over the elements, we loop on the faces.
-    for (UInt iFace(nbBoundaryFaces+1); iFace<= nbFaces; ++iFace)
+    for (UInt iFace(nbBoundaryFaces); iFace< nbFaces; ++iFace)
     {
         // Get the adjacent elements ID
         const UInt adjacentElement1(M_fespace->mesh()->face(iFace).firstAdjacentElementIdentity());
@@ -593,7 +593,7 @@ addIPStabilizationStencil(const matrix_ptrType& matrixGalerkin,
         // across the different partitions of the mesh (if they exist).
         // These cases are the excluded.
 
-        if ((adjacentElement1 == 0) || (adjacentElement2 == 0) || (adjacentElement1 == adjacentElement2))
+        if ((adjacentElement1 == NotAnId) || (adjacentElement2 == NotAnId) || (adjacentElement1 == adjacentElement2))
         {
             continue;
         };

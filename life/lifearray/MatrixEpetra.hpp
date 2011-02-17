@@ -96,9 +96,8 @@ public:
     /*!
       @param map Row map. The column map will be defined in MatrixEpetra<DataType>::GlobalAssemble(...,...)
       @param numEntries The average number of entries for each row.
-      @param indexBase The base index to address entries in the matrix (Usually 0 o 1)
      */
-    MatrixEpetra( const MapEpetra& map, Int numEntries = 50, Int indexBase = 1 );
+    MatrixEpetra( const MapEpetra& map, Int numEntries = 50 );
 
     //! Copy Constructor
     /*!
@@ -414,7 +413,7 @@ public:
       @param format Format of the matrix (Epetra_FECrsMatrix::COLUMN_MAJOR or Epetra_FECrsMatrix::ROW_MAJOR)
      */
     void addToCoefficients( Int const numRows, Int const numColumns,
-                            std::vector<Int> const rowIndices, std::vector<Int> const columnIndices,
+                            std::vector<Int> const& rowIndices, std::vector<Int> const& columnIndices,
                             DataType* const* const localValues,
                             Int format = Epetra_FECrsMatrix::COLUMN_MAJOR );
 
@@ -498,10 +497,6 @@ private:
 
     // Pointer on a Epetra_FECrsMatrix
     matrix_ptrtype  M_epetraCrs;
-
-    //  The index base for the matrix
-    Int M_indexBase;
-
 };
 
 
@@ -509,10 +504,9 @@ private:
 // Constructors & Destructor
 // ===================================================
 template <typename DataType>
-MatrixEpetra<DataType>::MatrixEpetra( const MapEpetra& map, Int numEntries, Int indexBase ) :
+MatrixEpetra<DataType>::MatrixEpetra( const MapEpetra& map, Int numEntries ) :
     M_map       ( new MapEpetra( map ) ),
-    M_epetraCrs ( new matrix_type( Copy, *M_map->map( Unique ), numEntries, false) ),
-    M_indexBase ( indexBase )
+    M_epetraCrs ( new matrix_type( Copy, *M_map->map( Unique ), numEntries, false) )
 {
 
 }
@@ -522,8 +516,7 @@ MatrixEpetra<DataType>::MatrixEpetra( const MatrixEpetra& matrix ) :
         M_map      ( matrix.M_map ),
         M_domainMap( matrix.M_domainMap ),
         M_rangeMap ( matrix.M_rangeMap ),
-        M_epetraCrs( new matrix_type( *matrix.M_epetraCrs ) ),
-        M_indexBase( matrix.M_indexBase )
+        M_epetraCrs( new matrix_type( *matrix.M_epetraCrs ) )
 {
 
 }
@@ -533,18 +526,8 @@ MatrixEpetra<DataType>::MatrixEpetra( const MatrixEpetra& matrix, const UInt red
     M_map      ( matrix.getMap().createRootMap( reduceToProc ) ),
     M_epetraCrs( new matrix_type( Copy, *M_map->map( Unique ),
                                   numEntries( matrix.M_epetraCrs->Map().Comm().MyPID() == reduceToProc ) * 20,
-                                  false ) ),
-    M_indexBase( matrix.M_indexBase )
+                                  false ) )
 {
-    Int  me = M_epetraCrs->Comm().MyPID();
-    if (!me)
-        std::cout << "matrix.M_epetraCrs->Map().IndexBase() = "
-                  << matrix.M_epetraCrs->Map().IndexBase()
-                  << std::endl
-                  << "M_epetraCrs->Map().IndexBase() = "
-                  << M_epetraCrs->Map().IndexBase()
-                  << std::endl;
-
     Epetra_Export reducedExport( M_epetraCrs->Map(), matrix.M_epetraCrs->Map() );
     M_epetraCrs->Import( *matrix.M_epetraCrs, reducedExport, Add );
 
@@ -559,8 +542,7 @@ template <typename DataType>
 MatrixEpetra<DataType>::MatrixEpetra( matrix_ptrtype CRSMatrixPtr ):
     M_map(),
     M_domainMap(),
-    M_rangeMap(),
-    M_indexBase( CRSMatrixPtr->Map().IndexBase() )
+    M_rangeMap()
 {
     M_epetraCrs = CRSMatrixPtr;
 }
@@ -591,7 +573,6 @@ MatrixEpetra<DataType>&  MatrixEpetra<DataType>::operator=( const MatrixEpetra& 
     M_domainMap  = matrix.M_domainMap;
     M_rangeMap   = matrix.M_rangeMap;
     *M_epetraCrs = *( matrix.M_epetraCrs );
-    M_indexBase  = matrix.M_indexBase;
 
     return *this;
 }
@@ -670,7 +651,7 @@ void MatrixEpetra<DataType>::removeZeros()
 
         for ( Int i(0); i<tmp->NumGlobalRows(); ++i )
         {
-            row = tmp->LRID( i+M_indexBase );
+            row = tmp->LRID( i );
             tmp->ExtractMyRowView( row, NumEntries, Values, Indices );
 
             Int Indices2[NumEntries];
@@ -831,10 +812,10 @@ void MatrixEpetra<DataType>::diagonalize( UInt const row,
     const Epetra_Map& colMap( M_epetraCrs->ColMap() );
 
 
-    Int myCol = colMap.LID( row + M_indexBase + offset );
+    Int myCol = colMap.LID( row + offset );
 
     // row: if r is mine, zero out values
-    Int myRow = rowMap.LID( row + M_indexBase + offset );
+    Int myRow = rowMap.LID( row + offset );
 
     if ( myRow >= 0 )  // I have this row
     {
@@ -898,17 +879,17 @@ void MatrixEpetra<DataType>::diagonalize( std::vector<UInt> rVec,
 
     for ( Int ii = 0; ii < (Int)rVec.size(); ++ii )
     {
-        Int lID = rowMap.LID(rVec[ii] + 1);
+        Int lID = rowMap.LID(rVec[ii]);
         if ( !( lID < 0 ) )
         {
 
-            localIDs.push_back( rVec[ii] + 1 );
+            localIDs.push_back( rVec[ii] );
             localData.push_back( datumVec[ii] );
-            localBC.insert( std::pair<Int, Real>( rVec[ii] + 1, datumVec[ii] ) );
+            localBC.insert( std::pair<Int, Real>( rVec[ii], datumVec[ii] ) );
         }
         else
         {
-            remoteIDs.push_back( rVec[ii] + 1 );
+            remoteIDs.push_back( rVec[ii] );
             remoteData.push_back( datumVec[ii] );
         }
     }
@@ -1002,7 +983,7 @@ void MatrixEpetra<DataType>::diagonalize( std::vector<UInt> rVec,
 
     for ( im = localBC.begin(); im != localBC.end(); ++im )
     {
-        diagonalize( im->first - 1, coefficient, rhs, im->second, offset );
+        diagonalize( im->first, coefficient, rhs, im->second, offset );
     }
 
     return;
@@ -1068,7 +1049,7 @@ void MatrixEpetra<DataType>::diagonalize( UInt const row,
     const Epetra_Map& colMap( M_epetraCrs->ColMap() );
 
 
-    Int myCol = colMap.LID( row + M_indexBase + offset );
+    Int myCol = colMap.LID( row + offset );
 
 #ifdef EPETRAMATRIX_SYMMETRIC_DIAGONALIZE
     if ( myCol >= 0 )  // I have this column
@@ -1082,7 +1063,7 @@ void MatrixEpetra<DataType>::diagonalize( UInt const row,
 #endif
 
     // row: if r is mine, zero out values
-    Int myRow = rowMap.LID( row + M_indexBase + offset );
+    Int myRow = rowMap.LID( row + offset );
 
     if ( myRow >= 0 )  // I have this row
     {
@@ -1100,7 +1081,7 @@ void MatrixEpetra<DataType>::diagonalize( UInt const row,
         DataType coeff( coefficient );
 
         M_epetraCrs->ReplaceMyValues( myRow, 1, &coeff, &myCol ); // A(r,r) = coeff
-        rhs[row + M_indexBase + offset] = coefficient * datum; // correct right hand side for row r // BASEINDEX + M_indexBase
+        rhs[row + offset] = coefficient * datum; // correct right hand side for row r
 
     }
 
@@ -1176,9 +1157,9 @@ template <typename DataType>
 void
 MatrixEpetra<DataType>::insertValueDiagonal( const DataType entry, const MapEpetra& Map, const UInt offset )
 {
-    for ( Int i=0 ; i<Map.map(Unique)->NumMyElements(); ++i )//num from 1
+    for ( Int i=0 ; i<Map.map(Unique)->NumMyElements(); ++i )
     {
-        addToCoefficient( offset + Map.map(Unique)->GID(i)-1 , offset + Map.map(Unique)->GID(i)-1, entry );
+        addToCoefficient( offset + Map.map(Unique)->GID(i) , offset + Map.map(Unique)->GID(i), entry );
     }
 }
 
@@ -1245,9 +1226,8 @@ template <typename DataType>
 void MatrixEpetra<DataType>::
 setCoefficient( UInt row, UInt column, DataType localValue )
 {
-    // incrementing row and cols by indexBase;
-    Int irow(    row + M_indexBase );
-    Int icol( column + M_indexBase );
+    Int irow(    row );
+    Int icol( column );
 
     Int ierr=M_epetraCrs->ReplaceGlobalValues( 1, &irow, 1, &icol, &localValue );
     if (ierr!=0)
@@ -1260,9 +1240,8 @@ void MatrixEpetra<DataType>::
 addToCoefficient( UInt row, UInt column, DataType localValue )
 {
 
-    // incrementing row and cols by indexBase;
-    Int irow(    row + M_indexBase );
-    Int icol( column + M_indexBase );
+    Int irow(    row );
+    Int icol( column );
 
     Int ierr = M_epetraCrs->InsertGlobalValues( 1, &irow, 1, &icol, &localValue );
 
@@ -1272,27 +1251,12 @@ addToCoefficient( UInt row, UInt column, DataType localValue )
 template <typename DataType>
 void MatrixEpetra<DataType>::
 addToCoefficients( Int const numRows, Int const numColumns,
-                   std::vector<Int> const rowIndices, std::vector<Int> const columnIndices,
+                   std::vector<Int> const& rowIndices, std::vector<Int> const& columnIndices,
                    DataType* const* const localValues,
                    Int format )
 {
-
-    // incrementing row and cols by indexBase;
-    std::vector<Int> irow( numRows );
-    std::vector<Int> icol( numColumns );
-
-    std::vector<Int>::const_iterator pt;
-
-    pt = rowIndices.begin();
-    for ( std::vector<Int>::iterator i( irow.begin() ); i !=  irow.end() && pt != rowIndices.end(); ++i, ++pt )
-        *i = *pt + M_indexBase;
-
-    pt = columnIndices.begin();
-    for ( std::vector<Int>::iterator i( icol.begin() ); i !=  icol.end() && pt != columnIndices.end(); ++i, ++pt )
-        *i = *pt + M_indexBase;
-
-
-    Int ierr = M_epetraCrs->InsertGlobalValues( numRows, &irow[0], numColumns, &icol[0], localValues, format );
+    Int ierr = M_epetraCrs->InsertGlobalValues( numRows, &rowIndices[0], numColumns,
+                                                &columnIndices[0], localValues, format );
 
     if ( ierr < 0 ) std::cout << " error in matrix insertion " << ierr << std::endl;
 }

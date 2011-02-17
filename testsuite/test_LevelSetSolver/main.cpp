@@ -77,8 +77,8 @@ static bool regML = (PRECFactory::instance().registerProduct( "ML", &createML ))
 
 Real betaFct( const Real& /* t */, const Real& /* x */, const Real& /* y */, const Real& /* z */, const ID& i )
 {
-    if (i == 1)
-        return 1;
+    if (i == 0)
+        return 1.;
     return 0;
 }
 

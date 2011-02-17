@@ -181,12 +181,26 @@ public:
      */
     void setDataFromGetPot( const GetPot& dataFile, const std::string& section );
 
+    //! Set a parameter in the list
+    /*!
+     *  @param name name of the parameter
+     *  @param value value of the parameter
+     */
+    template <typename ParameterType>
+    void setParameter( const std::string& name, const ParameterType value ) { M_trilinosParameterList.set( name, value ); }
+
     //! Set the current parameters with the internal parameters list
     /*!
       Note: The parameter list is set using "setDataFromGetPot".
       @param cerrWarningIfUnused If true the solver return warning if some parameters are unused
      */
     void setParameters();
+
+    //! Set the current parameters list
+    /*!
+     *  @param list Teuchos parameters list
+     */
+    void setParametersList( const Teuchos::ParameterList& list ) { M_trilinosParameterList = list; }
 
     //! Set the tolerance of the solver
     /*!
@@ -196,8 +210,8 @@ public:
 
     //! Set the tolerance and the maximum number of iterations
     /*!
-      @param maxIter Maximum number of iteration
-    */
+     * @param maxIter Maximum number of iteration
+     */
     void setMaxNumIterations( const Int maxIter = -1 );
 
     //@}
@@ -211,6 +225,12 @@ public:
 
     //! Return the true residual
     Real trueResidual();
+
+    //! Get the current parameters list
+    /*!
+     * @return Teuchos parameters list
+     */
+    const Teuchos::ParameterList& parametersList() const { return M_trilinosParameterList; }
 
     //@}
 

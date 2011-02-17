@@ -42,68 +42,6 @@
 namespace LifeV
 {
 
-namespace detail
-{
-
-// Import function for 3D mesh
-template<typename Elt>
-void
-import( std::string const&  fileName,
-        MeshFormat const&   format,
-        RegionMesh3D<Elt>&  mesh,
-        entityFlag_Type     regionFlag )
-{
-    // Select the right mesh format
-    switch ( format )
-    {
-    case MESHPP:
-        readMppFile( mesh, fileName, regionFlag );
-        break;
-
-    case INRIA:
-        readINRIAMeshFile( mesh, fileName, regionFlag );
-        break;
-
-    case GMSH:
-        readGmshFile( mesh, fileName, regionFlag );
-        break;
-
-    case NETGEN:
-        readNetgenMesh( mesh, fileName, regionFlag );
-        break;
-    }
-
-} // import
-
-// Import function for 2D mesh
-template<typename Elt>
-void
-import( std::string const& fileName,
-        MeshFormat const&  format,
-        RegionMesh2D<Elt>& mesh,
-        entityFlag_Type    regionFlag )
-{
-    // Select the right mesh format, only Gmsh allowed
-    switch ( format )
-    {
-    case MESHPP:
-    case INRIA:
-    case NETGEN:
-    {
-        std::ostringstream ostr;
-        ostr << "Unsupported file format for RegionMesh2D";
-        throw std::invalid_argument( ostr.str() );
-    }
-    break;
-    case GMSH:
-        readGmshFile( mesh, fileName, regionFlag );
-        break;
-    }
-
-} // import
-
-} // Namespace detail
-
 // ===================================================
 // Operators
 // ===================================================

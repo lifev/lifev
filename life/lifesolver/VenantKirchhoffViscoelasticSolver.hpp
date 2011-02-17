@@ -616,7 +616,7 @@ buildSystem(matrix_ptrtype matrSystem, const Real& xi)
     // Elementary computation and matrix assembling
     // Loop on elements
 
-    for ( UInt iVol = 1; iVol <= this->M_FESpace->mesh()->numVolumes(); ++iVol )
+    for ( UInt iVol = 0; iVol < this->M_FESpace->mesh()->numVolumes(); ++iVol )
     {
         this->M_FESpace->fe().updateFirstDeriv( this->M_FESpace->mesh()->element( iVol ) );
 
@@ -684,7 +684,7 @@ buildDamping(matrix_ptrtype damping, const Real& alpha)
 
      // Elementary computation and matrix assembling
      // Loop on elements
-     for ( UInt iVol = 1; iVol <= this->M_FESpace->mesh()->numVolumes(); ++iVol )
+     for ( UInt iVol = 0; iVol < this->M_FESpace->mesh()->numVolumes(); ++iVol )
      {
       this->M_FESpace->fe().updateFirstDeriv( this->M_FESpace->mesh()->element( iVol ) );
 
@@ -781,7 +781,7 @@ updateSourceTerm(const  vector_type&  source)
   LifeChrono chrono;
   chrono.start();
 
-  for ( UInt iVol = 1; iVol <= this->M_FESpace->mesh()->numVolumes(); ++iVol )
+  for ( UInt iVol = 0; iVol < this->M_FESpace->mesh()->numVolumes(); ++iVol )
     {
       //  M_elvecSource.zero();
       Real f, x, y, z;
@@ -799,7 +799,7 @@ updateSourceTerm(const  vector_type&  source)
 
           for ( i = 0;i < M_FESpace->fe().nbFEDof(); ++i )
             {
-              inod = this->M_FESpace->dof().localToGlobal( eleID, i + 1 ) + iComp * this->M_FESpace->dof().numTotalDof();
+              inod = this->M_FESpace->dof().localToGlobalMap( eleID, i ) + iComp * this->M_FESpace->dof().numTotalDof();
               u_ig = f*this->M_FESpace->fe().phi( i, ig );
               source.sumIntoGlobalValues(inod, u_ig * this->M_FESpace->fe().weightDet( ig ));
             }

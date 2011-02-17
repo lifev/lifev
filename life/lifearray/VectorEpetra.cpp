@@ -151,9 +151,7 @@ VectorEpetra::VectorEpetra( const VectorEpetra& vector, const Int& reduceToProc)
 VectorEpetra::data_type&
 VectorEpetra::operator[]( const UInt row )
 {
-    Int lrow = blockMap().LID(row); // BASEINDEX + 1, row + 1
-
-    // hint: with gdb: break LifeV::VectorEpetra<Real>::operator[](unsigned Int)
+    Int lrow = blockMap().LID(row);
     if ( lrow < 0 )
     {
         std::cout << M_epetraVector->Comm().MyPID() << " " << row << " " << lrow << std::endl;
@@ -166,8 +164,7 @@ VectorEpetra::operator[]( const UInt row )
 const VectorEpetra::data_type&
 VectorEpetra::operator[]( const UInt row ) const
 {
-    Int lrow = blockMap().LID(row); // BASEINDEX + 1 row+1
-
+    Int lrow = blockMap().LID(row);
     if ( lrow < 0 )
     {
         std::cout << M_epetraVector->Comm().MyPID() << " " << row << " " << lrow << std::endl;

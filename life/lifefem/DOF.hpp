@@ -48,6 +48,7 @@
 #define _DOF_HH
 
 #include <life/lifearray/VectorSimple.hpp>
+#include <life/lifearray/ArraySimple.hpp>
 
 #include <life/lifecore/LifeV.hpp>
 
@@ -94,7 +95,7 @@ public:
       \param Offset: the smallest DOF numbering. It might be used if we want the
       degrees of freedom numbering start from a specific value.
     */
-    DOF( const DOFLocalPattern& fePattern, UInt offset = 1 );
+    DOF( const DOFLocalPattern& fePattern);
 
     //! Copy constructor
     DOF( const DOF & dof2 );
@@ -107,7 +108,7 @@ public:
       degrees of freedom numbering start from a specific value.
     */
     template <typename MeshType>
-    DOF( MeshType& mesh, const DOFLocalPattern& fePattern, UInt offset = 1 );
+    DOF( MeshType& mesh, const DOFLocalPattern& fePattern);
 
     //@}
 
@@ -127,7 +128,7 @@ public:
       Returns the global numbering of a DOF, given an internal face and the
       local numbering
       \param faceId the internal face ID
-      \param localDOF the local DOF numbering (starting from 1)
+      \param localDOF the local DOF numbering
       \return The global numbering of the DOF
     */
     ID localToGlobalByFace(const ID& faceId, const ID& localDof, bool& exist ) const;
@@ -169,13 +170,13 @@ public:
     /*!
       Returns the global numbering of a DOF, given an element and the local numbering
       \param ELId the element ID
-      \param localNode the local DOF numbering (starting from 1)
+      \param localNode the local DOF numbering
       \return The numbering of the DOF
     */
-    const ID& localToGlobal( const ID ElId, const ID localNode) const
-    {
-        return M_localToGlobal( localNode, ElId );
-    }
+    const ID& localToGlobalMap( const ID ElId, const ID localNode) const
+	{
+		return M_localToGlobal( localNode, ElId );
+	}
 
     //! Number of elements in mesh
     const UInt& numElements() const
@@ -234,9 +235,6 @@ private:
     //! The pattern of the local degrees of freedom.
     const DOFLocalPattern& M_elementDofPattern;
 
-    // Offset for the first degree of freedom numerated
-    UInt M_offset;
-
     // Total number of degrees of freedom
     UInt M_totalDof;
 
@@ -277,9 +275,8 @@ private:
 
 //! Constructor that builds the localToglobal table
 template <typename MeshType>
-DOF::DOF( MeshType& mesh, const DOFLocalPattern& fePattern, UInt offset ) :
+DOF::DOF( MeshType& mesh, const DOFLocalPattern& fePattern)://, UInt offset ) :
         M_elementDofPattern       ( fePattern ),
-        M_offset  ( offset ),
         M_totalDof( 0 ),
         M_numElement     ( 0 ),
         M_nbLocalVertex      ( 0 ),
@@ -390,21 +387,21 @@ void DOF::update( MeshType& mesh )
     }
 
 
-    UInt gcount( M_offset );
+    UInt gcount( 0 );
     UInt lcount;
     UInt lc;
 
     // Vertex Based Dof
     M_dofPositionByEntity[ 0 ] = gcount;
     if ( nbLocalDofPerVertex > 0 )
-        for ( ie = 1; ie <= M_numElement; ++ie )//for each element
+        for ( ie = 0; ie < M_numElement; ++ie )//for each element
         {
             lc = 0;
-            for ( i = 1; i <= M_nbLocalVertex; ++i )//for each vertex in the element
+            for ( i = 0; i < M_nbLocalVertex; ++i )//for each vertex in the element
                 for ( l = 0; l < nbLocalDofPerVertex; ++l )//for each degree of freedom per vertex
                 {
-                    //                       label of the ith point of the mesh element-1
-                    M_localToGlobal( ++lc, ie ) = gcount + ( mesh.element( ie ).point( i ).id() - 1 ) * nbLocalDofPerVertex + l;
+                    // label of the ith point of the mesh element
+                    M_localToGlobal( lc++, ie ) = gcount + mesh.element( ie ).point( i ).id() * nbLocalDofPerVertex + l;
                     //M_localToGlobal(++lc, ie) is the global label assigned to the ++lc dof of the element.
                 }
         }
@@ -413,14 +410,14 @@ void DOF::update( MeshType& mesh )
     lcount = nbLocalDofPerVertex * M_nbLocalVertex;
     M_dofPositionByEntity[ 1 ] = gcount;
     if ( nbLocalDofPerEdge > 0 )
-        for ( ie = 1; ie <= M_numElement; ++ie )
+        for ( ie = 0; ie < M_numElement; ++ie )
         {
             lc = lcount;
-            for ( i = 1; i <= M_nbLocalEdge; ++i )
+            for ( i = 0; i < M_nbLocalEdge; ++i )
                 for ( l = 0; l < nbLocalDofPerEdge; ++l )
                 {
                     UInt eID = mesh.edgeList(mesh.localEdgeId(ie, i)).id();
-                    M_localToGlobal( ++lc, ie ) = gcount + ( eID - 1 ) * nbLocalDofPerEdge + l;
+                    M_localToGlobal( lc++, ie ) = gcount + eID * nbLocalDofPerEdge + l;
 
                 }
         }
@@ -430,19 +427,19 @@ void DOF::update( MeshType& mesh )
     lcount += nbLocalDofPerEdge * M_nbLocalEdge;
     M_dofPositionByEntity[ 2 ] = gcount;
     if ( nbLocalDofPerFace > 0 )
-        for ( ie = 1; ie <= M_numElement; ++ie )
+        for ( ie = 0; ie < M_numElement; ++ie )
         {
             lc = lcount;
 #ifdef TWODIM
             // when working in 2D we simply iterate over the elements to have faces
             for ( l = 0; l < nbLocalDofPerFace; ++l )
-                M_localToGlobal( ++lc, ie ) = gcount + ( ie - 1 ) * nbLocalDofPerFace + l;
+                M_localToGlobal( lc++, ie ) = gcount + ( ie  ) * nbLocalDofPerFace + l;
 #else // THREEDIM
-            for ( i = 1; i <= M_nbLocalFace; ++i )
+            for ( i = 0; i < M_nbLocalFace; ++i )
                 for ( l = 0; l < nbLocalDofPerFace; ++l )
                 {
                     UInt fID = mesh.faceList( mesh.localFaceId( ie, i ) ).id();
-                    M_localToGlobal( ++lc, ie ) = gcount + ( fID - 1 ) * nbLocalDofPerFace + l;
+                    M_localToGlobal( lc++, ie ) = gcount + fID * nbLocalDofPerFace + l;
                 }
 #endif
         }
@@ -452,17 +449,17 @@ void DOF::update( MeshType& mesh )
     lcount += nbLocalDofPerFace * M_nbLocalFace;
     M_dofPositionByEntity[ 3 ] = gcount;
     if ( nbLocalDofPerVolume > 0 )
-        for ( ie = 1; ie <= M_numElement; ++ie )
+        for ( ie = 0; ie < M_numElement; ++ie )
         {
             lc = lcount;
             for ( l = 0; l < nbLocalDofPerVolume; ++l )
             {
-                M_localToGlobal( ++lc, ie ) = gcount + (mesh.element( ie ).id() - 1) * nbLocalDofPerVolume + l;
+                M_localToGlobal( lc++, ie ) = gcount + mesh.element( ie ).id() * nbLocalDofPerVolume + l;
             }
         }
     gcount += nbGlobalVolume * nbLocalDofPerVolume;
     M_dofPositionByEntity[ 4 ] = gcount;
-    ASSERT_POS( gcount - M_offset == M_totalDof , "Something wrong in DOF Setup " << gcount << " " << M_offset << " " << M_totalDof ) ;
+    ASSERT_POS( gcount == M_totalDof , "Something wrong in Dof Setup " << gcount  << " " << M_totalDof ) ;
 
     if ( update_edges )
         mesh.cleanElementEdges();
@@ -474,24 +471,21 @@ void DOF::update( MeshType& mesh )
 
     if (M_numLocalDofByFace>0)
     {
-        //UInt lfID = 0;
-        for (UInt k = 1; k <= M_numElement; k++)
+        for (UInt k = 0; k < M_numElement; k++)
         {
-            for (UInt j = 1; j <= M_nbLocalFace; j++)
+            for (UInt j = 0; j < M_nbLocalFace; j++)
             {
                 ID fID  = mesh.faceList( mesh.localFaceId( k, j ) ).id();
                 std::vector<ID> v(M_numLocalDofByFace,0);
-                for (UInt i = 1; i <= M_numLocalDofByFace; i++)
+                for (UInt i = 0; i < M_numLocalDofByFace; i++)
                 {
-                    v[i-1] = M_localToGlobal( M_faceToPoint( j, i ), k );
+                    v[i] = M_localToGlobal( M_faceToPoint( j, i ), k );
                 }
                 M_globalToLocalByFace[fID] = M_localToGlobalByFace.size();
                 M_localToGlobalByFace.push_back(v);
             }
         }
     }
-
-
 }
 
 }

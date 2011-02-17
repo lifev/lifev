@@ -277,7 +277,6 @@ EnsightToHdf5::run()
 
     for ( Real time = t0 + dt ; time <= tFinal + dt/2.; time += dt, iter++)
     {
-        std::cout << "Doing " << time << std::endl;
         chrono.stop();
         importer->import( time );
 
@@ -302,7 +301,7 @@ computeP0pressure(const feSpacePtr_Type& pFESpacePtr,
                   Real /*time*/)
 {
 
-    int MyPID;
+	int MyPID;
     MPI_Comm_rank(MPI_COMM_WORLD, &MyPID);
     UInt offset = 3*uFESpacePtr->dof().numTotalDof();
 
@@ -311,7 +310,7 @@ computeP0pressure(const feSpacePtr_Type& pFESpacePtr,
     std::vector<Real> val0Vec(0);
     val0Vec.reserve(p0FESpacePtr->mesh()->numVolumes());
 
-    for (UInt ivol=1; ivol<= pFESpacePtr->mesh()->numVolumes(); ++ivol)
+    for (UInt ivol=0; ivol < pFESpace.mesh()->numVolumes(); ++ivol)
     {
 
         pFESpacePtr->fe().update( pFESpacePtr->mesh()->volumeList( ivol ), UPDATE_DPHI );
@@ -322,13 +321,12 @@ computeP0pressure(const feSpacePtr_Type& pFESpacePtr,
         double tmpsum=0.;
         for (UInt iNode=0; iNode < (UInt) pFESpacePtr->fe().nbFEDof(); iNode++)
         {
-            int ig = pFESpacePtr->dof().localToGlobal( eleID, iNode + 1 );
+            int ig = pFESpace.dof().localToGlobalMap( eleID, iNode );
             tmpsum += velAndPressure(ig+offset);
             gid0Vec.push_back( p0FESpacePtr->fe().currentId() );
             val0Vec.push_back( tmpsum / (double) pFESpacePtr->fe().nbFEDof() );
         }
     }
-
     P0pres.setCoefficients(gid0Vec, val0Vec);
     P0pres.globalAssemble();
     MPI_Barrier(MPI_COMM_WORLD);

@@ -25,7 +25,7 @@
 //@HEADER
 
 /**
-   @file user_fun.hpp
+   @file
    @author A. Fumagalli <alessio.fumagalli@mail.polimi.it>
    @date 2010-07-29
 */
@@ -59,45 +59,48 @@ typedef boost::numeric::ublas::matrix<Real> Matrix;
 // ===================================================
 
 // Inverse of permeability matrix
-Matrix inversePermeability( const Real&, const Real&, const Real&, const Real&, const std::vector<Real>& );
+Matrix inversePermeability ( const Real&, const Real&, const Real&, const Real&, const std::vector<Real>& );
 
 // Source term
-Real source_in( const Real&, const Real&, const Real&, const Real&, const ID& );
+Real source ( const Real&, const Real&, const Real&, const Real&, const ID& );
+
+// Vector source term
+Vector vectorSource ( const Real&, const Real&, const Real&, const Real&, const ID& );
 
 // Initial time primal variable for transient and non-linear transient solvers
-Real initialPrimal( const Real&, const Real&, const Real&, const Real&, const ID& );
+Real initialPrimal ( const Real&, const Real&, const Real&, const Real&, const ID& );
 
 // Zero iteration primal variable for non-linear solver
-Real primalZeroIteration( const Real&, const Real&, const Real&, const Real&, const ID& );
+Real primalZeroIteration ( const Real&, const Real&, const Real&, const Real&, const ID& );
 
 // Mass function for time dependent problem
-Real mass( const Real&, const Real&, const Real&, const Real&, const ID& );
+Real mass ( const Real&, const Real&, const Real&, const Real&, const ID& );
 
 // ===================================================
 //!                    Boundary data
 // ===================================================
 
 // Boundary condition of Dirichlet
-Real dirichlet( const Real&, const Real&, const Real&, const Real&, const ID& );
+Real dirichlet ( const Real&, const Real&, const Real&, const Real&, const ID& );
 
 // Boundary condition of Neumann
-Real neumann1( const Real&, const Real&, const Real&, const Real&, const ID& );
+Real neumann1 ( const Real&, const Real&, const Real&, const Real&, const ID& );
 
-Real neumann2( const Real&, const Real&, const Real&, const Real&, const ID& );
+Real neumann2 ( const Real&, const Real&, const Real&, const Real&, const ID& );
 
 // Boundary condition of Robin
-Real robin( const Real&, const Real&, const Real&, const Real&, const ID& );
+Real robin ( const Real&, const Real&, const Real&, const Real&, const ID& );
 
 // ===================================================
 //!                 Analytical solution
 // ===================================================
 
 // Analytical solution
-Real analyticalSolution( const Real&, const Real&, const Real&, const Real&, const ID& );
+Real analyticalSolution ( const Real&, const Real&, const Real&, const Real&, const ID& );
 
 // Gradient of the analytical solution
-Real analyticalFlux( const Real&, const Real&, const Real&, const Real&, const ID& );
+Real analyticalFlux ( const Real&, const Real&, const Real&, const Real&, const ID& );
 
-}
+} // namespace LifeV
 
 #endif /* __user_fun_H */

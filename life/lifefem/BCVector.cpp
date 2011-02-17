@@ -123,7 +123,7 @@ Real
 BCVectorBase::operator() ( const ID& globalDofId, const ID& component ) const
 {
     ASSERT_PRE( this->isFinalized(), "BC Vector should be finalized before being accessed." );
-    return ( *M_rightHandSideVectorPtr ) ( ( component - 1 ) * M_numberOfTotalDof + globalDofId );
+    return ( *M_rightHandSideVectorPtr ) ( component * M_numberOfTotalDof + globalDofId );
 }
 
 
@@ -135,7 +135,7 @@ Real
 BCVectorBase::robinCoeffVector ( const ID& globalDofId, const ID& component ) const
 {
     ASSERT_PRE( this->isFinalized(), "BC Vector should be finalized before being accessed." );
-    return ( *M_robinBoundaryMassCoeffVectorPtr ) ( ( component - 1 ) * M_numberOfTotalDof + globalDofId );
+    return ( *M_robinBoundaryMassCoeffVectorPtr ) ( component * M_numberOfTotalDof + globalDofId );
 }
 
 
@@ -146,7 +146,7 @@ BCVectorBase::betaCoeffVector ( const ID& globalDofId, const ID& component ) con
 
     ASSERT_PRE( this->isFinalized(), "BC Vector should be finalized before being accessed." );
 
-    return ( *M_betaCoeffVectorPtr ) ( ( component - 1 ) * M_numberOfTotalDof + globalDofId );
+    return ( *M_betaCoeffVectorPtr ) ( component * M_numberOfTotalDof + globalDofId );
 }
 
 
@@ -242,8 +242,6 @@ createBCVector( BCVectorBase const* __bc )
 {
     return new BCVector( ( BCVector const& )*__bc );
 }
-// register BCFunctionBase in factory for cloning
-const bool __bcvec = FactoryCloneBCVector::instance().registerProduct( typeid(BCVector), &createBCVector );
 
 
 // ====================================
@@ -292,7 +290,7 @@ Real
 BCVectorInterface::operator() ( const ID& globalDofId, const ID& component ) const
 {
     ASSERT_PRE( this->isFinalized(), "BC Vector should be finalized before being accessed." );
-    return ( *M_rightHandSideVectorPtr ) (( component - 1 ) * M_numberOfTotalDof + M_interfaceDofPtr->getInterfaceDof( globalDofId ));
+    return ( *M_rightHandSideVectorPtr ) ( component * M_numberOfTotalDof + M_interfaceDofPtr->getInterfaceDof( globalDofId ));
 }
 
 // ===================================
@@ -330,7 +328,7 @@ Real
 BCVectorInterface::robinCoeffVector( const ID& globalDofId, const ID& component ) const
 {
     ASSERT_PRE( this->isFinalized(), "BC Vector should be finalized before being accessed." );
-    return ( *M_robinBoundaryMassCoeffVectorPtr ) (( component - 1 ) * M_numberOfTotalDof + M_interfaceDofPtr->getInterfaceDof( globalDofId ));
+    return ( *M_robinBoundaryMassCoeffVectorPtr ) ( component * M_numberOfTotalDof + M_interfaceDofPtr->getInterfaceDof( globalDofId ));
 }
 
 
@@ -338,7 +336,7 @@ Real
 BCVectorInterface::betaCoeffVector( const ID& globalDofId, const ID& component ) const
 {
     ASSERT_PRE( this->isFinalized(), "BC Vector should be finalized before being accessed." );
-    return ( *M_betaCoeffVectorPtr ) (( component - 1 ) * M_numberOfTotalDof + M_interfaceDofPtr->getInterfaceDof( globalDofId ));
+    return ( *M_betaCoeffVectorPtr ) ( component * M_numberOfTotalDof + M_interfaceDofPtr->getInterfaceDof( globalDofId ));
 }
 
 
@@ -361,7 +359,5 @@ createBCVectorInterface( BCVectorBase const* bcVectorBase )
     return new BCVectorInterface( ( BCVectorInterface const& )* bcVectorBase );
 }
 
-// register BCFunctionBase in factory for cloning
-const bool bcVectorBase = FactoryCloneBCVector::instance().registerProduct( typeid(BCVectorInterface), &createBCVectorInterface );
 
 }

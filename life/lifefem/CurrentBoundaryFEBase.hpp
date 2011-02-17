@@ -230,7 +230,7 @@ public:
     //! Values of the basis functions on quadrature points
     const Real& phi(const UInt& i, const UInt& iQuadPt) const
     {
-        return M_phi(int(i),int(iQuadPt));
+    	return M_phi(int(i),int(iQuadPt));
     }
 
     //! Values of the derivatives of the basis functions on quadrature points on the reference finite element

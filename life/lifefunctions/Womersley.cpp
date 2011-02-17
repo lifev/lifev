@@ -53,11 +53,11 @@ Real Womersley::uexact( const Real& t, const Real& /*x*/, const Real& y, const R
 	cbessjy01(z2, b2, S_cj1, S_cy0, S_cy1, S_cj0p, S_cj1p, S_cy0p, S_cy1p);
 	Real u = real(S_A/S_L/S_rho/S_wi*(1.-b2/S_b1)*exp(S_wi*t));
     switch(i) {
-        case 1:  //u_1
+        case 0:  //u_1
             return u;//-4*x*y*y; //u-4*x*y*y;
-        case 2:  //u_2
+        case 1:  //u_2
             return 0;//y*y*y;
-        case 3:
+        case 2:
         	return 0;
         default:
             exit(1);
@@ -79,35 +79,35 @@ Real Womersley::grad_u( const UInt& icoor, const Real& t, const Real& /*x*/, con
 	Real u_r = real(S_A/S_L/S_rho/S_wi*+b2/S_b1*exp(S_wi*t));
 
 	switch(icoor) {
-		case 1:
+		case 0:
 			switch(i) {
+			case 0:
+				return 0;
 			case 1:
 				return 0;
 			case 2:
 				return 0;
-			case 3:
-				return 0;
 			default:
 				exit(1);
 			 }
-		case 2:   // u_y
+		case 1:   // u_y
 			switch(i) {
-	        case 1:
+	        case 0:
 	            return u_r/r*y;
-	        case 2:
+	        case 1:
 	            return 0;
-	        case 3:
+	        case 2:
 	        	return 0;
 	        default:
 	            exit(1);
 			}
-		case 3:
+		case 2:
 			switch(i) {
-	        case 1:
+	        case 0:
 	            return u_r/r*z;
-	        case 2:
+	        case 1:
 	            return 0;
-	        case 3:
+	        case 2:
 	        	return 0;
 	        default:
 	            exit(1);
@@ -119,11 +119,11 @@ Real Womersley::grad_u( const UInt& icoor, const Real& t, const Real& /*x*/, con
 
 Real Womersley::f( const Real& /* t */, const Real&  /*x*/ , const Real&  /*y*/ , const Real& /* z */, const ID& i ) {
 	switch(i) {
+	        case 0:
+	            return 0;
 	        case 1:
 	            return 0;
 	        case 2:
-	            return 0;
-	        case 3:
 	        	return 0;
 	        default:
 	            exit(1);
@@ -137,10 +137,10 @@ Real Womersley::xexact( const Real& t,
                     const ID& i )
 {
     switch(i) {
-        case 1:  //u_1
-        case 2:  //u_2
+        case 0:  //u_1
+        case 1:  //u_2
         	return uexact(t, x, y, z, i);
-        case 3:  //pressure
+        case 2:  //pressure
             return pexact(t, x, y, z, 1);
             break;
         default:
@@ -165,7 +165,7 @@ Real Womersley::u0( const Real& t, const Real& x, const Real& y, const Real& z, 
 // Initial pressure
 Real Womersley::p0( const Real& t, const Real& x, const Real& y, const Real& z, const ID& /*i*/ )
 {
-    return pexact(t,x,y,z,1);
+    return pexact(t,x,y,z,0);
 }
 
 //we suppose that the problem geometry is the cylinder having axis x, origin (0,0,0), diameter D and height L
@@ -186,13 +186,13 @@ Real Womersley::fNeumann( const Real& t, const Real& x, const Real& y, const Rea
     }
 
     for (UInt k =0; k< nDimensions; k++)  //mu gradu n
-        out += S_mu* grad_u(k+1, t, x, y, z, i)*n[k];
+        out += S_mu* grad_u(k, t, x, y, z, i)*n[k];
 
     if(S_flagStrain)
     	for (UInt k =0; k< nDimensions; k++)  //mu gradu^T n
-    		out += S_mu* grad_u(i, t, x, y, z, k+1)*n[k];
+    		out += S_mu* grad_u(i, t, x, y, z, k)*n[k];
 
-    out -= pexact(t, x, y, z, i) * n[i-1];
+    out -= pexact(t, x, y, z, i) * n[i];
 
 
     return  out;
@@ -214,7 +214,7 @@ Real Womersley::normalVector( const Real& /*t*/, const Real& x, const Real& y,
         // std::cout << "strange point: x=" << x << " y=" << y << " z=" << z
         //          << std::endl;
     }
-    return n[i-1];
+    return n[i];
 };
 
 //we suppose that the problem geometry is the cylinder having axis x, origin (0,0,0), diameter D and height L
@@ -235,11 +235,11 @@ Real Womersley::fShearStress( const Real& t, const Real& x, const Real& y, const
     }
 
     for (UInt k =0; k< nDimensions; k++)  //mu gradu n
-        out += S_mu* grad_u(k+1, t, x, y, z, i)*n[k];
+        out += S_mu* grad_u(k, t, x, y, z, i)*n[k];
 
     if(S_flagStrain)
         for (UInt k =0; k< nDimensions; k++)  //mu gradu^T n
-            out += S_mu* grad_u(i, t, x, y, z, k+1)*n[k];
+            out += S_mu* grad_u(i, t, x, y, z, k)*n[k];
 
     return  out;
 }
@@ -268,9 +268,9 @@ Real Womersley::fWallShearStress( const Real& t, const Real& x, const Real& y, c
     wss = fShearStress(t, x, y, z, i);
 
     for (UInt k =0; k< nDimensions; k++) // ( s_n \cdot n )
-        s_n_n += fShearStress(t, x, y, z, k+1) * n[k];
+        s_n_n += fShearStress(t, x, y, z, k) * n[k];
 
-    wss -= s_n_n * n[i-1];
+    wss -= s_n_n * n[i];
 
     return  wss;
 }

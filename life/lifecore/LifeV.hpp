@@ -93,6 +93,7 @@
 #include <numeric>
 #include <iosfwd>
 #include <string>
+#include <limits>
 
 #include <life/lifecore/LifeAssert.hpp>
 
@@ -159,11 +160,15 @@ typedef int32_type  Int;
 //! generic unsigned integer (used mainly for addressing)
 typedef uint32_type UInt;
 
-//! IDs (which starts ALWAYS from 1)
+//! IDs
 typedef uint32_type ID;
 
 // For now only 3 dimensional problems.
 extern const UInt nDimensions;
+
+// used to denote an ID not set. We use max of Int (instead of UInt) since
+// MPI does not have the UInt type.
+const ID NotAnId = std::numeric_limits<Int>::max();
 #define NDIM 3
 
 } // end namespace LifeV

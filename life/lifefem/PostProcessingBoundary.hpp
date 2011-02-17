@@ -435,7 +435,7 @@ void PostProcessingBoundary<MeshType>::buildVectors()
     for (UInt iFESpace=0; iFESpace<M_numFESpaces; ++iFESpace)
     {
 
-        numBoundaryDofVector[iFESpace] = 1;
+        numBoundaryDofVector[iFESpace] = 0;
 
         // Some useful local variables, to save some typing
         M_numDofPerVertexVector[iFESpace] = M_dofPtrVector[iFESpace]->localDofPattern().nbDofPerVertex(); // number of DOF per vertices
@@ -461,13 +461,13 @@ void PostProcessingBoundary<MeshType>::buildVectors()
     // ===================================================
     // Loop on boundary faces
     // ===================================================
-    for ( ID iboundaryFace = 1 ; iboundaryFace <= M_numBoundaryFaces; ++iboundaryFace )
+    for ( ID iboundaryFace = 0 ; iboundaryFace < M_numBoundaryFaces; ++iboundaryFace )
     {
 
         iFirstAdjacentElement = M_meshPtr->bElement( iboundaryFace ).firstAdjacentElementIdentity();  // id of the element adjacent to the face
         iFaceLocalId = M_meshPtr->bElement( iboundaryFace ).firstAdjacentElementPosition(); // local id of the face in its adjacent element
 
-        boundaryFlag = M_meshPtr->bElement(iboundaryFace).marker();
+        boundaryFlag = M_meshPtr->bElement(iboundaryFace ).marker();
         M_boundaryMarkerToFacetIdMap[boundaryFlag].push_back( iboundaryFace ); // fill the flag-to-faceIdList map
 
         for (UInt iFESpace=0; iFESpace<M_numFESpaces; ++iFESpace)
@@ -486,17 +486,17 @@ void PostProcessingBoundary<MeshType>::buildVectors()
             {
 
                 // loop on face vertices
-                for ( ID iVertexPerFace = 1; iVertexPerFace <= M_numVerticesPerFace; ++iVertexPerFace )
+                for ( ID iVertexPerFace = 0; iVertexPerFace < M_numVerticesPerFace; ++iVertexPerFace )
                 {
                 	// local vertex number (in element)
                     iVertexLocalId = elementGeometricShape_Type::faceToPoint( iFaceLocalId, iVertexPerFace );
 
                     // Loop number of DOF per vertex
-                    for ( ID localDof = 1; localDof <= M_numDofPerVertexVector[iFESpace]; ++localDof )
+                    for ( ID localDof = 0; localDof < M_numDofPerVertexVector[iFESpace]; ++localDof )
                     {
-                        dofLocalId = ( iVertexPerFace - 1 ) * M_numDofPerVertexVector[iFESpace] + localDof ; // local Dof
-                        dofGlobalId = M_dofPtrVector[iFESpace]->localToGlobal(
-                        		iFirstAdjacentElement, ( iVertexLocalId - 1 ) * M_numDofPerVertexVector[iFESpace] + localDof ); // global Dof
+                        dofLocalId = iVertexPerFace * M_numDofPerVertexVector[iFESpace] + localDof ; // local Dof
+                        dofGlobalId = M_dofPtrVector[iFESpace]->localToGlobalMap(
+                        		iFirstAdjacentElement, ( iVertexLocalId ) * M_numDofPerVertexVector[iFESpace] + localDof ); // global Dof
                         dofGlobalIdVectorIterator = find(
                         		M_dofGlobalIdVector[iFESpace].begin(), M_dofGlobalIdVector[iFESpace].end(), dofGlobalId );
                         if ( dofGlobalIdVectorIterator == M_dofGlobalIdVector[iFESpace].end() )
@@ -507,7 +507,7 @@ void PostProcessingBoundary<MeshType>::buildVectors()
                         }
                         else
                         { // the dofGlobalId has been already inserted in the M_dofGlobalIdVector vector
-                            dofAuxiliaryId = ( ID ) ( ( dofGlobalIdVectorIterator - M_dofGlobalIdVector[iFESpace].begin() ) ) + 1;
+                            dofAuxiliaryId = ( ID ) ( ( dofGlobalIdVectorIterator - M_dofGlobalIdVector[iFESpace].begin() ) );
                             boundaryDofGlobalIdVector( dofLocalId ) = dofAuxiliaryId; // local to boundary global on this face
                         }
                     }
@@ -519,17 +519,17 @@ void PostProcessingBoundary<MeshType>::buildVectors()
             if ( M_numDofPerEdgeVector[iFESpace] )
             {
                 // loop on face edges
-                for ( ID iEdgePerFace = 1; iEdgePerFace <= M_numVerticesPerFace; ++iEdgePerFace )
+                for ( ID iEdgePerFace = 0; iEdgePerFace < M_numVerticesPerFace; ++iEdgePerFace )
                 {
                 	// local edge number (in element)
                     iEdgeLocalId = elementGeometricShape_Type::faceToEdge( iFaceLocalId, iEdgePerFace ).first;
                     // Loop number of DOF per edge
-                    for ( ID localDof = 1; localDof <= M_numDofPerEdgeVector[iFESpace]; ++localDof )
+                    for ( ID localDof = 0; localDof < M_numDofPerEdgeVector[iFESpace]; ++localDof )
                     {
                         dofLocalId = M_numVertexDofPerFaceVector[iFESpace] +
-                        		( iEdgePerFace - 1 ) * M_numDofPerEdgeVector[iFESpace] + localDof ; // local Dof
-                        dofGlobalId = M_dofPtrVector[iFESpace]->localToGlobal(
-                        		iFirstAdjacentElement, M_numVertexDofPerElement[iFESpace] + ( iEdgeLocalId - 1 ) *
+                        		iEdgePerFace * M_numDofPerEdgeVector[iFESpace] + localDof ; // local Dof
+                        dofGlobalId = M_dofPtrVector[iFESpace]->localToGlobalMap(
+                        		iFirstAdjacentElement, M_numVertexDofPerElement[iFESpace] + iEdgeLocalId *
                         		                       M_numDofPerEdgeVector[iFESpace] + localDof ); // global Dof
                         dofGlobalIdVectorIterator = find(
                         		M_dofGlobalIdVector[iFESpace].begin(), M_dofGlobalIdVector[iFESpace].end(), dofGlobalId );
@@ -541,7 +541,7 @@ void PostProcessingBoundary<MeshType>::buildVectors()
                         }
                         else
                         { // the dofGlobalId has been already inserted in the M_dofGlobalIdVector vector
-                            dofAuxiliaryId = ( ID ) ( dofGlobalIdVectorIterator - M_dofGlobalIdVector[iFESpace].begin() ) + 1;
+                            dofAuxiliaryId = ( ID ) ( dofGlobalIdVectorIterator - M_dofGlobalIdVector[iFESpace].begin() );
                             boundaryDofGlobalIdVector( dofLocalId ) = dofAuxiliaryId; // local to boundary global on this face
                         }
                     }
@@ -551,13 +551,13 @@ void PostProcessingBoundary<MeshType>::buildVectors()
             // Face based Dof
             // ===================================================
             // Loop on number of DOF per face
-            for ( ID localDof = 1; localDof <= M_numDofPerFaceVector[iFESpace]; ++localDof )
+            for ( ID localDof = 0; localDof < M_numDofPerFaceVector[iFESpace]; ++localDof )
             {
             	// local Dof
                 dofLocalId = M_numEdgeDofPerFaceVector[iFESpace] + M_numVertexDofPerFaceVector[iFESpace] + localDof;
-                dofGlobalId = M_dofPtrVector[iFESpace]->localToGlobal(
+                dofGlobalId = M_dofPtrVector[iFESpace]->localToGlobalMap(
                 		iFirstAdjacentElement, M_numEdgeDofPerElementVector[iFESpace] + M_numVertexDofPerElement[iFESpace] +
-                		( iFaceLocalId - 1 ) * M_numDofPerFaceVector[iFESpace] + localDof ); // global Dof
+                		iFaceLocalId * M_numDofPerFaceVector[iFESpace] + localDof ); // global Dof
                 dofGlobalIdVectorIterator = find(
                 		M_dofGlobalIdVector[iFESpace].begin(), M_dofGlobalIdVector[iFESpace].end(), dofGlobalId );
                 if ( dofGlobalIdVectorIterator == M_dofGlobalIdVector[iFESpace].end() )
@@ -568,7 +568,7 @@ void PostProcessingBoundary<MeshType>::buildVectors()
                 }
                 else
                 { // the dofGlobalId has been already inserted in the M_dofGlobalIdVector vector
-                    dofAuxiliaryId = ( ID ) ( dofGlobalIdVectorIterator - M_dofGlobalIdVector[iFESpace].begin() ) + 1;
+                    dofAuxiliaryId = ( ID ) ( dofGlobalIdVectorIterator - M_dofGlobalIdVector[iFESpace].begin() ) ;
                     boundaryDofGlobalIdVector( dofLocalId ) = dofAuxiliaryId; // local to boundary global on this face
                 }
             }
@@ -657,7 +657,7 @@ Real PostProcessingBoundary<MeshType>::flux( const VectorType& field, const enti
     {
 
         // Updating quadrature data on the current face
-        M_currentBdFEPtrVector[feSpace]->updateMeasNormalQuadPt(M_meshPtr->bElement(*j));
+        M_currentBdFEPtrVector[feSpace]->updateMeasNormalQuadPt(M_meshPtr->bElement(*j) );
 
         // Quadrature formula
         // Loop on quadrature points
@@ -671,19 +671,19 @@ Real PostProcessingBoundary<MeshType>::flux( const VectorType& field, const enti
 
                 // Interpolation
                 // Loop on local dof
-                for (ID iDof=1; iDof<=M_numTotalDofPerFaceVector[feSpace]; ++iDof)
+                for (ID iDof=0; iDof<M_numTotalDofPerFaceVector[feSpace]; ++iDof)
                 {
 
                     // Extracting nodal values of field in the current face
-                    dofVectorIndex = M_vectorNumberingPerFacetVector[feSpace][ ( UInt ) *j - 1 ][ iDof - 1 ];
-                    dofGlobalId = M_dofGlobalIdVector[feSpace][dofVectorIndex-1]; // this is in the GLOBAL mesh
+                    dofVectorIndex = M_vectorNumberingPerFacetVector[feSpace][ ( UInt ) *j ][ iDof ];
+                    dofGlobalId = M_dofGlobalIdVector[feSpace][dofVectorIndex]; // this is in the GLOBAL mesh
 
-                    localFieldVector[iComponent*M_numTotalDofPerFaceVector[feSpace]+iDof-1] =
+                    localFieldVector[iComponent*M_numTotalDofPerFaceVector[feSpace]+iDof] =
                     		field[iComponent*M_numTotalDofVector[feSpace]+dofGlobalId];
 
                     fluxScatter += M_currentBdFEPtrVector[feSpace]->weightMeas(iq)
-                                    * localFieldVector[iComponent*M_numTotalDofPerFaceVector[feSpace]+iDof-1]
-                                    * M_currentBdFEPtrVector[feSpace]->phi(Int(iDof-1),iq)
+                                    * localFieldVector[iComponent*M_numTotalDofPerFaceVector[feSpace]+iDof]
+                                    * M_currentBdFEPtrVector[feSpace]->phi(Int(iDof),iq)
                                     * M_currentBdFEPtrVector[feSpace]->normal(Int(iComponent),iq);
                 }
             }
@@ -736,7 +736,7 @@ Vector PostProcessingBoundary<MeshType>::average( const VectorType& field, const
         for ( UInt iComponent=0; iComponent < nDim; ++iComponent ) localField[iComponent] = 0.;
 
         // Updating quadrature data on the current face
-        M_currentBdFEPtrVector[feSpace]->updateMeasNormalQuadPt(M_meshPtr->bElement(*j));
+        M_currentBdFEPtrVector[feSpace]->updateMeasNormalQuadPt(M_meshPtr->bElement(*j) );
 
         // Loop on components
         for (UInt iComponent =0; iComponent<nDim; ++iComponent)
@@ -749,18 +749,18 @@ Vector PostProcessingBoundary<MeshType>::average( const VectorType& field, const
 
                 // Interpolation
                 // Loop on local dof
-                for (ID iDof=1; iDof<=M_numTotalDofPerFaceVector[feSpace]; ++iDof)
+                for (ID iDof=0; iDof<M_numTotalDofPerFaceVector[feSpace]; ++iDof)
                 {
 
                     // Extracting nodal values of field in the current face
-                    dofVectorIndex = M_vectorNumberingPerFacetVector[feSpace][ ( UInt ) *j - 1 ][ iDof - 1 ];
-                    dofGlobalId = M_dofGlobalIdVector[feSpace][dofVectorIndex-1]; // this is in the GLOBAL mesh
+                    dofVectorIndex = M_vectorNumberingPerFacetVector[feSpace][ ( UInt ) *j ][ iDof];
+                    dofGlobalId = M_dofGlobalIdVector[feSpace][dofVectorIndex]; // this is in the GLOBAL mesh
 
                     // basic policy for type VectorType: operator[] available
-                    localFieldVector[iDof-1] = field[iComponent*M_numTotalDofVector[feSpace]+dofGlobalId];
+                    localFieldVector[iDof] = field[iComponent*M_numTotalDofVector[feSpace]+dofGlobalId];
 
                     localField[iComponent] += M_currentBdFEPtrVector[feSpace]->weightMeas(iq)
-                                    * localFieldVector[iDof-1] * M_currentBdFEPtrVector[feSpace]->phi(Int(iDof-1),iq);
+                                    * localFieldVector[iDof] * M_currentBdFEPtrVector[feSpace]->phi(Int(iDof),iq);
                 }
             }
             // Computing the field integral over the boundary faces
@@ -800,18 +800,18 @@ void PostProcessingBoundary<MeshType>::computePatchesMeasure()
         // ===================================================
         // Loop on boundary faces
         // ===================================================
-        for ( ID iboundaryFace = 1 ; iboundaryFace <= M_numBoundaryFaces; ++iboundaryFace )
+        for ( ID iboundaryFace = 0 ; iboundaryFace < M_numBoundaryFaces; ++iboundaryFace )
         {
         	// updating finite element information
             M_currentBdFEPtrVector[iFESpace]->updateMeas( M_meshPtr->bElement( iboundaryFace ) );
 
             localMeasure = M_currentBdFEPtrVector[iFESpace]->measure();
             // Loop on the total DOF per Face
-            for ( ID iDof = 1; iDof <= M_numTotalDofPerFaceVector[iFESpace]; ++iDof )
+            for ( ID iDof = 0; iDof < M_numTotalDofPerFaceVector[iFESpace]; ++iDof )
             {
                 // Extracting local ID of iDof
-                dofVectorIndex = M_vectorNumberingPerFacetVector[iFESpace][ iboundaryFace - 1 ][ iDof - 1 ];
-                M_patchMeasureVector[iFESpace][dofVectorIndex-1] += localMeasure;
+                dofVectorIndex = M_vectorNumberingPerFacetVector[iFESpace][ iboundaryFace ][ iDof];
+                M_patchMeasureVector[iFESpace][dofVectorIndex] += localMeasure;
             }
         }
     }
@@ -825,13 +825,13 @@ void PostProcessingBoundary<MeshType>::showPatchesMeasure( std::ostream& output 
 
         output << "\n***** Post Proc: Measure of the patches *****"
                   << "\n\tfor variable " << iFESpace << std::endl;
-        ID counter = 1;
+        ID counter = 0;
 
         for ( Vector::const_iterator it = M_patchMeasureVector[iFESpace].begin();
         		it!=M_patchMeasureVector[iFESpace].end(); it++ )
         {
             output << "Boundary DOF: " << counter
-                      << ", corresponding to Global DOF: " << M_dofGlobalIdVector[iFESpace][ counter - 1 ]
+                      << ", corresponding to Global DOF: " << M_dofGlobalIdVector[iFESpace][ counter ]
                       << " has patch measure: " << *it << std::endl;
             counter++;
         }
@@ -893,7 +893,7 @@ void PostProcessingBoundary<MeshType>::computePatchesNormal()
         // ===================================================
         // Loop on boundary faces
         // ===================================================
-        for ( ID iboundaryFace = 1 ; iboundaryFace <= M_numBoundaryFaces; ++iboundaryFace )
+        for ( ID iboundaryFace = 0 ; iboundaryFace < M_numBoundaryFaces; ++iboundaryFace )
         {
             // updating finite element information
             M_currentBdFEPtrVector[iFESpace]->updateMeasNormal( M_meshPtr->bElement( iboundaryFace ) );
@@ -909,11 +909,11 @@ void PostProcessingBoundary<MeshType>::computePatchesNormal()
                     sum += M_currentBdFEPtrVector[iFESpace]->normal( iComponent, iQuadraturePoint ) *
                     		M_currentBdFEPtrVector[iFESpace]->weightMeas( iQuadraturePoint );
                 }
-                for ( ID iDof = 1; iDof <= M_numTotalDofPerFaceVector[iFESpace]; ++iDof )
+                for ( ID iDof = 0; iDof < M_numTotalDofPerFaceVector[iFESpace]; ++iDof )
                 {
                     // Extracting local ID of iDof
-                    dofVectorIndex = M_vectorNumberingPerFacetVector[iFESpace][ iboundaryFace - 1 ][ iDof - 1 ];
-                    M_patchNormalVector[iFESpace][ iComponent * M_numBoundaryDofVector[iFESpace] + dofVectorIndex - 1 ] += sum;
+                    dofVectorIndex = M_vectorNumberingPerFacetVector[iFESpace][ iboundaryFace ][ iDof ];
+                    M_patchNormalVector[iFESpace][ iComponent * M_numBoundaryDofVector[iFESpace] + dofVectorIndex ] += sum;
                 }
             }
         }
@@ -937,18 +937,18 @@ void PostProcessingBoundary<MeshType>::showPatchesNormal( std::ostream& output )
         output << "\n***** Post Proc: Normal vector on the patches *****"
                   << "\n\tfor variable " << iFESpace << std::endl;
 
-        ID counter = 1;
+        ID counter = 0;
 
         for ( Vector::const_iterator it = M_patchMeasureVector[iFESpace].begin();
         		it!=M_patchMeasureVector[iFESpace].end(); it++ )
         {
             output << "Boundary DOF: " << counter
-                      << ", corresponding to Global DOF: " << M_dofGlobalIdVector[iFESpace][ counter - 1 ]
+                      << ", corresponding to Global DOF: " << M_dofGlobalIdVector[iFESpace][ counter ]
                       << " has patch measure: " << *it << std::endl;
             output << "and normal components " ;
             for ( Int iComponent = 0; iComponent<NDIM; iComponent++ )
                 output <<
-                M_patchNormalVector[iFESpace][ iComponent * M_numBoundaryDofVector[iFESpace] + counter - 1 ] << " ";
+                M_patchNormalVector[iFESpace][ iComponent * M_numBoundaryDofVector[iFESpace] + counter ] << " ";
 
             output << std::endl;
             counter++;
@@ -978,25 +978,25 @@ void PostProcessingBoundary<MeshType>::computePatchesPhi()
         // ===================================================
         // Loop on boundary faces
         // ===================================================
-        for ( ID iboundaryFace = 1 ; iboundaryFace <= M_numBoundaryFaces; ++iboundaryFace )
+        for ( ID iboundaryFace = 0 ; iboundaryFace < M_numBoundaryFaces; ++iboundaryFace )
         {
         	// updating finite element information
             M_currentBdFEPtrVector[iFESpace]->updateMeas( M_meshPtr->bElement( iboundaryFace ) );
 
-            for ( ID iDof = 1; iDof <= M_numTotalDofPerFaceVector[iFESpace]; ++iDof )
+            for ( ID iDof = 0; iDof < M_numTotalDofPerFaceVector[iFESpace]; ++iDof )
             {
                 sum = 0.0;
                 // global dof
-                dofVectorIndex = M_vectorNumberingPerFacetVector[iFESpace][ ( UInt ) iboundaryFace - 1 ][ iDof - 1 ];
+                dofVectorIndex = M_vectorNumberingPerFacetVector[iFESpace][ iboundaryFace ][ iDof ];
 
                 // Loop on the quadrature points
                 for ( UInt iQuadraturePoint = 0; iQuadraturePoint < M_currentBdFEPtrVector[iFESpace]->nbQuadPt();
                 		++iQuadraturePoint )
                 {
-                    sum += M_currentBdFEPtrVector[iFESpace]->phi( ( Int ) ( iDof - 1 ), iQuadraturePoint )
+                    sum += M_currentBdFEPtrVector[iFESpace]->phi( ( Int ) ( iDof), iQuadraturePoint )
                     		* M_currentBdFEPtrVector[iFESpace]->weightMeas( iQuadraturePoint );
                 }
-                M_patchIntegratedPhiVector[iFESpace][ dofVectorIndex - 1 ] += sum;
+                M_patchIntegratedPhiVector[iFESpace][ dofVectorIndex ] += sum;
             }
         }
     }
@@ -1017,8 +1017,8 @@ void PostProcessingBoundary<MeshType>::showPatchesPhi( std::ostream& output ) co
         for ( Vector::const_iterator it = M_patchMeasureVector[iFESpace].begin();
         		it!=M_patchMeasureVector[iFESpace].end(); it++ )
         {
-            output << "Boundary DOF: " << counter + 1
-                      << ", corresponding to Global DOF: " << M_dofGlobalIdVector[iFESpace][ counter - 1 ]
+            output << "Boundary DOF: " << counter
+                      << ", corresponding to Global DOF: " << M_dofGlobalIdVector[iFESpace][ counter ]
                       << " has patch measure: " << *it << std::endl;
             output << "and average phi  " << M_patchIntegratedPhiVector[iFESpace][ counter ] << std::endl ;
             counter++;
@@ -1065,7 +1065,7 @@ VectorType PostProcessingBoundary<MeshType>::compute_sstress( const VectorType& 
         coef[0] = 1.;
         index[0] = counter;
         coef[1] = 1./ M_patchIntegratedPhiVector[0][counter];
-        index[1] = dofGlobalId - 1;
+        index[1] = dofGlobalId;
 
         for ( UInt ind_comp = 0; ind_comp < ncomp; ++ind_comp )
         {
@@ -1123,9 +1123,9 @@ VectorType PostProcessingBoundary<MeshType>::compute_stress( const VectorType& g
             {
                 stress[ bound_dof + scomp*M_numBoundaryDofVector[0] ] += visc *
                                                           // grad!
-                                                          ( grad[ dofGlobalId-1 + ncomp*dim + scomp*nDimensions*dim ] +
+                                                          ( grad[ dofGlobalId + ncomp*dim + scomp*nDimensions*dim ] +
                                                             // transpose grad!
-                                                            grad[ dofGlobalId-1 + scomp*dim + ncomp*nDimensions*dim ] )
+                                                            grad[ dofGlobalId + scomp*dim + ncomp*nDimensions*dim ] )
                                                           * M_patchNormalVector[ bound_dof + ncomp*M_numBoundaryDofVector[0] ];
             }
     }

@@ -22,24 +22,23 @@
 
 SUFFIXES	= .cpp .hpp .idl .c .h .f .F .o .moc
 
-DO_NOT_COMPILE= example_cavity \
-				example_masstransport \
-                example_ML \
-                unmaintained_ct \
-                unmaintained_rk
-                
-
 SUBDIRS		=  benchmark_RossEthierSteinman \
+               example_cavity \
                example_cylinder \
                example_heart \
                example_impes \
+               example_ML \
                example_NavierStokesRestart \
                example_ns_flux \
                example_nsResistanceBC \
                utility_converterGetPot2Teuchos \
                utility_fsiCutter \
-               utility_meshReorder
-              
+               utility_meshReorder \
+               unmaintained_ct \
+               unmaintained_masstransport \
+               unmaintained_rk
+
+
 
 
 
@@ -56,7 +55,7 @@ $(srcdir)/package.m4: $(top_srcdir)/configure.in.in
 
 EXTRA_DIST =
 
-EXAMPLES = $(srcdir)/examples
+#EXAMPLES = $(srcdir)/examples
 check-local:
 
 

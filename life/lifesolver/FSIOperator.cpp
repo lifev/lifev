@@ -533,7 +533,7 @@ FSIOperator::updateSystem( )
 
         if ( M_fluid->solution().get() )
             M_un.reset( new vector_Type( *M_fluid->solution() ) );
-	M_bdf->updateRHSContribution( M_data->dataFluid()->dataTime()->timeStep() );
+        M_bdf->updateRHSContribution( M_data->dataFluid()->dataTime()->timeStep() );
         *M_rhs = M_fluid->matrixMass()*M_bdf->rhsContributionFirstDerivative();
     }
 
@@ -633,7 +633,6 @@ void FSIOperator::createInterfaceMaps( std::map<ID, ID> const& locDofMap )
     M_fluidInterfaceMap.reset( new MapEpetra( -1,
                                               static_cast<int>(dofInterfaceFluid.size()),
                                               pointerToDofs,
-                                              1,
                                               M_epetraWorldComm ));
     disp.leaderPrint("done\n");
     M_epetraWorldComm->Barrier();
@@ -662,7 +661,6 @@ void FSIOperator::createInterfaceMaps( std::map<ID, ID> const& locDofMap )
     M_solidInterfaceMap.reset( new MapEpetra( -1,
                                               static_cast<int>(dofInterfaceSolid.size()),
                                               pointerToDofs,
-                                              1,
                                               M_epetraWorldComm ));
 
     M_epetraWorldComm->Barrier();
@@ -961,8 +959,8 @@ FSI::displacementOnInterface()
 //     vector_Type dispOnInterface();
 // //@     dispOnInterface = ZeroVector(dispOnInterface.size());
 
-//  //    FOR_EACH_INTERFACE_DOF( dispOnInterface[IDsolid - 1 + jDim*totalDofSolid] =
-// //                             M_solid->disp()[IDsolid - 1 + jDim*totalDofSolid]);
+//  //    FOR_EACH_INTERFACE_DOF( dispOnInterface[IDsolid + jDim*totalDofSolid] =
+// //                             M_solid->disp()[IDsolid + jDim*totalDofSolid]);
 
 //     Real norminf;
 //     Real norm2;
@@ -1376,7 +1374,7 @@ FSIOperator::interpolateVelocity( const vector_Type& _vec1, vector_Type& _vec2 )
     ID lDof;
 
     // Loop on elements of the mesh
-    for ( ID iElem = 1; iElem <= M_uFESpace->mesh()->numVolumes(); ++iElem )
+    for ( ID iElem = 0; iElem < M_uFESpace->mesh()->numVolumes(); ++iElem )
     {
         UInt elemId = M_uFESpace->mesh()->volume( iElem ).localId();
         if (elemId != iElem)
@@ -1388,25 +1386,25 @@ FSIOperator::interpolateVelocity( const vector_Type& _vec1, vector_Type& _vec2 )
             {
                 wLoc( icmp * nDofElemMesh + idof ) =
                     _vec1( icmp * M_mmFESpace->dof().numTotalDof()
-                           + M_mmFESpace->dof().localToGlobal( iElem, idof + 1));
+                           + M_mmFESpace->dof().localToGlobalMap( iElem, idof));
             }
         // Vertex based Dof
         if ( nDofpV )
         {
 
             // loop on element vertices
-            for ( ID iVe = 1; iVe <= nElemV; ++iVe )
+            for ( ID iVe = 0; iVe < nElemV; ++iVe )
             {
 
                 // Loop number of DOF per vertex
-                for ( ID l = 1; l <= nDofpV; ++l )
+                for ( ID l = 0; l < nDofpV; ++l )
                 {
-                    lDof = ( iVe - 1 ) * nDofpV + l; // Local dof in this element
+                    lDof = iVe * nDofpV + l; // Local dof in this element
 
                     // Nodal coordinates
-                    x = M_uFESpace->refFE().xi( lDof - 1 );
-                    y = M_uFESpace->refFE().eta( lDof - 1 );
-                    z = M_uFESpace->refFE().zeta( lDof - 1 );
+                    x = M_uFESpace->refFE().xi( lDof );
+                    y = M_uFESpace->refFE().eta( lDof );
+                    z = M_uFESpace->refFE().zeta( lDof );
 
                     // Loop on data vector components
                     for ( UInt icmp = 0; icmp < nDimensions; ++icmp )
@@ -1418,7 +1416,7 @@ FSIOperator::interpolateVelocity( const vector_Type& _vec1, vector_Type& _vec2 )
                             __sum += wLoc( icmp * nDofElemMesh + idof ) * M_mmFESpace->refFE().phi( idof, x, y, z );
 
                         // Updating interpolated mesh velocity
-                        int iDof = icmp * M_uFESpace->dof().numTotalDof() + M_uFESpace->dof().localToGlobal( iElem, lDof  );
+                        int iDof = icmp * M_uFESpace->dof().numTotalDof() + M_uFESpace->dof().localToGlobalMap( iElem, lDof  );
                         _vec2.setCoefficient( iDof ,__sum);
 
                     }
@@ -1431,18 +1429,18 @@ FSIOperator::interpolateVelocity( const vector_Type& _vec1, vector_Type& _vec2 )
         {
 
             // loop on element edges
-            for ( ID iEd = 1; iEd <= nElemE; ++iEd )
+            for ( ID iEd = 0; iEd < nElemE; ++iEd )
             {
 
                 // Loop number of DOF per edge
-                for ( ID l = 1; l <= nDofpE; ++l )
+                for ( ID l = 0; l < nDofpE; ++l )
                 {
-                    lDof = nDofElemV + ( iEd - 1 ) * nDofpE + l; // Local dof in the adjacent Element
+                    lDof = nDofElemV + iEd * nDofpE + l; // Local dof in the adjacent Element
 
                     // Nodal coordinates
-                    x = M_uFESpace->refFE().xi( lDof - 1 );
-                    y = M_uFESpace->refFE().eta( lDof - 1 );
-                    z = M_uFESpace->refFE().zeta( lDof - 1 );
+                    x = M_uFESpace->refFE().xi( lDof );
+                    y = M_uFESpace->refFE().eta( lDof );
+                    z = M_uFESpace->refFE().zeta( lDof );
 
                     // Loop on data vector components
                     for ( UInt icmp = 0; icmp < nDimensions; ++icmp )
@@ -1454,7 +1452,7 @@ FSIOperator::interpolateVelocity( const vector_Type& _vec1, vector_Type& _vec2 )
                             __sum += wLoc( icmp * nDofElemMesh + idof ) * M_mmFESpace->refFE().phi( idof, x, y, z ); // Problem here with P2
 
                         // Updating interpolating vector
-                        int iDof = icmp * M_uFESpace->dof().numTotalDof() + M_uFESpace->dof().localToGlobal( iElem, lDof );
+                        int iDof = icmp * M_uFESpace->dof().numTotalDof() + M_uFESpace->dof().localToGlobalMap( iElem, lDof );
                         _vec2.setCoefficient( iDof ,__sum);
 
                     }
@@ -1467,19 +1465,19 @@ FSIOperator::interpolateVelocity( const vector_Type& _vec1, vector_Type& _vec2 )
         {
 
             // loop on element faces
-            for ( ID iFa = 1; iFa <= nElemF; ++iFa )
+            for ( ID iFa = 0; iFa < nElemF; ++iFa )
             {
 
                 // Loop on number of DOF per face
-                for ( ID l = 1; l <= nDofpF; ++l )
+                for ( ID l = 0; l < nDofpF; ++l )
                 {
 
-                    lDof = nDofElemE + nDofElemV + ( iFa - 1 ) * nDofpF + l; // Local dof in the adjacent Element
+                    lDof = nDofElemE + nDofElemV + iFa  * nDofpF + l; // Local dof in the adjacent Element
 
                     // Nodal coordinates
-                    x = M_uFESpace->refFE().xi( lDof - 1 );
-                    y = M_uFESpace->refFE().eta( lDof - 1 );
-                    z = M_uFESpace->refFE().zeta( lDof - 1 );
+                    x = M_uFESpace->refFE().xi( lDof );
+                    y = M_uFESpace->refFE().eta( lDof );
+                    z = M_uFESpace->refFE().zeta( lDof );
 
                     // Loop on data vector components
                     for ( UInt icmp = 0; icmp < nDimensions; ++icmp )
@@ -1491,7 +1489,7 @@ FSIOperator::interpolateVelocity( const vector_Type& _vec1, vector_Type& _vec2 )
                             __sum += wLoc( icmp * nDofElemMesh + idof ) * M_mmFESpace->refFE().phi( idof, x, y, z ); // Problem here with P2
 
                         // Updating interpolating vector
-                        int iDof = icmp * M_uFESpace->dof().numTotalDof() + M_uFESpace->dof().localToGlobal( iElem, lDof + 1);
+                        int iDof = icmp * M_uFESpace->dof().numTotalDof() + M_uFESpace->dof().localToGlobalMap( iElem, lDof );
                         _vec2.setCoefficient( iDof ,__sum);
                     }
                 }
@@ -1500,14 +1498,14 @@ FSIOperator::interpolateVelocity( const vector_Type& _vec1, vector_Type& _vec2 )
 
         // Element based Dof
         // Loop on number of DOF per Element
-        for ( ID l = 1; l <= nDofpEl; ++l )
+        for ( ID l = 0; l < nDofpEl; ++l )
         {
             lDof = nDofElemF + nDofElemE + nDofElemV + l; // Local dof in the Element
 
             // Nodal coordinates
-            x = M_uFESpace->refFE().xi( lDof - 1 );
-            y = M_uFESpace->refFE().eta( lDof - 1 );
-            z = M_uFESpace->refFE().zeta( lDof - 1 );
+            x = M_uFESpace->refFE().xi( lDof );
+            y = M_uFESpace->refFE().eta( lDof );
+            z = M_uFESpace->refFE().zeta( lDof );
 
             // Loop on data vector components
             for ( UInt icmp = 0; icmp < nDimensions; ++icmp )
@@ -1522,7 +1520,7 @@ FSIOperator::interpolateVelocity( const vector_Type& _vec1, vector_Type& _vec2 )
 //                std::cout << M_uFESpace->dof().localToGlobal( elemId, lDof ) << " ";
 //                std::cout << icmp * M_uFESpace->dof().numTotalDof() + M_uFESpace->dof().localToGlobal( elemId, lDof ) << std::endl;
 
-                int iDof = icmp * M_uFESpace->dof().numTotalDof() + M_uFESpace->dof().localToGlobal( elemId, lDof );
+                int iDof = icmp * M_uFESpace->dof().numTotalDof() + M_uFESpace->dof().localToGlobalMap( elemId, lDof );
                 _vec2.setCoefficient( iDof, __sum);
             }
         }
@@ -1601,13 +1599,14 @@ FSIOperator::interpolateInterfaceDofs( const FESpace<mesh_Type, MapEpetra>& _fes
     if (nDofPerVert1 && nDofPerVert2)
     {
         //            std::cout << "  -> both FESpace have unknowns on their nodes" << std::endl;
-        for ( ID iVert = 1; iVert <= _fespace1.mesh()->numVertices(); ++iVert )
+        for ( ID iVert = 0; iVert < _fespace1.mesh()->numVertices(); ++iVert )
         {
             if ((int)_fespace1.mesh()->pointList(iVert).marker() != M_data->fluidInterfaceFlag()) continue;
 
             ID nodeID = _fespace1.mesh()->pointList(iVert).id();
             // Loop number of DOF per vertex
-            for ( ID l = 1; l <= nDofPerVert1; ++l )
+            //TODO check this, loop does not depend on l
+            for ( ID l = 0; l < nDofPerVert1; ++l )
             {
                 // Loop on data vector components
                 for ( UInt icmp = 0; icmp < nDimensions; ++icmp )
@@ -1630,7 +1629,7 @@ FSIOperator::interpolateInterfaceDofs( const FESpace<mesh_Type, MapEpetra>& _fes
     if ( nDofPerEdge1 )
     {
         // loop on boundary edges
-        for ( ID iEdge = 1; iEdge <= nBEdges1; ++iEdge )
+        for ( ID iEdge = 0; iEdge < nBEdges1; ++iEdge )
         {
             if ((int)_fespace1.mesh()->edgeList(iEdge).marker() != M_data->fluidInterfaceFlag()) continue;
 
@@ -1641,7 +1640,7 @@ FSIOperator::interpolateInterfaceDofs( const FESpace<mesh_Type, MapEpetra>& _fes
 
             if (nDofPerEdge2) // the second FE space has dofs on its edges
             {
-                for ( ID l = 1; l <= nDofPerEdge1; ++l )
+                for ( ID l = 0; l < nDofPerEdge1; ++l )
                 {
                     // Loop on data vector components
                     for ( UInt icmp = 0; icmp < nDimensions; ++icmp )
@@ -1660,14 +1659,14 @@ FSIOperator::interpolateInterfaceDofs( const FESpace<mesh_Type, MapEpetra>& _fes
             }
             else
             {
-                for ( ID l = 1; l <= nDofPerEdge1; ++l )
+                for ( ID l = 0; l < nDofPerEdge1; ++l )
                 {
                     // Loop on data vector components
                     for ( UInt icmp = 0; icmp < nDimensions; ++icmp )
                     {
                         //
                         // ID of the 1st node of the edge
-                        ID node1 = _fespace1.mesh()->edgeList(iEdge).point(1).id();
+                        ID node1 = _fespace1.mesh()->edgeList(iEdge).point(0).id();
                         iter = locDofMap.find(node1);
                         // ID of the 1st dof of the edge in the solid numerotation
                         int iDof1 = icmp*numTotalDof2 + iter->second;
@@ -1676,7 +1675,7 @@ FSIOperator::interpolateInterfaceDofs( const FESpace<mesh_Type, MapEpetra>& _fes
                         _vec2.setCoefficient( iDof1, value );
                         //
                         // ID of the 2nd node of the edge
-                        ID node2 = _fespace1.mesh()->edgeList(iEdge).point(2).id();
+                        ID node2 = _fespace1.mesh()->edgeList(iEdge).point(1).id();
                         iter = locDofMap.find(node2);
                         // ID of the 2nd dof of the edge in the solid numerotation
                         int iDof2 = icmp*numTotalDof2 + iter->second;
@@ -1702,7 +1701,7 @@ FSIOperator::interpolateInterfaceDofs( const FESpace<mesh_Type, MapEpetra>& _fes
         // First we need to go through the FS interface boundary edges on the second mesh
 
         // loop on boundary edges
-        for ( ID iEdge = 1; iEdge <= nBEdges2; ++iEdge )
+        for ( ID iEdge = 0; iEdge < nBEdges2; ++iEdge )
         {
             if ((int)_fespace2.mesh()->edgeList(iEdge).marker() != M_data->fluidInterfaceFlag()) continue;
             // Now that we have an edge on the FS interface, let's get its ID
@@ -1710,14 +1709,14 @@ FSIOperator::interpolateInterfaceDofs( const FESpace<mesh_Type, MapEpetra>& _fes
             // dof position of the edge since unknowns are store using [ node | edges | faces | volumes ]
             int iDofEdge = numTotalVert2 + edgeID;
 
-            for ( ID l = 1; l <= nDofPerEdge1; ++l )
+            for ( ID l = 0; l < nDofPerEdge1; ++l )
             {
                 // Loop on data vector components
                 for ( UInt icmp = 0; icmp < nDimensions; ++icmp )
                 {
                     // interpolation of the nodal values in the middle of the segement
-                    ID node1 = _fespace2.mesh()->edgeList(iEdge).point(1).id();
-                    ID node2 = _fespace2.mesh()->edgeList(iEdge).point(2).id();
+                    ID node1 = _fespace2.mesh()->edgeList(iEdge).point(0).id();
+                    ID node2 = _fespace2.mesh()->edgeList(iEdge).point(1).id();
                     value = 0.5*(_vec2(icmp*numTotalDof2 + node1) + _vec2(icmp*numTotalDof2 + node2));
                     _vec2.setCoefficient(iDofEdge, value);
                 }
@@ -1731,19 +1730,19 @@ FSIOperator::interpolateInterfaceDofs( const FESpace<mesh_Type, MapEpetra>& _fes
 //         {
 
 //             // loop on element faces
-//             for ( ID iFa = 1; iFa <= nElemF; ++iFa )
+//             for ( ID iFa = 0; iFa < nElemF; ++iFa )
 //             {
 
 //                 // Loop on number of DOF per face
-//                 for ( ID l = 1; l <= nDofpF; ++l )
+//                 for ( ID l = 0; l < nDofpF; ++l )
 //                 {
 
-//                     lDof = nDofElemE + nDofElemV + ( iFa - 1 ) * nDofpF + l; // Local dof in the adjacent Element
+//                     lDof = nDofElemE + nDofElemV + iFa * nDofpF + l; // Local dof in the adjacent Element
 
 //                     // Nodal coordinates
-//                     x = _fespace1.refFE().xi( lDof - 1 );
-//                     y = _fespace1.refFE().eta( lDof - 1 );
-//                     z = _fespace1.refFE().zeta( lDof - 1 );
+//                     x = _fespace1.refFE().xi( lDof );
+//                     y = _fespace1.refFE().eta( lDof );
+//                     z = _fespace1.refFE().zeta( lDof );
 
 //                     // Loop on data vector components
 //                     for ( UInt icmp = 0; icmp < nDimensions; ++icmp )
@@ -1755,7 +1754,7 @@ FSIOperator::interpolateInterfaceDofs( const FESpace<mesh_Type, MapEpetra>& _fes
 //                             __sum += wLoc( icmp * nDofElemMesh + idof ) * M_mmFESpace->refFE().phi( idof, x, y, z ); // Problem here with P2
 
 //                         // Updating interpolating vector
-//                         int iDof = icmp * _fespace1.dof().numTotalDof() + _fespace1.dof().localToGlobal( iElem, lDof + 1);
+//                         int iDof = icmp * _fespace1.dof().numTotalDof() + _fespace1.dof().localToGlobalMap( iElem, lDof);
 //                         _vec2.setCoefficient( iDof ,__sum);
 //                     }
 //                 }
@@ -1764,14 +1763,14 @@ FSIOperator::interpolateInterfaceDofs( const FESpace<mesh_Type, MapEpetra>& _fes
 
 //         // Element based Dof
 //         // Loop on number of DOF per Element
-//         for ( ID l = 1; l <= nDofpEl; ++l )
+//         for ( ID l = 0; l < nDofpEl; ++l )
 //         {
 //             lDof = nDofElemF + nDofElemE + nDofElemV + l; // Local dof in the Element
 
 //             // Nodal coordinates
-//             x = _fespace1.refFE().xi( lDof - 1 );
-//             y = _fespace1.refFE().eta( lDof - 1 );
-//             z = _fespace1.refFE().zeta( lDof - 1 );
+//             x = _fespace1.refFE().xi( lDof );
+//             y = _fespace1.refFE().eta( lDof );
+//             z = _fespace1.refFE().zeta( lDof );
 
 //             // Loop on data vector components
 //             for ( UInt icmp = 0; icmp < nDimensions; ++icmp )
@@ -1784,7 +1783,7 @@ FSIOperator::interpolateInterfaceDofs( const FESpace<mesh_Type, MapEpetra>& _fes
 
 //                 // Updating interpolating vector
 
-//                 int iDof = icmp * _fespace1.dof().numTotalDof() + _fespace1.dof().localToGlobal( elemId, lDof );
+//                 int iDof = icmp * _fespace1.dof().numTotalDof() + _fespace1.dof().localToGlobalMap( elemId, lDof );
 //                 _vec2.setCoefficient( iDof, __sum);
 //             }
 //         }

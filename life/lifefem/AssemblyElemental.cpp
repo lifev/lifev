@@ -4719,8 +4719,34 @@ void mass_Hdiv( Real ( *InvpermFun ) ( const Real&, const Real&, const Real& ),
     }
 }
 
+//----------------------------------------------------------------------
+// Compute the source vector in Hdiv with a real vector.
+void source_Hdiv( const Vector& source, VectorElemental& elvec, const CurrentFE& dualFE, int iblock )
+{
+    VectorElemental::vector_view vec = elvec.block( iblock );
+    Real sum(0.);
 
+    // Loop over all the degrees of freedom of the dual variable.
+    for ( UInt i(0); i < dualFE.nbFEDof(); ++i )
+    { 
+        // Loop over all the quadrature point.
+        for ( UInt ig(0); ig < dualFE.nbQuadPt(); ++ig )
+        {
+            sum = 0.;
+            /* Loop over all the space dimension of the dual variable,
+               e.g. in 3D three times, in 2D two times.*/
+            for ( UInt icoor(0); icoor < dualFE.nbCoor(); ++icoor )
+            {
+                // sum[icoor] = source[icoor] * phi[icoor] for all icorr.  
+                sum += source( icoor ) * dualFE.phi( i, icoor, ig );
 
+            }
+
+            vec( i ) += sum * dualFE.wDetJacobian( ig );
+        }
+    }
 }
+
+} // namespace LifeV
 
 #endif

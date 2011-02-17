@@ -259,7 +259,7 @@ public:
 
     typedef DarcySolver<Mesh, SolverType> DarcySolverPolicies;
 
-    typedef typename DarcySolverPolicies::Function           Function;
+    typedef typename DarcySolverPolicies::function_Type      function_Type;
 
     typedef typename DarcySolverPolicies::permeability_Type  permeability_Type;
 
@@ -341,7 +341,7 @@ public:
       Set the function for the first iteration for the fixed point method. The default is the zero function.
       @param primalZeroIteration The function for the first iteration.
     */
-    void setPrimalZeroIteration ( const Function& primalZeroIteration );
+    void setPrimalZeroIteration ( const function_Type& primalZeroIteration );
 
     //! Set the inverse of diffusion tensor,
     /*!
@@ -499,7 +499,7 @@ private:
     Real           M_fixedPointResidual;
 
     //! Primal solution at zero time step.
-    Function       M_primalZeroIteration;
+    function_Type  M_primalZeroIteration;
 
     //@}
 
@@ -665,7 +665,7 @@ fixedPointScheme ()
 template<typename Mesh, typename SolverType>
 void
 DarcySolverNonLinear<Mesh, SolverType>::
-setPrimalZeroIteration ( const Function& primalZeroIteration )
+setPrimalZeroIteration ( const function_Type& primalZeroIteration )
 {
     // Set the function for the first iteration.
     M_primalZeroIteration = primalZeroIteration;

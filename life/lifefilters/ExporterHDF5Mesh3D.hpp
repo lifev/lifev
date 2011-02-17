@@ -530,16 +530,16 @@ typename ExporterHDF5Mesh3D<MeshType>::meshPtr_Type ExporterHDF5Mesh3D<MeshType>
 
     for (Int j = 0; j < numPoints; ++j)
     {
-        pp = &(tempMesh->addPoint(bool(pointBoundaryFlags[j])));
+    	pp = &(tempMesh->addPoint(bool(pointBoundaryFlags[j])));
         pp->setMarker(pointMarkers[j]);
         pp->x() = pointCoordinates[0][j];
         pp->y() = pointCoordinates[1][j];
         pp->z() = pointCoordinates[2][j];
-        pp->setLocalId(j + 1);
+        pp->setLocalId(j);
         pp->setId(pointGlobalId[j]);
 
-        tempMesh->localToGlobalNode().insert(std::make_pair(j + 1, pointGlobalId[j]));
-        tempMesh->globalToLocalNode().insert(std::make_pair(pointGlobalId[j], j + 1));
+        tempMesh->localToGlobalNode().insert(std::make_pair(j, pointGlobalId[j]));
+        tempMesh->globalToLocalNode().insert(std::make_pair(pointGlobalId[j], j));
     }
 
     pointCoordinates.clear();
@@ -569,13 +569,11 @@ typename ExporterHDF5Mesh3D<MeshType>::meshPtr_Type ExporterHDF5Mesh3D<MeshType>
     for (Int j = 0; j < numEdges; ++j)
     {
         pe = &(tempMesh->addEdge(edgeBoundaryFlags[j]));
-        pe->setLocalId(j + 1);
+        pe->setLocalId(j);
         pe->setId(edgeGlobalId[j]);
-        pe->setPoint(1, tempMesh->point(edgePoints[0][j]));
-        pe->setPoint(2, tempMesh->point(edgePoints[1][j]));
+        pe->setPoint(0, tempMesh->point(edgePoints[0][j]));
+        pe->setPoint(1, tempMesh->point(edgePoints[1][j]));
         pe->setMarker(edgeMarkers[j]);
-
-        tempMesh->globalToLocalEdge().insert(std::make_pair(edgeGlobalId[j], j + 1));
     }
 
     edgePoints.clear();
@@ -625,7 +623,7 @@ typename ExporterHDF5Mesh3D<MeshType>::meshPtr_Type ExporterHDF5Mesh3D<MeshType>
     for (Int j = 0; j < numFaces; ++j)
     {
         pf = &(tempMesh->addFace(faceBoundaryFlags[j]));
-        pf->setLocalId(j + 1);
+        pf->setLocalId(j);
         pf->setId(faceGlobalId[j]);
 
         pf->firstAdjacentElementIdentity() = faceNeighbourId[0][j];
@@ -636,11 +634,8 @@ typename ExporterHDF5Mesh3D<MeshType>::meshPtr_Type ExporterHDF5Mesh3D<MeshType>
         pf->setMarker(faceMarkers[j]);
         for (UInt k = 0; k < faceNodes; ++k)
         {
-            pf->setPoint(k + 1, tempMesh->point(facePoints[k][j]));
+            pf->setPoint(k, tempMesh->point(facePoints[k][j]));
         }
-
-        tempMesh->globalToLocalFace().insert(std::make_pair(faceGlobalId[j], j + 1));
-
     }
 
     tempMesh->setLinkSwitch("HAS_ALL_FACES");
@@ -679,15 +674,12 @@ typename ExporterHDF5Mesh3D<MeshType>::meshPtr_Type ExporterHDF5Mesh3D<MeshType>
     {
         pv = &(tempMesh->addVolume());
         pv->setId(volumeGlobalId[j]);
-        pv->setLocalId(j + 1);
+        pv->setLocalId(j);
         for (UInt k = 0; k < elementNodes; ++k)
         {
-            pv->setPoint(k + 1, tempMesh->point(volumePoints[k][j]));
+            pv->setPoint(k, tempMesh->point(volumePoints[k][j]) );
         }
         pv->setMarker(volumeMarkers[j]);
-
-        tempMesh->globalToLocalVolume().insert(std::make_pair(volumeGlobalId[j], j + 1));
-
     }
 
     volumePoints.clear();
@@ -832,7 +824,7 @@ void ExporterHDF5Mesh3D<MeshType>::writePartition(meshPtr_Type mesh, std::string
         pointCoordinates[2][j] = mesh->pointList[j].z();
         pointMarkers[j] = mesh->pointList[j].marker();
         pointGlobalId[j] = it->second;
-        if (mesh->isBoundaryPoint(j+1))
+        if (mesh->isBoundaryPoint(j))
         {
             pointBoundaryFlags[j] = 1;
         }
@@ -861,12 +853,12 @@ void ExporterHDF5Mesh3D<MeshType>::writePartition(meshPtr_Type mesh, std::string
 
     for (Int j = 0; j < numEdges; ++j)
     {
-        edgePoints[0][j] = mesh->edgeList[j].point(1).localId();
-        edgePoints[1][j] = mesh->edgeList[j].point(2).localId();
+        edgePoints[0][j] = mesh->edgeList[j].point(0).localId();
+        edgePoints[1][j] = mesh->edgeList[j].point(1).localId();
         edgeMarkers[j] = mesh->edgeList[j].marker();
         edgeGlobalId[j] = mesh->edgeList[j].id();
 
-        if (mesh->isBoundaryEdge(j+1))
+        if (mesh->isBoundaryEdge(j))
         {
             edgeBoundaryFlags[j] = 1;
         }
@@ -899,7 +891,7 @@ void ExporterHDF5Mesh3D<MeshType>::writePartition(meshPtr_Type mesh, std::string
     {
         for (UInt k = 0; k < faceNodes; ++k)
         {
-            facePoints[k][j] = mesh->faceList[j].point(k + 1).localId();
+            facePoints[k][j] = mesh->faceList[j].point(k).localId();
         }
         faceMarkers[j] = mesh->faceList[j].marker();
         faceGlobalId[j] = mesh->faceList[j].id();
@@ -909,7 +901,7 @@ void ExporterHDF5Mesh3D<MeshType>::writePartition(meshPtr_Type mesh, std::string
         faceNeighbourPos[0][j] = mesh->faceList[j].firstAdjacentElementPosition();
         faceNeighbourPos[1][j] = mesh->faceList[j].secondAdjacentElementPosition();
 
-        if (mesh->isBoundaryFace(j+1))
+        if (mesh->isBoundaryFace(j))
         {
             faceBoundaryFlags[j] = 1;
         }
@@ -956,7 +948,7 @@ void ExporterHDF5Mesh3D<MeshType>::writePartition(meshPtr_Type mesh, std::string
     {
         for (UInt k = 0; k < elementNodes; ++k)
         {
-            volumePoints[k][j] = mesh->volumeList[j].point(k + 1).localId();
+            volumePoints[k][j] = mesh->volumeList[j].point(k).localId();
         }
         volumeMarkers[j] = mesh->volumeList[j].marker();
         volumeGlobalId[j] = mesh->volumeList[j].id();

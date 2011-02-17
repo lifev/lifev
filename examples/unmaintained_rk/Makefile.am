@@ -26,10 +26,11 @@ include $(top_srcdir)/testsuite/Makefile.testsuite
 
 check_HEADERS = ctRK.hpp
 
-check_PROGRAMS = test_rk
+# To compile test_mt uncomment the following line and make check
+##check_PROGRAMS = test_rk
 test_rk_SOURCES = main.cpp ctRK.cpp
 
-EXTRA_DIST = data testsuite.at
+EXTRA_DIST = data
 
 link:
 	test -a data || ln -s $(srcdir)/data

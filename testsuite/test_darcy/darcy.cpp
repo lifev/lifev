@@ -99,13 +99,7 @@ using namespace LifeV;
 
 enum BCNAME
 {
-    /*
-      FLUX0            = 0,
-      INLETPRESSURE1   = 1,
-      INLETPRESSURE2   = 2,
-      OUTLETPRESSURE   = 3,
-      FLUX1            = 4*/
-
+    // Flags for cartesian_cube* meshes
     BACK   = 1,
     FRONT  = 2,
     LEFT   = 3,
@@ -114,12 +108,16 @@ enum BCNAME
     TOP    = 6
 
 
-    /*        LEFT   = 4,
+/*
+    // Falgs for structured meshes
+    LEFT   = 4,
     RIGHT  = 2,
     FRONT  = 1,
     BACK   = 3,
     TOP    = 6,
-    BOTTOM = 5*/
+    BOTTOM = 5
+*/
+
 };
 
 enum DARCY_SOLVER_TYPE
@@ -166,11 +164,16 @@ struct darcy::Private
                                    const Real&, const Real&, const ID& )>
     fct_type;
 
-    // Policy for matrices
+    // Policy for vector functions
+    typedef boost::function<Vector ( const Real&, const Real&,
+                                     const Real&, const Real&, const ID& )>
+    Vfct_type;
+
+    // Policy for matrix functions
     typedef boost::function<Matrix ( const Real&, const Real&,
                                      const Real&, const Real&,
                                      const std::vector<Real>& )>
-    matrix_type;
+    Mfct_type;
 
     std::string    data_file_name;
     std::string    discretization_section;
@@ -207,9 +210,9 @@ struct darcy::Private
         return f;
     }
 
-    matrix_type getInversePermeability ( )
+    Mfct_type getInversePermeability ( )
     {
-        matrix_type m;
+        Mfct_type m;
         m = boost::bind( &dataProblem::inversePermeability, _1, _2, _3, _4 , _5 );
         return m;
     }
@@ -217,7 +220,14 @@ struct darcy::Private
     fct_type getSource ( )
     {
         fct_type f;
-        f = boost::bind( &dataProblem::source_in, _1, _2, _3, _4, _5 );
+        f = boost::bind( &dataProblem::source, _1, _2, _3, _4, _5 );
+        return f;
+    }
+
+    Vfct_type getVectorSource ( )
+    {
+        Vfct_type f;
+        f = boost::bind( &dataProblem::vectorSource, _1, _2, _3, _4, _5 );
         return f;
     }
 
@@ -356,7 +366,11 @@ darcy::run()
         regularMesh3D( *fullMeshPtr, 0,
                        dataFile( ( Members->discretization_section + "/space_discretization/nx" ).data(), 4 ),
                        dataFile( ( Members->discretization_section + "/space_discretization/ny" ).data(), 4 ),
-                       dataFile( ( Members->discretization_section + "/space_discretization/nz" ).data(), 4 ) );
+                       dataFile( ( Members->discretization_section + "/space_discretization/nz" ).data(), 4 ),
+                       dataFile( ( Members->discretization_section + "/space_discretization/verbose" ).data(), false ),
+                       dataFile( ( Members->discretization_section + "/space_discretization/lx" ).data(), 1. ),
+                       dataFile( ( Members->discretization_section + "/space_discretization/ly" ).data(), 1. ),
+                       dataFile( ( Members->discretization_section + "/space_discretization/lz" ).data(), 1. ) );
     }
 
     // Partition the mesh using ParMetis
@@ -374,24 +388,6 @@ darcy::run()
 
     // Start chronoBoundaryCondition for measure the total time for create the boundary conditions
     chronoBoundaryCondition.start();
-
-    /*
-    BCFunctionBase dirichletBDfun1, dirichletBDfun2, dirichletBDfun3, neumannBDfun1;
-    BCFunctionRobin robinBDfun;
-
-    dirichletBDfun1.setFunction( dataProblem::dirichlet1 );
-    dirichletBDfun2.setFunction( dataProblem::dirichlet2 );
-    dirichletBDfun3.setFunction( dataProblem::dirichlet3 );
-    neumannBDfun1.setFunction( dataProblem::neumann3 );
-
-
-    BCHandler bcDarcy( 5 );
-    bcDarcy.addBC( "Top",            FLUX0,          Natural,   Full,    neumannBDfun1, 0 );
-    bcDarcy.addBC( "Top2",           FLUX1,          Natural,   Full,    neumannBDfun1, 0 );
-    bcDarcy.addBC( "InletPressure",  INLETPRESSURE1, Essential, Scalar,  dirichletBDfun1  );
-    bcDarcy.addBC( "InletPressure1", INLETPRESSURE2, Essential, Scalar,  dirichletBDfun3  );
-    bcDarcy.addBC( "OutletPressure", OUTLETPRESSURE, Essential, Scalar,  dirichletBDfun2  );
-    */
 
     BCFunctionBase dirichletBDfun, neumannBDfun1, neumannBDfun2;
     BCFunctionRobin robinBDfun;
@@ -586,23 +582,26 @@ darcy::run()
     // Process the problem
 
     // Start chronoProcess for measure the total time for the simulation
-    chronoProcess.start();
+    chronoProcess.start ();
 
     // Setup phase for the linear solver
-    darcySolver->setup();
+    darcySolver->setup ();
 
     // Set the source term
-    darcySolver->setSourceTerm( Members->getSource() );
+    darcySolver->setSource ( Members->getSource() );
+
+    // Set the vector source term
+    darcySolver->setVectorSource ( Members->getVectorSource() );
 
     // Create the inverse permeability
     inversePermeability < RegionMesh > invPerm ( Members->getInversePermeability(),
                                                  *p_FESpacePtr );
 
     // Set the inverse of the permeability
-    darcySolver->setInversePermeability( invPerm );
+    darcySolver->setInversePermeability ( invPerm );
 
     // Set the boudary conditions
-    darcySolver->setBC( bcDarcy );
+    darcySolver->setBC ( bcDarcy );
 
     switch ( solverType )
     {
@@ -705,7 +704,7 @@ darcy::run()
     switch ( solverType )
     {
     case DARCY_LINEAR:
-
+    {
         // Solve the problem
 
         // Build the linear system and the right hand side
@@ -731,11 +730,11 @@ darcy::run()
 
         // Save the solution into the exporter
         exporter->postProcess( static_cast<Real>(0) );
-
-        break;
+    }
+    break;
 
     case DARCY_NON_LINEAR:
-
+    {
         // Solve the problem
 
         // Start the fixed point simulation
@@ -755,11 +754,11 @@ darcy::run()
 
         // Save the solution into the exporter
         exporter->postProcess( static_cast<Real>(0) );
-
-        break;
+    }
+    break;
 
     case DARCY_TRANSIENT:
-
+    {
         // Solve the problem
 
         // Save the initial primal
@@ -771,8 +770,15 @@ darcy::run()
         exporter->postProcess( darcyData.dataTime()->initialTime() );
 
         // A loop for the simulation, it starts from \Delta t and end in N \Delta t = T
-        while ( !darcyData.dataTime()->isLastTimeStep() )
+        for ( ; darcyData.dataTime()->time() < darcyData.dataTime()->endTime(); )
         {
+
+            // Check if the time step is consistent, i.e. if innerTimeStep + currentTime < endTime.
+            if ( darcyData.dataTime()->isLastTimeStep() )
+            {
+                // Compute the last time step.
+                darcyData.dataTime()->setTimeStep( darcyData.dataTime()->leftTime() );
+            }
 
             // Advance the current time of \Delta t.
             darcyData.dataTime()->updateTime();
@@ -808,11 +814,11 @@ darcy::run()
             exporter->postProcess( darcyData.dataTime()->time() );
 
         }
-
-        break;
+    }
+    break;
 
     case DARCY_TRANSIENT_NON_LINEAR:
-
+    {
         // Solve the problem
 
         // Save the initial primal
@@ -824,10 +830,15 @@ darcy::run()
         exporter->postProcess( darcyData.dataTime()->initialTime() );
 
         // A loop for the simulation, it starts from \Delta t and end in N \Delta t = T
-        while ( !darcyData.dataTime()->isLastTimeStep() )
+        for ( ; darcyData.dataTime()->time() < darcyData.dataTime()->endTime(); )
         {
-            // Update the primal old solution for the fixed point scheme
-            ( dynamic_pointer_cast< darcyTransientNonLinearSolver_type >( darcySolver ) )->updatePrimalOldSolution();
+
+            // Check if the time step is consistent, i.e. if innerTimeStep + currentTime < endTime.
+            if ( darcyData.dataTime()->isLastTimeStep() )
+            {
+                // Compute the last time step.
+                darcyData.dataTime()->setTimeStep( darcyData.dataTime()->leftTime() );
+            }
 
             // Advance the current time of \Delta t.
             darcyData.dataTime()->updateTime();
@@ -837,6 +848,9 @@ darcy::run()
             {
                 darcyData.dataTime()->showMe();
             }
+
+            // Update the primal old solution for the fixed point scheme
+            ( dynamic_pointer_cast< darcyTransientNonLinearSolver_type >( darcySolver ) )->updatePrimalOldSolution();
 
             // Start the fixed point simulation
             ( dynamic_pointer_cast< darcyTransientNonLinearSolver_type >( darcySolver ) )->fixedPointScheme();
@@ -857,8 +871,8 @@ darcy::run()
             exporter->postProcess( darcyData.dataTime()->time() );
 
         }
-
-        break;
+    }
+    break;
 
     }
 
@@ -967,4 +981,4 @@ darcy::run()
     // Return the error, needed for the succes/failure of the test
     return primalL2Error;
 
-}
+} // run

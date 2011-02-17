@@ -45,8 +45,6 @@
 #include <life/lifecore/LifeV.hpp>
 #include <life/lifefem/DOFInterface.hpp>
 #include <life/lifearray/VectorEpetra.hpp>
-#include <life/lifecore/FactorySingleton.hpp>
-#include <life/lifecore/Factory.hpp>
 
 
 
@@ -87,6 +85,7 @@ public:
 
     typedef VectorEpetra vector_Type;
     typedef vector_Type const* vectorConstPtr_Type;
+    typedef boost::shared_ptr<BCVectorBase> BCVectorBasePtr_Type;
 
     //@}
 
@@ -142,6 +141,16 @@ public:
 
     //! @name Methods
 
+    //! Clone the current object
+    /*!
+      @return Pointer to the cloned object
+    */
+    virtual BCVectorBasePtr_Type clone() const
+    {
+        BCVectorBasePtr_Type copy ( new BCVectorBase ( *this ) );
+        return copy;
+    }
+
     //!  Return the value of the selected component of the boundary mass coefficient vector at position dofID
     /*!
       @param globalDofId The global DOF id
@@ -163,7 +172,11 @@ public:
      * @param verbose The verbosity
      * @param out The output stream (default: cout)
      */
-    virtual std::ostream & showMe( bool verbose = false, std::ostream & out = std::cout ) const = 0;
+    virtual std::ostream & showMe( bool /*verbose = false*/, std::ostream & out = std::cout ) const
+    {
+        out << "not implemented in parent class, use derived class implementation!" << std::endl;
+        return out;
+    }
 
 
     //@}
@@ -524,7 +537,17 @@ public:
     //! @name Methods
     //@{
 
-    //!  Return the value of the selected component of the boundary mass coefficient vector at position dofID
+    //! Clone the current object
+    /*!
+      @return Pointer to the cloned object
+    */
+    BCVectorBase::BCVectorBasePtr_Type clone() const
+    {
+        BCVectorBase::BCVectorBasePtr_Type copy ( new BCVectorInterface( *this ) );
+        return copy;
+    }
+
+   //!  Return the value of the selected component of the boundary mass coefficient vector at position dofID
     /*!
       @param globalDofId The global DOF id
       @param component The vector component
@@ -559,6 +582,5 @@ protected:
     dofInterfacePtr_Type M_interfaceDofPtr;
 
 };
-typedef LifeV::FactorySingleton< LifeV::FactoryClone< BCVectorBase > > FactoryCloneBCVector;
 }
 #endif

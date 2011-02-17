@@ -83,7 +83,7 @@ BCBase::BCBase( const bcName_Type& name, const bcFlag_Type& flag,
         M_type( type ),
         M_mode( mode ),
         M_components( components ),
-        M_bcFunction( FactoryCloneBCFunction::instance().createObject( &bcFunction ) ),
+        M_bcFunction( bcFunction.clone() ),
         M_bcFunctionFEVectorDependent(),
         M_bcVector(),
         M_isStored_BcVector( false ),
@@ -91,7 +91,7 @@ BCBase::BCBase( const bcName_Type& name, const bcFlag_Type& flag,
         M_offset( -1 ),
         M_finalized( false )
 {
-    if ( M_mode != Component )
+	if ( M_mode != Component )
     {
         ERROR_MSG( "BCBase::BCBase: You should use a more specific constructor for this mode" );
     }
@@ -107,7 +107,7 @@ BCBase::BCBase( const bcName_Type& name,
         M_type( type ),
         M_mode( mode ),
         M_components(),
-        M_bcFunction( FactoryCloneBCFunction::instance().createObject( &bcFunction ) ),
+        M_bcFunction( bcFunction.clone() ),
         M_bcFunctionFEVectorDependent(),
         M_bcVector(),
         M_isStored_BcVector( false ),
@@ -121,12 +121,12 @@ BCBase::BCBase( const bcName_Type& name,
     case Scalar:
         numberOfComponents = 1;
         M_components.reserve( numberOfComponents );
-        M_components.push_back( 1 );
+        M_components.push_back( 0 );
         break;
     case Tangential:
         numberOfComponents = nDimensions;
         M_components.reserve( numberOfComponents );
-        for ( ID i = 1; i <= numberOfComponents; ++i )
+        for ( ID i = 0; i < numberOfComponents; ++i )
             M_components.push_back( i );
         break;
     case Normal:
@@ -135,20 +135,20 @@ BCBase::BCBase( const bcName_Type& name,
         {
             numberOfComponents = 1;
             M_components.reserve( numberOfComponents );
-            M_components.push_back( nDimensions );
+            M_components.push_back( nDimensions-1 );
         }
         else
         {
             numberOfComponents = nDimensions;
             M_components.reserve( numberOfComponents );
-            for ( ID i = 1; i <= numberOfComponents; ++i )
+            for ( ID i = 0; i < numberOfComponents; ++i )
                 M_components.push_back( i );
         }
         break;
     case Directional:
         numberOfComponents = 1;
         M_components.reserve( numberOfComponents );
-        M_components.push_back( nDimensions );
+        M_components.push_back( nDimensions - 1 );
         break;
     default:
         ERROR_MSG( "BCBase::BCBase: You should use a more specific constructor for this mode" );
@@ -167,7 +167,7 @@ BCBase::BCBase( const bcName_Type& name,
         M_type( type ),
         M_mode( mode ),
         M_components(),
-        M_bcFunction( FactoryCloneBCFunction::instance().createObject( &bcFunction ) ),
+        M_bcFunction( bcFunction.clone() ),
         M_bcFunctionFEVectorDependent(),
         M_bcVector(),
         M_isStored_BcVector( false ),
@@ -180,7 +180,7 @@ BCBase::BCBase( const bcName_Type& name,
         ERROR_MSG( "BCBase::BCBase: You should use a more specific constructor for this mode" );
     }
     M_components.reserve( numberOfComponents );
-    for ( ID i = 1; i <= numberOfComponents; ++i )
+    for ( ID i = 0; i < numberOfComponents; ++i )
         M_components.push_back( i );
 
 }
@@ -200,13 +200,13 @@ BCBase::BCBase( const bcName_Type& name,
         M_components(components),
         M_bcFunction(),
         M_bcFunctionFEVectorDependent(),
-        M_bcVector( FactoryCloneBCVector::instance().createObject( &bcVector )  ),
+        M_bcVector( bcVector.clone() ),
         M_isStored_BcVector( true ),
         M_isStored_BcFunctionVectorDependent(false),
         M_offset( -1 ),
         M_finalized( false )
 {
-    if ( mode != Component )
+	if ( mode != Component )
     {
         ERROR_MSG( "BCBase::BCBase: You should use a more specific constructor for this mode" );
     }
@@ -225,7 +225,7 @@ BCBase::BCBase( const bcName_Type& name,
         M_components(),
         M_bcFunction(),
         M_bcFunctionFEVectorDependent(),
-        M_bcVector( FactoryCloneBCVector::instance().createObject( &bcVector ) ),
+        M_bcVector( bcVector.clone() ),
         M_isStored_BcVector( true ),
         M_isStored_BcFunctionVectorDependent(false),
         M_finalized( false )
@@ -236,26 +236,26 @@ BCBase::BCBase( const bcName_Type& name,
     case Scalar:
         numberOfComponents = 1;
         M_components.reserve( numberOfComponents );
-        M_components.push_back( 1 );
+        M_components.push_back( 0 );
 
         break;
     case Tangential:
         numberOfComponents = nDimensions - 1;
         M_components.reserve( numberOfComponents );
-        for ( ID i = 1; i <= numberOfComponents; ++i )
+        for ( ID i = 0; i < numberOfComponents; ++i )
             M_components.push_back( i );
 
         break;
     case Normal:
         numberOfComponents = 1;
         M_components.reserve( numberOfComponents );
-        M_components.push_back( nDimensions );
+        M_components.push_back( nDimensions - 1 );
 
         break;
     case Directional:
         numberOfComponents = 1;
         M_components.reserve( numberOfComponents );
-        M_components.push_back( nDimensions );
+        M_components.push_back( nDimensions - 1 );
         break;
     default:
         ERROR_MSG( "BCBase::BCBase: You should use a more specific constructor for this mode" );
@@ -277,7 +277,7 @@ BCBase::BCBase( const bcName_Type& name,
         M_components(),
         M_bcFunction(),
         M_bcFunctionFEVectorDependent(),
-        M_bcVector( FactoryCloneBCVector::instance().createObject( &bcVector ) ),
+        M_bcVector( bcVector.clone() ),
         M_isStored_BcVector( true ),
         M_isStored_BcFunctionVectorDependent(false),
         M_offset( -1 ),
@@ -289,7 +289,7 @@ BCBase::BCBase( const bcName_Type& name,
     }
 
     M_components.reserve( numberOfComponents );
-    for ( ID i = 1; i <= numberOfComponents; ++i )
+    for ( ID i = 0; i < numberOfComponents; ++i )
         M_components.push_back( i );
 
 }
@@ -306,13 +306,13 @@ BCBase::BCBase( const bcName_Type&     name,
         M_mode( mode ),
         M_components( components ),
         M_bcFunction(),
-        M_bcFunctionFEVectorDependent( FactoryCloneBCFunctionUDep::instance().createObject( &bcFunctionFEVectorDependent ) ),
+        M_bcFunctionFEVectorDependent( bcFunctionFEVectorDependent.clone() ),
         M_bcVector(),
         M_isStored_BcVector( false ),
         M_isStored_BcFunctionVectorDependent(true),
         M_finalized( false )
 {
-    if ( M_mode != Component )
+	if ( M_mode != Component )
     {
         ERROR_MSG( "BCBase::BCBase: You should use a more specific constructor for this mode" );
     }
@@ -329,7 +329,7 @@ BCBase::BCBase( const bcName_Type&  name,
         M_mode( mode ),
         M_components(),
         M_bcFunction(),
-        M_bcFunctionFEVectorDependent( FactoryCloneBCFunctionUDep::instance().createObject( &bcFunctionFEVectorDependent ) ),
+        M_bcFunctionFEVectorDependent( bcFunctionFEVectorDependent.clone() ),
         M_bcVector(),
         M_isStored_BcVector( false ),
         M_isStored_BcFunctionVectorDependent(true),
@@ -343,23 +343,23 @@ BCBase::BCBase( const bcName_Type&  name,
     case Scalar:
         numberOfComponents = 1;
         M_components.reserve( numberOfComponents );
-        M_components.push_back( 1 );
+        M_components.push_back( 0 );
         break;
     case Tangential:
         numberOfComponents = nDimensions - 1;
         M_components.reserve( numberOfComponents );
-        for ( ID i = 1; i <= numberOfComponents; ++i )
+        for ( ID i = 0; i < numberOfComponents; ++i )
             M_components.push_back( i );
         break;
     case Normal:
         numberOfComponents = 1;
         M_components.reserve( numberOfComponents );
-        M_components.push_back( nDimensions );
+        M_components.push_back( nDimensions -1 );
         break;
     case Directional:
         numberOfComponents = 1;
         M_components.reserve( numberOfComponents );
-        M_components.push_back( nDimensions );
+        M_components.push_back( nDimensions - 1);
         break;
     default:
         ERROR_MSG( "BCBase::BCBase: You should use a more specific constructor for this mode" );
@@ -380,7 +380,7 @@ BCBase::BCBase( const bcName_Type&  name,
         M_mode( mode ),
         M_components(),
         M_bcFunction(),
-        M_bcFunctionFEVectorDependent( FactoryCloneBCFunctionUDep::instance().createObject( &bcFunctionFEVectorDependent ) ),
+        M_bcFunctionFEVectorDependent( bcFunctionFEVectorDependent.clone() ),
         M_bcVector(),
         M_isStored_BcVector( false ),
         M_isStored_BcFunctionVectorDependent(true),
@@ -393,7 +393,7 @@ BCBase::BCBase( const bcName_Type&  name,
     }
 
     M_components.reserve( numberOfComponents );
-    for ( ID i = 1; i <= numberOfComponents; ++i )
+    for ( ID i = 0; i < numberOfComponents; ++i )
         M_components.push_back( i );
 
 }
@@ -437,8 +437,8 @@ BCBase::~BCBase()
 
 ID BCBase::component( const ID i ) const
 {
-    ASSERT_BD( i >= 1 && i <= M_components.size() );
-    return M_components[ i -1 ];
+    ASSERT_BD( i < M_components.size() );
+    return M_components[ i ];
 }
 
 bool  BCBase::isRobinCoeffAVector()  const
@@ -606,12 +606,6 @@ BCBase::operator[] ( const ID& i ) const
     return M_idVector[ i ].get();
 }
 
-const BCIdentifierBase*
-BCBase::operator() ( const ID& i ) const
-{
-    return this->operator[] ( i-1 );
-}
-
 Real BCBase::operator() ( const Real& t, const Real& x, const Real& y,
                           const Real& z, const ID& iComponent ) const
 {
@@ -646,7 +640,7 @@ Real BCBase::operator() ( const ID& iDof, const ID& iComponent ) const
 void
 BCBase::setBCVector( const BCVectorBase& bcVector )
 {
-    M_bcVector = boost::shared_ptr<BCVectorBase >( FactoryCloneBCVector::instance().createObject( &bcVector ) );
+    M_bcVector = boost::shared_ptr<BCVectorBase >( bcVector.clone() );
     M_isStored_BcVector = true;
     M_isStored_BcFunctionVectorDependent=false;
 }
@@ -654,7 +648,7 @@ BCBase::setBCVector( const BCVectorBase& bcVector )
 void
 BCBase::setBCFunction( const BCFunctionBase& bcFunction )
 {
-    M_bcFunction = boost::shared_ptr<BCFunctionBase>( FactoryCloneBCFunction::instance().createObject( &bcFunction ) );
+    M_bcFunction = bcFunction.clone();
     M_isStored_BcVector = false;
     M_isStored_BcFunctionVectorDependent=false;
 }
@@ -662,7 +656,7 @@ BCBase::setBCFunction( const BCFunctionBase& bcFunction )
 void
 BCBase::setBCFunction( const BCFunctionUDepBase& bcFunctionFEVectorDependent )
 {
-    M_bcFunctionFEVectorDependent = boost::shared_ptr<BCFunctionUDepBase>( FactoryCloneBCFunctionUDep::instance().createObject( &bcFunctionFEVectorDependent ) );
+    M_bcFunctionFEVectorDependent = bcFunctionFEVectorDependent.clone();
     M_isStored_BcVector = false;
     M_isStored_BcFunctionVectorDependent=true;
 }

@@ -1,9 +1,9 @@
 # -*- makefile -*-
 ###################################################################################################
 #
-#                       This file is part of the LifeV Library                       
+#                       This file is part of the LifeV Library
 #                Copyright (C) 2004, 2005, 2007 EPFL, Politecnico di Milano, INRIA
-#                Copyright (C) 2010 EPFL, Politecnico di Milano, Emory University   
+#                Copyright (C) 2010 EPFL, Politecnico di Milano, Emory University
 #
 #      Author(s): Cristiano Malossi <cristiano.malossi@epfl.ch>
 #           Date: 05-01-2010
@@ -13,7 +13,7 @@
 
 SUFFIXES    = .cpp .hpp .idl .c .h .f .F .o .moc .tex .pdf
 
-PDF         = LifeV_Development_Guidelines.pdf LifeV_CleaningWeeks2010.pdf
+PDF         = LifeV_Development_Guidelines.pdf #LifeV_CleaningWeeks2010.pdf
 
 LifeV_Development_Guidelines_TEX = LifeV_Development_Guidelines.tex
 LifeV_CleaningWeeks2010_TEX = LifeV_CleaningWeeks2010.tex

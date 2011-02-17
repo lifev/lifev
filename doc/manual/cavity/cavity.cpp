@@ -67,7 +67,7 @@ LifeV::Real lidBC(const LifeV::Real& /*t*/, const LifeV::Real& /*x*/, const Life
 {
     switch (i)
     {
-    case 2:
+    case 1:
         return 1.0;
     default:
         return 0.0;

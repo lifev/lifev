@@ -33,7 +33,7 @@
 
  */
 
-#include <climits>
+#include <limits>
 #include <life/lifemesh/Marker.hpp>
 
 namespace LifeV
@@ -47,13 +47,18 @@ namespace LifeV
 // MarkerTraits //
 ///////////////////////
 
-const MarkerTraits::entityFlag_Type MarkerTraits::S_NULLFLAG = LONG_MIN;
+const MarkerTraits::entityFlag_Type MarkerTraits::S_NULLFLAG =
+    std::numeric_limits<Int>::max();
 
 //MM: if you modify these changes here recheck function readNetgenMesh
 //        because it uses this changes
 
 MarkerTraits::entityFlag_Type MarkerTraits::strongerFlag( entityFlag_Type const & flag1, entityFlag_Type const & flag2 )
 {
+    if ( flag1 == S_NULLFLAG )
+        return flag2;
+    if ( flag2 == S_NULLFLAG )
+        return flag1;
     return flag1 > flag2 ? flag1 : flag2 ;
 }
 

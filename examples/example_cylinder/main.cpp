@@ -76,18 +76,6 @@ std::set<UInt> parseList( const std::string& list )
     return setList;
 }
 
-
-
-
-namespace LifeV
-{
-namespace
-{
-static bool regIF = (PRECFactory::instance().registerProduct( "Ifpack", &createIfpack ));
-static bool regML = (PRECFactory::instance().registerProduct( "ML", &createML ));
-}
-}
-
 int
 main( int argc, char** argv )
 {

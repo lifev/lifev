@@ -136,13 +136,13 @@ Real dual( const Real& /* t */,
 {
     switch ( ic )
     {
-    case 1:
+    case 0:
         return -2.*Pi;//5
         break;
-    case 2:
+    case 1:
         return 2.*Pi; //0
         break;
-    case 3:
+    case 2:
         return 0.;
         break;
     }

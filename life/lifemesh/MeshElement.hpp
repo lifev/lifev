@@ -126,8 +126,8 @@ public:
 
     //! Swap Points
     /*!
-        @param firstIdentity Identity of the first point to be swapped (numbering starts from 1)
-        @param secondIdentity Identity of the second point to be swapped (numbering starts from 1)
+        @param firstIdentity Identity of the first point to be swapped
+        @param secondIdentity Identity of the second point to be swapped
         @warning Function to be used only by routines for checking or amending meshes
      */
     void swapPoints( const ID & firstIdentity, const ID & secondIdentity );
@@ -135,14 +135,14 @@ public:
     //! Exchange points
     /*!
      	 Exchanges points according to a list of old-to-new local identity numbering
-        @param oldToNew New local identity of a point (numbering starts from 1)
+        @param oldToNew New local identity of a point
         @warning Function to be used only by routines for checking or amending meshes
      */
     void exchangePoints( const ID oldToNew[ GeoShape::S_numPoints ] );
 
     //! Returns the point of identity indicated in the argument
     /*!
-    	@param identity Identity of the point (numbering starts from 1)
+    	@param identity Identity of the point
         @return reference to a point object, possibly derived from point_Type
     */
     point_Type const & point ( ID const identity ) const;
@@ -151,7 +151,7 @@ public:
      	It starts from the last point and it follows the rule: vertices first.
      	It may be used to access the points of a Geometry Element in a reverse way
      	(i.e. with the opposite MeshElementMarked orientation)
-    		@param identity Identity of the point (numbering starts from 1)
+    		@param identity Identity of the point
         	@return reference to a point object, possibly derived from point_Type
     */
     point_Type const & reversepoint ( ID const identity ) const;
@@ -233,7 +233,7 @@ const UInt MeshElement<GeoShape, PointType>::S_numLocalVertices;
 
 template <typename GeoShape, typename PointType>
 MeshElement<GeoShape, PointType>::MeshElement() :
-        MeshEntity( 0 )
+        MeshEntity( NotAnId )
 {
 
 }
@@ -296,7 +296,7 @@ showMe( bool verbose, std::ostream & out ) const
     if ( verbose )
     {
         out << " POINTS INFORMATION" << std::endl << std::endl;
-        for ( unsigned i = 1 ; i <= GeoShape::S_numVertices; i++ )
+        for ( unsigned i = 0 ; i < GeoShape::S_numVertices; i++ )
         {
             out << "POINT ID. " << i << std::endl;
             out << point( i ).showMe( verbose, out );
@@ -309,9 +309,9 @@ showMe( bool verbose, std::ostream & out ) const
 template <typename GeoShape, typename PointType>
 void MeshElement<GeoShape, PointType>::swapPoints( const ID & firstIdentity, const ID & secondIdentity )
 {
-    point_Type const* tmp( M_points[ firstIdentity - 1 ] );
-    M_points[ firstIdentity - 1 ] = M_points[ secondIdentity - 1 ];
-    M_points[ secondIdentity - 1 ] = tmp;
+    point_Type const* tmp( M_points[ firstIdentity ] );
+    M_points[ firstIdentity ] = M_points[ secondIdentity ];
+    M_points[ secondIdentity ] = tmp;
 }
 
 template <typename GeoShape, typename PointType>
@@ -324,7 +324,7 @@ void MeshElement<GeoShape, PointType>::exchangePoints( const ID oldToNew[ GeoSha
     }
     for ( UInt i = 0; i < GeoShape::S_numPoints; ++i )
     {
-        M_points[ i ] = tmp[ oldToNew[ i ] - 1 ];
+        M_points[ i ] = tmp[ oldToNew[ i ] ];
     }
 }
 
@@ -332,33 +332,33 @@ template <typename GeoShape, typename PointType>
 inline
 PointType const & MeshElement<GeoShape, PointType>::point( ID const identity ) const
 {
-    ASSERT_BD( ( identity > 0 && identity <= MeshElement<GeoShape, PointType>::S_numLocalPoints ) );
-    return *( static_cast<PointType const*>( M_points[ identity - 1 ] ) );
+    ASSERT_BD( ( identity < MeshElement<GeoShape, PointType>::S_numLocalPoints ) );
+    return *( static_cast<PointType const*>( M_points[ identity ] ) );
 }
 
 template <typename GeoShape, typename PointType>
 inline
 PointType const & MeshElement<GeoShape, PointType>::reversepoint( ID const identity ) const
 {
-    ASSERT_BD( ( identity > 0 && identity <= MeshElement<GeoShape, PointType>::S_numLocalPoints ) );
-    return *( static_cast<PointType const*>( M_points[ reversePoint<GeoShape>::operate( identity ) - 1 ] ) );
+    ASSERT_BD( ( identity < MeshElement<GeoShape, PointType>::S_numLocalPoints ) );
+    return *( static_cast<PointType const*>( M_points[ reversePoint<GeoShape>::operate( identity ) ] ) );
 }
 
 template <typename GeoShape, typename PointType>
 inline
 void MeshElement<GeoShape, PointType>::setPoint( ID const identity, point_Type const & point )
 {
-    ASSERT_BD( ( identity > 0 && identity <= MeshElement<GeoShape, PointType>::S_numLocalPoints ) ) ;
-    M_points[ identity - 1 ] = ( &point );
+    ASSERT_BD( ( identity < MeshElement<GeoShape, PointType>::S_numLocalPoints ) ) ;
+    M_points[ identity ] = ( &point );
 }
 
 template <typename GeoShape, typename PointType>
 bool MeshElement<GeoShape, PointType>::setPointWithBoundaryCheck( ID const identity, point_Type const & point )
 {
-    ASSERT_BD0( ( identity > 0 && identity <= MeshElement<GeoShape, PointType>::S_numLocalPoints ) ) ;
-    if ( identity <= 0 || identity > MeshElement<GeoShape, PointType>::S_numLocalVertices )
+    ASSERT_BD0( ( identity < MeshElement<GeoShape, PointType>::S_numLocalPoints ) ) ;
+    if ( identity >= MeshElement<GeoShape, PointType>::S_numLocalVertices )
         return false;
-    M_points[ identity -1 ] = ( &point );
+    M_points[ identity ] = ( &point );
     return true;
 }
 
@@ -366,24 +366,24 @@ template <typename GeoShape, typename PointType>
 inline
 void MeshElement<GeoShape, PointType>::setPoint( ID const identity, point_Type const * point )
 {
-    ASSERT_BD( ( identity > 0 && identity <= MeshElement<GeoShape, PointType>::S_numLocalPoints ) ) ;
-    M_points[ identity - 1 ] = ( point );
+    ASSERT_BD( ( identity < MeshElement<GeoShape, PointType>::S_numLocalPoints ) ) ;
+    M_points[ identity ] = ( point );
 }
 
 template <typename GeoShape, typename PointType>
 bool MeshElement<GeoShape, PointType>::setPointWithBoundaryCheck( ID const identity, point_Type const * point )
 {
-    ASSERT_BD0( ( identity > 0 && identity <= MeshElement<GeoShape, PointType>::S_numLocalPoints ) ) ;
-    if ( identity <= 0 || identity > MeshElement<GeoShape, PointType>::S_numLocalVertices )
+    ASSERT_BD0( ( identity < MeshElement<GeoShape, PointType>::S_numLocalPoints ) ) ;
+    if ( identity >= MeshElement<GeoShape, PointType>::S_numLocalVertices )
         return false;
-    M_points[ identity -1 ] = ( point );
+    M_points[ identity ] = ( point );
     return true;
 }
 
 template <typename GeoShape, typename PointType>
 entityFlag_Type MeshElement<GeoShape, PointType>::setStrongerMarkerAtPoint( const ID& identity, entityFlag_Type const & flag )
 {
-    return (const_cast<PointType *> ( M_points[identity -1]) ) -> setStrongerMarker(flag);
+    return (const_cast<PointType *> ( M_points[identity]) ) -> setStrongerMarker(flag);
 }
 
 }

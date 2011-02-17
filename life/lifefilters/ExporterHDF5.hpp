@@ -696,7 +696,9 @@ void ExporterHDF5<MeshType>::writeTopology  ( std::ofstream& xdmf )
          << "         NumberOfElements=\""
          << this->M_mesh->numGlobalElements()
          << "\"\n"
-         << "         BaseOffset=\"1\">\n"
+         << "         BaseOffset=\""
+         << 0
+         << "\">\n"
          << "         <DataStructure Format=\"HDF\"\n"
          << "                        Dimensions=\""
          << this->M_mesh->numGlobalElements()
@@ -961,13 +963,13 @@ void ExporterHDF5<MeshType>::writeGeometry()
 
     std::vector<Int> elementList;
     elementList.reserve(this->M_mesh->numElements()*numberOfPoints);
-    for (ID i=1; i <= this->M_mesh->numElements(); ++i)
+    for (ID i=0; i < this->M_mesh->numElements(); ++i)
     {
         typename MeshType::ElementType const& element (this->M_mesh->element(i));
-        UInt lid=(i-1)*numberOfPoints;
-        for (ID j=1; j<= numberOfPoints; ++j, ++lid)
+        UInt lid= i*numberOfPoints;
+        for (ID j=0; j< numberOfPoints; ++j, ++lid)
         {
-            elementList[lid] = (element.id()-1)*numberOfPoints+(j-1);
+            elementList[lid] = element.id()*numberOfPoints+j;
         }
     }
 
@@ -977,11 +979,11 @@ void ExporterHDF5<MeshType>::writeGeometry()
                               0, this->M_dataVector.begin()->storedArrayPtr()->comm());
 
     Epetra_IntVector connections(connectionsMap);
-    for (ID i=1; i <= this->M_mesh->numElements(); ++i)
+    for (ID i=0; i < this->M_mesh->numElements(); ++i)
     {
         typename MeshType::ElementType const& element (this->M_mesh->element(i));
-        UInt lid=(i-1)*numberOfPoints;
-        for (ID j=1; j<= numberOfPoints; ++j, ++lid)
+        UInt lid=i*numberOfPoints;
+        for (ID j=0; j< numberOfPoints; ++j, ++lid)
         {
             connections[lid] = element.point(j).id();
         }
@@ -989,12 +991,9 @@ void ExporterHDF5<MeshType>::writeGeometry()
 
     this->M_dataVector.begin()->storedArrayPtr()->comm().Barrier();
 
-    // this offset is needed by hdf5 since it starts numbering from 0
-    Int const hdf5Offset(0);
-
     // Points
 
-    // Build a map for linear elements, even though the origianl FE might be P0
+    // Build a map for linear elements, even though the original FE might be P0
     // This gives the right map for the coordinate arrays
 
     MapEpetra subMap;
@@ -1034,10 +1033,11 @@ void ExporterHDF5<MeshType>::writeGeometry()
     VectorEpetra pointsZ(subMap);
 
     Int gid;
-    for (ID i=1; i <= this->M_mesh->numVertices(); ++i)
+    for (ID i=0; i < this->M_mesh->numVertices(); ++i)
     {
         typename MeshType::point_Type const& point (this->M_mesh->pointList(i));
-        gid = point.id() - hdf5Offset;
+
+        gid = point.id();
 
         bool insertedX(true);
         bool insertedY(true);

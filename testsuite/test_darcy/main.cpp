@@ -89,29 +89,39 @@ int main(int argc, char** argv)
 {
 
 #ifdef HAVE_MPI
-    MPI_Init(&argc, &argv);
+
+    MPI_Init( &argc, &argv );
+
     std::cout << "MPI Initialization" << std::endl;
+
 #endif
 
-    // Error of the problem
-    LifeV::Real error(0);
     // Error known
-    const LifeV::Real errorKnown( 0.200340988220163 );
-    // Tollerance between the error and the errorKnown
-    const LifeV::Real tollerance( 1e-8 );
+    const LifeV::Real errorKnown( 0.2003822844278755 );
+
+    // Tolerance between the error and the errorKnown
+    const LifeV::Real tolerance( 1e-8 );
 
     darcy Darcy( argc, argv );
-    error = Darcy.run();
 
+    // Error of the problem
+    const LifeV::Real error = Darcy.run();
 
 #ifdef HAVE_MPI
+
     MPI_Finalize();
+
     std::cout << "MPI Finalization" << std::endl;
+
 #endif
 
-    if ( abs( error - errorKnown ) > tollerance )
+    if ( std::abs( error - errorKnown ) > tolerance )
+    {
         return ( EXIT_FAILURE );
+    }
     else
+    {
         return ( EXIT_SUCCESS );
+    }
 }
 

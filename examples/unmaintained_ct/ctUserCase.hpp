@@ -50,7 +50,7 @@ private:
     // time independant parabolic profile
     Real u3Dcyl(const Real&, const Real&, const Real& y, const Real&, const ID& i)
     {
-        if (i == 1)
+        if (i == 0)
             return ( C_ampl / (C_dimY * C_dimY)*(y + C_dimY)*(C_dimY-y) );
         else
             return(0.);
@@ -59,7 +59,7 @@ private:
     // time dependant parabolic profile
     Real u3Dcyl_dyn(const Real& t, const Real&, const Real& y, const Real&, const ID& i)
     {
-        if (i==1)
+        if (i==0)
         {
             if (t < C_amplstep)
                 return ( (t/C_amplstep) * C_ampl / (C_dimY * C_dimY)*(y + C_dimY)*(C_dimY-y) );

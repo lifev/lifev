@@ -504,9 +504,9 @@ reinitializationDirect()
     std::vector< std::vector< Real > > my_points(nPt, std::vector<Real>(dim));
     for (int iter_pt(0); iter_pt < nPt; ++iter_pt)
     {
-        my_points[iter_pt][0]=M_fespace->mesh()->point(iter_pt+1).x();
-        my_points[iter_pt][1]=M_fespace->mesh()->point(iter_pt+1).y();
-        my_points[iter_pt][2]=M_fespace->mesh()->point(iter_pt+1).z();
+        my_points[iter_pt][0]=M_fespace->mesh()->point(iter_pt).x();
+        my_points[iter_pt][1]=M_fespace->mesh()->point(iter_pt).y();
+        my_points[iter_pt][2]=M_fespace->mesh()->point(iter_pt).z();
     };
 
 
@@ -636,7 +636,7 @@ reinitializationDirect()
             };
         };
 
-        ID my_id(M_fespace->mesh()->point(iter_pt+1).id());
+        ID my_id(M_fespace->mesh()->point(iter_pt).id());
         int sign(1);
         if (repSol(my_id) < 0) {sign = -1;};
         repSol(my_id) = abs_dist*sign;
@@ -665,7 +665,7 @@ updateFacesNormalsRadius()
 
     UInt n_el(M_fespace->mesh()->numElements());
     UInt n_dof(M_fespace->dof().numLocalDof());
-    for (ID iter_el(1); iter_el <= n_el; ++iter_el)
+    for (ID iter_el(0); iter_el < n_el; ++iter_el)
     {
 
         // Storage for the points on the face
@@ -673,14 +673,14 @@ updateFacesNormalsRadius()
 
 
         // Find the edges that are crossed by the interface
-        for (UInt iter_dof_1(1); iter_dof_1 <= n_dof; ++iter_dof_1)
+        for (UInt iter_dof_1(0); iter_dof_1 < n_dof; ++iter_dof_1)
         {
-            ID id_dof_1( M_fespace->dof().localToGlobal(iter_el, iter_dof_1));
+            ID id_dof_1( M_fespace->dof().localToGlobalMap(iter_el, iter_dof_1));
             Real val1 (rep_solution(id_dof_1));
 
-            for (UInt iter_dof_2(iter_dof_1+1); iter_dof_2 <= n_dof ; ++iter_dof_2)
+            for (UInt iter_dof_2(iter_dof_1+1); iter_dof_2 < n_dof ; ++iter_dof_2)
             {
-                ID id_dof_2( M_fespace->dof().localToGlobal(iter_el, iter_dof_2));
+                ID id_dof_2( M_fespace->dof().localToGlobalMap(iter_el, iter_dof_2));
                 Real val2 (rep_solution(id_dof_2));
 
                 // Check if there is a change in the sign

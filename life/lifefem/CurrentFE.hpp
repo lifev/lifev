@@ -798,7 +798,7 @@ void CurrentFE::update(const MeshElementMarked& geoele, const flag_Type& upFlag)
     {
         for ( UInt icoor(0); icoor < M_nbCoor; ++icoor)
         {
-            pts[i][icoor] = geoele.point(i+1).coordinate(icoor+1);
+            pts[i][icoor] = geoele.point(i).coordinate(icoor);
         }
     }
     update(pts,upFlag);
@@ -814,7 +814,7 @@ void CurrentFE::computeCellNodes(const MeshElementMarked& geoele)
     {
         for ( UInt icoor(0); icoor < M_nbCoor; ++icoor)
         {
-            pts[i][icoor] = geoele.point(i+1).coordinate(icoor+1);
+            pts[i][icoor] = geoele.point(i).coordinate(icoor);
         }
 
     }

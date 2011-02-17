@@ -318,14 +318,14 @@ public:
     /*!
         @param i The local DOF in the face
     */
-    ID localToGlobalMap( const ID& i ) const
+    ID boundaryLocalToGlobalMap( const ID& i ) const
     {
         return M_localToGlobal( i );
     }
 
     ID __attribute__ ((__deprecated__)) bdLocalToGlobal( const ID& i ) const
     {
-        return localToGlobalMap( i );
+        return boundaryLocalToGlobalMap( i );
     }
 
     //@}

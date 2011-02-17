@@ -55,11 +55,11 @@ Real RossEthierSteinmanUnsteadyDec::uexact( const Real& t,
 	Real e = exp(-S_d*S_d*S_nu*t);
 
     switch(i) {
-        case 1:
+        case 0:
             return -S_a * e * ( exp(S_a*x) * sin(S_a*y+S_d*z) + exp(S_a*z) * cos(S_a*x+S_d*y) );
-        case 2:
+        case 1:
             return -S_a * e * ( exp(S_a*y) * sin(S_a*z+S_d*x) + exp(S_a*x) * cos(S_a*y+S_d*z) );
-        case 3:
+        case 2:
             return -S_a * e * ( exp(S_a*z) * sin(S_a*x+S_d*y) + exp(S_a*y) * cos(S_a*z+S_d*x) );
         default:
             exit(1);
@@ -85,33 +85,33 @@ Real RossEthierSteinmanUnsteadyDec::grad_u( const UInt& icoor, const Real& t, co
 	switch(icoor) {
 		case 1:    // u_x
 			switch(i) {
-				case 1:
+				case 0:
 					return -S_a * e * ( S_a * exp(S_a*x) * sin(S_a*y+S_d*z) - S_a * exp(S_a*z) * sin(S_a*x+S_d*y) );
-				case 2:
+				case 1:
 					return -S_a * e * ( S_d * exp(S_a*y) * cos(S_a*z+S_d*x) + S_a * exp(S_a*x) * cos(S_a*y+S_d*z) );
-				case 3:
+				case 2:
 					return -S_a * e * ( S_a * exp(S_a*z) * cos(S_a*x+S_d*y) - S_d * exp(S_a*y) * sin(S_a*z+S_d*x) );
 				default:
 					exit(1);
 			 }
 		case 2:   // u_y
 			switch(i) {
-				case 1:
+				case 0:
 					return -S_a * e * ( S_a * exp(S_a*x) * cos(S_a*y+S_d*z) - S_d * exp(S_a*z) * sin(S_a*x+S_d*y) );
-				case 2:
+				case 1:
 					return -S_a * e * ( S_a * exp(S_a*y) * sin(S_a*z+S_d*x) - S_a * exp(S_a*x) * sin(S_a*y+S_d*z) );
-				case 3:
+				case 2:
 					return -S_a * e * ( S_d * exp(S_a*z) * cos(S_a*x+S_d*y) + S_a * exp(S_a*y) * cos(S_a*z+S_d*x) );
 				default:
 					exit(1);
 			}
 		case 3:
 		    switch(i) {
-		        case 1:
+		        case 0:
 		            return -S_a * e * ( S_d * exp(S_a*x) * cos(S_a*y+S_d*z) +  S_a * exp(S_a*z) * cos(S_a*x+S_d*y) );
-		        case 2:
+		        case 1:
 		            return -S_a * e * ( S_a * exp(S_a*y) * cos(S_a*z+S_d*x) - S_d * exp(S_a*x) * sin(S_a*y+S_d*z) );
-		        case 3:
+		        case 2:
 		            return -S_a * e * ( S_a * exp(S_a*z) * sin(S_a*x+S_d*y) - S_a * exp(S_a*y) * sin(S_a*z+S_d*x) );
 		        default:
 		            exit(1);
@@ -134,11 +134,11 @@ Real RossEthierSteinmanUnsteadyDec::xexact( const Real& t,
                                      const ID& i )
 {
     switch(i) {
+        case 0:
         case 1:
         case 2:
-        case 3:
             return uexact(t, x, y, z, i);
-        case 4:
+        case 3:
             return pexact(t, x, y, z, 1);
         default:
             exit(1);
@@ -182,13 +182,13 @@ Real RossEthierSteinmanUnsteadyDec::fNeumann( const Real& t,
 	}
 
 	for (UInt k =0; k< 3; k++)  //mu grad_u n
-		out += S_mu* grad_u(k+1, t, x, y, z, i)*n[k];
+		out += S_mu* grad_u(k, t, x, y, z, i)*n[k];
 
 	if(S_flagStrain)
 		for (UInt k =0; k< 3; k++)  //mu grad_u^T n
-			out += S_mu* grad_u(i, t, x, y, z, k+1)*n[k];
+			out += S_mu* grad_u(i, t, x, y, z, k)*n[k];
 
-	out -= pexact(t, x, y, z, i) * n[i-1]; //grad_p n
+	out -= pexact(t, x, y, z, i) * n[i]; //grad_p n
 	return out;
 }
 
@@ -217,7 +217,7 @@ Real RossEthierSteinmanUnsteadyDec::normalVector( const Real& /*t*/,
         std::cout << "strange point: x=" << x << " y=" << y << " z=" << z
                   << std::endl;
     }
-    return n[i-1];
+    return n[i];
 
 }
 
@@ -228,11 +228,11 @@ Real RossEthierSteinmanUnsteadyDec::fShearStress( const Real& t, const Real& x, 
     Real out=0;
 
     for (UInt k =0; k< nDimensions; k++)  //mu gradu n
-        out += S_mu* grad_u(k+1, t, x, y, z, i)*normalVector( t, x, y, z, k+1 );
+        out += S_mu* grad_u(k, t, x, y, z, i)*normalVector( t, x, y, z, k );
 
     if(S_flagStrain)
         for (UInt k =0; k< nDimensions; k++)  //mu gradu^T n
-            out += S_mu* grad_u(i, t, x, y, z, k+1)*normalVector( t, x, y, z, k+1 );
+            out += S_mu* grad_u(i, t, x, y, z, k)*normalVector( t, x, y, z, k );
 
     return  out;
 }
@@ -247,7 +247,7 @@ Real RossEthierSteinmanUnsteadyDec::fWallShearStress( const Real& t, const Real&
     wss = fShearStress(t, x, y, z, i);
 
     for (UInt k =0; k< nDimensions; k++) // ( s_n \cdot n )
-        s_n_n += fShearStress(t, x, y, z, k+1) * normalVector( t, x, y, z, k+1 );
+        s_n_n += fShearStress(t, x, y, z, k) * normalVector( t, x, y, z, k );
 
     wss -= s_n_n * normalVector( t, x, y, z, i );
 

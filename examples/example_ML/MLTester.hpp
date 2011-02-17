@@ -32,8 +32,9 @@
 #ifndef _MLTESTER_H_
 #define _MLTESTER_H_
 
+#include <life/lifecore/LifeChrono.hpp>
 #include <life/lifesolver/OseenSolver.hpp>
-
+#include <life/lifealg/PreconditionerML.hpp>
 
 namespace LifeV
 {
@@ -49,37 +50,37 @@ public :
 
     typedef OseenSolver<Mesh, SolverType> super;
 
-    typedef OseenData<Mesh> data_type;
+    typedef OseenData data_Type;
 
     typedef Real ( *Function ) ( const Real&, const Real&, const Real&,
                                  const Real&, const ID& );
     typedef boost::function<Real ( Real const&, Real const&, Real const&,
-                                   Real const&, ID const& )> source_type;
+                                   Real const&, ID const& )> source_Type;
 
-    typedef Mesh mesh_type;
+    typedef Mesh mesh_Type;
 
-    typedef BCHandler                             bchandler_raw_type;
-    typedef boost::shared_ptr<bchandler_raw_type> bchandler_type;
+    typedef BCHandler                              bchandler_raw_Type;
+    typedef boost::shared_ptr<bchandler_raw_Type>  bchandler_Type;
 
-//    typedef SolverType                    solver_type;
-    typedef typename super::matrix_type      matrix_type;
-    typedef boost::shared_ptr<matrix_type>        matrix_ptrtype;
-    typedef typename super::vector_type      vector_type;
+//    typedef SolverType                    solver_Type;
+    typedef typename super::matrix_Type            matrix_Type;
+    typedef boost::shared_ptr<matrix_Type>         matrix_ptrtype;
+    typedef typename super::vector_Type            vector_Type;
 
-    typedef typename super::prec_raw_type    prec_raw_type;
-    typedef typename super::prec_type        prec_type;
+    typedef typename super::preconditioner_Type    preconditioner_Type;
+    typedef typename super::preconditionerPtr_Type preconditionerPtr_Type;
 
 
     // constructor
-    MLTester( const data_type&          dataType,
+    MLTester( boost::shared_ptr<data_Type>&          dataType,
               FESpace<Mesh, MapEpetra>& uFESpace,
               FESpace<Mesh, MapEpetra>& pFESpace,
-              Epetra_Comm&              comm );
+              boost::shared_ptr<Epetra_Comm>&              comm );
 
-    MLTester( const data_type&          dataType,
+    MLTester( boost::shared_ptr<data_Type>&          dataType,
               FESpace<Mesh, MapEpetra>& uFESpace,
               FESpace<Mesh, MapEpetra>& pFESpace,
-              Epetra_Comm&              comm,
+              boost::shared_ptr<Epetra_Comm>&              comm,
               const MapEpetra           monolithicMap,
               const UInt                offset=0);
 
@@ -94,7 +95,7 @@ public :
     void createDefaultList( const GetPot&       dataFile,
                             const std::string&  section );
 
-    void testML(  bchandler_raw_type& bch );
+    void testML(  bchandler_raw_Type& bch );
 
 private :
 
@@ -106,24 +107,24 @@ private :
 
 template< typename Mesh, typename SolverType >
 MLTester<Mesh, SolverType>::
-MLTester( const data_type&          dataType,
+MLTester( boost::shared_ptr<data_Type>&          dataType,
           FESpace<Mesh, MapEpetra>& uFESpace,
           FESpace<Mesh, MapEpetra>& pFESpace,
-          Epetra_Comm&              comm ):
-        super(dataType, uFESpace, pFESpace, comm)
+          boost::shared_ptr<Epetra_Comm>&              comm ):
+    super(dataType, uFESpace, pFESpace, comm)
 {};
 
 
 
 template< typename Mesh, typename SolverType >
 MLTester<Mesh, SolverType>::
-MLTester( const data_type&          dataType,
+MLTester( boost::shared_ptr<data_Type>&          dataType,
           FESpace<Mesh, MapEpetra>& uFESpace,
           FESpace<Mesh, MapEpetra>& pFESpace,
-          Epetra_Comm&              comm,
+          boost::shared_ptr<Epetra_Comm>&              comm,
           const MapEpetra           monolithicMap,
           const UInt                offset):
-        super(dataType, uFESpace, pFESpace, comm, monolithicMap, offset)
+    super(dataType, uFESpace, pFESpace, comm, monolithicMap, offset)
 {};
 
 
@@ -135,17 +136,17 @@ MLTester<Mesh, SolverType>::createDefaultList( const GetPot&       dataFile,
                                                const std::string&  section )
 {
     std::cout << "Section = " << section << std::endl;
-    createMLList(dataFile, section, M_MLDefaultList);
+    LifeV::PreconditionerML::createMLList(M_MLDefaultList, dataFile, section);
 };
 
 
 template < typename Mesh, typename SolverType >
 void MLTester<Mesh, SolverType>::
-testML( bchandler_raw_type& bch )
+testML( bchandler_raw_Type& bch )
 {
 
 
-    Chrono chrono;
+    LifeChrono chrono;
 
 
     // matrix and vector assembling communication
@@ -155,19 +156,19 @@ testML( bchandler_raw_type& bch )
     chrono.start();
 
 
-    this->M_matrixNoBC->GlobalAssemble();
+    this->M_matrixNoBC->globalAssemble();
 
-    if (this->M_stab)
-        this->M_matrStab->GlobalAssemble();
+    if (this->M_stabilization)
+        this->M_matrixStabilization->globalAssemble();
 
-    matrix_ptrtype matrFull( new matrix_type( this->M_localMap, this->M_matrixNoBC->getMeanNumEntries()));
+    matrix_ptrtype matrFull( new matrix_Type( this->M_localMap, this->M_matrixNoBC->meanNumEntries()));
 
     updateStabilization(*matrFull);
     getFluidMatrix(*matrFull);
 
-    vector_type rhsFull (this->M_rhsNoBC);
+    vector_Type rhsFull (this->M_rightHandSideNoBC);
 
-//     matrFull.reset(new matrix_type(*M_matrixNoBC));
+//     matrFull.reset(new matrix_Type(*M_matrixNoBC));
 //     M_rhsFull = M_rhsNoBC;
 
     chrono.stop();
@@ -175,7 +176,7 @@ testML( bchandler_raw_type& bch )
     this->getDisplayer().leaderPrintMax("done in ", chrono.diff() );
 
     // boundary conditions update
-    this->M_comm->Barrier();
+    this->getDisplayer().comm()->Barrier();
 
     this->getDisplayer().leaderPrint("  f-  Applying boundary conditions ...         ");
 
@@ -192,7 +193,7 @@ testML( bchandler_raw_type& bch )
 
     //this->SetParameters(true);
 
-    bool TestPassed = true;
+//    bool TestPassed = true;
 
 
     // parameter list definition
@@ -274,14 +275,14 @@ testML( bchandler_raw_type& bch )
 
     std::ofstream ofile( "results.txt" );
 
-    for (int smi = 0; smi < DefaultParamList.size(); smi++)
-        for (int cl = 0; cl < CoarseParamList.size(); cl++)
+    for (UInt smi = 0; smi < DefaultParamList.size(); smi++)
+        for (UInt cl = 0; cl < CoarseParamList.size(); cl++)
             for (int sweeps = 1 ; sweeps < 2 ; sweeps += 2)
                 for (unsigned int i = 0; i < TestList.size(); ++i)
                     for (unsigned int j = 0; j < PreOrPost.size(); ++j)
                         for (unsigned int k = 0; k < Damping.size(); ++k)
                         {
-                            if (this->M_comm->MyPID() == 0)
+                            if (this->getDisplayer().comm()->MyPID() == 0)
                             {
                                 std::cout << std::endl;
                                 //                                    std::cout << "### Testing       " << DefaultParamList[smi];
@@ -336,22 +337,22 @@ testML( bchandler_raw_type& bch )
 
                             //MLList.print(std::cout);
 
-                            prec_type prec( (PRECFactory::instance().createObject( "ML" ) ) );
-                            prec->setList(MLList);
+                            preconditionerPtr_Type prec( (PRECFactory::instance().createObject( "ML" ) ) );
+                            prec->setParametersList(MLList);
                             this->M_linearSolver.setPreconditioner( prec );
 
-                            Epetra_Time Time(*this->M_comm);
+                            Epetra_Time Time(*this->getDisplayer().comm());
 
-                            this->M_sol.getEpetraVector().Scale(0.);
+                            this->M_solution->epetraVector().Scale(0.);
 
                             this->M_linearSolver.setMatrix(*matrFull);
-                            this->M_linearSolver.solveSystem( rhsFull, this->M_sol, matrFull );
+                            this->M_linearSolver.solveSystem( rhsFull, *this->M_solution, matrFull );
 
 
                             this->resetPreconditioner();
 
                             double status[AZ_STATUS_SIZE];
-                            this->M_linearSolver.getAztecStatus( status );
+                            this->M_linearSolver.aztecStatus( status );
 
                             if ( status[AZ_why] == AZ_normal         ) AZstatus = "N";
                             else if ( status[AZ_why] == AZ_maxits    ) AZstatus = "M";
@@ -359,7 +360,7 @@ testML( bchandler_raw_type& bch )
                             else if ( status[AZ_why] == AZ_ill_cond  ) AZstatus = "I";
                             else if ( status[AZ_why] == AZ_breakdown ) AZstatus = "B";
 
-                            int MLIters   = this->M_linearSolver.NumIters();
+                            int MLIters   = this->M_linearSolver.numIterations();
                             double MLTime = Time.ElapsedTime();
 
                             if (AZstatus == "N")
@@ -386,7 +387,7 @@ testML( bchandler_raw_type& bch )
                             }
 
 
-                            if (this->M_comm->MyPID() == 0)
+                            if (this->getDisplayer().comm()->MyPID() == 0)
                             {
                                 std::cout << "ML     : iters     = " << MLIters;
                                 std::cout << " time      = " << MLTime << " (s) with "
@@ -405,7 +406,7 @@ testML( bchandler_raw_type& bch )
                         }
 
 
-    if (this->M_comm->MyPID() == 0)
+    if (this->getDisplayer().comm()->MyPID() == 0)
     {
         std::cout << "Best time : " << bestTime << std::endl;
         std::cout << "  Def. Param = " << bestTimeDefParamList;

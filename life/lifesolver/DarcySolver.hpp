@@ -48,10 +48,8 @@
 #include <life/lifealg/SolverAztecOO.hpp>
 
 //
-#include <life/lifefem/GeometricMap.hpp>
 #include <life/lifesolver/DarcyData.hpp>
 //
-#include <life/lifecore/Displayer.hpp>
 
 
 // Local namespace to store the default source term and the default permeability tensor.
@@ -91,18 +89,19 @@ namespace LifeV
   \f[
   \left\{
   \begin{array}{l l l}
-  \Lambda^{-1} \sigma + \nabla p = 0 & \mathrm{in} & \Omega\,,  \vspace{0.2cm} \\
-  \nabla \cdot \sigma - f = 0        & \mathrm{in} & \Omega\,,  \vspace{0.2cm} \\
-  p = g_D                            & \mathrm{on} & \Gamma_D\,,\vspace{0.2cm} \\
-  \sigma \cdot n + h p = g_R         & \mathrm{on} & \Gamma_R\,.
+  \Lambda^{-1} \sigma + \nabla p = f_v & \mathrm{in} & \Omega\,,  \vspace{0.2cm} \\
+  \nabla \cdot \sigma - f = 0          & \mathrm{in} & \Omega\,,  \vspace{0.2cm} \\
+  p = g_D                              & \mathrm{on} & \Gamma_D\,,\vspace{0.2cm} \\
+  \sigma \cdot n + h p = g_R           & \mathrm{on} & \Gamma_R\,.
   \end{array}
   \right.
   \f]
-  The first equation is the Darcy equation and the second equation is the conservation law. The data in the system
-  are \f$ \Lambda \f$ that is the permeability tensor, \f$ f \f$ that is the source term, \f$ \Gamma_D \f$ that
-  is the subset of the boundary of \f$ \Omega \f$ with Dirichlet boundary conditions with datum \f$ g_D \f$ and
-  \f$ \Gamma_R \f$ that is the part of the boundary of \f$ \Omega \f$ with Robin, or Neumann, boundary conditions
-  with data \f$ h \f$ and \f$ g_R \f$. We suppose that \f$ \partial \Omega = \Gamma_D \cup \Gamma_R \f$ and
+  The first equation is the Darcy equation and the second equation is the conservation law. 
+  <br>
+  The data in the system are: \f$ \Lambda \f$ the permeability tensor, \f$ f \f$ the source term, \f$ f_v \f$ the
+  vector source term, \f$ \Gamma_D \f$ the subset of the boundary of \f$ \Omega \f$ with Dirichlet boundary conditions,
+  with datum \f$ g_D \f$, and \f$ \Gamma_R \f$ that is the part of the boundary of \f$ \Omega \f$ with Robin, or Neumann, 
+  boundary conditions with data \f$ h \f$ and \f$ g_R \f$. We suppose that \f$ \partial \Omega = \Gamma_D \cup \Gamma_R \f$ and
   \f$ \Gamma_D \cap \Gamma_R = \emptyset \f$.
   <br>
   Using the hybridization procedure, and introducing a new variable, we may split the problem from
@@ -129,6 +128,7 @@ namespace LifeV
   c(\lambda, \tau) = \displaystyle \sum_{K \in \mathcal{T}_h} \int_{\partial K} \lambda \tau \cdot n\,,&
   h(\lambda, \mu) = \displaystyle \sum_{K \in \mathcal{T}_h} \int_{\partial K \cap \Gamma_R} h \mu \lambda \,,\vspace{0.2cm}\\
   F(v) = \displaystyle \sum_{K \in \mathcal{T}_h} \int_K f v\,,&
+  F_v(\tau) = \displaystyle \sum_{K \in \mathcal{T}_h} \int_K f_v \tau \,, \vspace{0.2cm}\\
   G(\mu) = \displaystyle \sum_{K \in \mathcal{T}_h} \int_{\partial K \cap \Gamma_R} g \mu\,,
   \end{array}
   \f]
@@ -136,9 +136,9 @@ namespace LifeV
   \f[
   \left\{
   \begin{array}{l l}
-  a(\sigma, \tau) + b(p, \tau) + c(\lambda, \tau) = 0\,,  & \forall \tau \in Z \,,\vspace{0.2cm}\\
-  b(v, \sigma) = - F(v)\,,                                  & \forall v \in V \,,\vspace{0.2cm}\\
-  c(\mu, \sigma) + h(\lambda, \mu) = G(\mu) \,,           & \forall \mu \in \Lambda\,.
+  a(\sigma, \tau) + b(p, \tau) + c(\lambda, \tau) = F_v(\tau)\,,  & \forall \tau \in Z \,,\vspace{0.2cm}\\
+  b(v, \sigma) = - F(v)\,,                                        & \forall v \in V \,,\vspace{0.2cm}\\
+  c(\mu, \sigma) + h(\lambda, \mu) = G(\mu) \,,                   & \forall \mu \in \Lambda\,.
   \end{array}
   \right.
   \f]
@@ -159,9 +159,9 @@ namespace LifeV
   \f[
   \left\{
   \begin{array}{l l}
-  a(\sigma_h, \tau_h) + b(p_h, \tau_h) + c(\lambda_h, \tau_h) = 0\,,  & \forall \tau_h \in Z_h \,,\vspace{0.2cm}\\
-  b(v_h, \sigma_h) = -F(v_h)\,,                                  & \forall v_h \in V_h \,,\vspace{0.2cm}\\
-  c(\mu_h, \sigma_h) + h(\lambda_h, \mu_h) = G(\mu_h) \,,           & \forall \mu_h \in \Lambda_h\,.
+  a(\sigma_h, \tau_h) + b(p_h, \tau_h) + c(\lambda_h, \tau_h) = F_v(\tau_h) \,,  & \forall \tau_h \in Z_h \,,\vspace{0.2cm}\\
+  b(v_h, \sigma_h) = -F(v_h)\,,                                                  & \forall v_h \in V_h \,,\vspace{0.2cm}\\
+  c(\mu_h, \sigma_h) + h(\lambda_h, \mu_h) = G(\mu_h) \,,                        & \forall \mu_h \in \Lambda_h\,.
   \end{array}
   \right.
   \f]
@@ -170,12 +170,13 @@ namespace LifeV
   \f$ \lambda_K \f$ alone. We introduce the following local matrices
   \f[
   \begin{array}{l l l}
-  \left[ A \right]_{ij} = \displaystyle   \int_K \Lambda^{-1} \psi_j \cdot \psi_i \,, &
-  \left[ B \right]_{ij} = \displaystyle - \int_K \phi_j \nabla \cdot \psi_i \,, &
-  \left[ C \right]_{ij} = \displaystyle   \int_{\partial K} \xi_i \psi_j \cdot n \,, \vspace{0.2cm} \\
-  \left[ H \right]_{ij} = \displaystyle   \int_{\partial K \cap \Gamma_R} h \xi_i \xi_j\,, &
-  \left[ F \right]_{j}  = \displaystyle   \int_K f \phi_j\,, &
-  \left[ G \right]_{j}  = \displaystyle   \int_{\partial K \cap \Gamma_R } g \xi_j\,,
+  \left[ A \right]_{ij}  = \displaystyle   \int_K \Lambda^{-1} \psi_j \cdot \psi_i \,, &
+  \left[ B \right]_{ij}  = \displaystyle - \int_K \phi_j \nabla \cdot \psi_i \,, &
+  \left[ C \right]_{ij}  = \displaystyle   \int_{\partial K} \xi_i \psi_j \cdot n \,, \vspace{0.2cm} \\
+  \left[ H \right]_{ij}  = \displaystyle   \int_{\partial K \cap \Gamma_R} h \xi_i \xi_j\,, &
+  \left[ F \right]_{j}   = \displaystyle   \int_K f \phi_j\,, &
+  \left[ F_v \right]_{j} = \displaystyle   \int_K f_v \psi_j\,, \vspace{0.2cm} \\
+  \left[ G \right]_{j}   = \displaystyle   \int_{\partial K \cap \Gamma_R } g \xi_j\,,
   \end{array}
   \f]
   where we avoid to write the dependence on the triangle \f$ K \f$ in all the matrices and vectors. <BR>
@@ -183,8 +184,8 @@ namespace LifeV
   \f[
   \left\{
   \begin{array}{l}
-  A \sigma_K + B p_K + C \lambda_K = 0\,, \vspace{0.2cm} \\
-  B^T \sigma_K = -F \,,                    \vspace{0.2cm}\\
+  A \sigma_K + B p_K + C \lambda_K = F_v\,, \vspace{0.2cm} \\
+  B^T \sigma_K = -F \,,                     \vspace{0.2cm}\\
   C^T \sigma_K + H \lambda_K = G\,.
   \end{array}
   \right.
@@ -209,7 +210,7 @@ namespace LifeV
   =
   \left[
   \begin{array}{c}
-  0 \vspace{0.2cm}\\
+  F_v \vspace{0.2cm}\\
   -F \vspace{0.2cm}\\
   G
   \end{array}
@@ -220,7 +221,7 @@ namespace LifeV
   \f[
   \begin{array}{l}
   L_K = - C^T A^{-1} C + C^T A^{-1} B \left( B^T A^{-1} B \right)^{-1} B^T A^{-1} C + H \,, \vspace{0.2cm} \\
-  r_K = G + C^T A^{-1} B \left( B^T A^{-1} B \right)^{-1} F\,,
+  r_K = G + C^T A^{-1} B \left( B^T A^{-1} B \right)^{-1} F + C^T A^{-1} B \left( B^T A^{-1} B \right)^{-1} B^T A^{-1} F_v - C^T A^{-1} F_v \,,
   \end{array}
   \f]
   Imposing that at each edge or face the hybrid unknown is single value we obtain a linear system for the hybrid unknown
@@ -230,8 +231,8 @@ namespace LifeV
   We recover the primal and dual variable as a post-process from the hybrid variable at element level, so we have
   \f[
   \begin{array}{l}
-  p_K = \left( B^T A^{-1} B \right)^{-1} \left( F - B^T A^{-1} C \lambda_K \right)\,, \vspace{0.2cm} \\
-  \sigma_K = -A^{-1} \left( B p_K + C \lambda_K \right) \,.
+  p_K = \left( B^T A^{-1} B \right)^{-1} \left( F + B^T A^{-1} F_v - B^T A^{-1} C \lambda_K \right)\,, \vspace{0.2cm} \\
+  \sigma_K = -A^{-1} \left( B p_K - F_v + C \lambda_K \right) \,.
   \end{array}
   \f]
   @note In the code we do not use the matrix \f$ H \f$ and the vector \f$ G \f$, because all the boundary
@@ -252,7 +253,10 @@ public:
     typedef SolverType                             solver_Type;
 
     typedef boost::function<Real ( const Real&, const Real&, const Real&,
-                                   const Real&, const UInt& )> Function;
+                                   const Real&, const UInt& )> function_Type;
+
+    typedef boost::function<Vector ( const Real&, const Real&, const Real&,
+                                     const Real&, const UInt& )> vectorFunction_Type;
 
     typedef inversePermeability<Mesh, SolverType>  permeability_Type;
     typedef boost::shared_ptr<permeability_Type>   permeabilityPtr_Type;
@@ -357,9 +361,18 @@ public:
       Set the source term, the default source term is the zero function.
       @param source Source term for the problem.
     */
-    void setSourceTerm ( const Function& source )
+    void setSource ( const function_Type& source )
     {
         M_source = source;
+    }
+
+    //! Set vector source term
+    /*!
+      @param source Vector source term for the problem.
+    */
+    void setVectorSource ( const vectorFunction_Type& vectorSource )
+    {
+        M_vectorSource = vectorSource;
     }
 
     //! Set inverse diffusion tensor
@@ -609,7 +622,10 @@ protected:
     const data_Type&     M_data;
 
     //! Source function.
-    Function             M_source;
+    function_Type        M_source;
+
+    //! Vector source function.
+    vectorFunction_Type  M_vectorSource;
 
     //! Permeability tensor.
     permeabilityPtr_Type M_inversePermeability;
@@ -679,6 +695,9 @@ protected:
 
     //! Element vector for the source term of the problem, lives in Qk(fe).
     VectorElemental M_elvecSource;
+
+    //! Element vector for the vector source term of the problem, lives in RTk(fe)
+    VectorElemental M_elvecSourceVector;
 
     //! Element vector for the dual variabl, lives in RTk(fe).
     VectorElemental M_elvecFlux;
@@ -759,6 +778,7 @@ DarcySolver ( const data_Type&                 dataFile,
         // Elementary matrices and vectors used for the static condensation.
         M_elvecHyb               ( M_hybrid_FESpace.refFE().nbDof(), 1 ),
         M_elvecSource            ( M_primal_FESpace.refFE().nbDof(), 1 ),
+        M_elvecSourceVector      ( M_dual_FESpace.refFE().nbDof(), 1 ),
         M_elvecFlux              ( M_dual_FESpace.refFE().nbDof(), 1 ),
         M_elmatMix               ( M_dual_FESpace.refFE().nbDof(), 1, 1, M_primal_FESpace.refFE().nbDof(), 0, 1,
                                    M_hybrid_FESpace.refFE().nbDof(), 0, 1 ),
@@ -797,7 +817,7 @@ DarcySolver ( const data_Type&                 dataFile,
         M_matrHybrid             ( new matrix_Type ( M_localMap ) ),
         M_rhs                    ( new vector_Type ( M_localMap ) ),
         M_primal    	    	 ( new vector_Type ( M_primal_FESpace.map() ) ),
-        M_dual		        	 ( new vector_Type ( M_dual_FESpace.map(), Repeated ) ),
+        M_dual	                 ( new vector_Type ( M_dual_FESpace.map(), Repeated ) ),
         M_hybrid                 ( new vector_Type ( M_hybrid_FESpace.map() ) ),
         M_residual               ( new vector_Type ( M_localMap ) ),
         M_linearSolver           ( ),
@@ -805,6 +825,7 @@ DarcySolver ( const data_Type&                 dataFile,
         // Local matrices and vectors.
         M_elvecHyb               ( M_hybrid_FESpace.refFE().nbDof(), 1 ),
         M_elvecSource            ( M_primal_FESpace.refFE().nbDof(), 1 ),
+        M_elvecSourceVector      ( M_dual_FESpace.refFE().nbDof(), 1 ),
         M_elvecFlux              ( M_dual_FESpace.refFE().nbDof(), 1 ),
         M_elmatMix               ( M_dual_FESpace.refFE().nbDof(), 1, 1, M_primal_FESpace.refFE().nbDof(), 0, 1,
                                    M_hybrid_FESpace.refFE().nbDof(), 0, 1 ),
@@ -882,7 +903,7 @@ buildSystem ()
     //    LOOP ON ALL THE VOLUME ELEMENTS
     //---------------------------------------
 
-    for ( UInt iElem(1); iElem <= meshNumberOfElements; ++iElem )
+    for ( UInt iElem(0); iElem < meshNumberOfElements; ++iElem )
     {
         // Compute the Hdiv mass matrix as a local matrix depending on the current element.
         localElementComputation( iElem );
@@ -924,6 +945,8 @@ buildSystem ()
     chronoGlobalAssembleMatrix.start();
 
     // Assemble the global hybrid matrix.
+    M_matrHybrid->spy("Hybrid");
+
     M_matrHybrid->globalAssemble();
 
     chronoGlobalAssembleMatrix.stop();
@@ -953,12 +976,12 @@ setup ()
     GetPot dataFile( *(M_data.dataFile()) );
 
     // Set up data for the linear solver and the preconditioner.
-    M_linearSolver.setDataFromGetPot( dataFile, "darcy/solver" );
-    M_linearSolver.setupPreconditioner( dataFile, "darcy/prec" );
+    M_linearSolver.setDataFromGetPot( dataFile, ( M_data.section() + "/solver" ).data() );
+    M_linearSolver.setupPreconditioner( dataFile, ( M_data.section() + "/prec" ).data() );
     M_linearSolver.setCommunicator( M_displayer.comm() );
 
     // Choose the preconditioner type.
-    std::string precType = dataFile( "darcy/prec/prectype", "Ifpack");
+    std::string precType = dataFile( ( M_data.section() + "/prec/prectype" ).data() , "Ifpack");
 
     // Create a preconditioner object.
     M_prec.reset( PRECFactory::instance().createObject( precType ) );
@@ -1015,7 +1038,7 @@ computePrimalAndDual ()
     //    LOOP ON ALL THE VOLUME ELEMENTS
     //---------------------------------------
 
-    for ( UInt iElem(1); iElem <= meshNumberOfElements; ++iElem )
+    for ( UInt iElem(0); iElem < meshNumberOfElements; ++iElem )
     {
         // Clear the hybrid right hand side, it will store the extranctions from the global vecotor.
         M_elvecHyb.zero();
@@ -1042,12 +1065,12 @@ computePrimalAndDual ()
                         M_primal_FESpace.dof(), 0 );
 
 
-        for ( UInt iLocalFace(1); iLocalFace <=  M_dual_FESpace.mesh()->element( iElem ).S_numLocalFaces; ++iLocalFace )
+        for ( UInt iLocalFace(0); iLocalFace <  M_dual_FESpace.mesh()->element( iElem ).S_numLocalFaces; ++iLocalFace )
         {
             UInt iGlobalFace( M_dual_FESpace.mesh()->localFaceId( iElem, iLocalFace ) );
-            if ( M_dual_FESpace.mesh()->faceElement( iGlobalFace, 1 ) != iElem )
+            if ( M_dual_FESpace.mesh()->faceElement( iGlobalFace, 0 ) != iElem )
             {
-                M_elvecFlux[ iLocalFace - 1 ] = 0;
+                M_elvecFlux[ iLocalFace ] = 0;
             }
         }
 
@@ -1087,14 +1110,14 @@ DarcySolver<Mesh, SolverType>::
 computeConstantMatrices ()
 {
 
-    /* Update the divergence matrix, it is independant of the current element
+    /* Update the divergence matrix, it is independent of the current element
        thanks to the Piola transform. */
     grad_Hdiv( static_cast<Real>(1.),
                M_elmatMix,
                M_dual_FESpace.fe(),
                M_primal_FESpace.fe(), 0, 1 );
 
-    /* Update the boundary matrix, it is independant of the current element
+    /* Update the boundary matrix, it is independent of the current element
        thanks to the Piola transform.
        Here we use the fact that a RefHybridFE "IS A" ReferenceFE and the method refFE of
        a FESpace object. In fact the method refFE return a const ReferenceFE&, but the function
@@ -1135,11 +1158,22 @@ localElementComputation ( const UInt & iElem )
     M_primal_FESpace.fe().barycenter( xg, yg, zg );
 
     /* Compute the Hdiv mass matrix. We pass the time at the inverse of the permeability
-       because the DarcySolverTransient needs the pemeability time dependent. In this case
+       because the DarcySolverTransient needs the permeability time dependent. In this case
        we do not have a time evolution. */
     mass_Hdiv( (*M_inversePermeability)( M_data.dataTime()->time(), xg, yg, zg, iElem ),
                M_elmatMix,
                M_dual_FESpace.fe(), 0, 0 );
+
+    // Clear the source vectors.
+    M_elvecSource.zero();
+    M_elvecSourceVector.zero();
+    
+    // Compute the source term.
+    source( M_source, M_elvecSource, M_primal_FESpace.fe(), M_data.dataTime()->time(), 0 );
+
+    // Compute the vector source term.
+    source_Hdiv ( M_vectorSource( M_data.dataTime()->time(), xg, yg, zg, 0), 
+                  M_elvecSourceVector, M_dual_FESpace.fe(), 0 );
 
 } // localElementComputation
 
@@ -1254,15 +1288,8 @@ staticCondensation ()
     //     VECTOR OPERATIONS
     //..........................
 
-    // Clear some vectors.
-    M_elvecSource.zero();
+    // Clear vector.
     M_elvecHyb.zero();
-
-    // Compute the right hand side.
-    source( M_source,
-            M_elvecSource,
-            M_primal_FESpace.fe(),
-            static_cast<Real>(0), 0 );
 
     /* Put in M_elvecSource the vector LB^{-1} * M_elvecSource = LB^{-1} F
        For more details see http://www.netlib.org/lapack/lapack-3.1.1/SRC/dtrtrs.f */
@@ -1273,6 +1300,32 @@ staticCondensation ()
        M_elvecHyb is fully stored.
        For more details see http://www.netlib.org/blas/dgemm.f */
     blas.GEMM ( TRANS, NOTRANS, NBL, NBRHS, NBP, ONE, M_BtC, NBP, M_elvecSource, NBP, ZERO, M_elvecHyb, NBL );
+
+    /* Put in M_elvecSourceVector the vector L^{-1} * M_elvecSourceVector, solving a triangular system.
+       For more details see http://www.netlib.org/lapack/lapack-3.1.1/SRC/dtrtrs.f */
+    lapack.TRTRS ( UPLO, NOTRANS, NODIAG, NBU, NBRHS, A, NBU, M_elvecSourceVector, NBU, INFO );
+    ASSERT_PRE( !INFO[0], "Lapack Computation M_elvecSourceVector = L^{-1} M_elvecSourceVector is not achieved." );
+
+    /* Add to M_elvecHyb the vector - C^T * M_elvecSourceVector = M_elvecHyb - C^T * A^{-1} * M_elvecSourceVector
+       M_elvecHyb is fully stored.
+       For more details see http://www.netlib.org/blas/dgemm.f */
+    blas.GEMM ( TRANS, NOTRANS, NBL, NBRHS, NBL, MINUSONE, C, NBL, M_elvecSourceVector, NBU, ONE, M_elvecHyb, NBL );
+
+    /* Put in M_elvecSource the vector B^T * L^{-T} * M_elvecSourceVector =  B^T * A^{-1} * M_elvecSourceVector
+       M_elvecSource fully stored.
+       For more details see http://www.netlib.org/blas/dgemm.f */
+    blas.GEMM ( TRANS, TRANS, NBP, NBRHS, NBU, ONE, B, NBU, M_elvecSourceVector, NBRHS, ZERO, M_elvecSource, NBRHS );
+  
+    /* Put in M_elvecSource the vector LB^{-1} * M_elvecSource = LB^{-1} * B^T * A^{-1} * M_elvecSource
+       For more details see http://www.netlib.org/lapack/lapack-3.1.1/SRC/dtrtrs.f */
+    lapack.TRTRS ( UPLO, NOTRANS, NODIAG, NBP, NBRHS, M_BtB, NBP, M_elvecSource, NBRHS, INFO );
+    ASSERT_PRE( !INFO[0], "Lapack Computation M_elvecSourceVector = LB^{-1} rhs is not achieved." );
+
+    /* Add in M_elvecHyb the vector M_BtC^T * M_elvecSource = 
+       C^T * A^{-1} * B^T * (B^T * A^{-1} * B)^{-1} * B^T * A^{-1} * M_elvecSource
+       M_elvecHyb is fully stored.
+       For more details see http://www.netlib.org/blas/dgemm.f */
+    blas.GEMM ( TRANS, NOTRANS, NBL, NBRHS, NBP, ONE, M_BtC, NBP, M_elvecSource, NBRHS, ONE, M_elvecHyb, NBL );
 
     //........................
     // END OF VECTOR OPERATIONS.
@@ -1390,14 +1443,18 @@ localComputePrimalAndDual ()
     //  1) Computation of the PRESSURE
     //...................................
 
-    // Clear the source vector.
-    M_elvecSource.zero();
+    // Save in M_elvecFlux the values in M_elvecSourceVector useful for the dual variable
+    M_elvecFlux = M_elvecSourceVector;
 
-    // The source term is computed with a test function in the primal variable space.
-    source( M_source,
-            M_elvecSource,
-            M_primal_FESpace.fe(),
-            static_cast<Real>(0), 0 );
+    /* Put in M_elvecSourceVector the vector L^{-1} * M_elvecSourceVector, solving a triangular system.
+       For more details see http://www.netlib.org/lapack/lapack-3.1.1/SRC/dtrtrs.f */
+    lapack.TRTRS ( UPLO, NOTRANS, NODIAG, NBU, NBRHS, A, NBU, M_elvecSourceVector, NBU, INFO );
+    ASSERT_PRE( !INFO[0], "Lapack Computation M_elvecSourceVector = L^{-1} M_elvecSourceVector is not achieved." );
+
+    /* Put in M_elvecSourceVector the vector B^T * L^{-T} * M_elvecSourceVector =  B^T * A^{-1} * M_elvecSourceVector
+       M_elvecSourceVector fully stored.
+       For more details see http://www.netlib.org/blas/dgemm.f */
+    blas.GEMM ( TRANS, TRANS, NBP, NBRHS, NBU, ONE, B, NBU, M_elvecSourceVector, NBRHS, ONE, M_elvecSource, NBRHS );
 
     /* Put in M_elvecSource the vector LB^{-1} * M_elvecSource = LB^{-1} * F
        For more details see http://www.netlib.org/lapack/lapack-3.1.1/SRC/dtrtrs.f */
@@ -1421,20 +1478,23 @@ localComputePrimalAndDual ()
     //  2) Computation of the VELOCITIES
     //.....................................
 
-    // Clear the element dual vector.
-    M_elvecFlux.zero();
+    /* Put in M_elvecFlux the vector L^{-1} * M_elvecFlux, solving a triangular system.
+       For more details see http://www.netlib.org/lapack/lapack-3.1.1/SRC/dtrtrs.f */
+    lapack.TRTRS ( UPLO, NOTRANS, NODIAG, NBU, NBRHS, A, NBU, M_elvecFlux, NBU, INFO );
+    ASSERT_PRE( !INFO[0], "Lapack Computation M_elvecFlux = L^{-1} M_elvecFlux is not achieved." );
 
-    /* Put in M_elvecFlux the vector B * M_elvecSource = L^{-1} * B * primal_K
+    /* Put in M_elvecFlux the vector B * M_elvecSource - M_elvecFlux = 
+       = L^{-1} * B * primal_K - M_elvecVectorSource
        For more details see http://www.netlib.org/slatec/lin/dgemv.f */
-    blas.GEMV ( NOTRANS, NBU, NBP, ONE, B, NBU, M_elvecSource, ZERO, M_elvecFlux );
+    blas.GEMV ( NOTRANS, NBU, NBP, ONE, B, NBU, M_elvecSource, MINUSONE, M_elvecFlux );
 
-    /* Put in M_elvecFlux the vector
-       - C * M_elvecHyb - M_elvecFlux = - L^{-1} * C * lambda_K - L^{-1} * B * primal_K
+    /* Put in M_elvecFlux the vector - C * M_elvecHyb - M_elvecFlux = 
+       = - L^{-1} * C * lambda_K - L^{-1} * B * primal_K + L^{-1} * M_elvecVectorSource
        For more details see http://www.netlib.org/slatec/lin/dgemv.f */
     blas.GEMV ( NOTRANS, NBU, NBL, MINUSONE, C, NBL, M_elvecHyb, MINUSONE, M_elvecFlux );
 
-    /* Put in flux the vector
-       L^{-T} * M_elvecFlux = - A^{-1} * C^T * lambda_K - A^{-1} * B^T * primal_K
+    /* Put in flux the vector L^{-T} * M_elvecFlux = 
+       = - A^{-1} * C^T * lambda_K - A^{-1} * B^T * primal_K + A^{-1} * M_elvecVectorSource
        For more details see http://www.netlib.org/lapack/lapack-3.1.1/SRC/dtrtrs.f */
     lapack.TRTRS ( UPLO, TRANS, NODIAG, NBU, NBRHS, A, NBU, M_elvecFlux, NBU, INFO );
     ASSERT_PRE(!INFO[0], "Lapack Computation M_elvecFlux = L^{-T} M_elvecFlux is not achieved.");

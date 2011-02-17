@@ -503,7 +503,7 @@ addMass(matrix_ptrType matrix, const Real& coefficient, const UInt& offsetLeft, 
     const UInt nbTotalDof(M_fespace->dof().numTotalDof());
 
     // Loop over the elements
-    for (UInt iterElement(1); iterElement <= nbElements; ++iterElement)
+    for (UInt iterElement(0); iterElement < nbElements; ++iterElement)
     {
         // Update the mass current FE
         M_massCFE->update( M_fespace->mesh()->element(iterElement), UPDATE_PHI | UPDATE_WDET );
@@ -540,7 +540,7 @@ addAdvection(matrix_ptrType matrix, const vector_type& beta, const UInt& offsetL
     // Beta has to be repeated!
     if (beta.mapType() == Unique)
     {
-        addAdvection(matrix,vector_type(beta,Repeated));
+        addAdvection(matrix,vector_type(beta,Repeated), offsetLeft, offsetUp);
         return;
     }
 
@@ -562,7 +562,7 @@ addAdvection(matrix_ptrType matrix, const vector_type& beta, const UInt& offsetL
     std::vector< std::vector< Real > > localBetaValue(nbQuadPt, std::vector<Real>(3,0.0));
 
     // Loop over the elements
-    for (UInt iterElement(1); iterElement <= nbElements; ++iterElement)
+    for (UInt iterElement(0); iterElement < nbElements; ++iterElement)
     {
         // Update the advection current FEs
         M_advCFE->update( M_fespace->mesh()->element(iterElement), UPDATE_PHI | UPDATE_DPHI | UPDATE_WDET );
@@ -611,7 +611,7 @@ addDiffusion(matrix_ptrType matrix, const Real& coefficient, const UInt& offsetL
     const UInt nbTotalDof(M_fespace->dof().numTotalDof());
 
     // Loop over the elements
-    for (UInt iterElement(1); iterElement <= nbElements; ++iterElement)
+    for (UInt iterElement(0); iterElement < nbElements; ++iterElement)
     {
         // Update the diffusion current FE
         M_diffCFE->update( M_fespace->mesh()->element(iterElement), UPDATE_DPHI | UPDATE_WDET );
@@ -668,7 +668,7 @@ addMassRhs(vector_type& rhs, const vector_type& f)
     std::vector<Real> fValues(nbQuadPt,0.0);
 
     // Loop over the elements
-    for (UInt iterElement(1); iterElement <= nbElements; ++iterElement)
+    for (UInt iterElement(0); iterElement < nbElements; ++iterElement)
     {
         // Update the diffusion current FE
         M_massRhsCFE->update( M_fespace->mesh()->element(iterElement), UPDATE_PHI |UPDATE_WDET );
@@ -688,7 +688,7 @@ addMassRhs(vector_type& rhs, const vector_type& f)
                 for (UInt iDof(0); iDof < nbFEDof ; ++iDof)
                 {
                     fValues[iQuadPt]+=
-                        f[ M_fespace->dof().localToGlobal(iterElement,iDof+1) + iterFDim*nbTotalDof]
+                        f[ M_fespace->dof().localToGlobalMap(iterElement,iDof) + iterFDim*nbTotalDof]
                         * M_massRhsCFE->phi(iDof,iQuadPt);
                 }
             }
@@ -749,7 +749,7 @@ addMassRhs(vector_type& rhs, const function_type& f, const Real& t)
     std::vector<Real> fValues(nbQuadPt,0.0);
 
     // Loop over the elements
-    for (UInt iterElement(1); iterElement <= nbElements; ++iterElement)
+    for (UInt iterElement(0); iterElement < nbElements; ++iterElement)
     {
         // Update the diffusion current FE
         M_massRhsCFE->update( M_fespace->mesh()->element(iterElement), UPDATE_QUAD_NODES | UPDATE_PHI |UPDATE_WDET );

@@ -62,13 +62,13 @@ Real d0(const Real& t, const Real& x, const Real& y, const Real& z, const ID& i)
     {
         switch (i)
         {
-        case 1:
+        case 0:
             return -z*(z - 5.)*x/50.;
             break;
-        case 2:
+        case 1:
             return -z*(z - 5.)*y/50.;
             break;
-        case 3:
+        case 2:
             return 0.0;
             break;
         default:
@@ -85,13 +85,13 @@ Real w0(const Real& /*t*/, const Real& /*x*/, const Real& /*y*/, const Real& /*z
 
     switch (i)
     {
+    case 0:
+        return 0.0;
+        break;
     case 1:
         return 0.0;
         break;
     case 2:
-        return 0.0;
-        break;
-    case 3:
         return 0.0;
         break;
     default:

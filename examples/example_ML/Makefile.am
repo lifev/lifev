@@ -24,12 +24,12 @@ SUFFIXES	= .cpp .hpp .idl .c .h .f .F .o .moc
 
 include $(top_srcdir)/testsuite/Makefile.testsuite
 
-check_HEADERS = MLTester.hpp 
+check_HEADERS = MLTester.hpp
 
-check_PROGRAMS = test_ml 
+check_PROGRAMS = test_ml
 test_ml_SOURCES = main.cpp
 
-EXTRA_DIST = data testsuite.at
+EXTRA_DIST = data
 
 link:
 	test -a data || ln -s $(srcdir)/data

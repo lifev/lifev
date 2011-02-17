@@ -602,7 +602,7 @@ impes::run()
     pressureSolver.setInversePermeability( invPermPress );
 
     // Set the source term in the pressure equation.
-    pressureSolver.setSourceTerm( Members->getPressureSource() );
+    pressureSolver.setSource( Members->getPressureSource() );
 
     // Set the boudary conditions.
     pressureSolver.setBC( bcPressure );
@@ -647,7 +647,7 @@ impes::run()
     saturationDarcySolver.setInitialPrimal( Members->getSaturationInitialCondition() );
 
     // Set the source term.
-    saturationDarcySolver.setSourceTerm( Members->getSaturationSource() );
+    saturationDarcySolver.setSource( Members->getSaturationSource() );
 
     // Set the boudary conditions.
     saturationDarcySolver.setBC( bcSaturation );
