@@ -586,29 +586,29 @@ OneDimensionalData::linearInterpolation( scalarVector_Type& vector,
     Real a  = dataFile( quantity.data(), defaultValue, 0 );
     Real b  = dataFile( quantity.data(), a, 1 );
 
-//#ifdef GHOSTNODE
-//    Real xa = M_mesh->point( 1 ).x();
-//    Real xb = M_mesh->point( M_mesh->numPoints() - 2 ).x();
-//#else
-//    Real xa = M_mesh->firstPoint().x();
-//    Real xb = M_mesh->lastPoint().x();
-//#endif
-//
-//    for ( UInt i(0) ; i < M_mesh->numPoints() ; ++i )
-//        if ( isArea )
-//        {
-//            vector[i] = std::sqrt(a / M_PI) + ( std::sqrt(b / M_PI) - std::sqrt(a / M_PI) ) / ( xb - xa ) * ( M_mesh->point( i ).x() - xa );
-//            vector[i] *= vector[i] * M_PI;
-//        }
-//        else
-//            vector[i] = a + (b - a) / ( xb - xa ) * ( M_mesh->point( i ).x() - xa );
+#ifdef GHOSTNODE
+    Real xa = M_mesh->point( 1 ).x();
+    Real xb = M_mesh->point( M_mesh->numPoints() - 2 ).x();
+#else
+    Real xa = M_mesh->firstPoint().x();
+    Real xb = M_mesh->lastPoint().x();
+#endif
 
-    // linearInterpolation disabled as tapering is not working!
-    for ( UInt i(0); i < M_mesh->numPoints() ; ++i )
+    for ( UInt i(0) ; i < M_mesh->numPoints() ; ++i )
         if ( isArea )
-            vector[i] = (a + b + 2 * std::sqrt(a*b)) / 4;
+        {
+            vector[i] = std::sqrt(a / M_PI) + ( std::sqrt(b / M_PI) - std::sqrt(a / M_PI) ) / ( xb - xa ) * ( M_mesh->point( i ).x() - xa );
+            vector[i] *= vector[i] * M_PI;
+        }
         else
-            vector[i] = (a + b) / 2;
+            vector[i] = a + (b - a) / ( xb - xa ) * ( M_mesh->point( i ).x() - xa );
+
+    // linearInterpolation to disable tapering (when needed)
+//    for ( UInt i(0); i < M_mesh->numPoints() ; ++i )
+//        if ( isArea )
+//            vector[i] = (a + b + 2 * std::sqrt(a*b)) / 4;
+//        else
+//            vector[i] = (a + b) / 2;
 }
 
 void
