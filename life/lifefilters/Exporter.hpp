@@ -211,7 +211,11 @@ public:
     std::string typeName() const;
 
     //! returns 1 (if Scalar) or 3 (if Vector)
-    UInt typeDim() const;
+    UInt __attribute__ (( deprecated )) typeDim() const
+    {
+        return fieldDim();
+    }
+    UInt fieldDim() const;
 
     //! Node or Cell centered ?
     const WhereEnum& where() const
