@@ -153,6 +153,15 @@ public:
      */
     virtual void addToCoupling( const matrixPtr_Type& Mat, UInt position ) =0;
 
+    //!
+    /*!
+      adds an entry to the coupling matrix
+        @param entry entry
+        @param row row for the insertion
+        @param col colon for the insertion
+     */
+    virtual void addToCoupling( const Real& entry , UInt row, UInt col, UInt position ) =0;
+
     virtual void setRecompute(UInt /*position*/, bool /*flag*/) {assert(false);}
 
     //! replaces a block

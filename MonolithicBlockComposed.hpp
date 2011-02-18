@@ -195,6 +195,16 @@ public:
         @param recompute flag stating wether the preconditioner for this block have to be recomputed at every time step
      */
     virtual void addToCoupling( const matrixPtr_Type& Mat, UInt position);
+
+    //!
+    /*!
+      adds an entry to the coupling matrix
+        @param entry entry
+        @param row row for the insertion
+        @param col colon for the insertion
+     */
+    void addToCoupling( const Real& entry , UInt row, UInt col, UInt position );
+
     //@}
 
     //!@name Get Methods

@@ -233,4 +233,26 @@ void MonolithicBlockMatrix::addToCoupling( const matrixPtr_Type& Mat, UInt /*pos
     }
 }
 
+
+    //!
+    /*!
+      adds an entry to the coupling matrix
+        @param entry entry
+        @param row row for the insertion
+        @param col colon for the insertion
+     */
+void MonolithicBlockMatrix::addToCoupling( const Real& entry , UInt row, UInt col, UInt /*position*/ )
+    {
+    if (!M_coupling->matrixPtr()->Filled())
+        M_coupling->setCoefficient(row, col, entry);
+    else
+    {
+        matrixPtr_Type tmp(new matrix_Type(M_coupling->map()));
+        *tmp += *M_coupling;
+        tmp->setCoefficient(row, col, entry);
+        M_coupling = tmp;
+    }
+    }
+
+
 } // Namespace LifeV

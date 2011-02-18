@@ -281,6 +281,9 @@ public:
      */
     void addToCoupling( const matrixPtr_Type& Mat, UInt /*position*/);
 
+
+    void addToCoupling( const Real& entry , UInt row, UInt col, UInt position );
+
     //! adds a block to the coupling matrix
     /*!
       This method is specific for the MonolithicBlockMatrix class, it is used e.g. to add the shape derivatives block in FSI

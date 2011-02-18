@@ -43,8 +43,8 @@ void MonolithicBlockComposed::GlobalAssemble()
     {
         M_blocks[k]->globalAssemble();
     }
-//             M_blocks[0]->spy("first");
-//             M_blocks[1]->spy("second");
+    //             M_blocks[0]->spy("first");
+    //             M_blocks[1]->spy("second");
 //             M_blocks[2]->spy("third");
 //        M_blocks[3]->spy("fourth");
 }
@@ -55,8 +55,8 @@ void MonolithicBlockComposed::blockAssembling()
     {
         blockAssembling(k);
     }
-//     M_coupling[0]->spy("C1");
-//     M_coupling[1]->spy("C2");
+    //     M_coupling[0]->spy("C1");
+    //     M_coupling[1]->spy("C2");
 }
 
 
@@ -115,7 +115,18 @@ void MonolithicBlockComposed::addToCoupling( const matrixPtr_Type& Mat, UInt pos
     *M_coupling[position] += *Mat;
 }
 
-
+void MonolithicBlockComposed::addToCoupling( const Real& entry , UInt row, UInt col, UInt position )
+{
+    if (!M_coupling[position]->matrixPtr()->Filled())
+        M_coupling[position]->setCoefficient(row, col, entry);
+    else
+    {
+        matrixPtr_Type tmp(new matrix_Type(M_coupling[position]->map()));
+        *tmp += *M_coupling[position];
+        tmp->setCoefficient(row, col, entry);
+        M_coupling[position] = tmp;
+    }
+}
 
 // ===================================================
 //! Protected Methods
