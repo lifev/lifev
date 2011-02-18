@@ -236,8 +236,6 @@ public:
     {
         M_BCh_u->merge(*M_BCh_flux);
         M_BCh_flux.reset();
-        M_BCh_d->merge(*M_BCh_Robin);
-        M_BCh_Robin.reset();
     }
 
 #ifdef HAVE_TRILINOS_ANASAZI
@@ -317,6 +315,23 @@ public:
     */
     virtual void initializeMesh(vectorPtr_Type fluid_dispOld);
 
+
+    //! activates the computation of the wall stress on the boundary with a specified flag.
+    /**
+       Notice that the specified flag must be in the coupling fluid-structure interface
+     */
+    void enableStressComputation(UInt  flag);
+
+    /**
+       Enables the computation of the stress on a coupling boundary
+       \param flag flag of the boundary portion where the stress is computed
+     */
+    /**
+       Computes the stress on the coupling boundary (the traction vector)
+     */
+    vectorPtr_Type computeStress();
+
+
     //@}
 
     //!@name Set Methods
@@ -329,15 +344,6 @@ public:
 
     //! returns a non-const pointer to the preconditioner. Can be used either as a setter or a getter.
     blockMatrixPtr_Type& operatorPtrView(){ return M_monolithicMatrix; }
-
-    /**
-       \small sets the fluid BCHandler and merges it with the flux BCHandler
-    */
-    virtual void setFluidBC     ( const fluidBchandlerPtr_Type& bc_fluid )
-    {
-        super_Type::setFluidBC(bc_fluid);
-        //bc_fluid->merge(*M_BCh_flux);
-    }
 
     /**
        \small sets the solid BCHandler and merges it with the Robin BCHandler
@@ -429,6 +435,28 @@ public:
 
     //! get the solution vector
     virtual const vector_Type& solution() const = 0;
+
+    //! set the BCs, this method when the boundary conditions  are changed during the simulation
+    //! resets the vector of shared pointers to the boundary conditions in the operator and preconditioner
+    void setFluidBC     ( const fluidBchandlerPtr_Type& bc_fluid )
+    {
+        super_Type::setFluidBC(bc_fluid);
+        if(M_BChs.size())
+        {
+            UInt nfluxes(M_BChs[1]->numberOfBCWithType(Flux));
+            //M_substituteFlux.reset(new std::vector<bool>(nfluxes))
+            M_fluxOffset.resize(nfluxes);
+            M_BCFluxNames = M_BChs[1]->findAllBCWithType(Flux);
+             for (UInt i=0; i<nfluxes; ++i)
+             {
+                 const BCBase* bc = M_BChs[1]->findBCWithName(M_BCFluxNames[i]);
+                 M_fluxOffset[i]=bc->offset();
+             }
+            M_BChs[1]=bc_fluid;
+            M_monolithicMatrix->setConditions(M_BChs);
+            M_precPtr->setConditions(M_BChs);
+        }
+    }
 
     //virtual vectorPtr_Type& solutionPtr() = 0;
     //@}
@@ -524,6 +552,15 @@ protected:
        \todo this should be handled externally
     */
     void updateRHS();
+
+    //! Checks if the flux bcs changed during the simulation, e.g. if a flux b.c. has been changed to Natural
+    //! (this can be useful when modeling valves)
+    /**
+       When the fluxes bcs changed a '1' is added in the line corresponding to the Lagrange multiplier. This method must
+       be called for both operator and preconditioner
+    */
+    void checkIfChangedFluxBC( precPtr_Type oper );
+
     //!@}
 
 
@@ -540,8 +577,8 @@ protected:
     fluidBchandlerPtr_Type                              M_BCh_flux;
     solidBchandlerPtr_Type                              M_BCh_Robin;
     //UInt                                              M_fluxes;
-    solidBchandlerPtr_Type                              M_BChWSS;
-    BCFunctionRobin                                   M_bcfWss;
+    solidBchandlerPtr_Type                              M_BChWS;
+    BCFunctionRobin                                   M_bcfWs;
     //    matrixPtr_Type                                    M_robinCoupling;
     UInt                                              M_offset;
     UInt                                              M_solidAndFluidDim;
@@ -549,6 +586,7 @@ protected:
     matrixPtr_Type                                    M_solidBlock;
     matrixPtr_Type                                    M_solidBlockPrec;
     matrixPtr_Type                                    M_robinCoupling; //uninitialized if not needed
+    matrixPtr_Type                                    M_bdMass;
     boost::shared_ptr<solver_Type>                    M_linearSolver;
     boost::shared_ptr<vector_Type>                    M_numerationInterface;
     std::vector<fluidBchandlerPtr_Type>                 M_BChs;
@@ -569,6 +607,9 @@ private:
     //!@{
     //! operator \f$P^{-1}AA^TP^{-T}\f$, where P is the preconditioner and A is the monolithic matrix
     boost::shared_ptr<ComposedOperator<Epetra_Operator> > M_preconditionedSymmetrizedMatrix;
+    boost::shared_ptr<vector_Type>                    M_stress;
+    std::vector<bcName_Type>                          M_BCFluxNames;
+    std::vector<UInt>                                 M_fluxOffset;
 #ifdef OBSOLETE
     boost::shared_ptr<vector_Type>                    M_rhsShapeDerivatives;
 #endif

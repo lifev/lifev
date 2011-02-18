@@ -234,6 +234,8 @@ FSIMonolithicGI::applyBoundaryConditions()
         M_monolithicMatrix->replace_matrix(M_meshBlock, 2);
     }
 
+    super_Type::checkIfChangedFluxBC( M_monolithicMatrix );
+
     M_monolithicMatrix->blockAssembling();
 
     if ( !M_BCh_u->bcUpdateDone() )
@@ -255,13 +257,15 @@ void FSIMonolithicGI::solveJac(vector_Type       &_step,
                             const vector_Type &_res,
                             const Real       /*_linearRelTol*/)
 {
-
     setupBlockPrec( );
+
+    checkIfChangedFluxBC( M_precPtr );
 
     M_precPtr->blockAssembling( );
     M_precPtr->applyBoundaryConditions( dataFluid()->dataTime()->time() );
     M_precPtr->GlobalAssemble( );
 
+    //M_monolithicMatrix->matrix()->spy("J");
     //boost::dynamic_pointer_cast<MonolithicBlockMatrix>(M_precPtr)->matrix()->spy("P");
 
     M_linearSolver->setMatrix(*M_monolithicMatrix->matrix());

@@ -198,6 +198,8 @@ void FSIMonolithicGE::applyBoundaryConditions( )
              M_monolithicMatrix->replace_matrix(M_solidBlockPrec, 0);
          }
 
+         super_Type::checkIfChangedFluxBC( M_monolithicMatrix );
+
          M_monolithicMatrix->blockAssembling();
          M_monolithicMatrix->applyBoundaryConditions(dataFluid()->dataTime()->time(), M_rhsFull);
 

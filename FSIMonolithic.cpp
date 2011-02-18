@@ -28,6 +28,8 @@
 #include <life/lifecore/LifeV.hpp>
 #include <lifemc/lifesolver/FSIMonolithic.hpp>
 
+#include <EpetraExt_Reindex_MultiVector.h>
+
 namespace LifeV
 {
 
@@ -47,7 +49,7 @@ FSIMonolithic::FSIMonolithic():
     M_rhsFull(),
     M_BCh_flux(),
     M_BCh_Robin(),
-    M_BChWSS(),
+    M_BChWS(),
     M_offset(0),
     M_solidAndFluidDim(0),
     M_fluidBlock(),
@@ -167,7 +169,7 @@ FSIMonolithic::setupFluidSolid( )
 
 
 void
-FSIMonolithic::setupFluidSolid( UInt const fluxes )
+FSIMonolithic::setupFluidSolid( UInt const /*fluxes*/ )
 {
 
     // Note: up to now it works only with matching grids (and poly order) on the interface
@@ -311,9 +313,9 @@ void
 FSIMonolithic::computeFNormals( vector_Type& normals)
 {
     BCManageNormal<matrix_Type> normalManager;
-    if ( !M_BChWSS->bcUpdateDone() )//possibly to avoid
-        M_BChWSS->bcUpdate(*M_uFESpace->mesh(), M_uFESpace->feBd(), M_uFESpace->dof() );
-    normalManager.init((*M_BChWSS)[0], 0.);
+    if ( !M_BChWS->bcUpdateDone() )//possibly to avoid
+        M_BChWS->bcUpdate(*M_uFESpace->mesh(), M_uFESpace->feBd(), M_uFESpace->dof() );
+    normalManager.init((*M_BChWS)[0], 0.);
     normalManager.computeIntegratedNormals(M_uFESpace->dof(), M_uFESpace->feBd(), normals, *M_uFESpace->mesh());
 }
 
@@ -324,8 +326,11 @@ FSIMonolithic::solveJac(vector_Type         &_step,
 {
     setupBlockPrec( );
 
+    checkIfChangedFluxBC( M_precPtr );
+
     M_precPtr->blockAssembling();
     M_precPtr->applyBoundaryConditions(dataFluid()->dataTime()->time());
+
     M_precPtr->GlobalAssemble();
 
     M_solid->getDisplayer().leaderPrint("  M-  Jacobian NormInf res:                    ", _res.normInf(), "\n");
@@ -575,5 +580,70 @@ void FSIMonolithic::updateRHS(  )
     //this->M_solid->updateVel();
     updateSolidSystem(this->M_rhs);
 }
+
+namespace
+{
+static Real fZero(const Real& /*t*/, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& /*i*/)
+{return 0.;}
+static Real fOne(const Real& /*t*/, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& /*i*/)
+{return 1.;}
+}
+
+void FSIMonolithic::enableStressComputation(UInt flag)
+{
+    M_BChWS.reset(new solidBchandler_Type());
+    BCFunctionBase bcfZero(fZero);
+    BCFunctionBase bcfOne(fOne);
+    M_bcfWs.setFunctions_Robin(bcfOne,bcfOne);
+
+    M_BChWS->addBC("WS", (UInt) flag, Robin, Full, M_bcfWs, 3);
+}
+
+FSIMonolithic::vectorPtr_Type FSIMonolithic::computeStress()
+{
+    vector_Type lambda(M_monolithicMatrix->interfaceMap());
+    lambda.subset(*M_un, M_solidAndFluidDim);
+
+    M_bdMass.reset(new matrix_Type(*M_interfaceMap));
+    if ( !M_BChWS->bcUpdateDone() )
+        M_BChWS->bcUpdate(*M_dFESpace->mesh(), M_dFESpace->feBd(), M_dFESpace->dof() );
+    bcManageMatrix(*M_bdMass, *M_dFESpace->mesh(), M_dFESpace->dof(), *M_BChWS, M_dFESpace->feBd(), 1., dataSolid()->getdataTime()->time() );
+    M_bdMass->globalAssemble();
+
+    solver_Type solverMass(M_epetraComm);
+    solverMass.setDataFromGetPot( M_dataFile, "solid/solver" );
+    solverMass.setupPreconditioner(M_dataFile, "solid/prec");//to avoid if we have already a prec.
+
+    boost::shared_ptr<PreconditionerIfpack> P(new PreconditionerIfpack());
+
+    vectorPtr_Type sol(new vector_Type(M_monolithicMatrix->interfaceMap()));
+    solverMass.setMatrix(*M_bdMass);
+    solverMass.setReusePreconditioner(false);
+    int numIter = solverMass.solveSystem( lambda, *sol, M_bdMass);
+
+    EpetraExt::MultiVector_Reindex reindexMV(*M_interfaceMap->map(Unique));
+    boost::shared_ptr<MapEpetra> newMap(new MapEpetra( *M_interfaceMap ));
+    M_stress.reset(new vector_Type(reindexMV(lambda.epetraVector()), newMap, Unique));
+    return M_stress;
+}
+
+void
+FSIMonolithic::checkIfChangedFluxBC( precPtr_Type oper )
+{
+   UInt nfluxes(M_BChs[1]->numberOfBCWithType(Flux));
+    if(M_fluxes != nfluxes)
+    {
+        //std::vector<bcName_Type> names = M_BChs[1]->findAllBCWithType(Flux);
+        for (UInt i=0; i<M_fluxes; ++i)
+        {
+            const BCBase* bc (M_BChs[1]->findBCWithName(M_BCFluxNames[i]));
+            if(bc->type() != Flux)
+            {
+                oper->addToCoupling(1., M_fluxOffset[i], M_fluxOffset[i],1 );
+            }
+        }
+    }
+}
+
 
 }
