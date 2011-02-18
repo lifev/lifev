@@ -13,6 +13,6 @@
 ### TESTSUITE: LIFEFILTERS ########################################################################
 ###################################################################################################
 
-m4_include([ensightToHdf5/testsuite.at])
+m4_include([lifefilters/ensightToHdf5/testsuite.at])
 
 # m4_include([exporterVTK/testsuite.at])
