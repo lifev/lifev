@@ -361,34 +361,6 @@ void ExporterVTK<Mesh>::postProcess(const Real& /*time*/)
 
             buffer.str("");
 
-            /*
-        composeTypeDataHeaderStream(exporterData_Type::Node, M_pointDataHeaderStringStream);
-        composeTypeDataFooterStream(exporterData_Type::Node, M_pointDataFooterStringStream);
-        composeTypeDataHeaderStream(exporterData_Type::Cell, M_cellDataHeaderStringStream);
-        composeTypeDataFooterStream(exporterData_Type::Cell, M_cellDataFooterStringStream);
-
-        vtkFile << M_pointDataHeaderStringStream.str();
-        composeDataArrayStream(exporterData_Type::Node, buffer);
-        vtkFile << buffer.str();
-        vtkFile << M_pointDataFooterStringStream.str();
-
-        buffer.str("");
-
-        vtkFile << M_cellDataHeaderStringStream.str();
-        composeDataArrayStream(exporterData_Type::Cell, buffer);
-        vtkFile << buffer.str();
-        vtkFile << M_cellDataFooterStringStream.str();
-
-            M_headerStringStream.str("");
-            M_dataHeaderStringStream.str("");
-            M_dataFooterStringStream.str("");
-            M_footerStringStream.str("");
-
-        M_pointDataHeaderStringStream.str("");
-        M_pointDataFooterStringStream.str("");
-        M_cellDataHeaderStringStream.str("");
-        M_cellDataFooterStringStream.str("");
-             */
         }
         chrono.stop();
         std::cout << "      done in " << chrono.diff() << " s." << std::endl;
