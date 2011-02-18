@@ -119,29 +119,29 @@ bool testExporterVTK(/*const*/ boost::shared_ptr<Epetra_Comm> & comm, GetPot & c
     displayer.leaderPrint( "[Creating the FE spaces]\n" );
 
     const std::string velFE =  dataFile( "space_discretization/velFE", "P2");
-    displayer.leaderPrint( "\tFE for the velocity: ", velFE );
+    displayer.leaderPrint( "\t-o FE for the velocity: ", velFE, "\n" );
 
-    displayer.leaderPrint( "\tBuilding the velocity FE space... " );
+    displayer.leaderPrint( "\t-o Building the velocity FE space...\n" );
 
     feSpacePtr_Type velFESpacePtr( new feSpace_Type(meshPart, velFE, nDimensions, comm) );
 
-    displayer.leaderPrint( "\tok." );
+    displayer.leaderPrint( "\t\t...ok.\n" );
 
     const std::string pressFE =  dataFile( "space_discretization/pressFE", "P1");
-    displayer.leaderPrint( "\tFE for the pressure: ", velFE );
+    displayer.leaderPrint( "\t-o FE for the pressure: ", pressFE, "\n" );
 
-    displayer.leaderPrint( "\tBuilding the pressure FE space... " );
+    displayer.leaderPrint( "\t-o Building the pressure FE space...\n" );
 
     feSpacePtr_Type pressFESpacePtr( new feSpace_Type(meshPart, pressFE, nDimensions, comm) );
 
-    displayer.leaderPrint( "\tok." );
+    displayer.leaderPrint( "\t\t...ok.\n" );
 
     // Total degrees of freedom (elements of matrix)
     UInt velTotalDof   = velFESpacePtr->map().map(Unique)->NumGlobalElements();
     UInt pressTotalDof = pressFESpacePtr->map().map(Unique)->NumGlobalElements();
 
-    displayer.leaderPrint( "\tTotal Dof for the velocity: ", velTotalDof );
-    displayer.leaderPrint( "\tTotal Dof for the pressure: ", pressTotalDof );
+    displayer.leaderPrint( "\t-o Total Dof for the velocity: ", velTotalDof, "\n" );
+    displayer.leaderPrint( "\t-o Total Dof for the pressure: ", pressTotalDof, "\n" );
 
     // +-----------------------------------------------+
     // |            Creating the exporter              |
@@ -164,7 +164,6 @@ bool testExporterVTK(/*const*/ boost::shared_ptr<Epetra_Comm> & comm, GetPot & c
     exporter->postProcess( 0 );
 
     initChrono.stop();
-    displayer.leaderPrint( "[Initialization time]", initChrono.diff() );
 
     // +-----------------------------------------------+
     // |             Solving the problem               |
