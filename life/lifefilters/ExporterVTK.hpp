@@ -321,7 +321,8 @@ void ExporterVTK<Mesh>::postProcess(const Real& /*time*/)
 
         LifeChrono chrono;
         chrono.start();
-        for (typename super::dataVectorIterator_Type i=this->M_dataVector.begin(); i != this->M_dataVector.end(); ++i)
+        for (typename super::dataVectorIterator_Type i=this->M_dataVector.begin();
+             i != this->M_dataVector.end(); ++i)
         {
             std::ofstream vtkFile;
             std::stringstream buffer("");
@@ -332,7 +333,8 @@ void ExporterVTK<Mesh>::postProcess(const Real& /*time*/)
                 composePVTUStream(*i, buffer);
 
                 std::ofstream vtkPFile;
-                vtkPFile.open( ( this->M_postDir+this->M_prefix+"_" + i->variableName()+this->M_postfix+".pvtu").c_str() );
+                vtkPFile.open( ( this->M_postDir+this->M_prefix+"_" + i->variableName()+
+                                this->M_postfix+".pvtu").c_str() );
                 vtkPFile << buffer.str();
                 vtkPFile.close();
 
@@ -355,7 +357,8 @@ void ExporterVTK<Mesh>::postProcess(const Real& /*time*/)
             composeVTUFooterStream( buffer );
 
             // each process writes its own file
-            vtkFile.open( ( this->M_postDir+this->M_prefix+"_" + i->variableName()+this->M_postfix+"."+this->M_procId+".vtu").c_str() );
+            vtkFile.open( ( this->M_postDir+this->M_prefix+"_" + i->variableName()+
+                            this->M_postfix+"."+this->M_procId+".vtu").c_str() );
             vtkFile << buffer.str();
             vtkFile.close();
 
@@ -363,7 +366,7 @@ void ExporterVTK<Mesh>::postProcess(const Real& /*time*/)
 
         }
         chrono.stop();
-        std::cout << "      done in " << chrono.diff() << " s." << std::endl;
+        if (!this->M_procId) std::cout << "      done in " << chrono.diff() << " s." << std::endl;
     }
 }
 
@@ -404,7 +407,7 @@ UInt ExporterVTK<Mesh>::whichCellType( const feSpacePtr_Type & _feSpacePtr )
             break;
         case FE_P2_3D:
         case FE_P2tilde_3D:
-            vtkCellType = VTK_QUADRATIC_TETRA; // maybe to be modified (P2 on linear tetra...) see also the geomap...
+            vtkCellType = VTK_QUADRATIC_TETRA;
             break;
         case FE_Q1_2D:
             vtkCellType = VTK_QUAD;
@@ -420,7 +423,7 @@ UInt ExporterVTK<Mesh>::whichCellType( const feSpacePtr_Type & _feSpacePtr )
             vtkCellType = VTK_QUADRATIC_HEXAHEDRON;
             break;
         default:
-            std::cout << "WARNING: the element is not yet implemented in vtk_wrtrs.h\n";
+            if (!this->M_procId) std::cout << "WARNING: the element is not yet implemented in vtk_wrtrs.h\n";
     }
 
     return vtkCellType;
@@ -475,7 +478,8 @@ ExporterVTK<Mesh>::composeDataArrayStream(const exporterData_Type& dvar,
                     for (UInt i=0; i<dvar.size(); ++i){
                         for (UInt icoor=0; icoor< nDimensions;++icoor){
                             for (UInt jcoor=0; jcoor< nDimensions;++jcoor){
-                                dataArraysStringStream << it->second( i * nDimensions * nDimensions + icoor * nDimensions + jcoor ) << " ";
+                                dataArraysStringStream << it->second( i * nDimensions * nDimensions +
+                                 icoor * nDimensions + jcoor ) << " ";
                             }
                         }
                     }
@@ -546,7 +550,8 @@ ExporterVTK<Mesh>::composeDataArrayStream(const typename exporterData_Type::Wher
                     for (UInt i=0; i<it->second.size(); ++i){
                         for (UInt icoor=0; icoor< nDimensions;++icoor){
                             for (UInt jcoor=0; jcoor< nDimensions;++jcoor){
-                                dataArraysStringStream << it->second( i * nDimensions * nDimensions + icoor * nDimensions + jcoor ) << " ";
+                                dataArraysStringStream << it->second( i * nDimensions * nDimensions +
+                                 icoor * nDimensions + jcoor ) << " ";
                             }
                         }
                     }
@@ -631,7 +636,8 @@ void ExporterVTK<Mesh>::composePVTUStream(const exporterData_Type& dvar,
 
     for( int iProc = 0; iProc < dvar.feSpacePtr()->map().comm().NumProc(); ++iProc )
     {
-        std::stringstream fileName( ( this->M_postDir+this->M_prefix+"_" + dvar.variableName()+this->M_postfix+"."+iProc+".vtu").c_str() );
+        std::stringstream fileName( ( this->M_postDir+this->M_prefix+"_" + dvar.variableName()+
+                                      this->M_postfix+"."+iProc+".vtu").c_str() );
 
         //footer part of the file
         pVTUStringStream << "\t\t<Piece Source=\"" << fileName.str() << "\"/>\n";
@@ -671,7 +677,7 @@ void ExporterVTK<Mesh>::createMaps( const feSpacePtr_Type & _feSpacePtr,
     std::pair< std::map<UInt,UInt>::iterator, bool > returnType;
 
     // Vertex based Dof: the coordinates are available from the Point List
-    for (ID iVertex=1; iVertex <= numVertices; ++iVertex)
+    for (ID iVertex=0; iVertex < numVertices; ++iVertex)
     {
         globalPointId = this->M_mesh->point(iVertex).id();
         localToGlobalPointsMap.insert( std::pair<UInt,UInt>( positionInPartitionedMesh, globalPointId ) );
@@ -680,7 +686,7 @@ void ExporterVTK<Mesh>::createMaps( const feSpacePtr_Type & _feSpacePtr,
         for (ID jCoor=0; jCoor < nDimensions; ++jCoor)
         {
             coordinatesOfPoints[jCoor][positionInPartitionedMesh] =
-                            this->M_mesh->point(iVertex).coordinate(jCoor+1);
+                            this->M_mesh->point(iVertex).coordinate(jCoor);
         }
         ++positionInPartitionedMesh;
     }
@@ -689,17 +695,18 @@ void ExporterVTK<Mesh>::createMaps( const feSpacePtr_Type & _feSpacePtr,
             "problem in storing the local to global and global to local maps" );
 
     // Now I store the coordinates of the supplementary nodes in a temporary vector
-    for ( UInt iElement = 1; iElement <= numElements; ++iElement )
+    for ( UInt iElement = 0; iElement < numElements; ++iElement )
     {
         _feSpacePtr->fe().updateJac( this->M_mesh->element( iElement ) );
-        for ( UInt iPoint = _feSpacePtr->dof().numLocalVertices(); iPoint < _feSpacePtr->dof().numLocalDof(); ++iPoint )
+        for ( UInt iPoint = _feSpacePtr->dof().numLocalVertices();
+              iPoint < _feSpacePtr->dof().numLocalDof(); ++iPoint )
         {
             _feSpacePtr->fe().coorMap( x, y, z,
                                        _feSpacePtr->fe().refFE().xi( iPoint ),
                                        _feSpacePtr->fe().refFE().eta( iPoint ),
                                        _feSpacePtr->fe().refFE().zeta( iPoint ) );
 
-            globalPointId = _feSpacePtr->dof().localToGlobal( iElement, iPoint+1 );
+            globalPointId = _feSpacePtr->dof().localToGlobalMap( iElement, iPoint );
 
             returnType = globalToLocalPointsMap.insert( std::pair<UInt,UInt>( globalPointId,
                                                                              positionInPartitionedMesh ) );
@@ -758,13 +765,13 @@ void ExporterVTK<Mesh>::composeVTUGeoStream( const feSpacePtr_Type & _feSpacePtr
     vtuGeoStringStream << "\t\t\t<Cells>\n";
     vtuGeoStringStream << "\t\t\t\t<DataArray type=\"Int32\" Name=\"connectivity\" format=\"ascii\">\n";
 
-    for (UInt iElement=1; iElement <= numElements; ++iElement)
+    for (UInt iElement=0; iElement < numElements; ++iElement)
     {
-        for ( UInt jPoint=1; jPoint <= numLocalDof; ++jPoint)
+        for ( UInt jPoint=0; jPoint < numLocalDof; ++jPoint)
         {
             // vtkFile.width(8);
             // UInt globalElementId( this->M_mesh->element(iElement).id() );
-            UInt globalPointId( _feSpacePtr->dof().localToGlobal( iElement, jPoint ) );
+            UInt globalPointId( _feSpacePtr->dof().localToGlobalMap( iElement, jPoint ) );
             ASSERT( globalToLocalPointsMap.find( globalPointId )!=globalToLocalPointsMap.end(),
                     "didn't find a local ID for global point" );
             UInt localId( globalToLocalPointsMap.find( globalPointId )->second );
@@ -831,21 +838,9 @@ template <typename Mesh>
 void
 ExporterVTK<Mesh>::composeTypeDataHeaderStream(const typename exporterData_Type::WhereEnum& where,
                                          std::stringstream& dataHeaderStringStream)
-                                         {
+{
     Debug(8000) << "\n[ExporterVTK::composeTypeDataHeaderStream] where = " << where << "\n";
-    // std::stringstream M_dataHeaderStringStream;
-    /*
-    typename super::iterator_Type it;
-    std::pair<typename super::iterator_Type, typename super::iterator_Type> rangeFound;
 
-    // every dvar will produce a different data set
-    // I'm just separating CELL data from POINT data
-    rangeFound = this->M_whereToDataMap.equal_range(where);
-
-    if ( rangeFound.first != rangeFound.second )
-    {
-        Debug(8000) << "\n[ExporterVTK::composeTypeDataHeaderStream] found data\n";
-     */
     std::string whereString;
     switch ( where )
     {
@@ -857,48 +852,16 @@ ExporterVTK<Mesh>::composeTypeDataHeaderStream(const typename exporterData_Type:
             break;
     }
     dataHeaderStringStream << "\t\t\t<" << whereString << " ";
-    /*
-                for (it = rangeFound.first; it != rangeFound.second; ++it)
-                {
-                    switch( it->second.type() )
-                    {
-                    case typename exporterData_Type::ScalarField:
-                        dataHeaderStringStream << "Scalars=\"" << it->second.variableName() << "\" ";
-                        break;
-                    case typename exporterData_Type::VectorField:
-                        dataHeaderStringStream << "Vectors=\"" << it->second.variableName() << "\" ";
-                        break;
-                    case typename exporterData_Type::TensorField:
-                        M_pointDataHeaderStringStream << "Tensors=\"" << it->second.variableName() << "\" ";
-                        break;
-                    }
-                }
-     */
-    dataHeaderStringStream << ">\n";
-    // }
 
-    // return M_dataHeaderStringStream;
-                                         }
+    dataHeaderStringStream << ">\n";
+}
 
 
 template <typename Mesh>
 void
 ExporterVTK<Mesh>::composeTypeDataFooterStream(const typename exporterData_Type::WhereEnum& where,
                                          std::stringstream& dataFooterStringStream)
-                                         {
-    // std::stringstream dataFooterStringStream;
-    /*
-    typename super::iterator_Type it;
-    std::pair<typename super::iterator_Type, typename super::iterator_Type> rangeFound;
-
-    // every dvar will produce a different data set
-    // I'm just separating CELL data from POINT data
-    rangeFound = this->M_whereToDataMap.equal_range(where);
-
-    if ( rangeFound.first != rangeFound.second )
-    {
-        Debug(8000) << "\n[ExporterVTK::composeTypeDataFooterStream] where = " << where << "\n";
-     */
+{
     std::string whereString;
     switch ( where )
     {
@@ -910,9 +873,6 @@ ExporterVTK<Mesh>::composeTypeDataFooterStream(const typename exporterData_Type:
             break;
     }
     dataFooterStringStream << "\t\t\t</" << whereString << ">\n";
-
-    //    }
-    // return dataFooterStringStream;
 }
 
 }
