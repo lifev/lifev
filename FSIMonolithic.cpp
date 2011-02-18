@@ -330,6 +330,7 @@ FSIMonolithic::solveJac(vector_Type         &_step,
 
     M_precPtr->blockAssembling();
     M_precPtr->applyBoundaryConditions(dataFluid()->dataTime()->time());
+
     M_precPtr->GlobalAssemble();
 
     M_solid->getDisplayer().leaderPrint("  M-  normInf res:                    ", _res.normInf(), "\n");
