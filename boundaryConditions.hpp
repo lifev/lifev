@@ -119,7 +119,7 @@ FSIOperator::fluidBchandlerPtr_Type BCh_monolithicFlux(bool /*isOpen=true*/)
     return BCh_fluid;
 }
 
-FSIOperator::fluidBchandlerPtr_Type BCh_monolithicFluid(FSIOperator &_oper, bool const & /*isOpen=true*/)
+FSIOperator::fluidBchandlerPtr_Type BCh_monolithicFluid(FSIOperator &_oper, bool const & isOpen=true)
 {
     // Boundary conditions for the fluid velocity
     Debug( 10000 ) << "Boundary condition for the fluid\n";
@@ -137,25 +137,11 @@ FSIOperator::fluidBchandlerPtr_Type BCh_monolithicFluid(FSIOperator &_oper, bool
     BCFunctionBase out_press (FlowConditions::outPressure0);
 
 
-//     if(isOpen)
-    //BCh_fluid->addBC("InFlow" , INLET,  Natural,   Normal, in_flow);
+    if(!isOpen)
+        BCh_fluid->addBC("InFlow" , INLET,  Natural, Full, bcf, 3);
 
     BCh_fluid->addBC("OutFlow", OUTLET,  Natural,  Normal, out_press);
     return BCh_fluid;
-}
-
-FSIOperator::solidBchandlerPtr_Type BCh_monolithicRobin(FSIOperator &_oper)
-{
-
-    FSIOperator::solidBchandlerPtr_Type BCh_solid( new FSIOperator::solidBchandler_Type );
-    BCFunctionBase hyd(fZero);
-    BCFunctionBase young (E);
-
-    //robin condition on the outer wall
-    _oper.setRobinOuterWall(hyd, young);
-    BCh_solid->addBC("OuterWall", OUTERWALL, Robin, Normal, _oper.bcfRobinOuterWall());
-
-    return BCh_solid;
 }
 
 FSIOperator::solidBchandlerPtr_Type BCh_monolithicSolid(FSIOperator &_oper)
@@ -169,14 +155,15 @@ FSIOperator::solidBchandlerPtr_Type BCh_monolithicSolid(FSIOperator &_oper)
     FSIOperator::solidBchandlerPtr_Type BCh_solid( new FSIOperator::solidBchandler_Type );
 
     BCFunctionBase bcf(fZero);
-    //BCFunctionBase young (E);
 
     BCh_solid->addBC("Top",   RING, Essential, Full, bcf,  3);
     BCh_solid->addBC("Base",  RING2, Essential, Full, bcf,  3);
 
-    BCh_solid->addBC("OuterWall", OUTERWALL, Natural, Full, bcf,  3);
-    BCh_solid->addBC("Edges", INOUTEDGE, Essential, Full, bcf,  3);
-    BCh_solid->addBC("Edges", INEDGE, Essential, Full, bcf,  3);
+    BCFunctionBase hyd(fZero);
+    BCFunctionBase young (E);
+    //robin condition on the outer wall
+    _oper.setRobinOuterWall(hyd, young);
+    BCh_solid->addBC("OuterWall", OUTERWALL, Robin, Normal, _oper.bcfRobinOuterWall());
 
     return BCh_solid;
 }

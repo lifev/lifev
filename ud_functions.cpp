@@ -342,8 +342,8 @@ Real u2(const Real& t, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, 
 
 Real u2normal(const Real& t, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& /*i*/)
 {
-    if (t<=0.003)
-        return -1.3332e4;//1.3332e5;
+    //   if (t<=0.003)
+        return -1.3332e4;
 
     return 0.;
 }
@@ -393,10 +393,10 @@ Real w0(const Real& /*t*/, const Real& /*x*/, const Real& /*y*/, const Real& /*z
 
 Real fluxFunction(const Real& t, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& /*i*/)
 {
-    if (t<=0.003)
-        return -100.;
-    else
-        return 0.;
+    //if (t<=0.003)
+    return -100 ; //* (t*100);
+        //else
+        //return 0.;
 }
 
 }

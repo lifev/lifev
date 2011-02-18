@@ -197,14 +197,14 @@ public:
 #ifdef DEBUG
         Debug( 10000 ) << "Setting up the BC \n";
 #endif
-        M_fsi->setFluidBC( BCh_monolithicFlux( false ) );
-        M_fsi->setSolidBC( BCh_monolithicRobin( *M_fsi->FSIOper( ) ) );
+        M_fsi->setFluidBC( BCh_monolithicFlux( true ) );
+        M_fsi->setSolidBC( BCh_monolithicSolid( *M_fsi->FSIOper( ) ) );
 
         M_fsi->setup(/*data_file*/);
 
-        M_fsi->setFluidBC( BCh_monolithicFluid( *M_fsi->FSIOper( ), false ) );
+        M_fsi->setFluidBC( BCh_monolithicFluid( *M_fsi->FSIOper( ), true ) );
         M_fsi->setHarmonicExtensionBC( BCh_harmonicExtension( *M_fsi->FSIOper( ) ) );
-        M_fsi->setSolidBC( BCh_monolithicSolid( *M_fsi->FSIOper( ) ) );
+
 #ifdef DEBUG
         Debug( 10000 ) << "BC set\n";
 #endif
@@ -251,12 +251,16 @@ public:
 
         M_solidDisp.reset( new vector_Type( M_fsi->FSIOper()->dFESpace().map(), M_exporterSolid->mapType() ));
         M_solidVel.reset ( new vector_Type( M_fsi->FSIOper()->dFESpace().map(), M_exporterSolid->mapType() ));
+        M_WS.reset           ( new vector_Type(  M_fsi->FSIOper()->dFESpace().map(), M_exporterSolid->mapType() ));
 
         M_exporterSolid->addVariable( ExporterData::Vector, "s-displacement", M_solidDisp,
                                       UInt(0), M_fsi->FSIOper()->dFESpace().dof().numTotalDof() );
         M_exporterSolid->addVariable( ExporterData::Vector, "s-velocity", M_solidVel,
                                       UInt(0),
                                       M_fsi->FSIOper()->dFESpace().dof().numTotalDof() );
+        M_exporterSolid->addVariable( ExporterData::Vector, "s-ws", M_WS,
+                                      UInt(0), M_fsi->FSIOper()->dFESpace().dof().numTotalDof() );
+
 
 
         // load using ensight/hdf5
@@ -293,6 +297,8 @@ public:
         int _i = 1;
         LifeV::UInt offset=dynamic_cast<LifeV::FSIMonolithic*>(M_fsi->FSIOper().get())->getOffset();
 
+        dynamic_cast<LifeV::FSIMonolithic*>(M_fsi->FSIOper().get())->enableStressComputation(1);
+
 #ifdef HAVE_HDF5
         if (M_exporterFluid->mapType() == LifeV::Unique)
         {
@@ -309,22 +315,23 @@ public:
             //std::cout<<"flux : "<<flux<<std::endl;
             if ( valveIsOpen)
             {
-                if (false && flux > 0.5)
+                if ( _i == 3 /*flux < -100*/)
                 {
                     valveIsOpen=false;
-                    M_fsi->setFluxBC(LifeV::BCh_monolithicFlux(valveIsOpen));
-                    M_fsi->setup(/*data_file*/);
+                    //M_fsi->setFluxBC(LifeV::BCh_monolithicFlux(valveIsOpen));
+                    //M_fsi->setup(/*data_file*/);
                     M_fsi->setFluidBC(BCh_monolithicFluid(*M_fsi->FSIOper(), valveIsOpen));
+                    //M_fsi->FSIOper()->BCh_fluid()->substituteBC( (const LifeV::bcFlag_Type) 2, bcf,  LifeV::Essential, LifeV::Full, (const LifeV::UInt) 3);
                 }
             }
             // close the valve
             else
             {
-                if (M_fsi->FSIOper()->fluid().pressure(2, M_fsi->displacement()) < LifeV::LumpedHeart::M_pressure )
+                if (false && M_fsi->FSIOper()->fluid().pressure(2, M_fsi->displacement()) < LifeV::LumpedHeart::M_pressure )
                 {
                     valveIsOpen=true;
                     M_fsi->setFluidBC(BCh_monolithicFluid(*M_fsi->FSIOper(), valveIsOpen));
-                    M_fsi->setFluidBC(BCh_monolithicFluid(*M_fsi->FSIOper(), valveIsOpen));
+                    //M_fsi->FSIOper()->BCh_fluid()->substituteBC( (const LifeV::bcFlag_Type) 2, bcf,  LifeV::Natural, LifeV::Full, 3);
                 }
             }
 
@@ -351,6 +358,9 @@ public:
 
             M_fsi->iterate();
 
+            *M_WS= *(dynamic_cast<LifeV::FSIMonolithic*>(M_fsi->FSIOper().get())->/*WS());//*/computeStress());
+
+
             *M_fluidDisp      = M_fsi->FSIOper()->meshDisp();
 
             M_exporterFluid->postProcess( M_data->dataFluid()->dataTime()->time() );
@@ -368,14 +378,14 @@ public:
                       << M_fsi->displacement().norm2() << "\n";
 
             ///////// CHECKING THE RESULTS OF THE TEST AT EVERY TIMESTEP
-            try
+            //try
             {
                 if (!M_data->method().compare("monolithicGI"))
                     checkCEResult(M_data->dataFluid()->dataTime()->time());
                 else
                     checkGCEResult(M_data->dataFluid()->dataTime()->time());
             }
-            catch (Problem::RESULT_CHANGED_EXCEPTION) {std::cout<<"res. changed"<<std::endl;}
+            //catch (Problem::RESULT_CHANGED_EXCEPTION) {std::cout<<"res. changed"<<std::endl;}
             ///////// END OF CHECK
         }
         if (M_data->method().compare("monolithicGI"))
@@ -419,6 +429,7 @@ private:
     LifeV::FlowConditions FC0;
     LifeV::LumpedHeart LH;
     LifeV::Real    M_Tstart;
+    vectorPtr_Type M_WS;
 
     struct RESULT_CHANGED_EXCEPTION
     {
@@ -627,27 +638,20 @@ void Problem::initialize(std::string& /*loadInitSol*/,  GetPot const& data_file)
 void Problem::checkGCEResult(const LifeV::Real& time)
 {
     LifeV::Real dispNorm=M_fsi->displacement().norm2();
-    if (time==0.001 && (dispNorm-684898)     /dispNorm*(dispNorm-684898)     /dispNorm>1e-5) throw Problem::RESULT_CHANGED_EXCEPTION(time);
-    else if (time==0.002 && (dispNorm-854345)     /dispNorm*(dispNorm-850537)     /dispNorm>1e-5) throw Problem::RESULT_CHANGED_EXCEPTION(time);
-    else if (time==0.003 && (dispNorm-1.11118e+06)/dispNorm*(dispNorm-1.10523e+06)/dispNorm>1e-5) throw Problem::RESULT_CHANGED_EXCEPTION(time);
-    else if (time==0.004 && (dispNorm-802296)     /dispNorm*(dispNorm-807697)     /dispNorm>1e-5) throw Problem::RESULT_CHANGED_EXCEPTION(time);
-    else if (time==0.005 && (dispNorm-869612)     /dispNorm*(dispNorm-869367)     /dispNorm>1e-5) throw Problem::RESULT_CHANGED_EXCEPTION(time);
-    else if (time==0.006 && (dispNorm-799188)     /dispNorm*(dispNorm-794390)     /dispNorm>1e-5) throw Problem::RESULT_CHANGED_EXCEPTION(time);
-    else if (time==0.007 && (dispNorm-795947)     /dispNorm*(dispNorm-794135)     /dispNorm>1e-5) throw Problem::RESULT_CHANGED_EXCEPTION(time);
-    else if (time==0.008 && (dispNorm-756083)     /dispNorm*(dispNorm-752333)     /dispNorm>1e-5) throw Problem::RESULT_CHANGED_EXCEPTION(time);
-    else if (time==0.009 && (dispNorm-765216)     /dispNorm*(dispNorm-762949)     /dispNorm>1e-5) throw Problem::RESULT_CHANGED_EXCEPTION(time);
+    if (time<=0.001 && (dispNorm-836642)     /dispNorm*(dispNorm-836642)     /dispNorm>1e-5) throw Problem::RESULT_CHANGED_EXCEPTION(time);
+    else if (time<=0.002 && (dispNorm-1.00024e+06)     /dispNorm*(dispNorm-1.00024e+06)     /dispNorm>1e-5) throw Problem::RESULT_CHANGED_EXCEPTION(time);
+    else if (time<=0.003 && (dispNorm-687107)/dispNorm*(dispNorm-687107)/dispNorm>1e-5) throw Problem::RESULT_CHANGED_EXCEPTION(time);
+    else if (time<=0.004 && (dispNorm-640969)     /dispNorm*(dispNorm-640969)     /dispNorm>1e-5) throw Problem::RESULT_CHANGED_EXCEPTION(time);
+    else if (time==0.005 && (dispNorm-612951)     /dispNorm*(dispNorm-612951)     /dispNorm>1e-5) throw Problem::RESULT_CHANGED_EXCEPTION(time);
 }
 
 
 void Problem::checkCEResult(const LifeV::Real& time)
 {
     LifeV::Real dispNorm=M_fsi->displacement().norm2();
-    if (time==0.001 && (dispNorm-615015)/dispNorm*(dispNorm-615015)/dispNorm>1e-3) throw Problem::RESULT_CHANGED_EXCEPTION(time);
-    else if (time==0.002 && (dispNorm-1.00181e+06)/dispNorm*(dispNorm-1.00181e+06)/dispNorm>1e-3) throw Problem::RESULT_CHANGED_EXCEPTION(time);
-    else if (time==0.003 && (dispNorm-1.01128e+06)/dispNorm*(dispNorm-1.01128e+06)/dispNorm>1e-3) throw Problem::RESULT_CHANGED_EXCEPTION(time);
-    else if (time==0.004 && (dispNorm-644936)/dispNorm*(dispNorm-644936)/dispNorm>1e-3) throw Problem::RESULT_CHANGED_EXCEPTION(time);
-    else if (time==0.005 && (dispNorm-652025)/dispNorm*(dispNorm-652025)/dispNorm>1e-3) throw Problem::RESULT_CHANGED_EXCEPTION(time);
-    else if (time==0.006 && (dispNorm-555216)/dispNorm*(dispNorm-555216)/dispNorm>1e-3) throw Problem::RESULT_CHANGED_EXCEPTION(time);
-    else if (time==0.007 && (dispNorm-538934)/dispNorm*(dispNorm-538934)/dispNorm>1e-3) throw Problem::RESULT_CHANGED_EXCEPTION(time);
-    else if (time==0.008 && (dispNorm-520004)/dispNorm*(dispNorm-520004)/dispNorm>1e-3) throw Problem::RESULT_CHANGED_EXCEPTION(time);
+    if (time==0.001 && (dispNorm-683834)/dispNorm*(dispNorm-683834)/dispNorm>1e-3) throw Problem::RESULT_CHANGED_EXCEPTION(time);
+    else if (time==0.002 && (dispNorm-1.18545e+06)/dispNorm*(dispNorm-1.18545e+06)/dispNorm>1e-3) throw Problem::RESULT_CHANGED_EXCEPTION(time);
+    else if (time==0.003 && (dispNorm-772163)/dispNorm*(dispNorm-772163)/dispNorm>1e-3) throw Problem::RESULT_CHANGED_EXCEPTION(time);
+    else if (time==0.004 && (dispNorm-692085)/dispNorm*(dispNorm-692085)/dispNorm>1e-3) throw Problem::RESULT_CHANGED_EXCEPTION(time);
+    else if (time==0.005 && (dispNorm-591272)/dispNorm*(dispNorm-591272)/dispNorm>1e-3) throw Problem::RESULT_CHANGED_EXCEPTION(time);
 }
