@@ -520,16 +520,8 @@ std::string ExporterData<MeshType>::typeName() const
 }
 
 template< typename MeshType >
-UInt ExporterData<MeshType>::typeDim() const
+UInt ExporterData<MeshType>::fieldDim() const
 {
-    /*switch ( M_fieldType )
-    {
-    case ScalarField:
-        return 1;
-    case VectorField:
-        return 3;
-    }*/
-
     return M_feSpacePtr->fieldDim();
 }
 

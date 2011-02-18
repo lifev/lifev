@@ -795,17 +795,17 @@ void ExporterHDF5<MeshType>::writeScalarDatastructure  ( std::ofstream& xdmf, co
     xdmf <<
 
         "         <DataStructure ItemType=\"HyperSlab\"\n" <<
-        "                        Dimensions=\"" << globalUnknowns << " " << dvar.typeDim() << "\"\n" <<
+        "                        Dimensions=\"" << globalUnknowns << " " << dvar.fieldDim() << "\"\n" <<
         "                        Type=\"HyperSlab\">\n" <<
         "           <DataStructure  Dimensions=\"3 2\"\n" <<
         "                           Format=\"XML\">\n" <<
         "               0    0\n" <<
         "               1    1\n" <<
-        "               " << globalUnknowns << " " << dvar.typeDim() << "\n" <<
+        "               " << globalUnknowns << " " << dvar.fieldDim() << "\n" <<
         "           </DataStructure>\n" <<
 
         "           <DataStructure  Format=\"HDF\"\n" <<
-        "                           Dimensions=\"" << dvar.size() << " " << dvar.typeDim() << "\"\n" <<
+        "                           Dimensions=\"" << dvar.size() << " " << dvar.fieldDim() << "\"\n" <<
         "                           DataType=\"Float\"\n" <<
         "                           Precision=\"8\">\n" <<
         "               " << M_outputFileName << ":/" << dvar.variableName()
@@ -826,11 +826,11 @@ void ExporterHDF5<MeshType>::writeVectorDatastructure  ( std::ofstream& xdmf, co
          << "                        Dimensions=\""
          << this->M_mesh->numGlobalVertices()
          << " "
-         << dvar.typeDim()
+         << dvar.fieldDim()
          << "\"\n"
          << "                        Function=\"JOIN($0 , $1, $2)\">\n";
 
-    for (Int i(0); i < dvar.typeDim(); ++i)
+    for (Int i(0); i < dvar.fieldDim(); ++i)
     {
         xdmf << "           <DataStructure  Format=\"HDF\"\n"
              << "                           Dimensions=\""

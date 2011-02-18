@@ -481,7 +481,7 @@ template <typename MeshType> void ExporterEnsight<MeshType>::writeAsciiVector(co
     vectorFile.precision(5);
 
     for (UInt i=0; i<vertexNumber; ++i)
-        for (UInt j=0; j< dvar.typeDim(); ++j)
+        for (UInt j=0; j< dvar.fieldDim(); ++j)
         {
             Int id = this->M_ltGNodesMap[i];
             vectorFile << setw(12) << float(dvar(start + j * size + id)) ;
@@ -621,7 +621,7 @@ template <typename MeshType> void ExporterEnsight<MeshType>::readVector(exporter
     vectorFile.precision(5);
 
     for (UInt i=0; i<vertexNumber; ++i)
-        for (UInt j=0; j< dvar.typeDim(); ++j)
+        for (UInt j=0; j< dvar.fieldDim(); ++j)
         {
             ASSERT(vectorFile.good(), std::stringstream("There is an error while reading " +
                                                         filename).str().c_str() );

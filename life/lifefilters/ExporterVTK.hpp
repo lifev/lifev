@@ -463,7 +463,7 @@ ExporterVTK<Mesh>::composeDataArrayStream(const exporterData_Type& dvar,
             << nDimensions << "\" format=\"ascii\">\n";
 
             for (UInt i=0; i<numPoints; ++i) {
-                for (UInt icoor=0; icoor< dvar.typeDim(); ++icoor) {
+                for (UInt icoor=0; icoor< dvar.fieldDim(); ++icoor) {
                     Int id = localToGlobalPointsMap.find(i)->second;
                     dataArraysStringStream << dvar( start + id + icoor * numDOF ) << " ";
                 }
