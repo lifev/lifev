@@ -13,49 +13,6 @@
 ### TESTSUITE: LIFEFILTERS ########################################################################
 ###################################################################################################
 
-AT_SETUP([test_filters])
-AT_KEYWORDS([output import export])
-AT_DATA([data],[[# -*- getpot -*- (GetPot mode activation for emacs)
-#-------------------------------------------------
-#      Data file for EthierSteinman test case
-#-------------------------------------------------
+m4_include([ensightToHdf5/testsuite.at])
 
-
-[exporter]
-multimesh  = false
-start      = 0
-save       = 1
-import_dir = importDir/
-
-[fluid]
-
-[./physics]
-density         = 1.0          # density
-viscosity       = .01       # viscosity
-
-[../time_discretization]
-initialtime		= 0.
-endtime			= 0.04
-timestep		= 0.01
-BDF_order		= 1
-
-[../space_discretization]
-mesh_dir        = ./   # the directory where the mesh file is
-mesh_file       = cube4x4.mesh          # mesh file
-
-verbose         = 0
-linearized      = 0
-diagonalize     = 1 # weight, 0=off
-div_beta_u_v    = 0 # 1=on, 0=off
-vel_order         = P1
-press_order       = P1
-
-[../miscellaneous]
-verbose         = 1
-steady          = 0
-]])
-AT_CHECK([ ln -sf $abs_top_srcdir/testsuite/lifefilters importDir &&
-	       ln -sf ../../data/mesh/inria/cube4x4.mesh &&
-           mpirun -np 4 ../../lifefilters/test_filters -c],[0],[ignore],[ignore])
-AT_CLEANUP
-
+# m4_include([exporterVTK/testsuite.at])
