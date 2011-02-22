@@ -123,9 +123,9 @@ public:
     //! @name Get Methods
     //@{
 
-    const bcType_Type& type( const bcLine_Type& bcLine ) { return M_bcType[bcLine]; }
+    const bcType_Type& type( const bcLine_Type& bcLine ) const { return M_bcType.find( bcLine )->second; }
 
-    bcFunction_Type& bcFunction( const bcLine_Type& bcLine ) { return M_bcFunction[bcLine]; }
+    const bcFunction_Type& bcFunction( const bcLine_Type& bcLine ) const { return M_bcFunction.find( bcLine )->second; }
 
     //@}
 

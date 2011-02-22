@@ -135,9 +135,9 @@ public:
     //! @name Get Methods
     //@{
 
-    const bcPtr_Type& bc( const bcSide_Type& bcSide ) { return M_boundary[bcSide]; }
+    const bcPtr_Type& bc( const bcSide_Type& bcSide ) const { return M_boundary.find( bcSide )->second; }
 
-    const bool& bcReady( const bcSide_Type& bcSide, const bcLine_Type& line ) { return M_boundarySet[bcSide][line]; }
+    const bool& bcReady( const bcSide_Type& bcSide, const bcLine_Type& line ) const { return M_boundarySet.find( bcSide )->second.find( line )->second; }
 
     //@}
 
