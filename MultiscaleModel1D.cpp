@@ -736,17 +736,8 @@ MultiscaleModel1D::solve( bc_Type& bc, solution_Type& solution, const std::strin
         std::cout << solverType << "  Number of subiterations                  " << subiterationNumber
                                 << " ( CFL = " << CFL*timeStep/M_data->dataTime()->timeStep() << " )" << std::endl;
 
-//    if ( M_displayer->isLeader() )
-//        std::cout << solverType << "  CFL                                      " << CFL*timeStep/M_data->dataTime()->timeStep() << std::endl;
-
     for ( UInt i(1) ; i <= subiterationNumber ; ++i )
     {
-//        if ( M_displayer->isLeader() )
-//        {
-//            std::cout << solverType << "  Subiteration                             " << i << "/" << SubiterationNumber << std::endl;
-//            std::cout << solverType << "  Time                                     " <<  M_data->dataTime()->previousTime() + i*timeStep << std::endl;
-//        }
-
         //bc.updateOperatorVariables();
         M_physics->setArea_tn( *solution["A"] );
         M_solver->updateRHS( solution, timeStep );
