@@ -614,8 +614,6 @@ OneDimensionalData::linearInterpolation( scalarVector_Type& vector,
 void
 OneDimensionalData::computeSpatialDerivatives()
 {
-    Real nodes = M_mesh->numPoints();
-
     for ( UInt iNode( 0 ) ; iNode < M_mesh->numPoints() ; ++iNode )
     {
         M_dArea0dz[iNode] = computeSpatialDerivativeAtNode( M_area0, iNode );
