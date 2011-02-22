@@ -451,7 +451,7 @@ private:
      *
      *  gamma = gamma_tilde / ( 2 sqrt(pi) )
      */
-    vector_Type viscoelasticFluxCorrection( const vector_Type& area, const vector_Type& flowRate, const Real& timeStep );
+    vector_Type viscoelasticFluxCorrection( const vector_Type& area, const vector_Type& flowRate, const OneDimensionalBCHandler& bcHandler, const Real& timeStep );
 
     //! Apply the longitudinal Flux correction:
     /*!
