@@ -301,7 +301,7 @@ OneDimensionalSolver::iterate( OneDimensionalBCHandler& bcHandler, solution_Type
 
     if ( M_physics->data()->viscoelasticWall() )
     {
-        *solution["Q_visc"] = viscoelasticFluxCorrection( area, flowRate, bcHandler, timeStep );
+        *solution["Q_visc"] = viscoelasticFluxCorrection( area, flowRate, timeStep );
         flowRate += *solution["Q_visc"];
     }
 

@@ -263,7 +263,6 @@ inline Real
 OneDimensionalPhysics::fromPToA( const Real& P, const Real& timeStep, const UInt& iNode ) const
 {
     if ( M_data->viscoelasticWall() && iNode != 0 && iNode != M_data->numberOfNodes() - 1 )
-    //if ( M_data->viscoelasticWall() )
     {
         // Newton method to solve the non linear equation
         Real tolerance(1e-8);
@@ -320,7 +319,6 @@ inline Real
 OneDimensionalPhysics::dPdAviscoelastic( const Real& A, const Real& timeStep, const UInt& iNode ) const
 {
     if ( M_data->viscoelasticWall() && iNode != 0 && iNode != M_data->numberOfNodes() - 1 )
-    //if ( M_data->viscoelasticWall() )
         return M_data->viscoelasticCoefficient( iNode ) / ( A * std::sqrt( A ) ) * ( 1 / timeStep - 3 * dAdt( A, timeStep, iNode ) / ( 2 * A ) );
     else
         return 0.;
@@ -330,7 +328,6 @@ inline Real
 OneDimensionalPhysics::dAdP( const Real& P, const Real& timeStep, const UInt& iNode ) const
 {
     if ( M_data->viscoelasticWall() && iNode != 0 && iNode != M_data->numberOfNodes() - 1 )
-    //if ( M_data->viscoelasticWall() )
     {
         // Finite difference approach
         return ( fromPToA( P + M_data->jacobianPerturbationPressure(), timeStep, iNode ) - fromPToA( P, timeStep, iNode ) ) / M_data->jacobianPerturbationPressure();
@@ -379,7 +376,6 @@ inline Real
 OneDimensionalPhysics::viscoelasticPressure( const Real& A, const Real& timeStep, const UInt& iNode ) const
 {
     if ( M_data->viscoelasticWall() && iNode != 0 && iNode != M_data->numberOfNodes() - 1 )
-    //if ( M_data->viscoelasticWall() )
         return M_data->viscoelasticCoefficient( iNode ) / ( A * std::sqrt( A ) ) * dAdt( A, timeStep, iNode );
     else
         return 0.;
