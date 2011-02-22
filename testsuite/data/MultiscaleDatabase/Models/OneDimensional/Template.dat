@@ -38,7 +38,7 @@ SourceType           = OneD_NonLinearSource
 
 [../PhysicalWall]
 ViscoelasticWall     = true        # Enable/Disable viscoelastic effects
-ViscoelasticAngle    = 5           # Viscoelastic wall angle (degree) 
+ViscoelasticAngle    = 10          # Viscoelastic wall angle (degree) 
 ViscoelasticPeriod   = 0.24        # Viscoelastic systolic period
 
 [../PhysicalParameters]
