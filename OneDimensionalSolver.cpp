@@ -888,7 +888,7 @@ OneDimensionalSolver::inertialFluxCorrection( const vector_Type& flux )
 }
 
 OneDimensionalSolver::vector_Type
-OneDimensionalSolver::viscoelasticFluxCorrection( const vector_Type& area, const vector_Type& flowRate, const OneDimensionalBCHandler& bcHandler, const Real& timeStep )
+OneDimensionalSolver::viscoelasticFluxCorrection( const vector_Type& area, const vector_Type& flowRate, const Real& timeStep )
 {
     matrix_Type systemMatrix( *M_homogeneousMassMatrix );
     matrix_Type stiffnessMatrix( M_feSpace->map() );
@@ -923,21 +923,13 @@ OneDimensionalSolver::viscoelasticFluxCorrection( const vector_Type& area, const
     rhs = stiffnessMatrix * (-flowRate);
 
     // Apply BC
+    applyDirichletBCToMatrix( systemMatrix );
 #ifdef GHOSTNODE
-    // NOT IMPLEMENTED
-#else
-    systemMatrix.globalAssemble();
-    //if ( bcHandler.bc( OneDimensional::left )->type( OneDimensional::first ) == OneDimensional::Q )
-    {
-        systemMatrix.diagonalize( 0, 1, 0 );
-        rhs( 0 ) = 0;
-    }
-    //if ( bcHandler.bc( OneDimensional::right )->type( OneDimensional::first ) == OneDimensional::Q )
-    {
-        systemMatrix.diagonalize( M_feSpace->dim() - 1, 1, 0 );
-        rhs( M_feSpace->dim() -1 ) = 0;
-    }
+    rhs( 1 ) = 0;
+    rhs( M_feSpace->dim() - 2 ) = 0;
 #endif
+    rhs( 0 ) = 0;
+    rhs( M_feSpace->dim() -1 ) = 0;
 
     // Compute flow rate correction at t^n+1
     vector_Type flowRateCorrection( rhs );
