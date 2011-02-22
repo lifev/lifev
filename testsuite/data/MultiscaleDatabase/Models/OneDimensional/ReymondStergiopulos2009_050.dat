@@ -40,7 +40,7 @@ ViscoelasticPeriod   = 0.24        # Viscoelastic systolic period
 
 [../PhysicalParameters]
 ComputeCoefficients  = true
-PowerlawCoefficient  = 9            # 2: Parabolic; 9: Typical value
+PowerlawCoefficient  = 9           # 2: Parabolic; 9: Typical value
 
 DistributionLaw      = linear              # Coefficients distribution law: uniform, linear, pointwise
 Area0                = '0.3216990877 0.2922466566' # Area of tube
