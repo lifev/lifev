@@ -74,9 +74,9 @@ public :
     //@{
 
     //! Constructor
-    explicit OneDimensionalPhysics() : M_data(), M_area_tn() {}
+    explicit OneDimensionalPhysics() : M_data(), M_previousArea() {}
 
-    explicit OneDimensionalPhysics( const dataPtr_Type data ) : M_data ( data ), M_area_tn() {}
+    explicit OneDimensionalPhysics( const dataPtr_Type data ) : M_data ( data ), M_previousArea() {}
 
     //! Destructor
     virtual ~OneDimensionalPhysics() {}
@@ -229,7 +229,7 @@ public :
 
     void setData( const dataPtr_Type& data ) { M_data = data; }
 
-    void setArea_tn( const vector_Type& area_tn ) { M_area_tn.reset( new vector_Type ( area_tn ) ); }
+    void setArea_tn( const vector_Type& area_tn ) { M_previousArea.reset( new vector_Type ( area_tn ) ); }
 
     //@}
 
@@ -253,7 +253,7 @@ private:
 
     //@}
 
-    vectorPtr_Type                    M_area_tn;
+    vectorPtr_Type                    M_previousArea;
 };
 
 // ===================================================
@@ -262,28 +262,20 @@ private:
 inline Real
 OneDimensionalPhysics::fromPToA( const Real& P, const Real& timeStep, const UInt& iNode ) const
 {
-    if ( M_data->viscoelasticWall() )
+    if ( M_data->viscoelasticWall() && iNode != 0 && iNode != M_data->numberOfNodes() - 1 )
+    //if ( M_data->viscoelasticWall() )
     {
         // Newton method to solve the non linear equation
         Real tolerance(1e-8);
-        Real maxIT(100);
+        Real maxIT(250);
         UInt i(0);
 
         Real A( M_data->area0( iNode ) );
         Real newtonUpdate(0);
         for ( ; i < maxIT ; ++i )
         {
-            if ( P < tolerance )
-            {
-                if ( std::abs( pressure( A, timeStep, iNode ) - P ) < tolerance )
-                	break;
-
-            }
-            else
-            {
-                if ( std::abs( pressure( A, timeStep, iNode ) / P - 1 ) < tolerance )
-                    break;
-            }
+            if ( std::abs( pressure( A, timeStep, iNode ) - P ) < tolerance )
+                break;
 
             newtonUpdate = ( pressure( A, timeStep, iNode ) - P ) / dPdA( A, timeStep, iNode );
             if ( A - newtonUpdate <= 0 )
@@ -309,7 +301,7 @@ OneDimensionalPhysics::fromPToA( const Real& P, const Real& timeStep, const UInt
 inline Real
 OneDimensionalPhysics::dAdt( const Real& Anp1, const Real& timeStep, const UInt& iNode ) const
 {
-    return ( Anp1 - (*M_area_tn)[iNode] ) / timeStep;
+    return ( Anp1 - (*M_previousArea)[iNode] ) / timeStep;
 }
 
 inline Real
@@ -327,13 +319,18 @@ OneDimensionalPhysics::dPdAelastic( const Real& A, const UInt& iNode ) const
 inline Real
 OneDimensionalPhysics::dPdAviscoelastic( const Real& A, const Real& timeStep, const UInt& iNode ) const
 {
-    return M_data->viscoelasticCoefficient( iNode ) / ( A * std::sqrt( A ) ) * ( 1 / timeStep - 3 * dAdt( A, timeStep, iNode ) / ( 2 * A ) );
+    if ( M_data->viscoelasticWall() && iNode != 0 && iNode != M_data->numberOfNodes() - 1 )
+    //if ( M_data->viscoelasticWall() )
+        return M_data->viscoelasticCoefficient( iNode ) / ( A * std::sqrt( A ) ) * ( 1 / timeStep - 3 * dAdt( A, timeStep, iNode ) / ( 2 * A ) );
+    else
+        return 0.;
 }
 
 inline Real
 OneDimensionalPhysics::dAdP( const Real& P, const Real& timeStep, const UInt& iNode ) const
 {
-    if ( M_data->viscoelasticWall() )
+    if ( M_data->viscoelasticWall() && iNode != 0 && iNode != M_data->numberOfNodes() - 1 )
+    //if ( M_data->viscoelasticWall() )
     {
         // Finite difference approach
         return ( fromPToA( P + M_data->jacobianPerturbationPressure(), timeStep, iNode ) - fromPToA( P, timeStep, iNode ) ) / M_data->jacobianPerturbationPressure();
@@ -381,7 +378,8 @@ OneDimensionalPhysics::elasticPressure( const Real& A, const UInt& iNode ) const
 inline Real
 OneDimensionalPhysics::viscoelasticPressure( const Real& A, const Real& timeStep, const UInt& iNode ) const
 {
-    if ( M_data->viscoelasticWall() )
+    if ( M_data->viscoelasticWall() && iNode != 0 && iNode != M_data->numberOfNodes() - 1 )
+    //if ( M_data->viscoelasticWall() )
         return M_data->viscoelasticCoefficient( iNode ) / ( A * std::sqrt( A ) ) * dAdt( A, timeStep, iNode );
     else
         return 0.;
