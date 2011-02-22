@@ -903,7 +903,7 @@ OneDimensionalSolver::viscoelasticFluxCorrection( const vector_Type& area, const
 
         // Compute stiffness coefficient
         stiffnessCoefficient  = timeStep * 0.5* ( M_physics->data()->viscoelasticCoefficient( iElement ) + M_physics->data()->viscoelasticCoefficient( iElement + 1 ) );
-        stiffnessCoefficient /= M_physics->data()->densityRho() * std::sqrt( 0.5* ( area[ iElement ] + area[ iElement + 1 ] ) );
+        stiffnessCoefficient /= M_physics->data()->densityRho() * std::sqrt( 0.5 * ( area[ iElement ] + area[ iElement + 1 ] ) );
 
         // Set the elementary matrices to 0.
         M_elementalStiffnessMatrix->zero();
