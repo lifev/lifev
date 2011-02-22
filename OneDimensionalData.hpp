@@ -171,6 +171,16 @@ public:
 
     void updateCoefficients();
 
+    //! Compute the spatial derivative of a quantity at a node.
+    /*!
+     * Note: works only for homogeneous discretizations.
+     * @param vector the quantity vector
+     * @param iNode node
+     * @return spatial derivative
+     */
+    template< typename VectorType >
+    Real computeSpatialDerivativeAtNode( const VectorType& vector, const UInt& iNode );
+
     void initLinearParam( const GetPot& dataFile ); // TO BE CHECKED - DON'T USE IT!
 
     void showMe( std::ostream& output = std::cout ) const;
@@ -326,10 +336,7 @@ private:
                               const bool& isArea = false );
 
     //! Compute the derivatives of alpha, area0, beta0, and beta1 using centered differences.
-    /*!
-     * Note: works only for homogeneous discretizations.
-     */
-    void computeDerivatives();
+    void computeSpatialDerivatives();
 
     //! Reset all the containers.
     void resetContainers();
@@ -419,6 +426,29 @@ private:
     scalarVector_Type M_source22;
 };
 
-} // OneDimensional namespace
+
+// ===================================================
+// Template implementation
+// ===================================================
+template< typename VectorType >
+inline Real
+OneDimensionalData::computeSpatialDerivativeAtNode( const VectorType& vector, const UInt& iNode )
+{
+    // We use 2° order finite differences to compute the derivatives (it is coded only for homogeneous discretizations)
+    if ( iNode == 0 )
+    {
+        return ( -1.5 * vector[0] + 2.0*vector[1] - 0.5 * vector[2] ) / ( M_mesh->meanH() );
+    }
+    else if ( iNode == M_mesh->numPoints() - 1 )
+    {
+        return ( 1.5 * vector[iNode] - 2.0*vector[iNode-1] + 0.5 * vector[iNode-2] ) / ( M_mesh->meanH() );
+    }
+    else
+    {
+        return ( vector[iNode+1] - vector[iNode-1] ) / ( 2.0 * M_mesh->meanH() );
+    }
+}
+
+} // LifeV namespace
 
 #endif //OneDimensionalData_H

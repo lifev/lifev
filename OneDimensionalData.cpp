@@ -428,13 +428,13 @@ OneDimensionalData::updateCoefficients()
                 M_beta1[i] = 0.5;
             }
 
-            // Compute Viscoelastic Coefficient: gamma = h * E * T * tan(phi) / ( 4 * \sqrt(pi))
-            M_viscoelasticCoefficient[i] = M_thickness[i] * M_young * M_viscoelasticPeriod * std::tan( M_viscoelasticAngle ) / ( 4 * std::sqrt(M_PI) );
+            // Compute Viscoelastic Coefficient: gamma = h * E / ( 1 - nu^2 ) * T * tan(phi) / ( 4 * \sqrt(pi))
+            M_viscoelasticCoefficient[i] = M_thickness[i] * M_young / (1 - M_poisson * M_poisson) * M_viscoelasticPeriod * std::tan( M_viscoelasticAngle ) / ( 4 * std::sqrt(M_PI) );
         }
     }
 
     // Compute the derivatives of the coefficients
-    computeDerivatives();
+    computeSpatialDerivatives();
 }
 
 void
@@ -612,35 +612,17 @@ OneDimensionalData::linearInterpolation( scalarVector_Type& vector,
 }
 
 void
-OneDimensionalData::computeDerivatives()
+OneDimensionalData::computeSpatialDerivatives()
 {
     Real nodes = M_mesh->numPoints();
 
-    // We use 2° order finite differences to compute the derivatives (it is coded only for homogeneous discretizations)
-    for ( UInt i = 1 ; i < nodes-1 ; ++i )
+    for ( UInt iNode( 0 ) ; iNode < M_mesh->numPoints() ; ++iNode )
     {
-        M_dArea0dz[i] = ( M_area0[i+1] - M_area0[i-1] ) / 2;
-        M_dBeta0dz[i] = ( M_beta0[i+1] - M_beta0[i-1] ) / 2;
-        M_dBeta1dz[i] = ( M_beta1[i+1] - M_beta1[i-1] ) / 2;
-        M_dAlphadz[i] = ( M_alpha[i+1] - M_alpha[i-1] ) / 2;
+        M_dArea0dz[iNode] = computeSpatialDerivativeAtNode( M_area0, iNode );
+        M_dBeta0dz[iNode] = computeSpatialDerivativeAtNode( M_beta0, iNode );
+        M_dBeta1dz[iNode] = computeSpatialDerivativeAtNode( M_beta1, iNode );
+        M_dAlphadz[iNode] = computeSpatialDerivativeAtNode( M_alpha, iNode );
     }
-
-    // First node
-    M_dArea0dz[0] = ( -M_area0[2] + 4*M_area0[1] - 3*M_area0[0] ) / 2;
-    M_dBeta0dz[0] = ( -M_beta0[2] + 4*M_beta0[1] - 3*M_beta0[0] ) / 2;
-    M_dBeta1dz[0] = ( -M_beta1[2] + 4*M_beta1[1] - 3*M_beta1[0] ) / 2;
-    M_dAlphadz[0] = ( -M_alpha[2] + 4*M_alpha[1] - 3*M_alpha[0] ) / 2;
-
-    // Last node
-    M_dArea0dz[nodes-1] = ( 3*M_area0[nodes-1] - 4*M_area0[nodes-2] + M_area0[nodes-3] ) / 2;
-    M_dBeta0dz[nodes-1] = ( 3*M_beta0[nodes-1] - 4*M_beta0[nodes-2] + M_beta0[nodes-3] ) / 2;
-    M_dBeta1dz[nodes-1] = ( 3*M_beta1[nodes-1] - 4*M_beta1[nodes-2] + M_beta1[nodes-3] ) / 2;
-    M_dAlphadz[nodes-1] = ( 3*M_alpha[nodes-1] - 4*M_alpha[nodes-2] + M_alpha[nodes-3] ) / 2;
-
-    M_dArea0dz /= M_mesh->meanH();
-    M_dBeta0dz /= M_mesh->meanH();
-    M_dBeta1dz /= M_mesh->meanH();
-    M_dAlphadz /= M_mesh->meanH();
 }
 
 void
