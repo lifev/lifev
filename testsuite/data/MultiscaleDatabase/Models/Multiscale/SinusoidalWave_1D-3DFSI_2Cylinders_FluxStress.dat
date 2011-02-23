@@ -27,16 +27,16 @@ couplingsPath    = './MultiscaleDatabase/Couplings/'
 ########### ID #### Type ############## File (without .dat) #######################################
 models = '    
             0        OneDimensional     Cylinder_5x10
-            1        FSI3D              Cylinder_tube20_Monolithic
+            1        FSI3D              Cylinder_tube20_MonolithicGE
          '
 ###################################################################################################
 
 # List of couplings ###############################################################################
 ########### ID #### Type ############## File (without .dat) ########### Models ######## Flags #####
 couplings = '    
-            0        BoundaryCondition    SinusoidalFluxWave            0               0
-            1        FlowRateStress       StaticPressure                1,0             0,1
-            2        BoundaryCondition    Absorbing_NobileVergara       1               1
+            0        BoundaryCondition  SinusoidalFluxWave              0               0
+            1        FlowRateStress     StaticPressure                  1,0             0,1
+            2        BoundaryCondition  Absorbing_NobileVergara         1               1
             '
 ###################################################################################################
 
