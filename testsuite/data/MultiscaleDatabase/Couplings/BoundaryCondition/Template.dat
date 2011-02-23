@@ -9,25 +9,23 @@
 #  License Terms: GNU GPL
 #
 ###################################################################################################
-### COUPLING: BoundaryCondition - Poiseuille Flux Dynamic #########################################
+### COUPLING: BoundaryCondition - Template ########################################################
 ###################################################################################################
 
 [Multiscale]
-couplingName    = BoundaryCondition_FlowRate_PoiseuilleDynamicSTP
+couplingName    = BoundaryCondition_Template
 
 [boundary_conditions]
-list = 'FlowRate_PoiseuilleDynamic'
-
-    [./FlowRate_PoiseuilleDynamic]
+list = 'TemplateBC'
+    
+    [./TemplateBC]
     type                = Flux
     mode                = Full
     component           = 3
-    functionFile        = physicalFunctions/SmoothTrapezoidalProfile.dat[B]
-    #OPERfunctionFile    = physicalFunctions/SmoothTrapezoidalProfile.dat[B]
-
+    function            = '0' 
+    
     # Additional parameters for 1D BC
     quantity            = Q
     line                = first
     
     [../]
-    

@@ -56,7 +56,7 @@ models = '
 # List of couplings ###############################################################################
 ########### ID #### Type ############## File (without .dat) ########### Models ######## Flags #####
 couplings = '    
-            1       BoundaryCondition   SinusoidalSquareFluxWave        1               0
+            1       BoundaryCondition   FlowRate_SquareSinusoidalWave   1               0
             2       Stress              StaticPressure                  95,1            0,1
             3       Stress              StaticPressure                  2,3,95          0,0,1
             4       Stress              StaticPressure                  14,15,2         0,0,1
@@ -69,7 +69,7 @@ couplings = '
            11       Stress              StaticPressure                  36,37,35        0,0,1
            12       Stress              StaticPressure                  34,39,37        0,0,1
            13       Stress              StaticPressure                  40,41,39        0,0,1
-           14       BoundaryCondition   Absorbing_1D_right              3,15,19,26,31,32,33,34,36,38,40,41  1,1,1,1,1,1,1,1,1,1,1,1
+           14       BoundaryCondition   Absorbing_1DRight               3,15,19,26,31,32,33,34,36,38,40,41  1,1,1,1,1,1,1,1,1,1,1,1
             '
 ###################################################################################################
 

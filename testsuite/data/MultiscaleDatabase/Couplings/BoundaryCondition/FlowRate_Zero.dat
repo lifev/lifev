@@ -13,19 +13,19 @@
 ###################################################################################################
 
 [Multiscale]
-couplingName	= BoundaryCondition_NoFlux
+couplingName    = BoundaryCondition_FlowRate_Zero
 
 [boundary_conditions]
-list = 'NoFlux'  # Unitary Flux
-	
-	[./NoFlux]
-	type				= Flux
-	mode				= Full
-	component			= 3
-	function   			= '0' 
-	
-    # Additional parameters for 1D BC
-    quantity        = Q
-    line            = first
+list = 'FlowRate_Zero'  # Unitary Flux
     
-	[../]
+    [./FlowRate_Zero]
+    type                = Flux
+    mode                = Full
+    component           = 3
+    function            = '0' 
+    
+    # Additional parameters for 1D BC
+    quantity            = Q
+    line                = first
+    
+    [../]

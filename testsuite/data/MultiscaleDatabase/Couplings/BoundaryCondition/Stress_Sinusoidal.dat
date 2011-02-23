@@ -13,18 +13,18 @@
 ###################################################################################################
 
 [Multiscale]
-couplingName	= BoundaryCondition_SinusoidalPressure
+couplingName    = BoundaryCondition_Stress_Sinusoidal
 
 [boundary_conditions]
-list = 'SinusoidalPressure'  # Sinusoidal Pressure
-	
-	[./SinusoidalPressure]
-	type			= Natural
-	mode			= Normal
-	function		= 'T=1; -sin(2*pi*t/T)'
+list = 'Stress_Sinusoidal'  # Sinusoidal Pressure
+    
+    [./Stress_Sinusoidal]
+    type                = Natural
+    mode                = Normal
+    function            = 'T=1; -sin(2*pi*t/T)'
 
     # Additional parameters for 1D BC
-    quantity        = P
-    line            = first
-    	
-	[../]
+    quantity            = P
+    line                = first
+        
+    [../]

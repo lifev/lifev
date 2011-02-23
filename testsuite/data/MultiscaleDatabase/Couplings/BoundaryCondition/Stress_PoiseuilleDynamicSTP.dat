@@ -13,18 +13,18 @@
 ###################################################################################################
 
 [Multiscale]
-couplingName	= BoundaryCondition_PressureDynamic
+couplingName    = BoundaryCondition_PressureDynamic
 
 [boundary_conditions]
 list = 'PressureDynamic'
 
-	[./PressureDynamic]
-	type				= Natural
-	mode				= Normal
-	functionFile	    = physicalFunctions/SmoothTrapezoidalProfile.dat[C]
+    [./PressureDynamic]
+    type                = Natural
+    mode                = Normal
+    functionFile        = physicalFunctions/SmoothTrapezoidalProfile.dat[C]
 
     # Additional parameters for 1D BC
-    quantity        = P
-    line            = first
+    quantity            = P
+    line                = first
     
-	[../]
+    [../]

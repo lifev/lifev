@@ -13,19 +13,19 @@
 ###################################################################################################
 
 [Multiscale]
-couplingName	= BoundaryCondition_SinusoidalFlux
+couplingName    = BoundaryCondition_FlowRate_Sinusoidal
 
 [boundary_conditions]
-list = 'SinusoidalFlux'  # Sinusoidal Flux
-	
-	[./SinusoidalFlux]
-	type				= Flux
-	mode				= Full
-	component			= 3
-	function		    = 'T=1; -sin(2*pi*t/T)'
+list = 'FlowRate_Sinusoidal'  # Sinusoidal Flux
+    
+    [./FlowRate_Sinusoidal]
+    type                = Flux
+    mode                = Full
+    component           = 3
+    function            = 'T=1; -sin(2*pi*t/T)'
 
     # Additional parameters for 1D BC
-    quantity        = Q
-    line            = first	
+    quantity            = Q
+    line                = first    
     
-	[../]
+    [../]

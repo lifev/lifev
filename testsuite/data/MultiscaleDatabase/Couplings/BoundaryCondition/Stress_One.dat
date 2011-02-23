@@ -13,18 +13,18 @@
 ###################################################################################################
 
 [Multiscale]
-couplingName	= BoundaryCondition_Pressure
+couplingName    = BoundaryCondition_Pressure
 
 [boundary_conditions]
 list = 'Pressure'
 
-	[./Pressure]
-	type				= Natural
-	mode				= Normal
-	function			= '-10'
-	
-    # Additional parameters for 1D BC
-    quantity        = P
-    line            = first
+    [./Pressure]
+    type                = Natural
+    mode                = Normal
+    function            = '-10'
     
-	[../]
+    # Additional parameters for 1D BC
+    quantity            = P
+    line                = first
+    
+    [../]

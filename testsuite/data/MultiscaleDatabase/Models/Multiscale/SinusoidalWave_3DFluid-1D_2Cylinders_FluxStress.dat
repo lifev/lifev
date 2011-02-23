@@ -34,9 +34,9 @@ models = '
 # List of couplings ###############################################################################
 ########### ID #### Type ############## File (without .dat) ########### Models ######## Flags #####
 couplings = '    
-            0       BoundaryCondition   SinusoidalFluxWave              0               0
+            0       BoundaryCondition   FlowRate_SinusoidalWave         0               0
             1       FlowRateStress      StaticPressure                  1,0             0,1
-            2       BoundaryCondition   Absorbing_1D_right              1               1
+            2       BoundaryCondition   Absorbing_1DRight               1               1
             '
 ###################################################################################################
 

@@ -13,14 +13,14 @@
 ###################################################################################################
 
 [Multiscale]
-couplingName	= BoundaryCondition_Absorbing_1D
+couplingName    = BoundaryCondition_Absorbing_1DRight
 
 [boundary_conditions]
 list = 'OutFlow_absorbing'
-	
-	[./OutFlow_absorbing]
-    quantity        = W2
-    line            = first
-    Default         = Absorbing
-	
-	[../]
+    
+    [./OutFlow_absorbing]
+    quantity            = W2
+    line                = first
+    Default             = Absorbing
+    
+    [../]

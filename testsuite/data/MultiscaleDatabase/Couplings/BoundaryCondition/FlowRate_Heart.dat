@@ -13,20 +13,20 @@
 ###################################################################################################
 
 [Multiscale]
-couplingName	= BoundaryCondition_HeartFlux
+couplingName    = BoundaryCondition_FlowRate_Heart
 
 [boundary_conditions]
-list = 'HeartFlux'
+list = 'FlowRate_Heart'
 
-	[./HeartFlux]
-	type				= Flux
-	mode				= Full
-	component			= 3
-	functionFile		= physicalFunctions/HeartPhysicalFlux.dat
+    [./FlowRate_Heart]
+    type                = Flux
+    mode                = Full
+    component           = 3
+    functionFile        = physicalFunctions/HeartPhysicalFlux.dat
 
-	# Additional parameters for 1D BC
-	quantity        = Q
-    line            = first
+    # Additional parameters for 1D BC
+    quantity            = Q
+    line                = first
     
-	[../]
-	
+    [../]
+    

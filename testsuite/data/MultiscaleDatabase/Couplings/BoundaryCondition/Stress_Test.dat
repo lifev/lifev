@@ -13,20 +13,20 @@
 ###################################################################################################
 
 [Multiscale]
-couplingName	= BoundaryCondition_TestStress
+couplingName    = BoundaryCondition_Stress_Test
 
 [boundary_conditions]
-list = 'TestStress'
-	
-	[./TestStress]
-	type			= Natural
-	mode			= Full
-	component		= 3
-	#function		= '[0, 0, 13332*(t<0.00300000001)]'
-	functionFile	= physicalFunctions/test_Flux2.dat
-	
-    # Additional parameters for 1D BC
-    quantity        = P
-    line            = first
+list = 'Stress_Test'
     
-	[../]
+    [./Stress_Test]
+    type                = Natural
+    mode                = Full
+    component           = 3
+    #function            = '[0, 0, 13332*(t<0.00300000001)]'
+    functionFile        = physicalFunctions/test_Flux2.dat
+    
+    # Additional parameters for 1D BC
+    quantity            = P
+    line                = first
+    
+    [../]

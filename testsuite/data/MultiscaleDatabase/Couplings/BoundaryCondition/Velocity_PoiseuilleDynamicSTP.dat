@@ -13,23 +13,23 @@
 ###################################################################################################
 
 [Multiscale]
-couplingName	= BoundaryCondition_PoiseuilleVelocityDynamic
+couplingName    = BoundaryCondition_Velocity_PoiseuilleDynamic
 
 [boundary_conditions]
 #list = 'XY ZPoiseuilleDynamic'
 list = 'ZPoiseuilleDynamic'
 
-	[./XY]
-	type       			= Essential
-	mode       			= Component
-	component 			= '1 2'
-	function   			= 0
+    [./XY]
+    type                = Essential
+    mode                = Component
+    component           = '1 2'
+    function            = 0
 
-	[../ZPoiseuilleDynamic]
-	type				= Essential
-	mode				= Component
-	component			= 3
-	functionFile	    = physicalFunctions/SmoothTrapezoidalProfile.dat[A]
-	#OPERfunctionFile	= physicalFunctions/SmoothTrapezoidalProfile.dat[A]
+    [../ZPoiseuilleDynamic]
+    type                = Essential
+    mode                = Component
+    component           = 3
+    functionFile        = physicalFunctions/SmoothTrapezoidalProfile.dat[A]
+    #OPERfunctionFile    = physicalFunctions/SmoothTrapezoidalProfile.dat[A]
 
-	[../]
+    [../]

@@ -13,19 +13,19 @@
 ###################################################################################################
 
 [Multiscale]
-couplingName	= BoundaryCondition_TestFlux
+couplingName    = BoundaryCondition_FlowRate_Test
 
 [boundary_conditions]
-list = 'TestFlux'
-	
-	[./TestFlux]
-	type			= Flux
-	mode			= Full
-	component		= 3
-	functionFile	= physicalFunctions/test_Flux1.dat
+list = 'FlowRate_Test'
+    
+    [./FlowRate_Test]
+    type                = Flux
+    mode                = Full
+    component           = 3
+    functionFile        = physicalFunctions/test_Flux1.dat
 
     # Additional parameters for 1D BC
-    quantity        = Q
-    line            = first
+    quantity            = Q
+    line                = first
     
-	[../]
+    [../]

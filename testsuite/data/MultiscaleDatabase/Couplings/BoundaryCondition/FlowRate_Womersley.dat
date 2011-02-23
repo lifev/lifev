@@ -13,20 +13,20 @@
 ###################################################################################################
 
 [Multiscale]
-couplingName	= BoundaryCondition_WomersleySinusoidalFlux
+couplingName    = BoundaryCondition_FlowRate_Womersley
 
 [boundary_conditions]
-list = 'WomersleySinusoidalFlux'  # Womersley Sinusoidal Flux
-	
-	[./WomersleySinusoidalFlux]
-	type			= Flux
-	mode			= Full
-	component		= 3
-	function		= 'T=29.6088132032681; -sin(2*pi*t/T)' 
-	                # Wo = 5, Re = 600 (with rho = 0.00593454445511297, mu = 2.79658816105093, D = 1)
+list = 'FlowRate_Womersley'  # Womersley Sinusoidal Flux
+    
+    [./FlowRate_Womersley]
+    type                = Flux
+    mode                = Full
+    component           = 3
+    function            = 'T=29.6088132032681; -sin(2*pi*t/T)' 
+                        # Wo = 5, Re = 600 (with rho = 0.00593454445511297, mu = 2.79658816105093, D = 1)
     
     # Additional parameters for 1D BC
-    quantity        = Q
-    line            = first	                
-	
-	[../]
+    quantity            = Q
+    line                = first                    
+    
+    [../]

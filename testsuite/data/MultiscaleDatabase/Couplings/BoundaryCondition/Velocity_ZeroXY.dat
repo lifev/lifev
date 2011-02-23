@@ -13,15 +13,15 @@
 ###################################################################################################
 
 [Multiscale]
-couplingName	= XY_ZeroTangentialVelocity
+couplingName    = Velocity_ZeroXY
 
 [boundary_conditions]
 list = 'XY'
 
-	[./XY]
-	type       			= Essential
-	mode       			= Component
-	component 			= '1 2'
-	function   			= 0
-	
-	[../]
+    [./XY]
+    type                = Essential
+    mode                = Component
+    component           = '1 2'
+    function            = 0
+    
+    [../]

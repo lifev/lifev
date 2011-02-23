@@ -33,8 +33,8 @@ models = '
 # List of couplings ###############################################################################
 ########### ID #### Type ############## File (without .dat) ########### Models ######## Flags #####
 couplings = '    
-            0       BoundaryCondition   CarotidBifurcationFlux_Dynamic  0               0
-            1       BoundaryCondition   NoStress                        0               1,2
+            0       BoundaryCondition   FlowRate_CarotidBifurcation     0               0
+            1       BoundaryCondition   Stress_Zero                     0               1,2
              '
 ###################################################################################################
 

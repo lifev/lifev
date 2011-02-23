@@ -56,7 +56,7 @@ models = '
 # List of couplings ###############################################################################
 ########### ID #### Type ############## File (without .dat) ########### Models ######## Flags #####
 couplings = '    
-            1       BoundaryCondition   HeartFlux                       1               0
+            1       BoundaryCondition   FlowRate_Heart                  1               0
             2       Stress              StaticPressure                  95,1            0,1
             3       Stress              StaticPressure                  2,3,95          0,0,1
             4       Stress              StaticPressure                  14,15,2         0,0,1
@@ -69,18 +69,18 @@ couplings = '
            11       Stress              StaticPressure                  36,37,35        0,0,1
            12       Stress              StaticPressure                  34,39,37        0,0,1
            13       Stress              StaticPressure                  40,41,39        0,0,1
-           14       BoundaryCondition   ReymondStergiopulos2009_003_R   3               1
-           15       BoundaryCondition   ReymondStergiopulos2009_015_R   15              1
-           16       BoundaryCondition   ReymondStergiopulos2009_019_R   19              1
-           17       BoundaryCondition   ReymondStergiopulos2009_026_R   26              1
-           18       BoundaryCondition   ReymondStergiopulos2009_031_R   31              1
-           19       BoundaryCondition   ReymondStergiopulos2009_032_R   32              1
-           20       BoundaryCondition   ReymondStergiopulos2009_033_R   33              1
-           21       BoundaryCondition   ReymondStergiopulos2009_034_R   34              1
-           22       BoundaryCondition   ReymondStergiopulos2009_036_R   36              1
-           23       BoundaryCondition   ReymondStergiopulos2009_038_R   38              1
-           24       BoundaryCondition   ReymondStergiopulos2009_040_R   40              1
-           25       BoundaryCondition   ReymondStergiopulos2009_041_R   41              1
+           14       BoundaryCondition   Terminal_ReymondStergiopulos2009_003   3               1
+           15       BoundaryCondition   Terminal_ReymondStergiopulos2009_015   15              1
+           16       BoundaryCondition   Terminal_ReymondStergiopulos2009_019   19              1
+           17       BoundaryCondition   Terminal_ReymondStergiopulos2009_026   26              1
+           18       BoundaryCondition   Terminal_ReymondStergiopulos2009_031   31              1
+           19       BoundaryCondition   Terminal_ReymondStergiopulos2009_032   32              1
+           20       BoundaryCondition   Terminal_ReymondStergiopulos2009_033   33              1
+           21       BoundaryCondition   Terminal_ReymondStergiopulos2009_034   34              1
+           22       BoundaryCondition   Terminal_ReymondStergiopulos2009_036   36              1
+           23       BoundaryCondition   Terminal_ReymondStergiopulos2009_038   38              1
+           24       BoundaryCondition   Terminal_ReymondStergiopulos2009_040   40              1
+           25       BoundaryCondition   Terminal_ReymondStergiopulos2009_041   41              1
             '
 ###################################################################################################
 
