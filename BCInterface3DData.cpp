@@ -56,11 +56,13 @@ BCInterface3DData::BCInterface3DData() :
         M_mapBase            ()
 {
     //Set mapType
-    M_mapType["Essential"]  = Essential;
-    M_mapType["Natural"]    = Natural;
-    M_mapType["Robin"]      = Robin;
-    M_mapType["Flux"]       = Flux;
-    M_mapType["Resistance"] = Resistance;
+    M_mapType["Essential"]         = Essential;
+    M_mapType["EssentialEdges"]    = EssentialEdges;
+    M_mapType["EssentialVertices"] = EssentialVertices;
+    M_mapType["Natural"]           = Natural;
+    M_mapType["Robin"]             = Robin;
+    M_mapType["Flux"]              = Flux;
+    M_mapType["Resistance"]        = Resistance;
 
     //Set mapMode
     M_mapMode["Scalar"]      = Scalar;
