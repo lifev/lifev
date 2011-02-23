@@ -105,9 +105,10 @@ public :
     //! Compute area given the elastic pressure.
     /*!
      *  To be used in initialization, when time derivative of A is supposed null
+     *  @param elasticExternalNodes consider elastic the external nodes (neglect viscoelasticity)
      *  @return A = A0 * ( (P - Pext) / beta0 + 1 )^(1/beta1)
      */
-    Real fromPToA( const Real& P, const Real& timeStep, const UInt& iNode ) const;
+    Real fromPToA( const Real& P, const Real& timeStep, const UInt& iNode, const bool& elasticExternalNodes = true ) const;
 
     //@}
 
@@ -126,9 +127,10 @@ public :
 
     //! Compute the derivative of the pressure with respect to A
     /*!
+     * @param elasticExternalNodes consider elastic the external nodes (neglect viscoelasticity)
      * @return dP(A)/dA = dPelastic(A)/dA + dPviscoelastic(A)/dA
      */
-    Real dPdA( const Real& A, const Real& timeStep, const UInt& iNode ) const;
+    Real dPdA( const Real& A, const Real& timeStep, const UInt& iNode, const bool& elasticExternalNodes = true ) const;
 
     //! Compute the derivative of the elastic pressure with respect to A
     /*!
@@ -138,15 +140,17 @@ public :
 
     //! Compute the derivative of the viscoelastic pressure with respect to A
     /*!
+     * @param elasticExternalNodes consider elastic the external nodes (neglect viscoelasticity)
      * @return dP(A)/dA = gamma / ( A^(3/2) ) * ( 1 / deltaT - 3 * dA/dT / ( 2 * A ) )
      */
-    Real dPdAviscoelastic( const Real& A, const Real& timeStep, const UInt& iNode ) const;
+    Real dPdAviscoelastic( const Real& A, const Real& timeStep, const UInt& iNode, const bool& elasticExternalNodes = true ) const;
 
     //! Compute the derivative of the elastic pressure with respect to A
     /*!
+     * @param elasticExternalNodes consider elastic the external nodes (neglect viscoelasticity)
      * @return dA(A)/dP = A0 / ( beta0 * beta1 ) * ( 1 + ( P - Pext )/ beta0 )^(1/beta1 - 1)
      */
-    Real dAdP( const Real& P, const Real& timeStep, const UInt& iNode ) const;
+    Real dAdP( const Real& P, const Real& timeStep, const UInt& iNode, const bool& elasticExternalNodes = true ) const;
 
     //! Compute the derivative of total pressure (P is the elastic pressure) with respect to A and Q.
     /*!
@@ -165,9 +169,10 @@ public :
     //! Compute the pressure.
     /*!
      * Includes the contribution of the external, elastic and viscoelastic pressure.
+     * @param elasticExternalNodes consider elastic the external nodes (neglect viscoelasticity)
      * @return P = P_elastic + P_viscoelastic + P_external
      */
-    Real pressure( const Real& A, const Real& timeStep, const UInt& iNode ) const;
+    Real pressure( const Real& A, const Real& timeStep, const UInt& iNode, const bool& elasticExternalNodes = true ) const;
 
     //! Return the external pressure.
     /*!
@@ -183,9 +188,10 @@ public :
 
     //! Compute the viscoelastic pressure.
     /*!
+     * @param elasticExternalNodes consider elastic the external nodes (neglect viscoelasticity)
      * @return P = gamma * 1/(2*sqrt(pi*A)) * dA / dt
      */
-    Real viscoelasticPressure( const Real& A, const Real& timeStep, const UInt& iNode ) const;
+    Real viscoelasticPressure( const Real& A, const Real& timeStep, const UInt& iNode, const bool& elasticExternalNodes = true ) const;
 
     //! Compute the total pressure (P is the elastic pressure)
     /*!
@@ -260,9 +266,11 @@ private:
 // Inline conversion methods
 // ===================================================
 inline Real
-OneDimensionalPhysics::fromPToA( const Real& P, const Real& timeStep, const UInt& iNode ) const
+OneDimensionalPhysics::fromPToA( const Real& P, const Real& timeStep, const UInt& iNode, const bool& elasticExternalNodes ) const
 {
-    if ( M_data->viscoelasticWall() && iNode != 0 && iNode != M_data->numberOfNodes() - 1 )
+    if ( !M_data->viscoelasticWall() || ( ( iNode == 0 || iNode == M_data->numberOfNodes() - 1 ) && elasticExternalNodes ) )
+        return ( M_data->area0( iNode ) * OneDimensional::pow20( ( P - externalPressure() ) / M_data->beta0( iNode ) + 1, 1 / M_data->beta1( iNode ) )  );
+    else
     {
         // Newton method to solve the non linear equation
         Real tolerance(1e-8);
@@ -273,25 +281,23 @@ OneDimensionalPhysics::fromPToA( const Real& P, const Real& timeStep, const UInt
         Real newtonUpdate(0);
         for ( ; i < maxIT ; ++i )
         {
-            if ( std::abs( pressure( A, timeStep, iNode ) - P ) < tolerance )
+            if ( std::abs( pressure( A, timeStep, iNode, elasticExternalNodes ) - P ) < tolerance )
                 break;
 
-            newtonUpdate = ( pressure( A, timeStep, iNode ) - P ) / dPdA( A, timeStep, iNode );
+            newtonUpdate = ( pressure( A, timeStep, iNode, elasticExternalNodes ) - P ) / dPdA( A, timeStep, iNode, elasticExternalNodes );
             if ( A - newtonUpdate <= 0 )
-                A /= 2; // Bisection
+                A /= 2.0; // Bisection
             else
                 A -= newtonUpdate; // Newton
         }
         if ( i == maxIT )
         {
             std::cout << "!!! Warning: conversion fromPToA below tolerance !!! " << std::endl;
-            std::cout << "Tolerance: " << tolerance << "; Residual: " << std::abs( pressure( A, timeStep, iNode ) - P ) << std::endl;
+            std::cout << "Tolerance: " << tolerance << "; Residual: " << std::abs( pressure( A, timeStep, iNode, elasticExternalNodes ) - P ) << std::endl;
         }
 
         return A;
     }
-    else
-        return ( M_data->area0( iNode ) * OneDimensional::pow20( ( P - externalPressure() ) / M_data->beta0( iNode ) + 1, 1 / M_data->beta1( iNode ) )  );
 }
 
 // ===================================================
@@ -304,9 +310,9 @@ OneDimensionalPhysics::dAdt( const Real& Anp1, const Real& timeStep, const UInt&
 }
 
 inline Real
-OneDimensionalPhysics::dPdA( const Real& A, const Real& timeStep, const UInt& iNode ) const
+OneDimensionalPhysics::dPdA( const Real& A, const Real& timeStep, const UInt& iNode, const bool& elasticExternalNodes ) const
 {
-    return dPdAelastic( A, iNode ) + dPdAviscoelastic( A, timeStep, iNode );
+    return dPdAelastic( A, iNode ) + dPdAviscoelastic( A, timeStep, iNode, elasticExternalNodes );
 }
 
 inline Real
@@ -316,26 +322,28 @@ OneDimensionalPhysics::dPdAelastic( const Real& A, const UInt& iNode ) const
 }
 
 inline Real
-OneDimensionalPhysics::dPdAviscoelastic( const Real& A, const Real& timeStep, const UInt& iNode ) const
+OneDimensionalPhysics::dPdAviscoelastic( const Real& A, const Real& timeStep, const UInt& iNode, const bool& elasticExternalNodes ) const
 {
-    if ( M_data->viscoelasticWall() && iNode != 0 && iNode != M_data->numberOfNodes() - 1 )
-        return M_data->viscoelasticCoefficient( iNode ) / ( A * std::sqrt( A ) ) * ( 1 / timeStep - 3 * dAdt( A, timeStep, iNode ) / ( 2 * A ) );
+    if ( !M_data->viscoelasticWall() || ( ( iNode == 0 || iNode == M_data->numberOfNodes() - 1 ) && elasticExternalNodes ) )
+        return 0;
     else
-        return 0.;
+        return M_data->viscoelasticCoefficient( iNode ) / ( A * std::sqrt( A ) ) * ( 1 / timeStep - 3 * dAdt( A, timeStep, iNode ) / ( 2 * A ) );
 }
 
 inline Real
-OneDimensionalPhysics::dAdP( const Real& P, const Real& timeStep, const UInt& iNode ) const
+OneDimensionalPhysics::dAdP( const Real& P, const Real& timeStep, const UInt& iNode, const bool& elasticExternalNodes ) const
 {
-    if ( M_data->viscoelasticWall() && iNode != 0 && iNode != M_data->numberOfNodes() - 1 )
+    if ( !M_data->viscoelasticWall() || ( ( iNode == 0 || iNode == M_data->numberOfNodes() - 1 ) && elasticExternalNodes ) )
     {
-        // Finite difference approach
-        return ( fromPToA( P + M_data->jacobianPerturbationPressure(), timeStep, iNode ) - fromPToA( P, timeStep, iNode ) ) / M_data->jacobianPerturbationPressure();
-    }
-    else
         return M_data->area0( iNode ) / ( M_data->beta0( iNode ) * M_data->beta1( iNode ) )
                                       * OneDimensional::pow10( 1 + ( P - externalPressure() )
                                       / M_data->beta0( iNode ), 1 / M_data->beta1( iNode ) - 1 );
+    }
+    else
+    {
+        // Finite difference approach
+        return ( fromPToA( P + M_data->jacobianPerturbationPressure(), timeStep, iNode, elasticExternalNodes ) - fromPToA( P, timeStep, iNode, elasticExternalNodes ) ) / M_data->jacobianPerturbationPressure();
+    }
 }
 
 inline Real
@@ -361,9 +369,9 @@ OneDimensionalPhysics::celerity0( const UInt& iNode ) const
 }
 
 inline Real
-OneDimensionalPhysics::pressure( const Real& A, const Real& timeStep, const UInt& iNode ) const
+OneDimensionalPhysics::pressure( const Real& A, const Real& timeStep, const UInt& iNode, const bool& elasticExternalNodes ) const
 {
-    return elasticPressure( A, iNode ) + viscoelasticPressure( A, timeStep, iNode ) + externalPressure();
+    return elasticPressure( A, iNode ) + viscoelasticPressure( A, timeStep, iNode, elasticExternalNodes ) + externalPressure();
 }
 
 inline Real
@@ -373,12 +381,12 @@ OneDimensionalPhysics::elasticPressure( const Real& A, const UInt& iNode ) const
 }
 
 inline Real
-OneDimensionalPhysics::viscoelasticPressure( const Real& A, const Real& timeStep, const UInt& iNode ) const
+OneDimensionalPhysics::viscoelasticPressure( const Real& A, const Real& timeStep, const UInt& iNode, const bool& elasticExternalNodes ) const
 {
-    if ( M_data->viscoelasticWall() && iNode != 0 && iNode != M_data->numberOfNodes() - 1 )
-        return M_data->viscoelasticCoefficient( iNode ) / ( A * std::sqrt( A ) ) * dAdt( A, timeStep, iNode );
+    if ( !M_data->viscoelasticWall() || ( ( iNode == 0 || iNode == M_data->numberOfNodes() - 1 ) && elasticExternalNodes ) )
+        return 0;
     else
-        return 0.;
+        return M_data->viscoelasticCoefficient( iNode ) / ( A * std::sqrt( A ) ) * dAdt( A, timeStep, iNode );
 }
 
 inline Real
