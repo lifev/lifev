@@ -99,6 +99,13 @@ OneDimensionalBCHandler::applyBC( const Real& time, const Real& timeStep, const 
     M_boundary[ OneDimensional::right ]->applyBC( time, timeStep, solution, flux, rhs );
 }
 
+void
+OneDimensionalBCHandler::applyViscoelasticBC( const Real& timeStep, const vector_Type& area, const vector_Type& flowRate, const fluxPtr_Type& flux, matrix_Type& matrix, vector_Type& rhs )
+{
+    M_boundary[ OneDimensional::left  ]->applyViscoelasticBC( timeStep, area, flowRate, flux, matrix, rhs );
+    M_boundary[ OneDimensional::right ]->applyViscoelasticBC( timeStep, area, flowRate, flux, matrix, rhs );
+}
+
 // ===================================================
 // Set Methods
 // ===================================================
@@ -205,14 +212,5 @@ OneDimensionalBCHandler::setSolution( const solutionPtr_Type& solution )
     for ( std::vector < bcFunctionDefaultPtr_Type >::const_iterator i = M_defaultFunctions.begin() ; i < M_defaultFunctions.end() ; ++i )
         ( *i )->setSolution( solution );
 }
-
-#ifdef GHOSTNODE
-void
-OneDimensionalBCHandler::setSystemResidual( const vectorPtrContainer_Type& systemResidual )
-{
-    for ( std::vector < bcFunctionDefaultPtr_Type >::const_iterator i = M_defaultFunctions.begin() ; i < M_defaultFunctions.end() ; ++i )
-        ( *i )->setSystemResidual( systemResidual );
-}
-#endif
 
 }

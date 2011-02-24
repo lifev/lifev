@@ -76,6 +76,9 @@ public:
 
     typedef bc_Type::vectorPtrContainer_Type    vectorPtrContainer_Type;
 
+    typedef bc_Type::vector_Type                vector_Type;
+    typedef bc_Type::matrix_Type                matrix_Type;
+
     typedef bc_Type::bcLine_Type                bcLine_Type;
     typedef bc_Type::bcSide_Type                bcSide_Type;
     typedef bc_Type::bcType_Type                bcType_Type;
@@ -107,6 +110,9 @@ public:
     //! Apply boundary conditions
     void applyBC( const Real& time, const Real& timeStep, const solution_Type& solution, const fluxPtr_Type& flux, vectorPtrContainer_Type& rhs );
 
+    //! Apply boundary conditions for the viscoelastic problem
+    void applyViscoelasticBC( const Real& timeStep, const vector_Type& area, const vector_Type& flowRate, const fluxPtr_Type& flux, matrix_Type& matrix, vector_Type& rhs );
+
     //@}
 
 
@@ -120,14 +126,6 @@ public:
     void setFluxSource( const fluxPtr_Type& flux, const sourcePtr_Type& source );
 
     void setSolution( const solutionPtr_Type& solution );
-
-#ifdef GHOSTNODE
-    // Set the system residual that is required by the ghost node implementation
-    /*
-     * @param rhs system residual
-     */
-    void setSystemResidual( const vectorPtrContainer_Type& systemResidual );
-#endif
 
     //@}
 

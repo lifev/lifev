@@ -82,6 +82,8 @@ public:
     typedef boost::shared_ptr< vector_Type >        vectorPtr_Type;
     typedef boost::array< vectorPtr_Type, 2 >       vectorPtrContainer_Type;
 
+    typedef linearSolver_Type::matrix_type          matrix_Type;
+
     typedef std::map< std::string, vectorPtr_Type > solution_Type;
     typedef boost::shared_ptr< solution_Type >      solutionPtr_Type;
 
@@ -125,14 +127,6 @@ public:
 
     void setSolution( const solutionPtr_Type& solution ) { M_solution = solution; }
 
-#ifdef GHOSTNODE
-    // Set the system residual that is required by the ghost node implementation
-    /*
-     * @param rhs system residual
-     */
-    void setSystemResidual( const vectorPtrContainer_Type& systemResidual );
-#endif
-
     //@}
 
 protected:
@@ -147,9 +141,6 @@ protected:
     fluxPtr_Type                             M_flux;
     sourcePtr_Type                           M_source;
     solutionPtr_Type                         M_solution;
-#ifdef GHOSTNODE
-    vectorPtrContainer_Type                  M_systemResidual;
-#endif
     
     UInt                                     M_bcNode;
     bcSide_Type                              M_bcSide;

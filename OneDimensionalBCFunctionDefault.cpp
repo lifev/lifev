@@ -52,9 +52,6 @@ OneDimensionalBCFunctionDefault::OneDimensionalBCFunctionDefault( const bcSide_T
         M_flux                          (),
         M_source                        (),
         M_solution                      (),
-#ifdef GHOSTNODE
-        M_systemResidual                (),
-#endif
         M_bcNode                        (),
         M_bcSide                        ( bcSide ),
         M_bcType                        ( bcType )
@@ -65,9 +62,6 @@ OneDimensionalBCFunctionDefault::OneDimensionalBCFunctionDefault( const OneDimen
         M_flux                          ( bcFunctionDefault.M_flux ),        // Ptr copy
         M_source                        ( bcFunctionDefault.M_source ),      // Ptr copy
         M_solution                      ( bcFunctionDefault.M_solution ),    // Ptr copy
-#ifdef GHOSTNODE
-        M_systemResidual                ( bcFunctionDefault.M_systemResidual ),   // Ptr copy
-#endif
         M_bcNode                        ( bcFunctionDefault.M_bcNode ),
         M_bcType                        ( bcFunctionDefault.M_bcType )
 {}
@@ -96,28 +90,13 @@ OneDimensionalBCFunctionDefault::setFluxSource( const fluxPtr_Type& flux, const 
     this->setupNode();
 }
 
-#ifdef GHOSTNODE
-void
-OneDimensionalBCFunctionDefault::setSystemResidual( const vectorPtrContainer_Type& systemResidual )
-{
-    M_systemResidual[0] = systemResidual[0];
-    M_systemResidual[1] = systemResidual[1];
-}
-#endif
-
 // ===================================================
 // Protected Methods
 // ===================================================
 void
 OneDimensionalBCFunctionDefault::setupNode()
 {
-
-#ifdef GHOSTNODE
-    ( M_bcSide == OneDimensional::left ) ? M_bcNode = 1 : M_bcNode = M_flux->physics()->data()->numberOfNodes() - 2;
-#else
     ( M_bcSide == OneDimensional::left ) ? M_bcNode = 0 : M_bcNode = M_flux->physics()->data()->numberOfNodes() - 1;
-#endif
-
 }
 
 
@@ -255,20 +234,6 @@ Real
 OneDimensionalBCFunctionCompatibility::evaluateRHS( const Real& eigenvalue, const container2D_Type& eigenvector,
                                                     const container2D_Type& deltaEigenvector, const Real& timeStep )
 {
-#ifdef GHOSTNODE
-    container2D_Type U;
-
-//    std::cout << "bcU[0]: " << M_bcU[0] << std::endl;
-//    std::cout << "bcU[1]: " << M_bcU[1] << std::endl;
-//
-//    std::cout << "Res[0]: " << (*M_systemResidual[0])( M_bcNode + 1 ) << std::endl;
-//    std::cout << "Res[1]: " << (*M_systemResidual[1])( M_bcNode + 1 ) << std::endl;
-
-    U[0] = M_bcU[0] + (*M_systemResidual[0])( M_bcNode + 1 );
-    U[1] = M_bcU[1] + (*M_systemResidual[1])( M_bcNode + 1 );
-
-    return scalarProduct( eigenvector, U );
-#else
     Real cfl = computeCFL( eigenvalue, timeStep );
 
     container2D_Type U_interpolated;
@@ -300,7 +265,6 @@ OneDimensionalBCFunctionCompatibility::evaluateRHS( const Real& eigenvalue, cons
     U[1] += 0;
 #endif
     return scalarProduct( eigenvector, U ) + timeStep * eigenvalue * scalarProduct( deltaEigenvector, U_interpolated );
-#endif
 }
 
 Real
@@ -369,15 +333,6 @@ OneDimensionalBCFunctionAbsorbing::operator()( const Real& /*time*/, const Real&
 
     return W_out_old + W_out * (b2*resistance-b1)/(c1-c2*resistance) + (a22*resistance-a11)/(c1-c2*resistance);
 }
-
-// ===================================================
-// Protected Methods
-// ===================================================
-/*void
-OneDimensionalBCFunctionAbsorbing::resistance( Real& resistance )
-{
-    //Do nothing => absorbing!
-}*/
 
 
 

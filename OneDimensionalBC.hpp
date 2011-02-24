@@ -76,6 +76,9 @@ public:
     typedef bcFunctionDefault_Type::container2D_Type     container2D_Type;
     typedef bcFunctionDefault_Type::vectorPtrContainer_Type vectorPtrContainer_Type;
 
+    typedef bcFunctionDefault_Type::vector_Type          vector_Type;
+    typedef bcFunctionDefault_Type::matrix_Type          matrix_Type;
+
     typedef bcFunctionDefault_Type::bcLine_Type          bcLine_Type;
     typedef bcFunctionDefault_Type::bcSide_Type          bcSide_Type;
     typedef bcFunctionDefault_Type::bcType_Type          bcType_Type;
@@ -106,6 +109,9 @@ public:
 
     //! Apply boundary conditions
     void applyBC( const Real& time, const Real& timeStep, const solution_Type& solution, const fluxPtr_Type& flux, vectorPtrContainer_Type& rhs );
+
+    //! Apply boundary conditions for the viscoelastic problem
+    void applyViscoelasticBC( const Real& timeStep, const vector_Type& area, const vector_Type& flowRate, const fluxPtr_Type& flux, matrix_Type& matrix, vector_Type& rhs );
 
     //@}
 
