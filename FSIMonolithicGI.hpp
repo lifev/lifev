@@ -169,7 +169,7 @@ public:
     //! and GI)
     const vector_Type&          meshDisp()const
     {
-        return this->M_meshMotion->dispOld();
+        return this->M_meshMotion->disp();
     }
 
     //! get the solution.
@@ -184,6 +184,12 @@ public:
     //! set the solution
     void setSolution( const vector_Type& solution ) { M_uk.reset( new vector_Type( solution ) ); }
 
+    void initialize( const vector_Type& un )
+    {
+        M_un.reset( new vector_Type( un ) );
+        M_uk.reset( new vector_Type( un ) );
+    }
+
     void setSolutionPtr                     ( const vectorPtr_Type& sol) { M_uk = sol; }
     //@}
 
@@ -193,6 +199,7 @@ protected:
     //@{
     //!sets the block preconditioner
     void                        setupBlockPrec( );
+
     //@}
 
 private:

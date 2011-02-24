@@ -360,6 +360,8 @@ public:
     */
     virtual void setSolutionPtr                     ( const vectorPtr_Type& sol)=0;
 
+    virtual void initialize( const vector_Type& un ) { M_un.reset( new vector_Type( un ) ); }
+
     //! set the solution
     virtual void setSolution( const vector_Type& solution ) = 0;
 
