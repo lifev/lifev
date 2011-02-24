@@ -108,7 +108,7 @@ public :
      *  @param elasticExternalNodes consider elastic the external nodes (neglect viscoelasticity)
      *  @return A = A0 * ( (P - Pext) / beta0 + 1 )^(1/beta1)
      */
-    Real fromPToA( const Real& P, const Real& timeStep, const UInt& iNode, const bool& elasticExternalNodes = true ) const;
+    Real fromPToA( const Real& P, const Real& timeStep, const UInt& iNode, const bool& elasticExternalNodes = false ) const;
 
     //@}
 
@@ -130,7 +130,7 @@ public :
      * @param elasticExternalNodes consider elastic the external nodes (neglect viscoelasticity)
      * @return dP(A)/dA = dPelastic(A)/dA + dPviscoelastic(A)/dA
      */
-    Real dPdA( const Real& A, const Real& timeStep, const UInt& iNode, const bool& elasticExternalNodes = true ) const;
+    Real dPdA( const Real& A, const Real& timeStep, const UInt& iNode, const bool& elasticExternalNodes = false ) const;
 
     //! Compute the derivative of the elastic pressure with respect to A
     /*!
@@ -143,14 +143,14 @@ public :
      * @param elasticExternalNodes consider elastic the external nodes (neglect viscoelasticity)
      * @return dP(A)/dA = gamma / ( A^(3/2) ) * ( 1 / deltaT - 3 * dA/dT / ( 2 * A ) )
      */
-    Real dPdAviscoelastic( const Real& A, const Real& timeStep, const UInt& iNode, const bool& elasticExternalNodes = true ) const;
+    Real dPdAviscoelastic( const Real& A, const Real& timeStep, const UInt& iNode, const bool& elasticExternalNodes = false ) const;
 
     //! Compute the derivative of the elastic pressure with respect to A
     /*!
      * @param elasticExternalNodes consider elastic the external nodes (neglect viscoelasticity)
      * @return dA(A)/dP = A0 / ( beta0 * beta1 ) * ( 1 + ( P - Pext )/ beta0 )^(1/beta1 - 1)
      */
-    Real dAdP( const Real& P, const Real& timeStep, const UInt& iNode, const bool& elasticExternalNodes = true ) const;
+    Real dAdP( const Real& P, const Real& timeStep, const UInt& iNode, const bool& elasticExternalNodes = false ) const;
 
     //! Compute the derivative of total pressure (P is the elastic pressure) with respect to A and Q.
     /*!
@@ -172,7 +172,7 @@ public :
      * @param elasticExternalNodes consider elastic the external nodes (neglect viscoelasticity)
      * @return P = P_elastic + P_viscoelastic + P_external
      */
-    Real pressure( const Real& A, const Real& timeStep, const UInt& iNode, const bool& elasticExternalNodes = true ) const;
+    Real pressure( const Real& A, const Real& timeStep, const UInt& iNode, const bool& elasticExternalNodes = false ) const;
 
     //! Return the external pressure.
     /*!
@@ -191,7 +191,7 @@ public :
      * @param elasticExternalNodes consider elastic the external nodes (neglect viscoelasticity)
      * @return P = gamma * 1/(2*sqrt(pi*A)) * dA / dt
      */
-    Real viscoelasticPressure( const Real& A, const Real& timeStep, const UInt& iNode, const bool& elasticExternalNodes = true ) const;
+    Real viscoelasticPressure( const Real& A, const Real& timeStep, const UInt& iNode, const bool& elasticExternalNodes = false ) const;
 
     //! Compute the total pressure (P is the elastic pressure)
     /*!

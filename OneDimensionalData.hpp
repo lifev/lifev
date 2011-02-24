@@ -179,7 +179,7 @@ public:
      * @return spatial derivative
      */
     template< typename VectorType >
-    Real computeSpatialDerivativeAtNode( const VectorType& vector, const UInt& iNode );
+    Real computeSpatialDerivativeAtNode( const VectorType& vector, const UInt& iNode, const UInt& bcFiniteDifferenceOrder = 2 );
 
     void initLinearParam( const GetPot& dataFile ); // TO BE CHECKED - DON'T USE IT!
 
@@ -432,20 +432,51 @@ private:
 // ===================================================
 template< typename VectorType >
 inline Real
-OneDimensionalData::computeSpatialDerivativeAtNode( const VectorType& vector, const UInt& iNode )
+OneDimensionalData::computeSpatialDerivativeAtNode( const VectorType& vector, const UInt& iNode, const UInt& bcFiniteDifferenceOrder )
 {
-    // We use 2° order finite differences to compute the derivatives (it is coded only for homogeneous discretizations)
-    if ( iNode == 0 )
+    // This method is coded only for homogeneous discretizations
+    switch ( bcFiniteDifferenceOrder  )
     {
-        return ( -1.5 * vector[0] + 2.0*vector[1] - 0.5 * vector[2] ) / ( M_mesh->meanH() );
-    }
-    else if ( iNode == M_mesh->numPoints() - 1 )
-    {
-        return ( 1.5 * vector[iNode] - 2.0*vector[iNode-1] + 0.5 * vector[iNode-2] ) / ( M_mesh->meanH() );
-    }
-    else
-    {
-        return ( vector[iNode+1] - vector[iNode-1] ) / ( 2.0 * M_mesh->meanH() );
+    case 1:
+
+        // We use 1° order finite differences at the boundaries to compute the derivatives
+        if ( iNode == 0 )
+        {
+            return ( -vector[0] + vector[1] ) / ( M_mesh->meanH() );
+        }
+        else if ( iNode == M_mesh->numPoints() - 1 )
+        {
+            return ( vector[iNode] - vector[iNode-1] ) / ( M_mesh->meanH() );
+        }
+        else
+        {
+            return ( vector[iNode+1] - vector[iNode-1] ) / ( 2.0 * M_mesh->meanH() );
+        }
+
+        break;
+
+    case 2:
+
+        // We use 2° order finite differences at the boundaries to compute the derivatives
+        if ( iNode == 0 )
+        {
+            return ( -1.5 * vector[0] + 2.0*vector[1] - 0.5 * vector[2] ) / ( M_mesh->meanH() );
+        }
+        else if ( iNode == M_mesh->numPoints() - 1 )
+        {
+            return ( 1.5 * vector[iNode] - 2.0*vector[iNode-1] + 0.5 * vector[iNode-2] ) / ( M_mesh->meanH() );
+        }
+        else
+        {
+            return ( vector[iNode+1] - vector[iNode-1] ) / ( 2.0 * M_mesh->meanH() );
+        }
+
+        break;
+
+    default:
+
+        std::cout << "!!! Warning: finite difference order \"" << bcFiniteDifferenceOrder << "\"not available!" << std::endl;
+        return 0;
     }
 }
 

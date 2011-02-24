@@ -427,7 +427,7 @@ private:
      *  the Dirichlet boundary conditions
      *  (works for P1Seg and canonic numbering!)
      */
-    void applyDirichletBCToMatrix( matrix_Type& mat );
+    void applyDirichletBCToMatrix( matrix_Type& matrix );
 
     //! Apply the inertial Flux correction:
     /*!
@@ -451,7 +451,7 @@ private:
      *
      *  gamma = gamma_tilde / ( 2 sqrt(pi) )
      */
-    vector_Type viscoelasticFluxCorrection( const vector_Type& area, const vector_Type& flowRate, const Real& timeStep );
+    vector_Type viscoelasticFluxCorrection( const vector_Type& area, const vector_Type& flowRate, const Real& timeStep, OneDimensionalBCHandler& bcHandler );
 
     //! Apply the longitudinal Flux correction:
     /*!
