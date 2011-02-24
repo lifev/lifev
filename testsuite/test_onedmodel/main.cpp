@@ -194,9 +194,7 @@ Int main(Int argc, char** argv)
 
     absorbing->setSolution( oneDModel.solution() );
     absorbing->setFluxSource( oneDModel.flux(), oneDModel.source() );
-#ifdef GHOSTNODE
-    absorbing->setSystemResidual( oneDModel.solver()->residual() );
-#endif
+
     // *********************************
     // Tempolar loop
     // *********************************

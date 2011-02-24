@@ -162,12 +162,7 @@ MultiscaleModel1D::setupData( const std::string& fileName )
     M_exporter->setDataFromGetPot( dataFile );
     M_exporter->setPrefix( "Step_" + number2string( multiscaleProblemStep ) + "_Model_" + number2string( M_ID ) );
     M_exporter->setPostDir( multiscaleProblemFolder );
-
-#ifdef GHOSTNODE
-    M_exporterMesh->setup( M_data->length() * ( M_data->numberOfElements() - 2 ) / M_data->numberOfElements(), M_data->numberOfElements() - 2 );
-#else
     M_exporterMesh->setup( M_data->length(), M_data->numberOfElements() );
-#endif
 
     M_importer->setDataFromGetPot( dataFile );
     M_importer->setPrefix( "Step_" + number2string( multiscaleProblemStep - 1 ) + "_Model_" + number2string( M_ID ) );
@@ -196,9 +191,6 @@ MultiscaleModel1D::setupModel()
     M_bc->setPhysicalSolver( M_solver );
     M_bc->setSolution( M_solution );
     M_bc->setFluxSource( M_flux, M_source );
-#ifdef GHOSTNODE
-    M_bc->setSystemResidual( M_solver->residual() );
-#endif
 
     //Post-processing
 #ifdef HAVE_HDF5
@@ -687,27 +679,7 @@ MultiscaleModel1D::copySolution( const solution_Type& solution1, solution_Type& 
 #endif
 
     for ( solutionConstIterator_Type i = solution1.begin() ; i != solution1.end() ; ++i )
-    {
-#ifdef GHOSTNODE
-        UInt sizeVector1( ( solution1.find(i->first)->second )->size() );
-        UInt sizeVector2( ( solution2.find(i->first)->second )->size() );
-
-        if ( sizeVector1 - 2 == sizeVector2 )      // True copy of the solution removing the ghost nodes.
-            for ( UInt iNode(0) ; iNode < sizeVector2 ; ++iNode )
-                (*solution2[i->first])[iNode] = (*i->second)[iNode + 1];
-        else if ( sizeVector1 + 2 == sizeVector2 ) // True copy of the solution adding ghost nodes (linear extrapolation).
-        {
-            for ( UInt iNode(0) ; iNode < sizeVector1 ; ++iNode )
-                (*solution2[i->first])[iNode + 1] = (*i->second)[iNode];
-
-                // Linear extrapolation for the ghost nodes
-                (*solution2[i->first])[0]           = 2 * (*solution2[i->first])[1] - (*solution2[i->first])[2];
-                (*solution2[i->first])[sizeVector2-1] = 2 * (*solution2[i->first])[sizeVector2-2] - (*solution2[i->first])[sizeVector2-3];
-        }
-        else // True copy of the solution
-#endif
-            *solution2[i->first] = *i->second;
-    }
+        *solution2[i->first] = *i->second;
 }
 
 void
