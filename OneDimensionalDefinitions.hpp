@@ -38,8 +38,6 @@
 #ifndef OneDimensionalDefinitions_H
 #define OneDimensionalDefinitions_H
 
-//#define GHOSTNODE 1
-
 #pragma GCC diagnostic ignored "-Wunused-variable"
 #pragma GCC diagnostic ignored "-Wunused-parameter"
 

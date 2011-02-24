@@ -124,11 +124,8 @@ OneDimensionalData::setup( const GetPot& dataFile, const std::string& section )
     // Mesh setup - Space Discretization
     Real length = dataFile( ( section + "/space_discretization/Length"           ).data(), 1. );
     Real numberOfElements = dataFile( ( section + "/space_discretization/NumberOfElements" ).data(), 10 );
-#ifdef GHOSTNODE
-    M_mesh->setup( length * ( numberOfElements + 2 ) / numberOfElements, numberOfElements + 2 );
-#else
+
     M_mesh->setup( length, numberOfElements );
-#endif
 
     //std::cout << " 1D- Mesh nodes:                               " << M_mesh->numPoints() << std::endl;
     //std::cout << " 1D- Mesh elements:                            " << M_mesh->numElements() << std::endl;
@@ -586,13 +583,8 @@ OneDimensionalData::linearInterpolation( scalarVector_Type& vector,
     Real a  = dataFile( quantity.data(), defaultValue, 0 );
     Real b  = dataFile( quantity.data(), a, 1 );
 
-#ifdef GHOSTNODE
-    Real xa = M_mesh->point( 1 ).x();
-    Real xb = M_mesh->point( M_mesh->numPoints() - 2 ).x();
-#else
     Real xa = M_mesh->firstPoint().x();
     Real xb = M_mesh->lastPoint().x();
-#endif
 
     for ( UInt i(0) ; i < M_mesh->numPoints() ; ++i )
         if ( isArea )
@@ -602,13 +594,6 @@ OneDimensionalData::linearInterpolation( scalarVector_Type& vector,
         }
         else
             vector[i] = a + (b - a) / ( xb - xa ) * ( M_mesh->point( i ).x() - xa );
-
-    // linearInterpolation to disable tapering (when needed)
-//    for ( UInt i(0); i < M_mesh->numPoints() ; ++i )
-//        if ( isArea )
-//            vector[i] = (a + b + 2 * std::sqrt(a*b)) / 4;
-//        else
-//            vector[i] = (a + b) / 2;
 }
 
 void

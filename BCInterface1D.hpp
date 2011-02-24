@@ -229,14 +229,6 @@ public:
      */
     void setSolution( const solutionPtr_Type& solution );
 
-#ifdef GHOSTNODE
-    // Set the system residual for the members that need it
-    /*
-     * @param rhs system residual
-     */
-    void setSystemResidual( const vectorPtrContainer_Type& systemResidual );
-#endif
-
     //@}
 
 
@@ -410,18 +402,6 @@ BCInterface1D< PhysicalSolverType >::setSolution( const solutionPtr_Type& soluti
 
     M_handler->setSolution( solution );
 }
-
-#ifdef GHOSTNODE
-template< class PhysicalSolverType >
-void
-BCInterface1D< PhysicalSolverType >::setSystemResidual( const vectorPtrContainer_Type& systemResidual )
-{
-    for ( typename vectorDefaultFunction_Type::const_iterator i = M_vectorDefaultFunction1D.begin() ; i < M_vectorDefaultFunction1D.end() ; ++i )
-        ( *i )->setSystemResidual( systemResidual );
-
-    M_handler->setSystemResidual( systemResidual );
-}
-#endif
 
 // ===================================================
 // Private Methods

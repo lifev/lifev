@@ -129,14 +129,6 @@ public:
      */
     void setSolution( const solutionPtr_Type& solution ) { M_defaultFunction->setSolution( solution ); }
 
-#ifdef GHOSTNODE
-    // Set the system residual that is required by the ghost node implementation
-    /*
-     * @param systemResidual system residual
-     */
-    void setSystemResidual( const vectorPtrContainer_Type& systemResidual ) { M_defaultFunction->setSystemResidual( systemResidual ); }
-#endif
-
     //@}
 
 
