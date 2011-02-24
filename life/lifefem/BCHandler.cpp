@@ -113,7 +113,7 @@ BCHandler::addBC( const bcName_Type& name,
                   const bcComponentsVec_Type& components )
 {
     M_bcList.push_back( BCBase( name, flag, type, mode, bcFunction, components ) );
-    //std::sort( M_bcList.begin(), M_bcList.end() );
+    std::sort( M_bcList.begin(), M_bcList.end() );
 }
 
 
@@ -125,7 +125,7 @@ BCHandler::addBC( const bcName_Type& name,
                   BCFunctionBase& bcFunction )
 {
     M_bcList.push_back( BCBase( name, flag, type, mode, bcFunction ) );
-    //std::sort( M_bcList.begin(), M_bcList.end() );
+    std::sort( M_bcList.begin(), M_bcList.end() );
 }
 
 void
@@ -137,7 +137,7 @@ BCHandler::addBC( const bcName_Type& name,
                   const UInt& numComponents )
 {
     M_bcList.push_back( BCBase( name, flag, type, mode, bcFunction, numComponents ) );
-    //std::sort( M_bcList.begin(), M_bcList.end() );
+    std::sort( M_bcList.begin(), M_bcList.end() );
 }
 
 void
@@ -149,7 +149,7 @@ BCHandler::addBC( const bcName_Type& name,
                   const bcComponentsVec_Type& numComponents )
 {
     M_bcList.push_back( BCBase( name, flag, type, mode, bcVector, numComponents ) );
-    //std::sort( M_bcList.begin(), M_bcList.end() );
+    std::sort( M_bcList.begin(), M_bcList.end() );
 }
 
 void
@@ -160,7 +160,7 @@ BCHandler::addBC( const bcName_Type& name,
                   BCVectorBase& bcVector )
 {
     M_bcList.push_back( BCBase( name, flag, type, mode, bcVector ) );
-    //std::sort( M_bcList.begin(), M_bcList.end() );
+    std::sort( M_bcList.begin(), M_bcList.end() );
 }
 
 void
@@ -172,7 +172,7 @@ BCHandler::addBC( const bcName_Type& name,
                   const UInt& numComponents )
 {
     M_bcList.push_back( BCBase( name, flag, type, mode, bcVector, numComponents ) );
-    //std::sort( M_bcList.begin(), M_bcList.end() );
+    std::sort( M_bcList.begin(), M_bcList.end() );
 }
 
 void
@@ -183,7 +183,7 @@ BCHandler::addBC( const bcName_Type& name,
                   BCFunctionUDepBase& bcUDepFunction )
 {
     M_bcList.push_back( BCBase( name, flag, type, mode, bcUDepFunction ) );
-    //std::sort( M_bcList.begin(), M_bcList.end() );
+    std::sort( M_bcList.begin(), M_bcList.end() );
 }
 
 void
