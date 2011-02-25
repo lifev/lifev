@@ -325,8 +325,14 @@ BCHandler::numberOfBCWithType( const bcType_Type& type ) const
     return typeNumber;
 }
 
-UInt
+const BCBase*
 BCHandler::findBCWithName(bcName_Type const & name) const
+{
+    return &M_bcList[ findBCIndexWithName(name) ];
+}
+
+UInt
+BCHandler::findBCIndexWithName(bcName_Type const & name) const
 {
     UInt iBC( 0 );
 
