@@ -132,7 +132,7 @@ OneDimensionalData::setup( const GetPot& dataFile, const std::string& section )
 
     // Physical Wall
     M_viscoelasticWall        = dataFile( ( section + "/PhysicalWall/ViscoelasticWall"                ).data(), false );
-    M_viscoelasticAngle       = dataFile( ( section + "/PhysicalWall/ViscoelasticAngle"               ).data(), 5 ) * M_PI / 180.;
+    M_viscoelasticAngle       = dataFile( ( section + "/PhysicalWall/ViscoelasticAngle"               ).data(), 5. ) * M_PI / 180.;
     M_viscoelasticPeriod      = dataFile( ( section + "/PhysicalWall/ViscoelasticPeriod"              ).data(), 0.3 * 0.8 );
 
     M_inertialWall            = dataFile( ( section + "/PhysicalWall/InertialWall"                    ).data(), false );
@@ -152,7 +152,7 @@ OneDimensionalData::setup( const GetPot& dataFile, const std::string& section )
     // Jacobian perturbation
     M_jacobianPerturbationArea     = dataFile( ( section + "/JacobianPerturbation/deltaArea"         ).data(), 0.001 );
     M_jacobianPerturbationFlowRate = dataFile( ( section + "/JacobianPerturbation/deltaFlowRate"     ).data(), 0.001 );
-    M_jacobianPerturbationPressure = dataFile( ( section + "/JacobianPerturbation/deltaPressure"     ).data(), 1 );
+    M_jacobianPerturbationPressure = dataFile( ( section + "/JacobianPerturbation/deltaPressure"     ).data(), 1.0 );
 
     // Physical Parameters
     M_computeCoefficients    = dataFile( ( section + "/PhysicalParameters/ComputeCoefficients"       ).data(), false );
@@ -165,7 +165,7 @@ OneDimensionalData::setup( const GetPot& dataFile, const std::string& section )
     M_young                  = dataFile( ( section + "/PhysicalParameters/young"                     ).data(), 4.0E6 );
     M_poisson                = dataFile( ( section + "/PhysicalParameters/poisson"                   ).data(), 0.5 );
 
-    M_externalPressure       = dataFile( ( section + "/PhysicalParameters/externalPressure"          ).data(), 0 );
+    M_externalPressure       = dataFile( ( section + "/PhysicalParameters/externalPressure"          ).data(), 0. );
     M_friction               = dataFile( ( section + "/PhysicalParameters/Kr"                        ).data(), 1. );
 
     M_robertsonCorrection    = dataFile( ( section + "/PhysicalParameters/RobertsonCorrection"       ).data(), 1. );
@@ -327,7 +327,7 @@ OneDimensionalData::oldStyleSetup( const GetPot& dataFile, const std::string& se
     // Jacobian perturbation
     M_jacobianPerturbationArea     = dataFile( ( section + "JacobianPerturbation/deltaArea"          ).data(), 0.001 );
     M_jacobianPerturbationFlowRate = dataFile( ( section + "JacobianPerturbation/deltaFlowRate"      ).data(), 0.001 );
-    M_jacobianPerturbationPressure = dataFile( ( section + "JacobianPerturbation/deltaPressure"      ).data(), 1 );
+    M_jacobianPerturbationPressure = dataFile( ( section + "JacobianPerturbation/deltaPressure"      ).data(), 1.0 );
 
     // Physical Parameters
     M_computeCoefficients    = dataFile( ( section + "/parameters/use_physical_values"               ).data(), false );
@@ -341,7 +341,7 @@ OneDimensionalData::oldStyleSetup( const GetPot& dataFile, const std::string& se
     M_young                  = dataFile( ( section + "/1d_physics/young"                             ).data(), 4.0E6 );
     M_poisson                = dataFile( ( section + "/1d_physics/ksi"                               ).data(), 0.5 );
 
-    M_externalPressure       = dataFile( ( section + "/PhysicalParameters/externalPressure"          ).data(), 0 );
+    M_externalPressure       = dataFile( ( section + "/PhysicalParameters/externalPressure"          ).data(), 0. );
 
     M_inertialModulus        = dataFile( ( section + "/PhysicalParameters/coeffA"                    ).data(), 0. );
     M_robertsonCorrection    = dataFile( ( section + "/PhysicalParameters/RobertsonCorrection"       ).data(), 1. );
@@ -594,6 +594,13 @@ OneDimensionalData::linearInterpolation( scalarVector_Type& vector,
         }
         else
             vector[i] = a + (b - a) / ( xb - xa ) * ( M_mesh->point( i ).x() - xa );
+
+    // linearInterpolation to disable tapering (when needed)
+//    for ( UInt i(0); i < M_mesh->numPoints() ; ++i )
+//        if ( isArea )
+//            vector[i] = (a + b + 2 * std::sqrt(a*b)) / 4;
+//        else
+//            vector[i] = (a + b) / 2;
 }
 
 void
