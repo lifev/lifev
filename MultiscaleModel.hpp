@@ -269,7 +269,7 @@ protected:
     /*!
      * @param tag user provided tag.
      */
-    void displayModelstatus( const std::string& tag ) const;
+    void displayModelStatus( const std::string& tag ) const;
 
     static UInt                          M_modelsNumber;       // Total number of models
 
@@ -305,7 +305,7 @@ private:
 // Protected Inline Methods
 // ===================================================
 inline void
-MultiscaleModel::displayModelstatus( const std::string& tag ) const
+MultiscaleModel::displayModelStatus( const std::string& tag ) const
 {
     if ( M_displayer->isLeader() )
         std::cout << " MS-  " << tag << " model " << M_ID << " - " << M_modelName << std::endl;
