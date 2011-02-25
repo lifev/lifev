@@ -232,7 +232,7 @@ MultiscaleModelMultiscale::solveSystem()
     Debug( 8110 ) << "MultiscaleModelMultiscale::SolveSystem() \n";
 #endif
 
-    displayModelstatus( "Solve" );
+    displayModelStatus( "Solve" );
     for ( multiscaleModelsVectorConstIterator_Type i = M_modelsList.begin(); i != M_modelsList.end(); ++i )
         ( *i )->solveSystem();
 }

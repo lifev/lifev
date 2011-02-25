@@ -272,7 +272,7 @@ MultiscaleModel1D::solveSystem()
     Debug( 8130 ) << "MultiscaleModel1D::solveSystem() \n";
 #endif
 
-    displayModelstatus( "Solve" );
+    displayModelStatus( "Solve" );
     solve( *M_bc->handler(), *M_solution );
 
 #ifdef JACOBIAN_WITH_FINITEDIFFERENCE
@@ -389,7 +389,7 @@ MultiscaleModel1D::solveLinearModel( bool& solveLinearSystem )
 
     imposePerturbation();
 
-    displayModelstatus( "Solve linear" );
+    displayModelStatus( "Solve linear" );
     solve( *M_linearBC, *M_linearSolution, "L1D-" );
 
     resetPerturbation();
@@ -792,7 +792,7 @@ MultiscaleModel1D::imposePerturbation()
 
             case OneDimensional::P:
 
-                M_bcDelta = 5; //M_Data->jacobianPerturbationPressure();
+                M_bcDelta = M_data->jacobianPerturbationPressure();
 
                 break;
 
