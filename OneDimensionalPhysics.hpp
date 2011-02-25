@@ -273,8 +273,8 @@ OneDimensionalPhysics::fromPToA( const Real& P, const Real& timeStep, const UInt
     else
     {
         // Newton method to solve the non linear equation
-        Real tolerance(1e-8);
-        Real maxIT(250);
+        Real tolerance(1e-6);
+        Real maxIT(100);
         UInt i(0);
 
         Real A( M_data->area0( iNode ) );
