@@ -418,7 +418,14 @@ public:
       @param name The name of the boundary condition
       @return The index of the boundary condition
      */
-    ID findBCWithName(const bcName_Type& name) const;
+    ID findBCIndexWithName(const bcName_Type& name) const;
+
+    // Get the BC from the list using its name
+    /*!
+      @param name The name of the boundary condition
+      @return The index of the boundary condition
+     */
+    const BCBase* findBCWithName(const bcName_Type& name) const;
 
 
     // Get the offset of the boundary conditions

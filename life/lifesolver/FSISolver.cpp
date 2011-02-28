@@ -257,12 +257,12 @@ FSISolver::initialize(vectorPtr_Type u0, vectorPtr_Type v0)
     if (!u0.get())
     {
         u0.reset(new vector_Type(*M_oper->couplingVariableMap()));
-        M_oper->setSolution(*u0); // couplingVariableMap()
+        M_oper->initialize(*u0); // couplingVariableMap()
         M_oper->initializeBDF(*u0);
     }
     else
     {
-        M_oper->setSolution(*u0); // couplingVariableMap()//copy
+        M_oper->initialize(*u0); // couplingVariableMap()//copy
         M_oper->initializeBDF(*u0);
     }
     if (!v0.get())

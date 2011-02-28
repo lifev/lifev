@@ -44,6 +44,7 @@
 
 #include <Amesos.h>
 #include <Amesos_BaseSolver.h>
+#include <Amesos_ConfigDefs.h>
 #include <Teuchos_ParameterList.hpp>
 
 // Tell the compiler to ignore specific kind of warnings:
@@ -98,7 +99,7 @@ public:
     SolverAmesos( const commPtr_Type& comm );
 
     //! Destructor
-    ~SolverAmesos() {}
+    ~SolverAmesos() { delete M_solver; }
 
     //@}
 
@@ -167,7 +168,7 @@ public:
     /*!
       @param matrix Matrix of the system
      */
-    void setMatrix( const matrix_type& matrix );
+    Int setMatrix( const matrix_type& matrix );
 
     //! Method to set a general linear operator (of class derived from Epetra_Operator) defining the linear system
     /*!

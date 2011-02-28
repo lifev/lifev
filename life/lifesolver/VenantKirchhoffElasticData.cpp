@@ -117,7 +117,7 @@ VenantKirchhoffElasticData::setup( const GetPot& dataFile, const std::string& se
     if ( materialsNumber == 0 )
     {
 
-        //WARNING("The material flag was not set from data file. Its value will be dedced from the first volume marker.");
+        //WARNING("The material flag was not set from data file. Its value will be deduced from the first volume marker.");
 //         M_young[1]   = dataFile( ( section + "/physics/young" ).data(), 0. );
 //         M_poisson[1] = dataFile( ( section + "/physics/poisson" ).data(), 0. );
     }

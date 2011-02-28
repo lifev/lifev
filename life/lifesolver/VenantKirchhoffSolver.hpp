@@ -663,15 +663,15 @@ void VenantKirchhoffSolver<Mesh, SolverType>::updateSystem( matrixPtr_Type& /*st
   vector_Type z = *M_disp;
   z             += coef*(*M_vel);
 
-  std::cout<< "M_disp in solid" << M_disp->norm2()<<std::endl;
+  //std::cout<< "M_disp in solid" << M_disp->norm2()<<std::endl;
 
   *M_rhsNoBC  = *M_mass * z;
 
-  std::cout<< "rhsNoBC in solid 1" << M_rhsNoBC->norm2()<<std::endl;
+  //std::cout<< "rhsNoBC in solid 1" << M_rhsNoBC->norm2()<<std::endl;
 
   *M_rhsNoBC -= *M_linearStiff * (*M_disp);
 
-  std::cout<< "rhsNoBC in solid 2" << M_rhsNoBC->norm2()<<std::endl;
+  //std::cout<< "rhsNoBC in solid 2" << M_rhsNoBC->norm2()<<std::endl;
 
   coef = 2.0/M_data->getdataTime()->timeStep();
   *M_rhsW  = coef * (*M_disp);

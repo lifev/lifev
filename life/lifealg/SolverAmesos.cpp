@@ -35,17 +35,6 @@
     @date 29-08-2004
  */
 
-// Tell the compiler to ignore specific kind of warnings:
-#pragma GCC diagnostic ignored "-Wunused-variable"
-#pragma GCC diagnostic ignored "-Wunused-parameter"
-
-#include <Epetra_Comm.h>
-
-// Tell the compiler to ignore specific kind of warnings:
-#pragma GCC diagnostic warning "-Wunused-variable"
-#pragma GCC diagnostic warning "-Wunused-parameter"
-
-#include <life/lifecore/LifeV.hpp>
 #include <life/lifealg/SolverAmesos.hpp>
 #include <life/lifecore/LifeDebug.hpp>
 #include <life/lifecore/LifeChrono.hpp>
@@ -99,7 +88,7 @@ SolverAmesos::solveSystem( vector_type&    rhsFull,
     M_problem.SetLHS( &solution.epetraVector() );
     M_problem.SetRHS( &rhsFull.epetraVector() );
 
-    M_solver->Solve();
+    AMESOS_CHK_ERR( M_solver->Solve() );
 
     chrono.stop();
 
@@ -170,14 +159,16 @@ void SolverAmesos::showMe( std::ostream& output ) const
 // ===================================================
 // Set Methods
 // ===================================================
-void SolverAmesos::setMatrix( const matrix_type& matrix )
+Int SolverAmesos::setMatrix( const matrix_type& matrix )
 {
     M_matrix = matrix.matrixPtr();
     M_problem.SetOperator( M_matrix.get() );
 
     // After setting the matrix we can perform symbolic & numeric factorization
-    M_solver->SymbolicFactorization();
-    M_solver->NumericFactorization();
+    AMESOS_CHK_ERR( M_solver->SymbolicFactorization() );
+    AMESOS_CHK_ERR( M_solver->NumericFactorization() );
+
+    return 0;
 }
 
 void SolverAmesos::setOperator( const Epetra_Operator& /*oper*/ )

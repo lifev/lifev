@@ -728,8 +728,8 @@ public:
 
     //! sets the solution vector by copy
     virtual void setSolution                 ( const vector_Type& solution )    { M_lambda.reset( new vector_Type( solution ) ); }
+    virtual void initialize                 ( const vector_Type& solution )    { setSolution(solution); }
     //! Initialize the fluid solution given a vector (calls setSolution)
-    virtual void initialize                  ( vectorPtr_Type u0)               { setSolution(*u0); }
 
 
     //! sets the solution time derivative vector by copy
