@@ -386,6 +386,112 @@ public:
 
     //! returns the type of the map to use for the VectorEpetra
     virtual MapEpetraType mapType() const = 0;
+
+    static void writeMeshMedit(std::string fname, mesh_Type& mesh )
+    {
+
+        std::ofstream ofile( fname.c_str() );
+
+        ASSERT( ofile, "Error: Output file cannot be open" );
+
+        ofile << "MeshVersionFormatted 1\n";
+        ofile << "Dimension\n3\n";
+        ofile << "\n";
+        ofile << "Vertices\n";
+
+        UInt nV = mesh.numVertices();
+        ofile << nV << "\n";
+
+        int ig;
+
+        std::map<int, int> localToGlobalNode = mesh.localToGlobalNode();
+        std::map<int, int>::iterator im;
+
+
+        for ( UInt i = 1; i <= nV; ++i )
+        {
+            ofile << mesh.pointList( i ).x() << " "
+                  << mesh.pointList( i ).y() << " "
+                  << mesh.pointList( i ).z() << " "
+                  << mesh.pointList( i ).marker() << "\n";
+        }
+        ofile << "\n";
+
+        //         std::map<int, int>::iterator im;
+        //    UInt iface;
+
+        typedef typename mesh_Type::FaceShape FaceShape;
+
+        switch ( FaceShape::S_shape )
+        {
+        case QUAD:
+            ofile << "Quadrilaterals\n";
+            break;
+        case TRIANGLE:
+            ofile << "Triangles\n";
+            break;
+        default:
+            ERROR_MSG( "BdShape not implement in MEDIT writer" );
+        }
+
+        UInt nBdF = mesh. numBFaces();
+        ofile << nBdF << "\n";
+
+        UInt nVpF = FaceShape::S_numVertices;
+
+
+        for ( ID k = 1; k <= nBdF; ++k )
+        {
+            for ( ID i = 1; i <= nVpF; ++i )
+            {
+                //            iface = mesh.boundaryFace( k ).point( i ).id();
+                ofile << mesh.boundaryFace( k ).point( i ).id()
+                      << " ";
+            }
+            ofile << mesh.boundaryFace( k ).marker() << "\n";
+        }
+        ofile << "\n";
+
+        typedef typename mesh_Type::VolumeShape ElementShape;
+
+        switch ( ElementShape::S_shape )
+        {
+        case HEXA:
+            ofile << "Hexaedra\n";
+            break;
+        case TETRA:
+            ofile << "Tetrahedra\n";
+            break;
+        default:
+            ERROR_MSG( "Shape not implement in MEDIT writer" );
+        }
+
+        UInt nE = mesh.numVolumes();
+        ofile << nE << "\n";
+
+        UInt nVpE = ElementShape::S_numVertices;
+
+        UInt ielem;
+
+        for ( ID k = 1; k <= nE; ++k )
+        {
+            for ( ID i = 1; i <= nVpE; ++i )
+            {
+                ielem =  mesh.volume( k ).point( i ).localId();
+
+                im = localToGlobalNode.find(ielem);
+                ig = im->second;
+                //                  std::cout << ig << " <-> " << ielem << std::endl;
+
+                //                 ielem =  mesh.volume( k ).point( i ).localId();
+                ofile << ielem
+                      << " ";
+            }
+            ofile << mesh.volume( k ).marker() << "\n";
+        }
+        ofile.close();
+    }
+
     //@}
 
 protected:
