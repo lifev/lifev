@@ -811,11 +811,16 @@ OneDimensionalSolver::inertialFluxCorrection( const vector_Type& flux )
 OneDimensionalSolver::vector_Type
 OneDimensionalSolver::viscoelasticFluxCorrection( const vector_Type& area, const vector_Type& flowRate, const Real& timeStep, OneDimensionalBCHandler& bcHandler )
 {
+    // Matrix
     matrix_Type systemMatrix( M_feSpace->map() );
     matrix_Type stiffnessMatrix( M_feSpace->map() );
 
     Real massCoefficient;
     Real stiffnessCoefficient;
+
+    // RHS
+    vector_Type rhs( M_feSpace->map() );
+    rhs = 0;
 
     // Elementary computation and matrix assembling
     for ( UInt iElement(0); iElement < M_physics->data()->numberOfElements() ; ++iElement )
@@ -841,18 +846,24 @@ OneDimensionalSolver::viscoelasticFluxCorrection( const vector_Type& area, const
         // Assemble the stiffness matrix
         assembleMatrix( systemMatrix,    *M_elementalMassMatrix,      M_feSpace->fe(), M_feSpace->dof(), 0, 0, 0, 0 );
         assembleMatrix( stiffnessMatrix, *M_elementalStiffnessMatrix, M_feSpace->fe(), M_feSpace->dof(), 0, 0, 0, 0 );
+
+        // Natural BC
+        if ( iElement == 0 )
+            rhs( 0 )            -= stiffnessCoefficient * M_flux->physics()->data()->computeSpatialDerivativeAtNode( flowRate, 0, 1 );
+        if ( iElement == M_physics->data()->numberOfElements() - 1 )
+            rhs( iElement + 1 ) += stiffnessCoefficient * M_flux->physics()->data()->computeSpatialDerivativeAtNode( flowRate, iElement + 1, 1 );
     }
+
     // System Matrix = MassMatrix + stiffnessCoefficient * StiffnessMatrix
     systemMatrix.globalAssemble();
     stiffnessMatrix.globalAssemble();
     systemMatrix += stiffnessMatrix;
 
     // RHS
-    vector_Type rhs( M_feSpace->map() );
-    rhs = stiffnessMatrix * (-flowRate);
+    rhs += stiffnessMatrix * (-flowRate);
 
     // Apply BC to Matrix and RHS
-    bcHandler.applyViscoelasticBC( timeStep, area, flowRate, M_flux, systemMatrix, rhs );
+    bcHandler.applyViscoelasticBC( M_flux, systemMatrix, rhs );
 
     // Compute flow rate correction at t^n+1
     vector_Type flowRateCorrection( rhs );
