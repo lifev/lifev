@@ -231,7 +231,7 @@ void VenantKirchhoffMaterialNonLinear<Mesh>::updateNonLinearJacobianMatrix( matr
       UInt nc = nDimensions;
 
 
-      for ( UInt i = 1; i <= this->M_FESpace->mesh()->numVolumes(); ++i )
+      for ( UInt i = 0; i < this->M_FESpace->mesh()->numVolumes(); ++i )
 	{
 	  this->M_FESpace->fe().updateFirstDerivQuadPt( this->M_FESpace->mesh()->volumeList( i ) );
 
@@ -245,7 +245,7 @@ void VenantKirchhoffMaterialNonLinear<Mesh>::updateNonLinearJacobianMatrix( matr
 	      UInt  iloc = this->M_FESpace->fe().patternFirst( iNode );
 	      for ( UInt iComp = 0; iComp < nDimensions; ++iComp )
 		{
-		  UInt ig = this->M_FESpace->dof().localToGlobal( eleID, iloc + 1 ) + iComp*dim + this->M_offset;
+		  UInt ig = this->M_FESpace->dof().localToGlobalMap( eleID, iloc + 1 ) + iComp*dim + this->M_offset;
 		  dk_loc[iloc + iComp*this->M_FESpace->fe().nbFEDof()] = dRep[ig]; // BASEINDEX + 1
 		}
 	    }
@@ -343,7 +343,7 @@ void VenantKirchhoffMaterialNonLinear<Mesh>::computeNonLinearNewMatrix(matrixPtr
 
     vector_Type dRep(disp, Repeated);
 
-    for ( UInt i = 1; i <= this->M_FESpace->mesh()->numVolumes(); i++ )
+    for ( UInt i = 0; i < this->M_FESpace->mesh()->numVolumes(); i++ )
     {
 
         this->M_FESpace->fe().updateFirstDerivQuadPt( this->M_FESpace->mesh()->volumeList( i ) );
@@ -356,7 +356,7 @@ void VenantKirchhoffMaterialNonLinear<Mesh>::computeNonLinearNewMatrix(matrixPtr
             UInt  iloc = this->M_FESpace->fe().patternFirst( iNode );
             for ( UInt iComp = 0; iComp < nDimensions; ++iComp )
             {
-                UInt ig = this->M_FESpace->dof().localToGlobal( eleID, iloc + 1 ) + iComp*dim + this->M_offset;
+                UInt ig = this->M_FESpace->dof().localToGlobalMap( eleID, iloc + 1 ) + iComp*dim + this->M_offset;
                 dk_loc[ iloc + iComp*this->M_FESpace->fe().nbFEDof() ] = dRep[ig]; // BASEINDEX + 1
             }
         }
@@ -437,7 +437,7 @@ void VenantKirchhoffMaterialNonLinear<Mesh>::evalNonLinearNewMatrix( matrixPtr_T
 
     vector_Type dRep(disp, Repeated);
 
-    for ( UInt i = 1; i <= this->M_FESpace->mesh()->numVolumes(); i++ )
+    for ( UInt i = 0; i < this->M_FESpace->mesh()->numVolumes(); i++ )
     {
 
         this->M_FESpace->fe().updateFirstDerivQuadPt( this->M_FESpace->mesh()->volumeList( i ) );
@@ -449,7 +449,7 @@ void VenantKirchhoffMaterialNonLinear<Mesh>::evalNonLinearNewMatrix( matrixPtr_T
             UInt  iloc = this->M_FESpace->fe().patternFirst( iNode );
             for ( UInt iComp = 0; iComp < nDimensions; ++iComp )
             {
-                UInt ig = this->M_FESpace->dof().localToGlobal( eleID, iloc + 1 ) + iComp*dim;
+                UInt ig = this->M_FESpace->dof().localToGlobalMap( eleID, iloc + 1 ) + iComp*dim;
                 dk_loc[ iloc + iComp*this->M_FESpace->fe().nbFEDof() ] = dRep[ig]; // BASEINDEX + 1
             }
         }

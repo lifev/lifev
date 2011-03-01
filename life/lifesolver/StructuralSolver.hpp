@@ -743,7 +743,7 @@ StructuralSolver<Mesh, SolverType>::computeMassMatrix( const Real& factor)
 
   // Elementary computation and matrix assembling
   // Loop on elements
-  for ( UInt i = 1; i <= M_FESpace->mesh()->numVolumes(); i++ )
+  for ( UInt i = 0; i < M_FESpace->mesh()->numVolumes(); i++ )
     {
 
       M_FESpace->fe().updateFirstDerivQuadPt( M_FESpace->mesh()->volumeList( i ) );
@@ -895,7 +895,7 @@ StructuralSolver<Mesh, SolverType>::evalConstraintTensor()
   *M_syy *= 0.;
   *M_szz *= 0.;
 
-  for ( UInt ielem = 1; ielem <= M_FESpace->mesh()->numVolumes(); ielem++ )
+  for ( UInt ielem = 0; ielem < M_FESpace->mesh()->numVolumes(); ielem++ )
     {
       //UInt elem = M_FESpace->mesh()->volumeList( ielem ).id();
       M_FESpace->fe().updateFirstDerivQuadPt( M_FESpace->mesh()->volumeList( ielem ) );

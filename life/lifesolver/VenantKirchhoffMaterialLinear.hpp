@@ -211,7 +211,7 @@ void VenantKirchhoffMaterialLinear<Mesh>::computeLinearStiffMatrix(dataPtr_Type&
     //In the case of Linear Material it is the Stiffness Matrix.
     //In the case of NonLinear Materials it must be added of the non linear part.
 
-    for ( UInt i = 1; i <= this->M_FESpace->mesh()->numVolumes(); i++ )
+    for ( UInt i = 0; i < this->M_FESpace->mesh()->numVolumes(); i++ )
     {
         this->M_FESpace->fe().updateFirstDerivQuadPt( this->M_FESpace->mesh()->volumeList( i ) );
 
