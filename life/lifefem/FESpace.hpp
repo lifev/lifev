@@ -332,7 +332,7 @@ public:
       @Note Results might be very wrong if you are not using lagrangian FE for tetrahedra
      */
     template <typename vector_type>
-    vector_type gradientRecovery(const vector_type& solution, const UInt& component);
+    vector_type gradientRecovery(const vector_type& solution, const UInt& component) const;
 
     //! Reconstruction of the laplacian using gradientRecovery procedures.
     /*!
@@ -342,7 +342,7 @@ public:
       @Note Results might be very wrong if you are not using lagrangian FE for tetrahedra
      */
     template <typename vector_type>
-    vector_type laplacianRecovery(const vector_type& solution);
+    vector_type laplacianRecovery(const vector_type& solution) const;
 
 
     //@}
@@ -1442,9 +1442,9 @@ template<typename MeshType, typename MapType>
 template<typename vector_type>
 vector_type
 FESpace<MeshType,MapType>::
-gradientRecovery(const vector_type& solution, const UInt& dxi)
+gradientRecovery(const vector_type& solution, const UInt& dxi) const
 {
-    if (solution.getMaptype() != Repeated)
+    if (solution.mapType() != Repeated)
     {
         return gradientRecovery(vector_type(solution,Repeated),dxi);
     };
@@ -1486,7 +1486,7 @@ gradientRecovery(const vector_type& solution, const UInt& dxi)
                 patchArea[globalDofID] += interpCFE.measure();
                 for (UInt iterDofGrad(0); iterDofGrad < numberLocalDof; ++iterDofGrad)
                 {
-                    ID globalDofIDGrad(dof().localToGlobalMap(iterVolume,iterDofGrad));
+                    ID globalDofIDGrad(dof().localToGlobalMap(iterVolume,iterDofGrad) + iDim*dof().numTotalDof());
                     gradientSum[globalDofID] += interpCFE.measure()*solution[globalDofIDGrad]*interpCFE.dphi(iterDofGrad,dxi,iterDof);
                 }
             }
@@ -1501,7 +1501,7 @@ template<typename MeshType, typename MapType>
 template<typename vector_type>
 vector_type
 FESpace<MeshType,MapType>::
-laplacianRecovery(const vector_type& solution)
+laplacianRecovery(const vector_type& solution) const
 {
     if (solution.getMaptype() != Repeated)
     {
