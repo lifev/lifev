@@ -70,7 +70,6 @@ OneDimensionalBC::applyBC( const Real& time, const Real& timeStep, const solutio
                            const fluxPtr_Type& flux, vectorPtrContainer_Type& rhs )
 {
     UInt iNode;
-
     ( M_bcSide == OneDimensional::left ) ? iNode = 0 : iNode = flux->physics()->data()->numberOfNodes() - 1;
 
     container2D_Type boundaryU;
@@ -111,23 +110,11 @@ OneDimensionalBC::applyBC( const Real& time, const Real& timeStep, const solutio
 }
 
 void
-OneDimensionalBC::applyViscoelasticBC( const Real& timeStep, const vector_Type& area, const vector_Type& flowRate, const fluxPtr_Type& flux, matrix_Type& matrix, vector_Type& rhs )
+OneDimensionalBC::applyViscoelasticBC( const fluxPtr_Type& flux, matrix_Type& matrix, vector_Type& rhs )
 {
     UInt iNode;
-    UInt iNodeInternal;
+    ( M_bcSide == OneDimensional::left ) ? iNode = 0 : iNode = flux->physics()->data()->numberOfNodes() - 1;
 
-    if ( M_bcSide == OneDimensional::left )
-    {
-        iNode = 0;
-        iNodeInternal = iNode + 1;
-    }
-    else
-    {
-        iNode = flux->physics()->data()->numberOfNodes() - 1;
-        iNodeInternal = iNode - 1;
-    }
-
-    matrix.globalAssemble();
     switch ( M_bcType.find( OneDimensional::first )->second )
     {
     case OneDimensional::Q:
@@ -141,17 +128,9 @@ OneDimensionalBC::applyViscoelasticBC( const Real& timeStep, const vector_Type& 
 
     case OneDimensional::A:
     case OneDimensional::P:
-    {
-        Real massCoefficient = 1 / ( 0.5 * ( area[ iNode ] + area[ iNodeInternal ] ) );
-        Real stiffnessCoefficient  = timeStep * 0.5* ( flux->physics()->data()->viscoelasticCoefficient( iNode ) + flux->physics()->data()->viscoelasticCoefficient( iNodeInternal ) )
-                                   / flux->physics()->data()->densityRho() * massCoefficient * std::sqrt( massCoefficient );
-        if ( M_bcSide == OneDimensional::left )
-            rhs( iNode ) -= stiffnessCoefficient * flux->physics()->data()->computeSpatialDerivativeAtNode( flowRate, iNode, 1 );
-        else
-            rhs( iNode ) += stiffnessCoefficient * flux->physics()->data()->computeSpatialDerivativeAtNode( flowRate, iNode, 1 );
 
         break;
-    }
+
     default:
 
         std::cout << "Warning: bcType \"" << M_bcType.find( OneDimensional::first )->second << "\"not available!" << std::endl;

@@ -100,10 +100,10 @@ OneDimensionalBCHandler::applyBC( const Real& time, const Real& timeStep, const 
 }
 
 void
-OneDimensionalBCHandler::applyViscoelasticBC( const Real& timeStep, const vector_Type& area, const vector_Type& flowRate, const fluxPtr_Type& flux, matrix_Type& matrix, vector_Type& rhs )
+OneDimensionalBCHandler::applyViscoelasticBC( const fluxPtr_Type& flux, matrix_Type& matrix, vector_Type& rhs )
 {
-    M_boundary[ OneDimensional::left  ]->applyViscoelasticBC( timeStep, area, flowRate, flux, matrix, rhs );
-    M_boundary[ OneDimensional::right ]->applyViscoelasticBC( timeStep, area, flowRate, flux, matrix, rhs );
+    M_boundary[ OneDimensional::left  ]->applyViscoelasticBC( flux, matrix, rhs );
+    M_boundary[ OneDimensional::right ]->applyViscoelasticBC( flux, matrix, rhs );
 }
 
 // ===================================================

@@ -111,7 +111,7 @@ public:
     void applyBC( const Real& time, const Real& timeStep, const solution_Type& solution, const fluxPtr_Type& flux, vectorPtrContainer_Type& rhs );
 
     //! Apply boundary conditions for the viscoelastic problem
-    void applyViscoelasticBC( const Real& timeStep, const vector_Type& area, const vector_Type& flowRate, const fluxPtr_Type& flux, matrix_Type& matrix, vector_Type& rhs );
+    void applyViscoelasticBC(const fluxPtr_Type& flux, matrix_Type& matrix, vector_Type& rhs );
 
     //@}
 
