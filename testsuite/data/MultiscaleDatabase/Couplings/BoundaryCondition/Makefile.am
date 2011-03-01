@@ -15,6 +15,7 @@ SUFFIXES    = .cpp .hpp .idl .c .h .f .F .o .moc
 dist_pkgdata_DATA =   Absorbing_1DLeft.dat \
                       Absorbing_1DRight.dat \
                       Absorbing_NobileVergara.dat \
+                      Area_One.dat \
                       FlowRate_CarotidBifurcation.dat \
                       FlowRate_Heart.dat \
                       FlowRate_One.dat \
