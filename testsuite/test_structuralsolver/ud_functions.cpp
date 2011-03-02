@@ -47,13 +47,13 @@ Real f(const Real& /*t*/, const Real& /*x*/, const Real& /*y*/, const Real& /*z*
 {
     switch (i)
     {
+    case 0:
+        return 0.0;
+        break;
     case 1:
         return 0.0;
         break;
     case 2:
-        return 0.0;
-        break;
-    case 3:
         return 0.0;
         break;
     default:
@@ -71,7 +71,7 @@ Real fzero_scalar(const Real& /*t*/, const Real& /*x*/, const Real& /*y*/, const
 
 Real InternalPressure(const Real& /*t*/, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& /*i*/)
 {
-    return -1e+5;
+    return 1e+5;
     //return -260000*sin(80*3.141592*t);
 }
 
@@ -80,13 +80,13 @@ Real d0(const Real& /*t*/, const Real& /*x*/, const Real& /*y*/, const Real& /*z
 {
     switch (i)
     {
+    case 0:
+        return 0.;
+        break;
     case 1:
         return 0.;
         break;
     case 2:
-        return 0.;
-        break;
-    case 3:
         return 0.;
         break;
     default:
@@ -101,13 +101,13 @@ Real w0(const Real& /*t*/, const Real& /*x*/, const Real& /*y*/, const Real& /*z
 
     switch (i)
     {
+    case 0:
+        return 0.0;
+        break;
     case 1:
         return 0.0;
         break;
     case 2:
-        return 0.0;
-        break;
-    case 3:
         return 0.0;
         break;
     default:
@@ -122,13 +122,13 @@ Real a0(const Real& /*t*/, const Real& /*x*/, const Real& /*y*/, const Real& /*z
 
     switch (i)
     {
+    case 0:
+        return 0.0;
+        break;
     case 1:
         return 0.0;
         break;
     case 2:
-        return 0.0;
-        break;
-    case 3:
         return 0.0;
         break;
     default:
@@ -145,13 +145,13 @@ Real g1(const Real& /*t*/, const Real& /*x*/, const Real& /*y*/, const Real& /*z
 {
     switch (i)
     {
+    case 0:
+        return 0.;
+        break;
     case 1:
         return 0.;
         break;
     case 2:
-        return 0.;
-        break;
-    case 3:
         return 0.;
         break;
     default:
@@ -165,13 +165,13 @@ Real g2(const Real& /*t*/, const Real& /*x*/, const Real& /*y*/, const Real& /*z
 {
     switch (i)
     {
+    case 0:
+        return 0.;
+        break;
     case 1:
         return 0.;
         break;
     case 2:
-        return 0.;
-        break;
-    case 3:
         return 1.e+5;
         break;
     default:
@@ -185,13 +185,13 @@ Real g3(const Real& /*t*/, const Real& /*x*/, const Real& /*y*/, const Real& /*z
 {
     switch (i)
     {
+    case 0:
+        return 0.;
+        break;
     case 1:
         return 0.;
         break;
     case 2:
-        return 0.;
-        break;
-    case 3:
         return 0.;
         break;
     default:
