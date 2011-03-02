@@ -26,7 +26,10 @@
 
 /*!
  *  @file
- *  @brief This file contains the definition of the St. Venant Kirchhoff material
+ *  @brief This file contains the definition of the St. Venant Kirchhoff material.
+ *         ATTENTION: At the moment, to get \mu and \lambda it is used the default value of the marker.
+ *                    This must be changed using the same approach used to built up the linear stiffness matrix!
+ *                     So: getMu(marker) and the same for lambda!!!
  *
  *  @version 1.0
  *  @date 01-01-2010

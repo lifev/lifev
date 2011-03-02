@@ -193,11 +193,11 @@ VenantKirchhoffMaterialLinear<Mesh>::setup(const boost::shared_ptr< FESpace<Mesh
 {
   std::cout<<"I am setting up the Material"<<std::endl;
 
-  this->M_FESpace                         = dFESpace;
-  this->M_elmatK.reset                    ( new MatrixElemental( this->M_FESpace->fe().nbFEDof(), nDimensions, nDimensions ) );
-  this->M_localMap                        = monolithicMap;
-  this->M_linearStiff.reset               (new matrix_Type(*this->M_localMap));
-  this->M_offset                          = offset;
+  this->M_FESpace                       = dFESpace;
+  this->M_elmatK.reset                        (new MatrixElemental( this->M_FESpace->fe().nbFEDof(), nDimensions, nDimensions ) );
+  this->M_localMap                      = monolithicMap;
+  this->M_linearStiff.reset             (new matrix_Type(*this->M_localMap));
+  this->M_offset                        = offset;
 }
 
 template <typename Mesh>
@@ -218,8 +218,12 @@ void VenantKirchhoffMaterialLinear<Mesh>::computeLinearStiffMatrix(dataPtr_Type&
         this->M_elmatK->zero();
 
         UInt marker = this->M_FESpace->mesh()->volumeList( i ).marker();
-        stiff_strain(    2.0 * dataMaterial->getMu(marker), *this->M_elmatK, this->M_FESpace->fe() );
-        stiff_div   ( dataMaterial->getLambda(marker), *this->M_elmatK, this->M_FESpace->fe() );
+
+	Real mu = dataMaterial->getMu(marker);
+	Real lambda = dataMaterial->getLambda(marker);
+
+        stiff_strain(    2.0 * mu, *this->M_elmatK, this->M_FESpace->fe() );
+        stiff_div   ( lambda, *this->M_elmatK, this->M_FESpace->fe() );
 
         // assembling
         for ( UInt ic = 0; ic < nc; ic++ )

@@ -234,7 +234,7 @@ protected:
   boost::shared_ptr<const MapEpetra>             M_localMap;
 
   //! Elementary matrices
-  boost::shared_ptr<MatrixElemental>             M_elmatK; 
+  boost::shared_ptr<MatrixElemental>             M_elmatK;
 
   //! Matrix Knl: stiffness (linear + nonlinear)
   matrixPtr_Type                                 M_stiff;
