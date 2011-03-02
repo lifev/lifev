@@ -303,6 +303,7 @@ void FSIFixedPoint::eval( const vector_Type& _disp,
 void FSIFixedPoint::registerMyProducts( )
 {
     FSIFactory_Type::instance().registerProduct( "fixedPoint", &createFP );
+    solid_Type::material_Type::StructureMaterialFactory::instance().registerProduct( "linearVenantKirchhoff", &createVenantKirchhoffLinear );
     //solid_Type::StructureSolverFactory::instance().registerProduct( "LinearVenantKirchhof", &FSIOperator::createLinearStructure );
     //solid_Type::StructureSolverFactory::instance().registerProduct( "NonLinearVenantKirchhof", &FSI::createNonLinearStructure );
 }
