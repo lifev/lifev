@@ -55,6 +55,9 @@
 #include <life/lifesolver/FSIData.hpp>
 //#include <life/lifesolver/VenantKirchhoffSolverLinear.hpp>
 #include <life/lifesolver/StructuralSolver.hpp>
+#include <life/lifesolver/StructuralMaterial.hpp>
+#include <life/lifesolver/VenantKirchhoffMaterialNonLinear.hpp>
+#include <life/lifesolver/VenantKirchhoffMaterialLinear.hpp>
 
 #include <life/lifesolver/StructuralMaterial.hpp>
 #include <life/lifesolver/VenantKirchhoffMaterialNonLinear.hpp>
@@ -102,8 +105,13 @@ namespace
   //LifeV::VenantKirchhoffSolver< LifeV::FSIOperator::mesh_Type, LifeV::SolverAztecOO >*    createLinearStructure() { return new VenantKirchhoffSolverLinear< LifeV::FSIOperator::mesh_Type, LifeV::SolverAztecOO >(); }
 
 
+
   //LifeV::StructuralMaterial< LifeV::FSIOperator::mesh_Type >*    createVenantKirchhoffLinear() { return new VenantKirchhoffMaterialLinear< LifeV::FSIOperator::mesh_Type >(); }
 
+
+
+
+  //LifeV::StructuralMaterial< LifeV::FSIOperator::mesh_Type >*    createVenantKirchhoffLinear() { return new VenantKirchhoffMaterialLinear< LifeV::FSIOperator::mesh_Type >(); }
 
 
 //NOTE: the nonlinear structure solver is still in development in the FSI framework
@@ -213,9 +221,13 @@ public:
 
       //VenantKirchhoffSolver< FSIOperator::mesh_Type, SolverAztecOO >::StructureSolverFactory::instance().registerProduct( "linearVenantKirchhof", &createLinearStructure );
 
+
       //StructuralSolver< FSIOperator::mesh_Type, SolverAztecOO >::material_Type::StructureMaterialFactory::instance().registerProduct( "linearVenantKirchhoff", &createVenantKirchhoffLinear );
 
       StructuralSolver< FSIOperator::mesh_Type, SolverAztecOO >();
+
+      //StructuralSolver< FSIOperator::mesh_Type, SolverAztecOO >::material_Type::StructureMaterialFactory::instance().registerProduct( "linearVenantKirchhoff", &createVenantKirchhoffLinear );
+
         //        VenantKirchhofSolver< FSIOperator::mesh_Type, SolverAztecOO >::StructureSolverFactory::instance().registerProduct( "nonLinearVenantKirchhof", &createNonLinearStructure );
 
         Debug( 10000 ) << "Setting up data from GetPot \n";

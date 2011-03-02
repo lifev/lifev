@@ -87,10 +87,10 @@
 //#include <life/lifesolver/VenantKirchhoffSolverLinear.hpp>
 #include <life/lifesolver/StructuralSolver.hpp>
 
+
 #include <life/lifesolver/StructuralMaterial.hpp>
 #include <life/lifesolver/VenantKirchhoffMaterialNonLinear.hpp>
 #include <life/lifesolver/VenantKirchhoffMaterialLinear.hpp>
-
 
 #include <life/lifesolver/HarmonicExtensionSolver.hpp>
 
@@ -342,6 +342,7 @@ public:
 
     //    static VenantKirchhofSolver< FSI::mesh_Type, SolverAztecOO >*    createNonLinearStructure(){ return new NonLinearVenantKirchhofSolver< FSI::mesh_Type, SolverAztecOO >(); }
   static StructuralMaterial< FSIOperator::mesh_Type >*    createVenantKirchhoffLinear(){ return new VenantKirchhoffMaterialLinear< FSIOperator::mesh_Type >(); }
+
   static StructuralMaterial< FSIOperator::mesh_Type >*    createVenantKirchhoffNonLinear(){ return new VenantKirchhoffMaterialNonLinear< FSIOperator::mesh_Type >(); }
 
     //!@name Factory Methods
