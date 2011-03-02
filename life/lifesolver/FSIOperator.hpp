@@ -86,9 +86,12 @@
 #include <life/lifesolver/OseenSolverShapeDerivative.hpp>
 //#include <life/lifesolver/VenantKirchhoffSolverLinear.hpp>
 #include <life/lifesolver/StructuralSolver.hpp>
+
 #include <life/lifesolver/StructuralMaterial.hpp>
 #include <life/lifesolver/VenantKirchhoffMaterialNonLinear.hpp>
 #include <life/lifesolver/VenantKirchhoffMaterialLinear.hpp>
+
+
 #include <life/lifesolver/HarmonicExtensionSolver.hpp>
 
 //#include <life/lifesolver/fixedPointBase.hpp>
@@ -345,7 +348,9 @@ public:
     //@{
     //! Factory method for the linear elasticity solver
     //static VenantKirchhoffSolver< FSIOperator::mesh_Type, SolverAztecOO >*    createLinearStructure() { return new VenantKirchhoffSolverLinear< FSIOperator::mesh_Type, SolverAztecOO >(); }
+
     //@}
+
 
     //!@name Public Methods
     //@{
@@ -606,6 +611,7 @@ public:
     //! gets a pointer to the solution vector by reference
     virtual vectorPtr_Type& solutionPtr()                               { return M_lambda; }
 
+
     //! gets the solid displacement by copy
     virtual void getSolidDisp( vector_Type& soliddisp )                 { soliddisp = M_solid->displacement(); }
 
@@ -615,8 +621,16 @@ public:
     //! gets the fluid velocity and pressure by copy
     virtual void getFluidVelAndPres( vector_Type& sol )                 { sol = *M_fluid->solution(); }
 
+
     //! Getter for the right hand side
     vectorPtr_Type const& getRHS       ( ) const {return M_rhs;}
+
+
+    //! Export the solid velocity by copying it to an external vector
+    /*!
+     * @param solidVelocity vector to be filled with the solid velocity
+     */
+    virtual void exportSolidVelocity( vector_Type& solidVelocity ) { solidVelocity = M_solid->velocity(); }
 
 
     //@}

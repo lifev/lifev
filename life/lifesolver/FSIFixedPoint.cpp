@@ -303,10 +303,13 @@ void FSIFixedPoint::eval( const vector_Type& _disp,
 void FSIFixedPoint::registerMyProducts( )
 {
     FSIFactory_Type::instance().registerProduct( "fixedPoint", &createFP );
+<<<<<<< HEAD
     solid_Type::material_Type::StructureMaterialFactory::instance().registerProduct( "linearVenantKirchhoff", &createVenantKirchhoffLinear );
     solid_Type::material_Type::StructureMaterialFactory::instance().registerProduct( "nonlinearVenantKirchhoff", &createVenantKirchhoffNonLinear );
 
     ///These were the lines before the implementation of the StructuralSolver class
+=======
+>>>>>>> First attempt to insert SS in FSI. LifeV compiles and the test_fsi as well.
     //solid_Type::StructureSolverFactory::instance().registerProduct( "LinearVenantKirchhof", &FSIOperator::createLinearStructure );
     //solid_Type::StructureSolverFactory::instance().registerProduct( "NonLinearVenantKirchhof", &FSI::createNonLinearStructure );
 }
