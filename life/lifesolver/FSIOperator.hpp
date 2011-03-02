@@ -84,7 +84,8 @@
 
 #include <life/lifesolver/FSIData.hpp>
 #include <life/lifesolver/OseenSolverShapeDerivative.hpp>
-#include <life/lifesolver/VenantKirchhoffSolverLinear.hpp>
+//#include <life/lifesolver/VenantKirchhoffSolverLinear.hpp>
+#include <life/lifesolver/StructuralSolver.hpp>
 #include <life/lifesolver/HarmonicExtensionSolver.hpp>
 
 //#include <life/lifesolver/fixedPointBase.hpp>
@@ -126,10 +127,12 @@ public:
     typedef ExporterHDF5Mesh3D<mesh_Type>                                           meshFilter_Type;
 #endif
     typedef OseenSolverShapeDerivative   <mesh_Type>                                      fluid_Type;
-    typedef VenantKirchhoffSolver  <mesh_Type>                                      solid_Type;
+  //typedef VenantKirchhoffSolver  <mesh_Type>                                      solid_Type;
+    typedef StructuralSolver  <mesh_Type>                                           solid_Type;
     typedef HarmonicExtensionSolver<mesh_Type>                                      meshMotion_Type;
     typedef OseenSolverShapeDerivative   <mesh_Type>                                      fluidLin_Type;
-    typedef VenantKirchhoffSolver  <mesh_Type>                                      solidLin_Type;
+  //typedef VenantKirchhoffSolver  <mesh_Type>                                      solidLin_Type;
+    typedef StructuralSolver  <mesh_Type>                                           solidLin_Type;
     typedef boost::shared_ptr<fluid_Type>                                           fluidPtr_Type;
     typedef boost::shared_ptr<solid_Type>                                           solidPtr_Type;
     typedef boost::shared_ptr<meshMotion_Type>                                      meshMotionPtr_Type;
@@ -336,7 +339,7 @@ public:
     //!@name Factory Methods
     //@{
     //! Factory method for the linear elasticity solver
-    static VenantKirchhoffSolver< FSIOperator::mesh_Type, SolverAztecOO >*    createLinearStructure() { return new VenantKirchhoffSolverLinear< FSIOperator::mesh_Type, SolverAztecOO >(); }
+    //static VenantKirchhoffSolver< FSIOperator::mesh_Type, SolverAztecOO >*    createLinearStructure() { return new VenantKirchhoffSolverLinear< FSIOperator::mesh_Type, SolverAztecOO >(); }
     //@}
 
     //!@name Public Methods
@@ -599,10 +602,10 @@ public:
     virtual vectorPtr_Type& solutionPtr()                               { return M_lambda; }
 
     //! gets the solid displacement by copy
-    virtual void getSolidDisp( vector_Type& soliddisp )                 { soliddisp = M_solid->getDisplacement(); }
+    virtual void getSolidDisp( vector_Type& soliddisp )                 { soliddisp = M_solid->displacement(); }
 
     //! gets the solid velocity by copy
-    virtual void getSolidVel( vector_Type& solidvel )                   { solidvel = M_solid->getVelocity(); }
+    virtual void getSolidVel( vector_Type& solidvel )                   { solidvel = M_solid->velocity(); }
 
     //! gets the fluid velocity and pressure by copy
     virtual void getFluidVelAndPres( vector_Type& sol )                 { sol = *M_fluid->solution(); }

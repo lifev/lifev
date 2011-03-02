@@ -200,6 +200,13 @@ public:
   */
   void iterate( bchandler_Type& bch );
 
+  //! Solve the linearized problem. Used in FSI segregated in ExactJacobian
+  /*!
+    \param bch BCHander object containing the boundary conditions
+  */
+  void iterateLin( bchandler_Type& bch );
+
+
   //! Output
   /*!
     \param c output file
@@ -246,6 +253,12 @@ public:
     \param iter iteration of the nonLinearRichardson method
   */
   void evalResidual( vector_Type &residual, const vector_Type& solution, Int iter);
+
+  //! Evaluates residual of the displacement for FSI problems
+  /*!
+    \param sol, the current displacement of he sturcture
+  */
+  void evalResidualDisplacement( const vector_Type& solution );
 
   void evalConstraintTensor();
 
@@ -816,10 +829,20 @@ StructuralSolver<Mesh, SolverType>::iterate( bchandler_Type& bch )
 
     //These two lines mut be checked fo FSI. With the linear solver, they have a totally
     //different expression. For structural problems it is not used.
-    *this->M_residual_d = *this->M_mass*(*this->M_disp);
-    *this->M_residual_d -= *this->M_rhsNoBC;
+    evalResidualDisplacement(*M_disp);
+
+    //*this->M_residual_d = *this->M_mass*(*this->M_disp);
+    //*this->M_residual_d -= *this->M_rhsNoBC;
   
 }
+
+template <typename Mesh, typename SolverType>
+void
+StructuralSolver<Mesh, SolverType>::iterateLin( bchandler_Type& bch )
+{
+  std::cout<< "Non faccio niente, ehmbé?" << std::endl;
+}
+
 
 template <typename Mesh, typename SolverType>
 void
@@ -884,6 +907,25 @@ StructuralSolver<Mesh, SolverType>::evalResidual( vector_Type &residual, const v
     chrono.stop();
     this->M_Displayer->leaderPrintMax("done in ", chrono.diff() );
 }
+
+template <typename Mesh, typename SolverType>
+void
+StructuralSolver<Mesh, SolverType>::evalResidualDisplacement( const vector_Type& solution )
+{
+
+    computeMatrix(this->M_tempMatrix, solution, 1.);
+
+    this->M_Displayer->leaderPrint("    S- Computing the residual displacement for the structure..... \t");
+    LifeChrono chrono;
+    chrono.start();
+
+    *this->M_residual_d  = *this->M_tempMatrix*solution;
+    *this->M_residual_d -= *this->M_rhsNoBC;
+
+    chrono.stop();
+    this->M_Displayer->leaderPrintMax("done in ", chrono.diff() );
+}
+
 
 template <typename Mesh, typename SolverType>
 void

@@ -92,7 +92,7 @@ void FSIExactJacobian::evalResidual(vector_Type&       res,
 
     this->displayer().leaderPrint("      NormInf res        =                     " , res.normInf(), "\n" );
     if (this->isSolid())
-        this->displayer().leaderPrint("      NormInf res_d      =                     " , this->solid().getResidual().normInf(), "\n" );
+        this->displayer().leaderPrint("      NormInf res_d      =                     " , this->solid().residual().normInf(), "\n" );
 
 }
 
@@ -115,7 +115,7 @@ void  FSIExactJacobian::solveLinearFluid()
         //            vector_Type repLambdaSolid(lambdaSolid(), Repeated);
 
         //this->transferInterfaceOnFluid(repLambdaSolid, dispFluidMesh);
-        this->transferSolidOnFluid(this->M_solid->getDisplacement(), dispFluidMesh);
+        this->transferSolidOnFluid(this->M_solid->displacement(), dispFluidMesh);
     }
     else
     {
@@ -223,8 +223,8 @@ FSIExactJacobian::setDataFile( const GetPot& dataFile )
 void FSIExactJacobian::registerMyProducts( )
 {
     FSIFactory_Type::instance().registerProduct( "exactJacobian", &createEJ );
-    solid_Type::StructureSolverFactory::instance().registerProduct( "LinearVenantKirchhof", &createLinearStructure );
-//solid_raw_type::StructureSolverFactory::instance().registerProduct( "NonLinearVenantKirchhof", &createNonLinearStructure );
+    //solid_Type::StructureSolverFactory::instance().registerProduct( "LinearVenantKirchhof", &createLinearStructure );
+    //solid_raw_type::StructureSolverFactory::instance().registerProduct( "NonLinearVenantKirchhof", &createNonLinearStructure );
 }
 
 // ===================================================
@@ -382,9 +382,9 @@ void FSIExactJacobian::eval(const vector_Type& _disp,
 
     if (this->isSolid())
     {
-        this->transferSolidOnInterface(this->M_solid->getDisplacement(),     lambdaSolidUnique);
-        this->transferSolidOnInterface(this->M_solid->getVelocity(),      lambdaDotSolidUnique);
-        this->transferSolidOnInterface(this->M_solid->getResidual(), sigmaSolidUnique);
+        this->transferSolidOnInterface(this->M_solid->displacement(),     lambdaSolidUnique);
+        this->transferSolidOnInterface(this->M_solid->velocity(),      lambdaDotSolidUnique);
+        this->transferSolidOnInterface(this->M_solid->residual(), sigmaSolidUnique);
     }
 
     this->setLambdaSolid(    lambdaSolidUnique);
@@ -411,8 +411,8 @@ void FSIExactJacobian::eval(const vector_Type& _disp,
         this->displayer().leaderPrint("      Max ResidualF      =                     " , M_fluid->residual().normInf(), "\n" );
     if ( this->isSolid() )
     {
-        this->displayer().leaderPrint("      NL2 Diplacement S. =                     " , M_solid->getDisplacement().norm2(), "\n" );
-        this->displayer().leaderPrint("      Max Residual Solid =                     " , M_solid->getResidual().normInf(), "\n" );
+        this->displayer().leaderPrint("      NL2 Diplacement S. =                     " , M_solid->displacement().norm2(), "\n" );
+        this->displayer().leaderPrint("      Max Residual Solid =                     " , M_solid->residual().normInf(), "\n" );
     }
 }
 
@@ -534,7 +534,7 @@ int FSIExactJacobian::Epetra_ExactJacobian::Apply(const Epetra_MultiVector &X, E
         if (M_ej->isSolid())
         {
             M_ej->solveLinearSolid();
-            M_ej->transferSolidOnInterface(M_ej->solid().getDisplacement(), lambdaSolidUnique);
+            M_ej->transferSolidOnInterface(M_ej->solid().displacement(), lambdaSolidUnique);
         }
 
         M_comm->Barrier();

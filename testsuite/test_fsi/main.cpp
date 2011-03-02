@@ -53,7 +53,8 @@
 //#include "life/lifesolver/exactJacobianBase.hpp"
 //#include "life/lifesolver/fixedPointBase.hpp"
 #include <life/lifesolver/FSIData.hpp>
-#include <life/lifesolver/VenantKirchhoffSolverLinear.hpp>
+//#include <life/lifesolver/VenantKirchhoffSolverLinear.hpp>
+#include <life/lifesolver/StructuralSolver.hpp>
 
 #include <life/lifefilters/ExporterHDF5.hpp>
 #include <life/lifefilters/ExporterEnsight.hpp>
@@ -94,7 +95,7 @@ namespace LifeV
 {
 namespace
 {
-LifeV::VenantKirchhoffSolver< LifeV::FSIOperator::mesh_Type, LifeV::SolverAztecOO >*    createLinearStructure() { return new VenantKirchhoffSolverLinear< LifeV::FSIOperator::mesh_Type, LifeV::SolverAztecOO >(); }
+  //LifeV::VenantKirchhoffSolver< LifeV::FSIOperator::mesh_Type, LifeV::SolverAztecOO >*    createLinearStructure() { return new VenantKirchhoffSolverLinear< LifeV::FSIOperator::mesh_Type, LifeV::SolverAztecOO >(); }
 
 //NOTE: the nonlinear structure solver is still in development in the FSI framework
 //LifeV::VenantKirchhofSolver< LifeV::FSI::mesh_Type, LifeV::SolverAztecOO >*    createNonLinearStructure(){ return new NonLinearVenantKirchhofSolver< LifeV::FSI::mesh_Type, LifeV::SolverAztecOO >(); }
@@ -119,19 +120,19 @@ public:
         //Real area0	= M_oper.fluid().area(3);
         Real area	= area0;
 
-        Real beta	= M_oper.solid().getThickness()*M_oper.solid().getYoung() /
-                    (1 - M_oper.solid().getPoisson()*M_oper.solid().getPoisson()) * PI/area0;
+        Real beta	= M_oper.solid().thickness()*M_oper.solid().young() /
+                    (1 - M_oper.solid().poisson()*M_oper.solid().poisson()) * PI/area0;
 
         Real qn		= M_oper.fluid().flux(3);
 
-        M_outflow			= std::pow(std::sqrt(M_oper.solid().getRho())/(2*std::sqrt(2.))*qn/area + std::sqrt(beta*std::sqrt(area0)), 2)
+        M_outflow			= std::pow(std::sqrt(M_oper.solid().rho())/(2*std::sqrt(2.))*qn/area + std::sqrt(beta*std::sqrt(area0)), 2)
                       - beta*std::sqrt(area0);
 
         std::cout << "--------------- Absorbing boundary condition ---------------" << std::endl;
-        std::cout << "  Outflow BC : density   = " << M_oper.solid().getRho() << std::endl;
-        std::cout << "  Outflow BC : thickness = " << M_oper.solid().getThickness() << std::endl;
-        std::cout << "  Outflow BC : young     = " << M_oper.solid().getYoung() << std::endl;
-        std::cout << "  Outflow BC : poisson   = " << M_oper.solid().getPoisson() << std::endl;
+        std::cout << "  Outflow BC : density   = " << M_oper.solid().rho() << std::endl;
+        std::cout << "  Outflow BC : thickness = " << M_oper.solid().thickness() << std::endl;
+        std::cout << "  Outflow BC : young     = " << M_oper.solid().young() << std::endl;
+        std::cout << "  Outflow BC : poisson   = " << M_oper.solid().poisson() << std::endl;
         std::cout << "  Outflow BC : area0     = " << area0 << std::endl;
         std::cout << "  Outflow BC : area      = " << M_oper.fluid().area(3) << std::endl;
         std::cout << "  Outflow BC : radius    = " << std::sqrt(area0/PI) << std::endl;
@@ -201,7 +202,8 @@ public:
     Problem( const std::string& dataFileName, std::string method = "" )
     {
 
-        VenantKirchhoffSolver< FSIOperator::mesh_Type, SolverAztecOO >::StructureSolverFactory::instance().registerProduct( "linearVenantKirchhof", &createLinearStructure );
+      //VenantKirchhoffSolver< FSIOperator::mesh_Type, SolverAztecOO >::StructureSolverFactory::instance().registerProduct( "linearVenantKirchhof", &createLinearStructure );
+      StructuralSolver< FSIOperator::mesh_Type, SolverAztecOO >();
         //        VenantKirchhofSolver< FSIOperator::mesh_Type, SolverAztecOO >::StructureSolverFactory::instance().registerProduct( "nonLinearVenantKirchhof", &createNonLinearStructure );
 
         Debug( 10000 ) << "Setting up data from GetPot \n";
@@ -284,8 +286,8 @@ public:
 
             M_exporterSolid->setMeshProcId(M_fsi->FSIOper()->dFESpace().mesh(), M_fsi->FSIOper()->dFESpace().map().comm().MyPID());
 
-            M_solidDisp.reset( new vector_Type( M_fsi->FSIOper()->solid().getMap(), M_exporterSolid->mapType() ));
-            M_solidVel.reset ( new vector_Type( M_fsi->FSIOper()->solid().getMap(), M_exporterSolid->mapType() ));
+            M_solidDisp.reset( new vector_Type( M_fsi->FSIOper()->solid().map(), M_exporterSolid->mapType() ));
+            M_solidVel.reset ( new vector_Type( M_fsi->FSIOper()->solid().map(), M_exporterSolid->mapType() ));
             M_exporterSolid->addVariable( ExporterData::Vector, "s-displacement", M_solidDisp,
                                           UInt(0), M_fsi->FSIOper()->dFESpace().dof().numTotalDof() );
             M_exporterSolid->addVariable( ExporterData::Vector, "s-velocity", M_solidVel,
@@ -389,8 +391,8 @@ public:
 
             if ( M_fsi->isSolid() )
 	      {
-                *M_solidDisp = M_fsi->FSIOper()->solid().getDisplacement();
-                *M_solidVel = M_fsi->FSIOper()->solid().getVelocity();
+                *M_solidDisp = M_fsi->FSIOper()->solid().displacement();
+                *M_solidVel = M_fsi->FSIOper()->solid().velocity();
                 M_exporterSolid->postProcess( M_data->dataFluid()->dataTime()->time() );
 	      }
 

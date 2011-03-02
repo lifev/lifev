@@ -445,7 +445,10 @@ FSIOperator::setupFluidSolid( UInt const fluxes )
 
         M_meshMotion.reset( new meshMotion_Type(               *M_mmFESpace,             M_epetraComm ) );
         M_fluid.reset(      new fluid_Type(      M_data->dataFluid(), *M_uFESpace, *M_pFESpace, M_epetraComm, fluxes ) );
-        M_solid.reset( solid_Type::StructureSolverFactory::instance().createObject( M_data->dataSolid()->getSolidType( ) ) );
+        //M_solid.reset( solid_Type::StructureSolverFactory::instance().createObject( M_data->dataSolid()->getSolidType( ) ) );
+
+	/////Paolo Tricerri, now the Structure is not a factory.What is a factory is the material.
+	M_solid.reset( new solid_Type( ) );
         M_solid->setup( M_data->dataSolid(), M_dFESpace, M_epetraComm );
 
 //         if ( M_linearFluid )
@@ -462,7 +465,10 @@ FSIOperator::setupFluidSolid( UInt const fluxes )
     {
 //         M_fluid.reset( new fluid_Type( *M_data->dataFluid(), *M_uFESpace, *M_pFESpace, M_epetraComm ) );
         M_meshMotion.reset( new meshMotion_Type(               *M_mmFESpace, M_epetraComm ) );
-        M_solid.reset(solid_Type::StructureSolverFactory::instance().createObject( M_data->dataSolid()->getSolidType( ) ) );
+        //M_solid.reset(solid_Type::StructureSolverFactory::instance().createObject( M_data->dataSolid()->getSolidType( ) ) );
+
+	/////Paolo Tricerri, now the Structure is not a factory.What is a factory is the material.
+	M_solid.reset( new solid_Type( ) );
         M_solid->setup( M_data->dataSolid(), M_dFESpace,  M_epetraComm );
 
 //         if ( M_linearFluid )
@@ -927,7 +933,8 @@ FSIOperator::isLeader() const
     if ( M_solid.get() == 0 )
         return ( M_epetraComm->MyPID() == 0 );
 
-    return M_solid->getDisplayer().isLeader();
+    //return M_solid->getDisplayer().isLeader();
+    return M_solid->displayer().isLeader();
 }
 
 
@@ -941,7 +948,8 @@ FSIOperator::displayer()
     if ( !isSolid() || !M_solid.get() )
         std::cout << "ERROR: displayer not ready" << std::endl;
 
-    return M_solid->getDisplayer();
+    //return M_solid->getDisplayer();
+    return M_solid->displayer();
 }
 
 

@@ -242,9 +242,9 @@ void FSIFixedPoint::eval( const vector_Type& _disp,
     if (this->isSolid())
     {
         this->M_solid->iterate( M_BCh_d );
-        this->transferSolidOnInterface(this->M_solid->getDisplacement(),     lambdaSolidUnique);
-        this->transferSolidOnInterface(this->M_solid->getVelocity(),      lambdaDotSolidUnique);
-        this->transferSolidOnInterface(this->M_solid->getResidual(), sigmaSolidUnique);
+        this->transferSolidOnInterface(this->M_solid->displacement(),     lambdaSolidUnique);
+        this->transferSolidOnInterface(this->M_solid->velocity(),      lambdaDotSolidUnique);
+        this->transferSolidOnInterface(this->M_solid->residual(), sigmaSolidUnique);
     }
 
     this->setLambdaSolid( lambdaSolidUnique );
@@ -285,11 +285,11 @@ void FSIFixedPoint::eval( const vector_Type& _disp,
     }
     if (this->isSolid())
     {
-        norm = M_solid->getDisplacement().norm2();
+        norm = M_solid->displacement().norm2();
         if (this->isLeader())
             std::cout << "NL2 DiplacementS     = " << norm << std::endl;
 
-        norm = M_solid->getResidual().normInf();
+        norm = M_solid->residual().normInf();
 
         if (this->isLeader())
             std::cout << "Max ResidualS        = " << norm << std::endl;
@@ -303,7 +303,7 @@ void FSIFixedPoint::eval( const vector_Type& _disp,
 void FSIFixedPoint::registerMyProducts( )
 {
     FSIFactory_Type::instance().registerProduct( "fixedPoint", &createFP );
-    solid_Type::StructureSolverFactory::instance().registerProduct( "LinearVenantKirchhof", &FSIOperator::createLinearStructure );
+    //solid_Type::StructureSolverFactory::instance().registerProduct( "LinearVenantKirchhof", &FSIOperator::createLinearStructure );
     //solid_Type::StructureSolverFactory::instance().registerProduct( "NonLinearVenantKirchhof", &FSI::createNonLinearStructure );
 }
 
