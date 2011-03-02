@@ -245,7 +245,7 @@ void VenantKirchhoffMaterialNonLinear<Mesh>::updateNonLinearJacobianMatrix( matr
 	      UInt  iloc = this->M_FESpace->fe().patternFirst( iNode );
 	      for ( UInt iComp = 0; iComp < nDimensions; ++iComp )
 		{
-		  UInt ig = this->M_FESpace->dof().localToGlobalMap( eleID, iloc + 1 ) + iComp*dim + this->M_offset;
+		  UInt ig = this->M_FESpace->dof().localToGlobalMap( eleID, iloc ) + iComp*dim + this->M_offset;
 		  dk_loc[iloc + iComp*this->M_FESpace->fe().nbFEDof()] = dRep[ig]; // BASEINDEX + 1
 		}
 	    }
@@ -356,7 +356,7 @@ void VenantKirchhoffMaterialNonLinear<Mesh>::computeNonLinearNewMatrix(matrixPtr
             UInt  iloc = this->M_FESpace->fe().patternFirst( iNode );
             for ( UInt iComp = 0; iComp < nDimensions; ++iComp )
             {
-                UInt ig = this->M_FESpace->dof().localToGlobalMap( eleID, iloc + 1 ) + iComp*dim + this->M_offset;
+                UInt ig = this->M_FESpace->dof().localToGlobalMap( eleID, iloc ) + iComp*dim + this->M_offset;
                 dk_loc[ iloc + iComp*this->M_FESpace->fe().nbFEDof() ] = dRep[ig]; // BASEINDEX + 1
             }
         }
@@ -394,9 +394,6 @@ void VenantKirchhoffMaterialNonLinear<Mesh>::computeNonLinearNewMatrix(matrixPtr
         }
 
     }
-
-
-
 
 }
 
@@ -449,7 +446,7 @@ void VenantKirchhoffMaterialNonLinear<Mesh>::evalNonLinearNewMatrix( matrixPtr_T
             UInt  iloc = this->M_FESpace->fe().patternFirst( iNode );
             for ( UInt iComp = 0; iComp < nDimensions; ++iComp )
             {
-                UInt ig = this->M_FESpace->dof().localToGlobalMap( eleID, iloc + 1 ) + iComp*dim;
+                UInt ig = this->M_FESpace->dof().localToGlobalMap( eleID, iloc ) + iComp*dim;
                 dk_loc[ iloc + iComp*this->M_FESpace->fe().nbFEDof() ] = dRep[ig]; // BASEINDEX + 1
             }
         }
