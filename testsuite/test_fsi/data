@@ -207,7 +207,7 @@ filter_singletons      = false
 
 [./physics]
 material_flag   = '1' # '1 2'
-solidType = linearVenantKirchhoff
+solidType = nonlinearVenantKirchhoff
 material_flag   = 1 # '1 2'
 young           = 3.0E6 #,1.9E9
 poisson         = 0.30 #,0.30
