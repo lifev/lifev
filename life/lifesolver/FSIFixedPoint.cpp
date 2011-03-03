@@ -304,6 +304,9 @@ void FSIFixedPoint::registerMyProducts( )
 {
     FSIFactory_Type::instance().registerProduct( "fixedPoint", &createFP );
     solid_Type::material_Type::StructureMaterialFactory::instance().registerProduct( "linearVenantKirchhoff", &createVenantKirchhoffLinear );
+    solid_Type::material_Type::StructureMaterialFactory::instance().registerProduct( "nonlinearVenantKirchhoff", &createVenantKirchhoffNonLinear );
+
+    ///These were the lines before the implementation of the StructuralSolver class
     //solid_Type::StructureSolverFactory::instance().registerProduct( "LinearVenantKirchhof", &FSIOperator::createLinearStructure );
     //solid_Type::StructureSolverFactory::instance().registerProduct( "NonLinearVenantKirchhof", &FSI::createNonLinearStructure );
 }

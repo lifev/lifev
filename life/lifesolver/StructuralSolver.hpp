@@ -260,6 +260,12 @@ public:
   */
   void evalResidualDisplacement( const vector_Type& solution );
 
+  //! Evaluates residual of the displacement in the Linearized problem of ExactJcobian. FSI problems
+  /*!
+    \param sol, the current displacement of he sturcture
+  */
+  void evalResidualDisplacementLin( const vector_Type& solution );
+
   void evalConstraintTensor();
 
   //! Sets the initial displacement, velocity, acceleration
@@ -426,6 +432,12 @@ protected:
 			       vector_Type &rhs,
 			       bchandler_Type& BCh,
 			       UInt         offset=0);
+
+  void applyBoundaryConditionsLin(matrix_Type &matrix,
+			       vector_Type &rhs,
+			       bchandler_Type& BCh,
+			       UInt         offset=0);
+
 
   UInt dim() const { return M_FESpace->dim(); }
 
@@ -840,7 +852,46 @@ template <typename Mesh, typename SolverType>
 void
 StructuralSolver<Mesh, SolverType>::iterateLin( bchandler_Type& bch )
 {
-  std::cout<< "Non faccio niente, ehmbé?" << std::endl;
+  LifeChrono chrono;
+
+  matrixPtr_Type matrFull( new matrix_Type( *M_localMap, M_tempMatrix->meanNumEntries()));
+
+  // matrix and vector assembling communication
+  this->M_Displayer->leaderPrint("  S-  Solving the system in iteratLin... \n");
+
+  // First Approximation: The Jacobian of P is equal to its linear part.
+  //this->M_tempMatrix.reset(new matrix_Type(*this->M_localMap));
+  *matrFull += *this->M_material->linearStiff(); //it returns just the linear part
+  *matrFull *= M_zeta;
+  *matrFull += *this->M_mass; // Global Assemble is done inside BCManageMatrix
+  ///End First Approximantion
+
+  this->M_Displayer->leaderPrint("\tS'-  Solving the linear system in iterateLin... \n");
+
+  // for BC treatment (done at each time-step)
+
+  this->M_Displayer->leaderPrint("\tS'-  Applying boundary conditions      ... ");
+
+  vector_Type rhsFull (M_rhsNoBC->map());
+
+  applyBoundaryConditionsLin( *matrFull, rhsFull, bch);
+
+
+  this->M_Displayer->leaderPrintMax( "done in ", chrono.diff() );
+
+  this->M_Displayer->leaderPrint("\tS'-  Solving system                    ... \n");
+  chrono.start();
+    
+  this->M_linearSolver->setMatrix(*matrFull);
+  
+  this->M_linearSolver->solveSystem( rhsFull, *M_disp, matrFull );
+  
+  chrono.stop();
+
+  //This line must be checked for FSI. In VenantKirchhoffSolver.hpp it has a 
+  //totally different expression.For structural problems it is not used
+  evalResidualDisplacementLin(*M_disp);
+  
 }
 
 
@@ -925,6 +976,30 @@ StructuralSolver<Mesh, SolverType>::evalResidualDisplacement( const vector_Type&
     chrono.stop();
     this->M_Displayer->leaderPrintMax("done in ", chrono.diff() );
 }
+
+template <typename Mesh, typename SolverType>
+void
+StructuralSolver<Mesh, SolverType>::evalResidualDisplacementLin( const vector_Type& solution )
+{
+
+  //This is consisten with the previous first approximation in iterateLin
+  this->M_tempMatrix.reset (new matrix_Type(*this->M_localMap));
+  *this->M_tempMatrix += *this->M_material->linearStiff();
+  *this->M_tempMatrix *= M_zeta;
+  *this->M_tempMatrix += *this->M_mass;
+  this->M_tempMatrix->globalAssemble();
+
+  this->M_Displayer->leaderPrint("    S- Computing the residual displacement for the structure..... \t");
+  LifeChrono chrono;
+  chrono.start();
+
+  //This definition of residual_d is similar to the one of iterateLin in VenantKirchhoffSolver
+  *this->M_residual_d  = *this->M_tempMatrix*solution;
+
+  chrono.stop();
+  this->M_Displayer->leaderPrintMax("done in ", chrono.diff() );
+}
+
 
 
 template <typename Mesh, typename SolverType>
@@ -1243,6 +1318,31 @@ StructuralSolver<Mesh, SolverType>::applyBoundaryConditions( matrix_Type&       
   rhs = rhsFull;
 
 }
+
+template<typename Mesh, typename SolverType>
+void
+StructuralSolver<Mesh, SolverType>::applyBoundaryConditionsLin( matrix_Type&        matrix,
+                                                             vector_Type&        rhs,
+                                                             bchandler_Type&     BCh,
+                                                             UInt                offset)
+{
+  // BC manage for the velocity
+  if (offset)
+    BCh->setOffset(offset);
+  if ( !BCh->bcUpdateDone() )
+    BCh->bcUpdate( *this->M_FESpace->mesh(), this->M_FESpace->feBd(), this->M_FESpace->dof() );
+
+  // vector_Type rhsFull(rhs, Repeated, Zero); // ignoring non-local entries, Otherwise they are summed up lately
+  vector_Type rhsFull(rhs, Unique);  // bcManages now manages the also repeated parts
+
+  bcManage( matrix, rhsFull, *M_FESpace->mesh(), M_FESpace->dof(), *BCh, M_FESpace->feBd(), 1., M_data->getdataTime()->time() );
+
+  // matrix should be GlobalAssembled by  bcManage
+
+  rhs = rhsFull;
+
+}
+
 
 
 }
