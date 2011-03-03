@@ -76,7 +76,7 @@ SolverAmesos::computeResidual( const vector_type& solution, const vector_type& r
 Int
 SolverAmesos::solveSystem( vector_type&    rhsFull,
                            vector_type&    solution,
-                           matrix_ptrtype& /*basePrecMatrix*/ )
+                           const matrix_ptrtype& /*basePrecMatrix*/ )
 {
     bool verbose = M_trilinosParameterList.get( "Verbose", true );
     if ( verbose )
