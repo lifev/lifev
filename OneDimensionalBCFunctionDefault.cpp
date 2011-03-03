@@ -182,12 +182,12 @@ OneDimensionalBCFunctionCompatibility::setupNode()
     switch ( M_bcSide )
     {
     case OneDimensional::left:
-        M_bcElement          = 0;
+        M_bcElement       = 0;
         M_bcInternalNode  = M_bcNode + 1;
         break;
 
     case OneDimensional::right:
-        M_bcElement          = M_bcNode - 1;
+        M_bcElement       = M_bcNode - 1;
         M_bcInternalNode  = M_bcNode - 1;
         break;
 
@@ -295,6 +295,23 @@ OneDimensionalBCFunctionCompatibility::computeCFL( const Real& eigenvalue, const
 Real
 OneDimensionalBCFunctionAbsorbing::operator()( const Real& /*time*/, const Real& timeStep )
 {
+//    updateBCVariables();
+//    computeEigenValuesVectors();
+//
+//    switch ( M_bcType )
+//    {
+//    case OneDimensional::W1:
+//        return scalarProduct( M_leftEigenvector1, M_bcU );
+//        break;
+//
+//    case OneDimensional::W2:
+//        return scalarProduct( M_leftEigenvector2, M_bcU );
+//        break;
+//    default:
+//        std::cout << "Warning: bcType \"" << M_bcType  << "\"not available!" << std::endl;
+//        return 0;
+//    }
+
     updateBCVariables();
     computeEigenValuesVectors();
 
