@@ -73,14 +73,19 @@ int
 main( int argc, char** argv )
 {
 
+    bool verbose(false);
 #ifdef HAVE_MPI
     MPI_Init(&argc, &argv);
     Epetra_MpiComm Comm(MPI_COMM_WORLD);
     if ( Comm.MyPID() == 0 )
-        cout << "% using MPI" << endl;
+    {
+        verbose = true;
+        cout << "Using MPI" << endl;
+    }
 #else
     Epetra_SerialComm Comm;
-    cout << "% using serial Version" << endl;
+    verbose = true;
+    cout << "Using serial Version" << endl;
 #endif
 
 //**************** cylinder
@@ -95,6 +100,7 @@ main( int argc, char** argv )
     else es.run();
 
 #ifdef HAVE_MPI
+    if (verbose) std::cout << "MPI Finalization" << std::endl;
     MPI_Finalize();
 #endif
     return( EXIT_SUCCESS );

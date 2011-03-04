@@ -161,20 +161,28 @@ Ethiersteinman::Ethiersteinman( int argc,
 void
 Ethiersteinman::check()
 {
+    bool verbose = (d->comm->MyPID() == 0);
+
+    // +-----------------------------------------------+
+    // |             Begining of the test              |
+    // +-----------------------------------------------+
     LifeChrono chrono;
 
-    // Reading from data file
-    //
+    // +-----------------------------------------------+
+    // |               Loading the data                |
+    // +-----------------------------------------------+
+    if (verbose) std::cout << std::endl << "[Loading the data]" << std::endl;
     GetPot dataFile( d->data_file_name.c_str() );
-
-    bool verbose = (d->comm->MyPID() == 0);
     if (verbose) std::cout << "Test checks the accuracy of the solution" << std::endl;
 
     chrono.start();
 
     Problem::setParamsFromGetPot( dataFile );
 
-    // Boundary conditions
+    // +-----------------------------------------------+
+    // |             Boundary conditions               |
+    // +-----------------------------------------------+
+    if (verbose) std::cout<< std::endl << "[Boundary conditions]" << std::endl;
     std::string dirichletList = dataFile( "fluid/problem/dirichletList", "" );
     std::set<UInt> dirichletMarkers = parseList( dirichletList );
     std::string neumannList = dataFile( "fluid/problem/neumannList", "" );
@@ -201,13 +209,22 @@ Ethiersteinman::check()
     boost::shared_ptr<OseenData> oseenData(new OseenData());
     oseenData->setup( dataFile );
 
+    // +-----------------------------------------------+
+    // |               Loading the mesh                |
+    // +-----------------------------------------------+
+    if (verbose) std::cout << std::endl << "[Loading the mesh]" << std::endl;
+
     MeshData meshData;
     meshData.setup(dataFile, "fluid/space_discretization");
 
     boost::shared_ptr<RegionMesh3D<LinearTetra> > fullMeshPtr(new RegionMesh3D<LinearTetra>);
     readMesh(*fullMeshPtr, meshData);
+    if (verbose) std::cout << std::endl << "Mesh source: file("
+                           << meshData.meshDir() << meshData.meshFile() << ")" << std::endl;
 
+    if (verbose) std::cout << "Partitioning the mesh ... " << std::flush;
     MeshPartitioner< RegionMesh3D<LinearTetra> >   meshPart(fullMeshPtr, d->comm);
+    if (verbose) std::cout << "ok." << std::endl;
 
     std::string uOrder =  dataFile( "fluid/space_discretization/vel_order",   "P1");
     std::string pOrder =  dataFile( "fluid/space_discretization/press_order", "P1");
@@ -215,35 +232,29 @@ Ethiersteinman::check()
     if (verbose) std::cout << std::endl;
     if (verbose) std::cout << "Time discretization order " << oseenData->dataTime()->orderBDF() << std::endl;
 
-    //oseenData->meshData()->setMesh(meshPart.mesh());
+    // +-----------------------------------------------+
+    // |            Creating the FE spaces             |
+    // +-----------------------------------------------+
+    if (verbose) std::cout << std::endl << "[Creating the FE spaces]" << std::endl;
 
-    if (verbose)
-        std::cout << "Building the velocity FE space ... " << std::flush;
-
+    if (verbose) std::cout << "Building the velocity FE space ... " << std::flush;
     FESpace< RegionMesh3D<LinearTetra>, MapEpetra > uFESpace(meshPart, uOrder, 3, d->comm);
+    if (verbose) std::cout << "ok." << std::endl;
 
-    if (verbose)
-        std::cout << "ok." << std::endl;
-
-    if (verbose)
-        std::cout << "Building the pressure FE space ... " << std::flush;
-
+    if (verbose) std::cout << "Building the pressure FE space ... " << std::flush;
     FESpace< RegionMesh3D<LinearTetra>, MapEpetra > pFESpace(meshPart,pOrder,1,d->comm);
-
-    if (verbose)
-        std::cout << "ok." << std::endl;
-
-
+    if (verbose) std::cout << "ok." << std::endl;
 
     UInt totalVelDof   = uFESpace.map().map(Unique)->NumGlobalElements();
     UInt totalPressDof = pFESpace.map().map(Unique)->NumGlobalElements();
 
+    if (verbose) std::cout << "Total Velocity Dof = " << totalVelDof << std::endl;
+    if (verbose) std::cout << "Total Pressure Dof = " << totalPressDof << std::endl;
 
-    if (verbose) std::cout << "Total Velocity DOF = " << totalVelDof << std::endl;
-    if (verbose) std::cout << "Total Pressure DOF = " << totalPressDof << std::endl;
-
-    if (verbose) std::cout << "Calling the fluid constructor ... ";
-
+    // +-----------------------------------------------+
+    // |             Creating the problem              |
+    // +-----------------------------------------------+
+    if (verbose) std::cout<< std::endl << "[Creating the problem]" << std::endl;
     OseenSolver< RegionMesh3D<LinearTetra> > fluid (oseenData,
                                               uFESpace,
                                               pFESpace,
@@ -260,15 +271,16 @@ Ethiersteinman::check()
 
     MPI_Barrier(MPI_COMM_WORLD);
 
-    // Initialization
-
+    // +-----------------------------------------------+
+    // |       Initialization of the simulation        |
+    // +-----------------------------------------------+
+    if (verbose) std::cout<< std::endl << "[Initialization of the simulation]" << std::endl;
     Real dt     = oseenData->dataTime()->timeStep();
     Real t0     = oseenData->dataTime()->initialTime();
     Real tFinal = oseenData->dataTime()->endTime ();
 
 
     // bdf object to store the previous solutions
-
     TimeAdvanceBDFNavierStokes<vector_Type> bdf;
     bdf.setup(oseenData->dataTime()->orderBDF());
 
@@ -372,11 +384,13 @@ Ethiersteinman::check()
                            UInt(pFESpace.dof().numTotalDof()) );
     exporter->postProcess( 0 );
 
-    std::cout << "uDOF: " << uFESpace.dof().numTotalDof() << std::endl;
-    std::cout << "pDOF: " << pFESpace.dof().numTotalDof() << std::endl;
+    if (verbose) std::cout << "uDOF: " << uFESpace.dof().numTotalDof() << std::endl;
+    if (verbose) std::cout << "pDOF: " << pFESpace.dof().numTotalDof() << std::endl;
 
-    // Temporal loop
-
+    // +-----------------------------------------------+
+    // |             Solving the problem               |
+    // +-----------------------------------------------+
+    if (verbose) std::cout<< std::endl << "[Solving the problem]" << std::endl;
     int iter = 1;
 
     LifeChrono chronoGlobal;
@@ -387,12 +401,7 @@ Ethiersteinman::check()
 
         oseenData->dataTime()->setTime(time);
 
-        if (verbose)
-        {
-            std::cout << std::endl;
-            std::cout << "We are now at time "<< oseenData->dataTime()->time() << " s. " << std::endl;
-            std::cout << std::endl;
-        }
+        if (verbose) std::cout << "[t = "<< oseenData->dataTime()->time() << " s.]" << std::endl;
 
         chrono.start();
 
@@ -469,21 +478,20 @@ Ethiersteinman::check()
 void
 Ethiersteinman::run()
 {
+    bool verbose = (d->comm->MyPID() == 0);
+
+    // +-----------------------------------------------+
+    // |             Begining of the test              |
+    // +-----------------------------------------------+
     LifeChrono chrono;
 
-    // Reading from data file
-    //
+    // +-----------------------------------------------+
+    // |               Loading the data                |
+    // +-----------------------------------------------+
+    if (verbose) std::cout << std::endl << "[Loading the data]" << std::endl;
     GetPot dataFile( d->data_file_name.c_str() );
-
-    bool verbose = (d->comm->MyPID() == 0);
     if (verbose) std::cout << "Test checks the convergence in space of the solution" << std::endl;
-
     Problem::setParamsFromGetPot( dataFile );
-
-
-    // +-----------------------------------------------+
-    // |             Settings of the test              |
-    // +-----------------------------------------------+
 
     // Loading the discretization to be tested
     UInt discretizationNumber = dataFile( "fluid/space_discretization/mesh_number", 1 );
@@ -557,17 +565,13 @@ Ethiersteinman::run()
             }
 
             // +-----------------------------------------------+
-            // |   Solving the problem for one configuration   |
+            // |             Boundary conditions               |
             // +-----------------------------------------------+
-
-            //
-            // Boundary conditions
-            //
+            if (verbose) std::cout<< std::endl << "[Boundary conditions]" << std::endl;
             std::string dirichletList = dataFile( "fluid/problem/dirichletList", "" );
             std::set<UInt> dirichletMarkers = parseList( dirichletList );
             std::string neumannList = dataFile( "fluid/problem/neumannList", "" );
             std::set<UInt> neumannMarkers = parseList( neumannList );
-
 
             BCHandler bcH;
             BCFunctionBase uWall( Problem::uexact );
@@ -590,6 +594,10 @@ Ethiersteinman::run()
             boost::shared_ptr<OseenData> oseenData(new OseenData());
             oseenData->setup( dataFile );
 
+            // +-----------------------------------------------+
+            // |               Loading the mesh                |
+            // +-----------------------------------------------+
+            if (verbose) std::cout << std::endl << "[Loading the mesh]" << std::endl;
             // THE DATAMESH IS NOT REQUIRED WHEN WE BUILD THE MESH
             //MeshData meshData;
             //meshData.setup(dataFile, "fluid/space_discratization");
@@ -600,11 +608,16 @@ Ethiersteinman::run()
             regularMesh3D( *fullMeshPtr,
                            1,
                            mElem, mElem, mElem,
-                           verbose,
+                           false,
                            2.0,   2.0,   2.0,
                            -1.0,  -1.0,  -1.0);
 
+            if (verbose) std::cout << std::endl << "Mesh source: regular mesh("
+                                   << mElem << "x" << mElem << "x" << mElem << ")" << std::endl;
+
+            if (verbose) std::cout << "Partitioning the mesh ... " << std::flush;
             MeshPartitioner< RegionMesh3D<LinearTetra> >   meshPart(fullMeshPtr, d->comm);
+            if (verbose) std::cout << "ok." << std::endl;
 
             std::string uOrder =  uFE[iElem];
             std::string pOrder =  pFE[iElem];
@@ -612,25 +625,18 @@ Ethiersteinman::run()
             if (verbose) std::cout << std::endl;
             if (verbose) std::cout << "Time discretization order " << oseenData->dataTime()->orderBDF() << std::endl;
 
-            //oseenData->meshData()->setMesh(meshPart.meshPartition());
+            // +-----------------------------------------------+
+            // |            Creating the FE spaces             |
+            // +-----------------------------------------------+
+            if (verbose) std::cout << std::endl << "[Creating the FE spaces]" << std::endl;
 
-            if (verbose)
-                std::cout << "Building the velocity FE space ... " << std::flush;
-
+            if (verbose) std::cout << "Building the velocity FE space ... " << std::flush;
             FESpace< RegionMesh3D<LinearTetra>, MapEpetra > uFESpace(meshPart, uOrder, 3, d->comm);
+            if (verbose) std::cout << "ok." << std::endl;
 
-            if (verbose)
-                std::cout << "ok." << std::endl;
-
-            if (verbose)
-                std::cout << "Building the pressure FE space ... " << std::flush;
-
+            if (verbose) std::cout << "Building the pressure FE space ... " << std::flush;
             FESpace< RegionMesh3D<LinearTetra>, MapEpetra > pFESpace(meshPart, pOrder, 1, d->comm);
-
-            if (verbose)
-                std::cout << "ok." << std::endl;
-
-
+            if (verbose) std::cout << "ok." << std::endl;
 
             UInt totalVelDof   = uFESpace.map().map(Unique)->NumGlobalElements();
             UInt totalPressDof = pFESpace.map().map(Unique)->NumGlobalElements();
@@ -638,11 +644,13 @@ Ethiersteinman::run()
             // If we change the FE we have to update the BCHandler (internal data)
             bcH.bcUpdate( *meshPart.meshPartition(), uFESpace.feBd(), uFESpace.dof());
 
-            if (verbose) std::cout << "Total Velocity DOF = " << totalVelDof << std::endl;
-            if (verbose) std::cout << "Total Pressure DOF = " << totalPressDof << std::endl;
+            if (verbose) std::cout << "Total Velocity Dof = " << totalVelDof << std::endl;
+            if (verbose) std::cout << "Total Pressure Dof = " << totalPressDof << std::endl;
 
-            if (verbose) std::cout << "Calling the fluid constructor ... ";
-
+            // +-----------------------------------------------+
+            // |             Creating the problem              |
+            // +-----------------------------------------------+
+            if (verbose) std::cout<< std::endl << "[Creating the problem]" << std::endl;
             OseenSolver< RegionMesh3D<LinearTetra> > fluid (oseenData,
                                                       uFESpace,
                                                       pFESpace,
@@ -659,15 +667,16 @@ Ethiersteinman::run()
 
             MPI_Barrier(MPI_COMM_WORLD);
 
-            // Initialization
-
+            // +-----------------------------------------------+
+            // |       Initialization of the simulation        |
+            // +-----------------------------------------------+
+            if (verbose) std::cout<< std::endl << "[Initialization of the simulation]" << std::endl;
             Real dt     = oseenData->dataTime()->timeStep();
             Real t0     = oseenData->dataTime()->initialTime();
             Real tFinal = oseenData->dataTime()->endTime();
 
 
             // bdf object to store the previous solutions
-
             TimeAdvanceBDFNavierStokes<vector_Type> bdf;
             bdf.setup(oseenData->dataTime()->orderBDF());
 
@@ -812,9 +821,10 @@ Ethiersteinman::run()
             if (verbose) std::cout << "uDOF: " << uFESpace.dof().numTotalDof() << std::endl;
             if (verbose) std::cout << "pDOF: " << pFESpace.dof().numTotalDof() << std::endl;
 
-            //
-            // Solving Navier-Stokes (Temporal loop)
-            //
+            // +-----------------------------------------------+
+            // |             Solving the problem               |
+            // +-----------------------------------------------+
+            if (verbose) std::cout<< std::endl << "[Solving the problem]" << std::endl;
             int iter = 1;
 
             LifeChrono chronoGlobal;
@@ -825,12 +835,7 @@ Ethiersteinman::run()
 
                 oseenData->dataTime()->setTime(time);
 
-                if (verbose)
-                {
-                    std::cout << std::endl;
-                    std::cout << "We are now at time "<< oseenData->dataTime()->time() << " s. " << std::endl;
-                    std::cout << std::endl;
-                }
+                if (verbose) std::cout << "[t = "<< oseenData->dataTime()->time() << " s.]" << std::endl;
 
                 chrono.start();
 
@@ -871,9 +876,6 @@ Ethiersteinman::run()
                 ul2error = uFESpace.l2Error (Problem::uexact, vel  , time, &urelerr );
                 pl2error = pFESpace.l20Error(Problem::pexact, press, time, &prelerr );
 
-
-                bool verbose = (d->comm->MyPID() == 0);
-
                 if (verbose)
                 {
                     out_norm << time  << " "
@@ -903,7 +905,7 @@ Ethiersteinman::run()
             chronoGlobal.stop();
             if (verbose) std::cout << "Total simulation time (time loop only) " << chronoGlobal.diff() << " s." << std::endl;
 
-            if (d->comm->MyPID()==0)
+            if (verbose)
             {
                 out_norm.close();
             }
