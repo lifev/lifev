@@ -126,6 +126,9 @@ FSIMonolithicGI::updateSystem()
     //M_meshMotion->dispOld() is at time n-1 !!
     //M_meshMotion->updateSystem();
 
+    Epetra_MultiVector zeroVec(*M_monolithicMatrix->interfaceMap()->map(Unique), 1);
+    M_uk->subset( zeroVec, *M_monolithicMatrix->interfaceMap(), 0, M_solidAndFluidDim );
+
     UInt offset(M_solidAndFluidDim + nDimensions*M_interface);
     vectorPtr_Type meshDispDiff(new vector_Type(M_mmFESpace->map()));
     meshDispDiff->subset(*M_uk, offset); //if the conv. term is to be condidered implicitly

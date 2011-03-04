@@ -169,6 +169,10 @@ public:
     //! and GI)
     const vector_Type&          meshDisp()const
     {
+        vectorPtr_Type meshDisp( new vector_Type(M_mmFESpace->map()) );
+        meshDisp->subset(*M_un, M_solidAndFluidDim + nDimensions*M_interface);
+        M_meshMotion->setDisplacement(*meshDisp);
+
         return this->M_meshMotion->disp();
     }
 
