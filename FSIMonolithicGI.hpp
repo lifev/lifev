@@ -169,11 +169,18 @@ public:
     //! and GI)
     const vector_Type&          meshDisp()const
     {
+        vectorPtr_Type meshDisp( new vector_Type(M_mmFESpace->map()) );
+        meshDisp->subset(*M_un, M_solidAndFluidDim + nDimensions*M_interface);
+        M_meshMotion->setDisplacement(*meshDisp);
+
         return this->M_meshMotion->disp();
     }
 
     //! get the solution.
-    const vector_Type& solution() const { return *M_uk; }
+    const vector_Type& solution() const
+    {
+        return *M_uk;
+    }
 
     //! get the solution.
     vectorPtr_Type& solutionPtr() { return M_uk; }

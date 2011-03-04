@@ -330,16 +330,15 @@ FSIMonolithic::solveJac(vector_Type         &_step,
 
     M_precPtr->blockAssembling();
     M_precPtr->applyBoundaryConditions(dataFluid()->dataTime()->time());
-
     M_precPtr->GlobalAssemble();
 
-    M_solid->getDisplayer().leaderPrint("  M-  Jacobian NormInf res:                    ", _res.normInf(), "\n");
+    M_solid->getDisplayer().leaderPrint("  M-  normInf res:                    ", _res.normInf(), "\n");
     M_solid->getDisplayer().leaderPrint("  M-  Solving Jacobian system ...              \n" );
 
     //M_monolithicMatrix->matrix()->spy("J");
     this->iterateMonolithic(_res, _step);
 
-    M_solid->getDisplayer().leaderPrint("  M-  Jacobian NormInf res:                    ", _step.normInf(), "\n");
+    M_solid->getDisplayer().leaderPrint("  M-  Newton step normInf:                    ", _step.normInf(), "\n");
 }
 
 void
@@ -503,7 +502,6 @@ FSIMonolithic::variablesInit(const std::string& dOrder)
                                                        dOrder,
                                                        3,
                                                        M_epetraComm));
-
     // INITIALIZATION OF THE VARIABLES
     M_lambdaFluid.reset(new vector_Type(*M_fluidInterfaceMap, Unique) );
     M_lambdaFluidRepeated.reset(new vector_Type(*M_fluidInterfaceMap, Repeated) );
@@ -511,20 +509,20 @@ FSIMonolithic::variablesInit(const std::string& dOrder)
 
 void FSIMonolithic::setupBlockPrec( )
 {
-     if(!(M_precPtr->set()))
+    if(!(M_precPtr->set()))
      {
-        M_precPtr->push_back_matrix(M_solidBlockPrec, false);
-        M_precPtr->push_back_matrix(M_fluidBlock, true);
-        M_precPtr->setConditions(M_BChs);
-        M_precPtr->setSpaces(M_FESpaces);
-        M_precPtr->setOffsets(2, M_offset, 0);
-        M_precPtr->coupler(M_monolithicMap, M_dofStructureToHarmonicExtension->localDofMap(), M_numerationInterface, M_data->dataFluid()->dataTime()->timeStep());
+         M_precPtr->push_back_matrix(M_solidBlockPrec, false);
+         M_precPtr->push_back_matrix(M_fluidBlock, true);
+         M_precPtr->setConditions(M_BChs);
+         M_precPtr->setSpaces(M_FESpaces);
+         M_precPtr->setOffsets(2, M_offset, 0);
+         M_precPtr->coupler(M_monolithicMap, M_dofStructureToHarmonicExtension->localDofMap(), M_numerationInterface, M_data->dataFluid()->dataTime()->timeStep());
      }
-     else
-     {
-         M_precPtr->replace_matrix(M_fluidBlock, 1);
-         M_precPtr->replace_matrix(M_solidBlockPrec, 0);
-     }
+    else
+    {
+        M_precPtr->replace_matrix(M_fluidBlock, 1);
+        M_precPtr->replace_matrix(M_solidBlockPrec, 0);
+    }
 }
 
 void
@@ -560,9 +558,8 @@ FSIMonolithic::assembleFluidBlock(UInt iter, vectorPtr_Type& solution)
     if (iter==0)
     {
         M_resetPrec=true;
-
-	M_bdf->updateRHSContribution(M_data->dataFluid()->dataTime()->timeStep() );
-        *this->M_rhs += M_fluid->matrixMass()*M_bdf->rhsContributionFirstDerivative() ;
+        M_bdf->updateRHSContribution(M_data->dataFluid()->dataTime()->timeStep() );
+        *this->M_rhs += M_fluid->matrixMass()*(*M_un)*1/M_data->dataFluid()->dataTime()->timeStep();//M_bdf->rhsContributionFirstDerivative() ;
         couplingRhs(this->M_rhs, M_un);
     }
     *M_rhsFull = *M_rhs;

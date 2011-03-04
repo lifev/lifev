@@ -86,10 +86,11 @@ FSIMonolithicGI::setupFluidSolid( UInt const fluxes )
     //std::cout<<"map global elements : "<<M_monolithicMap->getMap(Unique)->NumGlobalElements()<<std::endl;
     M_interface=M_monolithicMatrix->interface();
 
-    vector_Type u0(*this->M_monolithicMap);
-    M_bdf.reset(new TimeAdvanceBDF<vector_Type>());
-    M_bdf->setup(M_data->dataFluid()->dataTime()->orderBDF());
-    M_bdf->setInitialCondition(u0);
+//     vector_Type u0(*this->M_monolithicMap);
+//     M_bdf.reset(new TimeAdvanceBDF<vector_Type>());
+//     M_bdf->setup(M_data->dataFluid()->dataTime()->orderBDF());
+//     M_bdf->setInitialCondition(u0);
+    this->M_beta.reset( new vector_Type(M_uFESpace->map()) );
     this->M_rhs.reset(new vector_Type(*this->M_monolithicMap));
     this->M_rhsFull.reset(new vector_Type(*this->M_monolithicMap));
     if(M_data->dataFluid()->useShapeDerivatives())
@@ -125,6 +126,9 @@ FSIMonolithicGI::updateSystem()
     //M_meshMotion->dispOld() is at time n-1 !!
     //M_meshMotion->updateSystem();
 
+    Epetra_MultiVector zeroVec(*M_monolithicMatrix->interfaceMap()->map(Unique), 1);
+    M_uk->subset( zeroVec, *M_monolithicMatrix->interfaceMap(), 0, M_solidAndFluidDim );
+
     UInt offset(M_solidAndFluidDim + nDimensions*M_interface);
     vectorPtr_Type meshDispDiff(new vector_Type(M_mmFESpace->map()));
     meshDispDiff->subset(*M_uk, offset); //if the conv. term is to be condidered implicitly
@@ -151,7 +155,6 @@ FSIMonolithicGI::evalResidual( vector_Type&       res,
         this->M_solid->updateVel();
     }
     M_uk.reset(new vector_Type( disp ));
-    this->M_beta.reset( new vector_Type(M_uFESpace->map()) );
     UInt offset( M_solidAndFluidDim + nDimensions*M_interface );
 
     vectorPtr_Type meshDispDiff( new vector_Type(M_mmFESpace->map()) );
@@ -268,13 +271,13 @@ void FSIMonolithicGI::solveJac(vector_Type       &_step,
     //M_monolithicMatrix->matrix()->spy("J");
     //boost::dynamic_pointer_cast<MonolithicBlockMatrix>(M_precPtr)->matrix()->spy("P");
 
-    M_linearSolver->setMatrix(*M_monolithicMatrix->matrix());
+    //    M_linearSolver->setMatrix(*M_monolithicMatrix->matrix());
 
-    M_solid->getDisplayer().leaderPrint("  M-  Jacobian NormInf res:                    ", _res.normInf(), "\n");
+    M_solid->getDisplayer().leaderPrint("  M-  NormInf res:                    ", _res.normInf(), "\n");
     M_solid->getDisplayer().leaderPrint("  M-  Solving Jacobian system ...              \n" );
-
     this->iterateMonolithic(_res, _step);
-    M_solid->getDisplayer().leaderPrint("  M-  Jacobian NormInf res:                    ", _step.normInf(), "\n");
+    M_solid->getDisplayer().leaderPrint("  M-  NormInf step:                    ", _step.normInf(), "\n");
+
 }
 
 void FSIMonolithicGI::initialize( FSIOperator::fluidPtr_Type::value_type::function_Type const& u0,
