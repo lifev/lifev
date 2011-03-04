@@ -467,9 +467,6 @@ FSIMonolithic::
 updateSolidSystem( vectorPtr_Type & rhsFluidCoupling )
 {
     M_solid->updateSystem();
-
-    std::cout<<"rhs solid: "<<M_solid->getRhsWithoutBC()->norm2()<<std::endl;
-
     *rhsFluidCoupling += *M_solid->getRhsWithoutBC();
 }
 
