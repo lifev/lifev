@@ -877,50 +877,109 @@ MultiscaleModel1D::tangentProblem( const bcSide_Type& bcOutputSide, const bcType
             if ( bcSide != bcOutputSide )
                 break;
 
+            // Compute the RHS
+            solver_Type::vector_Type rhs( M_feSpace->map() );
+            rhs = 0.;
+
             // Compute the eigenvectors
             data_Type::container2D_Type eigenvalues, leftEigenvector1, leftEigenvector2;
             M_solver->boundaryEigenValuesEigenVectors( bcSide, *M_solution_tn, eigenvalues, leftEigenvector1, leftEigenvector2 );
 
-            switch ( bcSide )
+            UInt bcNode = M_solver->boundaryDOF( bcOutputSide );
+
+            switch ( bcOutputSide )
             {
             case OneDimensional::left:
                 switch ( bcOutputType )
                 {
-                case OneDimensional::Q: // dQ_L/dP_L
-                    jacobianCoefficient = leftEigenvector2[0] / leftEigenvector2[1]
-                                          * M_physics->dAdP( M_solver->boundaryValue( *M_solution, OneDimensional::P, OneDimensional::left ), M_data->dataTime()->timeStep(), 0 );
+                case OneDimensional::Q: // dQ_L/dP_L given by -1 * ( -L21/L22 )
+
+                    rhs[bcNode] = -leftEigenvector2[0] / leftEigenvector2[1];
+                    jacobianCoefficient = -solveTangentProblem( rhs, bcNode ) * M_physics->dAdP( M_solver->boundaryValue( *M_solution, OneDimensional::P, bcOutputSide ), M_data->dataTime()->timeStep(), bcNode );
+
                     break;
-                case OneDimensional::P: // dP_L/dQ_L
+
+                case OneDimensional::P: // dP_L/dQ_L given by -1 * ( -L22/L21 )
+
                     jacobianCoefficient = leftEigenvector2[1] / leftEigenvector2[0]
-                                          * M_physics->dPdA( M_solver->boundaryValue( *M_solution, OneDimensional::A, OneDimensional::left ), M_data->dataTime()->timeStep(), 0 );
+                                          * M_physics->dPdA( M_solver->boundaryValue( *M_solution, OneDimensional::A, bcOutputSide ), M_data->dataTime()->timeStep(), bcNode );
+
                     break;
+
                 default:
+
                     std::cout << "Warning: bcType \"" << bcOutputType << "\"not available!" << std::endl;
                 }
+
                 break;
-            case OneDimensional::right:
+
+           case OneDimensional::right:
                 switch ( bcOutputType )
                 {
-                case OneDimensional::Q: // dQ_R/dP_R
-                    jacobianCoefficient = -leftEigenvector1[0] / leftEigenvector1[1]
-                                          * M_physics->dAdP( M_solver->boundaryValue( *M_solution, OneDimensional::P, OneDimensional::right ), M_data->dataTime()->timeStep(), M_data->numberOfElements() );
+                case OneDimensional::Q: // dQ_R/dP_R given by -L11/L12
+
+                    rhs[bcNode] = -leftEigenvector1[0] / leftEigenvector1[1];
+                    jacobianCoefficient = solveTangentProblem( rhs, bcNode ) * M_physics->dAdP( M_solver->boundaryValue( *M_solution, OneDimensional::P, bcOutputSide ), M_data->dataTime()->timeStep(), bcNode );
+
                     break;
-                case OneDimensional::P: // dP_R/dQ_R
+
+                case OneDimensional::P: // dP_R/dQ_R given by -L12/L11
+
                     jacobianCoefficient = -leftEigenvector1[1] / leftEigenvector1[0]
-                                          * M_physics->dPdA( M_solver->boundaryValue( *M_solution, OneDimensional::A, OneDimensional::right ), M_data->dataTime()->timeStep(), M_data->numberOfElements() );
+                                          * M_physics->dPdA( M_solver->boundaryValue( *M_solution, OneDimensional::A, bcOutputSide ), M_data->dataTime()->timeStep(), bcNode );
                     break;
+
                 default:
+
                     std::cout << "Warning: bcType \"" << bcOutputType << "\"not available!" << std::endl;
                 }
+
                 break;
+
             default:
+
                 std::cout << "Warning: bcSide \"" << bcSide << "\" not available!" << std::endl;
             }
 
+            // Quit the loop
             break;
         }
 
     return jacobianCoefficient;
+}
+
+Real
+MultiscaleModel1D::solveTangentProblem( solver_Type::vector_Type& rhs, const UInt& bcNode )
+{
+    if ( M_data->viscoelasticWall() )
+    {
+        // Solve elastic tangent problem
+        solver_Type::vector_Type flowRate( M_feSpace->map() );
+        M_linearSolver->solveSystem( rhs, flowRate, M_solver->massMatrix() );
+
+        // Solve viscoelastic tangent problem
+        solver_Type::vector_Type flowRateCorrection( M_feSpace->map() );
+        flowRateCorrection = 0;
+
+        solver_Type::vector_Type flowRateDelta( M_feSpace->map() );
+        Real correction( 0 );
+
+        for ( UInt iNode(0); iNode < M_physics->data()->numberOfNodes() ; ++iNode )
+        //UInt iNode = bcNode;
+        {
+            flowRateCorrection  = 0;
+            flowRateDelta = 0;
+            flowRateDelta[iNode] = 1;
+            flowRateCorrection = M_solver->viscoelasticFluxCorrection( *(*M_solution)["A"], flowRateDelta, M_data->dataTime()->timeStep(), *M_bc->handler() );
+
+            correction += flowRateCorrection[bcNode] * flowRate[iNode];
+
+        }
+
+        return correction + flowRate[bcNode];
+    }
+    else
+        return rhs[bcNode];
 }
 
 #endif

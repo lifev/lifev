@@ -43,7 +43,7 @@
 #define MultiscaleModel1D_H 1
 
 // Jacobian coefficient approximation
-#define JACOBIAN_WITH_FINITEDIFFERENCE
+//#define JACOBIAN_WITH_FINITEDIFFERENCE
 #ifdef JACOBIAN_WITH_FINITEDIFFERENCE
 //#define JACOBIAN_WITH_FINITEDIFFERENCE_AREA
 #endif
@@ -416,6 +416,14 @@ private:
      * @return Jacobian coefficient.
      */
     Real tangentProblem( const bcSide_Type& bcOutputSide, const bcType_Type& bcOutputType );
+
+    //! Solve the tangent problem formulation
+    /*!
+     * @param flowRate rhs for the tangent problem.
+     * @param bcNode node of the quantity to be computed.
+     * @return solution of the tangent problem at specific node.
+     */
+    Real solveTangentProblem( solver_Type::vector_Type& rhs, const UInt& bcNode );
 
 #endif
     //@}
