@@ -296,7 +296,7 @@ public:
      *
      *  gamma = gamma_tilde / ( 2 sqrt(pi) )
      */
-    vector_Type viscoelasticFluxCorrection( const vector_Type& area, const vector_Type& flowRate, const Real& timeStep, OneDimensionalBCHandler& bcHandler );
+    vector_Type viscoelasticFluxCorrection( const vector_Type& area, const vector_Type& flowRate, const Real& timeStep, OneDimensionalBCHandler& bcHandler, const bool& updateSystemMatrix = true );
 
     //! CFL computation (correct for constant mesh)
     /*!
@@ -323,13 +323,28 @@ public:
                      const sourcePtr_Type&  source );
 
     //! Set the communicator
+    /*!
+     * @param comm the Epetra MPI communicator
+     */
     void setCommunicator( const commPtr_Type& comm );
 
     //! Set the FEspace
-    void setFESpace( const feSpacePtr_Type& FESpace );
+    /*!
+     * @param feSpace the FE space
+     */
+    void setFESpace( const feSpacePtr_Type& feSpace );
 
     //! Set the linear solver
+    /*!
+     * @param linearSolver the linear solver for the hyperbolic problem
+     */
     void setLinearSolver( const linearSolverPtr_Type& linearSolver );
+
+    //! Set the linear solver
+    /*!
+     * @param linearViscoelasticSolver the linear solver for the viscoelastic problem
+     */
+    void setLinearViscoelasticSolver( const linearSolverPtr_Type& linearViscoelasticSolver );
 
     //@}
 
@@ -524,6 +539,7 @@ private:
 
     //! The linear solver
     linearSolverPtr_Type               M_linearSolver;
+    linearSolverPtr_Type               M_linearViscoelasticSolver;
 
 private:
 

@@ -81,7 +81,8 @@ OneDimensionalSolver::OneDimensionalSolver():
     M_dFdUStiffnessMatrix       (),
     M_dFdUGradientMatrix        (),
     M_dSdUDivergenceMatrix      (),
-    M_linearSolver              ()
+    M_linearSolver              (),
+    M_linearViscoelasticSolver  ()
 {
 }
 
@@ -326,7 +327,7 @@ OneDimensionalSolver::iterate( OneDimensionalBCHandler& bcHandler, solution_Type
 }
 
 OneDimensionalSolver::vector_Type
-OneDimensionalSolver::viscoelasticFluxCorrection( const vector_Type& area, const vector_Type& flowRate, const Real& timeStep, OneDimensionalBCHandler& bcHandler )
+OneDimensionalSolver::viscoelasticFluxCorrection( const vector_Type& area, const vector_Type& flowRate, const Real& timeStep, OneDimensionalBCHandler& bcHandler, const bool& updateSystemMatrix )
 {
     // Matrix
     matrix_Type systemMatrix( M_feSpace->map() );
@@ -373,8 +374,8 @@ OneDimensionalSolver::viscoelasticFluxCorrection( const vector_Type& area, const
     }
 
     // System Matrix = MassMatrix + stiffnessCoefficient * StiffnessMatrix
-    systemMatrix.globalAssemble();
     stiffnessMatrix.globalAssemble();
+    systemMatrix.globalAssemble();
     systemMatrix += stiffnessMatrix;
 
     // RHS
@@ -386,11 +387,9 @@ OneDimensionalSolver::viscoelasticFluxCorrection( const vector_Type& area, const
     // Compute flow rate correction at t^n+1
     vector_Type flowRateCorrection( rhs );
 
-    linearSolver_Type linearSolver( M_comm );
-    linearSolver.setParametersList( M_linearSolver->parametersList() );
-    linearSolver.setParameters();
-    linearSolver.setMatrix( systemMatrix );
-    linearSolver.solveSystem( rhs, flowRateCorrection, M_homogeneousMassMatrix );
+    if ( updateSystemMatrix )
+        M_linearViscoelasticSolver->setMatrix( systemMatrix );
+    M_linearViscoelasticSolver->solveSystem( rhs, flowRateCorrection, M_homogeneousMassMatrix );
 
     return flowRateCorrection;
 }
@@ -495,6 +494,12 @@ void
 OneDimensionalSolver::setLinearSolver( const linearSolverPtr_Type& linearSolver )
 {
     M_linearSolver = linearSolver;
+}
+
+void
+OneDimensionalSolver::setLinearViscoelasticSolver( const linearSolverPtr_Type& linearViscoelasticSolver )
+{
+    M_linearViscoelasticSolver = linearViscoelasticSolver;
 }
 
 // ===================================================

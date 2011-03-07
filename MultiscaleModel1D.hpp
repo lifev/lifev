@@ -463,6 +463,7 @@ private:
 
     // Linear solver
     boost::shared_ptr< linearSolver_Type > M_linearSolver;
+    boost::shared_ptr< linearSolver_Type > M_linearViscoelasticSolver;
 
     // FE spaces
     boost::shared_ptr< feSpace_Type >      M_feSpace;
