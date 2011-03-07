@@ -16,11 +16,11 @@ algorithmName        = Default
 algorithmType        = Broyden
 
 [Parameters]
-initializeAsIdentityMatrix     = false
-resetAtEachTimeStep            = true
+initializeAsIdentityMatrix     = false # Initialize the Jacobian as the identity matrix
+iterationsLimitForReset        = 0.8    # Percentage of iterations to reset
 
 orthogonalization              = false
-orthogonalizationSize          = 1
+orthogonalizationSize          = 0
 
 [Solver]
 	[./AztecOO]
