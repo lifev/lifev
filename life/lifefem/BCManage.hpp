@@ -1428,7 +1428,7 @@ bcNaturalManageUDep( Real (*mu)(Real time,Real x, Real y, Real z, Real u),
             Real uPt;            //value in the point
             for (ID idofLocU=0; idofLocU<nDofF; idofLocU++)
             {
-                ID idGDofU=pId->bdLocalToGlobal(idofLocU)+ boundaryCond.component( 0 ) * totalDof + offset;
+                ID idGDofU=pId->boundaryLocalToGlobalMap(idofLocU)+ boundaryCond.component( 0 ) * totalDof + offset;
                 locU[idofLocU]=feVec[idGDofU];
             }
 
@@ -1441,7 +1441,7 @@ bcNaturalManageUDep( Real (*mu)(Real time,Real x, Real y, Real z, Real u),
                 {
 
                     //global Dof
-                    idDof = pId->bdLocalToGlobal( idofF ) + boundaryCond.component( j ) * totalDof + offset;
+                    idDof = pId->boundaryLocalToGlobalMap( idofF ) + boundaryCond.component( j ) * totalDof + offset;
 
                     // Loop on quadrature points
                     for ( int l = 0; l < (int)currentBdFE.nbQuadPt; ++l )

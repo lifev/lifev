@@ -120,14 +120,14 @@ int bessjy01a(double x,double &j0,double &j1,double &y0,double &y1,
         for (k=1;k<=30;k++) {
             r *= -0.25*x2/(k*k);
             j0 += r;
-            if (fabs(r) < fabs(j0)*1e-15) break;
+            if (std::abs(r) < std::abs(j0)*1e-15) break;
         }
         j1 = 1.0;
         r = 1.0;
         for (k=1;k<=30;k++) {
             r *= -0.25*x2/(k*(k+1));
             j1 += r;
-            if (fabs(r) < fabs(j1)*1e-15) break;
+            if (std::abs(r) < std::abs(j1)*1e-15) break;
         }
         j1 *= 0.5*x;
         ec = log(0.5*x)+el;
@@ -139,7 +139,7 @@ int bessjy01a(double x,double &j0,double &j1,double &y0,double &y1,
             r0 *= -0.25*x2/(k*k);
             r = r0 * w0;
             cs0 += r;
-            if (fabs(r) < fabs(cs0)*1e-15) break;
+            if (std::abs(r) < std::abs(cs0)*1e-15) break;
         }
         y0 = M_2_PI*(ec*j0-cs0);
         cs1 = 1.0;
@@ -150,7 +150,7 @@ int bessjy01a(double x,double &j0,double &j1,double &y0,double &y1,
             r1 *= -0.25*x2/(k*(k+1));
             r = r1*(2.0*w1+1.0/(k+1));
             cs1 += r;
-            if (fabs(r) < fabs(cs1)*1e-15) break;
+            if (std::abs(r) < std::abs(cs1)*1e-15) break;
         }
         y1 = M_2_PI * (ec*j1-1.0/x-0.25*x*cs1);
     }
@@ -267,7 +267,7 @@ int msta1(double x,int mp)
     double a0,f0,f1,f;
     int i,n0,n1,nn;
 
-    a0 = fabs(x);
+    a0 = std::abs(x);
     n0 = (int)(1.1*a0)+1;
     f0 = 0.5*log10(6.28*n0)-n0*log10(1.36*a0/n0)-mp;
     n1 = n0+5;
@@ -275,7 +275,7 @@ int msta1(double x,int mp)
     for (i=0;i<20;i++) {
         nn = (int) (n1- (n1-n0)/(1.0-f0/f1));
         f = 0.5*log10(6.28*nn)-nn*log10(1.36*a0/nn)-mp;
-        if (abs(nn-n1) < 1) break;
+        if (std::abs(nn-n1) < 1) break;
         n0 = n1;
         f0 = f1;
         n1 = nn;
@@ -288,7 +288,7 @@ int msta2(double x,int n,int mp)
     double a0,ejn,hmp,f0,f1,f,obj;
     int i,n0,n1,nn;
 
-    a0 = fabs(x);
+    a0 = std::abs(x);
     hmp = 0.5*mp;
     ejn = 0.5*log10(6.28*n)-n*log10(1.36*a0/n);
     if (ejn <= hmp) {
@@ -306,7 +306,7 @@ int msta2(double x,int n,int mp)
     for (i=0;i<20;i++) {
         nn = (int)(n1-(n1-n0)/(1.0-f0/f1));
         f = 0.5*log10(6.28*nn)-nn*log10(1.36*a0/nn)-obj;
-        if (abs(nn-n1) < 1) break;
+        if (std::abs(nn-n1) < 1) break;
         n0 = n1;
         f0 = f1;
         n1 = nn;
@@ -374,7 +374,7 @@ int bessjyna(int n,double x,int &nm,double *jn,double *yn,
             f2 = f1;
             f1 = f;
         }
-        if (fabs(bj0) > fabs(bj1)) cs = bj0/f;
+        if (std::abs(bj0) > std::abs(bj1)) cs = bj0/f;
         else cs = bj1/f2;
         for (k=0;k<=nm;k++) {
             jn[k] *= cs;
@@ -565,7 +565,7 @@ int bessjyv(double v,double x,double &vm,double *jv,double *yv,
             for (k=1;k<=40;k++) {
                 r *= -0.25*x2/(k*(k+vl));
                 bjvl += r;
-                if (fabs(r) < fabs(bjvl)*1e-15) break;
+                if (std::abs(r) < std::abs(bjvl)*1e-15) break;
             }
             vg = 1.0 + vl;
             a = pow(0.5*x,vl)/gamma(vg);
@@ -635,7 +635,7 @@ int bessjyv(double v,double x,double &vm,double *jv,double *yv,
             f2 = f1;
             f1 = f;
         }
-        if (fabs(bjv0) > fabs(bjv1)) cs = bjv0/f;
+        if (std::abs(bjv0) > std::abs(bjv1)) cs = bjv0/f;
         else cs = bjv1/f2;
         for (k=0;k<=n;k++) {
             jv[k] *= cs;
@@ -653,7 +653,7 @@ int bessjyv(double v,double x,double &vm,double *jv,double *yv,
                 for (k=1;k<=40;k++) {
                     r *= -0.25*x2/(k*(k-vl));
                     bjvl += r;
-                    if (fabs(r) < fabs(bjvl)*1e-15) break;
+                    if (std::abs(r) < std::abs(bjvl)*1e-15) break;
                 }
                 vg = 1.0-vl;
                 b = pow(2.0/x,vl)/gamma(vg);

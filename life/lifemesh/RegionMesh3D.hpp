@@ -2852,9 +2852,7 @@ RegionMesh3D<GEOSHAPE, MC>::showMe( bool verbose, std::ostream & out ) const
     out << "                      RegionMesh3D                " << std::endl;
     out << "**************************************************" << std::endl;
     out << "**************************************************" << std::endl;
-    out << " ID: " << this->id() << " Marker Flag:";
-    this->Marker<LifeV::MarkerTraits>::showMe( out );
-    out << std::endl;
+    out << " ID: " << this->id() << " Marker Flag: " << this->marker() << std::endl;
     //  out <<"Faces local to  volumes stored: "<<hasLocalFaces()<<std::endl;
     //out <<"Edges local to  volumes stored: "<<hasLocalEdges()<<std::endl;
     //out <<"Edges local to  faces   stored:"<<switches.test("FACEtoEDGE")<<std::endl;

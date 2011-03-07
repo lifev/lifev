@@ -1067,7 +1067,7 @@ VenantKirchhoffSolver<Mesh, SolverType>::reduceSolution( Vector& displacement, V
 
   if ( getComunicator()->MyPID() == 0 )
     {
-      for ( UInt iDof = 0; iDof < nDimensions*dim(); ++iDof )
+      for ( UInt iDof = 0; iDof < nDimensions*getDim(); ++iDof )
 	{
 	  disp[ iDof ] = displacement[ iDof ];
 	  vel [ iDof ] = velocity    [ iDof ];
