@@ -6,8 +6,10 @@
 //
 #include <complex>
 #include <life/lifefunctions/bessel/bessel.hpp>
-double gamma(double);
 using namespace std;
+
+namespace bessel{
+double gamma(double);
 
 static complex<double> cii(0.0,1.0);
 static complex<double> cone(1.0,0.0);
@@ -712,5 +714,4 @@ int cbessjyva(double v,complex<double> z,double &vm,complex<double>*cjv,
     vm = n+v0;
     return 0;
 }
-
-
+}

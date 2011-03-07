@@ -50,7 +50,7 @@ Real Womersley::uexact( const Real& t, const Real& /*x*/, const Real& y, const R
 	Real r=sqrt(z*z+y*y);
 	std::complex<Real> z2, b2;
 	z2 = 2.*r/S_D*S_z1;
-	cbessjy01(z2, b2, S_cj1, S_cy0, S_cy1, S_cj0p, S_cj1p, S_cy0p, S_cy1p);
+	bessel::cbessjy01(z2, b2, S_cj1, S_cy0, S_cy1, S_cj0p, S_cj1p, S_cy0p, S_cy1p);
 	Real u = real(S_A/S_L/S_rho/S_wi*(1.-b2/S_b1)*exp(S_wi*t));
     switch(i) {
         case 0:  //u_1
@@ -74,7 +74,7 @@ Real Womersley::grad_u( const UInt& icoor, const Real& t, const Real& /*x*/, con
 	Real r=sqrt(y*y+z*z);
 	std::complex<Real> z2, b2;
 	z2 = 2.*r/S_D*S_z1;
-	cbessjy01(z2, b2, S_cj1, S_cy0, S_cy1, S_cj0p, S_cj1p, S_cy0p, S_cy1p);
+	bessel::cbessjy01(z2, b2, S_cj1, S_cy0, S_cy1, S_cj0p, S_cj1p, S_cy0p, S_cy1p);
 	b2 = -2./S_D*S_z1*S_cj0p;
 	Real u_r = real(S_A/S_L/S_rho/S_wi*+b2/S_b1*exp(S_wi*t));
 
@@ -290,7 +290,7 @@ void Womersley::setParamsFromGetPot( const GetPot& dataFile )
     S_w = 2.*Pi/S_T;
     S_wi = S_w*S_ii;
     S_z1 = S_W0*pow(S_ii,1.5);
-    cbessjy01(S_z1, S_b1, S_cj1, S_cy0, S_cy1, S_cj0p, S_cj1p, S_cy0p, S_cy1p);
+    bessel::cbessjy01(S_z1, S_b1, S_cj1, S_cy0, S_cy1, S_cj0p, S_cj1p, S_cy0p, S_cy1p);
 
 }
 

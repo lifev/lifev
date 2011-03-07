@@ -9,6 +9,8 @@
 
 using namespace std;
 
+namespace bessel{
+
 static complex<double> cii(0.0,1.0);
 static complex<double> czero(0.0,0.0);
 static complex<double> cone(1.0,0.0);
@@ -452,4 +454,5 @@ int cbessikv(double v,complex<double>z,double &vm,complex<double> *civ,
     }
     vm = n+v0;
     return 0;
+}
 }

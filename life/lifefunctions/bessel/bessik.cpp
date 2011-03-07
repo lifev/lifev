@@ -7,7 +7,7 @@
 //
 #include <math.h>
 #include <life/lifefunctions/bessel/bessel.hpp>
-
+namespace bessel{
 double gamma(double x);
 
 int bessik01a(double x,double &i0,double &i1,double &k0,double &k1,
@@ -483,4 +483,5 @@ int bessikv(double v,double x,double &vm,double *iv,double *kv,
     }
     vm = n+v0;
     return 0;
+}
 }

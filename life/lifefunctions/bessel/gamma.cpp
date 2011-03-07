@@ -10,6 +10,7 @@
 //      or if argument exceeds 171.
 //
 #include <math.h>
+namespace bessel{
 double gamma(double x)
 {
     int i,k,m;
@@ -78,4 +79,5 @@ double gamma(double x)
         }
     }
     return ga;
+}
 }

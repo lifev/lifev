@@ -71,7 +71,7 @@ bcManage( MatrixType& matrix,
           BCHandler const& bcHandler,
           CurrentBoundaryFE& currentBdFE,
           DataType const& diagonalizeCoef,
-          DataType const& time = 0 );
+          DataType const& time );
 
 
 
@@ -124,7 +124,7 @@ bcManageMatrix( MatrixType&      matrix,
                 const BCHandler& bcHandler,
                 CurrentBoundaryFE&     currentBdFE,
                 const DataType&  diagonalizeCoef,
-                const DataType&  time = 0);
+                const DataType&  time );
 
 
 
@@ -228,7 +228,7 @@ bcEssentialManageUDep( MatrixType& matrix,
                        const DataType& diagonalizeCoef,
                        const DataType& time,
                        const VectorType& feVec ,
-                       UInt offset=0);
+                       UInt offset );
 
 
 
@@ -556,7 +556,7 @@ bcManage( MatrixType& matrix,
           BCHandler const& bcHandler,
           CurrentBoundaryFE& currentBdFE,
           DataType const& diagonalizeCoef,
-          DataType const& time = 0 )
+          DataType const& time )
 {
 
     VectorType rhsRepeated(rightHandSide.map(), Repeated);
@@ -729,7 +729,7 @@ bcManageMatrix( MatrixType&      matrix,
                 const BCHandler& bcHandler,
                 CurrentBoundaryFE&     currentBdFE,
                 const DataType&  diagonalizeCoef,
-                const DataType&  time = 0)
+                const DataType&  time )
 {
 
     bool globalassemble=false;
@@ -981,7 +981,7 @@ bcEssentialManageUDep( MatrixType& matrix,
                        const DataType& diagonalizeCoef,
                        const DataType& time,
                        const VectorType& feVec ,
-                       UInt offset=0)
+                       UInt offset )
 {
 
     ID idDof;

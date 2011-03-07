@@ -13,7 +13,7 @@
 //
 #include <math.h>
 #include <life/lifefunctions/bessel/bessel.hpp>
-
+namespace bessel{
 double gamma(double x);
 //
 //  INPUT:
@@ -275,7 +275,7 @@ int msta1(double x,int mp)
     for (i=0;i<20;i++) {
         nn = (int) (n1- (n1-n0)/(1.0-f0/f1));
         f = 0.5*log10(6.28*nn)-nn*log10(1.36*a0/nn)-mp;
-        if (fabs(nn-n1) < 1) break;
+        if (abs(nn-n1) < 1) break;
         n0 = n1;
         f0 = f1;
         n1 = nn;
@@ -306,7 +306,7 @@ int msta2(double x,int n,int mp)
     for (i=0;i<20;i++) {
         nn = (int)(n1-(n1-n0)/(1.0-f0/f1));
         f = 0.5*log10(6.28*nn)-nn*log10(1.36*a0/nn)-obj;
-        if (fabs(nn-n1) < 1) break;
+        if (abs(nn-n1) < 1) break;
         n0 = n1;
         f0 = f1;
         n1 = nn;
@@ -701,4 +701,5 @@ int bessjyv(double v,double x,double &vm,double *jv,double *yv,
     }
     vm = n + v0;
     return 0;
+}
 }

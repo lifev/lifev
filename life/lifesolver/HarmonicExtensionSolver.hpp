@@ -159,9 +159,6 @@ public:
     //! manually rescale the system matrix by dt
     void rescaleMatrix(Real& dt) {*M_matrHE *= dt;}
 
-    //! this method is not a setter. It is an operator=+
-    void __attribute__ ((__deprecated__)) setMatrix(matrixPtr_Type matr) { addSystemMatrixTo(matr); }
-
     //! Adds the system matrix to the argument
     void addSystemMatrixTo(matrixPtr_Type matr) const {*matr += *M_matrHE;}
 
