@@ -286,6 +286,18 @@ public:
      */
     void iterate( OneDimensionalBCHandler& bcH, solution_Type& solution, const Real& time, const Real& timeStep );
 
+    //! Apply the viscoelastic Flux correction:
+    /*!
+     *  We use a finite element scheme for the correction term:
+     *  given the solution of Taylor-Galerkin scheme, solve
+     *  ( 1/(dt*Ah(n+1)) Qtildeh(n+1), phi) +        //! 1/A * massFactor^{-1} * Un+1
+     *  ( gamma / rho ) *     ( dQtildeh(n+1)/dz, dphi/dz )  //! stiff * Qtilde(U)
+     *  = - ( gamma / rho ) * ( dQhath(n+1)/dz, dphi/dz )  //! stiff * Qhat(U)
+     *
+     *  gamma = gamma_tilde / ( 2 sqrt(pi) )
+     */
+    vector_Type viscoelasticFluxCorrection( const vector_Type& area, const vector_Type& flowRate, const Real& timeStep, OneDimensionalBCHandler& bcHandler );
+
     //! CFL computation (correct for constant mesh)
     /*!
      * @param timeStep the time step
@@ -369,6 +381,12 @@ public:
      */
     const vectorPtrContainer_Type& residual() const { return M_residual; }
 
+    //! Get the system matrix without BC
+    /*!
+     * @return system matrix without BC
+     */
+    const matrixPtr_Type& massMatrix() const { return M_homogeneousMassMatrix; }
+
     //@}
 
 private:
@@ -440,18 +458,6 @@ private:
      *  m = rho_w h0 / ( 2 sqrt(pi) sqrt(A0) )
      */
     vector_Type inertialFluxCorrection( const vector_Type& );
-
-    //! Apply the viscoelastic Flux correction:
-    /*!
-     *  We use a finite element scheme for the correction term:
-     *  given the solution of Taylor-Galerkin scheme, solve
-     *  ( 1/(dt*Ah(n+1)) Qtildeh(n+1), phi) +        //! 1/A * massFactor^{-1} * Un+1
-     *  ( gamma / rho ) *     ( dQtildeh(n+1)/dz, dphi/dz )  //! stiff * Qtilde(U)
-     *  = - ( gamma / rho ) * ( dQhath(n+1)/dz, dphi/dz )  //! stiff * Qhat(U)
-     *
-     *  gamma = gamma_tilde / ( 2 sqrt(pi) )
-     */
-    vector_Type viscoelasticFluxCorrection( const vector_Type& area, const vector_Type& flowRate, const Real& timeStep, OneDimensionalBCHandler& bcHandler );
 
     //! Apply the longitudinal Flux correction:
     /*!
