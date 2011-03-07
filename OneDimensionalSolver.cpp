@@ -325,6 +325,76 @@ OneDimensionalSolver::iterate( OneDimensionalBCHandler& bcHandler, solution_Type
     computePressure( solution, timeStep );
 }
 
+OneDimensionalSolver::vector_Type
+OneDimensionalSolver::viscoelasticFluxCorrection( const vector_Type& area, const vector_Type& flowRate, const Real& timeStep, OneDimensionalBCHandler& bcHandler )
+{
+    // Matrix
+    matrix_Type systemMatrix( M_feSpace->map() );
+    matrix_Type stiffnessMatrix( M_feSpace->map() );
+
+    Real massCoefficient;
+    Real stiffnessCoefficient;
+
+    // RHS
+    vector_Type rhs( M_feSpace->map() );
+    rhs = 0;
+
+    // Elementary computation and matrix assembling
+    for ( UInt iElement(0); iElement < M_physics->data()->numberOfElements() ; ++iElement )
+    {
+        // Update the current element
+        M_feSpace->fe().update( M_feSpace->mesh()->edgeList(iElement), UPDATE_DPHI | UPDATE_WDET );
+
+        // Compute mass coefficient
+        massCoefficient = 1 / ( 0.5 * ( area[ iElement ] + area[ iElement + 1 ] ) );
+//      massCoefficient = 1 / ( 0.5 * ( M_physics->data()->area0( iElement ) + M_physics->data()->area0( iElement + 1 ) ) );
+
+        // Compute stiffness coefficient
+        stiffnessCoefficient  = timeStep * 0.5 * ( M_physics->data()->viscoelasticCoefficient( iElement ) + M_physics->data()->viscoelasticCoefficient( iElement + 1 ) )
+                              / M_physics->data()->densityRho() * massCoefficient * std::sqrt( massCoefficient );
+
+        // Set the elementary matrices to 0.
+        M_elementalMassMatrix->zero();
+        M_elementalStiffnessMatrix->zero();
+
+        // Assemble the elemental matrix
+        mass(  massCoefficient,      *M_elementalMassMatrix,      M_feSpace->fe(), 0, 0 );
+        stiff( stiffnessCoefficient, *M_elementalStiffnessMatrix, M_feSpace->fe(), 0, 0 );
+
+        // Assemble the stiffness matrix
+        assembleMatrix( systemMatrix,    *M_elementalMassMatrix,      M_feSpace->fe(), M_feSpace->dof(), 0, 0, 0, 0 );
+        assembleMatrix( stiffnessMatrix, *M_elementalStiffnessMatrix, M_feSpace->fe(), M_feSpace->dof(), 0, 0, 0, 0 );
+
+        // Natural BC
+        if ( iElement == 0 )
+            rhs( 0 )            -= stiffnessCoefficient * M_flux->physics()->data()->computeSpatialDerivativeAtNode( flowRate, 0, 1 );
+        if ( iElement == M_physics->data()->numberOfElements() - 1 )
+            rhs( iElement + 1 ) += stiffnessCoefficient * M_flux->physics()->data()->computeSpatialDerivativeAtNode( flowRate, iElement + 1, 1 );
+    }
+
+    // System Matrix = MassMatrix + stiffnessCoefficient * StiffnessMatrix
+    systemMatrix.globalAssemble();
+    stiffnessMatrix.globalAssemble();
+    systemMatrix += stiffnessMatrix;
+
+    // RHS
+    rhs += stiffnessMatrix * (-flowRate);
+
+    // Apply BC to Matrix and RHS
+    bcHandler.applyViscoelasticBC( M_flux, systemMatrix, rhs );
+
+    // Compute flow rate correction at t^n+1
+    vector_Type flowRateCorrection( rhs );
+
+    linearSolver_Type linearSolver( M_comm );
+    linearSolver.setParametersList( M_linearSolver->parametersList() );
+    linearSolver.setParameters();
+    linearSolver.setMatrix( systemMatrix );
+    linearSolver.solveSystem( rhs, flowRateCorrection, M_homogeneousMassMatrix );
+
+    return flowRateCorrection;
+}
+
 Real
 OneDimensionalSolver::computeCFL( const solution_Type& solution, const Real& timeStep ) const
 {
@@ -806,75 +876,6 @@ OneDimensionalSolver::inertialFluxCorrection( const vector_Type& flux )
     //std::cout <<" iterations number :  " << numIter << std::endl;
 
     return sol;
-}
-
-OneDimensionalSolver::vector_Type
-OneDimensionalSolver::viscoelasticFluxCorrection( const vector_Type& area, const vector_Type& flowRate, const Real& timeStep, OneDimensionalBCHandler& bcHandler )
-{
-    // Matrix
-    matrix_Type systemMatrix( M_feSpace->map() );
-    matrix_Type stiffnessMatrix( M_feSpace->map() );
-
-    Real massCoefficient;
-    Real stiffnessCoefficient;
-
-    // RHS
-    vector_Type rhs( M_feSpace->map() );
-    rhs = 0;
-
-    // Elementary computation and matrix assembling
-    for ( UInt iElement(0); iElement < M_physics->data()->numberOfElements() ; ++iElement )
-    {
-        // Update the current element
-        M_feSpace->fe().update( M_feSpace->mesh()->edgeList(iElement), UPDATE_DPHI | UPDATE_WDET );
-
-        // Compute mass coefficient
-        massCoefficient = 1 / ( 0.5 * ( area[ iElement ] + area[ iElement + 1 ] ) );
-
-        // Compute stiffness coefficient
-        stiffnessCoefficient  = timeStep * 0.5* ( M_physics->data()->viscoelasticCoefficient( iElement ) + M_physics->data()->viscoelasticCoefficient( iElement + 1 ) )
-                              / M_physics->data()->densityRho() * massCoefficient * std::sqrt( massCoefficient );
-
-        // Set the elementary matrices to 0.
-        M_elementalMassMatrix->zero();
-        M_elementalStiffnessMatrix->zero();
-
-        // Assemble the elemental matrix
-        mass(  massCoefficient,      *M_elementalMassMatrix,      M_feSpace->fe(), 0, 0 );
-        stiff( stiffnessCoefficient, *M_elementalStiffnessMatrix, M_feSpace->fe(), 0, 0 );
-
-        // Assemble the stiffness matrix
-        assembleMatrix( systemMatrix,    *M_elementalMassMatrix,      M_feSpace->fe(), M_feSpace->dof(), 0, 0, 0, 0 );
-        assembleMatrix( stiffnessMatrix, *M_elementalStiffnessMatrix, M_feSpace->fe(), M_feSpace->dof(), 0, 0, 0, 0 );
-
-        // Natural BC
-        if ( iElement == 0 )
-            rhs( 0 )            -= stiffnessCoefficient * M_flux->physics()->data()->computeSpatialDerivativeAtNode( flowRate, 0, 1 );
-        if ( iElement == M_physics->data()->numberOfElements() - 1 )
-            rhs( iElement + 1 ) += stiffnessCoefficient * M_flux->physics()->data()->computeSpatialDerivativeAtNode( flowRate, iElement + 1, 1 );
-    }
-
-    // System Matrix = MassMatrix + stiffnessCoefficient * StiffnessMatrix
-    systemMatrix.globalAssemble();
-    stiffnessMatrix.globalAssemble();
-    systemMatrix += stiffnessMatrix;
-
-    // RHS
-    rhs += stiffnessMatrix * (-flowRate);
-
-    // Apply BC to Matrix and RHS
-    bcHandler.applyViscoelasticBC( M_flux, systemMatrix, rhs );
-
-    // Compute flow rate correction at t^n+1
-    vector_Type flowRateCorrection( rhs );
-
-    linearSolver_Type linearSolver( M_comm );
-    linearSolver.setParametersList( M_linearSolver->parametersList() );
-    linearSolver.setParameters();
-    linearSolver.setMatrix( systemMatrix );
-    linearSolver.solveSystem( rhs, flowRateCorrection, M_homogeneousMassMatrix );
-
-    return flowRateCorrection;
 }
 
 OneDimensionalSolver::vector_Type
