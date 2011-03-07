@@ -14,7 +14,7 @@
 
 [Problem] #########################################################################################
 ProblemType = Multiscale
-ProblemFile = ./MultiscaleDatabase/Models/Multiscale/SinusoidalSquareWave_1D_2Cylinders_FluxStress
+ProblemFile = ./MultiscaleDatabase/Models/Multiscale/SinusoidalSquareWave_1D_2Cylinders_Stress
 #ProblemFile = ./MultiscaleDatabase/Models/Multiscale/SinusoidalWave_1D_2Cylinders_FluxStress
 #ProblemFile = ./MultiscaleDatabase/Models/Multiscale/SinusoidalWave_1D_2Cylinders_Stress
 
@@ -28,10 +28,10 @@ ProblemFile = ./MultiscaleDatabase/Models/Multiscale/SinusoidalSquareWave_1D_2Cy
     [../time_discretization]
     initialtime                = .00      # [s]
     endtime                    = .05      # [s]
-    timestep                   = 5e-5     # [s]
+    timestep                   = 0.001     # [s]
 
     [../Algorithm]
-    type                       = Newton            # Aitken, Explicit, Newton, Broyden
+    type                       = Broyden            # Aitken, Explicit, Newton, Broyden
     file                       = Default           # File name (without .dat extension)
     subiterationsMaximumNumber = 100               # Maximum number for coupling subiterations
     tolerance                  = 1.e-6             # Tolerance on the coupling values
