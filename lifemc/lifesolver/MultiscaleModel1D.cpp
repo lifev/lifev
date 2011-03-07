@@ -73,6 +73,7 @@ MultiscaleModel1D::MultiscaleModel1D() :
         M_source                       (),
         M_solver                       ( new solver_Type() ),
         M_linearSolver                 (),
+        M_linearViscoelasticSolver     (),
         M_feSpace                      (),
         M_solution_tn                  ( new solution_Type() ),
         M_solution                     ( new solution_Type() )
@@ -145,10 +146,19 @@ MultiscaleModel1D::setupData( const std::string& fileName )
     M_linearSolver->setParameter( "Verbose", false );
     M_linearSolver->setParameters();
 
+    //Linear Viscoelastic Solver
+    if ( M_data->viscoelasticWall() )
+    {
+        M_linearViscoelasticSolver.reset( new linearSolver_Type( M_comm ) );
+        M_linearViscoelasticSolver->setParametersList( M_linearSolver->parametersList() );
+        M_linearViscoelasticSolver->setParameters();
+    }
+
     //1D Model Solver
     M_solver->setCommunicator( M_comm );
     M_solver->setProblem( M_physics, M_flux, M_source );
     M_solver->setLinearSolver( M_linearSolver );
+    M_solver->setLinearViscoelasticSolver( M_linearViscoelasticSolver );
 
     //BC - We need to create the BCHandler before using it
     M_bc->createHandler();
@@ -954,29 +964,24 @@ MultiscaleModel1D::solveTangentProblem( solver_Type::vector_Type& rhs, const UIn
     if ( M_data->viscoelasticWall() )
     {
         // Solve elastic tangent problem
-        solver_Type::vector_Type flowRate( M_feSpace->map() );
-        M_linearSolver->solveSystem( rhs, flowRate, M_solver->massMatrix() );
+        solver_Type::vector_Type flowRateElasticCorrection( M_feSpace->map() );
+        M_linearSolver->solveSystem( rhs, flowRateElasticCorrection, M_solver->massMatrix() );
 
         // Solve viscoelastic tangent problem
-        solver_Type::vector_Type flowRateCorrection( M_feSpace->map() );
-        flowRateCorrection = 0;
+        solver_Type::vector_Type flowRateViscoelasticCorrection( M_feSpace->map() );
+        flowRateViscoelasticCorrection = 0.;
 
         solver_Type::vector_Type flowRateDelta( M_feSpace->map() );
-        Real correction( 0 );
+        flowRateDelta = 0.;
 
         for ( UInt iNode(0); iNode < M_physics->data()->numberOfNodes() ; ++iNode )
-        //UInt iNode = bcNode;
         {
-            flowRateCorrection  = 0;
-            flowRateDelta = 0;
-            flowRateDelta[iNode] = 1;
-            flowRateCorrection = M_solver->viscoelasticFluxCorrection( *(*M_solution)["A"], flowRateDelta, M_data->dataTime()->timeStep(), *M_bc->handler() );
-
-            correction += flowRateCorrection[bcNode] * flowRate[iNode];
-
+            flowRateDelta[iNode] = 1.;
+            flowRateViscoelasticCorrection += M_solver->viscoelasticFluxCorrection( *(*M_solution)["A"], flowRateDelta, M_data->dataTime()->timeStep(), *M_bc->handler(), false ) * flowRateElasticCorrection[iNode];
+            flowRateDelta[iNode] = 0.;
         }
 
-        return correction + flowRate[bcNode];
+        return flowRateViscoelasticCorrection[bcNode] + flowRateElasticCorrection[bcNode];
     }
     else
         return rhs[bcNode];
