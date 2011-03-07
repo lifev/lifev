@@ -13,7 +13,7 @@
 ###################################################################################################
 
 [Multiscale]
-couplingName    = '1D ReymondStergiopulos 41 (terminal resistance)'
+couplingName    = '1D ReymondStergiopulos 041 (terminal resistance)'
 
 [boundary_conditions]
 list = 'terminalResistance'
@@ -22,6 +22,6 @@ list = 'terminalResistance'
     quantity            = W2
     line                = first
     Default             = Resistance
-    resistance          = 7.481e3      # dyne s / cm^5
+    resistance          = 7.4810e+03      # dyne s / cm^5
     
     [../]

@@ -13,7 +13,7 @@
 ###################################################################################################
 
 [Multiscale]
-couplingName    = '1D ReymondStergiopulos 47 (terminal resistance)'
+couplingName    = '1D ReymondStergiopulos 047 (terminal resistance)'
 
 [boundary_conditions]
 list = 'terminalResistance'
