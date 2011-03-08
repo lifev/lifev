@@ -613,7 +613,7 @@ FSIMonolithic::vectorPtr_Type FSIMonolithic::computeStress()
     vectorPtr_Type sol(new vector_Type(M_monolithicMatrix->interfaceMap()));
     solverMass.setMatrix(*M_bdMass);
     solverMass.setReusePreconditioner(false);
-    int numIter = solverMass.solveSystem( lambda, *sol, M_bdMass);
+    solverMass.solveSystem( lambda, *sol, M_bdMass);
 
     EpetraExt::MultiVector_Reindex reindexMV(*M_interfaceMap->map(Unique));
     boost::shared_ptr<MapEpetra> newMap(new MapEpetra( *M_interfaceMap ));
