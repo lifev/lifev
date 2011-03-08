@@ -113,14 +113,13 @@ public:
      */
     //@{
     //! Computes L2 errors
-
-    void check();
     void run();
 
     //@}
 
 
 private:
+    enum TestType{None, Accuracy,SpaceConvergenceRate};
 
     struct RESULT_CHANGED_EXCEPTION
     {
@@ -162,6 +161,8 @@ private:
     std::vector<std::string> pFE;
     std::vector<LifeV::UInt> uConvergenceOrder;
     std::vector<LifeV::UInt> pConvergenceOrder;
+
+    TestType M_test;
 };
 
 #endif /* __Ethiersteinman_H */

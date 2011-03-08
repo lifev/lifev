@@ -96,8 +96,7 @@ main( int argc, char** argv )
     GetPot command_line( argc, argv );
     const bool check = command_line.search(2, "-c", "--check");
 
-    if (check) es.check();
-    else es.run();
+    es.run();
 
 #ifdef HAVE_MPI
     if (verbose) std::cout << "MPI Finalization" << std::endl;
