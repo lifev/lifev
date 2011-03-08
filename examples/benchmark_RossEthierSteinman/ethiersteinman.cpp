@@ -159,6 +159,85 @@ Ethiersteinman::Ethiersteinman( int argc,
 }
 
 void
+Ethiersteinman::computeErrors(const vector_Type& velocityAndPressureSolution,
+                              LifeV::Real& uL2Error, LifeV::Real& uRelError, fespace_Type& uFESpace,
+                              LifeV::Real& pL2Error, LifeV::Real& pRelError, fespace_Type& pFESpace,
+                              LifeV::Real time)
+{
+    // Computation of the error
+    vector_Type vel  (uFESpace.map(), Repeated);
+    vector_Type press(pFESpace.map(), Repeated);
+    vector_Type velpressure ( velocityAndPressureSolution, Repeated );
+
+    velpressure = velocityAndPressureSolution;
+    vel.subset(velpressure);
+    press.subset(velpressure, uFESpace.dim()*uFESpace.fieldDim());
+
+    uL2Error = uFESpace.l2Error (Problem::uexact, vel  , time, &uRelError );
+    pL2Error = pFESpace.l20Error(Problem::pexact, press, time, &pRelError );
+}
+
+bool
+Ethiersteinman::checkConvergenceRate(const std::vector<std::string>& uFELabel,
+                                     const std::vector<std::vector<LifeV::Real> >& uL2Error,
+                                     const std::vector<UInt>& uConvergenceOrder,
+                                     const std::vector<std::string>& pFELabel,
+                                     const std::vector<std::vector<LifeV::Real> > pL2Error,
+                                     const std::vector<UInt>& pConvergenceOrder,
+                                     const std::vector<UInt>& meshDiscretizations,
+                                     LifeV::Real convTolerance)
+{
+    // We want to check the convergence of the error and
+    // see if it matches the theory.
+    std::cout << "Checking the convergence:" << std::endl;
+
+    // Test variable
+    bool success(true); // Variable to keep trace of a previous error
+    Real h1(0.0), h2(0.0); // Space discretization step
+    Real uBound(0.0), pBound(0.0); // Velocity and pressure bounds
+    Real uErrRatio(0.0), pErrRatio(0.0); // Ratio of the error E1/E2
+    std::string status(""); // Information string
+
+    UInt FEnumber(uFELabel.size());
+    UInt discretizationNumber(meshDiscretizations.size());
+
+    for (UInt iElem(0); iElem<FEnumber; ++iElem)
+    {
+        std::cout << "    - " << uFELabel[iElem] << "-" << pFELabel[iElem] << " ... ";
+
+        // Everything is OK a priori
+        status = "OK";
+
+        for (UInt jDiscretization(0); jDiscretization<discretizationNumber-1; ++jDiscretization)
+        {
+            h1 = 1.0/meshDiscretizations[jDiscretization];
+            h2 = 1.0/meshDiscretizations[jDiscretization+1];
+
+            uBound = convTolerance*pow(h1/h2,int(uConvergenceOrder[iElem]));
+            pBound = convTolerance*pow(h1/h2,int(pConvergenceOrder[iElem]));
+
+            uErrRatio = uL2Error[iElem][jDiscretization]/uL2Error[iElem][jDiscretization+1]; // E1/E2
+            pErrRatio = pL2Error[iElem][jDiscretization]/pL2Error[iElem][jDiscretization+1];
+
+            if (uErrRatio < uBound)
+            {
+                status = "FAILED";
+                success = false;
+            }
+            if (pErrRatio < pBound)
+            {
+                status = "FAILED";
+                success = false;
+            }
+        }
+        std::cout << status << std::endl;
+
+    }
+
+    return success;
+}
+
+void
 Ethiersteinman::check()
 {
     bool verbose = (d->comm->MyPID() == 0);
@@ -466,21 +545,12 @@ Ethiersteinman::check()
     if (verbose) std::cout << "Total simulation time (time loop only) " << chronoGlobal.diff() << " s." << std::endl;
 
     // Computation of the error
-    vector_Type vel  (uFESpace.map(), Repeated);
-    vector_Type press(pFESpace.map(), Repeated);
-    vector_Type velpressure ( *fluid.solution(), Repeated );
+    LifeV::Real urelerr,prelerr,ul2error,pl2error;
 
-    velpressure = *fluid.solution();
-    vel.subset(velpressure);
-    press.subset(velpressure, uFESpace.dim()*uFESpace.fieldDim());
-
-    double urelerr;
-    double prelerr;
-    double ul2error;
-    double pl2error;
-
-    ul2error = uFESpace.l2Error (Problem::uexact, vel  , time, &urelerr );
-    pl2error = pFESpace.l20Error(Problem::pexact, press, time, &prelerr );
+    computeErrors(*fluid.solution(),
+                  ul2error, urelerr, uFESpace,
+                  pl2error, prelerr, pFESpace,
+                  time);
 
     double testTol(0.02);
 
@@ -955,49 +1025,12 @@ Ethiersteinman::run()
     // Check if the correct convergence is achieved
     if (verbose)
     {
-        // We want to check the convergence of the error and
-        // see if it matches the theory.
-        std::cout << "Checking the convergence:" << std::endl;
-
-        // Test variable
-        bool success(true); // Variable to keep trace of a previous error
-        Real h1(0.0), h2(0.0); // Space discretization step
-        Real uBound(0.0), pBound(0.0); // Velocity and pressure bounds
-        Real uErrRatio(0.0), pErrRatio(0.0); // Ratio of the error E1/E2
-        std::string status(""); // Information string
-
-        for (UInt iElem(0); iElem<FEnumber; ++iElem)
-        {
-            std::cout << "    - " << uFE[iElem] << "-" << pFE[iElem] << " ... ";
-
-            // Everything is OK a priori
-            status = "OK";
-
-            for (UInt jDiscretization(0); jDiscretization<discretizationNumber-1; ++jDiscretization)
-            {
-                h1 = 1.0/meshDiscretization[jDiscretization];
-                h2 = 1.0/meshDiscretization[jDiscretization+1];
-
-                uBound = convTol*pow(h1/h2,int(uConvergenceOrder[iElem]));
-                pBound = convTol*pow(h1/h2,int(pConvergenceOrder[iElem]));
-
-                uErrRatio = uL2Error[iElem][jDiscretization]/uL2Error[iElem][jDiscretization+1]; // E1/E2
-                pErrRatio = pL2Error[iElem][jDiscretization]/pL2Error[iElem][jDiscretization+1];
-
-                if (uErrRatio < uBound)
-                {
-                    status = "FAILED";
-                    success = false;
-                }
-                if (pErrRatio < pBound)
-                {
-                    status = "FAILED";
-                    success = false;
-                }
-            }
-            std::cout << status << std::endl;
-
-        }
+        convTol = 1.0;
+        bool success;
+        success = checkConvergenceRate(uFE, uL2Error, uConvergenceOrder,
+                                       pFE, pL2Error, pConvergenceOrder,
+                                       meshDiscretization,
+                                       convTol);
 
         if (!success)
         {

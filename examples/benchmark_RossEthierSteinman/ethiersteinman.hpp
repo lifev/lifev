@@ -131,6 +131,20 @@ private:
         }
     };
 
+    void computeErrors(const vector_Type& velocityAndPressureSolution,
+                       LifeV::Real& uL2Error, LifeV::Real& uRelError, fespace_Type& uFESpace,
+                       LifeV::Real& pL2Error, LifeV::Real& pRelError, fespace_Type& pFESpace,
+                       LifeV::Real time);
+
+    bool checkConvergenceRate(const std::vector<std::string>& uFELabel,
+                              const std::vector<std::vector<LifeV::Real> >& uL2Error,
+                              const std::vector<LifeV::UInt>& uConvergenceOrder,
+                              const std::vector<std::string>& pFELabel,
+                              const std::vector<std::vector<LifeV::Real> > pL2Error,
+                              const std::vector<LifeV::UInt>& pConvergenceOrder,
+                              const std::vector<LifeV::UInt>& meshDiscretizations,
+                              LifeV::Real convTolerance);
+
 
     struct Private;
     boost::shared_ptr<Private> d;
@@ -143,11 +157,11 @@ private:
     // convTol lower down the theoretical bounds
     LifeV::Real convTol;
 
-    std::vector<UInt> meshDiscretization;
+    std::vector<LifeV::UInt> meshDiscretization;
     std::vector<std::string> uFE;
     std::vector<std::string> pFE;
-    std::vector<UInt> uConvergenceOrder;
-    std::vector<UInt> pConvergenceOrder;
+    std::vector<LifeV::UInt> uConvergenceOrder;
+    std::vector<LifeV::UInt> pConvergenceOrder;
 };
 
 #endif /* __Ethiersteinman_H */
