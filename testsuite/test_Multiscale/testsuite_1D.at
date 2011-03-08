@@ -19,6 +19,6 @@ AT_DATA([data],[[
 AT_CHECK([ln -sf $abs_top_builddir/testsuite/data/mesh/inria/ Mesh &&
           ln -sf $abs_top_builddir/testsuite/data/physicalFunctions/ physicalFunctions &&
 		  ln -sf $abs_top_builddir/testsuite/data/MultiscaleDatabase/ MultiscaleDatabase &&
-		  mpirun -n 1 $abs_top_builddir/testsuite/test_Multiscale/test_MS -s 1 -f MultiscaleDatabase/Test_1D.dat -c 1e-07],[0],[ignore],[ignore])
+		  mpirun -n 1 $abs_top_builddir/testsuite/test_Multiscale/test_MS -s 1 -f MultiscaleDatabase/Test_1D.dat -c 1.11498e-07],[0],[ignore],[ignore])
 AT_CLEANUP
 
