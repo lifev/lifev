@@ -124,7 +124,7 @@ private:
 
     struct RESULT_CHANGED_EXCEPTION
     {
-public:
+    public:
         RESULT_CHANGED_EXCEPTION()
         {
             std::cout << "Some modifications led to changes in the l2 norm of the solution" << std::endl;
@@ -143,6 +143,11 @@ public:
     // convTol lower down the theoretical bounds
     LifeV::Real convTol;
 
+    std::vector<UInt> meshDiscretization;
+    std::vector<std::string> uFE;
+    std::vector<std::string> pFE;
+    std::vector<UInt> uConvergenceOrder;
+    std::vector<UInt> pConvergenceOrder;
 };
 
 #endif /* __Ethiersteinman_H */

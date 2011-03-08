@@ -214,17 +214,46 @@ Ethiersteinman::check()
     // +-----------------------------------------------+
     if (verbose) std::cout << std::endl << "[Loading the mesh]" << std::endl;
 
-    MeshData meshData;
-    meshData.setup(dataFile, "fluid/space_discretization");
+    std::string meshSource =  dataFile( "fluid/space_discretization/mesh_source",   "regularMesh");
 
     boost::shared_ptr<RegionMesh3D<LinearTetra> > fullMeshPtr(new RegionMesh3D<LinearTetra>);
-    readMesh(*fullMeshPtr, meshData);
-    if (verbose) std::cout << std::endl << "Mesh source: file("
-                           << meshData.meshDir() << meshData.meshFile() << ")" << std::endl;
+
+    UInt mElem = 20;
+    // Building the mesh from the source
+    if(meshSource == "regularMesh")
+    {
+        regularMesh3D( *fullMeshPtr,
+                       1,
+                       mElem, mElem, mElem,
+                       false,
+                       2.0,   2.0,   2.0,
+                       -1.0,  -1.0,  -1.0);
+
+        if (verbose) std::cout << std::endl << "Mesh source: regular mesh("
+                               << mElem << "x" << mElem << "x" << mElem << ")" << std::endl;
+    }
+    else if(meshSource == "file")
+    {
+        MeshData meshData;
+        meshData.setup(dataFile, "fluid/space_discretization");
+        readMesh(*fullMeshPtr, meshData);
+
+        if (verbose) std::cout << std::endl << "Mesh source: file("
+                               << meshData.meshDir() << meshData.meshFile() << ")" << std::endl;
+    }
+    else
+    {
+        if (verbose) std::cout << std::endl << "Error: Unknown source type for the mesh" << std::endl;
+        exit(1);
+            }
 
     if (verbose) std::cout << "Partitioning the mesh ... " << std::flush;
     MeshPartitioner< RegionMesh3D<LinearTetra> >   meshPart(fullMeshPtr, d->comm);
     if (verbose) std::cout << "ok." << std::endl;
+
+    // +-----------------------------------------------+
+    // |            Creating the FE spaces             |
+    // +-----------------------------------------------+
 
     std::string uOrder =  dataFile( "fluid/space_discretization/vel_order",   "P1");
     std::string pOrder =  dataFile( "fluid/space_discretization/press_order", "P1");
@@ -232,9 +261,6 @@ Ethiersteinman::check()
     if (verbose) std::cout << std::endl;
     if (verbose) std::cout << "Time discretization order " << oseenData->dataTime()->orderBDF() << std::endl;
 
-    // +-----------------------------------------------+
-    // |            Creating the FE spaces             |
-    // +-----------------------------------------------+
     if (verbose) std::cout << std::endl << "[Creating the FE spaces]" << std::endl;
 
     if (verbose) std::cout << "Building the velocity FE space ... " << std::flush;
@@ -495,7 +521,6 @@ Ethiersteinman::run()
 
     // Loading the discretization to be tested
     UInt discretizationNumber = dataFile( "fluid/space_discretization/mesh_number", 1 );
-    std::vector<UInt> meshDiscretization;
     for ( UInt i( 0 ); i < discretizationNumber; ++i )
     {
         meshDiscretization.push_back(dataFile( "fluid/space_discretization/mesh_size", 8, i ));
@@ -503,24 +528,20 @@ Ethiersteinman::run()
 
     // Loading the Finite element to be tested
     UInt FEnumber = dataFile( "fluid/space_discretization/FE_number", 1 );
-    std::vector<std::string> uFE;
     for ( UInt i( 0 ); i < FEnumber; ++i )
     {
         uFE.push_back(dataFile( "fluid/space_discretization/vel_order", "P1", i ));
     }
-    std::vector<std::string> pFE;
     for ( UInt i( 0 ); i < FEnumber; ++i )
     {
         pFE.push_back(dataFile( "fluid/space_discretization/press_order", "P1", i ));
     }
 
     // Loading the convergence rate for the finite elements tested
-    std::vector<UInt> uConvergenceOrder;
     for ( UInt i( 0 ); i < FEnumber; ++i )
     {
         uConvergenceOrder.push_back(dataFile( "fluid/space_discretization/vel_conv_order_order", 2, i ));
     }
-    std::vector<UInt> pConvergenceOrder;
     for ( UInt i( 0 ); i < FEnumber; ++i )
     {
         pConvergenceOrder.push_back(dataFile( "fluid/space_discretization/press_conv_order", 2, i ));
@@ -588,46 +609,56 @@ Ethiersteinman::run()
                 bcH.addBC( "Flux", *it, Natural, Full, uNeumann, 3 );
             }
 
-            //
-            // fluid solver
-
-            boost::shared_ptr<OseenData> oseenData(new OseenData());
-            oseenData->setup( dataFile );
-
             // +-----------------------------------------------+
             // |               Loading the mesh                |
             // +-----------------------------------------------+
             if (verbose) std::cout << std::endl << "[Loading the mesh]" << std::endl;
-            // THE DATAMESH IS NOT REQUIRED WHEN WE BUILD THE MESH
-            //MeshData meshData;
-            //meshData.setup(dataFile, "fluid/space_discratization");
+
+            std::string meshSource =  dataFile( "fluid/space_discretization/mesh_source",   "regularMesh");
 
             boost::shared_ptr<RegionMesh3D<LinearTetra> > fullMeshPtr(new RegionMesh3D<LinearTetra>);
 
-            // Call the function to build a mesh
-            regularMesh3D( *fullMeshPtr,
-                           1,
-                           mElem, mElem, mElem,
-                           false,
-                           2.0,   2.0,   2.0,
-                           -1.0,  -1.0,  -1.0);
+            // Building the mesh from the source
+            if(meshSource == "regularMesh")
+            {
+                regularMesh3D( *fullMeshPtr,
+                               1,
+                               mElem, mElem, mElem,
+                               false,
+                               2.0,   2.0,   2.0,
+                               -1.0,  -1.0,  -1.0);
 
-            if (verbose) std::cout << std::endl << "Mesh source: regular mesh("
-                                   << mElem << "x" << mElem << "x" << mElem << ")" << std::endl;
+                if (verbose) std::cout << std::endl << "Mesh source: regular mesh("
+                                       << mElem << "x" << mElem << "x" << mElem << ")" << std::endl;
+            }
+            else if(meshSource == "file")
+            {
+                MeshData meshData;
+                meshData.setup(dataFile, "fluid/space_discretization");
+                readMesh(*fullMeshPtr, meshData);
+
+                if (verbose) std::cout << std::endl << "Mesh source: file("
+                                       << meshData.meshDir() << meshData.meshFile() << ")" << std::endl;
+            }
+            else
+            {
+                if (verbose) std::cout << std::endl << "Error: Unknown source type for the mesh" << std::endl;
+                exit(1);
+            }
 
             if (verbose) std::cout << "Partitioning the mesh ... " << std::flush;
             MeshPartitioner< RegionMesh3D<LinearTetra> >   meshPart(fullMeshPtr, d->comm);
             if (verbose) std::cout << "ok." << std::endl;
 
+            // +-----------------------------------------------+
+            // |            Creating the FE spaces             |
+            // +-----------------------------------------------+
+
             std::string uOrder =  uFE[iElem];
             std::string pOrder =  pFE[iElem];
 
             if (verbose) std::cout << std::endl;
-            if (verbose) std::cout << "Time discretization order " << oseenData->dataTime()->orderBDF() << std::endl;
 
-            // +-----------------------------------------------+
-            // |            Creating the FE spaces             |
-            // +-----------------------------------------------+
             if (verbose) std::cout << std::endl << "[Creating the FE spaces]" << std::endl;
 
             if (verbose) std::cout << "Building the velocity FE space ... " << std::flush;
@@ -651,6 +682,11 @@ Ethiersteinman::run()
             // |             Creating the problem              |
             // +-----------------------------------------------+
             if (verbose) std::cout<< std::endl << "[Creating the problem]" << std::endl;
+            boost::shared_ptr<OseenData> oseenData(new OseenData());
+            oseenData->setup( dataFile );
+
+            if (verbose) std::cout << "Time discretization order " << oseenData->dataTime()->orderBDF() << std::endl;
+
             OseenSolver< RegionMesh3D<LinearTetra> > fluid (oseenData,
                                                       uFESpace,
                                                       pFESpace,
