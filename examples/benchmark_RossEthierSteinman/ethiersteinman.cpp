@@ -138,6 +138,72 @@ Ethiersteinman::Ethiersteinman( int argc,
     d->nu = dataFile( "fluid/physics/viscosity", 1. ) /
             dataFile( "fluid/physics/density", 1. );
 
+    // Test type
+    string testType = dataFile("RossEthierSteinman/test", "none");
+    if(testType == "none")
+    {
+        M_test = None;
+    }
+    else if(testType == "accuracy")
+    {
+        M_test = Accuracy;
+    }
+    else if(testType == "space_convergence_rate")
+    {
+        M_test = SpaceConvergenceRate;
+    }
+    else
+    {
+        std::cout << "[Error] Unknown test method" << std::endl;
+        exit(1);
+    }
+
+    M_convTol     = dataFile("RossEthierSteinman/space_convergence_tolerance", 1.0);
+    M_accuracyTol = dataFile("RossEthierSteinman/accuracy_tolerance", 1.0);
+
+    // Method of initialization
+    string initType = dataFile("RossEthierSteinman/initialization", "projection");
+    if(initType == "projection")
+    {
+        M_initMethod = Projection;
+    }
+    else if(initType == "interpolation")
+    {
+        M_initMethod = Interpolation;
+    }
+    else
+    {
+        std::cout << "[Error] Unknown initialization method" << std::endl;
+        exit(1);
+    }
+
+    M_exportNorms = dataFile("RossEthierSteinman/export_norms", false);
+    M_exportExactSolutions = dataFile("RossEthierSteinman/export_exact_solutions", false);
+
+
+    std::string meshSource =  dataFile( "RossEthierSteinman/mesh_source", "regular_mesh");
+    if(meshSource == "regular_mesh")
+    {
+        M_meshSource = RegularMesh;
+    }
+    else if(meshSource == "file")
+    {
+        M_meshSource = File;
+    }
+    else
+    {
+        std::cout << "[Error] Unknown mesh source" << std::endl;
+        exit(1);
+    }
+
+    //Checking the consistency of the data
+    if(M_meshSource == File && M_test == SpaceConvergenceRate)
+    {
+        std::cout << "[Error] You cannot use mesh files to test the space convergence." << std::endl;
+        exit(1);
+    }
+
+
 #ifdef EPETRA_MPI
 
     //    MPI_Init(&argc,&argv);
@@ -252,14 +318,47 @@ Ethiersteinman::run()
     // +-----------------------------------------------+
     if (verbose) std::cout << std::endl << "[Loading the data]" << std::endl;
     GetPot dataFile( d->data_file_name.c_str() );
-    if (verbose) std::cout << "Test checks the convergence in space of the solution" << std::endl;
+    if (verbose)
+    {
+        switch(M_test)
+        {
+            case Accuracy:
+                std::cout << "Test : checks the accuracy of the solution" << std::endl;
+                break;
+            case SpaceConvergenceRate:
+                std::cout << "Test : checks the convergence in space of the solution" << std::endl;
+                break;
+            case None:
+                break;
+        }
+    }
     Problem::setParamsFromGetPot( dataFile );
 
+    UInt discretizationNumber;
+    if(M_test == SpaceConvergenceRate)
+    {
     // Loading the discretization to be tested
-    UInt discretizationNumber = dataFile( "fluid/space_discretization/mesh_number", 1 );
+    discretizationNumber = dataFile( "fluid/space_discretization/mesh_number", 1 );
     for ( UInt i( 0 ); i < discretizationNumber; ++i )
     {
         meshDiscretization.push_back(dataFile( "fluid/space_discretization/mesh_size", 8, i ));
+    }
+
+    // Loading the convergence rate for the finite elements tested
+    UInt FEnumber = dataFile( "fluid/space_discretization/FE_number", 1 );
+    for ( UInt i( 0 ); i < FEnumber; ++i )
+    {
+        uConvergenceOrder.push_back(dataFile( "fluid/space_discretization/vel_conv_order_order", 2, i ));
+    }
+    for ( UInt i( 0 ); i < FEnumber; ++i )
+    {
+        pConvergenceOrder.push_back(dataFile( "fluid/space_discretization/press_conv_order", 2, i ));
+    }
+    }
+    else
+    {
+        meshDiscretization.push_back(0); // Just to be sure to have 1 element
+        discretizationNumber = 1;
     }
 
     // Loading the Finite element to be tested
@@ -273,15 +372,8 @@ Ethiersteinman::run()
         pFE.push_back(dataFile( "fluid/space_discretization/press_order", "P1", i ));
     }
 
-    // Loading the convergence rate for the finite elements tested
-    for ( UInt i( 0 ); i < FEnumber; ++i )
-    {
-        uConvergenceOrder.push_back(dataFile( "fluid/space_discretization/vel_conv_order_order", 2, i ));
-    }
-    for ( UInt i( 0 ); i < FEnumber; ++i )
-    {
-        pConvergenceOrder.push_back(dataFile( "fluid/space_discretization/press_conv_order", 2, i ));
-    }
+
+
 
     // Initialization of the errors array
     std::vector<std::vector<LifeV::Real> > uL2Error;
@@ -305,20 +397,22 @@ Ethiersteinman::run()
         {
             chrono.start();
 
-            if (d->comm->MyPID()==0)
+            if (verbose)
             {
                 std::cout << "Using: -" << uFE[iElem] << "-" << pFE[iElem] << " finite element" << std::endl;
                 std::cout << "       -Regular mesh " << mElem << "x" << mElem << "x" << mElem << std::endl;
-                std::string fileName("norm_");
-                std::ostringstream oss;
-                oss << mElem;
-                fileName.append(oss.str());
-                fileName.append("_");
-                fileName.append(uFE[iElem]);
-                fileName.append(pFE[iElem]);
-                fileName.append(".txt");
-                out_norm.open(fileName.c_str());
-                out_norm << "% time / u L2 error / L2 rel error   p L2 error / L2 rel error \n" << std::flush;
+                if(M_exportNorms){
+                    std::string fileName("norm_");
+                    std::ostringstream oss;
+                    oss << mElem;
+                    fileName.append(oss.str());
+                    fileName.append("_");
+                    fileName.append(uFE[iElem]);
+                    fileName.append(pFE[iElem]);
+                    fileName.append(".txt");
+                    out_norm.open(fileName.c_str());
+                    out_norm << "% time / u L2 error / L2 rel error   p L2 error / L2 rel error \n" << std::flush;
+                }
             }
 
             // +-----------------------------------------------+
@@ -350,12 +444,10 @@ Ethiersteinman::run()
             // +-----------------------------------------------+
             if (verbose) std::cout << std::endl << "[Loading the mesh]" << std::endl;
 
-            std::string meshSource =  dataFile( "fluid/space_discretization/mesh_source",   "regularMesh");
-
             boost::shared_ptr<RegionMesh3D<LinearTetra> > fullMeshPtr(new RegionMesh3D<LinearTetra>);
 
             // Building the mesh from the source
-            if(meshSource == "regularMesh")
+            if(M_meshSource == RegularMesh)
             {
                 regularMesh3D( *fullMeshPtr,
                                1,
@@ -367,7 +459,7 @@ Ethiersteinman::run()
                 if (verbose) std::cout << std::endl << "Mesh source: regular mesh("
                                        << mElem << "x" << mElem << "x" << mElem << ")" << std::endl;
             }
-            else if(meshSource == "file")
+            else if(M_meshSource == File)
             {
                 MeshData meshData;
                 meshData.setup(dataFile, "fluid/space_discretization");
@@ -468,9 +560,6 @@ Ethiersteinman::run()
 
             bdf.bdfVelocity().setInitialCondition( *fluid.solution() );
 
-            std::string const proj =  dataFile( "fluid/space_discretization/initialization", "proj");
-            bool const L2proj( !proj.compare("proj") );
-
             if (verbose) std::cout << std::endl;
             if (verbose) std::cout << "Time loop ... " << std::endl << std::endl;
 
@@ -490,7 +579,7 @@ Ethiersteinman::run()
 
                 beta = *fluid.solution();
 
-                if (L2proj)
+                if (M_initMethod == Projection)
                 {
                     uFESpace.interpolate(Problem::uderexact, rhs, time);
                     //uFESpace.l2ScalarProduct(Problem::uderexact, rhs, time);
@@ -508,10 +597,7 @@ Ethiersteinman::run()
                               pl2error, prelerr, pFESpace,
                               time);
 
-
-                bool verbose = (d->comm->MyPID() == 0);
-
-                if (verbose)
+                if (verbose && M_exportNorms)
                 {
                     out_norm << time  << " "
                     << ul2error << " "
@@ -536,10 +622,12 @@ Ethiersteinman::run()
             boost::shared_ptr< Exporter<RegionMesh3D<LinearTetra> > > exporter;
 
             vectorPtr_Type velAndPressure;
-            vectorPtr_Type exactPressPtr;                     //DEBUG
-            vector_Type exactPress(pFESpace.map(), Repeated); //DEBUG
-            vectorPtr_Type exactVelPtr;                       //DEBUG
-            vector_Type exactVel(uFESpace.map(), Repeated);   //DEBUG
+            // only for export -->
+            vectorPtr_Type exactPressPtr;
+            vector_Type exactPress(pFESpace.map(), Repeated);
+            vectorPtr_Type exactVelPtr;
+            vector_Type exactVel(uFESpace.map(), Repeated);
+            // <--
 
             std::string const exporterType =  dataFile( "exporter/type", "ensight");
 
@@ -564,10 +652,13 @@ Ethiersteinman::run()
             }
 
             velAndPressure.reset( new vector_Type(*fluid.solution(), exporter->mapType() ) );
-            exactPressPtr.reset( new vector_Type(exactPress, exporter->mapType() ) ); //DEBUG
-            pFESpace.interpolate(Problem::pexact, *exactPressPtr, 0);                 //DEBUG
-            exactVelPtr.reset( new vector_Type(exactVel, exporter->mapType() ) );     //DEBUG
-            uFESpace.interpolate(Problem::uexact, *exactVelPtr, 0);                   //DEBUG
+            if(M_exportExactSolutions)
+            {
+                exactPressPtr.reset( new vector_Type(exactPress, exporter->mapType() ) );
+                pFESpace.interpolate(Problem::pexact, *exactPressPtr, 0);
+                exactVelPtr.reset( new vector_Type(exactVel, exporter->mapType() ) );
+                uFESpace.interpolate(Problem::uexact, *exactVelPtr, 0);
+            }
 
             exporter->addVariable( ExporterData::Vector, "velocity", velAndPressure,
                                    UInt(0), uFESpace.dof().numTotalDof() );
@@ -575,10 +666,13 @@ Ethiersteinman::run()
             exporter->addVariable( ExporterData::Scalar, "pressure", velAndPressure,
                                    UInt(3*uFESpace.dof().numTotalDof()),
                                    UInt(pFESpace.dof().numTotalDof()) );
-            exporter->addVariable( ExporterData::Scalar, "exactPressure", exactPressPtr, //DEBUG
-                                   UInt(0), UInt(pFESpace.dof().numTotalDof()) );
-            exporter->addVariable( ExporterData::Vector, "exactVelocity", exactVelPtr,   //DEBUG
-                                   UInt(0), UInt(uFESpace.dof().numTotalDof()) );
+            if(M_exportExactSolutions)
+            {
+                exporter->addVariable( ExporterData::Scalar, "exactPressure", exactPressPtr,
+                                       UInt(0), UInt(pFESpace.dof().numTotalDof()) );
+                exporter->addVariable( ExporterData::Vector, "exactVelocity", exactVelPtr,
+                                       UInt(0), UInt(uFESpace.dof().numTotalDof()) );
+            }
             exporter->postProcess( 0 );
 
             if (verbose) std::cout << "uDOF: " << uFESpace.dof().numTotalDof() << std::endl;
@@ -630,7 +724,7 @@ Ethiersteinman::run()
                               pl2error, prelerr, pFESpace,
                               time);
 
-                if (verbose)
+                if (verbose && M_exportNorms)
                 {
                     out_norm << time  << " "
                     << ul2error << " "
@@ -645,8 +739,11 @@ Ethiersteinman::run()
 
                 // Exporting the solution
                 *velAndPressure = *fluid.solution();
-                pFESpace.interpolate(Problem::pexact, *exactPressPtr, time); //DEBUG
-                uFESpace.interpolate(Problem::uexact, *exactVelPtr, time);   //DEBUG
+                if(M_exportExactSolutions)
+                {
+                    pFESpace.interpolate(Problem::pexact, *exactPressPtr, time);
+                    uFESpace.interpolate(Problem::uexact, *exactVelPtr, time);
+                }
                 exporter->postProcess( time );
 
 
@@ -659,7 +756,7 @@ Ethiersteinman::run()
             chronoGlobal.stop();
             if (verbose) std::cout << "Total simulation time (time loop only) " << chronoGlobal.diff() << " s." << std::endl;
 
-            if (verbose)
+            if (verbose && M_exportNorms)
             {
                 out_norm.close();
             }
@@ -667,8 +764,6 @@ Ethiersteinman::run()
             // ** BEGIN Accuracy test **
             if(M_test == Accuracy)
             {
-                double testTol(0.02);
-
                 // Computation of the error
                 LifeV::Real urelerr, prelerr, ul2error, pl2error;
 
@@ -678,9 +773,9 @@ Ethiersteinman::run()
                               time);
 
                 if (verbose) std::cout << "Relative error: E(u)=" << urelerr << ", E(p)=" << prelerr << std::endl
-                                       << "Tolerance=" << testTol << std::endl;
+                                       << "Tolerance=" << M_accuracyTol << std::endl;
 
-                if (urelerr>testTol || prelerr>testTol)
+                if (urelerr>M_accuracyTol || prelerr>M_accuracyTol)
                 {
                     if (verbose) std::cout << "TEST_ETHIERSTEINMAN STATUS: ECHEC" << std::endl;
                     throw Ethiersteinman::RESULT_CHANGED_EXCEPTION();
@@ -698,12 +793,11 @@ Ethiersteinman::run()
     // ** BEGIN Space convergence test **
     if (verbose && (M_test == SpaceConvergenceRate))
     {
-        convTol = 1.0;
         bool success;
         success = checkConvergenceRate(uFE, uL2Error, uConvergenceOrder,
                                        pFE, pL2Error, pConvergenceOrder,
                                        meshDiscretization,
-                                       convTol);
+                                       M_convTol);
 
         if (!success)
         {

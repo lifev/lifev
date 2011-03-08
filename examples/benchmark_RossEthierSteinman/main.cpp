@@ -93,9 +93,6 @@ main( int argc, char** argv )
 
     Ethiersteinman es( argc, argv );
 
-    GetPot command_line( argc, argv );
-    const bool check = command_line.search(2, "-c", "--check");
-
     es.run();
 
 #ifdef HAVE_MPI

@@ -120,6 +120,8 @@ public:
 
 private:
     enum TestType{None, Accuracy,SpaceConvergenceRate};
+    enum InitializationType{Projection,Interpolation};
+    enum MeshSourceType{File,RegularMesh};
 
     struct RESULT_CHANGED_EXCEPTION
     {
@@ -147,14 +149,6 @@ private:
 
     struct Private;
     boost::shared_ptr<Private> d;
-    std::ofstream              out_norm;
-
-    // Tolerance of the test (should be <1)
-    // Actually for convTol=1, the test failed
-    // if the improvement of accuracy is less
-    // than predicted by the theory.
-    // convTol lower down the theoretical bounds
-    LifeV::Real convTol;
 
     std::vector<LifeV::UInt> meshDiscretization;
     std::vector<std::string> uFE;
@@ -162,7 +156,27 @@ private:
     std::vector<LifeV::UInt> uConvergenceOrder;
     std::vector<LifeV::UInt> pConvergenceOrder;
 
-    TestType M_test;
+    // Test to be performed (accuracy or convergence in space)
+    TestType    M_test;
+    LifeV::Real M_convTol; // Tolerance of the test (should be <1)
+                           // Actually for convTol=1, the test failed
+                           // if the improvement of accuracy is less
+                           // than predicted by the theory.
+                           // convTol lower down the theoretical bounds
+    LifeV::Real M_accuracyTol;
+
+    // Data related to norm export
+    bool               M_exportNorms;
+    std::ofstream      out_norm;
+
+    // Data related to solution export
+    bool               M_exportExactSolutions;
+
+    // Initialization method
+    InitializationType M_initMethod;
+
+    // Mesh source
+    MeshSourceType M_meshSource;
 };
 
 #endif /* __Ethiersteinman_H */
