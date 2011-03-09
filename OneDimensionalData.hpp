@@ -271,7 +271,7 @@ public:
     // Jacobian perturbation parameters
     const Real& jacobianPerturbationArea() const { return M_jacobianPerturbationArea; }
     const Real& jacobianPerturbationFlowRate() const { return M_jacobianPerturbationFlowRate; }
-    const Real& jacobianPerturbationPressure() const { return M_jacobianPerturbationPressure; }
+    const Real& jacobianPerturbationStress() const { return M_jacobianPerturbationStress; }
 
     // Physical Parameters
     const Real& densityRho() const { return M_density; }
@@ -371,7 +371,7 @@ private:
     //! Jacobian perturbation
     Real M_jacobianPerturbationArea;
     Real M_jacobianPerturbationFlowRate;
-    Real M_jacobianPerturbationPressure;
+    Real M_jacobianPerturbationStress;
 
     //! Physical Parameters
     bool M_computeCoefficients;

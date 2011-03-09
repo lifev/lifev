@@ -67,7 +67,7 @@ OneDimensionalData::OneDimensionalData():
     M_CFLmax                    (),
     M_jacobianPerturbationArea  (),
     M_jacobianPerturbationFlowRate(),
-    M_jacobianPerturbationPressure(),
+    M_jacobianPerturbationStress(),
     M_computeCoefficients       (),
     M_powerLawCoefficient       (),
     M_density                   (),
@@ -152,7 +152,7 @@ OneDimensionalData::setup( const GetPot& dataFile, const std::string& section )
     // Jacobian perturbation
     M_jacobianPerturbationArea     = dataFile( ( section + "/JacobianPerturbation/deltaArea"         ).data(), 0.001 );
     M_jacobianPerturbationFlowRate = dataFile( ( section + "/JacobianPerturbation/deltaFlowRate"     ).data(), 0.001 );
-    M_jacobianPerturbationPressure = dataFile( ( section + "/JacobianPerturbation/deltaPressure"     ).data(), 1.0 );
+    M_jacobianPerturbationStress   = dataFile( ( section + "/JacobianPerturbation/deltaStress"       ).data(), 1.0 );
 
     // Physical Parameters
     M_computeCoefficients    = dataFile( ( section + "/PhysicalParameters/ComputeCoefficients"       ).data(), false );
@@ -327,7 +327,7 @@ OneDimensionalData::oldStyleSetup( const GetPot& dataFile, const std::string& se
     // Jacobian perturbation
     M_jacobianPerturbationArea     = dataFile( ( section + "JacobianPerturbation/deltaArea"          ).data(), 0.001 );
     M_jacobianPerturbationFlowRate = dataFile( ( section + "JacobianPerturbation/deltaFlowRate"      ).data(), 0.001 );
-    M_jacobianPerturbationPressure = dataFile( ( section + "JacobianPerturbation/deltaPressure"      ).data(), 1.0 );
+    M_jacobianPerturbationStress   = dataFile( ( section + "JacobianPerturbation/deltaStress"        ).data(), 1.0 );
 
     // Physical Parameters
     M_computeCoefficients    = dataFile( ( section + "/parameters/use_physical_values"               ).data(), false );
@@ -512,7 +512,7 @@ OneDimensionalData::showMe( std::ostream& output ) const
     // Jacobian perturbation
     output << "Jacobian perturbation Area      = " << M_jacobianPerturbationArea << std::endl;
     output << "Jacobian perturbation Flow Rate = " << M_jacobianPerturbationFlowRate << std::endl;
-    output << "Jacobian perturbation Pressure  = " << M_jacobianPerturbationPressure << std::endl;
+    output << "Jacobian perturbation Stress    = " << M_jacobianPerturbationStress << std::endl;
 
     // Physical Parameters
     output << "\n*** Values for data [PhysicalParameters]" << std::endl << std::endl;
