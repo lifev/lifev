@@ -320,9 +320,7 @@ FSIMonolithic::computeFNormals( vector_Type& normals)
 }
 
 void
-FSIMonolithic::solveJac(vector_Type         &_step,
-                     const vector_Type   &_res,
-                     const Real         /*_linearRelTol*/)
+FSIMonolithic::solveJac( vector_Type& _step, const vector_Type& _res, const Real /*_linearRelTol*/ )
 {
     setupBlockPrec( );
 
@@ -332,13 +330,13 @@ FSIMonolithic::solveJac(vector_Type         &_step,
     M_precPtr->applyBoundaryConditions(dataFluid()->dataTime()->time());
     M_precPtr->GlobalAssemble();
 
-    M_solid->getDisplayer().leaderPrint("  M-  normInf res:                    ", _res.normInf(), "\n");
-    M_solid->getDisplayer().leaderPrint("  M-  Solving Jacobian system ...              \n" );
+    M_solid->getDisplayer().leaderPrint("  M-  Residual NormInf:                        ", _res.normInf(), "\n");
+    //M_solid->getDisplayer().leaderPrint("  M-  Solving Jacobian system ...              \n" );
 
     //M_monolithicMatrix->matrix()->spy("J");
     this->iterateMonolithic(_res, _step);
 
-    M_solid->getDisplayer().leaderPrint("  M-  Newton step normInf:                    ", _step.normInf(), "\n");
+    M_solid->getDisplayer().leaderPrint("  M-  Solution NormInf:                        ", _step.normInf(), "\n");
 }
 
 void
@@ -421,7 +419,7 @@ iterateMonolithic(const vector_Type& rhs, vector_Type& step)
             M_solid->getDisplayer().leaderPrint("   ERROR: Iterative solver failed.\n");
     }
 
-    M_solid->getDisplayer().leaderPrint("  M-  System solved.\n" );
+    //M_solid->getDisplayer().leaderPrint("  M-  System solved.\n" );
 }
 
 void

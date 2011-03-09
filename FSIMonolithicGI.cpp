@@ -253,9 +253,7 @@ FSIMonolithicGI::applyBoundaryConditions()
 }
 
 
-void FSIMonolithicGI::solveJac(vector_Type       &_step,
-                            const vector_Type &_res,
-                            const Real       /*_linearRelTol*/)
+void FSIMonolithicGI::solveJac( vector_Type&_step, const vector_Type& _res, const Real /*_linearRelTol*/)
 {
     setupBlockPrec( );
 
@@ -270,11 +268,12 @@ void FSIMonolithicGI::solveJac(vector_Type       &_step,
 
     //    M_linearSolver->setMatrix(*M_monolithicMatrix->matrix());
 
-    M_solid->getDisplayer().leaderPrint("  M-  NormInf res:                    ", _res.normInf(), "\n");
-    M_solid->getDisplayer().leaderPrint("  M-  Solving Jacobian system ...              \n" );
-    this->iterateMonolithic(_res, _step);
-    M_solid->getDisplayer().leaderPrint("  M-  NormInf step:                    ", _step.normInf(), "\n");
+    M_solid->getDisplayer().leaderPrint("  M-  Residual NormInf:                        ", _res.normInf(), "\n");
+    //M_solid->getDisplayer().leaderPrint("  M-  Solving Jacobian system ...              \n" );
 
+    this->iterateMonolithic(_res, _step);
+
+    M_solid->getDisplayer().leaderPrint("  M-  Solution NormInf:                        ", _step.normInf(), "\n");
 }
 
 void FSIMonolithicGI::initialize( FSIOperator::fluidPtr_Type::value_type::function_Type const& u0,
