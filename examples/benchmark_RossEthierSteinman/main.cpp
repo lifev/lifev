@@ -4,7 +4,7 @@
 
   Author(s): Christophe Prud'homme <christophe.prudhomme@epfl.ch>
              Gwenol Grandperrin <gwenol.grandperrin@epfl.ch>
-       Date: 2010-05-18
+       Date: 2011-03-08
 
   Copyright (C) 2010 EPFL
 
@@ -27,7 +27,7 @@
    \file main.cpp
    \author Christophe Prud'homme <christophe.prudhomme@epfl.ch>
    \author Gwenol Grandperrin <gwenol.grandperrin@epfl.ch>
-   \date 2010-05-18
+   \date 2011-03-08
  */
 
 #ifdef TWODIM
@@ -77,15 +77,10 @@ main( int argc, char** argv )
 #ifdef HAVE_MPI
     MPI_Init(&argc, &argv);
     Epetra_MpiComm Comm(MPI_COMM_WORLD);
-    if ( Comm.MyPID() == 0 )
-    {
-        verbose = true;
-        cout << "Using MPI" << endl;
-    }
+    if ( Comm.MyPID() == 0 ) verbose = true;
 #else
     Epetra_SerialComm Comm;
     verbose = true;
-    cout << "Using serial Version" << endl;
 #endif
 
 //**************** cylinder

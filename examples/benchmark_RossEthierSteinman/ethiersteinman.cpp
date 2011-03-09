@@ -4,7 +4,7 @@
 
   Author(s): Gilles Fourestey <gilles.fourestey@epfl.ch>
              Gwenol Grandperrin <gwenol.grandperrin@epfl.ch>
-       Date: 2010-05-18
+       Date: 2011-03-09
 
   Copyright (C) 2010 EPFL
 
@@ -27,7 +27,7 @@
    \file ethiersteiman.cpp
    \author Gilles Fourestey <gilles.fourestey@epfl.ch>
    \author Gwenol Grandperrin <gwenol.grandperrin@epfl.ch>
-   \date 2010-05-18
+   \date 2011-03-08
  */
 
 // Tell the compiler to ignore specific kind of warnings:
@@ -148,9 +148,9 @@ Ethiersteinman::Ethiersteinman( int argc,
     {
         M_test = Accuracy;
     }
-    else if(testType == "space_convergence_rate")
+    else if(testType == "space_convergence")
     {
-        M_test = SpaceConvergenceRate;
+        M_test = SpaceConvergence;
     }
     else
     {
@@ -197,7 +197,7 @@ Ethiersteinman::Ethiersteinman( int argc,
     }
 
     //Checking the consistency of the data
-    if(M_meshSource == File && M_test == SpaceConvergenceRate)
+    if(M_meshSource == File && M_test == SpaceConvergence)
     {
         std::cout << "[Error] You cannot use mesh files to test the space convergence." << std::endl;
         exit(1);
@@ -214,13 +214,6 @@ Ethiersteinman::Ethiersteinman( int argc,
 #else
     d->comm.reset( new Epetra_SerialComm() );
 #endif
-
-    if (!d->comm->MyPID())
-    {
-        std::cout << "My PID = " << d->comm->MyPID() << " out of " << ntasks << " running." << std::endl;
-        std::cout << "Re = " << d->Re << std::endl
-                  << "nu = " << d->nu << std::endl;
-    }
 
 }
 
@@ -307,11 +300,39 @@ void
 Ethiersteinman::run()
 {
     bool verbose = (d->comm->MyPID() == 0);
+    int nproc;
+    MPI_Comm_size(MPI_COMM_WORLD,&nproc);
+    if(verbose){
+        std::cout << " +-----------------------------------------------+" << std::endl
+                  << " |    RossEthierSteinman benchmark for LifeV     |" << std::endl
+                  << " +-----------------------------------------------+" << std::endl
+                  << std::endl
+                  << " +-----------------------------------------------+" << std::endl
+                  << " |          Authors: Gwenol Grandperrin          |" << std::endl
+                  << " |                   Gilles Fourestey            |" << std::endl
+                  << " |                   Christophe Prud'homme       |" << std::endl
+                  << " |             Date: 2010-03-09                  |" << std::endl
+                  << " +-----------------------------------------------+" << std::endl
+                  << std::endl;
+        if (verbose) std::cout << "[[BEGIN_SIMULATION]]" << std::endl << std::endl;
+           std::cout << "[Initilization of MPI]" << std::endl;
+#ifdef HAVE_MPI
+           std::cout << "Using MPI (" << nproc << " proc.)" << std::endl;
+#else
+           std::cout << "Using serial version" << std::endl;
+#endif
+    }
 
     // +-----------------------------------------------+
     // |             Begining of the test              |
     // +-----------------------------------------------+
-    LifeChrono chrono;
+    LifeChrono globalChrono;
+    LifeChrono runChrono;
+    LifeChrono initChrono;
+    LifeChrono iterChrono;
+
+    globalChrono.start();
+    initChrono.start();
 
     // +-----------------------------------------------+
     // |               Loading the data                |
@@ -325,7 +346,7 @@ Ethiersteinman::run()
             case Accuracy:
                 std::cout << "Test : checks the accuracy of the solution" << std::endl;
                 break;
-            case SpaceConvergenceRate:
+            case SpaceConvergence:
                 std::cout << "Test : checks the convergence in space of the solution" << std::endl;
                 break;
             case None:
@@ -335,25 +356,25 @@ Ethiersteinman::run()
     Problem::setParamsFromGetPot( dataFile );
 
     UInt discretizationNumber;
-    if(M_test == SpaceConvergenceRate)
+    if(M_test == SpaceConvergence)
     {
-    // Loading the discretization to be tested
-    discretizationNumber = dataFile( "fluid/space_discretization/mesh_number", 1 );
-    for ( UInt i( 0 ); i < discretizationNumber; ++i )
-    {
-        meshDiscretization.push_back(dataFile( "fluid/space_discretization/mesh_size", 8, i ));
-    }
+        // Loading the discretization to be tested
+        discretizationNumber = dataFile( "fluid/space_discretization/mesh_number", 1 );
+        for ( UInt i( 0 ); i < discretizationNumber; ++i )
+        {
+            meshDiscretization.push_back(dataFile( "fluid/space_discretization/mesh_size", 8, i ));
+        }
 
-    // Loading the convergence rate for the finite elements tested
-    UInt FEnumber = dataFile( "fluid/space_discretization/FE_number", 1 );
-    for ( UInt i( 0 ); i < FEnumber; ++i )
-    {
-        uConvergenceOrder.push_back(dataFile( "fluid/space_discretization/vel_conv_order_order", 2, i ));
-    }
-    for ( UInt i( 0 ); i < FEnumber; ++i )
-    {
-        pConvergenceOrder.push_back(dataFile( "fluid/space_discretization/press_conv_order", 2, i ));
-    }
+        // Loading the convergence rate for the finite elements tested
+        UInt FEnumber = dataFile( "fluid/space_discretization/FE_number", 1 );
+        for ( UInt i( 0 ); i < FEnumber; ++i )
+        {
+            uConvergenceOrder.push_back(dataFile( "fluid/space_discretization/vel_conv_order_order", 2, i ));
+        }
+        for ( UInt i( 0 ); i < FEnumber; ++i )
+        {
+            pConvergenceOrder.push_back(dataFile( "fluid/space_discretization/press_conv_order", 2, i ));
+        }
     }
     else
     {
@@ -372,9 +393,6 @@ Ethiersteinman::run()
         pFE.push_back(dataFile( "fluid/space_discretization/press_order", "P1", i ));
     }
 
-
-
-
     // Initialization of the errors array
     std::vector<std::vector<LifeV::Real> > uL2Error;
     std::vector<std::vector<LifeV::Real> > pL2Error;
@@ -387,6 +405,9 @@ Ethiersteinman::run()
         pL2Error.push_back(tmpVec);
     }
 
+    initChrono.stop();
+    if (verbose) std::cout << "Initialization time (pre-run): " << initChrono.diff() << " s." << std::endl;
+
     // Loop on the mesh refinement
     for (UInt jDiscretization(0); jDiscretization<discretizationNumber; ++jDiscretization)
     {
@@ -395,30 +416,30 @@ Ethiersteinman::run()
         // Loop on the finite element
         for (UInt iElem(0); iElem<FEnumber; ++iElem)
         {
-            chrono.start();
+            if (verbose) std::cout << std::endl << "[[BEGIN_RUN]]" << std::endl;
+            runChrono.reset();
+            runChrono.start();
+            initChrono.reset();
+            initChrono.start();
 
-            if (verbose)
+            if (verbose && M_exportNorms)
             {
-                std::cout << "Using: -" << uFE[iElem] << "-" << pFE[iElem] << " finite element" << std::endl;
-                std::cout << "       -Regular mesh " << mElem << "x" << mElem << "x" << mElem << std::endl;
-                if(M_exportNorms){
-                    std::string fileName("norm_");
-                    std::ostringstream oss;
-                    oss << mElem;
-                    fileName.append(oss.str());
-                    fileName.append("_");
-                    fileName.append(uFE[iElem]);
-                    fileName.append(pFE[iElem]);
-                    fileName.append(".txt");
-                    out_norm.open(fileName.c_str());
-                    out_norm << "% time / u L2 error / L2 rel error   p L2 error / L2 rel error \n" << std::flush;
-                }
+                std::string fileName("norm_");
+                std::ostringstream oss;
+                oss << mElem;
+                fileName.append(oss.str());
+                fileName.append("_");
+                fileName.append(uFE[iElem]);
+                fileName.append(pFE[iElem]);
+                fileName.append(".txt");
+                out_norm.open(fileName.c_str());
+                out_norm << "% time / u L2 error / L2 rel error   p L2 error / L2 rel error \n" << std::flush;
             }
 
             // +-----------------------------------------------+
             // |             Boundary conditions               |
             // +-----------------------------------------------+
-            if (verbose) std::cout<< std::endl << "[Boundary conditions]" << std::endl;
+            if (verbose) std::cout << "[Boundary conditions]" << std::endl;
             std::string dirichletList = dataFile( "fluid/problem/dirichletList", "" );
             std::set<UInt> dirichletMarkers = parseList( dirichletList );
             std::string neumannList = dataFile( "fluid/problem/neumannList", "" );
@@ -456,7 +477,7 @@ Ethiersteinman::run()
                                2.0,   2.0,   2.0,
                                -1.0,  -1.0,  -1.0);
 
-                if (verbose) std::cout << std::endl << "Mesh source: regular mesh("
+                if (verbose) std::cout << "Mesh source: regular mesh("
                                        << mElem << "x" << mElem << "x" << mElem << ")" << std::endl;
             }
             else if(M_meshSource == File)
@@ -465,7 +486,7 @@ Ethiersteinman::run()
                 meshData.setup(dataFile, "fluid/space_discretization");
                 readMesh(*fullMeshPtr, meshData);
 
-                if (verbose) std::cout << std::endl << "Mesh source: file("
+                if (verbose) std::cout << "Mesh source: file("
                                        << meshData.meshDir() << meshData.meshFile() << ")" << std::endl;
             }
             else
@@ -476,7 +497,6 @@ Ethiersteinman::run()
 
             if (verbose) std::cout << "Partitioning the mesh ... " << std::flush;
             MeshPartitioner< RegionMesh3D<LinearTetra> >   meshPart(fullMeshPtr, d->comm);
-            if (verbose) std::cout << "ok." << std::endl;
 
             // +-----------------------------------------------+
             // |            Creating the FE spaces             |
@@ -485,9 +505,9 @@ Ethiersteinman::run()
             std::string uOrder =  uFE[iElem];
             std::string pOrder =  pFE[iElem];
 
-            if (verbose) std::cout << std::endl;
-
             if (verbose) std::cout << std::endl << "[Creating the FE spaces]" << std::endl;
+            if (verbose) std::cout << "FE for the velocity: " << uOrder << std::endl
+                                   << "FE for the pressure: " << pOrder << std::endl;
 
             if (verbose) std::cout << "Building the velocity FE space ... " << std::flush;
             FESpace< RegionMesh3D<LinearTetra>, MapEpetra > uFESpace(meshPart, uOrder, 3, d->comm);
@@ -497,8 +517,8 @@ Ethiersteinman::run()
             FESpace< RegionMesh3D<LinearTetra>, MapEpetra > pFESpace(meshPart, pOrder, 1, d->comm);
             if (verbose) std::cout << "ok." << std::endl;
 
-            UInt totalVelDof   = uFESpace.map().map(Unique)->NumGlobalElements();
-            UInt totalPressDof = pFESpace.map().map(Unique)->NumGlobalElements();
+            UInt totalVelDof   = uFESpace.dof().numTotalDof();
+            UInt totalPressDof = pFESpace.dof().numTotalDof();
 
             // If we change the FE we have to update the BCHandler (internal data)
             bcH.bcUpdate( *meshPart.meshPartition(), uFESpace.feBd(), uFESpace.dof());
@@ -521,13 +541,8 @@ Ethiersteinman::run()
                                                       d->comm);
             MapEpetra fullMap(fluid.getMap());
 
-            if (verbose) std::cout << "ok." << std::endl;
-
             fluid.setUp(dataFile);
             fluid.buildSystem();
-
-            if (verbose)
-                std::cout << d->comm->MyPID() << " Init time (partial) " << chrono.diff() << " s." << std::endl;
 
             MPI_Barrier(MPI_COMM_WORLD);
 
@@ -547,8 +562,7 @@ Ethiersteinman::run()
             // initialization with exact solution: either interpolation or "L2-NS"-projection
             t0 -= dt*bdf.bdfVelocity().order();
 
-            if (verbose) std::cout << std::endl;
-            if (verbose) std::cout << "Computing the initial solution ... " << std::endl << std::endl;
+            if (verbose) std::cout << "Computing the initial solution ... " << std::endl;
 
             vector_Type beta( fullMap );
             vector_Type rhs ( fullMap );
@@ -559,9 +573,6 @@ Ethiersteinman::run()
             fluid.initialize( Problem::uexact, Problem::pexact );
 
             bdf.bdfVelocity().setInitialCondition( *fluid.solution() );
-
-            if (verbose) std::cout << std::endl;
-            if (verbose) std::cout << "Time loop ... " << std::endl << std::endl;
 
             //
             // Initial solution loading (interpolation or projection)
@@ -611,11 +622,6 @@ Ethiersteinman::run()
                 bdf.bdfVelocity().shiftRight( *fluid.solution() );
 
             }
-
-            chrono.stop();
-            if (verbose)
-                std::cout << d->comm->MyPID() << " Total init time " << chrono.diff() << " s." << std::endl;
-            // end initialization step
 
             fluid.resetPreconditioner();
 
@@ -675,8 +681,8 @@ Ethiersteinman::run()
             }
             exporter->postProcess( 0 );
 
-            if (verbose) std::cout << "uDOF: " << uFESpace.dof().numTotalDof() << std::endl;
-            if (verbose) std::cout << "pDOF: " << pFESpace.dof().numTotalDof() << std::endl;
+            initChrono.stop();
+            if (verbose) std::cout << "Initialization time: " << initChrono.diff() << " s." << std::endl;
 
             // +-----------------------------------------------+
             // |             Solving the problem               |
@@ -684,17 +690,14 @@ Ethiersteinman::run()
             if (verbose) std::cout<< std::endl << "[Solving the problem]" << std::endl;
             int iter = 1;
 
-            LifeChrono chronoGlobal;
-            chronoGlobal.start();
-
             for ( ; time <= tFinal + dt/2.; time += dt, iter++)
             {
+                iterChrono.reset();
+                iterChrono.start();
 
                 oseenData->dataTime()->setTime(time);
 
                 if (verbose) std::cout << "[t = "<< oseenData->dataTime()->time() << " s.]" << std::endl;
-
-                chrono.start();
 
                 double alpha = bdf.bdfVelocity().coefficientFirstDerivative( 0 ) / oseenData->dataTime()->timeStep();
 
@@ -749,12 +752,9 @@ Ethiersteinman::run()
 
                 MPI_Barrier(MPI_COMM_WORLD);
 
-                chrono.stop();
-                if (verbose) std::cout << "Total iteration time " << chrono.diff() << " s." << std::endl;
+                iterChrono.stop();
+                if (verbose) std::cout << "Iteration time: " << initChrono.diff() << " s." << std::endl << std::endl;
             }
-
-            chronoGlobal.stop();
-            if (verbose) std::cout << "Total simulation time (time loop only) " << chronoGlobal.diff() << " s." << std::endl;
 
             if (verbose && M_exportNorms)
             {
@@ -777,21 +777,21 @@ Ethiersteinman::run()
 
                 if (urelerr>M_accuracyTol || prelerr>M_accuracyTol)
                 {
-                    if (verbose) std::cout << "TEST_ETHIERSTEINMAN STATUS: ECHEC" << std::endl;
+                    if (verbose) std::cout << "TEST_ROSSETHIERSTEINMAN STATUS: ECHEC" << std::endl;
                     throw Ethiersteinman::RESULT_CHANGED_EXCEPTION();
-                }
-                else
-                {
-                    if (verbose) std::cout << "TEST_ETHIERSTEINMAN STATUS: SUCCESS" << std::endl;
                 }
             }
             // ** END Accuracy test **
+
+            runChrono.stop();
+            if (verbose) std::cout << "Total run time: " << runChrono.diff() << " s." << std::endl;
+            if (verbose) std::cout << "[[END_RUN]]" << std::endl;
 
         } // End of loop on the finite elements
     } // End of loop on the mesh refinement
 
     // ** BEGIN Space convergence test **
-    if (verbose && (M_test == SpaceConvergenceRate))
+    if (verbose && (M_test == SpaceConvergence))
     {
         bool success;
         success = checkConvergenceRate(uFE, uL2Error, uConvergenceOrder,
@@ -801,15 +801,15 @@ Ethiersteinman::run()
 
         if (!success)
         {
-            if (verbose) std::cout << "TEST_ETHIERSTEINMAN STATUS: ECHEC" << std::endl;
+            if (verbose) std::cout << "TEST_ROSSETHIERSTEINMAN STATUS: ECHEC" << std::endl;
             throw Ethiersteinman::RESULT_CHANGED_EXCEPTION();
-        }
-        else
-        {
-            if (verbose) std::cout << "TEST_ETHIERSTEINMAN STATUS: SUCCESS" << std::endl;
         }
     }
     // ** END Space convergence test **
+    globalChrono.stop();
+    if (verbose) std::cout << std::endl << "Total simulation time:" << globalChrono.diff() << " s." << std::endl;
+    if (verbose && (M_test != None)) std::cout << "TEST_ROSSETHIERSTEINMAN STATUS: SUCCESS" << std::endl;
+    if (verbose) std::cout << std::endl << "[[END_SIMULATION]]" << std::endl;
 }
 
 

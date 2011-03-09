@@ -12,12 +12,12 @@ save       = 1
 
 [RossEthierSteinman]
 initialization         = projection   # initialization (L2 projection) or interpolation
-export_norms           = true
+export_norms           = false
 export_exact_solutions = true
 test                   = accuracy
 accuracy_tolerance     = 0.02   # if test == accuracy
-space_convergence_tolerance = 1 # if test == SpaceConvergenceRate
-mesh_source            = regular_mesh
+space_convergence_tolerance = 1 # if test == space_convergence
+mesh_source            = file
 
 [fluid]
 
@@ -42,11 +42,11 @@ mesh_source            = regular_mesh
     linearized      = 0
     diagonalize     = 1 # weight, 0=off
     div_beta_u_v    = 0 # 1=on, 0=off
-    FE_number         = 3
-    vel_order         = 'P1 P1Bubble P2'
-    press_order       = 'P1 P1 P1'
-    vel_conv_order    = '2 2 3'
-    press_conv_order  = '2 2 2'
+    FE_number         = 1
+    vel_order         = 'P2'
+    press_order       = 'P1'
+    vel_conv_order    = '3'
+    press_conv_order  = '2'
 
     [../miscellaneous]
     verbose         = 1
@@ -133,6 +133,6 @@ mesh_source            = regular_mesh
     #a = 1.57
     #d = 0.78
     sigma = 0
-    neumannList = 1
-    dirichletList = 2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26
-    #dirichletList = 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26
+    #neumannList = 1
+    #dirichletList = 2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26
+    dirichletList = 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26

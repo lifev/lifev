@@ -4,7 +4,7 @@
 
   Author(s): Christophe Prud'homme <christophe.prudhomme@epfl.ch>
              Gwenol Grandperrin <gwenol.grandperrin@epfl.ch>
-       Date: 2010-05-18
+       Date: 2011-03-09
 
   Copyright (C) 2010 EPFL
 
@@ -27,7 +27,7 @@
    \file ethiersteiman.hpp
    \author Christophe Prud'homme <christophe.prudhomme@epfl.ch>
    \author Gwenol Grandperrin <gwenol.grandperrin@epfl.ch>
-   \date 2010-05-18
+   \date 2011-03-08
  */
 
 #ifndef __Ethiersteinman_H
@@ -119,7 +119,7 @@ public:
 
 
 private:
-    enum TestType{None, Accuracy,SpaceConvergenceRate};
+    enum TestType{None, Accuracy,SpaceConvergence};
     enum InitializationType{Projection,Interpolation};
     enum MeshSourceType{File,RegularMesh};
 
