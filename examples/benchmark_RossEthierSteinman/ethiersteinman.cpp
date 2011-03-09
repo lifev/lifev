@@ -356,7 +356,7 @@ Ethiersteinman::run()
     Problem::setParamsFromGetPot( dataFile );
 
     UInt discretizationNumber;
-    if(M_test == SpaceConvergence)
+    if((M_test == SpaceConvergence) || (M_test == None))
     {
         // Loading the discretization to be tested
         discretizationNumber = dataFile( "fluid/space_discretization/mesh_number", 1 );
@@ -364,7 +364,15 @@ Ethiersteinman::run()
         {
             meshDiscretization.push_back(dataFile( "fluid/space_discretization/mesh_size", 8, i ));
         }
+    }
+    else
+    {
+        meshDiscretization.push_back(0); // Just to be sure to have 1 element
+        discretizationNumber = 1;
+    }
 
+    if(M_test == SpaceConvergence)
+    {
         // Loading the convergence rate for the finite elements tested
         UInt FEnumber = dataFile( "fluid/space_discretization/FE_number", 1 );
         for ( UInt i( 0 ); i < FEnumber; ++i )
@@ -375,11 +383,6 @@ Ethiersteinman::run()
         {
             pConvergenceOrder.push_back(dataFile( "fluid/space_discretization/press_conv_order", 2, i ));
         }
-    }
-    else
-    {
-        meshDiscretization.push_back(0); // Just to be sure to have 1 element
-        discretizationNumber = 1;
     }
 
     // Loading the Finite element to be tested
@@ -416,7 +419,7 @@ Ethiersteinman::run()
         // Loop on the finite element
         for (UInt iElem(0); iElem<FEnumber; ++iElem)
         {
-            if (verbose) std::cout << std::endl << "[[BEGIN_RUN]]" << std::endl;
+            if (verbose) std::cout << std::endl << "[[BEGIN_RUN_" << jDiscretization*FEnumber+iElem << "]]" << std::endl;
             runChrono.reset();
             runChrono.start();
             initChrono.reset();
@@ -437,33 +440,9 @@ Ethiersteinman::run()
             }
 
             // +-----------------------------------------------+
-            // |             Boundary conditions               |
-            // +-----------------------------------------------+
-            if (verbose) std::cout << "[Boundary conditions]" << std::endl;
-            std::string dirichletList = dataFile( "fluid/problem/dirichletList", "" );
-            std::set<UInt> dirichletMarkers = parseList( dirichletList );
-            std::string neumannList = dataFile( "fluid/problem/neumannList", "" );
-            std::set<UInt> neumannMarkers = parseList( neumannList );
-
-            BCHandler bcH;
-            BCFunctionBase uWall( Problem::uexact );
-            BCFunctionBase uNeumann( Problem::fNeumann );
-
-            for (std::set<UInt>::const_iterator it = dirichletMarkers.begin();
-                    it != dirichletMarkers.end(); ++it)
-            {
-                bcH.addBC( "Wall", *it, Essential, Full, uWall, 3 );
-            }
-            for (std::set<UInt>::const_iterator it = neumannMarkers.begin();
-                    it != neumannMarkers.end(); ++it)
-            {
-                bcH.addBC( "Flux", *it, Natural, Full, uNeumann, 3 );
-            }
-
-            // +-----------------------------------------------+
             // |               Loading the mesh                |
             // +-----------------------------------------------+
-            if (verbose) std::cout << std::endl << "[Loading the mesh]" << std::endl;
+            if (verbose) std::cout << "[Loading the mesh]" << std::endl;
 
             boost::shared_ptr<RegionMesh3D<LinearTetra> > fullMeshPtr(new RegionMesh3D<LinearTetra>);
 
@@ -520,11 +499,35 @@ Ethiersteinman::run()
             UInt totalVelDof   = uFESpace.dof().numTotalDof();
             UInt totalPressDof = pFESpace.dof().numTotalDof();
 
-            // If we change the FE we have to update the BCHandler (internal data)
-            bcH.bcUpdate( *meshPart.meshPartition(), uFESpace.feBd(), uFESpace.dof());
-
             if (verbose) std::cout << "Total Velocity Dof = " << totalVelDof << std::endl;
             if (verbose) std::cout << "Total Pressure Dof = " << totalPressDof << std::endl;
+
+            // +-----------------------------------------------+
+            // |             Boundary conditions               |
+            // +-----------------------------------------------+
+            if (verbose) std::cout << std::endl << "[Boundary conditions]" << std::endl;
+            std::string dirichletList = dataFile( "fluid/problem/dirichletList", "" );
+            std::set<UInt> dirichletMarkers = parseList( dirichletList );
+            std::string neumannList = dataFile( "fluid/problem/neumannList", "" );
+            std::set<UInt> neumannMarkers = parseList( neumannList );
+
+            BCHandler bcH;
+            BCFunctionBase uWall( Problem::uexact );
+            BCFunctionBase uNeumann( Problem::fNeumann );
+
+            for (std::set<UInt>::const_iterator it = dirichletMarkers.begin();
+                    it != dirichletMarkers.end(); ++it)
+            {
+                bcH.addBC( "Wall", *it, Essential, Full, uWall, 3 );
+            }
+            for (std::set<UInt>::const_iterator it = neumannMarkers.begin();
+                    it != neumannMarkers.end(); ++it)
+            {
+                bcH.addBC( "Flux", *it, Natural, Full, uNeumann, 3 );
+            }
+
+            // If we change the FE we have to update the BCHandler (internal data)
+            bcH.bcUpdate( *meshPart.meshPartition(), uFESpace.feBd(), uFESpace.dof());
 
             // +-----------------------------------------------+
             // |             Creating the problem              |
@@ -785,7 +788,7 @@ Ethiersteinman::run()
 
             runChrono.stop();
             if (verbose) std::cout << "Total run time: " << runChrono.diff() << " s." << std::endl;
-            if (verbose) std::cout << "[[END_RUN]]" << std::endl;
+            if (verbose) std::cout << "[[END_RUN_" << jDiscretization*FEnumber+iElem << "]]" << std::endl;
 
         } // End of loop on the finite elements
     } // End of loop on the mesh refinement

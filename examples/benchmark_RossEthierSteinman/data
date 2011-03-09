@@ -16,7 +16,6 @@ export_norms           = false
 export_exact_solutions = true
 test                   = accuracy
 accuracy_tolerance     = 0.02   # if test == accuracy
-space_convergence_tolerance = 1 # if test == space_convergence
 mesh_source            = file
 
 [fluid]
@@ -33,8 +32,6 @@ mesh_source            = file
     BDF_order		= 1
 
     [../space_discretization]
-	mesh_number     = 3
-    mesh_size       = '4 8 16'
     mesh_dir		= ./Mesh/
     mesh_file       = cube16x16.mesh
 
@@ -42,11 +39,9 @@ mesh_source            = file
     linearized      = 0
     diagonalize     = 1 # weight, 0=off
     div_beta_u_v    = 0 # 1=on, 0=off
-    FE_number         = 1
-    vel_order         = 'P2'
-    press_order       = 'P1'
-    vel_conv_order    = '3'
-    press_conv_order  = '2'
+    FE_number         = 3
+    vel_order         = 'P1 P1Bubble P2'
+    press_order       = 'P1 P1 P1'
 
     [../miscellaneous]
     verbose         = 1
