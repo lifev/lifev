@@ -44,6 +44,7 @@ along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
 #define EXPORTERVTK_H 1
 
 #include <life/lifefilters/Exporter.hpp>
+#include <life/lifecore/EncoderBase64.hpp>
 
 namespace LifeV
 {
@@ -87,6 +88,14 @@ public:
         VTK_QUADRATIC_TETRA = 24,
         VTK_QUADRATIC_HEXAHEDRON = 25
 
+    };
+
+    /*! @enum EXPORT_MODE
+        The export modes currently supported are ascii and binary
+     */
+    enum EXPORT_MODE {
+        ASCII_EXPORT = 1,
+        BINARY_EXPORT = 2
     };
 
     typedef MeshType                          mesh_Type;
@@ -274,6 +283,7 @@ private:
 
     //! @name Private members
     //@{
+    EXPORT_MODE M_exportMode;
     //@}
 
 };
@@ -289,7 +299,8 @@ private:
 
 template<typename Mesh>
 ExporterVTK<Mesh>::ExporterVTK():
-super()
+super(),
+M_exportMode(ASCII_EXPORT)
 {
 }
 
@@ -300,6 +311,16 @@ template<typename Mesh> ExporterVTK<Mesh >::ExporterVTK(
                 :
                 super(data_file, prefix)
 {
+    switch( data_file("exporter/exportMode",1) )
+    {
+        case 1:
+            M_exportMode = ASCII_EXPORT;
+            break;
+        case 2:
+            M_exportMode = BINARY_EXPORT;
+            break;
+
+    }
 }
 
 
@@ -436,55 +457,78 @@ ExporterVTK<Mesh>::composeDataArrayStream(const exporterData_Type& dvar,
                                           const std::map<UInt,UInt>& localToGlobalPointsMap,
                                           std::stringstream& dataArraysStringStream)
 {
-    dataArraysStringStream.setf(std::ios_base::fixed);
-    dataArraysStringStream.precision(5);
-    dataArraysStringStream.width(12);
-
     UInt start   = dvar.start();
     UInt numDOF  = dvar.numDOF();
     UInt numPoints( localToGlobalPointsMap.size() );
 
-    switch ( dvar.fieldType() )
+    std::stringstream dataToBeEncoded; dataToBeEncoded.str("");
+    std::string encodedDataString;
+
+    std::string formatString;
+    std::stringstream nComponents;
+    nComponents << dvar.fieldDim();
+
+    int32_type lengthOfData( dvar.fieldDim()*numPoints*sizeof(Real) );
+
+    switch( M_exportMode )
     {
-        case exporterData_Type::ScalarField:
-
-            dataArraysStringStream << "\t\t\t\t<DataArray type=\"Float32\" Name=\""
-            << dvar.variableName() << "\" NumberOfComponents=\"1\" format=\"ascii\">\n";
-
-            for (UInt i=0; i<numPoints; ++i) {
-                Int id = localToGlobalPointsMap.find(i)->second;
-                dataArraysStringStream << dvar( start + id ) << " ";
-            }
+        case ASCII_EXPORT:
+            formatString = "ascii";
             break;
-        case exporterData_Type::VectorField:
+        case BINARY_EXPORT:
+            formatString = "binary";
+            dataToBeEncoded.write( reinterpret_cast<char *>( &lengthOfData ),
+                                   sizeof(int32_type) );
+            lengthOfData += sizeof(int32_type);
+            break;
+    }
 
-            dataArraysStringStream << "\t\t\t\t<DataArray type=\"Float32\" Name=\""
-            << dvar.variableName() << "\" NumberOfComponents=\""
-            << nDimensions << "\" format=\"ascii\">\n";
+    dataArraysStringStream << "\t\t\t\t<DataArray type=\"Float64\" Name=\""
+                    << dvar.variableName() << "\" NumberOfComponents=\""
+                    << nComponents.str() << "\" format=\"" << formatString << "\">\n";
 
-            for (UInt i=0; i<numPoints; ++i) {
-                for (UInt icoor=0; icoor< dvar.fieldDim(); ++icoor) {
-                    Int id = localToGlobalPointsMap.find(i)->second;
-                    dataArraysStringStream << dvar( start + id + icoor * numDOF ) << " ";
+    switch( M_exportMode )
+    {
+        case ASCII_EXPORT:
+            dataArraysStringStream.setf(std::ios_base::fixed);
+            dataArraysStringStream.precision(5);
+            dataArraysStringStream.width(12);
+
+            for (UInt i=0; i<numPoints; ++i)
+            {
+                Int id = localToGlobalPointsMap.find(i)->second;
+                for (UInt icoor=0; icoor< dvar.fieldDim(); ++icoor)
+                {
+                    for (UInt jcoor=0; jcoor< dvar.fieldDim() / nDimensions; ++jcoor)
+                    {
+                        dataArraysStringStream << dvar( start + id +
+                                                        icoor * numDOF +
+                                                        jcoor * numDOF * dvar.fieldDim() ) << " ";
+                    }
                 }
             }
             break;
-            /*case typename exporterData_Type::TensorField:
-
-                    dataArraysStringStream << "\t\t\t\t<DataArray type=\"Float32\" Name=\""
-                            << dvar.variableName() << "\" NumberOfComponents=\""
-                            << nDimensions*nDimensions << "\" format=\"ascii\">\n";
-
-                    for (UInt i=0; i<dvar.size(); ++i){
-                        for (UInt icoor=0; icoor< nDimensions;++icoor){
-                            for (UInt jcoor=0; jcoor< nDimensions;++jcoor){
-                                dataArraysStringStream << it->second( i * nDimensions * nDimensions +
-                                 icoor * nDimensions + jcoor ) << " ";
-                            }
-                        }
+        case BINARY_EXPORT:
+            for (UInt i=0; i<numPoints; ++i)
+            {
+                Int id = localToGlobalPointsMap.find(i)->second;
+                for (UInt icoor=0; icoor< dvar.fieldDim(); ++icoor)
+                {
+                    for (UInt jcoor=0; jcoor< dvar.fieldDim() / nDimensions; ++jcoor)
+                    {
+                        Real value( dvar( start + id + icoor * numDOF + jcoor * numDOF * dvar.fieldDim() ) );
+                        dataToBeEncoded.write( reinterpret_cast<const char *>(&value), sizeof(Real) );
                     }
-                    break;*/
+                }
+            }
+
+            encodedDataString = base64_encode(reinterpret_cast<const unsigned char *>( dataToBeEncoded.str().c_str() ),
+                                              lengthOfData );
+            dataArraysStringStream << encodedDataString;
+
+            break;
     }
+
     dataArraysStringStream << "\n\t\t\t\t</DataArray>\n";
     // return dataArraysStringStream;
 }
@@ -605,22 +649,22 @@ void ExporterVTK<Mesh>::composePVTUStream(const exporterData_Type& dvar,
 
     pVTUStringStream << ">\n";
 
-    switch ( dvar.fieldType() )
+    std::string formatString;
+    std::stringstream nComponents;
+    nComponents << dvar.fieldDim();
+    switch( M_exportMode )
     {
-        case exporterData_Type::ScalarField:
-
-            pVTUStringStream << "\t\t\t<PDataArray type=\"Float32\" Name=\""
-            << dvar.variableName() << "\" NumberOfComponents=\"1\" format=\"ascii\">\n";
-
+        case ASCII_EXPORT:
+            formatString = "ascii";
             break;
-        case exporterData_Type::VectorField:
-
-            pVTUStringStream << "\t\t\t<PDataArray type=\"Float32\" Name=\""
-            << dvar.variableName() << "\" NumberOfComponents=\""
-            << nDimensions << "\" format=\"ascii\">\n";
-
+        case BINARY_EXPORT:
+            formatString = "binary";
             break;
     }
+    pVTUStringStream << "\t\t\t<PDataArray type=\"Float64\" Name=\""
+                    << dvar.variableName() << "\" NumberOfComponents=\""
+                    << nComponents.str() << "\" format=\"" << formatString << "\">\n";
+
     pVTUStringStream << "\t\t\t</PDataArray>\n";
 
     switch ( dvar.where() )
