@@ -196,20 +196,20 @@ void regularMesh3D( RegionMesh3D<GeoShape,MC>& mesh,
     UInt boundaryPointsNumber( 0 );
     if ( GeoShape::S_numPoints>4 )
     {
-        std::cout << "Quadratic Tetra Mesh ( from Linear geometry )" << std::endl;
+        oStr << "Quadratic Tetra Mesh ( from Linear geometry )" << std::endl;
         // In this case there is one extra points on each edge
         pointsNumber = verticesNumber + edgesNumber;
         boundaryPointsNumber = boundaryVerticesNumber + boundaryEdgesNumber;
     }
     else
     {
-        std::cout << "Linear Tetra Mesh" << std::endl;
+        oStr << "Linear Tetra Mesh" << std::endl;
         pointsNumber = verticesNumber;
         boundaryPointsNumber = boundaryVerticesNumber;
     }
 
     // Set the data
-    std::cout << "initialization of mesh...";
+    oStr << "initialization of mesh...";
 
     // Note: The vertices are the nodes of the mesh while the points
     //       are the nodes and some new points added for example for
@@ -245,7 +245,7 @@ void regularMesh3D( RegionMesh3D<GeoShape,MC>& mesh,
     mesh.setMaxNumGlobalVolumes( volumesNumber );
 
     mesh.setMarker( regionFlag );
-    std::cout << "done" << std::endl;
+    oStr << "done" << std::endl;
 
     // Declaration of pointers on the different mesh entities
     typename RegionMesh3D<GeoShape,MC>::point_Type*  pointPtr  = 0;
@@ -254,7 +254,7 @@ void regularMesh3D( RegionMesh3D<GeoShape,MC>& mesh,
     typename RegionMesh3D<GeoShape,MC>::VolumeType* volumePtr = 0;
 
     // Build the points of the mesh
-    std::cout << "building the points of the mesh...";
+    oStr << "building the points of the mesh...";
     Real xPosition( 0.0 ), yPosition( 0.0 ), zPosition( 0.0 );
     entityFlag_Type nodeFlag( 0 );
     UInt nodeID( 0 );
@@ -298,11 +298,11 @@ void regularMesh3D( RegionMesh3D<GeoShape,MC>& mesh,
             }
         }
     }
-    std::cout << "done" << std::endl;
+    oStr << "done" << std::endl;
 
     /*
     // Build the boundary edges (ONLY!)
-    std::cout << "building the boundary edges...";
+    oStr << "building the boundary edges...";
 
      //edges l_x x l_y
     for ( UInt j(0); j<m_y; ++j )
@@ -581,10 +581,10 @@ void regularMesh3D( RegionMesh3D<GeoShape,MC>& mesh,
             edgePtr->setPoint( 2, mesh.point(P2) );
         }
     }
-    std::cout << "done" << std::endl;
+    oStr << "done" << std::endl;
 
     // Build the boundary faces (ONLY!)
-    std::cout << "building the boundary faces...";
+    oStr << "building the boundary faces...";
     // Faces l_x x l_y
     for ( UInt j(0); j<m_y; ++j )
     {
@@ -869,11 +869,11 @@ void regularMesh3D( RegionMesh3D<GeoShape,MC>& mesh,
             }
         }
     }
-    std::cout << "done" << std::endl;
+    oStr << "done" << std::endl;
     */
 
     // Build the volumes
-    std::cout << "building the volumes...";
+    oStr << "building the volumes...";
     UInt volumeID(0);
     for ( UInt k(0); k<m_z; ++k )
     {
@@ -1002,7 +1002,7 @@ void regularMesh3D( RegionMesh3D<GeoShape,MC>& mesh,
             }
         }
     }
-    std::cout << "done" << std::endl;
+    oStr << "done" << std::endl;
 
     // Build a P2 mesh from a P1 geometry
     if ( GeoShape::S_numPoints > 4 ) MeshUtility::p2MeshFromP1Data( mesh );
