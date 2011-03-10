@@ -558,6 +558,10 @@ OneDimensionalSolver::boundaryValue( const solution_Type& solution, const bcType
 
         return (*solution.find("P")->second)( boundaryDof );
 
+    case OneDimensional::S:
+
+        return -(*solution.find("P")->second)( boundaryDof );
+
     default:
 
         std::cout << "Warning: bcType \"" << bcType << "\"not available!" << std::endl;

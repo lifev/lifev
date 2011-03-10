@@ -65,6 +65,7 @@ BCInterface1DData::BCInterface1DData() :
     M_mapQuantity["W1"] = OneDimensional::W1;
     M_mapQuantity["W2"] = OneDimensional::W2;
     M_mapQuantity["P"]  = OneDimensional::P;
+    M_mapQuantity["S"]  = OneDimensional::S;
 
     //Set mapLine
     M_mapLine["first"]  = OneDimensional::first;

@@ -106,8 +106,7 @@ enum couplings_Type
  */
 enum stress_Type
 {
-    StaticPressure,          /*!< Use static pressure */
-    TotalPressure,           /*!< Use total pressure (static + dynamic) */
+    Pressure,                /*!< Use static pressure */
     LagrangeMultiplier       /*!< Use the Lagrange multiplier */
 };
 
@@ -198,8 +197,7 @@ multiscaleMapsDefinition()
     multiscaleAlgorithmsMap["Newton"]           = Newton;
 
     multiscaleStressesMap["LagrangeMultiplier"] = LagrangeMultiplier;
-    multiscaleStressesMap["StaticPressure"]     = StaticPressure;
-    multiscaleStressesMap["TotalPressure"]      = TotalPressure;
+    multiscaleStressesMap["Pressure"]           = Pressure;
 }
 
 //! Perform a dynamic cast from a base class to a derived class

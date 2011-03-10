@@ -421,14 +421,9 @@ MultiscaleModelFluid3D::boundaryStress( const bcFlag_Type& flag, const stress_Ty
 {
     switch ( stressType )
     {
-    case StaticPressure:
+    case Pressure:
     {
         return -boundaryPressure( flag );
-    }
-
-    case TotalPressure:
-    {
-        return -boundaryPressure( flag ) + boundaryDynamicPressure( flag ) * ( ( boundaryFlowRate( flag ) > 0.0 ) ? 1 : -1 );
     }
 
     case LagrangeMultiplier:
@@ -461,12 +456,6 @@ MultiscaleModelFluid3D::boundaryDeltaPressure( const bcFlag_Type& flag, bool& so
 }
 
 Real
-MultiscaleModelFluid3D::boundaryDeltaDynamicPressure( const bcFlag_Type& flag, bool& solveLinearSystem )
-{
-    return boundaryDensity( flag ) * boundaryDeltaFlowRate( flag, solveLinearSystem ) * boundaryFlowRate( flag ) / ( boundaryArea( flag ) * boundaryArea( flag ) );
-}
-
-Real
 MultiscaleModelFluid3D::boundaryDeltaLagrangeMultiplier( const bcFlag_Type& flag, bool& solveLinearSystem )
 {
     solveLinearModel( solveLinearSystem );
@@ -479,14 +468,9 @@ MultiscaleModelFluid3D::boundaryDeltaStress( const bcFlag_Type& flag, bool& solv
 {
     switch ( stressType )
     {
-    case StaticPressure:
+    case Pressure:
     {
         return -boundaryDeltaPressure( flag, solveLinearSystem );
-    }
-
-    case TotalPressure:
-    {
-        return -boundaryDeltaPressure( flag, solveLinearSystem ) + boundaryDeltaDynamicPressure( flag, solveLinearSystem ); //Verify the sign of DynamicPressure contribute!
     }
 
     case LagrangeMultiplier:

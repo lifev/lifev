@@ -243,7 +243,7 @@ public:
      * @param stressType Type of approximation for the stress
      * @return stress value
      */
-    Real boundaryStress( const bcFlag_Type& flag, const stress_Type& stressType = StaticPressure ) const;
+    Real boundaryStress( const bcFlag_Type& flag, const stress_Type& stressType = Pressure ) const;
 
     //! Get the variation of the flow rate (on a specific boundary face) using the linear model
     /*!
@@ -253,22 +253,6 @@ public:
      */
     Real boundaryDeltaFlowRate( const bcFlag_Type& flag, bool& solveLinearSystem );
 
-    //! Get the variation of the pressure (on a specific boundary face) using the linear model
-    /*!
-     * @param flag flag of the boundary face on which quantity should be computed
-     * @param solveLinearSystem a flag to which determine if the linear system has to be solved
-     * @return variation of the pressure
-     */
-    Real boundaryDeltaPressure( const bcFlag_Type& flag, bool& solveLinearSystem );
-
-    //! Get the variation of the total pressure (on a specific boundary face) using the linear model
-    /*!
-     * @param flag flag of the boundary face on which quantity should be computed
-     * @param solveLinearSystem a flag to which determine if the linear system has to be solved
-     * @return variation of the dynamic pressure
-     */
-    Real boundaryDeltaDynamicPressure( const bcFlag_Type& flag, bool& solveLinearSystem );
-
     //! Get the variation of the integral of the normal stress (on a specific boundary face)
     /*!
      * @param flag flag of the boundary face
@@ -276,7 +260,7 @@ public:
      * @param stressType Type of approximation for the stress
      * @return variation of the stress
      */
-    Real boundaryDeltaStress( const bcFlag_Type& flag, bool& solveLinearSystem, const stress_Type& stressType = StaticPressure );
+    Real boundaryDeltaStress( const bcFlag_Type& flag, bool& solveLinearSystem, const stress_Type& stressType = Pressure );
 
     //@}
 
