@@ -57,18 +57,18 @@ models = '
 ########### ID #### Type ############## File (without .dat) ########### Models ######## Flags #####
 couplings = '    
             1       BoundaryCondition   FlowRate_Heart                  1               0
-            2       Stress              StaticPressure                  95,1            0,1
-            3       Stress              StaticPressure                  2,3,95          0,0,1
-            4       Stress              StaticPressure                  14,15,2         0,0,1
-            5       Stress              StaticPressure                  18,19,14        0,0,1
-            6       Stress              StaticPressure                  26,27,18        0,0,1
-            7       Stress              StaticPressure                  28,29,27        0,0,1
-            8       Stress              StaticPressure                  30,31,29        0,0,1
-            9       Stress              StaticPressure                  32,33,30        0,0,1
-           10       Stress              StaticPressure                  38,35,28        0,0,1
-           11       Stress              StaticPressure                  36,37,35        0,0,1
-           12       Stress              StaticPressure                  34,39,37        0,0,1
-           13       Stress              StaticPressure                  40,41,39        0,0,1
+            2       Stress              Pressure                        95,1            0,1
+            3       Stress              Pressure                        2,3,95          0,0,1
+            4       Stress              Pressure                        14,15,2         0,0,1
+            5       Stress              Pressure                        18,19,14        0,0,1
+            6       Stress              Pressure                        26,27,18        0,0,1
+            7       Stress              Pressure                        28,29,27        0,0,1
+            8       Stress              Pressure                        30,31,29        0,0,1
+            9       Stress              Pressure                        32,33,30        0,0,1
+           10       Stress              Pressure                        38,35,28        0,0,1
+           11       Stress              Pressure                        36,37,35        0,0,1
+           12       Stress              Pressure                        34,39,37        0,0,1
+           13       Stress              Pressure                        40,41,39        0,0,1
            14       BoundaryCondition   Terminal_ReymondStergiopulos2009_003   3               1
            15       BoundaryCondition   Terminal_ReymondStergiopulos2009_015   15              1
            16       BoundaryCondition   Terminal_ReymondStergiopulos2009_019   19              1

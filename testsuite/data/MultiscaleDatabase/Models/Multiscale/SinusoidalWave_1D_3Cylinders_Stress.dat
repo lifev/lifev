@@ -36,8 +36,8 @@ models = '
 ########### ID #### Type ############## File (without .dat) ########### Models ######## Flags #####
 couplings = '    
             0       BoundaryCondition   FlowRate_SquareSinusoidalWave   0               0
-            1       Stress              StaticPressure                  1,0             0,1
-            2       Stress              StaticPressure                  2,1             0,1
+            1       Stress              Pressure                        1,0             0,1
+            2       Stress              Pressure                        2,1             0,1
             3       BoundaryCondition   Absorbing_1DRight               2               1
             '
 ###################################################################################################

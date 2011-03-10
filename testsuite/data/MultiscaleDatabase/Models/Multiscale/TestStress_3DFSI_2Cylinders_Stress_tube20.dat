@@ -35,7 +35,7 @@ models = '
 ########### ID #### Type ############## File (without .dat) ########### Models ######## Flags #####
 couplings = '
             0       BoundaryCondition   Stress_Test                     0               0
-            1       Stress              StaticPressure                  1,0             0,1
+            1       Stress              Pressure                        1,0             0,1
             2       BoundaryCondition   Stress_Zero                     1               1
             '
 ###################################################################################################
