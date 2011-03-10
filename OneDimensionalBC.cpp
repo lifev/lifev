@@ -128,6 +128,7 @@ OneDimensionalBC::applyViscoelasticBC( const fluxPtr_Type& flux, matrix_Type& ma
 
     case OneDimensional::A:
     case OneDimensional::P:
+    case OneDimensional::S:
 
         break;
 
@@ -166,6 +167,9 @@ OneDimensionalBC::computeMatrixAndRHS( const Real& time, const Real& timeStep, c
         bcMatrix[line][0] = 1.;
         bcMatrix[line][1] = 0.;
         break;
+    case OneDimensional::S:
+        // The normal stress has opposite sign with respect to the pressure
+        bcRHS *= -1;
     case OneDimensional::P:
         bcRHS = flux->physics()->fromPToA( bcRHS, timeStep, iNode );
         bcMatrix[line][0] = 1.;
