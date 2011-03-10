@@ -415,7 +415,7 @@ FSIMonolithicGI::assembleMeshBlock(UInt /*iter*/)
 
     /******************alternative way************************/
 //     BCFunctionBase bcf(fZero);
-//     fluidBchandlerPtr_Type BCh(new fluid_bchandler_raw_type() );
+//     fluidBchandlerPtr_Type BCh(new fluidBchandler_Type() );
 //     BCh->addBC("Interface", 1, Essential, Full,
 //                bcf, 3);
 
@@ -424,14 +424,14 @@ FSIMonolithicGI::assembleMeshBlock(UInt /*iter*/)
 //     if ( !BCh->bcUpdateDone() )
 //         BCh->bcUpdate( *M_mmFESpace->mesh(), M_mmFESpace->feBd(), M_mmFESpace->dof() );
 
-//     bcManage( *M_meshBlock, *M_rhsFull, *M_mmFESpace->mesh(), M_mmFESpace->dof(), *BCh, M_mmFESpace->feBd(), 1., dataFluid().dataTime()->time());
+//     bcManage( *M_meshBlock, *M_rhsFull, *M_mmFESpace->mesh(), M_mmFESpace->dof(), *BCh, M_mmFESpace->feBd(), 1., dataFluid()->dataTime()->time());
     /********************************************************/
 
     for ( ID dim=0; dim < nDimensions; ++dim )
         for ( ITrow = locdofmap.begin(); ITrow != locdofmap.end(); ++ITrow )
         {
             UInt i = ITrow->first;
-            M_meshBlock->diagonalize(i+offset+dim*M_mmFESpace->dof().numTotalDof()-1 , 1.);
+            M_meshBlock->diagonalize(i+offset+dim*M_mmFESpace->dof().numTotalDof() , 1.);
         }
 }
 
