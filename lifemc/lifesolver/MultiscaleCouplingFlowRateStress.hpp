@@ -227,7 +227,7 @@ MultiscaleCouplingFlowRateStress::imposeStress1D( const UInt& i )
 {
     ModelType *model = multiscaleDynamicCast< ModelType >( M_models[i] );
 
-    model->bcInterface().setBC( (M_flags[i] == 0) ? OneDimensional::left : OneDimensional::right, OneDimensional::first, OneDimensional::P, M_baseStress1D );
+    model->bcInterface().setBC( (M_flags[i] == 0) ? OneDimensional::left : OneDimensional::right, OneDimensional::first, OneDimensional::S, M_baseStress1D );
 }
 
 } // Namespace Multiscale
