@@ -303,14 +303,14 @@ FSISolver::iterate()
     // the newton solver
     UInt maxiter = M_data->maxSubIterationNumber();
     UInt status = NonLinearRichardson( *lambda,
-                                    *M_oper,
-                                    M_data->absoluteTolerance(),
-                                    M_data->relativeTolerance(),
-                                    maxiter,
-                                    M_data->errorTolerance(),
-                                    M_data->NonLinearLineSearch(),
-                                    M_out_res,
-                                    M_data->dataFluid()->dataTime()->time() );
+                                       *M_oper,
+                                       M_data->absoluteTolerance(),
+                                       M_data->relativeTolerance(),
+                                       maxiter,
+                                       M_data->errorTolerance(),
+                                       M_data->NonLinearLineSearch(),
+                                       M_out_res,
+                                       M_data->dataFluid()->dataTime()->time() );
 
     // We update the solution
     M_oper->setSolution( *lambda );
