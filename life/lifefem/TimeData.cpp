@@ -27,13 +27,13 @@
 /*!
     @file
     @brief File containing a class for handling temporal discretization
- 
+
     @author M.A. Fernandez
     @author Cristiano Malossi <cristiano.malossi@epfl.ch>
     @date 01-06-2009
-  
+
     @contributor Matteo Pozzoli <matteo1.pozzoli@mail.polimi.it>
-  
+
     @maintainer Matteo Pozzoli <matteo1.pozzoli@mail.polimi.it>
  */
 #include <life/lifefem/TimeData.hpp>
@@ -53,7 +53,8 @@ TimeData::TimeData( ) :
         M_timeStepNumber( 0 ),
         M_orderBDF      ( 1 ),
         M_theta         ( 0.25 ),
-        M_gamma         ( 0.5)
+        M_gamma         ( 0.5),
+        M_timestepBackup( 1.e-4)
 {
 }
 
