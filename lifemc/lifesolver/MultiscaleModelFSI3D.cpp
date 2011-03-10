@@ -173,13 +173,13 @@ MultiscaleModelFSI3D::setupModel()
 
     //Setup linear model
     setupLinearModel();
-
-    M_solidDisplacement_tn.reset( new vector_Type( *M_fluidDisplacement ));
 }
 
 void
 MultiscaleModelFSI3D::buildSystem()
 {
+    M_solidDisplacement_tn.reset( new vector_Type( *M_fluidDisplacement ));
+
     // Update BCInterface Operator BC
     updateBC();
 
@@ -219,9 +219,6 @@ MultiscaleModelFSI3D::solveSystem( )
 {
     displayModelStatus( "Solve" );
 
-    UInt maxSubIterationNumber = M_data->maxSubIterationNumber();
-    std::ofstream outRes; // Unuseful variable
-
     // Non-linear Richardson solver
     vectorPtr_Type solution( new vector_Type( *M_fluidVelocityPressure_tn ) ) ;
     boost::dynamic_pointer_cast<LifeV::FSIMonolithic>(M_FSIoperator)->initializeMesh(M_solidDisplacement_tn);
@@ -241,6 +238,8 @@ MultiscaleModelFSI3D::solveSystem( )
         M_FSIoperator->applyBoundaryConditions( );
     }
 
+    UInt maxSubIterationNumber = M_data->maxSubIterationNumber();
+    std::ofstream outRes; // Unuseful variable
     UInt status = NonLinearRichardson( *solution, *M_FSIoperator,
                                     M_data->absoluteTolerance(),
                                     M_data->relativeTolerance(),
@@ -559,7 +558,7 @@ MultiscaleModelFSI3D::updateBC()
         M_fluidBC->updatePhysicalSolverVariables();
         M_harmonicExtensionBC->updatePhysicalSolverVariables();
     }
-    else
+    if ( M_FSIoperator->isSolid() )
     {
         M_solidBC->updatePhysicalSolverVariables();
     }

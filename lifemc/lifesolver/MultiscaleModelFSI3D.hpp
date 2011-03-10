@@ -68,6 +68,7 @@ namespace Multiscale
 //! MultiscaleModelFSI3D - Multiscale model for 3D FSI simulations
 /*!
  *  @author Paolo Crosetto
+ *  @author Cristiano Malossi <cristiano.malossi@epfl.ch>
  */
 class MultiscaleModelFSI3D: public virtual multiscaleModel_Type
 {
@@ -284,7 +285,6 @@ private:
     void setupCommunicator();
 
     void setupBC( const std::string& fileName );
-    //void setupSegregatedBC( const std::string& fileName );
     void updateBC();
 
     void setupExporter( IOFilePtr_Type& exporter, const GetPot& dataFile, const std::string& label = "" );
