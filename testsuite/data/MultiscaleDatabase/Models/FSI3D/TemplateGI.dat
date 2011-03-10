@@ -1,4 +1,3 @@
-# -*- getpot -*- GetPot mode activation for emacs
 ###################################################################################################
 #
 #                       This file is part of the LifeV Applications
@@ -275,7 +274,7 @@ semiImplicit        = false  # tells if we advance in time after the first nonli
     [./solver]                        # Solver Parameters
     solver          = gmres
     scaling         = none
-    output          = all # all none
+    output          = none # all none
     conv            = rhs
     max_iter        = 500
     reuse           = true

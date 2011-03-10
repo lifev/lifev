@@ -1,4 +1,3 @@
-# -*- getpot -*- GetPot mode activation for emacs
 ###################################################################################################
 #
 #                       This file is part of the LifeV Applications
@@ -221,7 +220,7 @@ tolerance       =  0   # how far points are to be considered the same on the int
     [./solver]                        # Solver Parameters
     solver          = gmres
     scaling         = none
-    output          = all # all none
+    output          = none # all none
     conv            = rhs
     max_iter        = 500
     reuse           = true
@@ -341,7 +340,7 @@ tolerance       =  0   # how far points are to be considered the same on the int
     [./solver]                        # Solver Parameters
     solver          = gmres
     scaling         = none
-    output          = all # all none
+    output          = none # all none
     conv            = rhs
     max_iter        = 500
     reuse           = true
