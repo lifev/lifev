@@ -128,6 +128,23 @@ public:
      */
     inline void setDataSolid( const dataSolid_PtrType dataSolid ) { M_dataSolid = dataSolid; }
 
+    void setTimeStep(const Real& timestep)
+    {
+        M_dataFluid->dataTime()->setTimeStep(timestep);
+        M_dataSolid->getdataTime()->setTimeStep(timestep);
+    }
+
+    void resetTimeStep(const Real& timestep)
+    {
+        M_dataFluid->dataTime()->resetTimeStep(timestep);
+        M_dataSolid->getdataTime()->resetTimeStep(timestep);
+    }
+
+    void restoreTimeStep( )
+    {
+        M_dataFluid->dataTime()->restoreTimeStep();
+        M_dataSolid->getdataTime()->restoreTimeStep();
+    }
     //@}
 
 
@@ -242,6 +259,13 @@ public:
      */
     inline Real interfaceTolerance() const { return M_interfaceTolerance; }
 
+    //! Get the timestep to restart the simulation
+    /*!
+     * @return the timestep used in the previous simulation from which we want to restart, used for the initialization
+     of the time discretization
+     */
+    inline Real restartTimestep() const { return M_restartTimestep; }
+
     //@}
 
 private:
@@ -276,6 +300,8 @@ private:
     boost::scoped_ptr<int const>  M_structureInterfaceVertexFlag;
 
     Real                          M_interfaceTolerance;
+
+    Real                          M_restartTimestep;
 };
 
 

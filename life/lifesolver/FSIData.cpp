@@ -83,7 +83,8 @@ FSIData::FSIData( const FSIData& FSIData ) :
         M_structureInterfaceFlag        ( FSIData.M_structureInterfaceFlag ),
         M_fluidInterfaceVertexFlag      ( new int const ( *FSIData.M_fluidInterfaceVertexFlag ) ),
         M_structureInterfaceVertexFlag  ( new int const ( *FSIData.M_structureInterfaceVertexFlag ) ),
-        M_interfaceTolerance            ( FSIData.M_interfaceTolerance )
+        M_interfaceTolerance            ( FSIData.M_interfaceTolerance ),
+        M_restartTimestep               ( 0. )
 {
 }
 
@@ -161,6 +162,8 @@ FSIData::setup( const GetPot& dataFile, const std::string& section )
         M_structureInterfaceVertexFlag.reset( new int const ( vertexFlag ) );
 
     M_interfaceTolerance = dataFile( "interface/tolerance",      0. );
+
+    M_restartTimestep  = dataFile( "importer/restart_timestep",      0. );
 }
 
 bool
