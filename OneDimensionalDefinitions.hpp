@@ -110,11 +110,12 @@ class OneDimensionalModel_BCFunction;
 
 enum bcType_Type
 {
-    W1,
-    W2,
-    A,
-    Q,
-    P
+    W1,         /*!< Riemann variable 1 */
+    W2,         /*!< Riemann variable 2 */
+    A,          /*!< Area */
+    Q,          /*!< Flow rate */
+    P,          /*!< Pressure */
+    S           /*!< Normal Stress */
 };
 
 enum bcSide_Type

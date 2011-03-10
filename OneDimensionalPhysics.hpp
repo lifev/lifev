@@ -342,7 +342,7 @@ OneDimensionalPhysics::dAdP( const Real& P, const Real& timeStep, const UInt& iN
     else
     {
         // Finite difference approach
-        return ( fromPToA( P + M_data->jacobianPerturbationPressure(), timeStep, iNode, elasticExternalNodes ) - fromPToA( P, timeStep, iNode, elasticExternalNodes ) ) / M_data->jacobianPerturbationPressure();
+        return ( fromPToA( P + M_data->jacobianPerturbationStress(), timeStep, iNode, elasticExternalNodes ) - fromPToA( P, timeStep, iNode, elasticExternalNodes ) ) / M_data->jacobianPerturbationStress();
     }
 }
 
