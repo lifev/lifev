@@ -21,7 +21,7 @@ list = 'Pressure'
     [./Pressure]
     type                = Natural
     mode                = Normal
-    function            = '-1000'
+    function            = '-1'
     
     # Additional parameters for 1D BC
     quantity            = S
