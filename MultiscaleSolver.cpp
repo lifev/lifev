@@ -166,7 +166,7 @@ MultiscaleSolver::solveProblem( const Real& externalResidual )
         {
             std::cout << std::endl;
             std::cout << "$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$" << std::endl;
-            std::cout << "                    MULTISCALE SIMULATION" << std::endl;
+            std::cout << "                    MULTISCALE FRAMEWORK" << std::endl;
             std::cout << "             time = " << M_globalData->dataTime()->time() << " s; "  <<
                       "time step number = " << M_globalData->dataTime()->timeStepNumber()  << std::endl;
             std::cout << "$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$" << std::endl << std::endl;
