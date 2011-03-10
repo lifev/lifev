@@ -42,11 +42,9 @@
 namespace LifeV
 {
 
-
 // ===================================================
-//! Constructurs and Destructor
+// Constructurs and Destructor
 // ===================================================
-
 PreconditionerComposed::PreconditionerComposed( boost::shared_ptr<Epetra_Comm> comm):
     super_Type (comm ),
     M_prec(new prec_Type(comm)),
@@ -68,10 +66,8 @@ PreconditionerComposed::~PreconditionerComposed()
 
 
 // ===================================================
-//! Public Methods
+// Public Methods
 // ===================================================
-
-
 void
 PreconditionerComposed::setDataFromGetPot( const GetPot&      dataFile,
                                            const std::string& section )
@@ -138,7 +134,8 @@ PreconditionerComposed::push_back(operatorPtr_Type& oper,
     LifeChrono chrono;
     epetraPrecPtr_Type prec;
 
-    this->M_displayer.leaderPrint(std::string("ICP-  Computing prec. factorization, type:") + M_prec->Operator()[M_operVector.size()-1]->preconditionerType() + " ...        ");
+    this->M_displayer.leaderPrint( std::string("ICP-  Preconditioner type:                     ") + M_prec->Operator()[M_operVector.size()-1]->preconditionerType() + std::string("\n") );
+    this->M_displayer.leaderPrint( "ICP-  Computing preconditioner ...             " );
     chrono.start();
     createPrec(oper, M_prec->Operator()[M_operVector.size()-1]);
     chrono.stop();
@@ -160,7 +157,8 @@ PreconditionerComposed::replace(operatorPtr_Type& oper,
     M_operVector[index] = oper;
     LifeChrono chrono;
     //ifpack_prec_type prec;
-    this->M_displayer.leaderPrint(std::string("ICP-  Computing prec. factorization, type:") + (M_prec->Operator()[index]->preconditionerType()) + " ...        ");
+    this->M_displayer.leaderPrint( std::string("ICP-  Preconditioner type:                     ") + M_prec->Operator()[index]->preconditionerType() + std::string("\n") );
+    this->M_displayer.leaderPrint( "ICP-  Computing preconditioner ...             " );
     chrono.start();
     createPrec(oper, M_prec->Operator()[index]);
     chrono.stop();
@@ -182,9 +180,8 @@ PreconditionerComposed::resetPreconditioner()
 
 
 // ===================================================
-//! Private Methods
+// Private Methods
 // ===================================================
-
 Int
 PreconditionerComposed::createPrec(operator_type& oper,
                                    boost::shared_ptr<Preconditioner> & prec )
