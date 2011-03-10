@@ -24,7 +24,7 @@ list = 'Stress_Sinusoidal'  # Sinusoidal Pressure
     function            = 'T=1; -sin(2*pi*t/T)'
 
     # Additional parameters for 1D BC
-    quantity            = P
+    quantity            = S
     line                = first
         
     [../]

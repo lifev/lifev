@@ -24,7 +24,7 @@ list = 'PressureDynamic'
     functionFile        = physicalFunctions/SmoothTrapezoidalProfile.dat[C]
 
     # Additional parameters for 1D BC
-    quantity            = P
+    quantity            = S
     line                = first
     
     [../]
