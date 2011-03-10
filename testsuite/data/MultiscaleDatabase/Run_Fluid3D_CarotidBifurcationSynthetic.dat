@@ -1,12 +1,12 @@
-# -*- getpot -*- GetPot mode activation for emacs
 ###################################################################################################
 #
-#                       This file is part of the LifeV Applications                        
-#                                 Copyright (C) 2009 EPFL          
+#                       This file is part of the LifeV Library                       
+#                Copyright (C) 2004, 2005, 2007 EPFL, Politecnico di Milano, INRIA
+#                Copyright (C) 2010 EPFL, Politecnico di Milano, Emory University
 #
 #      Author(s): Cristiano Malossi <cristiano.malossi@epfl.ch>
-#           Date: 2009-09-01
-#  License Terms: GNU GPL
+#           Date: 2011-03-10
+#  License Terms: GNU LGPL
 #
 ###################################################################################################
 ### MULTISCALE: Main data file ####################################################################
@@ -14,8 +14,8 @@
 
 [Problem] #########################################################################################
 ProblemType = Multiscale
-ProblemFile = ./MultiscaleDatabase/Models/Multiscale/CarotidBifurcation_3DFluid_Synthetic_FluxStress
-#ProblemFile = ./MultiscaleDatabase/Models/Multiscale/CarotidBifurcation_3DFluid_Synthetic_Stress
+ProblemFile = ./MultiscaleDatabase/Models/Multiscale/Fluid3D_CarotidBifurcationSynthetic_FS
+#ProblemFile = ./MultiscaleDatabase/Models/Multiscale/Fluid3D_CarotidBifurcationSynthetic_S
 
 [Solver] ##########################################################################################
 ###################################################################################################

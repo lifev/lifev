@@ -1,20 +1,20 @@
-# -*- getpot -*- GetPot mode activation for emacs
 ###################################################################################################
 #
-#                       This file is part of the LifeV Applications                        
-#                                 Copyright (C) 2009 EPFL          
+#                       This file is part of the LifeV Library                       
+#                Copyright (C) 2004, 2005, 2007 EPFL, Politecnico di Milano, INRIA
+#                Copyright (C) 2010 EPFL, Politecnico di Milano, Emory University
 #
 #      Author(s): Cristiano Malossi <cristiano.malossi@epfl.ch>
-#           Date: 2009-10-08
-#  License Terms: GNU GPL
+#           Date: 2011-03-10
+#  License Terms: GNU LGPL
 #
 ###################################################################################################
-### MODEL: Multiscale - TEST: One 3DFluid cylinder - FluxPressure - Stationary ####################
+### MODEL: Multiscale - TEST: One Fluid3D Cylinder ################################################
 ###################################################################################################
 
 [Multiscale] ######################################################################################
 ###################################################################################################
-modelName        = 'Stationary: One cylinder (tube20 - Fluid3D)'
+modelName        = '1 Cylinder-tube20 with Poiseuille Flow (Fluid3D)'
 modelType        = Multiscale
 couplingFlags    = ' '
 
@@ -41,6 +41,6 @@ couplings = '
 # Geometry offset #################################################################################
 ########### ID #### Scale (x,y,z) ############# Rotate (x,y,z) ############ Translate (x,y,z) #####
 offset = '    
-            0        1.0 1.0 1.0                0.0 0.0 0.0                 0.0 0.0 -2.5
+            0       1.0 1.0 1.0                 0.0 0.0 0.0                 0.0 0.0 -2.5
          '
 ###################################################################################################

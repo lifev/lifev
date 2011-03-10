@@ -1,12 +1,12 @@
-# -*- getpot -*- GetPot mode activation for emacs
 ###################################################################################################
 #
-#                       This file is part of the LifeV Applications
-#                                 Copyright (C) 2010 EPFL
+#                       This file is part of the LifeV Library                       
+#                Copyright (C) 2004, 2005, 2007 EPFL, Politecnico di Milano, INRIA
+#                Copyright (C) 2010 EPFL, Politecnico di Milano, Emory University
 #
 #      Author(s): Cristiano Malossi <cristiano.malossi@epfl.ch>
-#           Date: 2010-04-26
-#  License Terms: GNU GPL
+#           Date: 2011-03-10
+#  License Terms: GNU LGPL
 #
 ###################################################################################################
 ### MULTISCALE: Main data file ####################################################################
@@ -14,7 +14,8 @@
 
 [Problem] #########################################################################################
 ProblemType = Multiscale
-ProblemFile = ./MultiscaleDatabase/Models/Multiscale/SinusoidalWave_1D-3DFSI_2Cylinders_FluxStress
+ProblemFile = ./MultiscaleDatabase/Models/Multiscale/1D-FSI3D_2Cylinders_FS
+#ProblemFile = ./MultiscaleDatabase/Models/Multiscale/1D-FSI3D_2Cylinders_S
 
 [Solver] ##########################################################################################
 ###################################################################################################
@@ -24,9 +25,9 @@ ProblemFile = ./MultiscaleDatabase/Models/Multiscale/SinusoidalWave_1D-3DFSI_2Cy
     RestartFromStepNumber      = 0
     
     [../time_discretization]
-    initialtime                = 0.0      # [s]
-    endtime                    = 0.0250   # [s]
-    timestep                   = 0.0001   # [s]
+    initialtime                = .00      # [s]
+    endtime                    = .50      # [s]
+    timestep                   = 5e-5     # [s]
 
     [../Algorithm]
     type                       = Newton            # Aitken, Explicit, Newton, Broyden
@@ -42,7 +43,7 @@ ProblemFile = ./MultiscaleDatabase/Models/Multiscale/SinusoidalWave_1D-3DFSI_2Cy
 ###################################################################################################
 FluidDensity                = 1.0           # density        [g/cm^3]
 FluidViscosity              = 0.035         # viscosity      [g/cm/s]
-FluidReferencePressure      = 0E+05         # ref. pressure  [g/cm/s^2 - dyne/cm^2]
+FluidReferencePressure      = 0             # ref. pressure  [g/cm/s^2 - dyne/cm^2]
 StructureDensity            = 1.2           # density        [g/cm^3]
 StructurePoissonCoefficient = 0.48          # Poisson coeff. []
 StructureYoungModulus       = 4.0E6         # Young modulus  [g/cm/s^2 - dyne/cm^2]

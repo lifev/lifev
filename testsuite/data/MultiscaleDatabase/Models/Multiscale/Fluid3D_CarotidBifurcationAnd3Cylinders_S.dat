@@ -1,20 +1,20 @@
-# -*- getpot -*- GetPot mode activation for emacs
 ###################################################################################################
 #
-#                       This file is part of the LifeV Applications                        
-#                                 Copyright (C) 2009 EPFL          
+#                       This file is part of the LifeV Library                       
+#                Copyright (C) 2004, 2005, 2007 EPFL, Politecnico di Milano, INRIA
+#                Copyright (C) 2010 EPFL, Politecnico di Milano, Emory University
 #
 #      Author(s): Cristiano Malossi <cristiano.malossi@epfl.ch>
-#           Date: 2009-10-19
-#  License Terms: GNU GPL
+#           Date: 2011-03-10
+#  License Terms: GNU LGPL
 #
 ###################################################################################################
-### MODEL: Multiscale - TEST: Carotid Bifurcation & three 3DFluid cylinders #######################
+### MODEL: Multiscale - One Fluid3D Carotid Bifurcation & three Fluid3D cylinders #################
 ###################################################################################################
 
 [Multiscale] ######################################################################################
 ###################################################################################################
-modelName        = 'Carotid Bifurcation (tube40, Fluid3D), Stress'
+modelName        = 'One Carotid Bifurcation & three Cylinders-tube40 (Fluid3D, Stress)'
 modelType        = Multiscale
 couplingFlags    = ' '
 

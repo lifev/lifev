@@ -1,20 +1,20 @@
-# -*- getpot -*- GetPot mode activation for emacs
 ###################################################################################################
 #
-#                       This file is part of the LifeV Applications                        
-#                                 Copyright (C) 2010 EPFL          
+#                       This file is part of the LifeV Library                       
+#                Copyright (C) 2004, 2005, 2007 EPFL, Politecnico di Milano, INRIA
+#                Copyright (C) 2010 EPFL, Politecnico di Milano, Emory University
 #
 #      Author(s): Cristiano Malossi <cristiano.malossi@epfl.ch>
-#           Date: 2010-05-19
-#  License Terms: GNU GPL
+#           Date: 2011-03-10
+#  License Terms: GNU LGPL
 #
 ###################################################################################################
-### MODEL: Multiscale - TEST: One 1D Cylinder #####################################################
+### MODEL: Multiscale - TEST: Two 1D Cylinders ####################################################
 ###################################################################################################
 
 [Multiscale] ######################################################################################
 ###################################################################################################
-modelName        = 'Two Cylinder (OneDimensional, FlowRateStress)'
+modelName        = '2 Cylinders (OneDimensional, FlowRateStress)'
 modelType        = Multiscale
 couplingFlags    = ' '
 
@@ -34,7 +34,7 @@ models = '
 # List of couplings ###############################################################################
 ########### ID #### Type ############## File (without .dat) ########### Models ######## Flags #####
 couplings = '    
-            0       BoundaryCondition   FlowRate_SinusoidalWave         0               0
+            0       BoundaryCondition   FlowRate_SquareSinusoidalWave   0               0
             1       FlowRateStress      Pressure                        1,0             0,1
             2       BoundaryCondition   Absorbing_1DRight               1               1
             '
@@ -43,7 +43,7 @@ couplings = '
 # Geometry offset #################################################################################
 ########### ID #### Scale (x,y,z) ############# Rotate (x,y,z) ############ Translate (x,y,z) #####
 offset = '    
-            0        1.0 1.0 1.0                0.0 0.0 0.0                 -5.075 0.0 0.0
-            1        1.0 1.0 1.0                0.0 0.0 0.0                  0.075 0.0 0.0
+            0       1.0 1.0 1.0                 0.0 0.0 0.0                 -5.075 0.0 0.0
+            1       1.0 1.0 1.0                 0.0 0.0 0.0                  0.075 0.0 0.0
          '
 ###################################################################################################

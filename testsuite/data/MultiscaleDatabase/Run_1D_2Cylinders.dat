@@ -1,12 +1,12 @@
-# -*- getpot -*- GetPot mode activation for emacs
 ###################################################################################################
 #
-#                       This file is part of the LifeV Applications
-#                                 Copyright (C) 2010 EPFL
+#                       This file is part of the LifeV Library                       
+#                Copyright (C) 2004, 2005, 2007 EPFL, Politecnico di Milano, INRIA
+#                Copyright (C) 2010 EPFL, Politecnico di Milano, Emory University
 #
 #      Author(s): Cristiano Malossi <cristiano.malossi@epfl.ch>
-#           Date: 2010-05-17
-#  License Terms: GNU GPL
+#           Date: 2011-03-10
+#  License Terms: GNU LGPL
 #
 ###################################################################################################
 ### MULTISCALE: Main data file ####################################################################
@@ -14,9 +14,8 @@
 
 [Problem] #########################################################################################
 ProblemType = Multiscale
-ProblemFile = ./MultiscaleDatabase/Models/Multiscale/SinusoidalSquareWave_1D_2Cylinders_Stress
-#ProblemFile = ./MultiscaleDatabase/Models/Multiscale/SinusoidalWave_1D_2Cylinders_FluxStress
-#ProblemFile = ./MultiscaleDatabase/Models/Multiscale/SinusoidalWave_1D_2Cylinders_Stress
+ProblemFile = ./MultiscaleDatabase/Models/Multiscale/1D_2Cylinders_S
+#ProblemFile = ./MultiscaleDatabase/Models/Multiscale/1D_2Cylinders_FS
 
 [Solver] ##########################################################################################
 ###################################################################################################

@@ -1,20 +1,20 @@
-# -*- getpot -*- GetPot mode activation for emacs
 ###################################################################################################
 #
-#                       This file is part of the LifeV Applications                        
-#                                 Copyright (C) 2010 EPFL          
+#                       This file is part of the LifeV Library                       
+#                Copyright (C) 2004, 2005, 2007 EPFL, Politecnico di Milano, INRIA
+#                Copyright (C) 2010 EPFL, Politecnico di Milano, Emory University
 #
 #      Author(s): Cristiano Malossi <cristiano.malossi@epfl.ch>
-#           Date: 2010-05-03
-#  License Terms: GNU GPL
+#           Date: 2011-03-10
+#  License Terms: GNU LGPL
 #
 ###################################################################################################
-### MODEL: Multiscale - Womersley: Five cylinders (Fluid3D) - FlowRateStress ######################
+### MODEL: Multiscale - Five Fluid3D Cylinders in a Womersley regime ##############################
 ###################################################################################################
 
 [Multiscale] ######################################################################################
 ###################################################################################################
-modelName        = 'Womersley: Five cylinders (tube20 - Fluid3D), FlowRateStress'
+modelName        = '5 Cylinders-tube20 with Womersley Flow (Fluid3D, FlowRateStress)'
 modelType        = Multiscale
 couplingFlags    = ' '
 
@@ -49,10 +49,10 @@ couplings = '
 # Geometry offset #################################################################################
 ########### ID #### Scale (x,y,z) ############# Rotate (x,y,z) ############ Translate (x,y,z) #####
 offset = '    
-            0        1.0     1.0     1.0        0.0     0.0     0.0         0.0     0.0    -12.8
-            1        1.0     1.0     1.0        0.0     0.0     0.0         0.0     0.0     -7.65
-            2        1.0     1.0     1.0        0.0     0.0     0.0         0.0     0.0     -2.5
-            3        1.0     1.0     1.0        0.0     0.0     0.0         0.0     0.0      2.65
-            4        1.0     1.0     1.0        0.0     0.0     0.0         0.0     0.0      7.8
+            0       1.0     1.0     1.0         0.0     0.0     0.0         0.0     0.0    -12.8
+            1       1.0     1.0     1.0         0.0     0.0     0.0         0.0     0.0     -7.65
+            2       1.0     1.0     1.0         0.0     0.0     0.0         0.0     0.0     -2.5
+            3       1.0     1.0     1.0         0.0     0.0     0.0         0.0     0.0      2.65
+            4       1.0     1.0     1.0         0.0     0.0     0.0         0.0     0.0      7.8
          '
 ###################################################################################################
