@@ -135,7 +135,10 @@ FSIOperator::fluidBchandlerPtr_Type BCh_monolithicFluid(FSIOperator &_oper, bool
     //BCFunctionBase in_flow  (LumpedHeart::outPressure);
 
     BCFunctionBase out_press (FlowConditions::outPressure0);
+    BCFunctionBase bcfw0 (w0);
 
+
+    //BCh_fluid->addBC("InFlow" , INLET,  Essential, Full, bcfw0, 3);
 
     if(!isOpen)
         BCh_fluid->addBC("InFlow" , INLET,  Natural, Full, bcf, 3);

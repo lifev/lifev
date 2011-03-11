@@ -141,7 +141,8 @@ public:
       -# initialize and setup the FSIsolver
     */
 
-    Problem( GetPot const& data_file )
+    Problem( GetPot const& data_file ):
+        M_Tstart(0.)
     {
         using namespace LifeV;
 
@@ -151,7 +152,7 @@ public:
 
         M_data = dataPtr_Type( new data_Type() );
         M_data->setup( data_file );
-        M_data->dataSolid()->setTimeData( M_data->dataFluid()->dataTime() ); //Same TimeData for fluid & solid
+        //M_data->dataSolid()->setTimeData( M_data->dataFluid()->dataTime() ); //Same TimeData for fluid & solid
         //M_data->showMe();
 
 #ifdef DEBUG
@@ -278,9 +279,11 @@ public:
 
         FC0.initParameters( *M_fsi->FSIOper(), 3);
         LH.initParameters( *M_fsi->FSIOper(), "dataHM");
-        M_data->dataFluid()->dataTime()->setInitialTime( M_Tstart + M_data->dataFluid()->dataTime()->timeStep() );
-//         M_data->dataFluid()->dataTime()->setInitialTime( M_data->dataFluid()->dataTime()->initialTime() + M_data->dataFluid()->dataTime()->timeStep() );
-//         M_data->dataFluid()->dataTime()->setTime( M_data->dataFluid()->dataTime()->initialTime() + M_data->dataFluid()->dataTime()->timeStep());
+        //M_data->dataFluid()->dataTime()->setInitialTime( M_Tstart + M_data->dataFluid()->dataTime()->timeStep() );
+        M_data->dataFluid()->dataTime()->setInitialTime( M_Tstart+M_data->dataFluid()->dataTime()->timeStep() );
+        M_data->dataFluid()->dataTime()->setTime( M_data->dataFluid()->dataTime()->initialTime() );
+        M_data->dataSolid()->getdataTime()->setInitialTime( M_Tstart+M_data->dataFluid()->dataTime()->timeStep() );
+        M_data->dataSolid()->getdataTime()->setTime( M_data->dataFluid()->dataTime()->initialTime() );
     }
 
     fsi_solver_ptr fsiSolver() { return M_fsi; }
@@ -294,7 +297,7 @@ public:
     run()
     {
         boost::timer _overall_timer;
-        M_Tstart=M_fsi->FSIOper()->dataFluid()->dataTime()->initialTime();
+
         int _i = 1;
         LifeV::UInt offset=dynamic_cast<LifeV::FSIMonolithic*>(M_fsi->FSIOper().get())->getOffset();
 
@@ -310,13 +313,13 @@ public:
 
         bool valveIsOpen=true;
 
-        for ( ; M_data->dataFluid()->dataTime()->canAdvance(); M_data->dataFluid()->dataTime()->updateTime(), ++_i)
+        for ( ; M_data->dataFluid()->dataTime()->canAdvance(); M_data->dataFluid()->dataTime()->updateTime(),M_data->dataSolid()->getdataTime()->updateTime(), ++_i)
         {
             LifeV::Real flux=M_fsi->FSIOper()->fluid().flux(2, M_fsi->displacement());
             //std::cout<<"flux : "<<flux<<std::endl;
             if ( valveIsOpen)
             {
-                if ( _i == 3 /*flux < -100*/)
+                if ( false && _i == 3 /*flux < -100*/)
                 {
                     valveIsOpen=false;
                     //M_fsi->setFluxBC(LifeV::BCh_monolithicFlux(valveIsOpen));
@@ -359,7 +362,7 @@ public:
 
             M_fsi->iterate();
 
-            *M_WS= *(dynamic_cast<LifeV::FSIMonolithic*>(M_fsi->FSIOper().get())->/*WS());//*/computeStress());
+            //*M_WS= *(dynamic_cast<LifeV::FSIMonolithic*>(M_fsi->FSIOper().get())->/*WS());//*/computeStress());
 
 
             *M_fluidDisp      = M_fsi->FSIOper()->meshDisp();
@@ -379,14 +382,14 @@ public:
                       << M_fsi->displacement().norm2() << "\n";
 
             ///////// CHECKING THE RESULTS OF THE TEST AT EVERY TIMESTEP
-            //try
+            try
             {
                 if (!M_data->method().compare("monolithicGI"))
                     checkCEResult(M_data->dataFluid()->dataTime()->time());
                 else
                     checkGCEResult(M_data->dataFluid()->dataTime()->time());
             }
-            //catch (Problem::RESULT_CHANGED_EXCEPTION) {std::cout<<"res. changed"<<std::endl;}
+            catch (Problem::RESULT_CHANGED_EXCEPTION) {std::cout<<"res. changed"<<std::endl;}
             ///////// END OF CHECK
         }
         if (M_data->method().compare("monolithicGI"))
@@ -526,6 +529,7 @@ int main(int argc, char** argv)
 
 void Problem::initialize(std::string& /*loadInitSol*/,  GetPot const& data_file)
 {
+    M_Tstart=data_file( "fluid/time_discretization/initialtime", 0.);
 
     using namespace LifeV;
     std::string const importerType =  data_file( "importer/type", "ensight");

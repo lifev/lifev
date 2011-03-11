@@ -382,7 +382,7 @@ Real w0(const Real& /*t*/, const Real& /*x*/, const Real& /*y*/, const Real& /*z
         return 0.0;
         break;
     case 2:
-        return 0.0;
+        return 10.0;
         break;
     default:
         ERROR_MSG("This entrie is not allowed: ud_functions.hpp");

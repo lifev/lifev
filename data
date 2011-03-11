@@ -12,7 +12,7 @@ blockOper   = AdditiveSchwarzGI
 #AdditiveSchwarzGI
 #AdditiveSchwarzRNGI
 
-DDBlockPrec = ComposedDNDGI
+DDBlockPrec = AdditiveSchwarzGI
 # OPTIONS:
 #AdditiveSchwarz: monolithic A-S preconditioner,
 #AdditiveSchwarzGI: monolithic A-S preconditioner,
@@ -189,7 +189,7 @@ displayList        = false
 
 [../prec]
 reuse           = false
-prectype        = Composed
+prectype        = Ifpack
 rescale_factor = 1. # solid matrix rescale factor
 displayList     = true
 entry           = 0.0
