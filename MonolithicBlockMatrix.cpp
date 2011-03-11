@@ -61,15 +61,27 @@ void MonolithicBlockMatrix::coupler(mapPtr_Type& map,
     super_Type::couplingMatrix( M_coupling,  M_couplingFlag, super_Type::M_FESpace, super_Type::M_offset, locDofMap, numerationInterface, timeStep);
 }
 
+
 void MonolithicBlockMatrix::coupler(mapPtr_Type& /*map*/,
-                          const std::map<ID, ID>& locDofMap,
-                          const vectorPtr_Type& numerationInterface,
-                          const Real& timeStep,
-                          UInt /*flag1*/
+                                    const std::map<ID, ID>& locDofMap,
+                                    const vectorPtr_Type& numerationInterface,
+                                    const Real& timeStep,
+                                    UInt /*flag*/,
+                                    UInt couplingFlag
                          )
 {
-    super_Type::couplingMatrix( M_coupling,  M_couplingFlag, super_Type::M_FESpace, super_Type::M_offset, locDofMap, numerationInterface, timeStep);
+    super_Type::couplingMatrix( M_coupling,  couplingFlag, super_Type::M_FESpace, super_Type::M_offset, locDofMap, numerationInterface, timeStep);
 }
+
+// void MonolithicBlockMatrix::coupler(mapPtr_Type& /*map*/,
+//                           const std::map<ID, ID>& locDofMap,
+//                           const vectorPtr_Type& numerationInterface,
+//                           const Real& timeStep,
+//                           UInt /*flag1*/
+//                          )
+// {
+//     super_Type::couplingMatrix( M_coupling,  M_couplingFlag, super_Type::M_FESpace, super_Type::M_offset, locDofMap, numerationInterface, timeStep);
+// }
 
 
 int MonolithicBlockMatrix::solveSystem( const vector_Type& rhs, vector_Type& step, solverPtr_Type& linearSolver)

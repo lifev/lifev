@@ -143,9 +143,10 @@ FSIMonolithicGI::buildSystem ()
 
 void
 FSIMonolithicGI::evalResidual( vector_Type&       res,
-                            const vector_Type& disp,
-                            const UInt          iter )
+                               const vector_Type& disp,
+                               const UInt          iter )
 {
+    Real alpha( 1./M_data->dataFluid()->dataTime()->timeStep() );
     setDispSolid(disp);
     if (iter > 0)
     {
@@ -164,14 +165,23 @@ FSIMonolithicGI::evalResidual( vector_Type&       res,
     //meshDispDiff->subset(*M_uk, offset); //if the mesh motion is at the previous nonlinear step (FP) in the convective term
     //meshDispDiff->subset(*M_un, offset); //if we linearize in a semi-implicit way
     M_meshMotion->initialize(*meshDispDiff);//M_disp is set to the total mesh disp.
-    double alpha = 1/M_data->dataFluid()->dataTime()->timeStep();
     vector_Type mmRep(*meshDispDiff, Repeated);// just to repeat dispDiff. No way witout copying?
     this->moveMesh(mmRep);// re-initialize the mesh points
-    *meshDispDiff -= *meshDispOld;//relative displacement
     if (!M_domainVelImplicit)
     {
+        if(M_restarts)
+        {
+            //M_data->resetTimeStep( M_data->restartTimestep() );
+            alpha = 1/M_data->restartTimestep();//dataFluid()->dataTime()->timeStep();
+            //M_data->restoreTimeStep();
+        }
+
         meshDispDiff=meshDispOld;// at time n /*->subset(*M_un, offset)*/; //if the mesh motion is at the previous time step in the convective term
         *meshDispDiff -= M_meshMotion->dispOld();//at time n-1
+    }
+    else
+    {
+    *meshDispDiff -= *meshDispOld;//relative displacement
     }
     *meshDispDiff *= -alpha;// -w, mesh velocity
     mmRep = *meshDispDiff;
@@ -226,6 +236,7 @@ FSIMonolithicGI::applyBoundaryConditions()
         M_monolithicMatrix->setSpaces(M_FESpaces);
         M_monolithicMatrix->setOffsets(3, M_offset, 0, M_solidAndFluidDim + nDimensions*M_interface);
         M_monolithicMatrix->coupler(M_monolithicMap, M_dofStructureToHarmonicExtension->localDofMap(), M_numerationInterface, M_data->dataFluid()->dataTime()->timeStep());
+        M_monolithicMatrix->coupler( M_monolithicMap, M_dofStructureToHarmonicExtension->localDofMap(), M_numerationInterface, M_data->dataFluid()->dataTime()->timeStep(), 2, 16);
     }
     else
     {
@@ -331,7 +342,7 @@ void FSIMonolithicGI::setupBlockPrec( )
         M_precPtr->setConditions( M_BChs );
         M_precPtr->setSpaces( M_FESpaces );
         M_precPtr->setOffsets( 3, M_offset, 0,  M_solidAndFluidDim + nDimensions*M_interface );
-        M_precPtr->coupler( M_monolithicMap, M_dofStructureToHarmonicExtension->localDofMap(), M_numerationInterface, M_data->dataFluid()->dataTime()->timeStep(), 2 );
+        M_precPtr->coupler( M_monolithicMap, M_dofStructureToHarmonicExtension->localDofMap(), M_numerationInterface, M_data->dataFluid()->dataTime()->timeStep(), 2 , 16);
 
         if (M_data->dataFluid()->useShapeDerivatives())
         {
@@ -446,12 +457,12 @@ namespace
 
 MonolithicBlockMatrix*    createAdditiveSchwarzGI()
 {
-    return new MonolithicBlockMatrix(31);
+    return new MonolithicBlockMatrix(15);
 }
 
 MonolithicBlockMatrix*    createAdditiveSchwarzRNGI()
 {
-    return new MonolithicBlockMatrixRN(31);
+    return new MonolithicBlockMatrixRN(15);
 }
 
 MonolithicBlock*    createComposedDNGI()

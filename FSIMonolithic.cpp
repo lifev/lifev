@@ -529,9 +529,11 @@ FSIMonolithic::assembleSolidBlock( UInt iter, vectorPtr_Type& solution )
     {
         if (!M_restarts)
         {
-            this->M_solid->updateVel();
-            M_restarts = false;
+            this->M_solid->updateVel( );
         }
+        else
+            M_restarts = false;
+
         updateSolidSystem(this->M_rhs);
     }
     else

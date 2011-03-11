@@ -121,6 +121,12 @@ FSIMonolithicGE::evalResidual( vector_Type&       res,
 
     if ((iter==0)|| !this->M_data->dataFluid()->isSemiImplicit())
     {
+
+        if(M_restarts)
+        {
+            M_data->resetTimeStep( M_data->restartTimestep() );
+        }
+
         // Solve HE
         iterateMesh(disp);
 
@@ -141,6 +147,10 @@ FSIMonolithicGE::evalResidual( vector_Type&       res,
         fluid->subset(*M_un, (UInt)0);
         *this->M_beta += *fluid/*M_un*/;//relative velocity beta=un-w
 
+        if (M_restarts)
+        {
+            M_data->restoreTimeStep();
+        }
         //M_monolithicMatrix.reset(new matrix_Type(*M_monolithicMap));
 
         assembleFluidBlock(iter, M_un);

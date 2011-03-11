@@ -141,11 +141,19 @@ public:
       @param numerationInterface vector containing the correspondence of the Lagrange multipliers with the interface dofs
       @param  unused flag kept for compliance with the base class
      */
-    void coupler(mapPtr_Type& map,
+    void coupler(mapPtr_Type& /*map*/,
                  const std::map<ID, ID>& locDofMap,
                  const vectorPtr_Type& numerationInterface,
                  const Real& timeStep,
-                 UInt /*flag*/ );
+                 UInt /*flag*/,
+                 UInt couplingFlag
+                 );
+
+//     void coupler(mapPtr_Type& map,
+//                  const std::map<ID, ID>& locDofMap,
+//                  const vectorPtr_Type& numerationInterface,
+//                  const Real& timeStep,
+//                  UInt /*flag*/ );
 
     //! returns true if the operator has at least one block
     /*!

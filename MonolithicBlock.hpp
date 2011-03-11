@@ -232,11 +232,12 @@ public:
       @param couplingBlock: flag specifying the block associated with the coupling
      */
     virtual void coupler(mapPtr_Type& map,
-                         const std::map<ID, ID>& locDofMap,
-                         const vectorPtr_Type& numerationInterface,
-                         const Real& timeStep,
-                         UInt couplingBlock
-                        )=0;
+                 const std::map<ID, ID>& locDofMap,
+                 const vectorPtr_Type& numerationInterface,
+                 const Real& timeStep,
+                 UInt flag,
+                 UInt couplingFlag
+                 )=0;
 
     //! returns true if the operator is set
     /*!
