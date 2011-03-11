@@ -56,6 +56,7 @@ dist_pkgdata_DATA = 1D_1Cylinder.dat \
                     FSI3D_1Cylinder-tube20.dat \
                     FSI3D_2Cylinders-tube20_FS.dat \
                     FSI3D_2Cylinders-tube20_S.dat \
+                    FSI3D_3Cylinders-tube20_FS.dat \
                     FSI3D-1D_CarotidBifurcation_FS.dat \
                     Template.dat \
                     Windkessel0D_Test.dat
