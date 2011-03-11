@@ -1426,13 +1426,13 @@ updateSystem( const Real         alpha,
                 M_ipStabilization.apply( *M_matrixStabilization, betaVector, false );
                 M_matrixStabilization->globalAssemble();
                 M_resetStabilization = false;
+                chrono.stop();
+                M_Displayer.leaderPrintMax( "done in " , chrono.diff() );
             }
             else
             {
-                M_Displayer.leaderPrint( "reusing stab." );
+                M_Displayer.leaderPrint( "reusing\n" );
             }
-            chrono.stop();
-            M_Displayer.leaderPrintMax( "done in " , chrono.diff() );
         }
     }
 
