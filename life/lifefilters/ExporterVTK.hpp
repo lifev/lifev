@@ -412,7 +412,7 @@ UInt ExporterVTK<Mesh>::whichCellType( const feSpacePtr_Type & _feSpacePtr )
 {
     ASSERT( _feSpacePtr.get(), "\nA pointer to a valid FE object is required!");
 
-    UInt vtkCellType;
+    UInt vtkCellType(0);
 
     switch ( _feSpacePtr->fe().refFE().type() )
     {
@@ -499,12 +499,13 @@ ExporterVTK<Mesh>::composeDataArrayStream(const exporterData_Type& dvar,
                 Int id = localToGlobalPointsMap.find(i)->second;
                 for (UInt icoor=0; icoor< dvar.fieldDim(); ++icoor)
                 {
-                    for (UInt jcoor=0; jcoor< dvar.fieldDim() / nDimensions; ++jcoor)
-                    {
-                        dataArraysStringStream << dvar( start + id +
-                                                        icoor * numDOF +
-                                                        jcoor * numDOF * dvar.fieldDim() ) << " ";
-                    }
+                    // the tensor case is not ready yet
+                    //                    for (UInt jcoor=0; jcoor< dvar.fieldDim() / nDimensions; ++jcoor)
+                    //                    {
+                    dataArraysStringStream << dvar( start + id +
+                                                    icoor * numDOF ) << " ";
+                    //                                                        + jcoor * numDOF * dvar.fieldDim() ) << " ";
+                    //                    }
                 }
             }
             break;
@@ -514,11 +515,13 @@ ExporterVTK<Mesh>::composeDataArrayStream(const exporterData_Type& dvar,
                 Int id = localToGlobalPointsMap.find(i)->second;
                 for (UInt icoor=0; icoor< dvar.fieldDim(); ++icoor)
                 {
-                    for (UInt jcoor=0; jcoor< dvar.fieldDim() / nDimensions; ++jcoor)
-                    {
-                        Real value( dvar( start + id + icoor * numDOF + jcoor * numDOF * dvar.fieldDim() ) );
-                        dataToBeEncoded.write( reinterpret_cast<const char *>(&value), sizeof(Real) );
-                    }
+                    // the tensor case is not ready yet
+                    //                    for (UInt jcoor=0; jcoor< dvar.fieldDim() / nDimensions; ++jcoor)
+                    //                    {
+                    Real value( dvar( start + id + icoor * numDOF ) );
+                    //                                                        + jcoor * numDOF * dvar.fieldDim() ) << " ";
+                    dataToBeEncoded.write( reinterpret_cast<const char *>(&value), sizeof(Real) );
+                    //                    }
                 }
             }
 
