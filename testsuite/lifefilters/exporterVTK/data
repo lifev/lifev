@@ -28,4 +28,4 @@ start = 0
 save = 1
 multimesh = false
 time_id_width = 3
-exportMode = 1
+exportMode = 2
