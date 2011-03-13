@@ -42,7 +42,6 @@
 
 namespace LifeV
 {
-
 //! MonolithicBlockComposedNN - Short description of the class
 /*!
     @author Paolo Crosetto
@@ -58,6 +57,7 @@ class MonolithicBlockComposedNN: public MonolithicBlockComposed
 {
 public:
 
+    enum Block { solid1, fluid1, solid2, fluid2 };
     typedef MonolithicBlockComposed          super_Type;
     typedef  ComposedOperator<Ifpack_Preconditioner> composed_prec;
 
@@ -66,7 +66,7 @@ public:
     //@{
 
     //! Empty Constructor
-    MonolithicBlockComposedNN(const std::vector<Int>& flag, const std::vector<Block>& order):
+    MonolithicBlockComposedNN(const std::vector<Int>& flag, const std::vector<Int>& order):
             super_Type( flag, order ),
             M_blockPrecs(),
             M_prec()
@@ -151,10 +151,10 @@ public:
 
     static MonolithicBlock* createComposedNN()
     {
-        const MonolithicBlockComposed::Block order[] = {  MonolithicBlockComposed::fluid, MonolithicBlockComposed::solid};
+        const Int order[] = {  MonolithicBlockComposedNN::fluid1, MonolithicBlockComposedNN::solid1,MonolithicBlockComposedNN::fluid2, MonolithicBlockComposedNN::solid2};
         const Int couplingsNN[] = { 8, 4, 1, 2};
         const std::vector<Int> couplingVectorNN(couplingsNN, couplingsNN+4);
-        const std::vector<MonolithicBlockComposed::Block> orderVector(order, order+4);
+        const std::vector<Int> orderVector(order, order+4);
         return new MonolithicBlockComposedNN( couplingVectorNN, orderVector );
     }
 
@@ -179,6 +179,11 @@ private:
 
     boost::shared_ptr< composed_prec > M_firstCompPrec ;
     boost::shared_ptr< composed_prec > M_secondCompPrec;
+
+    std::vector<matrix_Type> M_matrixVector; // temporary, should be avoided
+    int M_overlapLevel;
+    std::string M_precType;
+    Ifpack M_factory;
 
     //@}
 };

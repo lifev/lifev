@@ -470,7 +470,7 @@ MonolithicBlock*    createComposedDNGI()
     const MonolithicBlockComposed::Block order[] = {  MonolithicBlockComposed::solid, MonolithicBlockComposed::fluid, MonolithicBlockComposed::mesh };
     const Int couplingsDNGI[] = { 0, 7, 16 };
     const std::vector<Int> couplingVectorDNGI(couplingsDNGI, couplingsDNGI+3);
-    const std::vector<MonolithicBlockComposed::Block> orderVector(order, order+3);
+    const std::vector<Int> orderVector(order, order+3);
     return new MonolithicBlockComposedDN( couplingVectorDNGI, orderVector );
 }
 
@@ -479,7 +479,7 @@ MonolithicBlock*    createComposedDN2GI()
     const MonolithicBlockComposed::Block order[] = { MonolithicBlockComposed::fluid, MonolithicBlockComposed::solid, MonolithicBlockComposed::mesh };
     const Int couplingsDN2GI[] = { 8, 6, 16 };
     const std::vector<Int> couplingVectorDN2GI(couplingsDN2GI, couplingsDN2GI+3);
-    const std::vector<MonolithicBlockComposed::Block> orderVector(order, order+3);
+    const std::vector<Int> orderVector(order, order+3);
     return new MonolithicBlockComposedDN( couplingVectorDN2GI, orderVector );
 }
 
@@ -488,7 +488,7 @@ MonolithicBlock*    createComposedDNDGI()
     const MonolithicBlockComposed::Block order[] = {  MonolithicBlockComposed::mesh, MonolithicBlockComposed::solid, MonolithicBlockComposed::fluid };
     const Int couplingsDNGI2[] = { 0, 7, 0 };
     const std::vector<Int> couplingVectorDNGI2(couplingsDNGI2, couplingsDNGI2+3);
-    const std::vector<MonolithicBlockComposed::Block> orderVector(order, order+3);
+    const std::vector<Int> orderVector(order, order+3);
     return new MonolithicBlockComposedDND( couplingVectorDNGI2, orderVector );
 }
 
@@ -497,7 +497,7 @@ MonolithicBlock*    createComposedDND2GI()
     const MonolithicBlockComposed::Block order[] = { MonolithicBlockComposed::mesh, MonolithicBlockComposed::fluid , MonolithicBlockComposed::solid};
     const Int couplingsDN2GI2[] = { 8, 6, 0 };
     const std::vector<Int> couplingVectorDN2GI2(couplingsDN2GI2, couplingsDN2GI2+3);
-    const std::vector<MonolithicBlockComposed::Block> orderVector(order, order+3);
+    const std::vector<Int> orderVector(order, order+3);
     return new MonolithicBlockComposedDND( couplingVectorDN2GI2, orderVector );
 }
 FSIOperator*    createFM() { return new FSIMonolithicGI(); }

@@ -55,8 +55,10 @@ void MonolithicBlockComposed::blockAssembling()
     {
         blockAssembling(k);
     }
-    //     M_coupling[0]->spy("C1");
-    //     M_coupling[1]->spy("C2");
+//     M_coupling[0]->spy("C1");
+//     M_coupling[1]->spy("C2");
+//     M_coupling[2]->spy("C1");
+//     M_coupling[3]->spy("C2");
 }
 
 

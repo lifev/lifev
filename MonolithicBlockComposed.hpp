@@ -85,12 +85,12 @@ public:
        \param flags: vector of flags specifying the type of coupling between the different blocks that we chose for this operator
        \param order: vector specifying the order of the blocks.
      */
-    MonolithicBlockComposed(const std::vector<Int>& flags, const std::vector<Block>& order):
+    MonolithicBlockComposed(const std::vector<Int>& flags, const std::vector<Int>& order):
             super_Type(),
             M_recompute(order.size()),
             M_coupling(),
             M_couplingFlags(new std::vector<Int>(flags)),// here I copy, so that the input param can be destroyed
-            M_blockReordering(new std::vector<Block>(order))
+            M_blockReordering(new std::vector<Int>(order))
     {}
 
 
@@ -275,11 +275,10 @@ protected:
     vector. e.g. the fisrt block to be applied corresponds to the number M_blockReordering[0] in the vector
     M_blocks of blocks. This vector is assigned in the coupler method of each class.
     */
-    boost::scoped_ptr<std::vector<Block> >                      M_blockReordering;
+    boost::scoped_ptr<std::vector<Int> >                      M_blockReordering;
     //@}
 
 private:
-
 
 };
 

@@ -122,7 +122,7 @@ public:
     //! @name Constructor and Destructor
     //@{
 
-    MonolithicBlockComposedDNND( const std::vector<Int>& flag, const std::vector<Block>& order ):
+    MonolithicBlockComposedDNND( const std::vector<Int>& flag, const std::vector<Int>& order ):
             super_Type( flag, order )
     {
     }
@@ -140,8 +140,8 @@ public:
         @param data GetPot object reading the text data file
         @param section string specifying the path in the data file where to find the options for the operator
      */
-    void setDataFromGetPot( const GetPot&      /*dataFile*/,
-                            const std::string& /*section*/ ){}
+//     void setDataFromGetPot( const GetPot&      /*dataFile*/,
+//                             const std::string& /*section*/ ){}
 
     //! Computes the coupling
     /*!
@@ -169,9 +169,9 @@ public:
     static MonolithicBlock* createComposedDNND()
     {
         const Int couplingsDNND[] = { 8, 4, 2, 8, 1, 2 };
-        const MonolithicBlockComposed::Block order[] = { MonolithicBlockComposed::fluid, MonolithicBlockComposed::solid};
+        const Int order[] = { MonolithicBlockComposedNN::fluid1, MonolithicBlockComposedNN::solid1, MonolithicBlockComposedNN::fluid2, MonolithicBlockComposedNN::solid2};
         const std::vector<Int> couplingVectorDNND(couplingsDNND, couplingsDNND+6);
-        const std::vector<MonolithicBlockComposed::Block> orderVector(order, order+6);
+        const std::vector<Int> orderVector(order, order+4);
         return new MonolithicBlockComposedDNND(couplingVectorDNND, orderVector);
     }
 

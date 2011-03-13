@@ -88,7 +88,7 @@ class MonolithicBlockComposedDN : public MonolithicBlockComposed
 public:
     typedef MonolithicBlockComposed super_Type;
 
-    MonolithicBlockComposedDN( const std::vector<Int>& flag, const std::vector<Block>& order):
+    MonolithicBlockComposedDN( const std::vector<Int>& flag, const std::vector<Int>& order):
             super_Type( flag, order ),
             M_blockPrecs(),
             M_uMap(),
@@ -187,20 +187,20 @@ public:
 
     static MonolithicBlock* createComposedDN()
     {
-        const MonolithicBlockComposed::Block order[] = { MonolithicBlockComposed::solid, MonolithicBlockComposed::fluid};
+        const Int order[] = { MonolithicBlockComposed::solid, MonolithicBlockComposed::fluid};
         const Int couplingsDN[] = { 0, 7};
         const std::vector<Int> couplingVectorDN(couplingsDN, couplingsDN+2);
-        const std::vector<MonolithicBlockComposed::Block> orderVector(order, order+2);
+        const std::vector<Int> orderVector(order, order+2);
         return new MonolithicBlockComposedDN(couplingVectorDN, orderVector);
     }
 
 
     static MonolithicBlock* createComposedDN2()
     {
-        const MonolithicBlockComposed::Block order[] = { MonolithicBlockComposed::fluid, MonolithicBlockComposed::solid};
+        const Int order[] = { MonolithicBlockComposed::fluid, MonolithicBlockComposed::solid};
         const Int couplingsDN2[] = { 8, 6};
         const std::vector<Int> couplingVectorDN2(couplingsDN2, couplingsDN2+2);
-        const std::vector<MonolithicBlockComposed::Block> orderVector(order, order+2);
+        const std::vector<Int> orderVector(order, order+2);
         return new MonolithicBlockComposedDN(couplingVectorDN2, orderVector);
     }
     //@}
