@@ -344,6 +344,8 @@ public:
     template <typename vector_type>
     vector_type laplacianRecovery(const vector_type& solution) const;
 
+    //! Return the polynomial degree of the finite element used
+    UInt polynomialDegree() const;
 
     //@}
 

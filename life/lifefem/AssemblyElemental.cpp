@@ -137,6 +137,142 @@ void stiffness(MatrixElemental& localStiff,
         }
     }
 }
+
+void grad( MatrixElemental& elmat,
+           const CurrentFE& uCFE,
+           const CurrentFE& pCFE,
+           const UInt& fieldDim)
+{
+    const UInt nbPFEDof(pCFE.nbFEDof());
+    const UInt nbUFEDof(uCFE.nbFEDof());
+    const UInt nbQuadPt(pCFE.nbQuadPt());
+    Real localValue(0);
+
+    for (UInt iFDim(0); iFDim<fieldDim; ++iFDim)
+    {
+        MatrixElemental::matrix_view localView = elmat.block(iFDim,0);
+
+        for (UInt iDofP(0); iDofP < nbPFEDof; ++iDofP)
+        {
+            for (UInt iDofU(0); iDofU< nbUFEDof; ++iDofU)
+            {
+                localValue=0.0;
+                for (UInt iQuadPt(0); iQuadPt< nbQuadPt; ++iQuadPt)
+                {
+                    localValue += uCFE.dphi(iDofU,iFDim,iQuadPt)
+                        * pCFE.phi(iDofP,iQuadPt)
+                        * uCFE.wDetJacobian(iQuadPt);
+                }
+                localView(iDofU,iDofP)-=localValue;
+            }
+        }
+    }
+}
+
+void divergence( MatrixElemental& elmat,
+                 const CurrentFE& uCFE,
+                 const CurrentFE& pCFE,
+                 const UInt& fieldDim)
+{
+    const UInt nbPFEDof(pCFE.nbFEDof());
+    const UInt nbUFEDof(uCFE.nbFEDof());
+    const UInt nbQuadPt(pCFE.nbQuadPt());
+    Real localValue(0);
+
+    for (UInt iFDim(0); iFDim<fieldDim; ++iFDim)
+    {
+        MatrixElemental::matrix_view localView = elmat.block(0,iFDim);
+
+        for (UInt iDofP(0); iDofP < nbPFEDof; ++iDofP)
+        {
+            for (UInt iDofU(0); iDofU< nbUFEDof; ++iDofU)
+            {
+                localValue=0.0;
+                for (UInt iQuadPt(0); iQuadPt< nbQuadPt; ++iQuadPt)
+                {
+                    localValue += uCFE.dphi(iDofU,iFDim,iQuadPt)
+                        * pCFE.phi(iDofP,iQuadPt)
+                        * uCFE.wDetJacobian(iQuadPt);
+                }
+                localView(iDofP,iDofU)=localValue;
+            }
+        }
+    }
+}
+
+void stiffStrain(MatrixElemental& localStiff,
+                 const CurrentFE& stiffCFE,
+                 const Real& coefficient,
+                 const UInt& fieldDim)
+{
+    const UInt nbFEDof(stiffCFE.nbFEDof());
+    const UInt nbQuadPt(stiffCFE.nbQuadPt());
+    Real localValue(0);
+    const Real newCoefficient(coefficient*0.5);
+
+    // Assemble the local diffusion
+    for (UInt iterFDim(0); iterFDim<fieldDim; ++iterFDim)
+    {
+        // Extract the view of the matrix
+        MatrixElemental::matrix_view localView = localStiff.block(iterFDim,iterFDim);
+
+        // Loop over the basis functions
+        for (UInt iDof(0); iDof < nbFEDof ; ++iDof)
+        {
+            // Build the local matrix only where needed:
+            // Lower triangular + diagonal parts
+            for (UInt jDof(0); jDof <= iDof; ++jDof)
+            {
+                localValue = 0.0;
+
+                //Loop on the quadrature nodes
+                for (UInt iQuadPt(0); iQuadPt < nbQuadPt; ++iQuadPt)
+                {
+                    for (UInt iDim(0); iDim<3; ++iDim)
+                    {
+                        localValue += stiffCFE.dphi(iDof,iDim,iQuadPt)
+                            * stiffCFE.dphi(jDof,iDim,iQuadPt)
+                            * stiffCFE.wDetJacobian(iQuadPt);
+                    }
+                }
+
+                localValue*=newCoefficient;
+
+                // Add on the local matrix
+                localView(iDof,jDof)+=localValue;
+
+                if (iDof != jDof)
+                {
+                    localView(jDof,iDof)+=localValue;
+                }
+            }
+        }
+    }
+
+    for ( UInt iFDim (0); iFDim < fieldDim; ++iFDim )
+    {
+        for ( UInt jFDim (0); jFDim < fieldDim; ++jFDim )
+        {
+            MatrixElemental::matrix_view localView = localStiff.block( iFDim, jFDim );
+
+            for ( UInt iDof(0); iDof < nbFEDof; ++iDof )
+            {
+                for ( UInt jDof (0); jDof < nbFEDof; ++jDof )
+                {
+                    localValue = 0.0;
+                    for ( UInt iQuadPt (0); iQuadPt < nbQuadPt; ++iQuadPt )
+                    {
+                        localValue += stiffCFE.dphi( iDof, jFDim, iQuadPt )
+                            * stiffCFE.dphi( jDof, iFDim, iQuadPt )
+                            * stiffCFE.wDetJacobian( iQuadPt );
+                    }
+                    localView( iDof, jDof ) += newCoefficient * localValue;
+                }
+            }
+        }
+    }
+}
+
 }
 
 //

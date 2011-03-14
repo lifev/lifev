@@ -188,7 +188,20 @@ void advection(MatrixElemental& localAdv,
     }
 }
 
+void grad(MatrixElemental& localGrad,
+          const CurrentFE& uCFE,
+          const CurrentFE& pCFE,
+          const UInt& fieldDim);
 
+void divergence(MatrixElemental& localDivergence,
+                const CurrentFE& uCFE,
+                const CurrentFE& pCFE,
+                const UInt& fieldDim);
+
+void stiffStrain(MatrixElemental& localStiff,
+                 const CurrentFE& stiffCFE,
+                 const Real& coefficient,
+                 const UInt& fieldDim);
 }
 
 //----------------------------------------------------------------------
