@@ -476,15 +476,15 @@ Ethiersteinman::run()
 
             if (verbose) std::cout << "Partitioning the mesh ... " << std::flush;
             MeshPartitioner< RegionMesh3D<LinearTetra> >   meshPart(fullMeshPtr, d->comm);
+            fullMeshPtr.reset(); //Freeing the global mesh to save memory
 
             // +-----------------------------------------------+
             // |            Creating the FE spaces             |
             // +-----------------------------------------------+
-
+            if (verbose) std::cout << std::endl << "[Creating the FE spaces]" << std::endl;
             std::string uOrder =  uFE[iElem];
             std::string pOrder =  pFE[iElem];
 
-            if (verbose) std::cout << std::endl << "[Creating the FE spaces]" << std::endl;
             if (verbose) std::cout << "FE for the velocity: " << uOrder << std::endl
                                    << "FE for the pressure: " << pOrder << std::endl;
 
