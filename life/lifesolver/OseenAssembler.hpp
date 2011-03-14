@@ -141,13 +141,13 @@ public:
     void addGradPressure(matrix_ptrType matrix, const UInt& offsetLeft, const UInt& offsetUp);
 
     //! Add the term corresponding to the divergence free constraint
-    void addDivergence(matrix_ptrType matrix)
+    void addDivergence(matrix_ptrType matrix,const Real& coefficient=1.0)
     {
-        addDivergence(matrix,0,M_uFESpace->dof().numTotalDof()*3);
+        addDivergence(matrix,0,M_uFESpace->dof().numTotalDof()*3,coefficient);
     };
 
     //! Add the divergence free constraint in a given position of the matrix.
-    void addDivergence(matrix_ptrType matrix, const UInt& offsetLeft, const UInt& offsetUp);
+    void addDivergence(matrix_ptrType matrix, const UInt& offsetLeft, const UInt& offsetUp,const Real& coefficient=1.0);
 
     //! Add the mass
     void addMass(matrix_ptrType matrix, const Real& coefficient)
@@ -357,7 +357,7 @@ addViscousStress(matrix_ptrType matrix, const Real& viscosity, const UInt& offse
     const UInt nbTotalDof(M_uFESpace->dof().numTotalDof());
 
     // Loop over the elements
-    for (UInt iterElement(1); iterElement <= nbElements; ++iterElement)
+    for (UInt iterElement(0); iterElement < nbElements; ++iterElement)
     {
         // Update the diffusion current FE
         M_viscousCFE->update( M_uFESpace->mesh()->element(iterElement), UPDATE_DPHI | UPDATE_WDET );
@@ -403,7 +403,7 @@ addStiffStrain(matrix_ptrType matrix, const Real& viscosity, const UInt& offsetL
     const UInt nbTotalDof(M_uFESpace->dof().numTotalDof());
 
     // Loop over the elements
-    for (UInt iterElement(1); iterElement <= nbElements; ++iterElement)
+    for (UInt iterElement(0); iterElement < nbElements; ++iterElement)
     {
         // Update the diffusion current FE
         M_viscousCFE->update( M_uFESpace->mesh()->element(iterElement), UPDATE_DPHI | UPDATE_WDET );
@@ -453,7 +453,7 @@ addGradPressure(matrix_ptrType matrix, const UInt& offsetLeft, const UInt& offse
     const UInt nbUTotalDof(M_uFESpace->dof().numTotalDof());
 
     // Loop over the elements
-    for (UInt iterElement(1); iterElement <= nbElements; ++iterElement)
+    for (UInt iterElement(0); iterElement < nbElements; ++iterElement)
     {
         // Update the diffusion current FE
         M_gradPressureUCFE->update( M_uFESpace->mesh()->element(iterElement), UPDATE_DPHI | UPDATE_WDET );
@@ -483,7 +483,7 @@ addGradPressure(matrix_ptrType matrix, const UInt& offsetLeft, const UInt& offse
 template< typename mesh_type, typename matrix_type, typename vector_type>
 void
 OseenAssembler<mesh_type,matrix_type,vector_type>::
-addDivergence(matrix_ptrType matrix, const UInt& offsetLeft, const UInt& offsetUp)
+addDivergence(matrix_ptrType matrix, const UInt& offsetLeft, const UInt& offsetUp, const Real& coefficient)
 {
     ASSERT(M_uFESpace != 0, "No velocity FE space for assembling the divergence.");
     ASSERT(M_pFESpace != 0, "No pressure FE space for assembling the divergence.");
@@ -501,7 +501,7 @@ addDivergence(matrix_ptrType matrix, const UInt& offsetLeft, const UInt& offsetU
     const UInt nbUTotalDof(M_uFESpace->dof().numTotalDof());
 
     // Loop over the elements
-    for (UInt iterElement(1); iterElement <= nbElements; ++iterElement)
+    for (UInt iterElement(0); iterElement < nbElements; ++iterElement)
     {
         // Update the diffusion current FE
         M_divergenceUCFE->update( M_uFESpace->mesh()->element(iterElement), UPDATE_DPHI | UPDATE_WDET );
@@ -511,7 +511,7 @@ addDivergence(matrix_ptrType matrix, const UInt& offsetLeft, const UInt& offsetU
         M_localDivergence->zero();
 
         // local stiffness
-        AssemblyElemental::divergence(*M_localDivergence,*M_divergenceUCFE,*M_divergencePCFE,fieldDim);
+        AssemblyElemental::divergence(*M_localDivergence,*M_divergenceUCFE,*M_divergencePCFE,fieldDim,coefficient);
 
         // Assembly
         for (UInt iFieldDim(0); iFieldDim<3; ++iFieldDim)
@@ -558,7 +558,7 @@ addConvection(matrix_ptrType matrix, const vector_type& beta, const UInt& offset
     std::vector< std::vector< Real > > localBetaValue(nbQuadPt,std::vector<Real>(3,0.0));
 
     // Loop over the elements
-    for (UInt iterElement(1); iterElement <= nbElements; ++iterElement)
+    for (UInt iterElement(0); iterElement < nbElements; ++iterElement)
     {
         // Update the diffusion current FE
         M_convectionUCFE->update( M_uFESpace->mesh()->element(iterElement), UPDATE_DPHI | UPDATE_WDET );
@@ -608,7 +608,7 @@ addMass(matrix_ptrType matrix, const Real& coefficient, const UInt& offsetLeft, 
     const UInt nbUTotalDof(M_uFESpace->dof().numTotalDof());
 
     // Loop over the elements
-    for (UInt iterElement(1); iterElement <= nbElements; ++iterElement)
+    for (UInt iterElement(0); iterElement < nbElements; ++iterElement)
     {
         // Update the diffusion current FE
         M_massCFE->update( M_uFESpace->mesh()->element(iterElement), UPDATE_PHI | UPDATE_WDET );

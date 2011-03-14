@@ -172,7 +172,8 @@ void grad( MatrixElemental& elmat,
 void divergence( MatrixElemental& elmat,
                  const CurrentFE& uCFE,
                  const CurrentFE& pCFE,
-                 const UInt& fieldDim)
+                 const UInt& fieldDim,
+                 const Real& coefficient)
 {
     const UInt nbPFEDof(pCFE.nbFEDof());
     const UInt nbUFEDof(uCFE.nbFEDof());
@@ -194,7 +195,7 @@ void divergence( MatrixElemental& elmat,
                         * pCFE.phi(iDofP,iQuadPt)
                         * uCFE.wDetJacobian(iQuadPt);
                 }
-                localView(iDofP,iDofU)=localValue;
+                localView(iDofP,iDofU)-=coefficient*localValue;
             }
         }
     }

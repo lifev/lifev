@@ -196,7 +196,8 @@ void grad(MatrixElemental& localGrad,
 void divergence(MatrixElemental& localDivergence,
                 const CurrentFE& uCFE,
                 const CurrentFE& pCFE,
-                const UInt& fieldDim);
+                const UInt& fieldDim,
+                const Real& coefficient=1.0);
 
 void stiffStrain(MatrixElemental& localStiff,
                  const CurrentFE& stiffCFE,
