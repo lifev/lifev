@@ -2104,6 +2104,48 @@ RT0ToP0Interpolate(const FESpace<mesh_Type,map_Type>& OriginalSpace,
 }
 
 
+template<typename MeshType, typename MapType>
+UInt
+FESpace<MeshType,MapType>::
+polynomialDegree() const
+{
+    switch(M_refFE->type())
+    {
+    case FE_P0_0D:
+    case FE_P0_2D:
+    case FE_Q0_2D:
+    case FE_P0_3D:
+    case FE_Q0_3D:
+        return 0;
+        break;
+
+    case FE_P1_1D:
+    case FE_P1_2D:
+    case FE_Q1_2D:
+    case FE_P1_3D:
+    case FE_Q1_3D:
+        return 1;
+        break;
+
+    case FE_P2_1D:
+    case FE_P2_2D:
+    case FE_Q2_2D:
+    case FE_P2_3D:
+    case FE_Q2_3D:
+        return 2;
+        break;
+
+    case FE_P1bubble_3D:
+    case FE_P2tilde_3D:
+        return 4;
+        break;
+
+    default:
+        std::cerr << " FESpace: No polynomial degre for this type of finite element " << std::endl;
+        std::cerr << " FESpace: " << M_refFE->name() << std::endl;
+        abort();
+    };
+}
 
 } // end of the namespace
 #endif

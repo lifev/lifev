@@ -59,7 +59,6 @@
 
 #include <life/lifearray/MatrixEpetra.hpp>
 
-#include <life/lifefilters/ExporterEnsight.hpp>
 #include <life/lifefilters/ExporterHDF5.hpp>
 
 #include <life/lifefem/FESpace.hpp>
@@ -78,6 +77,8 @@ namespace
 {
 static bool regIF = (PRECFactory::instance().registerProduct( "Ifpack", &createIfpack ));
 static bool regML = (PRECFactory::instance().registerProduct( "ML", &createML ));
+
+enum DiffusionType{ViscousStress,StiffStrain};
 }
 
 //#define TEST_MASS
@@ -178,6 +179,10 @@ main( int argc, char** argv )
     const UInt mElem(dataFile("mesh/nelements",10));
     if (verbose) std::cout << "Number of elements: " << mElem << std::endl;
 
+    Real viscosity = 1.0;
+    Real timestep  = 1e-4;
+    DiffusionType diffusionType = ViscousStress;
+
     // +-----------------------------------------------+
     // |               Loading the mesh                |
     // +-----------------------------------------------+
@@ -223,7 +228,6 @@ main( int argc, char** argv )
     if (verbose) std::cout << std::endl << "[Creating the FE spaces]" << std::endl;
     std::string uOrder("P2");
     std::string pOrder("P1");
-    std::string bOrder("P2");
 
     if (verbose) std::cout << "FE for the velocity: " << uOrder << std::endl
                            << "FE for the pressure: " << pOrder << std::endl
@@ -237,10 +241,6 @@ main( int argc, char** argv )
     boost::shared_ptr<FESpace< mesh_type, MapEpetra > > pFESpace( new FESpace< mesh_type, MapEpetra >(meshPart,pOrder, 1, Comm));
     if (verbose) std::cout << "ok." << std::endl;
 
-    if (verbose) std::cout << "Building the pressure FE space ... " << std::flush;
-    boost::shared_ptr<FESpace< mesh_type, MapEpetra > > betaFESpace( new FESpace< mesh_type, MapEpetra >(meshPart,bOrder, 3, Comm));
-    if (verbose) std::cout << "ok." << std::endl;
-
     if (verbose) std::cout << "Total Velocity Dof = " << uFESpace->dof().numTotalDof() << std::endl;
     if (verbose) std::cout << "Total Pressure Dof = " << uFESpace->dof().numTotalDof() << std::endl;
 
@@ -251,7 +251,7 @@ main( int argc, char** argv )
 
     if (verbose) std::cout << "Setting up assembler... " << std::flush;
     OseenAssembler<mesh_type,matrix_type,vector_type> oseenAssembler;
-    oseenAssembler.setup(uFESpace,betaFESpace);
+    oseenAssembler.setup(uFESpace,pFESpace);
     if (verbose) std::cout << "done" << std::endl;
 
     if (verbose) std::cout << "Defining the matrix... " << std::flush;
@@ -260,18 +260,40 @@ main( int argc, char** argv )
     if (verbose) std::cout << "done" << std::endl;
 
     // Perform the assembly of the matrix
-    if (verbose) std::cout << "Adding the diffusion ..." << std::flush;
-    oseenAssembler.addDiffusion(systemMatrix,epsilon);
-    if (verbose) std::cout << "done in " << oseenAssembler.diffusionAssemblyChrono().diffCumul() << " s." << std::endl;
+    switch(diffusionType)
+    {
+        case ViscousStress:
+            if (verbose) std::cout << "Adding the viscous stress... " << std::flush;
+            oseenAssembler.addViscousStress(systemMatrix,viscosity);
+            if (verbose) std::cout << "done" << std::endl;
+            break;
+        case StiffStrain:
+            if (verbose) std::cout << "Adding the stiff strain... " << std::flush;
+            oseenAssembler.addStiffStrain(systemMatrix,viscosity);
+            if (verbose) std::cout << "done" << std::endl;
+            break;
+        default:
+            cerr << "[Error] Diffusion type unknown" << std::endl;
+            exit(1);
+            break;
+    }
 
-    if (verbose) std::cout << "Adding the advection... " << std::flush;
-    vector_type beta(betaFESpace->map(),Repeated);
-    betaFESpace->interpolate(betaFct,beta,0.0);
-    adrAssembler.addAdvection(systemMatrix,beta);
+    if (verbose) std::cout << "Adding the convection... " << std::flush;
+    vector_type beta(uFESpace->map(),Repeated);
+    beta *= 0;
+    adrAssembler.addConvection(systemMatrix,beta);
     if (verbose) std::cout << "done" << std::endl;
 
     if (verbose) std::cout << "Adding the mass... " << std::flush;
     adrAssembler.addMass(systemMatrix,1.0);
+    if (verbose) std::cout << "done" << std::endl;
+
+    if (verbose) std::cout << "Adding the gradient of the pressure... " << std::flush;
+    adrAssembler.addGradPressure(systemMatrix);
+    if (verbose) std::cout << "done" << std::endl;
+
+    if (verbose) std::cout << "Adding the divergence free constraint... " << std::flush;
+    adrAssembler.addDivergence(systemMatrix);
     if (verbose) std::cout << "done" << std::endl;
 
     if (verbose) std::cout << "Closing the matrix... " << std::flush;
