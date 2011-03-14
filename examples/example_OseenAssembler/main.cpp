@@ -54,22 +54,18 @@
 
 #include <life/lifealg/PreconditionerIfpack.hpp>
 #include <life/lifealg/PreconditionerML.hpp>
-
 #include <life/lifealg/SolverAztecOO.hpp>
-
 #include <life/lifearray/MatrixEpetra.hpp>
-
 #include <life/lifefilters/ExporterHDF5.hpp>
-
 #include <life/lifefem/FESpace.hpp>
 #include <life/lifefem/BCManage.hpp>
-
 #include <life/lifemesh/MeshPartitioner.hpp>
 #include <life/lifemesh/RegionMesh3DStructured.hpp>
 #include <life/lifemesh/RegionMesh3D.hpp>
-
 #include <life/lifesolver/OseenAssembler.hpp>
 #include <life/lifemesh/MeshData.hpp>
+
+#include "EthierSteinmanUnsteady.hpp"
 
 using namespace LifeV;
 
@@ -80,58 +76,12 @@ static bool regML = (PRECFactory::instance().registerProduct( "ML", &createML ))
 
 enum DiffusionType{ViscousStress,StiffStrain};
 enum MeshType{RegularMesh,File};
-}
-
-//#define TEST_MASS
-//#define TEST_ADVECTION
-#define TEST_RHS
-
-
-#ifdef TEST_MASS
-Real epsilon(1);
-
-Real exactSolution( const Real& /* t */, const Real& x, const Real& /* y */, const Real& /* z */ , const ID& /* i */ )
-{
-    Real seps(sqrt(epsilon));
-    return  exp(seps*x)/(exp(seps)-exp(-seps));
-}
-#endif
-
-#ifdef TEST_ADVECTION
-Real epsilon(1);
-
-Real exactSolution( const Real& /* t */, const Real& x, const Real& /* y */, const Real& /* z */, const ID& /* i */ )
-{
-    return  (exp(x/epsilon) - 1 )/( exp(1/epsilon) - 1);
-}
-
-Real betaFct( const Real& /* t */, const Real& /* x */, const Real& /* y */, const Real& /* z */, const ID& i )
-{
-    if (i == 1)
-        return 1;
-    return 0;
-}
-#endif
-
-#ifdef TEST_RHS
-Real epsilon(1);
-
-Real exactSolution( const Real& /* t */, const Real& x, const Real& y, const Real& z , const ID& /* i */ )
-{
-    return  sin(x+y)+z*z/2;
-}
-
-
-Real fRhs( const Real& /* t */, const Real& x, const Real& y, const Real& /* z */ , const ID& /* i */ )
-{
-    return  2*sin(x+y)-1;
-}
-#endif
-
 
 typedef RegionMesh3D<LinearTetra> mesh_type;
 typedef MatrixEpetra<Real> matrix_type;
 typedef VectorEpetra vector_type;
+}
+
 
 int
 main( int argc, char** argv )
@@ -173,17 +123,35 @@ main( int argc, char** argv )
     // |               Loading the data                |
     // +-----------------------------------------------+
     if (verbose) std::cout << std::endl << "[Loading the data]" << std::endl;
+
+    // **** Stupid GetPot stuff ****
     GetPot command_line(argc,argv);
     const std::string dataFileName = command_line.follow("data", 2, "-f","--file");
     GetPot dataFile(dataFileName);
+    // *****************************
 
-    const UInt mElem(dataFile("mesh/nelements",10));
-    if (verbose) std::cout << "Number of elements: " << mElem << std::endl;
+    // Physical quantity
+    const Real viscosity      = 0.01;
+    const Real density        = 1.0;
 
-    const Real viscosity = 1.0;
-    const Real timestep  = 1e-4;
-    const DiffusionType diffusionType = ViscousStress;
+    // Time discretization
+    const Real initialtime    = 0.0;
+    const Real endtime        = 1e-4;
+    const Real timestep       = 1e-5;
+
+    // Space discretization
     const MeshType meshSource = RegularMesh;
+    const UInt numMeshElem    = 10;
+
+    // Numerical scheme
+    const DiffusionType diffusionType = ViscousStress;
+
+    // EthierSteinman data
+    EthierSteinmanUnsteady ethierSteinmanData;
+    ethierSteinmanData.setA(1.0);
+    ethierSteinmanData.setD(1.0);
+    ethierSteinmanData.setViscosity(viscosity);
+    ethierSteinmanData.setDensity(density);
 
     // +-----------------------------------------------+
     // |               Loading the mesh                |
@@ -197,13 +165,13 @@ main( int argc, char** argv )
     {
         regularMesh3D( *fullMeshPtr,
                        1,
-                       mElem, mElem, mElem,
+                       numMeshElem, numMeshElem, numMeshElem,
                        false,
                        2.0,   2.0,   2.0,
                        -1.0,  -1.0,  -1.0);
 
         if (verbose) std::cout << "Mesh source: regular mesh("
-                               << mElem << "x" << mElem << "x" << mElem << ")" << std::endl;
+                               << numMeshElem << "x" << numMeshElem << "x" << numMeshElem << ")" << std::endl;
     }
     else if(meshSource == File)
     {
@@ -248,7 +216,7 @@ main( int argc, char** argv )
     // +-----------------------------------------------+
     // |               Matrix Assembly                 |
     // +-----------------------------------------------+
-    if (verbose) std::cout << "[Matrix Assembly]" << std::flush;
+    if (verbose) std::cout << std::endl << "[Matrix Assembly]" << std::endl;
 
     if (verbose) std::cout << "Setting up assembler... " << std::flush;
     OseenAssembler<mesh_type,matrix_type,vector_type> oseenAssembler;
@@ -266,12 +234,12 @@ main( int argc, char** argv )
     {
         case ViscousStress:
             if (verbose) std::cout << "Adding the viscous stress... " << std::flush;
-            oseenAssembler.addViscousStress(systemMatrix,viscosity);
+            oseenAssembler.addViscousStress(systemMatrix,viscosity/density);
             if (verbose) std::cout << "done" << std::endl;
             break;
         case StiffStrain:
             if (verbose) std::cout << "Adding the stiff strain... " << std::flush;
-            oseenAssembler.addStiffStrain(systemMatrix,viscosity);
+            oseenAssembler.addStiffStrain(systemMatrix,viscosity/density);
             if (verbose) std::cout << "done" << std::endl;
             break;
         default:
@@ -303,14 +271,14 @@ main( int argc, char** argv )
     systemMatrix->globalAssemble();
     if (verbose) std::cout << "done" << std::endl;
 
-    /*
     // +-----------------------------------------------+
     // |                 RHS Assembly                  |
     // +-----------------------------------------------+
-    if (verbose) std::cout << "[RHS Assembly]" << std::flush;
+    if (verbose) std::cout << std::endl << "[RHS Assembly]" << std::endl;
     vector_type rhs(uFESpace->map(),Repeated);
     rhs*=0.0;
 
+    /*
 #ifdef TEST_RHS
     vector_type fInterpolated(uFESpace->map(),Repeated);
     fInterpolated*=0.0;
@@ -318,9 +286,11 @@ main( int argc, char** argv )
     adrAssembler.addMassRhs(rhs,fInterpolated);
     rhs.globalAssemble();
 #endif
+*/
 
     if (verbose) std::cout << " done ! " << std::endl;
 
+    /*
     // +-----------------------------------------------+
     // |             Boundary conditions               |
     // +-----------------------------------------------+
