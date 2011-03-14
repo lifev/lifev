@@ -14,7 +14,7 @@
 
 [mesh]
 
-nelements = 19
+nelements = 10
 
 [../exporter]
 

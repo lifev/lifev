@@ -79,6 +79,7 @@ static bool regIF = (PRECFactory::instance().registerProduct( "Ifpack", &createI
 static bool regML = (PRECFactory::instance().registerProduct( "ML", &createML ));
 
 enum DiffusionType{ViscousStress,StiffStrain};
+enum MeshType{RegularMesh,File};
 }
 
 //#define TEST_MASS
@@ -179,19 +180,20 @@ main( int argc, char** argv )
     const UInt mElem(dataFile("mesh/nelements",10));
     if (verbose) std::cout << "Number of elements: " << mElem << std::endl;
 
-    Real viscosity = 1.0;
-    Real timestep  = 1e-4;
-    DiffusionType diffusionType = ViscousStress;
+    const Real viscosity = 1.0;
+    const Real timestep  = 1e-4;
+    const DiffusionType diffusionType = ViscousStress;
+    const MeshType meshSource = RegularMesh;
 
     // +-----------------------------------------------+
     // |               Loading the mesh                |
     // +-----------------------------------------------+
-    if (verbose) std::cout << "[Loading the mesh]" << std::endl;
+    if (verbose) std::cout << std::endl << "[Loading the mesh]" << std::endl;
 
     boost::shared_ptr<RegionMesh3D<LinearTetra> > fullMeshPtr(new RegionMesh3D<LinearTetra>);
 
     // Building the mesh from the source
-    if(M_meshSource == RegularMesh)
+    if(meshSource == RegularMesh)
     {
         regularMesh3D( *fullMeshPtr,
                        1,
@@ -203,7 +205,7 @@ main( int argc, char** argv )
         if (verbose) std::cout << "Mesh source: regular mesh("
                                << mElem << "x" << mElem << "x" << mElem << ")" << std::endl;
     }
-    else if(M_meshSource == File)
+    else if(meshSource == File)
     {
         MeshData meshData;
         meshData.setup(dataFile, "fluid/space_discretization");
@@ -219,7 +221,7 @@ main( int argc, char** argv )
     }
 
     if (verbose) std::cout << "Partitioning the mesh ... " << std::flush;
-    MeshPartitioner< RegionMesh3D<LinearTetra> >   meshPart(fullMeshPtr, d->comm);
+    MeshPartitioner< RegionMesh3D<LinearTetra> >   meshPart(fullMeshPtr, Comm);
     fullMeshPtr.reset(); //Freeing the global mesh to save memory
 
     // +-----------------------------------------------+
@@ -230,8 +232,7 @@ main( int argc, char** argv )
     std::string pOrder("P1");
 
     if (verbose) std::cout << "FE for the velocity: " << uOrder << std::endl
-                           << "FE for the pressure: " << pOrder << std::endl
-                           << "FE for beta        : " << bOrder << std::endl;
+                           << "FE for the pressure: " << pOrder << std::endl;
 
     if (verbose) std::cout << "Building the velocity FE space ... " << std::flush;
     boost::shared_ptr<FESpace< mesh_type, MapEpetra > > uFESpace( new FESpace< mesh_type, MapEpetra >(meshPart,uOrder, 3, Comm));
@@ -241,8 +242,8 @@ main( int argc, char** argv )
     boost::shared_ptr<FESpace< mesh_type, MapEpetra > > pFESpace( new FESpace< mesh_type, MapEpetra >(meshPart,pOrder, 1, Comm));
     if (verbose) std::cout << "ok." << std::endl;
 
-    if (verbose) std::cout << "Total Velocity Dof = " << uFESpace->dof().numTotalDof() << std::endl;
-    if (verbose) std::cout << "Total Pressure Dof = " << uFESpace->dof().numTotalDof() << std::endl;
+    if (verbose) std::cout << "Total Velocity Dof = " << 3*uFESpace->dof().numTotalDof() << std::endl;
+    if (verbose) std::cout << "Total Pressure Dof = " << pFESpace->dof().numTotalDof() << std::endl;
 
     // +-----------------------------------------------+
     // |               Matrix Assembly                 |
@@ -255,7 +256,8 @@ main( int argc, char** argv )
     if (verbose) std::cout << "done" << std::endl;
 
     if (verbose) std::cout << "Defining the matrix... " << std::flush;
-    boost::shared_ptr<matrix_type> systemMatrix(new matrix_type( uFESpace->map() ));
+    MapEpetra solutionMap(uFESpace->map()+pFESpace->map());
+    boost::shared_ptr<matrix_type> systemMatrix(new matrix_type( solutionMap ));
     *systemMatrix *=0.0;
     if (verbose) std::cout << "done" << std::endl;
 
@@ -281,19 +283,20 @@ main( int argc, char** argv )
     if (verbose) std::cout << "Adding the convection... " << std::flush;
     vector_type beta(uFESpace->map(),Repeated);
     beta *= 0;
-    adrAssembler.addConvection(systemMatrix,beta);
+    beta += 1;
+    oseenAssembler.addConvection(systemMatrix,beta);
     if (verbose) std::cout << "done" << std::endl;
 
     if (verbose) std::cout << "Adding the mass... " << std::flush;
-    adrAssembler.addMass(systemMatrix,1.0);
+    oseenAssembler.addMass(systemMatrix,1.0/timestep);
     if (verbose) std::cout << "done" << std::endl;
 
     if (verbose) std::cout << "Adding the gradient of the pressure... " << std::flush;
-    adrAssembler.addGradPressure(systemMatrix);
+    oseenAssembler.addGradPressure(systemMatrix);
     if (verbose) std::cout << "done" << std::endl;
 
     if (verbose) std::cout << "Adding the divergence free constraint... " << std::flush;
-    adrAssembler.addDivergence(systemMatrix);
+    oseenAssembler.addDivergence(systemMatrix);
     if (verbose) std::cout << "done" << std::endl;
 
     if (verbose) std::cout << "Closing the matrix... " << std::flush;
@@ -341,10 +344,14 @@ main( int argc, char** argv )
     rhs = rhsBC;
     if (verbose) std::cout << " done ! " << std::endl;
 
+    */
+
     //************* SPY ***********
-    //systemMatrix->spy("matrix");
+    systemMatrix->spy("matrix");
     //rhs.spy("vector");
     //*****************************
+
+    /*
 
     // +-----------------------------------------------+
     // |            Solver initialization              |
