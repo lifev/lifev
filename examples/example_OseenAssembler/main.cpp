@@ -1,0 +1,389 @@
+//@HEADER
+/*
+*******************************************************************************
+
+    Copyright (C) 2004, 2005, 2007 EPFL, Politecnico di Milano, INRIA
+    Copyright (C) 2010 EPFL, Politecnico di Milano, Emory University
+
+    This file is part of LifeV.
+
+    LifeV is free software; you can redistribute it and/or modify
+    it under the terms of the GNU Lesser General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    LifeV is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+    Lesser General Public License for more details.
+
+    You should have received a copy of the GNU Lesser General Public License
+    along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
+
+*******************************************************************************
+*/
+//@HEADER
+
+/*!
+    @file
+    @brief
+
+    @author Gwenol Grandperrin <gwenol.grandperrin@epfl.ch>
+    @author Samuel Quinodoz <samuel.quinodoz@epfl.ch>
+    @date 14-03-2011
+ */
+
+// Tell the compiler to ignore specific kind of warnings:
+#pragma GCC diagnostic ignored "-Wunused-variable"
+#pragma GCC diagnostic ignored "-Wunused-parameter"
+
+#include <Epetra_ConfigDefs.h>
+#ifdef EPETRA_MPI
+#include <mpi.h>
+#include <Epetra_MpiComm.h>
+#else
+#include <Epetra_SerialComm.h>
+#endif
+
+//Tell the compiler to restore the warning previously silented
+#pragma GCC diagnostic warning "-Wunused-variable"
+#pragma GCC diagnostic warning "-Wunused-parameter"
+
+#include <life/lifecore/LifeV.hpp>
+
+
+#include <life/lifealg/PreconditionerIfpack.hpp>
+#include <life/lifealg/PreconditionerML.hpp>
+
+#include <life/lifealg/SolverAztecOO.hpp>
+
+#include <life/lifearray/MatrixEpetra.hpp>
+
+#include <life/lifefilters/ExporterEnsight.hpp>
+#include <life/lifefilters/ExporterHDF5.hpp>
+
+#include <life/lifefem/FESpace.hpp>
+#include <life/lifefem/BCManage.hpp>
+
+#include <life/lifemesh/MeshPartitioner.hpp>
+#include <life/lifemesh/RegionMesh3DStructured.hpp>
+#include <life/lifemesh/RegionMesh3D.hpp>
+
+#include <life/lifesolver/OseenAssembler.hpp>
+#include <life/lifemesh/MeshData.hpp>
+
+using namespace LifeV;
+
+namespace
+{
+static bool regIF = (PRECFactory::instance().registerProduct( "Ifpack", &createIfpack ));
+static bool regML = (PRECFactory::instance().registerProduct( "ML", &createML ));
+}
+
+//#define TEST_MASS
+//#define TEST_ADVECTION
+#define TEST_RHS
+
+
+#ifdef TEST_MASS
+Real epsilon(1);
+
+Real exactSolution( const Real& /* t */, const Real& x, const Real& /* y */, const Real& /* z */ , const ID& /* i */ )
+{
+    Real seps(sqrt(epsilon));
+    return  exp(seps*x)/(exp(seps)-exp(-seps));
+}
+#endif
+
+#ifdef TEST_ADVECTION
+Real epsilon(1);
+
+Real exactSolution( const Real& /* t */, const Real& x, const Real& /* y */, const Real& /* z */, const ID& /* i */ )
+{
+    return  (exp(x/epsilon) - 1 )/( exp(1/epsilon) - 1);
+}
+
+Real betaFct( const Real& /* t */, const Real& /* x */, const Real& /* y */, const Real& /* z */, const ID& i )
+{
+    if (i == 1)
+        return 1;
+    return 0;
+}
+#endif
+
+#ifdef TEST_RHS
+Real epsilon(1);
+
+Real exactSolution( const Real& /* t */, const Real& x, const Real& y, const Real& z , const ID& /* i */ )
+{
+    return  sin(x+y)+z*z/2;
+}
+
+
+Real fRhs( const Real& /* t */, const Real& x, const Real& y, const Real& /* z */ , const ID& /* i */ )
+{
+    return  2*sin(x+y)-1;
+}
+#endif
+
+
+typedef RegionMesh3D<LinearTetra> mesh_type;
+typedef MatrixEpetra<Real> matrix_type;
+typedef VectorEpetra vector_type;
+
+int
+main( int argc, char** argv )
+{
+    // +-----------------------------------------------+
+    // |            Initialization of MPI              |
+    // +-----------------------------------------------+
+#ifdef HAVE_MPI
+    MPI_Init(&argc, &argv);
+    boost::shared_ptr<Epetra_Comm> Comm(new Epetra_MpiComm(MPI_COMM_WORLD));
+    int nproc;
+    MPI_Comm_size(MPI_COMM_WORLD, &nproc);
+#else
+    boost::shared_ptr<Epetra_Comm> Comm(new Epetra_SerialComm);
+#endif
+
+    const bool verbose(Comm->MyPID()==0);
+    if(verbose){
+        std::cout
+            << " +-----------------------------------------------+" << std::endl
+            << " |            OseenAssembler example             |" << std::endl
+            << " +-----------------------------------------------+" << std::endl
+            << std::endl
+            << " +-----------------------------------------------+" << std::endl
+            << " |           Author: Gwenol Grandperrin          |" << std::endl
+            << " |             Date: 2010-03-14                  |" << std::endl
+            << " +-----------------------------------------------+" << std::endl
+            << std::endl;
+
+        std::cout << "[Initilization of MPI]" << std::endl;
+#ifdef HAVE_MPI
+        std::cout << "Using MPI (" << nproc << " proc.)" << std::endl;
+#else
+        std::cout << "Using serial version" << std::endl;
+#endif
+    }
+
+    // +-----------------------------------------------+
+    // |               Loading the data                |
+    // +-----------------------------------------------+
+    if (verbose) std::cout << std::endl << "[Loading the data]" << std::endl;
+    GetPot command_line(argc,argv);
+    const std::string dataFileName = command_line.follow("data", 2, "-f","--file");
+    GetPot dataFile(dataFileName);
+
+    const UInt mElem(dataFile("mesh/nelements",10));
+    if (verbose) std::cout << "Number of elements: " << mElem << std::endl;
+
+    // +-----------------------------------------------+
+    // |               Loading the mesh                |
+    // +-----------------------------------------------+
+    if (verbose) std::cout << "[Loading the mesh]" << std::endl;
+
+    boost::shared_ptr<RegionMesh3D<LinearTetra> > fullMeshPtr(new RegionMesh3D<LinearTetra>);
+
+    // Building the mesh from the source
+    if(M_meshSource == RegularMesh)
+    {
+        regularMesh3D( *fullMeshPtr,
+                       1,
+                       mElem, mElem, mElem,
+                       false,
+                       2.0,   2.0,   2.0,
+                       -1.0,  -1.0,  -1.0);
+
+        if (verbose) std::cout << "Mesh source: regular mesh("
+                               << mElem << "x" << mElem << "x" << mElem << ")" << std::endl;
+    }
+    else if(M_meshSource == File)
+    {
+        MeshData meshData;
+        meshData.setup(dataFile, "fluid/space_discretization");
+        readMesh(*fullMeshPtr, meshData);
+
+        if (verbose) std::cout << "Mesh source: file("
+                               << meshData.meshDir() << meshData.meshFile() << ")" << std::endl;
+    }
+    else
+    {
+        if (verbose) std::cout << std::endl << "Error: Unknown source type for the mesh" << std::endl;
+        exit(1);
+    }
+
+    if (verbose) std::cout << "Partitioning the mesh ... " << std::flush;
+    MeshPartitioner< RegionMesh3D<LinearTetra> >   meshPart(fullMeshPtr, d->comm);
+    fullMeshPtr.reset(); //Freeing the global mesh to save memory
+
+    // +-----------------------------------------------+
+    // |            Creating the FE spaces             |
+    // +-----------------------------------------------+
+    if (verbose) std::cout << std::endl << "[Creating the FE spaces]" << std::endl;
+    std::string uOrder("P2");
+    std::string pOrder("P1");
+    std::string bOrder("P2");
+
+    if (verbose) std::cout << "FE for the velocity: " << uOrder << std::endl
+                           << "FE for the pressure: " << pOrder << std::endl
+                           << "FE for beta        : " << bOrder << std::endl;
+
+    if (verbose) std::cout << "Building the velocity FE space ... " << std::flush;
+    boost::shared_ptr<FESpace< mesh_type, MapEpetra > > uFESpace( new FESpace< mesh_type, MapEpetra >(meshPart,uOrder, 3, Comm));
+    if (verbose) std::cout << "ok." << std::endl;
+
+    if (verbose) std::cout << "Building the pressure FE space ... " << std::flush;
+    boost::shared_ptr<FESpace< mesh_type, MapEpetra > > pFESpace( new FESpace< mesh_type, MapEpetra >(meshPart,pOrder, 1, Comm));
+    if (verbose) std::cout << "ok." << std::endl;
+
+    if (verbose) std::cout << "Building the pressure FE space ... " << std::flush;
+    boost::shared_ptr<FESpace< mesh_type, MapEpetra > > betaFESpace( new FESpace< mesh_type, MapEpetra >(meshPart,bOrder, 3, Comm));
+    if (verbose) std::cout << "ok." << std::endl;
+
+    if (verbose) std::cout << "Total Velocity Dof = " << uFESpace->dof().numTotalDof() << std::endl;
+    if (verbose) std::cout << "Total Pressure Dof = " << uFESpace->dof().numTotalDof() << std::endl;
+
+    // +-----------------------------------------------+
+    // |               Matrix Assembly                 |
+    // +-----------------------------------------------+
+    if (verbose) std::cout << "[Matrix Assembly]" << std::flush;
+
+    if (verbose) std::cout << "Setting up assembler... " << std::flush;
+    OseenAssembler<mesh_type,matrix_type,vector_type> oseenAssembler;
+    oseenAssembler.setup(uFESpace,betaFESpace);
+    if (verbose) std::cout << "done" << std::endl;
+
+    if (verbose) std::cout << "Defining the matrix... " << std::flush;
+    boost::shared_ptr<matrix_type> systemMatrix(new matrix_type( uFESpace->map() ));
+    *systemMatrix *=0.0;
+    if (verbose) std::cout << "done" << std::endl;
+
+    // Perform the assembly of the matrix
+    if (verbose) std::cout << "Adding the diffusion ..." << std::flush;
+    oseenAssembler.addDiffusion(systemMatrix,epsilon);
+    if (verbose) std::cout << "done in " << oseenAssembler.diffusionAssemblyChrono().diffCumul() << " s." << std::endl;
+
+    if (verbose) std::cout << "Adding the advection... " << std::flush;
+    vector_type beta(betaFESpace->map(),Repeated);
+    betaFESpace->interpolate(betaFct,beta,0.0);
+    adrAssembler.addAdvection(systemMatrix,beta);
+    if (verbose) std::cout << "done" << std::endl;
+
+    if (verbose) std::cout << "Adding the mass... " << std::flush;
+    adrAssembler.addMass(systemMatrix,1.0);
+    if (verbose) std::cout << "done" << std::endl;
+
+    if (verbose) std::cout << "Closing the matrix... " << std::flush;
+    systemMatrix->globalAssemble();
+    if (verbose) std::cout << "done" << std::endl;
+
+    /*
+    // +-----------------------------------------------+
+    // |                 RHS Assembly                  |
+    // +-----------------------------------------------+
+    if (verbose) std::cout << "[RHS Assembly]" << std::flush;
+    vector_type rhs(uFESpace->map(),Repeated);
+    rhs*=0.0;
+
+#ifdef TEST_RHS
+    vector_type fInterpolated(uFESpace->map(),Repeated);
+    fInterpolated*=0.0;
+    uFESpace->interpolate(fRhs,fInterpolated,0.0);
+    adrAssembler.addMassRhs(rhs,fInterpolated);
+    rhs.globalAssemble();
+#endif
+
+    if (verbose) std::cout << " done ! " << std::endl;
+
+    // +-----------------------------------------------+
+    // |             Boundary conditions               |
+    // +-----------------------------------------------+
+    if (verbose) std::cout << " -- Building the BCHandler ... " << std::flush;
+    BCHandler bchandler;
+    BCFunctionBase BCu( exactSolution );
+    bchandler.addBC("Dirichlet",1,Essential,Full,BCu,1);
+    for (UInt i(2); i<=6; ++i)
+    {
+        bchandler.addBC("Dirichlet",i,Essential,Full,BCu,1);
+    }
+    if (verbose) std::cout << " done ! " << std::endl;
+
+    if (verbose) std::cout << " -- Updating the BCs ... " << std::flush;
+    bchandler.bcUpdate(*uFESpace->mesh(),uFESpace->feBd(),uFESpace->dof());
+    if (verbose) std::cout << " done ! " << std::endl;
+
+    if (verbose) std::cout << " -- Applying the BCs ... " << std::flush;
+    vector_type rhsBC(rhs,Unique);
+    bcManage(*systemMatrix,rhsBC,*uFESpace->mesh(),uFESpace->dof(),bchandler,uFESpace->feBd(),1.0,0.0);
+    rhs = rhsBC;
+    if (verbose) std::cout << " done ! " << std::endl;
+
+    //************* SPY ***********
+    //systemMatrix->spy("matrix");
+    //rhs.spy("vector");
+    //*****************************
+
+    // +-----------------------------------------------+
+    // |            Solver initialization              |
+    // +-----------------------------------------------+
+    if (verbose) std::cout << "[Solver initialization]" << std::flush;
+    SolverAztecOO linearSolver;
+
+    if (verbose) std::cout << "Setting up the solver... " << std::flush;
+    linearSolver.setDataFromGetPot(dataFile,"solver");
+    linearSolver.setupPreconditioner(dataFile,"prec");
+    if (verbose) std::cout << "done" << std::endl;
+
+    if (verbose) std::cout << "Setting matrix in the solver... " << std::flush;
+    linearSolver.setMatrix(*systemMatrix);
+    if (verbose) std::cout << "done" << std::endl;
+
+    linearSolver.setCommunicator(Comm);
+
+    // +-----------------------------------------------+
+    // |             Solving the problem               |
+    // +-----------------------------------------------+
+    // Definition of the solution
+    if (verbose) std::cout << "Defining the solution vector... " << std::flush;
+    vector_type solution(uFESpace->map(),Unique);
+    solution*=0.0;
+    if (verbose) std::cout << "done" << std::endl;
+
+    // Solve the problem
+    if (verbose) std::cout << "Solving the system... " << std::flush;
+    linearSolver.solveSystem(rhsBC,solution,systemMatrix);
+    if (verbose) std::cout << "done" << std::endl;
+
+
+    // Exporter definition and use
+    if (verbose) std::cout << "Defining the exporter... " << std::flush;
+    ExporterHDF5<mesh_type> exporter ( dataFile, "OseenAssembler");
+    exporter->setPostDir( "./" ); // This is a test to see if M_post_dir is working
+    exporter->setMeshProcId( meshPart.meshPartition(), d->comm->MyPID() );
+    if (verbose) std::cout << "done" << std::endl;
+
+    if (verbose) std::cout << "Defining the exported quantities... " << std::flush;
+    boost::shared_ptr<vector_type> solutionPtr (new vector_type(solution,Repeated));
+    if (verbose) std::cout << "done" << std::endl;
+
+    if (verbose) std::cout << "Updating the exporter... " << std::flush;
+    exporter->addVariable( ExporterData::Vector, "velocity", solutionPtr,
+                                       UInt(0), uFESpace.dof().numTotalDof() );
+    exporter->addVariable( ExporterData::Scalar, "pressure", solutionPtr,
+                                       UInt(3*uFESpace.dof().numTotalDof()),
+                                       UInt(pFESpace.dof().numTotalDof()) );
+    if (verbose) std::cout << "done" << std::endl;
+
+    if (verbose) std::cout << "Exporting... " << std::flush;
+    exporter.postProcess(0);
+    if (verbose) std::cout << "done" << std::endl;
+    */
+
+#ifdef HAVE_MPI
+    MPI_Finalize();
+#endif
+    return( EXIT_SUCCESS );
+}
+
+
