@@ -393,10 +393,12 @@ Real w0(const Real& /*t*/, const Real& /*x*/, const Real& /*y*/, const Real& /*z
 
 Real fluxFunction(const Real& /*t*/, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& /*i*/)
 {
-    //if (t<=0.003)
-    return -100 ; //* (t*100);
-        //else
-        //return 0.;
+    return -100;
+}
+
+Real squareSinusoidalFluxFunction(const Real& t, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& /*i*/)
+{
+    return -(t<(0.005/2))*std::sin(2*M_PI*t/0.005)*std::sin(2*M_PI*t/0.005);
 }
 
 }
