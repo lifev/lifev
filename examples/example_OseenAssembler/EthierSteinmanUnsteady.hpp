@@ -49,46 +49,42 @@ class EthierSteinmanUnsteady
 {
 private:
     // derivatives for neumann
-    Real ux( const Real& t, const Real& x, const Real& y,
-             const Real& z, const ID& i ) const;
-    Real uy( const Real& t, const Real& x, const Real& y,
-             const Real& z, const ID& i ) const;
-    Real uz( const Real& t, const Real& x, const Real& y,
-             const Real& z, const ID& i ) const;
+    static Real ux( const Real& t, const Real& x, const Real& y,
+                    const Real& z, const ID& i );
+    static Real uy( const Real& t, const Real& x, const Real& y,
+                    const Real& z, const ID& i );
+    static Real uz( const Real& t, const Real& x, const Real& y,
+                    const Real& z, const ID& i );
 
-    Real a;
-    Real d;
-    Real mu;
-    Real density;
-    Real nu;
+    static Real a;
+    static Real d;
+    static Real viscosity;
+    static Real density;
+    static Real nu;
 
 public:
-    EthierSteinmanUnsteady();
-    EthierSteinmanUnsteady(const EthierSteinmanUnsteady& ESU);
-    ~EthierSteinmanUnsteady();
-
-    Real f        ( const Real& t, const Real& x, const Real& y,
-                    const Real& z, const ID& i ) const;
-    Real xexact   ( const Real& t, const Real& x, const Real& y,
-                    const Real& z, const ID& i ) const;
-    Real uexact   ( const Real& t, const Real& x, const Real& y,
-                    const Real& z, const ID& i ) const;
-    Real uderexact( const Real& t, const Real& x, const Real& y,
-                    const Real& z, const ID& i ) const;
-    Real pexact   ( const Real& t, const Real& x, const Real& y,
-                    const Real& z, const ID& i ) const;
+    static Real f        ( const Real& t, const Real& x, const Real& y,
+                           const Real& z, const ID& i );
+    static Real xexact   ( const Real& t, const Real& x, const Real& y,
+                           const Real& z, const ID& i );
+    static Real uexact   ( const Real& t, const Real& x, const Real& y,
+                           const Real& z, const ID& i );
+    static Real uderexact( const Real& t, const Real& x, const Real& y,
+                           const Real& z, const ID& i );
+    static Real pexact   ( const Real& t, const Real& x, const Real& y,
+                           const Real& z, const ID& i );
 
     // Initial velocity
-    Real x0( const Real& t, const Real& x, const Real& y,
-             const Real& z, const ID& i ) const;
+    static Real x0( const Real& t, const Real& x, const Real& y,
+                    const Real& z, const ID& i );
 
-    Real fNeumann( const Real& t, const Real& x, const Real& y,
-                   const Real& z, const ID& i ) const;
+    static Real fNeumann( const Real& t, const Real& x, const Real& y,
+                          const Real& z, const ID& i );
 
-    void setA(const Real& a);
-    void setD(const Real& d);
-    void setViscosity(const Real& mu);
-    void setDensity(const Real& density);
+    static void setA(const Real& aValue);
+    static void setD(const Real& dValue);
+    static void setViscosity(const Real& mu);
+    static void setDensity(const Real& rho);
 
 }; // class EthierSteinmanUnsteady
 

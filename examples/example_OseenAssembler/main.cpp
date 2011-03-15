@@ -50,20 +50,19 @@
 #pragma GCC diagnostic warning "-Wunused-parameter"
 
 #include <life/lifecore/LifeV.hpp>
-
-
+#include <life/lifemesh/RegionMesh3DStructured.hpp>
+#include <life/lifemesh/MeshData.hpp>
+#include <life/lifemesh/RegionMesh3D.hpp>
+#include <life/lifemesh/MeshPartitioner.hpp>
+#include <life/lifefem/FESpace.hpp>
+#include <life/lifefem/BCManage.hpp>
+#include <life/lifearray/MatrixEpetra.hpp>
+#include <life/lifesolver/OseenAssembler.hpp>
 #include <life/lifealg/PreconditionerIfpack.hpp>
 #include <life/lifealg/PreconditionerML.hpp>
 #include <life/lifealg/SolverAztecOO.hpp>
-#include <life/lifearray/MatrixEpetra.hpp>
 #include <life/lifefilters/ExporterHDF5.hpp>
-#include <life/lifefem/FESpace.hpp>
-#include <life/lifefem/BCManage.hpp>
-#include <life/lifemesh/MeshPartitioner.hpp>
-#include <life/lifemesh/RegionMesh3DStructured.hpp>
-#include <life/lifemesh/RegionMesh3D.hpp>
-#include <life/lifesolver/OseenAssembler.hpp>
-#include <life/lifemesh/MeshData.hpp>
+#include <life/lifefem/TimeAdvanceBDFNavierStokes.hpp>
 
 #include "EthierSteinmanUnsteady.hpp"
 
@@ -76,10 +75,12 @@ static bool regML = (PRECFactory::instance().registerProduct( "ML", &createML ))
 
 enum DiffusionType{ViscousStress,StiffStrain};
 enum MeshType{RegularMesh,File};
+enum InitType{Interpolation,Projection};
 
 typedef RegionMesh3D<LinearTetra> mesh_type;
 typedef MatrixEpetra<Real> matrix_type;
 typedef VectorEpetra vector_type;
+typedef boost::shared_ptr<VectorEpetra> vectorPtr_type;
 }
 
 
@@ -123,6 +124,12 @@ main( int argc, char** argv )
     // |               Loading the data                |
     // +-----------------------------------------------+
     if (verbose) std::cout << std::endl << "[Loading the data]" << std::endl;
+    LifeChrono globalChrono;
+    LifeChrono initChrono;
+    LifeChrono iterChrono;
+
+    globalChrono.start();
+    initChrono.start();
 
     // **** Stupid GetPot stuff ****
     GetPot command_line(argc,argv);
@@ -135,23 +142,25 @@ main( int argc, char** argv )
     const Real density        = 1.0;
 
     // Time discretization
-    const Real initialtime    = 0.0;
-    const Real endtime        = 1e-4;
+    const Real initialTime    = 0.0;
+    const Real endTime        = 1e-4;
     const Real timestep       = 1e-5;
 
     // Space discretization
+    const UInt numDimensions  = 3;
     const MeshType meshSource = RegularMesh;
     const UInt numMeshElem    = 10;
 
     // Numerical scheme
     const DiffusionType diffusionType = ViscousStress;
+    const UInt BDFOrder = 1;
+    const InitType initializationMethod = Projection;
 
     // EthierSteinman data
-    EthierSteinmanUnsteady ethierSteinmanData;
-    ethierSteinmanData.setA(1.0);
-    ethierSteinmanData.setD(1.0);
-    ethierSteinmanData.setViscosity(viscosity);
-    ethierSteinmanData.setDensity(density);
+    EthierSteinmanUnsteady::setA(1.0);
+    EthierSteinmanUnsteady::setD(1.0);
+    EthierSteinmanUnsteady::setViscosity(viscosity);
+    EthierSteinmanUnsteady::setDensity(density);
 
     // +-----------------------------------------------+
     // |               Loading the mesh                |
@@ -203,30 +212,69 @@ main( int argc, char** argv )
                            << "FE for the pressure: " << pOrder << std::endl;
 
     if (verbose) std::cout << "Building the velocity FE space ... " << std::flush;
-    boost::shared_ptr<FESpace< mesh_type, MapEpetra > > uFESpace( new FESpace< mesh_type, MapEpetra >(meshPart,uOrder, 3, Comm));
+    boost::shared_ptr<FESpace< mesh_type, MapEpetra > > uFESpace( new FESpace< mesh_type, MapEpetra >(meshPart,uOrder, numDimensions, Comm));
     if (verbose) std::cout << "ok." << std::endl;
 
     if (verbose) std::cout << "Building the pressure FE space ... " << std::flush;
     boost::shared_ptr<FESpace< mesh_type, MapEpetra > > pFESpace( new FESpace< mesh_type, MapEpetra >(meshPart,pOrder, 1, Comm));
     if (verbose) std::cout << "ok." << std::endl;
 
-    if (verbose) std::cout << "Total Velocity Dof = " << 3*uFESpace->dof().numTotalDof() << std::endl;
+    // Creation of the total map
+    MapEpetra solutionMap(uFESpace->map()+pFESpace->map());
+
+    // Pressure offset in the vector
+    UInt pressureOffset = numDimensions * uFESpace->dof().numTotalDof();
+
+    if (verbose) std::cout << "Total Velocity Dof = " << pressureOffset << std::endl;
     if (verbose) std::cout << "Total Pressure Dof = " << pFESpace->dof().numTotalDof() << std::endl;
 
     // +-----------------------------------------------+
-    // |               Matrix Assembly                 |
+    // |             Boundary conditions               |
     // +-----------------------------------------------+
-    if (verbose) std::cout << std::endl << "[Matrix Assembly]" << std::endl;
+    if (verbose) std::cout << std::endl << "[Boundary conditions]" << std::endl;
+    BCHandler bcHandler;
+    BCFunctionBase uDirichlet( EthierSteinmanUnsteady::uexact );
+    BCFunctionBase uNeumann( EthierSteinmanUnsteady::fNeumann );
+
+    if (verbose) std::cout << "Setting Neumann BC... " << std::flush;
+    bcHandler.addBC( "Flux", 1, Natural, Full, uNeumann, 3 );
+    if (verbose) std::cout << "ok." << std::endl;
+
+    if (verbose) std::cout << "Setting Dirichlet BC... " << std::flush;
+    for (UInt iDirichlet(2);iDirichlet<=26;++iDirichlet)
+    {
+        bcHandler.addBC( "Wall", iDirichlet, Essential, Full, uDirichlet, 3 );
+    }
+    if (verbose) std::cout << "ok." << std::endl;
+
+    // Update the BCHandler (internal data related to FE)
+    bcHandler.bcUpdate( *meshPart.meshPartition(), uFESpace->feBd(), uFESpace->dof());
+
+    /*
+    if (verbose) std::cout << " -- Applying the BCs ... " << std::flush;
+    vector_type rhsBC(rhs,Unique);
+    bcManage(*systemMatrix,rhsBC,*uFESpace->mesh(),uFESpace->dof(),bchandler,uFESpace->feBd(),1.0,0.0);
+    rhs = rhsBC;
+    if (verbose) std::cout << " done ! " << std::endl;
+    */
+
+    // +-----------------------------------------------+
+    // |              Matrices Assembly                |
+    // +-----------------------------------------------+
+    if (verbose) std::cout << std::endl << "[Matrices Assembly]" << std::endl;
 
     if (verbose) std::cout << "Setting up assembler... " << std::flush;
     OseenAssembler<mesh_type,matrix_type,vector_type> oseenAssembler;
     oseenAssembler.setup(uFESpace,pFESpace);
     if (verbose) std::cout << "done" << std::endl;
 
-    if (verbose) std::cout << "Defining the matrix... " << std::flush;
-    MapEpetra solutionMap(uFESpace->map()+pFESpace->map());
+    if (verbose) std::cout << "Defining the matrices... " << std::flush;
     boost::shared_ptr<matrix_type> systemMatrix(new matrix_type( solutionMap ));
     *systemMatrix *=0.0;
+    boost::shared_ptr<matrix_type> baseMatrix(new matrix_type( solutionMap ));
+    *baseMatrix *=0.0;
+    boost::shared_ptr<matrix_type> massMatrix(new matrix_type( solutionMap ));
+    *massMatrix *=0.0;
     if (verbose) std::cout << "done" << std::endl;
 
     // Perform the assembly of the matrix
@@ -234,12 +282,12 @@ main( int argc, char** argv )
     {
         case ViscousStress:
             if (verbose) std::cout << "Adding the viscous stress... " << std::flush;
-            oseenAssembler.addViscousStress(systemMatrix,viscosity/density);
+            oseenAssembler.addViscousStress(baseMatrix,viscosity/density);
             if (verbose) std::cout << "done" << std::endl;
             break;
         case StiffStrain:
             if (verbose) std::cout << "Adding the stiff strain... " << std::flush;
-            oseenAssembler.addStiffStrain(systemMatrix,viscosity/density);
+            oseenAssembler.addStiffStrain(baseMatrix,viscosity/density);
             if (verbose) std::cout << "done" << std::endl;
             break;
         default:
@@ -248,85 +296,32 @@ main( int argc, char** argv )
             break;
     }
 
-    if (verbose) std::cout << "Adding the convection... " << std::flush;
-    vector_type beta(uFESpace->map(),Repeated);
-    beta *= 0;
-    beta += 1;
-    oseenAssembler.addConvection(systemMatrix,beta);
-    if (verbose) std::cout << "done" << std::endl;
-
-    if (verbose) std::cout << "Adding the mass... " << std::flush;
-    oseenAssembler.addMass(systemMatrix,1.0/timestep);
-    if (verbose) std::cout << "done" << std::endl;
-
     if (verbose) std::cout << "Adding the gradient of the pressure... " << std::flush;
-    oseenAssembler.addGradPressure(systemMatrix);
+    oseenAssembler.addGradPressure(baseMatrix);
     if (verbose) std::cout << "done" << std::endl;
 
     if (verbose) std::cout << "Adding the divergence free constraint... " << std::flush;
-    oseenAssembler.addDivergence(systemMatrix);
+    oseenAssembler.addDivergence(baseMatrix);
     if (verbose) std::cout << "done" << std::endl;
 
-    if (verbose) std::cout << "Closing the matrix... " << std::flush;
-    systemMatrix->globalAssemble();
+    if (verbose) std::cout << "Adding the mass... " << std::flush;
+    oseenAssembler.addMass(massMatrix,1.0);
     if (verbose) std::cout << "done" << std::endl;
 
-    // +-----------------------------------------------+
-    // |                 RHS Assembly                  |
-    // +-----------------------------------------------+
-    if (verbose) std::cout << std::endl << "[RHS Assembly]" << std::endl;
-    vector_type rhs(uFESpace->map(),Repeated);
-    rhs*=0.0;
-
-    /*
-#ifdef TEST_RHS
-    vector_type fInterpolated(uFESpace->map(),Repeated);
-    fInterpolated*=0.0;
-    uFESpace->interpolate(fRhs,fInterpolated,0.0);
-    adrAssembler.addMassRhs(rhs,fInterpolated);
-    rhs.globalAssemble();
-#endif
-*/
-
-    if (verbose) std::cout << " done ! " << std::endl;
-
-    /*
-    // +-----------------------------------------------+
-    // |             Boundary conditions               |
-    // +-----------------------------------------------+
-    if (verbose) std::cout << " -- Building the BCHandler ... " << std::flush;
-    BCHandler bchandler;
-    BCFunctionBase BCu( exactSolution );
-    bchandler.addBC("Dirichlet",1,Essential,Full,BCu,1);
-    for (UInt i(2); i<=6; ++i)
-    {
-        bchandler.addBC("Dirichlet",i,Essential,Full,BCu,1);
-    }
-    if (verbose) std::cout << " done ! " << std::endl;
-
-    if (verbose) std::cout << " -- Updating the BCs ... " << std::flush;
-    bchandler.bcUpdate(*uFESpace->mesh(),uFESpace->feBd(),uFESpace->dof());
-    if (verbose) std::cout << " done ! " << std::endl;
-
-    if (verbose) std::cout << " -- Applying the BCs ... " << std::flush;
-    vector_type rhsBC(rhs,Unique);
-    bcManage(*systemMatrix,rhsBC,*uFESpace->mesh(),uFESpace->dof(),bchandler,uFESpace->feBd(),1.0,0.0);
-    rhs = rhsBC;
-    if (verbose) std::cout << " done ! " << std::endl;
-
-    */
+    if (verbose) std::cout << "Closing the matrices... " << std::flush;
+    baseMatrix->globalAssemble();
+    massMatrix->globalAssemble();
+    if (verbose) std::cout << "done" << std::endl;
 
     //************* SPY ***********
-    systemMatrix->spy("matrix");
-    //rhs.spy("vector");
+    //baseMatrix->spy("baseMatrix");
+    //massMatrix->spy("massMatrix");
     //*****************************
-
-    /*
 
     // +-----------------------------------------------+
     // |            Solver initialization              |
     // +-----------------------------------------------+
-    if (verbose) std::cout << "[Solver initialization]" << std::flush;
+    if (verbose) std::cout << std::endl << "[Solver initialization]" << std::endl;
     SolverAztecOO linearSolver;
 
     if (verbose) std::cout << "Setting up the solver... " << std::flush;
@@ -334,50 +329,189 @@ main( int argc, char** argv )
     linearSolver.setupPreconditioner(dataFile,"prec");
     if (verbose) std::cout << "done" << std::endl;
 
-    if (verbose) std::cout << "Setting matrix in the solver... " << std::flush;
-    linearSolver.setMatrix(*systemMatrix);
+    linearSolver.setCommunicator(Comm);
+
+    // +-----------------------------------------------+
+    // |       Initialization of the simulation        |
+    // +-----------------------------------------------+
+    if (verbose) std::cout<< std::endl << "[Initialization of the simulation]" << std::endl;
+    if (verbose) std::cout << "Creation of vectors... " << std::flush;
+    vectorPtr_type rhs;
+    rhs.reset(new vector_type(solutionMap,Repeated));
+
+    vectorPtr_type beta;
+    beta.reset(new vector_type(solutionMap,Repeated));
+
+    vectorPtr_type velocity;
+    velocity.reset(new vector_type(uFESpace->map()));
+
+    vectorPtr_type pressure;
+    pressure.reset(new vector_type(pFESpace->map()));
+
+    vectorPtr_type solution;
+    solution.reset(new vector_type(solutionMap,Unique));
     if (verbose) std::cout << "done" << std::endl;
 
-    linearSolver.setCommunicator(Comm);
+    if (verbose) std::cout << "Computing the initial solution ... " << std::endl;
+    // bdf object to store the previous solutions
+    TimeAdvanceBDFNavierStokes<vector_type> bdf;
+    bdf.setup(BDFOrder);
+    Real currentTime = initialTime-timestep*BDFOrder;
+
+    uFESpace->interpolate(EthierSteinmanUnsteady::uexact,*velocity,currentTime);
+    pFESpace->interpolate(EthierSteinmanUnsteady::pexact,*pressure,currentTime);
+    *solution = *velocity;
+    solution->add(*pressure,pressureOffset);
+
+    bdf.bdfVelocity().setInitialCondition( *solution );
+
+    //
+    // Initial solution loading (interpolation or projection)
+    //
+    currentTime += timestep;
+    for ( ; currentTime <=  initialTime + timestep/2.; currentTime += timestep)
+    {
+        *rhs  *= 0.;
+
+        uFESpace->interpolate(EthierSteinmanUnsteady::uexact,*velocity,currentTime);
+        pFESpace->interpolate(EthierSteinmanUnsteady::pexact,*pressure,currentTime);
+        *solution = *velocity;
+        solution->add(*pressure,pressureOffset);
+
+        if (initializationMethod == Projection)
+        {
+            uFESpace->interpolate(EthierSteinmanUnsteady::uderexact, *rhs, currentTime);
+            //uFESpace.l2ScalarProduct(EthierSteinmanUnsteady::uderexact, rhs, currentTime);
+            rhs->globalAssemble();
+            *rhs *= -1.;
+            *rhs = (*massMatrix)*(*rhs);
+
+            if (verbose) std::cout << "Updating the system... " << std::flush;
+            systemMatrix.reset(new matrix_type( solutionMap ));
+            *systemMatrix += *baseMatrix;
+            *beta = bdf.bdfVelocity().extrapolation(); // Extrapolation for the convective term
+            oseenAssembler.addConvection(systemMatrix,*solution);
+            if (verbose) std::cout << "done" << std::endl;
+
+            if (verbose) std::cout << "Applying BC... " << std::flush;
+            bcManage(*systemMatrix,*rhs,*uFESpace->mesh(),uFESpace->dof(),bcHandler,uFESpace->feBd(),1.0,0.0);
+            systemMatrix->globalAssemble();
+            if (verbose) std::cout << "done" << std::endl;
+
+            if (verbose) std::cout << "Solving the system... " << std::endl;
+            *solution *= 0;
+            linearSolver.setMatrix(*systemMatrix);
+            linearSolver.solveSystem(*rhs,*solution,systemMatrix);
+        }
+
+        // Updating bdf
+        bdf.bdfVelocity().shiftRight( *solution );
+    }
+
+    linearSolver.resetPreconditioner();
+
+    //************* SPY ***********
+    //rhs.spy("vector");
+    //*****************************
+
+    // +-----------------------------------------------+
+    // |             Setting the exporter              |
+    // +-----------------------------------------------+
+    if (verbose) std::cout << "Defining the exporter... " << std::flush;
+    ExporterHDF5<mesh_type> exporter ( dataFile, "OseenAssembler");
+    exporter.setPostDir( "./" ); // This is a test to see if M_post_dir is working
+    exporter.setMeshProcId( meshPart.meshPartition(), Comm->MyPID() );
+    if (verbose) std::cout << "done" << std::endl;
+
+    if (verbose) std::cout << "Updating the exporter... " << std::flush;
+    exporter.addVariable( ExporterData::Vector, "velocity", solution,
+                          UInt(0), uFESpace->dof().numTotalDof() );
+    exporter.addVariable( ExporterData::Scalar, "pressure", solution,
+                          pressureOffset,
+                          UInt(pFESpace->dof().numTotalDof()) );
+    if (verbose) std::cout << "done" << std::endl;
+
+    if (verbose) std::cout << "Exporting solution at time t=" << initialTime << "... " << std::endl;
+    exporter.postProcess(initialTime);
+
+    initChrono.stop();
+    if (verbose) std::cout << "Initialization time: " << initChrono.diff() << " s." << std::endl;
 
     // +-----------------------------------------------+
     // |             Solving the problem               |
     // +-----------------------------------------------+
-    // Definition of the solution
-    if (verbose) std::cout << "Defining the solution vector... " << std::flush;
-    vector_type solution(uFESpace->map(),Unique);
-    solution*=0.0;
-    if (verbose) std::cout << "done" << std::endl;
+    if (verbose) std::cout<< std::endl << "[Solving the problem]" << std::endl;
+    int iter = 1;
 
-    // Solve the problem
-    if (verbose) std::cout << "Solving the system... " << std::flush;
-    linearSolver.solveSystem(rhsBC,solution,systemMatrix);
-    if (verbose) std::cout << "done" << std::endl;
+    for ( ; currentTime <= endTime + timestep/2.; currentTime += timestep, iter++)
+    {
+        iterChrono.reset();
+        iterChrono.start();
 
+        if (verbose) std::cout << "[t = "<< currentTime << " s.]" << std::endl;
 
-    // Exporter definition and use
-    if (verbose) std::cout << "Defining the exporter... " << std::flush;
-    ExporterHDF5<mesh_type> exporter ( dataFile, "OseenAssembler");
-    exporter->setPostDir( "./" ); // This is a test to see if M_post_dir is working
-    exporter->setMeshProcId( meshPart.meshPartition(), d->comm->MyPID() );
-    if (verbose) std::cout << "done" << std::endl;
+        if (verbose) std::cout << "Updating the system... " << std::flush;
+        bdf.bdfVelocity().updateRHSContribution( timestep );
+        *rhs  = *massMatrix*bdf.bdfVelocity().rhsContributionFirstDerivative();
 
-    if (verbose) std::cout << "Defining the exported quantities... " << std::flush;
-    boost::shared_ptr<vector_type> solutionPtr (new vector_type(solution,Repeated));
-    if (verbose) std::cout << "done" << std::endl;
+        systemMatrix.reset(new matrix_type( solutionMap ));
+        double alpha = bdf.bdfVelocity().coefficientFirstDerivative( 0 ) / timestep;
+        *systemMatrix += *massMatrix*alpha;
+        *systemMatrix += *baseMatrix;
+        *beta = bdf.bdfVelocity().extrapolation(); // Extrapolation for the convective term
+        oseenAssembler.addConvection(systemMatrix,*beta);
+        if (verbose) std::cout << "done" << std::endl;
 
-    if (verbose) std::cout << "Updating the exporter... " << std::flush;
-    exporter->addVariable( ExporterData::Vector, "velocity", solutionPtr,
-                                       UInt(0), uFESpace.dof().numTotalDof() );
-    exporter->addVariable( ExporterData::Scalar, "pressure", solutionPtr,
-                                       UInt(3*uFESpace.dof().numTotalDof()),
-                                       UInt(pFESpace.dof().numTotalDof()) );
-    if (verbose) std::cout << "done" << std::endl;
+        if (verbose) std::cout << "Applying BC... " << std::flush;
+        bcManage(*systemMatrix,*rhs,*uFESpace->mesh(),uFESpace->dof(),bcHandler,uFESpace->feBd(),1.0,0.0);
+        systemMatrix->globalAssemble();
+        //************* SPY ***********
+        //systemMatrix->spy("systemMatrix");
+        //rhs->spy("rhs");
+        //*****************************
+        if (verbose) std::cout << "done" << std::endl;
 
-    if (verbose) std::cout << "Exporting... " << std::flush;
-    exporter.postProcess(0);
-    if (verbose) std::cout << "done" << std::endl;
-    */
+        if (verbose) std::cout << "Solving the system... " << std::endl;
+        *solution *= 0;
+        linearSolver.setMatrix(*systemMatrix);
+        linearSolver.solveSystem(*rhs,*solution,systemMatrix);
+
+        // Updating the BDF scheme
+        bdf.bdfVelocity().shiftRight( *solution );
+
+        // Exporting the solution
+        exporter.postProcess( currentTime );
+
+        iterChrono.stop();
+        if (verbose) std::cout << "Iteration time: " << iterChrono.diff() << " s." << std::endl << std::endl;
+
+        MPI_Barrier(MPI_COMM_WORLD);
+    }
+
+    // +-----------------------------------------------+
+    // |             Computing the error               |
+    // +-----------------------------------------------+
+    if (verbose) std::cout << "[Computed errors]" << std::endl;
+    velocity->subset(*solution);
+    pressure->subset(*solution, pressureOffset);
+    Real uRelativeError, pRelativeError, uL2Error, pL2Error;
+    uL2Error = uFESpace->l2Error (EthierSteinmanUnsteady::uexact, *velocity, currentTime, &uRelativeError );
+    pL2Error = pFESpace->l20Error(EthierSteinmanUnsteady::pexact, *pressure, currentTime, &pRelativeError );
+    if (verbose) std::cout << "Velocity" << std::endl;
+    if (verbose) std::cout << "  L2 error      : " << uL2Error << std::endl;
+    if (verbose) std::cout << "  Relative error: " << uRelativeError << std::endl;
+    if (verbose) std::cout << "Pressure" << std::endl;
+    if (verbose) std::cout << "  L2 error      : " << pL2Error << std::endl;
+    if (verbose) std::cout << "  Relative error: " << pRelativeError << std::endl;
+
+    // +-----------------------------------------------+
+    // |            Ending the simulation              |
+    // +-----------------------------------------------+
+    exporter.closeFile();
+
+    globalChrono.stop();
+    if (verbose) std::cout << std::endl << "Total simulation time:" << globalChrono.diff() << " s." << std::endl;
+    if (verbose) std::cout << std::endl << "[[END_SIMULATION]]" << std::endl;
 
 #ifdef HAVE_MPI
     MPI_Finalize();

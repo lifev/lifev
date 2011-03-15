@@ -41,17 +41,18 @@
 namespace LifeV
 {
 
+
 Real EthierSteinmanUnsteady::f( const Real& /* t */,
                                 const Real& /* x */,
                                 const Real& /* y */,
                                 const Real& /* z */,
-                                const ID& /* i */ ) const { return 0; }
+                                const ID& /* i */ ) { return 0; }
 
 Real EthierSteinmanUnsteady::xexact( const Real& t,
                                      const Real& x,
                                      const Real& y,
                                      const Real& z,
-                                     const ID& i ) const
+                                     const ID& i )
 {
     Real tau = nu * t;
 
@@ -88,7 +89,7 @@ Real EthierSteinmanUnsteady::uexact( const Real& t,
                                      const Real& x,
                                      const Real& y,
                                      const Real& z,
-                                     const ID& i) const
+                                     const ID& i)
 {
     if (i < 3)
         return xexact(t, x, y, z, i);
@@ -100,14 +101,14 @@ Real EthierSteinmanUnsteady::pexact( const Real& t,
                                      const Real& x,
                                      const Real& y,
                                      const Real& z,
-                                     const ID& /* i */ ) const
+                                     const ID& /* i */ )
 {
     return xexact(t, x, y, z, 3);
 }
 
 // Initial velocity
 Real EthierSteinmanUnsteady::x0( const Real& /* t */, const Real& x, const Real& y,
-                                 const Real& z, const ID& i ) const
+                                 const Real& z, const ID& i )
 {
     return xexact(0.,x, y, z, i);
 }
@@ -117,7 +118,7 @@ Real EthierSteinmanUnsteady::uderexact( const Real& t,
                                         const Real& x,
                                         const Real& y,
                                         const Real& z,
-                                        const ID& i) const
+                                        const ID& i)
 {
 
     if (i < 3)
@@ -127,28 +128,13 @@ Real EthierSteinmanUnsteady::uderexact( const Real& t,
 }
 
 
-EthierSteinmanUnsteady::EthierSteinmanUnsteady()
-:a(1.), d(1.), mu(1.), density(1.), nu(mu/density)
-{
 
-}
-
-EthierSteinmanUnsteady::EthierSteinmanUnsteady(const EthierSteinmanUnsteady& ESU)
-:a(ESU.a), d(ESU.d), mu(ESU.mu), density(ESU.density), nu(mu/density)
-{
-
-}
-
-EthierSteinmanUnsteady::~EthierSteinmanUnsteady()
-{
-
-}
 
 
 
 // derivatives for neumann
 Real EthierSteinmanUnsteady::ux( const Real& t, const Real& x, const Real& y,
-                                 const Real& z, const ID& i ) const
+                                 const Real& z, const ID& i )
 {
     Real tau = nu * t;
 
@@ -175,7 +161,7 @@ Real EthierSteinmanUnsteady::ux( const Real& t, const Real& x, const Real& y,
 }
 
 Real EthierSteinmanUnsteady::uy( const Real& t, const Real& x, const Real& y,
-                                 const Real& z, const ID& i ) const
+                                 const Real& z, const ID& i )
 {
     Real tau = nu * t;
 
@@ -202,7 +188,7 @@ Real EthierSteinmanUnsteady::uy( const Real& t, const Real& x, const Real& y,
 }
 
 Real EthierSteinmanUnsteady::uz( const Real& t, const Real& x, const Real& y,
-                                 const Real& z, const ID& i ) const
+                                 const Real& z, const ID& i )
 {
     Real tau = nu * t;
 
@@ -232,7 +218,7 @@ Real EthierSteinmanUnsteady::fNeumann( const Real& t,
                                        const Real& x,
                                        const Real& y,
                                        const Real& z,
-                                       const ID& i ) const
+                                       const ID& i )
 {
     Real nx = 0.;
     Real ny = 0.;
@@ -271,25 +257,25 @@ Real EthierSteinmanUnsteady::fNeumann( const Real& t,
     {
     case 0:
         return - pexact(t, x, y, z, 0) * nx
-               + mu * ( ux(t, x, y, z, 0) * nx * 2 +
-                        ux(t, x, y, z, 1) * ny +
-                        ux(t, x, y, z, 2) * nz +
-                        uy(t, x, y, z, 0) * ny +
-                        uz(t, x, y, z, 0) * nz );
+               + viscosity * ( ux(t, x, y, z, 0) * nx * 2 +
+                               ux(t, x, y, z, 1) * ny +
+                               ux(t, x, y, z, 2) * nz +
+                               uy(t, x, y, z, 0) * ny +
+                               uz(t, x, y, z, 0) * nz );
     case 1:
         return - pexact(t, x, y, z, 0) * ny
-               + mu * ( uy(t, x, y, z, 0) * nx +
-                        uy(t, x, y, z, 1) * ny * 2 +
-                        uy(t, x, y, z, 2) * nz +
-                        ux(t, x, y, z, 1) * nx +
-                        uz(t, x, y, z, 1) * nz );
+               + viscosity * ( uy(t, x, y, z, 0) * nx +
+                               uy(t, x, y, z, 1) * ny * 2 +
+                               uy(t, x, y, z, 2) * nz +
+                               ux(t, x, y, z, 1) * nx +
+                               uz(t, x, y, z, 1) * nz );
     case 2:
         return - pexact(t, x, y, z, 0) * nz
-               + mu * ( uz(t, x, y, z, 0) * nx +
-                        uz(t, x, y, z, 1) * ny +
-                        uz(t, x, y, z, 2) * nz * 2 +
-                        ux(t, x, y, z, 2) * nx +
-                        uy(t, x, y, z, 2) * ny);
+               + viscosity * ( uz(t, x, y, z, 0) * nx +
+                               uz(t, x, y, z, 1) * ny +
+                               uz(t, x, y, z, 2) * nz * 2 +
+                               ux(t, x, y, z, 2) * nx +
+                               uy(t, x, y, z, 2) * ny);
     default:
         exit(1);
     }
@@ -297,43 +283,43 @@ Real EthierSteinmanUnsteady::fNeumann( const Real& t,
     /*
     switch(i) {
         case 1:
-            return - mu/nu*pexact(t, x, y, z, 0) * nx
-                + mu * ( ux(t, x, y, z, 0) * nx +
-                         uy(t, x, y, z, 0) * ny +
-                         uz(t, x, y, z, 0) * nz );
+            return - viscosity/nu*pexact(t, x, y, z, 0) * nx
+                   + viscosity * ( ux(t, x, y, z, 0) * nx +
+                                   uy(t, x, y, z, 0) * ny +
+                                   uz(t, x, y, z, 0) * nz );
         case 2:
-            return - mu/nu*pexact(t, x, y, z, 0) * ny
-                + mu * ( ux(t, x, y, z, 1) * nx +
-                         uy(t, x, y, z, 1) * ny +
-                         uz(t, x, y, z, 1) * nz );
+            return - viscosity/nu*pexact(t, x, y, z, 0) * ny
+                   + viscosity * ( ux(t, x, y, z, 1) * nx +
+                                   uy(t, x, y, z, 1) * ny +
+                                   uz(t, x, y, z, 1) * nz );
         case 3:
-            return - mu/nu*pexact(t, x, y, z, 0) * nz
-                + mu * ( ux(t, x, y, z, 2) * nx +
-                         uy(t, x, y, z, 2) * ny +
-                         uz(t, x, y, z, 2) * nz);
+            return - viscosity/nu*pexact(t, x, y, z, 0) * nz
+                   + viscosity * ( ux(t, x, y, z, 2) * nx +
+                                   uy(t, x, y, z, 2) * ny +
+                                   uz(t, x, y, z, 2) * nz);
         default:
             exit(1);
     }
     */
 }
 
-void EthierSteinmanUnsteady::setA(const Real& a)
+void EthierSteinmanUnsteady::setA(const Real& aValue)
 {
-    this->a = a;
+    a = aValue;
 }
-void EthierSteinmanUnsteady::setD(const Real& d)
+void EthierSteinmanUnsteady::setD(const Real& dValue)
 {
-    this->d = d;
+    d = dValue;
 }
 void EthierSteinmanUnsteady::setViscosity(const Real& mu)
 {
-    this->mu = mu;
-    this->nu = mu/density;
+    viscosity = mu;
+    nu = viscosity/density;
 }
-void EthierSteinmanUnsteady::setDensity(const Real& density)
+void EthierSteinmanUnsteady::setDensity(const Real& rho)
 {
-    this->density = density;
-    this->nu = mu/density;
+    density = rho;
+    nu = viscosity/density;
 }
 
 void setParamsFromGetPot( EthierSteinmanUnsteady& ESU, const GetPot& dataFile )
@@ -343,5 +329,11 @@ void setParamsFromGetPot( EthierSteinmanUnsteady& ESU, const GetPot& dataFile )
     ESU.setViscosity(dataFile( "fluid/physics/viscosity", 1. ));
     ESU.setDensity(dataFile( "fluid/physics/density", 1. ));
 }
+
+Real EthierSteinmanUnsteady::a;
+Real EthierSteinmanUnsteady::d;
+Real EthierSteinmanUnsteady::viscosity;
+Real EthierSteinmanUnsteady::density;
+Real EthierSteinmanUnsteady::nu;
 
 } // namespace LifeV
