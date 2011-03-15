@@ -90,12 +90,7 @@ public:
 
     MonolithicBlockComposedDN( const std::vector<Int>& flag, const std::vector<Int>& order):
             super_Type( flag, order ),
-            M_blockPrecs(),
-            M_uMap(),
-            M_pMap(),
-            M_dMap(),
-            M_interfaceMap(),
-            M_multipliers(0)
+            M_blockPrecs()
     {
     }
 
@@ -222,12 +217,7 @@ protected:
     /*!
       Pointer to an PreconditionerComposed object containing the preconditioners for each block
     */
-    boost::shared_ptr<PreconditionerComposed>            M_blockPrecs;
-    mapPtr_Type                                      M_uMap;
-    mapPtr_Type                                      M_pMap;
-    mapPtr_Type                                      M_dMap;
-    mapPtr_Type                                      M_interfaceMap;
-    UInt                                             M_multipliers;
+    boost::shared_ptr<PreconditionerComposed>        M_blockPrecs;
     //@}
 
 private:

@@ -467,7 +467,7 @@ MonolithicBlockMatrix*    createAdditiveSchwarzRNGI()
 
 MonolithicBlock*    createComposedDNGI()
 {
-    const MonolithicBlockComposed::Block order[] = {  MonolithicBlockComposed::solid, MonolithicBlockComposed::fluid, MonolithicBlockComposed::mesh };
+    const MonolithicBlockComposed::Block order[] = { MonolithicBlockComposed::solid, MonolithicBlockComposed::fluid, MonolithicBlockComposed::mesh };
     const Int couplingsDNGI[] = { 0, 7, 16 };
     const std::vector<Int> couplingVectorDNGI(couplingsDNGI, couplingsDNGI+3);
     const std::vector<Int> orderVector(order, order+3);

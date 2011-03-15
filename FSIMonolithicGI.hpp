@@ -165,12 +165,12 @@ public:
     //! getter for the current iteration solution
     const vectorPtr_Type  uk()  const      {return M_uk;}
 
-    //! getter for the domain displacement at the previous time step (to correctly visualize the solition of both GE
-    //! and GI)
-    const vector_Type&          meshDisp()const
-    {
-        return this->M_meshMotion->disp();
-    }
+//     //! getter for the domain displacement at the previous time step (to correctly visualize the solition of both GE
+//     //! and GI)
+//     const vector_Type&          meshDisp()const
+//     {
+//         return this->M_meshMotion->disp();
+//     }
 
     //! get the solution.
     const vector_Type& solution() const

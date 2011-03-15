@@ -86,28 +86,6 @@ void MonolithicBlockComposed::coupler( mapPtr_Type& map,
         M_coupling.push_back(coupling);
 }
 
-
-// void MonolithicBlockComposed::coupler( mapPtr_Type& map,
-//                                  const std::map<ID, ID>& locDofMap,
-//                                  const vectorPtr_Type& numerationInterface,
-//                                  const Real& timeStep,
-//                                  UInt couplingBlock )
-// {
-//     matrixPtr_Type coupling(new matrix_Type(*map));
-//     couplingMatrix( coupling,  (*M_couplingFlags)[couplingBlock], M_FESpace, M_offset, locDofMap, numerationInterface, timeStep);
-//     UInt totalDofs( map->map(Unique)->NumGlobalElements() );
-
-//     coupling->insertValueDiagonal( 1., 0 , M_offset[couplingBlock] );
-//     coupling->insertValueDiagonal( 1., M_offset[couplingBlock]+M_FESpace[couplingBlock]->map().map(Unique)->NumGlobalElements(), totalDofs );
-
-//     if(couplingBlock != M_coupling.size()+1)
-//     {
-//         M_coupling.insert(M_coupling.begin()+couplingBlock, coupling);
-//     }
-//     else
-//         M_coupling.push_back(coupling);
-// }
-
 void MonolithicBlockComposed::push_back_matrix(const matrixPtr_Type& Mat, const  bool recompute)
 {
     M_blocks.push_back(Mat);
