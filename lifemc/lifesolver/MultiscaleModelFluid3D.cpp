@@ -93,7 +93,7 @@ MultiscaleModelFluid3D::setupData( const std::string& fileName )
 
     GetPot dataFile( fileName );
 
-    //Fluid data
+    // Load data
     M_data->setup( dataFile );
     if ( M_globalData.get() )
         setupGlobalData( fileName );
@@ -289,7 +289,7 @@ MultiscaleModelFluid3D::saveSolution()
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 8120 ) << "MultiscaleModelFluid3D::SaveSolution() \n";
+    Debug( 8120 ) << "MultiscaleModelFluid3D::saveSolution() \n";
 #endif
 
     //Post-processing
@@ -334,7 +334,7 @@ MultiscaleModelFluid3D::setupLinearModel()
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 8120 ) << "MultiscaleModelFluid3D::SetupLinearModel( ) \n";
+    Debug( 8120 ) << "MultiscaleModelFluid3D::setupLinearModel( ) \n";
 #endif
 
     // Define BCFunctions for tangent problem
@@ -355,7 +355,7 @@ MultiscaleModelFluid3D::updateLinearModel()
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 8120 ) << "MultiscaleModelFluid3D::UpdateLinearModel() \n";
+    Debug( 8120 ) << "MultiscaleModelFluid3D::updateLinearModel() \n";
 #endif
 
     //Create an empty vector
@@ -381,7 +381,7 @@ MultiscaleModelFluid3D::solveLinearModel( bool& solveLinearSystem )
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 8120 ) << "MultiscaleModelFluid3D::SolveLinearModel() \n";
+    Debug( 8120 ) << "MultiscaleModelFluid3D::solveLinearModel() \n";
 #endif
 
     if ( !solveLinearSystem )
@@ -494,7 +494,7 @@ MultiscaleModelFluid3D::setupGlobalData( const std::string& fileName )
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 8120 ) << "MultiscaleModelFluid3D::SetupGlobalData( fileName ) \n";
+    Debug( 8120 ) << "MultiscaleModelFluid3D::setupGlobalData( fileName ) \n";
 #endif
 
     GetPot dataFile( fileName );
@@ -562,7 +562,7 @@ MultiscaleModelFluid3D::setupFEspace()
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 8120 ) << "MultiscaleModelFluid3D::SetupFEspace() \n";
+    Debug( 8120 ) << "MultiscaleModelFluid3D::setupFEspace() \n";
 #endif
 
     //Velocity FE Space
@@ -628,7 +628,7 @@ MultiscaleModelFluid3D::setupDOF()
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 8120 ) << "MultiscaleModelFluid3D::SetupDOF \n";
+    Debug( 8120 ) << "MultiscaleModelFluid3D::setupDOF \n";
 #endif
 
     M_lmDOF = M_bc->handler()->numberOfBCWithType( Flux );
@@ -642,7 +642,7 @@ MultiscaleModelFluid3D::setupBCOffset( const bcPtr_Type& BC )
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 8120 ) << "MultiscaleModelFluid3D::SetupBCOffset( BC ) \n";
+    Debug( 8120 ) << "MultiscaleModelFluid3D::setupBCOffset( BC ) \n";
 #endif
 
     UInt offset = M_uFESpace->map().map( Unique )->NumGlobalElements() + M_pFESpace->map().map( Unique )->NumGlobalElements();
@@ -657,7 +657,7 @@ MultiscaleModelFluid3D::initializeSolution()
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 8120 ) << "MultiscaleModelFluid3D::InitializeSolution() \n";
+    Debug( 8120 ) << "MultiscaleModelFluid3D::initializeSolution() \n";
 #endif
 
     if ( multiscaleProblemStep > 0 )
