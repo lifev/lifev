@@ -16,7 +16,8 @@ SUBDIRS		= 	Algorithms\
                 Couplings\
 				Models
 
-dist_pkgdata_DATA = Run_1D_1Cylinder.dat \
+dist_pkgdata_DATA = Run_0D_Windkessel.dat \
+                    Run_1D_1Cylinder.dat \
 					Run_1D_2Cylinders.dat \
 					Run_1D_ReymondStergiopulos2009_Aorta.dat \
 					Run_1D_ReymondStergiopulos2009_AortaArmsLegs.dat \
