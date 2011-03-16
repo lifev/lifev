@@ -39,8 +39,9 @@
 
 #include <lifemc/lifesolver/MultiscaleModel.hpp>
 #include <lifemc/lifesolver/MultiscaleModelFluid3D.hpp>
-#include <lifemc/lifesolver/MultiscaleModel1D.hpp>
 #include <lifemc/lifesolver/MultiscaleModelFSI3D.hpp>
+#include <lifemc/lifesolver/MultiscaleModel1D.hpp>
+#include <lifemc/lifesolver/MultiscaleModelWindkessel0D.hpp>
 
 #include <lifemc/lifesolver/MultiscaleCoupling.hpp>
 #include <lifemc/lifesolver/MultiscaleCouplingBoundaryCondition.hpp>

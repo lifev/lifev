@@ -53,6 +53,7 @@ liblifemcsolver_la_SOURCES   = BCInterface1DData.cpp \
                                MultiscaleModelFluid3D.cpp \
                                MultiscaleModelFSI3D.cpp \
                                MultiscaleModel1D.cpp \
+                               MultiscaleModelWindkessel0D.cpp \
                                MultiscaleCoupling.cpp \
                                MultiscaleCouplingBoundaryCondition.cpp \
                                MultiscaleCouplingStress.cpp \

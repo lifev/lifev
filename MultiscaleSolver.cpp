@@ -67,8 +67,9 @@ MultiscaleSolver::MultiscaleSolver() :
     //Register the objects
     multiscaleModelFactory_Type::instance().registerProduct   (  Multiscale,          &createMultiscaleModelMultiscale );
     multiscaleModelFactory_Type::instance().registerProduct   (  Fluid3D,             &createMultiscaleModelFluid3D );
-    multiscaleModelFactory_Type::instance().registerProduct   (  OneDimensional,      &createMultiscaleModelOneDimensional );
     multiscaleModelFactory_Type::instance().registerProduct   (  FSI3D,               &createMultiscaleModelFSI3D );
+    multiscaleModelFactory_Type::instance().registerProduct   (  OneDimensional,      &createMultiscaleModelOneDimensional );
+    multiscaleModelFactory_Type::instance().registerProduct   (  Windkessel0D,        &createMultiscaleModelWindkessel0D );
 
     multiscaleCouplingFactory_Type::instance().registerProduct(  Stress,              &createMultiscaleCouplingStress );
     multiscaleCouplingFactory_Type::instance().registerProduct(  FlowRateStress,      &createMultiscaleCouplingFlowRateStress );
@@ -206,10 +207,13 @@ MultiscaleSolver::solveProblem( const Real& externalResidual )
         std::cout << " MS-  Total simulation time:                   " << totalSimulationTime << " s" << std::endl;
 
     // Redisual check
-    Real algorithmResidual( M_algorithm->computeResidual() );
-    if ( externalResidual >= 0. && std::abs( externalResidual - algorithmResidual ) > 1e-8 )
-        multiscaleErrorCheck( Residual, "Algorithm Residual: " + number2string( algorithmResidual ) +
-                       " (External Residual: " + number2string( externalResidual ) + ")\n" );
+    if ( M_model->type() == Multiscale )
+    {
+        Real algorithmResidual( M_algorithm->computeResidual() );
+        if ( externalResidual >= 0. && std::abs( externalResidual - algorithmResidual ) > 1e-8 )
+            multiscaleErrorCheck( Residual, "Algorithm Residual: " + number2string( algorithmResidual ) +
+                           " (External Residual: " + number2string( externalResidual ) + ")\n" );
+    }
 
     return multiscaleExitFlag;
 }
