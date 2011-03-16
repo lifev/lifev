@@ -250,14 +250,6 @@ main( int argc, char** argv )
     // Update the BCHandler (internal data related to FE)
     bcHandler.bcUpdate( *meshPart.meshPartition(), uFESpace->feBd(), uFESpace->dof());
 
-    /*
-    if (verbose) std::cout << " -- Applying the BCs ... " << std::flush;
-    vector_type rhsBC(rhs,Unique);
-    bcManage(*systemMatrix,rhsBC,*uFESpace->mesh(),uFESpace->dof(),bchandler,uFESpace->feBd(),1.0,0.0);
-    rhs = rhsBC;
-    if (verbose) std::cout << " done ! " << std::endl;
-    */
-
     // +-----------------------------------------------+
     // |              Matrices Assembly                |
     // +-----------------------------------------------+
@@ -301,7 +293,7 @@ main( int argc, char** argv )
     if (verbose) std::cout << "done" << std::endl;
 
     if (verbose) std::cout << "Adding the divergence free constraint... " << std::flush;
-    oseenAssembler.addDivergence(baseMatrix);
+    oseenAssembler.addDivergence(baseMatrix,-1.0);
     if (verbose) std::cout << "done" << std::endl;
 
     if (verbose) std::cout << "Adding the mass... " << std::flush;
@@ -312,11 +304,6 @@ main( int argc, char** argv )
     baseMatrix->globalAssemble();
     massMatrix->globalAssemble();
     if (verbose) std::cout << "done" << std::endl;
-
-    //************* SPY ***********
-    //baseMatrix->spy("baseMatrix");
-    //massMatrix->spy("massMatrix");
-    //*****************************
 
     // +-----------------------------------------------+
     // |            Solver initialization              |
@@ -365,18 +352,19 @@ main( int argc, char** argv )
 
     bdf.bdfVelocity().setInitialCondition( *solution );
 
-    //
-    // Initial solution loading (interpolation or projection)
-    //
+    // Initial solution (interpolation or projection)
     currentTime += timestep;
     for ( ; currentTime <=  initialTime + timestep/2.; currentTime += timestep)
     {
         *rhs  *= 0.;
+        *beta *= 0.;
 
         uFESpace->interpolate(EthierSteinmanUnsteady::uexact,*velocity,currentTime);
         pFESpace->interpolate(EthierSteinmanUnsteady::pexact,*pressure,currentTime);
         *solution = *velocity;
         solution->add(*pressure,pressureOffset);
+
+        solution->spy("betaSystem");
 
         if (initializationMethod == Projection)
         {
@@ -389,13 +377,16 @@ main( int argc, char** argv )
             if (verbose) std::cout << "Updating the system... " << std::flush;
             systemMatrix.reset(new matrix_type( solutionMap ));
             *systemMatrix += *baseMatrix;
-            *beta = bdf.bdfVelocity().extrapolation(); // Extrapolation for the convective term
             oseenAssembler.addConvection(systemMatrix,*solution);
             if (verbose) std::cout << "done" << std::endl;
 
             if (verbose) std::cout << "Applying BC... " << std::flush;
-            bcManage(*systemMatrix,*rhs,*uFESpace->mesh(),uFESpace->dof(),bcHandler,uFESpace->feBd(),1.0,0.0);
+            bcManage(*systemMatrix,*rhs,*uFESpace->mesh(),uFESpace->dof(),bcHandler,uFESpace->feBd(),1.0,currentTime);
             systemMatrix->globalAssemble();
+            //************* SPY ***********
+            systemMatrix->spy("systemMatrix");
+            rhs->spy("systemRHS");
+            //*****************************
             if (verbose) std::cout << "done" << std::endl;
 
             if (verbose) std::cout << "Solving the system... " << std::endl;
@@ -409,10 +400,6 @@ main( int argc, char** argv )
     }
 
     linearSolver.resetPreconditioner();
-
-    //************* SPY ***********
-    //rhs.spy("vector");
-    //*****************************
 
     // +-----------------------------------------------+
     // |             Setting the exporter              |
@@ -463,11 +450,11 @@ main( int argc, char** argv )
         if (verbose) std::cout << "done" << std::endl;
 
         if (verbose) std::cout << "Applying BC... " << std::flush;
-        bcManage(*systemMatrix,*rhs,*uFESpace->mesh(),uFESpace->dof(),bcHandler,uFESpace->feBd(),1.0,0.0);
+        bcManage(*systemMatrix,*rhs,*uFESpace->mesh(),uFESpace->dof(),bcHandler,uFESpace->feBd(),1.0,currentTime);
         systemMatrix->globalAssemble();
         //************* SPY ***********
-        //systemMatrix->spy("systemMatrix");
-        //rhs->spy("rhs");
+        systemMatrix->spy("systemMatrix");
+        rhs->spy("systemRHS");
         //*****************************
         if (verbose) std::cout << "done" << std::endl;
 
