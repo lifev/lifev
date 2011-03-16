@@ -117,6 +117,12 @@ MultiscaleCouplingBoundaryCondition::setupCoupling()
 
             break;
 
+        case Windkessel0D:
+
+            applyBoundaryConditions0D< MultiscaleModelWindkessel0D > ( i );
+
+            break;
+
         default:
 
             if ( M_displayer->isLeader() )
@@ -183,6 +189,15 @@ MultiscaleCouplingBoundaryCondition::displayCouplingValues( std::ostream& output
         {
             flowRate        = multiscaleDynamicCast< MultiscaleModel1D >( M_models[i] )->boundaryFlowRate( M_flags[i] );
             pressure        = multiscaleDynamicCast< MultiscaleModel1D >( M_models[i] )->boundaryPressure( M_flags[i] );
+
+            break;
+        }
+
+        case Windkessel0D:
+        {
+            flowRate        = multiscaleDynamicCast< MultiscaleModelWindkessel0D >( M_models[i] )->boundaryFlowRate( M_flags[i] );
+            pressure        = multiscaleDynamicCast< MultiscaleModelWindkessel0D >( M_models[i] )->boundaryPressure( M_flags[i] );
+            dynamicPressure = multiscaleDynamicCast< MultiscaleModelWindkessel0D >( M_models[i] )->boundaryDynamicPressure( M_flags[i] );
 
             break;
         }

@@ -90,7 +90,8 @@ enum models_Type
     Fluid3D,                /*!< Fluid (Oseen) 3D model */
     FSI3D,                  /*!< FSI 3D model */
     Multiscale,             /*!< Multiscale model */
-    OneDimensional          /*!< 1D model */
+    OneDimensional,         /*!< 1D model */
+    Windkessel0D            /*!< Windkessel0D model */
 };
 
 /*! @enum couplingsTypes
@@ -186,6 +187,7 @@ multiscaleMapsDefinition()
     multiscaleModelsMap["FSI3D"]                = FSI3D;
     multiscaleModelsMap["Multiscale"]           = Multiscale;
     multiscaleModelsMap["OneDimensional"]       = OneDimensional;
+    multiscaleModelsMap["Windkessel0D"]         = Windkessel0D;
 
     multiscaleCouplingsMap["BoundaryCondition"] = BoundaryCondition;
     multiscaleCouplingsMap["FlowRateStress"]    = FlowRateStress;

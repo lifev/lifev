@@ -44,6 +44,7 @@
 #include <lifemc/lifesolver/MultiscaleModelFluid3D.hpp>
 #include <lifemc/lifesolver/MultiscaleModelFSI3D.hpp>
 #include <lifemc/lifesolver/MultiscaleModel1D.hpp>
+#include <lifemc/lifesolver/MultiscaleModelWindkessel0D.hpp>
 
 namespace LifeV
 {
@@ -148,6 +149,10 @@ private:
     //! @name Private Methods
     //@{
 
+    //! Apply the boundary condition to the specific 0D model
+    template< class ModelType >
+    void applyBoundaryConditions0D( const UInt& i );
+
     //! Apply the boundary condition to the specific 1D model
     template< class ModelType >
     void applyBoundaryConditions1D( const UInt& i );
@@ -173,6 +178,16 @@ inline multiscaleCoupling_Type* createMultiscaleCouplingBoundaryCondition()
 // ===================================================
 // Template implementation
 // ===================================================
+template< class ModelType >
+inline void
+MultiscaleCouplingBoundaryCondition::applyBoundaryConditions0D( const UInt& i )
+{
+    ModelType *model = multiscaleDynamicCast< ModelType >( M_models[i] );
+
+    // Windkessel0D has only 1 BC
+    //model->setBC( M_fileName, "boundary_conditions/", M_list[0] );
+}
+
 template< class ModelType >
 inline void
 MultiscaleCouplingBoundaryCondition::applyBoundaryConditions1D( const UInt& i )
