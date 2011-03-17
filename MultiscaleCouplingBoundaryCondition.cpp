@@ -197,7 +197,6 @@ MultiscaleCouplingBoundaryCondition::displayCouplingValues( std::ostream& output
         {
             flowRate        = multiscaleDynamicCast< MultiscaleModelWindkessel0D >( M_models[i] )->boundaryFlowRate( M_flags[i] );
             pressure        = multiscaleDynamicCast< MultiscaleModelWindkessel0D >( M_models[i] )->boundaryPressure( M_flags[i] );
-            dynamicPressure = multiscaleDynamicCast< MultiscaleModelWindkessel0D >( M_models[i] )->boundaryDynamicPressure( M_flags[i] );
 
             break;
         }

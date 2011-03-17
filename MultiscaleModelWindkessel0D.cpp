@@ -227,14 +227,9 @@ MultiscaleModelWindkessel0D::boundaryStress( const bcFlag_Type& flag, const stre
 {
     switch ( stressType )
     {
-    case StaticPressure:
+    case Pressure:
     {
         return boundaryPressure( flag );
-    }
-
-    case TotalPressure:
-    {
-        return boundaryPressure( flag ) + boundaryDynamicPressure( flag ) * ( ( boundaryFlowRate( flag ) > 0.0 ) ? 1 : -1 );
     }
 
     default:
@@ -267,14 +262,9 @@ MultiscaleModelWindkessel0D::boundaryDeltaStress( const bcFlag_Type& flag, bool&
 {
     switch ( stressType )
     {
-    case StaticPressure:
+    case Pressure:
     {
         return boundaryDeltaPressure( flag, solveLinearSystem );
-    }
-
-    case TotalPressure:
-    {
-        return boundaryDeltaPressure( flag, solveLinearSystem ) + boundaryDeltaDynamicPressure( flag, solveLinearSystem ); //Verify the sign of DynamicPressure contribute!
     }
 
     default:
