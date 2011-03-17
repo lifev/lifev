@@ -37,9 +37,9 @@
 #ifndef BCInterface3D_H
 #define BCInterface3D_H 1
 
-#include <lifemc/lifesolver/BCInterface3DDefinitions.hpp>
+#include <lifemc/lifesolver/BCInterfaceDefinitions.hpp>
 
-#include <lifemc/lifesolver/BCInterface3DData.hpp>
+#include <lifemc/lifesolver/BCInterfaceData.hpp>
 #include <lifemc/lifesolver/BCInterface3DFunction.hpp>
 #include <lifemc/lifesolver/BCInterface3DFunctionFile.hpp>
 #include <lifemc/lifesolver/BCInterface3DFunctionSolver.hpp>
