@@ -42,19 +42,51 @@ namespace LifeV
 // ===================================================
 // Constructors
 // ===================================================
-BCInterface3DData::BCInterface3DData() :
+BCInterfaceData::BCInterfaceData() :
+        M_baseString         (),
+        M_side               (),
+        M_line               (),
+        M_quantity           (),
+        M_base1D             (),
+        M_resistance         (),
+        M_mapSide            (),
+        M_mapQuantity        (),
+        M_mapLine            (),
+        M_mapBase1D          (),
         M_name               (),
         M_flag               (),
         M_type               (),
         M_mode               (),
         M_comV               (),
         M_direction          (),
-        M_baseString         (),
-        M_base               (),
+        M_base3D             (),
         M_mapType            (),
         M_mapMode            (),
-        M_mapBase            ()
+        M_mapBase3D          ()
 {
+    //Set mapSide
+    M_mapSide["left"]   = OneDimensional::left;
+    M_mapSide["right"]  = OneDimensional::right;
+
+    //Set mapQuantity
+    M_mapQuantity["A"]  = OneDimensional::A;
+    M_mapQuantity["Q"]  = OneDimensional::Q;
+    M_mapQuantity["W1"] = OneDimensional::W1;
+    M_mapQuantity["W2"] = OneDimensional::W2;
+    M_mapQuantity["P"]  = OneDimensional::P;
+    M_mapQuantity["S"]  = OneDimensional::S;
+
+    //Set mapLine
+    M_mapLine["first"]  = OneDimensional::first;
+    M_mapLine["second"] = OneDimensional::second;
+
+    //Set mapBase
+    M_mapBase1D["function"]         = BCI1DFunction;
+    M_mapBase1D["functionFile"]     = BCI1DFunctionFile;
+    M_mapBase1D["OPERfunction"]     = BCI1DFunctionSolver;
+    M_mapBase1D["OPERfunctionFile"] = BCI1DFunctionFileSolver;
+    M_mapBase1D["Default"]          = BCI1DFunctionDefault;
+
     //Set mapType
     M_mapType["Essential"]         = Essential;
     M_mapType["EssentialEdges"]    = EssentialEdges;
@@ -73,47 +105,65 @@ BCInterface3DData::BCInterface3DData() :
     M_mapMode["Directional"] = Directional;
 
     //Set mapBase
-    M_mapBase["function"]         = BCI3DFunction;
-    M_mapBase["functionFile"]     = BCI3DFunctionFile;
-    M_mapBase["OPERfunction"]     = BCI3DFunctionSolver;
-    M_mapBase["OPERfunctionFile"] = BCI3DFunctionFileSolver;
-    M_mapBase["FSI"]              = BCI3DFunctionFSI;
+    M_mapBase3D["function"]         = BCI3DFunction;
+    M_mapBase3D["functionFile"]     = BCI3DFunctionFile;
+    M_mapBase3D["OPERfunction"]     = BCI3DFunctionSolver;
+    M_mapBase3D["OPERfunctionFile"] = BCI3DFunctionFileSolver;
+    M_mapBase3D["FSI"]              = BCI3DFunctionFSI;
 }
 
-BCInterface3DData::BCInterface3DData( const BCInterface3DData& data ) :
+BCInterfaceData::BCInterfaceData( const BCInterfaceData& data ) :
+        M_baseString        ( data.M_baseString ),
+        M_side              ( data.M_side ),
+        M_line              ( data.M_line ),
+        M_quantity          ( data.M_quantity ),
+        M_base1D            ( data.M_base1D ),
+        M_resistance        ( data.M_resistance ),
+        M_mapSide           ( data.M_mapSide ),
+        M_mapQuantity       ( data.M_mapQuantity ),
+        M_mapLine           ( data.M_mapLine ),
+        M_mapBase1D         ( data.M_mapBase1D ),
         M_name              ( data.M_name ),
         M_flag              ( data.M_flag ),
         M_type              ( data.M_type ),
         M_mode              ( data.M_mode ),
         M_comV              ( data.M_comV ),
         M_direction         ( data.M_direction ),
-        M_baseString        ( data.M_baseString ),
-        M_base              ( data.M_base ),
+        M_base3D            ( data.M_base3D ),
         M_mapType           ( data.M_mapType ),
         M_mapMode           ( data.M_mapMode ),
-        M_mapBase           ( data.M_mapBase )
+        M_mapBase3D         ( data.M_mapBase3D )
 {
 }
 
 // ===================================================
 // Operators
 // ===================================================
-BCInterface3DData&
-BCInterface3DData::operator=( const BCInterface3DData& data )
+BCInterfaceData&
+BCInterfaceData::operator=( const BCInterfaceData& data )
 {
     if ( this != &data )
     {
+        M_baseString        = data.M_baseString;
+        M_side              = data.M_side;
+        M_line              = data.M_line;
+        M_quantity          = data.M_quantity;
+        M_base1D            = data.M_base1D;
+        M_resistance        = data.M_resistance;
+        M_mapSide           = data.M_mapSide;
+        M_mapQuantity       = data.M_mapQuantity;
+        M_mapLine           = data.M_mapLine;
+        M_mapBase1D         = data.M_mapBase1D;
         M_name              = data.M_name;
         M_flag              = data.M_flag;
         M_type              = data.M_type;
         M_mode              = data.M_mode;
         M_comV              = data.M_comV;
         M_direction         = data.M_direction;
-        M_baseString        = data.M_baseString;
-        M_base              = data.M_base;
+        M_base3D            = data.M_base3D;
         M_mapType           = data.M_mapType;
         M_mapMode           = data.M_mapMode;
-        M_mapBase           = data.M_mapBase;
+        M_mapBase3D         = data.M_mapBase3D;
     }
 
     return *this;
@@ -123,9 +173,21 @@ BCInterface3DData::operator=( const BCInterface3DData& data )
 // Methods
 // ===================================================
 void
-BCInterface3DData::readBC( const std::string& fileName,
-                          const std::string& dataSection,
-                          const bcName_Type& name )
+BCInterfaceData::readBC1D( const std::string& fileName, const std::string& dataSection, const bcName_Type& name )
+{
+    GetPot dataFile( fileName );
+
+    readSide( dataFile, ( dataSection + name + "/side" ).c_str() );
+    readQuantity( dataFile, ( dataSection + name + "/quantity" ).c_str() );
+    readLine( dataFile, ( dataSection + name + "/line" ).c_str() );
+    readBase1D( dataFile, dataSection + name + "/" );
+    readResistance( dataFile, ( dataSection + name + "/resistance" ).c_str() );
+}
+
+void
+BCInterfaceData::readBC3D( const std::string& fileName,
+                         const std::string& dataSection,
+                         const bcName_Type& name )
 {
     GetPot dataFile( fileName );
 
@@ -136,12 +198,23 @@ BCInterface3DData::readBC( const std::string& fileName,
     readMode( dataFile, ( dataSection + name + "/mode" ).c_str() );
     readComV( dataFile, ( dataSection + name + "/component" ).c_str() );
     readDirection( dataFile, ( dataSection + name + "/direction" ).c_str() );
-    readBase( dataFile, dataSection + name + "/" );
+    readBase3D( dataFile, dataSection + name + "/" );
 }
 
 void
-BCInterface3DData::showMe( std::ostream& output ) const
+BCInterfaceData::showMe( std::ostream& output ) const
 {
+    output << "baseString = " << M_baseString << std::endl;
+
+    output << "Side       = " << M_side << std::endl;
+    output << "Line       = " << M_line << std::endl;
+    output << "Quantity   = " << M_quantity << std::endl;
+    output << "base       = " << M_base1D.second << std::endl;
+    output << "Resistance  = ";
+    for ( UInt i(0); i < static_cast<UInt>( M_resistance.size() ); ++i )
+        output << M_resistance[i] << " ";
+    output << "\n";
+
     output << "Flag       = " << static_cast< Real > ( M_flag ) << std::endl;
     output << "Type       = " << M_type << std::endl;
     output << "Mode       = " << M_mode << std::endl;
@@ -150,14 +223,13 @@ BCInterface3DData::showMe( std::ostream& output ) const
         output << M_comV[i] << " ";
     output << "\n";
     output << "direction  = " << M_direction << std::endl;
-    output << "base       = " << M_base.second << std::endl;
-    output << "baseString = " << M_baseString << std::endl;
+    output << "base       = " << M_base3D.second << std::endl;
 }
 
 // ===================================================
 // Set Methods
 // ===================================================
-void BCInterface3DData::setBaseString( const std::string& baseString )
+void BCInterfaceData::setBaseString( const std::string& baseString )
 {
     M_baseString = baseString;
     boost::replace_all( M_baseString, " ", "" );
@@ -167,7 +239,32 @@ void BCInterface3DData::setBaseString( const std::string& baseString )
 // Private Methods
 // ===================================================
 void
-BCInterface3DData::readComV( const GetPot& dataFile, const char* component )
+BCInterfaceData::readResistance( const GetPot& dataFile, const char* resistance )
+{
+    UInt resistanceSize = dataFile.vector_variable_size( resistance );
+
+    M_resistance.clear();
+    M_resistance.reserve( resistanceSize );
+
+    for ( UInt j( 0 ); j < resistanceSize; ++j )
+        M_resistance.push_back( dataFile( resistance, 0, j ) );
+}
+void
+BCInterfaceData::readBase1D( const GetPot& dataFile, const std::string& base )
+{
+    for ( std::map< std::string, baseList1D_Type >::iterator j = M_mapBase1D.begin(); j
+            != M_mapBase1D.end(); ++j )
+        if ( isBase( dataFile, ( base + j->first ).c_str() ) )
+        {
+            M_base1D.first = j->first;
+            M_base1D.second = M_mapBase1D[j->first];
+
+            break;
+        }
+}
+
+void
+BCInterfaceData::readComV( const GetPot& dataFile, const char* component )
 {
     UInt componentSize = dataFile.vector_variable_size( component );
 
@@ -179,21 +276,21 @@ BCInterface3DData::readComV( const GetPot& dataFile, const char* component )
 }
 
 void
-BCInterface3DData::readBase( const GetPot& dataFile, const std::string& base )
+BCInterfaceData::readBase3D( const GetPot& dataFile, const std::string& base )
 {
-    for ( std::map< std::string, bcBaseList_Type >::iterator j = M_mapBase.begin(); j
-            != M_mapBase.end(); ++j )
+    for ( std::map< std::string, baseList3D_Type >::iterator j = M_mapBase3D.begin(); j
+            != M_mapBase3D.end(); ++j )
         if ( isBase( dataFile, ( base + j->first ).c_str() ) )
         {
-            M_base.first = j->first;
-            M_base.second = M_mapBase[j->first];
+            M_base3D.first = j->first;
+            M_base3D.second = M_mapBase3D[j->first];
 
             break;
         }
 }
 
 bool
-BCInterface3DData::isBase( const GetPot& dataFile, const char* base )
+BCInterfaceData::isBase( const GetPot& dataFile, const char* base )
 {
     M_baseString = dataFile( base, " " );
 

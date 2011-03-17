@@ -63,7 +63,7 @@ public:
     //@{
 
     typedef PhysicalSolverType                                                    physicalSolver_Type;
-    typedef BCInterface3DData                                                     data_Type;
+    typedef BCInterfaceData                                                     data_Type;
     typedef BCInterface3DFunction< physicalSolver_Type >                          function_Type;
     typedef BCInterface3DFunctionFile< physicalSolver_Type >                      functionFile_Type;
     typedef BCInterface3DFunctionSolver< physicalSolver_Type >                    functionSolver_Type;

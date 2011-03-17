@@ -81,7 +81,7 @@ public:
     //@{
 
     typedef PhysicalSolverType                                                    physicalSolver_Type;
-    typedef BCInterface1DData                                                     data_Type;
+    typedef BCInterfaceData                                                     data_Type;
     typedef BCInterface1DFunction< physicalSolver_Type >                          function_Type;
     typedef OneDimensionalSolver::solutionPtr_Type                                solutionPtr_Type;
 
@@ -171,7 +171,7 @@ protected:
     boost::shared_ptr< PhysicalSolverType >    M_physicalSolver;
     solutionPtr_Type                           M_solution;
 
-    data_Type::bcSide_Type                     M_side;
+    OneDimensional::bcSide_Type                M_side;
     std::set< physicalSolverList >             M_list;
 
 private:

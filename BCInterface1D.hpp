@@ -37,9 +37,9 @@
 #ifndef BCInterface1D_H
 #define BCInterface1D_H 1
 
-#include <lifemc/lifesolver/BCInterface1DDefinitions.hpp>
+#include <lifemc/lifesolver/BCInterface3DDefinitions.hpp>
 
-#include <lifemc/lifesolver/BCInterface1DData.hpp>
+#include <lifemc/lifesolver/BCInterface3DData.hpp>
 #include <lifemc/lifesolver/BCInterface1DFunction.hpp>
 #include <lifemc/lifesolver/BCInterface1DFunctionFile.hpp>
 #include <lifemc/lifesolver/BCInterface1DFunctionSolver.hpp>
@@ -124,7 +124,7 @@ public:
 
     typedef PhysicalSolverType                                                                        physicalSolver_Type;
     typedef baseList1D_Type                                                                           bcBaseList_Type;
-    typedef BCInterface1DData                                                                         data_Type;
+    typedef BCInterfaceData                                                                         data_Type;
 
     typedef FactorySingleton< Factory< BCInterface1DFunction< physicalSolver_Type > , bcBaseList_Type > >    factoryFunction_Type;
 
@@ -177,7 +177,7 @@ public:
      * @param dataSection section in the data file
      * @param name name of the boundary condition
      */
-    void readBC( const std::string& fileName, const std::string& dataSection, const bcName_Type& name ) { M_data.readBC( fileName, dataSection, name ); }
+    void readBC( const std::string& fileName, const std::string& dataSection, const bcName_Type& name ) { M_data.readBC1D( fileName, dataSection, name ); }
 
     //! Insert the current boundary condition in the BChandler
     void insertBC() { buildBase(); }
@@ -196,7 +196,7 @@ public:
      * @param base base of the condition
      */
     template< class BCBaseType >
-    void setBC( const data_Type::bcSide_Type& bcSide, const data_Type::bcLine_Type& bcLine, const data_Type::bcType_Type& bcType, const BCBaseType& base ) { M_handler->setBC( bcSide, bcLine, bcType, base ); }
+    void setBC( const OneDimensional::bcSide_Type& bcSide, const OneDimensional::bcLine_Type& bcLine, const OneDimensional::bcType_Type& bcType, const BCBaseType& base ) { M_handler->setBC( bcSide, bcLine, bcType, base ); }
 
     //@}
 
@@ -327,7 +327,7 @@ BCInterface1D< PhysicalSolverType >::fillHandler( const std::string& fileName, c
     GetPot DataFile( fileName );
     for ( UInt i( 0 ); i < DataFile.vector_variable_size( ( dataSection + "/boundary_conditions/list" ).c_str() ); ++i )
     {
-        M_data.readBC( fileName,
+        M_data.readBC1D( fileName,
                        dataSection + "/boundary_conditions/",
                        DataFile( ( dataSection + "/boundary_conditions/list" ).c_str(), " ", i )
                      );
@@ -415,14 +415,14 @@ BCInterface1D< PhysicalSolverType >::buildBase()
     Debug( 5020 ) << "BCInterface1D::BuildBase\n";
 #endif
 
-    switch ( M_data.base().second )
+    switch ( M_data.base1D().second )
     {
     case BCI1DFunction:
     case BCI1DFunctionFile:
     case BCI1DFunctionSolver:
     case BCI1DFunctionFileSolver:
 
-        addBase( M_vectorFunction, M_data.base().second );
+        addBase( M_vectorFunction, M_data.base1D().second );
 
         addBCManager( M_vectorFunction.back()->base() );
 
@@ -450,7 +450,7 @@ template< class PhysicalSolverType > template< class BCInterfaceBaseType >
 inline void
 BCInterface1D< PhysicalSolverType >::addBase( std::vector< boost::shared_ptr< BCInterfaceBaseType > >& baseVector, const bcBaseList_Type& physicalSolver )
 {
-    boost::shared_ptr< BCInterfaceBaseType > function( factoryFunction_Type::instance().createObject( physicalSolver, M_data.mapBase() ) );
+    boost::shared_ptr< BCInterfaceBaseType > function( factoryFunction_Type::instance().createObject( physicalSolver, M_data.mapBase1D() ) );
 
     function->setData( M_data );
 
