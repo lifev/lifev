@@ -332,7 +332,7 @@ public:
       @Note Results might be very wrong if you are not using lagrangian FE for tetrahedra
      */
     template <typename vector_type>
-    vector_type gradientRecovery(const vector_type& solution, const UInt& component);
+    vector_type gradientRecovery(const vector_type& solution, const UInt& component) const;
 
     //! Reconstruction of the laplacian using gradientRecovery procedures.
     /*!
@@ -1442,7 +1442,7 @@ template<typename MeshType, typename MapType>
 template<typename vector_type>
 vector_type
 FESpace<MeshType,MapType>::
-gradientRecovery(const vector_type& solution, const UInt& dxi)
+gradientRecovery(const vector_type& solution, const UInt& dxi) const
 {
     if (solution.getMaptype() != Repeated)
     {
