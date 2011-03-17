@@ -79,8 +79,7 @@ public:
     //@{
 
     typedef PhysicalSolverType                                                    physicalSolver_Type;
-    typedef BCInterfaceData                                                     data_Type;
-    typedef OneDimensionalBCFunction                                              bcFunction_Type;
+    typedef BCInterfaceData                                                       data_Type;
     typedef Parser                                                                parser_Type;
 
     //@}
@@ -102,6 +101,20 @@ public:
     virtual ~BCInterface1DFunction() {}
 
     //@}
+    
+    //! @name Methods
+    //@{
+
+    //! Assign the function to the base
+    /*!
+     * @param base base of the bc
+     */
+    void assignFunction( OneDimensionalBCFunction& base )
+    {
+        base.setFunction( boost::bind( &BCInterface1DFunction::function, this, _1 ) );
+    }
+
+    //@}
 
 
     //! @name Set Methods
@@ -112,18 +125,6 @@ public:
      * @param data BC data loaded from GetPot file
      */
     virtual void setData( const data_Type& data );
-
-    //@}
-
-
-    //! @name Get Methods
-    //@{
-
-    //! Get the base of the boundary condition
-    /*!
-     * @return boundary condition base
-     */
-    bcFunction_Type& base() { return M_base; }
 
     //@}
 
@@ -154,15 +155,10 @@ private:
     //! @name Private Methods
     //@{
 
-    //! setFunction
-    void setFunction() { M_base.setFunction( boost::bind( &BCInterface1DFunction::function, this, _1 ) ); }
-
     //! function
     Real function( const Real& t );
 
     //@}
-
-    bcFunction_Type                  M_base;
 
 };
 
@@ -181,8 +177,7 @@ inline BCInterface1DFunction< PhysicalSolverType >* createBCInterface1DFunction(
 // ===================================================
 template< typename PhysicalSolverType >
 BCInterface1DFunction< PhysicalSolverType >::BCInterface1DFunction() :
-        M_parser    (),
-        M_base      ()
+        M_parser    ()
 {
 
 #ifdef HAVE_LIFEV_DEBUG
@@ -193,8 +188,7 @@ BCInterface1DFunction< PhysicalSolverType >::BCInterface1DFunction() :
 
 template< typename PhysicalSolverType >
 BCInterface1DFunction< PhysicalSolverType >::BCInterface1DFunction( const data_Type& data ) :
-        M_parser    (),
-        M_base      ()
+        M_parser    ()
 {
 
 #ifdef HAVE_LIFEV_DEBUG
@@ -220,8 +214,6 @@ BCInterface1DFunction< PhysicalSolverType >::setData( const data_Type& data )
         M_parser->setString( data.baseString() );
     else
         M_parser.reset( new parser_Type( data.baseString() ) );
-
-    setFunction();
 }
 
 // ===================================================
@@ -233,7 +225,7 @@ BCInterface1DFunction< PhysicalSolverType >::function( const Real& t )
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 5021 ) << "BCInterface1DFunction::Function: " << "\n";
+    Debug( 5021 ) << "BCInterface1DFunction::function: " << "\n";
     Debug( 5021 ) << "                                                           t: " << t << "\n";
 #endif
 
