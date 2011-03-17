@@ -26,7 +26,7 @@
 
 /*!
  *  @file
- *  @brief File containing the BCInterface3D definitions
+ *  @brief File containing the BCInterface definitions
  *
  *  @date 12-11-2009
  *  @author Cristiano Malossi <cristiano.malossi@epfl.ch>
@@ -34,8 +34,8 @@
  *  @maintainer Cristiano Malossi <cristiano.malossi@epfl.ch>
  */
 
-#ifndef BCInterface3DDefinitions_H
-#define BCInterface3DDefinitions_H 1
+#ifndef BCInterfaceDefinitions_H
+#define BCInterfaceDefinitions_H 1
 
 // Tell the compiler to ignore specific kind of warnings:
 #pragma GCC diagnostic ignored "-Wunused-variable"
@@ -61,10 +61,23 @@
 #include <life/lifecore/Factory.hpp>
 #include <life/lifecore/FactorySingleton.hpp>
 
+// 1D BCHandler
+#include <lifemc/lifefem/OneDimensionalBCHandler.hpp>
+
+// 3D BCHandler
 #include <life/lifefem/BCHandler.hpp>
 
 namespace LifeV
 {
+
+enum baseList1D_Type
+{
+    BCI1DFunction,
+    BCI1DFunctionFile,
+    BCI1DFunctionSolver,
+    BCI1DFunctionFileSolver,
+    BCI1DFunctionDefault
+};
 
 // Enum objects
 enum baseList3D_Type
@@ -78,4 +91,4 @@ enum baseList3D_Type
 
 } // Namespace LifeV
 
-#endif /* BCInterface3DDefinitions_H */
+#endif /* BCInterfaceDefinitions_H */

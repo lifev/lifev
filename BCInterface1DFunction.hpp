@@ -37,8 +37,8 @@
 #ifndef BCInterface1DFunction_H
 #define BCInterface1DFunction_H 1
 
-#include <lifemc/lifesolver/BCInterface1DDefinitions.hpp>
-#include <lifemc/lifesolver/BCInterface1DData.hpp>
+#include <lifemc/lifesolver/BCInterface3DDefinitions.hpp>
+#include <lifemc/lifesolver/BCInterface3DData.hpp>
 
 #include <lifemc/lifecore/Parser.hpp>
 
@@ -79,7 +79,7 @@ public:
     //@{
 
     typedef PhysicalSolverType                                                    physicalSolver_Type;
-    typedef BCInterface1DData                                                     data_Type;
+    typedef BCInterfaceData                                                     data_Type;
     typedef OneDimensionalBCFunction                                              bcFunction_Type;
     typedef Parser                                                                parser_Type;
 

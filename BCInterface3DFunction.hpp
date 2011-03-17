@@ -92,7 +92,7 @@ public:
     //@{
 
     typedef PhysicalSolverType                                                    physicalSolver_Type;
-    typedef BCInterface3DData                                                     data_Type;
+    typedef BCInterfaceData                                                     data_Type;
     typedef BCFunctionBase                                                        bcFunction_Type;
     typedef Parser                                                                parser_Type;
 

@@ -123,7 +123,7 @@ public:
 
     typedef PhysicalSolverType                                                                        physicalSolver_Type;
     typedef baseList3D_Type                                                                           bcBaseList_Type;
-    typedef BCInterface3DData                                                                         data_Type;
+    typedef BCInterfaceData                                                                         data_Type;
 
     typedef FactorySingleton< Factory< BCInterface3DFunction< physicalSolver_Type > , bcBaseList_Type > >    factoryFunction_Type;
 
@@ -171,7 +171,7 @@ public:
      * @param dataSection section in the data file
      * @param name name of the boundary condition
      */
-    void readBC( const std::string& fileName, const std::string& dataSection, const bcName_Type& name ) { M_data.readBC( fileName, dataSection, name ); }
+    void readBC( const std::string& fileName, const std::string& dataSection, const bcName_Type& name ) { M_data.readBC3D( fileName, dataSection, name ); }
 
     //! Insert the current boundary condition in the BChandler
     void insertBC() { buildBase(); }
@@ -328,7 +328,7 @@ BCInterface3D< PhysicalSolverType >::fillHandler( const std::string& fileName, c
     GetPot DataFile( fileName );
     for ( UInt i( 0 ); i < DataFile.vector_variable_size( ( dataSection + "/boundary_conditions/list" ).c_str() ); ++i )
     {
-        M_data.readBC( fileName,
+        M_data.readBC3D( fileName,
                        dataSection + "/boundary_conditions/",
                        DataFile( ( dataSection + "/boundary_conditions/list" ).c_str(), " ", i )
                      );
@@ -418,14 +418,14 @@ BCInterface3D< PhysicalSolverType >::buildBase()
     Debug( 5020 ) << "BCInterface3D::BuildBase\n";
 #endif
 
-    switch ( M_data.base().second )
+    switch ( M_data.base3D().second )
     {
     case BCI3DFunction:
     case BCI3DFunctionFile:
     case BCI3DFunctionSolver:
     case BCI3DFunctionFileSolver:
 
-        addBase( M_vectorFunction, M_data.base().second );
+        addBase( M_vectorFunction, M_data.base3D().second );
 
         addBCManager( M_vectorFunction.back()->base() );
 
@@ -451,7 +451,7 @@ template< class PhysicalSolverType > template< class BCInterfaceBaseType >
 inline void
 BCInterface3D< PhysicalSolverType >::addBase( std::vector< boost::shared_ptr< BCInterfaceBaseType > >& baseVector, const bcBaseList_Type& physicalSolver )
 {
-    boost::shared_ptr< BCInterfaceBaseType > function( factoryFunction_Type::instance().createObject( physicalSolver, M_data.mapBase() ) );
+    boost::shared_ptr< BCInterfaceBaseType > function( factoryFunction_Type::instance().createObject( physicalSolver, M_data.mapBase3D() ) );
 
     function->setData( M_data );
 
@@ -521,11 +521,11 @@ BCInterface3D< PhysicalSolverType >::addBCManager( BCBaseType& base )
         {
             // Parameters for direction BC
             M_data.setName( M_data.name() + "_direction" );
-            M_data.setBase( make_pair( "function", BCI3DFunction ) );
+            M_data.setBase3D( make_pair( "function", BCI3DFunction ) );
             M_data.setBaseString( M_data.direction() );
 
             // Directional field
-            addBase( M_vectorFunction, M_data.base().second );
+            addBase( M_vectorFunction, M_data.base3D().second );
 
             // Directional base
             boost::shared_ptr< BCFunctionDirectional > directionalBase( new BCFunctionDirectional( base.Function(), M_vectorFunction.back()->base().Function() ) );
