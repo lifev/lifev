@@ -26,7 +26,7 @@ AM_CPPFLAGS = -DNO_BLASLAPACK
 
 lib_LTLIBRARIES	= liblifemcsolver.la
 
-liblifemcsolver_la_SOURCES   = BCInterface3DData.cpp \
+liblifemcsolver_la_SOURCES   = BCInterfaceData.cpp \
                                BCInterface3DFunctionFSI.cpp \
                                FSIMonolithic.cpp \
                                FSIMonolithicGI.cpp \

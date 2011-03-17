@@ -37,14 +37,14 @@
 #ifndef BCInterface3DFunctionFSI_H
 #define BCInterface3DFunctionFSI_H 1
 
-#include <lifemc/lifesolver/BCInterface3DDefinitions.hpp>
-#include <lifemc/lifesolver/BCInterface3DData.hpp>
-
 #include <life/lifesolver/FSIExactJacobian.hpp>
 #include <life/lifesolver/FSIFixedPoint.hpp>
 //#include <life/lifesolver/steklovPoincareBase.hpp>
 #include <lifemc/lifesolver/FSIMonolithicGE.hpp>
 #include <lifemc/lifesolver/FSIMonolithicGI.hpp>
+
+#include <lifemc/lifesolver/BCInterfaceDefinitions.hpp>
+#include <lifemc/lifesolver/BCInterfaceData.hpp>
 
 namespace LifeV
 {

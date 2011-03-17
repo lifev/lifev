@@ -37,8 +37,8 @@
 #ifndef BCInterface1DFunctionDefault_H
 #define BCInterface1DFunctionDefault_H 1
 
-#include <lifemc/lifesolver/BCInterface3DDefinitions.hpp>
-#include <lifemc/lifesolver/BCInterface3DData.hpp>
+#include <lifemc/lifesolver/BCInterfaceDefinitions.hpp>
+#include <lifemc/lifesolver/BCInterfaceData.hpp>
 
 #include <lifemc/lifesolver/OneDimensionalSolver.hpp>
 

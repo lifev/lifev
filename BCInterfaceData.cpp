@@ -34,7 +34,7 @@
  *  @maintainer Cristiano Malossi <cristiano.malossi@epfl.ch>
  */
 
-#include <lifemc/lifesolver/BCInterface3DData.hpp>
+#include <lifemc/lifesolver/BCInterfaceData.hpp>
 
 namespace LifeV
 {
