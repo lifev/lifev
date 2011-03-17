@@ -26,7 +26,7 @@
 
 /*!
  *  @file
- *  @brief File containing the BCInterface3DFunctionFSI class
+ *  @brief File containing the BCInterface3DFSI class
  *
  *  @date 23-04-2009
  *  @author Cristiano Malossi <cristiano.malossi@epfl.ch>
@@ -34,7 +34,7 @@
  *  @maintainer Cristiano Malossi <cristiano.malossi@epfl.ch>
  */
 
-#include <lifemc/lifesolver/BCInterface3DFunctionFSI.hpp>
+#include <lifemc/lifesolver/BCInterface3DFSI.hpp>
 
 namespace LifeV
 {
@@ -42,7 +42,7 @@ namespace LifeV
 // ===================================================
 // Constructors
 // ===================================================
-BCInterface3DFunctionFSI< FSIOperator >::BCInterface3DFunctionFSI() :
+BCInterface3DFSI< FSIOperator >::BCInterface3DFSI() :
         M_FSIFunction   (),
         M_name          (),
         M_flag          (),
@@ -57,7 +57,7 @@ BCInterface3DFunctionFSI< FSIOperator >::BCInterface3DFunctionFSI() :
 
 }
 
-BCInterface3DFunctionFSI< FSIOperator >::BCInterface3DFunctionFSI( const data_Type& data ) :
+BCInterface3DFSI< FSIOperator >::BCInterface3DFSI( const data_Type& data ) :
         M_FSIFunction   (),
         M_name          (),
         M_flag          (),
@@ -77,7 +77,7 @@ BCInterface3DFunctionFSI< FSIOperator >::BCInterface3DFunctionFSI( const data_Ty
 // Methods
 // ===================================================
 void
-BCInterface3DFunctionFSI< FSIOperator >::exportData( data_Type& data )
+BCInterface3DFSI< FSIOperator >::exportData( data_Type& data )
 {
 
 #ifdef HAVE_LIFEV_DEBUG
@@ -92,7 +92,7 @@ BCInterface3DFunctionFSI< FSIOperator >::exportData( data_Type& data )
 }
 
 void
-BCInterface3DFunctionFSI< FSIOperator >::assignFunction( const boost::shared_ptr< FSIOperator >& physicalSolver, BCVectorInterface& base )
+BCInterface3DFSI< FSIOperator >::assignFunction( const boost::shared_ptr< FSIOperator >& physicalSolver, BCVectorInterface& base )
 {
     //Set mapMethod
     std::map< std::string, FSIMethod > mapMethod;
@@ -155,7 +155,7 @@ BCInterface3DFunctionFSI< FSIOperator >::assignFunction( const boost::shared_ptr
 // Set Methods
 // ===================================================
 void
-BCInterface3DFunctionFSI< FSIOperator >::setData( const data_Type& data )
+BCInterface3DFSI< FSIOperator >::setData( const data_Type& data )
 {
 
 #ifdef HAVE_LIFEV_DEBUG

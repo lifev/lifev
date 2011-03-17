@@ -26,22 +26,22 @@
 
 /*!
  *  @file
- *  @brief File containing the BCInterface3DFunctionFile class
+ *  @brief File containing the BCInterfaceFunctionFile class
  *
  *  @date 09-07-2009
  *  @author Cristiano Malossi <cristiano.malossi@epfl.ch>
  *
  *  @maintainer Cristiano Malossi <cristiano.malossi@epfl.ch>
  */
-#ifndef BCInterface3DFunctionFile_H
-#define BCInterface3DFunctionFile_H 1
+#ifndef BCInterfaceFunctionFile_H
+#define BCInterfaceFunctionFile_H 1
 
-#include <lifemc/lifesolver/BCInterface3DFunction.hpp>
+#include <lifemc/lifesolver/BCInterfaceFunction.hpp>
 
 namespace LifeV
 {
 
-//! BCInterface3DFunctionFile - LifeV bcFunction wrapper for BCInterface
+//! BCInterfaceFunctionFile - LifeV bcFunction wrapper for BCInterface
 /*!
  *  @author Cristiano Malossi
  *
@@ -56,7 +56,7 @@ namespace LifeV
  *  The constructor of the class takes a string contains the GetPot file name.
  *  The GetPot file has the following structure:
  *
- *  function:  contains the expression of the function to use (as described in the BCInterface3DFunction class).
+ *  function:  contains the expression of the function to use (as described in the BCInterfaceFunction class).
  *
  *  variables: contains the list of variables and coefficients present in the function.
  *             The first one is the variable and should be sorted in a growing order,
@@ -87,7 +87,7 @@ namespace LifeV
  *  				1.000000000		4.00'
  */
 template< typename PhysicalSolverType >
-class BCInterface3DFunctionFile: public virtual BCInterface3DFunction< PhysicalSolverType >
+class BCInterfaceFunctionFile: public virtual BCInterfaceFunction< PhysicalSolverType >
 {
 public:
 
@@ -96,7 +96,7 @@ public:
 
     typedef PhysicalSolverType                                                    physicalSolver_Type;
     typedef BCInterfaceData                                                     data_Type;
-    typedef BCInterface3DFunction< physicalSolver_Type >                          function_Type;
+    typedef BCInterfaceFunction< physicalSolver_Type >                          function_Type;
 
     //@}
 
@@ -105,16 +105,16 @@ public:
     //@{
 
     //! Empty Constructor
-    explicit BCInterface3DFunctionFile();
+    explicit BCInterfaceFunctionFile();
 
     //! Constructor
     /*!
      * @param data BC data loaded from GetPot file
      */
-    explicit BCInterface3DFunctionFile( const data_Type& data );
+    explicit BCInterfaceFunctionFile( const data_Type& data );
 
     //! Destructor
-    virtual ~BCInterface3DFunctionFile() {}
+    virtual ~BCInterfaceFunctionFile() {}
 
     //@}
 
@@ -135,9 +135,9 @@ private:
     //! @name Unimplemented Methods
     //@{
 
-    BCInterface3DFunctionFile( const BCInterface3DFunctionFile& function );
+    BCInterfaceFunctionFile( const BCInterfaceFunctionFile& function );
 
-    BCInterface3DFunctionFile& operator=( const BCInterface3DFunctionFile& function );
+    BCInterfaceFunctionFile& operator=( const BCInterfaceFunctionFile& function );
 
     //@}
 
@@ -164,16 +164,16 @@ private:
 // ===================================================
 //! Factory create function
 template< typename PhysicalSolverType >
-inline BCInterface3DFunction< PhysicalSolverType >* createBCInterface3DFunctionFile()
+inline BCInterfaceFunction< PhysicalSolverType >* createBCInterfaceFunctionFile()
 {
-    return new BCInterface3DFunctionFile< PhysicalSolverType > ();
+    return new BCInterfaceFunctionFile< PhysicalSolverType > ();
 }
 
 // ===================================================
 // Constructors
 // ===================================================
 template< typename PhysicalSolverType >
-BCInterface3DFunctionFile< PhysicalSolverType >::BCInterface3DFunctionFile() :
+BCInterfaceFunctionFile< PhysicalSolverType >::BCInterfaceFunctionFile() :
         function_Type                    (),
         M_variables                      (),
         M_loop                           (),
@@ -182,13 +182,13 @@ BCInterface3DFunctionFile< PhysicalSolverType >::BCInterface3DFunctionFile() :
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 5022 ) << "BCInterface3DFunctionFile::BCInterface3DFunctionFile()" << "\n";
+    Debug( 5022 ) << "BCInterfaceFunctionFile::BCInterfaceFunctionFile()" << "\n";
 #endif
 
 }
 
 template< typename PhysicalSolverType >
-BCInterface3DFunctionFile< PhysicalSolverType >::BCInterface3DFunctionFile( const data_Type& data ) :
+BCInterfaceFunctionFile< PhysicalSolverType >::BCInterfaceFunctionFile( const data_Type& data ) :
         function_Type                    (),
         M_variables                      (),
         M_loop                           (),
@@ -197,7 +197,7 @@ BCInterface3DFunctionFile< PhysicalSolverType >::BCInterface3DFunctionFile( cons
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 5022 ) << "BCInterface3DFunctionFile::BCInterface3DFunctionFile( data )" << "\n";
+    Debug( 5022 ) << "BCInterfaceFunctionFile::BCInterfaceFunctionFile( data )" << "\n";
 #endif
 
     this->setData( data );
@@ -208,11 +208,11 @@ BCInterface3DFunctionFile< PhysicalSolverType >::BCInterface3DFunctionFile( cons
 // ===================================================
 template< typename PhysicalSolverType >
 inline void
-BCInterface3DFunctionFile< PhysicalSolverType >::loadData( data_Type data )
+BCInterfaceFunctionFile< PhysicalSolverType >::loadData( data_Type data )
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 5022 ) << "BCInterface3DFunctionFile::loadData            fileName: " << data.baseString() << "\n";
+    Debug( 5022 ) << "BCInterfaceFunctionFile::loadData            fileName: " << data.baseString() << "\n";
 #endif
 
     std::vector< std::string > stringsVector;
@@ -238,7 +238,7 @@ BCInterface3DFunctionFile< PhysicalSolverType >::loadData( data_Type data )
 
 #ifdef HAVE_LIFEV_DEBUG
     std::stringstream output;
-    output << "BCInterface3DFunctionFile::loadData           variables: ";
+    output << "BCInterfaceFunctionFile::loadData           variables: ";
     for ( UInt j(0); j < variablesNumber; ++j )
         output << M_variables[j] << "  ";
 
@@ -283,7 +283,7 @@ BCInterface3DFunctionFile< PhysicalSolverType >::loadData( data_Type data )
     //Initialize iterator
     M_dataIterator = M_data[M_variables[0]].begin();
 
-    //Update the data container (IT IS A COPY!) with the correct base string for the BCInterface3DFunction
+    //Update the data container (IT IS A COPY!) with the correct base string for the BCInterfaceFunction
     if ( stringsVector.size() < 2 )
         data.setBaseString( dataFile( "function", "Undefined" ) );
     else
@@ -303,7 +303,7 @@ BCInterface3DFunctionFile< PhysicalSolverType >::loadData( data_Type data )
 
 template< typename PhysicalSolverType >
 inline void
-BCInterface3DFunctionFile< PhysicalSolverType >::dataInterpolation()
+BCInterfaceFunctionFile< PhysicalSolverType >::dataInterpolation()
 {
     //Get variable
     Real X = function_Type::M_parser->variable( M_variables[0] );
@@ -365,4 +365,4 @@ BCInterface3DFunctionFile< PhysicalSolverType >::dataInterpolation()
 
 } // Namespace LifeV
 
-#endif /* BCInterface3DFunctionFile_H */
+#endif /* BCInterfaceFunctionFile_H */
