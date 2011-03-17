@@ -92,8 +92,7 @@ public:
     //@{
 
     typedef PhysicalSolverType                                                    physicalSolver_Type;
-    typedef BCInterfaceData                                                     data_Type;
-    typedef BCFunctionBase                                                        bcFunction_Type;
+    typedef BCInterfaceData                                                       data_Type;
     typedef Parser                                                                parser_Type;
 
     //@}
@@ -117,6 +116,24 @@ public:
     //@}
 
 
+    //! @name Methods
+    //@{
+
+    //! Assign the function to the base
+    /*!
+     * @param base base of the bc
+     */
+    void assignFunction( BCFunctionBase& base )
+    {
+        if ( M_parser->countSubstring( "," ) )
+            base.setFunction( boost::bind( &BCInterface3DFunction::functionID, this, _1, _2, _3, _4, _5 ) );
+        else
+            base.setFunction( boost::bind( &BCInterface3DFunction::function, this, _1, _2, _3, _4, _5 ) );
+    }
+
+    //@}
+
+
     //! @name Set Methods
     //@{
 
@@ -125,18 +142,6 @@ public:
      * @param data BC data loaded from GetPot file
      */
     virtual void setData( const data_Type& data );
-
-    //@}
-
-
-    //! @name Get Methods
-    //@{
-
-    //! Get the base of the boundary condition
-    /*!
-     * @return boundary condition base
-     */
-    bcFunction_Type& base() { return M_base; }
 
     //@}
 
@@ -175,7 +180,6 @@ private:
 
     //@}
 
-    bcFunction_Type                  M_base;
     std::map< ID, ID >               M_mapID;
 
 };
@@ -196,7 +200,6 @@ inline BCInterface3DFunction< PhysicalSolverType >* createBCInterface3DFunction(
 template< typename PhysicalSolverType >
 BCInterface3DFunction< PhysicalSolverType >::BCInterface3DFunction() :
         M_parser    (),
-        M_base      (),
         M_mapID     ()
 {
 
@@ -209,7 +212,6 @@ BCInterface3DFunction< PhysicalSolverType >::BCInterface3DFunction() :
 template< typename PhysicalSolverType >
 BCInterface3DFunction< PhysicalSolverType >::BCInterface3DFunction( const data_Type& data ) :
         M_parser    (),
-        M_base      (),
         M_mapID     ()
 {
 
@@ -249,15 +251,11 @@ BCInterface3DFunction< PhysicalSolverType >::setData( const data_Type& data )
      * COMPONENT     '1 3'         (x,y)         |      2             2             functionID
      */
 
-    UInt arguments = M_parser->countSubstring( "," ) + 1;
-
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 5021 ) << "BCInterface3DFunction::setFunction            arguments: " << arguments << "\n";
+    Debug( 5021 ) << "BCInterface3DFunction::setFunction            arguments: " << M_parser->countSubstring( "," ) << "\n";
 #endif
 
-    if ( arguments == 1 )
-        M_base.setFunction( boost::bind( &BCInterface3DFunction::function, this, _1, _2, _3, _4, _5 ) );
-    else
+    if ( M_parser->countSubstring( "," ) )
     {
         //Create the ID map
         if ( data.comV().size() > 1 ) // Component
@@ -267,8 +265,6 @@ BCInterface3DFunction< PhysicalSolverType >::setData( const data_Type& data )
             // if ( data.comV().front() == arguments )  Full
             for ( ID i( 0 ); i < data.comV().front(); ++i )
                 M_mapID[i+1] = i+1;
-
-        M_base.setFunction( boost::bind( &BCInterface3DFunction::functionID, this, _1, _2, _3, _4, _5 ) );
     }
 }
 
@@ -281,7 +277,7 @@ BCInterface3DFunction< PhysicalSolverType >::function( const Real& t, const Real
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 5021 ) << "BCInterface3DFunction::Function: " << "\n";
+    Debug( 5021 ) << "BCInterface3DFunction::function: " << "\n";
     Debug( 5021 ) << "                                                           x: " << x << "\n";
     Debug( 5021 ) << "                                                           y: " << y << "\n";
     Debug( 5021 ) << "                                                           z: " << z << "\n";
@@ -308,7 +304,7 @@ BCInterface3DFunction< PhysicalSolverType >::functionID( const Real& t, const Re
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 5021 ) << "BCInterface3DFunction::Function: " << "\n";
+    Debug( 5021 ) << "BCInterface3DFunction::function: " << "\n";
     Debug( 5021 ) << "                                                           x: " << x << "\n";
     Debug( 5021 ) << "                                                           y: " << y << "\n";
     Debug( 5021 ) << "                                                           z: " << z << "\n";

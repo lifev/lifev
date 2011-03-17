@@ -124,7 +124,7 @@ public:
 
     typedef PhysicalSolverType                                                                        physicalSolver_Type;
     typedef baseList1D_Type                                                                           bcBaseList_Type;
-    typedef BCInterfaceData                                                                         data_Type;
+    typedef BCInterfaceData                                                                           data_Type;
 
     typedef FactorySingleton< Factory< BCInterface1DFunction< physicalSolver_Type > , bcBaseList_Type > >    factoryFunction_Type;
 
@@ -158,9 +158,6 @@ public:
     //! @name Methods
     //@{
 
-    //! Update the variables inside the physical solver
-    void updatePhysicalSolverVariables();
-
     //! Create the bcHandler.
     void createHandler() { M_handler.reset( new bcHandler_Type() ); }
 
@@ -177,10 +174,16 @@ public:
      * @param dataSection section in the data file
      * @param name name of the boundary condition
      */
-    void readBC( const std::string& fileName, const std::string& dataSection, const bcName_Type& name ) { M_data.readBC1D( fileName, dataSection, name ); }
+    void readBC( const std::string& fileName, const std::string& dataSection, const bcName_Type& name )
+    {
+        M_data.readBC1D( fileName, dataSection, name );
+    }
 
     //! Insert the current boundary condition in the BChandler
-    void insertBC() { buildBase(); }
+    void insertBC();
+
+    //! Update the variables inside the physical solver
+    void updatePhysicalSolverVariables();
 
     //@}
 
@@ -196,7 +199,10 @@ public:
      * @param base base of the condition
      */
     template< class BCBaseType >
-    void setBC( const OneDimensional::bcSide_Type& bcSide, const OneDimensional::bcLine_Type& bcLine, const OneDimensional::bcType_Type& bcType, const BCBaseType& base ) { M_handler->setBC( bcSide, bcLine, bcType, base ); }
+    void setBC( const OneDimensional::bcSide_Type& bcSide, const OneDimensional::bcLine_Type& bcLine, const OneDimensional::bcType_Type& bcType, const BCBaseType& base )
+    {
+        M_handler->setBC( bcSide, bcLine, bcType, base );
+    }
 
     //@}
 
@@ -264,16 +270,14 @@ private:
     //! @name Private Methods
     //@{
 
-    void buildBase();
+    template< class BCInterfaceBaseType >
+    void createFunction( std::vector< boost::shared_ptr< BCInterfaceBaseType > >& baseVector );
 
     template< class BCInterfaceBaseType >
-    void addBase( std::vector< boost::shared_ptr< BCInterfaceBaseType > >& baseVector );
-
-    template< class BCInterfaceBaseType >
-    void addBase( std::vector< boost::shared_ptr< BCInterfaceBaseType > >& baseVector, const bcBaseList_Type& physicalSolver );
+    void createFunction( std::vector< boost::shared_ptr< BCInterfaceBaseType > >& baseVector, const bcBaseList_Type& physicalSolver );
 
     template< class BCBaseType >
-    void addBCManager( BCBaseType& base );
+    void addBcToHandler( BCBaseType& base );
 
     //@}
 
@@ -302,7 +306,7 @@ BCInterface1D< PhysicalSolverType >::BCInterface1D( ) :
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 5020 ) << "BCInterface1D::BCInterface1D------------------------------" << "\n";
+    Debug( 5020 ) << "BCInterface1D::BCInterface1D" << "\n";
 #endif
 
     //Factory registration
@@ -321,18 +325,57 @@ BCInterface1D< PhysicalSolverType >::fillHandler( const std::string& fileName, c
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 5020 ) << "BCInterface1D::buildHandler\n";
+    Debug( 5020 ) << "BCInterface1D::fillHandler\n";
 #endif
 
-    GetPot DataFile( fileName );
-    for ( UInt i( 0 ); i < DataFile.vector_variable_size( ( dataSection + "/boundary_conditions/list" ).c_str() ); ++i )
+    GetPot dataFile( fileName );
+    for ( UInt i( 0 ); i < dataFile.vector_variable_size( ( dataSection + "/boundary_conditions/list" ).c_str() ); ++i )
     {
         M_data.readBC1D( fileName,
-                       dataSection + "/boundary_conditions/",
-                       DataFile( ( dataSection + "/boundary_conditions/list" ).c_str(), " ", i )
-                     );
+                         dataSection + "/boundary_conditions/",
+                         dataFile( ( dataSection + "/boundary_conditions/list" ).c_str(), " ", i )
+                       );
 
-        buildBase();
+        insertBC();
+    }
+}
+
+template< class PhysicalSolverType >
+inline void
+BCInterface1D< PhysicalSolverType >::insertBC()
+{
+
+#ifdef HAVE_LIFEV_DEBUG
+    Debug( 5020 ) << "BCInterface1D::insertBC\n";
+#endif
+
+    switch ( M_data.base1D().second )
+    {
+    case BCI1DFunction:
+    case BCI1DFunctionFile:
+    case BCI1DFunctionSolver:
+    case BCI1DFunctionFileSolver:
+    {
+        createFunction( M_vectorFunction, M_data.base1D().second );
+
+        OneDimensionalBCFunction base;
+        M_vectorFunction.back()->assignFunction( base );
+
+        addBcToHandler( base );
+
+        break;
+    }
+    case BCI1DFunctionDefault:
+    {
+        createFunction( M_vectorDefaultFunction1D );
+
+        OneDimensionalBCFunction base;
+        M_vectorDefaultFunction1D.back()->assignFunction( base );
+
+        addBcToHandler( base );
+
+        break;
+    }
     }
 }
 
@@ -342,7 +385,7 @@ BCInterface1D< PhysicalSolverType >::updatePhysicalSolverVariables()
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 5020 ) << "BCInterface1D::UpdateOperatorVariables\n";
+    Debug( 5020 ) << "BCInterface1D::updatePhysicalSolverVariables\n";
 #endif
 
     for ( UInt i( 0 ); i < M_vectorFunction.size(); ++i )
@@ -406,49 +449,17 @@ BCInterface1D< PhysicalSolverType >::setSolution( const solutionPtr_Type& soluti
 // ===================================================
 // Private Methods
 // ===================================================
-template< class PhysicalSolverType >
+template< class PhysicalSolverType > template< class BCInterfaceBaseType >
 inline void
-BCInterface1D< PhysicalSolverType >::buildBase()
+BCInterface1D< PhysicalSolverType >::createFunction( std::vector< boost::shared_ptr< BCInterfaceBaseType > >& baseVector )
 {
-
-#ifdef HAVE_LIFEV_DEBUG
-    Debug( 5020 ) << "BCInterface1D::BuildBase\n";
-#endif
-
-    switch ( M_data.base1D().second )
-    {
-    case BCI1DFunction:
-    case BCI1DFunctionFile:
-    case BCI1DFunctionSolver:
-    case BCI1DFunctionFileSolver:
-
-        addBase( M_vectorFunction, M_data.base1D().second );
-
-        addBCManager( M_vectorFunction.back()->base() );
-
-        break;
-
-    case BCI1DFunctionDefault:
-
-        addBase( M_vectorDefaultFunction1D );
-
-        addBCManager( M_vectorDefaultFunction1D.back()->base() );
-
-        break;
-    }
+    boost::shared_ptr< BCInterfaceBaseType > function( new BCInterfaceBaseType( M_data ) );
+    baseVector.push_back( function );
 }
 
 template< class PhysicalSolverType > template< class BCInterfaceBaseType >
 inline void
-BCInterface1D< PhysicalSolverType >::addBase( std::vector< boost::shared_ptr< BCInterfaceBaseType > >& baseVector )
-{
-    boost::shared_ptr< BCInterfaceBaseType > Function( new BCInterfaceBaseType( M_data ) );
-    baseVector.push_back( Function );
-}
-
-template< class PhysicalSolverType > template< class BCInterfaceBaseType >
-inline void
-BCInterface1D< PhysicalSolverType >::addBase( std::vector< boost::shared_ptr< BCInterfaceBaseType > >& baseVector, const bcBaseList_Type& physicalSolver )
+BCInterface1D< PhysicalSolverType >::createFunction( std::vector< boost::shared_ptr< BCInterfaceBaseType > >& baseVector, const bcBaseList_Type& physicalSolver )
 {
     boost::shared_ptr< BCInterfaceBaseType > function( factoryFunction_Type::instance().createObject( physicalSolver, M_data.mapBase1D() ) );
 
@@ -459,10 +470,14 @@ BCInterface1D< PhysicalSolverType >::addBase( std::vector< boost::shared_ptr< BC
 
 template< class PhysicalSolverType > template< class BCBaseType >
 inline void
-BCInterface1D< PhysicalSolverType >::addBCManager( BCBaseType& base )
+BCInterface1D< PhysicalSolverType >::addBcToHandler( BCBaseType& base )
 {
     if ( !M_handler.get() ) // If BCHandler has not been created yet, we do it now
         createHandler();
+
+#ifdef HAVE_LIFEV_DEBUG
+        Debug( 5020 ) << "BCInterface1D::addBCManager" << "\n\n";
+#endif
 
     M_handler->setBC( M_data.side(), M_data.line(), M_data.quantity(), base );
 }
