@@ -26,7 +26,7 @@
 
 /*!
  *  @file
- *  @brief File containing the BCInterface3DFunctionFSI class
+ *  @brief File containing the BCInterface3DFSI class
  *
  *  @date 23-04-2009
  *  @author Cristiano Malossi <cristiano.malossi@epfl.ch>
@@ -34,12 +34,12 @@
  *  @maintainer Cristiano Malossi <cristiano.malossi@epfl.ch>
  */
 
-#ifndef BCInterface3DFunctionFSI_H
-#define BCInterface3DFunctionFSI_H 1
+#ifndef BCInterface3DFSI_H
+#define BCInterface3DFSI_H 1
 
 #include <life/lifesolver/FSIExactJacobian.hpp>
 #include <life/lifesolver/FSIFixedPoint.hpp>
-//#include <life/lifesolver/steklovPoincareBase.hpp>
+
 #include <lifemc/lifesolver/FSIMonolithicGE.hpp>
 #include <lifemc/lifesolver/FSIMonolithicGI.hpp>
 
@@ -49,12 +49,12 @@
 namespace LifeV
 {
 
-//! BCInterface3DFunctionFSI Fake class for non-FSI problems.
+//! BCInterface3DFSI Fake class for non-FSI problems.
 /*!
  *  @author Cristiano Malossi
  */
 template< class PhysicalSolverType >
-class BCInterface3DFunctionFSI
+class BCInterface3DFSI
 {
 public:
 
@@ -70,10 +70,10 @@ public:
     //! @name Constructors & Destructor
     //@{
 
-    explicit BCInterface3DFunctionFSI() {}
-    explicit BCInterface3DFunctionFSI( const data_Type& /*data*/) {}
+    explicit BCInterface3DFSI() {}
+    explicit BCInterface3DFSI( const data_Type& /*data*/) {}
 
-    virtual ~BCInterface3DFunctionFSI() {}
+    virtual ~BCInterface3DFSI() {}
 
     //@}
 
@@ -99,15 +99,15 @@ private:
     //! @name Unimplemented Methods
     //@{
 
-    BCInterface3DFunctionFSI( const BCInterface3DFunctionFSI& fsi);
+    BCInterface3DFSI( const BCInterface3DFSI& fsi);
 
-    BCInterface3DFunctionFSI& operator=( const BCInterface3DFunctionFSI& fsi );
+    BCInterface3DFSI& operator=( const BCInterface3DFSI& fsi );
 
     //@}
 
 };
 
-//! BCInterface3DFunctionFSI - specialized template implementation for FSI problems.
+//! BCInterface3DFSI - specialized template implementation for FSI problems.
 /*!
  *  @author Cristiano Malossi
  *
@@ -143,7 +143,7 @@ private:
  *	To get the base for the boundary condition call the getBase function.
  */
 template< >
-class BCInterface3DFunctionFSI< FSIOperator >
+class BCInterface3DFSI< FSIOperator >
 {
 public:
 
@@ -159,16 +159,16 @@ public:
     //@{
 
     //! Constructor
-    explicit BCInterface3DFunctionFSI();
+    explicit BCInterface3DFSI();
 
     //! Constructor
     /*!
      * @param data BC data loaded from GetPot file
      */
-    explicit BCInterface3DFunctionFSI( const data_Type& data );
+    explicit BCInterface3DFSI( const data_Type& data );
 
     //! Destructor
-    virtual ~BCInterface3DFunctionFSI() {}
+    virtual ~BCInterface3DFSI() {}
 
     //@}
 
@@ -207,9 +207,9 @@ private:
     //! @name Unimplemented Methods
     //@{
 
-    BCInterface3DFunctionFSI( const BCInterface3DFunctionFSI& fsi);
+    BCInterface3DFSI( const BCInterface3DFSI& fsi);
 
-    BCInterface3DFunctionFSI& operator=( const BCInterface3DFunctionFSI& fsi );
+    BCInterface3DFSI& operator=( const BCInterface3DFSI& fsi );
 
     //@}
 
@@ -256,7 +256,7 @@ private:
 // Private functions
 // ===================================================
 template< class method >
-inline void BCInterface3DFunctionFSI< FSIOperator >::checkFunction( const boost::shared_ptr< FSIOperator >& physicalSolver, BCVectorInterface& base )
+inline void BCInterface3DFSI< FSIOperator >::checkFunction( const boost::shared_ptr< FSIOperator >& physicalSolver, BCVectorInterface& base )
 {
     method *operMethod = dynamic_cast< method * > ( &*physicalSolver );
 
@@ -406,4 +406,4 @@ inline void BCInterface3DFunctionFSI< FSIOperator >::checkFunction( const boost:
 
 } // Namespace LifeV
 
-#endif /* BCInterface3DFunctionFSI_H */
+#endif /* BCInterface3DFSI_H */

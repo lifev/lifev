@@ -40,11 +40,11 @@
 #include <lifemc/lifesolver/BCInterfaceDefinitions.hpp>
 
 #include <lifemc/lifesolver/BCInterfaceData.hpp>
-#include <lifemc/lifesolver/BCInterface3DFunction.hpp>
-#include <lifemc/lifesolver/BCInterface3DFunctionFile.hpp>
-#include <lifemc/lifesolver/BCInterface3DFunctionSolver.hpp>
-#include <lifemc/lifesolver/BCInterface3DFunctionFileSolver.hpp>
-#include <lifemc/lifesolver/BCInterface3DFunctionFSI.hpp>
+#include <lifemc/lifesolver/BCInterfaceFunction.hpp>
+#include <lifemc/lifesolver/BCInterfaceFunctionFile.hpp>
+#include <lifemc/lifesolver/BCInterfaceFunctionSolver.hpp>
+#include <lifemc/lifesolver/BCInterfaceFunctionFileSolver.hpp>
+#include <lifemc/lifesolver/BCInterface3DFSI.hpp>
 
 namespace LifeV
 {
@@ -125,14 +125,14 @@ public:
     typedef baseList3D_Type                                                                           bcBaseList_Type;
     typedef BCInterfaceData                                                                           data_Type;
 
-    typedef FactorySingleton< Factory< BCInterface3DFunction< physicalSolver_Type > , bcBaseList_Type > >    factoryFunction_Type;
+    typedef FactorySingleton< Factory< BCInterfaceFunction< physicalSolver_Type > , bcBaseList_Type > >    factoryFunction_Type;
 
     typedef BCHandler                                                                                 bcHandler_Type;
     typedef boost::shared_ptr< bcHandler_Type >                                                       bcHandlerPtr_Type;
 
-    typedef std::vector< boost::shared_ptr< BCInterface3DFunction< physicalSolver_Type > > >          vectorFunction_Type;
+    typedef std::vector< boost::shared_ptr< BCInterfaceFunction< physicalSolver_Type > > >            vectorFunction_Type;
     typedef std::vector< boost::shared_ptr< BCFunctionDirectional > >                                 vectorFunctionDirectional_Type;
-    typedef std::vector< boost::shared_ptr< BCInterface3DFunctionFSI< physicalSolver_Type > > >       vectorFSI_Type;
+    typedef std::vector< boost::shared_ptr< BCInterface3DFSI< physicalSolver_Type > > >               vectorFSI_Type;
 
     //@}
 
@@ -314,10 +314,10 @@ BCInterface3D< PhysicalSolverType >::BCInterface3D( ) :
 #endif
 
     //Factory registration
-    factoryFunction_Type::instance().registerProduct( BCI3DFunction,           &createBCInterface3DFunction< physicalSolver_Type > );
-    factoryFunction_Type::instance().registerProduct( BCI3DFunctionFile,       &createBCInterface3DFunctionFile< physicalSolver_Type > );
-    factoryFunction_Type::instance().registerProduct( BCI3DFunctionSolver,     &createBCInterface3DFunctionSolver< physicalSolver_Type > );
-    factoryFunction_Type::instance().registerProduct( BCI3DFunctionFileSolver, &createBCInterface3DFunctionFileSolver< physicalSolver_Type > );
+    factoryFunction_Type::instance().registerProduct( BCI3DFunction,           &createBCInterfaceFunction< physicalSolver_Type > );
+    factoryFunction_Type::instance().registerProduct( BCI3DFunctionFile,       &createBCInterfaceFunctionFile< physicalSolver_Type > );
+    factoryFunction_Type::instance().registerProduct( BCI3DFunctionSolver,     &createBCInterfaceFunctionSolver< physicalSolver_Type > );
+    factoryFunction_Type::instance().registerProduct( BCI3DFunctionFileSolver, &createBCInterfaceFunctionFileSolver< physicalSolver_Type > );
 }
 
 // ===================================================
@@ -388,8 +388,8 @@ BCInterface3D< PhysicalSolverType >::updatePhysicalSolverVariables()
 
     for ( UInt i( 0 ); i < M_vectorFunction.size(); ++i )
     {
-        BCInterface3DFunctionSolver< physicalSolver_Type > *physicalSolver =
-            dynamic_cast< BCInterface3DFunctionSolver< physicalSolver_Type > * > ( &( *M_vectorFunction[i] ) );
+        BCInterfaceFunctionSolver< physicalSolver_Type > *physicalSolver =
+            dynamic_cast< BCInterfaceFunctionSolver< physicalSolver_Type > * > ( &( *M_vectorFunction[i] ) );
 
         if ( physicalSolver != 0 )
             physicalSolver->updatePhysicalSolverVariables();
@@ -406,8 +406,8 @@ BCInterface3D< PhysicalSolverType >::setPhysicalSolver( const boost::shared_ptr<
     //for ( typename vectorFunction_Type::const_iterator i = M_vectorFunction.begin() ; i < M_vectorFunction.end() ; ++i )
     for ( UInt i( 0 ); i < M_vectorFunction.size(); ++i )
     {
-        BCInterface3DFunctionSolver< physicalSolver_Type > *castedOperator =
-            dynamic_cast < BCInterface3DFunctionSolver< physicalSolver_Type >* > ( &( *M_vectorFunction[i] ) );
+        BCInterfaceFunctionSolver< physicalSolver_Type > *castedOperator =
+            dynamic_cast < BCInterfaceFunctionSolver< physicalSolver_Type >* > ( &( *M_vectorFunction[i] ) );
 
         if ( castedOperator != 0 )
             castedOperator->setPhysicalSolver( physicalSolver );
