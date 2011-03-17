@@ -122,10 +122,9 @@ public:
     //@{
 
     typedef PhysicalSolverType                                                                        physicalSolver_Type;
-    typedef baseList3D_Type                                                                           bcBaseList_Type;
     typedef BCInterfaceData                                                                           data_Type;
 
-    typedef FactorySingleton< Factory< BCInterfaceFunction< physicalSolver_Type > , bcBaseList_Type > >    factoryFunction_Type;
+    typedef FactorySingleton< Factory< BCInterfaceFunction< physicalSolver_Type > , baseList_Type > > factoryFunction_Type;
 
     typedef BCHandler                                                                                 bcHandler_Type;
     typedef boost::shared_ptr< bcHandler_Type >                                                       bcHandlerPtr_Type;
@@ -271,7 +270,7 @@ private:
     void createFunction( std::vector< boost::shared_ptr< BCInterfaceBaseType > >& baseVector );
 
     template< class BCInterfaceBaseType >
-    void createFunction( std::vector< boost::shared_ptr< BCInterfaceBaseType > >& baseVector, const bcBaseList_Type& physicalSolver );
+    void createFunction( std::vector< boost::shared_ptr< BCInterfaceBaseType > >& baseVector, const baseList_Type& physicalSolver );
 
     // This method should be removed: it is a workaround due to legacy of LifeV BC.
     void addBcToHandler( BCVectorInterface& base );
@@ -314,10 +313,10 @@ BCInterface3D< PhysicalSolverType >::BCInterface3D( ) :
 #endif
 
     //Factory registration
-    factoryFunction_Type::instance().registerProduct( BCI3DFunction,           &createBCInterfaceFunction< physicalSolver_Type > );
-    factoryFunction_Type::instance().registerProduct( BCI3DFunctionFile,       &createBCInterfaceFunctionFile< physicalSolver_Type > );
-    factoryFunction_Type::instance().registerProduct( BCI3DFunctionSolver,     &createBCInterfaceFunctionSolver< physicalSolver_Type > );
-    factoryFunction_Type::instance().registerProduct( BCI3DFunctionFileSolver, &createBCInterfaceFunctionFileSolver< physicalSolver_Type > );
+    factoryFunction_Type::instance().registerProduct( BCIFunction,           &createBCInterfaceFunction< physicalSolver_Type > );
+    factoryFunction_Type::instance().registerProduct( BCIFunctionFile,       &createBCInterfaceFunctionFile< physicalSolver_Type > );
+    factoryFunction_Type::instance().registerProduct( BCIFunctionSolver,     &createBCInterfaceFunctionSolver< physicalSolver_Type > );
+    factoryFunction_Type::instance().registerProduct( BCIFunctionFileSolver, &createBCInterfaceFunctionFileSolver< physicalSolver_Type > );
 }
 
 // ===================================================
@@ -353,14 +352,14 @@ BCInterface3D< PhysicalSolverType >::insertBC()
     Debug( 5020 ) << "BCInterface3D::insertBC\n";
 #endif
 
-    switch ( M_data.base3D().second )
+    switch ( M_data.base().second )
     {
-    case BCI3DFunction:
-    case BCI3DFunctionFile:
-    case BCI3DFunctionSolver:
-    case BCI3DFunctionFileSolver:
+    case BCIFunction:
+    case BCIFunctionFile:
+    case BCIFunctionSolver:
+    case BCIFunctionFileSolver:
     {
-        createFunction( M_vectorFunction, M_data.base3D().second );
+        createFunction( M_vectorFunction, M_data.base().second );
 
         BCFunctionBase base;
         M_vectorFunction.back()->assignFunction( base );
@@ -369,11 +368,15 @@ BCInterface3D< PhysicalSolverType >::insertBC()
 
         break;
     }
-    case BCI3DFunctionFSI:
+    case BCI3DFSI:
 
         createFunction( M_vectorFSI );
 
         break;
+
+    default:
+
+        std::cout << " !!! Error: " << M_data.base().first << " is not valid in BCInterface3D !!!" << std::endl;
     }
 }
 
@@ -438,9 +441,9 @@ BCInterface3D< PhysicalSolverType >::createFunction( std::vector< boost::shared_
 
 template< class PhysicalSolverType > template< class BCInterfaceBaseType >
 inline void
-BCInterface3D< PhysicalSolverType >::createFunction( std::vector< boost::shared_ptr< BCInterfaceBaseType > >& baseVector, const bcBaseList_Type& physicalSolver )
+BCInterface3D< PhysicalSolverType >::createFunction( std::vector< boost::shared_ptr< BCInterfaceBaseType > >& baseVector, const baseList_Type& physicalSolver )
 {
-    boost::shared_ptr< BCInterfaceBaseType > function( factoryFunction_Type::instance().createObject( physicalSolver, M_data.mapBase3D() ) );
+    boost::shared_ptr< BCInterfaceBaseType > function( factoryFunction_Type::instance().createObject( physicalSolver, M_data.mapBase() ) );
 
     function->setData( M_data );
 
@@ -510,11 +513,11 @@ BCInterface3D< PhysicalSolverType >::addBcToHandler( BCBaseType& base )
         {
             // Parameters for direction BC
             M_data.setName( M_data.name() + "_direction" );
-            M_data.setBase3D( make_pair( "function", BCI3DFunction ) );
+            M_data.setBase( make_pair( "function", BCIFunction ) );
             M_data.setBaseString( M_data.direction() );
 
             // Directional field
-            createFunction( M_vectorFunction, M_data.base3D().second );
+            createFunction( M_vectorFunction, M_data.base().second );
 
             BCFunctionBase baseDirectional;
             M_vectorFunction.back()->assignFunction( baseDirectional );

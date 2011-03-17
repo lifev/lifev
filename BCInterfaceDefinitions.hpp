@@ -70,23 +70,14 @@
 namespace LifeV
 {
 
-enum baseList1D_Type
+enum baseList_Type
 {
-    BCI1DFunction,
-    BCI1DFunctionFile,
-    BCI1DFunctionSolver,
-    BCI1DFunctionFileSolver,
-    BCI1DFunctionDefault
-};
-
-// Enum objects
-enum baseList3D_Type
-{
-    BCI3DFunction,
-    BCI3DFunctionFile,
-    BCI3DFunctionSolver,
-    BCI3DFunctionFileSolver,
-    BCI3DFunctionFSI
+    BCIFunction,
+    BCIFunctionFile,
+    BCIFunctionSolver,
+    BCIFunctionFileSolver,
+    BCI1DFunctionDefault,
+    BCI3DFSI
 };
 
 } // Namespace LifeV

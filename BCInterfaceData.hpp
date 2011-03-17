@@ -122,6 +122,18 @@ public:
     //! @name Set Methods
     //@{
 
+    //! Set the base string of the boundary condition
+    /*!
+     * @param baseString Boundary condition base string
+     */
+    void setBaseString( const std::string& baseString );
+
+    //! Set the base type of the boundary condition
+    /*!
+     * @param base Boundary condition base type
+     */
+    void setBase( const std::pair< std::string, baseList_Type >& base ) { M_base = base; }
+
     //! Set the side of the boundary condition
     /*!
      * @param flag Boundary condition side
@@ -139,12 +151,6 @@ public:
      * @param quantity Boundary condition quantity
      */
     void setQuantity( const OneDimensional::bcType_Type& quantity ) { M_quantity = quantity; }
-
-    //! Set the base type of the boundary condition
-    /*!
-     * @param base Boundary condition base type
-     */
-    void setBase1D( const std::pair< std::string, baseList1D_Type >& base ) { M_base1D = base; }
 
     //! Set the name of the boundary condition
     /*!
@@ -195,18 +201,6 @@ public:
      */
     void setDirection( const std::string& direction ) { M_direction = direction; }
 
-    //! Set the base string of the boundary condition
-    /*!
-     * @param baseString Boundary condition base string
-     */
-    void setBaseString( const std::string& baseString );
-
-    //! Set the base type of the boundary condition
-    /*!
-     * @param base Boundary condition base type
-     */
-    void setBase3D( const std::pair< std::string, baseList3D_Type >& base ) { M_base3D = base; }
-
     //@}
 
 
@@ -219,6 +213,18 @@ public:
      */
     const std::string& baseString() const { return M_baseString; }
 
+    //! Get the base type of the boundary condition
+    /*!
+     * @return Boundary condition base
+     */
+    const std::pair< std::string, baseList_Type >& base() const { return M_base; }
+
+    //! Get the base map of the boundary condition
+    /*!
+     * @return Boundary condition base map
+     */
+    const std::map< std::string, baseList_Type >& mapBase() const { return M_mapBase; }
+
     //! Get the flag of the boundary condition
     const OneDimensional::bcSide_Type& side() const { return M_side; }
 
@@ -227,12 +233,6 @@ public:
 
     //! Get the quantity of the boundary condition
     const OneDimensional::bcType_Type& quantity() const { return M_quantity; }
-
-    //! Get the base type of the boundary condition
-    const std::pair< std::string, baseList1D_Type >& base1D() const { return M_base1D; }
-
-    //! Get the base type of the boundary condition
-    const std::map< std::string, baseList1D_Type >& mapBase1D() const { return M_mapBase1D; }
 
     //! Get the resistance vector {R1, R2, R3 ...}
     const resistanceContainer_Type& resistance() const { return M_resistance; }
@@ -279,18 +279,6 @@ public:
      */
     const std::string& direction() const { return M_direction; }
 
-    //! Get the base type of the boundary condition
-    /*!
-     * @return Boundary condition base
-     */
-    const std::pair< std::string, baseList3D_Type >& base3D() const { return M_base3D; }
-
-    //! Get the base map of the boundary condition
-    /*!
-     * @return Boundary condition base map
-     */
-    const std::map< std::string, baseList3D_Type >& mapBase3D() const { return M_mapBase3D; }
-
     //@}
 
 private:
@@ -304,7 +292,7 @@ private:
 
     void readQuantity( const GetPot& dataFile, const char* quantity ) { M_quantity = M_mapQuantity[dataFile( quantity, "A" )]; }
 
-    void readBase1D( const GetPot& dataFile, const std::string& base );
+    void readBase( const GetPot& dataFile, const std::string& base );
 
     void readResistance( const GetPot& dataFile, const char* resistance );
 
@@ -318,8 +306,6 @@ private:
 
     void readDirection( const GetPot& dataFile, const char* direction ) { M_direction = dataFile( direction, " " ); }
 
-    void readBase3D( const GetPot& dataFile, const std::string& base );
-
     bool isBase( const GetPot& dataFile, const char* base );
 
     //@}
@@ -329,6 +315,8 @@ private:
     //@{
 
     std::string                                                    M_baseString;
+    std::pair< std::string, baseList_Type >                        M_base;
+    std::map< std::string, baseList_Type >                         M_mapBase;
 
     //@}
 
@@ -339,7 +327,6 @@ private:
     OneDimensional::bcSide_Type                                    M_side;
     OneDimensional::bcLine_Type                                    M_line;
     OneDimensional::bcType_Type                                    M_quantity;
-    std::pair< std::string, baseList1D_Type >                      M_base1D;
 
     resistanceContainer_Type                                       M_resistance;
 
@@ -347,7 +334,6 @@ private:
     std::map< std::string, OneDimensional::bcSide_Type >           M_mapSide;
     std::map< std::string, OneDimensional::bcType_Type >           M_mapQuantity;
     std::map< std::string, OneDimensional::bcLine_Type >           M_mapLine;
-    std::map< std::string, baseList1D_Type >                       M_mapBase1D;
 
     //@}
 
@@ -361,12 +347,10 @@ private:
     bcMode_Type                                                    M_mode;
     bcComponentsVec_Type                                           M_comV;
     std::string                                                    M_direction;
-    std::pair< std::string, baseList3D_Type >                      M_base3D;
 
     // Maps
     std::map< std::string, bcType_Type >                           M_mapType;
     std::map< std::string, bcMode_Type >                           M_mapMode;
-    std::map< std::string, baseList3D_Type >                       M_mapBase3D;
 
     //@}
 };
