@@ -182,7 +182,7 @@ BCInterface3DFunctionFile< PhysicalSolverType >::BCInterface3DFunctionFile() :
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 5022 ) << "BCInterface_FunctionFile::BCInterface3DFunctionFile()" << "\n";
+    Debug( 5022 ) << "BCInterface3DFunctionFile::BCInterface3DFunctionFile()" << "\n";
 #endif
 
 }
@@ -197,7 +197,7 @@ BCInterface3DFunctionFile< PhysicalSolverType >::BCInterface3DFunctionFile( cons
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 5022 ) << "BCInterface_FunctionFile::BCInterface3DFunctionFile( data )" << "\n";
+    Debug( 5022 ) << "BCInterface3DFunctionFile::BCInterface3DFunctionFile( data )" << "\n";
 #endif
 
     this->setData( data );
@@ -212,7 +212,7 @@ BCInterface3DFunctionFile< PhysicalSolverType >::loadData( data_Type data )
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 5022 ) << "BCInterface3DFunctionFile::setData             fileName: " << data.baseString() << "\n";
+    Debug( 5022 ) << "BCInterface3DFunctionFile::loadData            fileName: " << data.baseString() << "\n";
 #endif
 
     std::vector< std::string > stringsVector;

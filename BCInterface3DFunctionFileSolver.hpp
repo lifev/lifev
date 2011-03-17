@@ -63,7 +63,7 @@ public:
     //@{
 
     typedef PhysicalSolverType                                                    physicalSolver_Type;
-    typedef BCInterfaceData                                                     data_Type;
+    typedef BCInterfaceData                                                       data_Type;
     typedef BCInterface3DFunction< physicalSolver_Type >                          function_Type;
     typedef BCInterface3DFunctionFile< physicalSolver_Type >                      functionFile_Type;
     typedef BCInterface3DFunctionSolver< physicalSolver_Type >                    functionSolver_Type;
@@ -167,6 +167,7 @@ BCInterface3DFunctionFileSolver< PhysicalSolverType >::setData( const data_Type&
     functionFile_Type::setData( data );
 
     //functionSolver_Type::setData( data ); Cannot call directly, because it call again BCInterface3DFunction::setup( data )
+    functionSolver_Type::M_side = data.side();
     functionSolver_Type::M_flag = data.flag();
 
     functionSolver_Type::createAccessList( data );
