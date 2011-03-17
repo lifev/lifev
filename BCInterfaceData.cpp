@@ -44,26 +44,32 @@ namespace LifeV
 // ===================================================
 BCInterfaceData::BCInterfaceData() :
         M_baseString         (),
+        M_base               (),
+        M_mapBase            (),
         M_side               (),
         M_line               (),
         M_quantity           (),
-        M_base1D             (),
         M_resistance         (),
         M_mapSide            (),
         M_mapQuantity        (),
         M_mapLine            (),
-        M_mapBase1D          (),
         M_name               (),
         M_flag               (),
         M_type               (),
         M_mode               (),
         M_comV               (),
         M_direction          (),
-        M_base3D             (),
         M_mapType            (),
-        M_mapMode            (),
-        M_mapBase3D          ()
+        M_mapMode            ()
 {
+    //Set mapBase
+    M_mapBase["function"]         = BCIFunction;
+    M_mapBase["functionFile"]     = BCIFunctionFile;
+    M_mapBase["OPERfunction"]     = BCIFunctionSolver;
+    M_mapBase["OPERfunctionFile"] = BCIFunctionFileSolver;
+    M_mapBase["Default"]          = BCI1DFunctionDefault;
+    M_mapBase["FSI"]              = BCI3DFSI;
+
     //Set mapSide
     M_mapSide["left"]   = OneDimensional::left;
     M_mapSide["right"]  = OneDimensional::right;
@@ -79,13 +85,6 @@ BCInterfaceData::BCInterfaceData() :
     //Set mapLine
     M_mapLine["first"]  = OneDimensional::first;
     M_mapLine["second"] = OneDimensional::second;
-
-    //Set mapBase
-    M_mapBase1D["function"]         = BCI1DFunction;
-    M_mapBase1D["functionFile"]     = BCI1DFunctionFile;
-    M_mapBase1D["OPERfunction"]     = BCI1DFunctionSolver;
-    M_mapBase1D["OPERfunctionFile"] = BCI1DFunctionFileSolver;
-    M_mapBase1D["Default"]          = BCI1DFunctionDefault;
 
     //Set mapType
     M_mapType["Essential"]         = Essential;
@@ -103,36 +102,27 @@ BCInterfaceData::BCInterfaceData() :
     M_mapMode["Normal"]      = Normal;
     M_mapMode["Tangential"]  = Tangential;
     M_mapMode["Directional"] = Directional;
-
-    //Set mapBase
-    M_mapBase3D["function"]         = BCI3DFunction;
-    M_mapBase3D["functionFile"]     = BCI3DFunctionFile;
-    M_mapBase3D["OPERfunction"]     = BCI3DFunctionSolver;
-    M_mapBase3D["OPERfunctionFile"] = BCI3DFunctionFileSolver;
-    M_mapBase3D["FSI"]              = BCI3DFunctionFSI;
 }
 
 BCInterfaceData::BCInterfaceData( const BCInterfaceData& data ) :
         M_baseString        ( data.M_baseString ),
+        M_base              ( data.M_base ),
+        M_mapBase           ( data.M_mapBase ),
         M_side              ( data.M_side ),
         M_line              ( data.M_line ),
         M_quantity          ( data.M_quantity ),
-        M_base1D            ( data.M_base1D ),
         M_resistance        ( data.M_resistance ),
         M_mapSide           ( data.M_mapSide ),
         M_mapQuantity       ( data.M_mapQuantity ),
         M_mapLine           ( data.M_mapLine ),
-        M_mapBase1D         ( data.M_mapBase1D ),
         M_name              ( data.M_name ),
         M_flag              ( data.M_flag ),
         M_type              ( data.M_type ),
         M_mode              ( data.M_mode ),
         M_comV              ( data.M_comV ),
         M_direction         ( data.M_direction ),
-        M_base3D            ( data.M_base3D ),
         M_mapType           ( data.M_mapType ),
-        M_mapMode           ( data.M_mapMode ),
-        M_mapBase3D         ( data.M_mapBase3D )
+        M_mapMode           ( data.M_mapMode )
 {
 }
 
@@ -145,25 +135,23 @@ BCInterfaceData::operator=( const BCInterfaceData& data )
     if ( this != &data )
     {
         M_baseString        = data.M_baseString;
+        M_base              = data.M_base;
+        M_mapBase           = data.M_mapBase;
         M_side              = data.M_side;
         M_line              = data.M_line;
         M_quantity          = data.M_quantity;
-        M_base1D            = data.M_base1D;
         M_resistance        = data.M_resistance;
         M_mapSide           = data.M_mapSide;
         M_mapQuantity       = data.M_mapQuantity;
         M_mapLine           = data.M_mapLine;
-        M_mapBase1D         = data.M_mapBase1D;
         M_name              = data.M_name;
         M_flag              = data.M_flag;
         M_type              = data.M_type;
         M_mode              = data.M_mode;
         M_comV              = data.M_comV;
         M_direction         = data.M_direction;
-        M_base3D            = data.M_base3D;
         M_mapType           = data.M_mapType;
         M_mapMode           = data.M_mapMode;
-        M_mapBase3D         = data.M_mapBase3D;
     }
 
     return *this;
@@ -180,8 +168,8 @@ BCInterfaceData::readBC1D( const std::string& fileName, const std::string& dataS
     readSide( dataFile, ( dataSection + name + "/side" ).c_str() );
     readQuantity( dataFile, ( dataSection + name + "/quantity" ).c_str() );
     readLine( dataFile, ( dataSection + name + "/line" ).c_str() );
-    readBase1D( dataFile, dataSection + name + "/" );
     readResistance( dataFile, ( dataSection + name + "/resistance" ).c_str() );
+    readBase( dataFile, dataSection + name + "/" );
 }
 
 void
@@ -198,7 +186,7 @@ BCInterfaceData::readBC3D( const std::string& fileName,
     readMode( dataFile, ( dataSection + name + "/mode" ).c_str() );
     readComV( dataFile, ( dataSection + name + "/component" ).c_str() );
     readDirection( dataFile, ( dataSection + name + "/direction" ).c_str() );
-    readBase3D( dataFile, dataSection + name + "/" );
+    readBase( dataFile, dataSection + name + "/" );
 }
 
 void
@@ -209,11 +197,11 @@ BCInterfaceData::showMe( std::ostream& output ) const
     output << "Side       = " << M_side << std::endl;
     output << "Line       = " << M_line << std::endl;
     output << "Quantity   = " << M_quantity << std::endl;
-    output << "base       = " << M_base1D.second << std::endl;
     output << "Resistance  = ";
     for ( UInt i(0); i < static_cast<UInt>( M_resistance.size() ); ++i )
         output << M_resistance[i] << " ";
     output << "\n";
+    output << "base       = " << M_base.second << std::endl;
 
     output << "Flag       = " << static_cast< Real > ( M_flag ) << std::endl;
     output << "Type       = " << M_type << std::endl;
@@ -223,7 +211,6 @@ BCInterfaceData::showMe( std::ostream& output ) const
         output << M_comV[i] << " ";
     output << "\n";
     output << "direction  = " << M_direction << std::endl;
-    output << "base       = " << M_base3D.second << std::endl;
 }
 
 // ===================================================
@@ -249,19 +236,6 @@ BCInterfaceData::readResistance( const GetPot& dataFile, const char* resistance 
     for ( UInt j( 0 ); j < resistanceSize; ++j )
         M_resistance.push_back( dataFile( resistance, 0, j ) );
 }
-void
-BCInterfaceData::readBase1D( const GetPot& dataFile, const std::string& base )
-{
-    for ( std::map< std::string, baseList1D_Type >::iterator j = M_mapBase1D.begin(); j
-            != M_mapBase1D.end(); ++j )
-        if ( isBase( dataFile, ( base + j->first ).c_str() ) )
-        {
-            M_base1D.first = j->first;
-            M_base1D.second = M_mapBase1D[j->first];
-
-            break;
-        }
-}
 
 void
 BCInterfaceData::readComV( const GetPot& dataFile, const char* component )
@@ -276,14 +250,14 @@ BCInterfaceData::readComV( const GetPot& dataFile, const char* component )
 }
 
 void
-BCInterfaceData::readBase3D( const GetPot& dataFile, const std::string& base )
+BCInterfaceData::readBase( const GetPot& dataFile, const std::string& base )
 {
-    for ( std::map< std::string, baseList3D_Type >::iterator j = M_mapBase3D.begin(); j
-            != M_mapBase3D.end(); ++j )
+    for ( std::map< std::string, baseList_Type >::iterator j = M_mapBase.begin(); j
+            != M_mapBase.end(); ++j )
         if ( isBase( dataFile, ( base + j->first ).c_str() ) )
         {
-            M_base3D.first = j->first;
-            M_base3D.second = M_mapBase3D[j->first];
+            M_base.first = j->first;
+            M_base.second = M_mapBase[j->first];
 
             break;
         }
