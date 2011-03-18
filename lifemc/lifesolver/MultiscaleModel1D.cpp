@@ -776,6 +776,7 @@ MultiscaleModel1D::imposePerturbation()
             case OneDimensional::A:
 
                 M_bcDelta = M_data->jacobianPerturbationArea();
+
                 break;
 
             case OneDimensional::Q:
@@ -791,6 +792,7 @@ MultiscaleModel1D::imposePerturbation()
                 break;
 
             default:
+
                 std::cout << "Warning: bcType \"" << M_bcDeltaType << "\"not available!" << std::endl;
             }
 
