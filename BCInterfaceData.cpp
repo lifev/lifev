@@ -164,6 +164,38 @@ BCInterfaceData::operator=( const BCInterfaceData& data )
 // Methods
 // ===================================================
 void
+BCInterfaceData::readBC( const std::string& fileName, const std::string& dataSection, const bcName_Type& name )
+{
+    GetPot dataFile( fileName );
+
+    // 1D
+    readSide( dataFile, ( dataSection + name + "/side" ).c_str() );
+    readQuantity( dataFile, ( dataSection + name + "/quantity" ).c_str() );
+    readLine( dataFile, ( dataSection + name + "/line" ).c_str() );
+    readResistance( dataFile, ( dataSection + name + "/resistance" ).c_str() );
+    readCapacitance( dataFile, ( dataSection + name + "/capacitance" ).c_str() );
+
+    // 3D
+    M_name = name;
+
+    readFlag( dataFile, ( dataSection + name + "/flag" ).c_str() );
+    readType( dataFile, ( dataSection + name + "/type" ).c_str() );
+    readMode( dataFile, ( dataSection + name + "/mode" ).c_str() );
+    readComV( dataFile, ( dataSection + name + "/component" ).c_str() );
+    readDirection( dataFile, ( dataSection + name + "/direction" ).c_str() );
+    readBase( dataFile, dataSection + name + "/" );
+}
+
+void
+BCInterfaceData::readBC0D( const std::string& fileName, const std::string& dataSection, const bcName_Type& name )
+{
+    GetPot dataFile( fileName );
+
+    readQuantity( dataFile, ( dataSection + name + "/quantity" ).c_str() );
+    readBase( dataFile, dataSection + name + "/" );
+}
+
+void
 BCInterfaceData::readBC1D( const std::string& fileName, const std::string& dataSection, const bcName_Type& name )
 {
     GetPot dataFile( fileName );
@@ -177,9 +209,7 @@ BCInterfaceData::readBC1D( const std::string& fileName, const std::string& dataS
 }
 
 void
-BCInterfaceData::readBC3D( const std::string& fileName,
-                         const std::string& dataSection,
-                         const bcName_Type& name )
+BCInterfaceData::readBC3D( const std::string& fileName, const std::string& dataSection, const bcName_Type& name )
 {
     GetPot dataFile( fileName );
 

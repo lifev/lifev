@@ -55,7 +55,7 @@ namespace LifeV
  */
 template< class PhysicalSolverType >
 class BCInterfaceFunctionFileSolver: public virtual BCInterfaceFunctionFile< PhysicalSolverType > ,
-                                       public virtual BCInterfaceFunctionSolver< PhysicalSolverType >
+                                     public virtual BCInterfaceFunctionSolver< PhysicalSolverType >
 {
 public:
 

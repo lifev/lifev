@@ -91,7 +91,7 @@ public:
 
     typedef BCHandler                                         bc_Type;
     typedef boost::shared_ptr< bc_Type >                      bcPtr_Type;
-    typedef BCInterface3D< fluid_Type >                       bcInterface_Type;
+    typedef BCInterface3D< bc_Type, fluid_Type >              bcInterface_Type;
     typedef boost::shared_ptr< bcInterface_Type >             bcInterfacePtr_Type;
 
     typedef TimeAdvanceBDFNavierStokes< fluidVector_Type >    bdf_Type;
@@ -374,7 +374,7 @@ private:
     // NS parameters
     UInt                                    M_subiterationsMaximumNumber;
     Real                                    M_tolerance;
-    NonLinearAitken< fluidVector_Type >   M_generalizedAitken;
+    NonLinearAitken< fluidVector_Type >     M_generalizedAitken;
 
     // BC Functions for tangent problem
     BCFunctionBase                          M_bcBaseDeltaZero;

@@ -101,7 +101,7 @@ public:
 
     typedef BCHandler                                 bc_Type;
     typedef boost::shared_ptr< bc_Type >              bcPtr_Type;
-    typedef BCInterface3D< FSIOperator >              bcInterface_Type;
+    typedef BCInterface3D< bc_Type, FSIOperator >     bcInterface_Type;
     typedef boost::shared_ptr< bcInterface_Type >     bcInterfacePtr_Type;
 
     //@}
