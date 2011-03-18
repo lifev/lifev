@@ -95,6 +95,23 @@ public:
     //! @name Methods
     //@{
 
+    //! Read parameters for all kind of BC
+    /*!
+     * @param fileName Name of the data file.
+     * @param dataSection BC section
+     * @param name name of the boundary condition
+     */
+    void readBC( const std::string& fileName, const std::string& dataSection, const bcName_Type& name );
+
+    //! Read parameters for 0D BC
+    /*!
+     * @param fileName Name of the data file.
+     * @param dataSection BC section
+     * @param name name of the boundary condition
+     */
+    void readBC0D( const std::string& fileName, const std::string& dataSection, const bcName_Type& name );
+
+    //! Read parameters for 1D BC
     /*!
      * @param fileName Name of the data file.
      * @param dataSection BC section
@@ -102,6 +119,7 @@ public:
      */
     void readBC1D( const std::string& fileName, const std::string& dataSection, const bcName_Type& name );
 
+    //! Read parameters for 3D BC
     /*!
      * @param fileName Name of the data file.
      * @param dataSection BC section

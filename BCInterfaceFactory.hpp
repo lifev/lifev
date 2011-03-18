@@ -66,6 +66,9 @@ public:
 
     typedef FactorySingleton< Factory< BCInterfaceFunction< physicalSolver_Type > , baseList_Type > > factoryFunction_Type;
 
+    typedef BCInterfaceFunction< physicalSolver_Type >                                                bcFunction_Type;
+    typedef boost::shared_ptr< bcFunction_Type >                                                      bcFunctionPtr_Type;
+
     //@}
 
 
@@ -84,7 +87,7 @@ public:
     //! @name Methods
     //@{
 
-    boost::shared_ptr< BCInterfaceFunction< physicalSolver_Type > > createFunction( const data_Type& data );
+    bcFunctionPtr_Type createFunction( const data_Type& data );
 
     //@}
 
@@ -122,10 +125,10 @@ BCInterfaceFactory< PhysicalSolverType >::BCInterfaceFactory()
 // Methods
 // ===================================================
 template< class PhysicalSolverType >
-inline boost::shared_ptr< BCInterfaceFunction < PhysicalSolverType > >
+inline typename BCInterfaceFactory< PhysicalSolverType >::bcFunctionPtr_Type
 BCInterfaceFactory< PhysicalSolverType >::createFunction( const data_Type& data )
 {
-    boost::shared_ptr< BCInterfaceFunction < physicalSolver_Type > > function( factoryFunction_Type::instance().createObject( data.base().second, data.mapBase() ) );
+    bcFunctionPtr_Type function( factoryFunction_Type::instance().createObject( data.base().second, data.mapBase() ) );
 
     function->setData( data );
 
