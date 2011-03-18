@@ -41,10 +41,21 @@
 // Mathcard includes
 #include <lifemc/lifesolver/MultiscaleModel.hpp>
 
+#include <lifemc/lifesolver/OneDimensionalDefinitions.hpp>
+#include <lifemc/lifesolver/BCInterface.hpp>
+
 namespace LifeV
 {
 namespace Multiscale
 {
+
+// Forward declarations
+class Windkessel0DbcHandler;
+
+template< class BcHandler, class PhysicalSolverType >
+class BCInterfaceWindkessel0D;
+
+
 
 //! MultiscaleModelWindkessel0D - Multiscale model for Windkessel 0D terminals
 /*!
@@ -56,6 +67,18 @@ namespace Multiscale
 class MultiscaleModelWindkessel0D: public virtual multiscaleModel_Type
 {
 public:
+
+    //! @name Type definitions
+    //@{
+
+    typedef Windkessel0DbcHandler                                           bc_Type;
+    typedef boost::shared_ptr< bc_Type >                                    bcPtr_Type;
+
+    typedef BCInterfaceWindkessel0D< bc_Type, MultiscaleModelWindkessel0D > bcInterface_Type;
+    typedef boost::shared_ptr< bcInterface_Type >                           bcInterfacePtr_Type;
+
+    //@}
+
 
     //! @name Constructors & Destructor
     //@{
@@ -117,33 +140,39 @@ public:
     //! @name Get Methods (couplings)
     //@{
 
+    //! Get the BCInterface container of the boundary conditions of the model
+    /*!
+     * @return BCInterface container
+     */
+    bcInterface_Type& bcInterface() { return *M_bc; }
+
     //! Get the density on a specific boundary face of the model
     /*!
      * @param flag flag of the boundary face
      * @return density value
      */
-    Real boundaryDensity( const bcFlag_Type& /*flag*/) const { return 0; }
+    Real boundaryDensity( const bcFlag_Type& /*flag*/) const { return M_globalData->fluidDensity(); }
 
     //! Get the viscosity on a specific boundary face of the model
     /*!
      * @param flag flag of the boundary face
      * @return viscosity value
      */
-    Real boundaryViscosity( const bcFlag_Type& /*flag*/) const { return 0; }
+    Real boundaryViscosity( const bcFlag_Type& /*flag*/) const { return M_globalData->fluidViscosity(); }
 
     //! Get the flux on a specific boundary face of the model
     /*!
      * @param flag flag of the boundary face
      * @return flux value
      */
-    Real boundaryFlowRate( const bcFlag_Type& flag ) const { return 0; }
+    Real boundaryFlowRate( const bcFlag_Type& /*flag*/ ) const { return M_flowRate; }
 
     //! Get the integral of the pressure (on a specific boundary face)
     /*!
      * @param flag flag of the boundary face
      * @return pressure value
      */
-    Real boundaryPressure( const bcFlag_Type& flag ) const { return 0; }
+    Real boundaryPressure( const bcFlag_Type& /*flag*/ ) const { return M_pressure; }
 
     //! Get the integral of the normal stress (on a specific boundary face)
     /*!
@@ -195,15 +224,6 @@ private:
     //! @name Private Methods
     //@{
 
-    //! Setup the global data of the model.
-    /*!
-     * In particular, it replaces the default local values with the ones in the global container.
-     * If a value is already specified in the data file, do not perform the replacement.
-     *
-     * @param fileName File name of the specific model.
-     */
-    void setupGlobalData( const std::string& fileName );
-
     //! Initialize the solution.
     void initializeSolution();
 
@@ -224,26 +244,27 @@ private:
         return (exp( RC * (-T))*( (R1+R2) * RC *( (Q2 -Q1) *(T) /dt + Q1 ) + R1 * dQ + Pv1*RC ));
     }
 
+    void setupExporterImporter();
+
     //@}
 
-     Real M_pressure_tn;    //Pressure (P1) @ t=t(n)
-     Real M_flowRate_tn;    //flowRate (Q1) @ t=t(n)
+    std::ofstream          M_outputFile;
 
-     Real M_pressure;       //Pressure (P2) @ t=t(n+1)
-     Real M_flowRate;       //flowRate (Q2) @ t=t(n+1)
+    bcInterfacePtr_Type    M_bc;
 
-     Real M_backPressure;    //Back Pressure (Pv)
+    Real                   M_pressure_tn;      // Pressure (P1) @ t=t(n)
+    Real                   M_flowRate_tn;      // flowRate (Q1) @ t=t(n)
 
-     Real M_dt      ;       //time step
-     Real M_nIntegration;   //Number of Integration steps in each time step
+    Real                   M_pressure;         // Pressure (P2) @ t=t(n+1)
+    Real                   M_flowRate;         // flowRate (Q2) @ t=t(n+1)
 
-     Real M_resistance1;    //Resistance 1 (R1)
-     Real M_resistance2;    //Resistance 2 (R2)
-     Real M_capacitance;    //capacitance  (C)
+    UInt                   M_nIntegration;     // Number of Integration steps in each time step
 
-     UInt M_solveForPressure;      //1= solve for Pressure, 0=solve for flowRate;
+    Real                   M_resistance1;      // Resistance 1 (R1)
+    Real                   M_resistance2;      // Resistance 2 (R2)
+    Real                   M_capacitance;      // capacitance  (C)
 
-
+    Real                   M_venousPressure;   // Back Pressure (Pv)
 };
 
 //! Factory create function
@@ -251,6 +272,159 @@ inline multiscaleModel_Type* createMultiscaleModelWindkessel0D()
 {
     return new MultiscaleModelWindkessel0D();
 }
+
+
+
+//! Windkessel0DbcHandler - A boundary conditions handler for the Windkessel 0D terminal
+/*!
+ *  @author Cristiano Malossi
+ *
+ *  This simple class handles the BC for the Windkessel 0D model.
+ *  NOTE: due to its simplicity, we use some 1D features in order to minimize the implementation.
+ */
+class Windkessel0DbcHandler
+{
+public:
+
+    //! @name Type definitions
+    //@{
+
+    typedef boost::function<Real ( const Real&  )>                        function_Type;
+    typedef OneDimensional::bcType_Type                                   bcType_Type;
+
+    //@}
+
+
+    //! @name Constructors & Destructor
+    //@{
+
+    //! Constructor
+    explicit Windkessel0DbcHandler() : M_function(), M_bcType() {}
+
+    //! Destructor
+    virtual ~Windkessel0DbcHandler() {}
+
+    //@}
+
+
+    //! @name Methods
+    //@{
+
+    //! Evaluate the bc
+    /*!
+     * @param time the current time of the simulation
+     * @return the bc value
+    */
+    Real evaluate( const Real& time ) { return M_function( time ); }
+
+    //@}
+
+
+    //! @name Set Methods
+    //@{
+
+    //! Set the function
+    /*!
+      @param function the user defined function
+    */
+    void setBC( const bcType_Type& bcType, const function_Type& function ) { M_bcType = bcType; M_function = function; }
+
+    //! Set the function
+    /*!
+      @param function the user defined function
+    */
+    void setFunction( const function_Type& function ) { M_function = function; }
+
+    //! Set the type
+    /*!
+      @param bcType the bc type
+    */
+    void setBcType( const bcType_Type& bcType ) { M_bcType = bcType; }
+
+    //@}
+
+
+    //! @name Get Methods
+    //@{
+
+    //! Get the function
+    /*!
+      @return the user defined function
+    */
+    const function_Type& function() { return M_function; }
+
+    //! Get the type
+    /*!
+      @return the bc type
+    */
+    const bcType_Type& bcType() { return M_bcType; }
+
+    //@}
+
+private:
+
+    function_Type               M_function;
+    bcType_Type                 M_bcType;
+};
+
+
+
+//! BCInterface0DWindkessel - A very simple BCInterface for the Windkessel model
+/*!
+ *  @author Cristiano Malossi
+ *
+ *  This simple class handles the BC for the Windkessel 0D model.
+ */
+template< class BcHandler, class PhysicalSolverType >
+class BCInterfaceWindkessel0D : public virtual BCInterface< BcHandler, PhysicalSolverType >
+{
+public:
+
+    //! @name Type definitions
+    //@{
+
+    typedef BCInterface< BcHandler, PhysicalSolverType >          bcInterface_Type;
+
+    //@}
+
+
+    //! @name Constructors & Destructor
+    //@{
+
+    //! Constructor
+    explicit BCInterfaceWindkessel0D() : bcInterface_Type() {}
+
+    //! Destructor
+    virtual ~BCInterfaceWindkessel0D() {}
+
+    //@}
+
+
+    //! @name Methods
+    //@{
+
+    //! Insert the current boundary condition in the BChandler
+    void insertBC()
+    {
+        bcInterface_Type::insertBC();
+
+        addBcToHandler();
+    }
+
+    //@}
+
+private:
+
+    void addBcToHandler()
+    {
+        if ( !this->M_handler.get() )
+            this->createHandler();
+
+        this->M_handler->setBC( this->M_data.quantity(), boost::bind( &BCInterfaceFunction<PhysicalSolverType>::functionTime, this->M_vectorFunction.back(), _1 ) );
+    }
+};
+
+
 
 } // Namespace multiscale
 } // Namespace LifeV
