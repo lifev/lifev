@@ -444,7 +444,10 @@ UInt ExporterVTK<Mesh>::whichCellType( const feSpacePtr_Type & _feSpacePtr )
             vtkCellType = VTK_QUADRATIC_HEXAHEDRON;
             break;
         default:
-            if (!this->M_procId) std::cout << "WARNING: the element is not yet implemented in vtk_wrtrs.h\n";
+            if (!this->M_procId)
+                std::cout << "WARNING: the element is not yet implemented in ExporterVTK\n";
+            assert();
+
     }
 
     return vtkCellType;
