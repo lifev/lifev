@@ -234,6 +234,7 @@ private:
 // ===================================================
 template< class BcHandler, class PhysicalSolverType >
 BCInterface1D< BcHandler, PhysicalSolverType >::BCInterface1D() :
+        bcInterface_Type          (),
         M_vectorDefaultFunction1D ()
 {
 
