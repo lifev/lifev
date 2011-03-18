@@ -184,8 +184,12 @@ MultiscaleCouplingBoundaryCondition::applyBoundaryConditions0D( const UInt& i )
 {
     ModelType *model = multiscaleDynamicCast< ModelType >( M_models[i] );
 
-    // Windkessel0D has only 1 BC
-    //model->setBC( M_fileName, "boundary_conditions/", M_list[0] );
+    for ( UInt j( 0 ); j < M_listSize; ++j )
+    {
+        model->bcInterface().readBC( M_fileName, "boundary_conditions/", M_list[j] );
+
+        model->bcInterface().insertBC();
+    }
 }
 
 template< class ModelType >

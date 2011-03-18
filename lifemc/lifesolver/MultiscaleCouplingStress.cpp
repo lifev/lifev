@@ -48,8 +48,6 @@ std::map< std::string, stress_Type > multiscaleStressesMap;
 // ===================================================
 MultiscaleCouplingStress::MultiscaleCouplingStress() :
         multiscaleCoupling_Type     (),
-        M_baseStress3D              (),
-        M_baseStress1D              (),
         M_stressType                ()
 {
 
@@ -93,11 +91,6 @@ MultiscaleCouplingStress::setupCoupling()
     //Create local vectors
     createLocalVectors();
 
-    //Set Functions
-    M_baseStress3D.setFunction( boost::bind( &MultiscaleCouplingStress::functionStress, this, _1, _2, _3, _4, _5 ) );
-
-    M_baseStress1D.setFunction( boost::bind( &MultiscaleCouplingStress::functionStress, this, _1, _1, _1, _1, _1 ) );
-
     // Impose stress
     for ( UInt i( 0 ); i < modelsNumber(); ++i )
         switch ( M_models[i]->type() )
@@ -117,6 +110,12 @@ MultiscaleCouplingStress::setupCoupling()
         case OneDimensional:
 
             imposeStress1D< MultiscaleModel1D > ( i );
+
+            break;
+
+        case Windkessel0D:
+
+            imposeStress0D< MultiscaleModelWindkessel0D > ( i );
 
             break;
 
@@ -162,6 +161,13 @@ MultiscaleCouplingStress::initializeCouplingVariables()
             break;
         }
 
+        case Windkessel0D:
+        {
+            ( *M_localCouplingVariables[0] )[0] += multiscaleDynamicCast< MultiscaleModelWindkessel0D >( M_models[i] )->boundaryStress( M_flags[i], M_stressType );
+
+            break;
+        }
+
         default:
 
             if ( M_displayer->isLeader() )
@@ -193,6 +199,14 @@ MultiscaleCouplingStress::initializeCouplingVariables()
         {
 
             ( *M_localCouplingVariables[0] )[i] = multiscaleDynamicCast< MultiscaleModel1D >( M_models[i] )->boundaryFlowRate( M_flags[i] );
+
+            break;
+        }
+
+        case Windkessel0D:
+        {
+
+            ( *M_localCouplingVariables[0] )[i] = multiscaleDynamicCast< MultiscaleModelWindkessel0D >( M_models[i] )->boundaryFlowRate( M_flags[i] );
 
             break;
         }
@@ -236,6 +250,12 @@ MultiscaleCouplingStress::exportCouplingResiduals( multiscaleVector_Type& coupli
         case OneDimensional:
 
             ( *M_localCouplingResiduals )[i] = multiscaleDynamicCast< MultiscaleModel1D >( M_models[i] )->boundaryFlowRate( M_flags[i] );
+
+            break;
+
+        case Windkessel0D:
+
+            ( *M_localCouplingResiduals )[i] = multiscaleDynamicCast< MultiscaleModelWindkessel0D >( M_models[i] )->boundaryFlowRate( M_flags[i] );
 
             break;
 
@@ -349,6 +369,12 @@ MultiscaleCouplingStress::insertJacobianDeltaCoefficients( multiscaleMatrix_Type
 
         break;
 
+    case Windkessel0D:
+
+        coefficient = multiscaleDynamicCast< MultiscaleModelWindkessel0D >( M_models[modelLocalID] )->boundaryDeltaFlowRate( M_flags[modelLocalID], solveLinearSystem );
+
+        break;
+
     default:
 
         if ( M_displayer->isLeader() )
@@ -397,6 +423,15 @@ MultiscaleCouplingStress::displayCouplingValues( std::ostream& output )
             flowRate        = multiscaleDynamicCast< MultiscaleModel1D >( M_models[i] )->boundaryFlowRate( M_flags[i] );
             stress          = ( *M_localCouplingVariables[0] )[0];
             pressure        = multiscaleDynamicCast< MultiscaleModel1D >( M_models[i] )->boundaryPressure( M_flags[i] );
+
+            break;
+        }
+
+        case Windkessel0D:
+        {
+            flowRate        = multiscaleDynamicCast< MultiscaleModelWindkessel0D >( M_models[i] )->boundaryFlowRate( M_flags[i] );
+            stress          = ( *M_localCouplingVariables[0] )[0];
+            pressure        = multiscaleDynamicCast< MultiscaleModelWindkessel0D >( M_models[i] )->boundaryPressure( M_flags[i] );
 
             break;
         }
