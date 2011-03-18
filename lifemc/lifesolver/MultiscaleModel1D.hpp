@@ -110,10 +110,10 @@ public:
     typedef solver_Type::feSpace_Type                              feSpace_Type;
     typedef solver_Type::feSpacePtr_Type                           feSpacePtr_Type;
 
-    typedef BCInterface1D< solver_Type >                           bcInterface_Type;
-    typedef boost::shared_ptr< bcInterface_Type >                  bcInterfacePtr_Type;
     typedef OneDimensionalBCHandler                                bc_Type;
     typedef boost::shared_ptr< bc_Type >                           bcPtr_Type;
+    typedef BCInterface1D< bc_Type, solver_Type >                  bcInterface_Type;
+    typedef boost::shared_ptr< bcInterface_Type >                  bcInterfacePtr_Type;
 
     typedef OneDimensionalBCFunction                               bcFunction_Type;
 
@@ -272,7 +272,7 @@ public:
     /*!
      * @return BC handler
      */
-    bc_Type& bc() const { return *(M_bc->handler()); }
+    bc_Type& bc() const { return *( M_bc->handler() ); }
 
     //! Get the data container of the 1D model.
     /*!
