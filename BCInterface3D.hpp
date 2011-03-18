@@ -247,6 +247,7 @@ private:
 // ===================================================
 template< class BcHandler, class PhysicalSolverType >
 BCInterface3D< BcHandler, PhysicalSolverType >::BCInterface3D() :
+        bcInterface_Type          (),
         M_vectorFunctionDirection (),
         M_vectorFSI               ()
 {

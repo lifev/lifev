@@ -140,6 +140,15 @@ public:
             base.setFunction( boost::bind( &BCInterfaceFunction::functionTimeSpace, this, _1, _2, _3, _4, _5 ) );
     }
 
+    //! Function of time
+    Real functionTime( const Real& t );
+
+    //! Function of time and space
+    Real functionTimeSpace( const Real& t, const Real& x, const Real& y, const Real& z, const ID& /*id*/);
+
+    //! Function of time and space and id
+    Real functionTimeSpaceID( const Real& t, const Real& x, const Real& y, const Real& z, const ID& id );
+
     //@}
 
 
@@ -174,21 +183,6 @@ private:
     BCInterfaceFunction( const BCInterfaceFunction& function );
 
     BCInterfaceFunction& operator=( const BCInterfaceFunction& function );
-
-    //@}
-
-
-    //! @name Private Methods
-    //@{
-    
-    //! Function of time
-    Real functionTime( const Real& t );
-
-    //! Function of time and space
-    Real functionTimeSpace( const Real& t, const Real& x, const Real& y, const Real& z, const ID& /*id*/);
-
-    //! Function of time and space and id
-    Real functionTimeSpaceID( const Real& t, const Real& x, const Real& y, const Real& z, const ID& id );
 
     //@}
 

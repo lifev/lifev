@@ -153,7 +153,7 @@ protected:
     //! @name Protected Methods
     //@{
 
-    void createAccessList( const data_Type& data );
+    void createAccessList( const data_Type& /*data*/ ) {}
 
     //@}
 
