@@ -50,6 +50,7 @@ BCInterfaceData::BCInterfaceData() :
         M_line               (),
         M_quantity           (),
         M_resistance         (),
+        M_capacitance        (),
         M_mapSide            (),
         M_mapQuantity        (),
         M_mapLine            (),
@@ -112,6 +113,7 @@ BCInterfaceData::BCInterfaceData( const BCInterfaceData& data ) :
         M_line              ( data.M_line ),
         M_quantity          ( data.M_quantity ),
         M_resistance        ( data.M_resistance ),
+        M_capacitance       ( data.M_capacitance ),
         M_mapSide           ( data.M_mapSide ),
         M_mapQuantity       ( data.M_mapQuantity ),
         M_mapLine           ( data.M_mapLine ),
@@ -141,6 +143,7 @@ BCInterfaceData::operator=( const BCInterfaceData& data )
         M_line              = data.M_line;
         M_quantity          = data.M_quantity;
         M_resistance        = data.M_resistance;
+        M_capacitance       = data.M_capacitance;
         M_mapSide           = data.M_mapSide;
         M_mapQuantity       = data.M_mapQuantity;
         M_mapLine           = data.M_mapLine;
@@ -169,6 +172,7 @@ BCInterfaceData::readBC1D( const std::string& fileName, const std::string& dataS
     readQuantity( dataFile, ( dataSection + name + "/quantity" ).c_str() );
     readLine( dataFile, ( dataSection + name + "/line" ).c_str() );
     readResistance( dataFile, ( dataSection + name + "/resistance" ).c_str() );
+    readCapacitance( dataFile, ( dataSection + name + "/capacitance" ).c_str() );
     readBase( dataFile, dataSection + name + "/" );
 }
 
@@ -201,6 +205,7 @@ BCInterfaceData::showMe( std::ostream& output ) const
     for ( UInt i(0); i < static_cast<UInt>( M_resistance.size() ); ++i )
         output << M_resistance[i] << " ";
     output << "\n";
+    output << "Capacitance= " << M_capacitance << std::endl;
     output << "base       = " << M_base.second << std::endl;
 
     output << "Flag       = " << static_cast< Real > ( M_flag ) << std::endl;
