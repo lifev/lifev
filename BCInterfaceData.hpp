@@ -226,16 +226,34 @@ public:
     const std::map< std::string, baseList_Type >& mapBase() const { return M_mapBase; }
 
     //! Get the flag of the boundary condition
+    /*!
+     * @return Boundary condition side
+     */
     const OneDimensional::bcSide_Type& side() const { return M_side; }
 
     //! Get the mode of the boundary condition
+    /*!
+     * @return Boundary condition line
+     */
     const OneDimensional::bcLine_Type& line() const { return M_line; }
 
     //! Get the quantity of the boundary condition
+    /*!
+     * @return Boundary condition quantity
+     */
     const OneDimensional::bcType_Type& quantity() const { return M_quantity; }
 
     //! Get the resistance vector {R1, R2, R3 ...}
+    /*!
+     * @return Boundary condition resistance vector
+     */
     const resistanceContainer_Type& resistance() const { return M_resistance; }
+
+    //! Get the capacitance
+    /*!
+     * @return Boundary condition capacitance
+     */
+    const Real& capacitance() const { return M_capacitance; }
 
     //! Get the name of the boundary condition
     /*!
@@ -296,6 +314,8 @@ private:
 
     void readResistance( const GetPot& dataFile, const char* resistance );
 
+    void readCapacitance( const GetPot& dataFile, const char* capacitance ) { M_capacitance = dataFile( capacitance, 0 ); }
+
     void readFlag( const GetPot& dataFile, const char* flag ) { M_flag = dataFile( flag, 0 ); }
 
     void readType( const GetPot& dataFile, const char* type ) { M_type = M_mapType[dataFile( type, "Essential" )]; }
@@ -329,6 +349,7 @@ private:
     OneDimensional::bcType_Type                                    M_quantity;
 
     resistanceContainer_Type                                       M_resistance;
+    Real                                                           M_capacitance;
 
     // Maps
     std::map< std::string, OneDimensional::bcSide_Type >           M_mapSide;
