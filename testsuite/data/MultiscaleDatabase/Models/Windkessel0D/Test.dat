@@ -1,15 +1,15 @@
-# -*- getpot -*- GetPot mode activation for emacs
 ###################################################################################################
 #
-#                       This file is part of the LifeV Applications                        
-#                                 Copyright (C) 2010 EPFL          
+#                       This file is part of the LifeV Library                       
+#                Copyright (C) 2004, 2005, 2007 EPFL, Politecnico di Milano, INRIA
+#                Copyright (C) 2010 EPFL, Politecnico di Milano, Emory University
 #
 #      Author(s): Cristiano Malossi <cristiano.malossi@epfl.ch>
-#           Date: 2010-08-20
-#  License Terms: GNU GPL
+#           Date: 2011-03-10
+#  License Terms: GNU LGPL
 #
 ###################################################################################################
-### MODEL: Fluid3D - Template #####################################################################
+### MODEL: Windkessel0D - Test ####################################################################
 ###################################################################################################
 
 [Multiscale]
@@ -18,14 +18,12 @@ modelType        = Windkessel0D
 couplingFlags    = '0'
 
 [Coefficients]
-Resistance1  = 100.0
-Resistance2  = 50.0
-capacitance  = 0.001
-
 IntegrationSteps = 5
-BackPressure = 0.0
-SolveForPressure = 1
 
+Resistance1    = 100.0
+Resistance2    = 50.0
+Capacitance    = 0.001
+VenousPressure = 0.0
 
 
 

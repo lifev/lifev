@@ -30,6 +30,8 @@ dist_pkgdata_DATA = 1D_1Cylinder.dat \
                     1D-FSI3D_2Cylinders_S.dat \
                     1D-FSI3D_3Cylinders_FS.dat \
                     1D-FSI3D_3Cylinders_S.dat \
+                    1D-Windkessel0D_1Cylinder_FS.dat \
+                    1D-Windkessel0D_1Cylinder_S.dat \
                     Fluid3D_1Cylinder-Stokes-tube20.dat \
                     Fluid3D_1Cylinder-tube20.dat \
                     Fluid3D_5Cylinders-tube20_FS.dat \
@@ -55,7 +57,8 @@ dist_pkgdata_DATA = 1D_1Cylinder.dat \
                     FSI3D_2Cylinders-tube20_FS.dat \
                     FSI3D_2Cylinders-tube20_S.dat \
                     FSI3D-1D_CarotidBifurcation_FS.dat \
-                    Template.dat
+                    Template.dat \
+                    Windkessel0D_Test.dat
 
 check-local:
 	@if test "$(top_srcdir)" != "$(top_builddir)"; then\
