@@ -98,6 +98,14 @@ public:
         BINARY_EXPORT = 2
     };
 
+    /*! @enum FLOAT_PRECISION
+        Currently supported are single and double precision
+     */
+    enum FLOAT_PRECISION {
+        SINGLE_PRECISION = 1,
+        DOUBLE_PRECISION = 2
+    };
+
     typedef MeshType                          mesh_Type;
     typedef Exporter<MeshType>                super;
     typedef typename super::meshPtr_Type      meshPtr_Type;
@@ -237,6 +245,7 @@ private:
      */
     void composeVTUGeoStream( const feSpacePtr_Type & _feSpacePtr,
                               const std::map<UInt, UInt>& globalToLocalPointsMap,
+                              const std::map<UInt, UInt>& localToGlobalPointsMap,
                               const std::vector<Vector>& coordinatesOfPoints,
                               std::stringstream& vtuGeoStringStream );
 
@@ -284,6 +293,8 @@ private:
     //! @name Private members
     //@{
     EXPORT_MODE M_exportMode;
+
+    FLOAT_PRECISION M_floatPrecision;
     //@}
 
 };
@@ -300,7 +311,8 @@ private:
 template<typename Mesh>
 ExporterVTK<Mesh>::ExporterVTK():
 super(),
-M_exportMode(ASCII_EXPORT)
+M_exportMode(ASCII_EXPORT),
+M_floatPrecision( DOUBLE_PRECISION )
 {
 }
 
@@ -318,6 +330,16 @@ template<typename Mesh> ExporterVTK<Mesh >::ExporterVTK(
             break;
         case 2:
             M_exportMode = BINARY_EXPORT;
+            break;
+
+    }
+    switch( data_file("exporter/floatPrecision",2) )
+    {
+        case 1:
+            M_floatPrecision = SINGLE_PRECISION;
+            break;
+        case 2:
+            M_floatPrecision = DOUBLE_PRECISION;
             break;
 
     }
@@ -369,7 +391,7 @@ void ExporterVTK<Mesh>::postProcess(const Real& /*time*/)
             createMaps( i->feSpacePtr(), gtlPointsMap, ltgPointsMap, pointsCoords );
 
             composeVTUHeaderStream( gtlPointsMap.size(), buffer );
-            composeVTUGeoStream( i->feSpacePtr(), gtlPointsMap, pointsCoords, buffer );
+            composeVTUGeoStream( i->feSpacePtr(), gtlPointsMap, ltgPointsMap, pointsCoords, buffer );
 
             composeTypeDataHeaderStream(i->where(), buffer);
             composeDataArrayStream(*i, ltgPointsMap, buffer);
@@ -446,7 +468,7 @@ UInt ExporterVTK<Mesh>::whichCellType( const feSpacePtr_Type & _feSpacePtr )
         default:
             if (!this->M_procId)
                 std::cout << "WARNING: the element is not yet implemented in ExporterVTK\n";
-            assert();
+            abort();
 
     }
 
@@ -471,7 +493,25 @@ ExporterVTK<Mesh>::composeDataArrayStream(const exporterData_Type& dvar,
     std::stringstream nComponents;
     nComponents << dvar.fieldDim();
 
-    int32_type lengthOfData( dvar.fieldDim()*numPoints*sizeof(Real) );
+    int32_type sizeOfFloat;
+    std::string floatTypeString;
+    switch( M_floatPrecision )
+    {
+        case SINGLE_PRECISION:
+            ASSERT( sizeof(float) == 4, "\nThis piece of code assumes sizeof(float) == 4" )
+            sizeOfFloat = sizeof(float);
+            floatTypeString = "Float32";
+            break;
+        case DOUBLE_PRECISION:
+            ASSERT( sizeof(Real) == 8, "\nThis piece of code assumes sizeof(float) == 4" )
+            sizeOfFloat = sizeof(Real);
+            floatTypeString = "Float64";
+            break;
+        default:
+            abort();
+    }
+
+    int32_type lengthOfData( dvar.fieldDim()*numPoints*sizeOfFloat );
 
     switch( M_exportMode )
     {
@@ -486,7 +526,7 @@ ExporterVTK<Mesh>::composeDataArrayStream(const exporterData_Type& dvar,
             break;
     }
 
-    dataArraysStringStream << "\t\t\t\t<DataArray type=\"Float64\" Name=\""
+    dataArraysStringStream << "\t\t\t\t<DataArray type=\"" << floatTypeString << "\" Name=\""
                     << dvar.variableName() << "\" NumberOfComponents=\""
                     << nComponents.str() << "\" format=\"" << formatString << "\">\n";
 
@@ -521,10 +561,20 @@ ExporterVTK<Mesh>::composeDataArrayStream(const exporterData_Type& dvar,
                     // the tensor case is not ready yet
                     //                    for (UInt jcoor=0; jcoor< dvar.fieldDim() / nDimensions; ++jcoor)
                     //                    {
-                    Real value( dvar( start + id + icoor * numDOF ) );
-                    //                                                        + jcoor * numDOF * dvar.fieldDim() ) << " ";
-                    dataToBeEncoded.write( reinterpret_cast<const char *>(&value), sizeof(Real) );
-                    //                    }
+                    if( M_floatPrecision == SINGLE_PRECISION )
+                    {
+                        float value( dvar( start + id + icoor * numDOF ) );
+                        //                                                        + jcoor * numDOF * dvar.fieldDim() ) << " ";
+                        dataToBeEncoded.write( reinterpret_cast<const char *>(&value), sizeof(float) );
+                        //                    }
+                    }
+                    else
+                    {
+                        Real value( dvar( start + id + icoor * numDOF ) );
+                        //                                                        + jcoor * numDOF * dvar.fieldDim() ) << " ";
+                        dataToBeEncoded.write( reinterpret_cast<const char *>(&value), sizeof(Real) );
+                        //                    }
+                    }
                 }
             }
 
@@ -620,6 +670,19 @@ void ExporterVTK<Mesh>::composePVTUStream(const exporterData_Type& dvar,
 {
     // ASSERT( vtkFile, "Error: Output file cannot be open" );
 
+    std::string floatTypeString;
+    switch( M_floatPrecision )
+    {
+        case SINGLE_PRECISION:
+            floatTypeString = "Float32";
+            break;
+        case DOUBLE_PRECISION:
+            floatTypeString = "Float64";
+            break;
+        default:
+            abort();
+    }
+
     //header part of the file
     pVTUStringStream << "<?xml version=\"1.0\"?>\n";
     pVTUStringStream << "<VTKFile type=\"PUnstructuredGrid\" version=\"0.1\" byte_order=\"LittleEndian\">\n";
@@ -640,6 +703,12 @@ void ExporterVTK<Mesh>::composePVTUStream(const exporterData_Type& dvar,
     pVTUStringStream << "\t\t\t<PDataArray type=\"Int32\" Name=\"types\" format=\"ascii\"/>\n";
 
     pVTUStringStream << "\t\t</PCells>\n";
+
+    pVTUStringStream << "\t\t<PPointData>\n";
+    pVTUStringStream << "\t\t\t<PDataArray type=\"Int32\" Name=\"GlobalId\" NumberOfComponents=\"1\" "
+                    << "format=\"ascii\">\n";
+    pVTUStringStream << "\t\t\t</PDataArray>\n";
+    pVTUStringStream << "\t\t</PPointData>\n";
 
     std::string whereString;
     switch ( dvar.where() )
@@ -667,7 +736,7 @@ void ExporterVTK<Mesh>::composePVTUStream(const exporterData_Type& dvar,
             formatString = "binary";
             break;
     }
-    pVTUStringStream << "\t\t\t<PDataArray type=\"Float64\" Name=\""
+    pVTUStringStream << "\t\t\t<PDataArray type=\"" << floatTypeString << "\" Name=\""
                     << dvar.variableName() << "\" NumberOfComponents=\""
                     << nComponents.str() << "\" format=\"" << formatString << "\">\n";
 
@@ -786,6 +855,7 @@ void ExporterVTK<Mesh>::createMaps( const feSpacePtr_Type & _feSpacePtr,
 template <typename Mesh>
 void ExporterVTK<Mesh>::composeVTUGeoStream( const feSpacePtr_Type & _feSpacePtr,
                                              const std::map<UInt, UInt>& globalToLocalPointsMap,
+                                             const std::map<UInt, UInt>& localToGlobalPointsMap,
                                              const std::vector<Vector>& coordinatesOfPoints,
                                              std::stringstream& vtuGeoStringStream )
 {
@@ -808,6 +878,7 @@ void ExporterVTK<Mesh>::composeVTUGeoStream( const feSpacePtr_Type & _feSpacePtr
             vtuGeoStringStream << coordinatesOfPoints[iCoor][ iPoint ] << " ";
     }
     vtuGeoStringStream << "\n\t\t\t\t</DataArray>\n";
+
     vtuGeoStringStream << "\t\t\t</Points>\n";
 
     // connectivity
@@ -850,6 +921,16 @@ void ExporterVTK<Mesh>::composeVTUGeoStream( const feSpacePtr_Type & _feSpacePtr
 
     vtuGeoStringStream << "\n\t\t\t\t</DataArray>\n";
     vtuGeoStringStream << "\t\t\t</Cells>\n";
+
+    vtuGeoStringStream << "\t\t\t<PointData>\n";
+    vtuGeoStringStream << "\t\t\t\t<DataArray type=\"Int32\" NumberOfComponents=\"1\" "
+                    << "Name=\"GlobalId\" format=\"ascii\">\n";
+    for ( UInt iPoint = 0; iPoint < numPoints; ++iPoint )
+    {
+        vtuGeoStringStream << localToGlobalPointsMap.find(  iPoint )->second << " ";
+    }
+    vtuGeoStringStream << "\n\t\t\t\t</DataArray>\n";
+    vtuGeoStringStream << "\t\t\t</PointData>\n";
 
 }
 

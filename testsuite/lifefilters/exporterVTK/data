@@ -29,3 +29,4 @@ save = 1
 multimesh = false
 time_id_width = 3
 exportMode = 2
+floatPrecision = 2
