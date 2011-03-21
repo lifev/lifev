@@ -213,13 +213,13 @@ Int main(Int argc, char** argv)
         chronoIteration.start();
 
         if ( oneDModel.data().dataTime()->isFirstTimeStep() )
-            oneDModel.buildSystem();
+            oneDModel.buildModel();
         else
-            oneDModel.updateSystem();
+            oneDModel.updateModel();
 
         chronoSystem.start();
 
-        oneDModel.solveSystem();
+        oneDModel.solveModel();
 
         chronoSystem.stop();
 

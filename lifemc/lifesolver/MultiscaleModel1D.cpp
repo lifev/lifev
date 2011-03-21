@@ -107,7 +107,7 @@ MultiscaleModel1D::setupData( const std::string& fileName )
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 8130 ) << "MultiscaleModel1D::setupData( ) \n";
+    Debug( 8130 ) << "MultiscaleModel1D::setupData( fileName ) \n";
 #endif
 
     // Preliminary setup of the communicator
@@ -186,7 +186,7 @@ MultiscaleModel1D::setupModel()
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 8130 ) << "MultiscaleModel1D::setupProblem() \n";
+    Debug( 8130 ) << "MultiscaleModel1D::setupModel() \n";
 #endif
 
     //FEspace
@@ -236,11 +236,11 @@ MultiscaleModel1D::setupModel()
 }
 
 void
-MultiscaleModel1D::buildSystem()
+MultiscaleModel1D::buildModel()
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 8130 ) << "MultiscaleModel1D::buildSystem() \n";
+    Debug( 8130 ) << "MultiscaleModel1D::buildModel() \n";
 #endif
 
     //M_data->showMe();
@@ -257,11 +257,11 @@ MultiscaleModel1D::buildSystem()
 }
 
 void
-MultiscaleModel1D::updateSystem()
+MultiscaleModel1D::updateModel()
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 8130 ) << "MultiscaleModel1D::updateSystem() \n";
+    Debug( 8130 ) << "MultiscaleModel1D::updateModel() \n";
 #endif
 
     // Update previous solution
@@ -275,11 +275,11 @@ MultiscaleModel1D::updateSystem()
 }
 
 void
-MultiscaleModel1D::solveSystem()
+MultiscaleModel1D::solveModel()
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 8130 ) << "MultiscaleModel1D::solveSystem() \n";
+    Debug( 8130 ) << "MultiscaleModel1D::solveModel() \n";
 #endif
 
     displayModelStatus( "Solve" );

@@ -176,7 +176,7 @@ MultiscaleModelFSI3D::setupModel()
 }
 
 void
-MultiscaleModelFSI3D::buildSystem()
+MultiscaleModelFSI3D::buildModel()
 {
     M_solidDisplacement_tn.reset( new vector_Type( *M_fluidDisplacement ));
 
@@ -195,7 +195,7 @@ MultiscaleModelFSI3D::buildSystem()
 }
 
 void
-MultiscaleModelFSI3D::updateSystem()
+MultiscaleModelFSI3D::updateModel()
 {
     // Update BCInterface Operator BC
     updateBC();
@@ -215,7 +215,7 @@ MultiscaleModelFSI3D::updateSystem()
 }
 
 void
-MultiscaleModelFSI3D::solveSystem( )
+MultiscaleModelFSI3D::solveModel( )
 {
     displayModelStatus( "Solve" );
 

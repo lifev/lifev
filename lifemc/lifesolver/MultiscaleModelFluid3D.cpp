@@ -85,7 +85,7 @@ MultiscaleModelFluid3D::setupData( const std::string& fileName )
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 8120 ) << "MultiscaleModelFluid3D::SetupData( ) \n";
+    Debug( 8120 ) << "MultiscaleModelFluid3D::setupData( fileName ) \n";
 #endif
 
     multiscaleModel_Type::setupData( fileName );
@@ -122,7 +122,7 @@ MultiscaleModelFluid3D::setupModel()
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 8120 ) << "MultiscaleModelFluid3D::SetupProblem() \n";
+    Debug( 8120 ) << "MultiscaleModelFluid3D::setupModel() \n";
 #endif
 
     //Mesh
@@ -171,11 +171,11 @@ MultiscaleModelFluid3D::setupModel()
 }
 
 void
-MultiscaleModelFluid3D::buildSystem()
+MultiscaleModelFluid3D::buildModel()
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 8120 ) << "MultiscaleModelFluid3D::BuildSystem() \n";
+    Debug( 8120 ) << "MultiscaleModelFluid3D::buildModel() \n";
 #endif
 
     //Build constant matrices
@@ -204,11 +204,11 @@ MultiscaleModelFluid3D::buildSystem()
 }
 
 void
-MultiscaleModelFluid3D::updateSystem()
+MultiscaleModelFluid3D::updateModel()
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 8120 ) << "MultiscaleModelFluid3D::UpdateSystem() \n";
+    Debug( 8120 ) << "MultiscaleModelFluid3D::updateModel() \n";
 #endif
 
     //Update BDF
@@ -236,11 +236,11 @@ MultiscaleModelFluid3D::updateSystem()
 }
 
 void
-MultiscaleModelFluid3D::solveSystem()
+MultiscaleModelFluid3D::solveModel()
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 8120 ) << "MultiscaleModelFluid3D::SolveSystem() \n";
+    Debug( 8120 ) << "MultiscaleModelFluid3D::solveModel() \n";
 #endif
 
     //Solve the problem
@@ -345,7 +345,7 @@ MultiscaleModelFluid3D::setupLinearModel()
     bcPtr_Type LinearBCHandler ( new bc_Type( *M_bc->handler() ) );
     M_linearBC = LinearBCHandler;
 
-    // Set all te BCFunctions to zero
+    // Set all the BCFunctions to zero
     for ( bc_Type::bcBaseIterator_Type i = M_linearBC->begin() ; i != M_linearBC->end() ; ++i )
         i->setBCFunction( M_bcBaseDeltaZero );
 }
@@ -681,7 +681,7 @@ MultiscaleModelFluid3D::imposePerturbation()
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 8120 ) << "MultiscaleModelFluid3D::ImposePerturbation() \n";
+    Debug( 8120 ) << "MultiscaleModelFluid3D::imposePerturbation() \n";
 #endif
 
     for ( multiscaleCouplingsVectorConstIterator_Type i = M_couplings.begin(); i < M_couplings.end(); ++i )
@@ -698,7 +698,7 @@ MultiscaleModelFluid3D::resetPerturbation()
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 8120 ) << "MultiscaleModelFluid3D::ResetPerturbation() \n";
+    Debug( 8120 ) << "MultiscaleModelFluid3D::resetPerturbation() \n";
 #endif
 
     for ( multiscaleCouplingsVectorConstIterator_Type i = M_couplings.begin(); i < M_couplings.end(); ++i )
