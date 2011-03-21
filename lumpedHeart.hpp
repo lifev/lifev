@@ -41,6 +41,7 @@
 // LifeV includes
 #include <life/lifecore/LifeV.hpp>
 #include <life/lifefilters/GetPot.hpp>
+#include <life/lifefem/BCHandler.hpp>
 #include <life/lifesolver/FSISolver.hpp>
 #include <life/lifesolver/FSIOperator.hpp>
 
@@ -53,7 +54,7 @@ namespace LifeV
 class LumpedHeart
 {
 public:
-    typedef BCInterface3D< FSIOperator >                                                   bc_type;
+    typedef BCInterface3D< BCHandler, FSIOperator >                                        bc_type;
     typedef FSIOperator::vector_Type                                                       vector_Type;
     typedef FSIOperator::vectorPtr_Type                                                    vectorPtr_Type;
 
@@ -106,7 +107,7 @@ private:
 
     Real                                      M_time;
     boost::shared_ptr< bc_type >              M_BC;
-    TimeAdvanceBDF<Real>                                M_ODEscheme;
+    TimeAdvanceBDF<Real>                      M_ODEscheme;
     Real                                      M_dt;
     Real                                      M_T_max  ;
     Real                                      M_E_max  ;
