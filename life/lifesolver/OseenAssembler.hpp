@@ -129,6 +129,7 @@ public:
         addStiffStrain(matrix,viscosity,0,0);
     };
 
+    //! Add the stiff strain using the given offsets
     void addStiffStrain(matrix_ptrType matrix, const Real& viscosity, const UInt& offsetLeft, const UInt& offsetUp);
 
     //! Add the term involved in the gradient of the pressure term
@@ -167,7 +168,8 @@ public:
     //! Add the convective term with the given offsets
     void addConvection(matrix_ptrType matrix, const vector_type& beta, const UInt& offsetLeft, const UInt offsetUp);
 
-    // void addStiffStrain
+    //! Add an explicit convection term to the right hand side
+    void addConvectionRhs(vector_type& rhs, const vector_type& velocity);
 
     //@}
 
@@ -227,6 +229,8 @@ private:
     currentFE_ptrType M_convectionUCFE;
     currentFE_ptrType M_convectionBetaCFE;
 
+    currentFE_ptrType M_convectionRhsUCFE;
+
 
     // Local matrix
     localMatrix_ptrType M_localViscous;
@@ -238,6 +242,8 @@ private:
     localMatrix_ptrType M_localMass;
 
     localMatrix_ptrType M_localConvection;
+
+    localVector_ptrType M_localConvectionRhs;
 
 };
 
@@ -257,12 +263,14 @@ OseenAssembler():
     M_massCFE(),
     M_convectionUCFE(),
     M_convectionBetaCFE(),
+    M_convectionRhsUCFE(),
 
     M_localViscous(),
     M_localGradPressure(),
     M_localDivergence(),
     M_localMass(),
-    M_localConvection()
+    M_localConvection(),
+    M_localConvectionRhs()
 {}
 
 
@@ -320,6 +328,10 @@ setup(const fespace_ptrType& uFESpace, const fespace_ptrType& pFESpace, const fe
                                                  M_uFESpace->fe().geoMap(),
                                                  QuadratureRuleProvider::provideExactnessMax(TETRA,2*uDegree+betaDegree-1)));
 
+    M_convectionRhsUCFE.reset(new currentFE_type(M_betaFESpace->refFE(),
+                                                 M_uFESpace->fe().geoMap(),
+                                                 QuadratureRuleProvider::provideExactnessMax(TETRA,2*betaDegree+betaDegree-1)));
+
     M_localViscous.reset(new localMatrix_type(M_uFESpace->fe().nbFEDof(),
                                               M_uFESpace->fieldDim(),
                                               M_uFESpace->fieldDim()));
@@ -333,6 +345,8 @@ setup(const fespace_ptrType& uFESpace, const fespace_ptrType& pFESpace, const fe
     M_localConvection.reset(new localMatrix_type(M_uFESpace->fe().nbFEDof(),
                                                  M_uFESpace->fieldDim(),
                                                  M_uFESpace->fieldDim()));
+
+    M_localConvectionRhs.reset(new localVector_type(M_uFESpace->fe().nbFEDof(), M_uFESpace->fieldDim()));
 
 }
 
@@ -588,6 +602,68 @@ addConvection(matrix_ptrType matrix, const vector_type& beta, const UInt& offset
     }
 }
 
+template< typename mesh_type, typename matrix_type, typename vector_type>
+void
+OseenAssembler<mesh_type,matrix_type,vector_type>::
+addConvectionRhs(vector_type& rhs, const vector_type& velocity)
+{
+    // f has to be repeated!
+    if (velocity.mapType() == Unique)
+    {
+        addConvectionRhs(rhs,vector_type(velocity,Repeated));
+        return;
+    }
+
+    // Check that the FESpace is set
+    ASSERT(M_betaFESpace != 0, "No convective FE space for assembling the convection.");
+
+    // Some constants
+    const UInt nbElements(M_uFESpace->mesh()->numElements());
+    const UInt fieldDim(M_uFESpace->fieldDim());
+    const UInt nbFEDof(M_convectionRhsUCFE->nbFEDof());
+    const UInt nbQuadPt(M_convectionRhsUCFE->nbQuadPt());
+
+    // Temporaries
+    VectorElemental localVelocity(M_betaFESpace.fe().nbFEDof(), fieldDim);
+
+    // Loop over the elements
+    for (UInt iterElement(0); iterElement < nbElements; ++iterElement)
+    {
+        // Update the diffusion current FE
+        M_convectionRhsUCFE->update( M_uFESpace->mesh()->element(iterElement), UPDATE_PHI |UPDATE_WDET );
+
+        // Clean the local vector
+        M_localConvectionRhs->zero();
+        localVelocity.zero();
+
+        for ( UInt iNode = 0 ; iNode < nbFEDof ; iNode++ )
+        {
+            UInt iLocal = M_betaFESpace.fe().patternFirst( iNode ); // iLocal = iNode
+
+            for ( Int iComponent = 0; iComponent < fieldDim; ++iComponent )
+            {
+                UInt iGlobal = M_betaFESpace.dof().localToGlobalMap( iterElement, iLocal ) + iComponent * fieldDim;
+
+                localVelocity.vec( ) [ iLocal + iComponent*nbFEDof ] = velocity( iGlobal );
+
+            }
+        }
+
+        source_mass2(1.0,localVelocity,localVelocity,*M_localConvectionRhs, *M_convectionRhsUCFE);
+
+        // Here add in the global rhs
+        for (UInt iterFDim(0); iterFDim<fieldDim; ++iterFDim)
+        {
+            assembleVector( rhs,
+                            iterElement,
+                            *M_localConvectionRhs,
+                            nbFEDof,
+                            M_uFESpace->dof(),
+                            iterFDim,
+                            iterFDim*M_uFESpace->dof().numTotalDof());
+        }
+    }
+}
 
 template< typename mesh_type, typename matrix_type, typename vector_type>
 void
