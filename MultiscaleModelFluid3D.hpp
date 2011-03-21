@@ -127,16 +127,16 @@ public:
     //! Setup the model.
     void setupModel();
 
-    //! Build the initial system (matrix and vectors).
-    void buildSystem();
+    //! Build the initial model.
+    void buildModel();
 
-    //! Update the system for (matrix and vectors).
-    void updateSystem();
+    //! Update the model.
+    void updateModel();
 
-    //! Solve the problem.
-    void solveSystem();
+    //! Solve the model.
+    void solveModel();
 
-    //! save the solution
+    //! Save the solution
     void saveSolution();
 
     //! Display some information about the model.
@@ -335,8 +335,8 @@ private:
     //! Reset all the coupling perturbations imposed on the BCHandler
     void resetPerturbation();
 
-    Real bcFunctionDeltaZero( const Real& /*t*/, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const UInt& /*id*/) { return 0.; }
-    Real bcFunctionDeltaOne ( const Real& /*t*/, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const UInt& /*id*/) { return 1.; }
+    Real bcFunctionDeltaZero( const Real& /*t*/, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const UInt& /*id*/ ) { return 0.; }
+    Real bcFunctionDeltaOne ( const Real& /*t*/, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const UInt& /*id*/ ) { return 1.; }
 
     //@}
 

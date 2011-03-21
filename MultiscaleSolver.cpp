@@ -169,28 +169,28 @@ MultiscaleSolver::solveProblem( const Real& externalResidual )
             std::cout << "$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$" << std::endl;
             std::cout << "                    MULTISCALE FRAMEWORK" << std::endl;
             std::cout << "             time = " << M_globalData->dataTime()->time() << " s; "  <<
-                      "time step number = " << M_globalData->dataTime()->timeStepNumber()  << std::endl;
+                         "time step number = " << M_globalData->dataTime()->timeStepNumber()  << std::endl;
             std::cout << "$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$" << std::endl << std::endl;
         }
 
         // Build or Update System
         if ( M_globalData->dataTime()->isFirstTimeStep() )
-            M_model->buildSystem();
+            M_model->buildModel();
         else
         {
             if ( M_model->type() == Multiscale )
                 M_algorithm->updateCouplingVariables();
-            M_model->updateSystem();
+            M_model->updateModel();
         }
 
-        // solveSystem
-        M_model->solveSystem();
+        // Solve the model
+        M_model->solveModel();
 
         // If it is a Multiscale model, call algorithms for subiterations
         if ( M_model->type() == Multiscale )
             M_algorithm->subIterate();
 
-        // saveSolution
+        // Save the solution
         M_model->saveSolution();
 
         // Chrono stop

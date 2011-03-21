@@ -79,25 +79,25 @@ public:
     //! @name Multiscale PhysicalModel Virtual Methods
     //@{
 
-    //! Load data and create the models and the couplings
+    //! Setup the data of the model.
     /*!
      * @param fileName Name of data file.
      */
     void setupData( const std::string& fileName );
 
-    //! Setup the model
+    //! Setup the model.
     void setupModel();
 
-    //! Build the system matrix and vectors
-    void buildSystem();
+    //! Build the initial model.
+    void buildModel();
 
-    //! Update the system matrix and vectors
-    void updateSystem();
+    //! Update the model.
+    void updateModel();
 
-    //! Solve the problem
-    void solveSystem();
+    //! Solve the model.
+    void solveModel();
 
-    //! save the solution
+    //! Save the solution
     void saveSolution();
 
     //! Display some information about the multiscale problem (call after SetupProblem)
