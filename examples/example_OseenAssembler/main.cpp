@@ -149,12 +149,12 @@ main( int argc, char** argv )
     // Space discretization
     const UInt numDimensions  = 3;
     const MeshType meshSource = RegularMesh;
-    const UInt numMeshElem    = 10;
+    const UInt numMeshElem    = 20;
 
     // Numerical scheme
     const DiffusionType diffusionType = ViscousStress;
     const UInt BDFOrder = 1;
-    const InitType initializationMethod = Projection;
+    const InitType initializationMethod = Interpolation;
 
     // EthierSteinman data
     EthierSteinmanUnsteady::setA(1.0);
@@ -324,16 +324,16 @@ main( int argc, char** argv )
     if (verbose) std::cout<< std::endl << "[Initialization of the simulation]" << std::endl;
     if (verbose) std::cout << "Creation of vectors... " << std::flush;
     vectorPtr_type rhs;
-    rhs.reset(new vector_type(solutionMap,Repeated));
+    rhs.reset(new vector_type(solutionMap,Unique));
 
     vectorPtr_type beta;
     beta.reset(new vector_type(solutionMap,Repeated));
 
     vectorPtr_type velocity;
-    velocity.reset(new vector_type(uFESpace->map()));
+    velocity.reset(new vector_type(uFESpace->map(),Unique));
 
     vectorPtr_type pressure;
-    pressure.reset(new vector_type(pFESpace->map()));
+    pressure.reset(new vector_type(pFESpace->map(),Unique));
 
     vectorPtr_type solution;
     solution.reset(new vector_type(solutionMap,Unique));
@@ -358,6 +358,7 @@ main( int argc, char** argv )
     {
         *rhs  *= 0.;
         *beta *= 0.;
+        *solution *= 0;
 
         uFESpace->interpolate(EthierSteinmanUnsteady::uexact,*velocity,currentTime);
         pFESpace->interpolate(EthierSteinmanUnsteady::pexact,*pressure,currentTime);
@@ -383,10 +384,6 @@ main( int argc, char** argv )
             if (verbose) std::cout << "Applying BC... " << std::flush;
             bcManage(*systemMatrix,*rhs,*uFESpace->mesh(),uFESpace->dof(),bcHandler,uFESpace->feBd(),1.0,currentTime);
             systemMatrix->globalAssemble();
-            //************* SPY ***********
-            systemMatrix->spy("systemMatrix");
-            rhs->spy("systemRHS");
-            //*****************************
             if (verbose) std::cout << "done" << std::endl;
 
             if (verbose) std::cout << "Solving the system... " << std::endl;
@@ -446,16 +443,13 @@ main( int argc, char** argv )
         *systemMatrix += *massMatrix*alpha;
         *systemMatrix += *baseMatrix;
         *beta = bdf.bdfVelocity().extrapolation(); // Extrapolation for the convective term
+
         oseenAssembler.addConvection(systemMatrix,*beta);
         if (verbose) std::cout << "done" << std::endl;
 
         if (verbose) std::cout << "Applying BC... " << std::flush;
         bcManage(*systemMatrix,*rhs,*uFESpace->mesh(),uFESpace->dof(),bcHandler,uFESpace->feBd(),1.0,currentTime);
         systemMatrix->globalAssemble();
-        //************* SPY ***********
-        systemMatrix->spy("systemMatrix");
-        rhs->spy("systemRHS");
-        //*****************************
         if (verbose) std::cout << "done" << std::endl;
 
         if (verbose) std::cout << "Solving the system... " << std::endl;
@@ -479,6 +473,8 @@ main( int argc, char** argv )
     // |             Computing the error               |
     // +-----------------------------------------------+
     if (verbose) std::cout << "[Computed errors]" << std::endl;
+    velocity.reset(new vector_type(uFESpace->map(),Repeated));
+    pressure.reset(new vector_type(pFESpace->map(),Repeated));
     velocity->subset(*solution);
     pressure->subset(*solution, pressureOffset);
     Real uRelativeError, pRelativeError, uL2Error, pL2Error;
