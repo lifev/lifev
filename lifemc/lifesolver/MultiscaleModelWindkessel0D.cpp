@@ -53,6 +53,8 @@ MultiscaleModelWindkessel0D::MultiscaleModelWindkessel0D() :
         M_flowRate_tn                  (),
         M_pressure                     (),
         M_flowRate                     (),
+        M_tangentPressure              (),
+        M_tangentFlowRate              (),
         M_nIntegration                 (),
         M_resistance1                  (),
         M_resistance2                  (),
@@ -90,6 +92,9 @@ MultiscaleModelWindkessel0D::setupData( const std::string& fileName )
     M_venousPressure    = dataFile( "Coefficients/VenousPressure"  , 0.0 );
 
     setupExporterImporter();
+
+    //BC - We need to create the BCHandler before using it
+    M_bc->createHandler();
 }
 
 void
@@ -97,18 +102,18 @@ MultiscaleModelWindkessel0D::setupModel()
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 8150 ) << "MultiscaleModelWindkessel0D::setupProblem() \n";
+    Debug( 8150 ) << "MultiscaleModelWindkessel0D::setupModel() \n";
 #endif
 
     initializeSolution();
 }
 
 void
-MultiscaleModelWindkessel0D::buildSystem()
+MultiscaleModelWindkessel0D::buildModel()
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 8150 ) << "MultiscaleModelWindkessel0D::buildSystem() \n";
+    Debug( 8150 ) << "MultiscaleModelWindkessel0D::buildModel() \n";
 #endif
 
     M_pressure_tn   = M_pressure;
@@ -116,11 +121,11 @@ MultiscaleModelWindkessel0D::buildSystem()
 }
 
 void
-MultiscaleModelWindkessel0D::updateSystem()
+MultiscaleModelWindkessel0D::updateModel()
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 8150 ) << "MultiscaleModelWindkessel0D::updateSystem() \n";
+    Debug( 8150 ) << "MultiscaleModelWindkessel0D::updateModel() \n";
 #endif
 
     M_pressure_tn  = M_pressure;
@@ -128,11 +133,11 @@ MultiscaleModelWindkessel0D::updateSystem()
 }
 
 void
-MultiscaleModelWindkessel0D::solveSystem()
+MultiscaleModelWindkessel0D::solveModel()
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 8150 ) << "MultiscaleModelWindkessel0D::solveSystem() \n";
+    Debug( 8150 ) << "MultiscaleModelWindkessel0D::solveModel() \n";
 #endif
 
     displayModelStatus( "Solve" );
@@ -199,44 +204,6 @@ MultiscaleModelWindkessel0D::showMe()
 }
 
 // ===================================================
-// Methods
-// ===================================================
-void
-MultiscaleModelWindkessel0D::setupLinearModel()
-{
-
-#ifdef HAVE_LIFEV_DEBUG
-    Debug( 8150 ) << "MultiscaleModelWindkessel0D::setupLinearModel( ) \n";
-#endif
-
-}
-
-void
-MultiscaleModelWindkessel0D::updateLinearModel()
-{
-
-}
-
-void
-MultiscaleModelWindkessel0D::solveLinearModel( bool& solveLinearSystem )
-{
-
-#ifdef HAVE_LIFEV_DEBUG
-    Debug( 8150 ) << "MultiscaleModelWindkessel0D::solveLinearModel() \n";
-#endif
-
-    if ( !solveLinearSystem )
-        return;
-
-    //Solve the linear problem
-    displayModelStatus( "Solve linear" );
-
-
-    //This flag avoid recomputation of the same system
-    solveLinearSystem = false;
-}
-
-// ===================================================
 // Get Methods (couplings)
 // ===================================================
 Real
@@ -263,7 +230,7 @@ MultiscaleModelWindkessel0D::boundaryDeltaFlowRate( const bcFlag_Type& flag, boo
 {
     solveLinearModel( solveLinearSystem );
 
-    return 0;
+    return M_tangentFlowRate;
 }
 
 Real
@@ -271,7 +238,7 @@ MultiscaleModelWindkessel0D::boundaryDeltaPressure( const bcFlag_Type& flag, boo
 {
     solveLinearModel( solveLinearSystem );
 
-    return 0;
+    return M_tangentPressure;
 }
 
 Real
@@ -297,6 +264,20 @@ MultiscaleModelWindkessel0D::boundaryDeltaStress( const bcFlag_Type& flag, bool&
 // Private Methods
 // ===================================================
 void
+MultiscaleModelWindkessel0D::setupExporterImporter()
+{
+
+#ifdef HAVE_LIFEV_DEBUG
+    Debug( 8150 ) << "MultiscaleModelWindkessel0D::setupExporterImporter() \n";
+#endif
+
+    std::string file = multiscaleProblemFolder + "/Step_" + number2string( multiscaleProblemStep ) + "_Model_" + number2string( M_ID ) + ".m";
+    M_outputFile.open( file.c_str(), std::ios::trunc );
+    M_outputFile << std::scientific << std::setprecision( 15 )
+                 << "% TIME                     FLOW RATE                PRESSURE" << std::endl;
+}
+
+void
 MultiscaleModelWindkessel0D::initializeSolution()
 {
 
@@ -306,7 +287,7 @@ MultiscaleModelWindkessel0D::initializeSolution()
 
     if ( multiscaleProblemStep > 0 )
     {
-        ;// Importer here
+        ;// TODO: Code the importer
     }
     else
     {
@@ -350,7 +331,6 @@ MultiscaleModelWindkessel0D::solveForPressure()
     Real dt     = M_globalData->dataTime()->timeStep();
     Real dti    = dt / M_nIntegration;
 
-
     Real RC     = 1.0 / ( M_resistance2 * M_capacitance );  //Dummy Variable
     Real mu     = exp( RC * dt);                            //Dummy Variable
 
@@ -362,23 +342,22 @@ MultiscaleModelWindkessel0D::solveForPressure()
     Real integrationSum      = 0;            //sum of Integration
 
     //%------Integration in dt-------------------------------------------------------------
-
     rhs = rightHandSideP(M_resistance1, M_resistance2, RC, t, M_flowRate_tn, M_flowRate, dQ, M_venousPressure, dt);
     integrationSum   = dti / 2.0 * rhs;
 
     //for ( Real t=dti; t<dti+dt; t+=dti )
-    for ( UInt i(1) ; i<(M_nIntegration) ; ++i )
+    for ( UInt i(1) ; i< M_nIntegration  ; ++i )
     {
         t   = t + dti;
         rhs = rightHandSideP(M_resistance1, M_resistance2, RC, t, M_flowRate_tn, M_flowRate, dQ, M_venousPressure, dt);
-        integrationSum   = integrationSum + dti * rhs ;
+        integrationSum   = integrationSum + dti * rhs;
     }
+
     t   = t + dti;
     rhs = rightHandSideP(M_resistance1, M_resistance2, RC, t, M_flowRate_tn, M_flowRate, dQ, M_venousPressure, dt);
     integrationSum   = integrationSum + dti / 2.0 * rhs;
-    return (K+integrationSum);
 
-
+    return K + integrationSum;
 }
 
 Real
@@ -387,56 +366,79 @@ MultiscaleModelWindkessel0D::solveForFlowRate()
 #ifdef HAVE_LIFEV_DEBUG
     Debug( 8150 ) << "MultiscaleModelWindkessel0D::solveForFlowRate() \n";
 #endif
+
+    // TODO There is a lot of code duplication with method solveForPressure()
+
     Real dt     = M_globalData->dataTime()->timeStep();
     Real dti    = dt / M_nIntegration;
-
 
     Real RC     = 1.0 / (M_resistance1 * M_resistance2 * M_capacitance);  //Dummy Variable
     Real mu     = exp( ( M_resistance1 + M_resistance2 ) * RC * dt);      //Dummy Variable
 
-
     Real K      = M_flowRate_tn / mu;                                     //Dummy Variable
     Real dP     = (M_pressure -M_pressure_tn)/ dt;                        //Dummy Variable
-
 
     Real rhs    = 0;        //Dummy Variable (Right Hand Side)
     Real t      = 0;        //Time Integration
     Real integrationSum      = 0;        //sum of Integration
 
     //%------Integration in dt-------------------------------------------------------------
-    t           = 0;
+    rhs = rightHandSideQ(M_resistance1, M_resistance2, RC, t, M_pressure_tn, M_pressure, dP, M_venousPressure, dt);
+    integrationSum = dti / 2.0 * rhs;
 
-    rhs         = rightHandSideQ(M_resistance1, M_resistance2, RC, t, M_pressure_tn, M_pressure, dP, M_venousPressure, dt);
-    integrationSum           = dti / 2.0 * rhs;
-    for ( UInt i(1) ; i<(M_nIntegration) ; ++i )
+    for ( UInt i(1) ; i< M_nIntegration  ; ++i )
     {
         t   = t + dti;
         rhs = rightHandSideQ(M_resistance1, M_resistance2, RC, t, M_pressure_tn, M_pressure, dP, M_venousPressure, dt);
-        integrationSum   = integrationSum + dti * rhs ;
+        integrationSum   = integrationSum + dti * rhs;
     }
+
     t   = t + dti;
     rhs = rightHandSideQ(M_resistance1, M_resistance2, RC, t, M_pressure_tn, M_pressure, dP, M_venousPressure, dt);
     integrationSum   = integrationSum + dti / 2.0 * rhs;
 
 
-    return (K+integrationSum);
-
+    return K + integrationSum;
 }
 
 void
-MultiscaleModelWindkessel0D::setupExporterImporter()
+MultiscaleModelWindkessel0D::solveLinearModel( bool& solveLinearSystem )
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 8150 ) << "MultiscaleModelWindkessel0D::setupExporterImporter() \n";
+    Debug( 8150 ) << "MultiscaleModelWindkessel0D::solveLinearModel() \n";
 #endif
 
-    std::string file = multiscaleProblemFolder + "/Step_" + number2string( multiscaleProblemStep ) + "_Model_" + number2string( M_ID ) + ".m";
-    M_outputFile.open( file.c_str(), std::ios::trunc );
-    M_outputFile << std::scientific << std::setprecision( 15 )
-                 << "% TIME                     FLOW RATE                PRESSURE" << std::endl;
-}
+    if ( !solveLinearSystem )
+        return;
 
+    //Solve the linear problem
+    displayModelStatus( "Solve linear" );
+    switch ( M_bc->handler()->bcType() )
+    {
+    case OneDimensional::Q:
+
+        M_tangentFlowRate = 1.;
+        //M_tangentPressure = tangentSolveForPressure(); //TODO Code this method
+
+        break;
+
+    case OneDimensional::P:
+    case OneDimensional::S:
+
+        M_tangentPressure = 1.;
+        //M_tangentFlowRate = tangentSolveForFlowRate(); //TODO Code this method
+
+        break;
+
+    default:
+
+        std::cout << "Warning: bcType \"" << M_bc->handler()->bcType() << "\"not available!" << std::endl;
+    }
+
+    //This flag avoid recomputation of the same system
+    solveLinearSystem = false;
+}
 
 } // Namespace multiscale
 } // Namespace LifeV

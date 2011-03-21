@@ -104,35 +104,20 @@ public:
     //! Setup the model.
     void setupModel();
 
-    //! Build the initial system (matrix and vectors).
-    void buildSystem();
+    //! Build the initial model.
+    void buildModel();
 
-    //! Update the system for (matrix and vectors).
-    void updateSystem();
+    //! Update the model.
+    void updateModel();
 
-    //! Solve the problem.
-    void solveSystem();
+    //! Solve the model.
+    void solveModel();
 
-    //! save the solution
+    //! Save the solution
     void saveSolution();
 
     //! Display some information about the model.
     void showMe();
-
-    //@}
-
-
-    //! @name Methods
-    //@{
-
-    //! Setup the linear model
-    void setupLinearModel();
-
-    //! Update the linear system matrix and vectors
-    void updateLinearModel();
-
-    //! Solve the linear problem
-    void solveLinearModel( bool& solveLinearSystem );
 
     //@}
 
@@ -224,15 +209,10 @@ private:
     //! @name Private Methods
     //@{
 
+    void setupExporterImporter();
+
     //! Initialize the solution.
     void initializeSolution();
-
-    //! Solving for the pressure.
-    /*!
-     * @return the computed pressure
-     */
-    Real solveForPressure();    // Solve the equations for Pressure
-    Real solveForFlowRate();    // Solve the equations for FlowRate
 
     Real rightHandSideQ  (Real R1, Real R2 , Real RC, Real T, Real P1, Real P2, Real dP, Real Pv1, Real dt) //Dummy function
     {
@@ -244,9 +224,16 @@ private:
         return (exp( RC * (-T))*( (R1+R2) * RC *( (Q2 -Q1) *(T) /dt + Q1 ) + R1 * dQ + Pv1*RC ));
     }
 
-    void setupExporterImporter();
+    //! Solving for the pressure.
+    /*!
+     * @return the computed pressure
+     */
+    Real solveForPressure();    // Solve the equations for Pressure
+    Real solveForFlowRate();    // Solve the equations for FlowRate
 
     //@}
+
+    void solveLinearModel( bool& solveLinearSystem );
 
     std::ofstream          M_outputFile;
 
@@ -257,6 +244,9 @@ private:
 
     Real                   M_pressure;         // Pressure (P2) @ t=t(n+1)
     Real                   M_flowRate;         // flowRate (Q2) @ t=t(n+1)
+
+    Real                   M_tangentPressure;  // Tangent pressure
+    Real                   M_tangentFlowRate;  // Tangent flowRate
 
     UInt                   M_nIntegration;     // Number of Integration steps in each time step
 
@@ -300,6 +290,10 @@ public:
 
     //! Constructor
     explicit Windkessel0DbcHandler() : M_function(), M_bcType() {}
+
+    explicit Windkessel0DbcHandler( const Windkessel0DbcHandler& handler ) :
+                    M_function( handler.M_function ),
+                    M_bcType  ( handler.M_bcType ) {}
 
     //! Destructor
     virtual ~Windkessel0DbcHandler() {}
