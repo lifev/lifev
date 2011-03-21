@@ -32,7 +32,7 @@ ProblemFile = ./MultiscaleDatabase/Models/Multiscale/1D-Windkessel0D_1Cylinder_S
     [../Algorithm]
     type                       = Newton            # Aitken, Explicit, Newton, Broyden
     file                       = Default           # File name (without .dat extension)
-    subiterationsMaximumNumber = 0                 # Maximum number for coupling subiterations
+    subiterationsMaximumNumber = 1000              # Maximum number for coupling subiterations
     tolerance                  = 1.e-6             # Tolerance on the coupling values
 
     [../]
