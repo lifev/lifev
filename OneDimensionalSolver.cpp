@@ -135,14 +135,18 @@ OneDimensionalSolver::buildConstantMatrices()
 }
 
 void
-OneDimensionalSolver::setupSolution( solution_Type& solution, const MapEpetra& map )
+OneDimensionalSolver::setupSolution( solution_Type& solution, const MapEpetra& map, const bool& onlyMainQuantities )
 {
-    solution["A"].reset( new vector_Type( map ) );
-    solution["A/A0-1"].reset( new vector_Type( map ) );
     solution["Q"].reset( new vector_Type( map ) );
+    solution["P"].reset( new vector_Type( map ) );
+    solution["AoverA0minus1"].reset( new vector_Type( map ) );
+
+    if( onlyMainQuantities )
+        return;
+
+    solution["A"].reset( new vector_Type( map ) );
     solution["W1"].reset( new vector_Type( map ) );
     solution["W2"].reset( new vector_Type( map ) );
-    solution["P"].reset( new vector_Type( map ) );
 
     // Flux correction with viscoelastic term
     if ( M_physics->data()->viscoelasticWall() )
@@ -214,14 +218,14 @@ void
 OneDimensionalSolver::computeAreaRatio( solution_Type& solution )
 {
     for ( UInt iNode(0); iNode < M_physics->data()->numberOfNodes() ; ++iNode )
-        ( *solution["A/A0-1"] ) [iNode] = ( *solution["A"] ) [iNode] / M_physics->data()->area0( iNode ) - 1;
+        ( *solution["AoverA0minus1"] ) [iNode] = ( *solution["A"] ) [iNode] / M_physics->data()->area0( iNode ) - 1;
 }
 
 void
 OneDimensionalSolver::computeArea( solution_Type& solution )
 {
     for ( UInt iNode(0); iNode < M_physics->data()->numberOfNodes() ; ++iNode )
-        ( *solution["A"] ) [iNode] = ( (*solution["A/A0-1"] ) [iNode] + 1 ) * M_physics->data()->area0( iNode );
+        ( *solution["A"] ) [iNode] = ( (*solution["AoverA0minus1"] ) [iNode] + 1 ) * M_physics->data()->area0( iNode );
 }
 
 void
@@ -436,6 +440,7 @@ OneDimensionalSolver::postProcess( const solution_Type& solution )
     {
         std::string file = M_physics->data()->postprocessingDirectory() + "/" + M_physics->data()->postprocessingFile() + "_" + i->first + ".m";
         outfile.open( file.c_str(), std::ios::app );
+        outfile.setf( ios::scientific, ios::floatfield );
 
         for ( UInt iNode(0); iNode < static_cast< UInt > ( (*i->second).size() ); ++iNode )
             outfile << (*i->second)(iNode) << " ";

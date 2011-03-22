@@ -236,8 +236,9 @@ public:
     /*!
      * @param solution solution container
      * @param map map for initializing the solution vectors
+     * @param onlyMainQuantities if true setup only Q, P, and A/A0-1
      */
-    void setupSolution( solution_Type& solution, const MapEpetra& map );
+    void setupSolution( solution_Type& solution, const MapEpetra& map, const bool& onlyMainQuantities = false );
 
     //! Initialize all the variables of the solution to a reference condition with Q=0, A=A0, and P=P_ext
     /*!
