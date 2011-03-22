@@ -150,46 +150,27 @@ public:
     \param dataMaterial: a pointer to the dataType member in StructuralSolver class to get the material coefficients (e.g. Young modulus, Poisson ratio..)
     \param displayer: a pointer to the Dysplaier member in the StructuralSolver class    
   */
-    virtual  void updateNonLinearJacobianMatrix( matrixPtr_Type& stiff, const vector_Type& disp, const dataPtr_Type& dataMaterial, const displayerPtr_Type& displayer ) = 0;
+  virtual  void updateNonLinearJacobianMatrix( matrixPtr_Type& /*stiff*/, const vector_Type& /*disp*/, const dataPtr_Type& /*dataMaterial*/, const displayerPtr_Type& /*displayer*/ ) = 0;
 
-  //! Computes the new Stiffness matrix in StructuralSolver::updateSystem
-  /*!
-    \param sol:  the solution vector
-    \param factor: scaling factor used in FSI
-    \param dataMaterial: a pointer to the dataType member in StructuralSolver class to get the material coefficients (e.g. Young modulus, Poisson ratio..)
-    \param displayer: a pointer to the Dysplaier member in the StructuralSolver class
-  */
-    virtual  void computeNewMatrix( const vector_Type& sol, Real factor, const dataPtr_Type& dataMaterial, const displayerPtr_Type& displayer ) = 0;
+    //! Computes the new Stiffness matrix in StructuralSolver given a certain displacement field. This function is used both in StructuralSolver::evalResidual and in 
+    //! StructuralSolver::updateSystem since the matrix is the expression of the matrix is the same.
+    /*!
+      \param sol:  the solution vector
+      \param factor: scaling factor used in FSI
+      \param dataMaterial: a pointer to the dataType member in StructuralSolver class to get the material coefficients (e.g. Young modulus, Poisson ratio..)
+      \param displayer: a pointer to the Dysplaier member in the StructuralSolver class
+    */
+    virtual  void computeMatrix( const vector_Type& sol, Real factor, const dataPtr_Type& dataMaterial, const displayerPtr_Type& displayer ) = 0;
 
-  //! Computes the nonlinear part of the new Stiffness matrix in StructuralSolver::updateSystem
-  /*!
-    \param stiff: stiffness matrix provided from outside
-    \param sol:  the solution vector
-    \param factor: scaling factor used in FSI
-    \param dataMaterial: a pointer to the dataType member in StructuralSolver class to get the material coefficients (e.g. Young modulus, Poisson ratio..)
-    \param displayer: a pointer to the Dysplaier member in the StructuralSolver class
-  */
-    virtual  void computeNonLinearNewMatrix( matrixPtr_Type& stiff, const vector_Type& sol, Real factor, const dataPtr_Type& dataMaterial, const displayerPtr_Type& displayer ) = 0;
-
-  //! Computes the matrix for the residual computation in StructuralSolver::evalResidual
-  /*!
-    \param sol:  the solution vector
-    \param factor: scaling factor used in FSI
-    \param dataMaterial: a pointer to the dataType member in StructuralSolver class to get the material coefficients (e.g. Young modulus, Poisson ratio..)
-    \param displayer: a pointer to the Dysplaier member in the StructuralSolver class
-  */
-    virtual  void evalNewMatrix( const vector_Type& sol, Real factor, const dataPtr_Type& dataMaterial, const displayerPtr_Type& displayer ) = 0;
-
-
-  //! Computes the nonlinear part of the global matrix for the residual computation in StructuralSolver::evalResidual
-  /*!
-    \param stiff: stiffness matrix provided from outside
-    \param sol:  the solution vector
-    \param factor: scaling factor used in FSI
-    \param dataMaterial: a pointer to the dataType member in StructuralSolver class to get the material coefficients (e.g. Young modulus, Poisson ratio..)
-    \param displayer: a pointer to the Dysplaier member in the StructuralSolver class
-  */
-  virtual  void evalNonLinearNewMatrix( matrixPtr_Type& stiff, const vector_Type& sol, Real factor, const dataPtr_Type& dataMaterial, const displayerPtr_Type& displayer ) = 0;
+    //! Computes the nonlinear part of Stiffness matrix in StructuralSolver given a certain displacement field. This function is used both in StructuralSolver::evalResidual and in 
+    //! StructuralSolver::updateSystem since the matrix is the expression of the matrix is the same. This is virtual and not pure virtual since in the linear St. Venant-Kirchhoff law it is not needed.
+    /*!
+      \param sol:  the solution vector
+      \param factor: scaling factor used in FSI
+      \param dataMaterial: a pointer to the dataType member in StructuralSolver class to get the material coefficients (e.g. Young modulus, Poisson ratio..)
+      \param displayer: a pointer to the Dysplaier member in the StructuralSolver class
+    */
+  virtual  void computeNonLinearMatrix( matrixPtr_Type& /*stiff*/, const vector_Type& /*sol*/, Real /*factor*/, const dataPtr_Type& /*dataMaterial*/, const displayerPtr_Type& /*displayer*/ ){};
 
 
   //! Output of the class
@@ -234,7 +215,7 @@ protected:
   boost::shared_ptr<const MapEpetra>             M_localMap;
 
   //! Elementary matrices
-  boost::shared_ptr<MatrixElemental>             M_elmatK;
+  boost::scoped_ptr<MatrixElemental>             M_elmatK;
 
   //! Matrix Knl: stiffness (linear + nonlinear)
   matrixPtr_Type                                 M_stiff;

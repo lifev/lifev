@@ -71,7 +71,7 @@ Real fzero_scalar(const Real& /*t*/, const Real& /*x*/, const Real& /*y*/, const
 
 Real InternalPressure(const Real& /*t*/, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& /*i*/)
 {
-    return 1e+5;
+    return -1e+5;
     //return -260000*sin(80*3.141592*t);
 }
 

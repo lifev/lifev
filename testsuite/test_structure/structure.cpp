@@ -63,7 +63,7 @@ Real d0(const Real& t, const Real& x, const Real& y, const Real& z, const ID& i)
         switch (i)
         {
         case 0:
-            return 0.0
+	  return 0.0;
             break;
         case 1:
             return 0.0;
@@ -335,7 +335,7 @@ Structure::run3d()
     */
 // BC for vessel2x4x20_10cm.mesh
     vector <ID> compx(1), compy(1), compz(1);
-    compx[0]=1; compy[0]=2, compz[0]=3;
+    compx[0]=0; compy[0]=1, compz[0]=2;
 
     // lower base
     BCh->addBC("BaseSx ", 2 , Essential, Component, fixed1, compz);

@@ -31,6 +31,7 @@ SUBDIRS		= data  \
               test_LevelSetSolver \
               test_partition \
               test_structure \
+              test_structuralsolver \
               test_TemplateTest \
               test_timeAdvance_orderI \
               test_timeAdvance_orderII
@@ -52,6 +53,7 @@ TESTSUITES=$(srcdir)/lifealg/testsuite.at \
 	   	   $(srcdir)/test_LevelSetSolver/testsuite.at \
            $(srcdir)/test_partition/testsuite.at \
            $(srcdir)/test_structure/testsuite.at \
+           $(srcdir)/test_structuralsolver/testsuite.at \
            $(srcdir)/test_TemplateTest/testsuite.at \
            $(srcdir)/test_timeAdvance_orderI/testsuite.at \
            $(srcdir)/test_timeAdvance_orderII/testsuite.at

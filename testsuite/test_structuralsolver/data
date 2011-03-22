@@ -28,7 +28,7 @@ save       = 1
   density   = 1.2               # density
   young     = 8.0E6
   poisson   = 0.4
-  solidType = linearVenantKirchhoff
+  solidType = nonlinearVenantKirchhoff
 
   [../time_discretization]
   initialtime = 0.
@@ -38,7 +38,7 @@ save       = 1
 
   [../space_discretization]
   mesh_dir  = Mesh/     # the directory where the mesh file is
-  mesh_file = cyl1x02_1796_edge.mesh
+  mesh_file = vessel20.mesh #cyl1x02_1796_edge.mesh
   #mesh_file = hexa2x2.mesh # mesh file
   order     = P1
 

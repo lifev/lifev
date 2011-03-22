@@ -157,7 +157,7 @@ Structure::run3d()
     BCFunctionBase Homogen(fzero_scalar);
     BCFunctionBase Intern(InternalPressure);
 
-    
+    /*
     // BC for cyl1x02_1796_edge.mesh
     vector <ID> compx(1), compy(1), compz(1);
     compx[0]=0; compy[0]=1, compz[0]=2;
@@ -174,11 +174,11 @@ Structure::run3d()
 
     //BCh->addBC("Base3", 1 , Natural, Normal,Intern); // compression
     BCh->addBC("Base3", 1 , Natural, Full, fixed1, 3); // free stress surfac
+    */
     
-    /*
 // BC for vessel2x4x20_10cm.mesh
     vector <ID> compx(1), compy(1), compz(1);
-    compx[0]=1; compy[0]=2, compz[0]=3;
+    compx[0]=0; compy[0]=1, compz[0]=2;
 
     // lower base
     BCh->addBC("BaseSx ", 2 , Essential, Component, fixed1, compz);
@@ -191,7 +191,7 @@ Structure::run3d()
 
     BCh->addBC("BaseIn", 10, Natural, Normal,  Homogen); // external pressure
     //BCh->addBC("BaseEx", 10, Natural, Full, fixed1, 3); // external pressure
-    */
+    
 
     StructuralSolver< RegionMesh3D<LinearTetra> > solid;
     solid.setup(dataStructure,

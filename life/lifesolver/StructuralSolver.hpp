@@ -406,7 +406,7 @@ public:
 
   // Physic constant
   //! Get the thickness
-  const Real thickness() const { return M_data->getThickness(); }
+  Real thickness() const { return M_data->getThickness(); }
 
   //! Get the Young modulus
   Real young()            const { return M_data->getYoung(); }
@@ -415,7 +415,7 @@ public:
   Real poisson()          const { return M_data->getPoisson(); }
 
   //! Get the density
-  const Real rho()       const { return M_data->getRho(); }
+  Real rho()       const { return M_data->getRho(); }
 
   //@}
 
@@ -627,7 +627,8 @@ void StructuralSolver<Mesh, SolverType>::updateSystem( matrixPtr_Type& stiff )
 
     //Compute the new Stiffness Matrix
 
-    M_material->computeNewMatrix(*this->M_disp, M_rescaleFactor, this->M_data, this->M_Displayer);
+    M_material->computeMatrix(*this->M_disp, M_rescaleFactor, this->M_data, this->M_Displayer);
+    //M_material->computeNewMatrix(*this->M_disp, M_rescaleFactor, this->M_data, this->M_Displayer);
 
     stiff.reset(new matrix_Type(*this->M_localMap));
     *stiff += *this->M_material->stiff();
@@ -917,7 +918,7 @@ void StructuralSolver<Mesh, SolverType>::computeMatrix( matrixPtr_Type& stiff, c
     chrono.start();
 
     //It is right to do globalAssemble() inside the M_material class
-    M_material->evalNewMatrix( sol, 1., this->M_data, this->M_Displayer);
+    M_material->computeMatrix( sol, 1., this->M_data, this->M_Displayer);
 
     stiff.reset(new matrix_Type(*this->M_localMap));
     *stiff +=*this->M_material->stiff();

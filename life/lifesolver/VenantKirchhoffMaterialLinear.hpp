@@ -112,62 +112,23 @@ class VenantKirchhoffMaterialLinear :
       \param displayer: a pointer to the Dysplaier member in the StructuralSolver class
     */
     void updateNonLinearJacobianMatrix( matrixPtr_Type& stiff,
-                                        const vector_Type& disp,
-                                        const dataPtr_Type& dataMaterial,
-                                        const displayerPtr_Type& displayer);
+                                        const vector_Type& /*disp*/,
+                                        const dataPtr_Type& /*dataMaterial*/,
+                                        const displayerPtr_Type& /*displayer*/);
 
-    //! Computes the new Stiffness matrix in StructuralSolver::updateSystem
+
+    //! Computes the new Stiffness matrix in StructuralSolver given a certain displacement field. This function is used both in StructuralSolver::evalResidual and in 
+    //! StructuralSolver::updateSystem since the matrix is the expression of the matrix is the same.
     /*!
       \param sol:  the solution vector
       \param factor: scaling factor used in FSI
       \param dataMaterial: a pointer to the dataType member in StructuralSolver class to get the material coefficients (e.g. Young modulus, Poisson ratio..)
       \param displayer: a pointer to the Dysplaier member in the StructuralSolver class
     */
-    void computeNewMatrix( const vector_Type& sol,
-                           Real factor,
-                           const dataPtr_Type& dataMaterial,
-                           const displayerPtr_Type& displayer);
-
-    //! Computes the nonlinear part of the new Stiffness matrix in StructuralSolver::updateSystem
-    /*!
-      \param stiff: stiffness matrix provided from outside
-      \param sol:  the solution vector
-      \param factor: scaling factor used in FSI
-      \param dataMaterial: a pointer to the dataType member in StructuralSolver class to get the material coefficients (e.g. Young modulus, Poisson ratio..)
-      \param displayer: a pointer to the Dysplaier member in the StructuralSolver class
-    */
-    void computeNonLinearNewMatrix( matrixPtr_Type& stiff,
-                                    const vector_Type& sol,
-                                    Real factor,
-                                    const dataPtr_Type& dataMaterial,
-                                    const displayerPtr_Type& displayer);
-
-    //! Computes the matrix for the residual computation in StructuralSolver::evalResidual
-    /*!
-      \param sol:  the solution vector
-      \param factor: scaling factor used in FSI
-      \param dataMaterial: a pointer to the dataType member in StructuralSolver class to get the material coefficients (e.g. Young modulus, Poisson ratio..)
-      \param displayer: a pointer to the Dysplaier member in the StructuralSolver class
-    */
-    void evalNewMatrix( const vector_Type& sol,
-                        Real factor,
-                        const dataPtr_Type& dataMaterial,
-                        const displayerPtr_Type& displayer);
-
-    //! Computes the nonlinear part of the global matrix for the residual computation in StructuralSolver::evalREsidual
-    /*!
-      \param stiff: stiffness matrix provided from outside
-      \param sol:  the solution vector
-      \param factor: scaling factor used in FSI
-      \param dataMaterial: a pointer to the dataType member in StructuralSolver class to get the material coefficients (e.g. Young modulus, Poisson ratio..)
-      \param displayer: a pointer to the Dysplaier member in the StructuralSolver class
-    */
-    void evalNonLinearNewMatrix( matrixPtr_Type& stiff,
-                                 const vector_Type& sol,
-                                 Real factor,
-                                 const dataPtr_Type& dataMaterial,
-                                 const displayerPtr_Type& displayer);
-
+    void computeMatrix( const vector_Type& /*sol*/,
+			Real /*factor*/,
+			const dataPtr_Type& /*dataMaterial*/,
+			const displayerPtr_Type& displayer);
 
     //@}
 
@@ -180,7 +141,7 @@ VenantKirchhoffMaterialLinear<Mesh>::VenantKirchhoffMaterialLinear():
 }
 
 template <typename Mesh>
-VenantKirchhoffMaterialLinear<Mesh>::~VentKirchhoffMaterialLinear()
+VenantKirchhoffMaterialLinear<Mesh>::~VenantKirchhoffMaterialLinear()
 {}
 
 
@@ -264,80 +225,28 @@ void VenantKirchhoffMaterialLinear<Mesh>::updateJacobianMatrix(const vector_Type
 }
 
 template <typename Mesh>
-void VenantKirchhoffMaterialLinear<Mesh>::updateNonLinearJacobianMatrix( matrixPtr_Type& stiff,
-                                                                         const  vector_Type& disp,
-                                                                         const dataPtr_Type& dataMaterial,
+void VenantKirchhoffMaterialLinear<Mesh>::updateNonLinearJacobianMatrix( matrixPtr_Type& /*stiff*/,
+                                                                         const  vector_Type& /*disp*/,
+                                                                         const dataPtr_Type& /*dataMaterial*/,
                                                                          const displayerPtr_Type& displayer )
     {
       displayer->leaderPrint("   Linear S-  Doing nothing (updating non linear terms in the Jacobian Matrix (in updateJacobian)");
       std::cout << std::endl;
     }
 
-
 template <typename Mesh>
-void VenantKirchhoffMaterialLinear<Mesh>::computeNewMatrix(const vector_Type& disp,
-                                                           Real factor,
-                                                           const dataPtr_Type& dataMaterial,
-                                                           const displayerPtr_Type& displayer)
+void VenantKirchhoffMaterialLinear<Mesh>::computeMatrix(const vector_Type& /*disp*/,
+							Real /*factor*/,
+							const dataPtr_Type& /*dataMaterial*/,
+							const displayerPtr_Type& displayer)
 {
     std::cout << std::endl;
     std::cout << "*********************************" << std::endl;
-    displayer->leaderPrint("   Linear S-  Using the Stiffness Matrix (constant) in UpdateSystem");
+    displayer->leaderPrint("   Linear S-  Using the linear part of the Stiffness Matrix\n");
     std::cout << std::endl;
     std::cout << "*********************************" << std::endl;
-
-    std::cout << std::endl;
-    std::cout << "*********************************" << std::endl;
-    computeNonLinearNewMatrix(this->M_stiff,disp,factor,dataMaterial,displayer);
-    std::cout << "*********************************" << std::endl;
-    std::cout << std::endl;
-
 }
 
-template <typename Mesh>
-void VenantKirchhoffMaterialLinear<Mesh>::computeNonLinearNewMatrix(matrixPtr_Type& stiff,
-                                                                    const vector_Type& disp,
-                                                                    Real factor,
-                                                                    const dataPtr_Type& dataMaterial,
-                                                                    const displayerPtr_Type& displayer)
-{
-    displayer->leaderPrint("   Linear S-  Doing nothing (updating non linear terms in the Stiffness Matrix (in updateSystem)");
-    std::cout << std::endl;
-}
-
-
-template <typename Mesh>
-void VenantKirchhoffMaterialLinear<Mesh>::evalNewMatrix( const vector_Type& sol,
-                                                         Real factor,
-                                                         const dataPtr_Type& dataMaterial,
-                                                         const displayerPtr_Type& displayer)
-{
-
-
-    std::cout << std::endl;
-    std::cout << "*********************************" << std::endl;
-    displayer->leaderPrint("   Linear S-  Using the Stiffness Matrix (constant) in EvalResidual");
-    std::cout << std::endl;
-    std::cout << "*********************************" << std::endl;
-
-    std::cout << std::endl;
-    std::cout << "*********************************" << std::endl;
-    evalNonLinearNewMatrix(this->M_stiff,sol,factor,dataMaterial,displayer);
-    std::cout << "*********************************" << std::endl;
-    std::cout << std::endl;
-}
-
-template <typename Mesh>
-void VenantKirchhoffMaterialLinear<Mesh>::evalNonLinearNewMatrix( matrixPtr_Type& stiff,
-                                                                  const vector_Type& sol,
-                                                                  Real factor,
-                                                                  const dataPtr_Type& dataMaterial,
-                                                                  const displayerPtr_Type& displayer)
-{
-    displayer->leaderPrint("   Linear S-  Doing nothing (updating non linear terms in the Stiffness Matrix (in evalResidual)");
-    std::cout << std::endl;
-
-}
 
 template <typename Mesh>
 inline StructuralMaterial<Mesh>* createVenantKirchhoffLinear() { return new VenantKirchhoffMaterialLinear<Mesh >(); }
