@@ -117,18 +117,20 @@ OneDimensionalBC::applyViscoelasticBC( const fluxPtr_Type& flux, matrix_Type& ma
 
     switch ( M_bcType.find( OneDimensional::first )->second )
     {
+    case OneDimensional::A:
+    case OneDimensional::P:
+    case OneDimensional::S:
+
+#ifdef HAVE_NEUMANN_VISCOELASTIC_BC
+        break;
+#endif
+
     case OneDimensional::Q:
     case OneDimensional::W1:
     case OneDimensional::W2:
 
         matrix.diagonalize( iNode, 1 );
         rhs( iNode ) = 0;
-
-        break;
-
-    case OneDimensional::A:
-    case OneDimensional::P:
-    case OneDimensional::S:
 
         break;
 
