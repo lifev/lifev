@@ -208,10 +208,10 @@ multiscaleMapsDefinition()
  * @return pointer to the derived object
  */
 template < typename DerivedType, typename BasePtrType >
-inline DerivedType*
+inline boost::shared_ptr< DerivedType >
 multiscaleDynamicCast( BasePtrType& base )
 {
-    return dynamic_cast< DerivedType * > ( &( *base ) );
+    return boost::dynamic_pointer_cast< DerivedType > ( base );
 }
 
 //! Display and error message
