@@ -73,6 +73,8 @@ namespace LifeV
 namespace OneDimensional
 {
 
+//#define HAVE_NEUMANN_VISCOELASTIC_BC 1 // Define whether to use homogeneous Neumann/Dirichlet BC for the viscoelastic problem.
+
 /*! @enum Physics Types
  */
 enum physicsType_Type
