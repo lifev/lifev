@@ -207,10 +207,10 @@ MultiscaleModel1D::setupModel()
     M_exporter->setMeshProcId( M_exporterMesh, M_comm->MyPID() );
 
     MapEpetra map( M_feSpace->refFE(), *M_exporterMesh, M_comm );
-    M_solver->setupSolution( *M_exporterSolution, map );
+    M_solver->setupSolution( *M_exporterSolution, map, true );
 
     //M_exporter->addVariable( ExporterData::Scalar, "Solid Area",      (*M_exporterSolution)["A"],    static_cast <UInt> ( 0 ), M_feSpace->dof().numTotalDof() );
-    M_exporter->addVariable( ExporterData::Scalar, "Area ratio",      (*M_exporterSolution)["A/A0-1"], static_cast <UInt> ( 0 ), M_feSpace->dof().numTotalDof() );
+    M_exporter->addVariable( ExporterData::Scalar, "Area ratio",      (*M_exporterSolution)["AoverA0minus1"], static_cast <UInt> ( 0 ), M_feSpace->dof().numTotalDof() );
     M_exporter->addVariable( ExporterData::Scalar, "Fluid Flow Rate", (*M_exporterSolution)["Q"],    static_cast <UInt> ( 0 ), M_feSpace->dof().numTotalDof() );
     //M_exporter->addVariable( ExporterData::Scalar, "W1",              (*M_exporterSolution)["W1"],   static_cast <UInt> ( 0 ), M_feSpace->dof().numTotalDof() );
     //M_exporter->addVariable( ExporterData::Scalar, "W2",              (*M_exporterSolution)["W2"],   static_cast <UInt> ( 0 ), M_feSpace->dof().numTotalDof() );
@@ -642,7 +642,7 @@ MultiscaleModel1D::initializeSolution()
         M_importer->setMeshProcId( M_exporterMesh, M_comm->MyPID() );
 
 //        M_exporter->addVariable( ExporterData::Scalar, "Solid Area",      (*M_exporterSolution)["A"],      static_cast <UInt> ( 0 ), M_feSpace->dof().numTotalDof() );
-        M_importer->addVariable( ExporterData::Scalar, "Area ratio",      (*M_exporterSolution)["A/A0-1"], static_cast <UInt> ( 0 ), M_feSpace->dof().numTotalDof() );
+        M_importer->addVariable( ExporterData::Scalar, "Area ratio",      (*M_exporterSolution)["AoverA0minus1"], static_cast <UInt> ( 0 ), M_feSpace->dof().numTotalDof() );
         M_importer->addVariable( ExporterData::Scalar, "Fluid Flow Rate", (*M_exporterSolution)["Q"],      static_cast <UInt> ( 0 ), M_feSpace->dof().numTotalDof() );
 //        M_importer->addVariable( ExporterData::Scalar, "W1",              (*M_exporterSolution)["W1"],     static_cast <UInt> ( 0 ), M_feSpace->dof().numTotalDof() );
 //        M_importer->addVariable( ExporterData::Scalar, "W2",              (*M_exporterSolution)["W2"],     static_cast <UInt> ( 0 ), M_feSpace->dof().numTotalDof() );
@@ -672,8 +672,8 @@ MultiscaleModel1D::copySolution( const solution_Type& solution1, solution_Type& 
     Debug( 8130 ) << "MultiscaleModel1D::copySolution( solution1, solution2 ) \n";
 #endif
 
-    for ( solutionConstIterator_Type i = solution1.begin() ; i != solution1.end() ; ++i )
-        *solution2[i->first] = *i->second;
+    for ( solutionConstIterator_Type i = solution2.begin() ; i != solution2.end() ; ++i )
+        *solution2[i->first] = *solution1.find(i->first)->second;
 }
 
 void
