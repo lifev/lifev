@@ -607,10 +607,10 @@ void
 OseenAssembler<mesh_type,matrix_type,vector_type>::
 addConvectionRhs(vector_type& rhs, const vector_type& velocity)
 {
-    // f has to be repeated!
+    // velocity has to be repeated!
     if (velocity.mapType() == Unique)
     {
-        addConvectionRhs(rhs,vector_type(velocity,Repeated));
+        addConvectionRhs(rhs, vector_type(velocity,Repeated));
         return;
     }
 
@@ -618,19 +618,19 @@ addConvectionRhs(vector_type& rhs, const vector_type& velocity)
     ASSERT(M_betaFESpace != 0, "No convective FE space for assembling the convection.");
 
     // Some constants
-    const UInt nbElements(M_uFESpace->mesh()->numElements());
-    const UInt fieldDim(M_uFESpace->fieldDim());
+    const UInt nbElements(M_betaFESpace->mesh()->numElements());
+    const UInt fieldDim(M_betaFESpace->fieldDim());
+    const UInt dim(M_betaFESpace->dim());
     const UInt nbFEDof(M_convectionRhsUCFE->nbFEDof());
-    const UInt nbQuadPt(M_convectionRhsUCFE->nbQuadPt());
 
     // Temporaries
-    VectorElemental localVelocity(M_betaFESpace.fe().nbFEDof(), fieldDim);
+    VectorElemental localVelocity(M_betaFESpace->fe().nbFEDof(), fieldDim);
 
     // Loop over the elements
     for (UInt iterElement(0); iterElement < nbElements; ++iterElement)
     {
         // Update the diffusion current FE
-        M_convectionRhsUCFE->update( M_uFESpace->mesh()->element(iterElement), UPDATE_PHI |UPDATE_WDET );
+        M_convectionRhsUCFE->update( M_betaFESpace->mesh()->element(iterElement), UPDATE_PHI | UPDATE_DPHI | UPDATE_WDET );
 
         // Clean the local vector
         M_localConvectionRhs->zero();
@@ -638,18 +638,20 @@ addConvectionRhs(vector_type& rhs, const vector_type& velocity)
 
         for ( UInt iNode = 0 ; iNode < nbFEDof ; iNode++ )
         {
-            UInt iLocal = M_betaFESpace.fe().patternFirst( iNode ); // iLocal = iNode
+            UInt iLocal = M_betaFESpace->fe().patternFirst( iNode ); // iLocal = iNode
 
-            for ( Int iComponent = 0; iComponent < fieldDim; ++iComponent )
+            for ( UInt iComponent = 0; iComponent < fieldDim; ++iComponent )
             {
-                UInt iGlobal = M_betaFESpace.dof().localToGlobalMap( iterElement, iLocal ) + iComponent * fieldDim;
+                UInt iGlobal = M_betaFESpace->dof().localToGlobalMap( iterElement, iLocal ) + iComponent * dim;
+                Real val = velocity( iGlobal );
 
-                localVelocity.vec( ) [ iLocal + iComponent*nbFEDof ] = velocity( iGlobal );
+                localVelocity.vec( ) [ iLocal + iComponent*nbFEDof ] = val;
 
             }
         }
 
-        source_mass2(1.0,localVelocity,localVelocity,*M_localConvectionRhs, *M_convectionRhsUCFE);
+        //source_mass2(1.0,localVelocity,localVelocity,*M_localConvectionRhs, *M_convectionRhsUCFE);
+        source_advection(localVelocity,localVelocity,*M_localConvectionRhs, *M_convectionRhsUCFE);
 
         // Here add in the global rhs
         for (UInt iterFDim(0); iterFDim<fieldDim; ++iterFDim)
@@ -658,9 +660,9 @@ addConvectionRhs(vector_type& rhs, const vector_type& velocity)
                             iterElement,
                             *M_localConvectionRhs,
                             nbFEDof,
-                            M_uFESpace->dof(),
+                            M_betaFESpace->dof(),
                             iterFDim,
-                            iterFDim*M_uFESpace->dof().numTotalDof());
+                            iterFDim*M_betaFESpace->dof().numTotalDof());
         }
     }
 }

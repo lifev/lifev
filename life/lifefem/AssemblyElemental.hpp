@@ -522,6 +522,10 @@ void source( Real coef, VectorElemental& f, VectorElemental& elvec, const Curren
 void source_fhn( Real coef_f, Real coef_a, VectorElemental& u, VectorElemental& elvec, const CurrentFE& fe,
                  int fblock = 0, int eblock = 0 );
 
+//! \f$( beta\cdot\nabla u^k, v  )\f$
+void source_advection( const VectorElemental& beta_loc, const VectorElemental& uk_loc,
+                       VectorElemental& elvec, const CurrentFE& fe );
+
 //!@name Shape derivative terms for Newton FSI
 //!@{
 //

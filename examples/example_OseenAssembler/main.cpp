@@ -460,6 +460,39 @@ main( int argc, char** argv )
         // Updating the BDF scheme
         bdf.bdfVelocity().shiftRight( *solution );
 
+        // +-----------------------------------------------+
+        // |         Test of the convecton term            |
+        // +-----------------------------------------------+
+
+        boost::shared_ptr<matrix_type> convectionMatrix;
+        convectionMatrix.reset(new matrix_type( uFESpace->map() ));
+        vector_type rhsConvection(uFESpace->map(),Unique);
+        vector_type rhsConvection2(uFESpace->map(),Repeated);
+        *convectionMatrix *= 0;
+        rhsConvection     *= 0;
+        rhsConvection2    *= 0;
+
+        oseenAssembler.addConvection(convectionMatrix,*solution);
+        convectionMatrix->globalAssemble();
+        velocity->subset(*solution);
+        rhsConvection += (*convectionMatrix)*(*velocity);
+
+        oseenAssembler.addConvectionRhs(rhsConvection2,*velocity);
+
+        rhsConvection.globalAssemble();
+        rhsConvection2.globalAssemble();
+
+        Real normTest((rhsConvection-rhsConvection2).norm2());
+        Real normRhsConvection(rhsConvection.norm2());
+        if (verbose) std::cout << "L2 error for the convection rhs assembly         : " << normTest << std::endl << std::endl;
+        if (verbose) std::cout << "L2 relative error for the convection rhs assembly: " << normTest/normRhsConvection << std::endl << std::endl;
+        rhsConvection.spy("rhs1");
+        rhsConvection2.spy("rhs2");
+
+        convectionMatrix.reset();
+
+        // +-----------------------------------------------+
+
         // Exporting the solution
         exporter.postProcess( currentTime );
 

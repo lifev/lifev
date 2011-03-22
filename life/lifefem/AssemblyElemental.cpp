@@ -3409,6 +3409,75 @@ void source_fhn( Real coef_f, Real coef_a, VectorElemental& u, VectorElemental& 
 
 }
 
+//! \f$(beta\cdot\nabla u^k, v  )\f$
+void source_advection( const VectorElemental& beta_loc, const VectorElemental& uk_loc,
+                       VectorElemental& elvec, const CurrentFE& fe )
+{
+
+    Real guk[ fe.nbCoor() ][ fe.nbCoor() ];      // \grad u^k at a quadrature point
+    Real beta[ fe.nbCoor() ];                    // beta at a quadrature point
+    Real conv[ fe.nbQuadPt() ][ fe.nbCoor() ];    // beta(\grad u^k) at each quadrature point
+    Real s;
+
+    UInt ig, icoor, jcoor, i;
+
+    // loop on quadrature points
+    for ( ig = 0; ig < fe.nbQuadPt(); ig++ )
+    {
+
+        // loop on space coordinates
+        for ( icoor = 0; icoor < fe.nbCoor(); icoor++ )
+        {
+
+            // each compontent (icoor) of beta at this quadrature point
+            s = 0.0;
+            for ( i = 0; i < fe.nbFEDof(); i++ )
+                s += fe.phi( i, ig ) * beta_loc.vec() [ i + icoor * fe.nbFEDof() ];
+            beta[ icoor ] = s;
+
+            // loop  on space coordinates
+            for ( jcoor = 0; jcoor < fe.nbCoor(); jcoor++ )
+            {
+                s = 0.0;
+                for ( i = 0; i < fe.nbFEDof(); i++ )
+                    s += fe.phiDer( i, jcoor, ig ) * uk_loc.vec() [ i + icoor * fe.nbFEDof() ]; //  \grad u^k at a quadrature point
+                guk[ icoor ][ jcoor ] = s;
+            }
+        }
+
+        // beta*(\grad u^k) at each quadrature point
+        for ( jcoor = 0; jcoor < fe.nbCoor(); jcoor++ )
+        {
+            s = 0.0;
+            for ( icoor = 0; icoor < fe.nbCoor(); icoor++ )
+                s += beta[ icoor ] * guk[ icoor ][ jcoor ];
+            conv[ ig ][ jcoor ] = s;
+        }
+    }
+
+    //
+    // Numerical integration
+    //
+
+    // loop on coordinates, i.e. loop on elementary vector blocks
+    for ( icoor = 0; icoor < fe.nbCoor(); icoor++ )
+    {
+
+        VectorElemental::vector_view vec = elvec.block( icoor );
+
+        // loop on nodes, i.e. loop on components of this block
+        for ( i = 0; i < fe.nbFEDof(); i++ )
+        {
+
+            // loop on quadrature points
+            s = 0;
+            for ( ig = 0; ig < fe.nbQuadPt(); ig++ )
+                s += conv[ ig ][ icoor ] * fe.phi( i, ig ) * fe.weightDet( ig );
+            vec( i ) += s;
+        }
+    }
+}
+
 // coef * ( - \grad w^k :[I\div d - (\grad d)^T] u^k + convect^T[I\div d - (\grad d)^T] (\grad u^k)^T , v  ) for Newton FSI
 //
 // Remark: convect = u^n-w^k relative vel.
