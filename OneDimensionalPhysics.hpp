@@ -108,7 +108,11 @@ public :
      *  @param elasticExternalNodes consider elastic the external nodes (neglect viscoelasticity)
      *  @return A = A0 * ( (P - Pext) / beta0 + 1 )^(1/beta1)
      */
+#ifdef HAVE_NEUMANN_VISCOELASTIC_BC
     Real fromPToA( const Real& P, const Real& timeStep, const UInt& iNode, const bool& elasticExternalNodes = false ) const;
+#else
+    Real fromPToA( const Real& P, const Real& timeStep, const UInt& iNode, const bool& elasticExternalNodes = true ) const;
+#endif
 
     //@}
 
@@ -130,8 +134,11 @@ public :
      * @param elasticExternalNodes consider elastic the external nodes (neglect viscoelasticity)
      * @return dP(A)/dA = dPelastic(A)/dA + dPviscoelastic(A)/dA
      */
+#ifdef HAVE_NEUMANN_VISCOELASTIC_BC
     Real dPdA( const Real& A, const Real& timeStep, const UInt& iNode, const bool& elasticExternalNodes = false ) const;
-
+#else
+    Real dPdA( const Real& A, const Real& timeStep, const UInt& iNode, const bool& elasticExternalNodes = true ) const;
+#endif
     //! Compute the derivative of the elastic pressure with respect to A
     /*!
      * @return dP(A)/dA = beta1 * beta0 * ( A / Area0 )^beta1 / A
@@ -143,15 +150,21 @@ public :
      * @param elasticExternalNodes consider elastic the external nodes (neglect viscoelasticity)
      * @return dP(A)/dA = gamma / ( A^(3/2) ) * ( 1 / deltaT - 3 * dA/dT / ( 2 * A ) )
      */
+#ifdef HAVE_NEUMANN_VISCOELASTIC_BC
     Real dPdAviscoelastic( const Real& A, const Real& timeStep, const UInt& iNode, const bool& elasticExternalNodes = false ) const;
-
+#else
+    Real dPdAviscoelastic( const Real& A, const Real& timeStep, const UInt& iNode, const bool& elasticExternalNodes = true ) const;
+#endif
     //! Compute the derivative of the elastic pressure with respect to A
     /*!
      * @param elasticExternalNodes consider elastic the external nodes (neglect viscoelasticity)
      * @return dA(A)/dP = A0 / ( beta0 * beta1 ) * ( 1 + ( P - Pext )/ beta0 )^(1/beta1 - 1)
      */
+#ifdef HAVE_NEUMANN_VISCOELASTIC_BC
     Real dAdP( const Real& P, const Real& timeStep, const UInt& iNode, const bool& elasticExternalNodes = false ) const;
-
+#else
+    Real dAdP( const Real& P, const Real& timeStep, const UInt& iNode, const bool& elasticExternalNodes = true ) const;
+#endif
     //! Compute the derivative of total pressure (P is the elastic pressure) with respect to A and Q.
     /*!
      * @return dPt/dU_ii = dP/dU_ii + rho/2 * d(Q/A)^2/dU_ii
@@ -172,7 +185,11 @@ public :
      * @param elasticExternalNodes consider elastic the external nodes (neglect viscoelasticity)
      * @return P = P_elastic + P_viscoelastic + P_external
      */
+#ifdef HAVE_NEUMANN_VISCOELASTIC_BC
     Real pressure( const Real& A, const Real& timeStep, const UInt& iNode, const bool& elasticExternalNodes = false ) const;
+#else
+    Real pressure( const Real& A, const Real& timeStep, const UInt& iNode, const bool& elasticExternalNodes = true ) const;
+#endif
 
     //! Return the external pressure.
     /*!
@@ -191,8 +208,11 @@ public :
      * @param elasticExternalNodes consider elastic the external nodes (neglect viscoelasticity)
      * @return P = gamma * 1/(2*sqrt(pi*A)) * dA / dt
      */
+#ifdef HAVE_NEUMANN_VISCOELASTIC_BC
     Real viscoelasticPressure( const Real& A, const Real& timeStep, const UInt& iNode, const bool& elasticExternalNodes = false ) const;
-
+#else
+    Real viscoelasticPressure( const Real& A, const Real& timeStep, const UInt& iNode, const bool& elasticExternalNodes = true ) const;
+#endif
     //! Compute the total pressure (P is the elastic pressure)
     /*!
      * @return Pt = P + rho/2 * (Q/A)^2

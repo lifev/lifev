@@ -947,6 +947,7 @@ MultiscaleModel1D::tangentProblem( const bcSide_Type& bcOutputSide, const bcType
 Real
 MultiscaleModel1D::solveTangentProblem( solver_Type::vector_Type& rhs, const UInt& bcNode )
 {
+#ifdef HAVE_NEUMANN_VISCOELASTIC_BC
     if ( M_data->viscoelasticWall() )
     {
         // Solve elastic tangent problem
@@ -970,6 +971,7 @@ MultiscaleModel1D::solveTangentProblem( solver_Type::vector_Type& rhs, const UIn
         return flowRateViscoelasticCorrection[bcNode] + flowRateElasticCorrection[bcNode];
     }
     else
+#endif
         return rhs[bcNode];
 }
 
