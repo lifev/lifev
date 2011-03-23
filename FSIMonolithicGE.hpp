@@ -1,4 +1,3 @@
-/* -*- mode: c++ -*- */
 //@HEADER
 /*
 *******************************************************************************
@@ -39,13 +38,13 @@
 #ifndef MONOLITHICGE_H
 #define MONOLITHICGE_H 1
 
+#include <life/lifecore/LifeV.hpp>
+
 #include <lifemc/lifesolver/MonolithicBlockMatrix.hpp>
 #include <lifemc/lifesolver/MonolithicBlockMatrixRN.hpp>
 #include <lifemc/lifesolver/MonolithicBlockComposedDN.hpp>
 #include <lifemc/lifesolver/MonolithicBlockComposedNN.hpp>
 #include <lifemc/lifesolver/MonolithicBlockComposedDNND.hpp>
-
-#include <life/lifecore/LifeV.hpp>
 
 #include <lifemc/lifesolver/FSIMonolithic.hpp>
 
@@ -57,7 +56,6 @@ namespace LifeV
   \include ../../testsuite/test_monolithic/fluidstructure.dox
   @author Paolo Crosetto
   @see \ref CDFQ
-
 
  Important parameters to set properly in the data file:
  - useShapeDerivatives: MUST be false, because in the GE approach the geometry is explicit;
@@ -75,13 +73,13 @@ namespace LifeV
  alphas=0.
  - DDBlockPrec: specifies the possible preconditioners to use. Can be: AdditiveSchwarz, MonolithicBlockComposedDN, MonolithicBlockComposedDN2,
  MonolithicBlockComposedNN, MonolithicBlockComposedDNND.
-
  */
 class FSIMonolithicGE : public FSIMonolithic
 {
 public:
 
     typedef FSIMonolithic super_Type;
+
     //! @name Constructor & Destructor
     //@{
 
@@ -95,7 +93,6 @@ public:
     {}
 
     //@}
-
 
 
     //! @name Public Methods
@@ -124,16 +121,13 @@ public:
      */
     void updateSystem();
 
-
     /**
        evaluates the residual b-Ax
        \param res: output
        \param _sol: monolithic solution
        \param iter: current NonLinearRichardson (Newton) iteration
     */
-    void   evalResidual(vector_Type&        res,
-                        const vector_Type& _sol,
-                        const UInt          _iter);
+    void evalResidual( vector_Type& res, const vector_Type& _sol, const UInt _iter );
 
     /**
       iterates the mesh
@@ -142,7 +136,9 @@ public:
     void iterateMesh( const vector_Type& disp );
 
     //@}
-    //!@name Getter Methods
+
+
+    //! @name Getter Methods
     //@{
 
     //! Gets the solution
@@ -155,29 +151,40 @@ public:
     void setSolution( const vector_Type& solution ) { M_un.reset( new vector_Type( solution ) ); }
     //@}
 
-    //!@name Setter Methods
+
+    //! @name Setter Methods
     //@{
+
     //! Sets the solution ptr
     void setSolutionPtr( const vectorPtr_Type& sol) { M_un = sol; }
 
     //! Applies the bounsary conditions to the matrix
     void applyBoundaryConditions();
+
     //@}
+
 
     //! Factory method
     static FSIOperator* createM(){ return new FSIMonolithicGE(); }
 
 private:
+
     //!@name Private Methods
     //@{
+
     void createOperator( std::string& operType )
     {
         M_monolithicMatrix.reset(MonolithicBlockMatrix::Factory_Type::instance().createObject( operType ));
     }
+
     //@}
 
+
     //!@name Private Members
+    //@{
+
     static bool reg;
+
     //@}
 };
 

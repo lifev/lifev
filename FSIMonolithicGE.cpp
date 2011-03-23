@@ -1,4 +1,3 @@
-/* -*- mode: c++ -*- */
 //@HEADER
 /*
 *******************************************************************************
@@ -24,6 +23,7 @@
 *******************************************************************************
 */
 //@HEADER
+
 
 /*!
     @file
@@ -104,12 +104,9 @@ FSIMonolithicGE::setupSystem( )
 }
 
 void
-FSIMonolithicGE::updateSystem( )
+FSIMonolithicGE::updateSystem()
 {
     super_Type::updateSystem();
-
-    // Set displacement for solid RHS
-    setDispSolid( *M_un );
 }
 
 
