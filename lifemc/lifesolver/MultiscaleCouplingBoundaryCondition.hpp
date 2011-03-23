@@ -182,7 +182,7 @@ template< class ModelType >
 inline void
 MultiscaleCouplingBoundaryCondition::applyBoundaryConditions0D( const UInt& i )
 {
-    ModelType *model = multiscaleDynamicCast< ModelType >( M_models[i] );
+    boost::shared_ptr< ModelType > model = multiscaleDynamicCast< ModelType >( M_models[i] );
 
     for ( UInt j( 0 ); j < M_listSize; ++j )
     {

@@ -241,7 +241,7 @@ template< class ModelType >
 inline void
 MultiscaleCouplingFlowRateStress::imposeFlowRate3D( const UInt& i )
 {
-    ModelType *model = multiscaleDynamicCast< ModelType >( M_models[i] );
+    boost::shared_ptr< ModelType > model = multiscaleDynamicCast< ModelType >( M_models[i] );
 
     bcFunction3D_Type base;
     base.setFunction  ( boost::bind( &MultiscaleCouplingFlowRateStress::functionFlowRate, this, _1, _2, _3, _4, _5 ) );
@@ -253,7 +253,7 @@ template< class ModelType >
 inline void
 MultiscaleCouplingFlowRateStress::imposeStress3D( const UInt& i )
 {
-    ModelType *model = multiscaleDynamicCast< ModelType >( M_models[i] );
+    boost::shared_ptr< ModelType > model = multiscaleDynamicCast< ModelType >( M_models[i] );
 
     bcFunction3D_Type base;
     base.setFunction( boost::bind( &MultiscaleCouplingFlowRateStress::functionStress, this, _1, _2, _3, _4, _5 ) );
