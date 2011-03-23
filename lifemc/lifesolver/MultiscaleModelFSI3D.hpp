@@ -35,8 +35,8 @@
  *  @maintainer Cristiano Malossi <cristiano.malossi@epfl.ch>
  */
 
-#ifndef MS_MODEL_FSI3D_H
-#define MS_MODEL_FSI3D_H 1
+#ifndef MultiscaleModelFSI3D_H
+#define MultiscaleModelFSI3D_H 1
 
 // LifeV includes
 #include <life/lifesolver/FSIOperator.hpp>
@@ -322,16 +322,17 @@ private:
     IOFilePtr_Type                         M_importerSolid;
 
     // Solution
-    vectorPtr_Type                         M_fluidVelocityPressure;
+    vectorPtr_Type                         M_fluidVelocityAndPressure;
     vectorPtr_Type                         M_fluidDisplacement;
     vectorPtr_Type                         M_solidVelocity;
     vectorPtr_Type                         M_solidDisplacement;
 
     // Old Solution
-    vectorPtr_Type                         M_fluidVelocityPressure_tn;
+    vectorPtr_Type                         M_fluidVelocityAndPressure_tn;
+    vectorPtr_Type                         M_fluidDisplacement_tn;
+    vectorPtr_Type                         M_solidVelocity_tn;
     vectorPtr_Type                         M_solidDisplacement_tn;
-    vectorPtr_Type                         M_solidDisplacementOld_tn;
-    vectorPtr_Type                         M_rhs_tn;
+
     UInt                                   M_nonLinearRichardsonIteration;
 
     // Boundary Conditions
@@ -358,4 +359,4 @@ inline multiscaleModel_Type* createMultiscaleModelFSI3D()
 } // Namespace multiscale
 } // Namespace LifeV
 
-#endif /* MS_MODEL_FSI3D_H */
+#endif /* MultiscaleModelFSI3D_H */
