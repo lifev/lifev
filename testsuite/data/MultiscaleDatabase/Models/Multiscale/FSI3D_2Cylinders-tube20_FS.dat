@@ -27,7 +27,7 @@ couplingsPath    = './MultiscaleDatabase/Couplings/'
 ########### ID #### Type ############## File (without .dat) #######################################
 models = '
             0       FSI3D               Cylinder_tube20_MonolithicGE
-            1       FSI3D               Cylinder_tube20_MonolithicGE
+            1       FSI3D               Cylinder_tube20_MonolithicGI
          '  
 ###################################################################################################
 
