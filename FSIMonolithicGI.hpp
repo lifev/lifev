@@ -1,4 +1,3 @@
-/* -*- mode: c++ -*- */
 //@HEADER
 /*
 *******************************************************************************
@@ -91,101 +90,25 @@ public:
 
     //!@name Constructor and Destructor
     //@{
+
     //! Empty Constructor
     FSIMonolithicGI();
+
     //! Destructor
-    virtual ~FSIMonolithicGI(){}
+    virtual ~FSIMonolithicGI() {}
+
     //@}
+
 
     //!@name Public Methods
     //@{
-    /**
-       constructs the matrix handling the coupling and sums it to matrix
-       \param matrix: output matrix
-       \param coupling:   flag handling the coupling of the different blocks. Chosing properly it's value, ranging from 0 to 31, one can decide which couplings to keep and which to neglect (it works like the chmod command in bash)
-    */
-    void                        setUp( const GetPot& dataFile );
 
-    //! initializes the fluid and mesh problems, creates the map of the global matrix
-    void                       setupFluidSolid( UInt const fluxes );
-
-    /**
-       updates the meshmotion, advances of a time step
-       \param displacement: solution
-    */
-    void                        updateSystem();
-
-
-    //@}
-
-    //! builds the constant part of the fluid-structure-mesh motion matrix
-    void                        buildSystem ();
-
-    /**
-       evaluates the residual b-Ax
-       \param res: output
-       \param _sol: fluid domain displacement solution
-       \param iter: current NonLinearRichardson (block Gauss Seidel for the tangent system) iteration
-    */
-    void                      evalResidual(vector_Type&        res,
-                                           const vector_Type& _sol,
-                                           const UInt          _iter);
-
-
-
-    void applyBoundaryConditions();
-
-
-    /**
-       solves the Jacobian system
-       \param _muk: output, solution at the current block GS step
-       \param _res: linear residual
-       \param _linearRelTol: not used
-    */
-    void                        solveJac(vector_Type       &_muk,
-                                         const vector_Type &_res,
-                                         const Real       _linearRelTol);
     //! initialize the system with functions
-    void                        initialize( FSIOperator::fluidPtr_Type::value_type::function_Type const& u0,
-                                            FSIOperator::solidPtr_Type::value_type::Function const& p0,
-                                            FSIOperator::solidPtr_Type::value_type::Function const& d0,
-                                            FSIOperator::solidPtr_Type::value_type::Function const& w0,
-                                            FSIOperator::solidPtr_Type::value_type::Function const& df0 );
-
-    //@}
-    //!@name Get Methods
-    //@{
-
-    //! getter for the map of fluid-structure-interface (without the mesh motion)
-    const MapEpetra&            mapWithoutMesh() const {return *M_mapWithoutMesh;}
-
-    //! getter for the global matrix of the system
-    const matrixPtr_Type        matrixPtr() const {return this->M_monolithicMatrix->matrix();}
-
-    //! getter for the current iteration solution
-    const vectorPtr_Type  uk()  const      {return M_uk;}
-
-    //! getter for the domain displacement at the previous time step (to correctly visualize the solition of both GE
-    //! and GI)
-    const vector_Type&          meshDisp()const
-    {
-        return this->M_meshMotion->disp();
-    }
-
-    //! get the solution.
-    const vector_Type& solution() const
-    {
-        return *M_uk;
-    }
-
-    //! get the solution.
-    vectorPtr_Type& solutionPtr() { return M_uk; }
-
-    //@}
-    //!@name Set Methods
-    //@{
-    //! set the solution
-    void setSolution( const vector_Type& solution ) { M_uk.reset( new vector_Type( solution ) ); }
+    void initialize( fluidPtr_Type::value_type::function_Type const& u0,
+                     fluidPtr_Type::value_type::function_Type const& p0,
+                     solidPtr_Type::value_type::Function const& d0,
+                     solidPtr_Type::value_type::Function const& /*w0*/,
+                     fluidPtr_Type::value_type::function_Type const& /*df0*/ );
 
     void initialize( const vector_Type& un )
     {
@@ -193,15 +116,76 @@ public:
         M_uk.reset( new vector_Type( un ) );
     }
 
-    void setSolutionPtr                     ( const vectorPtr_Type& sol) { M_uk = sol; }
+    /**
+       constructs the matrix handling the coupling and sums it to matrix
+       \param matrix: output matrix
+       \param coupling:   flag handling the coupling of the different blocks. Chosing properly it's value, ranging from 0 to 31, one can decide which couplings to keep and which to neglect (it works like the chmod command in bash)
+    */
+    void setUp( const GetPot& dataFile );
+
+    //! initializes the fluid and mesh problems, creates the map of the global matrix
+    void setupFluidSolid( UInt const fluxes );
+
+    //! builds the constant part of the fluid-structure-mesh motion matrix
+    void buildSystem ();
+
+    /**
+       updates the meshmotion, advances of a time step
+       \param displacement: solution
+    */
+    void updateSystem();
+
+    void applyBoundaryConditions();
+
+    /**
+       evaluates the residual b-Ax
+       \param res: output
+       \param _sol: fluid domain displacement solution
+       \param iter: current NonLinearRichardson (block Gauss Seidel for the tangent system) iteration
+    */
+    void evalResidual( vector_Type&  res, const vector_Type& _sol, const UInt _iter );
+
+    //@}
+
+
+    //!@name Set Methods
+    //@{
+
+    //! set the solution
+    void setSolution( const vector_Type& solution ) { M_uk.reset( new vector_Type( solution ) ); }
+
+    void setSolutionPtr( const vectorPtr_Type& sol) { M_uk = sol; }
+
+    //@}
+
+
+    //!@name Get Methods
+    //@{
+
+    //! getter for the map of fluid-structure-interface (without the mesh motion)
+    const MapEpetra& mapWithoutMesh() const { return *M_mapWithoutMesh; }
+
+    //! getter for the global matrix of the system
+    const matrixPtr_Type matrixPtr() const { return M_monolithicMatrix->matrix(); }
+
+    //! getter for the current iteration solution
+    const vectorPtr_Type uk() const { return M_uk; }
+
+    //! get the solution.
+    const vector_Type& solution() const { return *M_uk; }
+
+    //! get the solution.
+    vectorPtr_Type& solutionPtr() { return M_uk; }
+
     //@}
 
 protected:
 
     //!@name Protected Methods
     //@{
-    //!sets the block preconditioner
-    void                        setupBlockPrec( );
+
+    //! set the block preconditioner
+    void setupBlockPrec();
 
     //@}
 
@@ -223,7 +207,7 @@ private:
        \param rhsShapeDerivatives: output. Shape derivative terms.
        \param meshDeltaDisp: input. Mesh displacement increment.
     */
-    void shapeDerivatives(matrixPtr_Type sdMatrix, const vector_Type& sol,  bool fullImplicit, bool convectiveTerm);
+    void shapeDerivatives( matrixPtr_Type sdMatrix );
 
     //! assembles the mesh motion matrix.
     /*!In Particular it diagonalize the part of the matrix corresponding to the
@@ -233,6 +217,8 @@ private:
     void assembleMeshBlock(UInt iter);
 
     //@}
+
+
     //!@name Private Members
     //@{
 
@@ -246,6 +232,7 @@ private:
     matrixPtr_Type                       M_solidDerBlock;
     //std::vector<fluidBchandlerPtr_Type>    M_BChsLin;
     static bool                          reg;
+
     //@}
 };
 
