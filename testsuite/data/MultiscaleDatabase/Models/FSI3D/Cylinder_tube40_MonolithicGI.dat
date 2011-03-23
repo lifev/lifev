@@ -153,7 +153,7 @@ semiImplicit        = false  # tells if we advance in time after the first nonli
     [./physics]
     solidType = linearVenantKirchhof # linearVenantKirchhof
                                      # nonLinearVenantKirchhof
-    #material_flag = 1
+    material_flag = 1
     #density   = 1.2    # density
     #young     = 4.0E6
     #poisson   = 0.48
