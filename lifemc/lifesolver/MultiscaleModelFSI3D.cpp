@@ -483,12 +483,18 @@ MultiscaleModelFSI3D::setupGlobalData( const std::string& fileName )
     if ( !dataFile.checkVariable( "fluid/physics/viscosity" ) )
         M_data->dataFluid()->setViscosity( M_globalData->fluidViscosity() );
 
+    UInt materialFlag;
+    if ( !dataFile.checkVariable( "solid/physics/material_flag" ) )
+        materialFlag = 1;
+    else
+        materialFlag = dataFile( "solid/physics/material_flag", 1 );
+
     if ( !dataFile.checkVariable( "solid/physics/density" ) )
         M_data->dataSolid()->setDensity( M_globalData->structureDensity() );
     if ( !dataFile.checkVariable( "solid/physics/poisson" ) )
-        M_data->dataSolid()->setPoisson( M_globalData->structurePoissonCoefficient() );
+        M_data->dataSolid()->setPoisson( M_globalData->structurePoissonCoefficient(), materialFlag );
     if ( !dataFile.checkVariable( "solid/physics/young" ) )
-        M_data->dataSolid()->setYoung( M_globalData->structureYoungModulus() );
+        M_data->dataSolid()->setYoung( M_globalData->structureYoungModulus(), materialFlag );
 
     //M_data->showMe();
 }
@@ -639,7 +645,7 @@ MultiscaleModelFSI3D::initializeSolution()
 
         temporaryVector = 0;
         temporaryVector.subset( *M_solidDisplacement, M_solidDisplacement->map(), static_cast<UInt> ( 0 ), offset );
-        temporaryVector *= 1 / ( M_FSIoperator->solid().getRescaleFactor() * M_data->dataFluid()->dataTime()->timeStep() );
+        temporaryVector /= M_FSIoperator->solid().getRescaleFactor() * M_data->dataFluid()->dataTime()->timeStep();
 
         solution += temporaryVector;
 
