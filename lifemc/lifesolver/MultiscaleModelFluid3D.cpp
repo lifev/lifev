@@ -53,7 +53,7 @@ MultiscaleModelFluid3D::MultiscaleModelFluid3D() :
         M_bc                           ( new bcInterface_Type() ),
         M_bdf                          (),
         M_data                         ( new data_Type() ),
-        M_meshData                     ( new MeshData()),
+        M_meshData                     ( new MeshData() ),
         M_mesh                         (),
         M_map                          (),
         M_solution                     (),
@@ -98,7 +98,8 @@ MultiscaleModelFluid3D::setupData( const std::string& fileName )
     if ( M_globalData.get() )
         setupGlobalData( fileName );
 
-    M_meshData->setup(dataFile, "fluid/space_discretization");
+    // Mesh data
+    M_meshData->setup( dataFile, "fluid/space_discretization" );
 
     // Parameters for the NS Iterations
     M_subiterationsMaximumNumber = dataFile( "fluid/miscellaneous/SubITMax", 0 );
@@ -161,7 +162,7 @@ MultiscaleModelFluid3D::setupModel()
         M_solution->setCombineMode( Zero );
 
     M_exporter->addVariable( ExporterData::Vector, "Fluid Velocity", M_solution, static_cast<UInt> ( 0 ), M_uFESpace->dof().numTotalDof() );
-    M_exporter->addVariable( ExporterData::Scalar, "Fluid Pressure", M_solution, 3 * M_uFESpace->dof().numTotalDof(),              M_pFESpace->dof().numTotalDof() );
+    M_exporter->addVariable( ExporterData::Scalar, "Fluid Pressure", M_solution, 3 * M_uFESpace->dof().numTotalDof(), M_pFESpace->dof().numTotalDof() );
 
     //Setup linear model
     setupLinearModel();
@@ -195,12 +196,16 @@ MultiscaleModelFluid3D::buildModel()
     {
         M_alpha = M_bdf->bdfVelocity().coefficientFirstDerivative( 0 ) / M_data->dataTime()->timeStep();
         *M_beta = M_bdf->bdfVelocity().extrapolation();
-	M_bdf->bdfVelocity().updateRHSContribution( M_data->dataTime()->timeStep() );
+
+        M_bdf->bdfVelocity().updateRHSContribution( M_data->dataTime()->timeStep() );
         *M_rhs  = M_fluid->matrixMass() * M_bdf->bdfVelocity().rhsContributionFirstDerivative();
     }
 
     //Set problem coefficients
     M_fluid->updateSystem( M_alpha, *M_beta, *M_rhs );
+
+    //Update operator BC
+    M_bc->updatePhysicalSolverVariables();
 }
 
 void
@@ -220,7 +225,6 @@ MultiscaleModelFluid3D::updateModel()
 
     M_bdf->bdfVelocity().updateRHSContribution( M_data->dataTime()->timeStep() );
     *M_rhs  = M_fluid->matrixMass() * M_bdf->bdfVelocity().rhsContributionFirstDerivative();
-
 
     //Set problem coefficients
     M_fluid->updateSystem( M_alpha, *M_beta, *M_rhs );
@@ -243,10 +247,11 @@ MultiscaleModelFluid3D::solveModel()
     Debug( 8120 ) << "MultiscaleModelFluid3D::solveModel() \n";
 #endif
 
-    //Solve the problem
+    // Solve the problem
     displayModelStatus( "Solve" );
     M_fluid->iterate( *M_bc->handler() );
 
+    // Non linear convective term with Aitken
     if ( M_subiterationsMaximumNumber > 0 )
     {
         Real residual = ( *M_beta - *M_fluid->solution() ).norm2(); // residual is computed on the whole solution vector;
@@ -363,14 +368,8 @@ MultiscaleModelFluid3D::updateLinearModel()
     vectorZero = 0.0;
 
     //updateLinearModel TODO REMOVE ?
-    M_fluid->updateLinearSystem( M_fluid->matrixNoBC(),
-                                 M_alpha,
-                                 *M_beta,
-                                 *M_fluid->solution(),
-                                 vectorZero,
-                                 vectorZero,
-                                 vectorZero,
-                                 vectorZero );
+    M_fluid->updateLinearSystem( M_fluid->matrixNoBC(), M_alpha, *M_beta, *M_fluid->solution(),
+                                 vectorZero, vectorZero, vectorZero, vectorZero );
 
     //Linear System Updated
     M_updateLinearModel = false;
@@ -579,7 +578,7 @@ MultiscaleModelFluid3D::setupFEspace()
     else if ( M_data->uOrder().compare( "P1" ) == 0 )
     {
         u_refFE = &feTetraP1;
-        u_qR = &quadRuleTetra4pt; // DoE 2
+        u_qR = &quadRuleTetra4pt;  // DoE 2
         u_bdQr = &quadRuleTria3pt; // DoE 2
     }
     else if ( M_data->uOrder().compare( "P1Bubble" ) == 0 )
@@ -632,9 +631,6 @@ MultiscaleModelFluid3D::setupDOF()
 #endif
 
     M_lmDOF = M_bc->handler()->numberOfBCWithType( Flux );
-
-    //M_uDOF = M_uFESpace->map().getMap(Unique)->NumGlobalElements();
-    //M_pFESpace->dof().numTotalDof() = M_pFESpace->map().getMap(Unique)->NumGlobalElements();
 }
 
 void
