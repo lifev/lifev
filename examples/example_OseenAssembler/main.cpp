@@ -76,7 +76,7 @@ static bool regML = (PRECFactory::instance().registerProduct( "ML", &createML ))
 enum DiffusionType{ViscousStress,StiffStrain};
 enum MeshType{RegularMesh,File};
 enum InitType{Interpolation,Projection};
-enum ConvectionType{Explicit,SemiImplicit,MatrixExplicit};
+enum ConvectionType{Explicit,SemiImplicit,MatrixExplicit,KIO91};
 
 typedef RegionMesh3D<LinearTetra> mesh_type;
 typedef MatrixEpetra<Real> matrix_type;
@@ -150,13 +150,13 @@ main( int argc, char** argv )
     // Space discretization
     const UInt numDimensions  = 3;
     const MeshType meshSource = RegularMesh;
-    const UInt numMeshElem    = 10;
+    const UInt numMeshElem    = 12;
 
     // Numerical scheme
     const DiffusionType diffusionType = ViscousStress;
-    const UInt BDFOrder = 1;
-    const InitType initializationMethod = Projection;
-    const ConvectionType convectionTerm = MatrixExplicit;
+          UInt BDFOrder = 3;
+    const InitType initializationMethod = Interpolation;
+    const ConvectionType convectionTerm = Explicit;
 
     // EthierSteinman data
     EthierSteinmanUnsteady::setA(1.0);
@@ -350,6 +350,7 @@ main( int argc, char** argv )
     uFESpace->interpolate(EthierSteinmanUnsteady::uexact,*velocity,currentTime);
     pFESpace->interpolate(EthierSteinmanUnsteady::pexact,*pressure,currentTime);
     *solution = *velocity;
+
     solution->add(*pressure,pressureOffset);
 
     bdf.bdfVelocity().setInitialCondition( *solution );
@@ -366,43 +367,6 @@ main( int argc, char** argv )
         pFESpace->interpolate(EthierSteinmanUnsteady::pexact,*pressure,currentTime);
         *solution = *velocity;
         solution->add(*pressure,pressureOffset);
-
-        // +-----------------------------------------------+
-        // |         Test of the convecton term            |
-        // +-----------------------------------------------+
-
-        boost::shared_ptr<matrix_type> convectionMatrix;
-        convectionMatrix.reset(new matrix_type( solutionMap ));
-        vector_type rhsConvection(solutionMap,Unique);
-        vector_type rhsConvection2(solutionMap,Unique);
-        *convectionMatrix *= 0;
-        rhsConvection     *= 0;
-        rhsConvection2    *= 0;
-
-        oseenAssembler.addConvection(convectionMatrix,*solution*100);
-        convectionMatrix->globalAssemble();
-        //solution->spy("sol1init");
-        rhsConvection += (*convectionMatrix)*(*solution*100);
-
-        //solution->spy("sol2init");
-        oseenAssembler.addConvectionRhs(rhsConvection2,*solution*100);
-
-        rhsConvection.globalAssemble();
-        rhsConvection2.globalAssemble();
-
-        Real normTest((rhsConvection-rhsConvection2).normInf());
-        Real normRhsConvection(rhsConvection.normInf());
-        if (verbose) std::cout << "inf error for the convection rhs assembly         : " << normTest << std::endl << std::endl;
-        if (verbose) std::cout << "inf relative error for the convection rhs assembly: " << normTest/normRhsConvection << std::endl << std::endl;
-        //convectionMatrix->spy("convectionInit");
-        //solution->spy("solutionInit");
-        //rhsConvection.spy("rhs1init");
-        //rhsConvection2.spy("rhs2init");
-
-        convectionMatrix.reset();
-        // +-----------------------------------------------+
-
-        //solution->spy("betaSystem");
 
         if (initializationMethod == Projection)
         {
@@ -434,6 +398,7 @@ main( int argc, char** argv )
                 velocity.subset(*solution);
                 *rhs += (*convectionMatrix)*velocity;
             }
+
             if (verbose) std::cout << "done" << std::endl;
 
             if (verbose) std::cout << "Applying BC... " << std::flush;
@@ -449,6 +414,7 @@ main( int argc, char** argv )
 
         // Updating bdf
         bdf.bdfVelocity().shiftRight( *solution );
+
     }
 
     linearSolver.resetPreconditioner();
@@ -533,40 +499,6 @@ main( int argc, char** argv )
         // Updating the BDF scheme
         bdf.bdfVelocity().shiftRight( *solution );
 
-        // +-----------------------------------------------+
-        // |         Test of the convecton term            |
-        // +-----------------------------------------------+
-
-        boost::shared_ptr<matrix_type> convectionMatrix;
-        convectionMatrix.reset(new matrix_type( solutionMap ));
-        vector_type rhsConvection(solutionMap,Unique);
-        vector_type rhsConvection2(solutionMap,Repeated);
-        *convectionMatrix *= 0;
-        rhsConvection     *= 0;
-        rhsConvection2    *= 0;
-
-        oseenAssembler.addConvection(convectionMatrix,*solution*100);
-        convectionMatrix->globalAssemble();
-        rhsConvection += (*convectionMatrix)*(*solution*100);
-
-        oseenAssembler.addConvectionRhs(rhsConvection2,*solution*100);
-
-        rhsConvection.globalAssemble();
-        rhsConvection2.globalAssemble();
-
-        Real normTest((rhsConvection-rhsConvection2).normInf());
-        Real normRhsConvection(rhsConvection.normInf());
-        if (verbose) std::cout << "inf error for the convection rhs assembly         : " << normTest << std::endl << std::endl;
-        if (verbose) std::cout << "inf relative error for the convection rhs assembly: " << normTest/normRhsConvection << std::endl << std::endl;
-        //convectionMatrix->spy("convection");
-        //solution->spy("solution");
-        //rhsConvection.spy("rhs1");
-        //rhsConvection2.spy("rhs2");
-
-        convectionMatrix.reset();
-
-        // +-----------------------------------------------+
-
         // Exporting the solution
         exporter.postProcess( currentTime );
 
@@ -600,7 +532,7 @@ main( int argc, char** argv )
     exporter.closeFile();
 
     globalChrono.stop();
-    if (verbose) std::cout << std::endl << "Total simulation time:" << globalChrono.diff() << " s." << std::endl;
+    if (verbose) std::cout << std::endl << "Total simulation time: " << globalChrono.diff() << " s." << std::endl;
     if (verbose) std::cout << std::endl << "[[END_SIMULATION]]" << std::endl;
 
 #ifdef HAVE_MPI
