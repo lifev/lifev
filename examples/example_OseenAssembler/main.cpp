@@ -63,6 +63,7 @@
 #include <life/lifealg/SolverAztecOO.hpp>
 #include <life/lifefilters/ExporterHDF5.hpp>
 #include <life/lifefem/TimeAdvanceBDFNavierStokes.hpp>
+#include <life/lifefem/TimeAdvanceBDF.hpp>
 
 #include "EthierSteinmanUnsteady.hpp"
 
@@ -73,10 +74,10 @@ namespace
 static bool regIF = (PRECFactory::instance().registerProduct( "Ifpack", &createIfpack ));
 static bool regML = (PRECFactory::instance().registerProduct( "ML", &createML ));
 
-enum DiffusionType{ViscousStress,StiffStrain};
-enum MeshType{RegularMesh,File};
-enum InitType{Interpolation,Projection};
-enum ConvectionType{Explicit,SemiImplicit,MatrixExplicit,KIO91};
+enum DiffusionType{ViscousStress, StiffStrain};
+enum MeshType{RegularMesh, File};
+enum InitType{Interpolation, Projection};
+enum ConvectionType{Explicit, SemiImplicit, MatrixExplicit, KIO91};
 
 typedef RegionMesh3D<LinearTetra> mesh_type;
 typedef MatrixEpetra<Real> matrix_type;
@@ -156,7 +157,7 @@ main( int argc, char** argv )
     const DiffusionType diffusionType = ViscousStress;
           UInt BDFOrder = 3;
     const InitType initializationMethod = Interpolation;
-    const ConvectionType convectionTerm = Explicit;
+    const ConvectionType convectionTerm = KIO91;
 
     // EthierSteinman data
     EthierSteinmanUnsteady::setA(1.0);
@@ -342,14 +343,25 @@ main( int argc, char** argv )
     if (verbose) std::cout << "done" << std::endl;
 
     if (verbose) std::cout << "Computing the initial solution ... " << std::endl;
+    if(convectionTerm == KIO91) BDFOrder = 3;
+
     // bdf object to store the previous solutions
     TimeAdvanceBDFNavierStokes<vector_type> bdf;
     bdf.setup(BDFOrder);
+    TimeAdvanceBDF<vector_type> bdfConvection;
+    bdfConvection.setup(BDFOrder);
     Real currentTime = initialTime-timestep*BDFOrder;
 
     uFESpace->interpolate(EthierSteinmanUnsteady::uexact,*velocity,currentTime);
     pFESpace->interpolate(EthierSteinmanUnsteady::pexact,*pressure,currentTime);
     *solution = *velocity;
+
+    if(convectionTerm == KIO91)
+    {
+        *beta *= 0;
+        oseenAssembler.addConvectionRhs(*beta,*solution);
+        bdfConvection.setInitialCondition( *beta );
+    }
 
     solution->add(*pressure,pressureOffset);
 
@@ -398,6 +410,12 @@ main( int argc, char** argv )
                 velocity.subset(*solution);
                 *rhs += (*convectionMatrix)*velocity;
             }
+            else if(convectionTerm == KIO91)
+            {
+                vector_type tmp(uFESpace->map(),Unique); // we do not want the pressure part
+                tmp = bdfConvection.extrapolation(); // Extrapolation for the convective term
+                *rhs -= tmp;
+            }
 
             if (verbose) std::cout << "done" << std::endl;
 
@@ -414,6 +432,13 @@ main( int argc, char** argv )
 
         // Updating bdf
         bdf.bdfVelocity().shiftRight( *solution );
+
+        if(convectionTerm == KIO91)
+        {
+            *beta *= 0;
+            oseenAssembler.addConvectionRhs(*beta,*solution);
+            bdfConvection.shiftRight(*beta);
+        }
 
     }
 
@@ -484,6 +509,12 @@ main( int argc, char** argv )
             velocity.subset(*solution);
             *rhs += (*convectionMatrix)*velocity;
         }
+        else if(convectionTerm == KIO91)
+        {
+            vector_type tmp(uFESpace->map(),Unique); // we do not want the pressure part
+            tmp = bdfConvection.extrapolation(); // Extrapolation for the convective term
+            *rhs -= tmp;
+        }
         if (verbose) std::cout << "done" << std::endl;
 
         if (verbose) std::cout << "Applying BC... " << std::flush;
@@ -498,6 +529,13 @@ main( int argc, char** argv )
 
         // Updating the BDF scheme
         bdf.bdfVelocity().shiftRight( *solution );
+
+        if(convectionTerm == KIO91)
+        {
+            *beta *= 0;
+            oseenAssembler.addConvectionRhs(*beta,*solution);
+            bdfConvection.shiftRight(*beta);
+        }
 
         // Exporting the solution
         exporter.postProcess( currentTime );
