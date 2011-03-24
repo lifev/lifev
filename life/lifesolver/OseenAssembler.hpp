@@ -322,15 +322,18 @@ setup(const fespace_ptrType& uFESpace, const fespace_ptrType& pFESpace, const fe
 
     M_convectionUCFE.reset(new currentFE_type(M_uFESpace->refFE(),
                                               M_uFESpace->fe().geoMap(),
-                                              QuadratureRuleProvider::provideExactnessMax(TETRA,2*uDegree+betaDegree-1)));
+                                              QuadratureRuleProvider::provideMaximal(TETRA)));
+                                              //QuadratureRuleProvider::provideExactnessMax(TETRA,2*uDegree+betaDegree-1)));
 
     M_convectionBetaCFE.reset(new currentFE_type(M_betaFESpace->refFE(),
                                                  M_uFESpace->fe().geoMap(),
-                                                 QuadratureRuleProvider::provideExactnessMax(TETRA,2*uDegree+betaDegree-1)));
+                                                 QuadratureRuleProvider::provideMaximal(TETRA)));
+                                                 //QuadratureRuleProvider::provideExactnessMax(TETRA,2*uDegree+betaDegree-1)));
 
     M_convectionRhsUCFE.reset(new currentFE_type(M_betaFESpace->refFE(),
                                                  M_uFESpace->fe().geoMap(),
-                                                 QuadratureRuleProvider::provideExactnessMax(TETRA,2*betaDegree+betaDegree-1)));
+                                                 QuadratureRuleProvider::provideMaximal(TETRA)));
+                                                 //QuadratureRuleProvider::provideExactnessMax(TETRA,2*betaDegree+betaDegree-1)));
 
     M_localViscous.reset(new localMatrix_type(M_uFESpace->fe().nbFEDof(),
                                               M_uFESpace->fieldDim(),
@@ -643,14 +646,11 @@ addConvectionRhs(vector_type& rhs, const vector_type& velocity)
             for ( UInt iComponent = 0; iComponent < fieldDim; ++iComponent )
             {
                 UInt iGlobal = M_betaFESpace->dof().localToGlobalMap( iterElement, iLocal ) + iComponent * dim;
-                Real val = velocity( iGlobal );
 
-                localVelocity.vec( ) [ iLocal + iComponent*nbFEDof ] = val;
-
+                localVelocity.vec( ) [ iLocal + iComponent*nbFEDof ] = velocity( iGlobal );
             }
         }
 
-        //source_mass2(1.0,localVelocity,localVelocity,*M_localConvectionRhs, *M_convectionRhsUCFE);
         source_advection(localVelocity,localVelocity,*M_localConvectionRhs, *M_convectionRhsUCFE);
 
         // Here add in the global rhs

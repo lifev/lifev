@@ -3425,22 +3425,29 @@ void source_advection( const VectorElemental& beta_loc, const VectorElemental& u
     for ( ig = 0; ig < fe.nbQuadPt(); ig++ )
     {
 
-        // loop on space coordinates
+        // Interpolating beta
         for ( icoor = 0; icoor < fe.nbCoor(); icoor++ )
         {
-
-            // each compontent (icoor) of beta at this quadrature point
+            // Evaluate beta in the Gauss Point
             s = 0.0;
             for ( i = 0; i < fe.nbFEDof(); i++ )
                 s += fe.phi( i, ig ) * beta_loc.vec() [ i + icoor * fe.nbFEDof() ];
             beta[ icoor ] = s;
+        }
 
-            // loop  on space coordinates
+        // Interpolation of grad u
+        for ( icoor = 0; icoor < fe.nbCoor(); icoor++ )
+        {
+            // loop  on the derivative variable
             for ( jcoor = 0; jcoor < fe.nbCoor(); jcoor++ )
             {
+                // Evaluate the derivative in the gauss point
                 s = 0.0;
                 for ( i = 0; i < fe.nbFEDof(); i++ )
-                    s += fe.phiDer( i, jcoor, ig ) * uk_loc.vec() [ i + icoor * fe.nbFEDof() ]; //  \grad u^k at a quadrature point
+                {
+                    //  grad u^k at a quadrature point
+                    s += fe.phiDer( i, jcoor, ig ) * uk_loc.vec() [ i + icoor * fe.nbFEDof() ];
+                }
                 guk[ icoor ][ jcoor ] = s;
             }
         }
@@ -3450,7 +3457,7 @@ void source_advection( const VectorElemental& beta_loc, const VectorElemental& u
         {
             s = 0.0;
             for ( icoor = 0; icoor < fe.nbCoor(); icoor++ )
-                s += beta[ icoor ] * guk[ icoor ][ jcoor ];
+                s += beta[ icoor ] * guk[ jcoor ][ icoor ];
             conv[ ig ][ jcoor ] = s;
         }
     }
@@ -3472,7 +3479,7 @@ void source_advection( const VectorElemental& beta_loc, const VectorElemental& u
             // loop on quadrature points
             s = 0;
             for ( ig = 0; ig < fe.nbQuadPt(); ig++ )
-                s += conv[ ig ][ icoor ] * fe.phi( i, ig ) * fe.weightDet( ig );
+                s += conv[ ig ][ icoor ] * fe.phi( i, ig ) * fe.wDetJacobian( ig );
             vec( i ) += s;
         }
     }
