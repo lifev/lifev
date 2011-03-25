@@ -167,6 +167,7 @@ MultiscaleModelFSI3D::setupModel()
 
     // Setup Fluid & Solid solver
     M_FSIoperator->setupFluidSolid( M_FSIoperator->imposedFluxes() );
+    M_FSIoperator->setupSystem();
 
     // Setup Exporters
     if ( M_FSIoperator->isFluid() )
@@ -190,10 +191,13 @@ MultiscaleModelFSI3D::buildModel()
     Debug( 8140 ) << "MultiscaleModelFSI3D::buildModel() \n";
 #endif
 
+    // Display data
+//    if ( M_displayer->isLeader() )
+//        M_data->showMe();
+
     // Update BCInterface solver variables
     updateBC();
 
-    M_FSIoperator->setupSystem();
     M_FSIoperator->buildSystem();
     M_FSIoperator->updateSystem();
 }
@@ -218,6 +222,8 @@ MultiscaleModelFSI3D::updateModel()
     *M_solidVelocity_tn            = *M_solidVelocity;
     *M_solidDisplacement_tn        = *M_solidDisplacement;
 
+    // Parameters for Multiscale subiterations
+    boost::dynamic_pointer_cast< FSIMonolithic > ( M_FSIoperator )->precPtrView()->setRecompute( 1, true );
     M_nonLinearRichardsonIteration = 0;
 }
 
@@ -236,13 +242,10 @@ MultiscaleModelFSI3D::solveModel()
 
     if ( M_nonLinearRichardsonIteration != 0 )
     {
-        boost::dynamic_pointer_cast< FSIMonolithic > ( M_FSIoperator )->precPtrView()->setRecompute( 1, false );
         M_FSIoperator->resetRHS();
         M_FSIoperator->updateRHS();
         M_FSIoperator->applyBoundaryConditions();
     }
-    else
-        boost::dynamic_pointer_cast< FSIMonolithic > ( M_FSIoperator )->precPtrView()->setRecompute( 1, true );
 
     // Non-linear Richardson solver
     UInt maxSubIterationNumber = M_data->maxSubIterationNumber();
@@ -262,6 +265,8 @@ MultiscaleModelFSI3D::solveModel()
     if ( status == EXIT_FAILURE )
         std::cout << "Non-Linear Richardson failed to converge" << std::endl;
 
+    // Parameters for Multiscale subiterations
+    boost::dynamic_pointer_cast< FSIMonolithic > ( M_FSIoperator )->precPtrView()->setRecompute( 1, false );
     M_nonLinearRichardsonIteration = 1;
 }
 
@@ -495,8 +500,6 @@ MultiscaleModelFSI3D::setupGlobalData( const std::string& fileName )
         M_data->dataSolid()->setPoisson( M_globalData->structurePoissonCoefficient(), materialFlag );
     if ( !dataFile.checkVariable( "solid/physics/young" ) )
         M_data->dataSolid()->setYoung( M_globalData->structureYoungModulus(), materialFlag );
-
-    //M_data->showMe();
 }
 
 void

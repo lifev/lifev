@@ -179,6 +179,10 @@ MultiscaleModelFluid3D::buildModel()
     Debug( 8120 ) << "MultiscaleModelFluid3D::buildModel() \n";
 #endif
 
+    // Display data
+//    if ( M_displayer->isLeader() )
+//        M_data->showMe();
+
     //Build constant matrices
     M_fluid->buildSystem();
 
