@@ -165,8 +165,8 @@ main( int argc, char** argv )
 
     // Time discretization
     const Real initialTime    = 0.0;
-    const Real endTime        = 1e-4;
-    const Real timestep       = 1e-5;
+    const Real endTime        = 1e-2;
+    const Real timestep       = 1e-3;
 
     // Space discretization
     const UInt numDimensions  = 3;
@@ -373,19 +373,33 @@ main( int argc, char** argv )
     bdfConvection.setup(BDFOrder);
     Real currentTime = initialTime-timestep*BDFOrder;
 
-    uFESpace->interpolate(EthierSteinmanUnsteady::uexact,*velocity,currentTime);
-    pFESpace->interpolate(EthierSteinmanUnsteady::pexact,*pressure,currentTime);
-    *solution = *velocity;
-
     if(convectionTerm == KIO91)
     {
+        uFESpace->interpolate(EthierSteinmanUnsteady::uexact,*velocity,currentTime);
+        *solution *= 0;
+        *solution = *velocity;
         *beta *= 0;
         oseenAssembler.addConvectionRhs(*beta,*solution);
         bdfConvection.setInitialCondition( *beta );
+
+        if(initializationMethod == Projection)
+        {
+            for(UInt i(0);i<BDFOrder;++i)
+            {
+                uFESpace->interpolate(EthierSteinmanUnsteady::uexact,*velocity,currentTime-(3-i)*timestep);
+                *solution = *velocity;
+                *beta *= 0;
+                oseenAssembler.addConvectionRhs(*beta,*solution);
+                bdfConvection.shiftRight( *beta );
+            }
+        }
     }
 
+    uFESpace->interpolate(EthierSteinmanUnsteady::uexact,*velocity,currentTime);
+    pFESpace->interpolate(EthierSteinmanUnsteady::pexact,*pressure,currentTime);
+    *solution *= 0;
+    *solution = *velocity;
     solution->add(*pressure,pressureOffset);
-
     bdf.bdfVelocity().setInitialCondition( *solution );
 
     // Initial solution (interpolation or projection)
