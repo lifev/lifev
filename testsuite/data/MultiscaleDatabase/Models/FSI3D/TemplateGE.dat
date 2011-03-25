@@ -158,7 +158,7 @@ tolerance       =  0   # how far points are to be considered the same on the int
     [./physics]
     solidType = linearVenantKirchhof # linearVenantKirchhof
                                      # nonLinearVenantKirchhof
-    #material_flag = 1
+    material_flag = 1
     #density   = 1.2    # density
     #young     = 4.0E6
     #poisson   = 0.48
@@ -184,8 +184,9 @@ tolerance       =  0   # how far points are to be considered the same on the int
     linesearch = 0
 
     [../boundary_conditions]
-    list = ' '                            # Free dispacement
-    #list = 'Top Base TopEdge BaseEdge'   # Fixed dispacement
+    list = ' '                                            # Free dispacement
+    #list = 'Top_NoDisplacementOnZ Base_NoDisplacementOnZ' # Free dispacement on XY
+    #list = 'Top Base TopEdge BaseEdge'                    # Fixed dispacement
 
         [./Top]
         type       = Essential
@@ -213,6 +214,20 @@ tolerance       =  0   # how far points are to be considered the same on the int
         flag       = 30
         mode       = Full
         component  = 3
+        function   = 0
+        
+        [../Top_NoDisplacementOnZ]
+        type       = Essential
+        flag       = 3
+        mode       = Component
+        component  = '2'
+        function   = 0
+        
+        [../Base_NoDisplacementOnZ]
+        type       = Essential
+        flag       = 2
+        mode       = Component
+        component  = '2'
         function   = 0
 
         [../]
@@ -289,8 +304,10 @@ tolerance       =  0   # how far points are to be considered the same on the int
         [../]
 
     [../boundary_conditions]
-    list = 'Interface'              # Free dispacement
-    #list = 'Top TopEdge Interface' # Fixed displacement
+    list = 'Interface'                                              # Free dispacement
+    #list = 'Top_NoDisplacementOnZ Base_NoDisplacementOnZ Interface' # Free dispacement on XY
+    #list = 'Top TopEdge Interface'                                  # Fixed displacement
+    #list = 'Top TopEdge Base BaseEdge NoInterface'                  # Test
 
         [./Top]
         type       = Essential
@@ -332,6 +349,20 @@ tolerance       =  0   # how far points are to be considered the same on the int
         flag       = 1
         mode       = Full
         component  = 3
+        function   = 0
+        
+        [../Top_NoDisplacementOnZ]
+        type       = Essential
+        flag       = 3
+        mode       = Component
+        component  = '2'
+        function   = 0
+        
+        [../Base_NoDisplacementOnZ]
+        type       = Essential
+        flag       = 2
+        mode       = Component
+        component  = '2'
         function   = 0
 
         [../]

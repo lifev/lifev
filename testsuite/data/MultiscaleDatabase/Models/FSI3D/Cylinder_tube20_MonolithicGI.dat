@@ -179,8 +179,9 @@ semiImplicit        = false  # tells if we advance in time after the first nonli
     linesearch = 0
 
     [../boundary_conditions]
-    list = ' '                            # Free dispacement
-    #list = 'Top Base TopEdge BaseEdge'   # Fixed dispacement
+    list = ' '                                            # Free dispacement
+    #list = 'Top_NoDisplacementOnZ Base_NoDisplacementOnZ' # Free dispacement on XY
+    #list = 'Top Base TopEdge BaseEdge'                    # Fixed dispacement
 
         [./Top]
         type       = Essential
@@ -209,6 +210,20 @@ semiImplicit        = false  # tells if we advance in time after the first nonli
         mode       = Full
         component  = 3
         function   = 0
+        
+        [../Top_NoDisplacementOnZ]
+        type       = Essential
+        flag       = 3
+        mode       = Component
+        component  = '2'
+        function   = 0
+        
+        [../Base_NoDisplacementOnZ]
+        type       = Essential
+        flag       = 2
+        mode       = Component
+        component  = '2'
+        function   = 0
 
         [../]
 
@@ -219,8 +234,10 @@ semiImplicit        = false  # tells if we advance in time after the first nonli
 [mesh_motion]
 
     [./boundary_conditions]
-    list = ' '                      # Free dispacement
-    #list = 'Top TopEdge Interface' # Fixed displacement
+    list = ' '                                               # Free dispacement
+    #list = 'Top_NoDisplacementOnZ Base_NoDisplacementOnZ'    # Free dispacement on XY
+    #list = 'Top TopEdge'                                     # Fixed displacement
+    #list = 'Top TopEdge Base BaseEdge NoInterface'           # Test
 
         [./Top]
         type       = Essential
@@ -262,6 +279,20 @@ semiImplicit        = false  # tells if we advance in time after the first nonli
         flag       = 1
         mode       = Full
         component  = 3
+        function   = 0
+        
+        [../Top_NoDisplacementOnZ]
+        type       = Essential
+        flag       = 3
+        mode       = Component
+        component  = '2'
+        function   = 0
+        
+        [../Base_NoDisplacementOnZ]
+        type       = Essential
+        flag       = 2
+        mode       = Component
+        component  = '2'
         function   = 0
 
         [../]
