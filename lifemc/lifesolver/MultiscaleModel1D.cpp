@@ -243,7 +243,10 @@ MultiscaleModel1D::buildModel()
     Debug( 8130 ) << "MultiscaleModel1D::buildModel() \n";
 #endif
 
-    //M_data->showMe();
+    // Display data
+//    if ( M_displayer->isLeader() )
+//        M_data->showMe();
+
     M_solver->buildConstantMatrices();
 
     // Update previous solution
@@ -861,6 +864,7 @@ MultiscaleModel1D::tangentProblem( const bcSide_Type& bcOutputSide, const bcType
     Debug( 8130 ) << "MultiscaleModel1D::tangentProblem( bcOutputSide, bcOutputType ) \n";
 #endif
 
+    displayModelStatus( "Solve linear" );
     Real jacobianCoefficient(0);
 
     for ( multiscaleCouplingsVectorConstIterator_Type i = M_couplings.begin(); i < M_couplings.end(); ++i )
