@@ -30,7 +30,7 @@
 
     @author Gwenol Grandperrin <gwenol.grandperrin@epfl.ch>
     @author Samuel Quinodoz <samuel.quinodoz@epfl.ch>
-    @date 14-03-2011
+    @date 25-03-2011
  */
 
 // Tell the compiler to ignore specific kind of warnings:
@@ -130,7 +130,7 @@ main( int argc, char** argv )
             << std::endl
             << " +-----------------------------------------------+" << std::endl
             << " |           Author: Gwenol Grandperrin          |" << std::endl
-            << " |             Date: 2010-03-14                  |" << std::endl
+            << " |             Date: 2010-03-25                  |" << std::endl
             << " +-----------------------------------------------+" << std::endl
             << std::endl;
 
@@ -165,8 +165,8 @@ main( int argc, char** argv )
 
     // Time discretization
     const Real initialTime    = 0.0;
-    const Real endTime        = 1e-2;
-    const Real timestep       = 1e-3;
+    const Real endTime        = 1e-4;
+    const Real timestep       = 1e-5;
 
     // Space discretization
     const UInt numDimensions  = 3;
@@ -177,7 +177,7 @@ main( int argc, char** argv )
     const DiffusionType diffusionType = ViscousStress;
           UInt BDFOrder = 3;
     const InitType initializationMethod = Interpolation;
-    const ConvectionType convectionTerm = SemiImplicit;
+    const ConvectionType convectionTerm = KIO91;
 
     // EthierSteinman data
     EthierSteinmanUnsteady::setA(1.0);
@@ -220,7 +220,8 @@ main( int argc, char** argv )
         exit(1);
     }
 
-    if (verbose) std::cout << "Partitioning the mesh ... " << std::flush;
+    if (verbose) std::cout << "Mesh size  : " << fullMeshPtr->maxH() << std::endl;
+    if (verbose) std::cout << "Partitioning the mesh ... " << std::endl;
     MeshPartitioner< RegionMesh3D<LinearTetra> >   meshPart(fullMeshPtr, Comm);
     fullMeshPtr.reset(); //Freeing the global mesh to save memory
 
@@ -248,8 +249,8 @@ main( int argc, char** argv )
     // Pressure offset in the vector
     UInt pressureOffset = numDimensions * uFESpace->dof().numTotalDof();
 
-    if (verbose) std::cout << "Total Velocity Dof = " << pressureOffset << std::endl;
-    if (verbose) std::cout << "Total Pressure Dof = " << pFESpace->dof().numTotalDof() << std::endl;
+    if (verbose) std::cout << "Total Velocity Dof: " << pressureOffset << std::endl;
+    if (verbose) std::cout << "Total Pressure Dof: " << pFESpace->dof().numTotalDof() << std::endl;
 
     // +-----------------------------------------------+
     // |             Boundary conditions               |
@@ -433,8 +434,7 @@ main( int argc, char** argv )
             else if(convectionTerm == KIO91)
             {
                 vector_type tmp(uFESpace->map(),Unique); // we do not want the pressure part
-                tmp = bdfConvection.extrapolation(); // Extrapolation for the convective term
-                *rhs -= tmp;
+                *rhs -= bdfConvection.extrapolation();
             }
 
             if (verbose) std::cout << "done" << std::endl;
@@ -537,8 +537,7 @@ main( int argc, char** argv )
         else if(convectionTerm == KIO91)
         {
             vector_type tmp(uFESpace->map(),Unique); // we do not want the pressure part
-            tmp = bdfConvection.extrapolation(); // Extrapolation for the convective term
-            *rhs -= tmp;
+            *rhs -= bdfConvection.extrapolation();
         }
         if (verbose) std::cout << "done" << std::endl;
 
