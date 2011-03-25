@@ -179,14 +179,14 @@ diagonalBlockPrec   = false
         type       = Essential
         flag       = 2
         mode       = Component
-        component  = '1 2'
+        component  = '0 1'
         function   = 0
 
         [../Outlet_NoVelocityOnXY]
         type       = Essential
         flag       = 3
         mode       = Component
-        component  = '1 2'
+        component  = '0 1'
         function   = 0
 
         [../]

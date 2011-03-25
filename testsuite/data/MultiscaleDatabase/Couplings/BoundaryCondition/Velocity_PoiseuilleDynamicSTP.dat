@@ -22,13 +22,13 @@ list = 'ZPoiseuilleDynamic'
     [./XY]
     type                = Essential
     mode                = Component
-    component           = '1 2'
+    component           = '0 1'
     function            = 0
 
     [../ZPoiseuilleDynamic]
     type                = Essential
     mode                = Component
-    component           = 3
+    component           = 2
     functionFile        = physicalFunctions/SmoothTrapezoidalProfile.dat[A]
     #OPERfunctionFile    = physicalFunctions/SmoothTrapezoidalProfile.dat[A]
 
