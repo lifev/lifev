@@ -83,6 +83,26 @@ typedef RegionMesh3D<LinearTetra> mesh_type;
 typedef MatrixEpetra<Real> matrix_type;
 typedef VectorEpetra vector_type;
 typedef boost::shared_ptr<VectorEpetra> vectorPtr_type;
+typedef FESpace< mesh_type, MapEpetra > fespace_type;
+typedef boost::shared_ptr< fespace_type > fespacePtr_type;
+}
+
+void printErrors(const vector_type& solution, const Real& currentTime, fespacePtr_type uFESpace, fespacePtr_type pFESpace, bool verbose)
+{
+    vector_type velocity(uFESpace->map(),Repeated);
+    vector_type pressure(pFESpace->map(),Repeated);
+    if (verbose) std::cout << std::endl << "[Computed errors]" << std::endl;
+    velocity.subset(solution);
+    pressure.subset(solution, 3 * uFESpace->dof().numTotalDof());
+    Real uRelativeError, pRelativeError, uL2Error, pL2Error;
+    uL2Error = uFESpace->l2Error (EthierSteinmanUnsteady::uexact, velocity, currentTime, &uRelativeError );
+    pL2Error = pFESpace->l20Error(EthierSteinmanUnsteady::pexact, pressure, currentTime, &pRelativeError );
+    if (verbose) std::cout << "Velocity" << std::endl;
+    if (verbose) std::cout << "  L2 error      : " << uL2Error << std::endl;
+    if (verbose) std::cout << "  Relative error: " << uRelativeError << std::endl;
+    if (verbose) std::cout << "Pressure" << std::endl;
+    if (verbose) std::cout << "  L2 error      : " << pL2Error << std::endl;
+    if (verbose) std::cout << "  Relative error: " << pRelativeError << std::endl;
 }
 
 
@@ -145,19 +165,19 @@ main( int argc, char** argv )
 
     // Time discretization
     const Real initialTime    = 0.0;
-    const Real endTime        = 1e-4;
-    const Real timestep       = 1e-5;
+    const Real endTime        = 1e-2;
+    const Real timestep       = 1e-3;
 
     // Space discretization
     const UInt numDimensions  = 3;
     const MeshType meshSource = RegularMesh;
-    const UInt numMeshElem    = 12;
+    const UInt numMeshElem    = 10;
 
     // Numerical scheme
     const DiffusionType diffusionType = ViscousStress;
           UInt BDFOrder = 3;
     const InitType initializationMethod = Interpolation;
-    const ConvectionType convectionTerm = KIO91;
+    const ConvectionType convectionTerm = SemiImplicit;
 
     // EthierSteinman data
     EthierSteinmanUnsteady::setA(1.0);
@@ -215,11 +235,11 @@ main( int argc, char** argv )
                            << "FE for the pressure: " << pOrder << std::endl;
 
     if (verbose) std::cout << "Building the velocity FE space ... " << std::flush;
-    boost::shared_ptr<FESpace< mesh_type, MapEpetra > > uFESpace( new FESpace< mesh_type, MapEpetra >(meshPart,uOrder, numDimensions, Comm));
+    fespacePtr_type uFESpace( new FESpace< mesh_type, MapEpetra >(meshPart,uOrder, numDimensions, Comm));
     if (verbose) std::cout << "ok." << std::endl;
 
     if (verbose) std::cout << "Building the pressure FE space ... " << std::flush;
-    boost::shared_ptr<FESpace< mesh_type, MapEpetra > > pFESpace( new FESpace< mesh_type, MapEpetra >(meshPart,pOrder, 1, Comm));
+    fespacePtr_type pFESpace( new FESpace< mesh_type, MapEpetra >(meshPart,pOrder, 1, Comm));
     if (verbose) std::cout << "ok." << std::endl;
 
     // Creation of the total map
@@ -468,6 +488,11 @@ main( int argc, char** argv )
     if (verbose) std::cout << "Initialization time: " << initChrono.diff() << " s." << std::endl;
 
     // +-----------------------------------------------+
+    // |             Computing the error               |
+    // +-----------------------------------------------+
+    printErrors(*solution,currentTime, uFESpace,pFESpace,verbose);
+
+    // +-----------------------------------------------+
     // |             Solving the problem               |
     // +-----------------------------------------------+
     if (verbose) std::cout<< std::endl << "[Solving the problem]" << std::endl;
@@ -478,7 +503,7 @@ main( int argc, char** argv )
         iterChrono.reset();
         iterChrono.start();
 
-        if (verbose) std::cout << "[t = "<< currentTime << " s.]" << std::endl;
+        if (verbose) std::cout << std::endl << "[t = "<< currentTime << " s.]" << std::endl;
 
         if (verbose) std::cout << "Updating the system... " << std::flush;
         bdf.bdfVelocity().updateRHSContribution( timestep );
@@ -541,28 +566,15 @@ main( int argc, char** argv )
         exporter.postProcess( currentTime );
 
         iterChrono.stop();
-        if (verbose) std::cout << "Iteration time: " << iterChrono.diff() << " s." << std::endl << std::endl;
+        if (verbose) std::cout << "Iteration time: " << iterChrono.diff() << " s." << std::endl;
+
+        // +-----------------------------------------------+
+        // |             Computing the error               |
+        // +-----------------------------------------------+
+        printErrors(*solution,currentTime, uFESpace,pFESpace,verbose);
 
         MPI_Barrier(MPI_COMM_WORLD);
     }
-
-    // +-----------------------------------------------+
-    // |             Computing the error               |
-    // +-----------------------------------------------+
-    if (verbose) std::cout << "[Computed errors]" << std::endl;
-    velocity.reset(new vector_type(uFESpace->map(),Repeated));
-    pressure.reset(new vector_type(pFESpace->map(),Repeated));
-    velocity->subset(*solution);
-    pressure->subset(*solution, pressureOffset);
-    Real uRelativeError, pRelativeError, uL2Error, pL2Error;
-    uL2Error = uFESpace->l2Error (EthierSteinmanUnsteady::uexact, *velocity, currentTime, &uRelativeError );
-    pL2Error = pFESpace->l20Error(EthierSteinmanUnsteady::pexact, *pressure, currentTime, &pRelativeError );
-    if (verbose) std::cout << "Velocity" << std::endl;
-    if (verbose) std::cout << "  L2 error      : " << uL2Error << std::endl;
-    if (verbose) std::cout << "  Relative error: " << uRelativeError << std::endl;
-    if (verbose) std::cout << "Pressure" << std::endl;
-    if (verbose) std::cout << "  L2 error      : " << pL2Error << std::endl;
-    if (verbose) std::cout << "  Relative error: " << pRelativeError << std::endl;
 
     // +-----------------------------------------------+
     // |            Ending the simulation              |
