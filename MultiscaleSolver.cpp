@@ -210,7 +210,7 @@ MultiscaleSolver::solveProblem( const Real& referenceSolution )
     if ( M_model->type() == Multiscale )
     {
         Real computedSolution( M_algorithm->couplingVariables()->norm2() );
-        if ( referenceSolution >= 0. && std::abs( referenceSolution - computedSolution ) > 1e-10 )
+        if ( referenceSolution >= 0. && std::abs( referenceSolution - computedSolution ) > 1e-8 )
             multiscaleErrorCheck( Solution, "Algorithm Solution: "  + number2string( computedSolution ) +
                                             " (External Residual: " + number2string( referenceSolution ) + ")\n", M_displayer->isLeader() );
     }
