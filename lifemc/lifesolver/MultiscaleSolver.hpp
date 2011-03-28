@@ -93,9 +93,11 @@ public:
 
     //! Run the time-loop to solve the Multiscale problem
     /*!
+     * If the provided reference solution is positive, the solver make also a check on the last computed solution.
+     * @param referenceSolution the reference coupling variables norm 2.
      * @return 0: EXIT_SUCCESS, 1: EXIT_FAILURE
      */
-    bool solveProblem( const Real& externalResidual = -1 );
+    bool solveProblem( const Real& referenceSolution = -1. );
 
     //! Display some information about the Multiscale problem (to be called after SetupProblem)
     void showMe();
@@ -119,7 +121,7 @@ private:
     // Algorithm for subiterations
     multiscaleAlgorithmPtr_Type      M_algorithm;
 
-    // PhysicalData container
+    // Container of global data
     multiscaleDataPtr_Type           M_globalData;
 
     // Communicator
@@ -129,7 +131,7 @@ private:
     boost::shared_ptr< Displayer >   M_displayer;
 
     // Chrono performances
-    LifeChrono                           M_chrono;
+    LifeChrono                       M_chrono;
 };
 
 } // Namespace multiscale

@@ -1,12 +1,12 @@
-# -*- getpot -*- GetPot mode activation for emacs
 ###################################################################################################
 #
-#                       This file is part of the LifeV Applications
-#                                 Copyright (C) 2010 EPFL
+#                       This file is part of the LifeV Library                       
+#                Copyright (C) 2004, 2005, 2007 EPFL, Politecnico di Milano, INRIA
+#                Copyright (C) 2010 EPFL, Politecnico di Milano, Emory University
 #
 #      Author(s): Cristiano Malossi <cristiano.malossi@epfl.ch>
-#           Date: 2009-09-01
-#  License Terms: GNU GPL
+#           Date: 2011-03-10
+#  License Terms: GNU LGPL
 #
 ###################################################################################################
 ### MULTISCALE: Main data file ####################################################################
@@ -14,14 +14,14 @@
 
 [Problem] #########################################################################################
 ProblemType = Multiscale
-ProblemFile = ./MultiscaleDatabase/Models/Multiscale/Womersley_3DFluid_5Cylinders_FluxStress_tube20
-#ProblemFile = ./MultiscaleDatabase/Models/Multiscale/Womersley_3DFluid_5Cylinders_FluxStress_tube40
-#ProblemFile = ./MultiscaleDatabase/Models/Multiscale/Womersley_3DFluid_5Cylinders_FluxStress_tube60
-#ProblemFile = ./MultiscaleDatabase/Models/Multiscale/Womersley_3DFluid_5Cylinders_FluxStress_tube80
-#ProblemFile = ./MultiscaleDatabase/Models/Multiscale/Womersley_3DFluid_5Cylinders_Stress_tube20
-#ProblemFile = ./MultiscaleDatabase/Models/Multiscale/Womersley_3DFluid_5Cylinders_Stress_tube40
-#ProblemFile = ./MultiscaleDatabase/Models/Multiscale/Womersley_3DFluid_5Cylinders_Stress_tube60
-#ProblemFile = ./MultiscaleDatabase/Models/Multiscale/Womersley_3DFluid_5Cylinders_Stress_tube80
+ProblemFile = ./MultiscaleDatabase/Models/Multiscale/Fluid3D_5Cylinders-tube20_FS
+#ProblemFile = ./MultiscaleDatabase/Models/Multiscale/Fluid3D_5Cylinders-tube40_FS
+#ProblemFile = ./MultiscaleDatabase/Models/Multiscale/Fluid3D_5Cylinders-tube60_FS
+#ProblemFile = ./MultiscaleDatabase/Models/Multiscale/Fluid3D_5Cylinders-tube80_FS
+#ProblemFile = ./MultiscaleDatabase/Models/Multiscale/Fluid3D_5Cylinders-tube20_F
+#ProblemFile = ./MultiscaleDatabase/Models/Multiscale/Fluid3D_5Cylinders-tube40_F
+#ProblemFile = ./MultiscaleDatabase/Models/Multiscale/Fluid3D_5Cylinders-tube60_F
+#ProblemFile = ./MultiscaleDatabase/Models/Multiscale/Fluid3D_5Cylinders-tube80_F
 
 [Solver] ##########################################################################################
 ###################################################################################################

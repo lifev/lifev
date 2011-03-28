@@ -1,12 +1,12 @@
-# -*- getpot -*- GetPot mode activation for emacs
 ###################################################################################################
 #
-#                       This file is part of the LifeV Applications
-#                                 Copyright (C) 2010 EPFL
+#                       This file is part of the LifeV Library                       
+#                Copyright (C) 2004, 2005, 2007 EPFL, Politecnico di Milano, INRIA
+#                Copyright (C) 2010 EPFL, Politecnico di Milano, Emory University
 #
 #      Author(s): Cristiano Malossi <cristiano.malossi@epfl.ch>
-#           Date: 2010-09-08
-#  License Terms: GNU GPL
+#           Date: 2011-03-10
+#  License Terms: GNU LGPL
 #
 ###################################################################################################
 ### MULTISCALE: Main data file ####################################################################
@@ -14,7 +14,8 @@
 
 [Problem] #########################################################################################
 ProblemType = Multiscale
-ProblemFile = ./MultiscaleDatabase/Models/Multiscale/ReymondStergiopulos2009_1D_Absorbing_Stress
+#ProblemFile = ./MultiscaleDatabase/Models/Multiscale/1D_ReymondStergiopulos2009-ArterialTree-Absorbing_S
+ProblemFile = ./MultiscaleDatabase/Models/Multiscale/1D_ReymondStergiopulos2009-ArterialTree_S
 
 [Solver] ##########################################################################################
 ###################################################################################################
@@ -28,9 +29,9 @@ ProblemFile = ./MultiscaleDatabase/Models/Multiscale/ReymondStergiopulos2009_1D_
     #endtime                    = 0.8      # [s] 1-HB
     #initialtime                = 0.8      # [s] 2-HB start
     #endtime                    = 1.6      # [s] 2-HB end
-    #initialtime                = 1.6      # [s] 2-HB start
-    #endtime                    = 2.4      # [s] 2-HB end
-    endtime                    = 0.8      # [s] Absorbing
+    #initialtime                = 1.6      # [s] 3-HB start
+    endtime                    = 2.4      # [s] 3-HB end
+    #endtime                    = 0.8      # [s] Absorbing
     timestep                   = 1e-3     # [s]
 
     [../Algorithm]

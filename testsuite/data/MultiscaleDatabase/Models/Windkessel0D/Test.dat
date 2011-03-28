@@ -1,0 +1,30 @@
+###################################################################################################
+#
+#                       This file is part of the LifeV Library                       
+#                Copyright (C) 2004, 2005, 2007 EPFL, Politecnico di Milano, INRIA
+#                Copyright (C) 2010 EPFL, Politecnico di Milano, Emory University
+#
+#      Author(s): Cristiano Malossi <cristiano.malossi@epfl.ch>
+#           Date: 2011-03-10
+#  License Terms: GNU LGPL
+#
+###################################################################################################
+### MODEL: Windkessel0D - Test ####################################################################
+###################################################################################################
+
+[Multiscale]
+modelName        = Windkessel0D_Test
+modelType        = Windkessel0D
+couplingFlags    = '0'
+
+[Coefficients]
+IntegrationSteps = 5
+
+Resistance1    = 100.0
+Resistance2    = 50.0
+Capacitance    = 0.001
+VenousPressure = 0.0
+
+
+
+

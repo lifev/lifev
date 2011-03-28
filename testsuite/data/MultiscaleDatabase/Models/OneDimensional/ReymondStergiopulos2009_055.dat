@@ -1,12 +1,12 @@
-# -*- getpot -*- GetPot mode activation for emacs
 ###################################################################################################
 #
-#                       This file is part of the LifeV Applications                        
-#                                 Copyright (C) 2010 EPFL          
+#                       This file is part of the LifeV Library                       
+#                Copyright (C) 2004, 2005, 2007 EPFL, Politecnico di Milano, INRIA
+#                Copyright (C) 2010 EPFL, Politecnico di Milano, Emory University
 #
 #      Author(s): Cristiano Malossi <cristiano.malossi@epfl.ch>
-#           Date: 2010-09-09
-#  License Terms: GNU GPL
+#           Date: 2011-03-10
+#  License Terms: GNU LGPL
 #
 ###################################################################################################
 ### MODEL: Reymond Stergiopulos 1D Arterial Tree ##################################################
@@ -61,7 +61,7 @@ NumberOfElements     = 343          # number of elements (half)
 [../JacobianPerturbation]
 deltaArea            = 0.01         # perturbation on the area
 deltaFlowRate        = 0.01         # perturbation on the flow rate
-deltaPressure        = 10           # perturbation on the pressure
+deltaStress          = 10           # perturbation on the pressure
 
 [../miscellaneous]
 post_dir             = ./           # the directory for postprocessing files

@@ -1,12 +1,12 @@
-# -*- getpot -*- GetPot mode activation for emacs
 ###################################################################################################
 #
-#                       This file is part of the LifeV Applications                        
-#                                 Copyright (C) 2009 EPFL          
+#                       This file is part of the LifeV Library                       
+#                Copyright (C) 2004, 2005, 2007 EPFL, Politecnico di Milano, INRIA
+#                Copyright (C) 2010 EPFL, Politecnico di Milano, Emory University
 #
 #      Author(s): Cristiano Malossi <cristiano.malossi@epfl.ch>
-#           Date: 2009-09-01
-#  License Terms: GNU GPL
+#           Date: 2011-03-10
+#  License Terms: GNU LGPL
 #
 ###################################################################################################
 ### COUPLING: BoundaryCondition - Poiseuille Velocity #############################################
@@ -22,13 +22,13 @@ list = 'XYZPoiseuille'  # Poiseuille
     [./XY]
     type                = Essential
     mode                = Component
-    component           = '1 2'
+    component           = '0 1'
     function            = 0
     
     [../ZPoiseuille]
     type                = Essential
     mode                = Component
-    component           = 3
+    component           = 2
     function            = '(1/4-(x^2+y^2))/(4*0.035)' #TEMPORARY FIX
     #OPERfunction        = '(1/4-(x^2+y^2))/(4*f_viscosity)'
     #OPERfunction        = '(f_area/pi-(x^2+y^2))/(4*f_viscosity)' # More general
@@ -36,7 +36,7 @@ list = 'XYZPoiseuille'  # Poiseuille
     [../XYZPoiseuille]
     type                = Essential
     mode                = Full
-    component           = 3
+    component           = 2
     function            = '[0., 0., (1/4-(x^2+y^2))/(4*0.035)]' #TEMPORARY FIX
     #OPERfunction        = '[0., 0., (1/4-(x^2+y^2))/(4*f_viscosity)]'
     #OPERfunction        = '[0., 0., (f_area/pi-(x^2+y^2))/(4*f_viscosity)]' # More general

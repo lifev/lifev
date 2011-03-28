@@ -1,13 +1,13 @@
-# -*- getpot -*- GetPot mode activation for emacs
 ###################################################################################################
 #
-#                       This file is part of the LifeV Applications
-#                                 Copyright (C) 2010 EPFL
+#                       This file is part of the LifeV Library                       
+#                Copyright (C) 2004, 2005, 2007 EPFL, Politecnico di Milano, INRIA
+#                Copyright (C) 2010 EPFL, Politecnico di Milano, Emory University
 #
 #      Author(s): Paolo Crosetto <paolo.crosetto@epfl.ch>
 #                 Cristiano Malossi <cristiano.malossi@epfl.ch>
-#           Date: 2010-05-01
-#  License Terms: GNU GPL
+#           Date: 2011-03-10
+#  License Terms: GNU LGPL
 #
 ###################################################################################################
 ### MODEL: FSI3D - Cylinder #######################################################################
@@ -153,7 +153,7 @@ semiImplicit        = false  # tells if we advance in time after the first nonli
     [./physics]
     solidType = linearVenantKirchhof # linearVenantKirchhof
                                      # nonLinearVenantKirchhof
-    #material_flag = 1
+    material_flag = 1
     #density   = 1.2    # density
     #young     = 4.0E6
     #poisson   = 0.48
@@ -179,8 +179,9 @@ semiImplicit        = false  # tells if we advance in time after the first nonli
     linesearch = 0
 
     [../boundary_conditions]
-    list = ' '                            # Free dispacement
-    #list = 'Top Base TopEdge BaseEdge'   # Fixed dispacement
+    list = ' '                                            # Free dispacement
+    #list = 'Top_NoDisplacementOnZ Base_NoDisplacementOnZ' # Free dispacement on XY
+    #list = 'Top Base TopEdge BaseEdge'                    # Fixed dispacement
 
         [./Top]
         type       = Essential
@@ -209,6 +210,20 @@ semiImplicit        = false  # tells if we advance in time after the first nonli
         mode       = Full
         component  = 3
         function   = 0
+        
+        [../Top_NoDisplacementOnZ]
+        type       = Essential
+        flag       = 3
+        mode       = Component
+        component  = '2'
+        function   = 0
+        
+        [../Base_NoDisplacementOnZ]
+        type       = Essential
+        flag       = 2
+        mode       = Component
+        component  = '2'
+        function   = 0
 
         [../]
 
@@ -219,8 +234,10 @@ semiImplicit        = false  # tells if we advance in time after the first nonli
 [mesh_motion]
 
     [./boundary_conditions]
-    list = ' '                      # Free dispacement
-    #list = 'Top TopEdge Interface' # Fixed displacement
+    list = ' '                                               # Free dispacement
+    #list = 'Top_NoDisplacementOnZ Base_NoDisplacementOnZ'    # Free dispacement on XY
+    #list = 'Top TopEdge'                                     # Fixed displacement
+    #list = 'Top TopEdge Base BaseEdge NoInterface'           # Test
 
         [./Top]
         type       = Essential
@@ -263,6 +280,20 @@ semiImplicit        = false  # tells if we advance in time after the first nonli
         mode       = Full
         component  = 3
         function   = 0
+        
+        [../Top_NoDisplacementOnZ]
+        type       = Essential
+        flag       = 3
+        mode       = Component
+        component  = '2'
+        function   = 0
+        
+        [../Base_NoDisplacementOnZ]
+        type       = Essential
+        flag       = 2
+        mode       = Component
+        component  = '2'
+        function   = 0
 
         [../]
 
@@ -275,7 +306,7 @@ semiImplicit        = false  # tells if we advance in time after the first nonli
     [./solver]                        # Solver Parameters
     solver          = gmres
     scaling         = none
-    output          = all # all none
+    output          = none # all none
     conv            = rhs
     max_iter        = 500
     reuse           = true

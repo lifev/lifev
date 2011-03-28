@@ -92,7 +92,7 @@ Int
 main( Int argc, char** argv )
 {
     //Setup main communicator
-    boost::shared_ptr< Epetra_Comm >	comm;
+    boost::shared_ptr< Epetra_Comm > comm;
 
     //Setup MPI variables
     Int nprocs(1);
@@ -129,7 +129,7 @@ main( Int argc, char** argv )
     std::string dataFile      = commandLine.follow( "./Multiscale.dat", 2, "-f", "--file" );
     bool verbose              = commandLine.follow( false, 2, "-s", "--showme" );
     std::string problemFolder = commandLine.follow( "Output", 2, "-n", "--name" );
-    Real externalResidual     = commandLine.follow( -1., 2, "-c", "--check" );
+    Real referenceSolution     = commandLine.follow( -1., 2, "-c", "--check" );
 
     // Create the problem folder
     if ( problemFolder.compare("./") )
@@ -148,7 +148,7 @@ main( Int argc, char** argv )
         multiscale.showMe();
 
     // Solve the problem
-    exitFlag = multiscale.solveProblem( externalResidual );
+    exitFlag = multiscale.solveProblem( referenceSolution );
 
 #ifdef HAVE_MPI
     if ( rank == 0 )
