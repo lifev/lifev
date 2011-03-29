@@ -48,6 +48,10 @@
 #include <EpetraExt_MatrixMatrix.h>
 #include <EpetraExt_RowMatrixOut.h>
 
+#ifdef HAVE_HDF5
+#include <EpetraExt_HDF5.h>
+#endif
+
 // Tell the compiler to ignore specific kind of warnings:
 #pragma GCC diagnostic warning "-Wunused-variable"
 #pragma GCC diagnostic warning "-Wunused-parameter"
@@ -281,6 +285,13 @@ public:
       @param filename file where the matrix will be saved
      */
     void spy( std::string const &fileName );
+
+    //! Save the matrix into a HDF5 (.h5) file
+    /*!
+      @param fileName file where the matrix will be saved
+      @param matrixName name of the matrix
+     */
+    void hdf5( std::string const &fileName, std::string const &matrixName = "matrix" );
 
     //! Print the contents of the matrix
     /*!
@@ -1118,6 +1129,32 @@ void MatrixEpetra<DataType>::spy( std::string const &fileName )
     EpetraExt::RowMatrixToMatlabFile( name.c_str(), *M_epetraCrs );
 
 }
+
+template <typename DataType>
+void MatrixEpetra<DataType>::hdf5( std::string const &fileName, std::string const &matrixName )
+{
+#ifdef HAVE_HDF5
+
+    EpetraExt::HDF5 HDF5 ( M_epetraCrs->Comm() );
+
+    // Create and open the file
+    HDF5.Create ( ( fileName + ".h5" ).data() );
+
+    // Check if the file is created
+    ASSERT_PRE( !HDF5.IsOpen (), "Unable to create " + fileName + ".h5" );
+
+    // Save the matrix into the file
+    HDF5.Write ( matrixName.data(), *M_epetraCrs );
+    
+    // Close the file
+    HDF5.Close ( );
+
+#else
+
+    ERROR_MSG( "This method is available only with HDF5 library.\n" );
+   
+#endif
+} // hdf5
 
 template <typename DataType>
 void MatrixEpetra<DataType>::showMe( std::ostream& output ) const
