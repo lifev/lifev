@@ -262,7 +262,7 @@ Ethiersteinman::checkConvergenceRate(const std::vector<std::string>& uFELabel,
 
     for (UInt iElem(0); iElem<FEnumber; ++iElem)
     {
-        std::cout << "    - " << uFELabel[iElem] << "-" << pFELabel[iElem] << " ... ";
+        std::cout << "    - " << uFELabel[iElem] << "-" << pFELabel[iElem] << " ... " << std::endl;
 
         // Everything is OK a priori
         status = "OK";
@@ -288,8 +288,10 @@ Ethiersteinman::checkConvergenceRate(const std::vector<std::string>& uFELabel,
                 status = "FAILED";
                 success = false;
             }
+            std::cout << "      " << " (velocity: " << uErrRatio << ">=?" << uBound
+                                  << ", pressure: " << pErrRatio << ">=?" << pBound << std::endl;
         }
-        std::cout << status << std::endl;
+        std::cout << "      Status: " << status << std::endl;
 
     }
 

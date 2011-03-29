@@ -15,7 +15,8 @@ initialization         = projection   # initialization (L2 projection) or interp
 export_norms           = false
 export_exact_solutions = true
 test                   = space_convergence
-space_convergence_tolerance = 1.0
+space_convergence_tolerance = 0.8     # 1.0 = The convergence must be equal or
+                                      #       faster of the theoretical prediction
 mesh_source            = regular_mesh
 
 [fluid]
@@ -39,9 +40,11 @@ mesh_source            = regular_mesh
     linearized      = 0
     diagonalize     = 1 # weight, 0=off
     div_beta_u_v    = 0 # 1=on, 0=off
-    FE_number         = 3
-    vel_order         = 'P1 P1Bubble P2'
-    press_order       = 'P1 P1 P1'
+    FE_number         = 2
+    vel_order         = 'P1Bubble P2'
+    press_order       = 'P1 P1'
+    vel_conv_order_order = '2 3'
+    press_conv_order     = '2 2'
 
     [../miscellaneous]
     verbose         = 1
