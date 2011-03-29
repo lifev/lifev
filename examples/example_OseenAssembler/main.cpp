@@ -77,7 +77,7 @@ static bool regML = (PRECFactory::instance().registerProduct( "ML", &createML ))
 enum DiffusionType{ViscousStress, StiffStrain};
 enum MeshType{RegularMesh, File};
 enum InitType{Interpolation, Projection};
-enum ConvectionType{Explicit, SemiImplicit, MatrixExplicit, KIO91};
+enum ConvectionType{Explicit, SemiImplicit, KIO91};
 
 typedef RegionMesh3D<LinearTetra> mesh_type;
 typedef MatrixEpetra<Real> matrix_type;
@@ -371,6 +371,8 @@ main( int argc, char** argv )
     bdf.setup(BDFOrder);
     TimeAdvanceBDF<vector_type> bdfConvection;
     bdfConvection.setup(BDFOrder);
+    TimeAdvanceBDF<vector_type> bdfConvectionInit; // Just for KIO91
+    bdfConvectionInit.setup(BDFOrder);
     Real currentTime = initialTime-timestep*BDFOrder;
 
     if(convectionTerm == KIO91)
@@ -381,6 +383,7 @@ main( int argc, char** argv )
         *beta *= 0;
         oseenAssembler.addConvectionRhs(*beta,*solution);
         bdfConvection.setInitialCondition( *beta );
+        bdfConvectionInit.setInitialCondition( *beta );
 
         if(initializationMethod == Projection)
         {
@@ -390,7 +393,7 @@ main( int argc, char** argv )
                 *solution = *velocity;
                 *beta *= 0;
                 oseenAssembler.addConvectionRhs(*beta,*solution);
-                bdfConvection.shiftRight( *beta );
+                bdfConvectionInit.shiftRight( *beta );
             }
         }
     }
@@ -434,21 +437,13 @@ main( int argc, char** argv )
             {
                 oseenAssembler.addConvectionRhs(*rhs,*solution);
             }
-            else if(convectionTerm == MatrixExplicit)
-            {
-                boost::shared_ptr<matrix_type> convectionMatrix;
-                convectionMatrix.reset(new matrix_type( uFESpace->map() ));
-                *convectionMatrix *= 0;
-                oseenAssembler.addConvection(convectionMatrix,*solution);
-                convectionMatrix->globalAssemble();
-                vector_type velocity(uFESpace->map(), Repeated);
-                velocity.subset(*solution);
-                *rhs += (*convectionMatrix)*velocity;
-            }
             else if(convectionTerm == KIO91)
             {
                 vector_type tmp(uFESpace->map(),Unique); // we do not want the pressure part
-                *rhs -= bdfConvection.extrapolation();
+                *rhs -= bdfConvectionInit.extrapolation();
+                *beta *= 0;
+                oseenAssembler.addConvectionRhs(*beta,*solution);
+                bdfConvectionInit.shiftRight(*beta);
             }
 
             if (verbose) std::cout << "done" << std::endl;
@@ -536,17 +531,6 @@ main( int argc, char** argv )
         else if(convectionTerm == Explicit)
         {
             oseenAssembler.addConvectionRhs(*rhs,*solution);
-        }
-        else if(convectionTerm == MatrixExplicit)
-        {
-            boost::shared_ptr<matrix_type> convectionMatrix;
-            convectionMatrix.reset(new matrix_type( uFESpace->map() ));
-            *convectionMatrix *= 0;
-            oseenAssembler.addConvection(convectionMatrix,*solution);
-            convectionMatrix->globalAssemble();
-            vector_type velocity(uFESpace->map(), Repeated);
-            velocity.subset(*solution);
-            *rhs += (*convectionMatrix)*velocity;
         }
         else if(convectionTerm == KIO91)
         {
