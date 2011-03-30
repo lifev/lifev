@@ -364,6 +364,9 @@ private:
      */
     void copySolution( const solution_Type& solution1, solution_Type& solution2 );
 
+    //! Update BCInterface physical solver variables
+    void updateBCPhysicalSolverVariables();
+
     //! Solve the 1D hyperbolic problem
     /*!
      * @param bc BCInterface container.

@@ -680,6 +680,18 @@ MultiscaleModel1D::copySolution( const solution_Type& solution1, solution_Type& 
 }
 
 void
+MultiscaleModel1D::updateBCPhysicalSolverVariables()
+{
+
+#ifdef HAVE_LIFEV_DEBUG
+    Debug( 8130 ) << "MultiscaleModel1D::updateBCPhysicalSolverVariables() \n";
+#endif
+
+    // Update BCInterface solver variables
+    M_bc->updatePhysicalSolverVariables();
+}
+
+void
 MultiscaleModel1D::solve( bc_Type& bc, solution_Type& solution, const std::string& solverType )
 {
 
@@ -707,7 +719,7 @@ MultiscaleModel1D::solve( bc_Type& bc, solution_Type& solution, const std::strin
 
     for ( UInt i(1) ; i <= subiterationNumber ; ++i )
     {
-        //bc.updateOperatorVariables();
+        updateBCPhysicalSolverVariables();
         M_physics->setArea_tn( *solution["A"] );
         M_solver->updateRHS( solution, timeStep );
         M_solver->iterate( bc, solution, M_data->dataTime()->previousTime() + i*timeStep, timeStep );
