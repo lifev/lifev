@@ -63,8 +63,9 @@ namespace LifeV
  *
  *	<b>AVAILABLE OPERATORS</b>
  *
- *	Available operators are:
+ *	Available variables are:
  *
+ *  f_timeStep
  *	f_area
  *	f_density
  *	f_flux
@@ -112,8 +113,11 @@ public:
     //! @name Methods
     //@{
 
-    //! Update operator variables
-    void updatePhysicalSolverVariables() {}
+    //! Update the solver variables
+    /*!
+     *  NOTE: A template specialization of this method should be provided for each solver.
+     */
+    void updatePhysicalSolverVariables() { std::cout << " !!! WARNING: updatePhysicalSolverVariables() is not defined for the selected solver. !!!" << std::endl; }
 
     //@}
 
@@ -127,9 +131,9 @@ public:
      */
     virtual void setData( const data_Type& data );
 
-    //! Set an operator
+    //! Set the physical solver
     /*!
-     * @param physicalSolver operator
+     * @param physicalSolver physical solver
      */
     void setPhysicalSolver( const boost::shared_ptr< PhysicalSolverType >& physicalSolver ) { M_physicalSolver = physicalSolver; }
 
@@ -153,13 +157,18 @@ protected:
     //! @name Protected Methods
     //@{
 
-    void createAccessList( const data_Type& /*data*/ ) {}
+    //! Create the list of variables for the physical solver.
+    /*!
+     *  NOTE: A template specialization of this method should be provided for each solver.
+     */
+    void createAccessList( const data_Type& /*data*/ ) { std::cout << " !!! WARNING: createAccessList() is not defined for the selected solver. !!!" << std::endl; }
 
     //@}
 
-    //List of all available operators
+    //List of all available operators (f: fluid; s: solid;)
     enum physicalSolverList
     {
+        f_timeStep,
         f_area,
         f_flux,
         f_density,
@@ -168,7 +177,7 @@ protected:
         s_density,
         s_poisson,
         s_thickness,
-        s_young,
+        s_young
     };
 
     boost::shared_ptr< PhysicalSolverType >    M_physicalSolver;
@@ -265,7 +274,16 @@ BCInterfaceFunctionSolver< OneDimensionalSolver >::updatePhysicalSolverVariables
     for ( std::set< physicalSolverList >::iterator j = M_list.begin(); j != M_list.end(); ++j )
         switch ( *j )
         {
-            // f_ -> FLUID
+         // f_ -> FLUID
+        case f_timeStep:
+
+#ifdef HAVE_LIFEV_DEBUG
+            Debug( 5023 ) << "                                              f_timeStep(" << static_cast<Real> (M_side) << "): " << M_physicalSolver->physics()->data()->dataTime()->timeStep() << "\n";
+#endif
+            setVariable( "f_timeStep", M_physicalSolver->physics()->data()->dataTime()->timeStep() );
+
+            break;
+
         case f_area:
 
 #ifdef HAVE_LIFEV_DEBUG
@@ -313,7 +331,7 @@ BCInterfaceFunctionSolver< OneDimensionalSolver >::updatePhysicalSolverVariables
 
             break;
 
-            // s_ -> SOLID
+        // s_ -> SOLID
         case s_density:
 
 #ifdef HAVE_LIFEV_DEBUG
@@ -372,7 +390,16 @@ BCInterfaceFunctionSolver< FSIOperator >::updatePhysicalSolverVariables()
     for ( std::set< physicalSolverList >::iterator j = M_list.begin(); j != M_list.end(); ++j )
         switch ( *j )
         {
-            // f_ -> FLUID
+        // f_ -> FLUID
+        case f_timeStep:
+
+#ifdef HAVE_LIFEV_DEBUG
+            Debug( 5023 ) << "                                              f_timeStep(" << static_cast<Real> (M_side) << "): " << M_physicalSolver->data().dataFluid()->dataTime()->timeStep() << "\n";
+#endif
+            setVariable( "f_timeStep", M_physicalSolver->data().dataFluid()->dataTime()->timeStep() );
+
+            break;
+
         case f_area:
 
 #ifdef HAVE_LIFEV_DEBUG
@@ -420,7 +447,7 @@ BCInterfaceFunctionSolver< FSIOperator >::updatePhysicalSolverVariables()
 
             break;
 
-            // s_ -> SOLID
+        // s_ -> SOLID
         case s_density:
 
 #ifdef HAVE_LIFEV_DEBUG
@@ -479,7 +506,16 @@ BCInterfaceFunctionSolver< OseenSolver< RegionMesh3D< LinearTetra > > >::updateP
     for ( std::set< physicalSolverList >::iterator j = M_list.begin(); j != M_list.end(); ++j )
         switch ( *j )
         {
-            // f_ -> FLUID
+        // f_ -> FLUID
+        case f_timeStep:
+
+#ifdef HAVE_LIFEV_DEBUG
+            Debug( 5023 ) << "                                              f_timeStep(" << static_cast<Real> (M_side) << "): " << M_physicalSolver->data()->dataTime()->timeStep() << "\n";
+#endif
+            setVariable( "f_timeStep", M_physicalSolver->data()->dataTime()->timeStep() );
+
+            break;
+
         case f_area:
 
 #ifdef HAVE_LIFEV_DEBUG
@@ -546,7 +582,16 @@ BCInterfaceFunctionSolver< OseenSolverShapeDerivative< RegionMesh3D< LinearTetra
     for ( std::set< physicalSolverList >::iterator j = M_list.begin(); j != M_list.end(); ++j )
         switch ( *j )
         {
-            // f_ -> FLUID
+        // f_ -> FLUID
+        case f_timeStep:
+
+#ifdef HAVE_LIFEV_DEBUG
+            Debug( 5023 ) << "                                              f_timeStep(" << static_cast<Real> (M_side) << "): " << M_physicalSolver->data()->dataTime()->timeStep() << "\n";
+#endif
+            setVariable( "f_timeStep", M_physicalSolver->data()->dataTime()->timeStep() );
+
+            break;
+
         case f_area:
 
 #ifdef HAVE_LIFEV_DEBUG
@@ -638,8 +683,8 @@ BCInterfaceFunctionSolver< OneDimensionalSolver >::createAccessList( const data_
     createSolidMap( mapList );
     createList( mapList, data );
 
-    //if ( M_physicalSolver.get() )
-    //    updatePhysicalSolverVariables();
+    if ( M_physicalSolver.get() )
+        updatePhysicalSolverVariables();
 }
 
 template< >
@@ -657,8 +702,8 @@ BCInterfaceFunctionSolver< FSIOperator >::createAccessList( const data_Type& dat
     createSolidMap( mapList );
     createList( mapList, data );
 
-    //if ( M_physicalSolver.get() )
-    //    updatePhysicalSolverVariables();
+    if ( M_physicalSolver.get() )
+        updatePhysicalSolverVariables();
 }
 
 template< >
@@ -675,8 +720,8 @@ BCInterfaceFunctionSolver< OseenSolver< RegionMesh3D< LinearTetra > > >::createA
     createFluidMap( mapList );
     createList( mapList, data );
 
-    //if ( M_physicalSolver.get() )
-    //    updatePhysicalSolverVariables();
+    if ( M_physicalSolver.get() )
+        updatePhysicalSolverVariables();
 }
 
 template< >
@@ -693,8 +738,8 @@ BCInterfaceFunctionSolver< OseenSolverShapeDerivative< RegionMesh3D< LinearTetra
     createFluidMap( mapList );
     createList( mapList, data );
 
-    //if ( M_physicalSolver.get() )
-    //    updatePhysicalSolverVariables();
+    if ( M_physicalSolver.get() )
+        updatePhysicalSolverVariables();
 }
 
 // ===================================================
@@ -704,6 +749,7 @@ template< class PhysicalSolverType >
 inline void
 BCInterfaceFunctionSolver< PhysicalSolverType >::createFluidMap( std::map< std::string, physicalSolverList >& mapList )
 {
+    mapList["f_timeStep"]  = f_timeStep;
     mapList["f_area"]      = f_area;
     mapList["f_density"]   = f_density;
     mapList["f_flux"]      = f_flux;

@@ -131,6 +131,10 @@ public:
 
     typedef typename bcInterface_Type::vectorFunction_Type        vectorFunction_Type;
 
+    typedef BCFunctionRobin                                       bcFunctionRobin_Type;
+    typedef boost::shared_ptr< bcFunctionRobin_Type >             bcFunctionRobinPtr_Type;
+    typedef std::vector< bcFunctionRobinPtr_Type >                vectorFunctionRobin_Type;
+
     typedef BCFunctionDirectional                                 bcFunctionDirectional_Type;
     typedef boost::shared_ptr< bcFunctionDirectional_Type >       bcFunctionDirectionalPtr_Type;
     typedef std::vector< bcFunctionDirectionalPtr_Type >          vectorFunctionDirectional_Type;
@@ -227,6 +231,12 @@ private:
     template< class BCInterfaceBaseType >
     void createFunction( std::vector< boost::shared_ptr< BCInterfaceBaseType > >& baseVector );
 
+    template< class BCBaseType >
+    void createFunctionRobin( BCBaseType& base );
+
+    template< class BCBaseType >
+    void createFunctionDirectional( BCBaseType& base );
+
     // This method should be removed: it is a workaround due to legacy of LifeV BC.
     void addBcToHandler( BCVectorInterface& base );
 
@@ -234,6 +244,9 @@ private:
     void addBcToHandler( BCBaseType& base );
 
     //@}
+
+    // Functions Robin
+    vectorFunctionRobin_Type        M_vectorFunctionRobin;
 
     // Functions Directions
     vectorFunctionDirectional_Type  M_vectorFunctionDirection;
@@ -248,6 +261,7 @@ private:
 template< class BcHandler, class PhysicalSolverType >
 BCInterface3D< BcHandler, PhysicalSolverType >::BCInterface3D() :
         bcInterface_Type          (),
+        M_vectorFunctionRobin     (),
         M_vectorFunctionDirection (),
         M_vectorFSI               ()
 {
@@ -283,15 +297,34 @@ BCInterface3D< BcHandler, PhysicalSolverType >::insertBC()
         BCFunctionBase base;
         this->M_vectorFunction.back()->assignFunction( base );
 
+        // Directional BC
+        if ( this->M_data.mode() == Directional )
+        {
+            createFunctionDirectional( base );
+            addBcToHandler( *M_vectorFunctionDirection.back() );
+
+            return;
+        }
+
+        // Robin BC
+        if ( this->M_data.type() == Robin )
+        {
+            createFunctionRobin( base );
+            addBcToHandler( *M_vectorFunctionRobin.back() );
+
+            return;
+        }
+
+        // All the other type of BC
         addBcToHandler( base );
 
-        break;
+        return;
     }
     case BCI3DFSI:
 
         createFunction( M_vectorFSI );
 
-        break;
+        return;
 
     default:
 
@@ -306,15 +339,7 @@ template< class BcHandler, class PhysicalSolverType >
 void
 BCInterface3D< BcHandler, PhysicalSolverType >::setPhysicalSolver( const boost::shared_ptr< physicalSolver_Type >& physicalSolver )
 {
-    //for ( typename vectorFunction_Type::const_iterator i = this->M_vectorFunction.begin() ; i < this->M_vectorFunction.end() ; ++i )
-    for ( UInt i( 0 ); i < this->M_vectorFunction.size(); ++i )
-    {
-        BCInterfaceFunctionSolver< physicalSolver_Type > *castedOperator =
-            dynamic_cast < BCInterfaceFunctionSolver< physicalSolver_Type >* > ( &( *this->M_vectorFunction[i] ) );
-
-        if ( castedOperator != 0 )
-            castedOperator->setPhysicalSolver( physicalSolver );
-    }
+    bcInterface_Type::setPhysicalSolver( physicalSolver );
 
     for ( typename vectorFSI_Type::const_iterator i = M_vectorFSI.begin() ; i < M_vectorFSI.end() ; ++i )
     {
@@ -327,7 +352,6 @@ BCInterface3D< BcHandler, PhysicalSolverType >::setPhysicalSolver( const boost::
     }
 }
 
-
 // ===================================================
 // Private Methods
 // ===================================================
@@ -337,6 +361,46 @@ BCInterface3D< BcHandler, PhysicalSolverType >::createFunction( std::vector< boo
 {
     boost::shared_ptr< BCInterfaceBaseType > function( new BCInterfaceBaseType( this->M_data ) );
     baseVector.push_back( function );
+}
+
+template< class BcHandler, class PhysicalSolverType >  template< class BCBaseType >
+inline void
+BCInterface3D< BcHandler, PhysicalSolverType >::createFunctionRobin( BCBaseType& base )
+{
+    // Parameters for direction BC
+    this->M_data.setName( this->M_data.name() + "_robinMassTerm" );
+    this->M_data.setRobinBase();
+
+    // Create the mass term function
+    factory_Type factory;
+    this->M_vectorFunction.push_back( factory.createFunction( this->M_data ) );
+
+    BCFunctionBase baseRobin;
+    this->M_vectorFunction.back()->assignFunction( baseRobin );
+
+    // Robin base
+    bcFunctionRobinPtr_Type robinBase( new bcFunctionRobin_Type( base.Function(), baseRobin.Function() ) );
+    M_vectorFunctionRobin.push_back( robinBase );
+}
+
+template< class BcHandler, class PhysicalSolverType >  template< class BCBaseType >
+inline void
+BCInterface3D< BcHandler, PhysicalSolverType >::createFunctionDirectional( BCBaseType& base )
+{
+    // Parameters for direction BC
+    this->M_data.setName( this->M_data.name() + "_directionalField" );
+    this->M_data.setDirectionalBase();
+
+    // Create the directional field
+    factory_Type factory;
+    this->M_vectorFunction.push_back( factory.createFunction( this->M_data ) );
+
+    BCFunctionBase baseDirectional;
+    this->M_vectorFunction.back()->assignFunction( baseDirectional );
+
+    // Directional base
+    bcFunctionDirectionalPtr_Type directionalBase( new bcFunctionDirectional_Type( base.Function(), baseDirectional.Function() ) );
+    M_vectorFunctionDirection.push_back( directionalBase );
 }
 
 template< class BcHandler, class PhysicalSolverType >
@@ -355,16 +419,16 @@ BCInterface3D< BcHandler, PhysicalSolverType >::addBcToHandler( BCVectorInterfac
     case Component:
 
 #ifdef HAVE_LIFEV_DEBUG
-        Debug( 5020 ) << "BCInterface3D::addBCManager                              others" << "\n\n";
+        Debug( 5020 ) << "BCInterface3D::addBcToHandler                            others" << "\n\n";
 #endif
 
-        std::cout << "ERROR: Scalar, Normal, Tangential, Directional, Component NOT AVAILABLE FOR FSI BC" << std::endl;
+        std::cout << "ERROR: Scalar, Normal, Tangential, Directional, Component NOT AVAILABLE FOR BCVectorInterface BASE" << std::endl;
         break;
 
     case Full:
 
 #ifdef HAVE_LIFEV_DEBUG
-        Debug( 5020 ) << "BCInterface3D::addBCManager                              Full" << "\n\n";
+        Debug( 5020 ) << "BCInterface3D::addBcToHandler                            Full" << "\n\n";
 #endif
 
         this->M_handler->addBC( this->M_data.name(), this->M_data.flag(), this->M_data.type(), this->M_data.mode(), base, this->M_data.comN() );
@@ -385,46 +449,20 @@ BCInterface3D< BcHandler, PhysicalSolverType >::addBcToHandler( BCBaseType& base
     case Scalar:
     case Normal:
     case Tangential:
+    case Directional:
 
 #ifdef HAVE_LIFEV_DEBUG
-        Debug( 5020 ) << "BCInterface3D::addBCManager                              Scalar, Normal, Tangential" << "\n\n";
+        Debug( 5020 ) << "BCInterface3D::addBcToHandler                            Scalar, Normal, Tangential, Directional" << "\n\n";
 #endif
 
         this->M_handler->addBC( this->M_data.name(), this->M_data.flag(), this->M_data.type(), this->M_data.mode(), base );
 
         break;
 
-    case Directional:
-
-#ifdef HAVE_LIFEV_DEBUG
-        Debug( 5020 ) << "BCInterface3D::addBCManager                              Directional" << "\n\n";
-#endif
-        {
-            // Parameters for direction BC
-            this->M_data.setName( this->M_data.name() + "_direction" );
-            this->M_data.setBase( make_pair( "function", BCIFunction ) );
-            this->M_data.setBaseString( this->M_data.direction() );
-
-            // Directional field
-            factory_Type factory;
-            this->M_vectorFunction.push_back( factory.createFunction( this->M_data ) );
-
-            BCFunctionBase baseDirectional;
-            this->M_vectorFunction.back()->assignFunction( baseDirectional );
-
-            // Directional base
-            boost::shared_ptr< BCFunctionDirectional > directionalBase( new BCFunctionDirectional( base.Function(), baseDirectional.Function() ) );
-            M_vectorFunctionDirection.push_back( directionalBase );
-
-            this->M_handler->addBC( this->M_data.name(), this->M_data.flag(), this->M_data.type(), this->M_data.mode(), *M_vectorFunctionDirection.back() );
-        }
-
-        break;
-
     case Full:
 
 #ifdef HAVE_LIFEV_DEBUG
-        Debug( 5020 ) << "BCInterface3D::addBCManager                              Full" << "\n\n";
+        Debug( 5020 ) << "BCInterface3D::addBcToHandler                            Full" << "\n\n";
 #endif
 
         this->M_handler->addBC( this->M_data.name(), this->M_data.flag(), this->M_data.type(), this->M_data.mode(), base, this->M_data.comN() );
@@ -434,7 +472,7 @@ BCInterface3D< BcHandler, PhysicalSolverType >::addBcToHandler( BCBaseType& base
     case Component:
 
 #ifdef HAVE_LIFEV_DEBUG
-        Debug( 5020 ) << "BCInterface3D::addBCManager                              Component" << "\n\n";
+        Debug( 5020 ) << "BCInterface3D::addBcToHandler                            Component" << "\n\n";
 #endif
 
         this->M_handler->addBC( this->M_data.name(), this->M_data.flag(), this->M_data.type(), this->M_data.mode(), base, this->M_data.comV() );

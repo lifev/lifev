@@ -43,33 +43,36 @@ namespace LifeV
 // Constructors
 // ===================================================
 BCInterfaceData::BCInterfaceData() :
-        M_baseString         (),
-        M_base               (),
-        M_mapBase            (),
-        M_side               (),
-        M_line               (),
-        M_quantity           (),
-        M_resistance         (),
-        M_capacitance        (),
-        M_mapSide            (),
-        M_mapQuantity        (),
-        M_mapLine            (),
-        M_name               (),
-        M_flag               (),
-        M_type               (),
-        M_mode               (),
-        M_comV               (),
-        M_direction          (),
-        M_mapType            (),
-        M_mapMode            ()
+        M_base                  (),
+        M_baseString            (),
+        M_baseRobin             (),
+        M_baseStringRobin       (),
+        M_baseDirectional       (),
+        M_baseStringDirectional (),
+        M_mapBase               (),
+        M_side                  (),
+        M_line                  (),
+        M_quantity              (),
+        M_resistance            (),
+        M_capacitance           (),
+        M_mapSide               (),
+        M_mapQuantity           (),
+        M_mapLine               (),
+        M_name                  (),
+        M_flag                  (),
+        M_type                  (),
+        M_mode                  (),
+        M_comV                  (),
+        M_mapType               (),
+        M_mapMode               ()
 {
     //Set mapBase
-    M_mapBase["function"]         = BCIFunction;
-    M_mapBase["functionFile"]     = BCIFunctionFile;
-    M_mapBase["OPERfunction"]     = BCIFunctionSolver;
-    M_mapBase["OPERfunctionFile"] = BCIFunctionFileSolver;
-    M_mapBase["Default"]          = BCI1DFunctionDefault;
-    M_mapBase["FSI"]              = BCI3DFSI;
+    M_mapBase["function"]           = BCIFunction;
+    M_mapBase["functionFile"]       = BCIFunctionFile;
+    M_mapBase["functionSolver"]     = BCIFunctionSolver;
+    M_mapBase["functionFileSolver"] = BCIFunctionFileSolver;
+    M_mapBase["functionDefault"]    = BCI1DFunctionDefault;
+    M_mapBase["FSI"]                = BCI3DFSI;
 
     //Set mapSide
     M_mapSide["left"]   = OneDimensional::left;
@@ -106,25 +109,28 @@ BCInterfaceData::BCInterfaceData() :
 }
 
 BCInterfaceData::BCInterfaceData( const BCInterfaceData& data ) :
-        M_baseString        ( data.M_baseString ),
-        M_base              ( data.M_base ),
-        M_mapBase           ( data.M_mapBase ),
-        M_side              ( data.M_side ),
-        M_line              ( data.M_line ),
-        M_quantity          ( data.M_quantity ),
-        M_resistance        ( data.M_resistance ),
-        M_capacitance       ( data.M_capacitance ),
-        M_mapSide           ( data.M_mapSide ),
-        M_mapQuantity       ( data.M_mapQuantity ),
-        M_mapLine           ( data.M_mapLine ),
-        M_name              ( data.M_name ),
-        M_flag              ( data.M_flag ),
-        M_type              ( data.M_type ),
-        M_mode              ( data.M_mode ),
-        M_comV              ( data.M_comV ),
-        M_direction         ( data.M_direction ),
-        M_mapType           ( data.M_mapType ),
-        M_mapMode           ( data.M_mapMode )
+        M_base                  ( data.M_base ),
+        M_baseString            ( data.M_baseString ),
+        M_baseRobin             ( data.M_baseRobin ),
+        M_baseStringRobin       ( data.M_baseStringRobin ),
+        M_baseDirectional       ( data.M_baseDirectional ),
+        M_baseStringDirectional ( data.M_baseStringDirectional ),
+        M_mapBase               ( data.M_mapBase ),
+        M_side                  ( data.M_side ),
+        M_line                  ( data.M_line ),
+        M_quantity              ( data.M_quantity ),
+        M_resistance            ( data.M_resistance ),
+        M_capacitance           ( data.M_capacitance ),
+        M_mapSide               ( data.M_mapSide ),
+        M_mapQuantity           ( data.M_mapQuantity ),
+        M_mapLine               ( data.M_mapLine ),
+        M_name                  ( data.M_name ),
+        M_flag                  ( data.M_flag ),
+        M_type                  ( data.M_type ),
+        M_mode                  ( data.M_mode ),
+        M_comV                  ( data.M_comV ),
+        M_mapType               ( data.M_mapType ),
+        M_mapMode               ( data.M_mapMode )
 {
 }
 
@@ -136,25 +142,28 @@ BCInterfaceData::operator=( const BCInterfaceData& data )
 {
     if ( this != &data )
     {
-        M_baseString        = data.M_baseString;
-        M_base              = data.M_base;
-        M_mapBase           = data.M_mapBase;
-        M_side              = data.M_side;
-        M_line              = data.M_line;
-        M_quantity          = data.M_quantity;
-        M_resistance        = data.M_resistance;
-        M_capacitance       = data.M_capacitance;
-        M_mapSide           = data.M_mapSide;
-        M_mapQuantity       = data.M_mapQuantity;
-        M_mapLine           = data.M_mapLine;
-        M_name              = data.M_name;
-        M_flag              = data.M_flag;
-        M_type              = data.M_type;
-        M_mode              = data.M_mode;
-        M_comV              = data.M_comV;
-        M_direction         = data.M_direction;
-        M_mapType           = data.M_mapType;
-        M_mapMode           = data.M_mapMode;
+        M_base                  = data.M_base;
+        M_baseString            = data.M_baseString;
+        M_baseRobin             = data.M_baseRobin;
+        M_baseStringRobin       = data.M_baseStringRobin;
+        M_baseDirectional       = data.M_baseDirectional;
+        M_baseStringDirectional = data.M_baseStringDirectional;
+        M_mapBase               = data.M_mapBase;
+        M_side                  = data.M_side;
+        M_line                  = data.M_line;
+        M_quantity              = data.M_quantity;
+        M_resistance            = data.M_resistance;
+        M_capacitance           = data.M_capacitance;
+        M_mapSide               = data.M_mapSide;
+        M_mapQuantity           = data.M_mapQuantity;
+        M_mapLine               = data.M_mapLine;
+        M_name                  = data.M_name;
+        M_flag                  = data.M_flag;
+        M_type                  = data.M_type;
+        M_mode                  = data.M_mode;
+        M_comV                  = data.M_comV;
+        M_mapType               = data.M_mapType;
+        M_mapMode               = data.M_mapMode;
     }
 
     return *this;
@@ -182,45 +191,13 @@ BCInterfaceData::readBC( const std::string& fileName, const std::string& dataSec
     readType( dataFile, ( dataSection + name + "/type" ).c_str() );
     readMode( dataFile, ( dataSection + name + "/mode" ).c_str() );
     readComV( dataFile, ( dataSection + name + "/component" ).c_str() );
-    readDirection( dataFile, ( dataSection + name + "/direction" ).c_str() );
-    readBase( dataFile, dataSection + name + "/" );
-}
 
-void
-BCInterfaceData::readBC0D( const std::string& fileName, const std::string& dataSection, const bcName_Type& name )
-{
-    GetPot dataFile( fileName );
-
-    readQuantity( dataFile, ( dataSection + name + "/quantity" ).c_str() );
-    readBase( dataFile, dataSection + name + "/" );
-}
-
-void
-BCInterfaceData::readBC1D( const std::string& fileName, const std::string& dataSection, const bcName_Type& name )
-{
-    GetPot dataFile( fileName );
-
-    readSide( dataFile, ( dataSection + name + "/side" ).c_str() );
-    readQuantity( dataFile, ( dataSection + name + "/quantity" ).c_str() );
-    readLine( dataFile, ( dataSection + name + "/line" ).c_str() );
-    readResistance( dataFile, ( dataSection + name + "/resistance" ).c_str() );
-    readCapacitance( dataFile, ( dataSection + name + "/capacitance" ).c_str() );
-    readBase( dataFile, dataSection + name + "/" );
-}
-
-void
-BCInterfaceData::readBC3D( const std::string& fileName, const std::string& dataSection, const bcName_Type& name )
-{
-    GetPot dataFile( fileName );
-
-    M_name = name;
-
-    readFlag( dataFile, ( dataSection + name + "/flag" ).c_str() );
-    readType( dataFile, ( dataSection + name + "/type" ).c_str() );
-    readMode( dataFile, ( dataSection + name + "/mode" ).c_str() );
-    readComV( dataFile, ( dataSection + name + "/component" ).c_str() );
-    readDirection( dataFile, ( dataSection + name + "/direction" ).c_str() );
-    readBase( dataFile, dataSection + name + "/" );
+    // Read base
+    readBase( dataFile, dataSection + name + "/", M_base, M_baseString );
+    if ( M_type == Robin )
+        readBase( dataFile, dataSection + name + "/Robin/", M_baseRobin, M_baseStringRobin );
+    if ( M_mode == Directional )
+        readBase( dataFile, dataSection + name + "/Directional/", M_baseDirectional, M_baseStringDirectional );
 }
 
 void
@@ -245,7 +222,6 @@ BCInterfaceData::showMe( std::ostream& output ) const
     for ( UInt i(0); i < static_cast<UInt>( M_comV.size() ); ++i )
         output << M_comV[i] << " ";
     output << "\n";
-    output << "direction  = " << M_direction << std::endl;
 }
 
 // ===================================================
@@ -285,23 +261,22 @@ BCInterfaceData::readComV( const GetPot& dataFile, const char* component )
 }
 
 void
-BCInterfaceData::readBase( const GetPot& dataFile, const std::string& base )
+BCInterfaceData::readBase( const GetPot& dataFile, const std::string& path, std::pair< std::string, baseList_Type >& base, std::string& baseString )
 {
-    for ( std::map< std::string, baseList_Type >::iterator j = M_mapBase.begin(); j
-            != M_mapBase.end(); ++j )
-        if ( isBase( dataFile, ( base + j->first ).c_str() ) )
+    for ( std::map< std::string, baseList_Type >::iterator j = M_mapBase.begin(); j != M_mapBase.end(); ++j )
+        if ( isBase( dataFile, ( path + j->first ).c_str(), baseString ) )
         {
-            M_base.first = j->first;
-            M_base.second = M_mapBase[j->first];
+            base.first = j->first;
+            base.second = M_mapBase[j->first];
 
             break;
         }
 }
 
 bool
-BCInterfaceData::isBase( const GetPot& dataFile, const char* base )
+BCInterfaceData::isBase( const GetPot& dataFile, const char* base, std::string& baseString )
 {
-    M_baseString = dataFile( base, " " );
+    baseString = dataFile( base, " " );
 
     return dataFile.checkVariable( base );
 }

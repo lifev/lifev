@@ -103,30 +103,11 @@ public:
      */
     void readBC( const std::string& fileName, const std::string& dataSection, const bcName_Type& name );
 
-    //! Read parameters for 0D BC
-    /*!
-     * @param fileName Name of the data file.
-     * @param dataSection BC section
-     * @param name name of the boundary condition
-     */
-    void readBC0D( const std::string& fileName, const std::string& dataSection, const bcName_Type& name );
+    //! Set the directional base as the current base
+    void setDirectionalBase() { M_base = M_baseDirectional; M_baseString = M_baseStringDirectional; }
 
-    //! Read parameters for 1D BC
-    /*!
-     * @param fileName Name of the data file.
-     * @param dataSection BC section
-     * @param name name of the boundary condition
-     */
-    void readBC1D( const std::string& fileName, const std::string& dataSection, const bcName_Type& name );
-
-    //! Read parameters for 3D BC
-    /*!
-     * @param fileName Name of the data file.
-     * @param dataSection BC section
-     * @param name name of the boundary condition
-     */
-    void readBC3D( const std::string& fileName, const std::string& dataSection, const bcName_Type& name );
-
+    //! Set the Robin base as the current base
+    void setRobinBase() { M_base = M_baseRobin; M_baseString = M_baseStringRobin; }
 
     //! Display general information about the content of the class
     /*!
@@ -212,12 +193,6 @@ public:
      * @param comV Boundary condition component
      */
     void addComV( const UInt& comV ) { M_comV.push_back( comV ); }
-
-    //! Set the direction string of the boundary condition
-    /*!
-     * @param direction Boundary condition direction string
-     */
-    void setDirection( const std::string& direction ) { M_direction = direction; }
 
     //@}
 
@@ -309,12 +284,6 @@ public:
      */
     const ID& comN() const { return M_comV.front(); }
 
-    //! Get the direction string of the boundary condition
-    /*!
-     * @return Boundary condition direction
-     */
-    const std::string& direction() const { return M_direction; }
-
     //@}
 
 private:
@@ -328,8 +297,6 @@ private:
 
     void readQuantity( const GetPot& dataFile, const char* quantity ) { M_quantity = M_mapQuantity[dataFile( quantity, "A" )]; }
 
-    void readBase( const GetPot& dataFile, const std::string& base );
-
     void readResistance( const GetPot& dataFile, const char* resistance );
 
     void readCapacitance( const GetPot& dataFile, const char* capacitance ) { M_capacitance = dataFile( capacitance, 0 ); }
@@ -342,9 +309,9 @@ private:
 
     void readComV( const GetPot& dataFile, const char* component );
 
-    void readDirection( const GetPot& dataFile, const char* direction ) { M_direction = dataFile( direction, " " ); }
+    void readBase( const GetPot& dataFile, const std::string& path, std::pair< std::string, baseList_Type >& base, std::string& baseString );
 
-    bool isBase( const GetPot& dataFile, const char* base );
+    bool isBase( const GetPot& dataFile, const char* base, std::string& baseString );
 
     //@}
 
@@ -352,8 +319,15 @@ private:
     //! @name Common Private Members
     //@{
 
-    std::string                                                    M_baseString;
     std::pair< std::string, baseList_Type >                        M_base;
+    std::string                                                    M_baseString;
+
+    std::pair< std::string, baseList_Type >                        M_baseRobin;
+    std::string                                                    M_baseStringRobin;
+
+    std::pair< std::string, baseList_Type >                        M_baseDirectional;
+    std::string                                                    M_baseStringDirectional;
+
     std::map< std::string, baseList_Type >                         M_mapBase;
 
     //@}
@@ -385,7 +359,6 @@ private:
     bcType_Type                                                    M_type;
     bcMode_Type                                                    M_mode;
     bcComponentsVec_Type                                           M_comV;
-    std::string                                                    M_direction;
 
     // Maps
     std::map< std::string, bcType_Type >                           M_mapType;

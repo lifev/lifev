@@ -271,7 +271,7 @@ BCInterface1D< BcHandler, PhysicalSolverType >::insertBC()
 
         addBcToHandler( base );
 
-        break;
+        return;
     }
     case BCI1DFunctionDefault:
     {
@@ -282,7 +282,7 @@ BCInterface1D< BcHandler, PhysicalSolverType >::insertBC()
 
         addBcToHandler( base );
 
-        break;
+        return;
     }
     default:
 
