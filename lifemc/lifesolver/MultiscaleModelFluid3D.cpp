@@ -351,8 +351,8 @@ MultiscaleModelFluid3D::setupLinearModel()
     M_bcBaseDeltaOne.setFunction(  boost::bind( &MultiscaleModelFluid3D::bcFunctionDeltaOne,  this, _1, _2, _3, _4, _5 ) );
 
     // The linear BCHandler is a copy of the original BCHandler with all BCFunctions giving zero
-    bcPtr_Type LinearBCHandler ( new bc_Type( *M_bc->handler() ) );
-    M_linearBC = LinearBCHandler;
+    bcPtr_Type linearBCHandler( new bc_Type( *M_bc->handler() ) );
+    M_linearBC = linearBCHandler;
 
     // Set all the BCFunctions to zero
     for ( bc_Type::bcBaseIterator_Type i = M_linearBC->begin() ; i != M_linearBC->end() ; ++i )
