@@ -161,8 +161,8 @@ MultiscaleModelFluid3D::setupModel()
     if ( M_exporter->mapType() == Unique )
         M_solution->setCombineMode( Zero );
 
-    M_exporter->addVariable( ExporterData::Vector, "Fluid Velocity", M_solution, static_cast<UInt> ( 0 ), M_uFESpace->dof().numTotalDof() );
-    M_exporter->addVariable( ExporterData::Scalar, "Fluid Pressure", M_solution, 3 * M_uFESpace->dof().numTotalDof(), M_pFESpace->dof().numTotalDof() );
+    M_exporter->addVariable( ExporterData::Vector, "Velocity (fluid)", M_solution, static_cast<UInt> ( 0 ), M_uFESpace->dof().numTotalDof() );
+    M_exporter->addVariable( ExporterData::Scalar, "Pressure (fluid)", M_solution, 3 * M_uFESpace->dof().numTotalDof(), M_pFESpace->dof().numTotalDof() );
 
     //Setup linear model
     setupLinearModel();
@@ -664,8 +664,8 @@ MultiscaleModelFluid3D::initializeSolution()
     {
         M_importer->setMeshProcId( M_mesh->meshPartition(), M_comm->MyPID() );
 
-        M_importer->addVariable( ExporterData::Vector, "Fluid Velocity", M_solution, static_cast <UInt> ( 0 ),            M_uFESpace->dof().numTotalDof() );
-        M_importer->addVariable( ExporterData::Scalar, "Fluid Pressure", M_solution, 3 * M_uFESpace->dof().numTotalDof(), M_pFESpace->dof().numTotalDof());
+        M_importer->addVariable( ExporterData::Vector, "Velocity (fluid)", M_solution, static_cast <UInt> ( 0 ),            M_uFESpace->dof().numTotalDof() );
+        M_importer->addVariable( ExporterData::Scalar, "Pressure (fluid)", M_solution, 3 * M_uFESpace->dof().numTotalDof(), M_pFESpace->dof().numTotalDof());
 
         // Import
         M_exporter->setStartIndex( M_importer->importFromTime( M_data->dataTime()->initialTime() ) + 1 );

@@ -210,11 +210,11 @@ MultiscaleModel1D::setupModel()
     M_solver->setupSolution( *M_exporterSolution, map, true );
 
     //M_exporter->addVariable( ExporterData::Scalar, "Solid Area",      (*M_exporterSolution)["A"],    static_cast <UInt> ( 0 ), M_feSpace->dof().numTotalDof() );
-    M_exporter->addVariable( ExporterData::Scalar, "Area ratio",      (*M_exporterSolution)["AoverA0minus1"], static_cast <UInt> ( 0 ), M_feSpace->dof().numTotalDof() );
-    M_exporter->addVariable( ExporterData::Scalar, "Fluid Flow Rate", (*M_exporterSolution)["Q"],    static_cast <UInt> ( 0 ), M_feSpace->dof().numTotalDof() );
+    M_exporter->addVariable( ExporterData::Scalar, "Area ratio",        (*M_exporterSolution)["AoverA0minus1"], static_cast <UInt> ( 0 ), M_feSpace->dof().numTotalDof() );
+    M_exporter->addVariable( ExporterData::Scalar, "Flow rate (fluid)", (*M_exporterSolution)["Q"],    static_cast <UInt> ( 0 ), M_feSpace->dof().numTotalDof() );
     //M_exporter->addVariable( ExporterData::Scalar, "W1",              (*M_exporterSolution)["W1"],   static_cast <UInt> ( 0 ), M_feSpace->dof().numTotalDof() );
     //M_exporter->addVariable( ExporterData::Scalar, "W2",              (*M_exporterSolution)["W2"],   static_cast <UInt> ( 0 ), M_feSpace->dof().numTotalDof() );
-    M_exporter->addVariable( ExporterData::Scalar, "Fluid Pressure",  (*M_exporterSolution)["P"],    static_cast <UInt> ( 0 ), M_feSpace->dof().numTotalDof() );
+    M_exporter->addVariable( ExporterData::Scalar, "Pressure (fluid)",  (*M_exporterSolution)["P"],    static_cast <UInt> ( 0 ), M_feSpace->dof().numTotalDof() );
 #endif
 
 #ifdef HAVE_MATLAB_POSTPROCESSING
@@ -645,11 +645,11 @@ MultiscaleModel1D::initializeSolution()
         M_importer->setMeshProcId( M_exporterMesh, M_comm->MyPID() );
 
 //        M_exporter->addVariable( ExporterData::Scalar, "Solid Area",      (*M_exporterSolution)["A"],      static_cast <UInt> ( 0 ), M_feSpace->dof().numTotalDof() );
-        M_importer->addVariable( ExporterData::Scalar, "Area ratio",      (*M_exporterSolution)["AoverA0minus1"], static_cast <UInt> ( 0 ), M_feSpace->dof().numTotalDof() );
-        M_importer->addVariable( ExporterData::Scalar, "Fluid Flow Rate", (*M_exporterSolution)["Q"],      static_cast <UInt> ( 0 ), M_feSpace->dof().numTotalDof() );
+        M_importer->addVariable( ExporterData::Scalar, "Area ratio",        (*M_exporterSolution)["AoverA0minus1"], static_cast <UInt> ( 0 ), M_feSpace->dof().numTotalDof() );
+        M_importer->addVariable( ExporterData::Scalar, "Flow rate (fluid)", (*M_exporterSolution)["Q"],      static_cast <UInt> ( 0 ), M_feSpace->dof().numTotalDof() );
 //        M_importer->addVariable( ExporterData::Scalar, "W1",              (*M_exporterSolution)["W1"],     static_cast <UInt> ( 0 ), M_feSpace->dof().numTotalDof() );
 //        M_importer->addVariable( ExporterData::Scalar, "W2",              (*M_exporterSolution)["W2"],     static_cast <UInt> ( 0 ), M_feSpace->dof().numTotalDof() );
-        M_importer->addVariable( ExporterData::Scalar, "Fluid Pressure",  (*M_exporterSolution)["P"],      static_cast <UInt> ( 0 ), M_feSpace->dof().numTotalDof() );
+        M_importer->addVariable( ExporterData::Scalar, "Pressure (fluid)",  (*M_exporterSolution)["P"],      static_cast <UInt> ( 0 ), M_feSpace->dof().numTotalDof() );
 
         // Import
         M_exporter->setStartIndex( M_importer->importFromTime( M_data->dataTime()->initialTime() ) + 1 );
@@ -676,7 +676,8 @@ MultiscaleModel1D::copySolution( const solution_Type& solution1, solution_Type& 
 #endif
 
     for ( solutionConstIterator_Type i = solution2.begin() ; i != solution2.end() ; ++i )
-        *solution2[i->first] = *solution1.find(i->first)->second;
+        if ( solution1.find( i->first ) != solution1.end() )
+            *solution2[i->first] = *solution1.find(i->first)->second;
 }
 
 void
