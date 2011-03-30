@@ -322,18 +322,15 @@ setup(const fespace_ptrType& uFESpace, const fespace_ptrType& pFESpace, const fe
 
     M_convectionUCFE.reset(new currentFE_type(M_uFESpace->refFE(),
                                               M_uFESpace->fe().geoMap(),
-                                              QuadratureRuleProvider::provideMaximal(TETRA)));
-                                              //QuadratureRuleProvider::provideExactnessMax(TETRA,2*uDegree+betaDegree-1)));
+                                              QuadratureRuleProvider::provideExactnessMax(TETRA,2*uDegree+betaDegree-1)));
 
     M_convectionBetaCFE.reset(new currentFE_type(M_betaFESpace->refFE(),
                                                  M_uFESpace->fe().geoMap(),
-                                                 QuadratureRuleProvider::provideMaximal(TETRA)));
-                                                 //QuadratureRuleProvider::provideExactnessMax(TETRA,2*uDegree+betaDegree-1)));
+                                                 QuadratureRuleProvider::provideExactnessMax(TETRA,2*uDegree+betaDegree-1)));
 
     M_convectionRhsUCFE.reset(new currentFE_type(M_betaFESpace->refFE(),
                                                  M_uFESpace->fe().geoMap(),
-                                                 QuadratureRuleProvider::provideMaximal(TETRA)));
-                                                 //QuadratureRuleProvider::provideExactnessMax(TETRA,2*betaDegree+betaDegree-1)));
+                                                 QuadratureRuleProvider::provideExactnessMax(TETRA,2*betaDegree+betaDegree-1)));
 
     M_localViscous.reset(new localMatrix_type(M_uFESpace->fe().nbFEDof(),
                                               M_uFESpace->fieldDim(),
