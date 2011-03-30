@@ -30,6 +30,6 @@ list = 'ZPoiseuilleDynamic'
     mode                = Component
     component           = 2
     functionFile        = physicalFunctions/SmoothTrapezoidalProfile.dat[A]
-    #OPERfunctionFile    = physicalFunctions/SmoothTrapezoidalProfile.dat[A]
+    #functionFileSolver  = physicalFunctions/SmoothTrapezoidalProfile.dat[A]
 
     [../]
