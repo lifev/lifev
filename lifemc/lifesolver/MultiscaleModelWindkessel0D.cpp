@@ -93,7 +93,7 @@ MultiscaleModelWindkessel0D::setupData( const std::string& fileName )
 
     setupExporterImporter();
 
-    //BC - We need to create the BCHandler before using it
+    // We need to create the BCHandler before using it
     M_bc->createHandler();
 }
 
