@@ -25,8 +25,8 @@ ProblemFile = ./MultiscaleDatabase/Models/Multiscale/1D_2Cylinders_S
     RestartFromStepNumber      = 0
     
     [../time_discretization]
-    initialtime                = .00      # [s]
-    endtime                    = .05      # [s]
+    initialtime                = 0.000     # [s]
+    endtime                    = 0.050     # [s]
     timestep                   = 0.001     # [s]
 
     [../Algorithm]
