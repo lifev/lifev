@@ -180,6 +180,7 @@ semiImplicit        = false  # tells if we advance in time after the first nonli
 
     [../boundary_conditions]
     list = ' '                                            # Free dispacement
+    #list = 'OuterWall_Robin'                              # Free dispacement + Robin on the external Wall
     #list = 'Top_NoDisplacementOnZ Base_NoDisplacementOnZ' # Free dispacement on XY
     #list = 'Top Base TopEdge BaseEdge'                    # Fixed dispacement
 
@@ -224,6 +225,16 @@ semiImplicit        = false  # tells if we advance in time after the first nonli
         mode       = Component
         component  = '2'
         function   = 0
+        
+        [../OuterWall_Robin]
+        type       = Robin
+        flag       = 10
+        mode       = Normal
+        function   = 0
+        
+            [./Robin]
+        	functionSolver = '-29000 * f_timeStep'
+        	[../]
 
         [../]
 
