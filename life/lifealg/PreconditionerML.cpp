@@ -217,6 +217,12 @@ PreconditionerML::createMLList( list_Type& list,
     bool SmootherHiptmairEfficientSymmetric = dataFile( (section + "/" + subSection + "/smoother/Hiptmair_efficient_symmetric").data(), true, found );
     if ( found ) list.set( "smoother: Hiptmair efficient symmetric", SmootherHiptmairEfficientSymmetric );
 
+    std::string SmootherIpackType           = dataFile( (section + "/" + subSection + "/smoother/ifpack_type").data(), "ILU", found );
+    if ( found ) list.set( "smoother: ifpack type", SmootherIpackType );
+
+    Int SmootherIpackOverlap        = dataFile( (section + "/" + subSection + "/smoother/ifpack_overlap").data(), 1, found );
+    if ( found ) list.set( "smoother: ifpack overlap", SmootherIpackOverlap );
+
     // subsmoother parameter
 
     std::string SubSmootherType             = dataFile( (section + "/" + subSection + "/subsmoother/type").data(), "Chebyshev", found );
