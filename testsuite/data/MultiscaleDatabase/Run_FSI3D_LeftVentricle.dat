@@ -1,0 +1,50 @@
+# -*- getpot -*- GetPot mode activation for emacs
+###################################################################################################
+#
+#                       This file is part of the LifeV Applications
+#                                 Copyright (C) 2010 EPFL
+#
+#      Author(s): Toni Lassila <toni.lassila@epfl.ch>, Cristiano Malossi <cristiano.malossi@epfl.ch>
+#           Date: 2011-03-09
+#  License Terms: GNU GPL
+#
+###################################################################################################
+### MULTISCALE: FSI3D Model for the left ventricle ################################################
+###################################################################################################
+
+[Problem] #########################################################################################
+ProblemType = Multiscale
+ProblemFile = ./MultiscaleDatabase/Models/Multiscale/3DFSI-1D_LeftVentricleAndAorta_S
+#ProblemFile = ./MultiscaleDatabase/Models/Multiscale/3DFSI-1D_LeftVentricleAndAorta_ClosedValve_S
+
+[Solver] ##########################################################################################
+###################################################################################################
+
+    [./Restart]
+    Restart                    = false
+    RestartFromStepNumber      = 0
+
+    [../time_discretization]
+    initialtime                = 0.000   # [s]
+    endtime                    = 2.800   # [s]
+    timestep                   = 0.001   # [s]
+
+    [../Algorithm]
+    type                       = Broyden           # Aitken, Explicit, Newton, Broyden
+    file                       = Default           # File name (without .dat extension)
+    subiterationsMaximumNumber = 100               # Maximum number for coupling subiterations
+    tolerance                  = 1.e-6             # Tolerance on the coupling values
+
+    [../]
+
+###################################################################################################
+
+[Physics] #########################################################################################
+###################################################################################################
+FluidDensity                = 1.0           # density        [g/cm^3]
+FluidViscosity              = 0.035         # viscosity      [g/cm/s]
+FluidReferencePressure      = 1.0E5         # ref. pressure  [g/cm/s^2 - dyne/cm^2] 
+StructureDensity            = 1.2           # density        [g/cm^3]
+StructurePoissonCoefficient = 0.4           # Poisson coeff. []
+StructureYoungModulus       = 7.0E6         # Young modulus  [g/cm/s^2 - dyne/cm^2]
+###################################################################################################
