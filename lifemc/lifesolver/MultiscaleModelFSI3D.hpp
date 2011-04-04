@@ -58,7 +58,9 @@
 #include <lifemc/lifesolver/MonolithicBlockComposedDNND.hpp>
 
 #include <lifemc/lifesolver/BCInterface3D.hpp>
+
 #include <lifemc/lifesolver/MultiscaleModel.hpp>
+#include <lifemc/lifesolver/MultiscaleInterfaceFluid.hpp>
 
 namespace LifeV
 {
@@ -70,7 +72,8 @@ namespace Multiscale
  *  @author Paolo Crosetto
  *  @author Cristiano Malossi <cristiano.malossi@epfl.ch>
  */
-class MultiscaleModelFSI3D: public virtual multiscaleModel_Type
+class MultiscaleModelFSI3D: public virtual multiscaleModel_Type,
+                            public virtual MultiscaleInterfaceFluid
 {
 public:
 
@@ -119,7 +122,7 @@ public:
     //@}
 
 
-    //! @name Multiscale PhysicalModel Virtual Methods
+    //! @name MultiscaleModel Methods
     //@{
 
     //! Setup the data of the model.
@@ -149,22 +152,45 @@ public:
     //@}
 
 
-    //! @name Methods
+    //! @name MultiscaleInterfaceFluid Methods
     //@{
 
-    //! Setup the linear model
-    void setupLinearModel();
+    //! Get the flow rate on a specific boundary face of the model
+    /*!
+     * @param flag flag of the boundary face
+     * @return flow rate value
+     */
+    Real boundaryFlowRate( const bcFlag_Type& flag ) const { return M_FSIoperator->fluid().flux( flag, *M_FSIoperator->solutionPtr() ); }
 
-    //! Update the linear system matrix and vectors
-    void updateLinearModel();
+    //! Get the integral of the normal stress (on a specific boundary face)
+    /*!
+     * @param flag flag of the boundary face
+     * @param stressType Type of approximation for the stress
+     * @return stress value
+     */
+    Real boundaryStress( const bcFlag_Type& flag ) const { return -boundaryPressure( flag ); }
 
-    //! Solve the linear problem
-    void solveLinearModel( bool& solveLinearSystem );
+    //! Get the variation of the flow rate (on a specific boundary face) using the linear model
+    /*!
+     * @param flag flag of the boundary face on which quantity should be computed
+     * @param solveLinearSystem a flag to which determine if the linear system has to be solved
+     * @return variation of the flow rate
+     */
+    Real boundaryDeltaFlowRate( const bcFlag_Type& flag, bool& solveLinearSystem );
+
+    //! Get the variation of the integral of the normal stress (on a specific boundary face)
+    /*!
+     * @param flag flag of the boundary face
+     * @param solveLinearSystem a flag to which determine if the linear system has to be solved
+     * @param stressType Type of approximation for the stress
+     * @return variation of the stress
+     */
+    Real boundaryDeltaStress( const bcFlag_Type& flag, bool& solveLinearSystem );
 
     //@}
 
 
-    //! @name Get Methods (couplings)
+    //! @name Get Methods
     //@{
 
     //! Get the BCInterface container of the boundary conditions of the model
@@ -194,67 +220,12 @@ public:
      */
     Real boundaryArea( const bcFlag_Type& flag ) const { return M_FSIoperator->fluid().area( flag ); }
 
-    //! Get the flow rate on a specific boundary face of the model
-    /*!
-     * @param flag flag of the boundary face
-     * @return flow rate value
-     */
-    Real boundaryFlowRate( const bcFlag_Type& flag ) const { return M_FSIoperator->fluid().flux( flag, *M_FSIoperator->solutionPtr() ); }
-
     //! Get the integral of the pressure (on a specific boundary face)
     /*!
      * @param flag flag of the boundary face
      * @return pressure value
      */
-    Real boundaryPressure( const bcFlag_Type& flag ) const { return M_FSIoperator->fluid().pressure( flag, *M_FSIoperator->solutionPtr() ); }
-
-    //! Get the value of the Lagrange multiplier associated to a specific boundary face
-    /*!
-     * @param flag flag of the boundary face
-     * @return Lagrange multiplier value
-     */
-    Real boundaryLagrangeMultiplier( const bcFlag_Type& flag ) const { return M_FSIoperator->fluid().lagrangeMultiplier(flag, *M_fluidBC->handler(), M_FSIoperator->solution() ); }
-
-    //! Get the integral of the normal stress (on a specific boundary face)
-    /*!
-     * @param flag flag of the boundary face
-     * @param stressType Type of approximation for the stress
-     * @return stress value
-     */
-    Real boundaryStress( const bcFlag_Type& flag, const stress_Type& stressType = Pressure ) const;
-
-    //! Get the variation of the flow rate (on a specific boundary face) using the linear model
-    /*!
-     * @param flag flag of the boundary face on which quantity should be computed
-     * @param solveLinearSystem a flag to which determine if the linear system has to be solved
-     * @return variation of the flow rate
-     */
-    Real boundaryDeltaFlowRate( const bcFlag_Type& flag, bool& solveLinearSystem );
-
-    //! Get the variation of the pressure (on a specific boundary face) using the linear model
-    /*!
-     * @param flag flag of the boundary face on which quantity should be computed
-     * @param solveLinearSystem a flag to which determine if the linear system has to be solved
-     * @return variation of the pressure
-     */
-    Real boundaryDeltaPressure( const bcFlag_Type& flag, bool& solveLinearSystem );
-
-    //! Get the variation of the Lagrange multiplier associated to a specific boundary face, using the linear model
-    /*!
-     * @param flag flag of the boundary face
-     * @param solveLinearSystem a flag to which determine if the linear system has to be solved
-     * @return Lagrange multiplier value
-     */
-    Real boundaryDeltaLagrangeMultiplier( const bcFlag_Type& flag, bool& solveLinearSystem );
-
-    //! Get the variation of the integral of the normal stress (on a specific boundary face)
-    /*!
-     * @param flag flag of the boundary face
-     * @param solveLinearSystem a flag to which determine if the linear system has to be solved
-     * @param stressType Type of approximation for the stress
-     * @return variation of the stress
-     */
-    Real boundaryDeltaStress( const bcFlag_Type& flag, bool& solveLinearSystem, const stress_Type& stressType = Pressure );
+    Real boundaryPressure( const bcFlag_Type& flag ) const;
 
     //@}
 
@@ -282,6 +253,9 @@ private:
      */
     void setupGlobalData( const std::string& fileName );
 
+    //! Initialize the solution.
+    void initializeSolution();
+
     void setupCommunicator();
 
     void setupBC( const std::string& fileName );
@@ -293,8 +267,14 @@ private:
     void setExporterFluid( const IOFilePtr_Type& exporter );
     void setExporterSolid( const IOFilePtr_Type& exporter );
 
-    //! Initialize the solution.
-    void initializeSolution();
+    //! Setup the linear model
+    void setupLinearModel();
+
+    //! Update the linear system matrix and vectors
+    void updateLinearModel();
+
+    //! Solve the linear problem
+    void solveLinearModel( bool& solveLinearSystem );
 
     //! Impose the coupling perturbation on the correct BC inside the BCHandler
     void imposePerturbation();

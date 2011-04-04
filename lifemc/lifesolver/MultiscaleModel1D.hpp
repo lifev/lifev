@@ -62,7 +62,9 @@
 #include <lifemc/lifesolver/OneDimensionalSolver.hpp>
 
 #include <lifemc/lifesolver/BCInterface1D.hpp>
+
 #include <lifemc/lifesolver/MultiscaleModel.hpp>
+#include <lifemc/lifesolver/MultiscaleInterfaceFluid.hpp>
 
 // LifeV includes
 #include <life/lifefem/FESpace.hpp>
@@ -82,7 +84,8 @@ namespace Multiscale
  *  The MultiscaleModel1D class is an implementation of the multiscaleModel_Type
  *  for 1D Fluid problem.
  */
-class MultiscaleModel1D: public virtual multiscaleModel_Type
+class MultiscaleModel1D: public virtual multiscaleModel_Type,
+                         public virtual MultiscaleInterfaceFluid
 {
 public:
 
@@ -137,7 +140,7 @@ public:
     //@}
 
 
-    //! @name Multiscale PhysicalModel Virtual Methods
+    //! @name MultiscaleModel Methods
     //@{
 
     //! Setup the data of the model.
@@ -167,27 +170,65 @@ public:
     //@}
 
 
-    //! @name Methods
+    //! @name MultiscaleInterfaceFluid Methods
     //@{
 
-#ifdef JACOBIAN_WITH_FINITEDIFFERENCE
+    //! Get the flow rate on a specific boundary face of the model
+    /*!
+     * @param flag flag of the boundary face
+     * @return flow rate value
+     */
+    Real boundaryFlowRate( const bcFlag_Type& flag ) const { return M_solver->boundaryValue( *M_solution, OneDimensional::Q, flagConverter( flag ) ); }
 
-    //! Setup the linear model
-    void setupLinearModel();
+    //! Get the integral of the normal stress (on a specific boundary face)
+    /*!
+     * @param flag flag of the boundary face
+     * @param stressType Type of approximation for the stress
+     * @return stress value
+     */
+    Real boundaryStress( const bcFlag_Type& flag ) const { return M_solver->boundaryValue( *M_solution, OneDimensional::S, flagConverter( flag ) ); }
 
-    //! Update the linear system matrix and vectors
-    void updateLinearModel();
+    //! Get the variation of the flow rate (on a specific boundary face) using the linear model
+    /*!
+     * @param flag flag of the boundary face on which quantity should be computed
+     * @param solveLinearSystem a flag to which determine if the linear system has to be solved
+     * @return variation of the flow rate
+     */
+    Real boundaryDeltaFlowRate( const bcFlag_Type& flag, bool& solveLinearSystem );
 
-    //! Solve the linear problem
-    void solveLinearModel( bool& solveLinearSystem );
-
-#endif
+    //! Get the variation of the integral of the normal stress (on a specific boundary face)
+    /*!
+     * @param flag flag of the boundary face
+     * @param solveLinearSystem a flag to which determine if the linear system has to be solved
+     * @param stressType Type of approximation for the stress
+     * @return variation of the stress
+     */
+    Real boundaryDeltaStress( const bcFlag_Type& flag, bool& solveLinearSystem );
 
     //@}
 
 
-    //! @name Get Methods (couplings)
+    //! @name Methods
     //@{
+
+    //! Convert the flag from a bcFlag type to a bcSide type
+    /*!
+     * @param flag boundary condition flag
+     * @return boundary condition side.
+     */
+    bcSide_Type flagConverter( const bcFlag_Type& flag ) const { return (flag == 0) ? OneDimensional::left : OneDimensional::right; }
+
+    //@}
+
+
+    //! @name Get Methods
+    //@{
+
+    //! Get the BC handler container of the boundary conditions of the model
+    /*!
+     * @return BC handler
+     */
+    bc_Type& bc() const { return *( M_bc->handler() ); }
 
     //! Get the BCInterface container of the boundary conditions of the model
     /*!
@@ -216,63 +257,12 @@ public:
      */
     Real boundaryArea( const bcFlag_Type& flag ) const { return M_solver->boundaryValue( *M_solution, OneDimensional::A, flagConverter( flag ) ); }
 
-    //! Get the flux on a specific boundary face of the model
-    /*!
-     * @param flag flag of the boundary face
-     * @return flux value
-     */
-    Real boundaryFlowRate( const bcFlag_Type& flag ) const { return M_solver->boundaryValue( *M_solution, OneDimensional::Q, flagConverter( flag ) ); }
-
     //! Get the integral of the pressure (on a specific boundary face)
     /*!
      * @param flag flag of the boundary face
      * @return pressure value
      */
     Real boundaryPressure( const bcFlag_Type& flag ) const { return M_solver->boundaryValue( *M_solution, OneDimensional::P, flagConverter( flag ) ); }
-
-    //! Get the integral of the dynamic pressure (on a specific boundary face)
-    /*!
-     * @param flag flag of the boundary face
-     * @return dynamic pressure value
-     */
-    Real boundaryDynamicPressure( const bcFlag_Type& flag ) const { return 0.5 * boundaryDensity( flag ) * std::pow( boundaryFlowRate( flag ) / boundaryArea( flag ), 2 ); }
-
-    //! Get the integral of the normal stress (on a specific boundary face)
-    /*!
-     * @param flag flag of the boundary face
-     * @param stressType Type of approximation for the stress
-     * @return stress value
-     */
-    Real boundaryStress( const bcFlag_Type& flag, const stress_Type& stressType = Pressure ) const;
-
-    //! Get the variation of the flow rate (on a specific boundary face) using the linear model
-    /*!
-     * @param flag flag of the boundary face on which quantity should be computed
-     * @param solveLinearSystem a flag to which determine if the linear system has to be solved
-     * @return variation of the flow rate
-     */
-    Real boundaryDeltaFlowRate( const bcFlag_Type& flag, bool& solveLinearSystem );
-
-    //! Get the variation of the integral of the normal stress (on a specific boundary face)
-    /*!
-     * @param flag flag of the boundary face
-     * @param solveLinearSystem a flag to which determine if the linear system has to be solved
-     * @param stressType Type of approximation for the stress
-     * @return variation of the stress
-     */
-    Real boundaryDeltaStress( const bcFlag_Type& flag, bool& solveLinearSystem, const stress_Type& stressType = Pressure );
-
-    //@}
-
-
-    //! @name Get Methods
-    //@{
-
-    //! Get the BC handler container of the boundary conditions of the model
-    /*!
-     * @return BC handler
-     */
-    bc_Type& bc() const { return *( M_bc->handler() ); }
 
     //! Get the data container of the 1D model.
     /*!
@@ -349,11 +339,11 @@ private:
      */
     void setupGlobalData( const std::string& fileName );
 
-    //! Setup the FE space for pressure and velocity
-    void setupFESpace();
-
     //! Initialize the solution.
     void initializeSolution();
+
+    //! Setup the FE space for pressure and velocity
+    void setupFESpace();
 
     //! Copy the solution (solution2 = solution1)
     /*!
@@ -375,16 +365,22 @@ private:
      */
     void solve( bc_Type& bc, solution_Type& solution, const std::string& solverType = " 1D-" );
 
-    bcSide_Type flagConverter( const bcFlag_Type& flag ) const { return (flag == 0) ? OneDimensional::left : OneDimensional::right; }
-
 #ifdef JACOBIAN_WITH_FINITEDIFFERENCE
-
 
     //! Update linear BC
     void createLinearBC();
 
     //! Update linear BC
     void updateLinearBC( const solution_Type& solution );
+
+    //! Setup the linear model
+    void setupLinearModel();
+
+    //! Update the linear system matrix and vectors
+    void updateLinearModel();
+
+    //! Solve the linear problem
+    void solveLinearModel( bool& solveLinearSystem );
 
     //! Impose the coupling perturbation on the correct BC inside the BCHandler
     void imposePerturbation();

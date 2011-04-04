@@ -45,8 +45,9 @@
 
 #include <lifemc/lifesolver/MultiscaleCoupling.hpp>
 #include <lifemc/lifesolver/MultiscaleCouplingBoundaryCondition.hpp>
-#include <lifemc/lifesolver/MultiscaleCouplingStress.hpp>
+//#include <lifemc/lifesolver/MultiscaleCouplingFlowRate.hpp>
 #include <lifemc/lifesolver/MultiscaleCouplingFlowRateStress.hpp>
+#include <lifemc/lifesolver/MultiscaleCouplingStress.hpp>
 
 namespace LifeV
 {
@@ -76,7 +77,7 @@ public:
     //@}
 
 
-    //! @name Multiscale PhysicalModel Virtual Methods
+    //! @name MultiscaleModel Methods
     //@{
 
     //! Setup the data of the model.

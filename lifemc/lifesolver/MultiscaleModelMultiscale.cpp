@@ -73,7 +73,7 @@ MultiscaleModelMultiscale::~MultiscaleModelMultiscale()
 }
 
 // ===================================================
-// Multiscale Physical Model
+// MultiscaleModel Methods
 // ===================================================
 void
 MultiscaleModelMultiscale::setupData( const std::string& fileName )

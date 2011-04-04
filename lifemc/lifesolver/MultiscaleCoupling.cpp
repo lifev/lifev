@@ -79,7 +79,7 @@ MultiscaleCoupling::setupData( const std::string& fileName )
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 8200 ) << "MultiscaleCoupling::SetupData( fileName ) \n";
+    Debug( 8200 ) << "MultiscaleCoupling::setupData( fileName ) \n";
 #endif
 
     GetPot dataFile( fileName );
@@ -122,7 +122,7 @@ MultiscaleCoupling::createCouplingMap( MapEpetra& couplingMap )
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 8200 ) << "MultiscaleCoupling::CreateCouplingMap( couplingMap ) \n";
+    Debug( 8200 ) << "MultiscaleCoupling::createCouplingMap( couplingMap ) \n";
 #endif
 
     M_couplingIndex.second = couplingMap.map( Unique )->NumGlobalElements();
@@ -135,21 +135,15 @@ MultiscaleCoupling::extrapolateCouplingVariables()
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 8200 ) << "MultiscaleCoupling::ExtrapolateCouplingVariables() \n";
+    Debug( 8200 ) << "MultiscaleCoupling::extrapolateCouplingVariables() \n";
 #endif
 
+    // Extrapolate the coupling variables at the next time
     multiscaleVector_Type extrapolatedCouplingVariables( *M_localCouplingVariables[0] );
-    UInt couplingVariablesSize( M_localCouplingVariables.size() );
-
-    // Time container for interpolation
-    timeContainer_Type timeContainer( couplingVariablesSize, 0 );
-    for ( UInt i(0) ; i < couplingVariablesSize ; ++i )
-        timeContainer[i] = M_globalData->dataTime()->time() - i * M_globalData->dataTime()->timeStep();
-
-    // Interpolate the coupling variables at the next time
-    interpolateCouplingVariables( timeContainer, M_globalData->dataTime()->nextTime(), extrapolatedCouplingVariables );
+    interpolateCouplingVariables( M_globalData->dataTime()->nextTime(), extrapolatedCouplingVariables );
 
     // If we have not yet enough samples for interpolation, we add a new one
+    UInt couplingVariablesSize( M_localCouplingVariables.size() );
     if ( couplingVariablesSize <= M_timeInterpolationOrder )
     {
         ++couplingVariablesSize;
@@ -213,7 +207,7 @@ MultiscaleCoupling::saveSolution()
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 8200 ) << "MultiscaleCoupling::SaveSolution() \n";
+    Debug( 8200 ) << "MultiscaleCoupling::saveSolution() \n";
 #endif
 
     std::ofstream output;
@@ -227,7 +221,7 @@ MultiscaleCoupling::saveSolution()
         {
             output.open( filename.c_str(), std::ios::trunc );
             output << "% Coupling Type: " << enum2String( M_type, multiscaleCouplingsMap ) << std::endl << std::endl;
-            output << "% TIME                     ID   FLAG FLUX                     STRESS                    S. PRESSURE              D. PRESSURE" << std::endl;
+            output << "% TIME                     ID   FLAG FLOW RATE                STRESS" << std::endl;
         }
         else
             output.open( filename.c_str(), std::ios::app );
@@ -253,7 +247,7 @@ MultiscaleCoupling::setCommunicator( const multiscaleCommPtr_Type& comm )
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 8200 ) << "MultiscaleCoupling::SetCommunicator( comm ) \n";
+    Debug( 8200 ) << "MultiscaleCoupling::setCommunicator( comm ) \n";
 #endif
 
     M_comm = comm;
@@ -316,9 +310,16 @@ MultiscaleCoupling::exportCouplingVector( const multiscaleVector_Type& localVect
 }
 
 void
-MultiscaleCoupling::interpolateCouplingVariables( const timeContainer_Type& timeContainer, const Real& t,
-                                                   multiscaleVector_Type& interpolatedCouplingVariables )
+MultiscaleCoupling::interpolateCouplingVariables( const Real& t, multiscaleVector_Type& interpolatedCouplingVariables )
 {
+    // Coupling variables size
+    UInt couplingVariablesSize( M_localCouplingVariables.size() );
+
+    // Time container for interpolation
+    timeContainer_Type timeContainer( couplingVariablesSize, 0 );
+    for ( UInt i(0) ; i < couplingVariablesSize ; ++i )
+        timeContainer[i] = M_globalData->dataTime()->time() - i * M_globalData->dataTime()->timeStep();
+
     // Lagrange interpolation
     interpolatedCouplingVariables *= 0;
     Real base(1);

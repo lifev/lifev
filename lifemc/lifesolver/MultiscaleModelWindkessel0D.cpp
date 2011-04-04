@@ -47,6 +47,7 @@ namespace Multiscale
 // ===================================================
 MultiscaleModelWindkessel0D::MultiscaleModelWindkessel0D() :
         multiscaleModel_Type           (),
+        MultiscaleInterfaceFluid       (),
         M_outputFile                   (),
         M_bc                           ( new bcInterface_Type() ),
         M_pressure_tn                  (),
@@ -70,7 +71,7 @@ MultiscaleModelWindkessel0D::MultiscaleModelWindkessel0D() :
 }
 
 // ===================================================
-// Multiscale PhysicalModel Virtual Methods
+// MultiscaleModel Methods
 // ===================================================
 void
 MultiscaleModelWindkessel0D::setupData( const std::string& fileName )
@@ -142,32 +143,32 @@ MultiscaleModelWindkessel0D::solveModel()
 
     displayModelStatus( "Solve" );
 
-    switch ( M_bc->handler()->bcType() )
+    switch ( M_bc->handler()->bc( OneDimensional::left ).bcType() )
     {
     case OneDimensional::Q:
 
-        M_flowRate = M_bc->handler()->evaluate( M_globalData->dataTime()->time() );
+        M_flowRate = M_bc->handler()->bc( OneDimensional::left ).evaluate( M_globalData->dataTime()->time() );
         M_pressure = solveForPressure();
 
         break;
 
     case OneDimensional::P:
 
-        M_pressure = M_bc->handler()->evaluate( M_globalData->dataTime()->time() );
+        M_pressure = M_bc->handler()->bc( OneDimensional::left ).evaluate( M_globalData->dataTime()->time() );
         M_flowRate = solveForFlowRate();
 
         break;
 
     case OneDimensional::S:
 
-        M_pressure = -M_bc->handler()->evaluate( M_globalData->dataTime()->time() );
+        M_pressure = -M_bc->handler()->bc( OneDimensional::left ).evaluate( M_globalData->dataTime()->time() );
         M_flowRate = solveForFlowRate();
 
         break;
 
     default:
 
-        std::cout << "Warning: bcType \"" << M_bc->handler()->bcType() << "\"not available!" << std::endl;
+        std::cout << "Warning: bcType \"" << M_bc->handler()->bc( OneDimensional::left ).bcType() << "\"not available!" << std::endl;
     }
 }
 
@@ -204,25 +205,12 @@ MultiscaleModelWindkessel0D::showMe()
 }
 
 // ===================================================
-// Get Methods (couplings)
+// MultiscaleInterfaceFluid Methods
 // ===================================================
 Real
-MultiscaleModelWindkessel0D::boundaryStress( const bcFlag_Type& flag, const stress_Type& stressType ) const
+MultiscaleModelWindkessel0D::boundaryStress( const bcFlag_Type& flag ) const
 {
-    switch ( stressType )
-    {
-    case Pressure:
-    {
-        return -boundaryPressure( flag );
-    }
-
-    default:
-    {
-        std::cout << "ERROR: Invalid stress type [" << enum2String( stressType, multiscaleStressesMap ) << "]" << std::endl;
-
-        return 0.0;
-    }
-    }
+    return -boundaryPressure( flag );
 }
 
 Real
@@ -234,30 +222,11 @@ MultiscaleModelWindkessel0D::boundaryDeltaFlowRate( const bcFlag_Type& flag, boo
 }
 
 Real
-MultiscaleModelWindkessel0D::boundaryDeltaPressure( const bcFlag_Type& flag, bool& solveLinearSystem )
+MultiscaleModelWindkessel0D::boundaryDeltaStress( const bcFlag_Type& flag, bool& solveLinearSystem )
 {
     solveLinearModel( solveLinearSystem );
 
-    return M_tangentPressure;
-}
-
-Real
-MultiscaleModelWindkessel0D::boundaryDeltaStress( const bcFlag_Type& flag, bool& solveLinearSystem, const stress_Type& stressType )
-{
-    switch ( stressType )
-    {
-    case Pressure:
-    {
-        return -boundaryDeltaPressure( flag, solveLinearSystem );
-    }
-
-    default:
-    {
-        std::cout << "ERROR: Invalid stress type [" << enum2String( stressType, multiscaleStressesMap ) << "]" << std::endl;
-
-        return 0.0;
-    }
-    }
+    return -M_tangentPressure;
 }
 
 // ===================================================
@@ -291,32 +260,33 @@ MultiscaleModelWindkessel0D::initializeSolution()
     }
     else
     {
+        //TODO Reference pressure
         M_pressure = 0;
         M_flowRate = 0;
 
-        switch ( M_bc->handler()->bcType() )
+        switch ( M_bc->handler()->bc( OneDimensional::left ).bcType() )
         {
         case OneDimensional::Q:
 
-            M_flowRate = M_bc->handler()->evaluate( M_globalData->dataTime()->time() );
+            M_flowRate = M_bc->handler()->bc( OneDimensional::left ).evaluate( M_globalData->dataTime()->time() );
 
             break;
 
         case OneDimensional::P:
 
-            M_pressure = M_bc->handler()->evaluate( M_globalData->dataTime()->time() );
+            M_pressure = M_bc->handler()->bc( OneDimensional::left ).evaluate( M_globalData->dataTime()->time() );
 
             break;
 
         case OneDimensional::S:
 
-            M_pressure = -M_bc->handler()->evaluate( M_globalData->dataTime()->time() );
+            M_pressure = -M_bc->handler()->bc( OneDimensional::left ).evaluate( M_globalData->dataTime()->time() );
 
             break;
 
         default:
 
-            std::cout << "Warning: bcType \"" << M_bc->handler()->bcType() << "\"not available!" << std::endl;
+            std::cout << "Warning: bcType \"" << M_bc->handler()->bc( OneDimensional::left ).bcType() << "\"not available!" << std::endl;
         }
     }
 }
@@ -414,7 +384,7 @@ MultiscaleModelWindkessel0D::solveLinearModel( bool& solveLinearSystem )
 
     //Solve the linear problem
     displayModelStatus( "Solve linear" );
-    switch ( M_bc->handler()->bcType() )
+    switch ( M_bc->handler()->bc( OneDimensional::left ).bcType() )
     {
     case OneDimensional::Q:
 
@@ -433,7 +403,7 @@ MultiscaleModelWindkessel0D::solveLinearModel( bool& solveLinearSystem )
 
     default:
 
-        std::cout << "Warning: bcType \"" << M_bc->handler()->bcType() << "\"not available!" << std::endl;
+        std::cout << "Warning: bcType \"" << M_bc->handler()->bc( OneDimensional::left ).bcType() << "\"not available!" << std::endl;
     }
 
     //This flag avoid recomputation of the same system

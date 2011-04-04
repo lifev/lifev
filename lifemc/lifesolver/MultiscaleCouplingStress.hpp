@@ -83,12 +83,6 @@ public:
     //! @name Multiscale PhysicalCoupling Implementation
     //@{
 
-    //! Setup the data of the coupling
-    /*!
-     *  @param FileName Name of data file
-     */
-    void setupData( const std::string& fileName );
-
     //! Setup the coupling
     void setupCoupling();
 
@@ -96,6 +90,9 @@ public:
     void initializeCouplingVariables();
 
     //! Update the values of the coupling residuals
+    /*!
+     * @param couplingResiduals Global vector of variables
+     */
     void exportCouplingResiduals( multiscaleVector_Type& couplingResiduals );
 
     //! Display some information about the coupling
@@ -120,7 +117,7 @@ private:
 
     //! Build the list of models affected by the perturbation of a local coupling variable
     /*!
-     * @param LocalCouplingVariableID local coupling variable (perturbed)
+     * @param localCouplingVariableID local coupling variable (perturbed)
      * @return list of models affected by the perturbation
      */
     multiscaleModelsVector_Type listOfPerturbedModels( const UInt& localCouplingVariableID );
@@ -161,11 +158,9 @@ private:
     template< class ModelType >
     void imposeStress3D( const UInt& i );
 
-    Real functionStress( const Real& /*t*/, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const UInt& /*id*/);
+    Real functionStress( const Real& /*t*/, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const UInt& /*id*/ );
 
     //@}
-
-    stress_Type       M_stressType;
 };
 
 //! Factory create function
@@ -183,7 +178,7 @@ MultiscaleCouplingStress::imposeStress0D( const UInt& i )
 {
     boost::shared_ptr< ModelType > model = multiscaleDynamicCast< ModelType >( M_models[i] );
 
-    model->bcInterface().handler()->setBC( OneDimensional::S, boost::bind( &MultiscaleCouplingStress::functionStress, this, _1, _1, _1, _1, _1 ) );
+    model->bcInterface().handler()->setBC( model->flagConverter( M_flags[i] ), OneDimensional::S, boost::bind( &MultiscaleCouplingStress::functionStress, this, _1, _1, _1, _1, _1 ) );
 }
 
 template< class ModelType >
@@ -195,7 +190,7 @@ MultiscaleCouplingStress::imposeStress1D( const UInt& i )
     bcFunction1D_Type base;
     base.setFunction( boost::bind( &MultiscaleCouplingStress::functionStress, this, _1, _1, _1, _1, _1 ) );
 
-    model->bcInterface().handler()->setBC( (M_flags[i] == 0) ? OneDimensional::left : OneDimensional::right, OneDimensional::first, OneDimensional::S, base );
+    model->bcInterface().handler()->setBC( model->flagConverter( M_flags[i] ), OneDimensional::first, OneDimensional::S, base );
 }
 
 template< class ModelType >

@@ -338,12 +338,10 @@ protected:
 
     //! Lagrange interpolation/extrapolation of the coupling variables at selected time.
     /*!
-     * @param timeContainer vector of times
      * @param t interpolation time
      * @param interpolatedCouplingVariables variables interpolated/extrapolated at time t
      */
-    void interpolateCouplingVariables( const timeContainer_Type& timeContainer, const Real& t,
-                                       multiscaleVector_Type& interpolatedCouplingVariables );
+    void interpolateCouplingVariables( const Real& t, multiscaleVector_Type& interpolatedCouplingVariables );
 
     //! Display and error message for the specific model
     /*!

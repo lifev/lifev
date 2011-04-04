@@ -99,16 +99,9 @@ enum models_Type
 enum couplings_Type
 {
     BoundaryCondition,      /*!< Boundary condition */
-    FlowRateStress,         /*!< Flow Rate/stress coupling condition */
+//    FlowRate,               /*!< All flow rate coupling condition */
+    FlowRateStress,         /*!< Flow rate/stress coupling condition */
     Stress                  /*!< All stress coupling condition */
-};
-
-/*! @enum stressTypes
- */
-enum stress_Type
-{
-    Pressure,                /*!< Use static pressure */
-    LagrangeMultiplier       /*!< Use the Lagrange multiplier */
 };
 
 enum errors_Type
@@ -134,7 +127,6 @@ extern bool multiscaleExitFlag;
 extern std::map< std::string, algorithms_Type > multiscaleAlgorithmsMap;
 extern std::map< std::string, models_Type >     multiscaleModelsMap;
 extern std::map< std::string, couplings_Type >  multiscaleCouplingsMap;
-extern std::map< std::string, stress_Type >     multiscaleStressesMap;
 
 // Forward class declarations
 class MultiscaleAlgorithm;
@@ -191,6 +183,7 @@ multiscaleMapsDefinition()
     multiscaleModelsMap["Windkessel0D"]         = Windkessel0D;
 
     multiscaleCouplingsMap["BoundaryCondition"] = BoundaryCondition;
+//    multiscaleCouplingsMap["FlowRate"]          = FlowRate;
     multiscaleCouplingsMap["FlowRateStress"]    = FlowRateStress;
     multiscaleCouplingsMap["Stress"]            = Stress;
 
@@ -198,9 +191,6 @@ multiscaleMapsDefinition()
     multiscaleAlgorithmsMap["Broyden"]          = Broyden;
     multiscaleAlgorithmsMap["Explicit"]         = Explicit;
     multiscaleAlgorithmsMap["Newton"]           = Newton;
-
-    multiscaleStressesMap["LagrangeMultiplier"] = LagrangeMultiplier;
-    multiscaleStressesMap["Pressure"]           = Pressure;
 }
 
 //! Perform a dynamic cast from a base class to a derived class

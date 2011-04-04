@@ -88,12 +88,6 @@ public:
     //! @name Multiscale PhysicalCoupling Implementation
     //@{
 
-    //! Setup the data of the coupling
-    /*!
-     *  @param fileName Name of data file
-     */
-    void setupData( const std::string& fileName );
-
     //! Setup the coupling
     void setupCoupling();
 
@@ -178,12 +172,10 @@ private:
     template< class ModelType >
     void imposeStress3D( const UInt& i );
 
-    Real functionFlowRate  ( const Real& t, const Real&, const Real&, const Real&, const UInt& );
-    Real functionStress( const Real& t, const Real&, const Real&, const Real&, const UInt& );
+    Real functionFlowRate  ( const Real& /*t*/, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const UInt& /*id*/ );
+    Real functionStress( const Real& /*t*/, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const UInt& /*id*/ );
 
     //@}
-
-    stress_Type       M_stressType;
 };
 
 //! Factory create function
@@ -201,7 +193,7 @@ MultiscaleCouplingFlowRateStress::imposeFlowRate0D( const UInt& i )
 {
     boost::shared_ptr< ModelType > model = multiscaleDynamicCast< ModelType >( M_models[i] );
 
-    model->bcInterface().handler()->setBC( OneDimensional::Q, boost::bind( &MultiscaleCouplingFlowRateStress::functionFlowRate, this, _1, _1, _1, _1, _1 ) );
+    model->bcInterface().handler()->setBC( model->flagConverter( M_flags[i] ), OneDimensional::Q, boost::bind( &MultiscaleCouplingFlowRateStress::functionFlowRate, this, _1, _1, _1, _1, _1 ) );
 }
 
 template< class ModelType >
@@ -210,7 +202,7 @@ MultiscaleCouplingFlowRateStress::imposeStress0D( const UInt& i )
 {
     boost::shared_ptr< ModelType > model = multiscaleDynamicCast< ModelType >( M_models[i] );
 
-    model->bcInterface().handler()->setBC( OneDimensional::S, boost::bind( &MultiscaleCouplingFlowRateStress::functionStress, this, _1, _1, _1, _1, _1 ) );
+    model->bcInterface().handler()->setBC( model->flagConverter( M_flags[i] ), OneDimensional::S, boost::bind( &MultiscaleCouplingFlowRateStress::functionStress, this, _1, _1, _1, _1, _1 ) );
 }
 
 template< class ModelType >
@@ -222,7 +214,7 @@ MultiscaleCouplingFlowRateStress::imposeFlowRate1D( const UInt& i )
     bcFunction1D_Type base;
     base.setFunction  ( boost::bind( &MultiscaleCouplingFlowRateStress::functionFlowRate, this, _1, _1, _1, _1, _1 ) );
 
-    model->bcInterface().handler()->setBC( (M_flags[i] == 0) ? OneDimensional::left : OneDimensional::right, OneDimensional::first, OneDimensional::Q, base );
+    model->bcInterface().handler()->setBC( model->flagConverter( M_flags[i] ), OneDimensional::first, OneDimensional::Q, base );
 }
 
 template< class ModelType >
@@ -234,7 +226,7 @@ MultiscaleCouplingFlowRateStress::imposeStress1D( const UInt& i )
     bcFunction1D_Type base;
     base.setFunction( boost::bind( &MultiscaleCouplingFlowRateStress::functionStress, this, _1, _1, _1, _1, _1 ) );
 
-    model->bcInterface().handler()->setBC( (M_flags[i] == 0) ? OneDimensional::left : OneDimensional::right, OneDimensional::first, OneDimensional::S, base );
+    model->bcInterface().handler()->setBC( model->flagConverter( M_flags[i] ), OneDimensional::first, OneDimensional::S, base );
 }
 
 template< class ModelType >

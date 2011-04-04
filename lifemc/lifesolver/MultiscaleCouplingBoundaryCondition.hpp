@@ -163,10 +163,10 @@ private:
 
     //@}
 
-    std::string           M_fileName;
+    std::string                M_fileName;
 
     std::vector< bcName_Type > M_list;
-    UInt                  M_listSize;
+    UInt                       M_listSize;
 };
 
 //! Factory create function

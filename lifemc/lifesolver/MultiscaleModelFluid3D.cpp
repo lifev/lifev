@@ -46,6 +46,7 @@ namespace Multiscale
 // ===================================================
 MultiscaleModelFluid3D::MultiscaleModelFluid3D() :
         multiscaleModel_Type           (),
+        MultiscaleInterfaceFluid       (),
         M_exporter                     (),
         M_importer                     (),
         M_fileName                     (),
@@ -78,7 +79,7 @@ MultiscaleModelFluid3D::MultiscaleModelFluid3D() :
 }
 
 // ===================================================
-// Multiscale PhysicalModel Virtual Methods
+// MultiscaleModel Methods
 // ===================================================
 void
 MultiscaleModelFluid3D::setupData( const std::string& fileName )
@@ -334,75 +335,26 @@ MultiscaleModelFluid3D::showMe()
     }
 }
 
-
 // ===================================================
-// Methods
+// MultiscaleInterfaceFluid Methods
 // ===================================================
-void
-MultiscaleModelFluid3D::setupLinearModel()
+Real
+MultiscaleModelFluid3D::boundaryDeltaFlowRate( const bcFlag_Type& flag, bool& solveLinearSystem )
 {
+    solveLinearModel( solveLinearSystem );
 
-#ifdef HAVE_LIFEV_DEBUG
-    Debug( 8120 ) << "MultiscaleModelFluid3D::setupLinearModel( ) \n";
-#endif
-
-    // Define BCFunctions for tangent problem
-    M_bcBaseDeltaZero.setFunction( boost::bind( &MultiscaleModelFluid3D::bcFunctionDeltaZero, this, _1, _2, _3, _4, _5 ) );
-    M_bcBaseDeltaOne.setFunction(  boost::bind( &MultiscaleModelFluid3D::bcFunctionDeltaOne,  this, _1, _2, _3, _4, _5 ) );
-
-    // The linear BCHandler is a copy of the original BCHandler with all BCFunctions giving zero
-    bcPtr_Type linearBCHandler( new bc_Type( *M_bc->handler() ) );
-    M_linearBC = linearBCHandler;
-
-    // Set all the BCFunctions to zero
-    for ( bc_Type::bcBaseIterator_Type i = M_linearBC->begin() ; i != M_linearBC->end() ; ++i )
-        i->setBCFunction( M_bcBaseDeltaZero );
+    return M_fluid->getLinearFlux( flag );
 }
 
-void
-MultiscaleModelFluid3D::updateLinearModel()
+Real
+MultiscaleModelFluid3D::boundaryDeltaStress( const bcFlag_Type& flag, bool& solveLinearSystem )
 {
+    solveLinearModel( solveLinearSystem );
 
-#ifdef HAVE_LIFEV_DEBUG
-    Debug( 8120 ) << "MultiscaleModelFluid3D::updateLinearModel() \n";
-#endif
-
-    //Create an empty vector
-    fluidVector_Type vectorZero( *M_solution );
-    vectorZero = 0.0;
-
-    //updateLinearModel TODO REMOVE ?
-    M_fluid->updateLinearSystem( M_fluid->matrixNoBC(), M_alpha, *M_beta, *M_fluid->solution(),
-                                 vectorZero, vectorZero, vectorZero, vectorZero );
-
-    //Linear System Updated
-    M_updateLinearModel = false;
-}
-
-void
-MultiscaleModelFluid3D::solveLinearModel( bool& solveLinearSystem )
-{
-
-#ifdef HAVE_LIFEV_DEBUG
-    Debug( 8120 ) << "MultiscaleModelFluid3D::solveLinearModel() \n";
-#endif
-
-    if ( !solveLinearSystem )
-        return;
-
-    imposePerturbation();
-
-    if ( M_updateLinearModel )
-        updateLinearModel();
-
-    //Solve the linear problem
-    displayModelStatus( "Solve linear" );
-    M_fluid->solveLinearSystem( *M_linearBC );
-
-    resetPerturbation();
-
-    //This flag avoid recomputation of the same system
-    solveLinearSystem = false;
+    if ( M_linearBC->findBCWithFlag( flag ).type() == Flux )
+        return -M_fluid->getLinearLagrangeMultiplier( flag, *M_linearBC );
+    else
+        return -M_fluid->getLinearPressure( flag );
 }
 
 // ===================================================
@@ -417,76 +369,15 @@ MultiscaleModelFluid3D::setSolution( const fluidVectorPtr_Type& solution )
 }
 
 // ===================================================
-// Get Methods (couplings)
+// Get Methods
 // ===================================================
 Real
-MultiscaleModelFluid3D::boundaryStress( const bcFlag_Type& flag, const stress_Type& stressType ) const
+MultiscaleModelFluid3D::boundaryPressure( const bcFlag_Type& flag ) const
 {
-    switch ( stressType )
-    {
-    case Pressure:
-    {
-        return -boundaryPressure( flag );
-    }
-
-    case LagrangeMultiplier:
-    {
-        return -boundaryLagrangeMultiplier( flag );
-    }
-
-    default:
-
-        std::cout << "ERROR: Invalid stress type [" << enum2String( stressType, multiscaleStressesMap ) << "]" << std::endl;
-
-        return 0.0;
-    }
-}
-
-Real
-MultiscaleModelFluid3D::boundaryDeltaFlowRate( const bcFlag_Type& flag, bool& solveLinearSystem )
-{
-    solveLinearModel( solveLinearSystem );
-
-    return M_fluid->getLinearFlux( flag );
-}
-
-Real
-MultiscaleModelFluid3D::boundaryDeltaPressure( const bcFlag_Type& flag, bool& solveLinearSystem )
-{
-    solveLinearModel( solveLinearSystem );
-
-    return M_fluid->getLinearPressure( flag );
-}
-
-Real
-MultiscaleModelFluid3D::boundaryDeltaLagrangeMultiplier( const bcFlag_Type& flag, bool& solveLinearSystem )
-{
-    solveLinearModel( solveLinearSystem );
-
-    return M_fluid->getLinearLagrangeMultiplier( flag, *M_linearBC );
-}
-
-Real
-MultiscaleModelFluid3D::boundaryDeltaStress( const bcFlag_Type& flag, bool& solveLinearSystem, const stress_Type& stressType )
-{
-    switch ( stressType )
-    {
-    case Pressure:
-    {
-        return -boundaryDeltaPressure( flag, solveLinearSystem );
-    }
-
-    case LagrangeMultiplier:
-    {
-        return -boundaryDeltaLagrangeMultiplier( flag, solveLinearSystem );
-    }
-
-    default:
-
-        std::cout << "ERROR: Invalid stress type [" << enum2String( stressType, multiscaleStressesMap ) << "]" << std::endl;
-
-        return 0.0;
-    }
+    if ( M_bc->handler()->findBCWithFlag( flag ).type() == Flux )
+        return M_fluid->lagrangeMultiplier( flag, *M_bc->handler() );
+    else
+        return M_fluid->pressure( flag );
 }
 
 // ===================================================
@@ -510,6 +401,30 @@ MultiscaleModelFluid3D::setupGlobalData( const std::string& fileName )
         M_data->setDensity( M_globalData->fluidDensity() );
     if ( !dataFile.checkVariable( "fluid/physics/viscosity" ) )
         M_data->setViscosity( M_globalData->fluidViscosity() );
+}
+
+void
+MultiscaleModelFluid3D::initializeSolution()
+{
+
+#ifdef HAVE_LIFEV_DEBUG
+    Debug( 8120 ) << "MultiscaleModelFluid3D::initializeSolution() \n";
+#endif
+
+    if ( multiscaleProblemStep > 0 )
+    {
+        M_importer->setMeshProcId( M_mesh->meshPartition(), M_comm->MyPID() );
+
+        M_importer->addVariable( ExporterData::Vector, "Velocity (fluid)", M_solution, static_cast <UInt> ( 0 ),            M_uFESpace->dof().numTotalDof() );
+        M_importer->addVariable( ExporterData::Scalar, "Pressure (fluid)", M_solution, 3 * M_uFESpace->dof().numTotalDof(), M_pFESpace->dof().numTotalDof());
+
+        // Import
+        M_exporter->setStartIndex( M_importer->importFromTime( M_data->dataTime()->initialTime() ) + 1 );
+    }
+    else
+        *M_solution = 0.0;
+
+    M_fluid->initialize( *M_solution );
 }
 
 void
@@ -653,27 +568,70 @@ MultiscaleModelFluid3D::setupBCOffset( const bcPtr_Type& BC )
 }
 
 void
-MultiscaleModelFluid3D::initializeSolution()
+MultiscaleModelFluid3D::setupLinearModel()
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 8120 ) << "MultiscaleModelFluid3D::initializeSolution() \n";
+    Debug( 8120 ) << "MultiscaleModelFluid3D::setupLinearModel( ) \n";
 #endif
 
-    if ( multiscaleProblemStep > 0 )
-    {
-        M_importer->setMeshProcId( M_mesh->meshPartition(), M_comm->MyPID() );
+    // Define BCFunctions for tangent problem
+    M_bcBaseDeltaZero.setFunction( boost::bind( &MultiscaleModelFluid3D::bcFunctionDeltaZero, this, _1, _2, _3, _4, _5 ) );
+    M_bcBaseDeltaOne.setFunction(  boost::bind( &MultiscaleModelFluid3D::bcFunctionDeltaOne,  this, _1, _2, _3, _4, _5 ) );
 
-        M_importer->addVariable( ExporterData::Vector, "Velocity (fluid)", M_solution, static_cast <UInt> ( 0 ),            M_uFESpace->dof().numTotalDof() );
-        M_importer->addVariable( ExporterData::Scalar, "Pressure (fluid)", M_solution, 3 * M_uFESpace->dof().numTotalDof(), M_pFESpace->dof().numTotalDof());
+    // The linear BCHandler is a copy of the original BCHandler with all BCFunctions giving zero
+    bcPtr_Type linearBCHandler( new bc_Type( *M_bc->handler() ) );
+    M_linearBC = linearBCHandler;
 
-        // Import
-        M_exporter->setStartIndex( M_importer->importFromTime( M_data->dataTime()->initialTime() ) + 1 );
-    }
-    else
-        *M_solution = 0.0;
+    // Set all the BCFunctions to zero
+    for ( bc_Type::bcBaseIterator_Type i = M_linearBC->begin() ; i != M_linearBC->end() ; ++i )
+        i->setBCFunction( M_bcBaseDeltaZero );
+}
 
-    M_fluid->initialize( *M_solution );
+void
+MultiscaleModelFluid3D::updateLinearModel()
+{
+
+#ifdef HAVE_LIFEV_DEBUG
+    Debug( 8120 ) << "MultiscaleModelFluid3D::updateLinearModel() \n";
+#endif
+
+    //Create an empty vector
+    fluidVector_Type vectorZero( *M_solution );
+    vectorZero = 0.0;
+
+    //updateLinearModel TODO REMOVE ?
+    M_fluid->updateLinearSystem( M_fluid->matrixNoBC(), M_alpha, *M_beta, *M_fluid->solution(),
+                                 vectorZero, vectorZero, vectorZero, vectorZero );
+
+    //Linear System Updated
+    M_updateLinearModel = false;
+}
+
+void
+MultiscaleModelFluid3D::solveLinearModel( bool& solveLinearSystem )
+{
+
+#ifdef HAVE_LIFEV_DEBUG
+    Debug( 8120 ) << "MultiscaleModelFluid3D::solveLinearModel() \n";
+#endif
+
+    if ( !solveLinearSystem )
+        return;
+
+    imposePerturbation();
+
+    if ( M_updateLinearModel )
+        updateLinearModel();
+
+    //Solve the linear problem
+    displayModelStatus( "Solve linear" );
+    M_fluid->solveLinearSystem( *M_linearBC );
+
+    resetPerturbation();
+
+    //This flag avoid recomputation of the same system
+    solveLinearSystem = false;
 }
 
 void
