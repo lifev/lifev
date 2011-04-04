@@ -12,7 +12,7 @@
 
 SUFFIXES	= .cpp .hpp .idl .c .h .f .F .o .moc
 
-dist_pkgdata_DATA = WindkessedTest.dat \
+dist_pkgdata_DATA = Test.dat \
                     Template.dat
 
 check-local:
