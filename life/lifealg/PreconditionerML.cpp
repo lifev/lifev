@@ -49,7 +49,8 @@ PreconditionerML::PreconditionerML():
         super(),
         M_operator(),
         M_preconditioner(),
-        M_analyze(false)
+        M_analyze(false),
+        M_visualizationDataAvailable(false)
 {
 
 }
@@ -294,7 +295,6 @@ PreconditionerML::createMLList( list_Type& list,
     Int RepartitionZoltanDimensions    = dataFile( (section + "/" + subSection + "/repartition/Zoltan_dimensions").data(), 2, found );
     if ( found ) list.set( "repartition: Zoltan dimensions", RepartitionZoltanDimensions );
 
-
     if ( MLPrintParameterList )
     {
         std::cout << "  Parameters List: " << std::endl;
@@ -320,9 +320,39 @@ PreconditionerML::setDataFromGetPot( const GetPot&      dataFile,
     // ML List
     createMLList( M_list, dataFile, section, "ML" );
 
+    // visualization
+    bool found(false);
+    bool enableViz    = dataFile( (section + "/" + "ML" + "/visualization/enable").data(), false, found );
+    if ( found )
+    {
+        if(M_visualizationDataAvailable)
+        {
+            M_list.set( "viz: enable", enableViz);
+            M_list.set( "viz: output format", "vtk");
+            M_list.set("x-coordinates", &((*M_xCoord)[0]) );
+            M_list.set("y-coordinates", &((*M_yCoord)[0]));
+            M_list.set("z-coordinates", &((*M_zCoord)[0]));
+        }
+        else
+        {
+            std::cout << "Warning: Visualization options are not available if you have not use setVerticesCoordinates firt!" << std::endl;
+        }
+    }
+
     // IfPack list
     list_Type& SmootherIFSubList = M_list.sublist( "smoother: ifpack list" );
     PreconditionerIfpack::createIfpackList( SmootherIFSubList, dataFile, section, "ML" );
+}
+
+void
+PreconditionerML::setVerticesCoordinates(boost::shared_ptr<vector<Real> > xCoord,
+                                         boost::shared_ptr<vector<Real> > yCoord,
+                                         boost::shared_ptr<vector<Real> > zCoord)
+{
+    M_xCoord = xCoord;
+    M_yCoord = yCoord;
+    M_zCoord = zCoord;
+    M_visualizationDataAvailable = true;
 }
 
 

@@ -184,6 +184,10 @@ public:
      */
     Int SetUseTranspose( bool useTranspose=false ) { return M_preconditioner->SetUseTranspose(useTranspose); }
 
+    void setVerticesCoordinates(boost::shared_ptr<vector<Real> > xCoord,
+                                boost::shared_ptr<vector<Real> > yCoord,
+                                boost::shared_ptr<vector<Real> > zCoord);
+
     //@}
 
 
@@ -226,6 +230,11 @@ private:
     prec_type               M_preconditioner;
 
     bool                    M_analyze;
+
+    bool                    M_visualizationDataAvailable;
+    boost::shared_ptr<vector<Real> > M_xCoord;
+    boost::shared_ptr<vector<Real> > M_yCoord;
+    boost::shared_ptr<vector<Real> > M_zCoord;
 
 };
 
