@@ -47,6 +47,7 @@ dist_pkgdata_DATA = 1D_1Cylinder.dat \
                     Fluid3D_CarotidBifurcationAnd3Cylinders_S.dat \
                     Fluid3D_CarotidBifurcationSynthetic_FS.dat \
                     Fluid3D_CarotidBifurcationSynthetic_S.dat \
+                    Fluid3D_Rhombus-tube20_F-FS-S.dat \
                     Fluid3D_Rhombus-tube20_FS.dat \
                     Fluid3D_Rhombus-tube20_FS-S.dat \
                     Fluid3D_Rhombus-tube20_S.dat \

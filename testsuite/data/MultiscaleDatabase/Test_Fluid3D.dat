@@ -14,7 +14,7 @@
 
 [Problem] #########################################################################################
 ProblemType = Multiscale
-ProblemFile = ./MultiscaleDatabase/Models/Multiscale/Fluid3D_Rhombus-tube20_FS-S
+ProblemFile = ./MultiscaleDatabase/Models/Multiscale/Fluid3D_Rhombus-tube20_F-FS-S
 
 [Solver] ##########################################################################################
 ###################################################################################################
