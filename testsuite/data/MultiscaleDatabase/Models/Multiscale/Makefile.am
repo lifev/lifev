@@ -53,6 +53,7 @@ dist_pkgdata_DATA = 1D_1Cylinder.dat \
                     Fluid3D_Rhombus-tube20_S.dat \
                     Fluid3D-1D_2Cylinders_FS.dat \
                     Fluid3D-1D_2Cylinders_S.dat \
+                    Fluid3D-1D_3Cylinders_FV.dat \
                     Fluid3D-1D_CarotidBifurcation_FS.dat \
                     FSI3D_1Cylinder-tube20.dat \
                     FSI3D_2Cylinders-tube20_FS.dat \
