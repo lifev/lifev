@@ -155,6 +155,20 @@ public:
     //! @name MultiscaleInterfaceFluid Methods
     //@{
 
+    //! Impose the flow rate on a specific boundary face of the model
+    /*!
+     * @param flag flag of the boundary face
+     * @param function boundary condition function
+     */
+    void imposeBoundaryFlowRate( const bcFlag_Type& flag, const function_Type& function ) const;
+
+    //! Impose the integral of the normal stress on a specific boundary face of the model
+    /*!
+     * @param flag flag of the boundary face
+     * @param function boundary condition function
+     */
+    void imposeBoundaryStress( const bcFlag_Type& flag, const function_Type& function ) const;
+
     //! Get the flow rate on a specific boundary face of the model
     /*!
      * @param flag flag of the boundary face

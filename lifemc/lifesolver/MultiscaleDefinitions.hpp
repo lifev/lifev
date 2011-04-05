@@ -99,7 +99,7 @@ enum models_Type
 enum couplings_Type
 {
     BoundaryCondition,      /*!< Boundary condition */
-//    FlowRate,               /*!< All flow rate coupling condition */
+    FlowRate,               /*!< All flow rate coupling condition */
     FlowRateStress,         /*!< Flow rate/stress coupling condition */
     Stress                  /*!< All stress coupling condition */
 };
@@ -183,7 +183,7 @@ multiscaleMapsDefinition()
     multiscaleModelsMap["Windkessel0D"]         = Windkessel0D;
 
     multiscaleCouplingsMap["BoundaryCondition"] = BoundaryCondition;
-//    multiscaleCouplingsMap["FlowRate"]          = FlowRate;
+    multiscaleCouplingsMap["FlowRate"]          = FlowRate;
     multiscaleCouplingsMap["FlowRateStress"]    = FlowRateStress;
     multiscaleCouplingsMap["Stress"]            = Stress;
 

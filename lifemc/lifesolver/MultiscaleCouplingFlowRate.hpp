@@ -26,16 +26,16 @@
 
 /*!
  *  @file
- *  @brief File containing the Multiscale Coupling FlowRateStress
+ *  @brief File containing the Multiscale Coupling FlowRate
  *
- *  @date 24-08-2009
+ *  @date 04-04-2011
  *  @author Cristiano Malossi <cristiano.malossi@epfl.ch>
  *
  *  @maintainer Cristiano Malossi <cristiano.malossi@epfl.ch>
  */
 
-#ifndef MultiscaleCouplingFlowRateStress_H
-#define MultiscaleCouplingFlowRateStress_H 1
+#ifndef MultiscaleCouplingFlowRate_H
+#define MultiscaleCouplingFlowRate_H 1
 
 #include <lifemc/lifesolver/MultiscaleCoupling.hpp>
 #include <lifemc/lifesolver/MultiscaleModelFluid3D.hpp>
@@ -48,19 +48,14 @@ namespace LifeV
 namespace Multiscale
 {
 
-//! MultiscaleCouplingFlowRateStress - FlowRate-Stress coupling condition
+//! MultiscaleCouplingFlowRate - FlowRate coupling condition
 /*!
  *  @author Cristiano Malossi
  *
- *  The MultiscaleCouplingFlowRateStress class is an implementation of the multiscaleCoupling_Type
- *  for applying FlowRate-Stress coupling conditions on the models.
- *
- *  The coupling equations are:
- *  Q_j = - \sum Q_i
- *  \sigma_i = -P_j
- *  where Q is the flux and P is the pressure (or the total pressure).
+ *  The MultiscaleCouplingFlowRate class is an implementation of the multiscaleCoupling_Type
+ *  for applying FlowRate coupling conditions on the models.
  */
-class MultiscaleCouplingFlowRateStress: public virtual multiscaleCoupling_Type
+class MultiscaleCouplingFlowRate: public virtual multiscaleCoupling_Type
 {
 public:
 
@@ -68,10 +63,10 @@ public:
     //@{
 
     //! Constructor
-    explicit MultiscaleCouplingFlowRateStress();
+    explicit MultiscaleCouplingFlowRate();
 
     //! Destructor
-    virtual ~MultiscaleCouplingFlowRateStress() {}
+    virtual ~MultiscaleCouplingFlowRate() {}
 
     //@}
 
@@ -101,9 +96,9 @@ private:
     //! @name Unimplemented Methods
     //@{
 
-    MultiscaleCouplingFlowRateStress( const MultiscaleCouplingFlowRateStress& coupling );
+    MultiscaleCouplingFlowRate( const MultiscaleCouplingFlowRate& coupling );
 
-    MultiscaleCouplingFlowRateStress& operator=( const MultiscaleCouplingFlowRateStress& coupling );
+    MultiscaleCouplingFlowRate& operator=( const MultiscaleCouplingFlowRate& coupling );
 
     //@}
 
@@ -143,12 +138,12 @@ private:
 };
 
 //! Factory create function
-inline multiscaleCoupling_Type* createMultiscaleCouplingFlowRateStress()
+inline multiscaleCoupling_Type* createMultiscaleCouplingFlowRate()
 {
-    return new MultiscaleCouplingFlowRateStress();
+    return new MultiscaleCouplingFlowRate();
 }
 
 } // Namespace Multiscale
 } // Namespace LifeV
 
-#endif /* MultiscaleCouplingFlowRateStress_H */
+#endif /* MultiscaleCouplingFlowRate_H */

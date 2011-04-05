@@ -55,6 +55,14 @@ class MultiscaleInterfaceFluid
 {
 public:
 
+    //! @name Type definitions
+    //@{
+
+    typedef boost::function< Real ( const Real&, const Real&, const Real&, const Real&, const ID& ) > function_Type;
+
+    //@}
+
+
     //! @name Constructors & Destructor
     //@{
 
@@ -62,13 +70,27 @@ public:
     explicit MultiscaleInterfaceFluid() {}
 
     //! Destructor
-    virtual ~MultiscaleInterfaceFluid() {};
+    virtual ~MultiscaleInterfaceFluid() {}
 
     //@}
 
 
     //! @name Multiscale Interface Virtual Methods
     //@{
+
+    //! Impose the flow rate on a specific boundary face of the model
+    /*!
+     * @param flag flag of the boundary face
+     * @param function boundary condition function
+     */
+    virtual void imposeBoundaryFlowRate( const bcFlag_Type& flag, const function_Type& function ) const = 0;
+
+    //! Impose the integral of the normal stress on a specific boundary face of the model
+    /*!
+     * @param flag flag of the boundary face
+     * @param function boundary condition function
+     */
+    virtual void imposeBoundaryStress( const bcFlag_Type& flag, const function_Type& function ) const = 0;
 
     //! Get the flow rate on a specific boundary face of the model
     /*!
@@ -80,7 +102,6 @@ public:
     //! Get the integral of the normal stress (on a specific boundary face)
     /*!
      * @param flag flag of the boundary face
-     * @param stressType Type of approximation for the stress
      * @return stress value
      */
     virtual Real boundaryStress( const bcFlag_Type& flag ) const = 0;
@@ -97,7 +118,6 @@ public:
     /*!
      * @param flag flag of the boundary face
      * @param solveLinearSystem a flag to which determine if the linear system has to be solved
-     * @param stressType Type of approximation for the stress
      * @return variation of the stress
      */
     virtual Real boundaryDeltaStress( const bcFlag_Type& flag, bool& solveLinearSystem ) = 0;

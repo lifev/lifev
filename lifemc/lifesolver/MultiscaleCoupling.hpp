@@ -46,6 +46,9 @@ namespace LifeV
 namespace Multiscale
 {
 
+// Forward declaration
+class MultiscaleCouplingFunction;
+
 //! MultiscaleCoupling - The Multiscale Physical Coupling
 /*!
  *  @author Cristiano Malossi
@@ -60,7 +63,12 @@ public:
     //! @name Type definitions
     //@{
 
+    typedef MultiscaleCouplingFunction                           couplingFunction_Type;
+    typedef boost::shared_ptr < couplingFunction_Type >          couplingFunctionPtr_Type;
+    typedef std::vector< couplingFunction_Type >              couplingFunctionsContainer_Type;
+
     typedef std::vector< multiscaleVectorPtr_Type >              couplingVariablesContainer_Type;
+
     typedef std::vector< Real >                                  timeContainer_Type;
 
     //@}
@@ -118,16 +126,23 @@ public:
     /*!
      * @param couplingVariables Global vector of coupling variables
      */
-    void importCouplingVariables( const multiscaleVector_Type& couplingVariables ) { importCouplingVector( couplingVariables, *M_localCouplingVariables[0] ); }
+    void importCouplingVariables( const multiscaleVector_Type& couplingVariables ) { importCouplingVector( couplingVariables, localCouplingVariables( 0 ) ); }
 
     //! Export the values of the coupling variables
     /*!
      * @param couplingVariables Global vector of coupling variables
      */
-    void exportCouplingVariables( multiscaleVector_Type& couplingVariables ) { exportCouplingVector( *M_localCouplingVariables[0], couplingVariables ); }
+    void exportCouplingVariables( multiscaleVector_Type& couplingVariables ) { exportCouplingVector( localCouplingVariables( 0 ), couplingVariables ); }
 
     //! Extrapolate the values of the coupling variables for the next time step
     void extrapolateCouplingVariables();
+
+    //! Lagrange interpolation/extrapolation of the coupling variables at selected time.
+    /*!
+     * @param t interpolation time
+     * @param interpolatedCouplingVariables variables interpolated/extrapolated at time t
+     */
+    void interpolateCouplingVariables( const Real& t, multiscaleVector_Type& interpolatedCouplingVariables ) const;
 
     //! Find if a perturbation is imposed on the coupling.
     /*!
@@ -257,6 +272,12 @@ public:
      */
     const UInt& couplingVariablesNumber() const { return M_couplingIndex.first; }
 
+    //! Get the container of the local coupling variables
+    /*!
+     * @return container of the local coupling variables
+     */
+    const couplingVariablesContainer_Type& couplingVariables() const { return M_localCouplingVariables; }
+
     //! Get the perturbed coupling.
     /*!
      * If it is unperturbed it returns -1.
@@ -318,6 +339,16 @@ protected:
     //! @name Protected Methods
     //@{
 
+    //! Access by reference to a specific local coupling variable
+    /*!
+     * This method is used to simplify the access to a specific local coupling variables vector.
+     * Note that the returned value is not const!
+     * @param id id of the local coupling variables vector
+     * @return reference to the local coupling variables vector
+     */
+    const multiscaleVector_Type& localCouplingVariables( const UInt& id ) const { return *M_localCouplingVariables[id]; }
+          multiscaleVector_Type& localCouplingVariables( const UInt& id )       { return *M_localCouplingVariables[id]; }
+
     //! Create the local vectors of the coupling
     void createLocalVectors();
 
@@ -335,13 +366,6 @@ protected:
      * @param globalVector the global vector
      */
     void exportCouplingVector( const multiscaleVector_Type& localVector, multiscaleVector_Type& globalVector );
-
-    //! Lagrange interpolation/extrapolation of the coupling variables at selected time.
-    /*!
-     * @param t interpolation time
-     * @param interpolatedCouplingVariables variables interpolated/extrapolated at time t
-     */
-    void interpolateCouplingVariables( const Real& t, multiscaleVector_Type& interpolatedCouplingVariables );
 
     //! Display and error message for the specific model
     /*!
@@ -364,6 +388,7 @@ protected:
 
     std::pair< UInt, UInt >              M_couplingIndex;
 
+    couplingFunctionsContainer_Type      M_localCouplingFunctions;
     couplingVariablesContainer_Type      M_localCouplingVariables;
     multiscaleVectorPtr_Type             M_localCouplingResiduals;
 
@@ -384,6 +409,58 @@ private:
     MultiscaleCoupling& operator=( const MultiscaleCoupling& coupling );
 
     //@}
+};
+
+//! MultiscaleCouplingFunction - The multiscale function for the couplings
+/*!
+ *  @author Cristiano Malossi
+ *
+ *  This simple class provides the implementation for the BC function used by the couplings.
+ */
+class MultiscaleCouplingFunction
+{
+public:
+
+    //! @name Constructors & Destructor
+    //@{
+
+    //! Constructor
+    explicit MultiscaleCouplingFunction() : M_coupling(), M_id() {}
+
+    //! Constructor
+    /*!
+     * @param coupling pointer to the coupling
+     * @param id id of the coupling variable
+     */
+    explicit MultiscaleCouplingFunction( const multiscaleCoupling_Type* coupling, const UInt& id) : M_coupling( coupling ), M_id( id ) {}
+
+    //! Destructor
+    virtual ~MultiscaleCouplingFunction() { /* M_coupling is deleted outside */ }
+
+    //@}
+
+
+    //! @name Methods
+    //@{
+
+    //! Evaluate the coupling quantity
+    /*!
+      @return evaluation of the function
+    */
+    Real function( const Real& t, const Real&, const Real&, const Real&, const UInt& )
+    {
+        multiscaleVector_Type interpolatedCouplingVariables( *M_coupling->couplingVariables()[0] );
+        M_coupling->interpolateCouplingVariables( t, interpolatedCouplingVariables );
+
+        return interpolatedCouplingVariables[M_id];
+    }
+
+    //@}
+
+private:
+
+    const multiscaleCoupling_Type*         M_coupling;
+    UInt                                   M_id;
 };
 
 } // Namespace Multiscale

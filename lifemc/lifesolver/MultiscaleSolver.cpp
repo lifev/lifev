@@ -72,7 +72,7 @@ MultiscaleSolver::MultiscaleSolver() :
     multiscaleModelFactory_Type::instance().registerProduct   (  Windkessel0D,        &createMultiscaleModelWindkessel0D );
 
     multiscaleCouplingFactory_Type::instance().registerProduct(  BoundaryCondition,   &createMultiscaleCouplingBoundaryCondition );
-//    multiscaleCouplingFactory_Type::instance().registerProduct(  FlowRate,            &createMultiscaleCouplingFlowRate );
+    multiscaleCouplingFactory_Type::instance().registerProduct(  FlowRate,            &createMultiscaleCouplingFlowRate );
     multiscaleCouplingFactory_Type::instance().registerProduct(  FlowRateStress,      &createMultiscaleCouplingFlowRateStress );
     multiscaleCouplingFactory_Type::instance().registerProduct(  Stress,              &createMultiscaleCouplingStress );
 

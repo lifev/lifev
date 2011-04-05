@@ -66,7 +66,7 @@ MultiscaleCouplingBoundaryCondition::setupData( const std::string& fileName )
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 8210 ) << "MultiscaleCouplingBoundaryCondition::SetupData() \n";
+    Debug( 8210 ) << "MultiscaleCouplingBoundaryCondition::setupData() \n";
 #endif
 
     multiscaleCoupling_Type::setupData( fileName );
@@ -87,7 +87,7 @@ MultiscaleCouplingBoundaryCondition::setupCoupling()
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 8210 ) << "MultiscaleCouplingBoundaryCondition::SetupCoupling() \n";
+    Debug( 8210 ) << "MultiscaleCouplingBoundaryCondition::setupCoupling() \n";
 #endif
 
     //Set number of coupling variables
@@ -153,7 +153,7 @@ MultiscaleCouplingBoundaryCondition::listOfPerturbedModels( const UInt& /*localC
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 8210 ) << "MultiscaleCouplingBoundaryCondition::GetListOfPerturbedModels() \n";
+    Debug( 8210 ) << "MultiscaleCouplingBoundaryCondition::listOfPerturbedModels() \n";
 #endif
 
     multiscaleModelsVector_Type emptyList;

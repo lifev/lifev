@@ -45,7 +45,7 @@
 
 #include <lifemc/lifesolver/MultiscaleCoupling.hpp>
 #include <lifemc/lifesolver/MultiscaleCouplingBoundaryCondition.hpp>
-//#include <lifemc/lifesolver/MultiscaleCouplingFlowRate.hpp>
+#include <lifemc/lifesolver/MultiscaleCouplingFlowRate.hpp>
 #include <lifemc/lifesolver/MultiscaleCouplingFlowRateStress.hpp>
 #include <lifemc/lifesolver/MultiscaleCouplingStress.hpp>
 

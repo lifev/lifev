@@ -59,15 +59,6 @@ class MultiscaleCouplingStress: public virtual multiscaleCoupling_Type
 {
 public:
 
-    //! @name Type definitions
-    //@{
-
-    typedef BCFunctionBase                                  bcFunction3D_Type;
-    typedef OneDimensionalBCFunction                        bcFunction1D_Type;
-
-    //@}
-
-
     //! @name Constructors & Destructor
     //@{
 
@@ -144,65 +135,12 @@ private:
     void displayCouplingValues( std::ostream& output );
 
     //@}
-
-
-    //! @name Private Methods
-    //@{
-
-    template< class ModelType >
-    void imposeStress0D( const UInt& i );
-
-    template< class ModelType >
-    void imposeStress1D( const UInt& i );
-
-    template< class ModelType >
-    void imposeStress3D( const UInt& i );
-
-    Real functionStress( const Real& /*t*/, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const UInt& /*id*/ );
-
-    //@}
 };
 
 //! Factory create function
 inline multiscaleCoupling_Type* createMultiscaleCouplingStress()
 {
     return new MultiscaleCouplingStress();
-}
-
-// ===================================================
-// Template implementation
-// ===================================================
-template< class ModelType >
-inline void
-MultiscaleCouplingStress::imposeStress0D( const UInt& i )
-{
-    boost::shared_ptr< ModelType > model = multiscaleDynamicCast< ModelType >( M_models[i] );
-
-    model->bcInterface().handler()->setBC( model->flagConverter( M_flags[i] ), OneDimensional::S, boost::bind( &MultiscaleCouplingStress::functionStress, this, _1, _1, _1, _1, _1 ) );
-}
-
-template< class ModelType >
-inline void
-MultiscaleCouplingStress::imposeStress1D( const UInt& i )
-{
-    boost::shared_ptr< ModelType > model = multiscaleDynamicCast< ModelType >( M_models[i] );
-
-    bcFunction1D_Type base;
-    base.setFunction( boost::bind( &MultiscaleCouplingStress::functionStress, this, _1, _1, _1, _1, _1 ) );
-
-    model->bcInterface().handler()->setBC( model->flagConverter( M_flags[i] ), OneDimensional::first, OneDimensional::S, base );
-}
-
-template< class ModelType >
-inline void
-MultiscaleCouplingStress::imposeStress3D( const UInt& i )
-{
-    boost::shared_ptr< ModelType > model = multiscaleDynamicCast< ModelType >( M_models[i] );
-
-    bcFunction3D_Type base;
-    base.setFunction( boost::bind( &MultiscaleCouplingStress::functionStress, this, _1, _2, _3, _4, _5 ) );
-
-    model->bcInterface().handler()->addBC( "CouplingStress_Model_" + number2string( model->ID() ) + "_Flag_" + number2string( M_flags[i] ), M_flags[i], Natural, Normal, base );
 }
 
 } // Namespace Multiscale

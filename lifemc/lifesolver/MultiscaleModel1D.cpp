@@ -339,6 +339,24 @@ MultiscaleModel1D::showMe()
 // ===================================================
 // MultiscaleInterfaceFluid Methods
 // ===================================================
+void
+MultiscaleModel1D::imposeBoundaryFlowRate( const bcFlag_Type& flag, const function_Type& function ) const
+{
+    OneDimensionalBCFunction base;
+   base.setFunction( boost::bind( function, _1, _1, _1, _1, _1 ) );
+
+    M_bc->handler()->setBC( flagConverter( flag ), OneDimensional::first, OneDimensional::Q, base );
+}
+
+void
+MultiscaleModel1D::imposeBoundaryStress( const bcFlag_Type& flag, const function_Type& function ) const
+{
+    OneDimensionalBCFunction base;
+    base.setFunction( boost::bind( function, _1, _1, _1, _1, _1 ) );
+
+    M_bc->handler()->setBC( flagConverter( flag ), OneDimensional::first, OneDimensional::S, base );
+}
+
 #ifdef JACOBIAN_WITH_FINITEDIFFERENCE
 
 Real

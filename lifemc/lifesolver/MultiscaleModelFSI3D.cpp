@@ -336,6 +336,24 @@ MultiscaleModelFSI3D::showMe()
 // ===================================================
 // MultiscaleInterfaceFluid Methods
 // ===================================================
+void
+MultiscaleModelFSI3D::imposeBoundaryFlowRate( const bcFlag_Type& flag, const function_Type& function ) const
+{
+    BCFunctionBase base;
+    base.setFunction( function );
+
+    M_fluidBC->handler()->addBC( "CouplingFlowRate_Model_" + number2string( M_ID ) + "_Flag_" + number2string( flag ), flag, Flux, Full, base, 3 );
+}
+
+void
+MultiscaleModelFSI3D::imposeBoundaryStress( const bcFlag_Type& flag, const function_Type& function ) const
+{
+    BCFunctionBase base;
+    base.setFunction( function );
+
+    M_fluidBC->handler()->addBC( "CouplingStress_Model_" + number2string( M_ID ) + "_Flag_" + number2string( flag ), flag, Natural, Normal, base );
+}
+
 Real
 MultiscaleModelFSI3D::boundaryDeltaFlowRate( const bcFlag_Type& flag, bool& solveLinearSystem )
 {

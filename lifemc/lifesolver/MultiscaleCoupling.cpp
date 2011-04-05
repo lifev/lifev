@@ -56,6 +56,7 @@ MultiscaleCoupling::MultiscaleCoupling() :
         M_flags                       (),
         M_globalData                  (),
         M_couplingIndex               (),
+        M_localCouplingFunctions      (),
         M_localCouplingVariables      (),
         M_localCouplingResiduals      (),
         M_timeInterpolationOrder      ( 1 ),
@@ -127,7 +128,7 @@ MultiscaleCoupling::createCouplingMap( MapEpetra& couplingMap )
 
     M_couplingIndex.second = couplingMap.map( Unique )->NumGlobalElements();
 
-    couplingMap += M_localCouplingVariables[0]->map();
+    couplingMap += localCouplingVariables( 0 ).map();
 }
 
 void
@@ -139,7 +140,7 @@ MultiscaleCoupling::extrapolateCouplingVariables()
 #endif
 
     // Extrapolate the coupling variables at the next time
-    multiscaleVector_Type extrapolatedCouplingVariables( *M_localCouplingVariables[0] );
+    multiscaleVector_Type extrapolatedCouplingVariables( localCouplingVariables( 0 ) );
     interpolateCouplingVariables( M_globalData->dataTime()->nextTime(), extrapolatedCouplingVariables );
 
     // If we have not yet enough samples for interpolation, we add a new one
@@ -147,20 +148,46 @@ MultiscaleCoupling::extrapolateCouplingVariables()
     if ( couplingVariablesSize <= M_timeInterpolationOrder )
     {
         ++couplingVariablesSize;
-        M_localCouplingVariables.push_back( multiscaleVectorPtr_Type ( new VectorEpetra( *M_localCouplingVariables[0] ) ) );
+        M_localCouplingVariables.push_back( multiscaleVectorPtr_Type ( new VectorEpetra( localCouplingVariables( 0 ) ) ) );
     }
 
     // Updating database
     for ( UInt i(1) ; i < couplingVariablesSize ; ++i )
-        *M_localCouplingVariables[couplingVariablesSize-i] = *M_localCouplingVariables[couplingVariablesSize-i-1];
+        localCouplingVariables( couplingVariablesSize-i ) = localCouplingVariables( couplingVariablesSize-i-1 );
 
-    *M_localCouplingVariables[0] = extrapolatedCouplingVariables;
+    localCouplingVariables( 0 ) = extrapolatedCouplingVariables;
 
 #ifdef HAVE_LIFEV_DEBUG
     for ( UInt i( 0 ); i < M_couplingIndex.first; ++i )
-        Debug( 8200 ) << "C(" << M_couplingIndex.second + i << ") = " << ( *M_localCouplingVariables[0] )[i]  << "\n";
+        Debug( 8200 ) << "C(" << M_couplingIndex.second + i << ") = " << ( localCouplingVariables( 0 ) )[i]  << "\n";
 #endif
 
+}
+
+void
+MultiscaleCoupling::interpolateCouplingVariables( const Real& t, multiscaleVector_Type& interpolatedCouplingVariables ) const
+{
+    // Coupling variables size
+    UInt couplingVariablesSize( M_localCouplingVariables.size() );
+
+    // Time container for interpolation
+    timeContainer_Type timeContainer( couplingVariablesSize, 0 );
+    for ( UInt i(0) ; i < couplingVariablesSize ; ++i )
+        timeContainer[i] = M_globalData->dataTime()->time() - i * M_globalData->dataTime()->timeStep();
+
+    // Lagrange interpolation
+    interpolatedCouplingVariables *= 0;
+    Real base(1);
+
+    for ( UInt i(0) ; i < M_localCouplingVariables.size() ; ++i )
+    {
+        base = 1;
+        for ( UInt j(0) ; j < M_localCouplingVariables.size() ; ++j )
+            if ( j != i )
+                base *= (t - timeContainer[j]) / (timeContainer[i] - timeContainer[j]);
+
+        interpolatedCouplingVariables += localCouplingVariables( i ) * base;
+    }
 }
 
 void
@@ -172,7 +199,7 @@ MultiscaleCoupling::exportJacobian( multiscaleMatrix_Type& jacobian )
 #endif
 
     // Definitions
-    bool solveLinearSystem;                   // Flag to avoid multiple solution of the same linear system
+    bool solveLinearSystem;                          // Flag to avoid multiple solution of the same linear system
     multiscaleModelsVector_Type perturbedModelsList; // List of perturbed model
 
     // Insert constant values in the jacobian (due to this coupling condition)
@@ -184,10 +211,10 @@ MultiscaleCoupling::exportJacobian( multiscaleMatrix_Type& jacobian )
     // Loop on all the local coupling variables that should be perturbed
     for ( UInt column(M_couplingIndex.second) ; M_perturbedCoupling < static_cast< Int > ( M_couplingIndex.first ); ++M_perturbedCoupling, ++column )
     {
-        // Build the list of models affected by the perturbation
+        // Build the list of models affected by the perturbation of the variable associated with this column
         perturbedModelsList = listOfPerturbedModels( M_perturbedCoupling );
 
-        // Loop on all the models, that could be influenced by the perturbation of the coupling variable
+        // Loop on all the models, that are influenced by the perturbation of the coupling variable
         for ( multiscaleModelsVectorIterator_Type j = perturbedModelsList.begin() ; j < perturbedModelsList.end() ; ++j )
         {
             solveLinearSystem = true;
@@ -237,12 +264,6 @@ MultiscaleCoupling::saveSolution()
 // Set Methods
 // ===================================================
 void
-MultiscaleCoupling::addFlagID( const UInt& flagID )
-{
-    M_flags.push_back( M_models.back()->flag( flagID ) );
-}
-
-void
 MultiscaleCoupling::setCommunicator( const multiscaleCommPtr_Type& comm )
 {
 
@@ -257,6 +278,12 @@ MultiscaleCoupling::setCommunicator( const multiscaleCommPtr_Type& comm )
 // ===================================================
 // Get Methods
 // ===================================================
+void
+MultiscaleCoupling::addFlagID( const UInt& flagID )
+{
+    M_flags.push_back( M_models.back()->flag( flagID ) );
+}
+
 UInt
 MultiscaleCoupling::modelGlobalToLocalID( const UInt& ID ) const
 {
@@ -307,32 +334,6 @@ MultiscaleCoupling::exportCouplingVector( const multiscaleVector_Type& localVect
     for ( UInt i(0) ; i < M_couplingIndex.first ; ++i )
         if ( M_comm->MyPID() == 0 )
             globalVector[ M_couplingIndex.second + i ] = localVector[i];
-}
-
-void
-MultiscaleCoupling::interpolateCouplingVariables( const Real& t, multiscaleVector_Type& interpolatedCouplingVariables )
-{
-    // Coupling variables size
-    UInt couplingVariablesSize( M_localCouplingVariables.size() );
-
-    // Time container for interpolation
-    timeContainer_Type timeContainer( couplingVariablesSize, 0 );
-    for ( UInt i(0) ; i < couplingVariablesSize ; ++i )
-        timeContainer[i] = M_globalData->dataTime()->time() - i * M_globalData->dataTime()->timeStep();
-
-    // Lagrange interpolation
-    interpolatedCouplingVariables *= 0;
-    Real base(1);
-
-    for ( UInt i(0) ; i < M_localCouplingVariables.size() ; ++i )
-    {
-        base = 1;
-        for ( UInt j(0) ; j < M_localCouplingVariables.size() ; ++j )
-            if ( j != i )
-                base *= (t - timeContainer[j]) / (timeContainer[i] - timeContainer[j]);
-
-        interpolatedCouplingVariables += *M_localCouplingVariables[i] * base;
-    }
 }
 
 void
