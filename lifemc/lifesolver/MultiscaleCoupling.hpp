@@ -101,11 +101,31 @@ public:
     //! Initialize the values of the coupling variables
     virtual void initializeCouplingVariables() = 0;
 
+    //! Update the coupling
+    /*!
+     * This method is the analogous of the "updateModel" for the models.
+     * It is alternative to initializeCouplingVariables and is called from the second timestep.
+     * It is reserved for the update of:
+     * <ol>
+     *     <li> objects that are not constant with respect to the time but should not be updated during subiterations.
+     * </ol>
+     */
+    virtual void updateCoupling() = 0;
+
     //! Export the values of the local coupling residuals into a global vector
     /*!
      * @param couplingResiduals Global vector of variables
      */
     virtual void exportCouplingResiduals( multiscaleVector_Type& couplingResiduals ) = 0;
+
+    //! Check if the topology is changed
+    /*!
+     * A topology change can be caused by a change in the coupling equations by,
+     * for example, the opening/closure of a valve (see MultiscaleCouplingFlowRateValve).
+     *
+     * @return true if the topology is changed, false otherwise
+     */
+    virtual bool topologyChange() { return false; }
 
     //! Display some information about the coupling
     virtual void showMe();
@@ -155,13 +175,6 @@ public:
      * @param Jacobian Jacobian Matrix
      */
     void exportJacobian( multiscaleMatrix_Type& jacobian );
-
-    //! Export the values of the Jacobian product
-    /*!
-     * @param deltaCouplingVariables variation of the coupling variables
-     * @param jacobianProduct the product of the Jacobian by the varuatuib if tge coupling variables
-     */
-    void exportJacobianProduct( const multiscaleVector_Type& deltaCouplingVariables, multiscaleVector_Type& jacobianProduct );
 
     //! save the coupling variables information on a file
     void saveSolution();
@@ -302,7 +315,7 @@ public:
 
 protected:
 
-    //! @name Protected Multiscale PhysicalCoupling Virtual Methods
+    //! @name Protected MultiscaleCoupling Virtual Methods
     //@{
 
     //! Build the list of models affected by the perturbation of a local coupling variable

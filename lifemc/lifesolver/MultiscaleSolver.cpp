@@ -73,6 +73,7 @@ MultiscaleSolver::MultiscaleSolver() :
 
     multiscaleCouplingFactory_Type::instance().registerProduct(  BoundaryCondition,   &createMultiscaleCouplingBoundaryCondition );
     multiscaleCouplingFactory_Type::instance().registerProduct(  FlowRate,            &createMultiscaleCouplingFlowRate );
+    multiscaleCouplingFactory_Type::instance().registerProduct(  FlowRateValve,       &createMultiscaleCouplingFlowRateValve );
     multiscaleCouplingFactory_Type::instance().registerProduct(  FlowRateStress,      &createMultiscaleCouplingFlowRateStress );
     multiscaleCouplingFactory_Type::instance().registerProduct(  Stress,              &createMultiscaleCouplingStress );
 
@@ -139,7 +140,6 @@ MultiscaleSolver::setupProblem( const std::string& fileName, const std::string& 
         M_algorithm->setTolerance( dataFile( "Solver/Algorithm/tolerance", 1e-2 ) );
         std::string path = "./MultiscaleDatabase/Algorithms/"; // TODO Add this to files
         M_algorithm->setupData( path + enum2String( M_algorithm->type(), multiscaleAlgorithmsMap ) + "/" + dataFile( "Solver/Algorithm/file", "undefined" ) + ".dat" );
-        M_algorithm->initializeCouplingVariables();
     }
 }
 
@@ -176,7 +176,11 @@ MultiscaleSolver::solveProblem( const Real& referenceSolution )
 
         // Build or Update System
         if ( M_globalData->dataTime()->isFirstTimeStep() )
+        {
+            if ( M_model->type() == Multiscale )
+                M_algorithm->initializeCouplingVariables();
             M_model->buildModel();
+        }
         else
         {
             if ( M_model->type() == Multiscale )
@@ -187,7 +191,7 @@ MultiscaleSolver::solveProblem( const Real& referenceSolution )
         // Solve the model
         M_model->solveModel();
 
-        // If it is a Multiscale model, call algorithms for subiterations
+        // If it is a Multiscale model, call algorithm for subiterations
         if ( M_model->type() == Multiscale )
             M_algorithm->subIterate();
 

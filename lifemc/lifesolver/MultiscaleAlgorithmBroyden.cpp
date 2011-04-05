@@ -115,7 +115,7 @@ MultiscaleAlgorithmBroyden::subIterate()
         // Compute the Jacobian (we completery delete the previous matrix)
         if ( subIT == 1 )
         {
-            if ( M_jacobian.get() == 0 || M_iterationsLimitReached )
+            if ( M_jacobian.get() == 0 || M_iterationsLimitReached || M_multiscale->topologyChange() )
             {
                 assembleJacobianMatrix();
                 M_iterationsLimitReached = false;

@@ -89,6 +89,12 @@ public:
     //! Initialize the values of the coupling variables (DO NOTHING)
     void initializeCouplingVariables() {}
 
+    //! Update the coupling
+    /*!
+     * Nothing to do for boundary conditions
+     */
+    void updateCoupling() {};
+
     //! Export the values of the local coupling residuals into a global vector (DO NOTHING)
     /*!
      * @param couplingResiduals Global vector of variables

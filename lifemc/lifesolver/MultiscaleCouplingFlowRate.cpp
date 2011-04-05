@@ -186,7 +186,7 @@ MultiscaleCouplingFlowRate::insertJacobianDeltaCoefficients( multiscaleMatrix_Ty
 
     // Definitions
     UInt modelLocalID = modelGlobalToLocalID( ID );
-    Real coefficient  = multiscaleDynamicCast< MultiscaleInterfaceFluid >( M_models[modelLocalID] )->boundaryDeltaStress( M_flags[modelLocalID], solveLinearSystem );;
+    Real coefficient  = multiscaleDynamicCast< MultiscaleInterfaceFluid >( M_models[modelLocalID] )->boundaryDeltaStress( M_flags[modelLocalID], solveLinearSystem );
     UInt row          = M_couplingIndex.second + modelLocalID;
 
     // Add coefficient to the matrix

@@ -80,6 +80,12 @@ public:
     //! Initialize the values of the coupling variables
     void initializeCouplingVariables();
 
+    //! Update the coupling
+    /*!
+     * Nothing to do for this coupling.
+     */
+    void updateCoupling() {};
+
     //! Update the values of the coupling residuals
     /*!
      * @param couplingResiduals Global vector of variables
@@ -91,19 +97,9 @@ public:
 
     //@}
 
-private:
+protected:
 
-    //! @name Unimplemented Methods
-    //@{
-
-    MultiscaleCouplingFlowRate( const MultiscaleCouplingFlowRate& coupling );
-
-    MultiscaleCouplingFlowRate& operator=( const MultiscaleCouplingFlowRate& coupling );
-
-    //@}
-
-
-    //! @name Private Multiscale PhysicalCoupling Implementation
+    //! @name Protected MultiscaleCoupling Implementation
     //@{
 
     //! Build the list of models affected by the perturbation of a local coupling variable
@@ -133,6 +129,17 @@ private:
      * @param output specify the output stream
      */
     void displayCouplingValues( std::ostream& output );
+
+    //@}
+
+private:
+
+    //! @name Unimplemented Methods
+    //@{
+
+    MultiscaleCouplingFlowRate( const MultiscaleCouplingFlowRate& coupling );
+
+    MultiscaleCouplingFlowRate& operator=( const MultiscaleCouplingFlowRate& coupling );
 
     //@}
 };

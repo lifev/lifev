@@ -46,6 +46,7 @@
 #include <lifemc/lifesolver/MultiscaleCoupling.hpp>
 #include <lifemc/lifesolver/MultiscaleCouplingBoundaryCondition.hpp>
 #include <lifemc/lifesolver/MultiscaleCouplingFlowRate.hpp>
+#include <lifemc/lifesolver/MultiscaleCouplingFlowRateValve.hpp>
 #include <lifemc/lifesolver/MultiscaleCouplingFlowRateStress.hpp>
 #include <lifemc/lifesolver/MultiscaleCouplingStress.hpp>
 
@@ -136,6 +137,14 @@ public:
      * @param jacobian Matrix
      */
     void exportJacobian( multiscaleMatrix_Type& jacobian );
+
+    //! Check if the topology is changed
+    /*!
+     * A topology change can be caused by a change in the coupling equations by,
+     * for example, the opening/closure of a valve (see MultiscaleCouplingFlowRateValve).
+     * @return true if the topology is changed, false otherwise
+     */
+    bool topologyChange();
 
     //@}
 

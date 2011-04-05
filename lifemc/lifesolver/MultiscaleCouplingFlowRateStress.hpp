@@ -85,6 +85,12 @@ public:
     //! Initialize the values of the coupling variables
     void initializeCouplingVariables();
 
+    //! Update the coupling
+    /*!
+     * Nothing to do for this coupling.
+     */
+    void updateCoupling() {};
+
     //! Update the values of the coupling residuals
     /*!
      * @param couplingResiduals Global vector of variables

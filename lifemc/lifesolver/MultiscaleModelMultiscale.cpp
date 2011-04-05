@@ -222,6 +222,9 @@ MultiscaleModelMultiscale::updateModel()
 
     for ( multiscaleModelsVectorConstIterator_Type i = M_modelsList.begin(); i != M_modelsList.end(); ++i )
         ( *i )->updateModel();
+
+    for ( multiscaleCouplingsVectorConstIterator_Type i = M_couplingsList.begin(); i != M_couplingsList.end(); ++i )
+        ( *i )->updateCoupling();
 }
 
 void
@@ -387,6 +390,22 @@ MultiscaleModelMultiscale::exportJacobian( multiscaleMatrix_Type& jacobian )
 
     for ( multiscaleCouplingsVectorConstIterator_Type i = M_couplingsList.begin(); i != M_couplingsList.end(); ++i )
         ( *i )->exportJacobian( jacobian );
+}
+
+bool
+MultiscaleModelMultiscale::topologyChange()
+{
+
+#ifdef HAVE_LIFEV_DEBUG
+    Debug( 8110 ) << "MultiscaleModelMultiscale::topologyChange() \n";
+#endif
+
+    bool topologyChange( false );
+
+    for ( multiscaleCouplingsVectorConstIterator_Type i = M_couplingsList.begin(); i != M_couplingsList.end(); ++i )
+        topologyChange = topologyChange || ( *i )->topologyChange();
+
+    return topologyChange;
 }
 
 // ===================================================

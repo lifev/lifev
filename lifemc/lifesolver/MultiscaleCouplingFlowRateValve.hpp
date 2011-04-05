@@ -26,47 +26,53 @@
 
 /*!
  *  @file
- *  @brief File containing the Multiscale Coupling Stress
+ *  @brief File containing the Multiscale Coupling FlowRateValve
  *
- *  @date 20-10-2009
+ *  @date 05-04-2011
  *  @author Cristiano Malossi <cristiano.malossi@epfl.ch>
  *
  *  @maintainer Cristiano Malossi <cristiano.malossi@epfl.ch>
  */
 
-#ifndef MultiscaleCouplingStress_H
-#define MultiscaleCouplingStress_H 1
+#ifndef MultiscaleCouplingFlowRateValve_H
+#define MultiscaleCouplingFlowRateValve_H 1
 
-#include <lifemc/lifesolver/MultiscaleCoupling.hpp>
-#include <lifemc/lifesolver/MultiscaleModelFluid3D.hpp>
-#include <lifemc/lifesolver/MultiscaleModelFSI3D.hpp>
-#include <lifemc/lifesolver/MultiscaleModel1D.hpp>
-#include <lifemc/lifesolver/MultiscaleModelWindkessel0D.hpp>
+#include <lifemc/lifesolver/MultiscaleCouplingFlowRate.hpp>
 
 namespace LifeV
 {
 namespace Multiscale
 {
 
-//! MultiscaleCouplingStress - Stress coupling condition
+//! MultiscaleCouplingFlowRateValve - FlowRate coupling condition with a valve
 /*!
  *  @author Cristiano Malossi
  *
- *  The MultiscaleCouplingStress class is an implementation of the multiscaleCoupling_Type
- *  for applying Stress coupling conditions on the models.
+ *  The MultiscaleCouplingFlowRateValve class is an implementation of the multiscaleCoupling_Type
+ *  for applying flow rate coupling conditions on the models including a valve between the first model and the others.
+ *
+ *  NOTE: The current implementation works only for two models!
  */
-class MultiscaleCouplingStress: public virtual multiscaleCoupling_Type
+class MultiscaleCouplingFlowRateValve: public virtual MultiscaleCouplingFlowRate
 {
 public:
+
+    //! @name Type definitions
+    //@{
+
+    typedef MultiscaleCouplingFlowRate                          super_Type;
+
+    //@}
+
 
     //! @name Constructors & Destructor
     //@{
 
     //! Constructor
-    explicit MultiscaleCouplingStress();
+    explicit MultiscaleCouplingFlowRateValve();
 
     //! Destructor
-    virtual ~MultiscaleCouplingStress() {}
+    virtual ~MultiscaleCouplingFlowRateValve() {}
 
     //@}
 
@@ -74,23 +80,31 @@ public:
     //! @name Multiscale PhysicalCoupling Implementation
     //@{
 
-    //! Setup the coupling
-    void setupCoupling();
-
     //! Initialize the values of the coupling variables
     void initializeCouplingVariables();
 
+    //! Setup the coupling
+    void setupCoupling();
+
     //! Update the coupling
     /*!
-     * Nothing to do for this coupling.
+     * Update the position of the valve.
      */
-    void updateCoupling() {};
+    void updateCoupling();
 
     //! Update the values of the coupling residuals
     /*!
      * @param couplingResiduals Global vector of variables
      */
     void exportCouplingResiduals( multiscaleVector_Type& couplingResiduals );
+
+    //! Check if the topology is changed
+    /*!
+     * The opening/closure of the valve change the topology.
+     *
+     * @return true if the topology is changed, false otherwise
+     */
+    bool topologyChange() { return M_topologyChange; }
 
     //! Display some information about the coupling
     void showMe();
@@ -102,22 +116,15 @@ private:
     //! @name Unimplemented Methods
     //@{
 
-    MultiscaleCouplingStress( const MultiscaleCouplingStress& coupling );
+    MultiscaleCouplingFlowRateValve( const MultiscaleCouplingFlowRateValve& coupling );
 
-    MultiscaleCouplingStress& operator=( const MultiscaleCouplingStress& coupling );
+    MultiscaleCouplingFlowRateValve& operator=( const MultiscaleCouplingFlowRateValve& coupling );
 
     //@}
 
 
     //! @name Private Multiscale PhysicalCoupling Implementation
     //@{
-
-    //! Build the list of models affected by the perturbation of a local coupling variable
-    /*!
-     * @param localCouplingVariableID local coupling variable (perturbed)
-     * @return list of models affected by the perturbation
-     */
-    multiscaleModelsVector_Type listOfPerturbedModels( const UInt& localCouplingVariableID );
 
     //! Insert constant coefficients into the Jacobian matrix
     /*!
@@ -134,22 +141,19 @@ private:
      */
     void insertJacobianDeltaCoefficients( multiscaleMatrix_Type& jacobian, const UInt& column, const UInt& ID, bool& solveLinearSystem );
 
-    //! Display some information about the coupling
-    /*!
-     * @param output specify the output stream
-     */
-    void displayCouplingValues( std::ostream& output );
-
     //@}
+
+    bool                     M_valveIsOpen;
+    bool                     M_topologyChange;
 };
 
 //! Factory create function
-inline multiscaleCoupling_Type* createMultiscaleCouplingStress()
+inline multiscaleCoupling_Type* createMultiscaleCouplingFlowRateValve()
 {
-    return new MultiscaleCouplingStress();
+    return new MultiscaleCouplingFlowRateValve();
 }
 
 } // Namespace Multiscale
 } // Namespace LifeV
 
-#endif /* MultiscaleCouplingStress_H */
+#endif /* MultiscaleCouplingFlowRateValve_H */
