@@ -1,14 +1,14 @@
-# -*- getpot -*- GetPot mode activation for emacs
 ###################################################################################################
 #
-#                       This file is part of the LifeV Applications
-#                                 Copyright (C) 2010 EPFL
+#                       This file is part of the LifeV Library                       
+#                Copyright (C) 2004, 2005, 2007 EPFL, Politecnico di Milano, INRIA
+#                Copyright (C) 2010 EPFL, Politecnico di Milano, Emory University
 #
 #      Author(s): Paolo Crosetto <paolo.crosetto@epfl.ch>
-#		  Toni Lassila <toni.lassila@epfl.ch>	
+#                 Toni Lassila <toni.lassila@epfl.ch>
 #                 Cristiano Malossi <cristiano.malossi@epfl.ch>
-#           Date: 2011-03-09
-#  License Terms: GNU GPL
+#           Date: 2011-03-10
+#  License Terms: GNU LGPL
 #
 ###################################################################################################
 ### MODEL: FSI3D - Left ventricle #################################################################
@@ -32,7 +32,6 @@ type             = hdf5
 
 [problem]
 method      = monolithicGE # monolithicGE, monolithicGI
-                           # exactJacobian, fixedPoint
 
 blockOper   = AdditiveSchwarz # AdditiveSchwarz   AdditiveSchwarzRN
                                 AdditiveSchwarzGI AdditiveSchwarzRNGI
@@ -79,7 +78,7 @@ semiImplicit        = true   # tells if we advance in time after the first nonli
 
     [../time_discretization]
     #timestep        = 0.0001          # [s] Defined here only if different from the one in the main file.
-    BDF_order        = 1
+    BDF_order       = 1
 
     [../space_discretization]
     mesh_dir         = ../../../cmcs-applications/applications/idealHeart/Mesh/
@@ -217,7 +216,6 @@ tolerance       =  0.0005   # how far points are to be considered the same on th
         flag       = 10
         mode       = Normal
         functionFile = physicalFunctions/EpicardialForce.dat
-
 
         [../]
 

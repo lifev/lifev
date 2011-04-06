@@ -33,7 +33,6 @@ type             = hdf5
 
 [problem]
 method      = monolithicGE # monolithicGE, monolithicGI
-                           # exactJaobilan, fixedPoint
 
 blockOper   = AdditiveSchwarz # AdditiveSchwarz   AdditiveSchwarzRN
                                 AdditiveSchwarzGI AdditiveSchwarzRNGI
