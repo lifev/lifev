@@ -88,6 +88,7 @@ dist_pkgdata_DATA =   Absorbing_1DLeft.dat \
                		  Terminal_ReymondStergiopulos2009_102.dat \
                       Velocity_Poiseuille.dat \
                       Velocity_PoiseuilleDynamicSTP.dat \
+                      Velocity_Zero.dat \
                       Velocity_ZeroXY.dat
 
 check-local:
