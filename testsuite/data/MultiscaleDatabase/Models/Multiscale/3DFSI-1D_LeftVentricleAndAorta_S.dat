@@ -9,12 +9,12 @@
 #  License Terms: GNU LGPL
 #
 ###################################################################################################
-### MODEL: Multiscale - Reymond Stergiopulos 2009 1D Aorta ########################################
+### MODEL: Multiscale - Left Ventricle + Reymond Stergiopulos 2009 1D Aorta #######################
 ###################################################################################################
 
 [Multiscale] ######################################################################################
 ###################################################################################################
-modelName        = 'Reymond Stergiopulos 2009 Aorta Absorbing (OneDimensional, Stress)'
+modelName        = 'Left Ventricle + Reymond Stergiopulos 2009 1D Aorta (FSI3D-OneDimensional, Stress)'
 modelType        = Multiscale
 couplingFlags    = ' '
 
@@ -57,20 +57,20 @@ models = '
 # List of couplings ###############################################################################
 ########### ID #### Type ############## File (without .dat) ########### Models ######## Flags #####
 couplings = '    
-            0       BoundaryCondition   MitralFlux                      0               0
-	    1	    FlowRateValve       Lagrange1                       1,0             0,1
-            2       Stress              Pressure                        95,1            0,1
-            3       Stress              Pressure                        2,3,95          0,0,1
-            4       Stress              Pressure                        14,15,2         0,0,1
-            5       Stress              Pressure                        18,19,14        0,0,1
-            6       Stress              Pressure                        26,27,18        0,0,1
-            7       Stress              Pressure                        28,29,27        0,0,1
-            8       Stress              Pressure                        30,31,29        0,0,1
-            9       Stress              Pressure                        32,33,30        0,0,1
-           10       Stress              Pressure                        38,35,28        0,0,1
-           11       Stress              Pressure                        36,37,35        0,0,1
-           12       Stress              Pressure                        34,39,37        0,0,1
-           13       Stress              Pressure                        40,41,39        0,0,1
+            0       BoundaryCondition   FlowRate_Mitral                 0               0
+            1       FlowRateValve       Lagrange1                       1,0             0,1
+            2       Stress              Lagrange1                       95,1            0,1
+            3       Stress              Lagrange1                       2,3,95          0,0,1
+            4       Stress              Lagrange1                       14,15,2         0,0,1
+            5       Stress              Lagrange1                       18,19,14        0,0,1
+            6       Stress              Lagrange1                       26,27,18        0,0,1
+            7       Stress              Lagrange1                       28,29,27        0,0,1
+            8       Stress              Lagrange1                       30,31,29        0,0,1
+            9       Stress              Lagrange1                       32,33,30        0,0,1
+           10       Stress              Lagrange1                       38,35,28        0,0,1
+           11       Stress              Lagrange1                       36,37,35        0,0,1
+           12       Stress              Lagrange1                       34,39,37        0,0,1
+           13       Stress              Lagrange1                       40,41,39        0,0,1
            14       BoundaryCondition   Terminal_ReymondStergiopulos2009_003   3               1
            15       BoundaryCondition   Terminal_ReymondStergiopulos2009_015   15              1
            16       BoundaryCondition   Terminal_ReymondStergiopulos2009_019   19              1

@@ -19,6 +19,7 @@ dist_pkgdata_DATA =   Absorbing_1DLeft.dat \
                       FlowRate_CarotidBifurcation.dat \
                       FlowRate_Exp.dat \
                       FlowRate_Heart.dat \
+                      FlowRate_Mitral.dat \
                       FlowRate_One.dat \
                       FlowRate_Poiseuille.dat \
                       FlowRate_PoiseuilleDynamicSTP.dat \
