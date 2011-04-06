@@ -14,8 +14,9 @@
 
 [Problem] #########################################################################################
 ProblemType = Multiscale
-ProblemFile = ./MultiscaleDatabase/Models/Multiscale/3DFSI-1D_LeftVentricleAndAorta_S
-#ProblemFile = ./MultiscaleDatabase/Models/Multiscale/3DFSI-1D_LeftVentricleAndAorta_ClosedValve_S
+ProblemFile = ./MultiscaleDatabase/Models/Multiscale/FSI3D-1D_IdealLeftVentricleWithAorta_S
+#ProblemFile = ./MultiscaleDatabase/Models/Multiscale/FSI3D-1D_IdealLeftVentricleWithAorta-ClosedValve_S
+#ProblemFile = ./MultiscaleDatabase/Models/Multiscale/FSI3D-1D_IdealLeftVentricleWithAorta-Absorbing_S
 
 [Solver] ##########################################################################################
 ###################################################################################################
