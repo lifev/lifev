@@ -169,20 +169,6 @@ public:
     //@}
 
 
-
-    //! @name Methods
-    //@{
-
-    //! Convert the flag from a bcFlag type to a bcSide type
-    /*!
-     * @param flag boundary condition flag
-     * @return boundary condition side.
-     */
-    bcSide_Type flagConverter( const bcFlag_Type& flag ) const { return (flag == 0) ? OneDimensional::left : OneDimensional::right; }
-
-    //@}
-
-
     //! @name Get Methods
     //@{
 
@@ -252,9 +238,16 @@ private:
     Real solveForPressure();    // Solve the equations for Pressure
     Real solveForFlowRate();    // Solve the equations for FlowRate
 
-    //@}
+    //! Convert the flag from a bcFlag type to a bcSide type
+    /*!
+     * @param flag boundary condition flag
+     * @return boundary condition side.
+     */
+    bcSide_Type flagConverter( const bcFlag_Type& flag ) const { return (flag == 0) ? OneDimensional::left : OneDimensional::right; }
 
     void solveLinearModel( bool& solveLinearSystem );
+
+    //@}
 
     std::ofstream          M_outputFile;
 

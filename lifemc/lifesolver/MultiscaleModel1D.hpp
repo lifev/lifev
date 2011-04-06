@@ -223,19 +223,6 @@ public:
     //@}
 
 
-    //! @name Methods
-    //@{
-
-    //! Convert the flag from a bcFlag type to a bcSide type
-    /*!
-     * @param flag boundary condition flag
-     * @return boundary condition side.
-     */
-    bcSide_Type flagConverter( const bcFlag_Type& flag ) const { return (flag == 0) ? OneDimensional::left : OneDimensional::right; }
-
-    //@}
-
-
     //! @name Get Methods
     //@{
 
@@ -422,6 +409,13 @@ private:
      * @return solution of the tangent problem at specific node.
      */
     Real solveTangentProblem( solver_Type::vector_Type& rhs, const UInt& bcNode );
+
+    //! Convert the flag from a bcFlag type to a bcSide type
+    /*!
+     * @param flag boundary condition flag
+     * @return boundary condition side.
+     */
+    bcSide_Type flagConverter( const bcFlag_Type& flag ) const { return (flag == 0) ? OneDimensional::left : OneDimensional::right; }
 
 #endif
     //@}
