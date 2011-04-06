@@ -14,7 +14,7 @@
 
 [Multiscale] ######################################################################################
 ###################################################################################################
-modelName        = 'Left Ventricle + Reymond Stergiopulos 2009 1D Aorta Absorbing (FSI3D-OneDimensional, Stress)'
+modelName        = 'Ideal Left Ventricle + Reymond Stergiopulos 2009 1D Aorta Absorbing (FSI3D-OneDimensional, Stress)'
 modelType        = Multiscale
 couplingFlags    = ' '
 
@@ -26,7 +26,7 @@ couplingsPath    = './MultiscaleDatabase/Couplings/'
 # List of models ##################################################################################
 ########### ID #### Type ############## File (without .dat) #######################################
 models = '    
-            0       FSI3D               LeftVentricle_MonolithicGE
+            0       FSI3D               IdealLeftVentricle_MonolithicGE
             1       OneDimensional      ReymondStergiopulos2009_001
             2       OneDimensional      ReymondStergiopulos2009_002
             3       OneDimensional      ReymondStergiopulos2009_003

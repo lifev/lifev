@@ -11,11 +11,11 @@
 #  License Terms: GNU LGPL
 #
 ###################################################################################################
-### MODEL: FSI3D - Left ventricle #################################################################
+### MODEL: FSI3D - Ideal left ventricle ###########################################################
 ###################################################################################################
 
 [Multiscale]
-modelName        = FSI3D_LeftVentricle_MonolithicGE
+modelName        = FSI3D_IdealLeftVentricle_MonolithicGE
 modelType        = FSI3D
 couplingFlags    = '2 3'
 
