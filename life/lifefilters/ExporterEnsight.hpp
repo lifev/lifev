@@ -225,7 +225,7 @@ void ExporterEnsight<MeshType>::postProcess(const Real& time)
     std::size_t found( this->M_postfix.find( "*" ) );
     if ( found == string::npos )
     {
-        if (!this->M_procId) std::cout << "  x-  ExporterEnsight post-processing ...        " << std::flush;
+        if (!this->M_procId) std::cout << "  X-  ExporterEnsight post-processing ...        " << std::flush;
         LifeChrono chrono;
         chrono.start();
         for (typename super::dataVectorIterator_Type i=this->M_dataVector.begin(); i != this->M_dataVector.end(); ++i)
@@ -276,7 +276,7 @@ void ExporterEnsight<MeshType>::import(const Real& time)
 
     assert( this->M_postfix != "*****" );
 
-    if (!this->M_procId) std::cout << "  x-  ExporterEnsight importing ..."<< std::endl;
+    if (!this->M_procId) std::cout << "  X-  ExporterEnsight importing ..."<< std::endl;
 
     LifeChrono chrono;
     chrono.start();

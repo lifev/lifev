@@ -23,8 +23,6 @@
 *******************************************************************************
 */
 //@HEADER
-//  \include ../../../mathcard/testsuite/test_monolithic/fluidstructure.dox
-
 
 /*!
  \include ../../doc/api/bibliography/newton
@@ -54,7 +52,7 @@ namespace LifeV
 {
 
 // ===================================================
-//! Constructors & Destructors
+//  Constructors & Destructors
 // ===================================================
 FSIOperator::FSIOperator():
     M_mesh                               ( ),
@@ -120,7 +118,6 @@ FSIOperator::FSIOperator():
     M_Alphaf                             ( ), //vector_Type, for alphaf robin
     M_AlphafCoef                         ( 0 ),
     M_betamedio                          ( ),
-    M_fluxes                             ( 0 ),
     M_epetraComm                         ( ),
     M_epetraWorldComm                    ( ),
     //begin of private members
@@ -154,9 +151,8 @@ FSIOperator::~FSIOperator()
 
 
 // ===================================================
-//! Virtual Public Methods
+//  Virtual Public Methods
 // ===================================================
-
 void
 FSIOperator::setDataFile( const GetPot& dataFile )
 {
@@ -433,7 +429,7 @@ FSIOperator::setupDOF( void )
 void
 FSIOperator::setupFluidSolid( void )
 {
-    setupFluidSolid(imposeFlux());
+    setupFluidSolid(imposedFluxes());
 }
 
 void
@@ -441,8 +437,6 @@ FSIOperator::setupFluidSolid( UInt const fluxes )
 {
     if ( this->isFluid() )
     {
-        //M_fluxes = imposeFlux();
-
         M_meshMotion.reset( new meshMotion_Type(               *M_mmFESpace,             M_epetraComm ) );
         M_fluid.reset(      new fluid_Type(      M_data->dataFluid(), *M_uFESpace, *M_pFESpace, M_epetraComm, fluxes ) );
         M_solid.reset( solid_Type::StructureSolverFactory::instance().createObject( M_data->dataSolid()->getSolidType( ) ) );
@@ -497,7 +491,6 @@ FSIOperator::setupSystem( void )
     M_epetraWorldComm->Barrier();
 }
 
-
 void
 FSIOperator::buildSystem()
 {
@@ -518,15 +511,13 @@ FSIOperator::buildSystem()
     M_epetraWorldComm->Barrier();
 }
 
-
-
 void
-FSIOperator::updateSystem( )
+FSIOperator::updateSystem()
 {
-    shiftSolution();
-
     if ( this->isFluid() )
     {
+        this->M_bdf->shiftRight( *M_fluid->solution() );
+
         M_meshMotion->updateSystem();
 
         transferMeshMotionOnFluid(M_meshMotion->disp(), *this->M_dispFluidMeshOld);
@@ -566,8 +557,9 @@ void FSIOperator::couplingVariableExtrap( )
 }
 
 void
-FSIOperator::shiftSolution()
+FSIOperator::updateSolution( const vector_Type& solution )
 {
+    setSolution( solution );
     if ( this->isFluid() )
     {
         this->M_bdf->shiftRight( *M_fluid->solution() );
@@ -575,7 +567,7 @@ FSIOperator::shiftSolution()
 }
 
 UInt
-FSIOperator::imposeFlux( void )
+FSIOperator::imposedFluxes( void )
 {
     if ( this->isFluid() )
     {
@@ -583,7 +575,7 @@ FSIOperator::imposeFlux( void )
         UInt numLM = static_cast<UInt>( fluxVector.size() );
 
         UInt offset = M_uFESpace->map().map(Unique)->NumGlobalElements()
-                      + M_pFESpace->map().map(Unique)->NumGlobalElements();
+                    + M_pFESpace->map().map(Unique)->NumGlobalElements();
 
         for ( UInt i = 0; i < numLM; ++i )
             M_BCh_u->setOffset( fluxVector[i], offset + i );
@@ -593,16 +585,74 @@ FSIOperator::imposeFlux( void )
         return 0;
 }
 
-// ===================================================
-//! Public Methods
-// ===================================================
+void
+FSIOperator::initialize( fluidPtr_Type::value_type::function_Type const& u0,
+                         fluidPtr_Type::value_type::function_Type const& p0,
+                         solidPtr_Type::value_type::Function const& d0,
+                         solidPtr_Type::value_type::Function const& w0,
+                         fluidPtr_Type::value_type::function_Type const& /*df0*/ )
+{
+    Debug( 6220 ) << "FSI:: solid init \n";
+    if (this->isSolid())
+        solid().initialize(d0, w0, w0);
+    Debug( 6220 ) << "FSI:: fluid init \n";
+    if (this->isFluid())
+        fluid().initialize(u0, p0);
+}
 
+void
+FSIOperator::initialize( const vectorPtr_Type& fluidVelocityAndPressure,
+                         const vectorPtr_Type& fluidDisplacement,
+                         const vectorPtr_Type& solidVelocity,
+                         const vectorPtr_Type& solidDisplacement )
+{
+    if ( M_isFluid )
+    {
+        M_fluid->initialize( *fluidVelocityAndPressure );
+        initializeBDF( *fluidVelocityAndPressure );
 
+        M_meshMotion->initialize( *fluidDisplacement );
+        moveMesh( *fluidDisplacement);
+    }
+    if ( M_isSolid )
+    {
+        M_solid->initialize( solidDisplacement, solidVelocity );
+    }
+}
+
+// ===================================================
+//  Public Methods
+// ===================================================
 void FSIOperator::initializeBDF( const vector_Type& un )
 {
-  M_bdf.reset( new TimeAdvanceBDF<vector_Type>( ));
-  M_bdf->setup(M_data->dataFluid()->dataTime()->orderBDF() ) ;
- M_bdf->setInitialCondition( un );
+    M_bdf.reset( new TimeAdvanceBDF<vector_Type>( ));
+    M_bdf->setup(M_data->dataFluid()->dataTime()->orderBDF() ) ;
+    M_bdf->setInitialCondition( un );
+}
+
+void
+FSIOperator::initializeFluid( const vector_Type& velAndPressure,
+                              const vector_Type& displacement )
+{
+    this->fluid().initialize( velAndPressure );
+    this->meshMotion().initialize( displacement );
+    this->moveMesh( displacement);
+}
+
+void
+FSIOperator::initializeSolid( vectorPtr_Type displacement,
+                              vectorPtr_Type velocity )
+{
+    this->solid().initialize( displacement, velocity);
+}
+
+void
+FSIOperator::moveMesh( const vector_Type& dep )
+{
+    displayer().leaderPrint("FSI-  Moving the mesh ...                      ");
+    M_fluidMeshPart->meshPartition()->moveMesh(dep,  this->M_mmFESpace->dof().numTotalDof());
+    displayer().leaderPrint( "done\n" );
+    M_fluid->setRecomputeMatrix( true );
 }
 
 void FSIOperator::createInterfaceMaps( std::map<ID, ID> const& locDofMap )
@@ -674,39 +724,6 @@ void FSIOperator::createInterfaceMaps( std::map<ID, ID> const& locDofMap )
     M_epetraWorldComm->Barrier();
 }
 
-
-
-void
-FSIOperator::initializeFluid( const vector_Type& velAndPressure,
-                              const vector_Type& displacement )
-{
-    this->fluid().initialize( velAndPressure );
-    this->meshMotion().initialize( displacement );
-    this->moveMesh( displacement);
-}
-
-
-
-void
-FSIOperator::initializeSolid( vectorPtr_Type displacement,
-                              vectorPtr_Type velocity )
-{
-    this->solid().initialize( displacement, velocity);
-}
-
-
-
-void
-FSIOperator::moveMesh( const vector_Type& dep )
-{
-    displayer().leaderPrint("FSI-  Moving the mesh ...                      ");
-    M_fluidMeshPart->meshPartition()->moveMesh(dep,  this->M_mmFESpace->dof().numTotalDof());
-    displayer().leaderPrint( "done\n" );
-    M_fluid->setRecomputeMatrix( true );
-}
-
-
-
 void
 FSIOperator::transferFluidOnInterface(const vector_Type &_vec1, vector_Type &_vec2)
 {
@@ -748,8 +765,6 @@ FSIOperator::transferFluidOnInterface(const vector_Type &_vec1, vector_Type &_ve
         }
 }
 
-
-
 //works in serial but no yet in parallel
 void
 FSIOperator::transferSolidOnFluid(const vector_Type &_vec1, vector_Type &_vec2)
@@ -789,8 +804,6 @@ FSIOperator::transferSolidOnFluid(const vector_Type &_vec1, vector_Type &_vec2)
                                   _vec1[it->first + dim*numTotalDofSolid]);
         }
 }
-
-
 
 void
 FSIOperator::transferSolidOnInterface(const vector_Type &_vec1, vector_Type &_vec2)
@@ -911,7 +924,7 @@ FSIOperator::setStructureToFluidParametres()
 }
 
 // ===================================================
-//! Display Methods
+//  Display Methods
 // ===================================================
 bool
 FSIOperator::isLeader() const
@@ -949,7 +962,7 @@ FSIOperator::displayer()
 
 
 // ===================================================
-//! Get Functions
+//  Get Functions
 // ===================================================
 /*
 FSI::vector_Type
@@ -984,7 +997,7 @@ FSI::displacementOnInterface()
 
 
 // ===================================================
-//! Set Functions
+//  Set Functions
 // ===================================================
 void
 FSIOperator::setComm( const commPtr_Type& comm,
@@ -1279,7 +1292,7 @@ void FSIOperator::setRobinOuterWall(function_Type const& dload, function_Type co
 
 
 // ===================================================
-//! Protected Methods
+//  Protected Methods
 // ===================================================
 
 

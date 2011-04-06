@@ -172,10 +172,10 @@ Int SolverAztecOO::solveSystem( const vector_type& rhsFull,
 
     LifeChrono chrono;
 
-    M_displayer->leaderPrint( "      Setting up the solver ...                \n" );
+    M_displayer->leaderPrint( "SLV-  Setting up the solver ...                \n" );
 
     if ( baseMatrixForPreconditioner.get() == 0 )
-        M_displayer->leaderPrint( "      Warning: baseMatrixForPreconditioner is empty     \n" );
+        M_displayer->leaderPrint( "SLV-  Warning: baseMatrixForPreconditioner is empty     \n" );
 
     if ( !isPreconditionerSet() || !M_reusePreconditioner  )
     {
@@ -185,7 +185,7 @@ Int SolverAztecOO::solveSystem( const vector_type& rhsFull,
     }
     else
     {
-        M_displayer->leaderPrint( "      Reusing precond ...                 \n" );
+        M_displayer->leaderPrint( "SLV-  Reusing precond ...                 \n" );
     }
 
     Int numIter = solveSystem( rhsFull, solution, M_preconditioner );
@@ -196,9 +196,9 @@ Int SolverAztecOO::solveSystem( const vector_type& rhsFull,
     {
         chrono.start();
 
-        M_displayer->leaderPrint( "     Iterative solver failed, numiter = " , - numIter );
-        M_displayer->leaderPrint( "     maxIterSolver = " , M_maxIter );
-        M_displayer->leaderPrint( "     retrying:          " );
+        M_displayer->leaderPrint( "SLV-  Iterative solver failed, numiter = " , - numIter );
+        M_displayer->leaderPrint( "SLV-  maxIterSolver = " , M_maxIter );
+        M_displayer->leaderPrint( "SLV-  retrying:          " );
 
         buildPreconditioner( baseMatrixForPreconditioner );
 
@@ -234,7 +234,7 @@ void SolverAztecOO::buildPreconditioner( matrix_ptrtype& preconditioner )
 
     chrono.start();
 
-    M_displayer->leaderPrint( "      Computing the precond ...                " );
+    M_displayer->leaderPrint( "SLV-  Computing the precond ...                " );
 
     M_preconditioner->buildPreconditioner( preconditioner );
 
@@ -242,7 +242,7 @@ void SolverAztecOO::buildPreconditioner( matrix_ptrtype& preconditioner )
     chrono.stop();
 
     M_displayer->leaderPrintMax( "done in " , chrono.diff() );
-    M_displayer->leaderPrint( "      Estimated condition number               " , condest, "\n" );
+    M_displayer->leaderPrint( "SLV-  Estimated condition number               " , condest, "\n" );
 }
 
 void SolverAztecOO::resetPreconditioner()

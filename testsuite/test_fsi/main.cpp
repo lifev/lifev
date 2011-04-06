@@ -215,7 +215,7 @@ public:
         M_data = dataPtr_Type( new data_Type() );
         M_data->setup( dataFile );
         M_data->dataSolid()->setTimeData( M_data->dataFluid()->dataTime() ); //Same TimeData for fluid & solid
-        //M_data->showMe();
+        M_data->showMe();
         MPI_Barrier( MPI_COMM_WORLD );
 
         Debug( 10000 ) << "creating FSISolver with operator :  " << method << "\n";

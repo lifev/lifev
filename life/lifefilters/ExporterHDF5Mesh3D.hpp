@@ -311,7 +311,7 @@ void ExporterHDF5Mesh3D<MeshType>::postProcess(const Real& time)
 
     if ( this->M_postfix != "*****" )
     {
-        if (!this->M_procId) std::cout << "  x-  HDF5 post-processing ...        " << std::flush;
+        if (!this->M_procId) std::cout << "  X-  HDF5 post-processing ...        " << std::flush;
         LifeChrono chrono;
         chrono.start();
         for (typename base::dataVectorIterator_Type i=this->M_dataVector.begin(); i != this->M_dataVector.end(); ++i)

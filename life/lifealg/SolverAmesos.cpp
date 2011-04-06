@@ -80,7 +80,7 @@ SolverAmesos::solveSystem( vector_type&    rhsFull,
 {
     bool verbose = M_trilinosParameterList.get( "Verbose", true );
     if ( verbose )
-        M_displayer.leaderPrint( "      Amesos solving system ...                " );
+        M_displayer.leaderPrint( "SLV-  Amesos solving system ...                " );
 
     LifeChrono chrono;
     chrono.start();
