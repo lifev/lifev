@@ -89,7 +89,13 @@ MultiscaleCouplingFlowRateValve::initializeCouplingVariables()
     {
         M_valveIsOpen = false;
         localCouplingVariables( 0 ) = 0;
+
+        if ( M_comm->MyPID() == 0 )
+            std::cout << " MS-  Valve close at coupling " << M_ID << std::endl;
     }
+    else
+        if ( M_comm->MyPID() == 0 )
+            std::cout << " MS-  Valve open at coupling " << M_ID << std::endl;
 }
 
 void
@@ -110,6 +116,9 @@ MultiscaleCouplingFlowRateValve::updateCoupling()
             M_valveIsOpen = false;
             M_topologyChange = true;
             localCouplingVariables( 0 ) = 0;
+
+            if ( M_comm->MyPID() == 0 )
+                std::cout << " MS-  Opening the valve at coupling " << M_ID << std::endl;
         }
     }
     else
@@ -119,6 +128,9 @@ MultiscaleCouplingFlowRateValve::updateCoupling()
         {
             M_valveIsOpen = true;
             M_topologyChange = true;
+
+            if ( M_comm->MyPID() == 0 )
+                std::cout << " MS-  Closing the valve at coupling " << M_ID << std::endl;
         }
     }
 }
