@@ -253,18 +253,15 @@ MultiscaleModelFSI3D::solveModel()
     vectorPtr_Type solution( new vector_Type( *M_fluidVelocityAndPressure_tn ) );
     std::ofstream outRes; // Unuseful variable - NonLinearRichardson interface must be clean..
 
-    UInt status = NonLinearRichardson( *solution, *M_FSIoperator,
-                                       M_data->absoluteTolerance(), M_data->relativeTolerance(),
-                                       maxSubIterationNumber, M_data->errorTolerance(),
-                                       M_data->NonLinearLineSearch(),
-                                       outRes, M_data->dataFluid()->dataTime()->time(),
-                                       M_nonLinearRichardsonIteration
-                                     );
+    NonLinearRichardson( *solution, *M_FSIoperator,
+                          M_data->absoluteTolerance(), M_data->relativeTolerance(),
+                          maxSubIterationNumber, M_data->errorTolerance(),
+                          M_data->NonLinearLineSearch(),
+                          outRes, M_data->dataFluid()->dataTime()->time(),
+                          M_nonLinearRichardsonIteration
+                       );
 
     M_FSIoperator->updateSolution( *solution );
-
-    if ( status == EXIT_FAILURE )
-        std::cout << "Non-Linear Richardson failed to converge" << std::endl;
 
     // Parameters for Multiscale subiterations
     boost::dynamic_pointer_cast< FSIMonolithic > ( M_FSIoperator )->precPtrView()->setRecompute( 1, false );
