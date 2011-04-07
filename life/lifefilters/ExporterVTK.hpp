@@ -139,8 +139,7 @@ private:
 
 public:
     //! Destructor
-    ~ExporterVTK() {}
-
+    ~ExporterVTK();
     //@}
 
     //! @name Public Methods
@@ -167,7 +166,7 @@ public:
     virtual void import(const Real& /*Tstart*/, const Real& /*dt*/) {}
 
     //! Read  only last timestep
-    virtual void import(const Real& /*Tstart*/) {}
+    virtual void import(const Real& Tstart);
 
     //@}
 
@@ -209,10 +208,19 @@ private:
        \param[out] coordinatesOfPoints a nDimensionsxnumPoints matrix, storing the nDimensions coordinates
               of the numPoints points
      */
-    void createMaps( const feSpacePtr_Type & _feSpacePtr,
-                     std::map<UInt, UInt>& globalToLocalPointsMap,
-                     std::map<UInt, UInt>& localToGlobalPointsMap,
-                     std::vector<Vector>& coordinatesOfPoints );
+    void createPointsMaps( const feSpacePtr_Type & _feSpacePtr,
+                           std::map<UInt, UInt>& globalToLocalPointsMap,
+                           std::map<UInt, UInt>& localToGlobalPointsMap,
+                           std::vector<Vector>& coordinatesOfPoints );
+
+    /*!
+       This method fills a buffer for the VTK collection (a *.pvd file).
+
+       \param time the current time
+       \param[out] vtkCollectionStringStream the stringstream object (a file buffer)
+     */
+    void composeVTKCollection( const std::string& variableName,
+                               std::stringstream& vtkCollectionStringStream);
 
     /*!
        This method fills a buffer for the header part of a *.vtu file.
@@ -245,7 +253,7 @@ private:
      */
     void composeVTUGeoStream( const feSpacePtr_Type & _feSpacePtr,
                               const std::map<UInt, UInt>& globalToLocalPointsMap,
-                              const std::map<UInt, UInt>& localToGlobalPointsMap,
+                              //const std::map<UInt, UInt>& localToGlobalPointsMap,
                               const std::vector<Vector>& coordinatesOfPoints,
                               std::stringstream& vtuGeoStringStream );
 
@@ -275,11 +283,11 @@ private:
        of the Data section of the file.
 
        \param dvar the ExporterData object
-       \param localToGlobalPointsMap a map to query the dvar object for global IDs
+       \param localToGlobalMap a map to query the dvar object for global IDs
        \param dataArraysStringStream the stringstream object (a file buffer)
      */
     void composeDataArrayStream(const exporterData_Type& dvar,
-                                const std::map<UInt,UInt>& localToGlobalPointsMap,
+                                const std::map<UInt,UInt>& localToGlobalMap,
                                 std::stringstream& dataArraysStringStream);
 
     // to be checked - do not use for now
@@ -288,6 +296,10 @@ private:
 
     virtual void readScalar( ExporterData<mesh_Type>& /*dvar*/ ) {}
     virtual void readVector( ExporterData<mesh_Type>& /*dvar*/ ) {}
+    void readVTUFiles( const exporterData_Type& dvar );
+    void readBinaryData( const std::string& line, const UInt& numBits,
+                         const UInt& numDOF, const UInt& fieldDim,
+                         std::vector<Real>& values );
     //@}
 
     //! @name Private members
@@ -295,6 +307,10 @@ private:
     EXPORT_MODE M_exportMode;
 
     FLOAT_PRECISION M_floatPrecision;
+
+    std::map< std::string, std::list<std::string> > M_pvtuFiles;
+
+    UInt M_numImportProc;
     //@}
 
 };
@@ -312,7 +328,8 @@ template<typename Mesh>
 ExporterVTK<Mesh>::ExporterVTK():
 super(),
 M_exportMode(ASCII_EXPORT),
-M_floatPrecision( DOUBLE_PRECISION )
+M_floatPrecision( DOUBLE_PRECISION ),
+M_numImportProc( 0 )
 {
 }
 
@@ -343,15 +360,52 @@ template<typename Mesh> ExporterVTK<Mesh >::ExporterVTK(
             break;
 
     }
+    M_numImportProc = data_file("exporter/numImportProc",1);
+
 }
 
+
+// ==============
+// Destructor
+// ==============
+template<typename Mesh>
+ExporterVTK<Mesh>::~ExporterVTK()
+{
+    // Right before dying, the exporter will write a VTK collection in a pvd file
+    // This allows ParaView to load a single file for the entire time series,
+    // and each frame will be associated to the correct time value.
+    // This will happen only if at least one time step was actually post-processed
+    if( this->M_timeSteps.size() )
+    {
+        std::stringstream buffer("");
+
+        // a unique time collection is produced by the leader process
+        if(this->M_procId==0)
+        {
+            for (typename super::dataVectorIterator_Type iData=this->M_dataVector.begin();
+                            iData != this->M_dataVector.end(); ++iData)
+            {
+                composeVTKCollection( iData->variableName(), buffer );
+
+                std::ofstream vtkCollectionFile;
+                vtkCollectionFile.open( ( this->M_postDir+this->M_prefix+"_" + iData->variableName() +
+                                +".pvd").c_str() );
+                vtkCollectionFile << buffer.str();
+                vtkCollectionFile.close();
+
+                buffer.str("");
+            }
+        }
+    }
+
+}
 
 // =====================
 // Public methods
 // =====================
 
 template<typename Mesh>
-void ExporterVTK<Mesh>::postProcess(const Real& /*time*/)
+void ExporterVTK<Mesh>::postProcess(const Real& time)
 {
     // typedef std::list< ExporterData >::iterator Iterator;
 
@@ -360,47 +414,54 @@ void ExporterVTK<Mesh>::postProcess(const Real& /*time*/)
     std::size_t found( this->M_postfix.find( "*" ) );
     if ( found == string::npos )
     {
-        if (!this->M_procId) std::cout << "\t[VTK post-processing] ...        " << std::endl;
+        if (!this->M_procId) std::cout << "  X-  ExporterVTK post-processing" << std::flush;
 
         LifeChrono chrono;
         chrono.start();
-        for (typename super::dataVectorIterator_Type i=this->M_dataVector.begin();
-             i != this->M_dataVector.end(); ++i)
+
+        this->M_timeSteps.push_back(time);
+
+        for (typename super::dataVectorIterator_Type iData=this->M_dataVector.begin();
+             iData != this->M_dataVector.end(); ++iData)
         {
             std::ofstream vtkFile;
             std::stringstream buffer("");
 
-            // a unique PVTU file is produced by the leader process
+            // a unique PVTU file + a time collection is produced by the leader process
             if(this->M_procId==0)
             {
-                composePVTUStream(*i, buffer);
+                composePVTUStream(*iData, buffer);
 
+                std::string vtkPFileName( this->M_postDir+this->M_prefix+"_" + iData->variableName()+
+                                          this->M_postfix+".pvtu" );
                 std::ofstream vtkPFile;
-                vtkPFile.open( ( this->M_postDir+this->M_prefix+"_" + i->variableName()+
-                                this->M_postfix+".pvtu").c_str() );
+                vtkPFile.open( vtkPFileName.c_str() );
                 vtkPFile << buffer.str();
                 vtkPFile.close();
 
                 buffer.str("");
+
+                this->M_pvtuFiles[iData->variableName()].push_back(vtkPFileName);
+
             }
 
 
             // redundant. should be done just the first time
             std::map<UInt,UInt> ltgPointsMap, gtlPointsMap;
             std::vector<Vector> pointsCoords;
-            createMaps( i->feSpacePtr(), gtlPointsMap, ltgPointsMap, pointsCoords );
+            createPointsMaps( iData->feSpacePtr(), gtlPointsMap, ltgPointsMap, pointsCoords );
 
             composeVTUHeaderStream( gtlPointsMap.size(), buffer );
-            composeVTUGeoStream( i->feSpacePtr(), gtlPointsMap, ltgPointsMap, pointsCoords, buffer );
+            composeVTUGeoStream( iData->feSpacePtr(), gtlPointsMap, pointsCoords, buffer );
 
-            composeTypeDataHeaderStream(i->where(), buffer);
-            composeDataArrayStream(*i, ltgPointsMap, buffer);
-            composeTypeDataFooterStream(i->where(), buffer);
+            composeTypeDataHeaderStream(iData->where(), buffer);
+            composeDataArrayStream(*iData, ltgPointsMap, buffer);
+            composeTypeDataFooterStream(iData->where(), buffer);
 
             composeVTUFooterStream( buffer );
 
             // each process writes its own file
-            vtkFile.open( ( this->M_postDir+this->M_prefix+"_" + i->variableName()+
+            vtkFile.open( ( this->M_postDir+this->M_prefix+"_" + iData->variableName()+
                             this->M_postfix+"."+this->M_procId+".vtu").c_str() );
             vtkFile << buffer.str();
             vtkFile.close();
@@ -409,8 +470,32 @@ void ExporterVTK<Mesh>::postProcess(const Real& /*time*/)
 
         }
         chrono.stop();
-        if (!this->M_procId) std::cout << "      done in " << chrono.diff() << " s." << std::endl;
+        if (!this->M_procId) std::cout << "...done in " << chrono.diff() << " s." << std::endl;
     }
+}
+
+
+template<typename Mesh>
+void ExporterVTK<Mesh>::import(const Real& /*time*/)
+{
+    //this->M_timeSteps.push_back(time);
+
+    this->computePostfix();
+
+    assert( this->M_postfix != "*****" );
+
+    if (!this->M_procId) std::cout << "  X-  ExporterVTK importing ..."<< std::endl;
+
+    LifeChrono chrono;
+    chrono.start();
+    for (typename super::dataVectorIterator_Type iData=this->M_dataVector.begin();
+                    iData != this->M_dataVector.end(); ++iData)
+    {
+        this->readVTUFiles(*iData);
+    }
+    chrono.stop();
+    if (!this->M_procId) std::cout << "      done in " << chrono.diff() << " s." << std::endl;
+
 }
 
 
@@ -479,12 +564,12 @@ UInt ExporterVTK<Mesh>::whichCellType( const feSpacePtr_Type & _feSpacePtr )
 template <typename Mesh>
 void
 ExporterVTK<Mesh>::composeDataArrayStream(const exporterData_Type& dvar,
-                                          const std::map<UInt,UInt>& localToGlobalPointsMap,
+                                          const std::map<UInt,UInt>& localToGlobalMap,
                                           std::stringstream& dataArraysStringStream)
 {
-    UInt start   = dvar.start();
-    UInt numDOF  = dvar.numDOF();
-    UInt numPoints( localToGlobalPointsMap.size() );
+    UInt start        ( dvar.start() );
+    UInt numGlobalDOF ( dvar.numDOF() );
+    UInt numMyDOF     ( localToGlobalMap.size() );
 
     std::stringstream dataToBeEncoded; dataToBeEncoded.str("");
     std::string encodedDataString;
@@ -511,7 +596,7 @@ ExporterVTK<Mesh>::composeDataArrayStream(const exporterData_Type& dvar,
             abort();
     }
 
-    int32_type lengthOfData( dvar.fieldDim()*numPoints*sizeOfFloat );
+    int32_type lengthOfRawData( dvar.fieldDim()*numMyDOF*sizeOfFloat );
 
     switch( M_exportMode )
     {
@@ -520,9 +605,9 @@ ExporterVTK<Mesh>::composeDataArrayStream(const exporterData_Type& dvar,
             break;
         case BINARY_EXPORT:
             formatString = "binary";
-            dataToBeEncoded.write( reinterpret_cast<char *>( &lengthOfData ),
+            dataToBeEncoded.write( reinterpret_cast<char *>( &lengthOfRawData ),
                                    sizeof(int32_type) );
-            lengthOfData += sizeof(int32_type);
+            lengthOfRawData += sizeof(int32_type);
             break;
     }
 
@@ -537,25 +622,25 @@ ExporterVTK<Mesh>::composeDataArrayStream(const exporterData_Type& dvar,
             dataArraysStringStream.precision(5);
             dataArraysStringStream.width(12);
 
-            for (UInt i=0; i<numPoints; ++i)
+            for (UInt iDOF=0; iDOF<numMyDOF; ++iDOF)
             {
-                Int id = localToGlobalPointsMap.find(i)->second;
+                Int id = localToGlobalMap.find(iDOF)->second;
                 for (UInt icoor=0; icoor< dvar.fieldDim(); ++icoor)
                 {
                     // the tensor case is not ready yet
                     //                    for (UInt jcoor=0; jcoor< dvar.fieldDim() / nDimensions; ++jcoor)
                     //                    {
                     dataArraysStringStream << dvar( start + id +
-                                                    icoor * numDOF ) << " ";
-                    //                                                        + jcoor * numDOF * dvar.fieldDim() ) << " ";
+                                                    icoor * numGlobalDOF ) << " ";
+                    //                                                        + jcoor * numGlobalDOF * dvar.fieldDim() ) << " ";
                     //                    }
                 }
             }
             break;
         case BINARY_EXPORT:
-            for (UInt i=0; i<numPoints; ++i)
+            for (UInt iDOF=0; iDOF<numMyDOF; ++iDOF)
             {
-                Int id = localToGlobalPointsMap.find(i)->second;
+                Int id = localToGlobalMap.find(iDOF)->second;
                 for (UInt icoor=0; icoor< dvar.fieldDim(); ++icoor)
                 {
                     // the tensor case is not ready yet
@@ -563,15 +648,15 @@ ExporterVTK<Mesh>::composeDataArrayStream(const exporterData_Type& dvar,
                     //                    {
                     if( M_floatPrecision == SINGLE_PRECISION )
                     {
-                        float value( dvar( start + id + icoor * numDOF ) );
-                        //                                                        + jcoor * numDOF * dvar.fieldDim() ) << " ";
+                        float value( dvar( start + id + icoor * numGlobalDOF ) );
+                        //                                                        + jcoor * numGlobalDOF * dvar.fieldDim() ) << " ";
                         dataToBeEncoded.write( reinterpret_cast<const char *>(&value), sizeof(float) );
                         //                    }
                     }
                     else
                     {
-                        Real value( dvar( start + id + icoor * numDOF ) );
-                        //                                                        + jcoor * numDOF * dvar.fieldDim() ) << " ";
+                        Real value( dvar( start + id + icoor * numGlobalDOF ) );
+                        //                                                        + jcoor * numGlobalDOF * dvar.fieldDim() ) << " ";
                         dataToBeEncoded.write( reinterpret_cast<const char *>(&value), sizeof(Real) );
                         //                    }
                     }
@@ -579,14 +664,167 @@ ExporterVTK<Mesh>::composeDataArrayStream(const exporterData_Type& dvar,
             }
 
             encodedDataString = base64_encode(reinterpret_cast<const unsigned char *>( dataToBeEncoded.str().c_str() ),
-                                              lengthOfData );
+                                              lengthOfRawData );
             dataArraysStringStream << encodedDataString;
 
             break;
     }
 
     dataArraysStringStream << "\n\t\t\t\t</DataArray>\n";
-    // return dataArraysStringStream;
+
+    dataArraysStringStream << "\t\t\t\t<DataArray type=\"Int32\" NumberOfComponents=\"1\" "
+                    << "Name=\"GlobalId\" format=\"ascii\">\n";
+    for ( UInt iDOF = 0; iDOF < numMyDOF; ++iDOF )
+    {
+        dataArraysStringStream << localToGlobalMap.find(  iDOF )->second << " ";
+    }
+    dataArraysStringStream << "\n\t\t\t\t</DataArray>\n";
+}
+
+
+template <typename Mesh>
+void
+ExporterVTK<Mesh>::readVTUFiles( const exporterData_Type& dvar )
+{
+    ASSERT( M_numImportProc, "The number of pieces to be loaded was not specified." );
+
+    UInt numPoints, numCells;
+    std::vector<Real> inputValues;
+
+    // Each processor will read all the files, and fill just its own component of the vectors
+    for( UInt iProc = 0; iProc < M_numImportProc; ++iProc )
+    {
+        std::string filename( this->M_postDir + this->M_prefix + "_" + dvar.variableName() +
+                              this->M_postfix + "." + iProc + ".vtu" );
+        std::ifstream inputFile( filename.c_str() );
+
+        if (!this->M_procId) std::cout << "\tfile "<< filename << std::endl;
+
+        ASSERT(inputFile.good(), std::stringstream("There is an error while reading " +
+                                                   filename).str().c_str() );
+
+        // file parsing: line by line
+        std::string line;
+        size_t found;
+        std::stringstream parseLine;
+
+        while ( getline( inputFile, line ) )
+        {
+            // this is essentially a consistency check: the number of DOF is explicitly
+            // written in the VTK files. We will check that the number of values read
+            // from file matches this number
+            found = line.find( "NumberOfPoints" );
+            if ( found != std::string::npos )
+            {
+                // place the get pointer at the first " after NumberOfPoints
+                found = line.find( "\"", found, 1 );
+                // after the " we'll find the number: parse the substring
+                parseLine.str( line.substr(found+1) );
+                parseLine >> numPoints;
+
+                // do the same for NumberOfCells
+                found = line.find( "NumberOfCells" );
+                found = line.find( "\"", found, 1 );
+                parseLine.str( line.substr(found+1) );
+                parseLine >> numCells;
+            }
+
+            if ( line.find( "<PointData" ) != std::string::npos )
+            {
+                getline( inputFile, line );
+                if ( line.find( "binary" ) != std::string::npos )
+                {
+                    UInt numBitsFloat;
+                    found = line.find( "Float" );
+                    parseLine.str( line.substr(found+5) );
+                    parseLine >> numBitsFloat;
+                    getline( inputFile, line );
+                    readBinaryData( line, numBitsFloat, numPoints, dvar.fieldDim(), inputValues );
+                }
+            }
+        }
+    }
+}
+
+
+template <typename Mesh>
+void
+ExporterVTK<Mesh>::readBinaryData( const std::string& line, const UInt& numBits,
+                                   const UInt& numDOF, const UInt& fieldDim,
+                                   std::vector<Real>& values )
+{
+    std::stringstream decodedData, dataToBeDecoded; dataToBeDecoded.str("");
+    std::string decodedDataString;
+    UInt sizeOfFloat, sizeOfVector(fieldDim*numDOF), lengthOfRawData;
+
+    switch( numBits )
+    {
+        case 32:
+            ASSERT( sizeof(float) == 4, "\nThis piece of code assumes sizeof(float) == 4" );
+            sizeOfFloat = sizeof(float);
+            break;
+        case 64:
+            ASSERT( sizeof(Real) == 8, "\nThis piece of code assumes sizeof(Real) == 8" );
+            sizeOfFloat = sizeof(Real);
+            break;
+        default:
+            ASSERT( false, "unmanaged float type" );
+            break;
+    }
+
+    lengthOfRawData = sizeOfVector*sizeOfFloat + sizeof(int32_type);
+
+    // read from file a block of char
+    //char* inputRawData = new char[ lengthOfRawData ];
+    //iFile.read( inputRawData, lengthOfRawData );
+
+    // assign the block of char to a stringstream (to convert it into a string)
+    dataToBeDecoded.write( line.c_str(), line.size() );
+
+    // perform the string decoding and store the string in a stringstream
+    // (to access it "bitwise")
+    decodedDataString = base64_decode( dataToBeDecoded.str() );
+    decodedData.str( decodedDataString );
+
+    std::cout << "\nlengthOfRawData = " << lengthOfRawData << ", line.size() = " << line.size()
+                << ", decodedDataString.size() = " << decodedDataString.size() << std::endl;
+    ASSERT( lengthOfRawData == decodedDataString.size(), "unexpected line length" );
+
+
+    // the first value in the string is the size of the subsequent bunch of data
+    int32_type* inputInt = new int32_type;
+    decodedData.read( reinterpret_cast< char *>( inputInt ),
+                      sizeof(int32_type) );
+
+    ASSERT( *inputInt - sizeOfVector, "Inconsistent size of data!" );
+
+    switch( numBits )
+    {
+        case 32:
+            {
+                float* inputFloat = new float[sizeOfVector];
+                decodedData.read( reinterpret_cast< char *>( inputFloat ),
+                                  sizeOfVector*sizeOfFloat );
+                std::vector<float> inputValuesTemp(sizeOfVector);
+                inputValuesTemp.assign( inputFloat, inputFloat+sizeOfVector );
+                values.assign( inputValuesTemp.begin(), inputValuesTemp.end() );
+                //for (UInt i = 0; i < inputValues.size(); i++)
+                //  inputValues[i] = inputValuesTemp[i];
+                break;
+            }
+        case 64:
+            {
+                Real* inputReal = new Real[sizeOfVector];
+                decodedData.read( reinterpret_cast< char *>( inputReal ),
+                                  sizeOfVector*sizeOfFloat );
+                values.assign( inputReal, inputReal+sizeOfVector );
+                break;
+            }
+    }
+    // output data to screen to verify/compare the results
+    for (UInt i = 0; i < values.size(); i++)
+      std::cout << values[i] << " " << std::flush;
+    std::cout << std::endl;
 }
 
 
@@ -625,8 +863,8 @@ ExporterVTK<Mesh>::composeDataArrayStream(const typename exporterData_Type::Wher
                     dataArraysStringStream << "\t\t\t\t<DataArray type=\"Float32\" Name=\""
                     << it->second.variableName() << "\" NumberOfComponents=\"1\" format=\"ascii\">\n";
 
-                    for (UInt i=1; i<=it->second.size(); ++i) {
-                        dataArraysStringStream << it->second( i ) << " ";
+                    for (UInt iValue=1; iValue<=it->second.size(); ++iValue) {
+                        dataArraysStringStream << it->second( iValue ) << " ";
                     }
                     break;
                 case exporterData_Type::VectorField:
@@ -635,9 +873,9 @@ ExporterVTK<Mesh>::composeDataArrayStream(const typename exporterData_Type::Wher
                     << it->second.variableName() << "\" NumberOfComponents=\""
                     << nDimensions << "\" format=\"ascii\">\n";
 
-                    for (UInt i=1; i<=it->second.size(); ++i) {
+                    for (UInt iValue=1; iValue<=it->second.size(); ++iValue) {
                         for (UInt icoor=0; icoor< nDimensions; ++icoor) {
-                            dataArraysStringStream << it->second( i + icoor * it->second.size() ) << " ";
+                            dataArraysStringStream << it->second( iValue + icoor * it->second.size() ) << " ";
                         }
                     }
                     break;
@@ -704,12 +942,6 @@ void ExporterVTK<Mesh>::composePVTUStream(const exporterData_Type& dvar,
 
     pVTUStringStream << "\t\t</PCells>\n";
 
-    pVTUStringStream << "\t\t<PPointData>\n";
-    pVTUStringStream << "\t\t\t<PDataArray type=\"Int32\" Name=\"GlobalId\" NumberOfComponents=\"1\" "
-                    << "format=\"ascii\">\n";
-    pVTUStringStream << "\t\t\t</PDataArray>\n";
-    pVTUStringStream << "\t\t</PPointData>\n";
-
     std::string whereString;
     switch ( dvar.where() )
     {
@@ -742,6 +974,10 @@ void ExporterVTK<Mesh>::composePVTUStream(const exporterData_Type& dvar,
 
     pVTUStringStream << "\t\t\t</PDataArray>\n";
 
+    pVTUStringStream << "\t\t\t<PDataArray type=\"Int32\" Name=\"GlobalId\" NumberOfComponents=\"1\" "
+                    << "format=\"ascii\">\n";
+    pVTUStringStream << "\t\t\t</PDataArray>\n";
+
     switch ( dvar.where() )
     {
         case exporterData_Type::Node:
@@ -769,10 +1005,10 @@ void ExporterVTK<Mesh>::composePVTUStream(const exporterData_Type& dvar,
 
 
 template <typename Mesh>
-void ExporterVTK<Mesh>::createMaps( const feSpacePtr_Type & _feSpacePtr,
-                                    std::map<UInt, UInt>& globalToLocalPointsMap,
-                                    std::map<UInt, UInt>& localToGlobalPointsMap,
-                                    std::vector<Vector>& coordinatesOfPoints )
+void ExporterVTK<Mesh>::createPointsMaps( const feSpacePtr_Type & _feSpacePtr,
+                                          std::map<UInt, UInt>& globalToLocalPointsMap,
+                                          std::map<UInt, UInt>& localToGlobalPointsMap,
+                                          std::vector<Vector>& coordinatesOfPoints )
 {
     ASSERT( this->M_mesh.get(), "\nA pointer to a valid mesh object is required!");
     ASSERT( _feSpacePtr.get(), "\nA pointer to a valid FESpace object is required!");
@@ -853,9 +1089,39 @@ void ExporterVTK<Mesh>::createMaps( const feSpacePtr_Type & _feSpacePtr,
 
 
 template <typename Mesh>
+void ExporterVTK<Mesh>::composeVTKCollection( const std::string& variableName,
+                                              std::stringstream& vtkCollectionStringStream )
+{
+    ASSERT( this->M_timeSteps.size(), "No time values to be saved in the VTK collection!");
+    ASSERT( this->M_pvtuFiles[variableName].size(), "No file names to be saved in the VTK collection!");
+    ASSERT( this->M_pvtuFiles[variableName].size() == this->M_timeSteps.size(),
+            "The number of post-processed files does not match the number of time steps in the list!" );
+
+    //header part of the file
+    vtkCollectionStringStream << "<?xml version=\"1.0\"?>\n";
+    vtkCollectionStringStream << "<VTKFile type=\"Collection\" version=\"0.1\" byte_order=\"LittleEndian\">\n";
+    vtkCollectionStringStream << "\t<Collection>\n";
+
+    typedef std::list<Real>::const_iterator realIterator;
+    realIterator iTime = this->M_timeSteps.begin();
+    typedef std::list<std::string>::const_iterator stringIterator;
+    stringIterator iFileName = this->M_pvtuFiles[variableName].begin();
+    for ( ; iTime != this->M_timeSteps.end(); ++iTime, ++iFileName)
+    {
+        vtkCollectionStringStream << "\t\t<DataSet timestep=\"" << *iTime << "\" group=\"\" part=\"0\" "
+                        << "file=\"" << *iFileName << "\" />\n";
+    }
+
+    vtkCollectionStringStream << "\t</Collection>\n";
+    vtkCollectionStringStream << "</VTKFile>\n";
+
+}
+
+
+template <typename Mesh>
 void ExporterVTK<Mesh>::composeVTUGeoStream( const feSpacePtr_Type & _feSpacePtr,
                                              const std::map<UInt, UInt>& globalToLocalPointsMap,
-                                             const std::map<UInt, UInt>& localToGlobalPointsMap,
+                                             //const std::map<UInt, UInt>& localToGlobalPointsMap,
                                              const std::vector<Vector>& coordinatesOfPoints,
                                              std::stringstream& vtuGeoStringStream )
 {
@@ -921,16 +1187,6 @@ void ExporterVTK<Mesh>::composeVTUGeoStream( const feSpacePtr_Type & _feSpacePtr
 
     vtuGeoStringStream << "\n\t\t\t\t</DataArray>\n";
     vtuGeoStringStream << "\t\t\t</Cells>\n";
-
-    vtuGeoStringStream << "\t\t\t<PointData>\n";
-    vtuGeoStringStream << "\t\t\t\t<DataArray type=\"Int32\" NumberOfComponents=\"1\" "
-                    << "Name=\"GlobalId\" format=\"ascii\">\n";
-    for ( UInt iPoint = 0; iPoint < numPoints; ++iPoint )
-    {
-        vtuGeoStringStream << localToGlobalPointsMap.find(  iPoint )->second << " ";
-    }
-    vtuGeoStringStream << "\n\t\t\t\t</DataArray>\n";
-    vtuGeoStringStream << "\t\t\t</PointData>\n";
 
 }
 
