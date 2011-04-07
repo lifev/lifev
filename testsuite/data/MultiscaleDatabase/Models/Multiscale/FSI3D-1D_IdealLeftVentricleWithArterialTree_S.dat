@@ -5,16 +5,17 @@
 #                Copyright (C) 2010 EPFL, Politecnico di Milano, Emory University
 #
 #      Author(s): Cristiano Malossi <cristiano.malossi@epfl.ch>
+#                 Toni Lassila <toni.lassila@epfl.ch>
 #           Date: 2011-03-10
 #  License Terms: GNU LGPL
 #
 ###################################################################################################
-### MODEL: Multiscale - Reymond Stergiopulos 2009 1D Arterial Tree ################################
+### MODEL: Multiscale - Ideal Left Ventricle + Reymond Stergiopulos 2009 1D Arterial Tree #########
 ###################################################################################################
 
 [Multiscale] ######################################################################################
 ###################################################################################################
-modelName        = 'Reymond Stergiopulos 2009 Arterial Tree Absorbing (OneDimensional, Stress)'
+modelName        = 'Ideal Left Ventricle + Reymond Stergiopulos 2009 1D Arterial Tree (FSI3D-OneDimensional, FlowRateValve-Stress)'
 modelType        = Multiscale
 couplingFlags    = ' '
 
@@ -25,7 +26,8 @@ couplingsPath    = './MultiscaleDatabase/Couplings/'
 
 # List of models ##################################################################################
 ########### ID #### Type ############## File (without .dat) #######################################
-models = '    
+models = '
+            0       FSI3D               IdealLeftVentricle_MonolithicGE  
             1       OneDimensional      ReymondStergiopulos2009_001
             2       OneDimensional      ReymondStergiopulos2009_002
             3       OneDimensional      ReymondStergiopulos2009_003
@@ -134,8 +136,9 @@ models = '
 
 # List of couplings ###############################################################################
 ########### ID #### Type ############## File (without .dat) ########### Models ######## Flags #####
-couplings = '    
-            1       BoundaryCondition   FlowRate_SquareSinusoidalWave   1               0
+couplings = '
+            0       BoundaryCondition   FlowRate_Mitral                 0               0
+            1       FlowRateValve       Lagrange1                       0,1             1,0
             2       Stress              Lagrange1                       95,96,97,1      0,0,0,1
             3       Stress              Lagrange1                       2,3,95          0,0,1
             4       Stress              Lagrange1                       4,5,3           0,0,1
@@ -189,13 +192,60 @@ couplings = '
            52       Stress              Lagrange1                       76,77,68        0,0,1
            53       Stress              Lagrange1                       78,69,77        0,1,1
            54       Stress              Lagrange1                       98,99,97        0,0,1
-           55       BoundaryCondition   Absorbing_1DRight               8,10,11,22,24,25,26,31,32,33,34,36,38,40,45,47,48,49,51,53,54,55,57,58,64,65,71,72,74,75,76,78,80,82,84,86,88,90,91,92,93,94,96,98,99,100,102  1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1
+           55       BoundaryCondition   Terminal_ReymondStergiopulos2009_008   8        1
+           56       BoundaryCondition   Terminal_ReymondStergiopulos2009_010   10       1
+           57       BoundaryCondition   Terminal_ReymondStergiopulos2009_011   11       1
+           58       BoundaryCondition   Terminal_ReymondStergiopulos2009_022   22       1
+           59       BoundaryCondition   Terminal_ReymondStergiopulos2009_024   24       1
+           60       BoundaryCondition   Terminal_ReymondStergiopulos2009_025   25       1
+           61       BoundaryCondition   Terminal_ReymondStergiopulos2009_026   26       1
+           62       BoundaryCondition   Terminal_ReymondStergiopulos2009_031   31       1
+           63       BoundaryCondition   Terminal_ReymondStergiopulos2009_032   32       1
+           64       BoundaryCondition   Terminal_ReymondStergiopulos2009_033   33       1
+           65       BoundaryCondition   Terminal_ReymondStergiopulos2009_034   34       1
+           66       BoundaryCondition   Terminal_ReymondStergiopulos2009_036   36       1
+           67       BoundaryCondition   Terminal_ReymondStergiopulos2009_038   38       1
+           68       BoundaryCondition   Terminal_ReymondStergiopulos2009_040   40       1
+           69       BoundaryCondition   Terminal_ReymondStergiopulos2009_045   45       1
+           70       BoundaryCondition   Terminal_ReymondStergiopulos2009_047   47       1
+           71       BoundaryCondition   Terminal_ReymondStergiopulos2009_048   48       1
+           72       BoundaryCondition   Terminal_ReymondStergiopulos2009_049   49       1
+           73       BoundaryCondition   Terminal_ReymondStergiopulos2009_051   51       1
+           74       BoundaryCondition   Terminal_ReymondStergiopulos2009_053   53       1
+           75       BoundaryCondition   Terminal_ReymondStergiopulos2009_054   54       1
+           76       BoundaryCondition   Terminal_ReymondStergiopulos2009_055   55       1
+           77       BoundaryCondition   Terminal_ReymondStergiopulos2009_057   57       1
+           78       BoundaryCondition   Terminal_ReymondStergiopulos2009_058   58       1
+           79       BoundaryCondition   Terminal_ReymondStergiopulos2009_064   64       1
+           80       BoundaryCondition   Terminal_ReymondStergiopulos2009_065   65       1
+           81       BoundaryCondition   Terminal_ReymondStergiopulos2009_071   71       1
+           82       BoundaryCondition   Terminal_ReymondStergiopulos2009_072   72       1
+           83       BoundaryCondition   Terminal_ReymondStergiopulos2009_074   74       1
+           84       BoundaryCondition   Terminal_ReymondStergiopulos2009_075   75       1
+           85       BoundaryCondition   Terminal_ReymondStergiopulos2009_076   76       1
+           86       BoundaryCondition   Terminal_ReymondStergiopulos2009_078   78       1
+           87       BoundaryCondition   Terminal_ReymondStergiopulos2009_080   80       1
+           88       BoundaryCondition   Terminal_ReymondStergiopulos2009_082   82       1
+           89       BoundaryCondition   Terminal_ReymondStergiopulos2009_084   84       1
+           90       BoundaryCondition   Terminal_ReymondStergiopulos2009_086   86       1
+           91       BoundaryCondition   Terminal_ReymondStergiopulos2009_088   88       1
+           92       BoundaryCondition   Terminal_ReymondStergiopulos2009_090   90       1
+           93       BoundaryCondition   Terminal_ReymondStergiopulos2009_091   91       1
+           94       BoundaryCondition   Terminal_ReymondStergiopulos2009_092   92       1
+           95       BoundaryCondition   Terminal_ReymondStergiopulos2009_093   93       1
+           96       BoundaryCondition   Terminal_ReymondStergiopulos2009_094   94       1
+           97       BoundaryCondition   Terminal_ReymondStergiopulos2009_096   96       1
+           98       BoundaryCondition   Terminal_ReymondStergiopulos2009_098   98       1
+           99       BoundaryCondition   Terminal_ReymondStergiopulos2009_099   99       1
+          100       BoundaryCondition   Terminal_ReymondStergiopulos2009_100  100       1
+          101       BoundaryCondition   Terminal_ReymondStergiopulos2009_102  102       1
            '
 ###################################################################################################
 
 # Geometry offset #################################################################################
 ########### ID #### Scale (x,y,z) ############# Rotate (x,y,z) ############ Translate (x,y,z) #####
-offset = '    
+offset = '
+            0       1.0 1.0 1.0                 -90 0 0                     1.4 -8.5 0 
             1       1       1       1       0       0     105       0       0       0
             2       1       1       1       0       0      30 -0.7371781444 3.929790049       0
             3       1       1       1       0       0 102.584652 -0.7371781444 3.929790049       0
