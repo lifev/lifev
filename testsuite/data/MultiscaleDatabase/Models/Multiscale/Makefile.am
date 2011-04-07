@@ -63,6 +63,7 @@ dist_pkgdata_DATA = 1D_1Cylinder.dat \
                     FSI3D-1D_IdealLeftVentricleWithAorta_S.dat \
                     FSI3D-1D_IdealLeftVentricleWithAorta-Absorbing_S.dat \
                     FSI3D-1D_IdealLeftVentricleWithAorta-ClosedValve_S.dat \
+                    FSI3D-1D_IdealLeftVentricleWithArterialTree_S.dat \
                     Template.dat \
                     Windkessel0D_Test.dat
 
