@@ -81,7 +81,7 @@ semiImplicit        = true   # tells if we advance in time after the first nonli
     BDF_order       = 1
 
     [../space_discretization]
-    mesh_dir         = ../../../cmcs-applications/applications/idealHeart/Mesh/
+    mesh_dir         = ./Mesh/
     mesh_file        = idealHeartPoints_fluid.mesh
     #mesh_file        = heart_fine.mesh
     mesh_type        = .mesh
@@ -178,7 +178,7 @@ tolerance       =  0.0005   # how far points are to be considered the same on th
     BDF_order       = 1
 
     [../space_discretization]
-    mesh_dir         = ./../../../cmcs-applications/applications/idealHeart/Mesh/
+    mesh_dir         = ./Mesh/
     mesh_file        = idealHeartPoints_wall.mesh
     #mesh_file        = toto2.mesh  # mesh file
     order            = P1
