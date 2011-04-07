@@ -154,7 +154,6 @@ MultiscaleModelMultiscale::setupData( const std::string& fileName )
         M_modelsList[i]->setGlobalData( M_globalData );
         M_modelsList[i]->setupData( path + enum2String( model, multiscaleModelsMap ) + "/"
                                     + dataFile( "Problem/models", "undefined", i * modelsColumnsNumber + 2 ) + ".dat" );
-
     }
 
     // Load couplings
