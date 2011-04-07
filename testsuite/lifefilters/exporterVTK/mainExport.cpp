@@ -62,7 +62,7 @@ int
 main( int argc, char** argv )
 {
     //MPI communicator initialization
-    boost::shared_ptr<Epetra_Comm> comm;
+    boost::shared_ptr<Epetra_Comm> commPtr;
 
 #ifdef HAVE_MPI
     std::cout << "MPI Initialization" << std::endl;
@@ -83,48 +83,23 @@ main( int argc, char** argv )
         std::cout << "MPI processes: " << nprocs << std::endl;
         std::cout << "MPI Epetra Initialization ... " << std::endl;
     }
-    comm.reset( new Epetra_MpiComm( MPI_COMM_WORLD ) );
+    commPtr.reset( new Epetra_MpiComm( MPI_COMM_WORLD ) );
 
-    comm->Barrier();
+    commPtr->Barrier();
 
 #else
 
     std::cout << "MPI SERIAL Epetra Initialization ... " << std::endl;
-    comm.reset( new Epetra_SerialComm() );
+    commPtr.reset( new Epetra_SerialComm() );
 
 #endif
 
     GetPot command_line(argc,argv);
-    const std::string problemName = command_line.follow("Womersley", 2, "-p","--problem");
+    TestExporterVTK testExporterVTK( commPtr );
+
     bool passed(false);
 
-    if (problemName.compare("Womersley") == 0)
-    {
-        passed = testExporterVTK<Womersley>(comm, command_line);
-    }
-    else
-    {
-        if (problemName.compare("RossEthierSteinmanInc") == 0)
-        {
-            passed = testExporterVTK<RossEthierSteinmanUnsteadyInc>(comm, command_line);
-        }
-        else
-        {
-            if (problemName.compare("RossEthierSteinmanDec") == 0)
-                passed = testExporterVTK<RossEthierSteinmanUnsteadyDec>(comm, command_line);
-            else
-            {
-                if (comm->MyPID() == 0)
-                {
-                    std::cout<<"Unrecognized problem. \n";
-                    std::cout<<"Usage: mpirun -n XX ./test_NavierStokes --problem Womersley \n";
-                    std::cout<<"Usage: mpirun -n XX ./test_NavierStokes --problem RossEthierSteinmanInc \n";
-                    std::cout<<"Usage: mpirun -n XX ./test_NavierStokes --problem RossEthierSteinmanDec \n";
-                }
-                passed = false;
-            }
-        }
-    }
+    passed = testExporterVTK.testExport( command_line );
 
     // ----- End of test calls -----
 

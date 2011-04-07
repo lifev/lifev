@@ -17,13 +17,15 @@ SUFFIXES                   = .cpp .hpp .idl .c .h .f .F .o .moc
 
 EXTRA_DIST = data testsuite.at
 
-MOSTLYCLEANFILES = *.vct *.scl *.case *.geo *.vtu *.pvtu
+MOSTLYCLEANFILES = *.vct *.scl *.case *.geo *.vtu *.pvtu *.pvd
 
 check_HEADERS              = testExporterVTK.hpp # List of all the hpp files
 
-check_PROGRAMS             = test_ExporterVTK
+check_PROGRAMS             = testExport testImport
 
-test_ExporterVTK_SOURCES  = main.cpp # List of all the cpp files
+testExport_SOURCES  = mainExport.cpp # List of all the cpp files
+
+testImport_SOURCES  = mainImport.cpp # List of all the cpp files
 
 link:
 	test -a data || ln -s $(srcdir)/data.txt
