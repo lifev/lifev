@@ -385,13 +385,13 @@ public:
         M_postDir = Directory;
     }
 
-    //! Set the folder for pre/postprocessing
+    //! Set the current time index
     /*!
-     * @param Directory output folder
+     * @param timeIndex index of the current time frame
      */
-    void setTimeIndexStart( const UInt& StartIndex )
+    void setTimeIndex( const UInt& timeIndex )
     {
-        M_timeIndexStart = StartIndex;
+        M_timeIndex = timeIndex;
     }
 
     //! Set how many time step between two saves.

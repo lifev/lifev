@@ -527,7 +527,7 @@ Cylinder::run()
                               velAndPressure,
                               3*uFESpacePtr->dof().numTotalDof() );
 
-        exporter.setTimeIndexStart(importer.importFromTime(0.0));
+        exporter.setTimeIndex(importer.importFromTime(0.0));
 
 
         //
