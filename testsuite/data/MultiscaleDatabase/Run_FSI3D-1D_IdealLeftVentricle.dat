@@ -14,7 +14,8 @@
 
 [Problem] #########################################################################################
 ProblemType = Multiscale
-ProblemFile = ./MultiscaleDatabase/Models/Multiscale/FSI3D-1D_IdealLeftVentricleWithAorta_S
+ProblemFile = ./MultiscaleDatabase/Models/Multiscale/FSI3D-1D_IdealLeftVentricleWithArterialTree_S
+#ProblemFile = ./MultiscaleDatabase/Models/Multiscale/FSI3D-1D_IdealLeftVentricleWithAorta_S
 #ProblemFile = ./MultiscaleDatabase/Models/Multiscale/FSI3D-1D_IdealLeftVentricleWithAorta-ClosedValve_S
 #ProblemFile = ./MultiscaleDatabase/Models/Multiscale/FSI3D-1D_IdealLeftVentricleWithAorta-Absorbing_S
 
@@ -27,7 +28,7 @@ ProblemFile = ./MultiscaleDatabase/Models/Multiscale/FSI3D-1D_IdealLeftVentricle
 
     [../time_discretization]
     initialtime                = 0.000   # [s]
-    endtime                    = 0.300   # [s]
+    endtime                    = 0.800   # [s]
     timestep                   = 0.001   # [s]
 
     [../Algorithm]
