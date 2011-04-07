@@ -66,137 +66,267 @@ typedef LifeV::RegionMesh3D<LifeV::LinearTetra>       mesh_Type;
 typedef LifeV::RossEthierSteinmanUnsteadyInc          problem_Type;
 typedef LifeV::FESpace< mesh_Type, LifeV::MapEpetra > feSpace_Type;
 typedef boost::shared_ptr<feSpace_Type>               feSpacePtr_Type;
+typedef boost::shared_ptr<Epetra_Comm>                commPtr_Type;
 
-template<typename ProblemType>
-bool testExporterVTK(/*const*/ boost::shared_ptr<Epetra_Comm> & comm, GetPot & commandLine)
+
+class TestExporterVTK
+{
+public:
+    TestExporterVTK( const commPtr_Type& commPtr );
+
+    bool testExport( GetPot& commandLine );
+    bool testImport( GetPot& commandLine );
+
+private:
+    void loadData( GetPot& commandLine );
+    void buildMesh();
+    void buildFESpaces();
+    void buildExporter();
+
+    commPtr_Type                                             M_commPtr;
+    LifeV::Displayer                                         M_displayer;
+    GetPot                                                   M_dataFile;
+    boost::shared_ptr< LifeV::MeshPartitioner< mesh_Type > > M_meshPartPtr;
+    boost::shared_ptr< LifeV::ExporterVTK< mesh_Type > >     M_exporterPtr;
+    feSpacePtr_Type                                          M_velFESpacePtr;
+    feSpacePtr_Type                                          M_pressFESpacePtr;
+};
+
+
+TestExporterVTK::TestExporterVTK( const commPtr_Type& commPtr ) :
+    M_commPtr  ( commPtr ),
+    M_displayer( commPtr )
+{}
+
+
+void
+TestExporterVTK::loadData( GetPot& commandLine )
 {
     using namespace LifeV;
-
     // Chronometer
-    LifeChrono globalChrono;
-    LifeChrono initChrono;
-    LifeChrono iterChrono;
-    globalChrono.start();
-    initChrono.start();
-
-    Displayer displayer(comm);
+    LifeChrono chrono;
 
     // +-----------------------------------------------+
     // |               Loading the data                |
     // +-----------------------------------------------+
-    displayer.leaderPrint( "[Loading the data]\n" );
+    M_displayer.leaderPrint( "[Loading the data]\n" );
+    chrono.start();
+
     const std::string problemName = commandLine.follow("", 2, "-p", "--problem");
     const std::string defaultDataFileName("data"+problemName);
     const std::string dataFileName = commandLine.follow(defaultDataFileName.c_str(), 2, "-f","--file");
-    GetPot dataFile(dataFileName);
+    M_dataFile = GetPot(dataFileName);
 
-    problem_Type::setParamsFromGetPot(dataFile);
+    problem_Type::setParamsFromGetPot(M_dataFile);
+
+    chrono.stop();
+    M_displayer.leaderPrint( "[...done in ", chrono.diff(), "s]\n" );
+}
+
+
+void
+TestExporterVTK::buildMesh()
+{
+    using namespace LifeV;
+    // Chronometer
+    LifeChrono chrono;
 
     // +-----------------------------------------------+
     // |              Building the mesh                |
     // +-----------------------------------------------+
-    displayer.leaderPrint( "[Building the mesh]\n" );
+    M_displayer.leaderPrint( "[Building the mesh]\n" );
+    chrono.start();
 
     boost::shared_ptr< mesh_Type > fullMeshPtr(new mesh_Type);
-    UInt nEl(dataFile("space_discretization/dimension", 1));
+    UInt nEl(M_dataFile("space_discretization/dimension", 1));
     regularMesh3D(*fullMeshPtr, 0, nEl, nEl, nEl);
     //  The following is when reading from file
     /*
     MeshData meshData;
-    meshData.setup(dataFile, "fluid/space_discretization");
+    meshData.setup(M_dataFile, "fluid/space_discretization");
     if (verbose) std::cout << "Mesh file: " << dataMesh.meshDir() << dataMesh.meshFile() << std::endl;
     readMesh(*fullMeshPtr, dataMesh);
     */
     // Split the mesh between processors
-    MeshPartitioner< mesh_Type > meshPart( fullMeshPtr, comm );
+    M_meshPartPtr.reset( new MeshPartitioner< mesh_Type >( fullMeshPtr, M_commPtr ) );
     // Release the original mesh from the MeshPartitioner object and delete the RegionMesh3D object
-    meshPart.releaseUnpartitionedMesh();
+    M_meshPartPtr->releaseUnpartitionedMesh();
     fullMeshPtr.reset();
+
+    chrono.stop();
+    M_displayer.leaderPrint( "[...done in ", chrono.diff(), "s]\n" );
+}
+
+
+void
+TestExporterVTK::buildFESpaces()
+{
+    using namespace LifeV;
+    // Chronometer
+    LifeChrono chrono;
 
     // +-----------------------------------------------+
     // |            Creating the FE spaces             |
     // +-----------------------------------------------+
-    displayer.leaderPrint( "[Creating the FE spaces]\n" );
+    M_displayer.leaderPrint( "[Creating the FE spaces...]\n" );
+    chrono.start();
 
-    const std::string velFE =  dataFile( "space_discretization/velFE", "P2");
-    displayer.leaderPrint( "\t-o FE for the velocity: ", velFE, "\n" );
+    const std::string velFE =  M_dataFile( "space_discretization/velFE", "P2");
+    M_displayer.leaderPrint( "\t-o FE for the velocity: ", velFE, "\n" );
 
-    displayer.leaderPrint( "\t-o Building the velocity FE space...\n" );
+    M_displayer.leaderPrint( "\t-o Building the velocity FE space...\n" );
 
-    feSpacePtr_Type velFESpacePtr( new feSpace_Type(meshPart, velFE, nDimensions, comm) );
+    M_velFESpacePtr.reset( new feSpace_Type(*M_meshPartPtr, velFE, nDimensions, M_commPtr) );
 
-    displayer.leaderPrint( "\t\t...ok.\n" );
+    M_displayer.leaderPrint( "\t\t...ok.\n" );
 
-    const std::string pressFE =  dataFile( "space_discretization/pressFE", "P1");
-    displayer.leaderPrint( "\t-o FE for the pressure: ", pressFE, "\n" );
+    const std::string pressFE =  M_dataFile( "space_discretization/pressFE", "P1");
+    M_displayer.leaderPrint( "\t-o FE for the pressure: ", pressFE, "\n" );
 
-    displayer.leaderPrint( "\t-o Building the pressure FE space...\n" );
+    M_displayer.leaderPrint( "\t-o Building the pressure FE space...\n" );
 
-    feSpacePtr_Type pressFESpacePtr( new feSpace_Type(meshPart, pressFE, nDimensions, comm) );
+    M_pressFESpacePtr.reset( new feSpace_Type(*M_meshPartPtr, pressFE, 1, M_commPtr) );
 
-    displayer.leaderPrint( "\t\t...ok.\n" );
+    M_displayer.leaderPrint( "\t\t...ok.\n" );
 
     // Total degrees of freedom (elements of matrix)
-    UInt velTotalDof   = velFESpacePtr->map().map(Unique)->NumGlobalElements();
-    UInt pressTotalDof = pressFESpacePtr->map().map(Unique)->NumGlobalElements();
+    UInt velTotalDof   = M_velFESpacePtr->map().map(Unique)->NumGlobalElements();
+    UInt pressTotalDof = M_pressFESpacePtr->map().map(Unique)->NumGlobalElements();
 
-    displayer.leaderPrint( "\t-o Total Dof for the velocity: ", velTotalDof, "\n" );
-    displayer.leaderPrint( "\t-o Total Dof for the pressure: ", pressTotalDof, "\n" );
+    M_displayer.leaderPrint( "\t-o Total Dof for the velocity: ", velTotalDof, "\n" );
+    M_displayer.leaderPrint( "\t-o Total Dof for the pressure: ", pressTotalDof, "\n" );
+
+    chrono.stop();
+    M_displayer.leaderPrint( "[...done in ", chrono.diff(), "s]\n" );
+
+}
+
+
+void
+TestExporterVTK::buildExporter()
+{
+    using namespace LifeV;
+    // Chronometer
+    LifeChrono chrono;
 
     // +-----------------------------------------------+
     // |            Creating the exporter              |
     // +-----------------------------------------------+
-    Exporter<mesh_Type >::vectorPtr_Type velInterpolantPtr(
-        new Exporter<mesh_Type >::vector_Type   ( velFESpacePtr->map(), Repeated ) );
-    Exporter<mesh_Type >::vectorPtr_Type pressInterpolantPtr(
-        new Exporter<mesh_Type >::vector_Type   ( pressFESpacePtr->map(), Repeated ) );
+    M_displayer.leaderPrint( "[Creating the exporter...]\n" );
+    chrono.start();
 
-    boost::shared_ptr< ExporterVTK<mesh_Type > > exporter;
-    exporter.reset( new ExporterVTK<mesh_Type > ( dataFile, "testExporterVTK" ) );
-    exporter->setPostDir( "./" );
-    exporter->setMeshProcId( meshPart.meshPartition(), comm->MyPID() );
+    M_exporterPtr.reset( new ExporterVTK<mesh_Type > ( M_dataFile, "testExporterVTK" ) );
+    M_exporterPtr->setPostDir( "./" );
+    M_exporterPtr->setMeshProcId( M_meshPartPtr->meshPartition(), M_commPtr->MyPID() );
 
-    exporter->addVariable( ExporterData<mesh_Type>::VectorField, "velocity",
-                           velFESpacePtr, velInterpolantPtr, UInt(0) );
+    chrono.stop();
+    M_displayer.leaderPrint( "[...done in ", chrono.diff(), "s]\n" );
 
-    exporter->addVariable( ExporterData<mesh_Type>::ScalarField, "pressure",
-                           pressFESpacePtr, pressInterpolantPtr, UInt(0) );
-    exporter->postProcess( 0 );
+}
 
-    initChrono.stop();
+
+bool
+TestExporterVTK::testExport( GetPot& commandLine )
+{
+    using namespace LifeV;
+
+    loadData( commandLine );
+    buildMesh();
+    buildFESpaces();
+    buildExporter();
+
+    // Chronometer
+    LifeChrono globalChrono;
 
     // +-----------------------------------------------+
     // |             Solving the problem               |
     // +-----------------------------------------------+
-    displayer.leaderPrint( "[Interpolating the analytic solution]\n" );
+    M_displayer.leaderPrint( "[Entering the time loop]\n" );
+    globalChrono.start();
+
+    Exporter<mesh_Type >::vectorPtr_Type velInterpolantPtr(
+        new Exporter<mesh_Type >::vector_Type   ( M_velFESpacePtr->map(), Repeated ) );
+    Exporter<mesh_Type >::vectorPtr_Type pressInterpolantPtr(
+        new Exporter<mesh_Type >::vector_Type   ( M_pressFESpacePtr->map(), Repeated ) );
+
+    M_exporterPtr->addVariable( ExporterData<mesh_Type>::VectorField, "velocity",
+                           M_velFESpacePtr, velInterpolantPtr, UInt(0) );
+
+    M_exporterPtr->addVariable( ExporterData<mesh_Type>::ScalarField, "pressure",
+                           M_pressFESpacePtr, pressInterpolantPtr, UInt(0) );
+    M_exporterPtr->postProcess( 0 );
 
     TimeData timeData;
-    timeData.setup( dataFile, "time_discretization" );
+    timeData.setup( M_dataFile, "time_discretization" );
 
     for ( ; timeData.canAdvance(); timeData.updateTime() )
     {
 
-        displayer.leaderPrint( "\t[t = ", timeData.time(), " s.]\n" );
+        M_displayer.leaderPrint( "[t = ", timeData.time(), " s.]\n" );
 
         // Computation of the interpolation
-        velFESpacePtr->interpolate( problem_Type::uexact, *velInterpolantPtr, timeData.time() );
-        pressFESpacePtr->interpolate( problem_Type::pexact, *pressInterpolantPtr, timeData.time() );
+        M_velFESpacePtr->interpolate( problem_Type::uexact, *velInterpolantPtr, timeData.time() );
+        M_pressFESpacePtr->interpolate( problem_Type::pexact, *pressInterpolantPtr, timeData.time() );
 
         // Exporting the solution
-        exporter->postProcess( timeData.time() );
+        M_exporterPtr->postProcess( timeData.time() );
 
         MPI_Barrier(MPI_COMM_WORLD);
 
     }
 
     globalChrono.stop();
-    displayer.leaderPrint( "Total simulation time:  ", globalChrono.diff(), " s.\n" );
+    M_displayer.leaderPrint( "[Time loop, elapsed time:  ", globalChrono.diff(), " s.]\n" );
 
-    exporter->closeFile();
+    M_exporterPtr->closeFile();
 
     return 0;
 }
 
 
+bool
+TestExporterVTK::testImport( GetPot& commandLine )
+{
+    using namespace LifeV;
+
+    loadData( commandLine );
+    buildMesh();
+    buildFESpaces();
+    buildExporter();
+
+    // Chronometer
+    LifeChrono globalChrono;
+
+    // +-----------------------------------------------+
+    // |             Solving the problem               |
+    // +-----------------------------------------------+
+    M_displayer.leaderPrint( "[Entering the time loop]\n" );
+    globalChrono.start();
+
+    Exporter<mesh_Type >::vectorPtr_Type velImportedPtr(
+        new Exporter<mesh_Type >::vector_Type   ( M_velFESpacePtr->map(), Repeated ) );
+    Exporter<mesh_Type >::vectorPtr_Type pressImportedPtr(
+        new Exporter<mesh_Type >::vector_Type   ( M_pressFESpacePtr->map(), Repeated ) );
+
+    M_exporterPtr->addVariable( ExporterData<mesh_Type>::VectorField, "velocity",
+                           M_velFESpacePtr, velImportedPtr, UInt(0) );
+
+    M_exporterPtr->addVariable( ExporterData<mesh_Type>::ScalarField, "pressure",
+                           M_pressFESpacePtr, pressImportedPtr, UInt(0) );
+
+    TimeData timeData;
+    timeData.setup( M_dataFile, "time_discretization" );
+
+    M_displayer.leaderPrint( "\t[t = ", timeData.time(), " s.]\n" );
+
+    // Import test
+    M_exporterPtr->setTimeIndex( 1 );
+    M_exporterPtr->import( timeData.time() );
+
+    globalChrono.stop();
+    M_displayer.leaderPrint( "[Time loop, elapsed time:  ", globalChrono.diff(), " s.\n" );
+
+    return 0;
+}
 
 #endif /* TESTEXPORTERVTK_HPP_ */
