@@ -28,7 +28,7 @@
   @file
   @brief An algorithm to encode / decode a string into base64 format
 
-  The code was written by René Nyffenegger (original Copytight notice follows)
+  The code was written by René Nyffenegger (original Copyright notice follows)
 
   @date 3-9-2011
 
