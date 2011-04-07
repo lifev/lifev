@@ -65,7 +65,7 @@ public:
 
     typedef MultiscaleCouplingFunction                           couplingFunction_Type;
     typedef boost::shared_ptr < couplingFunction_Type >          couplingFunctionPtr_Type;
-    typedef std::vector< couplingFunction_Type >              couplingFunctionsContainer_Type;
+    typedef std::vector< couplingFunction_Type >                 couplingFunctionsContainer_Type;
 
     typedef std::vector< multiscaleVectorPtr_Type >              couplingVariablesContainer_Type;
 
@@ -364,6 +364,12 @@ protected:
 
     //! Create the local vectors of the coupling
     void createLocalVectors();
+
+    //! Reset the history of the couplings
+    /*!
+     *  This method is used when the topology change.
+     */
+    void resetCouplingHistory();
 
     //! Import the content of the Global Vector in the Local vector
     /*!

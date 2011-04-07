@@ -87,11 +87,11 @@ MultiscaleCouplingFlowRateValve::initializeCouplingVariables()
 
     if ( localCouplingVariables( 0 )[0] <= 0 )
     {
-        M_valveIsOpen = false;
-        localCouplingVariables( 0 ) = 0;
-
         if ( M_comm->MyPID() == 0 )
             std::cout << " MS-  Valve close at coupling " << M_ID << std::endl;
+
+        M_valveIsOpen = false;
+        localCouplingVariables( 0 ) = 0;
     }
     else
         if ( M_comm->MyPID() == 0 )
@@ -113,12 +113,14 @@ MultiscaleCouplingFlowRateValve::updateCoupling()
     {
         if ( multiscaleDynamicCast< MultiscaleInterfaceFluid >( M_models[0] )->boundaryFlowRate( M_flags[0] ) < 0 )
         {
-            M_valveIsOpen = false;
-            M_topologyChange = true;
-            localCouplingVariables( 0 ) = 0;
-
             if ( M_comm->MyPID() == 0 )
                 std::cout << " MS-  Opening the valve at coupling " << M_ID << std::endl;
+
+            M_valveIsOpen = false;
+            M_topologyChange = true;
+
+            // Reset coupling variable history
+            resetCouplingHistory();
         }
     }
     else
@@ -126,11 +128,14 @@ MultiscaleCouplingFlowRateValve::updateCoupling()
         if (   multiscaleDynamicCast< MultiscaleInterfaceFluid >( M_models[1] )->boundaryStress( M_flags[1] )
              - multiscaleDynamicCast< MultiscaleInterfaceFluid >( M_models[0] )->boundaryStress( M_flags[0] ) > 0 )
         {
+            if ( M_comm->MyPID() == 0 )
+                std::cout << " MS-  Closing the valve at coupling " << M_ID << std::endl;
+
             M_valveIsOpen = true;
             M_topologyChange = true;
 
-            if ( M_comm->MyPID() == 0 )
-                std::cout << " MS-  Closing the valve at coupling " << M_ID << std::endl;
+            // Reset coupling variable history
+            resetCouplingHistory();
         }
     }
 }

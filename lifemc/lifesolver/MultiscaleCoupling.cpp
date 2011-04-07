@@ -314,6 +314,14 @@ MultiscaleCoupling::createLocalVectors()
 }
 
 void
+MultiscaleCoupling::resetCouplingHistory()
+{
+    // Reset coupling variable history
+    for ( UInt i( 0 ) ; i < M_localCouplingVariables.size() ; ++i )
+        localCouplingVariables( i ) = 0;
+}
+
+void
 MultiscaleCoupling::importCouplingVector( const multiscaleVector_Type& globalVector, multiscaleVector_Type& localVector )
 {
     Real value(0);
