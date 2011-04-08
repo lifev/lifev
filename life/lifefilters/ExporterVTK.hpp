@@ -297,9 +297,8 @@ private:
     virtual void readScalar( ExporterData<mesh_Type>& /*dvar*/ ) {}
     virtual void readVector( ExporterData<mesh_Type>& /*dvar*/ ) {}
     void readVTUFiles( const exporterData_Type& dvar );
-    void readBinaryData( const std::string& line, const UInt& numBits,
-                         const UInt& numDOF, const UInt& fieldDim,
-                         std::vector<Real>& values );
+    void readBinaryData( const std::string& line, std::vector<Real>& values, const UInt& numBits );
+    void readASCIIData( const std::string& line, std::vector<Real>& values );
     //@}
 
     //! @name Private members
@@ -690,6 +689,7 @@ ExporterVTK<Mesh>::readVTUFiles( const exporterData_Type& dvar )
 
     UInt numPoints, numCells;
     std::vector<Real> inputValues;
+    std::vector<Real> localDOF;
 
     // Each processor will read all the files, and fill just its own component of the vectors
     for( UInt iProc = 0; iProc < M_numImportProc; ++iProc )
@@ -729,18 +729,34 @@ ExporterVTK<Mesh>::readVTUFiles( const exporterData_Type& dvar )
                 parseLine >> numCells;
             }
 
+            // load all PointData arrays
             if ( line.find( "<PointData" ) != std::string::npos )
             {
-                getline( inputFile, line );
-                if ( line.find( "binary" ) != std::string::npos )
+                while ( getline( inputFile, line ) )
                 {
-                    UInt numBitsFloat;
-                    found = line.find( "Float" );
-                    parseLine.str( line.substr(found+5) );
-                    parseLine >> numBitsFloat;
-                    getline( inputFile, line );
-                    readBinaryData( line, numBitsFloat, numPoints, dvar.fieldDim(), inputValues );
+                    if ( line.find( dvar.variableName() ) != std::string::npos )
+                    {
+                        inputValues.resize( dvar.fieldDim()*numPoints );
+
+                        if ( line.find( "binary" ) != std::string::npos )
+                        {
+                            UInt numBitsFloat;
+                            found = line.find( "Float" );
+                            parseLine.str( line.substr(found+5) );
+                            parseLine >> numBitsFloat;
+                            getline( inputFile, line );
+                            readBinaryData( line, inputValues, numBitsFloat );
+                        }
+                    }
+                    if ( line.find( "GlobalId" ) != std::string::npos )
+                    {
+                        localDOF.resize( numPoints );
+                        getline( inputFile, line );
+                        readASCIIData( line, localDOF );
+                    }
                 }
+
+
             }
         }
     }
@@ -749,13 +765,11 @@ ExporterVTK<Mesh>::readVTUFiles( const exporterData_Type& dvar )
 
 template <typename Mesh>
 void
-ExporterVTK<Mesh>::readBinaryData( const std::string& line, const UInt& numBits,
-                                   const UInt& numDOF, const UInt& fieldDim,
-                                   std::vector<Real>& values )
+ExporterVTK<Mesh>::readBinaryData( const std::string& line, std::vector<Real>& values, const UInt& numBits )
 {
     std::stringstream decodedData, dataToBeDecoded; dataToBeDecoded.str("");
     std::string decodedDataString;
-    UInt sizeOfFloat, sizeOfVector(fieldDim*numDOF), lengthOfRawData;
+    UInt sizeOfFloat, sizeOfVector( values.size() ), lengthOfRawData;
 
     switch( numBits )
     {
@@ -825,6 +839,24 @@ ExporterVTK<Mesh>::readBinaryData( const std::string& line, const UInt& numBits,
     for (UInt i = 0; i < values.size(); i++)
       std::cout << values[i] << " " << std::flush;
     std::cout << std::endl;
+}
+
+
+template <typename Mesh>
+void
+ExporterVTK<Mesh>::readASCIIData( const std::string& line, std::vector<Real>& values )
+{
+    std::stringstream readData( line );
+
+    // simply parse the line to fill the vector of values
+    for (UInt i = 0; i < values.size(); i++)
+      readData >> values[i];
+
+    // output data to screen to verify/compare the results
+    for (UInt i = 0; i < values.size(); i++)
+      std::cout << values[i] << " " << std::flush;
+    std::cout << std::endl;
+
 }
 
 
