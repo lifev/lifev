@@ -85,17 +85,21 @@ MultiscaleCouplingFlowRateValve::initializeCouplingVariables()
 
     super_Type::initializeCouplingVariables();
 
-    if ( localCouplingVariables( 0 )[0] <= 0 )
+    if ( localCouplingVariables( 0 )[0] <= 1e-10 )
     {
         if ( M_comm->MyPID() == 0 )
-            std::cout << " MS-  Valve close at coupling " << M_ID << std::endl;
+            std::cout << " MS-  Valve closed at coupling " << M_ID << std::endl;
 
         M_valveIsOpen = false;
         localCouplingVariables( 0 ) = 0;
     }
     else
+    {
         if ( M_comm->MyPID() == 0 )
             std::cout << " MS-  Valve open at coupling " << M_ID << std::endl;
+
+        M_valveIsOpen = true;
+    }
 }
 
 void
