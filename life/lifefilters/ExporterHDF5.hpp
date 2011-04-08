@@ -1035,7 +1035,11 @@ void ExporterHDF5<MeshType>::writeGeometry()
     Int gid;
     for (ID i=0; i < this->M_mesh->numVertices(); ++i)
     {
-        typename MeshType::point_Type const& point (this->M_mesh->pointList(i));
+        typename MeshType::point_Type point;
+        if ( this->M_multimesh )
+            point = this->M_mesh->point(i);
+        else
+            point = this->M_mesh->pointInitial(i);
 
         gid = point.id();
 
