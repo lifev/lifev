@@ -379,7 +379,7 @@ MultiscaleModelFSI3D::boundaryPressure( const bcFlag_Type& flag ) const
     if ( M_fluidBC->handler()->findBCWithFlag( flag ).type() == Flux )
         return M_FSIoperator->fluid().lagrangeMultiplier(flag, *M_fluidBC->handler(), M_FSIoperator->solution() );
     else
-        return M_FSIoperator->fluid().pressure( flag, *M_FSIoperator->solutionPtr() );
+        return M_FSIoperator->fluid().pressure( flag, M_FSIoperator->solution() );
 }
 
 // ===================================================
