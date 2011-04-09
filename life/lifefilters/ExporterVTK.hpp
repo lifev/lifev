@@ -296,7 +296,7 @@ private:
 
     virtual void readScalar( ExporterData<mesh_Type>& /*dvar*/ ) {}
     virtual void readVector( ExporterData<mesh_Type>& /*dvar*/ ) {}
-    void readVTUFiles( const exporterData_Type& dvar );
+    void readVTUFiles( exporterData_Type& dvar );
     void readBinaryData( const std::string& line, std::vector<Real>& values, const UInt& numBits );
     void readASCIIData( const std::string& line, std::vector<Real>& values );
     //@}
@@ -624,13 +624,13 @@ ExporterVTK<Mesh>::composeDataArrayStream(const exporterData_Type& dvar,
             for (UInt iDOF=0; iDOF<numMyDOF; ++iDOF)
             {
                 Int id = localToGlobalMap.find(iDOF)->second;
-                for (UInt icoor=0; icoor< dvar.fieldDim(); ++icoor)
+                for (UInt iCoor=0; iCoor< dvar.fieldDim(); ++iCoor)
                 {
                     // the tensor case is not ready yet
                     //                    for (UInt jcoor=0; jcoor< dvar.fieldDim() / nDimensions; ++jcoor)
                     //                    {
                     dataArraysStringStream << dvar( start + id +
-                                                    icoor * numGlobalDOF ) << " ";
+                                                    iCoor * numGlobalDOF ) << " ";
                     //                                                        + jcoor * numGlobalDOF * dvar.fieldDim() ) << " ";
                     //                    }
                 }
@@ -640,21 +640,21 @@ ExporterVTK<Mesh>::composeDataArrayStream(const exporterData_Type& dvar,
             for (UInt iDOF=0; iDOF<numMyDOF; ++iDOF)
             {
                 Int id = localToGlobalMap.find(iDOF)->second;
-                for (UInt icoor=0; icoor< dvar.fieldDim(); ++icoor)
+                for (UInt iCoor=0; iCoor< dvar.fieldDim(); ++iCoor)
                 {
                     // the tensor case is not ready yet
                     //                    for (UInt jcoor=0; jcoor< dvar.fieldDim() / nDimensions; ++jcoor)
                     //                    {
                     if( M_floatPrecision == SINGLE_PRECISION )
                     {
-                        float value( dvar( start + id + icoor * numGlobalDOF ) );
+                        float value( dvar( start + id + iCoor * numGlobalDOF ) );
                         //                                                        + jcoor * numGlobalDOF * dvar.fieldDim() ) << " ";
                         dataToBeEncoded.write( reinterpret_cast<const char *>(&value), sizeof(float) );
                         //                    }
                     }
                     else
                     {
-                        Real value( dvar( start + id + icoor * numGlobalDOF ) );
+                        Real value( dvar( start + id + iCoor * numGlobalDOF ) );
                         //                                                        + jcoor * numGlobalDOF * dvar.fieldDim() ) << " ";
                         dataToBeEncoded.write( reinterpret_cast<const char *>(&value), sizeof(Real) );
                         //                    }
@@ -683,13 +683,19 @@ ExporterVTK<Mesh>::composeDataArrayStream(const exporterData_Type& dvar,
 
 template <typename Mesh>
 void
-ExporterVTK<Mesh>::readVTUFiles( const exporterData_Type& dvar )
+ExporterVTK<Mesh>::readVTUFiles( exporterData_Type& dvar )
 {
     ASSERT( M_numImportProc, "The number of pieces to be loaded was not specified." );
 
     UInt numPoints, numCells;
     std::vector<Real> inputValues;
     std::vector<Real> localDOF;
+
+    UInt start        ( dvar.start() );
+    UInt numGlobalDOF ( dvar.numDOF() );
+
+    dvar.feSpacePtr()->map().map(Repeated)->Print( std::cout );
+    dvar.feSpacePtr()->map().map(Unique)->Print( std::cout );
 
     // Each processor will read all the files, and fill just its own component of the vectors
     for( UInt iProc = 0; iProc < M_numImportProc; ++iProc )
@@ -756,7 +762,21 @@ ExporterVTK<Mesh>::readVTUFiles( const exporterData_Type& dvar )
                     }
                 }
 
-
+                for (UInt iPoint=0; iPoint<numPoints; ++iPoint)
+                {
+                    Int id = localDOF[iPoint];
+                    if( dvar.feSpacePtr()->map().map(Repeated)->MyGID( id ) )
+                    {
+                        std::cout << "\nProcessor " << this->M_procId
+                                        << " will take care of (" << dvar.variableName()
+                                        << ") Global ID " << id << std::endl;
+                        for (UInt iCoor=0; iCoor< dvar.fieldDim(); ++iCoor)
+                        {
+                            dvar( start + id + iCoor * numGlobalDOF ) =
+                                            inputValues[ iPoint * dvar.fieldDim() + iCoor ];
+                        }
+                    }
+                }
             }
         }
     }
@@ -800,8 +820,8 @@ ExporterVTK<Mesh>::readBinaryData( const std::string& line, std::vector<Real>& v
     decodedDataString = base64_decode( dataToBeDecoded.str() );
     decodedData.str( decodedDataString );
 
-    std::cout << "\nlengthOfRawData = " << lengthOfRawData << ", line.size() = " << line.size()
-                << ", decodedDataString.size() = " << decodedDataString.size() << std::endl;
+    //std::cout << "\nlengthOfRawData = " << lengthOfRawData << ", line.size() = " << line.size()
+    //            << ", decodedDataString.size() = " << decodedDataString.size() << std::endl;
     ASSERT( lengthOfRawData == decodedDataString.size(), "unexpected line length" );
 
 
@@ -836,9 +856,9 @@ ExporterVTK<Mesh>::readBinaryData( const std::string& line, std::vector<Real>& v
             }
     }
     // output data to screen to verify/compare the results
-    for (UInt i = 0; i < values.size(); i++)
-      std::cout << values[i] << " " << std::flush;
-    std::cout << std::endl;
+    //for (UInt i = 0; i < values.size(); i++)
+    //  std::cout << values[i] << " " << std::flush;
+    //std::cout << std::endl;
 }
 
 
@@ -853,9 +873,9 @@ ExporterVTK<Mesh>::readASCIIData( const std::string& line, std::vector<Real>& va
       readData >> values[i];
 
     // output data to screen to verify/compare the results
-    for (UInt i = 0; i < values.size(); i++)
-      std::cout << values[i] << " " << std::flush;
-    std::cout << std::endl;
+    //for (UInt i = 0; i < values.size(); i++)
+    //  std::cout << values[i] << " " << std::flush;
+    //std::cout << std::endl;
 
 }
 
@@ -906,8 +926,8 @@ ExporterVTK<Mesh>::composeDataArrayStream(const typename exporterData_Type::Wher
                     << nDimensions << "\" format=\"ascii\">\n";
 
                     for (UInt iValue=1; iValue<=it->second.size(); ++iValue) {
-                        for (UInt icoor=0; icoor< nDimensions; ++icoor) {
-                            dataArraysStringStream << it->second( iValue + icoor * it->second.size() ) << " ";
+                        for (UInt iCoor=0; iCoor< nDimensions; ++iCoor) {
+                            dataArraysStringStream << it->second( iValue + iCoor * it->second.size() ) << " ";
                         }
                     }
                     break;
@@ -918,10 +938,10 @@ ExporterVTK<Mesh>::composeDataArrayStream(const typename exporterData_Type::Wher
                             << nDimensions*nDimensions << "\" format=\"ascii\">\n";
 
                     for (UInt i=0; i<it->second.size(); ++i){
-                        for (UInt icoor=0; icoor< nDimensions;++icoor){
+                        for (UInt iCoor=0; iCoor< nDimensions;++iCoor){
                             for (UInt jcoor=0; jcoor< nDimensions;++jcoor){
                                 dataArraysStringStream << it->second( i * nDimensions * nDimensions +
-                                 icoor * nDimensions + jcoor ) << " ";
+                                 iCoor * nDimensions + jcoor ) << " ";
                             }
                         }
                     }
