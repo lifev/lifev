@@ -81,13 +81,13 @@ private:
     void loadData( GetPot& commandLine );
     void buildMesh();
     void buildFESpaces();
-    void buildExporter();
+    void buildExporter( boost::shared_ptr< LifeV::ExporterVTK< mesh_Type > >& exporterPtr );
 
     commPtr_Type                                             M_commPtr;
     LifeV::Displayer                                         M_displayer;
     GetPot                                                   M_dataFile;
     boost::shared_ptr< LifeV::MeshPartitioner< mesh_Type > > M_meshPartPtr;
-    boost::shared_ptr< LifeV::ExporterVTK< mesh_Type > >     M_exporterPtr;
+
     feSpacePtr_Type                                          M_velFESpacePtr;
     feSpacePtr_Type                                          M_pressFESpacePtr;
 };
@@ -203,7 +203,7 @@ TestExporterVTK::buildFESpaces()
 
 
 void
-TestExporterVTK::buildExporter()
+TestExporterVTK::buildExporter( boost::shared_ptr< LifeV::ExporterVTK< mesh_Type > >& exporterPtr )
 {
     using namespace LifeV;
     // Chronometer
@@ -215,9 +215,9 @@ TestExporterVTK::buildExporter()
     M_displayer.leaderPrint( "[Creating the exporter...]\n" );
     chrono.start();
 
-    M_exporterPtr.reset( new ExporterVTK<mesh_Type > ( M_dataFile, "testExporterVTK" ) );
-    M_exporterPtr->setPostDir( "./" );
-    M_exporterPtr->setMeshProcId( M_meshPartPtr->meshPartition(), M_commPtr->MyPID() );
+    exporterPtr.reset( new ExporterVTK<mesh_Type > ( M_dataFile, "testExporterVTK" ) );
+    exporterPtr->setPostDir( "./" );
+    exporterPtr->setMeshProcId( M_meshPartPtr->meshPartition(), M_commPtr->MyPID() );
 
     chrono.stop();
     M_displayer.leaderPrint( "[...done in ", chrono.diff(), "s]\n" );
@@ -233,7 +233,10 @@ TestExporterVTK::testExport( GetPot& commandLine )
     loadData( commandLine );
     buildMesh();
     buildFESpaces();
-    buildExporter();
+
+    boost::shared_ptr< LifeV::ExporterVTK< mesh_Type > > exporterPtr;
+
+    buildExporter( exporterPtr );
 
     // Chronometer
     LifeChrono globalChrono;
@@ -249,12 +252,12 @@ TestExporterVTK::testExport( GetPot& commandLine )
     Exporter<mesh_Type >::vectorPtr_Type pressInterpolantPtr(
         new Exporter<mesh_Type >::vector_Type   ( M_pressFESpacePtr->map(), Repeated ) );
 
-    M_exporterPtr->addVariable( ExporterData<mesh_Type>::VectorField, "velocity",
+    exporterPtr->addVariable( ExporterData<mesh_Type>::VectorField, "velocity",
                            M_velFESpacePtr, velInterpolantPtr, UInt(0) );
 
-    M_exporterPtr->addVariable( ExporterData<mesh_Type>::ScalarField, "pressure",
+    exporterPtr->addVariable( ExporterData<mesh_Type>::ScalarField, "pressure",
                            M_pressFESpacePtr, pressInterpolantPtr, UInt(0) );
-    M_exporterPtr->postProcess( 0 );
+    exporterPtr->postProcess( 0 );
 
     TimeData timeData;
     timeData.setup( M_dataFile, "time_discretization" );
@@ -269,7 +272,7 @@ TestExporterVTK::testExport( GetPot& commandLine )
         M_pressFESpacePtr->interpolate( problem_Type::pexact, *pressInterpolantPtr, timeData.time() );
 
         // Exporting the solution
-        M_exporterPtr->postProcess( timeData.time() );
+        exporterPtr->postProcess( timeData.time() );
 
         MPI_Barrier(MPI_COMM_WORLD);
 
@@ -278,7 +281,7 @@ TestExporterVTK::testExport( GetPot& commandLine )
     globalChrono.stop();
     M_displayer.leaderPrint( "[Time loop, elapsed time:  ", globalChrono.diff(), " s.]\n" );
 
-    M_exporterPtr->closeFile();
+    exporterPtr->closeFile();
 
     return 0;
 }
@@ -292,7 +295,10 @@ TestExporterVTK::testImport( GetPot& commandLine )
     loadData( commandLine );
     buildMesh();
     buildFESpaces();
-    buildExporter();
+
+    boost::shared_ptr< LifeV::ExporterVTK< mesh_Type > > importerPtr, exporterPtr;
+    buildExporter( importerPtr );
+    buildExporter( exporterPtr );
 
     // Chronometer
     LifeChrono globalChrono;
@@ -308,10 +314,16 @@ TestExporterVTK::testImport( GetPot& commandLine )
     Exporter<mesh_Type >::vectorPtr_Type pressImportedPtr(
         new Exporter<mesh_Type >::vector_Type   ( M_pressFESpacePtr->map(), Repeated ) );
 
-    M_exporterPtr->addVariable( ExporterData<mesh_Type>::VectorField, "velocity",
+    importerPtr->addVariable( ExporterData<mesh_Type>::VectorField, "velocity",
                            M_velFESpacePtr, velImportedPtr, UInt(0) );
 
-    M_exporterPtr->addVariable( ExporterData<mesh_Type>::ScalarField, "pressure",
+    importerPtr->addVariable( ExporterData<mesh_Type>::ScalarField, "pressure",
+                           M_pressFESpacePtr, pressImportedPtr, UInt(0) );
+
+    exporterPtr->addVariable( ExporterData<mesh_Type>::VectorField, "importedVelocity",
+                           M_velFESpacePtr, velImportedPtr, UInt(0) );
+
+    exporterPtr->addVariable( ExporterData<mesh_Type>::ScalarField, "importedPressure",
                            M_pressFESpacePtr, pressImportedPtr, UInt(0) );
 
     TimeData timeData;
@@ -320,8 +332,10 @@ TestExporterVTK::testImport( GetPot& commandLine )
     M_displayer.leaderPrint( "\t[t = ", timeData.time(), " s.]\n" );
 
     // Import test
-    M_exporterPtr->setTimeIndex( 1 );
-    M_exporterPtr->import( timeData.time() );
+    importerPtr->setTimeIndex( 1 );
+    importerPtr->import( timeData.time() );
+
+    exporterPtr->postProcess( 0 );
 
     globalChrono.stop();
     M_displayer.leaderPrint( "[Time loop, elapsed time:  ", globalChrono.diff(), " s.\n" );
