@@ -338,10 +338,6 @@ private:
     bcPtr_Type                             M_linearBC;
     vectorPtr_Type                         M_linearRHS;
     vectorPtr_Type                         M_linearSolution;
-
-    // BC Functions for tangent problem
-    BCFunctionBase                         M_bcBaseDeltaZero;
-    BCFunctionBase                         M_bcBaseDeltaOne;
 };
 
 //! Factory create function

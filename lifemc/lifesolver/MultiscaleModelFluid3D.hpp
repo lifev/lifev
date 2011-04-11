@@ -363,10 +363,6 @@ private:
     UInt                                    M_subiterationsMaximumNumber;
     Real                                    M_tolerance;
     NonLinearAitken< fluidVector_Type >     M_generalizedAitken;
-
-    // BC Functions for tangent problem
-    BCFunctionBase                          M_bcBaseDeltaZero;
-    BCFunctionBase                          M_bcBaseDeltaOne;
 };
 
 //! Factory create function

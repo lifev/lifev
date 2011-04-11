@@ -26,7 +26,7 @@
 
 /*!
  *  @file
- *  @brief File containing the Multiscale Physical Data
+ *  @brief File containing the Multiscale Global Physical Data
  *
  *  @date 09-09-2009
  *  @author Cristiano Malossi <cristiano.malossi@epfl.ch>
@@ -48,11 +48,11 @@ MultiscaleData::MultiscaleData() :
         M_timeData                      (),
         M_fluidDensity                  (),
         M_fluidViscosity                (),
-        M_fluidReferencePressure        (),
-        M_structureDensity              (),
-        M_structurePoissonCoefficient   (),
-        //M_structureThickness            (),
-        M_structureYoungModulus         ()
+        M_solidExternalPressure         (),
+        M_solidDensity                  (),
+        M_solidPoissonCoefficient       (),
+        //M_solidThickness                (),
+        M_solidYoungModulus             ()
 {
 }
 
@@ -60,11 +60,11 @@ MultiscaleData::MultiscaleData( const MultiscaleData& data ) :
         M_timeData                      ( data.M_timeData ),
         M_fluidDensity                  ( data.M_fluidDensity ),
         M_fluidViscosity                ( data.M_fluidViscosity ),
-        M_fluidReferencePressure        ( data.M_fluidReferencePressure ),
-        M_structureDensity              ( data.M_structureDensity ),
-        M_structurePoissonCoefficient   ( data.M_structurePoissonCoefficient ),
-        //M_structureThickness            ( data.M_structureThickness ),
-        M_structureYoungModulus         ( data.M_structureYoungModulus )
+        M_solidExternalPressure         ( data.M_solidExternalPressure ),
+        M_solidDensity                  ( data.M_solidDensity ),
+        M_solidPoissonCoefficient       ( data.M_solidPoissonCoefficient ),
+        //M_solidThickness                ( data.M_solidThickness ),
+        M_solidYoungModulus             ( data.M_solidYoungModulus )
 {
 }
 
@@ -79,11 +79,11 @@ MultiscaleData::operator=( const MultiscaleData& data )
         M_timeData                      = data.M_timeData;
         M_fluidDensity                  = data.M_fluidDensity;
         M_fluidViscosity                = data.M_fluidViscosity;
-        M_fluidReferencePressure        = data.M_fluidReferencePressure;
-        M_structureDensity              = data.M_structureDensity;
-        M_structurePoissonCoefficient   = data.M_structurePoissonCoefficient;
-        //M_structureThickness            = data.M_structureThickness;
-        M_structureYoungModulus         = data.M_structureYoungModulus;
+        M_solidExternalPressure         = data.M_solidExternalPressure;
+        M_solidDensity                  = data.M_solidDensity;
+        M_solidPoissonCoefficient       = data.M_solidPoissonCoefficient;
+        //M_solidThickness                = data.M_solidThickness;
+        M_solidYoungModulus             = data.M_solidYoungModulus;
     }
 
     return *this;
@@ -98,24 +98,24 @@ MultiscaleData::readData( const GetPot& dataFile )
     M_timeData.reset( new time_Type( dataFile, "Solver/time_discretization" ) );
     M_fluidDensity                  = dataFile( "Physics/FluidDensity", 0. );
     M_fluidViscosity                = dataFile( "Physics/FluidViscosity", 0. );
-    M_fluidReferencePressure        = dataFile( "Physics/FluidReferencePressure", 0. );
-    M_structureDensity              = dataFile( "Physics/StructureDensity", 0. );
-    M_structurePoissonCoefficient   = dataFile( "Physics/StructurePoissonCoefficient", 0. );
-    //M_structureThickness            = dataFile( "Physics/StructureThickness", 0. );
-    M_structureYoungModulus         = dataFile( "Physics/StructureYoungModulus", 0. );
+    M_solidExternalPressure         = dataFile( "Physics/SolidExternalPressure", 0. );
+    M_solidDensity                  = dataFile( "Physics/SolidDensity", 0. );
+    M_solidPoissonCoefficient       = dataFile( "Physics/SolidPoissonCoefficient", 0. );
+    //M_solidThickness                = dataFile( "Physics/SolidThickness", 0. );
+    M_solidYoungModulus             = dataFile( "Physics/SolidYoungModulus", 0. );
 }
 
 void
 MultiscaleData::showMe()
 {
     std::cout << "Fluid density                 = " << M_fluidDensity << std::endl
-              << "Fluid viscosity               = " << M_fluidViscosity << std::endl
-              << "Fluid reference pressure      = " << M_fluidReferencePressure << std::endl << std::endl;
+              << "Fluid viscosity               = " << M_fluidViscosity << std::endl << std::endl;
 
-    std::cout << "Structure density coefficient = " << M_structureDensity << std::endl
-              << "Structure Poisson coefficient = " << M_structurePoissonCoefficient << std::endl
-              //<< "Structure Thickness           = " << M_structureThickness << std::endl
-              << "Structure Young modulus       = " << M_structureYoungModulus << std::endl << std::endl;
+    std::cout << "Solid reference pressure      = " << M_solidExternalPressure << std::endl
+              << "Solid density coefficient     = " << M_solidDensity << std::endl
+              << "Solid Poisson coefficient     = " << M_solidPoissonCoefficient << std::endl
+              //<< "Solid Thickness               = " << M_solidThickness << std::endl
+              << "Solid Young modulus           = " << M_solidYoungModulus << std::endl << std::endl;
 
     std::cout << "Initial time                  = " << M_timeData->initialTime() << std::endl
               << "End time                      = " << M_timeData->endTime() << std::endl

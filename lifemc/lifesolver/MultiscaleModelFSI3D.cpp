@@ -68,9 +68,7 @@ MultiscaleModelFSI3D::MultiscaleModelFSI3D() :
         M_harmonicExtensionBC          ( new bcInterface_Type() ),
         M_linearBC                     (),
         M_linearRHS                    (),
-        M_linearSolution               (),
-        M_bcBaseDeltaZero              (),
-        M_bcBaseDeltaOne               ()
+        M_linearSolution               ()
 {
 
 #ifdef HAVE_LIFEV_DEBUG
@@ -390,16 +388,17 @@ MultiscaleModelFSI3D::setupGlobalData( const std::string& fileName )
 {
     GetPot dataFile( fileName );
 
-    //Global data time
+    // Global data time
     M_data->dataFluid()->setTimeData( M_globalData->dataTime() );
     M_data->dataSolid()->setTimeData( M_globalData->dataTime() );
 
-    //Global physical quantities
+    // Fluid global physical quantities
     if ( !dataFile.checkVariable( "fluid/physics/density" ) )
         M_data->dataFluid()->setDensity( M_globalData->fluidDensity() );
     if ( !dataFile.checkVariable( "fluid/physics/viscosity" ) )
         M_data->dataFluid()->setViscosity( M_globalData->fluidViscosity() );
 
+    // Solid global physical quantities
     UInt materialFlag;
     if ( !dataFile.checkVariable( "solid/physics/material_flag" ) )
         materialFlag = 1;
@@ -407,11 +406,13 @@ MultiscaleModelFSI3D::setupGlobalData( const std::string& fileName )
         materialFlag = dataFile( "solid/physics/material_flag", 1 );
 
     if ( !dataFile.checkVariable( "solid/physics/density" ) )
-        M_data->dataSolid()->setDensity( M_globalData->structureDensity() );
+        M_data->dataSolid()->setDensity( M_globalData->solidDensity() );
     if ( !dataFile.checkVariable( "solid/physics/poisson" ) )
-        M_data->dataSolid()->setPoisson( M_globalData->structurePoissonCoefficient(), materialFlag );
+        M_data->dataSolid()->setPoisson( M_globalData->solidPoissonCoefficient(), materialFlag );
     if ( !dataFile.checkVariable( "solid/physics/young" ) )
-        M_data->dataSolid()->setYoung( M_globalData->structureYoungModulus(), materialFlag );
+        M_data->dataSolid()->setYoung( M_globalData->solidYoungModulus(), materialFlag );
+    if ( !dataFile.checkVariable( "solid/physics/externalPressure" ) )
+        M_data->dataSolid()->setExternalPressure( M_globalData->solidExternalPressure() );
 }
 
 void
@@ -604,17 +605,16 @@ MultiscaleModelFSI3D::setupLinearModel()
     Debug( 8140 ) << "MultiscaleModelFSI3D::setupLinearModel() \n";
 #endif
 
-    // Define BCFunctions for tangent problem
-    M_bcBaseDeltaZero.setFunction( boost::bind( &MultiscaleModelFSI3D::bcFunctionDeltaZero, this, _1, _2, _3, _4, _5 ) );
-    M_bcBaseDeltaOne.setFunction(  boost::bind( &MultiscaleModelFSI3D::bcFunctionDeltaOne,  this, _1, _2, _3, _4, _5 ) );
-
     // The linear BCHandler is a copy of the original BCHandler with all BCFunctions giving zero
     bcPtr_Type linearBCHandler ( new bc_Type( *M_fluidBC->handler() ) );
     M_linearBC = linearBCHandler;
 
     // Set all the BCFunctions to zero
+    BCFunctionBase bcBaseDeltaZero;
+    bcBaseDeltaZero.setFunction( boost::bind( &MultiscaleModelFSI3D::bcFunctionDeltaZero, this, _1, _2, _3, _4, _5 ) );
+
     for ( bc_Type::bcBaseIterator_Type i = M_linearBC->begin() ; i != M_linearBC->end() ; ++i )
-        i->setBCFunction( M_bcBaseDeltaZero );
+        i->setBCFunction( bcBaseDeltaZero );
 
     // Setup linear solution & the RHS
     M_linearSolution.reset( new vector_Type( M_FSIoperator->un()->map() ) );
@@ -670,7 +670,10 @@ MultiscaleModelFSI3D::imposePerturbation()
     for ( multiscaleCouplingsVectorConstIterator_Type i = M_couplings.begin(); i < M_couplings.end(); ++i )
         if ( ( *i )->isPerturbed() )
         {
-            M_linearBC->findBCWithFlag( ( *i )->flag( ( *i )->modelGlobalToLocalID( M_ID ) ) ).setBCFunction( M_bcBaseDeltaOne );
+            BCFunctionBase bcBaseDeltaOne;
+            bcBaseDeltaOne.setFunction( boost::bind( &MultiscaleModelFSI3D::bcFunctionDeltaOne, this, _1, _2, _3, _4, _5 ) );
+
+            M_linearBC->findBCWithFlag( ( *i )->flag( ( *i )->modelGlobalToLocalID( M_ID ) ) ).setBCFunction( bcBaseDeltaOne );
 
             break;
         }
@@ -687,7 +690,10 @@ MultiscaleModelFSI3D::resetPerturbation()
     for ( multiscaleCouplingsVectorConstIterator_Type i = M_couplings.begin(); i < M_couplings.end(); ++i )
         if ( ( *i )->isPerturbed() )
         {
-            M_linearBC->findBCWithFlag( ( *i )->flag( ( *i )->modelGlobalToLocalID( M_ID ) ) ).setBCFunction( M_bcBaseDeltaZero );
+            BCFunctionBase bcBaseDeltaZero;
+            bcBaseDeltaZero.setFunction( boost::bind( &MultiscaleModelFSI3D::bcFunctionDeltaZero, this, _1, _2, _3, _4, _5 ) );
+
+            M_linearBC->findBCWithFlag( ( *i )->flag( ( *i )->modelGlobalToLocalID( M_ID ) ) ).setBCFunction( bcBaseDeltaZero );
 
             break;
         }

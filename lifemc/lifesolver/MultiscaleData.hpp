@@ -140,31 +140,31 @@ public:
     /*!
      * @return reference pressure of the fluid.
      */
-    const Real& fluidReferencePressure() const { return M_fluidReferencePressure; }
+    const Real& solidExternalPressure() const { return M_solidExternalPressure; }
 
     //! Get the global structural Poisson coefficient.
     /*!
-     * @return Poisson coefficient of the structure.
+     * @return Poisson coefficient of the solid.
      */
-    const Real& structureDensity() const { return M_structureDensity; }
+    const Real& solidDensity() const { return M_solidDensity; }
 
     //! Get the global structural density.
     /*!
-     * @return density of the structure.
+     * @return density of the solid.
      */
-    const Real& structurePoissonCoefficient() const { return M_structurePoissonCoefficient; }
+    const Real& solidPoissonCoefficient() const { return M_solidPoissonCoefficient; }
 
     // //! Get the global structural thickness.
     // /*!
-    // * @return thickness of the structure.
+    // * @return thickness of the solid.
     // */
-    // const Real& GetStructureThickness() const { return M_structureThickness; }
+    // const Real& solidThickness() const { return M_structureThickness; }
 
     //! Get the global structural Young modulus.
     /*!
-     * @return Young modulus of the structure.
+     * @return Young modulus of the solid.
      */
-    const Real& structureYoungModulus() const { return M_structureYoungModulus; }
+    const Real& solidYoungModulus() const { return M_solidYoungModulus; }
 
     //@}
 
@@ -174,12 +174,12 @@ private:
 
     Real                                M_fluidDensity;
     Real                                M_fluidViscosity;
-    Real                                M_fluidReferencePressure;
 
-    Real                                M_structureDensity;
-    Real                                M_structurePoissonCoefficient;
+    Real                                M_solidExternalPressure;
+    Real                                M_solidDensity;
+    Real                                M_solidPoissonCoefficient;
 //    Real                                M_structureThickness;
-    Real                                M_structureYoungModulus;
+    Real                                M_solidYoungModulus;
 
 };
 

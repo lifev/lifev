@@ -571,7 +571,7 @@ MultiscaleModelFluid3D::setupDOF()
 }
 
 void
-MultiscaleModelFluid3D::setupBCOffset( const bcPtr_Type& BC )
+MultiscaleModelFluid3D::setupBCOffset( const bcPtr_Type& bc )
 {
 
 #ifdef HAVE_LIFEV_DEBUG
@@ -580,9 +580,9 @@ MultiscaleModelFluid3D::setupBCOffset( const bcPtr_Type& BC )
 
     UInt offset = M_uFESpace->map().map( Unique )->NumGlobalElements() + M_pFESpace->map().map( Unique )->NumGlobalElements();
 
-    std::vector< bcName_Type > FluxVector = BC->findAllBCWithType( Flux );
+    std::vector< bcName_Type > fluxVector = bc->findAllBCWithType( Flux );
     for ( UInt i = 0; i < M_lmDOF; ++i )
-        BC->setOffset( FluxVector[i], offset + i );
+        bc->setOffset( fluxVector[i], offset + i );
 }
 
 void
@@ -593,17 +593,16 @@ MultiscaleModelFluid3D::setupLinearModel()
     Debug( 8120 ) << "MultiscaleModelFluid3D::setupLinearModel( ) \n";
 #endif
 
-    // Define BCFunctions for tangent problem
-    M_bcBaseDeltaZero.setFunction( boost::bind( &MultiscaleModelFluid3D::bcFunctionDeltaZero, this, _1, _2, _3, _4, _5 ) );
-    M_bcBaseDeltaOne.setFunction(  boost::bind( &MultiscaleModelFluid3D::bcFunctionDeltaOne,  this, _1, _2, _3, _4, _5 ) );
-
     // The linear BCHandler is a copy of the original BCHandler with all BCFunctions giving zero
     bcPtr_Type linearBCHandler( new bc_Type( *M_bc->handler() ) );
     M_linearBC = linearBCHandler;
 
     // Set all the BCFunctions to zero
+    BCFunctionBase bcBaseDeltaZero;
+    bcBaseDeltaZero.setFunction( boost::bind( &MultiscaleModelFluid3D::bcFunctionDeltaZero, this, _1, _2, _3, _4, _5 ) );
+
     for ( bc_Type::bcBaseIterator_Type i = M_linearBC->begin() ; i != M_linearBC->end() ; ++i )
-        i->setBCFunction( M_bcBaseDeltaZero );
+        i->setBCFunction( bcBaseDeltaZero );
 }
 
 void
@@ -663,7 +662,10 @@ MultiscaleModelFluid3D::imposePerturbation()
     for ( multiscaleCouplingsVectorConstIterator_Type i = M_couplings.begin(); i < M_couplings.end(); ++i )
         if ( ( *i )->isPerturbed() )
         {
-            M_linearBC->findBCWithFlag( ( *i )->flag( ( *i )->modelGlobalToLocalID( M_ID ) ) ).setBCFunction( M_bcBaseDeltaOne );
+            BCFunctionBase bcBaseDeltaOne;
+            bcBaseDeltaOne.setFunction( boost::bind( &MultiscaleModelFluid3D::bcFunctionDeltaOne, this, _1, _2, _3, _4, _5 ) );
+
+            M_linearBC->findBCWithFlag( ( *i )->flag( ( *i )->modelGlobalToLocalID( M_ID ) ) ).setBCFunction( bcBaseDeltaOne );
 
             break;
         }
@@ -680,7 +682,10 @@ MultiscaleModelFluid3D::resetPerturbation()
     for ( multiscaleCouplingsVectorConstIterator_Type i = M_couplings.begin(); i < M_couplings.end(); ++i )
         if ( ( *i )->isPerturbed() )
         {
-            M_linearBC->findBCWithFlag( ( *i )->flag( ( *i )->modelGlobalToLocalID( M_ID ) ) ).setBCFunction( M_bcBaseDeltaZero );
+            BCFunctionBase bcBaseDeltaZero;
+            bcBaseDeltaZero.setFunction( boost::bind( &MultiscaleModelFluid3D::bcFunctionDeltaZero, this, _1, _2, _3, _4, _5 ) );
+
+            M_linearBC->findBCWithFlag( ( *i )->flag( ( *i )->modelGlobalToLocalID( M_ID ) ) ).setBCFunction( bcBaseDeltaZero );
 
             break;
         }

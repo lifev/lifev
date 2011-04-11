@@ -479,13 +479,13 @@ MultiscaleModel1D::setupGlobalData( const std::string& fileName )
     if ( !dataFile.checkVariable( "1D_Model/PhysicalParameters/viscosity" ) )
         M_data->setViscosity( M_globalData->fluidViscosity() );
     if ( !dataFile.checkVariable( "1D_Model/PhysicalParameters/externalPressure" ) )
-        M_data->setExternalPressure( M_globalData->fluidReferencePressure() );
+        M_data->setExternalPressure( M_globalData->solidExternalPressure() );
     if ( !dataFile.checkVariable( "1D_Model/PhysicalParameters/densityWall" ) )
-        M_data->setDensityWall( M_globalData->structureDensity() );
+        M_data->setDensityWall( M_globalData->solidDensity() );
     if ( !dataFile.checkVariable( "1D_Model/PhysicalParameters/poisson" ) )
-        M_data->setPoisson( M_globalData->structurePoissonCoefficient() );
+        M_data->setPoisson( M_globalData->solidPoissonCoefficient() );
     if ( !dataFile.checkVariable( "1D_Model/PhysicalParameters/young" ) )
-        M_data->setYoung( M_globalData->structureYoungModulus() );
+        M_data->setYoung( M_globalData->solidYoungModulus() );
 
     //After changing some parameters we need to update the coefficients
     M_data->updateCoefficients();
