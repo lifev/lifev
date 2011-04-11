@@ -177,7 +177,8 @@ protected:
         s_density,
         s_poisson,
         s_thickness,
-        s_young
+        s_young,
+        s_externalPressure
     };
 
     boost::shared_ptr< PhysicalSolverType >    M_physicalSolver;
@@ -372,6 +373,16 @@ BCInterfaceFunctionSolver< OneDimensionalSolver >::updatePhysicalSolverVariables
 
             break;
 
+        case s_externalPressure:
+
+#ifdef HAVE_LIFEV_DEBUG
+            Debug( 5023 ) << "                                              s_externalPressure: " << M_physicalSolver->physics()->data()->externalPressure() << "\n";
+#endif
+
+            setVariable( "s_externalPressure", M_physicalSolver->physics()->data()->externalPressure() );
+
+            break;
+
         default:
             switchErrorMessage( "OneDimensionalModel_Solver" );
         }
@@ -485,6 +496,16 @@ BCInterfaceFunctionSolver< FSIOperator >::updatePhysicalSolverVariables()
 #endif
 
             setVariable( "s_young", M_physicalSolver->solid().getYoung() );
+
+            break;
+
+        case s_externalPressure:
+
+#ifdef HAVE_LIFEV_DEBUG
+            Debug( 5023 ) << "                                              s_externalPressure: " << M_physicalSolver->solid().data()->externalPressure() << "\n";
+#endif
+
+            setVariable( "s_externalPressure", M_physicalSolver->solid().data()->externalPressure() );
 
             break;
 
@@ -761,10 +782,11 @@ template< class PhysicalSolverType >
 inline void
 BCInterfaceFunctionSolver< PhysicalSolverType >::createSolidMap( std::map< std::string, physicalSolverList >& mapList )
 {
-    mapList["s_density"]   = s_density;
-    mapList["s_poisson"]   = s_poisson;
-    mapList["s_thickness"] = s_thickness;
-    mapList["s_young"]     = s_young;
+    mapList["s_density"]          = s_density;
+    mapList["s_poisson"]          = s_poisson;
+    mapList["s_thickness"]        = s_thickness;
+    mapList["s_young"]            = s_young;
+    mapList["s_externalPressure"] = s_externalPressure;
 }
 
 template< class PhysicalSolverType >
