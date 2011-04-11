@@ -35,6 +35,7 @@ dist_pkgdata_DATA = Run_1D_1Cylinder.dat \
 					Run_Fluid3D-1D_CarotidBifurcation.dat \
 					Run_FSI3D_1Cylinder.dat \
 					Run_FSI3D_2Cylinders.dat \
+					Run_FSI3D-1D_2Cylinders.dat \
 					Run_FSI3D-1D_CarotidBifurcation.dat \
 					Run_FSI3D-1D_IdealLeftVentricle.dat \
 					Run_Windkessel0D_Test.dat \
