@@ -397,6 +397,7 @@ MultiscaleModelFSI3D::setupGlobalData( const std::string& fileName )
         M_data->dataSolid()->setExternalPressure( M_globalData->solidExternalPressure() );
 
     std::vector< UInt > materialFlags;
+
     if ( !dataFile.checkVariable( "solid/physics/material_flag" ) )
         materialFlags.push_back( 1 );
     else
