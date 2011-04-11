@@ -60,6 +60,7 @@ dist_pkgdata_DATA = 1D_1Cylinder.dat \
                     FSI3D_2Cylinders-tube20_S.dat \
                     FSI3D_3Cylinders-tube20_FS.dat \
                     FSI3D-1D_CarotidBifurcation_FS.dat \
+                    FSI3D-1D_2Cylinders_FV.dat \
                     FSI3D-1D_IdealLeftVentricleWithAorta_S.dat \
                     FSI3D-1D_IdealLeftVentricleWithAorta-Absorbing_S.dat \
                     FSI3D-1D_IdealLeftVentricleWithAorta-ClosedValve_S.dat \
