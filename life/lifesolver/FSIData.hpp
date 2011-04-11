@@ -36,8 +36,8 @@
  */
 
 
-#ifndef DATAFSI_H
-#define DATAFSI_H
+#ifndef FSIDATA_H
+#define FSIDATA_H
 
 #include <life/lifesolver/OseenData.hpp>
 #include <life/lifesolver/VenantKirchhoffElasticData.hpp>
@@ -73,13 +73,16 @@ public:
     //@{
 
     //! Empty Constructor
-    FSIData();
+    explicit FSIData();
 
     //! Copy constructor
     /*!
      * @param FSIData - FSIData
      */
-    FSIData( const FSIData& FSIData );
+    explicit FSIData( const FSIData& FSIData );
+
+    //! Destructor
+    virtual ~FSIData() {}
 
     //@}
 
@@ -120,13 +123,13 @@ public:
     /*!
      * @param dataFluid shared_ptr to dataFluid container
      */
-    inline void setDataFluid( const dataFluid_PtrType dataFluid ) { M_dataFluid = dataFluid; }
+    void setDataFluid( const dataFluid_PtrType& dataFluid ) { M_dataFluid = dataFluid; }
 
     //! Set data solid container
     /*!
      * @param dataFluid shared_ptr to dataSolid container
      */
-    inline void setDataSolid( const dataSolid_PtrType dataSolid ) { M_dataSolid = dataSolid; }
+    void setDataSolid( const dataSolid_PtrType& dataSolid ) { M_dataSolid = dataSolid; }
 
     //@}
 
@@ -138,69 +141,67 @@ public:
     /*!
      * @return shared_ptr to dataFluid container
      */
-    inline const dataFluid_PtrType& dataFluid() const { return M_dataFluid; }
+    const dataFluid_PtrType& dataFluid() const { return M_dataFluid; }
 
     //! Get data solid container
     /*!
      * @return shared_ptr to dataSolid container
      */
-    inline const dataSolid_PtrType& dataSolid() const { return M_dataSolid; }
-
-    inline const dataSolid_PtrType& getDataSolid() const { return M_dataSolid; }
+    const dataSolid_PtrType& dataSolid() const { return M_dataSolid; }
 
     //! Get maximum number of subiterations
     /*!
      * @return maximum number of subiterations
      */
-    inline UInt maxSubIterationNumber() const { return M_maxSubIterationNumber; }
+    const UInt& maxSubIterationNumber() const { return M_maxSubIterationNumber; }
 
     //! Get absolute tolerance
     /*!
      * @return absolute tolerance
      */
-    inline Real absoluteTolerance() const { return M_absoluteTolerance; }
+    const Real& absoluteTolerance() const { return M_absoluteTolerance; }
 
     //! Get relative tolerance
     /*!
      * @return relative tolerance
      */
-    inline Real relativeTolerance() const { return M_relativeTolerance; }
+    const Real& relativeTolerance() const { return M_relativeTolerance; }
 
     //! Get error tolerance
     /*!
      * @return error tolerance
      */
-    inline Real errorTolerance() const { return M_errorTolerance; }
+    const Real& errorTolerance() const { return M_errorTolerance; }
 
     //! Get NonLinearLineSearch
     /*!
      * @return NonLinearLineSearch
      */
-    inline Int NonLinearLineSearch() const { return M_NonLinearLineSearch; }
+    const Int& NonLinearLineSearch() const { return M_NonLinearLineSearch; }
 
     //! Get method type
     /*!
      * @return method type
      */
-    inline std::string method() const { return M_method; }
+    const std::string& method() const { return M_method; }
 
     //! Get algorithm type
     /*!
      * @return algorithm type
      */
-    inline std::string algorithm() const { return M_algorithm; }
+    const std::string& algorithm() const { return M_algorithm; }
 
     //! Get default omega for Aitken iterations
     /*!
      * @return default omega for Aitken iterations
      */
-    inline Real defaultOmega() const { return M_defaultOmega; }
+    const Real& defaultOmega() const { return M_defaultOmega; }
 
     //! Get the range of omega for Aitken iterations
     /*!
      * @return range of omega for Aitken iterations
      */
-    inline boost::array< Real, 2 > OmegaRange() const { return M_rangeOmega; }
+    const boost::array< Real, 2 >& OmegaRange() const { return M_rangeOmega; }
 
     //! Get update every
     /*!
@@ -210,37 +211,37 @@ public:
      *
      * @return updateEvery value
      */
-    inline int updateEvery() const { return M_updateEvery; }
+    const Int& updateEvery() const { return M_updateEvery; }
 
     //! Get the fluid Interface Flag
     /*!
      * @return Flag of the interface  on the fluid boundary side
      */
-    inline int fluidInterfaceFlag() const { return M_fluidInterfaceFlag; }
+    const Int& fluidInterfaceFlag() const { return M_fluidInterfaceFlag; }
 
     //! Get the structure Interface Flag
     /*!
      * @return Flag of the interface  on the structure boundary side
      */
-    inline int structureInterfaceFlag() const { return M_structureInterfaceFlag; }
+    const Int& structureInterfaceFlag() const { return M_structureInterfaceFlag; }
 
     //! Get the fluid Interface Flag (for Vertices)
     /*!
      * @return Flag of the vertex on the interface on the fluid boundary side
      */
-    inline int const* fluidInterfaceVertexFlag() const { return M_fluidInterfaceVertexFlag.get(); }
+    Int const* fluidInterfaceVertexFlag() const { return M_fluidInterfaceVertexFlag.get(); }
 
     //! Get the fluid Interface Flag (for Vertices)
     /*!
      * @return Flag of the vertex on the interface on the structure boundary side
      */
-    inline int const* structureInterfaceVertexFlag() const { return M_structureInterfaceVertexFlag.get(); }
+    Int const* structureInterfaceVertexFlag() const { return M_structureInterfaceVertexFlag.get(); }
 
     //! Get the tolerance for the Interface identification
     /*!
      * @return the tolerance for the Interface identification
      */
-    inline Real interfaceTolerance() const { return M_interfaceTolerance; }
+    const Real& interfaceTolerance() const { return M_interfaceTolerance; }
 
     //@}
 
@@ -256,30 +257,25 @@ private:
     Real                          M_errorTolerance;
     Int                           M_NonLinearLineSearch;
 
-    // Problem - Preconditioner
-    UInt                          M_DDBlockPreconditioner;
-
     // Problem - Methods
     std::string                   M_method;
     std::string                   M_algorithm;
 
-    // Problem - FixPoint / EJ
+    // Problem - FixedPoint / EJ
     Real                          M_defaultOmega;
     boost::array< Real, 2 >       M_rangeOmega;
-    int                           M_updateEvery;
+    Int                           M_updateEvery;
 
     // Interface
-    int                           M_fluidInterfaceFlag;
-    int                           M_structureInterfaceFlag;
+    Int                           M_fluidInterfaceFlag;
+    Int                           M_structureInterfaceFlag;
 
-    boost::scoped_ptr<int const>  M_fluidInterfaceVertexFlag;
-    boost::scoped_ptr<int const>  M_structureInterfaceVertexFlag;
+    boost::scoped_ptr<Int const>  M_fluidInterfaceVertexFlag;
+    boost::scoped_ptr<Int const>  M_structureInterfaceVertexFlag;
 
     Real                          M_interfaceTolerance;
 };
 
-
-
 } // end namespace LifeV
 
-#endif // end DATAFSI_H
+#endif // end FSIDATA_H
