@@ -13,6 +13,7 @@
 SUFFIXES	= .cpp .hpp .idl .c .h .f .F .o .moc
 
 dist_pkgdata_DATA = Carotid_MonolithicGE.dat \
+                    CurvedCylinder_tube20_MonolithicGE.dat \
                     Cylinder_tube20_MonolithicGE.dat \
                     Cylinder_tube20_MonolithicGI.dat \
                     Cylinder_tube40_MonolithicGE.dat \

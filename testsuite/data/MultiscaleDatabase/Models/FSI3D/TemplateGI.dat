@@ -152,10 +152,11 @@ semiImplicit        = false  # tells if we advance in time after the first nonli
     [./physics]
     solidType = linearVenantKirchhof # linearVenantKirchhof
                                      # nonLinearVenantKirchhof
-    material_flag = 1
-    #density   = 1.2    # density
-    #young     = 4.0E6
-    #poisson   = 0.48
+    material_flag    = 1
+    #externalPressure = 0
+    #density          = 1.2
+    #young            = 4.0E6
+    #poisson          = 0.48
 
     [../time_discretization]
     #timestep                   = 0.0001 # [s]
@@ -178,10 +179,11 @@ semiImplicit        = false  # tells if we advance in time after the first nonli
     linesearch = 0
 
     [../boundary_conditions]
-    list = ' '                                            # Free dispacement
-    #list = 'OuterWall_Robin'                              # Free dispacement + Robin on the external Wall
-    #list = 'Top_NoDisplacementOnZ Base_NoDisplacementOnZ' # Free dispacement on XY
-    #list = 'Top Base TopEdge BaseEdge'                    # Fixed dispacement
+    #list = ' '                                                                         # Free dispacement
+    list = 'OuterWall_ReferencePressure'                                               # Free dispacement + Reference pressure
+    #list = 'OuterWall_Robin'                                                           # Free dispacement + Robin on the external Wall
+    #list = 'Top_NoDisplacementOnZ Base_NoDisplacementOnZ OuterWall_ReferencePressure'  # Free dispacement on XY + Reference pressure
+    #list = 'Top Base TopEdge BaseEdge OuterWall_ReferencePressure'                     # Fixed dispacement + Reference pressure
 
         [./Top]
         type       = Essential
@@ -224,6 +226,12 @@ semiImplicit        = false  # tells if we advance in time after the first nonli
         mode       = Component
         component  = '2'
         function   = 0
+        
+        [../OuterWall_ReferencePressure]
+        type       = Natural
+        flag       = 10
+        mode       = Normal
+        functionSolver = '-s_externalPressure'
         
         [../OuterWall_Robin]
         type       = Robin

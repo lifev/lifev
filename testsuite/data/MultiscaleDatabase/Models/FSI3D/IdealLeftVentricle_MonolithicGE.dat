@@ -19,6 +19,8 @@ modelName        = FSI3D_IdealLeftVentricle_MonolithicGE
 modelType        = FSI3D
 couplingFlags    = '2 3'
 
+
+
 [exporter]
 start            = 0             # start index for filenames
 save             = 1             # how many time steps per posptrocessing
@@ -81,11 +83,11 @@ semiImplicit        = true   # tells if we advance in time after the first nonli
     BDF_order       = 1
 
     [../space_discretization]
-    mesh_dir         = ./Mesh/
-    mesh_file        = idealHeartPoints_fluid.mesh
-    #mesh_file        = heart_fine.mesh
-    mesh_type        = .mesh
-    verbose          = 0                # verbose during mesh-reading
+    mesh_dir        = ./Mesh/
+    mesh_file       = idealHeartPoints_fluid.mesh
+    #mesh_file       = heart_fine.mesh
+    mesh_type       = .mesh
+    verbose         = 0                # verbose during mesh-reading
 
     vel_order       = P1               # P1, P1Bubble, P2
     #vel_order       = P1Bubble         # P1, P1Bubble, P2
@@ -168,10 +170,11 @@ tolerance       =  0.0005   # how far points are to be considered the same on th
     [./physics]
     solidType = linearVenantKirchhof # linearVenantKirchhof
                                      # nonLinearVenantKirchhof
-    material_flag = 0
-    density   = 1.2    # density
-    young     = 7.0E6
-    poisson   = 0.4
+    material_flag    = 0
+    externalPressure = 0
+    #density          = 1.2
+    young            = 7.0E6
+    #poisson          = 0.4
 
     [../time_discretization]
     #timestep                   = 0.0001 # [s]
@@ -204,7 +207,7 @@ tolerance       =  0.0005   # how far points are to be considered the same on th
         component  = 3
         function   = 0
 
-          [../InnerRing]
+        [../InnerRing]
         type       = EssentialVertices
         flag       = 30
         mode       = Full
@@ -291,7 +294,7 @@ tolerance       =  0.0005   # how far points are to be considered the same on th
         [../]
 
     [../boundary_conditions]
-    list = 'Inlet Outlet Interface InletEdge OutletEdge'              
+    list = 'Inlet Outlet Interface InletEdge OutletEdge'
 
         [./Inlet]
         type       = Essential
