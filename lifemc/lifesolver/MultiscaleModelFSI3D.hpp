@@ -267,13 +267,15 @@ private:
      */
     void setupGlobalData( const std::string& fileName );
 
-    //! Initialize the solution.
+    //! Initialize the FSI solution.
     void initializeSolution();
 
     void setupCommunicator();
 
     void setupBC( const std::string& fileName );
     void updateBC();
+
+    void updateSolution();
 
     void setupExporter( IOFilePtr_Type& exporter, const GetPot& dataFile, const std::string& label = "" );
     void setupImporter( IOFilePtr_Type& exporter, const GetPot& dataFile, const std::string& label = "" );

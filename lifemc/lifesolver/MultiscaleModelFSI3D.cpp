@@ -274,21 +274,13 @@ MultiscaleModelFSI3D::saveSolution()
     Debug( 8140 ) << "MultiscaleModelFSI3D::saveSolution() \n";
 #endif
 
-    if ( M_FSIoperator->isFluid() )
-    {
-        M_FSIoperator->exportFluidVelocityAndPressure( *M_fluidVelocityAndPressure );
-        M_FSIoperator->exportFluidDisplacement( *M_fluidDisplacement );
+    updateSolution();
 
+    if ( M_FSIoperator->isFluid() )
         M_exporterFluid->postProcess( M_data->dataFluid()->dataTime()->time() );
-    }
 
     if ( M_FSIoperator->isSolid() )
-    {
-        M_FSIoperator->exportSolidVelocity( *M_solidVelocity );
-        M_FSIoperator->exportSolidDisplacement( *M_solidDisplacement );
-
         M_exporterSolid->postProcess( M_data->dataSolid()->getdataTime()->time() );
-    }
 
 #ifdef HAVE_HDF5
     if ( M_data->dataFluid()->dataTime()->isLastTimeStep() )
@@ -428,9 +420,9 @@ MultiscaleModelFSI3D::initializeSolution()
         M_importerFluid->setMeshProcId( M_FSIoperator->uFESpace().mesh(), M_FSIoperator->uFESpace().map().comm().MyPID() );
         M_importerSolid->setMeshProcId( M_FSIoperator->dFESpace().mesh(), M_FSIoperator->dFESpace().map().comm().MyPID() );
 
-        M_importerFluid->addVariable( ExporterData::Vector, "Velocity (fluid)", M_fluidVelocityAndPressure, UInt(0), M_FSIoperator->uFESpace().dof().numTotalDof()  );
-        M_importerFluid->addVariable( ExporterData::Scalar, "Pressure (fluid)", M_fluidVelocityAndPressure, UInt(3 * M_FSIoperator->uFESpace().dof().numTotalDof()  ),
-                                      UInt(    M_FSIoperator->pFESpace().dof().numTotalDof()  ) );
+        M_importerFluid->addVariable( ExporterData::Vector, "Velocity (fluid)", M_fluidVelocityAndPressure, UInt(0), M_FSIoperator->uFESpace().dof().numTotalDof() );
+        M_importerFluid->addVariable( ExporterData::Scalar, "Pressure (fluid)", M_fluidVelocityAndPressure, UInt(3 * M_FSIoperator->uFESpace().dof().numTotalDof() ),
+                                                                                                            UInt(    M_FSIoperator->pFESpace().dof().numTotalDof() ) );
         M_importerFluid->addVariable( ExporterData::Vector, "Displacement (fluid)", M_fluidDisplacement, UInt(0), M_FSIoperator->mmFESpace().dof().numTotalDof() );
 
         M_importerSolid->addVariable( ExporterData::Vector, "Velocity (solid)",     M_solidVelocity,     UInt(0), M_FSIoperator->dFESpace().dof().numTotalDof() );
@@ -476,6 +468,15 @@ MultiscaleModelFSI3D::initializeSolution()
         *M_fluidDisplacement        = 0.0;
         *M_solidVelocity            = 0.0;
         *M_solidDisplacement        = 0.0;
+
+        // We initialize the fluid pressure equal to the external pressure
+        vector_Type fluidPressure( M_FSIoperator->pFESpace().mapPtr(), Unique );
+        fluidPressure = M_data->dataSolid()->externalPressure();
+
+        vector_Type extendedFluidPressure( *M_fluidVelocityAndPressure, Unique, Zero );
+        extendedFluidPressure.subset( fluidPressure, fluidPressure.map(), static_cast <UInt> ( 0 ), UInt( 3 * M_FSIoperator->uFESpace().dof().numTotalDof() ) );
+
+        *M_fluidVelocityAndPressure += extendedFluidPressure;
     }
 
     // Initialize solution at time tn
@@ -540,6 +541,27 @@ MultiscaleModelFSI3D::updateBC()
 }
 
 void
+MultiscaleModelFSI3D::updateSolution()
+{
+
+#ifdef HAVE_LIFEV_DEBUG
+    Debug( 8140 ) << "MultiscaleModelFSI3D::updateSolution() \n";
+#endif
+
+    if ( M_FSIoperator->isFluid() )
+    {
+        M_FSIoperator->exportFluidVelocityAndPressure( *M_fluidVelocityAndPressure );
+        M_FSIoperator->exportFluidDisplacement( *M_fluidDisplacement );
+    }
+
+    if ( M_FSIoperator->isSolid() )
+    {
+        M_FSIoperator->exportSolidVelocity( *M_solidVelocity );
+        M_FSIoperator->exportSolidDisplacement( *M_solidDisplacement );
+    }
+}
+
+void
 MultiscaleModelFSI3D::setupExporter( IOFilePtr_Type& exporter, const GetPot& dataFile, const std::string& label )
 {
     const std::string exporterType = dataFile( "exporter/type", "ensight" );
@@ -575,8 +597,7 @@ MultiscaleModelFSI3D::setExporterFluid( const IOFilePtr_Type& exporter )
     M_fluidVelocityAndPressure.reset( new vector_Type( M_FSIoperator->fluid().getMap(),  M_exporterFluid->mapType() ) );
     M_fluidDisplacement.reset       ( new vector_Type( M_FSIoperator->mmFESpace().map(), M_exporterFluid->mapType() ) );
 
-    exporter->setMeshProcId( M_FSIoperator->uFESpace().mesh(),
-                             M_FSIoperator->uFESpace().map().comm().MyPID() );
+    exporter->setMeshProcId( M_FSIoperator->uFESpace().mesh(), M_FSIoperator->uFESpace().map().comm().MyPID() );
 
     exporter->addVariable( ExporterData::Vector, "Velocity (fluid)", M_fluidVelocityAndPressure, static_cast<UInt> ( 0 ), M_FSIoperator->uFESpace().dof().numTotalDof()  );
     exporter->addVariable( ExporterData::Scalar, "Pressure (fluid)", M_fluidVelocityAndPressure, static_cast<UInt> (3 * M_FSIoperator->uFESpace().dof().numTotalDof()  ),
@@ -590,8 +611,7 @@ MultiscaleModelFSI3D::setExporterSolid( const IOFilePtr_Type& exporter )
     M_solidDisplacement.reset( new vector_Type( M_FSIoperator->dFESpace().map(), M_exporterSolid->mapType() ) );
     M_solidVelocity.reset    ( new vector_Type( M_FSIoperator->dFESpace().map(), M_exporterSolid->mapType() ) );
 
-    exporter->setMeshProcId( M_FSIoperator->dFESpace().mesh(),
-                             M_FSIoperator->dFESpace().map().comm().MyPID() );
+    exporter->setMeshProcId( M_FSIoperator->dFESpace().mesh(), M_FSIoperator->dFESpace().map().comm().MyPID() );
 
     exporter->addVariable( ExporterData::Vector, "Velocity (solid)",     M_solidVelocity,     static_cast<UInt> ( 0 ), M_FSIoperator->dFESpace().dof().numTotalDof() );
     exporter->addVariable( ExporterData::Vector, "Displacement (solid)", M_solidDisplacement, static_cast<UInt> ( 0 ), M_FSIoperator->dFESpace().dof().numTotalDof() );
