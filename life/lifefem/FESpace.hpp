@@ -372,7 +372,8 @@ public:
     //! Returns map
     const map_Type&		map()	const { return *M_map; }
     map_Type&			map()		  { return *M_map; }
-    const boost::shared_ptr<const MapType>			mapPtr() const  { return M_map; }
+
+    const mapPtr_Type& mapPtr() const { return M_map; }
 
     //! Returns the velocity dof
     const DOF&			dof()	const { return *M_dof; }
