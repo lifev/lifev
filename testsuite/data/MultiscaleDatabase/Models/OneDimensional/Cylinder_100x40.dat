@@ -48,8 +48,6 @@ Area0                = 0.785398163397448 # Area of tube series
 thickVessel          = false
 thickness            = 0.1
 
-externalPressure     = 0  # g/cm/s^2(dyne/cm^2)
-
 [../space_discretization]
 Length               = 100
 NumberOfElements     = 4000          # number of elements
