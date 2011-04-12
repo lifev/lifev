@@ -45,7 +45,7 @@ ProblemFile = ./MultiscaleDatabase/Models/Multiscale/FSI3D-1D_IdealLeftVentricle
 ###################################################################################################
 FluidDensity                = 1.0           # density        [g/cm^3]
 FluidViscosity              = 0.035         # viscosity      [g/cm/s]
-SolidExternalPressure       = 1.0E5         # ref. pressure  [g/cm/s^2 - dyne/cm^2] 
+SolidExternalPressure       = 1E+05         # ref. pressure  [g/cm/s^2 - dyne/cm^2]
 SolidDensity                = 1.2           # density        [g/cm^3]
 SolidPoissonCoefficient     = 0.4           # Poisson coeff. []
 SolidYoungModulus           = 7.0E6         # Young modulus  [g/cm/s^2 - dyne/cm^2]

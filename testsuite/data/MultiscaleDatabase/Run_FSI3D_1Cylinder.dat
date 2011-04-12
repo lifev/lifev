@@ -42,6 +42,7 @@ ProblemFile = ./MultiscaleDatabase/Models/Multiscale/FSI3D_1Cylinder-tube20
 ###################################################################################################
 FluidDensity                = 1.0           # density        [g/cm^3]
 FluidViscosity              = 0.035         # viscosity      [g/cm/s]
+SolidExternalPressure       = 1E+05         # ref. pressure  [g/cm/s^2 - dyne/cm^2]
 SolidDensity                = 1.2           # density        [g/cm^3]
 SolidPoissonCoefficient     = 0.48          # Poisson coeff. []
 SolidYoungModulus           = 4.0E6         # Young modulus  [g/cm/s^2 - dyne/cm^2]

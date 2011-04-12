@@ -14,8 +14,8 @@
 
 [Problem] #########################################################################################
 ProblemType = Multiscale
-#ProblemFile = ./MultiscaleDatabase/Models/Multiscale/1D-FSI3D_3Cylinders_FS_Initial
-ProblemFile = ./MultiscaleDatabase/Models/Multiscale/1D-FSI3D_3Cylinders_FS
+ProblemFile = ./MultiscaleDatabase/Models/Multiscale/1D-FSI3D_3Cylinders_F
+#ProblemFile = ./MultiscaleDatabase/Models/Multiscale/1D-FSI3D_3Cylinders_FS
 #ProblemFile = ./MultiscaleDatabase/Models/Multiscale/1D-FSI3D_3Cylinders_S
 
 [Solver] ##########################################################################################
@@ -26,8 +26,8 @@ ProblemFile = ./MultiscaleDatabase/Models/Multiscale/1D-FSI3D_3Cylinders_FS
     RestartFromStepNumber      = 0
     
     [../time_discretization]
-    initialtime                = 0.010    # [s]
-    endtime                    = 0.000    # [s]
+    initialtime                = 0.000    # [s]
+    endtime                    = 0.040    # [s]
     timestep                   = 0.001    # [s]
 
     [../Algorithm]
