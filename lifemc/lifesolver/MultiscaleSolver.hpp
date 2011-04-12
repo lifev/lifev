@@ -52,11 +52,11 @@ namespace LifeV
 namespace Multiscale
 {
 
-//! MultiscaleSolver - The Multiscale problem solver
+//! MultiscaleSolver - The Multiscale solver
 /*!
  *  @author Cristiano Malossi
  *
- *  The MultiscaleSolver class provides a series of functions to create and
+ *  The MultiscaleSolver class provides a series of methods to create and
  *  solve a general Multiscale problem.
  */
 class MultiscaleSolver
@@ -78,16 +78,10 @@ public:
     //! @name Methods
     //@{
 
-    //! Set the epetra communicator for the Multiscale problem
-    /*!
-     * @param comm Epetra communicator
-     */
-    void setCommunicator( const multiscaleCommPtr_Type& comm );
-
     //! Setup the problem
     /*!
-     * @param FileName Name of the data file.
-     * @param problemName the name of the problem (useful for saving data in a specific folder)
+     * @param fileName Name of the data file.
+     * @param problemName the name of the problem (used to save data in a specific folder).
      */
     void setupProblem( const std::string& fileName, const std::string& problemName );
 
@@ -99,8 +93,20 @@ public:
      */
     bool solveProblem( const Real& referenceSolution = -1. );
 
-    //! Display some information about the Multiscale problem (to be called after SetupProblem)
+    //! Display some information about the Multiscale problem (should be called after setupProblem)
     void showMe();
+
+    //@}
+
+
+    //! @name Set Methods
+    //@{
+
+    //! Set the epetra communicator for the Multiscale problem
+    /*!
+     * @param comm Epetra communicator
+     */
+    void setCommunicator( const multiscaleCommPtr_Type& comm );
 
     //@}
 

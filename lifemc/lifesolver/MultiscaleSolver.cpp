@@ -87,23 +87,11 @@ MultiscaleSolver::MultiscaleSolver() :
 // Methods
 // ===================================================
 void
-MultiscaleSolver::setCommunicator( const multiscaleCommPtr_Type& comm )
-{
-
-#ifdef HAVE_LIFEV_DEBUG
-    Debug( 8000 ) << "MultiscaleSolver::SetCommunicator( comm ) \n";
-#endif
-
-    M_comm = comm;
-    M_displayer.reset( new Displayer( M_comm ) );
-}
-
-void
 MultiscaleSolver::setupProblem( const std::string& fileName, const std::string& problemFolder )
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 8000 ) << "MultiscaleSolver::SetupData( fileName, problemFolder ) \n";
+    Debug( 8000 ) << "MultiscaleSolver::setupData( fileName, problemFolder ) \n";
 #endif
 
     // Load data file
@@ -148,7 +136,7 @@ MultiscaleSolver::solveProblem( const Real& referenceSolution )
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 8000 ) << "MultiscaleSolver::SolveProblem() \n";
+    Debug( 8000 ) << "MultiscaleSolver::solveProblem() \n";
 #endif
 
     // save initial solution if it is the very first time step
@@ -245,6 +233,21 @@ MultiscaleSolver::showMe()
 
     if ( M_displayer->isLeader() )
         std::cout << "=============================================================" << std::endl << std::endl;
+}
+
+// ===================================================
+// Set Methods
+// ===================================================
+void
+MultiscaleSolver::setCommunicator( const multiscaleCommPtr_Type& comm )
+{
+
+#ifdef HAVE_LIFEV_DEBUG
+    Debug( 8000 ) << "MultiscaleSolver::setCommunicator( comm ) \n";
+#endif
+
+    M_comm = comm;
+    M_displayer.reset( new Displayer( M_comm ) );
 }
 
 } // Namespace multiscale
