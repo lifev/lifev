@@ -28,6 +28,7 @@ dist_pkgdata_DATA = 1D_1Cylinder.dat \
                     1D-Fluid3D_2Cylinders_S.dat \
                     1D-FSI3D_2Cylinders_FS.dat \
                     1D-FSI3D_2Cylinders_S.dat \
+                    1D-FSI3D_3Cylinders_F.dat \
                     1D-FSI3D_3Cylinders_FS.dat \
                     1D-FSI3D_3Cylinders_S.dat \
                     1D-Windkessel0D_1Cylinder_FS.dat \
