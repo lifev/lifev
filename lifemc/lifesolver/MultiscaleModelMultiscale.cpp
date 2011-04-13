@@ -257,7 +257,7 @@ MultiscaleModelMultiscale::saveSolution()
 void
 MultiscaleModelMultiscale::showMe()
 {
-    if ( M_displayer->isLeader() )
+    if ( M_comm->MyPID() == 0 )
     {
         multiscaleModel_Type::showMe();
         std::cout << "Models number       = " << M_modelsList.size() << std::endl
@@ -269,7 +269,7 @@ MultiscaleModelMultiscale::showMe()
     for ( multiscaleModelsVectorConstIterator_Type i = M_modelsList.begin(); i != M_modelsList.end(); ++i )
         ( *i )->showMe();
 
-    if ( M_displayer->isLeader() )
+    if ( M_comm->MyPID() == 0 )
         std::cout << "=================== Couplings Information ===================" << std::endl << std::endl;
 
     for ( multiscaleCouplingsVectorConstIterator_Type i = M_couplingsList.begin(); i != M_couplingsList.end(); ++i )

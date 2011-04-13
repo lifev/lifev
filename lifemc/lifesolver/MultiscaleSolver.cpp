@@ -53,7 +53,6 @@ MultiscaleSolver::MultiscaleSolver() :
         M_algorithm         (),
         M_globalData        ( new multiscaleData_Type() ),
         M_comm              (),
-        M_displayer         (),
         M_chrono            ()
 {
 
@@ -152,7 +151,7 @@ MultiscaleSolver::solveProblem( const Real& referenceSolution )
     {
         M_chrono.start();
 
-        if ( M_displayer->isLeader() )
+        if ( M_comm->MyPID() == 0 )
         {
             std::cout << std::endl;
             std::cout << "$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$" << std::endl;
@@ -192,11 +191,11 @@ MultiscaleSolver::solveProblem( const Real& referenceSolution )
         // Updating total simulation time
         totalSimulationTime += M_chrono.diff();
 
-        if ( M_displayer->isLeader() )
+        if ( M_comm->MyPID() == 0 )
             std::cout << " MS-  Total iteration time:                    " << M_chrono.diff() << " s" << std::endl;
     }
 
-    if ( M_displayer->isLeader() )
+    if ( M_comm->MyPID() == 0 )
         std::cout << " MS-  Total simulation time:                   " << totalSimulationTime << " s" << std::endl;
 
     // Check on the last iteration
@@ -205,7 +204,7 @@ MultiscaleSolver::solveProblem( const Real& referenceSolution )
         Real computedSolution( M_algorithm->couplingVariables()->norm2() );
         if ( referenceSolution >= 0. && std::abs( referenceSolution - computedSolution ) > 1e-8 )
             multiscaleErrorCheck( Solution, "Algorithm Solution: "  + number2string( computedSolution ) +
-                                            " (External Residual: " + number2string( referenceSolution ) + ")\n", M_displayer->isLeader() );
+                                            " (External Residual: " + number2string( referenceSolution ) + ")\n", M_comm->MyPID() );
     }
 
     return multiscaleExitFlag;
@@ -214,7 +213,7 @@ MultiscaleSolver::solveProblem( const Real& referenceSolution )
 void
 MultiscaleSolver::showMe()
 {
-    if ( M_displayer->isLeader() )
+    if ( M_comm->MyPID() == 0 )
     {
         std::cout << std::endl << std::endl
                   << "=============== Multiscale Solver Information ===============" << std::endl << std::endl;
@@ -231,23 +230,8 @@ MultiscaleSolver::showMe()
     if ( M_model->type() == Multiscale )
         M_algorithm->showMe();
 
-    if ( M_displayer->isLeader() )
+    if ( M_comm->MyPID() == 0 )
         std::cout << "=============================================================" << std::endl << std::endl;
-}
-
-// ===================================================
-// Set Methods
-// ===================================================
-void
-MultiscaleSolver::setCommunicator( const multiscaleCommPtr_Type& comm )
-{
-
-#ifdef HAVE_LIFEV_DEBUG
-    Debug( 8000 ) << "MultiscaleSolver::setCommunicator( comm ) \n";
-#endif
-
-    M_comm = comm;
-    M_displayer.reset( new Displayer( M_comm ) );
 }
 
 } // Namespace multiscale

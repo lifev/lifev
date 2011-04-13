@@ -245,7 +245,7 @@ MultiscaleModel1D::buildModel()
 #endif
 
     // Display data
-//    if ( M_displayer->isLeader() )
+//    if ( M_comm->MyPID() == 0 )
 //        M_data->showMe();
 
     M_solver->buildConstantMatrices();
@@ -324,7 +324,7 @@ MultiscaleModel1D::saveSolution()
 void
 MultiscaleModel1D::showMe()
 {
-    if ( M_displayer->isLeader() )
+    if ( M_comm->MyPID() == 0 )
     {
         multiscaleModel_Type::showMe();
 
@@ -614,7 +614,7 @@ MultiscaleModel1D::solve( bc_Type& bc, solution_Type& solution, const std::strin
         timeStep /= subiterationNumber;
     }
 
-    if ( M_displayer->isLeader() )
+    if ( M_comm->MyPID() == 0 )
         std::cout << solverType << "  Number of subiterations                  " << subiterationNumber
                                 << " ( CFL = " << CFL*timeStep/M_data->dataTime()->timeStep() << " )" << std::endl;
 

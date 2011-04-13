@@ -58,8 +58,7 @@ MultiscaleModel::MultiscaleModel() :
         M_geometryScale     (),
         M_geometryRotate    (),
         M_geometryTranslate (),
-        M_comm              (),
-        M_displayer         ()
+        M_comm              ()
 {
 
 #ifdef HAVE_LIFEV_DEBUG
@@ -151,18 +150,6 @@ MultiscaleModel::setGeometry( const boost::array< Real, NDIM >& scale,
     M_geometryScale     = scale;
     M_geometryRotate    = rotate;
     M_geometryTranslate = translate;
-}
-
-void
-MultiscaleModel::setCommunicator( const multiscaleCommPtr_Type& comm )
-{
-
-#ifdef HAVE_LIFEV_DEBUG
-    Debug( 8100 ) << "MultiscaleModel::SetCommunicator( comm ) \n";
-#endif
-
-    M_comm = comm;
-    M_displayer.reset( new Displayer( M_comm ) );
 }
 
 // ===================================================

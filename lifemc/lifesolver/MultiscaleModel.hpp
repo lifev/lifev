@@ -196,7 +196,7 @@ public:
     /*!
      * @param comm Epetra communicator
      */
-    void setCommunicator( const multiscaleCommPtr_Type& comm );
+    void setCommunicator( const multiscaleCommPtr_Type& comm ) { M_comm = comm; }
 
     //@}
 
@@ -287,7 +287,6 @@ protected:
     boost::array< Real, NDIM >           M_geometryTranslate;  // Global geometrical translation
 
     multiscaleCommPtr_Type               M_comm;               // Communicator
-    boost::shared_ptr< Displayer >       M_displayer;          // Displayer
 
 private:
 
@@ -307,7 +306,7 @@ private:
 inline void
 MultiscaleModel::displayModelStatus( const std::string& tag ) const
 {
-    if ( M_displayer->isLeader() )
+    if ( M_comm->MyPID() == 0 )
         std::cout << " MS-  " << tag << " model " << M_ID << " - " << M_modelName << std::endl;
 }
 

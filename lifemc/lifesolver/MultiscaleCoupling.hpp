@@ -229,7 +229,7 @@ public:
     /*!
      * @param comm Epetra communicator
      */
-    void setCommunicator( const multiscaleCommPtr_Type& comm );
+    void setCommunicator( const multiscaleCommPtr_Type& comm ) { M_comm = comm; }
 
     //@}
 
@@ -416,7 +416,6 @@ protected:
     Int                                  M_perturbedCoupling;
 
     multiscaleCommPtr_Type               M_comm;
-    boost::shared_ptr< Displayer >       M_displayer;
 
 private:
 

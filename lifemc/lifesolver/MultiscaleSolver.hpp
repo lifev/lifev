@@ -106,7 +106,7 @@ public:
     /*!
      * @param comm Epetra communicator
      */
-    void setCommunicator( const multiscaleCommPtr_Type& comm );
+    void setCommunicator( const multiscaleCommPtr_Type& comm ) { M_comm = comm; }
 
     //@}
 
@@ -132,9 +132,6 @@ private:
 
     // Communicator
     multiscaleCommPtr_Type           M_comm;
-
-    // Displayer tool for MPI processes
-    boost::shared_ptr< Displayer >   M_displayer;
 
     // Chrono performances
     LifeChrono                       M_chrono;

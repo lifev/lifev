@@ -116,7 +116,7 @@ public:
     /*!
      * @param comm Epetra communicator
      */
-    void setCommunicator( const multiscaleCommPtr_Type& comm );
+    void setCommunicator( const multiscaleCommPtr_Type& comm ) { M_comm = comm; }
 
     //! Set the main Multiscale model
     /*!
@@ -216,7 +216,6 @@ protected:
     multiscaleVectorPtr_Type                 M_couplingResiduals;
 
     multiscaleCommPtr_Type                   M_comm;
-    boost::shared_ptr< Displayer >           M_displayer;
 
     UInt                                     M_subiterationsMaximumNumber;
     Real                                     M_tolerance;

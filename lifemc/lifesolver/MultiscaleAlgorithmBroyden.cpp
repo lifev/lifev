@@ -166,7 +166,7 @@ MultiscaleAlgorithmBroyden::subIterate()
 void
 MultiscaleAlgorithmBroyden::showMe()
 {
-    if ( M_displayer->isLeader() )
+    if ( M_comm->MyPID() == 0 )
     {
         multiscaleAlgorithm_Type::showMe();
 

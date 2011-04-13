@@ -132,7 +132,7 @@ MultiscaleCouplingFlowRate::exportCouplingResiduals( multiscaleVector_Type& coup
 void
 MultiscaleCouplingFlowRate::showMe()
 {
-    if ( M_displayer->isLeader() )
+    if ( M_comm->MyPID() == 0 )
     {
         multiscaleCoupling_Type::showMe();
 

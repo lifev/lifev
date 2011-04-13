@@ -181,7 +181,7 @@ MultiscaleModelFluid3D::buildModel()
 #endif
 
     // Display data
-//    if ( M_displayer->isLeader() )
+//    if ( M_comm->MyPID() == 0 )
 //        M_data->showMe();
 
     //Build constant matrices
@@ -261,7 +261,7 @@ MultiscaleModelFluid3D::solveModel()
     {
         Real residual = ( *M_beta - *M_fluid->solution() ).norm2(); // residual is computed on the whole solution vector;
 
-        if ( M_displayer->isLeader() )
+        if ( M_comm->MyPID() == 0 )
             std::cout << "  F-  Residual:                                " << residual << std::endl;
 
         M_generalizedAitken.restart();
@@ -285,7 +285,7 @@ MultiscaleModelFluid3D::solveModel()
             residual = ( *M_beta - *M_fluid->solution() ).norm2(); // residual is computed on the whole solution vector
 
             // Display subiteration information
-            if ( M_displayer->isLeader() )
+            if ( M_comm->MyPID() == 0 )
             {
                 std::cout << "  F-  Sub-iteration n.:                        " << subIT << std::endl;
                 std::cout << "  F-  Residual:                                " << residual << std::endl;
@@ -316,7 +316,7 @@ MultiscaleModelFluid3D::saveSolution()
 void
 MultiscaleModelFluid3D::showMe()
 {
-    if ( M_displayer->isLeader() )
+    if ( M_comm->MyPID() == 0 )
     {
         multiscaleModel_Type::showMe();
 
@@ -526,7 +526,7 @@ MultiscaleModelFluid3D::setupFEspace()
     }
     else
     {
-        if ( M_displayer->isLeader() )
+        if ( M_comm->MyPID() == 0 )
             std::cout << M_data->uOrder() << " Velocity FE not implemented yet." << std::endl;
         exit( EXIT_FAILURE );
     }
@@ -550,7 +550,7 @@ MultiscaleModelFluid3D::setupFEspace()
     }
     else
     {
-        if ( M_displayer->isLeader() )
+        if ( M_comm->MyPID() == 0 )
             std::cout << M_data->pOrder() << " pressure FE not implemented yet." << std::endl;
         exit( EXIT_FAILURE );
     }

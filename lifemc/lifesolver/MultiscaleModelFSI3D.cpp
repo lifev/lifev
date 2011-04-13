@@ -191,7 +191,7 @@ MultiscaleModelFSI3D::buildModel()
 #endif
 
     // Display data
-//    if ( M_displayer->isLeader() )
+//    if ( M_comm->MyPID() == 0 )
 //        M_data->showMe();
 
     // Update BCInterface solver variables
@@ -297,7 +297,7 @@ MultiscaleModelFSI3D::saveSolution()
 void
 MultiscaleModelFSI3D::showMe()
 {
-    if ( M_displayer->isLeader() )
+    if ( M_comm->MyPID() == 0 )
     {
         multiscaleModel_Type::showMe();
 

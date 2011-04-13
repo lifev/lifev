@@ -61,8 +61,7 @@ MultiscaleCoupling::MultiscaleCoupling() :
         M_localCouplingResiduals      (),
         M_timeInterpolationOrder      ( 1 ),
         M_perturbedCoupling           ( false ),
-        M_comm                        (),
-        M_displayer                   ()
+        M_comm                        ()
 {
 
 #ifdef HAVE_LIFEV_DEBUG
@@ -258,21 +257,6 @@ MultiscaleCoupling::saveSolution()
 
     if ( M_comm->MyPID() == 0 )
         output.close();
-}
-
-// ===================================================
-// Set Methods
-// ===================================================
-void
-MultiscaleCoupling::setCommunicator( const multiscaleCommPtr_Type& comm )
-{
-
-#ifdef HAVE_LIFEV_DEBUG
-    Debug( 8200 ) << "MultiscaleCoupling::setCommunicator( comm ) \n";
-#endif
-
-    M_comm = comm;
-    M_displayer.reset( new Displayer( M_comm ) );
 }
 
 // ===================================================

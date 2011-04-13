@@ -125,7 +125,7 @@ MultiscaleCouplingBoundaryCondition::setupCoupling()
 
         default:
 
-            if ( M_displayer->isLeader() )
+            if ( M_comm->MyPID() == 0 )
                 switchErrorMessage( M_models[i] );
         }
 }
@@ -133,7 +133,7 @@ MultiscaleCouplingBoundaryCondition::setupCoupling()
 void
 MultiscaleCouplingBoundaryCondition::showMe()
 {
-    if ( M_displayer->isLeader() )
+    if ( M_comm->MyPID() == 0 )
     {
         multiscaleCoupling_Type::showMe();
 

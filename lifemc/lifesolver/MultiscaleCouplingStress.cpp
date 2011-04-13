@@ -136,7 +136,7 @@ MultiscaleCouplingStress::exportCouplingResiduals( multiscaleVector_Type& coupli
 void
 MultiscaleCouplingStress::showMe()
 {
-    if ( M_displayer->isLeader() )
+    if ( M_comm->MyPID() == 0 )
     {
         multiscaleCoupling_Type::showMe();
 

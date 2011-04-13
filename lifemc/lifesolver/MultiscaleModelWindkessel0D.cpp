@@ -192,7 +192,7 @@ MultiscaleModelWindkessel0D::saveSolution()
 void
 MultiscaleModelWindkessel0D::showMe()
 {
-    if ( M_displayer->isLeader() )
+    if ( M_comm->MyPID() == 0 )
     {
         multiscaleModel_Type::showMe();
 
