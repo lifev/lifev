@@ -12,15 +12,8 @@
 
 SUFFIXES	= .cpp .hpp .idl .c .h .f .F .o .moc
 
-dist_pkgdata_DATA = Carotid_MonolithicGE.dat \
-                    CurvedCylinder_tube20_MonolithicGE.dat \
-                    Cylinder_tube20_MonolithicGE.dat \
-                    Cylinder_tube20_MonolithicGI.dat \
-                    Cylinder_tube40_MonolithicGE.dat \
-                    Cylinder_tube40_MonolithicGI.dat \
-                    IdealLeftVentricle_MonolithicGE.dat \
-                    TemplateGE.dat \
-                    TemplateGI.dat
+dist_pkgdata_DATA = $(shell find $(srcdir) -name "*.dat") 
+
 
 check-local:
 	@if test "$(top_srcdir)" != "$(top_builddir)"; then\

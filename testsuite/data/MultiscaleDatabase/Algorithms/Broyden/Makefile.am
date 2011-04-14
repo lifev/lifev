@@ -12,7 +12,7 @@
 
 SUFFIXES	= .cpp .hpp .idl .c .h .f .F .o .moc
 
-dist_pkgdata_DATA = Default.dat
+dist_pkgdata_DATA = $(shell find $(srcdir) -name "*.dat") 
 					
 check-local:
 	@if test "$(top_srcdir)" != "$(top_builddir)"; then\

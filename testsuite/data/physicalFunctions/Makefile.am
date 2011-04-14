@@ -12,14 +12,7 @@
 
 SUFFIXES	= .cpp .hpp .idl .c .h .f .F .o .moc
 
-dist_pkgdata_DATA = AortaPhysicalFlux.dat\
-                    AortaPhysicalPressure.dat\
-                    CarotidBifurcationPhysicalFlux.dat\
-                    EpicardialForce.dat\
-                    HeartPhysicalFlux.dat\
-                    MitralValveInFlow.dat\
-                    SmoothTrapezoidalProfile.dat\
-                    test_Flux1.dat test_Flux2.dat
+dist_pkgdata_DATA = $(shell find $(srcdir) -name "*.dat") 
 
 check-local:
 	@if test "$(top_srcdir)" != "$(top_builddir)"; then\
