@@ -180,6 +180,15 @@ MultiscaleModelFSI3D::setupModel()
 
     //Setup linear model
     setupLinearModel();
+
+    std::cout << std::scientific << std::setprecision(15) << "Flag 2: " << M_FSIoperator->fluid().area( 2 ) << std::endl;
+    std::cout << "Flag 3: " << M_FSIoperator->fluid().area( 3 ) << std::endl;
+    std::cout << "Flag 4: " << M_FSIoperator->fluid().area( 4 ) << std::endl;
+    std::cout << "Flag 5: " << M_FSIoperator->fluid().area( 5 ) << std::endl;
+    std::cout << "Flag 6: " << M_FSIoperator->fluid().area( 6 ) << std::endl;
+    std::cout << "Flag 7: " << M_FSIoperator->fluid().area( 7 ) << std::endl;
+    std::cout << "Flag 8: " << M_FSIoperator->fluid().area( 8 ) << std::endl;
+    std::cout << "Flag 9: " << M_FSIoperator->fluid().area( 9 ) << std::endl;
 }
 
 void
@@ -391,20 +400,25 @@ MultiscaleModelFSI3D::setupGlobalData( const std::string& fileName )
         M_data->dataFluid()->setViscosity( M_globalData->fluidViscosity() );
 
     // Solid global physical quantities
-    UInt materialFlag;
-    if ( !dataFile.checkVariable( "solid/physics/material_flag" ) )
-        materialFlag = 1;
-    else
-        materialFlag = dataFile( "solid/physics/material_flag", 1 );
-
     if ( !dataFile.checkVariable( "solid/physics/density" ) )
         M_data->dataSolid()->setDensity( M_globalData->solidDensity() );
-    if ( !dataFile.checkVariable( "solid/physics/poisson" ) )
-        M_data->dataSolid()->setPoisson( M_globalData->solidPoissonCoefficient(), materialFlag );
-    if ( !dataFile.checkVariable( "solid/physics/young" ) )
-        M_data->dataSolid()->setYoung( M_globalData->solidYoungModulus(), materialFlag );
     if ( !dataFile.checkVariable( "solid/physics/externalPressure" ) )
         M_data->dataSolid()->setExternalPressure( M_globalData->solidExternalPressure() );
+
+    std::vector< UInt > materialFlags;
+    if ( !dataFile.checkVariable( "solid/physics/material_flag" ) )
+        materialFlags.push_back( 1 );
+    else
+        for ( UInt i( 0 ) ; i < dataFile.vector_variable_size( "solid/physics/material_flag" ) ; ++i )
+            materialFlags.push_back( dataFile( "solid/physics/material_flag", 1, i ) );
+
+    for ( std::vector< UInt >::const_iterator i = materialFlags.begin(); i != materialFlags.end() ; ++i )
+    {
+        if ( !dataFile.checkVariable( "solid/physics/poisson" ) )
+            M_data->dataSolid()->setPoisson( M_globalData->solidPoissonCoefficient(), *i );
+        if ( !dataFile.checkVariable( "solid/physics/young" ) )
+            M_data->dataSolid()->setYoung( M_globalData->solidYoungModulus(), *i );
+    }
 }
 
 void
