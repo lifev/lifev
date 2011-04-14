@@ -87,6 +87,7 @@ MultiscaleModelMultiscale::setupData( const std::string& fileName )
 
     // Useful variables
     UInt id;
+    Real load;
 
     models_Type model;
     couplings_Type coupling;
@@ -100,16 +101,34 @@ MultiscaleModelMultiscale::setupData( const std::string& fileName )
 
     UInt modelsColumnsNumber    = 3.0;
     UInt couplingsColumnsNumber = 5.0;
+    UInt groupsColumnsNumber    = 3.0;
     UInt geometryColumnsNumber  = 10.0;
 
     GetPot dataFile( fileName );
 
     UInt modelsLinesNumber    = dataFile.vector_variable_size( "Problem/models" ) / modelsColumnsNumber;
     UInt couplingsLinesNumber = dataFile.vector_variable_size( "Problem/couplings" ) / couplingsColumnsNumber;
+    UInt groupsLinesNumber    = dataFile.vector_variable_size( "Problem/groups" ) / groupsColumnsNumber;
     UInt geometryLinesNumber  = dataFile.vector_variable_size( "Problem/offset" ) / geometryColumnsNumber;
 
     M_modelsList.resize( modelsLinesNumber );
     M_couplingsList.resize( couplingsLinesNumber );
+
+    // Load groups
+    MultiscaleCommunicatorsManager commManager;
+    commManager.setCommunicator( M_comm );
+
+    for ( UInt i( 0 ); i < groupsLinesNumber; ++i )
+    {
+        load = dataFile( "Problem/groups", -1, i * groupsColumnsNumber + 1 );
+        string2numbersVector< UInt > ( dataFile( "Problem/groups", "undefined", i * groupsColumnsNumber + 2 ), modelsIDVector );
+
+        commManager.addGroup( load, modelsIDVector );
+        modelsIDVector.clear();
+    }
+
+    commManager.showMe();
+    commManager.splitCommunicators();
 
     // Load Models
     std::string path = dataFile( "Problem/modelsPath", "./" );

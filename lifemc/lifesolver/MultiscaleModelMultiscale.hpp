@@ -37,6 +37,8 @@
 #ifndef MultiscaleModelMultiscale_H
 #define MultiscaleModelMultiscale_H 1
 
+#include <lifemc/lifesolver/MultiscaleCommunicatorsManager.hpp>
+
 #include <lifemc/lifesolver/MultiscaleModel.hpp>
 #include <lifemc/lifesolver/MultiscaleModelFluid3D.hpp>
 #include <lifemc/lifesolver/MultiscaleModelFSI3D.hpp>
