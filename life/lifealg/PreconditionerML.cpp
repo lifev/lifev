@@ -159,6 +159,9 @@ PreconditionerML::createMLList( list_Type& list,
     std::string AggregationType                  = dataFile( (section + "/" + subSection + "/aggregation/type").data(), "Uncoupled", found );
     if ( found ) list.set( "aggregation: type", AggregationType );
 
+    bool AggregationBlockScaling          = dataFile( (section + "/" + subSection + "/aggregation/block_scaling").data(), false, found );
+    if ( found ) list.set( "aggregation: block scaling", AggregationBlockScaling );
+
     Real        AggregationThreshold             = dataFile( (section + "/" + subSection + "/aggregation/threshold").data(), 0.0 , found );
     if ( found ) list.set( "aggregation: threshold", AggregationThreshold );
 
@@ -185,6 +188,17 @@ PreconditionerML::createMLList( list_Type& list,
 
     bool AggregationSymmetrize                   = dataFile( (section + "/" + subSection + "/aggregation/symmetrize").data(), false, found );
     if ( found ) list.set( "aggregation: symmetrize", AggregationSymmetrize );
+
+    Int AggregationNumLevelTypes                 = dataFile( (section + "/" + subSection + "/aggregation/level_type").data(), 0, found );
+    if ( found )
+    {
+        for(Int i(0);i<AggregationNumLevelTypes;++i)
+        {
+            std::string levelIndex             = dataFile( (section + "/" + subSection + "/aggregation/level_type").data(), "0", 2*i+1 );
+            std::string levelParamValue = dataFile( (section + "/" + subSection + "/aggregation/level_type").data(), "METIS", 2*i+2 );
+            list.set( ("aggregation: type (level " + levelIndex + ")").data(), levelParamValue );
+        }
+    }
 
     bool   EnergyMinimizationEnable              = dataFile( (section + "/" + subSection + "/energy_minimization/enable").data(), false, found );
     if ( found ) list.set( "energy minimization: enable", EnergyMinimizationEnable );
@@ -221,8 +235,30 @@ PreconditionerML::createMLList( list_Type& list,
     std::string SmootherIpackType           = dataFile( (section + "/" + subSection + "/smoother/ifpack_type").data(), "ILU", found );
     if ( found ) list.set( "smoother: ifpack type", SmootherIpackType );
 
-    Int SmootherIpackOverlap        = dataFile( (section + "/" + subSection + "/smoother/ifpack_overlap").data(), 1, found );
+    Int SmootherIpackOverlap                = dataFile( (section + "/" + subSection + "/smoother/ifpack_overlap").data(), 1, found );
     if ( found ) list.set( "smoother: ifpack overlap", SmootherIpackOverlap );
+
+    Int SmootherNumLevelTypes               = dataFile( (section + "/" + subSection + "/smoother/level_type").data(), 0, found );
+    if ( found )
+    {
+        for(Int i(0);i<SmootherNumLevelTypes;++i)
+        {
+            std::string levelIndex          = dataFile( (section + "/" + subSection + "/smoother/level_type").data(), "0", 2*i+1 );
+            std::string levelParamValue     = dataFile( (section + "/" + subSection + "/smoother/level_type").data(), "IFPACK", 2*i+2 );
+            list.set( ("smoother: type (level " + levelIndex + ")").data(), levelParamValue );
+        }
+    }
+
+    Int SmootherNumLevelSweeps              = dataFile( (section + "/" + subSection + "/smoother/level_sweeps").data(), 0, found );
+    if ( found )
+    {
+        for(Int i(0);i<SmootherNumLevelSweeps;++i)
+        {
+            std::string levelIndex          = dataFile( (section + "/" + subSection + "/smoother/level_sweeps").data(), "0", 2*i+1 );
+            Int levelParamValue             = dataFile( (section + "/" + subSection + "/smoother/level_sweeps").data(), 1, 2*i+2 );
+            list.set( ("smoother: sweeps (level " + levelIndex + ")").data(), levelParamValue );
+        }
+    }
 
     // subsmoother parameter
 
@@ -330,8 +366,8 @@ PreconditionerML::setDataFromGetPot( const GetPot&      dataFile,
             M_list.set( "viz: enable", enableViz);
             M_list.set( "viz: output format", "vtk");
             M_list.set("x-coordinates", &((*M_xCoord)[0]) );
-            M_list.set("y-coordinates", &((*M_yCoord)[0]));
-            M_list.set("z-coordinates", &((*M_zCoord)[0]));
+            M_list.set("y-coordinates", &((*M_yCoord)[0]) );
+            M_list.set("z-coordinates", &((*M_zCoord)[0]) );
         }
         else
         {
