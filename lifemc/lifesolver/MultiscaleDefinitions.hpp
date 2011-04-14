@@ -170,7 +170,7 @@ typedef MultiscaleData                                                          
 typedef boost::shared_ptr< multiscaleData_Type >                                 multiscaleDataPtr_Type;
 
 // ===================================================
-// MS Utility Methods
+// Multiscale Utility Methods
 // ===================================================
 
 //! Define the map of the MS objects
