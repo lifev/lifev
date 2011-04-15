@@ -1,0 +1,24 @@
+###################################################################################################
+#
+#                       This file is part of the LifeV Library                       
+#                Copyright (C) 2004, 2005, 2007 EPFL, Politecnico di Milano, INRIA
+#                Copyright (C) 2010 EPFL, Politecnico di Milano, Emory University
+#
+#      Author(s): Cristiano Malossi <cristiano.malossi@epfl.ch>
+#           Date: 2011-03-10
+#  License Terms: GNU LGPL
+#
+###################################################################################################
+### COUPLING: Reymond Stergiopulos 1D Arterial Tree ###############################################
+###################################################################################################
+
+[Multiscale]
+modelName        = '1D ReymondStergiopulos 096 (terminal)'
+modelType        = Windkessel0D
+couplingFlags    = '0'
+
+[Coefficients]
+
+Resistance1      = 5.9301799072e+04      # dyn s / cm^5 - Capillaries
+Resistance2      = 1.4825449768e+04      # dyn s / cm^5 - Arterioles
+Capacitance      = 1.9951637531e-07      # cm^5 / dyn
