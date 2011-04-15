@@ -83,10 +83,7 @@ semiImplicit        = false  # tells if we advance in time after the first nonli
 
     [../space_discretization]
     mesh_dir        = ./Mesh/
-    #mesh_file       = tube20.mesh      #  1050 Vertex
     mesh_file       = tube40.mesh      # 9486 Vertex
-    #mesh_file       = tube60.mesh      # 25063 Vertex
-    #mesh_file       = tube80.mesh      # 71820 Vertex
     mesh_type       = .mesh
     verbose         = 0                # verbose during mesh-reading
 
@@ -95,7 +92,7 @@ semiImplicit        = false  # tells if we advance in time after the first nonli
     #vel_order       = P2               # P1, P1Bubble, P2
     press_order     = P1               # P1, P2
     stiff_strain    = false            # true: sigma with grad( u )^T, false: sigma without it
-    div_beta_u_v    = false                # 1=on, 0=off
+    div_beta_u_v    = false            # 1=on, 0=off
     diagonalize     = 0                # weight, 0=off
     stabilization   = 'ip'             # "none": none, "ip": Interior Penalty, "sd":Stream-line diffusion
 
@@ -122,25 +119,24 @@ semiImplicit        = false  # tells if we advance in time after the first nonli
     #nb_polygon_edges               = 10
 
     [../boundary_conditions]
-        # DirichletNeumann conditions
-        list = ' '
-        #list = 'InFlowEdge OutFlowEdge'
+    list = ' '
+    #list = 'InFlowEdge OutFlowEdge'
 
-            [./InFlowEdge]
-            type            = Essential
-            flag            = 20
-            mode            = Full
-            component       = 3
-            function        = 0
+        [./InFlowEdge]
+        type            = Essential
+        flag            = 20
+        mode            = Full
+        component       = 3
+        function        = 0
 
-            [../OutFlowEdge]
-            type            = Essential
-            flag            = 30
-            mode            = Full
-            component       = 3
-            function        = 0
+        [../OutFlowEdge]
+        type            = Essential
+        flag            = 30
+        mode            = Full
+        component       = 3
+        function        = 0
 
-            [../]
+        [../]
 
     [../]
 
@@ -164,7 +160,6 @@ semiImplicit        = false  # tells if we advance in time after the first nonli
 
     [../space_discretization]
     mesh_dir         = ./Mesh/
-    #mesh_file        = vessel20.mesh  # mesh file
     mesh_file        = vessel40.mesh  # mesh file
     order            = P1
 

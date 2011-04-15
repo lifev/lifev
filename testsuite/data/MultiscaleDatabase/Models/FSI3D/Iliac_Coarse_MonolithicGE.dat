@@ -6,17 +6,24 @@
 #
 #      Author(s): Paolo Crosetto <paolo.crosetto@epfl.ch>
 #                 Cristiano Malossi <cristiano.malossi@epfl.ch>
-#           Date: 2011-03-10
+#           Date: 2011-04-14
 #  License Terms: GNU LGPL
 #
 ###################################################################################################
-### MODEL: FSI3D - Cylinder #######################################################################
+### MODEL: FSI3D - Aorta ##########################################################################
 ###################################################################################################
 
 [Multiscale]
-modelName        = FSI3D_Cylinder_tube40_MonolithicGE
+modelName        = FSI3D_Iliac_Coarse_MonolithicGE
 modelType        = FSI3D
-couplingFlags    = '2 3'
+couplingFlags    = '2 3 4 5 6'
+
+#Note on the flags: 
+# 2: Abdominal Aorta E,        Area = 1.528053101775165e+00
+# 3: Inner Iliac (Left),       Area = 1.608700348268665e-01
+# 4: External Iliac (Left),    Area = 1.991225727820763e-01
+# 5: Inner Iliac (Right),      Area = 1.686868541692753e-01
+# 6: External Iliac (Right),   Area = 2.210729557211047e-01
 
 
 
@@ -83,7 +90,7 @@ semiImplicit        = true   # tells if we advance in time after the first nonli
 
     [../space_discretization]
     mesh_dir        = ./Mesh/
-    mesh_file       = tube40.mesh      # 9486 Vertex
+    mesh_file       = iliac_fluid_scaled.mesh
     mesh_type       = .mesh
     verbose         = 0                # verbose during mesh-reading
 
@@ -120,23 +127,6 @@ semiImplicit        = true   # tells if we advance in time after the first nonli
 
     [../boundary_conditions]
     list = ' '
-    #list = 'InFlowEdge OutFlowEdge'
-
-        [./InFlowEdge]
-        type            = Essential
-        flag            = 20
-        mode            = Full
-        component       = 3
-        function        = 0
-
-        [../OutFlowEdge]
-        type            = Essential
-        flag            = 30
-        mode            = Full
-        component       = 3
-        function        = 0
-
-        [../]
 
     [../]
 
@@ -156,7 +146,7 @@ tolerance       =  0   # how far points are to be considered the same on the int
     material_flag    = 1
     #externalPressure = 0
     #density          = 1.2
-    #young            = 4.0E6
+    young            = 4.0E6
     #poisson          = 0.48
 
     [../time_discretization]
@@ -165,7 +155,7 @@ tolerance       =  0   # how far points are to be considered the same on the int
 
     [../space_discretization]
     mesh_dir         = ./Mesh/
-    mesh_file        = vessel40.mesh  # mesh file
+    mesh_file        = iliac_structure_scaled.mesh  # mesh file
     order            = P1
 
     [../miscellaneous]
@@ -180,62 +170,38 @@ tolerance       =  0   # how far points are to be considered the same on the int
 
     [../boundary_conditions]
     #list = ' '                                                                         # Free dispacement
-    list = 'Top_ReferencePressure Base_ReferencePressure OuterWall_ReferencePressure'   # Free dispacement + Reference pressure
+    list = 'AbdominalAorta_ReferencePressure    OuterWall_ReferencePressure
+            ExternalIliacLeft_ReferencePressure ExternalIliacRight_ReferencePressure
+            InternalIliacLeft_ReferencePressure InternalIliacRight_ReferencePressure'   # Free dispacement + Reference pressure
     #list = 'OuterWall_Robin'                                                           # Free dispacement + Robin on the external Wall
-    #list = 'Top_NoDisplacementOnZ Base_NoDisplacementOnZ OuterWall_ReferencePressure'  # Free dispacement on XY + Reference pressure
-    #list = 'Top Base TopEdge BaseEdge OuterWall_ReferencePressure'                     # Fixed dispacement + Reference pressure
-
-        [./Top]
-        type       = Essential
-        flag       = 3
-        mode       = Full
-        component  = 3
-        function   = 0
-
-        [../Base]
-        type       = Essential
-        flag       = 2
-        mode       = Full
-        component  = 3
-        function   = 0
-
-        [../TopEdge]
-        type       = Essential
-        flag       = 20
-        mode       = Full
-        component  = 3
-        function   = 0
-
-        [../BaseEdge]
-        type       = Essential
-        flag       = 30
-        mode       = Full
-        component  = 3
-        function   = 0
         
-        [../Top_NoDisplacementOnZ]
-        type       = Essential
-        flag       = 3
-        mode       = Component
-        component  = '2'
-        function   = 0
+        [./AbdominalAorta_ReferencePressure]
+        type       = Natural
+        flag       = 5
+        mode       = Normal
+        functionSolver = '-s_externalPressure'
         
-        [../Base_NoDisplacementOnZ]
-        type       = Essential
-        flag       = 2
-        mode       = Component
-        component  = '2'
-        function   = 0
+        [../ExternalIliacLeft_ReferencePressure]
+        type       = Natural
+        flag       = 6
+        mode       = Normal
+        functionSolver = '-s_externalPressure'
         
-        [../Top_ReferencePressure]
+        [../ExternalIliacRight_ReferencePressure]
         type       = Natural
         flag       = 3
         mode       = Normal
         functionSolver = '-s_externalPressure'
         
-        [../Base_ReferencePressure]
+        [../InternalIliacLeft_ReferencePressure]
         type       = Natural
         flag       = 2
+        mode       = Normal
+        functionSolver = '-s_externalPressure'
+        
+        [../InternalIliacRight_ReferencePressure]
+        type       = Natural
+        flag       = 4
         mode       = Normal
         functionSolver = '-s_externalPressure'
         
@@ -330,65 +296,13 @@ tolerance       =  0   # how far points are to be considered the same on the int
 
     [../boundary_conditions]
     list = 'Interface'                                              # Free dispacement
-    #list = 'Top_NoDisplacementOnZ Base_NoDisplacementOnZ Interface' # Free dispacement on XY
-    #list = 'Top TopEdge Interface'                                  # Fixed displacement
-    #list = 'Top TopEdge Base BaseEdge NoInterface'                  # Test
 
-        [./Top]
-        type       = Essential
-        flag       = 3
-        mode       = Full
-        component  = 3
-        function   = 0
-
-        [../Base]
-        type       = Essential
-        flag       = 2
-        mode       = Full
-        component  = 3
-        function   = 0
-
-        [../TopEdge]
-        type       = Essential
-        flag       = 20
-        mode       = Full
-        component  = 3
-        function   = 0
-
-        [../BaseEdge]
-        type       = Essential
-        flag       = 30
-        mode       = Full
-        component  = 3
-        function   = 0
-
-        [../Interface]
+        [./Interface]
         type       = Essential
         flag       = 1
         mode       = Full
         component  = 3
         FSI        = StructureDispToHarmonicExtension
-        
-        [../NoInterface]
-        type       = Essential
-        flag       = 1
-        mode       = Full
-        component  = 3
-        function   = 0
-        
-        [../Top_NoDisplacementOnZ]
-        type       = Essential
-        flag       = 3
-        mode       = Component
-        component  = '2'
-        function   = 0
-        
-        [../Base_NoDisplacementOnZ]
-        type       = Essential
-        flag       = 2
-        mode       = Component
-        component  = '2'
-        function   = 0
 
         [../]
 
