@@ -13,7 +13,7 @@
 ###################################################################################################
 
 [Multiscale]
-modelName        = '1D ReymondStergiopulos 031 (terminal)'
+modelName        = '1D ReymondStergiopulos 031 (Windkessel RCR terminal)'
 modelType        = Windkessel0D
 couplingFlags    = '0'
 
