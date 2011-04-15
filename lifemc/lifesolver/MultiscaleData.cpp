@@ -48,6 +48,7 @@ MultiscaleData::MultiscaleData() :
         M_timeData                      (),
         M_fluidDensity                  (),
         M_fluidViscosity                (),
+        M_fluidVenousPressure           (),
         M_solidExternalPressure         (),
         M_solidDensity                  (),
         M_solidPoissonCoefficient       (),
@@ -60,6 +61,7 @@ MultiscaleData::MultiscaleData( const MultiscaleData& data ) :
         M_timeData                      ( data.M_timeData ),
         M_fluidDensity                  ( data.M_fluidDensity ),
         M_fluidViscosity                ( data.M_fluidViscosity ),
+        M_fluidVenousPressure           ( data.M_fluidVenousPressure ),
         M_solidExternalPressure         ( data.M_solidExternalPressure ),
         M_solidDensity                  ( data.M_solidDensity ),
         M_solidPoissonCoefficient       ( data.M_solidPoissonCoefficient ),
@@ -79,6 +81,7 @@ MultiscaleData::operator=( const MultiscaleData& data )
         M_timeData                      = data.M_timeData;
         M_fluidDensity                  = data.M_fluidDensity;
         M_fluidViscosity                = data.M_fluidViscosity;
+        M_fluidVenousPressure           = data.M_fluidVenousPressure;
         M_solidExternalPressure         = data.M_solidExternalPressure;
         M_solidDensity                  = data.M_solidDensity;
         M_solidPoissonCoefficient       = data.M_solidPoissonCoefficient;
@@ -98,6 +101,7 @@ MultiscaleData::readData( const GetPot& dataFile )
     M_timeData.reset( new time_Type( dataFile, "Solver/time_discretization" ) );
     M_fluidDensity                  = dataFile( "Physics/FluidDensity", 0. );
     M_fluidViscosity                = dataFile( "Physics/FluidViscosity", 0. );
+    M_fluidVenousPressure           = dataFile( "Physics/FluidVenousPressure", 0. );
     M_solidExternalPressure         = dataFile( "Physics/SolidExternalPressure", 0. );
     M_solidDensity                  = dataFile( "Physics/SolidDensity", 0. );
     M_solidPoissonCoefficient       = dataFile( "Physics/SolidPoissonCoefficient", 0. );
@@ -109,7 +113,8 @@ void
 MultiscaleData::showMe()
 {
     std::cout << "Fluid density                 = " << M_fluidDensity << std::endl
-              << "Fluid viscosity               = " << M_fluidViscosity << std::endl << std::endl;
+              << "Fluid viscosity               = " << M_fluidViscosity << std::endl
+              << "Fluid venous pressure         = " << M_fluidVenousPressure << std::endl << std::endl;
 
     std::cout << "Solid reference pressure      = " << M_solidExternalPressure << std::endl
               << "Solid density coefficient     = " << M_solidDensity << std::endl

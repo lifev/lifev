@@ -52,8 +52,11 @@ namespace Multiscale
  *  <ul>
  *      <li> Fluid density
  *      <li> Fluid viscosity
- *      <li> Structure Young modulus
- *      <li> Structure Poisson coefficient
+ *      <li> Fluid venous pressure
+ *      <li> Solid external pressure
+ *      <li> Solid density
+ *      <li> Solid Young modulus
+ *      <li> Solid Poisson coefficient
  *  </ul>
  */
 class MultiscaleData
@@ -136,6 +139,12 @@ public:
      */
     const Real& fluidViscosity() const { return M_fluidViscosity; }
 
+    //! Get the global fluid venous pressure.
+    /*!
+     * @return venous pressure of the fluid.
+     */
+    const Real& fluidVenousPressure() const { return M_fluidVenousPressure; }
+
     //! Get the global fluid reference pressure (used by 1D model).
     /*!
      * @return reference pressure of the fluid.
@@ -174,6 +183,7 @@ private:
 
     Real                                M_fluidDensity;
     Real                                M_fluidViscosity;
+    Real                                M_fluidVenousPressure;
 
     Real                                M_solidExternalPressure;
     Real                                M_solidDensity;

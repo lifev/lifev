@@ -243,7 +243,7 @@ MultiscaleModelWindkessel0D::setupGlobalData( const std::string& fileName )
     GetPot dataFile( fileName );
 
     if ( !dataFile.checkVariable( "Coefficients/VenousPressure" ) )
-        M_venousPressure = M_globalData->solidExternalPressure();
+        M_venousPressure = M_globalData->fluidVenousPressure();
 }
 
 void
