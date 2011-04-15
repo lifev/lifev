@@ -144,10 +144,9 @@ public:
     //! Get the integral of the normal stress (on a specific boundary face)
     /*!
      * @param flag flag of the boundary face
-     * @param stressType Type of approximation for the stress
      * @return stress value
      */
-    Real boundaryStress( const bcFlag_Type& flag ) const;
+    Real boundaryStress( const bcFlag_Type& flag ) const { return -boundaryPressure( flag ); }
 
     //! Get the variation of the flow rate (on a specific boundary face) using the linear model
     /*!
@@ -161,7 +160,6 @@ public:
     /*!
      * @param flag flag of the boundary face
      * @param solveLinearSystem a flag to which determine if the linear system has to be solved
-     * @param stressType Type of approximation for the stress
      * @return variation of the stress
      */
     Real boundaryDeltaStress( const bcFlag_Type& flag, bool& solveLinearSystem );
@@ -177,20 +175,6 @@ public:
      * @return BCInterface container
      */
     bcInterface_Type& bcInterface() { return *M_bc; }
-
-    //! Get the density on a specific boundary face of the model
-    /*!
-     * @param flag flag of the boundary face
-     * @return density value
-     */
-    Real boundaryDensity( const bcFlag_Type& /*flag*/) const { return M_globalData->fluidDensity(); }
-
-    //! Get the viscosity on a specific boundary face of the model
-    /*!
-     * @param flag flag of the boundary face
-     * @return viscosity value
-     */
-    Real boundaryViscosity( const bcFlag_Type& /*flag*/) const { return M_globalData->fluidViscosity(); }
 
     //! Get the integral of the pressure (on a specific boundary face)
     /*!
@@ -223,22 +207,48 @@ private:
      *
      * @param fileName File name of the specific model.
      */
-    void setupGlobalData();
-
-    void setupExporterImporter();
+    void setupGlobalData( const std::string& fileName );
 
     //! Initialize the solution.
     void initializeSolution();
 
+    void setupExporterImporter();
+
+    //! Solving for the flow rate.
+    /*!
+     * TODO ADD THE EQUATIONS
+     * @return the computed flow rate
+     */
+    Real solveForFlowRate();
+
     //! Solving for the pressure.
     /*!
+     * TODO ADD THE EQUATIONS
      * @return the computed pressure
      */
-    Real solveForPressure();    // Solve the equations for Pressure
-    Real solveForFlowRate();    // Solve the equations for FlowRate
-    Real tangentSolveForFlowRate(); //solve dQ/dP
-    Real tangentSolveForPressure(); //solve dP/dQ
+    Real solveForPressure();
 
+    //! Solve the tangent problem
+    /*!
+     * @param solveLinearSystem if true the system as already been solved.
+     */
+    void solveLinearModel( bool& solveLinearSystem );
+
+    //! Solve the tangent problem for the flow rate
+    /*!
+     * TODO ADD THE EQUATIONS
+     * @return \f$ dQ/dP \f$
+     */
+    Real tangentSolveForFlowRate();
+
+    //! Solve the tangent problem for the flow rate
+    /*!
+     * TODO ADD THE EQUATIONS
+     * @return \f$ dP/dQ \f$
+     */
+    Real tangentSolveForPressure();
+
+    //@}
 
     //! Convert the flag from a bcFlag type to a bcSide type
     /*!
@@ -246,10 +256,6 @@ private:
      * @return boundary condition side.
      */
     bcSide_Type flagConverter( const bcFlag_Type& flag ) const { return (flag == 0) ? OneDimensional::left : OneDimensional::right; }
-
-    void solveLinearModel( bool& solveLinearSystem );
-
-    //@}
 
     std::ofstream          M_outputFile;
 
