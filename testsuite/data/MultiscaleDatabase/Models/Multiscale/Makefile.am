@@ -66,8 +66,7 @@ dist_pkgdata_DATA = 1D_1Cylinder.dat \
                     FSI3D-1D_IdealLeftVentricleWithAorta-Absorbing_S.dat \
                     FSI3D-1D_IdealLeftVentricleWithAorta-ClosedValve_S.dat \
                     FSI3D-1D_IdealLeftVentricleWithArterialTree_S.dat \
-                    Template.dat \
-                    Windkessel0D_Test.dat
+                    Template.dat
 
 check-local:
 	@if test "$(top_srcdir)" != "$(top_builddir)"; then\
