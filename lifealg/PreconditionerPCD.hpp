@@ -76,6 +76,7 @@ public:
     typedef boost::shared_ptr<operator_raw_type>    operator_type;
 
     typedef boost::shared_ptr<FESpace<mesh_type,map_type> >  FESpace_ptr;
+    typedef boost::shared_ptr<BCHandler>            BCHandlerPtr_type;
 
     typedef Teuchos::ParameterList                  list_Type;
     //@}
@@ -105,7 +106,8 @@ public:
     static void createPCDList( list_Type&         list,
                                const GetPot&      dataFile,
                                const std::string& section,
-                               const std::string& subSection = "PCD" );
+                               const std::string& subSection = "PCD",
+                               const bool& verbose = true );
 
     //! Return an estimation of the conditionement number of the preconditioner
     double      condest ();
@@ -150,6 +152,14 @@ public:
      */
     void setFESpace(FESpace_ptr uFESpace,FESpace_ptr pFESpace);
 
+    //! Setter for the BCHandler
+    /*!
+        This method set the pointer for the FESpaces needed
+        for the construction of the operators Ap, Fp and Mp.
+        @param bchPtr pointer to a BCHandler boject
+    */
+    void setBCHandler(BCHandlerPtr_type bchPtr);
+
     //! Setter for the timestep
     /*!
         This method set the timestep used to compute Fp.
@@ -190,12 +200,15 @@ protected:
 
     // todo: Remove the member dataFile (bad programmation)
     GetPot      M_dataFile;
+    BCHandlerPtr_type M_bcHandlerPtr;
     string      M_fluidPrec;
     string      M_fluidPrecDataSection;
     string      M_pressureLaplacianPrec;
     string      M_pressureLaplacianPrecDataSection;
     string      M_pressureMassPrec;
     string      M_pressureMassPrecDataSection;
+
+    string      M_pressureBoundaryConditions;
 
 private:
     PreconditionerPCD(const PreconditionerPCD& /*P*/){}

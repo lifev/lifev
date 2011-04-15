@@ -36,7 +36,7 @@
 #include <lifemc/lifearray/MatrixBlockView.hpp>
 #include <lifemc/lifearray/MatrixBlockUtils.hpp>
 
-#define shuttleworth
+#define shuttleworth2
 
 #ifdef shuttleworth
 #include <EpetraExt_MatrixMatrix.h>
@@ -50,7 +50,8 @@ PreconditionerPCD::PreconditionerPCD(const  boost::shared_ptr<Epetra_Comm>& comm
     M_pressureBlockSize(-1),
     M_timestep(1.0),
     M_viscosity(1.0),
-    M_density(1.0)
+    M_density(1.0),
+    M_pressureBoundaryConditions("none")
 {
     M_uFESpace.reset();
     M_pFESpace.reset();
@@ -65,24 +66,19 @@ void PreconditionerPCD::createParametersList( list_Type&         list,
                                               const std::string& section,
                                               const std::string& subSection )
 {
-    createPCDList( list, dataFile, section, subSection );
+    createPCDList( list, dataFile, section, subSection, M_comm->MyPID() == 0 );
 }
 
 void PreconditionerPCD::createPCDList( list_Type&         list,
                                        const GetPot&      dataFile,
                                        const std::string& section,
-                                       const std::string& subsection )
+                                       const std::string& subsection,
+                                       const bool& verbose)
 {
-    bool displayList = dataFile((section + "/displayList").data(),     false);
+    bool displayList = dataFile((section + "/displayList").data(), false);
 
     std::string precType = dataFile((section + "/prectype").data(),"PCD");
     list.set("prectype", precType);
-
-    int velocityBlockSize = dataFile((section + "/" + subsection + "/blocks/velocity_block_size").data(), -1);
-    int pressureBlockSize = dataFile((section + "/" + subsection + "/blocks/pressure_block_size").data(), -1);
-
-    list.set("blocks: velocity block size", velocityBlockSize);
-    list.set("blocks: pressure block size", pressureBlockSize);
 
     std::string fluidPrec = dataFile((section + "/" + subsection + "/subprecs/fluid_prec").data(),"ML");
     list.set("subprecs: fluid prec", fluidPrec);
@@ -99,7 +95,10 @@ void PreconditionerPCD::createPCDList( list_Type&         list,
     std::string pressureMassPrecDataSection = dataFile((section + "/" + subsection + "/subprecs/pressure_mass_prec_data_section").data(), "");
     list.set("subprecs: pressure mass prec data section", (section + "/" + subsection+"/subprecs/"+pressureMassPrecDataSection).data());
 
-    if (displayList) list.print(std::cout);
+    std::string pressureBoundaryConditions = dataFile((section + "/" + subsection + "/pressure_boundary_conditions").data(),"none");
+    list.set("pressure boundary conditions",pressureBoundaryConditions);
+
+    if (displayList && verbose) list.print(std::cout);
 }
 
 Real PreconditionerPCD::condest()
@@ -142,9 +141,9 @@ int PreconditionerPCD::buildPreconditioner(operator_type& oper)
     LifeChrono timer;
 
     /*
-      Getting the block structure of A
-      / F Bt \
-      \ B C  /
+     * Getting the block structure of A
+     * / F Bt \
+     * \ B C  /
      */
     if(verbose) std::cout << std::endl << "      >Getting the structure of A... ";
     timer.start();
@@ -167,22 +166,22 @@ int PreconditionerPCD::buildPreconditioner(operator_type& oper)
     if(verbose) std::cout << "done in " << timer.diff() << " s." << std::endl;
 
     /*
-     PCD:
-     / F Bt \   / I  0 \ / I Bt \ / F 0 \
-     \ 0 -S / = \ 0 -S / \ 0 I  / \ 0 I /
-
-     PCD^-1:
-     / F  Bt \^-1   / F^-1 0 \ / I -Bt \ / I  0    \
-     \ 0 -S  /    = \ 0    I / \ 0  I  / \ 0 -S^-1 /
+     * PCD:
+     * / F Bt \   / I  0 \ / I Bt \ / F 0 \
+     * \ 0 -S / = \ 0 -S / \ 0 I  / \ 0 I /
+     *
+     * PCD^-1:
+     * / F  Bt \^-1   / F^-1 0 \ / I -Bt \ / I  0    \
+     * \ 0 -S  /    = \ 0    I / \ 0  I  / \ 0 -S^-1 /
      */
 
     // Getting the block structure of B
     MatrixBlockView B11,B12,B21,B22,B22base;
 
     /*
-     Building the block
-     / I  0 \   / I  0       \   / I  0  \ / I 0     \ / I 0  \
-     \ 0 -S / = \ 0 -ApFp^-1 / = \ 0 -Ap / \ 0 Fp^-1 / \ 0 Mp /
+     * Building the block
+     * / I  0 \   / I  0       \   / I  0  \ / I 0     \ / I 0  \
+     * \ 0 -S / = \ 0 -ApFp^-1 / = \ 0 -Ap / \ 0 Fp^-1 / \ 0 Mp /
      */
     if(verbose) std::cout << " Building Fp" << std::endl;
     timer.start();
@@ -194,7 +193,6 @@ int PreconditionerPCD::buildPreconditioner(operator_type& oper)
     M_adrPressureAssembler.addAdvection(PFp,*M_beta,B22.firstRowIndex(),B22.firstColumnIndex());
     M_adrPressureAssembler.addMass(PFp,1.0/M_timestep,B22.firstRowIndex(),B22.firstColumnIndex());
     PFp->globalAssemble();
-    //PFp->spy("pFp");
     boost::shared_ptr<parent_matrix_type> pFp = PFp;
     if(verbose) std::cout << " done in " << timer.diff() << " s." << std::endl;
 
@@ -215,12 +213,13 @@ int PreconditionerPCD::buildPreconditioner(operator_type& oper)
 
     MatrixBlockUtils::createScalarBlock(B11,1);
 #else
-    M_adrPressureAssembler.addDiffusion(PAp,-1.0,B22.firstRowIndex(),B22.firstColumnIndex());
+    M_adrPressureAssembler.addDiffusion(PAp,1.0,B22.firstRowIndex(),B22.firstColumnIndex());
     MatrixBlockUtils::createIdentityBlock(B11);
 #endif
     PAp->globalAssemble();
     boost::shared_ptr<parent_matrix_type> pAp = PAp;
     if(verbose) std::cout << " done in " << timer.diff() << " s." << std::endl;
+
 
     if(verbose) std::cout << " Building Mp" << std::endl;
     timer.start();
@@ -230,10 +229,36 @@ int PreconditionerPCD::buildPreconditioner(operator_type& oper)
     PMp->getMatrixBlockView(0,0,B11);
     PMp->getMatrixBlockView(1,1,B22);
     MatrixBlockUtils::createIdentityBlock(B11);
-    M_adrPressureAssembler.addMass(PMp,1.0,B22.firstRowIndex(),B22.firstColumnIndex());
+    M_adrPressureAssembler.addMass(PMp,-1.0,B22.firstRowIndex(),B22.firstColumnIndex());
     PMp->globalAssemble();
     boost::shared_ptr<parent_matrix_type> pMp = PMp;
     if(verbose) std::cout << " done in " << timer.diff() << " s." << std::endl;
+
+    if(M_pressureBoundaryConditions == "FirstCoefficients")
+    {
+        UInt firstIndex = M_pFESpace->map().map(Unique)->MaxMyGID() + B22.firstRowIndex();
+        pAp->diagonalize(firstIndex,1.0);
+        pFp->diagonalize(firstIndex,1.0);
+        //pMp->diagonalize(firstIndex,1.0);
+    }
+    else if(M_pressureBoundaryConditions == "SetAllDirichlet")
+    {
+        // Loop on boundary conditions
+        for ( ID i = 0; i < M_bcHandlerPtr->size(); ++i )
+        {
+            if( M_bcHandlerPtr->operator[](i).type() == Essential )
+            {
+                for ( ID j = 0; j < M_bcHandlerPtr->operator[](i).list_size(); ++j )
+                {
+                    UInt myId = M_bcHandlerPtr->operator[](i)[j]->id() + B22.firstRowIndex();
+                    pAp->diagonalize(myId,1.0);
+                    pFp->diagonalize(myId,1.0);
+                    //pMp->diagonalize(myId,1.0);
+                }
+            }
+        }
+    }
+    if(verbose) std::cout << " Pressure BC type = " << M_pressureBoundaryConditions << std::endl;
 
     if(verbose) std::cout << " P1a" << std::endl;
     timer.start();
@@ -265,9 +290,9 @@ int PreconditionerPCD::buildPreconditioner(operator_type& oper)
     if(verbose) std::cout << " done in " << timer.diff() << " s." << std::endl;
 
     /*
-     Building the block (the block is inversed)
-     / I -Bt \
-     \ 0  I  /
+     * Building the block (the block is inversed)
+     * / I -Bt \
+     * \ 0  I  /
      */
     if(verbose) std::cout << " P2" << std::endl;
     timer.start();
@@ -287,9 +312,9 @@ int PreconditionerPCD::buildPreconditioner(operator_type& oper)
     if(verbose) std::cout << " done in " << timer.diff() << " s." << std::endl;
 
     /*
-     Building the block
-     / F 0 \
-     \ 0 I /
+     * Building the block
+     * / F 0 \
+     * \ 0 I /
      */
     if(verbose) std::cout << " P3" << std::endl;
     timer.start();
@@ -332,8 +357,6 @@ void PreconditionerPCD::setDataFromGetPot( const GetPot& dataFile,
     M_dataFile   = dataFile;
     createPCDList(M_list, dataFile, section, "PCD");
 
-    M_velocityBlockSize = this->M_list.get("blocks: velocity block size", -1);
-    M_pressureBlockSize = this->M_list.get("blocks: pressure block size", -1);
     M_precType          = this->M_list.get("prectype", "PCD");
 
     M_fluidPrec                   = this->M_list.get("subprecs: fluid prec","ML");
@@ -345,15 +368,27 @@ void PreconditionerPCD::setDataFromGetPot( const GetPot& dataFile,
     M_pressureMassPrec            = this->M_list.get("subprecs: pressure mass prec","ML");
     M_pressureMassPrecDataSection = this->M_list.get("subprecs: pressure mass prec data section", "");
 
+    M_pressureBoundaryConditions  = this->M_list.get("pressure boundary conditions","none");
+
 }
 
-void PreconditionerPCD::setFESpace(FESpace_ptr uFESpace,FESpace_ptr pFESpace){
+void PreconditionerPCD::setFESpace(FESpace_ptr uFESpace,FESpace_ptr pFESpace)
+{
     M_uFESpace = uFESpace;
     M_pFESpace = pFESpace;
     M_adrPressureAssembler.setup(pFESpace,uFESpace); // p,beta=u
     M_adrVelocityAssembler.setup(uFESpace,uFESpace); // u,beta=u
     M_beta.reset(new vector_type(M_uFESpace->map() + M_pFESpace->map()));
     *M_beta *= 0;
+
+    // We setup the size of the blocks
+    M_velocityBlockSize = M_uFESpace->fieldDim() * M_uFESpace->dof().numTotalDof();
+    M_pressureBlockSize = M_pFESpace->dof().numTotalDof();
+}
+
+void PreconditionerPCD::setBCHandler(BCHandlerPtr_type bchPtr)
+{
+    M_bcHandlerPtr = bchPtr;
 }
 
 void PreconditionerPCD::setTimestep(const Real& timestep)
