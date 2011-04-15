@@ -1,0 +1,355 @@
+###################################################################################################
+#
+#                       This file is part of the LifeV Library                       
+#                Copyright (C) 2004, 2005, 2007 EPFL, Politecnico di Milano, INRIA
+#                Copyright (C) 2010 EPFL, Politecnico di Milano, Emory University
+#
+#      Author(s): Cristiano Malossi <cristiano.malossi@epfl.ch>
+#                 Toni Lassila <toni.lassila@epfl.ch>
+#           Date: 2011-03-10
+#  License Terms: GNU LGPL
+#
+###################################################################################################
+### MODEL: Multiscale - Ideal Left Ventricle + Reymond Stergiopulos 2009 1D Arterial Tree #########
+###################################################################################################
+
+[Multiscale] ######################################################################################
+###################################################################################################
+modelName        = 'Ideal Left Ventricle + Aorta + Reymond Stergiopulos 2009 1D Arterial Tree (FSI3D-OneDimensional, FlowRateValve-Stress)'
+modelType        = Multiscale
+couplingFlags    = ' '
+
+[Problem] #########################################################################################
+###################################################################################################
+modelsPath       = './MultiscaleDatabase/Models/'
+couplingsPath    = './MultiscaleDatabase/Couplings/'
+
+# List of models ##################################################################################
+########### ID #### Type ############## File (without .dat) #######################################
+models = '
+            150     FSI3D               Aorta_Coarse_MonolithicGE
+            0       FSI3D               IdealLeftVentricle_MonolithicGE
+            1       OneDimensional      ReymondStergiopulos2009_001
+            2       OneDimensional      ReymondStergiopulos2009_002
+            3       OneDimensional      ReymondStergiopulos2009_003
+            4       OneDimensional      ReymondStergiopulos2009_004
+            5       OneDimensional      ReymondStergiopulos2009_005
+            6       OneDimensional      ReymondStergiopulos2009_006
+            7       OneDimensional      ReymondStergiopulos2009_007
+            8       OneDimensional      ReymondStergiopulos2009_008
+            9       OneDimensional      ReymondStergiopulos2009_009
+           10       OneDimensional      ReymondStergiopulos2009_010
+           11       OneDimensional      ReymondStergiopulos2009_011
+           12       OneDimensional      ReymondStergiopulos2009_012
+           13       OneDimensional      ReymondStergiopulos2009_013
+           14       OneDimensional      ReymondStergiopulos2009_014
+           15       OneDimensional      ReymondStergiopulos2009_015
+           16       OneDimensional      ReymondStergiopulos2009_016
+           17       OneDimensional      ReymondStergiopulos2009_017
+           18       OneDimensional      ReymondStergiopulos2009_018
+           19       OneDimensional      ReymondStergiopulos2009_019
+           20       OneDimensional      ReymondStergiopulos2009_020
+           21       OneDimensional      ReymondStergiopulos2009_021
+           22       OneDimensional      ReymondStergiopulos2009_022
+           23       OneDimensional      ReymondStergiopulos2009_023
+           24       OneDimensional      ReymondStergiopulos2009_024
+           25       OneDimensional      ReymondStergiopulos2009_025
+           26       OneDimensional      ReymondStergiopulos2009_026
+           27       OneDimensional      ReymondStergiopulos2009_027
+           28       OneDimensional      ReymondStergiopulos2009_028
+           29       OneDimensional      ReymondStergiopulos2009_029
+           30       OneDimensional      ReymondStergiopulos2009_030
+           31       OneDimensional      ReymondStergiopulos2009_031
+           32       OneDimensional      ReymondStergiopulos2009_032
+           33       OneDimensional      ReymondStergiopulos2009_033
+           34       OneDimensional      ReymondStergiopulos2009_034
+           35       OneDimensional      ReymondStergiopulos2009_035
+           36       OneDimensional      ReymondStergiopulos2009_036
+           37       OneDimensional      ReymondStergiopulos2009_037
+           38       OneDimensional      ReymondStergiopulos2009_038
+           39       OneDimensional      ReymondStergiopulos2009_039
+           40       OneDimensional      ReymondStergiopulos2009_040
+           41       OneDimensional      ReymondStergiopulos2009_041
+           42       OneDimensional      ReymondStergiopulos2009_042
+           43       OneDimensional      ReymondStergiopulos2009_043
+           44       OneDimensional      ReymondStergiopulos2009_044
+           45       OneDimensional      ReymondStergiopulos2009_045
+           46       OneDimensional      ReymondStergiopulos2009_046
+           47       OneDimensional      ReymondStergiopulos2009_047
+           48       OneDimensional      ReymondStergiopulos2009_048
+           49       OneDimensional      ReymondStergiopulos2009_049
+           50       OneDimensional      ReymondStergiopulos2009_050
+           51       OneDimensional      ReymondStergiopulos2009_051
+           52       OneDimensional      ReymondStergiopulos2009_052
+           53       OneDimensional      ReymondStergiopulos2009_053
+           54       OneDimensional      ReymondStergiopulos2009_054
+           55       OneDimensional      ReymondStergiopulos2009_055
+           56       OneDimensional      ReymondStergiopulos2009_056
+           57       OneDimensional      ReymondStergiopulos2009_057
+           58       OneDimensional      ReymondStergiopulos2009_058
+           59       OneDimensional      ReymondStergiopulos2009_059
+           60       OneDimensional      ReymondStergiopulos2009_060
+           61       OneDimensional      ReymondStergiopulos2009_061
+           62       OneDimensional      ReymondStergiopulos2009_062
+           63       OneDimensional      ReymondStergiopulos2009_063
+           64       OneDimensional      ReymondStergiopulos2009_064
+           65       OneDimensional      ReymondStergiopulos2009_065
+           66       OneDimensional      ReymondStergiopulos2009_066
+           67       OneDimensional      ReymondStergiopulos2009_067
+           68       OneDimensional      ReymondStergiopulos2009_068
+           69       OneDimensional      ReymondStergiopulos2009_069
+           70       OneDimensional      ReymondStergiopulos2009_070
+           71       OneDimensional      ReymondStergiopulos2009_071
+           72       OneDimensional      ReymondStergiopulos2009_072
+           73       OneDimensional      ReymondStergiopulos2009_073
+           74       OneDimensional      ReymondStergiopulos2009_074
+           75       OneDimensional      ReymondStergiopulos2009_075
+           76       OneDimensional      ReymondStergiopulos2009_076
+           77       OneDimensional      ReymondStergiopulos2009_077
+           78       OneDimensional      ReymondStergiopulos2009_078
+           79       OneDimensional      ReymondStergiopulos2009_079
+           80       OneDimensional      ReymondStergiopulos2009_080
+           81       OneDimensional      ReymondStergiopulos2009_081
+           82       OneDimensional      ReymondStergiopulos2009_082
+           83       OneDimensional      ReymondStergiopulos2009_083
+           84       OneDimensional      ReymondStergiopulos2009_084
+           85       OneDimensional      ReymondStergiopulos2009_085
+           86       OneDimensional      ReymondStergiopulos2009_086
+           87       OneDimensional      ReymondStergiopulos2009_087
+           88       OneDimensional      ReymondStergiopulos2009_088
+           89       OneDimensional      ReymondStergiopulos2009_089
+           90       OneDimensional      ReymondStergiopulos2009_090
+           91       OneDimensional      ReymondStergiopulos2009_091
+           92       OneDimensional      ReymondStergiopulos2009_092
+           93       OneDimensional      ReymondStergiopulos2009_093
+           94       OneDimensional      ReymondStergiopulos2009_094
+           95       OneDimensional      ReymondStergiopulos2009_095
+           96       OneDimensional      ReymondStergiopulos2009_096
+           97       OneDimensional      ReymondStergiopulos2009_097
+           98       OneDimensional      ReymondStergiopulos2009_098
+           99       OneDimensional      ReymondStergiopulos2009_099
+          100       OneDimensional      ReymondStergiopulos2009_100
+          101       OneDimensional      ReymondStergiopulos2009_101
+          102       OneDimensional      ReymondStergiopulos2009_102
+          103       OneDimensional      ReymondStergiopulos2009_103
+         '
+###################################################################################################
+
+# List of couplings ###############################################################################
+########### ID #### Type ############## File (without .dat) ########### Models ######## Flags #####
+couplings = '
+            0       BoundaryCondition   FlowRate_Mitral                 0               0
+            1       FlowRateValve       Lagrange1                       0,1             1,0
+            2       Stress              Lagrange1                       95,96,97,1      0,0,0,1
+            3       Stress              Lagrange1                       2,3,95          0,0,1
+            4       Stress              Lagrange1                       4,5,3           0,0,1
+            5       Stress              Lagrange1                       6,7,4           0,0,1
+            6       Stress              Lagrange1                       8,9,7           0,0,1
+            7       Stress              Lagrange1                       10,11,9         0,0,1
+            8       Stress              Lagrange1                       14,15,2         0,0,1
+            9       Stress              Lagrange1                       18,19,14        0,0,1
+           10       Stress              Lagrange1                       20,21,19        0,0,1
+           11       Stress              Lagrange1                       22,23,21        0,0,1
+           12       Stress              Lagrange1                       24,25,23        0,0,1
+           13       Stress              Lagrange1                       26,27,18        0,0,1
+           14       Stress              Lagrange1                       28,29,27        0,0,1
+           15       Stress              Lagrange1                       30,31,29        0,0,1
+           16       Stress              Lagrange1                       32,33,30        0,0,1
+           17       Stress              Lagrange1                       38,35,28        0,0,1
+           18       Stress              Lagrange1                       36,37,35        0,0,1
+           19       Stress              Lagrange1                       34,39,37        0,0,1
+           20       Stress              Lagrange1                       40,41,39        0,0,1
+           21       Stress              Lagrange1                       40,41,39        0,0,1
+           22       Stress              Lagrange1                       42,43,41        0,0,1
+           23       Stress              Lagrange1                       44,45,43        0,0,1
+           24       Stress              Lagrange1                       46,47,44        0,0,1
+           25       Stress              Lagrange1                       48,49,46        0,0,1
+           26       Stress              Lagrange1                       50,51,42        0,0,1
+           27       Stress              Lagrange1                       52,53,50        0,0,1
+           28       Stress              Lagrange1                       54,55,52        0,0,1
+           29       Stress              Lagrange1                       12,13,5         0,0,1
+           30       Stress              Lagrange1                       83,84,13        0,0,1
+           31       Stress              Lagrange1                       87,88,83        0,0,1
+           32       Stress              Lagrange1                       91,92,87        0,0,1
+           33       Stress              Lagrange1                       16,17,15        0,0,1
+           34       Stress              Lagrange1                       85,86,17        0,0,1
+           35       Stress              Lagrange1                       89,90,85        0,0,1
+           36       Stress              Lagrange1                       93,94,89        0,0,1
+           37       Stress              Lagrange1                       79,80,12        0,0,1
+           38       Stress              Lagrange1                       81,82,16        0,0,1
+           39       Stress              Lagrange1                       56,6,20         0,1,1
+           40       Stress              Lagrange1                       57,58,59,56     0,0,0,1
+           41       Stress              Lagrange1                       60,61,59        0,0,1
+           42       Stress              Lagrange1                       62,64,60        0,0,1
+           43       Stress              Lagrange1                       63,65,61        0,0,1
+           44       Stress              Lagrange1                       66,62,79        0,1,1
+           45       Stress              Lagrange1                       67,63,81        0,1,1
+           46       Stress              Lagrange1                       100,101,66      0,0,1
+           47       Stress              Lagrange1                       102,103,67      0,0,1
+           48       Stress              Lagrange1                       68,70,101       0,0,1
+           49       Stress              Lagrange1                       71,72,70        0,0,1
+           50       Stress              Lagrange1                       69,73,103       0,0,1
+           51       Stress              Lagrange1                       74,75,73        0,0,1
+           52       Stress              Lagrange1                       76,77,68        0,0,1
+           53       Stress              Lagrange1                       78,69,77        0,1,1
+           54       Stress              Lagrange1                       98,99,97        0,0,1
+           55       BoundaryCondition   Terminal_ReymondStergiopulos2009_008   8        1
+           56       BoundaryCondition   Terminal_ReymondStergiopulos2009_010   10       1
+           57       BoundaryCondition   Terminal_ReymondStergiopulos2009_011   11       1
+           58       BoundaryCondition   Terminal_ReymondStergiopulos2009_022   22       1
+           59       BoundaryCondition   Terminal_ReymondStergiopulos2009_024   24       1
+           60       BoundaryCondition   Terminal_ReymondStergiopulos2009_025   25       1
+           61       BoundaryCondition   Terminal_ReymondStergiopulos2009_026   26       1
+           62       BoundaryCondition   Terminal_ReymondStergiopulos2009_031   31       1
+           63       BoundaryCondition   Terminal_ReymondStergiopulos2009_032   32       1
+           64       BoundaryCondition   Terminal_ReymondStergiopulos2009_033   33       1
+           65       BoundaryCondition   Terminal_ReymondStergiopulos2009_034   34       1
+           66       BoundaryCondition   Terminal_ReymondStergiopulos2009_036   36       1
+           67       BoundaryCondition   Terminal_ReymondStergiopulos2009_038   38       1
+           68       BoundaryCondition   Terminal_ReymondStergiopulos2009_040   40       1
+           69       BoundaryCondition   Terminal_ReymondStergiopulos2009_045   45       1
+           70       BoundaryCondition   Terminal_ReymondStergiopulos2009_047   47       1
+           71       BoundaryCondition   Terminal_ReymondStergiopulos2009_048   48       1
+           72       BoundaryCondition   Terminal_ReymondStergiopulos2009_049   49       1
+           73       BoundaryCondition   Terminal_ReymondStergiopulos2009_051   51       1
+           74       BoundaryCondition   Terminal_ReymondStergiopulos2009_053   53       1
+           75       BoundaryCondition   Terminal_ReymondStergiopulos2009_054   54       1
+           76       BoundaryCondition   Terminal_ReymondStergiopulos2009_055   55       1
+           77       BoundaryCondition   Terminal_ReymondStergiopulos2009_057   57       1
+           78       BoundaryCondition   Terminal_ReymondStergiopulos2009_058   58       1
+           79       BoundaryCondition   Terminal_ReymondStergiopulos2009_064   64       1
+           80       BoundaryCondition   Terminal_ReymondStergiopulos2009_065   65       1
+           81       BoundaryCondition   Terminal_ReymondStergiopulos2009_071   71       1
+           82       BoundaryCondition   Terminal_ReymondStergiopulos2009_072   72       1
+           83       BoundaryCondition   Terminal_ReymondStergiopulos2009_074   74       1
+           84       BoundaryCondition   Terminal_ReymondStergiopulos2009_075   75       1
+           85       BoundaryCondition   Terminal_ReymondStergiopulos2009_076   76       1
+           86       BoundaryCondition   Terminal_ReymondStergiopulos2009_078   78       1
+           87       BoundaryCondition   Terminal_ReymondStergiopulos2009_080   80       1
+           88       BoundaryCondition   Terminal_ReymondStergiopulos2009_082   82       1
+           89       BoundaryCondition   Terminal_ReymondStergiopulos2009_084   84       1
+           90       BoundaryCondition   Terminal_ReymondStergiopulos2009_086   86       1
+           91       BoundaryCondition   Terminal_ReymondStergiopulos2009_088   88       1
+           92       BoundaryCondition   Terminal_ReymondStergiopulos2009_090   90       1
+           93       BoundaryCondition   Terminal_ReymondStergiopulos2009_091   91       1
+           94       BoundaryCondition   Terminal_ReymondStergiopulos2009_092   92       1
+           95       BoundaryCondition   Terminal_ReymondStergiopulos2009_093   93       1
+           96       BoundaryCondition   Terminal_ReymondStergiopulos2009_094   94       1
+           97       BoundaryCondition   Terminal_ReymondStergiopulos2009_096   96       1
+           98       BoundaryCondition   Terminal_ReymondStergiopulos2009_098   98       1
+           99       BoundaryCondition   Terminal_ReymondStergiopulos2009_099   99       1
+          100       BoundaryCondition   Terminal_ReymondStergiopulos2009_100  100       1
+          101       BoundaryCondition   Terminal_ReymondStergiopulos2009_102  102       1
+           '
+###################################################################################################
+
+# Geometry offset #################################################################################
+########### ID #### Scale (x,y,z) ############# Rotate (x,y,z) ############ Translate (x,y,z) #####
+offset = '
+          150       1.0 1.0 1.0                 0 0 0                       0 0 0 
+            0       1.0 1.0 1.0                 -90 0 0                     1.4 -8.45 0 
+            1       1       1       1       0       0     105       0       0       0
+            2       1       1       1       0       0      30 -0.7371781444 3.929790049       0
+            3       1       1       1       0       0 102.584652 -0.7371781444 3.929790049       0
+            4       1       1       1       0       0 223.259641 -1.477976301 7.248105599       0
+            5       1       1       1       0       0 179.7306262 -1.477976301 7.248105599       0
+            6       1       1       1       0       0 66.83476254 -3.954045567 4.918066759       0
+            7       1       1       1       0       0    -140 -3.954045567 4.918066759       0
+            8       1       1       1       0       0    -115 -36.28112107 -22.20757037       0
+            9       1       1       1       0       0     -85 -36.28112107 -22.20757037       0
+           10       1       1       1       0       0    -120 -35.69717759 -28.88207485       0
+           11       1       1       1       0       0    -105 -35.69717759 -28.88207485       0
+           12       1       1       1       0       0 51.17916797 -10.87787241 7.292299155       0
+           13       1       1       1       0       0      80 -10.87787241 7.292299155       0
+           14       1       1       1       0       0     -25 0.9948726632 4.929790049       0
+           15       1       1       1       0       0 9.78576571 0.9948726632 4.929790049       0
+           16       1       1       1       0       0 128.820832 14.69262981 7.292299155       0
+           17       1       1       1       0       0     100 14.69262981 7.292299155       0
+           18       1       1       1       0       0     -55 4.529473033 3.281578828       0
+           19       1       1       1       0       0 28.77164751 4.529473033 3.281578828       0
+           20       1       1       1       0       0 112.2430889 7.509725916 4.918066759       0
+           21       1       1       1       0       0     -40 7.509725916 4.918066759       0
+           22       1       1       1       0       0     -65 39.83680142 -22.20757037       0
+           23       1       1       1       0       0     -95 39.83680142 -22.20757037       0
+           24       1       1       1       0       0     -55 39.25285794 -28.88207485       0
+           25       1       1       1       0       0     -75 39.25285794 -28.88207485       0
+           26       1       1       1       0       0     -20 7.512070502 -0.9780118024       0
+           27       1       1       1       0       0     -95 7.512070502 -0.9780118024       0
+           28       1       1       1       0       0    -110 6.605650777 -11.33843666       0
+           29       1       1       1       0       0       0 6.605650777 -11.33843666       0
+           30       1       1       1       0       0     -10 8.605650777 -11.33843666       0
+           31       1       1       1       0       0      35 8.605650777 -11.33843666       0
+           32       1       1       1       0       0      10 10.57526628 -11.68573302       0
+           33       1       1       1       0       0     -30 10.57526628 -11.68573302       0
+           34       1       1       1       0       0     210 4.792944017 -20.25803856       0
+           35       1       1       1       0       0    -100 4.792944017 -16.31880755       0
+           36       1       1       1       0       0     -30 4.445647662 -18.28842306       0
+           37       1       1       1       0       0     -80 4.445647662 -18.28842306       0
+           38       1       1       1       0       0     210 4.792944017 -16.31880755       0
+           39       1       1       1       0       0     -95 4.792944017 -20.25803856       0
+           40       1       1       1       0       0     -25 3.869093144 -30.81770236       0
+           41       1       1       1       0       0     -90 3.869093144 -30.81770236       0
+           42       1       1       1       0       0    -150 3.869093144 -32.81770236       0
+           43       1       1       1       0       0     -30 3.869093144 -32.81770236       0
+           44       1       1       1       0       0     -60 8.978643027 -35.76770236       0
+           45       1       1       1       0       0    -100 8.978643027 -35.76770236       0
+           46       1       1       1       0       0     -90 16.17864303 -48.23846818       0
+           47       1       1       1       0       0    -110 16.17864303 -48.23846818       0
+           48       1       1       1       0       0    -100 16.17864303 -92.53846818       0
+           49       1       1       1       0       0     -80 16.17864303 -92.53846818       0
+           50       1       1       1       0       0    -120 -1.240456738 -35.76770236       0
+           51       1       1       1       0       0     -80 -1.240456738 -35.76770236       0
+           52       1       1       1       0       0     -90 -8.440456738 -48.23846818       0
+           53       1       1       1       0       0     -70 -8.440456738 -48.23846818       0
+           54       1       1       1       0       0     -80 -8.440456738 -92.53846818       0
+           55       1       1       1       0       0    -100 -8.440456738 -92.53846818       0
+           56       1       1       1       0       0      90 1.907378696 18.61674208       0
+           57       1       1       1       0       0    -120 1.907378696 20.61674208       0
+           58       1       1       1       0       0     -60 1.907378696 20.61674208       0
+           59       1       1       1       0       0      90 1.907378696 20.61674208       0
+           60       1       1       1       0       0     170 1.907378696 21.11674208       0
+           61       1       1       1       0       0      10 1.907378696 21.11674208       0
+           62       1       1       1       0       0     150 1.710417145 21.15147172       0
+           63       1       1       1       0       0      30 2.104340246 21.15147172       0
+           64       1       1       1       0       0    -125 1.710417145 21.15147172       0
+           65       1       1       1       0       0     -55 2.104340246 21.15147172       0
+           66       1       1       1       0       0     110 1.364006984 21.35147172       0
+           67       1       1       1       0       0      70 2.450750408 21.35147172       0
+           68       1       1       1       0       0 64.75563508 1.295602955 21.73941024       0
+           69       1       1       1       0       0 115.2443649 2.519154436 21.73941024       0
+           70       1       1       1       0       0     135 1.295602955 21.73941024       0
+           71       1       1       1       0       0     145 0.7299175299 22.30509567       0
+           72       1       1       1       0       0     125 0.7299175299 22.30509567       0
+           73       1       1       1       0       0      45 2.519154436 21.73941024       0
+           74       1       1       1       0       0      35 3.084839861 22.30509567       0
+           75       1       1       1       0       0      55 3.084839861 22.30509567       0
+           76       1       1       1       0       0     125 1.807378696 22.82480676       0
+           77       1       1       1       0       0       0 1.807378696 22.82480676       0
+           78       1       1       1       0       0      55 2.007378696 22.82480676       0
+           79       1       1       1       0       0      10 0.2807184552 21.16045872       0
+           80       1       1       1       0       0     155 0.2807184552 21.16045872       0
+           81       1       1       1       0       0     170 3.534038936 21.16045872       0
+           82       1       1       1       0       0      25 3.534038936 21.16045872       0
+           83       1       1       1       0       0      60 -10.16591489 11.33001094       0
+           84       1       1       1       0       0     145 -10.16591489 11.33001094       0
+           85       1       1       1       0       0     120 13.98067228 11.33001094       0
+           86       1       1       1       0       0      35 13.98067228 11.33001094       0
+           87       1       1       1       0       0      80 -7.115914886 16.6127659       0
+           88       1       1       1       0       0     145 -7.115914886 16.6127659       0
+           89       1       1       1       0       0     100 10.93067228 16.6127659       0
+           90       1       1       1       0       0      35 10.93067228 16.6127659       0
+           91       1       1       1       0       0     120 -6.056661002 22.6200932       0
+           92       1       1       1       0       0     145 -6.056661002 22.6200932       0
+           93       1       1       1       0       0      60 9.871418393 22.6200932       0
+           94       1       1       1       0       0      35 9.871418393 22.6200932       0
+           95       1       1       1       0       0     100 -0.1294095226 0.4829629131       0
+           96       1       1       1       0       0    -190 -0.1294095226 0.4829629131       0
+           97       1       1       1       0       0      65 -0.1294095226 0.4829629131       0
+           98       1       1       1       0       0       5 0.08189960832 0.9361168067       0
+           99       1       1       1       0       0      60 0.08189960832 0.9361168067       0
+          100       1       1       1       0       0     155 1.295602955 21.53941024       0
+          101       1       1       1       0       0      90 1.295602955 21.53941024       0
+          102       1       1       1       0       0      25 2.519154436 21.53941024       0
+          103       1       1       1       0       0      90 2.519154436 21.53941024       0
+         '
+###################################################################################################
