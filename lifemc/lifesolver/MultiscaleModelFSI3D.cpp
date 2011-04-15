@@ -180,15 +180,6 @@ MultiscaleModelFSI3D::setupModel()
 
     //Setup linear model
     setupLinearModel();
-
-    std::cout << std::scientific << std::setprecision(15) << "Flag 2: " << M_FSIoperator->fluid().area( 2 ) << std::endl;
-    std::cout << "Flag 3: " << M_FSIoperator->fluid().area( 3 ) << std::endl;
-    std::cout << "Flag 4: " << M_FSIoperator->fluid().area( 4 ) << std::endl;
-    std::cout << "Flag 5: " << M_FSIoperator->fluid().area( 5 ) << std::endl;
-    std::cout << "Flag 6: " << M_FSIoperator->fluid().area( 6 ) << std::endl;
-    std::cout << "Flag 7: " << M_FSIoperator->fluid().area( 7 ) << std::endl;
-    std::cout << "Flag 8: " << M_FSIoperator->fluid().area( 8 ) << std::endl;
-    std::cout << "Flag 9: " << M_FSIoperator->fluid().area( 9 ) << std::endl;
 }
 
 void
