@@ -14,7 +14,8 @@
 
 [Problem] #########################################################################################
 ProblemType = Multiscale
-ProblemFile = ./MultiscaleDatabase/Models/Multiscale/Windkessel0D_Test
+ProblemFile = ./MultiscaleDatabase/Models/Multiscale/Windkessel0D_Test_S
+#ProblemFile = ./MultiscaleDatabase/Models/Multiscale/Windkessel0D_Test_F
 
 [Solver] ##########################################################################################
 ###################################################################################################
@@ -25,7 +26,7 @@ ProblemFile = ./MultiscaleDatabase/Models/Multiscale/Windkessel0D_Test
     
     [../time_discretization]
     initialtime                = .00      # [s]
-    endtime                    = 1.0      # [s]
+    endtime                    = .03      # [s]
     timestep                   = .01     # [s]
 
     [../Algorithm]

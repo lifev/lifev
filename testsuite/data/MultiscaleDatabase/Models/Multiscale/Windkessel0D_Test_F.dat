@@ -14,7 +14,7 @@
 
 [Multiscale] ######################################################################################
 ###################################################################################################
-modelName        = 'Test (Windkessel0D)'
+modelName        = 'Test Flow Rate (Windkessel0D)'
 modelType        = Multiscale
 couplingFlags    = ' '
 

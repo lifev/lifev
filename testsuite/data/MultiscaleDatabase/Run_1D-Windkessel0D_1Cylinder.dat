@@ -14,8 +14,8 @@
 
 [Problem] #########################################################################################
 ProblemType = Multiscale
-ProblemFile = ./MultiscaleDatabase/Models/Multiscale/1D-Windkessel0D_1Cylinder_S
-#ProblemFile = ./MultiscaleDatabase/Models/Multiscale/1D-Windkessel0D_1Cylinder_FS
+#ProblemFile = ./MultiscaleDatabase/Models/Multiscale/1D-Windkessel0D_1Cylinder_S
+ProblemFile = ./MultiscaleDatabase/Models/Multiscale/1D-Windkessel0D_1Cylinder_FS
 
 [Solver] ##########################################################################################
 ###################################################################################################
@@ -26,8 +26,8 @@ ProblemFile = ./MultiscaleDatabase/Models/Multiscale/1D-Windkessel0D_1Cylinder_S
     
     [../time_discretization]
     initialtime                = 0.0      # [s]
-    endtime                    = 1.0      # [s]
-    timestep                   = 0.0001   # [s]
+    endtime                    = 0.1      # [s]
+    timestep                   = 0.00005  # [s]
 
     [../Algorithm]
     type                       = Newton            # Aitken, Explicit, Newton, Broyden
@@ -43,7 +43,7 @@ ProblemFile = ./MultiscaleDatabase/Models/Multiscale/1D-Windkessel0D_1Cylinder_S
 ###################################################################################################
 FluidDensity                = 1.0           # density        [g/cm^3]
 FluidViscosity              = 0.035         # viscosity      [g/cm/s]
-SolidExternalPressure       = 0             # ref. pressure  [g/cm/s^2 - dyne/cm^2]
+SolidExternalPressure       = 1E+5          # ref. pressure  [g/cm/s^2 - dyne/cm^2]
 SolidDensity                = 1.2           # density        [g/cm^3]
 SolidPoissonCoefficient     = 0.0           # Poisson coeff. []
 SolidYoungModulus           = 4.0E6         # Young modulus  [g/cm/s^2 - dyne/cm^2]
