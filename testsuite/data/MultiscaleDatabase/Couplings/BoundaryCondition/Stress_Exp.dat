@@ -9,23 +9,22 @@
 #  License Terms: GNU LGPL
 #
 ###################################################################################################
-### COUPLING: BoundaryCondition - Exp Flow Rate ###################################################
+### COUPLING: BoundaryCondition - Exp Pressure ####################################################
 ###################################################################################################
 
 [Multiscale]
-couplingName    = BoundaryCondition_FlowRate_Exp
+couplingName    = BoundaryCondition_Stress_Exp
 
 [boundary_conditions]
-list = 'FlowRate_Exp'  # Exp Flow Rate
+list = 'Stress_Exp'  # Exp Pressure
     
-    [./FlowRate_Exp]
-    type                = Flux
-    mode                = Full
-    component           = 3
+    [./Stress_Exp]
+    type                = Natural
+    mode                = Normal
     function            = 'a=-100000; a*exp(-t)'
 
     # Additional parameters for 1D BC
-    quantity            = Q
+    quantity            = S
     line                = first
 
     [../]

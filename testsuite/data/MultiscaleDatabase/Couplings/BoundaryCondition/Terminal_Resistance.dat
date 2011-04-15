@@ -9,23 +9,19 @@
 #  License Terms: GNU LGPL
 #
 ###################################################################################################
-### COUPLING: BoundaryCondition - Exp Flow Rate ###################################################
+### COUPLING: Terminal Resistance #################################################################
 ###################################################################################################
 
 [Multiscale]
-couplingName    = BoundaryCondition_FlowRate_Exp
+couplingName    = '1D (terminal resistance)'
 
 [boundary_conditions]
-list = 'FlowRate_Exp'  # Exp Flow Rate
+list = 'terminalResistance'
     
-    [./FlowRate_Exp]
-    type                = Flux
-    mode                = Full
-    component           = 3
-    function            = 'a=-100000; a*exp(-t)'
-
-    # Additional parameters for 1D BC
-    quantity            = Q
+    [./terminalResistance]
+    quantity            = W2
     line                = first
-
-    [../]
+    Default             = Resistance
+    resistance          = 1e+06      # dyne s / cm^5
+    
+    [../].
