@@ -122,7 +122,7 @@ PreconditionerML::createMLList( list_Type& list,
 
     bool found;
 
-    Int MLPrintParameterList = dataFile( (section + "/displayList").data(), 0, found );
+    bool MLPrintParameterList = dataFile( (section + "/displayList").data(), false, found );
 
     Int MLOutput             = dataFile((section + "/" + subSection + "/MLOuput").data(), 0, found);
     if ( found ) list.set( "ML output", MLOutput );
