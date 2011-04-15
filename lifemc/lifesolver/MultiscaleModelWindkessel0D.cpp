@@ -56,7 +56,6 @@ MultiscaleModelWindkessel0D::MultiscaleModelWindkessel0D() :
         M_flowRate                     (),
         M_tangentPressure              (),
         M_tangentFlowRate              (),
-        M_nIntegration                 (),
         M_resistance1                  (),
         M_resistance2                  (),
         M_capacitance                  (),
@@ -85,17 +84,19 @@ MultiscaleModelWindkessel0D::setupData( const std::string& fileName )
 
     GetPot dataFile( fileName );
 
-    M_nIntegration      = dataFile( "Coefficients/IntegrationSteps", 1   );
-
     M_resistance1       = dataFile( "Coefficients/Resistance1"     , 1.0 );
     M_resistance2       = dataFile( "Coefficients/Resistance2"     , 1.0 );
     M_capacitance       = dataFile( "Coefficients/Capacitance"     , 1.0 );
     M_venousPressure    = dataFile( "Coefficients/VenousPressure"  , 0.0 );
 
-    setupExporterImporter();
+    if ( M_globalData.get() )
+        setupGlobalData( fileName );
 
     // We need to create the BCHandler before using it
     M_bc->createHandler();
+
+    // Exporter/Importer
+    setupExporterImporter();
 }
 
 void
@@ -195,8 +196,6 @@ MultiscaleModelWindkessel0D::showMe()
     {
         multiscaleModel_Type::showMe();
 
-        std::cout << "Integration Steps   = " << M_nIntegration << std::endl << std::endl;
-
         std::cout << "Resistance1         = " << M_resistance1 << std::endl
                   << "Resistance2         = " << M_resistance2 << std::endl
                   << "Capacitance         = " << M_capacitance << std::endl
@@ -245,6 +244,15 @@ MultiscaleModelWindkessel0D::boundaryDeltaStress( const bcFlag_Type& flag, bool&
 // Private Methods
 // ===================================================
 void
+MultiscaleModelWindkessel0D::setupGlobalData( const std::string& fileName )
+{
+    GetPot dataFile( fileName );
+
+    if ( !dataFile.checkVariable( "Coefficients/VenousPressure" ) )
+        M_venousPressure = M_globalData->fluidReferencePressure();
+}
+
+void
 MultiscaleModelWindkessel0D::setupExporterImporter()
 {
 
@@ -272,11 +280,10 @@ MultiscaleModelWindkessel0D::initializeSolution()
     }
     else
     {
-        //TODO Reference pressure
-        M_pressure = 0;
+        M_pressure = M_globalData->fluidReferencePressure();
         M_flowRate = 0;
 
-        switch ( M_bc->handler()->bc( OneDimensional::left ).bcType() )
+/*        switch ( M_bc->handler->bc( OneDimensional::left )->bcType() )
         {
         case OneDimensional::Q:
 
@@ -299,7 +306,7 @@ MultiscaleModelWindkessel0D::initializeSolution()
         default:
 
             std::cout << "Warning: bcType \"" << M_bc->handler()->bc( OneDimensional::left ).bcType() << "\"not available!" << std::endl;
-        }
+        }*/
     }
 }
 
@@ -310,36 +317,19 @@ MultiscaleModelWindkessel0D::solveForPressure()
     Debug( 8150 ) << "MultiscaleModelWindkessel0D::solveForPressure() \n";
 #endif
 
-    Real dt     = M_globalData->dataTime()->timeStep();
-    Real dti    = dt / M_nIntegration;
 
-    Real RC     = 1.0 / ( M_resistance2 * M_capacitance );  //Dummy Variable
-    Real mu     = exp( RC * dt);                            //Dummy Variable
-
-    Real K      = M_pressure_tn / mu;                       //Dummy Variable
-    Real dQ     = (M_flowRate - M_flowRate_tn) / dt;
-
-    Real rhs    = 0;            //Dummy Variable (Right Hand Side)
-    Real t      = 0;            //Time Integration
-    Real integrationSum      = 0;            //sum of Integration
-
-    //%------Integration in dt-------------------------------------------------------------
-    rhs = rightHandSideP(M_resistance1, M_resistance2, RC, t, M_flowRate_tn, M_flowRate, dQ, M_venousPressure, dt);
-    integrationSum   = dti / 2.0 * rhs;
-
-    //for ( Real t=dti; t<dti+dt; t+=dti )
-    for ( UInt i(1) ; i< M_nIntegration  ; ++i )
+    if (fabs(M_capacitance)<(1.0e-15))
+        return (-(M_resistance1+M_resistance2)*M_flowRate+M_venousPressure);
+    else
     {
-        t   = t + dti;
-        rhs = rightHandSideP(M_resistance1, M_resistance2, RC, t, M_flowRate_tn, M_flowRate, dQ, M_venousPressure, dt);
-        integrationSum   = integrationSum + dti * rhs;
+        Real dt     = M_globalData->dataTime()->timeStep();
+        Real dQ     = -(M_flowRate - M_flowRate_tn) / dt;
+        Real K1     = 1.0 / (M_resistance2 * M_capacitance);                              //Dummy Variable
+        Real K2     = (M_resistance1 + M_resistance2) / (M_resistance2 *M_capacitance);   //Dummy Variable
+
+        return (-1.0/(K1*K1)*(K2*dQ-exp(-K1*dt)*(K2*dQ+(K1*K1)*M_pressure_tn-(K1*K1)*M_venousPressure+K1*K2*M_flowRate_tn-K1*M_resistance1*dQ))+(M_resistance1*dQ+K1*M_venousPressure-K2*M_flowRate_tn+K2*dQ*dt)/K1);
     }
 
-    t   = t + dti;
-    rhs = rightHandSideP(M_resistance1, M_resistance2, RC, t, M_flowRate_tn, M_flowRate, dQ, M_venousPressure, dt);
-    integrationSum   = integrationSum + dti / 2.0 * rhs;
-
-    return K + integrationSum;
 }
 
 Real
@@ -351,36 +341,60 @@ MultiscaleModelWindkessel0D::solveForFlowRate()
 
     // TODO There is a lot of code duplication with method solveForPressure()
 
-    Real dt     = M_globalData->dataTime()->timeStep();
-    Real dti    = dt / M_nIntegration;
-
-    Real RC     = 1.0 / (M_resistance1 * M_resistance2 * M_capacitance);  //Dummy Variable
-    Real mu     = exp( ( M_resistance1 + M_resistance2 ) * RC * dt);      //Dummy Variable
-
-    Real K      = M_flowRate_tn / mu;                                     //Dummy Variable
-    Real dP     = (M_pressure -M_pressure_tn)/ dt;                        //Dummy Variable
-
-    Real rhs    = 0;        //Dummy Variable (Right Hand Side)
-    Real t      = 0;        //Time Integration
-    Real integrationSum      = 0;        //sum of Integration
-
-    //%------Integration in dt-------------------------------------------------------------
-    rhs = rightHandSideQ(M_resistance1, M_resistance2, RC, t, M_pressure_tn, M_pressure, dP, M_venousPressure, dt);
-    integrationSum = dti / 2.0 * rhs;
-
-    for ( UInt i(1) ; i< M_nIntegration  ; ++i )
+    if (fabs(M_capacitance)<(1.0e-15))
+        return (-(M_pressure-M_venousPressure)/(M_resistance1+M_resistance2));
+    else
     {
-        t   = t + dti;
-        rhs = rightHandSideQ(M_resistance1, M_resistance2, RC, t, M_pressure_tn, M_pressure, dP, M_venousPressure, dt);
-        integrationSum   = integrationSum + dti * rhs;
+        Real dt     =   M_globalData->dataTime()->timeStep();
+        Real dP     = ( M_pressure    - M_pressure_tn ) / dt;
+        Real K1     = ( M_resistance1 + M_resistance2 ) / ( M_resistance1 * M_resistance2 * M_capacitance);
+        Real K2     =   1.0 / ( M_resistance1 * M_resistance2 * M_capacitance);
+        Real K3     =   1.0 /   M_resistance1;
+
+        return (-(K3*dP+K2*M_pressure_tn-K2*M_venousPressure+K2*dP*dt)/K1+1.0/(K1*K1)*(K2*dP+exp(-K1*dt)*(-K2*dP+(K1*K1)*M_flowRate_tn+K1*K2*M_pressure_tn-K1*K2*M_venousPressure+K1*K3*dP)));
+    }
+}
+
+Real
+MultiscaleModelWindkessel0D::tangentSolveForFlowRate()
+{
+#ifdef HAVE_LIFEV_DEBUG
+    Debug( 8150 ) << "MultiscaleModelWindkessel0D::tangentSolveForFlowRate() \n";
+#endif
+
+    // TODO There is a lot of code duplication with method solveForPressure()
+
+    if (fabs(M_capacitance)<(1.0e-15))
+        return (-1.0/(M_resistance1+M_resistance2));
+    else
+    {
+        Real dt     =   M_globalData->dataTime()->timeStep();
+        Real K1     = ( M_resistance1 + M_resistance2 ) / ( M_resistance1 * M_resistance2 * M_capacitance);
+        Real K2     =   1.0 / ( M_resistance1 * M_resistance2 * M_capacitance);
+        Real K3     =   1.0 /   M_resistance1;
+        return (-(K2+K3/dt)/K1-1.0/(K1*K1)*(exp(-K1*dt)*(K2/dt-(K1*K3)/dt)-K2/dt));
     }
 
-    t   = t + dti;
-    rhs = rightHandSideQ(M_resistance1, M_resistance2, RC, t, M_pressure_tn, M_pressure, dP, M_venousPressure, dt);
-    integrationSum   = integrationSum + dti / 2.0 * rhs;
+}
 
+Real
+MultiscaleModelWindkessel0D::tangentSolveForPressure()
+{
+#ifdef HAVE_LIFEV_DEBUG
+    Debug( 8150 ) << "MultiscaleModelWindkessel0D::tangentSolveForPressure() \n";
+#endif
 
-    return K + integrationSum;
+    // TODO There is a lot of code duplication with method solveForPressure()
+    if (fabs(M_capacitance)<(1.0e-15))
+        return (-(M_resistance1+M_resistance2));
+    else
+    {
+        Real dt     = M_globalData->dataTime()->timeStep();
+        Real K1     = 1.0 / (M_resistance2 * M_capacitance);                              //Dummy Variable
+        Real K2     = (M_resistance1 + M_resistance2) / (M_resistance2 *M_capacitance);   //Dummy Variable
+        return (-(K2+M_resistance1/dt)/K1-1.0/(K1*K1)*(exp(-K1*dt)*(K2/dt-(K1*M_resistance1)/dt)-K2/dt));
+    }
+
 }
 
 void
@@ -398,18 +412,24 @@ MultiscaleModelWindkessel0D::solveLinearModel( bool& solveLinearSystem )
     displayModelStatus( "Solve linear" );
     switch ( M_bc->handler()->bc( OneDimensional::left ).bcType() )
     {
-    case OneDimensional::Q:
+    case OneDimensional::Q: // dP/dQ
 
         M_tangentFlowRate = 1.;
-        //M_tangentPressure = tangentSolveForPressure(); //TODO Code this method
+        M_tangentPressure = tangentSolveForPressure();
 
         break;
 
-    case OneDimensional::P:
-    case OneDimensional::S:
+    case OneDimensional::P: // dQ/dP
 
         M_tangentPressure = 1.;
-        //M_tangentFlowRate = tangentSolveForFlowRate(); //TODO Code this method
+        M_tangentFlowRate = tangentSolveForFlowRate();
+
+        break;
+
+    case OneDimensional::S: // dQ/dS
+
+        M_tangentPressure = 1.;
+        M_tangentFlowRate = -tangentSolveForFlowRate();
 
         break;
 

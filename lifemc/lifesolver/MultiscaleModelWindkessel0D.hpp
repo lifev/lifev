@@ -216,20 +216,19 @@ private:
     //! @name Private Methods
     //@{
 
+    //! Setup the global data of the model.
+    /*!
+     * In particular, it replaces the default local values with the ones in the global container.
+     * If a value is already specified in the data file, do not perform the replacement.
+     *
+     * @param fileName File name of the specific model.
+     */
+    void setupGlobalData();
+
     void setupExporterImporter();
 
     //! Initialize the solution.
     void initializeSolution();
-
-    Real rightHandSideQ  (Real R1, Real R2 , Real RC, Real T, Real P1, Real P2, Real dP, Real Pv1, Real dt) //Dummy function
-    {
-        return ((exp( ( R1 + R2 ) * RC * (-T)) )*( RC * ( (P2-P1)*(T)/dt+ P1 ) + dP/R1 - (Pv1)*RC ));
-    }
-
-    Real rightHandSideP (Real R1,Real R2,Real RC,Real T,Real Q1,Real Q2,Real dQ,Real Pv1,Real dt) //Dummy function
-    {
-        return (exp( RC * (-T))*( (R1+R2) * RC *( (Q2 -Q1) *(T) /dt + Q1 ) + R1 * dQ + Pv1*RC ));
-    }
 
     //! Solving for the pressure.
     /*!
@@ -237,6 +236,9 @@ private:
      */
     Real solveForPressure();    // Solve the equations for Pressure
     Real solveForFlowRate();    // Solve the equations for FlowRate
+    Real tangentSolveForFlowRate(); //solve dQ/dP
+    Real tangentSolveForPressure(); //solve dP/dQ
+
 
     //! Convert the flag from a bcFlag type to a bcSide type
     /*!
@@ -261,8 +263,6 @@ private:
 
     Real                   M_tangentPressure;  // Tangent pressure
     Real                   M_tangentFlowRate;  // Tangent flowRate
-
-    UInt                   M_nIntegration;     // Number of Integration steps in each time step
 
     Real                   M_resistance1;      // Resistance 1 (R1)
     Real                   M_resistance2;      // Resistance 2 (R2)
