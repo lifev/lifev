@@ -215,6 +215,8 @@ public:
 
     void setExternalPressure( const Real& externalPressure ) { M_externalPressure = externalPressure; }
 
+    void setVenousPressure( const Real& venousPressure ) { M_venousPressure = venousPressure; }
+
     void setArea0( const Real& area0, const UInt& i ) { M_area0[i] = area0; }
 
     void setBeta0( const Real& beta0, const UInt& i ) { M_beta0[i] = beta0; }
@@ -281,6 +283,12 @@ public:
     const Real& poisson() const { return M_poisson; }
 
     const Real& externalPressure() const { return M_externalPressure; }
+
+    //! Get the venous pressure
+    /*!
+     * @return venous pressure.
+     */
+    const Real& venousPressure() const { return M_venousPressure; }
 
     const Real& robertsonCorrection() const;
 
@@ -385,6 +393,7 @@ private:
     Real M_poisson;
 
     Real M_externalPressure;
+    Real M_venousPressure;
     Real M_robertsonCorrection;
 
     scalarVector_Type M_thickness;
