@@ -42,7 +42,7 @@ ProblemFile = ./MultiscaleDatabase/Models/Multiscale/1D_Rhombus_FS-S
 ###################################################################################################
 FluidDensity                = 1.0           # density        [g/cm^3]
 FluidViscosity              = 0.035         # viscosity      [g/cm/s]
-FluidVenousPressure         = 0.0           # ref. pressure  [g/cm/s^2 - dyne/cm^2]
+FluidVenousPressure         = 0.0           # ven. pressure  [g/cm/s^2 - dyne/cm^2]
 SolidExternalPressure       = 0.0           # ref. pressure  [g/cm/s^2 - dyne/cm^2]
 SolidDensity                = 0.00          # density        [g/cm^3]
 SolidPoissonCoefficient     = 0.00          # Poisson coeff. []

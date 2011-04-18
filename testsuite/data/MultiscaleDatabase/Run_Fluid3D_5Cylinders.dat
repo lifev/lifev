@@ -49,6 +49,8 @@ ProblemFile = ./MultiscaleDatabase/Models/Multiscale/Fluid3D_5Cylinders-tube20_F
 ###################################################################################################
 FluidDensity                = 2.79658816105093      # density        [g/cm^3]
 FluidViscosity              = 0.00593454445511297   # viscosity      [g/cm/s]
+FluidVenousPressure         = 0             # ven. pressure  [g/cm/s^2 - dyne/cm^2]
+SolidExternalPressure       = 0             # ref. pressure  [g/cm/s^2 - dyne/cm^2]
 SolidDensity                = 0                     # density        [g/cm^3]
 SolidPoissonCoefficient     = 0                     # Poisson coeff. []
 SolidYoungModulus           = 0                     # Young modulus  [g/cm/s^2 - dyne/cm^2]

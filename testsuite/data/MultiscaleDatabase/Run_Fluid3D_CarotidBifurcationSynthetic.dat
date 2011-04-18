@@ -41,8 +41,10 @@ ProblemFile = ./MultiscaleDatabase/Models/Multiscale/Fluid3D_CarotidBifurcationS
 
 [Physics] #########################################################################################
 ###################################################################################################
-FluidDensity                = 1.0           # density        [g/cm^3]
+FluidDensity                = 1.04          # density        [g/cm^3]
 FluidViscosity              = 0.035         # viscosity      [g/cm/s]
+FluidVenousPressure         = 0             # ven. pressure  [g/cm/s^2 - dyne/cm^2]
+SolidExternalPressure       = 0             # ref. pressure  [g/cm/s^2 - dyne/cm^2]
 SolidDensity                = 1.2           # density        [g/cm^3]
 SolidPoissonCoefficient     = 0.48          # Poisson coeff. []
 SolidYoungModulus           = 4.0E6         # Young modulus  [g/cm/s^2 - dyne/cm^2]
