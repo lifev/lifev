@@ -305,13 +305,16 @@ MultiscaleModelWindkessel0D::initializeSolution()
             break;
 
         case OneDimensional::P:
-            if ( std::abs( M_globalData->solidExternalPressure() - M_bc->handler()->bc( OneDimensional::left ).evaluate( M_globalData->dataTime()->time() ) ) > 1e-14 )
-                std::cout << "!!! Warning: external pressure should be equal to the initial pressure !!! " << std::endl;
+
+//            if ( std::abs( M_globalData->solidExternalPressure() - M_bc->handler()->bc( OneDimensional::left ).evaluate( M_globalData->dataTime()->time() ) ) > 1e-14 )
+//                std::cout << "!!! Warning: external pressure should be equal to the initial pressure !!! " << std::endl;
+
+            break;
 
         case OneDimensional::S:
 
-            if ( std::abs( M_globalData->solidExternalPressure() + M_bc->handler()->bc( OneDimensional::left ).evaluate( M_globalData->dataTime()->time() ) ) > 1e-14 )
-                std::cout << "!!! Warning: external pressure should be equal to the initial pressure !!! " << std::endl;
+//            if ( std::abs( M_globalData->solidExternalPressure() + M_bc->handler()->bc( OneDimensional::left ).evaluate( M_globalData->dataTime()->time() ) ) > 1e-14 )
+//                std::cout << "!!! Warning: external pressure should be equal to the initial pressure !!! " << std::endl;
 
             break;
 
