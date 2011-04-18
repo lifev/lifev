@@ -478,6 +478,8 @@ MultiscaleModel1D::setupGlobalData( const std::string& fileName )
         M_data->setDensity( M_globalData->fluidDensity() );
     if ( !dataFile.checkVariable( "1D_Model/PhysicalParameters/viscosity" ) )
         M_data->setViscosity( M_globalData->fluidViscosity() );
+    if ( !dataFile.checkVariable( "1D_Model/PhysicalParameters/venousPressure" ) )
+        M_data->setVenousPressure( M_globalData->fluidVenousPressure() );
     if ( !dataFile.checkVariable( "1D_Model/PhysicalParameters/externalPressure" ) )
         M_data->setExternalPressure( M_globalData->solidExternalPressure() );
     if ( !dataFile.checkVariable( "1D_Model/PhysicalParameters/densityWall" ) )
