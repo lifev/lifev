@@ -344,8 +344,19 @@ public:
 
 protected:
 
+    //! Set the value of the resistance
+    /*!
+     * For absorbing BC do nothing.
+     * @param resistance value of the resistance
+     */
+    virtual void resistance( Real& /*resistance*/ ) { /*Do nothing => absorbing!*/ }
 
-   virtual void resistance( Real& /*resistance*/ ) { /*Do nothing => absorbing!*/ }
+    //! Venous pressure
+    /*!
+     * For absorbing BC the venous pressure is equal to the external pressure.
+     * @return venous pressure.
+     */
+    virtual Real venousPressure() { return M_flux->physics()->externalPressure(); }
 
 };
 
@@ -390,10 +401,19 @@ public:
 
 protected:
 
+    //! Set the value of the resistance
+    /*!
+     * @param resistance value of the resistance
+     */
     void resistance( Real& resistance ) { resistance = M_resistance; }
 
-    Real M_resistance;
+    //! Venous pressure
+    /*!
+     * @return venous pressure.
+     */
+    Real venousPressure() { return M_flux->physics()->venousPressure(); }
 
+    Real M_resistance;
 };
 
 

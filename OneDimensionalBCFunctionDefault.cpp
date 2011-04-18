@@ -332,7 +332,7 @@ OneDimensionalBCFunctionAbsorbing::operator()( const Real& /*time*/, const Real&
     }
 
     Real a1, a2, a11, a22, b1, b2, c1, c2;
-    a1 = M_flux->physics()->pressure( M_bcU[0], timeStep, M_bcNode ) - M_flux->physics()->externalPressure(); // pressure at previous time step
+    a1 = M_flux->physics()->pressure( M_bcU[0], timeStep, M_bcNode ) - this->venousPressure(); // pressure at previous time step
     a2 = M_bcU[1]; // flux at previous time step
 
     b1 = M_flux->physics()->dPdW( M_bcW[0], M_bcW[1], 0, M_bcNode );  // dP / dW1
@@ -345,7 +345,6 @@ OneDimensionalBCFunctionAbsorbing::operator()( const Real& /*time*/, const Real&
     a22 = a2 - b2*M_bcW[0] - c2*M_bcW[1];
 
     Real resistance(b1 / b2);
-
     this->resistance( resistance );
 
     return W_out_old + W_out * (b2*resistance-b1)/(c1-c2*resistance) + (a22*resistance-a11)/(c1-c2*resistance);
