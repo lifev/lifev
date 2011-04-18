@@ -181,7 +181,7 @@ MultiscaleModelWindkessel0D::saveSolution()
     Debug( 8150 ) << "MultiscaleModelWindkessel0D::saveSolution() \n";
 #endif
 
-    M_outputFile << "  " << M_globalData->dataTime()->time()
+    M_outputFile << "    " << M_globalData->dataTime()->time()
                  << "    " << M_flowRate
                  << "    " << M_pressure << std::endl;
 
@@ -256,12 +256,45 @@ MultiscaleModelWindkessel0D::initializeSolution()
 
     if ( multiscaleProblemStep > 0 )
     {
-        ;// TODO: Code the importer
+        std::string file = multiscaleProblemFolder + "/Step_" + number2string( multiscaleProblemStep - 1 ) + "_Model_" + number2string( M_ID ) + ".m";
+
+        std::ifstream inputFile;
+        inputFile.open( file.c_str(), std::ios::in );
+
+        if ( inputFile.is_open() )
+        {
+            // Define some variables
+            std::string line;
+            std::vector<std::string> stringsVector;
+            Real deltaT(1e15);
+
+            // Read the first line with comments
+            std::getline( inputFile, line, '\n' );
+
+            // Read one-by-one all the others lines of the file
+            while ( std::getline( inputFile, line, '\n' ) )
+            {
+                // Split the three entries
+                boost::split( stringsVector, line, boost::is_any_of( " " ), boost::token_compress_on );
+
+                // Import values
+                if ( std::abs( string2number( stringsVector[1] ) - M_globalData->dataTime()->initialTime() ) <= deltaT )
+                {
+                    deltaT = std::abs( string2number( stringsVector[1] ) - M_globalData->dataTime()->initialTime() );
+
+                    M_flowRate = string2number( stringsVector[2] );
+                    M_pressure = string2number( stringsVector[3] );
+                }
+            }
+
+            // Close file
+            inputFile.close();
+        }
     }
     else
     {
-        M_pressure = M_globalData->solidExternalPressure();
         M_flowRate = 0;
+        M_pressure = M_globalData->solidExternalPressure();
 
         switch ( M_bc->handler()->bc( OneDimensional::left ).bcType() )
         {
@@ -272,9 +305,14 @@ MultiscaleModelWindkessel0D::initializeSolution()
             break;
 
         case OneDimensional::P:
+            if ( std::abs( M_globalData->solidExternalPressure() - M_bc->handler()->bc( OneDimensional::left ).evaluate( M_globalData->dataTime()->time() ) ) > 1e-14 )
+                std::cout << "!!! Warning: external pressure should be equal to the initial pressure !!! " << std::endl;
+
         case OneDimensional::S:
 
-            // In this case the external pressure should be equal to the initial pressure
+            if ( std::abs( M_globalData->solidExternalPressure() + M_bc->handler()->bc( OneDimensional::left ).evaluate( M_globalData->dataTime()->time() ) ) > 1e-14 )
+                std::cout << "!!! Warning: external pressure should be equal to the initial pressure !!! " << std::endl;
+
             break;
 
         default:
@@ -295,7 +333,7 @@ MultiscaleModelWindkessel0D::setupExporterImporter()
     std::string file = multiscaleProblemFolder + "/Step_" + number2string( multiscaleProblemStep ) + "_Model_" + number2string( M_ID ) + ".m";
     M_outputFile.open( file.c_str(), std::ios::trunc );
     M_outputFile << std::scientific << std::setprecision( 15 )
-                 << "% TIME                     FLOW RATE                PRESSURE" << std::endl;
+                 << "%   TIME                     FLOW RATE                PRESSURE" << std::endl;
 }
 
 Real
