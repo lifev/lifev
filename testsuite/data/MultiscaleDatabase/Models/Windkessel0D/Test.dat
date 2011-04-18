@@ -22,4 +22,3 @@ couplingFlags    = '0'
 Resistance1    = 5e+05
 Resistance2    = 5e+05
 Capacitance    = 1e-4
-#VenousPressure = 0
