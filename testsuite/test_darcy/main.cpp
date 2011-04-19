@@ -115,7 +115,7 @@ int main(int argc, char** argv)
 
 #endif
 
-    if ( std::abs( error - errorKnown ) > tolerance )
+    if ( std::fabs( error - errorKnown ) > tolerance )
     {
         return ( EXIT_FAILURE );
     }

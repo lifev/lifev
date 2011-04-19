@@ -440,7 +440,7 @@ addIPStabilizationStencil(const matrix_ptrType& matrixGalerkin,
                                       * M_IPFaceCFE->normal(iDim,iQuadPt);
                 }
             }
-            betaN[iQuadPt] = std::abs(betaN[iQuadPt]);
+            betaN[iQuadPt] = std::fabs(betaN[iQuadPt]);
         }
 
         // Now we can start the assembly. There are 4 parts, depending on

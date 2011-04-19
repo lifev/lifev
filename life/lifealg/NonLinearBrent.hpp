@@ -100,16 +100,16 @@ Real NonLinearBrent( const Function& f, const Real& leftExtremeBase, const Real&
     Real fx( f(x) ), fv( fx ), fw( fx ), fu(0);
 
     // Relative tollerance
-    Real tollRelative( std::numeric_limits<Real>::epsilon() * std::abs( x ) + toll );
+    Real tollRelative( std::numeric_limits<Real>::epsilon() * std::fabs( x ) + toll );
 
 
-    while ( std::abs( x - midpoint) > ( static_cast<Real>(2.) * tollRelative - ( rightExtreme - leftExtreme ) / static_cast<Real>(2.) ) && numIter < maxIter )
+    while ( std::fabs( x - midpoint) > ( static_cast<Real>(2.) * tollRelative - ( rightExtreme - leftExtreme ) / static_cast<Real>(2.) ) && numIter < maxIter )
     {
 
         // Clear some ausiliar variables
         p = q = r = static_cast<Real>(0);
 
-        if ( std::abs( e ) > tollRelative )
+        if ( std::fabs( e ) > tollRelative )
         {
             r = ( x - w ) * ( fx - fv );
             q = ( x - v ) * ( fx - fw );
@@ -130,7 +130,7 @@ Real NonLinearBrent( const Function& f, const Real& leftExtremeBase, const Real&
         }
 
 
-        if ( std::abs( p ) < std::abs( q * r / static_cast<Real>(2.) ) && p > q * ( leftExtreme - x ) && p < q * ( rightExtreme - x ) )
+        if ( std::fabs( p ) < std::fabs( q * r / static_cast<Real>(2.) ) && p > q * ( leftExtreme - x ) && p < q * ( rightExtreme - x ) )
         {
             d = p / q;
             u = x + d;
@@ -161,7 +161,7 @@ Real NonLinearBrent( const Function& f, const Real& leftExtremeBase, const Real&
             d = gold * e;
         }
 
-        if ( std::abs( d ) >= tollRelative )
+        if ( std::fabs( d ) >= tollRelative )
         {
             u = x + d;
         }
@@ -230,7 +230,7 @@ Real NonLinearBrent( const Function& f, const Real& leftExtremeBase, const Real&
         midpoint = ( leftExtreme + rightExtreme ) / static_cast<Real>(2.);
 
         // Compute the relative tollerance
-        tollRelative = std::numeric_limits<Real>::epsilon() * std::abs( x ) + toll;
+        tollRelative = std::numeric_limits<Real>::epsilon() * std::fabs( x ) + toll;
 
         // Increase the iterations number
         ++numIter;

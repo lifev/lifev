@@ -262,7 +262,7 @@ Int NonLinearLineSearchCubic( Fct& f, VectorType& residual, VectorType& sol, Vec
             a = c * ( c11 * g1 + c12 * g2 );
             b = c * ( c21 * g1 + c22 * g2 );
             disc = b * b - 3. * a * slope;
-            if ( ( fabs( a ) > std::numeric_limits<Real>::min() ) &&
+            if ( ( std::fabs( a ) > std::numeric_limits<Real>::min() ) &&
                     ( disc > std::numeric_limits<Real>::min() )
                )
                 lambdaTemporary = ( - b + sqrt( disc ) ) / ( 3. * a );

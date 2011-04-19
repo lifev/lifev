@@ -172,13 +172,13 @@ public:
     /*!
      * @param omegaMin minimum of Omega
      */
-    void setOmegaMin( const Real& omegaMin ) { M_rangeOmega[0] = std::abs( omegaMin ); }
+    void setOmegaMin( const Real& omegaMin ) { M_rangeOmega[0] = std::fabs( omegaMin ); }
 
     //! Set the maximum of Omega.
     /*!
      * @param omegaMax maximum of Omega
      */
-    void setOmegaMax( const Real& omegaMax ) { M_rangeOmega[1] = std::abs( omegaMax ); }
+    void setOmegaMax( const Real& omegaMax ) { M_rangeOmega[1] = std::fabs( omegaMax ); }
 
     //! Set minimization type.
     /*!
@@ -563,14 +563,14 @@ template < class VectorType >
 inline void
 NonLinearAitken< VectorType >::checkRange( Real& omega )
 {
-    if ( std::abs(omega) < std::abs(M_rangeOmega[0]) )
+    if ( std::fabs(omega) < std::fabs(M_rangeOmega[0]) )
     {
         if ( omega < 0 )
             omega = -M_rangeOmega[0];
         else
             omega = M_rangeOmega[0];
     }
-    else if ( std::abs(omega) > std::abs(M_rangeOmega[1]) )
+    else if ( std::fabs(omega) > std::fabs(M_rangeOmega[1]) )
     {
         if ( omega < 0 )
             omega = -M_rangeOmega[1];

@@ -104,7 +104,7 @@ int main(int argc, char** argv)
     std::cout << "MPI Finalization" << std::endl;
 #endif
 
-    if ( abs( error - errorKnown ) > tollerance )
+    if ( std::fabs( error - errorKnown ) > tollerance )
         return ( EXIT_FAILURE );
     else
         return ( EXIT_SUCCESS );
