@@ -209,6 +209,10 @@ protected:
     string      M_pressureMassPrecDataSection;
 
     string      M_pressureBoundaryConditions;
+    string      M_pressureLaplacianOperator;
+    bool        M_useLumpedPressureMass;
+    bool        M_setApBoundaryConditions;
+    bool        M_setFpBoundaryConditions;
 
 private:
     PreconditionerPCD(const PreconditionerPCD& /*P*/){}
