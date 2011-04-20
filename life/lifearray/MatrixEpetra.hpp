@@ -291,7 +291,7 @@ public:
     //! Save the matrix into a HDF5 (.h5) file
     /*!
       @param fileName Name of the file where the matrix will be saved, without extension (.h5)
-      @param matrixName Name of the matnnnnrix in the HDF5 file
+      @param matrixName Name of the matrix in the HDF5 file
      */
     void exportToHDF5( std::string const &fileName, std::string const &matrixName = "matrix" );
 #endif
