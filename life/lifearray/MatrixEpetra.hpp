@@ -39,6 +39,9 @@
 #ifndef _EPETRAMATRIX_HPP_
 #define _EPETRAMATRIX_HPP_
 
+#include <life/lifecore/LifeV.hpp>
+#include <life/lifearray/VectorEpetra.hpp>
+
 // Tell the compiler to ignore specific kind of warnings:
 #pragma GCC diagnostic ignored "-Wunused-variable"
 #pragma GCC diagnostic ignored "-Wunused-parameter"
@@ -56,9 +59,7 @@
 #pragma GCC diagnostic warning "-Wunused-variable"
 #pragma GCC diagnostic warning "-Wunused-parameter"
 
-#include <life/lifecore/LifeV.hpp>
-#include <life/lifearray/VectorEpetra.hpp>
-
+#include <cstdlib>
 #include <vector>
 
 //@@
@@ -286,12 +287,14 @@ public:
      */
     void spy( std::string const &fileName );
 
+#ifdef HAVE_HDF5
     //! Save the matrix into a HDF5 (.h5) file
     /*!
-      @param fileName file where the matrix will be saved
-      @param matrixName name of the matrix
+      @param fileName Name of the file where the matrix will be saved, without extension (.h5)
+      @param matrixName Name of the matnnnnrix in the HDF5 file
      */
-    void hdf5( std::string const &fileName, std::string const &matrixName = "matrix" );
+    void exportToHDF5( std::string const &fileName, std::string const &matrixName = "matrix" );
+#endif
 
     //! Print the contents of the matrix
     /*!
@@ -1130,10 +1133,10 @@ void MatrixEpetra<DataType>::spy( std::string const &fileName )
 
 }
 
-template <typename DataType>
-void MatrixEpetra<DataType>::hdf5( std::string const &fileName, std::string const &matrixName )
-{
 #ifdef HAVE_HDF5
+template <typename DataType>
+void MatrixEpetra<DataType>::exportToHDF5( std::string const &fileName, std::string const &matrixName )
+{
 
     EpetraExt::HDF5 HDF5 ( M_epetraCrs->Comm() );
 
@@ -1141,7 +1144,11 @@ void MatrixEpetra<DataType>::hdf5( std::string const &fileName, std::string cons
     HDF5.Create ( ( fileName + ".h5" ).data() );
 
     // Check if the file is created
-    ASSERT_PRE( !HDF5.IsOpen (), "Unable to create " + fileName + ".h5" );
+    if ( !HDF5.IsOpen () )
+    {
+        std::cerr << "Unable to create " + fileName + ".h5";
+        abort();
+    }
 
     // Save the matrix into the file
     HDF5.Write ( matrixName.data(), *M_epetraCrs );
@@ -1149,12 +1156,8 @@ void MatrixEpetra<DataType>::hdf5( std::string const &fileName, std::string cons
     // Close the file
     HDF5.Close ( );
 
-#else
-
-    ERROR_MSG( "This method is available only with HDF5 library.\n" );
-   
+} // exportToHDF5
 #endif
-} // hdf5
 
 template <typename DataType>
 void MatrixEpetra<DataType>::showMe( std::ostream& output ) const
