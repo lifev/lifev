@@ -297,7 +297,7 @@ void ExporterHDF5<MeshType>::postProcess(const Real& time)
     std::size_t found( this->M_postfix.find( "*" ) );
     if ( found == string::npos )
     {
-        if (!this->M_procId) std::cout << "  X-  HDF5 post-processing ...        " << std::flush;
+        if (!this->M_procId) std::cout << "  X-  HDF5 post-processing ...                 " << std::flush;
         LifeChrono chrono;
         chrono.start();
         for (typename super::dataVectorIterator_Type i=this->M_dataVector.begin(); i != this->M_dataVector.end(); ++i)
@@ -319,7 +319,7 @@ void ExporterHDF5<MeshType>::postProcess(const Real& time)
         // Write to file without closing the file
         M_HDF5->Flush();
 
-        if (!this->M_procId) std::cout << "         done in " << chrono.diff() << " s." << std::endl;
+        if (!this->M_procId) std::cout << "done in " << chrono.diff() << " s." << std::endl;
     }
 }
 
@@ -506,7 +506,7 @@ void ExporterHDF5<MeshType>::import(const Real& time)
 
     assert( this->M_postfix != "*****" );
 
-    if (!this->M_procId) std::cout << "  X-  HDF5 importing ..."<< std::endl;
+    if (!this->M_procId) std::cout << "  X-  HDF5 importing ...      "<< std::endl;
 
     LifeChrono chrono;
     chrono.start();
@@ -515,7 +515,7 @@ void ExporterHDF5<MeshType>::import(const Real& time)
         this->readVariable(*i); ///!!! Simone
     }
     chrono.stop();
-    if (!this->M_procId) std::cout << "      done in " << chrono.diff() << " s." << std::endl;
+    if (!this->M_procId) std::cout << "done in " << chrono.diff() << " s." << std::endl;
 }
 
 template <typename MeshType>
@@ -1035,7 +1035,12 @@ void ExporterHDF5<MeshType>::writeGeometry()
     Int gid;
     for (ID i=0; i < this->M_mesh->numVertices(); ++i)
     {
-        typename MeshType::point_Type const& point (this->M_mesh->pointList(i));
+        // Saving the initial mesh if M_multimesh is false (this is important for restart)
+        typename MeshType::point_Type point;
+        if ( this->M_multimesh )
+            point = this->M_mesh->point(i);
+        else
+            point = this->M_mesh->pointInitial(i);
 
         gid = point.id();
 
