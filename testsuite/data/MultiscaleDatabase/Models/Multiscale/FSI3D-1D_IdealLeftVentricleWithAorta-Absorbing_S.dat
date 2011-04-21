@@ -15,7 +15,7 @@
 
 [Multiscale] ######################################################################################
 ###################################################################################################
-modelName        = 'Ideal Left Ventricle + Reymond Stergiopulos 2009 1D Aorta Absorbing (FSI3D-OneDimensional, Stress)'
+modelName        = 'Ideal Left Ventricle + RS2009 Aorta Absorbing (FSI3D-OneDimensional, Stress)'
 modelType        = Multiscale
 couplingFlags    = ' '
 

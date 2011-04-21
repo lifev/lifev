@@ -25,7 +25,7 @@ couplingsPath    = './MultiscaleDatabase/Couplings/'
 
 # List of models ##################################################################################
 ########### ID #### Type ############## File (without .dat) #######################################
-models = '    
+models = '
             1       OneDimensional      ReymondStergiopulos2009_001
             2       OneDimensional      ReymondStergiopulos2009_002
             3       OneDimensional      ReymondStergiopulos2009_003
@@ -181,114 +181,113 @@ models = '
 
 # List of couplings ###############################################################################
 ########### ID #### Type ############## File (without .dat) ########### Models ######## Flags #####
-couplings = '    
-            1       BoundaryCondition   FlowRate_Heart                  1               0
-            2       Stress              Lagrange1                       95,96,97,1      0,0,0,1
-            3       Stress              Lagrange1                       2,3,95          0,0,1
-            4       Stress              Lagrange1                       4,5,3           0,0,1
-            5       Stress              Lagrange1                       6,7,4           0,0,1
-            6       Stress              Lagrange1                       8,9,7           0,0,1
-            7       Stress              Lagrange1                       10,11,9         0,0,1
-            8       Stress              Lagrange1                       14,15,2         0,0,1
-            9       Stress              Lagrange1                       18,19,14        0,0,1
-           10       Stress              Lagrange1                       20,21,19        0,0,1
-           11       Stress              Lagrange1                       22,23,21        0,0,1
-           12       Stress              Lagrange1                       24,25,23        0,0,1
-           13       Stress              Lagrange1                       26,27,18        0,0,1
-           14       Stress              Lagrange1                       28,29,27        0,0,1
-           15       Stress              Lagrange1                       30,31,29        0,0,1
-           16       Stress              Lagrange1                       32,33,30        0,0,1
-           17       Stress              Lagrange1                       38,35,28        0,0,1
-           18       Stress              Lagrange1                       36,37,35        0,0,1
-           19       Stress              Lagrange1                       34,39,37        0,0,1
-           20       Stress              Lagrange1                       40,41,39        0,0,1
-           21       Stress              Lagrange1                       40,41,39        0,0,1
-           22       Stress              Lagrange1                       42,43,41        0,0,1
-           23       Stress              Lagrange1                       44,45,43        0,0,1
-           24       Stress              Lagrange1                       46,47,44        0,0,1
-           25       Stress              Lagrange1                       48,49,46        0,0,1
-           26       Stress              Lagrange1                       50,51,42        0,0,1
-           27       Stress              Lagrange1                       52,53,50        0,0,1
-           28       Stress              Lagrange1                       54,55,52        0,0,1
-           29       Stress              Lagrange1                       12,13,5         0,0,1
-           30       Stress              Lagrange1                       83,84,13        0,0,1
-           31       Stress              Lagrange1                       87,88,83        0,0,1
-           32       Stress              Lagrange1                       91,92,87        0,0,1
-           33       Stress              Lagrange1                       16,17,15        0,0,1
-           34       Stress              Lagrange1                       85,86,17        0,0,1
-           35       Stress              Lagrange1                       89,90,85        0,0,1
-           36       Stress              Lagrange1                       93,94,89        0,0,1
-           37       Stress              Lagrange1                       79,80,12        0,0,1
-           38       Stress              Lagrange1                       81,82,16        0,0,1
-           39       Stress              Lagrange1                       56,6,20         0,1,1
-           40       Stress              Lagrange1                       57,58,59,56     0,0,0,1
-           41       Stress              Lagrange1                       60,61,59        0,0,1
-           42       Stress              Lagrange1                       62,64,60        0,0,1
-           43       Stress              Lagrange1                       63,65,61        0,0,1
-           44       Stress              Lagrange1                       66,62,79        0,1,1
-           45       Stress              Lagrange1                       67,63,81        0,1,1
-           46       Stress              Lagrange1                       100,101,66      0,0,1
-           47       Stress              Lagrange1                       102,103,67      0,0,1
-           48       Stress              Lagrange1                       68,70,101       0,0,1
-           49       Stress              Lagrange1                       71,72,70        0,0,1
-           50       Stress              Lagrange1                       69,73,103       0,0,1
-           51       Stress              Lagrange1                       74,75,73        0,0,1
-           52       Stress              Lagrange1                       76,77,68        0,0,1
-           53       Stress              Lagrange1                       78,69,77        0,1,1
-           54       Stress              Lagrange1                       98,99,97        0,0,1
-           55       Stress              Lagrange1                       1008,8          0,1
-           56       Stress              Lagrange1                       1010,10         0,1
-           57       Stress              Lagrange1                       1011,11         0,1
-           58       Stress              Lagrange1                       1022,22         0,1
-           59       Stress              Lagrange1                       1024,24         0,1
-           60       Stress              Lagrange1                       1025,25         0,1
-           61       Stress              Lagrange1                       1026,26         0,1
-           62       Stress              Lagrange1                       1031,31         0,1
-           63       Stress              Lagrange1                       1032,32         0,1
-           64       Stress              Lagrange1                       1033,33         0,1
-           65       Stress              Lagrange1                       1034,34         0,1
-           66       Stress              Lagrange1                       1036,36         0,1
-           67       Stress              Lagrange1                       1038,38         0,1
-           68       Stress              Lagrange1                       1040,40         0,1
-           69       Stress              Lagrange1                       1045,45         0,1
-           70       Stress              Lagrange1                       1047,47         0,1
-           71       Stress              Lagrange1                       1048,48         0,1
-           72       Stress              Lagrange1                       1049,49         0,1
-           73       Stress              Lagrange1                       1051,51         0,1
-           74       Stress              Lagrange1                       1053,53         0,1
-           75       Stress              Lagrange1                       1054,54         0,1
-           76       Stress              Lagrange1                       1055,55         0,1
-           77       Stress              Lagrange1                       1057,57         0,1
-           78       Stress              Lagrange1                       1058,58         0,1
-           79       Stress              Lagrange1                       1064,64         0,1
-           80       Stress              Lagrange1                       1065,65         0,1
-           81       Stress              Lagrange1                       1071,71         0,1
-           82       Stress              Lagrange1                       1072,72         0,1
-           83       Stress              Lagrange1                       1074,74         0,1
-           84       Stress              Lagrange1                       1075,75         0,1
-           85       Stress              Lagrange1                       1076,76         0,1
-           86       Stress              Lagrange1                       1078,78         0,1
-           87       Stress              Lagrange1                       1080,80         0,1
-           88       Stress              Lagrange1                       1082,82         0,1
-           89       Stress              Lagrange1                       1084,84         0,1
-           90       Stress              Lagrange1                       1086,86         0,1
-           91       Stress              Lagrange1                       1088,88         0,1
-           92       Stress              Lagrange1                       1090,90         0,1
-           93       Stress              Lagrange1                       1091,91         0,1
-           94       Stress              Lagrange1                       1092,92         0,1
-           95       Stress              Lagrange1                       1093,93         0,1
-           96       Stress              Lagrange1                       1094,94         0,1
-           97       Stress              Lagrange1                       1096,96         0,1
-           98       Stress              Lagrange1                       1098,98         0,1
-           99       Stress              Lagrange1                       1099,99         0,1
-          100       Stress              Lagrange1                       1100,100        0,1
-          101       Stress              Lagrange1                       1102,102        0,1
-           '
+couplings = '
+            1001    BoundaryCondition   FlowRate_Heart                  1               0
+               2    Stress              Lagrange1                       95,96,97,1      0,0,0,1
+               3    Stress              Lagrange1                       98,99,97        0,0,1
+               4    Stress              Lagrange1                       2,3,95          0,0,1
+               5    Stress              Lagrange1                       4,5,3           0,0,1
+               6    Stress              Lagrange1                       6,7,4           0,0,1
+               7    Stress              Lagrange1                       14,15,2         0,0,1
+               8    Stress              Lagrange1                       18,19,14        0,0,1
+               9    Stress              Lagrange1                       20,21,19        0,0,1
+              10    Stress              Lagrange1                       26,27,18        0,0,1
+              11    Stress              Lagrange1                       28,29,27        0,0,1
+              12    Stress              Lagrange1                       8,9,7           0,0,1
+              13    Stress              Lagrange1                       10,11,9         0,0,1
+              14    Stress              Lagrange1                       22,23,21        0,0,1
+              15    Stress              Lagrange1                       24,25,23        0,0,1
+              16    Stress              Lagrange1                       30,31,29        0,0,1
+              17    Stress              Lagrange1                       32,33,30        0,0,1
+              18    Stress              Lagrange1                       38,35,28        0,0,1
+              19    Stress              Lagrange1                       36,37,35        0,0,1
+              20    Stress              Lagrange1                       34,39,37        0,0,1
+              21    Stress              Lagrange1                       40,41,39        0,0,1
+              22    Stress              Lagrange1                       42,43,41        0,0,1
+              23    Stress              Lagrange1                       44,45,43        0,0,1
+              24    Stress              Lagrange1                       50,51,42        0,0,1
+              25    Stress              Lagrange1                       46,47,44        0,0,1
+              26    Stress              Lagrange1                       48,49,46        0,0,1
+              27    Stress              Lagrange1                       52,53,50        0,0,1
+              28    Stress              Lagrange1                       54,55,52        0,0,1
+              29    Stress              Lagrange1                       12,13,5         0,0,1
+              30    Stress              Lagrange1                       83,84,13        0,0,1
+              31    Stress              Lagrange1                       87,88,83        0,0,1
+              32    Stress              Lagrange1                       91,92,87        0,0,1
+              33    Stress              Lagrange1                       16,17,15        0,0,1
+              34    Stress              Lagrange1                       85,86,17        0,0,1
+              35    Stress              Lagrange1                       89,90,85        0,0,1
+              36    Stress              Lagrange1                       93,94,89        0,0,1
+              37    Stress              Lagrange1                       79,80,12        0,0,1
+              38    Stress              Lagrange1                       81,82,16        0,0,1
+              39    Stress              Lagrange1                       56,6,20         0,1,1
+              40    Stress              Lagrange1                       57,58,59,56     0,0,0,1
+              41    Stress              Lagrange1                       60,61,59        0,0,1
+              42    Stress              Lagrange1                       62,64,60        0,0,1
+              43    Stress              Lagrange1                       63,65,61        0,0,1
+              44    Stress              Lagrange1                       66,62,79        0,1,1
+              45    Stress              Lagrange1                       67,63,81        0,1,1
+              46    Stress              Lagrange1                       100,101,66      0,0,1
+              47    Stress              Lagrange1                       102,103,67      0,0,1
+              48    Stress              Lagrange1                       68,70,101       0,0,1
+              49    Stress              Lagrange1                       71,72,70        0,0,1
+              50    Stress              Lagrange1                       69,73,103       0,0,1
+              51    Stress              Lagrange1                       74,75,73        0,0,1
+              52    Stress              Lagrange1                       76,77,68        0,0,1
+              53    Stress              Lagrange1                       78,69,77        0,1,1
+            1008    Stress              Lagrange1                       1008,8          0,1
+            1010    Stress              Lagrange1                       1010,10         0,1
+            1011    Stress              Lagrange1                       1011,11         0,1
+            1022    Stress              Lagrange1                       1022,22         0,1
+            1024    Stress              Lagrange1                       1024,24         0,1
+            1025    Stress              Lagrange1                       1025,25         0,1
+            1026    Stress              Lagrange1                       1026,26         0,1
+            1031    Stress              Lagrange1                       1031,31         0,1
+            1032    Stress              Lagrange1                       1032,32         0,1
+            1033    Stress              Lagrange1                       1033,33         0,1
+            1034    Stress              Lagrange1                       1034,34         0,1
+            1036    Stress              Lagrange1                       1036,36         0,1
+            1038    Stress              Lagrange1                       1038,38         0,1
+            1040    Stress              Lagrange1                       1040,40         0,1
+            1045    Stress              Lagrange1                       1045,45         0,1
+            1047    Stress              Lagrange1                       1047,47         0,1
+            1048    Stress              Lagrange1                       1048,48         0,1
+            1049    Stress              Lagrange1                       1049,49         0,1
+            1051    Stress              Lagrange1                       1051,51         0,1
+            1053    Stress              Lagrange1                       1053,53         0,1
+            1054    Stress              Lagrange1                       1054,54         0,1
+            1055    Stress              Lagrange1                       1055,55         0,1
+            1057    Stress              Lagrange1                       1057,57         0,1
+            1058    Stress              Lagrange1                       1058,58         0,1
+            1064    Stress              Lagrange1                       1064,64         0,1
+            1065    Stress              Lagrange1                       1065,65         0,1
+            1071    Stress              Lagrange1                       1071,71         0,1
+            1072    Stress              Lagrange1                       1072,72         0,1
+            1074    Stress              Lagrange1                       1074,74         0,1
+            1075    Stress              Lagrange1                       1075,75         0,1
+            1076    Stress              Lagrange1                       1076,76         0,1
+            1078    Stress              Lagrange1                       1078,78         0,1
+            1080    Stress              Lagrange1                       1080,80         0,1
+            1082    Stress              Lagrange1                       1082,82         0,1
+            1084    Stress              Lagrange1                       1084,84         0,1
+            1086    Stress              Lagrange1                       1086,86         0,1
+            1088    Stress              Lagrange1                       1088,88         0,1
+            1090    Stress              Lagrange1                       1090,90         0,1
+            1091    Stress              Lagrange1                       1091,91         0,1
+            1092    Stress              Lagrange1                       1092,92         0,1
+            1093    Stress              Lagrange1                       1093,93         0,1
+            1094    Stress              Lagrange1                       1094,94         0,1
+            1096    Stress              Lagrange1                       1096,96         0,1
+            1098    Stress              Lagrange1                       1098,98         0,1
+            1099    Stress              Lagrange1                       1099,99         0,1
+            1100    Stress              Lagrange1                       1100,100        0,1
+            1102    Stress              Lagrange1                       1102,102        0,1
+            '
 ###################################################################################################
 
 # Geometry offset #################################################################################
 ########### ID #### Scale (x,y,z) ############# Rotate (x,y,z) ############ Translate (x,y,z) #####
-offset = '    
+offset = '
             1       1       1       1       0       0     105       0       0       0
             2       1       1       1       0       0      30 -0.7371781444 3.929790049       0
             3       1       1       1       0       0 102.584652 -0.7371781444 3.929790049       0

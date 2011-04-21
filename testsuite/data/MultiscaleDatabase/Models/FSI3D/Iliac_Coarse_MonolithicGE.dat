@@ -19,11 +19,18 @@ modelType        = FSI3D
 couplingFlags    = '2 3 4 5 6'
 
 #Note on the flags: 
-# 2: Abdominal Aorta E,        Area = 1.528053101775165e+00
-# 3: Inner Iliac (Left),       Area = 1.608700348268665e-01
-# 4: External Iliac (Left),    Area = 1.991225727820763e-01
-# 5: Inner Iliac (Right),      Area = 1.686868541692753e-01
-# 6: External Iliac (Right),   Area = 2.210729557211047e-01
+# 2: Abdominal Aorta E,        Area = 1.528053101775165e+00 - (RS_041: 0.9160884178 0.8494866535)
+# 3: Inner Iliac (left),       Area = 1.608700348268665e-01 - (RS_045: 0.125663706143592)
+# 4: External Iliac (left),    Area = 1.991225727820763e-01 - (RS_044: 0.3216990877 0.2922466566)
+# 5: Inner Iliac (right),      Area = 1.686868541692753e-01 - (RS_051: 0.125663706143592)
+# 6: External Iliac (right),   Area = 2.210729557211047e-01 - (RS_050: 0.3216990877 0.2922466566)
+
+### Iliac dimensions (measures taken from the centerline):
+# Abdominal Aorta E lenght        = 3.57 cm (1D lenght: 2.0 cm)
+# Inner Iliac (left) lenght       = 3.15 cm (1D length: 5.0 cm)
+# External Iliac (left) lenght    = 5.70 cm (1D length: 14.4 cm)
+# Inner Iliac (right) lenght      = 3.00 cm (1D length: 5.0 cm)
+# External Iliac (right) lenght   = 5.57 cm (1D length: 14.4 cm)
 
 
 

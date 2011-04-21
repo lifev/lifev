@@ -81,63 +81,62 @@ models = '
 # List of couplings ###############################################################################
 ########### ID #### Type ############## File (without .dat) ########### Models ######## Flags #####
 couplings = '    
-            1       BoundaryCondition   FlowRate_Heart                  1               0
-            2       Stress              Lagrange1                       95,1            0,1
-            3       Stress              Lagrange1                       2,3,95          0,0,1
-            4       Stress              Lagrange1                       4,3             0,1
-            5       Stress              Lagrange1                       7,4             0,1
-            6       Stress              Lagrange1                       8,9,7           0,0,1
-            7       Stress              Lagrange1                       10,11,9         0,0,1
-            8       Stress              Lagrange1                       14,15,2         0,0,1
-            9       Stress              Lagrange1                       18,19,14        0,0,1
-           10       Stress              Lagrange1                       21,19           0,1
-           11       Stress              Lagrange1                       22,23,21        0,0,1
-           12       Stress              Lagrange1                       24,25,23        0,0,1
-           13       Stress              Lagrange1                       26,27,18        0,0,1
-           14       Stress              Lagrange1                       28,29,27        0,0,1
-           15       Stress              Lagrange1                       30,31,29        0,0,1
-           16       Stress              Lagrange1                       32,33,30        0,0,1
-           17       Stress              Lagrange1                       38,35,28        0,0,1
-           18       Stress              Lagrange1                       36,37,35        0,0,1
-           19       Stress              Lagrange1                       34,39,37        0,0,1
-           20       Stress              Lagrange1                       40,41,39        0,0,1
-           21       Stress              Lagrange1                       40,41,39        0,0,1
-           22       Stress              Lagrange1                       42,43,41        0,0,1
-           23       Stress              Lagrange1                       44,45,43        0,0,1
-           24       Stress              Lagrange1                       46,47,44        0,0,1
-           25       Stress              Lagrange1                       48,49,46        0,0,1
-           26       Stress              Lagrange1                       50,51,42        0,0,1
-           27       Stress              Lagrange1                       52,53,50        0,0,1
-           28       Stress              Lagrange1                       54,55,52        0,0,1
-           29       BoundaryCondition   Terminal_ReymondStergiopulos2009_008   8               1
-           30       BoundaryCondition   Terminal_ReymondStergiopulos2009_010   10              1
-           31       BoundaryCondition   Terminal_ReymondStergiopulos2009_011   11              1
-           32       BoundaryCondition   Terminal_ReymondStergiopulos2009_015   15              1
-           33       BoundaryCondition   Terminal_ReymondStergiopulos2009_022   22              1
-           34       BoundaryCondition   Terminal_ReymondStergiopulos2009_024   24              1
-           35       BoundaryCondition   Terminal_ReymondStergiopulos2009_025   25              1
-           36       BoundaryCondition   Terminal_ReymondStergiopulos2009_026   26              1
-           37       BoundaryCondition   Terminal_ReymondStergiopulos2009_031   31              1
-           38       BoundaryCondition   Terminal_ReymondStergiopulos2009_032   32              1
-           39       BoundaryCondition   Terminal_ReymondStergiopulos2009_033   33              1
-           40       BoundaryCondition   Terminal_ReymondStergiopulos2009_034   34              1
-           41       BoundaryCondition   Terminal_ReymondStergiopulos2009_036   36              1
-           42       BoundaryCondition   Terminal_ReymondStergiopulos2009_038   38              1
-           43       BoundaryCondition   Terminal_ReymondStergiopulos2009_040   40              1
-           44       BoundaryCondition   Terminal_ReymondStergiopulos2009_045   45              1
-           45       BoundaryCondition   Terminal_ReymondStergiopulos2009_047   47              1
-           46       BoundaryCondition   Terminal_ReymondStergiopulos2009_048   48              1
-           47       BoundaryCondition   Terminal_ReymondStergiopulos2009_049   49              1
-           48       BoundaryCondition   Terminal_ReymondStergiopulos2009_051   51              1
-           49       BoundaryCondition   Terminal_ReymondStergiopulos2009_053   53              1
-           50       BoundaryCondition   Terminal_ReymondStergiopulos2009_054   54              1
-           51       BoundaryCondition   Terminal_ReymondStergiopulos2009_055   55              1
-           '
+            1001    BoundaryCondition   FlowRate_Heart                  1               0
+               2    Stress              Lagrange1                       95,1            0,1
+               3    Stress              Lagrange1                       2,3,95          0,0,1
+               4    Stress              Lagrange1                       4,3             0,1
+               5    Stress              Lagrange1                       7,4             0,1
+               6    Stress              Lagrange1                       8,9,7           0,0,1
+               7    Stress              Lagrange1                       10,11,9         0,0,1
+               8    Stress              Lagrange1                       14,15,2         0,0,1
+               9    Stress              Lagrange1                       18,19,14        0,0,1
+              10    Stress              Lagrange1                       21,19           0,1
+              11    Stress              Lagrange1                       22,23,21        0,0,1
+              12    Stress              Lagrange1                       24,25,23        0,0,1
+              13    Stress              Lagrange1                       26,27,18        0,0,1
+              14    Stress              Lagrange1                       28,29,27        0,0,1
+              15    Stress              Lagrange1                       30,31,29        0,0,1
+              16    Stress              Lagrange1                       32,33,30        0,0,1
+              17    Stress              Lagrange1                       38,35,28        0,0,1
+              18    Stress              Lagrange1                       36,37,35        0,0,1
+              19    Stress              Lagrange1                       34,39,37        0,0,1
+              20    Stress              Lagrange1                       40,41,39        0,0,1
+              21    Stress              Lagrange1                       42,43,41        0,0,1
+              22    Stress              Lagrange1                       44,45,43        0,0,1
+              23    Stress              Lagrange1                       46,47,44        0,0,1
+              24    Stress              Lagrange1                       48,49,46        0,0,1
+              25    Stress              Lagrange1                       50,51,42        0,0,1
+              26    Stress              Lagrange1                       52,53,50        0,0,1
+              27    Stress              Lagrange1                       54,55,52        0,0,1
+            1008    BoundaryCondition   Terminal_ReymondStergiopulos2009_008   8               1
+            1010    BoundaryCondition   Terminal_ReymondStergiopulos2009_010   10              1
+            1011    BoundaryCondition   Terminal_ReymondStergiopulos2009_011   11              1
+            1015    BoundaryCondition   Terminal_ReymondStergiopulos2009_015   15              1
+            1022    BoundaryCondition   Terminal_ReymondStergiopulos2009_022   22              1
+            1024    BoundaryCondition   Terminal_ReymondStergiopulos2009_024   24              1
+            1025    BoundaryCondition   Terminal_ReymondStergiopulos2009_025   25              1
+            1026    BoundaryCondition   Terminal_ReymondStergiopulos2009_026   26              1
+            1031    BoundaryCondition   Terminal_ReymondStergiopulos2009_031   31              1
+            1032    BoundaryCondition   Terminal_ReymondStergiopulos2009_032   32              1
+            1033    BoundaryCondition   Terminal_ReymondStergiopulos2009_033   33              1
+            1034    BoundaryCondition   Terminal_ReymondStergiopulos2009_034   34              1
+            1036    BoundaryCondition   Terminal_ReymondStergiopulos2009_036   36              1
+            1038    BoundaryCondition   Terminal_ReymondStergiopulos2009_038   38              1
+            1040    BoundaryCondition   Terminal_ReymondStergiopulos2009_040   40              1
+            1045    BoundaryCondition   Terminal_ReymondStergiopulos2009_045   45              1
+            1047    BoundaryCondition   Terminal_ReymondStergiopulos2009_047   47              1
+            1048    BoundaryCondition   Terminal_ReymondStergiopulos2009_048   48              1
+            1049    BoundaryCondition   Terminal_ReymondStergiopulos2009_049   49              1
+            1051    BoundaryCondition   Terminal_ReymondStergiopulos2009_051   51              1
+            1053    BoundaryCondition   Terminal_ReymondStergiopulos2009_053   53              1
+            1054    BoundaryCondition   Terminal_ReymondStergiopulos2009_054   54              1
+            1055    BoundaryCondition   Terminal_ReymondStergiopulos2009_055   55              1
+            '
 ###################################################################################################
 
 # Geometry offset #################################################################################
 ########### ID #### Scale (x,y,z) ############# Rotate (x,y,z) ############ Translate (x,y,z) #####
-offset = '    
+offset = '
             1       1       1       1       0       0     105       0       0       0
             2       1       1       1       0       0      30 -0.7371781444 3.929790049       0
             3       1       1       1       0       0 102.584652 -0.7371781444 3.929790049       0
