@@ -27,6 +27,7 @@ SUBDIRS		=  benchmark_RossEthierSteinman \
                example_cylinder \
                example_heart \
                example_impes \
+               example_incompressibleStructure \
                example_ML \
                example_NavierStokesRestart \
                example_ns_flux \
