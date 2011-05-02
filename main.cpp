@@ -186,22 +186,33 @@ main( Int argc, char** argv )
 
     std::cout << std::endl << "TEST ENDS SUCCESFULLY" << std::endl;
 
-//    // PERFORMANCE TEST
-//	Chrono chrono;
+    // PERFORMANCE TEST
+//    LifeChrono chronoParser;
+//    LifeChrono chronoReference;
 //
-//	expression = "sqrt(((index+pi)*2)^3)"; //We test ONE expression containing different operations
-//	parser.SetString(expression);
+//    expression = "sqrt(((index+pi)*2)^3)"; //We test ONE complex expression containing different operations
+//    parser.setString(expression);
 //
-//	chrono.start();
-//	UInt nEvaluations = 10000000; // 10 Milions
-//	for (UInt i = 0 ; i < nEvaluations ; ++i)
-//	{
-//	    parser.setVariable("index", i);
-//		parser.evaluate();
-//	}
-//	chrono.stop();
+//    UInt nEvaluations = 1000000; // 1 Million
+//    Real solution;
 //
-//	std::cout << std::endl << "Total time for " << nEvaluations << " evaluations of expression f=" << expression << " --> " << chrono.diff() << " s" << std::endl;
+//    chronoParser.start();
+//    for (UInt i = 0 ; i < nEvaluations ; ++i)
+//    {
+//        parser.setVariable("index", i);
+//        solution = parser.evaluate();
+//    }
+//    chronoParser.stop();
+//
+//    chronoReference.start();
+//    for (UInt i = 0 ; i < nEvaluations ; ++i)
+//    {
+//        solution = std::sqrt( std::pow( ( i + M_PI )*2, 3 ) );
+//    }
+//    chronoReference.stop();
+//
+//    std::cout << std::endl << "Total time for " << nEvaluations << " evaluations of expression f=" << expression << " --> " << chronoParser.diff() << " s" << std::endl;
+//    std::cout << std::endl << "Reference time " << chronoReference.diff() << " s" << std::endl;
 
 #ifdef HAVE_MPI
     std::cout << std::endl << "MPI Finalization" << std::endl;
