@@ -16,9 +16,9 @@ AT_KEYWORDS([test_MS Fluid3D])
 AT_DATA([data],[[
 
 ]])
-AT_CHECK([ln -sf $abs_top_builddir/testsuite/data/mesh/inria/ Mesh &&
-          ln -sf $abs_top_builddir/testsuite/data/physicalFunctions/ physicalFunctions &&
-		  ln -sf $abs_top_builddir/testsuite/data/MultiscaleDatabase/ MultiscaleDatabase &&
+AT_CHECK([ln -sf $top_srcdir/testsuite/data/mesh/inria Mesh &&
+          ln -sf $top_srcdir/testsuite/data/physicalFunctions physicalFunctions &&
+		  ln -sf $top_srcdir/testsuite/data/MultiscaleDatabase MultiscaleDatabase &&
 		  mpirun -n 4 $abs_top_builddir/testsuite/test_Multiscale/test_MS -s 1 -f MultiscaleDatabase/Test_Fluid3D.dat -c 1.8919584275659009],[0],[ignore],[ignore])
 AT_CLEANUP
 

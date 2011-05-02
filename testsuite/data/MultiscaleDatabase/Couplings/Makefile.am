@@ -18,12 +18,11 @@ SUBDIRS		=   BoundaryCondition\
                 FlowRateStress\
                 Stress
 
-dist_pkgdata_DATA = 
-					
-check-local:
-	@if test "$(top_srcdir)" != "$(top_builddir)"; then\
-	 for i in $(dist_pkgdata_DATA); do \
-           $(LN_S) -f $(srcdir)/$$i .; \
-         done; \
-	fi
+# dist_pkgdata_DATA = $(shell find $(srcdir) -name "*.dat") 
 
+# check-local:
+#    @if test "$(top_srcdir)" != "$(top_builddir)"; then\
+#        for i in $(dist_pkgdata_DATA); do \
+#            $(LN_S) -f $(srcdir)/$$i .; \
+#         done; \
+#    fi
