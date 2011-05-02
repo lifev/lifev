@@ -28,7 +28,7 @@
 
 /*!
     @file
-    @brief File containing the FEAbstractFct, FEScalarFct, FEVectorFct and FEMatrixFct classes
+    @brief File containing the FEFct, FEScalarFct, FEVectorFct and FEMatrixFct classes
 
     @author A. Fumagalli <alessio.fumagalli@mail.polimi.it>
     @author M. Kern <michel.kern@inria.fr>
@@ -41,7 +41,7 @@
 namespace LifeV
 {
 
-//! FEAbstractFct - This class gives an abstract implementation of a finite element function on finite elements fields.
+//! FEFct - This class gives an abstract implementation of a finite element function on finite elements fields.
 /*!
   @author A. Fumagalli <alessio.fumagalli@mail.polimi.it>
   @author M. Kern <michel.kern@inria.fr>
@@ -76,7 +76,7 @@ namespace LifeV
   @todo Add a method without the element id, less efficient but more flexible.
 */
 template < typename Mesh, typename Map, typename FunctionType >
-class FEAbstractFct
+class FEFct
 {
 public:
 
@@ -200,18 +200,18 @@ private:
   @author A. Fumagalli <alessio.fumagalli@mail.polimi.it>
   @author M. Kern <michel.kern@inria.fr>
 
-  Template partial specialization of the class FEAbstractFct for the scalar type functions.
+  Template partial specialization of the class FEFct for the scalar type functions.
 */
 template < typename Mesh, typename Map >
 class FEScalarFct :
-public FEAbstractFct < Mesh, Map, Real >
+public FEFct < Mesh, Map, Real >
 {
 public:
 
     //! @name Public Types
     //@{
 
-    typedef typename FEAbstractFct < Mesh, Map, Real >::point_Type point_Type;
+    typedef typename FEFct < Mesh, Map, Real >::point_Type point_Type;
 
     //@}
 };
@@ -221,18 +221,18 @@ public:
   @author A. Fumagalli <alessio.fumagalli@mail.polimi.it>
   @author M. Kern <michel.kern@inria.fr>
 
-  Template partial specialization of the class FEAbstractFct for the vector type functions.
+  Template partial specialization of the class FEFct for the vector type functions.
 */
 template < typename Mesh, typename Map >
 class FEVectorFct :
-public FEAbstractFct < Mesh, Map, Vector >
+public FEFct < Mesh, Map, Vector >
 {
 public:
 
     //! @name Public Types
     //@{
 
-    typedef typename FEAbstractFct < Mesh, Map, Vector >::point_Type point_Type;
+    typedef typename FEFct < Mesh, Map, Vector >::point_Type point_Type;
 
     //@}
 };
@@ -242,18 +242,18 @@ public:
   @author A. Fumagalli <alessio.fumagalli@mail.polimi.it>
   @author M. Kern <michel.kern@inria.fr>
 
-  Template partial specialization of the class FEAbstractFct for the matrix type functions.
+  Template partial specialization of the class FEFct for the matrix type functions.
 */
 template < typename Mesh, typename Map >
 class FEMatrixFct :
-public FEAbstractFct < Mesh, Map, Matrix >
+public FEFct < Mesh, Map, Matrix >
 {
 public:
 
     //! @name Public Types
     //@{
 
-    typedef typename FEAbstractFct < Mesh, Map, Matrix >::point_Type point_Type;
+    typedef typename FEFct < Mesh, Map, Matrix >::point_Type point_Type;
 
     //@}
 };

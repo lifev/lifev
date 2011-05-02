@@ -27,7 +27,7 @@
 
 /*!
     @file
-    @brief File containing the FEAbstractField, FEScalarField and FEVectorField classes
+    @brief File containing the FEField, FEScalarField and FEVectorField classes
 
     @author A. Fumagalli <alessio.fumagalli@mail.polimi.it>
     @author M. Kern <michel.kern@inria.fr>
@@ -53,7 +53,7 @@ namespace LifeV
 typedef boost::numeric::ublas::vector<Real> Vector;
 typedef boost::numeric::ublas::matrix<Real> Matrix;
 
-//! FEAbstractField - This class gives an abstract implementation of a finite element field.
+//! FEField - This class gives an abstract implementation of a finite element field.
 /*!
   @author A. Fumagalli <alessio.fumagalli@mail.polimi.it>
   @author M. Kern <michel.kern@inria.fr>
@@ -72,7 +72,7 @@ typedef boost::numeric::ublas::matrix<Real> Matrix;
   @todo Add a method without the element id, less efficient but more flexible.
 */
 template < typename Mesh, typename Map, typename FunctionType >
-class FEAbstractField
+class FEField
 {
 
 public:
@@ -97,9 +97,9 @@ public:
       @param fESpace Finite element space where the field is defined.
       @param vector vector witch represent the solution.
     */
-    FEAbstractField ( FESpace_Type& fESpace, const vectorPtr_Type& vector ):
-    M_FESpace       ( fESpace ),
-    M_vector        ( vector )
+    FEField ( FESpace_Type& fESpace, const vectorPtr_Type& vector ):
+    M_FESpace ( fESpace ),
+    M_vector ( vector )
     {}
 
     //! Constructor for the class without the vector.
@@ -109,22 +109,22 @@ public:
       @param fESpace Finite element space where the field is defined.
       @param mapType Specify wether the map is Unique or Repeated. Default value: Repeated.
     */
-    FEAbstractField ( FESpace_Type& fESpace, const MapEpetraType& mapType = Repeated ):
-    M_FESpace       ( fESpace ),
-    M_vector        ( new vector_Type ( M_FESpace.map(), mapType ) )
+    FEField ( FESpace_Type& fESpace, const MapEpetraType& mapType = Repeated ):
+    M_FESpace ( fESpace ),
+    M_vector ( new vector_Type ( M_FESpace.map(), mapType ) )
     {}
 
     //! Copy constructor.
     /*!
       @param field Finite element field to be copied.
     */
-    FEAbstractField ( const FEAbstractField& field ):
-    M_FESpace       ( field.M_FESpace ),
-    M_vector        ( field.M_vector )
+    FEField ( const FEField& field ):
+    M_FESpace ( field.M_FESpace ),
+    M_vector ( field.M_vector )
     {}
 
     //! Virtual destructor.
-    virtual ~FEAbstractField () {};
+    virtual ~FEField () {};
 
     //@}
 
@@ -200,24 +200,24 @@ protected:
   @author A. Fumagalli <alessio.fumagalli@mail.polimi.it>
   @author M. Kern <michel.kern@inria.fr>
 
-  This class, derived from FEAbstractField, implements the concept of a scalar field associated to a 
+  This class, derived from FEField, implements the concept of a scalar field associated to a 
   finite element space.
 */
 template < typename Mesh, typename Map >
 class FEScalarField :
-public FEAbstractField < Mesh, Map, Real >
+public FEField < Mesh, Map, Real >
 {
 public:
 
     //! @name Public Types
     //@{
 
-    typedef FEAbstractField < Mesh, Map, Real > FEAbstractField_Type;
+    typedef FEField < Mesh, Map, Real > FEField_Type;
 
-    typedef typename FEAbstractField_Type::FESpace_Type FESpace_Type;
-    typedef typename FEAbstractField_Type::vectorPtr_Type vectorPtr_Type;
+    typedef typename FEField_Type::FESpace_Type FESpace_Type;
+    typedef typename FEField_Type::vectorPtr_Type vectorPtr_Type;
 
-    typedef typename FEAbstractField_Type::point_Type point_Type;
+    typedef typename FEField_Type::point_Type point_Type;
 
     //@}
 
@@ -230,7 +230,7 @@ public:
       @param vector vector witch represent the solution.
     */
     FEScalarField ( FESpace_Type& fESpace, const vectorPtr_Type& vector ):
-    FEAbstractField_Type ( fESpace, vector )
+    FEField_Type ( fESpace, vector )
     {}
 
     //! Constructor for the class without the vector.
@@ -241,7 +241,7 @@ public:
       @param mapType Specify wether the map is Unique or Repeated. Default value: Repeated.
     */
     FEScalarField ( FESpace_Type& fESpace, const MapEpetraType& mapType = Repeated ):
-    FEAbstractField_Type ( fESpace, mapType )
+    FEField_Type ( fESpace, mapType )
     {}
 
     //! Copy constructor.
@@ -249,7 +249,7 @@ public:
       @param field Finite element field to be copied.
     */
     FEScalarField ( const FEScalarField& field ):
-    FEAbstractField_Type ( field )
+    FEField_Type ( field )
     {}
 
     //! Virtual destructor.
@@ -284,12 +284,12 @@ public:
   @author A. Fumagalli <alessio.fumagalli@mail.polimi.it>
   @author M. Kern <michel.kern@inria.fr> 
 
-  This class, derived from FEAbstractField, implements the concept of a vector field associated to a 
+  This class, derived from FEField, implements the concept of a vector field associated to a 
   finite element space.
 */
 template < typename Mesh, typename Map >
 class FEVectorField :
-public FEAbstractField < Mesh, Map, Vector >
+public FEField < Mesh, Map, Vector >
 {
 
 public:
@@ -297,12 +297,12 @@ public:
     //! @name Public Types
     //@{
 
-    typedef FEAbstractField < Mesh, Map, Vector > FEAbstractField_Type;
+    typedef FEField < Mesh, Map, Vector > FEField_Type;
 
-    typedef typename FEAbstractField_Type::FESpace_Type   FESpace_Type;
-    typedef typename FEAbstractField_Type::vectorPtr_Type vectorPtr_Type;
+    typedef typename FEField_Type::FESpace_Type FESpace_Type;
+    typedef typename FEField_Type::vectorPtr_Type vectorPtr_Type;
 
-    typedef typename FEAbstractField_Type::point_Type point_Type;
+    typedef typename FEField_Type::point_Type point_Type;
 
     //@}
 
@@ -315,7 +315,7 @@ public:
       @param vector vector witch represent the solution.
     */
     FEVectorField ( FESpace_Type& fESpace, const vectorPtr_Type& vector ):
-    FEAbstractField_Type ( fESpace, vector )
+    FEField_Type ( fESpace, vector )
     {}
 
     //! Constructor for the class without the vector.
@@ -326,7 +326,7 @@ public:
       @param mapType Specify wether the map is Unique or Repeated. Default value: Repeated.
     */
     FEVectorField ( FESpace_Type& fESpace, const MapEpetraType& mapType = Repeated ):
-    FEAbstractField_Type ( fESpace, mapType )
+    FEField_Type ( fESpace, mapType )
     {}
 
     //! Copy constructor.
@@ -334,7 +334,7 @@ public:
       @param field Finite element field to be copied.
     */
     FEVectorField ( const FEVectorField& field ):
-    FEAbstractField_Type ( field )
+    FEField_Type ( field )
     {}
 
     //! Virtual destructor.
