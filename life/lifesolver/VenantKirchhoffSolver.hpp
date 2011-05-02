@@ -509,10 +509,6 @@ protected:
   vectorPtr_Type                    M_syy;
   vectorPtr_Type                    M_szz;
 
-  //! files for lists of iterations and residuals per timestep
-  std::ofstream                  M_out_iter;
-  std::ofstream                  M_out_res;
-
   bchandler_Type   M_BCh;
 
   boost::shared_ptr<const MapEpetra>                      M_localMap;
@@ -570,8 +566,6 @@ VenantKirchhoffSolver<Mesh, SolverType>::VenantKirchhoffSolver( ):
   M_sxx                        (/*M_localMap*/),//useless
   M_syy                        (/*M_localMap*/),//useless
   M_szz                        (/*M_localMap*/),//useless
-  M_out_iter                   ( "out_iter_solid" ),
-  M_out_res                    ( "out_res_solid" ),
   M_BCh                        (),
   M_localMap                   ( ),
   M_mass                       ( ),
