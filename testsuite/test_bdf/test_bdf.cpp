@@ -169,7 +169,7 @@ void test_bdf::run()
     //=============================================================================
     //finite element space of the solution
     FESpace<RegionMesh, MapEpetra> FeSpace(meshPart,
-                                           dataFile(("bdf/"+discretization_section).c_str(), "P2"), 1, Members->comm);
+                                           dataFile(("bdf/"+discretization_section+"/order").c_str(), "P2"), 1, Members->comm);
 
     if (verbose)
         std::cout << "  Number of unknowns : "
