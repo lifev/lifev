@@ -674,7 +674,7 @@ void ExporterHDF5<MeshType>::writeTopology  ( std::ofstream& xdmf )
 {
     std::string FEstring;
 
-    switch ( MeshType::ElementShape::S_shape )
+    switch ( MeshType::elementShape_Type::S_shape )
     {
     case TETRA:
         FEstring = "Tetrahedron";
@@ -959,13 +959,13 @@ void ExporterHDF5<MeshType>::writeGeometry()
 
     // Connections
     // Need to use elements not dofs for this map. Recover local element lists
-    UInt numberOfPoints = MeshType::ElementShape::S_numPoints;
+    UInt numberOfPoints = MeshType::elementShape_Type::S_numPoints;
 
     std::vector<Int> elementList;
     elementList.reserve(this->M_mesh->numElements()*numberOfPoints);
     for (ID i=0; i < this->M_mesh->numElements(); ++i)
     {
-        typename MeshType::ElementType const& element (this->M_mesh->element(i));
+        typename MeshType::element_Type const& element (this->M_mesh->element(i));
         UInt lid= i*numberOfPoints;
         for (ID j=0; j< numberOfPoints; ++j, ++lid)
         {
@@ -981,7 +981,7 @@ void ExporterHDF5<MeshType>::writeGeometry()
     Epetra_IntVector connections(connectionsMap);
     for (ID i=0; i < this->M_mesh->numElements(); ++i)
     {
-        typename MeshType::ElementType const& element (this->M_mesh->element(i));
+        typename MeshType::element_Type const& element (this->M_mesh->element(i));
         UInt lid=i*numberOfPoints;
         for (ID j=0; j< numberOfPoints; ++j, ++lid)
         {
@@ -997,7 +997,7 @@ void ExporterHDF5<MeshType>::writeGeometry()
     // This gives the right map for the coordinate arrays
 
     MapEpetra subMap;
-    switch ( MeshType::ElementShape::S_shape )
+    switch ( MeshType::elementShape_Type::S_shape )
     {
     case TETRA:
     {

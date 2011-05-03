@@ -430,7 +430,7 @@ typename ExporterHDF5Mesh3D<MeshType>::meshPtr_Type ExporterHDF5Mesh3D<MeshType>
     meshPtr_Type tempMesh(new MeshType);
 
     UInt elementNodes, faceNodes;
-    switch (MeshType::ElementShape::S_shape)
+    switch (MeshType::elementShape_Type::S_shape)
     {
     case HEXA:
         elementNodes = 8;
@@ -564,7 +564,7 @@ typename ExporterHDF5Mesh3D<MeshType>::meshPtr_Type ExporterHDF5Mesh3D<MeshType>
 
     tempMesh->edgeList.reserve(numEdges);
 
-    typename MeshType::EdgeType *pe;
+    typename MeshType::ridge_Type *pe;
 
     for (Int j = 0; j < numEdges; ++j)
     {
@@ -616,7 +616,7 @@ typename ExporterHDF5Mesh3D<MeshType>::meshPtr_Type ExporterHDF5Mesh3D<MeshType>
                        &faceNeighbourPos[1][0]);
 
 
-    typename MeshType::FaceType *pf = 0;
+    typename MeshType::facet_Type *pf = 0;
 
     tempMesh->faceList.reserve(numFaces);
 
@@ -638,8 +638,8 @@ typename ExporterHDF5Mesh3D<MeshType>::meshPtr_Type ExporterHDF5Mesh3D<MeshType>
         }
     }
 
-    tempMesh->setLinkSwitch("HAS_ALL_FACES");
-    tempMesh->setLinkSwitch("FACES_HAVE_ADIACENCY");
+    tempMesh->setLinkSwitch("HAS_ALL_FACETS");
+    tempMesh->setLinkSwitch("FACETS_HAVE_ADIACENCY");
 
     facePoints.clear();
     faceMarkers.clear();
@@ -668,7 +668,7 @@ typename ExporterHDF5Mesh3D<MeshType>::meshPtr_Type ExporterHDF5Mesh3D<MeshType>
 
     tempMesh->volumeList.reserve(numVolumes);
 
-    typename MeshType::VolumeType *pv = 0;
+    typename MeshType::element_Type *pv = 0;
 
     for (Int j = 0; j < numVolumes; ++j)
     {
@@ -777,7 +777,7 @@ template <typename MeshType>
 void ExporterHDF5Mesh3D<MeshType>::writePartition(meshPtr_Type mesh, std::string& suffix)
 {
     UInt elementNodes, faceNodes;
-    switch (MeshType::ElementShape::S_shape)
+    switch (MeshType::elementShape_Type::S_shape)
     {
     case HEXA:
         elementNodes = 8;
@@ -858,7 +858,7 @@ void ExporterHDF5Mesh3D<MeshType>::writePartition(meshPtr_Type mesh, std::string
         edgeMarkers[j] = mesh->edgeList[j].marker();
         edgeGlobalId[j] = mesh->edgeList[j].id();
 
-        if (mesh->isBoundaryEdge(j))
+        if (mesh->isBoundaryRidge(j))
         {
             edgeBoundaryFlags[j] = 1;
         }
@@ -901,7 +901,7 @@ void ExporterHDF5Mesh3D<MeshType>::writePartition(meshPtr_Type mesh, std::string
         faceNeighbourPos[0][j] = mesh->faceList[j].firstAdjacentElementPosition();
         faceNeighbourPos[1][j] = mesh->faceList[j].secondAdjacentElementPosition();
 
-        if (mesh->isBoundaryFace(j))
+        if (mesh->isBoundaryFacet(j))
         {
             faceBoundaryFlags[j] = 1;
         }

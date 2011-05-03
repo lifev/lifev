@@ -297,9 +297,9 @@ void ExporterEnsight<MeshType>::setMeshProcId( const meshPtr_Type mesh, const In
     initNodesMap();
     initProcId();
 
-    typedef typename MeshType::ElementShape ElementShape;
+    typedef typename MeshType::elementShape_Type elementShape_Type;
 
-    switch ( ElementShape::S_shape )
+    switch ( elementShape_Type::S_shape )
     {
     case TETRA:
         M_FEstr = "tetra4";
