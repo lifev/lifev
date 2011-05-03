@@ -68,36 +68,27 @@ CurrentBoundaryFEBase::CurrentBoundaryFEBase( const ReferenceFE& refFE, const Ge
         M_quadPt    ( ( int ) M_nbQuadPt, 3 ),
         invArea   ( 1. )
 {
+	Real x[3] = {0, 0, 0};
 	for ( UInt iQuadPt(0); iQuadPt < M_nbQuadPt; iQuadPt++ )
     {
+		for ( UInt icoor = 0; icoor < M_nbCoor+1; icoor++)
+			x[icoor] =  qr.quadPointCoor(iQuadPt,icoor);
+
         for ( UInt iNode(0); iNode < M_nbNode; iNode++ )
         {
-            M_phi( iNode, iQuadPt ) = refFE.phi( iNode,
-                                      qr.quadPointCoor(iQuadPt,0),
-                                      qr.quadPointCoor(iQuadPt,1),
-                                      qr.quadPointCoor(iQuadPt,2));
+
+            M_phi( iNode, iQuadPt ) = refFE.phi( iNode, x[0], x[1], x[2]);
 
             for ( UInt iCoor(0); iCoor < M_nbCoor; iCoor++ )
-            {
-                M_dPhiRef( int(iNode), int(iCoor), int(iQuadPt) ) = refFE.dPhi( iNode,
-                                                                              iCoor,
-                                                                              qr.quadPointCoor(iQuadPt,0),
-                                                                              qr.quadPointCoor(iQuadPt,1),
-                                                                              qr.quadPointCoor(iQuadPt,2));
-            }
+                M_dPhiRef( int(iNode), int(iCoor), int(iQuadPt) ) = refFE.dPhi( iNode, iCoor, x[0], x[1], x[2]);
         }
+
         for ( UInt iGeoNode(0); iGeoNode < M_nbGeoNode; iGeoNode++ )
         {
-            M_phiGeo( iGeoNode, iQuadPt ) = geoMap.phi( iGeoNode,
-                                                      qr.quadPointCoor(iQuadPt,0),
-                                                      qr.quadPointCoor(iQuadPt,1),
-                                                      qr.quadPointCoor(iQuadPt,2));
+            M_phiGeo( iGeoNode, iQuadPt ) = geoMap.phi( iGeoNode, x[0], x[1], x[2]);
+
             for ( UInt iCoor(0); iCoor < M_nbCoor; iCoor++ )
-            {
-                M_dPhiGeo( int(iGeoNode), int(iCoor), int(iQuadPt) ) = geoMap.dPhi( iGeoNode, iCoor, qr.quadPointCoor(iQuadPt,0),
-                                                                   qr.quadPointCoor(iQuadPt,1),
-                                                                   qr.quadPointCoor(iQuadPt,2));
-            }
+                M_dPhiGeo( int(iGeoNode), int(iCoor), int(iQuadPt) ) = geoMap.dPhi( iGeoNode, iCoor, x[0], x[1], x[2]);
         }
     }
 #ifdef TEST_PRE
@@ -158,47 +149,35 @@ CurrentBoundaryFEBase::CurrentBoundaryFEBase( const ReferenceFE& refFE, const Ge
         invArea( invarea ),
         M_currentID( currentid )
 {
-    for ( UInt iQuadPt(0); iQuadPt < M_nbQuadPt; iQuadPt++ )
-    {
-        for ( UInt iNode(0); iNode < M_nbNode; iNode++ )
+	Real x[3] = {0, 0, 0};
+	for ( UInt iQuadPt(0); iQuadPt < M_nbQuadPt; iQuadPt++ )
+	{
+		for ( UInt icoor = 0; icoor < M_nbCoor + 1; icoor++)
+			x[icoor] =  qr.quadPointCoor(iQuadPt,icoor);
+
+		for ( UInt iNode(0); iNode < M_nbNode; iNode++ )
         {
-            M_phi( iNode, iQuadPt ) = invArea*refFE.phi( iNode,               // invArea added here
-                                              qr.quadPointCoor(iQuadPt,0),
-                                              qr.quadPointCoor(iQuadPt,1),
-                                              qr.quadPointCoor(iQuadPt,2));
+            M_phi( iNode, iQuadPt ) = invArea*refFE.phi( iNode, x[0], x[1], x[2]);
 
             for ( UInt iCoor(0); iCoor < M_nbCoor; iCoor++ )
-            {
-                M_dPhiRef( int(iNode), int(iCoor), int(iQuadPt) ) = refFE.dPhi( iNode,
-                                                      iCoor,
-                                                      qr.quadPointCoor(iQuadPt,0),
-                                                      qr.quadPointCoor(iQuadPt,1),
-                                                      qr.quadPointCoor(iQuadPt,2));
-            }
+                M_dPhiRef( int(iNode), int(iCoor), int(iQuadPt) ) = refFE.dPhi( iNode, iCoor, x[0], x[1], x[2]);
+
         }
         for ( UInt iGeoNode(0); iGeoNode < M_nbGeoNode; iGeoNode++ )
         {
-            M_phiGeo( iGeoNode, iQuadPt ) = geoMap.phi( iGeoNode,
-                                                      qr.quadPointCoor(iQuadPt,0),
-                                                      qr.quadPointCoor(iQuadPt,1),
-                                                      qr.quadPointCoor(iQuadPt,2));
+            M_phiGeo( iGeoNode, iQuadPt ) = geoMap.phi( iGeoNode, x[0], x[1], x[2]);
+
             for ( UInt iCoor(0); iCoor < M_nbCoor; iCoor++ )
-            {
-                M_dPhiGeo( int(iGeoNode), int(iCoor), int(iQuadPt) ) = geoMap.dPhi( iGeoNode,
-                                                                   iCoor,
-                                                                   qr.quadPointCoor(iQuadPt,0),
-                                                                   qr.quadPointCoor(iQuadPt,1),
-                                                                   qr.quadPointCoor(iQuadPt,2));
-            }
+                M_dPhiGeo( int(iGeoNode), int(iCoor), int(iQuadPt) ) = geoMap.dPhi( iGeoNode, iCoor, x[0], x[1], x[2]);
         }
     }
 
     for ( UInt iGeoNode(0); iGeoNode < M_nbGeoNode; iGeoNode++ )
     {
-        M_point( iGeoNode, UInt(0) ) = refcoor[ 3 * iGeoNode ];
-        M_point( iGeoNode, UInt(1) ) = refcoor[ 3 * iGeoNode + 1 ];
-        M_point( iGeoNode, UInt(2) ) = refcoor[ 3 * iGeoNode + 2 ];
+    	for ( UInt icoor = 0; icoor < M_nbCoor+1; icoor++)
+			M_point( iGeoNode, icoor ) = refcoor[ (M_nbCoor+1) * iGeoNode + icoor];
     }
+
 #ifdef TEST_PRE
     M_hasQR = true;
 #endif
@@ -226,7 +205,7 @@ void CurrentBoundaryFEBase::coorMap( Real& x, Real& y, Real& z,
                           const Real & xi, const Real & eta ) const
 {
     Vector coor = ZeroVector(3);
-    for ( UInt icoor=0; icoor< nDimensions; icoor++)
+    for ( UInt icoor=0; icoor< M_nbCoor+1; icoor++)
         for ( UInt i = 0; i < (UInt)M_nbGeoNode; i++ )
             coor[icoor] += M_point( i, icoor ) * geoMap.phi( i, xi, eta, 0. );
     x = coor[0];
@@ -263,9 +242,9 @@ void CurrentBoundaryFEBase::computeMeasure()
 
     for ( UInt iQuadPt(0); iQuadPt < M_nbQuadPt; iQuadPt++ )
     {
-        for ( UInt iCoor(0); iCoor < nDimensions; iCoor++ )
+        for ( UInt iCoor(0); iCoor < M_nbCoor+1; iCoor++ )
         {
-            for ( UInt jCoor(0); jCoor < nDimensions-1; jCoor++ )
+            for ( UInt jCoor(0); jCoor < M_nbCoor; jCoor++ )
             {
                 fctDer = 0.;
                 for ( UInt iGeoNode(0); iGeoNode < M_nbGeoNode; iGeoNode++ )
@@ -278,43 +257,46 @@ void CurrentBoundaryFEBase::computeMeasure()
         }
         // metric tensor
         s = 0.;
-        for ( UInt iCoor = 0; iCoor < nDimensions; iCoor++ )
+        for ( UInt iCoor = 0; iCoor < M_nbCoor + 1; iCoor++ )
         {
             s += M_tangent( int(0), int(iCoor), int(iQuadPt) ) * M_tangent( int(0), int(iCoor), int(iQuadPt) );
         }
         M_metric( int(0), int(0), int(iQuadPt) ) = s;
 
-#if defined(TWODIM)
-        M_meas( iQuadPt ) = sqrt( M_metric( 0, 0, iQuadPt ) );
-        M_weightMeas( iQuadPt ) = M_meas( iQuadPt ) * qr.weight( iQuadPt );
-#else
-        s = 0.;
-        for ( UInt iCoor = 0; iCoor < nDimensions; iCoor++ )
+        if(M_nbCoor == 1)
         {
-            s += M_tangent( int(1), int(iCoor), int(iQuadPt) ) * M_tangent( int(1), int(iCoor), int(iQuadPt) );
+        	M_meas( iQuadPt ) = sqrt( M_metric( 0, 0, int(iQuadPt) ) );
+        	M_weightMeas( iQuadPt ) = M_meas( iQuadPt ) * qr.weight( iQuadPt );
         }
-
-        M_metric( int(1), int(1), int(iQuadPt) ) = s;
-        s = 0.;
-        for ( UInt iCoor = 0; iCoor < nDimensions; iCoor++ )
+        else
         {
-            s += M_tangent( int(0), int(iCoor), int(iQuadPt) ) * M_tangent( int(1), int(iCoor), int(iQuadPt) );
-        }
+			s = 0.;
+			for ( UInt iCoor = 0; iCoor < M_nbCoor+1; iCoor++ )
+			{
+				s += M_tangent( int(1), int(iCoor), int(iQuadPt) ) * M_tangent( int(1), int(iCoor), int(iQuadPt) );
+			}
 
-        M_metric( int(0), int(1), int(iQuadPt) ) = M_metric( int(1), int(0), int(iQuadPt) ) = s;
-        M_meas( iQuadPt ) = sqrt( M_metric( int(0), int(0), int(iQuadPt) ) * M_metric( int(1), int(1), int(iQuadPt) )
-                                - M_metric( int(0), int(1), int(iQuadPt) ) * M_metric( int(1), int(0), int(iQuadPt) ) );
-        M_weightMeas( iQuadPt ) = M_meas( iQuadPt ) * qr.weight( iQuadPt );
+			M_metric( int(1), int(1), int(iQuadPt) ) = s;
+			s = 0.;
+			for ( UInt iCoor = 0; iCoor < M_nbCoor+1; iCoor++ )
+			{
+				s += M_tangent( int(0), int(iCoor), int(iQuadPt) ) * M_tangent( int(1), int(iCoor), int(iQuadPt) );
+			}
 
-        for ( UInt iCoor = 0; iCoor < nDimensions; iCoor++ )
-        {
-            for ( UInt jCoor = 0; jCoor < nDimensions-1; jCoor++ )
-            {
-                M_tangent( int(jCoor), int(iCoor), int(iQuadPt) ) = M_tangent( int(jCoor), int(iCoor), int(iQuadPt) )
-                    / sqrt( M_metric( int(jCoor), int(jCoor), int(iQuadPt) ) );
-            }
+			M_metric( int(0), int(1), int(iQuadPt) ) = M_metric( int(1), int(0), int(iQuadPt) ) = s;
+			M_meas( iQuadPt ) = sqrt( M_metric( int(0), int(0), int(iQuadPt) ) * M_metric( int(1), int(1), int(iQuadPt) )
+									- M_metric( int(0), int(1), int(iQuadPt) ) * M_metric( int(1), int(0), int(iQuadPt) ) );
+			M_weightMeas( iQuadPt ) = M_meas( iQuadPt ) * qr.weight( iQuadPt );
+
+			for ( UInt iCoor = 0; iCoor < M_nbCoor+1; iCoor++ )
+			{
+				for ( UInt jCoor = 0; jCoor < M_nbCoor; jCoor++ )
+				{
+					M_tangent( int(jCoor), int(iCoor), int(iQuadPt) ) = M_tangent( int(jCoor), int(iCoor), int(iQuadPt) )
+						/ sqrt( M_metric( int(jCoor), int(jCoor), int(iQuadPt) ) );
+				}
+			}
         }
-#endif
     }
 }
 
@@ -325,33 +307,34 @@ void CurrentBoundaryFEBase::computeMeasureNormal()
 
     Real norm, n1, n2;
     computeMeasure();
-#if defined(TWODIM)
-
-    for ( UInt ig = 0; ig < M_nbQuadPt; ig++ )
+    if(M_nbCoor == 1)
     {
-        n1 = - M_tangent( int(0), int(1), int(ig) );
-        n2 = M_tangent( int(0), int(0), int(ig) );
-        norm = sqrt( n1 * n1 + n2 * n2 );
-        M_normal( 0, ig ) = n1 / norm;
-        M_normal( 1, ig ) = n2 / norm;
+		for ( UInt ig = 0; ig < M_nbQuadPt; ig++ )
+		{
+			n1 = - M_tangent( int(0), int(1), int(ig) );
+			n2 = M_tangent( int(0), int(0), int(ig) );
+			norm = sqrt( n1 * n1 + n2 * n2 );
+			M_normal( UInt(0), ig ) = n1 / norm;
+			M_normal( UInt(1), ig ) = n2 / norm;
+		}
     }
-#else
-    Real n3;
-    for ( UInt ig = 0; ig < M_nbQuadPt; ig++ )
+    else
     {
-        n1 = M_tangent( int(0), int(1), int(ig) ) * M_tangent( int(1), int(2), int(ig) )
-            - M_tangent( int(0), int(2), int(ig) ) * M_tangent( int(1), int(1), int(ig) );
-        n2 = M_tangent( int(0), int(2), int(ig) ) * M_tangent( int(1), int(0), int(ig) )
-            - M_tangent( int(0), int(0), int(ig) ) * M_tangent( int(1), int(2), int(ig) );
-        n3 = M_tangent( int(0), int(0), int(ig) ) * M_tangent( int(1), int(1), int(ig) )
-            - M_tangent( int(0), int(1), int(ig) ) * M_tangent( int(1), int(0), int(ig) );
-        norm = sqrt( n1 * n1 + n2 * n2 + n3 * n3 );
-        M_normal( UInt(0), ig ) = n1 / norm;
-        M_normal( UInt(1), ig ) = n2 / norm;
-        M_normal( UInt(2), ig ) = n3 / norm;
+		Real n3;
+		for ( UInt ig = 0; ig < M_nbQuadPt; ig++ )
+		{
+			n1 = M_tangent( int(0), int(1), int(ig) ) * M_tangent( int(1), int(2), int(ig) )
+				- M_tangent( int(0), int(2), int(ig) ) * M_tangent( int(1), int(1), int(ig) );
+			n2 = M_tangent( int(0), int(2), int(ig) ) * M_tangent( int(1), int(0), int(ig) )
+				- M_tangent( int(0), int(0), int(ig) ) * M_tangent( int(1), int(2), int(ig) );
+			n3 = M_tangent( int(0), int(0), int(ig) ) * M_tangent( int(1), int(1), int(ig) )
+				- M_tangent( int(0), int(1), int(ig) ) * M_tangent( int(1), int(0), int(ig) );
+			norm = sqrt( n1 * n1 + n2 * n2 + n3 * n3 );
+			M_normal( UInt(0), ig ) = n1 / norm;
+			M_normal( UInt(1), ig ) = n2 / norm;
+			M_normal( UInt(2), ig ) = n3 / norm;
+		}
     }
-
-#endif
 }
 
 }
