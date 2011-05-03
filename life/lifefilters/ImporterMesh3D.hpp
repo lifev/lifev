@@ -111,9 +111,9 @@ readMppFileHead( std::ifstream & myStream,
   @return true if everything went fine, false otherwise.
 */
 
-template <typename GeoShape, typename MC>
+template <typename Mesh>
 bool
-readMppFile( RegionMesh3D<GeoShape, MC> & mesh,
+readMppFile( Mesh & mesh,
              const std::string          & fileName,
              markerID_Type              regionFlag,
              bool                         verbose = false )
@@ -139,9 +139,8 @@ readMppFile( RegionMesh3D<GeoShape, MC> & mesh,
 
     std::ostream& oStr = verbose ? std::cout : discardedLog;
 
-    ASSERT_PRE0( GeoShape::S_shape == TETRA ,  "readMppFiles reads only tetra meshes" ) ;
-    ASSERT_PRE0( GeoShape::S_shape == TETRA,   "Sorry, readMppFiles reads only tetra meshes" );
-    ASSERT_PRE0( GeoShape::S_numVertices <= 6, "Sorry, readMppFiles handles only liner&quad tetras" );
+    ASSERT_PRE0( Mesh::elementShape_Type::S_shape == TETRA ,  "readMppFiles reads only tetra meshes" ) ;
+    ASSERT_PRE0( Mesh::elementShape_Type::S_numVertices <= 6, "Sorry, readMppFiles handles only liner&quad tetras" );
 
     // open stream to read header
 
@@ -181,7 +180,7 @@ readMppFile( RegionMesh3D<GeoShape, MC> & mesh,
                   ( 3 * numberBoundaryFaces - 2 * numberBoundaryVertices ) / 4;
 
     // Be a little verbose
-    if ( GeoShape::S_numPoints > 4 )
+    if ( Mesh::elementShape_Type::S_numPoints > 4 )
     {
         std::cout << "Quadratic Tetra  Mesh (from Linear geometry)"
                   << std::endl;
@@ -234,10 +233,10 @@ readMppFile( RegionMesh3D<GeoShape, MC> & mesh,
     mesh.setMarker             ( regionFlag ); // Mark the region
 
 
-    typename RegionMesh3D<GeoShape, MC>::point_Type  * pointerPoint  = 0;
-    typename RegionMesh3D<GeoShape, MC>::EdgeType   * pointerEdge   = 0;
-    typename RegionMesh3D<GeoShape, MC>::FaceType   * pointerFace   = 0;
-    typename RegionMesh3D<GeoShape, MC>::VolumeType * pointerVolume = 0;
+    typename Mesh::point_Type  * pointerPoint  = 0;
+    typename Mesh::ridge_Type   * pointerEdge   = 0;
+    typename Mesh::facet_Type   * pointerFace   = 0;
+    typename Mesh::volume_Type * pointerVolume = 0;
 
     // addPoint(), Face() and Edge() return a reference to the last stored point
     // I use that information to set all point info, by using a pointer.
@@ -376,7 +375,7 @@ readMppFile( RegionMesh3D<GeoShape, MC> & mesh,
     }
     // This part is to build a P2 mesh from a P1 geometry
 
-    if ( GeoShape::S_numPoints > 4 )
+    if ( Mesh::elementShape_Type::S_numPoints > 4 )
     {
     	MeshUtility::p2MeshFromP1Data( mesh );
     }
@@ -468,9 +467,9 @@ readINRIAMeshFileHead( std::ifstream &        myStream,
   @return true if everything went fine, false otherwise.
 */
 
-template <typename GeoShape, typename MC>
+template <typename Mesh>
 bool
-readINRIAMeshFile( RegionMesh3D<GeoShape, MC>&      mesh,
+readINRIAMeshFile( Mesh&      mesh,
                    std::string const&               fileName,
                    markerID_Type                  regionFlag,
                    bool                             verbose = false,
@@ -544,7 +543,7 @@ readINRIAMeshFile( RegionMesh3D<GeoShape, MC>&      mesh,
         std::abort();
     }
 
-    ASSERT_PRE0( GeoShape::S_shape == shape, "INRIA Mesh file and mesh element shape is not consistent" );
+    ASSERT_PRE0( Mesh::elementShape_Type::S_shape == shape, "INRIA Mesh file and mesh element shape is not consistent" );
 
     // Euler formulas to get number of faces and number of edges
     numberFaces = 2 * numberVolumes + ( numberBoundaryFaces / 2 );
@@ -561,16 +560,16 @@ readINRIAMeshFile( RegionMesh3D<GeoShape, MC>&      mesh,
     {
 
     case HEXA:
-        ASSERT_PRE0( GeoShape::S_numPoints == 8, "Sorry I can read only bilinear Hexa meshes" );
+        ASSERT_PRE0( Mesh::elementShape_Type::S_numPoints == 8, "Sorry I can read only bilinear Hexa meshes" );
         std::cout << "Linear Hexa mesh" << std::endl;
         numberPoints =  numberVertices;
         numberBoundaryPoints = numberBoundaryVertices;
         break;
 
     case TETRA:
-        if ( GeoShape::S_numPoints > 4 )
+        if ( Mesh::elementShape_Type::S_numPoints > 4 )
         {
-            //if (GeoShape::S_numPoints ==6 )
+            //if (elementShape_Type::S_numPoints ==6 )
             std::cout << "Quadratic Tetra mesh (from linear geometry)" << std::endl;
             numberPoints = numberVertices + numberEdges;
 
@@ -646,14 +645,14 @@ readINRIAMeshFile( RegionMesh3D<GeoShape, MC>&      mesh,
 
     mesh.setMarker             ( regionFlag ); // Add Marker to list of Markers
 
-    typedef typename RegionMesh3D<GeoShape, MC>::point_Type  point_Type;
-    typedef typename RegionMesh3D<GeoShape, MC>::VolumeType VolumeType;
+    typedef typename Mesh::point_Type  point_Type;
+    typedef typename Mesh::volume_Type volume_Type;
 
 
-    typename RegionMesh3D<GeoShape, MC>::point_Type  * pointerPoint  = 0;
-    typename RegionMesh3D<GeoShape, MC>::EdgeType   * pointerEdge   = 0;
-    typename RegionMesh3D<GeoShape, MC>::FaceType   * pointerFace   = 0;
-    typename RegionMesh3D<GeoShape, MC>::VolumeType * pointerVolume = 0;
+    typename Mesh::point_Type  * pointerPoint  = 0;
+    typename Mesh::ridge_Type   * pointerEdge   = 0;
+    typename Mesh::facet_Type   * pointerFace   = 0;
+    typename Mesh::volume_Type * pointerVolume = 0;
     // addPoint()/Face()/Edge() returns a reference to the last stored point
     // I use that information to set all point info, by using a pointer.
 
@@ -886,7 +885,7 @@ readINRIAMeshFile( RegionMesh3D<GeoShape, MC>&      mesh,
                 pointerVolume->setMarker( markerID_Type( ibc ) );
                 count++;
             }
-            oStr << "size of the volume storage is " << sizeof( VolumeType ) * count / 1024. / 1024.
+            oStr << "size of the volume storage is " << sizeof( volume_Type ) * count / 1024. / 1024.
                  << " Mo." << std::endl;
             oStr << count << " Volume elements read" << std::endl;
             done++;
@@ -933,7 +932,7 @@ readINRIAMeshFile( RegionMesh3D<GeoShape, MC>&      mesh,
        }
 
     // This part is to build a P2 mesh from a P1 geometry
-    if ( shape == TETRA && GeoShape::S_numPoints > 4 )
+    if ( shape == TETRA && Mesh::elementShape_Type::S_numPoints > 4 )
     {
         MeshUtility::p2MeshFromP1Data( mesh );
     }
@@ -969,9 +968,9 @@ readINRIAMeshFile( RegionMesh3D<GeoShape, MC>&      mesh,
    @return true if everything went fine, false otherwise
 */
 
-template <typename GeoShape, typename MC>
+template <typename Mesh>
 bool
-readGmshFile( RegionMesh3D<GeoShape, MC> & mesh,
+readGmshFile( Mesh & mesh,
               const std::string &          fileName,
               markerID_Type              regionFlag,
               bool                         verbose = false )
@@ -1039,9 +1038,9 @@ readGmshFile( RegionMesh3D<GeoShape, MC> & mesh,
     UInt numberElements;
     inputFile >> numberElements;
 
-    typename RegionMesh3D<GeoShape, MC>::EdgeType   * pointerEdge   = 0;
-    typename RegionMesh3D<GeoShape, MC>::FaceType   * pointerFace   = 0;
-    typename RegionMesh3D<GeoShape, MC>::VolumeType * pointerVolume = 0;
+    typename Mesh::ridge_Type   * pointerEdge   = 0;
+    typename Mesh::facet_Type   * pointerFace   = 0;
+    typename Mesh::volume_Type * pointerVolume = 0;
 
 #ifdef DEBUG
     Debug ( 8000 ) << "number of elements: " << numberElements << "\n";
@@ -1178,7 +1177,7 @@ readGmshFile( RegionMesh3D<GeoShape, MC> & mesh,
         }
     }
     // add the point to the mesh
-    typename RegionMesh3D<GeoShape, MC>::point_Type * pointerPoint = 0;
+    typename Mesh::point_Type * pointerPoint = 0;
 
     mesh.setMaxNumPoints( numberNodes, true );
     mesh.setNumVertices ( numberNodes );
@@ -1314,9 +1313,9 @@ readGmshFile( RegionMesh3D<GeoShape, MC> & mesh,
    @return true if everything went fine, false otherwise.
 */
 
-template<typename GeoShape, typename MC>
+template <typename Mesh>
 bool
-readNetgenMesh(RegionMesh3D<GeoShape,MC> & mesh,
+readNetgenMesh(Mesh & mesh,
                const std::string  &        fileName,
                markerID_Type             regionFlag,
                bool                        verbose = false )
@@ -1617,7 +1616,7 @@ readNetgenMesh(RegionMesh3D<GeoShape,MC> & mesh,
     numberEdges = numberVolumes + numberVertices + ( 3 * numberBoundaryFaces - 2 * numberBoundaryVertices ) / 4;
 
     // Be a little verbose
-    if ( GeoShape::S_numPoints > 4 )
+    if ( Mesh::elementShape_Type::S_numPoints > 4 )
     {
         std::cout << "Quadratic Tetra  Mesh (from Linear geometry)" <<std::endl;
         numberPoints = numberVertices + numberEdges;
@@ -1672,10 +1671,10 @@ readNetgenMesh(RegionMesh3D<GeoShape,MC> & mesh,
 
     mesh.setMarker             ( regionFlag ); // Add Marker to list of Markers
 
-    typename RegionMesh3D<GeoShape,MC>::point_Type  * pointerPoint  = 0;
-    typename RegionMesh3D<GeoShape,MC>::EdgeType   * pointerEdge   = 0;
-    typename RegionMesh3D<GeoShape,MC>::FaceType   * pointerFace   = 0;
-    typename RegionMesh3D<GeoShape,MC>::VolumeType * pointerVolume = 0;
+    typename Mesh::point_Type  * pointerPoint  = 0;
+    typename Mesh::ridge_Type   * pointerEdge   = 0;
+    typename Mesh::facet_Type   * pointerFace   = 0;
+    typename Mesh::volume_Type * pointerVolume = 0;
 
     // addPoint()/Face()/Edge() returns a reference to the last stored point
     // I use that information to set all point info, by using a pointer.
@@ -1761,7 +1760,7 @@ readNetgenMesh(RegionMesh3D<GeoShape,MC> & mesh,
 
     // This part is to build a P2 mesh from a P1 geometry
 
-    if ( GeoShape::S_numPoints > 4 )
+    if ( Mesh::elementShape_Type::S_numPoints > 4 )
     {
     MeshUtility::p2MeshFromP1Data( mesh );
     }
