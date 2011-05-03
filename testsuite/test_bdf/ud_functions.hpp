@@ -39,7 +39,7 @@ namespace LifeV
 //! User functions
 // ===================================================
 
-#ifdef TWODIM
+#if 1
 class SourceFct
 {
 public:
@@ -77,7 +77,7 @@ public:
     }
 };
 
-#elif defined THREEDIM
+#else
 class SourceFct
 {
 public:
