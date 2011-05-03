@@ -275,7 +275,7 @@ MultiscaleCoupling::modelGlobalToLocalID( const UInt& ID ) const
         if ( M_models[localID]->ID() == ID )
             return localID;
 
-    return -1;
+    return 0;
 }
 
 // ===================================================
