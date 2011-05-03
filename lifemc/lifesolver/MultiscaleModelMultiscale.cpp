@@ -175,7 +175,7 @@ MultiscaleModelMultiscale::setupData( const std::string& fileName )
                                     + dataFile( "Problem/models", "undefined", i * modelsColumnsNumber + 2 ) + ".dat" );
     }
 
-    // Load couplings
+    // Load Couplings
     path = dataFile( "Problem/couplingsPath", "./" );
     for ( UInt i( 0 ); i < couplingsLinesNumber; ++i )
     {
