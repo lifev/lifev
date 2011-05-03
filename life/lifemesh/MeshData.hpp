@@ -47,14 +47,12 @@
 #include <life/lifefilters/GetPot.hpp>
 #include <life/lifecore/LifeV.hpp>
 
-#ifdef TWODIM
 #include <life/lifemesh/RegionMesh2D.hpp>
 #include <life/lifefilters/ImporterMesh2D.hpp>
-#else // THREEDIM
+
 #include <life/lifemesh/RegionMesh3D.hpp>
 #include <life/lifefilters/ImporterMesh3D.hpp>
 #include <life/lifemesh/RegionMesh3DStructured.hpp>
-#endif
 
 namespace LifeV
 {
@@ -137,23 +135,30 @@ private:
     bool            M_verbose;		//!< verbose output?
 };
 
-template <typename Mesh>
-void readMesh( Mesh& mesh, const MeshData& data )
+template <typename GEOSHAPE, typename MC>
+void readMesh( RegionMesh2D<GEOSHAPE, MC>& mesh, const MeshData& data )
 {
     if ( data.verbose() )
         std::cout << "\nBuilding mesh ... ";
 
-#ifdef TWODIM
 
     if ( data.meshType() == ".msh" )
-        readFreeFemFile( mesh, data.meshDir() + M_meshFile(), 1, verbatim );
+        readFreeFemFile( mesh, data.meshDir() + data.meshFile(), 1, data.verbose() );
     else
         ERROR_MSG( "Sorry, this mesh file can not be loaded" );
 
     //Update Edges
-    M_mesh->updateElementEdges(true);
+    mesh.updateElementFacets(true);
 
-#else // THREEDIM
+    if ( data.verbose() )
+        std::cout << "mesh read.\n" << std::endl;
+}
+
+template <typename GEOSHAPE, typename MC>
+void readMesh( RegionMesh3D<GEOSHAPE, MC>& mesh, const MeshData& data )
+{
+    if ( data.verbose() )
+        std::cout << "\nBuilding mesh ... ";
 
     bool updateEdgesAndFaces(true);
 
@@ -171,15 +176,15 @@ void readMesh( Mesh& mesh, const MeshData& data )
     //Update Edges & Faces
     if (updateEdgesAndFaces)
     {
-        mesh.updateElementEdges( true, data.verbose() );
-        mesh.updateElementFaces( true, data.verbose() );
+        mesh.updateElementRidges( true, data.verbose() );
+        mesh.updateElementFacets( true, data.verbose() );
     }
-
-#endif
 
     if ( data.verbose() )
         std::cout << "mesh read.\n" << std::endl;
 }
+
+
 
 } // namespace LifeV
 
