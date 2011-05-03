@@ -41,11 +41,7 @@
 #define LINEAREPETRAOPERATORBLOCK_H 1
 
 #include <life/lifealg/LinearEpetraOperator.hpp>
-// Tell the compiler to ignore specific kind of warnings:
-#pragma GCC diagnostic ignored "-Wunused-variable"
-#pragma GCC diagnostic ignored "-Wunused-parameter"
-#pragma GCC diagnostic ignored "-Wextra"
-
+#include <boost/numeric/ublas/matrix.hpp>
 #include <Epetra_Import.h>
 
 // Tell the compiler to ignore specific kind of warnings:
@@ -77,6 +73,7 @@ public:
     typedef Epetra_MultiVector raw_vector;
     typedef boost::shared_ptr<raw_vector> vector_ptr;
     typedef std::vector<vector_ptr> vector_container;
+
 
     enum Structure {Diagonal, LowerTriangular, UpperTriangular, NoStructure, Rectangular};
     //@}
