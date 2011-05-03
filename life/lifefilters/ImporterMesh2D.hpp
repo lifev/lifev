@@ -259,8 +259,8 @@ importerMesh2D( RegionMesh2D      & mesh, //importerMesh2D
 
     // Now put the whole lot into the RegionMesh2D structure
     typename RegionMesh2D::point_Type * pp = 0;
-    typename RegionMesh2D::EdgeType  * pe = 0;
-    typename RegionMesh2D::FaceType  * pf = 0;
+    typename RegionMesh2D::facet_Type  * pe = 0;
+    typename RegionMesh2D::face_Type  * pf = 0;
 
 
     // first the vertices
@@ -433,8 +433,8 @@ readGmshFile( RegionMesh2D<GeoShape, MC> & mesh,
     UInt __nele;
     __is >> __nele;
 
-    typename RegionMesh2D<GeoShape, MC>::EdgeType * pe = 0;
-    typename RegionMesh2D<GeoShape, MC>::FaceType * pf = 0;
+    typename RegionMesh2D<GeoShape, MC>::facet_Type * pe = 0;
+    typename RegionMesh2D<GeoShape, MC>::face_Type * pf = 0;
 
 #ifdef DEBUG
     Debug ( 8000 ) << "number of elements: " << __nele << "\n";
@@ -593,7 +593,7 @@ read a freefem mesh (2D) file and store it in a RegionMesh2D.
 @param mesh, the mesh data structure to fill in.
 @param fileName, the name of the freefem mesh file to read.
 @param regionFlag, the identifier for the region.
-@param bool useless, it will be removed.
+@param bool verbose, verbosity (not used)
 @return true if everything went fine, false otherwise.
  */
 
@@ -601,16 +601,23 @@ template <typename GeoShape, typename MC>
 bool
 readFreeFemFile( RegionMesh2D<GeoShape, MC> & mesh,
                  const std::string          & fileName,
-                 entityFlag_Type              regionFlag, bool useless )
+                 entityFlag_Type              regionFlag, bool /*verbose*/ = false )
 {
     MeshElementBareHandler<BareEdge> _be;
     std::pair<BareEdge, bool> _edge;
 
     typename RegionMesh2D<GeoShape, MC>::point_Type * pp = 0;
-    typename RegionMesh2D<GeoShape, MC>::EdgeType * pe = 0;
-    typename RegionMesh2D<GeoShape, MC>::FaceType * pf = 0;
+    typename RegionMesh2D<GeoShape, MC>::facet_Type * pe = 0;
+    typename RegionMesh2D<GeoShape, MC>::face_Type * pf = 0;
 
     std::ifstream __is ( fileName.c_str() );
+    if( __is.fail() )
+    {
+        std::cerr << " Error in readFreeFemFile: File " << fileName
+                  << " not found or locked"
+                  << std::endl;
+        abort();
+    }
 
     // first row: how many vertices, triangles, edges
     UInt __nv, __nt, __ne, i1, i2, i3;
@@ -662,7 +669,12 @@ readFreeFemFile( RegionMesh2D<GeoShape, MC> & mesh,
         >> __triangle_nodes[ 3 * __i + 2 ]
         >> __triangle_label[ __i ];
 
-        // dump first the existing edges, to maintain the correct numbering
+        //from 1-based numbering to 0-based numbering
+		__triangle_nodes[3 * __i]--;
+		__triangle_nodes[3 * __i+1]--;
+		__triangle_nodes[3 * __i+2]--;
+
+		// dump first the existing edges, to maintain the correct numbering
         // if everything is correct the numbering in the bareedge
         // structure will reflect the actual edge numbering
 
@@ -671,6 +683,7 @@ readFreeFemFile( RegionMesh2D<GeoShape, MC> & mesh,
         i1 = __triangle_nodes[ 3 * __i ];
         i2 = __triangle_nodes[ 3 * __i + 1 ];
         i3 = __triangle_nodes[ 3 * __i + 2 ];
+
 
         _edge                             = makeBareEdge( i1, i2 );
         _check                            = _be.addIfNotThere( _edge.first );
@@ -703,17 +716,21 @@ readFreeFemFile( RegionMesh2D<GeoShape, MC> & mesh,
         __is >> __edge_nodes[ 2 * __i ] >> __edge_nodes[ 2 * __i + 1 ] >> __edge_label[ __i ];
     }
 
+    //from 1-based numbering to 0-based numbering
+    for(UInt i(0); i<__edge_nodes.size(); i++)
+    	__edge_nodes[i]--;
+
     // Set mesh properties
     // Add Marker to list of Markers
     mesh.setMarker( regionFlag );
 
     // Till now I only have information about boundary edges - I don't know the MAX num of edges
     // Euler formula: ne = nv + nt - 1
-    mesh.setMaxNumEdges      ( __nv + __nt - 1 );
-    mesh.setMaxNumGlobalEdges( __nv + __nt - 1 );
+    mesh.setMaxNumEdges      ( _be.size() );
+    mesh.setMaxNumGlobalEdges( _be.size() );
 
     // Here the REAL number of edges (all of them)
-    mesh.numEdges() = __nv + __nt - 1;
+    mesh.numEdges() = _be.size();
 
     mesh.setNumBEdges        ( __ne );
     mesh.setMaxNumFaces      ( __nt );
@@ -744,6 +761,8 @@ readFreeFemFile( RegionMesh2D<GeoShape, MC> & mesh,
         pp->setMarker( __whichboundary[ __i ] );
         pp->x() = __x[ 2 * __i ];
         pp->y() = __x[ 2 * __i + 1 ];
+        pp->z() = 0;
+        //std::cout << "("<< pp->x() << ", " << pp->y() << ", " << pp->z() << ")"<< std::endl;
         pp->setId( __i );
         pp->setLocalId( __i );
 
