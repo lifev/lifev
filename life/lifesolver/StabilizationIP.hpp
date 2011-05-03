@@ -259,8 +259,9 @@ void StabilizationIP<MeshType, DofType>::apply( MatrixType& matrix,  const Vecto
     LifeChronoFake chronoAssembly9;
     LifeChrono chronoAssembly;
 
-    MatrixElemental elMatU( M_feOnSide1->nbFEDof(), nDimensions    , nDimensions   );
-    MatrixElemental elMatP( M_feOnSide1->nbFEDof(), nDimensions + 1, nDimensions+1 );
+    ID geoDimension = M_mesh->dimension();
+    MatrixElemental elMatU( M_feOnSide1->nbFEDof(), geoDimension    , geoDimension   );
+    MatrixElemental elMatP( M_feOnSide1->nbFEDof(), geoDimension + 1, geoDimension+1 );
 
 
     const UInt nDof = M_dof->numTotalDof();
@@ -269,17 +270,17 @@ void StabilizationIP<MeshType, DofType>::apply( MatrixType& matrix,  const Vecto
     state.normInf(&normInf);
 
     // local trace of the velocity
-    VectorElemental beta( M_feBd->nbNode(), nDimensions );
+    VectorElemental beta( M_feBd->nbNode(), geoDimension );
 
     UInt myFaces(0);
 
     chronoAssembly.start();
     // loop on interior faces
-    for ( UInt iFace( M_mesh->numBFaces() ); iFace< M_mesh->numFaces();
-            ++iFace )
+    for ( UInt iFacet( M_mesh->numBFaces() ); iFacet< M_mesh->numFaces();
+            ++iFacet )
     {
-        const UInt iElAd1 ( M_mesh->face( iFace ).firstAdjacentElementIdentity()  );
-        const UInt iElAd2 ( M_mesh->face( iFace ).secondAdjacentElementIdentity() );
+        const UInt iElAd1 ( M_mesh->facet( iFacet ).firstAdjacentElementIdentity()  );
+        const UInt iElAd2 ( M_mesh->facet( iFacet ).secondAdjacentElementIdentity() );
 
         if ( Flag::testOneSet( M_mesh->face( iFace ).flag(),
                                EntityFlags::SUBDOMAIN_INTERFACE | EntityFlags::PHYSICAL_BOUNDARY ) )
@@ -292,16 +293,16 @@ void StabilizationIP<MeshType, DofType>::apply( MatrixType& matrix,  const Vecto
         chronoUpdate.start();
         // update current finite elements
 #if WITH_DIVERGENCE
-        M_feBd->updateMeas( M_mesh->face( iFace ) );
+        M_feBd->updateMeas( M_mesh->facet( iFacet ) );
 #else
-        M_feBd->updateMeasNormal( M_mesh->face( iFace ) );
+        M_feBd->updateMeasNormal( M_mesh->facet( iFacet ) );
         KNM<Real>& normal = M_feBd->normal;
 #endif
         const Real hK2 = M_feBd->measure();
 
 
-        M_feOnSide1->updateFirstDeriv( M_mesh->volumeList( iElAd1 ) );
-        M_feOnSide2->updateFirstDeriv( M_mesh->volumeList( iElAd2 ) );
+        M_feOnSide1->updateFirstDeriv( M_mesh->element( iElAd1 ) );
+        M_feOnSide2->updateFirstDeriv( M_mesh->element( iElAd2 ) );
         chronoUpdate.stop();
 
         Real bmax(0);
@@ -311,8 +312,8 @@ void StabilizationIP<MeshType, DofType>::apply( MatrixType& matrix,  const Vecto
             // determine bmax = ||\beta||_{0,\infty,K}
             // first, get the local trace of the velocity into beta
 
-            // local id of the face in its adjacent element
-            UInt iFaEl ( M_mesh->face( iFace ).firstAdjacentElementPosition() );
+            // local id of the facet in its adjacent element
+            UInt iFaEl ( M_mesh->facet( iFacet ).firstAdjacentElementPosition() );
             for ( UInt iNode ( 0 ); iNode < M_feBd->nbNode(); ++iNode )
             {
                 UInt iloc ( M_faceToPoint( iFaEl, iNode ) );
@@ -349,50 +350,50 @@ void StabilizationIP<MeshType, DofType>::apply( MatrixType& matrix,  const Vecto
 
             elMatP.zero();
             chronoElemComp.start();
-            // coef*\int_{face} grad u1 . grad v1
+            // coef*\int_{facet} grad u1 . grad v1
             ipstab_grad( coeffPress, elMatP, *M_feOnSide1, *M_feOnSide1, *M_feBd,
-                         nDimensions, nDimensions);
+                         geoDimension, geoDimension);
             chronoElemComp.stop();
             chronoAssembly1.start();
 
             assembleMatrix(matrix, elMatP, *M_feOnSide1, *M_dof,
-                           nDimensions, nDimensions, nDimensions*nDof, nDimensions*nDof);
+                           geoDimension, geoDimension, geoDimension*nDof, geoDimension*nDof);
             chronoAssembly1.stop();
 
             elMatP.zero();
             chronoElemComp.start();
             // coef*\int_{face} grad u2 . grad v2
             ipstab_grad( coeffPress, elMatP, *M_feOnSide2, *M_feOnSide2, *M_feBd,
-                         nDimensions, nDimensions);
+                         geoDimension, geoDimension);
             chronoElemComp.stop();
             chronoAssembly2.start();
 
             assembleMatrix(matrix, elMatP, *M_feOnSide2, *M_dof,
-                           nDimensions, nDimensions, nDimensions*nDof, nDimensions*nDof);
+                           geoDimension, geoDimension, geoDimension*nDof, geoDimension*nDof);
             chronoAssembly2.stop();
 
             elMatP.zero();
             chronoElemComp.start();
             // - coef*\int_{face} grad u1 . grad v2
             ipstab_grad(- coeffPress, elMatP, *M_feOnSide1, *M_feOnSide2, *M_feBd,
-                        nDimensions, nDimensions);
+                        geoDimension, geoDimension);
             chronoElemComp.stop();
             chronoAssembly3.start();
 
             assembleMatrix(matrix, elMatP, *M_feOnSide1, *M_feOnSide2, *M_dof, *M_dof,
-                           nDimensions, nDimensions, nDimensions*nDof, nDimensions*nDof);
+                           geoDimension, geoDimension, geoDimension*nDof, geoDimension*nDof);
             chronoAssembly3.stop();
 
             elMatP.zero();
             chronoElemComp.start();
             // - coef*\int_{face} grad u2 . grad v1
             ipstab_grad(- coeffPress, elMatP, *M_feOnSide2, *M_feOnSide1, *M_feBd,
-                        nDimensions, nDimensions);
+                        geoDimension, geoDimension);
             chronoElemComp.stop();
             chronoAssembly4.start();
 
             assembleMatrix(matrix, elMatP, *M_feOnSide2, *M_feOnSide1, *M_dof, *M_dof,
-                           nDimensions, nDimensions, nDimensions*nDof, nDimensions*nDof);
+                           geoDimension, geoDimension, geoDimension*nDof, geoDimension*nDof);
             chronoAssembly4.stop();
         }
 
@@ -439,18 +440,18 @@ void StabilizationIP<MeshType, DofType>::apply( MatrixType& matrix,  const Vecto
 #if WITH_DIVERGENCE
             // coef*\int_{face} (\beta1 . grad u1) (\beta2 . grad v2)
             ipstab_bgrad( coeffBeta, elMatU, *M_feOnSide1, *M_feOnSide1, beta,
-                          *M_feBd, 0, 0, nDimensions );
+                          *M_feBd, 0, 0, geoDimension );
             // coef*\int_{face} div u1 . div v1
             ipstab_div( coeffDiv, elMatU, *M_feOnSide1, *M_feOnSide1, *M_feBd );
 #else
             // coef*\int_{face} grad u1 . grad v1
             ipstab_grad( coeffGrad, elMatU, *M_feOnSide1, *M_feOnSide1, *M_feBd, 0, 0,
-                         nDimensions );
+                         geoDimension );
 #endif
             chronoElemComp.stop();
             chronoAssembly5.start();
-            for ( UInt iComp ( 0 ); iComp<nDimensions; ++iComp )
-                for ( UInt jComp ( 0 ); jComp<nDimensions; ++jComp )
+            for ( UInt iComp ( 0 ); iComp<geoDimension; ++iComp )
+                for ( UInt jComp ( 0 ); jComp<geoDimension; ++jComp )
                 {
                     assembleMatrix( matrix, elMatU, *M_feOnSide1, *M_dof,
                                     iComp, jComp, iComp*nDof, jComp*nDof );
@@ -462,18 +463,18 @@ void StabilizationIP<MeshType, DofType>::apply( MatrixType& matrix,  const Vecto
 #if WITH_DIVERGENCE
             // coef*\int_{face} (\beta2 . grad u2) (\beta2 . grad v2)
             ipstab_bgrad( coeffBeta, elMatU, *M_feOnSide2, *M_feOnSide2, beta,
-                          *M_feBd, 0, 0, nDimensions );
+                          *M_feBd, 0, 0, geoDimension );
             // coef*\int_{face} div u2 . div v2
             ipstab_div( coeffDiv, elMatU, *M_feOnSide2, *M_feOnSide2, *M_feBd );
 #else
             // coef*\int_{face} grad u2 . grad v2
             ipstab_grad( coeffGrad, elMatU, *M_feOnSide2, *M_feOnSide2, *M_feBd, 0, 0,
-                         nDimensions );
+                         geoDimension );
 #endif
             chronoElemComp.stop();
             chronoAssembly6.start();
-            for ( UInt iComp ( 0 ); iComp<nDimensions; ++iComp )
-                for ( UInt jComp ( 0 ); jComp<nDimensions; ++jComp )
+            for ( UInt iComp ( 0 ); iComp<geoDimension; ++iComp )
+                for ( UInt jComp ( 0 ); jComp<geoDimension; ++jComp )
                 {
                     assembleMatrix( matrix, elMatU, *M_feOnSide2, *M_dof,
                                     iComp, jComp, iComp*nDof, jComp*nDof );
@@ -485,18 +486,18 @@ void StabilizationIP<MeshType, DofType>::apply( MatrixType& matrix,  const Vecto
 #if WITH_DIVERGENCE
             // - coef*\int_{face} (\beta1 . grad u1) (\beta2 . grad v2)
             ipstab_bgrad( -coeffBeta, elMatU, *M_feOnSide1, *M_feOnSide2, beta,
-                          *M_feBd, 0, 0, nDimensions );
+                          *M_feBd, 0, 0, geoDimension );
             // - coef*\int_{face} div u1 . div v2
             ipstab_div( -coeffDiv, elMatU, *M_feOnSide1, *M_feOnSide2, *M_feBd );
 #else
             // - coef*\int_{face} grad u1 . grad v2
             ipstab_grad( -coeffGrad, elMatU, *M_feOnSide1, *M_feOnSide2, *M_feBd, 0, 0,
-                         nDimensions );
+                         geoDimension );
 #endif
             chronoElemComp.stop();
             chronoAssembly7.start();
-            for ( UInt iComp = 0; iComp<nDimensions; ++iComp )
-                for ( UInt jComp = 0; jComp<nDimensions; ++jComp )
+            for ( UInt iComp = 0; iComp<geoDimension; ++iComp )
+                for ( UInt jComp = 0; jComp<geoDimension; ++jComp )
                 {
                     assembleMatrix( matrix, elMatU, *M_feOnSide1, *M_feOnSide2, *M_dof, *M_dof,
                                     iComp, jComp, iComp*nDof, jComp*nDof );
@@ -508,18 +509,18 @@ void StabilizationIP<MeshType, DofType>::apply( MatrixType& matrix,  const Vecto
 #if WITH_DIVERGENCE
             // - coef*\int_{face} (\beta2 . grad u2) (\beta1 . grad v1)
             ipstab_bgrad( -coeffBeta, elMatU, *M_feOnSide2, *M_feOnSide1, beta,
-                          *M_feBd, 0, 0, nDimensions );
+                          *M_feBd, 0, 0, geoDimension );
             // - coef*\int_{face} div u2 . div v1
             ipstab_div( -coeffDiv, elMatU, *M_feOnSide2, *M_feOnSide1, *M_feBd );
 #else
             // - coef*\int_{face} grad u2 . grad v1
             ipstab_grad( -coeffGrad, elMatU, *M_feOnSide2, *M_feOnSide1, *M_feBd, 0, 0,
-                         nDimensions );
+                         geoDimension );
 #endif
             chronoElemComp.stop();
             chronoAssembly8.start();
-            for ( UInt iComp ( 0 ); iComp<nDimensions; ++iComp )
-                for ( UInt jComp ( 0 ); jComp<nDimensions; ++jComp )
+            for ( UInt iComp ( 0 ); iComp<geoDimension; ++iComp )
+                for ( UInt jComp ( 0 ); jComp<geoDimension; ++jComp )
                 {
                     assembleMatrix( matrix, elMatU, *M_feOnSide2, *M_feOnSide1, *M_dof, *M_dof,
                                     iComp, jComp, iComp*nDof, jComp*nDof );
