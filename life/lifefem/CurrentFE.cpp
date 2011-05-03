@@ -936,11 +936,11 @@ void CurrentFE::computeTInverseJacobian()
 
             Real det ( a*d - b*c );
 
-            M_tInverseJacobian[0][0][iterQuad] = ( a ) / det ;
-            M_tInverseJacobian[0][1][iterQuad] = ( -b ) / det ;
+            M_tInverseJacobian[0][0][iterQuad] = d / det ;
+            M_tInverseJacobian[0][1][iterQuad] = -c / det ;
 
-            M_tInverseJacobian[1][0][iterQuad] = ( -c ) / det ;
-            M_tInverseJacobian[1][1][iterQuad] = ( d ) / det ;
+            M_tInverseJacobian[1][0][iterQuad] =  -b / det ;
+            M_tInverseJacobian[1][1][iterQuad] =  a / det ;
 
             break;
         }
@@ -1007,8 +1007,8 @@ void CurrentFE::computeDetJacobian()
         {
             Real a ( M_jacobian[0][0][iterQuad] );
             Real b ( M_jacobian[0][1][iterQuad] );
-            Real c ( M_jacobian[0][2][iterQuad] );
-            Real d ( M_jacobian[1][0][iterQuad] );
+            Real c ( M_jacobian[1][0][iterQuad] );
+            Real d ( M_jacobian[1][1][iterQuad] );
 
             Real det( a*d-b*c);
             M_detJacobian[iterQuad]= det;
