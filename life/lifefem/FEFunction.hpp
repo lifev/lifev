@@ -52,17 +52,18 @@ namespace LifeV
   scalar and vector.
   <br>
   <br>
-  The access operator (), which is abstract and virtual, is the manipulator of the fields.
+  The method eval, which is abstract and virtual, is the manipulator of the fields.
   <br>
   For example the scalar function \f$ f \f$ is a function of the scalar field \f$ S \f$ and the vector 
   field \f$ u \f$, that is \f$ f = f(S, u)\f$. And, for example, the function \f$ f \f$ is
   \f[
 	f(S, u) = S^2 + \sin( u_0 )
   \f]
-  then create a new class MyFun which inherit from FEScalarFct where the access operator (), using the methods scalarField and vectorField, can be written as
+  then create a new class MyFun which inherit from FEFct<MeshType, MapType, Real> where the eval method, 
+  using the methods scalarField and vectorField, can be written as
   @code
-  const Real S = scalarField(0)( iElem, point, time );
-  const Vector u = vectorField(0)( iElem, point, time );
+  const Real S = scalarField(0).eval( iElem, point, time );
+  const Vector u = vectorField(0).eval( iElem, point, time );
   return std::pow(S, 2) + std::sin( u[0] );
   @endcode
   Partial specialization of the type returned by the access operator is scalar, vector and matrix, implemented
@@ -75,7 +76,7 @@ namespace LifeV
 
   @todo Add a method without the element id, less efficient but more flexible.
 */
-template < typename Mesh, typename Map, typename FunctionType >
+template < typename MeshType, typename MapType, typename ReturnType >
 class FEFct
 {
 public:
@@ -83,38 +84,53 @@ public:
     //! @name Public Types
     //@{
 
-    typedef FEScalarField<Mesh, Map> FEScalarField_Type;
-    typedef FEVectorField<Mesh, Map> FEVectorField_Type;
+    typedef MeshType mesh_Type;
+    typedef MapType map_Type;
+    typedef ReturnType return_Type;
 
-    typedef typename boost::shared_ptr<FEScalarField_Type> FEScalarFieldPtr_Type;
-    typedef typename boost::shared_ptr<FEVectorField_Type> FEVectorFieldPtr_Type;
+    typedef FEField < mesh_Type, map_Type, return_Type > FEField_Type;
+    typedef FEScalarField < mesh_Type, map_Type > FEScalarField_Type;
+    typedef FEVectorField < mesh_Type, map_Type > FEVectorField_Type;
 
-    typedef typename std::vector<FEScalarFieldPtr_Type> FEScalarFieldPtrContainer_Type;
-    typedef typename std::vector<FEVectorFieldPtr_Type> FEVectorFieldPtrContainer_Type;
+    typedef typename boost::shared_ptr < FEField_Type > FEFieldPtr_Type;
+    typedef typename boost::shared_ptr < FEScalarField_Type > FEScalarFieldPtr_Type;
+    typedef typename boost::shared_ptr < FEVectorField_Type > FEVectorFieldPtr_Type;
 
-    typedef typename FEScalarField_Type::point_Type point_Type;
+    typedef typename std::vector < FEScalarFieldPtr_Type > FEScalarFieldPtrContainer_Type;
+    typedef typename std::vector < FEVectorFieldPtr_Type > FEVectorFieldPtrContainer_Type;
 
-    //@}
-
-    //! @name Opertors
-    //@{
-
-    //! Abstract virtual access opertor.
-    /*!
-      In the case of derived and specialized classes it evaluates the function on a given point 
-      in a given element
-      @param iElem Element id in the mesh.
-      @param point Point where the field is evaluated, vector format.
-      @return The type template of value of the function.
-    */
-    virtual FunctionType operator() ( const UInt& iElem, 
-                                      const point_Type& P, 
-                                      const Real& time = 0. ) const = 0;
+    typedef typename FEField_Type::point_Type point_Type;
 
     //@}
 
     //! @name Methods
     //@{
+
+    //! Abstract virtual eval function.
+    /*!
+      In the case of derived and specialized classes it evaluates the function on a given point 
+      in a given element
+      @param iElem Element id in the mesh.
+      @param point Point where the field is evaluated, vector format.
+      @param time Time in the evaluation.
+      @return The type template of value of the function.
+    */
+    virtual return_Type eval ( const UInt& iElem, 
+                               const point_Type& P, 
+                               const Real& time = 0. ) const = 0;
+
+    //! Interpolate to a field
+    /*!
+      Fill the input field with the value of the function. Useful for exporting pourpose.
+      @param interpolatedFct Field where the function is interpolated.
+      @param time Time in the evaluation.
+      @note The method does not work for matrix value functions.
+    */
+    inline void interpolate ( FEField_Type& interpolatedFct,
+                              const Real& time = 0. ) const
+    {
+        interpolatedFct.getFESpace().interpolate( this, interpolatedFct.getVector(), time );
+    }
 
     //! Add an external scalar field to the function.
     /*!
@@ -142,6 +158,28 @@ public:
     //! Return the i-th scalar field.
     /*!
       @param i Index of the scalar field.
+      @return Constant FEScalarFieldPtr_Type reference stored of index i.
+    */
+    inline const FEScalarFieldPtr_Type& scalarFieldPtr ( const UInt& i ) const
+    {
+        ASSERT ( i < M_scalarFields.size() , "Index out of range.");
+        return M_scalarFields[ i ];
+    }
+
+    //! Return the i-th scalar field.
+    /*!
+      @param i Index of the scalar field.
+      @return FEScalarFieldPtr_Type reference stored of index i.
+    */
+    inline FEScalarFieldPtr_Type& scalarFieldPtr ( const UInt& i )
+    {
+        ASSERT ( i < M_scalarFields.size() , "Index out of range.");
+        return M_scalarFields[ i ];
+    }
+
+    //! Return the i-th scalar field.
+    /*!
+      @param i Index of the scalar field.
       @return Constant FEScalarField_Type reference stored of index i.
     */
     inline const FEScalarField_Type& scalarField ( const UInt& i ) const
@@ -159,6 +197,28 @@ public:
     {
         ASSERT ( i < M_scalarFields.size() , "Index out of range.");
         return *( M_scalarFields[ i ] );
+    }
+
+    //! Return the i-th vector field.
+    /*!
+      @param i Index of the vector field.
+      @return Constant FEVectorFieldPtr_Type reference stored of index i.
+    */
+    inline const FEVectorFieldPtr_Type& vectorFieldPtr ( const UInt& i ) const
+    {
+        ASSERT ( i < M_vectorFields.size() , "Index out of range.");
+        return M_vectorFields[ i ];
+    }
+
+    //! Return the i-th vector field.
+    /*!
+      @param i Index of the vector field.
+      @return FEVectorFieldPtr_Type reference stored of index i.
+    */
+    inline FEVectorFieldPtr_Type& vectorFieldPtr ( const UInt& i )
+    {
+        ASSERT ( i < M_vectorFields.size() , "Index out of range.");
+        return M_vectorFields[ i ];
     }
 
     //! Return the i-th vector field.
@@ -182,7 +242,7 @@ public:
         ASSERT ( i < M_vectorFields.size() , "Index out of range.");
         return *( M_vectorFields[ i ] );
     }
-   
+
     //@}
 
 private:
@@ -193,69 +253,6 @@ private:
     //! Vector of pointers of vector fields.
     FEVectorFieldPtrContainer_Type M_vectorFields;
 
-};
-
-//! FEScalarFct - This class gives an abstract implementation of a scalar finite element function on finite elements fields.
-/*!
-  @author A. Fumagalli <alessio.fumagalli@mail.polimi.it>
-  @author M. Kern <michel.kern@inria.fr>
-
-  Template partial specialization of the class FEFct for the scalar type functions.
-*/
-template < typename Mesh, typename Map >
-class FEScalarFct :
-public FEFct < Mesh, Map, Real >
-{
-public:
-
-    //! @name Public Types
-    //@{
-
-    typedef typename FEFct < Mesh, Map, Real >::point_Type point_Type;
-
-    //@}
-};
-
-//! FEVectorFct - This class gives an abstract implementation of a vector finite element function on finite elements fields.
-/*!
-  @author A. Fumagalli <alessio.fumagalli@mail.polimi.it>
-  @author M. Kern <michel.kern@inria.fr>
-
-  Template partial specialization of the class FEFct for the vector type functions.
-*/
-template < typename Mesh, typename Map >
-class FEVectorFct :
-public FEFct < Mesh, Map, Vector >
-{
-public:
-
-    //! @name Public Types
-    //@{
-
-    typedef typename FEFct < Mesh, Map, Vector >::point_Type point_Type;
-
-    //@}
-};
-
-//! FEMatrixFct - This class gives an abstract implementation of a matrix finite element function on finite elements fields.
-/*!
-  @author A. Fumagalli <alessio.fumagalli@mail.polimi.it>
-  @author M. Kern <michel.kern@inria.fr>
-
-  Template partial specialization of the class FEFct for the matrix type functions.
-*/
-template < typename Mesh, typename Map >
-class FEMatrixFct :
-public FEFct < Mesh, Map, Matrix >
-{
-public:
-
-    //! @name Public Types
-    //@{
-
-    typedef typename FEFct < Mesh, Map, Matrix >::point_Type point_Type;
-
-    //@}
 };
 
 } // namespace LifeV

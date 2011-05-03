@@ -71,7 +71,7 @@ typedef boost::numeric::ublas::matrix<Real> Matrix;
 
   @todo Add a method without the element id, less efficient but more flexible.
 */
-template < typename Mesh, typename Map, typename FunctionType >
+template < typename MeshType, typename MapType, typename ReturnType >
 class FEField
 {
 
@@ -80,7 +80,11 @@ public:
     //! @name Public Types
     //@{
 
-    typedef FESpace < Mesh, Map > FESpace_Type;
+    typedef MeshType mesh_Type;
+    typedef MapType map_Type;
+    typedef ReturnType return_Type;
+
+    typedef FESpace < mesh_Type, map_Type > FESpace_Type;
 
     typedef VectorEpetra vector_Type;
     typedef boost::shared_ptr < vector_Type > vectorPtr_Type;
@@ -128,19 +132,19 @@ public:
 
     //@}
 
-    //! @name Opertors
+    //! @name Methods
     //@{
 
-    //! Abstract virtual access opertor.
+    //! Abstract virtual eval function.
     /*!
       Evaluate the field on a given point in a given element.
       @param iElem Element id in the mesh.
       @param point Point where the field is evaluated, vector format.
       @return The template type of the value of the field.
     */
-    virtual FunctionType operator() ( const UInt& iElem, 
-                                      const point_Type& point, 
-                                      const Real& time = 0.) const = 0;
+    virtual return_Type eval ( const UInt& iElem, 
+                               const point_Type& point, 
+                               const Real& time = 0.) const = 0;
 
     //@}    
 
@@ -169,7 +173,7 @@ public:
     /*!
       @return Constant vectorPtr_Type reference of the vector.
     */
-    inline const vectorPtr_Type& getVector () const
+    inline const vectorPtr_Type& getVectorPtr () const
     {
         return M_vector;
     }
@@ -178,9 +182,27 @@ public:
     /*!
       @return vectorPtr_Type reference of the vector.
     */
-    inline vectorPtr_Type& getVector ()
+    inline vectorPtr_Type& getVectorPtr ()
     {
         return M_vector;
+    }
+
+    //! Return the vector where the value are stored.
+    /*!
+      @return Constant vector_Type reference of the vector.
+    */
+    inline const vector_Type& getVector () const
+    {
+        return *M_vector;
+    }
+
+    //! Return the vector where the value are stored.
+    /*!
+      @return vector_Type reference of the vector.
+    */
+    inline vector_Type& getVector ()
+    {
+        return *M_vector;
     }
 
     //@}
@@ -203,16 +225,20 @@ protected:
   This class, derived from FEField, implements the concept of a scalar field associated to a 
   finite element space.
 */
-template < typename Mesh, typename Map >
+template < typename MeshType, typename MapType >
 class FEScalarField :
-public FEField < Mesh, Map, Real >
+public FEField < MeshType, MapType, Real >
 {
 public:
 
     //! @name Public Types
     //@{
 
-    typedef FEField < Mesh, Map, Real > FEField_Type;
+    typedef MeshType mesh_Type;
+    typedef MapType map_Type;
+    typedef Real return_Type;
+
+    typedef FEField < mesh_Type, map_Type, return_Type > FEField_Type;
 
     typedef typename FEField_Type::FESpace_Type FESpace_Type;
     typedef typename FEField_Type::vectorPtr_Type vectorPtr_Type;
@@ -257,19 +283,19 @@ public:
 
     //@}
 
-    //! @name Opertors
+    //! @name Methods
     //@{
 
-    //! Access opertor.
+    //! Eval function.
     /*!
       Evaluate the field on a given point in a given element.
       @param iElem Element id in the mesh.
       @param point Point where the field is evaluated, vector format.
       @return The scalar value of the field.
     */
-    inline virtual Real operator() ( const UInt& iElem, 
-                                     const point_Type& P, 
-                                     const Real& time = 0. ) const
+    inline virtual return_Type eval ( const UInt& iElem, 
+                                      const point_Type& P, 
+                                      const Real& time = 0. ) const
     {
         // Evaluate the field using a method implemented in FESpace
         return this->M_FESpace.feInterpolateValue( iElem, *(this->M_vector), P );
@@ -287,9 +313,9 @@ public:
   This class, derived from FEField, implements the concept of a vector field associated to a 
   finite element space.
 */
-template < typename Mesh, typename Map >
+template < typename MeshType, typename MapType >
 class FEVectorField :
-public FEField < Mesh, Map, Vector >
+public FEField < MeshType, MapType, Vector >
 {
 
 public:
@@ -297,7 +323,11 @@ public:
     //! @name Public Types
     //@{
 
-    typedef FEField < Mesh, Map, Vector > FEField_Type;
+    typedef MeshType mesh_Type;
+    typedef MapType map_Type;
+    typedef Vector return_Type;
+
+    typedef FEField < mesh_Type, map_Type, return_Type > FEField_Type;
 
     typedef typename FEField_Type::FESpace_Type FESpace_Type;
     typedef typename FEField_Type::vectorPtr_Type vectorPtr_Type;
@@ -345,16 +375,16 @@ public:
     //! @name Opertors
     //@{
 
-    //! Access opertor.
+    //! Eval function.
     /*!
       Evaluate the field on a given point in a given element.
       @param iElem Element id in the mesh.
       @param point Point where the field is evaluated, vector format.
       @return The vector value of the field.
     */
-    inline virtual Vector operator() ( const UInt& iElem, 
-                                       const point_Type& P, 
-                                       const Real& time = 0. ) const
+    inline virtual return_Type eval ( const UInt& iElem, 
+                                      const point_Type& P, 
+                                      const Real& time = 0. ) const
     {
         Vector value( P.size() );
         // Evaluate each component of the vector field with a method in the class FESpace.
