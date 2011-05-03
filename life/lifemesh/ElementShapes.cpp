@@ -67,6 +67,23 @@ UInt shapeDimension(const ReferenceShapes& shape)
           IMPLEMENTATION
 *******************************************************************/
 
+
+//! @return the local ID of the j-th point of the i-th edge
+ID
+LinearLine::edgeToPoint( ID const& /*iEdge*/, ID const& jPoint )
+{
+	return jPoint;
+}
+
+//! @return the local ID of the j-th point of the i-th edge
+ID
+QuadraticLine::edgeToPoint( ID const& /*iEdge*/, ID const& jPoint )
+{
+	return jPoint;
+}
+
+
+
 /*
           -- LinearTriangle
                 3
@@ -89,6 +106,18 @@ LinearTriangle::edgeToPoint( ID const& iEdge, ID const& jPoint )
     ASSERT_BD( jPoint < 2 ) ;
     ASSERT_BD( iEdge < S_numEdges ) ;
     return _edgeToPoint[ 2 * iEdge + jPoint ] - 1;
+}
+
+ID
+LinearTriangle::faceToPoint( ID const& /*iFace*/, ID const& jPoint )
+{
+	return jPoint;
+}
+
+std::pair<ID, bool>
+LinearTriangle::faceToEdge( ID const& /*iFace*/, ID const& jEdge )
+{
+    return std::make_pair( jEdge, true );
 }
 
 
@@ -115,6 +144,18 @@ QuadraticTriangle::edgeToPoint( ID const& iEdge, ID const& jPoint )
     return _edgeToPoint[ 3 * iEdge + jPoint ] - 1;
 }
 
+ID
+QuadraticTriangle::faceToPoint( ID const& /*iFace*/, ID const& jPoint )
+{
+	return jPoint;
+}
+
+std::pair<ID, bool>
+QuadraticTriangle::faceToEdge( ID const& /*iFace*/, ID const& jEdge )
+{
+    return std::make_pair( jEdge, true );
+}
+
 
 /*
           -- LinearQuad
@@ -138,6 +179,19 @@ LinearQuad::edgeToPoint( ID const& iEdge, ID const& jPoint )
     ASSERT_BD( iEdge < S_numEdges ) ;
     return _edgeToPoint[ 2 * iEdge + jPoint] - 1;
 }
+
+ID
+LinearQuad::faceToPoint( ID const& /*iFace*/, ID const& jPoint )
+{
+	return jPoint;
+}
+
+std::pair<ID, bool>
+LinearQuad::faceToEdge( ID const& /*iFace*/, ID const& jEdge )
+{
+    return std::make_pair( jEdge, true );
+}
+
 
 
 /*
@@ -163,6 +217,17 @@ QuadraticQuad::edgeToPoint( ID const& iEdge, ID const& jPoint )
     return _edgeToPoint[ 3 * iEdge + jPoint ] - 1;
 }
 
+ID
+QuadraticQuad::faceToPoint( ID const& /*iFace*/, ID const& jPoint )
+{
+	return jPoint;
+}
+
+std::pair<ID, bool>
+QuadraticQuad::faceToEdge( ID const& /*iFace*/, ID const& jEdge )
+{
+    return std::make_pair( jEdge, true );
+}
 
 /*
           -- LinearTetra
@@ -223,68 +288,6 @@ LinearTetra::faceToEdge( ID const& iFace, ID const& jEdge )
     return std::make_pair( _faceToEdge[ 3 * iFace + jEdge ] - 1, _orient[ 3 * iFace + jEdge ] );
 }
 
-
-///////////////////////
-
-/*
-          -- LinearTetraBubble
-
-                4
-               / .
-              /  \.3
-             /  . \\
-            / . .5 \\
-           /.       \!
-         1 ----------2
-
-
-*/
-ID
-LinearTetraBubble::edgeToPoint( ID const& iEdge, ID const& jPoint )
-// edgeToPoint(i,j) = localId of jth point on ith local edge
-{
-    static const ID _edgeToPoint[ 2 * S_numEdges ] =
-    {
-        1, 2, 2, 3, 3, 1, 1, 4, 2, 4, 3, 4
-    };
-    ASSERT_BD( jPoint < 2 ) ;
-    ASSERT_BD( iEdge < S_numEdges ) ;
-    return _edgeToPoint[ 2 * iEdge + jPoint ] - 1;
-}
-
-ID
-LinearTetraBubble::faceToPoint( ID const& iFace, ID const& jPoint )
-// faceToPoint(i,j) = localId of jth point on ith local face
-{
-    static const ID _faceToPoint[ 3 * S_numFaces ] =
-    {
-        1, 3, 2, 1, 2, 4, 2, 3, 4, 1, 4, 3
-    }
-    ; // AV - November 2000: fixed a little bug
-    //  {1,3,2, 1,2,4, 2,3,4, 3,1,4};
-    ASSERT_BD( jPoint < 3 ) ;
-    ASSERT_BD( iFace < S_numFaces ) ;
-    return _faceToPoint[ 3 * iFace + jPoint ] - 1;
-}
-
-std::pair<ID, bool>
-LinearTetraBubble::faceToEdge( ID const& iFace, ID const& jEdge )
-// faceToEdge(i,j) = localId of jth edge on ith local face
-{
-    static const ID _faceToEdge[ 3 * S_numFaces ] =
-    {
-        3, 2, 1, 1, 5, 4, 2, 6, 5, 4, 6, 3
-    };
-    static const bool _orient[ 3 * S_numFaces ] =
-    {
-        0, 0, 0, 1, 1, 0, 1, 1, 0, 1, 0, 1
-    };
-
-    ASSERT_BD( jEdge < 3 ) ;
-    ASSERT_BD( iFace < S_numFaces ) ;
-
-    return std::make_pair( _faceToEdge[ 3 * iFace + jEdge ] - 1, _orient[ 3 * iFace + jEdge ] );
-}
 
 
 ///////////////////////

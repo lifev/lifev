@@ -136,6 +136,9 @@ public:
     static const UInt S_numFaces              = 0;     //!< Number of faces
     static const UInt S_numEdges              = 0;     //!< Number of edges
     static const UInt S_numVertices           = 1;     //!< Number of vertices.
+    static const UInt S_numFacets             = 0;     //!< Number of facets
+    static const UInt S_numRidges             = 0;     //!< Number of ridges
+    static const UInt S_numPeaks	          = 0;     //!< Number of peaks
 };
 
 
@@ -149,6 +152,9 @@ public:
     static const UInt S_numFaces = 0;                //!< Number of faces
     static const UInt S_numEdges = 1;                //!< Number of edges
     static const UInt S_numVertices = 2;             //!< Number of vertices.
+    static const UInt S_numFacets = S_numVertices;   //!< Number of facets
+    static const UInt S_numRidges = 0;     		     //!< Number of ridges
+    static const UInt S_numPeaks = 0;     		     //!< Number of peaks
 };
 
 
@@ -160,8 +166,11 @@ public:
     static const ReferenceGeometry S_geometry = FACE;//!< Identify the geometric entity
     static const UInt S_nDimensions = 2;             //!< Dimensionality
     static const UInt S_numVertices = 3;             //!< Number of vertices.
+    static const UInt S_numEdges = 3;    //!< Number of edges
     static const UInt S_numFaces = 1;                //!< Number of faces
-    static const UInt S_numEdges = S_numVertices;    //!< Number of edges
+    static const UInt S_numFacets = S_numEdges;      //!< Number of facets
+    static const UInt S_numRidges = S_numVertices;   //!< Number of ridges
+    static const UInt S_numPeaks = 0;     		     //!< Number of peaks
 };
 
 
@@ -174,7 +183,10 @@ public:
     static const UInt S_nDimensions = 2;             //!< Dimensionality
     static const UInt S_numFaces = 1;                //!< Number of faces
     static const UInt S_numVertices = 4;             //!< Number of vertices.
-    static const UInt S_numEdges = S_numVertices;    //!< Number of edges
+    static const UInt S_numEdges = 4;    			 //!< Number of edges
+    static const UInt S_numFacets = S_numEdges;      //!< Number of facets
+    static const UInt S_numRidges = S_numVertices;   //!< Number of ridges
+    static const UInt S_numPeaks = 0;     		     //!< Number of peaks
 };
 
 
@@ -188,6 +200,9 @@ public:
     static const UInt S_numVertices = 4;                      //!< Number of vertices.
     static const UInt S_numFaces = 4;                         //!< Number of faces
     static const UInt S_numEdges = S_numFaces + S_numVertices - 2;//!< Number of edges
+    static const UInt S_numFacets = S_numFaces;  			 //!< Number of facets
+    static const UInt S_numRidges = S_numEdges;  			 //!< Number of ridges
+    static const UInt S_numPeaks = S_numVertices;     		     		 //!< Number of peaks
 };
 
 
@@ -201,6 +216,9 @@ public:
     static const UInt S_numFaces = 6;                         //!< Number of faces
     static const UInt S_numVertices = 8;                      //!< Number of vertices.
     static const UInt S_numEdges = S_numFaces + S_numVertices - 2;//!< Number of edges
+    static const UInt S_numFacets = S_numFaces;  			 //!< Number of facets
+    static const UInt S_numRidges = S_numEdges;  			 //!< Number of ridges
+    static const UInt S_numPeaks = S_numVertices;     		     		 //!< Number of peaks
 };
 
 
@@ -235,6 +253,11 @@ public:
     typedef Point BasRefSha;
     //@}
     static const UInt S_numPoints = 1; //!< Number of points
+    static const UInt S_numPointsPerElement = 1;   //!< Number of points per element
+    static const UInt S_numPointsPerFacet = 0;   //!< Number of points per facet
+    static const UInt S_numPointsPerRidge = 0;   //!< Number of points per ridge
+    static const UInt S_numPointsPerPeak = 0;   //!< Number of points per peak
+
 };
 
 
@@ -250,8 +273,19 @@ public:
     typedef GeoPoint GeoBShape;             //!< Geometric shape of the boundary
     //@}
     static const UInt S_numPoints = 2;      //!< Number of points
-    static const UInt S_numPointsPerVertex = 1; //!< Number of points per vertex
     static const UInt S_numPointsPerEdge = 0;   //!< Number of points per edge
+    static const UInt S_numPointsPerVertex = 1; //!< Number of points per vertex
+    static const UInt S_numPointsPerElement = S_numPointsPerEdge;   //!< Number of points per element
+    static const UInt S_numPointsPerFacet = S_numPointsPerVertex;   //!< Number of points per facet
+    static const UInt S_numPointsPerRidge = 0;   //!< Number of points per ridge
+    static const UInt S_numPointsPerPeak = 0;   //!< Number of points per peak
+
+    //! @return the local ID of the j-th point of the i-th edge
+    static ID edgeToPoint( ID const& iEdge, ID const& jPoint );
+    inline static ID facetToRidge( ID const& /*iFacet*/, ID const& /*jRidge*/ )
+    	{return ID();}
+	inline static ID facetToPeak( ID const& /*iFacet*/, ID const& /*jPeak*/ )
+		{return ID();}
 };
 template <>
 inline ID reversePoint<LinearLine>( ID const & pointId ){
@@ -272,8 +306,19 @@ public:
     typedef GeoPoint GeoBShape;             //!< Geometric shape of the boundary
     //@}
     static const UInt S_numPoints = 3;      //!< Number of points
-    static const UInt S_numPointsPerVertex = 1; //!< Number of points per vertex
     static const UInt S_numPointsPerEdge = 1;   //!< Number of points per edge
+    static const UInt S_numPointsPerVertex = 1; //!< Number of points per vertex
+    static const UInt S_numPointsPerElement = S_numPointsPerEdge;   //!< Number of points per element
+    static const UInt S_numPointsPerFacet = S_numPointsPerVertex;   //!< Number of points per facet
+    static const UInt S_numPointsPerRidge = 0;   //!< Number of points per ridge
+    static const UInt S_numPointsPerPeak = 0;   //!< Number of points per peak
+
+    //! @return the local ID of the j-th point of the i-th edge
+    static ID edgeToPoint( ID const& iEdge, ID const& jPoint );
+    inline static ID facetToRidge( ID const& /*iFacet*/, ID const& /*jRidge*/ )
+    	{return ID();}
+	inline static ID facetToPeak( ID const& /*iFacet*/, ID const& /*jPeak*/ )
+		{return ID();}
 };
 template <>
 inline ID reversePoint<QuadraticLine>( ID const & pointId ){
@@ -297,8 +342,23 @@ public:
     static const UInt S_numPointsPerVertex = 1; //!< Number of points per vertex
     static const UInt S_numPointsPerEdge = 0;   //!< Number of points per edge
     static const UInt S_numPointsPerFace = 0;   //!< Number of points per face
+    static const UInt S_numPointsPerElement = S_numPointsPerFace;  //!< Number of points per element
+    static const UInt S_numPointsPerFacet = S_numPointsPerEdge;  //!< Number of points per facet
+    static const UInt S_numPointsPerRidge = S_numPointsPerVertex; ;   //!< Number of points per ridge
+    static const UInt S_numPointsPerPeak = 0;   //!< Number of points per peak
+
     //! @return the local ID of the j-th point of the i-th edge
     static ID edgeToPoint( ID const& iEdge, ID const& jPoint );
+    //! @return the local ID of the j-th point of the i-th face
+    static ID faceToPoint( ID const& iFace, ID const& jPoint );
+    inline static ID facetToPoint( ID const& iFacet, ID const& jPoint )
+        {return edgeToPoint( iFacet, jPoint );}
+    static std::pair<ID, bool> faceToEdge( ID const& iFace, ID const& jEdge );
+    inline static ID facetToRidge( ID const& iFacet, ID const& jRidge )
+    	{return edgeToPoint(iFacet, jRidge);}
+	inline static ID facetToPeak( ID const& /*iFacet*/, ID const& /*jPeak*/ )
+		{return ID();}
+
 };
 template <>
 inline ID reversePoint<LinearTriangle>( ID const & pointId ){
@@ -322,8 +382,24 @@ public:
     static const UInt S_numPointsPerVertex = 1; //!< Number of points per vertex
     static const UInt S_numPointsPerEdge = 1;   //!< Number of points per edge
     static const UInt S_numPointsPerFace = 0;   //!< Number of points per face
+    static const UInt S_numPointsPerElement = S_numPointsPerFace;  //!< Number of points per element
+    static const UInt S_numPointsPerFacet = S_numPointsPerEdge;  //!< Number of points per facet
+    static const UInt S_numPointsPerRidge = S_numPointsPerVertex; //!< Number of points per ridge
+    static const UInt S_numPointsPerPeak = 0;   //!< Number of points per peak
+
+
     //! @return the local ID of the j-th point of the i-th edge
     static ID edgeToPoint( ID const& iEdge, ID const& jPoint );
+    //! @return the local ID of the j-th point of the i-th face
+    static ID faceToPoint( ID const& iFace, ID const& jPoint );
+    inline static ID facetToPoint( ID const& iFacet, ID const& jPoint )
+        {return edgeToPoint( iFacet, jPoint );}
+    static std::pair<ID, bool> faceToEdge( ID const& iFace, ID const& jEdge );
+    inline static ID facetToRidge( ID const& iFacet, ID const& jRidge )
+		{return edgeToPoint(iFacet, jRidge);}
+	inline static ID facetToPeak( ID const& /*iFacet*/, ID const& /*jPeak*/ )
+		{return ID();}
+
 };
 
 template <>
@@ -348,8 +424,23 @@ public:
     static const UInt S_numPointsPerVertex = 1; //!< Number of points per vertex
     static const UInt S_numPointsPerEdge = 0;   //!< Number of points per edge
     static const UInt S_numPointsPerFace = 0;   //!< Number of points per face
+    static const UInt S_numPointsPerElement = S_numPointsPerFace;  //!< Number of points per element
+    static const UInt S_numPointsPerFacet = S_numPointsPerEdge;  //!< Number of points per facet
+    static const UInt S_numPointsPerRidge = S_numPointsPerVertex;  //!< Number of points per ridge
+    static const UInt S_numPointsPerPeak = 0;   //!< Number of points per peak
+
+
     //! @return the local ID of the j-th point of the i-th edge
     static ID edgeToPoint( ID const& iEdge, ID const& jPoint );
+    //! @return the local ID of the j-th point of the i-th face
+    static ID faceToPoint( ID const& iFace, ID const& jPoint );
+    inline static ID facetToPoint( ID const& iFacet, ID const& jPoint )
+        {return edgeToPoint( iFacet, jPoint );}
+    static std::pair<ID, bool> faceToEdge( ID const& iFace, ID const& jEdge );
+    inline static ID facetToRidge( ID const& iFacet, ID const& jRidge )
+		{return edgeToPoint(iFacet, jRidge);}
+	inline static ID facetToPeak( ID const& /*iFacet*/, ID const& /*jPeak*/ )
+		{return ID();}
 };
 
 //! Specialization
@@ -375,6 +466,11 @@ public:
     static const UInt S_numPointsPerVertex = 1; //!< Number of points per vertex
     static const UInt S_numPointsPerEdge = 1;   //!< Number of points per edge
     static const UInt S_numPointsPerFace = 1;   //!< Number of points per face
+    static const UInt S_numPointsPerElement = S_numPointsPerFace;  //!< Number of points per element
+    static const UInt S_numPointsPerFacet = S_numPointsPerEdge;  //!< Number of points per facet
+    static const UInt S_numPointsPerRidge = S_numPointsPerVertex;   //!< Number of points per ridge
+    static const UInt S_numPointsPerPeak = 0;   //!< Number of points per peak
+
     //! @return the local ID of the j-th point of the i-th edge
     static ID edgeToPoint( ID const& iEdge, ID const& jPoint );
 };
@@ -402,16 +498,25 @@ public:
     static const UInt S_numPointsPerEdge = 0;   //!< Number of points per edge
     static const UInt S_numPointsPerFace = 0;   //!< Number of points per face
     static const UInt S_numPointsPerVolume = 0; //!< Number of points per volume
+    static const UInt S_numPointsPerElement = S_numPointsPerVolume; //!< Number of points per element
+    static const UInt S_numPointsPerFacet =  S_numPointsPerFace; //!< Number of points per facet
+    static const UInt S_numPointsPerRidge = S_numPointsPerEdge;    //!< Number of points per ridge
+    static const UInt S_numPointsPerPeak = S_numPointsPerVertex;   //!< Number of points per peak
+
     //! @return the local ID of the j-th point of the i-th edge
     static ID edgeToPoint( ID const& iEdge, ID const& jPoint );
     //! @return the local ID of the j-th point of the i-th face
     static ID faceToPoint( ID const& iFace, ID const& jPoint );
-    /*!
-        @return a pair: the local numbering of the j-th edge on the i-th face, and
-                true if the orientation of the edge on the face is consistent
-	            with that of the same edge on the element
-     */
+
+    inline static ID facetToPoint( ID const& iFacet, ID const& jPoint )
+    	{return edgeToPoint( iFacet, jPoint );}
+
     static std::pair<ID, bool> faceToEdge( ID const& iFace, ID const& jEdge );
+    inline static ID facetToRidge( ID const& iFacet, ID const& jRidge )
+        {return edgeToPoint(iFacet, jRidge);}
+	inline static ID facetToPeak( ID const& /*iFacet*/, ID const& /*jPeak*/ )
+		{return ID();}
+
 };
 
 //! Specialization
@@ -433,21 +538,33 @@ public:
     typedef Tetra BasRefSha;
     typedef LinearTriangle GeoBShape;
     //@}
-    static const UInt S_numPoints = 5;      //!< Number of points
+    static const UInt S_numPoints = 4;      //!< Number of points
     static const UInt S_numPointsPerVertex = 1; //!< Number of points per vertex
     static const UInt S_numPointsPerEdge = 0;   //!< Number of points per edge
     static const UInt S_numPointsPerFace = 0;   //!< Number of points per face
-    static const UInt S_numPointsPerVolume = 1; //!< Number of points per volume
+    static const UInt S_numPointsPerVolume = 0; //!< Number of points per volume
+    static const UInt S_numPointsPerElement = S_numPointsPerVolume; //!< Number of points per element
+    static const UInt S_numPointsPerFacet =  S_numPointsPerFace; //!< Number of points per facet
+    static const UInt S_numPointsPerRidge = S_numPointsPerEdge;    //!< Number of points per ridge
+    static const UInt S_numPointsPerPeak = S_numPointsPerVertex;   //!< Number of points per peak
+
     //! @return the local ID of the j-th point of the i-th edge
     static ID edgeToPoint( ID const& iEdge, ID const& jPoint );
     //! @return the local ID of the j-th point of the i-th face
     static ID faceToPoint( ID const& iFace, ID const& jPoint );
+
+    inline static ID facetToPoint( ID const& iFacet, ID const& jPoint )
+    	{return faceToPoint( iFacet, jPoint );}
     /*!
         @return a pair: the local numbering of the j-th edge on the i-th face, and
                 true if the orientation of the edge on the face is consistent
 	            with that of the same edge on the element
      */
     static std::pair<ID, bool> faceToEdge( ID const& iFace, ID const& jEdge );
+    inline static ID facetToRidge( ID const& iFacet, ID const& jRidge )
+        {return faceToEdge(iFacet, jRidge).first;}
+    inline static ID facetToPeak( ID const& iFacet, ID const& jPeak )
+    	{return faceToPoint(iFacet, jPeak);}
 };
 
 template <>
@@ -473,10 +590,25 @@ public:
     static const UInt S_numPointsPerEdge = 1;   //!< Number of points per edge
     static const UInt S_numPointsPerFace = 0;   //!< Number of points per face
     static const UInt S_numPointsPerVolume = 0; //!< Number of points per volume
+    static const UInt S_numPointsPerElement = S_numPointsPerVolume; //!< Number of points per element
+    static const UInt S_numPointsPerFacet =  S_numPointsPerFace; //!< Number of points per facet
+    static const UInt S_numPointsPerRidge = S_numPointsPerEdge;    //!< Number of points per ridge
+    static const UInt S_numPointsPerPeak = S_numPointsPerVertex;   //!< Number of points per peak
+
+
     //! @return the local ID of the j-th point of the i-th edge
     static ID edgeToPoint( ID const& iEdge, ID const& jPoint );
     //! @return the local ID of the j-th point of the i-th face
     static ID faceToPoint( ID const& iFace, ID const& jPoint );
+
+    inline static ID facetToPoint( ID const& iFacet, ID const& jPoint )
+    	{return faceToPoint( iFacet, jPoint );}
+
+    inline static ID facetToRidge( ID const& iFacet, ID const& jRidge )
+        {return faceToEdge(iFacet, jRidge).first;}
+    inline static ID facetToPeak( ID const& iFacet, ID const& jPeak )
+    	{return faceToPoint(iFacet, jPeak);}
+
     /*!
         @return a pair: the local numbering of the j-th edge on the i-th face, and
                 true if the orientation of the edge on the face is consistent
@@ -508,10 +640,25 @@ public:
     static const UInt S_numPointsPerEdge = 0;   //!< Number of points per edge
     static const UInt S_numPointsPerFace = 0;   //!< Number of points per face
     static const UInt S_numPointsPerVolume = 0; //!< Number of points per volume
+    static const UInt S_numPointsPerElement = S_numPointsPerVolume; //!< Number of points per element
+    static const UInt S_numPointsPerFacet =  S_numPointsPerFace; //!< Number of points per facet
+    static const UInt S_numPointsPerRidge = S_numPointsPerEdge;    //!< Number of points per ridge
+    static const UInt S_numPointsPerPeak = S_numPointsPerVertex;   //!< Number of points per peak
+
+
     //! @return the local ID of the j-th point of the i-th edge
     static ID edgeToPoint( ID const& iEdge, ID const& jPoint );
     //! @return the local ID of the j-th point of the i-th face
     static ID faceToPoint( ID const& iFace, ID const& jPoint );
+
+    inline static ID facetToPoint( ID const& iFacet, ID const& jPoint )
+    		{return faceToPoint( iFacet, jPoint );}
+
+    inline static ID facetToRidge( ID const& iFacet, ID const& jRidge )
+        {return faceToEdge(iFacet, jRidge).first;}
+    inline static ID facetToPeak( ID const& iFacet, ID const& jPeak )
+    	{return faceToPoint(iFacet, jPeak);}
+
     /*!
         @return a pair: the local numbering of the j-th edge on the i-th face, and
                 true if the orientation of the edge on the face is consistent
@@ -543,10 +690,26 @@ public:
     static const UInt S_numPointsPerEdge = 1;   //!< Number of points per edge
     static const UInt S_numPointsPerFace = 1;   //!< Number of points per face
     static const UInt S_numPointsPerVolume = 1; //!< Number of points per volume
+    static const UInt S_numPointsPerElement = S_numPointsPerVolume; //!< Number of points per element
+    static const UInt S_numPointsPerFacet =  S_numPointsPerFace; //!< Number of points per facet
+    static const UInt S_numPointsPerRidge = S_numPointsPerEdge;    //!< Number of points per ridge
+    static const UInt S_numPointsPerPeak = S_numPointsPerVertex;   //!< Number of points per peak
+
+
     //! @return the local ID of the j-th point of the i-th edge
     static ID edgeToPoint( ID const& iEdge, ID const& jPoint );
     //! @return the local ID of the j-th point of the i-th face
     static ID faceToPoint( ID const& iFace, ID const& jPoint );
+
+    inline static ID facetToPoint( ID const& iFacet, ID const& jPoint )
+		{return faceToPoint( iFacet, jPoint );}
+
+    inline static ID facetToRidge( ID const& iFacet, ID const& jRidge )
+        {return faceToEdge(iFacet, jRidge).first;}
+
+    inline static ID facetToPeak( ID const& iFacet, ID const& jPeak )
+    	{return faceToPoint(iFacet, jPeak);}
+
     /*!
         @return a pair: the local numbering of the j-th edge on the i-th face, and
                 true if the orientation of the edge on the face is consistent
