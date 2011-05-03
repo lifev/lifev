@@ -41,6 +41,7 @@
 #define LINEAREPETRAOPERATORBLOCK_H 1
 
 #include <life/lifealg/LinearEpetraOperator.hpp>
+#include <boost/numeric/ublas/matrix.hpp>
 #include <Epetra_Import.h>
 
 namespace LifeV
@@ -68,6 +69,7 @@ public:
     typedef Epetra_MultiVector raw_vector;
     typedef boost::shared_ptr<raw_vector> vector_ptr;
     typedef std::vector<vector_ptr> vector_container;
+
 
     enum Structure {Diagonal, LowerTriangular, UpperTriangular, NoStructure, Rectangular};
     //@}
