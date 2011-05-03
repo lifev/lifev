@@ -305,10 +305,10 @@ public:
      *  set up.
      *
      *  The possible Switches are:
-     *  - \c HAS_ALL_EDGES
+     *  - \c HAS_ALL_RIDGES
      *  - \c HAS_FACE_TO_EDGES
      *  - \c HAS_BEEN_CHECKED
-     *  - \c HAS_BOUNDARY_EDGES
+     *  - \c HAS_BOUNDARY_RIDGES
      *  - \c EDGES_HAVE_ADIACENCY
      *
      *  @{
@@ -490,7 +490,7 @@ public:
     //! Update Element-To-Faces lookup table (not implemented)
     void updateElementFaces( bool createFaces = false, UInt estimateFaceNumber = 0 );
     //! Clean Element-To-Faces lookup table (not implemented)
-    void cleanElementFaces() {}
+    void cleanElementFacets() {}
 
     /** @} */ // End of group Faces Methods
 
@@ -1091,7 +1091,7 @@ public:
      *
      *  It does nothing in 1D mesh.
      */
-    void cleanElementEdges() {return;}
+    void cleanElementRidges() {return;}
 
     //! Global number of Edges.
     /**
@@ -1518,8 +1518,8 @@ template <typename GEOSHAPE, typename MC>
 void
 RegionMesh1D<GEOSHAPE, MC>::setSwitch( Switch & sw )
 {
-    sw.create( "HAS_ALL_EDGES" );
-    sw.create( "HAS_BOUNDARY_EDGES" );
+    sw.create( "HAS_ALL_RIDGES" );
+    sw.create( "HAS_BOUNDARY_RIDGES" );
     sw.create( "HAS_FACE_TO_EDGES" );
     sw.create( "HAS_BEEN_CHECKED" );
     sw.create( "EDGES_HAVE_ADIACENCY" );
@@ -2322,8 +2322,8 @@ RegionMesh1D<GEOSHAPE, MC>::check( int level, bool const fix, bool const verb, s
         if ( verb )
             out << "MAY NOT WORK IF WE HAVE DOF ON EDGES AND ESSENTIAL BC!!!!" << std::endl;
         severity = -1;
-        unsetLinkSwitch( "HAS_ALL_EDGES" );
-        unsetLinkSwitch( "HAS_BOUNDARY_EDGES" );
+        unsetLinkSwitch( "HAS_ALL_RIDGES" );
+        unsetLinkSwitch( "HAS_BOUNDARY_RIDGES" );
     }
 
     UInt count = 0;
