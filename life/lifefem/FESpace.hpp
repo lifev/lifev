@@ -44,6 +44,7 @@
 #define _FESPACE_H_
 
 #include <cmath>
+#include <map>
 #include <iomanip>
 #include <sstream>
 #include <utility>
@@ -326,6 +327,15 @@ public:
     vector_type feToFEInterpolate(const FESpace<mesh_Type,map_Type>& originalSpace,
                                   const vector_type& originalVector, const MapEpetraType& outputMapType = Unique) const;
 
+
+
+    template<typename vector_type>
+    vector_type
+	interpolateGeneric( const FESpace<mesh_Type,map_Type>& OriginalSpace,
+								  const vector_type& OriginalVector) const;
+
+
+
     //! This method reconstruct a gradient of a solution in the present FE space.
     /*!
       The goal of this method is to build an approximation of the gradient of a given
@@ -426,7 +436,8 @@ private:
 
 
     //! Set space
-    inline void setSpace( const std::string& space, UInt dimension = 3);
+    inline void setSpace( const std::string& space, UInt dimension );
+
 
     //! This is a generic function called by feToFEInterpolate method.
     //! It allows to interpolate vectors between any two continuous and scalar FE spaces. It is used when other specialized functions are not provided
@@ -572,7 +583,7 @@ FESpace(	MeshPartitioner<MeshType>&	mesh,
     M_spaceMap["P2_HIGH"]	= P2_HIGH;
 
     // Set space
-    setSpace( space);
+    setSpace( space, M_mesh->dimension() );
 
     // Set other quantities
     M_dof.reset( new DOF( *M_mesh, *M_refFE ) );
@@ -642,7 +653,7 @@ FESpace(	meshPtr_Type			mesh,
     M_spaceMap["P2_HIGH"]	= P2_HIGH;
 
     // Set space
-    setSpace( space);
+    setSpace( space, M_mesh->dimension() );
 
     // Set other quantities
     M_dof.reset( new DOF( *M_mesh, *M_refFE ) );
@@ -689,10 +700,10 @@ FESpace<MeshType, MapType>::interpolate( const function_Type& fct,
     std::vector<Real> FEValues(numberLocalDof,0);
 
     // Do the loop over the cells
-    for (UInt iterVolume(0); iterVolume < totalNumberElements; ++iterVolume)
+    for (UInt iterElement(0); iterElement < totalNumberElements; ++iterElement)
     {
         // We update the CurrentFE so that we get the coordinates of the nodes
-        interpCFE.update(M_mesh->element(iterVolume), UPDATE_QUAD_NODES);
+        interpCFE.update(M_mesh->element(iterElement), UPDATE_QUAD_NODES);
 
         // Loop over the dimension of the field
         for (UInt iDim(0); iDim < M_fieldDim; ++iDim)
@@ -712,7 +723,7 @@ FESpace<MeshType, MapType>::interpolate( const function_Type& fct,
             for (UInt iterDof(0); iterDof < numberLocalDof; ++iterDof)
             {
                 // Find the ID of the considered DOF
-                ID globalDofID(M_dof->localToGlobalMap(iterVolume,iterDof) + iDim*M_dim);
+                ID globalDofID(M_dof->localToGlobalMap(iterElement,iterDof) + iDim*M_dim);
 
                 // Compute the value of the function and set it
                 vect.setCoefficient(globalDofID,FEValues[iterDof]);
@@ -720,7 +731,7 @@ FESpace<MeshType, MapType>::interpolate( const function_Type& fct,
             }
         }
     }
-}
+}*/
 
 template < typename MeshType, typename MapType>
 template < typename FEFunctionType, typename vector_Type >
@@ -1316,7 +1327,7 @@ feInterpolateGradient(const ID& elementID, const vector_type& solutionVector, co
     M_fe->coorBackMap(x,y,z,hat_x,hat_y,hat_z);
 
     // Store the number of local DoF
-    UInt nDof(dof().numLocalDof());
+    UInt nDof(dof().numLocalDof(feInterpolateGradient));
     UInt totalDof(dof().numTotalDof());
 
     // Initialization
@@ -1502,20 +1513,20 @@ gradientRecovery(const vector_type& solution, const UInt& dxi) const
     CurrentFE interpCFE(*M_refFE,getGeometricMap(*M_mesh ),interpQuad);
 
     // Loop over the cells
-    for (UInt iterVolume(0); iterVolume< totalNumberElements; ++iterVolume)
+    for (UInt iterElement(0); iterElement< totalNumberElements; ++iterElement)
     {
-        interpCFE.update(mesh()->element(iterVolume), UPDATE_DPHI | UPDATE_WDET );
+        interpCFE.update(mesh()->element(iterElement), UPDATE_DPHI | UPDATE_WDET );
 
         for (UInt iterDof(0); iterDof < numberLocalDof; ++iterDof)
         {
             for (UInt iDim(0); iDim < M_fieldDim; ++iDim)
             {
-                ID globalDofID(dof().localToGlobalMap(iterVolume,iterDof) + iDim*dof().numTotalDof());
+                ID globalDofID(dof().localToGlobalMap(iterElement,iterDof) + iDim*dof().numTotalDof());
 
                 patchArea[globalDofID] += interpCFE.measure();
                 for (UInt iterDofGrad(0); iterDofGrad < numberLocalDof; ++iterDofGrad)
                 {
-                    ID globalDofIDGrad(dof().localToGlobalMap(iterVolume,iterDofGrad) + iDim*dof().numTotalDof());
+                    ID globalDofIDGrad(dof().localToGlobalMap(iterElement,iterDofGrad) + iDim*dof().numTotalDof());
                     gradientSum[globalDofID] += interpCFE.measure()*solution[globalDofIDGrad]*interpCFE.dphi(iterDofGrad,dxi,iterDof);
                 }
             }
@@ -1767,7 +1778,7 @@ P2Interpolate(const FESpace<mesh_Type,map_Type>& OriginalSpace,
     // Some constants (avoid recomputing them each time used)
     UInt FieldDim(fieldDim());
 
-    UInt numVolumes(mesh()->numVolumes());
+    UInt numElements(mesh()->numElements());
 
     UInt totalDofsOriginal(OriginalSpace.dof().numTotalDof());
     UInt totalDofsPresent(dof().numTotalDof());
@@ -1777,9 +1788,9 @@ P2Interpolate(const FESpace<mesh_Type,map_Type>& OriginalSpace,
     std::vector<Real> DofValues(localDofsPresent, 0.0);
 
     // Loop over the elements to get the values
-    for ( ID iElem = 0; iElem < numVolumes ; ++iElem )
+    for ( ID iElem = 0; iElem < numElements ; ++iElem )
     {
-        UInt elemId (mesh()->volume(iElem).localId());
+        UInt elemId (mesh()->element(iElem).localId());
 
         // In the file /lifefem/ReferenceElement.hpp, we can see that the dofs for P1
         // are the first ones of the P2 dofs. We have then to recompute the values
@@ -1836,17 +1847,17 @@ RT0ToP0Interpolate(const FESpace<mesh_Type,map_Type>& OriginalSpace,
     UInt FieldDim(fieldDim());
 
     // Total number of mesh elements.
-    UInt numVolumes(mesh()->numVolumes());
+    UInt numElements(mesh()->numElements());
 
     // Total d.o.f. in the present FESpace.
     UInt totalDofsPresent(dof().numTotalDof());
 
     // Loop over the elements to get the values. To compute the value we use the Piola transformation.
-    for ( ID iElem(0); iElem < numVolumes ; ++iElem )
+    for ( ID iElem(0); iElem < numElements ; ++iElem )
     {
 
         // Map between local and global mesh.
-        UInt elemId (mesh()->volume(iElem).localId());
+        UInt elemId (mesh()->element(iElem).localId());
 
         // Current and reference barycenter, Jacobian of the map.
         std::vector<Real> barCurrentFE(3,0), barRefFE(3,0), Jac(3,0);
@@ -1889,10 +1900,11 @@ RT0ToP0Interpolate(const FESpace<mesh_Type,map_Type>& OriginalSpace,
                 ID globalDofID( OriginalSpace.dof().localToGlobalMap( elemId, iter_dof) );
 
                 // Find the correct position in the final vector.
-                UInt iGlobalFace( mesh()->localFaceId( elemId, iter_dof ) );
+                UInt iGlobalFacet( mesh()->localFacetId( elemId, iter_dof ) );
 
-                // Select if the current face is coherent or not with the orientation. If yes use +, if not use -.
-                if ( mesh()->faceElement( iGlobalFace, 0 ) != iElem )
+                // Select if the current facet is coherent or not with the orientation. If yes use +, if not use -.
+                //if ( mesh()->faceElement( iGlobalFacet, 0 ) != iElem )
+                if ( mesh()->facet( iGlobalFacet ).firstAdjacentElementIdentity() != iElem )
                 {
                     // Loop on each component of the selected finite element.
                     for (UInt jComponent(0); jComponent < FieldDim; ++jComponent)
