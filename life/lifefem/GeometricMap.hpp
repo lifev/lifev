@@ -147,42 +147,42 @@ template <typename MeshType>
 const GeometricMap& getGeometricMap( MeshType & /*mesh*/ )
 {
 
-    typedef typename MeshType::ElementShape ElementShape;
+    typedef typename MeshType::elementShape_Type elementShape_Type;
 
-    switch ( ElementShape::S_shape )
+    switch ( elementShape_Type::S_shape )
     {
     case POINT:
-        if ( ElementShape::S_numPoints == 1 )
+        if ( elementShape_Type::S_numPoints == 1 )
             return geoLinearNode;
         else
             ERROR_MSG( "Geomap type not yet implemented" );
         break;
     case LINE:
-        if ( ElementShape::S_numPoints == 2 )
+        if ( elementShape_Type::S_numPoints == 2 )
             return geoLinearSeg;
         else
             ERROR_MSG( "Geomap type not yet implemented" );
         break;
     case HEXA:
-        if ( ElementShape::S_numPoints == 8 )
+        if ( elementShape_Type::S_numPoints == 8 )
             return geoBilinearHexa;
         else
             ERROR_MSG( "Geomap type not yet implemented" );
         break;
     case TETRA:
-        if ( ElementShape::S_numPoints == 4 )
+        if ( elementShape_Type::S_numPoints == 4 )
             return geoLinearTetra;
         else
             ERROR_MSG( "Geomap type not yet implemented" );
         break;
     case TRIANGLE:
-        if ( ElementShape::S_numPoints == 3 )
+        if ( elementShape_Type::S_numPoints == 3 )
             return geoLinearTria;
         else
             ERROR_MSG( "Geomap type not yet implemented" );
         break;
     case QUAD:
-        if ( ElementShape::S_numPoints == 4 )
+        if ( elementShape_Type::S_numPoints == 4 )
             return geoBilinearQuad;
         else
             ERROR_MSG( "Geomap type not yet implemented" );

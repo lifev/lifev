@@ -80,7 +80,7 @@ class PostProcessingBoundary
 
     //! @name Public Types
     //@{
-    typedef typename MeshType::VolumeShape                   elementGeometricShape_Type;
+    typedef typename MeshType::elementShape_Type             elementGeometricShape_Type;
     typedef typename elementGeometricShape_Type::GeoBShape   facetGeometricShape_Type;
     typedef MeshType                                         mesh_Type;
     typedef boost::shared_ptr<MeshType>                      meshPtr_Type;
@@ -464,10 +464,10 @@ void PostProcessingBoundary<MeshType>::buildVectors()
     for ( ID iboundaryFace = 0 ; iboundaryFace < M_numBoundaryFaces; ++iboundaryFace )
     {
 
-        iFirstAdjacentElement = M_meshPtr->bElement( iboundaryFace ).firstAdjacentElementIdentity();  // id of the element adjacent to the face
-        iFaceLocalId = M_meshPtr->bElement( iboundaryFace ).firstAdjacentElementPosition(); // local id of the face in its adjacent element
+        iFirstAdjacentElement = M_meshPtr->bFacet( iboundaryFace ).firstAdjacentElementIdentity();  // id of the element adjacent to the face
+        iFaceLocalId = M_meshPtr->bFacet( iboundaryFace ).firstAdjacentElementPosition(); // local id of the face in its adjacent element
 
-        boundaryFlag = M_meshPtr->bElement(iboundaryFace ).marker();
+        boundaryFlag = M_meshPtr->bFacet(iboundaryFace ).marker();
         M_boundaryMarkerToFacetIdMap[boundaryFlag].push_back( iboundaryFace ); // fill the flag-to-faceIdList map
 
         for (UInt iFESpace=0; iFESpace<M_numFESpaces; ++iFESpace)
@@ -477,7 +477,7 @@ void PostProcessingBoundary<MeshType>::buildVectors()
             boundaryDofGlobalIdVector.resize( M_numTotalDofPerFaceVector[iFESpace] );
 
             // updating finite element information
-            M_currentBdFEPtrVector[iFESpace]->updateMeas( M_meshPtr->bElement( iboundaryFace ) );
+            M_currentBdFEPtrVector[iFESpace]->updateMeas( M_meshPtr->bFacet( iboundaryFace ) );
 
             // ===================================================
             // Vertex based Dof
@@ -617,7 +617,7 @@ Real PostProcessingBoundary<MeshType>::measure( const entityFlag_Type& flag )
     for (Iterator j=faceList.begin(); j != faceList.end(); ++j)
     {
 
-        M_currentBdFEPtrVector[0]->updateMeas( M_meshPtr->bElement( *j ) );  // updating finite element information
+        M_currentBdFEPtrVector[0]->updateMeas( M_meshPtr->bFacet( *j ) );  // updating finite element information
 
         measureScatter += M_currentBdFEPtrVector[0]->measure();
 
@@ -657,7 +657,7 @@ Real PostProcessingBoundary<MeshType>::flux( const VectorType& field, const enti
     {
 
         // Updating quadrature data on the current face
-        M_currentBdFEPtrVector[feSpace]->updateMeasNormalQuadPt(M_meshPtr->bElement(*j) );
+        M_currentBdFEPtrVector[feSpace]->updateMeasNormalQuadPt(M_meshPtr->bFacet(*j) );
 
         // Quadrature formula
         // Loop on quadrature points
@@ -736,7 +736,7 @@ Vector PostProcessingBoundary<MeshType>::average( const VectorType& field, const
         for ( UInt iComponent=0; iComponent < nDim; ++iComponent ) localField[iComponent] = 0.;
 
         // Updating quadrature data on the current face
-        M_currentBdFEPtrVector[feSpace]->updateMeasNormalQuadPt(M_meshPtr->bElement(*j) );
+        M_currentBdFEPtrVector[feSpace]->updateMeasNormalQuadPt(M_meshPtr->bFacet(*j) );
 
         // Loop on components
         for (UInt iComponent =0; iComponent<nDim; ++iComponent)
@@ -803,7 +803,7 @@ void PostProcessingBoundary<MeshType>::computePatchesMeasure()
         for ( ID iboundaryFace = 0 ; iboundaryFace < M_numBoundaryFaces; ++iboundaryFace )
         {
         	// updating finite element information
-            M_currentBdFEPtrVector[iFESpace]->updateMeas( M_meshPtr->bElement( iboundaryFace ) );
+            M_currentBdFEPtrVector[iFESpace]->updateMeas( M_meshPtr->bFacet( iboundaryFace ) );
 
             localMeasure = M_currentBdFEPtrVector[iFESpace]->measure();
             // Loop on the total DOF per Face
@@ -896,7 +896,7 @@ void PostProcessingBoundary<MeshType>::computePatchesNormal()
         for ( ID iboundaryFace = 0 ; iboundaryFace < M_numBoundaryFaces; ++iboundaryFace )
         {
             // updating finite element information
-            M_currentBdFEPtrVector[iFESpace]->updateMeasNormal( M_meshPtr->bElement( iboundaryFace ) );
+            M_currentBdFEPtrVector[iFESpace]->updateMeasNormal( M_meshPtr->bFacet( iboundaryFace ) );
 
             // Loop on the components
             for ( Int iComponent = 0; iComponent < NDIM; iComponent++ )
@@ -981,7 +981,7 @@ void PostProcessingBoundary<MeshType>::computePatchesPhi()
         for ( ID iboundaryFace = 0 ; iboundaryFace < M_numBoundaryFaces; ++iboundaryFace )
         {
         	// updating finite element information
-            M_currentBdFEPtrVector[iFESpace]->updateMeas( M_meshPtr->bElement( iboundaryFace ) );
+            M_currentBdFEPtrVector[iFESpace]->updateMeas( M_meshPtr->bFacet( iboundaryFace ) );
 
             for ( ID iDof = 0; iDof < M_numTotalDofPerFaceVector[iFESpace]; ++iDof )
             {
