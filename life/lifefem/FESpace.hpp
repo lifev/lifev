@@ -43,6 +43,7 @@
 #define _FESPACE_H_
 
 #include <cmath>
+#include <map>
 #include <iomanip>
 #include <sstream>
 #include <utility>
@@ -316,6 +317,15 @@ public:
     vector_type feToFEInterpolate(const FESpace<mesh_Type,map_Type>& originalSpace,
                                   const vector_type& originalVector) const;
 
+
+
+    template<typename vector_type>
+    vector_type
+	interpolateGeneric( const FESpace<mesh_Type,map_Type>& OriginalSpace,
+								  const vector_type& OriginalVector) const;
+
+
+
     //! This method reconstruct a gradient of a solution in the present FE space.
     /*!
       The goal of this method is to build an approximation of the gradient of a given
@@ -413,7 +423,7 @@ private:
 
 
     //! Set space
-    inline void setSpace( const std::string& space );
+    inline void setSpace( const std::string& space, UInt dimension );
 
 
     //! This is a specialized function called by feToFEInterpolate method for P_2 to P_1 interpolation
@@ -584,7 +594,7 @@ FESpace(	MeshPartitioner<MeshType>&	mesh,
     M_spaceMap["P2_HIGH"]	= P2_HIGH;
 
     // Set space
-    setSpace( space );
+    setSpace( space, M_mesh->dimension() );
 
     // Set other quantities
     M_dof.reset( new DOF( *M_mesh, *M_refFE ) );
@@ -654,7 +664,7 @@ FESpace(	meshPtr_Type			mesh,
     M_spaceMap["P2_HIGH"]	= P2_HIGH;
 
     // Set space
-    setSpace( space );
+    setSpace( space, M_mesh->dimension() );
 
     // Set other quantities
     M_dof.reset( new DOF( *M_mesh, *M_refFE ) );
@@ -676,7 +686,113 @@ FESpace(	meshPtr_Type			mesh,
 // Methods
 // ===================================================
 
+template <typename MeshType, typename MapType>
+template<typename vector_type>
+void
+FESpace<MeshType, MapType>::interpolate( const function_Type& fct,
+                                 vector_type&    vect,
+                                 const Real      time)
+{
+    // number of local DOF
+	UInt numberLocalDof(M_dof->numLocalDof());
 
+    // Storage for the values
+    std::vector<std::vector<Real> > nodalValues(M_fieldDim, std::vector<Real>(numberLocalDof, 0.));
+    std::vector<Real> FEValues(numberLocalDof,0.);
+    Real x,y,z;
+
+    // Do the loop over the cells
+    for (UInt iterElement(0); iterElement < M_mesh->numElements(); ++iterElement)
+    {
+        // We update the CurrentFE so that we get the coordinates of the nodes
+        M_fe->update(M_mesh->element(iterElement), UPDATE_ONLY_CELL_NODES);
+
+        // Loop over the dimension of the field
+        for (UInt iterDof(0); iterDof < numberLocalDof; ++iterDof)
+		{
+			// get coordinates of DOF node
+			M_fe->coorMap( x, y, z, M_refFE->xi(iterDof), M_refFE->eta(iterDof), M_refFE->zeta(iterDof) );
+
+			//store nodal values
+			for (UInt iDim(0); iDim < M_fieldDim; ++iDim)
+				nodalValues[iDim][iterDof] = fct(time, x, y, z, iDim);
+		}
+
+        for (UInt iDim(0); iDim < M_fieldDim; ++iDim)
+        {
+            // Transform the nodal values in FE values
+            FEValues = M_refFE->nodalToFEValues(nodalValues[iDim]);
+
+            // Then on the dimension of the FESpace (scalar field vs vectorial field)
+            for (UInt iterDof(0); iterDof < numberLocalDof; ++iterDof)
+            {
+                // Find the ID of the considered DOF
+                ID globalDofID(M_dof->localToGlobalMap(iterElement,iterDof) + iDim*M_dim);
+
+                // Compute the value of the function and set it
+                vect.setCoefficient(globalDofID,FEValues[iterDof]);
+
+            }
+        }
+    }
+}
+
+
+
+
+template<typename MeshType, typename MapType>
+template<typename vector_type>
+vector_type
+FESpace<MeshType,MapType>::
+interpolateGeneric( const FESpace<mesh_Type,map_Type>& OriginalSpace,
+        const vector_type& OriginalVector) const
+{
+
+	vector_type Interpolated(map(),Repeated);
+
+	// Initialization of the dimensions of the vectors
+	UInt size_comp_in = OriginalSpace.dim();
+
+	// number of local DOF
+    UInt numberLocalDof(M_dof->numLocalDof());
+
+    Real xi, yi, zi;
+
+    std::vector<std::vector<Real> > nodalValues(M_fieldDim, std::vector<Real>(numberLocalDof, 0.));
+    std::vector<Real> FEValues(numberLocalDof,0.);
+
+    for ( UInt iElem(0); iElem < M_mesh->numElements(); ++iElem )
+    {
+    	for ( UInt iterDof = 0 ; iterDof < numberLocalDof ; ++iterDof )
+    	{
+    		xi = M_refFE->xi(iterDof);
+        	yi = M_refFE->eta(iterDof);
+        	zi = M_refFE->zeta(iterDof);
+        	for (UInt iterDofOrig(0) ; iterDofOrig < OriginalSpace.dof().numLocalDof(); ++iterDofOrig)
+        	{
+        		size_t index = OriginalSpace.dof().localToGlobalMap( iElem, iterDofOrig );
+        		for ( UInt iDim = 0; iDim < M_fieldDim; ++iDim )
+        			nodalValues[iDim][iterDof] += OriginalVector[iDim * size_comp_in + index]*OriginalSpace.refFE().phi(iterDofOrig, xi, yi, zi);
+    		}
+        }
+        for ( UInt iDim = 0; iDim < M_fieldDim; ++iDim )
+        {
+        	FEValues = M_refFE->nodalToFEValues(nodalValues[iDim]); //needed for non-Lagrangian elements
+            for ( UInt iterDof(0) ; iterDof < numberLocalDof; ++iterDof )
+			{
+            	ID globalDofId(M_dof->localToGlobalMap( iElem, iterDof ) + iDim * M_dim);
+
+            	// Compute the value of the function and set it
+            	Interpolated.setCoefficient(globalDofId,FEValues[iterDof]);
+
+            	nodalValues[iDim][iterDof] = 0;
+			}
+        }
+    }
+    return Interpolated;
+}
+
+/*
 template <typename MeshType, typename MapType>
 template<typename vector_type>
 void
@@ -701,10 +817,10 @@ FESpace<MeshType, MapType>::interpolate( const function_Type& fct,
     std::vector<Real> FEValues(numberLocalDof,0);
 
     // Do the loop over the cells
-    for (UInt iterVolume(0); iterVolume < totalNumberElements; ++iterVolume)
+    for (UInt iterElement(0); iterElement < totalNumberElements; ++iterElement)
     {
         // We update the CurrentFE so that we get the coordinates of the nodes
-        interpCFE.update(M_mesh->element(iterVolume), UPDATE_QUAD_NODES);
+        interpCFE.update(M_mesh->element(iterElement), UPDATE_QUAD_NODES);
 
         // Loop over the dimension of the field
         for (UInt iDim(0); iDim < M_fieldDim; ++iDim)
@@ -724,7 +840,7 @@ FESpace<MeshType, MapType>::interpolate( const function_Type& fct,
             for (UInt iterDof(0); iterDof < numberLocalDof; ++iterDof)
             {
                 // Find the ID of the considered DOF
-                ID globalDofID(M_dof->localToGlobalMap(iterVolume,iterDof) + iDim*M_dim);
+                ID globalDofID(M_dof->localToGlobalMap(iterElement,iterDof) + iDim*M_dim);
 
                 // Compute the value of the function and set it
                 vect.setCoefficient(globalDofID,FEValues[iterDof]);
@@ -732,7 +848,7 @@ FESpace<MeshType, MapType>::interpolate( const function_Type& fct,
             }
         }
     }
-}
+}*/
 
 
 template <typename MeshType, typename MapType>
@@ -1268,7 +1384,7 @@ feInterpolateGradient(const ID& elementID, const vector_type& solutionVector, co
     M_fe->coorBackMap(x,y,z,hat_x,hat_y,hat_z);
 
     // Store the number of local DoF
-    UInt nDof(dof().numLocalDof());
+    UInt nDof(dof().numLocalDof(feInterpolateGradient));
     UInt totalDof(dof().numTotalDof());
 
     // Initialization
@@ -1449,10 +1565,16 @@ gradientRecovery(const vector_type& solution, const UInt& dxi) const
         return gradientRecovery(vector_type(solution,Repeated),dxi);
     };
 
+    Real refElemArea(0); //area of reference element
+
+    //compute the area of reference element
+    for(UInt iq=0; iq< M_Qr->nbQuadPt(); iq++)
+    	refElemArea += M_Qr->weight(iq);
+
     // Define a special quadrature rule for the interpolation
     QuadratureRule interpQuad;
-    interpQuad.setDimensionShape(3,M_refFE->shape());
-    Real wQuad(1.0/(M_refFE->nbDof() * 6.0));       //Here use area=1/6 ==> only for tetra
+    interpQuad.setDimensionShape(shapeDimension(M_refFE->shape()), M_refFE->shape());
+    Real wQuad(refElemArea/M_refFE->nbDof());
 
     for (UInt i(0); i<M_refFE->nbDof(); ++i) //nbRefCoor
     {
@@ -1473,20 +1595,20 @@ gradientRecovery(const vector_type& solution, const UInt& dxi) const
     CurrentFE interpCFE(*M_refFE,getGeometricMap(*M_mesh ),interpQuad);
 
     // Loop over the cells
-    for (UInt iterVolume(0); iterVolume< totalNumberElements; ++iterVolume)
+    for (UInt iterElement(0); iterElement< totalNumberElements; ++iterElement)
     {
-        interpCFE.update(mesh()->element(iterVolume), UPDATE_DPHI | UPDATE_WDET );
+        interpCFE.update(mesh()->element(iterElement), UPDATE_DPHI | UPDATE_WDET );
 
         for (UInt iterDof(0); iterDof < numberLocalDof; ++iterDof)
         {
             for (UInt iDim(0); iDim < M_fieldDim; ++iDim)
             {
-                ID globalDofID(dof().localToGlobalMap(iterVolume,iterDof) + iDim*dof().numTotalDof());
+                ID globalDofID(dof().localToGlobalMap(iterElement,iterDof) + iDim*dof().numTotalDof());
 
                 patchArea[globalDofID] += interpCFE.measure();
                 for (UInt iterDofGrad(0); iterDofGrad < numberLocalDof; ++iterDofGrad)
                 {
-                    ID globalDofIDGrad(dof().localToGlobalMap(iterVolume,iterDofGrad) + iDim*dof().numTotalDof());
+                    ID globalDofIDGrad(dof().localToGlobalMap(iterElement,iterDofGrad) + iDim*dof().numTotalDof());
                     gradientSum[globalDofID] += interpCFE.measure()*solution[globalDofIDGrad]*interpCFE.dphi(iterDofGrad,dxi,iterDof);
                 }
             }
@@ -1527,82 +1649,82 @@ laplacianRecovery(const vector_type& solution) const
 // Set FE space (default standard parameters)
 template <typename MeshType, typename MapType>
 inline void
-FESpace<MeshType, MapType>::setSpace( const std::string& space )
+FESpace<MeshType, MapType>::setSpace( const std::string& space, UInt dimension )
 {
-    switch ( M_spaceMap[space] )
-    {
-    case P1 :
 
-#ifdef TWODIM
-        M_refFE = &feTriaP1;
-        M_Qr    = &quadRuleTria6pt;
-        M_bdQr  = &quadRuleSeg3pt;
-#else // THREEDIM
-        M_refFE = &feTetraP1;
-        M_Qr    = &quadRuleTetra4pt;
-        M_bdQr	= &quadRuleTria3pt;
-#endif
+	if(dimension == 2)
+	{
+		switch ( M_spaceMap[space] )
+		{
+		case P1 :
+			M_refFE = &feTriaP1;
+			M_Qr    = &quadRuleTria3pt;
+			M_bdQr  = &quadRuleSeg2pt;
+			break;
 
-        break;
+		case P1_HIGH :
+			M_refFE = &feTriaP1;
+			M_Qr    = &quadRuleTria6pt;
+			M_bdQr  = &quadRuleSeg3pt;
+			break;
 
-    case P1_HIGH :
+		case P1Bubble :
+			break;
 
-#ifdef TWODIM
-        M_refFE = &feTriaP1;
-        M_Qr    = &quadRuleTria6pt;
-        M_bdQr  = &quadRuleSeg3pt;
-#else // THREEDIM
-        M_refFE = &feTetraP1;
-        M_Qr    = &quadRuleTetra15pt;
-        M_bdQr	= &quadRuleTria4pt;
-#endif
+		case P2 :
+			M_refFE = &feTriaP2;
+			M_Qr    = &quadRuleTria6pt;
+			M_bdQr  = &quadRuleSeg3pt;
+			break;
 
-        break;
+		case P2_HIGH :
+			M_refFE = &feTriaP2;
+			M_Qr    = &quadRuleTria7pt;
+			M_bdQr  = &quadRuleSeg3pt;
+			break;
 
-    case P1Bubble :
+		default :
+			std::cout << "!!! WARNING: Space " << space << "not implemented in FESpace class !!!" << std::endl;
+		}
+	}
+	else
+	{
+		switch ( M_spaceMap[space] )
+		{
+		case P1 :
+			M_refFE = &feTetraP1;
+			M_Qr    = &quadRuleTetra4pt;
+			M_bdQr	= &quadRuleTria3pt;
+			break;
 
-#ifdef TWODIM
+		case P1_HIGH :
+			M_refFE = &feTetraP1;
+			M_Qr    = &quadRuleTetra15pt;
+			M_bdQr	= &quadRuleTria4pt;
+			break;
 
-        break;
+		case P1Bubble :
+			M_refFE = &feTetraP1bubble;
+			M_Qr    = &quadRuleTetra64pt;
+			M_bdQr	= &quadRuleTria3pt;
+			break;
 
-#else // THREEDIM
-        M_refFE = &feTetraP1bubble;
-        M_Qr    = &quadRuleTetra64pt;
-        M_bdQr	= &quadRuleTria3pt;
-#endif
+		case P2 :
+			M_refFE = &feTetraP2;
+			M_Qr    = &quadRuleTetra15pt;
+			M_bdQr	= &quadRuleTria4pt;
+			break;
 
-        break;
+		case P2_HIGH :
+			M_refFE = &feTetraP2;
+			M_Qr    = &quadRuleTetra64pt;
+			M_bdQr	= &quadRuleTria4pt;
+			break;
 
-    case P2 :
-
-#ifdef TWODIM
-        M_refFE = &feTriaP2;
-        M_Qr    = &quadRuleTria6pt;
-        M_bdQr  = &quadRuleSeg3pt;
-#else // THREEDIM
-        M_refFE = &feTetraP2;
-        M_Qr    = &quadRuleTetra15pt;
-        M_bdQr	= &quadRuleTria3pt;
-#endif
-
-    case P2_HIGH :
-
-#ifdef TWODIM
-        M_refFE = &feTriaP2;
-        M_Qr    = &quadRuleTria6pt;
-        M_bdQr  = &quadRuleSeg3pt;
-#else // THREEDIM
-        M_refFE = &feTetraP2;
-        M_Qr    = &quadRuleTetra64pt;
-        M_bdQr	= &quadRuleTria4pt;
-#endif
-
-        break;
-
-    default :
-
-        std::cout << "!!! WARNING: Space " << space << "not implemented in FESpace class !!!" << std::endl;
-    }
+		default :
+			std::cout << "!!! WARNING: Space " << space << "not implemented in FESpace class !!!" << std::endl;
+		}
+	}
 }
 
 template<typename MeshType, typename MapType>
@@ -1634,15 +1756,15 @@ P2ToP1Interpolate(const FESpace<mesh_Type,map_Type>& OriginalSpace,
     // Some constants (avoid recomputing them each time used)
     UInt FieldDim(fieldDim());
 
-    UInt numVolumes(mesh()->numVolumes());
+    UInt numElements(mesh()->numElements());
 
     UInt totalDofsOriginal(OriginalSpace.dof().numTotalDof());
     UInt totalDofsPresent(dof().numTotalDof());
 
     // Loop over the elements to get the values
-    for ( ID iElem = 0; iElem < numVolumes ; ++iElem )
+    for ( ID iElem = 0; iElem < numElements ; ++iElem )
     {
-        UInt elemId (mesh()->volume(iElem).localId());
+        UInt elemId (mesh()->element(iElem).localId());
 
         // In the file /lifefem/ReferenceElement.hpp, we can see that the dofs pour P1
         // are the first ones of the P2 dofs. We have 4 P1 dofs to report per
@@ -1685,15 +1807,15 @@ P1bToP1Interpolate(const FESpace<mesh_Type,map_Type>& OriginalSpace,
     // Some constants (avoid recomputing them each time used)
     UInt FieldDim(fieldDim());
 
-    UInt numVolumes(mesh()->numVolumes());
+    UInt numElements(mesh()->numElements());
 
     UInt totalDofsOriginal(OriginalSpace.dof().numTotalDof());
     UInt totalDofsPresent(dof().numTotalDof());
 
     // Loop over the elements to get the values
-    for ( ID iElem = 0; iElem < numVolumes ; ++iElem )
+    for ( ID iElem = 0; iElem < numElements ; ++iElem )
     {
-        UInt elemId (mesh()->volume(iElem).localId());
+        UInt elemId (mesh()->element(iElem).localId());
 
         // In the file /lifefem/ReferenceElement.hpp, we can see that the dofs pour P1
         // are the first ones of the P1Bubble dofs. We have 4 P1 dofs to report per
@@ -1736,7 +1858,7 @@ P1ToP2Interpolate(const FESpace<mesh_Type,map_Type>& OriginalSpace,
     // Some constants (avoid recomputing them each time used)
     UInt FieldDim(fieldDim());
 
-    UInt numVolumes(mesh()->numVolumes());
+    UInt numElements(mesh()->numElements());
 
     UInt totalDofsOriginal(OriginalSpace.dof().numTotalDof());
     UInt totalDofsPresent(dof().numTotalDof());
@@ -1745,13 +1867,13 @@ P1ToP2Interpolate(const FESpace<mesh_Type,map_Type>& OriginalSpace,
     std::vector<Real> DofValues(10,0.0);
 
     // Loop over the elements to get the values
-    for ( ID iElem = 0; iElem < numVolumes ; ++iElem )
+    for ( ID iElem = 0; iElem < numElements ; ++iElem )
     {
-        UInt elemId (mesh()->volume(iElem).localId());
+        UInt elemId (mesh()->element(iElem).localId());
 
-        // In the file /lifefem/ReferenceElement.hpp, we can see that the dofs pour P1
+        // In the file /lifefem/ReferenceElement.hpp, we can see that the for pour P1
         // are the first ones of the P2 dofs. We have then to recompute the values
-        // in the "face" dofs of the P2 element.
+        // in the "ridge" dofs of the P2 element.
 
         for (UInt iComponent(0); iComponent< FieldDim; ++iComponent)
         {
@@ -1763,7 +1885,7 @@ P1ToP2Interpolate(const FESpace<mesh_Type,map_Type>& OriginalSpace,
                 DofValues[iP1dof]  =  OriginalVector[globalDofID_original];
             };
 
-            // Compute the values in the faces
+            // Compute the values in the ridges
             DofValues[4] = 0.5*(DofValues[0]+DofValues[1]);
             DofValues[5] = 0.5*(DofValues[1]+DofValues[2]);
             DofValues[6] = 0.5*(DofValues[0]+DofValues[2]);
@@ -1805,7 +1927,7 @@ P1ToP1bInterpolate(const FESpace<mesh_Type,map_Type>& OriginalSpace,
     // Some constants (avoid recomputing them each time used)
     UInt FieldDim(fieldDim());
 
-    UInt numVolumes(mesh()->numVolumes());
+    UInt numElements(mesh()->numElements());
 
     UInt totalDofsOriginal(OriginalSpace.dof().numTotalDof());
     UInt totalDofsPresent(dof().numTotalDof());
@@ -1814,11 +1936,11 @@ P1ToP1bInterpolate(const FESpace<mesh_Type,map_Type>& OriginalSpace,
     std::vector<Real> DofValues(5,0.0);
 
     // Loop over the elements to get the values
-    for ( ID iElem = 0; iElem < numVolumes ; ++iElem )
+    for ( ID iElem = 0; iElem < numElements ; ++iElem )
     {
-        UInt elemId (mesh()->volume(iElem).localId());
+        UInt elemId (mesh()->element(iElem).localId());
 
-        // In the file /lifefem/ReferenceElement.hpp, we can see that the dofs pour P1
+        // In the file /lifefem/ReferenceElement.hpp, we can see that the dofs for P1
         // are the first ones of the P1Bubble dofs. The value of the Bubble is
         // zero when interpolating a P1 functions.
 
@@ -1869,7 +1991,7 @@ P1bToP2Interpolate(const FESpace<mesh_Type,map_Type>& OriginalSpace,
     // Some constants (avoid recomputing them each time used)
     UInt FieldDim(fieldDim());
 
-    UInt numVolumes(mesh()->numVolumes());
+    UInt numElements(mesh()->numElements());
 
     UInt totalDofsOriginal(OriginalSpace.dof().numTotalDof());
     UInt totalDofsPresent(dof().numTotalDof());
@@ -1878,9 +2000,9 @@ P1bToP2Interpolate(const FESpace<mesh_Type,map_Type>& OriginalSpace,
     std::vector<Real> DofValues(10,0.0);
 
     // Loop over the elements to get the values
-    for ( ID iElem = 0; iElem < numVolumes ; ++iElem )
+    for ( ID iElem = 0; iElem < numElements ; ++iElem )
     {
-        UInt elemId (mesh()->volume(iElem).localId());
+        UInt elemId (mesh()->element(iElem).localId());
 
         // In the file /lifefem/ReferenceElement.hpp, we can see that the dofs pour P1
         // are the first ones of the P2 dofs. We have then to recompute the values
@@ -1940,7 +2062,7 @@ P2ToP1bInterpolate(const FESpace<mesh_Type,map_Type>& OriginalSpace,
     // Some constants (avoid recomputing them each time used)
     UInt FieldDim(fieldDim());
 
-    UInt numVolumes(mesh()->numVolumes());
+    UInt numElements(mesh()->numElements());
 
     UInt totalDofsOriginal(OriginalSpace.dof().numTotalDof());
     UInt totalDofsPresent(dof().numTotalDof());
@@ -1949,9 +2071,9 @@ P2ToP1bInterpolate(const FESpace<mesh_Type,map_Type>& OriginalSpace,
     std::vector<Real> DofValues(5,0.0);
 
     // Loop over the elements to get the values
-    for ( ID iElem = 0; iElem < numVolumes ; ++iElem )
+    for ( ID iElem = 0; iElem < numElements ; ++iElem )
     {
-        UInt elemId (mesh()->volume(iElem).localId());
+        UInt elemId (mesh()->element(iElem).localId());
 
         // This is a tricky case. The problem is that the P2 functions
         // have an influence on the gravity center. Moreover, the P1Bubble
@@ -1974,9 +2096,9 @@ P2ToP1bInterpolate(const FESpace<mesh_Type,map_Type>& OriginalSpace,
             std::vector<Real> gravityCenter(3,0);
             for (UInt iterVertices(0); iterVertices<4; ++iterVertices)
             {
-                gravityCenter[0] += mesh()->volume(iElem).point(iterVertices).coordinate(0)/4.0;
-                gravityCenter[1] += mesh()->volume(iElem).point(iterVertices).coordinate(1)/4.0;
-                gravityCenter[2] += mesh()->volume(iElem).point(iterVertices).coordinate(2)/4.0;
+                gravityCenter[0] += mesh()->element(iElem).point(iterVertices).coordinate(0)/4.0;
+                gravityCenter[1] += mesh()->element(iElem).point(iterVertices).coordinate(1)/4.0;
+                gravityCenter[2] += mesh()->element(iElem).point(iterVertices).coordinate(2)/4.0;
             };
 
             Real gravityCenterValue(0);
@@ -2019,17 +2141,17 @@ RT0ToP0Interpolate(const FESpace<mesh_Type,map_Type>& OriginalSpace,
     UInt FieldDim(fieldDim());
 
     // Total number of mesh elements.
-    UInt numVolumes(mesh()->numVolumes());
+    UInt numElements(mesh()->numElements());
 
     // Total d.o.f. in the present FESpace.
     UInt totalDofsPresent(dof().numTotalDof());
 
     // Loop over the elements to get the values. To compute the value we use the Piola transformation.
-    for ( ID iElem(0); iElem < numVolumes ; ++iElem )
+    for ( ID iElem(0); iElem < numElements ; ++iElem )
     {
 
         // Map between local and global mesh.
-        UInt elemId (mesh()->volume(iElem).localId());
+        UInt elemId (mesh()->element(iElem).localId());
 
         // Current and reference barycenter, Jacobian of the map.
         std::vector<Real> barCurrentFE(3,0), barRefFE(3,0), Jac(3,0);
@@ -2072,10 +2194,11 @@ RT0ToP0Interpolate(const FESpace<mesh_Type,map_Type>& OriginalSpace,
                 ID globalDofID( OriginalSpace.dof().localToGlobalMap( elemId, iter_dof) );
 
                 // Find the correct position in the final vector.
-                UInt iGlobalFace( mesh()->localFaceId( elemId, iter_dof ) );
+                UInt iGlobalFacet( mesh()->localFacetId( elemId, iter_dof ) );
 
-                // Select if the current face is coherent or not with the orientation. If yes use +, if not use -.
-                if ( mesh()->faceElement( iGlobalFace, 0 ) != iElem )
+                // Select if the current facet is coherent or not with the orientation. If yes use +, if not use -.
+                //if ( mesh()->faceElement( iGlobalFacet, 0 ) != iElem )
+                if ( mesh()->facet( iGlobalFacet ).firstAdjacentElementIdentity() != iElem )
                 {
                     // Loop on each component of the selected finite element.
                     for (UInt jComponent(0); jComponent < FieldDim; ++jComponent)
