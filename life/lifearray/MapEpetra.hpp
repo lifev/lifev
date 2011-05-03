@@ -387,7 +387,7 @@ MapEpetra( const ReferenceFE&        refFE,
     {
         repeatedNodeVector.reserve(mesh.numPoints());
         for ( UInt ii = 0; ii < mesh.numPoints(); ii++ )
-            repeatedNodeVector.push_back( mesh.pointList(ii).id() );
+            repeatedNodeVector.push_back( mesh.point(ii).id() );
     }
 
     if ( refFE.nbDofPerEdge() )
@@ -395,7 +395,7 @@ MapEpetra( const ReferenceFE&        refFE,
         repeatedEdgeVector.reserve( mesh.numEdges() );
 
         for ( UInt ii = 0; ii < mesh.numEdges(); ii++ )
-            repeatedEdgeVector.push_back( mesh.edgeList(ii).id() );
+            repeatedEdgeVector.push_back( mesh.edge(ii).id() );
     }
 
     if ( refFE.nbDofPerFace() )
@@ -403,7 +403,7 @@ MapEpetra( const ReferenceFE&        refFE,
         repeatedFaceVector.reserve( mesh.numFaces() );
 
         for ( UInt ii = 0; ii < mesh.numFaces(); ii++ )
-            repeatedFaceVector.push_back( mesh.faceList(ii).id() );
+            repeatedFaceVector.push_back( mesh.face(ii).id() );
     }
 
     if ( refFE.nbDofPerVolume() )
@@ -411,7 +411,7 @@ MapEpetra( const ReferenceFE&        refFE,
         repeatedVolumeVector.reserve( mesh.numVolumes() );
 
         for ( UInt ii = 0; ii < mesh.numVolumes(); ii++ )
-            repeatedVolumeVector.push_back( mesh.volumeList(ii).id() );
+            repeatedVolumeVector.push_back( mesh.volume(ii).id() );
     }
 
 
