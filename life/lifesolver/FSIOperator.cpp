@@ -1364,7 +1364,7 @@ FSIOperator::interpolateVelocity( const vector_Type& _vec1, vector_Type& _vec2 )
     assert(_vec1.mapType() == Repeated);
     assert(_vec2.mapType() == Unique);
 
-    typedef mesh_Type::VolumeShape GeoShape; // Element shape
+    typedef mesh_Type::elementShape_Type GeoShape; // Element shape
 
     UInt nDofpV = M_uFESpace->refFE().nbDofPerVertex(); // number of DOF per vertex
     UInt nDofpE = M_uFESpace->refFE().nbDofPerEdge();   // number of DOF per edge
@@ -1555,7 +1555,7 @@ FSIOperator::interpolateInterfaceDofs( const FESpace<mesh_Type, MapEpetra>& _fes
     assert(_vec1.mapType() == Repeated);
     assert(_vec2.mapType() == Unique);
 
-    typedef mesh_Type::VolumeShape GeoShape; // Element shape
+    typedef mesh_Type::elementShape_Type GeoShape; // Element shape
 
 
     UInt nDofPerVert1  = _fespace1.refFE().nbDofPerVertex(); // number of DOF per vertex

@@ -559,6 +559,10 @@ setup ()
 
     }
 
+    //make sure mesh facets are updated
+    if(! M_FESpace.mesh()->hasLocalFacets() )
+		M_FESpace.mesh()->updateElementFacets();
+
 } // setup
 
 // Solve one time step of the hyperbolic problem.
@@ -638,10 +642,10 @@ CFL() const
         for ( UInt iFace(0); iFace < M_FESpace.mesh()->numLocalFaces(); ++iFace )
         {
 
-            const UInt iGlobalFace( M_FESpace.mesh()->localFaceId( iElem, iFace ) );
+            const UInt iGlobalFace( M_FESpace.mesh()->localFacetId( iElem, iFace ) );
 
             // Update the normal vector of the current face in each quadrature point
-            M_FESpace.feBd().updateMeasNormalQuadPt( M_FESpace.mesh()->bElement( iGlobalFace ) );
+            M_FESpace.feBd().updateMeasNormalQuadPt( M_FESpace.mesh()->bFacet( iGlobalFace ) );
 
             // Take the left element to the face, see regionMesh for the meaning of left element
             const UInt leftElement( M_FESpace.mesh()->faceElement( iGlobalFace, 0 ) );
@@ -795,7 +799,7 @@ localEvolve ( const UInt& iElem )
     for ( UInt iFace(0); iFace < M_FESpace.mesh()->numLocalFaces(); ++iFace )
     {
         // Id mapping
-        const UInt iGlobalFace( M_FESpace.mesh()->localFaceId( iElem, iFace ) );
+        const UInt iGlobalFace( M_FESpace.mesh()->localFacetId( iElem, iFace ) );
 
         // Take the left element to the face, see regionMesh for the meaning of left element
         const UInt leftElement( M_FESpace.mesh()->faceElement( iGlobalFace, 0 ) );
@@ -804,7 +808,7 @@ localEvolve ( const UInt& iElem )
         const UInt rightElement( M_FESpace.mesh()->faceElement( iGlobalFace, 1 ) );
 
         // Update the normal vector of the current face in each quadrature point
-        M_FESpace.feBd().updateMeasNormalQuadPt( M_FESpace.mesh()->bElement( iGlobalFace ) );
+        M_FESpace.feBd().updateMeasNormalQuadPt( M_FESpace.mesh()->bFacet( iGlobalFace ) );
 
         // Local flux of a face times the integration weight
         VectorElemental localFaceFluxWeight ( M_FESpace.refFE().nbDof(), 1 );
@@ -837,7 +841,7 @@ localEvolve ( const UInt& iElem )
             }
 
             // Take the boundary marker for the current boundary face
-            const ID faceMarker ( M_FESpace.mesh()->bElement( iGlobalFace ).marker() );
+            const ID faceMarker ( M_FESpace.mesh()->bFacet( iGlobalFace ).marker() );
 
             // Take the corrispective boundary function
             const BCBase& bcBase ( M_BCh->findBCWithFlag( faceMarker ) );

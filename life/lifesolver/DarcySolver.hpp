@@ -987,6 +987,10 @@ setup ()
     M_prec.reset( PRECFactory::instance().createObject( precType ) );
     ASSERT( M_prec.get() != 0, "DarcySolver : Preconditioner not set" );
 
+    // make sure mesh facets are updated
+    if(! M_dual_FESpace.mesh()->hasLocalFacets() )
+    M_dual_FESpace.mesh()->updateElementFacets();
+
 } // setup
 
 // Solve the linear system.
@@ -1067,7 +1071,7 @@ computePrimalAndDual ()
 
         for ( UInt iLocalFace(0); iLocalFace <  M_dual_FESpace.mesh()->element( iElem ).S_numLocalFaces; ++iLocalFace )
         {
-            UInt iGlobalFace( M_dual_FESpace.mesh()->localFaceId( iElem, iLocalFace ) );
+            UInt iGlobalFace( M_dual_FESpace.mesh()->localFacetId( iElem, iLocalFace ) );
             if ( M_dual_FESpace.mesh()->faceElement( iGlobalFace, 0 ) != iElem )
             {
                 M_elvecFlux[ iLocalFace ] = 0;
