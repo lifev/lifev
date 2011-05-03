@@ -480,18 +480,18 @@ void BCManageNormal<MatrixType>::computeIntegratedNormals(const DOF& dof,Current
 
     VectorType repNormals(normals.map(), Repeated);
     //Loop on the Faces
-    for ( UInt iFace = 0; iFace< mesh.numBElements(); ++iFace )
+    for ( UInt iFace = 0; iFace< mesh.numBFacets(); ++iFace )
     {
         //Update the currentBdFE with the face data
-        currentBdFE.updateMeasNormalQuadPt( mesh.bElement( iFace ) );
-        ID idFace = mesh.bElement( iFace ).id();
+        currentBdFE.updateMeasNormalQuadPt( mesh.bFacet( iFace ) );
+        ID idFace = mesh.bFacet( iFace ).id();
         UInt nDofF = currentBdFE.nbNode();
 
         //For each node on the face
         for (UInt icheck = 0; icheck< nDofF; ++icheck)
         {
             bool idFaceExist(false); //Is the face in the array?
-            ID idf = dof.localToGlobalByFace(idFace,icheck,idFaceExist);
+            ID idf = dof.localToGlobalMapByBdFacet(idFace,icheck); idFaceExist=true;
 
             //If the face exists and the point is on this processor
             if (idFaceExist && (M_flags.find(idf) != M_flags.end()))
@@ -500,7 +500,7 @@ void BCManageNormal<MatrixType>::computeIntegratedNormals(const DOF& dof,Current
 
                 //if the normal is not already calculated
                 //and the marker correspond to the flag of the point
-                if ((flag == mesh.bElement(iFace).marker())||(flag == 0))
+                if ((flag == mesh.bFacet(iFace).marker())||(flag == 0))
                 {
                     //Warning: the normal is taken in the first Gauss point
                     //since the normal is the same over the triangle
