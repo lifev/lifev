@@ -135,8 +135,8 @@ int main(int argc, char** argv)
     aMesh.updateElementFaces();
     aMesh.showMe();
     cout<< " Now cleaning local Edges/faces Stuff"<<endl<<endl;
-    aMesh.cleanElementEdges();
-    aMesh.cleanElementFaces();
+    aMesh.cleanElementRidges();
+    aMesh.cleanElementFacets();
     aMesh.showMe();
     cout <<" **********************************************************"<<endl;
 

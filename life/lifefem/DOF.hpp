@@ -138,7 +138,7 @@ public:
 
     //! Ouput
     void showMe( std::ostream & out = std::cout, bool verbose = false ) const;
-    void showMeByFace(std::ostream& out = std::cout, bool verbose = false) const;
+    void showMeByBdFacet(std::ostream& out = std::cout, bool verbose = false) const;
 
     //@}
 
@@ -187,12 +187,6 @@ public:
         return M_numElement;
     }
 
-    //! Number of faces in the mesh
-    const UInt& numFaces() const
-    {
-        return M_nbFacets;
-    }
-
     //! Number of local vertices (in a elment)
     const UInt& numLocalVertices() const
     {
@@ -209,13 +203,6 @@ public:
     const UInt& numLocalFaces() const
     {
         return M_nbLocalFacets;
-    }
-
-    //! Number of Local DofByFace
-    const UInt& numLocalDofByFace() const
-    {
-        ASSERT_PRE( (M_numLocalDofByFacet>0) , "This data are not available for this reference element");
-        return M_numLocalDofByFacet;
     }
 
     //! Getter for the localDofPattern
@@ -252,17 +239,11 @@ private:
     // The local to global table
     Container_Type M_localToGlobal;
 
-    // number of faces in the mesh
-    UInt M_nbFacets;
-
     // The local to global table based on the boundary facets
     std::vector<VectorSimple<ID> > M_localToGlobalByBdFacet;
 
     // local array that maps the local dof of the
     facetToPointPtr_Type M_facetToPoint;
-
-    // face to the local dof the the element
-    UInt M_numLocalDofByFacet;
 
     // Just 5 counters
     UInt M_dofPositionByEntity[ 5 ];
@@ -282,10 +263,7 @@ DOF::DOF( MeshType& mesh, const DOFLocalPattern& fePattern):
         M_nbLocalPeaks      ( 0 ),
         M_nbLocalRidges      ( 0 ),
         M_nbLocalFacets      ( 0 ),
-        M_localToGlobal     (),
-        M_nbFacets( 0 ),
-        M_localToGlobalByFacet(),
-        M_globalToLocalByFacet()
+        M_localToGlobal     ()
 {
     //Getting the face
     switch ( fePattern.nbLocalDof() )

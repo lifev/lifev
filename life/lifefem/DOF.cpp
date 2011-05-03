@@ -49,7 +49,7 @@ namespace LifeV
 
 DOF::DOF( const DOFLocalPattern& fePattern) : M_elementDofPattern( fePattern ), M_totalDof( 0 ),
         M_numElement( 0 ), M_nbLocalPeaks( 0 ), M_nbLocalRidges( 0 ), M_nbLocalFacets( 0 ), M_localToGlobal(),
-        M_nbFacets(0),M_localToGlobalByFacet(),M_globalToLocalByFacet()
+        M_localToGlobalByBdFacet()
 {
     //Getting the face
     switch ( fePattern.nbLocalDof() )
@@ -94,9 +94,8 @@ DOF::DOF( const DOFLocalPattern& fePattern) : M_elementDofPattern( fePattern ), 
 DOF::DOF( const DOF & dof2 ) : M_elementDofPattern( dof2.M_elementDofPattern ), //, M_offset( dof2.M_offset ),
         M_totalDof( dof2.M_totalDof ), M_numElement( dof2.M_numElement ),
         M_nbLocalPeaks( dof2.M_nbLocalPeaks ), M_nbLocalRidges( dof2.M_nbLocalRidges ), M_nbLocalFacets( dof2.M_nbLocalFacets ),
-        M_localToGlobal( dof2.M_localToGlobal ),M_nbFacets(dof2.M_nbFacets),
-        M_localToGlobalByFacet(dof2.M_localToGlobalByFacet),M_globalToLocalByFacet(dof2.M_globalToLocalByFacet),
-        M_facetToPoint(dof2.M_facetToPoint),M_numLocalDofByFacet(dof2.M_numLocalDofByFacet)
+        M_localToGlobal( dof2.M_localToGlobal ),
+        M_localToGlobalByBdFacet(), M_facetToPoint(dof2.M_facetToPoint)
 {
     if ( &dof2 == this )
         return ;
@@ -154,33 +153,33 @@ void DOF::showMe( std::ostream & out, bool verbose ) const
 
 }
 
-void DOF::showMeByFace(std::ostream& out, bool verbose) const
+void DOF::showMeByBdFacet(std::ostream& out, bool verbose) const
 {
     out << "--------------------------------------------------------------------------------" << std::endl;
-    out << " Degree of freedom by face object " << std::endl;
+    out << " Degree of freedom by facet object " << std::endl;
     out << "--------------------------------------------------------------------------------" << std::endl;
 
-    out << " Number of local dof per face = " << M_numLocalDofByFacet << std::endl;
+    out << " Number of local dof per boundary facet = " << M_localToGlobalByBdFacet[0].size() << std::endl;
 
     if (verbose)
     {
         out << "*********************************************************************************" << std::endl;
-        out << " Local-to-global DOF table (DOF grouped by internal face)" << std::endl;
+        out << " Local-to-global DOF table (DOF grouped by boundary facet)" << std::endl;
         out << "*********************************************************************************" << std::endl;
         out << "=================================================================================" << std::endl;
-        out << "Face ID     Local DOF   Global DOF  " << std::endl;
+        out << "Facet ID     Local DOF   Global DOF  " << std::endl;
         out << "=================================================================================" << std::endl;
 
-        for (UInt i = 0; i < M_nbFacets; ++i)
+        for (UInt i = 0; i < M_localToGlobalByBdFacet.size(); ++i)
         {
-            for (UInt j = 0; j < M_numLocalDofByFacet; ++j)
+            for (UInt j = 0; j < M_localToGlobalByBdFacet[i].size(); ++j)
             {
                 out.width(12);
                 out << i;
                 out.width(12);
                 out << j;
                 out.width(12);
-                out << localToGlobalMap(i, j);
+                out << M_localToGlobalByBdFacet[i][j];
                 out << " # ";
                 if (j % 2 != 0) out << std::endl;
             } // for j

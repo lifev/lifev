@@ -294,6 +294,7 @@ private:
       \param numParts - unsigned int - number of partitions for the graph cutting process
     */
     void partitionConnectivityGraph(UInt numParts);
+    
     //! Updates the map between elements and processors in FSI
     /*!
       Updates M_elementDomains during FSI modeling.
@@ -729,6 +730,7 @@ void MeshPartitioner<MeshType>::findRepeatedFacesFSI()
                   MPI_INT, MPI_MAX, mpiComm->Comm() );
 }
 
+
 template<typename MeshType>
 void MeshPartitioner<MeshType>::partitionConnectivityGraph(UInt numParts)
 {
@@ -1107,6 +1109,7 @@ void MeshPartitioner<MeshType>::redistributeElements()
             }
         }
     }
+
 }
 
 template<typename MeshType>
