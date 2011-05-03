@@ -48,52 +48,20 @@ namespace LifeV
 // ===================================================
 
 DOF::DOF( const DOFLocalPattern& fePattern) : M_elementDofPattern( fePattern ), M_totalDof( 0 ),
-        M_numElement( 0 ), M_nbLocalVertex( 0 ), M_nbLocalEdge( 0 ), M_nbLocalFace( 0 ), M_localToGlobal(),
-        M_nbFace(0),M_localToGlobalByFace(),M_globalToLocalByFace()
+        M_numElement( 0 ), M_nbLocalPeaks( 0 ), M_nbLocalRidges( 0 ), M_nbLocalFacets( 0 ), M_localToGlobal(),
+        M_nbFacets(0),M_localToGlobalByFacet(),M_globalToLocalByFacet()
 {
     //Getting the face
-    switch ( fePattern.nbLocalDof() )
-    {
-    case 2:
-        // No M_faceToPoint (it is 1D)
-        M_numLocalDofByFace = 1;
-        break;
-    case 4:
-        M_faceToPoint = LinearTetra::faceToPoint;
-        M_numLocalDofByFace = 3;
-        break;
-    case 5:
-        M_faceToPoint = LinearTetraBubble::faceToPoint;
-        M_numLocalDofByFace = 3;
-        break;
-    case 10:
-        M_faceToPoint = QuadraticTetra::faceToPoint;
-        M_numLocalDofByFace = 6;
-        break;
-    case 8:
-        M_faceToPoint = LinearHexa::faceToPoint;
-        M_numLocalDofByFace = 4;
-        break;
-    case 27:
-        M_faceToPoint = QuadraticHexa::faceToPoint;
-        M_numLocalDofByFace = 27;
-        break;
-    default:
-        std::cout << "Warning: This refFE is not available for the dof by face."  <<  std::endl;
-        M_numLocalDofByFace = 0;
-        break;
-    }
-
     for ( UInt i = 0; i < 5; ++i )
         M_dofPositionByEntity[ i ] = 0;
 }
 
 DOF::DOF( const DOF & dof2 ) : M_elementDofPattern( dof2.M_elementDofPattern ), //, M_offset( dof2.M_offset ),
         M_totalDof( dof2.M_totalDof ), M_numElement( dof2.M_numElement ),
-        M_nbLocalVertex( dof2.M_nbLocalVertex ), M_nbLocalEdge( dof2.M_nbLocalEdge ), M_nbLocalFace( dof2.M_nbLocalFace ),
-        M_localToGlobal( dof2.M_localToGlobal ),M_nbFace(dof2.M_nbFace),
-        M_localToGlobalByFace(dof2.M_localToGlobalByFace),M_globalToLocalByFace(dof2.M_globalToLocalByFace),
-        M_faceToPoint(dof2.M_faceToPoint),M_numLocalDofByFace(dof2.M_numLocalDofByFace)
+        M_nbLocalPeaks( dof2.M_nbLocalPeaks ), M_nbLocalRidges( dof2.M_nbLocalRidges ), M_nbLocalFacets( dof2.M_nbLocalFacets ),
+        M_localToGlobal( dof2.M_localToGlobal ),M_nbFacets(dof2.M_nbFacets),
+        M_localToGlobalByFacet(dof2.M_localToGlobalByFacet),M_globalToLocalByFacet(dof2.M_globalToLocalByFacet),
+        M_facetToPoint(dof2.M_facetToPoint),M_numLocalDofByFacet(dof2.M_numLocalDofByFacet)
 {
     if ( &dof2 == this )
         return ;
@@ -106,22 +74,12 @@ DOF::DOF( const DOF & dof2 ) : M_elementDofPattern( dof2.M_elementDofPattern ), 
 // Methods
 // ===================================================
 
-ID DOF::localToGlobalByFace(const ID& faceId, const ID& localDof, bool& exist ) const
+ID DOF::localToGlobalMapByBdFacet(const ID& facetId, const ID& localDof ) const
 {
-    ASSERT_PRE( (M_numLocalDofByFace>0) , "This data are not available for this reference element");
-    std::map<ID,ID>::const_iterator mapIt(M_globalToLocalByFace.find(faceId) );
-
-    if (mapIt != M_globalToLocalByFace.end())
-    {
-        exist = true;
-        return M_localToGlobalByFace[(*mapIt).second][localDof];
-    }
-    else
-    {
-        exist = false;
-        return 0;
-    }
+	ASSERT_PRE( (M_localToGlobalByBdFacet.size()>0) , "The local to global map by boundary facet is void");
+	return M_localToGlobalByBdFacet[facetId][localDof];
 }
+
 
 void DOF::showMe( std::ostream & out, bool verbose ) const
 {
@@ -167,7 +125,7 @@ void DOF::showMeByFace(std::ostream& out, bool verbose) const
     out << " Degree of freedom by face object " << std::endl;
     out << "--------------------------------------------------------------------------------" << std::endl;
 
-    out << " Number of local dof per face = " << M_numLocalDofByFace << std::endl;
+    out << " Number of local dof per face = " << M_numLocalDofByFacet << std::endl;
 
     if (verbose)
     {
@@ -178,9 +136,9 @@ void DOF::showMeByFace(std::ostream& out, bool verbose) const
         out << "Face ID     Local DOF   Global DOF  " << std::endl;
         out << "=================================================================================" << std::endl;
 
-        for (UInt i = 0; i < M_nbFace; ++i)
+        for (UInt i = 0; i < M_nbFacets; ++i)
         {
-            for (UInt j = 0; j < M_numLocalDofByFace; ++j)
+            for (UInt j = 0; j < M_numLocalDofByFacet; ++j)
             {
                 out.width(12);
                 out << i;
