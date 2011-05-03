@@ -14,9 +14,7 @@
 
 [Problem] #########################################################################################
 ProblemType = Multiscale
-ProblemFile = ./MultiscaleDatabase/Models/Multiscale/1D-FSI3D_3Cylinders_S
-#ProblemFile = ./MultiscaleDatabase/Models/Multiscale/1D-FSI3D_3Cylinders_FS
-#ProblemFile = ./MultiscaleDatabase/Models/Multiscale/1D-FSI3D_3Cylinders_F
+ProblemFile = ./MultiscaleDatabase/Models/Multiscale/1D_3Cylinders_S
 
 [Solver] ##########################################################################################
 ###################################################################################################
