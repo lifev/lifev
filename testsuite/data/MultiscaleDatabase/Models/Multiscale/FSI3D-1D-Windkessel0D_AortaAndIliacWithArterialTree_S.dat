@@ -10,12 +10,12 @@
 #  License Terms: GNU LGPL
 #
 ###################################################################################################
-### MODEL: Multiscale - Ideal Left Ventricle + Reymond Stergiopulos 2009 1D Arterial Tree #########
+### MODEL: Multiscale - Aorta and Iliac + Reymond Stergiopulos 2009 1D Arterial Tree ##############
 ###################################################################################################
 
 [Multiscale] ######################################################################################
 ###################################################################################################
-modelName        = 'Aorta + Iliac + RS2009 Arterial Tree (FSI3D-OneDimensional-Windkessel0D, FlowRateValve-Stress)'
+modelName        = 'Aorta + Iliac + RS2009 Arterial Tree (FSI3D-OneDimensional-Windkessel0D, Stress)'
 modelType        = Multiscale
 couplingFlags    = ' '
 
