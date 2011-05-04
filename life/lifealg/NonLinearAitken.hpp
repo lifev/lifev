@@ -339,7 +339,7 @@ NonLinearAitken< VectorType >::computeDeltaLambdaFSI( const vector_Type& solutio
         }
 #ifdef HAVE_LIFEV_DEBUG
         else
-            Debug(7020) << "NonLinearAitken: Failure: Det=0!!" << fabs(det) << "\n";
+            Debug(7020) << "NonLinearAitken: Failure: Det=0!!" << std::fabs(det) << "\n";
 
         Debug(7020) << " --------------- NonLinearAitken: \n";
         Debug(7020) << " omegaSolid = " << omegaSolid << " omegaFluid = " << omegaFluid << "\n";

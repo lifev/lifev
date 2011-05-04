@@ -211,7 +211,7 @@ Int SolverAztecOO::solveSystem( const vector_type& rhsFull,
             M_displayer->leaderPrint( " ERROR: Iterative solver failed again.\n" );
     }
 
-    if ( abs(numIter) > M_maxIterForReuse )
+    if ( std::abs(numIter) > M_maxIterForReuse )
         resetPreconditioner();
 
     return numIter;
