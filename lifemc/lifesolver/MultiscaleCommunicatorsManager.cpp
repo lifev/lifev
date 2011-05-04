@@ -22,7 +22,7 @@
 
 *******************************************************************************
 */
-//@HEADERR
+//@HEADER
 
 /*!
  *  @file
@@ -45,10 +45,11 @@ namespace Multiscale
 // Constructors
 // ===================================================
 MultiscaleCommunicatorsManager::MultiscaleCommunicatorsManager() :
-        M_comm              (),
-        M_commContainer     (),
-        M_loadContainer     (),
-        M_modelsIDContainer ()
+        M_comm               (),
+        M_commContainer      (),
+        M_serialModelsID     (),
+        M_parallelModelsID   (),
+        M_parallelModelsLoad ()
 {
 
 #ifdef HAVE_LIFEV_DEBUG
@@ -61,6 +62,14 @@ MultiscaleCommunicatorsManager::MultiscaleCommunicatorsManager() :
 // Methods
 // ===================================================
 void
+MultiscaleCommunicatorsManager::splitCommunicators()
+{
+//    MPI_Comm localComm;
+//    MPI_Comm_split( ( dynamic_cast<Epetra_MpiComm*> ( &(*M_comm) ) )->Comm(), M_comm->MyPID(), M_comm->MyPID(), &localComm );
+//    M_comm.reset( new Epetra_MpiComm( localComm ) );
+}
+
+void
 MultiscaleCommunicatorsManager::showMe()
 {
     if ( M_comm->MyPID() == 0 )
@@ -68,17 +77,21 @@ MultiscaleCommunicatorsManager::showMe()
         std::cout << std::endl;
         std::cout << "================= Communicators Information =================" << std::endl << std::endl;
 
-        std::cout << "Groups number       = " << M_loadContainer.size() << std::endl;
-        std::cout << "Load / Models       = ";
-        for ( UInt i( 0 ); i < M_loadContainer.size(); ++i )
-        {
-            std::cout << M_loadContainer[i] << " / ";
-            for ( UInt j( 0 ); j < M_modelsIDContainer[i].size(); ++j )
-                std::cout << M_modelsIDContainer[i][j] << " ";
-            std::cout << std::endl << "                      ";
-        }
+        std::cout << "Serial models number = " << M_serialModelsID.size() << std::endl;
+        std::cout << "Serial models list   = ";
+        for ( UInt i( 0 ) ; i < M_serialModelsID.size() ; ++i )
+            std::cout << M_serialModelsID[i] << " ";
+        std::cout << std::endl << std::endl;
 
+        std::cout << "Parallel models number = " << M_parallelModelsID.size() << std::endl;
+        std::cout << "Parallel models list   = ";
+        for ( UInt i( 0 ) ; i < M_parallelModelsID.size() ; ++i )
+            std::cout << M_parallelModelsID[i] << " ";
         std::cout << std::endl;
+        std::cout << "Parallel models load   = ";
+        for ( UInt i( 0 ) ; i < M_parallelModelsID.size() ; ++i )
+            std::cout << M_parallelModelsLoad[i] << " ";
+        std::cout << std::endl << std::endl;
 
         std::cout << "=============================================================" << std::endl << std::endl;
     }

@@ -79,7 +79,7 @@ public:
     //@{
 
     //! Split the communicator among the models
-    void splitCommunicators() {}
+    void splitCommunicators();
 
     //! Display some information about the Multiscale problem (should be called after setupProblem)
     void showMe();
@@ -103,10 +103,17 @@ public:
      * @param load percentage load of the model (-1 means each model on a different processor).
      * @param modelsIDList list of models.
      */
-    void addGroup( const Real& load, const std::vector< UInt >& modelsIDList )
+    void addGroup( const Real& load, const std::vector< UInt >& modelsID )
     {
-        M_loadContainer.push_back( load );
-        M_modelsIDContainer.push_back( modelsIDList );
+        if ( load < 0 )
+            M_serialModelsID.insert( M_serialModelsID.end(), modelsID.begin(), modelsID.end() );
+        else
+        {
+            M_parallelModelsID.insert( M_parallelModelsID.end(), modelsID.begin(), modelsID.end() );
+
+            std::vector< Real > loadVector( modelsID.size(), load );
+            M_parallelModelsLoad.insert( M_parallelModelsLoad.end(), loadVector.begin(), loadVector.end() );
+        }
     }
 
     //@}
@@ -148,8 +155,9 @@ private:
     // Models communicator
     modelsCommunicatorContainer_Type    M_commContainer;
 
-    std::vector< Real >                 M_loadContainer;
-    std::vector< std::vector< UInt > >  M_modelsIDContainer;
+    std::vector< UInt >                 M_serialModelsID;
+    std::vector< UInt >                 M_parallelModelsID;
+    std::vector< Real >                 M_parallelModelsLoad;
 };
 
 } // Namespace multiscale
