@@ -9,23 +9,22 @@
 #  License Terms: GNU LGPL
 #
 ###################################################################################################
-### COUPLING: BoundaryCondition - Sinusoidal FlowRate #############################################
+### COUPLING: BoundaryCondition - Stress_Zero ########################################################
 ###################################################################################################
 
 [Multiscale]
-couplingName    = BoundaryCondition_FlowRate_Sinusoidal
+couplingName    = BoundaryCondition_Stress_Zero
 
 [boundary_conditions]
-list = 'FlowRate_Sinusoidal'  # Sinusoidal FlowRate
+list = 'Stress_Zero' # Stress_Zero
+
+    [./Stress_Zero]
+    type                = Natural
+    mode                = Normal
+    function            = 0
     
-    [./FlowRate_Sinusoidal]
-    type                = Flux
-    mode                = Full
-    component           = 3
-    function            = 'a=1; T=0.05; -a*sin(2*pi*t/T)'
-
     # Additional parameters for 1D BC
-    quantity            = Q
+    quantity            = S
     line                = first
-
+    
     [../]

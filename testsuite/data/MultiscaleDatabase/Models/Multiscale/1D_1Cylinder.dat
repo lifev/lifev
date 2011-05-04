@@ -33,7 +33,7 @@ models = '
 # List of couplings ###############################################################################
 ########### ID #### Type ############## File (without .dat) ########### Models ######## Flags #####
 couplings = '    
-            0       BoundaryCondition   FlowRate_SquareSinusoidalWave   0               0
+            0       BoundaryCondition   FlowRate_Sinusoidal             0               0
             1       BoundaryCondition   Terminal_Resistance             0               1
             '
 ###################################################################################################

@@ -26,15 +26,15 @@ couplingsPath    = './MultiscaleDatabase/Couplings/'
 # List of models ##################################################################################
 ########### ID #### Type ############## File (without .dat) #######################################
 models = '    
-            0       Fluid3D             Cylinder_tube20
+            0       Fluid3D             Cylinder_tube20-NoParser
          '
 ###################################################################################################
 
 # List of couplings ###############################################################################
 ########### ID #### Type ############## File (without .dat) ########### Models ######## Flags #####
 couplings = '    
-            0       BoundaryCondition   FlowRate_Sinusoidal             0               0
-            1       BoundaryCondition   Stress_Zero                     0               1
+            0       BoundaryCondition   FlowRate_Sinusoidal-NoParser    0               0
+            1       BoundaryCondition   Stress_Zero-NoParser            0               1
             '
 ###################################################################################################
 

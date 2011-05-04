@@ -14,7 +14,8 @@
 
 [Problem] #########################################################################################
 ProblemType = Multiscale
-ProblemFile = ./MultiscaleDatabase/Models/Multiscale/1D_1Cylinder
+#ProblemFile = ./MultiscaleDatabase/Models/Multiscale/1D_1Cylinder
+ProblemFile = ./MultiscaleDatabase/Models/Multiscale/1D_1Cylinder-NoParser
 
 [Solver] ##########################################################################################
 ###################################################################################################
@@ -22,11 +23,11 @@ ProblemFile = ./MultiscaleDatabase/Models/Multiscale/1D_1Cylinder
     [./Restart]
     Restart                    = false
     RestartFromStepNumber      = 0
-    
+
     [../time_discretization]
     initialtime                = 0.0      # [s]
     endtime                    = 0.1      # [s]
-    timestep                   = 0.00005  # [s]
+    timestep                   = 0.001    # [s]
 
     [../Algorithm]
     type                       = Explicit          # Aitken, Explicit, Newton, Broyden
@@ -40,10 +41,10 @@ ProblemFile = ./MultiscaleDatabase/Models/Multiscale/1D_1Cylinder
 
 [Physics] #########################################################################################
 ###################################################################################################
-FluidDensity                = 1.04           # density        [g/cm^3]
+FluidDensity                = 1.04          # density        [g/cm^3]
 FluidViscosity              = 0.035         # viscosity      [g/cm/s]
 FluidVenousPressure         = 0             # ven. pressure  [g/cm/s^2 - dyne/cm^2]
-SolidExternalPressure       = 1E+5          # ref. pressure  [g/cm/s^2 - dyne/cm^2]
+SolidExternalPressure       = 0             # ref. pressure  [g/cm/s^2 - dyne/cm^2]
 SolidDensity                = 1.2           # density        [g/cm^3]
 SolidPoissonCoefficient     = 0.0           # Poisson coeff. []
 SolidYoungModulus           = 4.0E6         # Young modulus  [g/cm/s^2 - dyne/cm^2]
