@@ -847,7 +847,7 @@ iterate( bchandler_raw_type& bch )
     M_linearSolver->setMatrix(*matrFull);
     Real numIter = M_linearSolver->solveSystem( rhsFull, *M_solution, matrFull);
 
-    numIter = abs(numIter);
+    numIter = std::abs(numIter);
 
     if (numIter >= M_maxIterForReuse || numIter >= M_maxIterSolver)
     {

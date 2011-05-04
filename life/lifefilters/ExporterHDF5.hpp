@@ -360,7 +360,7 @@ UInt ExporterHDF5<MeshType>::importFromTime( const Real& Time )
         SelectedTimeAndPostfix = TimeAndPostfix.front();
         for ( std::vector< std::pair< Real, Int > >::const_iterator i = TimeAndPostfix.begin();
               i < TimeAndPostfix.end() ; ++i )
-            if ( std::abs( SelectedTimeAndPostfix.first - Time ) >= std::abs( (*i).first - Time ) )
+            if ( std::fabs( SelectedTimeAndPostfix.first - Time ) >= std::fabs( (*i).first - Time ) )
                 SelectedTimeAndPostfix = *i;
     }
     this->M_listData.begin()->storedArray()->comm().Broadcast( &SelectedTimeAndPostfix.second, 1, 0 );

@@ -141,8 +141,8 @@ FSIData::setup( const GetPot& dataFile, const std::string& section )
 
     // Problem - FixPoint / EJ
     M_defaultOmega = dataFile( ( section + "/defOmega" ).data(), 0.001);
-    M_rangeOmega[0] = dataFile( ( section + "/defOmega" ).data(), std::abs( M_defaultOmega )*1024, 0);
-    M_rangeOmega[1] = dataFile( ( section + "/defOmega" ).data(), std::abs( M_defaultOmega )/1024, 1);
+    M_rangeOmega[0] = dataFile( ( section + "/defOmega" ).data(), std::fabs( M_defaultOmega )*1024., 0);
+    M_rangeOmega[1] = dataFile( ( section + "/defOmega" ).data(), std::fabs( M_defaultOmega )/1024., 1);
     M_updateEvery = dataFile( ( section + "/updateEvery" ).data(), 1);
 
     // Interface

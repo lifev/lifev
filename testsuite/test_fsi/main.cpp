@@ -428,10 +428,10 @@ private:
 
     bool sameAs(const LifeV::Real& a, const LifeV::Real& b, const LifeV::Real& relTol = 1e-6)
     {
-        const LifeV::Real maxAbs (std::max(std::abs(a),std::abs(b)));
+        const LifeV::Real maxAbs (std::max(std::fabs(a),std::fabs(b)));
         if (maxAbs < relTol*relTol) return true;
 
-        return std::abs(a-b) < relTol*maxAbs;
+        return std::fabs(a-b) < relTol*maxAbs;
     }
 
     fsi_solver_ptr M_fsi;
