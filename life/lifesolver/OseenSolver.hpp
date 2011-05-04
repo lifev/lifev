@@ -93,9 +93,10 @@ public:
     //! @name Public Types
     //@{
 
-    typedef MeshType                              mesh_Type;
-    typedef SolverType                            linearSolver_Type;
-    typedef OseenData                      data_Type;
+    typedef MeshType                                    mesh_Type;
+    typedef SolverType                                  linearSolver_Type;
+    typedef OseenData                                   data_Type;
+    typedef boost::shared_ptr< data_Type >              dataPtr_Type;
 
     typedef boost::function<Real ( const Real& t, const Real& x, const Real& y,
                                    const Real& z, const ID& i )> function_Type;
@@ -103,13 +104,13 @@ public:
     typedef boost::function<Real ( const Real& t, const Real& x, const Real& y,
                                    const Real& z, const ID& i )> source_Type;
 
-    typedef BCHandler                             bcHandler_Type;
-    typedef boost::shared_ptr<bcHandler_Type>     bcHandlerPtr_Type;
+    typedef BCHandler                                   bcHandler_Type;
+    typedef boost::shared_ptr<bcHandler_Type>           bcHandlerPtr_Type;
 
     typedef typename linearSolver_Type::matrix_type     matrix_Type;
-    typedef boost::shared_ptr<matrix_Type>        matrixPtr_Type;
+    typedef boost::shared_ptr<matrix_Type>              matrixPtr_Type;
     typedef typename linearSolver_Type::vector_type     vector_Type;
-    typedef boost::shared_ptr<vector_Type>        vectorPtr_Type;
+    typedef boost::shared_ptr<vector_Type>              vectorPtr_Type;
 
     typedef typename linearSolver_Type::prec_raw_type   preconditioner_Type;
     typedef typename linearSolver_Type::prec_type       preconditionerPtr_Type;
@@ -406,6 +407,15 @@ public:
     //! @name Get Methods
     //@{
 
+    //! Return the data container of the fluid
+    /*!
+        @return data container of the fluid
+     */
+    const dataPtr_Type& data() const
+    {
+        return M_oseenData;
+    }
+
     //! Return the density of the fluid
     /*!
         @return Density of the fluid
@@ -414,6 +424,7 @@ public:
     {
         return M_oseenData->density();
     }
+
     //! Return the viscosity of the fluid
     /*!
         @return Viscosity of the fluid
@@ -638,7 +649,7 @@ protected:
     //private members
 
     //! data for Navier-Stokes solvers
-    boost::shared_ptr<data_Type>   M_oseenData;
+    dataPtr_Type                   M_oseenData;
 
     // FE spaces
     FESpace<mesh_Type, MapEpetra>& M_velocityFESpace;
@@ -1426,13 +1437,13 @@ updateSystem( const Real         alpha,
                 M_ipStabilization.apply( *M_matrixStabilization, betaVector, false );
                 M_matrixStabilization->globalAssemble();
                 M_resetStabilization = false;
+                chrono.stop();
+                M_Displayer.leaderPrintMax( "done in " , chrono.diff() );
             }
             else
             {
-                M_Displayer.leaderPrint( "reusing stab." );
+                M_Displayer.leaderPrint( "reusing\n" );
             }
-            chrono.stop();
-            M_Displayer.leaderPrintMax( "done in " , chrono.diff() );
         }
     }
 

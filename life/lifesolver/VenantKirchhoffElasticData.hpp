@@ -40,16 +40,18 @@
  *  @maintainer  Paolo Tricerri <paolo.tricerri@epfl.ch>
  */
 
-#ifndef _DATAELASTICSTRUCTURE_H_
-#define _DATAELASTICSTRUCTURE_H_
+#ifndef VenantKirchhoffElasticData_H
+#define VenantKirchhoffElasticData_H
 
 #include <string>
 #include <iostream>
 #include <map>
-#include <life/lifefilters/GetPot.hpp>
+
 #include <boost/shared_ptr.hpp>
+
 #include <life/lifecore/LifeV.hpp>
 #include <life/lifecore/StringUtility.hpp>
+#include <life/lifefilters/GetPot.hpp>
 #include <life/lifefem/TimeData.hpp>
 
 namespace LifeV
@@ -63,11 +65,11 @@ public:
     //! @name Type definitions
     //@{
 
-    typedef TimeData                                                  Time_Type;
-    typedef boost::shared_ptr< Time_Type >                            TimePtr_Type;
+    typedef TimeData                                                  time_Type;
+    typedef boost::shared_ptr< time_Type >                            timePtr_Type;
 
-    typedef std::map<UInt, Real>                                      MaterialContainer_Type;
-    typedef MaterialContainer_Type::const_iterator                    MaterialContainer_ConstIterator;
+    typedef std::map<UInt, Real>                                      materialContainer_Type;
+    typedef materialContainer_Type::const_iterator                    materialContainerIterator_Type;
 
     //@}
 
@@ -82,7 +84,7 @@ public:
     /*!
      * @param VenantKirchhoffElasticData - VenantKirchhoffElasticData
      */
-    VenantKirchhoffElasticData( const VenantKirchhoffElasticData& VenantKirchhoffElasticData );
+    VenantKirchhoffElasticData( const VenantKirchhoffElasticData& venantKirchhoffElasticData );
 
     //@}
 
@@ -94,7 +96,7 @@ public:
     /*!
      * @param VenantKirchhoffElasticData - VenantKirchhoffElasticData
      */
-    VenantKirchhoffElasticData& operator=( const VenantKirchhoffElasticData& VenantKirchhoffElasticData );
+    VenantKirchhoffElasticData& operator=( const VenantKirchhoffElasticData& venantKirchhoffElasticData );
 
     //@}
 
@@ -122,33 +124,33 @@ public:
     /*!
      * @param TimeData shared_ptr to TimeData container
      */
-    void setTimeData( const TimePtr_Type TimeData );
+    void setTimeData( const timePtr_Type timeData ) { M_time = timeData; }
 
     //! Set density
     /*!
      * @param density solid density value
      */
-    void setDensity( const Real& density );
+    void setDensity( const Real& density ) { M_density = density; }
 
     //! Set thickness
     /*!
      * @param thickness solid thickness value
      */
-    void setThickness( const Real& thickness );
+    void setThickness( const Real& thickness ) { M_thickness = thickness; }
 
     //! Set poisson
     /*!
      * @param poisson solid poisson value
      * @param material material ID (1 by default)
      */
-    void setPoisson( const Real& poisson, const UInt& material = 1 );
+    void setPoisson( const Real& poisson, const UInt& material ) { M_materialsFlagSet = true; M_poisson[material] = poisson; }
 
     //! Set Young modulus
     /*!
      * @param Young solid young modulus value
      * @param material material ID (1 by default)
      */
-    void setYoung( const Real& young, const UInt& material = 1 );
+    void setYoung( const Real& young, const UInt& material ) { M_materialsFlagSet = true; M_young[material] = young; }
 
     //@}
 
@@ -160,19 +162,19 @@ public:
     /*!
      * @return shared_ptr to TimeData container
      */
-    const TimePtr_Type getdataTime() const;
+    const timePtr_Type& getdataTime() const { return M_time; }
 
     //! Get solid density
     /*!
      * @return Solid density
      */
-    const Real& getRho() const;
+    const Real& getRho() const { return M_density; }
 
     //! Get solid thickness
     /*!
      * @return Solid thickness
      */
-    const Real& getThickness() const;
+    const Real& getThickness() const { return M_thickness; }
 
     //! Get solid poisson coefficient
     /*!
@@ -206,45 +208,46 @@ public:
     /*!
      * @return FE order
      */
-    const std::string& getOrder() const;
+    const std::string& getOrder() const { return M_order; }
 
     //! Get solid amplification factor
     /*!
      * @return Solid amplification factor
      */
-    const Real& getFactor() const;
+    const Real& getFactor() const { return M_factor; }
 
     //! Get verbose level
     /*!
      * @return verbose level
      */
-    const UInt& getVerbose() const;
+    const UInt& getVerbose() const { return M_verbose; }
 
     //! Get solid type
     /*!
      * @return solid type
      */
-    const std::string& getSolidType();
+    const std::string& getSolidType() { return M_solidType; }
 
     //! Get whether to use or not exact Jacobian
     /*!
      * @return true: if using exact Jacobian, false: otherwise
      */
-    const bool& getUseExactJacobian() const;
+    const bool& getUseExactJacobian() const { return M_useExactJacobian; }
 
     //@}
 
 private:
 
     //! Data containers for time and mesh
-    TimePtr_Type           M_time;
+    timePtr_Type           M_time;
 
     //! Physics
     Real                   M_density;
     Real                   M_thickness;
 
-    MaterialContainer_Type M_poisson;
-    MaterialContainer_Type M_young;
+    bool                   M_materialsFlagSet;
+    materialContainer_Type M_poisson;
+    materialContainer_Type M_young;
 
     //! Space discretization
     std::string            M_order;
@@ -255,9 +258,8 @@ private:
 
     std::string            M_solidType;
     bool                   M_useExactJacobian;
-
 };
 
 } // end namespace LifeV
 
-#endif // end _DATAELASTICSTRUCTURE_H_
+#endif // VenantKirchhoffElasticData_H

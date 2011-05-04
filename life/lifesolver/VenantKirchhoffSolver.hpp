@@ -1094,12 +1094,6 @@ VenantKirchhoffSolver<Mesh, SolverType>::setDataFromGetPot( const GetPot& dataFi
 {
   M_linearSolver->setDataFromGetPot( dataFile, "solid/solver" );
   M_linearSolver->setupPreconditioner(dataFile, "solid/prec");
-
-  UInt marker = M_FESpace->mesh()->volumeList( 0 ).marker();
-  if (!M_data->getYoung(marker))
-    M_data->setYoung(dataFile( "solid/physics/young", 0. ), marker);
-  if (!M_data->getPoisson(marker))
-    M_data->setPoisson(dataFile( "solid/physics/poisson", 0. ), marker);
 }
 
 

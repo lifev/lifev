@@ -887,6 +887,20 @@ public:
      */
     point_Type & point( UInt const i );
 
+    //! Returns the i-th mesh Point at the initial configuration.
+    /*!
+     * Note: this method simply call point();
+     * it has been added for compatibility reasons with RegionMesh3D and the exporters.
+     */
+    point_Type const & pointInitial( UInt const i ) const { return point(i); }
+
+    //! Returns the i-th mesh Point at the initial configuration.
+    /*!
+     * Note: this method simply call point();
+     * it has been added for compatibility reasons with RegionMesh3D and the exporters.
+     */
+    point_Type & pointInitial( UInt const i ) { return point(i); }
+
     //! Returns a reference to the i-th mesh Boundary Point.
     /**
      *  Returns the i-th Boundary Point in the mesh.

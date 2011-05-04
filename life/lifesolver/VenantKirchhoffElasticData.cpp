@@ -43,19 +43,19 @@
  *  @maintainer  Paolo Tricerri <paolo.tricerri@epfl.ch>
  */
 
-#include <life/lifecore/LifeV.hpp>
 #include <life/lifesolver/VenantKirchhoffElasticData.hpp>
+
+namespace LifeV
+{
 
 //=====================================================
 // Constructors
 //=====================================================
-
-namespace LifeV
-{
 VenantKirchhoffElasticData::VenantKirchhoffElasticData():
         M_time                             ( ),
         M_density                          ( ),
         M_thickness                        ( ),
+        M_materialsFlagSet                 ( false ),
         M_poisson                          ( ),
         M_young                            ( ),
         M_order                            ( ),
@@ -64,16 +64,17 @@ VenantKirchhoffElasticData::VenantKirchhoffElasticData():
 {
 }
 
-VenantKirchhoffElasticData::VenantKirchhoffElasticData( const VenantKirchhoffElasticData& VenantKirchhoffElasticData ):
-        TimeData                           ( VenantKirchhoffElasticData ),
-        M_time                             ( VenantKirchhoffElasticData.M_time ),
-        M_density                          ( VenantKirchhoffElasticData.M_density ),
-        M_thickness                        ( VenantKirchhoffElasticData.M_thickness ),
-        M_poisson                          ( VenantKirchhoffElasticData.M_poisson ),
-        M_young                            ( VenantKirchhoffElasticData.M_young ),
-        M_order                            ( VenantKirchhoffElasticData.M_order ),
-        M_factor                           ( VenantKirchhoffElasticData.M_factor ),
-        M_verbose                          ( VenantKirchhoffElasticData.M_verbose )
+VenantKirchhoffElasticData::VenantKirchhoffElasticData( const VenantKirchhoffElasticData& venantKirchhoffElasticData ):
+        TimeData                           ( venantKirchhoffElasticData ),
+        M_time                             ( venantKirchhoffElasticData.M_time ),
+        M_density                          ( venantKirchhoffElasticData.M_density ),
+        M_thickness                        ( venantKirchhoffElasticData.M_thickness ),
+        M_materialsFlagSet                 ( venantKirchhoffElasticData.M_materialsFlagSet ),
+        M_poisson                          ( venantKirchhoffElasticData.M_poisson ),
+        M_young                            ( venantKirchhoffElasticData.M_young ),
+        M_order                            ( venantKirchhoffElasticData.M_order ),
+        M_factor                           ( venantKirchhoffElasticData.M_factor ),
+        M_verbose                          ( venantKirchhoffElasticData.M_verbose )
 {
 }
 
@@ -81,18 +82,19 @@ VenantKirchhoffElasticData::VenantKirchhoffElasticData( const VenantKirchhoffEla
 // Operators
 // ===================================================
 VenantKirchhoffElasticData&
-VenantKirchhoffElasticData::operator=( const VenantKirchhoffElasticData& VenantKirchhoffElasticData )
+VenantKirchhoffElasticData::operator=( const VenantKirchhoffElasticData& venantKirchhoffElasticData )
 {
-    if ( this != &VenantKirchhoffElasticData )
+    if ( this != &venantKirchhoffElasticData )
     {
-        M_time                             = VenantKirchhoffElasticData.M_time;
-        M_density                          = VenantKirchhoffElasticData.M_density;
-        M_thickness                        = VenantKirchhoffElasticData.M_thickness;
-        M_poisson                          = VenantKirchhoffElasticData.M_poisson;
-        M_young                            = VenantKirchhoffElasticData.M_young;
-        M_order                            = VenantKirchhoffElasticData.M_order;
-        M_factor                           = VenantKirchhoffElasticData.M_factor;
-        M_verbose                          = VenantKirchhoffElasticData.M_verbose;
+        M_time                             = venantKirchhoffElasticData.M_time;
+        M_density                          = venantKirchhoffElasticData.M_density;
+        M_thickness                        = venantKirchhoffElasticData.M_thickness;
+        M_materialsFlagSet                 = venantKirchhoffElasticData.M_materialsFlagSet;
+        M_poisson                          = venantKirchhoffElasticData.M_poisson;
+        M_young                            = venantKirchhoffElasticData.M_young;
+        M_order                            = venantKirchhoffElasticData.M_order;
+        M_factor                           = venantKirchhoffElasticData.M_factor;
+        M_verbose                          = venantKirchhoffElasticData.M_verbose;
     }
 
     return *this;
@@ -106,42 +108,47 @@ VenantKirchhoffElasticData::setup( const GetPot& dataFile, const std::string& se
 {
     // If data time has not been set
     if ( !M_time.get() )
-        M_time.reset( new Time_Type( dataFile, section + "/time_discretization" ) );
+        M_time.reset( new time_Type( dataFile, section + "/time_discretization" ) );
 
     // physics
-    M_density   = dataFile( ( section + "/physics/density" ).data(), 1. );
+    M_solidType = dataFile( ( section + "/physics/solidType" ).data(), "linearVenantKirchhof" );
+    M_density   = dataFile( ( section + "/physics/density"   ).data(), 1. );
     M_thickness = dataFile( ( section + "/physics/thickness" ).data(), 0.1 );
-    M_useExactJacobian = dataFile( ( section + "/useExactJacobian" ).data(), false );
 
     UInt materialsNumber = dataFile.vector_variable_size( ( section + "/physics/material_flag" ).data() );
     if ( materialsNumber == 0 )
     {
+        // If no material is specified in the data file the code assume that there is just one material
+        // and by default it is memorized with ID 1. Getters and Setters have been designed to deal with thic choice.
+        M_materialsFlagSet = false;
 
-        //WARNING("The material flag was not set from data file. Its value will be deduced from the first volume marker.");
-//         M_young[1]   = dataFile( ( section + "/physics/young" ).data(), 0. );
-//         M_poisson[1] = dataFile( ( section + "/physics/poisson" ).data(), 0. );
+        M_young[1]   = dataFile( ( section + "/physics/young"   ).data(), 0. );
+        M_poisson[1] = dataFile( ( section + "/physics/poisson" ).data(), 0. );
     }
     else
     {
-        ASSERT( materialsNumber == dataFile.vector_variable_size( ( section + "/physics/young" ).data()),   "!!! ERROR: Inconsistent size for Young Modulus !!!");
-        ASSERT( materialsNumber == dataFile.vector_variable_size( ( section + "/physics/poisson" ).data() ), "!!! ERROR: Inconsistent size for Poisson Coeff. !!!");
+        M_materialsFlagSet = true;
+
+        // These asserts are commented because in some cases we need to initialize the materials with default Young and Poisson, setting the correct values a posteriori.
+        //ASSERT( M_materialsFlagSet == dataFile.vector_variable_size( ( section + "/physics/young"   ).data()),  "!!! ERROR: Inconsistent size for Young Modulus !!!");
+        //ASSERT( M_materialsFlagSet == dataFile.vector_variable_size( ( section + "/physics/poisson" ).data() ), "!!! ERROR: Inconsistent size for Poisson Coef. !!!");
 
         UInt material(0);
         for ( UInt i(0) ; i < materialsNumber ; ++i )
         {
-            material            = dataFile( ( section + "/physics/material_flag" ).data(), 0., i );
-            M_young[material]   = dataFile( ( section + "/physics/young" ).data(), 0., i );
-            M_poisson[material] = dataFile( ( section + "/physics/poisson" ).data(), 0., i );
+            material            = dataFile( ( section + "/physics/material_flag" ).data(), 0, i );
+            M_young[material]   = dataFile( ( section + "/physics/young"         ).data(), 0., i );
+            M_poisson[material] = dataFile( ( section + "/physics/poisson"       ).data(), 0., i );
         }
     }
 
     // space_discretization
-    M_order     = dataFile( "solid/space_discretization/order", "P1" );
+    M_order            = dataFile( ( section + "/space_discretization/order" ).data(), "P1" );
 
     // miscellaneous
-    M_factor  = dataFile( "solid/miscellaneous/factor", 1.0 );
-    M_verbose = dataFile( "solid/miscellaneous/verbose", 1 );
-    M_solidType = dataFile( "solid/physics/solidType", "linearVenantKirchhof" );
+    M_factor           = dataFile( ( section + "/miscellaneous/factor"  ).data(), 1.0 );
+    M_verbose          = dataFile( ( section + "/miscellaneous/verbose" ).data(), 1 );
+    M_useExactJacobian = dataFile( ( section + "/useExactJacobian"      ).data(), false );
 }
 
 void
@@ -151,12 +158,12 @@ VenantKirchhoffElasticData::showMe( std::ostream& output ) const
     output << "\n*** Values for data [solid/physics]\n\n";
     output << "density                          = " << M_density << std::endl;
     output << "thickness                        = " << M_thickness << std::endl;
-    for ( MaterialContainer_ConstIterator i = M_young.begin() ; i != M_young.end() ; ++i )
+    for ( materialContainerIterator_Type i = M_young.begin() ; i != M_young.end() ; ++i )
         output << "young[" << i->first << "]                         = " << i->second << std::endl;
-    for ( MaterialContainer_ConstIterator i = M_poisson.begin() ; i != M_poisson.end() ; ++i )
+    for ( materialContainerIterator_Type i = M_poisson.begin() ; i != M_poisson.end() ; ++i )
         output << "poisson[" << i->first << "]                       = " << i->second << std::endl;
 
-    for ( MaterialContainer_ConstIterator i = M_poisson.begin() ; i != M_poisson.end() ; ++i )
+    for ( materialContainerIterator_Type i = M_poisson.begin() ; i != M_poisson.end() ; ++i )
     {
         output << "Lame - lambda[" << i->first << "]                 = " << getLambda( i->first ) << std::endl;
         output << "Lame - mu[" << i->first << "]                     = " << getMu( i->first ) << std::endl;
@@ -174,68 +181,23 @@ VenantKirchhoffElasticData::showMe( std::ostream& output ) const
 }
 
 // ===================================================
-// Set Method
-// ===================================================
-void
-VenantKirchhoffElasticData::setTimeData( const TimePtr_Type TimeData )
-{
-    M_time = TimeData;
-}
-
-void
-VenantKirchhoffElasticData::setDensity( const Real& density )
-{
-    M_density = density;
-}
-
-void
-VenantKirchhoffElasticData::setThickness( const Real& thickness )
-{
-    M_thickness = thickness;
-}
-
-void
-VenantKirchhoffElasticData::setPoisson( const Real& poisson, const UInt& material )
-{
-    M_poisson[material] = poisson;
-}
-
-void
-VenantKirchhoffElasticData::setYoung( const Real& young, const UInt& material )
-{
-    M_young[material] = young;
-}
-
-// ===================================================
 // Get Method
 // ===================================================
-const VenantKirchhoffElasticData::TimePtr_Type
-VenantKirchhoffElasticData::getdataTime() const
-{
-    return M_time;
-}
-
-const Real&
-VenantKirchhoffElasticData::getRho() const
-{
-    return M_density;
-}
-
-const Real&
-VenantKirchhoffElasticData::getThickness() const
-{
-    return M_thickness;
-}
-
 Real
 VenantKirchhoffElasticData::getPoisson( const UInt& material ) const
 {
-    MaterialContainer_Type::const_iterator IT = M_poisson.find( material );
-    if (IT != M_poisson.end())
+    materialContainer_Type::const_iterator IT;
+
+    if ( M_materialsFlagSet )
+        IT = M_poisson.find( material );
+    else
+        IT = M_poisson.find( 1 );
+
+    if ( IT != M_poisson.end() )
         return M_poisson.find( material )->second;
     else
     {
-        //WARNING("the Poisson modulus has not been set");
+        std::cout << " !!! Warning: the Poisson modulus has not been set !!!" << std::endl;
         return 0;
     }
 }
@@ -243,12 +205,17 @@ VenantKirchhoffElasticData::getPoisson( const UInt& material ) const
 Real
 VenantKirchhoffElasticData::getYoung( const UInt& material ) const
 {
-    MaterialContainer_Type::const_iterator IT = M_young.find( material );
-    if (IT != M_young.end())
+    materialContainer_Type::const_iterator IT;
+    if ( M_materialsFlagSet )
+        IT = M_young.find( material );
+    else
+        IT = M_young.find( 1 );
+
+    if ( IT != M_young.end() )
         return IT->second;
     else
     {
-        //WARNING("the Young modulus has not been set");
+        std::cout << " !!! Warning: the Young modulus has not been set !!!" << std::endl;
         return 0;
     }
 }
@@ -256,44 +223,23 @@ VenantKirchhoffElasticData::getYoung( const UInt& material ) const
 Real
 VenantKirchhoffElasticData::getLambda( const UInt& material ) const
 {
-    return M_young.find( material )->second * M_poisson.find( material )->second /
-           ( ( 1.0 + M_poisson.find( material )->second ) * ( 1.0 - 2.0 * M_poisson.find( material )->second ) );
+    Real young, poisson;
+
+    young   = getYoung( material );
+    poisson = getPoisson( material );
+
+    return young * poisson / ( ( 1.0 + poisson ) * ( 1.0 - 2.0 * poisson ) );
 }
 
 Real
 VenantKirchhoffElasticData::getMu( const UInt& material ) const
 {
-    return M_young.find( material )->second/( 2.0 * ( 1.0 + M_poisson.find( material )->second ) );
-}
+    Real young, poisson;
 
-const std::string&
-VenantKirchhoffElasticData::getOrder() const
-{
-    return M_order;
-}
+    young   = getYoung( material );
+    poisson = getPoisson( material );
 
-const Real&
-VenantKirchhoffElasticData::getFactor() const
-{
-    return M_factor;
-}
-
-const UInt&
-VenantKirchhoffElasticData::getVerbose() const
-{
-    return M_verbose;
-}
-
-const std::string&
-VenantKirchhoffElasticData::getSolidType()
-{
-    return M_solidType;
-}
-
-const bool&
-VenantKirchhoffElasticData::getUseExactJacobian() const
-{
-    return M_useExactJacobian;
+    return young / ( 2.0 * ( 1.0 + poisson ) );
 }
 
 }
