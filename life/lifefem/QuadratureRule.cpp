@@ -261,7 +261,7 @@ UInt QuadratureRule::checkExactnessTetra() const
         partialSum += weight(iterQ);
     }
 
-    if ( std::abs(partialSum - 1.0/6.0) > S_exactnessTol)
+    if ( std::fabs(partialSum - 1.0/6.0) > S_exactnessTol)
     {
         return 0;
     }
@@ -273,7 +273,7 @@ UInt QuadratureRule::checkExactnessTetra() const
         partialSum += (quadPointCoor(iterQ,0) + quadPointCoor(iterQ,1) + 2*quadPointCoor(iterQ,2) )*weight(iterQ);
     }
 
-    if ( std::abs(partialSum - 1.0/6.0) > S_exactnessTol)
+    if ( std::fabs(partialSum - 1.0/6.0) > S_exactnessTol)
     {
         return 0;
     }
@@ -288,7 +288,7 @@ UInt QuadratureRule::checkExactnessTetra() const
                       )*weight(iterQ);
     }
 
-    if ( std::abs(partialSum - 1.0/24.0) > S_exactnessTol)
+    if ( std::fabs(partialSum - 1.0/24.0) > S_exactnessTol)
     {
         return 1;
     }
@@ -304,7 +304,7 @@ UInt QuadratureRule::checkExactnessTetra() const
                       )*weight(iterQ);
     }
 
-    if ( std::abs(partialSum - 5.0/72.0) > S_exactnessTol)
+    if ( std::fabs(partialSum - 5.0/72.0) > S_exactnessTol)
     {
         return 2;
     }
@@ -319,7 +319,7 @@ UInt QuadratureRule::checkExactnessTetra() const
                       )*weight(iterQ);
     }
 
-    if ( std::abs(partialSum - 1.0/72.0) > S_exactnessTol)
+    if ( std::fabs(partialSum - 1.0/72.0) > S_exactnessTol)
     {
         return 3;
     }
@@ -339,7 +339,7 @@ UInt QuadratureRule::checkExactnessTriangle() const
         partialSum += weight(iterQ);
     }
 
-    if ( std::abs(partialSum - 0.5) > S_exactnessTol)
+    if ( std::fabs(partialSum - 0.5) > S_exactnessTol)
     {
         return 0;
     }
@@ -353,7 +353,7 @@ UInt QuadratureRule::checkExactnessTriangle() const
                       * weight(iterQ);
     }
 
-    if ( std::abs(partialSum - 1.0/3.0) > S_exactnessTol)
+    if ( std::fabs(partialSum - 1.0/3.0) > S_exactnessTol)
     {
         return 0;
     }
@@ -368,7 +368,7 @@ UInt QuadratureRule::checkExactnessTriangle() const
                       * weight(iterQ);
     }
 
-    if ( std::abs(partialSum - 5.0/24.0) > S_exactnessTol)
+    if ( std::fabs(partialSum - 5.0/24.0) > S_exactnessTol)
     {
         return 1;
     }
@@ -383,7 +383,7 @@ UInt QuadratureRule::checkExactnessTriangle() const
                       * weight(iterQ);
     }
 
-    if ( std::abs(partialSum + 23.0/120.0) > S_exactnessTol)
+    if ( std::fabs(partialSum + 23.0/120.0) > S_exactnessTol)
     {
         return 2;
     }
@@ -399,7 +399,7 @@ UInt QuadratureRule::checkExactnessTriangle() const
                       * weight(iterQ);
     }
 
-    if ( std::abs(partialSum - 1.0/40.0) > S_exactnessTol)
+    if ( std::fabs(partialSum - 1.0/40.0) > S_exactnessTol)
     {
         return 3;
     }
@@ -415,7 +415,7 @@ UInt QuadratureRule::checkExactnessTriangle() const
                       ) * weight(iterQ);
     }
 
-    if ( std::abs(partialSum - 1.0/84.0) > S_exactnessTol)
+    if ( std::fabs(partialSum - 1.0/84.0) > S_exactnessTol)
     {
         return 4;
     }
@@ -434,7 +434,7 @@ UInt QuadratureRule::checkExactnessSegment() const
         partialSum += weight(iterQ);
     }
 
-    if ( std::abs(partialSum - 1.0) > S_exactnessTol)
+    if ( std::fabs(partialSum - 1.0) > S_exactnessTol)
     {
         return 0;
     }
@@ -446,7 +446,7 @@ UInt QuadratureRule::checkExactnessSegment() const
         partialSum += (quadPointCoor(iterQ,0))*weight(iterQ);
     }
 
-    if ( std::abs(partialSum - 1.0/2.0) > S_exactnessTol)
+    if ( std::fabs(partialSum - 1.0/2.0) > S_exactnessTol)
     {
         return 0;
     }
@@ -458,7 +458,7 @@ UInt QuadratureRule::checkExactnessSegment() const
         partialSum += (quadPointCoor(iterQ,0)*quadPointCoor(iterQ,0) )*weight(iterQ);
     }
 
-    if ( std::abs(partialSum - 1.0/3.0) > S_exactnessTol)
+    if ( std::fabs(partialSum - 1.0/3.0) > S_exactnessTol)
     {
         return 1;
     }
@@ -470,7 +470,7 @@ UInt QuadratureRule::checkExactnessSegment() const
         partialSum += (quadPointCoor(iterQ,0)*quadPointCoor(iterQ,0)*quadPointCoor(iterQ,0) )*weight(iterQ);
     }
 
-    if ( std::abs(partialSum - 1.0/4.0) > S_exactnessTol)
+    if ( std::fabs(partialSum - 1.0/4.0) > S_exactnessTol)
     {
         return 2;
     }
@@ -483,7 +483,7 @@ UInt QuadratureRule::checkExactnessSegment() const
                       )*weight(iterQ);
     }
 
-    if ( std::abs(partialSum - 1.0/5.0) > S_exactnessTol)
+    if ( std::fabs(partialSum - 1.0/5.0) > S_exactnessTol)
     {
         return 3;
     }
@@ -498,7 +498,7 @@ UInt QuadratureRule::checkExactnessSegment() const
                       )*weight(iterQ);
     }
 
-    if ( std::abs(partialSum - 1.0/6.0) > S_exactnessTol)
+    if ( std::fabs(partialSum - 1.0/6.0) > S_exactnessTol)
     {
         return 4;
     }

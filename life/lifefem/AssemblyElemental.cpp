@@ -1478,7 +1478,7 @@ void ipstab_bagrad( const Real         coef,
                 sum1 += betaLoc * bdfe.normal(icoor, ig);
             }
         }
-        bn[ ig ] = std::abs(sum1);
+        bn[ ig ] = std::fabs(sum1);
     }
 
     for ( UInt ig = 0; ig < bdfe.nbQuadPt(); ++ig )

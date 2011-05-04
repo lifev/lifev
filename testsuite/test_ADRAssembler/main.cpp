@@ -221,7 +221,7 @@ main( int argc, char** argv )
 #ifdef TEST_RHS
     Real matrixNorm(systemMatrix->norm1());
     if (verbose) std::cout << " ---> Norm 1 : " << matrixNorm << std::endl;
-    if ( abs(matrixNorm - 1.68421 ) > 1e-3)
+    if ( std::fabs(matrixNorm - 1.68421 ) > 1e-3)
     {
         std::cout << " <!> Matrix has changed !!! <!> " << std::endl;
         return EXIT_FAILURE;

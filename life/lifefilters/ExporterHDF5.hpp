@@ -361,8 +361,8 @@ UInt ExporterHDF5<MeshType>::importFromTime( const Real& Time )
         // Find the closest time step
         SelectedTimeAndPostfix = TimeAndPostfix.front();
         for ( std::vector< std::pair< Real, Int > >::const_iterator i = TimeAndPostfix.begin();
-                i < TimeAndPostfix.end() ; ++i )
-            if ( std::abs( SelectedTimeAndPostfix.first - Time ) >= std::abs( (*i).first - Time ) )
+              i < TimeAndPostfix.end() ; ++i )
+            if ( std::fabs( SelectedTimeAndPostfix.first - Time ) >= std::fabs( (*i).first - Time ) )
                 SelectedTimeAndPostfix = *i;
     }
     this->M_dataVector.begin()->storedArrayPtr()->comm().Broadcast( &SelectedTimeAndPostfix.second, 1, 0 );

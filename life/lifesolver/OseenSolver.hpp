@@ -1736,7 +1736,7 @@ OseenSolver<MeshType, SolverType>::removeMean( vector_Type& x )
     mean = ones* ( M_matrixMassPtr * x );
     x += ( -mean );
 
-    ASSERT( abs( ones* ( M_matrixMassPtr * x ) ) < 1e-9 , "after removeMean the mean pressure should be zero!");
+    ASSERT( std::fabs( ones* ( M_matrixMassPtr * x ) ) < 1e-9 , "after removeMean the mean pressure should be zero!");
 
     return mean;
 
