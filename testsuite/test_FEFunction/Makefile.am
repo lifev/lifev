@@ -16,9 +16,9 @@ SUFFIXES        = .cpp .hpp .idl .c .h .f .F .o .moc
 include $(top_srcdir)/testsuite/Makefile.testsuite
 
 check_HEADERS = fefct.hpp user_fun.hpp
-check_PROGRAMS = test_fefct
+check_PROGRAMS = test_FEFunction
 
-test_fefct_SOURCES = main.cpp fefct.cpp user_fun.cpp
+test_FEFunction_SOURCES = main.cpp fefct.cpp user_fun.cpp
 
 EXTRA_DIST = data testsuite.at
 
