@@ -508,11 +508,11 @@ void StabilizationSD<MeshType, DofType>::computeParameters(const Real dt, const 
     }
 
     // second, calculate its max norm
-    Real bmax = fabs( beta.vec()[ 0 ] );
+    Real bmax = std::fabs( beta.vec()[ 0 ] );
     for ( UInt l = 1; l < UInt( M_fe.nbCoor()*M_fe.nbNode ); ++l )
     {
-        if ( bmax < fabs( beta.vec()[ l ] ) )
-            bmax = fabs( beta.vec()[ l ] );
+        if ( bmax < std::fabs( beta.vec()[ l ] ) )
+            bmax = std::fabs( beta.vec()[ l ] );
     }
 
     coeffBeta = M_gammaBeta  / sqrt( 4/( dt * dt)

@@ -847,7 +847,7 @@ VenantKirchhoffSolver<Mesh, SolverType>::iterateLin( bchandler_Type& bch )
 
   //M_Displayer->leaderPrintMax("dz norm     = " , M_disp.NormInf() );
 
-  numIter = abs(numIter);
+  numIter = std::abs(numIter);
 
   *M_residual_d =  *M_massStiff*(*M_disp);
   //    M_residual_d -= M_rhsNoBC;
