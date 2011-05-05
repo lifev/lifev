@@ -619,7 +619,6 @@ public:
 
 
     //! Getter for the right hand side
-    vectorPtr_Type const& getRHS       ( ) const {return M_rhs;}
 
     //! Export the fluid velocity and pressure by copying it to an external vector
     /*!

@@ -260,15 +260,12 @@ public:
   */
   void evalResidualDisplacement( const vector_Type& solution );
 
-<<<<<<< HEAD
   //! Evaluates residual of the displacement in the Linearized problem of ExactJcobian. FSI problems
   /*!
     \param sol, the current displacement of he sturcture
   */
   void evalResidualDisplacementLin( const vector_Type& solution );
 
-=======
->>>>>>> First attempt to insert SS in FSI. LifeV compiles and the test_fsi as well.
   void evalConstraintTensor();
 
   //! Sets the initial displacement, velocity, acceleration
@@ -849,7 +846,7 @@ StructuralSolver<Mesh, SolverType>::iterate( bchandler_Type& bch )
 
     //*this->M_residual_d = *this->M_mass*(*this->M_disp);
     //*this->M_residual_d -= *this->M_rhsNoBC;
-<<<<<<< HEAD
+
   
 }
 
@@ -896,17 +893,7 @@ StructuralSolver<Mesh, SolverType>::iterateLin( bchandler_Type& bch )
   //This line must be checked for FSI. In VenantKirchhoffSolver.hpp it has a 
   //totally different expression.For structural problems it is not used
   evalResidualDisplacementLin(*M_disp);
-=======
->>>>>>> First attempt to insert SS in FSI. LifeV compiles and the test_fsi as well.
-  
-}
 
-
-template <typename Mesh, typename SolverType>
-void
-StructuralSolver<Mesh, SolverType>::iterateLin( bchandler_Type& bch )
-{
-  std::cout<< "Non faccio niente, ehmbé?" << std::endl;
 }
 
 
@@ -992,7 +979,7 @@ StructuralSolver<Mesh, SolverType>::evalResidualDisplacement( const vector_Type&
     this->M_Displayer->leaderPrintMax("done in ", chrono.diff() );
 }
 
-<<<<<<< HEAD
+
 template <typename Mesh, typename SolverType>
 void
 StructuralSolver<Mesh, SolverType>::evalResidualDisplacementLin( const vector_Type& solution )
@@ -1017,8 +1004,6 @@ StructuralSolver<Mesh, SolverType>::evalResidualDisplacementLin( const vector_Ty
 }
 
 
-=======
->>>>>>> First attempt to insert SS in FSI. LifeV compiles and the test_fsi as well.
 
 template <typename Mesh, typename SolverType>
 void
