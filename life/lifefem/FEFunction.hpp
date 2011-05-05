@@ -28,7 +28,7 @@
 
 /*!
     @file
-    @brief File containing the FEFct, FEScalarFct, FEVectorFct and FEMatrixFct classes
+    @brief File containing the FEFunction class
 
     @author A. Fumagalli <alessio.fumagalli@mail.polimi.it>
     @author M. Kern <michel.kern@inria.fr>
@@ -41,7 +41,7 @@
 namespace LifeV
 {
 
-//! FEFct - This class gives an abstract implementation of a finite element function on finite elements fields.
+//! FEFunction - This class gives an abstract implementation of a finite element function on finite elements fields.
 /*!
   @author A. Fumagalli <alessio.fumagalli@mail.polimi.it>
   @author M. Kern <michel.kern@inria.fr>
@@ -59,7 +59,7 @@ namespace LifeV
   \f[
 	f(S, u) = S^2 + \sin( u_0 )
   \f]
-  then create a new class MyFun which inherit from FEFct<MeshType, MapType, Real> where the eval method, 
+  then create a new class MyFun which inherit from FEFunction<MeshType, MapType, Real> where the eval method, 
   using the methods scalarField and vectorField, can be written as
   @code
   const Real S = scalarField(0).eval( iElem, point, time );
@@ -77,7 +77,7 @@ namespace LifeV
   @todo Add a method without the element id, less efficient but more flexible.
 */
 template < typename MeshType, typename MapType, typename ReturnType >
-class FEFct
+class FEFunction
 {
 public:
 
@@ -102,6 +102,14 @@ public:
     typedef typename FEField_Type::point_Type point_Type;
 
     //@}
+
+    //! @name Constructors and destructor
+    //@{
+
+    //! Empty constructor for the class.
+    FEFunction ( )
+    {}
+
 
     //! @name Methods
     //@{

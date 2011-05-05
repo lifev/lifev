@@ -47,19 +47,20 @@ typedef MapEpetra map_Type;
 typedef Exporter < regionMesh_Type > exporter_Type;
 typedef boost::shared_ptr < exporter_Type > exporterPtr_Type;
 
-typedef FESpace < regionMesh_Type, map_Type > fESpace_Type;
+typedef FESpace < regionMesh_Type, map_Type > FESpace_Type;
+typedef boost::shared_ptr < FESpace_Type > FESpacePtr_Type; 
 
-typedef FEVectorField < regionMesh_Type, map_Type > fEVectorField_Type;
-typedef boost::shared_ptr < fEVectorField_Type > fEVectorFieldPtr_Type;
+typedef FEVectorField < regionMesh_Type, map_Type > FEVectorField_Type;
+typedef boost::shared_ptr < FEVectorField_Type > FEVectorFieldPtr_Type;
 
-typedef FEScalarField < regionMesh_Type, map_Type > fEScalarField_Type;
-typedef boost::shared_ptr < fEScalarField_Type > fEScalarFieldPtr_Type;
+typedef FEScalarField < regionMesh_Type, map_Type > FEScalarField_Type;
+typedef boost::shared_ptr < FEScalarField_Type > FEScalarFieldPtr_Type;
 
-typedef FEFct < regionMesh_Type, map_Type, Vector > fEVectorFct_Type;
-typedef boost::shared_ptr < fEVectorFct_Type > fEVectorFctPtr_Type;
+typedef FEFunction < regionMesh_Type, map_Type, Vector > FEVectorFct_Type;
+typedef boost::shared_ptr < FEVectorFct_Type > FEVectorFctPtr_Type;
 
-typedef FEFct < regionMesh_Type, map_Type, Real > fEScalarFct_Type;
-typedef boost::shared_ptr < fEScalarFct_Type > fEScalarFctPtr_Type;
+typedef FEFunction < regionMesh_Type, map_Type, Real > FEScalarFct_Type;
+typedef boost::shared_ptr < FEScalarFct_Type > FEScalarFctPtr_Type;
 
 } // Namespace LifeV
 
@@ -72,11 +73,11 @@ using namespace LifeV;
 //!                       Data
 // ===================================================
 
-class MyFun : public fEScalarFct_Type
+class MyFun : public FEScalarFct_Type
 {
 public:
     virtual Real eval ( const UInt& iElem,
-                        const fEScalarFct_Type::point_Type& P,
+                        const FEScalarFct_Type::point_Type& P,
                         const Real& time = 0. ) const;
 };
 

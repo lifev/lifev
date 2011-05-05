@@ -154,12 +154,12 @@ public:
 
     //! Interpolation method for FEFunctions
     /*!
-      @param fEFct Pointer to an FEFct
+      @param fEFunction Pointer to an FEFunction
       @param vector Interpolated function
       @param time Time in the interpolation
     */
-    template < typename FEFctType, typename vector_Type >
-    void interpolate ( const FEFctType* fEFct, vector_Type& vector, const Real time = 0. );
+    template < typename FEFunctionType, typename vector_Type >
+    void interpolate ( const FEFunctionType* fEFunction, vector_Type& vector, const Real time = 0. );
 
     //! calculate L2 velocity error for given exact velocity function
     //! \param pexact the exact velocity as a function
@@ -744,9 +744,9 @@ FESpace<MeshType, MapType>::interpolate( const function_Type& fct,
 }
 
 template < typename MeshType, typename MapType>
-template < typename FEFctType, typename vector_Type >
+template < typename FEFunctionType, typename vector_Type >
 void FESpace<MeshType, MapType>::
-interpolate ( const FEFctType* fEFct, vector_Type& vector, const Real time )
+interpolate ( const FEFunctionType* fEFunction, vector_Type& vector, const Real time )
 {
 
     // First, we build a "quadrature" that consists in the nodes (0 weight)
@@ -762,7 +762,7 @@ interpolate ( const FEFctType* fEFct, vector_Type& vector, const Real time )
     const UInt numberLocalDof ( M_dof->numLocalDof() );
 
     // Storage for the values
-    typename FEFctType::point_Type point(3);
+    typename FEFunctionType::point_Type point(3);
     std::vector<Real> nodalValues (numberLocalDof, 0);
     std::vector<Real> FEValues (numberLocalDof, 0);
 
@@ -782,7 +782,7 @@ interpolate ( const FEFctType* fEFct, vector_Type& vector, const Real time )
                 point [1] = interpCFE.quadNode( iterDof, 1 );
                 point [2] = interpCFE.quadNode( iterDof, 2 );
                 // Store the nodal value
-                nodalValues[iterDof] =  fEFct->eval( iterVolume, point, time );
+                nodalValues[iterDof] =  fEFunction->eval( iterVolume, point, time );
             }
 
             // Transform the nodal values in FE values

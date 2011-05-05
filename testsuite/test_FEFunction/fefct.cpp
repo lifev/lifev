@@ -42,29 +42,6 @@
 
 using namespace LifeV;
 
-enum BCNAME
-{
-    // Flags for cartesian_cube* meshes
-    BACK   = 1,
-    FRONT  = 2,
-    LEFT   = 3,
-    RIGHT  = 4,
-    BOTTOM = 5,
-    TOP    = 6
-
-
-/*
-    // Falgs for structured meshes
-    LEFT   = 4,
-    RIGHT  = 2,
-    FRONT  = 1,
-    BACK   = 3,
-    TOP    = 6,
-    BOTTOM = 5
-*/
-
-};
-
 // ===================================================
 //!              Standard functions
 // ===================================================
@@ -225,20 +202,23 @@ fefct::run()
     bdQr_fct  = &quadRuleTria4pt;
 
     // Finite element space of the first scalar field
-    fESpace_Type scalarField1_FESpace ( meshPart, *refFE_scalarField1, *qR_scalarField1, 
-                                        *bdQr_scalarField1, 1, Members->comm );
+    FESpacePtr_Type scalarField1_FESpace ( new FESpace_Type ( meshPart, *refFE_scalarField1, 
+                                                              *qR_scalarField1, *bdQr_scalarField1,
+                                                              1, Members->comm ) );
 
     // Finite element space of the second scalar field
-    fESpace_Type scalarField2_FESpace ( meshPart, *refFE_scalarField2, *qR_scalarField2,
-                                        *bdQr_scalarField2, 1, Members->comm );
+    FESpacePtr_Type scalarField2_FESpace ( new FESpace_Type ( meshPart, *refFE_scalarField2,
+                                                              *qR_scalarField2, *bdQr_scalarField2,
+                                                              1, Members->comm ) );
 
     // Finite element space of the vector field
-    fESpace_Type vectorField_FESpace( meshPart, *refFE_vectorField, *qR_vectorField,
-                                      *bdQr_vectorField, 3, Members->comm );
+    FESpacePtr_Type vectorField_FESpace ( new FESpace_Type ( meshPart, *refFE_vectorField,
+                                                             *qR_vectorField, *bdQr_vectorField,
+                                                             3, Members->comm ) );
 
     // Finite element space for the function visualization
-    fESpace_Type function_FESpace( meshPart, *refFE_fct, *qR_fct,
-                                   *bdQr_fct, 1, Members->comm );
+    FESpacePtr_Type function_FESpace ( new FESpace_Type ( meshPart, *refFE_fct, *qR_fct,
+                                                          *bdQr_fct, 1, Members->comm ) );
 
     // Stop chronoFiniteElementSpace
     chronoFiniteElementSpace.stop();
@@ -252,22 +232,22 @@ fefct::run()
     chronoFEFieldAndFEFct.start();
 
     // First scalar field
-    fEScalarFieldPtr_Type scalarField1 ( new fEScalarField_Type ( scalarField1_FESpace ) );
+    FEScalarFieldPtr_Type scalarField1 ( new FEScalarField_Type ( scalarField1_FESpace ) );
     scalarField1->getVector() = 1.;
 
     // Second scalar field
-    fEScalarFieldPtr_Type scalarField2 ( new fEScalarField_Type ( scalarField2_FESpace ) );
+    FEScalarFieldPtr_Type scalarField2 ( new FEScalarField_Type ( scalarField2_FESpace ) );
     scalarField2->getVector() = 2.;
 
     // Vector field
-    fEVectorFieldPtr_Type vectorField ( new fEVectorField_Type ( vectorField_FESpace ) );
+    FEVectorFieldPtr_Type vectorField ( new FEVectorField_Type ( vectorField_FESpace ) );
     vectorField->getVector() = 3.;
 
     // Function
     dataProblem::MyFun function;
 
     // Scalar field for visualize the function
-    fEScalarFieldPtr_Type scalarFieldFunction ( new fEScalarField_Type ( function_FESpace ) );
+    FEScalarFieldPtr_Type scalarFieldFunction ( new FEScalarField_Type ( function_FESpace ) );
 
     // Stop chronoFEFieldAndFEFct
     chronoFEFieldAndFEFct.stop();
@@ -346,7 +326,7 @@ fefct::run()
                            fieldName + "1",
                            scalarField1->getVectorPtr(),
                            static_cast<UInt>( 0 ),
-                           static_cast<UInt>( scalarField1_FESpace.dof().numTotalDof() ),
+                           static_cast<UInt>( scalarField1_FESpace->dof().numTotalDof() ),
                            static_cast<UInt>( 0 ),
                            ExporterData::Cell );
 
@@ -355,7 +335,7 @@ fefct::run()
                            fieldName + "2",
                            scalarField2->getVectorPtr(),
                            static_cast<UInt>( 0 ),
-                           static_cast<UInt>( scalarField2_FESpace.dof().numTotalDof() ),
+                           static_cast<UInt>( scalarField2_FESpace->dof().numTotalDof() ),
                            static_cast<UInt>( 0 ) );
 
     // Add the vector field to the exporter
@@ -363,7 +343,7 @@ fefct::run()
                            fieldName + "3",
                            vectorField->getVectorPtr(),
                            static_cast<UInt>( 0 ),
-                           static_cast<UInt>( vectorField_FESpace.dof().numTotalDof() ),
+                           static_cast<UInt>( vectorField_FESpace->dof().numTotalDof() ),
                            static_cast<UInt>( 0 ),
                            ExporterData::Cell );
 
@@ -374,7 +354,7 @@ fefct::run()
                            fctName + "1",
                            scalarFieldFunction->getVectorPtr(),
                            static_cast<UInt>( 0 ),
-                           static_cast<UInt>( function_FESpace.dof().numTotalDof() ),
+                           static_cast<UInt>( function_FESpace->dof().numTotalDof() ),
                            static_cast<UInt>( 0 ),
                            ExporterData::Cell );
 
