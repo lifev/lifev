@@ -292,8 +292,16 @@ public:
     /*!
       @param fileName Name of the file where the matrix will be saved, without extension (.h5)
       @param matrixName Name of the matrix in the HDF5 file
+      @param truncate True if the file has to be truncated; False if the file already exist and should not be truncated
      */
-    void exportToHDF5( std::string const &fileName, std::string const &matrixName = "matrix" );
+    void exportToHDF5( std::string const &fileName, std::string const &matrixName = "matrix", bool const& truncate = true );
+
+    //! Read a matrix from a HDF5 (.h5) file
+    /*!
+      @param fileName Name of the file where the matrix will be saved, without extension (.h5)
+      @param matrixName Name of the matrix in the HDF5 file
+     */
+    void importFromHDF5( std::string const &fileName, std::string const &matrixName = "matrix" );
 #endif
 
     //! Print the contents of the matrix
@@ -1135,13 +1143,20 @@ void MatrixEpetra<DataType>::spy( std::string const &fileName )
 
 #ifdef HAVE_HDF5
 template <typename DataType>
-void MatrixEpetra<DataType>::exportToHDF5( std::string const &fileName, std::string const &matrixName )
+void MatrixEpetra<DataType>::exportToHDF5( std::string const &fileName, std::string const &matrixName, bool const &truncate )
 {
+    EpetraExt::HDF5 HDF5( M_epetraCrs->Comm() );
 
-    EpetraExt::HDF5 HDF5 ( M_epetraCrs->Comm() );
-
-    // Create and open the file
-    HDF5.Create ( ( fileName + ".h5" ).data() );
+    if ( truncate )
+    {
+        // Create and open the file / Truncate and open the file
+        HDF5.Create( ( fileName + ".h5" ).data() );
+    }
+    else
+    {
+        // Open an existing file without truncating it
+        HDF5.Open( ( fileName + ".h5" ).data() );
+    }
 
     // Check if the file is created
     if ( !HDF5.IsOpen () )
@@ -1151,12 +1166,39 @@ void MatrixEpetra<DataType>::exportToHDF5( std::string const &fileName, std::str
     }
 
     // Save the matrix into the file
-    HDF5.Write ( matrixName.data(), *M_epetraCrs );
+    HDF5.Write( matrixName.data(), *M_epetraCrs );
     
     // Close the file
-    HDF5.Close ( );
+    HDF5.Close();
 
 } // exportToHDF5
+
+template <typename DataType>
+void MatrixEpetra<DataType>::importFromHDF5( std::string const &fileName, std::string const &matrixName )
+{
+    EpetraExt::HDF5 HDF5( M_epetraCrs->Comm() );
+
+    // Open an existing file
+    HDF5.Open( ( fileName + ".h5" ).data() );
+
+    // Check if the file is created
+    if ( !HDF5.IsOpen () )
+    {
+        std::cerr << "Unable to open " + fileName + ".h5";
+        abort();
+    }
+
+    // Read the matrix from the file
+    Epetra_CrsMatrix* importedMatrix(0);
+    HDF5.Read( matrixName.data(), M_epetraCrs->DomainMap(), M_epetraCrs->RangeMap(), importedMatrix );
+
+    // Copy the loaded matrix to the member object
+    M_epetraCrs.reset( new matrix_type( *dynamic_cast< Epetra_FECrsMatrix* > ( importedMatrix ) ) );
+
+    // Close the file
+    HDF5.Close();
+
+} // importFromHDF5
 #endif
 
 template <typename DataType>
