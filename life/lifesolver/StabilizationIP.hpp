@@ -380,8 +380,8 @@ void StabilizationIP<MeshType, DofType>::apply( MatrixType& matrix,  const Vecto
             // second, calculate its max norm
             for ( UInt l ( 0 ); l < static_cast<UInt>( M_feOnSide1->nbCoor()*M_feBd->nbNode() ); ++l )
             {
-                if ( bmax < fabs( beta.vec()[ l ] ) )
-                    bmax = fabs( beta.vec()[ l ] );
+                if ( bmax < std::fabs( beta.vec()[ l ] ) )
+                    bmax = std::fabs( beta.vec()[ l ] );
             }
 
             chronoBeta.stop();

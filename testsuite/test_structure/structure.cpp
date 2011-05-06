@@ -445,13 +445,13 @@ Structure::run3d()
 
 void Structure::CheckResults(const LifeV::Real& dispNorm,const LifeV::Real& time)
 {
-    if ( time == 0.005 && abs(dispNorm-1.55991)>1e-4 )
+    if ( time == 0.005 && std::fabs(dispNorm-1.55991)>1e-4 )
         RESULT_CHANGED_EXCEPTION(time);
-    else if ( time == 0.01  && abs(dispNorm-1.49237)>1e-4 )
+    else if ( time == 0.01  && std::fabs(dispNorm-1.49237)>1e-4 )
         RESULT_CHANGED_EXCEPTION(time);
-    else if ( time == 0.015  && abs(dispNorm-1.34538)>1e-4 )
+    else if ( time == 0.015  && std::fabs(dispNorm-1.34538)>1e-4 )
         RESULT_CHANGED_EXCEPTION(time);
-    else if ( time == 0.02  && abs(dispNorm-1.11341)>1e-4 )
+    else if ( time == 0.02  && std::fabs(dispNorm-1.11341)>1e-4 )
         RESULT_CHANGED_EXCEPTION(time);
 }
 
