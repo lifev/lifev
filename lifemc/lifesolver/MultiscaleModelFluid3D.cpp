@@ -438,6 +438,10 @@ MultiscaleModelFluid3D::initializeSolution()
 
         // Import
         M_exporter->setStartIndex( M_importer->importFromTime( M_data->dataTime()->initialTime() ) + 1 );
+
+#ifdef HAVE_HDF5
+        ( multiscaleDynamicCast< hdf5IOFile_Type >( M_importer ) )->closeFile();
+#endif
     }
     else
         *M_solution = 0.0;

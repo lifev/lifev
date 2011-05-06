@@ -503,6 +503,7 @@ MultiscaleModel1D::initializeSolution()
 
     if ( multiscaleProblemStep > 0 )
     {
+#ifdef HAVE_HDF5
         M_importer->setMeshProcId( M_exporterMesh, M_comm->MyPID() );
 
 //        M_exporter->addVariable( ExporterData::Scalar, "Solid Area",      (*M_exporterSolution)["A"],      static_cast <UInt> ( 0 ), M_feSpace->dof().numTotalDof() );
@@ -514,6 +515,11 @@ MultiscaleModel1D::initializeSolution()
 
         // Import
         M_exporter->setStartIndex( M_importer->importFromTime( M_data->dataTime()->initialTime() ) + 1 );
+
+        M_importer->closeFile();
+#else
+        std::cout << "!!! ERROR: Importer not implemented for this filter !!!" << std::endl;
+#endif
 
         // Copy the imported solution to the problem solution container
         copySolution( *M_exporterSolution, *M_solution );

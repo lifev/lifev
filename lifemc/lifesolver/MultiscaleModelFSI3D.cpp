@@ -437,6 +437,13 @@ MultiscaleModelFSI3D::initializeSolution()
         M_exporterFluid->setStartIndex( M_importerFluid->importFromTime( M_data->dataFluid()->dataTime()->initialTime() ) + 1 );
         M_exporterSolid->setStartIndex( M_importerSolid->importFromTime( M_data->dataSolid()->getdataTime()->initialTime() ) + 1 );
 
+#ifdef HAVE_HDF5
+        if ( M_FSIoperator->isFluid() )
+            ( multiscaleDynamicCast< hdf5IOFile_Type >( M_importerFluid ) )->closeFile();
+        if ( M_FSIoperator->isSolid() )
+            ( multiscaleDynamicCast< hdf5IOFile_Type >( M_importerSolid ) )->closeFile();
+#endif
+
         // Assemble the Monolithic solution
         vector_Type solution( *M_FSIoperator->couplingVariableMap() );
 
