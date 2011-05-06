@@ -238,14 +238,14 @@ public:
 
         M_exporterFluid->setMeshProcId(M_fsi->FSIOper()->uFESpace().mesh(), M_fsi->FSIOper()->uFESpace().map().comm().MyPID());
         M_exporterSolid->setMeshProcId(M_fsi->FSIOper()->dFESpace().mesh(), M_fsi->FSIOper()->dFESpace().map().comm().MyPID());
-        M_exporterFluid->addVariable( ExporterData::Vector, "f-velocity", M_velAndPressure,
-                                      UInt(0), M_fsi->FSIOper()->uFESpace().dof().numTotalDof() );
-        M_exporterFluid->addVariable( ExporterData::Scalar, "f-pressure", M_velAndPressure,
-                                      UInt(3*M_fsi->FSIOper()->uFESpace().dof().numTotalDof()),
-                                      UInt(M_fsi->FSIOper()->pFESpace().dof().numTotalDof()) );
+        M_exporterFluid->addVariable( ExporterData<FSIOperator::mesh_Type>::VectorField, "f-velocity",
+                                      M_fsi->FSIOper()->uFESpacePtr(), M_velAndPressure, UInt(0) );
+        M_exporterFluid->addVariable( ExporterData<FSIOperator::mesh_Type>::ScalarField, "f-pressure",
+                                      M_fsi->FSIOper()->pFESpacePtr(), M_velAndPressure,
+                                      UInt(3*M_fsi->FSIOper()->uFESpace().dof().numTotalDof()) );
 
-        M_exporterFluid->addVariable( ExporterData::Vector, "f-displacement", M_fluidDisp,
-                                      UInt(0), M_fsi->FSIOper()->mmFESpace().dof().numTotalDof() );
+        M_exporterFluid->addVariable( ExporterData<FSIOperator::mesh_Type>::VectorField, "f-displacement",
+                                      M_fsi->FSIOper()->mmFESpacePtr(), M_fluidDisp, UInt(0) );
 
 
 
@@ -253,13 +253,12 @@ public:
         M_solidVel.reset ( new vector_Type( M_fsi->FSIOper()->dFESpace().map(), M_exporterSolid->mapType() ));
         M_WS.reset           ( new vector_Type(  M_fsi->FSIOper()->dFESpace().map(), M_exporterSolid->mapType() ));
 
-        M_exporterSolid->addVariable( ExporterData::Vector, "s-displacement", M_solidDisp,
-                                      UInt(0), M_fsi->FSIOper()->dFESpace().dof().numTotalDof() );
-        M_exporterSolid->addVariable( ExporterData::Vector, "s-velocity", M_solidVel,
-                                      UInt(0),
-                                      M_fsi->FSIOper()->dFESpace().dof().numTotalDof() );
-        M_exporterSolid->addVariable( ExporterData::Vector, "s-ws", M_WS,
-                                      UInt(0), M_fsi->FSIOper()->dFESpace().dof().numTotalDof() );
+        M_exporterSolid->addVariable( ExporterData<FSIOperator::mesh_Type>::VectorField, "s-displacement",
+                                      M_fsi->FSIOper()->dFESpacePtr(), M_solidDisp, UInt(0) );
+        M_exporterSolid->addVariable( ExporterData<FSIOperator::mesh_Type>::VectorField, "s-velocity",
+                                      M_fsi->FSIOper()->dFESpacePtr(), M_solidVel, UInt(0) );
+        M_exporterSolid->addVariable( ExporterData<FSIOperator::mesh_Type>::VectorField, "s-ws",
+                                      M_fsi->FSIOper()->dFESpacePtr(), M_WS, UInt(0) );
 
 
 
@@ -558,23 +557,22 @@ void Problem::initialize(std::string& /*loadInitSol*/,  GetPot const& data_file)
     M_importerFluid->setMeshProcId(M_fsi->FSIOper()->uFESpace().mesh(), M_fsi->FSIOper()->uFESpace().map().comm().MyPID());
     M_importerSolid->setMeshProcId(M_fsi->FSIOper()->dFESpace().mesh(), M_fsi->FSIOper()->dFESpace().map().comm().MyPID());
 
-    M_importerFluid->addVariable( ExporterData::Vector, "f-velocity", M_velAndPressure,
-                                  UInt(0), M_fsi->FSIOper()->uFESpace().dof().numTotalDof() );
+    M_importerFluid->addVariable( ExporterData<FSIOperator::mesh_Type>::VectorField, "f-velocity",
+                                  M_fsi->FSIOper()->uFESpacePtr(), M_velAndPressure, UInt(0) );
 
-    M_importerFluid->addVariable( ExporterData::Scalar, "f-pressure", M_velAndPressure,
-                                  UInt(3*M_fsi->FSIOper()->uFESpace().dof().numTotalDof()),
-                                  UInt(M_fsi->FSIOper()->pFESpace().dof().numTotalDof()) );
+    M_importerFluid->addVariable( ExporterData<FSIOperator::mesh_Type>::ScalarField, "f-pressure",
+                                  M_fsi->FSIOper()->pFESpacePtr(), M_velAndPressure,
+                                  UInt(3*M_fsi->FSIOper()->uFESpace().dof().numTotalDof()) );
 
-    M_importerFluid->addVariable( ExporterData::Vector, "f-displacement", M_fluidDisp,
-                                  UInt(0), M_fsi->FSIOper()->mmFESpace().dof().numTotalDof() );
+    M_importerFluid->addVariable( ExporterData<FSIOperator::mesh_Type>::VectorField, "f-displacement",
+                                  M_fsi->FSIOper()->mmFESpacePtr(), M_fluidDisp, UInt(0) );
 
 
 
-    M_importerSolid->addVariable( ExporterData::Vector, "s-displacement", M_solidDisp,
-                                  UInt(0), M_fsi->FSIOper()->dFESpace().dof().numTotalDof() );
-    M_importerSolid->addVariable( ExporterData::Vector, "s-velocity", M_solidVel,
-                                  UInt(0),
-                                  M_fsi->FSIOper()->dFESpace().dof().numTotalDof() );
+    M_importerSolid->addVariable( ExporterData<FSIOperator::mesh_Type>::VectorField, "s-displacement",
+                                  M_fsi->FSIOper()->dFESpacePtr(), M_solidDisp, UInt(0) );
+    M_importerSolid->addVariable( ExporterData<FSIOperator::mesh_Type>::VectorField, "s-velocity",
+                                  M_fsi->FSIOper()->dFESpacePtr(), M_solidVel, UInt(0) );
 
 
     using namespace LifeV;
