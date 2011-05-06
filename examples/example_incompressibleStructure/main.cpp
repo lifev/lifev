@@ -223,14 +223,14 @@ int main(int argc, char** argv)
     bcH.addBC( "Bottom", BOTTOM, LifeV::Essential, LifeV::Full     , noDisplacement, 3     );
 
     // Get the number of Lagrange Multiplyers (LM) and set the offsets
-    std::vector<LifeV::bcName_Type> fluxVector = bcH.findAllBCWithType( LifeV::Flux );
-    LifeV::UInt numLM = static_cast<LifeV::UInt>( fluxVector.size() );
-
-    LifeV::UInt offset = uFESpace.map().map(LifeV::Unique)->NumGlobalElements()
-                         + pFESpace.map().map(LifeV::Unique)->NumGlobalElements();
-
-    for ( LifeV::UInt i = 0; i < numLM; ++i )
-        bcH.setOffset( fluxVector[i], offset + i );
+//    std::vector<LifeV::bcName_Type> fluxVector = bcH.findAllBCWithType( LifeV::Flux );
+//    LifeV::UInt numLM = static_cast<LifeV::UInt>( fluxVector.size() );
+//    std::cout << "numLM = " << numLM << std::endl;
+//    LifeV::UInt offset = uFESpace.map().map(LifeV::Unique)->NumGlobalElements()
+//                         + pFESpace.map().map(LifeV::Unique)->NumGlobalElements();
+//
+//    for ( LifeV::UInt i = 0; i < numLM; ++i )
+//        bcH.setOffset( fluxVector[i], offset + i );
 
     // +-----------------------------------------------+
     // |             Creating the problem              |
@@ -257,8 +257,8 @@ int main(int argc, char** argv)
     LifeV::IncompressibleStructureSolver< LifeV::RegionMesh3D<LifeV::LinearTetra> > structure (incompressibleStructureData,
                                                                                                uFESpace,
                                                                                                pFESpace,
-                                                                                               comm,
-                                                                                               numLM);
+                                                                                               comm);
+//                                                                                               /*numLM*/);
     MPI_Barrier(MPI_COMM_WORLD);
     // Gets inputs from the data file
     std::cout<< std::endl << "Sono qui D: setup solver" << std::endl;

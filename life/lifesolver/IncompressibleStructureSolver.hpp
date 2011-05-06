@@ -123,7 +123,7 @@ public:
     //! Constructor
     /*!
         @param dataType IncompressibleStructureData class
-        @param velocityFESpace Velocity FE space
+        @param DisplacementFESpace Displacement FE space
         @param pressureFESpace Pressure FE space
         @param communicator MPI communicator
         @param lagrangeMultiplier Lagrange multiplier
@@ -132,8 +132,8 @@ public:
     IncompressibleStructureSolver( boost::shared_ptr<data_Type>    dataType,
                                    FESpace<mesh_Type, MapEpetra>&  displacementFESpace,
                                    FESpace<mesh_Type, MapEpetra>&  pressureFESpace,
-                                   boost::shared_ptr<Epetra_Comm>& communicator,
-                                   const Int                       lagrangeMultiplier = 0 );
+                                   boost::shared_ptr<Epetra_Comm>& communicator//,
+                                   /*const Int                       lagrangeMultiplier = 0*/ );
 
 
     //! virtual destructor
@@ -248,6 +248,7 @@ public:
         return M_solution;
     }
 
+
     //! Return the local residual vector
     /*!
         @return Residual vector
@@ -257,9 +258,9 @@ public:
         return M_residual;
     }
 
-    //! Return velocity FE space
+    //! Return Displacement FE space
     /*!
-        @return velocity FE space
+        @return Displacement FE space
      */
     FESpace<mesh_Type, MapEpetra>& displacementFESpace()
     {
@@ -375,7 +376,7 @@ protected:
      */
 //    void echo( std::string message );
 
-    //! Return the dim of velocity FE space
+    //! Return the dim of Displacement FE space
     const UInt& dimDisplacement() const
     {
         return M_displacementFESpace.dim();
@@ -423,7 +424,7 @@ protected:
     //! source term for Navier-Stokes equations
     source_Type                    M_source;
 
-    //! Right hand side for the velocity component
+    //! Right hand side for the Displacement component
     vector_Type                    M_rightHandSideNoBC;
 
     //! Global right hand side
@@ -431,7 +432,7 @@ protected:
 
     //! Global solution
     vectorPtr_Type                 M_solution;
-
+//    vector_Type                    M_solution;
     //! residual
     vector_Type                    M_residual;
 
@@ -450,13 +451,13 @@ protected:
 
 //    UInt                           M_count;
 
-    bool                           M_recomputeMatrix;
+//    bool                           M_recomputeMatrix;
 
 //    bool                           M_isDiagonalBlockPreconditioner;
 
     //! Elementary matrices and vectors
-    MatrixElemental                M_elementMatrixStiff;      // velocity Stokes
-    MatrixElemental                M_elementMatrixMass;       // velocity mass
+    MatrixElemental                M_elementMatrixStiff;      // Displacement Stokes
+    MatrixElemental                M_elementMatrixMass;       // Displacement mass
     MatrixElemental                M_elementMatrixPreconditioner;          // (p,q) bloc for preconditioners
     MatrixElemental                M_elementMatrixDivergence;
     MatrixElemental                M_elementMatrixGradient;
@@ -465,6 +466,8 @@ protected:
 //    VectorElemental                M_wLoc;
 //    VectorElemental                M_uLoc;
 //    boost::shared_ptr<vector_Type> M_un;
+
+    MatrixElemental                M_elementGradientDeformationTensor;
 
 }; // class IncompressibleStructureSolver
 
@@ -479,13 +482,13 @@ IncompressibleStructureSolver<MeshType, SolverType>::
 IncompressibleStructureSolver( boost::shared_ptr<data_Type>    dataType,
                                FESpace<mesh_Type, MapEpetra>&  displacementFESpace,
                                FESpace<mesh_Type, MapEpetra>&  pressureFESpace,
-                               boost::shared_ptr<Epetra_Comm>& communicator,
-                               const Int                       lagrangeMultiplier ):
+                               boost::shared_ptr<Epetra_Comm>& communicator//,
+                               /*const Int                       lagrangeMultiplier*/ ):
         M_incompressibleStructureData       ( dataType ),
         M_displacementFESpace        ( displacementFESpace ),
         M_pressureFESpace        ( pressureFESpace ),
         M_Displayer              ( communicator ),
-        M_localMap               ( M_displacementFESpace.map() + M_pressureFESpace.map() + lagrangeMultiplier),
+        M_localMap               ( M_displacementFESpace.map() + M_pressureFESpace.map() /*+ lagrangeMultiplier*/),
         M_matrixMass             ( ),
         M_matrixMassPtr          ( ),
         M_matrixStokes           ( ),
@@ -506,7 +509,7 @@ IncompressibleStructureSolver( boost::shared_ptr<data_Type>    dataType,
 //        M_stiffStrain            ( false ),
 //        M_diagonalize            ( false ),
 //        M_count                  ( 0 ),
-        M_recomputeMatrix        ( false ),
+//        M_recomputeMatrix        ( false ),
         M_elementMatrixStiff     ( M_displacementFESpace.fe().nbFEDof(), nDimensions, nDimensions ),
         M_elementMatrixMass      ( M_displacementFESpace.fe().nbFEDof(), nDimensions, nDimensions ),
         M_elementMatrixPreconditioner ( M_pressureFESpace.fe().nbFEDof(), 1, 1 ),
@@ -515,10 +518,11 @@ IncompressibleStructureSolver( boost::shared_ptr<data_Type>    dataType,
         M_elementMatrixGradient  ( M_displacementFESpace.fe().nbFEDof(), nDimensions, 0,
                                    M_pressureFESpace.fe().nbFEDof(), 0, 1 ),
         M_elementRightHandSide   ( M_displacementFESpace.fe().nbFEDof(), nDimensions ),
-        M_blockPreconditioner    ( )
+        M_blockPreconditioner    ( ),
 //        M_wLoc                   ( M_displacementFESpace.fe().nbFEDof(), nDimensions ),
 //        M_uLoc                   ( M_displacementFESpace.fe().nbFEDof(), nDimensions )
 //        M_un                     ( new vector_Type(M_localMap) )
+        M_elementGradientDeformationTensor (M_displacementFESpace.fe().nbFEDof(), nDimensions, nDimensions)
 {
 
     std::cout << "costruttore 1 " << std::endl << std::endl;
@@ -543,8 +547,8 @@ void
 IncompressibleStructureSolver<MeshType, SolverType>::setUp( const GetPot& dataFile )
 {
 
-    M_linearSolver.setupPreconditioner( dataFile, "fluid/prec" );
-    M_linearSolver.setDataFromGetPot( dataFile, "fluid/solver" );
+    M_linearSolver.setupPreconditioner( dataFile, "strutcure/prec" );
+    M_linearSolver.setDataFromGetPot( dataFile, "structure/solver" );
 
 //    M_steady        = dataFile( "fluid/miscellaneous/steady", 0 );
 
@@ -581,13 +585,15 @@ IncompressibleStructureSolver<MeshType, SolverType>::buildSystem()
     LifeChrono chronoStab;
     LifeChrono chronoZero;
 
-    // Number of velocity components
-    UInt numVelocityComponent = nDimensions;
+    // Number of Displacement components
+    UInt numDisplacementComponent = nDimensions;
+    std::cout<< std::endl << "This is a " << numDisplacementComponent << "D simulation," << std::endl;
 
     // Elementary computation and matrix assembling
     // Loop on elements
 
-    UInt velocityTotalDof   = M_displacementFESpace.dof().numTotalDof();
+    UInt displacementTotalDof   = M_displacementFESpace.dof().numTotalDof();
+    std::cout<< std::endl << "so there are " << displacementTotalDof << " degrees of freedom for each component." << std::endl;
 //    UInt pressureTotalDof = M_pressureFESpace.dof().numTotalDof();
 
 //    if ( M_isDiagonalBlockPreconditioner == true )
@@ -628,7 +634,8 @@ IncompressibleStructureSolver<MeshType, SolverType>::buildSystem()
 
 
 
-        for ( UInt iComponent = 0; iComponent < numVelocityComponent; iComponent++ )
+
+        for ( UInt iComponent = 0; iComponent < numDisplacementComponent; iComponent++ )
         {
             // stiffness matrix
             chronoStiffAssemble.start();
@@ -662,6 +669,7 @@ IncompressibleStructureSolver<MeshType, SolverType>::buildSystem()
 //                }
 //                else // sigma = mu grad( u )
 //                {
+
                     assembleMatrix( *M_matrixStokes,
                                     M_elementMatrixStiff,
                                     M_displacementFESpace.fe(),
@@ -669,7 +677,7 @@ IncompressibleStructureSolver<MeshType, SolverType>::buildSystem()
                                     M_displacementFESpace.dof(),
                                     M_displacementFESpace.dof(),
                                     iComponent, iComponent,
-                                    iComponent * velocityTotalDof, iComponent * velocityTotalDof);
+                                    iComponent * displacementTotalDof, iComponent * displacementTotalDof);
 //                }
 //            }
             chronoStiffAssemble.stop();
@@ -698,6 +706,8 @@ IncompressibleStructureSolver<MeshType, SolverType>::buildSystem()
                   iComponent, 0 );
             chronoGrad.stop();
 
+            //M_elementMatrixGradient.showMe(cout);
+
             chronoGradAssemble.start();
             assembleMatrix( *M_matrixStokes,
                             M_elementMatrixGradient,
@@ -706,7 +716,7 @@ IncompressibleStructureSolver<MeshType, SolverType>::buildSystem()
                             M_displacementFESpace.dof(),
                             M_pressureFESpace.dof(),
                             iComponent, 0,
-                            iComponent * velocityTotalDof, numVelocityComponent * velocityTotalDof );
+                            iComponent * displacementTotalDof, numDisplacementComponent * displacementTotalDof );
             chronoGradAssemble.stop();
 
             chronoDivAssemble.start();
@@ -718,7 +728,7 @@ IncompressibleStructureSolver<MeshType, SolverType>::buildSystem()
                                      M_pressureFESpace.dof(),
                                      M_displacementFESpace.dof(),
                                      0 , iComponent,
-                                     numVelocityComponent * velocityTotalDof, iComponent * velocityTotalDof );
+                                     numDisplacementComponent * displacementTotalDof, iComponent * displacementTotalDof );
             chronoDivAssemble.stop();
         }
     }
@@ -800,8 +810,8 @@ updateSystem( const vector_Type& sourceVector,
 
 
 
-    if ( M_recomputeMatrix )
-        buildSystem();
+//    if ( M_recomputeMatrix )
+//        buildSystem();
 
     M_Displayer.leaderPrint( "  F-  Copying the matrices ...                 " );
 
@@ -880,12 +890,81 @@ IncompressibleStructureSolver<MeshType, SolverType>::iterate( bcHandler_Type& bc
     M_linearSolver.setMatrix( *matrixFull );
 
     M_linearSolver.solveSystem( rightHandSideFull, *M_solution, matrixFull );
-
+//    M_linearSolver.solveSystem( rightHandSideFull, M_solution, matrixFull );
 
     M_residual  = M_rightHandSideNoBC;
     M_residual -= (*M_matrixNoBC) * (*M_solution);
+//    M_residual -= (*M_matrixNoBC) * (M_solution);
+       //.spy(res);
 
-    //M_residual.spy("residual");
+
+
+    UInt dim = M_displacementFESpace.dim();
+    VectorElemental ukLoc( M_displacementFESpace.fe().nbFEDof(), nDimensions );
+    ukLoc.zero();
+    vector_Type dRep(*M_solution, Repeated);
+    std::string   res="res";
+    dRep.spy(res);
+    LifeV::Real s;
+    Real guk[ M_displacementFESpace.fe().nbCoor() ][ M_displacementFESpace.fe().nbCoor() ][ M_displacementFESpace.fe().nbQuadPt() ];      // \grad u^k at each quadrature point
+
+    for ( UInt i = 0; i < M_displacementFESpace.mesh()->numVolumes(); i++ )
+        {
+
+//
+//        M_displacementFESpace.fe().updateFirstDerivQuadPt( this->M_FESpace->mesh()->volumeList( i ) );
+//
+//        UInt marker = this->M_displacementFESpace->mesh()->volumeList( i ).marker();
+//
+//        Real mu = dataMaterial->getMu(marker);
+//        Real lambda = dataMaterial->getLambda(marker);
+//
+            UInt eleID = M_displacementFESpace.fe().currentLocalId();
+////
+            for ( UInt iNode = 0 ; iNode <  M_displacementFESpace.fe().nbFEDof() ; iNode++ )
+            {
+                UInt  iloc = M_displacementFESpace.fe().patternFirst( iNode );
+
+                for ( UInt iComp = 0; iComp < nDimensions; ++iComp )
+                {
+                    UInt ig = M_displacementFESpace.dof().localToGlobalMap( eleID, iloc ) + iComp * dim ;
+                    ukLoc[ iloc + iComp * M_displacementFESpace.fe().nbFEDof() ] = dRep[ig]; //315961 BASEINDEX + 1
+                }
+            }
+//
+        //ukLoc.showMe(cout);
+
+        // loop on quadrature points
+        for ( UInt qp = 0; qp < M_displacementFESpace.fe().nbQuadPt(); qp++ )
+        {
+
+            // loop on space coordinates
+            for ( UInt icoor = 0; icoor < M_displacementFESpace.fe().nbCoor(); icoor++ )
+            {
+
+                // loop  on space coordinates
+                for ( UInt jcoor = 0; jcoor < M_displacementFESpace.fe().nbCoor(); jcoor++ )
+                {
+                    s = 0.0;
+
+                    for ( UInt i = 0; i < M_displacementFESpace.fe().nbFEDof(); i++ )
+                        s += M_displacementFESpace.fe().phiDer( i, jcoor, qp ) * ukLoc.vec() [ i + icoor * M_displacementFESpace.fe().nbFEDof() ]; //  \grad u^k at a quadrature point
+
+                    guk[ icoor ][ jcoor ][ qp ] = s;
+
+                }
+                guk[ icoor ][ icoor ][ qp ] += 1.0;
+            }
+        }
+
+
+        std::cout << guk << std::endl << std::endl;
+        }
+
+
+
+
+
 } // iterate()
 
 
@@ -907,8 +986,8 @@ IncompressibleStructureSolver<MeshType, SolverType>::applyBoundaryConditions( ma
                                                       bcHandler_Type& bcHandler )
 {
 
-    // BC manage for the velocity
-    if ( !bcHandler.bcUpdateDone() || M_recomputeMatrix )
+    // BC manage for the displacement
+    if ( !bcHandler.bcUpdateDone() )
     {
         bcHandler.bcUpdate( *M_displacementFESpace.mesh(),
                             M_displacementFESpace.feBd(),
