@@ -29,7 +29,7 @@ lib_LTLIBRARIES		= liblifecore.la
 liblifecore_la_SOURCES	=  LifeV.cpp LifeVersion.cpp\
 StringData.cpp LifeDebug.cpp \
 Switch.cpp StringUtility.cpp FactoryTypeInfo.cpp\
-LifeAssertSmart.cpp Displayer.cpp
+LifeAssertSmart.cpp Displayer.cpp EncoderBase64.cpp
 BADD	= $(aztec_libs)
 
 include $(top_srcdir)/Doxyfile.am

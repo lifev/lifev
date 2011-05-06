@@ -26,81 +26,90 @@
 
 /*!
     @file
-    @brief Simple Fourier test with Dirichlet Boundary condition
+    @brief test ExporterVTK
 
+    @author Tiziano Passerini <tiziano@mathcs.emory.edu>
     @author Umberto Villa <uvilla@emory.edu>
-    @date 14-04-2010
+    @contributor
+    @maintainer
 
-      Solve the problem
+    @date 13-1-2011
 
-           \partial_t u - \nu(t) \Delta u + sigma(t) u = f(t)
+ */
 
-                    u = g on the boundary
-                        u(t=0) = u0 initial condition
-
-            on a cube
-       \nu, \sigma and \source can be function of time
-      (which implies that the matrix needs to be reassembled each time)
-
-     Purpose: Test BDF of different order
-*/
-
-// ===================================================
-//! Includes
-// ===================================================
 // Tell the compiler to ignore specific kind of warnings:
 #pragma GCC diagnostic ignored "-Wunused-variable"
 #pragma GCC diagnostic ignored "-Wunused-parameter"
 
 #include <Epetra_ConfigDefs.h>
-#ifdef EPETRA_MPI
-#include <mpi.h>
-#include <Epetra_MpiComm.h>
-#else
-#include <Epetra_SerialComm.h>
-#endif
+#include <Epetra_Comm.h>
 
 //Tell the compiler to restore the warning previously silented
 #pragma GCC diagnostic warning "-Wunused-variable"
 #pragma GCC diagnostic warning "-Wunused-parameter"
 
+#include <boost/shared_ptr.hpp>
+
 #include <life/lifecore/LifeV.hpp>
+#include <life/lifefunctions/Womersley.hpp>
+#include <life/lifefunctions/RossEthierSteinmanInc.hpp>
+#include <life/lifefunctions/RossEthierSteinmanDec.hpp>
+#include "testExporterVTK.hpp"
 
-#include <life/lifealg/PreconditionerIfpack.hpp>
-#include <life/lifealg/PreconditionerML.hpp>
-
-#include "test_bdf.hpp"
-
-
-// ===================================================
-//! Namespaces
-// ===================================================
 using namespace LifeV;
 
-// ===================================================
-//! Main
-// ===================================================
-int main(int argc, char** argv)
+int
+main( int argc, char** argv )
 {
+    //MPI communicator initialization
+    boost::shared_ptr<Epetra_Comm> commPtr;
 
 #ifdef HAVE_MPI
-    MPI_Init(&argc, &argv);
     std::cout << "MPI Initialization" << std::endl;
+    MPI_Init( &argc, &argv );
 #endif
 
-    test_bdf bdf_t( argc, argv );
-    bdf_t.run();
-    bool check(true);
-    check = bdf_t.check();
+    //MPI Preprocessing
+#ifdef EPETRA_MPI
 
+    int nprocs;
+    int rank;
+
+    MPI_Comm_size( MPI_COMM_WORLD, &nprocs );
+    MPI_Comm_rank( MPI_COMM_WORLD, &rank );
+
+    if ( rank == 0 )
+    {
+        std::cout << "MPI processes: " << nprocs << std::endl;
+        std::cout << "MPI Epetra Initialization ... " << std::endl;
+    }
+    commPtr.reset( new Epetra_MpiComm( MPI_COMM_WORLD ) );
+
+    commPtr->Barrier();
+
+#else
+
+    std::cout << "MPI SERIAL Epetra Initialization ... " << std::endl;
+    commPtr.reset( new Epetra_SerialComm() );
+
+#endif
+
+    GetPot command_line(argc,argv);
+    TestExporterVTK testExporterVTK( commPtr );
+
+    bool passed(false);
+
+    passed = testExporterVTK.testExport( command_line );
+
+    // ----- End of test calls -----
 
 #ifdef HAVE_MPI
-    MPI_Finalize();
     std::cout << "MPI Finalization" << std::endl;
+    MPI_Finalize();
 #endif
 
-    if (check)
-        return( EXIT_SUCCESS );
+    if (passed)
+        return EXIT_SUCCESS;
     else
-        return( EXIT_FAILURE );
+        return EXIT_FAILURE;
 }

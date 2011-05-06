@@ -219,10 +219,10 @@ int main(int argc, char** argv)
 
     // The problem (matrix and rhs) is packed in an object called fluid
     LifeV::OseenSolver< LifeV::RegionMesh3D<LifeV::LinearTetra> > fluid (oseenData,
-                                                                   uFESpace,
-                                                                   pFESpace,
-                                                                   comm,
-                                                                   numLM);
+                                                                         uFESpace,
+                                                                         pFESpace,
+                                                                         comm,
+                                                                         numLM);
     // Gets inputs from the data file
     fluid.setUp(dataFile);
 
