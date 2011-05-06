@@ -189,21 +189,23 @@ main( int argc, char** argv )
     if (verbose)
         std::cout << "Building the velocity FE space ... " << std::flush;
 
-    FESpace< RegionMesh3D<LinearTetra>, MapEpetra > uFESpace(meshPart,"P2",3,comm);
+    boost::shared_ptr<FESpace< RegionMesh3D<LinearTetra>, MapEpetra > > uFESpacePtr(
+                    new FESpace< RegionMesh3D<LinearTetra>, MapEpetra >(meshPart,"P2",3,comm) );
 
     // then the pressure FE space
 
     if (verbose)
         std::cout << "Building the pressure FE space ... " << std::flush;
 
-    FESpace< RegionMesh3D<LinearTetra>, MapEpetra > pFESpace(meshPart,"P1",1,comm);
+    boost::shared_ptr<FESpace< RegionMesh3D<LinearTetra>, MapEpetra > > pFESpacePtr(
+                    new FESpace< RegionMesh3D<LinearTetra>, MapEpetra >(meshPart,"P1",1,comm) );
 
 
     if (verbose)
         std::cout << "ok." << std::endl;
 
-    UInt totalVelDof   = uFESpace.map().map(Unique)->NumGlobalElements();
-    UInt totalPressDof = pFESpace.map().map(Unique)->NumGlobalElements();
+    UInt totalVelDof   = uFESpacePtr->map().map(Unique)->NumGlobalElements();
+    UInt totalPressDof = pFESpacePtr->map().map(Unique)->NumGlobalElements();
 
 
     if (verbose) std::cout << "Total Velocity DOF = " << totalVelDof << std::endl;
@@ -216,8 +218,8 @@ main( int argc, char** argv )
     if (verbose) std::cout << "Calling the fluid constructor ... ";
 
     MLTester< RegionMesh3D<LinearTetra> > fluid (oseenData,
-                                                 uFESpace,
-                                                 pFESpace,
+                                                 *uFESpacePtr,
+                                                 *pFESpacePtr,
                                                  comm);
 
 
@@ -246,13 +248,12 @@ main( int argc, char** argv )
 
     // and we add the variables to be saved
     // the velocity
-    ensight.addVariable( ExporterData::Vector, "velocity", velAndPressure,
-                         UInt(0), uFESpace.dof().numTotalDof() );
+    ensight.addVariable( ExporterData<RegionMesh3D<LinearTetra> >::VectorField, "velocity",
+                         uFESpacePtr, velAndPressure, UInt(0) );
 
     // and the pressure
-    ensight.addVariable( ExporterData::Scalar, "pressure", velAndPressure,
-                         UInt(3*uFESpace.dof().numTotalDof() ),
-                         UInt(  pFESpace.dof().numTotalDof() ) );
+    ensight.addVariable( ExporterData<RegionMesh3D<LinearTetra> >::ScalarField, "pressure",
+                         pFESpacePtr, velAndPressure, UInt(3*uFESpacePtr->dof().numTotalDof() ) );
 
     // everything is ready now
     // a little barrier to synchronize the processes

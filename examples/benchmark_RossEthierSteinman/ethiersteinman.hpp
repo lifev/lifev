@@ -57,8 +57,9 @@ class Ethiersteinman
 {
 public:
     typedef LifeV::RegionMesh3D<LifeV::LinearTetra>       mesh_Type;
-    typedef LifeV::FESpace< mesh_Type, LifeV::MapEpetra > fespace_Type;
-    typedef LifeV::OseenSolver< mesh_Type >                     fluid_Type;
+    typedef LifeV::FESpace< mesh_Type, LifeV::MapEpetra > feSpace_Type;
+    typedef boost::shared_ptr<feSpace_Type>               feSpacePtr_Type;
+    typedef LifeV::OseenSolver< mesh_Type >               fluid_Type;
     typedef fluid_Type::vector_Type                       vector_Type;
     typedef boost::shared_ptr<vector_Type>                vectorPtr_Type;
     typedef fluid_Type::matrix_Type                       matrix_Type;
