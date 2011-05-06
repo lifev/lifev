@@ -322,41 +322,41 @@ fefct::run()
     const std::string fieldName = dataFile( "exporter/name_field", "Field" );
 
     // Add the first scalar field to the exporter
-    exporter->addVariable( ExporterData::Scalar,
+    exporter->addVariable( ExporterData< regionMesh_Type >::ScalarField,
                            fieldName + "1",
+                           scalarField1_FESpace,
                            scalarField1->getVectorPtr(),
                            static_cast<UInt>( 0 ),
-                           static_cast<UInt>( scalarField1_FESpace->dof().numTotalDof() ),
-                           static_cast<UInt>( 0 ),
-                           ExporterData::Cell );
+                           ExporterData< regionMesh_Type >::UnsteadyRegime,
+                           ExporterData< regionMesh_Type >::Cell );
 
     // Add the second scalar field to the exporter
-    exporter->addVariable( ExporterData::Scalar,
+    exporter->addVariable( ExporterData< regionMesh_Type >::ScalarField,
                            fieldName + "2",
+                           scalarField2_FESpace,
                            scalarField2->getVectorPtr(),
                            static_cast<UInt>( 0 ),
-                           static_cast<UInt>( scalarField2_FESpace->dof().numTotalDof() ),
-                           static_cast<UInt>( 0 ) );
+                           ExporterData< regionMesh_Type >::UnsteadyRegime );
 
     // Add the vector field to the exporter
-    exporter->addVariable( ExporterData::Vector,
+    exporter->addVariable( ExporterData< regionMesh_Type >::VectorField,
                            fieldName + "3",
+                           vectorField_FESpace,
                            vectorField->getVectorPtr(),
                            static_cast<UInt>( 0 ),
-                           static_cast<UInt>( vectorField_FESpace->dof().numTotalDof() ),
-                           static_cast<UInt>( 0 ),
-                           ExporterData::Cell );
+                           ExporterData< regionMesh_Type >::UnsteadyRegime,
+                           ExporterData< regionMesh_Type >::Cell );
 
     const std::string fctName =  dataFile( "exporter/name_fct", "Function" );
 
     // Add the scalar field representing the function to the exporter
-    exporter->addVariable( ExporterData::Scalar,
+    exporter->addVariable( ExporterData< regionMesh_Type >::ScalarField,
                            fctName + "1",
+                           function_FESpace,
                            scalarFieldFunction->getVectorPtr(),
                            static_cast<UInt>( 0 ),
-                           static_cast<UInt>( function_FESpace->dof().numTotalDof() ),
-                           static_cast<UInt>( 0 ),
-                           ExporterData::Cell );
+                           ExporterData< regionMesh_Type >::UnsteadyRegime,                           
+                           ExporterData< regionMesh_Type >::Cell );
 
     // Interpolate the value of the function
     function.interpolate( *scalarFieldFunction );
