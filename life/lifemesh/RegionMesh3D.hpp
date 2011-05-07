@@ -2757,7 +2757,11 @@ RegionMesh3D<GEOSHAPE, MC>::pointInitial( UInt const i ) const
 {
     ASSERT_BD( i < pointList.size() ) ;
 
-    return _pointList( i );
+    // If the mesh has not been moved, _pointList is empty, therefore we use pointList.
+    if ( M_moved )
+        return _pointList( i );
+    else
+        return point(i);
 }
 
 template <typename GEOSHAPE, typename MC>
@@ -2767,7 +2771,11 @@ RegionMesh3D<GEOSHAPE, MC>::pointInitial( UInt const i )
 {
     ASSERT_BD( i < pointList.size() ) ;
 
-    return _pointList( i );
+    // If the mesh has not been moved, _pointList is empty, therefore we use pointList.
+    if ( M_moved )
+        return _pointList( i );
+    else
+        return point(i);
 }
 
 template <typename GEOSHAPE, typename MC>

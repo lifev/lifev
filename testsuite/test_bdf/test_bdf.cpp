@@ -168,36 +168,37 @@ void test_bdf::run()
 
     //=============================================================================
     //finite element space of the solution
-    FESpace<RegionMesh, MapEpetra> FeSpace(meshPart,
-                                           dataFile(("bdf/"+discretization_section).c_str(), "P2"), 1, Members->comm);
+    boost::shared_ptr<FESpace<RegionMesh, MapEpetra> > feSpacePtr(
+        new FESpace<RegionMesh, MapEpetra> (
+            meshPart, dataFile(("bdf/"+discretization_section).c_str(), "P2"), 1, Members->comm) );
 
     if (verbose)
         std::cout << "  Number of unknowns : "
-                  << FeSpace.map().map(Unique)->NumGlobalElements()
+                  << feSpacePtr->map().map(Unique)->NumGlobalElements()
                   << std::endl;
 
-    bc.bcUpdate(*(FeSpace.mesh()), FeSpace.feBd(), FeSpace.dof());
+    bc.bcUpdate(*(feSpacePtr->mesh()), feSpacePtr->feBd(), feSpacePtr->dof());
 
     //=============================================================================
     //Fe Matrices and vectors
-    MatrixElemental elmat(FeSpace.fe().nbFEDof(), 1, 1); //local matrix
-    MatrixEpetra<double> matM(FeSpace.map()); //mass matrix
+    MatrixElemental elmat(feSpacePtr->fe().nbFEDof(), 1, 1); //local matrix
+    MatrixEpetra<double> matM(feSpacePtr->map()); //mass matrix
     boost::shared_ptr<MatrixEpetra<double> > matA_ptr(
-        new MatrixEpetra<double> (FeSpace.map())); //stiff matrix
-    VectorEpetra u(FeSpace.map(), Unique); // solution vector
-    VectorEpetra f(FeSpace.map(), Unique); // forcing term vector
+        new MatrixEpetra<double> (feSpacePtr->map())); //stiff matrix
+    VectorEpetra u(feSpacePtr->map(), Unique); // solution vector
+    VectorEpetra f(feSpacePtr->map(), Unique); // forcing term vector
 
     LifeChrono chrono;
     //Assembling Matrix M
     Members->comm->Barrier();
     chrono.start();
-    for (UInt iVol = 0; iVol < FeSpace.mesh()->numElements(); iVol++)
+    for (UInt iVol = 0; iVol < feSpacePtr->mesh()->numElements(); iVol++)
     {
-        FeSpace.fe().updateJac(FeSpace.mesh()->element(iVol));
+        feSpacePtr->fe().updateJac(feSpacePtr->mesh()->element(iVol));
         elmat.zero();
-        mass(1., elmat, FeSpace.fe(), 0, 0);
-        assembleMatrix(matM, elmat, FeSpace.fe(), FeSpace.fe(), FeSpace.dof(),
-                       FeSpace.dof(), 0, 0, 0, 0);
+        mass(1., elmat, feSpacePtr->fe(), 0, 0);
+        assembleMatrix(matM, elmat, feSpacePtr->fe(), feSpacePtr->fe(), feSpacePtr->dof(),
+                       feSpacePtr->dof(), 0, 0, 0, 0);
     }
     matM.globalAssemble();
     Members->comm->Barrier();
@@ -218,6 +219,7 @@ void test_bdf::run()
 
     //Initialization
     bdf.setInitialCondition<Real(*) (Real, Real, Real, Real, UInt), FESpace<RegionMesh, MapEpetra> >(AnalyticalSol::u, u, FeSpace, t0, delta_t);
+
     if (verbose) bdf.showMe();
     Members->comm->Barrier();
 
@@ -248,10 +250,9 @@ void test_bdf::run()
     exporter->setMeshProcId( meshPart.meshPartition(), Members->comm->MyPID() );
 
     boost::shared_ptr<VectorEpetra> u_display_ptr(new VectorEpetra(
-                                                      FeSpace.map(), exporter->mapType()));
-    exporter->addVariable(ExporterData::Scalar, "u", u_display_ptr,
-                          UInt(0),
-                          UInt(FeSpace.dof().numTotalDof()));
+                                                      feSpacePtr->map(), exporter->mapType()));
+    exporter->addVariable(ExporterData<RegionMesh >::ScalarField, "u", feSpacePtr,
+                          u_display_ptr, UInt(0));
     *u_display_ptr = u;
     exporter->postProcess(0);
 
@@ -271,21 +272,21 @@ void test_bdf::run()
         if (verbose)
             cout << "Now we are at time " << t << endl;
 
-        matA_ptr.reset(new MatrixEpetra<double> (FeSpace.map()));
+        matA_ptr.reset(new MatrixEpetra<double> (feSpacePtr->map()));
 
         chrono.start();
         //Assemble A
         Real coeff = bdf.coefficientDerivative(0) / delta_t;
         Real visc = nu(t);
         Real s = sigma(t);
-        for (UInt i = 0; i < FeSpace.mesh()->numElements(); i++)
+        for (UInt i = 0; i < feSpacePtr->mesh()->numElements(); i++)
         {
-            FeSpace.fe().updateFirstDerivQuadPt(FeSpace.mesh()->element(i));
+            feSpacePtr->fe().updateFirstDerivQuadPt(feSpacePtr->mesh()->element(i));
             elmat.zero();
-            mass(coeff + s, elmat, FeSpace.fe());
-            stiff(visc, elmat, FeSpace.fe());
-            assembleMatrix(*matA_ptr, elmat, FeSpace.fe(), FeSpace.fe(),
-                           FeSpace.dof(), FeSpace.dof(), 0, 0, 0, 0);
+            mass(coeff + s, elmat, feSpacePtr->fe());
+            stiff(visc, elmat, feSpacePtr->fe());
+            assembleMatrix(*matA_ptr, elmat, feSpacePtr->fe(), feSpacePtr->fe(),
+                           feSpacePtr->dof(), feSpacePtr->dof(), 0, 0, 0, 0);
         }
 
         chrono.stop();
@@ -294,14 +295,14 @@ void test_bdf::run()
 
         // Handling of the right hand side
         f = (matM*bdf.rhsContribution());       //f = M*\sum_{i=1}^{orderBdf} \alpha_i u_{n-i}
-        FeSpace.l2ScalarProduct(sf, f, t);  //f +=\int_\Omega{ volumeForces *v dV}
+        feSpacePtr->l2ScalarProduct(sf, f, t);  //f +=\int_\Omega{ volumeForces *v dV}
         Members->comm->Barrier();
 
         // Treatment of the Boundary conditions
         if (verbose) cout << "*** BC Management: " << endl;
         Real tgv = 1.;
         chrono.start();
-        bcManage(*matA_ptr, f, *FeSpace.mesh(), FeSpace.dof(), bc, FeSpace.feBd(), tgv, t);
+        bcManage(*matA_ptr, f, *feSpacePtr->mesh(), feSpacePtr->dof(), bc, feSpacePtr->feBd(), tgv, t);
         matA_ptr->globalAssemble();
         chrono.stop();
         if (verbose) cout << chrono.diff() << "s." << endl;
@@ -329,7 +330,7 @@ void test_bdf::run()
 
         Real L2_Error, L2_RelError;
 
-        L2_Error = FeSpace.l2Error(AnalyticalSol::u, uComputed, t, &L2_RelError);
+        L2_Error = feSpacePtr->l2Error(AnalyticalSol::u, uComputed, t, &L2_RelError);
 
         if (verbose)
             std::cout << "Error Norm L2: " << L2_Error

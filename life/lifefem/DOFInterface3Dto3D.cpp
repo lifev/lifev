@@ -102,7 +102,7 @@ bool coincide( const KN_<Real>& v1, const KN_<Real>& v2, const Real& tol )
 
     for ( UInt i(0); i < nDimensions; ++i )
     {
-        normDiff += fabs( v1[ i ] - v2[ i ] );
+        normDiff += std::fabs( v1[ i ] - v2[ i ] );
     }
 
     if ( normDiff <= tol )
@@ -119,7 +119,7 @@ bool coincide( const KN_<Real>& v1, const KN_<Real>& v2, const Real& tol )
 bool coincide( const Real& x1, const Real& y1, const Real& z1, const Real& x2, const Real& y2, const Real& z2, const Real& tol )
 {
 
-    Real normDiff (fabs( x1 - x2 ) + fabs( y1 - y2 ) + fabs( z1 - z2 ));
+    Real normDiff (std::fabs( x1 - x2 ) + std::fabs( y1 - y2 ) + std::fabs( z1 - z2 ));
 
     if ( normDiff <= tol )
     {

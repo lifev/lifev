@@ -114,8 +114,6 @@ const int RIGHT  = 4;
 const int FRONT  = 2;
 const int BACK   = 1;
 
-typedef RegionMesh3D<LinearTetra> RegionMesh;
-
 
 // ===================================================
 //! Private members
@@ -174,13 +172,14 @@ problem::problem( int          argc,
 void
 problem::run()
 {
-    typedef VenantKirchhoffViscoelasticSolver< RegionMesh3D<LinearTetra> >::vector_type    vector_type;
-    typedef boost::shared_ptr<vector_type>                                         vector_ptrtype;
+    typedef RegionMesh3D<LinearTetra>                                   mesh_Type;
+    typedef VenantKirchhoffViscoelasticSolver< mesh_Type >::vector_type vector_type;
+    typedef boost::shared_ptr<vector_type>                              vector_ptrtype;
 
-    typedef boost::shared_ptr< TimeAdvance< vector_type > >                 TimeAdvance_type;
+    typedef boost::shared_ptr< TimeAdvance< vector_type > >             TimeAdvance_type;
 
-    typedef FESpace< RegionMesh3D<LinearTetra>, MapEpetra > FESpace_type;
-    typedef  boost::shared_ptr<FESpace_type> FESpace_ptrtype;
+    typedef FESpace< mesh_Type, MapEpetra >                             FESpace_type;
+    typedef  boost::shared_ptr<FESpace_type>                            FESpace_ptrtype;
 
     bool verbose = (members->comm->MyPID() == 0);
 
@@ -190,16 +189,16 @@ problem::run()
 
     GetPot dataFile( members->data_file_name.c_str() );
     boost::shared_ptr<VenantKirchhoffViscoelasticData> dataProblem(new VenantKirchhoffViscoelasticData( ));
-     dataProblem->setup(dataFile, "problem");
+    dataProblem->setup(dataFile, "problem");
 
 
     MeshData             meshData;
     meshData.setup(dataFile, "problem/space_discretization");
 
-    boost::shared_ptr<RegionMesh3D<LinearTetra> > fullMeshPtr(new RegionMesh3D<LinearTetra>);
+    boost::shared_ptr<mesh_Type > fullMeshPtr(new mesh_Type);
     readMesh(*fullMeshPtr, meshData);
 
-    MeshPartitioner< RegionMesh3D<LinearTetra> > meshPart( fullMeshPtr, members->comm );
+    MeshPartitioner< mesh_Type > meshPart( fullMeshPtr, members->comm );
 
     //
     // The Problem Solver
@@ -240,17 +239,17 @@ problem::run()
 
 
     // finite element space of the solution
-   // finite element space of the solution
+    // finite element space of the solution
     std::string dOrder =  dataFile( "problem/space_discretization/order", "P1");
 
     FESpace_ptrtype feSpace( new FESpace_type(meshPart,dOrder,1,members->comm) );
 
     // instantiation of the VenantKirchhoffViscoelasticSolver class
 
-    VenantKirchhoffViscoelasticSolver< RegionMesh3D<LinearTetra> > problem;
+    VenantKirchhoffViscoelasticSolver< mesh_Type > problem;
 
     problem.setup(dataProblem,  feSpace,
-                                  members->comm);
+                  members->comm);
 
     problem.setDataFromGetPot(dataFile);
 // the boundary conditions
@@ -318,20 +317,20 @@ problem::run()
     vector_type rhsV( uMap, Unique );
 
     // postProcess
-    boost::shared_ptr< Exporter<RegionMesh3D<LinearTetra> > > exporter;
+    boost::shared_ptr< Exporter<mesh_Type > > exporter;
 
     std::string const exporterType =  dataFile( "exporter/type", "ensight");
 
 #ifdef HAVE_HDF5
     if (exporterType.compare("hdf5") == 0)
-        exporter.reset( new ExporterHDF5<RegionMesh3D<LinearTetra> > ( dataFile, "problem" ) );
+        exporter.reset( new ExporterHDF5<mesh_Type > ( dataFile, "problem" ) );
     else
 #endif
     {
         if (exporterType.compare("none") == 0)
-            exporter.reset( new ExporterEmpty<RegionMesh3D<LinearTetra> > ( dataFile, meshPart.meshPartition(), "problem", members ->comm->MyPID()) );
+            exporter.reset( new ExporterEmpty<mesh_Type > ( dataFile, meshPart.meshPartition(), "problem", members ->comm->MyPID()) );
         else
-            exporter.reset( new ExporterEnsight<RegionMesh3D<LinearTetra> > ( dataFile, meshPart.meshPartition(), "problem",   members->comm->MyPID()) );
+            exporter.reset( new ExporterEnsight<mesh_Type > ( dataFile, meshPart.meshPartition(), "problem",   members->comm->MyPID()) );
     }
 
     exporter->setPostDir( "./" ); // This is a test to see if M_post_dir is working
@@ -342,16 +341,17 @@ problem::run()
     vector_ptrtype Exact ( new vector_type(*problem.solution(), exporter->mapType() ) );
     vector_ptrtype vExact  ( new vector_type(*problem.solution(),  exporter->mapType() ) );
     vector_ptrtype RHS ( new vector_type(*problem.solution(), exporter->mapType() ) );
-    exporter->addVariable( ExporterData::Scalar, "displacement", U,
-                           UInt(0), feSpace->dof().numTotalDof() );
+    exporter->addVariable( ExporterData<mesh_Type>::ScalarField, "displacement",
+                           feSpace, U, UInt(0) );
 
-    exporter->addVariable( ExporterData::Scalar, "velocity", V,
-                           UInt(0), feSpace->dof().numTotalDof() );
-    exporter->addVariable( ExporterData::Scalar, "uexact", Exact,
-                           UInt(0), feSpace->dof().numTotalDof() );
+    exporter->addVariable( ExporterData<mesh_Type>::ScalarField, "velocity",
+                           feSpace, V, UInt(0) );
 
-    exporter->addVariable( ExporterData::Scalar, "vexact", vExact,
-                           UInt(0), feSpace->dof().numTotalDof() );
+    exporter->addVariable( ExporterData<mesh_Type>::ScalarField, "uexact",
+                           feSpace, Exact, UInt(0) );
+
+    exporter->addVariable( ExporterData<mesh_Type>::ScalarField, "vexact",
+                           feSpace, vExact, UInt(0) );
 
     exporter->postProcess( 0 );
 
@@ -392,7 +392,7 @@ problem::run()
     *U = timeAdvance->solution();
     *V = timeAdvance->velocity();
 
-     for (Real time = dt; time <= T; time += dt)
+    for (Real time = dt; time <= T; time += dt)
     {
         dataProblem->setTime(time);
 
@@ -404,19 +404,19 @@ problem::run()
 
         //evaluate rhs
         rhs *=0;
-	timeAdvance->updateRHSContribution(dt);
+        timeAdvance->updateRHSContribution(dt);
         rhsV = timeAdvance->rhsContributionFirstDerivative();
         feSpace->l2ScalarProduct(source_in, rhs, time);
         rhs += problem.matrMass() *rhsV;
 
         //updateRHS
-	problem.updateRHS(rhs);
+        problem.updateRHS(rhs);
 
         //solver system
-	 problem.iterate( bcH );    // Computes the matrices and solves the system
+        problem.iterate( bcH );    // Computes the matrices and solves the system
 
         //update unknowns of timeAdvance
-         timeAdvance->shiftRight(*problem.solution());
+        timeAdvance->shiftRight(*problem.solution());
 
         //evaluate uexact solution
         feSpace->interpolate(uexact, *Exact , time);
@@ -449,7 +449,7 @@ problem::run()
         }
 
         MPI_Barrier(MPI_COMM_WORLD);
-        }
+    }
     chrono.stop();
     if (verbose) std::cout << "Total iteration time " << chrono.diff() << " s." << std::endl;
 }

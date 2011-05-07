@@ -127,13 +127,13 @@ public:
     /*!
         @param dataFile GetPot object
      */
-    void setUp        ( const GetPot& dataFile );
+    void setUp( const GetPot& dataFile );
 
     //! Initialize with velocityFunction and pressureFunction
     /*!
         @param disp vector of displacements to initialize the simulation
      */
-    void initialize   ( const vector_Type& disp )  { setDisplacement(disp); }
+    void initialize( const vector_Type& disp )  { setDispOld(disp); }
 
     //! Update system
     /*!
