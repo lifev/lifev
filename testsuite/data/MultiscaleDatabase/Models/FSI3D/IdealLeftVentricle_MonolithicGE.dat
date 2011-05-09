@@ -173,7 +173,7 @@ tolerance       =  0.0005   # how far points are to be considered the same on th
     externalPressure = 0
     #density          = 1.2
     young            = 7.0E6
-    #poisson          = 0.4
+    poisson          = 0.48
 
     [../time_discretization]
     #timestep                   = 0.0001 # [s]
@@ -236,7 +236,7 @@ tolerance       =  0.0005   # how far points are to be considered the same on th
     reuse           = true
     max_iter_reuse  = 500
     kspace          = 500
-    tol             = 1.e-13
+    tol             = 1.e-9
 
     [../prec]
     #prectype                = AztecOO
@@ -361,7 +361,7 @@ tolerance       =  0.0005   # how far points are to be considered the same on th
     reuse           = true
     max_iter_reuse  = 500
     kspace          = 500
-    tol             = 1.e-13
+    tol             = 1.e-9
 
     [../prec]
     #prectype                = AztecOO

@@ -135,6 +135,15 @@ semiImplicit        = true   # tells if we advance in time after the first nonli
     [../boundary_conditions]
     list = ' '
 
+        [./Rings]
+        type       = Essential
+        flag       = 20
+        mode       = Full
+        component  = 3
+        function   = 0
+
+        [../]
+
     [../]
 
 
@@ -153,8 +162,8 @@ tolerance       =  0   # how far points are to be considered the same on the int
     material_flag    = 1
     #externalPressure = 0
     #density          = 1.2
-    young            = 4.0E6
-    #poisson          = 0.48
+    young            = 3.0784E6
+    poisson          = 0.48
 
     [../time_discretization]
     #timestep                   = 0.0001 # [s]
@@ -245,7 +254,7 @@ tolerance       =  0   # how far points are to be considered the same on the int
     reuse           = true
     max_iter_reuse  = 500
     kspace          = 500
-    tol             = 1.e-13
+    tol             = 1.e-9
 
     [../prec]
     #prectype                = AztecOO
@@ -328,7 +337,7 @@ tolerance       =  0   # how far points are to be considered the same on the int
     reuse           = true
     max_iter_reuse  = 500
     kspace          = 500
-    tol             = 1.e-13
+    tol             = 1.e-9
 
     [../prec]
     #prectype                = AztecOO
