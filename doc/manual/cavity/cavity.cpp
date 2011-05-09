@@ -47,9 +47,11 @@
 
 // Object type definitions
 typedef LifeV::RegionMesh3D<LifeV::LinearTetra>       mesh_Type;
-typedef LifeV::OseenSolver< mesh_Type >                     fluid_Type;
+typedef LifeV::OseenSolver< mesh_Type >               fluid_Type;
 typedef fluid_Type::vector_Type                       vector_Type;
 typedef boost::shared_ptr<vector_Type>                vectorPtr_Type;   //Pointer
+typedef LifeV::FESpace< mesh_Type, LifeV::MapEpetra > feSpace_Type;
+typedef boost::shared_ptr<feSpace_Type>               feSpacePtr_Type;   //Pointer
 
 // +-----------------------------------------------+
 // | Data and functions for the boundary conditions|
@@ -145,10 +147,10 @@ int main(int argc, char** argv)
     LifeV::MeshData meshData;
     meshData.setup(dataFile, "fluid/space_discretization");
     if (verbose) std::cout << "Mesh file: " << meshData.meshDir() << meshData.meshFile() << std::endl;
-    boost::shared_ptr< LifeV::RegionMesh3D<LifeV::LinearTetra> > fullMeshPtr(new LifeV::RegionMesh3D<LifeV::LinearTetra>);
+    boost::shared_ptr< mesh_Type > fullMeshPtr(new mesh_Type);
     LifeV::readMesh(*fullMeshPtr, meshData);
     // Split the mesh between processors
-    LifeV::MeshPartitioner< LifeV::RegionMesh3D<LifeV::LinearTetra> >   meshPart(fullMeshPtr, comm);
+    LifeV::MeshPartitioner< mesh_Type >   meshPart(fullMeshPtr, comm);
 
     // +-----------------------------------------------+
     // |            Creating the FE spaces             |
@@ -160,17 +162,17 @@ int main(int argc, char** argv)
                                << "FE for the pressure: " << pOrder << std::endl;
 
     if (verbose) std::cout << "Building the velocity FE space... " << std::flush;
-    LifeV::FESpace< LifeV::RegionMesh3D<LifeV::LinearTetra>, LifeV::MapEpetra > uFESpace(meshPart, uOrder, 3, comm);
+    feSpacePtr_Type uFESpacePtr( new feSpace_Type(meshPart, uOrder, 3, comm) );
     if (verbose)
         std::cout << "ok." << std::endl;
 
     if (verbose) std::cout << "Building the pressure FE space... " << std::flush;
-    LifeV::FESpace< LifeV::RegionMesh3D<LifeV::LinearTetra>, LifeV::MapEpetra > pFESpace(meshPart,pOrder,1,comm);
+    feSpacePtr_Type pFESpacePtr( new feSpace_Type(meshPart,pOrder,1,comm) );
     if (verbose) std::cout << "ok." << std::endl;
 
     // Total degrees of freedom (elements of matrix)
-    LifeV::UInt totalVelDof   = uFESpace.map().map(LifeV::Unique)->NumGlobalElements();
-    LifeV::UInt totalPressDof = pFESpace.map().map(LifeV::Unique)->NumGlobalElements();
+    LifeV::UInt totalVelDof   = uFESpacePtr->map().map(LifeV::Unique)->NumGlobalElements();
+    LifeV::UInt totalPressDof = pFESpacePtr->map().map(LifeV::Unique)->NumGlobalElements();
 
     if (verbose) std::cout << "Total Velocity Dof: " << totalVelDof << std::endl;
     if (verbose) std::cout << "Total Pressure Dof: " << totalPressDof << std::endl;
@@ -199,8 +201,8 @@ int main(int argc, char** argv)
     std::vector<LifeV::bcName_Type> fluxVector = bcH.findAllBCWithType( LifeV::Flux );
     LifeV::UInt numLM = static_cast<LifeV::UInt>( fluxVector.size() );
 
-    LifeV::UInt offset = uFESpace.map().map(LifeV::Unique)->NumGlobalElements()
-                         + pFESpace.map().map(LifeV::Unique)->NumGlobalElements();
+    LifeV::UInt offset = uFESpacePtr->map().map(LifeV::Unique)->NumGlobalElements()
+                         + pFESpacePtr->map().map(LifeV::Unique)->NumGlobalElements();
 
     for ( LifeV::UInt i = 0; i < numLM; ++i )
         bcH.setOffset( fluxVector[i], offset + i );
@@ -215,11 +217,11 @@ int main(int argc, char** argv)
     if (verbose) std::cout << "Time discretization order " << oseenData->dataTime()->orderBDF() << std::endl;
 
     // The problem (matrix and rhs) is packed in an object called fluid
-    LifeV::OseenSolver< LifeV::RegionMesh3D<LifeV::LinearTetra> > fluid (oseenData,
-                                                                   uFESpace,
-                                                                   pFESpace,
-                                                                   comm,
-                                                                   numLM);
+    LifeV::OseenSolver< mesh_Type > fluid (oseenData,
+                                           *uFESpacePtr,
+                                           *pFESpacePtr,
+                                           comm,
+                                           numLM);
     // Gets inputs from the data file
     fluid.setUp(dataFile);
 
@@ -275,24 +277,23 @@ int main(int argc, char** argv)
     // (A new one should be built for Navier-Stokes)
     fluid.resetPreconditioner();
 
-    boost::shared_ptr< LifeV::ExporterHDF5<LifeV::RegionMesh3D<LifeV::LinearTetra> > > exporter;
+    boost::shared_ptr< LifeV::ExporterHDF5<mesh_Type> > exporter;
 
     vectorPtr_Type velAndPressure;
 
     std::string const exporterType =  dataFile( "exporter/type", "ensight");
 
-    exporter.reset( new LifeV::ExporterHDF5<LifeV::RegionMesh3D<LifeV::LinearTetra> > ( dataFile, "cavity_example" ) );
+    exporter.reset( new LifeV::ExporterHDF5<mesh_Type> ( dataFile, "cavity_example" ) );
     exporter->setPostDir( "./" ); // This is a test to see if M_post_dir is working
     exporter->setMeshProcId( meshPart.meshPartition(), comm->MyPID() );
 
     velAndPressure.reset( new vector_Type(*fluid.solution(), exporter->mapType() ) );
 
-    exporter->addVariable( LifeV::ExporterData::Vector, "velocity", velAndPressure,
-                           LifeV::UInt(0), uFESpace.dof().numTotalDof() );
+    exporter->addVariable( LifeV::ExporterData<mesh_Type>::VectorField, "velocity", uFESpacePtr,
+                           velAndPressure, LifeV::UInt(0) );
 
-    exporter->addVariable( LifeV::ExporterData::Scalar, "pressure", velAndPressure,
-                           LifeV::UInt(3*uFESpace.dof().numTotalDof()),
-                           LifeV::UInt(pFESpace.dof().numTotalDof()) );
+    exporter->addVariable( LifeV::ExporterData<mesh_Type>::ScalarField, "pressure", pFESpacePtr,
+                           velAndPressure, LifeV::UInt(3*uFESpacePtr->dof().numTotalDof()) );
     exporter->postProcess( 0 );
 
     initChrono.stop();
@@ -316,7 +317,7 @@ int main(int argc, char** argv)
         double alpha = bdf.bdfVelocity().coefficientFirstDerivative( 0 ) / oseenData->dataTime()->timeStep();
 
         beta = bdf.bdfVelocity().extrapolation(); // Extrapolation for the convective term
-	bdf.bdfVelocity().updateRHSContribution(oseenData->dataTime()->timeStep() );
+        bdf.bdfVelocity().updateRHSContribution(oseenData->dataTime()->timeStep() );
         rhs  = fluid.matrixMass()*bdf.bdfVelocity().rhsContributionFirstDerivative();
 
         fluid.getDisplayer().leaderPrint("alpha ", alpha);
@@ -332,13 +333,13 @@ int main(int argc, char** argv)
         bdf.bdfVelocity().shiftRight( *fluid.solution() );
 
         // Computation of the error
-        vector_Type vel  (uFESpace.map(), LifeV::Repeated);
-        vector_Type press(pFESpace.map(), LifeV::Repeated);
+        vector_Type vel  (uFESpacePtr->map(), LifeV::Repeated);
+        vector_Type press(pFESpacePtr->map(), LifeV::Repeated);
         vector_Type velpressure ( *fluid.solution(), LifeV::Repeated );
 
         velpressure = *fluid.solution();
         vel.subset(velpressure);
-        press.subset(velpressure, uFESpace.dim()*uFESpace.fieldDim());
+        press.subset(velpressure, uFESpacePtr->dim()*uFESpacePtr->fieldDim());
 
 
         bool verbose = (comm->MyPID() == 0);
