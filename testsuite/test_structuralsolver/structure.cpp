@@ -207,8 +207,8 @@ Structure::run3d()
     // Temporal data and initial conditions
     //
 
-    Real dt = dataStructure->getdataTime()->timeStep();
-    Real T  = dataStructure->getdataTime()->endTime();
+    Real dt = dataStructure->dataTime()->timeStep();
+    Real T  = dataStructure->dataTime()->endTime();
 
     vectorPtr_Type disp(new vector_Type(solid.displacement(), Unique));
     vectorPtr_Type vel(new vector_Type(solid.velocity(), Unique));
@@ -265,7 +265,7 @@ Structure::run3d()
 	exporter->addVariable( ExporterData::Vector, "velocity", solidVel,
 			       UInt(0), dFESpace->dof().numTotalDof() );
 
-	exporter->addVariable( ExporterData::Vector, "velocity", solidAcc,
+	exporter->addVariable( ExporterData::Vector, "acceleration", solidAcc,
 			       UInt(0), dFESpace->dof().numTotalDof() );
 
 
@@ -278,12 +278,12 @@ Structure::run3d()
 
 	for (Real time = dt; time <= T; time += dt)
 	  {
-	    dataStructure->getdataTime()->setTime(time);
+	    dataStructure->dataTime()->setTime(time);
 
 	    if (verbose)
 	      {
 		std::cout << std::endl;
-		std::cout << "S- Now we are at time " << dataStructure->getdataTime()->time() << " s." << std::endl;
+		std::cout << "S- Now we are at time " << dataStructure->dataTime()->time() << " s." << std::endl;
 	      }
 	
 	    //solid.updateSystem(dZero);    // Computes the rigth hand side
