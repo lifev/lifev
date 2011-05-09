@@ -197,6 +197,12 @@ public :
      */
     const Real& externalPressure() const { return M_data->externalPressure(); }
 
+    //! Return the venous pressure.
+    /*!
+     * @return P_venous
+     */
+    const Real& venousPressure() const { return M_data->venousPressure(); }
+
     //! Compute the elastic pressure.
     /*!
      * @return P = beta0 * ( ( A / Area0 )^beta1 - 1 )

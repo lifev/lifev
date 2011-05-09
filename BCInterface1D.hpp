@@ -37,8 +37,8 @@
 #ifndef BCInterface1D_H
 #define BCInterface1D_H 1
 
+// Mathcard includes
 #include <lifemc/lifesolver/BCInterface.hpp>
-
 #include <lifemc/lifesolver/BCInterface1DFunctionDefault.hpp>
 
 namespace LifeV
@@ -271,7 +271,7 @@ BCInterface1D< BcHandler, PhysicalSolverType >::insertBC()
 
         addBcToHandler( base );
 
-        break;
+        return;
     }
     case BCI1DFunctionDefault:
     {
@@ -282,7 +282,7 @@ BCInterface1D< BcHandler, PhysicalSolverType >::insertBC()
 
         addBcToHandler( base );
 
-        break;
+        return;
     }
     default:
 

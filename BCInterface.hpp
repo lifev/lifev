@@ -26,7 +26,7 @@
 
 /*!
  *  @file
- *  @brief File containing the BCInterface class
+ *  @brief File containing the BCInterface main class
  *
  *  @date 10-05-2010
  *  @author Cristiano Malossi <cristiano.malossi@epfl.ch>
@@ -45,64 +45,92 @@
 namespace LifeV
 {
 
-//! BCInterface - LifeV Interface to load Boundary Conditions completely from a GetPot file
+//! BCInterface - LifeV Interface to load boundary conditions completely from a GetPot file
 /*!
  *  @author Cristiano Malossi
  *
- *  This class allows to impose boundary conditions completely from a file.
+ *  This class allows to impose boundary conditions completely from a GetPot file. You can derive a
+ *  specific implementation for the BCHandler of your problem. For 1D and 3D problem the derived classes
+ *  are already available, see BCInterface1D and BCInterface3D.
  *
  *  <b>EXAMPLE - DATA FILE</b>
  *
  *  In the GetPot data file, BCInterface reads a new section: [boundary_conditions].
  *
- *  Inside the new section there is a list of condition which correspond to other sub-section
- *  with the same name. The list must be inside the apex ' '.
+ *  Inside the new section there is a list of boundary conditions which correspond to other sub-section
+ *  with the same name, for example: list = 'InFlow OutFlow'
  *
- *  Each condition has a similar structure; here there is an example:
+ *  Each boundary condition has a similar structure. The list of properties depends from the type of the
+ *  boundary condition (if it is for 1D or 3D solver for example). For example:
  *
- *  [InFlow]               <br>
- *  type       = Q         <br>
- *  side       = left      <br>
- *  line       = first     <br>
+ *  [InFlow]                             <br>
+ *  ...                                  <br>
+ *  ...                                  <br>
  *  function   = '3*0.03*(1/4-(x^2+y^2)' <br>
  *
- *  NOTE: All the parameters are case sensitive.
+ *  [OutFlow]        <br>
+ *  ...              <br>
+ *  ...              <br>
+ *  function   = '0' <br>
  *
- *  type - can be: A, Q, W1, W2, P
- *  side - can be: left, right
- *  line - can be: first, second.
- *  function - contains the function. See BCInterfaceFunction1D for more details about the syntax.
+ *  All the parameters are case sensitive.
  *
  *  <b>NOTE:</b>
  *
  *  The string "function" represent the base module and can be replaced by other expanded modules.
- *  Up to now we have the following modules for function:
+ *  The following functions are available (see the related classes for more information):
  *
  *  - function
  *  - functionFile
- *  - OperatorFunction
- *  - OperatorFunctionFile
- *  - Default_1D
- *
- *  To see some example look at test_fsi.
+ *  - functionSolver
+ *  - functionFileSolver
  *
  *  <b>EXAMPLE - HOW TO USE</b>
  *
- *  Here there is a short example on how to use it.
+ *  Here there is a short guide on how to create and use a BCInterface object.
  *
- *  1) You can define your BCInterface class in a shared pointer:
- *     boost::shared_ptr<BCInterface> 	M_fluidBC;
+ *  1) First of all, you have to define a BCInterface class:
  *
- *  2) Build the BCInterface using empty constructor;
+ *     BCInterface bcInterface;
  *
- *  3) If you have operator conditions you have to give the operator to access variables
- *     M_fluidBC->setPhysicalSolver( M_fsi->FSIOper() );
+ *  2) You can create an empty handler by calling:
  *
- *  4) Then you can fill the handler from a file and a section (this can be done for multiple files & sections)
- *     M_fluidBC->fillHandler( "fileName.dat", "fluid" );
+ *     bcInterface.createHandler()
+ *
+ *     or you can set it from outside
+ *
+ *     boost::shared_ptr< bcHandler_Type > bcHandler( new bcHandler_Type() );
+ *     bcInterface.setHandler( bcHandler );
+ *
+ *  3) Then you can add all the file boundary condition by calling
+ *
+ *     bcInterface.fillHandler( "fileName.dat", "section" );
+ *
+ *     Or you can add one specific boundary conditions by calling
+ *
+ *     bcInterface.readBC( "fileName.dat", "section", "bcSection" )
+ *     bcInterface.insertBC();
+ *
+ *     Note that between readBC and insertBC you can manipulate the BC parameters by accessing
+ *     the data container:
+ *
+ *     bcInterface.dataContainer();
+ *
+ *     In addition, you can also add BC directly from the code by accessing the bcHandler
+ *
+ *     M_bc.handler()->addBC( ... );
+ *
+ *  4) If you are using functions that use solver variables first you have to pass the solver
+ *
+ *     M_bc.setPhysicalSolver( physicalSolverPtr );
+ *
+ *     Then be sure to update the variable at each time step before using the BCHandler:
+ *
+ *     M_bc.updatePhysicalSolverVariables();
  *
  *  5) Finally, to get the handler you can use:
- *     M_fluidBC->handler();
+ *
+ *     M_bc.handler();
  *
  *  NOTE:
  *

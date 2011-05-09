@@ -76,6 +76,7 @@ OneDimensionalData::OneDimensionalData():
     M_young                     (),
     M_poisson                   (),
     M_externalPressure          (),
+    M_venousPressure            (),
     M_robertsonCorrection       (),
     M_thickness                 (),
     M_friction                  (),
@@ -166,6 +167,7 @@ OneDimensionalData::setup( const GetPot& dataFile, const std::string& section )
     M_poisson                = dataFile( ( section + "/PhysicalParameters/poisson"                   ).data(), 0.5 );
 
     M_externalPressure       = dataFile( ( section + "/PhysicalParameters/externalPressure"          ).data(), 0. );
+    M_venousPressure         = dataFile( ( section + "/PhysicalParameters/venousPressure"            ).data(), 0. );
     M_friction               = dataFile( ( section + "/PhysicalParameters/Kr"                        ).data(), 1. );
 
     M_robertsonCorrection    = dataFile( ( section + "/PhysicalParameters/RobertsonCorrection"       ).data(), 1. );
@@ -342,6 +344,7 @@ OneDimensionalData::oldStyleSetup( const GetPot& dataFile, const std::string& se
     M_poisson                = dataFile( ( section + "/1d_physics/ksi"                               ).data(), 0.5 );
 
     M_externalPressure       = dataFile( ( section + "/PhysicalParameters/externalPressure"          ).data(), 0. );
+    M_venousPressure         = dataFile( ( section + "/PhysicalParameters/venousPressure"            ).data(), 0. );
 
     M_inertialModulus        = dataFile( ( section + "/PhysicalParameters/coeffA"                    ).data(), 0. );
     M_robertsonCorrection    = dataFile( ( section + "/PhysicalParameters/RobertsonCorrection"       ).data(), 1. );
@@ -524,6 +527,7 @@ OneDimensionalData::showMe( std::ostream& output ) const
     output << "Young modulus          = " << M_young << std::endl;
     output << "Poisson                = " << M_poisson << std::endl;
     output << "External pressure      = " << M_externalPressure << std::endl;
+    output << "Venous pressure        = " << M_venousPressure << std::endl;
     output << "Robertson correction   = " << M_robertsonCorrection << std::endl;
 
     output << "Area0                  = " << M_area0 << std::endl;
