@@ -500,6 +500,8 @@ protected:
 
   //! Matrix Temp: Temporary matrix to compute residuals, store jacobian
   matrixPtr_Type                       M_tempMatrix;
+  //! Jacobian Matrix: Matrix to store the jacobian of the newton method
+  matrixPtr_Type                       M_jacobian;
 
   //! level of recursion for Aztec (has a sens with FSI coupling)
   UInt                                 M_recur;
@@ -546,6 +548,7 @@ StructuralSolver<Mesh, SolverType>::StructuralSolver( ):
   M_localMap                   ( ),
   M_mass                       ( ),
   M_tempMatrix                 ( ),
+  M_jacobian                   ( ),
   M_recur                      ( ),
   M_source                     ( ),
   M_offset                     ( 0 ),
@@ -605,10 +608,11 @@ StructuralSolver<Mesh, SolverType>::setup(boost::shared_ptr<data_Type>        da
   M_rhsNoBC.reset                   ( new vector_Type(*M_localMap) );
   M_mass.reset                      (new matrix_Type(*M_localMap));
   M_tempMatrix.reset                (new matrix_Type(*M_localMap));
+  M_jacobian.reset                  (new matrix_Type(*M_localMap));
   M_offset                          = offset;
 
   M_theta                           = 2.0 * M_data->dataTime()->theta();
-  M_zeta                           = M_data->dataTime()->gamma();
+  M_zeta                            = M_data->dataTime()->gamma();
 
   M_material.reset( material_Type::StructureMaterialFactory::instance().createObject( M_data->getSolidType()));
   M_material->setup(dFESpace,M_localMap,M_offset);
@@ -629,9 +633,8 @@ void StructuralSolver<Mesh, SolverType>::updateSystem( matrixPtr_Type& stiff )
     chrono.start();
 
     //Compute the new Stiffness Matrix
-
     M_material->computeMatrix(*this->M_disp, M_rescaleFactor, this->M_data, this->M_Displayer);
-    //M_material->computeNewMatrix(*this->M_disp, M_rescaleFactor, this->M_data, this->M_Displayer);
+
 
     stiff.reset(new matrix_Type(*this->M_localMap));
     *stiff += *this->M_material->stiff();
@@ -871,6 +874,11 @@ StructuralSolver<Mesh, SolverType>::iterateLin( bchandler_Type& bch )
   *matrFull += *this->M_mass; // Global Assemble is done inside BCManageMatrix
   ///End First Approximantion
 
+  // Use of the complete Jacobian
+  *matrFull += *this->M_jacobian; 
+  *matrFull *= M_zeta;
+  *matrFull += *this->M_mass; // Global Assemble is done inside BCManageMatrix
+ 
   this->M_Displayer->leaderPrint("\tS'-  Solving the linear system in iterateLin... \n");
 
   // for BC treatment (done at each time-step)
@@ -906,10 +914,12 @@ StructuralSolver<Mesh, SolverType>::showMe( std::ostream& c  ) const
 {
   c << "\n*** StructuralSolver::showMe method" << std::endl;
   c << "****** Data of the Material************" << std::endl;
-  c << "Thickness:   " << M_data->thickness();
-  c << "Density:   " << M_data->rho();
-  c << "Young:   " << M_data->young();
-  c << "Poisson:   " << M_data->poisson();
+  c << "Thickness:    " << M_data->thickness() << std::endl;
+  c << "Density:      " << M_data->rho() << std::endl;
+  c << "Young:        " << M_data->young() << std::endl;
+  c << "Poisson:      " << M_data->poisson() << std::endl;
+  c << "Theta:        " << M_theta << std::endl;
+  c << "Zeta:         " << M_zeta << std::endl;
   c << "***************************************" << std::endl;
 }
 
@@ -1264,7 +1274,7 @@ solveJacobian( vector_Type&           step,
 {
     LifeChrono chrono;
 
-    updateJacobian( *this->M_disp, this->M_tempMatrix );
+    updateJacobian( *this->M_disp, this->M_jacobian );
 
     this->M_Displayer->leaderPrint("\tS'-  Solving the linear system ... \n");
 
@@ -1279,7 +1289,7 @@ solveJacobian( vector_Type&           step,
 
 
 //    bcManageMatrix( *this->M_jacobian, *this->M_FESpace->mesh(), this->M_FESpace->dof(), *this->M_BCh, this->M_FESpace->feBd(), tgv );
-    applyBoundaryConditions( *this->M_tempMatrix, rhsFull, BCh);
+    applyBoundaryConditions( *this->M_jacobian, rhsFull, BCh);
 
 
     this->M_Displayer->leaderPrintMax( "done in ", chrono.diff() );
@@ -1287,9 +1297,9 @@ solveJacobian( vector_Type&           step,
     this->M_Displayer->leaderPrint("\tS'-  Solving system                    ... \n");
     chrono.start();
 
-    this->M_linearSolver->setMatrix(*this->M_tempMatrix);
+    this->M_linearSolver->setMatrix(*this->M_jacobian);
 
-    this->M_linearSolver->solveSystem( rhsFull, step, this->M_tempMatrix );
+    this->M_linearSolver->solveSystem( rhsFull, step, this->M_jacobian );
 
     chrono.stop();
 
