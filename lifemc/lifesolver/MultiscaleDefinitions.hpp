@@ -100,10 +100,7 @@ enum couplings_Type
 {
     BoundaryCondition,      /*!< Boundary condition */
     FlowRate,               /*!< All flow rate coupling condition */
-<<<<<<< HEAD
     FlowRateValve,          /*!< All flow rate coupling condition with a valve between model 1 and the others*/
-=======
->>>>>>> Multiscale Framework Interface upgraded:
     FlowRateStress,         /*!< Flow rate/stress coupling condition */
     Stress                  /*!< All stress coupling condition */
 };
