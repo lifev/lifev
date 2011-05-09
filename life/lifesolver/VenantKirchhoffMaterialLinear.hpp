@@ -180,8 +180,8 @@ void VenantKirchhoffMaterialLinear<Mesh>::computeLinearStiffMatrix(dataPtr_Type&
 
         UInt marker = this->M_FESpace->mesh()->volumeList( i ).marker();
 
-	Real mu = dataMaterial->getMu(marker);
-	Real lambda = dataMaterial->getLambda(marker);
+	Real mu = dataMaterial->mu(marker);
+	Real lambda = dataMaterial->lambda(marker);
 
         stiff_strain(    2.0 * mu, *this->M_elmatK, this->M_FESpace->fe() );
         stiff_div   ( lambda, *this->M_elmatK, this->M_FESpace->fe() );

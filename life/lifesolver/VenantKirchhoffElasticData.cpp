@@ -165,8 +165,8 @@ VenantKirchhoffElasticData::showMe( std::ostream& output ) const
 
     for ( materialContainerIterator_Type i = M_poisson.begin() ; i != M_poisson.end() ; ++i )
     {
-        output << "Lame - lambda[" << i->first << "]                 = " << getLambda( i->first ) << std::endl;
-        output << "Lame - mu[" << i->first << "]                     = " << getMu( i->first ) << std::endl;
+        output << "Lame - lambda[" << i->first << "]                 = " << lambda( i->first ) << std::endl;
+        output << "Lame - mu[" << i->first << "]                     = " << mu( i->first ) << std::endl;
     }
 
     output << "\n*** Values for data [solid/miscellaneous]\n\n";
@@ -184,7 +184,7 @@ VenantKirchhoffElasticData::showMe( std::ostream& output ) const
 // Get Method
 // ===================================================
 Real
-VenantKirchhoffElasticData::getPoisson( const UInt& material ) const
+VenantKirchhoffElasticData::poisson( const UInt& material ) const
 {
     materialContainer_Type::const_iterator IT;
 
@@ -203,7 +203,7 @@ VenantKirchhoffElasticData::getPoisson( const UInt& material ) const
 }
 
 Real
-VenantKirchhoffElasticData::getYoung( const UInt& material ) const
+VenantKirchhoffElasticData::young( const UInt& material ) const
 {
     materialContainer_Type::const_iterator IT;
     if ( M_materialsFlagSet )
@@ -221,25 +221,25 @@ VenantKirchhoffElasticData::getYoung( const UInt& material ) const
 }
 
 Real
-VenantKirchhoffElasticData::getLambda( const UInt& material ) const
+VenantKirchhoffElasticData::lambda( const UInt& material ) const
 {
-    Real young, poisson;
+    Real youngC, poissonC;
 
-    young   = getYoung( material );
-    poisson = getPoisson( material );
+    youngC   = this->young( material );
+    poissonC = this->poisson( material );
 
-    return young * poisson / ( ( 1.0 + poisson ) * ( 1.0 - 2.0 * poisson ) );
+    return youngC * poissonC / ( ( 1.0 + poissonC ) * ( 1.0 - 2.0 * poissonC ) );
 }
 
 Real
-VenantKirchhoffElasticData::getMu( const UInt& material ) const
+VenantKirchhoffElasticData::mu( const UInt& material ) const
 {
-    Real young, poisson;
+    Real youngC, poissonC;
 
-    young   = getYoung( material );
-    poisson = getPoisson( material );
+    youngC   = this->young( material );
+    poissonC = this->poisson( material );
 
-    return young / ( 2.0 * ( 1.0 + poisson ) );
+    return youngC / ( 2.0 * ( 1.0 + poissonC ) );
 }
 
 }

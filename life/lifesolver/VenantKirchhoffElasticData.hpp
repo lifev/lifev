@@ -162,65 +162,65 @@ public:
     /*!
      * @return shared_ptr to TimeData container
      */
-    const timePtr_Type& getdataTime() const { return M_time; }
+    const timePtr_Type& dataTime() const { return M_time; }
 
     //! Get solid density
     /*!
      * @return Solid density
      */
-    const Real& getRho() const { return M_density; }
+    const Real& rho() const { return M_density; }
 
     //! Get solid thickness
     /*!
      * @return Solid thickness
      */
-    const Real& getThickness() const { return M_thickness; }
+    const Real& thickness() const { return M_thickness; }
 
     //! Get solid poisson coefficient
     /*!
      * @param material material ID (1 by default)
      * @return Solid poisson coefficient
      */
-    Real getPoisson( const UInt& material = 1 ) const;
+    Real poisson( const UInt& material = 1 ) const;
 
     //! Get solid young modulus
     /*!
      * @param material material ID (1 by default)
      * @return Solid young modulus
      */
-    Real getYoung( const UInt& material = 1 ) const;
+    Real young( const UInt& material = 1 ) const;
 
     //! Get solid first lame coefficient
     /*!
      * @param material material ID (1 by default)
      * @return Solid first Lame coefficient
      */
-    Real getLambda( const UInt& material = 1 ) const;
+    Real lambda( const UInt& material = 1 ) const;
 
     //! Get solid second Lame coefficient
     /*!
      * @param material material ID (1 by default)
      * @return Solid second Lame coefficient
      */
-    Real getMu( const UInt& material = 1 ) const;
+    Real mu( const UInt& material = 1 ) const;
 
     //! Get FE order
     /*!
      * @return FE order
      */
-    const std::string& getOrder() const { return M_order; }
+    const std::string& order() const { return M_order; }
 
     //! Get solid amplification factor
     /*!
      * @return Solid amplification factor
      */
-    const Real& getFactor() const { return M_factor; }
+    const Real& factor() const { return M_factor; }
 
     //! Get verbose level
     /*!
      * @return verbose level
      */
-    const UInt& getVerbose() const { return M_verbose; }
+    const UInt& verbose() const { return M_verbose; }
 
     //! Get solid type
     /*!

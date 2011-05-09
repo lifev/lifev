@@ -176,7 +176,7 @@ FSIOperator::setupFEspace()
 
     std::string uOrder = M_data->dataFluid()->uOrder();
     std::string pOrder = M_data->dataFluid()->pOrder();
-    std::string dOrder = M_data->dataSolid()->getOrder();
+    std::string dOrder = M_data->dataSolid()->order();
 
     const ReferenceFE*    refFE_vel(0);
     const QuadratureRule* qR_vel(0);
@@ -725,7 +725,7 @@ void FSIOperator::createInterfaceMaps( std::map<ID, ID> const& locDofMap )
     disp.leaderPrint("FSI-  Variables initialization ...             \n");
 
     //variablesInit( refFE_struct, bdQr_struct, qR_struct);
-    variablesInit( M_data->dataSolid()->getOrder() );
+    variablesInit( M_data->dataSolid()->order() );
 
     M_epetraWorldComm->Barrier();
 }
@@ -905,9 +905,9 @@ void
 FSIOperator::setAlphafCoef( )
 {
     Real h=0.1, R=0.5;
-    M_AlphafCoef  = 2*(this->dataSolid()->getRho()*h)/this->dataFluid()->dataTime()->timeStep();
-    M_AlphafCoef += h*this->dataSolid()->getYoung(0)*this->dataFluid()->dataTime()->timeStep() /
-                    (2*pow(R,2) *(1-pow(dataSolid()->getPoisson(0),2)));
+    M_AlphafCoef  = 2*(this->dataSolid()->rho()*h)/this->dataFluid()->dataTime()->timeStep();
+    M_AlphafCoef += h*this->dataSolid()->young(0)*this->dataFluid()->dataTime()->timeStep() /
+                    (2*pow(R,2) *(1-pow(dataSolid()->poisson(0),2)));
 }
 
 void

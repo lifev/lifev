@@ -406,16 +406,16 @@ public:
 
   // Physic constant
   //! Get the thickness
-  Real thickness() const { return M_data->getThickness(); }
+  Real thickness() const { return M_data->thickness(); }
 
   //! Get the Young modulus
-  Real young()            const { return M_data->getYoung(); }
+  Real young()            const { return M_data->young(); }
 
   //! Get the Poisson coefficient
-  Real poisson()          const { return M_data->getPoisson(); }
+  Real poisson()          const { return M_data->poisson(); }
 
   //! Get the density
-  Real rho()       const { return M_data->getRho(); }
+  Real rho()       const { return M_data->rho(); }
 
   //@}
 
@@ -550,8 +550,8 @@ StructuralSolver<Mesh, SolverType>::StructuralSolver( ):
   M_source                     ( ),
   M_offset                     ( 0 ),
   M_rescaleFactor              ( 1. ),
-  M_zeta                       ( 0.5 ),
-  M_theta                      ( 0.5 ),
+  M_zeta                       ( 0.0 ),
+  M_theta                      ( 0.0 ),
   M_material                   ( )
 {
   std::cout << "I am in the constructor for the solver" << std::endl;
@@ -607,6 +607,9 @@ StructuralSolver<Mesh, SolverType>::setup(boost::shared_ptr<data_Type>        da
   M_tempMatrix.reset                (new matrix_Type(*M_localMap));
   M_offset                          = offset;
 
+  M_theta                           = 2.0 * M_data->dataTime()->theta();
+  M_zeta                           = M_data->dataTime()->gamma();
+
   M_material.reset( material_Type::StructureMaterialFactory::instance().createObject( M_data->getSolidType()));
   M_material->setup(dFESpace,M_localMap,M_offset);
 }
@@ -638,7 +641,7 @@ void StructuralSolver<Mesh, SolverType>::updateSystem( matrixPtr_Type& stiff )
 
     computeRightHandSide();
 
-    Real DeltaT    = this->M_data->getdataTime()->timeStep();
+    Real DeltaT    = this->M_data->dataTime()->timeStep();
     vector_Type z = *this->M_disp;
 
      z            +=  DeltaT*(*this->M_vel);
@@ -698,7 +701,7 @@ void StructuralSolver<Mesh, SolverType>::updateSystem( source_Type const& source
 
         for ( UInt ic = 0; ic < nc; ++ic )
 	  {
-            compute_vec( source, M_elvec, this->M_FESpace->fe(),  this->M_data->getdataTime()->getTime(), ic ); // compute local vector
+            compute_vec( source, M_elvec, this->M_FESpace->fe(),  this->M_data->dataTime()->getTime(), ic ); // compute local vector
             assembleVector( *this->M_rhsNoBC, M_elvec, this->M_FESpace->fe(), this->M_FESpace->dof(), ic, ic*this->M_FESpace->getDim() ); // assemble local vector into global one
 	  }
       }
@@ -713,7 +716,7 @@ template <typename Mesh, typename SolverType>
 void StructuralSolver<Mesh, SolverType>::computeRightHandSide( void )
 {
   
-    Real DeltaT    = this->M_data->getdataTime()->timeStep();
+    Real DeltaT    = this->M_data->dataTime()->timeStep();
     vector_Type z  = *this->M_disp;
 
     z             +=  DeltaT * (*this->M_vel);
@@ -765,7 +768,7 @@ StructuralSolver<Mesh, SolverType>::computeMassMatrix( const Real& factor)
   UInt nc = nDimensions;
 
   //inverse of dt square:
-  Real dti2 = 2.0 / ( M_data->getdataTime()->timeStep() * M_data->getdataTime()->timeStep() );
+  Real dti2 = 2.0 / ( M_data->dataTime()->timeStep() * M_data->dataTime()->timeStep() );
 
   // Elementary computation and matrix assembling
   // Loop on elements
@@ -777,7 +780,7 @@ StructuralSolver<Mesh, SolverType>::computeMassMatrix( const Real& factor)
       M_elmatM->zero();
 
       // mass
-      mass( dti2 * M_data->getRho(), *M_elmatM, M_FESpace->fe(), 0, 0, nDimensions );
+      mass( dti2 * M_data->rho(), *M_elmatM, M_FESpace->fe(), 0, 0, nDimensions );
 
       // assembling
       for ( UInt ic = 0; ic < nc; ic++ )
@@ -815,7 +818,7 @@ StructuralSolver<Mesh, SolverType>::iterate( bchandler_Type& bch )
 
     Int status = 0;
 
-    status = NonLinearRichardson( *this->M_disp, *this, abstol, reltol, maxiter, etamax, NonLinearLineSearch, this->M_out_res, this->M_data->getdataTime()->time() );
+    status = NonLinearRichardson( *this->M_disp, *this, abstol, reltol, maxiter, etamax, NonLinearLineSearch, this->M_out_res, this->M_data->dataTime()->time() );
 
     if ( status == 1 )
     {
@@ -829,7 +832,7 @@ StructuralSolver<Mesh, SolverType>::iterate( bchandler_Type& bch )
 
         std::cout <<" Number of inner iterations       : " << maxiter <<  std::endl;
 
-        std::cout <<" We are at the time step          : "  << this->M_data->getdataTime()->time() << std::endl;
+        std::cout <<" We are at the time step          : "  << this->M_data->dataTime()->time() << std::endl;
 
         this->M_out_iter << time << " " << maxiter << std::endl;
     }
@@ -903,10 +906,10 @@ StructuralSolver<Mesh, SolverType>::showMe( std::ostream& c  ) const
 {
   c << "\n*** StructuralSolver::showMe method" << std::endl;
   c << "****** Data of the Material************" << std::endl;
-  c << "Thickness:   " << M_data->getThickness();
-  c << "Density:   " << M_data->getRho();
-  c << "Young:   " << M_data->getYoung();
-  c << "Poisson:   " << M_data->getPoisson();
+  c << "Thickness:   " << M_data->thickness();
+  c << "Density:   " << M_data->rho();
+  c << "Young:   " << M_data->young();
+  c << "Poisson:   " << M_data->poisson();
   c << "***************************************" << std::endl;
 }
 
@@ -950,7 +953,7 @@ StructuralSolver<Mesh, SolverType>::evalResidual( vector_Type &residual, const v
 
     vector_Type rhsFull(*this->M_rhsNoBC, Unique); // ignoring non-local entries, Otherwise they are summed up lately
 
-    bcManageVector( rhsFull, *this->M_FESpace->mesh(), this->M_FESpace->dof(), *this->M_BCh, this->M_FESpace->feBd(),  this->M_data->getdataTime()->time(), 1.0 );
+    bcManageVector( rhsFull, *this->M_FESpace->mesh(), this->M_FESpace->dof(), *this->M_BCh, this->M_FESpace->feBd(),  this->M_data->dataTime()->time(), 1.0 );
 
     *this->M_rhs = rhsFull;
 
@@ -1031,17 +1034,17 @@ StructuralSolver<Mesh, SolverType>::evalConstraintTensor()
 	      Int i    = M_FESpace->fe().patternFirst(k);
 	      Int idof = M_FESpace->dof().localToGlobal(M_FESpace->fe().currentLocalId(), i + 1);
 
-	      s+= (2*M_data->getMu() + M_data->getLambda())*
+	      s+= (2*M_data->mu() + M_data->lambda())*
 		M_FESpace->fe().weightDet( ig )*
 		M_FESpace->fe().phiDer( k, 0 , ig )*
 		(*M_disp)[idof + 0*M_FESpace->dim()];
 
-	      s+= M_data->getLambda()*
+	      s+= M_data->lambda()*
 		M_FESpace->fe().weightDet( ig )*
 		M_FESpace->fe().phiDer( k, 1 , ig )*
 		(*M_disp)[idof + 1*M_FESpace->dim()];
 
-	      s+= M_data->getLambda()*
+	      s+= M_data->lambda()*
 		M_FESpace->fe().weightDet( ig )*
 		M_FESpace->fe().phiDer( k, 2 , ig )*
 		(*M_disp)[idof + 2*M_FESpace->dim()];
@@ -1067,17 +1070,17 @@ StructuralSolver<Mesh, SolverType>::evalConstraintTensor()
 	      Int i    = M_FESpace->fe().patternFirst(k);
 	      Int idof = M_FESpace->dof().localToGlobal(M_FESpace->fe().currentLocalId(), i + 1);
 
-	      s += M_data->getLambda()*
+	      s += M_data->lambda()*
 		M_FESpace->fe().weightDet( ig )*
 		M_FESpace->fe().phiDer( k, 0 , ig )*
 		(*M_disp)[idof + 0*M_FESpace->dim()];
 
-	      s += (2*M_data->getMu() + M_data->getLambda())*
+	      s += (2*M_data->mu() + M_data->lambda())*
 		M_FESpace->fe().weightDet( ig )*
 		M_FESpace->fe().phiDer( k, 1 , ig )*
 		(*M_disp)[idof + 1*M_FESpace->dim()];
 
-	      s += M_data->getLambda()*
+	      s += M_data->lambda()*
 		M_FESpace->fe().weightDet( ig )*
 		M_FESpace->fe().phiDer( k, 2 , ig )*
 		(*M_disp)[idof + 2*M_FESpace->dim()];
@@ -1105,17 +1108,17 @@ StructuralSolver<Mesh, SolverType>::evalConstraintTensor()
 	      Int i    = M_FESpace->fe().patternFirst(k);
 	      Int idof = M_FESpace->dof().localToGlobal(M_FESpace->fe().currentLocalId(), i + 1);
 
-	      s += M_data->getLambda()*
+	      s += M_data->lambda()*
 		M_FESpace->fe().weightDet( ig )*
 		M_FESpace->fe().phiDer( k, 0 , ig )*
 		(*M_disp)[idof + 0*M_FESpace->dim()];
 
-	      s += M_data->getLambda()*
+	      s += M_data->lambda()*
 		M_FESpace->fe().weightDet( ig )*
 		M_FESpace->fe().phiDer( k, 1 , ig )*
 		(*M_disp)[idof + 1*M_FESpace->dim()];
 
-	      s += (2*M_data->getMu() + M_data->getLambda())*
+	      s += (2*M_data->mu() + M_data->lambda())*
 		M_FESpace->fe().weightDet( ig )*
 		M_FESpace->fe().phiDer( k, 2 , ig )*
 		(*M_disp)[idof + 2*M_FESpace->dim()];
@@ -1172,7 +1175,7 @@ StructuralSolver<Mesh, SolverType>::initialize( const Function& d0, const Functi
 template <typename Mesh, typename SolverType>
 void StructuralSolver<Mesh, SolverType>::updateVelAndAcceleration()
 {
-    Real DeltaT = this->M_data->getdataTime()->timeStep();
+    Real DeltaT = this->M_data->dataTime()->timeStep();
 
     *this->M_acc = (2.0 /( this->M_zeta * pow(DeltaT,2) ))  * (*this->M_disp)  - *this->M_rhsA;
     *this->M_vel = *this->M_rhsW + this->M_theta * DeltaT * (*M_acc) ;
@@ -1201,8 +1204,8 @@ template <typename Mesh, typename SolverType>
 void
 StructuralSolver<Mesh, SolverType>::rescaleMatrices()
 {
-  *M_mass *=(M_data->getdataTime()->timeStep()*M_rescaleFactor);
-  *M_linearStiff *= (M_data->getdataTime()->timeStep()*M_rescaleFactor);
+  *M_mass *=(M_data->dataTime()->timeStep()*M_rescaleFactor);
+  *M_linearStiff *= (M_data->dataTime()->timeStep()*M_rescaleFactor);
 }
 */
 template <typename Mesh, typename SolverType>
@@ -1213,9 +1216,9 @@ StructuralSolver<Mesh, SolverType>::setDataFromGetPot( const GetPot& dataFile )
   M_linearSolver->setupPreconditioner(dataFile, "solid/prec");
 
   UInt marker = M_FESpace->mesh()->volumeList( 1 ).marker();
-  if (!M_data->getYoung(marker))
+  if (!M_data->young(marker))
     M_data->setYoung(dataFile( "solid/physics/young", 0. ), marker);
-  if (!M_data->getPoisson(marker))
+  if (!M_data->poisson(marker))
     M_data->setPoisson(dataFile( "solid/physics/poisson", 0. ), marker);
 }
 
@@ -1313,8 +1316,8 @@ StructuralSolver<Mesh, SolverType>::applyBoundaryConditions( matrix_Type&       
   // vector_Type rhsFull(rhs, Repeated, Zero); // ignoring non-local entries, Otherwise they are summed up lately
   vector_Type rhsFull(rhs, Unique);  // bcManages now manages the also repeated parts
 
-  //bcManage( matrix, rhsFull, *M_FESpace->mesh(), M_FESpace->dof(), *BCh, M_FESpace->feBd(), 1., M_data->getdataTime()->time() );
-  bcManageMatrix( matrix, *this->M_FESpace->mesh(), this->M_FESpace->dof(), *BCh, this->M_FESpace->feBd(), 1., this->M_data->getdataTime()->time() );
+  //bcManage( matrix, rhsFull, *M_FESpace->mesh(), M_FESpace->dof(), *BCh, M_FESpace->feBd(), 1., M_data->dataTime()->time() );
+  bcManageMatrix( matrix, *this->M_FESpace->mesh(), this->M_FESpace->dof(), *BCh, this->M_FESpace->feBd(), 1., this->M_data->dataTime()->time() );
 
   // matrix should be GlobalAssembled by  bcManage
 
@@ -1338,7 +1341,7 @@ StructuralSolver<Mesh, SolverType>::applyBoundaryConditionsLin( matrix_Type&    
   // vector_Type rhsFull(rhs, Repeated, Zero); // ignoring non-local entries, Otherwise they are summed up lately
   vector_Type rhsFull(rhs, Unique);  // bcManages now manages the also repeated parts
 
-  bcManage( matrix, rhsFull, *M_FESpace->mesh(), M_FESpace->dof(), *BCh, M_FESpace->feBd(), 1., M_data->getdataTime()->time() );
+  bcManage( matrix, rhsFull, *M_FESpace->mesh(), M_FESpace->dof(), *BCh, M_FESpace->feBd(), 1., M_data->dataTime()->time() );
 
   // matrix should be GlobalAssembled by  bcManage
 
